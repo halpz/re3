@@ -56,7 +56,7 @@ CPathFind::PreparePathData(void)
 	   DetachedNodesCars && DetachedNodesPeds){
 		tempNodes = new CTempNode[4000];
 
-		m_numLinks = 0;
+		m_numConnections = 0;
 		for(i = 0; i < PATHNODESIZE; i++)
 			m_pathNodes[i].flags &= ~(PathNodeFlag1 | PathNodeFlag2);
 
@@ -200,7 +200,7 @@ CPathFind::CountFloodFillGroups(uint8 type)
 			prev = node;
 			node = node->next;
 			for(i = 0; i < prev->numLinks; i++){
-				l = m_linkTo[prev->firstLink + i];
+				l = m_connections[prev->firstLink + i];
 				if(m_pathNodes[l].group == 0){
 					m_pathNodes[l].group = n;
 					if(m_pathNodes[l].group == 0)
@@ -237,7 +237,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 
 	typeoff = 12*type;
 	oldNumPathNodes = m_numPathNodes;
-	oldNumLinks = m_numLinks;
+	oldNumLinks = m_numConnections;
 
 	// Initialize map objects
 	for(i = 0; i < m_numMapObjects; i++)
@@ -347,7 +347,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 	for(i = oldNumPathNodes; i < m_numPathNodes; i++){
 		// Init link
 		m_pathNodes[i].numLinks = 0;
-		m_pathNodes[i].firstLink = m_numLinks;
+		m_pathNodes[i].firstLink = m_numConnections;
 
 		// See if node connects to external nodes
 		for(j = 0; j < TempListLength; j++){
@@ -356,44 +356,44 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 
 			// Add link to other side of the external
 			if(tempnodes[j].link1 == i)
-				m_linkTo[m_numLinks] = tempnodes[j].link2;
+				m_connections[m_numConnections] = tempnodes[j].link2;
 			else if(tempnodes[j].link2 == i)
-				m_linkTo[m_numLinks] = tempnodes[j].link1;
+				m_connections[m_numConnections] = tempnodes[j].link1;
 			else
 				continue;
 
-			dist = m_pathNodes[i].pos - m_pathNodes[m_linkTo[m_numLinks]].pos;
-			m_distTo[m_numLinks] = dist.Magnitude();
-			m_linkFlags[m_numLinks] = 0;
+			dist = m_pathNodes[i].pos - m_pathNodes[m_connections[m_numConnections]].pos;
+			m_distances[m_numConnections] = dist.Magnitude();
+			m_connectionFlags[m_numConnections] = 0;
 
 			if(type == PathTypeCar){
 				// IMPROVE: use a goto here
-				// Find existing navi node
-				for(k = 0; k < m_numNaviNodes; k++){
-					if(m_naviNodes[k].dirX == tempnodes[j].dirX &&
-					   m_naviNodes[k].dirY == tempnodes[j].dirY &&
-					   m_naviNodes[k].posX == tempnodes[j].pos.x &&
-					   m_naviNodes[k].posY == tempnodes[j].pos.y){
-						m_naviNodeLinks[m_numLinks] = k;
-						k = m_numNaviNodes;
+				// Find existing car path link
+				for(k = 0; k < m_numCarPathLinks; k++){
+					if(m_carPathLinks[k].dirX == tempnodes[j].dirX &&
+					   m_carPathLinks[k].dirY == tempnodes[j].dirY &&
+					   m_carPathLinks[k].posX == tempnodes[j].pos.x &&
+					   m_carPathLinks[k].posY == tempnodes[j].pos.y){
+						m_carPathConnections[m_numConnections] = k;
+						k = m_numCarPathLinks;
 					}
 				}
-				// k is m_numNaviNodes+1 if we found one
-				if(k == m_numNaviNodes){
-					m_naviNodes[m_numNaviNodes].dirX = tempnodes[j].dirX;
-					m_naviNodes[m_numNaviNodes].dirY = tempnodes[j].dirY;
-					m_naviNodes[m_numNaviNodes].posX = tempnodes[j].pos.x;
-					m_naviNodes[m_numNaviNodes].posY = tempnodes[j].pos.y;
-					m_naviNodes[m_numNaviNodes].pathNodeIndex = i;
-					m_naviNodes[m_numNaviNodes].numLeftLanes = tempnodes[j].numLeftLanes;
-					m_naviNodes[m_numNaviNodes].numRightLanes = tempnodes[j].numRightLanes;
-					m_naviNodes[m_numNaviNodes].trafficLightType = 0;
-					m_naviNodeLinks[m_numLinks] = m_numNaviNodes++;
+				// k is m_numCarPathLinks+1 if we found one
+				if(k == m_numCarPathLinks){
+					m_carPathLinks[m_numCarPathLinks].dirX = tempnodes[j].dirX;
+					m_carPathLinks[m_numCarPathLinks].dirY = tempnodes[j].dirY;
+					m_carPathLinks[m_numCarPathLinks].posX = tempnodes[j].pos.x;
+					m_carPathLinks[m_numCarPathLinks].posY = tempnodes[j].pos.y;
+					m_carPathLinks[m_numCarPathLinks].pathNodeIndex = i;
+					m_carPathLinks[m_numCarPathLinks].numLeftLanes = tempnodes[j].numLeftLanes;
+					m_carPathLinks[m_numCarPathLinks].numRightLanes = tempnodes[j].numRightLanes;
+					m_carPathLinks[m_numCarPathLinks].trafficLightType = 0;
+					m_carPathConnections[m_numConnections] = m_numCarPathLinks++;
 				}
 			}
 
 			m_pathNodes[i].numLinks++;
-			m_numLinks++;
+			m_numConnections++;
 		}
 
 		// Find i inside path segment
@@ -414,9 +414,9 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 			if(objectpathinfo[istart + iseg].next == jseg ||
 			   objectpathinfo[jstart + jseg].next == iseg){
 				// Found a link between i and j
-				m_linkTo[m_numLinks] = j;
+				m_connections[m_numConnections] = j;
 				dist = m_pathNodes[i].pos - m_pathNodes[j].pos;
-				m_distTo[m_numLinks] = dist.Magnitude();
+				m_distances[m_numConnections] = dist.Magnitude();
 
 				if(type == PathTypeCar){
 					posx = (m_pathNodes[i].pos.x + m_pathNodes[j].pos.x)*0.5f;
@@ -431,39 +431,39 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 						dy = -dy;
 					}
 					// IMPROVE: use a goto here
-					// Find existing navi node
-					for(k = 0; k < m_numNaviNodes; k++){
-						if(m_naviNodes[k].dirX == dx &&
-						   m_naviNodes[k].dirY == dy &&
-						   m_naviNodes[k].posX == posx &&
-						   m_naviNodes[k].posY == posy){
-							m_naviNodeLinks[m_numLinks] = k;
-							k = m_numNaviNodes;
+					// Find existing car path link
+					for(k = 0; k < m_numCarPathLinks; k++){
+						if(m_carPathLinks[k].dirX == dx &&
+						   m_carPathLinks[k].dirY == dy &&
+						   m_carPathLinks[k].posX == posx &&
+						   m_carPathLinks[k].posY == posy){
+							m_carPathConnections[m_numConnections] = k;
+							k = m_numCarPathLinks;
 						}
 					}
-					// k is m_numNaviNodes+1 if we found one
-					if(k == m_numNaviNodes){
-						m_naviNodes[m_numNaviNodes].dirX = dx;
-						m_naviNodes[m_numNaviNodes].dirY = dy;
-						m_naviNodes[m_numNaviNodes].posX = posx;
-						m_naviNodes[m_numNaviNodes].posY = posy;
-						m_naviNodes[m_numNaviNodes].pathNodeIndex = i;
-						m_naviNodes[m_numNaviNodes].numLeftLanes = -1;
-						m_naviNodes[m_numNaviNodes].numRightLanes = -1;
-						m_naviNodes[m_numNaviNodes].trafficLightType = 0;
-						m_naviNodeLinks[m_numLinks] = m_numNaviNodes++;
+					// k is m_numCarPathLinks+1 if we found one
+					if(k == m_numCarPathLinks){
+						m_carPathLinks[m_numCarPathLinks].dirX = dx;
+						m_carPathLinks[m_numCarPathLinks].dirY = dy;
+						m_carPathLinks[m_numCarPathLinks].posX = posx;
+						m_carPathLinks[m_numCarPathLinks].posY = posy;
+						m_carPathLinks[m_numCarPathLinks].pathNodeIndex = i;
+						m_carPathLinks[m_numCarPathLinks].numLeftLanes = -1;
+						m_carPathLinks[m_numCarPathLinks].numRightLanes = -1;
+						m_carPathLinks[m_numCarPathLinks].trafficLightType = 0;
+						m_carPathConnections[m_numConnections] = m_numCarPathLinks++;
 					}
 				}else{
 					// Crosses road
 					if(objectpathinfo[istart + iseg].next == jseg && objectpathinfo[istart + iseg].flag & 1 ||
 					   objectpathinfo[jstart + jseg].next == iseg && objectpathinfo[jstart + jseg].flag & 1)
-						m_linkFlags[m_numLinks] |= 1;
+						m_connectionFlags[m_numConnections] |= 1;
 					else
-						m_linkFlags[m_numLinks] &= ~1;
+						m_connectionFlags[m_numConnections] &= ~1;
 				}
 
 				m_pathNodes[i].numLinks++;
-				m_numLinks++;
+				m_numConnections++;
 			}
 		}
 	}
@@ -477,35 +477,35 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 			for(i = 0; i < m_numPathNodes; i++){
 				if(m_pathNodes[i].numLinks != 2)
 					continue;
-				l1 = m_naviNodeLinks[m_pathNodes[i].firstLink];
-				l2 = m_naviNodeLinks[m_pathNodes[i].firstLink+1];
+				l1 = m_carPathConnections[m_pathNodes[i].firstLink];
+				l2 = m_carPathConnections[m_pathNodes[i].firstLink+1];
 
-				if(m_naviNodes[l1].numLeftLanes == -1 &&
-				   m_naviNodes[l2].numLeftLanes != -1){
+				if(m_carPathLinks[l1].numLeftLanes == -1 &&
+				   m_carPathLinks[l2].numLeftLanes != -1){
 					done = 0;
-					if(m_naviNodes[l2].pathNodeIndex == i){
+					if(m_carPathLinks[l2].pathNodeIndex == i){
 						// why switch left and right here?
-						m_naviNodes[l1].numLeftLanes = m_naviNodes[l2].numRightLanes;
-						m_naviNodes[l1].numRightLanes = m_naviNodes[l2].numLeftLanes;
+						m_carPathLinks[l1].numLeftLanes = m_carPathLinks[l2].numRightLanes;
+						m_carPathLinks[l1].numRightLanes = m_carPathLinks[l2].numLeftLanes;
 					}else{
-						m_naviNodes[l1].numLeftLanes = m_naviNodes[l2].numLeftLanes;
-						m_naviNodes[l1].numRightLanes = m_naviNodes[l2].numRightLanes;
+						m_carPathLinks[l1].numLeftLanes = m_carPathLinks[l2].numLeftLanes;
+						m_carPathLinks[l1].numRightLanes = m_carPathLinks[l2].numRightLanes;
 					}
-					m_naviNodes[l1].pathNodeIndex = i;
-				}else if(m_naviNodes[l1].numLeftLanes != -1 &&
-				         m_naviNodes[l2].numLeftLanes == -1){
+					m_carPathLinks[l1].pathNodeIndex = i;
+				}else if(m_carPathLinks[l1].numLeftLanes != -1 &&
+				         m_carPathLinks[l2].numLeftLanes == -1){
 					done = 0;
-					if(m_naviNodes[l1].pathNodeIndex == i){
+					if(m_carPathLinks[l1].pathNodeIndex == i){
 						// why switch left and right here?
-						m_naviNodes[l2].numLeftLanes = m_naviNodes[l1].numRightLanes;
-						m_naviNodes[l2].numRightLanes = m_naviNodes[l1].numLeftLanes;
+						m_carPathLinks[l2].numLeftLanes = m_carPathLinks[l1].numRightLanes;
+						m_carPathLinks[l2].numRightLanes = m_carPathLinks[l1].numLeftLanes;
 					}else{
-						m_naviNodes[l2].numLeftLanes = m_naviNodes[l1].numLeftLanes;
-						m_naviNodes[l2].numRightLanes = m_naviNodes[l1].numRightLanes;
+						m_carPathLinks[l2].numLeftLanes = m_carPathLinks[l1].numLeftLanes;
+						m_carPathLinks[l2].numRightLanes = m_carPathLinks[l1].numRightLanes;
 					}
-					m_naviNodes[l2].pathNodeIndex = i;
-				}else if(m_naviNodes[l1].numLeftLanes == -1 &&
-				         m_naviNodes[l2].numLeftLanes == -1)
+					m_carPathLinks[l2].pathNodeIndex = i;
+				}else if(m_carPathLinks[l1].numLeftLanes == -1 &&
+				         m_carPathLinks[l2].numLeftLanes == -1)
 					done = 0;
 			}
 		}
@@ -513,11 +513,11 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 		// Fall back to default values for number of lanes
 		for(i = 0; i < m_numPathNodes; i++)
 			for(j = 0; j < m_pathNodes[i].numLinks; j++){
-				k = m_naviNodeLinks[m_pathNodes[i].firstLink + j];
-				if(m_naviNodes[k].numLeftLanes < 0)
-					m_naviNodes[k].numLeftLanes = 1;
-				if(m_naviNodes[k].numRightLanes < 0)
-					m_naviNodes[k].numRightLanes = 1;
+				k = m_carPathConnections[m_pathNodes[i].firstLink + j];
+				if(m_carPathLinks[k].numLeftLanes < 0)
+					m_carPathLinks[k].numLeftLanes = 1;
+				if(m_carPathLinks[k].numRightLanes < 0)
+					m_carPathLinks[k].numRightLanes = 1;
 			}
 	}
 
@@ -532,7 +532,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				if((m_pathNodes[i].flags & PathNodeDeadEnd) == 0){
 					k = 0;
 					for(j = 0; j < m_pathNodes[i].numLinks; j++)
-						if((m_pathNodes[m_linkTo[m_pathNodes[i].firstLink + j]].flags & PathNodeDeadEnd) == 0)
+						if((m_pathNodes[m_connections[m_pathNodes[i].firstLink + j]].flags & PathNodeDeadEnd) == 0)
 							k++;
 					if(k < 2){
 						m_pathNodes[i].flags |= PathNodeDeadEnd;
@@ -554,9 +554,9 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				m_pathNodes[j] = m_pathNodes[j+1];
 
 			// Fix links
-			for(j = oldNumLinks; j < m_numLinks; j++)
-				if(m_linkTo[j] >= i)
-					m_linkTo[j]--;
+			for(j = oldNumLinks; j < m_numConnections; j++)
+				if(m_connections[j] >= i)
+					m_connections[j]--;
 
 			// Also in treadables
 			for(j = 0; j < m_numMapObjects; j++)

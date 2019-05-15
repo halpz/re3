@@ -40,8 +40,7 @@ struct CPathNode
 */
 };
 
-// TODO: name?
-struct NaviNode
+struct CCarPathLink
 {
 	float posX;
 	float posY;
@@ -51,8 +50,8 @@ struct NaviNode
 	int8 numLeftLanes;
 	int8 numRightLanes;
 	int8 trafficLightType;
-	// probably only padding
 	int8 field15;
+	// probably only padding
 	int8 field16;
 	int8 field17;
 };
@@ -93,28 +92,28 @@ class CPathFind
 public:
 /*	For reference VC:
 	CPathNode pathNodes[9650];
-	NaviNode naviNodes[3500];
-	CBuilding *mapObjects[1250];
+	CCarPathLink m_carPathLinks[3500];
+	CBuilding *m_mapObjects[1250];
 	// 0x8000 is cross road flag
 	// 0x4000 is traffic light flag
-	uint16 linkTo[20400];
-	uint8 distTo[20400];
-	int16 naviNodeLinks[20400];
+	uint16 m_connections[20400];
+	uint8 m_distances[20400];
+	int16 m_carPathConnections[20400];
 */
 	CPathNode m_pathNodes[4930];
-	NaviNode m_naviNodes[2076];
+	CCarPathLink m_carPathLinks[2076];
 	CTreadable *m_mapObjects[1250];
 	uint8 m_objectFlags[1250];
-	int16 m_linkTo[10260];
-	int16 m_distTo[10260];
-	uint8 m_linkFlags[10260];
-	int16 m_naviNodeLinks[10260];
+	int16 m_connections[10260];
+	int16 m_distances[10260];
+	uint8 m_connectionFlags[10260];
+	int16 m_carPathConnections[10260];
 	int32 m_numPathNodes;
 	int32 m_numCarPathNodes;
 	int32 m_numPedPathNodes;
 	int16 m_numMapObjects;
-	int16 m_numLinks;
-	int32 m_numNaviNodes;
+	int16 m_numConnections;
+	int32 m_numCarPathLinks;
 	int32 h;
 	uint8 m_numGroups[2];
 	CPathNode m_aExtraPaths[872];
