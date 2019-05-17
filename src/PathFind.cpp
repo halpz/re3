@@ -19,6 +19,9 @@ enum
 	PathNodeDeadEnd = 4,
 	PathNodeDisabled = 8,
 	PathNodeBetweenLevels = 0x10,
+
+	ConnectionCrossRoad = 1,
+	ConnectionTrafficLight = 2,
 };
 
 // link flags:
@@ -113,18 +116,18 @@ CPathFind::PreparePathData(void)
 			if(numIntern == 1 && numExtern == 2){
 				if(numLanes < 4){
 					if((i & 7) == 4){		// WHAT?
-						m_objectFlags[i] |= 1;
+						m_objectFlags[i] |= PathNodeFlag1;
 						if(maxX > maxY)
-							m_objectFlags[i] |= 2;
+							m_objectFlags[i] |= PathNodeFlag2;
 						else
-							m_objectFlags[i] &= ~2;
+							m_objectFlags[i] &= ~PathNodeFlag2;
 					}
 				}else{
-					m_objectFlags[i] |= 1;
+					m_objectFlags[i] |= PathNodeFlag1;
 					if(maxX > maxY)
-						m_objectFlags[i] |= 2;
+						m_objectFlags[i] |= PathNodeFlag2;
 					else
-						m_objectFlags[i] &= ~2;
+						m_objectFlags[i] &= ~PathNodeFlag2;
 				}
 			}
 		}
@@ -258,7 +261,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				&CoorsXFormed);
 			m_pathNodes[m_numPathNodes].pos = CoorsXFormed;
 			m_pathNodes[m_numPathNodes].objectIndex = i;
-			m_pathNodes[m_numPathNodes].flags |= 1;
+			m_pathNodes[m_numPathNodes].flags |= PathNodeFlag1;
 			m_mapObjects[i]->m_nodeIndicesCars[typeoff + j] = m_numPathNodes++;
 		}
 	}
@@ -326,9 +329,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				// collapse this node with nearest we found
 				dx = m_pathNodes[tempnodes[nearestId].link1].pos.x - m_pathNodes[tempnodes[nearestId].link2].pos.x;
 				dy = m_pathNodes[tempnodes[nearestId].link1].pos.y - m_pathNodes[tempnodes[nearestId].link2].pos.y;
-				tempnodes[nearestId].pos.x = (tempnodes[nearestId].pos.x + CoorsXFormed.x)*0.5f;
-				tempnodes[nearestId].pos.y = (tempnodes[nearestId].pos.y + CoorsXFormed.y)*0.5f;
-				tempnodes[nearestId].pos.z = (tempnodes[nearestId].pos.z + CoorsXFormed.z)*0.5f;
+				tempnodes[nearestId].pos = (tempnodes[nearestId].pos + CoorsXFormed)*0.5f;
 				mag = sqrt(dx*dx + dy*dy);
 				tempnodes[nearestId].dirX = dx/mag;
 				tempnodes[nearestId].dirY = dy/mag;
@@ -336,8 +337,9 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				if(type == PathTypeCar)
 					if(tempnodes[nearestId].numLeftLanes != 0 && tempnodes[nearestId].numRightLanes != 0 &&
 					   (objectpathinfo[start + j].numLeftLanes == 0 || objectpathinfo[start + j].numRightLanes == 0)){
-						tempnodes[nearestId].numLeftLanes = objectpathinfo[start + j].numLeftLanes;
-						tempnodes[nearestId].numRightLanes = objectpathinfo[start + j].numRightLanes;
+						// why switch left and right here?
+						tempnodes[nearestId].numLeftLanes = objectpathinfo[start + j].numRightLanes;
+						tempnodes[nearestId].numRightLanes = objectpathinfo[start + j].numLeftLanes;
 					}
 			}
 		}
@@ -457,9 +459,9 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 					// Crosses road
 					if(objectpathinfo[istart + iseg].next == jseg && objectpathinfo[istart + iseg].flag & 1 ||
 					   objectpathinfo[jstart + jseg].next == iseg && objectpathinfo[jstart + jseg].flag & 1)
-						m_connectionFlags[m_numConnections] |= 1;
+						m_connectionFlags[m_numConnections] |= ConnectionCrossRoad;
 					else
-						m_connectionFlags[m_numConnections] &= ~1;
+						m_connectionFlags[m_numConnections] &= ~ConnectionCrossRoad;
 				}
 
 				m_pathNodes[i].numLinks++;
@@ -588,4 +590,5 @@ CPathFind::CalcNodeCoors(int16 x, int16 y, int16 z, int id, CVector *out)
 STARTPATCHES
 	InjectHook(0x429610, &CPathFind::PreparePathData, PATCH_JUMP);
 	InjectHook(0x429C20, &CPathFind::PreparePathDataForType, PATCH_JUMP);
+	InjectHook(0x42B810, &CPathFind::CountFloodFillGroups, PATCH_JUMP);
 ENDPATCHES
