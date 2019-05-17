@@ -9,6 +9,11 @@ CSector (*CWorld::ms_aSectors)[NUMSECTORS_X] = (CSector (*)[NUMSECTORS_Y])0x6656
 uint16 &CWorld::ms_nCurrentScanCode = *(uint16*)0x95CC64;
 
 bool &CWorld::bNoMoreCollisionTorque = *(bool*)0x95CDCC;
+CEntity *&CWorld::pIgnoreEntity	= *(CEntity**)0x8F6494;
+bool &CWorld::bSecondShift = *(bool*)0x95CD54;
+bool &CWorld::bForceProcessControl = *(bool*)0x95CD6C;
+bool &CWorld::bProcessCutsceneOnly = *(bool*)0x95CD8B;
+
 
 void
 CWorld::ClearScanCodes(void)

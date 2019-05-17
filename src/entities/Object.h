@@ -8,6 +8,8 @@ enum {
 	TEMP_OBJECT = 3,
 };
 
+class CVehicle;
+
 class CObject : public CPhysical
 {
 public:
@@ -39,7 +41,7 @@ public:
   int8 field_186;
   int8 field_187;
 	CEntity *m_pCurSurface;
-  CEntity *field_18C;
+	CVehicle *m_pCollidingVehicle;
 	int8 m_colour1, m_colour2;
 
 	static void *operator new(size_t);

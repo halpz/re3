@@ -22,6 +22,7 @@ struct CColBox
 	uint8 piece;
 
 	void Set(const CVector &min, const CVector &max, uint8 surf, uint8 piece);
+	CVector GetSize(void) { return max - min; }
 };
 
 struct CColLine

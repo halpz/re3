@@ -77,6 +77,8 @@ public:
 	CRect GetBoundRect(void);
 	void ProcessControl(void);
 
+	virtual int32 ProcessEntityCollision(CEntity *ent, CColPoint *point);
+
 	void RemoveAndAdd(void);
 	void AddToMovingList(void);
 	void RemoveFromMovingList(void);
@@ -127,6 +129,8 @@ public:
 	void AddCollisionRecord(CEntity *ent);
 	void AddCollisionRecord_Treadable(CEntity *ent);
 	bool GetHasCollidedWith(CEntity *ent);
+
+	bool ProcessShiftSectorList(CPtrList *ptrlists);
 
 	// to make patching virtual functions possible
 	void Add_(void) { CPhysical::Add(); }

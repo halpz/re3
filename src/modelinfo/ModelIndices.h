@@ -205,6 +205,16 @@ enum
 
 	MI_RHINO = 122,
 	MI_COACH = 127,
+	MI_RCBANDIT = 131,
+
+	MI_CAR_DOOR = 190,
+	MI_CAR_BUMPER,
+	MI_CAR_PANEL,
+	MI_CAR_BONNET,
+	MI_CAR_BOOT,
+	MI_CAR_WEEL,
+	MI_BODYPARTA,
+	MI_BODYPARTB,
 };
 
 void InitModelIndices(void);
@@ -221,4 +231,20 @@ IsGlass(int16 id)
 		id == MI_GLASS6 ||
 		id == MI_GLASS7 ||
 		id == MI_GLASS8;
+}
+
+inline bool
+IsTrafficLight(int16 id)
+{
+	return id == MI_TRAFFICLIGHTS ||
+		id == MI_SINGLESTREETLIGHTS1 ||
+		id == MI_SINGLESTREETLIGHTS2 ||
+		id == MI_SINGLESTREETLIGHTS3 ||
+		id == MI_DOUBLESTREETLIGHTS;
+}
+
+inline bool
+IsBodyPart(int16 id)
+{
+	return id == MI_BODYPARTA || id == MI_BODYPARTB;
 }

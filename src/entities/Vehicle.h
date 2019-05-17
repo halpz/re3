@@ -16,6 +16,12 @@ public:
 	CEntity *m_pCurSurface;
 	uint8 stuff3[160];
 	int32 m_vehType;
+
+	bool IsCar(void) { return m_vehType == VEHICLE_TYPE_CAR; }
+	bool IsBoat(void) { return m_vehType == VEHICLE_TYPE_BOAT; }
+	bool IsTrain(void) { return m_vehType == VEHICLE_TYPE_TRAIN; }
+	bool IsHeli(void) { return m_vehType == VEHICLE_TYPE_HELI; }
+	bool IsPlane(void) { return m_vehType == VEHICLE_TYPE_PLANE; }
 };
 static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_pCurSurface) == 0x1E0, "CVehicle: error");

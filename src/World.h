@@ -32,6 +32,8 @@ public:
 };
 static_assert(sizeof(CSector) == 0x28, "CSector: error");
 
+class CEntity;
+
 class CWorld
 {
 	static CPtrList *ms_bigBuildingsList;	// [4];
@@ -40,7 +42,12 @@ class CWorld
 	static uint16 &ms_nCurrentScanCode;
 
 public:
+	static CEntity *&pIgnoreEntity;
 	static bool &bNoMoreCollisionTorque;
+	static bool &bSecondShift;
+	static bool &bForceProcessControl;
+	static bool &bProcessCutsceneOnly;
+
 
 	static CSector *GetSector(int x, int y) { return &ms_aSectors[y][x]; }
 	static CPtrList &GetBigBuildingList(eLevelName i) { return ms_bigBuildingsList[i]; }

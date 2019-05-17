@@ -787,6 +787,17 @@ CPhysical::ApplyFriction(float adhesiveLimit, CColPoint &colpoint)
 }
 
 
+// ProcessCollision calls
+//  CheckCollision
+//  CheckCollision_SimpleCar
+// CheckCollision calls
+//  ProcessCollisionSectorList
+// CheckCollision_SimpleCar
+//  ProcessCollisionSectorList_SimpleCar
+// ProcessShift calls
+//  ProcessCollisionSectorList
+//  ProcessShiftSectorList
+
 void
 CPhysical::AddCollisionRecord(CEntity *ent)
 {
@@ -837,6 +848,168 @@ CPhysical::GetHasCollidedWith(CEntity *ent)
 			if(m_aCollisionRecords[i] == ent)
 				return true;
 	return false;
+}
+
+bool
+CPhysical::ProcessShiftSectorList(CPtrList *lists)
+{
+	int i, j;
+	CPtrList *list;
+	CPtrNode *node;
+	CPhysical *A, *B;
+	CObject *Bobj;
+	bool canshift;
+	CVector center;
+	float radius;
+
+	int numCollisions;
+	int mostColliding;
+	CColPoint colpoints[32];
+	CVector shift = { 0.0f, 0.0f, 0.0f };
+	bool doShift = false;
+	CEntity *boat = nil;
+
+	bool skipShift;
+
+	A = this;
+
+	A->GetBoundCentre(center);
+	radius = A->GetBoundRadius();
+	for(i = 0; i <= ENTITYLIST_PEDS_OVERLAP; i++){
+		list = &lists[i];
+		for(node = list->first; node; node = node->next){
+			B = (CPhysical*)node->item;
+			Bobj = (CObject*)B;
+			skipShift = false;
+
+			if(B->IsBuilding() ||
+			   B->IsObject() && B->bInfiniteMass)
+				canshift = true;
+			else
+				canshift = A->IsPed() &&
+					B->IsObject() && B->bInfiniteMass && !Bobj->bHasBeenDamaged;
+			if(B == A ||
+			   B->m_scanCode == CWorld::GetCurrentScanCode() ||
+			   !B->bUsesCollision ||
+			   (A->bHasHitWall && !canshift) ||
+			   !B->GetIsTouching(center, radius))
+				continue;
+
+			// This could perhaps be done a bit nicer
+
+			if(B->IsBuilding())
+				skipShift = false;
+			else if(IsTrafficLight(A->GetModelIndex()) &&
+			  (B->IsVehicle() || B->IsPed()) &&
+			  A->GetUp().z < 0.66f)
+				skipShift = true;
+			else if((A->IsVehicle() || A->IsPed()) &&
+			  B->GetUp().z < 0.66f &&
+			  IsTrafficLight(B->GetModelIndex()))
+				skipShift = true;
+			else if(A->IsObject() && B->IsVehicle()){
+				CObject *Aobj = (CObject*)A;
+				if(Aobj->ObjectCreatedBy != TEMP_OBJECT &&
+				   !Aobj->bHasBeenDamaged &&
+				   Aobj->bIsStatic){
+					if(Aobj->m_pCollidingVehicle == B)
+						Aobj->m_pCollidingVehicle = nil;
+				}else if(Aobj->m_pCollidingVehicle != B){
+					CMatrix inv;
+					CVector size = CModelInfo::GetModelInfo(A->GetModelIndex())->GetColModel()->boundingBox.GetSize();
+					size = A->GetMatrix() * size;
+					if(size.z < B->GetPosition().z ||
+					   (Invert(B->GetMatrix(), inv) * size).z < 0.0f){
+						skipShift = true;
+						Aobj->m_pCollidingVehicle = (CVehicle*)B;
+					}
+				}
+			}else if(B->IsObject() && A->IsVehicle()){
+				CObject *Bobj = (CObject*)B;
+				if(Bobj->ObjectCreatedBy != TEMP_OBJECT &&
+				   !Bobj->bHasBeenDamaged &&
+				   Bobj->bIsStatic){
+					if(Bobj->m_pCollidingVehicle == A)
+						Bobj->m_pCollidingVehicle = nil;
+				}else if(Bobj->m_pCollidingVehicle != A){
+					CMatrix inv;
+					CVector size = CModelInfo::GetModelInfo(B->GetModelIndex())->GetColModel()->boundingBox.GetSize();
+					size = B->GetMatrix() * size;
+					if(size.z < A->GetPosition().z ||
+					   (Invert(A->GetMatrix(), inv) * size).z < 0.0f){
+						skipShift = true;
+						Bobj->m_pCollidingVehicle = (CVehicle*)A;
+					}
+				}
+			}else if(IsBodyPart(A->GetModelIndex()) && B->IsPed())
+				skipShift = true;
+			else if(A->IsPed() && IsBodyPart(B->GetModelIndex()))
+				skipShift = true;
+			else if(A->IsPed() && ((CPed*)A)->m_pCollidingVehicle == B ||
+			  B->IsPed() && ((CPed*)B)->m_pCollidingVehicle == A ||
+			  A->GetModelIndex() == MI_RCBANDIT && B->IsVehicle() ||
+			  B->GetModelIndex() == MI_RCBANDIT && (A->IsPed() || A->IsVehicle()))
+				skipShift = true;
+
+			if(skipShift)
+				continue;
+
+			B->m_scanCode = CWorld::GetCurrentScanCode();
+			numCollisions = A->ProcessEntityCollision(B, colpoints);
+			if(numCollisions <= 0)
+				continue;
+
+			mostColliding = 0;
+			for(j = 1; j < numCollisions; j++)
+				if(colpoints[j].depth > colpoints[mostColliding].depth)
+					mostColliding = j;
+
+			if(CWorld::bSecondShift)
+				for(j = 0; j < numCollisions; j++)
+					shift += colpoints[j].normal * colpoints[j].depth * 1.5f/numCollisions;
+			else
+				for(j = 0; j < numCollisions; j++)
+					shift += colpoints[j].normal * colpoints[j].depth * 1.2f/numCollisions;
+
+			if(A->IsVehicle() && B->IsVehicle()){
+				CVector dir = A->GetPosition() - B->GetPosition();
+				dir.Normalise();
+				if(dir.z < 0.0f && dir.z < A->GetForward().z && dir.z < A->GetRight().z)
+					dir.z = min(0.0f, min(A->GetForward().z, A->GetRight().z));
+				shift += dir * colpoints[mostColliding].depth * 0.5f;
+			}else if(A->IsPed() && B->IsVehicle() && ((CVehicle*)B)->IsBoat()){
+				CVector dir = colpoints[mostColliding].normal;
+				float f = min(fabs(dir.z), 0.9f);
+				dir.z = 0.0f;
+				dir.Normalise();
+				shift += dir * colpoints[mostColliding].depth / (1.0f - f);
+				boat = B;
+			}else if(B->IsPed() && A->IsVehicle() && ((CVehicle*)A)->IsBoat()){
+				CVector dir = colpoints[mostColliding].normal * -1.0f;
+				float f = min(fabs(dir.z), 0.9f);
+				dir.z = 0.0f;
+				dir.Normalise();
+				B->GetPosition() += dir * colpoints[mostColliding].depth / (1.0f - f);
+				// BUG? how can that ever happen? A is a Ped
+				if(B->IsVehicle())
+					B->ProcessEntityCollision(A, colpoints);
+			}else{
+				if(CWorld::bSecondShift)
+					shift += colpoints[mostColliding].normal * colpoints[mostColliding].depth * 0.4f;
+				else
+					shift += colpoints[mostColliding].normal * colpoints[mostColliding].depth * 0.2f;
+			}
+
+			doShift = true;
+		}
+	}
+
+	if(!doShift)
+		return false;
+	GetPosition() += shift;
+	if(boat)
+		ProcessEntityCollision(boat, colpoints);
+	return true;
 }
 
 void
@@ -896,6 +1069,8 @@ STARTPATCHES
 	InjectHook(0x497180, &CPhysical::AddCollisionRecord, PATCH_JUMP);
 	InjectHook(0x4970C0, &CPhysical::AddCollisionRecord_Treadable, PATCH_JUMP);
 	InjectHook(0x497240, &CPhysical::GetHasCollidedWith, PATCH_JUMP);
+
+	InjectHook(0x49DA10, &CPhysical::ProcessShiftSectorList, PATCH_JUMP);
 
 #define F3 float, float, float
 	InjectHook(0x495B10, &CPhysical::ApplyMoveSpeed, PATCH_JUMP);

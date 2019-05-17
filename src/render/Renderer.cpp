@@ -195,7 +195,7 @@ CRenderer::RenderEverythingBarRoads(void)
 
 		if(e->IsVehicle() ||
 		   e->IsPed() && CVisibilityPlugins::GetClumpAlpha((RpClump*)e->m_rwObject) != 255){
-			if(e->IsVehicle() && ((CVehicle*)e)->m_vehType == VEHICLE_TYPE_BOAT){
+			if(e->IsVehicle() && ((CVehicle*)e)->IsBoat()){
 				dist = ms_vecCameraPosition - e->GetPosition();
 				if(!CVisibilityPlugins::InsertEntityIntoSortedList(e, dist.Magnitude())){
 					printf("Ran out of space in alpha entity list");
@@ -221,7 +221,7 @@ CRenderer::RenderVehiclesButNotBoats(void)
 	    node != &gSortedVehiclesAndPeds.head;
 	    node = node->prev){
 		CVehicle *v = (CVehicle*)node->item.ent;
-		if(v->IsVehicle() && v->m_vehType == VEHICLE_TYPE_BOAT)		// BUG: missing in III
+		if(v->IsVehicle() && v->IsBoat())		// BUG: IsVehicle missing in III
 			continue;
 		RenderOneNonRoad(v);
 	}
@@ -236,9 +236,7 @@ CRenderer::RenderBoats(void)
 	    node != &gSortedVehiclesAndPeds.head;
 	    node = node->prev){
 		CVehicle *v = (CVehicle*)node->item.ent;
-		if(!v->IsVehicle())		// BUG: missing in III
-			continue;
-		if(v->m_vehType == VEHICLE_TYPE_BOAT)
+		if(v->IsVehicle() && v->IsBoat())		// BUG: IsVehicle missing in III
 			RenderOneNonRoad(v);
 	}
 }
