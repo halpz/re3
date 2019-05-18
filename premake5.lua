@@ -7,11 +7,16 @@ workspace "re3"
 	files { "src/modelinfo/*.*" }
 	files { "src/entities/*.*" }
 	files { "src/render/*.*" }
+	files { "src/control/*.*" }
+	files { "src/audio/*.*" }
 
-	includedirs { "src", "src/modelinfo" }
-	includedirs { "src", "src/entities" }
-	includedirs { "src", "src/render" }
-	includedirs { os.getenv("RWSDK33") }
+	includedirs { "src" }
+	includedirs { "src/modelinfo" }
+	includedirs { "src/entities" }
+	includedirs { "src/render" }
+	includedirs { "src/control" }
+	includedirs { "src/audio" }
+	includedirs { "rwsdk/include/d3d8" }
 
 project "re3"
 	kind "SharedLib"

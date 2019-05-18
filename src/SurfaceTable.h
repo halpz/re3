@@ -92,8 +92,14 @@ enum
 	NUMADHESIVEGROUPS
 };
 
+struct CColPoint;
+
 class CSurfaceTable
 {
+//	static float ms_aAdhesiveLimitTable[NUMADHESIVEGROUPS][NUMADHESIVEGROUPS];
+	static float (*ms_aAdhesiveLimitTable)[NUMADHESIVEGROUPS];
 public:
 	static int GetAdhesionGroup(uint8 surfaceType);
+	static float GetWetMultiplier(uint8 surfaceType);
+	static float GetAdhesiveLimit(CColPoint &colpoint);
 };

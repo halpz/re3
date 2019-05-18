@@ -82,6 +82,11 @@ public:
 	void RemoveAndAdd(void);
 	void AddToMovingList(void);
 	void RemoveFromMovingList(void);
+	void SetDamagedPieceRecord(uint16 piece, float impulse, CEntity *entity, CVector dir);
+	void AddCollisionRecord(CEntity *ent);
+	void AddCollisionRecord_Treadable(CEntity *ent);
+	bool GetHasCollidedWith(CEntity *ent);
+	void RemoveRefsToEntity(CEntity *ent);
 
 	// get speed of point p relative to entity center
 	CVector GetSpeed(const CVector &r);
@@ -126,16 +131,14 @@ public:
 	bool ApplyFriction(CPhysical *B, float adhesiveLimit, CColPoint &colpoint);
 	bool ApplyFriction(float adhesiveLimit, CColPoint &colpoint);
 
-	void AddCollisionRecord(CEntity *ent);
-	void AddCollisionRecord_Treadable(CEntity *ent);
-	bool GetHasCollidedWith(CEntity *ent);
-
 	bool ProcessShiftSectorList(CPtrList *ptrlists);
+	bool ProcessCollisionSectorList_SimpleCar(CPtrList *lists);
 
 	// to make patching virtual functions possible
 	void Add_(void) { CPhysical::Add(); }
 	void Remove_(void) { CPhysical::Remove(); }
 	CRect GetBoundRect_(void) { return CPhysical::GetBoundRect(); }
 	void ProcessControl_(void) { CPhysical::ProcessControl(); }
+	int32 ProcessEntityCollision_(CEntity *ent, CColPoint *point) { return CPhysical::ProcessEntityCollision(ent, point); }
 };
 static_assert(sizeof(CPhysical) == 0x128, "CPhysical: error");
