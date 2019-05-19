@@ -64,6 +64,7 @@ public:
 		this->z /= t;
 		return *this;
 	}
+	bool IsZero(void) { return x == 0.0f && y == 0.0f && z == 0.0f; }
 };
 
 inline float

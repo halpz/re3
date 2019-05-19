@@ -41,7 +41,7 @@ public:
   int8 field_186;
   int8 field_187;
 	CEntity *m_pCurSurface;
-	CVehicle *m_pCollidingVehicle;
+	CEntity *m_pCollidingEntity;
 	int8 m_colour1, m_colour2;
 
 	static void *operator new(size_t);

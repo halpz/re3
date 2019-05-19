@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Lists.h"
+#include "Timer.h"
 #include "Entity.h"
 #include "Treadable.h"
 
@@ -37,16 +38,16 @@ public:
   char field_EC;
 	uint8 m_nStaticFrames;
 	uint8 m_nCollisionRecords;
-  char field_EF;
+	bool field_EF;
 	CEntity *m_aCollisionRecords[PHYSICAL_MAX_COLLISIONRECORDS];
 
 	float m_fDistanceTravelled;
 
 	// damaged piece
-	float m_fCollisionImpulse;
-	CEntity *m_pCollidingEntity;
-	CVector m_vecCollisionDirection;
-	int16 m_nCollisionPieceType;
+	float m_fDamageImpulse;
+	CEntity *m_pDamageEntity;
+	CVector m_vecDamageNormal;
+	int16 m_nDamagePieceType;
 
 	uint8 m_phy_flagA1 : 1;
 	uint8 bAffectedByGravity : 1;
@@ -88,6 +89,7 @@ public:
 	bool GetHasCollidedWith(CEntity *ent);
 	void RemoveRefsToEntity(CEntity *ent);
 
+	float GetDistanceSq(void) { return m_vecMoveSpeed.MagnitudeSqr() * sq(CTimer::GetTimeStep()); }
 	// get speed of point p relative to entity center
 	CVector GetSpeed(const CVector &r);
 	CVector GetSpeed(void) { return GetSpeed(CVector(0.0f, 0.0f, 0.0f)); }
@@ -133,12 +135,19 @@ public:
 
 	bool ProcessShiftSectorList(CPtrList *ptrlists);
 	bool ProcessCollisionSectorList_SimpleCar(CPtrList *lists);
+	bool ProcessCollisionSectorList(CPtrList *lists);
+	bool CheckCollision(void);
+	bool CheckCollision_SimpleCar(void);
+	void ProcessShift(void);
+	void ProcessCollision(void);
 
 	// to make patching virtual functions possible
 	void Add_(void) { CPhysical::Add(); }
 	void Remove_(void) { CPhysical::Remove(); }
 	CRect GetBoundRect_(void) { return CPhysical::GetBoundRect(); }
 	void ProcessControl_(void) { CPhysical::ProcessControl(); }
+	void ProcessShift_(void) { CPhysical::ProcessShift(); }
+	void ProcessCollision_(void) { CPhysical::ProcessCollision(); }
 	int32 ProcessEntityCollision_(CEntity *ent, CColPoint *point) { return CPhysical::ProcessEntityCollision(ent, point); }
 };
 static_assert(sizeof(CPhysical) == 0x128, "CPhysical: error");

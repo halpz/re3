@@ -203,9 +203,14 @@ enum
 	MI_FATFEMALE01,
 	MI_FATFEMALE02,
 
+	MI_PREDATOR = 120,
 	MI_RHINO = 122,
+	MI_TRAIN = 124,
 	MI_COACH = 127,
 	MI_RCBANDIT = 131,
+	MI_SPEEDER = 142,
+	MI_REEFER = 143,
+	MI_GHOST = 150,
 
 	MI_CAR_DOOR = 190,
 	MI_CAR_BUMPER,
@@ -247,4 +252,14 @@ inline bool
 IsBodyPart(int16 id)
 {
 	return id == MI_BODYPARTA || id == MI_BODYPARTB;
+}
+
+// This is bad and should perhaps not be used
+inline bool
+IsBoatModel(int16 id)
+{
+	return id == MI_PREDATOR ||
+		id == MI_REEFER ||
+		id == MI_SPEEDER ||
+		id == MI_GHOST;
 }
