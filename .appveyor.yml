@@ -13,3 +13,5 @@ before_build:
 build:
   project: c:\projects\re3\build\re3.sln
   verbosity: minimal
+artifacts:
+  - path: bin/ReleaseCI/re3.dll
