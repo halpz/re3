@@ -1,5 +1,5 @@
 workspace "re3"
-	configurations { "Release","Debug" }
+	configurations { "ReleaseCI", "Release", "Debug" }
 	location "build"
 
 	files { "src/*.*" }
@@ -41,3 +41,7 @@ project "re3"
 		debugdir "C:/Users/aap/games/gta3_re"
 		debugcommand "C:/Users/aap/games/gta3_re/gta3.exe"
 		postbuildcommands "copy /y \"$(TargetPath)\" \"C:\\Users\\aap\\games\\gta3_re\\plugins\\re3.dll\""
+	filter "configurations:ReleaseCI"
+		defines { "NDEBUG" }
+		optimize "On"
+		flags { "StaticRuntime" }
