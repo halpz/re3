@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "Sprite.h"
+#include "Sprite2d.h"
 #include "General.h"
 #include "Coronas.h"
 #include "Camera.h"
