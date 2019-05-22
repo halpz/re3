@@ -4,6 +4,9 @@ The aim of this project is to reverse GTA III for PC by replacing
 parts of the game [one by one](https://en.wikipedia.org/wiki/Ship_of_Theseus)
 such that we have a working game at all times.
 
+Apparently you can download a binary of the latest version
+[here](https://ci.appveyor.com/api/projects/aap/re3/artifacts/bin%2FReleaseCI%2Fre3.dll?branch=master).
+
 # Strategy
 
 A good approach is to start at the fringes of the code base,
@@ -31,6 +34,9 @@ CPedModelInfo
 CVehicleModelInfo
 CVisibilityPlugins
 CRenderer
+CSprite
+CSprite2d
+CFont
 CEntity
 CPhysical
 CCollision
