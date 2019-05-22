@@ -16,6 +16,7 @@ public:
 	static void Initialize(void);
 	static void Shutdown(void);
 	static int AddTxdSlot(const char *name);
+	static void RemoveTxdSlot(int slot);
 	static int FindTxdSlot(const char *name);
 	static char *GetTxdName(int slot);
 	static void PushCurrentTxd(void);

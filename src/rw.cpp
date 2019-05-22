@@ -207,6 +207,7 @@ static uint32_t RwStreamFindChunk_A = AddressByVersion<uint32_t>(0x5AA540, 0, 0,
 WRAPPER RwBool RwStreamFindChunk(RwStream*, RwUInt32, RwUInt32*, RwUInt32*) { VARJMP(RwStreamFindChunk_A); }
 static uint32_t RwTexDictionaryStreamRead_A = AddressByVersion<uint32_t>(0x5924A0, 0, 0, 0x61E710, 0, 0);
 WRAPPER RwTexDictionary *RwTexDictionaryStreamRead(RwStream*) { VARJMP(RwTexDictionaryStreamRead_A); }
+WRAPPER void _rwD3D8TexDictionaryEnableRasterFormatConversion(RwBool enable) { EAXJMP(0x5BE280); }
 
 static uint32_t RpGeometryLock_A = AddressByVersion<uint32_t>(0, 0, 0, 0x64CCD0, 0, 0);
 static uint32_t RpGeometryUnlock_A = AddressByVersion<uint32_t>(0, 0, 0, 0x64CD00, 0, 0);

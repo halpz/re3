@@ -4,6 +4,9 @@
 #include "Streaming.h"
 #include "TxdStore.h"
 
+WRAPPER RwTexDictionary *RwTexDictionaryGtaStreamRead(RwStream *stream) { EAXJMP(0x5924A0); }
+
+
 CPool<TxdDef,TxdDef> *&CTxdStore::ms_pTxdPool = *(CPool<TxdDef,TxdDef>**)0x8F5FB8;
 RwTexDictionary *&CTxdStore::ms_pStoredTxd = *(RwTexDictionary**)0x9405BC;
 
@@ -30,6 +33,15 @@ CTxdStore::AddTxdSlot(const char *name)
 	def->refCount = 0;
 	strcpy(def->name, name);
 	return ms_pTxdPool->GetJustIndex(def);
+}
+
+void
+CTxdStore::RemoveTxdSlot(int slot)
+{
+	TxdDef *def = GetSlot(slot);
+	if(def->texDict)
+		RwTexDictionaryDestroy(def->texDict);
+	ms_pTxdPool->Delete(def);
 }
 
 int
@@ -98,33 +110,34 @@ CTxdStore::RemoveRefWithoutDelete(int slot)
 	GetSlot(slot)->refCount--;
 }
 
-/*
 bool
 CTxdStore::LoadTxd(int slot, RwStream *stream)
 {
 	TxdDef *def = GetSlot(slot);
-	if(!rw::findChunk(stream, rw::ID_TEXDICTIONARY, nil, nil)){
-		return false;
-	}else{
-		def->texDict = rw::TexDictionary::streamRead(stream);
-		convertTxd(def->texDict);
+
+	if(RwStreamFindChunk(stream, rwID_TEXDICTIONARY, nil, nil)){
+		def->texDict = RwTexDictionaryGtaStreamRead(stream);
 		return def->texDict != nil;
 	}
+	printf("Failed to load TXD\n");
+	return false;
 }
 
 bool
 CTxdStore::LoadTxd(int slot, const char *filename)
 {
-	rw::StreamFile stream;
-	if(stream.open(getPath(filename), "rb")){
-		LoadTxd(slot, &stream);
-		stream.close();
-		return true;
-	}
-	printf("Failed to open TXD\n");
-	return false;
+	RwStream *stream;
+	bool ret;
+
+	ret = false;
+	_rwD3D8TexDictionaryEnableRasterFormatConversion(true);
+	do
+		stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename);
+	while(stream == nil);
+	ret = LoadTxd(slot, stream);
+	RwStreamClose(stream, nil);
+	return ret;
 }
-*/
 
 void
 CTxdStore::RemoveTxd(int slot)
