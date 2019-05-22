@@ -1,0 +1,17 @@
+image: Visual Studio 2017
+configuration: ReleaseCI
+platform:
+  - Win32
+environment:
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true
+install:
+  - set PATH=%APPVEYOR_BUILD_FOLDER%/bin;%PATH%
+before_build:
+  - mkdir "%APPVEYOR_BUILD_FOLDER%/build"
+  - cd "%APPVEYOR_BUILD_FOLDER%"
+  - premake5.exe vs2015
+build:
+  project: c:\projects\re3\build\re3.sln
+  verbosity: minimal
+artifacts:
+  - path: bin/ReleaseCI/re3.dll
