@@ -5,6 +5,7 @@
 #pragma warning(disable: 4244)	// int to float
 #pragma warning(disable: 4800)	// int to bool
 #pragma warning(disable: 4838)  // narrowing conversion
+#pragma warning(disable: 4996)  // POSIX names
 
 #include <stdint.h>
 #include <math.h>
@@ -60,6 +61,8 @@ extern RsGlobalType &RsGlobal;
 
 #define SCREENW (RsGlobal.maximumWidth)
 #define SCREENH (RsGlobal.maximumHeight)
+
+char *GetUserDirectory(void);
 
 struct GlobalScene
 {

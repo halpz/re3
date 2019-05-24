@@ -1,5 +1,6 @@
-#include "common.h"
+#include <direct.h>
 #include <Windows.h>
+#include "common.h"
 #include "patcher.h"
 #include "Renderer.h"
 #include "debugmenu_public.h"
@@ -34,6 +35,16 @@ void
 mysrand(unsigned int seed)
 {
 	myrand_seed = seed;
+}
+
+// platform stuff
+char*
+GetUserDirectory(void)
+{
+	static char path[MAX_PATH];
+	strcpy(path, "userfiles");
+	mkdir(path);
+	return path;
 }
 
 
