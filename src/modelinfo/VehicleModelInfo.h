@@ -56,7 +56,7 @@ public:
 	uint8 m_colours1[NUM_VEHICLE_COLOURS];
 	uint8 m_colours2[NUM_VEHICLE_COLOURS];
 	uint8 m_numColours;
-	uint8 m_bLastColorVariation;	//
+	uint8 m_lastColorVariation;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
 	RwTexture *m_envMap;
@@ -78,6 +78,7 @@ public:
 	static RwFrame *CollapseFramesCB(RwFrame *frame, void *data);
 	static RwObject *MoveObjectsCB(RwObject *object, void *data);
 	static RpAtomic *HideDamagedAtomicCB(RpAtomic *atomic, void *data);
+	static RpAtomic *HideAllComponentsAtomicCB(RpAtomic *atomic, void *data);
 	static RpMaterial *HasAlphaMaterialCB(RpMaterial *material, void *data);
 
 	static RpAtomic *SetAtomicRendererCB(RpAtomic *atomic, void *data);
@@ -100,6 +101,10 @@ public:
 	static RpAtomic *GetEditableMaterialListCB(RpAtomic *atomic, void *data);
 	void FindEditableMaterialList(void);
 	void SetVehicleColour(uint8 c1, uint8 c2);
+	void ChooseVehicleColour(uint8 &col1, uint8 &col2);
+	void AvoidSameVehicleColour(uint8 *col1, uint8 *col2);
+	static void LoadVehicleColours(void);
+	static void DeleteVehicleColourTextures(void);
 
 	static RpAtomic *SetEnvironmentMapCB(RpAtomic *atomic, void *data);
 	static RpMaterial *SetEnvironmentMapCB(RpMaterial *material, void *data);
@@ -107,6 +112,8 @@ public:
 	void SetEnvironmentMap(void);
 	static void LoadEnvironmentMaps(void);
 	static void ShutdownEnvironmentMaps(void);
+
+	static int GetMaximumNumberOfPassengersFromNumberOfDoors(int id);
 
 	void DeleteRwObject_(void) { this->CVehicleModelInfo::DeleteRwObject(); }
 	RwObject *CreateInstance_(void) { return this->CVehicleModelInfo::CreateInstance(); }

@@ -8,7 +8,11 @@ class CVehicle : public CPhysical
 {
 public:
 	// 0x128
-	uint8 stuff1[120];
+	uint8 stuff1[116];
+	uint8 m_currentColour1;
+	uint8 m_currentColour2;
+uint8 m_extra1;
+uint8 m_extra2;
 	int16 m_nAlarmState;
 	CPed *pDriver;
 	CPed *pPassengers[8];
