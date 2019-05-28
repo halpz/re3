@@ -58,18 +58,9 @@ public:
 	uint8 m_phy_flagA40 : 1;
 	uint8 m_phy_flagA80 : 1;
 
-	uint8 m_phy_flagB1 : 1;
-	uint8 m_phy_flagB2 : 1;
-	uint8 m_phy_flagB4 : 1;
-	uint8 m_phy_flagB8 : 1;
-	uint8 m_phy_flagB10 : 1;
-	uint8 m_phy_flagB20 : 1;
-	uint8 m_phy_flagB40 : 1;
-	uint8 m_phy_flagB80 : 1;
-
-  char byteLastCollType;
-  char byteZoneLevel;
-  int16 pad;
+  uint8 m_nLastCollType;
+  uint8 m_nZoneLevel;
+  uint8 pad[3];
 
 
 	// from CEntity

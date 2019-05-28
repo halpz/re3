@@ -59,6 +59,8 @@ open_script(const char *path, const char *mode)
 	return open_script_orig(path, mode);
 }
 
+int gDbgSurf;
+
 int (*RsEventHandler_orig)(int a, int b);
 int
 delayedPatches10(int a, int b)
@@ -71,6 +73,7 @@ delayedPatches10(int a, int b)
 		DebugMenuAddVarBool8("Debug", "Don't render Big Buildings", (int8*)&gbDontRenderBigBuildings, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
+		DebugMenuAddVar("Debug", "Dbg Surface", &gDbgSurf, nil, 1, 0, 34, nil);
 	}
 
 	return RsEventHandler_orig(a, b);

@@ -2,9 +2,65 @@
 
 #include "Physical.h"
 
-enum PedAction
+enum PedState
 {
-	PED_PASSENGER = 44,
+	// This is a bit strange...shouldn't PED_NONE be 0?
+	PED_NONE = 1,
+	PED_IDLE,
+	PED_LOOK_ENTITY,
+	PED_LOOK_HEADING,
+	PED_WANDER_RANGE,
+	PED_WANDER_PATH,
+	PED_SEEK_POS,
+	PED_SEEK_ENTITY,
+	PED_FLEE_POS,
+	PED_FLEE_ENTITY,
+	PED_PURSUE,
+	PED_FOLLOW_PATH,
+	PED_SNIPER_MODE,
+	PED_ROCKET_ODE,
+	PED_DUMMY,
+	PED_PAUSE,
+	PED_ATTACK,
+	PED_FIGHT,
+	PED_FACE_PHONE,
+	PED_MAKE_CALL,
+	PED_CHAT,
+	PED_MUG,
+	PED_AIM_GUN,
+	PED_AI_CONTROL,
+	PED_SEEK_CAR,
+	PED_SEEK_IN_BOAT,
+	PED_FOLLOW_ROUTE,
+	PED_CPR,
+	PED_SOLICIT,
+	PED_BUY_ICECREAM,
+	PED_INVESTIGATE,
+	PED_STEP_AWAY,
+	PED_STATES_NO_AI,
+	PED_ON_FIRE,
+	PED_JUMP,
+	PED_FALL,
+	PED_GETUP,
+	PED_STAGGER,
+	PED_DIVE_AWAY,
+	PED_STATES_NO_ST,
+	PED_ENTER_TRAIN,
+	PED_EXIT_TRAIN,
+	PED_ARREST_PLAYER,
+	PED_DRIVING,
+	PED_PASSENGER,
+	PED_TAXI_PASSENGER,
+	PED_OPEN_DOOR,
+	PED_DIE,
+	PED_DEAD,
+	PED_CARJACK,
+	PED_DRAG_FROM_CAR,
+	PED_ENTER_CAR,
+	PED_STEAL_CAR,
+	PED_EXIT_CAR,
+	PED_HANDS_UP,
+	PED_ARRESTED,
 };
 
 class CVehicle;
@@ -107,6 +163,7 @@ public:
 //	static void operator delete(void*, size_t);
 
 	bool IsPlayer(void) { return m_nPedType == 0 || m_nPedType== 1 || m_nPedType == 2 || m_nPedType == 3; }
+	bool UseGroundColModel(void);
 	void KillPedWithCar(CVehicle *veh, float impulse);
 };
 static_assert(offsetof(CPed, m_nPedState) == 0x224, "CPed: error");

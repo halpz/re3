@@ -384,7 +384,7 @@ CCollision::TestSphereTriangle(const CColSphere &sphere,
 }
 
 bool
-CCollision::TestLineOfSight(CColLine &line, const CMatrix &matrix, CColModel &model, bool ignoreSurf78)
+CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColModel &model, bool ignoreSeeThrough)
 {
 	static CMatrix matTransform;
 	int i;
@@ -398,18 +398,18 @@ CCollision::TestLineOfSight(CColLine &line, const CMatrix &matrix, CColModel &mo
 		return false;
 
 	for(i = 0; i < model.numSpheres; i++)
-		if(!ignoreSurf78 || model.spheres[i].surface != 7 && model.spheres[i].surface != 8)
+		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_SCAFFOLD)
 			if(TestLineSphere(newline, model.spheres[i]))
 				return true;
 
 	for(i = 0; i < model.numBoxes; i++)
-		if(!ignoreSurf78 || model.boxes[i].surface != 7 && model.boxes[i].surface != 8)
+		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_SCAFFOLD)
 			if(TestLineBox(newline, model.boxes[i]))
 				return true;
 
 	CalculateTrianglePlanes(&model);
 	for(i = 0; i < model.numTriangles; i++)
-		if(!ignoreSurf78 || model.triangles[i].surface != 7 && model.triangles[i].surface != 8)
+		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_SCAFFOLD)
 			if(TestLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i]))
 				return true;
 
@@ -933,7 +933,7 @@ CCollision::ProcessSphereTriangle(const CColSphere &sphere,
 bool
 CCollision::ProcessLineOfSight(const CColLine &line,
 	const CMatrix &matrix, CColModel &model,
-	CColPoint &point, float &mindist, bool ignoreSurf78)
+	CColPoint &point, float &mindist, bool ignoreSeeThrough)
 {
 	static CMatrix matTransform;
 	int i;
@@ -948,16 +948,16 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 
 	float coldist = mindist;
 	for(i = 0; i < model.numSpheres; i++)
-		if(!ignoreSurf78 || model.spheres[i].surface != 7 && model.spheres[i].surface != 8)
+		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_SCAFFOLD)
 			ProcessLineSphere(newline, model.spheres[i], point, coldist);
 
 	for(i = 0; i < model.numBoxes; i++)
-		if(!ignoreSurf78 || model.boxes[i].surface != 7 && model.boxes[i].surface != 8)
+		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_SCAFFOLD)
 			ProcessLineBox(newline, model.boxes[i], point, coldist);
 
 	CalculateTrianglePlanes(&model);
 	for(i = 0; i < model.numTriangles; i++)
-		if(!ignoreSurf78 || model.triangles[i].surface != 7 && model.triangles[i].surface != 8)
+		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_SCAFFOLD)
 			ProcessLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i], point, coldist);
 
 	if(coldist < mindist){
@@ -972,7 +972,7 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 bool
 CCollision::ProcessVerticalLine(const CColLine &line,
 	const CMatrix &matrix, CColModel &model,
-	CColPoint &point, float &mindist, bool ignoreSurf78, CStoredCollPoly *poly)
+	CColPoint &point, float &mindist, bool ignoreSeeThrough, CStoredCollPoly *poly)
 {
 	static CStoredCollPoly TempStoredPoly;
 	int i;
@@ -988,17 +988,17 @@ CCollision::ProcessVerticalLine(const CColLine &line,
 
 	float coldist = mindist;
 	for(i = 0; i < model.numSpheres; i++)
-		if(!ignoreSurf78 || model.spheres[i].surface != 7 && model.spheres[i].surface != 8)
+		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_SCAFFOLD)
 			ProcessLineSphere(newline, model.spheres[i], point, coldist);
 
 	for(i = 0; i < model.numBoxes; i++)
-		if(!ignoreSurf78 || model.boxes[i].surface != 7 && model.boxes[i].surface != 8)
+		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_SCAFFOLD)
 			ProcessLineBox(newline, model.boxes[i], point, coldist);
 
 	CalculateTrianglePlanes(&model);
 	TempStoredPoly.valid = false;
 	for(i = 0; i < model.numTriangles; i++)
-		if(!ignoreSurf78 || model.triangles[i].surface != 7 && model.triangles[i].surface != 8)
+		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_SCAFFOLD)
 			ProcessVerticalLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i], point, coldist, &TempStoredPoly);
 
 	if(coldist < mindist){
@@ -1260,6 +1260,7 @@ CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel,
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
+extern int gDbgSurf;
 
 	for(i = 0; i < colModel.numTriangles; i++){
 		colModel.GetTrianglePoint(verts[0], colModel.triangles[i].a);
@@ -1310,6 +1311,7 @@ CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel,
 		}
 
 		// TODO: make some surface types flicker?
+//if(s != gDbgSurf) continue;
 
 		if(s > SURFACE_32){
 			r = CGeneral::GetRandomNumber();
@@ -1385,6 +1387,7 @@ CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel,
 		}
 
 		// TODO: make some surface types flicker?
+//if(s != gDbgSurf) continue;
 
 		RenderBuffer::StartStoring(36, 8, &iptr, &vptr);
 		RwIm3DVertexSetRGBA(&vptr[0], r, g, b, 255);

@@ -16,7 +16,6 @@ public:
 	CMatrix m_objectMatrix;
 	float m_fUprootLimit;
 	int8 ObjectCreatedBy;
-//	int8 m_nObjectFlags;
 	int8 m_obj_flag1 : 1;
 	int8 m_obj_flag2 : 1;
 	int8 m_obj_flag4 : 1;

@@ -93,7 +93,7 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 			return;
 #endif
 		ped = (CPed*)e;
-		if(ped->m_nPedState == PED_PASSENGER)
+		if(ped->m_nPedState == PED_DRIVING)
 			return;
 	}
 #ifndef MASTER
@@ -111,10 +111,10 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 	// Render Peds in vehicle before vehicle itself
 	if(e->IsVehicle()){
 		veh = (CVehicle*)e;
-		if(veh->pDriver && veh->pDriver->m_nPedState == PED_PASSENGER)
+		if(veh->pDriver && veh->pDriver->m_nPedState == PED_DRIVING)
 			veh->pDriver->Render();
 		for(i = 0; i < 8; i++)
-			if(veh->pPassengers[i] && veh->pPassengers[i]->m_nPedState == PED_PASSENGER)
+			if(veh->pPassengers[i] && veh->pPassengers[i]->m_nPedState == PED_DRIVING)
 				veh->pPassengers[i]->Render();
 	}
 	e->Render();

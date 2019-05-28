@@ -33,6 +33,9 @@ public:
 static_assert(sizeof(CSector) == 0x28, "CSector: error");
 
 class CEntity;
+struct CColPoint;
+struct CColLine;
+struct CStoredCollPoly;
 
 class CWorld
 {
@@ -43,6 +46,7 @@ class CWorld
 
 public:
 	static CEntity *&pIgnoreEntity;
+	static bool &bIncludeDeadPeds;
 	static bool &bNoMoreCollisionTorque;
 	static bool &bSecondShift;
 	static bool &bForceProcessControl;
@@ -61,10 +65,28 @@ public:
 	}
 	static void ClearScanCodes(void);
 
+	static bool CameraToIgnoreThisObject(CEntity *ent);
+
+	static bool ProcessLineOfSight(const CVector &point1, const CVector &point2, CColPoint &point, CEntity *&entity, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
+	static bool ProcessLineOfSightSector(CSector &sector, const CColLine &line, CColPoint &point, float &dist, CEntity *&entity, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
+	static bool ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColPoint &point, float &dist, CEntity *&entity, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
+	static bool ProcessVerticalLine(const CVector &point1, float z2, CColPoint &point, CEntity *&entity, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, CStoredCollPoly *poly);
+	static bool ProcessVerticalLineSector(CSector &sector, const CColLine &line, CColPoint &point, CEntity *&entity, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, CStoredCollPoly *poly);
+	static bool ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CColPoint &point, float &dist, CEntity *&entity, bool ignoreSeeThrough, CStoredCollPoly *poly);
+	static bool GetIsLineOfSightClear(const CVector &point1, const CVector &point2, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
+	static bool GetIsLineOfSightSectorClear(CSector &sector, const CColLine &line, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
+	static bool GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
+
+	static float FindGroundZForCoord(float x, float y);
+	static float FindGroundZFor3DCoord(float x, float y, float z, bool *found);
+	static float FindRoofZFor3DCoord(float x, float y, float z, bool *found);
+
 	static float GetSectorX(float f) { return ((f + 2000.0f)/40.0f); }
 	static float GetSectorY(float f) { return ((f + 2000.0f)/40.0f); }
 	static int GetSectorIndexX(float f) { return (int)GetSectorX(f); }
 	static int GetSectorIndexY(float f) { return (int)GetSectorY(f); }
+	static float GetWorldX(int x) { return x*40.0f - 2000.0f; }
+	static float GetWorldY(int y) { return y*40.0f - 2000.0f; }
 };
 
 CVector &FindPlayerCoors(CVector &v);
