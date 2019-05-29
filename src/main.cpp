@@ -24,17 +24,37 @@ void operator delete(void *ptr) noexcept { gtadelete(ptr); }
 
 unsigned __int64 myrand_seed = 1;
 
-int
-myrand(void)
+
+int _cwrand() // original codewarrior rand
 {
+	return ((int (__cdecl *)())0x5A41D0)();
+}
+
+int
+myps2rand(void)
+{
+	return _cwrand();
 	myrand_seed = 0x5851F42D4C957F2D * myrand_seed + 1;
 	return ((myrand_seed >> 32) & 0x7FFFFFFF);
+}
+
+int myrand(void)
+{
+#if USE_PS2_RAND == TRUE
+	return myps2rand();
+#else
+	return _cwrand();
+#endif
 }
 
 void
 mysrand(unsigned int seed)
 {
+#if USE_PS2_RAND == TRUE
 	myrand_seed = seed;
+#else
+	;
+#endif
 }
 
 // platform stuff

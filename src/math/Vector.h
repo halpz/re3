@@ -6,66 +6,127 @@ public:
 	float x, y, z;
 	CVector(void) {}
 	CVector(float x, float y, float z) : x(x), y(y), z(z) {}
-//	CVector(rw::V3d const &v) : x(v.x), y(v.y), z(v.z) {}
+//	CVector(CVector &refVector) : x(refVector.x), y(refVector.y), z(refVector.z) { }
+//	CVector(const CVector &refVector) : x(refVector.x), y(refVector.y), z(refVector.z) {}
+//	CVector(CVector2D &refVector, float _z = 0.0f) : x(refVector.x), y(refVector.y), z(_z) {}
+#ifdef RWCORE_H
+	CVector(RwV3d const &v) : x(v.x), y(v.y), z(v.z) {}
+
+	operator RwV3d (void) const {
+		RwV3d vecRw = { this->x, this->y, this->z };
+		return vecRw;
+	}
+	
+	operator RwV3d *(void)
+	{
+		return (RwV3d *)this;
+	}
+	
+	operator RwV3d &(void)
+	{
+		return *((RwV3d *)this);
+	}
+#endif
 	float Magnitude(void) const { return sqrt(x*x + y*y + z*z); }
 	float MagnitudeSqr(void) const { return x*x + y*y + z*z; }
 	float Magnitude2D(void) const { return sqrt(x*x + y*y); }
-	void Normalise(void){
-		float sq = MagnitudeSqr();
-		if(sq > 0.0f){
-			float invsqrt = 1.0f/sqrt(sq);
-			x *= invsqrt;
-			y *= invsqrt;
-			z *= invsqrt;
-		}else
-			x = 1.0f;
-	}
-//	rw::V3d ToRW(void){
-//		return rw::makeV3d(x, y, z);
-//	}
-//	void operator=(rw::V3d const &rhs){
-//		x = rhs.x;
-//		y = rhs.y;
-//		z = rhs.z;
-//	}
-	CVector operator-(const CVector &rhs) const {
-		return CVector(x-rhs.x, y-rhs.y, z-rhs.z);
-	}
-	CVector operator+(const CVector &rhs) const {
-		return CVector(x+rhs.x, y+rhs.y, z+rhs.z);
-	}
-	CVector operator*(float t) const {
-		return CVector(x*t, y*t, z*t);
-	}
-	CVector operator/(float t) const {
-		return CVector(x/t, y/t, z/t);
-	}
-	CVector &operator-=(const CVector &rhs) {
-		this->x -= rhs.x;
-		this->y -= rhs.y;
-		this->z -= rhs.z;
+	void Normalise(void);
+
+
+	// operator =
+	inline CVector const& operator = (CVector const &refRight)
+	{
+		x = refRight.x;
+		y = refRight.y;
+		z = refRight.z;
 		return *this;
 	}
-	CVector &operator+=(const CVector &rhs) {
-		this->x += rhs.x;
-		this->y += rhs.y;
-		this->z += rhs.z;
+	
+	inline CVector const& operator = (float fRight)
+	{
+		x = fRight;
+		y = fRight;
+		z = fRight;
 		return *this;
 	}
-	CVector &operator*=(float t) {
-		this->x *= t;
-		this->y *= t;
-		this->z *= t;
+	
+	// operator +=
+	inline CVector const& operator += (CVector const &refRight)
+	{
+		x += refRight.x;
+		y += refRight.y;
+		z += refRight.z;
 		return *this;
 	}
-	CVector &operator/=(float t) {
-		this->x /= t;
-		this->y /= t;
-		this->z /= t;
+	
+	inline CVector const& operator += (float fRight)
+	{
+		x += fRight;
+		y += fRight;
+		z += fRight;
 		return *this;
 	}
+	
+	// operator -=
+	inline CVector const& operator -= (CVector const &refRight)
+	{
+		x -= refRight.x;
+		y -= refRight.y;
+		z -= refRight.z;
+		return *this;
+	}
+	
+	inline CVector const& operator -= (float fRight)
+	{
+		x -= fRight;
+		y -= fRight;
+		z -= fRight;
+		return *this;
+	}
+	
+	// operator *=
+	inline CVector const& operator *= (CVector const &refRight)
+	{
+		x *= refRight.x;
+		y *= refRight.y;
+		z *= refRight.z;
+		return *this;
+	}
+	
+	inline CVector const& operator *= (float fRight)
+	{
+		x *= fRight;
+		y *= fRight;
+		z *= fRight;
+		return *this;
+	}
+	
+	// operator /=
+	inline CVector const& operator /= (CVector const &refRight)
+	{
+		x /= refRight.x;
+		y /= refRight.y;
+		z /= refRight.z;
+		return *this;
+	}
+	
+	inline CVector const& operator /= (float fRight)
+	{
+		x /= fRight;
+		y /= fRight;
+		z /= fRight;
+		return *this;
+	}
+	
+	inline CVector operator - () const
+    {
+        return CVector(-x, -y, -z);
+    }
+	
 	bool IsZero(void) { return x == 0.0f && y == 0.0f && z == 0.0f; }
 };
+
+//extern CVector operator*(CMatrix const& matrix, CVector const& vector);
 
 inline float
 DotProduct(const CVector &v1, const CVector &v2)
@@ -81,3 +142,23 @@ CrossProduct(const CVector &v1, const CVector &v2)
 		v1.z*v2.x - v1.x*v2.z,
 		v1.x*v2.y - v1.y*v2.x);
 }
+
+// operator +
+extern CVector operator + (CVector const &refLeft, CVector const &refRight);
+extern CVector operator + (CVector const &refLeft, float fRight);
+extern CVector operator + (float fLeft, CVector const &refRight);
+
+// operator -
+extern CVector operator - (CVector const &refLeft, CVector const &refRight);
+extern CVector operator - (CVector const &refLeft, float fRight);
+extern CVector operator - (float fLeft, CVector const &refRight);
+ 
+// operator *
+extern CVector operator * (CVector const &refLeft, CVector const &refRight);
+extern CVector operator * (CVector const &refLeft, float fRight);
+extern CVector operator * (float fLeft, CVector const &refRight);
+ 
+// operator /
+extern CVector operator / (CVector const &refLeft, CVector const &refRight);
+extern CVector operator / (CVector const &refLeft, float fRight);
+extern CVector operator / (float fLeft, CVector const &refRight);

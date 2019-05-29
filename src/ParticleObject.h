@@ -28,4 +28,6 @@ class CParticleObject
 {
 public:
 	static void AddObject(uint16, const CVector &pos, bool remove);
+	static void Initialise();
+	static void UpdateAll();
 };

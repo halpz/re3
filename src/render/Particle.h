@@ -1,82 +1,100 @@
 #pragma once
+#include "ParticleMgr.h"
 
-enum tParticleType
-{
-	PARTICLE_SPARK,
-	PARTICLE_SPARK_SMALL,
-	PARTICLE_WHEEL_DIRT,
-	PARTICLE_WHEEL_WATER,
-	PARTICLE_BLOOD,
-	PARTICLE_BLOOD_SMALL,
-	PARTICLE_BLOOD_SPURT,
-	PARTICLE_DEBRIS,
-	PARTICLE_DEBRIS2,
-	PARTICLE_WATER,
-	PARTICLE_FLAME,
-	PARTICLE_FIREBALL,
-	PARTICLE_GUNFLASH,
-	PARTICLE_GUNFLASH_NOANIM,
-	PARTICLE_GUNSMOKE,
-	PARTICLE_GUNSMOKE2,
-	PARTICLE_SMOKE,
-	PARTICLE_SMOKE_SLOWMOTION,
-	PARTICLE_GARAGEPAINT_SPRAY,
-	PARTICLE_SHARD,
-	PARTICLE_SPLASH,
-	PARTICLE_CARFLAME,
-	PARTICLE_STEAM,
-	PARTICLE_STEAM2,
-	PARTICLE_STEAM_NY,
-	PARTICLE_STEAM_NY_SLOWMOTION,
-	PARTICLE_ENGINE_STEAM,
-	PARTICLE_RAINDROP,
-	PARTICLE_RAINDROP_SMALL,
-	PARTICLE_RAIN_SPLASH,
-	PARTICLE_RAIN_SPLASH_BIGGROW,
-	PARTICLE_RAIN_SPLASHUP,
-	PARTICLE_WATERSPRAY,
-	PARTICLE_EXPLOSION_MEDIUM,
-	PARTICLE_EXPLOSION_LARGE,
-	PARTICLE_EXPLOSION_MFAST,
-	PARTICLE_EXPLOSION_LFAST,
-	PARTICLE_CAR_SPLASH,
-	PARTICLE_BOAT_SPLASH,
-	PARTICLE_BOAT_THRUSTJET,
-	PARTICLE_BOAT_WAKE,
-	PARTICLE_WATER_HYDRANT,
-	PARTICLE_WATER_CANNON,
-	PARTICLE_EXTINGUISH_STEAM,
-	PARTICLE_PED_SPLASH,
-	PARTICLE_PEDFOOT_DUST,
-	PARTICLE_HELI_DUST,
-	PARTICLE_HELI_ATTACK,
-	PARTICLE_ENGINE_SMOKE,
-	PARTICLE_ENGINE_SMOKE2,
-	PARTICLE_CARFLAME_SMOKE,
-	PARTICLE_FIREBALL_SMOKE,
-	PARTICLE_PAINT_SMOKE,
-	PARTICLE_TREE_LEAVES,
-	PARTICLE_CARCOLLISION_DUST,
-	PARTICLE_CAR_DEBRIS,
-	PARTICLE_HELI_DEBRIS,
-	PARTICLE_EXHAUST_FUMES,
-	PARTICLE_RUBBER_SMOKE,
-	PARTICLE_BURNINGRUBBER_SMOKE,
-	PARTICLE_BULLETHIT_SMOKE,
-	PARTICLE_GUNSHELL_FIRST,
-	PARTICLE_GUNSHELL,
-	PARTICLE_GUNSHELL_BUMP1,
-	PARTICLE_GUNSHELL_BUMP2,
-	PARTICLE_TEST,
-	PARTICLE_BIRD_FRONT,
-	PARTICLE_RAINDROP_2D,
-};
 
 class CEntity;
 
 class CParticle
 {
+	enum
+	{
+		RAND_TABLE_SIZE    = 20,
+		SIN_COS_TABLE_SIZE = 1024
+	};
+	
 public:
-	static void AddParticle(tParticleType, const CVector &pos, const CVector &velocity, CEntity *ent = nil,
-		float size = 0.0, int32 rotationStep = 0, int32 rotation = 0, int startFrame = 0, int lifeSpan = 0);
+	CVector   m_vecPosition;
+	CVector   m_vecVelocity;
+	CVector   m_vecScreenPosition;
+	UInt32     m_nTimeWhenWillBeDestroyed;
+	UInt32     m_nTimeWhenColorWillBeChanged;
+	Float     m_fZGround;
+	CVector   m_vecParticleMovementOffset;
+	Int16     m_nCurrentZRotation;
+	UInt16     m_nZRotationTimer;
+	Float     m_fCurrentZRadius;
+	UInt16     m_nZRadiusTimer;
+	char _pad0[2];
+	Float     m_fSize;
+	Float     m_fExpansionRate;
+	UInt16     m_nFadeToBlackTimer;
+	UInt16     m_nFadeAlphaTimer;
+	UInt8     m_nColorIntensity;
+	UInt8     m_nAlpha;
+	UInt16    m_nCurrentFrame;
+	Int16     m_nAnimationSpeedTimer;
+	Int16     m_nRotationStep;
+	Int16     m_nRotation;
+	RwRGBA    m_Color;
+	char _pad1[2];
+	CParticle *m_pNext;
+	
+	CParticle()
+	{
+		;
+	}
+	
+	~CParticle()
+	{
+		;
+	}
+
+	//static Float      ms_afRandTable[RAND_TABLE_SIZE];
+	static Float      (&ms_afRandTable)[RAND_TABLE_SIZE];
+	static CParticle *m_pUnusedListHead;
+	
+	/*
+	static Float      m_SinTable[SIN_COS_TABLE_SIZE];
+	static Float      m_CosTable[SIN_COS_TABLE_SIZE];
+	*/
+	static Float      (&m_SinTable)[SIN_COS_TABLE_SIZE];
+	static Float      (&m_CosTable)[SIN_COS_TABLE_SIZE];
+	
+	
+	static void ReloadConfig();
+	static void Initialise();
+	static void Shutdown();
+	
+	static CParticle *AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity = NULL, Float fSize = 0.0f, Int32 nRotationSpeed = 0, Int32 nRotation = 0, Int32 nCurFrame = 0, Int32 nLifeSpan = 0);
+	static CParticle *AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity, Float fSize, RwRGBA const &color, Int32 nRotationSpeed = 0, Int32 nRotation = 0, Int32 nCurFrame = 0, Int32 nLifeSpan = 0);
+
+	static void Update();
+	static void Render();
+
+	static void RemovePSystem(tParticleType type);
+	static void RemoveParticle(CParticle *pParticle, CParticle *pPrevParticle, tParticleSystemData *pPSystemData);
+	
+	static inline void _Next(CParticle *&pParticle, CParticle *&pPrevParticle, tParticleSystemData *pPSystemData, Bool bRemoveParticle)
+	{
+		if ( bRemoveParticle )
+		{
+			RemoveParticle(pParticle, pPrevParticle, pPSystemData);
+					
+			if ( pPrevParticle )
+				pParticle = pPrevParticle->m_pNext;
+			else
+				pParticle = pPSystemData->m_pParticles;
+		}
+		else
+		{
+			pPrevParticle = pParticle;
+			pParticle = pParticle->m_pNext;
+		}
+	}
+
+	static void AddJetExplosion(CVector const &vecPos, Float fPower, Float fSize);
+	static void AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatrix);
+
 };
+
+VALIDATE_SIZE(CParticle, 0x68);
