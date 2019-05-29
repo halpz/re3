@@ -149,9 +149,9 @@ sq(float x) { return x*x; }
 
 
 #if USE_PS2_RAND == TRUE
-#define MY_RAND_MAX		32767
-#else
 #define MY_RAND_MAX		65535
+#else
+#define MY_RAND_MAX		32767
 #endif
 
 int myrand(void);
