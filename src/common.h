@@ -25,6 +25,21 @@ typedef uint32_t uint32;
 typedef int32_t int32;
 typedef uintptr_t uintptr;
 
+typedef char                            Int8;
+typedef unsigned char                   UInt8;
+typedef signed char                     SInt8;
+typedef short                           Int16;
+typedef unsigned short                  UInt16;
+typedef signed short                    SInt16;
+typedef int                             Int32;
+typedef unsigned int                    UInt32;
+typedef signed int                      SInt32;
+typedef float                           Float;
+typedef double                          Double;
+typedef Int8 Bool; //typedef bool Bool;
+typedef char Char;
+
+
 #define nil NULL
 
 #include "config.h"
@@ -62,6 +77,15 @@ extern RsGlobalType &RsGlobal;
 #define SCREENW (RsGlobal.maximumWidth)
 #define SCREENH (RsGlobal.maximumHeight)
 
+#define DEFAULT_SCREEN_WIDTH (640)
+#define DEFAULT_SCREEN_HEIGHT (448)
+#define SCREEN_WIDTH Float(RsGlobal.width)
+#define SCREEN_HEIGHT Float(RsGlobal.height)
+#define SCREEN_STRETCH_X(a)   Float( a * ( SCREEN_WIDTH / Float(DEFAULT_SCREEN_WIDTH)  ) )
+#define SCREEN_STRETCH_Y(a)   Float( a * ( SCREEN_HEIGHT / Float(DEFAULT_SCREEN_HEIGHT) ) )
+#define SCREEN_FROM_RIGHT(a)  Float( SCREEN_WIDTH - SCREEN_STRETCH_X(a) )
+#define SCREEN_FROM_BOTTOM(a) Float( SCREEN_HEIGHT - SCREEN_STRETCH_Y(a) )
+
 char *GetUserDirectory(void);
 
 struct GlobalScene
@@ -79,22 +103,57 @@ extern GlobalScene &Scene;
 class CRGBA
 {
 public:
-	uint8 r, g, b, a;
+	union
+	{
+	    uint32 color32;
+		struct { uint8 r, g, b, a; };
+		struct { uint8 red, green, blue, alpha; };
+#ifdef RWCORE_H
+		struct  { RwRGBA rwRGBA; };
+#endif
+	};
+	
 	CRGBA(void) { }
 	CRGBA(uint8 r, uint8 g, uint8 b, uint8 a) : r(r), g(g), b(b), a(a) { }
+#ifdef RWCORE_H
+	operator RwRGBA &(void)
+	{
+		return rwRGBA;
+	}
+	
+	operator RwRGBA *(void)
+	{
+		return &rwRGBA;
+	}
+	
+	operator RwRGBA (void) const
+	{
+		return rwRGBA;
+	}
+#endif
 };
 
-inline float
-clamp(float v, float min, float max){ return v<min ? min : v>max ? max : v; }
+// inline float clamp(float v, float min, float max){ return v<min ? min : v>max ? max : v; }
+
 inline float
 sq(float x) { return x*x; }
+
+#define SQR(x) ( x * x )
+
 #define PI M_PI
-#define DEGTORAD(d) (d/180.0f*PI)
+#define DEGTORAD(x) ((x) * PI / 180.0f)
+#define RADTODEG(x) ((x) * 180.0f / PI)
 
 int myrand(void);
 void mysrand(unsigned int seed);
 
 #define debug printf
+#define ASSERT assert
 
+#define clamp(v, a, b) (max(min(v, b), a))
 //#define min(a, b) ((a) < (b) ? (a) : (b))
 //#define max(a, b) ((a) > (b) ? (a) : (b))
+
+#define PERCENT(x, p)                    ( ( Float(x) * ( Float(p) / 100.0f ) ) )
+#define ARRAY_SIZE(array)                (sizeof(array) / sizeof(array[0]))
+#define BIT(num)                         (1<<(num))

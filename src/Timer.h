@@ -2,6 +2,7 @@
 
 class CTimer
 {
+public: // remove when each variable will be encapsulated
 	static uint32 &m_snTimeInMilliseconds;
 	static uint32 &m_snTimeInMillisecondsPauseMode;
 	static uint32 &m_snTimeInMillisecondsNonClipped;
