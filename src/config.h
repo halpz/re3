@@ -53,6 +53,6 @@ enum Config {
 	NUMHOURS = 24,
 };
 
-#define USE_PS2_RAND FALSE
+#define USE_PS2_RAND TRUE
 
 #endif
