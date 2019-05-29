@@ -4,12 +4,6 @@
 #include "Camera.h"
 #include "Sprite.h"
 
-// Get rid of bullshit windows definitions, we're not running on an 8086
-#ifdef far
-#undef far
-#undef near
-#endif
-
 float &CSprite::m_f2DNearScreenZ = *(float*)0x8F1ABC;
 float &CSprite::m_f2DFarScreenZ = *(float*)0x8F2C94;
 float &CSprite::m_fRecipNearClipPlane = *(float*)0x8F5FFC;

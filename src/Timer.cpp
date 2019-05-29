@@ -1,10 +1,9 @@
+#include <Windows.h>
 #include "common.h"
 #include "patcher.h"
 #include "DMAudio.h"
+#include "Record.h"
 #include "Timer.h"
-#include "RecordDataForGame.h"
-#include "RecordDataForChase.h"
-#include <Windows.h>
 
 uint32 &CTimer::m_snTimeInMilliseconds = *(uint32*)0x885B48;
 uint32 &CTimer::m_snTimeInMillisecondsPauseMode = *(uint32*)0x5F7614;
@@ -229,4 +228,3 @@ STARTPATCHES
 	InjectHook(0x4AD4A0, CTimer::EndUserPause, PATCH_JUMP);
 ENDPATCHES
 #endif
-

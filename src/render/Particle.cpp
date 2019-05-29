@@ -1229,7 +1229,9 @@ void CParticle::Update()
 							moveStep.z = point.point.z;
 							if ( psystem->m_Type == PARTICLE_DEBRIS2 )
 							{
-								particle->m_vecVelocity *= CVector(0.8f, 0.8f, -0.4f);
+								particle->m_vecVelocity.x *= 0.8f;
+								particle->m_vecVelocity.y *= 0.8f;
+								particle->m_vecVelocity.z *= -0.4f;
 								if ( particle->m_vecVelocity.z < 0.005f )
 									particle->m_vecVelocity.z = 0.0f;
 							}

@@ -18,31 +18,28 @@
 
 #define rwVENDORID_ROCKSTAR 0x0253F2
 
-typedef uint8_t uint8;
-typedef int8_t int8;
-typedef uint16_t uint16;
-typedef int16_t int16;
-typedef uint32_t uint32;
-typedef int32_t int32;
+// Get rid of bullshit windows definitions, we're not running on an 8086
+#ifdef far
+#undef far
+#endif
+#ifdef near
+#undef near
+#endif
+
+typedef uint8_t uint8, UInt8;
+typedef int8_t int8, Int8;
+typedef uint16_t uint16, UInt16;
+typedef int16_t int16, Int16;
+typedef uint32_t uint32, UInt32;
+typedef int32_t int32, Int32;
 typedef uintptr_t uintptr;
+typedef uint64_t uint64, UInt64;
+typedef int64_t int64, Int64;
 
-typedef char                            Int8;
-typedef unsigned char                   UInt8;
-typedef signed char                     SInt8;
-typedef short                           Int16;
-typedef unsigned short                  UInt16;
-typedef signed short                    SInt16;
-typedef int                             Int32;
-typedef unsigned int                    UInt32;
-typedef signed int                      SInt32;
-typedef float                           Float;
-typedef double                          Double;
-typedef Int8 Bool; //typedef bool Bool;
+typedef float Float;
+typedef double Double;
+typedef bool Bool;
 typedef char Char;
-
-typedef __int64                         Int64;
-typedef unsigned __int64                UInt64;
-typedef signed __int64                  SInt64;
 
 #define nil NULL
 
@@ -85,10 +82,10 @@ extern RsGlobalType &RsGlobal;
 #define DEFAULT_SCREEN_HEIGHT (448)
 #define SCREEN_WIDTH Float(RsGlobal.width)
 #define SCREEN_HEIGHT Float(RsGlobal.height)
-#define SCREEN_STRETCH_X(a)   Float( a * ( SCREEN_WIDTH / Float(DEFAULT_SCREEN_WIDTH)  ) )
-#define SCREEN_STRETCH_Y(a)   Float( a * ( SCREEN_HEIGHT / Float(DEFAULT_SCREEN_HEIGHT) ) )
-#define SCREEN_FROM_RIGHT(a)  Float( SCREEN_WIDTH - SCREEN_STRETCH_X(a) )
-#define SCREEN_FROM_BOTTOM(a) Float( SCREEN_HEIGHT - SCREEN_STRETCH_Y(a) )
+#define SCREEN_STRETCH_X(a)   Float((a) * (SCREEN_WIDTH / Float(DEFAULT_SCREEN_WIDTH)))
+#define SCREEN_STRETCH_Y(a)   Float((a) * (SCREEN_HEIGHT / Float(DEFAULT_SCREEN_HEIGHT)))
+#define SCREEN_FROM_RIGHT(a)  Float(SCREEN_WIDTH - SCREEN_STRETCH_X(a))
+#define SCREEN_FROM_BOTTOM(a) Float(SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
 
 char *GetUserDirectory(void);
 
@@ -120,40 +117,28 @@ public:
 	CRGBA(void) { }
 	CRGBA(uint8 r, uint8 g, uint8 b, uint8 a) : r(r), g(g), b(b), a(a) { }
 #ifdef RWCORE_H
-	operator RwRGBA &(void)
-	{
+	operator RwRGBA &(void) {
 		return rwRGBA;
 	}
 	
-	operator RwRGBA *(void)
-	{
+	operator RwRGBA *(void) {
 		return &rwRGBA;
 	}
 	
-	operator RwRGBA (void) const
-	{
+	operator RwRGBA (void) const {
 		return rwRGBA;
 	}
 #endif
 };
 
-// inline float clamp(float v, float min, float max){ return v<min ? min : v>max ? max : v; }
+#define clamp(v, low, high) ((v)<(low) ? (low) : (v)>(high) ? (high) : (v))
 
-inline float
-sq(float x) { return x*x; }
-
-#define SQR(x) ( x * x )
+inline float sq(float x) { return x*x; }
+#define SQR(x) ((x) * (x))
 
 #define PI M_PI
 #define DEGTORAD(x) ((x) * PI / 180.0f)
 #define RADTODEG(x) ((x) * 180.0f / PI)
-
-
-#if USE_PS2_RAND == TRUE
-#define MY_RAND_MAX		65535
-#else
-#define MY_RAND_MAX		32767
-#endif
 
 int myrand(void);
 void mysrand(unsigned int seed);
@@ -167,10 +152,6 @@ void mysrand(unsigned int seed);
 #define VALIDATE_SIZE(struc, size) static_assert(sizeof(struc) == size, "Invalid structure size of " #struc)
 #define VALIDATE_OFFSET(struc, member, offset) static_assert(offsetof(struc, member) == offset, "The offset of " #member " in " #struc " is not " #offset "...")
 
-#define clamp(v, a, b) (max(min(v, b), a))
-//#define min(a, b) ((a) < (b) ? (a) : (b))
-//#define max(a, b) ((a) > (b) ? (a) : (b))
-
-#define PERCENT(x, p)                    ( ( Float(x) * ( Float(p) / 100.0f ) ) )
+#define PERCENT(x, p)                    ((Float(x) * (Float(p) / 100.0f)))
 #define ARRAY_SIZE(array)                (sizeof(array) / sizeof(array[0]))
 #define BIT(num)                         (1<<(num))

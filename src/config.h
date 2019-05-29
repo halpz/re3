@@ -1,5 +1,4 @@
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#pragma once
 
 enum Config {
 	NUMCDIMAGES = 50,	// was 12
@@ -52,7 +51,3 @@ enum Config {
 	NUMWEATHERS = 4,
 	NUMHOURS = 24,
 };
-
-#define USE_PS2_RAND TRUE
-
-#endif

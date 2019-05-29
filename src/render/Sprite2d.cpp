@@ -4,12 +4,6 @@
 #include "Camera.h"
 #include "Sprite2d.h"
 
-// Get rid of bullshit windows definitions, we're not running on an 8086
-#ifdef far
-#undef far
-#undef near
-#endif
-
 RwIm2DVertex *CSprite2d::maVertices = (RwIm2DVertex*)0x6E9168;
 float &CSprite2d::RecipNearClip = *(float*)0x880DB4;
 int32 &CSprite2d::mCurrentBank = *(int32*)0x8F1AF4;
@@ -17,7 +11,6 @@ RwTexture **CSprite2d::mpBankTextures = (RwTexture**)0x774DC0;
 int32 *CSprite2d::mCurrentSprite = (int32*)0x6F4500;
 int32 *CSprite2d::mBankStart = (int32*)0x774BE8;
 RwIm2DVertex *CSprite2d::maBankVertices = (RwIm2DVertex*)0x8429F8;
-
 
 void
 CSprite2d::SetRecipNearClip(void)
