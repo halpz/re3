@@ -6,6 +6,7 @@ workspace "re3"
 	files { "src/math/*.*" }
 	files { "src/modelinfo/*.*" }
 	files { "src/entities/*.*" }
+	files { "src/weapons/*.*" }
 	files { "src/render/*.*" }
 	files { "src/control/*.*" }
 	files { "src/audio/*.*" }
@@ -13,6 +14,7 @@ workspace "re3"
 	includedirs { "src" }
 	includedirs { "src/modelinfo" }
 	includedirs { "src/entities" }
+	includedirs { "src/weapons" }
 	includedirs { "src/render" }
 	includedirs { "src/control" }
 	includedirs { "src/audio" }

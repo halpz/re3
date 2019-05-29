@@ -85,7 +85,7 @@ struct CCam
 	float   f_Roll; //used for adding a slight roll to the camera in the
 	float	f_rollSpeed;
 	float   m_fSyphonModeTargetZOffSet;
-float m_unknownZOffset;
+	float	m_fUnknownZOffSet;
 	float   m_fAmountFractionObscured;
 	float   m_fAlphaSpeedOverOneFrame; // 100
 	float   m_fBetaSpeedOverOneFrame;
@@ -162,9 +162,20 @@ float m_unknownZOffset;
 	bool        m_bFirstPersonRunAboutActive;
 
 
-	void Process_Debug(float *vec, float a, float b, float c);
-	void Process_Kalvin(float*, float, float, float);
 	void GetVectorsReadyForRW(void);
+	CVector DoAverageOnVector(const CVector &vec);
+	float GetPedBetaAngleForClearView(const CVector &Target, float Dist, float BetaOffset, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies);
+	void WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation);
+	void WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, float TargetHeight);
+	bool RotCamIfInFrontCar(CVector &TargetCoors, float TargetOrientation);
+	bool FixCamIfObscured(CVector &TargetCoors, float TargetHeight, float TargetOrientation);
+	void Cam_On_A_String_Unobscured(const CVector &TargetCoors, float BaseDist);
+	void FixCamWhenObscuredByVehicle(const CVector &TargetCoors);
+
+	void Process_Debug(float *vec, float a, float b, float c);
+	void Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, float, float);
+	void Process_BehindCar(const CVector &CameraTarget, float TargetOrientation, float, float);
+	void Process_Cam_On_A_String(const CVector &CameraTarget, float TargetOrientation, float, float);
 };
 static_assert(sizeof(CCam) == 0x1A4, "CCam: wrong size");
 static_assert(offsetof(CCam, Alpha) == 0xA8, "CCam: error");

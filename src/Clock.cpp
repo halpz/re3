@@ -30,7 +30,7 @@ CClock::Initialise(uint32 scale)
 void
 CClock::Update(void)
 {
-	if(CPad::GetPad(1)->NewState.r1){
+	if(CPad::GetPad(1)->GetRightShoulder1()){
 		ms_nGameClockMinutes += 8;
 		ms_nLastClockTick = CTimer::GetTimeInMilliseconds();
 		if(ms_nGameClockMinutes >= 60){

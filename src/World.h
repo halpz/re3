@@ -89,7 +89,9 @@ public:
 	static float GetWorldY(int y) { return y*40.0f - 2000.0f; }
 };
 
-CVector &FindPlayerCoors(CVector &v);
+class CPed;
 class CVehicle;
+CPed *FindPlayerPed(void);
+CVector &FindPlayerCoors(CVector &v);
 CVehicle *FindPlayerVehicle(void);
 CVehicle *FindPlayerTrain(void);

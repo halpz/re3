@@ -1,0 +1,31 @@
+#pragma once
+
+enum eWeaponType
+{
+	WEAPONTYPE_UNARMED = 0,
+	WEAPONTYPE_BASEBALLBAT,
+	WEAPONTYPE_COLT45,
+	WEAPONTYPE_UZI,
+	WEAPONTYPE_SHOTGUN,
+	WEAPONTYPE_AK47,
+	WEAPONTYPE_M16,
+	WEAPONTYPE_SNIPERRIFLE,
+	WEAPONTYPE_ROCKETLAUNCHER,
+	WEAPONTYPE_FLAMETHROWER,
+	WEAPONTYPE_MOLOTOV,
+	WEAPONTYPE_GRENADE,
+	WEAPONTYPE_DETONATOR,
+	WEAPONTYPE_HELICANNON
+};
+
+class CWeapon
+{
+public:
+	eWeaponType m_eWeaponType;
+	int32 m_eWeaponState;
+	int32 m_nAmmoInClip;
+	int32 m_nAmmoTotal;
+	int32 m_nTimer;
+	bool m_bAddRotOffset;
+};
+static_assert(sizeof(CWeapon) == 0x18, "CWeapon: error");

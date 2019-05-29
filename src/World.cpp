@@ -584,6 +584,7 @@ STARTPATCHES
 	InjectHook(0x4B3B50, CWorld::FindRoofZFor3DCoord, PATCH_JUMP);
 ENDPATCHES
 
+WRAPPER CPed *FindPlayerPed(void) { EAXJMP(0x4A1150); }
 WRAPPER CVector &FindPlayerCoors(CVector &v) { EAXJMP(0x4A1030); }
 WRAPPER CVehicle *FindPlayerVehicle(void) { EAXJMP(0x4A10C0); }
 WRAPPER CVehicle *FindPlayerTrain(void) { EAXJMP(0x4A1120); }

@@ -1,6 +1,11 @@
 #pragma once
 
 #include "Physical.h"
+#include "Weapon.h"
+
+enum {
+	PED_MAX_WEAPONS = 13
+};
 
 enum PedState
 {
@@ -61,6 +66,14 @@ enum PedState
 	PED_EXIT_CAR,
 	PED_HANDS_UP,
 	PED_ARRESTED,
+};
+
+enum {
+	PEDMOVE_NONE,
+	PEDMOVE_STILL,
+	PEDMOVE_WALK,
+	PEDMOVE_RUN,
+	PEDMOVE_SPRINT,
 };
 
 class CVehicle;
@@ -145,7 +158,9 @@ public:
 	uint8 m_ped_flagI80 : 1;
 	uint8 stuff1[199];
 	int32 m_nPedState;
-	uint8 stuff2[196];
+	int32 m_nLastPedState;
+	int32 m_nMoveState;
+	uint8 stuff2[188];
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
@@ -157,7 +172,11 @@ public:
 
 	uint8 stuff5[28];
 	CEntity *m_pCollidingEntity;
-	uint8 stuff6[496];
+	uint8 stuff6[12];
+	CWeapon m_weapons[PED_MAX_WEAPONS];
+	int32 stuff7;
+	uint8 m_currentWeapon;
+	uint8 stuff[167];
 
 //	static void *operator new(size_t);
 //	static void operator delete(void*, size_t);
@@ -165,10 +184,13 @@ public:
 	bool IsPlayer(void) { return m_nPedType == 0 || m_nPedType== 1 || m_nPedType == 2 || m_nPedType == 3; }
 	bool UseGroundColModel(void);
 	void KillPedWithCar(CVehicle *veh, float impulse);
+	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 };
 static_assert(offsetof(CPed, m_nPedState) == 0x224, "CPed: error");
 static_assert(offsetof(CPed, m_pCurSurface) == 0x2FC, "CPed: error");
 static_assert(offsetof(CPed, m_pMyVehicle) == 0x310, "CPed: error");
 static_assert(offsetof(CPed, m_nPedType) == 0x32C, "CPed: error");
 static_assert(offsetof(CPed, m_pCollidingEntity) == 0x34C, "CPed: error");
+static_assert(offsetof(CPed, m_weapons) == 0x35C, "CPed: error");
+static_assert(offsetof(CPed, m_currentWeapon) == 0x498, "CPed: error");
 static_assert(sizeof(CPed) == 0x540, "CPed: error");

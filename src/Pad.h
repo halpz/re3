@@ -53,19 +53,19 @@ enum Key
 class CControllerState
 {
 public:
-	int16 leftX, leftY;
-	int16 rightX, rightY;
-	int16 l1, l2;
-	int16 r1, r2;
-	int16 up, down, left, right;
-	int16 start, select;
-	int16 square, triangle, cross, circle;
-	int16 leftshock, rightshock;
-	int16 networktalk;
-	float getLeftX(void) { return leftX/32767.0f; };
-	float getLeftY(void) { return leftY/32767.0f; };
-	float getRightX(void) { return rightX/32767.0f; };
-	float getRightY(void) { return rightY/32767.0f; };
+	int16 LeftStickX, LeftStickY;
+	int16 RightStickX, RightStickY;
+	int16 LeftShoulder1, LeftShoulder2;
+	int16 RightShoulder1, RightShoulder2;
+	int16 DPadUp, DPadDown, DPadLeft, DPadRight;
+	int16 Start, Select;
+	int16 Square, Triangle, Cross, Circle;
+	int16 LeftShock, RightShock;
+	int16 NetworkTalk;
+	float GetLeftStickX(void) { return LeftStickX/32767.0f; };
+	float GetLeftStickY(void) { return LeftStickY/32767.0f; };
+	float GetRightStickX(void) { return RightStickX/32767.0f; };
+	float GetRightStickY(void) { return RightStickY/32767.0f; };
 
 	void Clear(void);
 };
@@ -107,6 +107,18 @@ public:
 	static CMouseControllerState &OldMouseControllerState;
 	static CMouseControllerState &NewMouseControllerState;
 	static CMouseControllerState &PCTempMouseControllerState;
+
+	int GetLeftShoulder1(void) { return NewState.LeftShoulder1; }
+	int GetLeftShoulder2(void) { return NewState.LeftShoulder2; }
+	int GetRightShoulder1(void) { return NewState.RightShoulder1; }
+	int GetRightShoulder2(void) { return NewState.RightShoulder2; }
+
+	bool ForceCameraBehindPlayer(void);
+	bool GetWeapon(void);
+	bool GetLookBehindForCar(void);
+	bool GetLookBehindForPed(void);
+	bool GetLookLeft(void);
+	bool GetLookRight(void);
 
 	static CPad *GetPad(int n) { return &Pads[n]; }
 };
