@@ -96,7 +96,7 @@ enum
 	ZCHECK_BUMP_FIRST = BIT(13)
 };
 
-#pragma pack(push, 1)
+
 struct tParticleSystemData
 {
 	tParticleType m_Type;
@@ -140,9 +140,9 @@ struct tParticleSystemData
 	RwRaster      **m_ppRaster;
 	CParticle     *m_pParticles;
 };
-#pragma pack(pop)
+VALIDATE_SIZE(tParticleSystemData, 0x88);
 
-#pragma pack(push, 1)
+
 class cParticleSystemMgr
 {
 	enum
@@ -200,6 +200,7 @@ public:
 	void LoadParticleData();
 	//void RangeCheck(tParticleSystemData *pData);
 };
-#pragma pack(pop)
+
+VALIDATE_SIZE(cParticleSystemMgr, 0x2420);
 
 extern cParticleSystemMgr mod_ParticleSystemManager;

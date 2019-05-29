@@ -766,7 +766,7 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 
 CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity, Float fSize, RwRGBA const &color, Int32 nRotationSpeed, Int32 nRotation, Int32 nCurFrame, Int32 nLifeSpan)
 {
-	if ( CTimer::m_UserPause || CTimer::m_CodePause )
+	if ( CTimer::GetIsPaused() )
 		return NULL;
 
 	if ( ( type == PARTICLE_ENGINE_SMOKE
@@ -777,7 +777,7 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 		|| type == PARTICLE_BURNINGRUBBER_SMOKE
 		|| type == PARTICLE_EXHAUST_FUMES
 		|| type == PARTICLE_CARCOLLISION_DUST )
-		&& nParticleCreationInterval & CTimer::m_FrameCounter )
+		&& nParticleCreationInterval & CTimer::GetFrameCounter() )
 	{
 		return NULL;
 	}
@@ -797,9 +797,9 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 	pParticle->m_fExpansionRate = psystem->m_fExpansionRate;
 	
 	if ( nLifeSpan != 0 )
-		pParticle->m_nTimeWhenWillBeDestroyed = CTimer::m_snTimeInMilliseconds + nLifeSpan;
+		pParticle->m_nTimeWhenWillBeDestroyed = CTimer::GetTimeInMilliseconds() + nLifeSpan;
 	else
-		pParticle->m_nTimeWhenWillBeDestroyed = CTimer::m_snTimeInMilliseconds + psystem->m_nLifeSpan;
+		pParticle->m_nTimeWhenWillBeDestroyed = CTimer::GetTimeInMilliseconds() + psystem->m_nLifeSpan;
 
 	pParticle->m_nColorIntensity = psystem->m_nFadeToBlackInitialIntensity;
 	pParticle->m_nAlpha = psystem->m_nFadeAlphaInitialIntensity;
@@ -829,7 +829,7 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 		RwRGBAAssign(&pParticle->m_Color, &psystem->m_RenderColouring);
 
 		if ( psystem->m_ColorFadeTime != 0 )
-			pParticle->m_nTimeWhenColorWillBeChanged = CTimer::m_snTimeInMilliseconds + psystem->m_ColorFadeTime;
+			pParticle->m_nTimeWhenColorWillBeChanged = CTimer::GetTimeInMilliseconds() + psystem->m_ColorFadeTime;
 
 		if ( psystem->m_InitialColorVariation != 0 )
 		{
@@ -995,17 +995,17 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 
 void CParticle::Update()
 {
-	if ( CTimer::m_UserPause || CTimer::m_CodePause )
+	if ( CTimer::GetIsPaused() )
 		return;
 
 	CRGBA color(0, 0, 0, 0);
 	
-	Float fFricDeccel50 = pow(0.50f, CTimer::ms_fTimeStep);
-	Float fFricDeccel80 = pow(0.80f, CTimer::ms_fTimeStep);
-	Float fFricDeccel90 = pow(0.90f, CTimer::ms_fTimeStep);
-	Float fFricDeccel95 = pow(0.95f, CTimer::ms_fTimeStep);
-	Float fFricDeccel96 = pow(0.96f, CTimer::ms_fTimeStep);
-	Float fFricDeccel99 = pow(0.99f, CTimer::ms_fTimeStep);
+	Float fFricDeccel50 = pow(0.50f, CTimer::GetTimeStep());
+	Float fFricDeccel80 = pow(0.80f, CTimer::GetTimeStep());
+	Float fFricDeccel90 = pow(0.90f, CTimer::GetTimeStep());
+	Float fFricDeccel95 = pow(0.95f, CTimer::GetTimeStep());
+	Float fFricDeccel96 = pow(0.96f, CTimer::GetTimeStep());
+	Float fFricDeccel99 = pow(0.99f, CTimer::GetTimeStep());
 	
 	CParticleObject::UpdateAll();
 
@@ -1023,9 +1023,9 @@ void CParticle::Update()
 		{
 			bRemoveParticle = false;
 
-			CVector moveStep = particle->m_vecPosition + ( particle->m_vecVelocity * CTimer::ms_fTimeStep );
+			CVector moveStep = particle->m_vecPosition + ( particle->m_vecVelocity * CTimer::GetTimeStep() );
 			
-			if (  CTimer::m_snTimeInMilliseconds > particle->m_nTimeWhenWillBeDestroyed || particle->m_nAlpha == 0 )
+			if (  CTimer::GetTimeInMilliseconds() > particle->m_nTimeWhenWillBeDestroyed || particle->m_nAlpha == 0 )
 			{
 				bRemoveParticle = true;
 				continue;
@@ -1033,9 +1033,9 @@ void CParticle::Update()
 
 			if ( particle->m_nTimeWhenColorWillBeChanged != 0 )
 			{
-				if ( particle->m_nTimeWhenColorWillBeChanged > CTimer::m_snTimeInMilliseconds )
+				if ( particle->m_nTimeWhenColorWillBeChanged > CTimer::GetTimeInMilliseconds() )
 				{
-					Float colorMul = 1.0f - Float(particle->m_nTimeWhenColorWillBeChanged - CTimer::m_snTimeInMilliseconds) / Float(psystem->m_ColorFadeTime);
+					Float colorMul = 1.0f - Float(particle->m_nTimeWhenColorWillBeChanged - CTimer::GetTimeInMilliseconds()) / Float(psystem->m_ColorFadeTime);
 				
 					particle->m_Color.red = clamp(
 						psystem->m_RenderColouring.red + Int32(Float(psystem->m_FadeDestinationColor.red - psystem->m_RenderColouring.red) * colorMul),
@@ -1103,7 +1103,7 @@ void CParticle::Update()
 			if ( psystem->m_fGravitationalAcceleration > 0.0f )
 			{
 				if ( -50.0f * psystem->m_fGravitationalAcceleration < particle->m_vecVelocity.z )
-					particle->m_vecVelocity.z -= psystem->m_fGravitationalAcceleration * CTimer::ms_fTimeStep;
+					particle->m_vecVelocity.z -= psystem->m_fGravitationalAcceleration * CTimer::GetTimeStep();
 
 				if ( psystem->Flags & ZCHECK_FIRST )
 				{
@@ -1301,7 +1301,7 @@ void CParticle::Update()
 				if ( psystem->m_fGravitationalAcceleration < 0.0f )
 				{
 					if ( -5.0f * psystem->m_fGravitationalAcceleration > particle->m_vecVelocity.z )
-						particle->m_vecVelocity.z -= psystem->m_fGravitationalAcceleration * CTimer::ms_fTimeStep;
+						particle->m_vecVelocity.z -= psystem->m_fGravitationalAcceleration * CTimer::GetTimeStep();
 				}
 				else
 				{
@@ -1616,7 +1616,7 @@ void CParticle::Render()
 								
 								Float fSpeed = particle->m_vecVelocity.Magnitude();
 								
-								Float fNewTrailLength = fSpeed * CTimer::ms_fTimeStep * w * 2.0f;
+								Float fNewTrailLength = fSpeed * CTimer::GetTimeStep() * w * 2.0f;
 								
 								if ( fDist > fNewTrailLength )
 									fTrailLength = fNewTrailLength;

@@ -39,6 +39,9 @@ typedef double                          Double;
 typedef Int8 Bool; //typedef bool Bool;
 typedef char Char;
 
+typedef __int64                         Int64;
+typedef unsigned __int64                UInt64;
+typedef signed __int64                  SInt64;
 
 #define nil NULL
 
@@ -144,11 +147,24 @@ sq(float x) { return x*x; }
 #define DEGTORAD(x) ((x) * PI / 180.0f)
 #define RADTODEG(x) ((x) * 180.0f / PI)
 
+
+#if USE_PS2_RAND == TRUE
+#define MY_RAND_MAX		32767
+#else
+#define MY_RAND_MAX		65535
+#endif
+
 int myrand(void);
 void mysrand(unsigned int seed);
 
 #define debug printf
 #define ASSERT assert
+
+#define _TODO(x)      
+#define _TODOCONST(x) (x)
+
+#define VALIDATE_SIZE(struc, size) static_assert(sizeof(struc) == size, "Invalid structure size of " #struc)
+#define VALIDATE_OFFSET(struc, member, offset) static_assert(offsetof(struc, member) == offset, "The offset of " #member " in " #struc " is not " #offset "...")
 
 #define clamp(v, a, b) (max(min(v, b), a))
 //#define min(a, b) ((a) < (b) ? (a) : (b))

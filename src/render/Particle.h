@@ -96,11 +96,5 @@ public:
 	static void AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatrix);
 
 };
-/*
-class CParticle
-{
-public:
-	static void AddParticle(tParticleType, const CVector &pos, const CVector &velocity, CEntity *ent = nil,
-		float size = 0.0, int32 rotationStep = 0, int32 rotation = 0, int startFrame = 0, int lifeSpan = 0);
-};
-*/
+
+VALIDATE_SIZE(CParticle, 0x68);
