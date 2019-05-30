@@ -121,6 +121,7 @@ public:
 	bool GetLookRight(void);
 
 	static CPad *GetPad(int n) { return &Pads[n]; }
+	static void PrintErrorMessage(void);
 };
 static_assert(sizeof(CPad) == 0xFC, "CPad: error");
 

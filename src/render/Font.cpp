@@ -341,22 +341,22 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, uint16 *s)
 		if(Details.backgroundOnlyText){
 			rect->left = xstart - maxlength/2 - 4.0f;
 			rect->right = xstart + maxlength/2 + 4.0f;
-			rect->top = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines +
+			rect->bottom = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines +
 				ystart + 2.0f;
-			rect->bottom = ystart - 2.0f;
+			rect->top = ystart - 2.0f;
 		}else{
 			rect->left = xstart - Details.centreSize*0.5f - 4.0f;
 			rect->right = xstart + Details.centreSize*0.5f + 4.0f;
-			rect->top = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines +
+			rect->bottom = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines +
 				ystart + 2.0f;
-			rect->bottom = ystart - 2.0f;
+			rect->top = ystart - 2.0f;
 		}
 	}else{
 		rect->left = xstart - 4.0f;
 		rect->right = Details.wrapX;
 		// WTF?
-		rect->top = ystart - 4.0f + 4.0f;
-		rect->bottom = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines +
+		rect->bottom = ystart - 4.0f + 4.0f;
+		rect->top = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines +
 				ystart + 2.0f + 2.0f;
 	}
 }

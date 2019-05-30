@@ -10,4 +10,7 @@ public:
 	static float &SunScreenX;
 	static bool &bSmallMoon;
 	static bool &SunBlockedByClouds;
+
+	static void Render(void);
+	static void RenderReflections(void);
 };

@@ -6,6 +6,11 @@ float &CDraw::ms_fNearClipZ = *(float*)0x8E2DC4;
 float &CDraw::ms_fFarClipZ = *(float*)0x9434F0;
 float &CDraw::ms_fFOV = *(float*)0x5FBC6C;
 
+uint8 &CDraw::FadeValue = *(uint8*)0x95CD68;
+uint8 &CDraw::FadeRed = *(uint8*)0x95CD90;
+uint8 &CDraw::FadeGreen = *(uint8*)0x95CD71;
+uint8 &CDraw::FadeBlue = *(uint8*)0x95CD53;
+
 static float hFov2vFov(float hfov)
 {
 	float w = SCREENW;

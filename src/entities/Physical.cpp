@@ -27,9 +27,9 @@ CPhysical::Add(void)
 	xstart = CWorld::GetSectorIndexX(bounds.left);
 	xend   = CWorld::GetSectorIndexX(bounds.right);
 	xmid   = CWorld::GetSectorIndexX((bounds.left + bounds.right)/2.0f);
-	ystart = CWorld::GetSectorIndexY(bounds.bottom);
-	yend   = CWorld::GetSectorIndexY(bounds.top);
-	ymid   = CWorld::GetSectorIndexY((bounds.bottom + bounds.top)/2.0f);
+	ystart = CWorld::GetSectorIndexY(bounds.top);
+	yend   = CWorld::GetSectorIndexY(bounds.bottom);
+	ymid   = CWorld::GetSectorIndexY((bounds.top + bounds.bottom)/2.0f);
 	assert(xstart >= 0);
 	assert(xend < NUMSECTORS_X);
 	assert(ystart >= 0);
@@ -92,9 +92,9 @@ CPhysical::RemoveAndAdd(void)
 	xstart = CWorld::GetSectorIndexX(bounds.left);
 	xend   = CWorld::GetSectorIndexX(bounds.right);
 	xmid   = CWorld::GetSectorIndexX((bounds.left + bounds.right)/2.0f);
-	ystart = CWorld::GetSectorIndexY(bounds.bottom);
-	yend   = CWorld::GetSectorIndexY(bounds.top);
-	ymid   = CWorld::GetSectorIndexY((bounds.bottom + bounds.top)/2.0f);
+	ystart = CWorld::GetSectorIndexY(bounds.top);
+	yend   = CWorld::GetSectorIndexY(bounds.bottom);
+	ymid   = CWorld::GetSectorIndexY((bounds.top + bounds.bottom)/2.0f);
 	assert(xstart >= 0);
 	assert(xend < NUMSECTORS_X);
 	assert(ystart >= 0);

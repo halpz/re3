@@ -7,6 +7,11 @@ private:
 	static float &ms_fFarClipZ;
 	static float &ms_fFOV;
 public:
+	static uint8 &FadeValue;
+	static uint8 &FadeRed;
+	static uint8 &FadeGreen;
+	static uint8 &FadeBlue;
+
 	static void SetNearClipZ(float nearclip) { ms_fNearClipZ = nearclip; }
 	static float GetNearClipZ(void) { return ms_fNearClipZ; }
 	static void SetFarClipZ(float farclip) { ms_fFarClipZ = farclip; }

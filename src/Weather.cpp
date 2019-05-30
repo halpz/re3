@@ -1,4 +1,5 @@
 #include "common.h"
+#include "patcher.h"
 #include "Weather.h"
 
 int32 &CWeather::SoundHandle = *(int32*)0x5FFBC4;
@@ -25,3 +26,5 @@ float &CWeather::Rainbow = *(float*)0x940598;
 
 bool &CWeather::bScriptsForceRain = *(bool*)0x95CD7D;
 bool &CWeather::Stored_StateStored = *(bool*)0x95CDC1;
+
+WRAPPER void CWeather::RenderRainStreaks(void) { EAXJMP(0x524550); }

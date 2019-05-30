@@ -3,6 +3,8 @@
 #include "ModelIndices.h"
 #include "Garages.h"
 
+WRAPPER void CGarages::PrintMessages(void) { EAXJMP(0x426310); }
+
 bool
 CGarages::IsModelIndexADoor(uint32 id)
 {

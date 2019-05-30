@@ -49,8 +49,8 @@ struct CCam
 		MODE_SPECIALFIXEDFORSYPHON,
 		MODE_FIGHT,
 		MODE_TOPDOWNPED,
-		MODE_FIRSTPERSONPEDONPC_38,
-		MODE_FIRSTPERSONPEDONPC_39,
+		MODE_SNIPER_RUN_AROUND,
+		MODE_ROCKET_RUN_AROUND,
 		MODE_FIRSTPERSONPEDONPC_40,
 		MODE_FIRSTPERSONPEDONPC_41,
 		MODE_FIRSTPERSONPEDONPC_42,
@@ -419,6 +419,13 @@ int     m_iModeObbeCamIsInForCar;
 	bool IsPointVisible(const CVector &center, const CMatrix *mat);
 	bool IsSphereVisible(const CVector &center, float radius, const CMatrix *mat);
 	bool IsBoxVisible(RwV3d *box, const CMatrix *mat);
+
+	void Fade(float timeout, int16 direction);
+	void ProcessFade(void);
+	void ProcessMusicFade(void);
+	void SetFadeColour(uint8 r, uint8 g, uint8 b);
+
+	void DrawBordersForWideScreen(void);
 };
 static_assert(offsetof(CCamera, m_WideScreenOn) == 0x70, "CCamera: error");
 static_assert(offsetof(CCamera, WorldViewerBeingUsed) == 0x75, "CCamera: error");

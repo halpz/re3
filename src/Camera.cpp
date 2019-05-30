@@ -14,6 +14,8 @@ const float DefaultFOV = 80.0f;	// actually 70.0f
 
 CCamera &TheCamera = *(CCamera*)0x6FACF8;
 
+WRAPPER void CCamera::DrawBordersForWideScreen(void) { EAXJMP(0x46B430); }
+
 bool
 CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat)
 {
@@ -66,6 +68,18 @@ CCamera::IsBoxVisible(RwV3d *box, const CMatrix *mat)
 	return true;
 }
 
+WRAPPER void CCamera::Fade(float timeout, int16 direction) { EAXJMP(0x46B3A0); }
+WRAPPER void CCamera::ProcessFade(void) { EAXJMP(0x46F080); }
+WRAPPER void CCamera::ProcessMusicFade(void) { EAXJMP(0x46F1E0); }
+
+void
+CCamera::SetFadeColour(uint8 r, uint8 g, uint8 b)
+{
+	m_FadeTargetIsSplashScreen = r == 0 && g == 0 && b == 0;
+	CDraw::FadeRed = r;
+	CDraw::FadeGreen = g;
+	CDraw::FadeBlue = b;
+}
 
 /*
  *
@@ -1186,6 +1200,8 @@ CCam::FixCamWhenObscuredByVehicle(const CVector &TargetCoors)
 
 STARTPATCHES
 	InjectHook(0x42C760, &CCamera::IsSphereVisible, PATCH_JUMP);
+	InjectHook(0x46FD00, &CCamera::SetFadeColour, PATCH_JUMP);
+
 	InjectHook(0x456F40, WellBufferMe, PATCH_JUMP);
 	InjectHook(0x4582F0, &CCam::GetVectorsReadyForRW, PATCH_JUMP);
 	InjectHook(0x457710, &CCam::DoAverageOnVector, PATCH_JUMP);

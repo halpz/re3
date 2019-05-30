@@ -1,4 +1,5 @@
 #include "common.h"
+#include "patcher.h"
 #include "Pad.h"
 
 CPad *CPad::Pads = (CPad*)0x6F0360;
@@ -10,6 +11,8 @@ uint16 *CPad::TempKeyState = (uint16*)0x774DE8;
 CMouseControllerState &CPad::OldMouseControllerState = *(CMouseControllerState*)0x8472A0;
 CMouseControllerState &CPad::NewMouseControllerState = *(CMouseControllerState*)0x8809F0;
 CMouseControllerState &CPad::PCTempMouseControllerState = *(CMouseControllerState*)0x6F1E60;
+
+WRAPPER void CPad::PrintErrorMessage(void) { EAXJMP(0x4942B0); }
 
 void
 CControllerState::Clear(void)

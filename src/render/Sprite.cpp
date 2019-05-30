@@ -377,7 +377,7 @@ CSprite::Set6Vertices2D(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, co
 	recipz = m_fRecipNearClipPlane;
 
 	RwIm2DVertexSetScreenX(&verts[0], r.left);
-	RwIm2DVertexSetScreenY(&verts[0], r.bottom);
+	RwIm2DVertexSetScreenY(&verts[0], r.top);
 	RwIm2DVertexSetScreenZ(&verts[0], screenz);
 	RwIm2DVertexSetCameraZ(&verts[0], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[0], recipz);
@@ -386,7 +386,7 @@ CSprite::Set6Vertices2D(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, co
 	RwIm2DVertexSetV(&verts[0], 0.0f, recipz);
 
 	RwIm2DVertexSetScreenX(&verts[1], r.right);
-	RwIm2DVertexSetScreenY(&verts[1], r.bottom);
+	RwIm2DVertexSetScreenY(&verts[1], r.top);
 	RwIm2DVertexSetScreenZ(&verts[1], screenz);
 	RwIm2DVertexSetCameraZ(&verts[1], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[1], recipz);
@@ -395,7 +395,7 @@ CSprite::Set6Vertices2D(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, co
 	RwIm2DVertexSetV(&verts[1], 0.0f, recipz);
 
 	RwIm2DVertexSetScreenX(&verts[2], r.right);
-	RwIm2DVertexSetScreenY(&verts[2], r.top);
+	RwIm2DVertexSetScreenY(&verts[2], r.bottom);
 	RwIm2DVertexSetScreenZ(&verts[2], screenz);
 	RwIm2DVertexSetCameraZ(&verts[2], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[2], recipz);
@@ -404,7 +404,7 @@ CSprite::Set6Vertices2D(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, co
 	RwIm2DVertexSetV(&verts[2], 1.0f, recipz);
 
 	RwIm2DVertexSetScreenX(&verts[3], r.left);
-	RwIm2DVertexSetScreenY(&verts[3], r.top);
+	RwIm2DVertexSetScreenY(&verts[3], r.bottom);
 	RwIm2DVertexSetScreenZ(&verts[3], screenz);
 	RwIm2DVertexSetCameraZ(&verts[3], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[3], recipz);
@@ -413,7 +413,7 @@ CSprite::Set6Vertices2D(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, co
 	RwIm2DVertexSetV(&verts[3], 1.0f, recipz);
 
 	RwIm2DVertexSetScreenX(&verts[4], r.left);
-	RwIm2DVertexSetScreenY(&verts[4], r.bottom);
+	RwIm2DVertexSetScreenY(&verts[4], r.top);
 	RwIm2DVertexSetScreenZ(&verts[4], screenz);
 	RwIm2DVertexSetCameraZ(&verts[4], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[4], recipz);
@@ -422,7 +422,7 @@ CSprite::Set6Vertices2D(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, co
 	RwIm2DVertexSetV(&verts[4], 0.0f, recipz);
 
 	RwIm2DVertexSetScreenX(&verts[5], r.right);
-	RwIm2DVertexSetScreenY(&verts[5], r.top);
+	RwIm2DVertexSetScreenY(&verts[5], r.bottom);
 	RwIm2DVertexSetScreenZ(&verts[5], screenz);
 	RwIm2DVertexSetCameraZ(&verts[5], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[5], recipz);

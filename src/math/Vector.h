@@ -101,6 +101,11 @@ inline CVector operator*(const CVector &left, float right)
 	return CVector(left.x * right, left.y * right, left.z * right);
 }
 
+inline CVector operator*(float left, const CVector &right)
+{
+	return CVector(left * right.x, left * right.y, left * right.z);
+}
+
 inline CVector operator/(const CVector &left, float right)
 {
 	return CVector(left.x / right, left.y / right, left.z / right);

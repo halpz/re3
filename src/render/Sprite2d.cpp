@@ -174,7 +174,7 @@ CSprite2d::SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const C
 	// | / |
 	// 3---2
 	RwIm2DVertexSetScreenX(&maVertices[0], r.left);
-	RwIm2DVertexSetScreenY(&maVertices[0], r.bottom);
+	RwIm2DVertexSetScreenY(&maVertices[0], r.top);
 	RwIm2DVertexSetScreenZ(&maVertices[0], screenz);
 	RwIm2DVertexSetCameraZ(&maVertices[0], z);
 	RwIm2DVertexSetRecipCameraZ(&maVertices[0], recipz);
@@ -183,7 +183,7 @@ CSprite2d::SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const C
 	RwIm2DVertexSetV(&maVertices[0], 0.0f, recipz);
 
 	RwIm2DVertexSetScreenX(&maVertices[1], r.right);
-	RwIm2DVertexSetScreenY(&maVertices[1], r.bottom);
+	RwIm2DVertexSetScreenY(&maVertices[1], r.top);
 	RwIm2DVertexSetScreenZ(&maVertices[1], screenz);
 	RwIm2DVertexSetCameraZ(&maVertices[1], z);
 	RwIm2DVertexSetRecipCameraZ(&maVertices[1], recipz);
@@ -192,7 +192,7 @@ CSprite2d::SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const C
 	RwIm2DVertexSetV(&maVertices[1], 0.0f, recipz);
 
 	RwIm2DVertexSetScreenX(&maVertices[2], r.right);
-	RwIm2DVertexSetScreenY(&maVertices[2], r.top);
+	RwIm2DVertexSetScreenY(&maVertices[2], r.bottom);
 	RwIm2DVertexSetScreenZ(&maVertices[2], screenz);
 	RwIm2DVertexSetCameraZ(&maVertices[2], z);
 	RwIm2DVertexSetRecipCameraZ(&maVertices[2], recipz);
@@ -201,7 +201,7 @@ CSprite2d::SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const C
 	RwIm2DVertexSetV(&maVertices[2], 1.0f, recipz);
 
 	RwIm2DVertexSetScreenX(&maVertices[3], r.left);
-	RwIm2DVertexSetScreenY(&maVertices[3], r.top);
+	RwIm2DVertexSetScreenY(&maVertices[3], r.bottom);
 	RwIm2DVertexSetScreenZ(&maVertices[3], screenz);
 	RwIm2DVertexSetCameraZ(&maVertices[3], z);
 	RwIm2DVertexSetRecipCameraZ(&maVertices[3], recipz);
@@ -225,7 +225,7 @@ CSprite2d::SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const C
 	// | / |
 	// 3---2
 	RwIm2DVertexSetScreenX(&maVertices[0], r.left);
-	RwIm2DVertexSetScreenY(&maVertices[0], r.bottom);
+	RwIm2DVertexSetScreenY(&maVertices[0], r.top);
 	RwIm2DVertexSetScreenZ(&maVertices[0], screenz);
 	RwIm2DVertexSetCameraZ(&maVertices[0], z);
 	RwIm2DVertexSetRecipCameraZ(&maVertices[0], recipz);
@@ -234,7 +234,7 @@ CSprite2d::SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const C
 	RwIm2DVertexSetV(&maVertices[0], v0, recipz);
 
 	RwIm2DVertexSetScreenX(&maVertices[1], r.right);
-	RwIm2DVertexSetScreenY(&maVertices[1], r.bottom);
+	RwIm2DVertexSetScreenY(&maVertices[1], r.top);
 	RwIm2DVertexSetScreenZ(&maVertices[1], screenz);
 	RwIm2DVertexSetCameraZ(&maVertices[1], z);
 	RwIm2DVertexSetRecipCameraZ(&maVertices[1], recipz);
@@ -243,7 +243,7 @@ CSprite2d::SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const C
 	RwIm2DVertexSetV(&maVertices[1], v1, recipz);
 
 	RwIm2DVertexSetScreenX(&maVertices[2], r.right);
-	RwIm2DVertexSetScreenY(&maVertices[2], r.top);
+	RwIm2DVertexSetScreenY(&maVertices[2], r.bottom);
 	RwIm2DVertexSetScreenZ(&maVertices[2], screenz);
 	RwIm2DVertexSetCameraZ(&maVertices[2], z);
 	RwIm2DVertexSetRecipCameraZ(&maVertices[2], recipz);
@@ -252,7 +252,7 @@ CSprite2d::SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const C
 	RwIm2DVertexSetV(&maVertices[2], v2, recipz);
 
 	RwIm2DVertexSetScreenX(&maVertices[3], r.left);
-	RwIm2DVertexSetScreenY(&maVertices[3], r.top);
+	RwIm2DVertexSetScreenY(&maVertices[3], r.bottom);
 	RwIm2DVertexSetScreenZ(&maVertices[3], screenz);
 	RwIm2DVertexSetCameraZ(&maVertices[3], z);
 	RwIm2DVertexSetRecipCameraZ(&maVertices[3], recipz);
@@ -358,7 +358,7 @@ CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, con
 	recipz = RecipNearClip;
 
 	RwIm2DVertexSetScreenX(&verts[0], r.left);
-	RwIm2DVertexSetScreenY(&verts[0], r.bottom);
+	RwIm2DVertexSetScreenY(&verts[0], r.top);
 	RwIm2DVertexSetScreenZ(&verts[0], screenz);
 	RwIm2DVertexSetCameraZ(&verts[0], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[0], recipz);
@@ -367,7 +367,7 @@ CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, con
 	RwIm2DVertexSetV(&verts[0], v0, recipz);
 
 	RwIm2DVertexSetScreenX(&verts[1], r.left);
-	RwIm2DVertexSetScreenY(&verts[1], r.top);
+	RwIm2DVertexSetScreenY(&verts[1], r.bottom);
 	RwIm2DVertexSetScreenZ(&verts[1], screenz);
 	RwIm2DVertexSetCameraZ(&verts[1], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[1], recipz);
@@ -376,7 +376,7 @@ CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, con
 	RwIm2DVertexSetV(&verts[1], v2, recipz);
 
 	RwIm2DVertexSetScreenX(&verts[2], r.right);
-	RwIm2DVertexSetScreenY(&verts[2], r.top);
+	RwIm2DVertexSetScreenY(&verts[2], r.bottom);
 	RwIm2DVertexSetScreenZ(&verts[2], screenz);
 	RwIm2DVertexSetCameraZ(&verts[2], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[2], recipz);
@@ -385,7 +385,7 @@ CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, con
 	RwIm2DVertexSetV(&verts[2], v3, recipz);
 
 	RwIm2DVertexSetScreenX(&verts[3], r.left);
-	RwIm2DVertexSetScreenY(&verts[3], r.bottom);
+	RwIm2DVertexSetScreenY(&verts[3], r.top);
 	RwIm2DVertexSetScreenZ(&verts[3], screenz);
 	RwIm2DVertexSetCameraZ(&verts[3], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[3], recipz);
@@ -394,7 +394,7 @@ CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, con
 	RwIm2DVertexSetV(&verts[3], v0, recipz);
 
 	RwIm2DVertexSetScreenX(&verts[4], r.right);
-	RwIm2DVertexSetScreenY(&verts[4], r.top);
+	RwIm2DVertexSetScreenY(&verts[4], r.bottom);
 	RwIm2DVertexSetScreenZ(&verts[4], screenz);
 	RwIm2DVertexSetCameraZ(&verts[4], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[4], recipz);
@@ -403,7 +403,7 @@ CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, con
 	RwIm2DVertexSetV(&verts[4], v3, recipz);
 
 	RwIm2DVertexSetScreenX(&verts[5], r.right);
-	RwIm2DVertexSetScreenY(&verts[5], r.bottom);
+	RwIm2DVertexSetScreenY(&verts[5], r.top);
 	RwIm2DVertexSetScreenZ(&verts[5], screenz);
 	RwIm2DVertexSetCameraZ(&verts[5], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[5], recipz);

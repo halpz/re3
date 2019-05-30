@@ -7,7 +7,7 @@
 #include "Coronas.h"
 #include "Weather.h"
 #include "CullZones.h"
-#include "MenuManager.h"
+#include "Frontend.h"
 
 RpLight *&pAmbient = *(RpLight**)0x885B6C;
 RpLight *&pDirect = *(RpLight**)0x880F7C;

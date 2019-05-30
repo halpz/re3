@@ -32,4 +32,6 @@ public:
 
 	static bool &bScriptsForceRain;
 	static bool &Stored_StateStored;
+
+	static void RenderRainStreaks(void);
 };

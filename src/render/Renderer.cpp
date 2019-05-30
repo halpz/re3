@@ -602,9 +602,9 @@ CRenderer::ScanWorld(void)
 		if(x1 < 0) x1 = 0;
 		x2 = CWorld::GetSectorIndexX(rect.right);
 		if(x2 >= NUMSECTORS_X-1) x2 = NUMSECTORS_X-1;
-		y1 = CWorld::GetSectorIndexY(rect.bottom);
+		y1 = CWorld::GetSectorIndexY(rect.top);
 		if(y1 < 0) y1 = 0;
-		y2 = CWorld::GetSectorIndexY(rect.top);
+		y2 = CWorld::GetSectorIndexY(rect.bottom);
 		if(y2 >= NUMSECTORS_Y-1) y2 = NUMSECTORS_Y-1;
 		for(; x1 <= x2; x1++)
 			for(int y = y1; y <= y2; y++)
@@ -713,9 +713,9 @@ CRenderer::RequestObjectsInFrustum(void)
 		if(x1 < 0) x1 = 0;
 		x2 = CWorld::GetSectorIndexX(rect.right);
 		if(x2 >= NUMSECTORS_X-1) x2 = NUMSECTORS_X-1;
-		y1 = CWorld::GetSectorIndexY(rect.bottom);
+		y1 = CWorld::GetSectorIndexY(rect.top);
 		if(y1 < 0) y1 = 0;
-		y2 = CWorld::GetSectorIndexY(rect.top);
+		y2 = CWorld::GetSectorIndexY(rect.bottom);
 		if(y2 >= NUMSECTORS_Y-1) y2 = NUMSECTORS_Y-1;
 		for(; x1 <= x2; x1++)
 			for(int y = y1; y <= y2; y++)

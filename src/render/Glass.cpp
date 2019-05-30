@@ -13,3 +13,5 @@ CGlass::WindowRespondsToSoftCollision(CEntity *ent, float amount)
 {
 	EAXJMP(0x504630);
 }
+
+WRAPPER void CGlass::Render(void) { EAXJMP(0x502350); }
