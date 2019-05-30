@@ -50,4 +50,6 @@ enum Config {
 
 	NUMWEATHERS = 4,
 	NUMHOURS = 24,
+
+	NUMANTENNAS = 8,
 };

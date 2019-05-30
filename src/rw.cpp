@@ -226,6 +226,7 @@ WRAPPER RwBool RwIm2DRenderIndexedPrimitive(RwPrimitiveType, RwIm2DVertex*, RwIn
 
 WRAPPER RwBool RwIm3DRenderIndexedPrimitive(RwPrimitiveType primType, RwImVertexIndex *indices, RwInt32 numIndices) { EAXJMP(0x5B6820); }
 WRAPPER void  *RwIm3DTransform(RwIm3DVertex *pVerts, RwUInt32 numVerts, RwMatrix *ltm, RwUInt32 flags) { EAXJMP(0x5B6720); }
+WRAPPER RwBool RwIm3DRenderLine(RwInt32 vert1, RwInt32 vert2) { EAXJMP(0x5B6980); }
 WRAPPER RwBool RwIm3DEnd(void) { EAXJMP(0x5B67F0); }
 
 static uint32_t _rwObjectHasFrameSetFrame_A = AddressByVersion<uint32_t>(0x5BC950, 0x5BCC10, 0x5C1820, 0x660CC0, 0x660D10, 0x65FC70);
