@@ -9,8 +9,7 @@ enum {
 
 enum PedState
 {
-	// This is a bit strange...shouldn't PED_NONE be 0?
-	PED_NONE = 1,
+	PED_NONE,
 	PED_IDLE,
 	PED_LOOK_ENTITY,
 	PED_LOOK_HEADING,
@@ -42,13 +41,17 @@ enum PedState
 	PED_BUY_ICECREAM,
 	PED_INVESTIGATE,
 	PED_STEP_AWAY,
-	PED_STATES_NO_AI,
 	PED_ON_FIRE,
+
+	PED_UNKNOWN,	// HANG_OUT in Fire_Head's idb
+
+	PED_STATES_NO_AI,
 	PED_JUMP,
 	PED_FALL,
 	PED_GETUP,
 	PED_STAGGER,
 	PED_DIVE_AWAY,
+
 	PED_STATES_NO_ST,
 	PED_ENTER_TRAIN,
 	PED_EXIT_TRAIN,
