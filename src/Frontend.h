@@ -2,6 +2,14 @@
 
 #include "Sprite2d.h"
 
+enum {
+	LANGUAGE_AMERICAN,
+	LANGUAGE_FRENCH,
+	LANGUAGE_GERMAN,
+	LANGUAGE_ITALIAN,
+	LANGUAGE_SPANISH,
+};
+
 struct tSkinInfo
 {
 	int field_0;
@@ -10,7 +18,6 @@ struct tSkinInfo
 	char date[256];
 	int field_304;
 };
-
 
 class CMenuManager
 {
@@ -77,6 +84,7 @@ public:
 	int m_nScreenChangeDelayTimer;
 
 	static int &m_PrefsBrightness;
+	static int &m_PrefsLanguage;
 
 	void DrawFrontEnd(void);
 };
