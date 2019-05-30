@@ -27,6 +27,12 @@ struct CFontDetails
 
 class CSprite2d;
 
+enum {
+	FONTSTYLE_0,
+	FONTSTYLE_1,
+	FONTSTYLE_2,
+};
+
 class CFont
 {
 	static CFontDetails &Details;

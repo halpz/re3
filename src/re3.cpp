@@ -3,6 +3,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "Renderer.h"
+#include "Credits.h"
 #include "debugmenu_public.h"
 
 void **rwengine = *(void***)0x5A10E1;
@@ -74,6 +75,9 @@ delayedPatches10(int a, int b)
 		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
 		DebugMenuAddVar("Debug", "Dbg Surface", &gDbgSurf, nil, 1, 0, 34, nil);
+
+		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
+		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 	}
 
 	return RsEventHandler_orig(a, b);
