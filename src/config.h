@@ -53,3 +53,6 @@ enum Config {
 
 	NUMANTENNAS = 8,
 };
+
+#define GTA3_1_1_PATCH FALSE
+#define USE_PS2_RAND FALSE

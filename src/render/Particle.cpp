@@ -210,7 +210,7 @@ RwTexture *      (&gpRainDropTex)[MAX_RAINDROP_FILES] = *(RwTexture * (*)[MAX_RA
 RwRaster  *gpRainDropRaster[MAX_RAINDROP_FILES];
 
 //Float      CParticle::ms_afRandTable[CParticle::RAND_TABLE_SIZE]; //
-Float      (&CParticle::ms_afRandTable)[CParticle::RAND_TABLE_SIZE] = *(Float (*)[CParticle::RAND_TABLE_SIZE])*(int *)0x6E9878;
+Float      (&CParticle::ms_afRandTable)[CParticle::RAND_TABLE_SIZE] = *(Float (*)[CParticle::RAND_TABLE_SIZE])*(int *)0x6E98C8;
 
 
 CParticle *CParticle::m_pUnusedListHead;
@@ -1853,7 +1853,6 @@ void CParticle::AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatr
 }
 
 STARTPATCHES
-return;	// causes crash, out temporarily
 	//InjectHook(0x50C410, &CParticle::ctor, PATCH_JUMP);
 	//InjectHook(0x50C420, &CParticle::dtor, PATCH_JUMP);
 	InjectHook(0x50C430, CParticle::ReloadConfig, PATCH_JUMP);
