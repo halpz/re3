@@ -13,6 +13,11 @@
 #include <assert.h>
 #include <new>
 
+#ifdef WITHD3D
+#include <Windows.h>
+#include <d3d8types.h>
+#endif
+
 #include <rwcore.h>
 #include <rpworld.h>
 

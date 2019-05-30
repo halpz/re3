@@ -107,5 +107,8 @@ public:
 	static int GetFluffyCloudsBottomRed(void) { return m_nCurrentFluffyCloudsBottomRed; }
 	static int GetFluffyCloudsBottomGreen(void) { return m_nCurrentFluffyCloudsBottomGreen; }
 	static int GetFluffyCloudsBottomBlue(void) { return m_nCurrentFluffyCloudsBottomBlue; }
+	static int GetFogRed(void) { return m_nCurrentFogColourRed; }
+	static int GetFogGreen(void) { return m_nCurrentFogColourGreen; }
+	static int GetFogBlue(void) { return m_nCurrentFogColourBlue; }
 
 };

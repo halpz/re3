@@ -25,15 +25,10 @@ void operator delete(void *ptr) noexcept { gtadelete(ptr); }
 unsigned __int64 myrand_seed = 1;
 
 int
-myps2rand(void)
+myrand(void)
 {
 	myrand_seed = 0x5851F42D4C957F2D * myrand_seed + 1;
 	return ((myrand_seed >> 32) & 0x7FFFFFFF);
-}
-
-int myrand(void)
-{
-	return myps2rand();
 }
 
 void
