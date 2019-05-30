@@ -28,9 +28,9 @@ struct CFontDetails
 class CSprite2d;
 
 enum {
-	FONTSTYLE_0,
-	FONTSTYLE_1,
-	FONTSTYLE_2,
+	FONT_BANK,
+	FONT_PAGER,
+	FONT_HEADING,
 };
 
 class CFont
