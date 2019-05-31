@@ -3,6 +3,7 @@ workspace "re3"
 	location "build"
 
 	files { "src/*.*" }
+	files { "src/skel/*.*" }
 	files { "src/math/*.*" }
 	files { "src/modelinfo/*.*" }
 	files { "src/entities/*.*" }

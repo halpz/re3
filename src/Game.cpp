@@ -7,3 +7,7 @@ bool &CGame::bDemoMode = *(bool*)0x5F4DD0;
 bool &CGame::nastyGame = *(bool*)0x5F4DD4;
 
 WRAPPER void CGame::Process(void) { EAXJMP(0x48C850); }
+WRAPPER Bool CGame::InitialiseOnceBeforeRW(void) { EAXJMP(0x48BB80); }
+WRAPPER Bool CGame::InitialiseRenderWare(void) { EAXJMP(0x48BBA0); }
+WRAPPER void CGame::ShutdownRenderWare(void) { EAXJMP(0x48BCB0); }
+WRAPPER void CGame::FinalShutdown(void) { EAXJMP(0x48BEC0); }

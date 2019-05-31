@@ -1,6 +1,7 @@
 #pragma once
 
 // same as RW skeleton
+/*
 enum Key
 {
 	// ascii...
@@ -46,8 +47,9 @@ enum Key
 	KEY_RALT   = 177,
 
 	KEY_NULL,	// unused
-	KEY_NUMKEYS,
+	KEY_NUMKEYS
 };
+*/
 
 
 class CControllerState
@@ -77,6 +79,61 @@ struct CMouseControllerState
 	int x, y;
 };
 
+class CKeyboardState
+{
+public:
+	Int16 F[12];
+	Int16 VK_KEYS[256];
+	Int16 ESC;
+	Int16 INS;
+	Int16 DEL;
+	Int16 HOME;
+	Int16 END;
+	Int16 PGUP;
+	Int16 PGDN;
+	Int16 UP;
+	Int16 DOWN;
+	Int16 LEFT;
+	Int16 RIGHT;
+	Int16 SCROLLLOCK;
+	Int16 PAUSE;
+	Int16 NUMLOCK;
+	Int16 DIV;
+	Int16 MUL;
+	Int16 SUB;
+	Int16 ADD;
+	Int16 ENTER;
+	Int16 DECIMAL;
+	Int16 NUM1;
+	Int16 NUM2;
+	Int16 NUM3;
+	Int16 NUM4;
+	Int16 NUM5;
+	Int16 NUM6;
+	Int16 NUM7;
+	Int16 NUM8;
+	Int16 NUM9;
+	Int16 NUM0;
+	Int16 BACKSP;
+	Int16 TAB;
+	Int16 CAPSLOCK;
+	Int16 EXTENTER;
+	Int16 LSHIFT;
+	Int16 RSHIFT;
+	Int16 SHIFT;
+	Int16 LCTRL;
+	Int16 RCTRL;
+	Int16 LALT;
+	Int16 RALT;
+	Int16 LWIN;
+	Int16 RWIN;
+	Int16 APPS;
+	
+	void Clear();
+};
+
+VALIDATE_SIZE(CKeyboardState, 0x270);
+
 class CPad
 {
 public:
@@ -101,12 +158,14 @@ public:
 	int32 AverageEntries;
 
 	static CPad *Pads;	//[2];
-	static uint16 *OldKeyState;	//[KEY_NUMKEYS];
-	static uint16 *NewKeyState;	//[KEY_NUMKEYS];
-	static uint16 *TempKeyState;	//[KEY_NUMKEYS];
+	static CKeyboardState &OldKeyState;
+	static CKeyboardState &NewKeyState;
+	static CKeyboardState &TempKeyState;
 	static CMouseControllerState &OldMouseControllerState;
 	static CMouseControllerState &NewMouseControllerState;
 	static CMouseControllerState &PCTempMouseControllerState;
+	
+	static Bool &m_bMapPadOneToPadTwo;
 
 	int GetLeftShoulder1(void) { return NewState.LeftShoulder1; }
 	int GetLeftShoulder2(void) { return NewState.LeftShoulder2; }
@@ -123,6 +182,8 @@ public:
 	static void UpdatePads(void);
 	static CPad *GetPad(int n) { return &Pads[n]; }
 	static void PrintErrorMessage(void);
+	
+	void AddToPCCheatString(Char c);
 };
 static_assert(sizeof(CPad) == 0xFC, "CPad: error");
 

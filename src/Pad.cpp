@@ -4,14 +4,17 @@
 
 CPad *CPad::Pads = (CPad*)0x6F0360;
 
-uint16 *CPad::OldKeyState = (uint16*)0x6F1E70;
-uint16 *CPad::NewKeyState = (uint16*)0x6E60D0;
-uint16 *CPad::TempKeyState = (uint16*)0x774DE8;
+CKeyboardState &CPad::OldKeyState = *(CKeyboardState*)0x6F1E70;
+CKeyboardState &CPad::NewKeyState = *(CKeyboardState*)0x6E60D0;
+CKeyboardState &CPad::TempKeyState = *(CKeyboardState*)0x774DE8;
 
 CMouseControllerState &CPad::OldMouseControllerState = *(CMouseControllerState*)0x8472A0;
 CMouseControllerState &CPad::NewMouseControllerState = *(CMouseControllerState*)0x8809F0;
 CMouseControllerState &CPad::PCTempMouseControllerState = *(CMouseControllerState*)0x6F1E60;
 
+Bool &CPad::m_bMapPadOneToPadTwo = *(Bool *)0x95CD48;
+
+WRAPPER void CPad::AddToPCCheatString(Char c) { EAXJMP(0x492450); }
 WRAPPER void CPad::UpdatePads(void) { EAXJMP(0x492720); }
 WRAPPER void CPad::PrintErrorMessage(void) { EAXJMP(0x4942B0); }
 
@@ -39,6 +42,35 @@ CControllerState::Clear(void)
 	LeftShock = 0;
 	RightShock = 0;
 	NetworkTalk = 0;
+}
+
+void CKeyboardState::Clear()
+{
+	for ( Int32 i = 0; i < 12; i++  )
+		F[i] = 0;
+	
+	for ( Int32 i = 0; i < 256; i++  )
+		VK_KEYS[i] = 0;
+
+	ESC = INS = DEL = HOME = END = PGUP = PGDN = 0;
+	
+	UP = DOWN = LEFT = RIGHT = 0;
+	
+	NUMLOCK = 0;
+	
+	DIV = MUL = SUB = ADD = 0;
+	
+	DECIMAL = NUM1 = NUM2 = NUM3 = NUM4 = 0;
+	
+	NUM5 = NUM6 = NUM7 = NUM8 = 0;
+	
+	NUM9 = NUM0 = SCROLLLOCK = PAUSE = 0;
+
+	BACKSP = TAB = CAPSLOCK = EXTENTER = 0;
+
+	LSHIFT = SHIFT = RSHIFT = LCTRL = RCTRL = LALT = RALT = 0;
+
+	LWIN = RWIN = APPS = 0;
 }
 
 bool

@@ -16,4 +16,8 @@ public:
 	static bool &nastyGame;
 
 	static void Process(void);
+	static Bool InitialiseOnceBeforeRW(void);
+	static Bool InitialiseRenderWare(void);
+	static void ShutdownRenderWare(void);
+	static void FinalShutdown(void);
 };

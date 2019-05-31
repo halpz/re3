@@ -45,6 +45,7 @@ typedef float Float;
 typedef double Double;
 typedef bool Bool;
 typedef char Char;
+typedef wchar_t WChar;
 
 #define nil NULL
 
@@ -56,29 +57,7 @@ typedef char Char;
 extern void **rwengine;
 #define RwEngineInstance (*rwengine)
 
-// TODO
-struct RsInputDevice
-{
-	int inputDeviceType;
-	int used;
-	void *inputEventHandler;
-};
-
-struct RsGlobalType
-{
-	const char *appName;
-	int width;
-	int height;
-	int maximumWidth;
-	int maximumHeight;
-	int maxFPS;
-	int quit;
-	void *ps;
-	RsInputDevice keyboard;
-	RsInputDevice mouse;
-	RsInputDevice pad;
-};
-extern RsGlobalType &RsGlobal;
+#include "skel\skeleton.h"
 
 #define SCREENW (RsGlobal.maximumWidth)
 #define SCREENH (RsGlobal.maximumHeight)

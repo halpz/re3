@@ -26,13 +26,6 @@ LARGE_INTEGER perfSuspendCounter;
 
 UInt32 suspendDepth;
 
-_TODO("We need skeleton.c for RsTimer()");
-
-RwUInt32 RsTimer(void)
-{
-	return ((RwUInt32 (__cdecl *)())0x584890)();
-}
-
 void CTimer::Initialise(void)
 {
 	debug("Initialising CTimer...\n");
@@ -86,7 +79,7 @@ void CTimer::Update(void)
 		LARGE_INTEGER pc;
 		QueryPerformanceCounter(&pc);
 		
-		Int64 updInCycles = (pc.LowPart - _oldPerfCounter.LowPart) & 0x7FFFFFFF;
+		Int32 updInCycles = (pc.LowPart - _oldPerfCounter.LowPart) & 0x7FFFFFFF;
 		
 		_oldPerfCounter = pc;
 		
@@ -94,14 +87,14 @@ void CTimer::Update(void)
 		
 		Double upd = updInCyclesScaled / (Double)_nCyclesPerMS;
 
-		m_snTimeInMillisecondsPauseMode += Int64(upd);
+		m_snTimeInMillisecondsPauseMode = (Int64)(m_snTimeInMillisecondsPauseMode + upd);
 		
 		if ( GetIsPaused() )
 			ms_fTimeStep = 0.0f;
 		else
 		{
-			m_snTimeInMilliseconds = Int64(upd);
-			m_snTimeInMillisecondsNonClipped += Int64(upd);
+			m_snTimeInMilliseconds = (Int64)(m_snTimeInMilliseconds + upd);
+			m_snTimeInMillisecondsNonClipped = (Int64)(m_snTimeInMillisecondsNonClipped + upd);
 			ms_fTimeStep = updInCyclesScaled / (Double)_nCyclesPerMS / 20.0;
 		}
 	}
@@ -115,14 +108,14 @@ void CTimer::Update(void)
 		
 		oldPcTimer = timer;
 		
-		m_snTimeInMillisecondsPauseMode += Int64(upd);
+		m_snTimeInMillisecondsPauseMode = (Int64)(m_snTimeInMillisecondsPauseMode + upd);
 															 
 		if ( GetIsPaused() )
 			ms_fTimeStep = 0.0f;
 		else
 		{
-			m_snTimeInMilliseconds += Int64(upd);
-			m_snTimeInMillisecondsNonClipped += Int64(upd);
+			m_snTimeInMilliseconds = (Int64)(m_snTimeInMilliseconds + upd);
+			m_snTimeInMillisecondsNonClipped = (Int64)(m_snTimeInMillisecondsNonClipped + upd);
 			ms_fTimeStep = upd / 1000.0f * 50.0f;
 		}
 	}
