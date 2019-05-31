@@ -5,6 +5,7 @@
 #include "Treadable.h"
 #include "Ped.h"
 #include "Vehicle.h"
+#include "Heli.h"
 #include "Object.h"
 #include "PathFind.h"
 #include "Collision.h"
@@ -14,6 +15,7 @@
 #include "Camera.h"
 #include "ModelIndices.h"
 #include "Streaming.h"
+#include "Shadows.h"
 #include "Renderer.h"
 
 bool gbShowPedRoadGroups;
@@ -48,6 +50,28 @@ CRenderer::Init(void)
 	gSortedVehiclesAndPeds.Init(40);
 	SortBIGBuildings();
 }
+
+void
+CRenderer::PreRender(void)
+{
+	int i;
+	CLink<CVisibilityPlugins::AlphaObjectInfo> *node;
+
+	for(i = 0; i < ms_nNoOfVisibleEntities; i++)
+		ms_aVisibleEntityPtrs[i]->PreRender();
+
+	for(i = 0; i < ms_nNoOfInVisibleEntities; i++)
+		ms_aInVisibleEntityPtrs[i]->PreRender();
+
+	for(node = CVisibilityPlugins::m_alphaEntityList.tail.prev;
+	    node != &CVisibilityPlugins::m_alphaEntityList.head;
+	    node = node->prev)
+		((CEntity*)node->item.entity)->PreRender();
+
+	CHeli::SpecialHeliPreRender();
+	CShadows::RenderExtraPlayerShadows();
+}
+
 void
 CRenderer::RenderOneRoad(CEntity *e)
 {

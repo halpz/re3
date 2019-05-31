@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "RwHelper.h"
+#include "Camera.h"
 #include "MBlur.h"
 
 RwRaster *&CMBlur::pFrontBuffer = *(RwRaster**)0x8E2C48;
@@ -104,26 +105,26 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
 }
 
 void
-CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 alpha, int32 type, uint32 bluralpha)
+CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 addalpha)
 {
-	RwRGBA color = { red, green, blue, alpha };
+	RwRGBA color = { red, green, blue, blur };
 	if(BlurOn){
 		if(pFrontBuffer){
 			if(ms_bJustInitialised)
 				ms_bJustInitialised = false;
 			else
-				OverlayRender(cam, pFrontBuffer, color, type, bluralpha);
+				OverlayRender(cam, pFrontBuffer, color, type, addalpha);
 		}
 		RwRasterPushContext(pFrontBuffer);
 		RwRasterRenderFast(RwCameraGetRaster(cam), 0, 0);
 		RwRasterPopContext();
 	}else{
-		OverlayRender(cam, nil, color, type, bluralpha);
+		OverlayRender(cam, nil, color, type, addalpha);
 	}
 }
 
 void
-CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type, uint32 bluralpha)
+CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type, uint32 addalpha)
 {
 	int r, g, b, a;
 
@@ -135,31 +136,31 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type,
 	DefinedState();
 
 	switch(type){
-	case 3:
+	case MBLUR_INTRO1:
 		r = 0;
 		g = 255;
 		b = 0;
 		a = 128;
 		break;
-	case 5:
+	case MBLUR_INTRO3:
 		r = 100;
 		g = 220;
 		b = 230;
 		a = 158;
 		break;
-	case 6:
+	case MBLUR_INTRO4:
 		r = 80;
 		g = 255;
 		b = 230;
 		a = 138;
 		break;
-	case 8:
+	case MBLUR_INTRO6:
 		r = 255;
 		g = 60;
 		b = 60;
 		a = 200;
 		break;
-	case 9:
+	case MBLUR_UNUSED:
 		r = 255;
 		g = 180;
 		b = 180;
@@ -191,7 +192,7 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type,
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 	RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, Vertex, 4, Index, 6);
 
-	a = bluralpha/2;
+	a = addalpha/2;
 	if(a < 30)
 		a = 30;
 

@@ -120,6 +120,7 @@ public:
 	bool GetLookLeft(void);
 	bool GetLookRight(void);
 
+	static void UpdatePads(void);
 	static CPad *GetPad(int n) { return &Pads[n]; }
 	static void PrintErrorMessage(void);
 };

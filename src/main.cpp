@@ -32,7 +32,174 @@
 #include "Darkel.h"
 #include "Garages.h"
 #include "MusicManager.h"
+#include "VisibilityPlugins.h"
+#include "DMAudio.h"
+#include "CutsceneMgr.h"
+#include "Lights.h"
+#include "Credits.h"
+#include "CullZones.h"
+#include "TimeCycle.h"
 #include "Frontend.h"
+
+WRAPPER int psCameraBeginUpdate(RwCamera *camera) { EAXJMP(0x580C70); }
+WRAPPER void psCameraShowRaster(RwCamera *camera) { EAXJMP(0x580CA0); }
+
+WRAPPER void CameraSize(RwCamera *camera, CRect *rect, float viewWindow, float aspectRatio) { EAXJMP(0x527170); }
+int RsCameraBeginUpdate(RwCamera *camera) { return psCameraBeginUpdate(camera); } // argument actually ignored
+void RsCameraShowRaster(RwCamera *camera) { psCameraShowRaster(camera); }
+
+bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
+
+
+bool DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
+void DoRWStuffEndOfFrame(void);
+
+void RenderScene(void);
+void RenderDebugShit(void);
+void RenderEffects(void);
+void Render2dStuff(void);
+void RenderMenus(void);
+void DoFade(void);
+void Render2dStuffAfterFade(void);
+
+extern void (*DebugMenuProcess)(void);
+extern void (*DebugMenuRender)(void);
+
+
+RwRGBA gColourTop;
+
+void
+Idle(void *arg)
+{
+	CTimer::Update();
+	CSprite2d::InitPerFrame();
+	CFont::InitPerFrame();
+	CPointLights::InitPerFrame();
+	CGame::Process();
+	DMAudio.Service();
+
+	if(CGame::bDemoMode && CTimer::GetTimeInMilliseconds() > (3*60 + 30)*1000 && !CCutsceneMgr::IsCutsceneProcessing()){
+		FrontEndMenuManager.m_bStartGameLoading = true;
+		FrontEndMenuManager.m_bLoadingSavedGame = false;
+		return;
+	}
+
+	if(FrontEndMenuManager.m_bStartGameLoading || b_FoundRecentSavedGameWantToLoad)
+		return;
+
+	SetLightsWithTimeOfDayColour(Scene.world);
+
+	if(arg == nil)
+		return;
+
+	if((!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.field_452 == 1) &&
+	   TheCamera.GetScreenFadeStatus() != FADE_2){
+		CRenderer::ConstructRenderList();
+		CRenderer::PreRender();
+
+		if(CWeather::LightningFlash && !CCullZones::CamNoRain()){
+			if(!DoRWStuffStartOfFrame_Horizon(255, 255, 255, 255, 255, 255, 255))
+				return;
+		}else{
+			if(!DoRWStuffStartOfFrame_Horizon(CTimeCycle::GetSkyTopRed(), CTimeCycle::GetSkyTopGreen(), CTimeCycle::GetSkyTopBlue(),
+						CTimeCycle::GetSkyBottomRed(), CTimeCycle::GetSkyBottomGreen(), CTimeCycle::GetSkyBottomBlue(),
+						255))
+				return;
+		}
+
+		DefinedState();
+
+		// BUG. This has to be done BEFORE RwCameraBeginUpdate
+		RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
+		RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
+
+		RenderScene();
+		RenderDebugShit();
+		RenderEffects();
+
+		if((TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_NORMAL) &&
+		   TheCamera.m_ScreenReductionPercentage > 0.0)
+		        TheCamera.SetMotionBlurAlpha(150);
+		TheCamera.RenderMotionBlur();
+
+		Render2dStuff();
+	}else{
+		float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
+		// ASPECT
+		CameraSize(Scene.camera, nil, viewWindow, 4.0f/3.0f);
+		CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
+		RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+		if(!RsCameraBeginUpdate(Scene.camera))
+			return;
+	}
+
+	RenderMenus();
+	DoFade();
+	Render2dStuffAfterFade();
+	CCredits::Render();
+	DoRWStuffEndOfFrame();
+
+//	if(g_SlowMode) 
+//		ProcessSlowMode();
+}
+
+void
+FrontendIdle(void)
+{
+	CTimer::Update();
+	CSprite2d::SetRecipNearClip();
+	CSprite2d::InitPerFrame();
+	CFont::InitPerFrame();
+	CPad::UpdatePads();
+	FrontEndMenuManager.Process();
+
+	if(RsGlobal.quit)
+		return;
+
+	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
+	// ASPECT
+	CameraSize(Scene.camera, nil, viewWindow, 4.0f/3.0f);
+	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
+	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+	if(!RsCameraBeginUpdate(Scene.camera))
+		return;
+
+	DefinedState();
+	RenderMenus();
+	DoFade();
+	Render2dStuffAfterFade();
+	CFont::DrawFonts();
+	DoRWStuffEndOfFrame();
+}
+
+bool
+DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha)
+{
+	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
+	// ASPECT
+	float aspectRatio = CMenuManager::m_PrefsUseWideScreen ? 16.0f/9.0f : 4.0f/3.0f;
+	CameraSize(Scene.camera, nil, viewWindow, aspectRatio);
+	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
+	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+
+	if(!RsCameraBeginUpdate(Scene.camera))
+		return false;
+
+	TheCamera.m_viewMatrix.Update();
+	CClouds::RenderBackground(TopRed, TopGreen, TopBlue, BottomRed, BottomGreen, BottomBlue, Alpha);
+
+	return true;
+}
+
+void
+DoRWStuffEndOfFrame(void)
+{
+	// CDebug::DebugDisplayTextBuffer();
+	// FlushObrsPrintfs();
+	RwCameraEndUpdate(Scene.camera);
+	RsCameraShowRaster(Scene.camera);
+}
+
 
 // This is certainly a very useful function
 void
@@ -143,6 +310,8 @@ Render2dStuff(void)
 	CGarages::PrintMessages();
 	CPad::PrintErrorMessage();
 	CFont::DrawFonts();
+
+	DebugMenuRender();
 }
 
 void
@@ -154,8 +323,8 @@ RenderMenus(void)
 
 bool &JustLoadedDontFadeInYet = *(bool*)0x95CDB4;
 bool &StillToFadeOut = *(bool*)0x95CD99;
-int32 &TimeStartedCountingForFade = *(int32*)0x9430EC;
-int32 &TimeToStayFadedBeforeFadeOut = *(int32*)0x611564;
+uint32 &TimeStartedCountingForFade = *(uint32*)0x9430EC;
+uint32 &TimeToStayFadedBeforeFadeOut = *(uint32*)0x611564;
 
 void
 DoFade(void)
@@ -171,12 +340,12 @@ DoFade(void)
 	if(StillToFadeOut){
 		if(CTimer::GetTimeInMilliseconds() - TimeStartedCountingForFade > TimeToStayFadedBeforeFadeOut){
 			StillToFadeOut = false;
-			TheCamera.Fade(3.0f, 1);
+			TheCamera.Fade(3.0f, FADE_IN);
 			TheCamera.ProcessFade();
 			TheCamera.ProcessMusicFade();
 		}else{
 			TheCamera.SetFadeColour(0, 0, 0);
-			TheCamera.Fade(0.0f, 0);
+			TheCamera.Fade(0.0f, FADE_OUT);
 			TheCamera.ProcessFade();
 		}
 	}
@@ -246,6 +415,10 @@ Render2dStuffAfterFade(void)
 
 
 STARTPATCHES
+	InjectHook(0x48E480, Idle, PATCH_JUMP);
+	InjectHook(0x48E700, FrontendIdle, PATCH_JUMP);
+
+	InjectHook(0x48D040, DoRWStuffStartOfFrame_Horizon, PATCH_JUMP);
 	InjectHook(0x48E030, RenderScene, PATCH_JUMP);
 	InjectHook(0x48E080, RenderDebugShit, PATCH_JUMP);
 	InjectHook(0x48E090, RenderEffects, PATCH_JUMP);

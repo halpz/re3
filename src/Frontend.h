@@ -85,7 +85,9 @@ public:
 
 	static int &m_PrefsBrightness;
 	static int &m_PrefsLanguage;
+	static bool &m_PrefsUseWideScreen;
 
+	void Process(void);
 	void DrawFrontEnd(void);
 };
 static_assert(sizeof(CMenuManager) == 0x564, "CMenuManager: error");

@@ -26,7 +26,7 @@ class CRenderer
 	static bool &m_loadingPriority;
 public:
 	static void Init(void);
-	// TODO: PreRender, needs CHeli and CShadows
+	static void PreRender(void);
 
 	static void RenderRoads(void);
 	static void RenderFadingInEntities(void);

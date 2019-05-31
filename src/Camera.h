@@ -212,6 +212,31 @@ enum
 	LOOKING_FORWARD,
 };
 
+enum
+{
+	// TODO: figure out
+	FADE_0,
+	FADE_1,	// mid fade
+	FADE_2,
+
+	FADE_OUT,
+	FADE_IN,
+};
+
+enum
+{
+	MBLUR_NONE,
+	MBLUR_SNIPER,
+	MBLUR_NORMAL,
+	MBLUR_INTRO1,		// green camera
+	MBLUR_INTRO2,		// unused
+	MBLUR_INTRO3,		// bank scene
+	MBLUR_INTRO4,		// jail break scene
+	MBLUR_INTRO5,		// explosion
+	MBLUR_INTRO6,		// player shot
+	MBLUR_UNUSED,		// pinkish
+};
+
 struct CCamera : public CPlaceable
 {
 	bool m_bAboveGroundTrainNodesLoaded;
@@ -421,9 +446,14 @@ int     m_iModeObbeCamIsInForCar;
 	bool IsBoxVisible(RwV3d *box, const CMatrix *mat);
 
 	void Fade(float timeout, int16 direction);
+	int GetScreenFadeStatus(void);
 	void ProcessFade(void);
 	void ProcessMusicFade(void);
 	void SetFadeColour(uint8 r, uint8 g, uint8 b);
+
+	void SetMotionBlur(int r, int g, int b, int a, int type);
+	void SetMotionBlurAlpha(int a);
+	void RenderMotionBlur(void);
 
 	void DrawBordersForWideScreen(void);
 };

@@ -98,6 +98,15 @@ public:
 	static float GetDirectionalRed(void) { return m_fCurrentDirectionalRed; }
 	static float GetDirectionalGreen(void) { return m_fCurrentDirectionalGreen; }
 	static float GetDirectionalBlue(void) { return m_fCurrentDirectionalBlue; }
+	static int GetSkyTopRed(void) { return m_nCurrentSkyTopRed; }
+	static int GetSkyTopGreen(void) { return m_nCurrentSkyTopGreen; }
+	static int GetSkyTopBlue(void) { return m_nCurrentSkyTopBlue; }
+	static int GetSkyBottomRed(void) { return m_nCurrentSkyBottomRed; }
+	static int GetSkyBottomGreen(void) { return m_nCurrentSkyBottomGreen; }
+	static int GetSkyBottomBlue(void) { return m_nCurrentSkyBottomBlue; }
+	static float GetFarClip(void) { return m_fCurrentFarClip; }
+	static float GetFogStart(void) { return m_fCurrentFogStart; }
+
 	static int GetLowCloudsRed(void) { return m_nCurrentLowCloudsRed; }
 	static int GetLowCloudsGreen(void) { return m_nCurrentLowCloudsGreen; }
 	static int GetLowCloudsBlue(void) { return m_nCurrentLowCloudsBlue; }

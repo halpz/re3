@@ -12,6 +12,7 @@ CMouseControllerState &CPad::OldMouseControllerState = *(CMouseControllerState*)
 CMouseControllerState &CPad::NewMouseControllerState = *(CMouseControllerState*)0x8809F0;
 CMouseControllerState &CPad::PCTempMouseControllerState = *(CMouseControllerState*)0x6F1E60;
 
+WRAPPER void CPad::UpdatePads(void) { EAXJMP(0x492720); }
 WRAPPER void CPad::PrintErrorMessage(void) { EAXJMP(0x4942B0); }
 
 void

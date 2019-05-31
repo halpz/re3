@@ -5,6 +5,7 @@
 #include "ModelInfo.h"
 #include "Lights.h"
 #include "Renderer.h"
+#include "Camera.h"
 #include "VisibilityPlugins.h"
 
 #define FADE_DISTANCE 20.0f
@@ -24,6 +25,7 @@ int32 &CVisibilityPlugins::ms_atomicPluginOffset = *(int32*)0x600124;
 int32 &CVisibilityPlugins::ms_framePluginOffset = *(int32*)0x600128;
 int32 &CVisibilityPlugins::ms_clumpPluginOffset = *(int32*)0x60012C;
 
+RwCamera *&CVisibilityPlugins::ms_pCamera = *(RwCamera**)0x8F2514;
 RwV3d *&CVisibilityPlugins::ms_pCameraPosn = *(RwV3d**)0x8F6270;
 float &CVisibilityPlugins::ms_cullCompsDist = *(float*)0x8F2BC4;
 float &CVisibilityPlugins::ms_vehicleLod0Dist = *(float*)0x885B28;
@@ -80,6 +82,28 @@ CVisibilityPlugins::InsertAtomicIntoSortedList(RpAtomic *a, float dist)
 //	if(!ret)
 //		printf("list full %d\n", m_alphaList.Count());
 	return ret;
+}
+
+void
+CVisibilityPlugins::SetRenderWareCamera(RwCamera *camera)
+{
+	ms_pCamera = camera;
+	ms_pCameraPosn = RwMatrixGetPos(RwFrameGetMatrix(RwCameraGetFrame(camera)));
+
+	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1 ||
+	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWNPED)
+		ms_cullCompsDist = 1000000.0f;
+	else
+		ms_cullCompsDist = sq(TheCamera.LODDistMultiplier * 20.0f);
+
+        ms_vehicleLod0Dist = sq(70.0 * TheCamera.GenerationDistMultiplier);
+        ms_vehicleLod1Dist = sq(90.0 * TheCamera.GenerationDistMultiplier);
+        ms_vehicleFadeDist = sq(100.0 * TheCamera.GenerationDistMultiplier);
+        ms_bigVehicleLod0Dist = sq(60.0 * TheCamera.GenerationDistMultiplier);
+        ms_bigVehicleLod1Dist = sq(150.0 * TheCamera.GenerationDistMultiplier);
+        ms_pedLod0Dist = sq(25.0 * TheCamera.LODDistMultiplier);
+        ms_pedLod1Dist = sq(60.0 * TheCamera.LODDistMultiplier);
+        ms_pedFadeDist = sq(70.0 * TheCamera.LODDistMultiplier);
 }
 
 RpMaterial*
@@ -802,6 +826,8 @@ STARTPATCHES
 	InjectHook(0x528FF0, CVisibilityPlugins::InsertEntityIntoSortedList, PATCH_JUMP);
 	InjectHook(0x528F80, CVisibilityPlugins::InitAlphaAtomicList, PATCH_JUMP);
 	InjectHook(0x528FA0, CVisibilityPlugins::InsertAtomicIntoSortedList, PATCH_JUMP);
+	InjectHook(0x528C50, CVisibilityPlugins::SetRenderWareCamera, PATCH_JUMP);
+
 	InjectHook(0x527F60, SetAlphaCB, PATCH_JUMP);
 	InjectHook(0x529040, CVisibilityPlugins::RenderAlphaAtomics, PATCH_JUMP);
 	InjectHook(0x529070, CVisibilityPlugins::RenderFadingEntities, PATCH_JUMP);

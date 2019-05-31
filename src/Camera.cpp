@@ -8,6 +8,7 @@
 #include "General.h"
 #include "CullZones.h"
 #include "SurfaceTable.h"
+#include "MBlur.h"
 #include "Camera.h"
 
 const float DefaultFOV = 80.0f;	// actually 70.0f
@@ -72,6 +73,16 @@ WRAPPER void CCamera::Fade(float timeout, int16 direction) { EAXJMP(0x46B3A0); }
 WRAPPER void CCamera::ProcessFade(void) { EAXJMP(0x46F080); }
 WRAPPER void CCamera::ProcessMusicFade(void) { EAXJMP(0x46F1E0); }
 
+int
+CCamera::GetScreenFadeStatus(void)
+{
+	if(m_fFLOATingFade == 0.0f)
+		return FADE_0;
+	if(m_fFLOATingFade == 255.0f)
+		return FADE_2;
+	return FADE_1;
+}
+
 void
 CCamera::SetFadeColour(uint8 r, uint8 g, uint8 b)
 {
@@ -80,6 +91,34 @@ CCamera::SetFadeColour(uint8 r, uint8 g, uint8 b)
 	CDraw::FadeGreen = g;
 	CDraw::FadeBlue = b;
 }
+
+void
+CCamera::SetMotionBlur(int r, int g, int b, int a, int type)
+{
+	m_BlurRed = r;
+	m_BlurGreen = g;
+	m_BlurBlue = b;
+	m_motionBlur = a;
+	m_BlurType = type;
+}
+
+void
+CCamera::SetMotionBlurAlpha(int a)
+{
+	m_imotionBlurAddAlpha = a;
+}
+
+void
+CCamera::RenderMotionBlur(void)
+{
+	if(m_BlurType == 0)
+		return;
+
+	CMBlur::MotionBlurRender(m_pRwCamera,
+		m_BlurRed, m_BlurGreen, m_BlurBlue,
+		m_motionBlur, m_BlurType, m_imotionBlurAddAlpha);
+}
+
 
 /*
  *
@@ -1201,6 +1240,10 @@ CCam::FixCamWhenObscuredByVehicle(const CVector &TargetCoors)
 STARTPATCHES
 	InjectHook(0x42C760, &CCamera::IsSphereVisible, PATCH_JUMP);
 	InjectHook(0x46FD00, &CCamera::SetFadeColour, PATCH_JUMP);
+
+	InjectHook(0x46FD40, &CCamera::SetMotionBlur, PATCH_JUMP);
+	InjectHook(0x46FD80, &CCamera::SetMotionBlurAlpha, PATCH_JUMP);
+	InjectHook(0x46F940, &CCamera::RenderMotionBlur, PATCH_JUMP);
 
 	InjectHook(0x456F40, WellBufferMe, PATCH_JUMP);
 	InjectHook(0x4582F0, &CCam::GetVectorsReadyForRW, PATCH_JUMP);

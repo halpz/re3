@@ -22,6 +22,7 @@ public:
 
 	static CLinkList<AlphaObjectInfo> &m_alphaList;
 	static CLinkList<AlphaObjectInfo> &m_alphaEntityList;
+	static RwCamera *&ms_pCamera;
 	static RwV3d *&ms_pCameraPosn;
 	static float &ms_cullCompsDist;
 	static float &ms_vehicleLod0Dist;
@@ -38,6 +39,8 @@ public:
 	static bool InsertEntityIntoSortedList(CEntity *e, float dist);
 	static void InitAlphaAtomicList(void);
 	static bool InsertAtomicIntoSortedList(RpAtomic *a, float dist);
+
+	static void SetRenderWareCamera(RwCamera *camera);
 
 	static RpAtomic *RenderWheelAtomicCB(RpAtomic *atomic);
 	static RpAtomic *RenderObjNormalAtomic(RpAtomic *atomic);

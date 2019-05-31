@@ -4,6 +4,7 @@
 #include "patcher.h"
 #include "Renderer.h"
 #include "Credits.h"
+#include "Camera.h"
 #include "debugmenu_public.h"
 
 void **rwengine = *(void***)0x5A10E1;
@@ -71,10 +72,30 @@ open_script(const char *path, const char *mode)
 
 int gDbgSurf;
 
+void (*DebugMenuProcess)(void);
+void (*DebugMenuRender)(void);
+static void stub(void) { }
+
+void
+DebugMenuInit(void)
+{
+	if(DebugMenuLoad()){
+		DebugMenuProcess = (void(*)(void))GetProcAddress(gDebugMenuAPI.module, "DebugMenuProcess");
+		DebugMenuRender = (void(*)(void))GetProcAddress(gDebugMenuAPI.module, "DebugMenuRender");
+	}
+	if(DebugMenuProcess == nil || DebugMenuRender == nil){
+		DebugMenuProcess = stub;
+		DebugMenuRender = stub;
+	}
+
+}
+
 int (*RsEventHandler_orig)(int a, int b);
 int
 delayedPatches10(int a, int b)
 {
+	DebugMenuInit();
+
 	if(DebugMenuLoad()){
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
@@ -84,6 +105,8 @@ delayedPatches10(int a, int b)
 		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
 		DebugMenuAddVar("Debug", "Dbg Surface", &gDbgSurf, nil, 1, 0, 34, nil);
+
+		DebugMenuAddVar("Debug", "blur type", &TheCamera.m_BlurType, nil, 1, 0, 10, nil);
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);

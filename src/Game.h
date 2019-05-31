@@ -12,4 +12,8 @@ class CGame
 {
 public:
 	static int &currLevel;
+	static bool &bDemoMode;
+	static bool &nastyGame;
+
+	static void Process(void);
 };
