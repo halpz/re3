@@ -132,6 +132,65 @@ CSprite::RenderOneXLUSprite(float x, float y, float z, float w, float h, uint8 r
 }
 
 void
+CSprite::RenderOneXLUSprite_Rotate_Aspect(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intens, float recipz, float rotation, uint8 a)
+{
+	float c = cos(DEGTORAD(rotation));
+	float s = sin(DEGTORAD(rotation));
+
+	float xs[4];
+	float ys[4];
+	float us[4];
+	float vs[4];
+	int i;
+
+	// Fade out when too near
+	// why not in buffered version?
+	if(z < 3.0f){
+		if(z < 1.5f)
+			return;
+		int f = (z - 1.5f)/1.5f * 255;
+		r = f*r >> 8;
+		g = f*g >> 8;
+		b = f*b >> 8;
+		intens = f*intens >> 8;
+	}
+
+	xs[0] = x + w*(-c-s);	us[0] = 0.0f;
+	xs[1] = x + w*(-c+s);	us[1] = 0.0f;
+	xs[2] = x + w*(+c+s);	us[2] = 1.0f;
+	xs[3] = x + w*(+c-s);	us[3] = 1.0f;
+
+	ys[0] = y + h*(-c+s);	vs[0] = 0.0f;
+	ys[1] = y + h*(+c+s);	vs[1] = 1.0f;
+	ys[2] = y + h*(+c-s);	vs[2] = 1.0f;
+	ys[3] = y + h*(-c-s);	vs[3] = 0.0f;
+
+	// No clipping, just culling
+	if(xs[0] < 0.0f && xs[1] < 0.0f && xs[2] < 0.0f && xs[3] < 0.0f) return;
+	if(ys[0] < 0.0f && ys[1] < 0.0f && ys[2] < 0.0f && ys[3] < 0.0f) return;
+	if(xs[0] > RsGlobal.maximumWidth && xs[1] > RsGlobal.maximumWidth &&
+	   xs[2] > RsGlobal.maximumWidth && xs[3] > RsGlobal.maximumWidth) return;
+	if(ys[0] > RsGlobal.maximumHeight && ys[1] > RsGlobal.maximumHeight &&
+	   ys[2] > RsGlobal.maximumHeight && ys[3] > RsGlobal.maximumHeight) return;
+
+	float screenz = m_f2DNearScreenZ +
+		(z-CDraw::GetNearClipZ())*(m_f2DFarScreenZ-m_f2DNearScreenZ)*CDraw::GetFarClipZ() /
+		((CDraw::GetFarClipZ()-CDraw::GetNearClipZ())*z);
+
+	for(i = 0; i < 4; i++){
+		RwIm2DVertexSetScreenX(&verts[i], xs[i]);
+		RwIm2DVertexSetScreenY(&verts[i], ys[i]);
+		RwIm2DVertexSetScreenZ(&verts[i], screenz);
+		RwIm2DVertexSetCameraZ(&verts[i], z);
+		RwIm2DVertexSetRecipCameraZ(&verts[i], recipz);
+		RwIm2DVertexSetIntRGBA(&verts[i], r*intens>>8, g*intens>>8, b*intens>>8, a);
+		RwIm2DVertexSetU(&verts[i], us[i], recipz);
+		RwIm2DVertexSetV(&verts[i], vs[i], recipz);
+	}
+	RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, verts, 4);
+}
+
+void
 CSprite::RenderBufferedOneXLUSprite(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intens, float recipz, uint8 a)
 {
 	m_bFlushSpriteBufferSwitchZTest = 0;
@@ -537,6 +596,7 @@ STARTPATCHES
 	InjectHook(0x51C5B0, CSprite::InitSpriteBuffer2D, PATCH_JUMP);
 	InjectHook(0x51C520, CSprite::FlushSpriteBuffer, PATCH_JUMP);
 	InjectHook(0x51C960, CSprite::RenderOneXLUSprite, PATCH_JUMP);
+	InjectHook(0x51D110, CSprite::RenderOneXLUSprite_Rotate_Aspect, PATCH_JUMP);
 	InjectHook(0x51C5D0, CSprite::RenderBufferedOneXLUSprite, PATCH_JUMP);
 	InjectHook(0x51D5B0, CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension, PATCH_JUMP);
 	InjectHook(0x51CCD0, CSprite::RenderBufferedOneXLUSprite_Rotate_Aspect, PATCH_JUMP);

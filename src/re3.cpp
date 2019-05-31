@@ -104,14 +104,13 @@ delayedPatches10(int a, int b)
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
 		DebugMenuAddVar("Debug", "Dbg Surface", &gDbgSurf, nil, 1, 0, 34, nil);
 
-		DebugMenuAddVar("Debug", "blur type", &TheCamera.m_BlurType, nil, 1, 0, 10, nil);
-
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 	}
 
 	return RsEventHandler_orig(a, b);
 }
+
 
 void
 patch()

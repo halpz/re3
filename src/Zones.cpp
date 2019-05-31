@@ -401,6 +401,9 @@ CTheZones::GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info)
 		info->pedGroup = night->pedGroup;
 }
 
+// BUG: there might be a bug somewhere in there that causes
+// thresholds to become negative so CCarCtrl::ChooseModel will hang
+
 void
 CTheZones::SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
 	int16 gang0Num, int16 gang1Num, int16 gang2Num,
@@ -431,6 +434,22 @@ CTheZones::SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
 	int16 oldGang6Num = info->gangThreshold[6] - info->gangThreshold[5];
 	int16 oldGang7Num = info->gangThreshold[7] - info->gangThreshold[6];
 	int16 oldGang8Num = info->gangThreshold[8] - info->gangThreshold[7];
+
+	assert(oldCar1Num >= 0);
+	assert(oldCar2Num >= 0);
+	assert(oldCar3Num >= 0);
+	assert(oldCar4Num >= 0);
+	assert(oldCar5Num >= 0);
+	assert(oldCopNum >= 0);
+	assert(oldGang0Num >= 0);
+	assert(oldGang1Num >= 0);
+	assert(oldGang2Num >= 0);
+	assert(oldGang3Num >= 0);
+	assert(oldGang4Num >= 0);
+	assert(oldGang5Num >= 0);
+	assert(oldGang6Num >= 0);
+	assert(oldGang7Num >= 0);
+	assert(oldGang8Num >= 0);
 
 	if(car0Num != -1) info->carThreshold[0] = car0Num;
 	if(car1Num != -1) info->carThreshold[1] = info->carThreshold[0] + car1Num;
@@ -463,6 +482,24 @@ CTheZones::SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
 	else               info->gangThreshold[7] = info->gangThreshold[6] + oldGang7Num;
 	if(gang8Num != -1) info->gangThreshold[8] = info->gangThreshold[7] + gang8Num;
 	else               info->gangThreshold[8] = info->gangThreshold[7] + oldGang8Num;
+
+	assert(info->carDensity >= 0);
+	assert(info->carThreshold[0] >= 0);
+	assert(info->carThreshold[1] >= 0);
+	assert(info->carThreshold[2] >= 0);
+	assert(info->carThreshold[3] >= 0);
+	assert(info->carThreshold[4] >= 0);
+	assert(info->carThreshold[5] >= 0);
+	assert(info->copThreshold >= 0);
+	assert(info->gangThreshold[0] >= 0);
+	assert(info->gangThreshold[1] >= 0);
+	assert(info->gangThreshold[2] >= 0);
+	assert(info->gangThreshold[3] >= 0);
+	assert(info->gangThreshold[4] >= 0);
+	assert(info->gangThreshold[5] >= 0);
+	assert(info->gangThreshold[6] >= 0);
+	assert(info->gangThreshold[7] >= 0);
+	assert(info->gangThreshold[8] >= 0);
 }
 
 void

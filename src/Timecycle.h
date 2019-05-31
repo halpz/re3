@@ -104,6 +104,13 @@ public:
 	static int GetSkyBottomRed(void) { return m_nCurrentSkyBottomRed; }
 	static int GetSkyBottomGreen(void) { return m_nCurrentSkyBottomGreen; }
 	static int GetSkyBottomBlue(void) { return m_nCurrentSkyBottomBlue; }
+	static int GetSunCoreRed(void) { return m_nCurrentSunCoreRed; }
+	static int GetSunCoreGreen(void) { return m_nCurrentSunCoreGreen; }
+	static int GetSunCoreBlue(void) { return m_nCurrentSunCoreBlue; }
+	static int GetSunCoronaRed(void) { return m_nCurrentSunCoronaRed; }
+	static int GetSunCoronaGreen(void) { return m_nCurrentSunCoronaGreen; }
+	static int GetSunCoronaBlue(void) { return m_nCurrentSunCoronaBlue; }
+	static float GetSunSize(void) { return m_fCurrentSunSize; }
 	static float GetFarClip(void) { return m_fCurrentFarClip; }
 	static float GetFogStart(void) { return m_fCurrentFogStart; }
 
@@ -119,4 +126,6 @@ public:
 	static int GetFogRed(void) { return m_nCurrentFogColourRed; }
 	static int GetFogGreen(void) { return m_nCurrentFogColourGreen; }
 	static int GetFogBlue(void) { return m_nCurrentFogColourBlue; }
+
+	static const CVector &GetSunPosition(void) { return m_VectorToSun[m_CurrentStoredValue]; }
 };

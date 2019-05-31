@@ -52,6 +52,7 @@ enum Config {
 	NUMHOURS = 24,
 
 	NUMANTENNAS = 8,
+	NUMCORONAS = 56
 };
 
 #define GTA3_1_1_PATCH FALSE
