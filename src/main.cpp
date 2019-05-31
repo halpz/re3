@@ -41,12 +41,22 @@
 #include "TimeCycle.h"
 #include "Frontend.h"
 
+#define DEFAULT_VIEWWINDOW (tan(CDraw::GetFOV() * (360.0f / PI)))
+
+#ifdef WIDE_SCREEN
+#define DEFAULT_ASPECTRATIO (16.0f/9.0f)
+#else
+#define DEFAULT_ASPECTRATIO (4.0f/3.0f)
+#endif
+
 WRAPPER int psCameraBeginUpdate(RwCamera *camera) { EAXJMP(0x580C70); }
 WRAPPER void psCameraShowRaster(RwCamera *camera) { EAXJMP(0x580CA0); }
 
-WRAPPER void CameraSize(RwCamera *camera, CRect *rect, float viewWindow, float aspectRatio) { EAXJMP(0x527170); }
-int RsCameraBeginUpdate(RwCamera *camera) { return psCameraBeginUpdate(camera); } // argument actually ignored
-void RsCameraShowRaster(RwCamera *camera) { psCameraShowRaster(camera); }
+WRAPPER void CameraSize(RwCamera *camera, void *rect, float viewWindow, float aspectRatio) { EAXJMP(0x527170); }
+
+WRAPPER RwBool RpAnimBlendPluginAttach() { EAXJMP(0x4052D0); }
+WRAPPER RwBool NodeNamePluginAttach() { EAXJMP(0x527100); }
+
 
 bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
 
@@ -413,6 +423,168 @@ Render2dStuffAfterFade(void)
 	CFont::DrawFonts();
 }
 
+#include "rwcore.h"
+#include "rpworld.h"
+#include "rpmatfx.h"
+#include "rpskin.h"
+#include "rphanim.h"
+#include "rtbmp.h"
+
+_TODO("temp, move this includes out of here")
+
+static RwBool 
+PluginAttach(void)
+{
+    if( !RpWorldPluginAttach() )
+    {
+        printf("Couldn't attach world plugin\n");
+        
+        return FALSE;
+    }
+	
+	if( !RpSkinPluginAttach() )
+    {
+        printf("Couldn't attach RpSkin plugin\n");
+        
+        return FALSE;
+    }
+	
+	if( !RpHAnimPluginAttach() )
+    {
+        printf("Couldn't attach RpHAnim plugin\n");
+        
+        return FALSE;
+    }
+	
+	if( !NodeNamePluginAttach() )
+    {
+        printf("Couldn't attach node name plugin\n");
+        
+        return FALSE;
+    }
+	
+	if( !CVisibilityPlugins::PluginAttach() )
+    {
+        printf("Couldn't attach visibility plugins\n");
+        
+        return FALSE;
+    }
+	
+	if( !RpAnimBlendPluginAttach() )
+    {
+        printf("Couldn't attach RpAnimBlend plugin\n");
+        
+        return FALSE;
+    }
+	
+	if( !RpMatFXPluginAttach() )
+    {
+        printf("Couldn't attach RpMatFX plugin\n");
+        
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static RwBool 
+Initialise3D(void *param)
+{
+    if (RsRwInitialise(param))
+    {
+        return CGame::InitialiseRenderWare();
+    }
+
+    return (FALSE);
+}
+
+
+static void 
+Terminate3D(void)
+{
+	CGame::ShutdownRenderWare();
+	
+    RsRwTerminate();
+
+    return;
+}
+
+RsEventStatus
+AppEventHandler(RsEvent event, void *param)
+{
+    switch( event )
+    {
+        case rsINITIALISE:
+        {
+			CGame::InitialiseOnceBeforeRW();
+            return RsInitialise() ? rsEVENTPROCESSED : rsEVENTERROR;
+        }
+
+        case rsCAMERASIZE:
+        {
+            CameraSize(Scene.camera, param, DEFAULT_VIEWWINDOW, DEFAULT_ASPECTRATIO);
+            
+            return rsEVENTPROCESSED;
+        }
+
+        case rsRWINITIALISE:
+        {
+            return Initialise3D(param) ? rsEVENTPROCESSED : rsEVENTERROR;
+        }
+
+        case rsRWTERMINATE:
+        {
+            Terminate3D();
+
+            return rsEVENTPROCESSED;
+        }
+
+        case rsTERMINATE:
+        {
+            CGame::FinalShutdown();
+
+            return rsEVENTPROCESSED;
+        }
+
+        case rsPLUGINATTACH:
+        {
+            return PluginAttach() ? rsEVENTPROCESSED : rsEVENTERROR;
+        }
+
+        case rsINPUTDEVICEATTACH:
+        {
+            AttachInputDevices();
+
+            return rsEVENTPROCESSED;
+        }
+
+        case rsIDLE:
+        {
+            Idle(param);
+
+            return rsEVENTPROCESSED;
+        }
+
+        case rsFRONTENDIDLE:
+        {
+            FrontendIdle();
+
+            return rsEVENTPROCESSED;
+        }
+
+        case rsACTIVATE:
+        {
+            param ? DMAudio.ReacquireDigitalHandle() : DMAudio.ReleaseDigitalHandle();
+
+            return rsEVENTPROCESSED;
+        }
+
+        default:
+        {
+            return rsEVENTNOTPROCESSED;
+        }
+    }
+}
 
 STARTPATCHES
 	InjectHook(0x48E480, Idle, PATCH_JUMP);
@@ -426,4 +598,9 @@ STARTPATCHES
 	InjectHook(0x48E450, RenderMenus, PATCH_JUMP);
 	InjectHook(0x48D120, DoFade, PATCH_JUMP);
 	InjectHook(0x48E470, Render2dStuffAfterFade, PATCH_JUMP);
+	
+	InjectHook(0x48D470, PluginAttach, PATCH_JUMP);
+	InjectHook(0x48D520, Initialise3D, PATCH_JUMP);
+	InjectHook(0x48D540, Terminate3D, PATCH_JUMP);
+	InjectHook(0x48E800, AppEventHandler, PATCH_JUMP);
 ENDPATCHES
