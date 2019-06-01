@@ -19,6 +19,26 @@ CZoneInfo *CTheZones::ZoneInfoArray = (CZoneInfo*)0x714400;
 
 #define SWAPF(a, b) { float t; t = a; a = b; b = t; }
 
+static void
+CheckZoneInfo(CZoneInfo *info)
+{
+	assert(info->carThreshold[0] >= 0);
+	assert(info->carThreshold[0] <= info->carThreshold[1]);
+	assert(info->carThreshold[1] <= info->carThreshold[2]);
+	assert(info->carThreshold[2] <= info->carThreshold[3]);
+	assert(info->carThreshold[3] <= info->carThreshold[4]);
+	assert(info->carThreshold[4] <= info->carThreshold[5]);
+	assert(info->carThreshold[5] <= info->copThreshold);
+	assert(info->copThreshold <= info->gangThreshold[0]);
+	assert(info->gangThreshold[0] <= info->gangThreshold[1]);
+	assert(info->gangThreshold[1] <= info->gangThreshold[2]);
+	assert(info->gangThreshold[2] <= info->gangThreshold[3]);
+	assert(info->gangThreshold[3] <= info->gangThreshold[4]);
+	assert(info->gangThreshold[4] <= info->gangThreshold[5]);
+	assert(info->gangThreshold[5] <= info->gangThreshold[6]);
+	assert(info->gangThreshold[6] <= info->gangThreshold[7]);
+	assert(info->gangThreshold[7] <= info->gangThreshold[8]);
+}
 
 void
 CTheZones::Init(void)
@@ -49,6 +69,7 @@ CTheZones::Init(void)
 		zonei->gangThreshold[6] = zonei->gangThreshold[5];
 		zonei->gangThreshold[7] = zonei->gangThreshold[6];
 		zonei->gangThreshold[8] = zonei->gangThreshold[7];
+		CheckZoneInfo(zonei);
 	}
 	TotalNumberOfZoneInfos = 1;	// why 1?
 
@@ -361,11 +382,11 @@ CTheZones::GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info)
 		if(CClock::GetIsTimeInRange(19, 22)){
 			n = (CClock::GetHours() - 19) / 3.0f;
 			assert(n >= 0.0f && n <= 1.0f);
-			d = n - 1.0f;
+			d = 1.0f - n;
 		}else{
 			d = (CClock::GetHours() - 5) / 3.0f;
 			assert(d >= 0.0f && d <= 1.0f);
-			n = d - 1.0f;
+			n = 1.0f - d;
 		}
 		info->carDensity = day->carDensity * d + night->carDensity * n;
 		info->carThreshold[0] = day->carThreshold[0] * d + night->carThreshold[0] * n;
@@ -402,27 +423,8 @@ CTheZones::GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info)
 	else
 		info->pedGroup = night->pedGroup;
 
-	assert(info->carDensity >= 0);
-	assert(info->carThreshold[0] >= 0);
-	assert(info->carThreshold[1] >= 0);
-	assert(info->carThreshold[2] >= 0);
-	assert(info->carThreshold[3] >= 0);
-	assert(info->carThreshold[4] >= 0);
-	assert(info->carThreshold[5] >= 0);
-	assert(info->copThreshold >= 0);
-	assert(info->gangThreshold[0] >= 0);
-	assert(info->gangThreshold[1] >= 0);
-	assert(info->gangThreshold[2] >= 0);
-	assert(info->gangThreshold[3] >= 0);
-	assert(info->gangThreshold[4] >= 0);
-	assert(info->gangThreshold[5] >= 0);
-	assert(info->gangThreshold[6] >= 0);
-	assert(info->gangThreshold[7] >= 0);
-	assert(info->gangThreshold[8] >= 0);
+	CheckZoneInfo(info);
 }
-
-// BUG: there might be a bug somewhere in there that causes
-// thresholds to become negative so CCarCtrl::ChooseModel will hang
 
 void
 CTheZones::SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
@@ -437,6 +439,8 @@ CTheZones::SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
 	CZoneInfo *info;
 	zone = GetZone(zoneid);
 	info = &ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight];
+
+	CheckZoneInfo(info);
 
 	if(carDensity != -1) info->carDensity = carDensity;
 	int16 oldCar1Num = info->carThreshold[1] - info->carThreshold[0];
@@ -454,22 +458,6 @@ CTheZones::SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
 	int16 oldGang6Num = info->gangThreshold[6] - info->gangThreshold[5];
 	int16 oldGang7Num = info->gangThreshold[7] - info->gangThreshold[6];
 	int16 oldGang8Num = info->gangThreshold[8] - info->gangThreshold[7];
-
-	assert(oldCar1Num >= 0);
-	assert(oldCar2Num >= 0);
-	assert(oldCar3Num >= 0);
-	assert(oldCar4Num >= 0);
-	assert(oldCar5Num >= 0);
-	assert(oldCopNum >= 0);
-	assert(oldGang0Num >= 0);
-	assert(oldGang1Num >= 0);
-	assert(oldGang2Num >= 0);
-	assert(oldGang3Num >= 0);
-	assert(oldGang4Num >= 0);
-	assert(oldGang5Num >= 0);
-	assert(oldGang6Num >= 0);
-	assert(oldGang7Num >= 0);
-	assert(oldGang8Num >= 0);
 
 	if(car0Num != -1) info->carThreshold[0] = car0Num;
 	if(car1Num != -1) info->carThreshold[1] = info->carThreshold[0] + car1Num;
@@ -503,23 +491,7 @@ CTheZones::SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
 	if(gang8Num != -1) info->gangThreshold[8] = info->gangThreshold[7] + gang8Num;
 	else               info->gangThreshold[8] = info->gangThreshold[7] + oldGang8Num;
 
-	assert(info->carDensity >= 0);
-	assert(info->carThreshold[0] >= 0);
-	assert(info->carThreshold[1] >= 0);
-	assert(info->carThreshold[2] >= 0);
-	assert(info->carThreshold[3] >= 0);
-	assert(info->carThreshold[4] >= 0);
-	assert(info->carThreshold[5] >= 0);
-	assert(info->copThreshold >= 0);
-	assert(info->gangThreshold[0] >= 0);
-	assert(info->gangThreshold[1] >= 0);
-	assert(info->gangThreshold[2] >= 0);
-	assert(info->gangThreshold[3] >= 0);
-	assert(info->gangThreshold[4] >= 0);
-	assert(info->gangThreshold[5] >= 0);
-	assert(info->gangThreshold[6] >= 0);
-	assert(info->gangThreshold[7] >= 0);
-	assert(info->gangThreshold[8] >= 0);
+	CheckZoneInfo(info);
 }
 
 void
@@ -534,15 +506,15 @@ CTheZones::SetZonePedInfo(uint16 zoneid, uint8 day, int16 pedDensity,
 	info = &ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight];
 	if(pedDensity != -1) info->pedDensity = pedDensity;
 	if(copDensity != -1) info->copDensity = copDensity;
-	if(gang0Density != -1) info->gangThreshold[0] = gang0Density;
-	if(gang1Density != -1) info->gangThreshold[1] = gang1Density;
-	if(gang2Density != -1) info->gangThreshold[2] = gang2Density;
-	if(gang3Density != -1) info->gangThreshold[3] = gang3Density;
-	if(gang4Density != -1) info->gangThreshold[4] = gang4Density;
-	if(gang5Density != -1) info->gangThreshold[5] = gang5Density;
-	if(gang6Density != -1) info->gangThreshold[6] = gang6Density;
-	if(gang7Density != -1) info->gangThreshold[7] = gang7Density;
-	if(gang8Density != -1) info->gangThreshold[8] = gang8Density;
+	if(gang0Density != -1) info->gangDensity[0] = gang0Density;
+	if(gang1Density != -1) info->gangDensity[1] = gang1Density;
+	if(gang2Density != -1) info->gangDensity[2] = gang2Density;
+	if(gang3Density != -1) info->gangDensity[3] = gang3Density;
+	if(gang4Density != -1) info->gangDensity[4] = gang4Density;
+	if(gang5Density != -1) info->gangDensity[5] = gang5Density;
+	if(gang6Density != -1) info->gangDensity[6] = gang6Density;
+	if(gang7Density != -1) info->gangDensity[7] = gang7Density;
+	if(gang8Density != -1) info->gangDensity[8] = gang8Density;
 }
 
 void

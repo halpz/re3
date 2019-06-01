@@ -37,7 +37,7 @@ CCredits::PrintCreditSpace(float space, uint32 &line)
 }
 
 void
-CCredits::PrintCreditText(float scaleX, float scaleY, wchar_t *text, uint32 &lineoffset, float scrolloffset)
+CCredits::PrintCreditText(float scaleX, float scaleY, wchar *text, uint32 &lineoffset, float scrolloffset)
 {
 	float start = SCREENH + 50.0f;
 	float y = lineoffset + start - scrolloffset;

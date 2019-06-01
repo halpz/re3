@@ -14,6 +14,8 @@ public:
 	static int &currLevel;
 	static bool &bDemoMode;
 	static bool &nastyGame;
+	static bool &frenchGame;
+	static bool &germanGame;
 
 	static void Process(void);
 	static Bool InitialiseOnceBeforeRW(void);

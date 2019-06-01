@@ -59,3 +59,5 @@ enum Config {
 
 #define GTA3_1_1_PATCH FALSE
 #define USE_PS2_RAND FALSE
+#define RANDOMSPLASH
+#define CHATTYSPLASH

@@ -61,6 +61,8 @@ int (*open_script_orig)(const char *path, const char *mode);
 int
 open_script(const char *path, const char *mode)
 {
+	if(GetAsyncKeyState('G') & 0x8000)
+		return open_script_orig("main.scm", mode);
 	if(GetAsyncKeyState('D') & 0x8000)
 		return open_script_orig("main_d.scm", mode);
 //	if(GetAsyncKeyState('R') & 0x8000)

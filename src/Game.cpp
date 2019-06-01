@@ -5,6 +5,8 @@
 int &CGame::currLevel = *(int*)0x941514;
 bool &CGame::bDemoMode = *(bool*)0x5F4DD0;
 bool &CGame::nastyGame = *(bool*)0x5F4DD4;
+bool &CGame::frenchGame = *(bool*)0x95CDCB;
+bool &CGame::germanGame = *(bool*)0x95CD1E;
 
 WRAPPER void CGame::Process(void) { EAXJMP(0x48C850); }
 WRAPPER Bool CGame::InitialiseOnceBeforeRW(void) { EAXJMP(0x48BB80); }

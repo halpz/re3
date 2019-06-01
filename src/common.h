@@ -40,12 +40,13 @@ typedef int32_t int32, Int32;
 typedef uintptr_t uintptr;
 typedef uint64_t uint64, UInt64;
 typedef int64_t int64, Int64;
+// hardcode ucs-2
+typedef uint16_t wchar, WChar;
 
 typedef float Float;
 typedef double Double;
 typedef bool Bool;
 typedef char Char;
-typedef wchar_t WChar;
 
 #define nil NULL
 

@@ -39,6 +39,9 @@
 #include "Credits.h"
 #include "CullZones.h"
 #include "TimeCycle.h"
+#include "TxdStore.h"
+#include "FileMgr.h"
+#include "Text.h"
 #include "Frontend.h"
 
 #define DEFAULT_VIEWWINDOW (tan(CDraw::GetFOV() * (360.0f / PI)))
@@ -71,6 +74,10 @@ void Render2dStuff(void);
 void RenderMenus(void);
 void DoFade(void);
 void Render2dStuffAfterFade(void);
+
+CSprite2d *LoadSplash(const char *name);
+void DestroySplashScreen(void);
+
 
 extern void (*DebugMenuProcess)(void);
 extern void (*DebugMenuRender)(void);
@@ -180,6 +187,30 @@ FrontendIdle(void)
 	Render2dStuffAfterFade();
 	CFont::DrawFonts();
 	DoRWStuffEndOfFrame();
+}
+
+bool
+DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha)
+{
+	CRGBA TopColor(TopRed, TopGreen, TopBlue, Alpha);
+	CRGBA BottomColor(BottomRed, BottomGreen, BottomBlue, Alpha);
+
+	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
+	// ASPECT
+	float aspectRatio = CMenuManager::m_PrefsUseWideScreen ? 16.0f/9.0f : 4.0f/3.0f;
+	CameraSize(Scene.camera, nil, viewWindow, aspectRatio);
+	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
+	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+
+	if(!RsCameraBeginUpdate(Scene.camera))
+		return false;
+
+	CSprite2d::InitPerFrame();
+
+	if(Alpha != 0)
+		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH), BottomColor, BottomColor, TopColor, TopColor);
+
+	return true;
 }
 
 bool
@@ -361,7 +392,7 @@ DoFade(void)
 	}
 
 	if(CDraw::FadeValue != 0 || CMenuManager::m_PrefsBrightness < 256){
-		// LoadSplash
+		CSprite2d *splash = LoadSplash(nil);
 
 		CRGBA fadeColor;
 		CRect rect;
@@ -411,7 +442,7 @@ DoFade(void)
 			fadeColor.g = 255;
 			fadeColor.b = 255;
 			fadeColor.a = CDraw::FadeValue;
-			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH), fadeColor, fadeColor, fadeColor, fadeColor);
+			splash->Draw(CRect(0.0f, 0.0f, SCREENW, SCREENH), fadeColor, fadeColor, fadeColor, fadeColor);
 		}
 	}
 }
@@ -421,6 +452,130 @@ Render2dStuffAfterFade(void)
 {
 	CHud::DrawAfterFade();
 	CFont::DrawFonts();
+}
+
+CSprite2d splash;
+int splashTxdId = -1;
+
+CSprite2d*
+LoadSplash(const char *name)
+{
+	RwTexDictionary *txd;
+	char filename[140];
+	RwTexture *tex = nil;
+
+	if(name == nil)
+		return &splash;
+	if(splashTxdId == -1)
+		splashTxdId = CTxdStore::AddTxdSlot("splash");
+
+	txd = CTxdStore::GetSlot(splashTxdId)->texDict;
+	if(txd)
+		tex = RwTexDictionaryFindNamedTexture(txd, name);
+	// if texture is found, splash was already set up below
+
+	if(tex == nil){
+		CFileMgr::SetDir("TXD\\");
+		sprintf(filename, "%s.txd", name);
+		if(splash.m_pTexture)
+			splash.Delete();
+		if(txd)
+			CTxdStore::RemoveTxd(splashTxdId);
+		CTxdStore::LoadTxd(splashTxdId, filename);
+		CTxdStore::AddRef(splashTxdId);
+		CTxdStore::PushCurrentTxd();
+		CTxdStore::SetCurrentTxd(splashTxdId);
+		splash.SetTexture(name);
+		CTxdStore::PopCurrentTxd();
+		CFileMgr::SetDir("");
+	}
+
+	return &splash;
+}
+
+void
+DestroySplashScreen(void)
+{
+	splash.Delete();
+	if(splashTxdId != -1)
+		CTxdStore::RemoveTxdSlot(splashTxdId);
+	splashTxdId = -1;
+}
+
+float NumberOfChunksLoaded;
+#define TOTALNUMCHUNKS 73.0f
+
+// TODO: compare with PS2
+void
+LoadingScreen(char *str1, char *str2, char *splashscreen)
+{
+	CSprite2d *splash;
+
+#ifndef RANDOMSPLASH
+	if(CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
+		splashscreen = "mainsc2";
+	else
+		splashscreen = "mainsc1";
+#endif
+
+	splash = LoadSplash(splashscreen);
+
+	if(RsGlobal.quit)
+		return;
+
+	if(DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255)){
+		CSprite2d::SetRecipNearClip();
+		CSprite2d::InitPerFrame();
+		CFont::InitPerFrame();
+		DefinedState();
+		RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
+		splash->Draw(CRect(0.0f, 0.0f, SCREENW, SCREENH), CRGBA(255, 255, 255, 255));
+
+		if(str1){
+			NumberOfChunksLoaded += 1;
+
+			float hpos = SCREEN_STRETCH_X(40);
+			float length = SCREENW - SCREEN_STRETCH_X(100);
+			float vpos = SCREENH - SCREEN_STRETCH_Y(13);
+			float height = SCREEN_STRETCH_Y(7);
+			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(40, 53, 68, 255));
+
+			length *= NumberOfChunksLoaded/TOTALNUMCHUNKS;
+			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(81, 106, 137, 255));
+
+			// this is done by the game but is unused
+			CFont::SetScale(SCREEN_STRETCH_X(2), SCREEN_STRETCH_Y(2));
+			CFont::SetPropOn();
+			CFont::SetRightJustifyOn();
+			CFont::SetFontStyle(FONT_HEADING);
+
+#ifdef CHATTYSPLASH
+			// my attempt
+			static wchar tmpstr[80];
+			float scale = SCREEN_STRETCH_Y(0.8f);
+			vpos -= 50*scale;
+			CFont::SetScale(scale, scale);
+			CFont::SetPropOn();
+			CFont::SetRightJustifyOff();
+			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetColor(CRGBA(255, 255, 255, 255));
+			AsciiToUnicode(str1, tmpstr);
+			CFont::PrintString(hpos, vpos, tmpstr);
+			vpos += 25*scale;
+			AsciiToUnicode(str2, tmpstr);
+			CFont::PrintString(hpos, vpos, tmpstr);
+#endif
+		}
+
+		CFont::DrawFonts();
+ 		DoRWStuffEndOfFrame();
+	}
+}
+
+void
+ResetLoadingScreenBar(void)
+{
+	NumberOfChunksLoaded = 0.0f;
 }
 
 #include "rwcore.h"
@@ -590,6 +745,7 @@ STARTPATCHES
 	InjectHook(0x48E480, Idle, PATCH_JUMP);
 	InjectHook(0x48E700, FrontendIdle, PATCH_JUMP);
 
+	InjectHook(0x48CF10, DoRWStuffStartOfFrame, PATCH_JUMP);
 	InjectHook(0x48D040, DoRWStuffStartOfFrame_Horizon, PATCH_JUMP);
 	InjectHook(0x48E030, RenderScene, PATCH_JUMP);
 	InjectHook(0x48E080, RenderDebugShit, PATCH_JUMP);
@@ -598,6 +754,11 @@ STARTPATCHES
 	InjectHook(0x48E450, RenderMenus, PATCH_JUMP);
 	InjectHook(0x48D120, DoFade, PATCH_JUMP);
 	InjectHook(0x48E470, Render2dStuffAfterFade, PATCH_JUMP);
+
+	InjectHook(0x48D550, LoadSplash, PATCH_JUMP);
+	InjectHook(0x48D670, DestroySplashScreen, PATCH_JUMP);
+	InjectHook(0x48D770, LoadingScreen, PATCH_JUMP);
+	InjectHook(0x48D760, ResetLoadingScreenBar, PATCH_JUMP);
 	
 	InjectHook(0x48D470, PluginAttach, PATCH_JUMP);
 	InjectHook(0x48D520, Initialise3D, PATCH_JUMP);
