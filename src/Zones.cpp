@@ -360,9 +360,11 @@ CTheZones::GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info)
 	else{
 		if(CClock::GetIsTimeInRange(19, 22)){
 			n = (CClock::GetHours() - 19) / 3.0f;
+			assert(n >= 0.0f && n <= 1.0f);
 			d = n - 1.0f;
 		}else{
 			d = (CClock::GetHours() - 5) / 3.0f;
+			assert(d >= 0.0f && d <= 1.0f);
 			n = d - 1.0f;
 		}
 		info->carDensity = day->carDensity * d + night->carDensity * n;
@@ -399,6 +401,24 @@ CTheZones::GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info)
 		info->pedGroup = day->pedGroup;
 	else
 		info->pedGroup = night->pedGroup;
+
+	assert(info->carDensity >= 0);
+	assert(info->carThreshold[0] >= 0);
+	assert(info->carThreshold[1] >= 0);
+	assert(info->carThreshold[2] >= 0);
+	assert(info->carThreshold[3] >= 0);
+	assert(info->carThreshold[4] >= 0);
+	assert(info->carThreshold[5] >= 0);
+	assert(info->copThreshold >= 0);
+	assert(info->gangThreshold[0] >= 0);
+	assert(info->gangThreshold[1] >= 0);
+	assert(info->gangThreshold[2] >= 0);
+	assert(info->gangThreshold[3] >= 0);
+	assert(info->gangThreshold[4] >= 0);
+	assert(info->gangThreshold[5] >= 0);
+	assert(info->gangThreshold[6] >= 0);
+	assert(info->gangThreshold[7] >= 0);
+	assert(info->gangThreshold[8] >= 0);
 }
 
 // BUG: there might be a bug somewhere in there that causes

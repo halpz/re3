@@ -111,6 +111,29 @@ delayedPatches10(int a, int b)
 	return RsEventHandler_orig(a, b);
 }
 
+void __declspec(naked) HeadlightsFix()
+{
+	static const float		fMinusOne = -1.0f;
+	_asm
+	{
+		fld		[esp+708h-690h]
+		fcomp	fMinusOne
+		fnstsw	ax
+		and		ah, 5
+		cmp		ah, 1
+		jnz		HeadlightsFix_DontLimit
+		fld		fMinusOne
+		fstp	[esp+708h-690h]
+
+HeadlightsFix_DontLimit:
+		fld		[esp+708h-690h]
+		fabs
+		fld		st
+		push		0x5382F2
+		retn
+	}
+}
+
 
 void
 patch()
@@ -119,6 +142,10 @@ patch()
 
 	Patch<float>(0x46BC61+6, 1.0f);	// car distance
 	InjectHook(0x59E460, printf, PATCH_JUMP);
+
+	// stolen from silentpatch (sorry)
+	Patch<WORD>(0x5382BF, 0x0EEB);
+	InjectHook(0x5382EC, HeadlightsFix, PATCH_JUMP);
 
 	InterceptCall(&open_script_orig, open_script, 0x438869);
 
