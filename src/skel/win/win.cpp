@@ -130,11 +130,12 @@ WRAPPER HRESULT _InputInitialise() { EAXJMP(0x5830D0); }
 WRAPPER void _InputShutdown() { EAXJMP(0x583910); }
 WRAPPER HRESULT _InputInitialiseMouse() { EAXJMP(0x583110); }
 WRAPPER void _InputInitialiseJoys() { EAXJMP(0x583580); }
-WRAPPER void LoadingScreen(char const *msg1, char const *msg2, char const *screen) { EAXJMP(0x48D770); }
 WRAPPER Bool InitialiseGame(void) { EAXJMP(0x48E7E0); }
 WRAPPER const Char *GetLevelSplashScreen(Int32 number) { EAXJMP(0x48D750); }
-WRAPPER CSprite2d *LoadSplash(const char *name) { EAXJMP(0x48D550); }
 //
+
+void LoadingScreen(char const *msg1, char const *msg2, char const *screen);
+CSprite2d *LoadSplash(const char *name);
 
 void InitialiseLanguage();
 RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode);
