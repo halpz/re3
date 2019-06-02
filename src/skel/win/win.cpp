@@ -3,6 +3,7 @@
 #define DIRECTINPUT_VERSION 0x0800
 #define WM_GRAPHNOTIFY  WM_USER+13
 
+#include <winerror.h>
 #include <windows.h>
 #include <mmsystem.h>
 #include <shellapi.h>
@@ -17,12 +18,14 @@
 
 #pragma warning( push )
 #pragma warning( disable : 4005)
+#include <d3d8.h>
 #include <ddraw.h>
 #include <dinput.h>
 #include <DShow.h>
-//#include <dmusici.h>
-#pragma warning( pop ) 
+#pragma warning( pop )
 
+#pragma comment( lib, "d3d8.lib" )
+#pragma comment( lib, "ddraw.lib" )
 #pragma comment( lib, "Winmm.lib" )
 #pragma comment( lib, "dxguid.lib" )
 #pragma comment( lib, "strmiids.lib" )
@@ -40,15 +43,24 @@
 #define MAX_SUBSYSTEMS      (16)
 
 
-static RwBool       ForegroundApp = TRUE;
-static RwBool       RwInitialised = FALSE;
+//static RwBool       ForegroundApp = TRUE;
+static RwBool       &ForegroundApp = *(RwBool*)0x060F000;
+
+//static RwBool       RwInitialised = FALSE;
+static RwBool       &RwInitialised = *(RwBool*)0x885B88;
+
 static RwSubSystemInfo GsubSysInfo[MAX_SUBSYSTEMS];
 static RwInt32      GnumSubSystems = 0;
 static RwInt32      GcurSel = 0, GcurSelVM = 0;
 
-static RwBool startupDeactivate;
-static RwBool useDefault;
-static RwBool defaultFullscreenRes = TRUE;
+//static RwBool startupDeactivate;
+static RwBool &startupDeactivate = *(RwBool*)0x8E2878;
+
+//static RwBool useDefault;
+static RwBool &useDefault = *(RwBool*)0x6510D4;
+
+//static RwBool defaultFullscreenRes = TRUE;
+static RwBool &defaultFullscreenRes = *(RwBool*)0x60EFFC;
 
 /* Class name for the MS Window's window class. */
 
@@ -84,9 +96,7 @@ static psGlobalType &PsGlobal = *(psGlobalType*)0x72CF60;
 
 #define SAFE_RELEASE(x) { if (x) x->Release(); x = NULL; }
 #define JIF(x) if (FAILED(hr=(x))) \
-	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return hr;}
-	
- 
+	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return;}
 
 #include "common.h"
 #include "patcher.h"
@@ -124,10 +134,6 @@ DWORD &_dwOperatingSystemVersion = *(DWORD*)0x70F290;
 
 RwUInt32 &gGameState = *(RwUInt32*)0x8F5838;
 
-//
-WRAPPER RwUInt32 GetBestRefreshRate(RwUInt32 width, RwUInt32 height, RwUInt32 depth) { EAXJMP(0x581CB0); }
-WRAPPER HRESULT _GetVideoMemInfo(DWORD *total, DWORD *avaible) { EAXJMP(0x580F30); }
-
 WRAPPER BOOL _InputTranslateKey(RsKeyCodes *rs, DWORD flag, UINT key) { EAXJMP(0x583A20); }
 WRAPPER void _InputTranslateShiftKeyUpDown(RsKeyCodes *rs) { EAXJMP(0x583DC0); }
 WRAPPER HRESULT _InputInitialise() { EAXJMP(0x5830D0); }
@@ -143,7 +149,7 @@ CSprite2d *LoadSplash(const char *name);
 
 void InitialiseLanguage();
 RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode);
-HRESULT CenterVideo(void);
+void CenterVideo(void);
 void CloseClip(void);
 
 /**/
@@ -368,8 +374,25 @@ InitInstance(HANDLE instance)
 						(HWND)NULL, (HMENU)NULL, (HINSTANCE)instance, NULL);
 }
 
-_TODO("")
-//_GetVideoMemInfo	0x580F30
+void _GetVideoMemInfo(LPDWORD total, LPDWORD avaible)
+{
+	HRESULT hr;
+	LPDIRECTDRAW7 pDD7;
+	
+	hr = DirectDrawCreateEx(NULL, (VOID**)&pDD7, IID_IDirectDraw7, NULL);
+	
+	if ( FAILED(hr) )
+		return;
+	
+	DDSCAPS2 caps;
+	
+	ZeroMemory(&caps, sizeof(DDSCAPS2));
+	caps.dwCaps = DDSCAPS_VIDEOMEMORY;
+	
+	pDD7->GetAvailableVidMem(&caps, total, avaible);
+	
+	pDD7->Release();
+}
 
 /*
  *****************************************************************************
@@ -597,6 +620,7 @@ psInitialise(void)
 	FrontEndMenuManager.LoadSettings();
 	
 	gGameState = GS_START_UP;
+	TRACE("gGameState = GS_START_UP");
 	
 	_psPrintCpuInfo();
 	
@@ -809,9 +833,11 @@ void _psSelectScreenVM(RwInt32 videoMode)
 /*
  *****************************************************************************
  */
-HRESULT WaitForState(FILTER_STATE State)
+void WaitForState(FILTER_STATE State)
 {
 	HRESULT hr;
+	
+	ASSERT(pMC != NULL);
 	
 	// Make sure we have switched to the required state
 	LONG   lfs;
@@ -819,45 +845,51 @@ HRESULT WaitForState(FILTER_STATE State)
 	{
 		hr = pMC->GetState(10, &lfs);
 	} while (State != lfs);
-	
-	return hr;
 }
 
 /*
  *****************************************************************************
  */
-HRESULT HandleGraphEvent(void)
+void HandleGraphEvent(void)
 {
 	LONG evCode, evParam1, evParam2;
 	HRESULT hr=S_OK;
+	
+	ASSERT(pME != NULL);
 
 	// Process all queued events
-	while(SUCCEEDED(pME->GetEvent(&evCode, (LONG_PTR *) &evParam1,
-					(LONG_PTR *) &evParam2, 0)))
+	while (SUCCEEDED(pME->GetEvent(&evCode, (LONG_PTR *)&evParam1,
+		(LONG_PTR *)&evParam2, 0)))
 	{
 		// Free memory associated with callback, since we're not using it
 		hr = pME->FreeEventParams(evCode, evParam1, evParam2);
 
 		// If this is the end of the clip, reset to beginning
-		if(EC_COMPLETE == evCode)
+		if (EC_COMPLETE == evCode)
 		{
-			switch ( gGameState )
+			switch (gGameState)
 			{
 				case GS_LOGO_MPEG:
+				{
 					gGameState = GS_INIT_INTRO_MPEG;
+					TRACE("gGameState = GS_INIT_INTRO_MPEG");
 					break;
+				}
 				case GS_INTRO_MPEG:
+				{
 					gGameState = GS_INIT_ONCE;
+					TRACE("gGameState = GS_INIT_ONCE");
 					break;
+				}
 				default:
+				{
 					break;
+				}
 			}
 
 			pME->SetNotifyWindow((OAHWND)NULL, 0, 0);
 		}
 	}
-
-	return hr;
 }
 
 /*
@@ -1066,6 +1098,8 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 				case GS_LOGO_MPEG:
 				case GS_INTRO_MPEG:
 				{
+					ASSERT(pMC != NULL);
+					
 					LONG state;
 					pMC->GetState(10, &state);
 					
@@ -1209,9 +1243,52 @@ RwBool IsForegroundApp()
 	return !!ForegroundApp;
 }
 
-_TODO("")
-//GetBestRefreshRate(uint,uint,uint) 00581CB0
+UINT GetBestRefreshRate(UINT width, UINT height, UINT depth)
+{
+	LPDIRECT3D8 d3d = Direct3DCreate8(D3D_SDK_VERSION);
+	
+	ASSERT(d3d != NULL);
+	
+	INT refreshRate = -1;
+	D3DFORMAT format;
 
+	if ( depth == 32 )
+		format = D3DFMT_X8R8G8B8;
+	else if ( depth == 24 )
+		format = D3DFMT_R8G8B8;
+	else
+		format = D3DFMT_R5G6B5;
+	
+	UINT modeCount = d3d->GetAdapterModeCount(GcurSel);
+	
+	for ( UINT i = 0; i < modeCount; i++ )
+	{
+		D3DDISPLAYMODE mode;
+		
+		d3d->EnumAdapterModes(GcurSel, i, &mode);
+		
+		if ( mode.Width == width && mode.Height == height && mode.Format == format )
+		{
+			if ( mode.RefreshRate == 0 )
+				return 0;
+#pragma warning( push )
+#pragma warning( disable : 4018)
+
+			if ( mode.RefreshRate < refreshRate && mode.RefreshRate >= 60 )
+				refreshRate = mode.RefreshRate;
+#pragma warning( pop ) 
+		}
+	}
+	
+#ifdef FIX_BUGS
+	d3d->Release();
+#endif
+	
+	if ( refreshRate == -1 )
+		return -1;
+
+	return refreshRate;
+}
 
 /*
  *****************************************************************************
@@ -1298,12 +1375,12 @@ psSelectDevice()
 	{
 		debug("%dx%dx%d", vm.width, vm.height, vm.depth);
 		
-		RwUInt32 refresh = GetBestRefreshRate(vm.width, vm.height, vm.depth);
+		UINT refresh = GetBestRefreshRate(vm.width, vm.height, vm.depth);
 		
-		if ( refresh != (RwUInt32)-1 )
+		if ( refresh != (UINT)-1 )
 		{
 			debug("refresh %d", refresh);
-			RwD3D8EngineSetRefreshRate(refresh);
+			RwD3D8EngineSetRefreshRate((RwUInt32)refresh);
 		}
 	}
 	
@@ -1553,11 +1630,13 @@ void InitialiseLanguage()
 /*
  *****************************************************************************
  */
-HRESULT CenterVideo(void)
+void CenterVideo(void)
 {
 	HRESULT hr = S_OK;
 	RECT rect;
 
+	ASSERT(pVW != NULL);
+	
 	GetClientRect(PSGLOBAL(window), &rect);
 
 	JIF(pVW->SetWindowPosition(rect.left, rect.top, rect.right, rect.bottom));
@@ -1565,14 +1644,12 @@ HRESULT CenterVideo(void)
 	JIF(pVW->put_MessageDrain((OAHWND) PSGLOBAL(window)));
 
 	SetFocus(PSGLOBAL(window));
-
-	return hr;
 }
 
 /*
  *****************************************************************************
  */
-HRESULT PlayMovieInWindow(int cmdShow, LPTSTR szFile)
+void PlayMovieInWindow(int cmdShow, LPTSTR szFile)
 {
 	WCHAR wFileName[256];
 	HRESULT hr;
@@ -1616,11 +1693,14 @@ HRESULT PlayMovieInWindow(int cmdShow, LPTSTR szFile)
 
 		SetFocus(PSGLOBAL(window));
 	}
+	
+	ASSERT(pGB != NULL);
+	ASSERT(pVW != NULL);
+	ASSERT(pME != NULL);
+	ASSERT(pMC != NULL);
 
 	if(FAILED(hr))
 		CloseClip();
-
-	return hr;
 }
 
 /*
@@ -1825,7 +1905,7 @@ _WinMain(HINSTANCE instance,
 	}
 	
 	SetErrorMode(SEM_FAILCRITICALERRORS);
-	
+
 	while ( TRUE )
 	{
 		RwInitialised = TRUE;
@@ -1860,12 +1940,13 @@ _WinMain(HINSTANCE instance,
 				}
 			}
 			else if( ForegroundApp )
-			{				
+			{
 				switch ( gGameState )
 				{
 					case GS_START_UP:
 					{
 						gGameState = GS_INIT_LOGO_MPEG;
+						TRACE("gGameState = GS_INIT_LOGO_MPEG");
 						break;
 					}
 					
@@ -1874,13 +1955,15 @@ _WinMain(HINSTANCE instance,
 						if ( !startupDeactivate )
 							PlayMovieInWindow(cmdShow, "movies\\Logo.mpg");
 						gGameState = GS_LOGO_MPEG;
+						TRACE("gGameState = GS_LOGO_MPEG;");
 						break;
 					}
 					
 					case GS_LOGO_MPEG:
 					{
 						CPad::UpdatePads();
-						if ( startupDeactivate || ControlsManager.GetJoyButtonJustDown() )
+
+						if ( startupDeactivate || ControlsManager.GetJoyButtonJustDown() != 0 )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetLeftMouseJustDown() )
 							++gGameState;
@@ -1892,6 +1975,8 @@ _WinMain(HINSTANCE instance,
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetTabJustDown() )
 							++gGameState;
+
+						break;
 					}
 					
 					case GS_INIT_INTRO_MPEG:
@@ -1906,13 +1991,15 @@ _WinMain(HINSTANCE instance,
 							PlayMovieInWindow(cmdShow, "movies\\GTAtitles.mpg");
 						
 						gGameState = GS_INTRO_MPEG;
+						TRACE("gGameState = GS_INTRO_MPEG;");
 						break;
 					}
 					
 					case GS_INTRO_MPEG:
 					{
 						CPad::UpdatePads();
-						if ( startupDeactivate || ControlsManager.GetJoyButtonJustDown() )
+
+						if ( startupDeactivate || ControlsManager.GetJoyButtonJustDown() != 0 )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetLeftMouseJustDown() )
 							++gGameState;
@@ -1924,6 +2011,8 @@ _WinMain(HINSTANCE instance,
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetTabJustDown() )
 							++gGameState;
+
+						break;
 					}
 					
 					case GS_INIT_ONCE:
@@ -1937,6 +2026,7 @@ _WinMain(HINSTANCE instance,
 							RsGlobal.quit = TRUE;
 						
 						gGameState = GS_INIT_FRONTEND;
+						TRACE("gGameState = GS_INIT_FRONTEND;");
 						break;
 					}
 					
@@ -1950,12 +2040,13 @@ _WinMain(HINSTANCE instance,
 						
 						if ( defaultFullscreenRes )
 						{
-							defaultFullscreenRes = 0;
+							defaultFullscreenRes = FALSE;
 							FrontEndMenuManager.m_nPrefsVideoMode = GcurSelVM;
 							FrontEndMenuManager.m_nDisplayVideoMode = GcurSelVM;
 						}
 						
 						gGameState = GS_FRONTEND;
+						TRACE("gGameState = GS_FRONTEND;");
 						break;
 					}
 					
@@ -1967,13 +2058,17 @@ _WinMain(HINSTANCE instance,
 							RsEventHandler(rsFRONTENDIDLE, NULL);
 
 						if ( !FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bLoadingSavedGame )
+						{
 							gGameState = GS_INIT_PLAYING_GAME;
+							TRACE("gGameState = GS_INIT_PLAYING_GAME;");
+						}
 
 						if ( FrontEndMenuManager.m_bLoadingSavedGame )
 						{
 							InitialiseGame();
 							FrontEndMenuManager.m_bGameNotLoaded = false;
 							gGameState = GS_PLAYING_GAME;
+							TRACE("gGameState = GS_PLAYING_GAME;");
 						}
 						break;
 					}
@@ -1983,6 +2078,7 @@ _WinMain(HINSTANCE instance,
 						InitialiseGame();
 						FrontEndMenuManager.m_bGameNotLoaded = false;
 						gGameState = GS_PLAYING_GAME;
+						TRACE("gGameState = GS_PLAYING_GAME;");
 						break;
 					}
 					
@@ -2044,9 +2140,15 @@ _WinMain(HINSTANCE instance,
 			CTimer::Stop();
 			
 			if ( FrontEndMenuManager.m_bFirstTime == true )
+			{
 				gGameState = GS_INIT_FRONTEND;
+				TRACE("gGameState = GS_INIT_FRONTEND;");
+			}
 			else
+			{
 				gGameState = GS_INIT_PLAYING_GAME;
+				TRACE("gGameState = GS_INIT_PLAYING_GAME;");
+			}
 		}
 		
 		FrontEndMenuManager.m_bFirstTime = false;
@@ -2126,6 +2228,7 @@ STARTPATCHES
 	InjectHook(0x580E30, psNativeTextureSupport, PATCH_JUMP);
 	InjectHook(0x580E40, InitApplication, PATCH_JUMP);
 	InjectHook(0x580EB0, InitInstance, PATCH_JUMP);
+	InjectHook(0x580F30, _GetVideoMemInfo, PATCH_JUMP);
 	InjectHook(0x580FA0, GetDXVersion, PATCH_JUMP);
 	InjectHook(0x5810C0, _psGetCpuVendr, PATCH_JUMP);
 	InjectHook(0x5810E0, _psGetCpuFeatures, PATCH_JUMP);
@@ -2141,6 +2244,7 @@ STARTPATCHES
 	InjectHook(0x5816E0, HandleGraphEvent, PATCH_JUMP);
 	InjectHook(0x581790, MainWndProc, PATCH_JUMP);
 	InjectHook(0x581C90, IsForegroundApp, PATCH_JUMP);
+	InjectHook(0x581CB0, GetBestRefreshRate, PATCH_JUMP);
 	InjectHook(0x581D80, psSelectDevice, PATCH_JUMP);
 	InjectHook(0x581F90, _psSetVideoMode, PATCH_JUMP);
 	InjectHook(0x582030, CommandLineToArgv, PATCH_JUMP);
