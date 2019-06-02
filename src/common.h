@@ -133,7 +133,8 @@ inline float sq(float x) { return x*x; }
 int myrand(void);
 void mysrand(unsigned int seed);
 
-#define debug printf
+#define debug(f, ...) printf("[DBG]: " f "\n", __VA_ARGS__)
+#define DEV(f, ...) printf("[DEV]: " f "", __VA_ARGS__)
 #define ASSERT assert
 
 #define _TODO(x)      

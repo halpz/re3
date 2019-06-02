@@ -73,11 +73,41 @@ public:
 };
 static_assert(sizeof(CControllerState) == 0x2A, "CControllerState: error");
 
-struct CMouseControllerState
+class CMouseControllerState
 {
-	uint32 btns;	// bit 0-2 button 1-3
-	int x, y;
+public:
+	//uint32 btns;	// bit 0-2 button 1-3
+
+	UInt8 LMB;
+	UInt8 RMB;
+	UInt8 MMB;
+	UInt8 WHEELUP;
+	UInt8 WHEELDN;
+	UInt8 MXB1;
+	UInt8 MXB2;
+	UInt8 _pad0;
+	
+	Float x, y;
+	
+	CMouseControllerState();
+	void Clear();
 };
+
+VALIDATE_SIZE(CMouseControllerState, 0x10);
+
+class CMousePointerStateHelper
+{
+public:
+	Bool bInvertHorizontally;
+	Bool bInvertVertically;
+	
+	CMouseControllerState GetMouseSetUp();
+};
+
+VALIDATE_SIZE(CMousePointerStateHelper, 0x2);
+
+extern CMousePointerStateHelper &MousePointerStateHelper;
+
 
 class CKeyboardState
 {
@@ -179,11 +209,25 @@ public:
 	bool GetLookLeft(void);
 	bool GetLookRight(void);
 
+	static void StopPadsShaking(void);
+	static void ResetCheats(void);
 	static void UpdatePads(void);
 	static CPad *GetPad(int n) { return &Pads[n]; }
 	static void PrintErrorMessage(void);
 	
 	void AddToPCCheatString(Char c);
+	void Clear(Bool unk);
+	
+	//
+	
+	inline Bool GetLeftMouseJustDown() { return !!(NewMouseControllerState.LMB && !OldMouseControllerState.LMB); }
+	
+	inline Bool GetEnterJustDown() { return !!(NewKeyState.ENTER && !OldKeyState.ENTER); }
+	inline Bool GetExtEnterJustDown() { return !!(NewKeyState.EXTENTER && !OldKeyState.EXTENTER); }
+	inline Bool GetCharJustDown(Char c) { return !!(NewKeyState.VK_KEYS[c] && !OldKeyState.VK_KEYS[c]); }
+	inline Bool GetLeftAltJustDown() { return !!(NewKeyState.LALT && !OldKeyState.LALT); }
+	inline Bool GetRightAltJustDown() { return !!(NewKeyState.RALT && !OldKeyState.RALT); }
+	inline Bool GetTabJustDown() { return !!(NewKeyState.TAB && !OldKeyState.TAB); }
 };
 static_assert(sizeof(CPad) == 0xFC, "CPad: error");
 

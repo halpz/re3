@@ -83,12 +83,21 @@ public:
 	int m_nCurrSaveSlot;
 	int m_nScreenChangeDelayTimer;
 
+	static int &OS_Language;
 	static int &m_PrefsBrightness;
 	static int &m_PrefsLanguage;
 	static bool &m_PrefsUseWideScreen;
+	static Bool &m_PrefsVsync;
+	static Bool &m_PrefsAllowNastyGame;
+	static Bool &m_bStartUpFrontEndRequested;
+	static Bool &m_PrefsFrameLimiter;
 
 	void Process(void);
 	void DrawFrontEnd(void);
+	void UnloadTextures(void);
+	void LoadAllTextures(void);
+	void LoadSettings(void);
+	void WaitForUserCD(void);
 };
 static_assert(sizeof(CMenuManager) == 0x564, "CMenuManager: error");
 

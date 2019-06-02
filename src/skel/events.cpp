@@ -3,7 +3,8 @@
 #include "events.h"
 
 //#include "main.h"
-
+	#define DIRECTINPUT_VERSION 0x0800
+	#include <dinput.h>
 #include "common.h"
 #include "Pad.h"
 #include "ControllerConfig.h"
@@ -350,7 +351,7 @@ HandleKeyDown(RsKeyStatus *keyStatus)
 		}
 	}
 	
-    return rsEVENTPROCESSED;
+	return rsEVENTPROCESSED;
 }
 
 
@@ -688,7 +689,7 @@ HandleKeyUp(RsKeyStatus *keyStatus)
 		}
 	}
 	
-    return rsEVENTPROCESSED;
+	return rsEVENTPROCESSED;
 }
 
 
@@ -698,26 +699,26 @@ HandleKeyUp(RsKeyStatus *keyStatus)
 static RsEventStatus 
 KeyboardHandler(RsEvent event, void *param)
 {
-    /*
-     * ...then the application events, if necessary...
-     */
-    switch( event )
-    {
-        case rsKEYDOWN:
-        {
-            return HandleKeyDown((RsKeyStatus *)param);
-        }
+	/*
+	 * ...then the application events, if necessary...
+	 */
+	switch( event )
+	{
+		case rsKEYDOWN:
+		{
+			return HandleKeyDown((RsKeyStatus *)param);
+		}
 
-        case rsKEYUP:
-        {
-            return HandleKeyUp((RsKeyStatus *)param);
-        }
+		case rsKEYUP:
+		{
+			return HandleKeyUp((RsKeyStatus *)param);
+		}
 
-        default:
-        {
-            return rsEVENTNOTPROCESSED;
-        }
-    }
+		default:
+		{
+			return rsEVENTNOTPROCESSED;
+		}
+	}
 }
 
 /*
@@ -791,7 +792,7 @@ HandlePadButtonUp(RsPadButtonStatus *padButtonStatus)
 			ControlsManager.AffectControllerStateOn_ButtonUp(btn, JOYSTICK);
 	}
 
-    return rsEVENTPROCESSED;
+	return rsEVENTPROCESSED;
 }
 
 /*
@@ -800,23 +801,23 @@ HandlePadButtonUp(RsPadButtonStatus *padButtonStatus)
 static RsEventStatus 
 PadHandler(RsEvent event, void *param)
 {
-    switch( event )
-    {
-        case rsPADBUTTONDOWN:
-        {
-            return HandlePadButtonDown((RsPadButtonStatus *)param);
-        }
+	switch( event )
+	{
+		case rsPADBUTTONDOWN:
+		{
+			return HandlePadButtonDown((RsPadButtonStatus *)param);
+		}
 
-        case rsPADBUTTONUP:
-        {
-            return HandlePadButtonUp((RsPadButtonStatus *)param);
-        }
+		case rsPADBUTTONUP:
+		{
+			return HandlePadButtonUp((RsPadButtonStatus *)param);
+		}
 
-        default:
-        {
-            return rsEVENTNOTPROCESSED;
-        }
-    }
+		default:
+		{
+			return rsEVENTNOTPROCESSED;
+		}
+	}
 }
 
 
@@ -826,11 +827,11 @@ PadHandler(RsEvent event, void *param)
 RwBool
 AttachInputDevices(void)
 {
-    RsInputDeviceAttach(rsKEYBOARD, KeyboardHandler);
+	RsInputDeviceAttach(rsKEYBOARD, KeyboardHandler);
 
-    RsInputDeviceAttach(rsPAD, PadHandler);
+	RsInputDeviceAttach(rsPAD, PadHandler);
 
-    return TRUE;
+	return TRUE;
 }
 
 

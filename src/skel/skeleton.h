@@ -24,17 +24,17 @@ extern "C"
 
 enum RsInputDeviceType
 {
-    rsKEYBOARD,
-    rsMOUSE,
-    rsPAD
+	rsKEYBOARD,
+	rsMOUSE,
+	rsPAD
 };
 typedef enum RsInputDeviceType RsInputDeviceType;
 
 enum RsEventStatus
 {
-    rsEVENTERROR,
-    rsEVENTPROCESSED,
-    rsEVENTNOTPROCESSED
+	rsEVENTERROR,
+	rsEVENTPROCESSED,
+	rsEVENTNOTPROCESSED
 };
 typedef enum RsEventStatus RsEventStatus;
 
@@ -88,27 +88,27 @@ typedef RsEventStatus (*RsInputEventHandler)(RsEvent event, void *param);
 typedef struct RsInputDevice RsInputDevice;
 struct RsInputDevice
 {
-    RsInputDeviceType inputDeviceType;
-    RwBool used;
-    RsInputEventHandler inputEventHandler;
+	RsInputDeviceType inputDeviceType;
+	RwBool used;
+	RsInputEventHandler inputEventHandler;
 };
 
 typedef struct RsGlobalType RsGlobalType;
 struct RsGlobalType
 {
-    const RwChar *appName;
-    RwInt32 width;
-    RwInt32 height;
-    RwInt32 maximumWidth;
-    RwInt32 maximumHeight;
+	const RwChar *appName;
+	RwInt32 width;
+	RwInt32 height;
+	RwInt32 maximumWidth;
+	RwInt32 maximumHeight;
 	RwInt32 maxFPS;
-    RwBool  quit;
+	RwBool  quit;
 
-    void   *ps; /* platform specific data */
+	void   *ps; /* platform specific data */
 
-    RsInputDevice keyboard;
-    RsInputDevice mouse;
-    RsInputDevice pad;
+	RsInputDevice keyboard;
+	RsInputDevice mouse;
+	RsInputDevice pad;
 };
 
 enum RsKeyCodes
@@ -183,14 +183,14 @@ typedef enum RsKeyCodes RsKeyCodes;
 typedef struct RsKeyStatus RsKeyStatus;
 struct RsKeyStatus
 {
-    RwInt32     keyCharCode;
+	RwInt32     keyCharCode;
 };
 
 typedef struct RsPadButtonStatus RsPadButtonStatus;
 struct RsPadButtonStatus
 {
-    RwInt32     padID;
-    RwUInt32    padButtons;
+	RwInt32     padID;
+	RwUInt32    padButtons;
 };
 
 enum RsPadButtons
@@ -203,14 +203,14 @@ enum RsPadButtons
 	rsPADBUTTON4    = 4,
 	
 	rsPADBUTTON5    = 5,
-    rsPADBUTTON6    = 6,
-    rsPADBUTTON7    = 7,
-    rsPADBUTTON8    = 8,
+	rsPADBUTTON6    = 6,
+	rsPADBUTTON7    = 7,
+	rsPADBUTTON8    = 8,
 	
 	rsPADSELECT     = 9,
 	
 	rsPADBUTTONA1   = 10,
-    rsPADBUTTONA2   = 11,
+	rsPADBUTTONA2   = 11,
 	
 	rsPADSTART      = 12,
 	
@@ -245,7 +245,7 @@ RsSelectDevice(void);
 
 extern RwBool                   
 RsInputDeviceAttach(RsInputDeviceType inputDevice,
-                    RsInputEventHandler inputEventHandler);
+					RsInputEventHandler inputEventHandler);
 
 extern RwUInt32                 
 RsTimer(void);

@@ -14,10 +14,17 @@ public:
 	static int &currLevel;
 	static bool &bDemoMode;
 	static bool &nastyGame;
+	static bool &frenchGame;
+	static bool &germanGame;
+	static bool &noProstitutes;
 
 	static void Process(void);
 	static Bool InitialiseOnceBeforeRW(void);
 	static Bool InitialiseRenderWare(void);
 	static void ShutdownRenderWare(void);
 	static void FinalShutdown(void);
+	static void ShutDown(void);
+	static void ShutDownForRestart(void);
+	static void InitialiseWhenRestarting(void);
+	static Bool InitialiseOnceAfterRW(void);
 };
