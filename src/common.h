@@ -125,7 +125,7 @@ inline float sq(float x) { return x*x; }
 #define DEGTORAD(x) ((x) * PI / 180.0f)
 #define RADTODEG(x) ((x) * 180.0f / PI)
 
-#if USE_PS2_RAND == TRUE
+#ifdef USE_PS2_RAND
 #define MYRAND_MAX		65535
 #else
 #define MYRAND_MAX		32767

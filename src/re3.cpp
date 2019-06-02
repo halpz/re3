@@ -21,7 +21,7 @@ WRAPPER void gtadelete(void *p) { EAXJMP(0x5A07E0); }
 void *operator new(size_t sz) { return gtanew(sz); }
 void operator delete(void *ptr) noexcept { gtadelete(ptr); }
 
-#if USE_PS2_RAND == TRUE
+#ifdef USE_PS2_RAND
 unsigned __int64 myrand_seed = 1;
 #else
 unsigned long int myrand_seed = 1;
@@ -30,7 +30,7 @@ unsigned long int myrand_seed = 1;
 int
 myrand(void)
 {
-#if USE_PS2_RAND == TRUE
+#ifdef USE_PS2_RAND
 	// Use our own implementation of rand, stolen from PS2
 	myrand_seed = 0x5851F42D4C957F2D * myrand_seed + 1;
 	return ((myrand_seed >> 32) & 0x7FFFFFFF);

@@ -1906,6 +1906,17 @@ _WinMain(HINSTANCE instance,
 	
 	SetErrorMode(SEM_FAILCRITICALERRORS);
 
+
+#ifdef NO_MOVIES
+	gGameState = GS_INIT_FRONTEND;
+	TRACE("gGameState = GS_INIT_FRONTEND");
+	
+	LoadingScreen(NULL, NULL, "loadsc0");
+	if ( !CGame::InitialiseOnceAfterRW() )
+		RsGlobal.quit = TRUE;
+#endif				
+						
+	
 	while ( TRUE )
 	{
 		RwInitialised = TRUE;

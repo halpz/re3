@@ -57,7 +57,10 @@ enum Config {
 	NUMPOINTLIGHTS = 32
 };
 
-#define GTA3_1_1_PATCH FALSE
-#define USE_PS2_RAND FALSE
+#define GTA3_1_1_PATCH
+#define USE_PS2_RAND
 #define RANDOMSPLASH
 #define CHATTYSPLASH
+//#define FIX_BUGS
+//#define NO_CDCHECK
+#define NO_MOVIES
