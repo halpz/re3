@@ -73,7 +73,9 @@ typedef struct
 }
 psGlobalType;
 
-static psGlobalType PsGlobal;
+//static psGlobalType PsGlobal;
+static psGlobalType &PsGlobal = *(psGlobalType*)0x72CF60;
+
 
 #define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
 
@@ -98,6 +100,8 @@ static psGlobalType PsGlobal;
 #include "Game.h"
 #include "PCSave.h"
 #include "Sprite2D.h"
+
+VALIDATE_SIZE(psGlobalType, 0x28);
 
 // DirectShow interfaces
 IGraphBuilder *pGB = NULL;
@@ -574,8 +578,6 @@ RwBool
 psInitialise(void)
 {
 	PsGlobal.lastMousePos.x = PsGlobal.lastMousePos.y = 0.0;
-
-	PsGlobal.fullScreen = FALSE;
 
 	RsGlobal.ps = &PsGlobal;
 	
