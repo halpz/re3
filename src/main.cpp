@@ -52,9 +52,6 @@
 #define DEFAULT_ASPECTRATIO (4.0f/3.0f)
 #endif
 
-WRAPPER int psCameraBeginUpdate(RwCamera *camera) { EAXJMP(0x580C70); }
-WRAPPER void psCameraShowRaster(RwCamera *camera) { EAXJMP(0x580CA0); }
-
 WRAPPER void CameraSize(RwCamera *camera, void *rect, float viewWindow, float aspectRatio) { EAXJMP(0x527170); }
 
 WRAPPER RwBool RpAnimBlendPluginAttach() { EAXJMP(0x4052D0); }
@@ -352,7 +349,9 @@ Render2dStuff(void)
 	CPad::PrintErrorMessage();
 	CFont::DrawFonts();
 
+#if 0
 	DebugMenuRender();
+#endif
 }
 
 void
@@ -590,67 +589,67 @@ _TODO("temp, move this includes out of here")
 static RwBool 
 PluginAttach(void)
 {
-    if( !RpWorldPluginAttach() )
-    {
-        printf("Couldn't attach world plugin\n");
-        
-        return FALSE;
-    }
+	if( !RpWorldPluginAttach() )
+	{
+		printf("Couldn't attach world plugin\n");
+		
+		return FALSE;
+	}
 	
 	if( !RpSkinPluginAttach() )
-    {
-        printf("Couldn't attach RpSkin plugin\n");
-        
-        return FALSE;
-    }
+	{
+		printf("Couldn't attach RpSkin plugin\n");
+		
+		return FALSE;
+	}
 	
 	if( !RpHAnimPluginAttach() )
-    {
-        printf("Couldn't attach RpHAnim plugin\n");
-        
-        return FALSE;
-    }
+	{
+		printf("Couldn't attach RpHAnim plugin\n");
+		
+		return FALSE;
+	}
 	
 	if( !NodeNamePluginAttach() )
-    {
-        printf("Couldn't attach node name plugin\n");
-        
-        return FALSE;
-    }
+	{
+		printf("Couldn't attach node name plugin\n");
+		
+		return FALSE;
+	}
 	
 	if( !CVisibilityPlugins::PluginAttach() )
-    {
-        printf("Couldn't attach visibility plugins\n");
-        
-        return FALSE;
-    }
+	{
+		printf("Couldn't attach visibility plugins\n");
+		
+		return FALSE;
+	}
 	
 	if( !RpAnimBlendPluginAttach() )
-    {
-        printf("Couldn't attach RpAnimBlend plugin\n");
-        
-        return FALSE;
-    }
+	{
+		printf("Couldn't attach RpAnimBlend plugin\n");
+		
+		return FALSE;
+	}
 	
 	if( !RpMatFXPluginAttach() )
-    {
-        printf("Couldn't attach RpMatFX plugin\n");
-        
-        return FALSE;
-    }
+	{
+		printf("Couldn't attach RpMatFX plugin\n");
+		
+		return FALSE;
+	}
 
-    return TRUE;
+	return TRUE;
 }
 
 static RwBool 
 Initialise3D(void *param)
 {
-    if (RsRwInitialise(param))
-    {
-        return CGame::InitialiseRenderWare();
-    }
+	if (RsRwInitialise(param))
+	{
+		return CGame::InitialiseRenderWare();
+	}
 
-    return (FALSE);
+	return (FALSE);
 }
 
 
@@ -659,86 +658,86 @@ Terminate3D(void)
 {
 	CGame::ShutdownRenderWare();
 	
-    RsRwTerminate();
+	RsRwTerminate();
 
-    return;
+	return;
 }
 
 RsEventStatus
 AppEventHandler(RsEvent event, void *param)
 {
-    switch( event )
-    {
-        case rsINITIALISE:
-        {
+	switch( event )
+	{
+		case rsINITIALISE:
+		{
 			CGame::InitialiseOnceBeforeRW();
-            return RsInitialise() ? rsEVENTPROCESSED : rsEVENTERROR;
-        }
+			return RsInitialise() ? rsEVENTPROCESSED : rsEVENTERROR;
+		}
 
-        case rsCAMERASIZE:
-        {
-            CameraSize(Scene.camera, param, DEFAULT_VIEWWINDOW, DEFAULT_ASPECTRATIO);
-            
-            return rsEVENTPROCESSED;
-        }
+		case rsCAMERASIZE:
+		{
+			CameraSize(Scene.camera, param, DEFAULT_VIEWWINDOW, DEFAULT_ASPECTRATIO);
+			
+			return rsEVENTPROCESSED;
+		}
 
-        case rsRWINITIALISE:
-        {
-            return Initialise3D(param) ? rsEVENTPROCESSED : rsEVENTERROR;
-        }
+		case rsRWINITIALISE:
+		{
+			return Initialise3D(param) ? rsEVENTPROCESSED : rsEVENTERROR;
+		}
 
-        case rsRWTERMINATE:
-        {
-            Terminate3D();
+		case rsRWTERMINATE:
+		{
+			Terminate3D();
 
-            return rsEVENTPROCESSED;
-        }
+			return rsEVENTPROCESSED;
+		}
 
-        case rsTERMINATE:
-        {
-            CGame::FinalShutdown();
+		case rsTERMINATE:
+		{
+			CGame::FinalShutdown();
 
-            return rsEVENTPROCESSED;
-        }
+			return rsEVENTPROCESSED;
+		}
 
-        case rsPLUGINATTACH:
-        {
-            return PluginAttach() ? rsEVENTPROCESSED : rsEVENTERROR;
-        }
+		case rsPLUGINATTACH:
+		{
+			return PluginAttach() ? rsEVENTPROCESSED : rsEVENTERROR;
+		}
 
-        case rsINPUTDEVICEATTACH:
-        {
-            AttachInputDevices();
+		case rsINPUTDEVICEATTACH:
+		{
+			AttachInputDevices();
 
-            return rsEVENTPROCESSED;
-        }
+			return rsEVENTPROCESSED;
+		}
 
-        case rsIDLE:
-        {
-            Idle(param);
+		case rsIDLE:
+		{
+			Idle(param);
 
-            return rsEVENTPROCESSED;
-        }
+			return rsEVENTPROCESSED;
+		}
 
-        case rsFRONTENDIDLE:
-        {
-            FrontendIdle();
+		case rsFRONTENDIDLE:
+		{
+			FrontendIdle();
 
-            return rsEVENTPROCESSED;
-        }
+			return rsEVENTPROCESSED;
+		}
 
-        case rsACTIVATE:
-        {
-            param ? DMAudio.ReacquireDigitalHandle() : DMAudio.ReleaseDigitalHandle();
+		case rsACTIVATE:
+		{
+			param ? DMAudio.ReacquireDigitalHandle() : DMAudio.ReleaseDigitalHandle();
 
-            return rsEVENTPROCESSED;
-        }
+			return rsEVENTPROCESSED;
+		}
 
-        default:
-        {
-            return rsEVENTNOTPROCESSED;
-        }
-    }
+		default:
+		{
+			return rsEVENTNOTPROCESSED;
+		}
+	}
 }
 
 STARTPATCHES

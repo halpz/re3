@@ -20,7 +20,9 @@ extern RwBool psCameraBeginUpdate(RwCamera *camera);
 
 extern void psMouseSetPos(RwV2d *pos);
 
-extern RwBool psSelectDevice(RwBool useDefault);
+extern RwBool psSelectDevice();
+
+extern RwMemoryFunctions *psGetMemoryFunctions(void);
 
 /* install the platform specific file system */
 extern RwBool psInstallFileSystem(void);

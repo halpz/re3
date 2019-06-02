@@ -16,15 +16,23 @@ float &CTimer::ms_fTimeStepNonClipped = *(float*)0x8E2C4C;
 bool  &CTimer::m_UserPause = *(bool*)0x95CD7C;
 bool  &CTimer::m_CodePause = *(bool*)0x95CDB1;
 
-UInt32 oldPcTimer;
-UInt32 suspendPcTimer;
+//UInt32 oldPcTimer;
+UInt32 &oldPcTimer = *(UInt32*)0x9434F4;
 
-UInt32 _nCyclesPerMS = 1;
+//UInt32 suspendPcTimer;
+UInt32 &suspendPcTimer = *(UInt32*)0x62A308;
 
-LARGE_INTEGER _oldPerfCounter;
-LARGE_INTEGER perfSuspendCounter;
+//UInt32 _nCyclesPerMS = 1;
+UInt32 &_nCyclesPerMS = *(UInt32*)0x5F7610;
 
-UInt32 suspendDepth;
+//LARGE_INTEGER _oldPerfCounter;
+LARGE_INTEGER &_oldPerfCounter = *(LARGE_INTEGER*)0x62A310;
+
+//LARGE_INTEGER perfSuspendCounter;
+LARGE_INTEGER &perfSuspendCounter = *(LARGE_INTEGER*)0x62A318;
+
+//UInt32 suspendDepth;
+UInt32 &suspendDepth = *(UInt32*)0x62A320;
 
 void CTimer::Initialise(void)
 {

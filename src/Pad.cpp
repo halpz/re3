@@ -4,6 +4,8 @@
 
 CPad *CPad::Pads = (CPad*)0x6F0360;
 
+CMousePointerStateHelper &MousePointerStateHelper = *(CMousePointerStateHelper*)0x95CC8C;
+
 CKeyboardState &CPad::OldKeyState = *(CKeyboardState*)0x6F1E70;
 CKeyboardState &CPad::NewKeyState = *(CKeyboardState*)0x6E60D0;
 CKeyboardState &CPad::TempKeyState = *(CKeyboardState*)0x774DE8;
@@ -14,9 +16,12 @@ CMouseControllerState &CPad::PCTempMouseControllerState = *(CMouseControllerStat
 
 Bool &CPad::m_bMapPadOneToPadTwo = *(Bool *)0x95CD48;
 
+WRAPPER void CPad::Clear(Bool unk) { EAXJMP(0x491A10); }
 WRAPPER void CPad::AddToPCCheatString(Char c) { EAXJMP(0x492450); }
 WRAPPER void CPad::UpdatePads(void) { EAXJMP(0x492720); }
 WRAPPER void CPad::PrintErrorMessage(void) { EAXJMP(0x4942B0); }
+WRAPPER void CPad::ResetCheats(void) { EAXJMP(0x494450); }
+WRAPPER void CPad::StopPadsShaking(void) { EAXJMP(0x492F30); }
 
 void
 CControllerState::Clear(void)
@@ -42,6 +47,39 @@ CControllerState::Clear(void)
 	LeftShock = 0;
 	RightShock = 0;
 	NetworkTalk = 0;
+}
+
+CMouseControllerState::CMouseControllerState()
+{
+	LMB = 0;
+	RMB = 0;
+	MMB = 0;
+	WHEELUP = 0;
+	WHEELDN = 0;
+	MXB1 = 0;
+	MXB2 = 0;
+	
+	x = 0.0f;
+	y = 0.0f;
+}
+
+void CMouseControllerState::Clear()
+{
+	LMB = 0;
+	RMB = 0;
+	MMB = 0;
+	WHEELUP = 0;
+	WHEELDN = 0;
+	MXB1 = 0;
+	MXB2 = 0;
+}
+
+CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
+{
+	CMouseControllerState r;
+	((void (__thiscall *)(CMousePointerStateHelper *, CMouseControllerState*))0x491BD0)(this, &r);
+	return r;
+	//EAXJMP(0x491BD0); // yep, this doesn't work here
 }
 
 void CKeyboardState::Clear()

@@ -4,6 +4,7 @@ workspace "re3"
 
 	files { "src/*.*" }
 	files { "src/skel/*.*" }
+	files { "src/skel/win/*.*" }
 	files { "src/math/*.*" }
 	files { "src/modelinfo/*.*" }
 	files { "src/entities/*.*" }
@@ -13,13 +14,18 @@ workspace "re3"
 	files { "src/audio/*.*" }
 
 	includedirs { "src" }
+	includedirs { "src/skel/" }
+	includedirs { "src/skel/win" }
 	includedirs { "src/modelinfo" }
 	includedirs { "src/entities" }
 	includedirs { "src/weapons" }
 	includedirs { "src/render" }
 	includedirs { "src/control" }
 	includedirs { "src/audio" }
+	includedirs { "dxsdk/include" }
 	includedirs { "rwsdk/include/d3d8" }
+	
+	libdirs { "dxsdk/lib" }
 
 project "re3"
 	kind "SharedLib"
