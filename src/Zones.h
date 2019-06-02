@@ -33,10 +33,10 @@ class CZoneInfo
 {
 public:
 	// Car data
-	uint16 carDensity;
-	uint16 carThreshold[6];
-	uint16 copThreshold;
-	uint16 gangThreshold[9];
+	int16 carDensity;
+	int16 carThreshold[6];
+	int16 copThreshold;
+	int16 gangThreshold[9];
 
 	// Ped data
 	uint16 pedDensity;

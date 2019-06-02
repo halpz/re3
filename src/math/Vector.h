@@ -25,6 +25,7 @@ public:
 	float Magnitude(void) const { return sqrt(x*x + y*y + z*z); }
 	float MagnitudeSqr(void) const { return x*x + y*y + z*z; }
 	float Magnitude2D(void) const { return sqrt(x*x + y*y); }
+	float MagnitudeSqr2D(void) const { return x*x + y*y; }
 	void Normalise(void) {
 		float sq = MagnitudeSqr();
 		if(sq > 0.0f){

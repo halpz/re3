@@ -78,7 +78,7 @@ CSprite2d::Delete(void)
 }
 
 void
-CSprite2d::SetTexture(char *name)
+CSprite2d::SetTexture(const char *name)
 {
 	Delete();
 	if(name)
@@ -86,7 +86,7 @@ CSprite2d::SetTexture(char *name)
 }
 
 void
-CSprite2d::SetTexture(char *name, char *mask)
+CSprite2d::SetTexture(const char *name, const char *mask)
 {
 	Delete();
 	if(name)
@@ -468,8 +468,8 @@ STARTPATCHES
 
 	InjectHook(0x51EA00, &CSprite2d::Delete, PATCH_JUMP);
 	InjectHook(0x51F950, &CSprite2d::SetRenderState, PATCH_JUMP);
-	InjectHook(0x51EA40, (void (CSprite2d::*)(char*))&CSprite2d::SetTexture, PATCH_JUMP);
-	InjectHook(0x51EA70, (void (CSprite2d::*)(char*,char*))&CSprite2d::SetTexture, PATCH_JUMP);
+	InjectHook(0x51EA40, (void (CSprite2d::*)(const char*))&CSprite2d::SetTexture, PATCH_JUMP);
+	InjectHook(0x51EA70, (void (CSprite2d::*)(const char*,const char*))&CSprite2d::SetTexture, PATCH_JUMP);
 	InjectHook(0x51EAA0, &CSprite2d::SetAddressing, PATCH_JUMP);
 
 	InjectHook(0x51EE90, (void (*)(const CRect&, C4, uint32))CSprite2d::SetVertices, PATCH_JUMP);

@@ -11,6 +11,9 @@
 
 RpLight *&pAmbient = *(RpLight**)0x885B6C;
 RpLight *&pDirect = *(RpLight**)0x880F7C;
+RpLight **pExtraDirectionals = (RpLight**)0x60009C;
+int *LightStrengths = (int*)0x87BEF0;
+int &NumExtraDirLightsInWorld = *(int*)0x64C608;
 
 RwRGBAReal &AmbientLightColourForFrame = *(RwRGBAReal*)0x6F46F8;
 RwRGBAReal &AmbientLightColourForFrame_PedsCarsAndObjects = *(RwRGBAReal*)0x6F1D10;
@@ -83,6 +86,151 @@ SetLightsWithTimeOfDayColour(RpWorld *)
 		DirectionalLightColourForFrame.blue = min(1.0f, AmbientLightColourForFrame.blue * f1);
 #endif
 	}
+}
+
+RpWorld*
+LightsCreate(RpWorld *world)
+{
+	int i;
+	RwRGBAReal color;
+	RwFrame *frame;
+
+	if(world == nil)
+		return nil;
+
+	pAmbient = RpLightCreate(rpLIGHTAMBIENT);
+	RpLightSetFlags(pAmbient, rpLIGHTLIGHTATOMICS);
+	color.red = 0.25f;
+	color.green = 0.25f;
+	color.blue = 0.2f;
+	RpLightSetColor(pAmbient, &color);
+
+	pDirect = RpLightCreate(rpLIGHTDIRECTIONAL);
+	RpLightSetFlags(pDirect, rpLIGHTLIGHTATOMICS);
+	color.red = 1.0f;
+	color.green = 0.84f;
+	color.blue = 0.45f;
+	RpLightSetColor(pDirect, &color);
+	RpLightSetRadius(pDirect, 2.0f);
+	frame = RwFrameCreate();
+	RpLightSetFrame(pDirect, frame);
+	RwV3d axis = { 1.0f, 1.0f, 0.0f };
+	RwFrameRotate(frame, &axis, 160.0f, rwCOMBINEPRECONCAT);
+
+	RpWorldAddLight(world, pAmbient);
+	RpWorldAddLight(world, pDirect);
+
+	for(i = 0; i < NUMEXTRADIRECTIONALS; i++){
+		pExtraDirectionals[i] = RpLightCreate(rpLIGHTDIRECTIONAL);
+		RpLightSetFlags(pExtraDirectionals[i], 0);
+		color.red = 1.0f;
+		color.green = 0.5f;
+		color.blue = 0.0f;
+		RpLightSetColor(pExtraDirectionals[i], &color);
+		RpLightSetRadius(pExtraDirectionals[i], 2.0f);
+		frame = RwFrameCreate();
+		RpLightSetFrame(pExtraDirectionals[i], frame);
+		RpWorldAddLight(world, pExtraDirectionals[i]);
+	}
+
+	return world;
+}
+
+void
+LightsDestroy(RpWorld *world)
+{
+	int i;
+
+	if(world == nil)
+		return;
+
+	if(pAmbient){
+		RpWorldRemoveLight(world, pAmbient);
+		RpLightDestroy(pAmbient);
+		pAmbient = nil;
+	}
+
+	if(pDirect){
+		RpWorldRemoveLight(world, pDirect);
+		RwFrameDestroy(RpLightGetFrame(pDirect));
+		RpLightDestroy(pDirect);
+		pDirect = nil;
+	}
+
+	for(i = 0; i < NUMEXTRADIRECTIONALS; i++)
+		if(pExtraDirectionals[i]){
+			RpWorldRemoveLight(world, pExtraDirectionals[i]);
+			RwFrameDestroy(RpLightGetFrame(pExtraDirectionals[i]));
+			RpLightDestroy(pExtraDirectionals[i]);
+			pExtraDirectionals[i] = nil;
+		}
+}
+
+void
+WorldReplaceNormalLightsWithScorched(RpWorld *world, float l)
+{
+	RwRGBAReal color;
+	color.red = l;
+	color.green = l;
+	color.blue = l;
+	RpLightSetColor(pAmbient, &color);
+	RpLightSetFlags(pDirect, 0);
+}
+
+void
+WorldReplaceScorchedLightsWithNormal(RpWorld *world)
+{
+	RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
+	RpLightSetFlags(pDirect, rpLIGHTLIGHTATOMICS);
+}
+
+void
+AddAnExtraDirectionalLight(RpWorld *world, float dirx, float diry, float dirz, float red, float green, float blue)
+{
+	float strength;
+	int weakest;
+	int i, n;
+	RwRGBAReal color;
+	RwV3d *dir;
+
+	strength = max(max(red, green), blue);
+	n = -1;
+	if(NumExtraDirLightsInWorld < NUMEXTRADIRECTIONALS)
+		n = NumExtraDirLightsInWorld;
+	else{
+		weakest = strength;
+		for(i = 0; i < NUMEXTRADIRECTIONALS; i++)
+			if(LightStrengths[i] < weakest){
+				weakest = LightStrengths[i];
+				n = i;
+			}
+	}
+
+	if(n < 0)
+		return;
+
+	color.red = red;
+	color.green = green;
+	color.blue = blue;
+	RpLightSetColor(pExtraDirectionals[n], &color);
+	dir = RwMatrixGetAt(RwFrameGetMatrix(RpLightGetFrame(pExtraDirectionals[n])));
+	dir->x = -dirx;
+	dir->y = -diry;
+	dir->z = -dirz;
+	RwMatrixUpdate(RwFrameGetMatrix(RpLightGetFrame(pExtraDirectionals[n])));
+	RwFrameUpdateObjects(RpLightGetFrame(pExtraDirectionals[n]));
+	RpLightSetFlags(pExtraDirectionals[n], rpLIGHTLIGHTATOMICS);
+	LightStrengths[n] = strength;
+	NumExtraDirLightsInWorld = min(NumExtraDirLightsInWorld+1, NUMEXTRADIRECTIONALS);
+}
+
+void
+RemoveExtraDirectionalLights(RpWorld *world)
+{
+	int i;
+	for(i = 0; i < NumExtraDirLightsInWorld; i++)
+		RpLightSetFlags(pExtraDirectionals[i], 0);
+	NumExtraDirLightsInWorld = 0;
 }
 
 void
@@ -159,13 +307,27 @@ SetAmbientColoursToIndicateRoadGroup(int i)
 	RpLightSetColor(pAmbient, &AmbientLightColour);
 }
 
+void
+SetAmbientColours(RwRGBAReal *color)
+{
+	RpLightSetColor(pAmbient, color);
+}
+
+
 STARTPATCHES
 	InjectHook(0x526510, SetLightsWithTimeOfDayColour, PATCH_JUMP);
+	InjectHook(0x5269A0, LightsCreate, PATCH_JUMP);
+	InjectHook(0x526B40, LightsDestroy, PATCH_JUMP);
+	InjectHook(0x526C10, WorldReplaceNormalLightsWithScorched, PATCH_JUMP);
+	InjectHook(0x526C50, WorldReplaceScorchedLightsWithNormal, PATCH_JUMP);
+	InjectHook(0x526C70, AddAnExtraDirectionalLight, PATCH_JUMP);
+	InjectHook(0x526DB0, RemoveExtraDirectionalLights, PATCH_JUMP);
 	InjectHook(0x526DE0, SetAmbientAndDirectionalColours, PATCH_JUMP);
 	InjectHook(0x526E60, SetBrightMarkerColours, PATCH_JUMP);
 	InjectHook(0x526F10, ReSetAmbientAndDirectionalColours, PATCH_JUMP);
 	InjectHook(0x526F40, DeActivateDirectional, PATCH_JUMP);
 	InjectHook(0x526F50, ActivateDirectional, PATCH_JUMP);
-	InjectHook(0x526F60, SetAmbientColours, PATCH_JUMP);
+	InjectHook(0x526F60, (void (*)(void))SetAmbientColours, PATCH_JUMP);
 	InjectHook(0x526F80, SetAmbientColoursForPedsCarsAndObjects, PATCH_JUMP);
+	InjectHook(0x526FA0, (void (*)(RwRGBAReal*))SetAmbientColours, PATCH_JUMP);
 ENDPATCHES

@@ -11,5 +11,5 @@ public:
 	static bool AreCreditsDone(void) { return bCreditsGoing; }
 	static void Render(void);
 	static void PrintCreditSpace(float space, uint32 &line);
-	static void PrintCreditText(float scaleX, float scaleY, wchar_t *text, uint32 &lineoffset, float scrolloffset);
+	static void PrintCreditText(float scaleX, float scaleY, wchar *text, uint32 &lineoffset, float scrolloffset);
 };

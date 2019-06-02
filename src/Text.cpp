@@ -5,7 +5,7 @@
 #include "Messages.h"
 #include "Text.h"
 
-static wchar_t WideErrorString[25];
+static wchar WideErrorString[25];
 
 CText &TheText = *(CText*)0x941520;
 
@@ -90,7 +90,7 @@ CText::Unload(void)
 	keyArray.Unload();
 }
 
-wchar_t*
+wchar*
 CText::Get(const char *key)
 {
 	return keyArray.Search(key);
@@ -119,11 +119,11 @@ CKeyArray::Unload(void)
 }
 
 void
-CKeyArray::Update(wchar_t *chars)
+CKeyArray::Update(wchar *chars)
 {
 	int i;
 	for(i = 0; i < numEntries; i++)
-		entries[i].value = (wchar_t*)((uint8*)chars + (uintptr)entries[i].value);
+		entries[i].value = (wchar*)((uint8*)chars + (uintptr)entries[i].value);
 }
 
 CKeyEntry*
@@ -146,7 +146,7 @@ CKeyArray::BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 hi
 	return nil;
 }
 
-wchar_t*
+wchar*
 CKeyArray::Search(const char *key)
 {
 	CKeyEntry *found;
@@ -169,8 +169,8 @@ CData::Load(uint32 length, uint8 *data, int *offset)
 	uint32 i;
 	uint8 *rawbytes;
 
-	numChars = length / sizeof(wchar_t);
-	chars = new wchar_t[numChars];
+	numChars = length / sizeof(wchar);
+	chars = new wchar[numChars];
 	rawbytes = (uint8*)chars;
 
 	for(i = 0; i < length; i++)
@@ -183,6 +183,12 @@ CData::Unload(void)
 	delete[] chars;
 	chars = nil;
 	numChars = 0;
+}
+
+void
+AsciiToUnicode(const char *cs, uint16 *ws)
+{
+	while((*ws++ = *cs++) != '\0');
 }
 
 STARTPATCHES

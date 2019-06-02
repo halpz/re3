@@ -23,8 +23,8 @@ public:
 	~CSprite2d(void) { Delete(); };
 	void Delete(void);
 	void SetRenderState(void);
-	void SetTexture(char *name);
-	void SetTexture(char *name, char *mask);
+	void SetTexture(const char *name);
+	void SetTexture(const char *name, const char *mask);
 	void SetAddressing(RwTextureAddressMode addr);
 	void Draw(float x, float y, float w, float h, const CRGBA &col);
 	void Draw(const CRect &rect, const CRGBA &col);
