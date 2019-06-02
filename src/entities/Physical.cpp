@@ -272,7 +272,7 @@ void
 CPhysical::ProcessControl(void)
 {
 	if(!IsPed())
-		m_phy_flagA8 = false;
+		bIsInWater = false;
 	bHasContacted = false;
 	bIsInSafePosition = false;
 	bWasPostponed = false;
@@ -438,7 +438,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 		if(B->IsPed() && ((CPed*)B)->m_pCurrentPhysSurface == A)
 			ispedcontactA = true;
 	}else
-		timestepA = A->m_phy_flagA1 ? 2.0f : 1.0f;
+		timestepA = A->bIsHeavy ? 2.0f : 1.0f;
 
 	float timestepB;
 	if(A->bPedPhysics){
@@ -451,7 +451,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 		if(A->IsPed() && ((CPed*)A)->m_pCurrentPhysSurface == B)
 			ispedcontactB = true;
 	}else
-		timestepB = B->m_phy_flagA1 ? 2.0f : 1.0f;
+		timestepB = B->bIsHeavy ? 2.0f : 1.0f;
 
 	float speedA, speedB;
 	if(B->bIsStatic){
@@ -1821,7 +1821,7 @@ CPhysical::ProcessCollision(void)
 	m_phy_flagA80 = false;
 	if(!m_vecMoveSpeed.IsZero() ||
 	   !m_vecTurnSpeed.IsZero() ||
-	   m_phy_flagA40 ||
+	   bHitByTrain ||
 	   m_status == STATUS_PLAYER || IsPed() && ped->IsPlayer()){
 		if(IsVehicle())
 			((CVehicle*)this)->m_veh_flagD4 = true;
@@ -1830,7 +1830,7 @@ CPhysical::ProcessCollision(void)
 			return;
 		}
 	}
-	m_phy_flagA40 = false;
+	bHitByTrain = false;
 	m_fDistanceTravelled = (GetPosition() - *savedMatrix.GetPosition()).Magnitude();
 	m_phy_flagA80 = false;
 
