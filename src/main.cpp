@@ -506,7 +506,7 @@ float NumberOfChunksLoaded;
 
 // TODO: compare with PS2
 void
-LoadingScreen(char *str1, char *str2, char *splashscreen)
+LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 {
 	CSprite2d *splash;
 
