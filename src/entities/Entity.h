@@ -94,6 +94,9 @@ public:
 	uint16 m_level;	// int16
 	CReference *m_pFirstReference;
 
+	CEntity(void);
+	~CEntity(void);
+
 	virtual void Add(void);
 	virtual void Remove(void);
 	virtual void SetModelIndex(uint32 i) { m_modelIndex = i; CreateRwObject(); }
@@ -120,6 +123,7 @@ public:
 	void GetBoundCentre(CVector &out);
 	CVector GetBoundCentre(void) { CVector v; GetBoundCentre(v); return v; }
 	float GetBoundRadius(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingSphere.radius; }
+	float GetDistanceFromCentreOfMassToBaseOfModel(void) { return -CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingBox.min.z; }
 	bool GetIsTouching(CVector const &center, float r);
 	bool GetIsOnScreen(void);
 	bool GetIsOnScreenComplex(void);
@@ -128,6 +132,9 @@ public:
 	int GetModelIndex(void) { return m_modelIndex; }
 	void UpdateRwFrame(void);
 	void SetupBigBuilding(void);
+
+	void AttachToRwObject(RwObject *obj);
+	void DetachFromRwObject(void);
 
 	void RegisterReference(CEntity **pent);
 	void ResolveReferences(void);

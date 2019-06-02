@@ -1169,6 +1169,7 @@ STARTPATCHES
 	InjectHook(0x4A9920, CRenderer::SetupBigBuildingVisibility, PATCH_JUMP);
 
 	InjectHook(0x4A76B0, CRenderer::ConstructRenderList, PATCH_JUMP);
+	InjectHook(0x4A7840, CRenderer::PreRender, PATCH_JUMP);
 	InjectHook(0x4A8970, CRenderer::ScanWorld, PATCH_JUMP);
 	InjectHook(0x4AA240, CRenderer::RequestObjectsInFrustum, PATCH_JUMP);
 	InjectHook(0x4A7F30, CRenderer::ScanSectorPoly, PATCH_JUMP);

@@ -49,13 +49,13 @@ public:
 	CVector m_vecDamageNormal;
 	int16 m_nDamagePieceType;
 
-	uint8 m_phy_flagA1 : 1;
+	uint8 bIsHeavy : 1;
 	uint8 bAffectedByGravity : 1;
 	uint8 bInfiniteMass : 1;
-	uint8 m_phy_flagA8 : 1;
+	uint8 bIsInWater : 1;
 	uint8 m_phy_flagA10 : 1;
 	uint8 m_phy_flagA20 : 1;
-	uint8 m_phy_flagA40 : 1;
+	uint8 bHitByTrain : 1;	// from nick
 	uint8 m_phy_flagA80 : 1;
 
   uint8 m_nLastCollType;

@@ -54,6 +54,9 @@ uint8 m_extra2;
 	uint8 stuff4[139];
 	int32 m_vehType;
 
+	static void *operator new(size_t);
+	static void operator delete(void*, size_t);
+
 	bool IsCar(void) { return m_vehType == VEHICLE_TYPE_CAR; }
 	bool IsBoat(void) { return m_vehType == VEHICLE_TYPE_BOAT; }
 	bool IsTrain(void) { return m_vehType == VEHICLE_TYPE_TRAIN; }

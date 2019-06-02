@@ -5,7 +5,7 @@
 class CAutomobile : public CVehicle
 {
 public:
-	// 0x228
+	// 0x288
 	uint8 stuff1[484];
 	float m_afWheelSuspDist[4];
 	uint8 stuff2[300];

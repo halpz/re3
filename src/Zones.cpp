@@ -629,6 +629,8 @@ STARTPATCHES
 	InjectHook(0x4B6790, CTheZones::FindSmallestZonePositionType, PATCH_JUMP);
 	InjectHook(0x4B6890, CTheZones::FindSmallestZonePositionILN, PATCH_JUMP);
 	InjectHook(0x4B6800, CTheZones::FindZoneByLabelAndReturnIndex, PATCH_JUMP);
+	InjectHook(0x4B6FA0, CTheZones::GetZone, PATCH_JUMP);
+	InjectHook(0x4B84F0, CTheZones::GetPointerForZoneIndex, PATCH_JUMP);
 	InjectHook(0x4B6A10, CTheZones::GetZoneInfo, PATCH_JUMP);
 	InjectHook(0x4B6FB0, CTheZones::GetZoneInfoForTimeOfDay, PATCH_JUMP);
 	InjectHook(0x4B6A50, CTheZones::SetZoneCarInfo, PATCH_JUMP);

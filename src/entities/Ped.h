@@ -179,10 +179,10 @@ public:
 	CWeapon m_weapons[PED_MAX_WEAPONS];
 	int32 stuff7;
 	uint8 m_currentWeapon;
-	uint8 stuff[167];
+	uint8 stuff[163];
 
-//	static void *operator new(size_t);
-//	static void operator delete(void*, size_t);
+	static void *operator new(size_t);
+	static void operator delete(void*, size_t);
 
 	bool IsPlayer(void) { return m_nPedType == 0 || m_nPedType== 1 || m_nPedType == 2 || m_nPedType == 3; }
 	bool UseGroundColModel(void);
@@ -196,4 +196,4 @@ static_assert(offsetof(CPed, m_nPedType) == 0x32C, "CPed: error");
 static_assert(offsetof(CPed, m_pCollidingEntity) == 0x34C, "CPed: error");
 static_assert(offsetof(CPed, m_weapons) == 0x35C, "CPed: error");
 static_assert(offsetof(CPed, m_currentWeapon) == 0x498, "CPed: error");
-static_assert(sizeof(CPed) == 0x540, "CPed: error");
+static_assert(sizeof(CPed) == 0x53C, "CPed: error");

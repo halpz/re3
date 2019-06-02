@@ -12,6 +12,63 @@
 
 int gBuildings;
 
+CEntity::CEntity(void)
+{
+	m_type = ENTITY_TYPE_NOTHING;
+	m_status = STATUS_ABANDONED;
+
+	bUsesCollision = false;
+	bCollisionProcessed = false;
+	bIsStatic = false;
+	bHasContacted = false;
+	bPedPhysics = false;
+	bIsStuck = false;
+	bIsInSafePosition = false;
+	bUseCollisionRecords = false;
+
+	bWasPostponed = false;
+	m_flagB2 = false;
+	bIsVisible = true;
+	bHasCollided = false;
+	bRenderScorched = false;
+	m_flagB20 = false;
+	bIsBIGBuilding = false;
+	bRenderDamaged = false;
+
+	m_flagC1 = false;
+	m_flagC2 = false;
+	m_flagC4 = false;
+	m_flagC8 = false;
+	m_flagC10 = false;
+	m_flagC20 = false;
+	m_bZoneCulled = false;
+	m_bZoneCulled2 = false;
+
+	bRemoveFromWorld = false;
+	bHasHitWall = false;
+	bImBeingRendered = false;
+	m_flagD8 = false;
+	m_flagD10 = false;
+	bDrawLast = false;
+	m_flagD40 = false;
+	m_flagD80 = false;
+
+	bDistanceFade = false;
+	m_flagE2 = false;
+
+	m_scanCode = 0;
+	m_modelIndex = -1;
+	m_rwObject = nil;
+	m_randomSeed = rand();
+	m_pFirstReference = nil;
+}
+
+CEntity::~CEntity(void)
+{
+	DeleteRwObject();
+	ResolveReferences();
+}
+
 void
 CEntity::GetBoundCentre(CVector &out)
 {
@@ -309,6 +366,28 @@ CEntity::SetupLighting(void)
 }
 
 void
+CEntity::AttachToRwObject(RwObject *obj)
+{
+	m_rwObject = obj;
+	if(m_rwObject){
+		if(RwObjectGetType(m_rwObject) == rpATOMIC)
+			m_matrix.Attach(RwFrameGetMatrix(RpAtomicGetFrame(m_rwObject)), false);
+		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
+			m_matrix.Attach(RwFrameGetMatrix(RpClumpGetFrame(m_rwObject)), false);
+		CModelInfo::GetModelInfo(m_modelIndex)->AddRef();
+	}
+}
+
+void
+CEntity::DetachFromRwObject(void)
+{
+	if(m_rwObject)
+		CModelInfo::GetModelInfo(m_modelIndex)->RemoveRef();
+	m_rwObject = nil;
+	m_matrix.Detach();
+}
+
+void
 CEntity::RegisterReference(CEntity **pent)
 {
 	if(IsBuilding())
@@ -380,6 +459,9 @@ STARTPATCHES
 	InjectHook(0x4A7480, &CEntity::RegisterReference, PATCH_JUMP);
 	InjectHook(0x4A74E0, &CEntity::ResolveReferences, PATCH_JUMP);
 	InjectHook(0x4A7530, &CEntity::PruneReferences, PATCH_JUMP);
+
+	InjectHook(0x473F10, &CEntity::AttachToRwObject, PATCH_JUMP);
+	InjectHook(0x473F60, &CEntity::DetachFromRwObject, PATCH_JUMP);
 
 	InjectHook(0x475080, &CEntity::Add_, PATCH_JUMP);
 	InjectHook(0x475310, &CEntity::Remove_, PATCH_JUMP);
