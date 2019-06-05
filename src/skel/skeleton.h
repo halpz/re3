@@ -190,7 +190,6 @@ typedef struct RsPadButtonStatus RsPadButtonStatus;
 struct RsPadButtonStatus
 {
 	RwInt32     padID;
-	RwUInt32    padButtons;
 };
 
 enum RsPadButtons
