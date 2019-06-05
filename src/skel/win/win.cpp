@@ -79,10 +79,10 @@ typedef struct
 	
 	DWORD field_14;
 
-	LPDIRECTINPUT8       pDI;
-	LPDIRECTINPUTDEVICE8 pMouse;
-	LPDIRECTINPUTDEVICE8 diDevice1;
-	LPDIRECTINPUTDEVICE8 diDevice2;
+	LPDIRECTINPUT8       dinterface;
+	LPDIRECTINPUTDEVICE8 mouse;
+	LPDIRECTINPUTDEVICE8 joy1;
+	LPDIRECTINPUTDEVICE8 joy2;
 }
 psGlobalType;
 
@@ -193,7 +193,7 @@ static CJoySticks AllValidWinJoys;
 
 CJoySticks::CJoySticks()
 {
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < _TODOCONST(2); i++)
 	{
 		ClearJoyInfo(i);
 	}
@@ -658,10 +658,10 @@ psInitialise(void)
 	
 	PsGlobal.fullScreen = FALSE;
 	
-	PsGlobal.pDI = NULL;
-	PsGlobal.pMouse     = NULL;
-	PsGlobal.diDevice1   = NULL;
-	PsGlobal.diDevice2   = NULL;
+	PsGlobal.dinterface = NULL;
+	PsGlobal.mouse     = NULL;
+	PsGlobal.joy1   = NULL;
+	PsGlobal.joy2   = NULL;
 
 	CFileMgr::Initialise();
 	
@@ -2273,7 +2273,7 @@ HRESULT _InputInitialise()
 
 	// Create a DInput object
 	if( FAILED( hr = DirectInput8Create( GetModuleHandle(NULL), DIRECTINPUT_VERSION, 
-										IID_IDirectInput8, (VOID**)&PSGLOBAL(pDI), NULL ) ) )
+										IID_IDirectInput8, (VOID**)&PSGLOBAL(dinterface), NULL ) ) )
 		return hr;
 		
 	return S_OK;
@@ -2284,7 +2284,7 @@ HRESULT _InputInitialiseMouse()
 	HRESULT hr;
 
 	// Obtain an interface to the system mouse device.
-	if( FAILED( hr = PSGLOBAL(pDI)->CreateDevice( GUID_SysMouse, &PSGLOBAL(pMouse), NULL ) ) )
+	if( FAILED( hr = PSGLOBAL(dinterface)->CreateDevice( GUID_SysMouse, &PSGLOBAL(mouse), NULL ) ) )
 		return hr;
 	
     // Set the data format to "mouse format" - a predefined data format 
@@ -2294,14 +2294,14 @@ HRESULT _InputInitialiseMouse()
     //
     // This tells DirectInput that we will be passing a
     // DIMOUSESTATE2 structure to IDirectInputDevice::GetDeviceState.
-    if( FAILED( hr = PSGLOBAL(pMouse)->SetDataFormat( &c_dfDIMouse2 ) ) )
+    if( FAILED( hr = PSGLOBAL(mouse)->SetDataFormat( &c_dfDIMouse2 ) ) )
         return hr;
 	
-	if( FAILED( hr = PSGLOBAL(pMouse)->SetCooperativeLevel( PSGLOBAL(window), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND ) ) )
+	if( FAILED( hr = PSGLOBAL(mouse)->SetCooperativeLevel( PSGLOBAL(window), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND ) ) )
 		return hr;
 	
 	// Acquire the newly created device
-    PSGLOBAL(pMouse)->Acquire();
+    PSGLOBAL(mouse)->Acquire();
 	
 	return S_OK;
 }
@@ -2318,7 +2318,7 @@ HRESULT CapturePad(Int32 padID)
 	DIJOYSTATE2 js; 
 	LPDIRECTINPUTDEVICE8 pPad = NULL;
 	
-	pPad = ( padID == 0 ) ? PSGLOBAL(diDevice1) : PSGLOBAL(diDevice2);
+	pPad = ( padID == 0 ) ? PSGLOBAL(joy1) : PSGLOBAL(joy2);
 	
 	if ( NULL == pPad )
 		return S_OK;
@@ -2432,17 +2432,17 @@ void _InputInitialiseJoys()
 	
 	_InputAddJoys();
 	
-	if ( PSGLOBAL(diDevice1) != NULL )
+	if ( PSGLOBAL(joy1) != NULL )
 	{
 		devCaps.dwSize = sizeof(DIDEVCAPS);
-		PSGLOBAL(diDevice1)->GetCapabilities(&devCaps);
+		PSGLOBAL(joy1)->GetCapabilities(&devCaps);
 
 		prop.diph.dwSize = sizeof(DIPROPDWORD);
 		prop.diph.dwHeaderSize = sizeof(DIPROPHEADER);
 		prop.diph.dwObj = 0;
 		prop.diph.dwHow = 0;
 		
-		PSGLOBAL(diDevice1)->GetProperty(DIPROP_VIDPID, (LPDIPROPHEADER)&prop);
+		PSGLOBAL(joy1)->GetProperty(DIPROP_VIDPID, (LPDIPROPHEADER)&prop);
 		AllValidWinJoys.m_aJoys[0].m_nVendorID = LOWORD(prop.dwData);
 		AllValidWinJoys.m_aJoys[0].m_nProductID = HIWORD(prop.dwData);
 		AllValidWinJoys.m_aJoys[0].m_bInitialised = true;
@@ -2450,9 +2450,9 @@ void _InputInitialiseJoys()
 		ControlsManager.InitDefaultControlConfigJoyPad(devCaps.dwButtons);
 	}
 		
-	if ( PSGLOBAL(diDevice2) != NULL )
+	if ( PSGLOBAL(joy2) != NULL )
 	{
-		PSGLOBAL(diDevice2)->GetProperty(DIPROP_VIDPID, (LPDIPROPHEADER)&prop);
+		PSGLOBAL(joy2)->GetProperty(DIPROP_VIDPID, (LPDIPROPHEADER)&prop);
 		AllValidWinJoys.m_aJoys[1].m_nVendorID = LOWORD(prop.dwData);
 		AllValidWinJoys.m_aJoys[1].m_nProductID = HIWORD(prop.dwData);
 		AllValidWinJoys.m_aJoys[1].m_bInitialised = true;
@@ -2534,20 +2534,20 @@ HRESULT _InputAddJoys()
 {
 	HRESULT hr;
 	
-	hr = PSGLOBAL(pDI)->EnumDevices(DI8DEVCLASS_GAMECTRL,  _InputEnumDevicesCallback, NULL, DIEDFL_ATTACHEDONLY );
+	hr = PSGLOBAL(dinterface)->EnumDevices(DI8DEVCLASS_GAMECTRL,  _InputEnumDevicesCallback, NULL, DIEDFL_ATTACHEDONLY );
 	 
 	if( FAILED(hr) )
 		return hr;
 	
-	if ( PSGLOBAL(diDevice1) == NULL )
+	if ( PSGLOBAL(joy1) == NULL )
 		return S_FALSE;
 	
-	_InputAddJoyStick(PSGLOBAL(diDevice1), 0);
+	_InputAddJoyStick(PSGLOBAL(joy1), 0);
 	
-	if ( PSGLOBAL(diDevice2) == NULL )
+	if ( PSGLOBAL(joy2) == NULL )
 		return S_OK;	// we have one device already so return OK and ignore second
 	
-	_InputAddJoyStick(PSGLOBAL(diDevice2), 1);
+	_InputAddJoyStick(PSGLOBAL(joy2), 1);
 	
 	return S_OK;
 }
@@ -2556,13 +2556,13 @@ HRESULT _InputGetMouseState(DIMOUSESTATE2 *state)
 {
 	HRESULT       hr;
 	
-	if ( PSGLOBAL(pMouse) == NULL )
+	if ( PSGLOBAL(mouse) == NULL )
 		return S_FALSE;
 	
 	// Get the input's device state, and put the state in dims
 	ZeroMemory( state, sizeof(DIMOUSESTATE2) );
 	
-	hr = PSGLOBAL(pMouse)->GetDeviceState( sizeof(DIMOUSESTATE2), state );
+	hr = PSGLOBAL(mouse)->GetDeviceState( sizeof(DIMOUSESTATE2), state );
 
 	if( FAILED(hr) ) 
     {
@@ -2572,12 +2572,12 @@ HRESULT _InputGetMouseState(DIMOUSESTATE2 *state)
         // We just re-acquire and try again.
         
         // If input is lost then acquire and keep trying 
-		hr = PSGLOBAL(pMouse)->Acquire();
+		hr = PSGLOBAL(mouse)->Acquire();
         while( hr == DIERR_INPUTLOST ) 
-            hr = PSGLOBAL(pMouse)->Acquire();
+            hr = PSGLOBAL(mouse)->Acquire();
 		
 		ZeroMemory( state, sizeof(DIMOUSESTATE2) );
-		hr = PSGLOBAL(pMouse)->GetDeviceState( sizeof(DIMOUSESTATE2), state );
+		hr = PSGLOBAL(mouse)->GetDeviceState( sizeof(DIMOUSESTATE2), state );
 		
 		return hr;
 	}
@@ -2587,7 +2587,7 @@ HRESULT _InputGetMouseState(DIMOUSESTATE2 *state)
 
 void _InputShutdown()
 {
-	SAFE_RELEASE(PSGLOBAL(pDI));
+	SAFE_RELEASE(PSGLOBAL(dinterface));
 }
 
 BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext )
@@ -2599,12 +2599,12 @@ BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, V
 	LPDIRECTINPUTDEVICE8 pJoystick = NULL;
 	
 	if ( Count == 0 )
-		pJoystick = PSGLOBAL(diDevice1);
+		pJoystick = PSGLOBAL(joy1);
 	else if ( Count == 1 )
-		pJoystick = PSGLOBAL(diDevice2);
+		pJoystick = PSGLOBAL(joy2);
 	
 	// Obtain an interface to the enumerated joystick. 
-	hr = PSGLOBAL(pDI)->CreateDevice( pdidInstance->guidInstance, &pJoystick, NULL );
+	hr = PSGLOBAL(dinterface)->CreateDevice( pdidInstance->guidInstance, &pJoystick, NULL );
 	
     // If it failed, then we can't use this joystick. (Maybe the user unplugged
     // it while we were in the middle of enumerating it.)
