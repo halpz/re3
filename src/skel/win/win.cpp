@@ -2739,6 +2739,7 @@ BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key)
 				*rs = rsLEFT;
 			else
 				*rs = rsPADLEFT;
+			break;
 		}
 		
 		case VK_UP:
