@@ -1,7 +1,6 @@
-#define _WIN32_WINDOWS 0x0410
+#define _WIN32_WINDOWS 0x0500
 #define WINVER 0x0500
 #define DIRECTINPUT_VERSION 0x0800
-#define WM_GRAPHNOTIFY  WM_USER+13
 
 #include <winerror.h>
 #include <windows.h>
@@ -24,6 +23,8 @@
 #include <DShow.h>
 #pragma warning( pop )
 
+#define WM_GRAPHNOTIFY	WM_USER+13
+
 #pragma comment( lib, "d3d8.lib" )
 #pragma comment( lib, "ddraw.lib" )
 #pragma comment( lib, "Winmm.lib" )
@@ -41,18 +42,18 @@
 #include "platform.h"
 #include "win.h"
 
-#define MAX_SUBSYSTEMS      (16)
+#define MAX_SUBSYSTEMS		(16)
 
 
-//static RwBool       ForegroundApp = TRUE;
-static RwBool       &ForegroundApp = *(RwBool*)0x060F000;
+//static RwBool		  ForegroundApp = TRUE;
+static RwBool		&ForegroundApp = *(RwBool*)0x060F000;
 
-//static RwBool       RwInitialised = FALSE;
-static RwBool       &RwInitialised = *(RwBool*)0x885B88;
+//static RwBool		  RwInitialised = FALSE;
+static RwBool		&RwInitialised = *(RwBool*)0x885B88;
 
 static RwSubSystemInfo GsubSysInfo[MAX_SUBSYSTEMS];
-static RwInt32      GnumSubSystems = 0;
-static RwInt32      GcurSel = 0, GcurSelVM = 0;
+static RwInt32		GnumSubSystems = 0;
+static RwInt32		GcurSel = 0, GcurSelVM = 0;
 
 //static RwBool startupDeactivate;
 static RwBool &startupDeactivate = *(RwBool*)0x8E2878;
@@ -67,25 +68,6 @@ static RwBool &defaultFullscreenRes = *(RwBool*)0x60EFFC;
 
 static const RwChar *AppClassName = RWSTRING("Grand theft auto 3");
 
-
-/* platform specfic global data */
-
-typedef struct
-{
-	HWND        window;
-	HINSTANCE   instance;
-	RwBool      fullScreen;
-	RwV2d       lastMousePos;
-	
-	DWORD field_14;
-
-	LPDIRECTINPUT8       dinterface;
-	LPDIRECTINPUTDEVICE8 mouse;
-	LPDIRECTINPUTDEVICE8 joy1;
-	LPDIRECTINPUTDEVICE8 joy2;
-}
-psGlobalType;
-
 //static psGlobalType PsGlobal;
 static psGlobalType &PsGlobal = *(psGlobalType*)0x72CF60;
 
@@ -93,7 +75,7 @@ static psGlobalType &PsGlobal = *(psGlobalType*)0x72CF60;
 #define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
 
 #undef MAKEPOINTS
-#define MAKEPOINTS(l)       (*((POINTS /*FAR*/ *)&(l)))
+#define MAKEPOINTS(l)		(*((POINTS /*FAR*/ *)&(l)))
 
 #define SAFE_RELEASE(x) { if (x) x->Release(); x = NULL; }
 #define JIF(x) if (FAILED(hr=(x))) \
@@ -121,9 +103,6 @@ IMediaEventEx *pME = NULL;
 IVideoWindow  *pVW = NULL;
 IMediaSeeking *pMS = NULL;
 
-/**/
-
-
 DWORD dwDXVersion;
 DWORD _dwMemTotalPhys;
 DWORD &_dwMemAvailPhys = *(DWORD*)0x70F29C;
@@ -141,27 +120,6 @@ WRAPPER const Char *GetLevelSplashScreen(Int32 number) { EAXJMP(0x48D750); }
 
 void LoadingScreen(char const *msg1, char const *msg2, char const *screen);
 CSprite2d *LoadSplash(const char *name);
-
-
-void InitialiseLanguage();
-RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode);
-void CenterVideo(void);
-void CloseClip(void);
-
-HRESULT _InputInitialise();
-HRESULT _InputInitialiseMouse();
-HRESULT CapturePad(Int32 padID);
-void _InputInitialiseJoys();
-HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num);
-HRESULT _InputAddJoys();
-HRESULT _InputGetMouseState(DIMOUSESTATE2 *state);
-void _InputShutdown();
-BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext );
-BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key);
-void _InputTranslateShiftKeyUpDown(RsKeyCodes *rs);;
-BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, bool bDown);
-BOOL _InputIsExtended(INT flag);
-/**/
 
 enum eJoypadState
 {
@@ -455,27 +413,27 @@ typedef HRESULT(WINAPI * DIRECTDRAWCREATEEX)( GUID*, VOID**, REFIID, IUnknown* )
 //-----------------------------------------------------------------------------
 // Name: GetDXVersion()
 // Desc: This function returns the DirectX version number as follows:
-//          0x0000 = No DirectX installed
-//          0x0700 = At least DirectX 7 installed.
-//          0x0800 = At least DirectX 8 installed.
+//			0x0000 = No DirectX installed
+//			0x0700 = At least DirectX 7 installed.
+//			0x0800 = At least DirectX 8 installed.
 // 
-//       Please note that this code is intended as a general guideline. Your
-//       app will probably be able to simply query for functionality (via
-//       QueryInterface) for one or two components.
+//		 Please note that this code is intended as a general guideline. Your
+//		 app will probably be able to simply query for functionality (via
+//		 QueryInterface) for one or two components.
 //
-//       Please also note:
-//          "if( dwDXVersion != 0x500 ) return FALSE;" is VERY BAD. 
-//          "if( dwDXVersion <  0x500 ) return FALSE;" is MUCH BETTER.
-//       to ensure your app will run on future releases of DirectX.
+//		 Please also note:
+//			"if( dwDXVersion != 0x500 ) return FALSE;" is VERY BAD. 
+//			"if( dwDXVersion <	0x500 ) return FALSE;" is MUCH BETTER.
+//		 to ensure your app will run on future releases of DirectX.
 //-----------------------------------------------------------------------------
 DWORD GetDXVersion()
 {
-	DIRECTDRAWCREATEEX   DirectDrawCreateEx = NULL;
-	HINSTANCE            hDDrawDLL          = NULL;
-	HINSTANCE            hD3D8DLL           = NULL;
-	HINSTANCE            hDPNHPASTDLL       = NULL;
-	DWORD                dwDXVersion        = 0;
-	//HRESULT              hr;
+	DIRECTDRAWCREATEEX	 DirectDrawCreateEx = NULL;
+	HINSTANCE			 hDDrawDLL			= NULL;
+	HINSTANCE			 hD3D8DLL			= NULL;
+	HINSTANCE			 hDPNHPASTDLL		= NULL;
+	DWORD				 dwDXVersion		= 0;
+	//HRESULT			   hr;
 
 	// First see if DDRAW.DLL even exists.
 	hDDrawDLL = LoadLibrary( "DDRAW.DLL" );
@@ -523,7 +481,7 @@ DWORD GetDXVersion()
 	hD3D8DLL = LoadLibrary( "D3D8.DLL" );
 	if( hD3D8DLL == NULL )
 	{
-	    FreeLibrary( hDDrawDLL );
+		FreeLibrary( hDDrawDLL );
 		OutputDebugString( "Couldn't LoadLibrary D3D8.DLL\r\n" );
 		return dwDXVersion;
 	}
@@ -540,7 +498,7 @@ DWORD GetDXVersion()
 	hDPNHPASTDLL = LoadLibrary( "dpnhpast.dll" );
 	if( hDPNHPASTDLL == NULL )
 	{
-	    FreeLibrary( hDPNHPASTDLL );
+		FreeLibrary( hDPNHPASTDLL );
 		OutputDebugString( "Couldn't LoadLibrary dpnhpast.dll\r\n" );
 		return dwDXVersion;
 	}
@@ -568,14 +526,14 @@ __declspec(naked)  const char * _psGetCpuVendr()
 {
 	__asm
 	{
-		push    ebx
-		xor     eax, eax
+		push	ebx
+		xor		eax, eax
 		cpuid
-		mov     dword ptr [cpuvendor+0], ebx
-		mov     dword ptr [cpuvendor+4], edx
-		mov     dword ptr [cpuvendor+8], ecx
-		mov     eax, offset cpuvendor
-		pop     ebx
+		mov		dword ptr [cpuvendor+0], ebx
+		mov		dword ptr [cpuvendor+4], edx
+		mov		dword ptr [cpuvendor+8], ecx
+		mov		eax, offset cpuvendor
+		pop		ebx
 		retn
 	}
 }
@@ -587,9 +545,9 @@ __declspec(naked) RwUInt32 _psGetCpuFeatures()
 {
 	__asm
 	{
-		mov     eax, 1
+		mov		eax, 1
 		cpuid
-		mov     eax, edx
+		mov		eax, edx
 		retn
 	}
 }
@@ -601,21 +559,21 @@ __declspec(naked) RwUInt32 _psGetCpuFeaturesEx()
 {
 	__asm
 	{
-		mov     eax, 80000000h
+		mov		eax, 80000000h
 		cpuid
 
-		cmp     eax, 80000000h
-		jbe     short _NOEX
+		cmp		eax, 80000000h
+		jbe		short _NOEX
 
-		mov     eax, 80000001h
+		mov		eax, 80000001h
 		cpuid
 
-		mov     eax, edx
-		jmp     short _RETEX
+		mov		eax, edx
+		jmp		short _RETEX
 
 _NOEX:
-		xor     eax, eax
-		mov     eax, eax
+		xor		eax, eax
+		mov		eax, eax
 		
 _RETEX:
 		retn   
@@ -624,7 +582,7 @@ _RETEX:
 
 void _psPrintCpuInfo()
 {
-	RwUInt32 features   = _psGetCpuFeatures();
+	RwUInt32 features	= _psGetCpuFeatures();
 	RwUInt32 FeaturesEx = _psGetCpuFeaturesEx();
 
 	debug("Running on a %s", _psGetCpuVendr());
@@ -641,9 +599,9 @@ void _psPrintCpuInfo()
  *****************************************************************************
  */
 #ifdef UNDER_CE
-#define CMDSTR  LPWSTR
+#define CMDSTR	LPWSTR
 #else
-#define CMDSTR  LPSTR
+#define CMDSTR	LPSTR
 #endif
 
 /*
@@ -659,9 +617,9 @@ psInitialise(void)
 	PsGlobal.fullScreen = FALSE;
 	
 	PsGlobal.dinterface = NULL;
-	PsGlobal.mouse     = NULL;
-	PsGlobal.joy1   = NULL;
-	PsGlobal.joy2   = NULL;
+	PsGlobal.mouse	   = NULL;
+	PsGlobal.joy1	= NULL;
+	PsGlobal.joy2	= NULL;
 
 	CFileMgr::Initialise();
 	
@@ -721,7 +679,7 @@ psInitialise(void)
 	if ( _dwOperatingSystemVersion == OS_WIN95 )
 	{
 		MessageBoxW(NULL,
-					(LPCWSTR)TheText.Get("WIN_95"),  // Grand Theft Auto III cannot run on Windows 95
+					(LPCWSTR)TheText.Get("WIN_95"),	 // Grand Theft Auto III cannot run on Windows 95
 					(LPCWSTR)TheText.Get("WIN_TTL"), // Grand Theft Auto III
 					MB_OK);
 
@@ -731,7 +689,7 @@ psInitialise(void)
 	if ( dwDXVersion < 0x801 )
 	{
 		MessageBoxW(NULL,
-					(LPCWSTR)TheText.Get("WIN_DX"),  // Grand Theft Auto III requires at least DirectX version 8.1
+					(LPCWSTR)TheText.Get("WIN_DX"),	 // Grand Theft Auto III requires at least DirectX version 8.1
 					(LPCWSTR)TheText.Get("WIN_TTL"), // Grand Theft Auto III
 					MB_OK);
 
@@ -741,8 +699,8 @@ psInitialise(void)
 	MEMORYSTATUS memstats;
 	GlobalMemoryStatus(&memstats);
 	
-	_dwMemTotalPhys    = memstats.dwTotalPhys;
-	_dwMemAvailPhys    = memstats.dwAvailPhys;
+	_dwMemTotalPhys	   = memstats.dwTotalPhys;
+	_dwMemAvailPhys	   = memstats.dwAvailPhys;
 	_dwMemTotalVirtual = memstats.dwTotalVirtual;
 	_dwMemAvailVirtual = memstats.dwAvailVirtual;
 	
@@ -755,7 +713,7 @@ psInitialise(void)
 	
 	if ( _dwMemAvailVideo < (12 * 1024 * 1024) /*12 MB*/ )
 	{
-        MessageBoxW(NULL,
+		MessageBoxW(NULL,
 					(LPCWSTR)TheText.Get("WIN_VDM"), // Grand Theft Auto III requires at least 12MB of available video memory
 					(LPCWSTR)TheText.Get("WIN_TTL"), // Grand Theft Auto III
 					MB_OK);
@@ -830,9 +788,9 @@ RwChar **_psGetVideoModeList()
 	
 	_VMList = (RwChar **)RwCalloc(numModes, sizeof(RwChar*));
 	
-	for ( i = 0; i < numModes; i++  )
+	for ( i = 0; i < numModes; i++	)
 	{
-		RwVideoMode         vm;
+		RwVideoMode			vm;
 		
 		RwEngineGetVideoModeInfo(&vm, i);
 		
@@ -981,7 +939,7 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 
 				if (r.w != LOWORD(lParam) && r.h != HIWORD(lParam))
 				{
-					WINDOWPLACEMENT     wp;
+					WINDOWPLACEMENT		wp;
 
 					/* failed to create window of required size */
 					noMemory = TRUE;
@@ -1013,8 +971,8 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			 * as this can be disabled by the user, then if there is not enough 
 			 * memory things don't work.
 			 */
-			RECT               *newPos = (LPRECT) lParam;
-			RECT                rect;
+			RECT			   *newPos = (LPRECT) lParam;
+			RECT				rect;
 
 			/* redraw window */
 			if (RwInitialised && gGameState == GS_PLAYING_GAME)
@@ -1348,9 +1306,9 @@ UINT GetBestRefreshRate(UINT width, UINT height, UINT depth)
 RwBool
 psSelectDevice()
 {
-	RwVideoMode         vm;
-	RwInt32             subSysNum;
-	RwInt32             AutoRenderer = 0;
+	RwVideoMode			vm;
+	RwInt32				subSysNum;
+	RwInt32				AutoRenderer = 0;
 	
 
 	RwBool modeFound = FALSE;
@@ -1395,9 +1353,9 @@ psSelectDevice()
 			while ( !modeFound && GcurSelVM < RwEngineGetNumVideoModes() )
 			{
 				RwEngineGetVideoModeInfo(&vm, GcurSelVM);
-				if ( defaultFullscreenRes   && vm.width  != 640 
+				if ( defaultFullscreenRes	&& vm.width	 != 640 
 											|| vm.height != 480
-											|| vm.depth  != 16
+											|| vm.depth	 != 16
 											|| !(vm.flags & rwVIDEOMODEEXCLUSIVE) )
 					++GcurSelVM;
 				else
@@ -1581,36 +1539,36 @@ void InitialiseLanguage()
 {
 #pragma warning( push )
 #pragma warning( disable : 4302)
-	WORD primUserLCID   = PRIMARYLANGID(GetSystemDefaultLCID());
+	WORD primUserLCID	= PRIMARYLANGID(GetSystemDefaultLCID());
 	WORD primSystemLCID = PRIMARYLANGID(GetUserDefaultLCID());
-	WORD primLayout     = PRIMARYLANGID(GetKeyboardLayout(0));
+	WORD primLayout		= PRIMARYLANGID(GetKeyboardLayout(0));
 	
-	WORD subUserLCID    = SUBLANGID(GetSystemDefaultLCID());
-	WORD subSystemLCID  = SUBLANGID(GetUserDefaultLCID());
-	WORD subLayout      = SUBLANGID(GetKeyboardLayout(0));
+	WORD subUserLCID	= SUBLANGID(GetSystemDefaultLCID());
+	WORD subSystemLCID	= SUBLANGID(GetUserDefaultLCID());
+	WORD subLayout		= SUBLANGID(GetKeyboardLayout(0));
 #pragma warning( pop ) 
 	
-	if (   primUserLCID   == LANG_GERMAN
+	if (   primUserLCID	  == LANG_GERMAN
 		|| primSystemLCID == LANG_GERMAN
-		|| primLayout     == LANG_GERMAN )
+		|| primLayout	  == LANG_GERMAN )
 	{
 		CGame::nastyGame = false;
 		CMenuManager::m_PrefsAllowNastyGame = false;
 		CGame::germanGame = true;
 	}
 	
-	if (   primUserLCID   == LANG_FRENCH
+	if (   primUserLCID	  == LANG_FRENCH
 		|| primSystemLCID == LANG_FRENCH
-		|| primLayout     == LANG_FRENCH )
+		|| primLayout	  == LANG_FRENCH )
 	{
 		CGame::nastyGame = false;
 		CMenuManager::m_PrefsAllowNastyGame = false;
 		CGame::frenchGame = true;
 	}
 	
-	if (   subUserLCID   == SUBLANG_ENGLISH_AUS
+	if (   subUserLCID	 == SUBLANG_ENGLISH_AUS
 		|| subSystemLCID == SUBLANG_ENGLISH_AUS
-		|| subLayout     == SUBLANG_ENGLISH_AUS )
+		|| subLayout	 == SUBLANG_ENGLISH_AUS )
 		CGame::noProstitutes = true;
 	
 	Int32 lang;
@@ -1808,7 +1766,7 @@ void HandleExit()
  */
 int PASCAL
 _WinMain(HINSTANCE instance, 
-		HINSTANCE prevInstance  __RWUNUSED__, 
+		HINSTANCE prevInstance	__RWUNUSED__, 
 		CMDSTR cmdLine, 
 		int cmdShow)
 {
@@ -1981,7 +1939,7 @@ _WinMain(HINSTANCE instance,
 
 		RsMouseSetPos(&pos);
 		
-		WINDOWPLACEMENT     wp;
+		WINDOWPLACEMENT		wp;
 		wp.length = sizeof(WINDOWPLACEMENT);
 
 		/*
@@ -2287,21 +2245,21 @@ HRESULT _InputInitialiseMouse()
 	if( FAILED( hr = PSGLOBAL(dinterface)->CreateDevice( GUID_SysMouse, &PSGLOBAL(mouse), NULL ) ) )
 		return hr;
 	
-    // Set the data format to "mouse format" - a predefined data format 
-    //
-    // A data format specifies which controls on a device we
-    // are interested in, and how they should be reported.
-    //
-    // This tells DirectInput that we will be passing a
-    // DIMOUSESTATE2 structure to IDirectInputDevice::GetDeviceState.
-    if( FAILED( hr = PSGLOBAL(mouse)->SetDataFormat( &c_dfDIMouse2 ) ) )
-        return hr;
+	// Set the data format to "mouse format" - a predefined data format 
+	//
+	// A data format specifies which controls on a device we
+	// are interested in, and how they should be reported.
+	//
+	// This tells DirectInput that we will be passing a
+	// DIMOUSESTATE2 structure to IDirectInputDevice::GetDeviceState.
+	if( FAILED( hr = PSGLOBAL(mouse)->SetDataFormat( &c_dfDIMouse2 ) ) )
+		return hr;
 	
 	if( FAILED( hr = PSGLOBAL(mouse)->SetCooperativeLevel( PSGLOBAL(window), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND ) ) )
 		return hr;
 	
 	// Acquire the newly created device
-    PSGLOBAL(mouse)->Acquire();
+	PSGLOBAL(mouse)->Acquire();
 	
 	return S_OK;
 }
@@ -2312,9 +2270,9 @@ HRESULT _InputInitialiseMouse()
 RwV2d leftStickPos;
 RwV2d rightStickPos;
 
-HRESULT CapturePad(Int32 padID)
+HRESULT CapturePad(RwInt32 padID)
 {
-	HRESULT     hr;
+	HRESULT		hr;
 	DIJOYSTATE2 js; 
 	LPDIRECTINPUTDEVICE8 pPad = NULL;
 	
@@ -2324,21 +2282,21 @@ HRESULT CapturePad(Int32 padID)
 		return S_OK;
 	
 	// Poll the device to read the current state
-    hr = pPad->Poll();
+	hr = pPad->Poll();
 	
 	if( FAILED(hr) )
-    {
-        // DInput is telling us that the input stream has been
-        // interrupted. We aren't tracking any state between polls, so
-        // we don't have any special reset that needs to be done. We
-        // just re-acquire and try again.
-        hr = pPad->Acquire();
-        while( hr == DIERR_INPUTLOST ) 
-            hr = pPad->Acquire();
+	{
+		// DInput is telling us that the input stream has been
+		// interrupted. We aren't tracking any state between polls, so
+		// we don't have any special reset that needs to be done. We
+		// just re-acquire and try again.
+		hr = pPad->Acquire();
+		while( hr == DIERR_INPUTLOST ) 
+			hr = pPad->Acquire();
 
-        // hr may be DIERR_OTHERAPPHASPRIO or other errors.  This
-        // may occur when the app is minimized or in the process of 
-        // switching, so just try again later 
+		// hr may be DIERR_OTHERAPPHASPRIO or other errors.	 This
+		// may occur when the app is minimized or in the process of 
+		// switching, so just try again later 
 		
 		if( FAILED(hr) )
 			return hr; 
@@ -2346,11 +2304,11 @@ HRESULT CapturePad(Int32 padID)
 		hr = pPad->Poll();
 		if( FAILED(hr) )
 			return hr; 
-    }
+	}
 	
 	// Get the input's device state
-    if( FAILED( hr = pPad->GetDeviceState( sizeof(DIJOYSTATE2), &js ) ) )
-        return hr; // The device should have been acquired during the Poll()
+	if( FAILED( hr = pPad->GetDeviceState( sizeof(DIJOYSTATE2), &js ) ) )
+		return hr; // The device should have been acquired during the Poll()
 	
 	if ( ControlsManager.field_0 == true )
 	{
@@ -2362,7 +2320,7 @@ HRESULT CapturePad(Int32 padID)
 	else
 	{
 		memcpy(&ControlsManager.m_OldState, &ControlsManager.m_NewState, sizeof(DIJOYSTATE2));
-		memcpy(&ControlsManager.m_NewState, &js,                         sizeof(DIJOYSTATE2));
+		memcpy(&ControlsManager.m_NewState, &js,						 sizeof(DIJOYSTATE2));
 	}
 
 	RsPadButtonStatus bs;
@@ -2387,7 +2345,7 @@ HRESULT CapturePad(Int32 padID)
 		
 		if ( AllValidWinJoys.m_aJoys[bs.padID].m_bHasAxisR && AllValidWinJoys.m_aJoys[bs.padID].m_bHasAxisZ )
 		{
-			rightStickPos.x = (Float)js.lZ  / (Float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
+			rightStickPos.x = (Float)js.lZ	/ (Float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
 			rightStickPos.y = (Float)js.lRz / (Float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
 		}
 	}
@@ -2407,10 +2365,10 @@ HRESULT CapturePad(Int32 padID)
 		CPad *pad = CPad::GetPad(bs.padID);
 
 		if ( fabs(leftStickPos.x)  > 0.3f )
-			pad->PCTempJoyState.LeftStickX  = (Int32)(leftStickPos.x  * 128.0f);
+			pad->PCTempJoyState.LeftStickX	= (Int32)(leftStickPos.x  * 128.0f);
 		
 		if ( fabs(leftStickPos.y)  > 0.3f )
-			pad->PCTempJoyState.LeftStickY  = (Int32)(leftStickPos.y  * 128.0f);
+			pad->PCTempJoyState.LeftStickY	= (Int32)(leftStickPos.y  * 128.0f);
 		
 		if ( fabs(rightStickPos.x) > 0.3f )
 			pad->PCTempJoyState.RightStickX = (Int32)(rightStickPos.x * 128.0f);
@@ -2481,7 +2439,7 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 	range.diph.dwObj = DIJOFS_X;
 	if ( lpDevice != NULL )
 	{
-		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,  DIJOFS_X, DIPH_BYOFFSET ) ) )
+		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_X, DIPH_BYOFFSET ) ) )
 		{
 			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
 				return S_FALSE;
@@ -2493,7 +2451,7 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 	range.diph.dwObj = DIJOFS_Y;
 	if ( lpDevice != NULL )
 	{
-		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,  DIJOFS_Y, DIPH_BYOFFSET ) ) )
+		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_Y, DIPH_BYOFFSET ) ) )
 		{
 			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
 				return S_FALSE;
@@ -2505,7 +2463,7 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 	range.diph.dwObj = DIJOFS_Z;
 	if ( lpDevice != NULL )
 	{
-		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,  DIJOFS_Z, DIPH_BYOFFSET ) ) )
+		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_Z, DIPH_BYOFFSET ) ) )
 		{
 			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
 				return S_FALSE;
@@ -2517,12 +2475,12 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 	range.diph.dwObj = DIJOFS_RZ;
 	if ( lpDevice != NULL )
 	{
-		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,  DIJOFS_RZ, DIPH_BYOFFSET ) ) )
+		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_RZ, DIPH_BYOFFSET ) ) )
 		{
 			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
 				return S_FALSE;
 			else
-				AllValidWinJoys.m_aJoys[num].m_bHasAxisR = 1; // r rightStickPos.y
+				AllValidWinJoys.m_aJoys[num].m_bHasAxisR = true; // r rightStickPos.y
 		}
 	}
 	
@@ -2554,7 +2512,7 @@ HRESULT _InputAddJoys()
 
 HRESULT _InputGetMouseState(DIMOUSESTATE2 *state)
 {
-	HRESULT       hr;
+	HRESULT		  hr;
 	
 	if ( PSGLOBAL(mouse) == NULL )
 		return S_FALSE;
@@ -2565,16 +2523,16 @@ HRESULT _InputGetMouseState(DIMOUSESTATE2 *state)
 	hr = PSGLOBAL(mouse)->GetDeviceState( sizeof(DIMOUSESTATE2), state );
 
 	if( FAILED(hr) ) 
-    {
+	{
 		 // DirectInput may be telling us that the input stream has been
-        // interrupted.  We aren't tracking any state between polls, so
-        // we don't have any special reset that needs to be done.
-        // We just re-acquire and try again.
-        
-        // If input is lost then acquire and keep trying 
+		// interrupted.	 We aren't tracking any state between polls, so
+		// we don't have any special reset that needs to be done.
+		// We just re-acquire and try again.
+		
+		// If input is lost then acquire and keep trying 
 		hr = PSGLOBAL(mouse)->Acquire();
-        while( hr == DIERR_INPUTLOST ) 
-            hr = PSGLOBAL(mouse)->Acquire();
+		while( hr == DIERR_INPUTLOST ) 
+			hr = PSGLOBAL(mouse)->Acquire();
 		
 		ZeroMemory( state, sizeof(DIMOUSESTATE2) );
 		hr = PSGLOBAL(mouse)->GetDeviceState( sizeof(DIMOUSESTATE2), state );
@@ -2606,10 +2564,10 @@ BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, V
 	// Obtain an interface to the enumerated joystick. 
 	hr = PSGLOBAL(dinterface)->CreateDevice( pdidInstance->guidInstance, &pJoystick, NULL );
 	
-    // If it failed, then we can't use this joystick. (Maybe the user unplugged
-    // it while we were in the middle of enumerating it.)
+	// If it failed, then we can't use this joystick. (Maybe the user unplugged
+	// it while we were in the middle of enumerating it.)
 	if( FAILED(hr) ) 
-        return DIENUM_CONTINUE;
+		return DIENUM_CONTINUE;
 	
 	if( FAILED( hr = pJoystick->SetDataFormat( &c_dfDIJoystick2 ) ) )
 	{
@@ -2622,15 +2580,15 @@ BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, V
 	if( FAILED( hr = pJoystick->SetCooperativeLevel( PSGLOBAL(window), DISCL_NONEXCLUSIVE) ) )
 	{
 		pJoystick->Release();
-        return DIENUM_CONTINUE;
+		return DIENUM_CONTINUE;
 	}
 	
 	if ( Count == 2 )
 		return DIENUM_STOP;
 	
-    // Stop enumeration. Note: we're just taking the first joystick we get. You
-    // could store all the enumerated joysticks and let the user pick.
-    return DIENUM_CONTINUE;
+	// Stop enumeration. Note: we're just taking the first joystick we get. You
+	// could store all the enumerated joysticks and let the user pick.
+	return DIENUM_CONTINUE;
 }
 
 BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key)
