@@ -138,7 +138,10 @@ public:
 		while(n--)
 			freeHead.Insert(&links[n]);
 	}
-	// Shutdown
+	void Shutdown(void){
+		delete[] links;
+		links = nil;
+	}
 	void Clear(void){
 		while(head.next != &tail)
 			Remove(head.next);

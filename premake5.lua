@@ -11,6 +11,7 @@ workspace "re3"
 	files { "src/weapons/*.*" }
 	files { "src/render/*.*" }
 	files { "src/control/*.*" }
+	files { "src/animation/*.*" }
 	files { "src/audio/*.*" }
 
 	includedirs { "src" }
@@ -22,6 +23,7 @@ workspace "re3"
 	includedirs { "src/render" }
 	includedirs { "src/control" }
 	includedirs { "src/audio" }
+	includedirs { "src/animation" }
 	includedirs { "dxsdk/include" }
 	includedirs { "rwsdk/include/d3d8" }
 	
