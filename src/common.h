@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include <math.h>
-#include <assert.h>
+//#include <assert.h>
 #include <new>
 
 #ifdef WITHD3D
@@ -125,7 +125,7 @@ inline float sq(float x) { return x*x; }
 #define DEGTORAD(x) ((x) * PI / 180.0f)
 #define RADTODEG(x) ((x) * 180.0f / PI)
 
-#if USE_PS2_RAND == TRUE
+#ifdef USE_PS2_RAND
 #define MYRAND_MAX		65535
 #else
 #define MYRAND_MAX		32767
@@ -134,8 +134,15 @@ inline float sq(float x) { return x*x; }
 int myrand(void);
 void mysrand(unsigned int seed);
 
-#define debug(f, ...) printf("[DBG]: " f "\n", __VA_ARGS__)
-#define DEV(f, ...) printf("[DEV]: " f "", __VA_ARGS__)
+void re3_debug(char *format, ...);
+void re3_trace(const char *filename, unsigned int lineno, const char *func, char *format, ...);
+void re3_assert(const char *expr, const char *filename, unsigned int lineno, const char *func);
+
+#define debug(f, ...) re3_debug("[DBG]: " f, __VA_ARGS__)
+#define DEV(f, ...)   re3_debug("[DEV]: " f, __VA_ARGS__)
+#define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, __VA_ARGS__)
+
+#define assert(_Expression) (void)( (!!(_Expression)) || (re3_assert(#_Expression, __FILE__, __LINE__, __FUNCTION__), 0) )
 #define ASSERT assert
 
 #define _TODO(x)      

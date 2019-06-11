@@ -1,4 +1,5 @@
 #include <direct.h>
+#include <csignal>
 #include <Windows.h>
 #include "common.h"
 #include "patcher.h"
@@ -20,7 +21,7 @@ WRAPPER void gtadelete(void *p) { EAXJMP(0x5A07E0); }
 void *operator new(size_t sz) { return gtanew(sz); }
 void operator delete(void *ptr) noexcept { gtadelete(ptr); }
 
-#if USE_PS2_RAND == TRUE
+#ifdef USE_PS2_RAND
 unsigned __int64 myrand_seed = 1;
 #else
 unsigned long int myrand_seed = 1;
@@ -29,7 +30,7 @@ unsigned long int myrand_seed = 1;
 int
 myrand(void)
 {
-#if USE_PS2_RAND == TRUE
+#ifdef USE_PS2_RAND
 	// Use our own implementation of rand, stolen from PS2
 	myrand_seed = 0x5851F42D4C957F2D * myrand_seed + 1;
 	return ((myrand_seed >> 32) & 0x7FFFFFFF);
@@ -136,6 +137,79 @@ HeadlightsFix_DontLimit:
 	}
 }
 
+const int   re3_buffsize = 1024;
+static char re3_buff[re3_buffsize];
+
+void re3_assert(const char *expr, const char *filename, unsigned int lineno, const char *func)
+{
+	int nCode;
+
+	strcpy_s(re3_buff, re3_buffsize, "Assertion failed!" );
+	strcat_s(re3_buff, re3_buffsize, "\n" );	
+	
+	strcat_s(re3_buff, re3_buffsize, "File: ");
+	strcat_s(re3_buff, re3_buffsize, filename );
+	strcat_s(re3_buff, re3_buffsize, "\n" );	
+
+	strcat_s(re3_buff, re3_buffsize, "Line: " );
+	_itoa_s( lineno, re3_buff + strlen(re3_buff), re3_buffsize - strlen(re3_buff), 10 );
+	strcat_s(re3_buff, re3_buffsize, "\n");
+	
+	strcat_s(re3_buff, re3_buffsize, "Function: ");
+	strcat_s(re3_buff, re3_buffsize, func );
+	strcat_s(re3_buff, re3_buffsize, "\n" );	
+	
+	strcat_s(re3_buff, re3_buffsize, "Expression: ");
+	strcat_s(re3_buff, re3_buffsize, expr);
+	strcat_s(re3_buff, re3_buffsize, "\n");
+
+	strcat_s(re3_buff, re3_buffsize, "\n" );
+	strcat_s(re3_buff, re3_buffsize, "(Press Retry to debug the application)");
+
+
+	nCode = ::MessageBoxA(NULL, re3_buff, "RE3 Assertion Failed!",
+		MB_ABORTRETRYIGNORE|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
+
+	if (nCode == IDABORT)
+	{
+		raise(SIGABRT);
+		_exit(3);
+	}
+
+	if (nCode == IDRETRY)
+	{
+		__debugbreak();
+		return;
+	}
+
+	if (nCode == IDIGNORE)
+		return;
+
+	abort();
+}
+
+void re3_debug(char *format, ...)
+{
+	va_list va;
+	va_start(va, format);
+	vsprintf_s(re3_buff, re3_buffsize, format, va);
+	va_end(va);
+
+	printf("%s\n", re3_buff);
+}
+
+void re3_trace(const char *filename, unsigned int lineno, const char *func, char *format, ...)
+{
+	char buff[re3_buffsize *2];
+	va_list va;
+	va_start(va, format);
+	vsprintf_s(re3_buff, re3_buffsize, format, va);
+	va_end(va);
+	
+	sprintf_s(buff, re3_buffsize * 2, "[%s.%s:%d]: %s", filename, func, lineno, re3_buff);
+	
+	OutputDebugStringA(buff);
+}
 
 void
 patch()

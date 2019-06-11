@@ -17,6 +17,7 @@ WRAPPER void CControllerConfigManager::MakeControllerActionsBlank() { EAXJMP(0x5
 WRAPPER void CControllerConfigManager::InitDefaultControlConfiguration() { EAXJMP(0x58B930); }
 WRAPPER void CControllerConfigManager::InitDefaultControlConfigMouse(CMouseControllerState const &mousestate) { EAXJMP(0x58BD00); }
 WRAPPER Int32 CControllerConfigManager::GetJoyButtonJustDown() { EAXJMP(0x58B7D0); }
+WRAPPER void CControllerConfigManager::InitDefaultControlConfigJoyPad(unsigned int buttons) { EAXJMP(0x58BD90); }
 
 void CControllerConfigManager::LoadSettings(Int32 file)
 {

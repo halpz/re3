@@ -3,6 +3,7 @@
 #define DIRECTINPUT_VERSION 0x0800
 #define WM_GRAPHNOTIFY  WM_USER+13
 
+#include <winerror.h>
 #include <windows.h>
 #include <mmsystem.h>
 #include <shellapi.h>
@@ -17,15 +18,18 @@
 
 #pragma warning( push )
 #pragma warning( disable : 4005)
+#include <d3d8.h>
 #include <ddraw.h>
 #include <dinput.h>
 #include <DShow.h>
-//#include <dmusici.h>
-#pragma warning( pop ) 
+#pragma warning( pop )
 
+#pragma comment( lib, "d3d8.lib" )
+#pragma comment( lib, "ddraw.lib" )
 #pragma comment( lib, "Winmm.lib" )
 #pragma comment( lib, "dxguid.lib" )
 #pragma comment( lib, "strmiids.lib" )
+#pragma comment( lib, "dinput8.lib" )
 
 #if (defined(_MSC_VER))
 #include <tchar.h>
@@ -40,15 +44,24 @@
 #define MAX_SUBSYSTEMS      (16)
 
 
-static RwBool       ForegroundApp = TRUE;
-static RwBool       RwInitialised = FALSE;
+//static RwBool       ForegroundApp = TRUE;
+static RwBool       &ForegroundApp = *(RwBool*)0x060F000;
+
+//static RwBool       RwInitialised = FALSE;
+static RwBool       &RwInitialised = *(RwBool*)0x885B88;
+
 static RwSubSystemInfo GsubSysInfo[MAX_SUBSYSTEMS];
 static RwInt32      GnumSubSystems = 0;
 static RwInt32      GcurSel = 0, GcurSelVM = 0;
 
-static RwBool startupDeactivate;
-static RwBool useDefault;
-static RwBool defaultFullscreenRes = TRUE;
+//static RwBool startupDeactivate;
+static RwBool &startupDeactivate = *(RwBool*)0x8E2878;
+
+//static RwBool useDefault;
+static RwBool &useDefault = *(RwBool*)0x6510D4;
+
+//static RwBool defaultFullscreenRes = TRUE;
+static RwBool &defaultFullscreenRes = *(RwBool*)0x60EFFC;
 
 /* Class name for the MS Window's window class. */
 
@@ -66,10 +79,10 @@ typedef struct
 	
 	DWORD field_14;
 
-	LPDIRECTINPUT8       diInterface;
-	LPDIRECTINPUTDEVICE8 diMouse;
-	LPDIRECTINPUTDEVICE8 diDevice1;
-	LPDIRECTINPUTDEVICE8 diDevice2;
+	LPDIRECTINPUT8       dinterface;
+	LPDIRECTINPUTDEVICE8 mouse;
+	LPDIRECTINPUTDEVICE8 joy1;
+	LPDIRECTINPUTDEVICE8 joy2;
 }
 psGlobalType;
 
@@ -84,9 +97,7 @@ static psGlobalType &PsGlobal = *(psGlobalType*)0x72CF60;
 
 #define SAFE_RELEASE(x) { if (x) x->Release(); x = NULL; }
 #define JIF(x) if (FAILED(hr=(x))) \
-	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return hr;}
-	
- 
+	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return;}
 
 #include "common.h"
 #include "patcher.h"
@@ -123,34 +134,81 @@ DWORD _dwMemAvailVideo;
 DWORD &_dwOperatingSystemVersion = *(DWORD*)0x70F290;
 
 RwUInt32 &gGameState = *(RwUInt32*)0x8F5838;
-
-//
-WRAPPER RwUInt32 GetBestRefreshRate(RwUInt32 width, RwUInt32 height, RwUInt32 depth) { EAXJMP(0x581CB0); }
-WRAPPER HRESULT _GetVideoMemInfo(DWORD *total, DWORD *avaible) { EAXJMP(0x580F30); }
-
-WRAPPER BOOL _InputTranslateKey(RsKeyCodes *rs, DWORD flag, UINT key) { EAXJMP(0x583A20); }
-WRAPPER void _InputTranslateShiftKeyUpDown(RsKeyCodes *rs) { EAXJMP(0x583DC0); }
-WRAPPER HRESULT _InputInitialise() { EAXJMP(0x5830D0); }
-WRAPPER void _InputShutdown() { EAXJMP(0x583910); }
-WRAPPER HRESULT _InputInitialiseMouse() { EAXJMP(0x583110); }
-WRAPPER void _InputInitialiseJoys() { EAXJMP(0x583580); }
 WRAPPER Bool InitialiseGame(void) { EAXJMP(0x48E7E0); }
+
 WRAPPER const Char *GetLevelSplashScreen(Int32 number) { EAXJMP(0x48D750); }
 //
 
 void LoadingScreen(char const *msg1, char const *msg2, char const *screen);
 CSprite2d *LoadSplash(const char *name);
 
+
 void InitialiseLanguage();
 RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode);
-HRESULT CenterVideo(void);
+void CenterVideo(void);
 void CloseClip(void);
 
+HRESULT _InputInitialise();
+HRESULT _InputInitialiseMouse();
+HRESULT CapturePad(Int32 padID);
+void _InputInitialiseJoys();
+HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num);
+HRESULT _InputAddJoys();
+HRESULT _InputGetMouseState(DIMOUSESTATE2 *state);
+void _InputShutdown();
+BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext );
+BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key);
+void _InputTranslateShiftKeyUpDown(RsKeyCodes *rs);;
+BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, bool bDown);
+BOOL _InputIsExtended(INT flag);
 /**/
 
-_TODO("")
-//CJoySticks::CJoySticks((void))	00580B30
-//CJoySticks::ClearJoyInfo((int))	00580B50
+enum eJoypadState
+{
+  JOYPAD_UNUSED,
+  JOYPAD_ATTACHED,
+};
+
+struct tJoy
+{
+	eJoypadState m_State;
+	Bool m_bInitialised;
+	Bool m_bHasAxisZ;
+	Bool m_bHasAxisR;
+	char _pad0;
+	Int32 m_nVendorID;
+	Int32 m_nProductID;
+};
+
+class CJoySticks
+{
+public:
+	tJoy m_aJoys[2];
+	
+	CJoySticks();
+	void ClearJoyInfo(int joyID);
+};
+
+static CJoySticks AllValidWinJoys;
+
+CJoySticks::CJoySticks()
+{
+	for (int i = 0; i < _TODOCONST(2); i++)
+	{
+		ClearJoyInfo(i);
+	}
+}
+
+void CJoySticks::ClearJoyInfo(int joyID)
+{
+	
+	m_aJoys[joyID].m_State = JOYPAD_UNUSED;
+	m_aJoys[joyID].m_bInitialised = false;
+	m_aJoys[joyID].m_bHasAxisZ = false;
+	m_aJoys[joyID].m_bHasAxisR = false;
+}
+
+
 
 /*
  *****************************************************************************
@@ -368,8 +426,25 @@ InitInstance(HANDLE instance)
 						(HWND)NULL, (HMENU)NULL, (HINSTANCE)instance, NULL);
 }
 
-_TODO("")
-//_GetVideoMemInfo	0x580F30
+void _GetVideoMemInfo(LPDWORD total, LPDWORD avaible)
+{
+	HRESULT hr;
+	LPDIRECTDRAW7 pDD7;
+	
+	hr = DirectDrawCreateEx(NULL, (VOID**)&pDD7, IID_IDirectDraw7, NULL);
+	
+	if ( FAILED(hr) )
+		return;
+	
+	DDSCAPS2 caps;
+	
+	ZeroMemory(&caps, sizeof(DDSCAPS2));
+	caps.dwCaps = DDSCAPS_VIDEOMEMORY;
+	
+	pDD7->GetAvailableVidMem(&caps, total, avaible);
+	
+	pDD7->Release();
+}
 
 /*
  *****************************************************************************
@@ -583,10 +658,10 @@ psInitialise(void)
 	
 	PsGlobal.fullScreen = FALSE;
 	
-	PsGlobal.diInterface = NULL;
-	PsGlobal.diMouse     = NULL;
-	PsGlobal.diDevice1   = NULL;
-	PsGlobal.diDevice2   = NULL;
+	PsGlobal.dinterface = NULL;
+	PsGlobal.mouse     = NULL;
+	PsGlobal.joy1   = NULL;
+	PsGlobal.joy2   = NULL;
 
 	CFileMgr::Initialise();
 	
@@ -597,6 +672,7 @@ psInitialise(void)
 	FrontEndMenuManager.LoadSettings();
 	
 	gGameState = GS_START_UP;
+	TRACE("gGameState = GS_START_UP");
 	
 	_psPrintCpuInfo();
 	
@@ -809,9 +885,11 @@ void _psSelectScreenVM(RwInt32 videoMode)
 /*
  *****************************************************************************
  */
-HRESULT WaitForState(FILTER_STATE State)
+void WaitForState(FILTER_STATE State)
 {
 	HRESULT hr;
+	
+	ASSERT(pMC != NULL);
 	
 	// Make sure we have switched to the required state
 	LONG   lfs;
@@ -819,45 +897,51 @@ HRESULT WaitForState(FILTER_STATE State)
 	{
 		hr = pMC->GetState(10, &lfs);
 	} while (State != lfs);
-	
-	return hr;
 }
 
 /*
  *****************************************************************************
  */
-HRESULT HandleGraphEvent(void)
+void HandleGraphEvent(void)
 {
 	LONG evCode, evParam1, evParam2;
 	HRESULT hr=S_OK;
+	
+	ASSERT(pME != NULL);
 
 	// Process all queued events
-	while(SUCCEEDED(pME->GetEvent(&evCode, (LONG_PTR *) &evParam1,
-					(LONG_PTR *) &evParam2, 0)))
+	while (SUCCEEDED(pME->GetEvent(&evCode, (LONG_PTR *)&evParam1,
+		(LONG_PTR *)&evParam2, 0)))
 	{
 		// Free memory associated with callback, since we're not using it
 		hr = pME->FreeEventParams(evCode, evParam1, evParam2);
 
 		// If this is the end of the clip, reset to beginning
-		if(EC_COMPLETE == evCode)
+		if (EC_COMPLETE == evCode)
 		{
-			switch ( gGameState )
+			switch (gGameState)
 			{
 				case GS_LOGO_MPEG:
+				{
 					gGameState = GS_INIT_INTRO_MPEG;
+					TRACE("gGameState = GS_INIT_INTRO_MPEG");
 					break;
+				}
 				case GS_INTRO_MPEG:
+				{
 					gGameState = GS_INIT_ONCE;
+					TRACE("gGameState = GS_INIT_ONCE");
 					break;
+				}
 				default:
+				{
 					break;
+				}
 			}
 
 			pME->SetNotifyWindow((OAHWND)NULL, 0, 0);
 		}
 	}
-
-	return hr;
 }
 
 /*
@@ -1066,6 +1150,8 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 				case GS_LOGO_MPEG:
 				case GS_INTRO_MPEG:
 				{
+					ASSERT(pMC != NULL);
+					
 					LONG state;
 					pMC->GetState(10, &state);
 					
@@ -1209,9 +1295,52 @@ RwBool IsForegroundApp()
 	return !!ForegroundApp;
 }
 
-_TODO("")
-//GetBestRefreshRate(uint,uint,uint) 00581CB0
+UINT GetBestRefreshRate(UINT width, UINT height, UINT depth)
+{
+	LPDIRECT3D8 d3d = Direct3DCreate8(D3D_SDK_VERSION);
+	
+	ASSERT(d3d != NULL);
+	
+	INT refreshRate = -1;
+	D3DFORMAT format;
 
+	if ( depth == 32 )
+		format = D3DFMT_X8R8G8B8;
+	else if ( depth == 24 )
+		format = D3DFMT_R8G8B8;
+	else
+		format = D3DFMT_R5G6B5;
+	
+	UINT modeCount = d3d->GetAdapterModeCount(GcurSel);
+	
+	for ( UINT i = 0; i < modeCount; i++ )
+	{
+		D3DDISPLAYMODE mode;
+		
+		d3d->EnumAdapterModes(GcurSel, i, &mode);
+		
+		if ( mode.Width == width && mode.Height == height && mode.Format == format )
+		{
+			if ( mode.RefreshRate == 0 )
+				return 0;
+#pragma warning( push )
+#pragma warning( disable : 4018)
+
+			if ( mode.RefreshRate < refreshRate && mode.RefreshRate >= 60 )
+				refreshRate = mode.RefreshRate;
+#pragma warning( pop ) 
+		}
+	}
+	
+#ifdef FIX_BUGS
+	d3d->Release();
+#endif
+	
+	if ( refreshRate == -1 )
+		return -1;
+
+	return refreshRate;
+}
 
 /*
  *****************************************************************************
@@ -1298,12 +1427,12 @@ psSelectDevice()
 	{
 		debug("%dx%dx%d", vm.width, vm.height, vm.depth);
 		
-		RwUInt32 refresh = GetBestRefreshRate(vm.width, vm.height, vm.depth);
+		UINT refresh = GetBestRefreshRate(vm.width, vm.height, vm.depth);
 		
-		if ( refresh != (RwUInt32)-1 )
+		if ( refresh != (UINT)-1 )
 		{
 			debug("refresh %d", refresh);
-			RwD3D8EngineSetRefreshRate(refresh);
+			RwD3D8EngineSetRefreshRate((RwUInt32)refresh);
 		}
 	}
 	
@@ -1553,11 +1682,13 @@ void InitialiseLanguage()
 /*
  *****************************************************************************
  */
-HRESULT CenterVideo(void)
+void CenterVideo(void)
 {
 	HRESULT hr = S_OK;
 	RECT rect;
 
+	ASSERT(pVW != NULL);
+	
 	GetClientRect(PSGLOBAL(window), &rect);
 
 	JIF(pVW->SetWindowPosition(rect.left, rect.top, rect.right, rect.bottom));
@@ -1565,14 +1696,12 @@ HRESULT CenterVideo(void)
 	JIF(pVW->put_MessageDrain((OAHWND) PSGLOBAL(window)));
 
 	SetFocus(PSGLOBAL(window));
-
-	return hr;
 }
 
 /*
  *****************************************************************************
  */
-HRESULT PlayMovieInWindow(int cmdShow, LPTSTR szFile)
+void PlayMovieInWindow(int cmdShow, LPTSTR szFile)
 {
 	WCHAR wFileName[256];
 	HRESULT hr;
@@ -1616,11 +1745,14 @@ HRESULT PlayMovieInWindow(int cmdShow, LPTSTR szFile)
 
 		SetFocus(PSGLOBAL(window));
 	}
+	
+	ASSERT(pGB != NULL);
+	ASSERT(pVW != NULL);
+	ASSERT(pME != NULL);
+	ASSERT(pMC != NULL);
 
 	if(FAILED(hr))
 		CloseClip();
-
-	return hr;
 }
 
 /*
@@ -1825,6 +1957,17 @@ _WinMain(HINSTANCE instance,
 	}
 	
 	SetErrorMode(SEM_FAILCRITICALERRORS);
+
+
+#ifdef NO_MOVIES
+	gGameState = GS_INIT_FRONTEND;
+	TRACE("gGameState = GS_INIT_FRONTEND");
+	
+	LoadingScreen(NULL, NULL, "loadsc0");
+	if ( !CGame::InitialiseOnceAfterRW() )
+		RsGlobal.quit = TRUE;
+#endif				
+						
 	
 	while ( TRUE )
 	{
@@ -1860,12 +2003,13 @@ _WinMain(HINSTANCE instance,
 				}
 			}
 			else if( ForegroundApp )
-			{				
+			{
 				switch ( gGameState )
 				{
 					case GS_START_UP:
 					{
 						gGameState = GS_INIT_LOGO_MPEG;
+						TRACE("gGameState = GS_INIT_LOGO_MPEG");
 						break;
 					}
 					
@@ -1874,13 +2018,15 @@ _WinMain(HINSTANCE instance,
 						if ( !startupDeactivate )
 							PlayMovieInWindow(cmdShow, "movies\\Logo.mpg");
 						gGameState = GS_LOGO_MPEG;
+						TRACE("gGameState = GS_LOGO_MPEG;");
 						break;
 					}
 					
 					case GS_LOGO_MPEG:
 					{
 						CPad::UpdatePads();
-						if ( startupDeactivate || ControlsManager.GetJoyButtonJustDown() )
+
+						if ( startupDeactivate || ControlsManager.GetJoyButtonJustDown() != 0 )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetLeftMouseJustDown() )
 							++gGameState;
@@ -1892,6 +2038,8 @@ _WinMain(HINSTANCE instance,
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetTabJustDown() )
 							++gGameState;
+
+						break;
 					}
 					
 					case GS_INIT_INTRO_MPEG:
@@ -1906,13 +2054,15 @@ _WinMain(HINSTANCE instance,
 							PlayMovieInWindow(cmdShow, "movies\\GTAtitles.mpg");
 						
 						gGameState = GS_INTRO_MPEG;
+						TRACE("gGameState = GS_INTRO_MPEG;");
 						break;
 					}
 					
 					case GS_INTRO_MPEG:
 					{
 						CPad::UpdatePads();
-						if ( startupDeactivate || ControlsManager.GetJoyButtonJustDown() )
+
+						if ( startupDeactivate || ControlsManager.GetJoyButtonJustDown() != 0 )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetLeftMouseJustDown() )
 							++gGameState;
@@ -1924,6 +2074,8 @@ _WinMain(HINSTANCE instance,
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetTabJustDown() )
 							++gGameState;
+
+						break;
 					}
 					
 					case GS_INIT_ONCE:
@@ -1937,6 +2089,7 @@ _WinMain(HINSTANCE instance,
 							RsGlobal.quit = TRUE;
 						
 						gGameState = GS_INIT_FRONTEND;
+						TRACE("gGameState = GS_INIT_FRONTEND;");
 						break;
 					}
 					
@@ -1950,12 +2103,13 @@ _WinMain(HINSTANCE instance,
 						
 						if ( defaultFullscreenRes )
 						{
-							defaultFullscreenRes = 0;
+							defaultFullscreenRes = FALSE;
 							FrontEndMenuManager.m_nPrefsVideoMode = GcurSelVM;
 							FrontEndMenuManager.m_nDisplayVideoMode = GcurSelVM;
 						}
 						
 						gGameState = GS_FRONTEND;
+						TRACE("gGameState = GS_FRONTEND;");
 						break;
 					}
 					
@@ -1967,13 +2121,17 @@ _WinMain(HINSTANCE instance,
 							RsEventHandler(rsFRONTENDIDLE, NULL);
 
 						if ( !FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bLoadingSavedGame )
+						{
 							gGameState = GS_INIT_PLAYING_GAME;
+							TRACE("gGameState = GS_INIT_PLAYING_GAME;");
+						}
 
 						if ( FrontEndMenuManager.m_bLoadingSavedGame )
 						{
 							InitialiseGame();
 							FrontEndMenuManager.m_bGameNotLoaded = false;
 							gGameState = GS_PLAYING_GAME;
+							TRACE("gGameState = GS_PLAYING_GAME;");
 						}
 						break;
 					}
@@ -1983,6 +2141,7 @@ _WinMain(HINSTANCE instance,
 						InitialiseGame();
 						FrontEndMenuManager.m_bGameNotLoaded = false;
 						gGameState = GS_PLAYING_GAME;
+						TRACE("gGameState = GS_PLAYING_GAME;");
 						break;
 					}
 					
@@ -2044,9 +2203,15 @@ _WinMain(HINSTANCE instance,
 			CTimer::Stop();
 			
 			if ( FrontEndMenuManager.m_bFirstTime == true )
+			{
 				gGameState = GS_INIT_FRONTEND;
+				TRACE("gGameState = GS_INIT_FRONTEND;");
+			}
 			else
+			{
 				gGameState = GS_INIT_PLAYING_GAME;
+				TRACE("gGameState = GS_INIT_PLAYING_GAME;");
+			}
 		}
 		
 		FrontEndMenuManager.m_bFirstTime = false;
@@ -2098,23 +2263,795 @@ _WinMain(HINSTANCE instance,
  *****************************************************************************
  */
 
-_TODO("");
-// _InputInitialise	.text	005830D0	00000033	00000000	00000000	R	.	.	.	.	.	.
-//_InputInitialiseMouse	.text	00583110	00000073	00000004	00000000	R	.	.	.	.	.	.
-//CapturePad(int)	.text	00583190	000003E7	00000128	00000004	R	.	.	.	.	.	.
-//_InputInitialiseJoys	.text	00583580	000000EA	00000044	00000000	R	.	.	.	.	.	.
-//_InputAddJoyStick	.text	00583670	00000197	00000164	00000008	R	.	.	.	.	.	.
-//_InputAddJoys	.text	00583810	0000005B	00000004	00000000	R	.	.	.	.	.	.
-//_InputGetMouseState	.text	00583870	00000095	00000008	00000004	R	.	.	.	.	T	.
-//_InputShutdown	.text	00583910	00000021	00000004	00000000	R	.	.	.	.	.	.
-//_InputEnumDevicesCallback	.text	00583940	000000DB	00000008	00000004	R	.	.	.	.	.	.
-//_InputTranslateKey	.text	00583A20	0000039C	00000008	0000000C	R	.	.	.	.	T	.
-//_InputTranslateShiftKeyUpDown	.text	00583DC0	00000088	00000004	00000004	R	.	.	.	.	T	.
-//_InputTranslateShiftKey	.text	00583E50	00000085	00000008	00000009	R	.	.	.	.	T	.
-//_InputIsExtended	.text	00583EE0	00000013	00000000	00000004	R	.	.	.	.	.	.
+#define DEVICE_AXIS_MIN -2000
+#define DEVICE_AXIS_MAX 2000
+
+
+HRESULT _InputInitialise()
+{
+	HRESULT hr;
+
+	// Create a DInput object
+	if( FAILED( hr = DirectInput8Create( GetModuleHandle(NULL), DIRECTINPUT_VERSION, 
+										IID_IDirectInput8, (VOID**)&PSGLOBAL(dinterface), NULL ) ) )
+		return hr;
+		
+	return S_OK;
+}
+
+HRESULT _InputInitialiseMouse()
+{
+	HRESULT hr;
+
+	// Obtain an interface to the system mouse device.
+	if( FAILED( hr = PSGLOBAL(dinterface)->CreateDevice( GUID_SysMouse, &PSGLOBAL(mouse), NULL ) ) )
+		return hr;
+	
+    // Set the data format to "mouse format" - a predefined data format 
+    //
+    // A data format specifies which controls on a device we
+    // are interested in, and how they should be reported.
+    //
+    // This tells DirectInput that we will be passing a
+    // DIMOUSESTATE2 structure to IDirectInputDevice::GetDeviceState.
+    if( FAILED( hr = PSGLOBAL(mouse)->SetDataFormat( &c_dfDIMouse2 ) ) )
+        return hr;
+	
+	if( FAILED( hr = PSGLOBAL(mouse)->SetCooperativeLevel( PSGLOBAL(window), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND ) ) )
+		return hr;
+	
+	// Acquire the newly created device
+    PSGLOBAL(mouse)->Acquire();
+	
+	return S_OK;
+}
+
+//#define SUCCEEDED(Status) ((HRESULT)(Status) >= 0)
+//#define FAILED(Status) ((HRESULT)(Status)<0)
+
+RwV2d leftStickPos;
+RwV2d rightStickPos;
+
+HRESULT CapturePad(Int32 padID)
+{
+	HRESULT     hr;
+	DIJOYSTATE2 js; 
+	LPDIRECTINPUTDEVICE8 pPad = NULL;
+	
+	pPad = ( padID == 0 ) ? PSGLOBAL(joy1) : PSGLOBAL(joy2);
+	
+	if ( NULL == pPad )
+		return S_OK;
+	
+	// Poll the device to read the current state
+    hr = pPad->Poll();
+	
+	if( FAILED(hr) )
+    {
+        // DInput is telling us that the input stream has been
+        // interrupted. We aren't tracking any state between polls, so
+        // we don't have any special reset that needs to be done. We
+        // just re-acquire and try again.
+        hr = pPad->Acquire();
+        while( hr == DIERR_INPUTLOST ) 
+            hr = pPad->Acquire();
+
+        // hr may be DIERR_OTHERAPPHASPRIO or other errors.  This
+        // may occur when the app is minimized or in the process of 
+        // switching, so just try again later 
+		
+		if( FAILED(hr) )
+			return hr; 
+		
+		hr = pPad->Poll();
+		if( FAILED(hr) )
+			return hr; 
+    }
+	
+	// Get the input's device state
+    if( FAILED( hr = pPad->GetDeviceState( sizeof(DIJOYSTATE2), &js ) ) )
+        return hr; // The device should have been acquired during the Poll()
+	
+	if ( ControlsManager.field_0 == true )
+	{
+		memcpy(&ControlsManager.m_OldState, &js, sizeof(DIJOYSTATE2));
+		memcpy(&ControlsManager.m_NewState, &js, sizeof(DIJOYSTATE2));
+		
+		ControlsManager.field_0 = false;
+	}
+	else
+	{
+		memcpy(&ControlsManager.m_OldState, &ControlsManager.m_NewState, sizeof(DIJOYSTATE2));
+		memcpy(&ControlsManager.m_NewState, &js,                         sizeof(DIJOYSTATE2));
+	}
+
+	RsPadButtonStatus bs;
+	bs.padID = padID;
+
+	RsPadEventHandler(rsPADBUTTONUP, (void *)&bs);
+	
+	Bool deviceAvailable = pPad != NULL;
+	
+	if ( deviceAvailable )
+	{
+		leftStickPos.x = (Float)js.lX / (Float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
+		leftStickPos.y = (Float)js.lY / (Float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
+		
+		if (LOWORD(js.rgdwPOV[0]) != -1)
+		{
+			Float angle = DEGTORAD((Float)js.rgdwPOV[0] / 100.0f);
+
+			leftStickPos.x = sin(angle);
+			leftStickPos.y = -cos(angle);
+		}
+		
+		if ( AllValidWinJoys.m_aJoys[bs.padID].m_bHasAxisR && AllValidWinJoys.m_aJoys[bs.padID].m_bHasAxisZ )
+		{
+			rightStickPos.x = (Float)js.lZ  / (Float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
+			rightStickPos.y = (Float)js.lRz / (Float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
+		}
+	}
+	
+	{
+		if (CPad::m_bMapPadOneToPadTwo)
+			bs.padID = 1;
+		
+		RsPadEventHandler(rsPADBUTTONUP,   (void *)&bs);
+		RsPadEventHandler(rsPADBUTTONDOWN, (void *)&bs);
+	}
+	
+	{
+		if (CPad::m_bMapPadOneToPadTwo)
+			bs.padID = 1;
+		
+		CPad *pad = CPad::GetPad(bs.padID);
+
+		if ( fabs(leftStickPos.x)  > 0.3f )
+			pad->PCTempJoyState.LeftStickX  = (Int32)(leftStickPos.x  * 128.0f);
+		
+		if ( fabs(leftStickPos.y)  > 0.3f )
+			pad->PCTempJoyState.LeftStickY  = (Int32)(leftStickPos.y  * 128.0f);
+		
+		if ( fabs(rightStickPos.x) > 0.3f )
+			pad->PCTempJoyState.RightStickX = (Int32)(rightStickPos.x * 128.0f);
+
+		if ( fabs(rightStickPos.y) > 0.3f )
+			pad->PCTempJoyState.RightStickY = (Int32)(rightStickPos.y * 128.0f);
+	}
+	
+	return S_OK;
+}
+
+void _InputInitialiseJoys()
+{
+	DIPROPDWORD prop;
+	DIDEVCAPS devCaps;
+
+	for ( Int32 i = 0; i < _TODOCONST(2); i++ )
+		AllValidWinJoys.ClearJoyInfo(i);
+	
+	_InputAddJoys();
+	
+	if ( PSGLOBAL(joy1) != NULL )
+	{
+		devCaps.dwSize = sizeof(DIDEVCAPS);
+		PSGLOBAL(joy1)->GetCapabilities(&devCaps);
+
+		prop.diph.dwSize = sizeof(DIPROPDWORD);
+		prop.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+		prop.diph.dwObj = 0;
+		prop.diph.dwHow = 0;
+		
+		PSGLOBAL(joy1)->GetProperty(DIPROP_VIDPID, (LPDIPROPHEADER)&prop);
+		AllValidWinJoys.m_aJoys[0].m_nVendorID = LOWORD(prop.dwData);
+		AllValidWinJoys.m_aJoys[0].m_nProductID = HIWORD(prop.dwData);
+		AllValidWinJoys.m_aJoys[0].m_bInitialised = true;
+		
+		ControlsManager.InitDefaultControlConfigJoyPad(devCaps.dwButtons);
+	}
+		
+	if ( PSGLOBAL(joy2) != NULL )
+	{
+		PSGLOBAL(joy2)->GetProperty(DIPROP_VIDPID, (LPDIPROPHEADER)&prop);
+		AllValidWinJoys.m_aJoys[1].m_nVendorID = LOWORD(prop.dwData);
+		AllValidWinJoys.m_aJoys[1].m_nProductID = HIWORD(prop.dwData);
+		AllValidWinJoys.m_aJoys[1].m_bInitialised = true;
+	}
+}
+
+#pragma warning( push )
+#pragma warning( disable : 4700)
+HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
+{
+	HRESULT hr;
+
+	DIDEVICEOBJECTINSTANCE objInst;
+	
+	objInst.dwSize = sizeof( DIDEVICEOBJECTINSTANCE );
+
+	DIPROPRANGE range;
+	range.diph.dwSize = sizeof(DIPROPRANGE);
+	range.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+	range.lMin = DEVICE_AXIS_MIN;
+	range.lMax = DEVICE_AXIS_MAX;
+	range.diph.dwHow = DIPH_BYOFFSET;
+
+	// get the info about the object from the device
+
+	range.diph.dwObj = DIJOFS_X;
+	if ( lpDevice != NULL )
+	{
+		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,  DIJOFS_X, DIPH_BYOFFSET ) ) )
+		{
+			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
+				return S_FALSE;
+			else
+				;
+		}
+	}
+	
+	range.diph.dwObj = DIJOFS_Y;
+	if ( lpDevice != NULL )
+	{
+		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,  DIJOFS_Y, DIPH_BYOFFSET ) ) )
+		{
+			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
+				return S_FALSE;
+			else
+				;
+		}
+	}
+	
+	range.diph.dwObj = DIJOFS_Z;
+	if ( lpDevice != NULL )
+	{
+		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,  DIJOFS_Z, DIPH_BYOFFSET ) ) )
+		{
+			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
+				return S_FALSE;
+			else
+				AllValidWinJoys.m_aJoys[num].m_bHasAxisZ = true; // z rightStickPos.x
+		}
+	}
+	
+	range.diph.dwObj = DIJOFS_RZ;
+	if ( lpDevice != NULL )
+	{
+		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,  DIJOFS_RZ, DIPH_BYOFFSET ) ) )
+		{
+			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
+				return S_FALSE;
+			else
+				AllValidWinJoys.m_aJoys[num].m_bHasAxisR = 1; // r rightStickPos.y
+		}
+	}
+	
+	return hr;
+}
+#pragma warning( pop )
+
+HRESULT _InputAddJoys()
+{
+	HRESULT hr;
+	
+	hr = PSGLOBAL(dinterface)->EnumDevices(DI8DEVCLASS_GAMECTRL,  _InputEnumDevicesCallback, NULL, DIEDFL_ATTACHEDONLY );
+	 
+	if( FAILED(hr) )
+		return hr;
+	
+	if ( PSGLOBAL(joy1) == NULL )
+		return S_FALSE;
+	
+	_InputAddJoyStick(PSGLOBAL(joy1), 0);
+	
+	if ( PSGLOBAL(joy2) == NULL )
+		return S_OK;	// we have one device already so return OK and ignore second
+	
+	_InputAddJoyStick(PSGLOBAL(joy2), 1);
+	
+	return S_OK;
+}
+
+HRESULT _InputGetMouseState(DIMOUSESTATE2 *state)
+{
+	HRESULT       hr;
+	
+	if ( PSGLOBAL(mouse) == NULL )
+		return S_FALSE;
+	
+	// Get the input's device state, and put the state in dims
+	ZeroMemory( state, sizeof(DIMOUSESTATE2) );
+	
+	hr = PSGLOBAL(mouse)->GetDeviceState( sizeof(DIMOUSESTATE2), state );
+
+	if( FAILED(hr) ) 
+    {
+		 // DirectInput may be telling us that the input stream has been
+        // interrupted.  We aren't tracking any state between polls, so
+        // we don't have any special reset that needs to be done.
+        // We just re-acquire and try again.
+        
+        // If input is lost then acquire and keep trying 
+		hr = PSGLOBAL(mouse)->Acquire();
+        while( hr == DIERR_INPUTLOST ) 
+            hr = PSGLOBAL(mouse)->Acquire();
+		
+		ZeroMemory( state, sizeof(DIMOUSESTATE2) );
+		hr = PSGLOBAL(mouse)->GetDeviceState( sizeof(DIMOUSESTATE2), state );
+		
+		return hr;
+	}
+	
+	return S_OK;
+}
+
+void _InputShutdown()
+{
+	SAFE_RELEASE(PSGLOBAL(dinterface));
+}
+
+BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext )
+{
+	HRESULT hr;
+	 
+	static INT Count = 0;
+	
+	LPDIRECTINPUTDEVICE8 pJoystick = NULL;
+	
+	if ( Count == 0 )
+		pJoystick = PSGLOBAL(joy1);
+	else if ( Count == 1 )
+		pJoystick = PSGLOBAL(joy2);
+	
+	// Obtain an interface to the enumerated joystick. 
+	hr = PSGLOBAL(dinterface)->CreateDevice( pdidInstance->guidInstance, &pJoystick, NULL );
+	
+    // If it failed, then we can't use this joystick. (Maybe the user unplugged
+    // it while we were in the middle of enumerating it.)
+	if( FAILED(hr) ) 
+        return DIENUM_CONTINUE;
+	
+	if( FAILED( hr = pJoystick->SetDataFormat( &c_dfDIJoystick2 ) ) )
+	{
+		pJoystick->Release();
+		return DIENUM_CONTINUE;
+	}
+	
+	++Count;
+	
+	if( FAILED( hr = pJoystick->SetCooperativeLevel( PSGLOBAL(window), DISCL_NONEXCLUSIVE) ) )
+	{
+		pJoystick->Release();
+        return DIENUM_CONTINUE;
+	}
+	
+	if ( Count == 2 )
+		return DIENUM_STOP;
+	
+    // Stop enumeration. Note: we're just taking the first joystick we get. You
+    // could store all the enumerated joysticks and let the user pick.
+    return DIENUM_CONTINUE;
+}
+
+BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key)
+{
+	*rs = rsNULL;
+	
+	switch ( key )
+	{
+		case VK_SHIFT:
+		{
+			if ( _dwOperatingSystemVersion == OS_WIN98 )
+				*rs = rsSHIFT;
+			break;
+		}
+		
+		case VK_RETURN:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsPADENTER;
+			else
+				*rs = rsENTER;
+			break;
+		}
+		
+		case VK_CONTROL:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsRCTRL;
+			else
+				*rs = rsLCTRL;
+			break;
+		}
+		
+		case VK_MENU:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsRALT;
+			else
+				*rs = rsLALT;
+			break;
+		}
+		
+		case VK_APPS:
+		{
+			*rs = rsAPPS;
+			break;
+		}
+		
+		case VK_PAUSE:
+		{
+			*rs = rsPAUSE;
+			break;
+		}
+		
+		case VK_CAPITAL:
+		{
+			*rs = rsCAPSLK;
+			break;
+		}
+		
+		case VK_ESCAPE:
+		{
+			*rs = rsESC;
+			break;
+		}
+		
+		case VK_PRIOR:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsPGUP;
+			else
+				*rs = rsPADPGUP;
+			break;
+		}
+		
+		case VK_NEXT:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsPGDN;
+			else
+				*rs = rsPADPGDN;
+			break;
+		}
+		
+		case VK_END:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsEND;
+			else
+				*rs = rsPADEND;
+			break;
+		}
+		
+		case VK_HOME:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsHOME;
+			else
+				*rs = rsPADHOME;
+			break;
+		}
+		
+		case VK_LEFT:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsLEFT;
+			else
+				*rs = rsPADLEFT;
+			break;
+		}
+		
+		case VK_UP:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsUP;
+			else
+				*rs = rsPADUP;
+			break;
+		}
+		
+		case VK_RIGHT:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsRIGHT;
+			else
+				*rs = rsPADRIGHT;
+			break;
+		}
+		
+		case VK_DOWN:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsDOWN;
+			else
+				*rs = rsPADDOWN;
+			break;
+		}
+		
+		case VK_INSERT:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsINS;
+			else
+				*rs = rsPADINS;
+			break;
+		}
+		
+		case VK_DELETE:
+		{
+			if ( _InputIsExtended(flag) )
+				*rs = rsDEL;
+			else
+				*rs = rsPADDEL;
+			break;
+		}
+		
+		case VK_LWIN:
+		{
+			*rs = rsLWIN;
+			break;
+		}
+		
+		case VK_RWIN:
+		{
+			*rs = rsRWIN;
+			break;
+		}
+		
+		case VK_NUMPAD0:
+		{
+			*rs = rsPADINS;
+			break;
+		}
+		
+		case VK_NUMPAD1:
+		{
+			*rs = rsPADEND;
+			break;
+		}
+		
+		case VK_NUMPAD2:
+		{
+			*rs = rsPADDOWN;
+			break;
+		}
+		
+		case VK_NUMPAD3:
+		{
+			*rs = rsPADPGDN;
+			break;
+		}
+		
+		case VK_NUMPAD4:
+		{
+			*rs = rsPADLEFT;
+			break;
+		}
+		
+		case VK_NUMPAD5:
+		{
+			*rs = rsPAD5;
+			break;
+		}
+		
+		case VK_NUMPAD6:
+		{
+			*rs = rsPADRIGHT;
+			break;
+		}
+		
+		case VK_NUMPAD7:
+		{
+			*rs = rsPADHOME;
+			break;
+		}
+		
+		case VK_NUMPAD8:
+		{
+			*rs = rsPADUP;
+			break;
+		}
+		
+		case VK_NUMPAD9:
+		{
+			*rs = rsPADPGUP;
+			break;
+		}
+		
+		case VK_MULTIPLY:
+		{
+			*rs = rsTIMES;
+			break;
+		}
+		
+		case VK_DIVIDE:
+		{
+			*rs = rsDIVIDE;
+			break;
+		}
+		
+		case VK_ADD:
+		{
+			*rs = rsPLUS;
+			break;
+		}
+		
+		case VK_SUBTRACT:
+		{
+			*rs = rsMINUS;
+			break;
+		}
+		
+		case VK_DECIMAL:
+		{
+			*rs = rsPADDEL;
+			break;
+		}
+		
+		case VK_F1:
+		{
+			*rs = rsF1;
+			break;
+		}
+		
+		case VK_F2:
+		{
+			*rs = rsF2;
+			break;
+		}
+		
+		case VK_F3:
+		{
+			*rs = rsF3;
+			break;
+		}
+		
+		case VK_F4:
+		{
+			*rs = rsF4;
+			break;
+		}
+		
+		case VK_F5:
+		{
+			*rs = rsF5;
+			break;
+		}
+		
+		case VK_F6:
+		{
+			*rs = rsF6;
+			break;
+		}
+		
+		case VK_F7:
+		{
+			*rs = rsF7;
+			break;
+		}
+		
+		case VK_F8:
+		{
+			*rs = rsF8;
+			break;
+		}
+		
+		case VK_F9:	
+		{
+			*rs = rsF9;
+			break;
+		}
+		
+		case VK_F10:
+		{
+			*rs = rsF10;
+			break;
+		}
+		
+		case VK_F11:
+		{
+			*rs = rsF11;
+			break;
+		}
+		
+		case VK_F12:
+		{
+			*rs = rsF12;
+			break;
+		}
+		
+		case VK_NUMLOCK:
+		{
+			*rs = rsNUMLOCK;
+			break;
+		}
+		
+		case VK_SCROLL:
+		{
+			*rs = rsSCROLL;
+			break;
+		}
+		
+		case VK_BACK:
+		{
+			*rs = rsBACKSP;
+			break;
+		}
+		
+		case VK_TAB:
+		{
+			*rs = rsTAB;
+			break;
+		}
+		
+		default:
+		{
+			UINT vkey = MapVirtualKey(key, MAPVK_VK_TO_CHAR) & 0xFFFF;
+			if ( vkey < 255 )
+				*rs = (RsKeyCodes)vkey;
+			break;
+		}
+	}
+	
+	return *rs != rsNULL;
+}
+
+void _InputTranslateShiftKeyUpDown(RsKeyCodes *rs)
+{
+	if ( _dwOperatingSystemVersion != OS_WIN98 )
+	{
+		if ( _InputTranslateShiftKey(rs, VK_LSHIFT, TRUE) )
+			RsKeyboardEventHandler(rsKEYDOWN, rs);
+		if ( _InputTranslateShiftKey(rs, VK_RSHIFT, TRUE) )
+			RsKeyboardEventHandler(rsKEYDOWN, rs);
+		if ( _InputTranslateShiftKey(rs, VK_LSHIFT, FALSE) )
+			RsKeyboardEventHandler(rsKEYUP, rs);
+		if ( _InputTranslateShiftKey(rs, VK_RSHIFT, FALSE) )
+			RsKeyboardEventHandler(rsKEYUP, rs);
+	}
+}
+
+#pragma warning( push )
+#pragma warning( disable : 4805)
+BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, bool bDown)
+{
+	*rs = rsNULL;
+	switch ( key )
+	{
+		case VK_LSHIFT:
+		{
+			if ( bDown == (GetKeyState(VK_LSHIFT) & 0x8000) >> 15 )
+				*rs = rsLSHIFT;
+			break;
+		}
+		
+		case VK_RSHIFT:
+		{
+			if ( bDown == (GetKeyState(VK_RSHIFT) & 0x8000) >> 15 )
+				*rs = rsRSHIFT;
+			break;
+		}
+		
+		default:
+		{
+			return *rs != rsNULL;
+		}
+	}
+	
+	return TRUE;
+}
+#pragma warning( pop )
+
+BOOL _InputIsExtended(INT flag)
+{
+	return (flag & 0x1000000) != 0;
+}
 
 
 STARTPATCHES	
+	//InjectHook(0x580B30, &CJoySticks::CJoySticks, PATCH_JUMP);
+	//InjectHook(0x580B50, &CJoySticks::ClearJoyInfo, PATCH_JUMP);
 	InjectHook(0x580B70, _psCreateFolder, PATCH_JUMP);
 	InjectHook(0x580BB0, _psGetUserFilesFolder, PATCH_JUMP);
 	InjectHook(0x580C70, psCameraBeginUpdate, PATCH_JUMP);
@@ -2126,6 +3063,7 @@ STARTPATCHES
 	InjectHook(0x580E30, psNativeTextureSupport, PATCH_JUMP);
 	InjectHook(0x580E40, InitApplication, PATCH_JUMP);
 	InjectHook(0x580EB0, InitInstance, PATCH_JUMP);
+	InjectHook(0x580F30, _GetVideoMemInfo, PATCH_JUMP);
 	InjectHook(0x580FA0, GetDXVersion, PATCH_JUMP);
 	InjectHook(0x5810C0, _psGetCpuVendr, PATCH_JUMP);
 	InjectHook(0x5810E0, _psGetCpuFeatures, PATCH_JUMP);
@@ -2141,6 +3079,7 @@ STARTPATCHES
 	InjectHook(0x5816E0, HandleGraphEvent, PATCH_JUMP);
 	InjectHook(0x581790, MainWndProc, PATCH_JUMP);
 	InjectHook(0x581C90, IsForegroundApp, PATCH_JUMP);
+	InjectHook(0x581CB0, GetBestRefreshRate, PATCH_JUMP);
 	InjectHook(0x581D80, psSelectDevice, PATCH_JUMP);
 	InjectHook(0x581F90, _psSetVideoMode, PATCH_JUMP);
 	InjectHook(0x582030, CommandLineToArgv, PATCH_JUMP);
@@ -2151,5 +3090,17 @@ STARTPATCHES
 	InjectHook(0x582680, CloseClip, PATCH_JUMP);
 	InjectHook(0x5826A0, HandleExit, PATCH_JUMP);
 	InjectHook(0x582710, _WinMain, PATCH_JUMP);
-
+	InjectHook(0x5830D0, _InputInitialise, PATCH_JUMP);
+	InjectHook(0x583110, _InputInitialiseMouse, PATCH_JUMP);
+	InjectHook(0x583190, CapturePad, PATCH_JUMP);
+	InjectHook(0x583580, _InputInitialiseJoys, PATCH_JUMP);
+	InjectHook(0x583670, _InputAddJoyStick, PATCH_JUMP);
+	InjectHook(0x583810, _InputAddJoys, PATCH_JUMP);
+	InjectHook(0x583870, _InputGetMouseState, PATCH_JUMP);
+	InjectHook(0x583910, _InputShutdown, PATCH_JUMP);
+	InjectHook(0x583940, _InputEnumDevicesCallback, PATCH_JUMP);
+	InjectHook(0x583A20, _InputTranslateKey, PATCH_JUMP);
+	InjectHook(0x583DC0, _InputTranslateShiftKeyUpDown, PATCH_JUMP);
+	InjectHook(0x583E50, _InputTranslateShiftKey, PATCH_JUMP);
+	InjectHook(0x583EE0, _InputIsExtended, PATCH_JUMP);
 ENDPATCHES

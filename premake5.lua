@@ -34,6 +34,7 @@ project "re3"
 	targetdir "bin/%{cfg.buildcfg}"
 	targetextension ".dll"
 	characterset ("MBCS")
+	linkoptions "/SAFESEH:NO"
 
 	filter "configurations:Debug"
 		defines { "DEBUG" }

@@ -587,7 +587,7 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_SMOKE_FILES; i++ )
 	{
 		RwTextureDestroy(gpSmokeTex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpSmokeTex[i] = NULL;
 #endif
 	}
@@ -595,7 +595,7 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_SMOKE2_FILES; i++ )
 	{
 		RwTextureDestroy(gpSmoke2Tex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpSmoke2Tex[i] = NULL;
 #endif
 	}
@@ -603,7 +603,7 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_RUBBER_FILES; i++ )
 	{
 		RwTextureDestroy(gpRubberTex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpRubberTex[i] = NULL;
 #endif
 	}
@@ -611,7 +611,7 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_RAINSPLASH_FILES; i++ )
 	{
 		RwTextureDestroy(gpRainSplashTex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpRainSplashTex[i] = NULL;
 #endif
 	}
@@ -619,7 +619,7 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_WATERSPRAY_FILES; i++ )
 	{
 		RwTextureDestroy(gpWatersprayTex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpWatersprayTex[i] = NULL;
 #endif
 	}
@@ -627,7 +627,7 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_EXPLOSIONMEDIUM_FILES; i++ )
 	{
 		RwTextureDestroy(gpExplosionMediumTex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpExplosionMediumTex[i] = NULL;
 #endif
 	}
@@ -635,7 +635,7 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_GUNFLASH_FILES; i++ )
 	{
 		RwTextureDestroy(gpGunFlashTex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpGunFlashTex[i] = NULL;
 #endif
 	}
@@ -643,7 +643,7 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_RAINDROP_FILES; i++ )
 	{
 		RwTextureDestroy(gpRainDropTex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpRainDropTex[i] = NULL;
 #endif
 	}
@@ -651,7 +651,7 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_RAINSPLASHUP_FILES; i++ )
 	{
 		RwTextureDestroy(gpRainSplashupTex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpRainSplashupTex[i] = NULL;
 #endif
 	}
@@ -659,7 +659,7 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_BIRDFRONT_FILES; i++ )
 	{
 		RwTextureDestroy(gpBirdfrontTex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpBirdfrontTex[i] = NULL;
 #endif
 	}
@@ -667,7 +667,7 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_CARDEBRIS_FILES; i++ )
 	{
 		RwTextureDestroy(gpCarDebrisTex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpCarDebrisTex[i] = NULL;
 #endif
 	}
@@ -675,78 +675,78 @@ void CParticle::Shutdown()
 	for ( Int32 i = 0; i < MAX_CARSPLASH_FILES; i++ )
 	{
 		RwTextureDestroy(gpCarSplashTex[i]);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 		gpCarSplashTex[i] = NULL;
 #endif
 	}
 	
 	RwTextureDestroy(gpFlame1Tex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpFlame1Tex = NULL;
 #endif
 
 	RwTextureDestroy(gpFlame5Tex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpFlame5Tex = NULL;
 #endif
 	
 	RwTextureDestroy(gpRainDropSmallTex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpRainDropSmallTex = NULL;
 #endif
 	
 	RwTextureDestroy(gpBloodTex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpBloodTex = NULL;
 #endif
 	
 	RwTextureDestroy(gpLeafTex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpLeafTex = NULL;
 #endif
 	
 	RwTextureDestroy(gpCloudTex1);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpCloudTex1 = NULL;
 #endif
 	
 	RwTextureDestroy(gpCloudTex4);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpCloudTex4 = NULL;
 #endif
 	
 	RwTextureDestroy(gpBloodSmallTex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpBloodSmallTex = NULL;
 #endif
 	
 	RwTextureDestroy(gpGungeTex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpGungeTex = NULL;
 #endif
 	
 	RwTextureDestroy(gpCollisionSmokeTex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpCollisionSmokeTex = NULL;
 #endif
 	
 	RwTextureDestroy(gpBulletHitTex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpBulletHitTex = NULL;
 #endif
 	
 	RwTextureDestroy(gpGunShellTex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpGunShellTex = NULL;
 #endif
 	
 	RwTextureDestroy(gpWakeOldTex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpWakeOldTex = NULL;
 #endif
 	
 	RwTextureDestroy(gpPointlightTex);
-#if GTA3_1_1_PATCH == TRUE
+#ifdef GTA3_1_1_PATCH
 	gpPointlightTex = NULL;
 #endif
 
