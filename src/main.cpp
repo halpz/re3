@@ -42,6 +42,7 @@
 #include "TxdStore.h"
 #include "FileMgr.h"
 #include "Text.h"
+#include "RpAnimBlend.h"
 #include "Frontend.h"
 
 #define DEFAULT_VIEWWINDOW (tan(CDraw::GetFOV() * (360.0f / PI)))
@@ -54,7 +55,7 @@
 
 WRAPPER void CameraSize(RwCamera *camera, void *rect, float viewWindow, float aspectRatio) { EAXJMP(0x527170); }
 
-WRAPPER RwBool RpAnimBlendPluginAttach() { EAXJMP(0x4052D0); }
+//WRAPPER RwBool RpAnimBlendPluginAttach() { EAXJMP(0x4052D0); }
 WRAPPER RwBool NodeNamePluginAttach() { EAXJMP(0x527100); }
 
 
