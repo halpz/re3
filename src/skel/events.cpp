@@ -654,7 +654,6 @@ HandleKeyUp(RsKeyStatus *keyStatus)
 					if ( c < 255 )
 					{
 						CPad::TempKeyState.VK_KEYS[c] = 0;
-						pad0->AddToPCCheatString(c);
 					}
 					break;
 				}

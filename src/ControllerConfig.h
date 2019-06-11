@@ -45,6 +45,7 @@ public:
 	void MakeControllerActionsBlank();
 	void InitDefaultControlConfiguration();
 	void InitDefaultControlConfigMouse(CMouseControllerState const &mousestate);
+	void InitDefaultControlConfigJoyPad(unsigned int buttons);
 	
 };
 
