@@ -56,7 +56,7 @@ There are a couple of things that have been reversed for other projects
 already that could probably be put into this project without too much effort.
 Again, the list is not complete:
 
-* Animation (https://github.com/aap/iii_anim)
+* ~~Animation (https://github.com/aap/iii_anim)~~
 * File Loader (https://github.com/aap/librwgta/tree/master/tools/IIItest)
 * ...
 

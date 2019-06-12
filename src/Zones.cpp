@@ -1,8 +1,11 @@
 #include "common.h"
 #include "patcher.h"
-#include "World.h"
-#include "Clock.h"
+
 #include "Zones.h"
+
+#include "Clock.h"
+#include "Text.h"
+#include "World.h"
 
 eLevelName &CTheZones::m_CurrLevel = *(eLevelName*)0x8F2BC8;
 CZone *&CTheZones::m_pPlayersZone = *(CZone**)0x8F254C;
@@ -38,6 +41,10 @@ CheckZoneInfo(CZoneInfo *info)
 	assert(info->gangThreshold[5] <= info->gangThreshold[6]);
 	assert(info->gangThreshold[6] <= info->gangThreshold[7]);
 	assert(info->gangThreshold[7] <= info->gangThreshold[8]);
+}
+
+wchar* CZone::GetTranslatedName() {
+	return TheText.Get(name);
 }
 
 void
@@ -615,6 +622,7 @@ CTheZones::InitialiseAudioZoneArray(void)
 }
 
 STARTPATCHES
+	InjectHook(0x4B5DD0, &CZone::GetTranslatedName, PATCH_JUMP);
 	InjectHook(0x4B5DE0, CTheZones::Init, PATCH_JUMP);
 	InjectHook(0x4B61D0, CTheZones::Update, PATCH_JUMP);
 	InjectHook(0x4B6210, CTheZones::CreateZone, PATCH_JUMP);

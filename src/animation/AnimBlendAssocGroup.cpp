@@ -93,7 +93,7 @@ GetModelFromName(const char *name)
 
 	for(i = 0; i < MODELINFOSIZE; i++){
 		mi = CModelInfo::GetModelInfo(i);
-		if(mi->GetRwObject() && RwObjectGetType(mi->GetRwObject()) == rpCLUMP &&
+		if(mi && mi->GetRwObject() && RwObjectGetType(mi->GetRwObject()) == rpCLUMP &&
 		   strcmpIgnoringDigits(mi->GetName(), name))
 			return mi;
 	}
@@ -152,6 +152,7 @@ CAnimBlendAssocGroup::CreateAssociations(const char *blockName, RpClump *clump, 
 
 
 STARTPATCHES
+	InjectHook(0x4012D0, &CAnimBlendAssocGroup::DestroyAssociations, PATCH_JUMP);
 	InjectHook(0x4013D0, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(uint32))&CAnimBlendAssocGroup::GetAnimation, PATCH_JUMP);
 	InjectHook(0x401300, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(const char*))&CAnimBlendAssocGroup::GetAnimation, PATCH_JUMP);
 	InjectHook(0x401420, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(uint32))&CAnimBlendAssocGroup::CopyAnimation, PATCH_JUMP);
