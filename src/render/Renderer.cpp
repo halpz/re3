@@ -16,6 +16,7 @@
 #include "ModelIndices.h"
 #include "Streaming.h"
 #include "Shadows.h"
+#include "PointLights.h"
 #include "Renderer.h"
 
 bool gbShowPedRoadGroups;
@@ -1153,6 +1154,16 @@ CRenderer::IsVehicleCullZoneVisible(CEntity *ent)
 	return true;
 }
 
+void
+CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)
+{
+	if(ent->bRenderScorched)
+		WorldReplaceScorchedLightsWithNormal(Scene.world);
+	CPointLights::RemoveLightsAffectingObject();
+	if(reset)
+		ReSetAmbientAndDirectionalColours();
+}
+
 STARTPATCHES
 	InjectHook(0x4A7680, CRenderer::Init, PATCH_JUMP);
 
@@ -1185,4 +1196,6 @@ STARTPATCHES
 	InjectHook(0x4A9840, CRenderer::ShouldModelBeStreamed, PATCH_JUMP);
 	InjectHook(0x4AAA00, CRenderer::IsEntityCullZoneVisible, PATCH_JUMP);
 	InjectHook(0x4AAAA0, CRenderer::IsVehicleCullZoneVisible, PATCH_JUMP);
+
+	InjectHook(0x4A7CF0, CRenderer::RemoveVehiclePedLights, PATCH_JUMP);
 ENDPATCHES

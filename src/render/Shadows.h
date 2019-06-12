@@ -1,6 +1,7 @@
 #pragma once
 
 struct RwTexture;
+class CEntity;
 
 class CShadows
 {
@@ -10,4 +11,5 @@ public:
 	static void RenderStoredShadows(void);
 	static void RenderExtraPlayerShadows(void);
 	static void CalcPedShadowValues(CVector light, float *frontX, float *frontY, float *sideX, float *sideY, float *dispX, float *dispY);
+	static void StoreShadowForPedObject(CEntity *ent, float dispX, float dispY, float frontX, float frontY, float sideX, float sideY);
 };

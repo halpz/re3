@@ -56,4 +56,6 @@ public:
 	static bool ShouldModelBeStreamed(CEntity *ent);
 	static bool IsEntityCullZoneVisible(CEntity *ent);
 	static bool IsVehicleCullZoneVisible(CEntity *ent);
+
+	static void RemoveVehiclePedLights(CEntity *ent, bool reset);
 };
