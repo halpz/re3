@@ -33,6 +33,7 @@
 #include "Garages.h"
 #include "MusicManager.h"
 #include "VisibilityPlugins.h"
+#include "NodeName.h"
 #include "DMAudio.h"
 #include "CutsceneMgr.h"
 #include "Lights.h"
@@ -54,9 +55,6 @@
 #endif
 
 WRAPPER void CameraSize(RwCamera *camera, void *rect, float viewWindow, float aspectRatio) { EAXJMP(0x527170); }
-
-//WRAPPER RwBool RpAnimBlendPluginAttach() { EAXJMP(0x4052D0); }
-WRAPPER RwBool NodeNamePluginAttach() { EAXJMP(0x527100); }
 
 
 bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
