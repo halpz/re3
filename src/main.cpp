@@ -79,6 +79,7 @@ void DestroySplashScreen(void);
 
 extern void (*DebugMenuProcess)(void);
 extern void (*DebugMenuRender)(void);
+void DebugMenuInit(void);
 
 
 RwRGBA gColourTop;
@@ -350,9 +351,7 @@ Render2dStuff(void)
 	CPad::PrintErrorMessage();
 	CFont::DrawFonts();
 
-#if 0
 	DebugMenuRender();
-#endif
 }
 
 void
@@ -647,6 +646,10 @@ Initialise3D(void *param)
 {
 	if (RsRwInitialise(param))
 	{
+		//
+		DebugMenuInit();
+		//
+
 		return CGame::InitialiseRenderWare();
 	}
 

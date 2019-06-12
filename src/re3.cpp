@@ -91,12 +91,9 @@ DebugMenuInit(void)
 
 }
 
-int (*RsEventHandler_orig)(int a, int b);
-int
-delayedPatches10(int a, int b)
+void
+DebugMenuPopulate(void)
 {
-	DebugMenuInit();
-
 	if(DebugMenuLoad()){
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
@@ -110,9 +107,19 @@ delayedPatches10(int a, int b)
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 	}
+}
+
+/*
+int (*RsEventHandler_orig)(int a, int b);
+int
+delayedPatches10(int a, int b)
+{
+	DebugMenuInit();
+	DebugMenuPopulate();
 
 	return RsEventHandler_orig(a, b);
 }
+*/
 
 void __declspec(naked) HeadlightsFix()
 {
@@ -225,7 +232,7 @@ patch()
 
 	InterceptCall(&open_script_orig, open_script, 0x438869);
 
-	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x58275E);
+//	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x58275E);
 }
 
 BOOL WINAPI
