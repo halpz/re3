@@ -27,6 +27,8 @@ public:
 	CZone     *child;
 	CZone     *parent;
 	CZone     *next;
+
+	wchar *GetTranslatedName();
 };
 
 class CZoneInfo
