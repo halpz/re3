@@ -117,39 +117,39 @@ CameraSize(RwCamera * camera, RwRect * rect,
 			zRaster = RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPEZBUFFER);
 			
 			if( raster && zRaster )
-            {
-                RwCameraSetRaster(camera, raster);
-                RwCameraSetZRaster(camera, zRaster);
-            }
-            else
-            {
-                if( raster )
-                {
-                    RwRasterDestroy(raster);
-                }
+			{
+				RwCameraSetRaster(camera, raster);
+				RwCameraSetZRaster(camera, zRaster);
+			}
+			else
+			{
+				if( raster )
+				{
+					RwRasterDestroy(raster);
+				}
 
-                if( zRaster )
-                {
-                    RwRasterDestroy(zRaster);
-                }
+				if( zRaster )
+				{
+					RwRasterDestroy(zRaster);
+				}
 
-                rect->x = origSize.x;
-                rect->y = origSize.y;
+				rect->x = origSize.x;
+				rect->y = origSize.y;
 			    rect->w = origSize.w;
-                rect->h = origSize.h;
+				rect->h = origSize.h;
 
-                /* 
-                 * Use default values... 
-                 */
-                raster =
-                    RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPECAMERA);
+				/* 
+				 * Use default values... 
+				 */
+				raster =
+					RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPECAMERA);
 
-                zRaster =
-                    RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPEZBUFFER);
+				zRaster =
+					RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPEZBUFFER);
 
-                RwCameraSetRaster(camera, raster);
-                RwCameraSetZRaster(camera, zRaster);
-            }
+				RwCameraSetRaster(camera, raster);
+				RwCameraSetZRaster(camera, zRaster);
+			}
 		}
 
 		/* Figure out the view window */
@@ -269,7 +269,7 @@ CameraCreate(RwInt32 width, RwInt32 height, RwBool zBuffer)
 }
 
 STARTPATCHES
-	InjectHook(0x526450, GetFirstObjectCallback, PATCH_JUMP);
+	//InjectHook(0x526450, GetFirstObjectCallback, PATCH_JUMP);
 	InjectHook(0x526460, GetFirstObject, PATCH_JUMP);
 	InjectHook(0x527170, CameraSize, PATCH_JUMP);
 	InjectHook(0x527340, CameraDestroy, PATCH_JUMP);
