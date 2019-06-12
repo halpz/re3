@@ -32,7 +32,7 @@ public:
 class COnscreenTimer
 {
 public:
-	COnscreenTimerEntry m_sEntries[1];
+	COnscreenTimerEntry m_sEntries[NUMONSCREENTIMERENTRIES];
 	bool m_bProcessed;
 	bool m_bDisabled;
 	char field_119[2];

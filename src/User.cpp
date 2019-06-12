@@ -16,7 +16,7 @@ char* CTheScripts::ScriptSpace = (char*)0x74B248;
 
 int COnscreenTimer::Init() {
 	m_bDisabled = false;
-	for(uint32 i = 0; i < 1; i++) {
+	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
 		m_sEntries[i].m_nTimerOffset = 0;
 		m_sEntries[i].m_nCounterOffset = 0;
 
@@ -34,7 +34,7 @@ int COnscreenTimer::Init() {
 
 void COnscreenTimer::Process() {
 	if(CReplay::Mode != 1 && !m_bDisabled) {
-		for(uint32 i = 0; i < 1; i++) {
+		for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
 			m_sEntries[i].Process();
 		}
 	}
@@ -43,7 +43,7 @@ void COnscreenTimer::Process() {
 void COnscreenTimer::ProcessForDisplay() {
 	if(CHud::m_Wants_To_Draw_Hud) {
 		m_bProcessed = false;
-		for(uint32 i = 0; i < 1; i++) {
+		for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
 			if(m_sEntries[i].ProcessForDisplay()) {
 				m_bProcessed = true;
 			}
@@ -52,7 +52,7 @@ void COnscreenTimer::ProcessForDisplay() {
 }
 
 void COnscreenTimer::ClearCounter(uint32 offset) {
-	for(uint32 i = 0; i < 1; i++) {
+	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
 		if(offset == m_sEntries[i].m_nCounterOffset) {
 			m_sEntries[i].m_nCounterOffset = 0;
 			m_sEntries[i].m_aCounterText[0] = 0;
@@ -63,7 +63,7 @@ void COnscreenTimer::ClearCounter(uint32 offset) {
 }
 
 void COnscreenTimer::ClearClock(uint32 offset) {
-	for(uint32 i = 0; i < 1; i++) {
+	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
 		if(offset == m_sEntries[i].m_nTimerOffset) {
 			m_sEntries[i].m_nTimerOffset = 0;
 			m_sEntries[i].m_aTimerText[0] = 0;
@@ -74,7 +74,7 @@ void COnscreenTimer::ClearClock(uint32 offset) {
 
 void COnscreenTimer::AddCounter(uint32 offset, uint16 type, char* text) {
 	uint32 i = 0;
-	for(uint32 i = 0; i < 1; i++) {
+	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
 		if(m_sEntries[i].m_nCounterOffset == 0) {
 			break;
 		}
@@ -93,7 +93,7 @@ void COnscreenTimer::AddCounter(uint32 offset, uint16 type, char* text) {
 
 void COnscreenTimer::AddClock(uint32 offset, char* text) {
 	uint32 i = 0;
-	for(uint32 i = 0; i < 1; i++) {
+	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
 		if(m_sEntries[i].m_nTimerOffset == 0) {
 			break;
 		}
