@@ -138,6 +138,8 @@ void re3_debug(char *format, ...);
 void re3_trace(const char *filename, unsigned int lineno, const char *func, char *format, ...);
 void re3_assert(const char *expr, const char *filename, unsigned int lineno, const char *func);
 
+#define DEBUGBREAK() __debugbreak();
+
 #define debug(f, ...) re3_debug("[DBG]: " f, __VA_ARGS__)
 #define DEV(f, ...)   re3_debug("[DEV]: " f, __VA_ARGS__)
 #define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, __VA_ARGS__)
