@@ -1,14 +1,12 @@
 #pragma once
 
-#include "common.h"
-
 class COnscreenTimerEntry
 {
 public:
 	uint32 m_nTimerOffset;
 	uint32 m_nCounterOffset;
-	uint8 m_aTimerText[10];
-	uint8 m_aCounterText[10];
+	char m_aTimerText[10];
+	char m_aCounterText[10];
 	uint16 m_nType;
 	char m_bCounterBuffer[42];
 	char m_bTimerBuffer[42];
@@ -24,20 +22,14 @@ public:
 
 static_assert(sizeof(COnscreenTimerEntry) == 0x74, "COnscreenTimerEntry: error");
 
-class CTheScripts{
-public:
-	static char *ScriptSpace;//[163840]
-};
-
 class COnscreenTimer
 {
 public:
 	COnscreenTimerEntry m_sEntries[NUMONSCREENTIMERENTRIES];
 	bool m_bProcessed;
 	bool m_bDisabled;
-	char field_119[2];
 
-	int Init();
+	void Init();
 	void Process();
 	void ProcessForDisplay();
 

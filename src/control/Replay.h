@@ -3,7 +3,11 @@
 class CReplay
 {
 public:
-	static void Display(void);
+	enum {
+		MODE_1
+	};
 
 	static uint8 &Mode;
+
+	static void Display(void);
 };
