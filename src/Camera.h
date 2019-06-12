@@ -219,7 +219,7 @@ enum
 	FADE_1,	// mid fade
 	FADE_2,
 
-	FADE_OUT,
+	FADE_OUT = 0,
 	FADE_IN,
 };
 
