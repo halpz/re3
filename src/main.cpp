@@ -56,6 +56,7 @@
 
 WRAPPER void CameraSize(RwCamera *camera, void *rect, float viewWindow, float aspectRatio) { EAXJMP(0x527170); }
 
+uint8 work_buff[55000];
 
 bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
 

@@ -1,9 +1,10 @@
+#pragma once
+
 class CTimeCycle
 {
 	static int   (*m_nAmbientRed)[NUMWEATHERS];
 	static int   (*m_nAmbientGreen)[NUMWEATHERS];
 	static int   (*m_nAmbientBlue)[NUMWEATHERS];
-
 	static int   (*m_nDirectionalRed)[NUMWEATHERS];
 	static int   (*m_nDirectionalGreen)[NUMWEATHERS];
 	static int   (*m_nDirectionalBlue)[NUMWEATHERS];
@@ -91,6 +92,12 @@ class CTimeCycle
 public:
 	static int   &m_CurrentStoredValue;
 	static CVector *m_VectorToSun;	// [16]
+	static float *m_fShadowFrontX;	// [16]
+	static float *m_fShadowFrontY;	// [16]
+	static float *m_fShadowSideX;	// [16]
+	static float *m_fShadowSideY;	// [16]
+	static float *m_fShadowDisplacementX;	// [16]
+	static float *m_fShadowDisplacementY;	// [16]
 
 	static float GetAmbientRed(void) { return m_fCurrentAmbientRed; }
 	static float GetAmbientGreen(void) { return m_fCurrentAmbientGreen; }
@@ -127,5 +134,7 @@ public:
 	static int GetFogGreen(void) { return m_nCurrentFogColourGreen; }
 	static int GetFogBlue(void) { return m_nCurrentFogColourBlue; }
 
-	static const CVector &GetSunPosition(void) { return m_VectorToSun[m_CurrentStoredValue]; }
+	static void Initialise(void);
+	static void Update(void);
+	static CVector &GetSunPosition(void) { return m_VectorToSun[m_CurrentStoredValue]; }
 };
