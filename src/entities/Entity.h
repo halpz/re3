@@ -82,7 +82,7 @@ public:
 	uint32 m_flagD10 : 1;
 	uint32 bDrawLast : 1;
 	uint32 m_flagD40 : 1;
-	uint32 m_flagD80 : 1;
+	uint32 m_flagD80 : 1;	// CObject visibility?
 
 	// flagsE
 	uint32 bDistanceFade : 1;

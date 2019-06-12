@@ -16,26 +16,26 @@ public:
 		m_hasRwMatrix = false;
 		*this = m;
 	}
-	CMatrix(RwMatrix *matrix, bool attach){
+	CMatrix(RwMatrix *matrix, bool owner = false){
 		m_attachment = nil;
-		Attach(matrix, attach);
+		Attach(matrix, owner);
 	}
 	~CMatrix(void){
 		if(m_hasRwMatrix && m_attachment)
 			RwMatrixDestroy(m_attachment);
 	}
-	void Attach(RwMatrix *matrix, bool attach){
+	void Attach(RwMatrix *matrix, bool owner = false){
 		if(m_hasRwMatrix && m_attachment)
 			RwMatrixDestroy(m_attachment);
 		m_attachment = matrix;
-		m_hasRwMatrix = attach;
+		m_hasRwMatrix = owner;
 		Update();
 	}
-	void AttachRW(RwMatrix *matrix, bool attach){
+	void AttachRW(RwMatrix *matrix, bool owner = false){
 		if(m_hasRwMatrix && m_attachment)
 			RwMatrixDestroy(m_attachment);
 		m_attachment = matrix;
-		m_hasRwMatrix = attach;
+		m_hasRwMatrix = owner;
 		UpdateRW();
 	}
 	void Detach(void){

@@ -1,9 +1,68 @@
 #include "common.h"
 #include "patcher.h"
-#include "Object.h"
 #include "Pools.h"
+#include "Radar.h"
+#include "Object.h"
+
+WRAPPER void CObject::ObjectDamage(float amount) { EAXJMP(0x4BB240); }
+
+int16 &CObject::nNoTempObjects = *(int16*)0x95CCA2;
 
 void *CObject::operator new(size_t sz) { return CPools::GetObjectPool()->New();  }
 void CObject::operator delete(void *p, size_t sz) { CPools::GetObjectPool()->Delete((CObject*)p); }
 
-WRAPPER void CObject::ObjectDamage(float amount) { EAXJMP(0x4BB240); }
+CObject::CObject(void)
+{
+	m_type = ENTITY_TYPE_OBJECT;
+	m_fUprootLimit = 0.0f;
+	m_nCollisionDamageEffect = 0;
+	m_bSpecialCollisionResponseCases = 0;
+	m_bCameraToAvoidThisObject = 0;
+	ObjectCreatedBy = 0;
+	m_nEndOfLifeTime = 0;
+//	m_nRefModelIndex = -1;	// duplicate
+//	bUseVehicleColours = false;	// duplicate
+	m_colour2 = 0;
+	m_colour1 = m_colour2;
+	field_172 = 0;
+	m_obj_flag1 = false;
+	m_obj_flag2 = false;
+	m_obj_flag4 = false;
+	m_obj_flag8 = false;
+	m_obj_flag10 = false;
+	bHasBeenDamaged = false;
+	m_nRefModelIndex = -1;
+	bUseVehicleColours = false;
+	m_pCurSurface = nil;
+	m_pCollidingEntity = nil;
+}
+
+CObject::~CObject(void)
+{
+	CRadar::ClearBlipForEntity(BLIP_OBJECT, CPools::GetObjectPool()->GetIndex(this));
+
+	if(m_nRefModelIndex != -1)
+		CModelInfo::GetModelInfo(m_nRefModelIndex)->RemoveRef();
+
+	if(ObjectCreatedBy == TEMP_OBJECT && nNoTempObjects != 0)
+		nNoTempObjects--;
+}
+
+void
+CObject::Render(void)
+{
+	if(m_flagD80)
+		return;
+
+	if(m_nRefModelIndex != -1 && ObjectCreatedBy == TEMP_OBJECT && bUseVehicleColours){
+		CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(m_nRefModelIndex);
+		assert(mi->m_type == MITYPE_VEHICLE);
+		mi->SetVehicleColour(m_colour1, m_colour2);
+	}
+
+	CEntity::Render();
+}
+
+STARTPATCHES
+	InjectHook(0x4BB1E0, &CObject::Render_, PATCH_JUMP);
+ENDPATCHES

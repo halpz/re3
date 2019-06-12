@@ -135,6 +135,7 @@ int myrand(void);
 void mysrand(unsigned int seed);
 
 extern uint8 work_buff[55000];
+extern char gString[256];
 
 void re3_debug(char *format, ...);
 void re3_trace(const char *filename, unsigned int lineno, const char *func, char *format, ...);

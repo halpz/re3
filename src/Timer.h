@@ -14,6 +14,7 @@ class CTimer
 	static bool  &m_CodePause;
 public:
 	static float GetTimeStep(void) { return ms_fTimeStep; }
+	static float GetTimeStepNonClipped(void) { return ms_fTimeStepNonClipped; }
 	static void SetTimeStep(float ts) { ms_fTimeStep = ts; }
 	static uint32 GetFrameCounter(void) { return m_FrameCounter; }
 	static uint32 GetTimeInMilliseconds(void) { return m_snTimeInMilliseconds; }

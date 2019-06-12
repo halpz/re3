@@ -56,6 +56,7 @@
 													   
 
 uint8 work_buff[55000];
+char gString[256];
 
 bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
 

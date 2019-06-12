@@ -1,13 +1,15 @@
 #pragma once
 
 void DefinedState(void);
+RwFrame *GetFirstChild(RwFrame *frame);
 RwObject *GetFirstObject(RwFrame *frame);
+RpAtomic *GetFirstAtomic(RpClump *clump);
 
-extern void CameraSize(RwCamera *camera,
-                       RwRect *rect,
-                       RwReal viewWindow,
-                       RwReal aspectRatio);
-extern void CameraDestroy(RwCamera *camera);
-extern RwCamera *CameraCreate(RwInt32 width,
-                              RwInt32 height,
-                              RwBool zBuffer);
+void CameraSize(RwCamera *camera,
+                RwRect *rect,
+                RwReal viewWindow,
+                RwReal aspectRatio);
+void CameraDestroy(RwCamera *camera);
+RwCamera *CameraCreate(RwInt32 width,
+                       RwInt32 height,
+                       RwBool zBuffer);

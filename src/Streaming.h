@@ -51,4 +51,8 @@ public:
 
 	static void RemoveModel(int32 id);
 	static void RequestModel(int32 model, int32 flags);
+	static void MakeSpaceFor(int32 size);
+	static void ImGonnaUseStreamingMemory(void);
+	static void IHaveUsedStreamingMemory(void);
+	static void UpdateMemoryUsed(void);
 };
