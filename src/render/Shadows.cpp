@@ -6,3 +6,4 @@ WRAPPER void CShadows::AddPermanentShadow(unsigned char ShadowType, RwTexture* p
 WRAPPER void CShadows::RenderStaticShadows(void) { EAXJMP(0x5145F0); }
 WRAPPER void CShadows::RenderStoredShadows(void) { EAXJMP(0x514010); }
 WRAPPER void CShadows::RenderExtraPlayerShadows(void) { EAXJMP(0x516F90); }
+WRAPPER void CShadows::CalcPedShadowValues(CVector light, float *frontX, float *frontY, float *sideX, float *sideY, float *dispX, float *dispY) { EAXJMP(0x516EB0); }
