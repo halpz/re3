@@ -72,8 +72,6 @@ extern void **rwengine;
 #define SCREEN_FROM_RIGHT(a)  Float(SCREEN_WIDTH - SCREEN_STRETCH_X(a))
 #define SCREEN_FROM_BOTTOM(a) Float(SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
 
-char *GetUserDirectory(void);
-
 struct GlobalScene
 {
 	RpWorld *world;
