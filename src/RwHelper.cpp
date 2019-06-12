@@ -1,6 +1,8 @@
 #define WITHD3D
 #include "common.h"
+#include "patcher.h"
 #include "TimeCycle.h"
+#include "skeleton.h"
 
 void
 DefinedState(void)
@@ -43,3 +45,233 @@ GetFirstObject(RwFrame *frame)
 	RwFrameForAllObjects(frame, GetFirstObjectCallback, &obj);
 	return obj;
 }
+
+void
+CameraSize(RwCamera * camera, RwRect * rect,
+		   RwReal viewWindow, RwReal aspectRatio)
+{
+	if (camera)
+	{
+		RwVideoMode         videoMode;
+		RwRect              r;
+		RwRect              origSize;
+		RwV2d               vw;
+
+		RwEngineGetVideoModeInfo(&videoMode,
+								 RwEngineGetCurrentVideoMode());
+								 
+		origSize.w  = RwRasterGetWidth(RwCameraGetRaster(camera));
+		origSize.h = RwRasterGetHeight(RwCameraGetRaster(camera));
+
+		if (!rect)
+		{
+			if (videoMode.flags & rwVIDEOMODEEXCLUSIVE)
+			{
+				/* For full screen applications, resizing the camera just doesn't
+				 * make sense, use the video mode size.
+				 */
+			 
+				r.x = r.y = 0;
+				r.w = videoMode.width;
+				r.h = videoMode.height;
+				rect = &r;
+			}
+			else
+			{
+				/*
+				rect not specified - reuse current values
+				*/
+				r.w = RwRasterGetWidth(RwCameraGetRaster(camera));
+				r.h = RwRasterGetHeight(RwCameraGetRaster(camera));
+				r.x = r.y = 0;
+				rect = &r;
+			}
+		}
+
+		if (( origSize.w != rect->w ) && ( origSize.h != rect->h ))
+		{
+			RwRaster           *raster;
+			RwRaster           *zRaster;
+			
+			/*
+			 * Destroy rasters...
+			 */
+			 
+			raster = RwCameraGetRaster(camera);
+			if( raster )
+			{
+				RwRasterDestroy(raster);
+			}
+
+			zRaster = RwCameraGetZRaster(camera);
+			if( zRaster )
+			{
+				RwRasterDestroy(zRaster);
+			}
+			
+			/*
+			 * Create new rasters... 
+			 */
+
+			raster = RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPECAMERA);
+			zRaster = RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPEZBUFFER);
+			
+			if( raster && zRaster )
+			{
+				RwCameraSetRaster(camera, raster);
+				RwCameraSetZRaster(camera, zRaster);
+			}
+			else
+			{
+				if( raster )
+				{
+					RwRasterDestroy(raster);
+				}
+
+				if( zRaster )
+				{
+					RwRasterDestroy(zRaster);
+				}
+
+				rect->x = origSize.x;
+				rect->y = origSize.y;
+			    rect->w = origSize.w;
+				rect->h = origSize.h;
+
+				/* 
+				 * Use default values... 
+				 */
+				raster =
+					RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPECAMERA);
+
+				zRaster =
+					RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPEZBUFFER);
+
+				RwCameraSetRaster(camera, raster);
+				RwCameraSetZRaster(camera, zRaster);
+			}
+		}
+
+		/* Figure out the view window */
+		if (videoMode.flags & rwVIDEOMODEEXCLUSIVE)
+		{
+			/* derive ratio from aspect ratio */
+			vw.x = viewWindow;
+			vw.y = viewWindow / aspectRatio;
+		}
+		else
+		{
+			/* derive from pixel ratios */
+			if (rect->w > rect->h)
+			{
+				vw.x = viewWindow;
+				vw.y = (rect->h * viewWindow) / rect->w;
+			}
+			else
+			{
+				vw.x = (rect->w * viewWindow) / rect->h;
+				vw.y = viewWindow;
+			}
+		}
+		
+		RwCameraSetViewWindow(camera, &vw);
+		
+		RsGlobal.width  = rect->w;
+		RsGlobal.height = rect->h;
+	}
+
+	return;
+}
+
+void
+CameraDestroy(RwCamera *camera)
+{
+	RwRaster    *raster, *tmpRaster;
+	RwFrame     *frame;
+
+	if (camera)
+	{
+		frame = RwCameraGetFrame(camera);
+		if (frame)
+		{
+			RwFrameDestroy(frame);
+		}
+
+		raster = RwCameraGetRaster(camera);
+		if (raster)
+		{
+			tmpRaster = RwRasterGetParent(raster);
+
+			RwRasterDestroy(raster);
+
+			if ((tmpRaster != NULL) && (tmpRaster != raster))
+			{
+				RwRasterDestroy(tmpRaster);
+			}
+		}
+
+		raster = RwCameraGetZRaster(camera);
+		if (raster)
+		{
+			tmpRaster = RwRasterGetParent(raster);
+
+			RwRasterDestroy(raster);
+
+			if ((tmpRaster != NULL) && (tmpRaster != raster))
+			{
+				RwRasterDestroy(tmpRaster);
+			}
+		}
+
+		RwCameraDestroy(camera);
+	}
+
+	return;
+}
+
+RwCamera           *
+CameraCreate(RwInt32 width, RwInt32 height, RwBool zBuffer)
+{
+	RwCamera           *camera;
+
+	camera = RwCameraCreate();
+
+	if (camera)
+	{
+		RwCameraSetFrame(camera, RwFrameCreate());
+		RwCameraSetRaster(camera,
+						  RwRasterCreate(0, 0, 0, rwRASTERTYPECAMERA));
+
+		if (zBuffer)
+		{
+			RwCameraSetZRaster(camera,
+							   RwRasterCreate(0, 0, 0,
+											  rwRASTERTYPEZBUFFER));
+		}
+
+		/* now check that everything is valid */
+		if (RwCameraGetFrame(camera) &&
+			RwCameraGetRaster(camera) &&
+			RwRasterGetParent(RwCameraGetRaster(camera)) &&
+			(!zBuffer || (RwCameraGetZRaster(camera) &&
+						  RwRasterGetParent(RwCameraGetZRaster
+											(camera)))))
+		{
+			/* everything OK */
+			return (camera);
+		}
+	}
+
+	/* if we're here then an error must have occurred so clean up */
+
+	CameraDestroy(camera);
+	return (NULL);
+}
+
+STARTPATCHES
+	//InjectHook(0x526450, GetFirstObjectCallback, PATCH_JUMP);
+	InjectHook(0x526460, GetFirstObject, PATCH_JUMP);
+	InjectHook(0x527170, CameraSize, PATCH_JUMP);
+	InjectHook(0x527340, CameraDestroy, PATCH_JUMP);
+	InjectHook(0x5273B0, CameraCreate, PATCH_JUMP);
+ENDPATCHES

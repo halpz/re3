@@ -53,8 +53,7 @@
 #else
 #define DEFAULT_ASPECTRATIO (4.0f/3.0f)
 #endif
-
-WRAPPER void CameraSize(RwCamera *camera, void *rect, float viewWindow, float aspectRatio) { EAXJMP(0x527170); }
+													   
 
 uint8 work_buff[55000];
 
@@ -679,7 +678,9 @@ AppEventHandler(RsEvent event, void *param)
 
 		case rsCAMERASIZE:
 		{
-			CameraSize(Scene.camera, param, DEFAULT_VIEWWINDOW, DEFAULT_ASPECTRATIO);
+											
+			CameraSize(Scene.camera, (RwRect *)param,
+				DEFAULT_VIEWWINDOW, DEFAULT_ASPECTRATIO);
 			
 			return rsEVENTPROCESSED;
 		}
