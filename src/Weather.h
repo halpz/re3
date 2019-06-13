@@ -34,4 +34,6 @@ public:
 	static bool &Stored_StateStored;
 
 	static void RenderRainStreaks(void);
+	
+	static void ReleaseWeather();
 };

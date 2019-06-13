@@ -161,6 +161,7 @@ struct CCam
 	CPed         *m_pLastPedLookedAt;// So interpolation works 
 	bool        m_bFirstPersonRunAboutActive;
 
+	Bool Using3rdPersonMouseCam();
 
 	void GetVectorsReadyForRW(void);
 	CVector DoAverageOnVector(const CVector &vec);

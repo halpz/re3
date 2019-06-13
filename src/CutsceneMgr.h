@@ -6,6 +6,7 @@ class CCutsceneMgr
 {
 	static bool &ms_running;
 	static bool &ms_cutsceneProcessing;
+	
 public:
 	static CDirectory *&ms_pCutsceneDir;
 

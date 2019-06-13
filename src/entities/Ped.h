@@ -188,6 +188,10 @@ public:
 	bool UseGroundColModel(void);
 	void KillPedWithCar(CVehicle *veh, float impulse);
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
+	
+	static Bool &bNastyLimbsCheat;
+	static Bool &bPedCheat2;
+	static Bool &bPedCheat3;
 };
 static_assert(offsetof(CPed, m_nPedState) == 0x224, "CPed: error");
 static_assert(offsetof(CPed, m_pCurSurface) == 0x2FC, "CPed: error");

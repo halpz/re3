@@ -91,6 +91,7 @@ public:
 	static Bool &m_PrefsAllowNastyGame;
 	static Bool &m_bStartUpFrontEndRequested;
 	static Bool &m_PrefsFrameLimiter;
+	static Bool &m_PrefsUseVibration;
 
 	void Process(void);
 	void DrawFrontEnd(void);

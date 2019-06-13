@@ -62,6 +62,12 @@ uint8 m_extra2;
 	bool IsTrain(void) { return m_vehType == VEHICLE_TYPE_TRAIN; }
 	bool IsHeli(void) { return m_vehType == VEHICLE_TYPE_HELI; }
 	bool IsPlane(void) { return m_vehType == VEHICLE_TYPE_PLANE; }
+	
+	static Bool &bWheelsOnlyCheat;
+	static Bool &bAllDodosCheat;
+	static Bool &bCheat3;
+	static Bool &bCheat4;
+	static Bool &bCheat5;
 };
 static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_pCurSurface) == 0x1E0, "CVehicle: error");
