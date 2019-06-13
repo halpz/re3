@@ -191,6 +191,7 @@ void _psCreateFolder(LPCSTR path)
  */
 const char *_psGetUserFilesFolder()
 {
+#ifdef USE_MY_DOCUMENTS
 	HKEY hKey = NULL;
 
 	static CHAR szUserFiles[256];
@@ -221,6 +222,12 @@ const char *_psGetUserFilesFolder()
 	
 	strcpy(szUserFiles, "data");
 	return szUserFiles;
+#else
+	static CHAR szUserFiles[256];
+	strcpy(szUserFiles, "userfiles");
+	_psCreateFolder(szUserFiles);
+	return szUserFiles;
+#endif
 }
 
 /*

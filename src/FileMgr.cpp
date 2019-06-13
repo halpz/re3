@@ -5,6 +5,8 @@
 #include "patcher.h"
 #include "FileMgr.h"
 
+const char *_psGetUserFilesFolder();
+
 /*
  * Windows FILE is BROKEN for GTA.
  *
@@ -49,14 +51,17 @@ found:
 	return fd;
 }
 
-static void
+static int
 myfclose(int fd)
 {
+	int ret;
 	assert(fd < NUMFILES);
 	if(myfiles[fd].file){
-		fclose(myfiles[fd].file);
+		ret = fclose(myfiles[fd].file);
 		myfiles[fd].file = nil;
+		return ret;
 	}
+	return EOF;
 }
 
 static int
@@ -158,7 +163,8 @@ myfseek(int fd, long offset, int whence)
 static int
 myfeof(int fd)
 {
-	return feof(myfiles[fd].file);
+//	return feof(myfiles[fd].file);
+	return ferror(myfiles[fd].file);
 }
 
 
@@ -205,7 +211,7 @@ void
 CFileMgr::SetDirMyDocuments(void)
 {
 	SetDir("");	// better start at the root if user directory is relative
-	chdir(GetUserDirectory());
+	chdir(_psGetUserFilesFolder());
 }
 
 int
@@ -265,10 +271,10 @@ CFileMgr::ReadLine(int fd, char *buf, int len)
 	return myfgets(buf, len, fd);
 }
 
-void
+int
 CFileMgr::CloseFile(int fd)
 {
-	myfclose(fd);
+	return myfclose(fd);
 }
 
 int

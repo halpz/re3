@@ -62,6 +62,8 @@ public:
   uint8 m_nZoneLevel;
   uint8 pad[3];
 
+	CPhysical(void);
+	~CPhysical(void);
 
 	// from CEntity
 	void Add(void);

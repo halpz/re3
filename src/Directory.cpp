@@ -23,7 +23,7 @@ CDirectory::ReadDirFile(const char *filename)
 	fd = CFileMgr::OpenFile(filename, "rb");
 	while(CFileMgr::Read(fd, (char*)&dirinfo, sizeof(dirinfo)))
 		AddItem(dirinfo);
-	return CFileMgr::CloseFile(fd);
+	CFileMgr::CloseFile(fd);
 }
 
 bool

@@ -65,3 +65,4 @@ enum Config {
 //#define FIX_BUGS
 //#define NO_CDCHECK
 #define NO_MOVIES
+//#define USE_MY_DOCUMENTS

@@ -38,7 +38,7 @@ public:
 #ifdef PED_SKIN
 	int32 modelNumber;	// doesn't seem to be used
 #endif
-	CVector *pedPosition;
+	CVector *velocity;
 	// order of frames is determined by RW hierarchy
 	AnimBlendFrameData *frames;
 

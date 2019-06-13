@@ -72,8 +72,6 @@ extern void **rwengine;
 #define SCREEN_FROM_RIGHT(a)  Float(SCREEN_WIDTH - SCREEN_STRETCH_X(a))
 #define SCREEN_FROM_BOTTOM(a) Float(SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
 
-char *GetUserDirectory(void);
-
 struct GlobalScene
 {
 	RpWorld *world;
@@ -135,6 +133,7 @@ int myrand(void);
 void mysrand(unsigned int seed);
 
 extern uint8 work_buff[55000];
+extern char gString[256];
 
 void re3_debug(char *format, ...);
 void re3_trace(const char *filename, unsigned int lineno, const char *func, char *format, ...);

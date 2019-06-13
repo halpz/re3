@@ -29,6 +29,23 @@ DefinedState(void)
 	RwD3D8SetRenderState(D3DRS_ALPHAREF, 2);
 }
 
+RwFrame*
+GetFirstFrameCallback(RwFrame *child, void *data)
+{
+	*(RwFrame**)data = child;
+	return nil;
+}
+
+RwFrame*
+GetFirstChild(RwFrame *frame)
+{
+	RwFrame *child;
+
+	child = nil;
+	RwFrameForAllChildren(frame, GetFirstFrameCallback, &child);
+	return child;
+}
+
 RwObject*
 GetFirstObjectCallback(RwObject *object, void *data)
 {
@@ -44,6 +61,23 @@ GetFirstObject(RwFrame *frame)
 	obj = nil;
 	RwFrameForAllObjects(frame, GetFirstObjectCallback, &obj);
 	return obj;
+}
+
+RpAtomic*
+GetFirstAtomicCallback(RpAtomic *atm, void *data)
+{
+	*(RpAtomic**)data = atm;
+	return nil;
+}
+
+RpAtomic*
+GetFirstAtomic(RpClump *clump)
+{
+	RpAtomic *atm;
+
+	atm = nil;
+	RpClumpForAllAtomics(clump, GetFirstAtomicCallback, &atm);
+	return atm;
 }
 
 void
@@ -135,7 +169,7 @@ CameraSize(RwCamera * camera, RwRect * rect,
 
 				rect->x = origSize.x;
 				rect->y = origSize.y;
-			    rect->w = origSize.w;
+				rect->w = origSize.w;
 				rect->h = origSize.h;
 
 				/* 

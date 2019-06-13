@@ -15,6 +15,60 @@
 #include "Automobile.h"
 #include "Physical.h"
 
+CPhysical::CPhysical(void)
+{
+	int i;
+
+	fForceMultiplier = 1.0f;
+	m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+	m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+	m_vecMoveFriction = CVector(0.0f, 0.0f, 0.0f);
+	m_vecTurnFriction = CVector(0.0f, 0.0f, 0.0f);
+	m_vecMoveSpeedAvg = CVector(0.0f, 0.0f, 0.0f);
+	m_vecTurnSpeedAvg = CVector(0.0f, 0.0f, 0.0f);
+
+	m_movingListNode = nil;
+	m_nStaticFrames = 0;
+
+	m_nCollisionRecords = 0;
+	for(i = 0; i < 6; i++)
+		m_aCollisionRecords[0] = nil;
+
+	field_EF = false;
+
+	m_nDamagePieceType = 0;
+	m_fDamageImpulse = 0.0f;
+	m_pDamageEntity = nil;
+	m_vecDamageNormal = CVector(0.0f, 0.0f, 0.0f);
+
+	bUsesCollision = true;
+	uAudioEntityId = -5;
+	unk1 = 100.0f;
+	m_vecCentreOfMass = CVector(0.0f, 0.0f, 0.0f);
+	field_EC = 0;
+
+	bIsHeavy = false;
+	bAffectedByGravity = true;
+	bInfiniteMass = false;
+	bIsInWater = false;
+	bHitByTrain = false;
+	m_phy_flagA80 = false;
+
+	m_fDistanceTravelled = 0.0f;
+	m_pedTreadable = nil;
+	m_carTreadable = nil;
+
+	m_phy_flagA10 = false;
+	m_phy_flagA20 = false;
+
+	m_nLastCollType = 0;
+}
+
+CPhysical::~CPhysical(void)
+{
+	m_entryInfoList.Flush();
+}
+
 void
 CPhysical::Add(void)
 {

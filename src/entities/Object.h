@@ -6,6 +6,7 @@ enum {
 	GAME_OBJECT = 1,
 	MISSION_OBJECT = 2,
 	TEMP_OBJECT = 3,
+	CUTSCENE_OBJECT = 4,
 };
 
 class CVehicle;
@@ -22,7 +23,7 @@ public:
 	int8 m_obj_flag8 : 1;
 	int8 m_obj_flag10 : 1;
 	int8 bHasBeenDamaged : 1;
-	int8 m_obj_flag40 : 1;
+	int8 bUseVehicleColours : 1;
 	int8 m_obj_flag80 : 1;
   int8 field_172;
   int8 field_173;
@@ -43,9 +44,19 @@ public:
 	CEntity *m_pCollidingEntity;
 	int8 m_colour1, m_colour2;
 
+	static int16 &nNoTempObjects;
+
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
 
+	CObject(void);
+	~CObject(void);
+
+	void Render(void);
+
 	void ObjectDamage(float amount);
+
+
+	void Render_(void) { CObject::Render(); }
 };
 static_assert(sizeof(CObject) == 0x198, "CObject: error");

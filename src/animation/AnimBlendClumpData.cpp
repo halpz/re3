@@ -9,7 +9,7 @@
 CAnimBlendClumpData::CAnimBlendClumpData(void)
 {
 	numFrames = 0;
-	pedPosition = nil;
+	velocity = nil;
 	frames = nil;
 	link.Init();
 }

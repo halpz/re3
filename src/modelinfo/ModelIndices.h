@@ -264,3 +264,9 @@ IsBoatModel(int16 id)
 		id == MI_SPEEDER ||
 		id == MI_GHOST;
 }
+
+inline bool
+IsPedModel(int16 id)
+{
+	return id >= 0 && id <= 89;
+}

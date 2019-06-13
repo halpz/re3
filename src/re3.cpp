@@ -47,17 +47,6 @@ mysrand(unsigned int seed)
 	myrand_seed = seed;
 }
 
-// platform stuff
-char*
-GetUserDirectory(void)
-{
-	static char path[MAX_PATH];
-	strcpy(path, "userfiles");
-	mkdir(path);
-	return path;
-}
-
-
 int (*open_script_orig)(const char *path, const char *mode);
 int
 open_script(const char *path, const char *mode)

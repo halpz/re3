@@ -289,7 +289,7 @@ CTimeCycle::Update(void)
 		TheCamera.SetMotionBlur(m_fCurrentBlurRed, m_fCurrentBlurGreen, m_fCurrentBlurBlue, m_fCurrentBlurAlpha, MBLUR_NORMAL);
 
 	if(m_FogReduction != 0)
-		m_fCurrentFarClip = max(m_fCurrentFarClip, m_FogReduction/64 * 650.0f);
+		m_fCurrentFarClip = max(m_fCurrentFarClip, m_FogReduction/64.0f * 650.0f);
 	m_nCurrentFogColourRed = (m_nCurrentSkyTopRed + 2*m_nCurrentSkyBottomRed) / 3;
 	m_nCurrentFogColourGreen = (m_nCurrentSkyTopGreen + 2*m_nCurrentSkyBottomGreen) / 3;
 	m_nCurrentFogColourBlue = (m_nCurrentSkyTopBlue + 2*m_nCurrentSkyBottomBlue) / 3;
