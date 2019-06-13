@@ -1,5 +1,5 @@
 workspace "re3"
-	configurations { "ReleaseCI", "Release", "ReleaseFH", "Debug" }
+	configurations { "DebugCI", "ReleaseCI", "Release", "ReleaseFH", "Debug" }
 	location "build"
 
 	files { "src/*.*" }
@@ -62,12 +62,11 @@ project "re3"
 		debugcommand "F:/Rockstar Games/GTAIII/gta3.exe"
 		targetextension ".asi"
 		targetdir "F:/Rockstar Games/GTAIII/scripts"
+	filter "configurations:DebugCI"
+		defines { "DEBUG" }
+		symbols "On"
+		staticruntime "on"
 	filter "configurations:ReleaseCI"
 		defines { "NDEBUG" }
 		optimize "On"
 		staticruntime "on"
-	filter "configurations:DebugCI"
-		defines { "DEBUG" }
-		staticruntime "on"
-		symbols "On"
-		

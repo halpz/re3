@@ -4,8 +4,12 @@ The aim of this project is to reverse GTA III for PC by replacing
 parts of the game [one by one](https://en.wikipedia.org/wiki/Ship_of_Theseus)
 such that we have a working game at all times.
 
-Apparently you can download a binary of the latest version
-[here](https://ci.appveyor.com/api/projects/aap/re3/artifacts/bin%2FReleaseCI%2Fre3.dll?branch=master).
+Apparently you can download a binary of the latest version here:
+[Debug](https://ci.appveyor.com/api/projects/app/re3/artifacts/bin/DebugCI/re3.dll?branch=master&job=Configuration%3A+DebugCI), 
+[Release](https://ci.appveyor.com/api/projects/app/re3/artifacts/bin/ReleaseCI/re3.dll?branch=master&job=Configuration%3A+ReleaseCI).
+
+Build status:
+[![Build status](https://ci.appveyor.com/api/projects/status/hyiwgegks122h8jg?svg=true)](https://ci.appveyor.com/project/aap/re3/branch/master)
 
 Re3 starts the script main_freeroam.scm by default. Make sure you copy it to your data directory.
 
