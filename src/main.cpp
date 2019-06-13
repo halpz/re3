@@ -33,6 +33,7 @@
 #include "Garages.h"
 #include "MusicManager.h"
 #include "VisibilityPlugins.h"
+#include "NodeName.h"
 #include "DMAudio.h"
 #include "CutsceneMgr.h"
 #include "Lights.h"
@@ -52,10 +53,9 @@
 #else
 #define DEFAULT_ASPECTRATIO (4.0f/3.0f)
 #endif
+													   
 
-//WRAPPER RwBool RpAnimBlendPluginAttach() { EAXJMP(0x4052D0); }
-WRAPPER RwBool NodeNamePluginAttach() { EAXJMP(0x527100); }
-
+uint8 work_buff[55000];
 
 bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
 
@@ -678,6 +678,7 @@ AppEventHandler(RsEvent event, void *param)
 
 		case rsCAMERASIZE:
 		{
+											
 			CameraSize(Scene.camera, (RwRect *)param,
 				DEFAULT_VIEWWINDOW, DEFAULT_ASPECTRATIO);
 			

@@ -3,9 +3,6 @@
 #include "FileMgr.h"
 #include "ParticleMgr.h"
 
-_TODO("work_buff");
-UInt8 work_buff[55000];
-
 cParticleSystemMgr mod_ParticleSystemManager;
 
 const Char *ParticleFilename = "PARTICLE.CFG";
