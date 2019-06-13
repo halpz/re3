@@ -46,6 +46,9 @@ public:
 	void InitDefaultControlConfiguration();
 	void InitDefaultControlConfigMouse(CMouseControllerState const &mousestate);
 	void InitDefaultControlConfigJoyPad(unsigned int buttons);
+	void ClearSimButtonPressCheckers();
+	void AffectPadFromKeyBoard();
+	void AffectPadFromMouse();
 	
 };
 

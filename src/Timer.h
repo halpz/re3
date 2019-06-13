@@ -19,6 +19,7 @@ public:
 	static uint32 GetTimeInMilliseconds(void) { return m_snTimeInMilliseconds; }
 	
 	static inline Bool GetIsPaused() { return m_UserPause || m_CodePause; }
+	static inline void SetTimeScale(Float ts) { ms_fTimeScale = ts; }
 	
 	static void Initialise(void);
 	static void Shutdown(void);

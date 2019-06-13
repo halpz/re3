@@ -28,3 +28,8 @@ bool &CWeather::bScriptsForceRain = *(bool*)0x95CD7D;
 bool &CWeather::Stored_StateStored = *(bool*)0x95CDC1;
 
 WRAPPER void CWeather::RenderRainStreaks(void) { EAXJMP(0x524550); }
+
+void CWeather::ReleaseWeather()
+{
+	ForcedWeatherType = -1;
+}

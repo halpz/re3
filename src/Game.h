@@ -17,6 +17,7 @@ public:
 	static bool &frenchGame;
 	static bool &germanGame;
 	static bool &noProstitutes;
+	static bool &playingIntro;
 
 	static void Process(void);
 	static Bool InitialiseOnceBeforeRW(void);

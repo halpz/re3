@@ -3,6 +3,10 @@
 #include "Timer.h"
 #include "Pad.h"
 #include "Clock.h"
+#include "Stats.h"
+
+_TODO("gbFastTime");
+Bool &gbFastTime = *(Bool*)0x95CDBB;
 
 uint8  &CClock::ms_nGameClockHours = *(uint8*)0x95CDA6;
 uint8  &CClock::ms_nGameClockMinutes = *(uint8*)0x95CDC8;
@@ -30,26 +34,37 @@ CClock::Initialise(uint32 scale)
 void
 CClock::Update(void)
 {
-	if(CPad::GetPad(1)->GetRightShoulder1()){
+	if(CPad::GetPad(1)->GetRightShoulder1())
+	{
 		ms_nGameClockMinutes += 8;
 		ms_nLastClockTick = CTimer::GetTimeInMilliseconds();
-		if(ms_nGameClockMinutes >= 60){
+		
+		if(ms_nGameClockMinutes >= 60)
+		{
 			ms_nGameClockHours++;
 			ms_nGameClockMinutes = 0;
 			if(ms_nGameClockHours >= 24)
 				ms_nGameClockHours = 0;
 		}
-	}else
-	if(CTimer::GetTimeInMilliseconds() - ms_nLastClockTick >
-	   ms_nMillisecondsPerGameMinute){
+		
+	}
+	else if(CTimer::GetTimeInMilliseconds() - ms_nLastClockTick > ms_nMillisecondsPerGameMinute || gbFastTime)
+	{
 		ms_nGameClockMinutes++;
 		ms_nLastClockTick += ms_nMillisecondsPerGameMinute;
-		if(ms_nGameClockMinutes >= 60){
+		
+		if ( gbFastTime )
+			ms_nLastClockTick = CTimer::GetTimeInMilliseconds();
+		
+		if(ms_nGameClockMinutes >= 60)
+		{
 			ms_nGameClockHours++;
 			ms_nGameClockMinutes = 0;
 			if(ms_nGameClockHours >= 24)
+			{
+				CStats::DaysPassed++;
 				ms_nGameClockHours = 0;
-				// TODO: stats days passed
+			}
 		}
 	}
 	ms_nGameClockSeconds +=

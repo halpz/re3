@@ -1988,7 +1988,7 @@ _WinMain(HINSTANCE instance,
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetLeftMouseJustDown() )
 							++gGameState;
-						else if ( CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetExtEnterJustDown() )
+						else if ( CPad::GetPad(0)->GetPadEnterJustDown() || CPad::GetPad(0)->GetEnterJustDown() )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetCharJustDown(' ') )
 							++gGameState;
@@ -2024,7 +2024,7 @@ _WinMain(HINSTANCE instance,
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetLeftMouseJustDown() )
 							++gGameState;
-						else if ( CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetExtEnterJustDown() )
+						else if ( CPad::GetPad(0)->GetPadEnterJustDown() || CPad::GetPad(0)->GetEnterJustDown() )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetCharJustDown(' ') )
 							++gGameState;

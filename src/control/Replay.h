@@ -6,4 +6,5 @@ public:
 	static void Display(void);
 
 	static uint8 &Mode;
+	static Bool &bPlayingBackFromFile;
 };

@@ -10,6 +10,7 @@ Bool &CMenuManager::m_PrefsVsync = *(Bool*)0x5F2E58;
 Bool &CMenuManager::m_PrefsAllowNastyGame = *(Bool*)0x5F2E64;
 Bool &CMenuManager::m_bStartUpFrontEndRequested = *(Bool*)0x95CCF4;
 Bool &CMenuManager::m_PrefsFrameLimiter = *(Bool*)0x5F2E60;
+Bool &CMenuManager::m_PrefsUseVibration = *(Bool*)0x95CD92;
 
 CMenuManager &FrontEndMenuManager = *(CMenuManager*)0x8F59D8;
 
