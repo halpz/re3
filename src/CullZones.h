@@ -71,6 +71,7 @@ public:
 	static bool &bCullZonesDisabled;
 
 	static void Init(void);
+	static void ResolveVisibilities(void);
 	static void Update(void);
 	static void ForceCullZoneCoors(CVector coors);
 	static int32 FindCullZoneForCoors(CVector coors);

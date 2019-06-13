@@ -49,6 +49,13 @@ CVisibilityPlugins::Initialise(void)
 }
 
 void
+CVisibilityPlugins::Shutdown(void)
+{
+	m_alphaList.Shutdown();
+	m_alphaEntityList.Shutdown();
+}
+
+void
 CVisibilityPlugins::InitAlphaEntityList(void)
 {
 	m_alphaEntityList.Clear();
@@ -822,6 +829,7 @@ CVisibilityPlugins::GetClumpAlpha(RpClump *clump)
 
 STARTPATCHES
 	InjectHook(0x527E50, CVisibilityPlugins::Initialise, PATCH_JUMP);
+	InjectHook(0x527EA0, CVisibilityPlugins::Shutdown, PATCH_JUMP);
 	InjectHook(0x528F90, CVisibilityPlugins::InitAlphaEntityList, PATCH_JUMP);
 	InjectHook(0x528FF0, CVisibilityPlugins::InsertEntityIntoSortedList, PATCH_JUMP);
 	InjectHook(0x528F80, CVisibilityPlugins::InitAlphaAtomicList, PATCH_JUMP);

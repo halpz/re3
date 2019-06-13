@@ -35,6 +35,7 @@ public:
 	static float &ms_pedFadeDist;
 
 	static void Initialise(void);
+	static void Shutdown(void);
 	static void InitAlphaEntityList(void);
 	static bool InsertEntityIntoSortedList(CEntity *e, float dist);
 	static void InitAlphaAtomicList(void);

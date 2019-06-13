@@ -6,6 +6,9 @@ RwObject *GetFirstObject(RwFrame *frame);
 RpAtomic *GetFirstAtomic(RpClump *clump);
 
 RwTexDictionary *RwTexDictionaryGtaStreamRead(RwStream *stream);
+RwTexDictionary *RwTexDictionaryGtaStreamRead1(RwStream *stream);
+RwTexDictionary *RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary *texDict);
+
 bool RpClumpGtaStreamRead1(RwStream *stream);
 RpClump *RpClumpGtaStreamRead2(RwStream *stream);
 void RpClumpGtaCancelStream(void);
