@@ -66,4 +66,8 @@ project "re3"
 		defines { "NDEBUG" }
 		optimize "On"
 		staticruntime "on"
+	filter "configurations:DebugCI"
+		defines { "DEBUG" }
+		staticruntime "on"
+		symbols "On"
 		

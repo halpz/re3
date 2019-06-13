@@ -88,7 +88,7 @@ CameraSize(RwCamera * camera, RwRect * rect,
 	{
 		RwVideoMode         videoMode;
 		RwRect              r;
-		RwRect              origSize;
+		RwRect              origSize = { 0, 0, 0, 0 };	// FIX just to make the compier happy
 		RwV2d               vw;
 
 		RwEngineGetVideoModeInfo(&videoMode,
