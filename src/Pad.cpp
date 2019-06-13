@@ -334,7 +334,7 @@ void CPad::StartShake(Int16 nDur, UInt8 nFreq)
 	if ( !CMenuManager::m_PrefsUseVibration )
 		return;
 	
-	if ( CCutsceneMgr::ms_running || CGame::playingIntro )
+	if ( CCutsceneMgr::IsRunning() || CGame::playingIntro )
 		return;
 	
 	if ( nFreq == 0 )
@@ -356,7 +356,7 @@ void CPad::StartShake_Distance(Int16 nDur, UInt8 nFreq, Float fX, Float fY, Floa
 	if ( !CMenuManager::m_PrefsUseVibration )
 		return;
 	
-	if ( CCutsceneMgr::ms_running || CGame::playingIntro )
+	if ( CCutsceneMgr::IsRunning() || CGame::playingIntro )
 		return;
 	
 	Float fDist = ( TheCamera.GetPosition() - CVector(fX, fY, fZ) ).Magnitude();
@@ -383,7 +383,7 @@ void CPad::StartShake_Train(Float fX, Float fY)
 	if ( !CMenuManager::m_PrefsUseVibration )
 		return;
 	
-	if ( CCutsceneMgr::ms_running || CGame::playingIntro )
+	if ( CCutsceneMgr::IsRunning() || CGame::playingIntro )
 		return;
 	
 	if (FindPlayerVehicle() != NULL && FindPlayerVehicle()->IsTrain() )
