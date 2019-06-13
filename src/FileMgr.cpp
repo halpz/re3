@@ -163,8 +163,8 @@ myfseek(int fd, long offset, int whence)
 static int
 myfeof(int fd)
 {
-//	return feof(myfiles[fd].file);
-	return ferror(myfiles[fd].file);
+	return feof(myfiles[fd].file);
+//	return ferror(myfiles[fd].file);
 }
 
 

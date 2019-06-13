@@ -2,10 +2,8 @@
 #include "patcher.h"
 #include "templates.h"
 #include "Streaming.h"
+#include "RwHelper.h"
 #include "TxdStore.h"
-
-WRAPPER RwTexDictionary *RwTexDictionaryGtaStreamRead(RwStream *stream) { EAXJMP(0x5924A0); }
-
 
 CPool<TxdDef,TxdDef> *&CTxdStore::ms_pTxdPool = *(CPool<TxdDef,TxdDef>**)0x8F5FB8;
 RwTexDictionary *&CTxdStore::ms_pStoredTxd = *(RwTexDictionary**)0x9405BC;
