@@ -1,5 +1,7 @@
 image: Visual Studio 2017
-configuration: ReleaseCI
+configuration:
+  - DebugCI
+  - ReleaseCI
 platform:
   - Win32
 environment:
@@ -14,4 +16,5 @@ build:
   project: c:\projects\re3\build\re3.sln
   verbosity: minimal
 artifacts:
-  - path: bin/ReleaseCI/re3.dll
+  path: bin/%CONFIGURATION%/re3.dll
+
