@@ -72,7 +72,7 @@ enum eAudioType : int32 {
 
 class tAudioEntity
 {
-public:
+      public:
 	eAudioType m_nType;
 	void *m_pEntity;
 	char m_bIsUsed;
@@ -100,7 +100,8 @@ public:
 
 static_assert(sizeof(tPedComment) == 0x1c, "tPedComment: error");
 
-class cPedComments {
+class cPedComments
+{
 public:
 	tPedComment m_asPedComments[40];
 	char field_1120[40];
@@ -113,7 +114,8 @@ static_assert(sizeof(cPedComments) == 0x48c, "cPedComments: error");
 
 class CEntity;
 
-class cAudioCollision {
+class cAudioCollision
+{
 public:
 	CEntity *m_pEntity1;
 	CEntity *m_pEntity2;
@@ -130,7 +132,8 @@ public:
 
 static_assert(sizeof(cAudioCollision) == 0x28, "cAudioCollision: error");
 
-class cAudioCollisionManager {
+class cAudioCollisionManager
+{
 public:
 	cAudioCollision m_asCollisions1[10];
 	cAudioCollision m_asCollisions2[10];
@@ -212,8 +215,11 @@ public:
 
 	void PlayerJustLeftCar(void);
 	void Service();
-	void GetPhrase(uint32 *a2, uint32 *a3, eAudioSamples sample,
-	               uint32 maxOffset);
+	void GetPhrase(eAudioSamples *phrase, eAudioSamples *prevPhrase,
+	               eAudioSamples sample, uint32 maxOffset);
+
+	uint32 GetPlayerTalkSfx(eSound sound);
+    uint32 GetGenericMaleTalkSfx(eSound sound);
 };
 
 static_assert(sizeof(cAudioManager) == 0x4B14, "cAudioManager: error");
