@@ -67,7 +67,7 @@ extern void **rwengine;
 #define DEFAULT_SCREEN_HEIGHT (448)
 #define SCREEN_WIDTH Float(RsGlobal.width)
 #define SCREEN_HEIGHT Float(RsGlobal.height)
-#define SCREEN_STRETCH_X(a)   Float((a) * (SCREEN_WIDTH / Float(DEFAULT_SCREEN_WIDTH)))
+#define SCREEN_STRETCH_X(a)   Float((a) * (SCREEN_WIDTH / Float(DEFAULT_SCREEN_WIDTH))) * Float(1.33334f / (CMenuManager::m_PrefsUseWideScreen ? 16.0f / 9.0f : 4.0f / 3.0f))
 #define SCREEN_STRETCH_Y(a)   Float((a) * (SCREEN_HEIGHT / Float(DEFAULT_SCREEN_HEIGHT)))
 #define SCREEN_FROM_RIGHT(a)  Float(SCREEN_WIDTH - SCREEN_STRETCH_X(a))
 #define SCREEN_FROM_BOTTOM(a) Float(SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))

@@ -36,4 +36,7 @@ CDraw::SetFOV(float fov)
 
 STARTPATCHES
 	InjectHook(0x4FE7B0, CDraw::SetFOV, PATCH_JUMP);
+
+	Nop(0x46B618, 2);
+	Patch<float>(0x5F0A64, 1.3333334f);
 ENDPATCHES
