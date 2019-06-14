@@ -81,22 +81,6 @@ enum {
 	PEDMOVE_SPRINT,
 };
 
-enum PedNode {
-	PED_WAIST = 0,
-	PED_TORSO,	// Smid on PS2/PC, Storso on mobile/xbox. We follow mobile/xbox (makes kicking on ground look better)
-	PED_HEAD,
-	PED_UPPERARML,
-	PED_UPPERARMR,
-	PED_HANDL,
-	PED_HANDR,
-	PED_UPPERLEGL,
-	PED_UPPERLEGR,
-	PED_FOOTL,
-	PED_FOOTR,
-	PED_NODE_11,
-	PED_NODE_MAX
-};
-
 class CVehicle;
 
 class CPed : public CPhysical
@@ -180,7 +164,7 @@ public:
 	uint8 stuff10[60];
 	int32 m_pEventEntity;
 	int32 m_fAngleToEvent;
-	AnimBlendFrameData *m_pFrames[PED_FRAME_MAX];
+	AnimBlendFrameData *m_pFrames[PED_NODE_MAX];
 	int32 m_animGroup;
 	int32 m_pVehicleAnim;
 	CVector2D m_vecAnimMoveDelta;

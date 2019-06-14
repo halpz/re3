@@ -15,8 +15,7 @@ enum PedNode {
 	PED_FOOTL,
 	PED_FOOTR,
 	PED_LOWERLEGR,
-	// This is not valid apparently
-	PED_LOWERLEGL,
+	PED_NODE_MAX// Not valid: PED_LOWERLEGL
 };
 
 class CPedModelInfo : public CClumpModelInfo
