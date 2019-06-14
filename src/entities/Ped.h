@@ -2,6 +2,8 @@
 
 #include "Physical.h"
 #include "Weapon.h"
+#include "PedIK.h"
+#include <animation\AnimBlendClumpData.h>
 
 enum {
 	PED_MAX_WEAPONS = 13
@@ -77,6 +79,22 @@ enum {
 	PEDMOVE_WALK,
 	PEDMOVE_RUN,
 	PEDMOVE_SPRINT,
+};
+
+enum PedNode {
+	PED_WAIST = 0,
+	PED_TORSO,	// Smid on PS2/PC, Storso on mobile/xbox. We follow mobile/xbox (makes kicking on ground look better)
+	PED_HEAD,
+	PED_UPPERARML,
+	PED_UPPERARMR,
+	PED_HANDL,
+	PED_HANDR,
+	PED_UPPERLEGL,
+	PED_UPPERLEGR,
+	PED_FOOTL,
+	PED_FOOTR,
+	PED_NODE_11,
+	PED_NODE_MAX
 };
 
 class CVehicle;
@@ -159,7 +177,16 @@ public:
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
-	uint8 stuff1[199];
+	uint8 stuff10[60];
+	int32 m_pEventEntity;
+	int32 m_fAngleToEvent;
+	AnimBlendFrameData *m_pFrames[PED_FRAME_MAX];
+	int32 m_animGroup;
+	int32 m_pVehicleAnim;
+	CVector2D m_vecAnimMoveDelta;
+	CVector m_vecOffsetSeek;
+	CPedIK m_pedIK; 
+	uint8 stuff1[12]; 
 	int32 m_nPedState;
 	int32 m_nLastPedState;
 	int32 m_nMoveState;
@@ -167,7 +194,8 @@ public:
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
-	uint8 stuff3[16];
+	uint8 stuff3[12];
+	CPed* m_pSeekTarget;
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
 	uint8 stuff4[23];
@@ -179,14 +207,25 @@ public:
 	CWeapon m_weapons[PED_MAX_WEAPONS];
 	int32 stuff7;
 	uint8 m_currentWeapon;
-	uint8 stuff[163];
+	uint8 stuff[3];
+	int32 m_pPointGunAt;
+	CVector m_vecHitLastPos;
+	uint8 stuff8[12];
+	CPed *m_pPedFight;
+	float m_fLookDirection;
+	int32 m_wepModelID;
+	uint8 stuff9[120];
 
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
 
 	bool IsPlayer(void) { return m_nPedType == 0 || m_nPedType== 1 || m_nPedType == 2 || m_nPedType == 3; }
 	bool UseGroundColModel(void);
+	void AddWeaponModel(int id);
+	void AimGun();
 	void KillPedWithCar(CVehicle *veh, float impulse);
+	void Say(uint16 audio);
+	void SetLookFlag(CEntity *to, bool set);
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	
 	static Bool &bNastyLimbsCheat;
