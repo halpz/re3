@@ -3,6 +3,7 @@
 #include "Physical.h"
 #include "Weapon.h"
 #include "PedIK.h"
+#include <animation\AnimManager.h>
 #include <animation\AnimBlendClumpData.h>
 
 enum {
@@ -94,7 +95,7 @@ public:
 	uint8 m_ped_flagA4 : 1;
 	uint8 m_ped_flagA8 : 1;
 	uint8 m_ped_flagA10 : 1;
-	uint8 m_ped_flagA20 : 1;
+	uint8 m_ped_flagA20_look : 1;
 	uint8 m_ped_flagA40 : 1;
 	uint8 m_ped_flagA80 : 1;
 	uint8 m_ped_flagB1 : 1;
@@ -163,14 +164,15 @@ public:
 	uint8 m_ped_flagI80 : 1;
 	uint8 stuff10[60];
 	int32 m_pEventEntity;
-	int32 m_fAngleToEvent;
+	float m_fAngleToEvent;
 	AnimBlendFrameData *m_pFrames[PED_NODE_MAX];
 	int32 m_animGroup;
 	int32 m_pVehicleAnim;
 	CVector2D m_vecAnimMoveDelta;
 	CVector m_vecOffsetSeek;
 	CPedIK m_pedIK; 
-	uint8 stuff1[12]; 
+	uint8 stuff1[8];
+	int32 m_nPedStateTimer;
 	int32 m_nPedState;
 	int32 m_nLastPedState;
 	int32 m_nMoveState;
@@ -198,7 +200,12 @@ public:
 	CPed *m_pPedFight;
 	float m_fLookDirection;
 	int32 m_wepModelID;
-	uint8 stuff9[120];
+	uint32 m_leaveCarTimer;
+	uint32 m_getUpTimer;
+	uint32 m_lookTimer;
+	uint8 stuff9[34];
+	uint8 m_bodyPartBleeding;
+	uint8 stuff11[73];
 
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
@@ -209,8 +216,17 @@ public:
 	void AimGun();
 	void KillPedWithCar(CVehicle *veh, float impulse);
 	void Say(uint16 audio);
-	void SetLookFlag(CEntity *to, bool set);
+	void SetLookFlag(CPed *to, bool set);
+	void SetLookFlag(float angle, bool set);
+	void SetDie(AnimationId anim, float arg1, float arg2);
+	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
+	void RemoveBodyPart(PedNode nodeId, char arg4);
+	void SpawnFlyingComponent(int, signed char);
+	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
+	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
+
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
+	RwFrame* GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
 	
 	static Bool &bNastyLimbsCheat;
 	static Bool &bPedCheat2;
@@ -223,4 +239,6 @@ static_assert(offsetof(CPed, m_nPedType) == 0x32C, "CPed: error");
 static_assert(offsetof(CPed, m_pCollidingEntity) == 0x34C, "CPed: error");
 static_assert(offsetof(CPed, m_weapons) == 0x35C, "CPed: error");
 static_assert(offsetof(CPed, m_currentWeapon) == 0x498, "CPed: error");
+static_assert(offsetof(CPed, m_lookTimer) == 0x4CC, "CPed: error");
+static_assert(offsetof(CPed, m_bodyPartBleeding) == 0x4F2, "CPed: error");
 static_assert(sizeof(CPed) == 0x53C, "CPed: error");
