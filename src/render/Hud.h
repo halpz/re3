@@ -49,7 +49,6 @@ public:
 	static int32 m_VehicleNameTimer;
 	static wchar* m_Message;
 	static wchar* m_PagerMessage;
-	static Bool &m_bRetuneInProgress;
 	static Bool &m_Wants_To_Draw_Hud;
 	static Bool &m_Wants_To_Draw_3dMarkers;
 	static wchar(*m_BigMessage)[128];

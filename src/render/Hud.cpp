@@ -53,7 +53,6 @@ wchar* CHud::m_pLastVehicleName = *(wchar **)0x8E2DD8;
 wchar* CHud::m_pVehicleNameToPrint;
 wchar* CHud::m_Message = (wchar*)0x72E318;
 wchar* CHud::m_PagerMessage = (wchar*)0x878840;
-Bool &CHud::m_bRetuneInProgress = *(Bool*)0x650B80;
 Bool &CHud::m_Wants_To_Draw_Hud = *(Bool*)0x95CD89;
 Bool &CHud::m_Wants_To_Draw_3dMarkers = *(Bool*)0x95CD62;
 wchar(*CHud::m_BigMessage)[128] = (wchar(*)[128])0x664CE0;
