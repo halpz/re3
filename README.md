@@ -24,6 +24,7 @@ to reverse at the time, calling the original functions is acceptable.
 
 This is a list of some things that have been reversed to some non-trivial extent.
 Not everything is listed, check the code.
+(TODO: keep this list at least a bit up to date...)
 
 ```
 CPool
@@ -52,6 +53,11 @@ CPathFind
 CCam
 CParticle
 CParticleMgr
+CPointLights
+CCoronas
+CAntennas
+CClouds
+CHud
 ```
 
 # Low hanging fruit
@@ -79,9 +85,12 @@ functionname(args)
 	if(a == b){
 		s1;
 		s2;
+	}else{
+		s3;
+		s4;
 	}
 	if(x != y)
-		s3;
+		s5;
 }
 
 type functionname(args)
@@ -89,9 +98,12 @@ type functionname(args)
 	if (a == b) {
 		s1;
 		s2;
+	} else {
+		s3;
+		s4;
 	}
 	if (x != y)
-		s3;
+		s5;
 }
 ```
 
@@ -105,14 +117,31 @@ type functionname ( args )
     s1;
     s2;
   }
-  if ( x != y )
+  else
   {
     s3;
+    s4;
+  }
+  if ( x != y )
+  {
+    s5;
   }
 }
 ```
 
-Indentation is done with TABS.
+i.e. 
+
+* Put the brace on the same line as control statements
+
+* Put the brace on the next line after function definitions and structs/classes
+
+* Put an `else` on the same line with the braces
+
+* Don't put braces around single statements
+
+* Put the function return type on a separate line
+
+* Indent with TABS
 
 As for the less cosmetic choices, here are some guidelines how the code should look:
 
@@ -124,6 +153,8 @@ since `4` will be used in other places and you can't easily see where else the e
 
 * Use the right types. In particular:
 
+    * use the lower case types! (unless you're Fire_Head)
+
     * don't use types like `__int16`, we have `int16` for that
 
     * don't use `unsigned`, we have typedefs for that
@@ -131,6 +162,8 @@ since `4` will be used in other places and you can't easily see where else the e
     * don't use `char` for anything but actual characters, use `int8`, `uint8` or `bool`
 
     * don't even think about using win32 types (`BYTE`, `WORD`, &c.) unless you're writing win32 specific code
+
+    * declare pointers like `int *ptr;`, not `int* ptr;`
 
 * As for variable names, the original gta source code was not written in a uniform style,
 but here are some observations:
