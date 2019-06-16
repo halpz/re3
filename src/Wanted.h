@@ -45,7 +45,7 @@ public:
 	int16 m_wRoadblockNode;
 	int8 field_1342;
 	int8 field_1343;
-	Float m_fDistanceToTarget;
+	float m_fDistanceToTarget;
 	int8 m_bIsInPursuit;
 	int8 m_bIsDisabledCop;
 	int8 field_1350;
@@ -67,7 +67,7 @@ public:
 	int32 m_nChaos;
 	int32 m_nLastUpdateTime;
 	int32 m_nLastWantedLevelChange;
-	Float m_fCrimeSensitivity;
+	float m_fCrimeSensitivity;
 	uint8 m_bCurrentCops;
 	uint8 m_bMaxCops;
 	uint8 m_bMaximumLawEnforcerVehicles;

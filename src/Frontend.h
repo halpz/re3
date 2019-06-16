@@ -161,13 +161,13 @@ public:
 	static int8 &m_PrefsLanguage;
 	static int8 &m_bDisableMouseSteering;
 	static int32 &m_PrefsBrightness;
-	static Float &m_PrefsLOD;
+	static float &m_PrefsLOD;
 	static int8 &m_bFrontEnd_ReloadObrTxtGxt;
 	static int32 &m_PrefsMusicVolume;
 	static int32 &m_PrefsSfxVolume;
 
-	static Bool &m_PrefsAllowNastyGame;
-	static Bool &m_bStartUpFrontEndRequested;
+	static bool &m_PrefsAllowNastyGame;
+	static bool &m_bStartUpFrontEndRequested;
 
 	void Process(void);
 	void DrawFrontEnd(void);

@@ -196,8 +196,8 @@ private:
 public:
 	CPathNode *m_pNextPathNode;
 	CPathNode *m_pLastPathNode;
-	Float m_fHealth;
-	Float m_fArmour;
+	float m_fHealth;
+	float m_fArmour;
 	uint8 stuff2[34];
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
@@ -205,7 +205,7 @@ public:
 	uint8 stuff3[12];
 	CPed* m_pSeekTarget;
 	CVehicle *m_pMyVehicle;
-	Bool bInVehicle;
+	bool bInVehicle;
 	uint8 stuff4[23];
 	int32 m_nPedType;
 	PedStat *m_pedStats;
@@ -255,9 +255,9 @@ public:
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
 
-	static Bool &bNastyLimbsCheat;
-	static Bool &bPedCheat2;
-	static Bool &bPedCheat3;
+	static bool &bNastyLimbsCheat;
+	static bool &bPedCheat2;
+	static bool &bPedCheat3;
 };
 static_assert(offsetof(CPed, m_nPedState) == 0x224, "CPed: error");
 static_assert(offsetof(CPed, m_pCurSurface) == 0x2FC, "CPed: error");

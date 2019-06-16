@@ -153,8 +153,6 @@ since `4` will be used in other places and you can't easily see where else the e
 
 * Use the right types. In particular:
 
-    * use the lower case types! (unless you're Fire_Head)
-
     * don't use types like `__int16`, we have `int16` for that
 
     * don't use `unsigned`, we have typedefs for that

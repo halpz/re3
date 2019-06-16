@@ -14,7 +14,7 @@ enum eBlipType
 class CRadar
 {
 public:
-	static Float &m_RadarRange;
+	static float &m_RadarRange;
 	static CVector2D &vec2DRadarOrigin;
 
 public:

@@ -128,4 +128,4 @@ enum /*eSounds*/
 	_SOUND_BULLET_SHELL_HIT_GROUND_2  = 123,
 };
 
-extern void PlayOneShotScriptObject(UInt8 id, CVector const &pos);
+extern void PlayOneShotScriptObject(uint8 id, CVector const &pos);

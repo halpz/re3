@@ -113,9 +113,9 @@ DWORD _dwMemAvailVideo;
 DWORD &_dwOperatingSystemVersion = *(DWORD*)0x70F290;
 
 RwUInt32 &gGameState = *(RwUInt32*)0x8F5838;
-WRAPPER Bool InitialiseGame(void) { EAXJMP(0x48E7E0); }
+WRAPPER bool InitialiseGame(void) { EAXJMP(0x48E7E0); }
 
-WRAPPER const Char *GetLevelSplashScreen(Int32 number) { EAXJMP(0x48D750); }
+WRAPPER const char *GetLevelSplashScreen(int32 number) { EAXJMP(0x48D750); }
 //
 
 void LoadingScreen(char const *msg1, char const *msg2, char const *screen);
@@ -130,12 +130,12 @@ enum eJoypadState
 struct tJoy
 {
 	eJoypadState m_State;
-	Bool m_bInitialised;
-	Bool m_bHasAxisZ;
-	Bool m_bHasAxisR;
+	bool m_bInitialised;
+	bool m_bHasAxisZ;
+	bool m_bHasAxisR;
 	char _pad0;
-	Int32 m_nVendorID;
-	Int32 m_nProductID;
+	int32 m_nVendorID;
+	int32 m_nProductID;
 };
 
 class CJoySticks
@@ -1210,7 +1210,7 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 					PDEV_BROADCAST_VOLUME pVol = (PDEV_BROADCAST_VOLUME)pDev;
 					if ( pVol->dbcv_flags & DBTF_MEDIA )
 					{
-						Char c = DMAudio.GetCDAudioDriveLetter();
+						char c = DMAudio.GetCDAudioDriveLetter();
 						
 						if ( c >= 'A' && pVol->dbcv_unitmask & (1 << (c - 'A')) )
 						{
@@ -1578,7 +1578,7 @@ void InitialiseLanguage()
 		|| subLayout	 == SUBLANG_ENGLISH_AUS )
 		CGame::noProstitutes = true;
 	
-	Int32 lang;
+	int32 lang;
 	
 	switch ( primSystemLCID )
 	{
@@ -1910,7 +1910,7 @@ _WinMain(HINSTANCE instance,
 	{
 		CFileMgr::SetDirMyDocuments();
 		
-		Int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
+		int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
 		
 		if ( gta3set )
 		{
@@ -2112,10 +2112,10 @@ _WinMain(HINSTANCE instance,
 					
 					case GS_PLAYING_GAME:
 					{
-						Float ms = (Float)CTimer::GetCurrentTimeInCycles() / (Float)CTimer::GetCyclesPerMillisecond();
+						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
 						if ( RwInitialised )
 						{
-							if (!CMenuManager::m_PrefsFrameLimiter || (1000.0f / (Float)RsGlobal.maxFPS) < ms)
+							if (!CMenuManager::m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
 								RsEventHandler(rsIDLE, (void *)TRUE);
 						}
 						break;
@@ -2335,16 +2335,16 @@ HRESULT CapturePad(RwInt32 padID)
 
 	RsPadEventHandler(rsPADBUTTONUP, (void *)&bs);
 	
-	Bool deviceAvailable = pPad != NULL;
+	bool deviceAvailable = pPad != NULL;
 	
 	if ( deviceAvailable )
 	{
-		leftStickPos.x = (Float)js.lX / (Float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
-		leftStickPos.y = (Float)js.lY / (Float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
+		leftStickPos.x = (float)js.lX / (float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
+		leftStickPos.y = (float)js.lY / (float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
 		
 		if (LOWORD(js.rgdwPOV[0]) != -1)
 		{
-			Float angle = DEGTORAD((Float)js.rgdwPOV[0] / 100.0f);
+			float angle = DEGTORAD((float)js.rgdwPOV[0] / 100.0f);
 
 			leftStickPos.x = sin(angle);
 			leftStickPos.y = -cos(angle);
@@ -2352,8 +2352,8 @@ HRESULT CapturePad(RwInt32 padID)
 		
 		if ( AllValidWinJoys.m_aJoys[bs.padID].m_bHasAxisR && AllValidWinJoys.m_aJoys[bs.padID].m_bHasAxisZ )
 		{
-			rightStickPos.x = (Float)js.lZ	/ (Float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
-			rightStickPos.y = (Float)js.lRz / (Float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
+			rightStickPos.x = (float)js.lZ	/ (float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
+			rightStickPos.y = (float)js.lRz / (float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
 		}
 	}
 	
@@ -2372,16 +2372,16 @@ HRESULT CapturePad(RwInt32 padID)
 		CPad *pad = CPad::GetPad(bs.padID);
 
 		if ( fabs(leftStickPos.x)  > 0.3f )
-			pad->PCTempJoyState.LeftStickX	= (Int32)(leftStickPos.x  * 128.0f);
+			pad->PCTempJoyState.LeftStickX	= (int32)(leftStickPos.x  * 128.0f);
 		
 		if ( fabs(leftStickPos.y)  > 0.3f )
-			pad->PCTempJoyState.LeftStickY	= (Int32)(leftStickPos.y  * 128.0f);
+			pad->PCTempJoyState.LeftStickY	= (int32)(leftStickPos.y  * 128.0f);
 		
 		if ( fabs(rightStickPos.x) > 0.3f )
-			pad->PCTempJoyState.RightStickX = (Int32)(rightStickPos.x * 128.0f);
+			pad->PCTempJoyState.RightStickX = (int32)(rightStickPos.x * 128.0f);
 
 		if ( fabs(rightStickPos.y) > 0.3f )
-			pad->PCTempJoyState.RightStickY = (Int32)(rightStickPos.y * 128.0f);
+			pad->PCTempJoyState.RightStickY = (int32)(rightStickPos.y * 128.0f);
 	}
 	
 	return S_OK;
@@ -2392,7 +2392,7 @@ void _InputInitialiseJoys()
 	DIPROPDWORD prop;
 	DIDEVCAPS devCaps;
 
-	for ( Int32 i = 0; i < _TODOCONST(2); i++ )
+	for ( int32 i = 0; i < _TODOCONST(2); i++ )
 		AllValidWinJoys.ClearJoyInfo(i);
 	
 	_InputAddJoys();

@@ -8,9 +8,9 @@
 #include "DMaudio.h"
 #include "Ped.h"
 
-Bool &CPed::bNastyLimbsCheat = *(Bool*)0x95CD44;
-Bool &CPed::bPedCheat2 = *(Bool*)0x95CD5A;
-Bool &CPed::bPedCheat3 = *(Bool*)0x95CD59;
+bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
+bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
+bool &CPed::bPedCheat3 = *(bool*)0x95CD59;
 
 void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
 void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }

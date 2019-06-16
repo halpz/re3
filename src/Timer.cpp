@@ -17,13 +17,13 @@ bool  &CTimer::m_UserPause = *(bool*)0x95CD7C;
 bool  &CTimer::m_CodePause = *(bool*)0x95CDB1;
 
 //UInt32 oldPcTimer;
-UInt32 &oldPcTimer = *(UInt32*)0x9434F4;
+uint32 &oldPcTimer = *(uint32*)0x9434F4;
 
 //UInt32 suspendPcTimer;
-UInt32 &suspendPcTimer = *(UInt32*)0x62A308;
+uint32 &suspendPcTimer = *(uint32*)0x62A308;
 
 //UInt32 _nCyclesPerMS = 1;
-UInt32 &_nCyclesPerMS = *(UInt32*)0x5F7610;
+uint32 &_nCyclesPerMS = *(uint32*)0x5F7610;
 
 //LARGE_INTEGER _oldPerfCounter;
 LARGE_INTEGER &_oldPerfCounter = *(LARGE_INTEGER*)0x62A310;
@@ -32,7 +32,7 @@ LARGE_INTEGER &_oldPerfCounter = *(LARGE_INTEGER*)0x62A310;
 LARGE_INTEGER &perfSuspendCounter = *(LARGE_INTEGER*)0x62A318;
 
 //UInt32 suspendDepth;
-UInt32 &suspendDepth = *(UInt32*)0x62A320;
+uint32 &suspendDepth = *(uint32*)0x62A320;
 
 void CTimer::Initialise(void)
 {
@@ -51,7 +51,7 @@ void CTimer::Initialise(void)
 	if ( QueryPerformanceFrequency(&perfFreq) )
 	{
 		OutputDebugString("Performance counter available\n");
-		_nCyclesPerMS = UInt32(perfFreq.QuadPart / 1000);
+		_nCyclesPerMS = uint32(perfFreq.QuadPart / 1000);
 		QueryPerformanceCounter(&_oldPerfCounter);
 	}
 	else
@@ -82,18 +82,18 @@ void CTimer::Update(void)
 {
 	m_snPreviousTimeInMilliseconds = m_snTimeInMilliseconds;
 	
-	if ( (Double)_nCyclesPerMS != 0.0 )
+	if ( (double)_nCyclesPerMS != 0.0 )
 	{
 		LARGE_INTEGER pc;
 		QueryPerformanceCounter(&pc);
 		
-		Int32 updInCycles = (pc.LowPart - _oldPerfCounter.LowPart) & 0x7FFFFFFF;
+		int32 updInCycles = (pc.LowPart - _oldPerfCounter.LowPart) & 0x7FFFFFFF;
 		
 		_oldPerfCounter = pc;
 		
-		Double updInCyclesScaled = (Double)updInCycles * ms_fTimeScale;
+		double updInCyclesScaled = (double)updInCycles * ms_fTimeScale;
 		
-		Double upd = updInCyclesScaled / (Double)_nCyclesPerMS;
+		double upd = updInCyclesScaled / (double)_nCyclesPerMS;
 
 		m_snTimeInMillisecondsPauseMode = (Int64)(m_snTimeInMillisecondsPauseMode + upd);
 		
@@ -103,16 +103,16 @@ void CTimer::Update(void)
 		{
 			m_snTimeInMilliseconds = (Int64)(m_snTimeInMilliseconds + upd);
 			m_snTimeInMillisecondsNonClipped = (Int64)(m_snTimeInMillisecondsNonClipped + upd);
-			ms_fTimeStep = updInCyclesScaled / (Double)_nCyclesPerMS / 20.0;
+			ms_fTimeStep = updInCyclesScaled / (double)_nCyclesPerMS / 20.0;
 		}
 	}
 	else
 	{
-		UInt32 timer = RsTimer();
+		uint32 timer = RsTimer();
 		
-		UInt32 updInMs = timer - oldPcTimer;
+		uint32 updInMs = timer - oldPcTimer;
 		
-		Double upd = (Double)updInMs * ms_fTimeScale;
+		double upd = (double)updInMs * ms_fTimeScale;
 		
 		oldPcTimer = timer;
 		
@@ -156,7 +156,7 @@ void CTimer::Suspend(void)
 	if ( ++suspendDepth > 1 )
 		return;
 	
-	if ( (Double)_nCyclesPerMS != 0.0 )
+	if ( (double)_nCyclesPerMS != 0.0 )
 		QueryPerformanceCounter(&perfSuspendCounter);
 	else
 		suspendPcTimer = RsTimer();
@@ -167,7 +167,7 @@ void CTimer::Resume(void)
 	if ( --suspendDepth != 0 )
 		return;
 
-	if ( (Double)_nCyclesPerMS != 0.0 )
+	if ( (double)_nCyclesPerMS != 0.0 )
 	{
 		LARGE_INTEGER pc;
 		QueryPerformanceCounter(&pc);
@@ -178,7 +178,7 @@ void CTimer::Resume(void)
 		oldPcTimer += RsTimer() - suspendPcTimer;
 }
 
-UInt32 CTimer::GetCyclesPerMillisecond(void)
+uint32 CTimer::GetCyclesPerMillisecond(void)
 {
 	if (_nCyclesPerMS != 0)
 		return _nCyclesPerMS;
@@ -186,7 +186,7 @@ UInt32 CTimer::GetCyclesPerMillisecond(void)
 		return 1;
 }
 
-UInt32 CTimer::GetCurrentTimeInCycles(void)
+uint32 CTimer::GetCurrentTimeInCycles(void)
 {
 	if ( _nCyclesPerMS != 0 )
 	{
@@ -198,7 +198,7 @@ UInt32 CTimer::GetCurrentTimeInCycles(void)
 		return RsTimer() - oldPcTimer;
 }
 
-Bool CTimer::GetIsSlowMotionActive(void)
+bool CTimer::GetIsSlowMotionActive(void)
 {
 	return ms_fTimeScale < 1.0f;
 }

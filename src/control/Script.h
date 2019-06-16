@@ -3,8 +3,8 @@
 
 struct CScriptRectangle 
 {
-	Bool m_bIsUsed;
-	Bool m_bIsAntialiased;
+	bool m_bIsUsed;
+	bool m_bIsAntialiased;
 	uint16 m_wTextureId;
 	CRect m_sRect;
 	CRGBA m_sColor;
@@ -12,23 +12,23 @@ struct CScriptRectangle
 
 struct CTextLine 
 {
-	Float m_fScaleX;
-	Float m_fScaleY;
+	float m_fScaleX;
+	float m_fScaleY;
 	CRGBA m_sColor;
-	Bool m_bJustify;
-	Bool m_bCentered;
-	Bool m_bBackground;
-	Bool m_bBackgroundOnly;
-	Float m_fWrapX;
-	Float m_fCenterSize;
+	bool m_bJustify;
+	bool m_bCentered;
+	bool m_bBackground;
+	bool m_bBackgroundOnly;
+	float m_fWrapX;
+	float m_fCenterSize;
 	CRGBA m_sBackgroundColor;
-	Bool m_bTextProportional;
+	bool m_bTextProportional;
 	int32 field_29;
-	Bool m_bRightJustify;
+	bool m_bRightJustify;
 	int32 field_31;
 	int32 m_nFont;
-	Float field_36;
-	Float field_40;
+	float field_36;
+	float field_40;
 	wchar m_awText[500];
 };
 

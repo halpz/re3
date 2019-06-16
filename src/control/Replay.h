@@ -8,7 +8,7 @@ public:
 	};
 
 	static uint8 &Mode;
-	static Bool &bPlayingBackFromFile;
+	static bool &bPlayingBackFromFile;
 
 	static void Display(void);
 };

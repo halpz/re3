@@ -14,7 +14,7 @@
 const float DefaultFOV = 80.0f;	// actually 70.0f
 
 CCamera &TheCamera = *(CCamera*)0x6FACF8;
-Bool &CCamera::m_bUseMouse3rdPerson = *(Bool *)0x5F03D8;
+bool &CCamera::m_bUseMouse3rdPerson = *(bool *)0x5F03D8;
 
 WRAPPER void CCamera::DrawBordersForWideScreen(void) { EAXJMP(0x46B430); }
 

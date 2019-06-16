@@ -1,4 +1,4 @@
 #include "common.h"
 #include "Population.h"
 
-Bool &CPopulation::ms_bGivePedsWeapons = *(Bool*)0x95CCF6;
+bool &CPopulation::ms_bGivePedsWeapons = *(bool*)0x95CCF6;

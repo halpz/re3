@@ -3,6 +3,6 @@
 class CStats
 {
 public:
-	static Int32 &DaysPassed;
-	static Int32 &HeadShots;
+	static int32 &DaysPassed;
+	static int32 &HeadShots;
 };

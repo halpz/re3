@@ -19,18 +19,18 @@ public:
 	static uint32 GetFrameCounter(void) { return m_FrameCounter; }
 	static uint32 GetTimeInMilliseconds(void) { return m_snTimeInMilliseconds; }
 	
-	static inline Bool GetIsPaused() { return m_UserPause || m_CodePause; }
-	static inline Bool GetIsUserPaused() { return m_UserPause; }
-	static inline void SetTimeScale(Float ts) { ms_fTimeScale = ts; }
+	static inline bool GetIsPaused() { return m_UserPause || m_CodePause; }
+	static inline bool GetIsUserPaused() { return m_UserPause; }
+	static inline void SetTimeScale(float ts) { ms_fTimeScale = ts; }
 	
 	static void Initialise(void);
 	static void Shutdown(void);
 	static void Update(void);
 	static void Suspend(void);
 	static void Resume(void);
-	static UInt32 GetCyclesPerMillisecond(void);
-	static UInt32 GetCurrentTimeInCycles(void);
-	static Bool GetIsSlowMotionActive(void);
+	static uint32 GetCyclesPerMillisecond(void);
+	static uint32 GetCurrentTimeInCycles(void);
+	static bool GetIsSlowMotionActive(void);
 	static void Stop(void);
 	static void StartUserPause(void);
 	static void EndUserPause(void);

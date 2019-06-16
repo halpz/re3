@@ -439,7 +439,7 @@ int     m_iModeObbeCamIsInForCar;
 	uint32 m_uiFadeTimeStarted;
 	uint32 m_uiFadeTimeStartedMusic;
 
-	static Bool &m_bUseMouse3rdPerson;
+	static bool &m_bUseMouse3rdPerson;
 
 	CMatrix &GetCameraMatrix(void) { return m_cameraMatrix; }
 	CVector &GetGameCamPosition(void) { return m_vecGameCamPos; }

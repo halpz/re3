@@ -726,8 +726,8 @@ KeyboardHandler(RsEvent event, void *param)
 static RsEventStatus
 HandlePadButtonDown(RsPadButtonStatus *padButtonStatus)
 {
-	Bool bPadTwo = false;
-	Int32 padNumber = padButtonStatus->padID;
+	bool bPadTwo = false;
+	int32 padNumber = padButtonStatus->padID;
 	
 	CPad *pad = CPad::GetPad(padNumber);
 	
@@ -739,7 +739,7 @@ HandlePadButtonDown(RsPadButtonStatus *padButtonStatus)
 	
 	ControlsManager.UpdateJoyButtonState(padNumber);
 	
-	for ( Int32 i = 0; i < _TODOCONST(16); i++ )
+	for ( int32 i = 0; i < _TODOCONST(16); i++ )
 	{
 		RsPadButtons btn = rsPADNULL;
 		if ( ControlsManager.m_aButtonStates[i] == TRUE )
@@ -761,8 +761,8 @@ HandlePadButtonDown(RsPadButtonStatus *padButtonStatus)
 static RsEventStatus
 HandlePadButtonUp(RsPadButtonStatus *padButtonStatus)
 {
-	Bool bPadTwo = false;
-	Int32 padNumber = padButtonStatus->padID;
+	bool bPadTwo = false;
+	int32 padNumber = padButtonStatus->padID;
 
 	CPad *pad = CPad::GetPad(padNumber);
 	
@@ -772,14 +772,14 @@ HandlePadButtonUp(RsPadButtonStatus *padButtonStatus)
 	if ( padNumber == 1 )
 		bPadTwo = true;
 	
-	Bool bCam = false;
-	Int16 mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
+	bool bCam = false;
+	int16 mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 	if ( mode == CCam::MODE_FLYBY || mode == CCam::MODE_FIXED )
-		Bool bCam = true;
+		bool bCam = true;
 	
 	ControlsManager.UpdateJoyButtonState(padNumber);
 	
-	for ( Int32 i = 1; i < _TODOCONST(16); i++ )
+	for ( int32 i = 1; i < _TODOCONST(16); i++ )
 	{
 		RsPadButtons btn = rsPADNULL;
 		if ( ControlsManager.m_aButtonStates[i] == FALSE )

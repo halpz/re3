@@ -16,19 +16,19 @@ WRAPPER void CControllerConfigManager::AffectControllerStateOn_ButtonUp(int butt
 WRAPPER void CControllerConfigManager::MakeControllerActionsBlank() { EAXJMP(0x58B7A0); }
 WRAPPER void CControllerConfigManager::InitDefaultControlConfiguration() { EAXJMP(0x58B930); }
 WRAPPER void CControllerConfigManager::InitDefaultControlConfigMouse(CMouseControllerState const &mousestate) { EAXJMP(0x58BD00); }
-WRAPPER Int32 CControllerConfigManager::GetJoyButtonJustDown() { EAXJMP(0x58B7D0); }
+WRAPPER int32 CControllerConfigManager::GetJoyButtonJustDown() { EAXJMP(0x58B7D0); }
 WRAPPER void CControllerConfigManager::InitDefaultControlConfigJoyPad(unsigned int buttons) { EAXJMP(0x58BD90); }
 WRAPPER void CControllerConfigManager::ClearSimButtonPressCheckers() { EAXJMP(0x58D220); }
 WRAPPER void CControllerConfigManager::AffectPadFromKeyBoard() { EAXJMP(0x58D0C0); }
 WRAPPER void CControllerConfigManager::AffectPadFromMouse() { EAXJMP(0x58D1A0); }
 
-void CControllerConfigManager::LoadSettings(Int32 file)
+void CControllerConfigManager::LoadSettings(int32 file)
 {
-	Bool bValid = true;
+	bool bValid = true;
 	
 	if ( file )
 	{
-		Char buff[29];
+		char buff[29];
 		CFileMgr::Read(file, buff, sizeof(buff));
 		
 		if ( !strncmp(buff, "THIS FILE IS NOT VALID YET", sizeof(buff) - 3) )
@@ -45,7 +45,7 @@ void CControllerConfigManager::LoadSettings(Int32 file)
 		{
 			for ( int j = 0; j < 41; j++ )
 			{
-				CFileMgr::Read(file, (Char *)&ControlsManager.m_aSettings[j][i], sizeof(tControllerConfigBind));
+				CFileMgr::Read(file, (char *)&ControlsManager.m_aSettings[j][i], sizeof(tControllerConfigBind));
 			}
 		}
 	}

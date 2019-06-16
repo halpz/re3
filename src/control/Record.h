@@ -3,11 +3,11 @@
 class CRecordDataForGame
 {
 public:
-	static UInt16 &RecordingState;
+	static uint16 &RecordingState;
 };
 
 class CRecordDataForChase
 {
 public:
-	static UInt8 &Status;
+	static uint8 &Status;
 };

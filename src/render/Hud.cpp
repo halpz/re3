@@ -35,10 +35,10 @@ int32 &CHud::m_HelpMessageState = *(int32*)0x880E1C;
 int32 &CHud::m_HelpMessageTimer = *(int32*)0x880FA4;
 int32 &CHud::m_HelpMessageFadeTimer = *(int32*)0x8F6258;
 wchar *CHud::m_HelpMessageToPrint = (wchar*)0x664480;
-Float &CHud::m_HelpMessageDisplayTime = *(Float*)0x8E2C28;
-Float &CHud::m_fTextBoxNumLines = *(Float*)0x8E2C28;
-Float &CHud::m_fHelpMessageTime = *(Float *)0x8E2C28;
-Bool &CHud::m_bHelpMessageQuick = *(Bool *)0x95CCF7;
+float &CHud::m_HelpMessageDisplayTime = *(float*)0x8E2C28;
+float &CHud::m_fTextBoxNumLines = *(float*)0x8E2C28;
+float &CHud::m_fHelpMessageTime = *(float *)0x8E2C28;
+bool &CHud::m_bHelpMessageQuick = *(bool *)0x95CCF7;
 int32 CHud::m_ZoneState = *(int32*)0x8F29AC;
 int32 CHud::m_ZoneFadeTimer;
 int32 CHud::m_ZoneNameTimer = *(int32*)0x8F1A50;
@@ -53,16 +53,16 @@ wchar* CHud::m_pLastVehicleName = *(wchar **)0x8E2DD8;
 wchar* CHud::m_pVehicleNameToPrint;
 wchar* CHud::m_Message = (wchar*)0x72E318;
 wchar* CHud::m_PagerMessage = (wchar*)0x878840;
-Bool &CHud::m_Wants_To_Draw_Hud = *(Bool*)0x95CD89;
-Bool &CHud::m_Wants_To_Draw_3dMarkers = *(Bool*)0x95CD62;
+bool &CHud::m_Wants_To_Draw_Hud = *(bool*)0x95CD89;
+bool &CHud::m_Wants_To_Draw_3dMarkers = *(bool*)0x95CD62;
 wchar(*CHud::m_BigMessage)[128] = (wchar(*)[128])0x664CE0;
-Float *CHud::BigMessageInUse = (Float*)0x862140;
-Float *CHud::BigMessageAlpha = (Float*)0x862108;
-Float *CHud::BigMessageX = (Float*)0x773248;
+float *CHud::BigMessageInUse = (float*)0x862140;
+float *CHud::BigMessageAlpha = (float*)0x862108;
+float *CHud::BigMessageX = (float*)0x773248;
 
-Float &CHud::OddJob2OffTimer = *(Float*)0x942FA0;
+float &CHud::OddJob2OffTimer = *(float*)0x942FA0;
 int8 &CHud::CounterOnLastFrame = *(int8*)0x95CD67;
-Float &CHud::OddJob2XOffset = *(Float*)0x8F1B5C;
+float &CHud::OddJob2XOffset = *(float*)0x8F1B5C;
 int16 &CHud::CounterFlashTimer = *(int16*)0x95CC20;
 int16 &CHud::OddJob2Timer = *(int16*)0x95CC52;
 int8 &CHud::TimerOnLastFrame = *(int8*)0x95CDA7;
@@ -70,7 +70,7 @@ int16 &CHud::OddJob2On = *(int16*)0x95CC78;
 int16 &CHud::TimerFlashTimer = *(int16*)0x95CC6C;
 int16 &CHud::PagerSoundPlayed = *(int16*)0x95CC4A;
 int32 &CHud::SpriteBrightness = *(int32*)0x95CC54;
-Float &CHud::PagerXOffset = *(Float*)0x941590;
+float &CHud::PagerXOffset = *(float*)0x941590;
 int32 CHud::m_ItemToFlash = *(int32*)0x95CC82;
 int16 &CHud::PagerTimer = *(int16*)0x95CC3A;
 int16 &CHud::PagerOn = *(int16*)0x95CCA0;
@@ -182,8 +182,8 @@ void CHud::Draw() {
 
 	if (CReplay::Mode != 1) {
 		if (m_Wants_To_Draw_Hud && !TheCamera.m_WideScreenOn) {
-			Bool Mode_RunAround = 0;
-			Bool Mode_FirstPerson = 0;
+			bool Mode_RunAround = 0;
+			bool Mode_FirstPerson = 0;
 
 			int32 WeaponType = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
 			int32 Mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
@@ -217,8 +217,8 @@ void CHud::Draw() {
 
 				RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 
-				Float fStep = sin((CTimer::GetTimeInMilliseconds() & 1023) * 0.0061328127);
-				Float fMultBright = CHud::SpriteBrightness * 0.033333335f * (0.25f * fStep + 0.75f);
+				float fStep = sin((CTimer::GetTimeInMilliseconds() & 1023) * 0.0061328127);
+				float fMultBright = CHud::SpriteBrightness * 0.033333335f * (0.25f * fStep + 0.75f);
 				CRect rect;
 
 				float fWidescreenOffset[2] = { 0.0f, 0.0f };
@@ -229,8 +229,8 @@ void CHud::Draw() {
 				}
 
 				if (Mode_RunAround && TheCamera.Cams->Using3rdPersonMouseCam()) {
-					Float f3rdX = SCREENW * TheCamera.m_f3rdPersonCHairMultX + fWidescreenOffset[0];
-					Float f3rdY = SCREENH * TheCamera.m_f3rdPersonCHairMultY - fWidescreenOffset[1];
+					float f3rdX = SCREENW * TheCamera.m_f3rdPersonCHairMultX + fWidescreenOffset[0];
+					float f3rdY = SCREENH * TheCamera.m_f3rdPersonCHairMultY - fWidescreenOffset[1];
 
 					if (CWorld::Players[CWorld::PlayerInFocus].m_pPed && WeaponType == WEAPONTYPE_M16) {
 						rect.left = f3rdX - HUD_STRETCH_X(32.0f * 0.6f);
@@ -503,7 +503,7 @@ void CHud::Draw() {
 				DrawZoneName
 			*/
 			if (CHud::m_pZoneName) {
-				Float fZoneAlpha = 0.0f;
+				float fZoneAlpha = 0.0f;
 
 				if (CHud::m_pZoneName != CHud::m_pLastZoneName) {
 					switch (CHud::m_ZoneState) {
@@ -599,7 +599,7 @@ void CHud::Draw() {
 				DrawVehicleName
 			*/
 			if (CHud::m_pVehicleName) {
-				Float fVehicleAlpha = 0.0f;
+				float fVehicleAlpha = 0.0f;
 
 				if (CHud::m_pVehicleName != CHud::m_pLastVehicleName) {
 					switch (CHud::m_VehicleState) {
@@ -807,7 +807,7 @@ void CHud::Draw() {
 				}
 				if (PagerOn == 1) {
 					if (PagerXOffset > 0.0f) {
-						Float fStep = PagerXOffset * 0.05f;
+						float fStep = PagerXOffset * 0.05f;
 						if (fStep > 10.0f)
 							fStep = 10.0f;
 						PagerXOffset -= fStep * CTimer::GetTimeStep();
@@ -818,7 +818,7 @@ void CHud::Draw() {
 					}
 				}
 				else if (PagerOn == 2) {
-					Float fStep = PagerXOffset * 0.05f;
+					float fStep = PagerXOffset * 0.05f;
 					if (fStep < 2.0f)
 						fStep = 2.0f;
 					PagerXOffset += fStep * CTimer::GetTimeStep();
@@ -995,7 +995,7 @@ void CHud::Draw() {
 						}
 					}
 					else {
-						Float fStep = (CTimer::GetTimeStep()
+						float fStep = (CTimer::GetTimeStep()
 							* 0.02f
 							* 1000.0f)
 							* 0.30000001f;
