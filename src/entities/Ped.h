@@ -181,14 +181,31 @@ public:
 	int32 m_nPedState;
 	int32 m_nLastPedState;
 	int32 m_nMoveState;
-	uint8 stuff2[188];
+	int32 m_nStoredActionState;
+	int32 m_nPrevActionState;
+	int32 m_nWaitState;
+	int32 m_nWaitTimer;
+private:
+	uint32 stuff0[28];
+public:
+	uint16 m_nPathNodes;
+	uint8 m_nCurPathNode;
+	int8 m_nPathState;
+private:
+	int8 _pad2B5[3];
+public:
+	CPathNode *m_pNextPathNode;
+	CPathNode *m_pLastPathNode;
+	Float m_fHealth;
+	Float m_fArmour;
+	uint8 stuff2[34];
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
 	uint8 stuff3[12];
 	CPed* m_pSeekTarget;
 	CVehicle *m_pMyVehicle;
-	bool bInVehicle;
+	Bool bInVehicle;
 	uint8 stuff4[23];
 	int32 m_nPedType;
 	PedStat *m_pedStats;

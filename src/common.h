@@ -59,6 +59,9 @@ extern void **rwengine;
 #define RwEngineInstance (*rwengine)
 
 #include "skel\skeleton.h"
+#include "Draw.h"
+
+#define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
 
 #define SCREENW (RsGlobal.maximumWidth)
 #define SCREENH (RsGlobal.maximumHeight)
@@ -68,9 +71,15 @@ extern void **rwengine;
 #define SCREEN_WIDTH Float(RsGlobal.width)
 #define SCREEN_HEIGHT Float(RsGlobal.height)
 #define SCREEN_STRETCH_X(a)   Float((a) * (SCREEN_WIDTH / Float(DEFAULT_SCREEN_WIDTH)))
+#define SCREEN_STRETCH_X_AR(a)   Float((a) * (SCREEN_WIDTH / Float(DEFAULT_SCREEN_WIDTH)) * (4.0/3.0f)/SCREEN_ASPECT_RATIO)
 #define SCREEN_STRETCH_Y(a)   Float((a) * (SCREEN_HEIGHT / Float(DEFAULT_SCREEN_HEIGHT)))
 #define SCREEN_FROM_RIGHT(a)  Float(SCREEN_WIDTH - SCREEN_STRETCH_X(a))
 #define SCREEN_FROM_BOTTOM(a) Float(SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
+
+#define HUD_STRETCH_X SCREEN_STRETCH_X_AR
+#define HUD_STRETCH_Y SCREEN_STRETCH_Y
+#define HUD_FROM_RIGHT(a) (SCREEN_WIDTH - HUD_STRETCH_X(a))
+#define HUD_FROM_BOTTOM(a) (SCREEN_HEIGHT - HUD_STRETCH_Y(a))
 
 struct GlobalScene
 {

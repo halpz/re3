@@ -1,43 +1,42 @@
 #pragma once
 
 #include "Ped.h"
+#include "Wanted.h"
 
-class CPlayerPed : public CPed
-{
+class CPlayerPed : public CPed {
 public:
-	// All credits goes to DK22Pac
-	// 0x53C
-	int *m_pWanted;			//	CWanted *
-	int *m_pArrestingCop;	//	CCopPed *m_pArrestingCop;
-	float m_fMoveSpeed;
-	float m_fCurrentStamina;
-	float m_fMaxStamina;
-	float m_fStaminaProgress;
-	char m_bWeaponSlot;
-	uint8 m_bSpeedTimerFlag;
-	bool m_bShouldEvade;
-	char field_1367;
-	uint32 m_nSpeedTimer;
-	uint32 m_nShotDelay;
-	float field_1376;
-	char field_1380;
-	char field_1381;
-	char field_1382;
-	char field_1383;
+	CWanted *m_pWanted;
+	CCopPed *m_pArrestingCop;
+	Float m_fMoveSpeed;
+	Float m_fCurrentStamina;
+	Float m_fMaxStamina;
+	Float m_fStaminaProgress;
+	Bool m_bWeaponSlot;
+	Bool m_bSpeedTimerFlag;
+	Bool m_bShouldEvade;
+	int8 field_1367;
+	int32 m_nSpeedTimer;
+	int32 m_nShotDelay;
+	Float field_1376;
+	int8 field_1380;
+	int8 field_1381;
+	int8 field_1382;
+	int8 field_1383;
 	CEntity *m_pEvadingFrom;
-	int m_nTargettableObjects[4];
-	bool m_bAdrenalineActive;
-	bool m_bHasLockOnTarget;
-	char field_1406;
-	char field_1407;
-	uint32 m_bAdrenalineTime;
-	bool m_bCanBeDamaged;
-	char field_1413;
-	char field_1414;
-	char field_1415;
+	int32 m_nTargettableObjects[4];
+	Bool m_bAdrenalineActive;
+	Bool m_bHasLockOnTarget;
+	int8 field_1406;
+	int8 field_1407;
+	Bool m_bAdrenalineTime;
+	Bool m_bCanBeDamaged;
+	int8 field_1413;
+	int8 field_1414;
+	int8 field_1415;
 	CVector field_1416[6];
-	int field_1488[6];
-	float field_1512;
-	float m_fFPSMoveHeading;
+	int32 field_1488[6];
+	Float field_1512;
+	Float m_fFPSMoveHeading;
 };
+
 static_assert(sizeof(CPlayerPed) == 0x5F0, "CPlayerPed: error");

@@ -161,7 +161,6 @@ struct CCam
 	CPed         *m_pLastPedLookedAt;// So interpolation works 
 	bool        m_bFirstPersonRunAboutActive;
 
-	Bool Using3rdPersonMouseCam();
 
 	void GetVectorsReadyForRW(void);
 	CVector DoAverageOnVector(const CVector &vec);
@@ -172,6 +171,7 @@ struct CCam
 	bool FixCamIfObscured(CVector &TargetCoors, float TargetHeight, float TargetOrientation);
 	void Cam_On_A_String_Unobscured(const CVector &TargetCoors, float BaseDist);
 	void FixCamWhenObscuredByVehicle(const CVector &TargetCoors);
+	bool Using3rdPersonMouseCam();
 
 	void Process_Debug(float *vec, float a, float b, float c);
 	void Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, float, float);
@@ -439,6 +439,7 @@ int     m_iModeObbeCamIsInForCar;
 	uint32 m_uiFadeTimeStarted;
 	uint32 m_uiFadeTimeStartedMusic;
 
+	static Bool &m_bUseMouse3rdPerson;
 
 	CMatrix &GetCameraMatrix(void) { return m_cameraMatrix; }
 	CVector &GetGameCamPosition(void) { return m_vecGameCamPos; }
