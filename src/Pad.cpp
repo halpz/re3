@@ -1837,7 +1837,7 @@ int32 *CPad::EditCodesForControls(int32 *pRsKeys, int32 nSize)
 			*pRsKeys = i;
 	}
 	
-	for ( int32 i = 0; i < 255; i++ )
+	for ( int32 i = 0; i < 12; i++ )
 	{
 		if ( GetPad(0)->GetFJustDown(i) )
 			*pRsKeys = i + rsF1;
