@@ -86,6 +86,7 @@ RwRGBA gColourTop;
 void
 Idle(void *arg)
 {
+	CDraw::CalculateAspectRatio();
 	CTimer::Update();
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
@@ -141,7 +142,7 @@ Idle(void *arg)
 	}else{
 		float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
 		// ASPECT
-		CameraSize(Scene.camera, nil, viewWindow, 4.0f/3.0f);
+		CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
 		CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 		RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 		if(!RsCameraBeginUpdate(Scene.camera))
@@ -161,6 +162,7 @@ Idle(void *arg)
 void
 FrontendIdle(void)
 {
+	CDraw::CalculateAspectRatio();
 	CTimer::Update();
 	CSprite2d::SetRecipNearClip();
 	CSprite2d::InitPerFrame();
@@ -173,7 +175,7 @@ FrontendIdle(void)
 
 	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
 	// ASPECT
-	CameraSize(Scene.camera, nil, viewWindow, 4.0f/3.0f);
+	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 	if(!RsCameraBeginUpdate(Scene.camera))
@@ -190,13 +192,13 @@ FrontendIdle(void)
 bool
 DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha)
 {
+	CDraw::CalculateAspectRatio();
 	CRGBA TopColor(TopRed, TopGreen, TopBlue, Alpha);
 	CRGBA BottomColor(BottomRed, BottomGreen, BottomBlue, Alpha);
 
 	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
 	// ASPECT
-	float aspectRatio = CMenuManager::m_PrefsUseWideScreen ? 16.0f/9.0f : 4.0f/3.0f;
-	CameraSize(Scene.camera, nil, viewWindow, aspectRatio);
+	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 
@@ -214,10 +216,10 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 bool
 DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha)
 {
+	CDraw::CalculateAspectRatio();
 	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
 	// ASPECT
-	float aspectRatio = CMenuManager::m_PrefsUseWideScreen ? 16.0f/9.0f : 4.0f/3.0f;
-	CameraSize(Scene.camera, nil, viewWindow, aspectRatio);
+	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 

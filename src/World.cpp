@@ -12,6 +12,8 @@ CPtrList &CWorld::ms_listMovingEntityPtrs = *(CPtrList*)0x8F433C;
 CSector (*CWorld::ms_aSectors)[NUMSECTORS_X] = (CSector (*)[NUMSECTORS_Y])0x665608;
 uint16 &CWorld::ms_nCurrentScanCode = *(uint16*)0x95CC64;
 
+uint8 &CWorld::PlayerInFocus = *(uint8 *)0x95CD61;
+CPlayerInfo *CWorld::Players = (CPlayerInfo *)0x9412F0;
 bool &CWorld::bNoMoreCollisionTorque = *(bool*)0x95CDCC;
 CEntity *&CWorld::pIgnoreEntity	= *(CEntity**)0x8F6494;
 bool &CWorld::bIncludeDeadPeds = *(bool*)0x95CD8F;
@@ -588,3 +590,6 @@ WRAPPER CPed *FindPlayerPed(void) { EAXJMP(0x4A1150); }
 WRAPPER CVector &FindPlayerCoors(CVector &v) { EAXJMP(0x4A1030); }
 WRAPPER CVehicle *FindPlayerVehicle(void) { EAXJMP(0x4A10C0); }
 WRAPPER CVehicle *FindPlayerTrain(void) { EAXJMP(0x4A1120); }
+WRAPPER CVector FindPlayerSpeed(void) { EAXJMP(0x4A1090); }
+WRAPPER CVector FindPlayerCentreOfWorld_NoSniperShift(void) { EAXJMP(0x4A11C0); }
+
