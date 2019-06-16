@@ -7,7 +7,7 @@
 #include "AnimManager.h"
 #include "AnimBlendClumpData.h"
 #include "PedStat.h"
-#include "Sounds.h"
+#include "DMAudio.h"
 
 enum {
 	PED_MAX_WEAPONS = 13
