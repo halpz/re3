@@ -2,12 +2,12 @@
 
 #include "Physical.h"
 #include "Weapon.h"
-#include "PathFind.h"
 #include "PedIK.h"
 #include "AnimManager.h"
 #include "AnimBlendClumpData.h"
-#include "PedStat.h"
-#include "DMAudio.h"
+
+struct PedStat;
+struct CPathNode;
 
 enum {
 	PED_MAX_WEAPONS = 13
@@ -234,25 +234,26 @@ public:
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
 
+	// TODO: enum!
 	bool IsPlayer(void) { return m_nPedType == 0 || m_nPedType== 1 || m_nPedType == 2 || m_nPedType == 3; }
 	bool UseGroundColModel(void);
 	void AddWeaponModel(int id);
 	void AimGun();
 	void KillPedWithCar(CVehicle *veh, float impulse);
-	void Say(eSound audio);
+	void Say(uint16 audio);
 	void SetLookFlag(CPed *to, bool set);
 	void SetLookFlag(float angle, bool set);
 	void SetLookTimer(int time);
 	void SetDie(AnimationId anim, float arg1, float arg2);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
-	void RemoveBodyPart(PedNode nodeId, char arg4);
-	void SpawnFlyingComponent(int, signed char);
+	void RemoveBodyPart(PedNode nodeId, int8 unknown);
+	void SpawnFlyingComponent(int, int8 unknown);
 	bool OurPedCanSeeThisOne(CEntity* who);
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
 	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
 
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
-	RwFrame* GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
+	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
 
 	static Bool &bNastyLimbsCheat;
 	static Bool &bPedCheat2;

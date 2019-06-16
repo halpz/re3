@@ -12,6 +12,13 @@ class CPed;
 class CPedIK
 {
 public:
+	// TODO
+	enum {
+		FLAG_1,
+		FLAG_2,
+		FLAG_4,
+	};
+
 	CPed* m_ped;
 	LimbOrientation m_headOrient;
 	LimbOrientation m_torsoOrient;

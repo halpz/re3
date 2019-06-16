@@ -1,10 +1,12 @@
 #include "common.h"
 #include "patcher.h"
-#include "Ped.h"
 #include "Pools.h"
 #include "Particle.h"
 #include "Stats.h"
 #include "World.h"
+#include "PedStat.h"
+#include "DMaudio.h"
+#include "Ped.h"
 
 Bool &CPed::bNastyLimbsCheat = *(Bool*)0x95CD44;
 Bool &CPed::bPedCheat2 = *(Bool*)0x95CD5A;
@@ -14,9 +16,9 @@ void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
 void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }
 
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
-WRAPPER void CPed::Say(eSound audio) { EAXJMP(0x4E5A10); }
+WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
 WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4D37D0); }
-WRAPPER void CPed::SpawnFlyingComponent(int, signed char) { EAXJMP(0x4EB060); }
+WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 
 static char ObjectiveText[34][28] = {
 	"No Obj",
@@ -250,38 +252,27 @@ CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
 		m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 150;
 
 		CParticle::AddParticle(PARTICLE_TEST, pos2,
-								CVector(
-									0.0f,
-									0.0f,
-									0.0f
-								), NULL, 0.2f, 0, 0, 0, 0);
+			CVector(0.0f, 0.0f, 0.0f), nil, 0.2f, 0, 0, 0, 0);
 
 		if (CEntity::GetIsOnScreen()) {
 			for(int i=0; i < 32; i++) {
 				CParticle::AddParticle(PARTICLE_BLOOD_SMALL,
-										pos2,
-										CVector(
-											0.0f,
-											0.0f,
-											0.03f
-										), NULL, 0.0f, 0, 0, 0, 0);
+					pos2, CVector(0.0f, 0.0f, 0.03f),
+					nil, 0.0f, 0, 0, 0, 0);
 			}
 
 			for (int i = 0; i < 16; i++) {
 				CParticle::AddParticle(PARTICLE_DEBRIS2,
-										pos2,
-										CVector(
-											0.0f,
-											0.0f,
-											0.01f
-										), NULL, 0.0f, 0, 0, 0, 0);
+					pos2,
+					CVector(0.0f, 0.0f, 0.01f),
+					nil, 0.0f, 0, 0, 0, 0);
 			}
 		}
 	}
 }
 
 void
-CPed::RemoveBodyPart(PedNode nodeId, char arg4)
+CPed::RemoveBodyPart(PedNode nodeId, int8 unk)
 {
 	RwFrame *frame;
 	RwFrame *fp;
@@ -291,7 +282,7 @@ CPed::RemoveBodyPart(PedNode nodeId, char arg4)
 	if (frame) {
 		if (CGame::nastyGame) {
 			if (nodeId != PED_HEAD)
-				CPed::SpawnFlyingComponent(nodeId, arg4);
+				CPed::SpawnFlyingComponent(nodeId, unk);
 
 			RecurseFrameChildrenVisibilityCB(frame, 0);
 			zero.x = 0.0f;
@@ -302,20 +293,14 @@ CPed::RemoveBodyPart(PedNode nodeId, char arg4)
 
 			if (CEntity::GetIsOnScreen()) {
 				CParticle::AddParticle(PARTICLE_TEST, zero,
-					CVector(
-						0.0f,
-						0.0f,
-						0.0f
-					), NULL, 0.2f, 0, 0, 0, 0);
+					CVector(0.0f, 0.0f, 0.0f),
+					nil, 0.2f, 0, 0, 0, 0);
 
 				for (int i = 0; i < 16; i++) {
 					CParticle::AddParticle(PARTICLE_BLOOD_SMALL,
 						zero,
-						CVector(
-							0.0f,
-							0.0f,
-							0.03f
-						), NULL, 0.0f, 0, 0, 0, 0);
+						CVector(0.0f, 0.0f, 0.03f),
+						nil, 0.0f, 0, 0, 0, 0);
 				}
 			}
 			m_ped_flagC20 = 1;
@@ -329,11 +314,9 @@ CPed::RemoveBodyPart(PedNode nodeId, char arg4)
 RwObject*
 CPed::SetPedAtomicVisibilityCB(RwObject *object, void *data)
 {
-	RwObject *result = object;
-	if (!data)
+	if (data == 0)
 		RpAtomicSetFlags(object, 0);
-
-	return result;
+	return object;
 }
 
 RwFrame*
@@ -356,7 +339,7 @@ CPed::SetLookFlag(CPed *to, bool set)
 		m_lookTimer = 0;
 		m_ped_flagA20_look = set;
 		if (m_nPedState != PED_DRIVING) {
-			m_pedIK.m_flags &= ~(1 << 2);
+			m_pedIK.m_flags &= ~CPedIK::FLAG_4;
 		}
 	}
 }
@@ -372,7 +355,7 @@ CPed::SetLookFlag(float angle, bool set)
 		m_lookTimer = 0;
 		m_ped_flagA20_look = set;
 		if (m_nPedState != PED_DRIVING) {
-			m_pedIK.m_flags &= ~(1 << 2);
+			m_pedIK.m_flags &= ~CPedIK::FLAG_4;
 		}
 	}
 }
@@ -411,7 +394,7 @@ CPed::OurPedCanSeeThisOne(CEntity* who)
 		return 0;
 
 	ourPos.z += 1.0f;
-	return CWorld::ProcessLineOfSight(ourPos, itsPos, colpoint, ent, 1, 0, 0, 0, 0, 0, 0) == 0;
+	return !CWorld::ProcessLineOfSight(ourPos, itsPos, colpoint, ent, 1, 0, 0, 0, 0, 0, 0);
 }
 
 STARTPATCHES

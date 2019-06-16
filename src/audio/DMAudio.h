@@ -1,6 +1,7 @@
 #pragma once
 
-enum eSound : int16 {
+enum eSound
+{
 	SOUND_CAR_DOOR_CLOSE_BONNET = 0,
 	SOUND_CAR_DOOR_CLOSE_BUMPER = 1,
 	SOUND_CAR_DOOR_CLOSE_FRONT_LEFT = 2,
@@ -180,8 +181,7 @@ public:
 	void ReleaseDigitalHandle(void);
 	void ReacquireDigitalHandle(void);
 	void Service(void);
-	void ReportCollision(CEntity* A, CEntity* B, uint8 surfA, uint8 surfB,
-						 float impulse, float speed);
+	void ReportCollision(CEntity* A, CEntity* B, uint8 surfA, uint8 surfB, float impulse, float speed);
 	void ResetTimers(UInt32 timerval);
 	Bool IsAudioInitialised(void);
 	Char GetCDAudioDriveLetter(void);
@@ -189,4 +189,4 @@ public:
 	void ChangeMusicMode(UInt8 mode);
 	void PlayFrontEndSound(uint32, uint32);
 };
-extern cDMAudio& DMAudio;
+extern cDMAudio &DMAudio;

@@ -1,7 +1,7 @@
 #pragma once
-#include "common.h"
 
-struct PedStat {
+struct PedStat
+{
 	uint32 m_id;
 	char m_name[24];
 	int32 m_fleeDistance;
@@ -13,8 +13,5 @@ struct PedStat {
 	int32 m_attackStrength;
 	int32 m_defendWeakness;
 	int16 m_flags;
-	uint8 unknown1;
-	uint8 unknown2;
 };
-
 static_assert(sizeof(PedStat) == 0x34, "PedStat: error");
