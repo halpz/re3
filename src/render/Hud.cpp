@@ -76,7 +76,7 @@ int16 &CHud::PagerTimer = *(int16*)0x95CC3A;
 int16 &CHud::PagerOn = *(int16*)0x95CCA0;
 
 CSprite2d *CHud::Sprites = (CSprite2d*)0x95CB9C;
-char *HudNames[] = {	"fist",
+char *WeaponFilenames[] = {	"fist",
 						"fistm",
 						"bat",
 						"batm",
@@ -136,8 +136,8 @@ void CHud::Initialise() {
 	CTxdStore::PopCurrentTxd();
 	CTxdStore::SetCurrentTxd(HudTXD);
 
-	for (int i = 0; i < 23; i++) {
-		Sprites[i].SetTexture(HudNames[i * 2]);
+	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames) / 2; i++) {
+		Sprites[i].SetTexture(WeaponFilenames[i * 2]);
 	}
 
 	gpSniperSightTex = RwTextureRead("sitesniper", 0);
