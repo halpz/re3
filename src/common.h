@@ -78,6 +78,8 @@ extern void **rwengine;
 
 #define HUD_STRETCH_X SCREEN_STRETCH_X_AR
 #define HUD_STRETCH_Y SCREEN_STRETCH_Y
+#define HUD_FROM_RIGHT(a) (SCREEN_WIDTH - HUD_STRETCH_X(a))
+#define HUD_FROM_BOTTOM(a) (SCREEN_HEIGHT - HUD_STRETCH_Y(a))
 
 struct GlobalScene
 {
