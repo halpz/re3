@@ -2,9 +2,12 @@
 
 #include "Physical.h"
 #include "Weapon.h"
+#include "PathFind.h"
 #include "PedIK.h"
-#include <animation\AnimManager.h>
-#include <animation\AnimBlendClumpData.h>
+#include "AnimManager.h"
+#include "AnimBlendClumpData.h"
+#include "PedStat.h"
+#include "Sounds.h"
 
 enum {
 	PED_MAX_WEAPONS = 13
@@ -162,7 +165,9 @@ public:
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
-	uint8 stuff10[60];
+	uint8 stuff10[15];
+	int32 m_field_16C;
+	uint8 stuff12[44];
 	int32 m_pEventEntity;
 	float m_fAngleToEvent;
 	AnimBlendFrameData *m_pFrames[PED_NODE_MAX];
@@ -172,7 +177,7 @@ public:
 	CVector m_vecOffsetSeek;
 	CPedIK m_pedIK; 
 	uint8 stuff1[8];
-	int32 m_nPedStateTimer;
+	uint32 m_nPedStateTimer;
 	int32 m_nPedState;
 	int32 m_nLastPedState;
 	int32 m_nMoveState;
@@ -186,8 +191,8 @@ public:
 	bool bInVehicle;
 	uint8 stuff4[23];
 	int32 m_nPedType;
-
-	uint8 stuff5[28];
+	PedStat *m_pedStats;
+	uint8 stuff5[24];
 	CEntity *m_pCollidingEntity;
 	uint8 stuff6[12];
 	CWeapon m_weapons[PED_MAX_WEAPONS];
@@ -205,7 +210,9 @@ public:
 	uint32 m_lookTimer;
 	uint8 stuff9[34];
 	uint8 m_bodyPartBleeding;
-	uint8 stuff11[73];
+	uint8 m_field_4F3;
+	CPed *m_nearPeds[10];
+	uint8 stuff11[32];
 
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
@@ -215,19 +222,21 @@ public:
 	void AddWeaponModel(int id);
 	void AimGun();
 	void KillPedWithCar(CVehicle *veh, float impulse);
-	void Say(uint16 audio);
+	void Say(eSound audio);
 	void SetLookFlag(CPed *to, bool set);
 	void SetLookFlag(float angle, bool set);
+	void SetLookTimer(int time);
 	void SetDie(AnimationId anim, float arg1, float arg2);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
 	void RemoveBodyPart(PedNode nodeId, char arg4);
 	void SpawnFlyingComponent(int, signed char);
+	bool OurPedCanSeeThisOne(CEntity* who);
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
 	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
 
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	RwFrame* GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
-	
+
 	static Bool &bNastyLimbsCheat;
 	static Bool &bPedCheat2;
 	static Bool &bPedCheat3;
@@ -241,4 +250,6 @@ static_assert(offsetof(CPed, m_weapons) == 0x35C, "CPed: error");
 static_assert(offsetof(CPed, m_currentWeapon) == 0x498, "CPed: error");
 static_assert(offsetof(CPed, m_lookTimer) == 0x4CC, "CPed: error");
 static_assert(offsetof(CPed, m_bodyPartBleeding) == 0x4F2, "CPed: error");
+static_assert(offsetof(CPed, m_field_16C) == 0x16C, "CPed: error");
+static_assert(offsetof(CPed, m_pEventEntity) == 0x19C, "CPed: error");
 static_assert(sizeof(CPed) == 0x53C, "CPed: error");

@@ -2,9 +2,9 @@
 #include "patcher.h"
 #include "Ped.h"
 #include "Pools.h"
-#include <render\Particle.h>
-#include <render\ParticleMgr.h>
-#include <Stats.h>
+#include "Particle.h"
+#include "Stats.h"
+#include "World.h"
 
 Bool &CPed::bNastyLimbsCheat = *(Bool*)0x95CD44;
 Bool &CPed::bPedCheat2 = *(Bool*)0x95CD5A;
@@ -14,7 +14,7 @@ void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
 void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }
 
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
-WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
+WRAPPER void CPed::Say(eSound audio) { EAXJMP(0x4E5A10); }
 WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4D37D0); }
 WRAPPER void CPed::SpawnFlyingComponent(int, signed char) { EAXJMP(0x4EB060); }
 
@@ -201,7 +201,6 @@ CPed::AimGun()
 {
 	RwV3d pos;
 	CVector vector;
-	uint8 newFlag;
 
 	if (m_pSeekTarget) {
 		if (m_pSeekTarget->m_status == STATUS_PHYSICS) {
@@ -210,9 +209,9 @@ CPed::AimGun()
 			vector.y = pos.y;
 			vector.z = pos.z;
 		} else {
-			vector = *(m_pSeekTarget->GetMatrix().GetPosition());
+			vector = *(m_pSeekTarget->GetPosition());
 		}
-		CPed::Say(0x74);
+		CPed::Say(SOUND_PED_ATTACK);
 
 		m_ped_flagB2 = m_pedIK.PointGunAtPosition(&vector);
 		if (m_pPedFight != m_pSeekTarget) {
@@ -221,12 +220,10 @@ CPed::AimGun()
 
 	} else {
 		if (CPed::IsPlayer()) {
-			newFlag = m_pedIK.PointGunInDirection(m_fLookDirection, m_vecMoveSpeedAvg.y);
+			m_ped_flagB2 = m_pedIK.PointGunInDirection(m_fLookDirection, ((CPlayerPed*)this)->m_fFPSMoveHeading);
 		} else {
-			newFlag = m_pedIK.PointGunInDirection(m_fLookDirection, 0.0);
+			m_ped_flagB2 = m_pedIK.PointGunInDirection(m_fLookDirection, 0.0f);
 		}
-
-		m_ped_flagB2 = newFlag;
 	}
 }
 
@@ -238,16 +235,15 @@ CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
 	CVector pos2 = CVector(
 		pos.x,
 		pos.y,
-		pos.z + 0.1
+		pos.z + 0.1f
 	);
 
-	if (!CPed::IsPlayer() || evenOnPlayer)
-	{
+	if (!CPed::IsPlayer() || evenOnPlayer) {
 		++CStats::HeadShots;
 
-		// yes. decompiled by hand.
+		// BUG: This condition will always return true.
 		if (m_nPedState != PED_PASSENGER || m_nPedState != PED_TAXI_PASSENGER) {
-			CPed::SetDie(ANIM_KO_SHOT_FRONT1, 4.0, 0.0);
+			CPed::SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
 		}
 
 		m_ped_flagC20 = 1;
@@ -255,30 +251,29 @@ CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
 
 		CParticle::AddParticle(PARTICLE_TEST, pos2,
 								CVector(
-									0.0,
-									0.0,
-									0.0
+									0.0f,
+									0.0f,
+									0.0f
 								), NULL, 0.2f, 0, 0, 0, 0);
 
-		if (CEntity::GetIsOnScreen())
-		{
-			for(int i=0; i<0x20; i++) {
+		if (CEntity::GetIsOnScreen()) {
+			for(int i=0; i < 32; i++) {
 				CParticle::AddParticle(PARTICLE_BLOOD_SMALL,
 										pos2,
 										CVector(
-											0.0,
-											0.0,
-											0.03
+											0.0f,
+											0.0f,
+											0.03f
 										), NULL, 0.0f, 0, 0, 0, 0);
 			}
 
-			for (int i = 0; i < 0x10; i++) {
+			for (int i = 0; i < 16; i++) {
 				CParticle::AddParticle(PARTICLE_DEBRIS2,
 										pos2,
 										CVector(
-											0.0,
-											0.0,
-											0.0099999998
+											0.0f,
+											0.0f,
+											0.01f
 										), NULL, 0.0f, 0, 0, 0, 0);
 			}
 		}
@@ -293,45 +288,40 @@ CPed::RemoveBodyPart(PedNode nodeId, char arg4)
 	RwV3d zero;
 
 	frame = GetNodeFrame(nodeId);
-	if (frame)
-	{
-		if (CGame::nastyGame)
-		{
+	if (frame) {
+		if (CGame::nastyGame) {
 			if (nodeId != PED_HEAD)
 				CPed::SpawnFlyingComponent(nodeId, arg4);
 
 			RecurseFrameChildrenVisibilityCB(frame, 0);
-			zero.x = 0.0;
-			zero.z = 0.0;
-			zero.y = 0.0;
+			zero.x = 0.0f;
+			zero.z = 0.0f;
+			zero.y = 0.0f;
 			for (fp = RwFrameGetParent(frame); fp; fp = RwFrameGetParent(frame))
 				RwV3dTransformPoints(&zero, &zero, 1, &fp->modelling);
 
-			if (CEntity::GetIsOnScreen())
-			{
+			if (CEntity::GetIsOnScreen()) {
 				CParticle::AddParticle(PARTICLE_TEST, zero,
 					CVector(
-						0.0,
-						0.0,
-						0.0
+						0.0f,
+						0.0f,
+						0.0f
 					), NULL, 0.2f, 0, 0, 0, 0);
 
-				for (int i = 0; i < 0x10; i++) {
+				for (int i = 0; i < 16; i++) {
 					CParticle::AddParticle(PARTICLE_BLOOD_SMALL,
 						zero,
 						CVector(
-							0.0,
-							0.0,
-							0.03
+							0.0f,
+							0.0f,
+							0.03f
 						), NULL, 0.0f, 0, 0, 0, 0);
 				}
 			}
 			m_ped_flagC20 = 1;
 			m_bodyPartBleeding = nodeId;
 		}
-	}
-	else
-	{
+	} else {
 		printf("Trying to remove ped component");
 	}
 }
@@ -341,7 +331,7 @@ CPed::SetPedAtomicVisibilityCB(RwObject *object, void *data)
 {
 	RwObject *result = object;
 	if (!data)
-		object->flags = 0;
+		RpAtomicSetFlags(object, 0);
 
 	return result;
 }
@@ -357,18 +347,16 @@ CPed::RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data)
 void
 CPed::SetLookFlag(CPed *to, bool set)
 {
-	if (m_lookTimer < CTimer::GetTimeInMilliseconds())
-	{
+	if (m_lookTimer < CTimer::GetTimeInMilliseconds()) {
 		m_ped_flagA10 = 1;
 		m_ped_flagA40 = 0;
 		m_pPedFight = to;
 		m_pPedFight->RegisterReference((CEntity**)&m_pPedFight);
-		m_fLookDirection = 999999;
+		m_fLookDirection = 999999.0f;
 		m_lookTimer = 0;
 		m_ped_flagA20_look = set;
 		if (m_nPedState != PED_DRIVING) {
-			// Resets second right most bit
-			m_pedIK.m_flags &= 0xFFFFFFFD;
+			m_pedIK.m_flags &= ~(1 << 2);
 		}
 	}
 }
@@ -376,8 +364,7 @@ CPed::SetLookFlag(CPed *to, bool set)
 void
 CPed::SetLookFlag(float angle, bool set)
 {
-	if (m_lookTimer < CTimer::GetTimeInMilliseconds())
-	{
+	if (m_lookTimer < CTimer::GetTimeInMilliseconds()) {
 		m_ped_flagA10 = 1;
 		m_ped_flagA40 = 0;
 		m_pPedFight = 0;
@@ -385,12 +372,47 @@ CPed::SetLookFlag(float angle, bool set)
 		m_lookTimer = 0;
 		m_ped_flagA20_look = set;
 		if (m_nPedState != PED_DRIVING) {
-			// Resets second right most bit
-			m_pedIK.m_flags &= 0xFFFFFFFD;
+			m_pedIK.m_flags &= ~(1 << 2);
 		}
 	}
 }
 
+void
+CPed::SetLookTimer(int time)
+{
+	if (CTimer::GetTimeInMilliseconds() > m_lookTimer) {
+		m_lookTimer = CTimer::GetTimeInMilliseconds() + time;
+	}
+}
+
+bool
+CPed::OurPedCanSeeThisOne(CEntity* who)
+{
+	float xDiff;
+	float yDiff;
+	float distance;
+	CColPoint colpoint;
+	CEntity* ent;
+	CVector ourPos;
+	CVector itsPos;
+
+	ourPos = this->GetPosition();
+	itsPos = who->GetPosition();
+
+	xDiff = itsPos.x - ourPos.x;
+	yDiff = itsPos.y - ourPos.y;
+
+	if ((yDiff * this->GetUp().y) + (xDiff * this->GetUp().x) < 0.0f)
+		return 0;
+
+	distance = sqrt(yDiff * yDiff + xDiff * xDiff);
+
+	if (distance < 40.0f)
+		return 0;
+
+	ourPos.z += 1.0f;
+	return CWorld::ProcessLineOfSight(ourPos, itsPos, colpoint, ent, 1, 0, 0, 0, 0, 0, 0) == 0;
+}
 
 STARTPATCHES
 	InjectHook(0x4CF8F0, &CPed::AddWeaponModel, PATCH_JUMP);
@@ -399,4 +421,6 @@ STARTPATCHES
 	InjectHook(0x4EAEE0, &CPed::RemoveBodyPart, PATCH_JUMP);
 	InjectHook(0x4C6460, (void (CPed::*)(CPed*, bool)) &CPed::SetLookFlag, PATCH_JUMP);
 	InjectHook(0x4C63E0, (void (CPed::*)(float, bool)) &CPed::SetLookFlag, PATCH_JUMP);
+	InjectHook(0x4D12E0, &CPed::SetLookTimer, PATCH_JUMP);
+	InjectHook(0x4C5700, &CPed::OurPedCanSeeThisOne, PATCH_JUMP);
 ENDPATCHES
