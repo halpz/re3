@@ -4,6 +4,34 @@
 #include "TimeCycle.h"
 #include "skeleton.h"
 
+void *
+RwMallocAlign(RwUInt32 size, RwUInt32 align)
+{
+	void *mem = (void *)malloc(size + align);
+	
+	ASSERT(mem != NULL);
+	
+	void *addr = (void *)((((RwUInt32)mem) + align) & ~(align - 1));
+	
+	ASSERT(addr != NULL);
+	
+	*(((void **)addr) - 1) = mem;
+	
+	return addr;
+}
+
+void
+RwFreeAlign(void *mem)
+{
+	ASSERT(mem != NULL);
+	
+	void *addr = *(((void **)mem) - 1);
+	
+	ASSERT(addr != NULL);
+	
+	free(addr);
+}
+
 void
 DefinedState(void)
 {
