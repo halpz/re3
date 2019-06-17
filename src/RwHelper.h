@@ -1,5 +1,8 @@
 #pragma once
 
+void *RwMallocAlign(RwUInt32 size, RwUInt32 align);
+void RwFreeAlign(void *mem);
+
 void DefinedState(void);
 RwFrame *GetFirstChild(RwFrame *frame);
 RwObject *GetFirstObject(RwFrame *frame);
