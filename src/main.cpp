@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "main.h"
 #include "RwHelper.h"
 #include "Clouds.h"
 #include "Draw.h"
@@ -54,6 +55,8 @@
 #define DEFAULT_ASPECTRATIO (4.0f/3.0f)
 #endif
 													   
+
+GlobalScene &Scene = *(GlobalScene*)0x726768;
 
 uint8 work_buff[55000];
 char gString[256];

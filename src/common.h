@@ -76,13 +76,6 @@ extern void **rwengine;
 #define HUD_FROM_RIGHT(a) (SCREEN_WIDTH - HUD_STRETCH_X(a))
 #define HUD_FROM_BOTTOM(a) (SCREEN_HEIGHT - HUD_STRETCH_Y(a))
 
-struct GlobalScene
-{
-	RpWorld *world;
-	RwCamera *camera;
-};
-extern GlobalScene &Scene;
-
 #include "math/Vector.h"
 #include "math/Vector2D.h"
 #include "math/Matrix.h"
@@ -135,10 +128,6 @@ inline float sq(float x) { return x*x; }
 
 int myrand(void);
 void mysrand(unsigned int seed);
-
-extern uint8 work_buff[55000];
-extern char gString[256];
-extern wchar *gUString;
 
 void re3_debug(char *format, ...);
 void re3_trace(const char *filename, unsigned int lineno, const char *func, char *format, ...);

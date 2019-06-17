@@ -1,6 +1,7 @@
 #include "common.h"
 #include <rpskin.h>
 #include "patcher.h"
+#include "main.h"
 #include "RwHelper.h"
 #include "RpAnimBlend.h"
 #include "AnimBlendClumpData.h"

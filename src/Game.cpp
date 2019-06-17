@@ -9,6 +9,7 @@ bool &CGame::frenchGame = *(bool*)0x95CDCB;
 bool &CGame::germanGame = *(bool*)0x95CD1E;
 bool &CGame::noProstitutes = *(bool*)0x95CDCF;
 bool &CGame::playingIntro = *(bool*)0x95CDC2;
+char *CGame::aDatFile = (char*)0x773A48;
 
 WRAPPER void CGame::Process(void) { EAXJMP(0x48C850); }
 WRAPPER bool CGame::InitialiseOnceBeforeRW(void) { EAXJMP(0x48BB80); }

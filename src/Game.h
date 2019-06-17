@@ -18,6 +18,7 @@ public:
 	static bool &germanGame;
 	static bool &noProstitutes;
 	static bool &playingIntro;
+	static char *aDatFile;	//[32];
 
 	static void Process(void);
 	static bool InitialiseOnceBeforeRW(void);

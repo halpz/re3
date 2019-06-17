@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "main.h"
 #include "Draw.h"
 #include "Camera.h"
 #include "Sprite2d.h"

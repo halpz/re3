@@ -4,7 +4,6 @@
 #include "Particle.h"
 #include "Stats.h"
 #include "World.h"
-#include "PedStat.h"
 #include "DMaudio.h"
 #include "Ped.h"
 

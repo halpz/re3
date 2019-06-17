@@ -15,3 +15,9 @@ struct PedStat
 	int16 m_flags;
 };
 static_assert(sizeof(PedStat) == 0x34, "PedStat: error");
+
+class CPedStats
+{
+public:
+	static int32 GetPedStatType(char *type);
+};

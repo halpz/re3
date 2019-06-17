@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "main.h"
 #include "Clock.h"
 #include "Weather.h"
 #include "Camera.h"

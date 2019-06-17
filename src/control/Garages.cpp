@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "main.h"
 #include "ModelIndices.h"
 #include "Garages.h"
 #include "Timer.h"
