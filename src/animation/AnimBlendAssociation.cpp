@@ -54,7 +54,7 @@ CAnimBlendAssociation::AllocateAnimBlendNodeArray(int n)
 void
 CAnimBlendAssociation::FreeAnimBlendNodeArray(void)
 {
-	ASSERT( nodes != NULL );
+	assert(nodes != nil);
 	RwFreeAlign(nodes);
 }
 

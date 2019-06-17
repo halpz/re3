@@ -139,7 +139,7 @@ CAnimBlendAssocGroup::CreateAssociations(const char *blockName, RpClump *clump, 
 		DestroyAssociations();
 
 	animBlock = CAnimManager::GetAnimationBlock(blockName);
-	assocList = new CAnimBlendAssociation[animBlock->numAnims];
+	assocList = new CAnimBlendAssociation[numAssocs];
 
 	numAssociations = 0;
 	for(i = 0; i < numAssocs; i++){
