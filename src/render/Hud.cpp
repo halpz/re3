@@ -432,7 +432,7 @@ void CHud::Draw()
 				if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_fHealth >= 10
 					|| CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_fHealth < 10 && CTimer::GetFrameCounter() & 8) {
 
-					AsciiToUnicode("[", sPrintIcon);
+					AsciiToUnicode("{", sPrintIcon);
 					sprintf(sTemp, "%03d", (int32)CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_fHealth);
 					AsciiToUnicode(sTemp, sPrint);
 
