@@ -31,22 +31,17 @@
 #undef near
 #endif
 
-typedef uint8_t uint8, UInt8;
-typedef int8_t int8, Int8;
-typedef uint16_t uint16, UInt16;
-typedef int16_t int16, Int16;
-typedef uint32_t uint32, UInt32;
-typedef int32_t int32, Int32;
+typedef uint8_t uint8;
+typedef int8_t int8;
+typedef uint16_t uint16;
+typedef int16_t int16;
+typedef uint32_t uint32;
+typedef int32_t int32;
 typedef uintptr_t uintptr;
-typedef uint64_t uint64, UInt64;
-typedef int64_t int64, Int64;
+typedef uint64_t uint64;
+typedef int64_t int64;
 // hardcode ucs-2
-typedef uint16_t wchar, WChar;
-
-typedef float Float;
-typedef double Double;
-typedef bool Bool;
-typedef char Char;
+typedef uint16_t wchar;
 
 #define nil NULL
 
@@ -59,18 +54,27 @@ extern void **rwengine;
 #define RwEngineInstance (*rwengine)
 
 #include "skel\skeleton.h"
+#include "Draw.h"
+
+#define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
 
 #define SCREENW (RsGlobal.maximumWidth)
 #define SCREENH (RsGlobal.maximumHeight)
 
 #define DEFAULT_SCREEN_WIDTH (640)
 #define DEFAULT_SCREEN_HEIGHT (448)
-#define SCREEN_WIDTH Float(RsGlobal.width)
-#define SCREEN_HEIGHT Float(RsGlobal.height)
-#define SCREEN_STRETCH_X(a)   Float((a) * (SCREEN_WIDTH / Float(DEFAULT_SCREEN_WIDTH)))
-#define SCREEN_STRETCH_Y(a)   Float((a) * (SCREEN_HEIGHT / Float(DEFAULT_SCREEN_HEIGHT)))
-#define SCREEN_FROM_RIGHT(a)  Float(SCREEN_WIDTH - SCREEN_STRETCH_X(a))
-#define SCREEN_FROM_BOTTOM(a) Float(SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
+#define SCREEN_WIDTH float(RsGlobal.width)
+#define SCREEN_HEIGHT float(RsGlobal.height)
+#define SCREEN_STRETCH_X(a)   float((a) * (SCREEN_WIDTH / float(DEFAULT_SCREEN_WIDTH)))
+#define SCREEN_STRETCH_X_AR(a)   float((a) * (SCREEN_WIDTH / float(DEFAULT_SCREEN_WIDTH)) * (4.0/3.0f)/SCREEN_ASPECT_RATIO)
+#define SCREEN_STRETCH_Y(a)   float((a) * (SCREEN_HEIGHT / float(DEFAULT_SCREEN_HEIGHT)))
+#define SCREEN_FROM_RIGHT(a)  float(SCREEN_WIDTH - SCREEN_STRETCH_X(a))
+#define SCREEN_FROM_BOTTOM(a) float(SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
+
+#define HUD_STRETCH_X SCREEN_STRETCH_X_AR
+#define HUD_STRETCH_Y SCREEN_STRETCH_Y
+#define HUD_FROM_RIGHT(a) (SCREEN_WIDTH - HUD_STRETCH_X(a))
+#define HUD_FROM_BOTTOM(a) (SCREEN_HEIGHT - HUD_STRETCH_Y(a))
 
 struct GlobalScene
 {
@@ -134,6 +138,7 @@ void mysrand(unsigned int seed);
 
 extern uint8 work_buff[55000];
 extern char gString[256];
+extern wchar *gUString;
 
 void re3_debug(char *format, ...);
 void re3_trace(const char *filename, unsigned int lineno, const char *func, char *format, ...);
@@ -154,6 +159,6 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 #define VALIDATE_SIZE(struc, size) static_assert(sizeof(struc) == size, "Invalid structure size of " #struc)
 #define VALIDATE_OFFSET(struc, member, offset) static_assert(offsetof(struc, member) == offset, "The offset of " #member " in " #struc " is not " #offset "...")
 
-#define PERCENT(x, p)                    ((Float(x) * (Float(p) / 100.0f)))
+#define PERCENT(x, p)                    ((float(x) * (float(p) / 100.0f)))
 #define ARRAY_SIZE(array)                (sizeof(array) / sizeof(array[0]))
 #define BIT(num)                         (1<<(num))

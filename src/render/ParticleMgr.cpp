@@ -5,7 +5,7 @@
 
 cParticleSystemMgr mod_ParticleSystemManager;
 
-const Char *ParticleFilename = "PARTICLE.CFG";
+const char *ParticleFilename = "PARTICLE.CFG";
 
 //cParticleSystemMgr::cParticleSystemMgr()
 void cParticleSystemMgr::ctor()
@@ -17,7 +17,7 @@ void cParticleSystemMgr::Initialise()
 {
 	LoadParticleData();
 	
-	for ( Int32 i = 0; i < MAX_PARTICLES; i++ )
+	for ( int32 i = 0; i < MAX_PARTICLES; i++ )
 		m_aParticles[i].m_pParticles = NULL;
 }
 
@@ -28,13 +28,13 @@ void cParticleSystemMgr::LoadParticleData()
 	CFileMgr::SetDir("");
 	
 	tParticleSystemData *entry = NULL;
-	Int32 type = PARTICLE_FIRST;
+	int32 type = PARTICLE_FIRST;
 	
-	Char *lineStart = (Char *)work_buff;
-	Char *lineEnd = lineStart + 1;
+	char *lineStart = (char *)work_buff;
+	char *lineEnd = lineStart + 1;
 	
-	Char line[500];
-	Char delims[4];
+	char line[500];
+	char delims[4];
 
 	while ( true )
 	{
@@ -44,7 +44,7 @@ void cParticleSystemMgr::LoadParticleData()
 		while ( *lineEnd != '\n' )
 			++lineEnd;
 		
-		Int32 lineLength = lineEnd - lineStart;
+		int32 lineLength = lineEnd - lineStart;
 		
 		ASSERT(lineLength < 500);
 
@@ -57,11 +57,11 @@ void cParticleSystemMgr::LoadParticleData()
 		
 		if ( *line != ';' )
 		{
-			Int32 param = CFG_PARAM_FIRST;
+			int32 param = CFG_PARAM_FIRST;
 
 			strcpy(delims, " \t");
 			
-			Char *value = strtok(line, delims);
+			char *value = strtok(line, delims);
 			
 			ASSERT(value != NULL);
 			

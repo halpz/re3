@@ -6,6 +6,8 @@ private:
 	static float &ms_fNearClipZ;
 	static float &ms_fFarClipZ;
 	static float &ms_fFOV;
+	static float ms_fAspectRatio;
+
 public:
 	static uint8 &FadeValue;
 	static uint8 &FadeRed;
@@ -16,6 +18,11 @@ public:
 	static float GetNearClipZ(void) { return ms_fNearClipZ; }
 	static void SetFarClipZ(float farclip) { ms_fFarClipZ = farclip; }
 	static float GetFarClipZ(void) { return ms_fFarClipZ; }
+
 	static void SetFOV(float fov);
 	static float GetFOV(void) { return ms_fFOV; }
+
+	static void CalculateAspectRatio();
+	static float GetAspectRatio(void) { return ms_fAspectRatio; }
+
 };

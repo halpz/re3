@@ -1,5 +1,5 @@
 workspace "re3"
-	configurations { "ReleaseCI", "Release", "ReleaseFH", "Debug" }
+	configurations { "DebugCI", "ReleaseCI", "Release", "ReleaseFH", "Debug" }
 	location "build"
 
 	files { "src/*.*" }
@@ -42,9 +42,9 @@ project "re3"
 		defines { "DEBUG" }
 		staticruntime "on"
 		symbols "On"
-		debugdir "C:/Users/aap/games/gta3_re"
-		debugcommand "C:/Users/aap/games/gta3_re/gta3.exe"
-		postbuildcommands "copy /y \"$(TargetPath)\" \"C:\\Users\\aap\\games\\gta3_re\\plugins\\re3.dll\""
+		debugdir "$(GTA_III_RE_DIR)"
+		debugcommand "$(GTA_III_RE_DIR)/gta3.exe"
+		postbuildcommands "copy /y \"$(TargetPath)\" \"$(GTA_III_RE_DIR)\\plugins\\re3.dll\""
 
 	filter "configurations:Release"
 		defines { "NDEBUG" }
@@ -52,22 +52,21 @@ project "re3"
 		staticruntime "on"
 		debugdir "C:/Users/aap/games/gta3_re"
 		debugcommand "C:/Users/aap/games/gta3_re/gta3.exe"
-		postbuildcommands "copy /y \"$(TargetPath)\" \"C:\\Users\\aap\\games\\gta3_re\\plugins\\re3.dll\""
+		postbuildcommands "copy /y \"$(TargetPath)\" \"$(GTA_III_RE_DIR)\\plugins\\re3.dll\""
 	filter "configurations:ReleaseFH"
 		defines { "NDEBUG" }
 		symbols "Full"
 		optimize "off"
 		staticruntime "on"
-		debugdir "F:/Rockstar Games/GTAIII"
-		debugcommand "F:/Rockstar Games/GTAIII/gta3.exe"
+		debugdir "$(GTA_III_DIR)"
+		debugcommand "$(GTA_III_DIR)/gta3.exe"
 		targetextension ".asi"
-		targetdir "F:/Rockstar Games/GTAIII/scripts"
+		targetdir "$(GTA_III_DIR)/scripts"
+	filter "configurations:DebugCI"
+		defines { "DEBUG" }
+		symbols "On"
+		staticruntime "on"
 	filter "configurations:ReleaseCI"
 		defines { "NDEBUG" }
 		optimize "On"
 		staticruntime "on"
-	filter "configurations:DebugCI"
-		defines { "DEBUG" }
-		staticruntime "on"
-		symbols "On"
-		

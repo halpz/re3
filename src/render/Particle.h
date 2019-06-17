@@ -16,25 +16,25 @@ public:
 	CVector   m_vecPosition;
 	CVector   m_vecVelocity;
 	CVector   m_vecScreenPosition;
-	UInt32     m_nTimeWhenWillBeDestroyed;
-	UInt32     m_nTimeWhenColorWillBeChanged;
-	Float     m_fZGround;
+	uint32     m_nTimeWhenWillBeDestroyed;
+	uint32     m_nTimeWhenColorWillBeChanged;
+	float     m_fZGround;
 	CVector   m_vecParticleMovementOffset;
-	Int16     m_nCurrentZRotation;
-	UInt16     m_nZRotationTimer;
-	Float     m_fCurrentZRadius;
-	UInt16     m_nZRadiusTimer;
+	int16     m_nCurrentZRotation;
+	uint16     m_nZRotationTimer;
+	float     m_fCurrentZRadius;
+	uint16     m_nZRadiusTimer;
 	char _pad0[2];
-	Float     m_fSize;
-	Float     m_fExpansionRate;
-	UInt16     m_nFadeToBlackTimer;
-	UInt16     m_nFadeAlphaTimer;
-	UInt8     m_nColorIntensity;
-	UInt8     m_nAlpha;
-	UInt16    m_nCurrentFrame;
-	Int16     m_nAnimationSpeedTimer;
-	Int16     m_nRotationStep;
-	Int16     m_nRotation;
+	float     m_fSize;
+	float     m_fExpansionRate;
+	uint16     m_nFadeToBlackTimer;
+	uint16     m_nFadeAlphaTimer;
+	uint8     m_nColorIntensity;
+	uint8     m_nAlpha;
+	uint16    m_nCurrentFrame;
+	int16     m_nAnimationSpeedTimer;
+	int16     m_nRotationStep;
+	int16     m_nRotation;
 	RwRGBA    m_Color;
 	char _pad1[2];
 	CParticle *m_pNext;
@@ -49,24 +49,24 @@ public:
 		;
 	}
 
-	//static Float      ms_afRandTable[RAND_TABLE_SIZE];
-	static Float      (&ms_afRandTable)[RAND_TABLE_SIZE];
+	//static float      ms_afRandTable[RAND_TABLE_SIZE];
+	static float      (&ms_afRandTable)[RAND_TABLE_SIZE];
 	static CParticle *m_pUnusedListHead;
 	
 	/*
-	static Float      m_SinTable[SIN_COS_TABLE_SIZE];
-	static Float      m_CosTable[SIN_COS_TABLE_SIZE];
+	static float      m_SinTable[SIN_COS_TABLE_SIZE];
+	static float      m_CosTable[SIN_COS_TABLE_SIZE];
 	*/
-	static Float      (&m_SinTable)[SIN_COS_TABLE_SIZE];
-	static Float      (&m_CosTable)[SIN_COS_TABLE_SIZE];
+	static float      (&m_SinTable)[SIN_COS_TABLE_SIZE];
+	static float      (&m_CosTable)[SIN_COS_TABLE_SIZE];
 	
 	
 	static void ReloadConfig();
 	static void Initialise();
 	static void Shutdown();
 	
-	static CParticle *AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity = NULL, Float fSize = 0.0f, Int32 nRotationSpeed = 0, Int32 nRotation = 0, Int32 nCurFrame = 0, Int32 nLifeSpan = 0);
-	static CParticle *AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity, Float fSize, RwRGBA const &color, Int32 nRotationSpeed = 0, Int32 nRotation = 0, Int32 nCurFrame = 0, Int32 nLifeSpan = 0);
+	static CParticle *AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity = NULL, float fSize = 0.0f, int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0);
+	static CParticle *AddParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, CEntity *pEntity, float fSize, RwRGBA const &color, int32 nRotationSpeed = 0, int32 nRotation = 0, int32 nCurFrame = 0, int32 nLifeSpan = 0);
 
 	static void Update();
 	static void Render();
@@ -74,7 +74,7 @@ public:
 	static void RemovePSystem(tParticleType type);
 	static void RemoveParticle(CParticle *pParticle, CParticle *pPrevParticle, tParticleSystemData *pPSystemData);
 	
-	static inline void _Next(CParticle *&pParticle, CParticle *&pPrevParticle, tParticleSystemData *pPSystemData, Bool bRemoveParticle)
+	static inline void _Next(CParticle *&pParticle, CParticle *&pPrevParticle, tParticleSystemData *pPSystemData, bool bRemoveParticle)
 	{
 		if ( bRemoveParticle )
 		{
@@ -92,7 +92,7 @@ public:
 		}
 	}
 
-	static void AddJetExplosion(CVector const &vecPos, Float fPower, Float fSize);
+	static void AddJetExplosion(CVector const &vecPos, float fPower, float fSize);
 	static void AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatrix);
 
 };

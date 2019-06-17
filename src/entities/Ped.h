@@ -2,6 +2,12 @@
 
 #include "Physical.h"
 #include "Weapon.h"
+#include "PedIK.h"
+#include "AnimManager.h"
+#include "AnimBlendClumpData.h"
+
+struct PedStat;
+struct CPathNode;
 
 enum {
 	PED_MAX_WEAPONS = 13
@@ -92,7 +98,7 @@ public:
 	uint8 m_ped_flagA4 : 1;
 	uint8 m_ped_flagA8 : 1;
 	uint8 m_ped_flagA10 : 1;
-	uint8 m_ped_flagA20 : 1;
+	uint8 m_ped_flagA20_look : 1;
 	uint8 m_ped_flagA40 : 1;
 	uint8 m_ped_flagA80 : 1;
 	uint8 m_ped_flagB1 : 1;
@@ -159,39 +165,99 @@ public:
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
-	uint8 stuff1[199];
+	uint8 stuff10[15];
+	int32 m_field_16C;
+	uint8 stuff12[44];
+	int32 m_pEventEntity;
+	float m_fAngleToEvent;
+	AnimBlendFrameData *m_pFrames[PED_NODE_MAX];
+	int32 m_animGroup;
+	int32 m_pVehicleAnim;
+	CVector2D m_vecAnimMoveDelta;
+	CVector m_vecOffsetSeek;
+	CPedIK m_pedIK; 
+	uint8 stuff1[8];
+	uint32 m_nPedStateTimer;
 	int32 m_nPedState;
 	int32 m_nLastPedState;
 	int32 m_nMoveState;
-	uint8 stuff2[188];
+	int32 m_nStoredActionState;
+	int32 m_nPrevActionState;
+	int32 m_nWaitState;
+	int32 m_nWaitTimer;
+private:
+	uint32 stuff0[28];
+public:
+	uint16 m_nPathNodes;
+	uint8 m_nCurPathNode;
+	int8 m_nPathState;
+private:
+	int8 _pad2B5[3];
+public:
+	CPathNode *m_pNextPathNode;
+	CPathNode *m_pLastPathNode;
+	float m_fHealth;
+	float m_fArmour;
+	uint8 stuff2[34];
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
-	uint8 stuff3[16];
+	uint8 stuff3[12];
+	CPed* m_pSeekTarget;
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
 	uint8 stuff4[23];
 	int32 m_nPedType;
-
-	uint8 stuff5[28];
+	PedStat *m_pedStats;
+	uint8 stuff5[24];
 	CEntity *m_pCollidingEntity;
 	uint8 stuff6[12];
 	CWeapon m_weapons[PED_MAX_WEAPONS];
 	int32 stuff7;
 	uint8 m_currentWeapon;
-	uint8 stuff[163];
+	uint8 stuff[3];
+	int32 m_pPointGunAt;
+	CVector m_vecHitLastPos;
+	uint8 stuff8[12];
+	CPed *m_pPedFight;
+	float m_fLookDirection;
+	int32 m_wepModelID;
+	uint32 m_leaveCarTimer;
+	uint32 m_getUpTimer;
+	uint32 m_lookTimer;
+	uint8 stuff9[34];
+	uint8 m_bodyPartBleeding;
+	uint8 m_field_4F3;
+	CPed *m_nearPeds[10];
+	uint8 stuff11[32];
 
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
 
+	// TODO: enum!
 	bool IsPlayer(void) { return m_nPedType == 0 || m_nPedType== 1 || m_nPedType == 2 || m_nPedType == 3; }
 	bool UseGroundColModel(void);
+	void AddWeaponModel(int id);
+	void AimGun();
 	void KillPedWithCar(CVehicle *veh, float impulse);
+	void Say(uint16 audio);
+	void SetLookFlag(CPed *to, bool set);
+	void SetLookFlag(float angle, bool set);
+	void SetLookTimer(int time);
+	void SetDie(AnimationId anim, float arg1, float arg2);
+	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
+	void RemoveBodyPart(PedNode nodeId, int8 unknown);
+	void SpawnFlyingComponent(int, int8 unknown);
+	bool OurPedCanSeeThisOne(CEntity* who);
+	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
+	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
+
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
-	
-	static Bool &bNastyLimbsCheat;
-	static Bool &bPedCheat2;
-	static Bool &bPedCheat3;
+	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
+
+	static bool &bNastyLimbsCheat;
+	static bool &bPedCheat2;
+	static bool &bPedCheat3;
 };
 static_assert(offsetof(CPed, m_nPedState) == 0x224, "CPed: error");
 static_assert(offsetof(CPed, m_pCurSurface) == 0x2FC, "CPed: error");
@@ -200,4 +266,8 @@ static_assert(offsetof(CPed, m_nPedType) == 0x32C, "CPed: error");
 static_assert(offsetof(CPed, m_pCollidingEntity) == 0x34C, "CPed: error");
 static_assert(offsetof(CPed, m_weapons) == 0x35C, "CPed: error");
 static_assert(offsetof(CPed, m_currentWeapon) == 0x498, "CPed: error");
+static_assert(offsetof(CPed, m_lookTimer) == 0x4CC, "CPed: error");
+static_assert(offsetof(CPed, m_bodyPartBleeding) == 0x4F2, "CPed: error");
+static_assert(offsetof(CPed, m_field_16C) == 0x16C, "CPed: error");
+static_assert(offsetof(CPed, m_pEventEntity) == 0x19C, "CPed: error");
 static_assert(sizeof(CPed) == 0x53C, "CPed: error");

@@ -14,8 +14,7 @@
 const float DefaultFOV = 80.0f;	// actually 70.0f
 
 CCamera &TheCamera = *(CCamera*)0x6FACF8;
-
-WRAPPER Bool CCam::Using3rdPersonMouseCam() { EAXJMP(0x457460); }
+bool &CCamera::m_bUseMouse3rdPerson = *(bool *)0x5F03D8;
 
 WRAPPER void CCamera::DrawBordersForWideScreen(void) { EAXJMP(0x46B430); }
 
@@ -1248,6 +1247,15 @@ CCam::FixCamWhenObscuredByVehicle(const CVector &TargetCoors)
 	}
 	WellBufferMe(HeightTarget, &HeightFixerCarsObscuring, &HeightFixerCarsObscuringSpeed, 0.2f, 0.025f, false);
 	Source.z += HeightFixerCarsObscuring;
+}
+
+bool CCam::Using3rdPersonMouseCam() 
+{
+	return CCamera::m_bUseMouse3rdPerson &&
+		(Mode == MODE_FOLLOWPED ||
+			TheCamera.m_bPlayerIsInGarage &&
+			FindPlayerPed() && FindPlayerPed()->m_nPedState != PED_DRIVING &&
+			Mode != MODE_TOPDOWN1 && this->CamTargetEntity == FindPlayerPed());
 }
 
 STARTPATCHES

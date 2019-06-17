@@ -57,6 +57,7 @@
 
 uint8 work_buff[55000];
 char gString[256];
+wchar *gUString = (wchar*)0x74B018;
 
 bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
 
@@ -140,8 +141,8 @@ Idle(void *arg)
 		Render2dStuff();
 	}else{
 		float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-		// ASPECT
-		CameraSize(Scene.camera, nil, viewWindow, 4.0f/3.0f);
+		CDraw::CalculateAspectRatio();
+		CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
 		CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 		RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 		if(!RsCameraBeginUpdate(Scene.camera))
@@ -172,8 +173,8 @@ FrontendIdle(void)
 		return;
 
 	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-	// ASPECT
-	CameraSize(Scene.camera, nil, viewWindow, 4.0f/3.0f);
+	CDraw::CalculateAspectRatio();
+	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 	if(!RsCameraBeginUpdate(Scene.camera))
@@ -194,9 +195,8 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	CRGBA BottomColor(BottomRed, BottomGreen, BottomBlue, Alpha);
 
 	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-	// ASPECT
-	float aspectRatio = CMenuManager::m_PrefsUseWideScreen ? 16.0f/9.0f : 4.0f/3.0f;
-	CameraSize(Scene.camera, nil, viewWindow, aspectRatio);
+	CDraw::CalculateAspectRatio();
+	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 
@@ -215,9 +215,8 @@ bool
 DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha)
 {
 	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-	// ASPECT
-	float aspectRatio = CMenuManager::m_PrefsUseWideScreen ? 16.0f/9.0f : 4.0f/3.0f;
-	CameraSize(Scene.camera, nil, viewWindow, aspectRatio);
+	CDraw::CalculateAspectRatio();
+	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 
@@ -324,15 +323,16 @@ Render2dStuff(void)
 		CRGBA black(0, 0, 0, 255);
 
 		// top and bottom strips
-		if(weaponType == WEAPONTYPE_ROCKETLAUNCHER){
-			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH/2 - SCREEN_STRETCH_Y(180)), black);
-			CSprite2d::DrawRect(CRect(0.0f, SCREENH/2 + SCREEN_STRETCH_Y(170), SCREENW, SCREENH), black);
-		}else{
-			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH/2 - SCREEN_STRETCH_Y(210)), black);
-			CSprite2d::DrawRect(CRect(0.0f, SCREENH/2 + SCREEN_STRETCH_Y(210), SCREENW, SCREENH), black);
+		if (weaponType == WEAPONTYPE_ROCKETLAUNCHER) {
+			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH / 2 - HUD_STRETCH_Y(180)), black);
+			CSprite2d::DrawRect(CRect(0.0f, SCREENH / 2 + HUD_STRETCH_Y(170), SCREENW, SCREENH), black);
 		}
-		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW/2 - SCREEN_STRETCH_X(210), SCREENH), black);
-		CSprite2d::DrawRect(CRect(SCREENW/2 + SCREEN_STRETCH_X(210), 0.0f, SCREENW, SCREENH), black);
+		else {
+			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH / 2 - HUD_STRETCH_Y(210)), black);
+			CSprite2d::DrawRect(CRect(0.0f, SCREENH / 2 + HUD_STRETCH_Y(210), SCREENW, SCREENH), black);
+		}
+		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW / 2 - HUD_STRETCH_X(210), SCREENH), black);
+		CSprite2d::DrawRect(CRect(SCREENW / 2 + HUD_STRETCH_X(210), 0.0f, SCREENW, SCREENH), black);
 	}
 
 	MusicManager.DisplayRadioStationName();

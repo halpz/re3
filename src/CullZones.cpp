@@ -6,6 +6,7 @@
 #include "Timer.h"
 #include "Camera.h"
 #include "World.h"
+#include "FileMgr.h"
 #include "CullZones.h"
 
 int32     &CCullZones::NumCullZones = *(int*)0x8F2564;
@@ -43,6 +44,27 @@ CCullZones::Init(void)
 		aPointersToBigBuildingsForBuildings[i] = -1;
 	for(i = 0; i < NUMTREADABLES; i++)
 		aPointersToBigBuildingsForTreadables[i] = -1;
+}
+
+void
+CCullZones::ResolveVisibilities(void)
+{
+	int fd;
+
+	CFileMgr::SetDir("");
+	fd = CFileMgr::OpenFile("DATA\\cullzone.dat", "rb");
+	if(fd > 0){
+		CFileMgr::Read(fd, (char*)&NumCullZones, 4);
+		CFileMgr::Read(fd, (char*)aZones, NUMCULLZONES*sizeof(CCullZone));
+		CFileMgr::Read(fd, (char*)&NumAttributeZones, 4);
+		CFileMgr::Read(fd, (char*)aAttributeZones, NUMATTRIBZONES*sizeof(CAttributeZone));
+		CFileMgr::Read(fd, (char*)aIndices, NUMZONEINDICES*2);
+		CFileMgr::Read(fd, (char*)aPointersToBigBuildingsForBuildings, NUMBUILDINGS*2);
+		CFileMgr::Read(fd, (char*)aPointersToBigBuildingsForTreadables, NUMTREADABLES*2);
+		CFileMgr::CloseFile(fd);
+	}else{
+		// TODO: implement code from mobile to generate data here
+	}
 }
 
 void
@@ -311,6 +333,7 @@ CCullZone::DoStuffEnteringZone_OneTreadable(uint16 i)
 
 STARTPATCHES
 	InjectHook(0x524BC0, &CCullZones::Init, PATCH_JUMP);
+	InjectHook(0x524EC0, &CCullZones::ResolveVisibilities, PATCH_JUMP);
 	InjectHook(0x524F80, &CCullZones::Update, PATCH_JUMP);
 	InjectHook(0x525370, &CCullZones::AddCullZone, PATCH_JUMP);
 	InjectHook(0x5250D0, &CCullZones::ForceCullZoneCoors, PATCH_JUMP);

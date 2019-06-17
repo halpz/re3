@@ -3,5 +3,5 @@
 class C_PcSave
 {
 public:
-	static void SetSaveDirectory(const Char *path);
+	static void SetSaveDirectory(const char *path);
 };

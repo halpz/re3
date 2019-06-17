@@ -28,22 +28,22 @@
 CPad *Pads = (CPad*)0x6F0360; // [2]
 CMousePointerStateHelper &MousePointerStateHelper = *(CMousePointerStateHelper*)0x95CC8C;
 
-Bool &CPad::bDisplayNoControllerMessage = *(Bool *)0x95CD52;
-Bool &CPad::bObsoleteControllerMessage = *(Bool *)0x95CDB8;
-Bool &CPad::m_bMapPadOneToPadTwo = *(Bool *)0x95CD48;
+bool &CPad::bDisplayNoControllerMessage = *(bool *)0x95CD52;
+bool &CPad::bObsoleteControllerMessage = *(bool *)0x95CDB8;
+bool &CPad::m_bMapPadOneToPadTwo = *(bool *)0x95CD48;
 
 CKeyboardState &CPad::OldKeyState = *(CKeyboardState*)0x6F1E70;
 CKeyboardState &CPad::NewKeyState = *(CKeyboardState*)0x6E60D0;
 CKeyboardState &CPad::TempKeyState = *(CKeyboardState*)0x774DE8;
 
-Char CPad::KeyBoardCheatString[18];
+char CPad::KeyBoardCheatString[18];
 
 CMouseControllerState &CPad::OldMouseControllerState = *(CMouseControllerState*)0x8472A0;
 CMouseControllerState &CPad::NewMouseControllerState = *(CMouseControllerState*)0x8809F0;
 CMouseControllerState &CPad::PCTempMouseControllerState = *(CMouseControllerState*)0x6F1E60;
 
 _TODO("gbFastTime");
-extern Bool &gbFastTime;
+extern bool &gbFastTime;
 
 WRAPPER void WeaponCheat() { EAXJMP(0x490D90); }
 WRAPPER void HealthCheat() { EAXJMP(0x490E70); }
@@ -84,10 +84,10 @@ CControllerState::Clear(void)
 
 void CKeyboardState::Clear()
 {
-	for ( Int32 i = 0; i < 12; i++  )
+	for ( int32 i = 0; i < 12; i++  )
 		F[i] = 0;
 	
-	for ( Int32 i = 0; i < 256; i++  )
+	for ( int32 i = 0; i < 256; i++  )
 		VK_KEYS[i] = 0;
 
 	ESC = INS = DEL = HOME = END = PGUP = PGDN = 0;
@@ -111,7 +111,7 @@ void CKeyboardState::Clear()
 	LWIN = RWIN = APPS = 0;
 }
 
-void CPad::Clear(Bool bResetPlayerControls)
+void CPad::Clear(bool bResetPlayerControls)
 {
 	NewState.Clear();
 	OldState.Clear();
@@ -138,12 +138,12 @@ void CPad::Clear(Bool bResetPlayerControls)
 	bApplyBrakes = false;
 	
 	
-	for ( Int32 i = 0; i < _TODOCONST(5); i++ )
+	for ( int32 i = 0; i < _TODOCONST(5); i++ )
 		bHornHistory[i] = false;
 	
 	iCurrHornHistory = 0;
 	
-	for ( Int32 i = 0; i < _TODOCONST(12); i++ )
+	for ( int32 i = 0; i < _TODOCONST(12); i++ )
 		_unk[i] = ' ';
 	
 	LastTimeTouched = CTimer::GetTimeInMilliseconds();
@@ -235,8 +235,8 @@ void CPad::UpdateMouse()
 		
 		if ( PSGLOBAL(mouse) != NULL && SUCCEEDED(_InputGetMouseState(&state)) )
 		{
-			Int32 signX = 1;
-			Int32 signy = 1;
+			int32 signX = 1;
+			int32 signy = 1;
 
 			if ( !FrontEndMenuManager.m_bMenuActive )
 			{
@@ -248,8 +248,8 @@ void CPad::UpdateMouse()
 			
 			PCTempMouseControllerState.Clear();
 			
-			PCTempMouseControllerState.x = (Float)(signX * state.lX);
-			PCTempMouseControllerState.y = (Float)(signy * state.lY);
+			PCTempMouseControllerState.x = (float)(signX * state.lX);
+			PCTempMouseControllerState.y = (float)(signy * state.lY);
 			PCTempMouseControllerState.LMB = state.rgbButtons[0] & 128;
 			PCTempMouseControllerState.RMB = state.rgbButtons[1] & 128;
 			PCTempMouseControllerState.MMB = state.rgbButtons[2] & 128;
@@ -329,7 +329,7 @@ CControllerState CPad::ReconcileTwoControllersInput(CControllerState const &Stat
 #undef _FIX_RECON_DIR
 }
 
-void CPad::StartShake(Int16 nDur, UInt8 nFreq)
+void CPad::StartShake(int16 nDur, uint8 nFreq)
 {
 	if ( !CMenuManager::m_PrefsUseVibration )
 		return;
@@ -351,7 +351,7 @@ void CPad::StartShake(Int16 nDur, UInt8 nFreq)
 	}
 }
 
-void CPad::StartShake_Distance(Int16 nDur, UInt8 nFreq, Float fX, Float fY, Float fZ)
+void CPad::StartShake_Distance(int16 nDur, uint8 nFreq, float fX, float fY, float fZ)
 {
 	if ( !CMenuManager::m_PrefsUseVibration )
 		return;
@@ -359,7 +359,7 @@ void CPad::StartShake_Distance(Int16 nDur, UInt8 nFreq, Float fX, Float fY, Floa
 	if ( CCutsceneMgr::IsRunning() || CGame::playingIntro )
 		return;
 	
-	Float fDist = ( TheCamera.GetPosition() - CVector(fX, fY, fZ) ).Magnitude();
+	float fDist = ( TheCamera.GetPosition() - CVector(fX, fY, fZ) ).Magnitude();
 	
 	if ( fDist < 70.0f )
 	{
@@ -378,7 +378,7 @@ void CPad::StartShake_Distance(Int16 nDur, UInt8 nFreq, Float fX, Float fY, Floa
 	}
 }
 
-void CPad::StartShake_Train(Float fX, Float fY)
+void CPad::StartShake_Train(float fX, float fY)
 {
 	if ( !CMenuManager::m_PrefsUseVibration )
 		return;
@@ -389,11 +389,11 @@ void CPad::StartShake_Train(Float fX, Float fY)
 	if (FindPlayerVehicle() != NULL && FindPlayerVehicle()->IsTrain() )
 		return;
 	
-	Float fDist = ( TheCamera.GetPosition() - CVector(fX, fY, 0.0f) ).Magnitude2D();
+	float fDist = ( TheCamera.GetPosition() - CVector(fX, fY, 0.0f) ).Magnitude2D();
 	
 	if ( fDist < 70.0f )
 	{
-		Int32 freq = (Int32)((70.0f - fDist) * 70.0f / 70.0f + 30.0f);
+		int32 freq = (int32)((70.0f - fDist) * 70.0f / 70.0f + 30.0f);
 
 		if ( ShakeDur < 100 )
 		{
@@ -403,9 +403,9 @@ void CPad::StartShake_Train(Float fX, Float fY)
 	}
 }
 
-void CPad::AddToPCCheatString(Char c)
+void CPad::AddToPCCheatString(char c)
 {
-	for ( Int32 i = ARRAY_SIZE(KeyBoardCheatString); i >= 0; i-- )
+	for ( int32 i = ARRAY_SIZE(KeyBoardCheatString); i >= 0; i-- )
 		KeyBoardCheatString[i + 1] = KeyBoardCheatString[i];
 	
 	KeyBoardCheatString[0] = c;
@@ -515,7 +515,7 @@ void CPad::AddToPCCheatString(Char c)
 
 void CPad::UpdatePads(void) 
 {
-	Bool bUpdate = true;
+	bool bUpdate = true;
 	
 	GetPad(0)->UpdateMouse();
 	CapturePad(0);
@@ -545,7 +545,7 @@ void CPad::ProcessPCSpecificStuff(void)
 	;
 }
 
-void CPad::Update(Int16 unk)
+void CPad::Update(int16 unk)
 {
 	OldState = NewState;
 	
@@ -573,7 +573,7 @@ void CPad::DoCheats(void)
 	GetPad(0)->DoCheats(0);
 }
 
-void CPad::DoCheats(Int16 unk)
+void CPad::DoCheats(int16 unk)
 {
 #ifdef PS2
 	if ( GetTriangleJustDown() )
@@ -619,17 +619,17 @@ void CPad::StopPadsShaking(void)
 	GetPad(0)->StopShaking(0);
 }
 
-void CPad::StopShaking(Int16 unk)
+void CPad::StopShaking(int16 unk)
 {
 	;
 }
 
-CPad *CPad::GetPad(Int32 pad)
+CPad *CPad::GetPad(int32 pad)
 {
 	return &Pads[pad];
 }
 
-Int16 CPad::GetSteeringLeftRight(void)
+int16 CPad::GetSteeringLeftRight(void)
 {
 	if ( DisablePlayerControls )
 		return 0;
@@ -639,8 +639,8 @@ Int16 CPad::GetSteeringLeftRight(void)
 		case 0:
 		case 2:
 		{
-			Int16 axis = NewState.LeftStickX;
-			Int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
+			int16 axis = NewState.LeftStickX;
+			int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
 			
 			if ( abs(axis) > abs(dpad) )
 				return axis;
@@ -662,7 +662,7 @@ Int16 CPad::GetSteeringLeftRight(void)
 	return 0;
 }
 
-Int16 CPad::GetSteeringUpDown(void)
+int16 CPad::GetSteeringUpDown(void)
 {
 	if ( DisablePlayerControls )
 		return 0;
@@ -672,8 +672,8 @@ Int16 CPad::GetSteeringUpDown(void)
 		case 0:
 		case 2:
 		{
-			Int16 axis = NewState.LeftStickY;
-			Int16 dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
+			int16 axis = NewState.LeftStickY;
+			int16 dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
 			
 			if ( abs(axis) > abs(dpad) )
 				return axis;
@@ -695,7 +695,7 @@ Int16 CPad::GetSteeringUpDown(void)
 	return 0;
 }
 
-Int16 CPad::GetCarGunUpDown(void)
+int16 CPad::GetCarGunUpDown(void)
 {
 	if ( DisablePlayerControls )
 		return 0;
@@ -722,7 +722,7 @@ Int16 CPad::GetCarGunUpDown(void)
 	return 0;
 }
 
-Int16 CPad::GetCarGunLeftRight(void)
+int16 CPad::GetCarGunLeftRight(void)
 {
 	if ( DisablePlayerControls )
 		return 0;
@@ -749,7 +749,7 @@ Int16 CPad::GetCarGunLeftRight(void)
 	return 0;
 }
 
-Int16 CPad::GetPedWalkLeftRight(void)
+int16 CPad::GetPedWalkLeftRight(void)
 {
 	if ( DisablePlayerControls )
 		return 0;
@@ -759,8 +759,8 @@ Int16 CPad::GetPedWalkLeftRight(void)
 		case 0:
 		case 2:
 		{
-			Int16 axis = NewState.LeftStickX;
-			Int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
+			int16 axis = NewState.LeftStickX;
+			int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
 			
 			if ( abs(axis) > abs(dpad) )
 				return axis;
@@ -783,7 +783,7 @@ Int16 CPad::GetPedWalkLeftRight(void)
 }
 
 
-Int16 CPad::GetPedWalkUpDown(void)
+int16 CPad::GetPedWalkUpDown(void)
 {
 	if ( DisablePlayerControls )
 		return 0;
@@ -793,8 +793,8 @@ Int16 CPad::GetPedWalkUpDown(void)
 		case 0:
 		case 2:
 		{
-			Int16 axis = NewState.LeftStickY;
-			Int16 dpad = (NewState.DPadDown - NewState.DPadUp) / 2;
+			int16 axis = NewState.LeftStickY;
+			int16 dpad = (NewState.DPadDown - NewState.DPadUp) / 2;
 			
 			if ( abs(axis) > abs(dpad) )
 				return axis;
@@ -816,15 +816,15 @@ Int16 CPad::GetPedWalkUpDown(void)
 	return 0;
 }
 
-Int16 CPad::GetAnalogueUpDown(void)
+int16 CPad::GetAnalogueUpDown(void)
 {
 	switch ( Mode )
 	{
 		case 0:
 		case 2:
 		{
-			Int16 axis = NewState.LeftStickY;
-			Int16 dpad = (NewState.DPadDown - NewState.DPadUp) / 2;
+			int16 axis = NewState.LeftStickY;
+			int16 dpad = (NewState.DPadDown - NewState.DPadUp) / 2;
 			
 			if ( abs(axis) > abs(dpad) )
 				return axis;
@@ -846,7 +846,7 @@ Int16 CPad::GetAnalogueUpDown(void)
 	return 0;
 }
 
-Bool CPad::GetLookLeft(void)
+bool CPad::GetLookLeft(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -854,7 +854,7 @@ Bool CPad::GetLookLeft(void)
 	return !!(NewState.LeftShoulder2 && !NewState.RightShoulder2);
 }
 
-Bool CPad::GetLookRight(void)
+bool CPad::GetLookRight(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -863,7 +863,7 @@ Bool CPad::GetLookRight(void)
 }
 
 
-Bool CPad::GetLookBehindForCar(void)
+bool CPad::GetLookBehindForCar(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -871,7 +871,7 @@ Bool CPad::GetLookBehindForCar(void)
 	return !!(NewState.RightShoulder2 && NewState.LeftShoulder2);
 }
 
-Bool CPad::GetLookBehindForPed(void)
+bool CPad::GetLookBehindForPed(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -879,7 +879,7 @@ Bool CPad::GetLookBehindForPed(void)
 	return !!NewState.RightShock;
 }
 
-Bool CPad::GetHorn(void)
+bool CPad::GetHorn(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -918,7 +918,7 @@ Bool CPad::GetHorn(void)
 	return false;
 }
 
-Bool CPad::HornJustDown(void)
+bool CPad::HornJustDown(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -958,7 +958,7 @@ Bool CPad::HornJustDown(void)
 }
 
 
-Bool CPad::GetCarGunFired(void)
+bool CPad::GetCarGunFired(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -985,7 +985,7 @@ Bool CPad::GetCarGunFired(void)
 	return false;
 }
 
-Bool CPad::CarGunJustDown(void)
+bool CPad::CarGunJustDown(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1012,7 +1012,7 @@ Bool CPad::CarGunJustDown(void)
 	return false;
 }
 
-Int16 CPad::GetHandBrake(void)
+int16 CPad::GetHandBrake(void)
 {
 	if ( DisablePlayerControls )
 		return 0;
@@ -1045,7 +1045,7 @@ Int16 CPad::GetHandBrake(void)
 	return 0;
 }
 
-Int16 CPad::GetBrake(void)
+int16 CPad::GetBrake(void)
 {
 	if ( DisablePlayerControls )
 		return 0;
@@ -1069,7 +1069,7 @@ Int16 CPad::GetBrake(void)
 		
 		case 3:
 		{
-			Int16 axis = 2 * NewState.RightStickY;
+			int16 axis = 2 * NewState.RightStickY;
 			
 			if ( axis < 0 )
 				return 0;
@@ -1083,7 +1083,7 @@ Int16 CPad::GetBrake(void)
 	return 0;
 }
 
-Bool CPad::GetExitVehicle(void)
+bool CPad::GetExitVehicle(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1110,7 +1110,7 @@ Bool CPad::GetExitVehicle(void)
 	return false;
 }
 
-Bool CPad::ExitVehicleJustDown(void)
+bool CPad::ExitVehicleJustDown(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1137,7 +1137,7 @@ Bool CPad::ExitVehicleJustDown(void)
 	return false;
 }
 
-Int32 CPad::GetWeapon(void)
+int32 CPad::GetWeapon(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1170,7 +1170,7 @@ Int32 CPad::GetWeapon(void)
 	return false;
 }
 
-Bool CPad::WeaponJustDown(void)
+bool CPad::WeaponJustDown(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1203,7 +1203,7 @@ Bool CPad::WeaponJustDown(void)
 	return false;
 }
 
-Int16 CPad::GetAccelerate(void)
+int16 CPad::GetAccelerate(void)
 {
 	if ( DisablePlayerControls )
 		return 0;
@@ -1227,7 +1227,7 @@ Int16 CPad::GetAccelerate(void)
 		
 		case 3:
 		{
-			Int16 axis = -2 * NewState.RightStickY;
+			int16 axis = -2 * NewState.RightStickY;
 			
 			if ( axis < 0 )
 				return 0;
@@ -1241,7 +1241,7 @@ Int16 CPad::GetAccelerate(void)
 	return 0;
 }
 
-Bool CPad::CycleCameraModeUpJustDown(void)
+bool CPad::CycleCameraModeUpJustDown(void)
 {
 	switch ( Mode )
 	{
@@ -1265,7 +1265,7 @@ Bool CPad::CycleCameraModeUpJustDown(void)
 	return false;
 }
 
-Bool CPad::CycleCameraModeDownJustDown(void)
+bool CPad::CycleCameraModeDownJustDown(void)
 {
 	switch ( Mode )
 	{
@@ -1289,7 +1289,7 @@ Bool CPad::CycleCameraModeDownJustDown(void)
 	return false;
 }
 
-Bool CPad::ChangeStationJustDown(void)
+bool CPad::ChangeStationJustDown(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1329,7 +1329,7 @@ Bool CPad::ChangeStationJustDown(void)
 }
 
 
-Bool CPad::CycleWeaponLeftJustDown(void)
+bool CPad::CycleWeaponLeftJustDown(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1337,7 +1337,7 @@ Bool CPad::CycleWeaponLeftJustDown(void)
 	return !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2);
 }
 
-Bool CPad::CycleWeaponRightJustDown(void)
+bool CPad::CycleWeaponRightJustDown(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1345,7 +1345,7 @@ Bool CPad::CycleWeaponRightJustDown(void)
 	return !!(NewState.RightShoulder2 && !OldState.RightShoulder2);
 }
 
-Bool CPad::GetTarget(void)
+bool CPad::GetTarget(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1372,7 +1372,7 @@ Bool CPad::GetTarget(void)
 	return false;
 }
 
-Bool CPad::TargetJustDown(void)
+bool CPad::TargetJustDown(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1399,7 +1399,7 @@ Bool CPad::TargetJustDown(void)
 	return false;
 }
 
-Bool CPad::JumpJustDown(void)
+bool CPad::JumpJustDown(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1407,7 +1407,7 @@ Bool CPad::JumpJustDown(void)
 	return !!(NewState.Square && !OldState.Square);
 }
 
-Bool CPad::GetSprint(void)
+bool CPad::GetSprint(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1434,7 +1434,7 @@ Bool CPad::GetSprint(void)
 	return false;
 }
 
-Bool CPad::ShiftTargetLeftJustDown(void)
+bool CPad::ShiftTargetLeftJustDown(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1442,7 +1442,7 @@ Bool CPad::ShiftTargetLeftJustDown(void)
 	return !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2);
 }
 
-Bool CPad::ShiftTargetRightJustDown(void)
+bool CPad::ShiftTargetRightJustDown(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1450,11 +1450,11 @@ Bool CPad::ShiftTargetRightJustDown(void)
 	return !!(NewState.RightShoulder2 && !OldState.RightShoulder2);
 }
 
-Bool CPad::GetAnaloguePadUp(void)
+bool CPad::GetAnaloguePadUp(void)
 {
-	static Int16 oldfStickY = 0;
+	static int16 oldfStickY = 0;
 	
-	Int16 Y = CPad::GetPad(0)->GetAnalogueUpDown();
+	int16 Y = CPad::GetPad(0)->GetAnalogueUpDown();
 	
 	if ( Y < 0 && oldfStickY >= 0 )
 	{
@@ -1468,11 +1468,11 @@ Bool CPad::GetAnaloguePadUp(void)
 	}
 }
 
-Bool CPad::GetAnaloguePadDown(void)
+bool CPad::GetAnaloguePadDown(void)
 {
-	static Int16 oldfStickY = 0;
+	static int16 oldfStickY = 0;
 	
-	Int16 Y = CPad::GetPad(0)->GetAnalogueUpDown();
+	int16 Y = CPad::GetPad(0)->GetAnalogueUpDown();
 	
 	if ( Y > 0 && oldfStickY <= 0 )
 	{
@@ -1486,11 +1486,11 @@ Bool CPad::GetAnaloguePadDown(void)
 	}
 }
 
-Bool CPad::GetAnaloguePadLeft(void)
+bool CPad::GetAnaloguePadLeft(void)
 {
-	static Int16 oldfStickX = 0;
+	static int16 oldfStickX = 0;
 	
-	Int16 X = CPad::GetPad(0)->GetPedWalkLeftRight();
+	int16 X = CPad::GetPad(0)->GetPedWalkLeftRight();
 	
 	if ( X < 0 && oldfStickX >= 0 )
 	{
@@ -1504,11 +1504,11 @@ Bool CPad::GetAnaloguePadLeft(void)
 	}
 }
 
-Bool CPad::GetAnaloguePadRight(void)
+bool CPad::GetAnaloguePadRight(void)
 {
-	static Int16 oldfStickX = 0;
+	static int16 oldfStickX = 0;
 	
-	Int16 X = CPad::GetPad(0)->GetPedWalkLeftRight();
+	int16 X = CPad::GetPad(0)->GetPedWalkLeftRight();
 	
 	if ( X > 0 && oldfStickX <= 0 )
 	{
@@ -1522,11 +1522,11 @@ Bool CPad::GetAnaloguePadRight(void)
 	}
 }
 
-Bool CPad::GetAnaloguePadLeftJustUp(void)
+bool CPad::GetAnaloguePadLeftJustUp(void)
 {
-	static Int16 oldfStickX = 0;
+	static int16 oldfStickX = 0;
 	
-	Int16 X = GetPad(0)->GetPedWalkLeftRight();
+	int16 X = GetPad(0)->GetPedWalkLeftRight();
 	
 	if ( X == 0 && oldfStickX < 0 )
 	{
@@ -1542,11 +1542,11 @@ Bool CPad::GetAnaloguePadLeftJustUp(void)
 	}
 }
 
-Bool CPad::GetAnaloguePadRightJustUp(void)
+bool CPad::GetAnaloguePadRightJustUp(void)
 {
-	static Int16 oldfStickX = 0;
+	static int16 oldfStickX = 0;
 	
-	Int16 X = GetPad(0)->GetPedWalkLeftRight();
+	int16 X = GetPad(0)->GetPedWalkLeftRight();
 	
 	if ( X == 0 && oldfStickX > 0 )
 	{
@@ -1562,7 +1562,7 @@ Bool CPad::GetAnaloguePadRightJustUp(void)
 	}
 }
 
-Bool CPad::ForceCameraBehindPlayer(void)
+bool CPad::ForceCameraBehindPlayer(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1595,7 +1595,7 @@ Bool CPad::ForceCameraBehindPlayer(void)
 	return false;
 }
 
-Bool CPad::SniperZoomIn(void)
+bool CPad::SniperZoomIn(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1622,7 +1622,7 @@ Bool CPad::SniperZoomIn(void)
 	return false;
 }
 
-Bool CPad::SniperZoomOut(void)
+bool CPad::SniperZoomOut(void)
 {
 	if ( DisablePlayerControls )
 		return false;
@@ -1650,10 +1650,10 @@ Bool CPad::SniperZoomOut(void)
 }
 
 
-Int16 CPad::SniperModeLookLeftRight(void)
+int16 CPad::SniperModeLookLeftRight(void)
 {
-	Int16 axis = NewState.LeftStickX;
-	Int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
+	int16 axis = NewState.LeftStickX;
+	int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
 	
 	if ( abs(axis) > abs(dpad) )
 		return axis;
@@ -1661,10 +1661,10 @@ Int16 CPad::SniperModeLookLeftRight(void)
 		return dpad;
 }
 
-Int16 CPad::SniperModeLookUpDown(void)
+int16 CPad::SniperModeLookUpDown(void)
 {
-	Int16 axis = NewState.LeftStickY;
-	Int16 dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
+	int16 axis = NewState.LeftStickY;
+	int16 dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
 	
 	if ( abs(axis) > abs(dpad) )
 		return axis;
@@ -1672,31 +1672,31 @@ Int16 CPad::SniperModeLookUpDown(void)
 		return dpad;
 }
 
-Int16 CPad::LookAroundLeftRight(void)
+int16 CPad::LookAroundLeftRight(void)
 {
-	Float axis = GetPad(0)->NewState.RightStickX;
+	float axis = GetPad(0)->NewState.RightStickX;
 	
 	if ( fabs(axis) > 85 && !GetLookBehindForPed() )
-		return (Int16) ( (axis + ( axis > 0 ) ? -85 : 85)
+		return (int16) ( (axis + ( axis > 0 ) ? -85 : 85)
 							* (127.0f / 32.0f) ); // 3.96875f
 
 	else if ( TheCamera.Cams[0].Using3rdPersonMouseCam() && fabs(axis) > 10 )
-		return (Int16) ( (axis + ( axis > 0 ) ? -10 : 10)
+		return (int16) ( (axis + ( axis > 0 ) ? -10 : 10)
 							* (127.0f / 64.0f) ); // 1.984375f
 	
 	return 0;
 }
 
-Int16 CPad::LookAroundUpDown(void)
+int16 CPad::LookAroundUpDown(void)
 {
-	Int16 axis = GetPad(0)->NewState.RightStickY;
+	int16 axis = GetPad(0)->NewState.RightStickY;
 	
 	if ( abs(axis) > 85 && !GetLookBehindForPed() )
-		return (Int16) ( (axis + ( axis > 0 ) ? -85 : 85)
+		return (int16) ( (axis + ( axis > 0 ) ? -85 : 85)
 							* (127.0f / 32.0f) ); // 3.96875f
 
 	else if ( TheCamera.Cams[0].Using3rdPersonMouseCam() && abs(axis) > 40 )
-		return (Int16) ( (axis + ( axis > 0 ) ? -40 : 40)
+		return (int16) ( (axis + ( axis > 0 ) ? -40 : 40)
 							* (127.0f / 64.0f) ); // 1.984375f
 
 	return 0;
@@ -1750,7 +1750,7 @@ void CPad::PrintErrorMessage(void)
 
 void LittleTest(void)
 {
-	static Int32 Cunt = 0;
+	static int32 Cunt = 0;
 	
 	Cunt++; // ???
 }
@@ -1775,12 +1775,12 @@ void CPad::ResetCheats(void)
 	CTimer::SetTimeScale(1.0f);
 }
 
-Char *CPad::EditString(Char *pStr, Int32 nSize)
+char *CPad::EditString(char *pStr, int32 nSize)
 {
-	Int32 pos = strlen(pStr);
+	int32 pos = strlen(pStr);
 	
 	// letters
-	for ( Int32 i = 0; i < ('Z' - 'A' + 1); i++ )
+	for ( int32 i = 0; i < ('Z' - 'A' + 1); i++ )
 	{
 		if ( GetPad(0)->GetCharJustDown(i + 'A') && pos < nSize - 1 )
 		{
@@ -1796,7 +1796,7 @@ Char *CPad::EditString(Char *pStr, Int32 nSize)
 	}
 	
 	// numbers 
-	for ( Int32 i = 0; i < ('0' - '9' + 1); i++ )
+	for ( int32 i = 0; i < ('0' - '9' + 1); i++ )
 	{
 		if ( GetPad(0)->GetCharJustDown(i + '0') && pos < nSize - 1 )
 		{
@@ -1827,17 +1827,17 @@ Char *CPad::EditString(Char *pStr, Int32 nSize)
 	return pStr;
 }
 
-Int32 *CPad::EditCodesForControls(Int32 *pRsKeys, Int32 nSize)
+int32 *CPad::EditCodesForControls(int32 *pRsKeys, int32 nSize)
 {
 	*pRsKeys = rsNULL;
 
-	for ( Int32 i = 0; i < 255; i++ )
+	for ( int32 i = 0; i < 255; i++ )
 	{
 		if ( GetPad(0)->GetCharJustDown(i) )
 			*pRsKeys = i;
 	}
 	
-	for ( Int32 i = 0; i < 255; i++ )
+	for ( int32 i = 0; i < 12; i++ )
 	{
 		if ( GetPad(0)->GetFJustDown(i) )
 			*pRsKeys = i + rsF1;
@@ -1996,7 +1996,7 @@ STARTPATCHES
 	InjectHook(0x492C60, &CPad::ProcessPCSpecificStuff, PATCH_JUMP);
 	InjectHook(0x492C70, &CPad::Update, PATCH_JUMP);
 	InjectHook(0x492F00, (void (*)())CPad::DoCheats, PATCH_JUMP);
-	InjectHook(0x492F20, (void (CPad::*)(Int16))&CPad::DoCheats, PATCH_JUMP);
+	InjectHook(0x492F20, (void (CPad::*)(int16))&CPad::DoCheats, PATCH_JUMP);
 	InjectHook(0x492F30, CPad::StopPadsShaking, PATCH_JUMP);
 	InjectHook(0x492F50, &CPad::StopShaking, PATCH_JUMP);
 	InjectHook(0x492F60, CPad::GetPad, PATCH_JUMP);

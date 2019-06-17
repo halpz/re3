@@ -6,7 +6,7 @@
 #include "Stats.h"
 
 _TODO("gbFastTime");
-Bool &gbFastTime = *(Bool*)0x95CDBB;
+bool &gbFastTime = *(bool*)0x95CDBB;
 
 uint8  &CClock::ms_nGameClockHours = *(uint8*)0x95CDA6;
 uint8  &CClock::ms_nGameClockMinutes = *(uint8*)0x95CDC8;

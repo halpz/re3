@@ -19,19 +19,19 @@ public:
 	struct tControllerConfigBind
 	{
 		RsKeyCodes m_Key;
-		Int32 m_ContSetOrder;
+		int32 m_ContSetOrder;
 	};
 
-	Bool field_0;
+	bool field_0;
 	char _pad0[3];
 	DIJOYSTATE2 m_OldState;
 	DIJOYSTATE2 m_NewState;
-	WChar m_aActionNames[41][40];
-	Bool m_aButtonStates[17];
+	wchar m_aActionNames[41][40];
+	bool m_aButtonStates[17];
 	char _pad1[3];
 	tControllerConfigBind m_aSettings[41][4];
-	UInt8 m_aSimCheckers[4][4];
-	Bool m_bMouseAssociated;
+	uint8 m_aSimCheckers[4][4];
+	bool m_bMouseAssociated;
 	char _pad2[3];
 	
 	void UpdateJoyButtonState(int padnumber);
@@ -40,8 +40,8 @@ public:
 	void UpdateJoyInConfigMenus_ButtonUp(int button, int padnumber);
 	void AffectControllerStateOn_ButtonUp(int button, int padnumber);
 	
-	Int32 GetJoyButtonJustDown();
-	void LoadSettings(Int32 file);
+	int32 GetJoyButtonJustDown();
+	void LoadSettings(int32 file);
 	void MakeControllerActionsBlank();
 	void InitDefaultControlConfiguration();
 	void InitDefaultControlConfigMouse(CMouseControllerState const &mousestate);

@@ -47,6 +47,6 @@ public:
 	static float GetRandomNumberInRange(float low, float high)
 		{ return low + (high - low)*(GetRandomNumber()/float(MYRAND_MAX + 1)); }
 		
-	static Int32 GetRandomNumberInRange(Int32 low, Int32 high)
+	static int32 GetRandomNumberInRange(int32 low, int32 high)
 		{ return low + (high - low)*(GetRandomNumber()/float(MYRAND_MAX + 1)); }
 };

@@ -3,5 +3,5 @@
 class CPopulation
 {
 public:
-	static Bool &ms_bGivePedsWeapons;
+	static bool &ms_bGivePedsWeapons;
 };

@@ -20,12 +20,12 @@ public:
 	static bool &playingIntro;
 
 	static void Process(void);
-	static Bool InitialiseOnceBeforeRW(void);
-	static Bool InitialiseRenderWare(void);
+	static bool InitialiseOnceBeforeRW(void);
+	static bool InitialiseRenderWare(void);
 	static void ShutdownRenderWare(void);
 	static void FinalShutdown(void);
 	static void ShutDown(void);
 	static void ShutDownForRestart(void);
 	static void InitialiseWhenRestarting(void);
-	static Bool InitialiseOnceAfterRW(void);
+	static bool InitialiseOnceAfterRW(void);
 };
