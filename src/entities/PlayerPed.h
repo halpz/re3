@@ -3,7 +3,8 @@
 #include "Ped.h"
 #include "Wanted.h"
 
-class CPlayerPed : public CPed {
+class CPlayerPed : public CPed
+{
 public:
 	CWanted *m_pWanted;
 	CCopPed *m_pArrestingCop;

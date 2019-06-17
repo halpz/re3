@@ -1,7 +1,15 @@
 #pragma once
 #include "Sprite2d.h"
 
-enum eSprites {
+enum eItems
+{
+	ITEM_ARMOUR = 3,
+	ITEM_HEALTH = 4,
+	ITEM_RADAR = 8
+};
+
+enum eSprites 
+{
 	HUD_FIST,
 	HUD_BAT,
 	HUD_PISTOL,
@@ -21,7 +29,8 @@ enum eSprites {
 	HUD_SITEM16 = 21
 };
 
-class CHud {
+class CHud
+{
 public:
 	static CSprite2d *Sprites;
 
@@ -38,23 +47,23 @@ public:
 	static int32 m_ZoneState;
 	static int32 m_ZoneFadeTimer;
 	static int32 m_ZoneNameTimer;
-	static wchar* &m_pZoneName;
-	static wchar* m_pLastZoneName;
-	static wchar* m_ZoneToPrint;
-	static wchar* &m_pVehicleName;
-	static wchar* m_pLastVehicleName;
-	static wchar* m_pVehicleNameToPrint;
+	static wchar *&m_pZoneName;
+	static wchar *m_pLastZoneName;
+	static wchar *m_ZoneToPrint;
+	static wchar *&m_pVehicleName;
+	static wchar *m_pLastVehicleName;
+	static wchar *m_pVehicleNameToPrint;
 	static int32 m_VehicleState;
 	static int32 m_VehicleFadeTimer;
 	static int32 m_VehicleNameTimer;
-	static wchar* m_Message;
-	static wchar* m_PagerMessage;
+	static wchar *m_Message;
+	static wchar *m_PagerMessage;
 	static bool &m_Wants_To_Draw_Hud;
 	static bool &m_Wants_To_Draw_3dMarkers;
 	static wchar(*m_BigMessage)[128];
-	static float* BigMessageInUse;
-	static float* BigMessageAlpha;
-	static float* BigMessageX;
+	static float *BigMessageInUse;
+	static float *BigMessageAlpha;
+	static float *BigMessageX;
 	static float &OddJob2OffTimer;
 	static int8 &CounterOnLastFrame;
 	static float &OddJob2XOffset;
@@ -75,12 +84,12 @@ public:
 	static void Shutdown();
 	static void ReInitialise();
 	static void GetRidOfAllHudMessages();
-	static void SetZoneName(wchar* name);
-	static void SetHelpMessage(wchar* message, bool quick);
-	static void SetVehicleName(wchar* name);
+	static void SetZoneName(wchar *name);
+	static void SetHelpMessage(wchar *message, bool quick);
+	static void SetVehicleName(wchar *name);
 	static void Draw();
 	static void DrawAfterFade();
-	static void SetMessage(wchar* message);
-	static void SetBigMessage(wchar* message, int16 style);
-	static void SetPagerMessage(wchar* message);
+	static void SetMessage(wchar *message);
+	static void SetBigMessage(wchar *message, int16 style);
+	static void SetPagerMessage(wchar *message);
 };

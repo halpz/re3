@@ -37,15 +37,15 @@ WRAPPER void CMenuManager::LoadSettings(void) { EAXJMP(0x488EE0); }
 WRAPPER void CMenuManager::WaitForUserCD(void) { EAXJMP(0x48ADD0); }
 
 int CMenuManager::FadeIn(int alpha) {
-	if (FrontEndMenuManager.m_nCurrScreen == MENU_LOADING_IN_PROGRESS ||
-		FrontEndMenuManager.m_nCurrScreen == MENU_SAVING_IN_PROGRESS ||
-		FrontEndMenuManager.m_nCurrScreen == MENU_DELETING)
+	if (m_nCurrScreen == MENU_LOADING_IN_PROGRESS ||
+		m_nCurrScreen == MENU_SAVING_IN_PROGRESS ||
+		m_nCurrScreen == MENU_DELETING)
 		return alpha;
 
-	if (FrontEndMenuManager.m_nMenuFadeAlpha >= alpha)
+	if (m_nMenuFadeAlpha >= alpha)
 		return alpha;
 
-	return FrontEndMenuManager.m_nMenuFadeAlpha;
+	return m_nMenuFadeAlpha;
 }
 
 STARTPATCHES

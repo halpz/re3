@@ -177,3 +177,10 @@ but here are some observations:
     * do *not* use `dw` for `DWORD` or so, we're not programming win32
 
 * Generally, try to make the code look as if R* could have written it
+
+# Environment Variables
+Here you can find a list of variables that you might need to set in windows:
+```
+"GTA_III_RE_DIR" * path to "gta3_re" game folder usually where this plugin run.
+"GTA_III_DIR)" * path to "GTAIII" game folder.
+```

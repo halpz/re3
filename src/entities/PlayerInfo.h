@@ -2,18 +2,21 @@
 #include "Automobile.h"
 #include "PlayerPed.h"
 
-enum eWastedBustedState {
-	WBSTATE_PLAYING = 0x0,
-	WBSTATE_WASTED = 0x1,
-	WBSTATE_BUSTED = 0x2,
-	WBSTATE_FAILED_CRITICAL_MISSION = 0x3,
+enum eWastedBustedState
+{
+	WBSTATE_PLAYING,
+	WBSTATE_WASTED,
+	WBSTATE_BUSTED,
+	WBSTATE_FAILED_CRITICAL_MISSION,
 };
 
-struct CCivilianPed  {
+struct CCivilianPed
+{
 
 };
 
-class CPlayerInfo {
+class CPlayerInfo
+{
 public:
 	CPlayerPed *m_pPed;
 	CVehicle *m_pRemoteVehicle;

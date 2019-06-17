@@ -1,6 +1,7 @@
 #pragma once
 
-enum eRadioStation {
+enum eRadioStation
+{
 	HEAD_RADIO,
 	DOUBLE_CLEF,
 	JAH_RADIO,
@@ -15,7 +16,8 @@ enum eRadioStation {
 	RADIO_OFF,
 };
 
-enum eStreamedSounds {
+enum eStreamedSounds
+{
 	STREAMED_SOUND_RADIO_HEAD = 0,
 	STREAMED_SOUND_RADIO_CLASSIC = 1,
 	STREAMED_SOUND_RADIO_KJAH = 2,
@@ -216,7 +218,8 @@ enum eStreamedSounds {
 	NO_STREAMED_SOUND = 197,
 };
 
-class tMP3Sample {
+class tMP3Sample
+{
 public:
 	uint32 m_nLength;
 	uint32 m_nPosition;

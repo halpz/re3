@@ -2,7 +2,8 @@
 #include "Entity.h"
 #include "math/Vector.h"
 
-enum eCrimeType {
+enum eCrimeType 
+{
 	CRIME_NONE,
 	CRIME_SHOT_FIRED,
 	CRIME_PED_FIGHT,
@@ -22,7 +23,8 @@ enum eCrimeType {
 	CRIME_DESTROYED_CESSNA,
 };
 
-enum eCopType {
+enum eCopType
+{
 	COP_STREET = 0,
 	COP_FBI = 1,
 	COP_SWAT = 2,
