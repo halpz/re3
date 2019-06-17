@@ -7,6 +7,8 @@
 #include "PedStat.h"
 #include "DMaudio.h"
 #include "Ped.h"
+#include "PedType.h"
+#include "General.h"
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -229,8 +231,6 @@ CPed::AimGun()
 	}
 }
 
-
-// After I finished this I realized it's only for SCM opcode...
 void
 CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
 {
@@ -397,6 +397,65 @@ CPed::OurPedCanSeeThisOne(CEntity* who)
 	return !CWorld::ProcessLineOfSight(ourPos, itsPos, colpoint, ent, 1, 0, 0, 0, 0, 0, 0);
 }
 
+void
+CPed::Avoid(void) {
+	int8 temper;
+	int moveState;
+	CPed* nearestPed;
+	float sinValue;
+	float cosValue;
+	float someRate;
+	float someY;
+	float someX;
+	float someDistance;
+	float simplifiedAngle;
+
+	temper = m_pedStats->m_temper;
+	if ((temper <= m_pedStats->m_fear || temper <= 50) && CTimer::GetTimeInMilliseconds() > m_nPedStateTimer) {
+		moveState = m_nMoveState;
+
+		if (moveState != PEDMOVE_NONE && moveState != PEDMOVE_STILL) {
+			nearestPed = m_nearPeds[0];
+
+			if (nearestPed) {
+				if (nearestPed->m_nPedState != PED_DEAD && nearestPed != m_pSeekTarget && nearestPed != m_field_16C
+					&& (CPedType::ms_apPedType[nearestPed->m_nPedType]->m_Type.IntValue
+						& CPedType::ms_apPedType[this->m_nPedType]->m_Avoid.IntValue)) {
+
+					simplifiedAngle = RADTODEG(m_fRotationCur) / RADTODEG(1);
+					sinValue = -sin(simplifiedAngle);
+					cosValue = cos(simplifiedAngle);
+
+					// sin^2 + cos^2 must always return 1, and it does return... so what's the point?
+					someRate = 1.0f / sqrt(cosValue * cosValue + sinValue * sinValue);
+
+					// Further codes checks whether the distance between us and ped will be equal or below 1.0, if we walk up to him by 1.25 meters.
+					// If so, we want to avoid it, so we turn our body 45 degree and look to somewhere else.
+					someY = nearestPed->GetPosition().y
+						- (1.25 * (cosValue * someRate)
+							+ GetPosition().y);
+					someX = nearestPed->GetPosition().x
+						- (1.25 * (sinValue * someRate)
+							+ GetPosition().x);
+					someDistance = sqrt(someY * someY + someX * someX);
+
+					if (someDistance <= 1.0f && CPed::OurPedCanSeeThisOne((CEntity*)nearestPed)) {
+						m_nPedStateTimer = CTimer::GetTimeInMilliseconds()
+							+ 500 + (m_randomSeed + 3 * CTimer::GetFrameCounter())
+							% 1000 / 5;
+
+						m_fRotationDest += DEGTORAD(45.0f);
+						if (!m_ped_flagA10) {
+							CPed::SetLookFlag(nearestPed, 0);
+							CPed::SetLookTimer(CGeneral::GetRandomNumberInRange(0, 300) + 500);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 STARTPATCHES
 	InjectHook(0x4CF8F0, &CPed::AddWeaponModel, PATCH_JUMP);
 	InjectHook(0x4C6AA0, &CPed::AimGun, PATCH_JUMP);
@@ -406,4 +465,5 @@ STARTPATCHES
 	InjectHook(0x4C63E0, (void (CPed::*)(float, bool)) &CPed::SetLookFlag, PATCH_JUMP);
 	InjectHook(0x4D12E0, &CPed::SetLookTimer, PATCH_JUMP);
 	InjectHook(0x4C5700, &CPed::OurPedCanSeeThisOne, PATCH_JUMP);
+	InjectHook(0x4D2BB0, &CPed::Avoid, PATCH_JUMP);
 ENDPATCHES
