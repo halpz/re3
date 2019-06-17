@@ -1,10 +1,8 @@
 #include "common.h"
 #include "patcher.h"
 #include "AnimBlendClumpData.h"
+#include "RwHelper.h"
 
-// TODO: implement those
-#define RwFreeAlign RwFree
-#define RwMallocAlign(sz, algn) RwMalloc(sz)
 
 CAnimBlendClumpData::CAnimBlendClumpData(void)
 {
