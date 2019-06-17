@@ -5,10 +5,7 @@
 #include "RpAnimBlend.h"
 #include "AnimManager.h"
 #include "AnimBlendAssociation.h"
-
-// TODO: implement those
-#define RwFreeAlign RwFree
-#define RwMallocAlign(sz, algn) RwMalloc(sz)
+#include "RwHelper.h"
 
 CAnimBlendAssociation::CAnimBlendAssociation(void)
 {
@@ -57,6 +54,7 @@ CAnimBlendAssociation::AllocateAnimBlendNodeArray(int n)
 void
 CAnimBlendAssociation::FreeAnimBlendNodeArray(void)
 {
+	ASSERT( nodes != NULL );
 	RwFreeAlign(nodes);
 }
 
