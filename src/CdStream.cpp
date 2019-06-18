@@ -456,12 +456,12 @@ CdStreamAddImage(char const *path)
 	SetLastError(0);
 	
 	gImgFiles[gNumImages] = CreateFile(path,
-									GENERIC_READ,
-									FILE_SHARE_READ,
-									NULL,
-									OPEN_EXISTING,
-									_gdwCdStreamFlags | FILE_FLAG_RANDOM_ACCESS | FILE_ATTRIBUTE_READONLY,
-									NULL);
+	                                   GENERIC_READ,
+	                                   FILE_SHARE_READ,
+	                                   NULL,
+	                                   OPEN_EXISTING,
+	                                   _gdwCdStreamFlags | FILE_FLAG_RANDOM_ACCESS | FILE_ATTRIBUTE_READONLY,
+	                                   NULL);
 	
 	ASSERT( gImgFiles[gNumImages] != NULL );
 	if ( gImgFiles[gNumImages] == NULL )

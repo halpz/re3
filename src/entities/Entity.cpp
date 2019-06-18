@@ -48,7 +48,7 @@ CEntity::CEntity(void)
 	bHasHitWall = false;
 	bImBeingRendered = false;
 	m_flagD8 = false;
-	m_flagD10 = false;
+	bIsSubway = false;
 	bDrawLast = false;
 	m_flagD40 = false;
 	m_flagD80 = false;

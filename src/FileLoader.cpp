@@ -1,9 +1,12 @@
 #include "common.h"
 #include "main.h"
 #include "patcher.h"
+#include "math/Quaternion.h"
 #include "ModelInfo.h"
 #include "ModelIndices.h"
 #include "TempColModels.h"
+#include "VisibilityPlugins.h"
+#include "FileMgr.h"
 #include "HandlingDataMgr.h"
 #include "CarCtrl.h"
 #include "PedType.h"
@@ -14,8 +17,12 @@
 #include "NodeName.h"
 #include "TxdStore.h"
 #include "PathFind.h"
-#include "VisibilityPlugins.h"
-#include "FileMgr.h"
+#include "ObjectData.h"
+#include "DummyObject.h"
+#include "World.h"
+#include "Zones.h"
+#include "CullZones.h"
+#include "CdStream.h"
 #include "FileLoader.h"
 
 char CFileLoader::ms_line[256];
@@ -85,6 +92,21 @@ CFileLoader::LoadLevel(const char *filename)
 		}else if(strncmp(line, "IDE", 3) == 0){
 			LoadingScreenLoadingFile(line + 4);
 			LoadObjectTypes(line + 4);
+		}else if(strncmp(line, "IPL", 3) == 0){
+			if(!objectsLoaded){
+				// CModelInfo::ConstructMloClumps();
+				CObjectData::Initialise("DATA\\OBJECT.DAT");
+				objectsLoaded = true;
+			}
+			LoadingScreenLoadingFile(line + 4);
+			LoadObjectInstance(line + 4);
+		}else if(strncmp(line, "MAPZONE", 7) == 0){
+			LoadingScreenLoadingFile(line + 8);
+			LoadMapZones(line + 8);
+		}else if(strncmp(line, "SPLASH", 6) == 0){
+			LoadSplash(GetRandomSplashScreen());
+		}else if(strncmp(line, "CDIMAGE", 7) == 0){
+			CdStreamAddImage(line + 8);
 		}
 	}
 
@@ -489,7 +511,7 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	int id, pathType;
 //	int mlo;
 
-	section = 0;
+	section = NONE;
 	pathIndex = -1;
 //	mlo = 0;
 	debug("Loading object types from %s...\n", filename);
@@ -907,8 +929,225 @@ CFileLoader::Load2dEffect(const char *line)
 	CTxdStore::PopCurrentTxd();
 }
 
+void
+CFileLoader::LoadScene(const char *filename)
+{
+	enum {
+		NONE,
+		INST,
+		ZONE,
+		CULL,
+		PICK,
+		PATH,
+	};
+	char *line;
+	int fd;
+	int section;
+	int pathIndex;
+	char pathTypeStr[20];
+
+	section = NONE;
+	pathIndex = -1;
+	debug("Creating objects from %s...\n", filename);
+
+	fd = CFileMgr::OpenFile(filename, "rb");
+	for(line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)){
+		if(*line == '\0' || *line == '#')
+			continue;
+
+		if(section == NONE){
+			if(strncmp(line, "inst", 4) == 0) section = INST;
+			else if(strncmp(line, "zone", 4) == 0) section = ZONE;
+			else if(strncmp(line, "cull", 4) == 0) section = CULL;
+			else if(strncmp(line, "pick", 4) == 0) section = PICK;
+			else if(strncmp(line, "path", 4) == 0) section = PATH;
+		}else if(strncmp(line, "end", 3) == 0){
+			section = NONE;
+		}else switch(section){
+		case INST:
+			LoadObjectInstance(line);
+			break;
+		case ZONE:
+			LoadZone(line);
+			break;
+		case CULL:
+			LoadCullZone(line);
+			break;
+		case PICK:
+			// unused
+			LoadPickup(line);
+			break;
+		case PATH:
+			// unfinished in the game
+			if(pathIndex == -1){
+				LoadPathHeader(line, pathTypeStr);
+				// type not set
+				pathIndex = 0;
+			}else{
+				// nodes not loaded
+				pathIndex++;
+				if(pathIndex == 12)
+					pathIndex = -1;
+			}
+			break;
+		}
+	}
+	CFileMgr::CloseFile(fd);
+
+	debug("Finished loading IPL\n");
+}
+
+void
+CFileLoader::LoadObjectInstance(const char *line)
+{
+	int id;
+	char name[24];
+	RwV3d trans, scale, axis;
+	float angle;
+	CSimpleModelInfo *mi;
+	RwMatrix *xform;
+	CEntity *entity;
+
+	if(sscanf(line, "%d %s %f %f %f %f %f %f %f %f %f %f",
+	          &id, name,
+	          &trans.x, &trans.y, &trans.z,
+	          &scale.x, &scale.y, &scale.z,
+	          &axis.x, &axis.y, &axis.z, &angle) != 12)
+		return;
+
+	mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
+	if(mi == nil)
+		return;
+	assert(mi->IsSimple());
+
+	angle = -RADTODEG(2.0f * acosf(angle));
+	xform = RwMatrixCreate();
+	RwMatrixRotate(xform, &axis, angle, rwCOMBINEREPLACE);
+	RwMatrixTranslate(xform, &trans, rwCOMBINEPOSTCONCAT);
+
+	if(mi->GetObjectID() == -1){
+		if(ThePaths.IsPathObject(id)){
+			entity = new CTreadable;
+			ThePaths.RegisterMapObject((CTreadable*)entity);
+		}else
+			entity = new CBuilding;
+		entity->SetModelIndexNoCreate(id);
+		entity->GetMatrix() = CMatrix(xform);
+		entity->m_level = CTheZones::GetLevelFromPosition(entity->GetPosition());
+		if(mi->IsSimple()){
+			if(mi->m_isBigBuilding)
+				entity->SetupBigBuilding();
+			if(mi->m_isSubway)
+				entity->bIsSubway = true;
+		}
+		if(mi->GetLargestLodDistance() < 2.0f)
+			entity->bIsVisible = false;
+		CWorld::Add(entity);
+	}else{
+		entity = new CDummyObject;
+		entity->SetModelIndexNoCreate(id);
+		entity->GetMatrix() = CMatrix(xform);
+		CWorld::Add(entity);
+		if(IsGlass(entity->GetModelIndex()))
+			entity->bIsVisible = false;
+		entity->m_level = CTheZones::GetLevelFromPosition(entity->GetPosition());
+	}
+
+	RwMatrixDestroy(xform);
+}
+
+void
+CFileLoader::LoadZone(const char *line)
+{
+	char name[24];
+	int type, level;
+	float minx, miny, minz;
+	float maxx, maxy, maxz;
+
+	if(sscanf(line, "%s %d %f %f %f %f %f %f %d", name, &type, &minx, &miny, &minz, &maxx, &maxy, &maxz, &level) == 9)
+		CTheZones::CreateZone(name, (eZoneType)type, minx, miny, minz, maxx, maxy, maxz, (eLevelName)level);
+}
+
+void
+CFileLoader::LoadCullZone(const char *line)
+{
+	CVector pos;
+	float minx, miny, minz;
+	float maxx, maxy, maxz;
+	int flags;
+	int wantedLevelDrop = 0;
+
+	sscanf(line, "%f %f %f %f %f %f %f %f %f %d %d",
+		&pos.x, &pos.y, &pos.z,
+		&minx, &miny, &minz,
+		&maxx, &maxy, &maxz,
+		&flags, &wantedLevelDrop);
+	CCullZones::AddCullZone(pos, minx, maxx, miny, maxy, minz, maxy, flags, wantedLevelDrop);
+}
+
+// unused
+void
+CFileLoader::LoadPickup(const char *line)
+{
+	int id;
+	float x, y, z;
+
+	sscanf(line, "%d %f %f %f", &id, &x, &y, &z);
+}
+
+void
+CFileLoader::LoadMapZones(const char *filename)
+{
+	enum {
+		NONE,
+		INST,
+		ZONE,
+		CULL,
+		PICK,
+		PATH,
+	};
+	char *line;
+	int fd;
+	int section;
+
+	section = NONE;
+	debug("Creating zones from %s...\n", filename);
+
+	fd = CFileMgr::OpenFile(filename, "rb");
+	for(line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)){
+		if(*line == '\0' || *line == '#')
+			continue;
+
+		if(section == NONE){
+			if(strncmp(line, "zone", 4) == 0) section = ZONE;
+		}else if(strncmp(line, "end", 3) == 0){
+			section = NONE;
+		}else switch(section){
+		case ZONE: {
+			char name[24];
+			int type, level;
+			float minx, miny, minz;
+			float maxx, maxy, maxz;
+			if(sscanf(line, "%s %d %f %f %f %f %f %f %d",
+			          &name, &type,
+			          &minx, &miny, &minz,
+			          &maxx, &maxy, &maxz,
+			          &level) == 9)
+				CTheZones::CreateMapZone(name, (eZoneType)type, minx, miny, minz, maxx, maxy, maxz, (eLevelName)level);
+			}
+			break;
+		}
+	}
+	CFileMgr::CloseFile(fd);
+
+	debug("Finished loading IPL\n");
+}
+
 
 STARTPATCHES
+	// this makes my game crash in CGarage!
+	//InjectHook(0x476290, CFileLoader::LoadLevel, PATCH_JUMP);
+
 	InjectHook(0x476520, CFileLoader::LoadCollisionFromDatFile, PATCH_JUMP);
 	InjectHook(0x4761D0, CFileLoader::LoadLine, PATCH_JUMP);
 	InjectHook(0x4765B0, CFileLoader::LoadTexDictionary, PATCH_JUMP);
@@ -933,4 +1172,11 @@ STARTPATCHES
 	InjectHook(0x477FF0, CFileLoader::LoadCarPathNode, PATCH_JUMP);
 	InjectHook(0x477F00, CFileLoader::LoadPedPathNode, PATCH_JUMP);
 	InjectHook(0x4780E0, CFileLoader::Load2dEffect, PATCH_JUMP);
+
+	InjectHook(0x478370, CFileLoader::LoadScene, PATCH_JUMP);
+	InjectHook(0x4786B0, CFileLoader::LoadObjectInstance, PATCH_JUMP);
+	InjectHook(0x478A00, CFileLoader::LoadZone, PATCH_JUMP);
+	InjectHook(0x478A90, CFileLoader::LoadCullZone, PATCH_JUMP);
+
+	InjectHook(0x478550, CFileLoader::LoadMapZones, PATCH_JUMP);
 ENDPATCHES

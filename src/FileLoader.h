@@ -31,4 +31,12 @@ public:
 	static void LoadPedPathNode(const char *line, int id, int node);
 	static void LoadCarPathNode(const char *line, int id, int node);
 	static void Load2dEffect(const char *line);
+
+	static void LoadScene(const char *filename);
+	static void LoadObjectInstance(const char *line);
+	static void LoadZone(const char *line);
+	static void LoadCullZone(const char *line);
+	static void LoadPickup(const char *line);
+
+	static void LoadMapZones(const char *filename);
 };

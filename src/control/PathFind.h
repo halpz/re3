@@ -67,6 +67,8 @@ struct CPathInfoForObject
 	int8 numRightLanes;
 	uint8 crossing : 1;
 };
+extern CPathInfoForObject *&InfoForTileCars;
+extern CPathInfoForObject *&InfoForTilePeds;
 
 struct CTempNode
 {
@@ -125,6 +127,9 @@ public:
 	void CalcNodeCoors(int16 x, int16 y, int16 z, int32 id, CVector *out);
 	void StoreNodeInfoPed(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, int16 width, bool crossing);
 	void StoreNodeInfoCar(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, int16 width, int8 numLeft, int8 numRight);
+	void RegisterMapObject(CTreadable *mapObject);
+
+	bool IsPathObject(int id) { return id < PATHNODESIZE && (InfoForTileCars[id*12].type != 0 || InfoForTilePeds[id*12].type != 0); }
 };
 static_assert(sizeof(CPathFind) == 0x4c8f4, "CPathFind: error");
 

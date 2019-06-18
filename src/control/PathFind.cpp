@@ -77,6 +77,12 @@ CPathFind::StoreNodeInfoCar(int16 id, int16 node, int8 type, int8 next, int16 x,
 }
 
 void
+CPathFind::RegisterMapObject(CTreadable *mapObject)
+{
+	m_mapObjects[m_numMapObjects++] = mapObject;
+}
+
+void
 CPathFind::PreparePathData(void)
 {
 	int i, j, k;

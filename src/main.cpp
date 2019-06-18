@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "main.h"
+#include "General.h"
 #include "RwHelper.h"
 #include "Clouds.h"
 #include "Draw.h"
@@ -577,6 +578,29 @@ void
 ResetLoadingScreenBar(void)
 {
 	NumberOfChunksLoaded = 0.0f;
+}
+
+char*
+GetRandomSplashScreen(void)
+{
+	int index;
+	static int index2 = 0;
+	static char splashName[128];
+	static int splashIndex[24] = {
+		25, 22, 4, 13,
+		1, 21, 14, 16,
+		10, 12, 5, 9,
+		11, 18, 3, 2,
+		19, 23, 7, 17,
+		15, 6, 8, 20
+	};
+
+	index = splashIndex[4*index2 + CGeneral::GetRandomNumberInRange(0, 3)];
+	index2++;
+	if(index2 == 6)
+		index2 = 0;
+	sprintf(splashName, "loadsc%d", index);
+	return splashName;
 }
 
 #include "rwcore.h"

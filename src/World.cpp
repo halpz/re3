@@ -7,6 +7,8 @@
 #include "TempColModels.h"
 #include "World.h"
 
+WRAPPER void CWorld::Add(CEntity *entity) { EAXJMP(0x4AE930); }
+
 CPtrList *CWorld::ms_bigBuildingsList = (CPtrList*)0x6FAB60;
 CPtrList &CWorld::ms_listMovingEntityPtrs = *(CPtrList*)0x8F433C;
 CSector (*CWorld::ms_aSectors)[NUMSECTORS_X] = (CSector (*)[NUMSECTORS_Y])0x665608;
