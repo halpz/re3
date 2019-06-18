@@ -99,7 +99,7 @@ CFileLoader::LoadLevel(const char *filename)
 				objectsLoaded = true;
 			}
 			LoadingScreenLoadingFile(line + 4);
-			LoadObjectInstance(line + 4);
+			LoadScene(line + 4);
 		}else if(strncmp(line, "MAPZONE", 7) == 0){
 			LoadingScreenLoadingFile(line + 8);
 			LoadMapZones(line + 8);
@@ -1146,7 +1146,7 @@ CFileLoader::LoadMapZones(const char *filename)
 
 STARTPATCHES
 	// this makes my game crash in CGarage!
-	//InjectHook(0x476290, CFileLoader::LoadLevel, PATCH_JUMP);
+	InjectHook(0x476290, CFileLoader::LoadLevel, PATCH_JUMP);
 
 	InjectHook(0x476520, CFileLoader::LoadCollisionFromDatFile, PATCH_JUMP);
 	InjectHook(0x4761D0, CFileLoader::LoadLine, PATCH_JUMP);
