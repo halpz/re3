@@ -3,10 +3,10 @@
 #include "Physical.h"
 #include "Weapon.h"
 #include "PedIK.h"
+#include "PedStats.h"
 #include "AnimManager.h"
 #include "AnimBlendClumpData.h"
 
-struct PedStat;
 struct CPathNode;
 
 enum {

@@ -401,7 +401,7 @@ CPed::Avoid(void) {
 	int8 temper;
 	int moveState;
 	CPed* nearestPed;
-	float rate;
+	float walkAngle;
 	float distance;
 
 	temper = m_pedStats->m_temper;
@@ -416,19 +416,17 @@ CPed::Avoid(void) {
 					&& (CPedType::ms_apPedType[nearestPed->m_nPedType]->m_Type.IntValue
 						& CPedType::ms_apPedType[this->m_nPedType]->m_Avoid.IntValue)) {
 
-					CVector2D pedAngleRatio(
-						cos(RADTODEG(m_fRotationCur) / RADTODEG(1)),
-						-sin(RADTODEG(m_fRotationCur) / RADTODEG(1))
-					);
-
-					// sin^2 + cos^2 must always return 1, and it does return... so what's the point?
-					rate = 1.0f / pedAngleRatio.Magnitude();
-
 					// Further codes checks whether the distance between us and ped will be equal or below 1.0, if we walk up to him by 1.25 meters.
 					// If so, we want to avoid it, so we turn our body 45 degree and look to somewhere else.
+
+					walkAngle = RADTODEG(m_fRotationCur) / RADTODEG(1);
+
+					// Original code was multiplying sin/cos with the number below, which is pointless because it's always 1.
+					// ratio = 1.0f / sqrt(sin*sin + cos*cos);
+
 					CVector2D walkedUpToPed(
-						nearestPed->GetPosition().x - (1.25 * (pedAngleRatio.y * rate) + GetPosition().x),
-						nearestPed->GetPosition().y - (1.25 * (pedAngleRatio.x * rate) + GetPosition().y)
+						nearestPed->GetPosition().x - (1.25 * -sin(walkAngle) + GetPosition().x),
+						nearestPed->GetPosition().y - (1.25 * cos(walkAngle) + GetPosition().y)
 					);
 
 					distance = walkedUpToPed.Magnitude();
