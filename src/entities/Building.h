@@ -6,7 +6,10 @@ class CBuilding : public CEntity
 {
 public:
 	// TODO: ReplaceWithNewModel
-	// TODO: ctor
+	CBuilding(void) {
+		m_type = ENTITY_TYPE_BUILDING;
+		bUsesCollision = true;
+	}
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
 

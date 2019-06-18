@@ -10,8 +10,6 @@
 
 void **rwengine = *(void***)0x5A10E1;
 
-GlobalScene &Scene = *(GlobalScene*)0x726768;
-
 DebugMenuAPI gDebugMenuAPI;
 
 WRAPPER void *gtanew(uint32 sz) { EAXJMP(0x5A0690); }

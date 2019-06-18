@@ -1995,7 +1995,10 @@ STARTPATCHES
 	InjectHook(0x492720, CPad::UpdatePads, PATCH_JUMP);
 	InjectHook(0x492C60, &CPad::ProcessPCSpecificStuff, PATCH_JUMP);
 	InjectHook(0x492C70, &CPad::Update, PATCH_JUMP);
+#pragma warning( push )
+#pragma warning( disable : 4573)
 	InjectHook(0x492F00, (void (*)())CPad::DoCheats, PATCH_JUMP);
+#pragma warning( pop )
 	InjectHook(0x492F20, (void (CPad::*)(int16))&CPad::DoCheats, PATCH_JUMP);
 	InjectHook(0x492F30, CPad::StopPadsShaking, PATCH_JUMP);
 	InjectHook(0x492F50, &CPad::StopShaking, PATCH_JUMP);

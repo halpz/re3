@@ -1,5 +1,7 @@
 #include "common.h"
 #include "patcher.h"
+#include "TempColModels.h"
+#include "ModelIndices.h"
 #include "ModelInfo.h"
 
 CBaseModelInfo **CModelInfo::ms_modelInfoPtrs = (CBaseModelInfo**)0x83D408;
@@ -18,6 +20,8 @@ void
 CModelInfo::Initialise(void)
 {
 	int i;
+	CSimpleModelInfo *m;
+
 	for(i = 0; i < MODELINFOSIZE; i++)
 		ms_modelInfoPtrs[i] = nil;
 	ms_2dEffectStore.clear();
@@ -26,10 +30,58 @@ CModelInfo::Initialise(void)
 	ms_clumpModelStore.clear();
 	ms_pedModelStore.clear();
 	ms_vehicleModelStore.clear();
+
+	m = AddSimpleModel(MI_CAR_DOOR);
+	m->SetColModel(&CTempColModels::ms_colModelDoor1);
+	m->SetTexDictionary("generic");
+	m->SetNumAtomics(1);
+	m->m_lodDistances[0] = 80.0f;
+
+	m = AddSimpleModel(MI_CAR_BUMPER);
+	m->SetColModel(&CTempColModels::ms_colModelBumper1);
+	m->SetTexDictionary("generic");
+	m->SetNumAtomics(1);
+	m->m_lodDistances[0] = 80.0f;
+
+	m = AddSimpleModel(MI_CAR_PANEL);
+	m->SetColModel(&CTempColModels::ms_colModelPanel1);
+	m->SetTexDictionary("generic");
+	m->SetNumAtomics(1);
+	m->m_lodDistances[0] = 80.0f;
+
+	m = AddSimpleModel(MI_CAR_BONNET);
+	m->SetColModel(&CTempColModels::ms_colModelBonnet1);
+	m->SetTexDictionary("generic");
+	m->SetNumAtomics(1);
+	m->m_lodDistances[0] = 80.0f;
+
+	m = AddSimpleModel(MI_CAR_BOOT);
+	m->SetColModel(&CTempColModels::ms_colModelBoot1);
+	m->SetTexDictionary("generic");
+	m->SetNumAtomics(1);
+	m->m_lodDistances[0] = 80.0f;
+
+	m = AddSimpleModel(MI_CAR_WHEEL);
+	m->SetColModel(&CTempColModels::ms_colModelWheel1);
+	m->SetTexDictionary("generic");
+	m->SetNumAtomics(1);
+	m->m_lodDistances[0] = 80.0f;
+
+	m = AddSimpleModel(MI_BODYPARTA);
+	m->SetColModel(&CTempColModels::ms_colModelBodyPart1);
+	m->SetTexDictionary("generic");
+	m->SetNumAtomics(1);
+	m->m_lodDistances[0] = 80.0f;
+
+	m = AddSimpleModel(MI_BODYPARTB);
+	m->SetColModel(&CTempColModels::ms_colModelBodyPart2);
+	m->SetTexDictionary("generic");
+	m->SetNumAtomics(1);
+	m->m_lodDistances[0] = 80.0f;
 }
 
 void
-CModelInfo::Shutdown(void)
+CModelInfo::ShutDown(void)
 {
 	int i;
 	for(i = 0; i < ms_simpleModelStore.allocPtr; i++)
@@ -42,6 +94,8 @@ CModelInfo::Shutdown(void)
 		ms_pedModelStore.store[i].Shutdown();
 	for(i = 0; i < ms_vehicleModelStore.allocPtr; i++)
 		ms_vehicleModelStore.store[i].Shutdown();
+	for(i = 0; i < ms_2dEffectStore.allocPtr; i++)
+		ms_2dEffectStore.store[i].Shutdown();
 }
 
 CSimpleModelInfo*
@@ -115,10 +169,12 @@ CModelInfo::GetModelInfo(const char *name, int *id)
 }
 
 STARTPATCHES
-//	InjectHook(0x50B920, CModelInfo::AddSimpleModel, PATCH_JUMP);
-//	InjectHook(0x50B9C0, CModelInfo::AddTimeModel, PATCH_JUMP);
-//	InjectHook(0x50BA10, CModelInfo::AddClumpModel, PATCH_JUMP);
-//	InjectHook(0x50BAD0, CModelInfo::AddPedModel, PATCH_JUMP);
-//	InjectHook(0x50BA60, CModelInfo::AddPedModel, PATCH_JUMP);
+	InjectHook(0x50B310, CModelInfo::Initialise, PATCH_JUMP);
+	InjectHook(0x50B5B0, CModelInfo::ShutDown, PATCH_JUMP);
+	InjectHook(0x50B920, CModelInfo::AddSimpleModel, PATCH_JUMP);
+	InjectHook(0x50B9C0, CModelInfo::AddTimeModel, PATCH_JUMP);
+	InjectHook(0x50BA10, CModelInfo::AddClumpModel, PATCH_JUMP);
+	InjectHook(0x50BAD0, CModelInfo::AddPedModel, PATCH_JUMP);
+	InjectHook(0x50BA60, CModelInfo::AddVehicleModel, PATCH_JUMP);
 	InjectHook(0x50B860, (CBaseModelInfo *(*)(const char*, int*))CModelInfo::GetModelInfo, PATCH_JUMP);
 ENDPATCHES

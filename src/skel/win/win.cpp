@@ -83,6 +83,7 @@ static psGlobalType &PsGlobal = *(psGlobalType*)0x72CF60;
 
 #include "common.h"
 #include "patcher.h"
+#include "main.h"
 #include "FileMgr.h"
 #include "Text.h"
 #include "Pad.h"

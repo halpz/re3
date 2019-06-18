@@ -53,7 +53,7 @@ CSimpleModelInfo::Init(void)
 	m_atomics[1] = nil;
 	m_atomics[2] = nil;
 	m_numAtomics = 0;
-	m_furthest      = 0;
+	m_firstDamaged  = 0;
 	m_normalCull    = 0;
 	m_isDamaged     = 0;
 	m_isBigBuilding = 0;
@@ -103,11 +103,10 @@ float
 CSimpleModelInfo::GetLargestLodDistance(void)
 {
 	float d;
-	// TODO: what exactly is going on here?
-	if(m_furthest != 0 && !m_isDamaged)
-		d = m_lodDistances[m_furthest-1];
-	else
+	if(m_firstDamaged == 0 || m_isDamaged)
 		d = m_lodDistances[m_numAtomics-1];
+	else
+		d = m_lodDistances[m_firstDamaged-1];
 	return d * TheCamera.LODDistMultiplier;
 }
 
@@ -116,9 +115,8 @@ CSimpleModelInfo::GetAtomicFromDistance(float dist)
 {
 	int i;
 	i = 0;
-	// TODO: what exactly is going on here?
 	if(m_isDamaged)
-		i = m_furthest;
+		i = m_firstDamaged;
 	for(; i < m_numAtomics; i++)
 		if(dist < m_lodDistances[i] *TheCamera.LODDistMultiplier)
 			return m_atomics[i];

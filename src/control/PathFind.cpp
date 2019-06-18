@@ -46,6 +46,43 @@ CTempDetachedNode *&DetachedNodesCars = *(CTempDetachedNode**)0x8E2824;
 CTempDetachedNode *&DetachedNodesPeds = *(CTempDetachedNode**)0x8E28A0;
 
 void
+CPathFind::StoreNodeInfoPed(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, int16 width, bool crossing)
+{
+	int i;
+
+	i = id*12 + node;
+	InfoForTilePeds[i].type = type;
+	InfoForTilePeds[i].next = next;
+	InfoForTilePeds[i].x = x;
+	InfoForTilePeds[i].y = y;
+	InfoForTilePeds[i].z = z;
+	InfoForTilePeds[i].numLeftLanes = 0;
+	InfoForTilePeds[i].numRightLanes = 0;
+	InfoForTilePeds[i].crossing = crossing;
+}
+
+void
+CPathFind::StoreNodeInfoCar(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, int16 width, int8 numLeft, int8 numRight)
+{
+	int i;
+
+	i = id*12 + node;
+	InfoForTileCars[i].type = type;
+	InfoForTileCars[i].next = next;
+	InfoForTileCars[i].x = x;
+	InfoForTileCars[i].y = y;
+	InfoForTileCars[i].z = z;
+	InfoForTileCars[i].numLeftLanes = numLeft;
+	InfoForTileCars[i].numRightLanes = numRight;
+}
+
+void
+CPathFind::RegisterMapObject(CTreadable *mapObject)
+{
+	m_mapObjects[m_numMapObjects++] = mapObject;
+}
+
+void
 CPathFind::PreparePathData(void)
 {
 	int i, j, k;
@@ -457,8 +494,8 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 					}
 				}else{
 					// Crosses road
-					if(objectpathinfo[istart + iseg].next == jseg && objectpathinfo[istart + iseg].flag & 1 ||
-					   objectpathinfo[jstart + jseg].next == iseg && objectpathinfo[jstart + jseg].flag & 1)
+					if(objectpathinfo[istart + iseg].next == jseg && objectpathinfo[istart + iseg].crossing ||
+					   objectpathinfo[jstart + jseg].next == iseg && objectpathinfo[jstart + jseg].crossing)
 						m_connectionFlags[m_numConnections] |= ConnectionCrossRoad;
 					else
 						m_connectionFlags[m_numConnections] &= ~ConnectionCrossRoad;

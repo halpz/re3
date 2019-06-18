@@ -3,3 +3,4 @@
 #include "CarCtrl.h"
 
 WRAPPER void CCarCtrl::SwitchVehicleToRealPhysics(CVehicle*) { EAXJMP(0x41F7F0); }
+WRAPPER void CCarCtrl::AddToCarArray(int id, int vehclass) { EAXJMP(0x4182F0); }

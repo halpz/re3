@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "main.h"
 #include "General.h"
 #include "TxdStore.h"
 #include "Camera.h"

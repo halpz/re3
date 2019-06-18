@@ -11,9 +11,9 @@ public:
 	float  m_lodDistances[3];
 	uint8  m_numAtomics;
 	uint8  m_alpha;
-	uint16 m_furthest      : 2; // 0: numAtomics-1 is furthest visible
-	                         // 1: atomic 0 is furthest
-	                         // 2: atomic 1 is furthest
+	uint16 m_firstDamaged   : 2; // 0: no damage model
+	                         // 1: 1 and 2 are damage models
+	                         // 2: 2 is damage model
 	uint16  m_normalCull    : 1;
 	uint16  m_isDamaged     : 1;
 	uint16  m_isBigBuilding : 1;

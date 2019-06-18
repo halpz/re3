@@ -8,8 +8,10 @@ public:
 	T store[n];
 
 	T *alloc(void){
-		if(this->allocPtr >= n)
+		if(this->allocPtr >= n){
 			printf("Size of this thing:%d needs increasing\n", n);
+			assert(0);
+		}
 		return &this->store[this->allocPtr++];
 	}
 	void clear(void){

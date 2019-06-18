@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "main.h"
 #include "Lights.h"
 #include "ModelInfo.h"
 #include "Treadable.h"

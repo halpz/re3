@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "main.h"
 #include "lights.h"
 #include "PointLights.h"
 #include "RpAnimBlend.h"

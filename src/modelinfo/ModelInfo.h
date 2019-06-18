@@ -20,13 +20,15 @@ class CModelInfo
 
 public:
 	static void Initialise(void);
-	static void Shutdown(void);
+	static void ShutDown(void);
 
 	static CSimpleModelInfo *AddSimpleModel(int id);
 	static CTimeModelInfo *AddTimeModel(int id);
 	static CClumpModelInfo *AddClumpModel(int id);
 	static CPedModelInfo *AddPedModel(int id);
 	static CVehicleModelInfo *AddVehicleModel(int id);
+
+	static CStore<C2dEffect, TWODFXSIZE> &Get2dEffectStore(void) { return ms_2dEffectStore; }
 
 	static CBaseModelInfo *GetModelInfo(const char *name, int *id);
 	static CBaseModelInfo *GetModelInfo(int id){
