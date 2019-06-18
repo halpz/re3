@@ -16,7 +16,7 @@ public:
 	enum {
 		FLAG_1,
 		FLAG_2,
-		FLAG_4,
+		FLAG_4,	// aims with arm
 	};
 
 	CPed* m_ped;

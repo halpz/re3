@@ -339,7 +339,7 @@ CPed::SetLookFlag(CPed *to, bool set)
 		m_lookTimer = 0;
 		m_ped_flagA20_look = set;
 		if (m_nPedState != PED_DRIVING) {
-			m_pedIK.m_flags &= ~CPedIK::FLAG_4;
+			m_pedIK.m_flags &= ~CPedIK::FLAG_2;
 		}
 	}
 }
@@ -355,7 +355,7 @@ CPed::SetLookFlag(float angle, bool set)
 		m_lookTimer = 0;
 		m_ped_flagA20_look = set;
 		if (m_nPedState != PED_DRIVING) {
-			m_pedIK.m_flags &= ~CPedIK::FLAG_4;
+			m_pedIK.m_flags &= ~CPedIK::FLAG_2;
 		}
 	}
 }
@@ -371,8 +371,6 @@ CPed::SetLookTimer(int time)
 bool
 CPed::OurPedCanSeeThisOne(CEntity* who)
 {
-	float xDiff;
-	float yDiff;
 	float distance;
 	CColPoint colpoint;
 	CEntity* ent;
@@ -382,13 +380,15 @@ CPed::OurPedCanSeeThisOne(CEntity* who)
 	ourPos = this->GetPosition();
 	itsPos = who->GetPosition();
 
-	xDiff = itsPos.x - ourPos.x;
-	yDiff = itsPos.y - ourPos.y;
+	CVector2D posDiff(
+		itsPos.x - ourPos.x,
+		itsPos.y - ourPos.y
+	);
 
-	if ((yDiff * this->GetUp().y) + (xDiff * this->GetUp().x) < 0.0f)
+	if ((posDiff.y * this->GetForward().y) + (posDiff.x * this->GetForward().x) < 0.0f)
 		return 0;
 
-	distance = sqrt(yDiff * yDiff + xDiff * xDiff);
+	distance = posDiff.Magnitude();
 
 	if (distance < 40.0f)
 		return 0;
@@ -402,13 +402,8 @@ CPed::Avoid(void) {
 	int8 temper;
 	int moveState;
 	CPed* nearestPed;
-	float sinValue;
-	float cosValue;
-	float someRate;
-	float someY;
-	float someX;
-	float someDistance;
-	float simplifiedAngle;
+	float rate;
+	float distance;
 
 	temper = m_pedStats->m_temper;
 	if ((temper <= m_pedStats->m_fear || temper <= 50) && CTimer::GetTimeInMilliseconds() > m_nPedStateTimer) {
@@ -422,24 +417,24 @@ CPed::Avoid(void) {
 					&& (CPedType::ms_apPedType[nearestPed->m_nPedType]->m_Type.IntValue
 						& CPedType::ms_apPedType[this->m_nPedType]->m_Avoid.IntValue)) {
 
-					simplifiedAngle = RADTODEG(m_fRotationCur) / RADTODEG(1);
-					sinValue = -sin(simplifiedAngle);
-					cosValue = cos(simplifiedAngle);
+					CVector2D pedAngleRatio(
+						cos(RADTODEG(m_fRotationCur) / RADTODEG(1)),
+						-sin(RADTODEG(m_fRotationCur) / RADTODEG(1))
+					);
 
 					// sin^2 + cos^2 must always return 1, and it does return... so what's the point?
-					someRate = 1.0f / sqrt(cosValue * cosValue + sinValue * sinValue);
+					rate = 1.0f / pedAngleRatio.Magnitude();
 
 					// Further codes checks whether the distance between us and ped will be equal or below 1.0, if we walk up to him by 1.25 meters.
 					// If so, we want to avoid it, so we turn our body 45 degree and look to somewhere else.
-					someY = nearestPed->GetPosition().y
-						- (1.25 * (cosValue * someRate)
-							+ GetPosition().y);
-					someX = nearestPed->GetPosition().x
-						- (1.25 * (sinValue * someRate)
-							+ GetPosition().x);
-					someDistance = sqrt(someY * someY + someX * someX);
+					CVector2D walkedUpToPed(
+						nearestPed->GetPosition().x - (1.25 * (pedAngleRatio.y * rate) + GetPosition().x),
+						nearestPed->GetPosition().y - (1.25 * (pedAngleRatio.x * rate) + GetPosition().y)
+					);
 
-					if (someDistance <= 1.0f && CPed::OurPedCanSeeThisOne((CEntity*)nearestPed)) {
+					distance = walkedUpToPed.Magnitude();
+
+					if (distance <= 1.0f && CPed::OurPedCanSeeThisOne((CEntity*)nearestPed)) {
 						m_nPedStateTimer = CTimer::GetTimeInMilliseconds()
 							+ 500 + (m_randomSeed + 3 * CTimer::GetFrameCounter())
 							% 1000 / 5;

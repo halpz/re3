@@ -95,7 +95,7 @@ public:
 	float m_fCollisionSpeed;
 	uint8 m_ped_flagA1 : 1;
 	uint8 m_ped_flagA2 : 1;
-	uint8 m_ped_flagA4 : 1;
+	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
 	uint8 m_ped_flagA8 : 1;
 	uint8 m_ped_flagA10 : 1;	// set when A20 just changed?
 	uint8 m_ped_flagA20_look : 1;
@@ -129,7 +129,7 @@ public:
 	uint8 m_ped_flagE2 : 1;
 	uint8 m_ped_flagE4 : 1;
 	uint8 m_ped_flagE8 : 1;
-	uint8 m_ped_flagE10 : 1;
+	uint8 m_ped_flagE10 : 1;	// can't attack if it's set
 	uint8 m_ped_flagE20 : 1;
 	uint8 m_ped_flagE40 : 1;
 	uint8 m_ped_flagE80 : 1;
@@ -228,7 +228,10 @@ public:
 	uint32 m_leaveCarTimer;
 	uint32 m_getUpTimer;
 	uint32 m_lookTimer;
-	uint8 stuff9[34];
+	uint32 m_standardTimer;
+	uint32 m_attackTimer;
+	uint32 m_lastHitTime;
+	uint8 stuff9[22];
 	uint8 m_bodyPartBleeding;
 	uint8 m_field_4F3;
 	CPed *m_nearPeds[10];

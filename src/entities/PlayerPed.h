@@ -19,7 +19,7 @@ public:
 	int32 m_nSpeedTimer;
 	int32 m_nShotDelay;
 	float field_1376;
-	int8 field_1380;
+	int8 field_1380;	// set if can't attack, why?
 	int8 field_1381;
 	int8 field_1382;
 	int8 field_1383;
