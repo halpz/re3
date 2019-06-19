@@ -20,7 +20,7 @@ CObjectData::Initialise(const char *filename)
 	CBaseModelInfo *mi;
 
 	CFileMgr::SetDir("");
-	CFileMgr::LoadFile(filename, work_buff, 55000, "r");
+	CFileMgr::LoadFile(filename, work_buff, sizeof(work_buff), "r");
 
 	id = 0;
 	p = (char*)work_buff;
