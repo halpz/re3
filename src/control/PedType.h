@@ -1,9 +1,5 @@
 #pragma once
 
-#include "common.h"
-#include "templates.h"
-#include "Lists.h"
-
 // Index into the PedType array
 enum
 {
@@ -27,7 +23,7 @@ enum
 	PEDTYPE_FIREMAN,
 	PEDTYPE_CRIMINAL,
 	PEDTYPE_SPECIAL,
-	PEDTYPE_PROSTITUE,
+	PEDTYPE_PROSTITUTE,
 	PEDTYPE_UNUSED1,
 	PEDTYPE_UNUSED2,
 
@@ -57,8 +53,8 @@ enum
 	PED_FLAG_CRIMINAL = 1 << 18,
 	PED_FLAG_SPECIAL = 1 << 19,
 	PED_FLAG_GUN = 1 << 20,
-	PED_FLAG_COPCAR = 1 << 21,
-	PED_FLAG_FASTCAR = 1 << 22,
+	PED_FLAG_COP_CAR = 1 << 21,
+	PED_FLAG_FAST_CAR = 1 << 22,
 	PED_FLAG_EXPLOSION = 1 << 23,
 	PED_FLAG_FIREMAN = 1 << 24,
 	PED_FLAG_DEADPEDS = 1 << 25,
@@ -67,11 +63,11 @@ enum
 class CPedType
 {
 	uint32 m_flag;
-	float field_4;
-	float field_8;
-	float field_C;
-	float field_10;
-	float field_14;
+	float unknown1;
+	float unknown2;
+	float unknown3;
+	float unknown4;
+	float unknown5;
 	uint32 m_threats;
 	uint32 m_avoid;
 
@@ -79,8 +75,12 @@ class CPedType
 public:
 
 	static void Initialise(void);
+	static void Shutdown(void);
 	static void LoadPedData(void);
 	static int32 FindPedType(char *type);
+	static uint32 FindPedFlag(char *type);
+	static void Save(uint8 *buffer, uint32 *length);
+	static void Load(uint8 *buffer, uint32 length);
 
 	static uint32 GetFlag(int type) { return ms_apPedType[type]->m_flag; }
 	static uint32 GetAvoid(int type) { return ms_apPedType[type]->m_avoid; }

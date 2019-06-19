@@ -138,11 +138,12 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 #define debug(f, ...) re3_debug("[DBG]: " f, __VA_ARGS__)
 #define DEV(f, ...)   re3_debug("[DEV]: " f, __VA_ARGS__)
 #define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, __VA_ARGS__)
+#define Error(f, ...) re3_debug("[ERROR]: " f, __VA_ARGS__)
 
 #define assert(_Expression) (void)( (!!(_Expression)) || (re3_assert(#_Expression, __FILE__, __LINE__, __FUNCTION__), 0) )
 #define ASSERT assert
 
-#define _TODO(x)      
+#define _TODO(x)
 #define _TODOCONST(x) (x)
 
 #define VALIDATE_SIZE(struc, size) static_assert(sizeof(struc) == size, "Invalid structure size of " #struc)

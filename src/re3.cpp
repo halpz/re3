@@ -189,7 +189,7 @@ void re3_debug(char *format, ...)
 	vsprintf_s(re3_buff, re3_buffsize, format, va);
 	va_end(va);
 
-	printf("%s\n", re3_buff);
+	printf("%s", re3_buff);
 }
 
 void re3_trace(const char *filename, unsigned int lineno, const char *func, char *format, ...)
