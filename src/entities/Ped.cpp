@@ -223,16 +223,16 @@ CPed::AimGun()
 		}
 		CPed::Say(SOUND_PED_ATTACK);
 
-		m_ped_flagB2 = m_pedIK.PointGunAtPosition(&vector);
+		bCanPointGunAtTarget = m_pedIK.PointGunAtPosition(&vector);
 		if (m_pLookTarget != m_pSeekTarget) {
 			CPed::SetLookFlag(m_pSeekTarget, 1);
 		}
 
 	} else {
 		if (CPed::IsPlayer()) {
-			m_ped_flagB2 = m_pedIK.PointGunInDirection(m_fLookDirection, ((CPlayerPed*)this)->m_fFPSMoveHeading);
+			bCanPointGunAtTarget = m_pedIK.PointGunInDirection(m_fLookDirection, ((CPlayerPed*)this)->m_fFPSMoveHeading);
 		} else {
-			m_ped_flagB2 = m_pedIK.PointGunInDirection(m_fLookDirection, 0.0f);
+			bCanPointGunAtTarget = m_pedIK.PointGunInDirection(m_fLookDirection, 0.0f);
 		}
 	}
 }
@@ -338,7 +338,7 @@ CPed::SetLookFlag(CPed *target, bool unknown)
 {
 	if (m_lookTimer < CTimer::GetTimeInMilliseconds()) {
 		bIsLooking = true;
-		m_ped_flagA40 = false;
+		bIsRestoringLook = false;
 		m_pLookTarget = target;
 		m_pLookTarget->RegisterReference((CEntity**)&m_pLookTarget);
 		m_fLookDirection = 999999.0f;
@@ -355,7 +355,7 @@ CPed::SetLookFlag(float direction, bool unknown)
 {
 	if (m_lookTimer < CTimer::GetTimeInMilliseconds()) {
 		bIsLooking = true;
-		m_ped_flagA40 = false;
+		bIsRestoringLook = false;
 		m_pLookTarget = nil;
 		m_fLookDirection = direction;
 		m_lookTimer = 0;

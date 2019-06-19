@@ -97,12 +97,12 @@ public:
 	uint8 m_ped_flagA2 : 1;
 	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
 	uint8 m_ped_flagA8 : 1;
-	uint8 bIsLooking : 1;	// set when A20 just changed?
-	uint8 m_ped_flagA20_look : 1;
-	uint8 m_ped_flagA40 : 1;
-	uint8 m_ped_flagA80 : 1;
-	uint8 m_ped_flagB1 : 1;
-	uint8 m_ped_flagB2 : 1;
+	uint8 bIsLooking : 1;
+	uint8 m_ped_flagA20_look : 1;	// probably missing in SA
+	uint8 bIsRestoringLook : 1;
+	uint8 bIsAimingGun : 1;
+	uint8 bIsRestoringGun : 1;
+	uint8 bCanPointGunAtTarget : 1;
 	uint8 m_ped_flagB4 : 1;
 	uint8 m_ped_flagB8 : 1;
 	uint8 m_ped_flagB10 : 1;
