@@ -3,10 +3,10 @@
 #include "Physical.h"
 #include "Weapon.h"
 #include "PedIK.h"
+#include "PedStats.h"
 #include "AnimManager.h"
 #include "AnimBlendClumpData.h"
 
-struct PedStat;
 struct CPathNode;
 
 enum {
@@ -95,9 +95,9 @@ public:
 	float m_fCollisionSpeed;
 	uint8 m_ped_flagA1 : 1;
 	uint8 m_ped_flagA2 : 1;
-	uint8 m_ped_flagA4 : 1;
+	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
 	uint8 m_ped_flagA8 : 1;
-	uint8 m_ped_flagA10 : 1;
+	uint8 m_ped_flagA10 : 1;	// set when A20 just changed?
 	uint8 m_ped_flagA20_look : 1;
 	uint8 m_ped_flagA40 : 1;
 	uint8 m_ped_flagA80 : 1;
@@ -114,7 +114,7 @@ public:
 	uint8 m_ped_flagC4 : 1;
 	uint8 m_ped_flagC8 : 1;
 	uint8 m_ped_flagC10 : 1;
-	uint8 m_ped_flagC20 : 1;
+	uint8 m_ped_flagC20 : 1;	// just left some body part?
 	uint8 m_ped_flagC40 : 1;
 	uint8 m_ped_flagC80 : 1;
 	uint8 m_ped_flagD1 : 1;
@@ -129,7 +129,7 @@ public:
 	uint8 m_ped_flagE2 : 1;
 	uint8 m_ped_flagE4 : 1;
 	uint8 m_ped_flagE8 : 1;
-	uint8 m_ped_flagE10 : 1;
+	uint8 m_ped_flagE10 : 1;	// can't attack if it's set
 	uint8 m_ped_flagE20 : 1;
 	uint8 m_ped_flagE40 : 1;
 	uint8 m_ped_flagE80 : 1;
@@ -166,7 +166,7 @@ public:
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
 	uint8 stuff10[15];
-	int32 m_field_16C;
+	CPed *m_field_16C;
 	uint8 stuff12[44];
 	int32 m_pEventEntity;
 	float m_fAngleToEvent;
@@ -198,7 +198,10 @@ public:
 	CPathNode *m_pLastPathNode;
 	float m_fHealth;
 	float m_fArmour;
-	uint8 stuff2[34];
+	uint8 stuff2[20];
+	float m_fRotationCur;
+	float m_fRotationDest;
+	uint8 stuff13[6];
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
@@ -225,7 +228,10 @@ public:
 	uint32 m_leaveCarTimer;
 	uint32 m_getUpTimer;
 	uint32 m_lookTimer;
-	uint8 stuff9[34];
+	uint32 m_standardTimer;
+	uint32 m_attackTimer;
+	uint32 m_lastHitTime;
+	uint8 stuff9[22];
 	uint8 m_bodyPartBleeding;
 	uint8 m_field_4F3;
 	CPed *m_nearPeds[10];
@@ -249,6 +255,7 @@ public:
 	void RemoveBodyPart(PedNode nodeId, int8 unknown);
 	void SpawnFlyingComponent(int, int8 unknown);
 	bool OurPedCanSeeThisOne(CEntity* who);
+	void Avoid(void);
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
 	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
 
