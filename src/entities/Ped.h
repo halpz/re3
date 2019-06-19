@@ -97,7 +97,7 @@ public:
 	uint8 m_ped_flagA2 : 1;
 	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
 	uint8 m_ped_flagA8 : 1;
-	uint8 m_ped_flagA10 : 1;	// set when A20 just changed?
+	uint8 bIsLooking : 1;	// set when A20 just changed?
 	uint8 m_ped_flagA20_look : 1;
 	uint8 m_ped_flagA40 : 1;
 	uint8 m_ped_flagA80 : 1;
@@ -222,7 +222,7 @@ public:
 	int32 m_pPointGunAt;
 	CVector m_vecHitLastPos;
 	uint8 stuff8[12];
-	CPed *m_pPedFight;
+	CEntity *m_pLookTarget;
 	float m_fLookDirection;
 	int32 m_wepModelID;
 	uint32 m_leaveCarTimer;
@@ -240,21 +240,20 @@ public:
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
 
-	// TODO: enum!
-	bool IsPlayer(void) { return m_nPedType == 0 || m_nPedType== 1 || m_nPedType == 2 || m_nPedType == 3; }
+	bool IsPlayer(void);
 	bool UseGroundColModel(void);
 	void AddWeaponModel(int id);
 	void AimGun();
 	void KillPedWithCar(CVehicle *veh, float impulse);
 	void Say(uint16 audio);
-	void SetLookFlag(CPed *to, bool set);
-	void SetLookFlag(float angle, bool set);
+	void SetLookFlag(CPed *target, bool unknown);
+	void SetLookFlag(float direction, bool unknown);
 	void SetLookTimer(int time);
 	void SetDie(AnimationId anim, float arg1, float arg2);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
 	void RemoveBodyPart(PedNode nodeId, int8 unknown);
 	void SpawnFlyingComponent(int, int8 unknown);
-	bool OurPedCanSeeThisOne(CEntity* who);
+	bool OurPedCanSeeThisOne(CEntity *target);
 	void Avoid(void);
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
 	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);

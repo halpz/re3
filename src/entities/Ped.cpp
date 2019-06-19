@@ -177,6 +177,13 @@ static char WaitStateText[21][16] = {
 };
 
 bool
+CPed::IsPlayer(void)
+{
+	return m_nPedType == PEDTYPE_PLAYER1 || m_nPedType== PEDTYPE_PLAYER2 ||
+		m_nPedType == PEDTYPE_PLAYER3 || m_nPedType == PEDTYPE_PLAYER4;
+}
+
+bool
 CPed::UseGroundColModel(void)
 {
 	return m_nPedState == PED_FALL ||
@@ -217,7 +224,7 @@ CPed::AimGun()
 		CPed::Say(SOUND_PED_ATTACK);
 
 		m_ped_flagB2 = m_pedIK.PointGunAtPosition(&vector);
-		if (m_pPedFight != m_pSeekTarget) {
+		if (m_pLookTarget != m_pSeekTarget) {
 			CPed::SetLookFlag(m_pSeekTarget, 1);
 		}
 
@@ -327,16 +334,16 @@ CPed::RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data)
 }
 
 void
-CPed::SetLookFlag(CPed *to, bool set)
+CPed::SetLookFlag(CPed *target, bool unknown)
 {
 	if (m_lookTimer < CTimer::GetTimeInMilliseconds()) {
-		m_ped_flagA10 = 1;
-		m_ped_flagA40 = 0;
-		m_pPedFight = to;
-		m_pPedFight->RegisterReference((CEntity**)&m_pPedFight);
+		bIsLooking = true;
+		m_ped_flagA40 = false;
+		m_pLookTarget = target;
+		m_pLookTarget->RegisterReference((CEntity**)&m_pLookTarget);
 		m_fLookDirection = 999999.0f;
 		m_lookTimer = 0;
-		m_ped_flagA20_look = set;
+		m_ped_flagA20_look = unknown;
 		if (m_nPedState != PED_DRIVING) {
 			m_pedIK.m_flags &= ~CPedIK::FLAG_2;
 		}
@@ -344,15 +351,15 @@ CPed::SetLookFlag(CPed *to, bool set)
 }
 
 void
-CPed::SetLookFlag(float angle, bool set)
+CPed::SetLookFlag(float direction, bool unknown)
 {
 	if (m_lookTimer < CTimer::GetTimeInMilliseconds()) {
-		m_ped_flagA10 = 1;
-		m_ped_flagA40 = 0;
-		m_pPedFight = 0;
-		m_fLookDirection = angle;
+		bIsLooking = true;
+		m_ped_flagA40 = false;
+		m_pLookTarget = nil;
+		m_fLookDirection = direction;
 		m_lookTimer = 0;
-		m_ped_flagA20_look = set;
+		m_ped_flagA20_look = unknown;
 		if (m_nPedState != PED_DRIVING) {
 			m_pedIK.m_flags &= ~CPedIK::FLAG_2;
 		}
@@ -368,76 +375,65 @@ CPed::SetLookTimer(int time)
 }
 
 bool
-CPed::OurPedCanSeeThisOne(CEntity* who)
+CPed::OurPedCanSeeThisOne(CEntity *target)
 {
-	float distance;
 	CColPoint colpoint;
-	CEntity* ent;
-	CVector ourPos;
-	CVector itsPos;
+	CEntity *ent;
 
-	ourPos = this->GetPosition();
-	itsPos = who->GetPosition();
+	CVector2D dist = CVector2D(target->GetPosition()) - CVector2D(this->GetPosition());
 
-	CVector2D posDiff(
-		itsPos.x - ourPos.x,
-		itsPos.y - ourPos.y
-	);
-
-	if ((posDiff.y * this->GetForward().y) + (posDiff.x * this->GetForward().x) < 0.0f)
+	// Check if target is behind ped
+	if (DotProduct2D(dist, CVector2D(this->GetForward())) < 0.0f)
 		return 0;
 
-	distance = posDiff.Magnitude();
-
-	if (distance < 40.0f)
+	// Check if target is too far away
+	if (dist.Magnitude() < 40.0f)
 		return 0;
 
-	ourPos.z += 1.0f;
-	return !CWorld::ProcessLineOfSight(ourPos, itsPos, colpoint, ent, 1, 0, 0, 0, 0, 0, 0);
+	// Check line of sight from head
+	CVector headPos = this->GetPosition();
+	headPos.z += 1.0f;
+	return !CWorld::ProcessLineOfSight(headPos, target->GetPosition(), colpoint, ent, true, false, false, false, false, false);
 }
 
 void
-CPed::Avoid(void) {
-	int8 temper;
-	int moveState;
-	CPed* nearestPed;
-	float walkAngle;
-	float distance;
+CPed::Avoid(void)
+{
+	CPed *nearestPed;
 
-	temper = m_pedStats->m_temper;
-	if ((temper <= m_pedStats->m_fear || temper <= 50) && CTimer::GetTimeInMilliseconds() > m_nPedStateTimer) {
-		moveState = m_nMoveState;
+	if(m_pedStats->m_temper > m_pedStats->m_fear && m_pedStats->m_temper > 50)
+		return;
 
-		if (moveState != PEDMOVE_NONE && moveState != PEDMOVE_STILL) {
+	if (CTimer::GetTimeInMilliseconds() > m_nPedStateTimer) {
+
+		if (m_nMoveState != PEDMOVE_NONE && m_nMoveState != PEDMOVE_STILL) {
 			nearestPed = m_nearPeds[0];
 
-			if (nearestPed) {
-				if (nearestPed->m_nPedState != PED_DEAD && nearestPed != m_pSeekTarget && nearestPed != m_field_16C
-					&& (CPedType::ms_apPedType[nearestPed->m_nPedType]->m_Type.IntValue
-						& CPedType::ms_apPedType[this->m_nPedType]->m_Avoid.IntValue)) {
+			if (nearestPed && nearestPed->m_nPedState != PED_DEAD && nearestPed != m_pSeekTarget && nearestPed != m_field_16C) {
+
+				// Check if this ped wants to avoid the nearest one
+				if (CPedType::GetAvoid(this->m_nPedType) & CPedType::GetFlag(nearestPed->m_nPedType)) {
 
 					// Further codes checks whether the distance between us and ped will be equal or below 1.0, if we walk up to him by 1.25 meters.
 					// If so, we want to avoid it, so we turn our body 45 degree and look to somewhere else.
 
-					walkAngle = RADTODEG(m_fRotationCur) / RADTODEG(1);
+					// Game converts from radians to degress and back again here, doesn't make much sense
+					CVector2D forward(-sin(m_fRotationCur), cos(m_fRotationCur));
+					forward.Normalise();	// this is kinda pointless
 
-					// Original code was multiplying sin/cos with the number below, which is pointless because it's always 1.
-					// ratio = 1.0f / sqrt(sin*sin + cos*cos);
+					// Move forward 1.25 meters
+					CVector2D testPosition = CVector2D(GetPosition()) + forward*1.25f;
 
-					CVector2D walkedUpToPed(
-						nearestPed->GetPosition().x - (1.25 * -sin(walkAngle) + GetPosition().x),
-						nearestPed->GetPosition().y - (1.25 * cos(walkAngle) + GetPosition().y)
-					);
+					// Get distance to ped we want to avoid
+					CVector2D distToPed = CVector2D(nearestPed->GetPosition()) - testPosition;
 
-					distance = walkedUpToPed.Magnitude();
-
-					if (distance <= 1.0f && CPed::OurPedCanSeeThisOne((CEntity*)nearestPed)) {
+					if (distToPed.Magnitude() <= 1.0f && CPed::OurPedCanSeeThisOne((CEntity*)nearestPed)) {
 						m_nPedStateTimer = CTimer::GetTimeInMilliseconds()
 							+ 500 + (m_randomSeed + 3 * CTimer::GetFrameCounter())
 							% 1000 / 5;
 
 						m_fRotationDest += DEGTORAD(45.0f);
-						if (!m_ped_flagA10) {
+						if (!bIsLooking) {
 							CPed::SetLookFlag(nearestPed, 0);
 							CPed::SetLookTimer(CGeneral::GetRandomNumberInRange(0, 300) + 500);
 						}

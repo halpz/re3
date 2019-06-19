@@ -1145,7 +1145,6 @@ CFileLoader::LoadMapZones(const char *filename)
 
 
 STARTPATCHES
-	// this makes my game crash in CGarage!
 	InjectHook(0x476290, CFileLoader::LoadLevel, PATCH_JUMP);
 
 	InjectHook(0x476520, CFileLoader::LoadCollisionFromDatFile, PATCH_JUMP);

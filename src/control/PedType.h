@@ -4,59 +4,87 @@
 #include "templates.h"
 #include "Lists.h"
 
-class CPedType {
-public:
-	union tPedTypeFlags
-	{
-		uint32 IntValue;
-		struct
-		{
-			uint8 bPlayer1 : 1;
-			uint8 bPlayer2 : 1;
-			uint8 bPlayer3 : 1;
-			uint8 bPlayer4 : 1;
-			uint8 bCivmale : 1;
-			uint8 bCivfemale : 1;
-			uint8 bCop : 1;
-			uint8 bGang1 : 1;
+// Index into the PedType array
+enum
+{
+	PEDTYPE_PLAYER1,
+	PEDTYPE_PLAYER2,
+	PEDTYPE_PLAYER3,
+	PEDTYPE_PLAYER4,
+	PEDTYPE_CIVMALE,
+	PEDTYPE_CIVFEMALE,
+	PEDTYPE_COP,
+	PEDTYPE_GANG1,
+	PEDTYPE_GANG2,
+	PEDTYPE_GANG3,
+	PEDTYPE_GANG4,
+	PEDTYPE_GANG5,
+	PEDTYPE_GANG6,
+	PEDTYPE_GANG7,
+	PEDTYPE_GANG8,
+	PEDTYPE_GANG9,
+	PEDTYPE_EMERGENCY,
+	PEDTYPE_FIREMAN,
+	PEDTYPE_CRIMINAL,
+	PEDTYPE_SPECIAL,
+	PEDTYPE_PROSTITUE,
+	PEDTYPE_UNUSED1,
+	PEDTYPE_UNUSED2,
 
-			uint8 bGang2 : 1;
-			uint8 bGang3 : 1;
-			uint8 bGang4 : 1;
-			uint8 bGang5 : 1;
-			uint8 bGang6 : 1;
-			uint8 bGang7 : 1;
-			uint8 bGang8 : 1;
-			uint8 bGang9 : 1;
+	NUM_PEDTYPES
+};
 
-			uint8 bEmergency : 1;
-			uint8 bProstitute : 1;
-			uint8 bCriminal : 1;
-			uint8 bSpecial : 1;
-			uint8 bGun : 1;
-			uint8 bCop_car : 1;
-			uint8 bFast_car : 1;
-			uint8 bExplosion : 1;
+enum
+{
+	PED_FLAG_PLAYER1 = 1 << 0,
+	PED_FLAG_PLAYER2 = 1 << 1,
+	PED_FLAG_PLAYER3 = 1 << 2,
+	PED_FLAG_PLAYER4 = 1 << 3,
+	PED_FLAG_CIVMALE = 1 << 4,
+	PED_FLAG_CIVFEMALE = 1 << 5,
+	PED_FLAG_COP = 1 << 6,
+	PED_FLAG_GANG1 = 1 << 7,
+	PED_FLAG_GANG2 = 1 << 8,
+	PED_FLAG_GANG3 = 1 << 9,
+	PED_FLAG_GANG4 = 1 << 10,
+	PED_FLAG_GANG5 = 1 << 11,
+	PED_FLAG_GANG6 = 1 << 12,
+	PED_FLAG_GANG7 = 1 << 13,
+	PED_FLAG_GANG8 = 1 << 14,
+	PED_FLAG_GANG9 = 1 << 15,
+	PED_FLAG_EMERGENCY = 1 << 16,
+	PED_FLAG_PROSTITUTE = 1 << 17,
+	PED_FLAG_CRIMINAL = 1 << 18,
+	PED_FLAG_SPECIAL = 1 << 19,
+	PED_FLAG_GUN = 1 << 20,
+	PED_FLAG_COPCAR = 1 << 21,
+	PED_FLAG_FASTCAR = 1 << 22,
+	PED_FLAG_EXPLOSION = 1 << 23,
+	PED_FLAG_FIREMAN = 1 << 24,
+	PED_FLAG_DEADPEDS = 1 << 25,
+};
 
-			uint8 bFireman : 1;
-			uint8 bDeadpeds : 1;
-		};
-	};
-
-	tPedTypeFlags m_Type;
+class CPedType
+{
+	uint32 m_flag;
 	float field_4;
 	float field_8;
 	float field_C;
 	float field_10;
 	float field_14;
-	tPedTypeFlags m_Threat;
-	tPedTypeFlags m_Avoid;
+	uint32 m_threats;
+	uint32 m_avoid;
 
-	static CPedType* (&ms_apPedType)[23];
+	static CPedType *(&ms_apPedType)[NUM_PEDTYPES];
+public:
 
-	static void Initialise();
-	static void LoadPedData();
-	static int32 FindPedType(char* type);
+	static void Initialise(void);
+	static void LoadPedData(void);
+	static int32 FindPedType(char *type);
+
+	static uint32 GetFlag(int type) { return ms_apPedType[type]->m_flag; }
+	static uint32 GetAvoid(int type) { return ms_apPedType[type]->m_avoid; }
+	static uint32 GetThreats(int type) { return ms_apPedType[type]->m_threats; }
 };
 
 static_assert(sizeof(CPedType) == 0x20, "CPedType: error");
