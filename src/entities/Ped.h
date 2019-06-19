@@ -211,7 +211,7 @@ public:
 	bool bInVehicle;
 	uint8 stuff4[23];
 	int32 m_nPedType;
-	PedStat *m_pedStats;
+	CPedStat *m_pedStats;
 	uint8 stuff5[24];
 	CEntity *m_pCollidingEntity;
 	uint8 stuff6[12];
