@@ -30,7 +30,7 @@ public:
   float fForceMultiplier;
 	float m_fAirResistance;
 	float m_fElasticity;
-  float fPercentSubmerged;
+	float m_fBuoyancy;
 	CVector m_vecCentreOfMass;
 	CEntryInfoList m_entryInfoList;
 	CPtrNode *m_movingListNode;

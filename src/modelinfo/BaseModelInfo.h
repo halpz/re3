@@ -52,7 +52,7 @@ public:
 	void DeleteCollisionModel(void);
 	void ClearTexDictionary(void) { m_txdSlot = -1; }
 	short GetObjectID(void) { return m_objectId; }
-	void SetObjectID(short id) { m_objectId = id; }
+	void SetObjectID(int16 id) { m_objectId = id; }
 	short GetTxdSlot(void) { return m_txdSlot; }
 	void AddRef(void);
 	void RemoveRef(void);

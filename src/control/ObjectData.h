@@ -1,7 +1,27 @@
 #pragma once
 
-class CObjectData
+class CObject;
+
+class CObjectInfo
 {
 public:
+	float m_fMass;
+	float m_fTurnMass;
+	float m_fAirResistance;
+	float m_fElasticity;
+	float m_fBuoyancy;
+	float m_fUprootLimit;
+	float m_fCollisionDamageMultiplier;
+	uint8 m_nCollisionDamageEffect;
+	uint8 m_nSpecialCollisionResponseCases;
+	bool m_bCameraToAvoidThisObject;
+};
+static_assert(sizeof(CObjectInfo) == 0x20, "CObjectInfo: error");
+
+class CObjectData
+{
+	static CObjectInfo ms_aObjectInfo[NUMOBJECTINFO];
+public:
 	static void Initialise(const char *filename);
+	static void SetObjectData(int32 modelId, CObject &object);
 };

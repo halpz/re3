@@ -54,8 +54,11 @@ enum
 	STAT_GUN_PANIC = 0x80
 };
 
-struct CPedStat
+class CPedStats
 {
+	static CPedStats *(&ms_apPedStats)[NUM_PEDSTATS];
+
+public:
 	ePedStats m_type;
 	char m_name[24];
 	float m_fleeDistance;
@@ -67,16 +70,10 @@ struct CPedStat
 	float m_attackStrength;
 	float m_defendWeakness;
 	int16 m_flags;
-};
-static_assert(sizeof(CPedStat) == 0x34, "CPedStat: error");
 
-class CPedStats
-{
-	static CPedStat *(&ms_apPedStats)[NUM_PEDSTATS];
-
-public:
 	static void Initialise(void);
 	static void Shutdown(void);
 	static void LoadPedStats(void);
 	static int32 GetPedStatType(char *name);
 };
+static_assert(sizeof(CPedStats) == 0x34, "CPedStats: error");

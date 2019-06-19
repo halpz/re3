@@ -9,6 +9,21 @@ enum {
 	CUTSCENE_OBJECT = 4,
 };
 
+enum {
+	COLLRESPONSE_NONE,
+	COLLRESPONSE_CHANGE_MODEL,
+	COLLRESPONSE_SPLIT_MODEL,
+	COLLRESPONSE_SMASH_COMPLETELY,
+	COLLRESPONSE_CHANGE_THEN_SMASH,
+	COLLRESPONSE_UNKNOWN5,
+
+	COLLRESPONSE_SMASH_CARDBOARD_COMPLETELY = 50,
+	COLLRESPONSE_SMASH_WOODENBOX_COMPLETELY = 60,
+	COLLRESPONSE_SMASH_TRAFFICCONE_COMPLETELY = 70,
+	COLLRESPONSE_SMASH_BARPOST_COMPLETELY = 80,
+
+};
+
 class CVehicle;
 
 class CObject : public CPhysical
@@ -28,9 +43,9 @@ public:
   int8 field_172;
   int8 field_173;
 	float m_fCollisionDamageMultiplier;
-	int8 m_nCollisionDamageEffect;
-	int8 m_bSpecialCollisionResponseCases;
-	int8 m_bCameraToAvoidThisObject;
+	uint8 m_nCollisionDamageEffect;
+	uint8 m_nSpecialCollisionResponseCases;
+	bool m_bCameraToAvoidThisObject;
   int8 field_17B;
   int8 field_17C;
   int8 field_17D;

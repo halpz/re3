@@ -16,8 +16,8 @@ CObject::CObject(void)
 	m_type = ENTITY_TYPE_OBJECT;
 	m_fUprootLimit = 0.0f;
 	m_nCollisionDamageEffect = 0;
-	m_bSpecialCollisionResponseCases = 0;
-	m_bCameraToAvoidThisObject = 0;
+	m_nSpecialCollisionResponseCases = COLLRESPONSE_NONE;
+	m_bCameraToAvoidThisObject = false;
 	ObjectCreatedBy = 0;
 	m_nEndOfLifeTime = 0;
 //	m_nRefModelIndex = -1;	// duplicate

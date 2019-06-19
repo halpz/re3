@@ -3,7 +3,7 @@
 #include "FileMgr.h"
 #include "PedStats.h"
 
-CPedStat *(&CPedStats::ms_apPedStats)[NUM_PEDSTATS] = *(CPedStat *(*)[NUM_PEDSTATS]) *(uintptr*)0x9404D4;
+CPedStats *(&CPedStats::ms_apPedStats)[NUM_PEDSTATS] = *(CPedStats *(*)[NUM_PEDSTATS]) *(uintptr*)0x9404D4;
 
 void
 CPedStats::Initialise(void)
@@ -12,7 +12,7 @@ CPedStats::Initialise(void)
 
 	debug("Initialising CPedStats...\n");
 	for(i = 0; i < NUM_PEDSTATS; i++){
-		ms_apPedStats[i] = new CPedStat;
+		ms_apPedStats[i] = new CPedStats;
 		ms_apPedStats[i]->m_type = PEDSTAT_PLAYER;
 		ms_apPedStats[i]->m_name[8] = 'R';	// WHAT?
 		ms_apPedStats[i]->m_fleeDistance = 20.0f;

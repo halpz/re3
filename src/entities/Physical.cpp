@@ -1801,8 +1801,8 @@ CPhysical::ProcessCollision(void)
 			n = distSq > 0.32f ? NUMSTEPS(0.3f) : NUMSTEPS(0.4f);
 		step = savedTimeStep / n;
 	}else if(IsObject()){
-		int responsecase = ((CObject*)this)->m_bSpecialCollisionResponseCases;
-		if(responsecase == 1){
+		int responsecase = ((CObject*)this)->m_nSpecialCollisionResponseCases;
+		if(responsecase == COLLRESPONSE_CHANGE_MODEL){
 			CVector speedUp = { 0.0f, 0.0f, 0.0f };
 			CVector speedDown = { 0.0f, 0.0f, 0.0f };
 			speedUp.z = GetBoundRadius();
@@ -1816,12 +1816,12 @@ CPhysical::ProcessCollision(void)
 				n = NUMSTEPS(0.3f);
 				step = savedTimeStep / n;
 			}
-		}else if(responsecase == 5){
+		}else if(responsecase == COLLRESPONSE_UNKNOWN5){
 			if(distSq >= 0.009f){
 				n = NUMSTEPS(0.09f);
 				step = savedTimeStep / n;
 			}
-		}else if(responsecase == 2 || responsecase == 4){
+		}else if(responsecase == COLLRESPONSE_SPLIT_MODEL || responsecase == COLLRESPONSE_CHANGE_THEN_SMASH){
 			if(distSq >= sq(0.15f)){
 				n = NUMSTEPS(0.15f);
 				step = savedTimeStep / n;
