@@ -572,7 +572,7 @@ CVisibilityPlugins::GetDotProductWithCameraVector(RwMatrix *atomicMat, RwMatrix 
 	if(flags & (ATOMIC_FLAG_FRONT | ATOMIC_FLAG_REAR))
 		dot = RwV3dDotProduct(&dist, RwMatrixGetUp(clumpMat));
 	// left/right facing
-	else if(flags & (ATOMIC_FLAG_LEFT & ATOMIC_FLAG_RIGHT))
+	else if(flags & (ATOMIC_FLAG_LEFT | ATOMIC_FLAG_RIGHT))
 		dot = RwV3dDotProduct(&dist, RwMatrixGetRight(clumpMat));
 	else
 		dot = 0.0f;
