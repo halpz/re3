@@ -6,6 +6,7 @@
 #include "NodeName.h"
 #include "TxdStore.h"
 #include "Weather.h"
+#include "HandlingMgr.h"
 #include "VisibilityPlugins.h"
 #include "FileMgr.h"
 #include "World.h"
@@ -21,9 +22,6 @@ RwTexture **CVehicleModelInfo::ms_colourTextureTable = (RwTexture**)0x711C40;
 
 RwTexture *&gpWhiteTexture = *(RwTexture**)0x64C4F8;
 RwFrame *&pMatFxIdentityFrame = *(RwFrame**)0x64C510;
-
-// TODO This depends on handling
-WRAPPER void CVehicleModelInfo::SetVehicleComponentFlags(RwFrame *frame, uint32 flags) { EAXJMP(0x5203C0); }
 
 enum {
 	CAR_WHEEL_RF	= 1,
@@ -435,11 +433,13 @@ CVehicleModelInfo::SetAtomicRenderCallbacks(void)
 	}
 }
 
-RpAtomic*
-CVehicleModelInfo::SetAtomicFlagCB(RpAtomic *atomic, void *data)
+RwObject*
+CVehicleModelInfo::SetAtomicFlagCB(RwObject *object, void *data)
 {
+	RpAtomic *atomic = (RpAtomic*)object;
+	assert(RwObjectGetType(object) == rpATOMIC);
 	CVisibilityPlugins::SetAtomicFlag(atomic, (int)data);
-	return atomic;
+	return object;
 }
 
 RpAtomic*
@@ -550,6 +550,41 @@ CVehicleModelInfo::PreprocessHierarchy(void)
 	}
 }
 
+void
+CVehicleModelInfo::SetVehicleComponentFlags(RwFrame *frame, uint32 flags)
+{
+	tHandlingData *handling;
+
+	handling = mod_HandlingManager.GetHandlingData((eHandlingId)m_handlingId);
+
+#define SETFLAGS(f) RwFrameForAllObjects(frame, SetAtomicFlagCB, (void*)(f))
+
+	if(flags & VEHICLE_FLAG_WINDSCREEN){
+		if(this == CModelInfo::GetModelInfo(MI_RHINO))
+			return;
+		SETFLAGS(ATOMIC_FLAG_WINDSCREEN);
+	}
+
+	if(flags & VEHICLE_FLAG_ANGLECULL)
+		SETFLAGS(ATOMIC_FLAG_ANGLECULL);
+
+	if(flags & VEHICLE_FLAG_FRONT)
+		SETFLAGS(ATOMIC_FLAG_FRONT);
+	else if(flags & VEHICLE_FLAG_REAR && (handling->Flags & HANDLING_IS_VAN || (flags & (VEHICLE_FLAG_LEFT|VEHICLE_FLAG_RIGHT)) == 0))
+		SETFLAGS(ATOMIC_FLAG_REAR);
+	if(flags & VEHICLE_FLAG_LEFT)
+		SETFLAGS(ATOMIC_FLAG_LEFT);
+	if(flags & VEHICLE_FLAG_RIGHT)
+		SETFLAGS(ATOMIC_FLAG_RIGHT);
+
+	if(flags & VEHICLE_FLAG_REARDOOR)
+		SETFLAGS(ATOMIC_FLAG_REARDOOR);
+	else if(flags & VEHICLE_FLAG_FRONTDOOR)
+		SETFLAGS(ATOMIC_FLAG_FRONTDOOR);
+
+	if(flags & VEHICLE_FLAG_DRAWLAST)
+		SETFLAGS(ATOMIC_FLAG_DRAWLAST);
+}
 
 #define COMPRULE_RULE(comprule) (((comprule) >> 12) & 0xF)
 #define COMPRULE_COMPS(comprule) ((comprule) & 0xFFF)
@@ -1110,6 +1145,7 @@ STARTPATCHES
 	InjectHook(0x520360, &CVehicleModelInfo::ClearAtomicFlagCB, PATCH_JUMP);
 
 	InjectHook(0x5204D0, &CVehicleModelInfo::PreprocessHierarchy, PATCH_JUMP);
+	InjectHook(0x5203C0, &CVehicleModelInfo::SetVehicleComponentFlags, PATCH_JUMP);
 
 	InjectHook(0x520840, &CVehicleModelInfo::GetWheelPosn, PATCH_JUMP);
 

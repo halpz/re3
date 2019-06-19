@@ -2,7 +2,7 @@
 #include "patcher.h"
 #include "main.h"
 #include "FileMgr.h"
-#include "HandlingDatamgr.h"
+#include "HandlingMgr.h"
 
 cHandlingDataMgr &mod_HandlingManager = *(cHandlingDataMgr*)0x728060;
 

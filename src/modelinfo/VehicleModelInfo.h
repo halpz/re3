@@ -99,7 +99,7 @@ public:
 	static RpAtomic *SetAtomicRendererCB_Heli(RpAtomic *atomic, void *data);
 	void SetAtomicRenderCallbacks(void);
 
-	static RpAtomic *SetAtomicFlagCB(RpAtomic *atomic, void *data);
+	static RwObject *SetAtomicFlagCB(RwObject *object, void *data);
 	static RpAtomic *ClearAtomicFlagCB(RpAtomic *atomic, void *data);
 	void SetVehicleComponentFlags(RwFrame *frame, uint32 flags);
 	void PreprocessHierarchy(void);

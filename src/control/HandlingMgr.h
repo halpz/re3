@@ -133,6 +133,7 @@ public:
 	int FindExactWord(const char *word, const char *words, int wordLen, int numWords);
 	void ConvertDataToGameUnits(tHandlingData *handling);
 	int32 GetHandlingId(const char *name);
+	tHandlingData *GetHandlingData(eHandlingId id) { return &HandlingData[id]; }
 };
 VALIDATE_SIZE(cHandlingDataMgr, 0x3030);
 extern cHandlingDataMgr &mod_HandlingManager;

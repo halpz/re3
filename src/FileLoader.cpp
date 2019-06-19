@@ -7,7 +7,7 @@
 #include "TempColModels.h"
 #include "VisibilityPlugins.h"
 #include "FileMgr.h"
-#include "HandlingDataMgr.h"
+#include "HandlingMgr.h"
 #include "CarCtrl.h"
 #include "PedType.h"
 #include "PedStats.h"
