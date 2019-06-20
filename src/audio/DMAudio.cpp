@@ -17,3 +17,4 @@ WRAPPER bool cDMAudio::CheckForAnAudioFileOnCD() { EAXJMP(0x57CA70); }
 WRAPPER void cDMAudio::ChangeMusicMode(uint8 mode) { EAXJMP(0x57CCF0); }
 
 WRAPPER void cDMAudio::PlayFrontEndSound(uint32, uint32) { EAXJMP(0x57CC20); }
+WRAPPER void cDMAudio::PlayOneShot(int, uint16, float) { EAXJMP(0x57C840); }

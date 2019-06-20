@@ -51,9 +51,9 @@ enum eSound
 	SOUND_WEAPON_BAT_ATTACK = 46,
 	SOUND_WEAPON_SHOT_FIRED = 47,
 	SOUND_WEAPON_RELOAD = 48,
-	SOUND_31 = 49,
-	SOUND_32 = 50,
-	SOUND_33 = 51,
+	SOUND_WEAPON_AK47_BULLET_ECHO = 49,
+	SOUND_WEAPON_UZI_BULLET_ECHO = 50,
+	SOUND_WEAPON_M16_BULLET_ECHO = 51,
 	SOUND_WEAPON_FLAMETHROWER_FIRE = 52,
 	SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM = 53,
 	SOUND_WEAPON_ROCKET_SHOT_NO_ZOOM = 54,
@@ -188,5 +188,6 @@ public:
 	bool CheckForAnAudioFileOnCD(void);
 	void ChangeMusicMode(uint8 mode);
 	void PlayFrontEndSound(uint32, uint32);
+	void PlayOneShot(int, uint16, float);
 };
 extern cDMAudio &DMAudio;

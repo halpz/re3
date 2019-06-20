@@ -2,15 +2,25 @@
 
 #include "Physical.h"
 #include "Weapon.h"
-#include "PedIK.h"
 #include "PedStats.h"
+#include "PedType.h"
+#include "PedIK.h"
 #include "AnimManager.h"
 #include "AnimBlendClumpData.h"
+#include "AnimBlendAssociation.h"
+#include "WeaponInfo.h"
 
 struct CPathNode;
 
 enum {
 	PED_MAX_WEAPONS = 13
+};
+
+enum PedOnGroundState {
+	NO_PED,
+	PED_BELOW_PLAYER,
+	PED_ON_THE_FLOOR,
+	PED_DEAD_ON_THE_FLOOR
 };
 
 enum PedState
@@ -98,7 +108,7 @@ public:
 	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
 	uint8 m_ped_flagA8 : 1;
 	uint8 bIsLooking : 1;
-	uint8 m_ped_flagA20_look : 1;	// probably missing in SA
+	uint8 m_ped_flagA20 : 1;	// "look" method? - probably missing in SA
 	uint8 bIsRestoringLook : 1;
 	uint8 bIsAimingGun : 1;
 	uint8 bIsRestoringGun : 1;
@@ -178,7 +188,7 @@ public:
 	CPedIK m_pedIK; 
 	uint8 stuff1[8];
 	uint32 m_nPedStateTimer;
-	int32 m_nPedState;
+	PedState m_nPedState;
 	int32 m_nLastPedState;
 	int32 m_nMoveState;
 	int32 m_nStoredActionState;
@@ -206,7 +216,7 @@ public:
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
 	uint8 stuff3[12];
-	CPed* m_pSeekTarget;
+	CPed *m_pSeekTarget;
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
 	uint8 stuff4[23];
@@ -235,7 +245,8 @@ public:
 	uint8 m_bodyPartBleeding;
 	uint8 m_field_4F3;
 	CPed *m_nearPeds[10];
-	uint8 stuff11[32];
+	uint16 m_numNearPeds;
+	uint8 stuff11[30];
 
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
@@ -243,7 +254,7 @@ public:
 	bool IsPlayer(void);
 	bool UseGroundColModel(void);
 	void AddWeaponModel(int id);
-	void AimGun();
+	void AimGun(void);
 	void KillPedWithCar(CVehicle *veh, float impulse);
 	void Say(uint16 audio);
 	void SetLookFlag(CPed *target, bool unknown);
@@ -255,8 +266,17 @@ public:
 	void SpawnFlyingComponent(int, int8 unknown);
 	bool OurPedCanSeeThisOne(CEntity *target);
 	void Avoid(void);
+	void Attack(void);
+	void ClearAimFlag(void);
+	void ClearLookFlag(void);
+	void RestorePreviousState(void);
+	void ClearAttack(void);
+	bool IsPedHeadAbovePos(float zOffset);
+	void RemoveWeaponModel(int);
+	void SelectGunIfArmed(void);
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
 	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
+	static void FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg);
 
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
@@ -265,6 +285,7 @@ public:
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;
 };
+
 static_assert(offsetof(CPed, m_nPedState) == 0x224, "CPed: error");
 static_assert(offsetof(CPed, m_pCurSurface) == 0x2FC, "CPed: error");
 static_assert(offsetof(CPed, m_pMyVehicle) == 0x310, "CPed: error");

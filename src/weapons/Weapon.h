@@ -1,4 +1,5 @@
 #pragma once
+#include "Entity.h"
 
 enum eWeaponType
 {
@@ -18,14 +19,35 @@ enum eWeaponType
 	WEAPONTYPE_HELICANNON
 };
 
+enum eWeaponFire {
+	WEAPON_FIRE_MELEE,
+	WEAPON_FIRE_INSTANT_HIT,
+	WEAPON_FIRE_PROJECTILE,
+	WEAPON_FIRE_AREA_EFFECT,
+	WEAPON_FIRE_USE
+};
+
+// Taken from MTA SA, seems it's unchanged
+enum eWeaponState
+{
+	WEAPONSTATE_READY,
+	WEAPONSTATE_FIRING,
+	WEAPONSTATE_RELOADING,
+	WEAPONSTATE_OUT_OF_AMMO,
+	WEAPONSTATE_MELEE_MADECONTACT
+};
+
 class CWeapon
 {
 public:
 	eWeaponType m_eWeaponType;
-	int32 m_eWeaponState;
+	eWeaponState m_eWeaponState;
 	int32 m_nAmmoInClip;
 	int32 m_nAmmoTotal;
 	int32 m_nTimer;
 	bool m_bAddRotOffset;
+
+	bool Fire(CEntity*, CVector*);
+	static void AddGunshell(CEntity*, CVector const&, CVector2D const&, float);
 };
 static_assert(sizeof(CWeapon) == 0x18, "CWeapon: error");
