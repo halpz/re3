@@ -66,6 +66,9 @@ static_assert(sizeof(CBlip) == 0x30, "CBlip: error");
 
 class CRadar
 {
+	static float cachedSin;
+	static float cachedCos;
+
 public:
 	static float &m_RadarRange;
 	static CVector2D &vec2DRadarOrigin;
@@ -98,15 +101,14 @@ public:
 	static void DrawMap();
 	static void TransformRadarPointToScreenSpace(CVector2D * out, CVector2D * in);
 	static void DrawBlips();
-	static bool DisplayThisBlip(int16 spriteid, int counter);
+	static bool DisplayThisBlip(int16 spriteid);
 	static int CalculateBlipAlpha(float dist);
 	static CRGBA GetRadarTraceColour(uint32 color, bool bright);
-	static int GetRadarTraceColour2(uint32 color, bool bright);
 	static void DrawRadarMap();
 	static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int alpha);
 	static void TransformRealWorldPointToRadarSpace(CVector2D *out, CVector2D *in);
 	static float LimitRadarPoint(CVector2D *point);
 	static void DrawRadarSprite(int sprite, float x, float y, int alpha);
-	static void ShowRadarMarker(CVector pos, uint32 color, float radius);
+	static void ShowRadarMarker(CVector pos, CRGBA color, float radius);
 	static void ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 green, uint32 blue, uint32 alpha);
 };

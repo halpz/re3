@@ -9,24 +9,24 @@
 #include "Vehicle.h"
 #include "Pools.h"
 #include "Script.h"
-#include "Font.h"
 
+//WRAPPER void CRadar::DrawMap () { EAXJMP(0x4A4200); }
+//WRAPPER void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int alpha) { EAXJMP(0x4A5D10); }
+//WRAPPER void CRadar::TransformRealWorldPointToRadarSpace(CVector2D *out, CVector2D *in) { EAXJMP(0x4A50D0); }
+//WRAPPER void CRadar::DrawRadarSprite(int sprite, float x, float y, int alpha) { EAXJMP(0x4A5EF0); }
+//WRAPPER void CRadar::ShowRadarMarker(CVector pos, uint32 color, float radius) { EAXJMP(0x4A59C0); }
+//WRAPPER void CRadar::DrawBlips() { EAXJMP(0x4A42F0); }
 WRAPPER void CRadar::ClearBlipForEntity(eBlipType type, int32 id) { EAXJMP(0x4A56C0); }
 WRAPPER void CRadar::Draw3dMarkers() { EAXJMP(0x4A4C70); }
-//WRAPPER void CRadar::DrawMap () { EAXJMP(0x4A4200); }
 WRAPPER void CRadar::DrawRadarMap() { EAXJMP(0x4A6C20); }
-//WRAPPER void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int alpha) { EAXJMP(0x4A5D10); }
-WRAPPER void CRadar::TransformRealWorldPointToRadarSpace(CVector2D *out, CVector2D *in) { EAXJMP(0x4A50D0); }
 WRAPPER float CRadar::LimitRadarPoint(CVector2D *point) { EAXJMP(0x4A4F30); }
-//WRAPPER void CRadar::DrawRadarSprite(int sprite, float x, float y, int alpha) { EAXJMP(0x4A5EF0); }
-WRAPPER void CRadar::ShowRadarMarker(CVector pos, uint32 color, float radius) { EAXJMP(0x4A59C0); }
 WRAPPER void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 green, uint32 blue, uint32 alpha) { EAXJMP(0x4A5870); }
-WRAPPER int CRadar::GetRadarTraceColour2(uint32 color, bool bright) { EAXJMP(0x4A5BB0); }
-//WRAPPER void CRadar::DrawBlips() { EAXJMP(0x4A42F0); }
 
 float &CRadar::m_RadarRange = *(float*)0x8E281C;
 CVector2D &CRadar::vec2DRadarOrigin = *(CVector2D*)0x6299B8;
 CBlip *CRadar::ms_RadarTrace = (CBlip*)0x6ED5E0;
+float CRadar::cachedSin;
+float CRadar::cachedCos;
 
 CSprite2d *CRadar::AsukaSprite = (CSprite2d*)0x8F1A40;
 CSprite2d *CRadar::BombSprite = (CSprite2d*)0x8F5FB4;
@@ -147,7 +147,7 @@ void CRadar::DrawBlips()
 					if (e) {
 						if (CRadar::ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || CRadar::ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 							if (CTheScripts::DbgFlag) {
-								CRadar::ShowRadarMarker(e->GetPosition(), CRadar::GetRadarTraceColour2(CRadar::ms_RadarTrace[i].m_nColor, CRadar::ms_RadarTrace[i].m_bDim), CRadar::ms_RadarTrace->m_Radius);
+								CRadar::ShowRadarMarker(e->GetPosition(), CRadar::GetRadarTraceColour(CRadar::ms_RadarTrace[i].m_nColor, CRadar::ms_RadarTrace[i].m_bDim), CRadar::ms_RadarTrace->m_Radius);
 
 								CRadar::ms_RadarTrace[i].m_Radius = CRadar::ms_RadarTrace[i].m_Radius - 0.1f;
 								if (CRadar::ms_RadarTrace[i].m_Radius >= 1.0f)
@@ -155,7 +155,7 @@ void CRadar::DrawBlips()
 							}
 						}
 						if (CRadar::ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || CRadar::ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
-							vec2d = { e->GetBoundCentre() };
+							vec2d = e->GetPosition();
 							CRadar::TransformRealWorldPointToRadarSpace(&in, &vec2d);
 							float dist = CRadar::LimitRadarPoint(&in);
 							int a = CRadar::CalculateBlipAlpha(dist);
@@ -179,10 +179,10 @@ void CRadar::DrawBlips()
 		for (int i = 0; i < 32; i++) {
 			if (CRadar::ms_RadarTrace[i].m_bInUse) {
 				if (ms_RadarTrace[i].m_eBlipType >= BLIP_COORD) {
-					if (CRadar::DisplayThisBlip(ms_RadarTrace[i].m_IconID, i) && CRadar::ms_RadarTrace[i].m_eBlipType != BLIP_CONTACT_POINT || !CTheScripts::IsPlayerOnAMission()) {
+					if (CRadar::DisplayThisBlip(ms_RadarTrace[i].m_IconID) && CRadar::ms_RadarTrace[i].m_eBlipType != BLIP_CONTACT_POINT || !CTheScripts::IsPlayerOnAMission()) {
 						if (CRadar::ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || CRadar::ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 							if (CTheScripts::DbgFlag) {
-								CRadar::ShowRadarMarker(CRadar::ms_RadarTrace[i].m_vecPos, CRadar::GetRadarTraceColour2(CRadar::ms_RadarTrace[i].m_nColor, CRadar::ms_RadarTrace[i].m_bDim), CRadar::ms_RadarTrace->m_Radius);
+								CRadar::ShowRadarMarker(CRadar::ms_RadarTrace[i].m_vecPos, CRadar::GetRadarTraceColour(CRadar::ms_RadarTrace[i].m_nColor, CRadar::ms_RadarTrace[i].m_bDim), CRadar::ms_RadarTrace->m_Radius);
 								CRadar::ms_RadarTrace[i].m_Radius = CRadar::ms_RadarTrace[i].m_Radius - 0.1f;
 								if (CRadar::ms_RadarTrace[i].m_Radius >= 1.0f)
 									CRadar::ms_RadarTrace[i].m_Radius = 5.0f;
@@ -209,7 +209,7 @@ void CRadar::DrawBlips()
 	}
 }
 
-bool CRadar::DisplayThisBlip(int16 spriteid, int counter) 
+bool CRadar::DisplayThisBlip(int16 spriteid) 
 {
 	switch (spriteid) {
 		case RADAR_SPRITE_NONE:
@@ -316,12 +316,79 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D *out, CVector2D *in)
 	out->y = (SCREEN_SCALE_Y(76.0f)) * 0.5f + SCREEN_HEIGHT - (SCREEN_SCALE_Y(123.0f)) - in->y * (SCREEN_SCALE_Y(76.0f)) * 0.5f;
 }
 
+void CRadar::TransformRealWorldPointToRadarSpace(CVector2D *out, CVector2D *in) 
+{ 
+	if (TheCamera.Cams->Mode != CCam::CamMode::MODE_TOPDOWN1 && TheCamera.Cams->Mode != CCam::CamMode::MODE_TOPDOWNPED) {
+		if (TheCamera.GetLookDirection() != LOOKING_FORWARD) {
+			cachedSin = sin(atan2(-TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->m_matrix.m_matrix.up.x, TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->m_matrix.m_matrix.up.y));
+			cachedCos = cos(atan2(-TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->m_matrix.m_matrix.up.x, TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->m_matrix.m_matrix.up.y));
+		}
+		else {
+			CVector vecCamera;
+
+			if (TheCamera.Cams->Mode == CCam::CamMode::MODE_FIRSTPERSON) {
+				vecCamera = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->m_matrix.m_matrix.up;
+				vecCamera.Normalise();
+			}
+			else
+				vecCamera = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->m_matrix.m_matrix.pos - TheCamera.Cams[TheCamera.ActiveCam].SourceBeforeLookBehind;
+		
+			cachedSin = sin(atan2(-vecCamera.x, vecCamera.y));
+			cachedCos = cos(atan2(-vecCamera.x, vecCamera.y));	
+		}
+	}
+	else {
+		cachedSin = 0.0f;
+		cachedCos = 1.0f;
+	}
+	
+	float x = (in->x - vec2DRadarOrigin.x) * (1.0f / m_RadarRange);
+	float y = (in->y - vec2DRadarOrigin.y) * (1.0f / m_RadarRange);
+	
+	out->x = cachedSin * y + cachedCos * x;
+	out->y = cachedCos * y - cachedSin * x;
+}
+
 void CRadar::DrawRadarSprite(int sprite, float x, float y, int alpha)
 { 
 	float w = SCREEN_SCALE_X(8.0f);
 	float h = SCREEN_SCALE_Y(8.0f);
 
 	RadarSprites[sprite]->Draw(CRect(x - w, y - h, x + w, y + h), CRGBA(255, 255, 255, alpha));
+}
+
+void CRadar::ShowRadarMarker(CVector pos, CRGBA color, float radius) {
+	float z2 = pos.z + (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.at.z;
+	float y2 = (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.at.y + pos.y;
+	float x2 = (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.at.x + pos.x;
+	float z1 = pos.z + (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.at.z;
+	float y1 = (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.at.y + pos.y;
+	float x1 = (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.at.x + pos.x;
+	CTheScripts::ScriptDebugLine3D(x1, y1, z1, x2, y2, z2, color.color32, color.color32);
+
+	z2 = pos.z - (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.at.x;
+	y2 = pos.y - (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.at.x;
+	x2 = pos.x - (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.at.x;
+	z1 = pos.z - (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.at.x;
+	y1 = pos.y - (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.at.x;
+	x1 = pos.x - (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.at.x;
+	CTheScripts::ScriptDebugLine3D(x1, y1, z1, x2, y2, z2, color.color32, color.color32);
+
+	z2 = (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.right.x + pos.z;
+	y2 = (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.right.x + pos.y;
+	x2 = (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.right.x + pos.x;
+	z1 = (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.right.x + pos.z;
+	y1 = (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.right.x + pos.y;
+	x1 = (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.right.x + pos.x;
+	CTheScripts::ScriptDebugLine3D(x1, y1, z1, x2, y2, z2, color.color32, color.color32);
+
+	z2 = pos.z - (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.right.x;
+	y2 = pos.y - (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.right.x;
+	x2 = pos.x - (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.right.x;
+	z1 = pos.z - (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.right.x;
+	y1 = pos.y - (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.right.x;
+	x1 = pos.x - (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.right.x;
+	CTheScripts::ScriptDebugLine3D(x1, y1, z1, x2, y2, z2, color.color32, color.color32);
 }
 
 void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int alpha)
