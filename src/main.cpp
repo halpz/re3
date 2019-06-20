@@ -328,15 +328,15 @@ Render2dStuff(void)
 
 		// top and bottom strips
 		if (weaponType == WEAPONTYPE_ROCKETLAUNCHER) {
-			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH / 2 - HUD_STRETCH_Y(180)), black);
-			CSprite2d::DrawRect(CRect(0.0f, SCREENH / 2 + HUD_STRETCH_Y(170), SCREENW, SCREENH), black);
+			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH / 2 - SCREEN_SCALE_Y(180)), black);
+			CSprite2d::DrawRect(CRect(0.0f, SCREENH / 2 + SCREEN_SCALE_Y(170), SCREENW, SCREENH), black);
 		}
 		else {
-			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH / 2 - HUD_STRETCH_Y(210)), black);
-			CSprite2d::DrawRect(CRect(0.0f, SCREENH / 2 + HUD_STRETCH_Y(210), SCREENW, SCREENH), black);
+			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH / 2 - SCREEN_SCALE_Y(210)), black);
+			CSprite2d::DrawRect(CRect(0.0f, SCREENH / 2 + SCREEN_SCALE_Y(210), SCREENW, SCREENH), black);
 		}
-		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW / 2 - HUD_STRETCH_X(210), SCREENH), black);
-		CSprite2d::DrawRect(CRect(SCREENW / 2 + HUD_STRETCH_X(210), 0.0f, SCREENW, SCREENH), black);
+		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW / 2 - SCREEN_SCALE_X(210), SCREENH), black);
+		CSprite2d::DrawRect(CRect(SCREENW / 2 + SCREEN_SCALE_X(210), 0.0f, SCREENW, SCREENH), black);
 	}
 
 	MusicManager.DisplayRadioStationName();
@@ -536,17 +536,17 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		if(str1){
 			NumberOfChunksLoaded += 1;
 
-			float hpos = SCREEN_STRETCH_X(40);
-			float length = SCREENW - SCREEN_STRETCH_X(100);
-			float vpos = SCREENH - SCREEN_STRETCH_Y(13);
-			float height = SCREEN_STRETCH_Y(7);
+			float hpos = SCREEN_SCALE_X(40);
+			float length = SCREENW - SCREEN_SCALE_X(100);
+			float vpos = SCREENH - SCREEN_SCALE_Y(13);
+			float height = SCREEN_SCALE_Y(7);
 			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(40, 53, 68, 255));
 
 			length *= NumberOfChunksLoaded/TOTALNUMCHUNKS;
 			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(81, 106, 137, 255));
 
 			// this is done by the game but is unused
-			CFont::SetScale(SCREEN_STRETCH_X(2), SCREEN_STRETCH_Y(2));
+			CFont::SetScale(SCREEN_SCALE_X(2), SCREEN_SCALE_Y(2));
 			CFont::SetPropOn();
 			CFont::SetRightJustifyOn();
 			CFont::SetFontStyle(FONT_HEADING);
@@ -554,7 +554,7 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 #ifdef CHATTYSPLASH
 			// my attempt
 			static wchar tmpstr[80];
-			float scale = SCREEN_STRETCH_Y(0.8f);
+			float scale = SCREEN_SCALE_Y(0.8f);
 			vpos -= 50*scale;
 			CFont::SetScale(scale, scale);
 			CFont::SetPropOn();

@@ -83,7 +83,7 @@ public:
 	}
 	T *GetAt(int handle){
 		return m_flags[handle>>8].u == handle & 0xFF ?
-		       (T*)&m_entries[handle>>8] : nil;
+		       nil : (T*)&m_entries[handle >> 8];
 	}
 	int GetIndex(T *entry){
 		int i = GetJustIndex(entry);

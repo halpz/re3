@@ -1,5 +1,8 @@
 #pragma once
 
+#define HUD_SCALE 0.8f
+#define DEFAULT_SCALE 1.0f
+
 class CDraw
 {
 private:
@@ -7,6 +10,7 @@ private:
 	static float &ms_fFarClipZ;
 	static float &ms_fFOV;
 	static float ms_fAspectRatio;
+	static float ms_fScreenMultiplier;
 
 public:
 	static uint8 &FadeValue;
@@ -24,5 +28,6 @@ public:
 
 	static void CalculateAspectRatio();
 	static float GetAspectRatio(void) { return ms_fAspectRatio; }
-
+	static void SetScreenMult(float mult) { ms_fScreenMultiplier = mult; };
+	static float GetScreenMult(void) { return ms_fScreenMultiplier; };
 };

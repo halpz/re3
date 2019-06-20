@@ -3,6 +3,7 @@
 
 enum eItems
 {
+	ITEM_NONE = -1,
 	ITEM_ARMOUR = 3,
 	ITEM_HEALTH = 4,
 	ITEM_RADAR = 8
@@ -43,16 +44,16 @@ public:
 	static float &m_HelpMessageDisplayTime;
 	static float &m_fTextBoxNumLines;
 	static float &m_fHelpMessageTime;
-	static bool	&m_bHelpMessageQuick;
+	static bool	&m_HelpMessageQuick;
 	static int32 m_ZoneState;
 	static int32 m_ZoneFadeTimer;
 	static int32 m_ZoneNameTimer;
-	static wchar *&m_pZoneName;
-	static wchar *m_pLastZoneName;
+	static wchar *&m_ZoneName;
+	static wchar *m_LastZoneName;
 	static wchar *m_ZoneToPrint;
-	static wchar *&m_pVehicleName;
-	static wchar *m_pLastVehicleName;
-	static wchar *m_pVehicleNameToPrint;
+	static wchar *&m_VehicleName;
+	static wchar *m_LastVehicleName;
+	static wchar *m_VehicleNameToPrint;
 	static int32 m_VehicleState;
 	static int32 m_VehicleFadeTimer;
 	static int32 m_VehicleNameTimer;

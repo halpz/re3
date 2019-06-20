@@ -594,4 +594,4 @@ WRAPPER CVehicle *FindPlayerVehicle(void) { EAXJMP(0x4A10C0); }
 WRAPPER CVehicle *FindPlayerTrain(void) { EAXJMP(0x4A1120); }
 WRAPPER CVector FindPlayerSpeed(void) { EAXJMP(0x4A1090); }
 WRAPPER CVector FindPlayerCentreOfWorld_NoSniperShift(void) { EAXJMP(0x4A11C0); }
-
+WRAPPER float FindPlayerHeading(void) { EAXJMP(0x4A1220); }

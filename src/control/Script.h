@@ -39,4 +39,9 @@ public:
 	static CTextLine* IntroTextLines;
 	static CScriptRectangle* IntroRectangles;
 	static CSprite2d* ScriptSprites;
+	static bool DbgFlag;
+	static uint32 OnAMissionFlag;
+
+public:
+	static bool IsPlayerOnAMission();
 };
