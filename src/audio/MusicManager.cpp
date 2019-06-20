@@ -16,8 +16,6 @@ int32 &gNumRetunePresses = *(int32*)0x650B80;
 wchar *pCurrentStation = (wchar*)0x650B9C;
 uint8 &cDisplay = *(uint8*)0x650BA1;
 
-//WRAPPER void cMusicManager::DisplayRadioStationName(void) { EAXJMP(0x57E6D0); }
-
 bool cMusicManager::PlayerInCar()
 {
 	if (!FindPlayerVehicle())
@@ -44,6 +42,9 @@ bool cMusicManager::PlayerInCar()
 	}
 }
 
+#if 0
+WRAPPER void cMusicManager::DisplayRadioStationName(void) { EAXJMP(0x57E6D0); }
+#else
 void cMusicManager::DisplayRadioStationName()
 {
 	int8 pRetune;
@@ -170,3 +171,4 @@ void cMusicManager::DisplayRadioStationName()
 		CFont::DrawFonts();
 	}
 }
+#endif
