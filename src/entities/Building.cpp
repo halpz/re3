@@ -18,7 +18,7 @@ CBuilding::ReplaceWithNewModel(int32 id)
 
 	if(bIsBIGBuilding)
 		if(m_level == LEVEL_NONE || m_level == CGame::currLevel)
-			CStreaming::RequestModel(id, STREAM_DONT_REMOVE);
+			CStreaming::RequestModel(id, STREAMFLAGS_DONT_REMOVE);
 }
 
 STARTPATCHES

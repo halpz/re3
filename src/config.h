@@ -1,7 +1,8 @@
 #pragma once
 
 enum Config {
-	NUMCDIMAGES = 50, // was 12
+	NUMCDIMAGES = 12,	// gta3.img duplicates (not used on PC)
+	MAX_CDIMAGES = 8,	// additional cdimages
 
 	MODELINFOSIZE = 5500,
 	TXDSTORESIZE = 850,
@@ -13,6 +14,8 @@ enum Config {
 	PEDMODELSIZE = 90,
 	VEHICLEMODELSIZE = 120,
 	TWODFXSIZE = 2000,
+
+	MAXVEHICLESLOADED = 50,	// 70 on mobile
 
 	NUMOBJECTINFO = 168, // object.dat
 
