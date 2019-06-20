@@ -5,6 +5,7 @@
 #include "Camera.h"
 
 float CDraw::ms_fAspectRatio;
+float CDraw::ms_fScreenMultiplier;
 
 float &CDraw::ms_fNearClipZ = *(float*)0x8E2DC4;
 float &CDraw::ms_fFarClipZ = *(float*)0x9434F0;
@@ -18,6 +19,8 @@ uint8 &CDraw::FadeBlue = *(uint8*)0x95CD53;
 void
 CDraw::CalculateAspectRatio()
 {
+	SetScreenMult(DEFAULT_SCALE);
+
 	if(FrontEndMenuManager.m_PrefsUseWideScreen)	
 		ms_fAspectRatio = 16.0f/9.0f;
 	else if(TheCamera.m_WideScreenOn)

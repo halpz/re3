@@ -11,11 +11,89 @@ enum eBlipType
 	BLIP_CONTACT_POINT
 };
 
+enum eBlipDisplay
+{
+	BLIP_DISPLAY_NEITHER = 0,
+	BLIP_DISPLAY_MARKER_ONLY = 1,
+	BLIP_DISPLAY_BLIP_ONLY = 2,
+	BLIP_DISPLAY_BOTH = 3,
+};
+
+enum eRadarSprite
+{
+	RADAR_SPRITE_NONE = 0,
+	RADAR_SPRITE_ASUKA = 1,
+	RADAR_SPRITE_BOMB = 2,
+	RADAR_SPRITE_CAT = 3,
+	RADAR_SPRITE_CENTRE = 4,
+	RADAR_SPRITE_COPCAR = 5,
+	RADAR_SPRITE_DON = 6,
+	RADAR_SPRITE_EIGHT = 7,
+	RADAR_SPRITE_EL = 8,
+	RADAR_SPRITE_ICE = 9,
+	RADAR_SPRITE_JOEY = 10,
+	RADAR_SPRITE_KENJI = 11,
+	RADAR_SPRITE_LIZ = 12,
+	RADAR_SPRITE_LUIGI = 13,
+	RADAR_SPRITE_NORTH = 14,
+	RADAR_SPRITE_RAY = 15,
+	RADAR_SPRITE_SAL = 16,
+	RADAR_SPRITE_SAVE = 17,
+	RADAR_SPRITE_SPRAY = 18,
+	RADAR_SPRITE_TONY = 19,
+	RADAR_SPRITE_WEAPON = 20,
+	RADAR_SPRITE_COUNT = 21,
+};
+
+struct CBlip
+{
+	int32 m_nColor;
+	int16 m_eBlipType; // eBlipType
+	int32 m_nEntityHandle;
+	CVector2D m_vec2DPos;
+	CVector m_vecPos;
+	int16 m_BlipIndex;
+	int8 m_bDim;
+	int8 m_bInUse;
+	float m_Radius;
+	int16 m_wScale;
+	int16 m_eBlipDisplay; // eBlipDisplay
+	int16 m_IconID; // eRadarSprite
+	char gap_46[2];
+};
+
+static_assert(sizeof(CBlip) == 0x30, "CBlip: error");
+
 class CRadar
 {
+	static float cachedSin;
+	static float cachedCos;
+
 public:
 	static float &m_RadarRange;
 	static CVector2D &vec2DRadarOrigin;
+	static CBlip *ms_RadarTrace;
+	static CSprite2d *AsukaSprite;
+	static CSprite2d *BombSprite;
+	static CSprite2d *CatSprite;
+	static CSprite2d *CentreSprite;
+	static CSprite2d *CopcarSprite;
+	static CSprite2d *DonSprite;
+	static CSprite2d *EightSprite;
+	static CSprite2d *ElSprite;
+	static CSprite2d *IceSprite;
+	static CSprite2d *JoeySprite;
+	static CSprite2d *KenjiSprite;
+	static CSprite2d *LizSprite;
+	static CSprite2d *LuigiSprite;
+	static CSprite2d *NorthSprite;
+	static CSprite2d *RaySprite;
+	static CSprite2d *SalSprite;
+	static CSprite2d *SaveSprite;
+	static CSprite2d *SpraySprite;
+	static CSprite2d *TonySprite;
+	static CSprite2d *WeaponSprite;
+	static CSprite2d *RadarSprites[21];
 
 public:
 	static void ClearBlipForEntity(eBlipType type, int32 id);
@@ -23,5 +101,14 @@ public:
 	static void DrawMap();
 	static void TransformRadarPointToScreenSpace(CVector2D * out, CVector2D * in);
 	static void DrawBlips();
+	static bool DisplayThisBlip(int16 spriteid);
+	static int CalculateBlipAlpha(float dist);
+	static CRGBA GetRadarTraceColour(uint32 color, bool bright);
 	static void DrawRadarMap();
+	static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int alpha);
+	static void TransformRealWorldPointToRadarSpace(CVector2D *out, CVector2D *in);
+	static float LimitRadarPoint(CVector2D *point);
+	static void DrawRadarSprite(int sprite, float x, float y, int alpha);
+	static void ShowRadarMarker(CVector pos, CRGBA color, float radius);
+	static void ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 green, uint32 blue, uint32 alpha);
 };

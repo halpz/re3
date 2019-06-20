@@ -56,6 +56,17 @@ extern void **rwengine;
 #include "skel\skeleton.h"
 #include "Draw.h"
 
+/*
+	{ SCREEN_STRETCH }	Done originally by the game for most of the printed stuff.
+						Stretches everything to screen avoiding it's aspect ratio.
+						Looks good only in 4:3.
+
+	{ SCREEN_SCALE }	Alternative to the one above, it's used in this project to scale
+						original content to a *DEFINED aspect ratio with the possibility to
+						set a multiplier and scale content differently.
+						In theory should look good on any screen.					
+*/
+
 #define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
 
 #define SCREENW (RsGlobal.maximumWidth)
@@ -66,15 +77,16 @@ extern void **rwengine;
 #define SCREEN_WIDTH float(RsGlobal.width)
 #define SCREEN_HEIGHT float(RsGlobal.height)
 #define SCREEN_STRETCH_X(a)   float((a) * (SCREEN_WIDTH / float(DEFAULT_SCREEN_WIDTH)))
-#define SCREEN_STRETCH_X_AR(a)   float((a) * (SCREEN_WIDTH / float(DEFAULT_SCREEN_WIDTH)) * (4.0/3.0f)/SCREEN_ASPECT_RATIO)
 #define SCREEN_STRETCH_Y(a)   float((a) * (SCREEN_HEIGHT / float(DEFAULT_SCREEN_HEIGHT)))
-#define SCREEN_FROM_RIGHT(a)  float(SCREEN_WIDTH - SCREEN_STRETCH_X(a))
-#define SCREEN_FROM_BOTTOM(a) float(SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
+#define SCREEN_STRETCH_FROM_RIGHT(a)  float(SCREEN_WIDTH - SCREEN_STRETCH_X(a))
+#define SCREEN_STRETCH_FROM_BOTTOM(a) float(SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
 
-#define HUD_STRETCH_X SCREEN_STRETCH_X_AR
-#define HUD_STRETCH_Y SCREEN_STRETCH_Y
-#define HUD_FROM_RIGHT(a) (SCREEN_WIDTH - HUD_STRETCH_X(a))
-#define HUD_FROM_BOTTOM(a) (SCREEN_HEIGHT - HUD_STRETCH_Y(a))
+#define SCREEN_MULTIPLIER (CDraw::GetScreenMult())
+#define SCREEN_SCALE(a) float((a) * (4.0f / 3.0f) / SCREEN_ASPECT_RATIO)
+#define SCREEN_SCALE_X(a) SCREEN_SCALE(SCREEN_STRETCH_X(a) * SCREEN_MULTIPLIER)
+#define SCREEN_SCALE_Y(a) (SCREEN_STRETCH_Y(a) * SCREEN_MULTIPLIER)
+#define SCREEN_SCALE_FROM_RIGHT(a) (SCREEN_WIDTH - SCREEN_SCALE_X(a))
+#define SCREEN_SCALE_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_SCALE_Y(a))
 
 #include "math/Vector.h"
 #include "math/Vector2D.h"

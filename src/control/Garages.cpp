@@ -68,40 +68,40 @@ CGarages::IsModelIndexADoor(uint32 id)
 void CGarages::PrintMessages()
 {
 	if (CTimer::GetTimeInMilliseconds() > CGarages::MessageStartTime && CTimer::GetTimeInMilliseconds() < CGarages::MessageEndTime) {
-		CFont::SetScale(HUD_STRETCH_X(1.2f / 2), HUD_STRETCH_Y(1.5f / 2)); // BUG: game doesn't use macro here.
+		CFont::SetScale(SCREEN_SCALE_X(1.2f / 2), SCREEN_SCALE_Y(1.5f / 2)); // BUG: game doesn't use macro here.
 		CFont::SetPropOn();
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(HUD_FROM_RIGHT(50.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(50.0f));
 		CFont::SetCentreOn();
 		CFont::SetFontStyle(FONT_BANK);
 
 		if (CGarages::MessageNumberInString2 < 0) {
 			if (CGarages::MessageNumberInString < 0) {
 				CFont::SetColor(CRGBA(0, 0, 0, 255));
-				CFont::PrintString((SCREEN_WIDTH/ 2) + HUD_STRETCH_X(2.0f), (SCREEN_HEIGHT / 2) + HUD_STRETCH_Y(-84.0f), TheText.Get(CGarages::MessageIDString));
+				CFont::PrintString((SCREEN_WIDTH/ 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f), TheText.Get(CGarages::MessageIDString));
 
 				CFont::SetColor(CRGBA(89, 115, 150, 255));
-				CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) + HUD_STRETCH_Y(-84.0f), TheText.Get(CGarages::MessageIDString));
+				CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f), TheText.Get(CGarages::MessageIDString));
 			}
 			else {
 				CMessages::InsertNumberInString(TheText.Get(CGarages::MessageIDString), CGarages::MessageNumberInString, -1, -1, -1, -1, -1, gUString);
 
 				CFont::SetColor(CRGBA(0, 0, 0, 255));
-				CFont::PrintString((SCREEN_WIDTH / 2) + HUD_STRETCH_X(2.0f), (SCREEN_HEIGHT / 2) + HUD_STRETCH_Y(-84.0f + 2.0 - 40.0f), gUString);
+				CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f + 2.0 - 40.0f), gUString);
 
 				CFont::SetColor(CRGBA(89, 115, 150, 255));
-				CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) + HUD_STRETCH_Y(-84.0f - 40.0f), gUString);
+				CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f - 40.0f), gUString);
 			}
 		}
 		else {
 			CMessages::InsertNumberInString(TheText.Get(CGarages::MessageIDString), CGarages::MessageNumberInString2, -1, -1, -1, -1, -1, gUString);
 
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
-			CFont::PrintString((SCREEN_WIDTH / 2) + HUD_STRETCH_X(2.0f), (SCREEN_HEIGHT / 2) + HUD_STRETCH_Y(-84.0f + 2.0 - 40.0f), gUString);
+			CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f + 2.0 - 40.0f), gUString);
 
 			CFont::SetColor(CRGBA(89, 115, 150, 255));
-			CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) + HUD_STRETCH_Y(-84.0f - 40.0f), gUString);
+			CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f - 40.0f), gUString);
 		}
 	}
 }
