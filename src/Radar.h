@@ -99,9 +99,12 @@ public:
 	static void ClearBlipForEntity(eBlipType type, int32 id);
 	static void Draw3dMarkers();
 	static void DrawMap();
+	static void StreamRadarSections(int x, int y);
+	static int ClipRadarPoly(CVector2D *out, CVector2D *in);
+	static void TransformRealWorldToTexCoordSpace(CVector2D *out, CVector2D *in, int x, int y);
+	static void DrawRadarSection(int x, int y);
 	static void TransformRadarPointToScreenSpace(CVector2D * out, CVector2D * in);
 	static void DrawBlips();
-	static bool DisplayThisBlip(int16 spriteid);
 	static int CalculateBlipAlpha(float dist);
 	static CRGBA GetRadarTraceColour(uint32 color, bool bright);
 	static void DrawRadarMap();
@@ -111,4 +114,8 @@ public:
 	static void DrawRadarSprite(int sprite, float x, float y, int alpha);
 	static void ShowRadarMarker(CVector pos, CRGBA color, float radius);
 	static void ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 green, uint32 blue, uint32 alpha);
+	static void DrawRadarMask();
+	static bool DisplayThisBlip(int counter);
+	static void GetTextureCorners(int x, int y, CVector2D * out);
+	static void ClipRadarTileCoords(int x, int y);
 };

@@ -1011,13 +1011,13 @@ void CHud::Draw()
 					CFont::PrintString(SCREEN_WIDTH / 2, (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(20.0f), m_BigMessage[0]);
 				}
 				else {
-					BigMessageAlpha[0] = 0.0;
-					BigMessageX[0] = -60.0;
-					BigMessageInUse[0] = 1.0;
+					BigMessageAlpha[0] = 0.0f;
+					BigMessageX[0] = -60.0f;
+					BigMessageInUse[0] = 1.0f;
 				}
 			}
 			else {
-				BigMessageInUse[0] = 0.0;
+				BigMessageInUse[0] = 0.0f;
 			}
 
 			// WastedBustedText
@@ -1149,7 +1149,7 @@ void CHud::DrawAfterFade()
 			CFont::SetFontStyle(FONT_BANK);
 			CFont::SetBackgroundOn();
 			CFont::SetBackGroundOnlyTextOff();
-			CFont::SetBackgroundColor(CRGBA(0, 0, 0, fAlpha));
+			CFont::SetBackgroundColor(CRGBA(0, 0, 0, fAlpha * 0.8f));
 			CFont::SetColor(CRGBA(175, 175, 175, 255));
 			CFont::PrintString(SCREEN_SCALE_X(26.0f), SCREEN_SCALE_Y(28.0f + (150.0f - PagerXOffset) * 0.6f), CHud::m_HelpMessageToPrint);
 			CFont::SetAlphaFade(255.0f);
@@ -1283,18 +1283,18 @@ void CHud::DrawAfterFade()
 			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), m_BigMessage[1]);
 		}
 		else {
-			BigMessageAlpha[1] = 0.0;
-			BigMessageX[1] = -60.0;
-			BigMessageInUse[1] = 1.0;
+			BigMessageAlpha[1] = 0.0f;
+			BigMessageX[1] = -60.0f;
+			BigMessageInUse[1] = 1.0f;
 		}
 	}
 	else {
-		BigMessageInUse[1] = 0.0;
+		BigMessageInUse[1] = 0.0f;
 	}
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CHud::ReInitialise(void) { EAXJMP(0x504CC0); }
 #else
 void CHud::ReInitialise() {
@@ -1315,7 +1315,7 @@ void CHud::ReInitialise() {
 			BigMessageInUse[i] = 0.0f;
 
 		if (i <= 128)
-			*(wchar*)(m_BigMessage[i]) = 0;
+			m_BigMessage[i][0] = 0;
 	}
 
 	m_HelpMessageTimer = 0;

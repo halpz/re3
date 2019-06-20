@@ -46,4 +46,6 @@ public:
 	static void DrawRect(const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3);
 	static void DrawRect(const CRect &r, const CRGBA &col);
 	static void DrawRectXLU(const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3);
+
+	static RwIm2DVertex* GetVertices() { return maVertices; };
 };
