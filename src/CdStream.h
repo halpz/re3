@@ -1,6 +1,5 @@
 #pragma once
 
-#define MAX_CDIMAGES 8
 #define CDSTREAM_SECTOR_SIZE 2048
 
 #define _GET_INDEX(a) (a >> 24)

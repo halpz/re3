@@ -20,9 +20,6 @@
 #include "User.h"
 #include "World.h"
 
-//WRAPPER void CHud::Draw(void) { EAXJMP(0x5052A0); }
-//WRAPPER void CHud::DrawAfterFade(void) { EAXJMP(0x509030); }
-//WRAPPER void CHud::ReInitialise(void) { EAXJMP(0x504CC0); }
 WRAPPER void CHud::GetRidOfAllHudMessages(void) { EAXJMP(0x504F90); }
 WRAPPER void CHud::SetHelpMessage(wchar *message, bool quick) { EAXJMP(0x5051E0); }
 WRAPPER void CHud::SetMessage(wchar *message) { EAXJMP(0x50A210); }
@@ -178,6 +175,9 @@ void CHud::SetZoneName(wchar *name)
 	m_ZoneName = name;
 }
 
+#if 0
+WRAPPER void CHud::Draw(void) { EAXJMP(0x5052A0); }
+#else
 void CHud::Draw()
 {
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
@@ -973,7 +973,7 @@ void CHud::Draw()
 			*/
 			// MissionCompleteFailedText
 			if (CHud::m_BigMessage[0][0]) {
-				if (BigMessageInUse[0] == 0.0f) {
+				if (BigMessageInUse[0] != 0.0f) {
 					CFont::SetJustifyOff();
 					CFont::SetBackgroundOff();
 					CFont::SetBackGroundOnlyTextOff();
@@ -981,15 +981,19 @@ void CHud::Draw()
 					CFont::SetPropOn();
 					CFont::SetCentreOn();
 					CFont::SetCentreSize(SCREEN_SCALE_X(615.0f));
-					CFont::SetColor(CRGBA(255, 255, 0, 255));
 					CFont::SetFontStyle(FONT_HEADING);
 
 					if (BigMessageX[0] >= (SCREENW - 20)) {
-						BigMessageAlpha[0] += (CTimer::GetTimeStep() * 0.02f * -255.0f);
+						BigMessageInUse[0] += (CTimer::GetTimeStep() * 0.02f * 120.0f);
+
+						if (BigMessageInUse[0] >= 120.0f) {
+							BigMessageInUse[0] = 120.0;
+							BigMessageAlpha[0] += (CTimer::GetTimeStep() * 0.02f * -255.0f);
+						}
 
 						if (BigMessageAlpha[0] <= 0.0f) {
-							BigMessageAlpha[0] = 0.0f;
-							BigMessageInUse[0] = 1.0f;
+							m_BigMessage[0][0] = 0;
+							BigMessageAlpha[0] = 0.0;
 						}
 					}
 					else {
@@ -1017,9 +1021,9 @@ void CHud::Draw()
 			}
 
 			// WastedBustedText
-			if (CHud::m_BigMessage[2][0]) {
-				if (BigMessageInUse[2] == 0.0f) {
-					BigMessageAlpha[2] += (CTimer::GetTimeStep() * 0.02f * 1000.0f) * 0.4f;
+			if (m_BigMessage[2][0]) {
+				if (BigMessageInUse[2] != 0.0f) {
+					BigMessageAlpha[2] += (CTimer::GetTimeStep() * 0.02f * 255.0f);
 
 					if (BigMessageAlpha[2] > 255.0f)
 						BigMessageAlpha[2] = 255.0;
@@ -1034,12 +1038,12 @@ void CHud::Draw()
 					CFont::SetPropOn();
 					CFont::SetRightJustifyOn();
 					CFont::SetFontStyle(FONT_HEADING);
-					CFont::SetColor(CRGBA(0, 0, 0, 0.75f * BigMessageAlpha[2]));
 
-					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f + 4.0f), SCREEN_SCALE_FROM_BOTTOM(78.0f), CHud::m_BigMessage[2]);
+					CFont::SetColor(CRGBA(0, 0, 0, BigMessageAlpha[2]));
+					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f + 4.0f), SCREEN_SCALE_FROM_BOTTOM(78.0f), m_BigMessage[2]);
 
 					CFont::SetColor(CRGBA(170, 123, 87, BigMessageAlpha[2]));
-					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(82.0f), CHud::m_BigMessage[2]);
+					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(82.0f), m_BigMessage[2]);
 				}
 				else {
 					BigMessageAlpha[2] = 0.0;
@@ -1052,7 +1056,11 @@ void CHud::Draw()
 		}
 	}
 }
+#endif
 
+#if 0
+WRAPPER void CHud::DrawAfterFade(void) { EAXJMP(0x509030); }
+#else
 void CHud::DrawAfterFade()
 {
 	if (CTimer::GetIsUserPaused() || CReplay::Mode == 1)
@@ -1136,14 +1144,12 @@ void CHud::DrawAfterFade()
 			else
 				CFont::SetScale(SCREEN_SCALE_X(0.52f), SCREEN_SCALE_Y(1.1f));
 
-			CFont::SetColor(CRGBA(175, 175, 175, 255));
 			CFont::SetJustifyOff();
 			CFont::SetWrapx(SCREEN_SCALE_X(200.0f + 26.0f - 4.0f));
 			CFont::SetFontStyle(FONT_BANK);
 			CFont::SetBackgroundOn();
 			CFont::SetBackGroundOnlyTextOff();
-			CRGBA BackColor = { 0, 0, 0, (uint8)(0.9f * fAlpha) };
-			CFont::SetBackgroundColor(BackColor);
+			CFont::SetBackgroundColor(CRGBA(0, 0, 0, fAlpha));
 			CFont::SetColor(CRGBA(175, 175, 175, 255));
 			CFont::PrintString(SCREEN_SCALE_X(26.0f), SCREEN_SCALE_Y(28.0f + (150.0f - PagerXOffset) * 0.6f), CHud::m_HelpMessageToPrint);
 			CFont::SetAlphaFade(255.0f);
@@ -1224,8 +1230,9 @@ void CHud::DrawAfterFade()
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
-		CFont::SetColor(CRGBA(0, 0, 0, 255));
 		CFont::SetFontStyle(FONT_BANK);
+
+		CFont::SetColor(CRGBA(0, 0, 0, 255));
 		CFont::PrintString(SCREEN_SCALE_X(2.0f) + (SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(20.0f + 2.0f), m_BigMessage[5]);
 
 		CFont::SetColor(CRGBA(156, 91, 40, 255));
@@ -1236,7 +1243,7 @@ void CHud::DrawAfterFade()
 		DrawMissionTitle
 	*/
 	if (m_BigMessage[1][0]) {
-		if (BigMessageInUse[1] == 0.0f) {
+		if (BigMessageInUse[1] != 0.0f) {
 			CFont::SetJustifyOff();
 			CFont::SetBackgroundOff();
 
@@ -1250,11 +1257,15 @@ void CHud::DrawAfterFade()
 			CFont::SetRightJustifyOn();
 			CFont::SetFontStyle(FONT_HEADING);
 			if (BigMessageX[1] >= (SCREENW - 20)) {
-				BigMessageAlpha[1] += (CTimer::GetTimeStep() * 0.02f * -255.0f);
+				BigMessageInUse[1] += (CTimer::GetTimeStep() * 0.02f * 120.0f);
 
-				if (BigMessageAlpha[1] <= 0.0f) {
-					BigMessageAlpha[1] = 0.0f;
-					BigMessageInUse[1] = 1.0f;
+				if (BigMessageInUse[1] >= 120.0f) {
+					BigMessageInUse[1] = 120.0;
+					BigMessageAlpha[1] += (CTimer::GetTimeStep() * 0.02f * -255.0f);
+				}
+				if (BigMessageAlpha[1] <= 0) {
+					m_BigMessage[1][0] = 0;
+					BigMessageAlpha[1] = 0.0;
 				}
 			}
 			else {
@@ -1264,6 +1275,7 @@ void CHud::DrawAfterFade()
 				if (BigMessageAlpha[1] >= 255.0f)
 					BigMessageAlpha[1] = 255.0f;
 			}
+
 			CFont::SetColor(CRGBA(40, 40, 40, BigMessageAlpha[1]));
 			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f - 2.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), m_BigMessage[1]);
 
@@ -1271,16 +1283,20 @@ void CHud::DrawAfterFade()
 			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), m_BigMessage[1]);
 		}
 		else {
-			BigMessageAlpha[1] = 0.0f;
-			BigMessageX[1] = -60.0f;
-			BigMessageInUse[1] = 1.0f;
+			BigMessageAlpha[1] = 0.0;
+			BigMessageX[1] = -60.0;
+			BigMessageInUse[1] = 1.0;
 		}
 	}
 	else {
-		BigMessageInUse[1] = 0.0f;
+		BigMessageInUse[1] = 0.0;
 	}
 }
+#endif
 
+#if 1
+WRAPPER void CHud::ReInitialise(void) { EAXJMP(0x504CC0); }
+#else
 void CHud::ReInitialise() {
 	m_Wants_To_Draw_Hud = true;
 	m_ZoneState = 0;
@@ -1329,6 +1345,7 @@ void CHud::ReInitialise() {
 	PagerXOffset = 150.0f;
 	OddJob2XOffset = 0.0f;
 }
+#endif
 
 STARTPATCHES
 	InjectHook(0x48BC9A, &CHud::Initialise, PATCH_CALL);

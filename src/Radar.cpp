@@ -10,12 +10,6 @@
 #include "Pools.h"
 #include "Script.h"
 
-//WRAPPER void CRadar::DrawMap () { EAXJMP(0x4A4200); }
-//WRAPPER void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int alpha) { EAXJMP(0x4A5D10); }
-//WRAPPER void CRadar::TransformRealWorldPointToRadarSpace(CVector2D *out, CVector2D *in) { EAXJMP(0x4A50D0); }
-//WRAPPER void CRadar::DrawRadarSprite(int sprite, float x, float y, int alpha) { EAXJMP(0x4A5EF0); }
-//WRAPPER void CRadar::ShowRadarMarker(CVector pos, uint32 color, float radius) { EAXJMP(0x4A59C0); }
-//WRAPPER void CRadar::DrawBlips() { EAXJMP(0x4A42F0); }
 WRAPPER void CRadar::ClearBlipForEntity(eBlipType type, int32 id) { EAXJMP(0x4A56C0); }
 WRAPPER void CRadar::Draw3dMarkers() { EAXJMP(0x4A4C70); }
 WRAPPER void CRadar::DrawRadarMap() { EAXJMP(0x4A6C20); }
@@ -73,6 +67,9 @@ CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = {
 	WeaponSprite
 };
 
+#if 0
+WRAPPER void CRadar::DrawMap () { EAXJMP(0x4A4200); }
+#else
 void CRadar::DrawMap()
 {
 	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
@@ -94,7 +91,11 @@ void CRadar::DrawMap()
 		CRadar::DrawRadarMap();
 	}
 }
+#endif 
 
+#if 0
+WRAPPER void CRadar::DrawBlips() { EAXJMP(0x4A42F0); }
+#else
 void CRadar::DrawBlips()
 {
 	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
@@ -208,6 +209,7 @@ void CRadar::DrawBlips()
 		}
 	}
 }
+#endif
 
 bool CRadar::DisplayThisBlip(int16 spriteid) 
 {
@@ -316,6 +318,9 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D *out, CVector2D *in)
 	out->y = (SCREEN_SCALE_Y(76.0f)) * 0.5f + SCREEN_HEIGHT - (SCREEN_SCALE_Y(123.0f)) - in->y * (SCREEN_SCALE_Y(76.0f)) * 0.5f;
 }
 
+#if 0
+WRAPPER void CRadar::TransformRealWorldPointToRadarSpace(CVector2D *out, CVector2D *in) { EAXJMP(0x4A50D0); }
+#else
 void CRadar::TransformRealWorldPointToRadarSpace(CVector2D *out, CVector2D *in) 
 { 
 	if (TheCamera.Cams->Mode != CCam::CamMode::MODE_TOPDOWN1 && TheCamera.Cams->Mode != CCam::CamMode::MODE_TOPDOWNPED) {
@@ -348,7 +353,11 @@ void CRadar::TransformRealWorldPointToRadarSpace(CVector2D *out, CVector2D *in)
 	out->x = cachedSin * y + cachedCos * x;
 	out->y = cachedCos * y - cachedSin * x;
 }
+#endif 
 
+#if 0
+WRAPPER void CRadar::DrawRadarSprite(int sprite, float x, float y, int alpha) { EAXJMP(0x4A5EF0); }
+#else
 void CRadar::DrawRadarSprite(int sprite, float x, float y, int alpha)
 { 
 	float w = SCREEN_SCALE_X(8.0f);
@@ -356,7 +365,11 @@ void CRadar::DrawRadarSprite(int sprite, float x, float y, int alpha)
 
 	RadarSprites[sprite]->Draw(CRect(x - w, y - h, x + w, y + h), CRGBA(255, 255, 255, alpha));
 }
+#endif
 
+#if 0
+WRAPPER void CRadar::ShowRadarMarker(CVector pos, CRGBA color, float radius) { EAXJMP(0x4A59C0); }
+#else
 void CRadar::ShowRadarMarker(CVector pos, CRGBA color, float radius) {
 	float z2 = pos.z + (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.at.z;
 	float y2 = (0.5f * color.color32) * TheCamera.m_matrix.m_matrix.at.y + pos.y;
@@ -390,7 +403,11 @@ void CRadar::ShowRadarMarker(CVector pos, CRGBA color, float radius) {
 	x1 = pos.x - (1.4f * color.color32) * TheCamera.m_matrix.m_matrix.right.x;
 	CTheScripts::ScriptDebugLine3D(x1, y1, z1, x2, y2, z2, color.color32, color.color32);
 }
+#endif
 
+#if 0
+WRAPPER void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int alpha) { EAXJMP(0x4A5D10); }
+#else
 void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int alpha)
 {
 	CVector curPosn[4];
@@ -417,6 +434,7 @@ void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float 
 
 	sprite->Draw(curPosn[2].x, curPosn[2].y, curPosn[3].x, curPosn[3].y, curPosn[0].x, curPosn[0].y, curPosn[1].x, curPosn[1].y, CRGBA(255, 255, 255, alpha));
 }
+#endif 
 
 STARTPATCHES
 	InjectHook(0x4A5040, CRadar::TransformRadarPointToScreenSpace, PATCH_JUMP);

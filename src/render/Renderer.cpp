@@ -1009,7 +1009,7 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 				case VIS_STREAMME:
 					if(!CStreaming::ms_disableStreaming){
 						CStreaming::RequestModel(ent->GetModelIndex(), 0);
-						if(CStreaming::ms_aInfoForModel[ent->GetModelIndex()].m_loadState != STREAM_LOADED)
+						if(CStreaming::ms_aInfoForModel[ent->GetModelIndex()].m_loadState != STREAMSTATE_LOADED)
 							m_loadingPriority = true;
 					}
 					break;

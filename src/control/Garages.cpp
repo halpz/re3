@@ -8,8 +8,6 @@
 #include "Messages.h"
 #include "Text.h"
 
-//WRAPPER void CGarages::PrintMessages(void) { EAXJMP(0x426310); }
-
 int32 &CGarages::BankVansCollected = *(int32 *)0x8F1B34;
 bool &CGarages::BombsAreFree = *(bool *)0x95CD7A;
 bool &CGarages::RespraysAreFree = *(bool *)0x95CD1D;
@@ -65,6 +63,9 @@ CGarages::IsModelIndexADoor(uint32 id)
 		id == MI_CRUSHERLID;
 }
 
+#if 0
+WRAPPER void CGarages::PrintMessages(void) { EAXJMP(0x426310); }
+#else
 void CGarages::PrintMessages()
 {
 	if (CTimer::GetTimeInMilliseconds() > CGarages::MessageStartTime && CTimer::GetTimeInMilliseconds() < CGarages::MessageEndTime) {
@@ -105,3 +106,4 @@ void CGarages::PrintMessages()
 		}
 	}
 }
+#endif

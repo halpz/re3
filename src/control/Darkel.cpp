@@ -8,5 +8,5 @@ bool CDarkel::Status = *(bool*)0x95CCB4;
 
 bool CDarkel::FrenzyOnGoing()
 {
-	return Status;
+	return Status == 1;
 }
