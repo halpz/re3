@@ -678,13 +678,14 @@ CPed::Attack(void)
 
 	if (!weaponAnimAssoc) {
 		if (ourWeapon->m_bThrow) {
-			weaponAnimAssoc = RpAnimBlendClumpGetAssociation((RpClump*)m_rwObject, ANIM_WEAPON_THROWU);
+			weaponAnimAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_WEAPON_THROWU);
 			delayBetweenAnimAndFire = 0.2f;
 		} else {
 			weaponAnimAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ourWeapon->m_Anim2ToPlay);
 			delayBetweenAnimAndFire = ourWeapon->m_fAnim2FrameFire;
 		}
-	} else {
+	}
+	if (weaponAnimAssoc) {
 		animStart = ourWeapon->m_fAnimLoopStart;
 		weaponAnimTime = weaponAnimAssoc->currentTime;
 		if (weaponAnimTime > animStart && weaponAnimTime - weaponAnimAssoc->timeStep <= animStart) {
