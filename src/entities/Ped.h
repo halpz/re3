@@ -12,10 +12,6 @@
 
 struct CPathNode;
 
-enum {
-	PED_MAX_WEAPONS = 13
-};
-
 enum PedOnGroundState {
 	NO_PED,
 	PED_BELOW_PLAYER,
@@ -138,7 +134,7 @@ public:
 	uint8 m_ped_flagE1 : 1;
 	uint8 m_ped_flagE2 : 1;
 	uint8 m_ped_flagE4 : 1;
-	uint8 m_ped_flagE8 : 1;
+	uint8 m_ped_flagE8 : 1;		// can duck?
 	uint8 m_ped_flagE10 : 1;	// can't attack if it's set
 	uint8 m_ped_flagE20 : 1;
 	uint8 m_ped_flagE40 : 1;
@@ -225,10 +221,11 @@ public:
 	uint8 stuff5[24];
 	CEntity *m_pCollidingEntity;
 	uint8 stuff6[12];
-	CWeapon m_weapons[PED_MAX_WEAPONS];
+	CWeapon m_weapons[NUM_PED_WEAPONTYPES];
 	int32 stuff7;
-	uint8 m_currentWeapon;
-	uint8 stuff[3];
+	uint8 m_currentWeapon;			// eWeaponType
+	uint8 m_maxWeaponTypeAllowed;	// eWeaponType
+	uint8 stuff[2];
 	int32 m_pPointGunAt;
 	CVector m_vecHitLastPos;
 	uint8 stuff8[12];
@@ -241,8 +238,11 @@ public:
 	uint32 m_standardTimer;
 	uint32 m_attackTimer;
 	uint32 m_lastHitTime;
-	uint8 stuff9[22];
-	uint8 m_bodyPartBleeding;
+	uint32 m_hitRecoverTimer;
+	uint32 field_4E0;
+	uint32 m_duckTimer;
+	uint8 stuff9[10];
+	uint8 m_bodyPartBleeding;		// PedNode
 	uint8 m_field_4F3;
 	CPed *m_nearPeds[10];
 	uint16 m_numNearPeds;
@@ -272,12 +272,17 @@ public:
 	void RestorePreviousState(void);
 	void ClearAttack(void);
 	bool IsPedHeadAbovePos(float zOffset);
-	void RemoveWeaponModel(int);
-	void SelectGunIfArmed(void);
+	void RemoveWeaponModel(int modelId);
+	void SetCurrentWeapon(eWeaponType weaponType);
+	bool SelectGunIfArmed(void);
+	void Duck(void);
+	void ClearDuck(void);
+	void ClearPointGunAt(void);
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
 	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
 	static void FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg);
 
+	bool HasWeapon(eWeaponType weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
 

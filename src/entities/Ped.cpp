@@ -9,6 +9,7 @@
 #include "Ped.h"
 #include "PlayerPed.h"
 #include "General.h"
+#include "VisibilityPlugins.h"
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -23,8 +24,6 @@ WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 WRAPPER void CPed::RestorePreviousState(void) { EAXJMP(0x4C5E30); }
 WRAPPER void CPed::ClearAttack(void) { EAXJMP(0x4E6790); }
-WRAPPER void CPed::SelectGunIfArmed(void) { EAXJMP(0x4DD920); }
-WRAPPER void CPed::RemoveWeaponModel(int) { EAXJMP(0x4CF980); }
 
 static char ObjectiveText[34][28] = {
 	"No Obj",
@@ -180,6 +179,18 @@ static char WaitStateText[21][16] = {
 	"Play Chat",
 	"Finish Flee",
 };
+
+static RwObject*
+RemoveAllModelCB(RwObject *object, void *data)
+{
+	RpAtomic* atomic = (RpAtomic*)object;
+	if (CVisibilityPlugins::GetAtomicModelInfo(atomic))
+	{
+		RpClumpRemoveAtomic(atomic->clump, atomic);
+		RpAtomicDestroy(atomic);
+	}
+	return object;
+}
 
 static PedOnGroundState
 CheckForPedsOnGroundToAttack(CPlayerPed *player, CPed **pedOnGround)
@@ -718,7 +729,7 @@ CPed::Attack(void)
 			} else {
 				firePos = GetMatrix() * firePos;
 			}
-
+			
 			GetWeapon()->Fire(this, &firePos);
 
 			if (ourWeaponType == WEAPONTYPE_MOLOTOV || ourWeaponType == WEAPONTYPE_GRENADE) {
@@ -752,29 +763,32 @@ CPed::Attack(void)
 				if (m_ped_flagA4 || CTimer::GetTimeInMilliseconds() < m_lastHitTime) {
 					weaponAnimAssoc->callbackType = 0;
 				}
-
-				lastReloadWasInFuture = false;
 			}
+
+			lastReloadWasInFuture = false;
 		}
 
 		if (ourWeaponType == WEAPONTYPE_SHOTGUN) {
 			weaponAnimTime = weaponAnimAssoc->currentTime;
+			firePos = ourWeapon->m_vecFireOffset;
+
 			if (weaponAnimTime > 1.0f && weaponAnimTime - weaponAnimAssoc->timeStep <= 1.0f && weaponAnimAssoc->IsRunning()) {
 				for (i = GetNodeFrame(PED_HANDR); i; i = RwFrameGetParent(i))
-					RwV3dTransformPoints((RwV3d*)ourWeapon->m_vecFireOffset, (RwV3d*)ourWeapon->m_vecFireOffset, 1, &i->modelling);
+					RwV3dTransformPoints((RwV3d*)firePos, (RwV3d*)firePos, 1, &i->modelling);
 
 				CVector gunshellPos(
-					ourWeapon->m_vecFireOffset.x - 0.6f * GetForward().x,
-					ourWeapon->m_vecFireOffset.y - 0.6f * GetForward().y,
-					ourWeapon->m_vecFireOffset.z - 0.15f * GetUp().z
+					firePos.x - 0.6f * GetForward().x,
+					firePos.y - 0.6f * GetForward().y,
+					firePos.z - 0.15f * GetUp().z
 				);
+
 				CVector2D gunshellRot(
 					GetRight().x,
 					GetRight().y
 				);
 
 				gunshellRot.Normalise();
-				CWeapon::AddGunshell(this, gunshellPos, gunshellRot, 0.025f);
+				GetWeapon()->AddGunshell(this, gunshellPos, gunshellRot, 0.025f);
 			}
 		}
 		animEnd = ourWeapon->m_fAnimLoopEnd;
@@ -787,7 +801,6 @@ CPed::Attack(void)
 		if (weaponAnimTime > animEnd || !weaponAnimAssoc->IsRunning() && ourWeaponFire != WEAPON_FIRE_PROJECTILE) {
 
 			if (weaponAnimTime - 2.0f * weaponAnimAssoc->timeStep <= animEnd
-				// BUG: We currently don't know any situation this cond. could be true.
 				&& (m_ped_flagA4 || CTimer::GetTimeInMilliseconds() < m_lastHitTime)
 				&& GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING) {
 
@@ -830,7 +843,7 @@ CPed::Attack(void)
 				if (ourWeaponType == WEAPONTYPE_FLAMETHROWER && weaponAnimAssoc->IsRunning()) {
 					weaponAnimAssoc->flags |= ASSOC_DELETEFADEDOUT;
 					weaponAnimAssoc->flags &= ~ASSOC_RUNNING;
-					weaponAnimAssoc->blendDelta = -4.0;
+					weaponAnimAssoc->blendDelta = -4.0f;
 				}
 			}
 		}
@@ -865,6 +878,107 @@ CPed::Attack(void)
 		CPed::FinishedAttackCB(0, this);
 }
 
+void
+CPed::RemoveWeaponModel(int modelId)
+{
+	// modelId is not used!! This function just removes the current weapon.
+	RwFrameForAllObjects(GetNodeFrame(PED_HANDR),RemoveAllModelCB,0);
+	m_wepModelID = -1;
+}
+
+void
+CPed::SetCurrentWeapon(eWeaponType weaponType)
+{
+	CWeaponInfo* weaponInfo;
+
+	if (HasWeapon(weaponType)) {
+		weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
+		RemoveWeaponModel(weaponInfo->m_nModelId);
+
+		m_currentWeapon = weaponType;
+
+		weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
+		AddWeaponModel(weaponInfo->m_nModelId);
+	}
+}
+
+// Only used while deciding which gun ped should switch to, if no ammo left.
+bool
+CPed::SelectGunIfArmed(void)
+{
+	eWeaponType weaponType;
+
+	for (int i = 0; i < m_maxWeaponTypeAllowed; i++) {
+
+		if (m_weapons[i].m_nAmmoTotal > 0) {
+			weaponType = m_weapons[i].m_eWeaponType;
+
+			// Original condition was ridiculous
+			// if (weaponType == WEAPONTYPE_COLT45 || weaponType < WEAPONTYPE_M16 || weaponType < WEAPONTYPE_FLAMETHROWER || weaponType == WEAPONTYPE_FLAMETHROWER)
+			if (weaponType < WEAPONTYPE_MOLOTOV) {
+				SetCurrentWeapon(weaponType);
+				return true;
+			}
+		}
+	}
+	SetCurrentWeapon(WEAPONTYPE_UNARMED);
+	return false;
+}
+
+void
+CPed::Duck(void)
+{
+	if (CTimer::GetTimeInMilliseconds() > m_duckTimer)
+		ClearDuck();
+}
+
+void
+CPed::ClearDuck(void)
+{
+	CAnimBlendAssociation *animAssoc;
+
+	animAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_DUCK_DOWN);
+	if (!animAssoc)
+		animAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_DUCK_LOW);
+
+	if (animAssoc) {
+
+		if (m_ped_flagE8) {
+
+			if (m_nPedState == PED_ATTACK || m_nPedState == PED_AIM_GUN) {
+				animAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_RBLOCK_CSHOOT);
+				if (!animAssoc || animAssoc->blendDelta < 0.0f) {
+					CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, ANIM_RBLOCK_CSHOOT, 4.0f);
+				}
+			}
+		}
+	} else
+		m_ped_flagE10 = false;
+}
+
+void
+CPed::ClearPointGunAt(void)
+{
+	CAnimBlendAssociation *animAssoc;
+	CWeaponInfo *weaponInfo;
+
+	ClearLookFlag();
+	ClearAimFlag();
+	m_ped_flagA8 = false;
+	if (m_nPedState == PED_AIM_GUN) {
+		RestorePreviousState();
+		weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
+		animAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, weaponInfo->m_AnimToPlay);
+		if (!animAssoc || animAssoc->blendDelta < 0.0f) {
+			animAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, weaponInfo->m_Anim2ToPlay);
+		}
+		if (animAssoc) {
+			animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+			animAssoc->blendDelta = -4.0;
+		}
+	}
+}
+
 STARTPATCHES
 	InjectHook(0x4CF8F0, &CPed::AddWeaponModel, PATCH_JUMP);
 	InjectHook(0x4C6AA0, &CPed::AimGun, PATCH_JUMP);
@@ -881,4 +995,10 @@ STARTPATCHES
 	InjectHook(0x4E68A0, &CPed::FinishedAttackCB, PATCH_JUMP);
 	InjectHook(0x4E5BD0, &CheckForPedsOnGroundToAttack, PATCH_JUMP);
 	InjectHook(0x4E6BA0, &CPed::Attack, PATCH_JUMP);
+	InjectHook(0x4CF980, &CPed::RemoveWeaponModel, PATCH_JUMP);
+	InjectHook(0x4CFA60, &CPed::SetCurrentWeapon, PATCH_JUMP);
+	InjectHook(0x4DD920, &CPed::SelectGunIfArmed, PATCH_JUMP);
+	InjectHook(0x4E4A10, &CPed::Duck, PATCH_JUMP);
+	InjectHook(0x4E4A30, &CPed::ClearDuck, PATCH_JUMP);
+	InjectHook(0x4E6180, &CPed::ClearPointGunAt, PATCH_JUMP);
 ENDPATCHES
