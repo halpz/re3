@@ -18,6 +18,7 @@ WRAPPER void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint32 red, u
 WRAPPER void CRadar::StreamRadarSections(int x, int y) { EAXJMP(0x4A6100); }
 WRAPPER int CRadar::ClipRadarPoly(CVector2D *out, CVector2D *in) { EAXJMP(0x4A64A0); }
 WRAPPER void CRadar::TransformRealWorldToTexCoordSpace(CVector2D *out, CVector2D *in, int x, int y) { EAXJMP(0x4A5530); }
+WRAPPER void CRadar::TransformRadarPointToRealWorldSpace(CVector2D *out, CVector2D *in) { EAXJMP(0x4A5300); }
 
 float &CRadar::m_RadarRange = *(float*)0x8E281C;
 CVector2D &CRadar::vec2DRadarOrigin = *(CVector2D*)0x6299B8;
@@ -103,7 +104,7 @@ WRAPPER void CRadar::DrawRadarMask() { EAXJMP(0x4A69C0); }
 #else
 void CRadar::DrawRadarMask() 
 { 
-	CVector2D vec2d[4]{
+	CVector2D vec2d[4] = {
 		CVector2D(1.0f, -1.0f),
 		CVector2D(1.0f, 1.0f),
 		CVector2D(-1.0f, 1.0f),
@@ -131,8 +132,8 @@ void CRadar::DrawRadarMask()
 		CRadar::TransformRadarPointToScreenSpace(out, &in);
 
 		for (int j = 0; j < 7; j++) {
-			CRadar::cachedCos = cos(j * M_PI_2 * (1.0f / 6.0f));
-			CRadar::cachedSin = sin(j * M_PI_2 * (1.0f / 6.0f));
+			CRadar::cachedCos = cos(j * (PI / 2.0f / 6.0f));
+			CRadar::cachedSin = sin(j * (PI / 2.0f / 6.0f));
 
 			in.x = vec2d[i].x * cachedCos;
 			in.y = vec2d[i].y * cachedSin;
@@ -208,10 +209,10 @@ void CRadar::DrawBlips()
 		CRadar::TransformRadarPointToScreenSpace(&out, &in);
 
 		float angle;
-		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::CamMode::MODE_TOPDOWN1)
+		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1)
 			angle = PI + FindPlayerHeading();
 		else
-			angle = FindPlayerHeading() - (PI + atan2(-TheCamera.m_matrix.m_matrix.up.x, TheCamera.m_matrix.m_matrix.up.y));
+			angle = FindPlayerHeading() - (PI + atan2(-TheCamera.GetForward().x, TheCamera.GetForward().y));
 
 		CRadar::DrawRotatingRadarSprite(CentreSprite, out.x, out.y, angle, 255);
 
@@ -230,7 +231,7 @@ void CRadar::DrawBlips()
 			if (ms_RadarTrace[i].m_bInUse) {
 				if (ms_RadarTrace[i].m_eBlipType <= BLIP_OBJECT) {
 					CEntity *e = nil;
-					switch (CRadar::ms_RadarTrace[i].m_eBlipType) {
+					switch (ms_RadarTrace[i].m_eBlipType) {
 					case BLIP_CAR:
 						e = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[i].m_nEntityHandle);
 						break;
@@ -261,7 +262,7 @@ void CRadar::DrawBlips()
 
 							CRGBA col = CRadar::GetRadarTraceColour(ms_RadarTrace[i].m_nColor, ms_RadarTrace[i].m_bDim);
 
-							if (CRadar::ms_RadarTrace[i].m_IconID)
+							if (ms_RadarTrace[i].m_IconID)
 								CRadar::DrawRadarSprite(ms_RadarTrace[i].m_IconID, out.x, out.y, a);
 							else
 								CRadar::ShowRadarTrace(out.x, out.y, ms_RadarTrace[i].m_wScale, col.r, col.g, col.b, 255);
@@ -276,8 +277,8 @@ void CRadar::DrawBlips()
 					if (ms_RadarTrace[i].m_eBlipType != BLIP_CONTACT_POINT || ms_RadarTrace[i].m_eBlipType == BLIP_CONTACT_POINT && DisplayThisBlip(i) || !CTheScripts::IsPlayerOnAMission()) {
 						if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 							if (CTheScripts::DbgFlag) {
-								CRadar::ShowRadarMarker(ms_RadarTrace[i].m_vecPos, GetRadarTraceColour(ms_RadarTrace[i].m_nColor, ms_RadarTrace[i].m_bDim), ms_RadarTrace->m_Radius);
-								CRadar::ms_RadarTrace[i].m_Radius = ms_RadarTrace[i].m_Radius - 0.1f;
+								CRadar::ShowRadarMarker(ms_RadarTrace[i].m_vecPos, CRadar::GetRadarTraceColour(ms_RadarTrace[i].m_nColor, ms_RadarTrace[i].m_bDim), ms_RadarTrace->m_Radius);
+								ms_RadarTrace[i].m_Radius = ms_RadarTrace[i].m_Radius - 0.1f;
 								if (ms_RadarTrace[i].m_Radius >= 1.0f)
 									ms_RadarTrace[i].m_Radius = 5.0f;
 							}
@@ -369,20 +370,20 @@ WRAPPER void CRadar::TransformRealWorldPointToRadarSpace(CVector2D *out, CVector
 #else
 void CRadar::TransformRealWorldPointToRadarSpace(CVector2D *out, CVector2D *in) 
 { 
-	if (TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::CamMode::MODE_TOPDOWN1 && TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::CamMode::MODE_TOPDOWNPED) {
+	if (TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_TOPDOWN1 && TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_TOPDOWNPED) {
 		if (TheCamera.GetLookDirection() != LOOKING_FORWARD) {
-			cachedSin = sin(atan2(-TheCamera.m_matrix.m_matrix.up.x, TheCamera.m_matrix.m_matrix.up.y));
-			cachedCos = cos(atan2(-TheCamera.m_matrix.m_matrix.up.x, TheCamera.m_matrix.m_matrix.up.y));
+			cachedSin = sin(atan2(-TheCamera.GetForward().x, TheCamera.GetForward().y));
+			cachedCos = cos(atan2(-TheCamera.GetForward().x, TheCamera.GetForward().y));
 		}
 		else {
 			CVector vecCamera;
 
-			if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::CamMode::MODE_FIRSTPERSON) {
+			if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FIRSTPERSON) {
 				vecCamera = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->m_matrix.m_matrix.up;
 				vecCamera.Normalise();
 			}
 			else
-				vecCamera = TheCamera.m_matrix.m_matrix.up;
+				vecCamera = TheCamera.GetForward();
 		
 			cachedSin = sin(atan2(-vecCamera.x, vecCamera.y));
 			cachedCos = cos(atan2(-vecCamera.x, vecCamera.y));	
@@ -494,6 +495,9 @@ bool CRadar::DisplayThisBlip(int counter)
 	}
 }
 
+#if 0
+WRAPPER void CRadar::GetTextureCorners(int x, int y, CVector2D *out) { EAXJMP(0x4A61C0); };
+#else
 void CRadar::GetTextureCorners(int x, int y, CVector2D *out)
 {
 	out[0].x = 500.0f * (x - 4);
@@ -505,6 +509,7 @@ void CRadar::GetTextureCorners(int x, int y, CVector2D *out)
 	out[3].x = 500.0f * (x - 4);
 	out[3].y = 500.0f * (3 - y + 1);
 }
+#endif
 
 void CRadar::ClipRadarTileCoords(int x, int y)
 {

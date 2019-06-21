@@ -102,6 +102,7 @@ public:
 	static void StreamRadarSections(int x, int y);
 	static int ClipRadarPoly(CVector2D *out, CVector2D *in);
 	static void TransformRealWorldToTexCoordSpace(CVector2D *out, CVector2D *in, int x, int y);
+	static void CRadar::TransformRadarPointToRealWorldSpace(CVector2D *out, CVector2D *in);
 	static void DrawRadarSection(int x, int y);
 	static void TransformRadarPointToScreenSpace(CVector2D * out, CVector2D * in);
 	static void DrawBlips();
