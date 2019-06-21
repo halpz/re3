@@ -2,11 +2,14 @@
 #include "patcher.h"
 #include "ModelInfo.h"
 #include "TxdStore.h"
+#include "ModelIndices.h"
 #include "Pools.h"
 #include "Directory.h"
 #include "RwHelper.h"
+#include "World.h"
 #include "Entity.h"
 #include "FileMgr.h"
+#include "FileLoader.h"
 #include "CdStream.h"
 #include "Streaming.h"
 
@@ -56,11 +59,10 @@ int32 &islandLODcomSub = *(int32*)0x6212D0;
 int32 &islandLODsubInd = *(int32*)0x6212D4;
 int32 &islandLODsubCom = *(int32*)0x6212D8;
 
-
-WRAPPER void CStreaming::RemoveModel(int32 id) { EAXJMP(0x408830); }
-WRAPPER void CStreaming::RequestModel(int32 model, int32 flags) { EAXJMP(0x407EA0); }
-
 WRAPPER void CStreaming::MakeSpaceFor(int32 size) { EAXJMP(0x409B70); }
+WRAPPER bool CStreaming::IsTxdUsedByRequestedModels(int32 txdId) { EAXJMP(0x4094C0); }
+WRAPPER bool CStreaming::AddToLoadedVehiclesList(int32 modelId) { EAXJMP(0x40B060); }
+
 
 void
 CStreaming::Init(void)
@@ -279,6 +281,428 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 	CFileMgr::CloseFile(fd);
 }
 
+bool
+CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
+{
+	RwMemory mem;
+	RwStream *stream;
+	int cdsize;
+	uint32 startTime, endTime, timeDiff;
+	CBaseModelInfo *mi;
+	bool success;
+
+	startTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
+
+	cdsize = ms_aInfoForModel[streamId].GetCdSize();
+	mem.start = (uint8*)buf;
+	mem.length = cdsize * CDSTREAM_SECTOR_SIZE;
+	stream = RwStreamOpen(rwSTREAMMEMORY, rwSTREAMREAD, &mem);
+
+	if(streamId < STREAM_OFFSET_TXD){
+		// Model
+		mi = CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL);
+
+		// Txd has to be loaded
+		if(CTxdStore::GetSlot(mi->GetTxdSlot())->texDict == nil){
+			debug("failed to load %s because TXD %s is not in memory\n", mi->GetName(), CTxdStore::GetTxdName(mi->GetTxdSlot()));
+			RemoveModel(streamId);
+			RemoveModel(mi->GetTxdSlot() + STREAM_OFFSET_TXD);
+			// re-request
+			RequestModel(streamId, ms_aInfoForModel[streamId].m_flags);
+			RwStreamClose(stream, &mem);
+			return false;
+		}
+
+		// Set Txd to use
+		CTxdStore::AddRef(mi->GetTxdSlot());
+		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
+
+		if(mi->IsSimple()){
+			success = CFileLoader::LoadAtomicFile(stream, streamId - STREAM_OFFSET_MODEL);
+		}else if(mi->m_type == MITYPE_VEHICLE){
+			// load vehicles in two parts
+			CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL)->AddRef();
+			success = CFileLoader::StartLoadClumpFile(stream, streamId - STREAM_OFFSET_MODEL);
+			if(success)
+				ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_STARTED;
+		}else{
+			success = CFileLoader::LoadClumpFile(stream, streamId - STREAM_OFFSET_MODEL);
+		}
+		UpdateMemoryUsed();
+
+		// Txd no longer needed unless we only read part of the file
+		if(ms_aInfoForModel[streamId].m_loadState != STREAMSTATE_STARTED)
+			CTxdStore::RemoveRefWithoutDelete(mi->GetTxdSlot());
+
+		if(!success){
+			debug("Failed to load %s\n", CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL)->GetName());
+			RemoveModel(streamId);
+			// re-request
+			RequestModel(streamId, ms_aInfoForModel[streamId].m_flags);
+			RwStreamClose(stream, &mem);
+			return false;
+		}
+	}else{
+		// Txd
+		assert(streamId < NUMSTREAMINFO);
+		if((ms_aInfoForModel[streamId].m_flags & STREAMFLAGS_KEEP_IN_MEMORY) == 0 &&
+		   !IsTxdUsedByRequestedModels(streamId - STREAM_OFFSET_TXD)){
+			RemoveModel(streamId);
+			RwStreamClose(stream, &mem);
+			return false;
+		}
+
+		if(ms_bLoadingBigModel || cdsize > 200){
+			success = CTxdStore::StartLoadTxd(streamId - STREAM_OFFSET_TXD, stream);
+			if(success)
+				ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_STARTED;
+		}else
+		        success = CTxdStore::LoadTxd(streamId - STREAM_OFFSET_TXD, stream);
+		UpdateMemoryUsed();
+
+		if(!success){
+			debug("Failed to load %s.txd\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD));
+			RemoveModel(streamId);
+			// re-request
+			RequestModel(streamId, ms_aInfoForModel[streamId].m_flags);
+			RwStreamClose(stream, &mem);
+			return false;
+		}
+	}
+
+	RwStreamClose(stream, &mem);
+
+	// We shouldn't even end up here unless load was successful
+	if(!success){
+		RequestModel(streamId, ms_aInfoForModel[streamId].m_flags);
+		if(streamId < STREAM_OFFSET_TXD)
+			debug("Failed to load %s.dff\n", mi->GetName());
+		else
+			debug("Failed to load %s.txd\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD));
+		return false;
+	}
+
+	if(streamId < STREAM_OFFSET_TXD){
+		// Model
+		// Vehicles and Peds not in loaded list
+		if(mi->m_type != MITYPE_VEHICLE && mi->m_type != MITYPE_PED){
+			CSimpleModelInfo *smi = (CSimpleModelInfo*)mi;
+
+			// Set fading for some objects
+			if(mi->IsSimple() && !smi->m_isBigBuilding){
+				if(ms_aInfoForModel[streamId].m_flags & STREAMFLAGS_NOFADE)
+					smi->m_alpha = 255;
+				else
+					smi->m_alpha = 0;
+			}
+
+			if((ms_aInfoForModel[streamId].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0)
+				ms_aInfoForModel[streamId].AddToList(&ms_startLoadedList);
+		}
+	}else{
+		// Txd
+		if((ms_aInfoForModel[streamId].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0)
+			ms_aInfoForModel[streamId].AddToList(&ms_startLoadedList);
+	}
+
+	// Mark objects as loaded
+	if(ms_aInfoForModel[streamId].m_loadState != STREAMSTATE_STARTED){
+		ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;
+		ms_memoryUsed += ms_aInfoForModel[streamId].GetCdSize() * CDSTREAM_SECTOR_SIZE;
+	}
+
+	endTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
+	timeDiff = endTime - startTime;
+	if(timeDiff > 5){
+		if(streamId < STREAM_OFFSET_TXD)
+			debug("model %s took %d ms\n", CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL)->GetName(), timeDiff);
+		else
+			debug("txd %s took %d ms\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD), timeDiff);
+	}
+
+	return true;
+}
+
+
+bool
+CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
+{
+	RwMemory mem;
+	RwStream *stream;
+	uint32 startTime, endTime, timeDiff;
+	CBaseModelInfo *mi;
+	bool success;
+
+	startTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
+
+	if(ms_aInfoForModel[streamId].m_loadState != STREAMSTATE_STARTED){
+		if(streamId < STREAM_OFFSET_TXD)
+			CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL)->RemoveRef();
+		return false;
+	}
+
+	mem.start = (uint8*)buf;
+	mem.length = ms_aInfoForModel[streamId].GetCdSize() * CDSTREAM_SECTOR_SIZE;
+	stream = RwStreamOpen(rwSTREAMMEMORY, rwSTREAMREAD, &mem);
+
+	if(streamId < STREAM_OFFSET_TXD){
+		// Model
+		mi = CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL);
+		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
+		success = CFileLoader::FinishLoadClumpFile(stream, streamId);
+		if(success)
+			success = AddToLoadedVehiclesList(streamId);
+		mi->RemoveRef();
+		CTxdStore::RemoveRefWithoutDelete(mi->GetTxdSlot());
+	}else{
+		// Txd
+		CTxdStore::AddRef(streamId - STREAM_OFFSET_TXD);
+		success = CTxdStore::FinishLoadTxd(streamId - STREAM_OFFSET_TXD, stream);
+		CTxdStore::RemoveRefWithoutDelete(streamId - STREAM_OFFSET_TXD);
+	}
+
+	RwStreamClose(stream, &mem);
+	ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;
+	ms_memoryUsed += ms_aInfoForModel[streamId].GetCdSize() * CDSTREAM_SECTOR_SIZE;
+
+	if(!success){
+		RemoveModel(streamId);
+		// re-request
+		RequestModel(streamId, ms_aInfoForModel[streamId].m_flags);
+		UpdateMemoryUsed();
+		return false;
+	}
+
+	UpdateMemoryUsed();
+
+	endTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
+	timeDiff = endTime - startTime;
+	if(timeDiff > 5){
+		if(streamId < STREAM_OFFSET_TXD)
+			debug("finish model %s took %d ms\n", CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL)->GetName(), timeDiff);
+		else
+			debug("finish txd %s took %d ms\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD), timeDiff);
+	}
+
+	return true;
+}
+
+void
+CStreaming::RequestModel(int32 id, int32 flags)
+{
+	CSimpleModelInfo *mi;
+
+	if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_INQUEUE){
+		// updgrade to priority
+		if(flags & STREAMFLAGS_PRIORITY && (ms_aInfoForModel[id].m_flags & STREAMFLAGS_PRIORITY) == 0){
+			ms_numPriorityRequests++;
+			ms_aInfoForModel[id].m_flags |= STREAMFLAGS_PRIORITY;
+		}
+	}else if(ms_aInfoForModel[id].m_loadState != STREAMSTATE_NOTLOADED){
+		flags &= ~STREAMFLAGS_PRIORITY;
+	}
+	ms_aInfoForModel[id].m_flags |= flags;
+
+	if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED){
+		// Already loaded, only check changed flags
+
+		if(ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOFADE && id < STREAM_OFFSET_TXD){
+			mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id - STREAM_OFFSET_MODEL);
+			if(mi->IsSimple())
+				mi->m_alpha = 255;
+		}
+
+		// reinsert into list
+		if(ms_aInfoForModel[id].m_next){
+			ms_aInfoForModel[id].RemoveFromList();
+			if((ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0)
+				ms_aInfoForModel[id].AddToList(&ms_startLoadedList);
+		}
+	}else if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_NOTLOADED ||
+	         ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED){	// how can this be true again?
+
+		if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_NOTLOADED){
+			if(id < STREAM_OFFSET_TXD)
+				RequestTxd(CModelInfo::GetModelInfo(id - STREAM_OFFSET_MODEL)->GetTxdSlot(), flags);
+			ms_aInfoForModel[id].AddToList(&ms_startRequestedList);
+			ms_numModelsRequested++;
+			if(flags & STREAMFLAGS_PRIORITY)
+				ms_numPriorityRequests++;
+		}
+
+		ms_aInfoForModel[id].m_loadState = STREAMSTATE_INQUEUE;
+		ms_aInfoForModel[id].m_flags = flags;
+	}
+}
+
+void
+CStreaming::RequestSubway(void)
+{
+	RequestModel(MI_SUBWAY1, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY2, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY3, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY4, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY5, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY6, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY7, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY8, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY9, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY10, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY11, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY12, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY13, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY14, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY15, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY16, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY17, STREAMFLAGS_NOFADE);
+	RequestModel(MI_SUBWAY18, STREAMFLAGS_NOFADE);
+
+	switch(CGame::currLevel){
+	case LEVEL_INDUSTRIAL:
+		RequestModel(MI_SUBPLATFORM_IND, STREAMFLAGS_NOFADE);
+		break;
+	case LEVEL_COMMERCIAL:
+		if(FindPlayerTrain()->GetPosition().y < -700.0f){
+			RequestModel(MI_SUBPLATFORM_COMS, STREAMFLAGS_NOFADE);
+			RequestModel(MI_SUBPLATFORM_COMS2, STREAMFLAGS_NOFADE);
+		}else{
+			RequestModel(MI_SUBPLATFORM_COMN, STREAMFLAGS_NOFADE);
+		}
+		break;
+	case LEVEL_SUBURBAN:
+		RequestModel(MI_SUBPLATFORM_SUB, STREAMFLAGS_NOFADE);
+		RequestModel(MI_SUBPLATFORM_SUB2, STREAMFLAGS_NOFADE);
+		break;
+	}
+}
+
+void
+CStreaming::RequestBigBuildings(eLevelName level)
+{
+	int i, n;
+	CBuilding *b;
+
+	n = CPools::GetBuildingPool()->GetSize();
+	for(i = 0; i < n; i++){
+		b = CPools::GetBuildingPool()->GetSlot(i);
+		if(b && b->bIsBIGBuilding && b->m_level == level)
+			RequestModel(b->GetModelIndex(), STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_PRIORITY);
+	}
+	RequestIslands(level);
+	ms_hasLoadedLODs = false;
+}
+
+void
+CStreaming::RequestIslands(eLevelName level)
+{
+	switch(level){
+	case LEVEL_INDUSTRIAL:
+		RequestModel(islandLODcomInd, STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_PRIORITY);
+		RequestModel(islandLODsubInd, STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_PRIORITY);
+		break;
+	case LEVEL_COMMERCIAL:
+		RequestModel(islandLODindust, STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_PRIORITY);
+		RequestModel(islandLODsubCom, STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_PRIORITY);
+		break;
+	case LEVEL_SUBURBAN:
+		RequestModel(islandLODindust, STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_PRIORITY);
+		RequestModel(islandLODcomSub, STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_PRIORITY);
+		break;
+	}
+}
+
+void
+CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flags)
+{
+	CBaseModelInfo *mi;
+	int txdId;
+	char oldName[48];
+	uint32 pos, size;
+
+	mi = CModelInfo::GetModelInfo(modelId);
+	if(strcmp(mi->GetName(), modelName) == 0){
+		// Already have the correct name, just request it
+		RequestModel(modelId, flags);
+		return;
+	}
+
+	strcpy(oldName, mi->GetName());
+	mi->SetName(modelName);
+
+	// What exactly is going on here?
+	if(CModelInfo::GetModelInfo(oldName, nil)){
+		txdId = CTxdStore::FindTxdSlot(oldName);
+		if(txdId != -1 && CTxdStore::GetSlot(txdId)->texDict){
+			CTxdStore::AddRef(txdId);
+			RemoveModel(modelId);
+			CTxdStore::RemoveRefWithoutDelete(txdId);
+		}else
+			RemoveModel(modelId);
+	}else
+		RemoveModel(modelId);
+
+	ms_pExtraObjectsDir->FindItem(modelName, pos, size);
+	mi->ClearTexDictionary();
+	if(CTxdStore::FindTxdSlot(modelName) == -1)
+		mi->SetTexDictionary("generic");
+	else
+		mi->SetTexDictionary(modelName);
+	ms_aInfoForModel[modelId].SetCdPosnAndSize(pos, size);
+	RequestModel(modelId, flags);
+}
+
+void
+CStreaming::RequestSpecialChar(int32 charId, const char *modelName, int32 flags)
+{
+	RequestSpecialModel(charId + MI_SPECIAL01, modelName, flags);
+}
+
+void
+CStreaming::RemoveModel(int32 id)
+{
+	int i;
+
+	if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_NOTLOADED)
+		return;
+
+	if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED){
+		if(id < STREAM_OFFSET_TXD)
+			CModelInfo::GetModelInfo(id - STREAM_OFFSET_MODEL)->DeleteRwObject();
+		else
+			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
+		ms_memoryUsed -= ms_aInfoForModel[id].GetCdSize()*CDSTREAM_SECTOR_SIZE;
+	}
+
+	if(ms_aInfoForModel[id].m_next){
+		// Remove from list, model is neither loaded nor requested
+		if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_INQUEUE){
+			ms_numModelsRequested--;
+			if(ms_aInfoForModel[id].m_flags & STREAMFLAGS_PRIORITY){
+				ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_PRIORITY;
+				ms_numPriorityRequests--;
+			}
+		}
+		ms_aInfoForModel[id].RemoveFromList();
+	}else if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_READING){
+		for(i = 0; i < 4; i++){
+			if(ms_channel[0].modelIds[i] == id - STREAM_OFFSET_MODEL)
+				ms_channel[0].modelIds[i] = -1;
+			if(ms_channel[1].modelIds[i] == id - STREAM_OFFSET_MODEL)
+				ms_channel[1].modelIds[i] = -1;
+		}
+	}
+
+	if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_STARTED){
+		if(id < STREAM_OFFSET_TXD)
+			RpClumpGtaCancelStream();
+		else
+			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
+	}
+
+	ms_aInfoForModel[id].m_loadState = STREAMSTATE_NOTLOADED;
+}
+
+
 void
 CStreaming::ImGonnaUseStreamingMemory(void)
 {
@@ -338,6 +762,15 @@ STARTPATCHES
 	InjectHook(0x406C80, CStreaming::Shutdown, PATCH_JUMP);
 	InjectHook(0x406CC0, (void (*)(void))CStreaming::LoadCdDirectory, PATCH_JUMP);
 	InjectHook(0x406DA0, (void (*)(const char*, int))CStreaming::LoadCdDirectory, PATCH_JUMP);
+	InjectHook(0x409740, CStreaming::ConvertBufferToObject, PATCH_JUMP);
+	InjectHook(0x409580, CStreaming::FinishLoadingLargeFile, PATCH_JUMP);
+	InjectHook(0x407EA0, CStreaming::RequestModel, PATCH_JUMP);
+	InjectHook(0x407FD0, CStreaming::RequestSubway, PATCH_JUMP);
+	InjectHook(0x408190, CStreaming::RequestBigBuildings, PATCH_JUMP);
+	InjectHook(0x408210, CStreaming::RequestIslands, PATCH_JUMP);
+	InjectHook(0x40A890, CStreaming::RequestSpecialModel, PATCH_JUMP);
+	InjectHook(0x40ADA0, CStreaming::RequestSpecialChar, PATCH_JUMP);
+	InjectHook(0x408830, CStreaming::RemoveModel, PATCH_JUMP);
 
 	InjectHook(0x4063E0, &CStreamingInfo::GetCdPosnAndSize, PATCH_JUMP);
 	InjectHook(0x406410, &CStreamingInfo::SetCdPosnAndSize, PATCH_JUMP);
