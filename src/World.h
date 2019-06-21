@@ -7,8 +7,20 @@
 /* Sectors span from -2000 to 2000 in x and y.
  * With 100x100 sectors, each is 40x40 units. */
 
-#define NUMSECTORS_X 100
-#define NUMSECTORS_Y 100
+#define SECTOR_SIZE_X (40.0f)
+#define SECTOR_SIZE_Y (40.0f)
+
+#define NUMSECTORS_X (100)
+#define NUMSECTORS_Y (100)
+
+#define WORLD_SIZE_X (NUMSECTORS_X * SECTOR_SIZE_X)
+#define WORLD_SIZE_Y (NUMSECTORS_Y * SECTOR_SIZE_Y)
+
+#define WORLD_MIN_X (-2000.0f)
+#define WORLD_MIN_Y (-2000.0f)
+
+#define WORLD_MAX_X (WORLD_MIN_X + WORLD_SIZE_X)
+#define WORLD_MAX_Y (WORLD_MIN_Y + WORLD_SIZE_Y)
 
 enum
 {
@@ -85,12 +97,12 @@ public:
 	static float FindGroundZFor3DCoord(float x, float y, float z, bool *found);
 	static float FindRoofZFor3DCoord(float x, float y, float z, bool *found);
 
-	static float GetSectorX(float f) { return ((f + 2000.0f)/40.0f); }
-	static float GetSectorY(float f) { return ((f + 2000.0f)/40.0f); }
+	static float GetSectorX(float f) { return ((f - WORLD_MIN_X)/SECTOR_SIZE_X); }
+	static float GetSectorY(float f) { return ((f - WORLD_MIN_Y)/SECTOR_SIZE_Y); }
 	static int GetSectorIndexX(float f) { return (int)GetSectorX(f); }
 	static int GetSectorIndexY(float f) { return (int)GetSectorY(f); }
-	static float GetWorldX(int x) { return x*40.0f - 2000.0f; }
-	static float GetWorldY(int y) { return y*40.0f - 2000.0f; }
+	static float GetWorldX(int x) { return x*SECTOR_SIZE_X + WORLD_MIN_X; }
+	static float GetWorldY(int y) { return y*SECTOR_SIZE_Y + WORLD_MIN_Y; }
 };
 
 class CPed;
