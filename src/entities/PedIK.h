@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include "PedModelInfo.h"
 
 struct LimbOrientation
 {
@@ -14,20 +15,21 @@ class CPedIK
 public:
 	// TODO
 	enum {
-		FLAG_1,
-		FLAG_2,
-		FLAG_4,	// aims with arm
+		FLAG_1 = 1,
+		FLAG_2 = 2,	// related to looking somewhere
+		FLAG_4 = 4,	// aims with arm
 	};
 
-	CPed* m_ped;
+	CPed *m_ped;
 	LimbOrientation m_headOrient;
 	LimbOrientation m_torsoOrient;
 	LimbOrientation m_upperArmOrient;
 	LimbOrientation m_lowerArmOrient;
 	int32 m_flags;
 
-	void GetComponentPosition(RwV3d* pos, int id);
 	bool PointGunInDirection(float phi, float theta);
-	bool PointGunAtPosition(CVector* position);
+	bool PointGunAtPosition(CVector *position);
+	void GetComponentPosition(RwV3d *pos, PedNode node);
+	static RwMatrix *GetWorldMatrix(RwFrame *source, RwMatrix *destination);
 };
 static_assert(sizeof(CPedIK) == 0x28, "CPedIK: error");

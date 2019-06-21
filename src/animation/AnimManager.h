@@ -208,6 +208,8 @@ enum AnimationId
 	ANIM_PHONE_IN,
 	ANIM_PHONE_OUT,
 	ANIM_PHONE_TALK,
+
+	NUM_ANIMS
 };
 
 class CAnimBlendAssociation;
