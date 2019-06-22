@@ -24,10 +24,10 @@ enum ePickupType
 class CPickup
 {
     ePickupType m_eType;
-    unsigned __int16 m_wQuantity;
+    uint16 m_wQuantity;
     CObject *m_pObject;
-    int m_nTimer;
-    __int16 m_eModelIndex;
-    __int16 m_wIndex;
+    uint32 m_nTimer;
+    int16 m_eModelIndex;
+    int16 m_wIndex;
     CVector m_vecPos;
 };
