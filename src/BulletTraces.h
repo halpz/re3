@@ -5,5 +5,5 @@
 class CBulletTraces
 {
 public:
-    static CBulletTrace(&aTraces)[16];
+	static CBulletTrace(&aTraces)[16];
 };

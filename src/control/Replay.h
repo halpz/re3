@@ -81,70 +81,70 @@ class CReplay
 	};
 
 
-    struct tGeneralPacket
-    {
-        uint8 type;
-        bool in_rcvehicle;
-        CMatrix camera_pos;
-        CVector player_pos;
-    };
-    static_assert(sizeof(tGeneralPacket) == 88, "tGeneralPacket: error");
+	struct tGeneralPacket
+	{
+		uint8 type;
+		bool in_rcvehicle;
+		CMatrix camera_pos;
+		CVector player_pos;
+	};
+	static_assert(sizeof(tGeneralPacket) == 88, "tGeneralPacket: error");
 
-    struct tClockPacket
-    {
-        uint8 type;
-        uint8 hours;
-        uint8 minutes;
-    private:
-        uint8 __align;
-    };
-    static_assert(sizeof(tClockPacket) == 4, "tClockPacket: error");
+	struct tClockPacket
+	{
+		uint8 type;
+		uint8 hours;
+		uint8 minutes;
+	private:
+		uint8 __align;
+	};
+	static_assert(sizeof(tClockPacket) == 4, "tClockPacket: error");
 
-    struct tWeatherPacket
-    {
-        uint8 type;
-        uint8 old_weather;
-        uint8 new_weather;
-        float interpolation;
-    };
-    static_assert(sizeof(tWeatherPacket) == 8, "tWeatherPacket: error");
+	struct tWeatherPacket
+	{
+		uint8 type;
+		uint8 old_weather;
+		uint8 new_weather;
+		float interpolation;
+	};
+	static_assert(sizeof(tWeatherPacket) == 8, "tWeatherPacket: error");
 
-    struct tTimerPacket
-    {
-        uint8 type;
-        uint32 timer;
-    };
-    static_assert(sizeof(tTimerPacket) == 8, "tTimerPacket: error");
+	struct tTimerPacket
+	{
+		uint8 type;
+		uint32 timer;
+	};
+	static_assert(sizeof(tTimerPacket) == 8, "tTimerPacket: error");
 
-    struct tPedHeaderPacket
-    {
-        uint8 type;
-        uint8 index;
-        uint16 mi;
-        uint8 pedtype;
-    private:
-        uint8 __align[3];
-    };
-    static_assert(sizeof(tPedHeaderPacket) == 8, "tPedHeaderPacket: error");
+	struct tPedHeaderPacket
+	{
+		uint8 type;
+		uint8 index;
+		uint16 mi;
+		uint8 pedtype;
+	private:
+		uint8 __align[3];
+	};
+	static_assert(sizeof(tPedHeaderPacket) == 8, "tPedHeaderPacket: error");
 
-    struct tBulletTracePacket
-    {
-        uint8 type;
-        uint8 frames;
-        uint8 lifetime;
-        uint8 index;
-        CVector inf;
-        CVector sup;
-    };
-    static_assert(sizeof(tBulletTracePacket) == 28, "tBulletTracePacket: error");
+	struct tBulletTracePacket
+	{
+		uint8 type;
+		uint8 frames;
+		uint8 lifetime;
+		uint8 index;
+		CVector inf;
+		CVector sup;
+	};
+	static_assert(sizeof(tBulletTracePacket) == 28, "tBulletTracePacket: error");
 
-    struct tEndOfFramePacket
-    {
-        uint8 type;
-    private:
-        uint8 __align[3];
-    };
-    static_assert(sizeof(tEndOfFramePacket) == 4, "tEndOfFramePacket: error");
+	struct tEndOfFramePacket
+	{
+		uint8 type;
+	private:
+		uint8 __align[3];
+	};
+	static_assert(sizeof(tEndOfFramePacket) == 4, "tEndOfFramePacket: error");
 
 private:
 	static uint8 &Mode;
@@ -179,8 +179,8 @@ private:
 
 public:
 	static void Init(void);
-    static void DisableReplays(void);
-    static void EnableReplays(void);
+	static void DisableReplays(void);
+	static void EnableReplays(void);
 	static void Update(void);
 	static void FinishPlayback(void);
 	static void Shutdown(void);
@@ -189,8 +189,8 @@ public:
 	static void StreamAllNecessaryCarsAndPeds(void);
 	static bool ShouldStandardCameraBeProcessed(void);
 
-    inline static bool IsPlayingBack() { return Mode == MODE_PLAYBACK; }
-    inline static bool IsPlayingBackFromFile() { return bPlayingBackFromFile; }
+	inline static bool IsPlayingBack() { return Mode == MODE_PLAYBACK; }
+	inline static bool IsPlayingBackFromFile() { return bPlayingBackFromFile; }
 
 private:
 	static void RecordThisFrame(void);
