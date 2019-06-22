@@ -216,10 +216,10 @@ void CRadar::StreamRadarSections(int x, int y)
 {
 	for (int i = 0; i < 8; ++i) {
 		for (int j = 0; j < 8; ++j) {
-			if (i >= x - 1 && i <= x + 1 && j >= y - 1 && j <= y + 1)
-				RequestMapSection(x, y);
+			if ((i >= x - 1 && i <= x + 1) && (j >= y - 1 && j <= y + 1))
+				RequestMapSection(i, j);
 			else
-				RemoveMapSection(x, y);
+				RemoveMapSection(i, j);
 		};
 	};
 }
