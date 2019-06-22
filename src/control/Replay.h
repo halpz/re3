@@ -12,39 +12,39 @@
 
 struct CAddressInReplayBuffer
 {
-	unsigned int m_nOffset;
+	uint32 m_nOffset;
 	uint8 *m_pBase;
 	uint8 m_bSlot;
 };
 
 struct CStoredAnimationState
 {
-	char animId;
-	char time;
-	char speed;
-	char secAnimId;
-	char secTime;
-	char secSpeed;
-	char blendAmount;
-	char partAnimId;
-	char partAnimTime;
-	char partAnimSpeed;
-	char partBlendAmount;
+	int8 animId;
+	int8 time;
+	int8 speed;
+	int8 secAnimId;
+	int8 secTime;
+	int8 secSpeed;
+	int8 blendAmount;
+	int8 partAnimId;
+	int8 partAnimTime;
+	int8 partAnimSpeed;
+	int8 partBlendAmount;
 };
 
 struct CStoredDetailedAnimationState
 {
-	char m_abAnimId[3];
-	char m_abCurTime[3];
-	char m_abSpeed[3];
-	char m_abBlendAmount[3];
-	char m_abFunctionCallbackID[3];
+	int8 m_abAnimId[3];
+	int8 m_abCurTime[3];
+	int8 m_abSpeed[3];
+	int8 m_abBlendAmount[3];
+	int8 m_abFunctionCallbackID[3];
 	int16 m_awFlags[3];
-	char m_abAnimId2[6];
-	char m_abCurTime2[6];
-	char m_abSpeed2[6];
-	char m_abBlendAmount2[6];
-	char m_abFunctionCallbackID2[6];
+	int8 m_abAnimId2[6];
+	int8 m_abCurTime2[6];
+	int8 m_abSpeed2[6];
+	int8 m_abBlendAmount2[6];
+	int8 m_abFunctionCallbackID2[6];
 	int16 m_awFlags2[6];
 };
 
