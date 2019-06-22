@@ -6,7 +6,7 @@ struct CBulletTrace
 {
     CVector m_vecInf;
     CVector m_vecSup;
-    char m_bInUse;
-    char m_bFramesInUse;
-    char m_bLifeTime;
+    bool m_bInUse;
+    uint8 m_bFramesInUse;
+    uint8 m_bLifeTime;
 };
