@@ -132,7 +132,6 @@ void CReplay::Update(void)
 #if 0
 WRAPPER void CReplay::RecordThisFrame(void) { EAXJMP(0x5932B0); }
 #else
-
 void CReplay::RecordThisFrame(void)
 {
 	tGeneralPacket* general = (tGeneralPacket*)&Record.m_pBase[Record.m_nOffset];
@@ -182,7 +181,7 @@ void CReplay::RecordThisFrame(void)
 		if (!CBulletTraces::aTraces[i].m_bInUse)
 			continue;
 		tBulletTracePacket* bt = (tBulletTracePacket*)&Record.m_pBase[Record.m_nOffset];
-		bt->type = REPLAYPACKET_BULLETTRACES;
+		bt->type = REPLAYPACKET_BULLET_TRACES;
 		bt->index = i;
 		bt->frames = CBulletTraces::aTraces[i].m_bFramesInUse;
 		bt->lifetime = CBulletTraces::aTraces[i].m_bLifeTime;
@@ -210,7 +209,28 @@ void CReplay::RecordThisFrame(void)
 	MarkEverythingAsNew();
 }
 #endif
+
+#if 0
 WRAPPER void CReplay::StorePedUpdate(CPed *ped, int id) { EAXJMP(0x5935B0); }
+#else
+void CReplay::StorePedUpdate(CPed *ped, int id)
+{
+	tPedUpdatePacket* pp = (tPedUpdatePacket*)&Record.m_pBase[Record.m_nOffset];
+	pp->type = REPLAYPACKET_PED_UPDATE;
+	pp->index = id;
+	pp->heading = 128.0f / M_PI * ped->m_fRotationCur;
+	pp->matrix.CompressFromFullMatrix(ped->GetMatrix());
+	pp->assoc_group_id = ped->m_animGroup;
+	/* 	Would be more sane to use GetJustIndex(ped->m_pMyVehicle) in following assignment */
+	if (ped->bInVehicle && ped->m_pMyVehicle)
+		pp->vehicle_index = (CPools::GetVehiclePool()->GetIndex(ped->m_pMyVehicle) >> 8) + 1;
+	else
+		pp->vehicle_index = 0;
+	pp->weapon_model = ped->m_wepModelID;
+	StorePedAnimation(ped, &pp->anim_state);
+	Record.m_nOffset += sizeof(tPedUpdatePacket);
+}
+#endif
 WRAPPER void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state) { EAXJMP(0x593670); }
 WRAPPER void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state) { EAXJMP(0x593BB0); }
 WRAPPER void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayBuffer *buffer) { EAXJMP(0x594050); }

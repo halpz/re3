@@ -65,13 +65,13 @@ class CReplay
 		REPLAYPACKET_END = 0,
 		REPLAYPACKET_VEHICLE = 1,
 		REPLAYPACKET_PED_HEADER = 2,
-		REPLAYPACKET_PED = 3,
+		REPLAYPACKET_PED_UPDATE = 3,
 		REPLAYPACKET_GENERAL = 4,
 		REPLAYPACKET_CLOCK = 5,
 		REPLAYPACKET_WEATHER = 6,
 		REPLAYPACKET_ENDOFFRAME = 7,
 		REPLAYPACKET_TIMER = 8,
-		REPLAYPACKET_BULLETTRACES = 9
+		REPLAYPACKET_BULLET_TRACES = 9
 	};
 
 	enum {
@@ -145,6 +145,19 @@ class CReplay
 		uint8 __align[3];
 	};
 	static_assert(sizeof(tEndOfFramePacket) == 4, "tEndOfFramePacket: error");
+
+	struct tPedUpdatePacket
+	{
+		uint8 type;
+		uint8 index;
+		int8 heading;
+		int8 vehicle_index;
+		CStoredAnimationState anim_state;
+		CCompressedMatrixNotAligned matrix;
+		uint8 assoc_group_id;
+		uint8 weapon_model;
+	};
+	static_assert(sizeof(tPedUpdatePacket) == 40, "tPedUpdatePacket: error");
 
 private:
 	static uint8 &Mode;

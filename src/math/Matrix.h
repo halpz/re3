@@ -246,3 +246,37 @@ Multiply3x3(const CMatrix &mat, const CVector &vec)
 		mat.m_matrix.right.y * vec.x + mat.m_matrix.up.y * vec.y + mat.m_matrix.at.y * vec.z,
 		mat.m_matrix.right.z * vec.x + mat.m_matrix.up.z * vec.y + mat.m_matrix.at.z * vec.z);
 }
+
+class CCompressedMatrixNotAligned
+{
+	CVector m_vecPos;
+	int8 m_rightX;
+	int8 m_rightY;
+	int8 m_rightZ;
+	int8 m_upX;
+	int8 m_upY;
+	int8 m_upZ;
+public:
+	void CompressFromFullMatrix(CMatrix &other)
+	{
+		m_rightX = 127.0f * other.GetRight()->x;
+		m_rightY = 127.0f * other.GetRight()->y;
+		m_rightZ = 127.0f * other.GetRight()->z;
+		m_upX = 127.0f * other.GetForward()->x;
+		m_upY = 127.0f * other.GetForward()->y;
+		m_upZ = 127.0f * other.GetForward()->z;
+		m_vecPos = *other.GetPosition();
+	}
+	void DecompressIntoFullMatrix(CMatrix &other)
+	{
+		other.GetRight()->x = m_rightX / 127.0f;
+		other.GetRight()->y = m_rightY / 127.0f;
+		other.GetRight()->z = m_rightZ / 127.0f;
+		other.GetForward()->x = m_upX / 127.0f;
+		other.GetForward()->y = m_upY / 127.0f;
+		other.GetForward()->z = m_upZ / 127.0f;
+		*other.GetUp() = CrossProduct(*other.GetRight(), *other.GetForward());
+		*other.GetPosition() = m_vecPos;
+		other.Reorthogonalise();
+	}
+};
