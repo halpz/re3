@@ -102,8 +102,10 @@ public:
 	static void StreamRadarSections(int x, int y);
 	static int ClipRadarPoly(CVector2D *out, CVector2D *in);
 	static void TransformRealWorldToTexCoordSpace(CVector2D *out, CVector2D *in, int x, int y);
-	static void CRadar::TransformRadarPointToRealWorldSpace(CVector2D *out, CVector2D *in);
+	static void TransformRadarPointToRealWorldSpace(CVector2D *out, CVector2D *in);
 	static void DrawRadarSection(int x, int y);
+	static void RequestMapSection(int x, int y);
+	static void RemoveMapSection(int x, int y);
 	static void TransformRadarPointToScreenSpace(CVector2D * out, CVector2D * in);
 	static void DrawBlips();
 	static int CalculateBlipAlpha(float dist);
@@ -116,7 +118,8 @@ public:
 	static void ShowRadarMarker(CVector pos, CRGBA color, float radius);
 	static void ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 green, uint32 blue, uint32 alpha);
 	static void DrawRadarMask();
+	static void SetRadarMarkerState(int counter, int flag);
 	static bool DisplayThisBlip(int counter);
 	static void GetTextureCorners(int x, int y, CVector2D * out);
-	static void ClipRadarTileCoords(int x, int y);
+	static void ClipRadarTileCoords(int *x, int *y);
 };

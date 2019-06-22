@@ -31,7 +31,7 @@ CEntity::CEntity(void)
 	bIsVisible = true;
 	bHasCollided = false;
 	bRenderScorched = false;
-	m_flagB20 = false;
+	bHasBlip = false;
 	bIsBIGBuilding = false;
 	bRenderDamaged = false;
 

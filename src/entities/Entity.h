@@ -5,6 +5,19 @@
 
 struct CReference;
 
+enum eEntityFlags
+{
+	IS_UNK = 0,
+	CONTROL_POSTPONED,
+	IS_EXPLOSIONPROOF,
+	IS_VISIBLE,
+	IS_ON_GROUND,
+	REQUIRES_SCORCHED_LIGHTS,
+	HAS_BLIP,
+	IS_BIG_BUILDING,
+	HAS_BEEN_DAMAGED,
+};
+
 enum eEntityType
 {
 	ENTITY_TYPE_NOTHING = 0,
@@ -59,7 +72,7 @@ public:
 	uint32 bIsVisible : 1;
 	uint32 bHasCollided : 1;	//
 	uint32 bRenderScorched : 1;
-	uint32 m_flagB20 : 1;	// bFlashing?
+	uint32 bHasBlip : 1;
 	uint32 bIsBIGBuilding : 1;
 	// VC inserts one more flag here: if drawdist <= 2000
 	uint32 bRenderDamaged : 1;
