@@ -2055,6 +2055,7 @@ STARTPATCHES
 	InjectHook(0x494450, CPad::ResetCheats, PATCH_JUMP);
 	InjectHook(0x4944B0, CPad::EditString, PATCH_JUMP);
 	InjectHook(0x494690, CPad::EditCodesForControls, PATCH_JUMP);
+
 	//InjectHook(0x494E50, `global constructor keyed to'Pad.cpp, PATCH_JUMP);
 	//InjectHook(0x494EB0, sub_494EB0, PATCH_JUMP);
 	//InjectHook(0x494ED0, &CPad::~CPad, PATCH_JUMP);

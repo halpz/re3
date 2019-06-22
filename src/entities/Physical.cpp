@@ -1790,7 +1790,7 @@ CPhysical::ProcessCollision(void)
 
 	if(IsPed() && (distSq >= sq(0.2f) || ped->IsPlayer())){
 		if(ped->IsPlayer())
-			n = min(NUMSTEPS(0.2f), 2.0);
+			n = max(NUMSTEPS(0.2f), 2.0);
 		else
 			n = NUMSTEPS(0.3f);
 		step = savedTimeStep / n;

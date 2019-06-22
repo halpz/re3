@@ -236,7 +236,7 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 					if(((CPed*)e)->UseGroundColModel())
 						colmodel = &CTempColModels::ms_colModelPedGroundHit;
 					else
-						colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
+						colmodel = ((CPedModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex()))->GetHitColModel();
 				}else
 					colmodel = nil;
 			}else if(e->bUsesCollision)
