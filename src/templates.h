@@ -116,8 +116,8 @@ public:
 		debug("CopyBack:%d (/%d)", GetNoOfUsedSpaces(), m_size); /* Assumed inlining */
 	}
 	void Store(uint8 **flags, U** entries){
-		*flags = (Flags*)malloc(sizeof(Flags)*size);
-		*entries = (U*)malloc(sizeof(U)*size);
+		*flags = (Flags*)malloc(sizeof(Flags)*m_size);
+		*entries = (U*)malloc(sizeof(U)*m_size);
 		memcpy(*flags, m_flags, sizeof(Flags)*m_size);
 		memcpy(*entries, m_entries, sizeof(U)*m_size);
 		debug("Stored:%d (/%d)", GetNoOfUsedSpaces(), m_size); /* Assumed inlining */
