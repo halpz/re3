@@ -64,6 +64,7 @@ struct CStreamingChannel
 };
 
 class CDirectory;
+enum eLevelName;
 
 class CStreaming
 {
