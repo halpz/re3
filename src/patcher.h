@@ -101,6 +101,15 @@ Nop(AT address, unsigned int nCount)
 	VirtualProtect((void*)address, nCount, dwProtect[0], &dwProtect[1]);
 }
 
+template<typename AT> inline void
+ClearCC(AT address, unsigned int nCount)
+{
+	DWORD		dwProtect[2];
+	VirtualProtect((void*)address, nCount, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
+	memset((void*)address, 0xCC, nCount);
+	VirtualProtect((void*)address, nCount, dwProtect[0], &dwProtect[1]);
+}
+
 template<typename AT, typename HT> inline void
 InjectHook(AT address, HT hook, unsigned int nType=PATCH_NOTHING)
 {

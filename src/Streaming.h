@@ -13,6 +13,9 @@ enum StreamFlags
 	STREAMFLAGS_DEPENDENCY  = 0x04,
 	STREAMFLAGS_PRIORITY    = 0x08,
 	STREAMFLAGS_NOFADE      = 0x10,
+
+	STREAMFLAGS_NOT_IN_LIST = STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_SCRIPTOWNED,
+	STREAMFLAGS_KEEP_IN_MEMORY = STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_SCRIPTOWNED|STREAMFLAGS_DEPENDENCY,
 };
 
 enum StreamLoadState
@@ -21,7 +24,7 @@ enum StreamLoadState
 	STREAMSTATE_LOADED    = 1,
 	STREAMSTATE_INQUEUE   = 2,
 	STREAMSTATE_READING   = 3,	// what is this?
-	STREAMSTATE_BIGFILE   = 4,
+	STREAMSTATE_STARTED   = 4,	// first part read
 };
 
 enum ChannelState
@@ -96,10 +99,21 @@ public:
 	static void Init(void);
 	static void Shutdown(void);
 	static void LoadCdDirectory(void);
-	static void LoadCdDirectory(const char *dirname, int n);
-
-	static void RemoveModel(int32 id);
+	static void LoadCdDirectory(const char *dirname, int32 n);
+	static bool ConvertBufferToObject(int8 *buf, int32 streamId);
+	static bool FinishLoadingLargeFile(int8 *buf, int32 streamId);
 	static void RequestModel(int32 model, int32 flags);
+	static void RequestTxd(int32 txd, int32 flags) { RequestModel(txd + STREAM_OFFSET_TXD, flags); }
+	static void RequestSubway(void);
+	static void RequestBigBuildings(eLevelName level);
+	static void RequestIslands(eLevelName level);
+	static void RequestSpecialModel(int32 modelId, const char *modelName, int32 flags);
+	static void RequestSpecialChar(int32 charId, const char *modelName, int32 flags);
+	static void RemoveModel(int32 id);
+
+	static bool IsTxdUsedByRequestedModels(int32 txdId);
+	static bool AddToLoadedVehiclesList(int32 modelId);
+
 	static void MakeSpaceFor(int32 size);
 	static void ImGonnaUseStreamingMemory(void);
 	static void IHaveUsedStreamingMemory(void);

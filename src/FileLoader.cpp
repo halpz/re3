@@ -1082,7 +1082,7 @@ CFileLoader::LoadCullZone(const char *line)
 		&minx, &miny, &minz,
 		&maxx, &maxy, &maxz,
 		&flags, &wantedLevelDrop);
-	CCullZones::AddCullZone(pos, minx, maxx, miny, maxy, minz, maxy, flags, wantedLevelDrop);
+	CCullZones::AddCullZone(pos, minx, maxx, miny, maxy, minz, maxz, flags, wantedLevelDrop);
 }
 
 // unused
