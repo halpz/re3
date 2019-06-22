@@ -101,6 +101,27 @@ public:
 				n++;
 		return n;
 	}
+    void ClearStorage(uint8 **flags, U **entries){
+        delete[] flags;
+        delete[] entries;
+        *flags = nil;
+        *entries = nil;
+    }
+    void CopyBack(uint8 **flags, U **entries){
+        memcpy(m_flags, *flags, sizeof(Flags)*m_size);
+        memcpy(m_entries, *entries, sizeof(U)*m_size);
+        debug("Size copied:%d (%d)", sizeof(U)*m_size, sizeof(Flags)*m_size);
+        m_allocPtr = 0;
+        ClearStorage(flags, entries);
+        debug("CopyBack:%d (/%d)", GetNoOfUsedSpaces(), m_size); /* Assumed inlining */
+    }
+    void Store(uint8 **flags, U** entries){
+        *flags = (Flags*)malloc(sizeof(Flags)*size);
+        *entries = (U*)malloc(sizeof(U)*size);
+        memcpy(*flags, m_flags, sizeof(Flags)*m_size);
+        memcpy(*entries, m_entries, sizeof(U)*m_size);
+        debug("Stored:%d (/%d)", GetNoOfUsedSpaces(), m_size); /* Assumed inlining */
+    }
 };
 
 template<typename T>

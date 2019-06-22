@@ -31,7 +31,7 @@ void COnscreenTimer::Init() {
 }
 
 void COnscreenTimer::Process() {
-	if(CReplay::Mode != CReplay::MODE_1 && !m_bDisabled) {
+	if(!CReplay::IsPlayingBack() && !m_bDisabled) {
 		for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
 			m_sEntries[i].Process();
 		}
