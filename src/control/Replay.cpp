@@ -34,8 +34,8 @@ CReference *&CReplay::pEmptyReferences = *(CReference**)0x8F256C;
 CStoredDetailedAnimationState *&CReplay::pPedAnims = *(CStoredDetailedAnimationState**)0x8F6260;
 CPickup *&CReplay::pPickups = *(CPickup**)0x8F1A48;
 CReference *&CReplay::pReferences = *(CReference**)0x880FAC;
-uint8(&CReplay::BufferStatus)[8] = *(uint8(*)[8])0x8804D8;
-uint8(&CReplay::Buffers)[8][100000] = *(uint8(*)[8][100000])0x779958;
+uint8(&CReplay::BufferStatus)[8] = *(uint8(*)[8])*(uintptr*)0x8804D8;
+uint8(&CReplay::Buffers)[8][100000] = *(uint8(*)[8][100000])*(uintptr*)0x779958;
 bool &CReplay::bPlayingBackFromFile = *(bool*)0x95CD58;
 bool &CReplay::bReplayEnabled = *(bool*)0x617CAC;
 uint32 &CReplay::SlowMotion = *(uint32*)0x9414D4;
@@ -49,9 +49,6 @@ void PrintElementsInPtrList(void)
 	}
 }
 
-#if 0
-WRAPPER void CReplay::Init(void) { EAXJMP(0x592FE0); }
-#else
 void CReplay::Init(void)
 {
 	pBuf0 = nil;
@@ -92,7 +89,6 @@ void CReplay::Init(void)
 	FramesActiveLookAroundCam = 0;
 	bDoLoadSceneWhenDone = false;
 }
-#endif
 
 void CReplay::DisableReplays(void)
 {
@@ -104,9 +100,6 @@ void CReplay::EnableReplays(void)
 	bReplayEnabled = true;
 }
 
-#if 0
-WRAPPER void CReplay::Update(void) { EAXJMP(0x593170); }
-#else
 void PlayReplayFromHD(void);
 void CReplay::Update(void)
 {
@@ -135,7 +128,6 @@ void CReplay::Update(void)
 			PlayReplayFromHD();
 	}
 }
-#endif
 
 #if 0
 WRAPPER void CReplay::RecordThisFrame(void) { EAXJMP(0x5932B0); }
