@@ -170,7 +170,7 @@ public:
 	uint8 m_ped_flagI1 : 1;
 	uint8 m_ped_flagI2 : 1;
 	uint8 m_ped_flagI4 : 1;
-	uint8 m_ped_flagI8 : 1;
+	uint8 bRecordedForReplay : 1;
 	uint8 m_ped_flagI10 : 1;
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;

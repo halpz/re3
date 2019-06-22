@@ -155,6 +155,9 @@ public:
 		r.Normalise();
 		f = CrossProduct(u, r);
 	}
+	void CopyOnlyMatrix(CMatrix *other){
+		m_matrix = other->m_matrix;
+	}
 };
 
 inline CMatrix&

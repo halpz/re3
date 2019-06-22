@@ -189,7 +189,7 @@ void CHud::Draw()
 	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 
-	if (CReplay::Mode != 1) {
+	if (!CReplay::IsPlayingBack()) {
 		if (m_Wants_To_Draw_Hud && !TheCamera.m_WideScreenOn) {
 			bool Mode_RunAround = 0;
 			bool Mode_FirstPerson = 0;
@@ -1063,7 +1063,7 @@ WRAPPER void CHud::DrawAfterFade(void) { EAXJMP(0x509030); }
 #else
 void CHud::DrawAfterFade()
 {
-	if (CTimer::GetIsUserPaused() || CReplay::Mode == 1)
+	if (CTimer::GetIsUserPaused() || CReplay::IsPlayingBack())
 		return;
 
 	if (m_HelpMessage[0]) {

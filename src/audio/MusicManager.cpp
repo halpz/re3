@@ -51,7 +51,7 @@ void cMusicManager::DisplayRadioStationName()
 	int8 gStreamedSound;
 	int8 gRetuneCounter;
 
-	if (!CTimer::GetIsPaused() && !TheCamera.m_WideScreenOn && cMusicManager::PlayerInCar() && CReplay::Mode != 1) {
+	if (!CTimer::GetIsPaused() && !TheCamera.m_WideScreenOn && cMusicManager::PlayerInCar() && !CReplay::IsPlayingBack()) {
 		if (MusicManager.m_bPlayerInCar && !MusicManager.m_bPreviousPlayerInCar)
 			pCurrentStation = nullptr;
 

@@ -525,7 +525,7 @@ void CPad::UpdatePads(void)
 	ControlsManager.AffectPadFromKeyBoard();
 	ControlsManager.AffectPadFromMouse();
 	
-	if ( CReplay::bPlayingBackFromFile )
+	if ( CReplay::IsPlayingBackFromFile() )
 		bUpdate = false;
 	
 	if ( bUpdate )
