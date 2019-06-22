@@ -4,6 +4,8 @@
 #include "AnimManager.h"
 
 class CWeaponInfo {
+//	static CWeaponInfo(&ms_apWeaponInfos)[14];
+	static CWeaponInfo ms_apWeaponInfos[14];
 public:
 	eWeaponFire m_eWeaponFire;
 	float m_fRange;
@@ -37,9 +39,12 @@ public:
 	uint8 m_bThrow : 1;
 	uint8 stuff;
 
-	static CWeaponInfo (&ms_apWeaponInfos)[14];
-
+	static void Initialise(void);
+	static void LoadWeaponData(void);
 	static CWeaponInfo *GetWeaponInfo(eWeaponType weaponType);
+	static eWeaponFire FindWeaponFireType(char *name);
+	static eWeaponType FindWeaponType(char *name);
+	static void Shutdown(void);
 };
 
 static_assert(sizeof(CWeaponInfo) == 0x54, "CWeaponInfo: error");

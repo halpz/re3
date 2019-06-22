@@ -16,7 +16,9 @@ enum eWeaponType
 	WEAPONTYPE_MOLOTOV,
 	WEAPONTYPE_GRENADE,
 	WEAPONTYPE_DETONATOR,
-	WEAPONTYPE_HELICANNON
+	NUM_PED_WEAPONTYPES = 13,
+	WEAPONTYPE_HELICANNON = 13,
+	NUM_WEAPONTYPES
 };
 
 enum eWeaponFire {
@@ -48,6 +50,6 @@ public:
 	bool m_bAddRotOffset;
 
 	bool Fire(CEntity*, CVector*);
-	static void AddGunshell(CEntity*, CVector const&, CVector2D const&, float);
+	void AddGunshell(CEntity*, CVector const&, CVector2D const&, float);
 };
 static_assert(sizeof(CWeapon) == 0x18, "CWeapon: error");
