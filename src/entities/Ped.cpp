@@ -388,8 +388,7 @@ void
 CPed::RemoveBodyPart(PedNode nodeId, int8 unk)
 {
 	RwFrame *frame;
-	RwFrame *fp;
-	RwV3d zero;
+	RwV3d pos;
 
 	frame = GetNodeFrame(nodeId);
 	if (frame) {
@@ -398,20 +397,20 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 unk)
 				CPed::SpawnFlyingComponent(nodeId, unk);
 
 			RecurseFrameChildrenVisibilityCB(frame, 0);
-			zero.x = 0.0f;
-			zero.z = 0.0f;
-			zero.y = 0.0f;
-			for (fp = RwFrameGetParent(frame); fp; fp = RwFrameGetParent(frame))
-				RwV3dTransformPoints(&zero, &zero, 1, &fp->modelling);
+			pos.x = 0.0f;
+			pos.z = 0.0f;
+			pos.y = 0.0f;
+			for (frame = RwFrameGetParent(frame); frame; frame = RwFrameGetParent(frame))
+				RwV3dTransformPoints(&pos, &pos, 1, RwFrameGetMatrix(frame));
 
 			if (CEntity::GetIsOnScreen()) {
-				CParticle::AddParticle(PARTICLE_TEST, zero,
+				CParticle::AddParticle(PARTICLE_TEST, pos,
 					CVector(0.0f, 0.0f, 0.0f),
 					nil, 0.2f, 0, 0, 0, 0);
 
 				for (int i = 0; i < 16; i++) {
 					CParticle::AddParticle(PARTICLE_BLOOD_SMALL,
-						zero,
+						pos,
 						CVector(0.0f, 0.0f, 0.03f),
 						nil, 0.0f, 0, 0, 0, 0);
 				}
@@ -642,10 +641,9 @@ CPed::Attack(void)
 	CAnimBlendAssociation *weaponAnimAssoc;
 	int32 weaponAnim;
 	float animStart;
-	RwFrame *f;
+	RwFrame *frame;
 	eWeaponType ourWeaponType;
 	float weaponAnimTime;
-	RwFrame *i;
 	eWeaponFire ourWeaponFire;
 	float animEnd;
 	CWeaponInfo *ourWeapon;
@@ -718,14 +716,12 @@ CPed::Attack(void)
 				firePos = GetMatrix() * firePos;
 			} else if (ourWeaponType != WEAPONTYPE_UNARMED) {
 				if (weaponAnimAssoc->animId == ANIM_KICK_FLOOR)
-					f = GetNodeFrame(PED_FOOTR);
+					frame = GetNodeFrame(PED_FOOTR);
 				else
-					f = GetNodeFrame(PED_HANDR);
+					frame = GetNodeFrame(PED_HANDR);
 
-				while (f) {
-					RwV3dTransformPoints((RwV3d*)firePos, (RwV3d*)firePos, 1, &f->modelling);
-					f = RwFrameGetParent(f);
-				}
+				for (; frame; frame = RwFrameGetParent(frame))
+					RwV3dTransformPoints((RwV3d*)firePos, (RwV3d*)firePos, 1, RwFrameGetMatrix(frame));
 			} else {
 				firePos = GetMatrix() * firePos;
 			}
@@ -773,8 +769,8 @@ CPed::Attack(void)
 			firePos = ourWeapon->m_vecFireOffset;
 
 			if (weaponAnimTime > 1.0f && weaponAnimTime - weaponAnimAssoc->timeStep <= 1.0f && weaponAnimAssoc->IsRunning()) {
-				for (i = GetNodeFrame(PED_HANDR); i; i = RwFrameGetParent(i))
-					RwV3dTransformPoints((RwV3d*)firePos, (RwV3d*)firePos, 1, &i->modelling);
+				for (frame = GetNodeFrame(PED_HANDR); frame; frame = RwFrameGetParent(frame))
+					RwV3dTransformPoints((RwV3d*)firePos, (RwV3d*)firePos, 1, RwFrameGetMatrix(frame));
 
 				CVector gunshellPos(
 					firePos.x - 0.6f * GetForward().x,

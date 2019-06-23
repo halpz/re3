@@ -38,6 +38,7 @@ public:
 
 	void SetLowDetailClump(RpClump*);
 	void CreateHitColModel(void);
+	CColModel *GetHitColModel(void) { return m_hitColModel; }
 
 
 	void DeleteRwObject_(void) { this->CPedModelInfo::DeleteRwObject(); }

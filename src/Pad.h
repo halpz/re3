@@ -292,7 +292,7 @@ public:
 
 	// keyboard
 	
-	inline bool GetCharJustDown(char c) { return !!(NewKeyState.VK_KEYS[c] && !OldKeyState.VK_KEYS[c]); }
+	inline bool GetCharJustDown(int32 c) { return !!(NewKeyState.VK_KEYS[c] && !OldKeyState.VK_KEYS[c]); }
 	inline bool GetFJustDown(int32 n)   { return !!(NewKeyState.F[n] && !OldKeyState.F[n]); }
 	inline bool GetEscapeJustDown()     { return !!(NewKeyState.ESC && !OldKeyState.ESC); }
 	inline bool GetInsertJustDown()     { return !!(NewKeyState.INS && !OldKeyState.INS); }
