@@ -1504,7 +1504,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 							else if(A->GetUp().z > 0.3f)
 								adhesion = 0.0f;
 							else
-								adhesion *= max(5.0f, 0.03f*impulseA + 1.0f);
+								adhesion *= min(5.0f, 0.03f*impulseA + 1.0f);
 						}
 
 						if(A->ApplyFriction(adhesion, aColPoints[i]))

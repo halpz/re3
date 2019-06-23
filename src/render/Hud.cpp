@@ -856,7 +856,11 @@ void CHud::Draw()
 			*/
 			if (CHud::m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || CHud::m_ItemToFlash != ITEM_RADAR) {
 				CRadar::DrawMap();
-				CHud::Sprites[HUD_RADARDISC].Draw(CRect(SCREEN_SCALE_X(16.0f), SCREEN_SCALE_FROM_BOTTOM(123.0f + 4.0f), SCREEN_SCALE_X(94.0f + 20.0f + 5.0f), SCREEN_SCALE_FROM_BOTTOM(-76.0f + 123.0f - 6.0f)), CRGBA(0, 0, 0, 255));
+				CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
+				// FIX: game doesn't scale RADAR_LEFT here
+				rect.Translate(SCREEN_SCALE_X(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
+				rect.Grow(4.0f);
+				CHud::Sprites[HUD_RADARDISC].Draw(rect, CRGBA(0, 0, 0, 255));
 				CRadar::DrawBlips();
 			}
 		}

@@ -26,4 +26,20 @@ public:
 		if(v.y < top) top = v.y;
 		if(v.y > bottom) bottom = v.y;
 	}
+
+	void Translate(float x, float y){
+		left += x;
+		right += x;
+		bottom += y;
+		top += y;
+	}
+	void Grow(float r){
+		left -= r;
+		right += r;
+		top -= r;
+		bottom += r;
+	}
+
+	float GetWidth(void) { return right - left; }
+	float GetHeight(void) { return bottom - top; }
 };

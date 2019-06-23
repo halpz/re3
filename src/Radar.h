@@ -53,26 +53,26 @@ struct CBlip
 	CVector2D m_vec2DPos;
 	CVector m_vecPos;
 	int16 m_BlipIndex;
-	int8 m_bDim;
-	int8 m_bInUse;
+	bool m_bDim;
+	bool m_bInUse;
 	float m_Radius;
 	int16 m_wScale;
 	int16 m_eBlipDisplay; // eBlipDisplay
 	int16 m_IconID; // eRadarSprite
-	char gap_46[2];
 };
-
 static_assert(sizeof(CBlip) == 0x30, "CBlip: error");
+
+// Values for screen space
+#define RADAR_LEFT (40.0f)
+#define RADAR_BOTTOM (47.0f)
+#define RADAR_WIDTH (94.0f)
+#define RADAR_HEIGHT (76.0f)
 
 class CRadar
 {
-	static float cachedSin;
-	static float cachedCos;
-
 public:
 	static float &m_RadarRange;
-	static CVector2D &vec2DRadarOrigin;
-	static CBlip *ms_RadarTrace;
+	static CBlip *ms_RadarTrace;	//[NUMRADARBLIPS]
 	static CSprite2d *AsukaSprite;
 	static CSprite2d *BombSprite;
 	static CSprite2d *CatSprite;
@@ -101,19 +101,15 @@ public:
 	static void DrawMap();
 	static void StreamRadarSections(int x, int y);
 	static int ClipRadarPoly(CVector2D *out, CVector2D *in);
-	static void TransformRealWorldToTexCoordSpace(CVector2D *out, CVector2D *in, int x, int y);
-	static void TransformRadarPointToRealWorldSpace(CVector2D *out, CVector2D *in);
 	static void DrawRadarSection(int x, int y);
 	static void RequestMapSection(int x, int y);
 	static void RemoveMapSection(int x, int y);
-	static void TransformRadarPointToScreenSpace(CVector2D * out, CVector2D * in);
 	static void DrawBlips();
 	static int CalculateBlipAlpha(float dist);
 	static CRGBA GetRadarTraceColour(uint32 color, bool bright);
 	static void DrawRadarMap();
 	static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int alpha);
-	static void TransformRealWorldPointToRadarSpace(CVector2D *out, CVector2D *in);
-	static float LimitRadarPoint(CVector2D *point);
+	static float LimitRadarPoint(CVector2D &point);
 	static void DrawRadarSprite(int sprite, float x, float y, int alpha);
 	static void ShowRadarMarker(CVector pos, CRGBA color, float radius);
 	static void ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 green, uint32 blue, uint32 alpha);
@@ -122,4 +118,8 @@ public:
 	static bool DisplayThisBlip(int counter);
 	static void GetTextureCorners(int x, int y, CVector2D * out);
 	static void ClipRadarTileCoords(int *x, int *y);
+	static void TransformRealWorldToTexCoordSpace(CVector2D &out, const CVector2D &in, int x, int y);
+	static void TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D &in);
+	static void TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &in);
+	static void TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D &in);
 };

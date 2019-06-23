@@ -111,6 +111,7 @@ public:
 	static void RequestSpecialModel(int32 modelId, const char *modelName, int32 flags);
 	static void RequestSpecialChar(int32 charId, const char *modelName, int32 flags);
 	static void RemoveModel(int32 id);
+	static void RemoveTxd(int32 id) { RemoveModel(id + STREAM_OFFSET_TXD); }
 
 	static bool IsTxdUsedByRequestedModels(int32 txdId);
 	static bool AddToLoadedVehiclesList(int32 modelId);
