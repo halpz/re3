@@ -1,11 +1,13 @@
 #include "common.h"
 #include "patcher.h"
+#include "AnimBlendAssociation.h"
 #include "BulletTraces.h"
 #include "Clock.h"
 #include "Draw.h"
 #include "math/Matrix.h"
 #include "ModelIndices.h"
 #include "Replay.h"
+#include "RpAnimBlend.h"
 #include "Pad.h"
 #include "Pools.h"
 #include "CutsceneMgr.h"
@@ -45,7 +47,7 @@ bool &CReplay::bDoLoadSceneWhenDone = *(bool*)0x95CD76;
 void PrintElementsInPtrList(void) 
 {
 	for (CPtrNode* node = CWorld::GetBigBuildingList(LEVEL_NONE).first; node; node = node->next) {
-		// Most likely debug print was present here
+		/* Most likely debug print was present here */
 	}
 }
 
@@ -231,7 +233,49 @@ void CReplay::StorePedUpdate(CPed *ped, int id)
 	Record.m_nOffset += sizeof(tPedUpdatePacket);
 }
 #endif
+
+#if 0
 WRAPPER void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state) { EAXJMP(0x593670); }
+#else
+void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
+{
+	CAnimBlendAssociation* second;
+	float blend_amount;
+	CAnimBlendAssociation* main = RpAnimBlendClumpGetMainAssociation((RpClump*)ped->m_rwObject, &second, &blend_amount);
+	if (main){
+		state->animId = main->animId;
+		state->time = 255.0f / 4.0f * max(0.0f, min(4.0f, main->currentTime));
+		state->speed = 255.0f / 3.0f * max(0.0f, min(3.0f, main->speed));
+	}else{
+		state->animId = 3;
+		state->time = 0;
+		state->speed = 85;
+	}
+	if (second) {
+		state->secAnimId = second->animId;
+		state->secTime = 255.0f / 4.0f * max(0.0f, min(4.0f, second->currentTime));
+		state->secSpeed = 255.0f / 3.0f * max(0.0f, min(3.0f, second->speed));
+		state->blendAmount = 255.0f / 2.0f * max(0.0f, min(2.0f, blend_amount));
+	}else{
+		state->secAnimId = 0;
+		state->secTime = 0;
+		state->secSpeed = 0;
+		state->blendAmount = 0;
+	}
+	CAnimBlendAssociation* partial = RpAnimBlendClumpGetMainPartialAssociation((RpClump*)ped->m_rwObject);
+	if (partial) {
+		state->partAnimId = partial->animId;
+		state->partAnimTime = 255.0f / 4.0f * max(0.0f, min(4.0f, partial->currentTime));
+		state->partAnimSpeed = 255.0f / 3.0f * max(0.0f, min(3.0f, partial->speed));
+		state->partBlendAmount = 255.0f / 2.0f * max(0.0f, min(2.0f, partial->blendAmount));
+	}else{
+		state->partAnimId = 0;
+		state->partAnimTime = 0;
+		state->partAnimSpeed = 0;
+		state->partBlendAmount = 0;
+	}
+}
+#endif
 WRAPPER void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state) { EAXJMP(0x593BB0); }
 WRAPPER void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayBuffer *buffer) { EAXJMP(0x594050); }
 WRAPPER void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state) { EAXJMP(0x5942A0); }

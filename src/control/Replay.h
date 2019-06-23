@@ -19,33 +19,33 @@ struct CAddressInReplayBuffer
 
 struct CStoredAnimationState
 {
-	int8 animId;
-	int8 time;
-	int8 speed;
-	int8 secAnimId;
-	int8 secTime;
-	int8 secSpeed;
-	int8 blendAmount;
-	int8 partAnimId;
-	int8 partAnimTime;
-	int8 partAnimSpeed;
-	int8 partBlendAmount;
+	uint8 animId;
+	uint8 time;
+	uint8 speed;
+	uint8 secAnimId;
+	uint8 secTime;
+	uint8 secSpeed;
+	uint8 blendAmount;
+	uint8 partAnimId;
+	uint8 partAnimTime;
+	uint8 partAnimSpeed;
+	uint8 partBlendAmount;
 };
 
 struct CStoredDetailedAnimationState
 {
-	int8 m_abAnimId[3];
-	int8 m_abCurTime[3];
-	int8 m_abSpeed[3];
-	int8 m_abBlendAmount[3];
-	int8 m_abFunctionCallbackID[3];
-	int16 m_awFlags[3];
-	int8 m_abAnimId2[6];
-	int8 m_abCurTime2[6];
-	int8 m_abSpeed2[6];
-	int8 m_abBlendAmount2[6];
-	int8 m_abFunctionCallbackID2[6];
-	int16 m_awFlags2[6];
+	int8 aAnimId[3];
+	int8 aCurTime[3];
+	int8 aSpeed[3];
+	int8 aBlendAmount[3];
+	int8 aFunctionCallbackID[3];
+	int16 aFlags[3];
+	int8 aAnimId2[6];
+	int8 aCurTime2[6];
+	int8 aSpeed2[6];
+	int8 aBlendAmount2[6];
+	int8 aFunctionCallbackID2[6];
+	int16 aFlags2[6];
 };
 
 class CReplay
