@@ -100,7 +100,7 @@ public:
 	static void Draw3dMarkers();
 	static void DrawMap();
 	static void StreamRadarSections(int x, int y);
-	static int ClipRadarPoly(CVector2D *out, CVector2D *in);
+	static int ClipRadarPoly(CVector2D *out, const CVector2D *in);
 	static void DrawRadarSection(int x, int y);
 	static void RequestMapSection(int x, int y);
 	static void RemoveMapSection(int x, int y);
@@ -116,10 +116,12 @@ public:
 	static void DrawRadarMask();
 	static void SetRadarMarkerState(int counter, int flag);
 	static bool DisplayThisBlip(int counter);
-	static void GetTextureCorners(int x, int y, CVector2D * out);
-	static void ClipRadarTileCoords(int *x, int *y);
 	static void TransformRealWorldToTexCoordSpace(CVector2D &out, const CVector2D &in, int x, int y);
 	static void TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D &in);
 	static void TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &in);
 	static void TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D &in);
+
+	// no in CRadar in the game:
+	static void GetTextureCorners(int x, int y, CVector2D *out);
+	static void ClipRadarTileCoords(int &x, int &y);
 };
