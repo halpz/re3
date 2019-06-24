@@ -501,7 +501,7 @@ CFileLoader::LoadObjectTypes(const char *filename)
 		CARS,
 		PEDS,
 		PATH,
-		TWO2FX
+		TWODFX
 	};
 	char *line;
 	int fd;
@@ -528,7 +528,7 @@ CFileLoader::LoadObjectTypes(const char *filename)
 			else if(strncmp(line, "cars", 4) == 0) section = CARS;
 			else if(strncmp(line, "peds", 4) == 0) section = PEDS;
 			else if(strncmp(line, "path", 4) == 0) section = PATH;
-			else if(strncmp(line, "2dfx", 4) == 0) section = TWO2FX;
+			else if(strncmp(line, "2dfx", 4) == 0) section = TWODFX;
 		}else if(strncmp(line, "end", 3) == 0){
 			section = section == MLO ? OBJS : NONE;
 		}else switch(section){
@@ -571,7 +571,7 @@ CFileLoader::LoadObjectTypes(const char *filename)
 					pathIndex = -1;
 			}
 			break;
-		case TWO2FX:
+		case TWODFX:
 			Load2dEffect(line);
 			break;
 		}
@@ -847,6 +847,7 @@ CFileLoader::LoadCarPathNode(const char *line, int id, int node)
 	sscanf(line, "%d %d %d %f %f %f %f %d %d", &type, &next, &cross, &x, &y, &z, &width, &numLeft, &numRight);
 	ThePaths.StoreNodeInfoCar(id, node, type, next, x, y, z, 0, numLeft, numRight);
 }
+
 
 void
 CFileLoader::Load2dEffect(const char *line)

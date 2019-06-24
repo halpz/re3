@@ -22,5 +22,6 @@ CBuilding::ReplaceWithNewModel(int32 id)
 }
 
 STARTPATCHES
+	InjectHook(0x4057D0, &CBuilding::ctor, PATCH_JUMP);
 	InjectHook(0x405850, &CBuilding::ReplaceWithNewModel, PATCH_JUMP);
 ENDPATCHES

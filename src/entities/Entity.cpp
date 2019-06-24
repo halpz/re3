@@ -339,9 +339,9 @@ CEntity::GetBoundRect(void)
 	return rect;
 }
 
-void
+WRAPPER void
 CEntity::PreRender(void)
-{
+{ EAXJMP(0x474350);
 }
 
 void
@@ -448,6 +448,7 @@ CEntity::PruneReferences(void)
 }
 
 STARTPATCHES
+	InjectHook(0x473C30, &CEntity::ctor, PATCH_JUMP);
 	InjectHook(0x4742C0, (void (CEntity::*)(CVector&))&CEntity::GetBoundCentre, PATCH_JUMP);
 	InjectHook(0x474310, &CEntity::GetBoundRadius, PATCH_JUMP);
 	InjectHook(0x474C10, &CEntity::GetIsTouching, PATCH_JUMP);
