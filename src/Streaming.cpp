@@ -13,11 +13,6 @@
 #include "CdStream.h"
 #include "Streaming.h"
 
-/*
-CStreaming::ms_channelError	0x880DB8	
-CStreaming::ms_lastVehicleDeleted	0x95CBF8	
-*/
-
 bool &CStreaming::ms_disableStreaming = *(bool*)0x95CD6E;
 bool &CStreaming::ms_bLoadingBigModel = *(bool*)0x95CDB0;
 int32 &CStreaming::ms_numModelsRequested = *(int32*)0x8E2C10;
@@ -29,11 +24,13 @@ CStreamingInfo &CStreaming::ms_endRequestedList = *(CStreamingInfo*)0x940738;
 int32 &CStreaming::ms_oldSectorX = *(int32*)0x8F2C84;
 int32 &CStreaming::ms_oldSectorY = *(int32*)0x8F2C88;
 uint32 &CStreaming::ms_streamingBufferSize = *(uint32*)0x942FB0;
-uint8 **CStreaming::ms_pStreamingBuffer = (uint8**)0x87F818;
+int8 **CStreaming::ms_pStreamingBuffer = (int8**)0x87F818;
 int32 &CStreaming::ms_memoryUsed = *(int32*)0x940568;
 CStreamingChannel *CStreaming::ms_channel = (CStreamingChannel*)0x727EE0;
+int32 &CStreaming::ms_channelError = *(int32*)0x880DB8;
 int32 &CStreaming::ms_numVehiclesLoaded = *(int32*)0x8F2C80;
 int32 *CStreaming::ms_vehiclesLoaded = (int32*)0x773560;
+int32 &CStreaming::ms_lastVehicleDeleted = *(int32*)0x95CBF8;
 CDirectory *&CStreaming::ms_pExtraObjectsDir = *(CDirectory**)0x95CB90;
 int32 &CStreaming::ms_numPriorityRequests = *(int32*)0x8F31C4;
 bool &CStreaming::ms_hasLoadedLODs = *(bool*)0x95CD47;
@@ -60,8 +57,8 @@ int32 &islandLODsubInd = *(int32*)0x6212D4;
 int32 &islandLODsubCom = *(int32*)0x6212D8;
 
 WRAPPER void CStreaming::MakeSpaceFor(int32 size) { EAXJMP(0x409B70); }
-WRAPPER bool CStreaming::IsTxdUsedByRequestedModels(int32 txdId) { EAXJMP(0x4094C0); }
-WRAPPER bool CStreaming::AddToLoadedVehiclesList(int32 modelId) { EAXJMP(0x40B060); }
+//WRAPPER bool CStreaming::IsTxdUsedByRequestedModels(int32 txdId) { EAXJMP(0x4094C0); }
+//WRAPPER bool CStreaming::AddToLoadedVehiclesList(int32 modelId) { EAXJMP(0x40B060); }
 
 
 void
@@ -101,12 +98,12 @@ CStreaming::Init(void)
 
 	// init channels
 
-	ms_channel[0].state = CHANNELSTATE_0;
-	ms_channel[1].state = CHANNELSTATE_0;
+	ms_channel[0].state = CHANNELSTATE_IDLE;
+	ms_channel[1].state = CHANNELSTATE_IDLE;
 	for(i = 0; i < 4; i++){
-		ms_channel[0].modelIds[i] = -1;
+		ms_channel[0].streamIds[i] = -1;
 		ms_channel[0].offsets[i] = -1;
-		ms_channel[1].modelIds[i] = -1;
+		ms_channel[1].streamIds[i] = -1;
 		ms_channel[1].offsets[i] = -1;
 	}
 
@@ -115,8 +112,8 @@ CStreaming::Init(void)
 	for(i = 0; i < MODELINFOSIZE; i++){
 		CBaseModelInfo *mi = CModelInfo::GetModelInfo(i);
 		if(mi && mi->GetRwObject()){
-			ms_aInfoForModel[i + STREAM_OFFSET_MODEL].m_loadState = STREAMSTATE_LOADED;
-			ms_aInfoForModel[i + STREAM_OFFSET_MODEL].m_flags = STREAMFLAGS_DONT_REMOVE;
+			ms_aInfoForModel[i].m_loadState = STREAMSTATE_LOADED;
+			ms_aInfoForModel[i].m_flags = STREAMFLAGS_DONT_REMOVE;
 			if(mi->IsSimple())
 				((CSimpleModelInfo*)mi)->m_alpha = 255;
 		}
@@ -143,7 +140,7 @@ CStreaming::Init(void)
 
 	// allocate streaming buffers
 	if(ms_streamingBufferSize & 1) ms_streamingBufferSize++;
-	ms_pStreamingBuffer[0] = (uint8*)RwMallocAlign(ms_streamingBufferSize*CDSTREAM_SECTOR_SIZE, CDSTREAM_SECTOR_SIZE);
+	ms_pStreamingBuffer[0] = (int8*)RwMallocAlign(ms_streamingBufferSize*CDSTREAM_SECTOR_SIZE, CDSTREAM_SECTOR_SIZE);
 	ms_streamingBufferSize /= 2;
 	ms_pStreamingBuffer[1] = ms_pStreamingBuffer[0] + ms_streamingBufferSize*CDSTREAM_SECTOR_SIZE;
 	debug("Streaming buffer size is %d sectors", ms_streamingBufferSize);
@@ -211,6 +208,9 @@ CStreaming::LoadCdDirectory(void)
 		ms_imageOffsets[i] = -1;
 	ms_imageSize = GetGTA3ImgSize();
 
+	// PS2 uses CFileMgr::GetCdFile on all IMG files to fill the array
+
+
 	i = CdStreamGetNumImages();
 	while(i-- >= 1){
 		strcpy(dirname, CdStreamGetImageName(i));
@@ -245,15 +245,15 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 
 		if(strcmp(dot+1, "DFF") == 0 || strcmp(dot+1, "dff") == 0){
 			if(CModelInfo::GetModelInfo(direntry.name, &modelId)){
-				if(ms_aInfoForModel[modelId + STREAM_OFFSET_MODEL].GetCdPosnAndSize(posn, size)){
+				if(ms_aInfoForModel[modelId].GetCdPosnAndSize(posn, size)){
 					debug("%s appears more than once in %s\n", direntry.name, dirname);
 					lastID = -1;
 				}else{
 					direntry.offset |= imgSelector;
-					ms_aInfoForModel[modelId + STREAM_OFFSET_MODEL].SetCdPosnAndSize(direntry.offset, direntry.size);
+					ms_aInfoForModel[modelId].SetCdPosnAndSize(direntry.offset, direntry.size);
 					if(lastID != -1)
-						ms_aInfoForModel[lastID].m_nextID = modelId + STREAM_OFFSET_MODEL;
-					lastID = modelId + STREAM_OFFSET_MODEL;
+						ms_aInfoForModel[lastID].m_nextID = modelId;
+					lastID = modelId;
 				}
 			}else{
 				// BUG: doesn't remember which cdimage this was in
@@ -300,15 +300,14 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 
 	if(streamId < STREAM_OFFSET_TXD){
 		// Model
-		mi = CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL);
+		mi = CModelInfo::GetModelInfo(streamId);
 
 		// Txd has to be loaded
 		if(CTxdStore::GetSlot(mi->GetTxdSlot())->texDict == nil){
 			debug("failed to load %s because TXD %s is not in memory\n", mi->GetName(), CTxdStore::GetTxdName(mi->GetTxdSlot()));
 			RemoveModel(streamId);
-			RemoveModel(mi->GetTxdSlot() + STREAM_OFFSET_TXD);
-			// re-request
-			RequestModel(streamId, ms_aInfoForModel[streamId].m_flags);
+			RemoveTxd(mi->GetTxdSlot());
+			ReRequestModel(streamId);
 			RwStreamClose(stream, &mem);
 			return false;
 		}
@@ -318,15 +317,15 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
 
 		if(mi->IsSimple()){
-			success = CFileLoader::LoadAtomicFile(stream, streamId - STREAM_OFFSET_MODEL);
+			success = CFileLoader::LoadAtomicFile(stream, streamId);
 		}else if(mi->m_type == MITYPE_VEHICLE){
 			// load vehicles in two parts
-			CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL)->AddRef();
-			success = CFileLoader::StartLoadClumpFile(stream, streamId - STREAM_OFFSET_MODEL);
+			CModelInfo::GetModelInfo(streamId)->AddRef();
+			success = CFileLoader::StartLoadClumpFile(stream, streamId);
 			if(success)
 				ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_STARTED;
 		}else{
-			success = CFileLoader::LoadClumpFile(stream, streamId - STREAM_OFFSET_MODEL);
+			success = CFileLoader::LoadClumpFile(stream, streamId);
 		}
 		UpdateMemoryUsed();
 
@@ -335,10 +334,9 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			CTxdStore::RemoveRefWithoutDelete(mi->GetTxdSlot());
 
 		if(!success){
-			debug("Failed to load %s\n", CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL)->GetName());
+			debug("Failed to load %s\n", CModelInfo::GetModelInfo(streamId)->GetName());
 			RemoveModel(streamId);
-			// re-request
-			RequestModel(streamId, ms_aInfoForModel[streamId].m_flags);
+			ReRequestModel(streamId);
 			RwStreamClose(stream, &mem);
 			return false;
 		}
@@ -363,8 +361,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 		if(!success){
 			debug("Failed to load %s.txd\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD));
 			RemoveModel(streamId);
-			// re-request
-			RequestModel(streamId, ms_aInfoForModel[streamId].m_flags);
+			ReRequestModel(streamId);
 			RwStreamClose(stream, &mem);
 			return false;
 		}
@@ -374,7 +371,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 
 	// We shouldn't even end up here unless load was successful
 	if(!success){
-		RequestModel(streamId, ms_aInfoForModel[streamId].m_flags);
+		ReRequestModel(streamId);
 		if(streamId < STREAM_OFFSET_TXD)
 			debug("Failed to load %s.dff\n", mi->GetName());
 		else
@@ -415,7 +412,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 	timeDiff = endTime - startTime;
 	if(timeDiff > 5){
 		if(streamId < STREAM_OFFSET_TXD)
-			debug("model %s took %d ms\n", CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL)->GetName(), timeDiff);
+			debug("model %s took %d ms\n", CModelInfo::GetModelInfo(streamId)->GetName(), timeDiff);
 		else
 			debug("txd %s took %d ms\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD), timeDiff);
 	}
@@ -437,7 +434,7 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 
 	if(ms_aInfoForModel[streamId].m_loadState != STREAMSTATE_STARTED){
 		if(streamId < STREAM_OFFSET_TXD)
-			CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL)->RemoveRef();
+			CModelInfo::GetModelInfo(streamId)->RemoveRef();
 		return false;
 	}
 
@@ -447,7 +444,7 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 
 	if(streamId < STREAM_OFFSET_TXD){
 		// Model
-		mi = CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL);
+		mi = CModelInfo::GetModelInfo(streamId);
 		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
 		success = CFileLoader::FinishLoadClumpFile(stream, streamId);
 		if(success)
@@ -467,8 +464,7 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 
 	if(!success){
 		RemoveModel(streamId);
-		// re-request
-		RequestModel(streamId, ms_aInfoForModel[streamId].m_flags);
+		ReRequestModel(streamId);
 		UpdateMemoryUsed();
 		return false;
 	}
@@ -479,7 +475,7 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 	timeDiff = endTime - startTime;
 	if(timeDiff > 5){
 		if(streamId < STREAM_OFFSET_TXD)
-			debug("finish model %s took %d ms\n", CModelInfo::GetModelInfo(streamId - STREAM_OFFSET_MODEL)->GetName(), timeDiff);
+			debug("finish model %s took %d ms\n", CModelInfo::GetModelInfo(streamId)->GetName(), timeDiff);
 		else
 			debug("finish txd %s took %d ms\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD), timeDiff);
 	}
@@ -507,7 +503,7 @@ CStreaming::RequestModel(int32 id, int32 flags)
 		// Already loaded, only check changed flags
 
 		if(ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOFADE && id < STREAM_OFFSET_TXD){
-			mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id - STREAM_OFFSET_MODEL);
+			mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
 			if(mi->IsSimple())
 				mi->m_alpha = 255;
 		}
@@ -523,7 +519,7 @@ CStreaming::RequestModel(int32 id, int32 flags)
 
 		if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_NOTLOADED){
 			if(id < STREAM_OFFSET_TXD)
-				RequestTxd(CModelInfo::GetModelInfo(id - STREAM_OFFSET_MODEL)->GetTxdSlot(), flags);
+				RequestTxd(CModelInfo::GetModelInfo(id)->GetTxdSlot(), flags);
 			ms_aInfoForModel[id].AddToList(&ms_startRequestedList);
 			ms_numModelsRequested++;
 			if(flags & STREAMFLAGS_PRIORITY)
@@ -667,7 +663,7 @@ CStreaming::RemoveModel(int32 id)
 
 	if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED){
 		if(id < STREAM_OFFSET_TXD)
-			CModelInfo::GetModelInfo(id - STREAM_OFFSET_MODEL)->DeleteRwObject();
+			CModelInfo::GetModelInfo(id)->DeleteRwObject();
 		else
 			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
 		ms_memoryUsed -= ms_aInfoForModel[id].GetCdSize()*CDSTREAM_SECTOR_SIZE;
@@ -685,10 +681,10 @@ CStreaming::RemoveModel(int32 id)
 		ms_aInfoForModel[id].RemoveFromList();
 	}else if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_READING){
 		for(i = 0; i < 4; i++){
-			if(ms_channel[0].modelIds[i] == id - STREAM_OFFSET_MODEL)
-				ms_channel[0].modelIds[i] = -1;
-			if(ms_channel[1].modelIds[i] == id - STREAM_OFFSET_MODEL)
-				ms_channel[1].modelIds[i] = -1;
+			if(ms_channel[0].streamIds[i] == id)
+				ms_channel[0].streamIds[i] = -1;
+			if(ms_channel[1].streamIds[i] == id)
+				ms_channel[1].streamIds[i] = -1;
 		}
 	}
 
@@ -702,10 +698,646 @@ CStreaming::RemoveModel(int32 id)
 	ms_aInfoForModel[id].m_loadState = STREAMSTATE_NOTLOADED;
 }
 
+void
+CStreaming::RemoveUnusedBuildings(eLevelName level)
+{
+	if(level != LEVEL_INDUSTRIAL)
+		RemoveBuildings(LEVEL_INDUSTRIAL);
+	if(level != LEVEL_COMMERCIAL)
+		RemoveBuildings(LEVEL_COMMERCIAL);
+	if(level != LEVEL_SUBURBAN)
+		RemoveBuildings(LEVEL_SUBURBAN);
+}
+
+void
+CStreaming::RemoveBuildings(eLevelName level)
+{
+	int i, n;
+	CEntity *e;
+	CBaseModelInfo *mi;
+
+	n = CPools::GetBuildingPool()->GetSize();
+	for(i = 0; i < n; i++){
+		e = CPools::GetBuildingPool()->GetSlot(i);
+		if(e && e->m_level == level){
+			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
+			if(!e->bImBeingRendered){
+				e->DeleteRwObject();
+				if(mi->m_refCount == 0)
+					RemoveModel(e->GetModelIndex());
+			}
+		}
+	}
+
+	n = CPools::GetTreadablePool()->GetSize();
+	for(i = 0; i < n; i++){
+		e = CPools::GetTreadablePool()->GetSlot(i);
+		if(e && e->m_level == level){
+			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
+			if(!e->bImBeingRendered){
+				e->DeleteRwObject();
+				if(mi->m_refCount == 0)
+					RemoveModel(e->GetModelIndex());
+			}
+		}
+	}
+
+	n = CPools::GetObjectPool()->GetSize();
+	for(i = 0; i < n; i++){
+		e = CPools::GetObjectPool()->GetSlot(i);
+		if(e && e->m_level == level){
+			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
+			if(!e->bImBeingRendered && ((CObject*)e)->ObjectCreatedBy == GAME_OBJECT){
+				e->DeleteRwObject();
+				if(mi->m_refCount == 0)
+					RemoveModel(e->GetModelIndex());
+			}
+		}
+	}
+
+	n = CPools::GetDummyPool()->GetSize();
+	for(i = 0; i < n; i++){
+		e = CPools::GetDummyPool()->GetSlot(i);
+		if(e && e->m_level == level){
+			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
+			if(!e->bImBeingRendered){
+				e->DeleteRwObject();
+				if(mi->m_refCount == 0)
+					RemoveModel(e->GetModelIndex());
+			}
+		}
+	}
+}
+
+void
+CStreaming::RemoveUnusedBigBuildings(eLevelName level)
+{
+	if(level != LEVEL_INDUSTRIAL)
+		RemoveBigBuildings(LEVEL_INDUSTRIAL);
+	if(level != LEVEL_COMMERCIAL)
+		RemoveBigBuildings(LEVEL_COMMERCIAL);
+	if(level != LEVEL_SUBURBAN)
+		RemoveBigBuildings(LEVEL_SUBURBAN);
+	RemoveIslandsNotUsed(level);
+}
+
+void
+DeleteIsland(CEntity *island)
+{
+	if(island == nil)
+		return;
+	if(island->bImBeingRendered)
+		debug("Didn't delete island because it was being rendered\n");
+	else{
+		island->DeleteRwObject();
+		CStreaming::RemoveModel(island->GetModelIndex());
+	}
+}
+
+void
+CStreaming::RemoveIslandsNotUsed(eLevelName level)
+{
+	switch(level){
+	case LEVEL_INDUSTRIAL:
+		DeleteIsland(pIslandLODindustEntity);
+		DeleteIsland(pIslandLODcomSubEntity);
+		DeleteIsland(pIslandLODsubComEntity);
+		break;
+	case LEVEL_COMMERCIAL:
+		DeleteIsland(pIslandLODcomIndEntity);
+		DeleteIsland(pIslandLODcomSubEntity);
+		DeleteIsland(pIslandLODsubIndEntity);
+		break;
+	case LEVEL_SUBURBAN:
+		DeleteIsland(pIslandLODsubIndEntity);
+		DeleteIsland(pIslandLODsubComEntity);
+		DeleteIsland(pIslandLODcomIndEntity);
+		break;
+	default:
+		DeleteIsland(pIslandLODindustEntity);
+		DeleteIsland(pIslandLODcomIndEntity);
+		DeleteIsland(pIslandLODcomSubEntity);
+		DeleteIsland(pIslandLODsubIndEntity);
+		DeleteIsland(pIslandLODsubComEntity);
+		break;
+	}
+}
+
+void
+CStreaming::RemoveBigBuildings(eLevelName level)
+{
+	int i, n;
+	CEntity *e;
+	CBaseModelInfo *mi;
+
+	n = CPools::GetBuildingPool()->GetSize();
+	for(i = 0; i < n; i++){
+		e = CPools::GetBuildingPool()->GetSlot(i);
+		if(e && e->bIsBIGBuilding && e->m_level == level){
+			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
+			if(!e->bImBeingRendered){
+				e->DeleteRwObject();
+				if(mi->m_refCount == 0)
+					RemoveModel(e->GetModelIndex());
+			}
+		}
+	}
+}
+
+bool
+CStreaming::RemoveLoadedVehicle(void)
+{
+	int i, id;
+
+	for(i = 0; i < MAXVEHICLESLOADED; i++){
+		ms_lastVehicleDeleted++;
+		if(ms_lastVehicleDeleted == MAXVEHICLESLOADED)
+			ms_lastVehicleDeleted = 0;
+		id = ms_vehiclesLoaded[ms_lastVehicleDeleted];
+		if(id != -1 &&
+		   (ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0 &&
+		   CModelInfo::GetModelInfo(id)->m_refCount == 0 &&
+		   ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED)
+			goto found;
+	}
+	return false;
+found:
+	RemoveModel(ms_vehiclesLoaded[ms_lastVehicleDeleted]);
+	ms_numVehiclesLoaded--;
+	ms_vehiclesLoaded[ms_lastVehicleDeleted] = -1;
+	return true;
+}
+
+bool
+CStreaming::RemoveLeastUsedModel(void)
+{
+	CStreamingInfo *si;
+	int streamId;
+
+	for(si = ms_endLoadedList.m_prev; si != &ms_startLoadedList; si = si->m_prev){
+		streamId = si - ms_aInfoForModel;
+		if(streamId < STREAM_OFFSET_TXD){
+			if(CTxdStore::GetNumRefs(streamId - STREAM_OFFSET_TXD) == 0 &&
+			   !IsTxdUsedByRequestedModels(streamId - STREAM_OFFSET_TXD)){
+				RemoveModel(streamId);
+				return true;
+			}
+		}else{
+			if(CModelInfo::GetModelInfo(streamId)->m_refCount == 0){
+				RemoveModel(streamId);
+				return true;
+			}
+		}
+	}
+	return ms_numVehiclesLoaded > 7 && RemoveLoadedVehicle();
+}
+
+void
+CStreaming::RemoveAllUnusedModels(void)
+{
+	int i;
+
+	for(i = 0; i < MAXVEHICLESLOADED; i++)
+		RemoveLoadedVehicle();
+
+	for(i = NUM_DEFAULT_MODELS; i < MODELINFOSIZE; i++){
+		if(ms_aInfoForModel[i].m_loadState == STREAMSTATE_LOADED &&
+		   ms_aInfoForModel[i].m_flags & STREAMFLAGS_DONT_REMOVE &&
+		   CModelInfo::GetModelInfo(i)->m_refCount == 0){
+			RemoveModel(i);
+			ms_aInfoForModel[i].m_loadState = STREAMSTATE_NOTLOADED;
+		}
+	}
+}
+
+bool
+CStreaming::RemoveReferencedTxds(int32 mem)
+{
+	CStreamingInfo *si;
+	int streamId;
+
+	for(si = ms_endLoadedList.m_prev; si != &ms_startLoadedList; si = si->m_prev){
+		streamId = si - ms_aInfoForModel;
+		if(streamId >= STREAM_OFFSET_TXD &&
+		   CTxdStore::GetNumRefs(streamId-STREAM_OFFSET_TXD) == 0){
+			RemoveModel(streamId);
+			if(ms_memoryUsed < mem)
+				return true;
+		}
+	}
+	return false;
+}
+
+// TODO: RemoveCurrentZonesModels
+
+void
+CStreaming::RemoveUnusedModelsInLoadedList(void)
+{
+	// empty
+}
+
+bool
+CStreaming::IsTxdUsedByRequestedModels(int32 txdId)
+{
+	CStreamingInfo *si;
+	int streamId;
+	int i;
+
+	for(si = ms_endRequestedList.m_prev; si != &ms_startRequestedList; si = si->m_prev){
+		streamId = si - ms_aInfoForModel;
+		if(streamId < STREAM_OFFSET_TXD &&
+		   CModelInfo::GetModelInfo(streamId)->GetTxdSlot() == txdId)
+			return true;
+	}
+
+	for(i = 0; i < 4; i++){
+		streamId = ms_channel[0].streamIds[i];
+		if(streamId != -1 && streamId < STREAM_OFFSET_TXD &&
+		   CModelInfo::GetModelInfo(streamId)->GetTxdSlot() == txdId)
+			return true;
+		streamId = ms_channel[1].streamIds[i];
+		if(streamId != -1 && streamId < STREAM_OFFSET_TXD &&
+		   CModelInfo::GetModelInfo(streamId)->GetTxdSlot() == txdId)
+			return true;
+	}
+
+	return false;
+}
+
+int32
+CStreaming::GetAvailableVehicleSlot(void)
+{
+	int i;
+	for(i = 0; i < MAXVEHICLESLOADED; i++)
+		if(ms_vehiclesLoaded[i] == -1)
+			return i;
+	return -1;
+}
+
+bool
+CStreaming::AddToLoadedVehiclesList(int32 modelId)
+{
+	int i;
+	int id;
+
+	if(ms_numVehiclesLoaded < desiredNumVehiclesLoaded){
+		// still room for vehicles
+		for(i = 0; i < MAXVEHICLESLOADED; i++){
+			if(ms_vehiclesLoaded[ms_lastVehicleDeleted] == -1)
+				break;
+			ms_lastVehicleDeleted++;
+			if(ms_lastVehicleDeleted == MAXVEHICLESLOADED)
+				ms_lastVehicleDeleted = 0;
+		}
+		assert(ms_vehiclesLoaded[ms_lastVehicleDeleted] == -1);
+		ms_numVehiclesLoaded++;
+	}else{
+		// find vehicle we can remove
+		for(i = 0; i < MAXVEHICLESLOADED; i++){
+			id = ms_vehiclesLoaded[ms_lastVehicleDeleted];
+			if(id != -1 &&
+			   (ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0 &&
+			    CModelInfo::GetModelInfo(id)->m_refCount == 0)
+				goto found;
+			ms_lastVehicleDeleted++;
+			if(ms_lastVehicleDeleted == MAXVEHICLESLOADED)
+				ms_lastVehicleDeleted = 0;
+		}
+		id = -1;
+found:
+		if(id == -1){
+			// didn't find anything, try a free slot
+			id = GetAvailableVehicleSlot();
+			if(id == -1)
+				return false;	// still no luck
+			ms_lastVehicleDeleted = id;
+			// this is more that we wanted actually
+			ms_numVehiclesLoaded++;
+		}else
+			RemoveModel(id);
+	}
+
+	ms_vehiclesLoaded[ms_lastVehicleDeleted++] = modelId;
+	if(ms_lastVehicleDeleted == MAXVEHICLESLOADED)
+		ms_lastVehicleDeleted = 0;
+	return true;
+}
+
+bool
+CStreaming::IsObjectInCdImage(int32 id)
+{
+	uint32 posn, size;
+	return ms_aInfoForModel[id].GetCdPosnAndSize(posn, size);
+}
+
+void
+CStreaming::HaveAllBigBuildingsLoaded(eLevelName level)
+{
+	int i, n;
+	CEntity *e;
+
+	if(ms_hasLoadedLODs)
+		return;
+
+	if(level == LEVEL_INDUSTRIAL){
+		if(ms_aInfoForModel[islandLODcomInd].m_loadState != STREAMSTATE_LOADED ||
+		   ms_aInfoForModel[islandLODsubInd].m_loadState != STREAMSTATE_LOADED)
+			return;
+	}else if(level == LEVEL_COMMERCIAL){
+		if(ms_aInfoForModel[islandLODindust].m_loadState != STREAMSTATE_LOADED ||
+		   ms_aInfoForModel[islandLODsubCom].m_loadState != STREAMSTATE_LOADED)
+			return;
+	}else if(level == LEVEL_SUBURBAN){
+		if(ms_aInfoForModel[islandLODindust].m_loadState != STREAMSTATE_LOADED ||
+		   ms_aInfoForModel[islandLODcomSub].m_loadState != STREAMSTATE_LOADED)
+			return;
+	}
+
+	n = CPools::GetBuildingPool()->GetSize();
+	for(i = 0; i < n; i++){
+		e = CPools::GetBuildingPool()->GetSlot(i);
+		if(e && e->bIsBIGBuilding && e->m_level == level &&
+		   ms_aInfoForModel[e->GetModelIndex()].m_loadState != STREAMSTATE_LOADED)
+			return;
+	}
+
+	RemoveUnusedBigBuildings(level);
+	ms_hasLoadedLODs = true;
+}
+
+void
+CStreaming::SetModelIsDeletable(int32 id)
+{
+	ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_DONT_REMOVE;
+	if(id >= STREAM_OFFSET_TXD ||
+	   CModelInfo::GetModelInfo(id)->m_type == MITYPE_VEHICLE && ms_aInfoForModel[id].m_flags & STREAMFLAGS_SCRIPTOWNED){
+		if(ms_aInfoForModel[id].m_loadState != STREAMSTATE_LOADED)
+			RemoveModel(id);
+		else if(ms_aInfoForModel[id].m_next == nil)
+			ms_aInfoForModel[id].AddToList(&ms_startLoadedList);
+	}
+}
+
+void
+CStreaming::SetModelTxdIsDeletable(int32 id)
+{
+	SetModelIsDeletable(CModelInfo::GetModelInfo(id)->GetTxdSlot() + STREAM_OFFSET_TXD);
+}
+
+void
+CStreaming::SetMissionDoesntRequireModel(int32 id)
+{
+	ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_SCRIPTOWNED;
+	if(id >= STREAM_OFFSET_TXD ||
+	   CModelInfo::GetModelInfo(id)->m_type == MITYPE_VEHICLE && ms_aInfoForModel[id].m_flags & STREAMFLAGS_DONT_REMOVE){
+		if(ms_aInfoForModel[id].m_loadState != STREAMSTATE_LOADED)
+			RemoveModel(id);
+		else if(ms_aInfoForModel[id].m_next == nil)
+			ms_aInfoForModel[id].AddToList(&ms_startLoadedList);
+	}
+}
+
+void
+CStreaming::LoadInitialPeds(void)
+{
+	RequestModel(MI_COP, STREAMFLAGS_DONT_REMOVE);
+	RequestModel(MI_MALE01, STREAMFLAGS_DONT_REMOVE);
+	RequestModel(MI_TAXI_D, STREAMFLAGS_DONT_REMOVE);
+}
+
+void
+CStreaming::LoadInitialVehicles(void)
+{
+	int id;
+
+	ms_numVehiclesLoaded = 0;
+	ms_lastVehicleDeleted = 0;
+
+	if(CModelInfo::GetModelInfo("taxi", &id))
+		RequestModel(id, STREAMFLAGS_DONT_REMOVE);
+	if(CModelInfo::GetModelInfo("police", &id))
+		RequestModel(id, STREAMFLAGS_DONT_REMOVE);
+}
+
+
+
+bool
+CStreaming::ProcessLoadingChannel(int32 ch)
+{
+	int status;
+	int i, id, cdsize;
+
+	status = CdStreamGetStatus(ch);
+	if(status != STREAM_NONE){
+		// busy
+		if(status != STREAM_READING && status != STREAM_WAITING){
+			ms_channelError = ch;
+			ms_channel[ch].state = CHANNELSTATE_ERROR;
+			ms_channel[ch].status = status;
+		}
+		return false;
+	}
+
+	if(ms_channel[ch].state == CHANNELSTATE_STARTED){
+		ms_channel[ch].state = CHANNELSTATE_IDLE;
+		FinishLoadingLargeFile(&ms_pStreamingBuffer[ch][ms_channel[ch].offsets[0]*CDSTREAM_SECTOR_SIZE],
+			ms_channel[ch].streamIds[0]);
+		ms_channel[ch].streamIds[0] = -1;
+	}else{
+		ms_channel[ch].state = CHANNELSTATE_IDLE;
+		for(i = 0; i < 4; i++){
+			id = ms_channel[ch].streamIds[i];
+			if(id == -1)
+				continue;
+
+			cdsize = ms_aInfoForModel[id].GetCdSize();
+			if(id < STREAM_OFFSET_TXD &&
+			   CModelInfo::GetModelInfo(id)->m_type == MITYPE_VEHICLE &&
+			   ms_numVehiclesLoaded >= desiredNumVehiclesLoaded &&
+			   RemoveLoadedVehicle() &&
+			   ((ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0 || GetAvailableVehicleSlot() == -1)){
+				// can't load vehicle
+				RemoveModel(id);
+				if(ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOT_IN_LIST)
+					ReRequestModel(id);
+				else if(CTxdStore::GetNumRefs(CModelInfo::GetModelInfo(id)->GetTxdSlot()) == 0)
+					RemoveTxd(CModelInfo::GetModelInfo(id)->GetTxdSlot());
+			}else{
+				MakeSpaceFor(cdsize * CDSTREAM_SECTOR_SIZE);
+				ConvertBufferToObject(&ms_pStreamingBuffer[ch][ms_channel[ch].offsets[i]*CDSTREAM_SECTOR_SIZE],
+					id);
+				if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_STARTED){
+					// queue for second part
+					ms_channel[ch].state = CHANNELSTATE_STARTED;
+					ms_channel[ch].offsets[0] = ms_channel[ch].offsets[i];
+					ms_channel[ch].streamIds[0] = id;
+					if(i != 0)
+						ms_channel[ch].streamIds[i] = -1;
+				}else
+					ms_channel[ch].streamIds[i] = -1;
+			}
+		}
+	}
+
+	if(ms_bLoadingBigModel && ms_channel[ch].state != CHANNELSTATE_STARTED){
+		ms_bLoadingBigModel = false;
+		// reset channel 1 after loading a big model
+		for(i = 0; i < 4; i++){
+			ms_channel[1].streamIds[i] = -1;
+			ms_channel[1].offsets[i] = -1;
+		}
+		ms_channel[1].state = CHANNELSTATE_IDLE;
+	}
+
+	return true;
+}
+
+inline bool
+TxdAvailable(int32 txdId)
+{
+	CStreamingInfo *si = &CStreaming::ms_aInfoForModel[txdId + STREAM_OFFSET_TXD];
+	return si->m_loadState == STREAMSTATE_LOADED || si->m_loadState == STREAMSTATE_READING;
+}
+
+// Find stream id of next requested file in cdimage
+int32
+CStreaming::GetNextFileOnCd(int32 lastPosn, bool priority)
+{
+	CStreamingInfo *si, *next;
+	int streamId;
+	uint32 posn, size;
+	int streamIdFirst, streamIdNext;
+	uint32 posnFirst, posnNext;
+
+	streamIdFirst = -1;
+	streamIdNext = -1;
+	posnFirst = UINT_MAX;
+	posnNext = UINT_MAX;
+
+	for(si = ms_startRequestedList.m_next; si != &ms_endRequestedList; si = next){
+		next = si->m_next;
+		streamId = si - ms_aInfoForModel;
+
+		// only priority requests if there are any
+		if(priority && ms_numPriorityRequests != 0 &&
+		   (si->m_flags & STREAMFLAGS_PRIORITY) == 0)
+			continue;
+
+		// request Txd if necessary
+		if(streamId < STREAM_OFFSET_TXD &&
+		   !TxdAvailable(CModelInfo::GetModelInfo(streamId)->GetTxdSlot())){
+			ReRequestTxd(CModelInfo::GetModelInfo(streamId)->GetTxdSlot());
+		}else if(ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size)){
+			if(posn < posnFirst){
+				// find first requested file in image
+				streamIdFirst = streamId;
+				posnFirst = posn;
+			}
+			if(posn < posnNext && posn >= (uint32)lastPosn){
+				// find first requested file after last read position
+				streamIdNext = streamId;
+				posnNext = posn;
+			}
+		}else{
+			// empty file
+			ms_numModelsRequested--;
+			if(ms_aInfoForModel[streamId].m_flags & STREAMFLAGS_PRIORITY){
+				ms_aInfoForModel[streamId].m_flags &= ~STREAMFLAGS_PRIORITY;
+				ms_numPriorityRequests--;
+			}
+			si->RemoveFromList();
+			si->m_loadState = STREAMSTATE_LOADED;
+		}
+	}
+
+	// wrap around
+	if(streamIdNext == -1)
+		streamIdNext = streamIdFirst;
+
+	if(streamIdNext == -1 && ms_numPriorityRequests){
+		// try non-priority files
+		ms_numPriorityRequests = 0;
+		streamIdNext = GetNextFileOnCd(lastPosn, false);
+	}
+
+	return streamIdNext;
+}
+
+void
+CStreaming::FlushChannels(void)
+{
+	if(ms_channel[1].state == CHANNELSTATE_STARTED)
+		ProcessLoadingChannel(1);
+
+	if(ms_channel[0].state == CHANNELSTATE_UNK1){
+		CdStreamSync(0);
+		ProcessLoadingChannel(0);
+	}
+	if(ms_channel[0].state == CHANNELSTATE_STARTED)
+		ProcessLoadingChannel(0);
+
+	if(ms_channel[1].state == CHANNELSTATE_UNK1){
+		CdStreamSync(1);
+		ProcessLoadingChannel(1);
+	}
+	if(ms_channel[1].state == CHANNELSTATE_STARTED)
+		ProcessLoadingChannel(1);
+}
+
+void
+CStreaming::FlushRequestList(void)
+{
+	CStreamingInfo *si, *next;
+
+	for(si = ms_startRequestedList.m_next; si != &ms_endRequestedList; si = next){
+		next = si->m_next;
+		RemoveModel(si - ms_aInfoForModel);
+	}
+	FlushChannels();
+}
+
+// Find starting offset of the cdimage we next want to read
+// Not useful at all on PC...
+int32
+CStreaming::GetCdImageOffset(int32 lastPosn)
+{
+	int offset, off;
+	int i, img;
+	int dist, mindist;
+
+	img = -1;
+	mindist = INT_MAX;
+	offset = ms_imageOffsets[ms_lastImageRead];
+	if(lastPosn <= offset || lastPosn > offset + ms_imageSize){
+		// last read position is not in last image
+		for(i = 0; i < NUMCDIMAGES; i++){
+			off = ms_imageOffsets[i];
+			if(off == -1) continue;
+			if((uint32)lastPosn > (uint32)off)
+				// after start of image, get distance from end
+				// negative if before end!
+				dist = lastPosn - (off + ms_imageSize);
+			else
+				// before image, get offset to start
+				// this will never be negative
+				dist = off - lastPosn;
+			if(dist < mindist){
+				img = i;
+				mindist = dist;
+			}
+		}
+		assert(img >= 0);
+		offset = ms_imageOffsets[img];
+		ms_lastImageRead = img;
+	}
+	return offset;
+}
+
 
 void
 CStreaming::ImGonnaUseStreamingMemory(void)
 {
+	// empty
 }
 
 void
@@ -717,8 +1349,8 @@ CStreaming::IHaveUsedStreamingMemory(void)
 void
 CStreaming::UpdateMemoryUsed(void)
 {
+	// empty
 }
-
 
 
 bool
@@ -770,7 +1402,35 @@ STARTPATCHES
 	InjectHook(0x408210, CStreaming::RequestIslands, PATCH_JUMP);
 	InjectHook(0x40A890, CStreaming::RequestSpecialModel, PATCH_JUMP);
 	InjectHook(0x40ADA0, CStreaming::RequestSpecialChar, PATCH_JUMP);
+
 	InjectHook(0x408830, CStreaming::RemoveModel, PATCH_JUMP);
+	InjectHook(0x4083A0, CStreaming::RemoveUnusedBuildings, PATCH_JUMP);
+	InjectHook(0x4083D0, CStreaming::RemoveBuildings, PATCH_JUMP);
+	InjectHook(0x408640, CStreaming::RemoveUnusedBigBuildings, PATCH_JUMP);
+	InjectHook(0x408680, CStreaming::RemoveBigBuildings, PATCH_JUMP);
+	InjectHook(0x408780, CStreaming::RemoveIslandsNotUsed, PATCH_JUMP);
+	InjectHook(0x40B180, CStreaming::RemoveLoadedVehicle, PATCH_JUMP);
+	InjectHook(0x4089B0, CStreaming::RemoveLeastUsedModel, PATCH_JUMP);
+	InjectHook(0x408940, CStreaming::RemoveAllUnusedModels, PATCH_JUMP);
+	InjectHook(0x409450, CStreaming::RemoveReferencedTxds, PATCH_JUMP);
+
+	InjectHook(0x40B160, CStreaming::GetAvailableVehicleSlot, PATCH_JUMP);
+	InjectHook(0x40B060, CStreaming::AddToLoadedVehiclesList, PATCH_JUMP);
+	InjectHook(0x4094C0, CStreaming::IsTxdUsedByRequestedModels, PATCH_JUMP);
+	InjectHook(0x407E70, CStreaming::IsObjectInCdImage, PATCH_JUMP);
+	InjectHook(0x408280, CStreaming::HaveAllBigBuildingsLoaded, PATCH_JUMP);
+	InjectHook(0x40A790, CStreaming::SetModelIsDeletable, PATCH_JUMP);
+	InjectHook(0x40A800, CStreaming::SetModelTxdIsDeletable, PATCH_JUMP);
+	InjectHook(0x40A820, CStreaming::SetMissionDoesntRequireModel, PATCH_JUMP);
+
+	InjectHook(0x40AA00, CStreaming::LoadInitialPeds, PATCH_JUMP);
+	InjectHook(0x40ADF0, CStreaming::LoadInitialVehicles, PATCH_JUMP);
+
+	InjectHook(0x409BE0, CStreaming::ProcessLoadingChannel, PATCH_JUMP);
+	InjectHook(0x40A610, CStreaming::FlushChannels, PATCH_JUMP);
+	InjectHook(0x40A680, CStreaming::FlushRequestList, PATCH_JUMP);
+	InjectHook(0x409FF0, CStreaming::GetCdImageOffset, PATCH_JUMP);
+	InjectHook(0x409E50, CStreaming::GetNextFileOnCd, PATCH_JUMP);
 
 	InjectHook(0x4063E0, &CStreamingInfo::GetCdPosnAndSize, PATCH_JUMP);
 	InjectHook(0x406410, &CStreamingInfo::SetCdPosnAndSize, PATCH_JUMP);

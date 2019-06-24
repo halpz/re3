@@ -14,6 +14,7 @@ enum StreamFlags
 	STREAMFLAGS_PRIORITY    = 0x08,
 	STREAMFLAGS_NOFADE      = 0x10,
 
+	// TODO: this isn't named well, maybe CANT_REMOVE?
 	STREAMFLAGS_NOT_IN_LIST = STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_SCRIPTOWNED,
 	STREAMFLAGS_KEEP_IN_MEMORY = STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_SCRIPTOWNED|STREAMFLAGS_DEPENDENCY,
 };
@@ -29,7 +30,10 @@ enum StreamLoadState
 
 enum ChannelState
 {
-	CHANNELSTATE_0 = 0,
+	CHANNELSTATE_IDLE = 0,
+	CHANNELSTATE_UNK1 = 1,
+	CHANNELSTATE_STARTED = 2,
+	CHANNELSTATE_ERROR = 3,
 };
 
 class CStreamingInfo
@@ -53,7 +57,7 @@ public:
 
 struct CStreamingChannel
 {
-	int32 modelIds[4];
+	int32 streamIds[4];
 	int32 offsets[4];
 	int32 state;
 	int32 field24;
@@ -80,11 +84,13 @@ public:
 	static int32 &ms_oldSectorX;
 	static int32 &ms_oldSectorY;
 	static uint32 &ms_streamingBufferSize;
-	static uint8 **ms_pStreamingBuffer;	//[2]
+	static int8 **ms_pStreamingBuffer;	//[2]
 	static int32 &ms_memoryUsed;
 	static CStreamingChannel *ms_channel;	//[2]
+	static int32 &ms_channelError;
 	static int32 &ms_numVehiclesLoaded;
 	static int32 *ms_vehiclesLoaded;	//[MAXVEHICLESLOADED]
+	static int32 &ms_lastVehicleDeleted;
 	static CDirectory *&ms_pExtraObjectsDir;
 	static int32 &ms_numPriorityRequests;
 	static bool &ms_hasLoadedLODs;
@@ -104,7 +110,9 @@ public:
 	static bool ConvertBufferToObject(int8 *buf, int32 streamId);
 	static bool FinishLoadingLargeFile(int8 *buf, int32 streamId);
 	static void RequestModel(int32 model, int32 flags);
+	static void ReRequestModel(int32 model) { RequestModel(model, ms_aInfoForModel[model].m_flags); }
 	static void RequestTxd(int32 txd, int32 flags) { RequestModel(txd + STREAM_OFFSET_TXD, flags); }
+	static void ReRequestTxd(int32 txd) { ReRequestModel(txd + STREAM_OFFSET_TXD); }
 	static void RequestSubway(void);
 	static void RequestBigBuildings(eLevelName level);
 	static void RequestIslands(eLevelName level);
@@ -112,12 +120,38 @@ public:
 	static void RequestSpecialChar(int32 charId, const char *modelName, int32 flags);
 	static void RemoveModel(int32 id);
 	static void RemoveTxd(int32 id) { RemoveModel(id + STREAM_OFFSET_TXD); }
-
+	static void RemoveUnusedBuildings(eLevelName level);
+	static void RemoveBuildings(eLevelName level);
+	static void RemoveUnusedBigBuildings(eLevelName level);
+	static void RemoveIslandsNotUsed(eLevelName level);
+	static void RemoveBigBuildings(eLevelName level);
+	static bool RemoveLoadedVehicle(void);
+	static bool RemoveLeastUsedModel(void);
+	static void RemoveAllUnusedModels(void);
+	static void RemoveUnusedModelsInLoadedList(void);
+	static bool RemoveReferencedTxds(int32 mem);
+	static int32 GetAvailableVehicleSlot(void);
 	static bool IsTxdUsedByRequestedModels(int32 txdId);
 	static bool AddToLoadedVehiclesList(int32 modelId);
+	static bool IsObjectInCdImage(int32 id);
+	static void HaveAllBigBuildingsLoaded(eLevelName level);
+	static void SetModelIsDeletable(int32 id);
+	static void SetModelTxdIsDeletable(int32 id);
+	static void SetMissionDoesntRequireModel(int32 id);
+
+	static int32 GetNextFileOnCd(int32 position, bool priority);
+	static bool ProcessLoadingChannel(int32 ch);
+	static void RequestModelStream(int32 ch);
+	static void FlushChannels(void);
+	static void FlushRequestList(void);
+	static int32 GetCdImageOffset(int32 lastPosn);
 
 	static void MakeSpaceFor(int32 size);
 	static void ImGonnaUseStreamingMemory(void);
 	static void IHaveUsedStreamingMemory(void);
 	static void UpdateMemoryUsed(void);
+
+
+	static void LoadInitialPeds(void);
+	static void LoadInitialVehicles(void);
 };

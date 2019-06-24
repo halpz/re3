@@ -326,6 +326,8 @@ enum
 
 	MI_AIRTRAIN_VLO = 198,
 	MI_LOPOLYGUY,
+
+	NUM_DEFAULT_MODELS,
 };
 
 void InitModelIndices(void);
