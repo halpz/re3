@@ -189,5 +189,11 @@ public:
 	void ChangeMusicMode(uint8 mode);
 	void PlayFrontEndSound(uint32, uint32);
 	void PlayOneShot(int, uint16, float);
+	int32 GetRadioInCar(void);
+	void SetEffectsFadeVol(uint8);
+	void SetMusicFadeVol(uint8);
+	int32 CreateEntity(int, void*);
+	void SetEntityStatus(int32, int8);
+	void SetRadioInCar(int32);
 };
 extern cDMAudio &DMAudio;

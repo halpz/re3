@@ -93,6 +93,8 @@ CCollision::LoadCollisionWhenINeedIt(bool changeLevel)
 
 #endif
 
+WRAPPER void CCollision::SortOutCollisionAfterLoad(void) { EAXJMP(0x40B900); }
+
 //
 // Test
 //
@@ -1582,6 +1584,8 @@ CColModel::GetTrianglePoint(CVector &v, int i) const
 {
 	v = vertices[i];
 }
+
+WRAPPER CColModel& CColModel::operator=(const CColModel& other) { EAXJMP(0x411710); }
 
 STARTPATCHES
 	InjectHook(0x4B9C30, (CMatrix& (*)(const CMatrix &src, CMatrix &dst))Invert, PATCH_JUMP);

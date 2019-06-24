@@ -71,6 +71,7 @@ public:
 
 	void ObjectDamage(float amount);
 
+	static void DeleteAllTempObjectInArea(CVector, float);
 
 	void Render_(void) { CObject::Render(); }
 };

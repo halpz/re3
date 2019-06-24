@@ -280,7 +280,32 @@ public:
 	void ClearPointGunAt(void);
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
 	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
-	static void FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg);
+	static void PedGetupCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedStaggerCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedEvadeCB(CAnimBlendAssociation *assoc, void *arg);
+	static void FinishDieAnimCB(CAnimBlendAssociation *assoc, void *arg);
+	static void FinishedWaitCB(CAnimBlendAssociation *assoc, void *arg);
+	static void FinishLaunchCB(CAnimBlendAssociation *assoc, void *arg);
+	static void FinishHitHeadCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedAnimGetInCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedAnimDoorOpenCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedAnimPullPedOutCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedAnimDoorCloseCB(CAnimBlendAssociation *assoc, void *arg);
+	static void SetInCarCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedSetOutCarCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedAnimAlignCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedSetDraggedOutCarCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedAnimStepOutCarCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedSetInTrainCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedSetOutTrainCB(CAnimBlendAssociation *assoc, void *arg);
+	static void FinishedAttackCB(CAnimBlendAssociation *assoc, void *arg);
+	static void FinishFightMoveCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedAnimDoorCloseRollingCB(CAnimBlendAssociation *assoc, void *arg);
+	static void FinishJumpCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedLandCB(CAnimBlendAssociation *assoc, void *arg);
+	static void RestoreHeadingRateCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 
 	bool HasWeapon(eWeaponType weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
@@ -290,6 +315,8 @@ public:
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;
 };
+
+void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 
 static_assert(offsetof(CPed, m_nPedState) == 0x224, "CPed: error");
 static_assert(offsetof(CPed, m_pCurSurface) == 0x2FC, "CPed: error");

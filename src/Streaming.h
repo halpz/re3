@@ -119,4 +119,7 @@ public:
 	static void ImGonnaUseStreamingMemory(void);
 	static void IHaveUsedStreamingMemory(void);
 	static void UpdateMemoryUsed(void);
+
+	static void LoadScene(CVector *pos);
+	static void LoadAllRequestedModels(bool);
 };

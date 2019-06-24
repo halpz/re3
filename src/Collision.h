@@ -108,6 +108,7 @@ struct CColModel
 
 	CColModel *ctor(void) { return ::new (this) CColModel(); }
 	void dtor(void) { this->CColModel::~CColModel(); }
+	CColModel& operator=(const CColModel& other);
 };
 
 class CCollision
@@ -119,6 +120,7 @@ public:
 	static void Init(void);
 	static void Update(void);
 	static void LoadCollisionWhenINeedIt(bool changeLevel);
+	static void SortOutCollisionAfterLoad(void);
 	static void DrawColModel(const CMatrix &mat, const CColModel &colModel);
 	static void DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel, int32 id);
 

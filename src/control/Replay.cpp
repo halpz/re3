@@ -2,17 +2,28 @@
 #include "patcher.h"
 #include "AnimBlendAssociation.h"
 #include "BulletTraces.h"
+#include "CarCtrl.h"
 #include "Clock.h"
+#include "DMAudio.h"
 #include "Draw.h"
 #include "math/Matrix.h"
 #include "ModelIndices.h"
+#include "ModelInfo.h"
+#include "Object.h"
+#include "Pad.h"
+#include "PhoneInfo.h"
+#include "Pickups.h"
+#include "Pools.h"
+#include "Population.h"
 #include "Replay.h"
 #include "RpAnimBlend.h"
-#include "Pad.h"
-#include "Pools.h"
+#include "RwHelper.h"
 #include "CutsceneMgr.h"
+#include "render/Skidmarks.h"
+#include "Streaming.h"
 #include "Timer.h"
 #include "Weather.h"
+#include "Zones.h"
 
 uint8 &CReplay::Mode = *(uint8*)0x95CD5B;
 CAddressInReplayBuffer &CReplay::Record = *(CAddressInReplayBuffer*)0x942F7C;
@@ -43,6 +54,66 @@ bool &CReplay::bReplayEnabled = *(bool*)0x617CAC;
 uint32 &CReplay::SlowMotion = *(uint32*)0x9414D4;
 uint32 &CReplay::FramesActiveLookAroundCam = *(uint32*)0x880F84;
 bool &CReplay::bDoLoadSceneWhenDone = *(bool*)0x95CD76;
+CPtrList &CReplay::WorldPtrList = *(CPtrList*)0x880F90;
+CPtrList &CReplay::BigBuildingPtrList = *(CPtrList*)0x941284;
+CWanted &CReplay::PlayerWanted = *(CWanted*)0x8F6278;
+CPlayerInfo &CReplay::PlayerInfo = *(CPlayerInfo*)0x8F5840;
+uint32 &CReplay::Time1 = *(uint32*)0x8F29DC;
+uint32 &CReplay::Time2 = *(uint32*)0x8F29D0;
+uint32 &CReplay::Time3 = *(uint32*)0x8F29D4;
+uint32 &CReplay::Time4 = *(uint32*)0x8F29C8;
+uint32 &CReplay::Frame = *(uint32*)0x8F2554;
+uint8 &CReplay::ClockHours = *(uint8*)0x95CDC5;
+uint8 &CReplay::ClockMinutes = *(uint8*)0x95CDA2;
+uint16 &CReplay::OldWeatherType = *(uint16*)0x95CCEA;
+uint16 &CReplay::NewWeatherType = *(uint16*)0x95CC6E;
+float &CReplay::WeatherInterpolationValue = *(float*)0x8F1A28;
+float &CReplay::TimeStepNonClipped = *(float*)0x8F5FF4;
+float &CReplay::TimeStep = *(float*)0x8F2C24;
+float &CReplay::TimeScale = *(float*)0x880E20;
+float &CReplay::CameraFixedX = *(float*)0x943054;
+float &CReplay::CameraFixedY = *(float*)0x943058;
+float &CReplay::CameraFixedZ = *(float*)0x94305C;
+int32 &CReplay::OldRadioStation = *(int32*)0x94151C;
+int8 &CReplay::CameraMode = *(int8*)0x95CD5F;
+bool &CReplay::bAllowLookAroundCam = *(bool*)0x95CDCD;
+float &CReplay::LoadSceneX = *(float*)0x880F9C;
+float &CReplay::LoadSceneY = *(float*)0x880F98;
+float &CReplay::LoadSceneZ = *(float*)0x880F94;
+
+#if 1
+static void(*(&CBArray)[30])(CAnimBlendAssociation*, void*) = *(void(*(*)[30])(CAnimBlendAssociation*, void*))0x61052C;
+#else
+static void(*CBArray[])(CAnimBlendAssociation*, void*) =
+{
+	nil, &CPed::PedGetupCB, &CPed::PedStaggerCB, &CPed::PedEvadeCB, &CPed::FinishDieAnimCB,
+	&CPed::FinishedWaitCB, &CPed::FinishLaunchCB, &CPed::FinishHitHeadCB, &CPed::PedAnimGetInCB, &CPed::PedAnimDoorOpenCB,
+	&CPed::PedAnimPullPedOutCB, &CPed::PedAnimDoorCloseCB, &CPed::SetInCarCB, &CPed::PedSetOutCarCB, &CPed::PedAnimAlignCB,
+	&CPed::PedSetDraggedOutCarCB, &CPed::PedAnimStepOutCarCB, &CPed::PedSetInTrainCB, &CPed::PedSetOutTrainCB, &CPed::FinishedAttackCB,
+	&CPed::FinishFightMoveCB, &PhonePutDownCB, &PhonePickUpCB, &CPed::PedAnimDoorCloseRollingCB, &CPed::FinishJumpCB,
+	&CPed::PedLandCB, &FinishFuckUCB, &CPed::RestoreHeadingRateCB, &CPed::PedSetQuickDraggedOutCarPositionCB, &CPed::PedSetDraggedOutCarPositionCB
+};
+#endif
+
+#if 0
+WRAPPER uint8 FindCBFunctionID(void(*f)(CAnimBlendAssociation*, void*)) { EAXJMP(0x584E70); }
+#else
+static uint8 FindCBFunctionID(void(*f)(CAnimBlendAssociation*, void*))
+{
+	for (int i = 0; i < sizeof(CBArray) / sizeof(*CBArray); i++){
+		if (CBArray[i] == f)
+			return i;
+	}
+	return 0;
+}
+#endif
+
+static void(*FindCBFunction(uint8 id))(CAnimBlendAssociation*, void*)
+{
+	return CBArray[id];
+}
+
+WRAPPER static void ApplyPanelDamageToCar(uint32, CAutomobile*, bool) { EAXJMP(0x584EA0); }
 
 void PrintElementsInPtrList(void) 
 {
@@ -276,28 +347,387 @@ void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
 	}
 }
 #endif
+
+#if 0
 WRAPPER void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state) { EAXJMP(0x593BB0); }
+#else
+void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state)
+{
+	for (int i = 0; i < 3; i++){
+		CAnimBlendAssociation* assoc = RpAnimBlendClumpGetMainAssociation_N((RpClump*)ped->m_rwObject, i);
+		if (assoc){
+			state->aAnimId[i] = assoc->animId;
+			state->aCurTime[i] = 255.0f / 4.0f * max(0.0f, min(4.0f, assoc->currentTime));
+			state->aSpeed[i] = 255.0f / 3.0f * max(0.0f, min(3.0f, assoc->speed));
+			state->aBlendAmount[i] = 255.0f / 2.0f * max(0.0f, min(2.0f, assoc->blendAmount));
+			state->aFlags[i] = assoc->flags;
+			if (assoc->callbackType == CAnimBlendAssociation::CB_FINISH || assoc->callbackType == CAnimBlendAssociation::CB_DELETE) {
+				state->aFunctionCallbackID[i] = FindCBFunctionID(assoc->callback);
+				if (assoc->callbackType == CAnimBlendAssociation::CB_FINISH)
+					state->aFunctionCallbackID[i] |= 0x80;
+			}else{
+				state->aFunctionCallbackID[i] = 0;
+			}
+		}else{
+			state->aAnimId[i] = 173; /* TODO: enum */
+			state->aCurTime[i] = 0;
+			state->aSpeed[i] = 85;
+			state->aFunctionCallbackID[i] = 0;
+			state->aFlags[i] = 0;
+		}
+	}
+	for (int i = 0; i < 6; i++) {
+		CAnimBlendAssociation* assoc = RpAnimBlendClumpGetMainPartialAssociation_N((RpClump*)ped->m_rwObject, i);
+		if (assoc) {
+			state->aAnimId2[i] = assoc->animId;
+			state->aCurTime2[i] = 255.0f / 4.0f * max(0.0f, min(4.0f, assoc->currentTime));
+			state->aSpeed2[i] = 255.0f / 3.0f * max(0.0f, min(3.0f, assoc->speed));
+			state->aBlendAmount2[i] = 255.0f / 2.0f * max(0.0f, min(2.0f, assoc->blendAmount));
+			state->aFlags2[i] = assoc->flags;
+			if (assoc->callbackType == CAnimBlendAssociation::CB_FINISH || assoc->callbackType == CAnimBlendAssociation::CB_DELETE) {
+				state->aFunctionCallbackID2[i] = FindCBFunctionID(assoc->callback);
+				if (assoc->callbackType == CAnimBlendAssociation::CB_FINISH)
+					state->aFunctionCallbackID2[i] |= 0x80;
+			}else{
+				state->aFunctionCallbackID2[i] = 0;
+			}
+		}
+		else {
+			state->aAnimId2[i] = 173; /* TODO: enum */
+			state->aCurTime2[i] = 0;
+			state->aSpeed2[i] = 85;
+			state->aFunctionCallbackID2[i] = 0;
+			state->aFlags2[i] = 0;
+		}
+	}
+}
+#endif
 WRAPPER void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayBuffer *buffer) { EAXJMP(0x594050); }
 WRAPPER void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state) { EAXJMP(0x5942A0); }
 WRAPPER void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state) { EAXJMP(0x5944B0); }
 WRAPPER void CReplay::PlaybackThisFrame(void) { EAXJMP(0x5946B0); }
+
+#if 0
 WRAPPER void CReplay::StoreCarUpdate(CVehicle *vehicle, int id) { EAXJMP(0x5947F0); }
+#else
+void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
+{
+	tVehicleUpdatePacket* vp = (tVehicleUpdatePacket*)&Record.m_pBase[Record.m_nOffset];
+	vp->type = REPLAYPACKET_VEHICLE;
+	vp->index = id;
+	vp->matrix.CompressFromFullMatrix(vehicle->GetMatrix());
+	vp->health = vehicle->m_fHealth / 4.0f; /* Not anticipated that health can be > 1000. */
+	vp->acceleration = vehicle->m_fAcceleration * 100.0f;
+	vp->panels = vehicle->IsCar() ? ((CAutomobile*)vehicle)->m_DamageManager.m_abPanelsStatus : 0;
+	vp->velocityX = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetSpeed().x)); /* 8000!? */
+	vp->velocityY = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetSpeed().y));
+	vp->velocityZ = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetSpeed().z));
+	vp->mi = vehicle->GetModelIndex();
+	vp->primary_color = vehicle->m_currentColour1;
+	vp->secondary_color = vehicle->m_currentColour2;
+	if (vehicle->GetModelIndex() == MI_RHINO)
+		vp->car_gun = 128.0f / M_PI * ((CAutomobile*)vehicle)->m_fCarGunLR;
+	else
+		vp->wheel_state = 50.0f * vehicle->m_fWheelState;
+	if (vehicle->IsCar()){
+		CAutomobile* car = (CAutomobile*)vehicle;
+		for (int i = 0; i < 4; i++){
+			vp->wheel_susp_dist[i] = 50.0f * car->m_afWheelSuspDist[i];
+			vp->wheel_rotation[i] = 128.0f / M_PI * car->m_afWheelRotation[i];
+		}
+		vp->door_angles[0] = 127.0f / M_PI * car->m_aDoors[2].m_fAngle;
+		vp->door_angles[1] = 127.0f / M_PI * car->m_aDoors[3].m_fAngle;
+		vp->door_status = 0;
+		for (int i = 0; i < 6; i++){
+			if (car->m_DamageManager.m_bDoorStatus[i] == 3)
+				vp->door_status |= BIT(i);
+		}
+	}
+	Record.m_nOffset += sizeof(tVehicleUpdatePacket);
+}
+#endif
 WRAPPER void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressInReplayBuffer *buffer) { EAXJMP(0x594D10); }
 WRAPPER bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer) { EAXJMP(0x595240); }
 WRAPPER void CReplay::FinishPlayback(void) { EAXJMP(0x595B20); }
 WRAPPER void CReplay::Shutdown(void) { EAXJMP(0x595BD0); }
 WRAPPER void CReplay::ProcessReplayCamera(void) { EAXJMP(0x595C40); }
 WRAPPER void CReplay::Display(void) { EAXJMP(0x595EE0); }
+
+#if 0
 WRAPPER void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene) { EAXJMP(0x596030); }
+#else
+void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene)
+{
+	if (Mode != MODE_RECORD)
+		return;
+	CameraFixedX = cam_x;
+	CameraFixedY = cam_y;
+	CameraFixedZ = cam_z;
+	Mode = MODE_PLAYBACK;
+	FramesActiveLookAroundCam = 0;
+	CameraMode = cam_mode;
+	bAllowLookAroundCam = true;
+	bPlayingBackFromFile = false;
+	OldRadioStation = DMAudio.GetRadioInCar();
+	DMAudio.ChangeMusicMode(0);
+	DMAudio.SetEffectsFadeVol(0);
+	DMAudio.SetMusicFadeVol(0);
+	int current;
+	for (current = 0; current < 8; current++)
+		if (BufferStatus[current] == REPLAYBUFFER_RECORD)
+			break;
+	int first;
+	for (first = (current + 1) % 8; ; first = (first + 1) % 8)
+		if (BufferStatus[first] == REPLAYBUFFER_RECORD || BufferStatus[first] == REPLAYBUFFER_PLAYBACK)
+			break;
+	Playback.m_bSlot = first;
+	Playback.m_nOffset = 0;
+	Playback.m_pBase = Buffers[first];
+	CObject::DeleteAllTempObjectInArea(CVector(0.0f, 0.0f, 0.0f), 1000000.0f);
+	StoreStuffInMem();
+	EmptyPedsAndVehiclePools();
+	SlowMotion = 1;
+	CSkidmarks::Clear();
+	StreamAllNecessaryCarsAndPeds();
+	if (load_scene)
+		bDoLoadSceneWhenDone = false;
+	else{
+		bDoLoadSceneWhenDone = true;
+		LoadSceneX = TheCamera.GetPosition().x;
+		LoadSceneY = TheCamera.GetPosition().y;
+		LoadSceneZ = TheCamera.GetPosition().z;
+		CVector ff_coord;
+		FindFirstFocusCoordinate(&ff_coord);
+		CGame::currLevel = CTheZones::GetLevelFromPosition(ff_coord);
+		CCollision::SortOutCollisionAfterLoad();
+		CStreaming::LoadScene(&ff_coord);
+	}
+	if (cam_mode == REPLAYCAMMODE_ASSTORED)
+		TheCamera.CarZoomIndicator = 5.0f;
+}
+#endif
+
+#if 1
 WRAPPER void CReplay::StoreStuffInMem(void) { EAXJMP(0x5961F0); }
+#else
+void CReplay::StoreStuffInMem(void)
+{
+	CPools::GetVehiclePool()->Store(pBuf0, pBuf1);
+	CPools::GetPedPool()->Store(pBuf2, pBuf3);
+	CPools::GetObjectPool()->Store(pBuf4, pBuf5);
+	CPools::GetPtrNodePool()->Store(pBuf6, pBuf7);
+	CPools::GetEntryInfoNodePool()->Store(pBuf8, pBuf9);
+	CPools::GetDummyPool()->Store(pBuf10, pBuf11);
+	pWorld1 = (CSector*)malloc(sizeof(CSector) * NUMSECTORS_X * NUMSECTORS_Y);
+	memcpy(pWorld1, CWorld::GetSector(0, 0), NUMSECTORS_X * NUMSECTORS_Y * sizeof(CSector));
+	WorldPtrList = CWorld::GetMovingEntityList(); /* Interesting way to copy a list... */
+	BigBuildingPtrList = CWorld::GetBigBuildingList(LEVEL_NONE);
+	pPickups = (CPickup*)malloc(sizeof(CPickup) * NUMPICKUPS);
+	memcpy(pPickups, CPickups::aPickUps, NUMPICKUPS * sizeof(CPickup));
+	pReferences = (CReference*)malloc(sizeof(CReference) * NUMREFERENCES);
+	memcpy(pReferences, CReferences::aRefs, NUMREFERENCES * sizeof(CReference));
+	pEmptyReferences = CReferences::pEmptyList;
+	pStoredCam = (CCamera*)malloc(sizeof(CCamera));
+	memcpy(pStoredCam, &TheCamera, sizeof(CCamera));
+	pRadarBlips = (CBlip*)malloc(sizeof(CBlip) * NUMBLIPS);
+	memcpy(pRadarBlips, CRadar::ms_RadarTrace, NUMBLIPS * sizeof(CBlip));
+	PlayerWanted = *FindPlayerPed()->m_pWanted;
+	PlayerInfo = CWorld::Players[0];
+	Time1 = CTimer::GetTimeInMilliseconds();
+	Time2 = CTimer::GetTimeInMillisecondsNonClipped();
+	Time3 = CTimer::GetPreviousTimeInMilliseconds();
+	Time4 = CTimer::GetTimeInMillisecondsPauseMode();
+	Frame = CTimer::GetFrameCounter();
+	ClockHours = CClock::GetHours();
+	ClockMinutes = CClock::GetMinutes();
+	OldWeatherType = CWeather::OldWeatherType;
+	NewWeatherType = CWeather::NewWeatherType;
+	WeatherInterpolationValue = CWeather::InterpolationValue;
+	TimeStepNonClipped = CTimer::GetTimeStepNonClipped();
+	TimeStep = CTimer::GetTimeStep();
+	TimeScale = CTimer::GetTimeScale();
+	int size = CPools::GetPedPool()->GetSize();
+	pPedAnims = (CStoredDetailedAnimationState*)malloc(size * sizeof(CStoredDetailedAnimationState));
+	for (int i = 0; i < size; i++) {
+		CPed* ped = CPools::GetPedPool()->GetSlot(i);
+		if (ped)
+			StoreDetailedPedAnimation(ped, &pPedAnims[i]);
+	}
+}
+#endif
+
+#if 1
 WRAPPER void CReplay::RestoreStuffFromMem(void) { EAXJMP(0x5966E0); }
+#else
+void CReplay::RestoreStuffFromMem(void)
+{
+	CPools::GetVehiclePool()->CopyBack(pBuf0, pBuf1);
+	CPools::GetPedPool()->CopyBack(pBuf2, pBuf3);
+	CPools::GetObjectPool()->CopyBack(pBuf4, pBuf5);
+	CPools::GetPtrNodePool()->CopyBack(pBuf6, pBuf7);
+	CPools::GetEntryInfoNodePool()->CopyBack(pBuf8, pBuf9);
+	CPools::GetDummyPool()->CopyBack(pBuf10, pBuf11);
+	memcpy(CWorld::GetSector(0, 0), pWorld1, sizeof(CSector) * NUMSECTORS_X * NUMSECTORS_Y);
+	free(pWorld1);
+	pWorld1 = nil;
+	CWorld::GetMovingEntityList() = WorldPtrList;
+	CWorld::GetBigBuildingList(LEVEL_NONE) = BigBuildingPtrList;
+	memcpy(CPickups::aPickUps, pPickups, sizeof(CPickup) * NUMPICKUPS);
+	free(pPickups);
+	pPickups = nil;
+	memcpy(CReferences::aRefs, pReferences, sizeof(CReference) * NUMREFERENCES);
+	free(pReferences);
+	pReferences = nil;
+	CReferences::pEmptyList = pEmptyReferences;
+	pEmptyReferences = nil;
+	memcpy(&TheCamera, pStoredCam, sizeof(CCamera));
+	free(pStoredCam);
+	pStoredCam = nil;
+	memcpy(CRadar::ms_RadarTrace, pRadarBlips, sizeof(CBlip) * NUMBLIPS);
+	free(pRadarBlips);
+	pRadarBlips = nil;
+	FindPlayerPed()->m_pWanted = new CWanted(PlayerWanted); /* Nice memory leak */
+	CWorld::Players[0] = PlayerInfo;
+	int size = CPools::GetPedPool()->GetSize();
+	for (int i = size - 1; i >= 0; i--){
+		CPed* ped = CPools::GetPedPool()->GetSlot(i);
+		if (!ped)
+			continue;
+		int mi = ped->GetModelIndex();
+		CStreaming::RequestModel(mi, 0);
+		CStreaming::LoadAllRequestedModels(false);
+		ped->m_rwObject = nil;
+		ped->m_modelIndex = -1;
+		ped->SetModelIndex(mi);
+		ped->m_pVehicleAnim = 0;
+		ped->uAudioEntityId = DMAudio.CreateEntity(0, ped);
+		DMAudio.SetEntityStatus(ped->uAudioEntityId, 1);
+		CPopulation::UpdatePedCount(ped->m_nPedType, false);
+		if (ped->m_wepModelID >= 0)
+			ped->AddWeaponModel(ped->m_wepModelID);
+	}
+	size = CPools::GetVehiclePool()->GetSize();
+	for (int i = size - 1; i >= 0; i--) {
+		CVehicle* vehicle = CPools::GetVehiclePool()->GetSlot(i);
+		if (!vehicle)
+			continue;
+		int mi = vehicle->GetModelIndex();
+		CStreaming::RequestModel(mi, 0);
+		CStreaming::LoadAllRequestedModels(false);
+		vehicle->m_rwObject = nil;
+		vehicle->m_modelIndex = -1;
+		vehicle->SetModelIndex(mi);
+		if (mi == MI_DODO){
+			CAutomobile* dodo = (CAutomobile*)vehicle;
+			GetFirstObject(dodo->m_apModelNodes[4])->flags = 0; /* TODO: 4 to enum */
+			CMatrix tmp1;
+			tmp1.Attach(&dodo->m_apModelNodes[1]->modelling, false);
+			CMatrix tmp2(&dodo->m_apModelNodes[4]->modelling, false);
+			*tmp1.GetPosition() += CVector(tmp2.GetPosition()->x + 0.1f, 0.0f, tmp2.GetPosition()->z);
+			tmp1.UpdateRW();
+		}
+		if (vehicle->IsCar()){
+			CAutomobile* car = (CAutomobile*)vehicle;
+			int32 panels = car->m_DamageManager.m_abPanelsStatus;
+			car->m_DamageManager.m_abPanelsStatus = 0;
+			ApplyPanelDamageToCar(panels, car, true);
+			car->SetDoorDamage(17, 0, true); /* BONNET */
+			car->SetDoorDamage(18, 1, true); /* BUMPER */
+			car->SetDoorDamage(15, 2, true); /* DOOR_FRONT_LEFT */
+			car->SetDoorDamage(11, 3, true); /* DOOR_FRONT_RIGHT */
+			car->SetDoorDamage(16, 4, true); /* DOOR_BACK_LEFT */
+			car->SetDoorDamage(12, 5, true); /* DOOR_BACK_RIGHT */
+		}
+		vehicle->uAudioEntityId = DMAudio.CreateEntity(0, vehicle);
+		DMAudio.SetEntityStatus(vehicle->uAudioEntityId, 1);
+		CCarCtrl::UpdateCarCount(vehicle, false);
+		if ((mi == MI_AIRTRAIN || mi == MI_DEADDODO) && vehicle->m_rwObject){
+			CVehicleModelInfo* info = (CVehicleModelInfo*)CModelInfo::GetModelInfo(mi);
+			if (RwObjectGetType(vehicle->m_rwObject) == rpATOMIC){
+				vehicle->GetMatrix().Detach();
+				if (vehicle->m_rwObject){
+					if (RwObjectGetType(vehicle->m_rwObject) == rpATOMIC){
+						RwFrame* frame = RpAtomicGetFrame(vehicle->m_rwObject);
+						RpAtomicDestroy((RpAtomic*)vehicle->m_rwObject);
+						RwFrameDestroy(frame);
+					}
+					vehicle->m_rwObject = nil;
+				}
+			}else{
+				vehicle->DeleteRwObject();
+				int model_id = info->m_wheelId;
+				if (model_id != -1){
+					if ((vehicle->m_rwObject = CModelInfo::GetModelInfo(model_id)->CreateInstance())){
+						vehicle->GetMatrix().AttachRW(&((RwFrame*)vehicle->m_rwObject->parent)->modelling, false);
+					}
+				}
+			}
+		}
+	}
+	PrintElementsInPtrList();
+	size = CPools::GetObjectPool()->GetSize();
+	for (int i = size - 1; i >= 0; i--) {
+		CObject* object = CPools::GetObjectPool()->GetSlot(i);
+		if (!object)
+			continue;
+		int mi = object->GetModelIndex();
+		CStreaming::RequestModel(mi, 0);
+		CStreaming::LoadAllRequestedModels(false);
+		object->m_rwObject = nil;
+		object->m_modelIndex = -1;
+		object->SetModelIndex(mi);
+		object->GetMatrix().m_attachment = nil;
+		if (RwObjectGetType(object->m_rwObject) == rpATOMIC)
+			object->GetMatrix().AttachRW(RwFrameGetMatrix(RpAtomicGetFrame(object->m_rwObject)), false);
+	}
+	size = CPools::GetDummyPool()->GetSize();
+	for (int i = size - 1; i >= 0; i--) {
+		CDummy* dummy = CPools::GetDummyPool()->GetSlot(i);
+		if (!dummy)
+			continue;
+		int mi = dummy->GetModelIndex();
+		CStreaming::RequestModel(mi, 0);
+		CStreaming::LoadAllRequestedModels(false);
+		dummy->m_rwObject = nil;
+		dummy->m_modelIndex = -1;
+		dummy->SetModelIndex(mi);
+		dummy->GetMatrix().m_attachment = nil;
+		if (RwObjectGetType(dummy->m_rwObject) == rpATOMIC)
+			dummy->GetMatrix().AttachRW(RwFrameGetMatrix(RpAtomicGetFrame(dummy->m_rwObject)), false);
+	}
+	CTimer::SetTimeInMilliseconds(Time1);
+	CTimer::SetTimeInMillisecondsNonClipped(Time2);
+	CTimer::SetPreviousTimeInMilliseconds(Time3);
+	CTimer::SetTimeInMillisecondsPauseMode(Time4);
+	CTimer::SetTimeScale(TimeScale);
+	CTimer::SetFrameCounter(Frame);
+	CTimer::SetTimeStep(TimeStep);
+	CTimer::SetTimeStepNonClipped(TimeStepNonClipped);
+	CClock::SetGameClock(ClockHours, ClockMinutes);
+	CWeather::OldWeatherType = OldWeatherType;
+	CWeather::NewWeatherType = NewWeatherType;
+	CWeather::InterpolationValue = WeatherInterpolationValue;
+	size = CPools::GetPedPool()->GetSize();
+	for (int i = 0; i < size; i++) {
+		CPed* ped = CPools::GetPedPool()->GetSlot(i);
+		if (!ped)
+			continue;
+		RetrieveDetailedPedAnimation(ped, &pPedAnims[i]);
+	}
+	free(pPedAnims);
+	pPedAnims = nil;
+	DMAudio.ChangeMusicMode(0);
+	DMAudio.SetRadioInCar(OldRadioStation);
+	DMAudio.ChangeMusicMode(1);
+}
+#endif
 WRAPPER void CReplay::EmptyPedsAndVehiclePools(void) { EAXJMP(0x5970E0); }
 WRAPPER void CReplay::EmptyAllPools(void) { EAXJMP(0x5971B0); }
 WRAPPER void CReplay::MarkEverythingAsNew(void) { EAXJMP(0x597280); }
 WRAPPER void CReplay::SaveReplayToHD(void) { EAXJMP(0x597330); }
 WRAPPER void PlayReplayFromHD(void) { EAXJMP(0x597420); }
 WRAPPER void CReplay::StreamAllNecessaryCarsAndPeds(void) { EAXJMP(0x597560); }
-WRAPPER void CReplay::FindFirstFocusCoordinate(CVector *coord) { EAXJMP(0x5975E00); }
+WRAPPER void CReplay::FindFirstFocusCoordinate(CVector *coord) { EAXJMP(0x5975E0); }
 WRAPPER bool CReplay::ShouldStandardCameraBeProcessed(void) { EAXJMP(0x597680); }
 WRAPPER void CReplay::ProcessLookAroundCam(void) { EAXJMP(0x5976C0); }
 WRAPPER size_t CReplay::FindSizeOfPacket(uint8 type) { EAXJMP(0x597CC0); }
@@ -308,4 +738,5 @@ InjectHook(0x592FE0, CReplay::Init, PATCH_JUMP);
 InjectHook(0x593150, CReplay::DisableReplays, PATCH_JUMP);
 InjectHook(0x593150, CReplay::EnableReplays, PATCH_JUMP);
 InjectHook(0x593170, CReplay::Update, PATCH_JUMP);
+//InjectHook(0x5966E0, CReplay::RestoreStuffFromMem, PATCH_JUMP);
 ENDPATCHES

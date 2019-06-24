@@ -1,3 +1,4 @@
+#include "config.h"
 #include "common.h"
 #include "patcher.h"
 #include "Radar.h"
@@ -176,7 +177,7 @@ WRAPPER void CRadar::ClearBlipForEntity(eBlipType type, int32 id) { EAXJMP(0x4A5
 #else
 void CRadar::ClearBlipForEntity(eBlipType type, int32 id)
 {
-	for (int i = 0; i < 32; i++) {
+	for (int i = 0; i < NUMBLIPS; i++) {
 		if (type == ms_RadarTrace[i].m_eBlipType && id == ms_RadarTrace[i].m_nEntityHandle) {
 			CRadar::SetRadarMarkerState(i, 0);
 			ms_RadarTrace[i].m_bInUse = 0;
@@ -322,7 +323,7 @@ void CRadar::DrawBlips()
 		/*
 			DrawEntityBlip
 		*/
-		for (int i = 0; i < 32; i++) {
+		for (int i = 0; i < NUMBLIPS; i++) {
 			if (ms_RadarTrace[i].m_bInUse) {
 				if (ms_RadarTrace[i].m_eBlipType <= BLIP_OBJECT) {
 					CEntity *e = nil;

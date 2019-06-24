@@ -7,6 +7,7 @@
 #include "Radar.h"
 #include "References.h"
 #include "Vehicle.h"
+#include "Wanted.h"
 #include "World.h"
 #include "common.h"
 
@@ -34,18 +35,18 @@ struct CStoredAnimationState
 
 struct CStoredDetailedAnimationState
 {
-	int8 aAnimId[3];
-	int8 aCurTime[3];
-	int8 aSpeed[3];
-	int8 aBlendAmount[3];
-	int8 aFunctionCallbackID[3];
-	int16 aFlags[3];
-	int8 aAnimId2[6];
-	int8 aCurTime2[6];
-	int8 aSpeed2[6];
-	int8 aBlendAmount2[6];
-	int8 aFunctionCallbackID2[6];
-	int16 aFlags2[6];
+	uint8 aAnimId[3];
+	uint8 aCurTime[3];
+	uint8 aSpeed[3];
+	uint8 aBlendAmount[3];
+	uint8 aFunctionCallbackID[3];
+	uint16 aFlags[3];
+	uint8 aAnimId2[6];
+	uint8 aCurTime2[6];
+	uint8 aSpeed2[6];
+	uint8 aBlendAmount2[6];
+	uint8 aFunctionCallbackID2[6];
+	uint16 aFlags2[6];
 };
 
 class CReplay
@@ -159,6 +160,31 @@ class CReplay
 	};
 	static_assert(sizeof(tPedUpdatePacket) == 40, "tPedUpdatePacket: error");
 
+	struct tVehicleUpdatePacket
+	{
+		uint8 type;
+		uint8 index;
+		uint8 health;
+		uint8 acceleration;
+		CCompressedMatrixNotAligned matrix;
+		int8 door_angles[2];
+		uint16 mi;
+		uint32 panels;
+		int8 velocityX;
+		int8 velocityY;
+		int8 velocityZ;
+		union{
+			int8 car_gun;
+			uint8 wheel_state;
+		};
+		uint8 wheel_susp_dist[4];
+		uint8 wheel_rotation[4];
+		uint8 door_status;
+		uint8 primary_color;
+		uint8 secondary_color;
+	};
+	static_assert(sizeof(tVehicleUpdatePacket) == 48, "tVehicleUpdatePacket: error");
+
 private:
 	static uint8 &Mode;
 	static CAddressInReplayBuffer &Record;
@@ -189,6 +215,32 @@ private:
 	static uint32 &SlowMotion;
 	static uint32 &FramesActiveLookAroundCam;
 	static bool &bDoLoadSceneWhenDone;
+	static CPtrList &WorldPtrList;
+	static CPtrList &BigBuildingPtrList;
+	static CWanted &PlayerWanted;
+	static CPlayerInfo &PlayerInfo;
+	static uint32 &Time1;
+	static uint32 &Time2;
+	static uint32 &Time3;
+	static uint32 &Time4;
+	static uint32 &Frame;
+	static uint8 &ClockHours;
+	static uint8 &ClockMinutes;
+	static uint16 &OldWeatherType;
+	static uint16 &NewWeatherType;
+	static float &WeatherInterpolationValue;
+	static float &TimeStepNonClipped;
+	static float &TimeStep;
+	static float &TimeScale;
+	static float &CameraFixedX;
+	static float &CameraFixedY;
+	static float &CameraFixedZ;
+	static int32 &OldRadioStation;
+	static int8 &CameraMode;
+	static bool &bAllowLookAroundCam;
+	static float &LoadSceneX;
+	static float &LoadSceneY;
+	static float &LoadSceneZ;
 
 public:
 	static void Init(void);
@@ -219,7 +271,9 @@ private:
 	static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer);
 	static void ProcessReplayCamera(void);
 	static void StoreStuffInMem(void);
+public: /* temp */
 	static void RestoreStuffFromMem(void);
+private:
 	static void EmptyPedsAndVehiclePools(void);
 	static void EmptyAllPools(void);
 	static void MarkEverythingAsNew(void);
