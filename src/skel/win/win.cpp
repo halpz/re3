@@ -633,8 +633,10 @@ psInitialise(void)
 	
 	C_PcSave::SetSaveDirectory(_psGetUserFilesFolder());
 	
-	InitialiseLanguage();
-	
+#ifndef NASTY_GAME
+		InitialiseLanguage();
+#endif
+
 	FrontEndMenuManager.LoadSettings();
 	
 	gGameState = GS_START_UP;
