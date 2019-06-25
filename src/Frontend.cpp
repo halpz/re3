@@ -48,6 +48,7 @@ int32 &CMenuManager::m_PrefsSfxVolume = *(int32*)0x5F2E48;
 
 CMenuManager &FrontEndMenuManager = *(CMenuManager*)0x8F59D8;
 
+// TODO: replace magic numbers with enums
 const CMenuScreen aScreens[] = {
 	// MENU_PAGE_NONE = 0
 	{ "", -1, -1, 1, 0, 0, },
@@ -459,25 +460,26 @@ char *FrontendFilenames[] = {
 };					
 
 char *MenuFilenames[] = {
-	"connection24",
-	"findgame24",
-	"hostgame24",
-	"mainmenu24",
-	"playersetup24",
-	"singleplayer24",
-	"multiplayer24",
-	"dmalogo128",
-	"gtaLogo128",
-	"rockstarLogo128",
-	"gamespy256",
-	"mouse",
-	"mousetimer",
-	"mp3logo",
-	"downOFF",
-	"upOFF",
-	"downON",
-	"upON",
-	"gta3logo256",
+	"connection24",	"",
+	"findgame24",	"",
+	"hostgame24",	"",
+	"mainmenu24",	"",
+	"Playersetup24",	"",
+	"singleplayer24",	"",
+	"multiplayer24",	"",
+	"dmalogo128",	"dmalogo128m",
+	"gtaLogo128",	"gtaLogo128",
+	"rockstarLogo128",	"rockstarlogo128m",
+	"gamespy256",	"gamespy256a",
+	"mouse",	"mousetimera",
+	"mousetimer",	"mousetimera",
+	"mp3logo",	"mp3logoA",
+	"downOFF",	"buttonA",
+	"downON",	"buttonA",
+	"upOFF",	"buttonA",
+	"upON",	"buttonA",
+	"gta3logo256",	"gta3logo256m",
+	nil, nil
 };
 
 #if 1
@@ -522,11 +524,8 @@ WRAPPER bool CMenuManager::CheckHover(int, int, int, int) { EAXJMP(0x48ACA0); }
 #else
 bool CMenuManager::CheckHover(int x1, int x2, int y1, int y2)
 {
-	if (m_nMousePosX > x1 && m_nMousePosX < x2) {
-		if (m_nMousePosY > y1 && m_nMousePosY < y2)
-			return true;
-	}
-	return false;
+	return m_nMousePosX > x1 && m_nMousePosX < x2 &&
+	       m_nMousePosY > y1 && m_nMousePosY < y2;
 }
 #endif
 
@@ -544,7 +543,7 @@ WRAPPER void CMenuManager::DisplayHelperText() { EAXJMP(0x48B490); }
 #else
 void CMenuManager::DisplayHelperText()
 {
-	wchar *str = nullptr;
+	wchar *str = nil;
 	switch (m_nHelperTextMsgId) {
 	case 0:
 		str = TheText.Get("FET_MIG");
@@ -585,27 +584,23 @@ float CMenuManager::DisplaySlider(float x, float y, float leftSize, float rightS
 	float sizeRange;
 
 	float input = 0.0f;
-	int rects = 16;
-	for (int i = 0; i < rects; i++) {
-		input = i * rectSize * 0.0625f + x;
+	for (int i = 0; i < 16; i++) {
+		input = i * rectSize/16.0f + x;
 
-		if (i * 0.0625f + 0.03125f < progress)
+		if (i/16.0f + 1/32.0f < progress)
 			color = CRGBA(255, 217, 106, FadeIn(255));
 		else
 			color = CRGBA(185, 120, 0, FadeIn(255));
 
-		if (leftSize <= rightSize)
-			sizeRange = rightSize;
-		else
-			sizeRange = leftSize;
+		sizeRange = max(leftSize, rightSize);
 
-		float _x = i * rectSize * 0.0625f + x;
-		float _y = y + sizeRange - ((rects - i) * leftSize + i * rightSize) * 0.0625f;
-		float _w = SCREEN_SCALE_X(10.0f) + i * rectSize * 0.0625f + x;
+		float _x = i * rectSize/16.0f + x;
+		float _y = y + sizeRange - ((16 - i) * leftSize + i * rightSize)/16.0f;
+		float _w = SCREEN_SCALE_X(10.0f) + i * rectSize/16.0f + x;
 		float _h = y + sizeRange;
 		float _s = SCREEN_SCALE_X(2.0f);
 		CSprite2d::DrawRect(CRect(_x + _s, _y + _s, _w + _s, _h + _s), CRGBA(0, 0, 0, FadeIn(255))); // Shadow
-		CSprite2d::DrawRect(CRect(i * rectSize * 0.0625f + x, y + sizeRange - ((rects - i) * leftSize + i * rightSize) * 0.0625f, SCREEN_SCALE_X(10.0f) + i * rectSize * 0.0625f + x, y + sizeRange), color);
+		CSprite2d::DrawRect(CRect(i * rectSize/16.0f + x, y + sizeRange - ((16 - i) * leftSize + i * rightSize)/16.0f, SCREEN_SCALE_X(10.0f) + i * rectSize/16.0f + x, y + sizeRange), color);
 	};
 	return input;
 }
@@ -693,8 +688,8 @@ void CMenuManager::Draw()
 	}
 
 	for (int i = 0; i < 18; ++i) {
-		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != 1 && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0]) {
-			wchar *columnToPrint[COLUMNS] = { nullptr, nullptr };
+		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0]) {
+			wchar *columnToPrint[COLUMNS] = { nil, nil };
 
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_ActionSlot >= MENU_ACTION_SAVE_1 && aScreens[m_nCurrScreen].m_aEntries[i].m_ActionSlot <= MENU_ACTION_SAVE_8) {
 				columnToPrint[L] = GetNameOfSavedGame(i - 1);
@@ -710,9 +705,9 @@ void CMenuManager::Draw()
 			}
 
 			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
-			case 3:
+			case MENUACTION_CTRLVIBRATION:
 				break;
-			case 4:
+			case MENUACTION_CTRLCONFIG:
 				switch (CPad::GetPad(0)->Mode) {
 				case 0:
 					columnToPrint[R] = TheText.Get("FEC_CF1");
@@ -728,37 +723,37 @@ void CMenuManager::Draw()
 					break;
 				};
 				break;
-			case 5:
+			case MENUACTION_CTRLDISPLAY:
 				break;
-			case 6:
+			case MENUACTION_FRAMESYNC:
 				columnToPrint[R] = TheText.Get(m_PrefsVsyncDisp ? "FEM_ON" : "FEM_OFF");
 				break;
-			case 7:
+			case MENUACTION_FRAMELIMIT:
 				columnToPrint[R] = TheText.Get(m_PrefsFrameLimiter ? "FEM_ON" : "FEM_OFF");
 				break;
-			case 8:
+			case MENUACTION_TRAILS:
 				columnToPrint[R] = TheText.Get(BlurOn ? "FEM_ON" : "FEM_OFF");
 				break;
-			case 9:
+			case MENUACTION_SUBTITLES:
 				columnToPrint[R] = TheText.Get(m_PrefsShowSubtitles ? "FEM_ON" : "FEM_OFF");
 				break;
-			case 10:
+			case MENUACTION_WIDESCREEN:
 				columnToPrint[R] = TheText.Get(m_PrefsUseWideScreen ? "FEM_ON" : "FEM_OFF");
 				break;
-			case 16:
+			case MENUACTION_RADIO:
 				sprintf(gString, "FEA_FM%d", m_PrefsRadioStation);
 				columnToPrint[R] = TheText.Get(gString);
 				break;
-			case 28:
+			case MENUACTION_SETDBGFLAG:
 				columnToPrint[R] = TheText.Get(CTheScripts::DbgFlag ? "FEM_ON" : "FEM_OFF");
 				break;
-			case 29:
+			case MENUACTION_SWITCHBIGWHITEDEBUGLIGHT:
 				columnToPrint[R] = TheText.Get(CTheScripts::DbgFlag ? "FEM_ON" : "FEM_OFF");
 				break;
-			case 81:
+			case MENUACTION_INVVERT:
 				columnToPrint[R] = TheText.Get(MousePointerStateHelper.bInvertVertically ? "FEM_ON" : "FEM_OFF");
 				break;
-			case 94:
+			case MENUACTION_SCREENRES:
 			{
 				char *res = _psGetVideoModeList()[m_nDisplayVideoMode];
 
@@ -769,7 +764,7 @@ void CMenuManager::Draw()
 				columnToPrint[R] = gUString;
 			}
 			break;
-			case 95:
+			case MENUACTION_AUDIOHW:
 				if (FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -1)
 					columnToPrint[R] = TheText.Get("FEA_NAH");
 				else {
@@ -778,7 +773,7 @@ void CMenuManager::Draw()
 					columnToPrint[R] = gUString;
 				}
 				break;
-			case 96:
+			case MENUACTION_SPEAKERCONF:
 				if (FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -1)
 					columnToPrint[R] = TheText.Get("FEA_NAH");
 				else {
@@ -795,7 +790,7 @@ void CMenuManager::Draw()
 					};
 				}
 				break;
-			case 99:
+			case MENUACTION_CTRLMETHOD:
 				switch (m_ControlMethod) {
 				case 0:
 					columnToPrint[L] = TheText.Get("FET_SCN");
@@ -805,10 +800,10 @@ void CMenuManager::Draw()
 					break;
 				};
 				break;
-			case 100:
+			case MENUACTION_DYNAMICACOUSTIC:
 				columnToPrint[R] = TheText.Get(m_PrefsDMA ? "FEM_ON" : "FEM_OFF");
 				break;
-			case 102:
+			case MENUACTION_MOUSESTEER:
 				columnToPrint[R] = TheText.Get(m_bDisableMouseSteering ? "FEM_ON" : "FEM_OFF");
 				break;
 			};
@@ -949,20 +944,20 @@ void CMenuManager::Draw()
 			// Sliders 
 			// TODO: CheckHover
 			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
-			case 11:
-				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(SLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsBrightness * 0.001953125);
+			case MENUACTION_BRIGHTNESS:
+				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(SLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsBrightness/512.0f);
 				break;
-			case 12:
-				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(SLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), (m_PrefsLOD - 0.80000001) * 1.0000001);
+			case MENUACTION_DRAWDIST:
+				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(SLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), (m_PrefsLOD - 0.8f) * 1.0f);
 				break;
-			case 13:
-				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(SLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsMusicVolume * 0.0078125);
+			case MENUACTION_MUSICVOLUME:
+				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(SLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsMusicVolume/128.0f);
 				break;
-			case 14:
-				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(SLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsSfxVolume *  0.0078125);
+			case MENUACTION_SFXVOLUME:
+				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(SLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsSfxVolume/128.0f);
 				break;
-			case 84:
-				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(SLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), TheCamera.m_fMouseAccelHorzntl * 200.0);
+			case MENUACTION_MOUSESENS:
+				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(SLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), TheCamera.m_fMouseAccelHorzntl * 200.0f);
 				break;
 			};
 
@@ -971,7 +966,7 @@ void CMenuManager::Draw()
 			if (m_nCurrScreen == MENU_SOUND_SETTINGS) {
 				for (int i = 0; i < POLICE_RADIO; i++) {
 
-					if (i > 5 && i < 7)
+					if (i == MSX_FM)
 						fIconSpacing -= 1.5f;
 
 					if (i < USERTRACK)
@@ -1046,14 +1041,14 @@ void CMenuManager::DrawFrontEnd()
 {
 	CFont::SetAlphaFade(255.0f);
 
-	if (!m_nCurrScreen) {
+	if (m_nCurrScreen == MENU_NONE) {
 		if (m_bGameNotLoaded)
 			m_nCurrScreen = MENU_START_MENU;
 		else
 			m_nCurrScreen = MENU_PAUSE_MENU;
 	}
 
-	if (!m_nCurrOption && aScreens[m_nCurrScreen].m_aEntries[0].m_Action == 1)
+	if (!m_nCurrOption && aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL)
 		m_nCurrOption = 1;
 
 	CMenuManager::DrawFrontEndNormal();
@@ -1077,7 +1072,7 @@ void CMenuManager::DrawFrontEndNormal()
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
 
-	eMenuSprites currentSprite = MENU_CONNECTION;
+	eMenuSprites currentSprite = MENU_MAINMENU;
 	switch (m_nPrevScreen) {
 	case MENU_STATS:
 	case MENU_START_MENU:
@@ -1134,7 +1129,7 @@ void CMenuManager::DrawFrontEndNormal()
 	}
 
 	// GTA LOGO
-	if (m_nCurrScreen == 51 || m_nCurrScreen == 52) {
+	if (m_nCurrScreen == MENU_START_MENU || m_nCurrScreen == MENU_PAUSE_MENU) {
 		if (CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
 			m_aMenuSprites[MENU_GTA3LOGO].Draw(CRect((SCREEN_WIDTH / 2) - SCREEN_SCALE_X(115.0f), SCREEN_SCALE_Y(70.0f), (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(115.0f), SCREEN_SCALE_Y(180.0f)), CRGBA(255, 255, 255, FadeIn(255)));
 		else
@@ -1262,8 +1257,8 @@ void CMenuManager::LoadAllTextures()
 		CTxdStore::SetCurrentTxd(menu);
 
 		debug("LOAD sprite\n");
-		for (int i = 0; i < ARRAY_SIZE(MenuFilenames); i++) {
-			m_aMenuSprites[i].SetTexture(MenuFilenames[i]);
+		for (int i = 0; i < ARRAY_SIZE(MenuFilenames)/2; i++) {
+			m_aMenuSprites[i].SetTexture(MenuFilenames[i*2], MenuFilenames[i*2+1]);
 			m_aMenuSprites[i].SetAddressing(rwTEXTUREADDRESSBORDER);
 		};
 
@@ -1485,7 +1480,7 @@ void CMenuManager::UnloadTextures()
 		CTxdStore::RemoveTxdSlot(frontend);
 
 		debug("Remove menu textures\n");
-		for (int i = 0; i < ARRAY_SIZE(MenuFilenames); ++i)
+		for (int i = 0; i < ARRAY_SIZE(MenuFilenames)/2; ++i)
 			m_aMenuSprites[i].Delete();
 
 		int menu = CTxdStore::FindTxdSlot("menu");
