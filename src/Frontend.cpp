@@ -458,12 +458,12 @@ void CMenuManager::Draw()
 			else {
 				CFont::SetFontStyle(FONT_HEADING);
 
-				int LeftMENUCOLUMN =
+				int LeftMenuColumn =
 					m_nCurrScreen == MENUPAGE_SOUND_SETTINGS ||
 					m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS ||
 					m_nCurrScreen == MENUPAGE_MOUSE_CONTROLS;
 
-				if (LeftMENUCOLUMN) {
+				if (LeftMenuColumn) {
 					CFont::SetAlignment(ALIGN_LEFT);
 					CFont::SetScale(SCREEN_SCALE_X(0.55f), SCREEN_SCALE_Y(0.8f));
 					fVerticalSpacing = MENUCOLUMN_SPACING_MIN;

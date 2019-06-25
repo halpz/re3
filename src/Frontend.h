@@ -106,6 +106,7 @@ enum eMenuSprites
 enum eSaveSlot
 {
 	SAVESLOT_NONE,
+	SAVESLOT_0,
 	SAVESLOT_1,
 	SAVESLOT_2,
 	SAVESLOT_3,
