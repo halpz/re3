@@ -68,7 +68,7 @@ WRAPPER void CGarages::PrintMessages(void) { EAXJMP(0x426310); }
 #else
 void CGarages::PrintMessages()
 {
-	if (CTimer::GetTimeInMilliseconds() > CGarages::MessageStartTime && CTimer::GetTimeInMilliseconds() < CGarages::MessageEndTime) {
+	if (CTimer::GetTimeInMilliseconds() > MessageStartTime && CTimer::GetTimeInMilliseconds() < MessageEndTime) {
 		CFont::SetScale(SCREEN_SCALE_X(1.2f / 2), SCREEN_SCALE_Y(1.5f / 2)); // BUG: game doesn't use macro here.
 		CFont::SetPropOn();
 		CFont::SetJustifyOff();
@@ -77,16 +77,16 @@ void CGarages::PrintMessages()
 		CFont::SetCentreOn();
 		CFont::SetFontStyle(FONT_BANK);
 
-		if (CGarages::MessageNumberInString2 < 0) {
-			if (CGarages::MessageNumberInString < 0) {
+		if (MessageNumberInString2 < 0) {
+			if (MessageNumberInString < 0) {
 				CFont::SetColor(CRGBA(0, 0, 0, 255));
-				CFont::PrintString((SCREEN_WIDTH/ 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f), TheText.Get(CGarages::MessageIDString));
+				CFont::PrintString((SCREEN_WIDTH/ 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f), TheText.Get(MessageIDString));
 
 				CFont::SetColor(CRGBA(89, 115, 150, 255));
-				CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f), TheText.Get(CGarages::MessageIDString));
+				CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f), TheText.Get(MessageIDString));
 			}
 			else {
-				CMessages::InsertNumberInString(TheText.Get(CGarages::MessageIDString), CGarages::MessageNumberInString, -1, -1, -1, -1, -1, gUString);
+				CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, -1, -1, -1, -1, -1, gUString);
 
 				CFont::SetColor(CRGBA(0, 0, 0, 255));
 				CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f + 2.0 - 40.0f), gUString);
@@ -96,7 +96,7 @@ void CGarages::PrintMessages()
 			}
 		}
 		else {
-			CMessages::InsertNumberInString(TheText.Get(CGarages::MessageIDString), CGarages::MessageNumberInString2, -1, -1, -1, -1, -1, gUString);
+			CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, MessageNumberInString2, -1, -1, -1, -1, gUString);
 
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
 			CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f + 2.0 - 40.0f), gUString);

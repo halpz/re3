@@ -69,3 +69,4 @@ enum Config {
 //#define NO_CDCHECK
 #define NO_MOVIES
 //#define USE_MY_DOCUMENTS
+#define NASTY_GAME
