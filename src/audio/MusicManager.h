@@ -264,6 +264,7 @@ public:
 	uint8 field_2395;
 
 public:
+	char *Get3DProviderName(char);
 	bool PlayerInCar();
 	void DisplayRadioStationName();
 };

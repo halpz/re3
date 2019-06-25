@@ -189,5 +189,7 @@ public:
 	void ChangeMusicMode(uint8 mode);
 	void PlayFrontEndSound(uint32, uint32);
 	void PlayOneShot(int, uint16, float);
+	int GetRadioInCar();
+	uint8 IsMP3RadioChannelAvailable();
 };
 extern cDMAudio &DMAudio;

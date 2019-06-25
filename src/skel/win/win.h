@@ -78,6 +78,8 @@ RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode);
 void CenterVideo(void);
 void CloseClip(void);
 
+RwChar **_psGetVideoModeList();
+
 #ifdef    __cplusplus
 }
 #endif                          /* __cplusplus */

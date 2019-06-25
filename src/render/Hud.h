@@ -62,9 +62,9 @@ public:
 	static bool &m_Wants_To_Draw_Hud;
 	static bool &m_Wants_To_Draw_3dMarkers;
 	static wchar(*m_BigMessage)[128];
-	static float *BigMessageInUse;
-	static float *BigMessageAlpha;
-	static float *BigMessageX;
+	static float BigMessageInUse[6];
+	static float BigMessageAlpha[6];
+	static float BigMessageX[6];
 	static float &OddJob2OffTimer;
 	static int8 &CounterOnLastFrame;
 	static float &OddJob2XOffset;

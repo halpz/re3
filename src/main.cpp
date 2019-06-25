@@ -85,6 +85,7 @@ extern void (*DebugMenuProcess)(void);
 extern void (*DebugMenuRender)(void);
 void DebugMenuInit(void);
 
+void PrintGameVersion();
 
 RwRGBA gColourTop;
 
@@ -154,6 +155,7 @@ Idle(void *arg)
 	}
 
 	RenderMenus();
+	PrintGameVersion();
 	DoFade();
 	Render2dStuffAfterFade();
 	CCredits::Render();
@@ -186,6 +188,7 @@ FrontendIdle(void)
 
 	DefinedState();
 	RenderMenus();
+	PrintGameVersion();
 	DoFade();
 	Render2dStuffAfterFade();
 	CFont::DrawFonts();
@@ -770,6 +773,25 @@ AppEventHandler(RsEvent event, void *param)
 			return rsEVENTNOTPROCESSED;
 		}
 	}
+}
+
+void PrintGameVersion()
+{
+	CFont::SetPropOn();
+	CFont::SetBackgroundOff();
+	CFont::SetScale(SCREEN_SCALE_X(0.7f), SCREEN_SCALE_Y(0.5f));
+	CFont::SetCentreOff();
+	CFont::SetRightJustifyOff();
+	CFont::SetBackGroundOnlyTextOff();
+	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetWrapx(SCREEN_WIDTH);
+	CFont::SetDropShadowPosition(0);
+	CFont::SetDropColor(CRGBA(0, 0, 0, 255));
+	CFont::SetColor(CRGBA(235, 170, 50, 255));
+
+	strcpy(gString, "RE3");
+	AsciiToUnicode(gString, gUString);
+	CFont::PrintString(SCREEN_SCALE_X(10.5f), SCREEN_SCALE_Y(8.0f), gUString);
 }
 
 STARTPATCHES
