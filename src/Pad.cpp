@@ -1674,30 +1674,26 @@ int16 CPad::SniperModeLookUpDown(void)
 
 int16 CPad::LookAroundLeftRight(void)
 {
-	float axis = GetPad(0)->NewState.RightStickX;
+	int16 axis = NewState.RightStickX;
 	
-	if ( fabs(axis) > 85 && !GetLookBehindForPed() )
-		return (int16) ( (axis + ( axis > 0 ) ? -85 : 85)
-							* (127.0f / 32.0f) ); // 3.96875f
+	if ( fabs(axis) > 65 && !GetLookBehindForPed() )
+		return ((axis > 0 ? axis - 65 : axis + 65) * ((255 - 65) / (127 - 32)));
 
-	else if ( TheCamera.Cams[0].Using3rdPersonMouseCam() && fabs(axis) > 10 )
-		return (int16) ( (axis + ( axis > 0 ) ? -10 : 10)
-							* (127.0f / 64.0f) ); // 1.984375f
+	else if (TheCamera.Cams[0].Using3rdPersonMouseCam() && fabs(axis) > 10)
+		return (axis);
 	
 	return 0;
 }
 
 int16 CPad::LookAroundUpDown(void)
 {
-	int16 axis = GetPad(0)->NewState.RightStickY;
+	int16 axis = NewState.RightStickY;
 	
-	if ( abs(axis) > 85 && !GetLookBehindForPed() )
-		return (int16) ( (axis + ( axis > 0 ) ? -85 : 85)
-							* (127.0f / 32.0f) ); // 3.96875f
+	if (fabs(axis) > 65 && !GetLookBehindForPed())
+		return ((axis > 0 ? axis - 65 : axis + 65) * ((255 - 65) / (127 - 32)));
 
-	else if ( TheCamera.Cams[0].Using3rdPersonMouseCam() && abs(axis) > 40 )
-		return (int16) ( (axis + ( axis > 0 ) ? -40 : 40)
-							* (127.0f / 64.0f) ); // 1.984375f
+	else if (TheCamera.Cams[0].Using3rdPersonMouseCam() && fabs(axis) > 10)
+		return (axis);
 
 	return 0;
 }
