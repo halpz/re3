@@ -84,7 +84,7 @@ float &CReplay::LoadSceneY = *(float*)0x880F98;
 float &CReplay::LoadSceneZ = *(float*)0x880F94;
 
 #if 1
-static void(*(&CBArray)[30])(CAnimBlendAssociation*, void*) = *(void(*(*)[30])(CAnimBlendAssociation*, void*))0x61052C;
+static void(*(&CBArray)[30])(CAnimBlendAssociation*, void*) = *(void(*(*)[30])(CAnimBlendAssociation*, void*))*(uintptr*)0x61052C;
 #else
 static void(*CBArray[])(CAnimBlendAssociation*, void*) =
 {
