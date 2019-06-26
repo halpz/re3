@@ -145,6 +145,7 @@ public:
 	static int32 GetNextFileOnCd(int32 position, bool priority);
 	static void RequestModelStream(int32 ch);
 	static bool ProcessLoadingChannel(int32 ch);
+	static void RetryLoadFile(int32 ch);
 	static void LoadRequestedModels(void);
 	static void LoadAllRequestedModels(bool priority);
 	static void FlushChannels(void);

@@ -20,9 +20,10 @@ public:
 	static uint32 GetTimeInMilliseconds(void) { return m_snTimeInMilliseconds; }
 	static uint32 GetTimeInMillisecondsPauseMode(void) { return m_snTimeInMillisecondsPauseMode; }
 
-	static inline bool GetIsPaused() { return m_UserPause || m_CodePause; }
-	static inline bool GetIsUserPaused() { return m_UserPause; }
-	static inline void SetTimeScale(float ts) { ms_fTimeScale = ts; }
+	static bool GetIsPaused() { return m_UserPause || m_CodePause; }
+	static bool GetIsUserPaused() { return m_UserPause; }
+	static void SetTimeScale(float ts) { ms_fTimeScale = ts; }
+	static void SetCodePause(bool pause) { m_CodePause = pause; }
 	
 	static void Initialise(void);
 	static void Shutdown(void);
