@@ -509,11 +509,11 @@ CPed::OurPedCanSeeThisOne(CEntity *target)
 
 	// Check if target is behind ped
 	if (DotProduct2D(dist, CVector2D(this->GetForward())) < 0.0f)
-		return 0;
+		return false;
 
 	// Check if target is too far away
-	if (dist.Magnitude() < 40.0f)
-		return 0;
+	if (dist.Magnitude() >= 40.0f)
+		return false;
 
 	// Check line of sight from head
 	CVector headPos = this->GetPosition();
