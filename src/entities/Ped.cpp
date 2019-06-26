@@ -1463,6 +1463,30 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 
 }
 
+WRAPPER void CPed::PedGetupCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE810); }
+WRAPPER void CPed::PedStaggerCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8D0); }
+WRAPPER void CPed::PedEvadeCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D36E0); }
+WRAPPER void CPed::FinishDieAnimCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D3950); }
+WRAPPER void CPed::FinishedWaitCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D6520); }
+WRAPPER void CPed::FinishLaunchCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D7490); }
+WRAPPER void CPed::FinishHitHeadCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D7A80); }
+WRAPPER void CPed::PedAnimGetInCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4DEC80); }
+WRAPPER void CPed::PedAnimDoorOpenCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4DE500); }
+WRAPPER void CPed::PedAnimPullPedOutCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4DEAF0); }
+WRAPPER void CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4DF1B0); }
+WRAPPER void CPed::SetInCarCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CF220); }
+WRAPPER void CPed::PedSetOutCarCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8F0); }
+WRAPPER void CPed::PedAnimAlignCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4DE130); }
+WRAPPER void CPed::PedAnimStepOutCarCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4DF5C0); }
+WRAPPER void CPed::PedSetInTrainCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4E3290); }
+WRAPPER void CPed::PedSetOutTrainCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4E36E0); }
+WRAPPER void CPed::FinishFightMoveCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4E9830); }
+WRAPPER void CPed::PedAnimDoorCloseRollingCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4E4B90); }
+WRAPPER void CPed::FinishJumpCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D7A50); }
+WRAPPER void CPed::PedLandCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8A0); }
+WRAPPER void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4C6620); }
+WRAPPER void CPed::RestoreHeadingRateCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D6550); }
+
 STARTPATCHES
 	InjectHook(0x4CF8F0, &CPed::AddWeaponModel, PATCH_JUMP);
 	InjectHook(0x4C6AA0, &CPed::AimGun, PATCH_JUMP);

@@ -10,8 +10,8 @@ struct CReference
 
 class CReferences
 {
-	static CReference *aRefs; //[NUMREFERENCES];
 public:
+	static CReference *aRefs; //[NUMREFERENCES];
 	static CReference *&pEmptyList;
 	static void Init(void);
 };

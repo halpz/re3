@@ -105,9 +105,9 @@ public:
 	static float GetWorldY(int y) { return y*SECTOR_SIZE_Y + WORLD_MIN_Y; }
 };
 
-class CPed;
+class CPlayerPed;
 class CVehicle;
-CPed *FindPlayerPed(void);
+CPlayerPed *FindPlayerPed(void);
 CVector &FindPlayerCoors(CVector &v);
 CVehicle *FindPlayerVehicle(void);
 CVehicle *FindPlayerTrain(void);

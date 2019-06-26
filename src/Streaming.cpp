@@ -1584,6 +1584,7 @@ CStreaming::UpdateMemoryUsed(void)
 	// empty
 }
 
+WRAPPER void CStreaming::LoadScene(CVector *pos) { EAXJMP(0x40A6D0); }
 
 bool
 CStreamingInfo::GetCdPosnAndSize(uint32 &posn, uint32 &size)
