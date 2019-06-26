@@ -3,6 +3,8 @@
 #include "Pad.h"
 #include "Hud.h"
 #include "Text.h"
+#include "Clock.h"
+#include "Renderer.h"
 #include "ModelInfo.h"
 #include "TxdStore.h"
 #include "ModelIndices.h"
@@ -60,9 +62,43 @@ int32 &islandLODsubInd = *(int32*)0x6212D4;
 int32 &islandLODsubCom = *(int32*)0x6212D8;
 
 WRAPPER void CStreaming::MakeSpaceFor(int32 size) { EAXJMP(0x409B70); }
-//WRAPPER bool CStreaming::IsTxdUsedByRequestedModels(int32 txdId) { EAXJMP(0x4094C0); }
-//WRAPPER bool CStreaming::AddToLoadedVehiclesList(int32 modelId) { EAXJMP(0x40B060); }
+WRAPPER void CStreaming::LoadScene(const CVector &pos) { EAXJMP(0x40A6D0); }
 
+bool
+CStreamingInfo::GetCdPosnAndSize(uint32 &posn, uint32 &size)
+{
+	if(m_size == 0)
+		return false;
+	posn = m_position;
+	size = m_size;
+	return true;
+}
+
+void
+CStreamingInfo::SetCdPosnAndSize(uint32 posn, uint32 size)
+{
+	m_position = posn;
+	m_size = size;
+}
+
+void
+CStreamingInfo::AddToList(CStreamingInfo *link)
+{
+	// Insert this after link
+	m_next = link->m_next;
+	m_prev = link;
+	link->m_next = this;
+	m_next->m_prev = this;
+}
+
+void
+CStreamingInfo::RemoveFromList(void)
+{
+	m_next->m_prev = m_prev;
+	m_prev->m_next = m_next;
+	m_next = nil;
+	m_prev = nil;
+}
 
 void
 CStreaming::Init(void)
@@ -1584,42 +1620,194 @@ CStreaming::UpdateMemoryUsed(void)
 	// empty
 }
 
-WRAPPER void CStreaming::LoadScene(CVector *pos) { EAXJMP(0x40A6D0); }
+#define STREAM_DIST (2*SECTOR_SIZE_X)
 
-bool
-CStreamingInfo::GetCdPosnAndSize(uint32 &posn, uint32 &size)
+void
+CStreaming::AddModelsToRequestList(const CVector &pos)
 {
-	if(m_size == 0)
-		return false;
-	posn = m_position;
-	size = m_size;
-	return true;
+	float xmin, xmax, ymin, ymax;
+	int ixmin, ixmax, iymin, iymax;
+	int ix, iy;
+	int dx, dy, d;
+	CSector *sect;
+
+	xmin = pos.x - STREAM_DIST;
+	ymin = pos.y - STREAM_DIST;
+	xmax = pos.x + STREAM_DIST;
+	ymax = pos.y + STREAM_DIST;
+
+	ixmin = CWorld::GetSectorIndexX(xmin);
+	if(ixmin < 0) ixmin = 0;
+	ixmax = CWorld::GetSectorIndexX(xmax);
+	if(ixmax >= NUMSECTORS_X) ixmax = NUMSECTORS_X-1;
+	iymin = CWorld::GetSectorIndexY(ymin);
+	if(iymin < 0) iymin = 0;
+	iymax = CWorld::GetSectorIndexY(ymax);
+	if(iymax >= NUMSECTORS_Y) iymax = NUMSECTORS_Y-1;
+
+	CWorld::AdvanceCurrentScanCode();
+
+	for(iy = iymin; iy < iymax; iy++){
+		dy = iy - CWorld::GetSectorIndexY(pos.y);
+		for(ix = ixmin; ix < ixmax; ix++){
+
+			if(CRenderer::m_loadingPriority && ms_numModelsRequested > 5)
+				return;
+
+			dx = ix - CWorld::GetSectorIndexX(pos.x);
+			d = dx*dx + dy*dy;
+			sect = CWorld::GetSector(ix, iy);
+			if(d <= 1){
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS]);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP]);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_OBJECTS]);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_DUMMIES]);
+			}else if(d <= 4*4){
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS], pos.x, pos.y, xmin, ymin, xmax, ymax);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], pos.x, pos.y, xmin, ymin, xmax, ymax);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_OBJECTS], pos.x, pos.y, xmin, ymin, xmax, ymax);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_DUMMIES], pos.x, pos.y, xmin, ymin, xmax, ymax);
+			}
+		}
+	}
 }
 
 void
-CStreamingInfo::SetCdPosnAndSize(uint32 posn, uint32 size)
+CStreaming::ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float xmin, float ymin, float xmax, float ymax)
 {
-	m_position = posn;
-	m_size = size;
+	CPtrNode *node;
+	CEntity *e;
+	float lodDistSq;
+	CVector2D pos;
+
+	for(node = list.first; node; node = node->next){
+		e = (CEntity*)node->item;
+
+		if(e->m_scanCode == CWorld::GetCurrentScanCode())
+			continue;
+
+		e->m_scanCode = CWorld::GetCurrentScanCode();
+		if(!e->m_flagC20 && !e->bIsSubway &&
+		   (!e->IsObject() || ((CObject*)e)->ObjectCreatedBy != TEMP_OBJECT)){
+			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
+			if(mi->m_type != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff())){
+				lodDistSq = sq(mi->GetLargestLodDistance());
+				lodDistSq = min(lodDistSq, sq(STREAM_DIST));
+				pos = CVector2D(e->GetPosition());
+				if(xmin < pos.x && pos.x < xmax &&
+				   ymin < pos.y && pos.y < ymax &&
+				   (CVector2D(x, y) - pos).MagnitudeSqr() < lodDistSq)
+					if(CRenderer::IsEntityCullZoneVisible(e))
+						RequestModel(e->GetModelIndex(), 0);
+			}
+		}
+	}
 }
 
 void
-CStreamingInfo::AddToList(CStreamingInfo *link)
+CStreaming::ProcessEntitiesInSectorList(CPtrList &list)
 {
-	// Insert this after link
-	m_next = link->m_next;
-	m_prev = link;
-	link->m_next = this;
-	m_next->m_prev = this;
+	CPtrNode *node;
+	CEntity *e;
+
+	for(node = list.first; node; node = node->next){
+		e = (CEntity*)node->item;
+
+		if(e->m_scanCode == CWorld::GetCurrentScanCode())
+			continue;
+
+		e->m_scanCode = CWorld::GetCurrentScanCode();
+		if(!e->m_flagC20 && !e->bIsSubway &&
+		   (!e->IsObject() || ((CObject*)e)->ObjectCreatedBy != TEMP_OBJECT)){
+			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
+			if(mi->m_type != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff()))
+				if(CRenderer::IsEntityCullZoneVisible(e))
+					RequestModel(e->GetModelIndex(), 0);
+		}
+	}
 }
 
 void
-CStreamingInfo::RemoveFromList(void)
+CStreaming::DeleteFarAwayRwObjects(const CVector &pos)
 {
-	m_next->m_prev = m_prev;
-	m_prev->m_next = m_next;
-	m_next = nil;
-	m_prev = nil;
+	// TODO
+}
+
+void
+CStreaming::DeleteAllRwObjects(void)
+{
+	int x, y;
+	CSector *sect;
+
+	for(x = 0; x < NUMSECTORS_X; x++)
+		for(y = 0; y < NUMSECTORS_Y; y++){
+			sect = CWorld::GetSector(x, y);
+			DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS]);
+			DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP]);
+			DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_OBJECTS]);
+			DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_OBJECTS_OVERLAP]);
+			DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_DUMMIES]);
+			DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_DUMMIES_OVERLAP]);
+		}
+}
+
+void
+CStreaming::DeleteRwObjectsAfterDeath(const CVector &pos)
+{
+	int ix, iy;
+	int x, y;
+	CSector *sect;
+
+	ix = CWorld::GetSectorIndexX(pos.x);
+	iy = CWorld::GetSectorIndexX(pos.y);
+
+	for(x = 0; x < NUMSECTORS_X; x++)
+		for(y = 0; y < NUMSECTORS_Y; y++)
+			if(fabs(ix - x) > 3.0f &&
+			   fabs(iy - y) > 3.0f){
+				sect = CWorld::GetSector(x, y);
+				DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS]);
+				DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP]);
+				DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_OBJECTS]);
+				DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_OBJECTS_OVERLAP]);
+				DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_DUMMIES]);
+				DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_DUMMIES_OVERLAP]);
+			}
+}
+
+void
+CStreaming::DeleteRwObjectsInSectorList(CPtrList &list)
+{
+	CPtrNode *node;
+	CEntity *e;
+
+	for(node = list.first; node; node = node->next){
+		e = (CEntity*)node->item;
+		if(!e->m_flagC20 && !e->bImBeingRendered)
+			e->DeleteRwObject();
+	}
+}
+
+void
+CStreaming::DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y)
+{
+	CPtrNode *node;
+	CEntity *e;
+
+	for(node = list.first; node; node = node->next){
+		e = (CEntity*)node->item;
+		if(e->m_rwObject && !e->m_flagC20 && !e->bImBeingRendered){
+			// Now this is pretty weird...
+			if(fabs(CWorld::GetSectorIndexX(e->GetPosition().x) - x) >= 2.0f)
+//			{
+				e->DeleteRwObject();
+//				return;		// BUG?
+//			}
+			else	// FIX?
+			if(fabs(CWorld::GetSectorIndexY(e->GetPosition().y) - y) >= 2.0f)
+				e->DeleteRwObject();
+		}
+	}
 }
 
 STARTPATCHES
@@ -1668,6 +1856,15 @@ STARTPATCHES
 	InjectHook(0x4077F0, CStreaming::RetryLoadFile, PATCH_JUMP);
 	InjectHook(0x40A390, CStreaming::LoadRequestedModels, PATCH_JUMP);
 	InjectHook(0x40A440, CStreaming::LoadAllRequestedModels, PATCH_JUMP);
+
+	InjectHook(0x4078F0, CStreaming::AddModelsToRequestList, PATCH_JUMP);
+	InjectHook(0x407C50, (void (*)(CPtrList&,float,float,float,float,float,float))CStreaming::ProcessEntitiesInSectorList, PATCH_JUMP);
+	InjectHook(0x407DD0, (void (*)(CPtrList&))CStreaming::ProcessEntitiesInSectorList, PATCH_JUMP);
+
+	InjectHook(0x407390, CStreaming::DeleteAllRwObjects, PATCH_JUMP);
+	InjectHook(0x407400, CStreaming::DeleteRwObjectsAfterDeath, PATCH_JUMP);
+	InjectHook(0x407560, CStreaming::DeleteRwObjectsInSectorList, PATCH_JUMP);
+	InjectHook(0x4075A0, CStreaming::DeleteRwObjectsInOverlapSectorList, PATCH_JUMP);
 
 	InjectHook(0x4063E0, &CStreamingInfo::GetCdPosnAndSize, PATCH_JUMP);
 	InjectHook(0x406410, &CStreamingInfo::SetCdPosnAndSize, PATCH_JUMP);

@@ -501,7 +501,7 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 		FindFirstFocusCoordinate(&ff_coord);
 		CGame::currLevel = CTheZones::GetLevelFromPosition(ff_coord);
 		CCollision::SortOutCollisionAfterLoad();
-		CStreaming::LoadScene(&ff_coord);
+		CStreaming::LoadScene(ff_coord);
 	}
 	if (cam_mode == REPLAYCAMMODE_ASSTORED)
 		TheCamera.CarZoomIndicator = 5.0f;
