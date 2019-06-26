@@ -953,7 +953,7 @@ CStreaming::IsTxdUsedByRequestedModels(int32 txdId)
 	int streamId;
 	int i;
 
-	for(si = ms_startRequestedList.m_next; si != &ms_startRequestedList; si = si->m_next){
+	for(si = ms_startRequestedList.m_next; si != &ms_endRequestedList; si = si->m_next){
 		streamId = si - ms_aInfoForModel;
 		if(streamId < STREAM_OFFSET_TXD &&
 		   CModelInfo::GetModelInfo(streamId)->GetTxdSlot() == txdId)
