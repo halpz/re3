@@ -24,14 +24,14 @@ enum StreamLoadState
 	STREAMSTATE_NOTLOADED = 0,
 	STREAMSTATE_LOADED    = 1,
 	STREAMSTATE_INQUEUE   = 2,
-	STREAMSTATE_READING   = 3,	// what is this?
-	STREAMSTATE_STARTED   = 4,	// first part read
+	STREAMSTATE_READING   = 3,	// channel is reading
+	STREAMSTATE_STARTED   = 4,	// first part loaded
 };
 
 enum ChannelState
 {
 	CHANNELSTATE_IDLE = 0,
-	CHANNELSTATE_UNK1 = 1,
+	CHANNELSTATE_READING = 1,
 	CHANNELSTATE_STARTED = 2,
 	CHANNELSTATE_ERROR = 3,
 };
@@ -53,6 +53,7 @@ public:
 	void AddToList(CStreamingInfo *link);
 	void RemoveFromList(void);
 	uint32 GetCdSize(void) { return m_size; }
+	bool IsPriority(void) { return !!(m_flags & STREAMFLAGS_PRIORITY); }
 };
 
 struct CStreamingChannel
@@ -63,7 +64,7 @@ struct CStreamingChannel
 	int32 field24;
 	int32 position;
 	int32 size;
-	int32 field30;
+	int32 numTries;
 	int32 status;	// from CdStream
 };
 
@@ -83,7 +84,7 @@ public:
 	static CStreamingInfo &ms_endRequestedList;
 	static int32 &ms_oldSectorX;
 	static int32 &ms_oldSectorY;
-	static uint32 &ms_streamingBufferSize;
+	static int32 &ms_streamingBufferSize;
 	static int8 **ms_pStreamingBuffer;	//[2]
 	static int32 &ms_memoryUsed;
 	static CStreamingChannel *ms_channel;	//[2]
@@ -118,6 +119,7 @@ public:
 	static void RequestIslands(eLevelName level);
 	static void RequestSpecialModel(int32 modelId, const char *modelName, int32 flags);
 	static void RequestSpecialChar(int32 charId, const char *modelName, int32 flags);
+	static void DecrementRef(int32 id);
 	static void RemoveModel(int32 id);
 	static void RemoveTxd(int32 id) { RemoveModel(id + STREAM_OFFSET_TXD); }
 	static void RemoveUnusedBuildings(eLevelName level);
@@ -139,12 +141,14 @@ public:
 	static void SetModelTxdIsDeletable(int32 id);
 	static void SetMissionDoesntRequireModel(int32 id);
 
+	static int32 GetCdImageOffset(int32 lastPosn);
 	static int32 GetNextFileOnCd(int32 position, bool priority);
-	static bool ProcessLoadingChannel(int32 ch);
 	static void RequestModelStream(int32 ch);
+	static bool ProcessLoadingChannel(int32 ch);
+	static void LoadRequestedModels(void);
+	static void LoadAllRequestedModels(bool priority);
 	static void FlushChannels(void);
 	static void FlushRequestList(void);
-	static int32 GetCdImageOffset(int32 lastPosn);
 
 	static void MakeSpaceFor(int32 size);
 	static void ImGonnaUseStreamingMemory(void);
