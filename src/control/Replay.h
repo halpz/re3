@@ -7,6 +7,7 @@
 #include "Radar.h"
 #include "References.h"
 #include "Vehicle.h"
+#include "Wanted.h"
 #include "World.h"
 #include "common.h"
 
@@ -19,33 +20,33 @@ struct CAddressInReplayBuffer
 
 struct CStoredAnimationState
 {
-	int8 animId;
-	int8 time;
-	int8 speed;
-	int8 secAnimId;
-	int8 secTime;
-	int8 secSpeed;
-	int8 blendAmount;
-	int8 partAnimId;
-	int8 partAnimTime;
-	int8 partAnimSpeed;
-	int8 partBlendAmount;
+	uint8 animId;
+	uint8 time;
+	uint8 speed;
+	uint8 secAnimId;
+	uint8 secTime;
+	uint8 secSpeed;
+	uint8 blendAmount;
+	uint8 partAnimId;
+	uint8 partAnimTime;
+	uint8 partAnimSpeed;
+	uint8 partBlendAmount;
 };
 
 struct CStoredDetailedAnimationState
 {
-	int8 m_abAnimId[3];
-	int8 m_abCurTime[3];
-	int8 m_abSpeed[3];
-	int8 m_abBlendAmount[3];
-	int8 m_abFunctionCallbackID[3];
-	int16 m_awFlags[3];
-	int8 m_abAnimId2[6];
-	int8 m_abCurTime2[6];
-	int8 m_abSpeed2[6];
-	int8 m_abBlendAmount2[6];
-	int8 m_abFunctionCallbackID2[6];
-	int16 m_awFlags2[6];
+	uint8 aAnimId[3];
+	uint8 aCurTime[3];
+	uint8 aSpeed[3];
+	uint8 aBlendAmount[3];
+	uint8 aFunctionCallbackID[3];
+	uint16 aFlags[3];
+	uint8 aAnimId2[6];
+	uint8 aCurTime2[6];
+	uint8 aSpeed2[6];
+	uint8 aBlendAmount2[6];
+	uint8 aFunctionCallbackID2[6];
+	uint16 aFlags2[6];
 };
 
 class CReplay
@@ -65,13 +66,13 @@ class CReplay
 		REPLAYPACKET_END = 0,
 		REPLAYPACKET_VEHICLE = 1,
 		REPLAYPACKET_PED_HEADER = 2,
-		REPLAYPACKET_PED = 3,
+		REPLAYPACKET_PED_UPDATE = 3,
 		REPLAYPACKET_GENERAL = 4,
 		REPLAYPACKET_CLOCK = 5,
 		REPLAYPACKET_WEATHER = 6,
 		REPLAYPACKET_ENDOFFRAME = 7,
 		REPLAYPACKET_TIMER = 8,
-		REPLAYPACKET_BULLETTRACES = 9
+		REPLAYPACKET_BULLET_TRACES = 9
 	};
 
 	enum {
@@ -146,6 +147,44 @@ class CReplay
 	};
 	static_assert(sizeof(tEndOfFramePacket) == 4, "tEndOfFramePacket: error");
 
+	struct tPedUpdatePacket
+	{
+		uint8 type;
+		uint8 index;
+		int8 heading;
+		int8 vehicle_index;
+		CStoredAnimationState anim_state;
+		CCompressedMatrixNotAligned matrix;
+		uint8 assoc_group_id;
+		uint8 weapon_model;
+	};
+	static_assert(sizeof(tPedUpdatePacket) == 40, "tPedUpdatePacket: error");
+
+	struct tVehicleUpdatePacket
+	{
+		uint8 type;
+		uint8 index;
+		uint8 health;
+		uint8 acceleration;
+		CCompressedMatrixNotAligned matrix;
+		int8 door_angles[2];
+		uint16 mi;
+		uint32 panels;
+		int8 velocityX;
+		int8 velocityY;
+		int8 velocityZ;
+		union{
+			int8 car_gun;
+			uint8 wheel_state;
+		};
+		uint8 wheel_susp_dist[4];
+		uint8 wheel_rotation[4];
+		uint8 door_status;
+		uint8 primary_color;
+		uint8 secondary_color;
+	};
+	static_assert(sizeof(tVehicleUpdatePacket) == 48, "tVehicleUpdatePacket: error");
+
 private:
 	static uint8 &Mode;
 	static CAddressInReplayBuffer &Record;
@@ -176,6 +215,32 @@ private:
 	static uint32 &SlowMotion;
 	static uint32 &FramesActiveLookAroundCam;
 	static bool &bDoLoadSceneWhenDone;
+	static CPtrList &WorldPtrList;
+	static CPtrList &BigBuildingPtrList;
+	static CWanted &PlayerWanted;
+	static CPlayerInfo &PlayerInfo;
+	static uint32 &Time1;
+	static uint32 &Time2;
+	static uint32 &Time3;
+	static uint32 &Time4;
+	static uint32 &Frame;
+	static uint8 &ClockHours;
+	static uint8 &ClockMinutes;
+	static uint16 &OldWeatherType;
+	static uint16 &NewWeatherType;
+	static float &WeatherInterpolationValue;
+	static float &TimeStepNonClipped;
+	static float &TimeStep;
+	static float &TimeScale;
+	static float &CameraFixedX;
+	static float &CameraFixedY;
+	static float &CameraFixedZ;
+	static int32 &OldRadioStation;
+	static int8 &CameraMode;
+	static bool &bAllowLookAroundCam;
+	static float &LoadSceneX;
+	static float &LoadSceneY;
+	static float &LoadSceneZ;
 
 public:
 	static void Init(void);
@@ -206,7 +271,9 @@ private:
 	static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer);
 	static void ProcessReplayCamera(void);
 	static void StoreStuffInMem(void);
+public: /* temp */
 	static void RestoreStuffFromMem(void);
+private:
 	static void EmptyPedsAndVehiclePools(void);
 	static void EmptyAllPools(void);
 	static void MarkEverythingAsNew(void);

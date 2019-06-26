@@ -159,4 +159,6 @@ public:
 
 	static void LoadInitialPeds(void);
 	static void LoadInitialVehicles(void);
+
+	static void LoadScene(CVector *pos);
 };
