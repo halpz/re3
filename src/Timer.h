@@ -18,7 +18,8 @@ public:
 	static void SetTimeStep(float ts) { ms_fTimeStep = ts; }
 	static uint32 GetFrameCounter(void) { return m_FrameCounter; }
 	static uint32 GetTimeInMilliseconds(void) { return m_snTimeInMilliseconds; }
-	
+	static uint32 GetTimeInMillisecondsPauseMode(void) { return m_snTimeInMillisecondsPauseMode; }
+
 	static inline bool GetIsPaused() { return m_UserPause || m_CodePause; }
 	static inline bool GetIsUserPaused() { return m_UserPause; }
 	static inline void SetTimeScale(float ts) { ms_fTimeScale = ts; }

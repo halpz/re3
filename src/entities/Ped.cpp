@@ -509,11 +509,11 @@ CPed::OurPedCanSeeThisOne(CEntity *target)
 
 	// Check if target is behind ped
 	if (DotProduct2D(dist, CVector2D(this->GetForward())) < 0.0f)
-		return 0;
+		return false;
 
 	// Check if target is too far away
-	if (dist.Magnitude() < 40.0f)
-		return 0;
+	if (dist.Magnitude() >= 40.0f)
+		return false;
 
 	// Check line of sight from head
 	CVector headPos = this->GetPosition();
@@ -1076,23 +1076,19 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 	ped->m_pSeekTarget = nil;
 	vehicle = ped->m_pMyVehicle;
 
-	if (ped->m_vehEnterType <= VEHICLE_ENTER_REAR_LEFT) {
-		switch (ped->m_vehEnterType) {
-			case VEHICLE_ENTER_FRONT_RIGHT:
-				vehicle->m_nGettingOutFlags &= ~GETTING_IN_OUT_FR;
-				break;
-			case VEHICLE_ENTER_REAR_RIGHT:
-				vehicle->m_nGettingOutFlags &= ~GETTING_IN_OUT_RR;
-				break;
-			case VEHICLE_ENTER_FRONT_LEFT:
-				vehicle->m_nGettingOutFlags &= ~GETTING_IN_OUT_FL;
-				break;
-			case VEHICLE_ENTER_REAR_LEFT:
-				vehicle->m_nGettingOutFlags &= ~GETTING_IN_OUT_RL;
-				break;
-			default:
-				break;
-		}
+	switch (ped->m_vehEnterType) {
+		case VEHICLE_ENTER_FRONT_RIGHT:
+			vehicle->m_nGettingOutFlags &= ~GETTING_IN_OUT_FR;
+			break;
+		case VEHICLE_ENTER_REAR_RIGHT:
+			vehicle->m_nGettingOutFlags &= ~GETTING_IN_OUT_RR;
+			break;
+		case VEHICLE_ENTER_FRONT_LEFT:
+			vehicle->m_nGettingOutFlags &= ~GETTING_IN_OUT_FL;
+			break;
+		case VEHICLE_ENTER_REAR_LEFT:
+			vehicle->m_nGettingOutFlags &= ~GETTING_IN_OUT_RL;
+			break;
 	}
 
 	if (vehicle->pDriver == ped) {
@@ -1431,7 +1427,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		m_fRotationCur = m_fRotationDest;
 	} else {
 		float limitedAngle = CGeneral::LimitRadianAngle(m_fRotationDest);
-		float timeUntilStateChange = (m_nPedStateTimer - CTimer::GetTimeInMilliseconds()) * 0.0016666667f; // changing this to 0.002 causes wrong rotation
+		float timeUntilStateChange = (m_nPedStateTimer - CTimer::GetTimeInMilliseconds())/600.0f;
 
 		m_vecOffsetSeek.z = 0.0;
 		if (timeUntilStateChange <= 0.0f) {
