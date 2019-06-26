@@ -20,3 +20,7 @@ WRAPPER void cDMAudio::PlayFrontEndSound(uint32, uint32) { EAXJMP(0x57CC20); }
 WRAPPER void cDMAudio::PlayOneShot(int, uint16, float) { EAXJMP(0x57C840); }
 WRAPPER int cDMAudio::GetRadioInCar() { EAXJMP(0x57CE40); }
 WRAPPER uint8 cDMAudio::IsMP3RadioChannelAvailable() { EAXJMP(0x57C9F0); }
+
+WRAPPER void cDMAudio::SetEffectsFadeVol(int16) { EAXJMP(0x57C8F0); }
+WRAPPER void cDMAudio::SetMusicFadeVol(int16) { EAXJMP(0x57C920); }
+

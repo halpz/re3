@@ -191,5 +191,8 @@ public:
 	void PlayOneShot(int, uint16, float);
 	int GetRadioInCar();
 	uint8 IsMP3RadioChannelAvailable();
+	void SetEffectsFadeVol(int16);
+	void SetMusicFadeVol(int16);
+
 };
 extern cDMAudio &DMAudio;
