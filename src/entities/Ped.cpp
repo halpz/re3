@@ -623,20 +623,22 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 			case ANIM_WEAPON_START_THROW:
 				if ((!ped->IsPlayer() || ((CPlayerPed*)ped)->field_1380) && ped->IsPlayer())
 				{
-					attackAssoc->blendDelta = -1000.0;
+					attackAssoc->blendDelta = -1000.0f;
 					newAnim = CAnimManager::AddAnimation((RpClump*)ped->m_rwObject, ASSOCGRP_STD, ANIM_WEAPON_THROWU);
 				} else {
-					attackAssoc->blendDelta = -1000.0;
+					attackAssoc->blendDelta = -1000.0f;
 					newAnim = CAnimManager::AddAnimation((RpClump*)ped->m_rwObject, ASSOCGRP_STD, ANIM_WEAPON_THROW);
 				}
 
-				newAnim->SetFinishCallback(CPed::FinishedAttackCB, ped);
-				break;
+				newAnim->SetFinishCallback(FinishedAttackCB, ped);
+				return;
+
 			case ANIM_FIGHT_PPUNCH:
-				attackAssoc->blendDelta = -8.0;
+				attackAssoc->blendDelta = -8.0f;
 				attackAssoc->flags |= ASSOC_DELETEFADEDOUT;
 				ped->ClearAttack();
-				break;
+				return;
+
 			case ANIM_WEAPON_THROW:
 			case ANIM_WEAPON_THROWU:
 				if (ped->GetWeapon()->m_nAmmoTotal > 0) {
@@ -645,12 +647,11 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 				}
 				break;
 			default:
-				if (!ped->m_ped_flagA4)
-					ped->ClearAttack();
-
 				break;
 		}
-	} else if (!ped->m_ped_flagA4)
+	}
+	
+	if (!ped->m_ped_flagA4)
 		ped->ClearAttack();
 }
 
@@ -759,15 +760,15 @@ CPed::Attack(void)
 				// If reloading just began, start the animation
 				if (GetWeapon()->m_eWeaponState == WEAPONSTATE_RELOADING && reloadAnim != NUM_ANIMS && !reloadAnimAssoc) {
 					CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, reloadAnim, 8.0f);
-					CPed::ClearLookFlag();
-					CPed::ClearAimFlag();
+					ClearLookFlag();
+					ClearAimFlag();
 					m_ped_flagA4 = false;
 					bIsPointingGunAt = false;
 					m_lastHitTime = CTimer::GetTimeInMilliseconds();
 					return;
 				}
 			} else {
-				if (weaponAnimAssoc->animId <= ANIM_WEAPON_BAT_V) {
+				if (weaponAnimAssoc->animId == ANIM_WEAPON_BAT_V || weaponAnimAssoc->animId == ANIM_WEAPON_BAT_H) {
 					DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_BAT_ATTACK, 1.0f);
 				} else if (weaponAnimAssoc->animId == ANIM_FIGHT_PPUNCH) {
 					DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_PUNCH_ATTACK, 0.0f);
@@ -834,24 +835,22 @@ CPed::Attack(void)
 						CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, ourWeapon->m_Anim2ToPlay, 8.0f);
 				}
 			} else {
-				CPed::ClearAimFlag();
+				ClearAimFlag();
 
 				// Echoes of bullets, at the end of the attack. (Bug: doesn't play while reloading)
-				if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep < ourWeapon->m_fAnimLoopEnd) {
-					if (ourWeaponType < WEAPONTYPE_SNIPERRIFLE) {
-						switch (ourWeaponType) {
-							case WEAPONTYPE_UZI:
-								DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_UZI_BULLET_ECHO, 0.0f);
-								break;
-							case WEAPONTYPE_AK47:
-								DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
-								break;
-							case WEAPONTYPE_M16:
-								DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_M16_BULLET_ECHO, 0.0f);
-								break;
-							default:
-								break;
-						}
+				if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep <= ourWeapon->m_fAnimLoopEnd) {
+					switch (ourWeaponType) {
+						case WEAPONTYPE_UZI:
+							DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_UZI_BULLET_ECHO, 0.0f);
+							break;
+						case WEAPONTYPE_AK47:
+							DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
+							break;
+						case WEAPONTYPE_M16:
+							DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_M16_BULLET_ECHO, 0.0f);
+							break;
+						default:
+							break;
 					}
 				}
 
@@ -929,9 +928,7 @@ CPed::SelectGunIfArmed(void)
 		if (m_weapons[i].m_nAmmoTotal > 0) {
 			weaponType = m_weapons[i].m_eWeaponType;
 
-			// I GOT THAT WRONG AND SHOULD BE FIXED!! (but I don't know how) Original code was;
-			// if ( v3 == 2 || (unsigned int)(v3 - 3) <= 2 || (unsigned int)(v3 - 7) <= 1 || v3 == 9 )
-			if (weaponType < WEAPONTYPE_MOLOTOV) {
+			if (weaponType >= WEAPONTYPE_COLT45 && weaponType != WEAPONTYPE_M16 && weaponType <= WEAPONTYPE_FLAMETHROWER) {
 				SetCurrentWeapon(weaponType);
 				return true;
 			}
@@ -1240,7 +1237,7 @@ CPed::GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType,
 	GetLocalPositionToOpenCarDoor(output, veh, enterType, offset);
 	doorPos = Multiply3x3(vehMat, *output);
 
-	*output = *vehMat.GetPosition() + doorPos;
+	*output = *veh->GetPosition() + doorPos;
 }
 
 void
@@ -1275,9 +1272,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		m_ped_flagC8 = 1;
 	}
 	if (phase == LINE_UP_TO_CAR_START) {
-		m_vecMoveSpeed.x = 0.0;
-		m_vecMoveSpeed.y = 0.0;
-		m_vecMoveSpeed.z = 0.0;
+		m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 	}
 	CVehicle *veh = m_pMyVehicle;
 
@@ -1361,7 +1356,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	CVector neededPos;
 
 	if (phase == LINE_UP_TO_CAR_2) {
-		neededPos = GetPosition();
+		neededPos = *GetPosition();
 	} else {
 		GetPositionToOpenCarDoor(&neededPos, veh, m_vehEnterType, seatPosMult);
 	}
@@ -1378,12 +1373,16 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	if (phase == LINE_UP_TO_CAR_END || phase == LINE_UP_TO_CAR_2) {
 		neededPos.z = GetPosition().z;
 
+		// Getting out
 		if (!veh->bIsBus || (veh->bIsBus && vehIsUpsideDown)) {
-			float vehNextZSpeed = m_vecMoveSpeed.z - 0.008f * CTimer::GetTimeStep();
+			float pedZSpeedOnExit = m_vecMoveSpeed.z - 0.008f * CTimer::GetTimeStep();
 
-			if (neededPos.z + vehNextZSpeed > autoZPos.z) {
-				m_vecMoveSpeed.z = vehNextZSpeed;
-				veh->ApplyMoveSpeed();
+			// If we're not in ground at next step, apply animation
+			if (neededPos.z + pedZSpeedOnExit > autoZPos.z) {
+				m_vecMoveSpeed.z = pedZSpeedOnExit;
+				ApplyMoveSpeed();
+				// Removing below line breaks the animation
+				neededPos.z = GetPosition().z;
 			} else {
 				neededPos.z = autoZPos.z;
 				m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
@@ -1396,8 +1395,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		if (m_pVehicleAnim && vehAnim != ANIM_VAN_GETIN_L && vehAnim != ANIM_VAN_CLOSE_L && vehAnim != ANIM_VAN_CLOSE && vehAnim != ANIM_VAN_GETIN) {
 			neededPos.z = autoZPos.z;
 			m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-		} else if (neededPos.z < currentZ && m_pVehicleAnim && vehAnim != ANIM_VAN_CLOSE_L && vehAnim != ANIM_VAN_CLOSE) {
-
+		} else if (neededPos.z <= currentZ && m_pVehicleAnim && vehAnim != ANIM_VAN_CLOSE_L && vehAnim != ANIM_VAN_CLOSE) {
 			adjustedTimeStep = min(m_pVehicleAnim->timeStep, 0.1f);
 
 			// Smoothly change ped position
@@ -1411,9 +1409,8 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 			if (neededPos.z > currentZ) {
 
 				if (m_pVehicleAnim &&
-					(vehAnim == ANIM_CAR_GETIN_RHS || vehAnim == ANIM_CAR_GETIN_LOW_RHS || vehAnim <= ANIM_CAR_GETIN_LOW_LHS
+					(vehAnim == ANIM_CAR_GETIN_RHS || vehAnim == ANIM_CAR_GETIN_LOW_RHS || vehAnim == ANIM_CAR_GETIN_LHS || vehAnim == ANIM_CAR_GETIN_LOW_LHS
 						|| vehAnim == ANIM_CAR_QJACK || vehAnim == ANIM_VAN_GETIN_L || vehAnim == ANIM_VAN_GETIN)) {
-
 					adjustedTimeStep = min(m_pVehicleAnim->timeStep, 0.1f);
 
 					// Smoothly change ped position
@@ -1426,15 +1423,15 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	}
 
 	// I hope
-	bool notInWater = false;
+	bool stillGettingInOut = false;
 	if (CTimer::GetTimeInMilliseconds() < m_nPedStateTimer)
-		notInWater = veh->m_vehType != VEHICLE_TYPE_BOAT || m_ped_flagG10;
+		stillGettingInOut = veh->m_vehType != VEHICLE_TYPE_BOAT || m_ped_flagG10;
 
-	if (!notInWater) {
+	if (!stillGettingInOut) {
 		m_fRotationCur = m_fRotationDest;
 	} else {
 		float limitedAngle = CGeneral::LimitRadianAngle(m_fRotationDest);
-		float timeUntilStateChange = (m_nPedStateTimer - CTimer::GetTimeInMilliseconds()) / 500.0f; // * 0.0016666667f;
+		float timeUntilStateChange = (m_nPedStateTimer - CTimer::GetTimeInMilliseconds()) * 0.0016666667f; // changing this to 0.002 causes wrong rotation
 
 		m_vecOffsetSeek.z = 0.0;
 		if (timeUntilStateChange <= 0.0f) {
@@ -1453,6 +1450,8 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	}
 
 	if (seatPosMult > 0.2f || vehIsUpsideDown) {
+		GetPosition() = neededPos;
+
 		GetMatrix().SetRotate(0.0f, 0.0f, m_fRotationCur);
 
 		// It will be all 0 after rotate.
@@ -1465,6 +1464,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		*vehDoorMat.GetPosition() += Multiply3x3(vehDoorMat, output);
 		GetMatrix() = vehDoorMat;
 	}
+
 }
 
 STARTPATCHES
