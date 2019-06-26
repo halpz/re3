@@ -108,6 +108,23 @@ GetFirstAtomic(RpClump *clump)
 	return atm;
 }
 
+RwTexture*
+GetFirstTextureCallback(RwTexture *tex, void *data)
+{
+	*(RwTexture**)data = tex;
+	return nil;
+}
+
+RwTexture*
+GetFirstTexture(RwTexDictionary *txd)
+{
+	RwTexture *tex;
+
+	tex = nil;
+	RwTexDictionaryForAllTextures(txd, GetFirstTextureCallback, &tex);
+	return tex;
+}
+
 void
 CameraSize(RwCamera * camera, RwRect * rect,
 		   RwReal viewWindow, RwReal aspectRatio)

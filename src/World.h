@@ -111,6 +111,6 @@ CPlayerPed *FindPlayerPed(void);
 CVector &FindPlayerCoors(CVector &v);
 CVehicle *FindPlayerVehicle(void);
 CVehicle *FindPlayerTrain(void);
-CVector FindPlayerSpeed(void);
+CVector &FindPlayerSpeed(void);
 CVector FindPlayerCentreOfWorld_NoSniperShift(void);
 float FindPlayerHeading(void);

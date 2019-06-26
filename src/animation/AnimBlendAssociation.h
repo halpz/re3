@@ -2,8 +2,7 @@
 
 #include "AnimBlendList.h"
 #include "AnimBlendNode.h"
-
-class CAnimBlendHierarchy;
+#include "AnimBlendHierarchy.h"
 
 enum {
 	// TODO
@@ -77,6 +76,8 @@ public:
 	void Start(float time);
 	void UpdateTime(float timeDelta, float relSpeed);
 	bool UpdateBlend(float timeDelta);
+
+	float GetTimeLeft() { return hierarchy->totalLength - currentTime; }
 
 	static CAnimBlendAssociation *FromLink(CAnimBlendLink *l) {
 		return (CAnimBlendAssociation*)((uint8*)l - offsetof(CAnimBlendAssociation, link));

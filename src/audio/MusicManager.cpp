@@ -16,6 +16,8 @@ int32 &gNumRetunePresses = *(int32*)0x650B80;
 wchar *pCurrentStation = (wchar*)0x650B9C;
 uint8 &cDisplay = *(uint8*)0x650BA1;
 
+WRAPPER char* cMusicManager::Get3DProviderName(char) { EAXJMP(0x57A8C0); }
+
 bool cMusicManager::PlayerInCar()
 {
 	if (!FindPlayerVehicle())

@@ -145,6 +145,30 @@ public:
 		m_matrix.pos.y = 0.0f;
 		m_matrix.pos.z = 0.0f;
 	}
+	void SetRotate(float xAngle, float yAngle, float zAngle) {
+		float cX = cos(xAngle);
+		float sX = sin(xAngle);
+		float cY = cos(yAngle);
+		float sY = sin(yAngle);
+		float cZ = cos(zAngle);
+		float sZ = sin(zAngle);
+
+		m_matrix.right.x = cZ * cY - (sZ * sX) * sY;
+		m_matrix.right.y = (cZ * sX) * sY + sZ * cY;
+		m_matrix.right.z = -cX * sY;
+
+		m_matrix.up.x = -sZ * cX;
+		m_matrix.up.y = cZ * cX;
+		m_matrix.up.z = sX;
+
+		m_matrix.at.x = (sZ * sX) * cY + cZ * sY;
+		m_matrix.at.y = sZ * sY - (cZ * sX) * cY;
+		m_matrix.at.z = cX * cY;
+
+		m_matrix.pos.x = 0.0f;
+		m_matrix.pos.y = 0.0f;
+		m_matrix.pos.z = 0.0f;
+	}
 	void Reorthogonalise(void){
 		CVector &r = *GetRight();
 		CVector &f = *GetForward();

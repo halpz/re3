@@ -58,9 +58,8 @@ enum Config {
 	NUMPOINTLIGHTS = 32,
 
 	NUMONSCREENTIMERENTRIES = 1,
-
+	NUMRADARBLIPS = 32,
 	NUMPICKUPS = 336,
-	NUMBLIPS = 32
 };
 
 #define GTA3_1_1_PATCH
@@ -71,3 +70,4 @@ enum Config {
 //#define NO_CDCHECK
 #define NO_MOVIES
 //#define USE_MY_DOCUMENTS
+#define NASTY_GAME

@@ -155,6 +155,7 @@ public:
 
 
 	// to make patching virtual functions possible
+	CEntity *ctor(void) { return ::new (this) CEntity(); }
 	void Add_(void) { CEntity::Add(); }
 	void Remove_(void) { CEntity::Remove(); }
 	void CreateRwObject_(void) { CEntity::CreateRwObject(); }

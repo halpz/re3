@@ -12,6 +12,19 @@
 
 struct CPathNode;
 
+enum {
+	VEHICLE_ENTER_FRONT_RIGHT = 11,
+	VEHICLE_ENTER_REAR_RIGHT = 12,
+	VEHICLE_ENTER_FRONT_LEFT = 15,
+	VEHICLE_ENTER_REAR_LEFT = 16,
+};
+
+enum PedLineUpPhase {
+	LINE_UP_TO_CAR_START,
+	LINE_UP_TO_CAR_END,
+	LINE_UP_TO_CAR_2
+};
+
 enum PedOnGroundState {
 	NO_PED,
 	PED_BELOW_PLAYER,
@@ -102,7 +115,7 @@ public:
 	uint8 m_ped_flagA1 : 1;
 	uint8 m_ped_flagA2 : 1;
 	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
-	uint8 m_ped_flagA8 : 1;
+	uint8 bIsPointingGunAt : 1;
 	uint8 bIsLooking : 1;
 	uint8 m_ped_flagA20 : 1;	// "look" method? - probably missing in SA
 	uint8 bIsRestoringLook : 1;
@@ -177,15 +190,15 @@ public:
 	int32 m_pEventEntity;
 	float m_fAngleToEvent;
 	AnimBlendFrameData *m_pFrames[PED_NODE_MAX];
-	int32 m_animGroup;
-	int32 m_pVehicleAnim;
+	AssocGroupId m_animGroup;
+	CAnimBlendAssociation *m_pVehicleAnim;
 	CVector2D m_vecAnimMoveDelta;
 	CVector m_vecOffsetSeek;
 	CPedIK m_pedIK; 
 	uint8 stuff1[8];
 	uint32 m_nPedStateTimer;
 	PedState m_nPedState;
-	int32 m_nLastPedState;
+	PedState m_nLastPedState;
 	int32 m_nMoveState;
 	int32 m_nStoredActionState;
 	int32 m_nPrevActionState;
@@ -207,7 +220,9 @@ public:
 	uint8 stuff2[20];
 	float m_fRotationCur;
 	float m_fRotationDest;
-	uint8 stuff13[6];
+	uint32 m_headingRate;
+	uint16 m_vehEnterType;
+	uint16 m_walkAroundType;
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
@@ -222,7 +237,7 @@ public:
 	CEntity *m_pCollidingEntity;
 	uint8 stuff6[12];
 	CWeapon m_weapons[NUM_PED_WEAPONTYPES];
-	int32 stuff7;
+	eWeaponType m_storedWeapon;
 	uint8 m_currentWeapon;			// eWeaponType
 	uint8 m_maxWeaponTypeAllowed;	// eWeaponType
 	uint8 stuff[2];
@@ -253,6 +268,7 @@ public:
 
 	bool IsPlayer(void);
 	bool UseGroundColModel(void);
+	bool CanSetPedState(void);
 	void AddWeaponModel(int id);
 	void AimGun(void);
 	void KillPedWithCar(CVehicle *veh, float impulse);
@@ -278,6 +294,13 @@ public:
 	void Duck(void);
 	void ClearDuck(void);
 	void ClearPointGunAt(void);
+	void BeingDraggedFromCar(void);
+	void RestartNonPartialAnims(void);
+	void LineUpPedWithCar(PedLineUpPhase phase);
+	void SetPedPositionInCar(void);
+	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
+	static void GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float seatPosMult);
+	static void GetPositionToOpenCarDoor(CVector* output, CVehicle* veh, uint32 enterType);
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
 	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
 	static void PedGetupCB(CAnimBlendAssociation *assoc, void *arg);
@@ -311,6 +334,9 @@ public:
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
 
+	static CVector &offsetToOpenRegularCarDoor;
+	static CVector &offsetToOpenLowCarDoor;
+	static CVector &offsetToOpenVanDoor;
 	static bool &bNastyLimbsCheat;
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;

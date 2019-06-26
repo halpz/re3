@@ -53,9 +53,9 @@ wchar *CHud::m_PagerMessage = (wchar*)0x878840;
 bool &CHud::m_Wants_To_Draw_Hud = *(bool*)0x95CD89;
 bool &CHud::m_Wants_To_Draw_3dMarkers = *(bool*)0x95CD62;
 wchar(*CHud::m_BigMessage)[128] = (wchar(*)[128])0x664CE0;
-float *CHud::BigMessageInUse = (float*)0x862140;
-float *CHud::BigMessageAlpha = (float*)0x862108;
-float *CHud::BigMessageX = (float*)0x773248;
+float CHud::BigMessageInUse[6];
+float CHud::BigMessageAlpha[6];
+float CHud::BigMessageX[6];
 
 float &CHud::OddJob2OffTimer = *(float*)0x942FA0;
 int8 &CHud::CounterOnLastFrame = *(int8*)0x95CD67;
@@ -231,8 +231,8 @@ void CHud::Draw()
 				CRect rect;
 
 				float fWidescreenOffset[2] = { 0.0f, 0.0f };
-
-				if (CMenuManager::m_PrefsUseWideScreen) {
+				
+				if (FrontEndMenuManager.m_PrefsUseWideScreen) {
 					fWidescreenOffset[0] = 0.0f;
 					fWidescreenOffset[1] = SCREEN_SCALE_Y(18.0f);
 				}
@@ -362,25 +362,32 @@ void CHud::Draw()
 			/*
 				DrawAmmo
 			*/
+			int16 AmmoAmount = CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition;
 			int32 AmmoInClip = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoInClip;
 			int32 TotalAmmo = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal;
+			int32 Ammo, Clip;
 
-			if (AmmoInClip <= 1 || AmmoInClip >= 1000) {
+			if (AmmoAmount <= 1 || AmmoAmount >= 1000)
 				sprintf(sTemp, "%d", TotalAmmo);
-			}
 			else {
 				if (WeaponType == WEAPONTYPE_FLAMETHROWER) {
-					int tot_min_clip_div_10 = (TotalAmmo - AmmoInClip) / 10;
-					if (tot_min_clip_div_10 > 9999)
-						tot_min_clip_div_10 = 9999;
+					Clip = AmmoInClip / 10;
 
-					sprintf(sTemp, "%d-%d", tot_min_clip_div_10, AmmoInClip / 10);
+					if ((TotalAmmo - AmmoInClip) / 10 <= 9999)
+						Ammo = (TotalAmmo - AmmoInClip) / 10;
+					else
+						Ammo = 9999;
 				}
 				else {
-					if (AmmoInClip > 9999)
-						AmmoInClip = 9999;
-					sprintf(sTemp, "%d-%d", (TotalAmmo - AmmoInClip), AmmoInClip);
+					Clip = AmmoInClip;
+
+					if (TotalAmmo - AmmoInClip > 9999)
+						Ammo = 9999;
+					else
+						Ammo = TotalAmmo - AmmoInClip;
 				}
+
+				sprintf(sTemp, "%d-%d", Ammo, Clip);
 			}
 
 			AsciiToUnicode(sTemp, sPrint);
@@ -580,7 +587,7 @@ void CHud::Draw()
 						CFont::SetPropOn();
 						CFont::SetBackgroundOff();
 
-						if (CMenuManager::m_PrefsLanguage == 4)
+						if (FrontEndMenuManager.m_PrefsLanguage == 4)
 							CFont::SetScale(SCREEN_SCALE_X(1.2f * 0.8f), SCREEN_SCALE_Y(1.2f));
 						else
 							CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
@@ -676,7 +683,7 @@ void CHud::Draw()
 						CFont::SetPropOn();
 						CFont::SetBackgroundOff();
 
-						if (CMenuManager::m_PrefsLanguage != 3 && CMenuManager::m_PrefsLanguage != 4)
+						if (FrontEndMenuManager.m_PrefsLanguage != 3 && FrontEndMenuManager.m_PrefsLanguage != 4)
 							CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
 						else
 							CFont::SetScale(SCREEN_SCALE_X(1.2f * 0.85f), SCREEN_SCALE_Y(1.2f));
@@ -856,7 +863,11 @@ void CHud::Draw()
 			*/
 			if (CHud::m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || CHud::m_ItemToFlash != ITEM_RADAR) {
 				CRadar::DrawMap();
-				CHud::Sprites[HUD_RADARDISC].Draw(CRect(SCREEN_SCALE_X(16.0f), SCREEN_SCALE_FROM_BOTTOM(123.0f + 4.0f), SCREEN_SCALE_X(94.0f + 20.0f + 5.0f), SCREEN_SCALE_FROM_BOTTOM(-76.0f + 123.0f - 6.0f)), CRGBA(0, 0, 0, 255));
+				CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
+				// FIX: game doesn't scale RADAR_LEFT here
+				rect.Translate(SCREEN_SCALE_X(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
+				rect.Grow(4.0f);
+				CHud::Sprites[HUD_RADARDISC].Draw(rect, CRGBA(0, 0, 0, 255));
 				CRadar::DrawBlips();
 			}
 		}
@@ -972,7 +983,7 @@ void CHud::Draw()
 				DrawBigMessage
 			*/
 			// MissionCompleteFailedText
-			if (CHud::m_BigMessage[0][0]) {
+			if (m_BigMessage[0][0]) {
 				if (BigMessageInUse[0] != 0.0f) {
 					CFont::SetJustifyOff();
 					CFont::SetBackgroundOff();
@@ -1247,7 +1258,7 @@ void CHud::DrawAfterFade()
 			CFont::SetJustifyOff();
 			CFont::SetBackgroundOff();
 
-			if (CGame::frenchGame || CMenuManager::m_PrefsLanguage == 4)
+			if (CGame::frenchGame || FrontEndMenuManager.m_PrefsLanguage == 4)
 				CFont::SetScale(SCREEN_SCALE_X(0.884f), SCREEN_SCALE_Y(1.36f));
 			else
 				CFont::SetScale(SCREEN_SCALE_X(1.04f), SCREEN_SCALE_Y(1.6f));

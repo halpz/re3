@@ -24,6 +24,8 @@
 #include "Timer.h"
 #include "Weather.h"
 #include "Zones.h"
+#include "Font.h"
+#include "Text.h"
 
 uint8 &CReplay::Mode = *(uint8*)0x95CD5B;
 CAddressInReplayBuffer &CReplay::Record = *(CAddressInReplayBuffer*)0x942F7C;
@@ -451,7 +453,6 @@ WRAPPER bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buf
 WRAPPER void CReplay::FinishPlayback(void) { EAXJMP(0x595B20); }
 WRAPPER void CReplay::Shutdown(void) { EAXJMP(0x595BD0); }
 WRAPPER void CReplay::ProcessReplayCamera(void) { EAXJMP(0x595C40); }
-WRAPPER void CReplay::Display(void) { EAXJMP(0x595EE0); }
 
 #if 0
 WRAPPER void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene) { EAXJMP(0x596030); }
@@ -731,6 +732,23 @@ WRAPPER void CReplay::FindFirstFocusCoordinate(CVector *coord) { EAXJMP(0x5975E0
 WRAPPER bool CReplay::ShouldStandardCameraBeProcessed(void) { EAXJMP(0x597680); }
 WRAPPER void CReplay::ProcessLookAroundCam(void) { EAXJMP(0x5976C0); }
 WRAPPER size_t CReplay::FindSizeOfPacket(uint8 type) { EAXJMP(0x597CC0); }
+
+#if 0
+WRAPPER void CReplay::Display(void) { EAXJMP(0x595EE0); }
+#else
+void CReplay::Display()
+{
+	if (CReplay::IsPlayingBack() && CTimer::GetFrameCounter() + 1 & 0x20) {
+		CFont::SetPropOn();
+		CFont::SetBackgroundOff();
+		CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
+		CFont::SetAlignment(ALIGN_LEFT);
+		CFont::SetColor(CRGBA(255, 255, 200, 200));
+		CFont::SetFontStyle(FONT_BANK);
+		CFont::PrintString(SCREEN_SCALE_X(63.5f), SCREEN_SCALE_Y(30.0f), TheText.Get("REPLAY"));
+	}
+}
+#endif
 
 STARTPATCHES
 InjectHook(0x592FC0, PrintElementsInPtrList, PATCH_JUMP);
