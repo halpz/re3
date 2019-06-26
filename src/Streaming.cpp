@@ -23,7 +23,7 @@ CStreamingInfo &CStreaming::ms_startRequestedList = *(CStreamingInfo*)0x8F1B3C;
 CStreamingInfo &CStreaming::ms_endRequestedList = *(CStreamingInfo*)0x940738;
 int32 &CStreaming::ms_oldSectorX = *(int32*)0x8F2C84;
 int32 &CStreaming::ms_oldSectorY = *(int32*)0x8F2C88;
-uint32 &CStreaming::ms_streamingBufferSize = *(uint32*)0x942FB0;
+int32 &CStreaming::ms_streamingBufferSize = *(int32*)0x942FB0;
 int8 **CStreaming::ms_pStreamingBuffer = (int8**)0x87F818;
 int32 &CStreaming::ms_memoryUsed = *(int32*)0x940568;
 CStreamingChannel *CStreaming::ms_channel = (CStreamingChannel*)0x727EE0;
@@ -240,7 +240,7 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 	while(CFileMgr::Read(fd, (char*)&direntry, sizeof(direntry))){
 		dot = strchr(direntry.name, '.');
 		if(dot) *dot = '\0';
-		if(direntry.size > ms_streamingBufferSize)
+		if(direntry.size > (uint32)ms_streamingBufferSize)
 			ms_streamingBufferSize = direntry.size;
 
 		if(strcmp(dot+1, "DFF") == 0 || strcmp(dot+1, "dff") == 0){
@@ -490,7 +490,7 @@ CStreaming::RequestModel(int32 id, int32 flags)
 
 	if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_INQUEUE){
 		// updgrade to priority
-		if(flags & STREAMFLAGS_PRIORITY && (ms_aInfoForModel[id].m_flags & STREAMFLAGS_PRIORITY) == 0){
+		if(flags & STREAMFLAGS_PRIORITY && !ms_aInfoForModel[id].IsPriority()){
 			ms_numPriorityRequests++;
 			ms_aInfoForModel[id].m_flags |= STREAMFLAGS_PRIORITY;
 		}
@@ -654,6 +654,16 @@ CStreaming::RequestSpecialChar(int32 charId, const char *modelName, int32 flags)
 }
 
 void
+CStreaming::DecrementRef(int32 id)
+{
+	ms_numModelsRequested--;
+	if(ms_aInfoForModel[id].IsPriority()){
+		ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_PRIORITY;
+		ms_numPriorityRequests--;
+	}
+}
+
+void
 CStreaming::RemoveModel(int32 id)
 {
 	int i;
@@ -671,13 +681,8 @@ CStreaming::RemoveModel(int32 id)
 
 	if(ms_aInfoForModel[id].m_next){
 		// Remove from list, model is neither loaded nor requested
-		if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_INQUEUE){
-			ms_numModelsRequested--;
-			if(ms_aInfoForModel[id].m_flags & STREAMFLAGS_PRIORITY){
-				ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_PRIORITY;
-				ms_numPriorityRequests--;
-			}
-		}
+		if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_INQUEUE)
+			DecrementRef(id);
 		ms_aInfoForModel[id].RemoveFromList();
 	}else if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_READING){
 		for(i = 0; i < 4; i++){
@@ -1120,7 +1125,223 @@ CStreaming::LoadInitialVehicles(void)
 }
 
 
+// Find starting offset of the cdimage we next want to read
+// Not useful at all on PC...
+int32
+CStreaming::GetCdImageOffset(int32 lastPosn)
+{
+	int offset, off;
+	int i, img;
+	int dist, mindist;
 
+	img = -1;
+	mindist = INT_MAX;
+	offset = ms_imageOffsets[ms_lastImageRead];
+	if(lastPosn <= offset || lastPosn > offset + ms_imageSize){
+		// last read position is not in last image
+		for(i = 0; i < NUMCDIMAGES; i++){
+			off = ms_imageOffsets[i];
+			if(off == -1) continue;
+			if((uint32)lastPosn > (uint32)off)
+				// after start of image, get distance from end
+				// negative if before end!
+				dist = lastPosn - (off + ms_imageSize);
+			else
+				// before image, get offset to start
+				// this will never be negative
+				dist = off - lastPosn;
+			if(dist < mindist){
+				img = i;
+				mindist = dist;
+			}
+		}
+		assert(img >= 0);
+		offset = ms_imageOffsets[img];
+		ms_lastImageRead = img;
+	}
+	return offset;
+}
+
+inline bool
+TxdAvailable(int32 txdId)
+{
+	CStreamingInfo *si = &CStreaming::ms_aInfoForModel[txdId + STREAM_OFFSET_TXD];
+	return si->m_loadState == STREAMSTATE_LOADED || si->m_loadState == STREAMSTATE_READING;
+}
+
+// Find stream id of next requested file in cdimage
+int32
+CStreaming::GetNextFileOnCd(int32 lastPosn, bool priority)
+{
+	CStreamingInfo *si, *next;
+	int streamId;
+	uint32 posn, size;
+	int streamIdFirst, streamIdNext;
+	uint32 posnFirst, posnNext;
+
+	streamIdFirst = -1;
+	streamIdNext = -1;
+	posnFirst = UINT_MAX;
+	posnNext = UINT_MAX;
+
+	for(si = ms_startRequestedList.m_next; si != &ms_endRequestedList; si = next){
+		next = si->m_next;
+		streamId = si - ms_aInfoForModel;
+
+		// only priority requests if there are any
+		if(priority && ms_numPriorityRequests != 0 && !si->IsPriority())
+			continue;
+
+		// request Txd if necessary
+		if(streamId < STREAM_OFFSET_TXD &&
+		   !TxdAvailable(CModelInfo::GetModelInfo(streamId)->GetTxdSlot())){
+			ReRequestTxd(CModelInfo::GetModelInfo(streamId)->GetTxdSlot());
+		}else if(ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size)){
+			if(posn < posnFirst){
+				// find first requested file in image
+				streamIdFirst = streamId;
+				posnFirst = posn;
+			}
+			if(posn < posnNext && posn >= (uint32)lastPosn){
+				// find first requested file after last read position
+				streamIdNext = streamId;
+				posnNext = posn;
+			}
+		}else{
+			// empty file
+			DecrementRef(streamId);
+			si->RemoveFromList();
+			si->m_loadState = STREAMSTATE_LOADED;
+		}
+	}
+
+	// wrap around
+	if(streamIdNext == -1)
+		streamIdNext = streamIdFirst;
+
+	if(streamIdNext == -1 && ms_numPriorityRequests != 0){
+		// try non-priority files
+		ms_numPriorityRequests = 0;
+		streamIdNext = GetNextFileOnCd(lastPosn, false);
+	}
+
+	return streamIdNext;
+}
+
+/*
+ * Streaming buffer size is half of the largest file.
+ * Files larger than the buffer size can only be loaded by channel 0,
+ * which then uses both buffers, while channel 1 is idle.
+ * ms_bLoadingBigModel is set to true to indicate this state.
+ *
+ * TODO: two-part files
+ */
+
+// Make channel read from disc
+void
+CStreaming::RequestModelStream(int32 ch)
+{
+	int lastPosn, imgOffset, streamId;
+	int totalSize;
+	uint32 posn, size, unused;
+	int i;
+	int haveBigFile, havePed;
+
+	lastPosn = CdStreamGetLastPosn();
+	imgOffset = GetCdImageOffset(lastPosn);
+	streamId = GetNextFileOnCd(lastPosn - imgOffset, true);
+
+	if(streamId == -1)
+		return;
+
+	// remove Txds that aren't requested anymore
+	while(streamId >= STREAM_OFFSET_TXD){
+		if(ms_aInfoForModel[streamId].m_flags & STREAMFLAGS_KEEP_IN_MEMORY ||
+		   IsTxdUsedByRequestedModels(streamId - STREAM_OFFSET_TXD))
+			break;
+		RemoveModel(streamId);
+		// so try next file
+		ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size);
+		streamId = GetNextFileOnCd(posn + size, true);
+	}
+
+	if(streamId == -1)
+		return;
+
+	ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size);
+	if(size > (uint32)ms_streamingBufferSize){
+		// Can only load big models on channel 0, and 1 has to be idle
+		if(ch == 1 || ms_channel[1].state != CHANNELSTATE_IDLE)
+			return;
+		ms_bLoadingBigModel = true;
+	}
+
+	// Load up to 4 adjacent files
+	haveBigFile = 0;
+	havePed = 0;
+	totalSize = 0;
+	for(i = 0; i < 4; i++){
+		// no more files we can read
+		if(streamId == -1 || ms_aInfoForModel[streamId].m_loadState != STREAMSTATE_INQUEUE)
+			break;
+
+		// also stop at non-priority files
+		ms_aInfoForModel[streamId].GetCdPosnAndSize(unused, size);
+		if(ms_numPriorityRequests != 0 && !ms_aInfoForModel[streamId].IsPriority())
+			break;
+
+		// Can't load certain combinations of files together
+		if(streamId < STREAM_OFFSET_TXD){
+			if(havePed && CModelInfo::GetModelInfo(streamId)->m_type == MITYPE_PED ||
+			   haveBigFile && CModelInfo::GetModelInfo(streamId)->m_type == MITYPE_VEHICLE ||
+			   !TxdAvailable(CModelInfo::GetModelInfo(streamId)->GetTxdSlot()))
+				break;
+		}else{
+			if(haveBigFile && size > 200)
+				break;
+		}
+
+		// Now add the file
+		ms_channel[ch].streamIds[i] = streamId;
+		ms_channel[ch].offsets[i] = totalSize;
+		totalSize += size;
+
+		// To big for buffer, remove again
+		if(totalSize > ms_streamingBufferSize && i > 0){
+			totalSize -= size;
+			break;
+		}
+		if(streamId < STREAM_OFFSET_TXD){
+			if(CModelInfo::GetModelInfo(streamId)->m_type == MITYPE_PED)
+				havePed = 1;
+			if(CModelInfo::GetModelInfo(streamId)->m_type == MITYPE_VEHICLE)
+				haveBigFile = 1;
+		}else{
+			if(size > 200)
+				haveBigFile = 1;
+		}
+		ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_READING;
+		ms_aInfoForModel[streamId].RemoveFromList();
+		DecrementRef(streamId);
+
+		streamId = ms_aInfoForModel[streamId].m_nextID;
+	}
+
+	// clear remaining slots
+	for(; i < 4; i++)
+		ms_channel[ch].streamIds[i] = -1;
+	// Now read the data
+	assert(!(ms_bLoadingBigModel && ch == 1));	// this would clobber the buffer
+	if(CdStreamRead(ch, ms_pStreamingBuffer[ch], imgOffset+posn, totalSize) == STREAM_NONE)
+		debug("FUCKFUCKFUCK\n");
+	ms_channel[ch].state = CHANNELSTATE_READING;
+	ms_channel[ch].field24 = 0;
+	ms_channel[ch].size = totalSize;
+	ms_channel[ch].position = imgOffset+posn;
+	ms_channel[ch].numTries = 0;
+}
+
+// Load data previously read from disc
 bool
 CStreaming::ProcessLoadingChannel(int32 ch)
 {
@@ -1192,75 +1413,81 @@ CStreaming::ProcessLoadingChannel(int32 ch)
 	return true;
 }
 
-inline bool
-TxdAvailable(int32 txdId)
+void
+CStreaming::LoadRequestedModels(void)
 {
-	CStreamingInfo *si = &CStreaming::ms_aInfoForModel[txdId + STREAM_OFFSET_TXD];
-	return si->m_loadState == STREAMSTATE_LOADED || si->m_loadState == STREAMSTATE_READING;
+	static int currentChannel = 0;
+
+	// We can't read with channel 1 while channel 0 is using its buffer
+	if(ms_bLoadingBigModel)
+		currentChannel = 0;
+
+	// We have data, load
+	if(ms_channel[currentChannel].state == CHANNELSTATE_READING ||
+	   ms_channel[currentChannel].state == CHANNELSTATE_STARTED)
+		ProcessLoadingChannel(currentChannel);
+
+	if(ms_channelError == -1){
+		// Channel is idle, read more data
+		if(ms_channel[currentChannel].state == CHANNELSTATE_IDLE)
+			RequestModelStream(currentChannel);
+		// Switch channel
+		if(ms_channel[currentChannel].state != CHANNELSTATE_STARTED)
+			currentChannel = 1 - currentChannel;
+	}
 }
 
-// Find stream id of next requested file in cdimage
-int32
-CStreaming::GetNextFileOnCd(int32 lastPosn, bool priority)
+void
+CStreaming::LoadAllRequestedModels(bool priority)
 {
-	CStreamingInfo *si, *next;
-	int streamId;
+	static bool bInsideLoadAll = false;
+	int imgOffset, streamId, status;
+	int i;
 	uint32 posn, size;
-	int streamIdFirst, streamIdNext;
-	uint32 posnFirst, posnNext;
 
-	streamIdFirst = -1;
-	streamIdNext = -1;
-	posnFirst = UINT_MAX;
-	posnNext = UINT_MAX;
+	if(bInsideLoadAll)
+		return;
 
-	for(si = ms_startRequestedList.m_next; si != &ms_endRequestedList; si = next){
-		next = si->m_next;
-		streamId = si - ms_aInfoForModel;
+	FlushChannels();
+	imgOffset = GetCdImageOffset(CdStreamGetLastPosn());
 
-		// only priority requests if there are any
-		if(priority && ms_numPriorityRequests != 0 &&
-		   (si->m_flags & STREAMFLAGS_PRIORITY) == 0)
-			continue;
+	while(ms_endRequestedList.m_prev != &ms_startRequestedList){
+		streamId = GetNextFileOnCd(0, priority);
+		if(streamId == -1)
+			break;
 
-		// request Txd if necessary
-		if(streamId < STREAM_OFFSET_TXD &&
-		   !TxdAvailable(CModelInfo::GetModelInfo(streamId)->GetTxdSlot())){
-			ReRequestTxd(CModelInfo::GetModelInfo(streamId)->GetTxdSlot());
-		}else if(ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size)){
-			if(posn < posnFirst){
-				// find first requested file in image
-				streamIdFirst = streamId;
-				posnFirst = posn;
-			}
-			if(posn < posnNext && posn >= (uint32)lastPosn){
-				// find first requested file after last read position
-				streamIdNext = streamId;
-				posnNext = posn;
+		ms_aInfoForModel[streamId].RemoveFromList();
+		DecrementRef(streamId);
+
+		if(ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size)){
+			do
+				status = CdStreamRead(0, ms_pStreamingBuffer[0], imgOffset+posn, size);
+			while(CdStreamSync(0) || status == STREAM_NONE);
+			ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_READING;
+
+			MakeSpaceFor(size * CDSTREAM_SECTOR_SIZE);
+			ConvertBufferToObject(ms_pStreamingBuffer[0], streamId);
+			if(ms_aInfoForModel[streamId].m_loadState == STREAMSTATE_STARTED)
+				FinishLoadingLargeFile(ms_pStreamingBuffer[0], streamId);
+
+			if(streamId < STREAM_OFFSET_TXD){
+				CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(streamId);
+				if(mi->IsSimple())
+					mi->m_alpha = 255;
 			}
 		}else{
-			// empty file
-			ms_numModelsRequested--;
-			if(ms_aInfoForModel[streamId].m_flags & STREAMFLAGS_PRIORITY){
-				ms_aInfoForModel[streamId].m_flags &= ~STREAMFLAGS_PRIORITY;
-				ms_numPriorityRequests--;
-			}
-			si->RemoveFromList();
-			si->m_loadState = STREAMSTATE_LOADED;
+			// empty
+			ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;
 		}
 	}
 
-	// wrap around
-	if(streamIdNext == -1)
-		streamIdNext = streamIdFirst;
-
-	if(streamIdNext == -1 && ms_numPriorityRequests){
-		// try non-priority files
-		ms_numPriorityRequests = 0;
-		streamIdNext = GetNextFileOnCd(lastPosn, false);
+	ms_bLoadingBigModel = false;
+	for(i = 0; i < 4; i++){
+		ms_channel[1].streamIds[i] = -1;
+		ms_channel[1].offsets[i] = -1;
 	}
-
-	return streamIdNext;
+	ms_channel[1].state = CHANNELSTATE_IDLE;
+	bInsideLoadAll = false;
 }
 
 void
@@ -1269,14 +1496,14 @@ CStreaming::FlushChannels(void)
 	if(ms_channel[1].state == CHANNELSTATE_STARTED)
 		ProcessLoadingChannel(1);
 
-	if(ms_channel[0].state == CHANNELSTATE_UNK1){
+	if(ms_channel[0].state == CHANNELSTATE_READING){
 		CdStreamSync(0);
 		ProcessLoadingChannel(0);
 	}
 	if(ms_channel[0].state == CHANNELSTATE_STARTED)
 		ProcessLoadingChannel(0);
 
-	if(ms_channel[1].state == CHANNELSTATE_UNK1){
+	if(ms_channel[1].state == CHANNELSTATE_READING){
 		CdStreamSync(1);
 		ProcessLoadingChannel(1);
 	}
@@ -1294,43 +1521,6 @@ CStreaming::FlushRequestList(void)
 		RemoveModel(si - ms_aInfoForModel);
 	}
 	FlushChannels();
-}
-
-// Find starting offset of the cdimage we next want to read
-// Not useful at all on PC...
-int32
-CStreaming::GetCdImageOffset(int32 lastPosn)
-{
-	int offset, off;
-	int i, img;
-	int dist, mindist;
-
-	img = -1;
-	mindist = INT_MAX;
-	offset = ms_imageOffsets[ms_lastImageRead];
-	if(lastPosn <= offset || lastPosn > offset + ms_imageSize){
-		// last read position is not in last image
-		for(i = 0; i < NUMCDIMAGES; i++){
-			off = ms_imageOffsets[i];
-			if(off == -1) continue;
-			if((uint32)lastPosn > (uint32)off)
-				// after start of image, get distance from end
-				// negative if before end!
-				dist = lastPosn - (off + ms_imageSize);
-			else
-				// before image, get offset to start
-				// this will never be negative
-				dist = off - lastPosn;
-			if(dist < mindist){
-				img = i;
-				mindist = dist;
-			}
-		}
-		assert(img >= 0);
-		offset = ms_imageOffsets[img];
-		ms_lastImageRead = img;
-	}
-	return offset;
 }
 
 
@@ -1431,6 +1621,9 @@ STARTPATCHES
 	InjectHook(0x40A680, CStreaming::FlushRequestList, PATCH_JUMP);
 	InjectHook(0x409FF0, CStreaming::GetCdImageOffset, PATCH_JUMP);
 	InjectHook(0x409E50, CStreaming::GetNextFileOnCd, PATCH_JUMP);
+	InjectHook(0x40A060, CStreaming::RequestModelStream, PATCH_JUMP);
+	InjectHook(0x40A390, CStreaming::LoadRequestedModels, PATCH_JUMP);
+	InjectHook(0x40A440, CStreaming::LoadAllRequestedModels, PATCH_JUMP);
 
 	InjectHook(0x4063E0, &CStreamingInfo::GetCdPosnAndSize, PATCH_JUMP);
 	InjectHook(0x406410, &CStreamingInfo::SetCdPosnAndSize, PATCH_JUMP);
