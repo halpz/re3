@@ -419,7 +419,7 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 	vp->index = id;
 	vp->matrix.CompressFromFullMatrix(vehicle->GetMatrix());
 	vp->health = vehicle->m_fHealth / 4.0f; /* Not anticipated that health can be > 1000. */
-	vp->acceleration = vehicle->m_fAcceleration * 100.0f;
+	vp->acceleration = vehicle->m_fGasPedal * 100.0f;
 	vp->panels = vehicle->IsCar() ? ((CAutomobile*)vehicle)->m_DamageManager.m_abPanelsStatus : 0;
 	vp->velocityX = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetSpeed().x)); /* 8000!? */
 	vp->velocityY = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetSpeed().y));
@@ -430,7 +430,7 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 	if (vehicle->GetModelIndex() == MI_RHINO)
 		vp->car_gun = 128.0f / M_PI * ((CAutomobile*)vehicle)->m_fCarGunLR;
 	else
-		vp->wheel_state = 50.0f * vehicle->m_fWheelState;
+		vp->wheel_state = 50.0f * vehicle->m_fSteerAngle;
 	if (vehicle->IsCar()){
 		CAutomobile* car = (CAutomobile*)vehicle;
 		for (int i = 0; i < 4; i++){

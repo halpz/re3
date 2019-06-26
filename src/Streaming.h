@@ -161,5 +161,4 @@ public:
 	static void LoadInitialVehicles(void);
 
 	static void LoadScene(CVector *pos);
-	static void LoadAllRequestedModels(bool);
 };
