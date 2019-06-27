@@ -103,7 +103,7 @@ public:
 	static int32 *ms_imageOffsets;	//[NUMCDIMAGES]
 	static int32 &ms_lastImageRead;
 	static int32 &ms_imageSize;
-	static int32 &ms_memoryAvailable;
+	static uint32 &ms_memoryAvailable;
 
 	static void Init(void);
 	static void Shutdown(void);
@@ -162,9 +162,12 @@ public:
 	static void ProcessEntitiesInSectorList(CPtrList &list);
 	static void DeleteFarAwayRwObjects(const CVector &pos);
 	static void DeleteAllRwObjects(void);
+	static void DeleteRwObjectsAfterDeath(const CVector &pos);
+	static void DeleteRwObjectsBehindCamera(int32 mem);
 	static void DeleteRwObjectsInSectorList(CPtrList &list);
 	static void DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y);
-	static void DeleteRwObjectsAfterDeath(const CVector &pos);
+	static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, int32 mem);
+	static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, int32 mem);
 
 	static void LoadInitialPeds(void);
 	static void LoadInitialVehicles(void);

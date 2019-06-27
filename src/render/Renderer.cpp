@@ -917,7 +917,7 @@ CRenderer::ScanBigBuildingList(CPtrList &list)
 
 	for(node = list.first; node; node = node->next){
 		ent = (CEntity*)node->item;
-		if(!ent->m_bZoneCulled && SetupBigBuildingVisibility(ent) == 1)
+		if(!ent->bZoneCulled && SetupBigBuildingVisibility(ent) == 1)
 			ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
 	}
 }
@@ -1122,7 +1122,7 @@ CRenderer::IsEntityCullZoneVisible(CEntity *ent)
 	CPed *ped;
 	CObject *obj;
 
-	if(ent->m_bZoneCulled)
+	if(ent->bZoneCulled)
 		return false;
 
 	switch(ent->m_type){
@@ -1132,12 +1132,12 @@ CRenderer::IsEntityCullZoneVisible(CEntity *ent)
 		ped = (CPed*)ent;
 		if(ped->bInVehicle)
 			return ped->m_pMyVehicle && IsVehicleCullZoneVisible(ped->m_pMyVehicle);
-		return !(ped->m_pCurSurface && ped->m_pCurSurface->m_bZoneCulled2);
+		return !(ped->m_pCurSurface && ped->m_pCurSurface->bZoneCulled2);
 	case ENTITY_TYPE_OBJECT:
 		obj = (CObject*)ent;
 		if(!obj->bIsStatic)
 			return true;
-		return !(obj->m_pCurSurface && obj->m_pCurSurface->m_bZoneCulled2);
+		return !(obj->m_pCurSurface && obj->m_pCurSurface->bZoneCulled2);
 	}
 	return true;
 }
@@ -1151,7 +1151,7 @@ CRenderer::IsVehicleCullZoneVisible(CEntity *ent)
 	case STATUS_PHYSICS:
 	case STATUS_ABANDONED:
 	case STATUS_WRECKED:
-		return !(v->m_pCurSurface && v->m_pCurSurface->m_bZoneCulled2);
+		return !(v->m_pCurSurface && v->m_pCurSurface->bZoneCulled2);
 	return true;
 }
 

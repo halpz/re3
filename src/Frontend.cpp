@@ -906,7 +906,7 @@ void CMenuManager::LoadAllTextures()
 	
 		CFileMgr::SetDir("");
 		CTimer::Stop();
-		CStreaming::MakeSpaceFor(716800);
+		CStreaming::MakeSpaceFor(700 * 1024);
 		CStreaming::ImGonnaUseStreamingMemory();
 		CTxdStore::PushCurrentTxd();
 

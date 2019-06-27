@@ -35,14 +35,14 @@ CEntity::CEntity(void)
 	bIsBIGBuilding = false;
 	bRenderDamaged = false;
 
-	m_flagC1 = false;
-	m_flagC2 = false;
-	m_flagC4 = false;
-	m_flagC8 = false;
-	m_flagC10 = false;
-	m_flagC20 = false;
-	m_bZoneCulled = false;
-	m_bZoneCulled2 = false;
+	bBulletProof = false;
+	bFireProof = false;
+	bCollisionProof = false;
+	bMeleeProof = false;
+	bOnlyDamagedByPlayer = false;
+	bStreamingDontDelete = false;
+	bZoneCulled = false;
+	bZoneCulled2 = false;
 
 	bRemoveFromWorld = false;
 	bHasHitWall = false;
@@ -305,7 +305,7 @@ CEntity::SetupBigBuilding(void)
 
 	mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(m_modelIndex);
 	bIsBIGBuilding = true;
-	m_flagC20 = true;
+	bStreamingDontDelete = true;
 	bUsesCollision = false;
 	m_level = CTheZones::GetLevelFromPosition(GetPosition());
 	if(m_level == LEVEL_NONE){

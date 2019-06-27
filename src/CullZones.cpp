@@ -233,10 +233,10 @@ CCullZone::DoStuffLeavingZone_OneBuilding(uint16 i)
 	int j;
 
 	if(i < 6000){
-		CPools::GetBuildingPool()->GetSlot(i)->m_bZoneCulled = false;
+		CPools::GetBuildingPool()->GetSlot(i)->bZoneCulled = false;
 		bb = CCullZones::aPointersToBigBuildingsForBuildings[i];
 		if(bb != -1)
-			CPools::GetBuildingPool()->GetSlot(bb)->m_bZoneCulled = false;
+			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = false;
 	}else{
 		i -= 6000;
 		for(j = 0; j < 3; j++)
@@ -251,11 +251,11 @@ CCullZone::DoStuffLeavingZone_OneTreadableBoth(uint16 i)
 	int j;
 
 	if(i < 6000){
-		CPools::GetTreadablePool()->GetSlot(i)->m_bZoneCulled = false;
-		CPools::GetTreadablePool()->GetSlot(i)->m_bZoneCulled2 = false;
+		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled = false;
+		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled2 = false;
 		bb = CCullZones::aPointersToBigBuildingsForTreadables[i];
 		if(bb != -1)
-			CPools::GetBuildingPool()->GetSlot(bb)->m_bZoneCulled = false;
+			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = false;
 	}else{
 		i -= 6000;
 		for(j = 0; j < 3; j++)
@@ -283,10 +283,10 @@ CCullZone::DoStuffEnteringZone_OneBuilding(uint16 i)
 	int j;
 
 	if(i < 6000){
-		CPools::GetBuildingPool()->GetSlot(i)->m_bZoneCulled = true;
+		CPools::GetBuildingPool()->GetSlot(i)->bZoneCulled = true;
 		bb = CCullZones::aPointersToBigBuildingsForBuildings[i];
 		if(bb != -1)
-			CPools::GetBuildingPool()->GetSlot(bb)->m_bZoneCulled = true;
+			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = true;
 	}else{
 		i -= 6000;
 		for(j = 0; j < 3; j++)
@@ -301,11 +301,11 @@ CCullZone::DoStuffEnteringZone_OneTreadablePlus10m(uint16 i)
 	int j;
 
 	if(i < 6000){
-		CPools::GetTreadablePool()->GetSlot(i)->m_bZoneCulled = true;;
-		CPools::GetTreadablePool()->GetSlot(i)->m_bZoneCulled2 = true;;
+		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled = true;;
+		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled2 = true;;
 		bb = CCullZones::aPointersToBigBuildingsForTreadables[i];
 		if(bb != -1)
-			CPools::GetBuildingPool()->GetSlot(bb)->m_bZoneCulled = true;
+			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = true;
 	}else{
 		i -= 6000;
 		for(j = 0; j < 3; j++)
@@ -320,10 +320,10 @@ CCullZone::DoStuffEnteringZone_OneTreadable(uint16 i)
 	int j;
 
 	if(i < 6000){
-		CPools::GetTreadablePool()->GetSlot(i)->m_bZoneCulled = true;;
+		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled = true;;
 		bb = CCullZones::aPointersToBigBuildingsForTreadables[i];
 		if(bb != -1)
-			CPools::GetBuildingPool()->GetSlot(bb)->m_bZoneCulled = true;
+			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = true;
 	}else{
 		i -= 6000;
 		for(j = 0; j < 3; j++)

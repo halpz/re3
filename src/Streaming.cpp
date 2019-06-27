@@ -15,6 +15,10 @@
 #include "Entity.h"
 #include "FileMgr.h"
 #include "FileLoader.h"
+#include "Zones.h"
+#include "CullZones.h"
+#include "Radar.h"
+#include "Camera.h"
 #include "CdStream.h"
 #include "Streaming.h"
 
@@ -46,7 +50,7 @@ uint16 &CStreaming::ms_loadedGangs = *(uint16*)0x95CC60;
 int32 *CStreaming::ms_imageOffsets = (int32*)0x6E60A0;
 int32 &CStreaming::ms_lastImageRead = *(int32*)0x880E2C;
 int32 &CStreaming::ms_imageSize = *(int32*)0x8F1A34;
-int32 &CStreaming::ms_memoryAvailable = *(int32*)0x880F8C;
+uint32 &CStreaming::ms_memoryAvailable = *(uint32*)0x880F8C;
 
 int32 &desiredNumVehiclesLoaded = *(int32*)0x5EC194;
 
@@ -60,9 +64,6 @@ int32 &islandLODcomInd = *(int32*)0x6212CC;
 int32 &islandLODcomSub = *(int32*)0x6212D0;
 int32 &islandLODsubInd = *(int32*)0x6212D4;
 int32 &islandLODsubCom = *(int32*)0x6212D8;
-
-WRAPPER void CStreaming::MakeSpaceFor(int32 size) { EAXJMP(0x409B70); }
-WRAPPER void CStreaming::LoadScene(const CVector &pos) { EAXJMP(0x40A6D0); }
 
 bool
 CStreamingInfo::GetCdPosnAndSize(uint32 &posn, uint32 &size)
@@ -1697,7 +1698,7 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float 
 			continue;
 
 		e->m_scanCode = CWorld::GetCurrentScanCode();
-		if(!e->m_flagC20 && !e->bIsSubway &&
+		if(!e->bStreamingDontDelete && !e->bIsSubway &&
 		   (!e->IsObject() || ((CObject*)e)->ObjectCreatedBy != TEMP_OBJECT)){
 			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
 			if(mi->m_type != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff())){
@@ -1727,7 +1728,7 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list)
 			continue;
 
 		e->m_scanCode = CWorld::GetCurrentScanCode();
-		if(!e->m_flagC20 && !e->bIsSubway &&
+		if(!e->bStreamingDontDelete && !e->bIsSubway &&
 		   (!e->IsObject() || ((CObject*)e)->ObjectCreatedBy != TEMP_OBJECT)){
 			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
 			if(mi->m_type != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff()))
@@ -1740,7 +1741,126 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list)
 void
 CStreaming::DeleteFarAwayRwObjects(const CVector &pos)
 {
-	// TODO
+	int posx, posy;
+	int x, y;
+	int r, i;
+	CSector *sect;
+
+	posx = CWorld::GetSectorIndexX(pos.x);
+	posy = CWorld::GetSectorIndexY(pos.y);
+
+	// Move oldSectorX/Y to new sector and delete RW objects in its "wake" for every step:
+	// O is the old sector, <- is the direction in which we move it,
+	// X are the sectors we delete RW objects from (except we go up to 10)
+	//            X
+	//          X X
+	//        X X X
+	//        X X X
+	// <- O   X X X
+	//        X X X
+	//        X X X
+	//          X X
+	//            X
+
+	while(posx != ms_oldSectorX){
+		if(posx < ms_oldSectorX){
+			for(r = 2; r <= 10; r++){
+				x = ms_oldSectorX + r;
+				if(x < 0)
+					continue;
+				if(x >= NUMSECTORS_X)
+					break;
+
+				for(i = -r; i <= r; i++){
+					y = ms_oldSectorY + i;
+					if(y < 0)
+						continue;
+					if(y >= NUMSECTORS_Y)
+						break;
+
+					sect = CWorld::GetSector(x, y);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS]);
+					DeleteRwObjectsInOverlapSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], ms_oldSectorX, ms_oldSectorY);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_OBJECTS]);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_DUMMIES]);
+				}
+			}
+			ms_oldSectorX--;
+		}else{
+			for(r = 2; r <= 10; r++){
+				x = ms_oldSectorX - r;
+				if(x < 0)
+					break;
+				if(x >= NUMSECTORS_X)
+					continue;
+
+				for(i = -r; i <= r; i++){
+					y = ms_oldSectorY + i;
+					if(y < 0)
+						continue;
+					if(y >= NUMSECTORS_Y)
+						break;
+
+					sect = CWorld::GetSector(x, y);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS]);
+					DeleteRwObjectsInOverlapSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], ms_oldSectorX, ms_oldSectorY);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_OBJECTS]);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_DUMMIES]);
+				}
+			}
+			ms_oldSectorX++;
+		}
+	}
+
+	while(posy != ms_oldSectorY){
+		if(posy < ms_oldSectorY){
+			for(r = 2; r <= 10; r++){
+				y = ms_oldSectorY + r;
+				if(y < 0)
+					continue;
+				if(y >= NUMSECTORS_Y)
+					break;
+
+				for(i = -r; i <= r; i++){
+					x = ms_oldSectorX + i;
+					if(x < 0)
+						continue;
+					if(x >= NUMSECTORS_X)
+						break;
+
+					sect = CWorld::GetSector(x, y);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS]);
+					DeleteRwObjectsInOverlapSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], ms_oldSectorX, ms_oldSectorY);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_OBJECTS]);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_DUMMIES]);
+				}
+			}
+			ms_oldSectorY--;
+		}else{
+			for(r = 2; r <= 10; r++){
+				y = ms_oldSectorY - r;
+				if(y < 0)
+					break;
+				if(y >= NUMSECTORS_Y)
+					continue;
+
+				for(i = -r; i <= r; i++){
+					x = ms_oldSectorX + i;
+					if(x < 0)
+						continue;
+					if(x >= NUMSECTORS_X)
+						break;
+
+					sect = CWorld::GetSector(x, y);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS]);
+					DeleteRwObjectsInOverlapSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], ms_oldSectorX, ms_oldSectorY);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_OBJECTS]);
+					DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_DUMMIES]);
+				}
+			}
+			ms_oldSectorY++;
+		}
+	}
 }
 
 void
@@ -1786,6 +1906,152 @@ CStreaming::DeleteRwObjectsAfterDeath(const CVector &pos)
 }
 
 void
+CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
+{
+	int ix, iy;
+	int x, y;
+	int xmin, xmax, ymin, ymax;
+	int inc;
+	CSector *sect;
+
+	if(ms_memoryUsed < mem)
+		return;
+
+	ix = CWorld::GetSectorIndexX(TheCamera.GetPosition().x);
+	iy = CWorld::GetSectorIndexX(TheCamera.GetPosition().y);
+
+	if(fabs(TheCamera.GetForward().x) > fabs(TheCamera.GetForward().y)){
+		// looking west/east
+
+		ymin = max(iy - 10, 0);
+		ymax = min(iy + 10, NUMSECTORS_Y);
+		assert(ymin <= ymax);
+
+		// Delete a block of sectors that we know is behind the camera
+		if(TheCamera.GetForward().x > 0){
+			// looking east
+			xmax = max(ix - 2, 0);
+			xmin = max(ix - 10, 0);
+			inc = 1;
+		}else{
+			// looking west
+			xmax = min(ix + 2, NUMSECTORS_X);
+			xmin = min(ix + 10, NUMSECTORS_X);
+			inc = -1;
+		}
+		for(y = ymin; y <= ymax; y++){
+			for(x = xmin; x != xmax; x += inc){
+				sect = CWorld::GetSector(x, y);
+				if(DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS], mem) ||
+				   DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_DUMMIES], mem) ||
+				   DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_OBJECTS], mem))
+					return;
+			}
+		}
+
+		// Now a block that intersects with the camera's frustum
+		if(TheCamera.GetForward().x > 0){
+			// looking east
+			xmax = max(ix + 10, 0);
+			xmin = max(ix - 2, 0);
+			inc = 1;
+		}else{
+			// looking west
+			xmax = min(ix - 10, NUMSECTORS_X);
+			xmin = min(ix + 2, NUMSECTORS_X);
+			inc = -1;
+		}
+		for(y = ymin; y <= ymax; y++){
+			for(x = xmin; x != xmax; x += inc){
+				sect = CWorld::GetSector(x, y);
+				if(DeleteRwObjectsNotInFrustumInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS], mem) ||
+				   DeleteRwObjectsNotInFrustumInSectorList(sect->m_lists[ENTITYLIST_DUMMIES], mem) ||
+				   DeleteRwObjectsNotInFrustumInSectorList(sect->m_lists[ENTITYLIST_OBJECTS], mem))
+					return;
+			}
+		}
+
+		if(RemoveReferencedTxds(mem))
+			return;
+
+		// As last resort, delete objects from the last step more aggressively
+		for(y = ymin; y <= ymax; y++){
+			for(x = xmax; x != xmin; x -= inc){
+				sect = CWorld::GetSector(x, y);
+				if(DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS], mem) ||
+				   DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_DUMMIES], mem) ||
+				   DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_OBJECTS], mem))
+					return;
+			}
+		}
+	}else{
+		// looking north/south
+
+		xmin = max(ix - 10, 0);
+		xmax = min(ix + 10, NUMSECTORS_X);
+		assert(xmin <= xmax);
+
+		// Delete a block of sectors that we know is behind the camera
+		if(TheCamera.GetForward().y > 0){
+			// looking north
+			ymax = max(iy - 2, 0);
+			ymin = max(iy - 10, 0);
+			inc = 1;
+		}else{
+			// looking south
+			ymax = min(iy + 2, NUMSECTORS_Y);
+			ymin = min(iy + 10, NUMSECTORS_Y);
+			inc = -1;
+		}
+		for(x = xmin; x <= xmax; x++){
+			for(y = ymin; y != ymax; y += inc){
+				sect = CWorld::GetSector(x, y);
+				if(DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS], mem) ||
+				   DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_DUMMIES], mem) ||
+				   DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_OBJECTS], mem))
+					return;
+			}
+		}
+
+		// Now a block that intersects with the camera's frustum
+		if(TheCamera.GetForward().y > 0){
+			// looking north
+			ymax = max(iy + 10, 0);
+			ymin = max(iy - 2, 0);
+			inc = 1;
+		}else{
+			// looking south
+			ymax = min(iy - 10, NUMSECTORS_Y);
+			ymin = min(iy + 2, NUMSECTORS_Y);
+			inc = -1;
+		}
+		for(x = xmin; x <= xmax; x++){
+			for(y = ymin; y != ymax; y += inc){
+				sect = CWorld::GetSector(x, y);
+				if(DeleteRwObjectsNotInFrustumInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS], mem) ||
+				   DeleteRwObjectsNotInFrustumInSectorList(sect->m_lists[ENTITYLIST_DUMMIES], mem) ||
+				   DeleteRwObjectsNotInFrustumInSectorList(sect->m_lists[ENTITYLIST_OBJECTS], mem))
+					return;
+			}
+		}
+
+		if(RemoveReferencedTxds(mem))
+			return;
+
+		// As last resort, delete objects from the last step more aggressively
+		for(x = xmin; x <= xmax; x++){
+			for(y = ymax; y != ymin; y -= inc){
+				sect = CWorld::GetSector(x, y);
+				if(DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS], mem) ||
+				   DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_DUMMIES], mem) ||
+				   DeleteRwObjectsBehindCameraInSectorList(sect->m_lists[ENTITYLIST_OBJECTS], mem))
+					return;
+			}
+		}
+	}
+}
+
+void
 CStreaming::DeleteRwObjectsInSectorList(CPtrList &list)
 {
 	CPtrNode *node;
@@ -1793,7 +2059,7 @@ CStreaming::DeleteRwObjectsInSectorList(CPtrList &list)
 
 	for(node = list.first; node; node = node->next){
 		e = (CEntity*)node->item;
-		if(!e->m_flagC20 && !e->bImBeingRendered)
+		if(!e->bStreamingDontDelete && !e->bImBeingRendered)
 			e->DeleteRwObject();
 	}
 }
@@ -1806,7 +2072,7 @@ CStreaming::DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y)
 
 	for(node = list.first; node; node = node->next){
 		e = (CEntity*)node->item;
-		if(e->m_rwObject && !e->m_flagC20 && !e->bImBeingRendered){
+		if(e->m_rwObject && !e->bStreamingDontDelete && !e->bImBeingRendered){
 			// Now this is pretty weird...
 			if(fabs(CWorld::GetSectorIndexX(e->GetPosition().x) - x) >= 2.0f)
 //			{
@@ -1818,6 +2084,86 @@ CStreaming::DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y)
 				e->DeleteRwObject();
 		}
 	}
+}
+
+bool
+CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, int32 mem)
+{
+	CPtrNode *node;
+	CEntity *e;
+
+	for(node = list.first; node; node = node->next){
+		e = (CEntity*)node->item;
+		if(!e->bStreamingDontDelete && !e->bImBeingRendered &&
+		   e->m_rwObject && ms_aInfoForModel[e->GetModelIndex()].m_next){
+			e->DeleteRwObject();
+			if(CModelInfo::GetModelInfo(e->GetModelIndex())->m_refCount == 0){
+				RemoveModel(e->GetModelIndex());
+				if(ms_memoryUsed < mem)
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool
+CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, int32 mem)
+{
+	CPtrNode *node;
+	CEntity *e;
+
+	for(node = list.first; node; node = node->next){
+		e = (CEntity*)node->item;
+		if(!e->bStreamingDontDelete && !e->bImBeingRendered &&
+		   e->m_rwObject && !e->IsVisible() && ms_aInfoForModel[e->GetModelIndex()].m_next){
+			e->DeleteRwObject();
+			if(CModelInfo::GetModelInfo(e->GetModelIndex())->m_refCount == 0){
+				RemoveModel(e->GetModelIndex());
+				if(ms_memoryUsed < mem)
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+void
+CStreaming::MakeSpaceFor(int32 size)
+{
+	// BUG: ms_memoryAvailable can be uninitialized
+	// the code still happens to work in that case because ms_memoryAvailable is unsigned
+	// but it's not nice....
+
+	while((uint32)ms_memoryUsed >= ms_memoryAvailable - size)
+		if(!RemoveLeastUsedModel()){
+			DeleteRwObjectsBehindCamera(ms_memoryAvailable - size);
+			return;
+		}
+}
+
+void
+CStreaming::LoadScene(const CVector &pos)
+{
+	CStreamingInfo *si, *prev;
+	eLevelName level;
+
+	level = CTheZones::GetLevelFromPosition(pos);
+	debug("Start load scene\n");
+	for(si = ms_endRequestedList.m_prev; si != &ms_startRequestedList; si = prev){
+		prev = si->m_prev;
+		if((si->m_flags & (STREAMFLAGS_KEEP_IN_MEMORY|STREAMFLAGS_PRIORITY)) == 0)
+			RemoveModel(si - ms_aInfoForModel);
+	}
+	CRenderer::m_loadingPriority = false;
+	CCullZones::ForceCullZoneCoors(pos);
+	DeleteAllRwObjects();
+	AddModelsToRequestList(pos);
+	CRadar::StreamRadarSections(pos);
+	RemoveUnusedBigBuildings(level);
+	RequestBigBuildings(level);
+	LoadAllRequestedModels(false);
+	debug("End load scene\n");
 }
 
 STARTPATCHES
@@ -1871,10 +2217,16 @@ STARTPATCHES
 	InjectHook(0x407C50, (void (*)(CPtrList&,float,float,float,float,float,float))CStreaming::ProcessEntitiesInSectorList, PATCH_JUMP);
 	InjectHook(0x407DD0, (void (*)(CPtrList&))CStreaming::ProcessEntitiesInSectorList, PATCH_JUMP);
 
+	InjectHook(0x407070, CStreaming::DeleteFarAwayRwObjects, PATCH_JUMP);
 	InjectHook(0x407390, CStreaming::DeleteAllRwObjects, PATCH_JUMP);
 	InjectHook(0x407400, CStreaming::DeleteRwObjectsAfterDeath, PATCH_JUMP);
+	InjectHook(0x408A60, CStreaming::DeleteRwObjectsBehindCamera, PATCH_JUMP);
 	InjectHook(0x407560, CStreaming::DeleteRwObjectsInSectorList, PATCH_JUMP);
 	InjectHook(0x4075A0, CStreaming::DeleteRwObjectsInOverlapSectorList, PATCH_JUMP);
+	InjectHook(0x409340, CStreaming::DeleteRwObjectsBehindCameraInSectorList, PATCH_JUMP);
+	InjectHook(0x4093C0, CStreaming::DeleteRwObjectsNotInFrustumInSectorList, PATCH_JUMP);
+	InjectHook(0x409B70, CStreaming::MakeSpaceFor, PATCH_JUMP);
+	InjectHook(0x40A6D0, CStreaming::LoadScene, PATCH_JUMP);
 
 	InjectHook(0x4063E0, &CStreamingInfo::GetCdPosnAndSize, PATCH_JUMP);
 	InjectHook(0x406410, &CStreamingInfo::SetCdPosnAndSize, PATCH_JUMP);

@@ -131,7 +131,7 @@ public:
 	static void ShowRadarMarker(CVector pos, int16 color, float radius);
 	static void ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 green, uint32 blue, uint32 alpha);
 	static void Shutdown();
-	static void StreamRadarSections(CVector posn);
+	static void StreamRadarSections(const CVector &posn);
 	static void StreamRadarSections(int32 x, int32 y);
 	static void TransformRealWorldToTexCoordSpace(CVector2D &out, const CVector2D &in, int32 x, int32 y);
 	static void TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D &in);

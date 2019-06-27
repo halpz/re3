@@ -645,7 +645,7 @@ int32 CRadar::GetRadarTraceColour(int32 color, bool bright)
 }
 #endif
 
-#if 0
+#if 1
 WRAPPER void CRadar::Initialise() { EAXJMP(0x4A3EF0); }
 #else
 void CRadar::Initialise()
@@ -671,8 +671,8 @@ float CRadar::LimitRadarPoint(CVector2D &point)
 }
 #endif
 
-#if 0
-WRAPPER void CRadar::LoadAllRadarBlips() { EAXJMP(0x4A6F30); }
+#if 1
+WRAPPER void CRadar::LoadAllRadarBlips(int32) { EAXJMP(0x4A6F30); }
 #else
 void CRadar::LoadAllRadarBlips(int32)
 {
@@ -680,7 +680,7 @@ void CRadar::LoadAllRadarBlips(int32)
 }
 #endif
 
-#if 0
+#if 1
 WRAPPER void CRadar::LoadTextures() { EAXJMP(0x4A4030); }
 #else
 void CRadar::LoadTextures()
@@ -689,8 +689,8 @@ void CRadar::LoadTextures()
 }
 #endif
 
-#if 0
-WRAPPER void CRadar::RemoveRadarSections() { EAXJMP(0x00); }
+#if 1
+WRAPPER void CRadar::RemoveRadarSections() { EAXJMP(0x4A60E0); }
 #else
 void CRadar::RemoveRadarSections()
 {
@@ -718,8 +718,8 @@ void CRadar::RequestMapSection(int32 x, int32 y)
 }
 #endif
 
-#if 0
-WRAPPER void CRadar::SaveAllRadarBlips(int32) { EAXJMP(0x00); }
+#if 1
+WRAPPER void CRadar::SaveAllRadarBlips(int32) { EAXJMP(0x4A6E30); }
 #else
 void CRadar::SaveAllRadarBlips(int32)
 {
@@ -727,8 +727,8 @@ void CRadar::SaveAllRadarBlips(int32)
 }
 #endif
 
-#if 0
-WRAPPER void CRadar::SetBlipSprite(int32, int32) { EAXJMP(0x00); }
+#if 1
+WRAPPER void CRadar::SetBlipSprite(int32, int32) { EAXJMP(0x4A5840); }
 #else
 void CRadar::SetBlipSprite(int32 i, int32 icon)
 {
@@ -736,8 +736,8 @@ void CRadar::SetBlipSprite(int32 i, int32 icon)
 }
 #endif
 
-#if 0
-WRAPPER void CRadar::SetCoordBlip(int32, CVector, int32) { EAXJMP(0x00); }
+#if 1
+WRAPPER int CRadar::SetCoordBlip(int32, CVector, int32) { EAXJMP(0x4A5590); }
 #else
 int CRadar::SetCoordBlip(int32 type, CVector pos, int32 flag)
 {
@@ -745,8 +745,8 @@ int CRadar::SetCoordBlip(int32 type, CVector pos, int32 flag)
 }
 #endif
 
-#if 0
-WRAPPER void CRadar::SetEntityBlip(int32 type, CVector pos, int32 color, int32 flag) { EAXJMP(0x00); }
+#if 1
+WRAPPER int CRadar::SetEntityBlip(int32 type, CVector pos, int32 color, int32 flag) { EAXJMP(0x4A5640); }
 #else
 int CRadar::SetEntityBlip(int32 type, CVector pos, int32 color, int32 flag)
 {
@@ -815,7 +815,7 @@ void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 gr
 }
 #endif
 
-#if 0
+#if 1
 WRAPPER void CRadar::Shutdown() { EAXJMP(0x4A3F60); }
 #else
 void CRadar::Shutdown()
@@ -824,10 +824,10 @@ void CRadar::Shutdown()
 }
 #endif
 
-#if 0
-WRAPPER void CRadar::StreamRadarSections() { EAXJMP(0x4A6B60); }
+#if 1
+WRAPPER void CRadar::StreamRadarSections(const CVector &posn) { EAXJMP(0x4A6B60); }
 #else
-void CRadar::StreamRadarSections(CVector posn)
+void CRadar::StreamRadarSections(const CVector &posn)
 {
 
 }

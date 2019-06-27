@@ -78,14 +78,14 @@ public:
 	uint32 bRenderDamaged : 1;
 
 	// flagsC
-	uint32 m_flagC1 : 1;	// bullet proof?
-	uint32 m_flagC2 : 1;	// fire proof?
-	uint32 m_flagC4 : 1;	// collision proof?
-	uint32 m_flagC8 : 1;	// melee proof?
-	uint32 m_flagC10 : 1;	// bOnlyDamagedByPlayer?
-	uint32 m_flagC20 : 1;
-	uint32 m_bZoneCulled : 1;
-	uint32 m_bZoneCulled2 : 1;	// only treadables+10m
+	uint32 bBulletProof : 1;
+	uint32 bFireProof : 1;
+	uint32 bCollisionProof : 1;
+	uint32 bMeleeProof : 1;
+	uint32 bOnlyDamagedByPlayer : 1;
+	uint32 bStreamingDontDelete : 1;
+	uint32 bZoneCulled : 1;
+	uint32 bZoneCulled2 : 1;	// only treadables+10m
 
 	// flagsD
 	uint32 bRemoveFromWorld : 1;
