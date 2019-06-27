@@ -249,7 +249,7 @@ CheckForPedsOnGroundToAttack(CPlayerPed *player, CPed **pedOnGround)
 						foundDead = 1;
 						if (!deadPed)
 							deadPed = (CPed*)currentPed;
-					} else if (currentPed->IsPedHeadAbovePos(-0.6f)) {
+					} else if (!currentPed->IsPedHeadAbovePos(-0.6f)) {
 						foundOnTheFloor = 1;
 						if (!pedOnTheFloor)
 							pedOnTheFloor = (CPed*)currentPed;
