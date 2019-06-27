@@ -48,7 +48,7 @@ CAnimBlendAssociation*
 RpAnimBlendGetNextAssociation(CAnimBlendAssociation *assoc)
 {
 	if(assoc->link.next)
-		CAnimBlendAssociation::FromLink(assoc->link.next);
+		return CAnimBlendAssociation::FromLink(assoc->link.next);
 	return nil;
 }
 
