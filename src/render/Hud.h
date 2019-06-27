@@ -34,7 +34,6 @@ class CHud
 {
 public:
 	static CSprite2d *Sprites;
-
 	static wchar *m_HelpMessage;
 	static wchar *m_LastHelpMessage;
 	static int32 &m_HelpMessageState;
@@ -62,6 +61,7 @@ public:
 	static bool &m_Wants_To_Draw_Hud;
 	static bool &m_Wants_To_Draw_3dMarkers;
 	static wchar(*m_BigMessage)[128];
+	static wchar *m_LastBigMessage;
 	static float BigMessageInUse[6];
 	static float BigMessageAlpha[6];
 	static float BigMessageX[6];
@@ -81,16 +81,16 @@ public:
 	static int16 &PagerOn;
 
 public:
-	static void Initialise();
-	static void Shutdown();
-	static void ReInitialise();
-	static void GetRidOfAllHudMessages();
-	static void SetZoneName(wchar *name);
-	static void SetHelpMessage(wchar *message, bool quick);
-	static void SetVehicleName(wchar *name);
 	static void Draw();
 	static void DrawAfterFade();
-	static void SetMessage(wchar *message);
+	static void GetRidOfAllHudMessages();
+	static void Initialise();
+	static void ReInitialise();
 	static void SetBigMessage(wchar *message, int16 style);
+	static void SetHelpMessage(wchar *message, bool quick);
+	static void SetMessage(wchar *message);
 	static void SetPagerMessage(wchar *message);
+	static void SetVehicleName(wchar *name);
+	static void SetZoneName(wchar *name);
+	static void Shutdown();
 };

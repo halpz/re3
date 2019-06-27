@@ -20,12 +20,6 @@
 #include "User.h"
 #include "World.h"
 
-WRAPPER void CHud::GetRidOfAllHudMessages(void) { EAXJMP(0x504F90); }
-WRAPPER void CHud::SetHelpMessage(wchar *message, bool quick) { EAXJMP(0x5051E0); }
-WRAPPER void CHud::SetMessage(wchar *message) { EAXJMP(0x50A210); }
-WRAPPER void CHud::SetBigMessage(wchar *message, int16 style) { EAXJMP(0x50A250); }
-WRAPPER void CHud::SetPagerMessage(wchar *message) { EAXJMP(0x50A320); }
-
 wchar *CHud::m_HelpMessage = (wchar*)0x86B888;
 wchar *CHud::m_LastHelpMessage = (wchar*)0x6E8F28;
 int32 &CHud::m_HelpMessageState = *(int32*)0x880E1C;
@@ -53,10 +47,10 @@ wchar *CHud::m_PagerMessage = (wchar*)0x878840;
 bool &CHud::m_Wants_To_Draw_Hud = *(bool*)0x95CD89;
 bool &CHud::m_Wants_To_Draw_3dMarkers = *(bool*)0x95CD62;
 wchar(*CHud::m_BigMessage)[128] = (wchar(*)[128])0x664CE0;
+wchar *CHud::m_LastBigMessage = (wchar*)0x86B288;
 float CHud::BigMessageInUse[6];
 float CHud::BigMessageAlpha[6];
 float CHud::BigMessageX[6];
-
 float &CHud::OddJob2OffTimer = *(float*)0x942FA0;
 int8 &CHud::CounterOnLastFrame = *(int8*)0x95CD67;
 float &CHud::OddJob2XOffset = *(float*)0x8F1B5C;
@@ -125,56 +119,6 @@ char *WeaponFilenames[] = {
 RwTexture *&gpSniperSightTex = *(RwTexture**)0x8F5834;
 RwTexture *&gpRocketSightTex = *(RwTexture**)0x8E2C20;
 
-void CHud::Initialise()
-{
-	debug("Init CHud");
-
-	ReInitialise();
-
-	int HudTXD = CTxdStore::AddTxdSlot("hud");
-	CTxdStore::LoadTxd(HudTXD, "MODELS/HUD.TXD");
-	CTxdStore::AddRef(HudTXD);
-	CTxdStore::PopCurrentTxd();
-	CTxdStore::SetCurrentTxd(HudTXD);
-
-	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames) / 2; i++) {
-		Sprites[i].SetTexture(WeaponFilenames[i * 2]);
-	}
-
-	gpSniperSightTex = RwTextureRead("sitesniper", 0);
-	gpRocketSightTex = RwTextureRead("siterocket", 0);
-
-	CTxdStore::PopCurrentTxd();
-}
-
-void CHud::Shutdown()
-{
-	debug("Shutdown CHud");
-
-	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames) / 2; ++i) {
-		Sprites[i].Delete();
-	}
-
-	RwTextureDestroy(gpSniperSightTex);
-	gpSniperSightTex = 0;
-
-	RwTextureDestroy(gpRocketSightTex);
-	gpRocketSightTex = 0;
-
-	int HudTXD = CTxdStore::FindTxdSlot("hud");
-	CTxdStore::RemoveTxdSlot(HudTXD);
-}
-
-void CHud::SetVehicleName(wchar *name)
-{
-	m_VehicleName = name;
-}
-
-void CHud::SetZoneName(wchar *name)
-{
-	m_ZoneName = name;
-}
-
 #if 0
 WRAPPER void CHud::Draw(void) { EAXJMP(0x5052A0); }
 #else
@@ -231,7 +175,7 @@ void CHud::Draw()
 				CRect rect;
 
 				float fWidescreenOffset[2] = { 0.0f, 0.0f };
-				
+
 				if (FrontEndMenuManager.m_PrefsUseWideScreen) {
 					fWidescreenOffset[0] = 0.0f;
 					fWidescreenOffset[1] = SCREEN_SCALE_Y(18.0f);
@@ -587,7 +531,7 @@ void CHud::Draw()
 						CFont::SetPropOn();
 						CFont::SetBackgroundOff();
 
-						if (FrontEndMenuManager.m_PrefsLanguage == 4)
+						if (FrontEndMenuManager.m_PrefsLanguage == LANGUAGE_SPANISH)
 							CFont::SetScale(SCREEN_SCALE_X(1.2f * 0.8f), SCREEN_SCALE_Y(1.2f));
 						else
 							CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
@@ -683,7 +627,7 @@ void CHud::Draw()
 						CFont::SetPropOn();
 						CFont::SetBackgroundOff();
 
-						if (FrontEndMenuManager.m_PrefsLanguage != 3 && FrontEndMenuManager.m_PrefsLanguage != 4)
+						if (FrontEndMenuManager.m_PrefsLanguage != LANGUAGE_ITALIAN && FrontEndMenuManager.m_PrefsLanguage != LANGUAGE_SPANISH)
 							CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
 						else
 							CFont::SetScale(SCREEN_SCALE_X(1.2f * 0.85f), SCREEN_SCALE_Y(1.2f));
@@ -1069,6 +1013,7 @@ void CHud::Draw()
 }
 #endif
 
+
 #if 0
 WRAPPER void CHud::DrawAfterFade(void) { EAXJMP(0x509030); }
 #else
@@ -1258,7 +1203,7 @@ void CHud::DrawAfterFade()
 			CFont::SetJustifyOff();
 			CFont::SetBackgroundOff();
 
-			if (CGame::frenchGame || FrontEndMenuManager.m_PrefsLanguage == 4)
+			if (CGame::frenchGame || FrontEndMenuManager.m_PrefsLanguage == LANGUAGE_SPANISH)
 				CFont::SetScale(SCREEN_SCALE_X(0.884f), SCREEN_SCALE_Y(1.36f));
 			else
 				CFont::SetScale(SCREEN_SCALE_X(1.04f), SCREEN_SCALE_Y(1.6f));
@@ -1304,6 +1249,37 @@ void CHud::DrawAfterFade()
 	}
 }
 #endif
+
+#if 0
+WRAPPER void CHud::GetRidOfAllHudMessages(void) { EAXJMP(0x504F90); }
+#else
+void CHud::GetRidOfAllHudMessages()
+{
+	ReInitialise();
+}
+#endif
+
+void CHud::Initialise()
+{
+	debug("Init CHud");
+
+	ReInitialise();
+
+	int HudTXD = CTxdStore::AddTxdSlot("hud");
+	CTxdStore::LoadTxd(HudTXD, "MODELS/HUD.TXD");
+	CTxdStore::AddRef(HudTXD);
+	CTxdStore::PopCurrentTxd();
+	CTxdStore::SetCurrentTxd(HudTXD);
+
+	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames) / 2; i++) {
+		Sprites[i].SetTexture(WeaponFilenames[i * 2]);
+	}
+
+	gpSniperSightTex = RwTextureRead("sitesniper", 0);
+	gpRocketSightTex = RwTextureRead("siterocket", 0);
+
+	CTxdStore::PopCurrentTxd();
+}
 
 #if 0
 WRAPPER void CHud::ReInitialise(void) { EAXJMP(0x504CC0); }
@@ -1358,8 +1334,124 @@ void CHud::ReInitialise() {
 }
 #endif
 
+#if 0
+WRAPPER void CHud::SetBigMessage(wchar *message, int16 style) { EAXJMP(0x50A250); }
+#else
+void CHud::SetBigMessage(wchar *message, int16 style)
+{
+	for (int i = 0; i < 128; i++) {
+		if (!message[i])
+			break;
+
+		if (message[i] != m_LastBigMessage[i]) {
+			OddJob2On = 0;
+			OddJob2OffTimer = 0.0f;
+		}
+
+		m_BigMessage[style][i] = message[i];
+	};
+}
+#endif
+
+#if 0
+WRAPPER void CHud::SetHelpMessage(wchar *message, bool quick) { EAXJMP(0x5051E0); }
+#else
+void CHud::SetHelpMessage(wchar *message, bool quick)
+{
+	if (!CReplay::IsPlayingBack()) {
+		CMessages::WideStringCopy(m_HelpMessage, message, 256);
+		CMessages::InsertPlayerControlKeysInString(m_HelpMessage);
+
+		for (int i = 0; i < 256; i++) {
+			m_LastHelpMessage[i] = message[i];
+		};
+
+		m_HelpMessageState = 0;
+		m_HelpMessageQuick = quick;
+	}
+}
+#endif
+
+#if 0
+WRAPPER void CHud::SetMessage(wchar *message) { EAXJMP(0x50A210); }
+#else
+void CHud::SetMessage(wchar *message)
+{
+	int i = 0;
+	for (i; i < 256; i++) {
+		if (!message[i])
+			break;
+
+		m_Message[i] = message[i];
+	};
+	m_Message[i] = message[i];
+}
+#endif
+
+#if 0
+WRAPPER void CHud::SetPagerMessage(wchar *message) { EAXJMP(0x50A320); }
+#else
+void CHud::SetPagerMessage(wchar *message)
+{
+	int i = 0;
+	for (i; i < 256; i++) {
+		if (!message[i])
+			break;
+
+		m_PagerMessage[i] = message[i];
+	};
+
+	m_PagerMessage[i] = 0;
+}
+#endif
+
+#if 0
+WRAPPER void CHud::SetVehicleName(wchar *name) { EAXJMP(0x505290); }
+#else
+void CHud::SetVehicleName(wchar *name)
+{
+	m_VehicleName = name;
+}
+#endif
+
+#if 0
+WRAPPER void CHud::SetZoneName(wchar *name) { EAXJMP(0x5051D0); }
+#else
+void CHud::SetZoneName(wchar *name)
+{
+	m_ZoneName = name;
+}
+#endif
+
+void CHud::Shutdown()
+{
+	debug("Shutdown CHud");
+
+	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames) / 2; ++i) {
+		Sprites[i].Delete();
+	}
+
+	RwTextureDestroy(gpSniperSightTex);
+	gpSniperSightTex = 0;
+
+	RwTextureDestroy(gpRocketSightTex);
+	gpRocketSightTex = 0;
+
+	int HudTXD = CTxdStore::FindTxdSlot("hud");
+	CTxdStore::RemoveTxdSlot(HudTXD);
+}
+
 STARTPATCHES
-	InjectHook(0x48BC9A, &CHud::Initialise, PATCH_CALL);
-	InjectHook(0x48C4F1, &CHud::ReInitialise, PATCH_CALL);
-	InjectHook(0x48BCBC, &CHud::Shutdown, PATCH_CALL);
+	InjectHook(0x5052A0, &CHud::Draw, PATCH_JUMP);
+	InjectHook(0x509030, &CHud::DrawAfterFade, PATCH_JUMP);
+	InjectHook(0x504F90, &CHud::GetRidOfAllHudMessages, PATCH_JUMP);
+	InjectHook(0x5048F0, &CHud::Initialise, PATCH_JUMP);
+	InjectHook(0x504CC0, &CHud::ReInitialise, PATCH_JUMP);
+	InjectHook(0x50A250, &CHud::SetBigMessage, PATCH_JUMP);
+	//InjectHook(0x5051E0, &CHud::SetHelpMessage, PATCH_JUMP);
+	InjectHook(0x50A210, &CHud::SetMessage, PATCH_JUMP);
+	InjectHook(0x50A320, &CHud::SetPagerMessage, PATCH_JUMP);
+	InjectHook(0x505290, &CHud::SetVehicleName, PATCH_JUMP);
+	InjectHook(0x5051D0, &CHud::SetZoneName, PATCH_JUMP);
+	InjectHook(0x504C50, &CHud::Shutdown, PATCH_JUMP);
 ENDPATCHES
