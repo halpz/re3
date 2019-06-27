@@ -182,5 +182,5 @@ but here are some observations:
 Here you can find a list of variables that you might need to set in windows:
 ```
 "GTA_III_RE_DIR" * path to "gta3_re" game folder usually where this plugin run.
-"GTA_III_DIR)" * path to "GTAIII" game folder.
+"GTA_III_DIR" * path to "GTAIII" game folder.
 ```
