@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AudioSamples.h"
+#include "DMAudio.h"
 #include "common.h"
 
 class tActiveSample
@@ -72,12 +73,12 @@ enum eAudioType : int32 {
 
 class tAudioEntity
 {
-      public:
+public:
 	eAudioType m_nType;
 	void *m_pEntity;
 	char m_bIsUsed;
 	char m_bStatus;
-	__int16 m_awAudioEvent[4];
+	int16 m_awAudioEvent[4];
 	char gap_18[2];
 	float m_afVolume[4];
 	char field_24;
@@ -146,7 +147,9 @@ public:
 static_assert(sizeof(cAudioCollisionManager) == 0x354,
               "cAudioCollisionManager: error");
 
-struct cMissionAudio {
+class cMissionAudio
+{
+public:
 	CVector m_vecPos;
 	char field_12;
 	char gap_13[3];
@@ -215,13 +218,28 @@ public:
 
 	void PlayerJustLeftCar(void);
 	void Service();
-	void GetPhrase(eAudioSamples *phrase, eAudioSamples *prevPhrase,
-	               eAudioSamples sample, uint32 maxOffset);
+	void GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample,
+	               uint32 maxOffset);
 
-	uint32 GetPlayerTalkSfx(eSound sound);
-    uint32 GetGenericMaleTalkSfx(eSound sound);
+	uint32 GetPlayerTalkSfx(int16 sound);
+	uint32 GetCopTalkSfx(int16 sound);
+	uint32 GetSwatTalkSfx(int16 sound);
+	uint32 GetFBITalkSfx(int16 sound);
+	uint32 GetArmyTalkSfx(int16 sound);
+	uint32 GetMedicTalkSfx(int16 sound);
+	uint32 GetFiremanTalkSfx(int16 sound);
+	uint32 GetNormalMaleTalkSfx(int16 sound);
+	uint32 GetTaxiDriverTalkSfx(int16 sound);
+	uint32 GetPimpTalkSfx(int16 sound);
+	uint32 GetMafiaTalkSfx(int16 sound);
+	uint32 GetTriadTalkSfx(int16 sound);
+	uint32 GetDiabloTalkSfx(int16 sound);
+	uint32 GetYakuzaTalkSfx(int16 sound);
+	uint32 GetYardieTalkSfx(int16 sound);
+	uint32 GetGenericMaleTalkSfx(int16 sound);
 };
 
 static_assert(sizeof(cAudioManager) == 0x4B14, "cAudioManager: error");
 
 extern cAudioManager &AudioManager;
+extern cAudioManager &Players;
