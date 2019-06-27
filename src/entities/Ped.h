@@ -227,7 +227,7 @@ public:
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
 	uint8 stuff3[12];
-	CPed *m_pSeekTarget;
+	CEntity *m_pSeekTarget;
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
 	uint8 stuff4[23];
@@ -273,7 +273,7 @@ public:
 	void AimGun(void);
 	void KillPedWithCar(CVehicle *veh, float impulse);
 	void Say(uint16 audio);
-	void SetLookFlag(CPed *target, bool unknown);
+	void SetLookFlag(CEntity *target, bool unknown);
 	void SetLookFlag(float direction, bool unknown);
 	void SetLookTimer(int time);
 	void SetDie(AnimationId anim, float arg1, float arg2);
