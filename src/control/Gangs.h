@@ -36,7 +36,7 @@ public:
 		GANG_HOODS,
 		GANG_7,
 		GANG_8,
-		TOTAL_GANGS
+		NUM_GANGS
 	};
 	static void Initialize(void);
 	static void SetGangVehicleModel(int16, int);
@@ -49,14 +49,5 @@ public:
 private:
 	static CGangInfo* GetGangInfo(int16 gang) { return &Gang[gang]; }
 
-	static CGangInfo(&Gang)[TOTAL_GANGS];
+	static CGangInfo(&Gang)[NUM_GANGS];
 };
-
-struct tGangSaveData
-{
-	char tag[4];
-	int32 size;
-	CGangInfo gangs[CGangs::TOTAL_GANGS];
-};
-
-static_assert(sizeof(tGangSaveData) == 0x98, "tGangSaveData: error");

@@ -2,7 +2,7 @@
 #include "patcher.h"
 #include "Gangs.h"
 
-CGangInfo(&CGangs::Gang)[TOTAL_GANGS] = *(CGangInfo(*)[9])*(uintptr*)0x6EDF78;
+CGangInfo(&CGangs::Gang)[NUM_GANGS] = *(CGangInfo(*)[9])*(uintptr*)0x6EDF78;
 
 void CGangs::Initialize(void)
 {
@@ -41,23 +41,43 @@ int8 CGangs::GetGangPedModelOverride(int16 gang)
 
 void CGangs::SaveAllGangData(uint8 *buffer, uint32 *size)
 {
-	tGangSaveData *data = (tGangSaveData*)buffer;
-	data->tag[0] = 'G';
-	data->tag[1] = 'N';
-	data->tag[2] = 'G';
-	data->tag[3] = '\0';
-	data->size = *size = sizeof(tGangSaveData);
-	for (int i = 0; i < TOTAL_GANGS; i++)
-		data->gangs[i] = *GetGangInfo(i);
-	buffer += sizeof(tGangSaveData);
+	buffer[0] = 'G';
+	buffer[1] = 'N';
+	buffer[2] = 'G';
+	buffer[3] = '\0';
+	*size = 8 + NUM_GANGS * 16;
+	*(uint32*)(buffer + 4) = *size - 8;
+	buffer += 8;
+	for (int i = 0; i < NUM_GANGS; i++) {
+		*(uint32*)(buffer) = GetGangInfo(i)->m_nVehicleMI;
+		*(int8*)(buffer + 4) = GetGangInfo(i)->m_nPedModelOverride;
+		*(int8*)(buffer + 5) = GetGangInfo(i)->field_5;
+		*(int16*)(buffer + 6) = GetGangInfo(i)->field_6;
+		*(eWeaponType*)(buffer + 8) = GetGangInfo(i)->m_Weapon1;
+		*(eWeaponType*)(buffer + 12) = GetGangInfo(i)->m_Weapon2;
+		buffer += 16;
+	}
 }
 
 void CGangs::LoadAllGangData(uint8 *buffer, uint32 size)
 {
 	Initialize();
-	tGangSaveData* data = (tGangSaveData*)buffer;
-	for (int i = 0; i < TOTAL_GANGS; i++)
-		*GetGangInfo(i) = data->gangs[i];
+	assert(size == 8 + NUM_GANGS * 16);
+	assert(buffer[0] == 'G');
+	assert(buffer[1] == 'N');
+	assert(buffer[2] == 'G');
+	assert(buffer[3] == '\0');
+	assert(*(uint32*)(buffer + 4) == size - 8);
+	buffer += 8;
+	for (int i = 0; i < NUM_GANGS; i++){
+		GetGangInfo(i)->m_nVehicleMI = *(uint32*)(buffer);
+		GetGangInfo(i)->m_nPedModelOverride = *(int8*)(buffer + 4);
+		GetGangInfo(i)->field_5 = *(int8*)(buffer + 5);
+		GetGangInfo(i)->field_6 = *(int16*)(buffer + 6);
+		GetGangInfo(i)->m_Weapon1 = *(eWeaponType*)(buffer + 8);
+		GetGangInfo(i)->m_Weapon2 = *(eWeaponType*)(buffer + 12);
+		buffer += 16;
+	}
 }
 
 STARTPATCHES
