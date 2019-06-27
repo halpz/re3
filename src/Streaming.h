@@ -70,6 +70,7 @@ struct CStreamingChannel
 
 class CDirectory;
 enum eLevelName;
+class CPtrList;
 
 class CStreaming
 {
@@ -156,9 +157,17 @@ public:
 	static void IHaveUsedStreamingMemory(void);
 	static void UpdateMemoryUsed(void);
 
+	static void AddModelsToRequestList(const CVector &pos);
+	static void ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float xmin, float ymin, float xmax, float ymax);
+	static void ProcessEntitiesInSectorList(CPtrList &list);
+	static void DeleteFarAwayRwObjects(const CVector &pos);
+	static void DeleteAllRwObjects(void);
+	static void DeleteRwObjectsInSectorList(CPtrList &list);
+	static void DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y);
+	static void DeleteRwObjectsAfterDeath(const CVector &pos);
 
 	static void LoadInitialPeds(void);
 	static void LoadInitialVehicles(void);
 
-	static void LoadScene(CVector *pos);
+	static void LoadScene(const CVector &pos);
 };

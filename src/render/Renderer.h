@@ -23,8 +23,9 @@ class CRenderer
 
 	static CVector &ms_vecCameraPosition;
 	static CVehicle *&m_pFirstPersonVehicle;
-	static bool &m_loadingPriority;
 public:
+	static bool &m_loadingPriority;
+
 	static void Init(void);
 	static void PreRender(void);
 
