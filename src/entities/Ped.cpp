@@ -313,9 +313,8 @@ bool
 CPed::CanSetPedState(void)
 {
 	return m_nPedState != PED_DIE && m_nPedState != PED_ARRESTED &&
-		m_nPedState != PED_ENTER_CAR && m_nPedState != PED_CARJACK && m_nPedState != PED_DRAG_FROM_CAR && m_nPedState != PED_STEAL_CAR;
+		m_nPedState != PED_ENTER_CAR && m_nPedState != PED_DEAD && m_nPedState != PED_CARJACK && m_nPedState != PED_STEAL_CAR;
 }
-
 
 void
 CPed::AddWeaponModel(int id)
@@ -338,23 +337,23 @@ CPed::AimGun(void)
 	CVector vector;
 
 	if (m_pSeekTarget) {
-		if (m_pSeekTarget->m_status == STATUS_PHYSICS) {
-			m_pSeekTarget->m_pedIK.GetComponentPosition(&pos, PED_TORSO);
+		if (m_pSeekTarget->IsPed()) {
+			((CPed*)m_pSeekTarget)->m_pedIK.GetComponentPosition(&pos, PED_TORSO);
 			vector.x = pos.x;
 			vector.y = pos.y;
 			vector.z = pos.z;
 		} else {
 			vector = *(m_pSeekTarget->GetPosition());
 		}
-		CPed::Say(SOUND_PED_ATTACK);
+		Say(SOUND_PED_ATTACK);
 
 		bCanPointGunAtTarget = m_pedIK.PointGunAtPosition(&vector);
 		if (m_pLookTarget != m_pSeekTarget) {
-			CPed::SetLookFlag(m_pSeekTarget, 1);
+			SetLookFlag(m_pSeekTarget, 1);
 		}
 
 	} else {
-		if (CPed::IsPlayer()) {
+		if (IsPlayer()) {
 			bCanPointGunAtTarget = m_pedIK.PointGunInDirection(m_fLookDirection, ((CPlayerPed*)this)->m_fFPSMoveHeading);
 		} else {
 			bCanPointGunAtTarget = m_pedIK.PointGunInDirection(m_fLookDirection, 0.0f);
@@ -459,7 +458,7 @@ CPed::RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data)
 }
 
 void
-CPed::SetLookFlag(CPed *target, bool unknown)
+CPed::SetLookFlag(CEntity *target, bool unknown)
 {
 	if (m_lookTimer < CTimer::GetTimeInMilliseconds()) {
 		bIsLooking = true;
@@ -621,8 +620,7 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 	if (attackAssoc) {
 		switch (attackAssoc->animId) {
 			case ANIM_WEAPON_START_THROW:
-				if ((!ped->IsPlayer() || ((CPlayerPed*)ped)->field_1380) && ped->IsPlayer())
-				{
+				if ((!ped->IsPlayer() || ((CPlayerPed*)ped)->field_1380) && ped->IsPlayer()) {
 					attackAssoc->blendDelta = -1000.0f;
 					newAnim = CAnimManager::AddAnimation((RpClump*)ped->m_rwObject, ASSOCGRP_STD, ANIM_WEAPON_THROWU);
 				} else {
@@ -1492,7 +1490,7 @@ STARTPATCHES
 	InjectHook(0x4C6AA0, &CPed::AimGun, PATCH_JUMP);
 	InjectHook(0x4EB470, &CPed::ApplyHeadShot, PATCH_JUMP);
 	InjectHook(0x4EAEE0, &CPed::RemoveBodyPart, PATCH_JUMP);
-	InjectHook(0x4C6460, (void (CPed::*)(CPed*, bool)) &CPed::SetLookFlag, PATCH_JUMP);
+	InjectHook(0x4C6460, (void (CPed::*)(CEntity*, bool)) &CPed::SetLookFlag, PATCH_JUMP);
 	InjectHook(0x4C63E0, (void (CPed::*)(float, bool)) &CPed::SetLookFlag, PATCH_JUMP);
 	InjectHook(0x4D12E0, &CPed::SetLookTimer, PATCH_JUMP);
 	InjectHook(0x4C5700, &CPed::OurPedCanSeeThisOne, PATCH_JUMP);
