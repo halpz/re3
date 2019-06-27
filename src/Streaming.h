@@ -170,4 +170,6 @@ public:
 	static void LoadInitialVehicles(void);
 
 	static void LoadScene(const CVector &pos);
+
+	static bool IsModelLoaded(int32 id) { return ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED; }
 };

@@ -4,6 +4,8 @@
 
 CPathFind &ThePaths = *(CPathFind*)0x8F6754;
 
+WRAPPER int32 CPathFind::FindNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bool disabled, bool betweenLevels) { EAXJMP(0x42CC30); }
+
 int TempListLength;
 
 enum

@@ -187,6 +187,7 @@ CStreaming::Init(void)
 	debug("Streaming buffer size is %d sectors", ms_streamingBufferSize);
 
 	// PC only, figure out how much memory we got
+#ifdef GTA_PC
 #define MB (1024*1024)
 	extern DWORD &_dwMemAvailPhys;
 	ms_memoryAvailable = (_dwMemAvailPhys - 10*MB)/2;
@@ -197,6 +198,7 @@ CStreaming::Init(void)
 		desiredNumVehiclesLoaded = MAXVEHICLESLOADED;
 	debug("Memory allocated to Streaming is %dMB", ms_memoryAvailable/MB);
 #undef MB
+#endif
 
 	// find island LODs
 
@@ -243,14 +245,22 @@ CStreaming::LoadCdDirectory(void)
 	char dirname[132];
 	int i;
 
-	// PC specific stuff
+#ifdef GTA_PC
 	ms_imageOffsets[0] = 0;
-	for(i = 1; i < NUMCDIMAGES; i++)
-		ms_imageOffsets[i] = -1;
+	ms_imageOffsets[1] = -1;
+	ms_imageOffsets[2] = -1;
+	ms_imageOffsets[3] = -1;
+	ms_imageOffsets[4] = -1;
+	ms_imageOffsets[5] = -1;
+	ms_imageOffsets[6] = -1;
+	ms_imageOffsets[7] = -1;
+	ms_imageOffsets[8] = -1;
+	ms_imageOffsets[9] = -1;
+	ms_imageOffsets[10] = -1;
+	ms_imageOffsets[11] = -1;
 	ms_imageSize = GetGTA3ImgSize();
-
 	// PS2 uses CFileMgr::GetCdFile on all IMG files to fill the array
-
+#endif
 
 	i = CdStreamGetNumImages();
 	while(i-- >= 1){

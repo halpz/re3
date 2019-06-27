@@ -128,6 +128,7 @@ public:
 	void StoreNodeInfoPed(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, int16 width, bool crossing);
 	void StoreNodeInfoCar(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, int16 width, int8 numLeft, int8 numRight);
 	void RegisterMapObject(CTreadable *mapObject);
+	int32 FindNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bool disabled, bool betweenLevels);
 
 	bool IsPathObject(int id) { return id < PATHNODESIZE && (InfoForTileCars[id*12].type != 0 || InfoForTilePeds[id*12].type != 0); }
 };

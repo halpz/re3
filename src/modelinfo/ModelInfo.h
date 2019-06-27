@@ -34,4 +34,6 @@ public:
 	static CBaseModelInfo *GetModelInfo(int id){
 		return ms_modelInfoPtrs[id];
 	}
+
+	static bool IsBoatModel(int32 id);
 };

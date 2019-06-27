@@ -84,6 +84,7 @@ void DestroySplashScreen(void);
 extern void (*DebugMenuProcess)(void);
 extern void (*DebugMenuRender)(void);
 void DebugMenuInit(void);
+void DebugMenuPopulate(void);
 
 void PrintGameVersion();
 
@@ -115,6 +116,13 @@ Idle(void *arg)
 
 	if((!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.field_452 == 1) &&
 	   TheCamera.GetScreenFadeStatus() != FADE_2){
+#ifdef GTA_PC
+		// This is from SA, but it's nice for windowed mode
+		RwV2d pos;
+		pos.x = SCREENW/2.0f;
+		pos.y = SCREENH/2.0f;
+		RsMouseSetPos(&pos);
+#endif
 		CRenderer::ConstructRenderList();
 		CRenderer::PreRender();
 
@@ -677,6 +685,7 @@ Initialise3D(void *param)
 	{
 		//
 		DebugMenuInit();
+		DebugMenuPopulate();
 		//
 
 		return CGame::InitialiseRenderWare();

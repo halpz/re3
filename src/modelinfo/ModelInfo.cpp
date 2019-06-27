@@ -168,6 +168,13 @@ CModelInfo::GetModelInfo(const char *name, int *id)
 	return nil;
 }
 
+bool
+CModelInfo::IsBoatModel(int32 id)
+{
+	return GetModelInfo(id)->m_type == MITYPE_VEHICLE &&
+		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_BOAT;
+}
+
 STARTPATCHES
 	InjectHook(0x50B310, CModelInfo::Initialise, PATCH_JUMP);
 	InjectHook(0x50B5B0, CModelInfo::ShutDown, PATCH_JUMP);

@@ -62,6 +62,12 @@ enum Config {
 	NUMPICKUPS = 336,
 };
 
+// We don't expect to compile for PS2 or Xbox
+// but it might be interesting for documentation purposes
+#define GTA_PC
+//#define GTA_PS2
+//#define GTA_XBOX
+
 #define GTA3_1_1_PATCH
 #define USE_PS2_RAND
 #define RANDOMSPLASH

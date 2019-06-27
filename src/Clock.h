@@ -21,7 +21,11 @@ public:
 	static void StoreClock(void);
 	static void RestoreClock(void);
 
-	static int8 GetHours(void) { return ms_nGameClockHours; }
-	static int8 GetMinutes(void) { return ms_nGameClockMinutes; }
+	static uint8 GetHours(void) { return ms_nGameClockHours; }
+	static uint8 GetMinutes(void) { return ms_nGameClockMinutes; }
 	static int16 GetSeconds(void) { return ms_nGameClockSeconds; }
+
+
+	static uint8 &GetHoursRef(void) { return ms_nGameClockHours; }
+	static uint8 &GetMinutesRef(void) { return ms_nGameClockMinutes; }
 };

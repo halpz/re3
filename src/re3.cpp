@@ -6,6 +6,14 @@
 #include "Renderer.h"
 #include "Credits.h"
 #include "Camera.h"
+#include "Weather.h"
+#include "Clock.h"
+#include "World.h"
+#include "Vehicle.h"
+#include "Streaming.h"
+#include "PathFind.h"
+#include "Boat.h"
+#include "Automobile.h"
 #include "debugmenu_public.h"
 
 void **rwengine = *(void***)0x5A10E1;
@@ -49,12 +57,20 @@ int (*open_script_orig)(const char *path, const char *mode);
 int
 open_script(const char *path, const char *mode)
 {
+	static int scriptToLoad = 1;
+
 	if(GetAsyncKeyState('G') & 0x8000)
-		return open_script_orig("main.scm", mode);
+		scriptToLoad = 0;
+	if(GetAsyncKeyState('R') & 0x8000)
+		scriptToLoad = 1;
 	if(GetAsyncKeyState('D') & 0x8000)
-		return open_script_orig("main_d.scm", mode);
-//	if(GetAsyncKeyState('R') & 0x8000)
-		return open_script_orig("main_freeroam.scm", mode);
+		scriptToLoad = 2;
+
+	switch(scriptToLoad){
+	case 0: return open_script_orig(path, mode);
+	case 1: return open_script_orig("main_freeroam.scm", mode);
+	case 2: return open_script_orig("main_d.scm", mode);
+	}
 	return open_script_orig(path, mode);
 }
 
@@ -78,10 +94,126 @@ DebugMenuInit(void)
 
 }
 
+void WeaponCheat();
+void HealthCheat();
+void TankCheat();
+void BlowUpCarsCheat();
+void ChangePlayerCheat();
+void MayhemCheat();
+void EverybodyAttacksPlayerCheat();
+void WeaponsForAllCheat();
+void FastTimeCheat();
+void SlowTimeCheat();
+void MoneyCheat();
+void ArmourCheat();
+void WantedLevelUpCheat();
+void WantedLevelDownCheat();
+void SunnyWeatherCheat();
+void CloudyWeatherCheat();
+void RainyWeatherCheat();
+void FoggyWeatherCheat();
+void FastWeatherCheat();
+void OnlyRenderWheelsCheat();
+void ChittyChittyBangBangCheat();
+void StrongGripCheat();
+void NastyLimbsCheat();
+
+// needs too much stuff for now
+#if 0
+void
+spawnCar(int id)
+{
+	CVector playerpos;
+	CStreaming::RequestModel(id, 0);
+	CStreaming::LoadAllRequestedModels(false);
+	if(CStreaming::IsModelLoaded(id)){
+		FindPlayerCoors(playerpos);
+		int node = ThePaths.FindNodeClosestToCoors(playerpos, 0, 100.0f, false, false);
+		if(node < 0)
+			return;
+
+		CVehicle *v;
+		if(CModelInfo::IsBoatModel(id)){
+//			CBoat* boat = (CBoat*)CVehicle__new(0x484);
+//			boat = boat->ctor(id, 1);
+//			v = (CVehicle*)(boat);
+		}else{
+//			CAutomobile *au = (CAutomobile*)CVehicle__new(0x5A8);
+//			au = au->ctor(id, 1);
+//			v = (CVehicle*)au;
+		}
+/*
+		// unlock doors
+		FIELD(int, v, 0x224) = 1;
+		// set player owned
+		FIELD(uint8, v, 0x1F7) |= 4;
+
+		DebugMenuEntrySetAddress(carCol1, &FIELD(uchar, v, 0x19C));
+		DebugMenuEntrySetAddress(carCol2, &FIELD(uchar, v, 0x19D));
+		//if(id == MODELID_ESPERANTO)
+		//	FIELD(uchar, v, 0x19C) = 54;
+
+		v->matrix.matrix.pos.x = ThePaths.nodes[node].x;
+		v->matrix.matrix.pos.y = ThePaths.nodes[node].y;
+		v->matrix.matrix.pos.z = ThePaths.nodes[node].z + 4.0f;
+		float x = v->matrix.matrix.pos.x;
+		float y = v->matrix.matrix.pos.y;
+		float z = v->matrix.matrix.pos.z;
+		v->matrix.SetRotate(0.0f, 0.0f, 3.49f);
+		v->matrix.matrix.pos.x += x;
+		v->matrix.matrix.pos.y += y;
+		v->matrix.matrix.pos.z += z;
+		v->bfTypeStatus = v->bfTypeStatus & 7 | 0x20;
+		FIELD(int, v, 0x224) = 1;
+*/
+		CWorld::Add(v);
+	}
+}
+#endif
+
 void
 DebugMenuPopulate(void)
 {
 	if(DebugMenuLoad()){
+		static const char *weathers[] = {
+			"Sunny", "Cloudy", "Rainy", "Foggy"
+		};
+		DebugMenuEntry *e;
+		e = DebugMenuAddVar("Time & Weather", "Current Hour", &CClock::GetHoursRef(), nil, 1, 0, 23, nil);
+		DebugMenuEntrySetWrap(e, true);
+		e = DebugMenuAddVar("Time & Weather", "Current Minute", &CClock::GetMinutesRef(),
+			[](){ CWeather::InterpolationValue = CClock::GetMinutes()/60.0f; }, 1, 0, 59, nil);
+			DebugMenuEntrySetWrap(e, true);
+		e = DebugMenuAddVar("Time & Weather", "Old Weather", (int16*)&CWeather::OldWeatherType, nil, 1, 0, 3, weathers);
+		DebugMenuEntrySetWrap(e, true);
+		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 3, weathers);
+		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddVar("Time & Weather", "Time scale", (float*)0x8F2C20, nil, 0.1f, 0.0f, 10.0f);
+
+		DebugMenuAddCmd("Cheats", "Weapons", WeaponCheat);
+		DebugMenuAddCmd("Cheats", "Money", MoneyCheat);
+		DebugMenuAddCmd("Cheats", "Health", HealthCheat);
+		DebugMenuAddCmd("Cheats", "Wanted level up", WantedLevelUpCheat);
+		DebugMenuAddCmd("Cheats", "Wanted level down", WantedLevelDownCheat);
+		DebugMenuAddCmd("Cheats", "Tank", TankCheat);
+		DebugMenuAddCmd("Cheats", "Blow up cars", BlowUpCarsCheat);
+		DebugMenuAddCmd("Cheats", "Change player", ChangePlayerCheat);
+		DebugMenuAddCmd("Cheats", "Mayhem", MayhemCheat);
+		DebugMenuAddCmd("Cheats", "Everybody attacks player", EverybodyAttacksPlayerCheat);
+		DebugMenuAddCmd("Cheats", "Weapons for all", WeaponsForAllCheat);
+		DebugMenuAddCmd("Cheats", "Fast time", FastTimeCheat);
+		DebugMenuAddCmd("Cheats", "Slow time", SlowTimeCheat);
+		DebugMenuAddCmd("Cheats", "Armour", ArmourCheat);
+		DebugMenuAddCmd("Cheats", "Sunny weather", SunnyWeatherCheat);
+		DebugMenuAddCmd("Cheats", "Cloudy weather", CloudyWeatherCheat);
+		DebugMenuAddCmd("Cheats", "Rainy weather", RainyWeatherCheat);
+		DebugMenuAddCmd("Cheats", "Foggy weather", FoggyWeatherCheat);
+		DebugMenuAddCmd("Cheats", "Fast weather", FastWeatherCheat);
+		DebugMenuAddCmd("Cheats", "Only render wheels", OnlyRenderWheelsCheat);
+		DebugMenuAddCmd("Cheats", "Chitty chitty bang bang", ChittyChittyBangBangCheat);
+		DebugMenuAddCmd("Cheats", "Strong grip", StrongGripCheat);
+		DebugMenuAddCmd("Cheats", "Nasty limbs", NastyLimbsCheat);
+
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Collision Polys", (int8*)&gbShowCollisionPolys, nil);
