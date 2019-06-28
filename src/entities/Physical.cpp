@@ -1842,7 +1842,7 @@ CPhysical::ProcessCollision(void)
 		if(CheckCollision()){
 			if(IsPed() && m_vecMoveSpeed.z == 0.0f &&
 			   !ped->m_ped_flagA2 &&
-			   ped->m_ped_flagA1)
+			   ped->bIsStanding)
 				savedMatrix.GetPosition()->z = GetPosition().z;
 			GetMatrix() = savedMatrix;
 			CTimer::SetTimeStep(savedTimeStep);
@@ -1850,7 +1850,7 @@ CPhysical::ProcessCollision(void)
 		}
 		if(IsPed() && m_vecMoveSpeed.z == 0.0f &&
 		   !ped->m_ped_flagA2 &&
-		   ped->m_ped_flagA1)
+		   ped->bIsStanding)
 			savedMatrix.GetPosition()->z = GetPosition().z;
 		GetMatrix() = savedMatrix;
 		CTimer::SetTimeStep(savedTimeStep);

@@ -227,10 +227,6 @@ int32 nParticleCreationInterval = 1;
 float fParticleScaleLimit       = 0.5f;
 
 
-
-RwTexture *&gpBloodPoolTex = *(RwTexture **)0x9415F8;
-
-
 void CParticle::ReloadConfig()
 {
 	debug("Initialising CParticleMgr...");

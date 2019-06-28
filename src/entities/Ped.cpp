@@ -14,6 +14,9 @@
 #include "HandlingMgr.h"
 #include "Replay.h"
 #include "PedPlacement.h"
+#include "Shadows.h"
+#include "Weather.h"
+#include "CullZones.h"
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -559,7 +562,7 @@ CPed::Avoid(void)
 						m_fRotationDest += DEGTORAD(45.0f);
 						if (!bIsLooking) {
 							CPed::SetLookFlag(nearestPed, 0);
-							CPed::SetLookTimer(CGeneral::GetRandomNumberInRange(0, 300) + 500);
+							CPed::SetLookTimer(CGeneral::GetRandomNumberInRange(500, 800));
 						}
 					}
 				}
@@ -663,7 +666,7 @@ CPed::Attack(void)
 	eWeaponType ourWeaponType;
 	float weaponAnimTime;
 	eWeaponFire ourWeaponFire;
-	float animEnd;
+	float animLoopEnd;
 	CWeaponInfo *ourWeapon;
 	bool lastReloadWasInFuture;
 	AnimationId reloadAnim;
@@ -689,7 +692,7 @@ CPed::Attack(void)
 	if (reloadAnim != NUM_ANIMS)
 		reloadAnimAssoc = RpAnimBlendClumpGetAssociation((RpClump*)m_rwObject, reloadAnim);
 
-	if (m_ped_flagE10)
+	if (bCantFireBecauseCrouched)
 		return;
 
 	if (reloadAnimAssoc) {
@@ -722,6 +725,7 @@ CPed::Attack(void)
 			else
 				m_pedIK.m_flags &= ~CPedIK::FLAG_4;
 		}
+
 		if (weaponAnimTime <= delayBetweenAnimAndFire || weaponAnimTime - weaponAnimAssoc->timeStep > delayBetweenAnimAndFire || !weaponAnimAssoc->IsRunning()) {
 			if (weaponAnimAssoc->speed < 1.0f)
 				weaponAnimAssoc->speed = 1.0;
@@ -772,7 +776,7 @@ CPed::Attack(void)
 					DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_PUNCH_ATTACK, 0.0f);
 				}
 
-				weaponAnimAssoc->speed = 0.5;
+				weaponAnimAssoc->speed = 0.5f;
 
 				// BUG: We currently don't know any situation this cond. could be true.
 				if (m_ped_flagA4 || CTimer::GetTimeInMilliseconds() < m_lastHitTime) {
@@ -806,16 +810,16 @@ CPed::Attack(void)
 				GetWeapon()->AddGunshell(this, gunshellPos, gunshellRot, 0.025f);
 			}
 		}
-		animEnd = ourWeapon->m_fAnimLoopEnd;
+		animLoopEnd = ourWeapon->m_fAnimLoopEnd;
 		if (ourWeaponFire == WEAPON_FIRE_MELEE && weaponAnimAssoc->animId == ourWeapon->m_Anim2ToPlay)
-			animEnd = 0.56f;
+			animLoopEnd = 0.56f;
 
 		weaponAnimTime = weaponAnimAssoc->currentTime;
 
-		// End of the attack
-		if (weaponAnimTime > animEnd || !weaponAnimAssoc->IsRunning() && ourWeaponFire != WEAPON_FIRE_PROJECTILE) {
+		// Anim loop end, either start the loop again or finish the attack
+		if (weaponAnimTime > animLoopEnd || !weaponAnimAssoc->IsRunning() && ourWeaponFire != WEAPON_FIRE_PROJECTILE) {
 
-			if (weaponAnimTime - 2.0f * weaponAnimAssoc->timeStep <= animEnd
+			if (weaponAnimTime - 2.0f * weaponAnimAssoc->timeStep <= animLoopEnd
 				&& (m_ped_flagA4 || CTimer::GetTimeInMilliseconds() < m_lastHitTime)
 				&& GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING) {
 
@@ -964,7 +968,7 @@ CPed::ClearDuck(void)
 			}
 		}
 	} else
-		m_ped_flagE10 = false;
+		bCantFireBecauseCrouched = false;
 }
 
 void
@@ -1047,7 +1051,7 @@ CPed::BeingDraggedFromCar(void)
 void
 CPed::RestartNonPartialAnims(void)
 {
-	CAnimBlendAssociation* assoc;
+	CAnimBlendAssociation *assoc;
 
 	for (assoc = RpAnimBlendClumpGetFirstAssociation((RpClump*)m_rwObject); !assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
 		if (!assoc->IsPartial())
@@ -1461,6 +1465,141 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 
 }
 
+static void
+particleProduceFootDust(CPed *ped, CVector *pos, float size, int times)
+{
+	switch (ped->m_nLastCollType)
+	{
+		case 1:	// somewhere hard
+		case 3:	// soft dirt
+		case 5:	// pavement
+		case 18:// sand
+			for (int i = 0; i < times; ++i) {
+				CVector adjustedPos = *pos;
+				adjustedPos.x += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
+				adjustedPos.y += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
+				CParticle::AddParticle(PARTICLE_PEDFOOT_DUST, adjustedPos, CVector(0.0f, 0.0f, 0.0f), nil, size, CRGBA(0, 0, 0, 0), 0, 0, 0, 0);
+			}
+			break;
+		default:
+			break;
+	}
+}
+
+static void
+particleProduceFootSplash(CPed *ped, CVector *pos, float size, int times)
+{
+	for (int i = 0; i < times; i++) {
+		CVector adjustedPos = *pos;
+		adjustedPos.x += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
+		adjustedPos.y += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
+
+		CVector direction = ped->GetForward() * -0.05f;
+		CParticle::AddParticle(PARTICLE_RAIN_SPLASHUP, adjustedPos, direction, nil, size, CRGBA(32, 32, 32, 32), 0, 0, CGeneral::GetRandomNumberInRange(0, 1), 200);
+	}
+}
+
+void
+CPed::PlayFootSteps(void)
+{
+	if (bDoBloodyFootprints) {
+		if (m_bloodyFootprintCount > 0 && m_bloodyFootprintCount < 300) {
+			m_bloodyFootprintCount--;
+
+			if (m_bloodyFootprintCount == 0)
+				bDoBloodyFootprints = false;
+		}
+	}
+
+	if (!bIsStanding)
+		return;
+
+	CAnimBlendAssociation *assoc = RpAnimBlendClumpGetFirstAssociation((RpClump*)m_rwObject);
+	CAnimBlendAssociation *walkRunAssoc = nil;
+	float walkRunAssocBlend = 0.0f, idleAssocBlend = 0.0f;
+
+	for (; assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
+		if (assoc->flags & ASSOC_FLAG80) {
+			walkRunAssoc = assoc;
+			walkRunAssocBlend += assoc->blendAmount;
+		} else if ((assoc->flags & ASSOC_FLAG200) == 0) {
+			idleAssocBlend += assoc->blendAmount;
+		}
+	}
+
+	if (walkRunAssoc && walkRunAssocBlend > 0.5f && idleAssocBlend < 1.0f) {
+		float stepStart = 1 / 15.0f;
+		float stepEnd = walkRunAssoc->hierarchy->totalLength / 2.0f + stepStart;
+		float currentTime = walkRunAssoc->currentTime;
+		int stepPart = 0;
+
+		if (currentTime >= stepStart && currentTime - walkRunAssoc->timeStep < stepStart)
+			stepPart = 1;
+		else if (currentTime >= stepEnd && currentTime - walkRunAssoc->timeStep < stepEnd)
+			stepPart = 2;
+
+		if (stepPart != 0) {
+			DMAudio.PlayOneShot(uAudioEntityId, stepPart == 1 ? SOUND_STEP_START : SOUND_STEP_END, 1.0f);
+			CVector footPos(0.0f, 0.0f, 0.0f);
+
+			for (RwFrame *frame = GetNodeFrame(stepPart == 1 ? PED_FOOTL : PED_FOOTR); frame; frame = RwFrameGetParent(frame))
+				RwV3dTransformPoints(footPos, footPos, 1, RwFrameGetMatrix(frame));
+
+			CVector forward = GetForward();
+
+			footPos.z -= 0.1f;
+			footPos += 0.2f * forward;
+
+			if (bDoBloodyFootprints) {
+				CVector2D top(forward * 0.26f);
+				CVector2D right(GetRight() * 0.14f);
+
+				CShadows::AddPermanentShadow(1, gpBloodPoolTex, &footPos,
+					top.x, top.y,
+					right.x, right.y,
+					255, 255, 0, 0, 4.0f, 3000.0f, 1.0f);
+
+				if (m_bloodyFootprintCount <= 20) {
+					m_bloodyFootprintCount = 0;
+					bDoBloodyFootprints = false;
+				} else {
+					m_bloodyFootprintCount -= 20;
+				}
+			}
+			if (CWeather::Rain <= 0.1f || CCullZones::CamNoRain() || CCullZones::PlayerNoRain()) {
+				if(IsPlayer())
+					particleProduceFootDust(this, &footPos, 0.0f, 4);
+			} else if(stepPart == 2) {
+				particleProduceFootSplash(this, &footPos, 0.15f, 4);
+			}
+		}
+	}
+
+	if (m_nLastCollType == 19) { // Water
+		float pedSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
+		if (pedSpeed > 0.03f && CTimer::GetFrameCounter() % 2 == 0 && pedSpeed > 0.13f) {
+			float particleSize = pedSpeed * 2.0f;
+
+			if (particleSize < 0.25f)
+				particleSize = 0.25f;
+
+			if (particleSize > 0.75f)
+				particleSize = 0.75f;
+
+			CVector particlePos = GetPosition() + GetForward() * 0.3f;
+			particlePos.z -= 1.2f;
+
+			CVector particleDir = m_vecMoveSpeed * 0.75f;
+
+			particleDir.z = CGeneral::GetRandomNumberInRange(0.01f, 0.03f);
+			CParticle::AddParticle(PARTICLE_PED_SPLASH, particlePos, particleDir, nil, 0.8f * particleSize, CRGBA(155,155,185,128), 0, 0, 0, 0);
+
+			particleDir.z = CGeneral::GetRandomNumberInRange(0.03f, 0.05f);
+			CParticle::AddParticle(PARTICLE_RUBBER_SMOKE, particlePos, particleDir, nil, particleSize, CRGBA(255,255,255,255), 0, 0, 0, 0);
+		}
+	}
+}
+
 WRAPPER void CPed::PedGetupCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE810); }
 WRAPPER void CPed::PedStaggerCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8D0); }
 WRAPPER void CPed::PedEvadeCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D36E0); }
@@ -1514,4 +1653,5 @@ STARTPATCHES
 	InjectHook(0x4E4660, (void (*)(CVector*, CVehicle*, uint32, float)) CPed::GetPositionToOpenCarDoor, PATCH_JUMP);
 	InjectHook(0x4E1A30, (void (*)(CVector*, CVehicle*, uint32)) CPed::GetPositionToOpenCarDoor, PATCH_JUMP);
 	InjectHook(0x4DF940, &CPed::LineUpPedWithCar, PATCH_JUMP);
+	InjectHook(0x4CC6C0, &CPed::PlayFootSteps, PATCH_JUMP);
 ENDPATCHES
