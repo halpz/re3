@@ -344,6 +344,8 @@ patch()
 
 	Patch<float>(0x46BC61+6, 1.0f);	// car distance
 	InjectHook(0x59E460, printf, PATCH_JUMP);
+	InjectHook(0x475E00, printf, PATCH_JUMP);	// _Error
+
 
 	// stolen from silentpatch (sorry)
 	Patch<WORD>(0x5382BF, 0x0EEB);

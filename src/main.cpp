@@ -90,17 +90,12 @@ void PrintGameVersion();
 
 RwRGBA gColourTop;
 
-#ifndef DEBUG
-// This is the weirdest shit. In Debug this causes my game to crash in CPed::IsPedInControl shortly after level change
 void
 InitialiseGame(void)
 {
 	LoadingScreen(nil, nil, "loadsc0");
 	CGame::Initialise("DATA\\GTA3.DAT");
 }
-#else
-WRAPPER void InitialiseGame(void) { EAXJMP(0x48E7E0); }
-#endif
 
 void
 Idle(void *arg)
