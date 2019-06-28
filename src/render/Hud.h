@@ -34,6 +34,7 @@ class CHud
 {
 public:
 	static CSprite2d *Sprites;
+	static int32 &SpriteBrightness;
 	static wchar *m_HelpMessage;
 	static wchar *m_LastHelpMessage;
 	static int32 &m_HelpMessageState;
@@ -47,12 +48,12 @@ public:
 	static int32 m_ZoneState;
 	static int32 m_ZoneFadeTimer;
 	static int32 m_ZoneNameTimer;
-	static wchar *&m_ZoneName;
-	static wchar *m_LastZoneName;
+	static wchar *&m_pZoneName;
+	static wchar *m_pLastZoneName;
 	static wchar *m_ZoneToPrint;
 	static wchar *&m_VehicleName;
-	static wchar *m_LastVehicleName;
-	static wchar *m_VehicleNameToPrint;
+	static wchar *m_pLastVehicleName;
+	static wchar *m_pVehicleNameToPrint;
 	static int32 m_VehicleState;
 	static int32 m_VehicleFadeTimer;
 	static int32 m_VehicleNameTimer;
@@ -61,7 +62,9 @@ public:
 	static bool &m_Wants_To_Draw_Hud;
 	static bool &m_Wants_To_Draw_3dMarkers;
 	static wchar(*m_BigMessage)[128];
-	static wchar *m_LastBigMessage;
+	static int32 m_ItemToFlash;
+
+	// These aren't really in CHud
 	static float BigMessageInUse[6];
 	static float BigMessageAlpha[6];
 	static float BigMessageX[6];
@@ -70,13 +73,11 @@ public:
 	static float &OddJob2XOffset;
 	static int16 &CounterFlashTimer;
 	static int16 &OddJob2Timer;
-	static int8	&TimerOnLastFrame;
+	static int8 &TimerOnLastFrame;
 	static int16 &OddJob2On;
 	static int16 &TimerFlashTimer;
 	static int16 &PagerSoundPlayed;
-	static int32 &SpriteBrightness;
 	static float &PagerXOffset;
-	static int32 m_ItemToFlash;
 	static int16 &PagerTimer;
 	static int16 &PagerOn;
 

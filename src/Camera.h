@@ -10,7 +10,7 @@ class CAutomobile;
 
 struct CCam
 {
-	enum CamMode
+	enum
 	{
 		MODE_TOPDOWN1 = 1,
 		MODE_TOPDOWN2,
