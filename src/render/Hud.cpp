@@ -205,8 +205,8 @@ void CHud::Draw()
 				}
 				else {
 					if (Mode == CCam::MODE_M16FIRSTPERSON_34 ||
-					    Mode == CCam::MODE_FIRSTPERSONPEDONPC_41 &&
-					    Mode != CCam::MODE_EDITOR) {
+					    Mode == CCam::MODE_FIRSTPERSONPEDONPC_41 ||
+					    Mode == CCam::MODE_EDITOR) {
 						rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(32.0f);
 						rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(32.0f);
 						rect.right = (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(32.0f);
