@@ -1,5 +1,11 @@
 #pragma once
 
+enum {
+	RECORDSTATE_0,
+	RECORDSTATE_1,
+	RECORDSTATE_2,
+};
+
 class CRecordDataForGame
 {
 public:

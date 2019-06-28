@@ -33,21 +33,23 @@ bool &CHud::m_HelpMessageQuick = *(bool *)0x95CCF7;
 int32 CHud::m_ZoneState = *(int32*)0x8F29AC;
 int32 CHud::m_ZoneFadeTimer;
 int32 CHud::m_ZoneNameTimer = *(int32*)0x8F1A50;
-wchar *&CHud::m_ZoneName = *(wchar **)0x8E2C2C;
-wchar *CHud::m_LastZoneName = (wchar*)0x8F432C;
+wchar *&CHud::m_pZoneName = *(wchar **)0x8E2C2C;
+wchar *CHud::m_pLastZoneName = (wchar*)0x8F432C;
 wchar *CHud::m_ZoneToPrint;
 int32 CHud::m_VehicleState = *(int32*)0x940560;
 int32 CHud::m_VehicleFadeTimer;
 int32 CHud::m_VehicleNameTimer = *(int32*)0x8F2A14;
 wchar *&CHud::m_VehicleName = *(wchar **)0x942FB4;
-wchar *CHud::m_LastVehicleName = *(wchar **)0x8E2DD8;
-wchar *CHud::m_VehicleNameToPrint;
+wchar *CHud::m_pLastVehicleName = *(wchar **)0x8E2DD8;
+wchar *CHud::m_pVehicleNameToPrint;
 wchar *CHud::m_Message = (wchar*)0x72E318;
 wchar *CHud::m_PagerMessage = (wchar*)0x878840;
 bool &CHud::m_Wants_To_Draw_Hud = *(bool*)0x95CD89;
 bool &CHud::m_Wants_To_Draw_3dMarkers = *(bool*)0x95CD62;
 wchar(*CHud::m_BigMessage)[128] = (wchar(*)[128])0x664CE0;
-wchar *CHud::m_LastBigMessage = (wchar*)0x86B288;
+int32 CHud::m_ItemToFlash = *(int32*)0x95CC82;
+
+// These aren't really in CHud
 float CHud::BigMessageInUse[6];
 float CHud::BigMessageAlpha[6];
 float CHud::BigMessageX[6];
@@ -62,7 +64,6 @@ int16 &CHud::TimerFlashTimer = *(int16*)0x95CC6C;
 int16 &CHud::PagerSoundPlayed = *(int16*)0x95CC4A;
 int32 &CHud::SpriteBrightness = *(int32*)0x95CC54;
 float &CHud::PagerXOffset = *(float*)0x941590;
-int32 CHud::m_ItemToFlash = *(int32*)0x95CC82;
 int16 &CHud::PagerTimer = *(int16*)0x95CC3A;
 int16 &CHud::PagerOn = *(int16*)0x95CCA0;
 
@@ -141,9 +142,9 @@ void CHud::Draw()
 			int32 WeaponType = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
 			int32 Mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 
-			if (Mode == CCam::CamMode::MODE_SNIPER || Mode == CCam::CamMode::MODE_ROCKET || Mode == CCam::CamMode::MODE_M16FIRSTPERSON_34 || Mode == CCam::CamMode::MODE_EDITOR)
+			if (Mode == CCam::MODE_SNIPER || Mode == CCam::MODE_ROCKET || Mode == CCam::MODE_M16FIRSTPERSON_34 || Mode == CCam::MODE_EDITOR)
 				Mode_FirstPerson = 1;
-			if (Mode == CCam::CamMode::MODE_FIRSTPERSONPEDONPC_41 || Mode == CCam::CamMode::MODE_SNIPER_RUN_AROUND)
+			if (Mode == CCam::MODE_FIRSTPERSONPEDONPC_41 || Mode == CCam::MODE_SNIPER_RUN_AROUND)
 				Mode_RunAround = 1;
 
 			/*
@@ -162,16 +163,16 @@ void CHud::Draw()
 			if (Mode_FirstPerson || Mode_RunAround) {
 				RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void *)rwFILTERLINEAR);
 
-				int32 SpriteBrightLikeADiamond = CHud::SpriteBrightness + 1;
+				int32 SpriteBrightLikeADiamond = SpriteBrightness + 1;
 				if (SpriteBrightLikeADiamond > 30)
 					SpriteBrightLikeADiamond = 30;
 
-				CHud::SpriteBrightness = SpriteBrightLikeADiamond;
+				SpriteBrightness = SpriteBrightLikeADiamond;
 
 				RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 
 				float fStep = sin((CTimer::GetTimeInMilliseconds() & 1023) * 0.0061328127);
-				float fMultBright = CHud::SpriteBrightness * 0.03f * (0.25f * fStep + 0.75f);
+				float fMultBright = SpriteBrightness * 0.03f * (0.25f * fStep + 0.75f);
 				CRect rect;
 
 				float fWidescreenOffset[2] = { 0.0f, 0.0f };
@@ -191,7 +192,7 @@ void CHud::Draw()
 						rect.right = f3rdX + SCREEN_SCALE_X(32.0f * 0.6f);
 						rect.bottom = f3rdY + SCREEN_SCALE_Y(32.0f  * 0.6f);
 
-						CHud::Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+						Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
 					}
 					else {
 						rect.left = f3rdX - SCREEN_SCALE_X(32.0f * 0.4f);
@@ -199,61 +200,61 @@ void CHud::Draw()
 						rect.right = f3rdX + SCREEN_SCALE_X(32.0f * 0.4f);
 						rect.bottom = f3rdY + SCREEN_SCALE_Y(32.0f  * 0.4f);
 
-						CHud::Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+						Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
 					}
 				}
 				else {
-					if (Mode != CCam::CamMode::MODE_M16FIRSTPERSON_34 && Mode != CCam::CamMode::MODE_FIRSTPERSONPEDONPC_41 && Mode != CCam::CamMode::MODE_EDITOR) {
-						if (Mode == CCam::CamMode::MODE_ROCKET_RUN_AROUND) {
-							rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(32.0f * 0.7f);
-							rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(32.0f * 0.7f);
-							rect.right = (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(32.0f * 0.7f);
-							rect.bottom = (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(32.0f * 0.7f);
-
-							CHud::Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
-						}
-						else if (Mode != CCam::CamMode::MODE_ROCKET && Mode != CCam::CamMode::MODE_SNIPER_RUN_AROUND) {
-							rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(210.0f);
-							rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(210.0f);
-							rect.right = SCREEN_WIDTH / 2;
-							rect.bottom = SCREEN_HEIGHT / 2;
-							CHud::Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
-
-							rect.right = (SCREEN_WIDTH / 2);
-							rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(210.0f);
-							rect.left = SCREEN_SCALE_X(210.0f) + (SCREEN_WIDTH / 2);
-							rect.bottom = SCREEN_HEIGHT / 2;
-							CHud::Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
-
-							rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(210.0f);
-							rect.bottom = (SCREEN_HEIGHT / 2);
-							rect.right = (SCREEN_WIDTH / 2);
-							rect.top = SCREEN_SCALE_Y(210.0f) + (SCREEN_HEIGHT / 2);
-							CHud::Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
-
-							rect.right = (SCREEN_WIDTH / 2);
-							rect.bottom = (SCREEN_HEIGHT / 2);
-							rect.left = SCREEN_SCALE_X(210.0f) + (SCREEN_WIDTH / 2);
-							rect.top = SCREEN_SCALE_Y(210.0f) + (SCREEN_HEIGHT / 2);
-							CHud::Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
-						}
-						else {
-							RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
-							RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDONE);
-							RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDONE);
-							RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
-							RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
-							RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpRocketSightTex->raster);
-
-							CSprite::RenderOneXLUSprite(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 1.0f, SCREEN_SCALE_X(40.0f), SCREEN_SCALE_Y(40.0f), (100.0f * fMultBright), (200.0f * fMultBright), (100.0f * fMultBright), 255, 1.0f, 255);
-						}
-					}
-					else {
+					if (Mode == CCam::MODE_M16FIRSTPERSON_34 ||
+					    Mode == CCam::MODE_FIRSTPERSONPEDONPC_41 ||
+					    Mode != CCam::MODE_EDITOR) {
 						rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(32.0f);
 						rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(32.0f);
 						rect.right = (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(32.0f);
 						rect.bottom = (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(32.0f);
-						CHud::Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+						Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+					}
+					else if (Mode == CCam::MODE_ROCKET_RUN_AROUND) {
+						rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(32.0f * 0.7f);
+						rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(32.0f * 0.7f);
+						rect.right = (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(32.0f * 0.7f);
+						rect.bottom = (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(32.0f * 0.7f);
+
+						Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+					}
+					else if (Mode == CCam::MODE_ROCKET || Mode == CCam::MODE_SNIPER_RUN_AROUND) {
+						RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
+						RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDONE);
+						RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDONE);
+						RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+						RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
+						RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpRocketSightTex->raster);
+
+						CSprite::RenderOneXLUSprite(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 1.0f, SCREEN_SCALE_X(40.0f), SCREEN_SCALE_Y(40.0f), (100.0f * fMultBright), (200.0f * fMultBright), (100.0f * fMultBright), 255, 1.0f, 255);
+					}
+					else {
+						rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(210.0f);
+						rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(210.0f);
+						rect.right = SCREEN_WIDTH / 2;
+						rect.bottom = SCREEN_HEIGHT / 2;
+						Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+
+						rect.right = (SCREEN_WIDTH / 2);
+						rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(210.0f);
+						rect.left = SCREEN_SCALE_X(210.0f) + (SCREEN_WIDTH / 2);
+						rect.bottom = SCREEN_HEIGHT / 2;
+						Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+
+						rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(210.0f);
+						rect.bottom = (SCREEN_HEIGHT / 2);
+						rect.right = (SCREEN_WIDTH / 2);
+						rect.top = SCREEN_SCALE_Y(210.0f) + (SCREEN_HEIGHT / 2);
+						Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+
+						rect.right = (SCREEN_WIDTH / 2);
+						rect.bottom = (SCREEN_HEIGHT / 2);
+						rect.left = SCREEN_SCALE_X(210.0f) + (SCREEN_WIDTH / 2);
+						rect.top = SCREEN_SCALE_Y(210.0f) + (SCREEN_HEIGHT / 2);
+						Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
 					}
 				}
 				RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void *)rwFILTERLINEAR);
@@ -261,7 +262,7 @@ void CHud::Draw()
 				RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDINVSRCALPHA);
 			}
 			else {
-				CHud::SpriteBrightness = 0;
+				SpriteBrightness = 0;
 			}
 
 			/*
@@ -346,7 +347,7 @@ void CHud::Draw()
 
 			if (!CDarkel::FrenzyOnGoing()) {
 				if (WeaponType) {
-					if (WeaponType != 1) {
+					if (WeaponType != WEAPONTYPE_BASEBALLBAT) {
 						CFont::SetColor(CRGBA(0, 0, 0, 255));
 						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(66.0f), SCREEN_SCALE_Y(73.0f), sPrint);
 					}
@@ -356,7 +357,7 @@ void CHud::Draw()
 			/*
 				DrawWeaponIcon
 			*/
-			CHud::Sprites[WeaponType].Draw(
+			Sprites[WeaponType].Draw(
 				CRect(SCREEN_SCALE_FROM_RIGHT(99.0f), SCREEN_SCALE_Y(27.0f), SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(91.0f)),
 				CRGBA(255, 255, 255, 255),
 				0.015f,
@@ -380,8 +381,8 @@ void CHud::Draw()
 			CFont::SetPropOff();
 			CFont::SetFontStyle(FONT_HEADING);
 
-			if (CHud::m_ItemToFlash == ITEM_HEALTH && CTimer::GetFrameCounter() & 8
-				|| CHud::m_ItemToFlash != ITEM_HEALTH
+			if (m_ItemToFlash == ITEM_HEALTH && CTimer::GetFrameCounter() & 8
+				|| m_ItemToFlash != ITEM_HEALTH
 				|| CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_fHealth < 10
 				&& CTimer::GetFrameCounter() & 8) {
 				if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_fHealth >= 10
@@ -410,7 +411,7 @@ void CHud::Draw()
 			/*
 				DrawArmour
 			*/
-			if (CHud::m_ItemToFlash == ITEM_ARMOUR && CTimer::GetFrameCounter() & 8 || CHud::m_ItemToFlash != ITEM_ARMOUR) {
+			if (m_ItemToFlash == ITEM_ARMOUR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_ARMOUR) {
 				CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
 				if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_fArmour > 1.0f) {
 					AsciiToUnicode("[", sPrintIcon);
@@ -462,71 +463,71 @@ void CHud::Draw()
 			/*
 				DrawZoneName
 			*/
-			if (CHud::m_ZoneName) {
+			if (m_pZoneName) {
 				float fZoneAlpha = 0.0f;
 
-				if (CHud::m_ZoneName != CHud::m_LastZoneName) {
-					switch (CHud::m_ZoneState) {
+				if (m_pZoneName != m_pLastZoneName) {
+					switch (m_ZoneState) {
 					case 0:
-						CHud::m_ZoneState = 2;
-						CHud::m_ZoneToPrint = CHud::m_ZoneName;
-						CHud::m_ZoneNameTimer = 0;
-						CHud::m_ZoneFadeTimer = 0;
+						m_ZoneState = 2;
+						m_ZoneToPrint = m_pZoneName;
+						m_ZoneNameTimer = 0;
+						m_ZoneFadeTimer = 0;
 						break;
 					case 1:
 					case 2:
 					case 3:
 					case 4:
-						CHud::m_ZoneNameTimer = 0;
-						CHud::m_ZoneState = 4;
+						m_ZoneNameTimer = 0;
+						m_ZoneState = 4;
 						break;
 					default:
 						break;
 					}
-					CHud::m_LastZoneName = CHud::m_ZoneName;
+					m_pLastZoneName = m_pZoneName;
 				}
 
-				if (CHud::m_ZoneState) {
-					switch (CHud::m_ZoneState) {
+				if (m_ZoneState) {
+					switch (m_ZoneState) {
 					case 1:
-						if (CHud::m_ZoneNameTimer > 10000) {
-							CHud::m_ZoneFadeTimer = 1000;
-							CHud::m_ZoneState = 3;
+						if (m_ZoneNameTimer > 10000) {
+							m_ZoneFadeTimer = 1000;
+							m_ZoneState = 3;
 						}
 						fZoneAlpha = 255.0f;
 						break;
 					case 2:
-						CHud::m_ZoneFadeTimer += (CTimer::GetTimeStep() * 0.02f * 1000.0f);
-						if (CHud::m_ZoneFadeTimer > 1000) {
-							CHud::m_ZoneState = 1;
-							CHud::m_ZoneFadeTimer = 1000;
+						m_ZoneFadeTimer += (CTimer::GetTimeStep() * 0.02f * 1000.0f);
+						if (m_ZoneFadeTimer > 1000) {
+							m_ZoneState = 1;
+							m_ZoneFadeTimer = 1000;
 						}
-						fZoneAlpha = CHud::m_ZoneFadeTimer * 0.001f * 255.0f;
+						fZoneAlpha = m_ZoneFadeTimer * 0.001f * 255.0f;
 						break;
 					case 3:
-						CHud::m_ZoneFadeTimer += (CTimer::GetTimeStep() * 0.02f * -1000.0f);
-						if (CHud::m_ZoneFadeTimer < 0) {
-							CHud::m_ZoneState = 0;
-							CHud::m_ZoneFadeTimer = 0;
+						m_ZoneFadeTimer += (CTimer::GetTimeStep() * 0.02f * -1000.0f);
+						if (m_ZoneFadeTimer < 0) {
+							m_ZoneState = 0;
+							m_ZoneFadeTimer = 0;
 						}
-						fZoneAlpha = CHud::m_ZoneFadeTimer * 0.001f * 255.0f;
+						fZoneAlpha = m_ZoneFadeTimer * 0.001f * 255.0f;
 						break;
 					case 4:
-						CHud::m_ZoneFadeTimer += (CTimer::GetTimeStep() * 0.02f * -1000.0f);
-						if (CHud::m_ZoneFadeTimer < 0) {
-							CHud::m_ZoneFadeTimer = 0;
-							CHud::m_ZoneToPrint = CHud::m_LastZoneName;
-							CHud::m_ZoneNameTimer = 0;
-							CHud::m_ZoneState = 2;
+						m_ZoneFadeTimer += (CTimer::GetTimeStep() * 0.02f * -1000.0f);
+						if (m_ZoneFadeTimer < 0) {
+							m_ZoneFadeTimer = 0;
+							m_ZoneToPrint = m_pLastZoneName;
+							m_ZoneNameTimer = 0;
+							m_ZoneState = 2;
 						}
-						fZoneAlpha = CHud::m_ZoneFadeTimer * 0.001f * 255.0f;
+						fZoneAlpha = m_ZoneFadeTimer * 0.001f * 255.0f;
 						break;
 					default:
 						break;
 
 					}
-					if (!CHud::m_Message[0]) {
-						CHud::m_ZoneNameTimer += (CTimer::GetTimeStep() * 0.02f * 1000.0f);
+					if (!m_Message[0]) {
+						m_ZoneNameTimer += (CTimer::GetTimeStep() * 0.02f * 1000.0f);
 						CFont::SetJustifyOff();
 						CFont::SetPropOn();
 						CFont::SetBackgroundOff();
@@ -541,88 +542,88 @@ void CHud::Draw()
 						CFont::SetBackGroundOnlyTextOff();
 						CFont::SetFontStyle(FONT_BANK);
 						CFont::SetColor(CRGBA(0, 0, 0, fZoneAlpha));
-						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f - 1.0f), SCREEN_SCALE_FROM_BOTTOM(30.0f - 1.0f), CHud::m_ZoneToPrint);
+						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f - 1.0f), SCREEN_SCALE_FROM_BOTTOM(30.0f - 1.0f), m_ZoneToPrint);
 
 						CFont::SetColor(CRGBA(152, 154, 82, fZoneAlpha));
-						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(30.0f), CHud::m_ZoneToPrint);
+						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(30.0f), m_ZoneToPrint);
 					}
 				}
 			}
 			else {
-				CHud::m_LastZoneName = 0;
-				CHud::m_ZoneState = 0;
-				CHud::m_ZoneFadeTimer = 0;
-				CHud::m_ZoneNameTimer = 0;
+				m_pLastZoneName = 0;
+				m_ZoneState = 0;
+				m_ZoneFadeTimer = 0;
+				m_ZoneNameTimer = 0;
 			}
 
 			/*
 				DrawVehicleName
 			*/
-			if (CHud::m_VehicleName) {
+			if (m_VehicleName) {
 				float fVehicleAlpha = 0.0f;
 
-				if (CHud::m_VehicleName != CHud::m_LastVehicleName) {
-					switch (CHud::m_VehicleState) {
+				if (m_VehicleName != m_pLastVehicleName) {
+					switch (m_VehicleState) {
 					case 0:
-						CHud::m_VehicleState = 2;
-						CHud::m_VehicleNameToPrint = CHud::m_VehicleName;
-						CHud::m_VehicleNameTimer = 0;
-						CHud::m_VehicleFadeTimer = 0;
+						m_VehicleState = 2;
+						m_pVehicleNameToPrint = m_VehicleName;
+						m_VehicleNameTimer = 0;
+						m_VehicleFadeTimer = 0;
 						break;
 					case 1:
 					case 2:
 					case 3:
 					case 4:
-						CHud::m_VehicleNameTimer = 0;
-						CHud::m_VehicleState = 4;
+						m_VehicleNameTimer = 0;
+						m_VehicleState = 4;
 						break;
 					default:
 						break;
 					}
-					CHud::m_LastVehicleName = CHud::m_VehicleName;
+					m_pLastVehicleName = m_VehicleName;
 				}
 
-				if (CHud::m_VehicleState) {
-					switch (CHud::m_VehicleState) {
+				if (m_VehicleState) {
+					switch (m_VehicleState) {
 					case 1:
-						if (CHud::m_VehicleNameTimer > 10000) {
-							CHud::m_VehicleFadeTimer = 1000;
-							CHud::m_VehicleState = 3;
+						if (m_VehicleNameTimer > 10000) {
+							m_VehicleFadeTimer = 1000;
+							m_VehicleState = 3;
 						}
 						fVehicleAlpha = 255.0f;
 						break;
 					case 2:
-						CHud::m_VehicleFadeTimer += (CTimer::GetTimeStep() * 0.02f * 1000.0f);
-						if (CHud::m_VehicleFadeTimer > 1000) {
-							CHud::m_VehicleState = 1;
-							CHud::m_VehicleFadeTimer = 1000;
+						m_VehicleFadeTimer += (CTimer::GetTimeStep() * 0.02f * 1000.0f);
+						if (m_VehicleFadeTimer > 1000) {
+							m_VehicleState = 1;
+							m_VehicleFadeTimer = 1000;
 						}
-						fVehicleAlpha = CHud::m_VehicleFadeTimer * 0.001f * 255.0f;
+						fVehicleAlpha = m_VehicleFadeTimer * 0.001f * 255.0f;
 						break;
 					case 3:
-						CHud::m_VehicleFadeTimer += (CTimer::GetTimeStep() * 0.02f * -1000.0f);
-						if (CHud::m_VehicleFadeTimer < 0) {
-							CHud::m_VehicleState = 0;
-							CHud::m_VehicleFadeTimer = 0;
+						m_VehicleFadeTimer += (CTimer::GetTimeStep() * 0.02f * -1000.0f);
+						if (m_VehicleFadeTimer < 0) {
+							m_VehicleState = 0;
+							m_VehicleFadeTimer = 0;
 						}
-						fVehicleAlpha = CHud::m_VehicleFadeTimer * 0.001f * 255.0f;
+						fVehicleAlpha = m_VehicleFadeTimer * 0.001f * 255.0f;
 						break;
 					case 4:
-						CHud::m_VehicleFadeTimer += (CTimer::GetTimeStep() * 0.02f * -1000.0f);
-						if (CHud::m_VehicleFadeTimer < 0) {
-							CHud::m_VehicleFadeTimer = 0;
-							CHud::m_VehicleNameToPrint = CHud::m_LastVehicleName;
-							CHud::m_VehicleNameTimer = 0;
-							CHud::m_VehicleState = 2;
+						m_VehicleFadeTimer += (CTimer::GetTimeStep() * 0.02f * -1000.0f);
+						if (m_VehicleFadeTimer < 0) {
+							m_VehicleFadeTimer = 0;
+							m_pVehicleNameToPrint = m_pLastVehicleName;
+							m_VehicleNameTimer = 0;
+							m_VehicleState = 2;
 						}
-						fVehicleAlpha = CHud::m_VehicleFadeTimer * 0.001f * 255.0f;
+						fVehicleAlpha = m_VehicleFadeTimer * 0.001f * 255.0f;
 						break;
 					default:
 						break;
 					}
 
-					if (!CHud::m_Message[0]) {
-						CHud::m_VehicleNameTimer += (CTimer::GetTimeStep() * 0.02f * 1000.0f);
+					if (!m_Message[0]) {
+						m_VehicleNameTimer += (CTimer::GetTimeStep() * 0.02f * 1000.0f);
 						CFont::SetJustifyOff();
 						CFont::SetPropOn();
 						CFont::SetBackgroundOff();
@@ -637,18 +638,18 @@ void CHud::Draw()
 						CFont::SetBackGroundOnlyTextOff();
 						CFont::SetFontStyle(FONT_BANK);
 						CFont::SetColor(CRGBA(0, 0, 0, fVehicleAlpha));
-						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f - 1.0f), SCREEN_SCALE_FROM_BOTTOM(55.0f - 1.0f), CHud::m_VehicleNameToPrint);
+						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f - 1.0f), SCREEN_SCALE_FROM_BOTTOM(55.0f - 1.0f), m_pVehicleNameToPrint);
 
 						CFont::SetColor(CRGBA(194, 165, 120, fVehicleAlpha));
-						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(55.0f), CHud::m_VehicleNameToPrint);
+						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(55.0f), m_pVehicleNameToPrint);
 					}
 				}
 			}
 			else {
-				CHud::m_LastVehicleName = 0;
-				CHud::m_VehicleState = 0;
-				CHud::m_VehicleFadeTimer = 0;
-				CHud::m_VehicleNameTimer = 0;
+				m_pLastVehicleName = 0;
+				m_VehicleState = 0;
+				m_VehicleFadeTimer = 0;
+				m_VehicleNameTimer = 0;
 			}
 
 			/*
@@ -788,7 +789,7 @@ void CHud::Draw()
 					}
 				}
 
-				CHud::Sprites[HUD_PAGER].Draw(CRect(SCREEN_SCALE_X(26.0f - PagerXOffset), SCREEN_SCALE_Y(27.0f), SCREEN_SCALE_X(160.0 + 26.0f - PagerXOffset), SCREEN_SCALE_Y(80.0f + 27.0f)), CRGBA(255, 255, 255, 255));
+				Sprites[HUD_PAGER].Draw(CRect(SCREEN_SCALE_X(26.0f - PagerXOffset), SCREEN_SCALE_Y(27.0f), SCREEN_SCALE_X(160.0 + 26.0f - PagerXOffset), SCREEN_SCALE_Y(80.0f + 27.0f)), CRGBA(255, 255, 255, 255));
 
 				CFont::SetBackgroundOff();
 				CFont::SetScale(SCREEN_SCALE_X(0.84f), SCREEN_SCALE_Y(1.0f));
@@ -799,19 +800,19 @@ void CHud::Draw()
 				CFont::SetJustifyOff();
 				CFont::SetPropOff();
 				CFont::SetFontStyle(FONT_PAGER);
-				CFont::PrintString(SCREEN_SCALE_X(52.0f - PagerXOffset), SCREEN_SCALE_Y(54.0f), CHud::m_PagerMessage);
+				CFont::PrintString(SCREEN_SCALE_X(52.0f - PagerXOffset), SCREEN_SCALE_Y(54.0f), m_PagerMessage);
 			}
 
 			/*
 				DrawRadar
 			*/
-			if (CHud::m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || CHud::m_ItemToFlash != ITEM_RADAR) {
+			if (m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_RADAR) {
 				CRadar::DrawMap();
 				CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
 				// FIX: game doesn't scale RADAR_LEFT here
 				rect.Translate(SCREEN_SCALE_X(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
 				rect.Grow(4.0f);
-				CHud::Sprites[HUD_RADARDISC].Draw(rect, CRGBA(0, 0, 0, 255));
+				Sprites[HUD_RADARDISC].Draw(rect, CRGBA(0, 0, 0, 255));
 				CRadar::DrawBlips();
 			}
 		}
@@ -819,7 +820,7 @@ void CHud::Draw()
 		/*
 			Draw3dMarkers
 		*/
-		if (CHud::m_Wants_To_Draw_3dMarkers && !TheCamera.m_WideScreenOn && !CHud::m_BigMessage[0][0] && !CHud::m_BigMessage[2][0]) {
+		if (m_Wants_To_Draw_3dMarkers && !TheCamera.m_WideScreenOn && !m_BigMessage[0][0] && !m_BigMessage[2][0]) {
 			CRadar::Draw3dMarkers();
 		}
 
@@ -902,7 +903,7 @@ void CHud::Draw()
 			/*
 				DrawSubtitles
 			*/
-			if (CHud::m_Message[0] && !CHud::m_BigMessage[2][0] && (FrontEndMenuManager.m_PrefsShowSubtitles == 1 || !TheCamera.m_WideScreenOn)) {
+			if (m_Message[0] && !m_BigMessage[2][0] && (FrontEndMenuManager.m_PrefsShowSubtitles == 1 || !TheCamera.m_WideScreenOn)) {
 				CFont::SetJustifyOff();
 				CFont::SetBackgroundOff();
 				CFont::SetBackgroundColor(CRGBA(0, 0, 0, 128));
@@ -919,7 +920,7 @@ void CHud::Draw()
 				CFont::SetDropShadowPosition(1);
 				CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 				CFont::SetColor(CRGBA(235, 235, 235, 255));
-				CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_SCALE_FROM_BOTTOM(64.0f), CHud::m_Message);
+				CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_SCALE_FROM_BOTTOM(64.0f), m_Message);
 				CFont::SetDropShadowPosition(0);
 			}
 
@@ -1255,7 +1256,38 @@ WRAPPER void CHud::GetRidOfAllHudMessages(void) { EAXJMP(0x504F90); }
 #else
 void CHud::GetRidOfAllHudMessages()
 {
-	ReInitialise();
+	m_ZoneState = 0;
+	m_pLastZoneName = 0;
+	m_ZoneNameTimer = 0;
+	m_pZoneName = 0;
+
+	for (int i = 0; i < 256; i++) {
+		m_HelpMessage[i] = 0;
+		m_LastHelpMessage[i] = 0;
+		m_HelpMessageToPrint[i] = 0;
+	}
+
+	m_HelpMessageTimer = 0;
+	m_HelpMessageFadeTimer = 0;
+	m_HelpMessageState = 0;
+	m_HelpMessageQuick = 0;
+	m_HelpMessageDisplayTime = 1.0f;
+	m_VehicleName = 0;
+	m_pLastVehicleName = 0;
+	m_pVehicleNameToPrint = 0;
+	m_VehicleNameTimer = 0;
+	m_VehicleFadeTimer = 0;
+	m_VehicleState = 0;
+
+	for (int i = 0; i < 256; i++)
+		m_Message[i] = 0;
+
+	for (int i = 0; i < 6; i++) {
+		BigMessageInUse[i] = 0.0f;
+
+		for (int j = 0; j < 128; j++)
+			m_BigMessage[i][j] = 0;
+	}
 }
 #endif
 
@@ -1286,41 +1318,16 @@ WRAPPER void CHud::ReInitialise(void) { EAXJMP(0x504CC0); }
 #else
 void CHud::ReInitialise() {
 	m_Wants_To_Draw_Hud = true;
-	m_ZoneState = 0;
 	m_Wants_To_Draw_3dMarkers = true;
-	m_LastZoneName = 0;
-	m_ZoneNameTimer = 0;
-	m_ZoneName = 0;
 
-	for (int i = 0; i < 256; i++) {
-		m_HelpMessage[i] = 0;
-		m_LastHelpMessage[i] = 0;
-		m_HelpMessageToPrint[i] = 0;
-		m_Message[i] = 0;
-
-		if (i <= 6)
-			BigMessageInUse[i] = 0.0f;
-
-		if (i <= 128)
-			m_BigMessage[i][0] = 0;
-	}
-
-	m_HelpMessageTimer = 0;
-	m_HelpMessageFadeTimer = 0;
-	m_HelpMessageState = 0;
-	m_HelpMessageQuick = 0;
-	m_VehicleName = 0;
-	m_LastVehicleName = 0;
-	m_VehicleNameToPrint = 0;
-	m_VehicleNameTimer = 0;
-	m_VehicleFadeTimer = 0;
-	m_VehicleState = 0;
-	m_HelpMessageDisplayTime = 1.0f;
+	GetRidOfAllHudMessages();
 
 	CounterOnLastFrame = 0;
 	m_ItemToFlash = ITEM_NONE;
 	OddJob2Timer = 0;
 	OddJob2OffTimer = 0.0f;
+	OddJob2On = 0;
+	OddJob2XOffset = 0.0f;
 	CounterFlashTimer = 0;
 	TimerOnLastFrame = 0;
 	TimerFlashTimer = 0;
@@ -1328,28 +1335,40 @@ void CHud::ReInitialise() {
 	PagerOn = 0;
 	PagerTimer = 0;
 	PagerSoundPlayed = 0;
-	OddJob2On = 0;
 	PagerXOffset = 150.0f;
-	OddJob2XOffset = 0.0f;
 }
 #endif
 
+wchar LastBigMessage[6][128];
 #if 0
 WRAPPER void CHud::SetBigMessage(wchar *message, int16 style) { EAXJMP(0x50A250); }
 #else
 void CHud::SetBigMessage(wchar *message, int16 style)
 {
-	for (int i = 0; i < 128; i++) {
-		if (!message[i])
-			break;
+	int i;
 
-		if (message[i] != m_LastBigMessage[i]) {
-			OddJob2On = 0;
-			OddJob2OffTimer = 0.0f;
+	if (style == 5) {
+		for (i = 0; i < 128; i++) {
+			if (message[i] == 0)
+				break;
+
+			if (message[i] != LastBigMessage[5][i]) {
+				OddJob2On = 0;
+				OddJob2OffTimer = 0.0f;
+			}
+
+			m_BigMessage[5][i] = message[i];
+			LastBigMessage[5][i] = message[i];
 		}
-
-		m_BigMessage[style][i] = message[i];
-	};
+	} else {
+		for (i = 0; i < 128; i++) {
+			if (message[i] == 0)
+				break;
+			m_BigMessage[style][i] = message[i];
+		}
+	}
+	LastBigMessage[style][i] = 0;
+	m_BigMessage[style][i] = 0;
 }
 #endif
 
@@ -1364,7 +1383,7 @@ void CHud::SetHelpMessage(wchar *message, bool quick)
 
 		for (int i = 0; i < 256; i++) {
 			m_LastHelpMessage[i] = message[i];
-		};
+		}
 
 		m_HelpMessageState = 0;
 		m_HelpMessageQuick = quick;
@@ -1377,14 +1396,14 @@ WRAPPER void CHud::SetMessage(wchar *message) { EAXJMP(0x50A210); }
 #else
 void CHud::SetMessage(wchar *message)
 {
-	int i = 0;
-	for (i; i < 256; i++) {
-		if (!message[i])
+	int i;
+	for (i = 0; i < 256; i++) {
+		if (message[i] == 0)
 			break;
 
 		m_Message[i] = message[i];
-	};
-	m_Message[i] = message[i];
+	}
+	m_Message[i] = 0;
 }
 #endif
 
@@ -1393,14 +1412,13 @@ WRAPPER void CHud::SetPagerMessage(wchar *message) { EAXJMP(0x50A320); }
 #else
 void CHud::SetPagerMessage(wchar *message)
 {
-	int i = 0;
-	for (i; i < 256; i++) {
-		if (!message[i])
+	int i;
+	for (i = 0; i < 256; i++) {
+		if (message[i] == 0)
 			break;
 
 		m_PagerMessage[i] = message[i];
-	};
-
+	}
 	m_PagerMessage[i] = 0;
 }
 #endif
@@ -1419,7 +1437,7 @@ WRAPPER void CHud::SetZoneName(wchar *name) { EAXJMP(0x5051D0); }
 #else
 void CHud::SetZoneName(wchar *name)
 {
-	m_ZoneName = name;
+	m_pZoneName = name;
 }
 #endif
 

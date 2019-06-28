@@ -10,7 +10,7 @@ enum StreamFlags
 {
 	STREAMFLAGS_DONT_REMOVE = 0x01,
 	STREAMFLAGS_SCRIPTOWNED = 0x02,
-	STREAMFLAGS_DEPENDENCY  = 0x04,
+	STREAMFLAGS_DEPENDENCY  = 0x04,	// Is this right?
 	STREAMFLAGS_PRIORITY    = 0x08,
 	STREAMFLAGS_NOFADE      = 0x10,
 
@@ -99,6 +99,7 @@ public:
 	static int32 &ms_currentPedGrp;
 	static int32 ms_lastCullZone;
 	static uint16 &ms_loadedGangs;
+	static uint16 &ms_loadedGangCars;
 	static int32 ms_currentPedLoading;
 	static int32 *ms_imageOffsets;	//[NUMCDIMAGES]
 	static int32 &ms_lastImageRead;
@@ -107,10 +108,12 @@ public:
 
 	static void Init(void);
 	static void Shutdown(void);
+	static void Update(void);
 	static void LoadCdDirectory(void);
 	static void LoadCdDirectory(const char *dirname, int32 n);
 	static bool ConvertBufferToObject(int8 *buf, int32 streamId);
 	static bool FinishLoadingLargeFile(int8 *buf, int32 streamId);
+	static bool HasModelLoaded(int32 id) { return ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED; }
 	static void RequestModel(int32 model, int32 flags);
 	static void ReRequestModel(int32 model) { RequestModel(model, ms_aInfoForModel[model].m_flags); }
 	static void RequestTxd(int32 txd, int32 flags) { RequestModel(txd + STREAM_OFFSET_TXD, flags); }
@@ -120,6 +123,8 @@ public:
 	static void RequestIslands(eLevelName level);
 	static void RequestSpecialModel(int32 modelId, const char *modelName, int32 flags);
 	static void RequestSpecialChar(int32 charId, const char *modelName, int32 flags);
+	static bool HasSpecialCharLoaded(int32 id);
+	static void SetMissionDoesntRequireSpecialChar(int32 id);
 	static void DecrementRef(int32 id);
 	static void RemoveModel(int32 id);
 	static void RemoveTxd(int32 id) { RemoveModel(id + STREAM_OFFSET_TXD); }
@@ -141,6 +146,11 @@ public:
 	static void SetModelIsDeletable(int32 id);
 	static void SetModelTxdIsDeletable(int32 id);
 	static void SetMissionDoesntRequireModel(int32 id);
+	static void LoadInitialPeds(void);
+	static void LoadInitialVehicles(void);
+	static void StreamVehiclesAndPeds(void);
+	static void StreamZoneModels(const CVector &pos);
+	static void RemoveCurrentZonesModels(void);
 
 	static int32 GetCdImageOffset(int32 lastPosn);
 	static int32 GetNextFileOnCd(int32 position, bool priority);
@@ -169,10 +179,8 @@ public:
 	static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, int32 mem);
 	static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, int32 mem);
 
-	static void LoadInitialPeds(void);
-	static void LoadInitialVehicles(void);
-
 	static void LoadScene(const CVector &pos);
 
-	static bool IsModelLoaded(int32 id) { return ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED; }
+	static void MemoryCardSave(uint8 *buffer, uint32 *length);
+	static void MemoryCardLoad(uint8 *buffer, uint32 length);
 };

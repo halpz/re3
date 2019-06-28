@@ -133,7 +133,7 @@ void CTimer::Update(void)
 
 	ms_fTimeStepNonClipped = ms_fTimeStep;
 	
-	if ( CRecordDataForGame::RecordingState != _TODOCONST(2) )
+	if ( CRecordDataForGame::RecordingState != RECORDSTATE_2 )
 	{
 		ms_fTimeStep = min(3.0f, ms_fTimeStep);
 
@@ -141,7 +141,7 @@ void CTimer::Update(void)
 			m_snTimeInMilliseconds = m_snPreviousTimeInMilliseconds + 60;
 	}
   
-	if ( CRecordDataForChase::Status == _TODOCONST(1) )
+	if ( CRecordDataForChase::Status == RECORDSTATE_1 )
 	{
 		ms_fTimeStep = 1.0f;
 		m_snTimeInMilliseconds = m_snPreviousTimeInMilliseconds + 16;
