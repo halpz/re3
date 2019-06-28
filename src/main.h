@@ -13,6 +13,9 @@ extern wchar *gUString;
 
 class CSprite2d;
 
+void InitialiseGame(void);
 void LoadingScreen(const char *str1, const char *str2, const char *splashscreen);
+void LoadingIslandScreen(const char *levelName);
 CSprite2d *LoadSplash(const char *name);
+char *GetLevelSplashScreen(int level);
 char *GetRandomSplashScreen(void);

@@ -165,6 +165,8 @@ void CReplay::Init(void)
 	bDoLoadSceneWhenDone = false;
 }
 
+WRAPPER void CReplay::EmptyReplayBuffer(void) { EAXJMP(0x595BD0); }
+
 void CReplay::DisableReplays(void)
 {
 	bReplayEnabled = false;

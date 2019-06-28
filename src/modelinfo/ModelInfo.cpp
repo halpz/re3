@@ -175,6 +175,23 @@ CModelInfo::IsBoatModel(int32 id)
 		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_BOAT;
 }
 
+void
+CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
+{
+	int i;
+	CBaseModelInfo *mi;
+	CColModel *colmodel;
+
+	for(i = 0; i < MODELINFOSIZE; i++){
+		mi = GetModelInfo(i);
+		if(mi){
+			colmodel = mi->GetColModel();
+			if(colmodel && colmodel->level != LEVEL_NONE && colmodel->level != level)
+				colmodel->RemoveCollisionVolumes();
+		}
+	}
+}
+
 STARTPATCHES
 	InjectHook(0x50B310, CModelInfo::Initialise, PATCH_JUMP);
 	InjectHook(0x50B5B0, CModelInfo::ShutDown, PATCH_JUMP);
@@ -184,4 +201,5 @@ STARTPATCHES
 	InjectHook(0x50BAD0, CModelInfo::AddPedModel, PATCH_JUMP);
 	InjectHook(0x50BA60, CModelInfo::AddVehicleModel, PATCH_JUMP);
 	InjectHook(0x50B860, (CBaseModelInfo *(*)(const char*, int*))CModelInfo::GetModelInfo, PATCH_JUMP);
+	InjectHook(0x50BBC0, CModelInfo::RemoveColModelsFromOtherLevels, PATCH_JUMP);
 ENDPATCHES

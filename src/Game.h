@@ -11,7 +11,7 @@ enum eLevelName
 class CGame
 {
 public:
-	static int &currLevel;
+	static eLevelName &currLevel;
 	static bool &bDemoMode;
 	static bool &nastyGame;
 	static bool &frenchGame;
@@ -20,13 +20,18 @@ public:
 	static bool &playingIntro;
 	static char *aDatFile;	//[32];
 
-	static void Process(void);
+	static void Initialise(const char *datFile);
 	static bool InitialiseOnceBeforeRW(void);
 	static bool InitialiseRenderWare(void);
+	static bool InitialiseOnceAfterRW(void);
+	static void InitialiseWhenRestarting(void);
+	static void ShutDown(void);
 	static void ShutdownRenderWare(void);
 	static void FinalShutdown(void);
-	static void ShutDown(void);
 	static void ShutDownForRestart(void);
-	static void InitialiseWhenRestarting(void);
-	static bool InitialiseOnceAfterRW(void);
+	static void Process(void);
+
+	// NB: these do something on PS2
+	static void TidyUpMemory(bool, bool) {}
+	static void DrasticTidyUpMemory(void) {}
 };

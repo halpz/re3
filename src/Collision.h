@@ -118,9 +118,11 @@ public:
 	static CLinkList<CColModel*> &ms_colModelCache;
 
 	static void Init(void);
+	static void Shutdown(void);
 	static void Update(void);
 	static void LoadCollisionWhenINeedIt(bool changeLevel);
 	static void SortOutCollisionAfterLoad(void);
+	static void LoadCollisionScreen(eLevelName level);
 	static void DrawColModel(const CMatrix &mat, const CColModel &colModel);
 	static void DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel, int32 id);
 

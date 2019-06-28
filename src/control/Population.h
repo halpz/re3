@@ -14,4 +14,5 @@ public:
 	static bool &ms_bGivePedsWeapons;
 
 	static void UpdatePedCount(uint32, bool);
+	static void DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool);
 };

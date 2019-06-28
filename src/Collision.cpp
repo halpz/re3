@@ -1,7 +1,20 @@
 #include "common.h"
 #include "patcher.h"
+#include "main.h"
+#include "Lists.h"
 #include "Game.h"
+#include "Zones.h"
 #include "General.h"
+#include "CullZones.h"
+#include "World.h"
+#include "Entity.h"
+#include "Train.h"
+#include "Streaming.h"
+#include "Pad.h"
+#include "DMAudio.h"
+#include "Population.h"
+#include "FileLoader.h"
+#include "Replay.h"
 #include "RenderBuffer.h"
 #include "SurfaceTable.h"
 #include "Collision.h"
@@ -19,8 +32,6 @@ enum Direction
 eLevelName &CCollision::ms_collisionInMemory = *(eLevelName*)0x8F6250;
 CLinkList<CColModel*> &CCollision::ms_colModelCache = *(CLinkList<CColModel*>*)0x95CB58;
 
-#if 0
-
 void
 CCollision::Init(void)
 {
@@ -29,71 +40,201 @@ CCollision::Init(void)
 }
 
 void
+CCollision::Shutdown(void)
+{
+	ms_colModelCache.Shutdown();
+}
+
+void
 CCollision::Update(void)
 {
-	CVector pos = FindPlayerCoors();
+	CVector playerCoors;
+	FindPlayerCoors(playerCoors);
 	eLevelName level = CTheZones::m_CurrLevel;
-	bool changeLevel = false;
+	bool forceLevelChange = false;
 
 	// hardcode a level if there are no zones
 	if(level == LEVEL_NONE){
 		if(CGame::currLevel == LEVEL_INDUSTRIAL &&
-		   pos.x < 400.0f){
+		   playerCoors.x < 400.0f){
 			level = LEVEL_COMMERCIAL;
-			changeLevel = true;
+			forceLevelChange = true;
 		}else if(CGame::currLevel == LEVEL_SUBURBAN &&
-		         pos.x > -450.0f && pos.y < -1400.0f){
+		         playerCoors.x > -450.0f && playerCoors.y < -1400.0f){
 			level = LEVEL_COMMERCIAL;
-			changeLevel = true;
+			forceLevelChange = true;
 		}else{
-			if(pos.x > 800.0f){
+			if(playerCoors.x > 800.0f){
 				level = LEVEL_INDUSTRIAL;
-				changeLevel = true;
-			}else if(pos.x < -800.0f){
+				forceLevelChange = true;
+			}else if(playerCoors.x < -800.0f){
 				level = LEVEL_SUBURBAN;
-				changeLevel = true;
+				forceLevelChange = true;
 			}
 		}
 	}
-	if(level != LEVEL_NONE && level != CGame::currLevel){
-		debug("changing level %d -> %d\n", CGame::currLevel, level);
+	if(level != LEVEL_NONE && level != CGame::currLevel)
 		CGame::currLevel = level;
-	}
 	if(ms_collisionInMemory != CGame::currLevel)
-		LoadCollisionWhenINeedIt(changeLevel);
+		LoadCollisionWhenINeedIt(forceLevelChange);
 	CStreaming::HaveAllBigBuildingsLoaded(CGame::currLevel);
 }
 
-void
-CCollision::LoadCollisionWhenINeedIt(bool changeLevel)
+eLevelName
+GetCollisionInSectorList(CPtrList &list)
 {
-	eLevelName level;
+	CPtrNode *node;
+	CEntity *e;
+	int level;
+
+	for(node = list.first; node; node = node->next){
+		e = (CEntity*)node->item;
+		level = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel()->level;
+		if(level != LEVEL_NONE)
+			return (eLevelName)level;
+	}
+	return LEVEL_NONE;
+}
+
+// Get a level this sector is in based on collision models
+eLevelName
+GetCollisionInSector(CSector &sect)
+{
+	int level;
+
+	level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_BUILDINGS]);
+	if(level == LEVEL_NONE)
+		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_BUILDINGS_OVERLAP]);
+	if(level == LEVEL_NONE)
+		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_OBJECTS]);
+	if(level == LEVEL_NONE)
+		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_OBJECTS_OVERLAP]);
+	if(level == LEVEL_NONE)
+		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_DUMMIES]);
+	if(level == LEVEL_NONE)
+		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_DUMMIES_OVERLAP]);
+	return (eLevelName)level;
+}
+
+void
+CCollision::LoadCollisionWhenINeedIt(bool forceChange)
+{
+	eLevelName level, l;
+	bool multipleLevels;
+	CVector playerCoors;
+	CVehicle *veh;
+	CEntryInfoNode *ei;
+	int sx, sy;
+	int xmin, xmax, ymin, ymax;
+	int x, y;
+
 	level = LEVEL_NONE;
-	if(!changeLevel){
-		//assert(0 && "unimplemented");
+
+	FindPlayerCoors(playerCoors);
+	sx = CWorld::GetSectorIndexX(playerCoors.x);
+	sy = CWorld::GetSectorIndexX(playerCoors.y);
+	multipleLevels = false;
+
+	veh = FindPlayerVehicle();
+	if(veh && veh->IsTrain()){
+		if(((CTrain*)veh)->m_doorState != TRAIN_DOOR_STATE2)
+			return ;
+	}else if(playerCoors.z < 4.0f && !CCullZones::DoINeedToLoadCollision())
+		return;
+
+	// Figure out whose level's collisions we're most likely to be interested in
+	if(!forceChange){
+		if(veh && veh->IsBoat()){
+			// on water we expect to be between levels
+			multipleLevels = true;
+		}else{
+			xmin = max(sx - 1, 0);
+			xmax = min(sx + 1, NUMSECTORS_X-1);
+			ymin = max(sy - 1, 0);
+			ymax = min(sy + 1, NUMSECTORS_Y-1);
+
+			for(x = xmin; x <= xmax; x++)
+				for(y = ymin; y <= ymax; y++){
+					l = GetCollisionInSector(*CWorld::GetSector(x, y));
+					if(l != LEVEL_NONE){
+						if(level == LEVEL_NONE)
+							level = l;
+						if(level != l)
+							multipleLevels = true;
+					}
+				}
+		}
+
+		if(multipleLevels && veh && veh->IsBoat())
+			for(ei = veh->m_entryInfoList.first; ei; ei = ei->next){
+				level = GetCollisionInSector(*ei->sector);
+				if(level != LEVEL_NONE)
+					break;
+			}
 	}
 
-	if(level != CGame::currLevel || changeLevel){
+	if(level == CGame::currLevel || forceChange){
 		CTimer::Stop();
+		DMAudio.SetEffectsFadeVol(0);
+		CPad::StopPadsShaking();
+		LoadCollisionScreen(CGame::currLevel);
+		DMAudio.Service();
+		CPopulation::DealWithZoneChange(ms_collisionInMemory, CGame::currLevel, false);
 		CStreaming::RemoveIslandsNotUsed(LEVEL_INDUSTRIAL);
 		CStreaming::RemoveIslandsNotUsed(LEVEL_COMMERCIAL);
 		CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
 		CStreaming::RemoveBigBuildings(LEVEL_INDUSTRIAL);
 		CStreaming::RemoveBigBuildings(LEVEL_COMMERCIAL);
 		CStreaming::RemoveBigBuildings(LEVEL_SUBURBAN);
+		CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+		CStreaming::RemoveUnusedModelsInLoadedList();
+		CGame::TidyUpMemory(true, true);
+		CFileLoader::LoadCollisionFromDatFile(CGame::currLevel);
 		ms_collisionInMemory = CGame::currLevel;
+		CReplay::EmptyReplayBuffer();
+		if(CGame::currLevel != LEVEL_NONE)
+			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
 		CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
 		CStreaming::RemoveUnusedBuildings(CGame::currLevel);
 		CStreaming::RequestBigBuildings(CGame::currLevel);
-		CStreaming::LoadAllRequestedModels();
+		CStreaming::LoadAllRequestedModels(true);
 		CStreaming::HaveAllBigBuildingsLoaded(CGame::currLevel);
+		CGame::TidyUpMemory(true, true);
 		CTimer::Update();
+		DMAudio.SetEffectsFadeVol(127);
 	}
 }
 
-#endif
+void
+CCollision::SortOutCollisionAfterLoad(void)
+{
+	if(ms_collisionInMemory == CGame::currLevel)
+		return;
 
-WRAPPER void CCollision::SortOutCollisionAfterLoad(void) { EAXJMP(0x40B900); }
+	CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+	if(CGame::currLevel != LEVEL_NONE){
+		CFileLoader::LoadCollisionFromDatFile(CGame::currLevel);
+		if(!CGame::playingIntro)
+			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
+	}
+	ms_collisionInMemory = CGame::currLevel;
+	CGame::TidyUpMemory(true, false);
+}
+
+void
+CCollision::LoadCollisionScreen(eLevelName level)
+{
+	static char *levelNames[4] = {
+		"",
+		"IND_ZON",
+		"COM_ZON",
+		"SUB_ZON"
+	};
+
+	// Why twice?
+	LoadingIslandScreen(levelNames[level]);
+	LoadingIslandScreen(levelNames[level]);
+}
 
 //
 // Test
@@ -1585,10 +1726,118 @@ CColModel::GetTrianglePoint(CVector &v, int i) const
 	v = vertices[i];
 }
 
-WRAPPER CColModel& CColModel::operator=(const CColModel& other) { EAXJMP(0x411710); }
+CColModel&
+CColModel::operator=(const CColModel &other)
+{
+	int i;
+	int numVerts;
+
+	assert(0);
+
+	boundingSphere = other.boundingSphere;
+	boundingBox = other.boundingBox;
+
+	// copy spheres
+	if(other.numSpheres){
+		if(numSpheres != other.numSpheres){
+			numSpheres = other.numSpheres;
+			if(spheres)
+				RwFree(spheres);
+			spheres = (CColSphere*)RwMalloc(numSpheres*sizeof(CColSphere));
+		}
+		for(i = 0; i < numSpheres; i++)
+			spheres[i] = other.spheres[i];
+	}else{
+		numSpheres = 0;
+		if(spheres)
+			RwFree(spheres);
+		spheres = nil;
+	}
+
+	// copy lines
+	if(other.numLines){
+		if(numLines != other.numLines){
+			numLines = other.numLines;
+			if(lines)
+				RwFree(lines);
+			lines = (CColLine*)RwMalloc(numLines*sizeof(CColLine));
+		}
+		for(i = 0; i < numLines; i++)
+			lines[i] = other.lines[i];
+	}else{
+		numLines = 0;
+		if(lines)
+			RwFree(lines);
+		lines = nil;
+	}
+
+	// copy boxes
+	if(other.numBoxes){
+		if(numBoxes != other.numBoxes){
+			numBoxes = other.numBoxes;
+			if(boxes)
+				RwFree(boxes);
+			boxes = (CColBox*)RwMalloc(numBoxes*sizeof(CColBox));
+		}
+		for(i = 0; i < numBoxes; i++)
+			boxes[i] = other.boxes[i];
+	}else{
+		numBoxes = 0;
+		if(boxes)
+			RwFree(boxes);
+		boxes = nil;
+	}
+
+	// copy mesh
+	if(other.numTriangles){
+		// copy vertices
+		numVerts = 0;
+		for(i = 0; i < other.numTriangles; i++){
+			if(other.triangles[i].a > numVerts)
+				other.triangles[i].a = numVerts;
+			if(other.triangles[i].b > numVerts)
+				other.triangles[i].b = numVerts;
+			if(other.triangles[i].c > numVerts)
+				other.triangles[i].c = numVerts;
+		}
+		numVerts++;
+		if(vertices)
+			RwFree(vertices);
+		if(numVerts){
+			vertices = (CVector*)RwMalloc(numVerts*sizeof(CVector));
+			for(i = 0; i < numVerts; i++)
+				vertices[i] = other.vertices[i];
+		}
+
+		// copy triangles
+		if(numTriangles != other.numTriangles){
+			numTriangles = other.numTriangles;
+			if(triangles)
+				RwFree(triangles);
+			triangles = (CColTriangle*)RwMalloc(numTriangles*sizeof(CColTriangle));
+		}
+		for(i = 0; i < numTriangles; i++)
+			triangles[i] = other.triangles[i];
+	}else{
+		numTriangles = 0;
+		if(triangles)
+			RwFree(triangles);
+		triangles = nil;
+		if(vertices)
+			RwFree(vertices);
+		vertices = nil;
+	}
+	return *this;
+}
 
 STARTPATCHES
 	InjectHook(0x4B9C30, (CMatrix& (*)(const CMatrix &src, CMatrix &dst))Invert, PATCH_JUMP);
+
+	InjectHook(0x40B380, CCollision::Init, PATCH_JUMP);
+	InjectHook(0x40B3A0, CCollision::Shutdown, PATCH_JUMP);
+	InjectHook(0x40B3B0, CCollision::Update, PATCH_JUMP);
+	InjectHook(0x40B5B0, CCollision::LoadCollisionWhenINeedIt, PATCH_JUMP);
+	InjectHook(0x40B900, CCollision::SortOutCollisionAfterLoad, PATCH_JUMP);
 
 	InjectHook(0x40BB70, CCollision::TestSphereBox, PATCH_JUMP);
 	InjectHook(0x40E130, CCollision::TestLineBox, PATCH_JUMP);
