@@ -1,6 +1,7 @@
 #pragma once
 
-void AsciiToUnicode(const char *cs, wchar *ws);
+void AsciiToUnicode(const char *src, wchar *dst);
+void TextCopy(wchar *dst, const wchar *src);
 
 struct CKeyEntry
 {
@@ -37,13 +38,15 @@ class CText
 {
 	CKeyArray keyArray;
 	CData data;
-	int8 unknown;
+	int8 encoding;
 public:
 	CText(void);
 	~CText(void);
 	void Load(void);
 	void Unload(void);
 	wchar *Get(const char *key);
+	wchar GetUpperCase(wchar c);
+	void UpperCase(wchar *s);
 };
 
 extern CText &TheText;

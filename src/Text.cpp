@@ -15,7 +15,7 @@ CText::CText(void)
 	keyArray.numEntries = 0;
 	data.chars = nil;
 	data.numChars = 0;
-	unknown = 101;	// What's this? version number?
+	encoding = 101;
 	memset(WideErrorString, 0, sizeof(WideErrorString));
 }
 
@@ -95,6 +95,25 @@ CText::Get(const char *key)
 {
 	return keyArray.Search(key);
 }
+
+wchar
+CText::GetUpperCase(wchar c)
+{
+	// TODO: do this depending on encoding
+	if(islower(c))
+		return toupper(c);
+	return c;
+}
+
+void
+CText::UpperCase(wchar *s)
+{
+	while(*s){
+		*s = GetUpperCase(*s);
+		s++;
+	}
+}
+
 
 void
 CKeyArray::Load(uint32 length, uint8 *data, int *offset)
@@ -186,9 +205,15 @@ CData::Unload(void)
 }
 
 void
-AsciiToUnicode(const char *cs, uint16 *ws)
+AsciiToUnicode(const char *src, uint16 *dst)
 {
-	while((*ws++ = *cs++) != '\0');
+	while((*dst++ = *src++) != '\0');
+}
+
+void
+TextCopy(wchar *dst, const wchar *src)
+{
+	while((*dst++ = *src++) != '\0');
 }
 
 STARTPATCHES

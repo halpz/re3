@@ -132,7 +132,7 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 
 	FindPlayerCoors(playerCoors);
 	sx = CWorld::GetSectorIndexX(playerCoors.x);
-	sy = CWorld::GetSectorIndexX(playerCoors.y);
+	sy = CWorld::GetSectorIndexY(playerCoors.y);
 	multipleLevels = false;
 
 	veh = FindPlayerVehicle();
