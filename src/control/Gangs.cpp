@@ -1,8 +1,16 @@
 #include "common.h"
 #include "patcher.h"
+#include "ModelIndices.h"
 #include "Gangs.h"
 
 CGangInfo(&CGangs::Gang)[NUM_GANGS] = *(CGangInfo(*)[9])*(uintptr*)0x6EDF78;
+
+CGangInfo::CGangInfo() :
+	m_nVehicleMI(MI_BUS),
+	m_nPedModelOverride(-1),
+	m_Weapon1(WEAPONTYPE_UNARMED),
+	m_Weapon2(WEAPONTYPE_UNARMED)
+{}
 
 void CGangs::Initialize(void)
 {

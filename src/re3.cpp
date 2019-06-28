@@ -126,7 +126,7 @@ spawnCar(int id)
 	CVector playerpos;
 	CStreaming::RequestModel(id, 0);
 	CStreaming::LoadAllRequestedModels(false);
-	if(CStreaming::IsModelLoaded(id)){
+	if(CStreaming::HasModelLoaded(id)){
 		FindPlayerCoors(playerpos);
 		int node = ThePaths.FindNodeClosestToCoors(playerpos, 0, 100.0f, false, false);
 		if(node < 0)

@@ -19,6 +19,11 @@
 #include "CullZones.h"
 #include "Radar.h"
 #include "Camera.h"
+#include "Record.h"
+#include "CarCtrl.h"
+#include "Population.h"
+#include "Gangs.h"
+#include "CutsceneMgr.h"
 #include "CdStream.h"
 #include "Streaming.h"
 
@@ -47,6 +52,7 @@ int32 &CStreaming::ms_currentPedGrp = *(int32*)0x8F2BBC;
 int32 CStreaming::ms_currentPedLoading;
 int32 CStreaming::ms_lastCullZone;
 uint16 &CStreaming::ms_loadedGangs = *(uint16*)0x95CC60;
+uint16 &CStreaming::ms_loadedGangCars = *(uint16*)0x95CC2E;
 int32 *CStreaming::ms_imageOffsets = (int32*)0x6E60A0;
 int32 &CStreaming::ms_lastImageRead = *(int32*)0x880E2C;
 int32 &CStreaming::ms_imageSize = *(int32*)0x8F1A34;
@@ -238,6 +244,53 @@ CStreaming::Shutdown(void)
 	ms_streamingBufferSize = 0;
 	if(ms_pExtraObjectsDir)
 		delete ms_pExtraObjectsDir;
+}
+
+void
+CStreaming::Update(void)
+{
+	CEntity *train;
+	CVector playerPos;
+	CStreamingInfo *si, *prev;
+	bool requestedSubway = false;
+
+	UpdateMemoryUsed();
+
+	if(ms_channelError != -1){
+		RetryLoadFile(ms_channelError);
+		return;
+	}
+
+	if(CTimer::GetIsPaused())
+		return;
+
+	train = FindPlayerTrain();
+	if(train && train->GetPosition().z < 0.0f){
+		RequestSubway();
+		requestedSubway = true;
+	}else if(!ms_disableStreaming)
+		AddModelsToRequestList(TheCamera.GetPosition());
+
+	DeleteFarAwayRwObjects(TheCamera.GetPosition());
+
+	if(!ms_disableStreaming &&
+	   !CCutsceneMgr::IsRunning() &&
+	   !requestedSubway &&
+	   !CGame::playingIntro &&
+	   ms_numModelsRequested < 5 &&
+	   !CRenderer::m_loadingPriority){
+		StreamVehiclesAndPeds();
+		FindPlayerCoors(playerPos);
+		StreamZoneModels(playerPos);
+	}
+
+	LoadRequestedModels();
+
+	for(si = ms_endRequestedList.m_prev; si != &ms_startRequestedList; si = prev){
+		prev = si->m_prev;
+		if((si->m_flags & (STREAMFLAGS_KEEP_IN_MEMORY|STREAMFLAGS_PRIORITY)) == 0)
+			RemoveModel(si - ms_aInfoForModel);
+	}
 }
 
 void
@@ -703,6 +756,18 @@ void
 CStreaming::RequestSpecialChar(int32 charId, const char *modelName, int32 flags)
 {
 	RequestSpecialModel(charId + MI_SPECIAL01, modelName, flags);
+}
+
+bool
+CStreaming::HasSpecialCharLoaded(int32 id)
+{
+	return HasModelLoaded(id + MI_SPECIAL01);
+}
+
+void
+CStreaming::SetMissionDoesntRequireSpecialChar(int32 id)
+{
+	return SetMissionDoesntRequireModel(id + MI_SPECIAL01);
 }
 
 void
@@ -1175,6 +1240,181 @@ CStreaming::LoadInitialVehicles(void)
 	if(CModelInfo::GetModelInfo("police", &id))
 		RequestModel(id, STREAMFLAGS_DONT_REMOVE);
 }
+
+void
+CStreaming::StreamVehiclesAndPeds(void)
+{
+	int i, model;
+	static int timeBeforeNextLoad = 0;
+	static int modelQualityClass = 0;
+
+	if(CRecordDataForGame::RecordingState == RECORDSTATE_1 ||
+	   CRecordDataForGame::RecordingState == RECORDSTATE_2)
+		return;
+
+	if(FindPlayerPed()->m_pWanted->AreSwatRequired()){
+		RequestModel(MI_ENFORCER, STREAMFLAGS_DONT_REMOVE);
+		RequestModel(MI_SWAT, STREAMFLAGS_DONT_REMOVE);
+	}else{
+		SetModelIsDeletable(MI_ENFORCER);
+		if(!HasModelLoaded(MI_ENFORCER))
+			SetModelIsDeletable(MI_SWAT);
+	}
+
+	if(FindPlayerPed()->m_pWanted->AreFbiRequired()){
+		RequestModel(MI_FBICAR, STREAMFLAGS_DONT_REMOVE);
+		RequestModel(MI_FBI, STREAMFLAGS_DONT_REMOVE);
+	}else{
+		SetModelIsDeletable(MI_FBICAR);
+		if(!HasModelLoaded(MI_FBICAR))
+			SetModelIsDeletable(MI_FBI);
+	}
+
+	if(FindPlayerPed()->m_pWanted->AreArmyRequired()){
+		RequestModel(MI_RHINO, STREAMFLAGS_DONT_REMOVE);
+		RequestModel(MI_BARRACKS, STREAMFLAGS_DONT_REMOVE);
+		RequestModel(MI_ARMY, STREAMFLAGS_DONT_REMOVE);
+	}else{
+		SetModelIsDeletable(MI_RHINO);
+		SetModelIsDeletable(MI_BARRACKS);
+		if(!HasModelLoaded(MI_RHINO) && !HasModelLoaded(MI_BARRACKS))
+			SetModelIsDeletable(MI_ARMY);
+	}
+
+	if(FindPlayerPed()->m_pWanted->NumOfHelisRequired() > 0)
+		RequestModel(MI_CHOPPER, STREAMFLAGS_DONT_REMOVE);
+	else
+		SetModelIsDeletable(MI_CHOPPER);
+
+	if(timeBeforeNextLoad >= 0)
+		timeBeforeNextLoad--;
+	else if(ms_numVehiclesLoaded <= desiredNumVehiclesLoaded){
+		for(i = 0; i <= 10; i++){
+			model =  CCarCtrl::ChooseCarModel(modelQualityClass);
+			modelQualityClass++;
+			if(modelQualityClass >= NUM_VEHICLE_CLASSES)
+				modelQualityClass = 0;
+
+			// check if we want to load this model
+			if(ms_aInfoForModel[model].m_loadState == STREAMSTATE_NOTLOADED &&
+			   ((CVehicleModelInfo*)CModelInfo::GetModelInfo(model))->m_level & (1 << (CGame::currLevel-1)))
+				break;
+		}
+
+		if(i <= 10){
+			RequestModel(model, STREAMFLAGS_DEPENDENCY);
+			timeBeforeNextLoad = 500;
+		}
+	}
+}
+
+void
+CStreaming::StreamZoneModels(const CVector &pos)
+{
+	int i;
+	uint16 gangsToLoad, gangCarsToLoad, bit;
+	CZoneInfo info;
+
+	CTheZones::GetZoneInfoForTimeOfDay(&pos, &info);
+
+	if(info.pedGroup != ms_currentPedGrp){
+
+		// unload pevious group
+		if(ms_currentPedGrp != -1)
+			for(i = 0; i < 8; i++){
+				if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
+					break;
+				SetModelIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
+				SetModelTxdIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
+			}
+
+		ms_currentPedGrp = info.pedGroup;
+
+		for(i = 0; i < 8; i++){
+			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
+				break;
+			RequestModel(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i], STREAMFLAGS_DONT_REMOVE);
+		}
+	}
+	RequestModel(MI_MALE01, STREAMFLAGS_DONT_REMOVE);
+
+	gangsToLoad = 0;
+	gangCarsToLoad = 0;
+	if(info.gangDensity[0] != 0) gangsToLoad |= 1<<0;
+	if(info.gangDensity[1] != 0) gangsToLoad |= 1<<1;
+	if(info.gangDensity[2] != 0) gangsToLoad |= 1<<2;
+	if(info.gangDensity[3] != 0) gangsToLoad |= 1<<3;
+	if(info.gangDensity[4] != 0) gangsToLoad |= 1<<4;
+	if(info.gangDensity[5] != 0) gangsToLoad |= 1<<5;
+	if(info.gangDensity[6] != 0) gangsToLoad |= 1<<6;
+	if(info.gangDensity[7] != 0) gangsToLoad |= 1<<7;
+	if(info.gangDensity[8] != 0) gangsToLoad |= 1<<8;
+	if(info.gangThreshold[0] != info.copDensity) gangCarsToLoad |= 1<<0;
+	if(info.gangThreshold[1] != info.gangThreshold[0]) gangCarsToLoad |= 1<<1;
+	if(info.gangThreshold[2] != info.gangThreshold[1]) gangCarsToLoad |= 1<<2;
+	if(info.gangThreshold[3] != info.gangThreshold[2]) gangCarsToLoad |= 1<<3;
+	if(info.gangThreshold[4] != info.gangThreshold[3]) gangCarsToLoad |= 1<<4;
+	if(info.gangThreshold[5] != info.gangThreshold[4]) gangCarsToLoad |= 1<<5;
+	if(info.gangThreshold[6] != info.gangThreshold[5]) gangCarsToLoad |= 1<<6;
+	if(info.gangThreshold[7] != info.gangThreshold[6]) gangCarsToLoad |= 1<<7;
+	if(info.gangThreshold[8] != info.gangThreshold[7]) gangCarsToLoad |= 1<<8;
+
+	if(gangsToLoad == ms_loadedGangs && gangCarsToLoad == ms_loadedGangCars)
+		return;
+
+	// This makes things simpler than the game does it
+	gangsToLoad |= gangCarsToLoad;
+
+	for(i = 0; i < NUM_GANGS; i++){
+		bit = 1<<i;
+
+		if(gangsToLoad & bit && (ms_loadedGangs & bit) == 0){
+			RequestModel(MI_GANG01 + i*2, STREAMFLAGS_DONT_REMOVE);
+			RequestModel(MI_GANG01 + i*2 + 1, STREAMFLAGS_DONT_REMOVE);
+			ms_loadedGangs |= bit;
+		}else if((gangsToLoad & bit) == 0 && ms_loadedGangs & bit){
+			SetModelIsDeletable(MI_GANG01 + i*2);
+			SetModelIsDeletable(MI_GANG01 + i*2 + 1);
+			SetModelTxdIsDeletable(MI_GANG01 + i*2);
+			SetModelTxdIsDeletable(MI_GANG01 + i*2 + 1);
+			ms_loadedGangs &= ~bit;
+		}
+
+		if(gangCarsToLoad & bit && (ms_loadedGangCars & bit) == 0){
+			RequestModel(CGangs::GetGangInfo(i)->m_nVehicleMI, STREAMFLAGS_DONT_REMOVE);
+		}else if((gangCarsToLoad & bit) == 0 && ms_loadedGangCars & bit){
+			SetModelIsDeletable(CGangs::GetGangInfo(i)->m_nVehicleMI);
+			SetModelTxdIsDeletable(CGangs::GetGangInfo(i)->m_nVehicleMI);
+		}
+	}
+	ms_loadedGangCars = gangCarsToLoad;
+}
+
+void
+CStreaming::RemoveCurrentZonesModels(void)
+{
+	int i;
+
+	if(ms_currentPedGrp != -1)
+		for(i = 0; i < 8; i++){
+			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
+				break;
+			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != MI_MALE01)
+				SetModelIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
+		}
+
+	for(i = 0; i < NUM_GANGS; i++){
+		SetModelIsDeletable(MI_GANG01 + i*2);
+		SetModelIsDeletable(MI_GANG01 + i*2 + 1);
+		if(CGangs::GetGangInfo(i)->m_nVehicleMI != -1)
+			SetModelIsDeletable(CGangs::GetGangInfo(i)->m_nVehicleMI);
+	}
+
+	ms_currentPedGrp = -1;
+	ms_loadedGangs = 0;
+	ms_loadedGangCars = 0;
+}
+
 
 
 // Find starting offset of the cdimage we next want to read
@@ -2166,9 +2406,35 @@ CStreaming::LoadScene(const CVector &pos)
 	debug("End load scene\n");
 }
 
+void
+CStreaming::MemoryCardSave(uint8 *buffer, uint32 *length)
+{
+	int i;
+
+	*length = NUM_DEFAULT_MODELS;
+	for(i = 0; i < NUM_DEFAULT_MODELS; i++)
+		if(ms_aInfoForModel[i].m_loadState == STREAMSTATE_LOADED)
+			buffer[i] = ms_aInfoForModel[i].m_flags;
+		else
+			buffer[i] = 0xFF;
+}
+
+void 
+CStreaming::MemoryCardLoad(uint8 *buffer, uint32 length)
+{
+	uint32 i;
+
+	assert(length == NUM_DEFAULT_MODELS);
+	for(i = 0; i < length; i++)
+		if(ms_aInfoForModel[i].m_loadState == STREAMSTATE_LOADED)
+			if(buffer[i] != 0xFF)
+				ms_aInfoForModel[i].m_flags = buffer[i];
+}
+
 STARTPATCHES
 	InjectHook(0x406430, CStreaming::Init, PATCH_JUMP);
 	InjectHook(0x406C80, CStreaming::Shutdown, PATCH_JUMP);
+	InjectHook(0x4076C0, CStreaming::Update, PATCH_JUMP);
 	InjectHook(0x406CC0, (void (*)(void))CStreaming::LoadCdDirectory, PATCH_JUMP);
 	InjectHook(0x406DA0, (void (*)(const char*, int))CStreaming::LoadCdDirectory, PATCH_JUMP);
 	InjectHook(0x409740, CStreaming::ConvertBufferToObject, PATCH_JUMP);
@@ -2179,6 +2445,9 @@ STARTPATCHES
 	InjectHook(0x408210, CStreaming::RequestIslands, PATCH_JUMP);
 	InjectHook(0x40A890, CStreaming::RequestSpecialModel, PATCH_JUMP);
 	InjectHook(0x40ADA0, CStreaming::RequestSpecialChar, PATCH_JUMP);
+	InjectHook(0x54A5F0, CStreaming::HasModelLoaded, PATCH_JUMP);
+	InjectHook(0x40ADC0, CStreaming::HasSpecialCharLoaded, PATCH_JUMP);
+	InjectHook(0x40ADE0, CStreaming::SetMissionDoesntRequireSpecialChar, PATCH_JUMP);
 
 	InjectHook(0x408830, CStreaming::RemoveModel, PATCH_JUMP);
 	InjectHook(0x4083A0, CStreaming::RemoveUnusedBuildings, PATCH_JUMP);
@@ -2202,6 +2471,9 @@ STARTPATCHES
 
 	InjectHook(0x40AA00, CStreaming::LoadInitialPeds, PATCH_JUMP);
 	InjectHook(0x40ADF0, CStreaming::LoadInitialVehicles, PATCH_JUMP);
+	InjectHook(0x40AE60, CStreaming::StreamVehiclesAndPeds, PATCH_JUMP);
+	InjectHook(0x40AA30, CStreaming::StreamZoneModels, PATCH_JUMP);
+	InjectHook(0x40AD00, CStreaming::RemoveCurrentZonesModels, PATCH_JUMP);
 
 	InjectHook(0x409BE0, CStreaming::ProcessLoadingChannel, PATCH_JUMP);
 	InjectHook(0x40A610, CStreaming::FlushChannels, PATCH_JUMP);
@@ -2227,6 +2499,9 @@ STARTPATCHES
 	InjectHook(0x4093C0, CStreaming::DeleteRwObjectsNotInFrustumInSectorList, PATCH_JUMP);
 	InjectHook(0x409B70, CStreaming::MakeSpaceFor, PATCH_JUMP);
 	InjectHook(0x40A6D0, CStreaming::LoadScene, PATCH_JUMP);
+
+	InjectHook(0x40B210, CStreaming::MemoryCardSave, PATCH_JUMP);
+	InjectHook(0x40B250, CStreaming::MemoryCardLoad, PATCH_JUMP);
 
 	InjectHook(0x4063E0, &CStreamingInfo::GetCdPosnAndSize, PATCH_JUMP);
 	InjectHook(0x406410, &CStreamingInfo::SetCdPosnAndSize, PATCH_JUMP);
