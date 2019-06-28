@@ -13,7 +13,7 @@ enum {
 	ASSOC_PARTIAL = 0x10,
 	ASSOC_MOVEMENT = 0x20,	// ???
 	ASSOC_HAS_TRANSLATION = 0x40,
-	ASSOC_FLAG80 = 0x80,
+	ASSOC_FLAG80 = 0x80, // walking and running have it
 	ASSOC_FLAG100 = 0x100,
 	ASSOC_FLAG200 = 0x200,
 	ASSOC_FLAG400 = 0x400,	// not seen yet

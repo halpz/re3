@@ -13,3 +13,5 @@ public:
 	static void CalcPedShadowValues(CVector light, float *frontX, float *frontY, float *sideX, float *sideY, float *dispX, float *dispY);
 	static void StoreShadowForPedObject(CEntity *ent, float dispX, float dispY, float frontX, float frontY, float sideX, float sideY);
 };
+
+extern RwTexture*& gpBloodPoolTex;

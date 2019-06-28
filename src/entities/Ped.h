@@ -112,7 +112,7 @@ public:
 	// 0x128
 	CStoredCollPoly m_collPoly;
 	float m_fCollisionSpeed;
-	uint8 m_ped_flagA1 : 1;
+	uint8 bIsStanding : 1;
 	uint8 m_ped_flagA2 : 1;
 	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
 	uint8 bIsPointingGunAt : 1;
@@ -148,9 +148,9 @@ public:
 	uint8 m_ped_flagE2 : 1;
 	uint8 m_ped_flagE4 : 1;
 	uint8 m_ped_flagE8 : 1;		// can duck?
-	uint8 m_ped_flagE10 : 1;	// can't attack if it's set
+	uint8 bCantFireBecauseCrouched : 1;	// set if you don't want ped to attack
 	uint8 m_ped_flagE20 : 1;
-	uint8 m_ped_flagE40 : 1;
+	uint8 bDoBloodyFootprints : 1;
 	uint8 m_ped_flagE80 : 1;
 	uint8 m_ped_flagF1 : 1;
 	uint8 m_ped_flagF2 : 1;
@@ -256,7 +256,9 @@ public:
 	uint32 m_hitRecoverTimer;
 	uint32 field_4E0;
 	uint32 m_duckTimer;
-	uint8 stuff9[10];
+	uint8 stuff13[4];
+	int32 m_bloodyFootprintCount;
+	uint8 stuff9[2];
 	uint8 m_bodyPartBleeding;		// PedNode
 	uint8 m_field_4F3;
 	CPed *m_nearPeds[10];
@@ -298,6 +300,7 @@ public:
 	void RestartNonPartialAnims(void);
 	void LineUpPedWithCar(PedLineUpPhase phase);
 	void SetPedPositionInCar(void);
+	void PlayFootSteps(void);
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
 	static void GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float seatPosMult);
 	static void GetPositionToOpenCarDoor(CVector* output, CVehicle* veh, uint32 enterType);
