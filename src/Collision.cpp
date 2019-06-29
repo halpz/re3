@@ -15,6 +15,7 @@
 #include "Population.h"
 #include "FileLoader.h"
 #include "Replay.h"
+#include "CutsceneMgr.h"
 #include "RenderBuffer.h"
 #include "SurfaceTable.h"
 #include "Collision.h"
@@ -52,6 +53,9 @@ CCollision::Update(void)
 	playerCoors = FindPlayerCoors();
 	eLevelName level = CTheZones::m_CurrLevel;
 	bool forceLevelChange = false;
+
+	if(CTimer::GetTimeInMilliseconds() < 2000 || CCutsceneMgr::IsCutsceneProcessing())
+		return;
 
 	// hardcode a level if there are no zones
 	if(level == LEVEL_NONE){
