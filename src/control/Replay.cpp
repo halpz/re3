@@ -444,7 +444,48 @@ void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayB
 	buffer->m_nOffset += sizeof(tPedUpdatePacket);
 }
 #endif
+
+#if 0
 WRAPPER void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state) { EAXJMP(0x5942A0); }
+#else
+void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
+{
+	CAnimBlendAssociation* anim1 = CAnimManager::BlendAnimation(
+		(RpClump*)ped->m_rwObject,
+		(state->animId > 3) ? ped->m_animGroup : ASSOCGRP_STD,
+		(AnimationId)state->animId, 100.0f);
+	anim1->SetCurrentTime(state->time * 4.0f / 255.0f);
+	anim1->speed = state->speed * 3.0f / 255.0f;
+	anim1->SetBlend(1.0f, 1.0f);
+	anim1->callbackType = CAnimBlendAssociation::CB_NONE;
+	if (state->blendAmount && state->secAnimId){
+		float time = state->secTime * 4.0f / 255.0f;
+		float speed = state->secSpeed * 3.0f / 255.0f;
+		float blend = state->blendAmount * 2.0f / 255.0f;
+		CAnimBlendAssociation* anim2 = CAnimManager::BlendAnimation(
+			(RpClump*)ped->m_rwObject,
+			(state->secAnimId > 3) ? ped->m_animGroup : ASSOCGRP_STD,
+			(AnimationId)state->secAnimId, 100.0f);
+		anim2->SetCurrentTime(time);
+		anim2->speed = speed;
+		anim2->SetBlend(blend, 1.0f);
+		anim2->callbackType = CAnimBlendAssociation::CB_NONE;
+	}
+	RpAnimBlendClumpRemoveAssociations((RpClump*)ped->m_rwObject, 0x10);
+	if (state->partAnimId){
+		float time = state->partAnimTime * 4.0f / 255.0f;
+		float speed = state->partAnimSpeed * 3.0f / 255.0f;
+		float blend = state->partBlendAmount * 2.0f / 255.0f;
+		if (blend > 0.0f && state->partAnimId != ANIM_IDLE_STANCE){
+			CAnimBlendAssociation* anim3 = CAnimManager::BlendAnimation(
+				(RpClump*)ped->m_rwObject, ASSOCGRP_STD, (AnimationId)state->partAnimId, 1000.0f);
+			anim3->SetCurrentTime(time);
+			anim3->speed = speed;
+			anim3->blendDelta = 0.0f; // is it correct?
+		}
+	}
+}
+#endif
 WRAPPER void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state) { EAXJMP(0x5944B0); }
 WRAPPER void CReplay::PlaybackThisFrame(void) { EAXJMP(0x5946B0); }
 
