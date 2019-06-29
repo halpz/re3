@@ -31,7 +31,7 @@ CDummy::Add(void)
 		for(x = xstart; x <= xend; x++){
 			s = CWorld::GetSector(x, y);
 			if(x == xmid && y == ymid)
-				list = &s->m_lists[ENTITYLIST_OBJECTS];
+				list = &s->m_lists[ENTITYLIST_DUMMIES];
 			else
 				list = &s->m_lists[ENTITYLIST_DUMMIES_OVERLAP];
 			CPtrNode *node = list->InsertItem(this);
