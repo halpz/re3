@@ -1621,7 +1621,7 @@ WRAPPER void CPed::FinishFightMoveCB(CAnimBlendAssociation *assoc, void *arg) { 
 WRAPPER void CPed::PedAnimDoorCloseRollingCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4E4B90); }
 WRAPPER void CPed::FinishJumpCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D7A50); }
 WRAPPER void CPed::PedLandCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8A0); }
-WRAPPER void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4C6620); }
+WRAPPER void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4C6580); }
 WRAPPER void CPed::RestoreHeadingRateCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D6550); }
 
 STARTPATCHES

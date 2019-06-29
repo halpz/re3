@@ -261,8 +261,9 @@ private:
 	static void RecordThisFrame(void);
 	static void StorePedUpdate(CPed *ped, int id);
 	static void StorePedAnimation(CPed *ped, CStoredAnimationState *state);
-	static void StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state);
 public:
+	static void StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state);
+
 	static void ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayBuffer *buffer);
 	static void RetrievePedAnimation(CPed *ped, CStoredAnimationState *state);
 	static void RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state);

@@ -83,10 +83,8 @@ float &CReplay::LoadSceneX = *(float*)0x880F9C;
 float &CReplay::LoadSceneY = *(float*)0x880F98;
 float &CReplay::LoadSceneZ = *(float*)0x880F94;
 
-#if 1
 static void(*(&CBArray)[30])(CAnimBlendAssociation*, void*) = *(void(*(*)[30])(CAnimBlendAssociation*, void*))*(uintptr*)0x61052C;
-#else
-static void(*CBArray[])(CAnimBlendAssociation*, void*) =
+static void(*CBArray_RE3[])(CAnimBlendAssociation*, void*) =
 {
 	nil, &CPed::PedGetupCB, &CPed::PedStaggerCB, &CPed::PedEvadeCB, &CPed::FinishDieAnimCB,
 	&CPed::FinishedWaitCB, &CPed::FinishLaunchCB, &CPed::FinishHitHeadCB, &CPed::PedAnimGetInCB, &CPed::PedAnimDoorOpenCB,
@@ -95,7 +93,6 @@ static void(*CBArray[])(CAnimBlendAssociation*, void*) =
 	&CPed::FinishFightMoveCB, &PhonePutDownCB, &PhonePickUpCB, &CPed::PedAnimDoorCloseRollingCB, &CPed::FinishJumpCB,
 	&CPed::PedLandCB, &FinishFuckUCB, &CPed::RestoreHeadingRateCB, &CPed::PedSetQuickDraggedOutCarPositionCB, &CPed::PedSetDraggedOutCarPositionCB
 };
-#endif
 
 #if 0
 WRAPPER uint8 FindCBFunctionID(void(*f)(CAnimBlendAssociation*, void*)) { EAXJMP(0x584E70); }
@@ -106,13 +103,17 @@ static uint8 FindCBFunctionID(void(*f)(CAnimBlendAssociation*, void*))
 		if (CBArray[i] == f)
 			return i;
 	}
+	for (int i = 0; i < sizeof(CBArray_RE3) / sizeof(*CBArray_RE3); i++) {
+		if (CBArray_RE3[i] == f)
+			return i;
+	}
 	return 0;
 }
 #endif
 
 static void(*FindCBFunction(uint8 id))(CAnimBlendAssociation*, void*)
 {
-	return CBArray[id];
+	return CBArray_RE3[id];
 }
 
 WRAPPER static void ApplyPanelDamageToCar(uint32, CAutomobile*, bool) { EAXJMP(0x584EA0); }
@@ -533,7 +534,35 @@ void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationSt
 	}
 }
 #endif
+
+#if 0
 WRAPPER void CReplay::PlaybackThisFrame(void) { EAXJMP(0x5946B0); }
+#else
+void CReplay::PlaybackThisFrame(void)
+{
+	static int SlowMotionCounter = 0;
+	CAddressInReplayBuffer buf = Playback;
+	if (PlayBackThisFrameInterpolation(&buf, 1.0f, nil)){
+		DMAudio.SetEffectsFadeVol(127);
+		DMAudio.SetMusicFadeVol(127);
+		return;
+	}
+	if (SlowMotionCounter){
+		CAddressInReplayBuffer buf_sm = buf;
+		if (PlayBackThisFrameInterpolation(&buf_sm, SlowMotionCounter * 1.0f / SlowMotion, nil)){
+			DMAudio.SetEffectsFadeVol(127);
+			DMAudio.SetMusicFadeVol(127);
+			return;
+		}
+	}
+	SlowMotionCounter = (SlowMotionCounter + 1) % SlowMotion;
+	if (SlowMotionCounter == 0)
+		Playback = buf;
+	ProcessLookAroundCam();
+	DMAudio.SetEffectsFadeVol(0);
+	DMAudio.SetMusicFadeVol(0);
+}
+#endif
 
 #if 0
 WRAPPER void CReplay::StoreCarUpdate(CVehicle *vehicle, int id) { EAXJMP(0x5947F0); }
@@ -883,6 +912,7 @@ InjectHook(0x593150, CReplay::DisableReplays, PATCH_JUMP);
 InjectHook(0x593160, CReplay::EnableReplays, PATCH_JUMP);
 InjectHook(0x593170, CReplay::Update, PATCH_JUMP);
 InjectHook(0x594050, CReplay::ProcessPedUpdate, PATCH_JUMP);
+InjectHook(0x593BB0, CReplay::StoreDetailedPedAnimation, PATCH_JUMP);
 InjectHook(0x5944B0, CReplay::RetrieveDetailedPedAnimation, PATCH_JUMP);
 //InjectHook(0x5966E0, CReplay::RestoreStuffFromMem, PATCH_JUMP);
 ENDPATCHES
