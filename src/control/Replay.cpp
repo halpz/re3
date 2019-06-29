@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "AnimBlendAssociation.h"
+#include "Boat.h"
 #include "BulletTraces.h"
 #include "CarCtrl.h"
 #include "Clock.h"
@@ -411,36 +412,37 @@ WRAPPER void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressI
 void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayBuffer *buffer)
 {
 	tPedUpdatePacket *pp = (tPedUpdatePacket*)&buffer->m_pBase[buffer->m_nOffset];
-	if (ped){
-		ped->m_fRotationCur = pp->heading * M_PI / 128.0f;
-		ped->m_fRotationDest = pp->heading * M_PI / 128.0f;
-		CMatrix ped_matrix;
-		pp->matrix.DecompressIntoFullMatrix(ped_matrix);
-		ped->GetMatrix() = ped->GetMatrix() * CMatrix(1.0f - interpolation);
-		*ped->GetMatrix().GetPosition() *= (1.0f - interpolation);
-		ped->GetMatrix() += CMatrix(interpolation) * ped_matrix;
-		if (pp->vehicle_index) {
-			ped->m_pMyVehicle = CPools::GetVehiclePool()->GetSlot(pp->vehicle_index - 1);
-			ped->bInVehicle = pp->vehicle_index;
-		}
-		else {
-			ped->m_pMyVehicle = nil;
-			ped->bInVehicle = false;
-		}
-		if (pp->assoc_group_id != ped->m_animGroup) {
-			ped->m_animGroup = (AssocGroupId)pp->assoc_group_id;
-			if (ped == FindPlayerPed())
-				((CPlayerPed*)ped)->ReApplyMoveAnims();
-		}
-		RetrievePedAnimation(ped, &pp->anim_state);
-		ped->RemoveWeaponModel(-1);
-		if (pp->weapon_model != (uint8)-1)
-			ped->AddWeaponModel(pp->weapon_model);
-		CWorld::Remove(ped);
-		CWorld::Add(ped);
-	}else{
+	if (!ped){
 		debug("Replay:Ped wasn't there\n");
+		buffer->m_nOffset += sizeof(tPedUpdatePacket);
+		return;
 	}
+	ped->m_fRotationCur = pp->heading * M_PI / 128.0f;
+	ped->m_fRotationDest = pp->heading * M_PI / 128.0f;
+	CMatrix ped_matrix;
+	pp->matrix.DecompressIntoFullMatrix(ped_matrix);
+	ped->GetMatrix() = ped->GetMatrix() * CMatrix(1.0f - interpolation);
+	*ped->GetMatrix().GetPosition() *= (1.0f - interpolation);
+	ped->GetMatrix() += CMatrix(interpolation) * ped_matrix;
+	if (pp->vehicle_index) {
+		ped->m_pMyVehicle = CPools::GetVehiclePool()->GetSlot(pp->vehicle_index - 1);
+		ped->bInVehicle = pp->vehicle_index;
+	}
+	else {
+		ped->m_pMyVehicle = nil;
+		ped->bInVehicle = false;
+	}
+	if (pp->assoc_group_id != ped->m_animGroup) {
+		ped->m_animGroup = (AssocGroupId)pp->assoc_group_id;
+		if (ped == FindPlayerPed())
+			((CPlayerPed*)ped)->ReApplyMoveAnims();
+	}
+	RetrievePedAnimation(ped, &pp->anim_state);
+	ped->RemoveWeaponModel(-1);
+	if (pp->weapon_model != (uint8)-1)
+		ped->AddWeaponModel(pp->weapon_model);
+	CWorld::Remove(ped);
+	CWorld::Add(ped);
 	buffer->m_nOffset += sizeof(tPedUpdatePacket);
 }
 #endif
@@ -603,7 +605,81 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 	Record.m_nOffset += sizeof(tVehicleUpdatePacket);
 }
 #endif
+
+#if 0
 WRAPPER void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressInReplayBuffer *buffer) { EAXJMP(0x594D10); }
+#else
+void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressInReplayBuffer *buffer)
+{
+	tVehicleUpdatePacket* vp = (tVehicleUpdatePacket*)&buffer->m_pBase[buffer->m_nOffset];
+	if (!vehicle){
+		debug("Replay:Car wasn't there");
+		return;
+	}
+	CMatrix vehicle_matrix;
+	vp->matrix.DecompressIntoFullMatrix(vehicle_matrix);
+	vehicle->GetMatrix() = vehicle->GetMatrix() * CMatrix(1.0f - interpolation);
+	*vehicle->GetMatrix().GetPosition() *= (1.0f - interpolation);
+	vehicle->GetMatrix() += CMatrix(interpolation) * vehicle_matrix;
+	vehicle->m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+	vehicle->m_fHealth = 4 * vp->health;
+	vehicle->m_fGasPedal = vp->acceleration / 100.0f;
+	if (vehicle->IsCar())
+		ApplyPanelDamageToCar(vp->panels, (CAutomobile*)vehicle, true);
+	vehicle->m_vecMoveSpeed = CVector(vp->velocityX / 8000.0f, vp->velocityY / 8000.0f, vp->velocityZ / 8000.0f);
+	if (vehicle->GetModelIndex() == MI_RHINO) {
+		((CAutomobile*)vehicle)->m_fCarGunLR = vp->car_gun * M_PI / 128.0f;
+		vehicle->m_fSteerAngle = 0.0f;
+	}else{
+		vehicle->m_fSteerAngle = vp->wheel_state / 50.0f;
+	}
+	if (vehicle->IsCar()) {
+		CAutomobile* car = (CAutomobile*)vehicle;
+		for (int i = 0; i < 4; i++) {
+			car->m_afWheelSuspDist[i] = vp->wheel_susp_dist[i] / 50.0f;
+			car->m_afWheelRotation[i] = vp->wheel_rotation[i] * M_PI / 128.0f;
+		}
+		car->m_aDoors[2].m_fAngle = car->m_aDoors[2].m_fPreviousAngle = vp->door_angles[0] * M_PI / 127.0f;
+		car->m_aDoors[3].m_fAngle = car->m_aDoors[3].m_fPreviousAngle = vp->door_angles[1] * M_PI / 127.0f;
+		if (vp->door_angles[0])
+			car->m_DamageManager.m_bDoorStatus[2] = 2;
+		if (vp->door_angles[1])
+			car->m_DamageManager.m_bDoorStatus[3] = 2;
+		if (vp->door_status & 1 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_BONNET) != 3){
+			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_BONNET, 3);
+			car->SetDoorDamage(17, CDamageManager::CAR_DOOR_BONNET, true);
+		}
+		if (vp->door_status & 2 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_BUMPER) != 3) {
+			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_BUMPER, 3);
+			car->SetDoorDamage(18, CDamageManager::CAR_DOOR_BUMPER, true);
+		}
+		if (vp->door_status & 4 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_LF) != 3) {
+			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_LF, 3);
+			car->SetDoorDamage(15, CDamageManager::CAR_DOOR_LF, true);
+		}
+		if (vp->door_status & 8 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_RF) != 3) {
+			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_RF, 3);
+			car->SetDoorDamage(11, CDamageManager::CAR_DOOR_RF, true);
+		}
+		if (vp->door_status & 0x10 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_LR) != 3) {
+			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_LR, 3);
+			car->SetDoorDamage(16, CDamageManager::CAR_DOOR_LR, true);
+		}
+		if (vp->door_status & 0x20 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_RR) != 3) {
+			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_RR, 3);
+			car->SetDoorDamage(12, CDamageManager::CAR_DOOR_RR, true);
+		}
+		vehicle->m_veh_flagA10 = true;
+		if (vehicle->IsCar())
+			((CAutomobile*)vehicle)->m_nDriveWheelsOnGround = 4;
+		CWorld::Remove(vehicle);
+		CWorld::Add(vehicle);
+		if (vehicle->IsBoat())
+			((CBoat*)vehicle)->m_bIsAnchored = false;
+	}
+}
+#endif
+
 WRAPPER bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer) { EAXJMP(0x595240); }
 WRAPPER void CReplay::FinishPlayback(void) { EAXJMP(0x595B20); }
 WRAPPER void CReplay::EmptyReplayBuffer(void) { EAXJMP(0x595BD0); }
@@ -912,6 +988,7 @@ InjectHook(0x593150, CReplay::DisableReplays, PATCH_JUMP);
 InjectHook(0x593160, CReplay::EnableReplays, PATCH_JUMP);
 InjectHook(0x593170, CReplay::Update, PATCH_JUMP);
 InjectHook(0x594050, CReplay::ProcessPedUpdate, PATCH_JUMP);
+InjectHook(0x594D10, CReplay::ProcessCarUpdate, PATCH_JUMP);
 InjectHook(0x593BB0, CReplay::StoreDetailedPedAnimation, PATCH_JUMP);
 InjectHook(0x5944B0, CReplay::RetrieveDetailedPedAnimation, PATCH_JUMP);
 //InjectHook(0x5966E0, CReplay::RestoreStuffFromMem, PATCH_JUMP);

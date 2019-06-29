@@ -18,7 +18,9 @@ public:
 	float m_afWheelRotation[4];
 	uint8 stuff3[200];
 	float m_fCarGunLR;
-	uint8 stuff4[36];
+	uint8 stuff4[13];
+	uint8 m_nDriveWheelsOnGround;
+	uint8 stuff5[22];
 
 	void SetDoorDamage(int32, uint32, bool); /* TODO: eDoors */
 };
