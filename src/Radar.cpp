@@ -279,7 +279,7 @@ void CRadar::DrawBlips()
 		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1)
 			angle = PI + FindPlayerHeading();
 		else
-			angle = FindPlayerHeading() - (PI + atan2(-TheCamera.GetForward().x, TheCamera.GetForward().y));
+			angle = FindPlayerHeading() - (PI + TheCamera.GetForward().Heading());
 
 		DrawRotatingRadarSprite(CentreSprite, out.x, out.y, angle, 255);
 
@@ -868,8 +868,8 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D
 {
 	float s, c;
 
-	s = -sin(atan2(-TheCamera.GetForward().x, TheCamera.GetForward().y));
-	c = cos(atan2(-TheCamera.GetForward().x, TheCamera.GetForward().y));
+	s = -sin(TheCamera.GetForward().Heading());
+	c = cos(TheCamera.GetForward().Heading());
 
 	if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1 || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWNPED) {
 		s = 0.0f;
@@ -885,8 +885,8 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D
 		else
 			forward = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetPosition() - TheCamera.Cams[TheCamera.ActiveCam].SourceBeforeLookBehind;
 
-		s = -sin(atan2(-forward.x, forward.y));
-		c = cos(atan2(-forward.x, forward.y));
+		s = -sin(forward.Heading());
+		c = cos(forward.Heading());
 	}
 
 	out.x = s * in.y + c * in.x;
@@ -915,8 +915,8 @@ void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D
 		c = 1.0f;
 	}
 	else if (TheCamera.GetLookDirection() == LOOKING_FORWARD) {
-		s = sin(atan2(-TheCamera.GetForward().x, TheCamera.GetForward().y));
-		c = cos(atan2(-TheCamera.GetForward().x, TheCamera.GetForward().y));
+		s = sin(TheCamera.GetForward().Heading());
+		c = cos(TheCamera.GetForward().Heading());
 	}
 	else {
 		CVector forward;
@@ -928,8 +928,8 @@ void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D
 		else
 			forward = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetPosition() - TheCamera.Cams[TheCamera.ActiveCam].SourceBeforeLookBehind;
 
-		s = sin(atan2(-forward.x, forward.y));
-		c = cos(atan2(-forward.x, forward.y));
+		s = sin(forward.Heading());
+		c = cos(forward.Heading());
 	}
 
 	float x = (in.x - vec2DRadarOrigin.x) * (1.0f / m_RadarRange);

@@ -11,4 +11,5 @@ public:
 	static int32 ChooseCarModel(int32 vehclass);
 
 	static int32 &NumLawEnforcerCars;
+	static bool &bCarsGeneratedAroundCamera;
 };

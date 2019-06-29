@@ -771,9 +771,9 @@ CPed::Attack(void)
 				}
 			} else {
 				if (weaponAnimAssoc->animId == ANIM_WEAPON_BAT_V || weaponAnimAssoc->animId == ANIM_WEAPON_BAT_H) {
-					DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_BAT_ATTACK, 1.0f);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, 1.0f);
 				} else if (weaponAnimAssoc->animId == ANIM_FIGHT_PPUNCH) {
-					DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_PUNCH_ATTACK, 0.0f);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_PUNCH_ATTACK, 0.0f);
 				}
 
 				weaponAnimAssoc->speed = 0.5f;
@@ -843,13 +843,13 @@ CPed::Attack(void)
 				if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep <= ourWeapon->m_fAnimLoopEnd) {
 					switch (ourWeaponType) {
 						case WEAPONTYPE_UZI:
-							DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_UZI_BULLET_ECHO, 0.0f);
+							DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_UZI_BULLET_ECHO, 0.0f);
 							break;
 						case WEAPONTYPE_AK47:
-							DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
+							DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
 							break;
 						case WEAPONTYPE_M16:
-							DMAudio.PlayOneShot(uAudioEntityId, SOUND_WEAPON_M16_BULLET_ECHO, 0.0f);
+							DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_M16_BULLET_ECHO, 0.0f);
 							break;
 						default:
 							break;
@@ -1281,19 +1281,19 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 
 	if (m_vehEnterType == VEHICLE_ENTER_FRONT_RIGHT || m_vehEnterType == VEHICLE_ENTER_REAR_RIGHT) {
 		if (vehIsUpsideDown) {
-			m_fRotationDest = -PI + atan2(-veh->GetForward().x, veh->GetForward().y);
+			m_fRotationDest = -PI + veh->GetForward().Heading();
 		} else if (veh->bIsBus) {
-			m_fRotationDest = 0.5 * PI + atan2(-veh->GetForward().x, veh->GetForward().y);
+			m_fRotationDest = 0.5 * PI + veh->GetForward().Heading();
 		} else {
-			m_fRotationDest = atan2(-veh->GetForward().x, veh->GetForward().y);
+			m_fRotationDest = GetForward().Heading();
 		}
 	} else if (m_vehEnterType == VEHICLE_ENTER_FRONT_LEFT || m_vehEnterType == VEHICLE_ENTER_REAR_LEFT) {
 		if (vehIsUpsideDown) {
-			m_fRotationDest = atan2(-veh->GetForward().x, veh->GetForward().y);
+			m_fRotationDest = veh->GetForward().Heading();
 		} else if (veh->bIsBus) {
-			m_fRotationDest = -0.5 * PI + atan2(-veh->GetForward().x, veh->GetForward().y);
+			m_fRotationDest = -0.5 * PI + veh->GetForward().Heading();
 		} else {
-			m_fRotationDest = atan2(-veh->GetForward().x, veh->GetForward().y);
+			m_fRotationDest = veh->GetForward().Heading();
 		}
 	}
 
@@ -1539,7 +1539,7 @@ CPed::PlayFootSteps(void)
 			stepPart = 2;
 
 		if (stepPart != 0) {
-			DMAudio.PlayOneShot(uAudioEntityId, stepPart == 1 ? SOUND_STEP_START : SOUND_STEP_END, 1.0f);
+			DMAudio.PlayOneShot(m_audioEntityId, stepPart == 1 ? SOUND_STEP_START : SOUND_STEP_END, 1.0f);
 			CVector footPos(0.0f, 0.0f, 0.0f);
 
 			for (RwFrame *frame = GetNodeFrame(stepPart == 1 ? PED_FOOTL : PED_FOOTR); frame; frame = RwFrameGetParent(frame))

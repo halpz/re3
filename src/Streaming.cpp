@@ -250,7 +250,6 @@ void
 CStreaming::Update(void)
 {
 	CEntity *train;
-	CVector playerPos;
 	CStreamingInfo *si, *prev;
 	bool requestedSubway = false;
 
@@ -280,8 +279,7 @@ CStreaming::Update(void)
 	   ms_numModelsRequested < 5 &&
 	   !CRenderer::m_loadingPriority){
 		StreamVehiclesAndPeds();
-		FindPlayerCoors(playerPos);
-		StreamZoneModels(playerPos);
+		StreamZoneModels(FindPlayerCoors());
 	}
 
 	LoadRequestedModels();

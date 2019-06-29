@@ -3,6 +3,7 @@
 #include "CarCtrl.h"
 
 int &CCarCtrl::NumLawEnforcerCars = *(int*)0x8F1B38;
+bool &CCarCtrl::bCarsGeneratedAroundCamera = *(bool*)0x95CD8A;
 
 WRAPPER void CCarCtrl::SwitchVehicleToRealPhysics(CVehicle*) { EAXJMP(0x41F7F0); }
 WRAPPER void CCarCtrl::AddToCarArray(int32 id, int32 vehclass) { EAXJMP(0x4182F0); }

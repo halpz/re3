@@ -49,7 +49,7 @@ void
 CCollision::Update(void)
 {
 	CVector playerCoors;
-	FindPlayerCoors(playerCoors);
+	playerCoors = FindPlayerCoors();
 	eLevelName level = CTheZones::m_CurrLevel;
 	bool forceLevelChange = false;
 
@@ -130,7 +130,7 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 
 	level = LEVEL_NONE;
 
-	FindPlayerCoors(playerCoors);
+	playerCoors = FindPlayerCoors();
 	sx = CWorld::GetSectorIndexX(playerCoors.x);
 	sy = CWorld::GetSectorIndexY(playerCoors.y);
 	multipleLevels = false;

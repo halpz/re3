@@ -42,7 +42,7 @@ CPhysical::CPhysical(void)
 	m_vecDamageNormal = CVector(0.0f, 0.0f, 0.0f);
 
 	bUsesCollision = true;
-	uAudioEntityId = -5;
+	m_audioEntityId = -5;
 	unk1 = 100.0f;
 	m_vecCentreOfMass = CVector(0.0f, 0.0f, 0.0f);
 	field_EC = 0;
