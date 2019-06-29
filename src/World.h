@@ -69,7 +69,6 @@ public:
 
 	static void Remove(CEntity *entity);
 	static void Add(CEntity *entity);
-	static void Remove(CEntity *ent);
 
 	static CSector *GetSector(int x, int y) { return &ms_aSectors[y][x]; }
 	static CPtrList &GetBigBuildingList(eLevelName i) { return ms_bigBuildingsList[i]; }
