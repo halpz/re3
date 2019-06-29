@@ -74,7 +74,7 @@ public:
 		m_matrix.at.z += rhs.m_matrix.at.z;
 		m_matrix.pos.x += rhs.m_matrix.pos.x;
 		m_matrix.pos.y += rhs.m_matrix.pos.y;
-		m_matrix.pos.y += rhs.m_matrix.pos.z;
+		m_matrix.pos.z += rhs.m_matrix.pos.z;
 		return *this;
 	}
 

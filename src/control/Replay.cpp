@@ -371,7 +371,7 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 				state->aFunctionCallbackID[i] = 0;
 			}
 		}else{
-			state->aAnimId[i] = 173; /* TODO: enum */
+			state->aAnimId[i] = NUM_ANIMS;
 			state->aCurTime[i] = 0;
 			state->aSpeed[i] = 85;
 			state->aFunctionCallbackID[i] = 0;
@@ -395,7 +395,7 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 			}
 		}
 		else {
-			state->aAnimId2[i] = 173; /* TODO: enum */
+			state->aAnimId2[i] = NUM_ANIMS;
 			state->aCurTime2[i] = 0;
 			state->aSpeed2[i] = 85;
 			state->aFunctionCallbackID2[i] = 0;
@@ -414,11 +414,10 @@ void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayB
 		ped->m_fRotationCur = pp->heading * M_PI / 128.0f;
 		ped->m_fRotationDest = pp->heading * M_PI / 128.0f;
 		CMatrix ped_matrix;
-		float coeff = 1.0f - interpolation;
 		pp->matrix.DecompressIntoFullMatrix(ped_matrix);
-		ped->GetMatrix() = ped->GetMatrix() * CMatrix(coeff);
-		*ped->GetMatrix().GetPosition() *= coeff;
-		ped->GetMatrix() += CMatrix(coeff) * ped_matrix;
+		ped->GetMatrix() = ped->GetMatrix() * CMatrix(1.0f - interpolation);
+		*ped->GetMatrix().GetPosition() *= (1.0f - interpolation);
+		ped->GetMatrix() += CMatrix(interpolation) * ped_matrix;
 		if (pp->vehicle_index) {
 			ped->m_pMyVehicle = CPools::GetVehiclePool()->GetSlot(pp->vehicle_index - 1);
 			ped->bInVehicle = pp->vehicle_index;
@@ -429,12 +428,12 @@ void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayB
 		}
 		if (pp->assoc_group_id != ped->m_animGroup) {
 			ped->m_animGroup = (AssocGroupId)pp->assoc_group_id;
-			if (ped->IsPlayer())
+			if (ped == FindPlayerPed())
 				((CPlayerPed*)ped)->ReApplyMoveAnims();
 		}
 		RetrievePedAnimation(ped, &pp->anim_state);
 		ped->RemoveWeaponModel(-1);
-		if (pp->weapon_model != -1)
+		if (pp->weapon_model != (uint8)-1)
 			ped->AddWeaponModel(pp->weapon_model);
 		CWorld::Remove(ped);
 		CWorld::Add(ped);
@@ -452,7 +451,7 @@ void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
 {
 	CAnimBlendAssociation* anim1 = CAnimManager::BlendAnimation(
 		(RpClump*)ped->m_rwObject,
-		(state->animId > 3) ? ped->m_animGroup : ASSOCGRP_STD,
+		(state->animId > 3) ? ASSOCGRP_STD : ped->m_animGroup,
 		(AnimationId)state->animId, 100.0f);
 	anim1->SetCurrentTime(state->time * 4.0f / 255.0f);
 	anim1->speed = state->speed * 3.0f / 255.0f;
@@ -464,7 +463,7 @@ void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
 		float blend = state->blendAmount * 2.0f / 255.0f;
 		CAnimBlendAssociation* anim2 = CAnimManager::BlendAnimation(
 			(RpClump*)ped->m_rwObject,
-			(state->secAnimId > 3) ? ped->m_animGroup : ASSOCGRP_STD,
+			(state->secAnimId > 3) ? ASSOCGRP_STD : ped->m_animGroup,
 			(AnimationId)state->secAnimId, 100.0f);
 		anim2->SetCurrentTime(time);
 		anim2->speed = speed;
@@ -481,12 +480,59 @@ void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
 				(RpClump*)ped->m_rwObject, ASSOCGRP_STD, (AnimationId)state->partAnimId, 1000.0f);
 			anim3->SetCurrentTime(time);
 			anim3->speed = speed;
-			anim3->blendDelta = 0.0f; // is it correct?
+			anim3->SetBlend(blend, 0.0f);
 		}
 	}
 }
 #endif
+
+#if 0
 WRAPPER void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state) { EAXJMP(0x5944B0); }
+#else
+void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state)
+{
+	for (int i = 0; i < 3; i++){
+		if (state->aAnimId[i] == NUM_ANIMS)
+			continue;
+		CAnimBlendAssociation* anim = CAnimManager::BlendAnimation(
+			(RpClump*)ped->m_rwObject,
+			state->aAnimId[i] > 3 ? ASSOCGRP_STD : ped->m_animGroup,
+			(AnimationId)state->aAnimId[i], 100.0f);
+		anim->SetCurrentTime(state->aCurTime[i] * 4.0f / 255.0f);
+		anim->speed = state->aSpeed[i] * 3.0f / 255.0f;
+		/* Lack of commented out calculation causes megajump */
+		anim->SetBlend(state->aBlendAmount[i] /* * 2.0f / 255.0f */, 1.0f);
+		anim->flags = state->aFlags[i];
+		uint8 callback = state->aFunctionCallbackID[i];
+		if (!callback)
+			anim->callbackType = CAnimBlendAssociation::CB_NONE;
+		else if (callback & 0x80)
+			anim->SetFinishCallback(FindCBFunction(callback & 0x7F), ped);
+		else
+			anim->SetDeleteCallback(FindCBFunction(callback & 0x7F), ped);
+	}
+	for (int i = 0; i < 6; i++) {
+		if (state->aAnimId2[i] == NUM_ANIMS)
+			continue;
+		CAnimBlendAssociation* anim = CAnimManager::BlendAnimation(
+			(RpClump*)ped->m_rwObject,
+			state->aAnimId2[i] > 3 ? ASSOCGRP_STD : ped->m_animGroup,
+			(AnimationId)state->aAnimId2[i], 100.0f);
+		anim->SetCurrentTime(state->aCurTime2[i] * 4.0f / 255.0f);
+		anim->speed = state->aSpeed2[i] * 3.0f / 255.0f;
+		/* Lack of commented out calculation causes megajump */
+		anim->SetBlend(state->aBlendAmount2[i] /* * 2.0f / 255.0f */, 1.0f);
+		anim->flags = state->aFlags2[i];
+		uint8 callback = state->aFunctionCallbackID2[i];
+		if (!callback)
+			anim->callbackType = CAnimBlendAssociation::CB_NONE;
+		else if (callback & 0x80)
+			anim->SetFinishCallback(FindCBFunction(callback & 0x7F), ped);
+		else
+			anim->SetDeleteCallback(FindCBFunction(callback & 0x7F), ped);
+	}
+}
+#endif
 WRAPPER void CReplay::PlaybackThisFrame(void) { EAXJMP(0x5946B0); }
 
 #if 0
@@ -834,7 +880,9 @@ STARTPATCHES
 InjectHook(0x592FC0, PrintElementsInPtrList, PATCH_JUMP);
 InjectHook(0x592FE0, CReplay::Init, PATCH_JUMP);
 InjectHook(0x593150, CReplay::DisableReplays, PATCH_JUMP);
-InjectHook(0x593150, CReplay::EnableReplays, PATCH_JUMP);
+InjectHook(0x593160, CReplay::EnableReplays, PATCH_JUMP);
 InjectHook(0x593170, CReplay::Update, PATCH_JUMP);
+InjectHook(0x594050, CReplay::ProcessPedUpdate, PATCH_JUMP);
+InjectHook(0x5944B0, CReplay::RetrieveDetailedPedAnimation, PATCH_JUMP);
 //InjectHook(0x5966E0, CReplay::RestoreStuffFromMem, PATCH_JUMP);
 ENDPATCHES
