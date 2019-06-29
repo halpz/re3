@@ -15,7 +15,7 @@ public:
 	static int Read(int fd, char *buf, int len);
 	static int Write(int fd, char *buf, int len);
 	static bool Seek(int fd, int offset, int whence);
-	static char *ReadLine(int fd, char *buf, int len);
+	static bool ReadLine(int fd, char *buf, int len);
 	static int CloseFile(int fd);
 	static int GetErrorReadWrite(int fd);
 };

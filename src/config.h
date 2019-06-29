@@ -77,3 +77,5 @@ enum Config {
 #define NO_MOVIES
 //#define USE_MY_DOCUMENTS
 #define NASTY_GAME
+#define PS2_MATFX
+

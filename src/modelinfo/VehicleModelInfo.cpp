@@ -1006,7 +1006,9 @@ CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial *material, void *data)
 		if(RpMaterialGetTexture(material) == 0)
 			RpMaterialSetTexture(material, gpWhiteTexture);
 		RpMatFXMaterialSetEffects(material, rpMATFXEFFECTENVMAP);
+#ifndef PS2_MATFX
 		spec *= 0.5f;	// Tone down a bit for PC
+#endif
 		RpMatFXMaterialSetupEnvMap(material, (RwTexture*)data, pMatFxIdentityFrame, false, spec);
 	}
 	return material;

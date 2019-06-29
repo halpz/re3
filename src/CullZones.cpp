@@ -2,6 +2,7 @@
 #include "patcher.h"
 #include "Building.h"
 #include "Treadable.h"
+#include "Train.h"
 #include "Pools.h"
 #include "Timer.h"
 #include "Camera.h"
@@ -71,7 +72,6 @@ void
 CCullZones::Update(void)
 {
 	bool invisible;
-	CVector v;
 
 	if(bCullZonesDisabled)
 		return;
@@ -95,7 +95,7 @@ CCullZones::Update(void)
 
 	case 6:
 		/* Update player attributes */
-		CurrentFlags_Player = FindAttributesForCoors(FindPlayerCoors(v),
+		CurrentFlags_Player = FindAttributesForCoors(FindPlayerCoors(),
 			&CurrentWantedLevelDrop_Player);
 		break;
 	}
@@ -152,7 +152,7 @@ CCullZones::FindZoneWithStairsAttributeForPlayer(void)
 	int i;
 	CVector coors;
 
-	FindPlayerCoors(coors);
+	coors = FindPlayerCoors();
 	for(i = 0; i < NumAttributeZones; i++)
 		if(aAttributeZones[i].attributes & ATTRZONE_STAIRS &&
 		   coors.x >= aAttributeZones[i].minx && coors.x <= aAttributeZones[i].maxx &&
@@ -162,9 +162,33 @@ CCullZones::FindZoneWithStairsAttributeForPlayer(void)
 	return nil;
 }
 
-WRAPPER void
+void
 CCullZones::MarkSubwayAsInvisible(bool visible)
-{ EAXJMP(0x525AF0);
+{
+	int i, n;
+	CEntity *e;
+	CVehicle *v;
+
+	n = CPools::GetBuildingPool()->GetSize();
+	for(i = 0; i < n; i++){
+		e = CPools::GetBuildingPool()->GetSlot(i);
+		if(e && e->bIsSubway)
+			e->bIsVisible = visible;
+	}
+
+	n = CPools::GetTreadablePool()->GetSize();
+	for(i = 0; i < n; i++){
+		e = CPools::GetTreadablePool()->GetSlot(i);
+		if(e && e->bIsSubway)
+			e->bIsVisible = visible;
+	}
+
+	n = CPools::GetVehiclePool()->GetSize();
+	for(i = 0; i < n; i++){
+		v = CPools::GetVehiclePool()->GetSlot(i);
+		if(v && v->IsTrain() && ((CTrain*)v)->m_trackId != 0)
+			v->bIsVisible = visible;
+	}
 }
 
 void

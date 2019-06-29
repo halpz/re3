@@ -2,7 +2,7 @@
 #include "patcher.h"
 #include "Game.h"
 
-int &CGame::currLevel = *(int*)0x941514;
+eLevelName &CGame::currLevel = *(eLevelName*)0x941514;
 bool &CGame::bDemoMode = *(bool*)0x5F4DD0;
 bool &CGame::nastyGame = *(bool*)0x5F4DD4;
 bool &CGame::frenchGame = *(bool*)0x95CDCB;
@@ -11,6 +11,7 @@ bool &CGame::noProstitutes = *(bool*)0x95CDCF;
 bool &CGame::playingIntro = *(bool*)0x95CDC2;
 char *CGame::aDatFile = (char*)0x773A48;
 
+WRAPPER void CGame::Initialise(const char *datFile) { EAXJMP(0x48BED0); }
 WRAPPER void CGame::Process(void) { EAXJMP(0x48C850); }
 WRAPPER bool CGame::InitialiseOnceBeforeRW(void) { EAXJMP(0x48BB80); }
 WRAPPER bool CGame::InitialiseRenderWare(void) { EAXJMP(0x48BBA0); }

@@ -5,6 +5,7 @@
 #include "World.h"
 #include "Vehicle.h"
 #include "Ped.h"
+#include "PlayerPed.h"
 #include "Pad.h"
 #include "General.h"
 #include "CullZones.h"

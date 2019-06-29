@@ -193,7 +193,7 @@ public:
 	void SetEffectsFadeVol(uint8);
 	void SetMusicFadeVol(uint8);
 	int32 CreateEntity(int, void*);
-	void SetEntityStatus(int32, int8);
+	void SetEntityStatus(int32 id, uint8 enable);
 	void SetRadioInCar(int32);
 	uint8 IsMP3RadioChannelAvailable();
 

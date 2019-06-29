@@ -1,6 +1,6 @@
 #pragma once
-#include "Automobile.h"
-#include "PlayerPed.h"
+
+#include "Collision.h"
 
 enum eWastedBustedState
 {
@@ -10,10 +10,9 @@ enum eWastedBustedState
 	WBSTATE_FAILED_CRITICAL_MISSION,
 };
 
-struct CCivilianPed
-{
-
-};
+class CVehicle;
+class CPlayerPed;
+class CCivilianPed;
 
 class CPlayerInfo
 {
@@ -22,10 +21,7 @@ public:
 	CVehicle *m_pRemoteVehicle;
 	CColModel m_ColModel;
 	CVehicle *m_pVehicleEx;
-	char m_aszPlayerName[70];
-private:
-	int8 _pad0[2];
-public:
+	char m_aPlayerName[70];
 	int32 m_nMoney;
 	int32 m_nVisibleMoney;
 	int32 m_nCollectedPackages;
@@ -40,7 +36,7 @@ public:
 	int32 m_nNextSexMoneyUpdateTime;
 	int32 m_nSexFrequency;
 	CCivilianPed *m_pHooker;
-	int8 m_bWBState; // eWastedBustedState
+	int8 m_WBState; // eWastedBustedState
 	int8 field_217;
 	int8 field_218;
 	int8 field_219;
@@ -71,4 +67,4 @@ public:
 	RwTexture *m_pSkinTexture;
 };
 
-static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerPed: error");
+static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");

@@ -46,7 +46,7 @@ CFileLoader::LoadLevel(const char *filename)
 {
 	int fd;
 	RwTexDictionary *savedTxd;
-	int savedLevel;
+	eLevelName savedLevel;
 	bool objectsLoaded;
 	char *line;
 	char txdname[64];
@@ -79,7 +79,7 @@ CFileLoader::LoadLevel(const char *filename)
 		}else if(strncmp(line, "COLFILE", 7) == 0){
 			int level;
 			sscanf(line+8, "%d", &level);
-			CGame::currLevel = level;
+			CGame::currLevel = (eLevelName)level;
 			LoadingScreenLoadingFile(line+10);
 			LoadCollisionFile(line+10);
 			CGame::currLevel = savedLevel;

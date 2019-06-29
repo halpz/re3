@@ -265,10 +265,10 @@ CFileMgr::Seek(int fd, int offset, int whence)
 	return !!myfseek(fd, offset, whence);
 }
 
-char*
+bool
 CFileMgr::ReadLine(int fd, char *buf, int len)
 {
-	return myfgets(buf, len, fd);
+	return myfgets(buf, len, fd) != nil;
 }
 
 int

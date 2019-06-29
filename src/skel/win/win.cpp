@@ -114,18 +114,11 @@ DWORD _dwMemAvailVideo;
 DWORD &_dwOperatingSystemVersion = *(DWORD*)0x70F290;
 
 RwUInt32 &gGameState = *(RwUInt32*)0x8F5838;
-WRAPPER bool InitialiseGame(void) { EAXJMP(0x48E7E0); }
-
-WRAPPER const char *GetLevelSplashScreen(int32 number) { EAXJMP(0x48D750); }
-//
-
-void LoadingScreen(char const *msg1, char const *msg2, char const *screen);
-CSprite2d *LoadSplash(const char *name);
 
 enum eJoypadState
 {
-  JOYPAD_UNUSED,
-  JOYPAD_ATTACHED,
+	JOYPAD_UNUSED,
+	JOYPAD_ATTACHED,
 };
 
 struct tJoy

@@ -244,6 +244,7 @@ private:
 
 public:
 	static void Init(void);
+	static void EmptyReplayBuffer(void);
 	static void DisableReplays(void);
 	static void EnableReplays(void);
 	static void Update(void);
