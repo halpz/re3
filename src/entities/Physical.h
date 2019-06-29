@@ -14,7 +14,7 @@ class CPhysical : public CEntity
 public:
 	// The not properly indented fields haven't been checked properly yet
 
-  int uAudioEntityId;
+	int32 m_audioEntityId;
   float unk1;
 	CTreadable *m_carTreadable;
 	CTreadable *m_pedTreadable;
@@ -58,9 +58,8 @@ public:
 	uint8 bHitByTrain : 1;	// from nick
 	uint8 m_phy_flagA80 : 1;
 
-  uint8 m_nLastCollType;
-  uint8 m_nZoneLevel;
-  uint8 pad[3];
+	uint8 m_nLastCollType;
+	uint8 m_nZoneLevel;
 
 	CPhysical(void);
 	~CPhysical(void);

@@ -72,7 +72,6 @@ void
 CCullZones::Update(void)
 {
 	bool invisible;
-	CVector v;
 
 	if(bCullZonesDisabled)
 		return;
@@ -96,7 +95,7 @@ CCullZones::Update(void)
 
 	case 6:
 		/* Update player attributes */
-		CurrentFlags_Player = FindAttributesForCoors(FindPlayerCoors(v),
+		CurrentFlags_Player = FindAttributesForCoors(FindPlayerCoors(),
 			&CurrentWantedLevelDrop_Player);
 		break;
 	}
@@ -153,7 +152,7 @@ CCullZones::FindZoneWithStairsAttributeForPlayer(void)
 	int i;
 	CVector coors;
 
-	FindPlayerCoors(coors);
+	coors = FindPlayerCoors();
 	for(i = 0; i < NumAttributeZones; i++)
 		if(aAttributeZones[i].attributes & ATTRZONE_STAIRS &&
 		   coors.x >= aAttributeZones[i].minx && coors.x <= aAttributeZones[i].maxx &&

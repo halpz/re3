@@ -25,5 +25,5 @@ WRAPPER uint8 cDMAudio::IsMP3RadioChannelAvailable() { EAXJMP(0x57C9F0); }
 WRAPPER void cDMAudio::SetEffectsFadeVol(uint8) { EAXJMP(0x57C8F0); }
 WRAPPER void cDMAudio::SetMusicFadeVol(uint8) { EAXJMP(0x57C920); }
 WRAPPER int32 cDMAudio::CreateEntity(int, void*) { EAXJMP(0x57C7C0); }
-WRAPPER void cDMAudio::SetEntityStatus(int32, int8) { EAXJMP(0x57C810); }
+WRAPPER void cDMAudio::SetEntityStatus(int32 id, uint8 enable) { EAXJMP(0x57C810); }
 WRAPPER void cDMAudio::SetRadioInCar(int32) { EAXJMP(0x57CE60); }

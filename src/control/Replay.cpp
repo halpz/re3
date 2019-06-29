@@ -212,7 +212,7 @@ void CReplay::RecordThisFrame(void)
 	tGeneralPacket* general = (tGeneralPacket*)&Record.m_pBase[Record.m_nOffset];
 	general->type = REPLAYPACKET_GENERAL;
 	general->camera_pos.CopyOnlyMatrix(&TheCamera.GetMatrix());
-	FindPlayerCoors(general->player_pos);
+	general->player_pos = FindPlayerCoors();
 	general->in_rcvehicle = CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle ? true : false;
 	Record.m_nOffset += sizeof(*general);
 	tClockPacket* clock = (tClockPacket*)&Record.m_pBase[Record.m_nOffset];
@@ -727,8 +727,8 @@ void CReplay::RestoreStuffFromMem(void)
 		ped->m_modelIndex = -1;
 		ped->SetModelIndex(mi);
 		ped->m_pVehicleAnim = 0;
-		ped->uAudioEntityId = DMAudio.CreateEntity(0, ped);
-		DMAudio.SetEntityStatus(ped->uAudioEntityId, 1);
+		ped->m_audioEntityId = DMAudio.CreateEntity(0, ped);
+		DMAudio.SetEntityStatus(ped->m_audioEntityId, true);
 		CPopulation::UpdatePedCount(ped->m_nPedType, false);
 		if (ped->m_wepModelID >= 0)
 			ped->AddWeaponModel(ped->m_wepModelID);
@@ -765,8 +765,8 @@ void CReplay::RestoreStuffFromMem(void)
 			car->SetDoorDamage(16, 4, true); /* DOOR_BACK_LEFT */
 			car->SetDoorDamage(12, 5, true); /* DOOR_BACK_RIGHT */
 		}
-		vehicle->uAudioEntityId = DMAudio.CreateEntity(0, vehicle);
-		DMAudio.SetEntityStatus(vehicle->uAudioEntityId, 1);
+		vehicle->m_audioEntityId = DMAudio.CreateEntity(0, vehicle);
+		DMAudio.SetEntityStatus(vehicle->m_audioEntityId, true);
 		CCarCtrl::UpdateCarCount(vehicle, false);
 		if ((mi == MI_AIRTRAIN || mi == MI_DEADDODO) && vehicle->m_rwObject){
 			CVehicleModelInfo* info = (CVehicleModelInfo*)CModelInfo::GetModelInfo(mi);

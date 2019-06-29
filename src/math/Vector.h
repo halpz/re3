@@ -22,6 +22,7 @@ public:
 		return *((RwV3d*)this);
 	}
 #endif
+	float Heading(void) const { return atan2(-x, y); }
 	float Magnitude(void) const { return sqrt(x*x + y*y + z*z); }
 	float MagnitudeSqr(void) const { return x*x + y*y + z*z; }
 	float Magnitude2D(void) const { return sqrt(x*x + y*y); }

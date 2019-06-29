@@ -69,6 +69,7 @@ public:
 
 	static void Remove(CEntity *entity);
 	static void Add(CEntity *entity);
+	static void Remove(CEntity *ent);
 
 	static CSector *GetSector(int x, int y) { return &ms_aSectors[y][x]; }
 	static CPtrList &GetBigBuildingList(eLevelName i) { return ms_bigBuildingsList[i]; }
@@ -111,9 +112,11 @@ public:
 class CPlayerPed;
 class CVehicle;
 CPlayerPed *FindPlayerPed(void);
-CVector &FindPlayerCoors(CVector &v);
 CVehicle *FindPlayerVehicle(void);
 CVehicle *FindPlayerTrain(void);
+CEntity *FindPlayerEntity(void);
+CVector FindPlayerCoors(void);
 CVector &FindPlayerSpeed(void);
-CVector FindPlayerCentreOfWorld_NoSniperShift(void);
+CVector &FindPlayerCentreOfWorld(int32 player);
+CVector &FindPlayerCentreOfWorld_NoSniperShift(void);
 float FindPlayerHeading(void);

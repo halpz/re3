@@ -114,7 +114,7 @@ void
 CTheZones::Update(void)
 {
 	CVector pos;
-	FindPlayerCoors(pos);
+	pos = FindPlayerCoors();
 	m_pPlayersZone = FindSmallestZonePosition(&pos);
 	m_CurrLevel = GetLevelFromPosition(pos);
 }

@@ -2,13 +2,15 @@
 #include "patcher.h"
 #include "Entity.h"
 #include "Ped.h"
+#include "PlayerPed.h"
+#include "Vehicle.h"
 #include "Object.h"
+#include "Camera.h"
+#include "DMAudio.h"
+#include "CarCtrl.h"
 #include "Garages.h"
 #include "TempColModels.h"
 #include "World.h"
-
-WRAPPER void CWorld::Add(CEntity *entity) { EAXJMP(0x4AE930); }
-WRAPPER void CWorld::Remove(CEntity *entity) { EAXJMP(0x4AE9D0); }
 
 CPtrList *CWorld::ms_bigBuildingsList = (CPtrList*)0x6FAB60;
 CPtrList &CWorld::ms_listMovingEntityPtrs = *(CPtrList*)0x8F433C;
@@ -24,6 +26,41 @@ bool &CWorld::bSecondShift = *(bool*)0x95CD54;
 bool &CWorld::bForceProcessControl = *(bool*)0x95CD6C;
 bool &CWorld::bProcessCutsceneOnly = *(bool*)0x95CD8B;
 
+void
+CWorld::Add(CEntity *ent)
+{
+	if(ent->IsVehicle() || ent->IsPed())
+		DMAudio.SetEntityStatus(((CPhysical*)ent)->m_audioEntityId, true);
+
+	if(ent->bIsBIGBuilding)
+		ms_bigBuildingsList[ent->m_level].InsertItem(ent);
+	else
+		ent->Add();
+
+	if(ent->IsBuilding() || ent->IsDummy())
+		return;
+
+	if(!ent->bIsStatic)
+		((CPhysical*)ent)->AddToMovingList();
+}
+
+void
+CWorld::Remove(CEntity *ent)
+{
+	if(ent->IsVehicle() || ent->IsPed())
+		DMAudio.SetEntityStatus(((CPhysical*)ent)->m_audioEntityId, false);
+
+	if(ent->bIsBIGBuilding)
+		ms_bigBuildingsList[ent->m_level].RemoveItem(ent);
+	else
+		ent->Remove();
+
+	if(ent->IsBuilding() || ent->IsDummy())
+		return;
+
+	if(!ent->bIsStatic)
+		((CPhysical*)ent)->RemoveFromMovingList();
+}
 
 void
 CWorld::ClearScanCodes(void)
@@ -572,7 +609,98 @@ CWorld::FindRoofZFor3DCoord(float x, float y, float z, bool *found)
 	}
 }
 
+CPlayerPed*
+FindPlayerPed(void)
+{
+	return CWorld::Players[CWorld::PlayerInFocus].m_pPed;
+}
+
+CVehicle*
+FindPlayerVehicle(void)
+{
+	CPlayerPed *ped = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
+	if(ped->bInVehicle && ped->m_pMyVehicle)
+		return ped->m_pMyVehicle;
+	else
+		return nil;
+}
+
+CVehicle*
+FindPlayerTrain(void)
+{
+	if(FindPlayerVehicle() && FindPlayerVehicle()->IsTrain())
+		return FindPlayerVehicle();
+	else
+		return nil;
+}
+
+CEntity*
+FindPlayerEntity(void)
+{
+	CPlayerPed *ped = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
+	if(ped->bInVehicle && ped->m_pMyVehicle)
+		return ped->m_pMyVehicle;
+	else
+		return ped;
+}
+
+CVector
+FindPlayerCoors(void)
+{
+	CPlayerPed *ped = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
+	if(ped->bInVehicle && ped->m_pMyVehicle)
+		return ped->m_pMyVehicle->GetPosition();
+	else
+		return ped->GetPosition();
+}
+
+CVector&
+FindPlayerSpeed(void)
+{
+	CPlayerPed *ped = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
+	if(ped->bInVehicle && ped->m_pMyVehicle)
+		return ped->m_pMyVehicle->m_vecMoveSpeed;
+	else
+		return ped->m_vecMoveSpeed;
+}
+
+CVector&
+FindPlayerCentreOfWorld(int32 player)
+{
+	if(CCarCtrl::bCarsGeneratedAroundCamera)
+		return TheCamera.GetPosition();
+	if(CWorld::Players[player].m_pRemoteVehicle)
+		return CWorld::Players[player].m_pRemoteVehicle->GetPosition();
+	if(FindPlayerVehicle())
+		return FindPlayerVehicle()->GetPosition();
+	return CWorld::Players[player].m_pPed->GetPosition();
+}
+
+CVector&
+FindPlayerCentreOfWorld_NoSniperShift(void)
+{
+	if(CCarCtrl::bCarsGeneratedAroundCamera)
+		return TheCamera.GetPosition();
+	if(CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
+		return CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->GetPosition();
+	if(FindPlayerVehicle())
+		return FindPlayerVehicle()->GetPosition();
+	return CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetPosition();
+}
+
+float
+FindPlayerHeading(void)
+{
+	if(CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
+		return CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->GetForward().Heading();
+	if(FindPlayerVehicle())
+		return FindPlayerVehicle()->GetForward().Heading();
+	return CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetForward().Heading();
+}
+
 STARTPATCHES
+	InjectHook(0x4AE930, CWorld::Add, PATCH_JUMP);
+	InjectHook(0x4AE9D0, CWorld::Remove, PATCH_JUMP);
 	InjectHook(0x4B1F60, CWorld::ClearScanCodes, PATCH_JUMP);
 	InjectHook(0x4AF970, CWorld::ProcessLineOfSight, PATCH_JUMP);
 	InjectHook(0x4B0A80, CWorld::ProcessLineOfSightSector, PATCH_JUMP);
@@ -588,11 +716,3 @@ STARTPATCHES
 	InjectHook(0x4B3AE0, CWorld::FindGroundZFor3DCoord, PATCH_JUMP);
 	InjectHook(0x4B3B50, CWorld::FindRoofZFor3DCoord, PATCH_JUMP);
 ENDPATCHES
-
-WRAPPER CPlayerPed *FindPlayerPed(void) { EAXJMP(0x4A1150); }
-WRAPPER CVector &FindPlayerCoors(CVector &v) { EAXJMP(0x4A1030); }
-WRAPPER CVehicle *FindPlayerVehicle(void) { EAXJMP(0x4A10C0); }
-WRAPPER CVehicle *FindPlayerTrain(void) { EAXJMP(0x4A1120); }
-WRAPPER CVector &FindPlayerSpeed(void) { EAXJMP(0x4A1090); }
-WRAPPER CVector FindPlayerCentreOfWorld_NoSniperShift(void) { EAXJMP(0x4A11C0); }
-WRAPPER float FindPlayerHeading(void) { EAXJMP(0x4A1220); }
