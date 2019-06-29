@@ -388,7 +388,7 @@ CCoronas::Render(void)
 	// streaks
 	for(i = 0; i < NUMCORONAS; i++){
 		if(aCoronas[i].id == 0 || !aCoronas[i].drawStreak)
-			break;
+			continue;
 
 		for(j = 0; j < 5; j++){
 			if(!aCoronas[i].hasValue[j] || !aCoronas[i].hasValue[j+1])

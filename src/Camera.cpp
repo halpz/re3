@@ -13,7 +13,7 @@
 #include "MBlur.h"
 #include "Camera.h"
 
-const float DefaultFOV = 80.0f;	// actually 70.0f
+const float DefaultFOV = 70.0f;	// beta: 80.0f
 
 CCamera &TheCamera = *(CCamera*)0x6FACF8;
 bool &CCamera::m_bUseMouse3rdPerson = *(bool *)0x5F03D8;

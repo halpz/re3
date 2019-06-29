@@ -342,7 +342,7 @@ patch()
 {
 	StaticPatcher::Apply();
 
-	Patch<float>(0x46BC61+6, 1.0f);	// car distance
+//	Patch<float>(0x46BC61+6, 1.0f);	// car distance
 	InjectHook(0x59E460, printf, PATCH_JUMP);
 	InjectHook(0x475E00, printf, PATCH_JUMP);	// _Error
 
