@@ -165,8 +165,6 @@ void CReplay::Init(void)
 	bDoLoadSceneWhenDone = false;
 }
 
-WRAPPER void CReplay::EmptyReplayBuffer(void) { EAXJMP(0x595BD0); }
-
 void CReplay::DisableReplays(void)
 {
 	bReplayEnabled = false;
@@ -406,7 +404,46 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 	}
 }
 #endif
+#if 0
 WRAPPER void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayBuffer *buffer) { EAXJMP(0x594050); }
+#else
+void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayBuffer *buffer)
+{
+	tPedUpdatePacket *pp = (tPedUpdatePacket*)&buffer->m_pBase[buffer->m_nOffset];
+	if (ped){
+		ped->m_fRotationCur = pp->heading * M_PI / 128.0f;
+		ped->m_fRotationDest = pp->heading * M_PI / 128.0f;
+		CMatrix ped_matrix;
+		float coeff = 1.0f - interpolation;
+		pp->matrix.DecompressIntoFullMatrix(ped_matrix);
+		ped->GetMatrix() = ped->GetMatrix() * CMatrix(coeff);
+		*ped->GetMatrix().GetPosition() *= coeff;
+		ped->GetMatrix() += CMatrix(coeff) * ped_matrix;
+		if (pp->vehicle_index) {
+			ped->m_pMyVehicle = CPools::GetVehiclePool()->GetSlot(pp->vehicle_index - 1);
+			ped->bInVehicle = pp->vehicle_index;
+		}
+		else {
+			ped->m_pMyVehicle = nil;
+			ped->bInVehicle = false;
+		}
+		if (pp->assoc_group_id != ped->m_animGroup) {
+			ped->m_animGroup = (AssocGroupId)pp->assoc_group_id;
+			if (ped->IsPlayer())
+				((CPlayerPed*)ped)->ReApplyMoveAnims();
+		}
+		RetrievePedAnimation(ped, &pp->anim_state);
+		ped->RemoveWeaponModel(-1);
+		if (pp->weapon_model != -1)
+			ped->AddWeaponModel(pp->weapon_model);
+		CWorld::Remove(ped);
+		CWorld::Add(ped);
+	}else{
+		debug("Replay:Ped wasn't there\n");
+	}
+	buffer->m_nOffset += sizeof(tPedUpdatePacket);
+}
+#endif
 WRAPPER void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state) { EAXJMP(0x5942A0); }
 WRAPPER void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state) { EAXJMP(0x5944B0); }
 WRAPPER void CReplay::PlaybackThisFrame(void) { EAXJMP(0x5946B0); }
@@ -453,7 +490,7 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 WRAPPER void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressInReplayBuffer *buffer) { EAXJMP(0x594D10); }
 WRAPPER bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer) { EAXJMP(0x595240); }
 WRAPPER void CReplay::FinishPlayback(void) { EAXJMP(0x595B20); }
-WRAPPER void CReplay::Shutdown(void) { EAXJMP(0x595BD0); }
+WRAPPER void CReplay::EmptyReplayBuffer(void) { EAXJMP(0x595BD0); }
 WRAPPER void CReplay::ProcessReplayCamera(void) { EAXJMP(0x595C40); }
 
 #if 0

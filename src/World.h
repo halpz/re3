@@ -67,6 +67,7 @@ public:
 	static bool &bForceProcessControl;
 	static bool &bProcessCutsceneOnly;
 
+	static void Remove(CEntity *entity);
 	static void Add(CEntity *entity);
 
 	static CSector *GetSector(int x, int y) { return &ms_aSectors[y][x]; }
@@ -103,6 +104,8 @@ public:
 	static int GetSectorIndexY(float f) { return (int)GetSectorY(f); }
 	static float GetWorldX(int x) { return x*SECTOR_SIZE_X + WORLD_MIN_X; }
 	static float GetWorldY(int y) { return y*SECTOR_SIZE_Y + WORLD_MIN_Y; }
+
+	static void Remove(void);
 };
 
 class CPlayerPed;

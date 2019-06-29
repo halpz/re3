@@ -155,7 +155,7 @@ class CReplay
 		int8 vehicle_index;
 		CStoredAnimationState anim_state;
 		CCompressedMatrixNotAligned matrix;
-		uint8 assoc_group_id;
+		int8 assoc_group_id;
 		uint8 weapon_model;
 	};
 	static_assert(sizeof(tPedUpdatePacket) == 40, "tPedUpdatePacket: error");
@@ -244,12 +244,11 @@ private:
 
 public:
 	static void Init(void);
-	static void EmptyReplayBuffer(void);
 	static void DisableReplays(void);
 	static void EnableReplays(void);
 	static void Update(void);
 	static void FinishPlayback(void);
-	static void Shutdown(void);
+	static void EmptyReplayBuffer(void);
 	static void Display(void);
 	static void TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene);
 	static void StreamAllNecessaryCarsAndPeds(void);

@@ -8,6 +8,7 @@
 #include "World.h"
 
 WRAPPER void CWorld::Add(CEntity *entity) { EAXJMP(0x4AE930); }
+WRAPPER void CWorld::Remove(CEntity *entity) { EAXJMP(0x4AE9D0); }
 
 CPtrList *CWorld::ms_bigBuildingsList = (CPtrList*)0x6FAB60;
 CPtrList &CWorld::ms_listMovingEntityPtrs = *(CPtrList*)0x8F433C;

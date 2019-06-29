@@ -20,6 +20,11 @@ public:
 		m_attachment = nil;
 		Attach(matrix, owner);
 	}
+	CMatrix(float scale){
+		m_attachment = nil;
+		m_hasRwMatrix = false;
+		SetScale(scale);
+	}
 	~CMatrix(void){
 		if(m_hasRwMatrix && m_attachment)
 			RwMatrixDestroy(m_attachment);
@@ -56,6 +61,21 @@ public:
 		m_matrix = rhs.m_matrix;
 		if(m_attachment)
 			UpdateRW();
+	}
+	CMatrix& operator+=(CMatrix const &rhs){
+		m_matrix.right.x += rhs.m_matrix.right.x;
+		m_matrix.up.x += rhs.m_matrix.up.x;
+		m_matrix.at.x += rhs.m_matrix.at.x;
+		m_matrix.right.y += rhs.m_matrix.right.y;
+		m_matrix.up.y += rhs.m_matrix.up.y;
+		m_matrix.at.y += rhs.m_matrix.at.y;
+		m_matrix.right.z += rhs.m_matrix.right.z;
+		m_matrix.up.z += rhs.m_matrix.up.z;
+		m_matrix.at.z += rhs.m_matrix.at.z;
+		m_matrix.pos.x += rhs.m_matrix.pos.x;
+		m_matrix.pos.y += rhs.m_matrix.pos.y;
+		m_matrix.pos.y += rhs.m_matrix.pos.z;
+		return *this;
 	}
 
 	CVector *GetPosition(void){ return (CVector*)&m_matrix.pos; }
