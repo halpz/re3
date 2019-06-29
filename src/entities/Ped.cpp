@@ -1285,7 +1285,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		} else if (veh->bIsBus) {
 			m_fRotationDest = 0.5 * PI + veh->GetForward().Heading();
 		} else {
-			m_fRotationDest = GetForward().Heading();
+			m_fRotationDest = veh->GetForward().Heading();
 		}
 	} else if (m_vehEnterType == VEHICLE_ENTER_FRONT_LEFT || m_vehEnterType == VEHICLE_ENTER_REAR_LEFT) {
 		if (vehIsUpsideDown) {
