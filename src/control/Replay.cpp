@@ -1533,15 +1533,20 @@ WRAPPER void CReplay::Display(void) { EAXJMP(0x595EE0); }
 #else
 void CReplay::Display()
 {
-	if (CReplay::IsPlayingBack() && CTimer::GetFrameCounter() + 1 & 0x20) {
-		CFont::SetPropOn();
-		CFont::SetBackgroundOff();
-		CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
-		CFont::SetAlignment(ALIGN_LEFT);
-		CFont::SetColor(CRGBA(255, 255, 200, 200));
-		CFont::SetFontStyle(FONT_BANK);
+	static int counter = 0;
+	if (Mode == MODE_RECORD)
+		return;
+	counter = (counter + 1) % 65536;
+	if (counter & 0x20 == 0)
+		return;
+	CFont::SetPropOn();
+	CFont::SetBackgroundOff();
+	CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
+	CFont::SetAlignment(ALIGN_LEFT);
+	CFont::SetColor(CRGBA(255, 255, 200, 200));
+	CFont::SetFontStyle(FONT_BANK);
+	if (Mode == MODE_PLAYBACK)
 		CFont::PrintString(SCREEN_SCALE_X(63.5f), SCREEN_SCALE_Y(30.0f), TheText.Get("REPLAY"));
-	}
 }
 #endif
 
