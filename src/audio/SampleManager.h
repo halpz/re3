@@ -6,6 +6,7 @@ public:
 
 public:
 	void ReleaseDigitalHandle();
+	void RequireDigitalHandle();
 	static bool IsMP3RadioChannelAvailable();
 };
 

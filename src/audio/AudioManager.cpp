@@ -18,7 +18,14 @@ cAudioManager::ReleaseDigitalHandle()
 	if(m_bIsInitialised) { cSampleManager.ReleaseDigitalHandle(); }
 }
 
-void cAudioManager::SetDynamicAcousticModelingStatus(bool status)
+void
+cAudioManager::RequireDigitalHandle()
+{
+	if(m_bIsInitialised) { cSampleManager.RequireDigitalHandle(); }
+}
+
+void
+cAudioManager::SetDynamicAcousticModelingStatus(bool status)
 {
 	m_bDynamicAcousticModelingStatus = status;
 }
@@ -2807,14 +2814,22 @@ cAudioManager::Service()
 }
 
 STARTPATCHES
-InjectHook(0x57A4C0, &cAudioManager::SetEntityStatus, PATCH_JUMP);
-InjectHook(0x569570, &cAudioManager::PreTerminateGameSpecificShutdown, PATCH_JUMP);
+
+InjectHook(0x57A9E0, &cAudioManager::ReleaseDigitalHandle, PATCH_JUMP);
+InjectHook(0x57A9F0, &cAudioManager::RequireDigitalHandle, PATCH_JUMP);
+InjectHook(0x57AA00, &cAudioManager::SetDynamicAcousticModelingStatus, PATCH_JUMP);
+
+InjectHook(0x57AA50, &cAudioManager::IsAudioInitialised, PATCH_JUMP);
+
 InjectHook(0x57A310, &cAudioManager::CreateEntity, PATCH_JUMP);
 InjectHook(0x57A400, &cAudioManager::DestroyEntity, PATCH_JUMP);
+InjectHook(0x57A4C0, &cAudioManager::SetEntityStatus, PATCH_JUMP);
+
+InjectHook(0x569570, &cAudioManager::PreTerminateGameSpecificShutdown, PATCH_JUMP);
 InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);
-InjectHook(0x57AA00, &cAudioManager::SetDynamicAcousticModelingStatus, PATCH_JUMP);
-InjectHook(0x57AA50, &cAudioManager::IsAudioInitialised, PATCH_JUMP);
+
 InjectHook(0x57C290, &cAudioManager::GenerateIntegerRandomNumberTable, PATCH_JUMP);
+
 InjectHook(0x56AD10, &cAudioManager::PlayerJustGotInCar, PATCH_JUMP);
 InjectHook(0x56AD20, &cAudioManager::PlayerJustLeftCar, PATCH_JUMP);
 InjectHook(0x570DB0, &cAudioManager::GetPhrase, PATCH_JUMP);

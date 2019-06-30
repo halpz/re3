@@ -217,6 +217,7 @@ public:
 	int m_nTimeOfRecentCrime;
 
 	void ReleaseDigitalHandle();
+	void RequireDigitalHandle();
 	void SetDynamicAcousticModelingStatus(bool status);
 
 	bool IsAudioInitialised() const;

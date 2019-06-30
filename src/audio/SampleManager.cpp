@@ -1,4 +1,5 @@
 #include "common.h"
+#include "patcher.h"
 #include "SampleManager.h"
 
 CSampleManager &cSampleManager = *(CSampleManager *)0x7341E0;
@@ -12,4 +13,11 @@ WRAPPER void
 CSampleManager::ReleaseDigitalHandle()
 {
 	EAXJMP(0x5664B0);
+}
+
+WRAPPER
+void
+CSampleManager::RequireDigitalHandle()
+{
+	EAXJMP(0x5664F0);
 }
