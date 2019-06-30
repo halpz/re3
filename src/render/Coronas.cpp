@@ -9,7 +9,7 @@
 #include "World.h"
 #include "Weather.h"
 #include "Collision.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "Coronas.h"
 
 struct FlareDef

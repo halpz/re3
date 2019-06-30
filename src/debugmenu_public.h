@@ -75,7 +75,7 @@ inline bool DebugMenuLoad(void)
 	if(gDebugMenuAPI.isLoaded)
 		return true;
 	HMODULE mod = LoadLibraryA("debugmenu");
-	if(mod == 0){
+	if(mod == nil){
 		char modulePath[MAX_PATH];
 		HMODULE dllModule;
 		GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCTSTR)&gDebugMenuAPI, &dllModule);
@@ -85,7 +85,7 @@ inline bool DebugMenuLoad(void)
 		strcat(modulePath, "debugmenu");
 		mod = LoadLibraryA(modulePath);
 	}
-	if(mod == 0)
+	if(mod == nil)
 		return false;
 	gDebugMenuAPI.addint8 = (DebugMenuAddInt8_TYPE)GetProcAddress(mod, "DebugMenuAddInt8");
 	gDebugMenuAPI.addint16 = (DebugMenuAddInt16_TYPE)GetProcAddress(mod, "DebugMenuAddInt16");

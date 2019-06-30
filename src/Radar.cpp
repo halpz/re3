@@ -43,7 +43,7 @@ CSprite2d *CRadar::TonySprite = (CSprite2d*)0x885B58;
 CSprite2d *CRadar::WeaponSprite = (CSprite2d*)0x941534;
 
 CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = { 
-	NULL,
+	nil,
 	AsukaSprite,
 	BombSprite,
 	CatSprite,

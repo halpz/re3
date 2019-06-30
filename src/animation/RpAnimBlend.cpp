@@ -366,7 +366,7 @@ RpAnimBlendClumpUpdateAnimations(RpClump *clump, float timeDelta)
 				updateData.foobar = 1;
 		}
 	}
-	updateData.nodes[i] = 0;
+	updateData.nodes[i] = nil;
 
 	clumpData->ForAllFrames(FrameUpdateCallBack, &updateData);
 

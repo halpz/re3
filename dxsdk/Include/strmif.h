@@ -862,7 +862,6 @@ typedef interface IVPManager IVPManager;
 extern "C"{
 #endif 
 
-void * __RPC_USER MIDL_user_allocate(size_t);
 void __RPC_USER MIDL_user_free( void * ); 
 
 /* interface __MIDL_itf_strmif_0000 */

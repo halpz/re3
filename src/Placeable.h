@@ -2,10 +2,10 @@
 
 class CPlaceable
 {
-	// disable allocation
-	static void *operator new(size_t) { assert(0); return nil; }
-	static void operator delete(void*, size_t) { assert(0); }
 public:
+	// disable allocation
+	static void *operator new(size_t) = delete;
+
 	CMatrix m_matrix;
 
 	CPlaceable(void);

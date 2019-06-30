@@ -4,7 +4,7 @@
 #include "Particle.h"
 #include "Stats.h"
 #include "World.h"
-#include "DMaudio.h"
+#include "DMAudio.h"
 #include "RpAnimBlend.h"
 #include "Ped.h"
 #include "PlayerPed.h"
@@ -474,7 +474,7 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 unk)
 			if (nodeId != PED_HEAD)
 				CPed::SpawnFlyingComponent(nodeId, unk);
 
-			RecurseFrameChildrenVisibilityCB(frame, 0);
+			RecurseFrameChildrenVisibilityCB(frame, nil);
 			pos.x = 0.0f;
 			pos.y = 0.0f;
 			pos.z = 0.0f;
@@ -505,7 +505,7 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 unk)
 RwObject*
 CPed::SetPedAtomicVisibilityCB(RwObject *object, void *data)
 {
-	if (data == 0)
+	if (data == nil)
 		RpAtomicSetFlags(object, 0);
 	return object;
 }
@@ -514,7 +514,7 @@ RwFrame*
 CPed::RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data)
 {
 	RwFrameForAllObjects(frame, SetPedAtomicVisibilityCB, data);
-	RwFrameForAllChildren(frame, RecurseFrameChildrenVisibilityCB, 0);
+	RwFrameForAllChildren(frame, RecurseFrameChildrenVisibilityCB, nil);
 	return frame;
 }
 
@@ -882,7 +882,7 @@ CPed::Attack(void)
 				&& GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING) {
 
 				weaponAnim = weaponAnimAssoc->animId;
-				if (ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), 0) < PED_ON_THE_FLOOR) {
+				if (ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), nil) < PED_ON_THE_FLOOR) {
 					if (weaponAnim != ourWeapon->m_Anim2ToPlay || weaponAnim == ANIM_RBLOCK_CSHOOT) {
 						weaponAnimAssoc->Start(ourWeapon->m_fAnimLoopStart);
 					} else {
@@ -931,7 +931,7 @@ CPed::Attack(void)
 
 	if (lastReloadWasInFuture) {
 		if (ourWeaponFire != WEAPON_FIRE_PROJECTILE || !CPed::IsPlayer() || ((CPlayerPed*)this)->field_1380) {
-			if (!CGame::nastyGame || ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), 0) < PED_ON_THE_FLOOR) {
+			if (!CGame::nastyGame || ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), nil) < PED_ON_THE_FLOOR) {
 				weaponAnimAssoc = CAnimManager::BlendAnimation((RpClump*)m_rwObject, ASSOCGRP_STD, ourWeapon->m_AnimToPlay, 8.0f);
 			} else {
 				weaponAnimAssoc = CAnimManager::BlendAnimation((RpClump*)m_rwObject, ASSOCGRP_STD, ourWeapon->m_Anim2ToPlay, 8.0f);
@@ -950,14 +950,14 @@ CPed::Attack(void)
 		}
 	}
 	else
-		CPed::FinishedAttackCB(0, this);
+		CPed::FinishedAttackCB(nil, this);
 }
 
 void
 CPed::RemoveWeaponModel(int modelId)
 {
 	// modelId is not used!! This function just removes the current weapon.
-	RwFrameForAllObjects(GetNodeFrame(PED_HANDR),RemoveAllModelCB,0);
+	RwFrameForAllObjects(GetNodeFrame(PED_HANDR),RemoveAllModelCB,nil);
 	m_wepModelID = -1;
 }
 

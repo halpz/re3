@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Placeable.h"
 
 class CEntity;

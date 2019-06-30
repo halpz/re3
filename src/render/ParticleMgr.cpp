@@ -19,7 +19,7 @@ void cParticleSystemMgr::Initialise()
 	LoadParticleData();
 	
 	for ( int32 i = 0; i < MAX_PARTICLES; i++ )
-		m_aParticles[i].m_pParticles = NULL;
+		m_aParticles[i].m_pParticles = nil;
 }
 
 void cParticleSystemMgr::LoadParticleData()
@@ -28,7 +28,7 @@ void cParticleSystemMgr::LoadParticleData()
 	CFileMgr::LoadFile(ParticleFilename, work_buff, ARRAY_SIZE(work_buff), "r");
 	CFileMgr::SetDir("");
 	
-	tParticleSystemData *entry = NULL;
+	tParticleSystemData *entry = nil;
 	int32 type = PARTICLE_FIRST;
 	
 	char *lineStart = (char *)work_buff;
@@ -39,8 +39,8 @@ void cParticleSystemMgr::LoadParticleData()
 
 	while ( true )
 	{
-		ASSERT(lineStart != NULL);
-		ASSERT(lineEnd != NULL);
+		ASSERT(lineStart != nil);
+		ASSERT(lineEnd != nil);
 		
 		while ( *lineEnd != '\n' )
 			++lineEnd;
@@ -64,7 +64,7 @@ void cParticleSystemMgr::LoadParticleData()
 			
 			char *value = strtok(line, delims);
 			
-			ASSERT(value != NULL);
+			ASSERT(value != nil);
 			
 			do
 			{	
@@ -73,7 +73,7 @@ void cParticleSystemMgr::LoadParticleData()
 					case CFG_PARAM_PARTICLE_TYPE_NAME:
 						ASSERT(type < MAX_PARTICLES);
 						entry = &m_aParticles[type];
-						ASSERT(entry != NULL);
+						ASSERT(entry != nil);
 						entry->m_Type = (tParticleType)type++;
 						strcpy(entry->m_aName, value);
 						break;
@@ -227,14 +227,14 @@ void cParticleSystemMgr::LoadParticleData()
 						break;
 				}
 				
-				value = strtok(NULL, delims);
+				value = strtok(nil, delims);
 
 				param++;
 
 				if ( param > CFG_PARAM_LAST )
 					param = CFG_PARAM_FIRST;
 		
-			} while ( value != NULL );
+			} while ( value != nil );
 		}
 		
 		lineEnd++;

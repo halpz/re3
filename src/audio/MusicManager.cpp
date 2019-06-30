@@ -55,7 +55,7 @@ void cMusicManager::DisplayRadioStationName()
 
 	if (!CTimer::GetIsPaused() && !TheCamera.m_WideScreenOn && cMusicManager::PlayerInCar() && !CReplay::IsPlayingBack()) {
 		if (MusicManager.m_bPlayerInCar && !MusicManager.m_bPreviousPlayerInCar)
-			pCurrentStation = nullptr;
+			pCurrentStation = nil;
 
 		if (cSampleManager.IsMP3RadioChannelAvailable()) {
 			gStreamedSound = MusicManager.m_nCurrentStreamedSound;
@@ -103,7 +103,7 @@ void cMusicManager::DisplayRadioStationName()
 			}
 		}
 
-		wchar *string = nullptr;
+		wchar *string = nil;
 
 		switch (pRetune) {
 		case HEAD_RADIO:

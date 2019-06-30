@@ -19,14 +19,14 @@ CPedPlacement::FindZCoorForPed(CVector* pos)
 		pos->z + 1.0f
 	);
 
-	if (CWorld::ProcessVerticalLine(vec, startZ, foundCol, foundEnt, true, false, false, false, true, false, false))
+	if (CWorld::ProcessVerticalLine(vec, startZ, foundCol, foundEnt, true, false, false, false, true, false, nil))
 		foundColZ = foundCol.point.z;
 
 	// Adjust coords and do a second test
 	vec.x += 0.1f;
 	vec.y += 0.1f;
 
-	if (CWorld::ProcessVerticalLine(vec, startZ, foundCol, foundEnt, true, false, false, false, true, false, false))
+	if (CWorld::ProcessVerticalLine(vec, startZ, foundCol, foundEnt, true, false, false, false, true, false, nil))
 		foundColZ2 = foundCol.point.z;
 
 	zForPed = max(foundColZ, foundColZ2);

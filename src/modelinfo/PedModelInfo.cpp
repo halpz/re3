@@ -25,7 +25,7 @@ RwObjectNameIdAssocation CPedModelInfo::m_pPedIds[12] = {
 	{ "Sfootl",	PED_FOOTL, 0, },
 	{ "Sfootr",	PED_FOOTR, 0, },
 	{ "Slowerlegr",	PED_LOWERLEGR, 0, },
-	{ NULL,	0, 0, },
+	{ nil,	0, 0, },
 };
 
 void
@@ -36,7 +36,7 @@ CPedModelInfo::SetClump(RpClump *clump)
 	if(m_hitColModel == nil)
 		CreateHitColModel();
 	if(strncmp(GetName(), "player", 7) == 0)
-		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB, CVisibilityPlugins::RenderPlayerCB);
+		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
 }
 
 RpAtomic*
@@ -82,8 +82,8 @@ CPedModelInfo::SetLowDetailClump(RpClump *lodclump)
 	RpClumpForAllAtomics(m_clump, CountAtomicsCB, &numAtm);		// actually unused
 	RpClumpForAllAtomics(lodclump, CountAtomicsCB, &numLodAtm);
 
-	RpClumpForAllAtomics(m_clump, SetAtomicRendererCB, CVisibilityPlugins::RenderPedHiDetailCB);
-	RpClumpForAllAtomics(lodclump, SetAtomicRendererCB, CVisibilityPlugins::RenderPedLowDetailCB);
+	RpClumpForAllAtomics(m_clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPedHiDetailCB);
+	RpClumpForAllAtomics(lodclump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPedLowDetailCB);
 
 	pAtm = atomics;
 	RpClumpForAllAtomics(lodclump, GetAtomicListCB, &pAtm);
@@ -112,14 +112,14 @@ struct ColNodeInfo
 // TODO: find out piece types
 #define NUMPEDINFONODES 8
 ColNodeInfo m_pColNodeInfos[NUMPEDINFONODES] = {
-	{ NULL,         PED_HEAD,        6,  0.0f,   0.05f, 0.2f },
+	{ nil,          PED_HEAD,        6,  0.0f,   0.05f, 0.2f },
 	{ "Storso",     0,               0,  0.0f,   0.15f, 0.2f },
 	{ "Storso",     0,               0,  0.0f,  -0.05f, 0.3f },
-	{ NULL,         PED_TORSO,       1,  0.0f,  -0.07f, 0.3f },
-	{ NULL,         PED_UPPERARML,   2,  0.07f, -0.1f,  0.2f },
-	{ NULL,         PED_UPPERARMR,   3, -0.07f, -0.1f,  0.2f },
+	{ nil,          PED_TORSO,       1,  0.0f,  -0.07f, 0.3f },
+	{ nil,          PED_UPPERARML,   2,  0.07f, -0.1f,  0.2f },
+	{ nil,          PED_UPPERARMR,   3, -0.07f, -0.1f,  0.2f },
 	{ "Slowerlegl", 0,               4,  0.0f,   0.07f, 0.25f },
-	{ NULL,         PED_LOWERLEGR,   5,  0.0f,   0.07f, 0.25f },
+	{ nil,          PED_LOWERLEGR,   5,  0.0f,   0.07f, 0.25f },
 };
 
 RwObject*

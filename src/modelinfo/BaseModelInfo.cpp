@@ -9,7 +9,7 @@
 CBaseModelInfo::CBaseModelInfo(ModeInfoType type)
 {
 	m_colModel = nil;
-	m_twodEffects = 0;
+	m_twodEffects = nil;
 	m_objectId = -1;
 	m_refCount = 0;
 	m_txdSlot = -1;
@@ -23,7 +23,7 @@ CBaseModelInfo::Shutdown(void)
 {
 	DeleteCollisionModel();
 	DeleteRwObject();
-	m_twodEffects = 0;
+	m_twodEffects = nil;
 	m_num2dEffects = 0;
 	m_txdSlot = -1;
 }
