@@ -216,17 +216,23 @@ public:
 	char field_19195;
 	int m_nTimeOfRecentCrime;
 
-	void SetEntityStatus(int32 id, bool status);
-	void PreTerminateGameSpecificShutdown();
+	void ReleaseDigitalHandle();
+	void SetDynamicAcousticModelingStatus(bool status);
+
+	bool IsAudioInitialised() const;
+
 	int32 CreateEntity(int32 type, void *memory);
 	void DestroyEntity(int32 id);
+	void SetEntityStatus(int32 id, bool status);
+
+	void PreTerminateGameSpecificShutdown();
 	void PostTerminateGameSpecificShutdown();
-	bool IsAudioInitialised() const;
-	void SetDynamicAcousticModelingStatus(bool status);
+
 	void GenerateIntegerRandomNumberTable();
 
 	void PlayerJustGotInCar();
 	void PlayerJustLeftCar();
+
 	void Service();
 	void GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample,
 	               uint32 maxOffset);

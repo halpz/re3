@@ -3,6 +3,7 @@
 #include "ModelIndices.h"
 #include "Ped.h"
 #include "PlayerPed.h"
+#include "SampleManager.h"
 #include "World.h"
 #include "common.h"
 #include "patcher.h"
@@ -12,44 +13,20 @@ cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 constexpr int totalAudioEntitiesSlots = 200;
 
 void
-cAudioManager::SetEntityStatus(int32 id, bool status)
+cAudioManager::ReleaseDigitalHandle()
 {
-	if(m_bIsInitialised && id >= 0 && id < totalAudioEntitiesSlots) {
-		if(m_asAudioEntities[id].m_bIsUsed) { m_asAudioEntities[id].m_bStatus = status; }
-	}
+	if(m_bIsInitialised) { cSampleManager.ReleaseDigitalHandle(); }
 }
 
-void
-cAudioManager::PreTerminateGameSpecificShutdown()
+void cAudioManager::SetDynamicAcousticModelingStatus(bool status)
 {
-	if(m_nBridgeEntity >= 0) {
-		DestroyEntity(m_nBridgeEntity);
-		m_nBridgeEntity = -5;
-	}
-	if(m_nPoliceChannelEntity >= 0) {
-		DestroyEntity(m_nPoliceChannelEntity);
-		m_nPoliceChannelEntity = -5;
-	}
-	if(m_nWaterCannonEntity >= 0) {
-		DestroyEntity(m_nWaterCannonEntity);
-		m_nWaterCannonEntity = -5;
-	}
-	if(m_nFireAudioEntity >= 0) {
-		DestroyEntity(m_nFireAudioEntity);
-		m_nFireAudioEntity = -5;
-	}
-	if(m_nCollisionEntity >= 0) {
-		DestroyEntity(m_nCollisionEntity);
-		m_nCollisionEntity = -5;
-	}
-	if(m_nFrontEndEntity >= 0) {
-		DestroyEntity(m_nFrontEndEntity);
-		m_nFrontEndEntity = -5;
-	}
-	if(m_nProjectileEntity >= 0) {
-		DestroyEntity(m_nProjectileEntity);
-		m_nProjectileEntity = -5;
-	}
+	m_bDynamicAcousticModelingStatus = status;
+}
+
+bool
+cAudioManager::IsAudioInitialised() const
+{
+	return m_bIsInitialised;
 }
 
 int32
@@ -97,20 +74,50 @@ cAudioManager::DestroyEntity(int32 id)
 }
 
 void
+cAudioManager::SetEntityStatus(int32 id, bool status)
+{
+	if(m_bIsInitialised && id >= 0 && id < totalAudioEntitiesSlots) {
+		if(m_asAudioEntities[id].m_bIsUsed) { m_asAudioEntities[id].m_bStatus = status; }
+	}
+}
+
+void
+cAudioManager::PreTerminateGameSpecificShutdown()
+{
+	if(m_nBridgeEntity >= 0) {
+		DestroyEntity(m_nBridgeEntity);
+		m_nBridgeEntity = -5;
+	}
+	if(m_nPoliceChannelEntity >= 0) {
+		DestroyEntity(m_nPoliceChannelEntity);
+		m_nPoliceChannelEntity = -5;
+	}
+	if(m_nWaterCannonEntity >= 0) {
+		DestroyEntity(m_nWaterCannonEntity);
+		m_nWaterCannonEntity = -5;
+	}
+	if(m_nFireAudioEntity >= 0) {
+		DestroyEntity(m_nFireAudioEntity);
+		m_nFireAudioEntity = -5;
+	}
+	if(m_nCollisionEntity >= 0) {
+		DestroyEntity(m_nCollisionEntity);
+		m_nCollisionEntity = -5;
+	}
+	if(m_nFrontEndEntity >= 0) {
+		DestroyEntity(m_nFrontEndEntity);
+		m_nFrontEndEntity = -5;
+	}
+	if(m_nProjectileEntity >= 0) {
+		DestroyEntity(m_nProjectileEntity);
+		m_nProjectileEntity = -5;
+	}
+}
+
+void
 cAudioManager::PostTerminateGameSpecificShutdown()
 {
 	;
-}
-
-bool
-cAudioManager::IsAudioInitialised() const
-{
-	return m_bIsInitialised;
-}
-
-void cAudioManager::SetDynamicAcousticModelingStatus(bool status)
-{
-	m_bDynamicAcousticModelingStatus = status;
 }
 
 void
