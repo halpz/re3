@@ -216,6 +216,7 @@ public:
 	char field_19195;
 	int m_nTimeOfRecentCrime;
 
+	bool IsAudioInitialised() const;
 	void GenerateIntegerRandomNumberTable();
 
 	void PlayerJustLeftCar(void);

@@ -9,6 +9,12 @@
 
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 
+bool
+cAudioManager::IsAudioInitialised() const
+{
+	return m_bIsInitialised;
+}
+
 void
 cAudioManager::GenerateIntegerRandomNumberTable()
 {
@@ -2688,6 +2694,8 @@ cAudioManager::Service()
 }
 
 STARTPATCHES
+
+InjectHook(0x57AA50, &cAudioManager::IsAudioInitialised, PATCH_JUMP);
 InjectHook(0x57C290, &cAudioManager::GenerateIntegerRandomNumberTable, PATCH_JUMP);
 InjectHook(0x56AD20, &cAudioManager::PlayerJustLeftCar, PATCH_JUMP);
 InjectHook(0x570DB0, &cAudioManager::GetPhrase, PATCH_JUMP);
