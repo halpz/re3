@@ -216,6 +216,8 @@ public:
 	char field_19195;
 	int m_nTimeOfRecentCrime;
 
+	void GenerateIntegerRandomNumberTable();
+
 	void PlayerJustLeftCar(void);
 	void Service();
 	void GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample,

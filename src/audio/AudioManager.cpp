@@ -10,6 +10,12 @@
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 
 void
+cAudioManager::GenerateIntegerRandomNumberTable()
+{
+	for(int32 i = 0; i < 5; i++) { m_anRandomTable[i] = rand(); }
+}
+
+void
 cAudioManager::PlayerJustLeftCar(void)
 {
 	// UNUSED: This is a perfectly empty function.
@@ -2682,6 +2688,7 @@ cAudioManager::Service()
 }
 
 STARTPATCHES
+InjectHook(0x57C290, &cAudioManager::GenerateIntegerRandomNumberTable, PATCH_JUMP);
 InjectHook(0x56AD20, &cAudioManager::PlayerJustLeftCar, PATCH_JUMP);
 InjectHook(0x570DB0, &cAudioManager::GetPhrase, PATCH_JUMP);
 
