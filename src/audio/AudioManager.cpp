@@ -9,15 +9,21 @@
 
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 
+void
+cAudioManager::PostTerminateGameSpecificShutdown()
+{
+	;
+}
+
 bool
 cAudioManager::IsAudioInitialised() const
 {
-    return m_bIsInitialised;
+	return m_bIsInitialised;
 }
 
 void cAudioManager::SetDynamicAcousticModelingStatus(bool status)
 {
-    m_bDynamicAcousticModelingStatus = status;
+	m_bDynamicAcousticModelingStatus = status;
 }
 
 void
@@ -2699,6 +2705,7 @@ cAudioManager::Service()
 }
 
 STARTPATCHES
+InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);
 InjectHook(0x57AA00, &cAudioManager::SetDynamicAcousticModelingStatus, PATCH_JUMP);
 InjectHook(0x57AA50, &cAudioManager::IsAudioInitialised, PATCH_JUMP);
 InjectHook(0x57C290, &cAudioManager::GenerateIntegerRandomNumberTable, PATCH_JUMP);

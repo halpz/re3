@@ -216,6 +216,7 @@ public:
 	char field_19195;
 	int m_nTimeOfRecentCrime;
 
+	void PostTerminateGameSpecificShutdown();
 	bool IsAudioInitialised() const;
 	void SetDynamicAcousticModelingStatus(bool status);
 	void GenerateIntegerRandomNumberTable();
