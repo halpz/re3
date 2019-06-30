@@ -25,6 +25,8 @@ public:
 	CAutomobile(int, uint8);
 	CAutomobile* ctor(int, uint8);
 	void SetDoorDamage(int32, uint32, bool); /* TODO: eDoors */
+	void SetPanelDamage(int32, uint32, bool); /* TODO: ePanels */
+	void SetBumperDamage(int32, uint32, bool); /* TODO: ePanels */
 	void dtor() { this->CAutomobile::~CAutomobile(); }
 };
 static_assert(sizeof(CAutomobile) == 0x5A8, "CAutomobile: error");

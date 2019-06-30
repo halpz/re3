@@ -456,6 +456,7 @@ int     m_iModeObbeCamIsInForCar;
 	void SetMotionBlur(int r, int g, int b, int a, int type);
 	void SetMotionBlurAlpha(int a);
 	void RenderMotionBlur(void);
+	void CalculateDerivedValues(void);
 
 	void DrawBordersForWideScreen(void);
 
