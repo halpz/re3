@@ -216,6 +216,7 @@ public:
 	char field_19195;
 	int m_nTimeOfRecentCrime;
 
+	void DestroyEntity(int32 id);
 	void PostTerminateGameSpecificShutdown();
 	bool IsAudioInitialised() const;
 	void SetDynamicAcousticModelingStatus(bool status);

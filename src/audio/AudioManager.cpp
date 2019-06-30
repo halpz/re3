@@ -10,6 +10,24 @@
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 
 void
+cAudioManager::DestroyEntity(int32 id)
+{
+	if(m_bIsInitialised && id >= 0 && id < 200 && m_asAudioEntities[id].m_bIsUsed) {
+		m_asAudioEntities[id].m_bIsUsed = 0;
+		for(i = 0; i < m_nAudioEntitiesTotal; ++i) {
+			if(id == m_anAudioEntityIndices[i]) {
+				if(i < 199)
+					memmove(&m_anAudioEntityIndices[i],
+					        &m_anAudioEntityIndices[i + 1],
+					        4 * (m_nAudioEntitiesTotal - (i + 1)));
+				m_anAudioEntityIndices[--m_nAudioEntitiesTotal] = 200;
+				return;
+			}
+		}
+	}
+}
+
+void
 cAudioManager::PostTerminateGameSpecificShutdown()
 {
 	;
@@ -2705,6 +2723,7 @@ cAudioManager::Service()
 }
 
 STARTPATCHES
+InjectHook(0x57A400, &cAudioManager::DestroyEntity, PATCH_JUMP);
 InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);
 InjectHook(0x57AA00, &cAudioManager::SetDynamicAcousticModelingStatus, PATCH_JUMP);
 InjectHook(0x57AA50, &cAudioManager::IsAudioInitialised, PATCH_JUMP);
