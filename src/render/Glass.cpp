@@ -2,6 +2,8 @@
 #include "patcher.h"
 #include "Glass.h"
 
+WRAPPER void CGlass::AskForObjectToBeRenderedInGlass(CEntity *ent) { EAXJMP(0x5033F0); }
+
 WRAPPER void
 CGlass::WindowRespondsToCollision(CEntity *ent, float amount, CVector speed, CVector point, bool foo)
 {

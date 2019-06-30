@@ -855,7 +855,7 @@ CFileLoader::Load2dEffect(const char *line)
 	int id, r, g, b, a, type;
 	float x, y, z;
 	char corona[32], shadow[32];
-	int shadowIntens, flash, roadReflection, flare, flags, probability;
+	int shadowIntens, lightType, roadReflection, flare, flags, probability;
 	CBaseModelInfo *mi;
 	C2dEffect *effect;
 	char *p;
@@ -888,14 +888,14 @@ CFileLoader::Load2dEffect(const char *line)
 
 		sscanf(line, "%f %f %f %f %d %d %d %d %d",
 			&effect->light.dist,
-			&effect->light.outerRange,
+			&effect->light.range,
 			&effect->light.size,
-			&effect->light.innerRange,
-			&shadowIntens, &flash, &roadReflection, &flare, &flags);
+			&effect->light.shadowRange,
+			&shadowIntens, &lightType, &roadReflection, &flare, &flags);
 		effect->light.corona = RwTextureRead(corona, nil);
 		effect->light.shadow = RwTextureRead(shadow, nil);
 		effect->light.shadowIntensity = shadowIntens;
-		effect->light.flash = flash;
+		effect->light.lightType = lightType;
 		effect->light.roadReflection = roadReflection;
 		effect->light.flareType = flare;
 		// TODO: check out the flags

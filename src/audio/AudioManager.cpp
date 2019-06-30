@@ -645,11 +645,6 @@ cAudioManager::GetWhiteCriminalTalkSfx(int16 sound)
 	return sfx;
 }
 
-WRAPPER int32 cAudioManager::GetSpecialCharacterTalkSfx(int32, int32)
-{
-	EAXJMP(0x574790);
-}
-
 uint32
 cAudioManager::GetMaleNo2TalkSfx(int16 sound)
 {
@@ -2433,6 +2428,197 @@ cAudioManager::GetCasualMaleOldTalkSfx(int16 sound)
 }
 
 uint32
+cAudioManager::GetSpecialCharacterTalkSfx(int32 modelIndex, int32 sound)
+{
+	char *modelName = CModelInfo::GetModelInfo(modelIndex)->GetName();
+	if(strcmp(modelName, "eight") == 0 ||
+	   strcmp(modelName, "eight2") == 0) {
+		return GetEightTalkSfx(sound);
+	}
+	if(strcmp(modelName, "frankie") == 0) {
+		return GetFrankieTalkSfx(sound);
+	}
+	if(strcmp(modelName, "misty") == 0) { return GetMistyTalkSfx(sound); }
+	if(strcmp(modelName, "ojg") == 0 ||
+	   strcmp(modelName, "ojg_p") == 0) {
+		return GetOJGTalkSfx(sound);
+	}
+	if(strcmp(modelName, "cat") == 0) {
+		return GetCatatalinaTalkSfx(sound);
+	}
+	if(strcmp(modelName, "bomber") == 0) {
+		return GetBomberTalkSfx(sound);
+	}
+	if(strcmp(modelName, "s_guard") == 0) {
+		return GetSecurityGuardTalkSfx(sound);
+	}
+	if(strcmp(modelName, "chunky") == 0) {
+		return GetChunkyTalkSfx(sound);
+	}
+	if(strcmp(modelName, "asuka") == 0) {
+		return GetGenericFemaleTalkSfx(sound);
+	}
+	if(strcmp(modelName, "maria") == 0) {
+		return GetGenericFemaleTalkSfx(sound);
+	}
+
+	return GetGenericMaleTalkSfx(sound);
+}
+uint32
+cAudioManager::GetEightTalkSfx(int16 sound)
+{
+	uint32 sfx;
+	static uint32 lastSfx = NO_SAMPLE;
+
+	switch(sound) {
+	case SOUND_PED_HANDS_UP:
+		cAudioManager::GetPhrase(&sfx, &lastSfx,
+		                         AUDIO_SAMPLE_PED_EIGHT_HANDS_UP_1, 2u);
+		break;
+	case SOUND_PED_ROBBED:
+		cAudioManager::GetPhrase(&sfx, &lastSfx,
+		                         AUDIO_SAMPLE_PED_EIGHT_ROBBED_1, 2u);
+		break;
+	case SOUND_PED_ATTACK:
+		cAudioManager::GetPhrase(&sfx, &lastSfx,
+		                         AUDIO_SAMPLE_PED_EIGHT_ATTACK_1, 6u);
+		break;
+	case SOUND_PED_EVADE:
+		cAudioManager::GetPhrase(&sfx, &lastSfx,
+		                         AUDIO_SAMPLE_PED_EIGHT_EVADE_1, 7u);
+		break;
+	default: return GetGenericMaleTalkSfx(sound);
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetFrankieTalkSfx(int16 sound)
+{
+	uint32 sfx;
+	static uint32 lastSfx = NO_SAMPLE;
+
+	switch(sound) {
+	case SOUND_PED_HANDS_UP:
+		GetPhrase(&sfx, &lastSfx, AUDIO_SAMPLE_PED_FRANKIE_HANDS_UP_1,
+		          4u);
+		break;
+	case SOUND_PED_ROBBED:
+		GetPhrase(&sfx, &lastSfx, AUDIO_SAMPLE_PED_FRANKIE_ROBBED_1,
+		          2u);
+		break;
+	case SOUND_PED_ATTACK:
+		GetPhrase(&sfx, &lastSfx, AUDIO_SAMPLE_PED_FRANKIE_ATTACK_1,
+		          6u);
+		break;
+	case SOUND_PED_EVADE:
+		GetPhrase(&sfx, &lastSfx, AUDIO_SAMPLE_PED_FRANKIE_EVADE_1, 3u);
+		break;
+	default: return GetGenericMaleTalkSfx(sound);
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetMistyTalkSfx(int16 sound)
+{
+	uint32 sfx;
+	static uint32 lastSfx = NO_SAMPLE;
+
+	switch(sound) {
+	case SOUND_PED_HANDS_UP:
+		GetPhrase(&sfx, &lastSfx, AUDIO_SAMPLE_PED_MISTY_HANDS_UP_1,
+		          5u);
+		break;
+	case SOUND_PED_ROBBED:
+		GetPhrase(&sfx, &lastSfx, AUDIO_SAMPLE_PED_MISTY_ROBBED_1, 2u);
+		break;
+	case SOUND_PED_ATTACK:
+		GetPhrase(&sfx, &lastSfx, AUDIO_SAMPLE_PED_MISTY_ATTACK_1, 4u);
+		break;
+	case SOUND_PED_EVADE:
+		GetPhrase(&sfx, &lastSfx, AUDIO_SAMPLE_PED_MISTY_EVADE_1, 5u);
+		break;
+	case SOUND_PED_TAXI_CALL:
+		GetPhrase(&sfx, &lastSfx, AUDIO_SAMPLE_PED_MISTY_THUMB_LIFT_1,
+		          4u);
+		break;
+	default: return GetGenericFemaleTalkSfx(sound); break;
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetOJGTalkSfx(int16 sound)
+{
+	return GetGenericMaleTalkSfx(sound);
+}
+
+uint32
+cAudioManager::GetCatatalinaTalkSfx(int16 sound)
+{
+	return GetGenericFemaleTalkSfx(sound);
+}
+
+uint32
+cAudioManager::GetBomberTalkSfx(int16 sound)
+{
+	uint32 sfx;
+	static uint32 lastSfx = NO_SAMPLE;
+
+	if(sound != SOUND_PED_BOMBER) return GetGenericMaleTalkSfx(sound);
+
+	GetPhrase(&sfx, &lastSfx, AUDIO_SAMPLE_PED_BOMBER_THREAT_1, 7u);
+	return sfx;
+}
+
+uint32
+cAudioManager::GetSecurityGuardTalkSfx(int16 sound)
+{
+	uint32 sfx;
+	static uint32 lastSfx = NO_SAMPLE;
+
+	switch(sound) {
+	case SOUND_PED_HANDS_UP:
+		GetPhrase(&sfx, &lastSfx,
+		          AUDIO_SAMPLE_PED_SECURITY_GUARD_HANDS_UP_1, 2u);
+		break;
+	case SOUND_PED_HANDS_COWER:
+		sfx = AUDIO_SAMPLE_PED_SECURITY_GUARD_HANDS_COWER_1;
+		break;
+	case SOUND_PED_CAR_JACKED:
+	case SOUND_PED_CAR_COLLISION:
+		GetPhrase(&sfx, &lastSfx,
+		          AUDIO_SAMPLE_PED_SECURITY_GUARD_CAR_EVENT_1, 6u);
+		break;
+	case SOUND_PED_ATTACK:
+		GetPhrase(&sfx, &lastSfx,
+		          AUDIO_SAMPLE_PED_SECURITY_GUARD_ATTACK_1, 2u);
+		break;
+	case SOUND_PED_FLEE_RUN:
+		GetPhrase(&sfx, &lastSfx,
+		          AUDIO_SAMPLE_PED_SECURITY_GUARD_CAR_EVENT_1, 12u);
+		break;
+	default: return GetGenericMaleTalkSfx(sound);
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetChunkyTalkSfx(int16 sound)
+{
+	uint32 sfx;
+	static uint32 lastSfx = NO_SAMPLE;
+
+	if(sound == SOUND_PED_DEATH) return AUDIO_SAMPLE_PED_CHUNKY_DEATH_1;
+
+	if(sound != SOUND_PED_FLEE_RUN) return GetGenericMaleTalkSfx(sound);
+
+	GetPhrase(&sfx, &lastSfx, AUDIO_SAMPLE_PED_CHUNKY_FLEE_RUN_1, 5u);
+	return sfx;
+}
+
+uint32
 cAudioManager::GetGenericMaleTalkSfx(int16 sound)
 {
 	uint32 sfx;
@@ -2484,7 +2670,7 @@ cAudioManager::GetGenericFemaleTalkSfx(int16 sound)
 		cAudioManager::GetPhrase(
 		    &sfx, &lastSfx, AUDIO_SAMPLE_PED_FEMALE_FLEE_SPRINT_1, 8u);
 		break;
-	default: sfx = NO_SAMPLE; break;
+	default: return NO_SAMPLE;
 	}
 	return sfx;
 }
@@ -2518,7 +2704,6 @@ InjectHook(0x571B00, &cAudioManager::GetColumbianTalkSfx, PATCH_JUMP);
 InjectHook(0x571C30, &cAudioManager::GetHoodTalkSfx, PATCH_JUMP);
 InjectHook(0x571D80, &cAudioManager::GetBlackCriminalTalkSfx, PATCH_JUMP);
 InjectHook(0x571E60, &cAudioManager::GetWhiteCriminalTalkSfx, PATCH_JUMP);
-// InjectHook(0x574790, &cAudioManager::GetSpecialCharacterTalkSfx, PATCH_JUMP);
 InjectHook(0x571F40, &cAudioManager::GetMaleNo2TalkSfx, PATCH_JUMP);
 InjectHook(0x572AF0, &cAudioManager::GetBlackProjectMaleTalkSfx, PATCH_JUMP);
 InjectHook(0x5725D0, &cAudioManager::GetWhiteFatMaleTalkSfx, PATCH_JUMP);
@@ -2563,6 +2748,16 @@ InjectHook(0x574480, &cAudioManager::GetShopperFemaleTalkSfx, PATCH_JUMP);
 InjectHook(0x574590, &cAudioManager::GetStudentMaleTalkSfx, PATCH_JUMP);
 InjectHook(0x574690, &cAudioManager::GetStudentFemaleTalkSfx, PATCH_JUMP);
 InjectHook(0x572040, &cAudioManager::GetCasualMaleOldTalkSfx, PATCH_JUMP);
+
+InjectHook(0x574790, &cAudioManager::GetSpecialCharacterTalkSfx, PATCH_JUMP);
+InjectHook(0x574DA0, &cAudioManager::GetEightTalkSfx, PATCH_JUMP);
+InjectHook(0x574E50, &cAudioManager::GetFrankieTalkSfx, PATCH_JUMP);
+InjectHook(0x574F00, &cAudioManager::GetMistyTalkSfx, PATCH_JUMP);
+InjectHook(0x574FD0, &cAudioManager::GetOJGTalkSfx, PATCH_JUMP);
+InjectHook(0x574FE0, &cAudioManager::GetCatatalinaTalkSfx, PATCH_JUMP);
+InjectHook(0x574FF0, &cAudioManager::GetBomberTalkSfx, PATCH_JUMP);
+InjectHook(0x575060, &cAudioManager::GetSecurityGuardTalkSfx, PATCH_JUMP);
+InjectHook(0x575120, &cAudioManager::GetChunkyTalkSfx, PATCH_JUMP);
 
 InjectHook(0x575460, &cAudioManager::GetGenericMaleTalkSfx, PATCH_JUMP);
 InjectHook(0x575510, &cAudioManager::GetGenericFemaleTalkSfx, PATCH_JUMP);

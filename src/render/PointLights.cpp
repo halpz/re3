@@ -13,8 +13,6 @@
 int16 &CPointLights::NumLights = *(int16*)0x95CC3E;
 CRegisteredPointLight *CPointLights::aLights = (CRegisteredPointLight*)0x7096D0;
 
-//WRAPPER void CPointLights::RenderFogEffect(void) { EAXJMP(0x510C30); }
-
 void
 CPointLights::InitPerFrame(void)
 {
@@ -69,7 +67,7 @@ CPointLights::GenerateLightsAffectingObject(CVector *objCoors)
 
 	ret = 1.0f;
 	for(i = 0; i < NumLights; i++){
-		if(aLights[i].type == LIGHT_FOGONLY_3 || aLights[i].type == LIGHT_FOGONLY_4)
+		if(aLights[i].type == LIGHT_FOGONLY || aLights[i].type == LIGHT_FOGONLY_ALWAYS)
 			continue;
 
 		// same weird distance calculation. simplified here
@@ -235,7 +233,7 @@ CPointLights::RenderFogEffect(void)
 				}
 			}
 
-		}else if(aLights[i].type == LIGHT_POINT || aLights[i].type == LIGHT_FOGONLY_3 || aLights[i].type == LIGHT_FOGONLY_4){
+		}else if(aLights[i].type == LIGHT_POINT || aLights[i].type == LIGHT_FOGONLY || aLights[i].type == LIGHT_FOGONLY_ALWAYS){
 			if(CWorld::ProcessVerticalLine(aLights[i].coors, aLights[i].coors.z - 20.0f,
 					point, entity, true, false, false, false, true, false, nil)){
 

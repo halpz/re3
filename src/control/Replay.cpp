@@ -2,7 +2,7 @@
 #include "patcher.h"
 #include "AnimBlendAssociation.h"
 #include "Boat.h"
-#include "BulletTraces.h"
+#include "SpecialFX.h"
 #include "CarCtrl.h"
 #include "CivilianPed.h"
 #include "Clock.h"
@@ -308,8 +308,8 @@ void CReplay::RecordThisFrame(void)
 		tBulletTracePacket* bt = (tBulletTracePacket*)&Record.m_pBase[Record.m_nOffset];
 		bt->type = REPLAYPACKET_BULLET_TRACES;
 		bt->index = i;
-		bt->frames = CBulletTraces::aTraces[i].m_bFramesInUse;
-		bt->lifetime = CBulletTraces::aTraces[i].m_bLifeTime;
+		bt->frames = CBulletTraces::aTraces[i].m_framesInUse;
+		bt->lifetime = CBulletTraces::aTraces[i].m_lifeTime;
 		bt->inf = CBulletTraces::aTraces[i].m_vecInf;
 		bt->sup = CBulletTraces::aTraces[i].m_vecSup;
 		Record.m_nOffset += sizeof(*bt);
@@ -897,8 +897,8 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 		{
 			tBulletTracePacket* pb = (tBulletTracePacket*)&ptr[offset];
 			CBulletTraces::aTraces[pb->index].m_bInUse = true;
-			CBulletTraces::aTraces[pb->index].m_bFramesInUse = pb->frames;
-			CBulletTraces::aTraces[pb->index].m_bLifeTime = pb->lifetime;
+			CBulletTraces::aTraces[pb->index].m_framesInUse = pb->frames;
+			CBulletTraces::aTraces[pb->index].m_lifeTime = pb->lifetime;
 			CBulletTraces::aTraces[pb->index].m_vecInf = pb->inf;
 			CBulletTraces::aTraces[pb->index].m_vecSup = pb->sup;
 			buffer->m_nOffset += sizeof(tBulletTracePacket);

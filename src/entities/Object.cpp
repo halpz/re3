@@ -25,7 +25,7 @@ CObject::CObject(void)
 	m_colour2 = 0;
 	m_colour1 = m_colour2;
 	field_172 = 0;
-	m_obj_flag1 = false;
+	bIsPickup = false;
 	m_obj_flag2 = false;
 	m_obj_flag4 = false;
 	m_obj_flag8 = false;
