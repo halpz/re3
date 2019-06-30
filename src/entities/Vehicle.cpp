@@ -16,6 +16,7 @@ bool &CVehicle::bCheat5 = *(bool *)0x95CD64;
 void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New();  }
 void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehiclePool()->New(handle); }
 void CVehicle::operator delete(void *p, size_t sz) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
+void CVehicle::operator delete(void *p, int handle) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
 
 CVehicle::~CVehicle()
 {
@@ -25,6 +26,8 @@ CVehicle::~CVehicle()
 		m_audioEntityId = -5;
 	}
 	CRadar::ClearBlipForEntity(BLIP_CAR, CPools::GetVehiclePool()->GetIndex(this));
+	if (pDriver)
+		pDriver->FlagToDestroyWhenNextProcessed();
 	for (int i = 0; i < m_nNumMaxPassengers; i++){
 		if (pPassengers[i])
 			pPassengers[i]->FlagToDestroyWhenNextProcessed();

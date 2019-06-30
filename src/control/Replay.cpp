@@ -47,13 +47,13 @@ uint8 *&CReplay::pBuf8 = *(uint8**)0x8E2C54;
 CEntryInfoNode *&CReplay::pBuf9 = *(CEntryInfoNode**)0x8E2C58;
 uint8 *&CReplay::pBuf10 = *(uint8**)0x8F2C28;
 CDummyPed *&CReplay::pBuf11 = *(CDummyPed**)0x8F2C2C;
-CBlip *&CReplay::pRadarBlips = *(CBlip**)0x8F29F8;
-CCamera *&CReplay::pStoredCam = *(CCamera**)0x8F2C34;
-CSector *&CReplay::pWorld1 = *(CSector**)0x8E29C4;
+uint8 *&CReplay::pRadarBlips = *(uint8**)0x8F29F8;
+uint8 *&CReplay::pStoredCam = *(uint8**)0x8F2C34;
+uint8 *&CReplay::pWorld1 = *(uint8**)0x8E29C4;
 CReference *&CReplay::pEmptyReferences = *(CReference**)0x8F256C;
 CStoredDetailedAnimationState *&CReplay::pPedAnims = *(CStoredDetailedAnimationState**)0x8F6260;
-CPickup *&CReplay::pPickups = *(CPickup**)0x8F1A48;
-CReference *&CReplay::pReferences = *(CReference**)0x880FAC;
+uint8 *&CReplay::pPickups = *(uint8**)0x8F1A48;
+uint8 *&CReplay::pReferences = *(uint8**)0x880FAC;
 uint8(&CReplay::BufferStatus)[8] = *(uint8(*)[8])*(uintptr*)0x8804D8;
 uint8(&CReplay::Buffers)[8][100000] = *(uint8(*)[8][100000])*(uintptr*)0x779958;
 bool &CReplay::bPlayingBackFromFile = *(bool*)0x95CD58;
@@ -988,7 +988,7 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CReplay::StoreStuffInMem(void) { EAXJMP(0x5961F0); }
 #else
 void CReplay::StoreStuffInMem(void)
@@ -999,19 +999,19 @@ void CReplay::StoreStuffInMem(void)
 	CPools::GetPtrNodePool()->Store(pBuf6, pBuf7);
 	CPools::GetEntryInfoNodePool()->Store(pBuf8, pBuf9);
 	CPools::GetDummyPool()->Store(pBuf10, pBuf11);
-	pWorld1 = (CSector*)malloc(sizeof(CSector) * NUMSECTORS_X * NUMSECTORS_Y);
+	pWorld1 = new uint8[sizeof(CSector) * NUMSECTORS_X * NUMSECTORS_Y];
 	memcpy(pWorld1, CWorld::GetSector(0, 0), NUMSECTORS_X * NUMSECTORS_Y * sizeof(CSector));
-	WorldPtrList = CWorld::GetMovingEntityList(); /* Interesting way to copy a list... */
+	WorldPtrList = CWorld::GetMovingEntityList();
 	BigBuildingPtrList = CWorld::GetBigBuildingList(LEVEL_NONE);
-	pPickups = (CPickup*)malloc(sizeof(CPickup) * NUMPICKUPS);
+	pPickups = new uint8[sizeof(CPickup) * NUMPICKUPS];
 	memcpy(pPickups, CPickups::aPickUps, NUMPICKUPS * sizeof(CPickup));
-	pReferences = (CReference*)malloc(sizeof(CReference) * NUMREFERENCES);
+	pReferences = new uint8[(sizeof(CReference) * NUMREFERENCES)];
 	memcpy(pReferences, CReferences::aRefs, NUMREFERENCES * sizeof(CReference));
 	pEmptyReferences = CReferences::pEmptyList;
-	pStoredCam = (CCamera*)malloc(sizeof(CCamera));
+	pStoredCam = new uint8[sizeof(CCamera)];
 	memcpy(pStoredCam, &TheCamera, sizeof(CCamera));
-	pRadarBlips = (CBlip*)malloc(sizeof(CBlip) * NUMBLIPS);
-	memcpy(pRadarBlips, CRadar::ms_RadarTrace, NUMBLIPS * sizeof(CBlip));
+	pRadarBlips = new uint8[sizeof(CBlip) * NUMRADARBLIPS];
+	memcpy(pRadarBlips, CRadar::ms_RadarTrace, NUMRADARBLIPS * sizeof(CBlip));
 	PlayerWanted = *FindPlayerPed()->m_pWanted;
 	PlayerInfo = CWorld::Players[0];
 	Time1 = CTimer::GetTimeInMilliseconds();
@@ -1037,7 +1037,7 @@ void CReplay::StoreStuffInMem(void)
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CReplay::RestoreStuffFromMem(void) { EAXJMP(0x5966E0); }
 #else
 void CReplay::RestoreStuffFromMem(void)
@@ -1049,28 +1049,28 @@ void CReplay::RestoreStuffFromMem(void)
 	CPools::GetEntryInfoNodePool()->CopyBack(pBuf8, pBuf9);
 	CPools::GetDummyPool()->CopyBack(pBuf10, pBuf11);
 	memcpy(CWorld::GetSector(0, 0), pWorld1, sizeof(CSector) * NUMSECTORS_X * NUMSECTORS_Y);
-	free(pWorld1);
+	delete[] pWorld1;
 	pWorld1 = nil;
 	CWorld::GetMovingEntityList() = WorldPtrList;
 	CWorld::GetBigBuildingList(LEVEL_NONE) = BigBuildingPtrList;
 	memcpy(CPickups::aPickUps, pPickups, sizeof(CPickup) * NUMPICKUPS);
-	free(pPickups);
+	delete[] pPickups;
 	pPickups = nil;
 	memcpy(CReferences::aRefs, pReferences, sizeof(CReference) * NUMREFERENCES);
-	free(pReferences);
+	delete[] pReferences;
 	pReferences = nil;
 	CReferences::pEmptyList = pEmptyReferences;
 	pEmptyReferences = nil;
 	memcpy(&TheCamera, pStoredCam, sizeof(CCamera));
-	free(pStoredCam);
+	delete[] pStoredCam;
 	pStoredCam = nil;
-	memcpy(CRadar::ms_RadarTrace, pRadarBlips, sizeof(CBlip) * NUMBLIPS);
-	free(pRadarBlips);
+	memcpy(CRadar::ms_RadarTrace, pRadarBlips, sizeof(CBlip) * NUMRADARBLIPS);
+	delete[] pRadarBlips;
 	pRadarBlips = nil;
 	FindPlayerPed()->m_pWanted = new CWanted(PlayerWanted); /* Nice memory leak */
 	CWorld::Players[0] = PlayerInfo;
-	int size = CPools::GetPedPool()->GetSize();
-	for (int i = size - 1; i >= 0; i--){
+	int i = CPools::GetPedPool()->GetSize();
+	while (--i){
 		CPed* ped = CPools::GetPedPool()->GetSlot(i);
 		if (!ped)
 			continue;
@@ -1087,8 +1087,8 @@ void CReplay::RestoreStuffFromMem(void)
 		if (ped->m_wepModelID >= 0)
 			ped->AddWeaponModel(ped->m_wepModelID);
 	}
-	size = CPools::GetVehiclePool()->GetSize();
-	for (int i = size - 1; i >= 0; i--) {
+	i = CPools::GetVehiclePool()->GetSize();
+	while (--i){
 		CVehicle* vehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!vehicle)
 			continue;
@@ -1146,8 +1146,8 @@ void CReplay::RestoreStuffFromMem(void)
 		}
 	}
 	PrintElementsInPtrList();
-	size = CPools::GetObjectPool()->GetSize();
-	for (int i = size - 1; i >= 0; i--) {
+	i = CPools::GetObjectPool()->GetSize();
+	while (--i){
 		CObject* object = CPools::GetObjectPool()->GetSlot(i);
 		if (!object)
 			continue;
@@ -1161,8 +1161,8 @@ void CReplay::RestoreStuffFromMem(void)
 		if (RwObjectGetType(object->m_rwObject) == rpATOMIC)
 			object->GetMatrix().AttachRW(RwFrameGetMatrix(RpAtomicGetFrame(object->m_rwObject)), false);
 	}
-	size = CPools::GetDummyPool()->GetSize();
-	for (int i = size - 1; i >= 0; i--) {
+	i = CPools::GetDummyPool()->GetSize();
+	while (--i){
 		CDummy* dummy = CPools::GetDummyPool()->GetSlot(i);
 		if (!dummy)
 			continue;
@@ -1188,8 +1188,7 @@ void CReplay::RestoreStuffFromMem(void)
 	CWeather::OldWeatherType = OldWeatherType;
 	CWeather::NewWeatherType = NewWeatherType;
 	CWeather::InterpolationValue = WeatherInterpolationValue;
-	size = CPools::GetPedPool()->GetSize();
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < CPools::GetPedPool()->GetSize(); i++) {
 		CPed* ped = CPools::GetPedPool()->GetSlot(i);
 		if (!ped)
 			continue;
@@ -1236,9 +1235,10 @@ InjectHook(0x592FE0, CReplay::Init, PATCH_JUMP);
 InjectHook(0x593150, CReplay::DisableReplays, PATCH_JUMP);
 InjectHook(0x593160, CReplay::EnableReplays, PATCH_JUMP);
 InjectHook(0x593170, CReplay::Update, PATCH_JUMP);
+InjectHook(0x595B20, CReplay::FinishPlayback, PATCH_JUMP);
 InjectHook(0x594050, CReplay::ProcessPedUpdate, PATCH_JUMP);
 InjectHook(0x594D10, CReplay::ProcessCarUpdate, PATCH_JUMP);
 InjectHook(0x593BB0, CReplay::StoreDetailedPedAnimation, PATCH_JUMP);
 InjectHook(0x5944B0, CReplay::RetrieveDetailedPedAnimation, PATCH_JUMP);
-//InjectHook(0x5966E0, CReplay::RestoreStuffFromMem, PATCH_JUMP);
+InjectHook(0x596030, CReplay::TriggerPlayback, PATCH_JUMP);
 ENDPATCHES

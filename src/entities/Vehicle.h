@@ -113,6 +113,7 @@ public:
 	static void *operator new(size_t);
 	static void *operator new(size_t sz, int slot);
 	static void operator delete(void*, size_t);
+	static void operator delete(void*, int);
 
 	~CVehicle(void);
 
