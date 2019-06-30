@@ -93,16 +93,16 @@ static psGlobalType &PsGlobal = *(psGlobalType*)0x72CF60;
 #include "Frontend.h"
 #include "Game.h"
 #include "PCSave.h"
-#include "Sprite2D.h"
+#include "Sprite2d.h"
 
 VALIDATE_SIZE(psGlobalType, 0x28);
 
 // DirectShow interfaces
-IGraphBuilder *pGB = NULL;
-IMediaControl *pMC = NULL;
-IMediaEventEx *pME = NULL;
-IVideoWindow  *pVW = NULL;
-IMediaSeeking *pMS = NULL;
+IGraphBuilder *pGB = nil;
+IMediaControl *pMC = nil;
+IMediaEventEx *pME = nil;
+IVideoWindow  *pVW = nil;
+IMediaSeeking *pMS = nil;
 
 DWORD dwDXVersion;
 DWORD _dwMemTotalPhys;
@@ -169,13 +169,13 @@ void _psCreateFolder(LPCSTR path)
 {
 	HANDLE hfle = CreateFile(path, GENERIC_READ, 
 									FILE_SHARE_READ,
-									NULL,
+									nil,
 									OPEN_EXISTING,
 									FILE_FLAG_BACKUP_SEMANTICS | FILE_ATTRIBUTE_NORMAL,
-									NULL);
+									nil);
 
 	if ( hfle == INVALID_HANDLE_VALUE )
-		CreateDirectory(path, NULL);
+		CreateDirectory(path, nil);
 	else
 		CloseHandle(hfle);
 }
@@ -304,7 +304,7 @@ psMouseSetPos(RwV2d *pos)
 RwMemoryFunctions*
 psGetMemoryFunctions(void)
 {
-	return 0;
+	return nil;
 }
 
 /*
@@ -344,9 +344,9 @@ InitApplication(HANDLE instance)
 	windowClass.cbClsExtra = 0;
 	windowClass.cbWndExtra = 0;
 	windowClass.hInstance = (HINSTANCE)instance;
-	windowClass.hIcon = NULL;
-	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	windowClass.hbrBackground = NULL;
+	windowClass.hIcon = nil;
+	windowClass.hCursor = LoadCursor(nil, IDC_ARROW);
+	windowClass.hbrBackground = nil;
 	windowClass.lpszMenuName = NULL;
 	windowClass.lpszClassName = AppClassName;
 
@@ -382,7 +382,7 @@ InitInstance(HANDLE instance)
 						WS_OVERLAPPEDWINDOW,
 						CW_USEDEFAULT, CW_USEDEFAULT,
 						rect.right - rect.left, rect.bottom - rect.top,
-						(HWND)NULL, (HMENU)NULL, (HINSTANCE)instance, NULL);
+						(HWND)nil, (HMENU)nil, (HINSTANCE)instance, nil);
 }
 
 void _GetVideoMemInfo(LPDWORD total, LPDWORD avaible)
@@ -390,7 +390,7 @@ void _GetVideoMemInfo(LPDWORD total, LPDWORD avaible)
 	HRESULT hr;
 	LPDIRECTDRAW7 pDD7;
 	
-	hr = DirectDrawCreateEx(NULL, (VOID**)&pDD7, IID_IDirectDraw7, NULL);
+	hr = DirectDrawCreateEx(nil, (VOID**)&pDD7, IID_IDirectDraw7, nil);
 	
 	if ( FAILED(hr) )
 		return;
@@ -430,15 +430,15 @@ typedef HRESULT(WINAPI * DIRECTDRAWCREATEEX)( GUID*, VOID**, REFIID, IUnknown* )
 DWORD GetDXVersion()
 {
 	DIRECTDRAWCREATEEX	 DirectDrawCreateEx = NULL;
-	HINSTANCE			 hDDrawDLL			= NULL;
-	HINSTANCE			 hD3D8DLL			= NULL;
+	HINSTANCE			 hDDrawDLL			= nil;
+	HINSTANCE			 hD3D8DLL			= nil;
 	HINSTANCE			 hDPNHPASTDLL		= NULL;
 	DWORD				 dwDXVersion		= 0;
 	//HRESULT			   hr;
 
 	// First see if DDRAW.DLL even exists.
 	hDDrawDLL = LoadLibrary( "DDRAW.DLL" );
-	if( hDDrawDLL == NULL )
+	if( hDDrawDLL == nil )
 	{
 		dwDXVersion = 0;
 		OutputDebugString( "Couldn't LoadLibrary DDraw\r\n" );
@@ -454,15 +454,15 @@ DWORD GetDXVersion()
 	LPDIRECTDRAW7 pDD7;
 	DirectDrawCreateEx = (DIRECTDRAWCREATEEX)GetProcAddress( hDDrawDLL,
 													   "DirectDrawCreateEx" );
-	if( NULL == DirectDrawCreateEx )
+	if( nil == DirectDrawCreateEx )
 	{
 		FreeLibrary( hDDrawDLL );
 		OutputDebugString( "Couldn't GetProcAddress DirectDrawCreateEx\r\n" );
 		return dwDXVersion;
 	}
 
-	if( FAILED( DirectDrawCreateEx( NULL, (VOID**)&pDD7, IID_IDirectDraw7,
-									NULL ) ) )
+	if( FAILED( DirectDrawCreateEx( nil, (VOID**)&pDD7, IID_IDirectDraw7,
+									nil ) ) )
 	{
 		FreeLibrary( hDDrawDLL );
 		OutputDebugString( "Couldn't DirectDrawCreateEx\r\n" );
@@ -480,7 +480,7 @@ DWORD GetDXVersion()
 
 	// Simply see if D3D8.dll exists.
 	hD3D8DLL = LoadLibrary( "D3D8.DLL" );
-	if( hD3D8DLL == NULL )
+	if( hD3D8DLL == nil )
 	{
 		FreeLibrary( hDDrawDLL );
 		OutputDebugString( "Couldn't LoadLibrary D3D8.DLL\r\n" );
@@ -497,7 +497,7 @@ DWORD GetDXVersion()
 
 	// Simply see if dpnhpast.dll exists.
 	hDPNHPASTDLL = LoadLibrary( "dpnhpast.dll" );
-	if( hDPNHPASTDLL == NULL )
+	if( hDPNHPASTDLL == nil )
 	{
 		FreeLibrary( hDPNHPASTDLL );
 		OutputDebugString( "Couldn't LoadLibrary dpnhpast.dll\r\n" );
@@ -617,10 +617,10 @@ psInitialise(void)
 	
 	PsGlobal.fullScreen = FALSE;
 	
-	PsGlobal.dinterface = NULL;
-	PsGlobal.mouse	   = NULL;
-	PsGlobal.joy1	= NULL;
-	PsGlobal.joy2	= NULL;
+	PsGlobal.dinterface = nil;
+	PsGlobal.mouse	   = nil;
+	PsGlobal.joy1	= nil;
+	PsGlobal.joy2	= nil;
 
 	CFileMgr::Initialise();
 	
@@ -681,7 +681,7 @@ psInitialise(void)
 	
 	if ( _dwOperatingSystemVersion == OS_WIN95 )
 	{
-		MessageBoxW(NULL,
+		MessageBoxW(nil,
 					(LPCWSTR)TheText.Get("WIN_95"),	 // Grand Theft Auto III cannot run on Windows 95
 					(LPCWSTR)TheText.Get("WIN_TTL"), // Grand Theft Auto III
 					MB_OK);
@@ -691,7 +691,7 @@ psInitialise(void)
 	
 	if ( dwDXVersion < 0x801 )
 	{
-		MessageBoxW(NULL,
+		MessageBoxW(nil,
 					(LPCWSTR)TheText.Get("WIN_DX"),	 // Grand Theft Auto III requires at least DirectX version 8.1
 					(LPCWSTR)TheText.Get("WIN_TTL"), // Grand Theft Auto III
 					MB_OK);
@@ -716,7 +716,7 @@ psInitialise(void)
 	
 	if ( _dwMemAvailVideo < (12 * 1024 * 1024) /*12 MB*/ )
 	{
-		MessageBoxW(NULL,
+		MessageBoxW(nil,
 					(LPCWSTR)TheText.Get("WIN_VDM"), // Grand Theft Auto III requires at least 12MB of available video memory
 					(LPCWSTR)TheText.Get("WIN_TTL"), // Grand Theft Auto III
 					MB_OK);
@@ -759,7 +759,7 @@ RwBool _psFreeVideoModeList()
 	
 	numModes = _psGetNumVideModes();
 	
-	if ( _VMList == NULL )
+	if ( _VMList == nil )
 		return TRUE;
 	
 	for ( i = 0; i < numModes; i++ )
@@ -769,7 +769,7 @@ RwBool _psFreeVideoModeList()
 	
 	RwFree(_VMList);
 	
-	_VMList = NULL;
+	_VMList = nil;
 	
 	return TRUE;
 }
@@ -782,7 +782,7 @@ RwChar **_psGetVideoModeList()
 	RwInt32 numModes;
 	RwInt32 i;
 	
-	if ( _VMList != NULL )
+	if ( _VMList != nil )
 	{
 		return _VMList;
 	}
@@ -810,10 +810,10 @@ RwChar **_psGetVideoModeList()
 				rwsprintf(_VMList[i],"%lu X %lu X %lu", vm.width, vm.height, vm.depth);
 			}
 			else
-				_VMList[i] = NULL;
+				_VMList[i] = nil;
 		}
 		else
-			_VMList[i] = NULL;
+			_VMList[i] = nil;
 	}
 	
 	return _VMList;
@@ -824,7 +824,7 @@ RwChar **_psGetVideoModeList()
  */
 void _psSelectScreenVM(RwInt32 videoMode)
 {
-	RwTexDictionarySetCurrent( NULL );
+	RwTexDictionarySetCurrent( nil );
 	
 	FrontEndMenuManager.UnloadTextures();
 	
@@ -834,7 +834,7 @@ void _psSelectScreenVM(RwInt32 videoMode)
 		
 		ShowWindow(PSGLOBAL(window), SW_HIDE);
 
-		MessageBoxW(NULL,
+		MessageBoxW(nil,
 			(LPCWSTR)TheText.Get("WIN_RSZ"), // Failed to select new screen resolution
 			(LPCWSTR)TheText.Get("WIN_TTL"), // Grand Theft Auto III
 			MB_OK);		
@@ -850,7 +850,7 @@ void WaitForState(FILTER_STATE State)
 {
 	HRESULT hr;
 	
-	ASSERT(pMC != NULL);
+	ASSERT(pMC != nil);
 	
 	// Make sure we have switched to the required state
 	LONG   lfs;
@@ -868,7 +868,7 @@ void HandleGraphEvent(void)
 	LONG evCode, evParam1, evParam2;
 	HRESULT hr=S_OK;
 	
-	ASSERT(pME != NULL);
+	ASSERT(pME != nil);
 
 	// Process all queued events
 	while (SUCCEEDED(pME->GetEvent(&evCode, (LONG_PTR *)&evParam1,
@@ -922,7 +922,7 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			ShowCursor(FALSE);
 			
-			SetCursor(NULL);
+			SetCursor(nil);
 			
 			break; // is this correct ?
 		}
@@ -1111,14 +1111,14 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 				case GS_LOGO_MPEG:
 				case GS_INTRO_MPEG:
 				{
-					ASSERT(pMC != NULL);
+					ASSERT(pMC != nil);
 					
 					LONG state;
 					pMC->GetState(10, &state);
 					
 					if ( !(BOOL)wParam ) // losing activation
 					{
-						if ( state == State_Running && pMC != NULL )
+						if ( state == State_Running && pMC != nil )
 						{
 							HRESULT hr = pMC->Pause();
 
@@ -1132,7 +1132,7 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 					{
 						CenterVideo();
 						
-						if ( state != State_Running && pMC != NULL )
+						if ( state != State_Running && pMC != nil )
 						{
 							HRESULT hr = pMC->Run();
 
@@ -1183,7 +1183,7 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			/*
 			 * Quit message handling.
 			 */
-			ClipCursor(NULL);
+			ClipCursor(nil);
 			
 			_InputShutdown();
 
@@ -1260,7 +1260,7 @@ UINT GetBestRefreshRate(UINT width, UINT height, UINT depth)
 {
 	LPDIRECT3D8 d3d = Direct3DCreate8(D3D_SDK_VERSION);
 	
-	ASSERT(d3d != NULL);
+	ASSERT(d3d != nil);
 	
 	INT refreshRate = -1;
 	D3DFORMAT format;
@@ -1367,7 +1367,7 @@ psSelectDevice()
 			
 			if ( !modeFound )
 			{
-				MessageBox(NULL, "Cannot find 640x480 video mode", "GTA3", MB_OK);
+				MessageBox(nil, "Cannot find 640x480 video mode", "GTA3", MB_OK);
 				return FALSE;
 			}
 		}
@@ -1417,7 +1417,7 @@ RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode)
 {
 	RwInitialised = FALSE;
 	
-	RsEventHandler(rsRWTERMINATE, NULL);
+	RsEventHandler(rsRWTERMINATE, nil);
 	
 	GcurSel = subSystem;
 	GcurSelVM = videoMode;
@@ -1544,11 +1544,11 @@ void InitialiseLanguage()
 #pragma warning( disable : 4302)
 	WORD primUserLCID	= PRIMARYLANGID(GetSystemDefaultLCID());
 	WORD primSystemLCID = PRIMARYLANGID(GetUserDefaultLCID());
-	WORD primLayout		= PRIMARYLANGID(GetKeyboardLayout(0));
+	WORD primLayout		= PRIMARYLANGID((DWORD)GetKeyboardLayout(0));
 	
 	WORD subUserLCID	= SUBLANGID(GetSystemDefaultLCID());
 	WORD subSystemLCID	= SUBLANGID(GetUserDefaultLCID());
-	WORD subLayout		= SUBLANGID(GetKeyboardLayout(0));
+	WORD subLayout		= SUBLANGID((DWORD)GetKeyboardLayout(0));
 #pragma warning( pop ) 
 	
 	if (   primUserLCID	  == LANG_GERMAN
@@ -1648,7 +1648,7 @@ void CenterVideo(void)
 	HRESULT hr = S_OK;
 	RECT rect;
 
-	ASSERT(pVW != NULL);
+	ASSERT(pVW != nil);
 	
 	GetClientRect(PSGLOBAL(window), &rect);
 
@@ -1674,16 +1674,16 @@ void PlayMovieInWindow(int cmdShow, LPTSTR szFile)
 	MultiByteToWideChar(CP_ACP, 0, szFile, -1, wFileName, sizeof(wFileName) - 1);
 
 	// Initialize COM
-	JIF(CoInitialize(NULL));
+	JIF(CoInitialize(nil));
 
 	// Get the interface for DirectShow's GraphBuilder
-	JIF(CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC, 
+	JIF(CoCreateInstance(CLSID_FilterGraph, nil, CLSCTX_INPROC, 
 						 IID_IGraphBuilder, (void **)&pGB));
 
 	if(SUCCEEDED(hr))
 	{
 		// Have the graph builder construct its the appropriate graph automatically
-		JIF(pGB->RenderFile(&wFileName[0], NULL));
+		JIF(pGB->RenderFile(&wFileName[0], nil));
 
 		// QueryInterface for DirectShow interfaces
 		JIF(pGB->QueryInterface(IID_IMediaControl, (void **)&pMC));
@@ -1707,10 +1707,10 @@ void PlayMovieInWindow(int cmdShow, LPTSTR szFile)
 		SetFocus(PSGLOBAL(window));
 	}
 	
-	ASSERT(pGB != NULL);
-	ASSERT(pVW != NULL);
-	ASSERT(pME != NULL);
-	ASSERT(pMC != NULL);
+	ASSERT(pGB != nil);
+	ASSERT(pVW != nil);
+	ASSERT(pME != nil);
+	ASSERT(pMC != nil);
 
 	if(FAILED(hr))
 		CloseClip();
@@ -1750,7 +1750,7 @@ void CloseClip(void)
 void HandleExit()
 {
 	MSG message;
-	while ( PeekMessage(&message, NULL, 0U, 0U, PM_REMOVE|PM_NOYIELD) )
+	while ( PeekMessage(&message, nil, 0U, 0U, PM_REMOVE|PM_NOYIELD) )
 	{
 		if( message.message == WM_QUIT )
 		{
@@ -1778,13 +1778,13 @@ _WinMain(HINSTANCE instance,
 	RwInt32 argc, i;
 	RwChar **argv;
 
-	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, NULL, SPIF_SENDCHANGE);
+	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
 
 	/* 
 	 * Initialize the platform independent data.
 	 * This will in turn initialize the platform specific data...
 	 */
-	if( RsEventHandler(rsINITIALISE, NULL) == rsEVENTERROR )
+	if( RsEventHandler(rsINITIALISE, nil) == rsEVENTERROR )
 	{
 		return FALSE;
 	}
@@ -1822,7 +1822,7 @@ _WinMain(HINSTANCE instance,
 	 * Create the window...
 	 */
 	PSGLOBAL(window) = InitInstance(instance);
-	if( PSGLOBAL(window) == NULL )
+	if( PSGLOBAL(window) == nil )
 	{
 		return FALSE;
 	}
@@ -1841,7 +1841,7 @@ _WinMain(HINSTANCE instance,
 	ControlsManager.InitDefaultControlConfigMouse(MousePointerStateHelper.GetMouseSetUp());
 	
 	SetWindowLong(PSGLOBAL(window), GWL_STYLE, WS_POPUP);
-	SetWindowPos(PSGLOBAL(window), 0, 0, 0, 0, 0,
+	SetWindowPos(PSGLOBAL(window), nil, 0, 0, 0, 0,
 				SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER|
 				SWP_FRAMECHANGED);
 
@@ -1852,7 +1852,7 @@ _WinMain(HINSTANCE instance,
 	{
 		DestroyWindow(PSGLOBAL(window));
 
-		RsEventHandler(rsTERMINATE, NULL);
+		RsEventHandler(rsTERMINATE, nil);
 
 		return FALSE;
 	}
@@ -1880,9 +1880,9 @@ _WinMain(HINSTANCE instance,
 		RsEventHandler(rsCAMERASIZE, &r);
 	}
 	
-	SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, FALSE, NULL, SPIF_SENDCHANGE);
-	SystemParametersInfo(SPI_SETPOWEROFFACTIVE, FALSE, NULL, SPIF_SENDCHANGE);
-	SystemParametersInfo(SPI_SETLOWPOWERACTIVE, FALSE, NULL, SPIF_SENDCHANGE);
+	SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, FALSE, nil, SPIF_SENDCHANGE);
+	SystemParametersInfo(SPI_SETPOWEROFFACTIVE, FALSE, nil, SPIF_SENDCHANGE);
+	SystemParametersInfo(SPI_SETLOWPOWERACTIVE, FALSE, nil, SPIF_SENDCHANGE);
 	
 
 	STICKYKEYS SavedStickyKeys;
@@ -1924,7 +1924,7 @@ _WinMain(HINSTANCE instance,
 	gGameState = GS_INIT_FRONTEND;
 	TRACE("gGameState = GS_INIT_FRONTEND");
 	
-	LoadingScreen(NULL, NULL, "loadsc0");
+	LoadingScreen(nil, nil, "loadsc0");
 	if ( !CGame::InitialiseOnceAfterRW() )
 		RsGlobal.quit = TRUE;
 #endif				
@@ -1951,7 +1951,7 @@ _WinMain(HINSTANCE instance,
 
 		while( !RsGlobal.quit && !FrontEndMenuManager.m_bStartGameLoading )
 		{
-			if( PeekMessage(&message, NULL, 0U, 0U, PM_REMOVE|PM_NOYIELD) )
+			if( PeekMessage(&message, nil, 0U, 0U, PM_REMOVE|PM_NOYIELD) )
 			{
 				if( message.message == WM_QUIT )
 				{
@@ -2044,7 +2044,7 @@ _WinMain(HINSTANCE instance,
 						CloseClip();
 						CoUninitialize();
 						
-						LoadingScreen(NULL, NULL, "loadsc0");
+						LoadingScreen(nil, nil, "loadsc0");
 						
 						if ( !CGame::InitialiseOnceAfterRW() )
 							RsGlobal.quit = TRUE;
@@ -2056,7 +2056,7 @@ _WinMain(HINSTANCE instance,
 					
 					case GS_INIT_FRONTEND:
 					{
-						LoadingScreen(NULL, NULL, "loadsc0");
+						LoadingScreen(nil, nil, "loadsc0");
 						
 						FrontEndMenuManager.m_bGameNotLoaded = true;
 						
@@ -2079,7 +2079,7 @@ _WinMain(HINSTANCE instance,
 						GetWindowPlacement(PSGLOBAL(window), &wp);
 						
 						if ( wp.showCmd != SW_SHOWMINIMIZED )
-							RsEventHandler(rsFRONTENDIDLE, NULL);
+							RsEventHandler(rsFRONTENDIDLE, nil);
 
 						if ( !FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bLoadingSavedGame )
 						{
@@ -2191,7 +2191,7 @@ _WinMain(HINSTANCE instance,
 	/*
 	 * Tidy up the 3D (RenderWare) components of the application...
 	 */
-	RsEventHandler(rsRWTERMINATE, NULL);
+	RsEventHandler(rsRWTERMINATE, nil);
 
 	/*
 	 * Kill the window...
@@ -2201,7 +2201,7 @@ _WinMain(HINSTANCE instance,
 	/*
 	 * Free the platform dependent data...
 	 */
-	RsEventHandler(rsTERMINATE, NULL);
+	RsEventHandler(rsTERMINATE, nil);
 
 	/* 
 	 * Free the argv strings...
@@ -2211,9 +2211,9 @@ _WinMain(HINSTANCE instance,
 	ShowCursor(TRUE);
 	
 	SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &SavedStickyKeys, SPIF_SENDCHANGE);
-	SystemParametersInfo(SPI_SETPOWEROFFACTIVE, TRUE, NULL, SPIF_SENDCHANGE);
-	SystemParametersInfo(SPI_SETLOWPOWERACTIVE, TRUE, NULL, SPIF_SENDCHANGE);
-	SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, TRUE, NULL, SPIF_SENDCHANGE);
+	SystemParametersInfo(SPI_SETPOWEROFFACTIVE, TRUE, nil, SPIF_SENDCHANGE);
+	SystemParametersInfo(SPI_SETLOWPOWERACTIVE, TRUE, nil, SPIF_SENDCHANGE);
+	SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, TRUE, nil, SPIF_SENDCHANGE);
 
 	SetErrorMode(0);
 
@@ -2233,8 +2233,8 @@ HRESULT _InputInitialise()
 	HRESULT hr;
 
 	// Create a DInput object
-	if( FAILED( hr = DirectInput8Create( GetModuleHandle(NULL), DIRECTINPUT_VERSION, 
-										IID_IDirectInput8, (VOID**)&PSGLOBAL(dinterface), NULL ) ) )
+	if( FAILED( hr = DirectInput8Create( GetModuleHandle(nil), DIRECTINPUT_VERSION, 
+										IID_IDirectInput8, (VOID**)&PSGLOBAL(dinterface), nil ) ) )
 		return hr;
 		
 	return S_OK;
@@ -2245,7 +2245,7 @@ HRESULT _InputInitialiseMouse()
 	HRESULT hr;
 
 	// Obtain an interface to the system mouse device.
-	if( FAILED( hr = PSGLOBAL(dinterface)->CreateDevice( GUID_SysMouse, &PSGLOBAL(mouse), NULL ) ) )
+	if( FAILED( hr = PSGLOBAL(dinterface)->CreateDevice( GUID_SysMouse, &PSGLOBAL(mouse), nil ) ) )
 		return hr;
 	
 	// Set the data format to "mouse format" - a predefined data format 
@@ -2277,11 +2277,11 @@ HRESULT CapturePad(RwInt32 padID)
 {
 	HRESULT		hr;
 	DIJOYSTATE2 js; 
-	LPDIRECTINPUTDEVICE8 pPad = NULL;
+	LPDIRECTINPUTDEVICE8 pPad = nil;
 	
 	pPad = ( padID == 0 ) ? PSGLOBAL(joy1) : PSGLOBAL(joy2);
 	
-	if ( NULL == pPad )
+	if ( nil == pPad )
 		return S_OK;
 	
 	// Poll the device to read the current state
@@ -2331,7 +2331,7 @@ HRESULT CapturePad(RwInt32 padID)
 
 	RsPadEventHandler(rsPADBUTTONUP, (void *)&bs);
 	
-	bool deviceAvailable = pPad != NULL;
+	bool deviceAvailable = pPad != nil;
 	
 	if ( deviceAvailable )
 	{
@@ -2393,7 +2393,7 @@ void _InputInitialiseJoys()
 	
 	_InputAddJoys();
 	
-	if ( PSGLOBAL(joy1) != NULL )
+	if ( PSGLOBAL(joy1) != nil )
 	{
 		devCaps.dwSize = sizeof(DIDEVCAPS);
 		PSGLOBAL(joy1)->GetCapabilities(&devCaps);
@@ -2411,7 +2411,7 @@ void _InputInitialiseJoys()
 		ControlsManager.InitDefaultControlConfigJoyPad(devCaps.dwButtons);
 	}
 		
-	if ( PSGLOBAL(joy2) != NULL )
+	if ( PSGLOBAL(joy2) != nil )
 	{
 		PSGLOBAL(joy2)->GetProperty(DIPROP_VIDPID, (LPDIPROPHEADER)&prop);
 		AllValidWinJoys.m_aJoys[1].m_nVendorID = LOWORD(prop.dwData);
@@ -2440,7 +2440,7 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 	// get the info about the object from the device
 
 	range.diph.dwObj = DIJOFS_X;
-	if ( lpDevice != NULL )
+	if ( lpDevice != nil )
 	{
 		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_X, DIPH_BYOFFSET ) ) )
 		{
@@ -2452,7 +2452,7 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 	}
 	
 	range.diph.dwObj = DIJOFS_Y;
-	if ( lpDevice != NULL )
+	if ( lpDevice != nil )
 	{
 		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_Y, DIPH_BYOFFSET ) ) )
 		{
@@ -2464,7 +2464,7 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 	}
 	
 	range.diph.dwObj = DIJOFS_Z;
-	if ( lpDevice != NULL )
+	if ( lpDevice != nil )
 	{
 		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_Z, DIPH_BYOFFSET ) ) )
 		{
@@ -2476,7 +2476,7 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 	}
 	
 	range.diph.dwObj = DIJOFS_RZ;
-	if ( lpDevice != NULL )
+	if ( lpDevice != nil )
 	{
 		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_RZ, DIPH_BYOFFSET ) ) )
 		{
@@ -2495,17 +2495,17 @@ HRESULT _InputAddJoys()
 {
 	HRESULT hr;
 	
-	hr = PSGLOBAL(dinterface)->EnumDevices(DI8DEVCLASS_GAMECTRL,  _InputEnumDevicesCallback, NULL, DIEDFL_ATTACHEDONLY );
+	hr = PSGLOBAL(dinterface)->EnumDevices(DI8DEVCLASS_GAMECTRL,  _InputEnumDevicesCallback, nil, DIEDFL_ATTACHEDONLY );
 	 
 	if( FAILED(hr) )
 		return hr;
 	
-	if ( PSGLOBAL(joy1) == NULL )
+	if ( PSGLOBAL(joy1) == nil )
 		return S_FALSE;
 	
 	_InputAddJoyStick(PSGLOBAL(joy1), 0);
 	
-	if ( PSGLOBAL(joy2) == NULL )
+	if ( PSGLOBAL(joy2) == nil )
 		return S_OK;	// we have one device already so return OK and ignore second
 	
 	_InputAddJoyStick(PSGLOBAL(joy2), 1);
@@ -2517,7 +2517,7 @@ HRESULT _InputGetMouseState(DIMOUSESTATE2 *state)
 {
 	HRESULT		  hr;
 	
-	if ( PSGLOBAL(mouse) == NULL )
+	if ( PSGLOBAL(mouse) == nil )
 		return S_FALSE;
 	
 	// Get the input's device state, and put the state in dims
@@ -2557,7 +2557,7 @@ BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, V
 	 
 	static INT Count = 0;
 	
-	LPDIRECTINPUTDEVICE8 pJoystick = NULL;
+	LPDIRECTINPUTDEVICE8 pJoystick = nil;
 	
 	if ( Count == 0 )
 		pJoystick = PSGLOBAL(joy1);
@@ -2565,7 +2565,7 @@ BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, V
 		pJoystick = PSGLOBAL(joy2);
 	
 	// Obtain an interface to the enumerated joystick. 
-	hr = PSGLOBAL(dinterface)->CreateDevice( pdidInstance->guidInstance, &pJoystick, NULL );
+	hr = PSGLOBAL(dinterface)->CreateDevice( pdidInstance->guidInstance, &pJoystick, nil );
 	
 	// If it failed, then we can't use this joystick. (Maybe the user unplugged
 	// it while we were in the middle of enumerating it.)

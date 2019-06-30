@@ -54,7 +54,7 @@ _rpMatFXD3D8AtomicMatFXDefaultRender(RxD3D8InstanceData *inst, int flags, RwText
 	if(flags & (rpGEOMETRYTEXTURED|rpGEOMETRYTEXTURED2) && texture)
 		RwD3D8SetTexture(texture, 0);
 	else
-		RwD3D8SetTexture(NULL, 0);
+		RwD3D8SetTexture(nil, 0);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)(inst->vertexAlpha || inst->material->color.alpha != 0xFF));
 	RwD3D8SetRenderState(D3DRS_DIFFUSEMATERIALSOURCE, inst->vertexAlpha != 0);
 	RwD3D8SetPixelShader(0);

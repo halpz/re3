@@ -9,7 +9,7 @@ CAnimBlendHierarchy::CAnimBlendHierarchy(void)
 	numSequences = 0;
 	compressed = 0;
 	totalLength = 0.0f;
-	linkPtr = 0;
+	linkPtr = nil;
 }
 
 void

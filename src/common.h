@@ -14,7 +14,7 @@
 #include <new>
 
 #ifdef WITHD3D
-#include <Windows.h>
+#include <windows.h>
 #include <d3d8types.h>
 #endif
 
@@ -43,7 +43,7 @@ typedef int64_t int64;
 // hardcode ucs-2
 typedef uint16_t wchar;
 
-#define nil NULL
+#define nil nullptr
 
 #include "config.h"
 
@@ -53,7 +53,7 @@ typedef uint16_t wchar;
 extern void **rwengine;
 #define RwEngineInstance (*rwengine)
 
-#include "skel\skeleton.h"
+#include "skeleton.h"
 #include "Draw.h"
 
 /*
@@ -164,3 +164,6 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 #define PERCENT(x, p)                    ((float(x) * (float(p) / 100.0f)))
 #define ARRAY_SIZE(array)                (sizeof(array) / sizeof(array[0]))
 #define BIT(num)                         (1<<(num))
+
+#define max(a, b)  (((a) > (b)) ? (a) : (b)) 
+#define min(a, b)  (((a) < (b)) ? (a) : (b)) 

@@ -48,7 +48,7 @@ CClumpModelInfo::SetClump(RpClump *clump)
 	AddTexDictionaryRef();
 	RpClumpForAllAtomics(clump, SetAtomicRendererCB, nil);
 	if(strncmp(GetName(), "playerh", 8) == 0)
-		RpClumpForAllAtomics(clump, SetAtomicRendererCB, CVisibilityPlugins::RenderPlayerCB);
+		RpClumpForAllAtomics(clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
 }
 
 void

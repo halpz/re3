@@ -1,14 +1,14 @@
 #include "common.h"
 #include "patcher.h"
 #include "main.h"
-#include "lights.h"
+#include "Lights.h"
 #include "PointLights.h"
 #include "RpAnimBlend.h"
 #include "AnimBlendClumpData.h"
 #include "Renderer.h"
 #include "ModelIndices.h"
 #include "Shadows.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "CutsceneObject.h"
 
 CCutsceneObject::CCutsceneObject(void)

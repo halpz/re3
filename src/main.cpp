@@ -41,7 +41,7 @@
 #include "Lights.h"
 #include "Credits.h"
 #include "CullZones.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "TxdStore.h"
 #include "FileMgr.h"
 #include "Text.h"

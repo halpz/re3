@@ -38,7 +38,7 @@ void
 LoadingScreenLoadingFile(const char *filename)
 {
 	sprintf(gString, "Loading %s", GetFilename(filename));
-	LoadingScreen("Loading the Game", gString, 0);
+	LoadingScreen("Loading the Game", gString, nil);
 }
 
 void
@@ -144,7 +144,7 @@ CFileLoader::LoadLine(int fd)
 	int i;
 	char *line;
 
-	if(CFileMgr::ReadLine(fd, ms_line, 256) == nil)
+	if(CFileMgr::ReadLine(fd, ms_line, 256) == false)
 		return nil;
 	for(i = 0; ms_line[i] != '\0'; i++)
 		if(ms_line[i] < ' ' || ms_line[i] == ',')
@@ -311,7 +311,7 @@ CFileLoader::FindRelatedModelInfoCB(RpAtomic *atomic, void *data)
 
 	nodename = GetFrameNodeName(RpClumpGetFrame(atomic));
 	GetNameAndLOD(nodename, name, &n);
-	mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(name, 0);
+	mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(name, nil);
 	if(mi){
 		assert(mi->IsSimple());
 		mi->SetAtomic(n, atomic);
@@ -360,7 +360,7 @@ CFileLoader::LoadClumpFile(const char *filename)
 		if(clump){
 			nodename = GetFrameNodeName(RpClumpGetFrame(clump));
 			GetNameAndLOD(nodename, name, &n);
-			mi = (CClumpModelInfo*)CModelInfo::GetModelInfo(name, 0);
+			mi = (CClumpModelInfo*)CModelInfo::GetModelInfo(name, nil);
 			assert(mi->IsClump());
 			if(mi)
 				mi->SetClump(clump);
@@ -457,7 +457,7 @@ CFileLoader::SetRelatedModelInfoCB(RpAtomic *atomic, void *data)
 	RpClumpRemoveAtomic(clump, atomic);
 	RpAtomicSetFrame(atomic, RwFrameCreate());
 	CVisibilityPlugins::SetAtomicModelInfo(atomic, gpRelatedModelInfo);
-	CVisibilityPlugins::SetAtomicRenderCallback(atomic, 0);
+	CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
 	return atomic;
 }
 

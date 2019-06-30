@@ -164,7 +164,7 @@ CTxdStore::StartLoadTxd(int slot, RwStream *stream)
 		return def->texDict != nil;
 	}else{
 		printf("Failed to load TXD\n");
-		return nil;
+		return false;
 	}
 }
 

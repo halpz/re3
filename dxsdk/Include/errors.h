@@ -24,7 +24,7 @@ extern "C" {
 #define VFW_FIRST_CODE   0x200
 #define MAX_ERROR_TEXT_LEN 160
 
-#include <VFWMSGS.H>                    // includes all message definitions
+#include <vfwmsgs.h>                    // includes all message definitions
 
 typedef BOOL (WINAPI* AMGETERRORTEXTPROCA)(HRESULT, char *, DWORD);
 typedef BOOL (WINAPI* AMGETERRORTEXTPROCW)(HRESULT, WCHAR *, DWORD);

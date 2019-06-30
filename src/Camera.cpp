@@ -790,7 +790,7 @@ CCam::WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation)
 		float RoadZ = 0.0f;
 		float RoofZ = 0.0f;
 
-		if(CWorld::ProcessVerticalLine(Source, -1000.0f, colpoint, ent, true, false, false, false, false, false, false) &&
+		if(CWorld::ProcessVerticalLine(Source, -1000.0f, colpoint, ent, true, false, false, false, false, false, nil) &&
 		   ent->IsBuilding()){
 			FoundRoad = true;
 			RoadZ = colpoint.point.z;
@@ -807,7 +807,7 @@ CCam::WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation)
 					TargetZOffSet = 0.0f;
 			}
 		}else{
-			if(CWorld::ProcessVerticalLine(Source, 1000.0f, colpoint, ent, true, false, false, false, false, false, false) &&
+			if(CWorld::ProcessVerticalLine(Source, 1000.0f, colpoint, ent, true, false, false, false, false, false, nil) &&
 			   ent->IsBuilding()){
 				FoundRoof = true;
 				RoofZ = colpoint.point.z;
