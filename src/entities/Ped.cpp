@@ -30,6 +30,7 @@ CVector &CPed::offsetToOpenVanDoor = *(CVector*)0x62E048;
 void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
 void *CPed::operator new(size_t sz, int handle) { return CPools::GetPedPool()->New(handle); }
 void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }
+void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((CPed*)p); }
 
 CPed::~CPed(void)
 {

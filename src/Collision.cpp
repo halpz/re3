@@ -1736,8 +1736,6 @@ CColModel::operator=(const CColModel &other)
 	int i;
 	int numVerts;
 
-	assert(0);
-
 	boundingSphere = other.boundingSphere;
 	boundingBox = other.boundingBox;
 

@@ -201,13 +201,13 @@ private:
 	static CEntryInfoNode *&pBuf9;
 	static uint8 *&pBuf10;
 	static CDummyPed *&pBuf11;
-	static CBlip *&pRadarBlips;
-	static CCamera *&pStoredCam;
-	static CSector *&pWorld1;
+	static uint8 *&pRadarBlips;
+	static uint8 *&pStoredCam;
+	static uint8 *&pWorld1;
 	static CReference *&pEmptyReferences;
 	static CStoredDetailedAnimationState *&pPedAnims;
-	static CPickup *&pPickups;
-	static CReference *&pReferences;
+	static uint8 *&pPickups;
+	static uint8 *&pReferences;
 	static uint8 (&BufferStatus)[8];
 	static uint8 (&Buffers)[8][100000];
 	static bool &bPlayingBackFromFile;
