@@ -175,7 +175,7 @@ public:
 	char field_2;
 	char m_bActiveSamples;
 	char field_4;
-	char m_bDynamicAcousticModelingStatus;
+	bool m_bDynamicAcousticModelingStatus;
 	char field_6;
 	char field_7;
 	float field_8;
@@ -217,6 +217,7 @@ public:
 	int m_nTimeOfRecentCrime;
 
 	bool IsAudioInitialised() const;
+	void SetDynamicAcousticModelingStatus(bool status);
 	void GenerateIntegerRandomNumberTable();
 
 	void PlayerJustLeftCar(void);
