@@ -9,6 +9,7 @@
 #include "AnimBlendClumpData.h"
 #include "AnimBlendAssociation.h"
 #include "WeaponInfo.h"
+#include "Fire.h"
 
 struct CPathNode;
 
@@ -85,15 +86,15 @@ enum PedState
 	PED_PASSENGER,
 	PED_TAXI_PASSENGER,
 	PED_OPEN_DOOR,
-	PED_DIE,
-	PED_DEAD,
+	PED_DIE = 48,
+	PED_DEAD = 49,
 	PED_CARJACK,
 	PED_DRAG_FROM_CAR,
 	PED_ENTER_CAR,
 	PED_STEAL_CAR,
 	PED_EXIT_CAR,
 	PED_HANDS_UP,
-	PED_ARRESTED,
+	PED_ARRESTED = 56,
 };
 
 enum {
@@ -184,7 +185,9 @@ public:
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
-	uint8 stuff10[15];
+	uint8 stuff10[3];
+	uint8 m_nCreatedBy;
+	uint8 stuff14[11];
 	CPed *m_field_16C;
 	uint8 stuff12[44];
 	int32 m_pEventEntity;
@@ -243,7 +246,8 @@ public:
 	uint8 stuff[2];
 	int32 m_pPointGunAt;
 	CVector m_vecHitLastPos;
-	uint8 stuff8[12];
+	uint8 stuff8[8];
+	CFire* m_pFire;
 	CEntity *m_pLookTarget;
 	float m_fLookDirection;
 	int32 m_wepModelID;
@@ -266,7 +270,14 @@ public:
 	uint8 stuff11[30];
 
 	static void *operator new(size_t);
+	static void *operator new(size_t, int);
 	static void operator delete(void*, size_t);
+	static void operator delete(void*, int);
+
+	~CPed(void);
+	void FlagToDestroyWhenNextProcessed(void);
+
+	void dtor(void) { this->CPed::~CPed(); }
 
 	bool IsPlayer(void);
 	bool UseGroundColModel(void);
@@ -301,6 +312,7 @@ public:
 	void LineUpPedWithCar(PedLineUpPhase phase);
 	void SetPedPositionInCar(void);
 	void PlayFootSteps(void);
+	void QuitEnteringCar(void);
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
 	static void GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float seatPosMult);
 	static void GetPositionToOpenCarDoor(CVector* output, CVehicle* veh, uint32 enterType);

@@ -31,7 +31,7 @@ CDummy::Add(void)
 		for(x = xstart; x <= xend; x++){
 			s = CWorld::GetSector(x, y);
 			if(x == xmid && y == ymid)
-				list = &s->m_lists[ENTITYLIST_OBJECTS];
+				list = &s->m_lists[ENTITYLIST_DUMMIES];
 			else
 				list = &s->m_lists[ENTITYLIST_DUMMIES_OVERLAP];
 			CPtrNode *node = list->InsertItem(this);
@@ -52,6 +52,7 @@ CDummy::Remove(void)
 }
 
 STARTPATCHES
+	InjectHook(0x473810, &CDummy::dtor, PATCH_JUMP);
 	InjectHook(0x473860, &CDummy::Add_, PATCH_JUMP);
 	InjectHook(0x473AD0, &CDummy::Remove_, PATCH_JUMP);
 ENDPATCHES

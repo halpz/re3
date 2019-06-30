@@ -4,7 +4,7 @@
 #include "Particle.h"
 #include "Stats.h"
 #include "World.h"
-#include "DMaudio.h"
+#include "DMAudio.h"
 #include "RpAnimBlend.h"
 #include "Ped.h"
 #include "PlayerPed.h"
@@ -17,6 +17,7 @@
 #include "Shadows.h"
 #include "Weather.h"
 #include "CullZones.h"
+#include "Population.h"
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -27,8 +28,66 @@ CVector &CPed::offsetToOpenLowCarDoor = *(CVector*)0x62E03C;
 CVector &CPed::offsetToOpenVanDoor = *(CVector*)0x62E048;
 
 void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
+void *CPed::operator new(size_t sz, int handle) { return CPools::GetPedPool()->New(handle); }
 void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }
+void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((CPed*)p); }
 
+CPed::~CPed(void)
+{
+	CWorld::Remove(this);
+	CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetIndex(this));
+	if (bInVehicle && m_pMyVehicle){
+		uint8 door_flag = 0;
+		switch (m_vehEnterType) {
+		case VEHICLE_ENTER_FRONT_LEFT:  door_flag = 1; break;
+		case VEHICLE_ENTER_REAR_LEFT:   door_flag = 2; break;
+		case VEHICLE_ENTER_FRONT_RIGHT: door_flag = 4; break;
+		case VEHICLE_ENTER_REAR_RIGHT:  door_flag = 8; break;
+		default: break;
+		}
+		if (m_pMyVehicle->pDriver == this)
+			m_pMyVehicle->pDriver = nil;
+		else {
+			for (int i = 0; i < m_pMyVehicle->m_nNumMaxPassengers; i++) {
+				if (m_pMyVehicle->pPassengers[i] == this)
+					m_pMyVehicle->pPassengers[i] = nil;
+			}
+		}
+		if (m_nPedState == PED_EXIT_CAR || m_nPedState == PED_DRAG_FROM_CAR)
+			m_pMyVehicle->m_nGettingOutFlags &= ~door_flag;
+		bInVehicle = false;
+		m_pMyVehicle = nil;
+	}else if (m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK){
+		QuitEnteringCar();
+	}
+	if (m_pFire)
+		m_pFire->Extinguish();
+	CPopulation::UpdatePedCount(m_nPedType, true);
+	DMAudio.DestroyEntity(m_audioEntityId);
+}
+
+void CPed::FlagToDestroyWhenNextProcessed(void)
+{
+	bRemoveFromWorld = true;
+	if (!bInVehicle || !m_pMyVehicle)
+		return;
+	if (m_pMyVehicle->pDriver == this){
+		m_pMyVehicle->pDriver = nil;
+		if (IsPlayer() && m_pMyVehicle->m_status != STATUS_WRECKED)
+			m_pMyVehicle->m_status = STATUS_ABANDONED;
+	}else{
+		m_pMyVehicle->RemovePassenger(this);
+	}
+	bInVehicle = false;
+	m_pMyVehicle = nil;
+	if (m_nCreatedBy == 2) /* TODO: enum (MISSION) */
+		m_nPedState = PED_DEAD;
+	else
+		m_nPedState = PED_NONE;
+	m_pVehicleAnim = nil;
+}
+
+WRAPPER void CPed::QuitEnteringCar() { EAXJMP(0x4E0E00); }
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
 WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4D37D0); }
@@ -416,7 +475,7 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 unk)
 			if (nodeId != PED_HEAD)
 				CPed::SpawnFlyingComponent(nodeId, unk);
 
-			RecurseFrameChildrenVisibilityCB(frame, 0);
+			RecurseFrameChildrenVisibilityCB(frame, nil);
 			pos.x = 0.0f;
 			pos.y = 0.0f;
 			pos.z = 0.0f;
@@ -447,7 +506,7 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 unk)
 RwObject*
 CPed::SetPedAtomicVisibilityCB(RwObject *object, void *data)
 {
-	if (data == 0)
+	if (data == nil)
 		RpAtomicSetFlags(object, 0);
 	return object;
 }
@@ -456,7 +515,7 @@ RwFrame*
 CPed::RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data)
 {
 	RwFrameForAllObjects(frame, SetPedAtomicVisibilityCB, data);
-	RwFrameForAllChildren(frame, RecurseFrameChildrenVisibilityCB, 0);
+	RwFrameForAllChildren(frame, RecurseFrameChildrenVisibilityCB, nil);
 	return frame;
 }
 
@@ -824,7 +883,7 @@ CPed::Attack(void)
 				&& GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING) {
 
 				weaponAnim = weaponAnimAssoc->animId;
-				if (ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), 0) < PED_ON_THE_FLOOR) {
+				if (ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), nil) < PED_ON_THE_FLOOR) {
 					if (weaponAnim != ourWeapon->m_Anim2ToPlay || weaponAnim == ANIM_RBLOCK_CSHOOT) {
 						weaponAnimAssoc->Start(ourWeapon->m_fAnimLoopStart);
 					} else {
@@ -873,7 +932,7 @@ CPed::Attack(void)
 
 	if (lastReloadWasInFuture) {
 		if (ourWeaponFire != WEAPON_FIRE_PROJECTILE || !CPed::IsPlayer() || ((CPlayerPed*)this)->field_1380) {
-			if (!CGame::nastyGame || ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), 0) < PED_ON_THE_FLOOR) {
+			if (!CGame::nastyGame || ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), nil) < PED_ON_THE_FLOOR) {
 				weaponAnimAssoc = CAnimManager::BlendAnimation((RpClump*)m_rwObject, ASSOCGRP_STD, ourWeapon->m_AnimToPlay, 8.0f);
 			} else {
 				weaponAnimAssoc = CAnimManager::BlendAnimation((RpClump*)m_rwObject, ASSOCGRP_STD, ourWeapon->m_Anim2ToPlay, 8.0f);
@@ -892,14 +951,14 @@ CPed::Attack(void)
 		}
 	}
 	else
-		CPed::FinishedAttackCB(0, this);
+		CPed::FinishedAttackCB(nil, this);
 }
 
 void
 CPed::RemoveWeaponModel(int modelId)
 {
 	// modelId is not used!! This function just removes the current weapon.
-	RwFrameForAllObjects(GetNodeFrame(PED_HANDR),RemoveAllModelCB,0);
+	RwFrameForAllObjects(GetNodeFrame(PED_HANDR),RemoveAllModelCB,nil);
 	m_wepModelID = -1;
 }
 
@@ -1621,10 +1680,11 @@ WRAPPER void CPed::FinishFightMoveCB(CAnimBlendAssociation *assoc, void *arg) { 
 WRAPPER void CPed::PedAnimDoorCloseRollingCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4E4B90); }
 WRAPPER void CPed::FinishJumpCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D7A50); }
 WRAPPER void CPed::PedLandCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8A0); }
-WRAPPER void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4C6620); }
+WRAPPER void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4C6580); }
 WRAPPER void CPed::RestoreHeadingRateCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D6550); }
 
 STARTPATCHES
+	InjectHook(0x4C50D0, &CPed::dtor, PATCH_JUMP);
 	InjectHook(0x4CF8F0, &CPed::AddWeaponModel, PATCH_JUMP);
 	InjectHook(0x4C6AA0, &CPed::AimGun, PATCH_JUMP);
 	InjectHook(0x4EB470, &CPed::ApplyHeadShot, PATCH_JUMP);

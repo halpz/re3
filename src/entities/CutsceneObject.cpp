@@ -1,14 +1,14 @@
 #include "common.h"
 #include "patcher.h"
 #include "main.h"
-#include "lights.h"
+#include "Lights.h"
 #include "PointLights.h"
 #include "RpAnimBlend.h"
 #include "AnimBlendClumpData.h"
 #include "Renderer.h"
 #include "ModelIndices.h"
 #include "Shadows.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "CutsceneObject.h"
 
 CCutsceneObject::CCutsceneObject(void)
@@ -90,6 +90,7 @@ CCutsceneObject::RemoveLighting(bool reset)
 }
 
 STARTPATCHES
+	InjectHook(0x4BA960, &CCutsceneObject::dtor, PATCH_JUMP);
 	InjectHook(0x4BA980, &CCutsceneObject::SetModelIndex_, PATCH_JUMP);
 	InjectHook(0x4BA9C0, &CCutsceneObject::ProcessControl_, PATCH_JUMP);
 	InjectHook(0x4BAA40, &CCutsceneObject::PreRender_, PATCH_JUMP);

@@ -134,6 +134,7 @@ public:
 	void ProcessCollision(void);
 
 	// to make patching virtual functions possible
+	void dtor(void) { this->CPhysical::~CPhysical(); }
 	void Add_(void) { CPhysical::Add(); }
 	void Remove_(void) { CPhysical::Remove(); }
 	CRect GetBoundRect_(void) { return CPhysical::GetBoundRect(); }

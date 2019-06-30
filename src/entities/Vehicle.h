@@ -50,8 +50,8 @@ public:
 	float m_fBreakPedal;
 	uint8 m_nCreatedBy;        // eVehicleCreatedBy
 	uint8 bIsLawEnforcer : 1;
-	uint8 m_veh_flagA2 : 1;
-	uint8 m_veh_flagA4 : 1;
+	uint8 bIsAmbulanceOnDuty : 1;
+	uint8 bIsFiretruckOnDuty : 1;
 	uint8 m_veh_flagA8 : 1;
 	uint8 m_veh_flagA10 : 1;
 	uint8 m_veh_flagA20 : 1;
@@ -111,7 +111,13 @@ public:
 	eVehicleType m_vehType;
 
 	static void *operator new(size_t);
+	static void *operator new(size_t sz, int slot);
 	static void operator delete(void*, size_t);
+	static void operator delete(void*, int);
+
+	~CVehicle(void);
+
+	void dtor(void) { this->CVehicle::~CVehicle(); }
 
 	bool IsCar(void) { return m_vehType == VEHICLE_TYPE_CAR; }
 	bool IsBoat(void) { return m_vehType == VEHICLE_TYPE_BOAT; }
@@ -120,6 +126,7 @@ public:
 	bool IsPlane(void) { return m_vehType == VEHICLE_TYPE_PLANE; }
 	bool IsLawEnforcementVehicle(void);
 	void ChangeLawEnforcerState(bool enable);
+	void RemovePassenger(CPed *);
 	void RemoveDriver(void);
 	bool IsUpsideDown(void);
 	

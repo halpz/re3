@@ -303,12 +303,12 @@ RsRwInitialise(void *displayID)
 	/*
 	 * Initialize debug message handling...
 	 */
-	RsEventHandler(rsINITDEBUG, NULL);
+	RsEventHandler(rsINITDEBUG, nil);
 
 	/*
 	 * Attach all plugins...
 	 */
-	if (RsEventHandler(rsPLUGINATTACH, NULL) == rsEVENTERROR)
+	if (RsEventHandler(rsPLUGINATTACH, nil) == rsEVENTERROR)
 	{
 		return (FALSE);
 	}
@@ -316,7 +316,7 @@ RsRwInitialise(void *displayID)
 	/*
 	 * Attach input devices...
 	 */
-	if (RsEventHandler(rsINPUTDEVICEATTACH, NULL) == rsEVENTERROR)
+	if (RsEventHandler(rsINPUTDEVICEATTACH, nil) == rsEVENTERROR)
 	{
 		return (FALSE);
 	}
@@ -346,7 +346,7 @@ RsRwInitialise(void *displayID)
 	/*
 	 * Register loaders for an image with a particular file extension...
 	 */
-	RsEventHandler(rsREGISTERIMAGELOADER, NULL);
+	RsEventHandler(rsREGISTERIMAGELOADER, nil);
 
 	psNativeTextureSupport();
 
@@ -390,17 +390,17 @@ RsInitialise(void)
 
 	/* setup the keyboard */
 	RsGlobal.keyboard.inputDeviceType = rsKEYBOARD;
-	RsGlobal.keyboard.inputEventHandler = 0;
+	RsGlobal.keyboard.inputEventHandler = nil;
 	RsGlobal.keyboard.used = FALSE;
 
 	/* setup the mouse */
 	RsGlobal.mouse.inputDeviceType = rsMOUSE;
-	RsGlobal.mouse.inputEventHandler = 0;
+	RsGlobal.mouse.inputEventHandler = nil;
 	RsGlobal.mouse.used = FALSE;
 
 	/* setup the pad */
 	RsGlobal.pad.inputDeviceType = rsPAD;
-	RsGlobal.pad.inputEventHandler = 0;
+	RsGlobal.pad.inputEventHandler = nil;
 	RsGlobal.pad.used = FALSE;
 
 	result = psInitialise();

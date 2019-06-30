@@ -155,7 +155,7 @@ class CReplay
 		int8 vehicle_index;
 		CStoredAnimationState anim_state;
 		CCompressedMatrixNotAligned matrix;
-		uint8 assoc_group_id;
+		int8 assoc_group_id;
 		uint8 weapon_model;
 	};
 	static_assert(sizeof(tPedUpdatePacket) == 40, "tPedUpdatePacket: error");
@@ -201,13 +201,13 @@ private:
 	static CEntryInfoNode *&pBuf9;
 	static uint8 *&pBuf10;
 	static CDummyPed *&pBuf11;
-	static CBlip *&pRadarBlips;
-	static CCamera *&pStoredCam;
-	static CSector *&pWorld1;
+	static uint8 *&pRadarBlips;
+	static uint8 *&pStoredCam;
+	static uint8 *&pWorld1;
 	static CReference *&pEmptyReferences;
 	static CStoredDetailedAnimationState *&pPedAnims;
-	static CPickup *&pPickups;
-	static CReference *&pReferences;
+	static uint8 *&pPickups;
+	static uint8 *&pReferences;
 	static uint8 (&BufferStatus)[8];
 	static uint8 (&Buffers)[8][100000];
 	static bool &bPlayingBackFromFile;
@@ -241,15 +241,18 @@ private:
 	static float &LoadSceneX;
 	static float &LoadSceneY;
 	static float &LoadSceneZ;
+	static float &CameraFocusX;
+	static float &CameraFocusY;
+	static float &CameraFocusZ;
+	static bool &bPlayerInRCBuggy;
 
 public:
 	static void Init(void);
-	static void EmptyReplayBuffer(void);
 	static void DisableReplays(void);
 	static void EnableReplays(void);
 	static void Update(void);
 	static void FinishPlayback(void);
-	static void Shutdown(void);
+	static void EmptyReplayBuffer(void);
 	static void Display(void);
 	static void TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene);
 	static void StreamAllNecessaryCarsAndPeds(void);
@@ -258,7 +261,7 @@ public:
 	inline static bool IsPlayingBack() { return Mode == MODE_PLAYBACK; }
 	inline static bool IsPlayingBackFromFile() { return bPlayingBackFromFile; }
 
-private:
+//private:
 	static void RecordThisFrame(void);
 	static void StorePedUpdate(CPed *ped, int id);
 	static void StorePedAnimation(CPed *ped, CStoredAnimationState *state);
@@ -272,9 +275,7 @@ private:
 	static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer);
 	static void ProcessReplayCamera(void);
 	static void StoreStuffInMem(void);
-public: /* temp */
 	static void RestoreStuffFromMem(void);
-private:
 	static void EmptyPedsAndVehiclePools(void);
 	static void EmptyAllPools(void);
 	static void MarkEverythingAsNew(void);

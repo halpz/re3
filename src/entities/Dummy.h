@@ -18,5 +18,6 @@ public:
 	// to make patching virtual functions possible
 	void Add_(void) { CDummy::Add(); }
 	void Remove_(void) { CDummy::Remove(); }
+	void dtor(void) { this->CDummy::~CDummy(); }
 };
 static_assert(sizeof(CDummy) == 0x68, "CDummy: error");

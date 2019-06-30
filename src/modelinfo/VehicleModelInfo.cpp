@@ -1003,7 +1003,7 @@ CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial *material, void *data)
 	if(spec <= 0.0f)
 		RpMatFXMaterialSetEffects(material, rpMATFXEFFECTNULL);
 	else{
-		if(RpMaterialGetTexture(material) == 0)
+		if(RpMaterialGetTexture(material) == nil)
 			RpMaterialSetTexture(material, gpWhiteTexture);
 		RpMatFXMaterialSetEffects(material, rpMATFXEFFECTENVMAP);
 #ifndef PS2_MATFX

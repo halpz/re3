@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Placeable.h"
 
 class CEntity;
@@ -459,6 +458,8 @@ int     m_iModeObbeCamIsInForCar;
 	void RenderMotionBlur(void);
 
 	void DrawBordersForWideScreen(void);
+
+	void dtor(void) { this->CCamera::~CCamera(); }
 };
 static_assert(offsetof(CCamera, m_WideScreenOn) == 0x70, "CCamera: error");
 static_assert(offsetof(CCamera, WorldViewerBeingUsed) == 0x75, "CCamera: error");

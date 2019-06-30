@@ -73,6 +73,7 @@ public:
 
 	static void DeleteAllTempObjectInArea(CVector, float);
 
+	void dtor(void) { this->CObject::~CObject(); }
 	void Render_(void) { CObject::Render(); }
 };
 static_assert(sizeof(CObject) == 0x198, "CObject: error");

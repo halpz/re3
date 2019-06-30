@@ -1,6 +1,6 @@
 #include <direct.h>
 #include <csignal>
-#include <Windows.h>
+#include <windows.h>
 #include "common.h"
 #include "patcher.h"
 #include "Renderer.h"
@@ -293,7 +293,7 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 	strcat_s(re3_buff, re3_buffsize, "(Press Retry to debug the application)");
 
 
-	nCode = ::MessageBoxA(NULL, re3_buff, "RE3 Assertion Failed!",
+	nCode = ::MessageBoxA(nil, re3_buff, "RE3 Assertion Failed!",
 		MB_ABORTRETRYIGNORE|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
 
 	if (nCode == IDABORT)
@@ -342,7 +342,7 @@ patch()
 {
 	StaticPatcher::Apply();
 
-	Patch<float>(0x46BC61+6, 1.0f);	// car distance
+//	Patch<float>(0x46BC61+6, 1.0f);	// car distance
 	InjectHook(0x59E460, printf, PATCH_JUMP);
 	InjectHook(0x475E00, printf, PATCH_JUMP);	// _Error
 

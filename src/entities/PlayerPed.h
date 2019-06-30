@@ -38,6 +38,11 @@ public:
 	int32 field_1488[6];
 	float field_1512;
 	float m_fFPSMoveHeading;
+
+	~CPlayerPed();
+
+	void dtor(void) { this->CPlayerPed::~CPlayerPed(); }
+	void ReApplyMoveAnims(void);
 };
 
 static_assert(sizeof(CPlayerPed) == 0x5F0, "CPlayerPed: error");

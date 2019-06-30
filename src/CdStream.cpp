@@ -1,4 +1,4 @@
-#include <Windows.h>
+#include <windows.h>
 #include "common.h"
 #include "patcher.h"
 #include "CdStream.h"
@@ -53,9 +53,9 @@ CdStreamInitThread(void)
 	{
 		for ( int32 i = 0; i < gNumChannels; i++ )
 		{
-			gpReadInfo[i].hSemaphore = CreateSemaphore(NULL, 0, 2, NULL);
+			gpReadInfo[i].hSemaphore = CreateSemaphore(nil, 0, 2, nil);
 			
-			if ( gpReadInfo[i].hSemaphore == NULL )
+			if ( gpReadInfo[i].hSemaphore == nil )
 			{
 				CDTRACE("failed to create sync semaphore");
 				ASSERT(0);
@@ -68,20 +68,20 @@ CdStreamInitThread(void)
 	gChannelRequestQ.head = 0;
 	gChannelRequestQ.tail = 0;
 	gChannelRequestQ.size = gNumChannels + 1;
-	ASSERT(gChannelRequestQ.items != NULL );
+	ASSERT(gChannelRequestQ.items != nil );
 	
-	gCdStreamSema = CreateSemaphore(NULL, 0, 5, "CdStream");
+	gCdStreamSema = CreateSemaphore(nil, 0, 5, "CdStream");
 	
-	if ( gCdStreamSema == NULL )
+	if ( gCdStreamSema == nil )
 	{
 		CDTRACE("failed to create stream semaphore");
 		ASSERT(0);
 		return;
 	}
 	
-	_gCdStreamThread = CreateThread(NULL, 64*1024/*64KB*/, CdStreamThread, NULL, CREATE_SUSPENDED, &_gCdStreamThreadId);
+	_gCdStreamThread = CreateThread(nil, 64*1024/*64KB*/, CdStreamThread, nil, CREATE_SUSPENDED, &_gCdStreamThreadId);
 	
-	if ( _gCdStreamThread == NULL )
+	if ( _gCdStreamThread == nil )
 	{
 		CDTRACE("failed to create streaming thread");
 		ASSERT(0);
@@ -101,7 +101,7 @@ CdStreamInit(int32 numChannels)
 	DWORD NumberOfFreeClusters;
 	DWORD TotalNumberOfClusters;
 
-	GetDiskFreeSpace(NULL, &SectorsPerCluster, &BytesPerSector, &NumberOfFreeClusters, &TotalNumberOfClusters);
+	GetDiskFreeSpace(nil, &SectorsPerCluster, &BytesPerSector, &NumberOfFreeClusters, &TotalNumberOfClusters);
 	
 	_gdwCdStreamFlags = 0;
 	
@@ -118,7 +118,7 @@ CdStreamInit(int32 numChannels)
 	_gbCdStreamAsync = FALSE;
 	
 	void *pBuffer = (void *)RwMallocAlign(CDSTREAM_SECTOR_SIZE, BytesPerSector);
-	ASSERT( pBuffer != NULL );
+	ASSERT( pBuffer != nil );
 	
 	SetLastError(0);
 	
@@ -127,7 +127,7 @@ CdStreamInit(int32 numChannels)
 	gNumChannels = numChannels;
 	
 	gpReadInfo = (CdReadInfo *)LocalAlloc(LMEM_ZEROINIT, sizeof(CdReadInfo) * numChannels);
-	ASSERT( gpReadInfo != NULL );
+	ASSERT( gpReadInfo != nil );
 	
 	CDDEBUG("read info %p", gpReadInfo);
 	
@@ -156,15 +156,15 @@ CdStreamInit(int32 numChannels)
 	
 	CdStreamInitThread();
 	
-	ASSERT( pBuffer != NULL );
+	ASSERT( pBuffer != nil );
 	RwFreeAlign(pBuffer);
 }
 
 uint32
 GetGTA3ImgSize(void)
 {
-	ASSERT( gImgFiles[0] != NULL );
-	return (uint32)GetFileSize(gImgFiles[0], NULL);
+	ASSERT( gImgFiles[0] != nil );
+	return (uint32)GetFileSize(gImgFiles[0], nil);
 }
 
 void
@@ -189,17 +189,17 @@ int32
 CdStreamRead(int32 channel, void *buffer, uint32 offset, uint32 size)
 {
 	ASSERT( channel < gNumChannels );
-	ASSERT( buffer != NULL );
+	ASSERT( buffer != nil );
 	
 	lastPosnRead = size + offset;
 	
 	ASSERT( _GET_INDEX(offset) < MAX_CDIMAGES );
 	HANDLE hImage = gImgFiles[_GET_INDEX(offset)];
-	ASSERT( hImage != NULL );
+	ASSERT( hImage != nil );
 	
 	
 	CdReadInfo *pChannel = &gpReadInfo[channel];
-	ASSERT( pChannel != NULL );
+	ASSERT( pChannel != nil );
 	
 	pChannel->hFile = hImage;
 	
@@ -218,7 +218,7 @@ CdStreamRead(int32 channel, void *buffer, uint32 offset, uint32 size)
 		
 		AddToQueue(&gChannelRequestQ, channel);
 		
-		if ( !ReleaseSemaphore(gCdStreamSema, 1, NULL) )
+		if ( !ReleaseSemaphore(gCdStreamSema, 1, nil) )
 			printf("Signal Sema Error\n");
 		
 		return STREAM_SUCCESS;
@@ -228,7 +228,7 @@ CdStreamRead(int32 channel, void *buffer, uint32 offset, uint32 size)
 	{
 		ASSERT( channel < gNumChannels );
 		CdReadInfo *pChannel = &gpReadInfo[channel];
-		ASSERT( pChannel != NULL );
+		ASSERT( pChannel != nil );
 		
 		pChannel->Overlapped.Offset = _GET_OFFSET(offset) * CDSTREAM_SECTOR_SIZE;
 		
@@ -239,11 +239,11 @@ CdStreamRead(int32 channel, void *buffer, uint32 offset, uint32 size)
 			return STREAM_SUCCESS;
 	}
 	
-	SetFilePointer(hImage, _GET_OFFSET(offset) * CDSTREAM_SECTOR_SIZE, NULL, FILE_BEGIN);
+	SetFilePointer(hImage, _GET_OFFSET(offset) * CDSTREAM_SECTOR_SIZE, nil, FILE_BEGIN);
 	
 	DWORD NumberOfBytesRead;
 	
-	if ( !ReadFile(hImage, buffer, size * CDSTREAM_SECTOR_SIZE, &NumberOfBytesRead, NULL) )
+	if ( !ReadFile(hImage, buffer, size * CDSTREAM_SECTOR_SIZE, &NumberOfBytesRead, nil) )
 		return STREAM_NONE;
 	else
 		return STREAM_SUCCESS;
@@ -254,7 +254,7 @@ CdStreamGetStatus(int32 channel)
 {
 	ASSERT( channel < gNumChannels );
 	CdReadInfo *pChannel = &gpReadInfo[channel];
-	ASSERT( pChannel != NULL );
+	ASSERT( pChannel != nil );
 	
 	if ( _gbCdStreamAsync )
 	{
@@ -278,7 +278,7 @@ CdStreamGetStatus(int32 channel)
 	
 	if ( _gbCdStreamOverlapped )
 	{
-		ASSERT( pChannel->hFile != NULL );
+		ASSERT( pChannel->hFile != nil );
 		if ( WaitForSingleObjectEx(pChannel->hFile, 0, TRUE) == WAIT_OBJECT_0 )
 			return STREAM_NONE;
 		else
@@ -299,7 +299,7 @@ CdStreamSync(int32 channel)
 {
 	ASSERT( channel < gNumChannels );
 	CdReadInfo *pChannel = &gpReadInfo[channel];
-	ASSERT( pChannel != NULL );
+	ASSERT( pChannel != nil );
 	
 	if ( _gbCdStreamAsync )
 	{
@@ -307,7 +307,7 @@ CdStreamSync(int32 channel)
 		{
 			pChannel->bLocked = true;
 
-			ASSERT( pChannel->hSemaphore != NULL );
+			ASSERT( pChannel->hSemaphore != nil );
 
 			WaitForSingleObject(pChannel->hSemaphore, INFINITE);
 		}
@@ -321,7 +321,7 @@ CdStreamSync(int32 channel)
 
 	if ( _gbCdStreamOverlapped && pChannel->hFile )
 	{
-		ASSERT(pChannel->hFile != NULL );
+		ASSERT(pChannel->hFile != nil );
 		if ( GetOverlappedResult(pChannel->hFile, &pChannel->Overlapped, &NumberOfBytesTransferred, TRUE) )
 			return STREAM_NONE;
 		else
@@ -334,8 +334,8 @@ CdStreamSync(int32 channel)
 void
 AddToQueue(Queue *queue, int32 item)
 {
-	ASSERT( queue != NULL );
-	ASSERT( queue->items != NULL );
+	ASSERT( queue != nil );
+	ASSERT( queue->items != nil );
 	queue->items[queue->tail] = item;
 	
 	queue->tail = (queue->tail + 1) % queue->size;
@@ -347,18 +347,18 @@ AddToQueue(Queue *queue, int32 item)
 int32 
 GetFirstInQueue(Queue *queue)
 {
-	ASSERT( queue != NULL );
+	ASSERT( queue != nil );
 	if ( queue->head == queue->tail )
 		return -1;
 
-	ASSERT( queue->items != NULL );
+	ASSERT( queue->items != nil );
 	return queue->items[queue->head];
 }
 
 void
 RemoveFirstInQueue(Queue *queue)
 {	
-	ASSERT( queue != NULL );
+	ASSERT( queue != nil );
 	if ( queue->head == queue->tail )
 	{
 		debug("Queue is empty\n");
@@ -381,7 +381,7 @@ WINAPI CdStreamThread(LPVOID lpThreadParameter)
 		ASSERT( channel < gNumChannels );
 		
 		CdReadInfo *pChannel = &gpReadInfo[channel];
-		ASSERT( pChannel != NULL );
+		ASSERT( pChannel != nil );
 		
 		pChannel->bInUse = true;
 		
@@ -391,8 +391,8 @@ WINAPI CdStreamThread(LPVOID lpThreadParameter)
 			{
 				pChannel->Overlapped.Offset = pChannel->nSectorOffset * CDSTREAM_SECTOR_SIZE;
 				
-				ASSERT(pChannel->hFile != NULL );
-				ASSERT(pChannel->pBuffer != NULL );
+				ASSERT(pChannel->hFile != nil );
+				ASSERT(pChannel->pBuffer != nil );
 				
 				DWORD NumberOfBytesTransferred;
 				
@@ -416,10 +416,10 @@ WINAPI CdStreamThread(LPVOID lpThreadParameter)
 			}
 			else
 			{
-				ASSERT(pChannel->hFile != NULL );
-				ASSERT(pChannel->pBuffer != NULL );
+				ASSERT(pChannel->hFile != nil );
+				ASSERT(pChannel->pBuffer != nil );
 				
-				SetFilePointer(pChannel->hFile, pChannel->nSectorOffset * CDSTREAM_SECTOR_SIZE, NULL, FILE_BEGIN);
+				SetFilePointer(pChannel->hFile, pChannel->nSectorOffset * CDSTREAM_SECTOR_SIZE, nil, FILE_BEGIN);
 
 				DWORD NumberOfBytesRead;
 				if ( ReadFile(pChannel->hFile,
@@ -439,7 +439,7 @@ WINAPI CdStreamThread(LPVOID lpThreadParameter)
 		
 		if ( pChannel->bLocked )
 		{
-			ASSERT( pChannel->hSemaphore != NULL );
+			ASSERT( pChannel->hSemaphore != nil );
 			ReleaseSemaphore(pChannel->hSemaphore, 1, NULL);
 		}
 		
@@ -450,7 +450,7 @@ WINAPI CdStreamThread(LPVOID lpThreadParameter)
 bool
 CdStreamAddImage(char const *path)
 {
-	ASSERT(path != NULL);
+	ASSERT(path != nil);
 	ASSERT(gNumImages < MAX_CDIMAGES);
 	
 	SetLastError(0);
@@ -458,12 +458,12 @@ CdStreamAddImage(char const *path)
 	gImgFiles[gNumImages] = CreateFile(path,
 	                                   GENERIC_READ,
 	                                   FILE_SHARE_READ,
-	                                   NULL,
+	                                   nil,
 	                                   OPEN_EXISTING,
 	                                   _gdwCdStreamFlags | FILE_FLAG_RANDOM_ACCESS | FILE_ATTRIBUTE_READONLY,
-	                                   NULL);
+	                                   nil);
 	
-	ASSERT( gImgFiles[gNumImages] != NULL );
+	ASSERT( gImgFiles[gNumImages] != nil );
 	if ( gImgFiles[gNumImages] == NULL )
 		return false;
 	
@@ -478,10 +478,10 @@ char *
 CdStreamGetImageName(int32 cd)
 {
 	ASSERT(cd < MAX_CDIMAGES);
-	if ( gImgFiles[cd] != NULL )
+	if ( gImgFiles[cd] != nil )
 		return gCdImageNames[cd];
 	
-	return NULL;
+	return nil;
 }
 
 void
@@ -495,7 +495,7 @@ CdStreamRemoveImages(void)
 		SetLastError(0);
 		
 		CloseHandle(gImgFiles[i]);
-		gImgFiles[i] = NULL;
+		gImgFiles[i] = nil;
 	}
 	
 	gNumImages = 0;

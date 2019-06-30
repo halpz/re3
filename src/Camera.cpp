@@ -13,7 +13,7 @@
 #include "MBlur.h"
 #include "Camera.h"
 
-const float DefaultFOV = 80.0f;	// actually 70.0f
+const float DefaultFOV = 70.0f;	// beta: 80.0f
 
 CCamera &TheCamera = *(CCamera*)0x6FACF8;
 bool &CCamera::m_bUseMouse3rdPerson = *(bool *)0x5F03D8;
@@ -790,7 +790,7 @@ CCam::WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation)
 		float RoadZ = 0.0f;
 		float RoofZ = 0.0f;
 
-		if(CWorld::ProcessVerticalLine(Source, -1000.0f, colpoint, ent, true, false, false, false, false, false, false) &&
+		if(CWorld::ProcessVerticalLine(Source, -1000.0f, colpoint, ent, true, false, false, false, false, false, nil) &&
 		   ent->IsBuilding()){
 			FoundRoad = true;
 			RoadZ = colpoint.point.z;
@@ -807,7 +807,7 @@ CCam::WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation)
 					TargetZOffSet = 0.0f;
 			}
 		}else{
-			if(CWorld::ProcessVerticalLine(Source, 1000.0f, colpoint, ent, true, false, false, false, false, false, false) &&
+			if(CWorld::ProcessVerticalLine(Source, 1000.0f, colpoint, ent, true, false, false, false, false, false, nil) &&
 			   ent->IsBuilding()){
 				FoundRoof = true;
 				RoofZ = colpoint.point.z;
@@ -1282,4 +1282,6 @@ STARTPATCHES
 	InjectHook(0x45E3A0, &CCam::Process_FollowPed, PATCH_JUMP);
 	InjectHook(0x45BE60, &CCam::Process_BehindCar, PATCH_JUMP);
 	InjectHook(0x45C090, &CCam::Process_Cam_On_A_String, PATCH_JUMP);
+
+	InjectHook(0x473250, &CCamera::dtor, PATCH_JUMP);
 ENDPATCHES

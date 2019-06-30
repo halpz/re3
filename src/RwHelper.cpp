@@ -1,7 +1,7 @@
 #define WITHD3D
 #include "common.h"
 #include "patcher.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "skeleton.h"
 
 void *
@@ -9,11 +9,11 @@ RwMallocAlign(RwUInt32 size, RwUInt32 align)
 {
 	void *mem = (void *)malloc(size + align);
 	
-	ASSERT(mem != NULL);
+	ASSERT(mem != nil);
 	
 	void *addr = (void *)((((RwUInt32)mem) + align) & ~(align - 1));
 	
-	ASSERT(addr != NULL);
+	ASSERT(addr != nil);
 	
 	*(((void **)addr) - 1) = mem;
 	
@@ -23,11 +23,11 @@ RwMallocAlign(RwUInt32 size, RwUInt32 align)
 void
 RwFreeAlign(void *mem)
 {
-	ASSERT(mem != NULL);
+	ASSERT(mem != nil);
 	
 	void *addr = *(((void **)mem) - 1);
 	
-	ASSERT(addr != NULL);
+	ASSERT(addr != nil);
 	
 	free(addr);
 }
@@ -283,7 +283,7 @@ CameraDestroy(RwCamera *camera)
 
 			RwRasterDestroy(raster);
 
-			if ((tmpRaster != NULL) && (tmpRaster != raster))
+			if ((tmpRaster != nil) && (tmpRaster != raster))
 			{
 				RwRasterDestroy(tmpRaster);
 			}
@@ -296,7 +296,7 @@ CameraDestroy(RwCamera *camera)
 
 			RwRasterDestroy(raster);
 
-			if ((tmpRaster != NULL) && (tmpRaster != raster))
+			if ((tmpRaster != nil) && (tmpRaster != raster))
 			{
 				RwRasterDestroy(tmpRaster);
 			}
@@ -344,7 +344,7 @@ CameraCreate(RwInt32 width, RwInt32 height, RwBool zBuffer)
 	/* if we're here then an error must have occurred so clean up */
 
 	CameraDestroy(camera);
-	return (NULL);
+	return (nil);
 }
 
 STARTPATCHES

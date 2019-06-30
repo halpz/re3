@@ -1,6 +1,6 @@
 #pragma once
 
-enum eSound
+enum eSound : int16
 {
 	SOUND_CAR_DOOR_CLOSE_BONNET = 0,
 	SOUND_CAR_DOOR_CLOSE_BUMPER = 1,
@@ -101,7 +101,7 @@ enum eSound
 	SOUND_PAGER = 96,
 	SOUND_PED_DEATH = 97,
 	SOUND_PED_DAMAGE = 98,
-	SOUND_PED_63 = 99,
+	SOUND_PED_HIT = 99,
 	SOUND_PED_LAND = 100,
 	SOUND_PED_BULLET_HIT = 101,
 	SOUND_PED_BOMBER = 102,
@@ -196,6 +196,6 @@ public:
 	void SetEntityStatus(int32 id, uint8 enable);
 	void SetRadioInCar(int32);
 	uint8 IsMP3RadioChannelAvailable();
-
+	void DestroyEntity(int32);
 };
 extern cDMAudio &DMAudio;
