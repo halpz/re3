@@ -187,10 +187,10 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 {
 	CMouseControllerState state;
 	
-	if ( PSGLOBAL(mouse) == NULL )
+	if ( PSGLOBAL(mouse) == nil )
 		_InputInitialiseMouse();
 	
-	if ( PSGLOBAL(mouse) != NULL )
+	if ( PSGLOBAL(mouse) != nil )
 	{
 		DIDEVCAPS devCaps;
 		devCaps.dwSize = sizeof(DIDEVCAPS);
@@ -228,12 +228,12 @@ void CPad::UpdateMouse()
 {
 	if ( IsForegroundApp() )
 	{
-		if ( PSGLOBAL(mouse) == NULL )
+		if ( PSGLOBAL(mouse) == nil )
 			_InputInitialiseMouse();
 		
 		DIMOUSESTATE2 state;
 		
-		if ( PSGLOBAL(mouse) != NULL && SUCCEEDED(_InputGetMouseState(&state)) )
+		if ( PSGLOBAL(mouse) != nil && SUCCEEDED(_InputGetMouseState(&state)) )
 		{
 			int32 signX = 1;
 			int32 signy = 1;
@@ -386,7 +386,7 @@ void CPad::StartShake_Train(float fX, float fY)
 	if ( CCutsceneMgr::IsRunning() || CGame::playingIntro )
 		return;
 	
-	if (FindPlayerVehicle() != NULL && FindPlayerVehicle()->IsTrain() )
+	if (FindPlayerVehicle() != nil && FindPlayerVehicle()->IsTrain() )
 		return;
 	
 	float fDist = ( TheCamera.GetPosition() - CVector(fX, fY, 0.0f) ).Magnitude2D();
@@ -1822,7 +1822,7 @@ char *CPad::EditString(char *pStr, int32 nSize)
 
 	// extenter/up/down
 	if ( GetPad(0)->GetEnterJustDown() || GetPad(0)->GetUpJustDown() || GetPad(0)->GetDownJustDown() )
-		return NULL;
+		return nil;
 	
 	return pStr;
 }

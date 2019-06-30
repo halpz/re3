@@ -1,4 +1,4 @@
-#include <Windows.h>
+#include <windows.h>
 #include "common.h"
 #include "patcher.h"
 #include "DMAudio.h"

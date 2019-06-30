@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Game.h"
+
 enum {
 	STREAM_OFFSET_MODEL = 0,
 	STREAM_OFFSET_TXD = STREAM_OFFSET_MODEL+MODELINFOSIZE,

@@ -543,7 +543,7 @@ void CHud::Draw()
 			}
 		}
 		else {
-			m_pLastZoneName = 0;
+			m_pLastZoneName = nil;
 			m_ZoneState = 0;
 			m_ZoneFadeTimer = 0;
 			m_ZoneNameTimer = 0;
@@ -639,7 +639,7 @@ void CHud::Draw()
 			}
 		}
 		else {
-			m_pLastVehicleName = 0;
+			m_pLastVehicleName = nil;
 			m_VehicleState = 0;
 			m_VehicleFadeTimer = 0;
 			m_VehicleNameTimer = 0;
@@ -1234,9 +1234,9 @@ WRAPPER void CHud::GetRidOfAllHudMessages(void) { EAXJMP(0x504F90); }
 void CHud::GetRidOfAllHudMessages()
 {
 	m_ZoneState = 0;
-	m_pLastZoneName = 0;
+	m_pLastZoneName = nil;
 	m_ZoneNameTimer = 0;
-	m_pZoneName = 0;
+	m_pZoneName = nil;
 
 	for (int i = 0; i < 256; i++) {
 		m_HelpMessage[i] = 0;
@@ -1249,9 +1249,9 @@ void CHud::GetRidOfAllHudMessages()
 	m_HelpMessageState = 0;
 	m_HelpMessageQuick = 0;
 	m_HelpMessageDisplayTime = 1.0f;
-	m_VehicleName = 0;
-	m_pLastVehicleName = 0;
-	m_pVehicleNameToPrint = 0;
+	m_VehicleName = nil;
+	m_pLastVehicleName = nil;
+	m_pVehicleNameToPrint = nil;
 	m_VehicleNameTimer = 0;
 	m_VehicleFadeTimer = 0;
 	m_VehicleState = 0;
@@ -1284,8 +1284,8 @@ void CHud::Initialise()
 		Sprites[i].SetTexture(WeaponFilenames[i * 2]);
 	}
 
-	gpSniperSightTex = RwTextureRead("sitesniper", 0);
-	gpRocketSightTex = RwTextureRead("siterocket", 0);
+	gpSniperSightTex = RwTextureRead("sitesniper", nil);
+	gpRocketSightTex = RwTextureRead("siterocket", nil);
 
 	CTxdStore::PopCurrentTxd();
 }
@@ -1427,10 +1427,10 @@ void CHud::Shutdown()
 	}
 
 	RwTextureDestroy(gpSniperSightTex);
-	gpSniperSightTex = 0;
+	gpSniperSightTex = nil;
 
 	RwTextureDestroy(gpRocketSightTex);
-	gpRocketSightTex = 0;
+	gpRocketSightTex = nil;
 
 	int HudTXD = CTxdStore::FindTxdSlot("hud");
 	CTxdStore::RemoveTxdSlot(HudTXD);

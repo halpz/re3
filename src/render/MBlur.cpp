@@ -107,7 +107,7 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
 void
 CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 addalpha)
 {
-	RwRGBA color = { red, green, blue, blur };
+	RwRGBA color = { (RwUInt8)red, (RwUInt8)green, (RwUInt8)blue, (RwUInt8)blur };
 	if(BlurOn){
 		if(pFrontBuffer){
 			if(ms_bJustInitialised)

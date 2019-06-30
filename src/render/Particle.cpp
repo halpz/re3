@@ -240,7 +240,7 @@ void CParticle::ReloadConfig()
 	for ( int32 i = 0; i < MAX_PARTICLES_ON_SCREEN; i++ )
 	{
 		if ( i == MAX_PARTICLES_ON_SCREEN - 1 )
-			gParticleArray[i].m_pNext = NULL;
+			gParticleArray[i].m_pNext = nil;
 		else
 			gParticleArray[i].m_pNext = &gParticleArray[i + 1];
 		
@@ -310,37 +310,37 @@ void CParticle::Initialise()
 	
 	for ( int32 i = 0; i < MAX_SMOKE_FILES; i++ )
 	{
-		gpSmokeTex[i] = RwTextureRead(SmokeFiles[i], NULL);
+		gpSmokeTex[i] = RwTextureRead(SmokeFiles[i], nil);
 		gpSmokeRaster[i] = RwTextureGetRaster(gpSmokeTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_SMOKE2_FILES; i++ )
 	{
-		gpSmoke2Tex[i] = RwTextureRead(Smoke2Files[i], NULL);
+		gpSmoke2Tex[i] = RwTextureRead(Smoke2Files[i], nil);
 		gpSmoke2Raster[i] = RwTextureGetRaster(gpSmoke2Tex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_RUBBER_FILES; i++ )
 	{
-		gpRubberTex[i] = RwTextureRead(RubberFiles[i], NULL);
+		gpRubberTex[i] = RwTextureRead(RubberFiles[i], nil);
 		gpRubberRaster[i] = RwTextureGetRaster(gpRubberTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_RAINSPLASH_FILES; i++ )
 	{
-		gpRainSplashTex[i] = RwTextureRead(RainSplashFiles[i], NULL);
+		gpRainSplashTex[i] = RwTextureRead(RainSplashFiles[i], nil);
 		gpRainSplashRaster[i] = RwTextureGetRaster(gpRainSplashTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_WATERSPRAY_FILES; i++ )
 	{
-		gpWatersprayTex[i] = RwTextureRead(WatersprayFiles[i], NULL);
+		gpWatersprayTex[i] = RwTextureRead(WatersprayFiles[i], nil);
 		gpWatersprayRaster[i] = RwTextureGetRaster(gpWatersprayTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_EXPLOSIONMEDIUM_FILES; i++ )
 	{
-		gpExplosionMediumTex[i] = RwTextureRead(ExplosionMediumFiles[i], NULL);
+		gpExplosionMediumTex[i] = RwTextureRead(ExplosionMediumFiles[i], nil);
 		gpExplosionMediumRaster[i] = RwTextureGetRaster(gpExplosionMediumTex[i]);
 	}
 	
@@ -352,13 +352,13 @@ void CParticle::Initialise()
 	
 	for ( int32 i = 0; i < MAX_RAINDROP_FILES; i++ )
 	{
-		gpRainDropTex[i] = RwTextureRead(RaindropFiles[i], NULL);
+		gpRainDropTex[i] = RwTextureRead(RaindropFiles[i], nil);
 		gpRainDropRaster[i] = RwTextureGetRaster(gpRainDropTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_RAINSPLASHUP_FILES; i++ )
 	{
-		gpRainSplashupTex[i] = RwTextureRead(RainSplashupFiles[i], NULL);
+		gpRainSplashupTex[i] = RwTextureRead(RainSplashupFiles[i], nil);
 		gpRainSplashupRaster[i] = RwTextureGetRaster(gpRainSplashupTex[i]);
 	}
 	
@@ -370,57 +370,57 @@ void CParticle::Initialise()
 	
 	for ( int32 i = 0; i < MAX_CARDEBRIS_FILES; i++ )
 	{
-		gpCarDebrisTex[i] = RwTextureRead(CardebrisFiles[i], NULL);
+		gpCarDebrisTex[i] = RwTextureRead(CardebrisFiles[i], nil);
 		gpCarDebrisRaster[i] = RwTextureGetRaster(gpCarDebrisTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_CARSPLASH_FILES; i++ )
 	{
-		gpCarSplashTex[i] = RwTextureRead(CarsplashFiles[i], NULL);
+		gpCarSplashTex[i] = RwTextureRead(CarsplashFiles[i], nil);
 		gpCarSplashRaster[i] = RwTextureGetRaster(gpCarSplashTex[i]);
 	}
 
 	gpFlame1Tex = RwTextureRead("flame1", NULL);
 	gpFlame1Raster = RwTextureGetRaster(gpFlame1Tex);
 
-	gpFlame5Tex = RwTextureRead("flame5", NULL);
+	gpFlame5Tex = RwTextureRead("flame5", nil);
 	
 	gpFlame5Raster = RwTextureGetRaster(gpFlame1Tex);	// copy-paste bug ?
 	
-	gpRainDropSmallTex = RwTextureRead("rainsmall", NULL);
+	gpRainDropSmallTex = RwTextureRead("rainsmall", nil);
 	gpRainDropSmallRaster = RwTextureGetRaster(gpRainDropSmallTex);
 
-	gpBloodTex = RwTextureRead("blood", NULL);
+	gpBloodTex = RwTextureRead("blood", nil);
 	gpBloodRaster = RwTextureGetRaster(gpBloodTex);
 
-	gpLeafTex = RwTextureRead("gameleaf01_64", NULL);
+	gpLeafTex = RwTextureRead("gameleaf01_64", nil);
 	gpLeafRaster = RwTextureGetRaster(gpLeafTex);
 
-	gpCloudTex1 = RwTextureRead("cloud3", NULL);
+	gpCloudTex1 = RwTextureRead("cloud3", nil);
 	gpCloudRaster1 = RwTextureGetRaster(gpCloudTex1);
 
-	gpCloudTex4 = RwTextureRead("cloudmasked", NULL);
+	gpCloudTex4 = RwTextureRead("cloudmasked", nil);
 	gpCloudRaster4 = RwTextureGetRaster(gpCloudTex4);
 
-	gpBloodSmallTex = RwTextureRead("bloodsplat2", NULL);
+	gpBloodSmallTex = RwTextureRead("bloodsplat2", nil);
 	gpBloodSmallRaster = RwTextureGetRaster(gpBloodSmallTex);
 
-	gpGungeTex = RwTextureRead("gunge", NULL);
+	gpGungeTex = RwTextureRead("gunge", nil);
 	gpGungeRaster = RwTextureGetRaster(gpGungeTex);
 
-	gpCollisionSmokeTex = RwTextureRead("collisionsmoke", NULL);
+	gpCollisionSmokeTex = RwTextureRead("collisionsmoke", nil);
 	gpCollisionSmokeRaster = RwTextureGetRaster(gpCollisionSmokeTex);
 
-	gpBulletHitTex = RwTextureRead("bullethitsmoke", NULL);
+	gpBulletHitTex = RwTextureRead("bullethitsmoke", nil);
 	gpBulletHitRaster = RwTextureGetRaster(gpBulletHitTex);
 
-	gpGunShellTex = RwTextureRead("gunshell", NULL);
+	gpGunShellTex = RwTextureRead("gunshell", nil);
 	gpGunShellRaster = RwTextureGetRaster(gpGunShellTex);
 
-	gpWakeOldTex = RwTextureRead("wake_old", NULL);
+	gpWakeOldTex = RwTextureRead("wake_old", nil);
 	gpWakeOldRaster = RwTextureGetRaster(gpWakeOldTex);
 
-	gpPointlightTex = RwTextureRead("pointlight", NULL);
+	gpPointlightTex = RwTextureRead("pointlight", nil);
 	gpPointlightRaster = RwTextureGetRaster(gpPointlightTex);
 	
 	CTxdStore::PopCurrentTxd();
@@ -451,7 +451,7 @@ void CParticle::Initialise()
 
 			case PARTICLE_GUNSMOKE:
 			case PARTICLE_SPLASH:
-				entry->m_ppRaster = NULL;
+				entry->m_ppRaster = nil;
 				break;
 
 			case PARTICLE_FLAME:
@@ -584,7 +584,7 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpSmokeTex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpSmokeTex[i] = NULL;
+		gpSmokeTex[i] = nil;
 #endif
 	}
 
@@ -592,7 +592,7 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpSmoke2Tex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpSmoke2Tex[i] = NULL;
+		gpSmoke2Tex[i] = nil;
 #endif
 	}
 	 
@@ -600,7 +600,7 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpRubberTex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpRubberTex[i] = NULL;
+		gpRubberTex[i] = nil;
 #endif
 	}
 	
@@ -608,7 +608,7 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpRainSplashTex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpRainSplashTex[i] = NULL;
+		gpRainSplashTex[i] = nil;
 #endif
 	}
 	
@@ -616,7 +616,7 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpWatersprayTex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpWatersprayTex[i] = NULL;
+		gpWatersprayTex[i] = nil;
 #endif
 	}
 	
@@ -624,7 +624,7 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpExplosionMediumTex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpExplosionMediumTex[i] = NULL;
+		gpExplosionMediumTex[i] = nil;
 #endif
 	}
 	
@@ -632,7 +632,7 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpGunFlashTex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpGunFlashTex[i] = NULL;
+		gpGunFlashTex[i] = nil;
 #endif
 	}
 	
@@ -640,7 +640,7 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpRainDropTex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpRainDropTex[i] = NULL;
+		gpRainDropTex[i] = nil;
 #endif
 	}
 	
@@ -648,7 +648,7 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpRainSplashupTex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpRainSplashupTex[i] = NULL;
+		gpRainSplashupTex[i] = nil;
 #endif
 	}
 	
@@ -656,7 +656,7 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpBirdfrontTex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpBirdfrontTex[i] = NULL;
+		gpBirdfrontTex[i] = nil;
 #endif
 	}
 	
@@ -664,7 +664,7 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpCarDebrisTex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpCarDebrisTex[i] = NULL;
+		gpCarDebrisTex[i] = nil;
 #endif
 	}
 	
@@ -672,78 +672,78 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpCarSplashTex[i]);
 #ifdef GTA3_1_1_PATCH
-		gpCarSplashTex[i] = NULL;
+		gpCarSplashTex[i] = nil;
 #endif
 	}
 	
 	RwTextureDestroy(gpFlame1Tex);
 #ifdef GTA3_1_1_PATCH
-	gpFlame1Tex = NULL;
+	gpFlame1Tex = nil;
 #endif
 
 	RwTextureDestroy(gpFlame5Tex);
 #ifdef GTA3_1_1_PATCH
-	gpFlame5Tex = NULL;
+	gpFlame5Tex = nil;
 #endif
 	
 	RwTextureDestroy(gpRainDropSmallTex);
 #ifdef GTA3_1_1_PATCH
-	gpRainDropSmallTex = NULL;
+	gpRainDropSmallTex = nil;
 #endif
 	
 	RwTextureDestroy(gpBloodTex);
 #ifdef GTA3_1_1_PATCH
-	gpBloodTex = NULL;
+	gpBloodTex = nil;
 #endif
 	
 	RwTextureDestroy(gpLeafTex);
 #ifdef GTA3_1_1_PATCH
-	gpLeafTex = NULL;
+	gpLeafTex = nil;
 #endif
 	
 	RwTextureDestroy(gpCloudTex1);
 #ifdef GTA3_1_1_PATCH
-	gpCloudTex1 = NULL;
+	gpCloudTex1 = nil;
 #endif
 	
 	RwTextureDestroy(gpCloudTex4);
 #ifdef GTA3_1_1_PATCH
-	gpCloudTex4 = NULL;
+	gpCloudTex4 = nil;
 #endif
 	
 	RwTextureDestroy(gpBloodSmallTex);
 #ifdef GTA3_1_1_PATCH
-	gpBloodSmallTex = NULL;
+	gpBloodSmallTex = nil;
 #endif
 	
 	RwTextureDestroy(gpGungeTex);
 #ifdef GTA3_1_1_PATCH
-	gpGungeTex = NULL;
+	gpGungeTex = nil;
 #endif
 	
 	RwTextureDestroy(gpCollisionSmokeTex);
 #ifdef GTA3_1_1_PATCH
-	gpCollisionSmokeTex = NULL;
+	gpCollisionSmokeTex = nil;
 #endif
 	
 	RwTextureDestroy(gpBulletHitTex);
 #ifdef GTA3_1_1_PATCH
-	gpBulletHitTex = NULL;
+	gpBulletHitTex = nil;
 #endif
 	
 	RwTextureDestroy(gpGunShellTex);
 #ifdef GTA3_1_1_PATCH
-	gpGunShellTex = NULL;
+	gpGunShellTex = nil;
 #endif
 	
 	RwTextureDestroy(gpWakeOldTex);
 #ifdef GTA3_1_1_PATCH
-	gpWakeOldTex = NULL;
+	gpWakeOldTex = nil;
 #endif
 	
 	RwTextureDestroy(gpPointlightTex);
 #ifdef GTA3_1_1_PATCH
-	gpPointlightTex = NULL;
+	gpPointlightTex = nil;
 #endif
 
 	int32 slot;
@@ -775,18 +775,18 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 		|| type == PARTICLE_CARCOLLISION_DUST )
 		&& nParticleCreationInterval & CTimer::GetFrameCounter() )
 	{
-		return NULL;
+		return nil;
 	}
 	
 	CParticle *pParticle = m_pUnusedListHead;
 	
-	if ( pParticle == NULL )
-		return NULL;
+	if ( pParticle == nil )
+		return nil;
 	
 	tParticleSystemData *psystem = &mod_ParticleSystemManager.m_aParticles[type];
 	
 	if ( psystem->m_fCreateRange != 0.0f && psystem->m_fCreateRange < ( TheCamera.GetPosition() - vecPos ).MagnitudeSqr() )
-		return NULL;
+		return nil;
 	
 	
 	pParticle->m_fSize = psystem->m_fDefaultInitialRadius;
@@ -918,13 +918,13 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 			
 			if ( !CWorld::ProcessVerticalLine(
 						pParticle->m_vecPosition + CVector(0.0f, 0.0f, 0.5f),
-						-100.0f, point, entity, true, true, false, false, true, false, NULL) )
+						-100.0f, point, entity, true, true, false, false, true, false, nil) )
 			{
-				return NULL;
+				return nil;
 			}
 			
 			if ( point.point.z >= pParticle->m_vecPosition.z )
-				return NULL;
+				return nil;
 			
 			pParticle->m_fZGround = point.point.z;
 			bValidGroundFound = true;
@@ -944,7 +944,7 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 			Z_Ground = CWorld::FindGroundZFor3DCoord(vecPos.x, vecPos.y, vecPos.z, (bool *)&bZFound);
 
 			if ( bZFound == false )
-				return NULL;
+				return nil;
 
 			pParticle->m_fZGround = Z_Ground;
 		}
@@ -1009,13 +1009,13 @@ void CParticle::Update()
 	{
 		tParticleSystemData *psystem = &mod_ParticleSystemManager.m_aParticles[i];
 		CParticle *particle = psystem->m_pParticles;
-		CParticle *prevParticle = NULL;
+		CParticle *prevParticle = nil;
 		bool bRemoveParticle;
 		
-		if ( particle == NULL )
+		if ( particle == nil )
 			continue;
 				
-		for ( ; particle != NULL; _Next(particle, prevParticle, psystem, bRemoveParticle) )
+		for ( ; particle != nil; _Next(particle, prevParticle, psystem, bRemoveParticle) )
 		{
 			bRemoveParticle = false;
 
@@ -1121,7 +1121,7 @@ void CParticle::Update()
 														particle->m_vecPosition.y,
 														0.05f + particle->m_fZGround
 													),
-													CVector(0.0f, 0.0f, 0.0f), NULL, 0.0f, 0, 0, 0, 0);
+													CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, 0, 0, 0, 0);
 									}
 									else
 									{
@@ -1132,7 +1132,7 @@ void CParticle::Update()
 														particle->m_vecPosition.y,
 														0.05f + particle->m_fZGround
 													),
-													CVector(0.0f, 0.0f, 0.0f), NULL, 0.0f, 0, 0, 0, 0);
+													CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, 0, 0, 0, 0);
 									}
 									
 									continue;
@@ -1156,7 +1156,7 @@ void CParticle::Update()
 															particle->m_vecPosition.y,
 															0.05f + particle->m_fZGround
 														),
-														CVector(0.0f, 0.0f, 0.0f), NULL, 0.0f, 0, 0, 0, 0);
+														CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, 0, 0, 0, 0);
 										}
 										else
 										{
@@ -1167,7 +1167,7 @@ void CParticle::Update()
 															particle->m_vecPosition.y,
 															0.05f + particle->m_fZGround
 														),
-														CVector(0.0f, 0.0f, 0.0f), NULL, 0.0f, 0, 0, 0, 0);
+														CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, 0, 0, 0, 0);
 										}
 										
 									}
@@ -1218,7 +1218,7 @@ void CParticle::Update()
 					CEntity *entity;
 
 					if ( CWorld::ProcessVerticalLine(particle->m_vecPosition, moveStep.z, point, entity, 
-														true, true, false, false, true, false, NULL) )
+														true, true, false, false, true, false, nil) )
 					{
 						if ( moveStep.z <= point.point.z )
 						{
@@ -1258,7 +1258,7 @@ void CParticle::Update()
 													CGeneral::GetRandomNumberInRange(-0.02f, 0.02f),
 													CGeneral::GetRandomNumberInRange(0.05f, 0.1f)
 												),
-												NULL,
+												nil,
 												particle->m_fSize, color, particle->m_nRotationStep, 0, 0, 0);
 									
 									PlayOneShotScriptObject(_SOUND_BULLET_SHELL_HIT_GROUND_1, particle->m_vecPosition);
@@ -1277,7 +1277,7 @@ void CParticle::Update()
 													0.05f + particle->m_fZGround
 												),
 												CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.03f, 0.06f)),
-												NULL,
+												nil,
 												particle->m_fSize, color, 0, 0, 0, 0);
 									
 									PlayOneShotScriptObject(_SOUND_BULLET_SHELL_HIT_GROUND_2, particle->m_vecPosition);
@@ -1309,7 +1309,7 @@ void CParticle::Update()
 						CEntity *entity;
 			
 						if ( CWorld::ProcessVerticalLine(particle->m_vecPosition, moveStep.z, point, entity,
-														true, false, false, false, true, false, NULL) )
+														true, false, false, false, true, false, nil) )
 						{
 							if ( moveStep.z <= point.point.z )
 							{
@@ -1317,7 +1317,7 @@ void CParticle::Update()
 								if ( psystem->m_Type == PARTICLE_HELI_ATTACK )
 								{
 									bRemoveParticle = true;
-									AddParticle(PARTICLE_STEAM, moveStep, CVector(0.0f, 0.0f, 0.05f), NULL, 0.2f, 0, 0, 0, 0);
+									AddParticle(PARTICLE_STEAM, moveStep, CVector(0.0f, 0.0f, 0.05f), nil, 0.2f, 0, 0, 0, 0);
 									continue;
 								}
 							}
@@ -1444,7 +1444,7 @@ void CParticle::Render()
 	
 	uint32 flags = DRAW_OPAQUE;
 	
-	RwRaster *prevFrame = NULL;
+	RwRaster *prevFrame = nil;
 	
 	for ( int32 i = 0; i < MAX_PARTICLES; i++ )
 	{
@@ -1495,7 +1495,7 @@ void CParticle::Render()
 				flags = psystem->Flags;
 			}
 			
-			if ( frames != NULL )
+			if ( frames != nil )
 			{
 				RwRaster *curFrame = *frames;
 				if ( curFrame != prevFrame )
@@ -1507,14 +1507,14 @@ void CParticle::Render()
 			}
 		}
 		
-		while ( particle != NULL )
+		while ( particle != nil )
 		{
 			bool canDraw = true;
 
 			if ( particle->m_nAlpha == 0 )
 				canDraw = false;
 			
-			if ( canDraw && psystem->m_nFinalAnimationFrame != 0 && frames != NULL )
+			if ( canDraw && psystem->m_nFinalAnimationFrame != 0 && frames != nil )
 			{
 				RwRaster *curFrame = frames[particle->m_nCurrentFrame];
 				if ( prevFrame != curFrame )
@@ -1754,7 +1754,7 @@ void CParticle::RemovePSystem(tParticleType type)
 	tParticleSystemData *psystemdata = &mod_ParticleSystemManager.m_aParticles[type];
 	
 	for ( CParticle *particle = psystemdata->m_pParticles; particle; particle = psystemdata->m_pParticles )
-		RemoveParticle(particle, NULL, psystemdata);
+		RemoveParticle(particle, nil, psystemdata);
 }
 
 void CParticle::RemoveParticle(CParticle *pParticle, CParticle *pPrevParticle, tParticleSystemData *pPSystemData)
@@ -1796,7 +1796,7 @@ void CParticle::AddJetExplosion(CVector const &vecPos, float fPower, float fSize
 						CGeneral::GetRandomNumberInRange(-0.2f, 0.2f),
 						CGeneral::GetRandomNumberInRange(-0.2f, 0.0f)
 					),
-					NULL,
+					nil,
 					fSize, color, 0, 0, 0, 0);
 
 		AddParticle(PARTICLE_EXPLOSION_MFAST,
@@ -1807,7 +1807,7 @@ void CParticle::AddJetExplosion(CVector const &vecPos, float fPower, float fSize
 						CGeneral::GetRandomNumberInRange(-0.04f, 0.04f),
 						CGeneral::GetRandomNumberInRange(0.0f, 0.07f)
 					),
-					NULL,
+					nil,
 					fSize, color, 0, 0, 0, 0);
 
 		AddParticle(PARTICLE_EXPLOSION_MFAST,
@@ -1818,7 +1818,7 @@ void CParticle::AddJetExplosion(CVector const &vecPos, float fPower, float fSize
 						CGeneral::GetRandomNumberInRange(-0.04f, 0.04f),
 						CGeneral::GetRandomNumberInRange(0.0f, 0.07f)
 					),
-					NULL,
+					nil,
 					fSize, color, 0, 0, 0, 0);
 		
 		vecStepPos += vecRandOffset;
@@ -1843,7 +1843,7 @@ void CParticle::AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatr
 		AddParticle(PARTICLE_CARCOLLISION_DUST,
 					pos,
 					CVector(0.0f, 0.0f, 0.0f),
-					NULL,
+					nil,
 					0.3f, color, 0, 0, 0, 0);
 	}
 }
