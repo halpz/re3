@@ -11,3 +11,7 @@ CDummyObject::CDummyObject(CObject *obj)
 	obj->DetachFromRwObject();
 	m_level = obj->m_level;
 }
+
+STARTPATCHES
+	InjectHook(0x4BAB70, &CDummyObject::dtor, PATCH_JUMP);
+ENDPATCHES

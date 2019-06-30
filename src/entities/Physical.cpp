@@ -1895,6 +1895,7 @@ CPhysical::ProcessCollision(void)
 
 
 STARTPATCHES
+	InjectHook(0x495130, &CPhysical::dtor, PATCH_JUMP);
 	InjectHook(0x4951F0, &CPhysical::Add_, PATCH_JUMP);
 	InjectHook(0x4954B0, &CPhysical::Remove_, PATCH_JUMP);
 	InjectHook(0x495540, &CPhysical::RemoveAndAdd, PATCH_JUMP);

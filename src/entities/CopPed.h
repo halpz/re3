@@ -63,6 +63,11 @@ public:
 	int8 field_1365;
 	int8 field_1366;
 	int8 field_1367;
+
+	~CCopPed();
+	void dtor(void) { this->CCopPed::~CCopPed(); }
+
+	void ClearPursuit(void);
 };
 
 static_assert(sizeof(CCopPed) == 0x558, "CCopPed: error");

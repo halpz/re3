@@ -241,6 +241,10 @@ private:
 	static float &LoadSceneX;
 	static float &LoadSceneY;
 	static float &LoadSceneZ;
+	static float &CameraFocusX;
+	static float &CameraFocusY;
+	static float &CameraFocusZ;
+	static bool &bPlayerInRCBuggy;
 
 public:
 	static void Init(void);
@@ -257,25 +261,21 @@ public:
 	inline static bool IsPlayingBack() { return Mode == MODE_PLAYBACK; }
 	inline static bool IsPlayingBackFromFile() { return bPlayingBackFromFile; }
 
-private:
+//private:
 	static void RecordThisFrame(void);
 	static void StorePedUpdate(CPed *ped, int id);
 	static void StorePedAnimation(CPed *ped, CStoredAnimationState *state);
 	static void StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state);
-public:
 	static void ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayBuffer *buffer);
 	static void RetrievePedAnimation(CPed *ped, CStoredAnimationState *state);
 	static void RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state);
-private:
 	static void PlaybackThisFrame(void);
 	static void StoreCarUpdate(CVehicle *vehicle, int id);
 	static void ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressInReplayBuffer *buffer);
 	static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer);
 	static void ProcessReplayCamera(void);
 	static void StoreStuffInMem(void);
-public: /* temp */
 	static void RestoreStuffFromMem(void);
-private:
 	static void EmptyPedsAndVehiclePools(void);
 	static void EmptyAllPools(void);
 	static void MarkEverythingAsNew(void);

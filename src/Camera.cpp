@@ -1282,4 +1282,6 @@ STARTPATCHES
 	InjectHook(0x45E3A0, &CCam::Process_FollowPed, PATCH_JUMP);
 	InjectHook(0x45BE60, &CCam::Process_BehindCar, PATCH_JUMP);
 	InjectHook(0x45C090, &CCam::Process_Cam_On_A_String, PATCH_JUMP);
+
+	InjectHook(0x473250, &CCamera::dtor, PATCH_JUMP);
 ENDPATCHES

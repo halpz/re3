@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Placeable.h"
+
 enum eParticleObjectType
 {
 	POBJECT_PAVEMENT_STEAM,
@@ -24,10 +26,12 @@ enum eParticleObjectType
 	POBJECT_CATALINAS_SHOTGUNFLASH,
 };
 
-class CParticleObject
+class CParticleObject : CPlaceable
 {
 public:
 	static void AddObject(uint16, const CVector &pos, bool remove);
 	static void Initialise();
 	static void UpdateAll();
+
+	void dtor() { this->CParticleObject::~CParticleObject(); }
 };

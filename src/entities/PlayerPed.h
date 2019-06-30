@@ -39,6 +39,9 @@ public:
 	float field_1512;
 	float m_fFPSMoveHeading;
 
+	~CPlayerPed();
+
+	void dtor(void) { this->CPlayerPed::~CPlayerPed(); }
 	void ReApplyMoveAnims(void);
 };
 
