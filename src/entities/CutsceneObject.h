@@ -14,7 +14,7 @@ public:
 	bool SetupLighting(void);
 	void RemoveLighting(bool reset);
 
-
+	void dtor(void) { this->CCutsceneObject::~CCutsceneObject(); }
 	void SetModelIndex_(uint32 id) { CCutsceneObject::SetModelIndex(id); }
 	void ProcessControl_(void) { CCutsceneObject::ProcessControl(); }
 	void PreRender_(void) { CCutsceneObject::PreRender(); }

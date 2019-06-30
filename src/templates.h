@@ -60,7 +60,7 @@ public:
 		return (T*)&m_entries[m_allocPtr];
 	}
 	T *New(int handle){
-		T *entry = (T*)m_entries[handle>>8];
+		T *entry = (T*)&m_entries[handle>>8];
 		SetNotFreeAt(handle);
 		return entry;
 	}

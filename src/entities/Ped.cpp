@@ -17,6 +17,7 @@
 #include "Shadows.h"
 #include "Weather.h"
 #include "CullZones.h"
+#include "Population.h"
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -27,8 +28,65 @@ CVector &CPed::offsetToOpenLowCarDoor = *(CVector*)0x62E03C;
 CVector &CPed::offsetToOpenVanDoor = *(CVector*)0x62E048;
 
 void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
+void *CPed::operator new(size_t sz, int handle) { return CPools::GetPedPool()->New(handle); }
 void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }
 
+CPed::~CPed(void)
+{
+	CWorld::Remove(this);
+	CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetIndex(this));
+	if (bInVehicle && m_pMyVehicle){
+		uint8 door_flag = 0;
+		switch (m_vehEnterType) {
+		case VEHICLE_ENTER_FRONT_LEFT:  door_flag = 1; break;
+		case VEHICLE_ENTER_REAR_LEFT:   door_flag = 2; break;
+		case VEHICLE_ENTER_FRONT_RIGHT: door_flag = 4; break;
+		case VEHICLE_ENTER_REAR_RIGHT:  door_flag = 8; break;
+		default: break;
+		}
+		if (m_pMyVehicle->pDriver == this)
+			m_pMyVehicle->pDriver = nil;
+		else {
+			for (int i = 0; i < m_pMyVehicle->m_nNumMaxPassengers; i++) {
+				if (m_pMyVehicle->pPassengers[i] == this)
+					m_pMyVehicle->pPassengers[i] = nil;
+			}
+		}
+		if (m_nPedState == PED_EXIT_CAR || m_nPedState == PED_DRAG_FROM_CAR)
+			m_pMyVehicle->m_nGettingOutFlags &= ~door_flag;
+		bInVehicle = false;
+		m_pMyVehicle = nil;
+	}else if (m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK){
+		QuitEnteringCar();
+	}
+	if (m_pFire)
+		m_pFire->Extinguish();
+	CPopulation::UpdatePedCount(m_nPedType, true);
+	DMAudio.DestroyEntity(m_audioEntityId);
+}
+
+void CPed::FlagToDestroyWhenNextProcessed(void)
+{
+	bRemoveFromWorld = true;
+	if (!bInVehicle || !m_pMyVehicle)
+		return;
+	if (m_pMyVehicle->pDriver == this){
+		m_pMyVehicle->pDriver = nil;
+		if (IsPlayer() && m_pMyVehicle->m_status != STATUS_WRECKED)
+			m_pMyVehicle->m_status = STATUS_ABANDONED;
+	}else{
+		m_pMyVehicle->RemovePassenger(this);
+	}
+	bInVehicle = false;
+	m_pMyVehicle = nil;
+	if (m_nCreatedBy == 2) /* TODO: enum (MISSION) */
+		m_nPedState = PED_DEAD;
+	else
+		m_nPedState = PED_NONE;
+	m_pVehicleAnim = nil;
+}
+
+WRAPPER void CPed::QuitEnteringCar() { EAXJMP(0x4E0E00); }
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
 WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4D37D0); }
@@ -1625,6 +1683,7 @@ WRAPPER void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4
 WRAPPER void CPed::RestoreHeadingRateCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D6550); }
 
 STARTPATCHES
+	InjectHook(0x4C50D0, &CPed::dtor, PATCH_JUMP);
 	InjectHook(0x4CF8F0, &CPed::AddWeaponModel, PATCH_JUMP);
 	InjectHook(0x4C6AA0, &CPed::AimGun, PATCH_JUMP);
 	InjectHook(0x4EB470, &CPed::ApplyHeadShot, PATCH_JUMP);

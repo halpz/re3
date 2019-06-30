@@ -52,6 +52,7 @@ CDummy::Remove(void)
 }
 
 STARTPATCHES
+	InjectHook(0x473810, &CDummy::dtor, PATCH_JUMP);
 	InjectHook(0x473860, &CDummy::Add_, PATCH_JUMP);
 	InjectHook(0x473AD0, &CDummy::Remove_, PATCH_JUMP);
 ENDPATCHES

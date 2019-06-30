@@ -241,6 +241,10 @@ private:
 	static float &LoadSceneX;
 	static float &LoadSceneY;
 	static float &LoadSceneZ;
+	static float &CameraFocusX;
+	static float &CameraFocusY;
+	static float &CameraFocusZ;
+	static bool &bPlayerInRCBuggy;
 
 public:
 	static void Init(void);

@@ -196,6 +196,6 @@ public:
 	void SetEntityStatus(int32 id, uint8 enable);
 	void SetRadioInCar(int32);
 	uint8 IsMP3RadioChannelAvailable();
-
+	void DestroyEntity(int32);
 };
 extern cDMAudio &DMAudio;

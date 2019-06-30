@@ -22,7 +22,10 @@ public:
 	uint8 m_nDriveWheelsOnGround;
 	uint8 stuff5[22];
 
+	CAutomobile(int, uint8);
+	CAutomobile* ctor(int, uint8);
 	void SetDoorDamage(int32, uint32, bool); /* TODO: eDoors */
+	void dtor() { this->CAutomobile::~CAutomobile(); }
 };
 static_assert(sizeof(CAutomobile) == 0x5A8, "CAutomobile: error");
 static_assert(offsetof(CAutomobile, m_afWheelSuspDist) == 0x46C, "CAutomobile: error");

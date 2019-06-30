@@ -4,7 +4,6 @@
 
 WRAPPER void CParticleObject::AddObject(uint16, const CVector &pos, bool remove) { EAXJMP(0x4BC4D0); }
 
-
 // Converted from static void __cdecl CParticleObject::Initialise() 0x42C760
 void CParticleObject::Initialise()
 {
@@ -16,3 +15,7 @@ void CParticleObject::UpdateAll()
 {
 	((void (__cdecl *)())0x4BCA30)();
 }
+
+STARTPATCHES
+	InjectHook(0x4BC420, &CParticleObject::dtor, PATCH_JUMP);
+ENDPATCHES

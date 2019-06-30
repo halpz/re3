@@ -66,5 +66,6 @@ CObject::Render(void)
 WRAPPER void CObject::DeleteAllTempObjectInArea(CVector, float) { EAXJMP(0x4BBED0); }
 
 STARTPATCHES
+	InjectHook(0x4BAE00, &CObject::dtor, PATCH_JUMP);
 	InjectHook(0x4BB1E0, &CObject::Render_, PATCH_JUMP);
 ENDPATCHES

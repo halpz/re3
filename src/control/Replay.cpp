@@ -4,9 +4,11 @@
 #include "Boat.h"
 #include "BulletTraces.h"
 #include "CarCtrl.h"
+#include "CivilianPed.h"
 #include "Clock.h"
 #include "DMAudio.h"
 #include "Draw.h"
+#include "Heli.h"
 #include "math/Matrix.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
@@ -14,6 +16,7 @@
 #include "Pad.h"
 #include "PhoneInfo.h"
 #include "Pickups.h"
+#include "Plane.h"
 #include "Pools.h"
 #include "Population.h"
 #include "Replay.h"
@@ -23,6 +26,7 @@
 #include "render/Skidmarks.h"
 #include "Streaming.h"
 #include "Timer.h"
+#include "Train.h"
 #include "Weather.h"
 #include "Zones.h"
 #include "Font.h"
@@ -83,6 +87,10 @@ bool &CReplay::bAllowLookAroundCam = *(bool*)0x95CDCD;
 float &CReplay::LoadSceneX = *(float*)0x880F9C;
 float &CReplay::LoadSceneY = *(float*)0x880F98;
 float &CReplay::LoadSceneZ = *(float*)0x880F94;
+float &CReplay::CameraFocusX = *(float*)0x942F5C;
+float &CReplay::CameraFocusY = *(float*)0x942F74;
+float &CReplay::CameraFocusZ = *(float*)0x942F58;
+bool &CReplay::bPlayerInRCBuggy = *(bool*)0x95CDC3;
 
 static void(*(&CBArray)[30])(CAnimBlendAssociation*, void*) = *(void(*(*)[30])(CAnimBlendAssociation*, void*))*(uintptr*)0x61052C;
 static void(*CBArray_RE3[])(CAnimBlendAssociation*, void*) =
@@ -680,9 +688,250 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 }
 #endif
 
+#if 0
 WRAPPER bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer) { EAXJMP(0x595240); }
+#else
+bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer){
+	/* Mistake. Not even sure what this is even doing here...
+	 * PlayerWanted is a backup to restore at the end of replay.
+	 * Setting current wanted pointer to it makes it useless.
+	 * Causes picking up bribes in replays reducing wanted level bug.
+	 * Obviously fact of picking them up is a bug on its own,
+	 * but it doesn't cancel this one.
+	 */
+	FindPlayerPed()->m_pWanted = &PlayerWanted;
+
+	CBulletTraces::Init();
+	float split = 1.0f - interpolation;
+	int ped_min_index = 0; /* Optimization due to peds and vehicles placed in buffer sequentially. */
+	int vehicle_min_index = 0; /* So next ped can't have pool index less than current. */
+	for(;;){
+		uint8* ptr = buffer->m_pBase;
+		uint32 offset = buffer->m_nOffset;
+		uint8 type = ptr[offset];
+		if (type == REPLAYPACKET_ENDOFFRAME)
+			break;
+		switch (type) {
+		case REPLAYPACKET_END:
+		{
+			int slot = buffer->m_bSlot;
+			if (BufferStatus[slot] == REPLAYBUFFER_RECORD) {
+				FinishPlayback();
+				return true;
+			}
+			buffer->m_bSlot = (slot + 1) % 8;
+			buffer->m_nOffset = 0;
+			buffer->m_pBase = Buffers[buffer->m_bSlot];
+			ped_min_index = 0;
+			vehicle_min_index = 0;
+			break;
+		}
+		case REPLAYPACKET_VEHICLE:
+		{
+			tVehicleUpdatePacket* vp = (tVehicleUpdatePacket*)&ptr[offset];
+			for (int i = vehicle_min_index; i < vp->index; i++) {
+				CVehicle* v = CPools::GetVehiclePool()->GetSlot(i);
+				if (!v)
+					continue;
+				/* Removing vehicles not present in this frame. */
+				CWorld::Remove(v);
+				delete v;
+			}
+			vehicle_min_index = vp->index + 1;
+			CVehicle* v = CPools::GetVehiclePool()->GetSlot(vp->index);
+			CVehicle* new_v;
+			if (!v) {
+				int mi = vp->mi;
+				if (CStreaming::ms_aInfoForModel[mi].m_loadState != 1) {
+					CStreaming::RequestModel(mi, 0);
+				}
+				else {
+					if (mi == MI_DEADDODO || mi == MI_AIRTRAIN) {
+						new_v = new(vp->index << 8) CPlane(mi, 2);
+					}
+					else if (mi == MI_TRAIN) {
+						new_v = new(vp->index << 8) CTrain(mi, 2);
+					}
+					else if (mi == MI_CHOPPER || mi == MI_ESCAPE) {
+						new_v = new(vp->index << 8) CHeli(mi, 2);
+					}
+					else if (CModelInfo::IsBoatModel(mi)){
+						new_v = new(vp->index << 8) CBoat(mi, 2);
+					}
+					else{
+						new_v = new(vp->index << 8) CAutomobile(mi, 2);
+					}
+					new_v->m_status = STATUS_PLAYER_PLAYBACKFROMBUFFER;
+					vp->matrix.DecompressIntoFullMatrix(new_v->GetMatrix());
+					new_v->m_currentColour1 = vp->primary_color;
+					new_v->m_currentColour2 = vp->secondary_color;
+					CWorld::Add(new_v);
+				}
+			}
+			ProcessCarUpdate(CPools::GetVehiclePool()->GetSlot(vp->index), interpolation, buffer);
+			buffer->m_nOffset += sizeof(tVehicleUpdatePacket);
+			break;
+		}
+		case REPLAYPACKET_PED_HEADER:
+		{
+			tPedHeaderPacket* ph = (tPedHeaderPacket*)&ptr[offset];
+			if (!CPools::GetPedPool()->GetSlot(ph->index)) {
+				if (CStreaming::ms_aInfoForModel[ph->mi].m_loadState != 1) {
+					CStreaming::RequestModel(ph->mi, 0);
+				}
+				else {
+					CPed* new_p = new(ph->index << 8) CCivilianPed(ph->pedtype, ph->mi);
+					new_p->m_status = STATUS_PLAYER_PLAYBACKFROMBUFFER;
+					new_p->GetMatrix().SetUnity();
+					CWorld::Add(new_p);
+				}
+			}
+			buffer->m_nOffset += sizeof(tPedHeaderPacket);
+			break;
+		}
+		case REPLAYPACKET_PED_UPDATE:
+		{
+			tPedUpdatePacket* pu = (tPedUpdatePacket*)&ptr[offset];
+			for (int i = ped_min_index; i < pu->index; i++) {
+				CPed* p = CPools::GetPedPool()->GetSlot(i);
+				if (!p)
+					continue;
+				/* Removing peds not present in this frame. */
+				CWorld::Remove(p);
+				delete p;
+			}
+			ped_min_index = pu->index + 1;
+			ProcessPedUpdate(CPools::GetPedPool()->GetSlot(pu->index), interpolation, buffer);
+			break;
+		}
+		case REPLAYPACKET_GENERAL:
+		{
+			tGeneralPacket* pg = (tGeneralPacket*)&ptr[offset];
+			TheCamera.GetMatrix() = TheCamera.GetMatrix() * CMatrix(split);
+			*TheCamera.GetMatrix().GetPosition() *= split;
+			TheCamera.GetMatrix() += CMatrix(interpolation) * pg->camera_pos;
+			RwMatrix* pm = &RpAtomicGetFrame(&TheCamera.m_pRwCamera->object.object)->modelling;
+			pm->pos = *(RwV3d*)TheCamera.GetMatrix().GetPosition();
+			pm->at = *(RwV3d*)TheCamera.GetMatrix().GetForward();
+			pm->up = *(RwV3d*)TheCamera.GetMatrix().GetUp();
+			pm->right = *(RwV3d*)TheCamera.GetMatrix().GetRight();
+			CameraFocusX = split * CameraFocusX + interpolation * pg->player_pos.x;
+			CameraFocusY = split * CameraFocusY + interpolation * pg->player_pos.y;
+			CameraFocusZ = split * CameraFocusZ + interpolation * pg->player_pos.z;
+			bPlayerInRCBuggy = pg->in_rcvehicle;
+			buffer->m_nOffset += sizeof(tGeneralPacket);
+			break;
+		}
+		case REPLAYPACKET_CLOCK:
+		{
+			tClockPacket* pc = (tClockPacket*)&ptr[offset];
+			CClock::SetGameClock(pc->hours, pc->minutes);
+			buffer->m_nOffset += sizeof(tClockPacket);
+			break;
+		}
+		case REPLAYPACKET_WEATHER:
+		{
+			tWeatherPacket* pw = (tWeatherPacket*)&ptr[offset];
+			CWeather::OldWeatherType = pw->old_weather;
+			CWeather::NewWeatherType = pw->new_weather;
+			CWeather::InterpolationValue = pw->interpolation;
+			buffer->m_nOffset += sizeof(tWeatherPacket);
+			break;
+		}
+		case REPLAYPACKET_ENDOFFRAME:
+		{
+			/* Not supposed to be here. */
+			buffer->m_nOffset++;
+			break;
+		}
+		case REPLAYPACKET_TIMER:
+		{
+			tTimerPacket* pt = (tTimerPacket*)&ptr[offset];
+			if (pTimer)
+				*pTimer = pt->timer;
+			CTimer::SetTimeInMilliseconds(pt->timer);
+			buffer->m_nOffset += sizeof(tTimerPacket);
+			break;
+		}
+		case REPLAYPACKET_BULLET_TRACES:
+		{
+			tBulletTracePacket* pb = (tBulletTracePacket*)&ptr[offset];
+			CBulletTraces::aTraces[pb->index].m_bInUse = true;
+			CBulletTraces::aTraces[pb->index].m_bFramesInUse = pb->frames;
+			CBulletTraces::aTraces[pb->index].m_bLifeTime = pb->lifetime;
+			CBulletTraces::aTraces[pb->index].m_vecInf = pb->inf;
+			CBulletTraces::aTraces[pb->index].m_vecSup = pb->sup;
+			buffer->m_nOffset += sizeof(tBulletTracePacket);
+		}
+		default:
+			break;
+		}
+	}
+	buffer->m_nOffset += 4;
+	for (int i = vehicle_min_index; i < CPools::GetVehiclePool()->GetSize(); i++) {
+		CVehicle* v = CPools::GetVehiclePool()->GetSlot(i);
+		if (!v)
+			continue;
+		/* Removing vehicles not present in this frame. */
+		CWorld::Remove(v);
+		delete v;
+	}
+	for (int i = ped_min_index; i < CPools::GetPedPool()->GetSize(); i++) {
+		CPed* p = CPools::GetPedPool()->GetSlot(i);
+		if (!p)
+			continue;
+		/* Removing peds not present in this frame. */
+		CWorld::Remove(p);
+		delete p;
+	}
+	ProcessReplayCamera();
+	return false;
+}
+#endif
+#if 0
 WRAPPER void CReplay::FinishPlayback(void) { EAXJMP(0x595B20); }
+#else
+void CReplay::FinishPlayback(void)
+{
+	if (Mode != MODE_PLAYBACK)
+		return;
+	EmptyAllPools();
+	RestoreStuffFromMem();
+	Mode = MODE_RECORD;
+	if (bDoLoadSceneWhenDone){
+		CVector v_ls(LoadSceneX, LoadSceneY, LoadSceneZ);
+		CGame::currLevel = CTheZones::GetLevelFromPosition(v_ls);
+		CCollision::SortOutCollisionAfterLoad();
+		CStreaming::LoadScene(v_ls);
+	}
+	bDoLoadSceneWhenDone = false;
+	if (bPlayingBackFromFile){
+		Init();
+		MarkEverythingAsNew();
+	}
+	DMAudio.SetEffectsFadeVol(127);
+	DMAudio.SetMusicFadeVol(127);
+}
+#endif
+
+#if 0
 WRAPPER void CReplay::EmptyReplayBuffer(void) { EAXJMP(0x595BD0); }
+#else
+void CReplay::EmptyReplayBuffer(void)
+{
+	if (Mode == MODE_PLAYBACK)
+		return;
+	for (int i = 0; i < 8; i++){
+		BufferStatus[i] = REPLAYBUFFER_UNUSED;
+	}
+	Record.m_bSlot = 0;
+	Record.m_pBase = Buffers[0];
+	BufferStatus[0] = REPLAYBUFFER_RECORD;
+	Record.m_pBase[Record.m_nOffset] = 0;
+	MarkEverythingAsNew();
+}
+#endif
+
 WRAPPER void CReplay::ProcessReplayCamera(void) { EAXJMP(0x595C40); }
 
 #if 0

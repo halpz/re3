@@ -9,5 +9,9 @@ public:
 	uint8 stuff1[57];
 	bool m_bIsAnchored;
 	uint8 stuff[450];
+
+	CBoat(int, uint8);
+	CBoat* ctor(int, uint8);
+	void dtor() { this->CBoat::~CBoat(); };
 };
 static_assert(sizeof(CBoat) == 0x484, "CBoat: error");

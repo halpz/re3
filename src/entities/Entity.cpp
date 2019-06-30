@@ -449,6 +449,8 @@ CEntity::PruneReferences(void)
 
 STARTPATCHES
 	InjectHook(0x473C30, &CEntity::ctor, PATCH_JUMP);
+	InjectHook(0x473E40, &CEntity::dtor, PATCH_JUMP);
+	InjectHook(0x473E70, &CEntity::SetModelIndex_, PATCH_JUMP);
 	InjectHook(0x4742C0, (void (CEntity::*)(CVector&))&CEntity::GetBoundCentre, PATCH_JUMP);
 	InjectHook(0x474310, &CEntity::GetBoundRadius, PATCH_JUMP);
 	InjectHook(0x474C10, &CEntity::GetIsTouching, PATCH_JUMP);
