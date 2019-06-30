@@ -45,11 +45,17 @@ class CWeapon
 public:
 	eWeaponType m_eWeaponType;
 	eWeaponState m_eWeaponState;
-	int32 m_nAmmoInClip;
-	int32 m_nAmmoTotal;
+	uint32 m_nAmmoInClip;
+	uint32 m_nAmmoTotal;
 	int32 m_nTimer;
 	bool m_bAddRotOffset;
 
+	CWeapon() {
+		m_bAddRotOffset = false;
+	}
+
+	void Initialise(eWeaponType type, int ammo);
+	void Reload(void);
 	bool Fire(CEntity*, CVector*);
 	void AddGunshell(CEntity*, CVector const&, CVector2D const&, float);
 };

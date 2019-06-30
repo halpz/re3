@@ -6,6 +6,20 @@
 WRAPPER bool CPedIK::PointGunInDirection(float phi, float theta) { EAXJMP(0x4ED9B0); }
 WRAPPER bool CPedIK::PointGunAtPosition(CVector *position) { EAXJMP(0x4ED920); }
 
+CPedIK::CPedIK(CPed *ped)
+{
+	m_ped = ped;
+	m_flags = 0;
+	m_headOrient.phi = 0.0f;
+	m_headOrient.theta = 0.0f;
+	m_torsoOrient.phi = 0.0f;
+	m_torsoOrient.theta = 0.0f;
+	m_upperArmOrient.phi = 0.0f;
+	m_upperArmOrient.theta = 0.0f;
+	m_lowerArmOrient.phi = 0.0f;
+	m_lowerArmOrient.theta = 0.0f;
+}
+
 void
 CPedIK::GetComponentPosition(RwV3d *pos, PedNode node)
 {

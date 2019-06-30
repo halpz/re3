@@ -56,8 +56,6 @@ enum
 
 class CPedStats
 {
-	static CPedStats *(&ms_apPedStats)[NUM_PEDSTATS];
-
 public:
 	ePedStats m_type;
 	char m_name[24];
@@ -70,6 +68,8 @@ public:
 	float m_attackStrength;
 	float m_defendWeakness;
 	int16 m_flags;
+
+	static CPedStats* (&ms_apPedStats)[NUM_PEDSTATS];
 
 	static void Initialise(void);
 	static void Shutdown(void);

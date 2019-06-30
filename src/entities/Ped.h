@@ -121,6 +121,7 @@ public:
 	uint8 m_ped_flagA20 : 1;	// "look" method? - probably missing in SA
 	uint8 bIsRestoringLook : 1;
 	uint8 bIsAimingGun : 1;
+
 	uint8 bIsRestoringGun : 1;
 	uint8 bCanPointGunAtTarget : 1;
 	uint8 m_ped_flagB4 : 1;
@@ -129,6 +130,7 @@ public:
 	uint8 m_ped_flagB20 : 1;
 	uint8 m_ped_flagB40 : 1;
 	uint8 m_ped_flagB80 : 1;
+
 	uint8 m_ped_flagC1 : 1;
 	uint8 m_ped_flagC2 : 1;
 	uint8 m_ped_flagC4 : 1;
@@ -137,6 +139,7 @@ public:
 	uint8 m_ped_flagC20 : 1;	// just left some body part?
 	uint8 m_ped_flagC40 : 1;
 	uint8 m_ped_flagC80 : 1;
+
 	uint8 m_ped_flagD1 : 1;
 	uint8 m_ped_flagD2 : 1;
 	uint8 m_ped_flagD4 : 1;
@@ -145,6 +148,7 @@ public:
 	uint8 m_ped_flagD20 : 1;
 	uint8 m_ped_flagD40 : 1;
 	uint8 m_ped_flagD80 : 1;
+
 	uint8 m_ped_flagE1 : 1;
 	uint8 m_ped_flagE2 : 1;
 	uint8 m_ped_flagE4 : 1;
@@ -153,6 +157,7 @@ public:
 	uint8 m_ped_flagE20 : 1;
 	uint8 bDoBloodyFootprints : 1;
 	uint8 m_ped_flagE80 : 1;
+
 	uint8 m_ped_flagF1 : 1;
 	uint8 m_ped_flagF2 : 1;
 	uint8 m_ped_flagF4 : 1;
@@ -161,6 +166,7 @@ public:
 	uint8 m_ped_flagF20 : 1;
 	uint8 m_ped_flagF40 : 1;
 	uint8 m_ped_flagF80 : 1;
+
 	uint8 m_ped_flagG1 : 1;
 	uint8 m_ped_flagG2 : 1;
 	uint8 m_ped_flagG4 : 1;
@@ -169,6 +175,7 @@ public:
 	uint8 m_ped_flagG20 : 1;
 	uint8 m_ped_flagG40 : 1;
 	uint8 m_ped_flagG80 : 1;
+
 	uint8 m_ped_flagH1 : 1;
 	uint8 m_ped_flagH2 : 1;
 	uint8 m_ped_flagH4 : 1;
@@ -177,6 +184,7 @@ public:
 	uint8 m_ped_flagH20 : 1;
 	uint8 m_ped_flagH40 : 1;
 	uint8 m_ped_flagH80 : 1;
+
 	uint8 m_ped_flagI1 : 1;
 	uint8 m_ped_flagI2 : 1;
 	uint8 m_ped_flagI4 : 1;
@@ -187,10 +195,22 @@ public:
 	uint8 m_ped_flagI80 : 1;
 	uint8 stuff10[3];
 	uint8 m_nCreatedBy;
-	uint8 stuff14[11];
-	CPed *m_field_16C;
-	uint8 stuff12[44];
-	int32 m_pEventEntity;
+	uint8 field_161;
+	uint8 pad_162[2];
+	uint32 m_objective;
+	uint32 m_prevObjective;
+	CPed* m_field_16C;
+	uint32 field_170;
+	uint32 field_174;
+	uint32 field_178;
+	uint32 field_17C;
+	uint32 field_180;
+	uint32 m_pedFormation;
+	uint32 m_fearFlags;
+	CEntity *m_threatEntity;
+	CVector2D m_eventOrThread;
+	uint32 m_eventType;
+	CEntity* m_pEventEntity;
 	float m_fAngleToEvent;
 	AnimBlendFrameData *m_pFrames[PED_NODE_MAX];
 	AssocGroupId m_animGroup;
@@ -198,7 +218,8 @@ public:
 	CVector2D m_vecAnimMoveDelta;
 	CVector m_vecOffsetSeek;
 	CPedIK m_pedIK; 
-	uint8 stuff1[8];
+	float m_actionX;
+	float m_actionY;
 	uint32 m_nPedStateTimer;
 	PedState m_nPedState;
 	PedState m_nLastPedState;
@@ -206,10 +227,9 @@ public:
 	int32 m_nStoredActionState;
 	int32 m_nPrevActionState;
 	int32 m_nWaitState;
-	int32 m_nWaitTimer;
-private:
-	uint32 stuff0[28];
-public:
+	uint32 m_nWaitTimer;
+	void *m_pPathNodesStates[8];
+	CVector2D m_stPathNodeStates[10];
 	uint16 m_nPathNodes;
 	uint8 m_nCurPathNode;
 	int8 m_nPathState;
@@ -220,7 +240,14 @@ public:
 	CPathNode *m_pLastPathNode;
 	float m_fHealth;
 	float m_fArmour;
-	uint8 stuff2[20];
+	int16 m_routeLastPoint;
+	uint16 m_routePoints;
+	uint16 m_routePos;
+	uint16 m_routeType;
+	uint16 m_routeCurDir;
+	uint16 field_2D2;
+	float m_movedX;
+	float m_movedY;
 	float m_fRotationCur;
 	float m_fRotationDest;
 	uint32 m_headingRate;
@@ -229,24 +256,43 @@ public:
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
-	uint8 stuff3[12];
+	CVector m_vecSeekVehicle;
 	CEntity *m_pSeekTarget;
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
-	uint8 stuff4[23];
+	uint8 pad_315[3];
+	uint32 field_318;
+	uint8 field_31C;
+	uint8 field_31D;
+	int16 m_phoneId;
+	uint32 m_lookingForPhone;
+	uint32 m_phoneTalkTimer;
+	void *m_lastAccident;
 	int32 m_nPedType;
 	CPedStats *m_pedStats;
-	uint8 stuff5[24];
+	float m_fleeFromPosX;
+	float m_fleeFromPosY;
+	CEntity *m_fleeFrom;
+	uint32 m_fleeTimer;
+	uint32 field_344;
+	uint32 m_lastThreatTimer;
 	CEntity *m_pCollidingEntity;
-	uint8 stuff6[12];
+	uint8 m_stateUnused;
+	uint8 pad_351[3];
+	uint32 m_timerUnused;
+	CEntity *m_targetUnused;
 	CWeapon m_weapons[NUM_PED_WEAPONTYPES];
 	eWeaponType m_storedWeapon;
 	uint8 m_currentWeapon;			// eWeaponType
 	uint8 m_maxWeaponTypeAllowed;	// eWeaponType
-	uint8 stuff[2];
-	int32 m_pPointGunAt;
+	uint8 m_wepSkills;
+	uint8 m_wepAccuracy;
+	CEntity *m_pPointGunAt;
 	CVector m_vecHitLastPos;
-	uint8 stuff8[8];
+	uint32 m_lastHitState;
+	uint8 m_fightFlags1;
+	uint8 m_fightFlags2;
+	uint8 pad_4B2[2];
 	CFire* m_pFire;
 	CEntity *m_pLookTarget;
 	float m_fLookDirection;
@@ -260,23 +306,43 @@ public:
 	uint32 m_hitRecoverTimer;
 	uint32 field_4E0;
 	uint32 m_duckTimer;
-	uint8 stuff13[4];
+	uint32 field_4E8;
 	int32 m_bloodyFootprintCount;
 	uint8 stuff9[2];
-	uint8 m_bodyPartBleeding;		// PedNode
+	int8 m_bodyPartBleeding;		// PedNode
 	uint8 m_field_4F3;
 	CPed *m_nearPeds[10];
 	uint16 m_numNearPeds;
-	uint8 stuff11[30];
+	int8 m_lastWepDam;
+	uint8 pad_51F;
+	uint8 field_520;
+	uint8 pad_521[3];
+	uint32 m_talkTimer;
+	uint16 m_talkTypeLast;
+	uint16 m_talkType;
+	CVector m_vecSeekPosEx;
+	float m_seekExAngle;
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
 	static void operator delete(void*, size_t);
 	static void operator delete(void*, int);
 
-	~CPed(void);
-	void FlagToDestroyWhenNextProcessed(void);
+	CPed(uint32 pedType);
+	virtual ~CPed(void);
 
+	virtual void SetModelIndex(uint32 mi);
+	virtual void ProcessControl(void);
+	virtual void Teleport(CVector);
+	virtual void PreRender(void);
+	virtual void Render(void);
+	virtual bool SetupLighting(void);
+	virtual void RemoveLighting(bool);
+	virtual void FlagToDestroyWhenNextProcessed(void);
+	virtual int32 ProcessEntityCollision(CEntity*, CColPoint*);
+	virtual void SetMoveAnim(void);
+
+	CPed* ctor(uint32 pedType) { return ::new (this) CPed(pedType); }
 	void dtor(void) { this->CPed::~CPed(); }
 
 	bool IsPlayer(void);
@@ -313,6 +379,11 @@ public:
 	void SetPedPositionInCar(void);
 	void PlayFootSteps(void);
 	void QuitEnteringCar(void);
+	bool IsPointerValid(void);
+	void SortPeds(CPed**, int, int);
+	void BuildPedLists(void);
+	void GiveWeapon(eWeaponType weaponType, int ammo);
+	void SetPedStats(ePedStats);
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
 	static void GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float seatPosMult);
 	static void GetPositionToOpenCarDoor(CVector* output, CVehicle* veh, uint32 enterType);
@@ -347,7 +418,15 @@ public:
 
 	bool HasWeapon(eWeaponType weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
+	CWeapon* GetWeapon(uint32 weaponType) { return &m_weapons[weaponType]; }
 	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
+
+	// to make patching virtual functions possible
+	void SetModelIndex_(uint32 mi) { CPed::SetModelIndex(mi); }
+	void FlagToDestroyWhenNextProcessed_(void) { CPed::FlagToDestroyWhenNextProcessed(); }
+
+	// set by 0482:set_threat_reaction_range_multiplier opcode
+	static uint16 &distanceMultToCountPedNear;
 
 	static CVector &offsetToOpenRegularCarDoor;
 	static CVector &offsetToOpenLowCarDoor;
