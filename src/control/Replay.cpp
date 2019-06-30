@@ -810,11 +810,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 			TheCamera.GetMatrix() = TheCamera.GetMatrix() * CMatrix(split);
 			*TheCamera.GetMatrix().GetPosition() *= split;
 			TheCamera.GetMatrix() += CMatrix(interpolation) * pg->camera_pos;
-			RwMatrix* pm = &RpAtomicGetFrame(&TheCamera.m_pRwCamera->object.object)->modelling;
-			pm->pos = *(RwV3d*)TheCamera.GetMatrix().GetPosition();
-			pm->at = *(RwV3d*)TheCamera.GetMatrix().GetForward();
-			pm->up = *(RwV3d*)TheCamera.GetMatrix().GetUp();
-			pm->right = *(RwV3d*)TheCamera.GetMatrix().GetRight();
+			*RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)) = TheCamera.GetMatrix().m_matrix;
 			CameraFocusX = split * CameraFocusX + interpolation * pg->player_pos.x;
 			CameraFocusY = split * CameraFocusY + interpolation * pg->player_pos.y;
 			CameraFocusZ = split * CameraFocusZ + interpolation * pg->player_pos.z;
@@ -932,7 +928,41 @@ void CReplay::EmptyReplayBuffer(void)
 }
 #endif
 
+#if 0
 WRAPPER void CReplay::ProcessReplayCamera(void) { EAXJMP(0x595C40); }
+#else
+void CReplay::ProcessReplayCamera(void)
+{
+	switch (CameraMode) {
+	case REPLAYCAMMODE_TOPDOWN:
+		*TheCamera.GetMatrix().GetPosition() = CVector(CameraFocusX, CameraFocusY, CameraFocusZ + 15.0f);
+		*TheCamera.GetMatrix().GetForward() = CVector(0.0f, 0.0f, -1.0f);
+		*TheCamera.GetMatrix().GetUp() = CVector(0.0f, 1.0f, 0.0f);
+		*TheCamera.GetMatrix().GetRight() = CVector(1.0f, 0.0f, 0.0f);
+		*RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)) = TheCamera.GetMatrix().m_matrix;
+		break;
+	case REPLAYCAMMODE_FIXED:
+		*TheCamera.GetMatrix().GetPosition() = CVector(CameraFixedX, CameraFixedY, CameraFixedZ);
+		CVector forward(CameraFocusX - CameraFixedX, CameraFocusY - CameraFixedY, CameraFocusZ - CameraFixedZ);
+		forward.Normalise();
+		CVector right = CrossProduct(CVector(0.0f, 0.0f, 1.0f), forward);
+		right.Normalise();
+		CVector up = CrossProduct(forward, right);
+		up.Normalise();
+		*TheCamera.GetMatrix().GetForward() = forward;
+		*TheCamera.GetMatrix().GetUp() = up;
+		*TheCamera.GetMatrix().GetRight() = right;
+		*RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)) = TheCamera.GetMatrix().m_matrix;
+		break;
+	default:
+		break;
+	}
+	TheCamera.m_vecGameCamPos = *TheCamera.GetMatrix().GetPosition();
+	TheCamera.CalculateDerivedValues();
+	RwMatrixUpdate(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
+	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));
+}
+#endif
 
 #if 0
 WRAPPER void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene) { EAXJMP(0x596030); }
@@ -1070,7 +1100,7 @@ void CReplay::RestoreStuffFromMem(void)
 	FindPlayerPed()->m_pWanted = new CWanted(PlayerWanted); /* Nice memory leak */
 	CWorld::Players[0] = PlayerInfo;
 	int i = CPools::GetPedPool()->GetSize();
-	while (--i){
+	while (i--){
 		CPed* ped = CPools::GetPedPool()->GetSlot(i);
 		if (!ped)
 			continue;
@@ -1088,7 +1118,7 @@ void CReplay::RestoreStuffFromMem(void)
 			ped->AddWeaponModel(ped->m_wepModelID);
 	}
 	i = CPools::GetVehiclePool()->GetSize();
-	while (--i){
+	while (i--){
 		CVehicle* vehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!vehicle)
 			continue;
@@ -1147,7 +1177,7 @@ void CReplay::RestoreStuffFromMem(void)
 	}
 	PrintElementsInPtrList();
 	i = CPools::GetObjectPool()->GetSize();
-	while (--i){
+	while (i--){
 		CObject* object = CPools::GetObjectPool()->GetSlot(i);
 		if (!object)
 			continue;
@@ -1162,7 +1192,7 @@ void CReplay::RestoreStuffFromMem(void)
 			object->GetMatrix().AttachRW(RwFrameGetMatrix(RpAtomicGetFrame(object->m_rwObject)), false);
 	}
 	i = CPools::GetDummyPool()->GetSize();
-	while (--i){
+	while (i--){
 		CDummy* dummy = CPools::GetDummyPool()->GetSlot(i);
 		if (!dummy)
 			continue;
@@ -1201,9 +1231,77 @@ void CReplay::RestoreStuffFromMem(void)
 	DMAudio.ChangeMusicMode(1);
 }
 #endif
+
+#if 0
 WRAPPER void CReplay::EmptyPedsAndVehiclePools(void) { EAXJMP(0x5970E0); }
+#else
+void CReplay::EmptyPedsAndVehiclePools(void)
+{
+	int i = CPools::GetVehiclePool()->GetSize();
+	while (i--) {
+		CVehicle* v = CPools::GetVehiclePool()->GetSlot(i);
+		if (!v)
+			continue;
+		CWorld::Remove(v);
+		delete v;
+	}
+	i = CPools::GetPedPool()->GetSize();
+	while (i--) {
+		CPed* p = CPools::GetPedPool()->GetSlot(i);
+		if (!p)
+			continue;
+		CWorld::Remove(p);
+		delete p;
+	}
+}
+#endif
+
+#if 0
 WRAPPER void CReplay::EmptyAllPools(void) { EAXJMP(0x5971B0); }
+#else
+void CReplay::EmptyAllPools(void)
+{
+	EmptyPedsAndVehiclePools();
+	int i = CPools::GetObjectPool()->GetSize();
+	while (i--) {
+		CObject* o = CPools::GetObjectPool()->GetSlot(i);
+		if (!o)
+			continue;
+		CWorld::Remove(o);
+		delete o;
+	}
+	i = CPools::GetDummyPool()->GetSize();
+	while (i--) {
+		CDummy* d = CPools::GetDummyPool()->GetSlot(i);
+		if (!d)
+			continue;
+		CWorld::Remove(d);
+		delete d;
+	}
+}
+#endif
+
+#if 0
 WRAPPER void CReplay::MarkEverythingAsNew(void) { EAXJMP(0x597280); }
+#else
+void CReplay::MarkEverythingAsNew(void)
+{
+	int i = CPools::GetVehiclePool()->GetSize();
+	while (i--) {
+		CVehicle* v = CPools::GetVehiclePool()->GetSlot(i);
+		if (!v)
+			continue;
+		v->bRecordedForReplay = false;
+	}
+	i = CPools::GetPedPool()->GetSize();
+	while (i--) {
+		CPed* p = CPools::GetPedPool()->GetSlot(i);
+		if (!p)
+			continue;
+		p->bRecordedForReplay = false;
+	}
+}
+#endif
 WRAPPER void CReplay::SaveReplayToHD(void) { EAXJMP(0x597330); }
 WRAPPER void PlayReplayFromHD(void) { EAXJMP(0x597420); }
 WRAPPER void CReplay::StreamAllNecessaryCarsAndPeds(void) { EAXJMP(0x597560); }
@@ -1236,9 +1334,6 @@ InjectHook(0x593150, CReplay::DisableReplays, PATCH_JUMP);
 InjectHook(0x593160, CReplay::EnableReplays, PATCH_JUMP);
 InjectHook(0x593170, CReplay::Update, PATCH_JUMP);
 InjectHook(0x595B20, CReplay::FinishPlayback, PATCH_JUMP);
-InjectHook(0x594050, CReplay::ProcessPedUpdate, PATCH_JUMP);
-InjectHook(0x594D10, CReplay::ProcessCarUpdate, PATCH_JUMP);
-InjectHook(0x593BB0, CReplay::StoreDetailedPedAnimation, PATCH_JUMP);
-InjectHook(0x5944B0, CReplay::RetrieveDetailedPedAnimation, PATCH_JUMP);
+InjectHook(0x595BD0, CReplay::EmptyReplayBuffer, PATCH_JUMP);
 InjectHook(0x596030, CReplay::TriggerPlayback, PATCH_JUMP);
 ENDPATCHES

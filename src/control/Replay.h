@@ -261,7 +261,7 @@ public:
 	inline static bool IsPlayingBack() { return Mode == MODE_PLAYBACK; }
 	inline static bool IsPlayingBackFromFile() { return bPlayingBackFromFile; }
 
-//private:
+private:
 	static void RecordThisFrame(void);
 	static void StorePedUpdate(CPed *ped, int id);
 	static void StorePedAnimation(CPed *ped, CStoredAnimationState *state);

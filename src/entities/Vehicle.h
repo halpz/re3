@@ -77,7 +77,7 @@ public:
 	uint8 m_veh_flagD2 : 1;
 	uint8 m_veh_flagD4 : 1;
 	uint8 m_veh_flagD8 : 1;
-	uint8 m_veh_flagD10 : 1;
+	uint8 bRecordedForReplay : 1;
 	uint8 m_veh_flagD20 : 1;
 	uint8 m_veh_flagD40 : 1;
 	uint8 m_veh_flagD80 : 1;
