@@ -240,7 +240,6 @@ public:
 	uint32 GetHoodTalkSfx(int16 sound);
 	uint32 GetBlackCriminalTalkSfx(int16 sound);
 	uint32 GetWhiteCriminalTalkSfx(int16 sound);
-	int32 GetSpecialCharacterTalkSfx(int32, int32);
 	uint32 GetMaleNo2TalkSfx(int16 sound);
 	uint32 GetBlackProjectMaleTalkSfx(int16 sound, int32 model);
 	uint32 GetWhiteFatMaleTalkSfx(int16 sound);
@@ -285,6 +284,16 @@ public:
 	uint32 GetStudentMaleTalkSfx(int16 sound);
 	uint32 GetStudentFemaleTalkSfx(int16 sound);
 	uint32 GetCasualMaleOldTalkSfx(int16 sound);
+
+	uint32 GetSpecialCharacterTalkSfx(int32 modelIndex, int32 sound);
+	uint32 GetEightTalkSfx(int16 sound);
+	uint32 GetFrankieTalkSfx(int16 sound);
+	uint32 GetMistyTalkSfx(int16 sound);
+	uint32 GetOJGTalkSfx(int16 sound);
+	uint32 GetCatatalinaTalkSfx(int16 sound);
+	uint32 GetBomberTalkSfx(int16 sound);
+	uint32 GetSecurityGuardTalkSfx(int16 sound);
+	uint32 GetChunkyTalkSfx(int16 sound);
 
 	uint32 GetGenericMaleTalkSfx(int16 sound);
 	uint32 GetGenericFemaleTalkSfx(int16 sound);
