@@ -130,7 +130,42 @@ static void(*FindCBFunction(uint8 id))(CAnimBlendAssociation*, void*)
 	return CBArray_RE3[id];
 }
 
+#if 0
 WRAPPER static void ApplyPanelDamageToCar(uint32, CAutomobile*, bool) { EAXJMP(0x584EA0); }
+#else
+static void ApplyPanelDamageToCar(uint32 panels, CAutomobile* vehicle, bool flying)
+{
+	CDamageManager::PanelStatus rp = *(CDamageManager::PanelStatus*)&panels;
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontLeftStatus != rp.m_nPanelFrontLeftStatus){
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontLeftStatus = rp.m_nPanelFrontLeftStatus;
+		vehicle->SetPanelDamage(13, CDamageManager::PANEL_FL, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontRightStatus != rp.m_nPanelFrontRightStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontRightStatus = rp.m_nPanelFrontRightStatus;
+		vehicle->SetPanelDamage(9, CDamageManager::PANEL_FR, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackLeftStatus != rp.m_nPanelBackLeftStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackLeftStatus = rp.m_nPanelBackLeftStatus;
+		vehicle->SetPanelDamage(14, CDamageManager::PANEL_RL, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackRightStatus != rp.m_nPanelBackRightStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackRightStatus = rp.m_nPanelBackRightStatus;
+		vehicle->SetPanelDamage(10, CDamageManager::PANEL_RR, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nWindshieldStatus != rp.m_nWindshieldStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nWindshieldStatus = rp.m_nWindshieldStatus;
+		vehicle->SetPanelDamage(19, CDamageManager::PANEL_WINDSHIELD, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontStatus != rp.m_nPanelFrontStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontStatus = rp.m_nPanelFrontStatus;
+		vehicle->SetPanelDamage(7, CDamageManager::PANEL_FRONT, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackStatus != rp.m_nPanelBackStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackStatus = rp.m_nPanelBackStatus;
+		vehicle->SetPanelDamage(8, CDamageManager::PANEL_BACK, flying);
+	}
+}
+#endif
 
 void PrintElementsInPtrList(void) 
 {
