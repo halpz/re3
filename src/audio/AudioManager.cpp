@@ -9,10 +9,12 @@
 
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 
+constexpr int totalAudioEntities = 200;
+
 void
 cAudioManager::SetEntityStatus(int32 id, bool status)
 {
-	if(m_bIsInitialised && id >= 0 && id < 200) {
+	if(m_bIsInitialised && id >= 0 && id < totalAudioEntities) {
 		if(m_asAudioEntities[id].m_bIsUsed) { m_asAudioEntities[id].m_bStatus = status; }
 	}
 }
@@ -53,15 +55,17 @@ cAudioManager::PreTerminateGameSpecificShutdown()
 void
 cAudioManager::DestroyEntity(int32 id)
 {
-	if(m_bIsInitialised && id >= 0 && id < 200 && m_asAudioEntities[id].m_bIsUsed) {
+	if(m_bIsInitialised && id >= 0 && id < totalAudioEntities &&
+	   m_asAudioEntities[id].m_bIsUsed) {
 		m_asAudioEntities[id].m_bIsUsed = 0;
 		for(i = 0; i < m_nAudioEntitiesTotal; ++i) {
 			if(id == m_anAudioEntityIndices[i]) {
-				if(i < 199)
+				if(i < totalAudioEntities - 1)
 					memmove(&m_anAudioEntityIndices[i],
 					        &m_anAudioEntityIndices[i + 1],
 					        4 * (m_nAudioEntitiesTotal - (i + 1)));
-				m_anAudioEntityIndices[--m_nAudioEntitiesTotal] = 200;
+				m_anAudioEntityIndices[--m_nAudioEntitiesTotal] =
+				    totalAudioEntities;
 				return;
 			}
 		}
