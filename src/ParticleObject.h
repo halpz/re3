@@ -29,7 +29,9 @@ enum eParticleObjectType
 class CParticleObject : CPlaceable
 {
 public:
-	static void AddObject(uint16, const CVector &pos, bool remove);
+	static void AddObject(uint16 type, const CVector &pos, bool remove);
+	static void AddObject(uint16 type, const CVector &pos, float size, bool remove);
+	static void AddObject(uint16 type, const CVector &pos, const CVector &dir, float size, bool remove);
 	static void Initialise();
 	static void UpdateAll();
 

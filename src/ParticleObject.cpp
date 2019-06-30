@@ -2,7 +2,9 @@
 #include "patcher.h"
 #include "ParticleObject.h"
 
-WRAPPER void CParticleObject::AddObject(uint16, const CVector &pos, bool remove) { EAXJMP(0x4BC4D0); }
+WRAPPER void CParticleObject::AddObject(uint16 type, const CVector &pos, bool remove) { EAXJMP(0x4BC4D0); }
+WRAPPER void CParticleObject::AddObject(uint16 type, const CVector &pos, float size, bool remove) { EAXJMP(0x4BC520); }
+WRAPPER void CParticleObject::AddObject(uint16 type, const CVector &pos, const CVector &dir, float size, bool remove) { EAXJMP(0x4BC570); }
 
 // Converted from static void __cdecl CParticleObject::Initialise() 0x42C760
 void CParticleObject::Initialise()

@@ -5,19 +5,6 @@
 
 struct CReference;
 
-enum eEntityFlags
-{
-	IS_UNK = 0,
-	CONTROL_POSTPONED,
-	IS_EXPLOSIONPROOF,
-	IS_VISIBLE,
-	IS_ON_GROUND,
-	REQUIRES_SCORCHED_LIGHTS,
-	HAS_BLIP,
-	IS_BIG_BUILDING,
-	HAS_BEEN_DAMAGED,
-};
-
 enum eEntityType
 {
 	ENTITY_TYPE_NOTHING = 0,
@@ -153,6 +140,12 @@ public:
 	void ResolveReferences(void);
 	void PruneReferences(void);
 
+	void PreRenderForGlassWindow(void);
+	void AddSteamsFromGround(CVector *unused);
+	void ModifyMatrixForTreeInWind(void);
+	void ModifyMatrixForBannerInWind(void);
+	void ProcessLightsForEntity(void);
+
 
 	// to make patching virtual functions possible
 	CEntity *ctor(void) { return ::new (this) CEntity(); }
@@ -163,6 +156,7 @@ public:
 	void CreateRwObject_(void) { CEntity::CreateRwObject(); }
 	void DeleteRwObject_(void) { CEntity::DeleteRwObject(); }
 	CRect GetBoundRect_(void) { return CEntity::GetBoundRect(); }
+	void PreRender_(void) { CEntity::PreRender(); }
 	void Render_(void) { CEntity::Render(); }
 	bool SetupLighting_(void) { return CEntity::SetupLighting(); }
 };
