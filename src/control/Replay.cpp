@@ -8,7 +8,9 @@
 #include "Clock.h"
 #include "DMAudio.h"
 #include "Draw.h"
+#include "FileMgr.h"
 #include "Heli.h"
+#include "main.h"
 #include "math/Matrix.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
@@ -91,6 +93,9 @@ float &CReplay::CameraFocusX = *(float*)0x942F5C;
 float &CReplay::CameraFocusY = *(float*)0x942F74;
 float &CReplay::CameraFocusZ = *(float*)0x942F58;
 bool &CReplay::bPlayerInRCBuggy = *(bool*)0x95CDC3;
+float &CReplay::fDistanceLookAroundCam = *(float*)0x885B44;
+float &CReplay::fBetaAngleLookAroundCam = *(float*)0x94072C;
+float &CReplay::fAlphaAngleLookAroundCam = *(float*)0x8F2A0C;
 
 static void(*(&CBArray)[30])(CAnimBlendAssociation*, void*) = *(void(*(*)[30])(CAnimBlendAssociation*, void*))*(uintptr*)0x61052C;
 static void(*CBArray_RE3[])(CAnimBlendAssociation*, void*) =
@@ -125,7 +130,42 @@ static void(*FindCBFunction(uint8 id))(CAnimBlendAssociation*, void*)
 	return CBArray_RE3[id];
 }
 
+#if 0
 WRAPPER static void ApplyPanelDamageToCar(uint32, CAutomobile*, bool) { EAXJMP(0x584EA0); }
+#else
+static void ApplyPanelDamageToCar(uint32 panels, CAutomobile* vehicle, bool flying)
+{
+	CDamageManager::PanelStatus rp = *(CDamageManager::PanelStatus*)&panels;
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontLeftStatus != rp.m_nPanelFrontLeftStatus){
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontLeftStatus = rp.m_nPanelFrontLeftStatus;
+		vehicle->SetPanelDamage(13, CDamageManager::PANEL_FL, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontRightStatus != rp.m_nPanelFrontRightStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontRightStatus = rp.m_nPanelFrontRightStatus;
+		vehicle->SetPanelDamage(9, CDamageManager::PANEL_FR, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackLeftStatus != rp.m_nPanelBackLeftStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackLeftStatus = rp.m_nPanelBackLeftStatus;
+		vehicle->SetPanelDamage(14, CDamageManager::PANEL_RL, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackRightStatus != rp.m_nPanelBackRightStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackRightStatus = rp.m_nPanelBackRightStatus;
+		vehicle->SetPanelDamage(10, CDamageManager::PANEL_RR, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nWindshieldStatus != rp.m_nWindshieldStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nWindshieldStatus = rp.m_nWindshieldStatus;
+		vehicle->SetPanelDamage(19, CDamageManager::PANEL_WINDSHIELD, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontStatus != rp.m_nPanelFrontStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontStatus = rp.m_nPanelFrontStatus;
+		vehicle->SetPanelDamage(7, CDamageManager::PANEL_FRONT, flying);
+	}
+	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackStatus != rp.m_nPanelBackStatus) {
+		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackStatus = rp.m_nPanelBackStatus;
+		vehicle->SetPanelDamage(8, CDamageManager::PANEL_BACK, flying);
+	}
+}
+#endif
 
 void PrintElementsInPtrList(void) 
 {
@@ -810,7 +850,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 			TheCamera.GetMatrix() = TheCamera.GetMatrix() * CMatrix(split);
 			*TheCamera.GetMatrix().GetPosition() *= split;
 			TheCamera.GetMatrix() += CMatrix(interpolation) * pg->camera_pos;
-			RwMatrix* pm = &RpAtomicGetFrame(&TheCamera.m_pRwCamera->object.object)->modelling;
+			RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
 			pm->pos = *(RwV3d*)TheCamera.GetMatrix().GetPosition();
 			pm->at = *(RwV3d*)TheCamera.GetMatrix().GetForward();
 			pm->up = *(RwV3d*)TheCamera.GetMatrix().GetUp();
@@ -932,7 +972,53 @@ void CReplay::EmptyReplayBuffer(void)
 }
 #endif
 
+#if 0
 WRAPPER void CReplay::ProcessReplayCamera(void) { EAXJMP(0x595C40); }
+#else
+void CReplay::ProcessReplayCamera(void)
+{
+	switch (CameraMode) {
+	case REPLAYCAMMODE_TOPDOWN:
+	{
+		*TheCamera.GetMatrix().GetPosition() = CVector(CameraFocusX, CameraFocusY, CameraFocusZ + 15.0f);
+		*TheCamera.GetMatrix().GetForward() = CVector(0.0f, 0.0f, -1.0f);
+		*TheCamera.GetMatrix().GetUp() = CVector(0.0f, 1.0f, 0.0f);
+		*TheCamera.GetMatrix().GetRight() = CVector(1.0f, 0.0f, 0.0f);
+		RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
+		pm->pos = *(RwV3d*)TheCamera.GetMatrix().GetPosition();
+		pm->at = *(RwV3d*)TheCamera.GetMatrix().GetForward();
+		pm->up = *(RwV3d*)TheCamera.GetMatrix().GetUp();
+		pm->right = *(RwV3d*)TheCamera.GetMatrix().GetRight();
+		break;
+	}
+	case REPLAYCAMMODE_FIXED:
+	{
+		*TheCamera.GetMatrix().GetPosition() = CVector(CameraFixedX, CameraFixedY, CameraFixedZ);
+		CVector forward(CameraFocusX - CameraFixedX, CameraFocusY - CameraFixedY, CameraFocusZ - CameraFixedZ);
+		forward.Normalise();
+		CVector right = CrossProduct(CVector(0.0f, 0.0f, 1.0f), forward);
+		right.Normalise();
+		CVector up = CrossProduct(forward, right);
+		up.Normalise();
+		*TheCamera.GetMatrix().GetForward() = forward;
+		*TheCamera.GetMatrix().GetUp() = up;
+		*TheCamera.GetMatrix().GetRight() = right;
+		RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
+		pm->pos = *(RwV3d*)TheCamera.GetMatrix().GetPosition();
+		pm->at = *(RwV3d*)TheCamera.GetMatrix().GetForward();
+		pm->up = *(RwV3d*)TheCamera.GetMatrix().GetUp();
+		pm->right = *(RwV3d*)TheCamera.GetMatrix().GetRight();
+		break;
+	}
+	default:
+		break;
+	}
+	TheCamera.m_vecGameCamPos = *TheCamera.GetMatrix().GetPosition();
+	TheCamera.CalculateDerivedValues();
+	RwMatrixUpdate(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
+	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));
+}
+#endif
 
 #if 0
 WRAPPER void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene) { EAXJMP(0x596030); }
@@ -1070,7 +1156,7 @@ void CReplay::RestoreStuffFromMem(void)
 	FindPlayerPed()->m_pWanted = new CWanted(PlayerWanted); /* Nice memory leak */
 	CWorld::Players[0] = PlayerInfo;
 	int i = CPools::GetPedPool()->GetSize();
-	while (--i){
+	while (i--){
 		CPed* ped = CPools::GetPedPool()->GetSlot(i);
 		if (!ped)
 			continue;
@@ -1088,7 +1174,7 @@ void CReplay::RestoreStuffFromMem(void)
 			ped->AddWeaponModel(ped->m_wepModelID);
 	}
 	i = CPools::GetVehiclePool()->GetSize();
-	while (--i){
+	while (i--){
 		CVehicle* vehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!vehicle)
 			continue;
@@ -1147,7 +1233,7 @@ void CReplay::RestoreStuffFromMem(void)
 	}
 	PrintElementsInPtrList();
 	i = CPools::GetObjectPool()->GetSize();
-	while (--i){
+	while (i--){
 		CObject* object = CPools::GetObjectPool()->GetSlot(i);
 		if (!object)
 			continue;
@@ -1162,7 +1248,7 @@ void CReplay::RestoreStuffFromMem(void)
 			object->GetMatrix().AttachRW(RwFrameGetMatrix(RpAtomicGetFrame(object->m_rwObject)), false);
 	}
 	i = CPools::GetDummyPool()->GetSize();
-	while (--i){
+	while (i--){
 		CDummy* dummy = CPools::GetDummyPool()->GetSlot(i);
 		if (!dummy)
 			continue;
@@ -1201,44 +1287,313 @@ void CReplay::RestoreStuffFromMem(void)
 	DMAudio.ChangeMusicMode(1);
 }
 #endif
+
+#if 0
 WRAPPER void CReplay::EmptyPedsAndVehiclePools(void) { EAXJMP(0x5970E0); }
+#else
+void CReplay::EmptyPedsAndVehiclePools(void)
+{
+	int i = CPools::GetVehiclePool()->GetSize();
+	while (i--) {
+		CVehicle* v = CPools::GetVehiclePool()->GetSlot(i);
+		if (!v)
+			continue;
+		CWorld::Remove(v);
+		delete v;
+	}
+	i = CPools::GetPedPool()->GetSize();
+	while (i--) {
+		CPed* p = CPools::GetPedPool()->GetSlot(i);
+		if (!p)
+			continue;
+		CWorld::Remove(p);
+		delete p;
+	}
+}
+#endif
+
+#if 0
 WRAPPER void CReplay::EmptyAllPools(void) { EAXJMP(0x5971B0); }
+#else
+void CReplay::EmptyAllPools(void)
+{
+	EmptyPedsAndVehiclePools();
+	int i = CPools::GetObjectPool()->GetSize();
+	while (i--) {
+		CObject* o = CPools::GetObjectPool()->GetSlot(i);
+		if (!o)
+			continue;
+		CWorld::Remove(o);
+		delete o;
+	}
+	i = CPools::GetDummyPool()->GetSize();
+	while (i--) {
+		CDummy* d = CPools::GetDummyPool()->GetSlot(i);
+		if (!d)
+			continue;
+		CWorld::Remove(d);
+		delete d;
+	}
+}
+#endif
+
+#if 0
 WRAPPER void CReplay::MarkEverythingAsNew(void) { EAXJMP(0x597280); }
+#else
+void CReplay::MarkEverythingAsNew(void)
+{
+	int i = CPools::GetVehiclePool()->GetSize();
+	while (i--) {
+		CVehicle* v = CPools::GetVehiclePool()->GetSlot(i);
+		if (!v)
+			continue;
+		v->bRecordedForReplay = false;
+	}
+	i = CPools::GetPedPool()->GetSize();
+	while (i--) {
+		CPed* p = CPools::GetPedPool()->GetSlot(i);
+		if (!p)
+			continue;
+		p->bRecordedForReplay = false;
+	}
+}
+#endif
+
+#if 0
 WRAPPER void CReplay::SaveReplayToHD(void) { EAXJMP(0x597330); }
+#else
+void CReplay::SaveReplayToHD(void)
+{
+	CFileMgr::SetDirMyDocuments();
+	int fw = CFileMgr::OpenFileForWriting("replay.rep");
+	if (fw < 0){
+		debug("Couldn't open replay.rep for writing");
+		CFileMgr::SetDir("");
+		return;
+	}
+	CFileMgr::Write(fw, "gta3_7f", sizeof("gta3_7f"));
+	int current;
+	for (current = 0; current < 8; current++)
+		if (BufferStatus[current] == REPLAYBUFFER_RECORD)
+			break;
+	int first;
+	for (first = (current + 1) % 8; ; first = (first + 1) % 8)
+		if (BufferStatus[first] == REPLAYBUFFER_RECORD || BufferStatus[first] == REPLAYBUFFER_PLAYBACK)
+			break;
+	for(int i = first;; i = (i + 1) % 8 ){
+		CFileMgr::Write(fw, (char*)Buffers[first], sizeof(Buffers[first]));
+		if (BufferStatus[i] == REPLAYBUFFER_RECORD)
+			break;
+	}
+	CFileMgr::CloseFile(fw);
+	CFileMgr::SetDir("");
+}
+#endif
+
+#if 0
 WRAPPER void PlayReplayFromHD(void) { EAXJMP(0x597420); }
+#else
+void PlayReplayFromHD(void)
+{
+	CFileMgr::SetDirMyDocuments();
+	int fr = CFileMgr::OpenFile("replay.rep", "rb");
+	if (fr < 0) {
+		debug("Couldn't open replay.rep for reading");
+		/* Forgot to SetDir? */
+		return;
+	}
+	CFileMgr::Read(fr, gString, 8);
+	if (strncmp(gString, "gta3_7f", sizeof("gta3_7f"))){
+		CFileMgr::CloseFile(fr);
+		debug("Wrong file type for replay");
+		CFileMgr::SetDir("");
+		return;
+	}
+	int slot;
+	for (slot = 0; CFileMgr::Read(fr, (char*)CReplay::Buffers[slot], sizeof(CReplay::Buffers[slot])); slot++)
+		CReplay::BufferStatus[slot] = CReplay::REPLAYBUFFER_PLAYBACK;
+	CReplay::BufferStatus[slot - 1] = CReplay::REPLAYBUFFER_RECORD;
+	while (slot < 8)
+		CReplay::BufferStatus[slot++] = CReplay::REPLAYBUFFER_UNUSED;
+	CFileMgr::CloseFile(fr);
+	CFileMgr::SetDir("");
+	CReplay::TriggerPlayback(CReplay::REPLAYCAMMODE_ASSTORED, 0.0f, 0.0f, 0.0f, false);
+	CReplay::bPlayingBackFromFile = true;
+	CReplay::bAllowLookAroundCam = true;
+	CReplay::StreamAllNecessaryCarsAndPeds();
+}
+#endif
+
+#if 0
 WRAPPER void CReplay::StreamAllNecessaryCarsAndPeds(void) { EAXJMP(0x597560); }
+#else
+void CReplay::StreamAllNecessaryCarsAndPeds(void)
+{
+	for (int slot = 0; slot < 8; slot++) {
+		if (BufferStatus[slot] == REPLAYBUFFER_UNUSED)
+			continue;
+		for (int offset = 0; Buffers[slot][offset] != REPLAYPACKET_END; offset += FindSizeOfPacket(Buffers[slot][offset])) {
+			switch (Buffers[slot][offset]) {
+			case REPLAYPACKET_VEHICLE:
+				CStreaming::RequestModel(((tVehicleUpdatePacket*)&Buffers[slot][offset])->mi, 0);
+				break;
+			case REPLAYPACKET_PED_HEADER:
+				CStreaming::RequestModel(((tPedHeaderPacket*)&Buffers[slot][offset])->mi, 0);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	CStreaming::LoadAllRequestedModels(false);
+}
+#endif
+
+#if 0
 WRAPPER void CReplay::FindFirstFocusCoordinate(CVector *coord) { EAXJMP(0x5975E0); }
+#else
+void CReplay::FindFirstFocusCoordinate(CVector *coord)
+{
+	*coord = CVector(0.0f, 0.0f, 0.0f);
+	for (int slot = 0; slot < 8; slot++) {
+		if (BufferStatus[slot] == REPLAYBUFFER_UNUSED)
+			continue;
+		for (int offset = 0; Buffers[slot][offset] != REPLAYPACKET_END; offset += FindSizeOfPacket(Buffers[slot][offset])) {
+			if (Buffers[slot][offset] == REPLAYPACKET_GENERAL) {
+				*coord = ((tGeneralPacket*)&Buffers[slot][offset])->player_pos;
+				return;
+			}
+		}
+	}
+}
+#endif
+
+#if 0
 WRAPPER bool CReplay::ShouldStandardCameraBeProcessed(void) { EAXJMP(0x597680); }
+#else
+bool CReplay::ShouldStandardCameraBeProcessed(void)
+{
+	if (Mode != MODE_PLAYBACK)
+		return true;
+	if (FramesActiveLookAroundCam || bPlayerInRCBuggy)
+		return false;
+	return FindPlayerVehicle() != nil;
+}
+#endif
+
+#if 0
 WRAPPER void CReplay::ProcessLookAroundCam(void) { EAXJMP(0x5976C0); }
+#else
+void CReplay::ProcessLookAroundCam(void)
+{
+	if (!bAllowLookAroundCam)
+		return;
+	float x_moved = CPad::NewMouseControllerState.x / 200.0f;
+	float y_moved = CPad::NewMouseControllerState.y / 200.0f;
+	if (x_moved > 0.01f || y_moved > 0.01f) {
+		if (FramesActiveLookAroundCam == 0)
+			fDistanceLookAroundCam = 9.0f;
+		FramesActiveLookAroundCam = 60;
+	}
+	if (bPlayerInRCBuggy)
+		FramesActiveLookAroundCam = 0;
+	if (!FramesActiveLookAroundCam)
+		return;
+	--FramesActiveLookAroundCam;
+	fBetaAngleLookAroundCam += x_moved;
+	if (CPad::NewMouseControllerState.LMB && CPad::NewMouseControllerState.RMB)
+		fDistanceLookAroundCam = max(3.0f, min(15.0f, fDistanceLookAroundCam + 2.0f * y_moved));
+	else
+		fAlphaAngleLookAroundCam = max(0.1f, min(1.5f, fAlphaAngleLookAroundCam + y_moved));
+	CVector camera_pt(
+		fDistanceLookAroundCam * sin(fBetaAngleLookAroundCam) * cos(fAlphaAngleLookAroundCam),
+		fDistanceLookAroundCam * cos(fBetaAngleLookAroundCam) * cos(fAlphaAngleLookAroundCam),
+		fDistanceLookAroundCam * sin(fAlphaAngleLookAroundCam)
+	);
+	CVector focus = CVector(CameraFocusX, CameraFocusY, CameraFocusZ);
+	camera_pt += focus;
+	CColPoint cp;
+	CEntity* pe = nil;
+	if (CWorld::ProcessLineOfSight(focus, camera_pt, cp, pe, true, false, false, false, false, true, true)){
+		camera_pt = cp.point;
+		CVector direction = focus - cp.point;
+		direction.Normalise();
+		camera_pt += direction / 4.0f;
+	}
+	CVector forward = focus - camera_pt;
+	forward.Normalise();
+	CVector right = CrossProduct(CVector(0.0f, 0.0f, 1.0f), forward);
+	right.Normalise();
+	CVector up = CrossProduct(forward, right);
+	up.Normalise();
+	*TheCamera.GetMatrix().GetForward() = forward;
+	*TheCamera.GetMatrix().GetUp() = up;
+	*TheCamera.GetMatrix().GetRight() = right;
+	*TheCamera.GetMatrix().GetPosition() = camera_pt;
+	RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
+	pm->pos = *(RwV3d*)TheCamera.GetMatrix().GetPosition();
+	pm->at = *(RwV3d*)TheCamera.GetMatrix().GetForward();
+	pm->up = *(RwV3d*)TheCamera.GetMatrix().GetUp();
+	pm->right = *(RwV3d*)TheCamera.GetMatrix().GetRight();
+	TheCamera.CalculateDerivedValues();
+	RwMatrixUpdate(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
+	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));
+}
+#endif
+
+#if 0
 WRAPPER size_t CReplay::FindSizeOfPacket(uint8 type) { EAXJMP(0x597CC0); }
+#else
+size_t CReplay::FindSizeOfPacket(uint8 type)
+{
+	switch (type) {
+	case REPLAYPACKET_END:			return 4;
+	case REPLAYPACKET_VEHICLE:		return sizeof(tVehicleUpdatePacket);
+	case REPLAYPACKET_PED_HEADER:	return sizeof(tPedHeaderPacket);
+	case REPLAYPACKET_PED_UPDATE:	return sizeof(tPedUpdatePacket);
+	case REPLAYPACKET_GENERAL:		return sizeof(tGeneralPacket);
+	case REPLAYPACKET_CLOCK:		return sizeof(tClockPacket);
+	case REPLAYPACKET_WEATHER:		return sizeof(tWeatherPacket);
+	case REPLAYPACKET_ENDOFFRAME:	return 4;
+	case REPLAYPACKET_TIMER:		return sizeof(tTimerPacket);
+	case REPLAYPACKET_BULLET_TRACES:return sizeof(tBulletTracePacket);
+	default: break;
+	}
+	return 0;
+}
+#endif
 
 #if 0
 WRAPPER void CReplay::Display(void) { EAXJMP(0x595EE0); }
 #else
 void CReplay::Display()
 {
-	if (CReplay::IsPlayingBack() && CTimer::GetFrameCounter() + 1 & 0x20) {
-		CFont::SetPropOn();
-		CFont::SetBackgroundOff();
-		CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
-		CFont::SetAlignment(ALIGN_LEFT);
-		CFont::SetColor(CRGBA(255, 255, 200, 200));
-		CFont::SetFontStyle(FONT_BANK);
+	static int counter = 0;
+	if (Mode == MODE_RECORD)
+		return;
+	counter = (counter + 1) % 65536;
+	if (counter & 0x20 == 0)
+		return;
+	CFont::SetPropOn();
+	CFont::SetBackgroundOff();
+	CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
+	CFont::SetAlignment(ALIGN_LEFT);
+	CFont::SetColor(CRGBA(255, 255, 200, 200));
+	CFont::SetFontStyle(FONT_BANK);
+	if (Mode == MODE_PLAYBACK)
 		CFont::PrintString(SCREEN_SCALE_X(63.5f), SCREEN_SCALE_Y(30.0f), TheText.Get("REPLAY"));
-	}
 }
 #endif
 
 STARTPATCHES
-InjectHook(0x592FC0, PrintElementsInPtrList, PATCH_JUMP);
-InjectHook(0x592FE0, CReplay::Init, PATCH_JUMP);
-InjectHook(0x593150, CReplay::DisableReplays, PATCH_JUMP);
-InjectHook(0x593160, CReplay::EnableReplays, PATCH_JUMP);
-InjectHook(0x593170, CReplay::Update, PATCH_JUMP);
-InjectHook(0x595B20, CReplay::FinishPlayback, PATCH_JUMP);
-InjectHook(0x594050, CReplay::ProcessPedUpdate, PATCH_JUMP);
-InjectHook(0x594D10, CReplay::ProcessCarUpdate, PATCH_JUMP);
-InjectHook(0x593BB0, CReplay::StoreDetailedPedAnimation, PATCH_JUMP);
-InjectHook(0x5944B0, CReplay::RetrieveDetailedPedAnimation, PATCH_JUMP);
-InjectHook(0x596030, CReplay::TriggerPlayback, PATCH_JUMP);
+InjectHook(0x592FE0, &CReplay::Init, PATCH_JUMP);
+InjectHook(0x593150, &CReplay::DisableReplays, PATCH_JUMP);
+InjectHook(0x593160, &CReplay::EnableReplays, PATCH_JUMP);
+InjectHook(0x593170, &CReplay::Update, PATCH_JUMP);
+InjectHook(0x595B20, &CReplay::FinishPlayback, PATCH_JUMP);
+InjectHook(0x595BD0, &CReplay::EmptyReplayBuffer, PATCH_JUMP);
+InjectHook(0x595EE0, &CReplay::Display, PATCH_JUMP);
+InjectHook(0x596030, &CReplay::TriggerPlayback, PATCH_JUMP);
+InjectHook(0x597560, &CReplay::StreamAllNecessaryCarsAndPeds, PATCH_JUMP);
+InjectHook(0x597680, &CReplay::ShouldStandardCameraBeProcessed, PATCH_JUMP);
 ENDPATCHES

@@ -48,6 +48,8 @@ struct CStoredDetailedAnimationState
 	uint16 aFlags2[6];
 };
 
+void PlayReplayFromHD(void);
+
 class CReplay
 {
 	enum {
@@ -244,6 +246,9 @@ private:
 	static float &CameraFocusY;
 	static float &CameraFocusZ;
 	static bool &bPlayerInRCBuggy;
+	static float &fDistanceLookAroundCam;
+	static float &fAlphaAngleLookAroundCam;
+	static float &fBetaAngleLookAroundCam;
 
 public:
 	static void Init(void);
@@ -260,7 +265,7 @@ public:
 	inline static bool IsPlayingBack() { return Mode == MODE_PLAYBACK; }
 	inline static bool IsPlayingBackFromFile() { return bPlayingBackFromFile; }
 
-//private:
+private:
 	static void RecordThisFrame(void);
 	static void StorePedUpdate(CPed *ped, int id);
 	static void StorePedAnimation(CPed *ped, CStoredAnimationState *state);
@@ -282,4 +287,7 @@ public:
 	static void FindFirstFocusCoordinate(CVector *coord);
 	static void ProcessLookAroundCam(void);
 	static size_t FindSizeOfPacket(uint8);
+
+	/* Absolute nonsense, but how could this function end up being outside of class? */
+	friend void PlayReplayFromHD(void); 
 };
