@@ -166,4 +166,4 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 #define BIT(num)                         (1<<(num))
 
 #define max(a, b)  (((a) > (b)) ? (a) : (b)) 
-#define min(a, b)  (((a) < (b)) ? (a) : (b)) 
+#define min(a, b)  (((a) < (b)) ? (a) : (b))

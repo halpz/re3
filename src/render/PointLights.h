@@ -26,8 +26,10 @@ public:
 		LIGHT_DIRECTIONAL,
 		LIGHT_DARKEN,	// no effects at all
 		// these have only fog, otherwise no difference?
-		LIGHT_FOGONLY_3,
-		LIGHT_FOGONLY_4,
+		// only used by CEntity::ProcessLightsForEntity it seems
+		// and there used together with fog type
+		LIGHT_FOGONLY_ALWAYS,
+		LIGHT_FOGONLY,
 	};
 	enum {
 		FOG_NONE,

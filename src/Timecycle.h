@@ -118,6 +118,7 @@ public:
 	static int GetSunCoronaGreen(void) { return m_nCurrentSunCoronaGreen; }
 	static int GetSunCoronaBlue(void) { return m_nCurrentSunCoronaBlue; }
 	static float GetSunSize(void) { return m_fCurrentSunSize; }
+	static float GetSpriteBrightness(void) { return m_fCurrentSpriteBrightness; }
 	static float GetFarClip(void) { return m_fCurrentFarClip; }
 	static float GetFogStart(void) { return m_fCurrentFogStart; }
 

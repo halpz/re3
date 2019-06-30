@@ -3,7 +3,6 @@
 #include "Camera.h"
 #include "Ped.h"
 #include "Pools.h"
-#include "Pickup.h"
 #include "Radar.h"
 #include "References.h"
 #include "Vehicle.h"

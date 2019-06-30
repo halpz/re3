@@ -315,6 +315,21 @@ enum
 	MI_TOYZ,
 	MI_GHOST,
 
+	MI_GRENADE = 170,
+	MI_AK47,
+	MI_BASEBALL_BAT,
+	MI_COLT,
+	MI_MOLOTOV,
+	MI_ROCKETLAUNCHER,
+	MI_SHOTGUN,
+	MI_SNIPER,
+	MI_UZI,
+	MI_MISSILE,
+	MI_M16,
+	MI_FLAMETHROWER,
+	MI_BOMB,
+	MI_FINGERS,
+
 	MI_CAR_DOOR = 190,
 	MI_CAR_BUMPER,
 	MI_CAR_PANEL,
@@ -376,4 +391,66 @@ inline bool
 IsPedModel(int16 id)
 {
 	return id >= 0 && id <= 89;
+}
+
+inline bool
+IsTreeModel(int16 id)
+{
+	return id == MI_TREE1 ||
+		id == MI_TREE2 ||
+		id == MI_TREE3 ||
+		id == MI_TREE4 ||
+		id == MI_TREE5 ||
+		id == MI_TREE6 ||
+		id == MI_TREE7 ||
+		id == MI_TREE8 ||
+		id == MI_TREE9 ||
+		id == MI_TREE10 ||
+		id == MI_TREE11 ||
+		id == MI_TREE12 ||
+		id == MI_TREE13 ||
+		id == MI_TREE14;
+}
+
+inline bool
+IsBannerModel(int16 id)
+{
+	return id == MI_CHINABANNER1 ||
+		id == MI_CHINABANNER2 ||
+		id == MI_CHINABANNER3 ||
+		id == MI_CHINABANNER4 ||
+		id == MI_CHINABANNER5 ||
+		id == MI_CHINABANNER6 ||
+		id == MI_CHINABANNER7 ||
+		id == MI_CHINABANNER8 ||
+		id == MI_CHINABANNER9 ||
+		id == MI_CHINABANNER10 ||
+		id == MI_CHINABANNER11 ||
+		id == MI_CHINABANNER12 ||
+		id == MI_ITALYBANNER1 ||
+		id == MI_CHINALANTERN;
+}
+inline bool
+IsPickupModel(int16 id)
+{
+	return id == MI_GRENADE ||
+		id == MI_AK47 ||
+		id == MI_BASEBALL_BAT ||
+		id == MI_COLT ||
+		id == MI_MOLOTOV ||
+		id == MI_ROCKETLAUNCHER ||
+		id == MI_SHOTGUN ||
+		id == MI_SNIPER ||
+		id == MI_UZI ||
+		id == MI_M16 ||
+		id == MI_FLAMETHROWER ||
+		id >= MI_M16 && id <= MI_FLAMETHROWER ||
+		id == MI_PICKUP_ADRENALINE ||
+		id == MI_PICKUP_BODYARMOUR ||
+		id == MI_PICKUP_INFO ||
+		id == MI_PICKUP_HEALTH ||
+		id == MI_PICKUP_BONUS ||
+		id == MI_PICKUP_BRIBE ||
+		id == MI_PICKUP_KILLFRENZY ||
+		id == MI_PICKUP_CAMERA;
 }

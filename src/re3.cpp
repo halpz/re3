@@ -188,6 +188,7 @@ DebugMenuPopulate(void)
 		DebugMenuEntrySetWrap(e, true);
 		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 3, weathers);
 		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddVar("Time & Weather", "Wind", (float*)&CWeather::Wind, nil, 0.1f, 0.0f, 1.0f);
 		DebugMenuAddVar("Time & Weather", "Time scale", (float*)0x8F2C20, nil, 0.1f, 0.0f, 10.0f);
 
 		DebugMenuAddCmd("Cheats", "Weapons", WeaponCheat);

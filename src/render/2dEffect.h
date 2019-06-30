@@ -4,19 +4,45 @@ enum {
 	EFFECT_ATTRACTOR
 };
 
+enum {
+	LIGHT_ON,
+	LIGHT_ON_NIGHT,
+	LIGHT_FLICKER,
+	LIGHT_FLICKER_NIGHT,
+	LIGHT_FLASH1,
+	LIGHT_FLASH1_NIGHT,
+	LIGHT_FLASH2,
+	LIGHT_FLASH2_NIGHT,
+	LIGHT_FLASH3,
+	LIGHT_FLASH3_NIGHT,
+	LIGHT_RANDOM_FLICKER,
+	LIGHT_RANDOM_FLICKER_NIGHT,
+	LIGHT_SPECIAL,
+	LIGHT_BRIDGE_FLASH1,
+	LIGHT_BRIDGE_FLASH2,
+};
+
+enum {
+	LIGHTFLAG_LOSCHECK = 1,
+	// same order as CPointLights flags, must start at 2
+	LIGHTFLAG_FOG_NORMAL = 2,	// can have light and fog
+	LIGHTFLAG_FOG_ALWAYS = 4,	// fog only
+	LIGHTFLAG_FOG = (LIGHTFLAG_FOG_NORMAL|LIGHTFLAG_FOG_ALWAYS)
+};
+
 class C2dEffect
 {
 public:
 	struct Light {
 		float dist;
-		float outerRange;
+		float range;	// of pointlight
 		float size;
-		float innerRange;
-		uint8 flash;
+		float shadowRange;
+		uint8 lightType;	// LIGHT_
 		uint8 roadReflection;
 		uint8 flareType;
 		uint8 shadowIntensity;
-		uint8 flags;
+		uint8 flags;		// LIGHTFLAG_
 		RwTexture *corona;
 		RwTexture *shadow;
 	};
