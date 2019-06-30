@@ -10,6 +10,14 @@
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 
 void
+cAudioManager::SetEntityStatus(int32 id, bool status)
+{
+	if(m_bIsInitialised && id >= 0 && id < 200) {
+		if(m_asAudioEntities[id].m_bIsUsed) { m_asAudioEntities[id].m_bStatus = status; }
+	}
+}
+
+void
 cAudioManager::PreTerminateGameSpecificShutdown()
 {
 	if(m_nBridgeEntity >= 0) {
@@ -2756,6 +2764,7 @@ cAudioManager::Service()
 }
 
 STARTPATCHES
+InjectHook(0x57A4C0, &cAudioManager::SetEntityStatus, PATCH_JUMP);
 InjectHook(0x569570, &cAudioManager::PreTerminateGameSpecificShutdown, PATCH_JUMP);
 InjectHook(0x57A400, &cAudioManager::DestroyEntity, PATCH_JUMP);
 InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);

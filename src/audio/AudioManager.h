@@ -216,6 +216,7 @@ public:
 	char field_19195;
 	int m_nTimeOfRecentCrime;
 
+	void SetEntityStatus(int32 id, bool status);
 	void PreTerminateGameSpecificShutdown();
 	void DestroyEntity(int32 id);
 	void PostTerminateGameSpecificShutdown();
