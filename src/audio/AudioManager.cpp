@@ -9,12 +9,12 @@
 
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 
-constexpr int totalAudioEntities = 200;
+constexpr int totalAudioEntitiesSlots = 200;
 
 void
 cAudioManager::SetEntityStatus(int32 id, bool status)
 {
-	if(m_bIsInitialised && id >= 0 && id < totalAudioEntities) {
+	if(m_bIsInitialised && id >= 0 && id < totalAudioEntitiesSlots) {
 		if(m_asAudioEntities[id].m_bIsUsed) { m_asAudioEntities[id].m_bStatus = status; }
 	}
 }
@@ -52,20 +52,44 @@ cAudioManager::PreTerminateGameSpecificShutdown()
 	}
 }
 
+int32
+cAudioManager::CreateEntity(int32 type, void *memory)
+{
+	if(!m_bIsInitialised) return -4;
+	if(!memory) return -2;
+	if(type >= TOTAL_AUDIO_TYPES) return -1;
+	for(uint32 i = 0; i < 200; i++) {
+		if(!m_asAudioEntities[i].m_bIsUsed) {
+			m_asAudioEntities[i].m_bIsUsed = true;
+			m_asAudioEntities[i].m_bStatus = 0;
+			m_asAudioEntities[i].m_nType = (eAudioType)type;
+			m_asAudioEntities[i].m_pEntity = memory;
+			m_asAudioEntities[i].m_awAudioEvent[0] = SOUND_TOTAL_PED_SOUNDS;
+			m_asAudioEntities[i].m_awAudioEvent[1] = SOUND_TOTAL_PED_SOUNDS;
+			m_asAudioEntities[i].m_awAudioEvent[2] = SOUND_TOTAL_PED_SOUNDS;
+			m_asAudioEntities[i].m_awAudioEvent[3] = SOUND_TOTAL_PED_SOUNDS;
+			m_asAudioEntities[i].field_24 = 0;
+			m_anAudioEntityIndices[m_nAudioEntitiesTotal++] = i;
+			return i;
+		}
+	}
+	return -3;
+}
+
 void
 cAudioManager::DestroyEntity(int32 id)
 {
-	if(m_bIsInitialised && id >= 0 && id < totalAudioEntities &&
+	if(m_bIsInitialised && id >= 0 && id < totalAudioEntitiesSlots &&
 	   m_asAudioEntities[id].m_bIsUsed) {
 		m_asAudioEntities[id].m_bIsUsed = 0;
-		for(i = 0; i < m_nAudioEntitiesTotal; ++i) {
+		for(uint32 i = 0; i < m_nAudioEntitiesTotal; ++i) {
 			if(id == m_anAudioEntityIndices[i]) {
-				if(i < totalAudioEntities - 1)
+				if(i < totalAudioEntitiesSlots - 1)
 					memmove(&m_anAudioEntityIndices[i],
 					        &m_anAudioEntityIndices[i + 1],
 					        4 * (m_nAudioEntitiesTotal - (i + 1)));
 				m_anAudioEntityIndices[--m_nAudioEntitiesTotal] =
-				    totalAudioEntities;
+				    totalAudioEntitiesSlots;
 				return;
 			}
 		}
@@ -2770,6 +2794,7 @@ cAudioManager::Service()
 STARTPATCHES
 InjectHook(0x57A4C0, &cAudioManager::SetEntityStatus, PATCH_JUMP);
 InjectHook(0x569570, &cAudioManager::PreTerminateGameSpecificShutdown, PATCH_JUMP);
+InjectHook(0x57A310, &cAudioManager::CreateEntity, PATCH_JUMP);
 InjectHook(0x57A400, &cAudioManager::DestroyEntity, PATCH_JUMP);
 InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);
 InjectHook(0x57AA00, &cAudioManager::SetDynamicAcousticModelingStatus, PATCH_JUMP);

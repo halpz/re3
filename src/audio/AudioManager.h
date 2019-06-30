@@ -76,7 +76,7 @@ class tAudioEntity
 public:
 	eAudioType m_nType;
 	void *m_pEntity;
-	char m_bIsUsed;
+	bool m_bIsUsed;
 	char m_bStatus;
 	int16 m_awAudioEvent[4];
 	char gap_18[2];
@@ -218,6 +218,7 @@ public:
 
 	void SetEntityStatus(int32 id, bool status);
 	void PreTerminateGameSpecificShutdown();
+	int32 CreateEntity(int32 type, void *memory);
 	void DestroyEntity(int32 id);
 	void PostTerminateGameSpecificShutdown();
 	bool IsAudioInitialised() const;
