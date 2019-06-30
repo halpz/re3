@@ -225,7 +225,8 @@ public:
 	void SetDynamicAcousticModelingStatus(bool status);
 	void GenerateIntegerRandomNumberTable();
 
-	void PlayerJustLeftCar(void);
+	void PlayerJustGotInCar();
+	void PlayerJustLeftCar();
 	void Service();
 	void GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample,
 	               uint32 maxOffset);

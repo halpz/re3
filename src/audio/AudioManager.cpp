@@ -116,7 +116,15 @@ void cAudioManager::SetDynamicAcousticModelingStatus(bool status)
 void
 cAudioManager::GenerateIntegerRandomNumberTable()
 {
-	for(int32 i = 0; i < 5; i++) { m_anRandomTable[i] = rand(); }
+    for(int32 i = 0; i < 5; i++) { m_anRandomTable[i] = rand(); }
+}
+
+bool bPlayerJustGotInCar = *(bool*)0x6508C4;
+
+void
+cAudioManager::PlayerJustGotInCar()
+{
+	if(m_bIsInitialised) { bPlayerJustGotInCar = true; }
 }
 
 void
@@ -2800,6 +2808,7 @@ InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JU
 InjectHook(0x57AA00, &cAudioManager::SetDynamicAcousticModelingStatus, PATCH_JUMP);
 InjectHook(0x57AA50, &cAudioManager::IsAudioInitialised, PATCH_JUMP);
 InjectHook(0x57C290, &cAudioManager::GenerateIntegerRandomNumberTable, PATCH_JUMP);
+InjectHook(0x56AD10, &cAudioManager::PlayerJustGotInCar, PATCH_JUMP);
 InjectHook(0x56AD20, &cAudioManager::PlayerJustLeftCar, PATCH_JUMP);
 InjectHook(0x570DB0, &cAudioManager::GetPhrase, PATCH_JUMP);
 
