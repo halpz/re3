@@ -10,6 +10,39 @@
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 
 void
+cAudioManager::PreTerminateGameSpecificShutdown()
+{
+	if(m_nBridgeEntity >= 0) {
+		DestroyEntity(m_nBridgeEntity);
+		m_nBridgeEntity = -5;
+	}
+	if(m_nPoliceChannelEntity >= 0) {
+		DestroyEntity(m_nPoliceChannelEntity);
+		m_nPoliceChannelEntity = -5;
+	}
+	if(m_nWaterCannonEntity >= 0) {
+		DestroyEntity(m_nWaterCannonEntity);
+		m_nWaterCannonEntity = -5;
+	}
+	if(m_nFireAudioEntity >= 0) {
+		DestroyEntity(m_nFireAudioEntity);
+		m_nFireAudioEntity = -5;
+	}
+	if(m_nCollisionEntity >= 0) {
+		DestroyEntity(m_nCollisionEntity);
+		m_nCollisionEntity = -5;
+	}
+	if(m_nFrontEndEntity >= 0) {
+		DestroyEntity(m_nFrontEndEntity);
+		m_nFrontEndEntity = -5;
+	}
+	if(m_nProjectileEntity >= 0) {
+		DestroyEntity(m_nProjectileEntity);
+		m_nProjectileEntity = -5;
+	}
+}
+
+void
 cAudioManager::DestroyEntity(int32 id)
 {
 	if(m_bIsInitialised && id >= 0 && id < 200 && m_asAudioEntities[id].m_bIsUsed) {
@@ -2723,6 +2756,7 @@ cAudioManager::Service()
 }
 
 STARTPATCHES
+InjectHook(0x569570, &cAudioManager::PreTerminateGameSpecificShutdown, PATCH_JUMP);
 InjectHook(0x57A400, &cAudioManager::DestroyEntity, PATCH_JUMP);
 InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);
 InjectHook(0x57AA00, &cAudioManager::SetDynamicAcousticModelingStatus, PATCH_JUMP);
