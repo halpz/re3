@@ -250,7 +250,7 @@ public:
 	float m_movedY;
 	float m_fRotationCur;
 	float m_fRotationDest;
-	uint32 m_headingRate;
+	float m_headingRate;
 	uint16 m_vehEnterType;
 	uint16 m_walkAroundType;
 	CEntity *m_pCurrentPhysSurface;
@@ -368,7 +368,7 @@ public:
 	void ClearAttack(void);
 	bool IsPedHeadAbovePos(float zOffset);
 	void RemoveWeaponModel(int modelId);
-	void SetCurrentWeapon(eWeaponType weaponType);
+	void SetCurrentWeapon(uint32 weaponType);
 	bool SelectGunIfArmed(void);
 	void Duck(void);
 	void ClearDuck(void);
@@ -382,7 +382,7 @@ public:
 	bool IsPointerValid(void);
 	void SortPeds(CPed**, int, int);
 	void BuildPedLists(void);
-	void GiveWeapon(eWeaponType weaponType, int ammo);
+	void GiveWeapon(eWeaponType weaponType, uint32 ammo);
 	void SetPedStats(ePedStats);
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
 	static void GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float seatPosMult);
@@ -416,10 +416,10 @@ public:
 	static void PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 
-	bool HasWeapon(eWeaponType weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
-	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
-	CWeapon* GetWeapon(uint32 weaponType) { return &m_weapons[weaponType]; }
-	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
+	inline bool HasWeapon(uint32 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
+	inline CWeapon *GetWeapon(uint32 weaponType) { return &m_weapons[weaponType]; }
+	inline CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
+	inline RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
 
 	// to make patching virtual functions possible
 	void SetModelIndex_(uint32 mi) { CPed::SetModelIndex(mi); }
