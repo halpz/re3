@@ -12,6 +12,24 @@ cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 
 constexpr int totalAudioEntitiesSlots = 200;
 
+int32
+cAudioManager::RandomDisplacement(uint32 seed)
+{
+	int32 value;
+
+	static bool bIsEven = true;
+	static uint8 base = 0;
+
+	if(!seed) return 0;
+
+	value = m_anRandomTable[(base + seed) % 5] % seed;
+	base += value;
+
+	if(value % 2) { bIsEven = !bIsEven; }
+	if(!bIsEven) value = -value;
+	return value;
+}
+
 void
 cAudioManager::ReleaseDigitalHandle()
 {
@@ -2814,6 +2832,7 @@ cAudioManager::Service()
 }
 
 STARTPATCHES
+InjectHook(0x57AF90, &cAudioManager::RandomDisplacement, PATCH_JUMP);
 
 InjectHook(0x57A9E0, &cAudioManager::ReleaseDigitalHandle, PATCH_JUMP);
 InjectHook(0x57A9F0, &cAudioManager::RequireDigitalHandle, PATCH_JUMP);

@@ -216,6 +216,8 @@ public:
 	char field_19195;
 	int m_nTimeOfRecentCrime;
 
+	int32 RandomDisplacement(uint32 seed);
+
 	void ReleaseDigitalHandle();
 	void RequireDigitalHandle();
 	void SetDynamicAcousticModelingStatus(bool status);
