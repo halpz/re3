@@ -27,6 +27,7 @@ public:
 	LimbOrientation m_lowerArmOrient;
 	int32 m_flags;
 
+	CPedIK(CPed *ped);
 	bool PointGunInDirection(float phi, float theta);
 	bool PointGunAtPosition(CVector *position);
 	void GetComponentPosition(RwV3d *pos, PedNode node);

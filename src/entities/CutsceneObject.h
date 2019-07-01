@@ -7,12 +7,12 @@ class CCutsceneObject : public CObject
 public:
 	CCutsceneObject(void);
 
-	void SetModelIndex(uint32 id);
-	void ProcessControl(void);
-	void PreRender(void);
-	void Render(void);
-	bool SetupLighting(void);
-	void RemoveLighting(bool reset);
+	virtual void SetModelIndex(uint32 id);
+	virtual void ProcessControl(void);
+	virtual void PreRender(void);
+	virtual void Render(void);
+	virtual bool SetupLighting(void);
+	virtual void RemoveLighting(bool reset);
 
 	void dtor(void) { this->CCutsceneObject::~CCutsceneObject(); }
 	void SetModelIndex_(uint32 id) { CCutsceneObject::SetModelIndex(id); }

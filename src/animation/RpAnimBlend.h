@@ -24,6 +24,7 @@ void RpAnimBlendClumpRemoveAllAssociations(RpClump *clump);
 void RpAnimBlendClumpRemoveAssociations(RpClump *clump, uint32 mask);
 void RpAnimBlendClumpInit(RpClump *clump);
 bool RpAnimBlendClumpIsInitialized(RpClump *clump);
+void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** frames);
 AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, const char *name);
 void FillFrameArrayCallBack(AnimBlendFrameData *frame, void *arg);
 CAnimBlendAssociation *RpAnimBlendClumpGetAssociation(RpClump *clump, uint32 id);

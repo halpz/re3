@@ -65,12 +65,13 @@ public:
 	~CPhysical(void);
 
 	// from CEntity
-	void Add(void);
-	void Remove(void);
-	CRect GetBoundRect(void);
-	void ProcessControl(void);
-
+	virtual void Add(void);
+	virtual void Remove(void);
+	virtual CRect GetBoundRect(void);
+	virtual void ProcessControl(void);
 	virtual int32 ProcessEntityCollision(CEntity *ent, CColPoint *point);
+	virtual void ProcessShift(void);
+	virtual void ProcessCollision(void);
 
 	void RemoveAndAdd(void);
 	void AddToMovingList(void);
@@ -130,8 +131,6 @@ public:
 	bool ProcessCollisionSectorList(CPtrList *lists);
 	bool CheckCollision(void);
 	bool CheckCollision_SimpleCar(void);
-	void ProcessShift(void);
-	void ProcessCollision(void);
 
 	// to make patching virtual functions possible
 	void dtor(void) { this->CPhysical::~CPhysical(); }

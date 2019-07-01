@@ -2,13 +2,18 @@
 #include "patcher.h"
 #include "CivilianPed.h"
 
-CCivilianPed::CCivilianPed(int pedtype, int mi)
+WRAPPER void CCivilianPed::ProcessControl(void) { EAXJMP(0x4BFFE0); }
+
+CCivilianPed::CCivilianPed(int pedtype, int mi) : CPed(pedtype)
 {
-	ctor(pedtype, mi);
+	CPed::SetModelIndex(mi);
+	for (int i = 0; i < 10; i++)
+	{
+		m_nearPeds[i] = nil;
+	}
 }
 
-WRAPPER CCivilianPed* CCivilianPed::ctor(int pedtype, int mi) { EAXJMP(0x4BFF30); }
-
 STARTPATCHES
+	InjectHook(0x4BFF30, &CCivilianPed::ctor, PATCH_JUMP);
 	InjectHook(0x4BFFC0, &CCivilianPed::dtor, PATCH_JUMP);
 ENDPATCHES

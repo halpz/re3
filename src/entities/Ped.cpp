@@ -19,9 +19,30 @@
 #include "CullZones.h"
 #include "Population.h"
 
+WRAPPER void CPed::QuitEnteringCar() { EAXJMP(0x4E0E00); }
+WRAPPER void CPed::KillPedWithCar(CVehicle* veh, float impulse) { EAXJMP(0x4EC430); }
+WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
+WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4D37D0); }
+WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
+WRAPPER void CPed::RestorePreviousState(void) { EAXJMP(0x4C5E30); }
+WRAPPER void CPed::ClearAttack(void) { EAXJMP(0x4E6790); }
+WRAPPER void CPed::PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation* dragAssoc, void* arg) { EAXJMP(0x4E2480); }
+WRAPPER void CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation* dragAssoc, void* arg) { EAXJMP(0x4E2920); }
+WRAPPER void CPed::SetPedPositionInCar(void) { EAXJMP(0x4D4970); }
+WRAPPER void CPed::ProcessControl(void) { EAXJMP(0x4C8910); }
+WRAPPER void CPed::Teleport(CVector) { EAXJMP(0x4D3E70); }
+WRAPPER void CPed::PreRender(void) { EAXJMP(0x4CFDD0); }
+WRAPPER void CPed::Render(void) { EAXJMP(0x4D03F0); }
+WRAPPER bool CPed::SetupLighting(void) { EAXJMP(0x4A7D30); }
+WRAPPER void CPed::RemoveLighting(bool) { EAXJMP(0x4A7DC0); }
+WRAPPER int32 CPed::ProcessEntityCollision(CEntity*, CColPoint*) { EAXJMP(0x4CBB30); }
+WRAPPER void CPed::SetMoveAnim(void) { EAXJMP(0x4C5A40); }
+
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
 bool &CPed::bPedCheat3 = *(bool*)0x95CD59;
+
+uint16 &CPed::distanceMultToCountPedNear = *(uint16*)0x5F8C98;
 
 CVector &CPed::offsetToOpenRegularCarDoor = *(CVector*)0x62E030;
 CVector &CPed::offsetToOpenLowCarDoor = *(CVector*)0x62E03C;
@@ -66,7 +87,8 @@ CPed::~CPed(void)
 	DMAudio.DestroyEntity(m_audioEntityId);
 }
 
-void CPed::FlagToDestroyWhenNextProcessed(void)
+void
+CPed::FlagToDestroyWhenNextProcessed(void)
 {
 	bRemoveFromWorld = true;
 	if (!bInVehicle || !m_pMyVehicle)
@@ -86,17 +108,6 @@ void CPed::FlagToDestroyWhenNextProcessed(void)
 		m_nPedState = PED_NONE;
 	m_pVehicleAnim = nil;
 }
-
-WRAPPER void CPed::QuitEnteringCar() { EAXJMP(0x4E0E00); }
-WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
-WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
-WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4D37D0); }
-WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
-WRAPPER void CPed::RestorePreviousState(void) { EAXJMP(0x4C5E30); }
-WRAPPER void CPed::ClearAttack(void) { EAXJMP(0x4E6790); }
-WRAPPER void CPed::PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *dragAssoc, void *arg) { EAXJMP(0x4E2480); }
-WRAPPER void CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *dragAssoc, void *arg) { EAXJMP(0x4E2920); }
-WRAPPER void CPed::SetPedPositionInCar(void) { EAXJMP(0x4D4970); }
 
 static char ObjectiveText[34][28] = {
 	"No Obj",
@@ -252,6 +263,243 @@ static char WaitStateText[21][16] = {
 	"Play Chat",
 	"Finish Flee",
 };
+
+CPed::CPed(uint32 pedType) : m_pedIK(this)
+{
+	m_type = ENTITY_TYPE_PED;
+	bPedPhysics = true;
+	bUseCollisionRecords = true;
+
+	m_vecAnimMoveDelta.x = 0.0;
+	m_vecAnimMoveDelta.y = 0.0;
+	m_fHealth = 100.0f;
+	m_fArmour = 0.0f;
+	m_nPedType = pedType;
+	field_520 = 0;
+	m_talkTimer = 0;
+	m_talkTypeLast = 167;
+	m_talkType = 167;
+	m_objective = 0;
+	m_prevObjective = 0;
+	m_nCreatedBy = 1;
+	field_180 = 0;
+	m_field_16C = nil;
+	field_170 = 0;
+	bInVehicle = 0;
+	m_pMyVehicle = nil;
+	m_pVehicleAnim = nil;
+	m_vecOffsetSeek.x = 0.0;
+	m_vecOffsetSeek.y = 0.0;
+	m_vecOffsetSeek.z = 0.0;
+	m_pedFormation = 0;
+	m_lastThreatTimer = 0;
+	m_nPedStateTimer = 0;
+	m_actionX = 0;
+	m_actionY = 0;
+	m_phoneTalkTimer = 0;
+	m_stateUnused = 0;
+	m_leaveCarTimer = 0;
+	m_getUpTimer = 0;
+	m_attackTimer = 0;
+	m_timerUnused = 0;
+	m_lookTimer = 0;
+	m_standardTimer = 0;
+	m_lastHitTime = 0;
+	m_hitRecoverTimer = 0;
+	field_4E8 = 0;
+	m_movedX = 0;
+	m_movedY = 0;
+	m_fRotationCur = 0.0f;
+	m_headingRate = 15.0f;
+	m_fRotationDest = 0.0f;
+	m_vehEnterType = VEHICLE_ENTER_FRONT_LEFT;
+	m_walkAroundType = 0;
+	m_pCurrentPhysSurface = nil;
+	m_vecOffsetFromPhysSurface = CVector(0.0f, 0.0f, 0.0f);
+	m_pSeekTarget = nil;
+	m_vecSeekVehicle = CVector(0.0f, 0.0f, 0.0f);
+	m_wepSkills = 0;
+	field_318 = 1.0f;
+	field_31C = 0;
+	m_phoneId = -1;
+	m_lastAccident = 0;
+	m_fleeFrom = nil;
+	m_fleeFromPosX = 0;
+	m_fleeFromPosY = 0;
+	m_fleeTimer = 0;
+	m_vecSeekPosEx = CVector(0.0f, 0.0f, 0.0f);
+	m_seekExAngle = 0.0f;
+	m_nWaitState = 0;
+	m_nWaitTimer = 0;
+	m_pCollidingEntity = nil;
+	m_nPedState = PED_IDLE;
+	m_nLastPedState = PED_NONE;
+	m_nMoveState = 1;
+	m_nStoredActionState = 0;
+	m_pFire = nil;
+	m_pPointGunAt = nil;
+	m_pLookTarget = 0;
+	m_fLookDirection = 0.0f;
+	m_pCurSurface = 0;
+	m_targetUnused = nil;
+	m_nPathNodes = 0;
+	m_nCurPathNode = 0;
+	m_nPathState = 0;
+	m_pNextPathNode = nil;
+	m_pLastPathNode = nil;
+	m_routeLastPoint = -1;
+	m_routePoints = 0;
+	m_routePos = 0;
+	m_routeType = 0;
+	m_bodyPartBleeding = -1;
+
+	m_fMass = 70.0f;
+	m_fTurnMass = 100.0f;
+	m_fAirResistance = 0.4f / m_fMass;
+	m_fElasticity = 0.05f;
+
+	bIsStanding = false;
+	m_ped_flagA2 = false;
+	m_ped_flagA4 = false;
+	bIsPointingGunAt = false;
+	bIsLooking = false;
+	m_ped_flagA20 = false;
+	bIsRestoringLook = false;
+	bIsAimingGun = false;
+
+	bIsRestoringGun = false;
+	bCanPointGunAtTarget = false;
+	m_ped_flagB4 = false;
+	m_ped_flagB8 = false;
+	m_ped_flagB10 = false;
+	m_ped_flagB20 = false;
+	m_ped_flagB40 = false;
+	m_ped_flagB80 = false;
+
+	m_ped_flagC1 = false;
+	m_ped_flagC2 = true;
+	m_ped_flagC4 = true;
+	m_ped_flagC8 = false;
+	m_ped_flagC10 = false;
+	m_ped_flagC20 = false;
+	m_ped_flagC40 = false;
+	m_ped_flagC80 = false;
+
+	m_ped_flagD1 = false;
+	m_ped_flagD2 = false;
+	m_ped_flagD4 = false;
+	m_ped_flagD8 = false;
+	m_ped_flagD10 = false;
+	m_ped_flagD20 = false;
+	m_ped_flagD40 = false;
+	m_ped_flagD80 = false;
+
+	m_ped_flagE1 = false;
+	m_ped_flagE2 = false;
+	m_ped_flagE4 = false;
+	m_ped_flagE8 = false;
+	bCantFireBecauseCrouched = false;
+	m_ped_flagE20 = false;
+	bDoBloodyFootprints = false;
+	m_ped_flagE80 = false;
+
+	m_ped_flagF1 = false;
+	m_ped_flagF2 = false;
+	m_ped_flagF4 = false;
+	m_ped_flagF8 = false;
+	m_ped_flagF10 = false;
+	m_ped_flagF20 = false;
+	m_ped_flagF40 = false;
+	m_ped_flagF80 = false;
+
+	m_ped_flagG1 = false;
+	m_ped_flagG2 = true;
+	m_ped_flagG4 = false;
+	m_ped_flagG8 = false;
+	m_ped_flagG10 = false;
+	m_ped_flagG20 = false;
+	m_ped_flagG40 = false;
+	m_ped_flagG80 = false;
+
+	m_ped_flagH1 = false;
+	m_ped_flagH2 = false;
+	m_ped_flagH4 = false;
+	m_ped_flagH8 = false;
+	m_ped_flagH10 = false;
+	m_ped_flagH20 = false;
+	m_ped_flagH40 = false;
+	m_ped_flagH80 = false;
+
+	m_ped_flagI1 = false;
+	m_ped_flagI2 = false;
+	m_ped_flagI4 = false;
+	bRecordedForReplay = false;
+	m_ped_flagI10 = false;
+
+	if ((CGeneral::GetRandomNumber() & 3) == 0)
+		m_ped_flagD1 = true;
+
+	m_audioEntityId = DMAudio.CreateEntity(0, this);
+	DMAudio.SetEntityStatus(m_audioEntityId, 1);
+	m_fearFlags = CPedType::GetThreats(m_nPedType);
+	m_threatEntity = nil;
+	m_eventOrThread = CVector2D(0.0f, 0.0f);
+	m_pEventEntity = nil;
+	m_fAngleToEvent = 0.0f;
+	m_numNearPeds = 0;
+
+	for (int i = 0; i < 10; i++)
+	{
+		m_nearPeds[i] = nil;
+		if (i < 8) {
+			m_pPathNodesStates[i] = nil;
+		}
+	}
+	m_maxWeaponTypeAllowed = 0;
+	m_currentWeapon = 0;
+	m_storedWeapon = NO_STORED_WEAPON;
+
+	for(int i = 0; i < NUM_PED_WEAPONTYPES; i++)
+	{
+		GetWeapon(i)->m_eWeaponType = WEAPONTYPE_UNARMED;
+		GetWeapon(i)->m_eWeaponState = WEAPONSTATE_READY;
+		GetWeapon(i)->m_nAmmoInClip = 0;
+		GetWeapon(i)->m_nAmmoTotal = 0;
+		GetWeapon(i)->m_nTimer = 0;
+	}
+
+	m_lastHitState = 0;
+	GiveWeapon(WEAPONTYPE_UNARMED, 0);
+	m_wepAccuracy = 60;
+	m_lastWepDam = -1;
+	m_collPoly.valid = false;
+	m_fCollisionSpeed = 0.0f;
+	m_wepModelID = -1;
+	CPopulation::UpdatePedCount(m_nPedType, false);
+}
+
+void
+CPed::GiveWeapon(eWeaponType weaponType, int ammo)
+{
+	CWeapon *weapon = GetWeapon(weaponType);
+	if (HasWeapon(weaponType))
+	{
+		if (ammo > 99999)
+			weapon->m_nAmmoTotal = 99999;
+		else
+			weapon->m_nAmmoTotal = ammo;
+
+		weapon->Reload();
+	}
+	else
+	{
+		weapon->Initialise(weaponType, ammo);
+		// TODO: It seems game uses this as both weapon count and max WeaponType we have, which is ofcourse erroneous.
+		m_maxWeaponTypeAllowed++;
+	}
+	if (weapon->m_eWeaponState == WEAPONSTATE_OUT_OF_AMMO)
+		weapon->m_eWeaponState = WEAPONSTATE_READY;
+}
 
 static RwObject*
 RemoveAllModelCB(RwObject *object, void *data)
@@ -787,7 +1035,7 @@ CPed::Attack(void)
 
 		if (weaponAnimTime <= delayBetweenAnimAndFire || weaponAnimTime - weaponAnimAssoc->timeStep > delayBetweenAnimAndFire || !weaponAnimAssoc->IsRunning()) {
 			if (weaponAnimAssoc->speed < 1.0f)
-				weaponAnimAssoc->speed = 1.0;
+				weaponAnimAssoc->speed = 1.0f;
 
 		} else {
 			firePos = ourWeapon->m_vecFireOffset;
@@ -871,7 +1119,7 @@ CPed::Attack(void)
 		}
 		animLoopEnd = ourWeapon->m_fAnimLoopEnd;
 		if (ourWeaponFire == WEAPON_FIRE_MELEE && weaponAnimAssoc->animId == ourWeapon->m_Anim2ToPlay)
-			animLoopEnd = 0.56f;
+			animLoopEnd = 3.4f/6.0f;
 
 		weaponAnimTime = weaponAnimAssoc->currentTime;
 
@@ -986,8 +1234,8 @@ CPed::SelectGunIfArmed(void)
 
 	for (int i = 0; i < m_maxWeaponTypeAllowed; i++) {
 
-		if (m_weapons[i].m_nAmmoTotal > 0) {
-			weaponType = m_weapons[i].m_eWeaponType;
+		if (GetWeapon(i)->m_nAmmoTotal > 0) {
+			weaponType = GetWeapon(i)->m_eWeaponType;
 
 			if (weaponType >= WEAPONTYPE_COLT45 && weaponType != WEAPONTYPE_M16 && weaponType <= WEAPONTYPE_FLAMETHROWER) {
 				SetCurrentWeapon(weaponType);
@@ -1659,6 +1907,154 @@ CPed::PlayFootSteps(void)
 	}
 }
 
+bool
+CPed::IsPointerValid(void)
+{
+	int8 pedIndex = CPools::GetPedPool()->GetIndex(this) >> 8;
+	if (pedIndex < 0 || pedIndex >= NUMPEDS)
+		return false;
+
+	if (m_entryInfoList.first || FindPlayerPed() == this)
+		return true;
+
+	return false;
+}
+
+// Binary insertion sort
+void
+CPed::SortPeds(CPed** list, int min, int max)
+{
+	if (min >= max)
+		return;
+
+	CVector leftDiff, rightDiff;
+	CVector middleDiff = GetPosition() - list[(max + min) / 2]->GetPosition();
+	float middleDist = middleDiff.Magnitude();
+
+	int left = max;
+	int right;
+	for(right = min; right <= left; )
+	{
+		// Those 1.0s are to make sure loop always run for first time.
+		for (float rightDist = middleDist-1.0f; middleDist > rightDist; right++)
+		{
+			rightDiff = GetPosition() - list[right]->GetPosition();
+			rightDist = rightDiff.Magnitude();
+		}
+		right--;
+
+		for (float leftDist = middleDist+1.0f; middleDist < leftDist; left--)
+		{
+			leftDiff = GetPosition() - list[left]->GetPosition();
+			leftDist = leftDiff.Magnitude();
+		}
+		left++;
+
+		if (right <= left)
+		{
+			CPed *ped = list[right];
+			list[right] = list[left];
+			list[left] = ped;
+			right++;
+			left--;
+		}
+	}
+	SortPeds(list, min, left);
+	SortPeds(list, right, max);
+}
+
+void
+CPed::BuildPedLists(void)
+{
+	static CPed* unsortedNearPeds[10];
+	static uint16 nextNearPedSlot;
+
+	if ((CTimer::GetFrameCounter() + m_randomSeed) & 15) {
+
+		for(int i = 0; i < 10; ) {
+			if (m_nearPeds[i]) {
+				if (m_nearPeds[i]->IsPointerValid()) {
+					float distSqr = (GetPosition() - m_nearPeds[i]->GetPosition()).MagnitudeSqr2D();
+					if (distSqr < 900.0f) {
+						i++;
+						continue;
+					}
+				}
+
+				// If we arrive here, the ped we're checking isn't "near", so we should remove it.
+				for (int j = i; j < 9; j++) {
+					m_nearPeds[j] = m_nearPeds[j + 1];
+					m_nearPeds[j + 1] = nil;
+				}
+				// Above loop won't work when it's 9, so we need to empty slot 9.
+				m_nearPeds[9] = nil;
+				m_numNearPeds--;
+			} else
+				i++;
+		}
+	} else {
+		CVector centre = CEntity::GetBoundCentre();
+		CRect rect(
+			(centre.x - 20.0f) * 0.025f + 50.0f,
+			(centre.y - 20.0f) * 0.025f + 50.0f,
+			(centre.x + 20.0f) * 0.025f + 50.0f,
+			(centre.y + 20.0f) * 0.025f + 50.0f);
+
+		nextNearPedSlot = 0;
+		for(int y = rect.top; y <= rect.bottom; y++)
+		{
+			for(int x = rect.left; x <= rect.right; x++)
+			{
+				for (CPtrNode *pedPtrNode = CWorld::GetSector(x,y)->m_lists[ENTITYLIST_PEDS].first; pedPtrNode; pedPtrNode = pedPtrNode->next)
+				{
+					CPed *ped = (CPed*)pedPtrNode->item;
+					if (ped != this && !ped->bInVehicle)
+					{
+						float dist = (ped->GetPosition() - GetPosition()).Magnitude2D();
+						if (distanceMultToCountPedNear * 30.0f > dist)
+						{
+							unsortedNearPeds[nextNearPedSlot] = ped;
+							nextNearPedSlot++;
+						}
+					}
+				}
+			}
+		}
+		unsortedNearPeds[nextNearPedSlot] = nil;
+		SortPeds(unsortedNearPeds, 0, nextNearPedSlot - 1);
+		for (m_numNearPeds = 0; m_numNearPeds < 10; m_numNearPeds++)
+		{
+			CPed *ped = unsortedNearPeds[m_numNearPeds];
+			if (!ped)
+				break;
+
+			m_nearPeds[m_numNearPeds] = ped;
+		}
+		for (int pedToClear = m_numNearPeds; pedToClear < 10; pedToClear++)
+			m_nearPeds[pedToClear] = nil;
+	}
+}
+
+void
+CPed::SetPedStats(ePedStats pedStat)
+{
+	m_pedStats = CPedStats::ms_apPedStats[pedStat];
+}
+
+void
+CPed::SetModelIndex(uint32 mi)
+{
+	CEntity::SetModelIndex(mi);
+	RpAnimBlendClumpInit((RpClump*) m_rwObject);
+	RpAnimBlendClumpFillFrameArray((RpClump*) m_rwObject, m_pFrames);
+	CPedModelInfo *modelInfo = (CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex);
+	SetPedStats(static_cast<ePedStats>(modelInfo->m_pedStatType));
+	m_headingRate = m_pedStats->m_headingChangeRate;
+	m_animGroup = static_cast<AssocGroupId>(modelInfo->m_animGroup);
+	CAnimManager::AddAnimation((RpClump*) m_rwObject, m_animGroup, ANIM_IDLE_STANCE);
+	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity = (CVector*) &m_vecAnimMoveDelta;
+}
+
 WRAPPER void CPed::PedGetupCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE810); }
 WRAPPER void CPed::PedStaggerCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8D0); }
 WRAPPER void CPed::PedEvadeCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D36E0); }
@@ -1684,6 +2080,7 @@ WRAPPER void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4
 WRAPPER void CPed::RestoreHeadingRateCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D6550); }
 
 STARTPATCHES
+	InjectHook(0x4C41C0, &CPed::ctor, PATCH_JUMP);
 	InjectHook(0x4C50D0, &CPed::dtor, PATCH_JUMP);
 	InjectHook(0x4CF8F0, &CPed::AddWeaponModel, PATCH_JUMP);
 	InjectHook(0x4C6AA0, &CPed::AimGun, PATCH_JUMP);
@@ -1714,4 +2111,9 @@ STARTPATCHES
 	InjectHook(0x4E1A30, (void (*)(CVector*, CVehicle*, uint32)) CPed::GetPositionToOpenCarDoor, PATCH_JUMP);
 	InjectHook(0x4DF940, &CPed::LineUpPedWithCar, PATCH_JUMP);
 	InjectHook(0x4CC6C0, &CPed::PlayFootSteps, PATCH_JUMP);
+	InjectHook(0x4C5350, &CPed::BuildPedLists, PATCH_JUMP);
+	InjectHook(0x4CF9B0, &CPed::GiveWeapon, PATCH_JUMP);
+	InjectHook(0x4C5330, &CPed::SetPedStats, PATCH_JUMP);
+	InjectHook(0x4C52A0, &CPed::SetModelIndex_, PATCH_JUMP);
+	InjectHook(0x4D6570, &CPed::FlagToDestroyWhenNextProcessed_, PATCH_JUMP);
 ENDPATCHES

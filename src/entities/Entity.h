@@ -95,7 +95,7 @@ public:
 	CReference *m_pFirstReference;
 
 	CEntity(void);
-	~CEntity(void);
+	virtual ~CEntity(void);
 
 	virtual void Add(void);
 	virtual void Remove(void);
