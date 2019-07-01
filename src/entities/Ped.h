@@ -382,7 +382,7 @@ public:
 	bool IsPointerValid(void);
 	void SortPeds(CPed**, int, int);
 	void BuildPedLists(void);
-	void GiveWeapon(eWeaponType weaponType, uint32 ammo);
+	uint32 GiveWeapon(eWeaponType weaponType, uint32 ammo);
 	void SetPedStats(ePedStats);
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
 	static void GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float seatPosMult);
@@ -416,8 +416,8 @@ public:
 	static void PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 
-	inline bool HasWeapon(uint32 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
-	inline CWeapon *GetWeapon(uint32 weaponType) { return &m_weapons[weaponType]; }
+	inline bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
+	inline CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
 	inline CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	inline RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
 

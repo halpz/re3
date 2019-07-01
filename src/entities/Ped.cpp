@@ -435,6 +435,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagI4 = false;
 	bRecordedForReplay = false;
 	m_ped_flagI10 = false;
+#ifdef KANGAROO_CHEAT
+	m_ped_flagI80 = false;
+#endif
 
 	if ((CGeneral::GetRandomNumber() & 3) == 0)
 		m_ped_flagD1 = true;
@@ -461,12 +464,12 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 
 	for(int i = 0; i < NUM_PED_WEAPONTYPES; i++)
 	{
-		CWeapon *weapon = GetWeapon(i);
-		weapon->m_eWeaponType = WEAPONTYPE_UNARMED;
-		weapon->m_eWeaponState = WEAPONSTATE_READY;
-		weapon->m_nAmmoInClip = 0;
-		weapon->m_nAmmoTotal = 0;
-		weapon->m_nTimer = 0;
+		CWeapon &weapon = GetWeapon(i);
+		weapon.m_eWeaponType = WEAPONTYPE_UNARMED;
+		weapon.m_eWeaponState = WEAPONSTATE_READY;
+		weapon.m_nAmmoInClip = 0;
+		weapon.m_nAmmoTotal = 0;
+		weapon.m_nTimer = 0;
 	}
 
 	m_lastHitState = 0;
@@ -479,23 +482,27 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	CPopulation::UpdatePedCount(m_nPedType, false);
 }
 
-void
+uint32
 CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo)
 {
-	if (HasWeapon(weaponType)) {
-		if (ammo > 99999)
-			m_weapons[weaponType].m_nAmmoTotal = 99999;
-		else
-			m_weapons[weaponType].m_nAmmoTotal = ammo;
+	CWeapon &weapon = GetWeapon(weaponType);
 
-		m_weapons[weaponType].Reload();
+	if (HasWeapon(weaponType)) {
+		if (weapon.m_nAmmoTotal + ammo > 99999)
+			weapon.m_nAmmoTotal = 99999;
+		else
+			weapon.m_nAmmoTotal += ammo;
+
+		weapon.Reload();	
 	} else {
-		m_weapons[weaponType].Initialise(weaponType, ammo);
+		weapon.Initialise(weaponType, ammo);
 		// TODO: It seems game uses this as both weapon count and max WeaponType we have, which is ofcourse erroneous.
 		m_maxWeaponTypeAllowed++;
 	}
-	if (m_weapons[weaponType].m_eWeaponState == WEAPONSTATE_OUT_OF_AMMO)
-		m_weapons[weaponType].m_eWeaponState = WEAPONSTATE_READY;
+	if (weapon.m_eWeaponState == WEAPONSTATE_OUT_OF_AMMO)
+		weapon.m_eWeaponState = WEAPONSTATE_READY;
+
+	return weaponType;
 }
 
 static RwObject*
@@ -1227,8 +1234,8 @@ bool
 CPed::SelectGunIfArmed(void)
 {
 	for (int i = 0; i < m_maxWeaponTypeAllowed; i++) {
-		if (GetWeapon(i)->m_nAmmoTotal > 0) {
-			eWeaponType weaponType = GetWeapon(i)->m_eWeaponType;
+		if (GetWeapon(i).m_nAmmoTotal > 0) {
+			eWeaponType weaponType = GetWeapon(i).m_eWeaponType;
 			if (weaponType >= WEAPONTYPE_COLT45 && weaponType != WEAPONTYPE_M16 && weaponType <= WEAPONTYPE_FLAMETHROWER) {
 				SetCurrentWeapon(i);
 				return true;

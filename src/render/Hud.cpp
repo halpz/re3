@@ -300,10 +300,10 @@ void CHud::Draw()
 		/*
 			DrawAmmo
 		*/
-		int16 AmmoAmount = CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition;
-		int32 AmmoInClip = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoInClip;
-		int32 TotalAmmo = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal;
-		int32 Ammo, Clip;
+		uint32 AmmoAmount = CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition;
+		uint32 AmmoInClip = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoInClip;
+		uint32 TotalAmmo = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal;
+		uint32 Ammo, Clip;
 
 		if (AmmoAmount <= 1 || AmmoAmount >= 1000)
 			sprintf(sTemp, "%d", TotalAmmo);
@@ -1359,7 +1359,7 @@ void CHud::SetHelpMessage(wchar *message, bool quick)
 		CMessages::InsertPlayerControlKeysInString(m_HelpMessage);
 
 		for (int i = 0; i < 256; i++) {
-			m_LastHelpMessage[i] = message[i];
+			m_LastHelpMessage[i] = 0;
 		}
 
 		m_HelpMessageState = 0;
@@ -1443,7 +1443,7 @@ STARTPATCHES
 	InjectHook(0x5048F0, &CHud::Initialise, PATCH_JUMP);
 	InjectHook(0x504CC0, &CHud::ReInitialise, PATCH_JUMP);
 	InjectHook(0x50A250, &CHud::SetBigMessage, PATCH_JUMP);
-	//InjectHook(0x5051E0, &CHud::SetHelpMessage, PATCH_JUMP);
+	InjectHook(0x5051E0, &CHud::SetHelpMessage, PATCH_JUMP);
 	InjectHook(0x50A210, &CHud::SetMessage, PATCH_JUMP);
 	InjectHook(0x50A320, &CHud::SetPagerMessage, PATCH_JUMP);
 	InjectHook(0x505290, &CHud::SetVehicleName, PATCH_JUMP);

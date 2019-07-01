@@ -27,11 +27,11 @@ CPedIK::GetComponentPosition(RwV3d *pos, PedNode node)
 	RwMatrix *mat;
 
 	f = m_ped->GetNodeFrame(node);
-	mat = &f->modelling;
+	mat = RwFrameGetMatrix(f);
 	*pos = mat->pos;
 
 	for (f = RwFrameGetParent(f); f; f = RwFrameGetParent(f))
-		RwV3dTransformPoints(pos, pos, 1, &f->modelling);
+		RwV3dTransformPoints(pos, pos, 1, RwFrameGetMatrix(f));
 }
 
 RwMatrix*
@@ -39,10 +39,10 @@ CPedIK::GetWorldMatrix(RwFrame *source, RwMatrix *destination)
 {
 	RwFrame *i;
 
-	*destination = source->modelling;
+	*destination = *RwFrameGetMatrix(source);
 
 	for (i = RwFrameGetParent(source); i; i = RwFrameGetParent(i))
-		RwMatrixTransform(destination, &i->modelling, rwCOMBINEPOSTCONCAT);
+		RwMatrixTransform(destination, RwFrameGetMatrix(i), rwCOMBINEPOSTCONCAT);
 
 	return destination;
 }
