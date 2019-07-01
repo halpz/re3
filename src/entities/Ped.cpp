@@ -461,11 +461,12 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 
 	for(int i = 0; i < NUM_PED_WEAPONTYPES; i++)
 	{
-		GetWeapon(i)->m_eWeaponType = WEAPONTYPE_UNARMED;
-		GetWeapon(i)->m_eWeaponState = WEAPONSTATE_READY;
-		GetWeapon(i)->m_nAmmoInClip = 0;
-		GetWeapon(i)->m_nAmmoTotal = 0;
-		GetWeapon(i)->m_nTimer = 0;
+		CWeapon *weapon = GetWeapon(i);
+		weapon->m_eWeaponType = WEAPONTYPE_UNARMED;
+		weapon->m_eWeaponState = WEAPONSTATE_READY;
+		weapon->m_nAmmoInClip = 0;
+		weapon->m_nAmmoTotal = 0;
+		weapon->m_nTimer = 0;
 	}
 
 	m_lastHitState = 0;
@@ -479,26 +480,22 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 }
 
 void
-CPed::GiveWeapon(eWeaponType weaponType, int ammo)
+CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo)
 {
-	CWeapon *weapon = GetWeapon(weaponType);
-	if (HasWeapon(weaponType))
-	{
+	if (HasWeapon(weaponType)) {
 		if (ammo > 99999)
-			weapon->m_nAmmoTotal = 99999;
+			m_weapons[weaponType].m_nAmmoTotal = 99999;
 		else
-			weapon->m_nAmmoTotal = ammo;
+			m_weapons[weaponType].m_nAmmoTotal = ammo;
 
-		weapon->Reload();
-	}
-	else
-	{
-		weapon->Initialise(weaponType, ammo);
+		m_weapons[weaponType].Reload();
+	} else {
+		m_weapons[weaponType].Initialise(weaponType, ammo);
 		// TODO: It seems game uses this as both weapon count and max WeaponType we have, which is ofcourse erroneous.
 		m_maxWeaponTypeAllowed++;
 	}
-	if (weapon->m_eWeaponState == WEAPONSTATE_OUT_OF_AMMO)
-		weapon->m_eWeaponState = WEAPONSTATE_READY;
+	if (m_weapons[weaponType].m_eWeaponState == WEAPONSTATE_OUT_OF_AMMO)
+		m_weapons[weaponType].m_eWeaponState = WEAPONSTATE_READY;
 }
 
 static RwObject*
@@ -1211,10 +1208,9 @@ CPed::RemoveWeaponModel(int modelId)
 }
 
 void
-CPed::SetCurrentWeapon(eWeaponType weaponType)
+CPed::SetCurrentWeapon(uint32 weaponType)
 {
 	CWeaponInfo *weaponInfo;
-
 	if (HasWeapon(weaponType)) {
 		weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
 		RemoveWeaponModel(weaponInfo->m_nModelId);
@@ -1230,15 +1226,11 @@ CPed::SetCurrentWeapon(eWeaponType weaponType)
 bool
 CPed::SelectGunIfArmed(void)
 {
-	eWeaponType weaponType;
-
 	for (int i = 0; i < m_maxWeaponTypeAllowed; i++) {
-
 		if (GetWeapon(i)->m_nAmmoTotal > 0) {
-			weaponType = GetWeapon(i)->m_eWeaponType;
-
+			eWeaponType weaponType = GetWeapon(i)->m_eWeaponType;
 			if (weaponType >= WEAPONTYPE_COLT45 && weaponType != WEAPONTYPE_M16 && weaponType <= WEAPONTYPE_FLAMETHROWER) {
-				SetCurrentWeapon(weaponType);
+				SetCurrentWeapon(i);
 				return true;
 			}
 		}
@@ -1920,7 +1912,7 @@ CPed::IsPointerValid(void)
 	return false;
 }
 
-// Binary insertion sort
+// Some kind of binary sort
 void
 CPed::SortPeds(CPed** list, int min, int max)
 {
@@ -1933,25 +1925,21 @@ CPed::SortPeds(CPed** list, int min, int max)
 
 	int left = max;
 	int right;
-	for(right = min; right <= left; )
-	{
+	for(right = min; right <= left; ){
 		// Those 1.0s are to make sure loop always run for first time.
-		for (float rightDist = middleDist-1.0f; middleDist > rightDist; right++)
-		{
+		for (float rightDist = middleDist-1.0f; middleDist > rightDist; right++) {
 			rightDiff = GetPosition() - list[right]->GetPosition();
 			rightDist = rightDiff.Magnitude();
 		}
 		right--;
 
-		for (float leftDist = middleDist+1.0f; middleDist < leftDist; left--)
-		{
+		for (float leftDist = middleDist+1.0f; middleDist < leftDist; left--) {
 			leftDiff = GetPosition() - list[left]->GetPosition();
 			leftDist = leftDiff.Magnitude();
 		}
 		left++;
 
-		if (right <= left)
-		{
+		if (right <= left) {
 			CPed *ped = list[right];
 			list[right] = list[left];
 			list[left] = ped;
@@ -1967,7 +1955,7 @@ void
 CPed::BuildPedLists(void)
 {
 	static CPed* unsortedNearPeds[10];
-	static uint16 nextNearPedSlot;
+	uint16 nextNearPedSlot = 0;
 
 	if ((CTimer::GetFrameCounter() + m_randomSeed) & 15) {
 
@@ -2000,16 +1988,11 @@ CPed::BuildPedLists(void)
 			(centre.x + 20.0f) * 0.025f + 50.0f,
 			(centre.y + 20.0f) * 0.025f + 50.0f);
 
-		nextNearPedSlot = 0;
-		for(int y = rect.top; y <= rect.bottom; y++)
-		{
-			for(int x = rect.left; x <= rect.right; x++)
-			{
-				for (CPtrNode *pedPtrNode = CWorld::GetSector(x,y)->m_lists[ENTITYLIST_PEDS].first; pedPtrNode; pedPtrNode = pedPtrNode->next)
-				{
+		for(int y = rect.top; y <= rect.bottom; y++) {
+			for(int x = rect.left; x <= rect.right; x++) {
+				for (CPtrNode *pedPtrNode = CWorld::GetSector(x,y)->m_lists[ENTITYLIST_PEDS].first; pedPtrNode; pedPtrNode = pedPtrNode->next) {
 					CPed *ped = (CPed*)pedPtrNode->item;
-					if (ped != this && !ped->bInVehicle)
-					{
+					if (ped != this && !ped->bInVehicle) {
 						float dist = (ped->GetPosition() - GetPosition()).Magnitude2D();
 						if (distanceMultToCountPedNear * 30.0f > dist)
 						{
@@ -2022,8 +2005,7 @@ CPed::BuildPedLists(void)
 		}
 		unsortedNearPeds[nextNearPedSlot] = nil;
 		SortPeds(unsortedNearPeds, 0, nextNearPedSlot - 1);
-		for (m_numNearPeds = 0; m_numNearPeds < 10; m_numNearPeds++)
-		{
+		for (m_numNearPeds = 0; m_numNearPeds < 10; m_numNearPeds++) {
 			CPed *ped = unsortedNearPeds[m_numNearPeds];
 			if (!ped)
 				break;
@@ -2052,6 +2034,8 @@ CPed::SetModelIndex(uint32 mi)
 	m_headingRate = m_pedStats->m_headingChangeRate;
 	m_animGroup = static_cast<AssocGroupId>(modelInfo->m_animGroup);
 	CAnimManager::AddAnimation((RpClump*) m_rwObject, m_animGroup, ANIM_IDLE_STANCE);
+
+	// This is a mistake by R*, velocity is CVector, whereas m_vecAnimMoveDelta is CVector2D. 
 	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity = (CVector*) &m_vecAnimMoveDelta;
 }
 

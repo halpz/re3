@@ -1,7 +1,7 @@
 #pragma once
 #include "Entity.h"
 
-enum eWeaponType
+enum eWeaponType : uint32
 {
 	WEAPONTYPE_UNARMED = 0,
 	WEAPONTYPE_BASEBALLBAT,
