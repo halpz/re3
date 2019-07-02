@@ -78,4 +78,4 @@ enum Config {
 //#define USE_MY_DOCUMENTS
 #define NASTY_GAME
 #define PS2_MATFX
-
+#define KANGAROO_CHEAT

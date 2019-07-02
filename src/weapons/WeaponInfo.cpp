@@ -61,7 +61,7 @@ CWeaponInfo::LoadWeaponData(void)
 	char animToPlay[32], anim2ToPlay[32];
 
 	CAnimBlendAssociation *animAssoc;
-	AnimationId animId, anim2Id;
+	AnimationId animId;
 
 	int bp, buflen;
 	int lp, linelen;
@@ -101,7 +101,6 @@ CWeaponInfo::LoadWeaponData(void)
 		fireOffsetY = 0.0f;
 		fireOffsetZ = 0.0f;
 		animId = ANIM_WALK;
-		anim2Id = ANIM_WALK;
 		sscanf(
 			&line[lp],
 			"%s %s %f %d %d %d %d %f %f %f %f %f %f %f %s %s %f %f %f %f %d %d",
@@ -136,9 +135,9 @@ CWeaponInfo::LoadWeaponData(void)
 		animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, animToPlay);
 		animId = static_cast<AnimationId>(animAssoc->animId);
 
-		if (strncmp(anim2ToPlay, "null", 5) != 0) {
+		if (strncmp(anim2ToPlay, "null", 4) != 0) {
 			animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, anim2ToPlay);
-			anim2Id = static_cast<AnimationId>(animAssoc->animId);
+			ms_apWeaponInfos[weaponType].m_Anim2ToPlay = static_cast<AnimationId>(animAssoc->animId);
 		}
 
 		CVector vecFireOffset(fireOffsetX, fireOffsetY, fireOffsetZ);
@@ -155,7 +154,6 @@ CWeaponInfo::LoadWeaponData(void)
 		ms_apWeaponInfos[weaponType].m_fSpread = spread;
 		ms_apWeaponInfos[weaponType].m_vecFireOffset = vecFireOffset;
 		ms_apWeaponInfos[weaponType].m_AnimToPlay = animId;
-		ms_apWeaponInfos[weaponType].m_Anim2ToPlay = anim2Id;
 		ms_apWeaponInfos[weaponType].m_fAnimLoopStart = animLoopStart * 0.03f;
 		ms_apWeaponInfos[weaponType].m_fAnimLoopEnd = animLoopEnd * 0.03f;
 		ms_apWeaponInfos[weaponType].m_fAnimFrameFire = delayBetweenAnimAndFire * 0.03f;

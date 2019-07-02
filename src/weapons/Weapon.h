@@ -47,7 +47,7 @@ public:
 	eWeaponState m_eWeaponState;
 	uint32 m_nAmmoInClip;
 	uint32 m_nAmmoTotal;
-	int32 m_nTimer;
+	uint32 m_nTimer;
 	bool m_bAddRotOffset;
 
 	CWeapon() {

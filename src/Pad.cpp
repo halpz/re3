@@ -14,6 +14,7 @@
 #include "Game.h"
 #include "CutsceneMgr.h"
 #include "Font.h"
+#include "Hud.h"
 #include "Text.h"
 #include "Timer.h"
 #include "World.h"
@@ -23,7 +24,6 @@
 #include "Replay.h"
 #include "Weather.h"
 #include "win.h"
-
 
 CPad *Pads = (CPad*)0x6F0360; // [2]
 CMousePointerStateHelper &MousePointerStateHelper = *(CMousePointerStateHelper*)0x95CC8C;
@@ -69,6 +69,28 @@ WRAPPER void ChittyChittyBangBangCheat() { EAXJMP(0x491640); }
 WRAPPER void StrongGripCheat() { EAXJMP(0x491670); }
 WRAPPER void NastyLimbsCheat() { EAXJMP(0x4916A0); }
 //////////////////////////////////////////////////////////////////////////
+
+#ifdef KANGAROO_CHEAT
+void KangarooCheat()
+{
+	wchar *string;
+	CPed *playerPed = FindPlayerPed();
+	int m_fMass;
+
+	if (playerPed->m_ped_flagI80) {
+		string = TheText.Get("CHEATOF");
+		m_fMass = 70.0f;
+	} else {
+		string = TheText.Get("CHEAT1");
+		m_fMass = 15.0f;
+	}
+	CHud::SetHelpMessage(string, 1);
+	playerPed->m_ped_flagI80 = !playerPed->m_ped_flagI80;
+
+	playerPed->m_fMass = m_fMass;
+	playerPed->m_fAirResistance = 0.4f / m_fMass;
+}
+#endif
 
 void
 CControllerState::Clear(void)
@@ -509,6 +531,12 @@ void CPad::AddToPCCheatString(char c)
 	// "NASTYLIMBSCHEAT"
 	if ( !_CHEATCMP("TAEHCSBMILYTSAN") )
 		NastyLimbsCheat();
+
+#ifdef KANGAROO_CHEAT
+	// "KANGAROO"
+	if (!_CHEATCMP("OORAGNAK"))
+		KangarooCheat();
+#endif
 	
 	#undef _CHEATCMP
 }
