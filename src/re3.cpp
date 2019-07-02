@@ -16,6 +16,10 @@
 #include "Automobile.h"
 #include "debugmenu_public.h"
 
+#include <vector>
+
+std::vector<int32> usedAddresses;
+
 void **rwengine = *(void***)0x5A10E1;
 
 DebugMenuAPI gDebugMenuAPI;

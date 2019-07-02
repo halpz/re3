@@ -9,6 +9,11 @@
 #define NOVMT __declspec(novtable)
 #define SETVMT(a) *((DWORD_PTR*)this) = (DWORD_PTR)a
 
+#include <algorithm>
+#include <vector>
+
+#include "common.h"
+
 enum
 {
 	PATCH_CALL,
@@ -27,6 +32,21 @@ enum
 };
 
 extern int gtaversion;
+
+class StaticPatcher
+{
+private:
+	using Patcher = void(*)();
+
+	Patcher		m_func;
+	StaticPatcher	*m_next;
+	static StaticPatcher	*ms_head;
+
+	void Run() { m_func(); }
+public:
+	StaticPatcher(Patcher func);
+	static void Apply();
+};
 
 template<typename T>
 inline T AddressByVersion(uint32_t addressIII10, uint32_t addressIII11, uint32_t addressIIISteam, uint32_t addressvc10, uint32_t addressvc11, uint32_t addressvcSteam)
@@ -110,9 +130,18 @@ ClearCC(AT address, unsigned int nCount)
 	VirtualProtect((void*)address, nCount, dwProtect[0], &dwProtect[1]);
 }
 
+extern std::vector<int32> usedAddresses;
+
 template<typename AT, typename HT> inline void
 InjectHook(AT address, HT hook, unsigned int nType=PATCH_NOTHING)
 {
+	if(std::any_of(usedAddresses.begin(), usedAddresses.end(),
+	               [address](AT value) { return (int32)value == address; })) {
+		debug("Used address %#06x twice when injecting hook\n", address);
+	}
+
+	usedAddresses.push_back((int32)address);
+
 	DWORD		dwProtect[2];
 	switch ( nType )
 	{
@@ -158,23 +187,6 @@ inline void InterceptVmethod(void *dst, T func, uint32_t a)
 	*(uint32_t*)dst = *(uint32_t*)a;
 	Patch(a, func);
 }
-
-
-
-class StaticPatcher
-{
-private:
-	using Patcher = void(*)();
-
-	Patcher		m_func;
-	StaticPatcher	*m_next;
-	static StaticPatcher	*ms_head;
-
-	void Run() { m_func(); }
-public:
-	StaticPatcher(Patcher func);
-	static void Apply();
-};
 
 #define STARTPATCHES static StaticPatcher Patcher([](){
 #define ENDPATCHES });
