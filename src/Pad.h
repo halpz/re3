@@ -1,22 +1,5 @@
 #pragma once
 
-// Some macros for frontend stuff.
-#define PAD_START (CPad::GetPad(0)->NewState.Start && !CPad::GetPad(0)->NewState.Start)
-#define PAD_ESC (CPad::GetPad(0)->NewKeyState.ESC && !CPad::GetPad(0)->OldKeyState.ESC) || (CPad::GetPad(0)->NewState.Triangle && !CPad::GetPad(0)->NewState.Triangle)
-#define PAD_ENTER (CPad::GetPad(0)->NewKeyState.EXTENTER && !CPad::GetPad(0)->OldKeyState.EXTENTER) || (CPad::GetPad(0)->NewKeyState.ENTER && !CPad::GetPad(0)->OldKeyState.ENTER) || (CPad::GetPad(0)->NewState.Cross && !CPad::GetPad(0)->NewState.Cross)
-#define PAD_UP (CPad::GetPad(0)->NewState.DPadUp && !CPad::GetPad(0)->OldState.DPadUp) || (CPad::GetPad(0)->NewKeyState.UP && !CPad::GetPad(0)->OldKeyState.UP) || (CPad::GetPad(0)->NewState.LeftStickY < 0 && !CPad::GetPad(0)->OldState.LeftStickY < 0)
-#define PAD_DOWN (CPad::GetPad(0)->NewState.DPadDown && !CPad::GetPad(0)->OldState.DPadDown) || (CPad::GetPad(0)->NewKeyState.DOWN && !CPad::GetPad(0)->OldKeyState.DOWN) || (CPad::GetPad(0)->NewState.LeftStickY > 0 && !CPad::GetPad(0)->OldState.LeftStickY > 0)
-#define PAD_LEFT (CPad::GetPad(0)->NewState.DPadLeft && !CPad::GetPad(0)->OldState.DPadLeft) || (CPad::GetPad(0)->NewKeyState.LEFT && !CPad::GetPad(0)->OldKeyState.LEFT) || (CPad::GetPad(0)->NewState.LeftStickX < 0 && !CPad::GetPad(0)->OldState.LeftStickX < 0)
-#define PAD_RIGHT (CPad::GetPad(0)->NewState.DPadRight && !CPad::GetPad(0)->OldState.DPadRight) || (CPad::GetPad(0)->NewKeyState.RIGHT && !CPad::GetPad(0)->OldKeyState.RIGHT) || (CPad::GetPad(0)->NewState.LeftStickX > 0 && !CPad::GetPad(0)->OldState.LeftStickX > 0)
-#define MOUSE_LMB (CPad::GetPad(0)->NewMouseControllerState.LMB && !CPad::GetPad(0)->OldMouseControllerState.LMB)
-#define MOUSE_RMB (CPad::GetPad(0)->NewMouseControllerState.RMB && !CPad::GetPad(0)->OldMouseControllerState.RMB)
-#define MOUSE_POS (CPad::GetPad(0)->NewMouseControllerState.x != 0.0f || CPad::GetPad(0)->NewMouseControllerState.y != 0.0f)
-#define MOUSE_WHU (CPad::GetPad(0)->NewMouseControllerState.WHEELUP && !CPad::GetPad(0)->OldMouseControllerState.WHEELUP != 0.0f)
-#define MOUSE_WHD (CPad::GetPad(0)->NewMouseControllerState.WHEELDN && !CPad::GetPad(0)->OldMouseControllerState.WHEELDN != 0.0f)
-
-#define PAD_INPUT (PAD_ESC || PAD_ENTER || PAD_UP || PAD_DOWN || PAD_LEFT || PAD_RIGHT)
-#define MOUSE_INPUT (MOUSE_LMB || MOUSE_RMB || MOUSE_POS || MOUSE_WHU || MOUSE_WHD)
-
 // same as RW skeleton
 /*
 enum Key

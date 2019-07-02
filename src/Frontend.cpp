@@ -66,6 +66,21 @@ int8 DisplayComboButtonErrMsg;
 bool MouseButtonJustClicked;
 bool JoyButtonJustClicked;
 
+// Frontend inputs.
+bool GetPadBack();
+bool GetPadForward();
+bool GetPadMoveUp();
+bool GetPadMoveDown();
+bool GetPadMoveLeft();
+bool GetPadMoveRight();
+bool GetMouseForward();
+bool GetMouseBack();
+bool GetMousePos();
+bool GetMouseMoveLeft();
+bool GetMouseMoveRight();
+bool GetPadInput();
+bool GetMouseInput();
+
 char *FrontendFilenames[] = {
 	"fe2_mainpanel_ul",
 	"fe2_mainpanel_ur",
@@ -696,13 +711,16 @@ void CMenuManager::Draw()
 				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(SavePageSlot ? MENUCOLUMN_SAVE_X : MENUCOLUMN_POS_X), vecPositions.y, textToPrint[MENUCOLUMN_RIGHT]);
 			}
 
-			// Mouse support.
-			if (m_nCurrScreen == MENUPAGE_SKIN_SELECT || m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
-				//TODO: inputs for these pages.
+			// Mouse support. 
+			// TODO: inputs for these pages.
+			if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
+			}
+			else if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+
 			}
 			else {
 				static bool bIsMouseInPosition = false;
-				if (m_nMenuFadeAlpha >= 255 && MOUSE_INPUT) {
+				if (m_nMenuFadeAlpha >= 255 && GetMouseInput()) {
 					CVector2D vecInputSize = { SCREEN_SCALE_X(20.0f), SCREEN_SCALE_FROM_RIGHT(20.0f) };
 					if (m_bShowMouse &&
 						((CheckHover(vecInputSize.x, vecInputSize.y, vecPositions.y, vecPositions.y + SCREEN_STRETCH_Y(20.0f)))))
@@ -718,7 +736,7 @@ void CMenuManager::Draw()
 
 						m_nPrevOption = m_nCurrOption;
 
-						if (MOUSE_LMB)
+						if (GetMouseForward())
 							m_nHoverOption = IGNORE_OPTION;
 						else
 							m_nHoverOption = ACTIVATE_OPTION;
@@ -1360,7 +1378,7 @@ void CMenuManager::Process(void)
 		m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
 	}
 	else {
-		if (PAD_ESC)
+		if (GetPadBack())
 			RequestFrontEndStartUp();
 
 		UnloadTextures();
@@ -1394,16 +1412,16 @@ void CMenuManager::ProcessButtonPresses()
 		m_nMousePosY = SCREEN_HEIGHT;
 
 	// Show/hide mouse cursor.
-	if (MOUSE_INPUT)
+	if (GetMouseInput())
 		m_bShowMouse = true;
-	else if (PAD_INPUT)
+	else if (GetPadInput())
 		m_bShowMouse = false;
 
 	// Get number of menu options.
 	uint8 NumberOfMenuOptions = GetNumberOfMenuOptions();
 
 	// Select next/previous option with pad. Mouse is done in drawing function.
-	if (PAD_UP) {
+	if (GetPadMoveUp()) {
 		m_nPrevOption = m_nCurrOption;
 		m_nCurrOption -= 1;
 
@@ -1418,7 +1436,7 @@ void CMenuManager::ProcessButtonPresses()
 
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 	}
-	else if (PAD_DOWN) {
+	else if (GetPadMoveDown()) {
 		m_nPrevOption = m_nCurrOption;
 		m_nCurrOption += 1;
 
@@ -1435,7 +1453,7 @@ void CMenuManager::ProcessButtonPresses()
 	}
 
 	// Set what happens if ESC is pressed.
-	if (PAD_ESC) {
+	if (GetPadBack()) {
 		bool PlayEscSound = false;
 		switch (m_nCurrScreen) {
 		case MENUPAGE_START_MENU:
@@ -1457,7 +1475,7 @@ void CMenuManager::ProcessButtonPresses()
 
 	// TODO: finish hover options.
 	// Set mouse buttons.
-	if (MOUSE_LMB) {
+	if (GetMouseForward()) {
 		switch (m_nHoverOption) {
 		case ACTIVATE_OPTION:
 			if (m_nCurrOption || m_nCurrScreen != MENUPAGE_PAUSE_MENU)
@@ -1472,8 +1490,8 @@ void CMenuManager::ProcessButtonPresses()
 
 	// Process all menu options here, but first check if it's an option or a redirect.
 	int32 CurrAction = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
-	if ((PAD_ENTER || MOUSE_LMB) ||
-		((PAD_LEFT || MOUSE_WHU) || (PAD_RIGHT || MOUSE_WHD)) &&
+	if ((GetPadForward() || GetMouseForward()) ||
+		((GetPadMoveLeft() || GetMouseMoveRight()) || (GetPadMoveRight() || GetMouseMoveLeft())) &&
 		(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu == m_nCurrScreen &&
 		CurrAction != MENUACTION_CHANGEMENU &&
 		CurrAction != MENUACTION_LOADRADIO &&
@@ -1520,8 +1538,8 @@ WRAPPER void CMenuManager::ProcessOnOffMenuOptions() { EAXJMP(0x48AE60); }
 #else
 void CMenuManager::ProcessOnOffMenuOptions()
 {
-	int8 InputDirection = (PAD_LEFT || MOUSE_WHD) && (!PAD_ENTER && !MOUSE_LMB) ? -1 : 1;
-	int8 InputEnter = PAD_ENTER;
+	int8 InputDirection = (GetPadMoveLeft() || GetMouseMoveLeft()) && (!GetPadForward() && !GetMouseForward()) ? -1 : 1;
+	int8 InputEnter = GetPadForward();
 
 	uint8 NumberOfMenuOptions = GetNumberOfMenuOptions();
 
@@ -2078,7 +2096,7 @@ WRAPPER void CMenuManager::SwitchMenuOnAndOff() { EAXJMP(0x488790); }
 void CMenuManager::SwitchMenuOnAndOff()
 {
 	// Just what the function name says.
-	if (PAD_START || m_bShutDownFrontEndRequested || m_bStartUpFrontEndRequested) {
+	if (m_bShutDownFrontEndRequested || m_bStartUpFrontEndRequested) {
 		if (!m_bMenuActive)
 			m_bMenuActive = true;
 
@@ -2154,7 +2172,7 @@ void CMenuManager::WaitForUserCD()
 		CPad::UpdatePads();
 		MessageScreen("NO_PCCD");
 
-		if (PAD_ESC) {
+		if (GetPadBack()) {
 			m_bQuitGameNoCD = true;
 			RsEventHandler(rsQUITAPP, 0);
 		}
@@ -2268,6 +2286,106 @@ void CMenuManager::SetDefaultPreferences(int8 screen)
 		TheCamera.m_bHeadBob = false;
 		break;
 	};
+}
+
+// Frontend inputs.
+bool GetPadBack()
+{
+	return
+		(CPad::GetPad(0)->NewKeyState.ESC && !CPad::GetPad(0)->OldKeyState.ESC) ||
+		(CPad::GetPad(0)->NewState.Start && !CPad::GetPad(0)->OldState.Start) ||
+		(CPad::GetPad(0)->NewState.Triangle && !CPad::GetPad(0)->OldState.Triangle);
+}
+
+bool GetPadForward()
+{
+	return
+		(CPad::GetPad(0)->NewKeyState.EXTENTER && !CPad::GetPad(0)->OldKeyState.EXTENTER) ||
+		(CPad::GetPad(0)->NewKeyState.ENTER && !CPad::GetPad(0)->OldKeyState.ENTER) ||
+		(CPad::GetPad(0)->NewState.Cross && !CPad::GetPad(0)->OldState.Cross);
+}
+
+bool GetPadMoveUp()
+{
+	return
+		(CPad::GetPad(0)->NewState.DPadUp && !CPad::GetPad(0)->OldState.DPadUp) ||
+		(CPad::GetPad(0)->NewKeyState.UP && !CPad::GetPad(0)->OldKeyState.UP) ||
+		(CPad::GetPad(0)->NewState.LeftStickY < 0 && !CPad::GetPad(0)->OldState.LeftStickY < 0);
+}
+
+bool GetPadMoveDown()
+{
+	return 
+		(CPad::GetPad(0)->NewState.DPadDown && !CPad::GetPad(0)->OldState.DPadDown) ||
+		(CPad::GetPad(0)->NewKeyState.DOWN && !CPad::GetPad(0)->OldKeyState.DOWN) ||
+		(CPad::GetPad(0)->NewState.LeftStickY > 0 && !CPad::GetPad(0)->OldState.LeftStickY > 0);
+}
+
+bool GetPadMoveLeft()
+{
+	return
+		(CPad::GetPad(0)->NewState.DPadLeft && !CPad::GetPad(0)->OldState.DPadLeft) ||
+		(CPad::GetPad(0)->NewKeyState.LEFT && !CPad::GetPad(0)->OldKeyState.LEFT) ||
+		(CPad::GetPad(0)->NewState.LeftStickX < 0 && !CPad::GetPad(0)->OldState.LeftStickX < 0);
+}
+
+bool GetPadMoveRight()
+{
+	return
+		(CPad::GetPad(0)->NewState.DPadRight && !CPad::GetPad(0)->OldState.DPadRight) ||
+		(CPad::GetPad(0)->NewKeyState.RIGHT && !CPad::GetPad(0)->OldKeyState.RIGHT) ||
+		(CPad::GetPad(0)->NewState.LeftStickX > 0 && !CPad::GetPad(0)->OldState.LeftStickX > 0);
+}
+
+bool GetMouseForward()
+{
+	return
+		(CPad::GetPad(0)->NewMouseControllerState.LMB && !CPad::GetPad(0)->OldMouseControllerState.LMB);
+}
+
+bool GetMouseBack()
+{
+	return
+		(CPad::GetPad(0)->NewMouseControllerState.RMB && !CPad::GetPad(0)->OldMouseControllerState.RMB);
+}
+
+bool GetMousePos()
+{
+	return 
+		(CPad::GetPad(0)->NewMouseControllerState.x != 0.0f || CPad::GetPad(0)->OldMouseControllerState.y != 0.0f);
+}
+
+bool GetMouseMoveLeft()
+{
+	return
+		(CPad::GetPad(0)->NewMouseControllerState.WHEELDN && !CPad::GetPad(0)->OldMouseControllerState.WHEELDN != 0.0f);
+}
+
+bool GetMouseMoveRight()
+{
+	return
+		(CPad::GetPad(0)->NewMouseControllerState.WHEELUP && !CPad::GetPad(0)->OldMouseControllerState.WHEELUP != 0.0f);
+}
+
+bool GetPadInput()
+{
+	return
+		GetPadBack() ||
+		GetPadForward() ||
+		GetPadMoveUp() ||
+		GetPadMoveDown() ||
+		GetPadMoveLeft() ||
+		GetPadMoveRight();
+}
+
+bool GetMouseInput()
+{
+	return
+		GetMouseForward() ||
+		GetMouseBack() ||
+		GetMousePos() ||
+		GetMouseMoveLeft() ||
+		GetMouseMoveRight();
 }
 
 STARTPATCHES
