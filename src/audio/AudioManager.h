@@ -71,11 +71,13 @@ enum eAudioType : int32 {
 	TOTAL_AUDIO_TYPES = 14,
 };
 
+class CPhysical;
+
 class tAudioEntity
 {
 public:
 	eAudioType m_nType;
-	void *m_pEntity;
+	CPhysical *m_pEntity;
 	bool m_bIsUsed;
 	char m_bStatus;
 	int16 m_awAudioEvent[4];
@@ -159,7 +161,7 @@ public:
 	char field_22;
 	char field_23;
 	int field_24;
-	char m_bIsPlayed;
+	bool m_bIsPlayed;
 	char field_29;
 	char field_30;
 	char field_31;
@@ -185,7 +187,7 @@ public:
 	char field_15;
 	int m_nTimer;
 	tActiveSample m_sQueueSample;
-	char m_bActiveSampleQueue;
+	uint8 m_bActiveSampleQueue;
 	char gap_109[3];
 	tActiveSample m_asSamples[54];
 	char m_abSampleQueueIndexTable[54];
@@ -216,6 +218,72 @@ public:
 	char field_19195;
 	int m_nTimeOfRecentCrime;
 
+	char GetMissionScriptPoliceAudioPlayingStatus();
+	bool GetMissionAudioLoadingStatus();
+
+	uint8 GetNum3DProvidersAvailable();
+	int8 AutoDetect3DProviders();
+	bool IsMP3RadioChannelAvailable();
+	uint8 GetCDAudioDriveLetter();
+
+	void SetEffectsMasterVolume(uint8 volume);
+	void SetMusicMasterVolume(uint8 volume);
+	void SetEffectsFadeVol(uint8 volume);
+	void SetMusicFadeVol(uint8 volume);
+
+	void SetSpeakerConfig(int32 conf);
+
+	void ProcessJumboFlying();
+	bool SetupJumboEngineSound(uint8, int32); // todo
+	void PreInitialiseGameSpecificSetup();
+	void SetMissionScriptPoliceAudio(int32 sfx);
+
+	void CalculateDistance(bool *ptr, float dist);
+
+	bool UsesSiren(int32 model);
+	bool UsesSirenSwitching(int32 model);
+
+	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission);
+
+	uint8 Get3DProviderName(uint8 id);
+
+	void ProcessJumboTaxi();
+	bool SetupJumboFlySound(uint8);          // todo
+	bool SetupJumboTaxiSound(uint8);         // todo
+	bool SetupJumboWhineSound(uint8, int32); // todo
+
+	void PlayLoadedMissionAudio();
+
+	void SetMissionAudioLocation(float x, float y, float z);
+
+	void ResetPoliceRadio();
+
+	void InterrogateAudioEntities();
+
+	void ClearRequestedQueue();
+//	void AgeCrimes();
+
+	bool UsesReverseWarning(int32 model);
+	bool HasAirBrakes(int32 model);
+
+	int32 GetJumboTaxiFreq();
+
+	void ProcessPhysical(int32 id);
+	void ProcessVehicle(CPhysical *); // todo
+	void ProcessPed(CPhysical *);     // todo
+	void ProcessPlane(void *);        // todo
+
+	void ClearMissionAudio();
+//	void ProcessReverb();
+
+	bool IsMissionAudioSampleFinished();
+
+	void ProcessEntity(int32);
+
+	void InitialisePoliceRadio();
+
+	// done
+
 	int32 RandomDisplacement(uint32 seed);
 
 	void ReleaseDigitalHandle();
@@ -224,7 +292,7 @@ public:
 
 	bool IsAudioInitialised() const;
 
-	int32 CreateEntity(int32 type, void *memory);
+	int32 CreateEntity(int32 type, CPhysical *memory);
 	void DestroyEntity(int32 id);
 	void SetEntityStatus(int32 id, bool status);
 
