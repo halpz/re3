@@ -341,11 +341,7 @@ Render2dStuff(void)
 		firstPersonWeapon = true;
 
 	// Draw black border for sniper and rocket launcher
-#ifndef NO_ROCKET_BORDERS
 	if((weaponType == WEAPONTYPE_SNIPERRIFLE || weaponType == WEAPONTYPE_ROCKETLAUNCHER) && firstPersonWeapon){
-#else
-	if (weaponType == WEAPONTYPE_SNIPERRIFLE && firstPersonWeapon) {
-#endif
 		CRGBA black(0, 0, 0, 255);
 
 		// top and bottom strips
@@ -360,7 +356,6 @@ Render2dStuff(void)
 		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW / 2 - SCREEN_SCALE_X(210), SCREENH), black);
 		CSprite2d::DrawRect(CRect(SCREENW / 2 + SCREEN_SCALE_X(210), 0.0f, SCREENW, SCREENH), black);
 	}
-
 
 	MusicManager.DisplayRadioStationName();
 //	TheConsole.Display();
@@ -787,7 +782,7 @@ AppEventHandler(RsEvent event, void *param)
 		{
 											
 			CameraSize(Scene.camera, (RwRect *)param,
-				DEFAULT_VIEWWINDOW, SCREEN_ASPECT_RATIO);
+				DEFAULT_VIEWWINDOW, DEFAULT_ASPECTRATIO);
 			
 			return rsEVENTPROCESSED;
 		}

@@ -1355,14 +1355,10 @@ psSelectDevice()
 		{
 			while ( !modeFound && GcurSelVM < RwEngineGetNumVideoModes() )
 			{
-				RECT Rect;
-				GetWindowRect(GetDesktopWindow(), &Rect);
-				printf(gString, "Cannot find %dx%dx32 video mode", Rect.right, Rect.bottom);
-
 				RwEngineGetVideoModeInfo(&vm, GcurSelVM);
-				if ( defaultFullscreenRes	&& vm.width	 != Rect.right
-											|| vm.height != Rect.bottom
-											|| vm.depth	 != 32
+				if ( defaultFullscreenRes	&& vm.width	 != 640 
+											|| vm.height != 480
+											|| vm.depth	 != 16
 											|| !(vm.flags & rwVIDEOMODEEXCLUSIVE) )
 					++GcurSelVM;
 				else
@@ -1371,7 +1367,7 @@ psSelectDevice()
 			
 			if ( !modeFound )
 			{
-				MessageBox(nil, gString, "GTA3", MB_OK);
+				MessageBox(nil, "Cannot find 640x480 video mode", "GTA3", MB_OK);
 				return FALSE;
 			}
 		}

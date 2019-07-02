@@ -79,10 +79,6 @@ void CenterVideo(void);
 void CloseClip(void);
 
 RwChar **_psGetVideoModeList();
-RwInt32 _psGetNumVideModes();
-
-void _psSelectScreenVM(RwInt32 videoMode);
-void HandleExit();
 
 #ifdef    __cplusplus
 }
