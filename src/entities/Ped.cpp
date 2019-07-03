@@ -2084,7 +2084,7 @@ STARTPATCHES
 	InjectHook(0x4D2BB0, &CPed::Avoid, PATCH_JUMP);
 	InjectHook(0x4C6A50, &CPed::ClearAimFlag, PATCH_JUMP);
 	InjectHook(0x4C64F0, &CPed::ClearLookFlag, PATCH_JUMP);
-	InjectHook(0x4E5BD0, &CPed::IsPedHeadAbovePos, PATCH_JUMP);
+	InjectHook(0x4EB670, &CPed::IsPedHeadAbovePos, PATCH_JUMP);
 	InjectHook(0x4E68A0, &CPed::FinishedAttackCB, PATCH_JUMP);
 	InjectHook(0x4E5BD0, &CheckForPedsOnGroundToAttack, PATCH_JUMP);
 	InjectHook(0x4E6BA0, &CPed::Attack, PATCH_JUMP);
