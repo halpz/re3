@@ -47,7 +47,7 @@ wchar *CHud::m_PagerMessage = (wchar*)0x878840;
 bool &CHud::m_Wants_To_Draw_Hud = *(bool*)0x95CD89;
 bool &CHud::m_Wants_To_Draw_3dMarkers = *(bool*)0x95CD62;
 wchar(*CHud::m_BigMessage)[128] = (wchar(*)[128])0x664CE0;
-int32 &CHud::m_ItemToFlash = *(int32*)0x95CC82;
+int16 &CHud::m_ItemToFlash = *(int16*)0x95CC82;
 
 // These aren't really in CHud
 float CHud::BigMessageInUse[6];
