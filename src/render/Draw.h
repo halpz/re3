@@ -1,16 +1,18 @@
 #pragma once
 
-#define HUD_SCALE 0.8f
-#define DEFAULT_SCALE 1.0f
-
 class CDraw
 {
 private:
 	static float &ms_fNearClipZ;
 	static float &ms_fFarClipZ;
 	static float &ms_fFOV;
+	static float ms_fLODDistance;	// unused
+
+#ifdef ASPECT_RATIO_SCALE
+	// we use this variable to scale a lot of 2D elements
+	// so better cache it
 	static float ms_fAspectRatio;
-	static float ms_fScreenMultiplier;
+#endif
 
 public:
 	static uint8 &FadeValue;
@@ -26,8 +28,12 @@ public:
 	static void SetFOV(float fov);
 	static float GetFOV(void) { return ms_fFOV; }
 
-	static void CalculateAspectRatio();
+	static float FindAspectRatio(void);
+#ifdef ASPECT_RATIO_SCALE
+	static float ConvertFOV(float fov);
 	static float GetAspectRatio(void) { return ms_fAspectRatio; }
-	static void SetScreenMult(float mult) { ms_fScreenMultiplier = mult; };
-	static float GetScreenMult(void) { return ms_fScreenMultiplier; };
+	static void SetAspectRatio(float ratio) { ms_fAspectRatio = ratio; }
+#else
+	static float GetAspectRatio(void) { return FindAspectRatio(); }
+#endif
 };

@@ -626,9 +626,7 @@ psInitialise(void)
 	
 	C_PcSave::SetSaveDirectory(_psGetUserFilesFolder());
 	
-#ifndef NASTY_GAME
-		InitialiseLanguage();
-#endif
+	InitialiseLanguage();
 
 	FrontEndMenuManager.LoadSettings();
 	
@@ -1262,7 +1260,7 @@ UINT GetBestRefreshRate(UINT width, UINT height, UINT depth)
 	
 	ASSERT(d3d != nil);
 	
-	INT refreshRate = -1;
+	UINT refreshRate = INT_MAX;
 	D3DFORMAT format;
 
 	if ( depth == 32 )
@@ -1284,12 +1282,9 @@ UINT GetBestRefreshRate(UINT width, UINT height, UINT depth)
 		{
 			if ( mode.RefreshRate == 0 )
 				return 0;
-#pragma warning( push )
-#pragma warning( disable : 4018)
 
 			if ( mode.RefreshRate < refreshRate && mode.RefreshRate >= 60 )
 				refreshRate = mode.RefreshRate;
-#pragma warning( pop ) 
 		}
 	}
 	
@@ -1540,8 +1535,6 @@ CommandLineToArgv(RwChar *cmdLine, RwInt32 *argCount)
  */
 void InitialiseLanguage()
 {
-#pragma warning( push )
-#pragma warning( disable : 4302)
 	WORD primUserLCID	= PRIMARYLANGID(GetSystemDefaultLCID());
 	WORD primSystemLCID = PRIMARYLANGID(GetUserDefaultLCID());
 	WORD primLayout		= PRIMARYLANGID((DWORD)GetKeyboardLayout(0));
@@ -1549,7 +1542,6 @@ void InitialiseLanguage()
 	WORD subUserLCID	= SUBLANGID(GetSystemDefaultLCID());
 	WORD subSystemLCID	= SUBLANGID(GetUserDefaultLCID());
 	WORD subLayout		= SUBLANGID((DWORD)GetKeyboardLayout(0));
-#pragma warning( pop ) 
 	
 	if (   primUserLCID	  == LANG_GERMAN
 		|| primSystemLCID == LANG_GERMAN
@@ -1573,6 +1565,12 @@ void InitialiseLanguage()
 		|| subSystemLCID == SUBLANG_ENGLISH_AUS
 		|| subLayout	 == SUBLANG_ENGLISH_AUS )
 		CGame::noProstitutes = true;
+
+#ifdef NASTY_GAME
+	CGame::nastyGame = true;
+	CMenuManager::m_PrefsAllowNastyGame = true;
+	CGame::noProstitutes = false;
+#endif
 	
 	int32 lang;
 	
@@ -2420,14 +2418,10 @@ void _InputInitialiseJoys()
 	}
 }
 
-#pragma warning( push )
-#pragma warning( disable : 4700)
-HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
+void _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 {
-	HRESULT hr;
-
 	DIDEVICEOBJECTINSTANCE objInst;
-	
+
 	objInst.dwSize = sizeof( DIDEVICEOBJECTINSTANCE );
 
 	DIPROPRANGE range;
@@ -2445,7 +2439,7 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_X, DIPH_BYOFFSET ) ) )
 		{
 			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
-				return S_FALSE;
+				return;
 			else
 				;
 		}
@@ -2457,7 +2451,7 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_Y, DIPH_BYOFFSET ) ) )
 		{
 			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
-				return S_FALSE;
+				return;
 			else
 				;
 		}
@@ -2469,7 +2463,7 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_Z, DIPH_BYOFFSET ) ) )
 		{
 			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
-				return S_FALSE;
+				return;
 			else
 				AllValidWinJoys.m_aJoys[num].m_bHasAxisZ = true; // z rightStickPos.x
 		}
@@ -2481,15 +2475,12 @@ HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num)
 		if ( SUCCEEDED( lpDevice->GetObjectInfo( &objInst,	DIJOFS_RZ, DIPH_BYOFFSET ) ) )
 		{
 			if( FAILED( lpDevice->SetProperty( DIPROP_RANGE, (LPCDIPROPHEADER)&range ) ) ) 
-				return S_FALSE;
+				return;
 			else
 				AllValidWinJoys.m_aJoys[num].m_bHasAxisR = true; // r rightStickPos.y
 		}
 	}
-	
-	return hr;
 }
-#pragma warning( pop )
 
 HRESULT _InputAddJoys()
 {
@@ -2973,9 +2964,7 @@ void _InputTranslateShiftKeyUpDown(RsKeyCodes *rs)
 	}
 }
 
-#pragma warning( push )
-#pragma warning( disable : 4805)
-BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, bool bDown)
+BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, BOOLEAN bDown)
 {
 	*rs = rsNULL;
 	switch ( key )
@@ -3002,7 +2991,6 @@ BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, bool bDown)
 	
 	return TRUE;
 }
-#pragma warning( pop )
 
 BOOL _InputIsExtended(INT flag)
 {

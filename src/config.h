@@ -62,20 +62,52 @@ enum Config {
 	NUMPICKUPS = 336,
 };
 
+
 // We don't expect to compile for PS2 or Xbox
 // but it might be interesting for documentation purposes
 #define GTA_PC
 //#define GTA_PS2
 //#define GTA_XBOX
 
-#define GTA3_1_1_PATCH
-#define USE_PS2_RAND
-#define RANDOMSPLASH
-#define CHATTYSPLASH
-//#define FIX_BUGS
-//#define NO_CDCHECK
-#define NO_MOVIES
-//#define USE_MY_DOCUMENTS
-#define NASTY_GAME
-#define PS2_MATFX
+// This enables things from the PS2 version on PC
+#define GTA_PS2_STUFF
+
+// This is enabled for all released games.
+// any debug stuff that isn't left in any game is not in FINAL
+//#define FINAL
+
+// This is enabled for all released games except mobile
+// any debug stuff that is only left in mobile, is not in MASTER
+//#define MASTER
+
+#if defined GTA_PS2
+#	define RANDOMSPLASH
+#elif defined GTA_PC
+#	define GTA3_1_1_PATCH
+#	ifdef GTA_PS2_STUFF
+#		define USE_PS2_RAND
+#		define RANDOMSPLASH	// use random splash as on PS2
+#		define PS2_MATFX
+#	endif
+#elif defined GTA_XBOX
+#endif
+
+#ifdef MASTER
+	// only in master builds
+#else
+	// not in master builds
+#endif
+
+#ifdef FINAL
+	// in all games
+#	define USE_MY_DOCUMENTS	// use my documents directory for user files
+#else
+	// not in any game
+#	define NASTY_GAME	// nasty game for all languages
+#	define NO_MOVIES	// disable intro videos
+#	define CHATTYSPLASH	// print what the game is loading
+#endif
+
+#define FIX_BUGS		// fix bugs in the game, TODO: use this more
 #define KANGAROO_CHEAT
+#define ASPECT_RATIO_SCALE

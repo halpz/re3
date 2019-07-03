@@ -48,14 +48,8 @@
 #include "RpAnimBlend.h"
 #include "Frontend.h"
 
-#define DEFAULT_VIEWWINDOW (tan(CDraw::GetFOV() * (360.0f / PI)))
+#define DEFAULT_VIEWWINDOW (tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
 
-#ifdef WIDE_SCREEN
-#define DEFAULT_ASPECTRATIO (16.0f/9.0f)
-#else
-#define DEFAULT_ASPECTRATIO (4.0f/3.0f)
-#endif
-													   
 
 GlobalScene &Scene = *(GlobalScene*)0x726768;
 
@@ -100,6 +94,10 @@ InitialiseGame(void)
 void
 Idle(void *arg)
 {
+#ifdef ASPECT_RATIO_SCALE
+	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
+#endif
+
 	CTimer::Update();
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
@@ -160,9 +158,8 @@ Idle(void *arg)
 
 		Render2dStuff();
 	}else{
-		float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-		CDraw::CalculateAspectRatio();
-		CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
+		float viewWindow = DEFAULT_VIEWWINDOW;
+		CameraSize(Scene.camera, nil, viewWindow, DEFAULT_ASPECT_RATIO);
 		CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 		RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 		if(!RsCameraBeginUpdate(Scene.camera))
@@ -170,7 +167,9 @@ Idle(void *arg)
 	}
 
 	RenderMenus();
+#ifndef FINAL
 	PrintGameVersion();
+#endif
 	DoFade();
 	Render2dStuffAfterFade();
 	CCredits::Render();
@@ -183,6 +182,10 @@ Idle(void *arg)
 void
 FrontendIdle(void)
 {
+#ifdef ASPECT_RATIO_SCALE
+	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
+#endif
+
 	CTimer::Update();
 	CSprite2d::SetRecipNearClip();
 	CSprite2d::InitPerFrame();
@@ -193,9 +196,8 @@ FrontendIdle(void)
 	if(RsGlobal.quit)
 		return;
 
-	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-	CDraw::CalculateAspectRatio();
-	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
+	float viewWindow = DEFAULT_VIEWWINDOW;
+	CameraSize(Scene.camera, nil, viewWindow, DEFAULT_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 	if(!RsCameraBeginUpdate(Scene.camera))
@@ -203,7 +205,9 @@ FrontendIdle(void)
 
 	DefinedState();
 	RenderMenus();
+#ifndef FINAL
 	PrintGameVersion();
+#endif
 	DoFade();
 	Render2dStuffAfterFade();
 	CFont::DrawFonts();
@@ -216,9 +220,7 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	CRGBA TopColor(TopRed, TopGreen, TopBlue, Alpha);
 	CRGBA BottomColor(BottomRed, BottomGreen, BottomBlue, Alpha);
 
-	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-	CDraw::CalculateAspectRatio();
-	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
+	CameraSize(Scene.camera, nil, DEFAULT_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 
@@ -236,9 +238,7 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 bool
 DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha)
 {
-	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-	CDraw::CalculateAspectRatio();
-	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
+	CameraSize(Scene.camera, nil, DEFAULT_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 
@@ -782,7 +782,7 @@ AppEventHandler(RsEvent event, void *param)
 		{
 											
 			CameraSize(Scene.camera, (RwRect *)param,
-				DEFAULT_VIEWWINDOW, DEFAULT_ASPECTRATIO);
+				DEFAULT_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 			
 			return rsEVENTPROCESSED;
 		}
