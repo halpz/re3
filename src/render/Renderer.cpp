@@ -222,16 +222,16 @@ CRenderer::RenderEverythingBarRoads(void)
 		if(e->IsVehicle() ||
 		   e->IsPed() && CVisibilityPlugins::GetClumpAlpha((RpClump*)e->m_rwObject) != 255){
 			if(e->IsVehicle() && ((CVehicle*)e)->IsBoat()){
+				ei.ent = e;
+				dist = ms_vecCameraPosition - e->GetPosition();
+				ei.sort = dist.MagnitudeSqr();
+				gSortedVehiclesAndPeds.InsertSorted(ei);
+			}else{
 				dist = ms_vecCameraPosition - e->GetPosition();
 				if(!CVisibilityPlugins::InsertEntityIntoSortedList(e, dist.Magnitude())){
 					printf("Ran out of space in alpha entity list");
 					RenderOneNonRoad(e);
 				}
-			}else{
-				ei.ent = e;
-				dist = ms_vecCameraPosition - e->GetPosition();
-				ei.sort = dist.MagnitudeSqr();
-				gSortedVehiclesAndPeds.InsertSorted(ei);
 			}
 		}else
 			RenderOneNonRoad(e);
@@ -241,15 +241,17 @@ CRenderer::RenderEverythingBarRoads(void)
 void
 CRenderer::RenderVehiclesButNotBoats(void)
 {
+	// This function doesn't do anything
+	// because only boats are inserted into the list
 	CLink<EntityInfo> *node;
 
 	for(node = gSortedVehiclesAndPeds.tail.prev;
 	    node != &gSortedVehiclesAndPeds.head;
 	    node = node->prev){
+		// only boats in this list
 		CVehicle *v = (CVehicle*)node->item.ent;
-		if(v->IsVehicle() && v->IsBoat())		// BUG: IsVehicle missing in III
-			continue;
-		RenderOneNonRoad(v);
+		if(!v->IsBoat())
+			RenderOneNonRoad(v);
 	}
 }
 
@@ -261,8 +263,9 @@ CRenderer::RenderBoats(void)
 	for(node = gSortedVehiclesAndPeds.tail.prev;
 	    node != &gSortedVehiclesAndPeds.head;
 	    node = node->prev){
+		// only boats in this list
 		CVehicle *v = (CVehicle*)node->item.ent;
-		if(v->IsVehicle() && v->IsBoat())		// BUG: IsVehicle missing in III
+		if(v->IsBoat())
 			RenderOneNonRoad(v);
 	}
 }
