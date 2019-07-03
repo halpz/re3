@@ -1,5 +1,12 @@
 #pragma once
 
+enum eAspectRatio 
+{
+	AR_AUTO,
+	AR_4_3,
+	AR_16_9,
+};
+
 class CDraw
 {
 private:

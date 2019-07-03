@@ -125,6 +125,15 @@ WRAPPER void CHud::Draw(void) { EAXJMP(0x5052A0); }
 #else
 void CHud::Draw()
 {
+	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSMIRROR);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
+	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
+
 	if (CReplay::IsPlayingBack())
 		return;
 
@@ -167,18 +176,15 @@ void CHud::Draw()
 			float fStep = sin((CTimer::GetTimeInMilliseconds() & 1023) * 0.0061328127);
 			float fMultBright = SpriteBrightness * 0.03f * (0.25f * fStep + 0.75f);
 			CRect rect;
-
-			float fWidescreenOffset[2] = { 0.0f, 0.0f };
-
-			if (FrontEndMenuManager.m_PrefsUseWideScreen) {
-				fWidescreenOffset[0] = 0.0f;
-				fWidescreenOffset[1] = SCREEN_SCALE_Y(18.0f);
-			}
-
+#ifndef ASPECT_RATIO_SCALE
 			if (Mode_RunAround && TheCamera.Cams->Using3rdPersonMouseCam()) {
-				float f3rdX = SCREENW * TheCamera.m_f3rdPersonCHairMultX + fWidescreenOffset[0];
-				float f3rdY = SCREENH * TheCamera.m_f3rdPersonCHairMultY - fWidescreenOffset[1];
-
+				float f3rdX = SCREEN_WIDTH * TheCamera.m_f3rdPersonCHairMultX;
+				float f3rdY = SCREEN_HEIGHT * TheCamera.m_f3rdPersonCHairMultY;
+#else
+			if (Mode_RunAround && TheCamera.Cams->Using3rdPersonMouseCam()) {
+				float f3rdX = (((TheCamera.m_f3rdPersonCHairMultX - 0.5f) / ((CDraw::GetAspectRatio()) / (DEFAULT_ASPECT_RATIO))) + 0.5f) * SCREEN_WIDTH;
+				float f3rdY = SCREEN_HEIGHT * TheCamera.m_f3rdPersonCHairMultY + SCREEN_SCALE_Y(-2.0f);
+#endif
 				if (CWorld::Players[CWorld::PlayerInFocus].m_pPed && WeaponType == WEAPONTYPE_M16) {
 					rect.left = f3rdX - SCREEN_SCALE_X(32.0f * 0.6f);
 					rect.top = f3rdY - SCREEN_SCALE_Y(32.0f  * 0.6f);
@@ -654,7 +660,7 @@ void CHud::Draw()
 		CFont::SetBackgroundOff();
 		CFont::SetBackGroundOnlyTextOn();
 		CFont::SetAlignment(ALIGN_RIGHT);
-		CFont::SetRightJustifyWrap(-SCREENW);
+		CFont::SetRightJustifyWrap(-SCREEN_WIDTH);
 		CFont::SetFontStyle(FONT_HEADING);
 		CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
 
@@ -917,7 +923,7 @@ void CHud::Draw()
 				CFont::SetCentreSize(SCREEN_SCALE_X(615.0f));
 				CFont::SetFontStyle(FONT_HEADING);
 
-				if (BigMessageX[0] >= (SCREENW - 20)) {
+				if (BigMessageX[0] >= (SCREEN_WIDTH - 20)) {
 					BigMessageInUse[0] += (CTimer::GetTimeStep() * 0.02f * 120.0f);
 
 					if (BigMessageInUse[0] >= 120.0f) {
@@ -1190,7 +1196,7 @@ void CHud::DrawAfterFade()
 			CFont::SetRightJustifyWrap(-500);
 			CFont::SetRightJustifyOn();
 			CFont::SetFontStyle(FONT_HEADING);
-			if (BigMessageX[1] >= (SCREENW - 20)) {
+			if (BigMessageX[1] >= (SCREEN_WIDTH - 20)) {
 				BigMessageInUse[1] += (CTimer::GetTimeStep() * 0.02f * 120.0f);
 
 				if (BigMessageInUse[1] >= 120.0f) {

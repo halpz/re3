@@ -10,6 +10,7 @@ extern GlobalScene &Scene;
 extern uint8 work_buff[55000];
 extern char gString[256];
 extern wchar *gUString;
+extern bool &b_FoundRecentSavedGameWantToLoad;
 
 class CSprite2d;
 
