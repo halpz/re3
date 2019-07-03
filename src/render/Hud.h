@@ -62,7 +62,7 @@ public:
 	static bool &m_Wants_To_Draw_Hud;
 	static bool &m_Wants_To_Draw_3dMarkers;
 	static wchar(*m_BigMessage)[128];
-	static int32 &m_ItemToFlash;
+	static int16 &m_ItemToFlash;
 
 	// These aren't really in CHud
 	static float BigMessageInUse[6];
