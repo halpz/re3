@@ -1572,7 +1572,7 @@ void CReplay::Display()
 	if (Mode == MODE_RECORD)
 		return;
 	counter = (counter + 1) % 65536;
-	if (counter & 0x20 == 0)
+	if ((counter & 0x20) == 0)
 		return;
 	CFont::SetPropOn();
 	CFont::SetBackgroundOff();

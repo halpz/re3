@@ -65,6 +65,8 @@ public:
 	bool m_bGetOutOfHospitalFree;
 	uint8 m_aSkinName[32];
 	RwTexture *m_pSkinTexture;
+
+	void MakePlayerSafe(bool);
 };
 
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");

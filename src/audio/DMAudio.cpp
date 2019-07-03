@@ -33,3 +33,4 @@ WRAPPER int32 cDMAudio::CreateEntity(int, void*) { EAXJMP(0x57C7C0); }
 WRAPPER void cDMAudio::SetEntityStatus(int32 id, uint8 enable) { EAXJMP(0x57C810); }
 WRAPPER void cDMAudio::SetRadioInCar(int32) { EAXJMP(0x57CE60); }
 WRAPPER void cDMAudio::DestroyEntity(int32) { EAXJMP(0x57C7F0); }
+WRAPPER void cDMAudio::ClearMissionAudio(void) { EAXJMP(0x57CE20); }

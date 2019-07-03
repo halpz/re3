@@ -203,5 +203,6 @@ public:
 	void SetRadioInCar(int32);
 	uint8 IsMP3RadioChannelAvailable();
 	void DestroyEntity(int32);
+	void ClearMissionAudio(void);
 };
 extern cDMAudio &DMAudio;

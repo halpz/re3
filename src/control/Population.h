@@ -12,6 +12,8 @@ class CPopulation
 public:
 	static PedGroup *ms_pPedGroups;	//[31]
 	static bool &ms_bGivePedsWeapons;
+	static int32 &m_AllRandomPedsThisType;
+	static float &PedDensityMultiplier;
 
 	static void UpdatePedCount(uint32, bool);
 	static void DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool);
