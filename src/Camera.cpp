@@ -1252,13 +1252,24 @@ CCam::FixCamWhenObscuredByVehicle(const CVector &TargetCoors)
 	Source.z += HeightFixerCarsObscuring;
 }
 
-bool CCam::Using3rdPersonMouseCam() 
+bool
+CCam::Using3rdPersonMouseCam() 
 {
 	return CCamera::m_bUseMouse3rdPerson &&
 		(Mode == MODE_FOLLOWPED ||
 			TheCamera.m_bPlayerIsInGarage &&
 			FindPlayerPed() && FindPlayerPed()->m_nPedState != PED_DRIVING &&
 			Mode != MODE_TOPDOWN1 && this->CamTargetEntity == FindPlayerPed());
+}
+
+bool
+CCam::GetWeaponFirstPersonOn()
+{
+	CEntity *target = this->CamTargetEntity;
+	if (target && target->IsPed())
+		return ((CPed*)target)->GetWeapon()->m_bAddRotOffset;
+	
+	return false;
 }
 
 STARTPATCHES
