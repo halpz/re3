@@ -56,26 +56,12 @@ extern void **rwengine;
 #include "skeleton.h"
 #include "Draw.h"
 
-/*
-	{ SCREEN_STRETCH }	Done originally by the game for most of the printed stuff.
-						Stretches everything to screen avoiding it's aspect ratio.
-						Looks good only in 4:3.
-
-	{ SCREEN_SCALE }	Alternative to the one above, it's used in this project to scale
-						original content to a *DEFINED aspect ratio with the possibility to
-						set a multiplier and scale content differently.
-						In theory should look good on any screen.					
-*/
-
 #define DEFAULT_SCREEN_WIDTH (640)
 #define DEFAULT_SCREEN_HEIGHT (448)
 #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
 
 // game uses maximumWidth/Height, but this probably won't work
 // with RW windowed mode
-// TODO: get rid of one of the two
-#define SCREENW (RsGlobal.width)
-#define SCREENH (RsGlobal.height)
 #define SCREEN_WIDTH ((float)RsGlobal.width)
 #define SCREEN_HEIGHT ((float)RsGlobal.height)
 #define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
