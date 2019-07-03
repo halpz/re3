@@ -20,6 +20,8 @@ bool &CCamera::m_bUseMouse3rdPerson = *(bool *)0x5F03D8;
 
 WRAPPER void CCamera::DrawBordersForWideScreen(void) { EAXJMP(0x46B430); }
 WRAPPER void CCamera::CalculateDerivedValues(void) { EAXJMP(0x46EEA0); }
+WRAPPER void CCamera::Restore(void) { EAXJMP(0x46F990); }
+WRAPPER void CCamera::SetWidescreenOff(void) { EAXJMP(0x46FF10); }
 
 bool
 CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat)
