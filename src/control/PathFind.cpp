@@ -626,6 +626,8 @@ CPathFind::CalcNodeCoors(int16 x, int16 y, int16 z, int id, CVector *out)
 	*out = m_mapObjects[id]->GetMatrix() * pos;
 }
 
+WRAPPER void CPathFind::SetLinksBridgeLights(float, float, float, float, bool) { EAXJMP(0x42E3B0); }
+
 STARTPATCHES
 	InjectHook(0x429610, &CPathFind::PreparePathData, PATCH_JUMP);
 	InjectHook(0x429C20, &CPathFind::PreparePathDataForType, PATCH_JUMP);
