@@ -42,13 +42,14 @@ public:
 
 	static float LimitRadianAngle(float angle)
 	{
+		float result;
+
 		if (angle < -25.0f)
-			angle = -25.0f;
-
-		if (angle > 25.0f)
-			angle = 25.0f;
-
-		float result = angle;
+			result = -25.0f;
+		else if (angle > 25.0f)
+			result = 25.0f;
+		else
+			result = angle;
 
 		while (result >= PI) {
 			result -= 2 * PI;
@@ -71,7 +72,7 @@ public:
 
 		if (x > 0.0f) {
 			if (y > 0.0f)
-				return 2 * PI - atan2(x / y, 1.0f);
+				return PI - atan2(x / y, 1.0f);
 			else
 				return -atan2(x / y, 1.0f);
 		} else {

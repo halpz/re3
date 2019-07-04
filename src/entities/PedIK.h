@@ -1,6 +1,7 @@
 #pragma once
 #include "common.h"
 #include "PedModelInfo.h"
+#include "AnimBlendClumpData.h"
 
 struct LimbOrientation
 {
@@ -32,5 +33,8 @@ public:
 	bool PointGunAtPosition(CVector *position);
 	void GetComponentPosition(RwV3d *pos, PedNode node);
 	static RwMatrix *GetWorldMatrix(RwFrame *source, RwMatrix *destination);
+	void RotateTorso(AnimBlendFrameData* animBlend, LimbOrientation* limb, bool changeRoll);
+	void ExtractYawAndPitchLocal(RwMatrixTag*, float*, float*);
+	void ExtractYawAndPitchWorld(RwMatrixTag*, float*, float*);
 };
 static_assert(sizeof(CPedIK) == 0x28, "CPedIK: error");

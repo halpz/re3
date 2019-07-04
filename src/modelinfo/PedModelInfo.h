@@ -21,9 +21,9 @@ enum PedNode {
 class CPedModelInfo : public CClumpModelInfo
 {
 public:
-	int32 m_animGroup;
-	int32 m_pedType;
-	int32 m_pedStatType;
+	uint32 m_animGroup;
+	uint32 m_pedType;
+	uint32 m_pedStatType;
 	uint32 m_carsCanDrive;
 	CColModel *m_hitColModel;
 	RpAtomic *m_head;

@@ -171,6 +171,7 @@ struct CCam
 	void Cam_On_A_String_Unobscured(const CVector &TargetCoors, float BaseDist);
 	void FixCamWhenObscuredByVehicle(const CVector &TargetCoors);
 	bool Using3rdPersonMouseCam();
+	bool GetWeaponFirstPersonOn();
 
 	void Process_Debug(float *vec, float a, float b, float c);
 	void Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, float, float);
