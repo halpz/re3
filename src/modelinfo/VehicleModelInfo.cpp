@@ -875,6 +875,7 @@ CreateCarColourTexture(uint8 r, uint8 g, uint8 b)
 	pixels[14] = b;
 	pixels[15] = 0xFF;
 	RwImageSetPixels(img, pixels);
+	RwImageSetStride(img, 8);
 	RwImageSetPalette(img, nil);
 	RwImageFindRasterFormat(img, rwRASTERTYPETEXTURE, &width, &height, &depth, &format);
 	ras = RwRasterCreate(width, height, depth, format);

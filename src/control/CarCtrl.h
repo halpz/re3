@@ -14,4 +14,5 @@ public:
 	static int32 &NumAmbulancesOnDuty;
 	static int32 &NumFiretrucksOnDuty;
 	static bool &bCarsGeneratedAroundCamera;
+	static float &CarDensityMultiplier;
 };

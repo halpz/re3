@@ -56,37 +56,33 @@ extern void **rwengine;
 #include "skeleton.h"
 #include "Draw.h"
 
-/*
-	{ SCREEN_STRETCH }	Done originally by the game for most of the printed stuff.
-						Stretches everything to screen avoiding it's aspect ratio.
-						Looks good only in 4:3.
-
-	{ SCREEN_SCALE }	Alternative to the one above, it's used in this project to scale
-						original content to a *DEFINED aspect ratio with the possibility to
-						set a multiplier and scale content differently.
-						In theory should look good on any screen.					
-*/
-
-#define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
-
-#define SCREENW (RsGlobal.maximumWidth)
-#define SCREENH (RsGlobal.maximumHeight)
-
 #define DEFAULT_SCREEN_WIDTH (640)
 #define DEFAULT_SCREEN_HEIGHT (448)
-#define SCREEN_WIDTH float(RsGlobal.width)
-#define SCREEN_HEIGHT float(RsGlobal.height)
-#define SCREEN_STRETCH_X(a)   float((a) * (SCREEN_WIDTH / float(DEFAULT_SCREEN_WIDTH)))
-#define SCREEN_STRETCH_Y(a)   float((a) * (SCREEN_HEIGHT / float(DEFAULT_SCREEN_HEIGHT)))
-#define SCREEN_STRETCH_FROM_RIGHT(a)  float(SCREEN_WIDTH - SCREEN_STRETCH_X(a))
-#define SCREEN_STRETCH_FROM_BOTTOM(a) float(SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
+#define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
 
-#define SCREEN_MULTIPLIER (CDraw::GetScreenMult())
-#define SCREEN_SCALE(a) float((a) * (4.0f / 3.0f) / SCREEN_ASPECT_RATIO)
-#define SCREEN_SCALE_X(a) SCREEN_SCALE(SCREEN_STRETCH_X(a) * SCREEN_MULTIPLIER)
-#define SCREEN_SCALE_Y(a) (SCREEN_STRETCH_Y(a) * SCREEN_MULTIPLIER)
+// game uses maximumWidth/Height, but this probably won't work
+// with RW windowed mode
+#define SCREEN_WIDTH ((float)RsGlobal.width)
+#define SCREEN_HEIGHT ((float)RsGlobal.height)
+#define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
+
+// This scales from PS2 pixel coordinates to the real resolution
+#define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH / DEFAULT_SCREEN_WIDTH)
+#define SCREEN_STRETCH_Y(a)   ((a) * (float) SCREEN_HEIGHT / DEFAULT_SCREEN_HEIGHT)
+#define SCREEN_STRETCH_FROM_RIGHT(a)  (SCREEN_WIDTH - SCREEN_STRETCH_X(a))
+#define SCREEN_STRETCH_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
+
+// This scales from PS2 pixel coordinates while optionally maintaining the aspect ratio
+#define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a))
+#define SCREEN_SCALE_Y(a) SCREEN_STRETCH_Y(a)
 #define SCREEN_SCALE_FROM_RIGHT(a) (SCREEN_WIDTH - SCREEN_SCALE_X(a))
 #define SCREEN_SCALE_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_SCALE_Y(a))
+
+#ifdef ASPECT_RATIO_SCALE
+#define SCREEN_SCALE_AR(a) ((a) * (4.0f / 3.0f) / SCREEN_ASPECT_RATIO)
+#else
+#define SCREEN_SCALE_AR(a) (a)
+#endif
 
 #include "math/Vector.h"
 #include "math/Vector2D.h"

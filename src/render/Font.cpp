@@ -83,7 +83,7 @@ CFont::Initialise(void)
 	Sprite[1].SetTexture("pager", "pager_mask");
 	Sprite[2].SetTexture("font1", "font1_mask");
 	SetScale(1.0f, 1.0f);
-	SetSlantRefPoint(SCREENW, 0.0f);
+	SetSlantRefPoint(SCREEN_WIDTH, 0.0f);
 	SetSlant(0.0);
 	SetColor(CRGBA(0xFF, 0xFF, 0xFF, 0));
 	SetJustifyOff();
@@ -123,8 +123,8 @@ CFont::InitPerFrame(void)
 void
 CFont::PrintChar(float x, float y, uint16 c)
 {
-	if(x <= 0.0f || x >= SCREENW ||
-	   y <= 0.0f || y >= SCREENH)	// BUG: game uses SCREENW again
+	if(x <= 0.0f || x >= SCREEN_WIDTH ||
+	   y <= 0.0f || y >= SCREEN_HEIGHT)	// BUG: game uses SCREENW again
 		return;
 
 	float w = GetCharacterWidth(c) / 32.0f;

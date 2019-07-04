@@ -16,7 +16,7 @@ CSprite::CalcHorizonCoors(void)
 	CVector p = TheCamera.GetPosition() + CVector(TheCamera.CamFrontXNorm, TheCamera.CamFrontYNorm, 0.0f)*3000.0f;
 	p.z = 0.0f;
 	p = TheCamera.m_viewMatrix * p;
-	return p.y * RsGlobal.maximumHeight / p.z;
+	return p.y * SCREEN_HEIGHT / p.z;
 }
 
 bool 
@@ -27,13 +27,13 @@ CSprite::CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, 
 	if(out->z <= CDraw::GetNearClipZ() + 1.0f) return false;
 	if(out->z >= CDraw::GetFarClipZ() && farclip) return false;
 	float recip = 1.0f/out->z;
-	out->x *= RsGlobal.maximumWidth * recip;
-	out->y *= RsGlobal.maximumHeight * recip;
+	out->x *= SCREEN_WIDTH * recip;
+	out->y *= SCREEN_HEIGHT * recip;
 	// What is this? size?
 	*outw = 70.0f/CDraw::GetFOV();
 	*outh = 70.0f/CDraw::GetFOV();
-	*outw *= RsGlobal.maximumWidth * recip;
-	*outh *= RsGlobal.maximumHeight * recip;
+	*outw *= SCREEN_WIDTH * recip;
+	*outh *= SCREEN_HEIGHT * recip;
 	return true;
 }
 
@@ -99,17 +99,17 @@ CSprite::RenderOneXLUSprite(float x, float y, float z, float w, float h, uint8 r
 			us[i] = -xs[i] / (2.0f*w);
 			xs[i] = 0.0f;
 		}
-		if(xs[i] > RsGlobal.maximumWidth){
-			us[i] = 1.0f - (xs[i]-RsGlobal.maximumWidth) / (2.0f*w);
-			xs[i] = RsGlobal.maximumWidth;
+		if(xs[i] > SCREEN_WIDTH){
+			us[i] = 1.0f - (xs[i]-SCREEN_WIDTH) / (2.0f*w);
+			xs[i] = SCREEN_WIDTH;
 		}
 		if(ys[i] < 0.0f){
 			vs[i] = -ys[i] / (2.0f*h);
 			ys[i] = 0.0f;
 		}
-		if(ys[i] > RsGlobal.maximumHeight){
-			vs[i] = 1.0f - (ys[i]-RsGlobal.maximumHeight) / (2.0f*h);
-			ys[i] = RsGlobal.maximumHeight;
+		if(ys[i] > SCREEN_HEIGHT){
+			vs[i] = 1.0f - (ys[i]-SCREEN_HEIGHT) / (2.0f*h);
+			ys[i] = SCREEN_HEIGHT;
 		}
 	}
 
@@ -169,10 +169,10 @@ CSprite::RenderOneXLUSprite_Rotate_Aspect(float x, float y, float z, float w, fl
 	// No clipping, just culling
 	if(xs[0] < 0.0f && xs[1] < 0.0f && xs[2] < 0.0f && xs[3] < 0.0f) return;
 	if(ys[0] < 0.0f && ys[1] < 0.0f && ys[2] < 0.0f && ys[3] < 0.0f) return;
-	if(xs[0] > RsGlobal.maximumWidth && xs[1] > RsGlobal.maximumWidth &&
-	   xs[2] > RsGlobal.maximumWidth && xs[3] > RsGlobal.maximumWidth) return;
-	if(ys[0] > RsGlobal.maximumHeight && ys[1] > RsGlobal.maximumHeight &&
-	   ys[2] > RsGlobal.maximumHeight && ys[3] > RsGlobal.maximumHeight) return;
+	if(xs[0] > SCREEN_WIDTH && xs[1] > SCREEN_WIDTH &&
+	   xs[2] > SCREEN_WIDTH && xs[3] > SCREEN_WIDTH) return;
+	if(ys[0] > SCREEN_HEIGHT && ys[1] > SCREEN_HEIGHT &&
+	   ys[2] > SCREEN_HEIGHT && ys[3] > SCREEN_HEIGHT) return;
 
 	float screenz = m_f2DNearScreenZ +
 		(z-CDraw::GetNearClipZ())*(m_f2DFarScreenZ-m_f2DNearScreenZ)*CDraw::GetFarClipZ() /
@@ -221,17 +221,17 @@ CSprite::RenderBufferedOneXLUSprite(float x, float y, float z, float w, float h,
 			us[i] = -xs[i] / (2.0f*w);
 			xs[i] = 0.0f;
 		}
-		if(xs[i] > RsGlobal.maximumWidth){
-			us[i] = 1.0f - (xs[i]-RsGlobal.maximumWidth) / (2.0f*w);
-			xs[i] = RsGlobal.maximumWidth;
+		if(xs[i] > SCREEN_WIDTH){
+			us[i] = 1.0f - (xs[i]-SCREEN_WIDTH) / (2.0f*w);
+			xs[i] = SCREEN_WIDTH;
 		}
 		if(ys[i] < 0.0f){
 			vs[i] = -ys[i] / (2.0f*h);
 			ys[i] = 0.0f;
 		}
-		if(ys[i] > RsGlobal.maximumHeight){
-			vs[i] = 1.0f - (ys[i]-RsGlobal.maximumHeight) / (2.0f*h);
-			ys[i] = RsGlobal.maximumHeight;
+		if(ys[i] > SCREEN_HEIGHT){
+			vs[i] = 1.0f - (ys[i]-SCREEN_HEIGHT) / (2.0f*h);
+			ys[i] = SCREEN_HEIGHT;
 		}
 	}
 
@@ -283,10 +283,10 @@ CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension(float x, float y, float z, 
 	// No clipping, just culling
 	if(xs[0] < 0.0f && xs[1] < 0.0f && xs[2] < 0.0f && xs[3] < 0.0f) return;
 	if(ys[0] < 0.0f && ys[1] < 0.0f && ys[2] < 0.0f && ys[3] < 0.0f) return;
-	if(xs[0] > RsGlobal.maximumWidth && xs[1] > RsGlobal.maximumWidth &&
-	   xs[2] > RsGlobal.maximumWidth && xs[3] > RsGlobal.maximumWidth) return;
-	if(ys[0] > RsGlobal.maximumHeight && ys[1] > RsGlobal.maximumHeight &&
-	   ys[2] > RsGlobal.maximumHeight && ys[3] > RsGlobal.maximumHeight) return;
+	if(xs[0] > SCREEN_WIDTH && xs[1] > SCREEN_WIDTH &&
+	   xs[2] > SCREEN_WIDTH && xs[3] > SCREEN_WIDTH) return;
+	if(ys[0] > SCREEN_HEIGHT && ys[1] > SCREEN_HEIGHT &&
+	   ys[2] > SCREEN_HEIGHT && ys[3] > SCREEN_HEIGHT) return;
 
 	float screenz = m_f2DNearScreenZ +
 		(z-CDraw::GetNearClipZ())*(m_f2DFarScreenZ-m_f2DNearScreenZ)*CDraw::GetFarClipZ() /
@@ -335,10 +335,10 @@ CSprite::RenderBufferedOneXLUSprite_Rotate_Aspect(float x, float y, float z, flo
 	// No clipping, just culling
 	if(xs[0] < 0.0f && xs[1] < 0.0f && xs[2] < 0.0f && xs[3] < 0.0f) return;
 	if(ys[0] < 0.0f && ys[1] < 0.0f && ys[2] < 0.0f && ys[3] < 0.0f) return;
-	if(xs[0] > RsGlobal.maximumWidth && xs[1] > RsGlobal.maximumWidth &&
-	   xs[2] > RsGlobal.maximumWidth && xs[3] > RsGlobal.maximumWidth) return;
-	if(ys[0] > RsGlobal.maximumHeight && ys[1] > RsGlobal.maximumHeight &&
-	   ys[2] > RsGlobal.maximumHeight && ys[3] > RsGlobal.maximumHeight) return;
+	if(xs[0] > SCREEN_WIDTH && xs[1] > SCREEN_WIDTH &&
+	   xs[2] > SCREEN_WIDTH && xs[3] > SCREEN_WIDTH) return;
+	if(ys[0] > SCREEN_HEIGHT && ys[1] > SCREEN_HEIGHT &&
+	   ys[2] > SCREEN_HEIGHT && ys[3] > SCREEN_HEIGHT) return;
 
 	float screenz = m_f2DNearScreenZ +
 		(z-CDraw::GetNearClipZ())*(m_f2DFarScreenZ-m_f2DNearScreenZ)*CDraw::GetFarClipZ() /
@@ -388,10 +388,10 @@ CSprite::RenderBufferedOneXLUSprite_Rotate_2Colours(float x, float y, float z, f
 	// No clipping, just culling
 	if(xs[0] < 0.0f && xs[1] < 0.0f && xs[2] < 0.0f && xs[3] < 0.0f) return;
 	if(ys[0] < 0.0f && ys[1] < 0.0f && ys[2] < 0.0f && ys[3] < 0.0f) return;
-	if(xs[0] > RsGlobal.maximumWidth && xs[1] > RsGlobal.maximumWidth &&
-	   xs[2] > RsGlobal.maximumWidth && xs[3] > RsGlobal.maximumWidth) return;
-	if(ys[0] > RsGlobal.maximumHeight && ys[1] > RsGlobal.maximumHeight &&
-	   ys[2] > RsGlobal.maximumHeight && ys[3] > RsGlobal.maximumHeight) return;
+	if(xs[0] > SCREEN_WIDTH && xs[1] > SCREEN_WIDTH &&
+	   xs[2] > SCREEN_WIDTH && xs[3] > SCREEN_WIDTH) return;
+	if(ys[0] > SCREEN_HEIGHT && ys[1] > SCREEN_HEIGHT &&
+	   ys[2] > SCREEN_HEIGHT && ys[3] > SCREEN_HEIGHT) return;
 
 	// Colour factors, cx/y is the direction in which colours change from rgb1 to rgb2
 	cf[0] = (cx*(-c-s) + cy*(-c+s))*0.5f + 0.5f;

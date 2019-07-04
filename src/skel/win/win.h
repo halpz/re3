@@ -63,14 +63,14 @@ HRESULT _InputInitialise();
 HRESULT _InputInitialiseMouse();
 HRESULT CapturePad(RwInt32 padID);
 void _InputInitialiseJoys();
-HRESULT _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num);
+void _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num);
 HRESULT _InputAddJoys();
 HRESULT _InputGetMouseState(DIMOUSESTATE2 *state);
 void _InputShutdown();
 BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext );
 BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key);
 void _InputTranslateShiftKeyUpDown(RsKeyCodes *rs);;
-BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, bool bDown);
+BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, BOOLEAN bDown);
 BOOL _InputIsExtended(INT flag);
 
 void InitialiseLanguage();
@@ -79,6 +79,10 @@ void CenterVideo(void);
 void CloseClip(void);
 
 RwChar **_psGetVideoModeList();
+RwInt32 _psGetNumVideModes();
+
+void _psSelectScreenVM(RwInt32 videoMode);
+void HandleExit();
 
 #ifdef    __cplusplus
 }

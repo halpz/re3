@@ -48,14 +48,8 @@
 #include "RpAnimBlend.h"
 #include "Frontend.h"
 
-#define DEFAULT_VIEWWINDOW (tan(CDraw::GetFOV() * (360.0f / PI)))
+#define DEFAULT_VIEWWINDOW (tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
 
-#ifdef WIDE_SCREEN
-#define DEFAULT_ASPECTRATIO (16.0f/9.0f)
-#else
-#define DEFAULT_ASPECTRATIO (4.0f/3.0f)
-#endif
-													   
 
 GlobalScene &Scene = *(GlobalScene*)0x726768;
 
@@ -100,6 +94,10 @@ InitialiseGame(void)
 void
 Idle(void *arg)
 {
+#ifdef ASPECT_RATIO_SCALE
+	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
+#endif
+
 	CTimer::Update();
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
@@ -126,8 +124,8 @@ Idle(void *arg)
 #ifdef GTA_PC
 		// This is from SA, but it's nice for windowed mode
 		RwV2d pos;
-		pos.x = SCREENW/2.0f;
-		pos.y = SCREENH/2.0f;
+		pos.x = SCREEN_WIDTH/2.0f;
+		pos.y = SCREEN_HEIGHT/2.0f;
 		RsMouseSetPos(&pos);
 #endif
 		CRenderer::ConstructRenderList();
@@ -160,9 +158,8 @@ Idle(void *arg)
 
 		Render2dStuff();
 	}else{
-		float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-		CDraw::CalculateAspectRatio();
-		CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
+		float viewWindow = DEFAULT_VIEWWINDOW;
+		CameraSize(Scene.camera, nil, viewWindow, DEFAULT_ASPECT_RATIO);
 		CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 		RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 		if(!RsCameraBeginUpdate(Scene.camera))
@@ -170,7 +167,9 @@ Idle(void *arg)
 	}
 
 	RenderMenus();
+#ifndef FINAL
 	PrintGameVersion();
+#endif
 	DoFade();
 	Render2dStuffAfterFade();
 	CCredits::Render();
@@ -183,6 +182,10 @@ Idle(void *arg)
 void
 FrontendIdle(void)
 {
+#ifdef ASPECT_RATIO_SCALE
+	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
+#endif
+
 	CTimer::Update();
 	CSprite2d::SetRecipNearClip();
 	CSprite2d::InitPerFrame();
@@ -193,9 +196,8 @@ FrontendIdle(void)
 	if(RsGlobal.quit)
 		return;
 
-	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-	CDraw::CalculateAspectRatio();
-	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
+	float viewWindow = DEFAULT_VIEWWINDOW;
+	CameraSize(Scene.camera, nil, viewWindow, DEFAULT_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 	if(!RsCameraBeginUpdate(Scene.camera))
@@ -203,7 +205,9 @@ FrontendIdle(void)
 
 	DefinedState();
 	RenderMenus();
+#ifndef FINAL
 	PrintGameVersion();
+#endif
 	DoFade();
 	Render2dStuffAfterFade();
 	CFont::DrawFonts();
@@ -216,9 +220,7 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	CRGBA TopColor(TopRed, TopGreen, TopBlue, Alpha);
 	CRGBA BottomColor(BottomRed, BottomGreen, BottomBlue, Alpha);
 
-	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-	CDraw::CalculateAspectRatio();
-	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
+	CameraSize(Scene.camera, nil, DEFAULT_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 
@@ -228,7 +230,7 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	CSprite2d::InitPerFrame();
 
 	if(Alpha != 0)
-		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH), BottomColor, BottomColor, TopColor, TopColor);
+		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), BottomColor, BottomColor, TopColor, TopColor);
 
 	return true;
 }
@@ -236,9 +238,7 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 bool
 DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha)
 {
-	float viewWindow = tan(DEGTORAD(CDraw::GetFOV() * 0.5f));
-	CDraw::CalculateAspectRatio();
-	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
+	CameraSize(Scene.camera, nil, DEFAULT_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 
@@ -346,15 +346,15 @@ Render2dStuff(void)
 
 		// top and bottom strips
 		if (weaponType == WEAPONTYPE_ROCKETLAUNCHER) {
-			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH / 2 - SCREEN_SCALE_Y(180)), black);
-			CSprite2d::DrawRect(CRect(0.0f, SCREENH / 2 + SCREEN_SCALE_Y(170), SCREENW, SCREENH), black);
+			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(180)), black);
+			CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(170), SCREEN_WIDTH, SCREEN_HEIGHT), black);
 		}
 		else {
-			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW, SCREENH / 2 - SCREEN_SCALE_Y(210)), black);
-			CSprite2d::DrawRect(CRect(0.0f, SCREENH / 2 + SCREEN_SCALE_Y(210), SCREENW, SCREENH), black);
+			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(210)), black);
+			CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(210), SCREEN_WIDTH, SCREEN_HEIGHT), black);
 		}
-		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREENW / 2 - SCREEN_SCALE_X(210), SCREENH), black);
-		CSprite2d::DrawRect(CRect(SCREENW / 2 + SCREEN_SCALE_X(210), 0.0f, SCREENW, SCREENH), black);
+		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH / 2 - SCREEN_SCALE_X(210), SCREEN_HEIGHT), black);
+		CSprite2d::DrawRect(CRect(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(210), 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), black);
 	}
 
 	MusicManager.DisplayRadioStationName();
@@ -444,16 +444,16 @@ DoFade(void)
 
 		if(TheCamera.m_WideScreenOn){
 			// what's this?
-			float y = SCREENH/2 * TheCamera.m_ScreenReductionPercentage/100.0f;
+			float y = SCREEN_HEIGHT/2 * TheCamera.m_ScreenReductionPercentage/100.0f;
 			rect.left = 0.0f;
-			rect.right = SCREENW;
+			rect.right = SCREEN_WIDTH;
 			rect.top = y - 8.0f;
-			rect.bottom = SCREENH - y - 8.0f;
+			rect.bottom = SCREEN_HEIGHT - y - 8.0f;
 		}else{
 			rect.left = 0.0f;
-			rect.right = SCREENW;
+			rect.right = SCREEN_WIDTH;
 			rect.top = 0.0f;
-			rect.bottom = SCREENH;
+			rect.bottom = SCREEN_HEIGHT;
 		}
 		CSprite2d::DrawRect(rect, fadeColor);
 
@@ -462,7 +462,7 @@ DoFade(void)
 			fadeColor.g = 255;
 			fadeColor.b = 255;
 			fadeColor.a = CDraw::FadeValue;
-			splash->Draw(CRect(0.0f, 0.0f, SCREENW, SCREENH), fadeColor, fadeColor, fadeColor, fadeColor);
+			splash->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), fadeColor, fadeColor, fadeColor, fadeColor);
 		}
 	}
 }
@@ -549,14 +549,14 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		CFont::InitPerFrame();
 		DefinedState();
 		RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
-		splash->Draw(CRect(0.0f, 0.0f, SCREENW, SCREENH), CRGBA(255, 255, 255, 255));
+		splash->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
 
 		if(str1){
 			NumberOfChunksLoaded += 1;
 
 			float hpos = SCREEN_SCALE_X(40);
-			float length = SCREENW - SCREEN_SCALE_X(100);
-			float vpos = SCREENH - SCREEN_SCALE_Y(13);
+			float length = SCREEN_WIDTH - SCREEN_SCALE_X(100);
+			float vpos = SCREEN_HEIGHT - SCREEN_SCALE_Y(13);
 			float height = SCREEN_SCALE_Y(7);
 			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(40, 53, 68, 255));
 
@@ -617,7 +617,7 @@ LoadingIslandScreen(const char *levelName)
 	CFont::InitPerFrame();
 	DefinedState();
 	col = CRGBA(255, 255, 255, 255);
-	splash->Draw(CRect(0.0f, 0.0f, SCREENW, SCREENH), col, col, col, col);
+	splash->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), col, col, col, col);
 	CFont::SetBackgroundOff();
 	CFont::SetScale(1.5f, 1.5f);
 	CFont::SetPropOn();
@@ -630,12 +630,12 @@ LoadingIslandScreen(const char *levelName)
 	CFont::SetDropShadowPosition(3);
 	CFont::SetColor(CRGBA(243, 237, 71, 255));
 	CFont::SetScale(SCREEN_STRETCH_X(1.2f), SCREEN_STRETCH_Y(1.2f));
-	CFont::PrintString(SCREENW - 20, SCREEN_STRETCH_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
+	CFont::PrintString(SCREEN_WIDTH - 20, SCREEN_STRETCH_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
 	TextCopy(wstr, name);
 	TheText.UpperCase(wstr);
 	CFont::SetColor(CRGBA(243, 237, 71, 255));
 	CFont::SetScale(SCREEN_STRETCH_X(1.2f), SCREEN_STRETCH_Y(1.2f));
-	CFont::PrintString(SCREENW-20, SCREEN_STRETCH_FROM_BOTTOM(80.0f), wstr);
+	CFont::PrintString(SCREEN_WIDTH-20, SCREEN_STRETCH_FROM_BOTTOM(80.0f), wstr);
 	CFont::DrawFonts();
 	DoRWStuffEndOfFrame();
 }
@@ -782,7 +782,7 @@ AppEventHandler(RsEvent event, void *param)
 		{
 											
 			CameraSize(Scene.camera, (RwRect *)param,
-				DEFAULT_VIEWWINDOW, DEFAULT_ASPECTRATIO);
+				DEFAULT_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 			
 			return rsEVENTPROCESSED;
 		}
