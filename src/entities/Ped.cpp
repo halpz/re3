@@ -2073,12 +2073,12 @@ CPed::SetupLighting(void)
 {
 	ActivateDirectional();
 	SetAmbientColoursForPedsCarsAndObjects();
-	if (m_ped_flagB10) {
+	if (bRenderScorched) {
 		WorldReplaceNormalLightsWithScorched(Scene.world, 0.1f);
 	} else {
 		// Note that this lightMult is only affected by LIGHT_DARKEN. If there's no LIGHT_DARKEN, it will be 1.0.
 		float lightMult = CPointLights::GenerateLightsAffectingObject(&GetPosition());
-		if (!m_ped_flagB20 && lightMult != 1.0f) {
+		if (!bHasBlip && lightMult != 1.0f) {
 			SetAmbientAndDirectionalColours(lightMult);
 			return true;
 		}
@@ -2252,7 +2252,7 @@ CPed::CanPedDriveOff(void)
 bool
 CPed::CanPedJumpThis(int32 unused)
 {
-	CVector2D forward(-sin(m_fRotationCur), -cos(m_fRotationCur));
+	CVector2D forward(-sin(m_fRotationCur), cos(m_fRotationCur));
 	CVector pos = GetPosition();
 	// wat?
 	CVector forwardPos(
