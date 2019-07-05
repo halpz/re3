@@ -135,34 +135,33 @@ WRAPPER static void ApplyPanelDamageToCar(uint32, CAutomobile*, bool) { EAXJMP(0
 #else
 static void ApplyPanelDamageToCar(uint32 panels, CAutomobile* vehicle, bool flying)
 {
-	CDamageManager::PanelStatus rp = *(CDamageManager::PanelStatus*)&panels;
-	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontLeftStatus != rp.m_nPanelFrontLeftStatus){
-		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontLeftStatus = rp.m_nPanelFrontLeftStatus;
-		vehicle->SetPanelDamage(13, CDamageManager::PANEL_FL, flying);
+	if(vehicle->m_DamageManager.GetPanelStatus(VEHPANEL_FRONT_LEFT) != CDamageManager::GetPanelStatus(panels, VEHPANEL_FRONT_LEFT)){
+		vehicle->m_DamageManager.SetPanelStatus(VEHPANEL_FRONT_LEFT, CDamageManager::GetPanelStatus(panels, VEHPANEL_FRONT_LEFT));
+		vehicle->SetPanelDamage(13, VEHPANEL_FRONT_LEFT, flying);
 	}
-	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontRightStatus != rp.m_nPanelFrontRightStatus) {
-		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontRightStatus = rp.m_nPanelFrontRightStatus;
-		vehicle->SetPanelDamage(9, CDamageManager::PANEL_FR, flying);
+	if(vehicle->m_DamageManager.GetPanelStatus(VEHPANEL_FRONT_RIGHT) != CDamageManager::GetPanelStatus(panels, VEHPANEL_FRONT_RIGHT)){
+		vehicle->m_DamageManager.SetPanelStatus(VEHPANEL_FRONT_RIGHT, CDamageManager::GetPanelStatus(panels, VEHPANEL_FRONT_RIGHT));
+		vehicle->SetPanelDamage(9, VEHPANEL_FRONT_RIGHT, flying);
 	}
-	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackLeftStatus != rp.m_nPanelBackLeftStatus) {
-		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackLeftStatus = rp.m_nPanelBackLeftStatus;
-		vehicle->SetPanelDamage(14, CDamageManager::PANEL_RL, flying);
+	if(vehicle->m_DamageManager.GetPanelStatus(VEHPANEL_REAR_LEFT) != CDamageManager::GetPanelStatus(panels, VEHPANEL_REAR_LEFT)){
+		vehicle->m_DamageManager.SetPanelStatus(VEHPANEL_REAR_LEFT, CDamageManager::GetPanelStatus(panels, VEHPANEL_REAR_LEFT));
+		vehicle->SetPanelDamage(14, VEHPANEL_REAR_LEFT, flying);
 	}
-	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackRightStatus != rp.m_nPanelBackRightStatus) {
-		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackRightStatus = rp.m_nPanelBackRightStatus;
-		vehicle->SetPanelDamage(10, CDamageManager::PANEL_RR, flying);
+	if(vehicle->m_DamageManager.GetPanelStatus(VEHPANEL_REAR_RIGHT) != CDamageManager::GetPanelStatus(panels, VEHPANEL_REAR_RIGHT)){
+		vehicle->m_DamageManager.SetPanelStatus(VEHPANEL_REAR_RIGHT, CDamageManager::GetPanelStatus(panels, VEHPANEL_REAR_RIGHT));
+		vehicle->SetPanelDamage(10, VEHPANEL_REAR_RIGHT, flying);
 	}
-	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nWindshieldStatus != rp.m_nWindshieldStatus) {
-		vehicle->m_DamageManager.m_sPanelsStatus.m_nWindshieldStatus = rp.m_nWindshieldStatus;
-		vehicle->SetPanelDamage(19, CDamageManager::PANEL_WINDSHIELD, flying);
+	if(vehicle->m_DamageManager.GetPanelStatus(VEHPANEL_WINDSCREEN) != CDamageManager::GetPanelStatus(panels, VEHPANEL_WINDSCREEN)){
+		vehicle->m_DamageManager.SetPanelStatus(VEHPANEL_WINDSCREEN, CDamageManager::GetPanelStatus(panels, VEHPANEL_WINDSCREEN));
+		vehicle->SetPanelDamage(19, VEHPANEL_WINDSCREEN, flying);
 	}
-	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontStatus != rp.m_nPanelFrontStatus) {
-		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelFrontStatus = rp.m_nPanelFrontStatus;
-		vehicle->SetPanelDamage(7, CDamageManager::PANEL_FRONT, flying);
+	if(vehicle->m_DamageManager.GetPanelStatus(VEHBUMPER_FRONT) != CDamageManager::GetPanelStatus(panels, VEHBUMPER_FRONT)){
+		vehicle->m_DamageManager.SetPanelStatus(VEHBUMPER_FRONT, CDamageManager::GetPanelStatus(panels, VEHBUMPER_FRONT));
+		vehicle->SetPanelDamage(7, VEHBUMPER_FRONT, flying);
 	}
-	if (vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackStatus != rp.m_nPanelBackStatus) {
-		vehicle->m_DamageManager.m_sPanelsStatus.m_nPanelBackStatus = rp.m_nPanelBackStatus;
-		vehicle->SetPanelDamage(8, CDamageManager::PANEL_BACK, flying);
+	if(vehicle->m_DamageManager.GetPanelStatus(VEHBUMPER_REAR) != CDamageManager::GetPanelStatus(panels, VEHBUMPER_REAR)){
+		vehicle->m_DamageManager.SetPanelStatus(VEHBUMPER_REAR, CDamageManager::GetPanelStatus(panels, VEHBUMPER_REAR));
+		vehicle->SetPanelDamage(8, VEHBUMPER_REAR, flying);
 	}
 }
 #endif
@@ -625,7 +624,7 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 	vp->matrix.CompressFromFullMatrix(vehicle->GetMatrix());
 	vp->health = vehicle->m_fHealth / 4.0f; /* Not anticipated that health can be > 1000. */
 	vp->acceleration = vehicle->m_fGasPedal * 100.0f;
-	vp->panels = vehicle->IsCar() ? ((CAutomobile*)vehicle)->m_DamageManager.m_abPanelsStatus : 0;
+	vp->panels = vehicle->IsCar() ? ((CAutomobile*)vehicle)->m_DamageManager.m_panelStatus : 0;
 	vp->velocityX = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetSpeed().x)); /* 8000!? */
 	vp->velocityY = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetSpeed().y));
 	vp->velocityZ = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetSpeed().z));
@@ -646,7 +645,7 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 		vp->door_angles[1] = 127.0f / M_PI * car->m_aDoors[3].m_fAngle;
 		vp->door_status = 0;
 		for (int i = 0; i < 6; i++){
-			if (car->m_DamageManager.m_bDoorStatus[i] == 3)
+			if (car->m_DamageManager.GetDoorStatus(i) == 3)
 				vp->door_status |= BIT(i);
 		}
 	}
@@ -690,32 +689,32 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 		car->m_aDoors[2].m_fAngle = car->m_aDoors[2].m_fPreviousAngle = vp->door_angles[0] * M_PI / 127.0f;
 		car->m_aDoors[3].m_fAngle = car->m_aDoors[3].m_fPreviousAngle = vp->door_angles[1] * M_PI / 127.0f;
 		if (vp->door_angles[0])
-			car->m_DamageManager.m_bDoorStatus[2] = 2;
+			car->m_DamageManager.SetDoorStatus(2, 2);
 		if (vp->door_angles[1])
-			car->m_DamageManager.m_bDoorStatus[3] = 2;
-		if (vp->door_status & 1 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_BONNET) != 3){
-			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_BONNET, 3);
-			car->SetDoorDamage(17, CDamageManager::CAR_DOOR_BONNET, true);
+			car->m_DamageManager.SetDoorStatus(3, 2);
+		if (vp->door_status & 1 && car->m_DamageManager.GetDoorStatus(VEHDOOR_BONNET) != 3){
+			car->m_DamageManager.SetDoorStatus(VEHDOOR_BONNET, 3);
+			car->SetDoorDamage(17, VEHDOOR_BONNET, true);
 		}
-		if (vp->door_status & 2 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_BUMPER) != 3) {
-			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_BUMPER, 3);
-			car->SetDoorDamage(18, CDamageManager::CAR_DOOR_BUMPER, true);
+		if (vp->door_status & 2 && car->m_DamageManager.GetDoorStatus(VEHDOOR_BOOT) != 3) {
+			car->m_DamageManager.SetDoorStatus(VEHDOOR_BOOT, 3);
+			car->SetDoorDamage(18, VEHDOOR_BOOT, true);
 		}
-		if (vp->door_status & 4 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_LF) != 3) {
-			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_LF, 3);
-			car->SetDoorDamage(15, CDamageManager::CAR_DOOR_LF, true);
+		if (vp->door_status & 4 && car->m_DamageManager.GetDoorStatus(VEHDOOR_FRONT_LEFT) != 3) {
+			car->m_DamageManager.SetDoorStatus(VEHDOOR_FRONT_LEFT, 3);
+			car->SetDoorDamage(15, VEHDOOR_FRONT_LEFT, true);
 		}
-		if (vp->door_status & 8 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_RF) != 3) {
-			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_RF, 3);
-			car->SetDoorDamage(11, CDamageManager::CAR_DOOR_RF, true);
+		if (vp->door_status & 8 && car->m_DamageManager.GetDoorStatus(VEHDOOR_FRONT_RIGHT) != 3) {
+			car->m_DamageManager.SetDoorStatus(VEHDOOR_FRONT_RIGHT, 3);
+			car->SetDoorDamage(11, VEHDOOR_FRONT_RIGHT, true);
 		}
-		if (vp->door_status & 0x10 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_LR) != 3) {
-			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_LR, 3);
-			car->SetDoorDamage(16, CDamageManager::CAR_DOOR_LR, true);
+		if (vp->door_status & 0x10 && car->m_DamageManager.GetDoorStatus(VEHDOOR_REAR_LEFT) != 3) {
+			car->m_DamageManager.SetDoorStatus(VEHDOOR_REAR_LEFT, 3);
+			car->SetDoorDamage(16, VEHDOOR_REAR_LEFT, true);
 		}
-		if (vp->door_status & 0x20 && car->m_DamageManager.GetDoorStatus(CDamageManager::CAR_DOOR_RR) != 3) {
-			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_RR, 3);
-			car->SetDoorDamage(12, CDamageManager::CAR_DOOR_RR, true);
+		if (vp->door_status & 0x20 && car->m_DamageManager.GetDoorStatus(VEHDOOR_REAR_RIGHT) != 3) {
+			car->m_DamageManager.SetDoorStatus(VEHDOOR_REAR_RIGHT, 3);
+			car->SetDoorDamage(12, VEHDOOR_REAR_RIGHT, true);
 		}
 		vehicle->bEngineOn = true;
 		if (vehicle->IsCar())
@@ -1195,8 +1194,8 @@ void CReplay::RestoreStuffFromMem(void)
 		}
 		if (vehicle->IsCar()){
 			CAutomobile* car = (CAutomobile*)vehicle;
-			int32 panels = car->m_DamageManager.m_abPanelsStatus;
-			car->m_DamageManager.m_abPanelsStatus = 0;
+			int32 panels = car->m_DamageManager.m_panelStatus;
+			car->m_DamageManager.m_panelStatus = 0;
 			ApplyPanelDamageToCar(panels, car, true);
 			car->SetDoorDamage(17, 0, true); /* BONNET */
 			car->SetDoorDamage(18, 1, true); /* BUMPER */
