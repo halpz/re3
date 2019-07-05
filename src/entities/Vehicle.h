@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Physical.h"
+#include "AutoPilot.h"
 
 class CPed;
 class CFire;
@@ -115,10 +116,7 @@ class CVehicle : public CPhysical
 public:
 	// 0x128
 	tHandlingData *m_handling;
-
-	// CAutoPilot
-	uint8 stuff1[112];
-
+	CAutoPilot m_autoPilot;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
 	uint8 m_aExtras[2];

@@ -35,6 +35,12 @@ CWeapon::Reload(void)
 		m_nAmmoInClip = m_nAmmoTotal;
 }
 
+bool
+CWeapon::IsTypeMelee(void)
+{
+	return m_eWeaponType == WEAPONTYPE_UNARMED || m_eWeaponType == WEAPONTYPE_BASEBALLBAT;
+}
+
 STARTPATCHES
 	InjectHook(0x55C330, &CWeapon::Initialise, PATCH_JUMP);
 	InjectHook(0x5639D0, &CWeapon::Reload, PATCH_JUMP);
