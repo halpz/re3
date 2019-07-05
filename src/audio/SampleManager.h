@@ -11,6 +11,13 @@ struct tSample {
 class CSampleManager
 {
 public:
+	bool IsSampleBankLoaded(uint8);
+	void UnloadSampleBank(uint8);
+	void Terminate();
+
+	bool Initialise();
+	int32 GetActiveSamples();
+
 	void ReleaseDigitalHandle();
 	void RequireDigitalHandle();
 

@@ -94,6 +94,102 @@ constexpr int totalAudioEntitiesSlots = 200;
 
 char &g_nMissionAudioPlayingStatus = *(char *)0x60ED88;
 
+void
+cAudioManager::Initialise()
+{
+	if(!m_bIsInitialised) {
+		PreInitialiseGameSpecificSetup();
+		m_bIsInitialised = cSampleManager.Initialise();
+		if(m_bIsInitialised) {
+			m_bActiveSamples = cSampleManager.GetActiveSamples();
+			if(m_bActiveSamples <= 1u) {
+				Terminate();
+			} else {
+				--m_bActiveSamples;
+				PostInitialiseGameSpecificSetup();
+				InitialisePoliceRadioZones();
+				InitialisePoliceRadio();
+				MusicManager.Initialise();
+			}
+		}
+	}
+}
+
+void
+cAudioManager::PostInitialiseGameSpecificSetup()
+{
+	m_nFireAudioEntity = CreateEntity(
+	    AUDIOTYPE_FIRE, (CPhysical *)0x8F31D0); // last is addr of firemanager @todo change
+	if(m_nFireAudioEntity >= 0) cAudioManager::SetEntityStatus(m_nFireAudioEntity, 1);
+
+	m_nCollisionEntity = CreateEntity(AUDIOTYPE_COLLISION, (CPhysical *)1);
+	if(m_nCollisionEntity >= 0) cAudioManager::SetEntityStatus(m_nCollisionEntity, 1);
+
+	m_nFrontEndEntity = CreateEntity(AUDIOTYPE_FRONTEND, (CPhysical *)1);
+	if(m_nFrontEndEntity >= 0) cAudioManager::SetEntityStatus(m_nFrontEndEntity, 1);
+
+	m_nProjectileEntity = CreateEntity(AUDIOTYPE_PROJECTILE, (CPhysical *)1);
+	if(m_nProjectileEntity >= 0) cAudioManager::SetEntityStatus(m_nProjectileEntity, 1);
+
+	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATER_CANNON, (CPhysical *)1);
+	if(m_nWaterCannonEntity >= 0) cAudioManager::SetEntityStatus(m_nWaterCannonEntity, 1);
+
+	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_D, (CPhysical *)1);
+	if(m_nPoliceChannelEntity >= 0) cAudioManager::SetEntityStatus(m_nPoliceChannelEntity, 1);
+
+	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (CPhysical *)1);
+	if(m_nBridgeEntity >= 0) cAudioManager::SetEntityStatus(m_nBridgeEntity, 1);
+
+	m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
+	m_sMissionAudio.m_bLoadingStatus = 0;
+	m_sMissionAudio.m_bPlayStatus = 0;
+	m_sMissionAudio.field_22 = 0;
+	m_sMissionAudio.m_bIsPlayed = 0;
+	m_sMissionAudio.field_12 = 1;
+	m_sMissionAudio.field_24 = 0;
+	ResetAudioLogicTimers((int32)CTimer::GetTimeInMilliseconds);
+}
+
+WRAPPER
+void
+cAudioManager::InitialisePoliceRadioZones()
+{
+	EAXJMP(0x57EAC0);
+}
+
+WRAPPER
+void
+cAudioManager::ResetAudioLogicTimers(int32 timer)
+{
+	EAXJMP(0x569650);
+}
+
+void
+cAudioManager::Terminate()
+{
+	if(m_bIsInitialised) {
+		MusicManager.Terminate();
+
+		for(uint32 i = 0; i < totalAudioEntitiesSlots; i++) {
+			m_asAudioEntities[i].m_bIsUsed = 0;
+			m_anAudioEntityIndices[i] = 200;
+		}
+
+		m_nAudioEntitiesTotal = 0;
+		m_nScriptObjectEntityTotal = 0;
+		PreTerminateGameSpecificShutdown();
+
+		for(uint32 i = 0; i < 2; i++) {
+			if(cSampleManager.IsSampleBankLoaded(i)) cSampleManager.UnloadSampleBank(i);
+		}
+
+		cSampleManager.Terminate();
+
+		m_bIsInitialised = 0;
+		PostTerminateGameSpecificShutdown();
+	}
+}
+
 char
 cAudioManager::GetMissionScriptPoliceAudioPlayingStatus()
 {
@@ -469,17 +565,17 @@ cAudioManager::IsAudioInitialised() const
 }
 
 int32
-cAudioManager::CreateEntity(int32 type, CPhysical *memory)
+cAudioManager::CreateEntity(int32 type, CPhysical *entity)
 {
 	if(!m_bIsInitialised) return -4;
-	if(!memory) return -2;
+	if(!entity) return -2;
 	if(type >= TOTAL_AUDIO_TYPES) return -1;
 	for(uint32 i = 0; i < 200; i++) {
 		if(!m_asAudioEntities[i].m_bIsUsed) {
 			m_asAudioEntities[i].m_bIsUsed = true;
 			m_asAudioEntities[i].m_bStatus = 0;
 			m_asAudioEntities[i].m_nType = (eAudioType)type;
-			m_asAudioEntities[i].m_pEntity = memory;
+			m_asAudioEntities[i].m_pEntity = entity;
 			m_asAudioEntities[i].m_awAudioEvent[0] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[1] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[2] = SOUND_TOTAL_PED_SOUNDS;
@@ -2720,6 +2816,12 @@ cAudioManager::Service()
 }
 
 STARTPATCHES
+InjectHook(0x57A0E0, &cAudioManager::Initialise, PATCH_JUMP);
+InjectHook(0x569420, &cAudioManager::PostInitialiseGameSpecificSetup, PATCH_JUMP);
+//InjectHook(0x57EAC0, &cAudioManager::InitialisePoliceRadioZones, PATCH_JUMP);
+//InjectHook(0x569650, &cAudioManager::ResetAudioLogicTimers, PATCH_JUMP);
+InjectHook(0x57A150, &cAudioManager::Terminate, PATCH_JUMP);
+
 InjectHook(0x57F050, &cAudioManager::GetMissionScriptPoliceAudioPlayingStatus, PATCH_JUMP);
 InjectHook(0x5795D0, &cAudioManager::GetMissionAudioLoadingStatus, PATCH_JUMP);
 

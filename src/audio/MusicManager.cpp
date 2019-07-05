@@ -174,3 +174,17 @@ void cMusicManager::DisplayRadioStationName()
 	}
 }
 #endif
+
+WRAPPER
+void
+cMusicManager::Initialise()
+{
+	EAXJMP(0x57CF70);
+}
+
+WRAPPER
+void
+cMusicManager::Terminate()
+{
+	EAXJMP(0x57D140);
+}

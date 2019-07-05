@@ -218,6 +218,15 @@ public:
 	char field_19195;
 	int m_nTimeOfRecentCrime;
 
+	void Initialise();
+	void PostInitialiseGameSpecificSetup();
+	void InitialisePoliceRadioZones(); // @todo
+	void ResetAudioLogicTimers(int32 timer); // @todo
+
+	void Terminate();
+
+	// done
+
 	char GetMissionScriptPoliceAudioPlayingStatus();
 	bool GetMissionAudioLoadingStatus();
 
@@ -282,8 +291,6 @@ public:
 
 	void InitialisePoliceRadio();
 
-	// done
-
 	int32 RandomDisplacement(uint32 seed);
 
 	void ReleaseDigitalHandle();
@@ -292,7 +299,7 @@ public:
 
 	bool IsAudioInitialised() const;
 
-	int32 CreateEntity(int32 type, CPhysical *memory);
+	int32 CreateEntity(int32 type, CPhysical *entity);
 	void DestroyEntity(int32 id);
 	void SetEntityStatus(int32 id, bool status);
 
