@@ -13,11 +13,55 @@
 
 struct CPathNode;
 
+enum eObjective {
+	OBJECTIVE_NONE,
+	OBJECTIVE_IDLE,
+	OBJECTIVE_FLEE_TILL_SAFE,
+	OBJECTIVE_GUARD_SPOT,
+	OBJECTIVE_GUARD_AREA,
+	OBJECTIVE_WAIT_IN_CAR,
+	OBJECTIVE_WAIT_IN_CAR_THEN_GETOUT,
+	OBJECTIVE_KILL_CHAR_ON_FOOT,
+	OBJECTIVE_KILL_CHAR_ANY_MEANS,
+	OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE,
+	OBJECTIVE_FLEE_CHAR_ON_FOOT_ALWAYS,
+	OBJECTIVE_GOTO_CHAR_ON_FOOT,
+	OBJECTIVE_FOLLOW_PED_IN_FORMATION,
+	OBJECTIVE_LEAVE_VEHICLE,
+	OBJECTIVE_ENTER_CAR_AS_PASSENGER,
+	OBJECTIVE_ENTER_CAR_AS_DRIVER,
+	OBJECTIVE_FOLLOW_CAR_IN_CAR,
+	OBJECTIVE_FIRE_AT_OBJ_FROM_VEHICLE,
+	OBJECTIVE_DESTROY_OBJ,
+	OBJECTIVE_DESTROY_CAR,
+	OBJECTIVE_GOTO_AREA_ANY_MEANS,
+	OBJECTIVE_GOTO_AREA_ON_FOOT,
+	OBJECTIVE_RUN_TO_AREA,
+	OBJECTIVE_23,
+	OBJECTIVE_24,
+	OBJECTIVE_FIGHT_CHAR,
+	OBJECTIVE_SET_LEADER,
+	OBJECTIVE_FOLLOW_ROUTE,
+	OBJECTIVE_SOLICIT,
+	OBJECTIVE_HAIL_TAXI,
+	OBJECTIVE_CATCH_TRAIN,
+	OBJECTIVE_BUY_ICE_CREAM,
+	OBJECTIVE_STEAL_ANY_CAR,
+	OBJECTIVE_MUG_CHAR,
+	OBJECTIVE_FLEE_CAR,
+	OBJECTIVE_35
+};
+
 enum {
 	VEHICLE_ENTER_FRONT_RIGHT = 11,
 	VEHICLE_ENTER_REAR_RIGHT = 12,
 	VEHICLE_ENTER_FRONT_LEFT = 15,
 	VEHICLE_ENTER_REAR_LEFT = 16,
+};
+
+enum {
+	RANDOM_CHAR = 1,
+	MISSION_CHAR,
 };
 
 enum PedLineUpPhase {
@@ -86,18 +130,18 @@ enum PedState
 	PED_PASSENGER,
 	PED_TAXI_PASSENGER,
 	PED_OPEN_DOOR,
-	PED_DIE = 48,
-	PED_DEAD = 49,
+	PED_DIE,
+	PED_DEAD,
 	PED_CARJACK,
 	PED_DRAG_FROM_CAR,
 	PED_ENTER_CAR,
 	PED_STEAL_CAR,
 	PED_EXIT_CAR,
 	PED_HANDS_UP,
-	PED_ARRESTED = 56,
+	PED_ARRESTED,
 };
 
-enum {
+enum eMoveState {
 	PEDMOVE_NONE,
 	PEDMOVE_STILL,
 	PEDMOVE_WALK,
@@ -113,6 +157,8 @@ public:
 	// 0x128
 	CStoredCollPoly m_collPoly;
 	float m_fCollisionSpeed;
+
+	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
 	uint8 bIsStanding : 1;
 	uint8 m_ped_flagA2 : 1;
 	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
@@ -133,7 +179,7 @@ public:
 
 	uint8 m_ped_flagC1 : 1;
 	uint8 m_ped_flagC2 : 1;
-	uint8 m_ped_flagC4 : 1;
+	uint8 m_ped_flagC4 : 1;		// false when in bus, bRenderPedInCar?
 	uint8 m_ped_flagC8 : 1;
 	uint8 m_ped_flagC10 : 1;
 	uint8 m_ped_flagC20 : 1;	// just left some body part?
@@ -146,7 +192,7 @@ public:
 	uint8 m_ped_flagD8 : 1;
 	uint8 m_ped_flagD10 : 1;
 	uint8 m_ped_flagD20 : 1;
-	uint8 m_ped_flagD40 : 1;
+	uint8 m_ped_flagD40 : 1;	// reset when objective changes
 	uint8 m_ped_flagD80 : 1;
 
 	uint8 m_ped_flagE1 : 1;
@@ -193,18 +239,19 @@ public:
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
+
 	uint8 stuff10[3];
-	uint8 m_nCreatedBy;
+	uint8 CharCreatedBy;
 	uint8 field_161;
 	uint8 pad_162[2];
-	uint32 m_objective;
-	uint32 m_prevObjective;
-	CPed* m_field_16C;
-	uint32 field_170;
+	eObjective m_objective;
+	eObjective m_prevObjective;
+	CPed *m_pedInObjective;
+	CVehicle *m_carInObjective;
 	uint32 field_174;
 	uint32 field_178;
 	uint32 field_17C;
-	uint32 field_180;
+	CPed *m_leader;
 	uint32 m_pedFormation;
 	uint32 m_fearFlags;
 	CEntity *m_threatEntity;
@@ -223,7 +270,7 @@ public:
 	uint32 m_nPedStateTimer;
 	PedState m_nPedState;
 	PedState m_nLastPedState;
-	int32 m_nMoveState;
+	eMoveState m_nMoveState;
 	int32 m_nStoredActionState;
 	int32 m_nPrevActionState;
 	int32 m_nWaitState;
@@ -246,8 +293,7 @@ public:
 	uint16 m_routeType;
 	uint16 m_routeCurDir;
 	uint16 field_2D2;
-	float m_movedX;
-	float m_movedY;
+	CVector2D m_moved;
 	float m_fRotationCur;
 	float m_fRotationDest;
 	float m_headingRate;
@@ -304,7 +350,7 @@ public:
 	uint32 m_attackTimer;
 	uint32 m_lastHitTime;
 	uint32 m_hitRecoverTimer;
-	uint32 field_4E0;
+	uint32 m_objectiveTimer;
 	uint32 m_duckTimer;
 	uint32 field_4E8;
 	int32 m_bloodyFootprintCount;
@@ -345,9 +391,6 @@ public:
 	CPed* ctor(uint32 pedType) { return ::new (this) CPed(pedType); }
 	void dtor(void) { this->CPed::~CPed(); }
 
-	bool IsPlayer(void);
-	bool UseGroundColModel(void);
-	bool CanSetPedState(void);
 	void AddWeaponModel(int id);
 	void AimGun(void);
 	void KillPedWithCar(CVehicle *veh, float impulse);
@@ -369,7 +412,6 @@ public:
 	bool IsPedHeadAbovePos(float zOffset);
 	void RemoveWeaponModel(int modelId);
 	void SetCurrentWeapon(uint32 weaponType);
-	bool SelectGunIfArmed(void);
 	void Duck(void);
 	void ClearDuck(void);
 	void ClearPointGunAt(void);
@@ -379,14 +421,22 @@ public:
 	void SetPedPositionInCar(void);
 	void PlayFootSteps(void);
 	void QuitEnteringCar(void);
-	bool IsPointerValid(void);
-	void SortPeds(CPed**, int, int);
 	void BuildPedLists(void);
 	uint32 GiveWeapon(eWeaponType weaponType, uint32 ammo);
-	void SetPedStats(ePedStats);
+	void CalculateNewOrientation(void);
+	float WorkOutHeadingForMovingFirstPerson(float);
+	void CalculateNewVelocity(void);
+	bool CanPedJumpThis(int32);
+	bool CanSeeEntity(CEntity*, float);
+	void RestorePreviousObjective(void);
+	void SetObjective(eObjective, void*);
+
+	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
 	static void GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float seatPosMult);
 	static void GetPositionToOpenCarDoor(CVector* output, CVehicle* veh, uint32 enterType);
+
+	// Callbacks
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
 	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
 	static void PedGetupCB(CAnimBlendAssociation *assoc, void *arg);
@@ -416,14 +466,39 @@ public:
 	static void PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 
+	// functions that I see unnecessary to hook
+	bool IsPlayer(void);
+	bool UseGroundColModel(void);
+	bool CanSetPedState(void);
+	bool IsPedInControl(void);
+	bool CanPedDriveOff(void);
+	bool CanBeDeleted(void);
+	bool CanStrafeOrMouseControl(void);
+	bool CanPedReturnToState(void);
+	void SetMoveState(eMoveState);
+	bool IsTemporaryObjective(eObjective objective);
+	void SetObjectiveTimer(int);
+	bool SelectGunIfArmed(void);
+	bool IsPointerValid(void);
+	void SortPeds(CPed**, int, int);
+	void ForceStoredObjective(eObjective);
+	void SetStoredObjective(void);
+	void SetLeader(CEntity* leader);
+	void SetPedStats(ePedStats);
+
 	inline bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	inline CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
 	inline CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	inline RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
+	PedState GetPedState(void) { return m_nPedState; }
+	void SetPedState(PedState state) { m_nPedState = state; }
 
 	// to make patching virtual functions possible
 	void SetModelIndex_(uint32 mi) { CPed::SetModelIndex(mi); }
 	void FlagToDestroyWhenNextProcessed_(void) { CPed::FlagToDestroyWhenNextProcessed(); }
+	bool SetupLighting_(void) { return CPed::SetupLighting(); }
+	void RemoveLighting_(bool reset) { CPed::RemoveLighting(reset); }
+	void Teleport_(CVector pos) { CPed::Teleport(pos); }
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 &distanceMultToCountPedNear;
@@ -447,6 +522,6 @@ static_assert(offsetof(CPed, m_weapons) == 0x35C, "CPed: error");
 static_assert(offsetof(CPed, m_currentWeapon) == 0x498, "CPed: error");
 static_assert(offsetof(CPed, m_lookTimer) == 0x4CC, "CPed: error");
 static_assert(offsetof(CPed, m_bodyPartBleeding) == 0x4F2, "CPed: error");
-static_assert(offsetof(CPed, m_field_16C) == 0x16C, "CPed: error");
+static_assert(offsetof(CPed, m_pedInObjective) == 0x16C, "CPed: error");
 static_assert(offsetof(CPed, m_pEventEntity) == 0x19C, "CPed: error");
 static_assert(sizeof(CPed) == 0x53C, "CPed: error");

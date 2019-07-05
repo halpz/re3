@@ -4,10 +4,6 @@ class CGeneral
 {
 public:
 	static float GetATanOfXY(float x, float y){
-//	why exactly doesn't this work?
-//		if(y >= 0.0f) return atan2(x, y);
-//		return atan2(x, y) + 2*M_PI;
-
 		if(x == 0.0f && y == 0.0f)
 			return 0.0f;
 		float xabs = fabs(x);
@@ -42,13 +38,14 @@ public:
 
 	static float LimitRadianAngle(float angle)
 	{
+		float result;
+
 		if (angle < -25.0f)
-			angle = -25.0f;
-
-		if (angle > 25.0f)
-			angle = 25.0f;
-
-		float result = angle;
+			result = -25.0f;
+		else if (angle > 25.0f)
+			result = 25.0f;
+		else
+			result = angle;
 
 		while (result >= PI) {
 			result -= 2 * PI;
@@ -71,7 +68,7 @@ public:
 
 		if (x > 0.0f) {
 			if (y > 0.0f)
-				return 2 * PI - atan2(x / y, 1.0f);
+				return PI - atan2(x / y, 1.0f);
 			else
 				return -atan2(x / y, 1.0f);
 		} else {
@@ -84,7 +81,7 @@ public:
 
 	// not too sure about all these...
 	static uint16 GetRandomNumber(void)
-		{ return myrand() & 0xFFFF; }
+		{ return myrand() & MYRAND_MAX; }
 	// Probably don't want to ever reach high
 	static float GetRandomNumberInRange(float low, float high)
 		{ return low + (high - low)*(GetRandomNumber()/float(MYRAND_MAX + 1)); }

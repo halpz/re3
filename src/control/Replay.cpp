@@ -717,7 +717,7 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 			car->m_DamageManager.SetDoorStatus(CDamageManager::CAR_DOOR_RR, 3);
 			car->SetDoorDamage(12, CDamageManager::CAR_DOOR_RR, true);
 		}
-		vehicle->m_veh_flagA10 = true;
+		vehicle->bEngineOn = true;
 		if (vehicle->IsCar())
 			((CAutomobile*)vehicle)->m_nDriveWheelsOnGround = 4;
 		CWorld::Remove(vehicle);

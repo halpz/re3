@@ -36,7 +36,7 @@ public:
 	int8 field_1415;
 	CVector field_1416[6];
 	int32 field_1488[6];
-	float field_1512;
+	float m_fWalkAngle;
 	float m_fFPSMoveHeading;
 
 	~CPlayerPed();

@@ -137,7 +137,7 @@ CWeaponInfo::LoadWeaponData(void)
 
 		if (strncmp(anim2ToPlay, "null", 4) != 0) {
 			animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, anim2ToPlay);
-			ms_apWeaponInfos[weaponType].m_Anim2ToPlay = static_cast<AnimationId>(animAssoc->animId);
+			ms_apWeaponInfos[weaponType].m_Anim2ToPlay = (AnimationId) animAssoc->animId;
 		}
 
 		CVector vecFireOffset(fireOffsetX, fireOffsetY, fireOffsetZ);
@@ -154,10 +154,10 @@ CWeaponInfo::LoadWeaponData(void)
 		ms_apWeaponInfos[weaponType].m_fSpread = spread;
 		ms_apWeaponInfos[weaponType].m_vecFireOffset = vecFireOffset;
 		ms_apWeaponInfos[weaponType].m_AnimToPlay = animId;
-		ms_apWeaponInfos[weaponType].m_fAnimLoopStart = animLoopStart * 0.03f;
-		ms_apWeaponInfos[weaponType].m_fAnimLoopEnd = animLoopEnd * 0.03f;
-		ms_apWeaponInfos[weaponType].m_fAnimFrameFire = delayBetweenAnimAndFire * 0.03f;
-		ms_apWeaponInfos[weaponType].m_fAnim2FrameFire = delayBetweenAnim2AndFire * 0.03f;
+		ms_apWeaponInfos[weaponType].m_fAnimLoopStart = animLoopStart / 30.0f;
+		ms_apWeaponInfos[weaponType].m_fAnimLoopEnd = animLoopEnd / 30.0f;
+		ms_apWeaponInfos[weaponType].m_fAnimFrameFire = delayBetweenAnimAndFire / 30.0f;
+		ms_apWeaponInfos[weaponType].m_fAnim2FrameFire = delayBetweenAnim2AndFire / 30.0f;
 		ms_apWeaponInfos[weaponType].m_nModelId = modelId;
 		ms_apWeaponInfos[weaponType].m_bUseGravity = flags;
 		ms_apWeaponInfos[weaponType].m_bSlowsDown = flags >> 1;

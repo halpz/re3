@@ -109,9 +109,9 @@ public:
 	// Force actually means Impulse here
 	void ApplyMoveForce(float jx, float jy, float jz);
 	void ApplyMoveForce(const CVector &j) { ApplyMoveForce(j.x, j.y, j.z); }
-	// v(x,y,z) is direction of force, p(x,y,z) is point relative to model center where force is applied
-	void ApplyTurnForce(float jx, float jy, float jz, float rx, float ry, float rz);
-	// v is direction of force, p is point relative to model center where force is applied
+	// j(x,y,z) is direction of force, p(x,y,z) is point relative to model center where force is applied
+	void ApplyTurnForce(float jx, float jy, float jz, float px, float py, float pz);
+	// j is direction of force, p is point relative to model center where force is applied
 	void ApplyTurnForce(const CVector &j, const CVector &p) { ApplyTurnForce(j.x, j.y, j.z, p.x, p.y, p.z); }
 	void ApplyFrictionMoveForce(float jx, float jy, float jz);
 	void ApplyFrictionMoveForce(const CVector &j) { ApplyFrictionMoveForce(j.x, j.y, j.z); }
