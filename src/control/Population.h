@@ -1,6 +1,7 @@
 #pragma once
 
-#include "PedType.h"
+class CPed;
+class CVehicle;
 
 struct PedGroup
 {
@@ -17,4 +18,5 @@ public:
 
 	static void UpdatePedCount(uint32, bool);
 	static void DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool);
+	static CPed *AddPedInCar(CVehicle *vehicle);
 };
