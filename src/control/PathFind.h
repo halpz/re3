@@ -131,6 +131,8 @@ public:
 	int32 FindNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bool disabled, bool betweenLevels);
 
 	bool IsPathObject(int id) { return id < PATHNODESIZE && (InfoForTileCars[id*12].type != 0 || InfoForTilePeds[id*12].type != 0); }
+
+	void SetLinksBridgeLights(float, float, float, float, bool);
 };
 static_assert(sizeof(CPathFind) == 0x4c8f4, "CPathFind: error");
 
