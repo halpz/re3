@@ -84,8 +84,8 @@ enum eVehEnter : uint16 {
 };
 
 enum {
-	CREATED_BY_RANDOM = 1,
-	CREATED_BY_SCRIPT
+	RANDOM_CHAR = 1,
+	MISSION_CHAR,
 };
 
 enum PedLineUpPhase {
@@ -154,15 +154,15 @@ enum PedState
 	PED_PASSENGER,
 	PED_TAXI_PASSENGER,
 	PED_OPEN_DOOR,
-	PED_DIE = 48,
-	PED_DEAD = 49,
+	PED_DIE,
+	PED_DEAD,
 	PED_CARJACK,
 	PED_DRAG_FROM_CAR,
 	PED_ENTER_CAR,
 	PED_STEAL_CAR,
 	PED_EXIT_CAR,
 	PED_HANDS_UP,
-	PED_ARRESTED = 56,
+	PED_ARRESTED,
 };
 
 enum eMoveState {
@@ -181,6 +181,8 @@ public:
 	// 0x128
 	CStoredCollPoly m_collPoly;
 	float m_fCollisionSpeed;
+
+	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
 	uint8 bIsStanding : 1;
 	uint8 m_ped_flagA2 : 1;
 	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
@@ -201,7 +203,7 @@ public:
 
 	uint8 m_ped_flagC1 : 1;
 	uint8 bRespondsToThreats : 1;
-	uint8 m_ped_flagC4 : 1;
+	uint8 m_ped_flagC4 : 1;		// false when in bus, bRenderPedInCar?
 	uint8 m_ped_flagC8 : 1;
 	uint8 m_ped_flagC10 : 1;
 	uint8 m_ped_flagC20 : 1;	// just left some body part?
@@ -261,8 +263,9 @@ public:
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
+
 	uint8 stuff10[3];
-	uint8 m_nCreatedBy;
+	uint8 CharCreatedBy;
 	uint8 field_161;
 	uint8 pad_162[2];
 	eObjective m_objective;
@@ -537,6 +540,8 @@ public:
 				return 0;
 		}
 	}
+	PedState GetPedState(void) { return m_nPedState; }
+	void SetPedState(PedState state) { m_nPedState = state; }
 
 	// to make patching virtual functions possible
 	void SetModelIndex_(uint32 mi) { CPed::SetModelIndex(mi); }

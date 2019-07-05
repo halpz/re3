@@ -49,6 +49,19 @@ typedef uint16_t wchar;
 
 #define ALIGNPTR(p) (void*)((((uintptr)(void*)p) + sizeof(void*)-1) & ~(sizeof(void*)-1))
 
+// PDP-10 like byte functions
+#define MASK(p, s) (((1<<(s))-1) << (p))
+inline uint32 dpb(uint32 b, uint32 p, uint32 s, uint32 w)
+{
+	uint32 m = MASK(p,s);
+	return w & ~m | b<<p & m;
+}
+inline uint32 ldb(uint32 p, uint32 s, uint32 w)
+{
+	return w>>p & (1<<s)-1;
+}
+
+
 // little hack
 extern void **rwengine;
 #define RwEngineInstance (*rwengine)

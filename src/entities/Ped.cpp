@@ -99,7 +99,7 @@ CPed::FlagToDestroyWhenNextProcessed(void)
 	}
 	bInVehicle = false;
 	m_pMyVehicle = nil;
-	if (m_nCreatedBy == CREATED_BY_SCRIPT)
+	if (CharCreatedBy == MISSION_CHAR)
 		m_nPedState = PED_DEAD;
 	else
 		m_nPedState = PED_NONE;
@@ -278,7 +278,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_talkType = 167;
 	m_objective = OBJECTIVE_NONE;
 	m_prevObjective = OBJECTIVE_NONE;
-	m_nCreatedBy = CREATED_BY_RANDOM;
+	CharCreatedBy = RANDOM_CHAR;
 	m_leader = nil;
 	m_pedInObjective = nil;
 	m_carInObjective = nil;
@@ -1336,13 +1336,13 @@ CPed::BeingDraggedFromCar(void)
 		if (m_vehEnterType == VEHICLE_ENTER_FRONT_LEFT || m_vehEnterType == VEHICLE_ENTER_REAR_LEFT) {
 			if (m_ped_flagF10) {
 				enterAnim = ANIM_CAR_QJACKED;
-			} else if (m_pMyVehicle->bIsLow) {
+			} else if (m_pMyVehicle->bLowVehicle) {
 				enterAnim = ANIM_CAR_LJACKED_LHS;
 			} else {
 				enterAnim = ANIM_CAR_JACKED_LHS;
 			}
 		} else if (m_vehEnterType == VEHICLE_ENTER_FRONT_RIGHT || m_vehEnterType == VEHICLE_ENTER_REAR_RIGHT) {
-			if (m_pMyVehicle->bIsLow)
+			if (m_pMyVehicle->bLowVehicle)
 				enterAnim = ANIM_CAR_LJACKED_RHS;
 			else
 				enterAnim = ANIM_CAR_JACKED_RHS;
@@ -1452,7 +1452,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 		vehDoorOffset = offsetToOpenVanDoor;
 	} else {
 		seatOffset = veh->m_handling->fSeatOffsetDistance * seatPosMult;
-		if (veh->bIsLow) {
+		if (veh->bLowVehicle) {
 			vehDoorOffset = offsetToOpenLowCarDoor;
 		} else {
 			vehDoorOffset = offsetToOpenRegularCarDoor;
@@ -2203,10 +2203,10 @@ CPed::CanBeDeleted(void)
 	if (this->bInVehicle)
 		return false;
 
-	switch (m_nCreatedBy) {
-		case CREATED_BY_RANDOM:
+	switch (CharCreatedBy) {
+		case RANDOM_CHAR:
 			return true;
-		case CREATED_BY_SCRIPT:
+		case MISSION_CHAR:
 			return false;
 		default:
 			return true;
@@ -2502,7 +2502,7 @@ CPed::SetObjective(eObjective newObj, void *entity)
 			m_vecSeekVehicle = CVector(0.0f, 0.0f, 0.0f);
 			if (newObj == OBJECTIVE_SOLICIT) {
 				m_objectiveTimer = CTimer::GetTimeInMilliseconds() + 10000;
-			} else if (m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER && m_nCreatedBy == CREATED_BY_SCRIPT &&
+			} else if (m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER && CharCreatedBy == MISSION_CHAR &&
 					(m_carInObjective->m_status == STATUS_PLAYER_DISABLED || CPad::GetPad(CWorld::PlayerInFocus)->DisablePlayerControls)) {
 				SetObjectiveTimer(14000);
 			} else {
@@ -2738,7 +2738,7 @@ CPed::ReactToAttack(CEntity *attacker)
 		return;
 	}
 	
-	if (IsPedInControl() && (m_nCreatedBy != CREATED_BY_SCRIPT || bRespondsToThreats)) {
+	if (IsPedInControl() && (CharCreatedBy != MISSION_CHAR || bRespondsToThreats)) {
 		CPed *ourLeader = m_leader;
 		if (ourLeader != attacker && (!ourLeader || FindPlayerPed() != ourLeader)
 			&& attacker->IsPed()) {
