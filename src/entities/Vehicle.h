@@ -1,17 +1,11 @@
 #pragma once
 
 #include "Physical.h"
+#include "AutoPilot.h"
 
 class CPed;
 class CFire;
 struct tHandlingData;
-
-enum {
-	GETTING_IN_OUT_FL = 1,
-	GETTING_IN_OUT_RL = 2,
-	GETTING_IN_OUT_FR = 4,
-	GETTING_IN_OUT_RR = 8
-};
 
 enum eCarLock : uint8 {
 	CARLOCK_NOT_USED,
@@ -29,7 +23,7 @@ class CVehicle : public CPhysical
 public:
 	// 0x128
 	tHandlingData *m_handling;
-	uint8 stuff1[112];
+	CAutoPilot m_autoPilot;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
 	uint8 m_anExtras[2];
