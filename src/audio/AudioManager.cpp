@@ -313,13 +313,9 @@ cAudioManager::ResetPoliceRadio()
 void
 cAudioManager::InterrogateAudioEntities()
 {
-	int32 i = 0;
-	int32 next;
-
-	while(i < m_nAudioEntitiesTotal) {
+	for(uint32 i = 0; i < m_nAudioEntitiesTotal; i++) {
 		ProcessEntity(m_anAudioEntityIndices[i]);
-		next = m_anAudioEntityIndices[i++];
-		m_asAudioEntities[next].field_24 = 0;
+		m_asAudioEntities[m_anAudioEntityIndices[i]].field_24 = 0;
 	}
 }
 
@@ -436,7 +432,7 @@ cAudioManager::RandomDisplacement(uint32 seed)
 	int32 value;
 
 	static bool bIsEven = true;
-	static uint8 base = 0;
+	static uint32 base = 0;
 
 	if(!seed) return 0;
 
