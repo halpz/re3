@@ -81,12 +81,9 @@ public:
 	float m_fMaxTrafficSpeed;
 	uint8 m_nCruiseSpeed;
 	uint8 m_nCarCtrlFlags;
-	int8 pad1[2];
 	CVector m_vecDestinationCoors;
 	void *m_aPathFindNodesInfo[8];
 	uint16 m_nPathFindNodesCount;
-	int8 pad2[2];
 	CVehicle *m_pTargetCar;
 };
-
 static_assert(sizeof(CAutoPilot) == 0x70, "CAutoPilot: error");
