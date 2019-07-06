@@ -1,5 +1,7 @@
 #include "common.h"
 #include "patcher.h"
+#include "main.h"
+#include "Lights.h"
 #include "Pools.h"
 #include "Radar.h"
 #include "Object.h"
@@ -61,6 +63,26 @@ CObject::Render(void)
 	}
 
 	CEntity::Render();
+}
+
+bool
+CObject::SetupLighting(void)
+{
+	DeActivateDirectional();
+	SetAmbientColours();
+
+	if(bRenderScorched){
+		WorldReplaceNormalLightsWithScorched(Scene.world, 0.1f);
+		return true;
+	}
+	return false;
+}
+
+void
+CObject::RemoveLighting(bool reset)
+{
+	if(reset)
+		WorldReplaceScorchedLightsWithNormal(Scene.world);
 }
 
 WRAPPER void CObject::DeleteAllTempObjectInArea(CVector, float) { EAXJMP(0x4BBED0); }

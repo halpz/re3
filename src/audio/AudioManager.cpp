@@ -1,3 +1,6 @@
+#include "common.h"
+#include "patcher.h"
+
 #include "AudioManager.h"
 
 #include "DMAudio.h"
@@ -10,10 +13,80 @@
 #include "Vehicle.h"
 #include "World.h"
 
-#include "common.h"
-#include "patcher.h"
-
-#include <cmath>
+// TODO: where is this used? Is this the right file?
+enum eVehicleModel
+{
+	LANDSTAL,
+	IDAHO,
+	STINGER,
+	LINERUN,
+	PEREN,
+	SENTINEL,
+	PATRIOT,
+	FIRETRUK,
+	TRASH,
+	STRETCH,
+	MANANA,
+	INFERNUS,
+	BLISTA,
+	PONY,
+	MULE,
+	CHEETAH,
+	AMBULAN,
+	FBICAR,
+	MOONBEAM,
+	ESPERANT,
+	TAXI,
+	KURUMA,
+	BOBCAT,
+	MRWHOOP,
+	BFINJECT,
+	CORPSE,
+	POLICE,
+	ENFORCER,
+	SECURICA,
+	BANSHEE,
+	PREDATOR,
+	BUS,
+	RHINO,
+	BARRACKS,
+	TRAIN,
+	CHOPPER,
+	DODO,
+	COACH,
+	CABBIE,
+	STALLION,
+	RUMPO,
+	RCBANDIT,
+	BELLYUP,
+	MRWONGS,
+	MAFIA,
+	YARDIE,
+	YAKUZA,
+	DIABLOS,
+	COLUMB,
+	HOODS,
+	AIRTRAIN,
+	DEADDODO,
+	SPEEDER,
+	REEFER,
+	PANLANT,
+	FLATBED,
+	YANKEE,
+	ESCAPE,
+	BORGNINE,
+	TOYZ,
+	GHOST,
+	CAR151,
+	CAR152,
+	CAR153,
+	CAR154,
+	CAR155,
+	CAR156,
+	CAR157,
+	CAR158,
+	CAR159,
+};
 
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 
@@ -132,7 +205,7 @@ void
 cAudioManager::CalculateDistance(bool *ptr, float dist)
 {
 	if(*ptr == false) {
-		m_sQueueSample.m_fDistance = std::sqrt(dist);
+		m_sQueueSample.m_fDistance = sqrt(dist);
 		*ptr = true;
 	}
 }
@@ -267,14 +340,14 @@ cAudioManager::ClearRequestedQueue()
 bool
 cAudioManager::UsesReverseWarning(int32 model)
 {
-	return model == LINERUN || std::abs(model - FIRETRUK) <= 1 || model == BUS ||
+	return model == LINERUN || fabs(model - FIRETRUK) <= 1 || model == BUS ||
 	       model == COACH; // fix
 }
 
 bool
 cAudioManager::HasAirBrakes(int32 model)
 {
-	return model == LINERUN || std::abs(model - FIRETRUK) <= 1 || model == BUS ||
+	return model == LINERUN || fabs(model - FIRETRUK) <= 1 || model == BUS ||
 	       model == COACH; // fix
 }
 

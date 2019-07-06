@@ -41,13 +41,22 @@ CClouds::Init(void)
 }
 
 void
+CClouds::Shutdown(void)
+{
+	RwTextureDestroy(gpCloudTex[0]);
+	RwTextureDestroy(gpCloudTex[1]);
+	RwTextureDestroy(gpCloudTex[2]);
+	RwTextureDestroy(gpCloudTex[3]);
+	RwTextureDestroy(gpCloudTex[4]);
+}
+
+void
 CClouds::Update(void)
 {
 	float s = sin(TheCamera.Orientation - 0.85f);
 	CloudRotation += CWeather::Wind*s*0.0025f;
 	IndividualRotation += (CWeather::Wind*CTimer::GetTimeStep() + 0.3f) * 60.0f;
 }
-
 
 void
 CClouds::Render(void)
@@ -424,6 +433,7 @@ CClouds::RenderHorizon(void)
 
 STARTPATCHES
 	InjectHook(0x4F6C10, CClouds::Init, PATCH_JUMP);
+	InjectHook(0x4F6CA0, CClouds::Shutdown, PATCH_JUMP);
 	InjectHook(0x4F6CE0, CClouds::Update, PATCH_JUMP);
 	InjectHook(0x4F6D90, CClouds::Render, PATCH_JUMP);
 	InjectHook(0x4F7F00, CClouds::RenderBackground, PATCH_JUMP);

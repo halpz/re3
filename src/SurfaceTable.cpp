@@ -1,10 +1,56 @@
 #include "common.h"
 #include "patcher.h"
+#include "main.h"
+#include "FileMgr.h"
 #include "Weather.h"
 #include "Collision.h"
 #include "SurfaceTable.h"
 
 float (*CSurfaceTable::ms_aAdhesiveLimitTable)[NUMADHESIVEGROUPS] = (float (*)[NUMADHESIVEGROUPS])0x8E29D4;
+
+void
+CSurfaceTable::Initialise(char *filename)
+{
+	int lineno, fieldno;
+	char *line;
+	char surfname[256];
+	float adhesiveLimit;
+
+	CFileMgr::SetDir("");
+	CFileMgr::LoadFile(filename, work_buff, sizeof(work_buff), "r");
+
+	line = (char*)work_buff;
+	for(lineno = 0; lineno < NUMADHESIVEGROUPS; lineno++){
+		// skip white space and comments
+		while(*line == ' ' || *line == '\t' || *line == '\n' || *line == '\r' || *line == ';'){
+			if(*line == ';'){
+				while(*line != '\n' && *line != '\r')
+					line++;
+			}else
+				line++;
+		}
+
+		sscanf(line, "%s", surfname);
+		// skip what we just read
+		while(!(*line == ' ' || *line == '\t' || *line == ','))
+			line++;
+
+		for(fieldno = 0; fieldno <= lineno; fieldno++){
+			// skip white space
+			while(*line == ' ' || *line == '\t' || *line == ',')
+				line++;
+			adhesiveLimit = 0.0f;
+			if(*line != '-')
+				sscanf(line, "%f", &adhesiveLimit);
+			// skip what we just read
+			while(!(*line == ' ' || *line == '\t' || *line == ',' || *line == '\n'))
+				line++;
+
+			ms_aAdhesiveLimitTable[lineno][fieldno] = adhesiveLimit;
+			ms_aAdhesiveLimitTable[fieldno][lineno] = adhesiveLimit;
+		}
+	}
+}
 
 int
 CSurfaceTable::GetAdhesionGroup(uint8 surfaceType)
@@ -95,3 +141,10 @@ CSurfaceTable::GetAdhesiveLimit(CColPoint &colpoint)
 {
 	return ms_aAdhesiveLimitTable[GetAdhesionGroup(colpoint.surfaceB)][GetAdhesionGroup(colpoint.surfaceA)];
 }
+
+STARTPATCHES
+	InjectHook(0x4AB8F0, CSurfaceTable::Initialise, PATCH_JUMP);
+	InjectHook(0x4ABA60, CSurfaceTable::GetAdhesionGroup, PATCH_JUMP);
+	InjectHook(0x4ABAA0, CSurfaceTable::GetWetMultiplier, PATCH_JUMP);
+	InjectHook(0x4ABA30, CSurfaceTable::GetAdhesiveLimit, PATCH_JUMP);
+ENDPATCHES

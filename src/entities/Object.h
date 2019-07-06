@@ -68,6 +68,8 @@ public:
 	~CObject(void);
 
 	void Render(void);
+	bool SetupLighting(void);
+	void RemoveLighting(bool reset);
 
 	void ObjectDamage(float amount);
 
