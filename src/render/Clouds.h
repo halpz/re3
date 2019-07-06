@@ -12,6 +12,7 @@ public:
 	static CRGBA &ms_colourBottom;
 
 	static void Init(void);
+	static void Shutdown(void);
 	static void Update(void);
 	static void Render(void);
 	static void RenderBackground(int16 topred, int16 topgreen, int16 topblue,

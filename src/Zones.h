@@ -28,7 +28,7 @@ public:
 	CZone     *parent;
 	CZone     *next;
 
-	wchar *GetTranslatedName();
+	wchar *GetTranslatedName(void);
 };
 
 class CZoneInfo
@@ -104,6 +104,9 @@ public:
 	static int16 FindAudioZone(CVector *pos);
 	static eLevelName FindZoneForPoint(const CVector &pos);
 	static CZone *GetPointerForZoneIndex(int32 i) { return i == -1 ? nil : &ZoneArray[i]; }
+	static int32 GetIndexForZonePointer(CZone *zone) { return zone == nil ? -1 : zone - ZoneArray; }
 	static void AddZoneToAudioZoneArray(CZone *zone);
 	static void InitialiseAudioZoneArray(void);
+	static void SaveAllZones(uint8 *buffer, uint32 *length);
+	static void LoadAllZones(uint8 *buffer, uint32 length);
 };

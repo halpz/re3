@@ -62,6 +62,9 @@ enum Config {
 	NUMPICKUPS = 336,
 };
 
+// We'll use this once we're ready to become independent of the game
+// Use it to mark bugs in the code that will prevent the game from working then
+//#define STANDALONE
 
 // We don't expect to compile for PS2 or Xbox
 // but it might be interesting for documentation purposes
