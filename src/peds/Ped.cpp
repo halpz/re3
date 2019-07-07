@@ -2702,9 +2702,9 @@ CPed::QuitEnteringCar(void)
 	bUsesCollision = true;
 
 	if (IsPlayer() && GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI) {
-		if (IsPlayer() && m_storedWeapon != NO_STORED_WEAPON) {
+		if (IsPlayer() && m_storedWeapon != WEAPONTYPE_UNIDENTIFIED) {
 			SetCurrentWeapon(m_storedWeapon);
-			m_storedWeapon = NO_STORED_WEAPON;
+			m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
 		}
 	} else {
 		CWeaponInfo *curWeapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
