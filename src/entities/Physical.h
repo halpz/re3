@@ -104,6 +104,9 @@ public:
 		bIsInSafePosition = false;	
 	}
 
+	const CVector& GetMoveSpeed() { return m_vecMoveSpeed; }
+	const CVector& GetTurnSpeed() { return m_vecTurnSpeed; }
+
 	void ApplyMoveSpeed(void);
 	void ApplyTurnSpeed(void);
 	// Force actually means Impulse here

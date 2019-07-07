@@ -29,6 +29,7 @@ public:
 	static inline void SetPreviousTimeInMilliseconds(uint32 t) { m_snPreviousTimeInMilliseconds = t; }
 	static float GetTimeScale(void) { return ms_fTimeScale; }
 	static inline void SetTimeScale(float ts) { ms_fTimeScale = ts; }
+	static inline float GetFrameTimeStepInMilliseconds() { return ms_fTimeStep / 50.0f * 1000.0f; }
 
 	static bool GetIsPaused() { return m_UserPause || m_CodePause; }
 	static bool GetIsUserPaused() { return m_UserPause; }

@@ -101,16 +101,24 @@ class CUpsideDownCarCheck
 
 public:
 	void Init();
+	bool IsCarUpsideDown(int32);
+	void UpdateTimers();
+	bool AreAnyCarsUpsideDown();
+	void AddCarToCheck(int32);
+	void RemoveCarFromCheck(int32);
+	bool HasCarBeenUpsideDownForAWhile(int32);
 };
 
 struct CStuckCarCheckEntry
 {
 	int32 m_nVehicleIndex;
 	CVector m_vecPos;
-	int32 m_nStartTime;
-	float m_fDistance;
+	int32 m_nLastCheck;
+	float m_fRadius;
 	uint32 m_nStuckTime;
 	bool m_bStuck;
+
+	inline void Reset();
 };
 
 class CStuckCarCheck
@@ -119,6 +127,10 @@ class CStuckCarCheck
 
 public:
 	void Init();
+	void Process();
+	void AddCarToCheck(int32, float, uint32);
+	void RemoveCarFromCheck(int32);
+	bool HasCarBeenStuckForAWhile(int32);
 };
 
 class CTheScripts
