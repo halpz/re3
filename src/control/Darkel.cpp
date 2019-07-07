@@ -34,7 +34,7 @@ int32 CDarkel::CalcFade(uint32 time, int32 start, uint32 end) {
 	if (time >= start && time <= end) {
 		if (time >= start + 500) {
 			if (time <= end - 500)
-				return 0;
+				return 255;
 			else
 				return 255 * (end - time) / 500;
 		}
@@ -55,6 +55,7 @@ void CDarkel::DrawMessages()
 
 	switch (Status) {
 	case KILLFRENZY_ONGOING:
+		assert(pStartMessage != nil);
 		DisplayTimers = true;
 		break;
 	case KILLFRENZY_PASSED:
