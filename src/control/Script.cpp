@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "CarCtrl.h"
 #include "DMAudio.h"
+#include "FileMgr.h"
 #include "Hud.h"
 #include "ModelIndices.h"
 #include "PlayerInfo.h"
@@ -17,18 +18,44 @@
 #include "Weather.h"
 #include "World.h"
 
-uint8 (&CTheScripts::ScriptSpace)[160 * 1024] = *(uint8(*)[160 * 1024])*(uintptr*)0x74B248;
-CTextLine (&CTheScripts::IntroTextLines)[2] = *(CTextLine (*)[2])*(uintptr*)0x70EA74;
-CScriptRectangle (&CTheScripts::IntroRectangles)[16] = *(CScriptRectangle (*)[16])*(uintptr*)0x72D108;
-CSprite2d (&CTheScripts::ScriptSprites)[16] = *(CSprite2d(*)[16])*(uintptr*)0x72B090;
+uint8 (&CTheScripts::ScriptSpace)[SIZE_SCRIPT_SPACE] = *(uint8(*)[SIZE_SCRIPT_SPACE])*(uintptr*)0x74B248;
+CRunningScript(&CTheScripts::ScriptsArray)[MAX_NUM_SCRIPTS] = *(CRunningScript(*)[MAX_NUM_SCRIPTS])*(uintptr*)0x6F5C08;
+int32(&CTheScripts::BaseBriefIdForContact)[MAX_NUM_CONTACTS] = *(int32(*)[MAX_NUM_CONTACTS])*(uintptr*)0x880200;
+int32(&CTheScripts::OnAMissionForContactFlag)[MAX_NUM_CONTACTS] = *(int32(*)[MAX_NUM_CONTACTS])*(uintptr*)0x8622F0;
+CTextLine (&CTheScripts::IntroTextLines)[MAX_NUM_INTRO_TEXT_LINES] = *(CTextLine (*)[MAX_NUM_INTRO_TEXT_LINES])*(uintptr*)0x70EA68;
+CScriptRectangle (&CTheScripts::IntroRectangles)[MAX_NUM_INTRO_RECTANGLES] = *(CScriptRectangle (*)[MAX_NUM_INTRO_RECTANGLES])*(uintptr*)0x72D108;
+CSprite2d (&CTheScripts::ScriptSprites)[MAX_NUM_SCRIPT_SRPITES] = *(CSprite2d(*)[MAX_NUM_SCRIPT_SRPITES])*(uintptr*)0x72B090;
+CScriptSphere(&CTheScripts::ScriptSphereArray)[MAX_NUM_SCRIPT_SPHERES] = *(CScriptSphere(*)[MAX_NUM_SCRIPT_SPHERES])*(uintptr*)0x727D60;
+tCollectiveData(&CTheScripts::CollectiveArray)[MAX_NUM_COLLECTIVES] = *(tCollectiveData(*)[MAX_NUM_COLLECTIVES])*(uintptr*)0x6FA008;
+tUsedObject(&CTheScripts::UsedObjectArray)[MAX_NUM_USED_OBJECTS] = *(tUsedObject(*)[MAX_NUM_USED_OBJECTS])*(uintptr*)0x6E69C8;
+int32(&CTheScripts::MultiScriptArray)[MAX_NUM_MISSION_SCRIPTS] = *(int32(*)[MAX_NUM_MISSION_SCRIPTS])*(uintptr*)0x6F0558;
+tBuildingSwap(&CTheScripts::BuildingSwapArray)[MAX_NUM_BUILDING_SWAPS] = *(tBuildingSwap(*)[MAX_NUM_BUILDING_SWAPS])*(uintptr*)0x880E30;
+CEntity*(&CTheScripts::InvisibilitySettingArray)[MAX_NUM_INVISIBILITY_SETTINGS] = *(CEntity*(*)[MAX_NUM_INVISIBILITY_SETTINGS])*(uintptr*)0x8620F0;
 bool &CTheScripts::DbgFlag = *(bool*)0x95CD87;
 uint32 &CTheScripts::OnAMissionFlag = *(uint32*)0x8F2A24;
 int32 &CTheScripts::StoreVehicleIndex = *(int32*)0x8F5F3C;
 bool &CTheScripts::StoreVehicleWasRandom = *(bool*)0x95CDBC;
-
-CMissionCleanup(&CTheScripts::MissionCleanup) = *(CMissionCleanup*)0x8F2AD8;
-CUpsideDownCarCheck(&CTheScripts::UpsideDownCars) = *(CUpsideDownCarCheck*)0x6EE450;
-CStuckCarCheck(&CTheScripts::StuckCars) = *(CStuckCarCheck*)0x87C588;
+CRunningScript *&CTheScripts::pIdleScripts = *(CRunningScript**)0x9430D4;
+CRunningScript *&CTheScripts::pActiveScripts = *(CRunningScript**)0x8E2BF4;
+uint32 &CTheScripts::NextFreeCollectiveIndex = *(uint32*)0x942F98;
+int32 &CTheScripts::LastRandomPedId = *(int32*)0x8F251C;
+uint16 &CTheScripts::NumberOfUsedObjects = *(uint16*)0x95CC72;
+bool &CTheScripts::bAlreadyRunningAMissionScript = *(bool*)0x95CDB3;
+bool &CTheScripts::bUsingAMultiScriptFile = *(bool*)0x95CD55;
+uint16 &CTheScripts::NumberOfMissionScripts = *(uint16*)0x95CC9A;
+uint32 &CTheScripts::LargestMissionScriptSize = *(uint32*)0x9414C8;
+uint32 &CTheScripts::MainScriptSize = *(uint32*)0x9405A4;
+uint8 &CTheScripts::FailCurrentMission = *(uint8*)0x95CD41;
+uint8 &CTheScripts::CountdownToMakePlayerUnsafe = *(uint8*)0x95CD51;
+uint8 &CTheScripts::DelayMakingPlayerUnsafeThisTime = *(uint8*)0x95CD88;
+uint16 &CTheScripts::NumScriptDebugLines = *(uint16*)0x95CC42;
+uint16 &CTheScripts::NumberOfIntroRectanglesThisFrame = *(uint16*)0x95CC88;
+uint16 &CTheScripts::NumberOfIntroTextLinesThisFrame = *(uint16*)0x95CC32;
+bool &CTheScripts::UseTextCommands = *(bool*)0x95CD57;
+CMissionCleanup (&CTheScripts::MissionCleanup) = *(CMissionCleanup*)0x8F2A24;
+CUpsideDownCarCheck (&CTheScripts::UpsideDownCars) = *(CUpsideDownCarCheck*)0x6EE450;
+CStuckCarCheck (&CTheScripts::StuckCars) = *(CStuckCarCheck*)0x87C588;
+int32(&ScriptParams)[32] = *(int32(*)[32])*(uintptr*)0x6ED460;
 
 CMissionCleanup::CMissionCleanup()
 {
@@ -277,11 +304,263 @@ bool CStuckCarCheck::HasCarBeenStuckForAWhile(int32 id)
 	return false;
 }
 
+void CRunningScript::CollectParameters(uint32* pIp, int16 total)
+{
+	for (int16 i = 0; i < total; i++){
+		float tmp;
+		switch (CTheScripts::Read1ByteFromScript(pIp))
+		{
+		case ARGUMENT_INT32:
+			ScriptParams[i] = CTheScripts::Read4BytesFromScript(pIp);
+			break;
+		case ARGUMENT_GLOBALVAR:
+			ScriptParams[i] = *((int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(pIp)]);
+			break;
+		case ARGUMENT_LOCALVAR:
+			ScriptParams[i] = m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
+			break;
+		case ARGUMENT_INT8:
+			ScriptParams[i] = CTheScripts::Read1ByteFromScript(pIp);
+			break;
+		case ARGUMENT_INT16:
+			ScriptParams[i] = CTheScripts::Read2BytesFromScript(pIp);
+			break;
+		case ARGUMENT_FLOAT:
+			tmp = CTheScripts::ReadFloatFromScript(pIp);
+			ScriptParams[i] = *(int32*)&tmp;
+			break;
+		default:
+			assert(0);
+			break;
+		}
+	}
+}
+
+int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
+{
+	uint32* pIp = &ip;
+	float tmp;
+	switch (CTheScripts::Read1ByteFromScript(pIp))
+	{
+	case ARGUMENT_INT32:
+		return CTheScripts::Read4BytesFromScript(pIp);
+	case ARGUMENT_GLOBALVAR:
+		return *((int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(pIp)]);
+	case ARGUMENT_LOCALVAR:
+		return m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
+	case ARGUMENT_INT8:
+		return CTheScripts::Read1ByteFromScript(pIp);
+	case ARGUMENT_INT16:
+		return CTheScripts::Read2BytesFromScript(pIp);
+	case ARGUMENT_FLOAT:
+		tmp = CTheScripts::ReadFloatFromScript(pIp);
+		return *(int32*)&tmp;
+	default:
+		assert(0);
+	}
+	return -1;
+}
+
+void CRunningScript::StoreParameters(uint32* pIp, int16 number)
+{
+	for (int16 i = 0; i < number; i++){
+		switch (CTheScripts::Read1ByteFromScript(pIp)) {
+		case ARGUMENT_GLOBALVAR:
+			*(int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(pIp)] = ScriptParams[i];
+			break;
+		case ARGUMENT_LOCALVAR:
+			m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)] = ScriptParams[i];
+			break;
+		default:
+			assert(0);
+		}
+	}
+}
+
+int32 *CRunningScript::GetPointerToScriptVariable(uint32* pIp, int16 type)
+{
+	switch (CTheScripts::Read1ByteFromScript(pIp))
+	{
+	case ARGUMENT_GLOBALVAR:
+		assert(type == VAR_GLOBAL);
+		return (int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(pIp)];
+	case ARGUMENT_LOCALVAR:
+		assert(type == VAR_LOCAL);
+		return &m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
+	default:
+		assert(0);
+	}
+	return nil;
+}
+
+void CRunningScript::Init()
+{
+	strcpy(m_abScriptName, "noname");
+	next = prev = nil;
+	m_nIp = 0;
+	for (int i = 0; i < MAX_STACK_DEPTH; i++)
+		m_anStack[i] = 0;
+	m_nStackPointer = 0;
+	m_nWakeTime = 0;
+	m_bCondResult = false;
+	m_bIsMissionThread = false;
+	m_bSkipWakeTime = false;
+	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
+		m_anLocalVariables[i] = 0;
+	m_nAndOrState = 0;
+	m_bNotFlag = false;
+	m_bWBCheckEnabled = true;
+	m_bWBChecked = false;
+	m_bMissionFlag = false;
+}
+
+#ifdef USE_DEBUG_SCRIPT_LOADER
+int open_script()
+{
+	static int scriptToLoad = 1;
+
+	if (GetAsyncKeyState('G') & 0x8000)
+		scriptToLoad = 0;
+	if (GetAsyncKeyState('R') & 0x8000)
+		scriptToLoad = 1;
+	if (GetAsyncKeyState('D') & 0x8000)
+		scriptToLoad = 2;
+
+	switch (scriptToLoad) {
+	case 0: return CFileMgr::OpenFile("main.scm", "rb");
+	case 1: return CFileMgr::OpenFile("main_freeroam.scm", "rb");
+	case 2: return CFileMgr::OpenFile("main_d.scm", "rb");
+	}
+	return CFileMgr::OpenFile("main.scm", "rb");
+}
+#endif
+
+void CTheScripts::Init()
+{
+	for (int i = 0; i < SIZE_SCRIPT_SPACE; i++)
+		ScriptSpace[i] = 0;
+	pActiveScripts = pIdleScripts = nil;
+	for (int i = 0; i < MAX_NUM_SCRIPTS; i++){
+		ScriptsArray[i].Init();
+		ScriptsArray[i].AddScriptToList(&pIdleScripts);
+	}
+	MissionCleanup.Init();
+	UpsideDownCars.Init();
+	StuckCars.Init();
+	CFileMgr::SetDir("data");
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	int mainf = open_script();
+#else
+	int mainf = CFileMgr::OpenFile("main.scm", "rb");
+#endif
+	CFileMgr::Read(mainf, (char*)ScriptSpace, SIZE_MAIN_SCRIPT);
+	CFileMgr::CloseFile(mainf);
+	CFileMgr::SetDir("");
+	StoreVehicleIndex = -1;
+	StoreVehicleWasRandom = true;
+	OnAMissionFlag = 0;
+	for (int i = 0; i < MAX_NUM_CONTACTS; i++){
+		BaseBriefIdForContact[i] = 0;
+		OnAMissionForContactFlag[i] = 0;
+	}
+	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++){
+		CollectiveArray[i].index = -1;
+		CollectiveArray[i].unk_data = 0;
+	}
+	NextFreeCollectiveIndex = 0;
+	LastRandomPedId = -1;
+	for (int i = 0; i < MAX_NUM_USED_OBJECTS; i++){
+		memset(&UsedObjectArray[i].name, 0, sizeof(UsedObjectArray[i].name));
+		UsedObjectArray[i].index = 0;
+	}
+	NumberOfUsedObjects = 0;
+	ReadObjectNamesFromScript();
+	UpdateObjectIndices();
+	bAlreadyRunningAMissionScript = false;
+	bUsingAMultiScriptFile = true;
+	for (int i = 0; i < MAX_NUM_MISSION_SCRIPTS; i++)
+		MultiScriptArray[i] = 0;
+	NumberOfMissionScripts = 0;
+	LargestMissionScriptSize = 0;
+	MainScriptSize = 0;
+	ReadMultiScriptFileOffsetsFromScript();
+	FailCurrentMission = 0;
+	CountdownToMakePlayerUnsafe = 0;
+	DbgFlag = 0;
+	DelayMakingPlayerUnsafeThisTime = 0;
+	NumScriptDebugLines = 0;
+	for (int i = 0; i < MAX_NUM_SCRIPT_SPHERES; i++){
+		ScriptSphereArray[i].m_bInUse = false;
+		ScriptSphereArray[i].m_Index = 1;
+		ScriptSphereArray[i].m_Id = 0;
+		ScriptSphereArray[i].m_vecCenter = CVector(0.0f, 0.0f, 0.0f);
+		ScriptSphereArray[i].m_fRadius = 0.0f;
+	}
+	for (int i = 0; i < MAX_NUM_INTRO_TEXT_LINES; i++){
+		IntroTextLines[i].m_fScaleX = 0.48f;
+		IntroTextLines[i].m_fScaleY = 1.12f;
+		IntroTextLines[i].m_sColor = CRGBA(225, 225, 225, 255);
+		IntroTextLines[i].m_bJustify = false;
+		IntroTextLines[i].m_bRightJustify = false;
+		IntroTextLines[i].m_bCentered = false;
+		IntroTextLines[i].m_bBackground = false;
+		IntroTextLines[i].m_bBackgroundOnly = false;
+		IntroTextLines[i].m_fWrapX = 182.0f; /* TODO: scaling as bugfix */
+		IntroTextLines[i].m_fCenterSize = 640.0f; /* --||-- */
+		IntroTextLines[i].m_sBackgroundColor = CRGBA(128, 128, 128, 128);
+		IntroTextLines[i].m_bTextProportional = true;
+		IntroTextLines[i].m_bTextBeforeFade = false;
+		IntroTextLines[i].m_nFont = 2; /* enum? */
+		IntroTextLines[i].m_fAtX = 0.0f;
+		IntroTextLines[i].m_fAtY = 0.0f;
+		memset(&IntroTextLines[i].m_Text, 0, sizeof(IntroTextLines[i].m_Text));
+	}
+	NumberOfIntroTextLinesThisFrame = 0;
+	UseTextCommands = false;
+	for (int i = 0; i < MAX_NUM_INTRO_RECTANGLES; i++){
+		IntroRectangles[i].m_bIsUsed = false;
+		IntroRectangles[i].m_bIsAntialiased = false;
+		IntroRectangles[i].m_nTextureId = -1;
+		IntroRectangles[i].m_sRect = CRect(0.0f, 0.0f, 0.0f, 0.0f);
+		IntroRectangles[i].m_sColor = CRGBA(255, 255, 255, 255);
+	}
+	NumberOfIntroRectanglesThisFrame = 0;
+	for (int i = 0; i < MAX_NUM_BUILDING_SWAPS; i++){
+		BuildingSwapArray[i].m_pBuilding = nil;
+		BuildingSwapArray[i].m_nNewModel = -1;
+		BuildingSwapArray[i].m_nOldModel = -1;
+	}
+	for (int i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++)
+		InvisibilitySettingArray[i] = nil;
+}
+
+void CRunningScript::RemoveScriptFromList(CRunningScript** ppScript)
+{
+	if (prev)
+		prev->next = next;
+	else
+		*ppScript = next;
+	if (next)
+		next->prev = prev;
+}
+
+void CRunningScript::AddScriptToList(CRunningScript** ppScript)
+{
+	next = *ppScript;
+	prev = nil;
+	if (*ppScript)
+		(*ppScript)->prev = this;
+	*ppScript = this;
+}
+
+WRAPPER bool CTheScripts::IsPlayerOnAMission() { EAXJMP(0x439410); }
+WRAPPER void CTheScripts::ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2) { EAXJMP(0x4534E0); }
 WRAPPER void CTheScripts::CleanUpThisVehicle(CVehicle*) { EAXJMP(0x4548D0); }
 WRAPPER void CTheScripts::CleanUpThisPed(CPed*) { EAXJMP(0x4547A0); }
 WRAPPER void CTheScripts::CleanUpThisObject(CObject*) { EAXJMP(0x454910); }
-WRAPPER bool CTheScripts::IsPlayerOnAMission() { EAXJMP(0x439410); }
-WRAPPER void CTheScripts::ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2) { EAXJMP(0x4534E0); }
+WRAPPER void CTheScripts::ReadObjectNamesFromScript() { EAXJMP(0x454960); }
+WRAPPER void CTheScripts::UpdateObjectIndices() { EAXJMP(0x454AD0); }
+WRAPPER void CTheScripts::ReadMultiScriptFileOffsetsFromScript() { EAXJMP(0x454BC0); }
 
 STARTPATCHES
 InjectHook(0x437AE0, &CMissionCleanup::Init, PATCH_JUMP);
@@ -299,4 +578,10 @@ InjectHook(0x4380A0, &CStuckCarCheck::Process, PATCH_JUMP);
 InjectHook(0x4381C0, &CStuckCarCheck::AddCarToCheck, PATCH_JUMP);
 InjectHook(0x438240, &CStuckCarCheck::RemoveCarFromCheck, PATCH_JUMP);
 InjectHook(0x4382A0, &CStuckCarCheck::HasCarBeenStuckForAWhile, PATCH_JUMP);
+InjectHook(0x4382E0, &CRunningScript::CollectParameters, PATCH_JUMP);
+InjectHook(0x438460, &CRunningScript::CollectNextParameterWithoutIncreasingPC, PATCH_JUMP);
+InjectHook(0x4385A0, &CRunningScript::StoreParameters, PATCH_JUMP);
+InjectHook(0x438640, &CRunningScript::GetPointerToScriptVariable, PATCH_JUMP);
+InjectHook(0x4386C0, &CRunningScript::Init, PATCH_JUMP);
+InjectHook(0x438790, &CTheScripts::Init, PATCH_JUMP);
 ENDPATCHES

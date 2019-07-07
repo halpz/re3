@@ -57,27 +57,6 @@ mysrand(unsigned int seed)
 	myrand_seed = seed;
 }
 
-int (*open_script_orig)(const char *path, const char *mode);
-int
-open_script(const char *path, const char *mode)
-{
-	static int scriptToLoad = 1;
-
-	if(GetAsyncKeyState('G') & 0x8000)
-		scriptToLoad = 0;
-	if(GetAsyncKeyState('R') & 0x8000)
-		scriptToLoad = 1;
-	if(GetAsyncKeyState('D') & 0x8000)
-		scriptToLoad = 2;
-
-	switch(scriptToLoad){
-	case 0: return open_script_orig(path, mode);
-	case 1: return open_script_orig("main_freeroam.scm", mode);
-	case 2: return open_script_orig("main_d.scm", mode);
-	}
-	return open_script_orig(path, mode);
-}
-
 int gDbgSurf;
 
 void (*DebugMenuProcess)(void);
@@ -356,7 +335,7 @@ patch()
 	Patch<WORD>(0x5382BF, 0x0EEB);
 	InjectHook(0x5382EC, HeadlightsFix, PATCH_JUMP);
 
-	InterceptCall(&open_script_orig, open_script, 0x438869);
+//	InterceptCall(&open_script_orig, open_script, 0x438869);
 
 //	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x58275E);
 }

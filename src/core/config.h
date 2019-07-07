@@ -114,3 +114,4 @@ enum Config {
 #define FIX_BUGS		// fix bugs in the game, TODO: use this more
 #define KANGAROO_CHEAT
 #define ASPECT_RATIO_SCALE
+#define USE_DEBUG_SCRIPT_LOADER
