@@ -44,7 +44,7 @@ public:
 	char m_bLoopEnded;
 	char field_82;
 	char field_83;
-	int field_84;
+	int calculatedVolume;
 	char field_88;
 	char field_89;
 	char field_90;
@@ -218,6 +218,20 @@ public:
 	char field_19195;
 	int m_nTimeOfRecentCrime;
 
+	void AddSampleToRequestedQueue();
+
+	void AddDetailsToRequestedOrderList(uint8 sample);
+	void AddReflectionsToRequestedQueue();
+
+	uint32 ComputeVolume(int emittingVolume, float soundIntensity, float distance);
+
+	void Initialise();
+	void PostInitialiseGameSpecificSetup();
+	void InitialisePoliceRadioZones();       // @todo
+	void ResetAudioLogicTimers(int32 timer); // @todo
+
+	void Terminate();
+
 	char GetMissionScriptPoliceAudioPlayingStatus();
 	bool GetMissionAudioLoadingStatus();
 
@@ -261,7 +275,7 @@ public:
 	void InterrogateAudioEntities();
 
 	void ClearRequestedQueue();
-//	void AgeCrimes();
+	//	void AgeCrimes(); //todo
 
 	bool UsesReverseWarning(int32 model);
 	bool HasAirBrakes(int32 model);
@@ -274,15 +288,13 @@ public:
 	void ProcessPlane(void *);        // todo
 
 	void ClearMissionAudio();
-//	void ProcessReverb();
+	//	void ProcessReverb(); // todo
 
 	bool IsMissionAudioSampleFinished();
 
 	void ProcessEntity(int32);
 
 	void InitialisePoliceRadio();
-
-	// done
 
 	int32 RandomDisplacement(uint32 seed);
 
@@ -292,7 +304,7 @@ public:
 
 	bool IsAudioInitialised() const;
 
-	int32 CreateEntity(int32 type, CPhysical *memory);
+	int32 CreateEntity(int32 type, CPhysical *entity);
 	void DestroyEntity(int32 id);
 	void SetEntityStatus(int32 id, bool status);
 
