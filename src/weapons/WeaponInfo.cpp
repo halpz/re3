@@ -6,7 +6,7 @@
 #include "AnimBlendAssociation.h"
 
 //CWeaponInfo (&CWeaponInfo::ms_apWeaponInfos)[14] = * (CWeaponInfo(*)[14]) * (uintptr*)0x6503EC;
-CWeaponInfo CWeaponInfo::ms_apWeaponInfos[NUM_WEAPONTYPES];
+CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
 
 static char ms_aWeaponNames[][32] = {
 	"Unarmed",
@@ -34,7 +34,7 @@ void
 CWeaponInfo::Initialise(void)
 {
 	debug("Initialising CWeaponInfo...\n");
-	for (int i = 0; i < NUM_WEAPONTYPES; i++) {
+	for (int i = 0; i < WEAPONTYPE_TOTALWEAPONS; i++) {
 		ms_apWeaponInfos[i].m_eWeaponFire = WEAPON_FIRE_INSTANT_HIT;
 		ms_apWeaponInfos[i].m_AnimToPlay = ANIM_PUNCH_R;
 		ms_apWeaponInfos[i].m_Anim2ToPlay = NUM_ANIMS;
@@ -176,7 +176,7 @@ CWeaponInfo::LoadWeaponData(void)
 eWeaponType
 CWeaponInfo::FindWeaponType(char *name)
 {
-	for (int i = 0; i < NUM_WEAPONTYPES; i++) {
+	for (int i = 0; i < WEAPONTYPE_TOTALWEAPONS; i++) {
 		if (strcmp(ms_aWeaponNames[i], name) == 0) {
 			return static_cast<eWeaponType>(i);
 		}

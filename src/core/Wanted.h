@@ -20,11 +20,11 @@ public:
 	int32 m_nLastUpdateTime;
 	int32 m_nLastWantedLevelChange;
 	float m_fCrimeSensitivity;
-	uint8 m_bCurrentCops;
-	uint8 m_bMaxCops;
-	uint8 m_bMaximumLawEnforcerVehicles;
+	uint8 m_CurrentCops;
+	uint8 m_MaxCops;
+	uint8 m_MaximumLawEnforcerVehicles;
 	int8 field_19;
-	int16 m_wRoadblockDensity;
+	int16 m_RoadblockDensity;
 	uint8 m_IsIgnoredByCops : 1;
 	uint8 m_IsIgnoredByEveryOne : 1;
 	uint8 m_IsSwatRequired : 1;
@@ -34,12 +34,16 @@ public:
 	int32 m_nWantedLevel;
 	CCrime m_sCrimes[16];
 	CCopPed *m_pCops[10];
+	static int32 &MaximumWantedLevel;
 
 public:
 	bool AreSwatRequired();
 	bool AreFbiRequired();
 	bool AreArmyRequired();
 	int NumOfHelisRequired();
+	void SetWantedLevel(int32);
+	void ClearQdCrimes();
+	void UpdateWantedLevel();
 };
 
 static_assert(sizeof(CWanted) == 0x204, "CWanted: error");

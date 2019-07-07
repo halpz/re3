@@ -41,6 +41,7 @@ WRAPPER void CPed::SetMoveAnim(void) { EAXJMP(0x4C5A40); }
 WRAPPER void CPed::SetFollowRoute(int16, int16) { EAXJMP(0x4DD690); }
 WRAPPER void CPed::SetDuck(uint32) { EAXJMP(0x4E4920); }
 WRAPPER void CPed::RegisterThreatWithGangPeds(CEntity*) { EAXJMP(0x4E3870); }
+WRAPPER void CPed::MakeChangesForNewWeapon(int8) { EAXJMP(0x4F2560); }
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -456,9 +457,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	}
 	m_maxWeaponTypeAllowed = 0;
 	m_currentWeapon = 0;
-	m_storedWeapon = NO_STORED_WEAPON;
+	m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
 
-	for(int i = 0; i < NUM_PED_WEAPONTYPES; i++)
+	for(int i = 0; i < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; i++)
 	{
 		CWeapon &weapon = GetWeapon(i);
 		weapon.m_eWeaponType = WEAPONTYPE_UNARMED;
@@ -1427,9 +1428,9 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 
 	// Only uzi can be used on cars, so previous weapon was stored
 	if (ped->IsPlayer() && weaponType == WEAPONTYPE_UZI) {
-		if (ped->m_storedWeapon != NO_STORED_WEAPON) {
+		if (ped->m_storedWeapon != WEAPONTYPE_UNIDENTIFIED) {
 			ped->SetCurrentWeapon(ped->m_storedWeapon);
-			ped->m_storedWeapon = NO_STORED_WEAPON;
+			ped->m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
 		}
 	} else {
 		ped->AddWeaponModel(CWeaponInfo::GetWeaponInfo(weaponType)->m_nModelId);
@@ -2701,9 +2702,9 @@ CPed::QuitEnteringCar(void)
 	bUsesCollision = true;
 
 	if (IsPlayer() && GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI) {
-		if (IsPlayer() && m_storedWeapon != NO_STORED_WEAPON) {
+		if (IsPlayer() && m_storedWeapon != WEAPONTYPE_UNIDENTIFIED) {
 			SetCurrentWeapon(m_storedWeapon);
-			m_storedWeapon = NO_STORED_WEAPON;
+			m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
 		}
 	} else {
 		CWeaponInfo *curWeapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);

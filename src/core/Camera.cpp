@@ -136,6 +136,15 @@ CCamera::RenderMotionBlur(void)
 		m_motionBlur, m_BlurType, m_imotionBlurAddAlpha);
 }
 
+void
+CCamera::ClearPlayerWeaponMode()
+{
+	PlayerWeaponMode.Mode = 0;
+	PlayerWeaponMode.MaxZoom = 1;
+	PlayerWeaponMode.MinZoom = -1;
+	PlayerWeaponMode.Duration = 0.0f;
+}
+
 
 /*
  *
