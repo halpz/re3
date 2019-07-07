@@ -8,7 +8,7 @@
 #include "Camera.h"
 #include "World.h"
 #include "FileMgr.h"
-#include "CullZones.h"
+#include "ZoneCull.h"
 
 int32     &CCullZones::NumCullZones = *(int*)0x8F2564;
 CCullZone *CCullZones::aZones = (CCullZone*)0x864750;	// [NUMCULLZONES];

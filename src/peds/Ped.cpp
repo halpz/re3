@@ -17,7 +17,7 @@
 #include "PedPlacement.h"
 #include "Shadows.h"
 #include "Weather.h"
-#include "CullZones.h"
+#include "ZoneCull.h"
 #include "Population.h"
 #include "Renderer.h"
 #include "Lights.h"

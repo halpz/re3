@@ -21,7 +21,7 @@
 #include "DummyObject.h"
 #include "World.h"
 #include "Zones.h"
-#include "CullZones.h"
+#include "ZoneCull.h"
 #include "CdStream.h"
 #include "FileLoader.h"
 

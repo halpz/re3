@@ -25,8 +25,8 @@ public:
 	CDoor Doors[6];
 	RwFrame *m_aCarNodes[NUM_CAR_NODES];
 	CColPoint m_aWheelColPoints[4];
-	float m_aWheelDist[4];
-	float m_aWheelDistPrev[4];
+	float m_aSuspensionSpringRatio[4];
+	float m_aSuspensionSpringRatioPrev[4];
 	float m_aWheelSkidThing[4];
 	int field_49C;
 	bool m_aWheelSkidmarkMuddy[4];
@@ -37,7 +37,7 @@ public:
 	uint8 stuff3[12];
 	uint32 m_nBusDoorTimerEnd;
 	uint32 m_nBusDoorTimerStart;
-	float m_aSuspensionRange[4];
+	float m_aSuspensionSpringLength[4];
 	float m_aSuspensionLineLength[4];
 	float m_fHeightAboveRoad;
 	float m_fImprovedHandling;
@@ -65,4 +65,3 @@ public:
 	void dtor() { this->CAutomobile::~CAutomobile(); }
 };
 static_assert(sizeof(CAutomobile) == 0x5A8, "CAutomobile: error");
-static_assert(offsetof(CAutomobile, m_aWheelDist) == 0x46C, "CAutomobile: error");

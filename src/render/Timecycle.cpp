@@ -5,7 +5,7 @@
 #include "Weather.h"
 #include "Camera.h"
 #include "Shadows.h"
-#include "CullZones.h"
+#include "ZoneCull.h"
 #include "CutsceneMgr.h"
 #include "FileMgr.h"
 #include "Timecycle.h"

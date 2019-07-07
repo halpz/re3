@@ -1897,10 +1897,10 @@ CPhysical::ProcessCollision(void)
 			CVehicle *veh = (CVehicle*)this;
 			if(veh->m_vehType == VEHICLE_TYPE_CAR){
 				CAutomobile *car = (CAutomobile*)this;
-				car->m_aWheelDist[0] = 1.0f;
-				car->m_aWheelDist[1] = 1.0f;
-				car->m_aWheelDist[2] = 1.0f;
-				car->m_aWheelDist[3] = 1.0f;
+				car->m_aSuspensionSpringRatio[0] = 1.0f;
+				car->m_aSuspensionSpringRatio[1] = 1.0f;
+				car->m_aSuspensionSpringRatio[2] = 1.0f;
+				car->m_aSuspensionSpringRatio[3] = 1.0f;
 			}else if(veh->m_vehType == VEHICLE_TYPE_BIKE){
 				assert(0 && "TODO - but unused");
 			}
