@@ -558,11 +558,11 @@ CheckForPedsOnGroundToAttack(CPlayerPed *player, CPed **pedOnGround)
 					if (currentPedState == PED_DEAD) {
 						foundDead = 1;
 						if (!deadPed)
-							deadPed = (CPed*)currentPed;
+							deadPed = currentPed;
 					} else if (!currentPed->IsPedHeadAbovePos(-0.6f)) {
 						foundOnTheFloor = 1;
 						if (!pedOnTheFloor)
-							pedOnTheFloor = (CPed*)currentPed;
+							pedOnTheFloor = currentPed;
 					}
 				}
 			} else if ((distance >= 0.8f || angleDiff >= DEGTORAD(75.0f))
@@ -573,11 +573,11 @@ CheckForPedsOnGroundToAttack(CPlayerPed *player, CPed **pedOnGround)
 				if (angleDiff < DEGTORAD(75.0f)) {
 					foundBelow = 1;
 					if (!pedBelow)
-						pedBelow = (CPed*)currentPed;
+						pedBelow = currentPed;
 				}
 			} else {
 				foundBelow = 1;
-				pedBelow = (CPed*)currentPed;
+				pedBelow = currentPed;
 				break;
 			}
 		}
@@ -598,7 +598,7 @@ CheckForPedsOnGroundToAttack(CPlayerPed *player, CPed **pedOnGround)
 	}
 
 	if (pedOnGround)
-		* pedOnGround = (CPed*)currentPed;
+		* pedOnGround = currentPed;
 
 	return stateToReturn;
 }
@@ -1370,7 +1370,7 @@ CPed::RestartNonPartialAnims(void)
 {
 	CAnimBlendAssociation *assoc;
 
-	for (assoc = RpAnimBlendClumpGetFirstAssociation((RpClump*)m_rwObject); !assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
+	for (assoc = RpAnimBlendClumpGetFirstAssociation((RpClump*)m_rwObject); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
 		if (!assoc->IsPartial())
 			assoc->flags |= ASSOC_RUNNING;
 	}
@@ -1680,7 +1680,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 			float pedZSpeedOnExit = m_vecMoveSpeed.z - 0.008f * CTimer::GetTimeStep();
 
 			// If we're not in ground at next step, apply animation
-			if (neededPos.z + pedZSpeedOnExit > autoZPos.z) {
+			if (neededPos.z + pedZSpeedOnExit >= autoZPos.z) {
 				m_vecMoveSpeed.z = pedZSpeedOnExit;
 				ApplyMoveSpeed();
 				// Removing below line breaks the animation
@@ -1742,9 +1742,9 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 			neededPos -= timeUntilStateChange * m_vecOffsetSeek;
 		}
 
-		if (limitedAngle >= PI + m_fRotationCur) {
+		if (limitedAngle > PI + m_fRotationCur) {
 			limitedAngle -= 2 * PI;
-		} else if (limitedAngle <= m_fRotationCur - PI) {
+		} else if (limitedAngle < m_fRotationCur - PI) {
 			limitedAngle += 2 * PI;
 		}
 		m_fRotationCur -= (m_fRotationCur - limitedAngle) * (1.0f - timeUntilStateChange);
@@ -2376,7 +2376,7 @@ CPed::SetLeader(CEntity *leader)
 	m_leader = (CPed*)leader;
 
 	if(m_leader)
-		m_leader->RegisterReference((CEntity **)m_leader);
+		m_leader->RegisterReference((CEntity **)&m_leader);
 }
 
 void
@@ -2458,9 +2458,9 @@ CPed::SetObjective(eObjective newObj, void *entity)
 			m_ped_flagD20 = false;
 			m_vecSeekVehicle = CVector(0.0f, 0.0f, 0.0f);
 			m_pedInObjective = (CPed*)entity;
-			m_pedInObjective->RegisterReference((CEntity**)m_pedInObjective);
+			m_pedInObjective->RegisterReference((CEntity**)&m_pedInObjective);
 			m_pLookTarget = (CEntity*)entity;
-			m_pLookTarget->RegisterReference((CEntity**)m_pLookTarget);
+			m_pLookTarget->RegisterReference((CEntity**)&m_pLookTarget);
 			return;
 		case OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE:
 		case OBJECTIVE_FLEE_CHAR_ON_FOOT_ALWAYS:
@@ -2468,17 +2468,17 @@ CPed::SetObjective(eObjective newObj, void *entity)
 		case OBJECTIVE_FIGHT_CHAR:
 			m_vecSeekVehicle = CVector(0.0f, 0.0f, 0.0f);
 			m_pedInObjective = (CPed*)entity;
-			m_pedInObjective->RegisterReference((CEntity**)m_pedInObjective);
+			m_pedInObjective->RegisterReference((CEntity**)&m_pedInObjective);
 			return;
 		case OBJECTIVE_FOLLOW_PED_IN_FORMATION:
 			m_pedInObjective = (CPed*)entity;
-			m_pedInObjective->RegisterReference((CEntity**)m_pedInObjective);
+			m_pedInObjective->RegisterReference((CEntity**)&m_pedInObjective);
 			m_pedFormation = 1;
 			return;
 		case OBJECTIVE_LEAVE_VEHICLE:
 		case OBJECTIVE_FLEE_CAR:
 			m_carInObjective = (CVehicle*)entity;
-			m_carInObjective->RegisterReference((CEntity **)m_carInObjective);
+			m_carInObjective->RegisterReference((CEntity **)&m_carInObjective);
 			if (!m_carInObjective->bIsBus || m_leaveCarTimer)
 				return;
 			break;
@@ -2496,9 +2496,9 @@ CPed::SetObjective(eObjective newObj, void *entity)
 		case OBJECTIVE_SOLICIT:
 		case OBJECTIVE_BUY_ICE_CREAM:
 			m_carInObjective = (CVehicle*)entity;
-			m_carInObjective->RegisterReference((CEntity**)m_carInObjective);
+			m_carInObjective->RegisterReference((CEntity**)&m_carInObjective);
 			m_pSeekTarget = m_carInObjective;
-			m_pSeekTarget->RegisterReference((CEntity**)m_pSeekTarget);
+			m_pSeekTarget->RegisterReference((CEntity**)&m_pSeekTarget);
 			m_vecSeekVehicle = CVector(0.0f, 0.0f, 0.0f);
 			if (newObj == OBJECTIVE_SOLICIT) {
 				m_objectiveTimer = CTimer::GetTimeInMilliseconds() + 10000;

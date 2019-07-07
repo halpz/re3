@@ -752,7 +752,7 @@ CAnimManager::LoadAnimFiles(void)
 		AnimAssocDefinition *def = &CAnimManager::ms_aAnimAssocDefinitions[i];
 		group->CreateAssociations(def->blockName, clump, def->animNames, def->numAnims);
 		for(j = 0; j < group->numAssociations; j++)
-			group->GetAnimation(def->animDescs[j].animId)->flags |= def->animDescs[j].flags;
+			group->GetAnimation(j)->flags |= def->animDescs[j].flags;
 		RpClumpDestroy(clump);
 	}
 }
