@@ -8,5 +8,6 @@ public:
 	static int32 &NumberKillFrenziesPassed;
 	static int32 &PeopleKilledByOthers;
 
+public:
 	static void AnotherKillFrenzyPassed();
 };

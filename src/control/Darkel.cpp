@@ -30,22 +30,22 @@ int32 &CDarkel::ModelToKill3 = *(int32*)0x885B3C;
 int32 &CDarkel::ModelToKill4 = *(int32*)0x885B34;
 wchar *CDarkel::pStartMessage = (wchar*)0x8F2C08;
 
-int32 CDarkel::CalcFade(uint32 time, int32 min, uint32 max) {
-	if (time >= min && time <= max) {
-		if (time >= min + 500) {
-			if (time <= max - 500)
-				return -1;
+int32 CDarkel::CalcFade(uint32 time, int32 start, uint32 end) {
+	if (time >= start && time <= end) {
+		if (time >= start + 500) {
+			if (time <= end - 500)
+				return 0;
 			else
-				return 255 * (max - time) / 500;
+				return 255 * (end - time) / 500;
 		}
 		else
-			return 255 * (time - min) / 500;
+			return 255 * (time - start) / 500;
 	}
 	else
 		return 0;
 }
 
-
+// This function has been cleaned up from unused stuff.
 #if 0
 WRAPPER void CDarkel::DrawMessages(void) { EAXJMP(0x420920); }
 #else
@@ -101,7 +101,7 @@ void CDarkel::DrawMessages()
 
 void CDarkel::Init()
 {
-	Status = KILLFRENZY_INIT;
+	Status = KILLFRENZY_NONE;
 }
 
 int16 CDarkel::QueryModelsKilledByPlayer(int32 modelId)
@@ -121,16 +121,24 @@ eKillFrenzyStatus CDarkel::ReadStatus()
 	return Status;
 }
 
+#if 1
+WRAPPER int32 CDarkel::RegisterCarBlownUpByPlayer(eKillFrenzyStatus status) { EAXJMP(0x421070); }
+#else
 int32 CDarkel::RegisterCarBlownUpByPlayer(eKillFrenzyStatus status)
 {
 	return 0;
 }
+#endif
 
+#if 1
+WRAPPER void CDarkel::RegisterKillByPlayer(int32 modelid, eWeaponType weapontype, bool flag) { EAXJMP(0x420F60); }
+#else
 void CDarkel::RegisterKillByPlayer(int32 modelid, eWeaponType weapontype, bool flag)
 {
 
 	
 }
+#endif
 
 void CDarkel::RegisterKillNotByPlayer()
 {
@@ -139,49 +147,62 @@ void CDarkel::RegisterKillNotByPlayer()
 
 void CDarkel::ResetModelsKilledByPlayer()
 {
-	for (int i = 0; i < 200; i++) {
-		for (int j = 0; j < 8; j++)
-			RegisteredKills[i + j] = 0;
-	};
+	for (int i = 0; i < 200; i++)
+		RegisteredKills[i] = 0;
 }
 
+#if 0
+WRAPPER void CDarkel::ResetOnPlayerDeath() { EAXJMP(0x420E70); }
+#else
 void CDarkel::ResetOnPlayerDeath()
 {
-	eWeaponType &EWeaponType = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
-	int32 &CurrentWeapon = CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nModelId;
-	int32 &CurrentDarkelWeapon = CDarkel::WeaponType;
-	uint32 &TotalAmmo = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal;
+	if (Status != KILLFRENZY_ONGOING)
+		return;
 
-	if (Status == KILLFRENZY_ONGOING) {
-		CPopulation::m_AllRandomPedsThisType = -1;
-		Status = KILLFRENZY_FAILED;
-		TimeOfFrenzyStart = CTimer::GetTimeInMilliseconds();
+	CPopulation::m_AllRandomPedsThisType = -1;
+	Status = KILLFRENZY_FAILED;
+	TimeOfFrenzyStart = CTimer::GetTimeInMilliseconds();
 
-		if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
-			CurrentDarkelWeapon = WEAPONTYPE_UZI;
+	if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
+		WeaponType = WEAPONTYPE_UZI;
 
-		if (CurrentDarkelWeapon < WEAPONTYPE_TOTALWEAPONS) {
-			FindPlayerPed()->m_bWeaponSlot = InterruptedWeapon;
-			TotalAmmo = AmmoInterruptedWeapon;
-		}
+	if (WeaponType < WEAPONTYPE_TOTALWEAPONS) {
+		FindPlayerPed()->m_bWeaponSlot = InterruptedWeapon;
+		CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal = AmmoInterruptedWeapon;
+	}
 
-		if (FindPlayerVehicle()) {
-			FindPlayerPed()->RemoveWeaponModel(CurrentWeapon);
-			FindPlayerPed()->m_currentWeapon = EWeaponType;
-			FindPlayerPed()->MakeChangesForNewWeapon(FindPlayerPed()->m_currentWeapon);
-		}
+	if (FindPlayerVehicle()) {
+		FindPlayerPed()->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nModelId);
+		FindPlayerPed()->m_currentWeapon = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
+		FindPlayerPed()->MakeChangesForNewWeapon(FindPlayerPed()->m_currentWeapon);
+	}
+
+
+	CPopulation::m_AllRandomPedsThisType = -1;
+	Status = KILLFRENZY_FAILED;
+	TimeOfFrenzyStart = CTimer::GetTimeInMilliseconds();
+
+	if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
+		WeaponType = WEAPONTYPE_UZI;
+
+	if (WeaponType < WEAPONTYPE_TOTALWEAPONS) {
+		FindPlayerPed()->m_bWeaponSlot = InterruptedWeapon;
+		CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal = AmmoInterruptedWeapon;
+	}
+
+	if (FindPlayerVehicle()) {
+		FindPlayerPed()->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nModelId);
+		FindPlayerPed()->m_currentWeapon = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
+		FindPlayerPed()->MakeChangesForNewWeapon(FindPlayerPed()->m_currentWeapon);
 	}
 }
+#endif
 
 #if 0
 WRAPPER void CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, int16 kill, int32 modelId0, wchar *text, int32 modelId2, int32 modelId3, int32 modelId4, bool standardSound, bool needHeadShot) { EAXJMP(0x4210E0); }
 #else
 void CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, int16 kill, int32 modelId0, wchar *text, int32 modelId2, int32 modelId3, int32 modelId4, bool standardSound, bool needHeadShot)
 {
-	eWeaponType &EWeaponType = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
-	uint32 &TotalAmmo = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal;
-	uint32 &AmmoInClip = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoInClip;
-
 	if (weaponType == WEAPONTYPE_UZI_DRIVEBY)
 		weaponType = WEAPONTYPE_UZI;
 
@@ -210,15 +231,15 @@ void CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, int16 kill, int32 
 	if (weaponType < WEAPONTYPE_TOTALWEAPONS) {
 		InterruptedWeapon = FindPlayerPed()->m_currentWeapon;
 		FindPlayerPed()->GiveWeapon(weaponType, 0);
-		AmmoInterruptedWeapon = TotalAmmo;
+		AmmoInterruptedWeapon = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal;
 		FindPlayerPed()->GiveWeapon(weaponType, 30000);
-		FindPlayerPed()->m_bWeaponSlot = EWeaponType;
+		FindPlayerPed()->m_bWeaponSlot = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
 		FindPlayerPed()->MakeChangesForNewWeapon(FindPlayerPed()->m_bWeaponSlot);
 
 		if (FindPlayerVehicle()) {
-			FindPlayerPed()->m_currentWeapon = EWeaponType;
-			if (TotalAmmo <= AmmoInClip)
-				AmmoInClip = TotalAmmo;
+			FindPlayerPed()->m_currentWeapon = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
+			if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal <= CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoInClip)
+				CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoInClip = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal;
 
 			FindPlayerPed()->ClearWeaponTarget();
 		}
@@ -230,76 +251,72 @@ void CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, int16 kill, int32 
 
 void CDarkel::Update()
 {
-	eWeaponType &EWeaponType = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
-	int32 &CurrentWeapon = CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nModelId;
-	int32 &CurrentDarkelWeapon = CDarkel::WeaponType;
-	uint32 &TotalAmmo = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal;
+	if (Status != KILLFRENZY_ONGOING)
+		return;
 
-	if (Status == KILLFRENZY_ONGOING) {
-		int32 FrameTime = TimeLimit - (CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart);
-		if ((TimeLimit - (CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart)) > 0 || TimeLimit < 0) {
-			DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_ONGOING, FrameTime);
+	int32 FrameTime = TimeLimit - (CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart);
+	if ((TimeLimit - (CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart)) > 0 || TimeLimit < 0) {
+		DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_ONGOING, FrameTime);
 
-			int32 PrevTime = FrameTime / 1000;
+		int32 PrevTime = FrameTime / 1000;
 
-			if (PrevTime != PreviousTime) {
-				if (PreviousTime < 12)
-					DMAudio.PlayFrontEndSound(SOUND_CLOCK_TICK, PrevTime);
-				PreviousTime = PrevTime;
-			}
-
-		}
-		else {
-			CPopulation::m_AllRandomPedsThisType = -1;
-			Status = KILLFRENZY_FAILED;
-			TimeOfFrenzyStart = CTimer::GetTimeInMilliseconds();
-
-			if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
-				CurrentDarkelWeapon = WEAPONTYPE_UZI;
-
-			if (CurrentDarkelWeapon < WEAPONTYPE_TOTALWEAPONS) {
-				FindPlayerPed()->m_bWeaponSlot = InterruptedWeapon;
-				TotalAmmo = AmmoInterruptedWeapon;
-			}
-
-			if (FindPlayerVehicle()) {
-				FindPlayerPed()->RemoveWeaponModel(CurrentWeapon);
-				FindPlayerPed()->m_currentWeapon = EWeaponType;
-				FindPlayerPed()->MakeChangesForNewWeapon(FindPlayerPed()->m_currentWeapon);
-			}
-
-			if (bStandardSoundAndMessages)
-				DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_FAILED, 0);
+		if (PrevTime != PreviousTime) {
+			if (PreviousTime < 12)
+				DMAudio.PlayFrontEndSound(SOUND_CLOCK_TICK, PrevTime);
+			PreviousTime = PrevTime;
 		}
 
-		if (KillsNeeded <= 0) {
-			CPopulation::m_AllRandomPedsThisType = -1;
-			Status = KILLFRENZY_PASSED;
+	}
+	else {
+		CPopulation::m_AllRandomPedsThisType = -1;
+		Status = KILLFRENZY_FAILED;
+		TimeOfFrenzyStart = CTimer::GetTimeInMilliseconds();
 
-			if (bProperKillFrenzy)
-				CStats::AnotherKillFrenzyPassed();
+		if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
+			WeaponType = WEAPONTYPE_UZI;
 
-			TimeOfFrenzyStart = CTimer::GetTimeInMilliseconds();
-
-			FindPlayerPed()->m_pWanted->SetWantedLevel(NOTWANTED);
-
-			if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
-				CurrentDarkelWeapon = WEAPONTYPE_UZI;
-
-			if (CurrentDarkelWeapon < WEAPONTYPE_TOTALWEAPONS) {
-				FindPlayerPed()->m_bWeaponSlot = InterruptedWeapon;
-				TotalAmmo = AmmoInterruptedWeapon;
-			}
-
-			if (FindPlayerVehicle()) {
-				FindPlayerPed()->RemoveWeaponModel(CurrentWeapon);
-				FindPlayerPed()->m_currentWeapon = EWeaponType;
-				FindPlayerPed()->MakeChangesForNewWeapon(FindPlayerPed()->m_currentWeapon);
-			}
-
-			if (bStandardSoundAndMessages)
-				DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_PASSED, 0);
+		if (WeaponType < WEAPONTYPE_TOTALWEAPONS) {
+			FindPlayerPed()->m_bWeaponSlot = InterruptedWeapon;
+			CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal = AmmoInterruptedWeapon;
 		}
+
+		if (FindPlayerVehicle()) {
+			FindPlayerPed()->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nModelId);
+			FindPlayerPed()->m_currentWeapon = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
+			FindPlayerPed()->MakeChangesForNewWeapon(FindPlayerPed()->m_currentWeapon);
+		}
+
+		if (bStandardSoundAndMessages)
+			DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_FAILED, 0);
+	}
+
+	if (KillsNeeded <= 0) {
+		CPopulation::m_AllRandomPedsThisType = -1;
+		Status = KILLFRENZY_PASSED;
+
+		if (bProperKillFrenzy)
+			CStats::AnotherKillFrenzyPassed();
+
+		TimeOfFrenzyStart = CTimer::GetTimeInMilliseconds();
+
+		FindPlayerPed()->m_pWanted->SetWantedLevel(NOTWANTED);
+
+		if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
+			WeaponType = WEAPONTYPE_UZI;
+
+		if (WeaponType < WEAPONTYPE_TOTALWEAPONS) {
+			FindPlayerPed()->m_bWeaponSlot = InterruptedWeapon;
+			CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal = AmmoInterruptedWeapon;
+		}
+
+		if (FindPlayerVehicle()) {
+			FindPlayerPed()->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nModelId);
+			FindPlayerPed()->m_currentWeapon = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
+			FindPlayerPed()->MakeChangesForNewWeapon(FindPlayerPed()->m_currentWeapon);
+		}
+
+		if (bStandardSoundAndMessages)
+			DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_PASSED, 0);
 	}
 }
 
