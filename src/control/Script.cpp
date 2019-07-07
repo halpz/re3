@@ -2,6 +2,7 @@
 #include "patcher.h"
 
 #include "Script.h"
+#include "ScriptCommands.h"
 
 #include "Camera.h"
 #include "CarCtrl.h"
