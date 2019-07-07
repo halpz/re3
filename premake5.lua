@@ -3,30 +3,39 @@ workspace "re3"
 	location "build"
 
 	files { "src/*.*" }
-	files { "src/skel/*.*" }
-	files { "src/skel/win/*.*" }
-	files { "src/math/*.*" }
-	files { "src/modelinfo/*.*" }
-	files { "src/entities/*.*" }
-	files { "src/weapons/*.*" }
-	files { "src/render/*.*" }
-	files { "src/control/*.*" }
 	files { "src/animation/*.*" }
 	files { "src/audio/*.*" }
+	files { "src/control/*.*" }
+	files { "src/core/*.*" }
+	files { "src/entities/*.*" }
+	files { "src/math/*.*" }
+	files { "src/modelinfo/*.*" }
+	files { "src/objects/*.*" }
+	files { "src/peds/*.*" }
+	files { "src/render/*.*" }
+	files { "src/skel/*.*" }
+	files { "src/skel/win/*.*" }
+	files { "src/vehicles/*.*" }
+	files { "src/weapons/*.*" }
 
 	includedirs { "src" }
+	includedirs { "src/animation" }
+	includedirs { "src/audio" }
+	includedirs { "src/control" }
+	includedirs { "src/core" }
+	includedirs { "src/entities" }
+	includedirs { "src/modelinfo" }
+	includedirs { "src/objects" }
+	includedirs { "src/peds" }
+	includedirs { "src/render" }
 	includedirs { "src/skel/" }
 	includedirs { "src/skel/win" }
-	includedirs { "src/modelinfo" }
-	includedirs { "src/entities" }
+	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
-	includedirs { "src/render" }
-	includedirs { "src/control" }
-	includedirs { "src/audio" }
-	includedirs { "src/animation" }
+
 	includedirs { "dxsdk/include" }
 	includedirs { "rwsdk/include/d3d8" }
-	
+
 	libdirs { "dxsdk/lib" }
 
 project "re3"

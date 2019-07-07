@@ -38,35 +38,35 @@ public:
 			x = 1.0f;
 	}
 
-	inline const CVector &operator+=(CVector const &right) {
+	const CVector &operator+=(CVector const &right) {
 		x += right.x;
 		y += right.y;
 		z += right.z;
 		return *this;
 	}
 
-	inline const CVector &operator-=(CVector const &right) {
+	const CVector &operator-=(CVector const &right) {
 		x -= right.x;
 		y -= right.y;
 		z -= right.z;
 		return *this;
 	}
 
-	inline const CVector &operator*=(float right) {
+	const CVector &operator*=(float right) {
 		x *= right;
 		y *= right;
 		z *= right;
 		return *this;
 	}
 
-	inline const CVector &operator/=(float right) {
+	const CVector &operator/=(float right) {
 		x /= right;
 		y /= right;
 		z /= right;
 		return *this;
 	}
 
-	inline CVector operator-() const {
+	CVector operator-() const {
 		return CVector(-x, -y, -z);
 	}
 

@@ -8,7 +8,7 @@
 #include "PlayerPed.h"
 #include "Pad.h"
 #include "General.h"
-#include "CullZones.h"
+#include "ZoneCull.h"
 #include "SurfaceTable.h"
 #include "MBlur.h"
 #include "Camera.h"

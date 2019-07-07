@@ -16,7 +16,7 @@
 #include "ModelInfo.h"
 #include "Object.h"
 #include "Pad.h"
-#include "PhoneInfo.h"
+#include "Phones.h"
 #include "Pickups.h"
 #include "Plane.h"
 #include "Pools.h"
@@ -638,7 +638,7 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 	if (vehicle->IsCar()){
 		CAutomobile* car = (CAutomobile*)vehicle;
 		for (int i = 0; i < 4; i++){
-			vp->wheel_susp_dist[i] = 50.0f * car->m_aWheelDist[i];
+			vp->wheel_susp_dist[i] = 50.0f * car->m_aSuspensionSpringRatio[i];
 			vp->wheel_rotation[i] = 128.0f / M_PI * car->m_aWheelRotation[i];
 		}
 		vp->door_angles[0] = 127.0f / M_PI * car->Doors[2].m_fAngle;
@@ -683,7 +683,7 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 	if (vehicle->IsCar()) {
 		CAutomobile* car = (CAutomobile*)vehicle;
 		for (int i = 0; i < 4; i++) {
-			car->m_aWheelDist[i] = vp->wheel_susp_dist[i] / 50.0f;
+			car->m_aSuspensionSpringRatio[i] = vp->wheel_susp_dist[i] / 50.0f;
 			car->m_aWheelRotation[i] = vp->wheel_rotation[i] * M_PI / 128.0f;
 		}
 		car->Doors[2].m_fAngle = car->Doors[2].m_fPreviousAngle = vp->door_angles[0] * M_PI / 127.0f;

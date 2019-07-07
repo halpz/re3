@@ -429,7 +429,7 @@ CVehicle::ProcessCarAlarm(void)
 	if(m_nAlarmState == 0 || m_nAlarmState == -1)
 		return;
 
-	step = CTimer::GetTimeStep()/50.0f * 1000.0f;
+	step = CTimer::GetTimeStepInMilliseconds();
 	if((uint16)m_nAlarmState < step)
 		m_nAlarmState = 0;
 	else

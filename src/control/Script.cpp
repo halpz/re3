@@ -129,6 +129,10 @@ void CMissionCleanup::Process()
 	}
 }
 
+/* NB: CUpsideDownCarCheck is not used by actual script at all
+ * It has a weird usage: AreAnyCarsUpsideDown would fail any mission
+ * just like death or arrest. */
+
 void CUpsideDownCarCheck::Init()
 {
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
@@ -137,16 +141,140 @@ void CUpsideDownCarCheck::Init()
 	}
 }
 
+bool CUpsideDownCarCheck::IsCarUpsideDown(int32 id)
+{
+	CVehicle* v = CPools::GetVehiclePool()->GetAt(id);
+	return v->GetUp().z <= -0.97f &&
+		v->GetMoveSpeed().Magnitude() < 0.01f &&
+		v->GetTurnSpeed().Magnitude() < 0.02f;
+}
+
+void CUpsideDownCarCheck::UpdateTimers()
+{
+	uint32 timeStep = CTimer::GetTimeStepInMilliseconds();
+	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
+		CVehicle* v = CPools::GetVehiclePool()->GetAt(m_sCars[i].m_nVehicleIndex);
+		if (v){
+			if (IsCarUpsideDown(m_sCars[i].m_nVehicleIndex))
+				m_sCars[i].m_nUpsideDownTimer += timeStep;
+			else
+				m_sCars[i].m_nUpsideDownTimer = 0;
+		}else{
+			m_sCars[i].m_nVehicleIndex = -1;
+			m_sCars[i].m_nUpsideDownTimer = 0;
+		}
+	}
+}
+
+bool CUpsideDownCarCheck::AreAnyCarsUpsideDown()
+{
+	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
+		if (m_sCars[i].m_nVehicleIndex >= 0 && m_sCars[i].m_nUpsideDownTimer > 1000)
+			return true;
+	}
+	return false;
+}
+
+void CUpsideDownCarCheck::AddCarToCheck(int32 id)
+{
+	uint16 index = 0;
+	while (index < MAX_UPSIDEDOWN_CAR_CHECKS && m_sCars[index].m_nVehicleIndex >= 0)
+		index++;
+	if (index >= MAX_UPSIDEDOWN_CAR_CHECKS)
+		return;
+	m_sCars[index].m_nVehicleIndex = id;
+	m_sCars[index].m_nUpsideDownTimer = 0;
+}
+
+void CUpsideDownCarCheck::RemoveCarFromCheck(int32 id)
+{
+	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
+		if (m_sCars[i].m_nVehicleIndex == id){
+			m_sCars[i].m_nVehicleIndex = -1;
+			m_sCars[i].m_nUpsideDownTimer = 0;
+		}
+	}
+}
+
+bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 id)
+{
+	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
+		if (m_sCars[i].m_nVehicleIndex == id)
+			return m_sCars[i].m_nUpsideDownTimer > 1000;
+	}
+	return false;
+}
+
+void CStuckCarCheckEntry::Reset()
+{
+	m_nVehicleIndex = -1;
+	m_vecPos = CVector(-5000.0f, -5000.0f, -5000.0f);
+	m_nLastCheck = -1;
+	m_fRadius = 0.0f;
+	m_nStuckTime = 0;
+	m_bStuck = false;
+}
+
 void CStuckCarCheck::Init()
 {
 	for (int i = 0; i < MAX_STUCK_CAR_CHECKS; i++) {
-		m_sCars[i].m_nVehicleIndex = -1;
-		m_sCars[i].m_vecPos = CVector(-5000.0f, -5000.0f, -5000.0f);
-		m_sCars[i].m_nStartTime = -1;
-		m_sCars[i].m_fDistance = 0.0f;
-		m_sCars[i].m_nStuckTime = 0;
-		m_sCars[i].m_bStuck = false;
+		m_sCars[i].Reset();
 	}
+}
+
+void CStuckCarCheck::Process()
+{
+	uint32 timer = CTimer::GetTimeInMilliseconds();
+	for (int i = 0; i < MAX_STUCK_CAR_CHECKS; i++){
+		if (m_sCars[i].m_nVehicleIndex < 0)
+			continue;
+		if (timer <= m_sCars[i].m_nStuckTime + m_sCars[i].m_nLastCheck)
+			continue;
+		CVehicle* pv = CPools::GetVehiclePool()->GetAt(m_sCars[i].m_nVehicleIndex);
+		if (!pv){
+			m_sCars[i].Reset();
+			continue;
+		}
+		float distance = (pv->GetPosition() - m_sCars[i].m_vecPos).Magnitude();
+		m_sCars[i].m_bStuck = distance < m_sCars[i].m_fRadius;
+		m_sCars[i].m_vecPos = pv->GetPosition();
+		m_sCars[i].m_nLastCheck = timer;
+	}
+}
+
+void CStuckCarCheck::AddCarToCheck(int32 id, float radius, uint32 time)
+{
+	CVehicle* pv = CPools::GetVehiclePool()->GetAt(id);
+	if (!pv)
+		return;
+	int index = 0;
+	while (index < MAX_STUCK_CAR_CHECKS && m_sCars[index].m_nVehicleIndex >= 0)
+		index++;
+	/* Would be nice to return if index >= MAX_STUCK_CAR_CHECKS... */
+	m_sCars[index].m_nVehicleIndex = id;
+	m_sCars[index].m_vecPos = pv->GetPosition();
+	m_sCars[index].m_nLastCheck = CTimer::GetTimeInMilliseconds();
+	m_sCars[index].m_fRadius = radius;
+	m_sCars[index].m_nStuckTime = time;
+	m_sCars[index].m_bStuck = false;
+}
+
+void CStuckCarCheck::RemoveCarFromCheck(int32 id)
+{
+	for (int i = 0; i < MAX_STUCK_CAR_CHECKS; i++){
+		if (m_sCars[i].m_nVehicleIndex == id){
+			m_sCars[i].Reset();
+		}
+	}
+}
+
+bool CStuckCarCheck::HasCarBeenStuckForAWhile(int32 id)
+{
+	for (int i = 0; i < MAX_STUCK_CAR_CHECKS; i++){
+		if (m_sCars[i].m_nVehicleIndex == id)
+			return m_sCars[i].m_bStuck;
+	}
+	return false;
 }
 
 WRAPPER void CTheScripts::CleanUpThisVehicle(CVehicle*) { EAXJMP(0x4548D0); }
@@ -160,4 +288,15 @@ InjectHook(0x437AE0, &CMissionCleanup::Init, PATCH_JUMP);
 InjectHook(0x437BA0, &CMissionCleanup::AddEntityToList, PATCH_JUMP);
 InjectHook(0x437BD0, &CMissionCleanup::RemoveEntityFromList, PATCH_JUMP);
 InjectHook(0x437C10, &CMissionCleanup::Process, PATCH_JUMP);
+InjectHook(0x437DC0, &CUpsideDownCarCheck::Init, PATCH_JUMP);
+InjectHook(0x437EE0, &CUpsideDownCarCheck::UpdateTimers, PATCH_JUMP);
+InjectHook(0x437F80, &CUpsideDownCarCheck::AreAnyCarsUpsideDown, PATCH_JUMP);
+InjectHook(0x437FB0, &CUpsideDownCarCheck::AddCarToCheck, PATCH_JUMP);
+InjectHook(0x437FE0, &CUpsideDownCarCheck::RemoveCarFromCheck, PATCH_JUMP);
+InjectHook(0x438010, &CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile, PATCH_JUMP);
+InjectHook(0x438050, &CStuckCarCheck::Init, PATCH_JUMP);
+InjectHook(0x4380A0, &CStuckCarCheck::Process, PATCH_JUMP);
+InjectHook(0x4381C0, &CStuckCarCheck::AddCarToCheck, PATCH_JUMP);
+InjectHook(0x438240, &CStuckCarCheck::RemoveCarFromCheck, PATCH_JUMP);
+InjectHook(0x4382A0, &CStuckCarCheck::HasCarBeenStuckForAWhile, PATCH_JUMP);
 ENDPATCHES

@@ -69,13 +69,6 @@ enum eDoors
 	DOOR_REAR_RIGHT
 };
 
-enum {
-	GETTING_IN_OUT_FL = 1,
-	GETTING_IN_OUT_RL = 2,
-	GETTING_IN_OUT_FR = 4,
-	GETTING_IN_OUT_RR = 8
-};
-
 class CVehicle : public CPhysical
 {
 public:

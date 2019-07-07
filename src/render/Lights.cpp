@@ -6,7 +6,7 @@
 #include "Timecycle.h"
 #include "Coronas.h"
 #include "Weather.h"
-#include "CullZones.h"
+#include "ZoneCull.h"
 #include "Frontend.h"
 
 RpLight *&pAmbient = *(RpLight**)0x885B6C;

@@ -40,7 +40,7 @@
 #include "CutsceneMgr.h"
 #include "Lights.h"
 #include "Credits.h"
-#include "CullZones.h"
+#include "ZoneCull.h"
 #include "Timecycle.h"
 #include "TxdStore.h"
 #include "FileMgr.h"

@@ -304,6 +304,22 @@ CPhysical::RemoveRefsToEntity(CEntity *ent)
 	}
 }
 
+void
+CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical *other, CPhysical *phys, CVector localPos)
+{
+	CVector worldPos = other->GetMatrix() * localPos;
+	float step = 0.9f * CTimer::GetTimeStep();
+	CVector pos = other->m_vecMoveSpeed*step + worldPos;
+
+	CWorld::Remove(phys);
+	phys->GetMatrix() = other->GetMatrix();
+	phys->GetPosition() = pos;
+	phys->m_vecMoveSpeed = other->m_vecMoveSpeed;
+	phys->GetMatrix().UpdateRW();
+	phys->UpdateRwFrame();
+	CWorld::Add(phys);
+}
+
 int32
 CPhysical::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 {
@@ -346,7 +362,7 @@ CPhysical::ProcessControl(void)
 		   IsPed() && !bPedPhysics){
 			m_vecMoveSpeedAvg = (m_vecMoveSpeedAvg + m_vecMoveSpeed)/2.0f;
 			m_vecTurnSpeedAvg = (m_vecTurnSpeedAvg + m_vecTurnSpeed)/2.0f;
-			float step = CTimer::GetTimeStep() * 0.003;
+			float step = CTimer::GetTimeStep() * 0.003f;
 			if(m_vecMoveSpeedAvg.MagnitudeSqr() < step*step &&
 			   m_vecTurnSpeedAvg.MagnitudeSqr() < step*step){
 				m_nStaticFrames++;
@@ -434,15 +450,38 @@ CPhysical::ApplyFrictionTurnForce(float jx, float jy, float jz, float px, float 
 	m_vecTurnFriction += turnimpulse*(1.0f/m_fTurnMass);
 }
 
-void
-CPhysical::ApplySpringCollision(float f1, CVector &v, CVector &p, float f2, float f3)
+bool
+CPhysical::ApplySpringCollision(float springConst, CVector &springDir, CVector &point, float springRatio, float bias)
 {
-	if(1.0f - f2 <= 0.0f)
-		return;
+	float compression = 1.0f - springRatio;
+	if(compression > 0.0f){
+		float step = min(CTimer::GetTimeStep(), 3.0f);
+		float impulse = -0.008f*m_fMass*step * springConst * compression * bias*2.0f;
+		ApplyMoveForce(springDir*impulse);
+		ApplyTurnForce(springDir*impulse, point);
+	}
+	return true;
+}
+
+// What exactly is speed?
+bool
+CPhysical::ApplySpringDampening(float damping, CVector &springDir, CVector &point, CVector &speed)
+{
+	float speedA = DotProduct(speed, springDir);
+	float speedB = DotProduct(GetSpeed(point), springDir);
 	float step = min(CTimer::GetTimeStep(), 3.0f);
-	float strength = -0.008f*m_fMass*2.0f*step * f1 * (1.0f-f2) * f3;
-	ApplyMoveForce(v*strength);
-	ApplyTurnForce(v*strength, p);
+	float impulse = -damping * (speedA + speedB)/2.0f * m_fMass * step * 0.53f;
+
+	// what is this?
+	float a = m_fTurnMass / ((point.MagnitudeSqr() + 1.0f) * 2.0f * m_fMass);
+	a = min(a, 1.0f);
+	float b = fabs(impulse / (speedB * m_fMass));
+	if(a < b)
+		impulse *= a/b;
+
+	ApplyMoveForce(springDir*impulse);
+	ApplyTurnForce(springDir*impulse, point);
+	return true;
 }
 
 void
@@ -1858,10 +1897,10 @@ CPhysical::ProcessCollision(void)
 			CVehicle *veh = (CVehicle*)this;
 			if(veh->m_vehType == VEHICLE_TYPE_CAR){
 				CAutomobile *car = (CAutomobile*)this;
-				car->m_aWheelDist[0] = 1.0f;
-				car->m_aWheelDist[1] = 1.0f;
-				car->m_aWheelDist[2] = 1.0f;
-				car->m_aWheelDist[3] = 1.0f;
+				car->m_aSuspensionSpringRatio[0] = 1.0f;
+				car->m_aSuspensionSpringRatio[1] = 1.0f;
+				car->m_aSuspensionSpringRatio[2] = 1.0f;
+				car->m_aSuspensionSpringRatio[3] = 1.0f;
 			}else if(veh->m_vehType == VEHICLE_TYPE_BIKE){
 				assert(0 && "TODO - but unused");
 			}
@@ -1909,6 +1948,7 @@ STARTPATCHES
 	InjectHook(0x4970C0, &CPhysical::AddCollisionRecord_Treadable, PATCH_JUMP);
 	InjectHook(0x497240, &CPhysical::GetHasCollidedWith, PATCH_JUMP);
 	InjectHook(0x49F820, &CPhysical::RemoveRefsToEntity, PATCH_JUMP);
+	InjectHook(0x49F890, &CPhysical::PlacePhysicalRelativeToOtherPhysical, PATCH_JUMP);
 
 #define F3 float, float, float
 	InjectHook(0x495B10, &CPhysical::ApplyMoveSpeed, PATCH_JUMP);
@@ -1918,6 +1958,7 @@ STARTPATCHES
 	InjectHook(0x495D90, (void (CPhysical::*)(F3))&CPhysical::ApplyFrictionMoveForce, PATCH_JUMP);
 	InjectHook(0x495E10, (void (CPhysical::*)(F3, F3))&CPhysical::ApplyFrictionTurnForce, PATCH_JUMP);
 	InjectHook(0x499890, &CPhysical::ApplySpringCollision, PATCH_JUMP);
+	InjectHook(0x499990, &CPhysical::ApplySpringDampening, PATCH_JUMP);
 	InjectHook(0x495B50, &CPhysical::ApplyGravity, PATCH_JUMP);
 	InjectHook(0x495B80, (void (CPhysical::*)(void))&CPhysical::ApplyFriction, PATCH_JUMP);
 	InjectHook(0x495C20, &CPhysical::ApplyAirResistance, PATCH_JUMP);

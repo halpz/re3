@@ -77,7 +77,7 @@ public:
 	void UpdateTime(float timeDelta, float relSpeed);
 	bool UpdateBlend(float timeDelta);
 
-	float GetTimeLeft() { return hierarchy->totalLength - currentTime; }
+	inline float GetTimeLeft() { return hierarchy->totalLength - currentTime; }
 
 	static CAnimBlendAssociation *FromLink(CAnimBlendLink *l) {
 		return (CAnimBlendAssociation*)((uint8*)l - offsetof(CAnimBlendAssociation, link));

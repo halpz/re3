@@ -262,8 +262,8 @@ public:
 	static void StreamAllNecessaryCarsAndPeds(void);
 	static bool ShouldStandardCameraBeProcessed(void);
 
-	inline static bool IsPlayingBack() { return Mode == MODE_PLAYBACK; }
-	inline static bool IsPlayingBackFromFile() { return bPlayingBackFromFile; }
+	static bool IsPlayingBack() { return Mode == MODE_PLAYBACK; }
+	static bool IsPlayingBackFromFile() { return bPlayingBackFromFile; }
 
 private:
 	static void RecordThisFrame(void);
