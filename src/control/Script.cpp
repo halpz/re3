@@ -8,7 +8,9 @@
 #include "DMAudio.h"
 #include "FileMgr.h"
 #include "Hud.h"
+#include "Messages.h"
 #include "ModelIndices.h"
+#include "Pad.h"
 #include "PlayerInfo.h"
 #include "PlayerPed.h"
 #include "Pools.h"
@@ -406,7 +408,7 @@ void CRunningScript::Init()
 	m_nStackPointer = 0;
 	m_nWakeTime = 0;
 	m_bCondResult = false;
-	m_bIsMissionThread = false;
+	m_bIsMissionScript = false;
 	m_bSkipWakeTime = false;
 	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
 		m_anLocalVariables[i] = 0;
@@ -526,7 +528,7 @@ void CTheScripts::Init()
 	NumberOfIntroTextLinesThisFrame = 0;
 	UseTextCommands = false;
 	for (int i = 0; i < MAX_NUM_INTRO_RECTANGLES; i++){
-		IntroRectangles[i].m_Type = 0;
+		IntroRectangles[i].m_bIsUsed = false;
 		IntroRectangles[i].m_bBeforeFade = false;
 		IntroRectangles[i].m_nTextureId = -1;
 		IntroRectangles[i].m_sRect = CRect(0.0f, 0.0f, 0.0f, 0.0f);
@@ -593,7 +595,7 @@ void CTheScripts::Process()
 			IntroTextLines[i].Reset();
 		NumberOfIntroRectanglesThisFrame = 0;
 		for (int i = 0; i < MAX_NUM_INTRO_RECTANGLES; i++){
-			IntroRectangles[i].m_Type = 0;
+			IntroRectangles[i].m_bIsUsed = false;
 			IntroRectangles[i].m_bBeforeFade = false;
 		}
 		NumberOfIntroRectanglesThisFrame = 0;
@@ -621,8 +623,78 @@ bool CTheScripts::IsPlayerOnAMission()
 	return OnAMissionFlag && *(int32*)&ScriptSpace[OnAMissionFlag] == 1;
 }
 
-WRAPPER void CRunningScript::Process() { EAXJMP(0x439440); }
+void CRunningScript::Process()
+{
+	if (m_bIsMissionScript)
+		DoDeatharrestCheck();
+	if (m_bMissionFlag && CTheScripts::FailCurrentMission == 1 && m_nStackPointer == 1)
+		m_nIp = m_anStack[--m_nStackPointer];
+	if (CTimer::GetTimeInMilliseconds() >= m_nWakeTime){
+		while (!ProcessOneCommand())
+			;
+		return;
+	}
+	if (!m_bSkipWakeTime)
+		return;
+	if (!CPad::GetPad(0)->GetCrossJustDown())
+		return;
+	m_nWakeTime = 0;
+	for (int i = 0; i < 6; i++){ /* TODO: add constant for number of messages */
+		if (CMessages::BIGMessages[i].m_Current.m_pText)
+			CMessages::BIGMessages[i].m_Current.m_nStartTime = 0;
+		if (CMessages::BriefMessages[0].m_pText)
+			CMessages::BriefMessages[0].m_nStartTime = 0;
+	}
+}
+
+int8 CRunningScript::ProcessOneCommand()
+{
+	++CTheScripts::CommandsExecuted;
+	int32 command = CTheScripts::Read2BytesFromScript(&m_nIp);
+	m_bNotFlag = (command & 0x8000);
+	command &= 0x7FFF;
+	if (command < 100)
+		return ProcessCommandsFrom0To99(command);
+	if (command < 200)
+		return ProcessCommandsFrom100To199(command);
+	if (command < 300)
+		return ProcessCommandsFrom200To299(command);
+	if (command < 400)
+		return ProcessCommandsFrom300To399(command);
+	if (command < 500)
+		return ProcessCommandsFrom400To499(command);
+	if (command < 600)
+		return ProcessCommandsFrom500To599(command);
+	if (command < 700)
+		return ProcessCommandsFrom600To699(command);
+	if (command < 800)
+		return ProcessCommandsFrom700To799(command);
+	if (command < 900)
+		return ProcessCommandsFrom800To899(command);
+	if (command < 1000)
+		return ProcessCommandsFrom900To999(command);
+	if (command < 1100)
+		return ProcessCommandsFrom1000To1099(command);
+	if (command < 1200)
+		return ProcessCommandsFrom1100To1199(command);
+	return -1;
+}
+
+WRAPPER int8 CRunningScript::ProcessCommandsFrom0To99(int32 command) { EAXJMP(0x439650); }
+WRAPPER int8 CRunningScript::ProcessCommandsFrom100To199(int32 command) { EAXJMP(0x43AEA0); }
+WRAPPER int8 CRunningScript::ProcessCommandsFrom200To299(int32 command) { EAXJMP(0x43D530); }
+WRAPPER int8 CRunningScript::ProcessCommandsFrom300To399(int32 command) { EAXJMP(0x43ED30); }
+WRAPPER int8 CRunningScript::ProcessCommandsFrom400To499(int32 command) { EAXJMP(0x440CB0); }
+WRAPPER int8 CRunningScript::ProcessCommandsFrom500To599(int32 command) { EAXJMP(0x4429C0); }
+WRAPPER int8 CRunningScript::ProcessCommandsFrom600To699(int32 command) { EAXJMP(0x444B20); }
+WRAPPER int8 CRunningScript::ProcessCommandsFrom700To799(int32 command) { EAXJMP(0x4458A0); }
+WRAPPER int8 CRunningScript::ProcessCommandsFrom800To899(int32 command) { EAXJMP(0x448240); }
+WRAPPER int8 CRunningScript::ProcessCommandsFrom900To999(int32 command) { EAXJMP(0x44CB80); }
+WRAPPER int8 CRunningScript::ProcessCommandsFrom1000To1099(int32 command) { EAXJMP(0x588490); }
+WRAPPER int8 CRunningScript::ProcessCommandsFrom1100To1199(int32 command) { EAXJMP(0x589D00); }
+
 WRAPPER void CTheScripts::DrawScriptSpheres() { EAXJMP(0x44FAC0); }
+WRAPPER void CRunningScript::DoDeatharrestCheck() { EAXJMP(0x452A30); }
 WRAPPER void CTheScripts::ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2) { EAXJMP(0x4534E0); }
 WRAPPER void CTheScripts::CleanUpThisVehicle(CVehicle*) { EAXJMP(0x4548D0); }
 WRAPPER void CTheScripts::CleanUpThisPed(CPed*) { EAXJMP(0x4547A0); }

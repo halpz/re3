@@ -8,7 +8,7 @@
 
 struct CScriptRectangle 
 {
-	int8 m_Type;
+	int8 m_bIsUsed;
 	bool m_bBeforeFade;
 	int16 m_nTextureId;
 	CRect m_sRect;
@@ -71,7 +71,7 @@ class CRunningScript
 	uint16 m_nStackPointer;
 	int32 m_anLocalVariables[NUM_LOCAL_VARS + NUM_TIMERS];
 	bool m_bCondResult;
-	bool m_bIsMissionThread;
+	bool m_bIsMissionScript;
 	bool m_bSkipWakeTime;
 	uint32 m_nWakeTime;
 	uint16 m_nAndOrState;
@@ -96,6 +96,20 @@ public:
 	void RemoveScriptFromList(CRunningScript**);
 	void AddScriptToList(CRunningScript**);
 	void Process();
+	int8 ProcessOneCommand();
+	void DoDeatharrestCheck();
+	int8 ProcessCommandsFrom0To99(int32);
+	int8 ProcessCommandsFrom100To199(int32);
+	int8 ProcessCommandsFrom200To299(int32);
+	int8 ProcessCommandsFrom300To399(int32);
+	int8 ProcessCommandsFrom400To499(int32);
+	int8 ProcessCommandsFrom500To599(int32);
+	int8 ProcessCommandsFrom600To699(int32);
+	int8 ProcessCommandsFrom700To799(int32);
+	int8 ProcessCommandsFrom800To899(int32);
+	int8 ProcessCommandsFrom900To999(int32);
+	int8 ProcessCommandsFrom1000To1099(int32);
+	int8 ProcessCommandsFrom1100To1199(int32);
 };
 
 enum {
