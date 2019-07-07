@@ -306,6 +306,15 @@ Multiply3x3(const CMatrix &mat, const CVector &vec)
 		mat.m_matrix.right.z * vec.x + mat.m_matrix.up.z * vec.y + mat.m_matrix.at.z * vec.z);
 }
 
+inline CVector
+Multiply3x3(const CVector &vec, const CMatrix &mat)
+{
+	return CVector(
+		mat.m_matrix.right.x * vec.x + mat.m_matrix.right.y * vec.y + mat.m_matrix.right.z * vec.z,
+		mat.m_matrix.up.x * vec.x + mat.m_matrix.up.y * vec.y + mat.m_matrix.up.z * vec.z,
+		mat.m_matrix.at.x * vec.x + mat.m_matrix.at.y * vec.y + mat.m_matrix.at.z * vec.z);
+}
+
 class CCompressedMatrixNotAligned
 {
 	CVector m_vecPos;

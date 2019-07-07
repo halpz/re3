@@ -686,8 +686,8 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 			car->m_aSuspensionSpringRatio[i] = vp->wheel_susp_dist[i] / 50.0f;
 			car->m_aWheelRotation[i] = vp->wheel_rotation[i] * M_PI / 128.0f;
 		}
-		car->Doors[2].m_fAngle = car->Doors[2].m_fPreviousAngle = vp->door_angles[0] * M_PI / 127.0f;
-		car->Doors[3].m_fAngle = car->Doors[3].m_fPreviousAngle = vp->door_angles[1] * M_PI / 127.0f;
+		car->Doors[2].m_fAngle = car->Doors[2].m_fPrevAngle = vp->door_angles[0] * M_PI / 127.0f;
+		car->Doors[3].m_fAngle = car->Doors[3].m_fPrevAngle = vp->door_angles[1] * M_PI / 127.0f;
 		if (vp->door_angles[0])
 			car->Damage.SetDoorStatus(2, 2);
 		if (vp->door_angles[1])
