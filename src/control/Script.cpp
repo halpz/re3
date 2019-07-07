@@ -13,6 +13,7 @@
 #include "PlayerPed.h"
 #include "Pools.h"
 #include "Population.h"
+#include "Replay.h"
 #include "Streaming.h"
 #include "User.h"
 #include "Weather.h"
@@ -32,7 +33,7 @@ int32(&CTheScripts::MultiScriptArray)[MAX_NUM_MISSION_SCRIPTS] = *(int32(*)[MAX_
 tBuildingSwap(&CTheScripts::BuildingSwapArray)[MAX_NUM_BUILDING_SWAPS] = *(tBuildingSwap(*)[MAX_NUM_BUILDING_SWAPS])*(uintptr*)0x880E30;
 CEntity*(&CTheScripts::InvisibilitySettingArray)[MAX_NUM_INVISIBILITY_SETTINGS] = *(CEntity*(*)[MAX_NUM_INVISIBILITY_SETTINGS])*(uintptr*)0x8620F0;
 bool &CTheScripts::DbgFlag = *(bool*)0x95CD87;
-uint32 &CTheScripts::OnAMissionFlag = *(uint32*)0x8F2A24;
+uint32 &CTheScripts::OnAMissionFlag = *(uint32*)0x8F1B64;
 int32 &CTheScripts::StoreVehicleIndex = *(int32*)0x8F5F3C;
 bool &CTheScripts::StoreVehicleWasRandom = *(bool*)0x95CDBC;
 CRunningScript *&CTheScripts::pIdleScripts = *(CRunningScript**)0x9430D4;
@@ -55,6 +56,8 @@ bool &CTheScripts::UseTextCommands = *(bool*)0x95CD57;
 CMissionCleanup (&CTheScripts::MissionCleanup) = *(CMissionCleanup*)0x8F2A24;
 CUpsideDownCarCheck (&CTheScripts::UpsideDownCars) = *(CUpsideDownCarCheck*)0x6EE450;
 CStuckCarCheck (&CTheScripts::StuckCars) = *(CStuckCarCheck*)0x87C588;
+uint16 &CTheScripts::CommandsExecuted = *(uint16*)0x95CCA6;
+uint16 &CTheScripts::ScriptsUpdated = *(uint16*)0x95CC5E;
 int32(&ScriptParams)[32] = *(int32(*)[32])*(uintptr*)0x6ED460;
 
 CMissionCleanup::CMissionCleanup()
@@ -435,6 +438,27 @@ int open_script()
 }
 #endif
 
+void CTextLine::Reset()
+{
+	m_fScaleX = 0.48f;
+	m_fScaleY = 1.12f;
+	m_sColor = CRGBA(225, 225, 225, 255);
+	m_bJustify = false;
+	m_bRightJustify = false;
+	m_bCentered = false;
+	m_bBackground = false;
+	m_bBackgroundOnly = false;
+	m_fWrapX = 182.0f; /* TODO: scaling as bugfix */
+	m_fCenterSize = 640.0f; /* --||-- */
+	m_sBackgroundColor = CRGBA(128, 128, 128, 128);
+	m_bTextProportional = true;
+	m_bTextBeforeFade = false;
+	m_nFont = 2; /* enum? */
+	m_fAtX = 0.0f;
+	m_fAtY = 0.0f;
+	memset(&m_Text, 0, sizeof(m_Text));
+}
+
 void CTheScripts::Init()
 {
 	for (int i = 0; i < SIZE_SCRIPT_SPACE; i++)
@@ -497,29 +521,13 @@ void CTheScripts::Init()
 		ScriptSphereArray[i].m_fRadius = 0.0f;
 	}
 	for (int i = 0; i < MAX_NUM_INTRO_TEXT_LINES; i++){
-		IntroTextLines[i].m_fScaleX = 0.48f;
-		IntroTextLines[i].m_fScaleY = 1.12f;
-		IntroTextLines[i].m_sColor = CRGBA(225, 225, 225, 255);
-		IntroTextLines[i].m_bJustify = false;
-		IntroTextLines[i].m_bRightJustify = false;
-		IntroTextLines[i].m_bCentered = false;
-		IntroTextLines[i].m_bBackground = false;
-		IntroTextLines[i].m_bBackgroundOnly = false;
-		IntroTextLines[i].m_fWrapX = 182.0f; /* TODO: scaling as bugfix */
-		IntroTextLines[i].m_fCenterSize = 640.0f; /* --||-- */
-		IntroTextLines[i].m_sBackgroundColor = CRGBA(128, 128, 128, 128);
-		IntroTextLines[i].m_bTextProportional = true;
-		IntroTextLines[i].m_bTextBeforeFade = false;
-		IntroTextLines[i].m_nFont = 2; /* enum? */
-		IntroTextLines[i].m_fAtX = 0.0f;
-		IntroTextLines[i].m_fAtY = 0.0f;
-		memset(&IntroTextLines[i].m_Text, 0, sizeof(IntroTextLines[i].m_Text));
+		IntroTextLines[i].Reset();
 	}
 	NumberOfIntroTextLinesThisFrame = 0;
 	UseTextCommands = false;
 	for (int i = 0; i < MAX_NUM_INTRO_RECTANGLES; i++){
-		IntroRectangles[i].m_bIsUsed = false;
-		IntroRectangles[i].m_bIsAntialiased = false;
+		IntroRectangles[i].m_Type = 0;
+		IntroRectangles[i].m_bBeforeFade = false;
 		IntroRectangles[i].m_nTextureId = -1;
 		IntroRectangles[i].m_sRect = CRect(0.0f, 0.0f, 0.0f, 0.0f);
 		IntroRectangles[i].m_sColor = CRGBA(255, 255, 255, 255);
@@ -553,7 +561,68 @@ void CRunningScript::AddScriptToList(CRunningScript** ppScript)
 	*ppScript = this;
 }
 
-WRAPPER bool CTheScripts::IsPlayerOnAMission() { EAXJMP(0x439410); }
+CRunningScript* CTheScripts::StartNewScript(uint32 ip)
+{
+	CRunningScript* pNew = pIdleScripts;
+	assert(pNew);
+	pNew->RemoveScriptFromList(&pIdleScripts);
+	pNew->Init();
+	pNew->SetIP(ip);
+	pNew->AddScriptToList(&pActiveScripts);
+	return pNew;
+}
+
+void CTheScripts::Process()
+{
+	if (CReplay::IsPlayingBack())
+		return;
+	CommandsExecuted = 0;
+	ScriptsUpdated = 0;
+	float timeStep = CTimer::GetTimeStepInMilliseconds();
+	UpsideDownCars.UpdateTimers();
+	StuckCars.Process();
+	DrawScriptSpheres();
+	if (FailCurrentMission)
+		--FailCurrentMission;
+	if (CountdownToMakePlayerUnsafe){
+		if (--CountdownToMakePlayerUnsafe == 0)
+			CWorld::Players[0].MakePlayerSafe(false);
+	}
+	if (UseTextCommands){
+		for (int i = 0; i < MAX_NUM_INTRO_TEXT_LINES; i++)
+			IntroTextLines[i].Reset();
+		NumberOfIntroRectanglesThisFrame = 0;
+		for (int i = 0; i < MAX_NUM_INTRO_RECTANGLES; i++){
+			IntroRectangles[i].m_Type = 0;
+			IntroRectangles[i].m_bBeforeFade = false;
+		}
+		NumberOfIntroRectanglesThisFrame = 0;
+		if (UseTextCommands == 1)
+			UseTextCommands = 0;
+	}
+	CRunningScript* script = pActiveScripts;
+	while (script != nil){
+		CRunningScript* next = script->GetNext();
+		++ScriptsUpdated;
+		script->UpdateTimers(timeStep);
+		script->Process();
+		script = next;
+	}
+	DbgFlag = false;
+}
+
+CRunningScript* CTheScripts::StartTestScript()
+{
+	return StartNewScript(0);
+}
+
+bool CTheScripts::IsPlayerOnAMission()
+{
+	return OnAMissionFlag && *(int32*)&ScriptSpace[OnAMissionFlag] == 1;
+}
+
+WRAPPER void CRunningScript::Process() { EAXJMP(0x439440); }
+WRAPPER void CTheScripts::DrawScriptSpheres() { EAXJMP(0x44FAC0); }
 WRAPPER void CTheScripts::ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2) { EAXJMP(0x4534E0); }
 WRAPPER void CTheScripts::CleanUpThisVehicle(CVehicle*) { EAXJMP(0x4548D0); }
 WRAPPER void CTheScripts::CleanUpThisPed(CPed*) { EAXJMP(0x4547A0); }
@@ -582,6 +651,9 @@ InjectHook(0x4382E0, &CRunningScript::CollectParameters, PATCH_JUMP);
 InjectHook(0x438460, &CRunningScript::CollectNextParameterWithoutIncreasingPC, PATCH_JUMP);
 InjectHook(0x4385A0, &CRunningScript::StoreParameters, PATCH_JUMP);
 InjectHook(0x438640, &CRunningScript::GetPointerToScriptVariable, PATCH_JUMP);
-InjectHook(0x4386C0, &CRunningScript::Init, PATCH_JUMP);
 InjectHook(0x438790, &CTheScripts::Init, PATCH_JUMP);
+InjectHook(0x439000, &CTheScripts::StartNewScript, PATCH_JUMP);
+InjectHook(0x439040, &CTheScripts::Process, PATCH_JUMP);
+InjectHook(0x439400, &CTheScripts::StartTestScript, PATCH_JUMP);
+InjectHook(0x439410, &CTheScripts::IsPlayerOnAMission, PATCH_JUMP);
 ENDPATCHES
