@@ -74,7 +74,7 @@ public:
 	static void RemovePSystem(tParticleType type);
 	static void RemoveParticle(CParticle *pParticle, CParticle *pPrevParticle, tParticleSystemData *pPSystemData);
 	
-	static inline void _Next(CParticle *&pParticle, CParticle *&pPrevParticle, tParticleSystemData *pPSystemData, bool bRemoveParticle)
+	static void _Next(CParticle *&pParticle, CParticle *&pPrevParticle, tParticleSystemData *pPSystemData, bool bRemoveParticle)
 	{
 		if ( bRemoveParticle )
 		{

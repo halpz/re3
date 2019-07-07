@@ -151,7 +151,7 @@ bool CUpsideDownCarCheck::IsCarUpsideDown(int32 id)
 
 void CUpsideDownCarCheck::UpdateTimers()
 {
-	uint32 timeStep = CTimer::GetFrameTimeStepInMilliseconds();
+	uint32 timeStep = CTimer::GetTimeStepInMilliseconds();
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
 		CVehicle* v = CPools::GetVehiclePool()->GetAt(m_sCars[i].m_nVehicleIndex);
 		if (v){

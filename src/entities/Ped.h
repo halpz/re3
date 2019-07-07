@@ -522,11 +522,11 @@ public:
 	void SetPedStats(ePedStats);
 	bool IsGangMember(void);
 
-	inline bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
-	inline CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
-	inline CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
-	inline RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
-	inline static uint8 GetVehEnterExitFlag(eVehEnter vehEnter) {
+	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
+	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
+	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
+	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
+	static uint8 GetVehEnterExitFlag(eVehEnter vehEnter) {
 		switch (vehEnter) {
 			case VEHICLE_ENTER_FRONT_RIGHT:
 				return 4;

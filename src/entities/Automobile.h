@@ -26,7 +26,7 @@ public:
 	RwFrame *m_aCarNodes[NUM_CAR_NODES];
 	CColPoint m_aWheelColPoints[4];
 	float m_aWheelDist[4];
-	float m_aWheelDist_2[4];
+	float m_aWheelDistPrev[4];
 	float m_aWheelSkidThing[4];
 	int field_49C;
 	bool m_aWheelSkidmarkMuddy[4];

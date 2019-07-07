@@ -346,7 +346,7 @@ CPhysical::ProcessControl(void)
 		   IsPed() && !bPedPhysics){
 			m_vecMoveSpeedAvg = (m_vecMoveSpeedAvg + m_vecMoveSpeed)/2.0f;
 			m_vecTurnSpeedAvg = (m_vecTurnSpeedAvg + m_vecTurnSpeed)/2.0f;
-			float step = CTimer::GetTimeStep() * 0.003;
+			float step = CTimer::GetTimeStep() * 0.003f;
 			if(m_vecMoveSpeedAvg.MagnitudeSqr() < step*step &&
 			   m_vecTurnSpeedAvg.MagnitudeSqr() < step*step){
 				m_nStaticFrames++;
