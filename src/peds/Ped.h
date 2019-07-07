@@ -351,7 +351,7 @@ public:
 	uint8 pad_351[3];
 	uint32 m_timerUnused;
 	CEntity *m_targetUnused;
-	CWeapon m_weapons[NUM_PED_WEAPONTYPES];
+	CWeapon m_weapons[WEAPONTYPE_TOTAL_INVENTORY_WEAPONS];
 	eWeaponType m_storedWeapon;
 	uint8 m_currentWeapon;			// eWeaponType
 	uint8 m_maxWeaponTypeAllowed;	// eWeaponType
@@ -465,6 +465,8 @@ public:
 	void RegisterThreatWithGangPeds(CEntity*);
 	bool TurnBody(void);
 	void Chat(void);
+  void MakeChangesForNewWeapon(int8);
+
 
 	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);

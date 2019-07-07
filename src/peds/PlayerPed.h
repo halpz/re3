@@ -43,6 +43,7 @@ public:
 
 	void dtor(void) { this->CPlayerPed::~CPlayerPed(); }
 	void ReApplyMoveAnims(void);
+	void ClearWeaponTarget();
 };
 
 static_assert(sizeof(CPlayerPed) == 0x5F0, "CPlayerPed: error");
