@@ -81,6 +81,7 @@ public:
 	void AddCollisionRecord_Treadable(CEntity *ent);
 	bool GetHasCollidedWith(CEntity *ent);
 	void RemoveRefsToEntity(CEntity *ent);
+	static void PlacePhysicalRelativeToOtherPhysical(CPhysical *other, CPhysical *phys, CVector localPos);
 
 	float GetDistanceSq(void) { return m_vecMoveSpeed.MagnitudeSqr() * sq(CTimer::GetTimeStep()); }
 	// get speed of point p relative to entity center
@@ -104,8 +105,8 @@ public:
 		bIsInSafePosition = false;	
 	}
 
-	const CVector& GetMoveSpeed() { return m_vecMoveSpeed; }
-	const CVector& GetTurnSpeed() { return m_vecTurnSpeed; }
+	const CVector &GetMoveSpeed() { return m_vecMoveSpeed; }
+	const CVector &GetTurnSpeed() { return m_vecTurnSpeed; }
 
 	void ApplyMoveSpeed(void);
 	void ApplyTurnSpeed(void);
@@ -120,7 +121,9 @@ public:
 	void ApplyFrictionMoveForce(const CVector &j) { ApplyFrictionMoveForce(j.x, j.y, j.z); }
 	void ApplyFrictionTurnForce(float jx, float jy, float jz, float rx, float ry, float rz);
 	void ApplyFrictionTurnForce(const CVector &j, const CVector &p) { ApplyFrictionTurnForce(j.x, j.y, j.z, p.x, p.y, p.z); }
-	void ApplySpringCollision(float f1, CVector &v, CVector &p, float f2, float f3);
+	// springRatio: 1.0 fully extended, 0.0 fully compressed
+	bool ApplySpringCollision(float springConst, CVector &springDir, CVector &point, float springRatio, float bias);
+	bool ApplySpringDampening(float damping, CVector &springDir, CVector &point, CVector &speed);
 	void ApplyGravity(void);
 	void ApplyFriction(void);
 	void ApplyAirResistance(void);

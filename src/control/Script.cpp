@@ -144,7 +144,7 @@ void CUpsideDownCarCheck::Init()
 bool CUpsideDownCarCheck::IsCarUpsideDown(int32 id)
 {
 	CVehicle* v = CPools::GetVehiclePool()->GetAt(id);
-	return v->GetMatrix().GetUp()->z <= -0.97f &&
+	return v->GetUp().z <= -0.97f &&
 		v->GetMoveSpeed().Magnitude() < 0.01f &&
 		v->GetTurnSpeed().Magnitude() < 0.02f;
 }
