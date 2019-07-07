@@ -250,10 +250,9 @@ enum
 	MI_BUSKER2,
 	MI_BUSKER3,
 	MI_BUSKER4,
-	MI_PED87,
-	MI_PED88,
-	MI_PED89,
-	MI_LANDSTAL,
+	// three more peds possible
+
+	MI_LANDSTAL = 90,
 	MI_IDAHO,
 	MI_STINGER,
 	MI_LINERUN,

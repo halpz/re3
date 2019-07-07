@@ -13,7 +13,31 @@
 
 struct CPathNode;
 
-enum eObjective {
+enum eWaitState : uint32 {
+	WAITSTATE_FALSE,
+	WAITSTATE_TRAFFIC_LIGHTS,
+	WAITSTATE_CROSS_ROAD,
+	WAITSTATE_CROSS_ROAD_LOOK,
+	WAITSTATE_LOOK_PED,
+	WAITSTATE_LOOK_SHOP,
+	WAITSTATE_LOOK_ACCIDENT,
+	WAITSTATE_FACEOFF_GANG,
+	WAITSTATE_DOUBLEBACK,
+	WAITSTATE_HITWALL,
+	WAITSTATE_TURN180,
+	WAITSTATE_SURPRISE,
+	WAITSTATE_STUCK,
+	WAITSTATE_LOOK_ABOUT,
+	WAITSTATE_PLAYANIM_DUCK,
+	WAITSTATE_PLAYANIM_COWER,
+	WAITSTATE_PLAYANIM_TAXI,
+	WAITSTATE_PLAYANIM_HANDSUP,
+	WAITSTATE_PLAYANIM_HANDSCOWER,
+	WAITSTATE_PLAYANIM_CHAT,
+	WAITSTATE_FINISH_FLEE
+};
+
+enum eObjective : uint32 {
 	OBJECTIVE_NONE,
 	OBJECTIVE_IDLE,
 	OBJECTIVE_FLEE_TILL_SAFE,
@@ -52,7 +76,7 @@ enum eObjective {
 	OBJECTIVE_35
 };
 
-enum {
+enum eVehEnter : uint16 {
 	VEHICLE_ENTER_FRONT_RIGHT = 11,
 	VEHICLE_ENTER_REAR_RIGHT = 12,
 	VEHICLE_ENTER_FRONT_LEFT = 15,
@@ -60,8 +84,8 @@ enum {
 };
 
 enum {
-	CREATED_BY_RANDOM = 1,
-	CREATED_BY_SCRIPT
+	RANDOM_CHAR = 1,
+	MISSION_CHAR,
 };
 
 enum PedLineUpPhase {
@@ -130,15 +154,15 @@ enum PedState
 	PED_PASSENGER,
 	PED_TAXI_PASSENGER,
 	PED_OPEN_DOOR,
-	PED_DIE = 48,
-	PED_DEAD = 49,
+	PED_DIE,
+	PED_DEAD,
 	PED_CARJACK,
 	PED_DRAG_FROM_CAR,
 	PED_ENTER_CAR,
 	PED_STEAL_CAR,
 	PED_EXIT_CAR,
 	PED_HANDS_UP,
-	PED_ARRESTED = 56,
+	PED_ARRESTED,
 };
 
 enum eMoveState {
@@ -157,6 +181,8 @@ public:
 	// 0x128
 	CStoredCollPoly m_collPoly;
 	float m_fCollisionSpeed;
+
+	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
 	uint8 bIsStanding : 1;
 	uint8 m_ped_flagA2 : 1;
 	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
@@ -168,16 +194,16 @@ public:
 
 	uint8 bIsRestoringGun : 1;
 	uint8 bCanPointGunAtTarget : 1;
-	uint8 m_ped_flagB4 : 1;
-	uint8 m_ped_flagB8 : 1;
-	uint8 m_ped_flagB10 : 1;
+	uint8 bIsTalking : 1;
+	uint8 bIsInTheAir : 1;
+	uint8 bIsLanding : 1;
 	uint8 m_ped_flagB20 : 1;
 	uint8 m_ped_flagB40 : 1;
 	uint8 m_ped_flagB80 : 1;
 
 	uint8 m_ped_flagC1 : 1;
-	uint8 m_ped_flagC2 : 1;
-	uint8 m_ped_flagC4 : 1;
+	uint8 bRespondsToThreats : 1;
+	uint8 m_ped_flagC4 : 1;		// false when in bus, bRenderPedInCar?
 	uint8 m_ped_flagC8 : 1;
 	uint8 m_ped_flagC10 : 1;
 	uint8 m_ped_flagC20 : 1;	// just left some body part?
@@ -195,9 +221,9 @@ public:
 
 	uint8 m_ped_flagE1 : 1;
 	uint8 m_ped_flagE2 : 1;
-	uint8 m_ped_flagE4 : 1;
-	uint8 m_ped_flagE8 : 1;		// can duck?
-	uint8 bCantFireBecauseCrouched : 1;	// set if you don't want ped to attack
+	uint8 bNotAllowedToDuck : 1;
+	uint8 bCrouchWhenShooting : 1;
+	uint8 bIsDucking : 1;	// set if you don't want ped to attack
 	uint8 m_ped_flagE20 : 1;
 	uint8 bDoBloodyFootprints : 1;
 	uint8 m_ped_flagE80 : 1;
@@ -237,8 +263,9 @@ public:
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
+
 	uint8 stuff10[3];
-	uint8 m_nCreatedBy;
+	uint8 CharCreatedBy;
 	uint8 field_161;
 	uint8 pad_162[2];
 	eObjective m_objective;
@@ -270,7 +297,7 @@ public:
 	eMoveState m_nMoveState;
 	int32 m_nStoredActionState;
 	int32 m_nPrevActionState;
-	int32 m_nWaitState;
+	eWaitState m_nWaitState;
 	uint32 m_nWaitTimer;
 	void *m_pPathNodesStates[8];
 	CVector2D m_stPathNodeStates[10];
@@ -286,15 +313,15 @@ public:
 	float m_fArmour;
 	int16 m_routeLastPoint;
 	uint16 m_routePoints;
-	uint16 m_routePos;
-	uint16 m_routeType;
-	uint16 m_routeCurDir;
+	int16 m_routePos;
+	int16 m_routeType;
+	int16 m_routeCurDir;
 	uint16 field_2D2;
 	CVector2D m_moved;
 	float m_fRotationCur;
 	float m_fRotationDest;
 	float m_headingRate;
-	uint16 m_vehEnterType;
+	eVehEnter m_vehEnterType;
 	uint16 m_walkAroundType;
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
@@ -426,8 +453,20 @@ public:
 	bool CanPedJumpThis(int32);
 	bool CanSeeEntity(CEntity*, float);
 	void RestorePreviousObjective(void);
+	void SetIdle(void);
 	void SetObjective(eObjective, void*);
-	void MakeChangesForNewWeapon(int8);
+	void SetObjective(eObjective);
+	void SetObjective(eObjective, int16, int16);
+	void ClearChat(void);
+	void InformMyGangOfAttack(CEntity*);
+	void SetFollowRoute(int16, int16);
+	void ReactToAttack(CEntity*);
+	void SetDuck(uint32);
+	void RegisterThreatWithGangPeds(CEntity*);
+	bool TurnBody(void);
+	void Chat(void);
+  void MakeChangesForNewWeapon(int8);
+
 
 	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
@@ -483,11 +522,28 @@ public:
 	void SetStoredObjective(void);
 	void SetLeader(CEntity* leader);
 	void SetPedStats(ePedStats);
+	bool IsGangMember(void);
 
 	inline bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	inline CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
 	inline CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	inline RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
+	inline static uint8 GetVehEnterExitFlag(eVehEnter vehEnter) {
+		switch (vehEnter) {
+			case VEHICLE_ENTER_FRONT_RIGHT:
+				return 4;
+			case VEHICLE_ENTER_REAR_RIGHT:
+				return 8;
+			case VEHICLE_ENTER_FRONT_LEFT:
+				return 1;
+			case VEHICLE_ENTER_REAR_LEFT:
+				return 2;
+			default:
+				return 0;
+		}
+	}
+	PedState GetPedState(void) { return m_nPedState; }
+	void SetPedState(PedState state) { m_nPedState = state; }
 
 	// to make patching virtual functions possible
 	void SetModelIndex_(uint32 mi) { CPed::SetModelIndex(mi); }

@@ -27,6 +27,7 @@ public:
 	static bool &m_loadingPriority;
 
 	static void Init(void);
+	static void Shutdown(void);
 	static void PreRender(void);
 
 	static void RenderRoads(void);

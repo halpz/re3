@@ -54,6 +54,12 @@ CRenderer::Init(void)
 }
 
 void
+CRenderer::Shutdown(void)
+{
+	gSortedVehiclesAndPeds.Shutdown();
+}
+
+void
 CRenderer::PreRender(void)
 {
 	int i;
@@ -1170,6 +1176,7 @@ CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)
 
 STARTPATCHES
 	InjectHook(0x4A7680, CRenderer::Init, PATCH_JUMP);
+	InjectHook(0x4A76A0, CRenderer::Shutdown, PATCH_JUMP);
 
 	InjectHook(0x4A7B90, CRenderer::RenderOneRoad, PATCH_JUMP);
 	InjectHook(0x4A7BA0, CRenderer::RenderOneNonRoad, PATCH_JUMP);

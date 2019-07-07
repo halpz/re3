@@ -1,19 +1,20 @@
 #pragma once
 
 #include "Physical.h"
+#include "AutoPilot.h"
 
 class CPed;
 class CFire;
 struct tHandlingData;
 
 enum {
-	GETTING_IN_OUT_FL = 1,
-	GETTING_IN_OUT_RL = 2,
-	GETTING_IN_OUT_FR = 4,
-	GETTING_IN_OUT_RR = 8
+	RANDOM_VEHICLE = 1,
+	MISSION_VEHICLE = 2,
+	PARKED_VEHICLE = 3,
+	PERMANENT_VEHICLE = 4,
 };
 
-enum eCarLock : uint8 {
+enum eCarLock {
 	CARLOCK_NOT_USED,
 	CARLOCK_UNLOCKED,
 	CARLOCK_LOCKED,
@@ -24,15 +25,66 @@ enum eCarLock : uint8 {
 	CARLOCK_SKIP_SHUT_DOORS
 };
 
+
+enum eCarNodes
+{
+	CAR_WHEEL_RF = 1,
+	CAR_WHEEL_RM,
+	CAR_WHEEL_RB,
+	CAR_WHEEL_LF,
+	CAR_WHEEL_LM,
+	CAR_WHEEL_LB,
+	CAR_BUMP_FRONT,
+	CAR_BUMP_REAR,
+	CAR_WING_RF,
+	CAR_WING_RR,
+	CAR_DOOR_RF,
+	CAR_DOOR_RR,
+	CAR_WING_LF,
+	CAR_WING_LR,
+	CAR_DOOR_LF,
+	CAR_DOOR_LR,
+	CAR_BONNET,
+	CAR_BOOT,
+	CAR_WINDSCREEN,
+	NUM_CAR_NODES,
+};
+
+enum
+{
+	CAR_POS_HEADLIGHTS,
+	CAR_POS_TAILLIGHTS,
+	CAR_POS_FRONTSEAT,
+	CAR_POS_BACKSEAT,
+	CAR_POS_EXHAUST		= 9,
+};
+
+enum eDoors
+{
+	DOOR_BONNET = 0,
+	DOOR_BOOT,
+	DOOR_FRONT_LEFT,
+	DOOR_FRONT_RIGHT,
+	DOOR_REAR_LEFT,
+	DOOR_REAR_RIGHT
+};
+
+enum {
+	GETTING_IN_OUT_FL = 1,
+	GETTING_IN_OUT_RL = 2,
+	GETTING_IN_OUT_FR = 4,
+	GETTING_IN_OUT_RR = 8
+};
+
 class CVehicle : public CPhysical
 {
 public:
 	// 0x128
 	tHandlingData *m_handling;
-	uint8 stuff1[112];
+	CAutoPilot m_autoPilot;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
-	uint8 m_anExtras[2];
+	uint8 m_aExtras[2];
 	int16 m_nAlarmState; // m_nWantedStarsOnEnter on DK22
 	int16 m_nMissionValue;
 	CPed *pDriver;
@@ -48,23 +100,27 @@ public:
 	float m_fSteerAngle;
 	float m_fGasPedal;
 	float m_fBreakPedal;
-	uint8 m_nCreatedBy;        // eVehicleCreatedBy
-	uint8 bIsLawEnforcer : 1;
-	uint8 bIsAmbulanceOnDuty : 1;
-	uint8 bIsFiretruckOnDuty : 1;
-	uint8 m_veh_flagA8 : 1;
-	uint8 m_veh_flagA10 : 1;
-	uint8 m_veh_flagA20 : 1;
-	uint8 m_veh_flagA40 : 1;
-	uint8 m_veh_flagA80 : 1;
-	uint8 bIsVan : 1;
-	uint8 bIsBus : 1;
-	uint8 bIsBig : 1;
-	uint8 bIsLow : 1;
+	uint8 VehicleCreatedBy;
+
+	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CVehicle.h from R*
+	uint8 bIsLawEnforcer: 1; // Is this guy chasing the player at the moment
+	uint8 bIsAmbulanceOnDuty: 1; // Ambulance trying to get to an accident
+	uint8 bIsFireTruckOnDuty: 1; // Firetruck trying to get to a fire
+	uint8 bIsLocked: 1; // Is this guy locked by the script (cannot be removed)
+	uint8 bEngineOn: 1; // For sound purposes. Parked cars have their engines switched off (so do destroyed cars)
+	uint8 bIsHandbrakeOn: 1; // How's the handbrake doing ?
+	uint8 bLightsOn: 1; // Are the lights switched on ?
+	uint8 bFreebies: 1; // Any freebies left in this vehicle ?
+
+	uint8 bIsVan: 1; // Is this vehicle a van (doors at back of vehicle)
+	uint8 bIsBus: 1; // Is this vehicle a bus
+	uint8 bIsBig: 1; // Is this vehicle a bus
+	uint8 bLowVehicle: 1; // Need this for sporty type cars to use low getting-in/out anims
 	uint8 m_veh_flagB10 : 1;
 	uint8 m_veh_flagB20 : 1;
 	uint8 m_veh_flagB40 : 1;
 	uint8 m_veh_flagB80 : 1;
+
 	uint8 m_veh_flagC1 : 1;
 	uint8 m_veh_flagC2 : 1;
 	uint8 m_veh_flagC4 : 1;
@@ -73,6 +129,7 @@ public:
 	uint8 m_veh_flagC20 : 1;
 	uint8 m_veh_flagC40 : 1;
 	uint8 m_veh_flagC80 : 1;
+
 	uint8 m_veh_flagD1 : 1;
 	uint8 m_veh_flagD2 : 1;
 	uint8 m_veh_flagD4 : 1;
@@ -81,8 +138,9 @@ public:
 	uint8 m_veh_flagD20 : 1;
 	uint8 m_veh_flagD40 : 1;
 	uint8 m_veh_flagD80 : 1;
+
 	int8 field_1F9;
-	uint8 m_nAmmoInClip[1];    // Used to make the guns on boat do a reload (20 by default)
+	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
 	int8 field_1FB;
 	int8 field_1FC[4];
 	float m_fHealth;           // 1000.0f = full health. 0 -> explode
@@ -105,6 +163,7 @@ public:
 	int8 field_22D;
 	uint8 m_nSirenOrAlarm;
 	int8 field_22F;
+	// TODO: this is an array
 	CStoredCollPoly m_frontCollPoly;     // poly which is under front part of car
 	CStoredCollPoly m_rearCollPoly;      // poly which is under rear part of car
 	float m_fSteerRatio;
@@ -116,8 +175,29 @@ public:
 	static void operator delete(void*, int);
 
 	~CVehicle(void);
+	// from CEntity
+	void SetModelIndex(uint32 i);
+	bool SetupLighting(void);
+	void RemoveLighting(bool);
+	void FlagToDestroyWhenNextProcessed(void) {}
 
-	void dtor(void) { this->CVehicle::~CVehicle(); }
+	virtual void ProcessControlInputs(uint8) {}
+	virtual void GetComponentWorldPosition(int32 component, CVector &pos) {}
+	virtual bool IsComponentPresent(int32 component) { return false; }
+	virtual void SetComponentRotation(int32 component, CVector rotation) {}
+	virtual void OpenDoor(int32, eDoors door, float) {}
+	virtual void ProcessOpenDoor(uint32, uint32, float) {}
+	virtual bool IsDoorReady(eDoors door) { return false; }
+	virtual bool IsDoorFullyOpen(eDoors door) { return false; }
+	virtual bool IsDoorClosed(eDoors door) { return false; }
+	virtual bool IsDoorMissing(eDoors door) { return false; }
+	virtual void RemoveRefsToVehicle(CEntity *ent) {}
+	virtual void BlowUpCar(CEntity *ent) {}
+	virtual bool SetUpWheelColModel(CColModel *colModel) { return false; }
+	virtual void BurstTyre(uint8 tyre) {}
+	virtual bool IsRoomForPedToLeaveCar(uint32, CVector *) { return false;}
+	virtual float GetHeightAboveRoad(void);
+	virtual void PlayCarHorn(void) {}
 
 	bool IsCar(void) { return m_vehType == VEHICLE_TYPE_CAR; }
 	bool IsBoat(void) { return m_vehType == VEHICLE_TYPE_BOAT; }
@@ -125,10 +205,26 @@ public:
 	bool IsHeli(void) { return m_vehType == VEHICLE_TYPE_HELI; }
 	bool IsPlane(void) { return m_vehType == VEHICLE_TYPE_PLANE; }
 	bool IsLawEnforcementVehicle(void);
-	void ChangeLawEnforcerState(bool enable);
-	void RemovePassenger(CPed *);
-	void RemoveDriver(void);
+	void ChangeLawEnforcerState(uint8 enable);
+	bool UsesSiren(uint32 id);
+	bool IsVehicleNormal(void);
+	bool CarHasRoof(void);
 	bool IsUpsideDown(void);
+	bool IsOnItsSide(void);
+	bool CanBeDeleted(void);
+	bool CanPedOpenLocks(CPed *ped);
+	bool CanPedEnterCar(void);
+	bool CanPedExitCar(void);
+	// do these two actually return something?
+	CPed *SetUpDriver(void);
+	CPed *SetupPassenger(int n);
+	void SetDriver(CPed *driver);
+	bool AddPassenger(CPed *passenger);
+	bool AddPassenger(CPed *passenger, uint8 n);
+	void RemovePassenger(CPed *passenger);
+	void RemoveDriver(void);
+	void ProcessCarAlarm(void);
+	bool IsSphereTouchingVehicle(float sx, float sy, float sz, float radius);
 	
 	static bool &bWheelsOnlyCheat;
 	static bool &bAllDodosCheat;
@@ -136,8 +232,16 @@ public:
 	static bool &bCheat4;
 	static bool &bCheat5;
 	static bool &m_bDisableMouseSteering;
+
+
+	void dtor(void) { CVehicle::~CVehicle(); }
+	void SetModelIndex_(uint32 id) { CVehicle::SetModelIndex(id); }
+	bool SetupLighting_(void) { return CVehicle::SetupLighting(); }
+	void RemoveLighting_(bool reset) { CVehicle::RemoveLighting(reset); }
+	float GetHeightAboveRoad_(void) { return CVehicle::GetHeightAboveRoad(); }
 };
 
 static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_pCurSurface) == 0x1E0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nAlarmState) == 0x1A0, "CVehicle: error");
+static_assert(offsetof(CVehicle, m_nLastWeaponDamage) == 0x228, "CVehicle: error");
