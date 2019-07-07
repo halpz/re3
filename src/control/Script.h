@@ -1,4 +1,6 @@
 #pragma once
+#include "common.h"
+#include "Collision.h"
 #include "Ped.h"
 #include "Object.h"
 #include "Sprite2d.h"
@@ -8,9 +10,15 @@ struct CScriptRectangle
 {
 	bool m_bIsUsed;
 	bool m_bIsAntialiased;
-	uint16 m_wTextureId;
+	int16 m_nTextureId;
 	CRect m_sRect;
 	CRGBA m_sColor;
+};
+
+static_assert(sizeof(CScriptRectangle) == 0x18, "Script.h: error");
+
+enum {
+	SCRIPT_TEXT_MAX_LENGTH = 500
 };
 
 struct CTextLine 
@@ -26,33 +34,58 @@ struct CTextLine
 	float m_fCenterSize;
 	CRGBA m_sBackgroundColor;
 	bool m_bTextProportional;
-	int32 field_29;
+	bool m_bTextBeforeFade;
 	bool m_bRightJustify;
-	int32 field_31;
 	int32 m_nFont;
-	float field_36;
-	float field_40;
-	wchar m_awText[500];
+	float m_fAtX;
+	float m_fAtY;
+	wchar m_Text[SCRIPT_TEXT_MAX_LENGTH];
 };
 
-struct CRunningScript
+static_assert(sizeof(CTextLine) == 0x414, "Script.h: error");
+
+struct CScriptSphere
+{
+	bool m_bInUse;
+	uint16 m_Index;
+	uint32 m_Id;
+	CVector m_vecCenter;
+	float m_fRadius;
+};
+
+enum {
+	MAX_STACK_DEPTH = 6,
+	NUM_LOCAL_VARS = 16,
+	NUM_TIMERS = 2
+};
+
+class CRunningScript
 {
 	CRunningScript *next;
 	CRunningScript *prev;
-	uint8 m_abScriptName[8];
+	char m_abScriptName[8];
 	uint32 m_nIp;
-	uint32 m_anStack[6];
+	uint32 m_anStack[MAX_STACK_DEPTH];
 	uint16 m_nStackPointer;
-	void* m_anLocalVariables[18];
+	int32 m_anLocalVariables[NUM_LOCAL_VARS + NUM_TIMERS];
 	bool m_bCondResult;
 	bool m_bIsMissionThread;
 	bool m_bSkipWakeTime;
 	uint32 m_nWakeTime;
-	uint16 m_wIfOp;
+	uint16 m_nAndOrState;
 	bool m_bNotFlag;
-	bool m_bWBCheck;
-	bool m_bWastedOrBusted;
+	bool m_bWBCheckEnabled;
+	bool m_bWBChecked;
 	bool m_bMissionFlag;
+
+public:
+	void CollectParameters(uint32*, int16);
+	int32 CollectNextParameterWithoutIncreasingPC(uint32);
+	int32* GetPointerToScriptVariable(uint32*, int16);
+	void StoreParameters(uint32*, int16);
+	void Init();
+	void RemoveScriptFromList(CRunningScript**);
+	void AddScriptToList(CRunningScript**);
 };
 
 enum {
@@ -133,13 +166,80 @@ public:
 	bool HasCarBeenStuckForAWhile(int32);
 };
 
+enum {
+	ARGUMENT_INT32 = 1,
+	ARGUMENT_GLOBALVAR,
+	ARGUMENT_LOCALVAR,
+	ARGUMENT_INT8,
+	ARGUMENT_INT16,
+	ARGUMENT_FLOAT
+};
+
+struct tCollectiveData
+{
+	int32 index;
+	uint32 unk_data;
+};
+
+enum {
+	USED_OBJECT_NAME_LENGTH = 24
+};
+
+struct tUsedObject
+{
+	char name[USED_OBJECT_NAME_LENGTH];
+	int32 index;
+};
+
+struct tBuildingSwap
+{
+	CBuilding* m_pBuilding;
+	int32 m_nNewModel;
+	int32 m_nOldModel;
+};
+
+
+enum {
+	VAR_LOCAL = 1,
+	VAR_GLOBAL = 2,
+};
+
+enum {
+	SIZE_MAIN_SCRIPT = 128 * 1024,
+	SIZE_MISSION_SCRIPT = 32 * 1024,
+	SIZE_SCRIPT_SPACE = SIZE_MAIN_SCRIPT + SIZE_MISSION_SCRIPT
+};
+
+enum {
+	MAX_NUM_SCRIPTS = 128,
+	MAX_NUM_CONTACTS = 16,
+	MAX_NUM_INTRO_TEXT_LINES = 2,
+	MAX_NUM_INTRO_RECTANGLES = 16,
+	MAX_NUM_SCRIPT_SRPITES = 16,
+	MAX_NUM_SCRIPT_SPHERES = 16,
+	MAX_NUM_COLLECTIVES = 32,
+	MAX_NUM_USED_OBJECTS = 200,
+	MAX_NUM_MISSION_SCRIPTS = 120,
+	MAX_NUM_BUILDING_SWAPS = 25,
+	MAX_NUM_INVISIBILITY_SETTINGS = 20
+};
+
 class CTheScripts
 {
 public:
-	static uint8(&ScriptSpace)[160 * 1024];
-	static CTextLine(&IntroTextLines)[2];
-	static CScriptRectangle(&IntroRectangles)[16];
-	static CSprite2d(&ScriptSprites)[16];
+	static uint8(&ScriptSpace)[SIZE_SCRIPT_SPACE];
+	static CRunningScript(&ScriptsArray)[MAX_NUM_SCRIPTS];
+	static int32(&BaseBriefIdForContact)[MAX_NUM_CONTACTS];
+	static int32(&OnAMissionForContactFlag)[MAX_NUM_CONTACTS];
+	static CTextLine(&IntroTextLines)[MAX_NUM_INTRO_TEXT_LINES];
+	static CScriptRectangle(&IntroRectangles)[MAX_NUM_INTRO_RECTANGLES];
+	static CSprite2d(&ScriptSprites)[MAX_NUM_SCRIPT_SRPITES];
+	static CScriptSphere(&ScriptSphereArray)[MAX_NUM_SCRIPT_SPHERES];
+	static tCollectiveData(&CollectiveArray)[MAX_NUM_COLLECTIVES];
+	static tUsedObject(&UsedObjectArray)[MAX_NUM_USED_OBJECTS];
+	static int32(&MultiScriptArray)[MAX_NUM_MISSION_SCRIPTS];
+	static tBuildingSwap(&BuildingSwapArray)[MAX_NUM_BUILDING_SWAPS];
+	static CEntity*(&InvisibilitySettingArray)[MAX_NUM_INVISIBILITY_SETTINGS];
 	static bool &DbgFlag;
 	static uint32 &OnAMissionFlag;
 	static CMissionCleanup &MissionCleanup;
@@ -147,11 +247,57 @@ public:
 	static CUpsideDownCarCheck &UpsideDownCars;
 	static int32 &StoreVehicleIndex;
 	static bool &StoreVehicleWasRandom;
-
+	static CRunningScript *&pIdleScripts;
+	static CRunningScript *&pActiveScripts;
+	static uint32 &NextFreeCollectiveIndex;
+	static int32 &LastRandomPedId;
+	static uint16 &NumberOfUsedObjects;
+	static bool &bAlreadyRunningAMissionScript;
+	static bool &bUsingAMultiScriptFile;
+	static uint16 &NumberOfMissionScripts;
+	static uint32 &LargestMissionScriptSize;
+	static uint32 &MainScriptSize;
+	static uint8 &FailCurrentMission;
+	static uint8 &CountdownToMakePlayerUnsafe;
+	static uint8 &DelayMakingPlayerUnsafeThisTime;
+	static uint16 &NumScriptDebugLines;
+	static uint16 &NumberOfIntroRectanglesThisFrame;
+	static uint16 &NumberOfIntroTextLinesThisFrame;
+	static bool &UseTextCommands;
 public:
 	static bool IsPlayerOnAMission();
 	static void ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2);
 	static void CleanUpThisVehicle(CVehicle*);
 	static void CleanUpThisPed(CPed*);
 	static void CleanUpThisObject(CObject*);
+	static void Init();
+
+	static void ReadObjectNamesFromScript();
+	static void UpdateObjectIndices();
+	static void ReadMultiScriptFileOffsetsFromScript();
+
+	static int32 Read4BytesFromScript(uint32* pIp){
+		int32 retval = 0;
+		for (int i = 0; i < 4; i++){
+			retval |= ScriptSpace[(*pIp)++] << (8 * i);
+		}
+		return retval;
+	}
+	static int16 Read2BytesFromScript(uint32* pIp){
+		int16 retval = 0;
+		for (int i = 0; i < 2; i++){
+			retval |= ScriptSpace[(*pIp)++] << (8 * i);
+		}
+		return retval;
+	}
+	static int8 Read1ByteFromScript(uint32* pIp){
+		int8 retval = 0;
+		for (int i = 0; i < 1; i++){
+			retval |= ScriptSpace[(*pIp)++] << (8 * i);
+		}
+		return retval;
+	}
+	static float ReadFloatFromScript(uint32* pIp){
+		return Read2BytesFromScript(pIp) / 16.0f;
+	}
 };
