@@ -48,10 +48,5 @@ public:
 		return (CSimpleModelInfo*)m_atomics[2]; }
 	void SetRelatedModel(CSimpleModelInfo *m){
 		m_atomics[2] = (RpAtomic*)m; }
-
-	void DeleteRwObject_(void) { this->CSimpleModelInfo::DeleteRwObject(); }
-	RwObject *CreateInstance_1(void) { return this->CSimpleModelInfo::CreateInstance(); }
-	RwObject *CreateInstance_2(RwMatrix *m) { return this->CSimpleModelInfo::CreateInstance(m); }
-	RwObject *GetRwObject_(void) { return this->CSimpleModelInfo::GetRwObject(); }
 };
 static_assert(sizeof(CSimpleModelInfo) == 0x4C, "CSimpleModelInfo: error");

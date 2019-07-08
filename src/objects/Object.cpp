@@ -87,7 +87,14 @@ CObject::RemoveLighting(bool reset)
 
 WRAPPER void CObject::DeleteAllTempObjectInArea(CVector, float) { EAXJMP(0x4BBED0); }
 
+class CObject_ : public CObject
+{
+public:
+	void dtor(void) { this->CObject::~CObject(); }
+	void Render_(void) { CObject::Render(); }
+};
+
 STARTPATCHES
-	InjectHook(0x4BAE00, &CObject::dtor, PATCH_JUMP);
-	InjectHook(0x4BB1E0, &CObject::Render_, PATCH_JUMP);
+	InjectHook(0x4BAE00, &CObject_::dtor, PATCH_JUMP);
+	InjectHook(0x4BB1E0, &CObject_::Render_, PATCH_JUMP);
 ENDPATCHES

@@ -15,13 +15,22 @@ public:
 	float m_aSuspensionSpringRatio[4];
 	float m_aSuspensionSpringRatioPrev[4];
 	float m_aWheelSkidThing[4];
-	int field_49C;
+	float field_49C;
 	bool m_aWheelSkidmarkMuddy[4];
 	bool m_aWheelSkidmarkBloody[4];
 	float m_aWheelRotation[4];
 	float m_aWheelPosition[4];
 	float m_aWheelSpeed[4];
-	uint8 stuff3[12];
+	uint8 field_4D8;
+	uint8 m_auto_flagA1 : 1;
+	uint8 m_auto_flagA2 : 1;
+	uint8 m_auto_flagA4 : 1;
+	uint8 bTaxiLight : 1;
+	uint8 m_auto_flagA10 : 1;
+	uint8 m_auto_flagA20 : 1;
+	uint8 m_auto_flagA40 : 1;
+	uint8 m_auto_flagA80 : 1;
+	uint8 field_4DA[10];
 	uint32 m_nBusDoorTimerEnd;
 	uint32 m_nBusDoorTimerStart;
 	float m_aSuspensionSpringLength[4];
@@ -44,11 +53,52 @@ public:
 	uint8 stuff5[5];
 	int32 m_aWheelState[4];
 
+	static bool &m_sAllTaxiLights;
+
 	CAutomobile(int, uint8);
+
+	// from CEntity
+	void SetModelIndex(uint32 id);
+	void ProcessControl(void);
+	void Teleport(CVector v);
+	void PreRender(void);
+	void Render(void);
+
+	// from CVehicle
+	void ProcessControlInputs(uint8);
+	void GetComponentWorldPosition(int32 component, CVector &pos);
+	bool IsComponentPresent(int32 component);
+	void SetComponentRotation(int32 component, CVector rotation);
+	void OpenDoor(int32, eDoors door, float);
+	void ProcessOpenDoor(uint32, uint32, float);
+	bool IsDoorReady(eDoors door);
+	bool IsDoorFullyOpen(eDoors door);
+	bool IsDoorClosed(eDoors door);
+	bool IsDoorMissing(eDoors door);
+	void RemoveRefsToVehicle(CEntity *ent);
+	void BlowUpCar(CEntity *ent);
+	bool SetUpWheelColModel(CColModel *colModel);
+	void BurstTyre(uint8 tyre);
+	bool IsRoomForPedToLeaveCar(uint32, CVector *);
+	float GetHeightAboveRoad(void);
+	void PlayCarHorn(void);
+
+	void SpawnFlyingComponent(int32 component, uint32 type);
+
+	void SetPanelDamage(int32 component, ePanels panel, bool noFlyingComponents);
+	void SetBumperDamage(int32 component, ePanels panel, bool noFlyingComponents);
+	void SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents);
+
+	void SetComponentVisibility(RwFrame *frame, uint32 flags);
+	void SetupModelNodes(void);
+	void SetTaxiLight(bool light);
+	bool GetAllWheelsOffGround(void);
+	void HideAllComps(void);
+	void ShowAllComps(void);
+	void ReduceHornCounter(void);
+
+	static void SetAllTaxiLights(bool set);
+
 	CAutomobile* ctor(int, uint8);
-	void SetDoorDamage(int32, uint32, bool); /* TODO: eDoors */
-	void SetPanelDamage(int32, uint32, bool); /* TODO: ePanels */
-	void SetBumperDamage(int32, uint32, bool); /* TODO: ePanels */
-	void dtor() { this->CAutomobile::~CAutomobile(); }
 };
 static_assert(sizeof(CAutomobile) == 0x5A8, "CAutomobile: error");

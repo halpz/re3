@@ -34,6 +34,4 @@ public:
 	static void AddObject(uint16 type, const CVector &pos, const CVector &dir, float size, bool remove);
 	static void Initialise();
 	static void UpdateAll();
-
-	void dtor() { this->CParticleObject::~CParticleObject(); }
 };

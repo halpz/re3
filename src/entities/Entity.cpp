@@ -865,10 +865,35 @@ CEntity::ModifyMatrixForBannerInWind(void)
 	UpdateRwFrame();
 }
 
+class CEntity_ : public CEntity
+{
+public:
+	CEntity *ctor(void) { return ::new (this) CEntity(); }
+	void dtor(void) { this->CEntity::~CEntity(); }
+	void Add_(void) { CEntity::Add(); }
+	void Remove_(void) { CEntity::Remove(); }
+	void SetModelIndex_(uint32 i) { CEntity::SetModelIndex(i); }
+	void CreateRwObject_(void) { CEntity::CreateRwObject(); }
+	void DeleteRwObject_(void) { CEntity::DeleteRwObject(); }
+	CRect GetBoundRect_(void) { return CEntity::GetBoundRect(); }
+	void PreRender_(void) { CEntity::PreRender(); }
+	void Render_(void) { CEntity::Render(); }
+	bool SetupLighting_(void) { return CEntity::SetupLighting(); }
+};
+
 STARTPATCHES
-	InjectHook(0x473C30, &CEntity::ctor, PATCH_JUMP);
-	InjectHook(0x473E40, &CEntity::dtor, PATCH_JUMP);
-	InjectHook(0x473E70, &CEntity::SetModelIndex_, PATCH_JUMP);
+	InjectHook(0x473C30, &CEntity_::ctor, PATCH_JUMP);
+	InjectHook(0x473E40, &CEntity_::dtor, PATCH_JUMP);
+	InjectHook(0x473E70, &CEntity_::SetModelIndex_, PATCH_JUMP);
+	InjectHook(0x475080, &CEntity_::Add_, PATCH_JUMP);
+	InjectHook(0x475310, &CEntity_::Remove_, PATCH_JUMP);
+	InjectHook(0x473EA0, &CEntity_::CreateRwObject_, PATCH_JUMP);
+	InjectHook(0x473F90, &CEntity_::DeleteRwObject_, PATCH_JUMP);
+	InjectHook(0x474000, &CEntity_::GetBoundRect_, PATCH_JUMP);
+	InjectHook(0x474350, &CEntity_::PreRender_, PATCH_JUMP);
+	InjectHook(0x474BD0, &CEntity_::Render_, PATCH_JUMP);
+	InjectHook(0x4A7C60, &CEntity_::SetupLighting_, PATCH_JUMP);
+
 	InjectHook(0x4742C0, (void (CEntity::*)(CVector&))&CEntity::GetBoundCentre, PATCH_JUMP);
 	InjectHook(0x474310, &CEntity::GetBoundRadius, PATCH_JUMP);
 	InjectHook(0x474C10, &CEntity::GetIsTouching, PATCH_JUMP);
@@ -889,13 +914,4 @@ STARTPATCHES
 	InjectHook(0x475670, &CEntity::ModifyMatrixForTreeInWind, PATCH_JUMP);
 	InjectHook(0x475830, &CEntity::ModifyMatrixForBannerInWind, PATCH_JUMP);
 	InjectHook(0x4FA530, &CEntity::ProcessLightsForEntity, PATCH_JUMP);
-
-	InjectHook(0x475080, &CEntity::Add_, PATCH_JUMP);
-	InjectHook(0x475310, &CEntity::Remove_, PATCH_JUMP);
-	InjectHook(0x473EA0, &CEntity::CreateRwObject_, PATCH_JUMP);
-	InjectHook(0x473F90, &CEntity::DeleteRwObject_, PATCH_JUMP);
-	InjectHook(0x474000, &CEntity::GetBoundRect_, PATCH_JUMP);
-	InjectHook(0x474350, &CEntity::PreRender_, PATCH_JUMP);
-	InjectHook(0x474BD0, &CEntity::Render_, PATCH_JUMP);
-	InjectHook(0x4A7C60, &CEntity::SetupLighting_, PATCH_JUMP);
 ENDPATCHES

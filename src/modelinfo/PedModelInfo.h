@@ -39,9 +39,5 @@ public:
 	void SetLowDetailClump(RpClump*);
 	void CreateHitColModel(void);
 	CColModel *GetHitColModel(void) { return m_hitColModel; }
-
-
-	void DeleteRwObject_(void) { this->CPedModelInfo::DeleteRwObject(); }
-	void SetClump_(RpClump *clump) { this->CPedModelInfo::SetClump(clump); }
 };
 static_assert(sizeof(CPedModelInfo) == 0x54, "CPedModelInfo: error");

@@ -15,8 +15,5 @@ public:
 	void ReplaceWithNewModel(int32 id);
 
 	virtual bool GetIsATreadable(void) { return false; }
-
-	CBuilding *ctor(void) { return ::new (this) CBuilding(); }
-	void dtor(void) { this->CBuilding::~CBuilding(); }
 };
 static_assert(sizeof(CBuilding) == 0x64, "CBuilding: error");

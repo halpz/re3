@@ -2893,9 +2893,28 @@ WRAPPER void CPed::PedLandCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0
 WRAPPER void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4C6580); }
 WRAPPER void CPed::RestoreHeadingRateCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D6550); }
 
+class CPed_ : public CPed
+{
+public:
+	CPed* ctor(uint32 pedType) { return ::new (this) CPed(pedType); }
+	void dtor(void) { CPed::~CPed(); }
+
+	void SetModelIndex_(uint32 mi) { CPed::SetModelIndex(mi); }
+	void FlagToDestroyWhenNextProcessed_(void) { CPed::FlagToDestroyWhenNextProcessed(); }
+	bool SetupLighting_(void) { return CPed::SetupLighting(); }
+	void RemoveLighting_(bool reset) { CPed::RemoveLighting(reset); }
+	void Teleport_(CVector pos) { CPed::Teleport(pos); }
+};
+
 STARTPATCHES
-	InjectHook(0x4C41C0, &CPed::ctor, PATCH_JUMP);
-	InjectHook(0x4C50D0, &CPed::dtor, PATCH_JUMP);
+	InjectHook(0x4C41C0, &CPed_::ctor, PATCH_JUMP);
+	InjectHook(0x4C50D0, &CPed_::dtor, PATCH_JUMP);
+	InjectHook(0x4C52A0, &CPed_::SetModelIndex_, PATCH_JUMP);
+	InjectHook(0x4D6570, &CPed_::FlagToDestroyWhenNextProcessed_, PATCH_JUMP);
+	InjectHook(0x4A7D30, &CPed_::SetupLighting_, PATCH_JUMP);
+	InjectHook(0x4A7DC0, &CPed_::RemoveLighting_, PATCH_JUMP);
+	InjectHook(0x4D3E70, &CPed_::Teleport_, PATCH_JUMP);
+
 	InjectHook(0x4CF8F0, &CPed::AddWeaponModel, PATCH_JUMP);
 	InjectHook(0x4C6AA0, &CPed::AimGun, PATCH_JUMP);
 	InjectHook(0x4EB470, &CPed::ApplyHeadShot, PATCH_JUMP);
@@ -2926,11 +2945,6 @@ STARTPATCHES
 	InjectHook(0x4CC6C0, &CPed::PlayFootSteps, PATCH_JUMP);
 	InjectHook(0x4C5350, &CPed::BuildPedLists, PATCH_JUMP);
 	InjectHook(0x4CF9B0, &CPed::GiveWeapon, PATCH_JUMP);
-	InjectHook(0x4C52A0, &CPed::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x4D6570, &CPed::FlagToDestroyWhenNextProcessed_, PATCH_JUMP);
-	InjectHook(0x4A7D30, &CPed::SetupLighting_, PATCH_JUMP);
-	InjectHook(0x4A7DC0, &CPed::RemoveLighting_, PATCH_JUMP);
-	InjectHook(0x4D3E70, &CPed::Teleport_, PATCH_JUMP);
 	InjectHook(0x4C7EA0, &CPed::CalculateNewOrientation, PATCH_JUMP);
 	InjectHook(0x4C78F0, &CPed::WorkOutHeadingForMovingFirstPerson, PATCH_JUMP);
 	InjectHook(0x4C73F0, &CPed::CalculateNewVelocity, PATCH_JUMP);

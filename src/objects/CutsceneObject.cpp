@@ -89,12 +89,24 @@ CCutsceneObject::RemoveLighting(bool reset)
 	CRenderer::RemoveVehiclePedLights(this, reset);
 }
 
+class CCutsceneObject_ : public CCutsceneObject
+{
+public:
+	void dtor(void) { this->CCutsceneObject::~CCutsceneObject(); }
+	void SetModelIndex_(uint32 id) { CCutsceneObject::SetModelIndex(id); }
+	void ProcessControl_(void) { CCutsceneObject::ProcessControl(); }
+	void PreRender_(void) { CCutsceneObject::PreRender(); }
+	void Render_(void) { CCutsceneObject::Render(); }
+	bool SetupLighting_(void) { return CCutsceneObject::SetupLighting(); }
+	void RemoveLighting_(bool reset) { CCutsceneObject::RemoveLighting(reset); }
+};
+
 STARTPATCHES
-	InjectHook(0x4BA960, &CCutsceneObject::dtor, PATCH_JUMP);
-	InjectHook(0x4BA980, &CCutsceneObject::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x4BA9C0, &CCutsceneObject::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x4BAA40, &CCutsceneObject::PreRender_, PATCH_JUMP);
-	InjectHook(0x4BAAA0, &CCutsceneObject::Render_, PATCH_JUMP);
-	InjectHook(0x4A7E70, &CCutsceneObject::SetupLighting_, PATCH_JUMP);
-	InjectHook(0x4A7F00, &CCutsceneObject::RemoveLighting_, PATCH_JUMP);
+	InjectHook(0x4BA960, &CCutsceneObject_::dtor, PATCH_JUMP);
+	InjectHook(0x4BA980, &CCutsceneObject_::SetModelIndex_, PATCH_JUMP);
+	InjectHook(0x4BA9C0, &CCutsceneObject_::ProcessControl_, PATCH_JUMP);
+	InjectHook(0x4BAA40, &CCutsceneObject_::PreRender_, PATCH_JUMP);
+	InjectHook(0x4BAAA0, &CCutsceneObject_::Render_, PATCH_JUMP);
+	InjectHook(0x4A7E70, &CCutsceneObject_::SetupLighting_, PATCH_JUMP);
+	InjectHook(0x4A7F00, &CCutsceneObject_::RemoveLighting_, PATCH_JUMP);
 ENDPATCHES

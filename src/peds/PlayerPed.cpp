@@ -21,8 +21,13 @@ void CPlayerPed::ClearWeaponTarget()
 	ClearPointGunAt();
 }
 
-STARTPATCHES
-InjectHook(0x4EFB30, &CPlayerPed::dtor, PATCH_JUMP);
-InjectHook(0x4F28A0, &CPlayerPed::ClearWeaponTarget, PATCH_JUMP);
+class CPlayerPed_ : public CPlayerPed
+{
+public:
+	void dtor(void) { CPlayerPed::~CPlayerPed(); }
+};
 
+STARTPATCHES
+	InjectHook(0x4EFB30, &CPlayerPed_::dtor, PATCH_JUMP);
+	InjectHook(0x4F28A0, &CPlayerPed::ClearWeaponTarget, PATCH_JUMP);
 ENDPATCHES

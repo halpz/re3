@@ -41,7 +41,6 @@ public:
 
 	~CPlayerPed();
 
-	void dtor(void) { this->CPlayerPed::~CPlayerPed(); }
 	void ReApplyMoveAnims(void);
 	void ClearWeaponTarget();
 };

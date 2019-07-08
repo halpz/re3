@@ -1,10 +1,12 @@
 #pragma once
 #include "common.h"
-#include "Collision.h"
-#include "Ped.h"
-#include "Object.h"
 #include "Sprite2d.h"
-#include "Vehicle.h"
+
+class CEntity;
+class CBuilding;
+class CVehicle;
+class CPed;
+class CObject;
 
 struct CScriptRectangle 
 {

@@ -460,11 +460,22 @@ CVehicle::IsSphereTouchingVehicle(float sx, float sy, float sz, float radius)
 	return true;
 }
 
+
+class CVehicle_ : public CVehicle
+{
+public:
+	void dtor(void) { CVehicle::~CVehicle(); }
+	void SetModelIndex_(uint32 id) { CVehicle::SetModelIndex(id); }
+	bool SetupLighting_(void) { return CVehicle::SetupLighting(); }
+	void RemoveLighting_(bool reset) { CVehicle::RemoveLighting(reset); }
+	float GetHeightAboveRoad_(void) { return CVehicle::GetHeightAboveRoad(); }
+};
+
 STARTPATCHES
-	InjectHook(0x551170, &CVehicle::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x4A7DD0, &CVehicle::SetupLighting_, PATCH_JUMP);
-	InjectHook(0x4A7E60, &CVehicle::RemoveLighting_, PATCH_JUMP);
-	InjectHook(0x417E60, &CVehicle::GetHeightAboveRoad_, PATCH_JUMP);
+	InjectHook(0x551170, &CVehicle_::SetModelIndex_, PATCH_JUMP);
+	InjectHook(0x4A7DD0, &CVehicle_::SetupLighting_, PATCH_JUMP);
+	InjectHook(0x4A7E60, &CVehicle_::RemoveLighting_, PATCH_JUMP);
+	InjectHook(0x417E60, &CVehicle_::GetHeightAboveRoad_, PATCH_JUMP);
 
 	InjectHook(0x552880, &CVehicle::IsLawEnforcementVehicle, PATCH_JUMP);
 	InjectHook(0x552820, &CVehicle::ChangeLawEnforcerState, PATCH_JUMP);

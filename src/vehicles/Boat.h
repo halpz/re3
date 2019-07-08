@@ -12,6 +12,5 @@ public:
 
 	CBoat(int, uint8);
 	CBoat* ctor(int, uint8);
-	void dtor() { this->CBoat::~CBoat(); };
 };
 static_assert(sizeof(CBoat) == 0x484, "CBoat: error");

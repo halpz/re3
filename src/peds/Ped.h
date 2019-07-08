@@ -399,21 +399,19 @@ public:
 	static void operator delete(void*, int);
 
 	CPed(uint32 pedType);
-	virtual ~CPed(void);
+	~CPed(void);
 
-	virtual void SetModelIndex(uint32 mi);
-	virtual void ProcessControl(void);
-	virtual void Teleport(CVector);
-	virtual void PreRender(void);
-	virtual void Render(void);
-	virtual bool SetupLighting(void);
-	virtual void RemoveLighting(bool);
-	virtual void FlagToDestroyWhenNextProcessed(void);
-	virtual int32 ProcessEntityCollision(CEntity*, CColPoint*);
+	void SetModelIndex(uint32 mi);
+	void ProcessControl(void);
+	void Teleport(CVector);
+	void PreRender(void);
+	void Render(void);
+	bool SetupLighting(void);
+	void RemoveLighting(bool);
+	void FlagToDestroyWhenNextProcessed(void);
+	int32 ProcessEntityCollision(CEntity*, CColPoint*);
+
 	virtual void SetMoveAnim(void);
-
-	CPed* ctor(uint32 pedType) { return ::new (this) CPed(pedType); }
-	void dtor(void) { this->CPed::~CPed(); }
 
 	void AddWeaponModel(int id);
 	void AimGun(void);
@@ -465,7 +463,7 @@ public:
 	void RegisterThreatWithGangPeds(CEntity*);
 	bool TurnBody(void);
 	void Chat(void);
-  void MakeChangesForNewWeapon(int8);
+	void MakeChangesForNewWeapon(int8);
 
 
 	// Static methods
@@ -544,13 +542,6 @@ public:
 	}
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
-
-	// to make patching virtual functions possible
-	void SetModelIndex_(uint32 mi) { CPed::SetModelIndex(mi); }
-	void FlagToDestroyWhenNextProcessed_(void) { CPed::FlagToDestroyWhenNextProcessed(); }
-	bool SetupLighting_(void) { return CPed::SetupLighting(); }
-	void RemoveLighting_(bool reset) { CPed::RemoveLighting(reset); }
-	void Teleport_(CVector pos) { CPed::Teleport(pos); }
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 &distanceMultToCountPedNear;

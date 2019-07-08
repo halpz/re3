@@ -3,11 +3,12 @@
 #include "Lists.h"
 #include "Timer.h"
 #include "Entity.h"
-#include "Treadable.h"
 
 enum {
 	PHYSICAL_MAX_COLLISIONRECORDS = 6
 };
+
+class CTreadable;
 
 class CPhysical : public CEntity
 {
@@ -65,13 +66,14 @@ public:
 	~CPhysical(void);
 
 	// from CEntity
-	virtual void Add(void);
-	virtual void Remove(void);
-	virtual CRect GetBoundRect(void);
-	virtual void ProcessControl(void);
+	void Add(void);
+	void Remove(void);
+	CRect GetBoundRect(void);
+	void ProcessControl(void);
+	void ProcessShift(void);
+	void ProcessCollision(void);
+
 	virtual int32 ProcessEntityCollision(CEntity *ent, CColPoint *point);
-	virtual void ProcessShift(void);
-	virtual void ProcessCollision(void);
 
 	void RemoveAndAdd(void);
 	void AddToMovingList(void);
@@ -137,15 +139,5 @@ public:
 	bool ProcessCollisionSectorList(CPtrList *lists);
 	bool CheckCollision(void);
 	bool CheckCollision_SimpleCar(void);
-
-	// to make patching virtual functions possible
-	void dtor(void) { this->CPhysical::~CPhysical(); }
-	void Add_(void) { CPhysical::Add(); }
-	void Remove_(void) { CPhysical::Remove(); }
-	CRect GetBoundRect_(void) { return CPhysical::GetBoundRect(); }
-	void ProcessControl_(void) { CPhysical::ProcessControl(); }
-	void ProcessShift_(void) { CPhysical::ProcessShift(); }
-	void ProcessCollision_(void) { CPhysical::ProcessCollision(); }
-	int32 ProcessEntityCollision_(CEntity *ent, CColPoint *point) { return CPhysical::ProcessEntityCollision(ent, point); }
 };
 static_assert(sizeof(CPhysical) == 0x128, "CPhysical: error");

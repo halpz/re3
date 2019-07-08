@@ -62,8 +62,6 @@ public:
 	void Init2dEffects(void);
 	void Add2dEffect(C2dEffect *fx);
 	C2dEffect *Get2dEffect(int n);
-
-	void Shutdown_(void) { this->CBaseModelInfo::Shutdown(); }
 };
 
 static_assert(sizeof(CBaseModelInfo) == 0x30, "CBaseModelInfo: error");

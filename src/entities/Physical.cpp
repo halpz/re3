@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Timer.h"
 #include "ModelIndices.h"
+#include "Treadable.h"
 #include "Vehicle.h"
 #include "Ped.h"
 #include "Object.h"
@@ -1932,16 +1933,28 @@ CPhysical::ProcessCollision(void)
 	RemoveAndAdd();
 }
 
+class CPhysical_ : public CPhysical
+{
+public:
+	void dtor(void) { CPhysical::~CPhysical(); }
+	void Add_(void) { CPhysical::Add(); }
+	void Remove_(void) { CPhysical::Remove(); }
+	CRect GetBoundRect_(void) { return CPhysical::GetBoundRect(); }
+	void ProcessControl_(void) { CPhysical::ProcessControl(); }
+	void ProcessShift_(void) { CPhysical::ProcessShift(); }
+	void ProcessCollision_(void) { CPhysical::ProcessCollision(); }
+	int32 ProcessEntityCollision_(CEntity *ent, CColPoint *point) { return CPhysical::ProcessEntityCollision(ent, point); }
+};
 
 STARTPATCHES
-	InjectHook(0x495130, &CPhysical::dtor, PATCH_JUMP);
-	InjectHook(0x4951F0, &CPhysical::Add_, PATCH_JUMP);
-	InjectHook(0x4954B0, &CPhysical::Remove_, PATCH_JUMP);
-	InjectHook(0x495540, &CPhysical::RemoveAndAdd, PATCH_JUMP);
-	InjectHook(0x495F10, &CPhysical::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x496F10, &CPhysical::ProcessShift_, PATCH_JUMP);
-	InjectHook(0x4961A0, &CPhysical::ProcessCollision_, PATCH_JUMP);
-	InjectHook(0x49F790, &CPhysical::ProcessEntityCollision_, PATCH_JUMP);
+	InjectHook(0x495130, &CPhysical_::dtor, PATCH_JUMP);
+	InjectHook(0x4951F0, &CPhysical_::Add_, PATCH_JUMP);
+	InjectHook(0x4954B0, &CPhysical_::Remove_, PATCH_JUMP);
+	InjectHook(0x495540, &CPhysical_::RemoveAndAdd, PATCH_JUMP);
+	InjectHook(0x495F10, &CPhysical_::ProcessControl_, PATCH_JUMP);
+	InjectHook(0x496F10, &CPhysical_::ProcessShift_, PATCH_JUMP);
+	InjectHook(0x4961A0, &CPhysical_::ProcessCollision_, PATCH_JUMP);
+	InjectHook(0x49F790, &CPhysical_::ProcessEntityCollision_, PATCH_JUMP);
 	InjectHook(0x4958F0, &CPhysical::AddToMovingList, PATCH_JUMP);
 	InjectHook(0x495940, &CPhysical::RemoveFromMovingList, PATCH_JUMP);
 	InjectHook(0x497180, &CPhysical::AddCollisionRecord, PATCH_JUMP);

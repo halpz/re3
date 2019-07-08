@@ -7,6 +7,12 @@
 void *CTreadable::operator new(size_t sz) { return CPools::GetTreadablePool()->New();  }
 void CTreadable::operator delete(void *p, size_t sz) { CPools::GetTreadablePool()->Delete((CTreadable*)p); }
 
+class CTreadable_ : public CTreadable
+{
+public:
+	void dtor(void) { CTreadable::~CTreadable(); }
+};
+
 STARTPATCHES
-	InjectHook(0x405A10, &CTreadable::dtor, PATCH_JUMP);
+	InjectHook(0x405A10, &CTreadable_::dtor, PATCH_JUMP);
 ENDPATCHES

@@ -69,6 +69,25 @@ enum eDoors
 	DOOR_REAR_RIGHT
 };
 
+enum ePanels
+{
+	VEHPANEL_FRONT_LEFT,
+	VEHPANEL_FRONT_RIGHT,
+	VEHPANEL_REAR_LEFT,
+	VEHPANEL_REAR_RIGHT,
+	VEHPANEL_WINDSCREEN,
+	VEHBUMPER_FRONT,
+	VEHBUMPER_REAR,
+};
+
+enum eLights
+{
+	VEHLIGHT_FRONT_LEFT,
+	VEHLIGHT_FRONT_RIGHT,
+	VEHLIGHT_REAR_LEFT,
+	VEHLIGHT_REAR_RIGHT,
+};
+
 class CVehicle : public CPhysical
 {
 public:
@@ -115,7 +134,7 @@ public:
 	uint8 m_veh_flagB80 : 1;
 
 	uint8 m_veh_flagC1 : 1;
-	uint8 m_veh_flagC2 : 1;
+	uint8 m_veh_flagC2 : 1;		// bIsDamaged
 	uint8 m_veh_flagC4 : 1;
 	uint8 m_veh_flagC8 : 1;
 	uint8 m_veh_flagC10 : 1;
@@ -169,7 +188,7 @@ public:
 
 	~CVehicle(void);
 	// from CEntity
-	void SetModelIndex(uint32 i);
+	void SetModelIndex(uint32 id);
 	bool SetupLighting(void);
 	void RemoveLighting(bool);
 	void FlagToDestroyWhenNextProcessed(void) {}
@@ -225,13 +244,6 @@ public:
 	static bool &bCheat4;
 	static bool &bCheat5;
 	static bool &m_bDisableMouseSteering;
-
-
-	void dtor(void) { CVehicle::~CVehicle(); }
-	void SetModelIndex_(uint32 id) { CVehicle::SetModelIndex(id); }
-	bool SetupLighting_(void) { return CVehicle::SetupLighting(); }
-	void RemoveLighting_(bool reset) { CVehicle::RemoveLighting(reset); }
-	float GetHeightAboveRoad_(void) { return CVehicle::GetHeightAboveRoad(); }
 };
 
 static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");
