@@ -813,6 +813,7 @@ CFileLoader::LoadPedObject(const char *line)
 		if(strcmp(animGroup, CAnimManager::GetAnimGroupName((AssocGroupId)animGroupId)) == 0)
 			break;
 	mi->m_animGroup = animGroupId;
+	mi->m_carsCanDrive = carsCanDrive;
 
 	// ???
 	CModelInfo::GetModelInfo(MI_LOPOLYGUY)->SetColModel(&CTempColModels::ms_colModelPed1);
