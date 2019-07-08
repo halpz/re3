@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common.h"
+
 struct tSample {
 	int m_nOffset;
 	unsigned int m_nSize;
@@ -11,6 +13,12 @@ struct tSample {
 class CSampleManager
 {
 public:
+	bool CheckForAnAudioFileOnCD();
+
+	int32 GetSampleBaseFrequency(int32);
+	int32 GetSampleLoopStartOffset(int32);
+	int32 GetSampleLoopEndOffset(int32);
+
 	bool IsSampleBankLoaded(uint8);
 	void UnloadSampleBank(uint8);
 	void Terminate();

@@ -97,11 +97,11 @@ extern void **rwengine;
 #define SCREEN_SCALE_AR(a) (a)
 #endif
 
-#include "math/maths.h"
-#include "math/Vector.h"
-#include "math/Vector2D.h"
-#include "math/Matrix.h"
-#include "math/Rect.h"
+#include "maths.h"
+#include "Vector.h"
+#include "Vector2D.h"
+#include "Matrix.h"
+#include "Rect.h"
 
 class CRGBA
 {

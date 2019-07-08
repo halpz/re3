@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math/Quaternion.h"
+#include "Quaternion.h"
 
 // TODO: put them somewhere else?
 struct KeyFrame {

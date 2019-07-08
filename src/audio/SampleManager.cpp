@@ -1,6 +1,6 @@
+#include "SampleManager.h"
 #include "common.h"
 #include "patcher.h"
-#include "SampleManager.h"
 
 CSampleManager &cSampleManager = *(CSampleManager *)0x7341E0;
 
@@ -8,9 +8,27 @@ uint32 &nNumOfMp3Files = *(uint32 *)0x95CC00;
 uint8 &num3DProvidersAvailable = *(uint8 *)0x734237;
 uint32 *asName3DProviders = (uint32 *)0x734238;
 
-bool CSampleManager::IsMP3RadioChannelAvailable() {
+bool
+CSampleManager::IsMP3RadioChannelAvailable()
+{
 	return nNumOfMp3Files != 0;
 }
+
+WRAPPER
+bool
+CSampleManager::CheckForAnAudioFileOnCD()
+{
+	EAXJMP(0x566EA0);
+}
+
+WRAPPER
+int32 CSampleManager::GetSampleBaseFrequency(int32) { EAXJMP(0x5672A0); }
+
+WRAPPER
+int32 CSampleManager::GetSampleLoopStartOffset(int32) { EAXJMP(0x5672C0); }
+
+WRAPPER
+int32 CSampleManager::GetSampleLoopEndOffset(int32) { EAXJMP(0x5672E0); }
 
 WRAPPER
 bool CSampleManager::IsSampleBankLoaded(uint8) { EAXJMP(0x567130); }
