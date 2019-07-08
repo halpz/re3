@@ -862,7 +862,7 @@ void CHud::Draw()
 		CScriptRectangle* IntroRect = CTheScripts::IntroRectangles;
 
 		for (int i = 0; i < 16; i++) {
-			if (CTheScripts::IntroRectangles[i].m_bIsUsed && CTheScripts::IntroRectangles[i].m_bIsAntialiased) {
+			if (CTheScripts::IntroRectangles[i].m_bIsUsed && CTheScripts::IntroRectangles[i].m_bBeforeFade) {
 				if (CTheScripts::IntroRectangles[i].m_nTextureId >= 0) {
 					CRect rect = {
 						CTheScripts::IntroRectangles[i].m_sRect.left,

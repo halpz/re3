@@ -10,8 +10,8 @@ class CObject;
 
 struct CScriptRectangle 
 {
-	bool m_bIsUsed;
-	bool m_bIsAntialiased;
+	int8 m_bIsUsed;
+	bool m_bBeforeFade;
 	int16 m_nTextureId;
 	CRect m_sRect;
 	CRGBA m_sColor;
@@ -42,6 +42,8 @@ struct CTextLine
 	float m_fAtX;
 	float m_fAtY;
 	wchar m_Text[SCRIPT_TEXT_MAX_LENGTH];
+
+	void Reset();
 };
 
 static_assert(sizeof(CTextLine) == 0x414, "Script.h: error");
@@ -71,7 +73,7 @@ class CRunningScript
 	uint16 m_nStackPointer;
 	int32 m_anLocalVariables[NUM_LOCAL_VARS + NUM_TIMERS];
 	bool m_bCondResult;
-	bool m_bIsMissionThread;
+	bool m_bIsMissionScript;
 	bool m_bSkipWakeTime;
 	uint32 m_nWakeTime;
 	uint16 m_nAndOrState;
@@ -81,6 +83,13 @@ class CRunningScript
 	bool m_bMissionFlag;
 
 public:
+	void SetIP(uint32 ip) { m_nIp = ip; }
+	CRunningScript* GetNext() { return next; }
+	void UpdateTimers(float timeStep){
+		m_anLocalVariables[NUM_LOCAL_VARS] += timeStep;
+		m_anLocalVariables[NUM_LOCAL_VARS + 1] += timeStep;
+	}
+
 	void CollectParameters(uint32*, int16);
 	int32 CollectNextParameterWithoutIncreasingPC(uint32);
 	int32* GetPointerToScriptVariable(uint32*, int16);
@@ -88,6 +97,21 @@ public:
 	void Init();
 	void RemoveScriptFromList(CRunningScript**);
 	void AddScriptToList(CRunningScript**);
+	void Process();
+	int8 ProcessOneCommand();
+	void DoDeatharrestCheck();
+	int8 ProcessCommandsFrom0To99(int32);
+	int8 ProcessCommandsFrom100To199(int32);
+	int8 ProcessCommandsFrom200To299(int32);
+	int8 ProcessCommandsFrom300To399(int32);
+	int8 ProcessCommandsFrom400To499(int32);
+	int8 ProcessCommandsFrom500To599(int32);
+	int8 ProcessCommandsFrom600To699(int32);
+	int8 ProcessCommandsFrom700To799(int32);
+	int8 ProcessCommandsFrom800To899(int32);
+	int8 ProcessCommandsFrom900To999(int32);
+	int8 ProcessCommandsFrom1000To1099(int32);
+	int8 ProcessCommandsFrom1100To1199(int32);
 };
 
 enum {
@@ -266,17 +290,23 @@ public:
 	static uint16 &NumberOfIntroRectanglesThisFrame;
 	static uint16 &NumberOfIntroTextLinesThisFrame;
 	static bool &UseTextCommands;
+	static uint16 &CommandsExecuted;
+	static uint16 &ScriptsUpdated;
 public:
-	static bool IsPlayerOnAMission();
 	static void ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2);
 	static void CleanUpThisVehicle(CVehicle*);
 	static void CleanUpThisPed(CPed*);
 	static void CleanUpThisObject(CObject*);
 	static void Init();
+	static CRunningScript* StartNewScript(uint32);
+	static void Process();
+	static CRunningScript* StartTestScript();
+	static bool IsPlayerOnAMission();
 
 	static void ReadObjectNamesFromScript();
 	static void UpdateObjectIndices();
 	static void ReadMultiScriptFileOffsetsFromScript();
+	static void DrawScriptSpheres();
 
 	static int32 Read4BytesFromScript(uint32* pIp){
 		int32 retval = 0;
