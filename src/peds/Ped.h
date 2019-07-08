@@ -76,13 +76,6 @@ enum eObjective : uint32 {
 	OBJECTIVE_35
 };
 
-enum eVehEnter : uint16 {
-	VEHICLE_ENTER_FRONT_RIGHT = 11,
-	VEHICLE_ENTER_REAR_RIGHT = 12,
-	VEHICLE_ENTER_FRONT_LEFT = 15,
-	VEHICLE_ENTER_REAR_LEFT = 16,
-};
-
 enum {
 	RANDOM_CHAR = 1,
 	MISSION_CHAR,
@@ -321,7 +314,7 @@ public:
 	float m_fRotationCur;
 	float m_fRotationDest;
 	float m_headingRate;
-	eVehEnter m_vehEnterType;
+	uint16 m_vehEnterType;
 	uint16 m_walkAroundType;
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
@@ -526,20 +519,6 @@ public:
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
-	static uint8 GetVehEnterExitFlag(eVehEnter vehEnter) {
-		switch (vehEnter) {
-			case VEHICLE_ENTER_FRONT_RIGHT:
-				return 4;
-			case VEHICLE_ENTER_REAR_RIGHT:
-				return 8;
-			case VEHICLE_ENTER_FRONT_LEFT:
-				return 1;
-			case VEHICLE_ENTER_REAR_LEFT:
-				return 2;
-			default:
-				return 0;
-		}
-	}
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
 

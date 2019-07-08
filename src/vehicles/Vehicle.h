@@ -88,6 +88,14 @@ enum eLights
 	VEHLIGHT_REAR_RIGHT,
 };
 
+enum
+{
+	CAR_PIECE_WHEEL_LF = 13,
+	CAR_PIECE_WHEEL_LR,
+	CAR_PIECE_WHEEL_RF,
+	CAR_PIECE_WHEEL_RR,
+};
+
 class CVehicle : public CPhysical
 {
 public:
@@ -250,3 +258,18 @@ static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_pCurSurface) == 0x1E0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nAlarmState) == 0x1A0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nLastWeaponDamage) == 0x228, "CVehicle: error");
+
+inline uint8 GetVehDoorFlag(int32 carnode) {
+	switch (carnode) {
+	case CAR_DOOR_LF:
+		return 1;
+	case CAR_DOOR_LR:
+		return 2;
+	case CAR_DOOR_RF:
+		return 4;
+	case CAR_DOOR_RR:
+		return 8;
+	default:
+		return 0;
+	}
+}

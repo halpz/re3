@@ -632,7 +632,7 @@ CEntity::ProcessLightsForEntity(void)
 				lightOn = true;
 			else
 				lightFlickering = true;
-			if((CTimer::GetTimeInMilliseconds()>>1 ^ m_randomSeed) & 3)
+			if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed) & 3)
 				lightOn = true;
 			break;
 		case LIGHT_FLICKER_NIGHT:
@@ -641,7 +641,7 @@ CEntity::ProcessLightsForEntity(void)
 					lightOn = true;
 				else
 					lightFlickering = true;
-				if((CTimer::GetTimeInMilliseconds()>>1 ^ m_randomSeed) & 3)
+				if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed) & 3)
 					lightOn = true;
 			}
 			break;
@@ -680,7 +680,7 @@ CEntity::ProcessLightsForEntity(void)
 					lightOn = true;
 				else
 					lightFlickering = true;
-				if((CTimer::GetTimeInMilliseconds()>>1 ^ m_randomSeed*8) & 3)
+				if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed*8) & 3)
 					lightOn = true;
 			}
 			break;
@@ -693,7 +693,7 @@ CEntity::ProcessLightsForEntity(void)
 						lightOn = true;
 					else
 						lightFlickering = true;
-					if((CTimer::GetTimeInMilliseconds()>>1 ^ m_randomSeed*8) & 3)
+					if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed*8) & 3)
 						lightOn = true;
 				}
 			}
@@ -815,8 +815,8 @@ CEntity::ModifyMatrixForTreeInWind(void)
 		strength = 0.005f;
 	}
 
-	mat.GetUp()->x = strength * flutter;
-	mat.GetUp()->y = mat.GetUp()->x;
+	mat.GetUp().x = strength * flutter;
+	mat.GetUp().y = mat.GetUp().x;
 
 	mat.UpdateRW();
 	UpdateRwFrame();
@@ -847,7 +847,7 @@ CEntity::ModifyMatrixForBannerInWind(void)
 	else
 		strength = 0.66f;
 
-	t = ((int)(GetMatrix().GetPosition()->x + GetMatrix().GetPosition()->y) << 10) + 16*CTimer::GetTimeInMilliseconds();
+	t = ((int)(GetMatrix().GetPosition().x + GetMatrix().GetPosition().y) << 10) + 16*CTimer::GetTimeInMilliseconds();
 	f = (t & 0x7FF)/(float)0x800;
 	flutter = f * BannerWindTabel[(t>>11)+1 & 0x1F] +
 		(1.0f - f) * BannerWindTabel[(t>>11) & 0x1F];

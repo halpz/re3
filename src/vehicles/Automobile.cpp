@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "VisibilityPlugins.h"
+#include "SurfaceTable.h"
 #include "HandlingMgr.h"
 #include "Automobile.h"
 
@@ -55,7 +56,7 @@ CAutomobile::SetComponentRotation(int32 component, CVector rotation)
 	mat.SetRotateX(DEGTORAD(rotation.x));
 	mat.SetRotateY(DEGTORAD(rotation.y));
 	mat.SetRotateZ(DEGTORAD(rotation.z));
-	*mat.GetPosition() += pos;
+	mat.GetPosition() += pos;
 	mat.UpdateRW();
 }
 
@@ -106,7 +107,38 @@ CAutomobile::RemoveRefsToVehicle(CEntity *ent)
 }
 
 WRAPPER void CAutomobile::BlowUpCar(CEntity *ent) { EAXJMP(0x53BC60); }
-WRAPPER bool CAutomobile::SetUpWheelColModel(CColModel *colModel) { EAXJMP(0x53BF70); }
+
+bool
+CAutomobile::SetUpWheelColModel(CColModel *colModel)
+{
+	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
+	CColModel *vehColModel = mi->GetColModel();
+
+	colModel->boundingSphere = vehColModel->boundingSphere;
+	colModel->boundingBox = vehColModel->boundingBox;
+
+	CMatrix mat;
+	mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]));
+	colModel->spheres[0].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_LF);
+	mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LB]));
+	colModel->spheres[1].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_LR);
+	mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]));
+	colModel->spheres[2].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_RF);
+	mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RB]));
+	colModel->spheres[3].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_RR);
+
+	if(m_aCarNodes[CAR_WHEEL_LM] != nil && m_aCarNodes[CAR_WHEEL_RM] != nil){
+		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LM]));
+		colModel->spheres[4].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_RF);
+		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RM]));
+		colModel->spheres[5].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_RR);
+		colModel->numSpheres = 6;
+	}else
+		colModel->numSpheres = 4;
+
+	return true;
+}
+
 WRAPPER void CAutomobile::BurstTyre(uint8 tyre) { EAXJMP(0x53C0E0); }
 WRAPPER bool CAutomobile::IsRoomForPedToLeaveCar(uint32, CVector *) { EAXJMP(0x53C5B0); }
 
@@ -285,7 +317,7 @@ public:
 	bool IsDoorMissing_(eDoors door) { return CAutomobile::IsDoorMissing(door); }
 	void RemoveRefsToVehicle_(CEntity *ent) { CAutomobile::RemoveRefsToVehicle(ent); }
 	void BlowUpCar_(CEntity *ent) { CAutomobile::BlowUpCar(ent); }
-	bool SetUpWheelColModel_(CColModel *colModel) { CAutomobile::SetUpWheelColModel(colModel); }
+	bool SetUpWheelColModel_(CColModel *colModel) { return CAutomobile::SetUpWheelColModel(colModel); }
 	void BurstTyre_(uint8 tyre) { CAutomobile::BurstTyre(tyre); }
 	bool IsRoomForPedToLeaveCar_(uint32 door, CVector *pos) { return CAutomobile::IsRoomForPedToLeaveCar(door, pos); }
 	float GetHeightAboveRoad_(void) { return CAutomobile::GetHeightAboveRoad(); }
@@ -303,6 +335,7 @@ STARTPATCHES
 	InjectHook(0x52EFD0, &CAutomobile_::IsDoorClosed_, PATCH_JUMP);
 	InjectHook(0x52F000, &CAutomobile_::IsDoorMissing_, PATCH_JUMP);
 	InjectHook(0x53BF40, &CAutomobile_::RemoveRefsToVehicle_, PATCH_JUMP);
+	InjectHook(0x53BF70, &CAutomobile_::SetUpWheelColModel_, PATCH_JUMP);
 	InjectHook(0x437690, &CAutomobile_::GetHeightAboveRoad_, PATCH_JUMP);
 	InjectHook(0x5301A0, &CAutomobile::SetPanelDamage, PATCH_JUMP);
 	InjectHook(0x530120, &CAutomobile::SetBumperDamage, PATCH_JUMP);

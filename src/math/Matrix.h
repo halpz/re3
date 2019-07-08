@@ -78,10 +78,10 @@ public:
 		return *this;
 	}
 
-	CVector *GetPosition(void){ return (CVector*)&m_matrix.pos; }
-	CVector *GetRight(void) { return (CVector*)&m_matrix.right; }
-	CVector *GetForward(void) { return (CVector*)&m_matrix.up; }
-	CVector *GetUp(void) { return (CVector*)&m_matrix.at; }
+	CVector &GetPosition(void){ return *(CVector*)&m_matrix.pos; }
+	CVector &GetRight(void) { return *(CVector*)&m_matrix.right; }
+	CVector &GetForward(void) { return *(CVector*)&m_matrix.up; }
+	CVector &GetUp(void) { return *(CVector*)&m_matrix.at; }
 	void SetScale(float s){
 		m_matrix.right.x = s;
 		m_matrix.right.y = 0.0f;
@@ -190,9 +190,9 @@ public:
 		m_matrix.pos.z = 0.0f;
 	}
 	void Reorthogonalise(void){
-		CVector &r = *GetRight();
-		CVector &f = *GetForward();
-		CVector &u = *GetUp();
+		CVector &r = GetRight();
+		CVector &f = GetForward();
+		CVector &u = GetUp();
 		u = CrossProduct(r, f);
 		u.Normalise();
 		r = CrossProduct(f, u);
@@ -327,24 +327,24 @@ class CCompressedMatrixNotAligned
 public:
 	void CompressFromFullMatrix(CMatrix &other)
 	{
-		m_rightX = 127.0f * other.GetRight()->x;
-		m_rightY = 127.0f * other.GetRight()->y;
-		m_rightZ = 127.0f * other.GetRight()->z;
-		m_upX = 127.0f * other.GetForward()->x;
-		m_upY = 127.0f * other.GetForward()->y;
-		m_upZ = 127.0f * other.GetForward()->z;
-		m_vecPos = *other.GetPosition();
+		m_rightX = 127.0f * other.GetRight().x;
+		m_rightY = 127.0f * other.GetRight().y;
+		m_rightZ = 127.0f * other.GetRight().z;
+		m_upX = 127.0f * other.GetForward().x;
+		m_upY = 127.0f * other.GetForward().y;
+		m_upZ = 127.0f * other.GetForward().z;
+		m_vecPos = other.GetPosition();
 	}
 	void DecompressIntoFullMatrix(CMatrix &other)
 	{
-		other.GetRight()->x = m_rightX / 127.0f;
-		other.GetRight()->y = m_rightY / 127.0f;
-		other.GetRight()->z = m_rightZ / 127.0f;
-		other.GetForward()->x = m_upX / 127.0f;
-		other.GetForward()->y = m_upY / 127.0f;
-		other.GetForward()->z = m_upZ / 127.0f;
-		*other.GetUp() = CrossProduct(*other.GetRight(), *other.GetForward());
-		*other.GetPosition() = m_vecPos;
+		other.GetRight().x = m_rightX / 127.0f;
+		other.GetRight().y = m_rightY / 127.0f;
+		other.GetRight().z = m_rightZ / 127.0f;
+		other.GetForward().x = m_upX / 127.0f;
+		other.GetForward().y = m_upY / 127.0f;
+		other.GetForward().z = m_upZ / 127.0f;
+		other.GetUp() = CrossProduct(other.GetRight(), other.GetForward());
+		other.GetPosition() = m_vecPos;
 		other.Reorthogonalise();
 	}
 };

@@ -63,7 +63,7 @@ CPed::~CPed(void)
 	CWorld::Remove(this);
 	CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetIndex(this));
 	if (bInVehicle && m_pMyVehicle){
-		uint8 door_flag = GetVehEnterExitFlag(m_vehEnterType);
+		uint8 door_flag = GetVehDoorFlag(m_vehEnterType);
 		if (m_pMyVehicle->pDriver == this)
 			m_pMyVehicle->pDriver = nil;
 		else {
@@ -309,7 +309,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fRotationCur = 0.0f;
 	m_headingRate = 15.0f;
 	m_fRotationDest = 0.0f;
-	m_vehEnterType = VEHICLE_ENTER_FRONT_LEFT;
+	m_vehEnterType = CAR_DOOR_LF;
 	m_walkAroundType = 0;
 	m_pCurrentPhysSurface = nil;
 	m_vecOffsetFromPhysSurface = CVector(0.0f, 0.0f, 0.0f);
@@ -1334,7 +1334,7 @@ CPed::BeingDraggedFromCar(void)
 		if (animAssoc)
 			animAssoc->blendDelta = -1000.0f;
 
-		if (m_vehEnterType == VEHICLE_ENTER_FRONT_LEFT || m_vehEnterType == VEHICLE_ENTER_REAR_LEFT) {
+		if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR) {
 			if (m_ped_flagF10) {
 				enterAnim = ANIM_CAR_QJACKED;
 			} else if (m_pMyVehicle->bLowVehicle) {
@@ -1342,7 +1342,7 @@ CPed::BeingDraggedFromCar(void)
 			} else {
 				enterAnim = ANIM_CAR_JACKED_LHS;
 			}
-		} else if (m_vehEnterType == VEHICLE_ENTER_FRONT_RIGHT || m_vehEnterType == VEHICLE_ENTER_REAR_RIGHT) {
+		} else if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR) {
 			if (m_pMyVehicle->bLowVehicle)
 				enterAnim = ANIM_CAR_LJACKED_RHS;
 			else
@@ -1396,7 +1396,7 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 	ped->m_pSeekTarget = nil;
 	vehicle = ped->m_pMyVehicle;
 
-	vehicle->m_nGettingOutFlags &= ~GetVehEnterExitFlag(ped->m_vehEnterType);
+	vehicle->m_nGettingOutFlags &= ~GetVehDoorFlag(ped->m_vehEnterType);
 
 	if (vehicle->pDriver == ped) {
 		vehicle->RemoveDriver();
@@ -1448,7 +1448,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 	float seatOffset;
 
 	vehModel = (CVehicleModelInfo*) CModelInfo::GetModelInfo(veh->m_modelIndex);
-	if (veh->bIsVan && (enterType == VEHICLE_ENTER_REAR_LEFT || enterType == VEHICLE_ENTER_REAR_RIGHT)) {
+	if (veh->bIsVan && (enterType == CAR_DOOR_LR || enterType == CAR_DOOR_RR)) {
 		seatOffset = 0.0f;
 		vehDoorOffset = offsetToOpenVanDoor;
 	} else {
@@ -1461,7 +1461,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 	}
 
 	switch (enterType) {
-		case VEHICLE_ENTER_FRONT_RIGHT:
+		case CAR_DOOR_RF:
 			if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
 				vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_BOAT_RUDDER];
 			else
@@ -1471,13 +1471,13 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 			vehDoorOffset.x = -vehDoorOffset.x;
 			break;
 
-		case VEHICLE_ENTER_REAR_RIGHT:
+		case CAR_DOOR_RR:
 			vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_REAR_SEATS];
 			vehDoorPos.x += seatOffset;
 			vehDoorOffset.x = -vehDoorOffset.x;
 			break;
 
-		case VEHICLE_ENTER_FRONT_LEFT:
+		case CAR_DOOR_LF:
 			if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
 				vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_BOAT_RUDDER];
 			else
@@ -1486,7 +1486,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 			vehDoorPos.x = -(vehDoorPos.x + seatOffset);
 			break;
 
-		case VEHICLE_ENTER_REAR_LEFT:
+		case CAR_DOOR_LR:
 			vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_REAR_SEATS];
 			vehDoorPos.x = -(vehDoorPos.x + seatOffset);
 			break;
@@ -1584,7 +1584,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	if (veh->GetUp().z <= -0.8f)
 		vehIsUpsideDown = true;
 
-	if (m_vehEnterType == VEHICLE_ENTER_FRONT_RIGHT || m_vehEnterType == VEHICLE_ENTER_REAR_RIGHT) {
+	if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR) {
 		if (vehIsUpsideDown) {
 			m_fRotationDest = -PI + veh->GetForward().Heading();
 		} else if (veh->bIsBus) {
@@ -1592,7 +1592,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		} else {
 			m_fRotationDest = veh->GetForward().Heading();
 		}
-	} else if (m_vehEnterType == VEHICLE_ENTER_FRONT_LEFT || m_vehEnterType == VEHICLE_ENTER_REAR_LEFT) {
+	} else if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR) {
 		if (vehIsUpsideDown) {
 			m_fRotationDest = veh->GetForward().Heading();
 		} else if (veh->bIsBus) {
@@ -1763,7 +1763,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		CMatrix vehDoorMat(veh->GetMatrix());
 
 		GetLocalPositionToOpenCarDoor(&output, veh, m_vehEnterType, 0.0f);
-		*vehDoorMat.GetPosition() += Multiply3x3(vehDoorMat, output);
+		vehDoorMat.GetPosition() += Multiply3x3(vehDoorMat, output);
 		GetMatrix() = vehDoorMat;
 	}
 
@@ -2696,7 +2696,7 @@ CPed::QuitEnteringCar(void)
 		if (veh->m_nNumGettingIn != 0)
 			veh->m_nNumGettingIn--;
 
-		veh->m_nGettingInFlags = GetVehEnterExitFlag(m_vehEnterType);
+		veh->m_nGettingInFlags = GetVehDoorFlag(m_vehEnterType);
 	}
 
 	bUsesCollision = true;

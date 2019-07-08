@@ -469,7 +469,7 @@ void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayB
 	CMatrix ped_matrix;
 	pp->matrix.DecompressIntoFullMatrix(ped_matrix);
 	ped->GetMatrix() = ped->GetMatrix() * CMatrix(1.0f - interpolation);
-	*ped->GetMatrix().GetPosition() *= (1.0f - interpolation);
+	ped->GetMatrix().GetPosition() *= (1.0f - interpolation);
 	ped->GetMatrix() += CMatrix(interpolation) * ped_matrix;
 	if (pp->vehicle_index) {
 		ped->m_pMyVehicle = CPools::GetVehiclePool()->GetSlot(pp->vehicle_index - 1);
@@ -666,7 +666,7 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 	CMatrix vehicle_matrix;
 	vp->matrix.DecompressIntoFullMatrix(vehicle_matrix);
 	vehicle->GetMatrix() = vehicle->GetMatrix() * CMatrix(1.0f - interpolation);
-	*vehicle->GetMatrix().GetPosition() *= (1.0f - interpolation);
+	vehicle->GetMatrix().GetPosition() *= (1.0f - interpolation);
 	vehicle->GetMatrix() += CMatrix(interpolation) * vehicle_matrix;
 	vehicle->m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
 	vehicle->m_fHealth = 4 * vp->health;
@@ -847,7 +847,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 		{
 			tGeneralPacket* pg = (tGeneralPacket*)&ptr[offset];
 			TheCamera.GetMatrix() = TheCamera.GetMatrix() * CMatrix(split);
-			*TheCamera.GetMatrix().GetPosition() *= split;
+			TheCamera.GetMatrix().GetPosition() *= split;
 			TheCamera.GetMatrix() += CMatrix(interpolation) * pg->camera_pos;
 			RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
 			pm->pos = *(RwV3d*)TheCamera.GetMatrix().GetPosition();
@@ -979,34 +979,34 @@ void CReplay::ProcessReplayCamera(void)
 	switch (CameraMode) {
 	case REPLAYCAMMODE_TOPDOWN:
 	{
-		*TheCamera.GetMatrix().GetPosition() = CVector(CameraFocusX, CameraFocusY, CameraFocusZ + 15.0f);
-		*TheCamera.GetMatrix().GetForward() = CVector(0.0f, 0.0f, -1.0f);
-		*TheCamera.GetMatrix().GetUp() = CVector(0.0f, 1.0f, 0.0f);
-		*TheCamera.GetMatrix().GetRight() = CVector(1.0f, 0.0f, 0.0f);
+		TheCamera.GetMatrix().GetPosition() = CVector(CameraFocusX, CameraFocusY, CameraFocusZ + 15.0f);
+		TheCamera.GetMatrix().GetForward() = CVector(0.0f, 0.0f, -1.0f);
+		TheCamera.GetMatrix().GetUp() = CVector(0.0f, 1.0f, 0.0f);
+		TheCamera.GetMatrix().GetRight() = CVector(1.0f, 0.0f, 0.0f);
 		RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-		pm->pos = *(RwV3d*)TheCamera.GetMatrix().GetPosition();
-		pm->at = *(RwV3d*)TheCamera.GetMatrix().GetForward();
-		pm->up = *(RwV3d*)TheCamera.GetMatrix().GetUp();
-		pm->right = *(RwV3d*)TheCamera.GetMatrix().GetRight();
+		pm->pos = *(RwV3d*)&TheCamera.GetMatrix().GetPosition();
+		pm->at = *(RwV3d*)&TheCamera.GetMatrix().GetForward();
+		pm->up = *(RwV3d*)&TheCamera.GetMatrix().GetUp();
+		pm->right = *(RwV3d*)&TheCamera.GetMatrix().GetRight();
 		break;
 	}
 	case REPLAYCAMMODE_FIXED:
 	{
-		*TheCamera.GetMatrix().GetPosition() = CVector(CameraFixedX, CameraFixedY, CameraFixedZ);
+		TheCamera.GetMatrix().GetPosition() = CVector(CameraFixedX, CameraFixedY, CameraFixedZ);
 		CVector forward(CameraFocusX - CameraFixedX, CameraFocusY - CameraFixedY, CameraFocusZ - CameraFixedZ);
 		forward.Normalise();
 		CVector right = CrossProduct(CVector(0.0f, 0.0f, 1.0f), forward);
 		right.Normalise();
 		CVector up = CrossProduct(forward, right);
 		up.Normalise();
-		*TheCamera.GetMatrix().GetForward() = forward;
-		*TheCamera.GetMatrix().GetUp() = up;
-		*TheCamera.GetMatrix().GetRight() = right;
+		TheCamera.GetMatrix().GetForward() = forward;
+		TheCamera.GetMatrix().GetUp() = up;
+		TheCamera.GetMatrix().GetRight() = right;
 		RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-		pm->pos = *(RwV3d*)TheCamera.GetMatrix().GetPosition();
-		pm->at = *(RwV3d*)TheCamera.GetMatrix().GetForward();
-		pm->up = *(RwV3d*)TheCamera.GetMatrix().GetUp();
-		pm->right = *(RwV3d*)TheCamera.GetMatrix().GetRight();
+		pm->pos = *(RwV3d*)&TheCamera.GetMatrix().GetPosition();
+		pm->at = *(RwV3d*)&TheCamera.GetMatrix().GetForward();
+		pm->up = *(RwV3d*)&TheCamera.GetMatrix().GetUp();
+		pm->right = *(RwV3d*)&TheCamera.GetMatrix().GetRight();
 		break;
 	}
 	default:
@@ -1189,7 +1189,7 @@ void CReplay::RestoreStuffFromMem(void)
 			CMatrix tmp1;
 			tmp1.Attach(RwFrameGetMatrix(dodo->m_aCarNodes[CAR_WHEEL_RF]), false);
 			CMatrix tmp2(RwFrameGetMatrix(dodo->m_aCarNodes[CAR_WHEEL_LF]), false);
-			*tmp1.GetPosition() += CVector(tmp2.GetPosition()->x + 0.1f, 0.0f, tmp2.GetPosition()->z);
+			tmp1.GetPosition() += CVector(tmp2.GetPosition().x + 0.1f, 0.0f, tmp2.GetPosition().z);
 			tmp1.UpdateRW();
 		}
 		if (vehicle->IsCar()){
@@ -1525,15 +1525,15 @@ void CReplay::ProcessLookAroundCam(void)
 	right.Normalise();
 	CVector up = CrossProduct(forward, right);
 	up.Normalise();
-	*TheCamera.GetMatrix().GetForward() = forward;
-	*TheCamera.GetMatrix().GetUp() = up;
-	*TheCamera.GetMatrix().GetRight() = right;
-	*TheCamera.GetMatrix().GetPosition() = camera_pt;
+	TheCamera.GetMatrix().GetForward() = forward;
+	TheCamera.GetMatrix().GetUp() = up;
+	TheCamera.GetMatrix().GetRight() = right;
+	TheCamera.GetMatrix().GetPosition() = camera_pt;
 	RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-	pm->pos = *(RwV3d*)TheCamera.GetMatrix().GetPosition();
-	pm->at = *(RwV3d*)TheCamera.GetMatrix().GetForward();
-	pm->up = *(RwV3d*)TheCamera.GetMatrix().GetUp();
-	pm->right = *(RwV3d*)TheCamera.GetMatrix().GetRight();
+	pm->pos = *(RwV3d*)&TheCamera.GetMatrix().GetPosition();
+	pm->at = *(RwV3d*)&TheCamera.GetMatrix().GetForward();
+	pm->up = *(RwV3d*)&TheCamera.GetMatrix().GetUp();
+	pm->right = *(RwV3d*)&TheCamera.GetMatrix().GetRight();
 	TheCamera.CalculateDerivedValues();
 	RwMatrixUpdate(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
 	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));

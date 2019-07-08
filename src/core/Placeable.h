@@ -10,10 +10,10 @@ public:
 
 	CPlaceable(void);
 	virtual ~CPlaceable(void);
-	CVector &GetPosition(void) { return *m_matrix.GetPosition(); }
-	CVector &GetRight(void) { return *m_matrix.GetRight(); }
-	CVector &GetForward(void) { return *m_matrix.GetForward(); }
-	CVector &GetUp(void) { return *m_matrix.GetUp(); }
+	CVector &GetPosition(void) { return m_matrix.GetPosition(); }
+	CVector &GetRight(void) { return m_matrix.GetRight(); }
+	CVector &GetForward(void) { return m_matrix.GetForward(); }
+	CVector &GetUp(void) { return m_matrix.GetUp(); }
 	CMatrix &GetMatrix(void) { return m_matrix; }
 	void SetTransform(RwMatrix *m) { m_matrix = CMatrix(m, false); }
 	void SetHeading(float angle);

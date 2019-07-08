@@ -1883,7 +1883,7 @@ CPhysical::ProcessCollision(void)
 			if(IsPed() && m_vecMoveSpeed.z == 0.0f &&
 			   !ped->m_ped_flagA2 &&
 			   ped->bIsStanding)
-				savedMatrix.GetPosition()->z = GetPosition().z;
+				savedMatrix.GetPosition().z = GetPosition().z;
 			GetMatrix() = savedMatrix;
 			CTimer::SetTimeStep(savedTimeStep);
 			return;
@@ -1891,7 +1891,7 @@ CPhysical::ProcessCollision(void)
 		if(IsPed() && m_vecMoveSpeed.z == 0.0f &&
 		   !ped->m_ped_flagA2 &&
 		   ped->bIsStanding)
-			savedMatrix.GetPosition()->z = GetPosition().z;
+			savedMatrix.GetPosition().z = GetPosition().z;
 		GetMatrix() = savedMatrix;
 		CTimer::SetTimeStep(savedTimeStep);
 		if(IsVehicle()){
