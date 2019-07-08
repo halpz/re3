@@ -88,6 +88,14 @@ enum eLights
 	VEHLIGHT_REAR_RIGHT,
 };
 
+enum eWheels
+{
+	VEHWHEEL_FRONT_LEFT,
+	VEHWHEEL_FRONT_RIGHT,
+	VEHWHEEL_REAR_LEFT,
+	VEHWHEEL_REAR_RIGHT,
+};
+
 enum
 {
 	CAR_PIECE_WHEEL_LF = 13,
@@ -142,7 +150,7 @@ public:
 	uint8 m_veh_flagB80 : 1;
 
 	uint8 m_veh_flagC1 : 1;
-	uint8 m_veh_flagC2 : 1;		// bIsDamaged
+	uint8 bIsDamaged : 1;
 	uint8 m_veh_flagC4 : 1;
 	uint8 m_veh_flagC8 : 1;
 	uint8 m_veh_flagC10 : 1;

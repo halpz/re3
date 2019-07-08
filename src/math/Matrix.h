@@ -82,6 +82,32 @@ public:
 	CVector &GetRight(void) { return *(CVector*)&m_matrix.right; }
 	CVector &GetForward(void) { return *(CVector*)&m_matrix.up; }
 	CVector &GetUp(void) { return *(CVector*)&m_matrix.at; }
+
+	void SetTranslate(float x, float y, float z){
+		m_matrix.right.x = 1.0f;
+		m_matrix.right.y = 0.0f;
+		m_matrix.right.z = 0.0f;
+
+		m_matrix.up.x = 0.0f;
+		m_matrix.up.y = 1.0f;
+		m_matrix.up.z = 0.0f;
+
+		m_matrix.at.x = 0.0f;
+		m_matrix.at.y = 0.0f;
+		m_matrix.at.z = 1.0f;
+
+		m_matrix.pos.x = x;
+		m_matrix.pos.y = y;
+		m_matrix.pos.z = z;
+	}
+	void SetTranslate(const CVector &trans){ SetTranslate(trans.x, trans.y, trans.z); }
+	void Translate(float x, float y, float z){
+		m_matrix.pos.x += x;
+		m_matrix.pos.y += y;
+		m_matrix.pos.z += z;
+	}
+	void Translate(const CVector &trans){ Translate(trans.x, trans.y, trans.z); }
+
 	void SetScale(float s){
 		m_matrix.right.x = s;
 		m_matrix.right.y = 0.0f;
@@ -99,6 +125,7 @@ public:
 		m_matrix.pos.y = 0.0f;
 		m_matrix.pos.z = 0.0f;
 	}
+
 	void SetRotateXOnly(float angle){
 		float c = cos(angle);
 		float s = sin(angle);

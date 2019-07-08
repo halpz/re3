@@ -1012,7 +1012,7 @@ void CReplay::ProcessReplayCamera(void)
 	default:
 		break;
 	}
-	TheCamera.m_vecGameCamPos = *TheCamera.GetMatrix().GetPosition();
+	TheCamera.m_vecGameCamPos = TheCamera.GetMatrix().GetPosition();
 	TheCamera.CalculateDerivedValues();
 	RwMatrixUpdate(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
 	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));

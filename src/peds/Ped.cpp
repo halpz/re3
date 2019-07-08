@@ -669,7 +669,7 @@ CPed::AimGun(void)
 			vector.y = pos.y;
 			vector.z = pos.z;
 		} else {
-			vector = *(m_pSeekTarget->GetPosition());
+			vector = m_pSeekTarget->GetPosition();
 		}
 		Say(SOUND_PED_ATTACK);
 
@@ -1540,7 +1540,7 @@ CPed::GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType,
 	GetLocalPositionToOpenCarDoor(output, veh, enterType, offset);
 	doorPos = Multiply3x3(vehMat, *output);
 
-	*output = *veh->GetPosition() + doorPos;
+	*output = veh->GetPosition() + doorPos;
 }
 
 void
@@ -1659,7 +1659,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	CVector neededPos;
 
 	if (phase == LINE_UP_TO_CAR_2) {
-		neededPos = *GetPosition();
+		neededPos = GetPosition();
 	} else {
 		GetPositionToOpenCarDoor(&neededPos, veh, m_vehEnterType, seatPosMult);
 	}
@@ -2087,7 +2087,7 @@ CPed::CalculateNewOrientation(void)
 	if (CReplay::IsPlayingBack() || !IsPedInControl())
 		return;
 
-	CVector pos = *GetPosition();
+	CVector pos = GetPosition();
 
 	GetMatrix().SetRotate(0.0f, 0.0f, m_fRotationCur);
 	

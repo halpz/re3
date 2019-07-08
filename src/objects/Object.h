@@ -72,6 +72,7 @@ public:
 	void RemoveLighting(bool reset);
 
 	void ObjectDamage(float amount);
+	void RefModelInfo(int32 modelId);
 
 	static void DeleteAllTempObjectInArea(CVector, float);
 };

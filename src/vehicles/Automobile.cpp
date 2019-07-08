@@ -1,8 +1,15 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
+#include "ModelIndices.h"
 #include "VisibilityPlugins.h"
+#include "DMAudio.h"
+#include "World.h"
 #include "SurfaceTable.h"
 #include "HandlingMgr.h"
+#include "CarCtrl.h"
+#include "Ped.h"
+#include "Object.h"
 #include "Automobile.h"
 
 bool &CAutomobile::m_sAllTaxiLights = *(bool*)0x95CD21;
@@ -23,7 +30,22 @@ CAutomobile::SetModelIndex(uint32 id)
 }
 
 WRAPPER void CAutomobile::ProcessControl(void) { EAXJMP(0x531470); }
-WRAPPER void CAutomobile::Teleport(CVector v) { EAXJMP(0x535180); }
+
+void
+CAutomobile::Teleport(CVector pos)
+{
+	CWorld::Remove(this);
+
+	GetPosition() = pos;
+	SetOrientation(0.0f, 0.0f, 0.0f);
+	SetMoveSpeed(0.0f, 0.0f, 0.0f);
+	SetTurnSpeed(0.0f, 0.0f, 0.0f);
+
+	ResetSuspension();
+
+	CWorld::Add(this);
+}
+
 WRAPPER void CAutomobile::PreRender(void) { EAXJMP(0x535B40); }
 WRAPPER void CAutomobile::Render(void) { EAXJMP(0x539EA0); }
 
@@ -51,16 +73,53 @@ void
 CAutomobile::SetComponentRotation(int32 component, CVector rotation)
 {
 	CMatrix mat(RwFrameGetMatrix(m_aCarNodes[component]));
-	CVector pos = *mat.GetPosition();
+	CVector pos = mat.GetPosition();
 	// BUG: all these set the whole matrix
 	mat.SetRotateX(DEGTORAD(rotation.x));
 	mat.SetRotateY(DEGTORAD(rotation.y));
 	mat.SetRotateZ(DEGTORAD(rotation.z));
-	mat.GetPosition() += pos;
+	mat.Translate(pos);
 	mat.UpdateRW();
 }
 
-WRAPPER void CAutomobile::OpenDoor(int32, eDoors door, float) { EAXJMP(0x52E750); }
+void
+CAutomobile::OpenDoor(int32 component, eDoors door, float openRatio)
+{
+	CMatrix mat(RwFrameGetMatrix(m_aCarNodes[component]));
+	CVector pos = mat.GetPosition();
+	float axes[3] = { 0.0f, 0.0f, 0.0f };
+	float wasClosed = false;
+
+	if(Doors[door].IsClosed()){
+		// enable angle cull for closed doors
+		RwFrameForAllObjects(m_aCarNodes[component], CVehicleModelInfo::ClearAtomicFlagCB, (void*)ATOMIC_FLAG_NOCULL);
+		wasClosed = true;
+	}
+
+	Doors[door].Open(openRatio);
+
+	if(wasClosed && Doors[door].RetAngleWhenClosed() != Doors[door].m_fAngle){
+		// door opened
+		HideAllComps();
+		// turn off angle cull for swinging door
+		RwFrameForAllObjects(m_aCarNodes[component], CVehicleModelInfo::SetAtomicFlagCB, (void*)ATOMIC_FLAG_NOCULL);
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_DOOR_OPEN_BONNET + door, 0.0f);
+	}
+
+	if(!wasClosed && openRatio == 0.0f){
+		// door closed
+		if(Damage.GetDoorStatus(door) == DOOR_STATUS_SWINGING)
+			Damage.SetDoorStatus(door, DOOR_STATUS_OK);	// huh?
+		ShowAllComps();
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_DOOR_CLOSE_BONNET + door, 0.0f);
+	}
+
+	axes[Doors[door].m_nAxis] = Doors[door].m_fAngle;
+	mat.SetRotate(axes[0], axes[1], axes[2]);
+	mat.Translate(pos);
+	mat.UpdateRW();
+}
+
 WRAPPER void CAutomobile::ProcessOpenDoor(uint32, uint32, float) { EAXJMP(0x52E910); }
 
 bool
@@ -139,7 +198,31 @@ CAutomobile::SetUpWheelColModel(CColModel *colModel)
 	return true;
 }
 
-WRAPPER void CAutomobile::BurstTyre(uint8 tyre) { EAXJMP(0x53C0E0); }
+// this probably isn't used in III yet
+void
+CAutomobile::BurstTyre(uint8 wheel)
+{
+	switch(wheel){
+	case CAR_PIECE_WHEEL_LF: wheel = VEHWHEEL_FRONT_LEFT; break;
+	case CAR_PIECE_WHEEL_LR: wheel = VEHWHEEL_REAR_LEFT; break;
+	case CAR_PIECE_WHEEL_RF: wheel = VEHWHEEL_FRONT_RIGHT; break;
+	case CAR_PIECE_WHEEL_RR: wheel = VEHWHEEL_REAR_RIGHT; break;
+	}
+
+	int status = Damage.GetWheelStatus(wheel);
+	if(status == WHEEL_STATUS_OK){
+		Damage.SetWheelStatus(wheel, WHEEL_STATUS_BURST);
+
+		if(m_status == STATUS_SIMPLE){
+			m_status = STATUS_PHYSICS;
+			CCarCtrl::SwitchVehicleToRealPhysics(this);
+		}
+
+		ApplyMoveForce(GetRight() * CGeneral::GetRandomNumberInRange(-0.3f, 0.3f));
+		ApplyTurnForce(GetRight() * CGeneral::GetRandomNumberInRange(-0.3f, 0.3f), GetForward());
+	}
+}
+
 WRAPPER bool CAutomobile::IsRoomForPedToLeaveCar(uint32, CVector *) { EAXJMP(0x53C5B0); }
 
 float
@@ -148,13 +231,269 @@ CAutomobile::GetHeightAboveRoad(void)
 	return m_fHeightAboveRoad;
 }
 
-WRAPPER void CAutomobile::PlayCarHorn(void) { EAXJMP(0x53C450); }
+void
+CAutomobile::PlayCarHorn(void)
+{
+	int r;
+
+	if(m_nCarHornTimer != 0)
+		return;
+
+	r = CGeneral::GetRandomNumber() & 7;
+	if(r < 2){
+		m_nCarHornTimer = 45;
+	}else if(r < 4){
+		if(pDriver)
+			pDriver->Say(SOUND_PED_CAR_COLLISION);
+		m_nCarHornTimer = 45;
+	}else{
+		if(pDriver)
+			pDriver->Say(SOUND_PED_CAR_COLLISION);
+	}
+}
 
 
+void
+CAutomobile::ResetSuspension(void)
+{
+	int i;
+	for(i = 0; i < 4; i++){
+		m_aSuspensionSpringRatio[i] = 1.0f;
+		m_aWheelSkidThing[i] = 0.0f;
+		m_aWheelRotation[i] = 0.0f;
+		m_aWheelState[i] = 0;	// TODO: enum?
+	}
+}
 
+void
+CAutomobile::ProcessSwingingDoor(int32 component, eDoors door)
+{
+	if(Damage.GetDoorStatus(door) != DOOR_STATUS_SWINGING)
+		return;
 
+	CMatrix mat(RwFrameGetMatrix(m_aCarNodes[component]));
+	CVector pos = mat.GetPosition();
+	float axes[3] = { 0.0f, 0.0f, 0.0f };
 
-WRAPPER void CAutomobile::SpawnFlyingComponent(int32 component, uint32 type) { EAXJMP(0x530300); }
+	Doors[door].Process(this);
+	axes[Doors[door].m_nAxis] = Doors[door].m_fAngle;
+	mat.SetRotate(axes[0], axes[1], axes[2]);
+	mat.Translate(pos);
+	mat.UpdateRW();
+}
+
+void
+CAutomobile::Fix(void)
+{
+	int component;
+
+	Damage.ResetDamageStatus();
+
+	if(m_handling->Flags & HANDLING_NO_DOORS){
+		Damage.SetDoorStatus(DOOR_FRONT_LEFT, DOOR_STATUS_MISSING);
+		Damage.SetDoorStatus(DOOR_FRONT_RIGHT, DOOR_STATUS_MISSING);
+		Damage.SetDoorStatus(DOOR_REAR_LEFT, DOOR_STATUS_MISSING);
+		Damage.SetDoorStatus(DOOR_REAR_RIGHT, DOOR_STATUS_MISSING);
+	}
+
+	bIsDamaged = false;
+	RpClumpForAllAtomics((RpClump*)m_rwObject, CVehicleModelInfo::HideAllComponentsAtomicCB, (void*)ATOMIC_FLAG_DAM);
+
+	for(component = CAR_BUMP_FRONT; component < NUM_CAR_NODES; component++){
+		if(m_aCarNodes[component]){
+			CMatrix mat(RwFrameGetMatrix(m_aCarNodes[component]));
+			mat.SetTranslate(mat.GetPosition());
+			mat.UpdateRW();
+		}
+	}
+}
+
+void
+CAutomobile::SetupDamageAfterLoad(void)
+{
+	if(m_aCarNodes[CAR_BUMP_FRONT])
+		SetBumperDamage(CAR_BUMP_FRONT, VEHBUMPER_FRONT);
+	if(m_aCarNodes[CAR_BONNET])
+		SetDoorDamage(CAR_BONNET, DOOR_BONNET);
+	if(m_aCarNodes[CAR_BUMP_REAR])
+		SetBumperDamage(CAR_BUMP_REAR, VEHBUMPER_REAR);
+	if(m_aCarNodes[CAR_BOOT])
+		SetDoorDamage(CAR_BOOT, DOOR_BOOT);
+	if(m_aCarNodes[CAR_DOOR_LF])
+		SetDoorDamage(CAR_DOOR_LF, DOOR_FRONT_LEFT);
+	if(m_aCarNodes[CAR_DOOR_RF])
+		SetDoorDamage(CAR_DOOR_RF, DOOR_FRONT_RIGHT);
+	if(m_aCarNodes[CAR_DOOR_LR])
+		SetDoorDamage(CAR_DOOR_LR, DOOR_REAR_LEFT);
+	if(m_aCarNodes[CAR_DOOR_RR])
+		SetDoorDamage(CAR_DOOR_RR, DOOR_REAR_RIGHT);
+	if(m_aCarNodes[CAR_WING_LF])
+		SetPanelDamage(CAR_WING_LF, VEHPANEL_FRONT_LEFT);
+	if(m_aCarNodes[CAR_WING_RF])
+		SetPanelDamage(CAR_WING_RF, VEHPANEL_FRONT_RIGHT);
+	if(m_aCarNodes[CAR_WING_LR])
+		SetPanelDamage(CAR_WING_LR, VEHPANEL_REAR_LEFT);
+	if(m_aCarNodes[CAR_WING_RR])
+		SetPanelDamage(CAR_WING_RR, VEHPANEL_REAR_RIGHT);
+}
+
+RwObject*
+GetCurrentAtomicObjectCB(RwObject *object, void *data)
+{
+	RpAtomic *atomic = (RpAtomic*)object;
+	assert(RwObjectGetType(object) == rpATOMIC);
+	if(RpAtomicGetFlags(atomic) & rpATOMICRENDER)
+		*(RpAtomic**)data = atomic;
+	return object;
+}
+
+CColPoint aTempPedColPts[32];	// this name doesn't make any sense
+
+CObject*
+CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
+{
+	RpAtomic *atomic;
+	RwFrame *frame;
+	RwMatrix *matrix;
+	CObject *obj;
+
+	if(CObject::nNoTempObjects >= NUMTEMPOBJECTS)
+		return nil;
+
+	atomic = nil;
+	RwFrameForAllObjects(m_aCarNodes[component], GetCurrentAtomicObjectCB, &atomic);
+	if(atomic == nil)
+		return nil;
+
+	obj = new CObject;
+	if(obj == nil)
+		return nil;
+
+	if(component == CAR_WINDSCREEN){
+		obj->SetModelIndexNoCreate(MI_CAR_BONNET);
+	}else switch(type){
+	case COMPGROUP_BUMPER:
+		obj->SetModelIndexNoCreate(MI_CAR_BUMPER);
+		break;
+	case COMPGROUP_WHEEL:
+		obj->SetModelIndexNoCreate(MI_CAR_WHEEL);
+		break;
+	case COMPGROUP_DOOR:
+		obj->SetModelIndexNoCreate(MI_CAR_DOOR);
+		obj->SetCenterOfMass(0.0f, -0.5f, 0.0f);
+		break;
+	case COMPGROUP_BONNET:
+		obj->SetModelIndexNoCreate(MI_CAR_BONNET);
+		obj->SetCenterOfMass(0.0f, 0.4f, 0.0f);
+		break;
+	case COMPGROUP_BOOT:
+		obj->SetModelIndexNoCreate(MI_CAR_BOOT);
+		obj->SetCenterOfMass(0.0f, -0.3f, 0.0f);
+		break;
+	case COMPGROUP_PANEL:
+	default:
+		obj->SetModelIndexNoCreate(MI_CAR_PANEL);
+		break;
+	}
+
+	// object needs base model
+	obj->RefModelInfo(GetModelIndex());
+
+	// create new atomic
+	matrix = RwFrameGetLTM(m_aCarNodes[component]);
+	frame = RwFrameCreate();
+	atomic = RpAtomicClone(atomic);
+	*RwFrameGetMatrix(frame) = *matrix;
+	RpAtomicSetFrame(atomic, frame);
+	CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
+	obj->AttachToRwObject((RwObject*)atomic);
+
+	// init object
+	obj->m_fMass = 10.0f;
+	obj->m_fTurnMass = 25.0f;
+	obj->m_fAirResistance = 0.97f;
+	obj->m_fElasticity = 0.1f;
+	obj->m_fBuoyancy = obj->m_fMass*GRAVITY/0.75f;
+	obj->ObjectCreatedBy = TEMP_OBJECT;
+	obj->bIsStatic = true;
+	obj->bIsPickup = false;
+	obj->bUseVehicleColours = true;
+	obj->m_colour1 = m_currentColour1;
+	obj->m_colour2 = m_currentColour2;
+
+	// life time - the more objects the are, the shorter this one will live
+	CObject::nNoTempObjects++;
+	if(CObject::nNoTempObjects > 20)
+		obj->m_nEndOfLifeTime = CTimer::GetTimeInMilliseconds() + 20000/5.0f;
+	else if(CObject::nNoTempObjects > 10)
+		obj->m_nEndOfLifeTime = CTimer::GetTimeInMilliseconds() + 20000/2.0f;
+	else
+		obj->m_nEndOfLifeTime = CTimer::GetTimeInMilliseconds() + 20000;
+
+	obj->m_vecMoveSpeed = m_vecMoveSpeed;
+	if(obj->m_vecMoveSpeed.z > 0.0f){
+		obj->m_vecMoveSpeed.z *= 1.5f;
+	}else if(GetUp().z > 0.0f &&
+	         (component == COMPGROUP_BONNET || component == COMPGROUP_BOOT || component == CAR_WINDSCREEN)){
+		obj->m_vecMoveSpeed.z *= -1.5f;
+		obj->m_vecMoveSpeed.z += 0.04f;
+	}else{
+		obj->m_vecMoveSpeed.z *= 0.25f;
+	}
+	obj->m_vecMoveSpeed.x *= 0.75f;
+	obj->m_vecMoveSpeed.y *= 0.75f;
+
+	obj->m_vecTurnSpeed = m_vecTurnSpeed*2.0f;
+
+	// push component away from car
+	CVector dist = obj->GetPosition() - GetPosition();
+	dist.Normalise();
+	if(component == COMPGROUP_BONNET || component == COMPGROUP_BOOT || component == CAR_WINDSCREEN){
+		// push these up some
+		dist += GetUp();
+		if(GetUp().z > 0.0f){
+			// simulate fast upward movement if going fast
+			float speed = CVector2D(m_vecMoveSpeed).MagnitudeSqr();
+			obj->GetPosition() += GetUp()*speed;
+		}
+	}
+	obj->ApplyMoveForce(dist);
+
+	if(type == COMPGROUP_WHEEL){
+		obj->m_fTurnMass = 5.0f;
+		obj->m_vecTurnSpeed.x = 0.5f;
+		obj->m_fAirResistance = 0.99f;
+	}
+
+	if(CCollision::ProcessColModels(obj->GetMatrix(), *CModelInfo::GetModelInfo(obj->GetModelIndex())->GetColModel(),
+			this->GetMatrix(), *CModelInfo::GetModelInfo(this->GetModelIndex())->GetColModel(),
+			aTempPedColPts, nil, nil) > 0)
+		obj->m_pCollidingEntity = this;
+
+	if(bRenderScorched)
+		obj->bRenderScorched = true;
+
+	CWorld::Add(obj);
+
+	return obj;
+}
+
+CObject*
+CAutomobile::RemoveBonnetInPedCollision(void)
+{
+	CObject *obj;
+
+	if(Damage.GetDoorStatus(DOOR_BONNET) != DOOR_STATUS_SWINGING &&
+	   Doors[DOOR_BONNET].RetAngleWhenOpen()*0.4f < Doors[DOOR_BONNET].m_fAngle){
+		// BUG? why not COMPGROUP_BONNET?
+		obj = SpawnFlyingComponent(CAR_BONNET, COMPGROUP_DOOR);
+		// make both doors invisible on car
+		SetComponentVisibility(m_aCarNodes[CAR_BONNET], ATOMIC_FLAG_NONE);
+		Damage.SetDoorStatus(DOOR_BONNET, DOOR_STATUS_MISSING);
+		return obj;
+	}
+	return nil;
+}
 
 void
 CAutomobile::SetPanelDamage(int32 component, ePanels panel, bool noFlyingComponents)
@@ -245,7 +584,7 @@ void
 CAutomobile::SetComponentVisibility(RwFrame *frame, uint32 flags)
 {
 	HideAllComps();
-	m_veh_flagC2 = true;
+	bIsDamaged = true;
 	RwFrameForAllObjects(frame, SetVehicleAtomicVisibilityCB, (void*)flags);
 }
 
@@ -327,16 +666,26 @@ public:
 STARTPATCHES
 	InjectHook(0x52D170, &CAutomobile_::dtor, PATCH_JUMP);
 	InjectHook(0x52D190, &CAutomobile_::SetModelIndex_, PATCH_JUMP);
+	InjectHook(0x535180, &CAutomobile_::Teleport_, PATCH_JUMP);
 	InjectHook(0x52E5F0, &CAutomobile_::GetComponentWorldPosition_, PATCH_JUMP);
 	InjectHook(0x52E660, &CAutomobile_::IsComponentPresent_, PATCH_JUMP);
 	InjectHook(0x52E680, &CAutomobile_::SetComponentRotation_, PATCH_JUMP);
+	InjectHook(0x52E750, &CAutomobile_::OpenDoor_, PATCH_JUMP);
 	InjectHook(0x52EF10, &CAutomobile_::IsDoorReady_, PATCH_JUMP);
 	InjectHook(0x52EF90, &CAutomobile_::IsDoorFullyOpen_, PATCH_JUMP);
 	InjectHook(0x52EFD0, &CAutomobile_::IsDoorClosed_, PATCH_JUMP);
 	InjectHook(0x52F000, &CAutomobile_::IsDoorMissing_, PATCH_JUMP);
 	InjectHook(0x53BF40, &CAutomobile_::RemoveRefsToVehicle_, PATCH_JUMP);
 	InjectHook(0x53BF70, &CAutomobile_::SetUpWheelColModel_, PATCH_JUMP);
+	InjectHook(0x53C0E0, &CAutomobile_::BurstTyre_, PATCH_JUMP);
 	InjectHook(0x437690, &CAutomobile_::GetHeightAboveRoad_, PATCH_JUMP);
+	InjectHook(0x53C450, &CAutomobile_::PlayCarHorn_, PATCH_JUMP);
+	InjectHook(0x5353A0, &CAutomobile::ResetSuspension, PATCH_JUMP);
+	InjectHook(0x535250, &CAutomobile::ProcessSwingingDoor, PATCH_JUMP);
+	InjectHook(0x53C240, &CAutomobile::Fix, PATCH_JUMP);
+	InjectHook(0x53C310, &CAutomobile::SetupDamageAfterLoad, PATCH_JUMP);
+	InjectHook(0x530300, &CAutomobile::SpawnFlyingComponent, PATCH_JUMP);
+	InjectHook(0x535320, &CAutomobile::RemoveBonnetInPedCollision, PATCH_JUMP);
 	InjectHook(0x5301A0, &CAutomobile::SetPanelDamage, PATCH_JUMP);
 	InjectHook(0x530120, &CAutomobile::SetBumperDamage, PATCH_JUMP);
 	InjectHook(0x530200, &CAutomobile::SetDoorDamage, PATCH_JUMP);
