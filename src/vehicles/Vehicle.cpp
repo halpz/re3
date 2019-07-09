@@ -92,7 +92,7 @@ CVehicle::RemoveLighting(bool reset)
 float
 CVehicle::GetHeightAboveRoad(void)
 {
-	return -1.0f * CModelInfo::GetModelInfo(GetModelIndex())->GetColModel()->boundingBox.min.z;
+	return -1.0f * GetColModel()->boundingBox.min.z;
 }
 
 
@@ -442,7 +442,7 @@ CVehicle::IsSphereTouchingVehicle(float sx, float sy, float sz, float radius)
 	float x, y, z;
 	// sphere relative to vehicle
 	CVector sph = CVector(sx, sy, sz) - GetPosition();
-	CColModel *colmodel = CModelInfo::GetModelInfo(GetModelIndex())->GetColModel();
+	CColModel *colmodel = GetColModel();
 
 	x = DotProduct(sph, GetRight());
 	if(colmodel->boundingBox.min.x - radius > x ||

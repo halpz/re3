@@ -10,6 +10,7 @@
 #include "Ped.h"
 #include "PlayerPed.h"
 #include "General.h"
+#include "SurfaceTable.h"
 #include "VisibilityPlugins.h"
 #include "AudioManager.h"
 #include "HandlingMgr.h"
@@ -27,6 +28,7 @@
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
 WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4D37D0); }
+WRAPPER void CPed::SetDead(void) { EAXJMP(0x4D3970); }
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 WRAPPER void CPed::RestorePreviousState(void) { EAXJMP(0x4C5E30); }
 WRAPPER void CPed::ClearAttack(void) { EAXJMP(0x4E6790); }
@@ -430,7 +432,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagI1 = false;
 	m_ped_flagI2 = false;
 	m_ped_flagI4 = false;
-	bRecordedForReplay = false;
+	bHasAlreadyBeenRecorded = false;
 	m_ped_flagI10 = false;
 #ifdef KANGAROO_CHEAT
 	m_ped_flagI80 = false;
@@ -669,7 +671,7 @@ CPed::AimGun(void)
 			vector.y = pos.y;
 			vector.z = pos.z;
 		} else {
-			vector = *(m_pSeekTarget->GetPosition());
+			vector = m_pSeekTarget->GetPosition();
 		}
 		Say(SOUND_PED_ATTACK);
 
@@ -1540,7 +1542,7 @@ CPed::GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType,
 	GetLocalPositionToOpenCarDoor(output, veh, enterType, offset);
 	doorPos = Multiply3x3(vehMat, *output);
 
-	*output = *veh->GetPosition() + doorPos;
+	*output = veh->GetPosition() + doorPos;
 }
 
 void
@@ -1659,7 +1661,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	CVector neededPos;
 
 	if (phase == LINE_UP_TO_CAR_2) {
-		neededPos = *GetPosition();
+		neededPos = GetPosition();
 	} else {
 		GetPositionToOpenCarDoor(&neededPos, veh, m_vehEnterType, seatPosMult);
 	}
@@ -1772,12 +1774,12 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 static void
 particleProduceFootDust(CPed *ped, CVector *pos, float size, int times)
 {
-	switch (ped->m_nLastCollType)
+	switch (ped->m_nSurfaceTouched)
 	{
-		case 1:	// somewhere hard
-		case 3:	// soft dirt
-		case 5:	// pavement
-		case 18:// sand
+		case SURFACE_TARMAC:
+		case SURFACE_DIRT:
+		case SURFACE_PAVEMENT:
+		case SURFACE_SAND:
 			for (int i = 0; i < times; ++i) {
 				CVector adjustedPos = *pos;
 				adjustedPos.x += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
@@ -1879,7 +1881,7 @@ CPed::PlayFootSteps(void)
 		}
 	}
 
-	if (m_nLastCollType == 19) { // Water
+	if (m_nSurfaceTouched == SURFACE_PUDDLE) {
 		float pedSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
 		if (pedSpeed > 0.03f && CTimer::GetFrameCounter() % 2 == 0 && pedSpeed > 0.13f) {
 			float particleSize = pedSpeed * 2.0f;
@@ -2087,7 +2089,7 @@ CPed::CalculateNewOrientation(void)
 	if (CReplay::IsPlayingBack() || !IsPedInControl())
 		return;
 
-	CVector pos = *GetPosition();
+	CVector pos = GetPosition();
 
 	GetMatrix().SetRotate(0.0f, 0.0f, m_fRotationCur);
 	

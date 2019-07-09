@@ -30,6 +30,8 @@ enum Config {
 	NUMDUMMIES = 2802, // 2368 on PS2
 	NUMAUDIOSCRIPTOBJECTS = 256,
 
+	NUMTEMPOBJECTS = 30,
+
 	// Link list lengths
 	// TODO: alpha list
 	NUMCOLCACHELINKS = 200,

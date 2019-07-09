@@ -1160,7 +1160,7 @@ CRenderer::IsVehicleCullZoneVisible(CEntity *ent)
 	case STATUS_PHYSICS:
 	case STATUS_ABANDONED:
 	case STATUS_WRECKED:
-		return !(v->m_pCurSurface && v->m_pCurSurface->bZoneCulled2);
+		return !(v->m_pCurGroundEntity && v->m_pCurGroundEntity->bZoneCulled2);
 	return true;
 }
 

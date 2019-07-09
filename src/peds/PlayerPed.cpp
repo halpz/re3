@@ -24,6 +24,19 @@ void CPlayerPed::ClearWeaponTarget()
 	ClearPointGunAt();
 }
 
+void
+CPlayerPed::SetWantedLevel(int32 level)
+{
+	m_pWanted->SetWantedLevel(level);
+}
+
+void
+CPlayerPed::SetWantedLevelNoDrop(int32 level)
+{
+	m_pWanted->SetWantedLevelNoDrop(level);
+}
+
+
 class CPlayerPed_ : public CPlayerPed
 {
 public:

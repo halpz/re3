@@ -8,6 +8,8 @@ enum {
 	PHYSICAL_MAX_COLLISIONRECORDS = 6
 };
 
+#define GRAVITY (0.008f)
+
 class CTreadable;
 
 class CPhysical : public CEntity
@@ -59,7 +61,7 @@ public:
 	uint8 bHitByTrain : 1;	// from nick
 	uint8 m_phy_flagA80 : 1;
 
-	uint8 m_nLastCollType;
+	uint8 m_nSurfaceTouched;
 	uint8 m_nZoneLevel;
 
 	CPhysical(void);
@@ -73,7 +75,7 @@ public:
 	void ProcessShift(void);
 	void ProcessCollision(void);
 
-	virtual int32 ProcessEntityCollision(CEntity *ent, CColPoint *point);
+	virtual int32 ProcessEntityCollision(CEntity *ent, CColPoint *colpoints);
 
 	void RemoveAndAdd(void);
 	void AddToMovingList(void);
@@ -108,7 +110,23 @@ public:
 	}
 
 	const CVector &GetMoveSpeed() { return m_vecMoveSpeed; }
+	void SetMoveSpeed(float x, float y, float z) {
+		m_vecMoveSpeed.x = x;
+		m_vecMoveSpeed.y = y;
+		m_vecMoveSpeed.z = z;
+	}
 	const CVector &GetTurnSpeed() { return m_vecTurnSpeed; }
+	void SetTurnSpeed(float x, float y, float z) {
+		m_vecTurnSpeed.x = x;
+		m_vecTurnSpeed.y = y;
+		m_vecTurnSpeed.z = z;
+	}
+	const CVector &GetCenterOfMass() { return m_vecCentreOfMass; }
+	void SetCenterOfMass(float x, float y, float z) {
+		m_vecCentreOfMass.x = x;
+		m_vecCentreOfMass.y = y;
+		m_vecCentreOfMass.z = z;
+	}
 
 	void ApplyMoveSpeed(void);
 	void ApplyTurnSpeed(void);

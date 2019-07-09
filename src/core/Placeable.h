@@ -17,6 +17,11 @@ public:
 	CMatrix &GetMatrix(void) { return m_matrix; }
 	void SetTransform(RwMatrix *m) { m_matrix = CMatrix(m, false); }
 	void SetHeading(float angle);
+	void SetOrientation(float x, float y, float z){
+		CVector pos = m_matrix.GetPosition();
+		m_matrix.SetRotate(x, y, z);
+		m_matrix.Translate(pos);
+	}
 	bool IsWithinArea(float x1, float y1, float x2, float y2);
 	bool IsWithinArea(float x1, float y1, float z1, float x2, float y2, float z2);
 };

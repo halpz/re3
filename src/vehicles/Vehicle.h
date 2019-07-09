@@ -88,6 +88,14 @@ enum eLights
 	VEHLIGHT_REAR_RIGHT,
 };
 
+enum eWheels
+{
+	VEHWHEEL_FRONT_LEFT,
+	VEHWHEEL_FRONT_RIGHT,
+	VEHWHEEL_REAR_LEFT,
+	VEHWHEEL_REAR_RIGHT,
+};
+
 enum
 {
 	CAR_PIECE_WHEEL_LF = 13,
@@ -115,7 +123,7 @@ public:
 	int8 m_nGettingOutFlags;
 	uint8 m_nNumMaxPassengers;
 	char field_1CD[19];
-	CEntity *m_pCurSurface;
+	CEntity *m_pCurGroundEntity;
 	CFire *m_pCarFire;
 	float m_fSteerAngle;
 	float m_fGasPedal;
@@ -142,19 +150,19 @@ public:
 	uint8 m_veh_flagB80 : 1;
 
 	uint8 m_veh_flagC1 : 1;
-	uint8 m_veh_flagC2 : 1;		// bIsDamaged
+	uint8 bIsDamaged : 1; // This vehicle has been damaged and is displaying all its components
 	uint8 m_veh_flagC4 : 1;
 	uint8 m_veh_flagC8 : 1;
 	uint8 m_veh_flagC10 : 1;
 	uint8 m_veh_flagC20 : 1;
-	uint8 m_veh_flagC40 : 1;
+	uint8 bCanBeDamaged : 1; // Set to FALSE during cut scenes to avoid explosions
 	uint8 m_veh_flagC80 : 1;
 
 	uint8 m_veh_flagD1 : 1;
 	uint8 m_veh_flagD2 : 1;
-	uint8 m_veh_flagD4 : 1;
-	uint8 m_veh_flagD8 : 1;
-	uint8 bRecordedForReplay : 1;
+	uint8 bVehicleColProcessed : 1;// Has ProcessEntityCollision been processed for this car?
+	uint8 bIsCarParkVehicle : 1; // Car has been created using the special CAR_PARK script command
+	uint8 bHasAlreadyBeenRecorded : 1; // Used for replays
 	uint8 m_veh_flagD20 : 1;
 	uint8 m_veh_flagD40 : 1;
 	uint8 m_veh_flagD80 : 1;
@@ -181,7 +189,7 @@ public:
 	int8 field_22B;
 	uint8 m_nCarHornTimer;
 	int8 field_22D;
-	uint8 m_nSirenOrAlarm;
+	bool m_bSirenOrAlarm;
 	int8 field_22F;
 	// TODO: this is an array
 	CStoredCollPoly m_frontCollPoly;     // poly which is under front part of car
@@ -255,7 +263,7 @@ public:
 };
 
 static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");
-static_assert(offsetof(CVehicle, m_pCurSurface) == 0x1E0, "CVehicle: error");
+static_assert(offsetof(CVehicle, m_pCurGroundEntity) == 0x1E0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nAlarmState) == 0x1A0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nLastWeaponDamage) == 0x228, "CVehicle: error");
 

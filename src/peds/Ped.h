@@ -251,7 +251,7 @@ public:
 	uint8 m_ped_flagI1 : 1;
 	uint8 m_ped_flagI2 : 1;
 	uint8 m_ped_flagI4 : 1;
-	uint8 bRecordedForReplay : 1;
+	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 m_ped_flagI10 : 1;
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;
@@ -414,6 +414,7 @@ public:
 	void SetLookFlag(float direction, bool unknown);
 	void SetLookTimer(int time);
 	void SetDie(AnimationId anim, float arg1, float arg2);
+	void SetDead(void);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
 	void RemoveBodyPart(PedNode nodeId, int8 unknown);
 	void SpawnFlyingComponent(int, int8 unknown);

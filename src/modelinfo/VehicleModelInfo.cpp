@@ -414,11 +414,13 @@ CVehicleModelInfo::SetAtomicFlagCB(RwObject *object, void *data)
 	return object;
 }
 
-RpAtomic*
-CVehicleModelInfo::ClearAtomicFlagCB(RpAtomic *atomic, void *data)
+RwObject*
+CVehicleModelInfo::ClearAtomicFlagCB(RwObject *object, void *data)
 {
+	RpAtomic *atomic = (RpAtomic*)object;
+	assert(RwObjectGetType(object) == rpATOMIC);
 	CVisibilityPlugins::ClearAtomicFlag(atomic, (int)data);
-	return atomic;
+	return object;
 }
 
 RwObject*

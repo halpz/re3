@@ -2261,7 +2261,7 @@ bool GetPadMoveUp()
 	return
 		(CPad::GetPad(0)->NewState.DPadUp && !CPad::GetPad(0)->OldState.DPadUp) ||
 		(CPad::GetPad(0)->NewKeyState.UP && !CPad::GetPad(0)->OldKeyState.UP) ||
-		(CPad::GetPad(0)->NewState.LeftStickY < 0 && !CPad::GetPad(0)->OldState.LeftStickY < 0);
+		(CPad::GetPad(0)->NewState.LeftStickY < 0 && !(CPad::GetPad(0)->OldState.LeftStickY < 0));
 }
 
 bool GetPadMoveDown()
@@ -2269,7 +2269,7 @@ bool GetPadMoveDown()
 	return 
 		(CPad::GetPad(0)->NewState.DPadDown && !CPad::GetPad(0)->OldState.DPadDown) ||
 		(CPad::GetPad(0)->NewKeyState.DOWN && !CPad::GetPad(0)->OldKeyState.DOWN) ||
-		(CPad::GetPad(0)->NewState.LeftStickY > 0 && !CPad::GetPad(0)->OldState.LeftStickY > 0);
+		(CPad::GetPad(0)->NewState.LeftStickY > 0 && !(CPad::GetPad(0)->OldState.LeftStickY > 0));
 }
 
 bool GetPadMoveLeft()
@@ -2277,7 +2277,7 @@ bool GetPadMoveLeft()
 	return
 		(CPad::GetPad(0)->NewState.DPadLeft && !CPad::GetPad(0)->OldState.DPadLeft) ||
 		(CPad::GetPad(0)->NewKeyState.LEFT && !CPad::GetPad(0)->OldKeyState.LEFT) ||
-		(CPad::GetPad(0)->NewState.LeftStickX < 0 && !CPad::GetPad(0)->OldState.LeftStickX < 0);
+		(CPad::GetPad(0)->NewState.LeftStickX < 0 && !(CPad::GetPad(0)->OldState.LeftStickX < 0));
 }
 
 bool GetPadMoveRight()
@@ -2285,7 +2285,7 @@ bool GetPadMoveRight()
 	return
 		(CPad::GetPad(0)->NewState.DPadRight && !CPad::GetPad(0)->OldState.DPadRight) ||
 		(CPad::GetPad(0)->NewKeyState.RIGHT && !CPad::GetPad(0)->OldKeyState.RIGHT) ||
-		(CPad::GetPad(0)->NewState.LeftStickX > 0 && !CPad::GetPad(0)->OldState.LeftStickX > 0);
+		(CPad::GetPad(0)->NewState.LeftStickX > 0 && !(CPad::GetPad(0)->OldState.LeftStickX > 0));
 }
 
 bool GetMouseForward()

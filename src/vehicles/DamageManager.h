@@ -20,6 +20,12 @@ enum ePanelStatus
 	PANEL_STATUS_MISSING,
 };
 
+enum eWheelStatus
+{
+	WHEEL_STATUS_OK,
+	WHEEL_STATUS_BURST
+};
+
 enum tComponent
 {
 	COMPONENT_DEFAULT,

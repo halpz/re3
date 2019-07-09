@@ -4,6 +4,8 @@
 #include "DamageManager.h"
 #include "Door.h"
 
+class CObject;
+
 class CAutomobile : public CVehicle
 {
 public:
@@ -64,12 +66,15 @@ public:
 	void PreRender(void);
 	void Render(void);
 
+	// from CPhysical
+	int32 ProcessEntityCollision(CEntity *ent, CColPoint *colpoints);
+
 	// from CVehicle
 	void ProcessControlInputs(uint8);
 	void GetComponentWorldPosition(int32 component, CVector &pos);
 	bool IsComponentPresent(int32 component);
 	void SetComponentRotation(int32 component, CVector rotation);
-	void OpenDoor(int32, eDoors door, float);
+	void OpenDoor(int32 component, eDoors door, float openRatio);
 	void ProcessOpenDoor(uint32, uint32, float);
 	bool IsDoorReady(eDoors door);
 	bool IsDoorFullyOpen(eDoors door);
@@ -83,12 +88,23 @@ public:
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
-	void SpawnFlyingComponent(int32 component, uint32 type);
+	void PlayHornIfNecessary(void);
+	void ResetSuspension(void);
+	void SetupSuspensionLines(void);
+	void ScanForCrimes(void);
+	void BlowUpCarsInPath(void);
+	bool HasCarStoppedBecauseOfLight(void);
+	void SetBusDoorTimer(uint32 timer, uint8 type);
+	void ProcessAutoBusDoors(void);
+	void ProcessSwingingDoor(int32 component, eDoors door);
+	void SetupDamageAfterLoad(void);
+	CObject *SpawnFlyingComponent(int32 component, uint32 type);
+	CObject *RemoveBonnetInPedCollision(void);
+	void SetPanelDamage(int32 component, ePanels panel, bool noFlyingComponents = false);
+	void SetBumperDamage(int32 component, ePanels panel, bool noFlyingComponents = false);
+	void SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents = false);
 
-	void SetPanelDamage(int32 component, ePanels panel, bool noFlyingComponents);
-	void SetBumperDamage(int32 component, ePanels panel, bool noFlyingComponents);
-	void SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents);
-
+	void Fix(void);
 	void SetComponentVisibility(RwFrame *frame, uint32 flags);
 	void SetupModelNodes(void);
 	void SetTaxiLight(bool light);

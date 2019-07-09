@@ -42,6 +42,7 @@ public:
 	bool AreArmyRequired();
 	int NumOfHelisRequired();
 	void SetWantedLevel(int32);
+	void SetWantedLevelNoDrop(int32 level);
 	void ClearQdCrimes();
 	void UpdateWantedLevel();
 };

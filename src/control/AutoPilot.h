@@ -59,9 +59,9 @@ enum eCarDrivingStyle : uint8
 
 class CAutoPilot {
 public:
-	void *m_currentAddress;
-	void *m_startingRouteNode;
-	void *m_PreviousRouteNode;
+	uint32 m_currentAddress;
+	uint32 m_startingRouteNode;
+	uint32 m_PreviousRouteNode;
 	uint32 m_nTotalSpeedScaleFactor;
 	uint32 m_nSpeedScaleFactor;
 	uint32 m_nCurrentPathNodeInfo;
