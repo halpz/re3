@@ -1237,6 +1237,7 @@ int8 CRunningScript::ProcessCommandsFrom0To99(int32 command)
 			pos = CWorld::Players[ScriptParams[0]].m_pPed->GetPosition();
 		*(CVector*)&ScriptParams[0] = pos;
 		StoreParameters(&m_nIp, 3);
+		return 0;
 	}
 	case COMMAND_SET_PLAYER_COORDINATES:
 	{
