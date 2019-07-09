@@ -24,9 +24,7 @@ public:
 	float m_aWheelPosition[4];
 	float m_aWheelSpeed[4];
 	uint8 field_4D8;
-	uint8 m_auto_flagA1 : 1;
-	uint8 m_auto_flagA2 : 1;
-	uint8 m_auto_flagA4 : 1;
+	uint8 m_auto_flagA7 : 1;
 	uint8 bTaxiLight : 1;
 	uint8 m_auto_flagA10 : 1;
 	uint8 m_auto_flagA20 : 1;
@@ -39,7 +37,8 @@ public:
 	float m_aSuspensionLineLength[4];
 	float m_fHeightAboveRoad;
 	float m_fImprovedHandling;
-	uint8 stuff6[32];
+	uint8 stuff6[28];
+	float field_530;
 	CPhysical *m_aGroundPhysical[4];	// physicals touching wheels
 	CVector m_aGroundOffset[4];		// from ground object to colpoint
 	CEntity *m_pBlowUpEntity;

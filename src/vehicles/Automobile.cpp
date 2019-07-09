@@ -24,9 +24,9 @@ bool &CAutomobile::m_sAllTaxiLights = *(bool*)0x95CD21;
 
 WRAPPER CAutomobile* CAutomobile::ctor(int, uint8) { EAXJMP(0x52C6B0); }
 
-CAutomobile::CAutomobile(int mi, uint8 owner)
+CAutomobile::CAutomobile(int mi, uint8 CreatedBy)
 {
-	ctor(mi, owner);
+	ctor(mi, CreatedBy);
 }
 
 
@@ -397,9 +397,7 @@ CAutomobile::BlowUpCar(CEntity *culprit)
 
 	m_fHealth = 0.0f;
 	m_nBombTimer = 0;
-	m_auto_flagA1 = false;
-	m_auto_flagA2 = false;
-	m_auto_flagA4 = false;
+	m_auto_flagA7 = 0;
 
 	TheCamera.CamShake(0.7f, GetPosition().x, GetPosition().y, GetPosition().z);
 
@@ -535,9 +533,8 @@ CAutomobile::PlayCarHorn(void)
 void
 CAutomobile::PlayHornIfNecessary(void)
 {
-	// TODO: flags
-	if(m_autoPilot.m_nCarCtrlFlags & 2 ||
-	   m_autoPilot.m_nCarCtrlFlags & 1)
+	if(m_autoPilot.m_flag2 ||
+	   m_autoPilot.m_flag1)
 		if(!HasCarStoppedBecauseOfLight())
 			PlayCarHorn();
 }
@@ -637,20 +634,20 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 	if(m_status != STATUS_SIMPLE && m_status != STATUS_PHYSICS)
 		return false;
 
-	if(m_autoPilot.m_currentAddress && m_autoPilot.m_startingRouteNode){
-		CPathNode *curnode = &ThePaths.m_pathNodes[m_autoPilot.m_currentAddress];
+	if(m_autoPilot.m_nCurrentRouteNode && m_autoPilot.m_nNextRouteNode){
+		CPathNode *curnode = &ThePaths.m_pathNodes[m_autoPilot.m_nCurrentRouteNode];
 		for(i = 0; i < curnode->numLinks; i++)
-			if(ThePaths.m_connections[curnode->firstLink + i] == m_autoPilot.m_startingRouteNode)
+			if(ThePaths.m_connections[curnode->firstLink + i] == m_autoPilot.m_nNextRouteNode)
 				break;
 		if(i < curnode->numLinks &&
 		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)	// TODO
 			return true;
 	}
 
-	if(m_autoPilot.m_currentAddress && m_autoPilot.m_PreviousRouteNode){
-		CPathNode *curnode = &ThePaths.m_pathNodes[m_autoPilot.m_currentAddress];
+	if(m_autoPilot.m_nCurrentRouteNode && m_autoPilot.m_nPrevRouteNode){
+		CPathNode *curnode = &ThePaths.m_pathNodes[m_autoPilot.m_nCurrentRouteNode];
 		for(i = 0; i < curnode->numLinks; i++)
-			if(ThePaths.m_connections[curnode->firstLink + i] == m_autoPilot.m_PreviousRouteNode)
+			if(ThePaths.m_connections[curnode->firstLink + i] == m_autoPilot.m_nPrevRouteNode)
 				break;
 		if(i < curnode->numLinks &&
 		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)	// TODO

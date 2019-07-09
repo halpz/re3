@@ -59,9 +59,9 @@ enum eCarDrivingStyle : uint8
 
 class CAutoPilot {
 public:
-	uint32 m_currentAddress;
-	uint32 m_startingRouteNode;
-	uint32 m_PreviousRouteNode;
+	uint32 m_nCurrentRouteNode;
+	uint32 m_nNextRouteNode;
+	uint32 m_nPrevRouteNode;
 	uint32 m_nTotalSpeedScaleFactor;
 	uint32 m_nSpeedScaleFactor;
 	uint32 m_nCurrentPathNodeInfo;
@@ -80,10 +80,41 @@ public:
 	uint8 m_nAnimationTime;
 	float m_fMaxTrafficSpeed;
 	uint8 m_nCruiseSpeed;
-	uint8 m_nCarCtrlFlags;
+	uint8 m_flag1 : 1;
+	uint8 m_flag2 : 1;
+	uint8 m_flag4 : 1;
+	uint8 m_flag8 : 1;
+	uint8 m_flag10 : 1;
 	CVector m_vecDestinationCoors;
 	void *m_aPathFindNodesInfo[8];
 	uint16 m_nPathFindNodesCount;
 	CVehicle *m_pTargetCar;
+
+	CAutoPilot(void) {
+		m_nPrevRouteNode = 0;
+		m_nNextRouteNode = m_nPrevRouteNode;
+		m_nCurrentRouteNode = m_nNextRouteNode;
+		m_nTotalSpeedScaleFactor = 0;
+		m_nSpeedScaleFactor = 1000;
+		m_nPreviousPathNodeInfo = 0;
+		m_nNextPathNodeInfo = m_nPreviousPathNodeInfo;
+		m_nCurrentPathNodeInfo = m_nNextPathNodeInfo;
+		m_nNextDirection = 1;
+		m_nCurrentDirecton = m_nNextDirection;
+		m_nCurrentPathDirection = 0;
+		m_nPreviousPathDirection = m_nCurrentPathDirection;
+		m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
+		m_nCarMission = MISSION_NONE;
+		m_nAnimationId = TEMPACT_NONE;
+		m_nCruiseSpeed = 10;
+		m_fMaxTrafficSpeed = 10.0f;
+		m_flag2 = false;
+		m_flag1 = false;
+		m_nPathFindNodesCount = 0;
+		m_pTargetCar = 0;
+		m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+		m_nTimeSwitchedToRealPhysics = m_nTimeToStartMission;
+		m_flag8 = false;
+	}
 };
 static_assert(sizeof(CAutoPilot) == 0x70, "CAutoPilot: error");

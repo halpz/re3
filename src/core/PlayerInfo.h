@@ -67,6 +67,7 @@ public:
 	RwTexture *m_pSkinTexture;
 
 	void MakePlayerSafe(bool);
+	void AwardMoneyForExplosion(CVehicle *vehicle);
 };
 
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");

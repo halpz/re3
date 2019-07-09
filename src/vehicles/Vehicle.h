@@ -104,6 +104,21 @@ enum
 	CAR_PIECE_WHEEL_RR,
 };
 
+enum tWheelState
+{
+	WHEEL_STATE_1 = 1,	// constant velocity
+	WHEEL_STATE_3 = 3,	// not moving
+};
+
+enum eFlightModel
+{
+	FLIGHT_MODEL_DODO,
+	// not used in III
+	FLIGHT_MODEL_RCPLANE,
+	FLIGHT_MODEL_HELI,
+	FLIGHT_MODEL_SEAPLANE
+};
+
 class CVehicle : public CPhysical
 {
 public:
@@ -179,7 +194,7 @@ public:
 	uint32 m_nTimeOfDeath;
 	int16 field_214;
 	int16 m_nBombTimer;        // goes down with each frame
-	CPed *m_pWhoDetonatedMe;
+	CPed *m_pWhoSetMeOnFire;
 	float field_21C;
 	float field_220;
 	eCarLock m_nDoorLock;
@@ -191,9 +206,7 @@ public:
 	int8 field_22D;
 	bool m_bSirenOrAlarm;
 	int8 field_22F;
-	// TODO: this is an array
-	CStoredCollPoly m_frontCollPoly;     // poly which is under front part of car
-	CStoredCollPoly m_rearCollPoly;      // poly which is under rear part of car
+	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
 	float m_fSteerRatio;
 	eVehicleType m_vehType;
 
@@ -202,6 +215,8 @@ public:
 	static void operator delete(void*, size_t);
 	static void operator delete(void*, int);
 
+	CVehicle(void) {}	// FAKE
+	CVehicle(uint8 CreatedBy);
 	~CVehicle(void);
 	// from CEntity
 	void SetModelIndex(uint32 id);
@@ -232,6 +247,11 @@ public:
 	bool IsTrain(void) { return m_vehType == VEHICLE_TYPE_TRAIN; }
 	bool IsHeli(void) { return m_vehType == VEHICLE_TYPE_HELI; }
 	bool IsPlane(void) { return m_vehType == VEHICLE_TYPE_PLANE; }
+
+	void FlyingControl(eFlightModel flightModel);
+	void ExtinguishCarFire(void);
+	void ProcessDelayedExplosion(void);
+	float ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVector &speed, float radius);
 	bool IsLawEnforcementVehicle(void);
 	void ChangeLawEnforcerState(uint8 enable);
 	bool UsesSiren(uint32 id);

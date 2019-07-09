@@ -190,7 +190,7 @@ public:
 	void PlayFrontEndSound(uint32, uint32);
 	void PlayFrontEndTrack(uint32, uint32);
 	void StopFrontEndTrack();
-	void PlayOneShot(int32, uint16, float);
+	void PlayOneShot(int32 audioentity, uint16 sound/*eSound*/, float);
 	void SetMusicMasterVolume(int8);
 	void SetEffectsMasterVolume(int8);
 	int8 SetCurrent3DProvider(int8);

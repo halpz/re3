@@ -158,8 +158,12 @@ void
 FixCar(void)
 {
 	CVehicle *veh = FindPlayerVehicle();
-	if(veh == nil || !veh->IsCar())
+	if(veh == nil)
 		return;
+	veh->m_fHealth = 1000.0f;
+	if(!veh->IsCar())
+		return;
+	((CAutomobile*)veh)->Damage.SetEngineStatus(0);
 	((CAutomobile*)veh)->Fix();
 }
 
