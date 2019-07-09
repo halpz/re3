@@ -91,6 +91,8 @@ public:
 	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);
 	void SetupSuspensionLines(void);
+	void ScanForCrimes(void);
+	void BlowUpCarsInPath(void);
 	bool HasCarStoppedBecauseOfLight(void);
 	void SetBusDoorTimer(uint32 timer, uint8 type);
 	void ProcessAutoBusDoors(void);

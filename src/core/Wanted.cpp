@@ -34,7 +34,7 @@ int CWanted::NumOfHelisRequired()
 		return 2;
 	default:
 		return 0;
-	};
+	}
 }
 
 void CWanted::SetWantedLevel(int32 level)
@@ -70,11 +70,17 @@ void CWanted::SetWantedLevel(int32 level)
 	UpdateWantedLevel();
 }
 
+void CWanted::SetWantedLevelNoDrop(int32 level)
+{
+	if (level > m_nWantedLevel)
+		SetWantedLevel(level);
+}
+
 void CWanted::ClearQdCrimes()
 {
 	for (int i = 0; i < 16; i++) {
 		m_sCrimes[i].m_eCrimeType = CRIME_NONE;
-	};
+	}
 }
 
 void CWanted::UpdateWantedLevel()

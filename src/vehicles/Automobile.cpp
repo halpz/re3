@@ -4,14 +4,21 @@
 #include "ModelIndices.h"
 #include "VisibilityPlugins.h"
 #include "DMAudio.h"
+#include "Camera.h"
+#include "Darkel.h"
+#include "Fire.h"
+#include "Explosion.h"
 #include "World.h"
 #include "SurfaceTable.h"
 #include "HandlingMgr.h"
 #include "CarCtrl.h"
 #include "PathFind.h"
 #include "Ped.h"
+#include "PlayerPed.h"
 #include "Object.h"
 #include "Automobile.h"
+
+RwObject *GetCurrentAtomicObjectCB(RwObject *object, void *data);
 
 bool &CAutomobile::m_sAllTaxiLights = *(bool*)0x95CD21;
 
@@ -357,7 +364,88 @@ CAutomobile::RemoveRefsToVehicle(CEntity *ent)
 			m_aGroundPhysical[i] = nil;
 }
 
-WRAPPER void CAutomobile::BlowUpCar(CEntity *ent) { EAXJMP(0x53BC60); }
+void
+CAutomobile::BlowUpCar(CEntity *culprit)
+{
+	int i;
+	RpAtomic *atomic;
+
+	if(!bCanBeDamaged)
+		return;
+
+	// explosion pushes vehicle up
+	m_vecMoveSpeed.z += 0.13f;
+	m_status = STATUS_WRECKED;
+	bRenderScorched = true;
+	m_nTimeOfDeath = CTimer::GetTimeInMilliseconds();
+	Damage.FuckCarCompletely();
+
+	if(GetModelIndex() != MI_RCBANDIT){
+		SetBumperDamage(CAR_BUMP_FRONT, VEHBUMPER_FRONT);
+		SetBumperDamage(CAR_BUMP_REAR, VEHBUMPER_REAR);
+		SetDoorDamage(CAR_BONNET, DOOR_BONNET);
+		SetDoorDamage(CAR_BOOT, DOOR_BOOT);
+		SetDoorDamage(CAR_DOOR_LF, DOOR_FRONT_LEFT);
+		SetDoorDamage(CAR_DOOR_RF, DOOR_FRONT_RIGHT);
+		SetDoorDamage(CAR_DOOR_LR, DOOR_REAR_LEFT);
+		SetDoorDamage(CAR_DOOR_RR, DOOR_REAR_RIGHT);
+		SpawnFlyingComponent(CAR_WHEEL_LF, COMPGROUP_WHEEL);
+		RwFrameForAllObjects(m_aCarNodes[CAR_WHEEL_LF], GetCurrentAtomicObjectCB, &atomic);
+		if(atomic)
+			RpAtomicSetFlags(atomic, 0);
+	}
+
+	m_fHealth = 0.0f;
+	m_nBombTimer = 0;
+	m_auto_flagA1 = false;
+	m_auto_flagA2 = false;
+	m_auto_flagA4 = false;
+
+	TheCamera.CamShake(0.7f, GetPosition().x, GetPosition().y, GetPosition().z);
+
+	// kill driver and passengers
+	if(pDriver){
+		CDarkel::RegisterKillByPlayer(pDriver, WEAPONTYPE_EXPLOSION);
+		if(pDriver->GetPedState() == PED_DRIVING){
+			pDriver->SetDead();
+			if(!pDriver->IsPlayer())
+				pDriver->FlagToDestroyWhenNextProcessed();
+		}else
+			pDriver->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+	}
+	for(i = 0; i < m_nNumMaxPassengers; i++){
+		if(pPassengers[i]){
+			CDarkel::RegisterKillByPlayer(pPassengers[i], WEAPONTYPE_EXPLOSION);
+			if(pPassengers[i]->GetPedState() == PED_DRIVING){
+				pPassengers[i]->SetDead();
+				if(!pPassengers[i]->IsPlayer())
+					pPassengers[i]->FlagToDestroyWhenNextProcessed();
+			}else
+				pPassengers[i]->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+		}
+	}
+
+	bEngineOn = false;
+	bLightsOn = false;
+	m_bSirenOrAlarm = false;
+	bTaxiLight = false;
+	if(bIsAmbulanceOnDuty){
+		bIsAmbulanceOnDuty = false;
+		CCarCtrl::NumAmbulancesOnDuty--;
+	}
+	if(bIsFireTruckOnDuty){
+		bIsFireTruckOnDuty = false;
+		CCarCtrl::NumFiretrucksOnDuty--;
+	}
+	ChangeLawEnforcerState(false);
+
+	gFireManager.StartFire(this, culprit, 0.8f, 1);	// TODO
+	CDarkel::RegisterCarBlownUpByPlayer(this);
+	if(GetModelIndex() == MI_RCBANDIT)
+		CExplosion::AddExplosion(this, culprit, EXPLOSION_4, GetPosition(), 0);	// TODO
+	else
+		CExplosion::AddExplosion(this, culprit, EXPLOSION_3, GetPosition(), 0);	// TODO
+}
 
 bool
 CAutomobile::SetUpWheelColModel(CColModel *colModel)
@@ -514,6 +602,31 @@ CAutomobile::SetupSuspensionLines(void)
 		for(i = 0; i < colModel->numSpheres; i++)
 			colModel->spheres[i].radius = 0.3f;
 	}
+}
+
+// called on police cars
+void
+CAutomobile::ScanForCrimes(void)
+{
+	if(FindPlayerVehicle() && FindPlayerVehicle()->IsCar())
+		if(FindPlayerVehicle()->m_nAlarmState != -1)
+			// if player's alarm is on, increase wanted level
+			if((FindPlayerVehicle()->GetPosition() - GetPosition()).MagnitudeSqr() < sq(20.0f))
+				CWorld::Players[CWorld::PlayerInFocus].m_pPed->SetWantedLevelNoDrop(1);
+}
+
+void
+CAutomobile::BlowUpCarsInPath(void)
+{
+	int i;
+
+	if(m_vecMoveSpeed.Magnitude() > 0.1f)
+		for(i = 0; i < m_nCollisionRecords; i++)
+			if(m_aCollisionRecords[i] &&
+			   m_aCollisionRecords[i]->IsVehicle() &&
+			   m_aCollisionRecords[i]->GetModelIndex() != MI_RHINO &&
+			   !m_aCollisionRecords[i]->bRenderScorched)
+				((CVehicle*)m_aCollisionRecords[i])->BlowUpCar(this);
 }
 
 bool
@@ -1014,12 +1127,14 @@ STARTPATCHES
 	InjectHook(0x52EFD0, &CAutomobile_::IsDoorClosed_, PATCH_JUMP);
 	InjectHook(0x52F000, &CAutomobile_::IsDoorMissing_, PATCH_JUMP);
 	InjectHook(0x53BF40, &CAutomobile_::RemoveRefsToVehicle_, PATCH_JUMP);
+	InjectHook(0x53BC60, &CAutomobile_::BlowUpCar_, PATCH_JUMP);
 	InjectHook(0x53BF70, &CAutomobile_::SetUpWheelColModel_, PATCH_JUMP);
 	InjectHook(0x53C0E0, &CAutomobile_::BurstTyre_, PATCH_JUMP);
 	InjectHook(0x437690, &CAutomobile_::GetHeightAboveRoad_, PATCH_JUMP);
 	InjectHook(0x53C450, &CAutomobile_::PlayCarHorn_, PATCH_JUMP);
 	InjectHook(0x5353A0, &CAutomobile::ResetSuspension, PATCH_JUMP);
 	InjectHook(0x52D210, &CAutomobile::SetupSuspensionLines, PATCH_JUMP);
+	InjectHook(0x53E000, &CAutomobile::BlowUpCarsInPath, PATCH_JUMP);
 	InjectHook(0x42E220, &CAutomobile::HasCarStoppedBecauseOfLight, PATCH_JUMP);
 	InjectHook(0x53D320, &CAutomobile::SetBusDoorTimer, PATCH_JUMP);
 	InjectHook(0x53D370, &CAutomobile::ProcessAutoBusDoors, PATCH_JUMP);

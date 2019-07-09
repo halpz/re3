@@ -28,6 +28,7 @@
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
 WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4D37D0); }
+WRAPPER void CPed::SetDead(void) { EAXJMP(0x4D3970); }
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 WRAPPER void CPed::RestorePreviousState(void) { EAXJMP(0x4C5E30); }
 WRAPPER void CPed::ClearAttack(void) { EAXJMP(0x4E6790); }

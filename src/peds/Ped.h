@@ -414,6 +414,7 @@ public:
 	void SetLookFlag(float direction, bool unknown);
 	void SetLookTimer(int time);
 	void SetDie(AnimationId anim, float arg1, float arg2);
+	void SetDead(void);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
 	void RemoveBodyPart(PedNode nodeId, int8 unknown);
 	void SpawnFlyingComponent(int, int8 unknown);

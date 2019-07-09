@@ -43,6 +43,8 @@ public:
 
 	void ReApplyMoveAnims(void);
 	void ClearWeaponTarget();
+	void SetWantedLevel(int32 level);
+	void SetWantedLevelNoDrop(int32 level);
 };
 
 static_assert(sizeof(CPlayerPed) == 0x5F0, "CPlayerPed: error");

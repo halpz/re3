@@ -123,18 +123,18 @@ eKillFrenzyStatus CDarkel::ReadStatus()
 }
 
 #if 1
-WRAPPER int32 CDarkel::RegisterCarBlownUpByPlayer(eKillFrenzyStatus status) { EAXJMP(0x421070); }
+WRAPPER void CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle) { EAXJMP(0x421070); }
 #else
-int32 CDarkel::RegisterCarBlownUpByPlayer(eKillFrenzyStatus status)
+int32 CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle)
 {
 	return 0;
 }
 #endif
 
 #if 1
-WRAPPER void CDarkel::RegisterKillByPlayer(int32 modelid, eWeaponType weapontype, bool flag) { EAXJMP(0x420F60); }
+WRAPPER void CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapontype, bool headshot) { EAXJMP(0x420F60); }
 #else
-void CDarkel::RegisterKillByPlayer(int32 modelid, eWeaponType weapontype, bool flag)
+void CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapontype, bool headshot)
 {
 
 	

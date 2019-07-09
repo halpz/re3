@@ -1,6 +1,9 @@
 #pragma once
 #include "Weapon.h"
 
+class CVehicle;
+class CPed;
+
 enum eKillFrenzyStatus
 {
 	KILLFRENZY_NONE,
@@ -37,8 +40,8 @@ public:
 	static void Init();
 	static int16 QueryModelsKilledByPlayer(int32 modelId);
 	static eKillFrenzyStatus ReadStatus();
-	static int32 RegisterCarBlownUpByPlayer(eKillFrenzyStatus status);
-	static void RegisterKillByPlayer(int32 modelid, eWeaponType weapontype, bool flag);
+	static void RegisterCarBlownUpByPlayer(CVehicle *vehicle);
+	static void RegisterKillByPlayer(CPed *victim, eWeaponType weapontype, bool headshot = false);
 	static void RegisterKillNotByPlayer();
 	static void ResetModelsKilledByPlayer();
 	static void ResetOnPlayerDeath();
