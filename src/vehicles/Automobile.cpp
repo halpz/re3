@@ -8,6 +8,7 @@
 #include "SurfaceTable.h"
 #include "HandlingMgr.h"
 #include "CarCtrl.h"
+#include "PathFind.h"
 #include "Ped.h"
 #include "Object.h"
 #include "Automobile.h"
@@ -48,6 +49,90 @@ CAutomobile::Teleport(CVector pos)
 
 WRAPPER void CAutomobile::PreRender(void) { EAXJMP(0x535B40); }
 WRAPPER void CAutomobile::Render(void) { EAXJMP(0x539EA0); }
+
+
+int32
+CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
+{
+	int i;
+	CColModel *colModel;
+
+	if(m_status != STATUS_SIMPLE)
+		bVehicleColProcessed = true;
+
+	if(m_veh_flagC80)
+		colModel = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel;
+	else
+		colModel = GetColModel();
+
+	int numWheelCollisions = 0;
+	float prevRatios[4] = { 0.0f, 0.0f, 0.0f, 0.0f};
+	for(i = 0; i < 4; i++)
+		prevRatios[i] = m_aSuspensionSpringRatio[i];
+
+	int numCollisions = CCollision::ProcessColModels(GetMatrix(), *colModel,
+		ent->GetMatrix(), *ent->GetColModel(),
+		colpoints,
+		m_aWheelColPoints, m_aSuspensionSpringRatio);
+
+	// m_aSuspensionSpringRatio are now set to the point where the tyre touches ground.
+	// In ProcessControl these will be re-normalized to ignore the tyre radius.
+
+	if(field_EF || m_phy_flagA80 ||
+	   GetModelIndex() == MI_DODO && (ent->m_status == STATUS_PHYSICS || ent->m_status == STATUS_SIMPLE)){
+		// don't do line collision
+		for(i = 0; i < 4; i++)
+			m_aSuspensionSpringRatio[i] = prevRatios[i];
+	}else{
+		for(i = 0; i < 4; i++)
+			if(m_aSuspensionSpringRatio[i] < 1.0f && m_aSuspensionSpringRatio[i] < prevRatios[i]){
+				numWheelCollisions++;
+
+				// wheel is touching a physical
+				if(ent->IsVehicle() || ent->IsObject()){
+					CPhysical *phys = (CPhysical*)ent;
+
+					m_aGroundPhysical[i] = phys;
+					phys->RegisterReference((CEntity**)&m_aGroundPhysical[i]);
+					m_aGroundOffset[i] = m_aWheelColPoints[i].point - phys->GetPosition();
+
+					if(phys->GetModelIndex() == MI_BODYCAST && m_status == STATUS_PLAYER){
+						// damage body cast
+						float speed = m_vecMoveSpeed.MagnitudeSqr();
+						if(speed > 0.1f){
+							CObject::nBodyCastHealth -= 0.1f*m_fMass*speed;
+							DMAudio.PlayOneShot(m_audioEntityId, SOUND_PED_BODYCAST_HIT, 0.0f);
+						}
+
+						// move body cast
+						if(phys->bIsStatic){
+							phys->bIsStatic = false;
+							phys->m_nStaticFrames = 0;
+							phys->ApplyMoveForce(m_vecMoveSpeed / speed);
+							phys->AddToMovingList();
+						}
+					}
+				}
+
+				m_nSurfaceTouched = m_aWheelColPoints[i].surfaceB;
+				if(ent->IsBuilding())
+					m_pCurGroundEntity = ent;
+			}
+	}
+
+	if(numCollisions > 0 || numWheelCollisions > 0){
+		AddCollisionRecord(ent);
+		if(!ent->IsBuilding())
+			((CPhysical*)ent)->AddCollisionRecord(this);
+
+		if(numCollisions > 0)
+			if(ent->IsBuilding() ||
+			   ent->IsObject() && ((CPhysical*)ent)->bInfiniteMass)
+				bHasHitWall = true;
+	}
+
+	return numCollisions;
+}
 
 
 WRAPPER void CAutomobile::ProcessControlInputs(uint8) { EAXJMP(0x53B660); }
@@ -120,7 +205,114 @@ CAutomobile::OpenDoor(int32 component, eDoors door, float openRatio)
 	mat.UpdateRW();
 }
 
-WRAPPER void CAutomobile::ProcessOpenDoor(uint32, uint32, float) { EAXJMP(0x52E910); }
+inline void ProcessDoorOpenAnimation(CAutomobile *car, uint32 component, eDoors door, float time, float start, float end)
+{
+	if(time > start && time < end){
+		float ratio = (time - start)/(end - start);
+		if(car->Doors[door].GetAngleOpenRatio() < ratio)
+			car->OpenDoor(component, door, ratio);
+	}else if(time > end){
+		car->OpenDoor(component, door, 1.0f);
+	}
+}
+
+inline void ProcessDoorCloseAnimation(CAutomobile *car, uint32 component, eDoors door, float time, float start, float end)
+{
+	if(time > start && time < end){
+		float ratio = 1.0f - (time - start)/(end - start);
+		if(car->Doors[door].GetAngleOpenRatio() > ratio)
+			car->OpenDoor(component, door, ratio);
+	}else if(time > end){
+		car->OpenDoor(component, door, 0.0f);
+	}
+}
+
+inline void ProcessDoorOpenCloseAnimation(CAutomobile *car, uint32 component, eDoors door, float time, float start, float mid, float end)
+{
+	if(time > start && time < mid){
+		// open
+		float ratio = (time - start)/(mid - start);
+		if(car->Doors[door].GetAngleOpenRatio() < ratio)
+			car->OpenDoor(component, door, ratio);
+	}else if(time > mid && time < end){
+		// close
+		float ratio = 1.0f - (time - mid)/(end - mid);
+		if(car->Doors[door].GetAngleOpenRatio() > ratio)
+			car->OpenDoor(component, door, ratio);
+	}else if(time > end){
+		car->OpenDoor(component, door, 0.0f);
+	}
+}
+void
+CAutomobile::ProcessOpenDoor(uint32 component, uint32 anim, float time)
+{
+	eDoors door;
+
+	switch(component){
+	case CAR_DOOR_RF: door = DOOR_FRONT_RIGHT; break;
+	case CAR_DOOR_RR: door = DOOR_REAR_RIGHT; break;
+	case CAR_DOOR_LF: door = DOOR_FRONT_LEFT; break;
+	case CAR_DOOR_LR: door = DOOR_REAR_LEFT; break;
+	default: assert(0);
+	}
+
+	if(IsDoorMissing(door))
+		return;
+
+	switch(anim){
+	case ANIM_CAR_QJACK:
+	case ANIM_CAR_OPEN_LHS:
+	case ANIM_CAR_OPEN_RHS:
+		ProcessDoorOpenAnimation(this, component, door, time, 0.66f, 0.8f);
+		break;
+	case ANIM_CAR_CLOSEDOOR_LHS:
+	case ANIM_CAR_CLOSEDOOR_LOW_LHS:
+	case ANIM_CAR_CLOSEDOOR_RHS:
+	case ANIM_CAR_CLOSEDOOR_LOW_RHS:
+		ProcessDoorCloseAnimation(this, component, door, time, 0.2f, 0.63f);
+		break;
+	case ANIM_CAR_ROLLDOOR:
+	case ANIM_CAR_ROLLDOOR_LOW:
+		ProcessDoorOpenCloseAnimation(this, component, door, time, 0.1f, 0.6f, 0.95f);
+		break;
+		break;
+	case ANIM_CAR_GETOUT_LHS:
+	case ANIM_CAR_GETOUT_LOW_LHS:
+	case ANIM_CAR_GETOUT_RHS:
+	case ANIM_CAR_GETOUT_LOW_RHS:
+		ProcessDoorOpenAnimation(this, component, door, time, 0.06f, 0.43f);
+		break;
+	case ANIM_CAR_CLOSE_LHS:
+	case ANIM_CAR_CLOSE_RHS:
+		ProcessDoorCloseAnimation(this, component, door, time, 0.1f, 0.23f);
+		break;
+	case ANIM_CAR_PULLOUT_RHS:
+	case ANIM_CAR_PULLOUT_LOW_RHS:
+		OpenDoor(component, door, 1.0f);
+	case ANIM_COACH_OPEN_L:
+	case ANIM_COACH_OPEN_R:
+		ProcessDoorOpenAnimation(this, component, door, time, 0.66f, 0.8f);
+		break;
+	case ANIM_COACH_OUT_L:
+		ProcessDoorOpenAnimation(this, component, door, time, 0.0f, 0.3f);
+		break;
+	case ANIM_VAN_OPEN_L:
+	case ANIM_VAN_OPEN:
+		ProcessDoorOpenAnimation(this, component, door, time, 0.37f, 0.55f);
+		break;
+	case ANIM_VAN_CLOSE_L:
+	case ANIM_VAN_CLOSE:
+		ProcessDoorCloseAnimation(this, component, door, time, 0.5f, 0.8f);
+		break;
+	case ANIM_VAN_GETOUT_L:
+	case ANIM_VAN_GETOUT:
+		ProcessDoorOpenAnimation(this, component, door, time, 0.5f, 0.6f);
+		break;
+	case NUM_ANIMS:
+		OpenDoor(component, door, time);
+		break;
+	}
+}
 
 bool
 CAutomobile::IsDoorReady(eDoors door)
@@ -252,6 +444,16 @@ CAutomobile::PlayCarHorn(void)
 	}
 }
 
+void
+CAutomobile::PlayHornIfNecessary(void)
+{
+	// TODO: flags
+	if(m_autoPilot.m_nCarCtrlFlags & 2 ||
+	   m_autoPilot.m_nCarCtrlFlags & 1)
+		if(!HasCarStoppedBecauseOfLight())
+			PlayCarHorn();
+}
+
 
 void
 CAutomobile::ResetSuspension(void)
@@ -262,6 +464,139 @@ CAutomobile::ResetSuspension(void)
 		m_aWheelSkidThing[i] = 0.0f;
 		m_aWheelRotation[i] = 0.0f;
 		m_aWheelState[i] = 0;	// TODO: enum?
+	}
+}
+
+void
+CAutomobile::SetupSuspensionLines(void)
+{
+	int i;
+	CVector posn;
+	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
+	CColModel *colModel = mi->GetColModel();
+
+	// Each suspension line starts at the uppermost wheel position
+	// and extends down to the lowermost point on the tyre
+	for(i = 0; i < 4; i++){
+		mi->GetWheelPosn(i, posn);
+		m_aWheelPosition[i] = posn.z;
+
+		// uppermost wheel position
+		posn.z += m_handling->fSuspensionUpperLimit;
+		colModel->lines[i].p0 = posn;
+
+		// lowermost wheel position
+		posn.z += m_handling->fSuspensionLowerLimit - m_handling->fSuspensionUpperLimit;
+		// lowest point on tyre
+		posn.z -= mi->m_wheelScale*0.5f;
+		colModel->lines[i].p1 = posn;
+
+		// this is length of the spring at rest
+		m_aSuspensionSpringLength[i] = m_handling->fSuspensionUpperLimit - m_handling->fSuspensionLowerLimit;
+		m_aSuspensionLineLength[i] = colModel->lines[i].p0.z - colModel->lines[i].p1.z;
+	}
+
+	// Compress spring somewhat to get normal height on road
+	m_fHeightAboveRoad = -(colModel->lines[0].p0.z + (colModel->lines[0].p1.z - colModel->lines[0].p0.z)*
+	                                                  (1.0f - 1.0f/(8.0f*m_handling->fSuspensionForceLevel)));
+	for(i = 0; i < 4; i++)
+		m_aWheelPosition[i] = mi->m_wheelScale*0.5f - m_fHeightAboveRoad;
+
+	// adjust col model to include suspension lines
+	if(colModel->boundingBox.min.z > colModel->lines[0].p1.z)
+		colModel->boundingBox.min.z = colModel->lines[0].p1.z;
+	float radius = max(colModel->boundingBox.min.Magnitude(), colModel->boundingBox.max.Magnitude());
+	if(colModel->boundingSphere.radius < radius)
+		colModel->boundingSphere.radius = radius;
+
+	if(GetModelIndex() == MI_RCBANDIT){
+		colModel->boundingSphere.radius = 2.0f;
+		for(i = 0; i < colModel->numSpheres; i++)
+			colModel->spheres[i].radius = 0.3f;
+	}
+}
+
+bool
+CAutomobile::HasCarStoppedBecauseOfLight(void)
+{
+	int i;
+
+	if(m_status != STATUS_SIMPLE && m_status != STATUS_PHYSICS)
+		return false;
+
+	if(m_autoPilot.m_currentAddress && m_autoPilot.m_startingRouteNode){
+		CPathNode *curnode = &ThePaths.m_pathNodes[m_autoPilot.m_currentAddress];
+		for(i = 0; i < curnode->numLinks; i++)
+			if(ThePaths.m_connections[curnode->firstLink + i] == m_autoPilot.m_startingRouteNode)
+				break;
+		if(i < curnode->numLinks &&
+		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)	// TODO
+			return true;
+	}
+
+	if(m_autoPilot.m_currentAddress && m_autoPilot.m_PreviousRouteNode){
+		CPathNode *curnode = &ThePaths.m_pathNodes[m_autoPilot.m_currentAddress];
+		for(i = 0; i < curnode->numLinks; i++)
+			if(ThePaths.m_connections[curnode->firstLink + i] == m_autoPilot.m_PreviousRouteNode)
+				break;
+		if(i < curnode->numLinks &&
+		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)	// TODO
+			return true;
+	}
+
+	return false;
+}
+
+void
+CAutomobile::SetBusDoorTimer(uint32 timer, uint8 type)
+{
+	if(timer < 1000)
+		timer = 1000;
+	if(type == 0)
+		// open and close
+		m_nBusDoorTimerStart = CTimer::GetTimeInMilliseconds();
+	else
+		// only close
+		m_nBusDoorTimerStart = CTimer::GetTimeInMilliseconds() - 500;
+	m_nBusDoorTimerEnd = m_nBusDoorTimerStart + timer;
+}
+
+void
+CAutomobile::ProcessAutoBusDoors(void)
+{
+	if(CTimer::GetTimeInMilliseconds() < m_nBusDoorTimerEnd){
+		if(m_nBusDoorTimerEnd != 0 && CTimer::GetTimeInMilliseconds() > m_nBusDoorTimerEnd-500){
+			// close door
+			if(!IsDoorMissing(DOOR_FRONT_LEFT) && (m_nGettingInFlags & 1) == 0){
+				if(IsDoorClosed(DOOR_FRONT_LEFT)){
+					m_nBusDoorTimerEnd = CTimer::GetTimeInMilliseconds();
+					OpenDoor(CAR_DOOR_LF, DOOR_FRONT_LEFT, 0.0f);
+				}else{
+					OpenDoor(CAR_DOOR_LF, DOOR_FRONT_LEFT,
+						1.0f - (CTimer::GetTimeInMilliseconds() - (m_nBusDoorTimerEnd-500))/500.0f);
+				}
+			}
+
+			if(!IsDoorMissing(DOOR_FRONT_RIGHT) && (m_nGettingInFlags & 4) == 0){
+				if(IsDoorClosed(DOOR_FRONT_RIGHT)){
+					m_nBusDoorTimerEnd = CTimer::GetTimeInMilliseconds();
+					OpenDoor(CAR_DOOR_RF, DOOR_FRONT_RIGHT, 0.0f);
+				}else{
+					OpenDoor(CAR_DOOR_RF, DOOR_FRONT_RIGHT,
+						1.0f - (CTimer::GetTimeInMilliseconds() - (m_nBusDoorTimerEnd-500))/500.0f);
+				}
+			}
+		}
+	}else{
+		// ended
+		if(m_nBusDoorTimerStart){
+			if(!IsDoorMissing(DOOR_FRONT_LEFT) && (m_nGettingInFlags & 1) == 0)
+				OpenDoor(CAR_DOOR_LF, DOOR_FRONT_LEFT, 0.0f);
+			if(!IsDoorMissing(DOOR_FRONT_RIGHT) && (m_nGettingInFlags & 4) == 0)
+				OpenDoor(CAR_DOOR_RF, DOOR_FRONT_RIGHT, 0.0f);
+			m_nBusDoorTimerStart = 0;
+			m_nBusDoorTimerEnd = 0;
+		}
 	}
 }
 
@@ -465,8 +800,8 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 		obj->m_fAirResistance = 0.99f;
 	}
 
-	if(CCollision::ProcessColModels(obj->GetMatrix(), *CModelInfo::GetModelInfo(obj->GetModelIndex())->GetColModel(),
-			this->GetMatrix(), *CModelInfo::GetModelInfo(this->GetModelIndex())->GetColModel(),
+	if(CCollision::ProcessColModels(obj->GetMatrix(), *obj->GetColModel(),
+			this->GetMatrix(), *this->GetColModel(),
 			aTempPedColPts, nil, nil) > 0)
 		obj->m_pCollidingEntity = this;
 
@@ -644,6 +979,8 @@ public:
 	void PreRender_(void) { CAutomobile::PreRender(); }
 	void Render_(void) { CAutomobile::Render(); }
 
+	int32 ProcessEntityCollision_(CEntity *ent, CColPoint *colpoints){ return CAutomobile::ProcessEntityCollision(ent, colpoints); }
+
 	void ProcessControlInputs_(uint8 x) { CAutomobile::ProcessControlInputs(x); }
 	void GetComponentWorldPosition_(int32 component, CVector &pos) { CAutomobile::GetComponentWorldPosition(component, pos); }
 	bool IsComponentPresent_(int32 component) { return CAutomobile::IsComponentPresent(component); }
@@ -667,6 +1004,7 @@ STARTPATCHES
 	InjectHook(0x52D170, &CAutomobile_::dtor, PATCH_JUMP);
 	InjectHook(0x52D190, &CAutomobile_::SetModelIndex_, PATCH_JUMP);
 	InjectHook(0x535180, &CAutomobile_::Teleport_, PATCH_JUMP);
+	InjectHook(0x53B270, &CAutomobile_::ProcessEntityCollision_, PATCH_JUMP);
 	InjectHook(0x52E5F0, &CAutomobile_::GetComponentWorldPosition_, PATCH_JUMP);
 	InjectHook(0x52E660, &CAutomobile_::IsComponentPresent_, PATCH_JUMP);
 	InjectHook(0x52E680, &CAutomobile_::SetComponentRotation_, PATCH_JUMP);
@@ -681,6 +1019,10 @@ STARTPATCHES
 	InjectHook(0x437690, &CAutomobile_::GetHeightAboveRoad_, PATCH_JUMP);
 	InjectHook(0x53C450, &CAutomobile_::PlayCarHorn_, PATCH_JUMP);
 	InjectHook(0x5353A0, &CAutomobile::ResetSuspension, PATCH_JUMP);
+	InjectHook(0x52D210, &CAutomobile::SetupSuspensionLines, PATCH_JUMP);
+	InjectHook(0x42E220, &CAutomobile::HasCarStoppedBecauseOfLight, PATCH_JUMP);
+	InjectHook(0x53D320, &CAutomobile::SetBusDoorTimer, PATCH_JUMP);
+	InjectHook(0x53D370, &CAutomobile::ProcessAutoBusDoors, PATCH_JUMP);
 	InjectHook(0x535250, &CAutomobile::ProcessSwingingDoor, PATCH_JUMP);
 	InjectHook(0x53C240, &CAutomobile::Fix, PATCH_JUMP);
 	InjectHook(0x53C310, &CAutomobile::SetupDamageAfterLoad, PATCH_JUMP);

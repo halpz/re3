@@ -147,7 +147,7 @@ public:
 	static bool ProcessSphereTriangle(const CColSphere &sph, const CVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane, CColPoint &point, float &mindistsq);
 	static bool ProcessLineOfSight(const CColLine &line, const CMatrix &matrix, CColModel &model, CColPoint &point, float &mindist, bool ignoreSeeThrough);
 	static bool ProcessVerticalLine(const CColLine &line, const CMatrix &matrix, CColModel &model, CColPoint &point, float &mindist, bool ignoreSeeThrough, CStoredCollPoly *poly);
-	static int32 ProcessColModels(const CMatrix &matrix1, CColModel &model1, const CMatrix &matrix2, CColModel &model2, CColPoint *point1, CColPoint *point2, float *linedists);
+	static int32 ProcessColModels(const CMatrix &matrixA, CColModel &modelA, const CMatrix &matrixB, CColModel &modelB, CColPoint *spherepoints, CColPoint *linepoints, float *linedists);
 
 	// TODO:
 	// CCollision::IsStoredPolyStillValidVerticalLine

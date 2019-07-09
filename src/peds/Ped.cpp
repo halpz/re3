@@ -10,6 +10,7 @@
 #include "Ped.h"
 #include "PlayerPed.h"
 #include "General.h"
+#include "SurfaceTable.h"
 #include "VisibilityPlugins.h"
 #include "AudioManager.h"
 #include "HandlingMgr.h"
@@ -430,7 +431,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagI1 = false;
 	m_ped_flagI2 = false;
 	m_ped_flagI4 = false;
-	bRecordedForReplay = false;
+	bHasAlreadyBeenRecorded = false;
 	m_ped_flagI10 = false;
 #ifdef KANGAROO_CHEAT
 	m_ped_flagI80 = false;
@@ -1772,12 +1773,12 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 static void
 particleProduceFootDust(CPed *ped, CVector *pos, float size, int times)
 {
-	switch (ped->m_nLastCollType)
+	switch (ped->m_nSurfaceTouched)
 	{
-		case 1:	// somewhere hard
-		case 3:	// soft dirt
-		case 5:	// pavement
-		case 18:// sand
+		case SURFACE_TARMAC:
+		case SURFACE_DIRT:
+		case SURFACE_PAVEMENT:
+		case SURFACE_SAND:
 			for (int i = 0; i < times; ++i) {
 				CVector adjustedPos = *pos;
 				adjustedPos.x += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
@@ -1879,7 +1880,7 @@ CPed::PlayFootSteps(void)
 		}
 	}
 
-	if (m_nLastCollType == 19) { // Water
+	if (m_nSurfaceTouched == SURFACE_PUDDLE) {
 		float pedSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
 		if (pedSpeed > 0.03f && CTimer::GetFrameCounter() % 2 == 0 && pedSpeed > 0.13f) {
 			float particleSize = pedSpeed * 2.0f;

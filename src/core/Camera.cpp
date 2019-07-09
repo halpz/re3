@@ -678,9 +678,13 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 		else if(TargetZOffSet == m_fUnknownZOffSet && TargetZOffSet > m_fCamBufferedHeight){
 			// TODO: figure this out
 			bool foo = false;
-			switch(((CPhysical*)CamTargetEntity)->m_nLastCollType)
-			case 2: case 3: case 5:
-			case 11: case 23: case 26:
+			switch(((CPhysical*)CamTargetEntity)->m_nSurfaceTouched)
+			case SURFACE_GRASS:
+			case SURFACE_DIRT:
+			case SURFACE_PAVEMENT:
+			case SURFACE_STEEL:
+			case SURFACE_TIRE:
+			case SURFACE_STONE:
 				foo = true;
 			if(foo)
 				WellBufferMe(TargetHeight, &m_fCamBufferedHeight, &m_fCamBufferedHeightSpeed, 0.4f, 0.05f, false);

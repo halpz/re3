@@ -66,6 +66,9 @@ public:
 	void PreRender(void);
 	void Render(void);
 
+	// from CPhysical
+	int32 ProcessEntityCollision(CEntity *ent, CColPoint *colpoints);
+
 	// from CVehicle
 	void ProcessControlInputs(uint8);
 	void GetComponentWorldPosition(int32 component, CVector &pos);
@@ -85,8 +88,13 @@ public:
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
-	void ProcessSwingingDoor(int32 component, eDoors door);
+	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);
+	void SetupSuspensionLines(void);
+	bool HasCarStoppedBecauseOfLight(void);
+	void SetBusDoorTimer(uint32 timer, uint8 type);
+	void ProcessAutoBusDoors(void);
+	void ProcessSwingingDoor(int32 component, eDoors door);
 	void SetupDamageAfterLoad(void);
 	CObject *SpawnFlyingComponent(int32 component, uint32 type);
 	CObject *RemoveBonnetInPedCollision(void);

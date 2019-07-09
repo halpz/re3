@@ -62,7 +62,7 @@ CPhysical::CPhysical(void)
 	m_phy_flagA10 = false;
 	m_phy_flagA20 = false;
 
-	m_nLastCollType = 0;
+	m_nSurfaceTouched = SURFACE_DEFAULT;
 }
 
 CPhysical::~CPhysical(void)
@@ -1918,7 +1918,7 @@ CPhysical::ProcessCollision(void)
 	   bHitByTrain ||
 	   m_status == STATUS_PLAYER || IsPed() && ped->IsPlayer()){
 		if(IsVehicle())
-			((CVehicle*)this)->m_veh_flagD4 = true;
+			((CVehicle*)this)->bVehicleColProcessed = true;
 		if(CheckCollision()){
 			GetMatrix() = savedMatrix;
 			return;

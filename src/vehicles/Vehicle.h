@@ -123,7 +123,7 @@ public:
 	int8 m_nGettingOutFlags;
 	uint8 m_nNumMaxPassengers;
 	char field_1CD[19];
-	CEntity *m_pCurSurface;
+	CEntity *m_pCurGroundEntity;
 	CFire *m_pCarFire;
 	float m_fSteerAngle;
 	float m_fGasPedal;
@@ -160,9 +160,9 @@ public:
 
 	uint8 m_veh_flagD1 : 1;
 	uint8 m_veh_flagD2 : 1;
-	uint8 m_veh_flagD4 : 1;
-	uint8 m_veh_flagD8 : 1;
-	uint8 bRecordedForReplay : 1;
+	uint8 bVehicleColProcessed : 1;
+	uint8 bIsCarParkVehicle : 1;
+	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 m_veh_flagD20 : 1;
 	uint8 m_veh_flagD40 : 1;
 	uint8 m_veh_flagD80 : 1;
@@ -263,7 +263,7 @@ public:
 };
 
 static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");
-static_assert(offsetof(CVehicle, m_pCurSurface) == 0x1E0, "CVehicle: error");
+static_assert(offsetof(CVehicle, m_pCurGroundEntity) == 0x1E0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nAlarmState) == 0x1A0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nLastWeaponDamage) == 0x228, "CVehicle: error");
 

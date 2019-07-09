@@ -61,7 +61,7 @@ public:
 	uint8 bHitByTrain : 1;	// from nick
 	uint8 m_phy_flagA80 : 1;
 
-	uint8 m_nLastCollType;
+	uint8 m_nSurfaceTouched;
 	uint8 m_nZoneLevel;
 
 	CPhysical(void);
@@ -75,7 +75,7 @@ public:
 	void ProcessShift(void);
 	void ProcessCollision(void);
 
-	virtual int32 ProcessEntityCollision(CEntity *ent, CColPoint *point);
+	virtual int32 ProcessEntityCollision(CEntity *ent, CColPoint *colpoints);
 
 	void RemoveAndAdd(void);
 	void AddToMovingList(void);
