@@ -43,6 +43,10 @@ public:
 
 	void ReApplyMoveAnims(void);
 	void ClearWeaponTarget();
+
+	static void SetupPlayerPed(int32);
+	static void DeactivatePlayerPed(int32);
+	static void ReactivatePlayerPed(int32);
 };
 
 static_assert(sizeof(CPlayerPed) == 0x5F0, "CPlayerPed: error");

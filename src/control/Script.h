@@ -112,6 +112,7 @@ public:
 	int8 ProcessCommandsFrom900To999(int32);
 	int8 ProcessCommandsFrom1000To1099(int32);
 	int8 ProcessCommandsFrom1100To1199(int32);
+	void UpdateCompareFlag(bool);
 };
 
 enum {
@@ -193,7 +194,8 @@ public:
 };
 
 enum {
-	ARGUMENT_INT32 = 1,
+	ARGUMENT_END = 0,
+	ARGUMENT_INT32,
 	ARGUMENT_GLOBALVAR,
 	ARGUMENT_LOCALVAR,
 	ARGUMENT_INT8,
@@ -307,6 +309,10 @@ public:
 	static void UpdateObjectIndices();
 	static void ReadMultiScriptFileOffsetsFromScript();
 	static void DrawScriptSpheres();
+	static void ClearSpaceForMissionEntity(const CVector&, CEntity*);
+	static void HighlightImportantArea(uint32, float, float, float, float, float);
+	static void DrawDebugSquare(float, float, float, float);
+	static void DrawDebugCube(float, float, float, float, float, float);
 
 	static int32 Read4BytesFromScript(uint32* pIp){
 		int32 retval = 0;
