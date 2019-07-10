@@ -106,8 +106,10 @@ enum
 
 enum tWheelState
 {
+	WHEEL_STATE_0 = 0,
 	WHEEL_STATE_1 = 1,	// constant velocity
-	WHEEL_STATE_3 = 3,	// not moving
+	WHEEL_STATE_2 = 2,	// normal
+	WHEEL_STATE_STATIC = 3,	// not moving
 };
 
 enum eFlightModel
@@ -249,6 +251,8 @@ public:
 	bool IsPlane(void) { return m_vehType == VEHICLE_TYPE_PLANE; }
 
 	void FlyingControl(eFlightModel flightModel);
+	void ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
+		int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, uint16 wheelStatus);
 	void ExtinguishCarFire(void);
 	void ProcessDelayedExplosion(void);
 	float ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVector &speed, float radius);

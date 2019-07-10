@@ -131,6 +131,47 @@ CVehicle::~CVehicle()
 }
 
 void
+CVehicle::SetModelIndex(uint32 id)
+{
+	CEntity::SetModelIndex(id);
+	m_aExtras[0] = CVehicleModelInfo::ms_compsUsed[0];
+	m_aExtras[1] = CVehicleModelInfo::ms_compsUsed[1];
+	m_nNumMaxPassengers = CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(id);
+}
+
+bool
+CVehicle::SetupLighting(void)
+{
+	ActivateDirectional();
+	SetAmbientColoursForPedsCarsAndObjects();
+
+	if(bRenderScorched){
+		WorldReplaceNormalLightsWithScorched(Scene.world, 0.1f);
+	}else{
+		CVector coors = GetPosition();
+		float lighting = CPointLights::GenerateLightsAffectingObject(&coors);
+		if(!bHasBlip && lighting != 1.0f){
+			SetAmbientAndDirectionalColours(lighting);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void
+CVehicle::RemoveLighting(bool reset)
+{
+	CRenderer::RemoveVehiclePedLights(this, reset);
+}
+
+float
+CVehicle::GetHeightAboveRoad(void)
+{
+	return -1.0f * GetColModel()->boundingBox.min.z;
+}
+
+void
 CVehicle::FlyingControl(eFlightModel flightModel)
 {
 	switch(flightModel){
@@ -192,46 +233,126 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 }
 
 void
-CVehicle::SetModelIndex(uint32 id)
+CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
+	int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, uint16 wheelStatus)
 {
-	CEntity::SetModelIndex(id);
-	m_aExtras[0] = CVehicleModelInfo::ms_compsUsed[0];
-	m_aExtras[1] = CVehicleModelInfo::ms_compsUsed[1];
-	m_nNumMaxPassengers = CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(id);
-}
+	// BUG: using statics here is probably a bad idea
+	static bool bAlreadySkidding = false;	// this is never reset
+	static bool bBraking;
+	static bool bDriving;
 
-bool
-CVehicle::SetupLighting(void)
-{
-	ActivateDirectional();
-	SetAmbientColoursForPedsCarsAndObjects();
+	// how much force we want to apply in these axes
+	float fwd = 0.0f;
+	float right = 0.0f;
 
-	if(bRenderScorched){
-		WorldReplaceNormalLightsWithScorched(Scene.world, 0.1f);
-	}else{
-		CVector coors = GetPosition();
-		float lighting = CPointLights::GenerateLightsAffectingObject(&coors);
-		if(!bHasBlip && lighting != 1.0f){
-			SetAmbientAndDirectionalColours(lighting);
-			return true;
+	bBraking = brake != 0.0f;
+	if(bBraking)
+		thrust = 0.0f;
+	bDriving = thrust != 0.0f;
+
+	float contactSpeedFwd = DotProduct(wheelContactSpeed, wheelFwd);
+	float contactSpeedRight = DotProduct(wheelContactSpeed, wheelRight);
+
+	if(*wheelState != WHEEL_STATE_0)
+		bAlreadySkidding = true;
+	*wheelState = WHEEL_STATE_0;
+
+	adhesion *= CTimer::GetTimeStep();
+	if(bAlreadySkidding)
+		adhesion *= m_handling->fTractionLoss;
+
+	// moving sideways
+	if(contactSpeedRight != 0.0f){
+		// exert opposing force
+		right = -contactSpeedRight/wheelsOnGround;
+
+		if(wheelStatus == WHEEL_STATUS_BURST){
+			float fwdspeed = min(contactSpeedFwd, 0.3f);
+			right += fwdspeed * CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
 		}
 	}
 
-	return false;
-}
+	if(bDriving){
+		fwd = thrust;
 
-void
-CVehicle::RemoveLighting(bool reset)
-{
-	CRenderer::RemoveVehiclePedLights(this, reset);
+		// limit sideways force (why?)
+		if(right > 0.0f){
+			if(right > adhesion)
+				right = adhesion;
+		}else{
+			if(right < -adhesion)
+				right = -adhesion;
+		}
+	}else if(contactSpeedFwd != 0.0f){
+		fwd = -contactSpeedFwd/wheelsOnGround;
+
+		if(!bBraking){
+			if(m_fGasPedal < 0.01f){
+				if(GetModelIndex() == MI_RCBANDIT)
+					brake = 0.2f * mod_HandlingManager.field_4 / m_fMass;
+				else
+					brake = mod_HandlingManager.field_4 / m_fMass;
+			}
+		}
+
+		if(brake > adhesion){
+			if(fabs(contactSpeedFwd) > 0.005f)
+				*wheelState = WHEEL_STATE_STATIC;
+		}else {
+			if(fwd > 0.0f){
+				if(fwd > brake)
+					fwd = brake;
+			}else{
+				if(fwd < -brake)
+					fwd = -brake;
+			}
+		}
+	}
+
+	if(sq(adhesion) < sq(right) + sq(fwd)){
+		if(*wheelState != WHEEL_STATE_STATIC){
+			if(bDriving && contactSpeedFwd < 0.2f)
+				*wheelState = WHEEL_STATE_1;
+			else
+				*wheelState = WHEEL_STATE_2;
+		}
+
+		float l = sqrt(sq(right) + sq(fwd));
+		float tractionLoss = bAlreadySkidding ? 1.0f : m_handling->fTractionLoss;
+		right *= adhesion * tractionLoss / l;
+		fwd *= adhesion * tractionLoss / l;
+	}
+
+	if(fwd != 0.0f || right != 0.0f){
+		CVector direction = fwd*wheelFwd + right*wheelRight;
+		float speed = direction.Magnitude();
+		direction.Normalise();
+
+		float impulse = speed*m_fMass;
+		float turnImpulse = speed*GetMass(wheelContactPoint, direction);
+
+		ApplyMoveForce(impulse * direction);
+		ApplyTurnForce(turnImpulse * direction, wheelContactPoint);
+	}
 }
 
 float
-CVehicle::GetHeightAboveRoad(void)
+CVehicle::ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVector &speed, float radius)
 {
-	return -1.0f * GetColModel()->boundingBox.min.z;
+	float angularVelocity;
+	switch(state){
+	case WHEEL_STATE_1:
+		angularVelocity = -1.1f;	// constant speed forward
+		break;
+	case WHEEL_STATE_STATIC:
+		angularVelocity = 0.0f;		// not moving
+		break;
+	default:
+		angularVelocity = -DotProduct(fwd, speed) / radius;	// forward speed
+		break;
+	}
+	return angularVelocity * CTimer::GetTimeStep();
 }
-
 
 void
 CVehicle::ExtinguishCarFire(void)
@@ -267,24 +388,6 @@ CVehicle::ProcessDelayedExplosion(void)
 			CWorld::Players[CWorld::PlayerInFocus].AwardMoneyForExplosion(this);
 		BlowUpCar(m_pWhoSetMeOnFire);
 	}
-}
-
-float
-CVehicle::ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVector &speed, float radius)
-{
-	float angularVelocity;
-	switch(state){
-	case WHEEL_STATE_1:
-		angularVelocity = -1.1f;	// constant speed forward
-		break;
-	case WHEEL_STATE_3:
-		angularVelocity = 0.0f;		// not moving
-		break;
-	default:
-		angularVelocity = -DotProduct(fwd, speed) / radius;	// forward speed
-		break;
-	}
-	return angularVelocity * CTimer::GetTimeStep();
 }
 
 bool
@@ -669,9 +772,10 @@ STARTPATCHES
 	InjectHook(0x417E60, &CVehicle_::GetHeightAboveRoad_, PATCH_JUMP);
 
 	InjectHook(0x552BB0, &CVehicle::FlyingControl, PATCH_JUMP);
+	InjectHook(0x5512E0, &CVehicle::ProcessWheel, PATCH_JUMP);
+	InjectHook(0x551280, &CVehicle::ProcessWheelRotation, PATCH_JUMP);
 	InjectHook(0x552AF0, &CVehicle::ExtinguishCarFire, PATCH_JUMP);
 	InjectHook(0x551C90, &CVehicle::ProcessDelayedExplosion, PATCH_JUMP);
-	InjectHook(0x551280, &CVehicle::ProcessWheelRotation, PATCH_JUMP);
 	InjectHook(0x552880, &CVehicle::IsLawEnforcementVehicle, PATCH_JUMP);
 	InjectHook(0x552820, &CVehicle::ChangeLawEnforcerState, PATCH_JUMP);
 	InjectHook(0x552200, &CVehicle::UsesSiren, PATCH_JUMP);
