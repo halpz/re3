@@ -210,13 +210,55 @@ AsciiToUnicode(const char *src, uint16 *dst)
 	while((*dst++ = *src++) != '\0');
 }
 
-WRAPPER char UnicodeToAscii(wchar * src) { EAXJMP(0x52C2F0); }
+char*
+UnicodeToAscii(wchar *src)
+{
+	static char aStr[256];
+	int len;
+	for(len = 0; src && *src != 0 && len < 256-1; len++, src++)
+		if(*src < 256)
+			aStr[len] = *src;
+		else
+			aStr[len] = '#';
+	aStr[len] = '\0';
+	return aStr;
+}
+
+char*
+UnicodeToAsciiForSaveLoad(wchar *src)
+{
+	// exact same code as above
+	static char aStr[256];
+	int len;
+	for(len = 0; src && *src != 0 && len < 256-1; len++, src++)
+		if(*src < 256)
+			aStr[len] = *src;
+		else
+			aStr[len] = '#';
+	aStr[len] = '\0';
+	return aStr;
+}
+
+void
+UnicodeStrcpy(wchar *dst, const wchar *src)
+{
+	while((*dst++ = *src++) != '\0');
+}
+
+int
+UnicodeStrlen(const wchar *str)
+{
+	int len;
+	for(len = 0; *str != 0; len++, str++);
+	return len;
+}
 
 void
 TextCopy(wchar *dst, const wchar *src)
 {
 	while((*dst++ = *src++) != '\0');
 }
+
 
 STARTPATCHES
 	InjectHook(0x52C3C0, &CText::Load, PATCH_JUMP);

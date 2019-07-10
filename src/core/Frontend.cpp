@@ -27,6 +27,8 @@
 #include "PlayerInfo.h"
 #include "World.h"
 
+#define ALL_ORIGINAL_FRONTEND 1
+
 int32 &CMenuManager::OS_Language = *(int32*)0x5F2F78;
 int8 &CMenuManager::m_PrefsUseVibration = *(int8*)0x95CD92;
 int8 &CMenuManager::m_DisplayControllerOnFoot = *(int8*)0x95CD8D;
@@ -62,9 +64,9 @@ CMenuManager &FrontEndMenuManager = *(CMenuManager*)0x8F59D8;
 float lodMultiplier = *(float*)0x5F726C;
 
 // Stuff not in CMenuManager:
-int VibrationTime;
+uint32 VibrationTime;
 char* pEditString = (char*)0x628D00;
-int32 &pControlEdit = *(int32*)0x628D08;
+int32 *&pControlEdit = *(int32**)0x628D08;
 int8 DisplayComboButtonErrMsg;
 int8 MouseButtonJustClicked;
 int8 JoyButtonJustClicked;
@@ -73,6 +75,7 @@ int32 TypeOfControl = 0;
 int32 *pControlTemp = 0;
 
 // Frontend inputs.
+
 bool GetPadBack();
 bool GetPadExitEnter();
 bool GetPadForward();
@@ -80,6 +83,11 @@ bool GetPadMoveUp();
 bool GetPadMoveDown();
 bool GetPadMoveLeft();
 bool GetPadMoveRight();
+bool GetMouseClickLeft();
+bool GetMouseClickRight();
+bool GetMouseClickMiddle();
+bool GetMouseWheelUp();
+bool GetMouseWheelDown();
 bool GetMouseForward();
 bool GetMouseBack();
 bool GetMousePos();
@@ -142,7 +150,7 @@ char *MenuFilenames[] = {
 	nil, nil
 };
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::BuildStatLine(char *text, float *stat, bool aFloat, float* stat2) { EAXJMP(0x483870); }
 #else
 void CMenuManager::BuildStatLine(char *text, float *stat, bool aFloat, float* stat2)
@@ -150,24 +158,27 @@ void CMenuManager::BuildStatLine(char *text, float *stat, bool aFloat, float* st
 	if (!text)
 		return;
 
-	if (stat) {
-		if (aFloat)
-			sprintf(gString, "%.2f");
-		else
-			sprintf(gString, "%d");
+	if (stat2) {
+		if (aFloat) 
+			sprintf(gString2, "  %.2f %s %.2f", *stat, UnicodeToAscii(TheText.Get("FEST_OO")), *stat2);
+		else 
+			sprintf(gString2, "  %d %s %d", *(int*)stat, UnicodeToAscii(TheText.Get("FEST_OO")), *(int*)stat2);
 	}
 	else if (stat2) {
-		if (aFloat) 
-			sprintf(gString, "%.2f %s %.2f", stat, UnicodeToAscii(TheText.Get("FEST_OO")), stat2);
-		else 
-			sprintf(gString, "%d %s %d", stat, UnicodeToAscii(TheText.Get("FEST_OO")), stat2);
+		if (aFloat)
+			sprintf(gString2, "  %.2f", *stat);
+		else
+			sprintf(gString2, "  %d", *(int*)stat);
 	}
+	else
+		gString2[0] = '\0';
 
-	wcscpy((wchar_t*)gUString, (wchar_t*)TheText.Get(text));
+	UnicodeStrcpy(gUString, TheText.Get(text));
+	AsciiToUnicode(gString2, gUString2);
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::CentreMousePointer() { EAXJMP(0x48ACE0); }
 #else
 void CMenuManager::CentreMousePointer()
@@ -195,7 +206,7 @@ void CMenuManager::CheckCodesForControls(int, int)
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER bool CMenuManager::CheckHover(int, int, int, int) { EAXJMP(0x48ACA0); }
 #else
 bool CMenuManager::CheckHover(int x1, int x2, int y1, int y2)
@@ -274,7 +285,7 @@ void CMenuManager::CheckSliderMovement(int value)
 		TheCamera.m_fMouseAccelVertical = fMouseSens;
 		SaveSettings();
 		break;
-	};
+	}
 }
 
 #if 1
@@ -286,7 +297,7 @@ int CMenuManager::CostructStatLine(int)
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::DisplayHelperText() { EAXJMP(0x48B490); }
 #else
 void CMenuManager::DisplayHelperText()
@@ -326,7 +337,7 @@ void CMenuManager::DisplayHelperText()
 		break;
 	default:
 		break;
-	};
+	}
 
 	CFont::SetAlignment(ALIGN_CENTER);
 	CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
@@ -339,7 +350,7 @@ void CMenuManager::DisplayHelperText()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER float CMenuManager::DisplaySlider(float, float, float, float, float, float) { EAXJMP(0x488420); }
 #else
 float CMenuManager::DisplaySlider(float x, float y, float leftSize, float rightSize, float rectSize, float progress) 
@@ -365,12 +376,12 @@ float CMenuManager::DisplaySlider(float x, float y, float leftSize, float rightS
 		float _s = SCREEN_SCALE_X(2.0f);
 		CSprite2d::DrawRect(CRect(_x + _s, _y + _s, _w + _s, _h + _s), CRGBA(0, 0, 0, FadeIn(255))); // Shadow
 		CSprite2d::DrawRect(CRect(i * rectSize/16.0f + x, y + sizeRange - ((16 - i) * leftSize + i * rightSize)/16.0f, SCREEN_SCALE_X(10.0f) + i * rectSize/16.0f + x, y + sizeRange), color);
-	};
+	}
 	return input;
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::DoSettingsBeforeStartingAGame() { EAXJMP(0x48AB40); }
 #else
 void CMenuManager::DoSettingsBeforeStartingAGame()
@@ -389,7 +400,7 @@ void CMenuManager::DoSettingsBeforeStartingAGame()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::Draw() { EAXJMP(0x47AE00); }
 #else
 void CMenuManager::Draw()
@@ -450,7 +461,7 @@ void CMenuManager::Draw()
 		default:
 			str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
 			break;
-		};
+		}
 
 		CFont::SetDropShadowPosition(MENUDROP_COLOR_SIZE);
 		CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(MENUDROP_COLOR_A)));
@@ -503,7 +514,7 @@ void CMenuManager::Draw()
 				case 3:
 					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEC_CF4");
 					break;
-				};
+				}
 				break;
 			case MENUACTION_CTRLDISPLAY:
 				break;
@@ -533,7 +544,7 @@ void CMenuManager::Draw()
 				case AR_16_9:
 					textToPrint[MENUCOLUMN_RIGHT] = (wchar*)L"16:9";
 					break;
-			};
+			}
 #endif
 				break;
 			case MENUACTION_RADIO:
@@ -583,7 +594,7 @@ void CMenuManager::Draw()
 					case 2:
 						textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEA_4SP");
 						break;
-					};
+					}
 				}
 				break;
 			case MENUACTION_CTRLMETHOD:
@@ -594,7 +605,7 @@ void CMenuManager::Draw()
 				case 1:
 					textToPrint[MENUCOLUMN_LEFT] = TheText.Get("FET_CCN");
 					break;
-				};
+				}
 				break;
 			case MENUACTION_DYNAMICACOUSTIC:
 				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_PrefsDMA ? "FEM_ON" : "FEM_OFF");
@@ -602,7 +613,7 @@ void CMenuManager::Draw()
 			case MENUACTION_MOUSESTEER:
 				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_bDisableMouseSteering ? "FEM_ON" : "FEM_OFF");
 				break;				
-			};
+			}
 
 			CFont::SetDropShadowPosition(MENUDROP_COLOR_SIZE);
 			CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(MENUDROP_COLOR_A)));
@@ -690,7 +701,7 @@ void CMenuManager::Draw()
 				default:
 					vecPositions.y = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(MENUCOLUMN_MID_Y);
 					break;
-				};
+				}
 			}
 
 			if (i > 0)
@@ -767,7 +778,7 @@ void CMenuManager::Draw()
 			case MENUACTION_MOUSESENS:
 				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(MENUSLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), TheCamera.m_fMouseAccelHorzntl * 200.0f);
 				break;
-			};
+			}
 
 			// Radio icons.
 			float fIconSpacing = 59.52f;
@@ -816,9 +827,9 @@ void CMenuManager::Draw()
 			case MENUPAGE_MOUSE_CONTROLS:
 				DisplayHelperText();
 				break;
-			};
+			}
 		}
-	};
+	}
 }
 #endif
 
@@ -849,7 +860,7 @@ void CMenuManager::DrawControllerSetupScreen()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::DrawFrontEnd(void) { EAXJMP(0x47A540); }
 #else
 void CMenuManager::DrawFrontEnd()
@@ -873,7 +884,7 @@ void CMenuManager::DrawFrontEnd()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::DrawFrontEndNormal(void) { EAXJMP(0x47A5B0); }
 #else
 void CMenuManager::DrawFrontEndNormal()
@@ -927,7 +938,7 @@ void CMenuManager::DrawFrontEndNormal()
 		case MENUPAGE_OPTIONS:
 			previousSprite = MENUSPRITE_PLAYERSET;
 			break;
-		};
+		}
 
 		if (m_nPrevScreen == MENUPAGE_NONE)
 			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(0, 0, 0, 255));
@@ -972,7 +983,7 @@ void CMenuManager::DrawFrontEndNormal()
 	case MENUPAGE_OPTIONS:
 		currentSprite = MENUSPRITE_PLAYERSET;
 		break;
-	};
+	}
 
 	uint32 savedShade;
 	uint32 savedAlpha;
@@ -1016,7 +1027,7 @@ void CMenuManager::DrawFrontEndNormal()
 	default:
 		CMenuManager::Draw();
 		break;
-	};
+	}
 
 	CFont::DrawFonts();
 
@@ -1035,7 +1046,7 @@ void CMenuManager::DrawPlayerSetupScreen()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER int CMenuManager::FadeIn(int alpha) { EAXJMP(0x48AC60); }
 #else
 int CMenuManager::FadeIn(int alpha)
@@ -1070,7 +1081,7 @@ int CMenuManager::GetStartOptionsCntrlConfigScreens()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::InitialiseChangedLanguageSettings() { EAXJMP(0x47A4D0); }
 #else
 void CMenuManager::InitialiseChangedLanguageSettings()
@@ -1092,12 +1103,12 @@ void CMenuManager::InitialiseChangedLanguageSettings()
 			break;
 		default:
 			break;
-		};
+		}
 	}
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::LoadAllTextures() { EAXJMP(0x47A230); }
 #else
 void CMenuManager::LoadAllTextures()
@@ -1133,7 +1144,7 @@ void CMenuManager::LoadAllTextures()
 		for (int i = 0; i < ARRAY_SIZE(FrontendFilenames); i++) {
 			m_aFrontEndSprites[i].SetTexture(FrontendFilenames[i]);
 			m_aFrontEndSprites[i].SetAddressing(rwTEXTUREADDRESSBORDER);
-		};
+		}
 
 		CTxdStore::PopCurrentTxd();
 
@@ -1146,7 +1157,7 @@ void CMenuManager::LoadAllTextures()
 		for (int i = 0; i < ARRAY_SIZE(MenuFilenames)/2; i++) {
 			m_aMenuSprites[i].SetTexture(MenuFilenames[i*2], MenuFilenames[i*2+1]);
 			m_aMenuSprites[i].SetAddressing(rwTEXTUREADDRESSBORDER);
-		};
+		}
 
 		CTxdStore::PopCurrentTxd();
 
@@ -1155,7 +1166,7 @@ void CMenuManager::LoadAllTextures()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::LoadSettings() { EAXJMP(0x488EE0); }
 #else
 void CMenuManager::LoadSettings()
@@ -1174,13 +1185,13 @@ void CMenuManager::LoadSettings()
 		if (strncmp(&Ver, "THIS FILE IS NOT VALID YET", 26)) {
 			CFileMgr::Seek(fileHandle, 0, 0);
 			ControlsManager.LoadSettings(fileHandle);
-			CFileMgr::Read(fileHandle, buf(&gString), 20);
-			CFileMgr::Read(fileHandle, buf(&gString), 20);
-			CFileMgr::Read(fileHandle, buf(&gString), 4);
-			CFileMgr::Read(fileHandle, buf(&gString), 4);
-			CFileMgr::Read(fileHandle, buf(&gString), 1);
-			CFileMgr::Read(fileHandle, buf(&gString), 1);
-			CFileMgr::Read(fileHandle, buf(&gString), 1);
+			CFileMgr::Read(fileHandle, buf(gString), 20);
+			CFileMgr::Read(fileHandle, buf(gString), 20);
+			CFileMgr::Read(fileHandle, buf(gString), 4);
+			CFileMgr::Read(fileHandle, buf(gString), 4);
+			CFileMgr::Read(fileHandle, buf(gString), 1);
+			CFileMgr::Read(fileHandle, buf(gString), 1);
+			CFileMgr::Read(fileHandle, buf(gString), 1);
 			CFileMgr::Read(fileHandle, buf(&TheCamera.m_bHeadBob), 1);
 			CFileMgr::Read(fileHandle, buf(&TheCamera.m_fMouseAccelHorzntl), 4);
 			CFileMgr::Read(fileHandle, buf(&TheCamera.m_fMouseAccelVertical), 4);
@@ -1276,7 +1287,7 @@ void CMenuManager::PrintBriefs()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::PrintErrorMessage() { EAXJMP(0x484F70); }
 #else
 void CMenuManager::PrintErrorMessage()
@@ -1309,157 +1320,180 @@ void CMenuManager::PrintStats()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::Process(void) { EAXJMP(0x485100); }
 #else
 void CMenuManager::Process(void)
 {
-	if (!m_bSaveMenuActive && TheCamera.GetScreenFadeStatus())
+	field_112 = 0;
+
+	if (!m_bSaveMenuActive && TheCamera.GetScreenFadeStatus() != FADE_0)
 		return;
 
-	field_112 = 0;
-	m_bLanguageLoaded = false;
+	//m_bLanguageLoaded = false;			//XXX
 	m_bStartGameLoading = false;
 	InitialiseChangedLanguageSettings();
 
-	// 
+	if (GetPadExitEnter())		//XXX only escape
+		RequestFrontEndStartUp();
+
 	SwitchMenuOnAndOff();
 
 	// Be able to re-open menu correctly.
-	if (!m_bMenuActive) {
-		if (GetPadExitEnter())
-			RequestFrontEndStartUp();
+	if (m_bMenuActive) {
 
-		UnloadTextures();
-		field_452 = 0;
-		SwitchToNewScreen(MENUPAGE_NONE);
-		pEditString = 0;
-		field_113 = 0;
-		return;
-	}
+		// Load frontend textures.
+		LoadAllTextures();
 
-	// Load frontend textures.
-	LoadAllTextures();
+		// Set save/delete game pages.
+		if (m_nCurrScreen == MENUPAGE_DELETING) {
+			bool SlotPopulated = false;
 
-	// Set save/delete game pages.
-	if (m_nCurrScreen == MENUPAGE_DELETING) {
-		bool SlotPopulated = false;
+			if (PcSaveHelper.DeleteSlot(m_nCurrSaveSlot)) {
+				PcSaveHelper.PopulateSlotInfo();
+				SlotPopulated = true;
+			}
 
-		if (PcSaveHelper.DeleteSlot(m_nCurrSaveSlot)) {
+			if (SlotPopulated) {
+				m_nPrevScreen = m_nCurrScreen;
+				m_nCurrScreen = MENUPAGE_DELETE_SUCCESS;
+				m_nCurrOption = 0;
+				m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
+			}
+			else
+				SaveLoadFileError_SetUpErrorScreen();
+		}
+		if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
+			int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
 			PcSaveHelper.PopulateSlotInfo();
-			SlotPopulated = true;
+			if (SaveSlot) {
+				m_nPrevScreen = m_nCurrScreen;
+				m_nCurrScreen = MENUPAGE_SAVE_SUCCESSFUL;
+				m_nCurrOption = 0;
+				m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
+			}
+			else
+				SaveLoadFileError_SetUpErrorScreen();
 		}
-
-		if (SlotPopulated) {
-			m_nPrevScreen = m_nCurrScreen;
-			m_nCurrScreen = MENUPAGE_DELETE_SUCCESS;
-			m_nCurrOption = 0;
-			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
-		}
-		else
-			SaveLoadFileError_SetUpErrorScreen();
-	}
-	if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
-		int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
-		PcSaveHelper.PopulateSlotInfo();
-		if (SaveSlot) {
-			m_nPrevScreen = m_nCurrScreen;
-			m_nCurrScreen = MENUPAGE_SAVE_SUCCESSFUL;
-			m_nCurrOption = 0;
-			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
-		}
-		else
-			SaveLoadFileError_SetUpErrorScreen();
-	}
-	if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
-		if (CheckSlotDataValid(m_nCurrSaveSlot)) {
-			TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == 0;
-			if (m_PrefsVsyncDisp != m_PrefsVsync)
-				m_PrefsVsync = m_PrefsVsyncDisp;
-			DMAudio.Service();
-			m_bStartGameLoading = 1;
-			RequestFrontEndShutdown();
-			m_bLoadingSavedGame = 1;
-			b_FoundRecentSavedGameWantToLoad = 1;
-			DMAudio.SetEffectsFadeVol(0);
-			DMAudio.SetMusicFadeVol(0);
-			DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
-		}
-		else
-			SaveLoadFileError_SetUpErrorScreen();
-	}
-
-	ProcessButtonPresses();
-
-	// Set binding keys.
-	if (pEditString && !CPad::EditString(pEditString, 0)) {
-		if (!pEditString)
-			strcpy(pEditString, "NoName");
-		pEditString = 0;
-		SaveSettings();
-	}
-
-	if (field_113) {
-		if ((m_nCurrScreen == MENUPAGE_13 || m_nCurrScreen == MENUPAGE_16) && CTimer::GetTimeInMillisecondsPauseMode() > field_558)
-			SwitchToNewScreen(m_nPrevScreen);
-
-		// Reset pad shaking.
-		if (VibrationTime && CTimer::GetTimeInMillisecondsPauseMode() > VibrationTime) {
-			CPad::GetPad(0)->StopPadsShaking();
-			VibrationTime = 0;
-		}
-
-		if (m_bStartGameLoading) {
-			if (m_bGameNotLoaded)
+		if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
+			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
+				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == 0;
+				if (m_PrefsVsyncDisp != m_PrefsVsync)
+					m_PrefsVsync = m_PrefsVsyncDisp;
 				DMAudio.Service();
+				m_bStartGameLoading = 1;
+				RequestFrontEndShutdown();
+				m_bLoadingSavedGame = 1;
+				b_FoundRecentSavedGameWantToLoad = 1;
+				DMAudio.SetEffectsFadeVol(0);
+				DMAudio.SetMusicFadeVol(0);
+				DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
+			}
+			else
+				SaveLoadFileError_SetUpErrorScreen();
 		}
-	}
 
-	if (!field_456) {
-		JoyButtonJustClicked = 0;
-		CPad::EditCodesForControls(&pControlEdit, 0);
-		MouseButtonJustClicked = 0;
+		ProcessButtonPresses();
 
-		if (GetMouseForward())
-			MouseButtonJustClicked = 1;
-		else {
-			if (GetMouseBack())
+		// Set binding keys.
+		if (pEditString && CPad::EditString(pEditString, 0) == nil) {
+			if (*pEditString == 0)
+				strcpy(pEditString, "NoName");
+			pEditString = nil;
+			SaveSettings();
+		}
+
+		if (field_113 && !field_456) {
+			pControlEdit = CPad::EditCodesForControls(pControlEdit, 1);
+			JoyButtonJustClicked = 0;
+			MouseButtonJustClicked = 0;
+
+			if (GetMouseClickLeft())
+				MouseButtonJustClicked = 1;
+			else if (GetMouseClickRight())
 				MouseButtonJustClicked = 3;
-		}
+			else if (GetMouseClickMiddle())
+				MouseButtonJustClicked = 2;
+			else if (GetMouseWheelUp())
+				MouseButtonJustClicked = 4;
+			else if (GetMouseWheelDown())
+				MouseButtonJustClicked = 5;
+			//XXX two more buttons
 
-		JoyButtonJustClicked = ControlsManager.GetJoyButtonJustDown();
+			JoyButtonJustClicked = ControlsManager.GetJoyButtonJustDown();
 
-		if (JoyButtonJustClicked)
-			TypeOfControl = 3;
-		if (MouseButtonJustClicked)
-			TypeOfControl = 2;
-		if (pControlEdit != 1056)
-			TypeOfControl = 0;
+			if (JoyButtonJustClicked)
+				TypeOfControl = 3;
+			if (MouseButtonJustClicked)
+				TypeOfControl = 2;
+			if (*pControlEdit != rsNULL)
+				TypeOfControl = 0;
 
-		if (field_534) {
-			if (!m_bKeyChangeNotProcessed) {
-				if (pControlEdit != 1056 || MouseButtonJustClicked || JoyButtonJustClicked)
+			if (!field_534) {
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
+				pControlEdit = nil;
+				field_113 = 0;
+				m_KeyPressedCode = -1;
+				field_456 = 0;
+			}
+			else if (!m_bKeyChangeNotProcessed) {
+				if (*pControlEdit != rsNULL || MouseButtonJustClicked || JoyButtonJustClicked)
 					CheckCodesForControls(TypeOfControl);
 
 				field_535 = 1;
-				return;
+			}
+			else {
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+				for (int i = 0; i < 4; i++)
+					ControlsManager.ClearSettingsAssociatedWithAction(m_CurrCntrlAction, i);
+				field_534 = false;
+				m_bKeyChangeNotProcessed = false;
+				pControlEdit = nil;
+				field_113 = 0;
+				m_KeyPressedCode = -1;
+				field_456 = 0;
 			}
 		}
-		else {
-			pControlEdit = 0;
-			field_113 = 0;
-			m_KeyPressedCode = -1;
+
+		if ((m_nCurrScreen == MENUPAGE_13 || m_nCurrScreen == MENUPAGE_16) && CTimer::GetTimeInMillisecondsPauseMode() > field_558) {
+			m_nCurrScreen = m_nPrevScreen;
+			m_nCurrOption = 0;
+		}
+
+		// Reset pad shaking.
+		if (VibrationTime && CTimer::GetTimeInMillisecondsPauseMode() > VibrationTime) {
+			CPad::StopPadsShaking();
+			VibrationTime = 0;
 		}
 	}
-	field_456 = 0;
+	else {
+		UnloadTextures();
+		field_452 = 0;
+		// byte_5F33E4 = 1;	// unused
+		m_nPrevScreen = 0;
+		m_nCurrScreen = m_nPrevScreen;
+		m_nCurrOption = 0;
+		pEditString = nil;
+		field_113 = 0;
+	}
+
+	if (!m_bStartGameLoading) {
+		if (m_bGameNotLoaded)
+			DMAudio.Service();
+	}
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::ProcessButtonPresses() { EAXJMP(0x4856F0); }
 #else
 void CMenuManager::ProcessButtonPresses()
 {
+	if(pEditString)
+		return;
+	if(pControlEdit)
+		return;
+
 	// Update mouse position
 	m_nMouseOldPosX = m_nMousePosX;
 	m_nMouseOldPosY = m_nMousePosY;
@@ -1500,7 +1534,7 @@ void CMenuManager::ProcessButtonPresses()
 			field_113 = 1;
 			field_456 = 1;
 			m_bKeyChangeNotProcessed = 1;
-			//pControlEdit = m_KeyPressedCode;
+			pControlEdit = &m_KeyPressedCode;
 		}
 
 		if (GetPadForward()) {
@@ -1509,7 +1543,7 @@ void CMenuManager::ProcessButtonPresses()
 				if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
 					field_113 = 1;
 					field_456 = 1;
-					//pControlEdit = m_KeyPressedCode;
+					pControlEdit = &m_KeyPressedCode;
 				}
 				if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
 					strcpy(m_PrefsSkinFile, m_aSkinName);
@@ -1527,7 +1561,7 @@ void CMenuManager::ProcessButtonPresses()
 				break;
 			default:
 				break;
-			};
+			}
 		}
 
 		bool once = false;
@@ -1604,7 +1638,7 @@ void CMenuManager::ProcessButtonPresses()
 			SwitchToNewScreen(aScreens[m_nCurrScreen].m_PreviousPage[0]);
 			PlayEscSound = true;
 			break;
-		};
+		}
 
 		if (PlayEscSound)
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_EXIT, 0);
@@ -1639,7 +1673,7 @@ void CMenuManager::ProcessButtonPresses()
 		default:
 			m_nHoverOption = HOVEROPTION_NULL;
 			break;
-		};
+		}
 	}
 
 	// Process all menu options here, but first check if it's an option or a redirect.
@@ -1675,11 +1709,11 @@ void CMenuManager::ProcessButtonPresses()
 		break;
 	default:
 		break;
-	};
+	}
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::ProcessOnOffMenuOptions() { EAXJMP(0x48AE60); }
 #else
 void CMenuManager::ProcessOnOffMenuOptions()
@@ -1740,7 +1774,7 @@ void CMenuManager::ProcessOnOffMenuOptions()
 			case AR_16_9:
 				m_PrefsUseWideScreen = AR_AUTO;
 				break;
-			};
+			}
 		}
 		else {
 			switch (m_PrefsUseWideScreen) {
@@ -1753,7 +1787,7 @@ void CMenuManager::ProcessOnOffMenuOptions()
 			case AR_16_9:
 				m_PrefsUseWideScreen = AR_4_3;
 				break;
-			};
+			}
 		}
 #endif
 		SaveSettings();
@@ -1999,7 +2033,7 @@ void CMenuManager::ProcessOnOffMenuOptions()
 			case 2:
 				m_PrefsSpeakers = 0;
 				break;
-			};
+			}
 		}
 		else {
 			switch (m_PrefsSpeakers) {
@@ -2012,7 +2046,7 @@ void CMenuManager::ProcessOnOffMenuOptions()
 			case 2:
 				m_PrefsSpeakers = 1;
 				break;
-			};
+			}
 		}
 
 		DMAudio.SetSpeakerConfig(m_PrefsSpeakers);
@@ -2040,11 +2074,11 @@ void CMenuManager::ProcessOnOffMenuOptions()
 	case MENUACTION_MOUSESTEER:
 		m_bDisableMouseSteering = m_bDisableMouseSteering == false;
 		return;
-	};
+	}
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::RequestFrontEndShutdown() { EAXJMP(0x488750); }
 #else
 void CMenuManager::RequestFrontEndShutdown()
@@ -2054,7 +2088,7 @@ void CMenuManager::RequestFrontEndShutdown()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::RequestFrontEndStartUp() { EAXJMP(0x488770); }
 #else
 void CMenuManager::RequestFrontEndStartUp()
@@ -2063,7 +2097,7 @@ void CMenuManager::RequestFrontEndStartUp()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::ResetHelperText() { EAXJMP(0x48B470); }
 #else
 void CMenuManager::ResetHelperText() 
@@ -2073,7 +2107,7 @@ void CMenuManager::ResetHelperText()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::SaveLoadFileError_SetUpErrorScreen() { EAXJMP(0x488930); }
 #else
 void CMenuManager::SaveLoadFileError_SetUpErrorScreen()
@@ -2116,8 +2150,8 @@ void CMenuManager::SaveLoadFileError_SetUpErrorScreen()
 }
 #endif
 
-#if 0
-WRAPPER void CMenuManager::SetHelperText() { EAXJMP(0x48B450); }
+#if ALL_ORIGINAL_FRONTEND
+WRAPPER void CMenuManager::SetHelperText(int text) { EAXJMP(0x48B450); }
 #else
 void CMenuManager::SetHelperText(int text)
 {
@@ -2126,7 +2160,7 @@ void CMenuManager::SetHelperText(int text)
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::SaveSettings() { EAXJMP(0x488CC0); }
 #else
 void CMenuManager::SaveSettings()
@@ -2173,7 +2207,7 @@ void CMenuManager::SaveSettings()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::ShutdownJustMenu() { EAXJMP(0x488920); }
 #else
 void CMenuManager::ShutdownJustMenu()
@@ -2184,7 +2218,7 @@ void CMenuManager::ShutdownJustMenu()
 #endif
 
 // We won't ever use this again.
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER float CMenuManager::StretchX(float) { EAXJMP(0x48ABE0); }
 #else
 float CMenuManager::StretchX(float x)
@@ -2196,7 +2230,7 @@ float CMenuManager::StretchX(float x)
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER float CMenuManager::StretchY(float) { EAXJMP(0x48AC20); }
 #else
 float CMenuManager::StretchY(float y)
@@ -2208,7 +2242,7 @@ float CMenuManager::StretchY(float y)
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::SwitchMenuOnAndOff() { EAXJMP(0x488790); }
 #else
 void CMenuManager::SwitchMenuOnAndOff()
@@ -2230,7 +2264,7 @@ void CMenuManager::SwitchMenuOnAndOff()
 			ShutdownJustMenu();
 			SaveSettings();
 			m_bStartUpFrontEndRequested = false;
-			pControlEdit = 0;
+			pControlEdit = nil;
 			m_bShutDownFrontEndRequested = false;
 			DisplayComboButtonErrMsg = 0;
 			CPad::GetPad(0)->Clear(0);
@@ -2254,7 +2288,7 @@ void CMenuManager::SwitchMenuOnAndOff()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::UnloadTextures() { EAXJMP(0x47A440); }
 #else
 void CMenuManager::UnloadTextures()
@@ -2279,7 +2313,7 @@ void CMenuManager::UnloadTextures()
 }
 #endif
 
-#if 0
+#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::WaitForUserCD(void) { EAXJMP(0x48ADD0); }
 #else
 void CMenuManager::WaitForUserCD()
@@ -2307,7 +2341,7 @@ uint8 CMenuManager::GetNumberOfMenuOptions()
 			break;
 
 		++Rows;
-	};
+	}
 	return Rows;
 }
 
@@ -2406,7 +2440,7 @@ void CMenuManager::SetDefaultPreferences(int8 screen)
 		CVehicle::m_bDisableMouseSteering = true;
 		TheCamera.m_bHeadBob = false;
 		break;
-	};
+	}
 }
 
 // Frontend inputs.
@@ -2464,16 +2498,45 @@ bool GetPadMoveRight()
 		(CPad::GetPad(0)->NewState.LeftStickX > 0 && !(CPad::GetPad(0)->OldState.LeftStickX > 0));
 }
 
-bool GetMouseForward()
+bool GetMouseClickLeft()
 {
 	return
 		(CPad::GetPad(0)->NewMouseControllerState.LMB && !CPad::GetPad(0)->OldMouseControllerState.LMB);
 }
 
-bool GetMouseBack()
+bool GetMouseClickRight()
 {
 	return
 		(CPad::GetPad(0)->NewMouseControllerState.RMB && !CPad::GetPad(0)->OldMouseControllerState.RMB);
+}
+
+bool GetMouseClickMiddle()
+{
+	return
+		(CPad::GetPad(0)->NewMouseControllerState.MMB && !CPad::GetPad(0)->OldMouseControllerState.MMB);
+}
+
+bool GetMouseWheelUp()
+{
+	return
+		(CPad::GetPad(0)->NewMouseControllerState.WHEELUP && !CPad::GetPad(0)->OldMouseControllerState.WHEELUP);
+}
+
+bool GetMouseWheelDown()
+{
+	return
+		(CPad::GetPad(0)->NewMouseControllerState.WHEELDN && !CPad::GetPad(0)->OldMouseControllerState.WHEELDN);
+}
+
+
+bool GetMouseForward()
+{
+	return GetMouseClickLeft();
+}
+
+bool GetMouseBack()
+{
+	return GetMouseClickRight;
 }
 
 bool GetMousePos()
@@ -2484,14 +2547,12 @@ bool GetMousePos()
 
 bool GetMouseMoveLeft()
 {
-	return
-		(CPad::GetPad(0)->NewMouseControllerState.WHEELDN && !CPad::GetPad(0)->OldMouseControllerState.WHEELDN != 0.0f);
+	return GetMouseWheelDown();
 }
 
 bool GetMouseMoveRight()
 {
-	return
-		(CPad::GetPad(0)->NewMouseControllerState.WHEELUP && !CPad::GetPad(0)->OldMouseControllerState.WHEELUP != 0.0f);
+	return GetMouseWheelUp();
 }
 
 bool GetPadInput()
@@ -2516,6 +2577,7 @@ bool GetMouseInput()
 }
 
 STARTPATCHES
+#ifndef ALL_ORIGINAL_FRONTEND
 	InjectHook(0x47A230, &CMenuManager::LoadAllTextures, PATCH_JUMP);
 	InjectHook(0x47A440, &CMenuManager::UnloadTextures, PATCH_JUMP);
 	InjectHook(0x485100, &CMenuManager::Process, PATCH_JUMP);
@@ -2526,4 +2588,5 @@ STARTPATCHES
 
 	for (int i = 1; i < ARRAY_SIZE(aScreens); i++)
 		Patch(0x611930 + sizeof(CMenuScreen) * i, aScreens[i]);
+#endif
 ENDPATCHES

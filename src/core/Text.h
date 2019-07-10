@@ -1,7 +1,10 @@
 #pragma once
 
 void AsciiToUnicode(const char *src, wchar *dst);
-char UnicodeToAscii(wchar *src);
+char *UnicodeToAscii(wchar *src);
+char *UnicodeToAsciiForSaveLoad(wchar *src);
+void UnicodeStrcpy(wchar *dst, const wchar *src);
+int UnicodeStrlen(const wchar *str);
 void TextCopy(wchar *dst, const wchar *src);
 
 struct CKeyEntry

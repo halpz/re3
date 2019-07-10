@@ -448,7 +448,7 @@ public:
 	int m_nCurrOption;
 	int m_nPrevOption;
 	int m_nPrevScreen;
- int field_558;
+ uint32 field_558;
 	int m_nCurrSaveSlot;
 	int m_nScreenChangeDelayTimer;
 
