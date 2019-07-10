@@ -24,6 +24,7 @@
 #include "Lights.h"
 #include "PointLights.h"
 #include "Pad.h"
+#include "Phones.h"
 
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
@@ -44,6 +45,7 @@ WRAPPER void CPed::SetFollowRoute(int16, int16) { EAXJMP(0x4DD690); }
 WRAPPER void CPed::SetDuck(uint32) { EAXJMP(0x4E4920); }
 WRAPPER void CPed::RegisterThreatWithGangPeds(CEntity*) { EAXJMP(0x4E3870); }
 WRAPPER void CPed::MakeChangesForNewWeapon(int8) { EAXJMP(0x4F2560); }
+WRAPPER bool CPed::Seek(void) { EAXJMP(0x4D1640); }
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -1391,7 +1393,7 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 	if (ped->m_nPedState != PED_ARRESTED) {
 		ped->m_nLastPedState = PED_NONE;
 		if (dragAssoc)
-			dragAssoc->blendDelta = -1000.0;
+			dragAssoc->blendDelta = -1000.0f;
 	}
 	ped->RestartNonPartialAnims();
 	ped->m_pVehicleAnim = nil;
@@ -2057,6 +2059,7 @@ CPed::SetupLighting(void)
 {
 	ActivateDirectional();
 	SetAmbientColoursForPedsCarsAndObjects();
+
 	if (bRenderScorched) {
 		WorldReplaceNormalLightsWithScorched(Scene.world, 0.1f);
 	} else {
@@ -2698,7 +2701,7 @@ CPed::QuitEnteringCar(void)
 		if (veh->m_nNumGettingIn != 0)
 			veh->m_nNumGettingIn--;
 
-		veh->m_nGettingInFlags = GetVehDoorFlag(m_vehEnterType);
+		veh->m_nGettingInFlags = ~GetVehDoorFlag(m_vehEnterType);
 	}
 
 	bUsesCollision = true;
@@ -2871,6 +2874,38 @@ CPed::Chat(void)
 	}
 }
 
+void
+CPed::CheckAroundForPossibleCollisions(void)
+{
+	CVector ourCentre, objCentre;
+	CEntity *objects[8];
+	int16 maxObject;
+
+	if (CTimer::GetTimeInMilliseconds() <= m_nPedStateTimer)
+		return;
+
+	GetBoundCentre(ourCentre);
+
+	CWorld::FindObjectsInRange(ourCentre, 10.0f, true, &maxObject, 6, objects, false, true, false, true, false);
+	for (int i = 0; i < maxObject; i++) {
+		CEntity *object = objects[i];
+		if (field_31C) {
+			if (gPhoneInfo.PhoneAtThisPosition(object->GetPosition()))
+				break;
+		}
+		object->GetBoundCentre(objCentre);
+		float radius = object->GetBoundRadius();
+		if (radius > 4.5f || radius < 1.0f)
+			radius = 1.0f;
+
+		// According to code, developers gave up calculating Z diff. later.
+		float diff = CVector(ourCentre - objCentre).MagnitudeSqr2D();
+
+		if (sq(radius + 1.0f) > diff)
+			m_fRotationDest += DEGTORAD(22.5f);
+	}
+}
+
 WRAPPER void CPed::PedGetupCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE810); }
 WRAPPER void CPed::PedStaggerCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8D0); }
 WRAPPER void CPed::PedEvadeCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D36E0); }
@@ -2963,4 +2998,5 @@ STARTPATCHES
 	InjectHook(0x4D3C80, &CPed::ClearChat, PATCH_JUMP);
 	InjectHook(0x4D1390, &CPed::TurnBody, PATCH_JUMP);
 	InjectHook(0x4D3AC0, &CPed::Chat, PATCH_JUMP);
+	InjectHook(0x4D0490, &CPed::CheckAroundForPossibleCollisions, PATCH_JUMP);
 ENDPATCHES

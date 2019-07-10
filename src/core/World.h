@@ -93,7 +93,9 @@ public:
 	static bool GetIsLineOfSightClear(const CVector &point1, const CVector &point2, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
 	static bool GetIsLineOfSightSectorClear(CSector &sector, const CColLine &line, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
 	static bool GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
-
+	
+	static void FindObjectsInRangeSectorList(CPtrList&, CVector&, float, bool, short*, short, CEntity**);
+	static void FindObjectsInRange(CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool);
 	static float FindGroundZForCoord(float x, float y);
 	static float FindGroundZFor3DCoord(float x, float y, float z, bool *found);
 	static float FindRoofZFor3DCoord(float x, float y, float z, bool *found);

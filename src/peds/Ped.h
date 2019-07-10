@@ -13,7 +13,7 @@
 
 struct CPathNode;
 
-enum eWaitState : uint32 {
+enum eWaitState {
 	WAITSTATE_FALSE,
 	WAITSTATE_TRAFFIC_LIGHTS,
 	WAITSTATE_CROSS_ROAD,
@@ -292,10 +292,10 @@ public:
 	int32 m_nPrevActionState;
 	eWaitState m_nWaitState;
 	uint32 m_nWaitTimer;
-	void *m_pPathNodesStates[8];
+	void *m_pPathNodesStates[8]; // seems unused
 	CVector2D m_stPathNodeStates[10];
 	uint16 m_nPathNodes;
-	uint8 m_nCurPathNode;
+	int16 m_nCurPathNode;
 	int8 m_nPathState;
 private:
 	int8 _pad2B5[3];
@@ -324,7 +324,7 @@ public:
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
 	uint8 pad_315[3];
-	uint32 field_318;
+	float field_318;
 	uint8 field_31C;
 	uint8 field_31D;
 	int16 m_phoneId;
@@ -458,7 +458,8 @@ public:
 	bool TurnBody(void);
 	void Chat(void);
 	void MakeChangesForNewWeapon(int8);
-
+	void CheckAroundForPossibleCollisions(void);
+	bool Seek(void);
 
 	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
