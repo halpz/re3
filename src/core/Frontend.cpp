@@ -64,15 +64,14 @@ CMenuManager &FrontEndMenuManager = *(CMenuManager*)0x8F59D8;
 float lodMultiplier = *(float*)0x5F726C;
 
 // Stuff not in CMenuManager:
-uint32 VibrationTime;
+uint32 &VibrationTime = *(uint32*)0x628CF8;
 char* pEditString = (char*)0x628D00;
 int32 *&pControlEdit = *(int32**)0x628D08;
-int8 DisplayComboButtonErrMsg;
-int8 MouseButtonJustClicked;
-int8 JoyButtonJustClicked;
+bool &DisplayComboButtonErrMsg = *(bool*)0x628D14;
+int32 &MouseButtonJustClicked = *(int32*)0x628D0C;
+int32 &JoyButtonJustClicked = *(int32*)0x628D10;
 int32 &nTimeForSomething = *(int32*)0x628D54;
-int32 TypeOfControl = 0;
-int32 *pControlTemp = 0;
+//int32 *pControlTemp = 0;
 
 // Frontend inputs.
 
@@ -164,7 +163,7 @@ void CMenuManager::BuildStatLine(char *text, float *stat, bool aFloat, float* st
 		else 
 			sprintf(gString2, "  %d %s %d", *(int*)stat, UnicodeToAscii(TheText.Get("FEST_OO")), *(int*)stat2);
 	}
-	else if (stat2) {
+	else if (stat) {
 		if (aFloat)
 			sprintf(gString2, "  %.2f", *stat);
 		else
@@ -1330,11 +1329,10 @@ void CMenuManager::Process(void)
 	if (!m_bSaveMenuActive && TheCamera.GetScreenFadeStatus() != FADE_0)
 		return;
 
-	//m_bLanguageLoaded = false;			//XXX
 	m_bStartGameLoading = false;
 	InitialiseChangedLanguageSettings();
 
-	if (GetPadExitEnter())		//XXX only escape
+	if (CPad::GetPad(0)->GetEscapeJustDown())
 		RequestFrontEndStartUp();
 
 	SwitchMenuOnAndOff();
@@ -1403,55 +1401,60 @@ void CMenuManager::Process(void)
 			SaveSettings();
 		}
 
-		if (field_113 && !field_456) {
-			pControlEdit = CPad::EditCodesForControls(pControlEdit, 1);
-			JoyButtonJustClicked = 0;
-			MouseButtonJustClicked = 0;
-
-			if (GetMouseClickLeft())
-				MouseButtonJustClicked = 1;
-			else if (GetMouseClickRight())
-				MouseButtonJustClicked = 3;
-			else if (GetMouseClickMiddle())
-				MouseButtonJustClicked = 2;
-			else if (GetMouseWheelUp())
-				MouseButtonJustClicked = 4;
-			else if (GetMouseWheelDown())
-				MouseButtonJustClicked = 5;
-			//XXX two more buttons
-
-			JoyButtonJustClicked = ControlsManager.GetJoyButtonJustDown();
-
-			if (JoyButtonJustClicked)
-				TypeOfControl = 3;
-			if (MouseButtonJustClicked)
-				TypeOfControl = 2;
-			if (*pControlEdit != rsNULL)
-				TypeOfControl = 0;
-
-			if (!field_534) {
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
-				pControlEdit = nil;
-				field_113 = 0;
-				m_KeyPressedCode = -1;
+		if (field_113) {
+			if (field_456)
 				field_456 = 0;
-			}
-			else if (!m_bKeyChangeNotProcessed) {
-				if (*pControlEdit != rsNULL || MouseButtonJustClicked || JoyButtonJustClicked)
-					CheckCodesForControls(TypeOfControl);
-
-				field_535 = 1;
-			}
 			else {
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
-				for (int i = 0; i < 4; i++)
-					ControlsManager.ClearSettingsAssociatedWithAction(m_CurrCntrlAction, i);
-				field_534 = false;
-				m_bKeyChangeNotProcessed = false;
-				pControlEdit = nil;
-				field_113 = 0;
-				m_KeyPressedCode = -1;
-				field_456 = 0;
+				pControlEdit = CPad::EditCodesForControls(pControlEdit, 1);
+				JoyButtonJustClicked = 0;
+				MouseButtonJustClicked = 0;
+
+				if (GetMouseClickLeft())
+					MouseButtonJustClicked = 1;
+				else if (GetMouseClickRight())
+					MouseButtonJustClicked = 3;
+				else if (GetMouseClickMiddle())
+					MouseButtonJustClicked = 2;
+				else if (GetMouseWheelUp())
+					MouseButtonJustClicked = 4;
+				else if (GetMouseWheelDown())
+					MouseButtonJustClicked = 5;
+				//XXX two more buttons
+
+				JoyButtonJustClicked = ControlsManager.GetJoyButtonJustDown();
+
+				int32 TypeOfControl = 0;				
+				if (JoyButtonJustClicked)
+					TypeOfControl = 3;
+				if (MouseButtonJustClicked)
+					TypeOfControl = 2;
+				if (*pControlEdit != rsNULL)
+					TypeOfControl = 0;
+
+				if (!field_534) {
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
+					pControlEdit = nil;
+					field_113 = 0;
+					m_KeyPressedCode = -1;
+					field_456 = 0;
+				}
+				else if (!m_bKeyChangeNotProcessed) {
+					if (*pControlEdit != rsNULL || MouseButtonJustClicked || JoyButtonJustClicked)
+						CheckCodesForControls(TypeOfControl);
+
+					field_535 = 1;
+				}
+				else {
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+					for (int i = 0; i < 4; i++)
+						ControlsManager.ClearSettingsAssociatedWithAction(m_CurrCntrlAction, i);
+					field_534 = false;
+					m_bKeyChangeNotProcessed = false;
+					pControlEdit = nil;
+					field_113 = 0;
+					m_KeyPressedCode = -1;
+					field_456 = 0;
+				}
 			}
 		}
 
@@ -1469,6 +1472,7 @@ void CMenuManager::Process(void)
 	else {
 		UnloadTextures();
 		field_452 = 0;
+		*(bool*)0x5F33E4 = true;
 		// byte_5F33E4 = 1;	// unused
 		m_nPrevScreen = 0;
 		m_nCurrScreen = m_nPrevScreen;
