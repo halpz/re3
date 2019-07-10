@@ -1295,9 +1295,9 @@ int8 CRunningScript::ProcessCommandsFrom0To99(int32 command)
 		y2 = *(float*)&ScriptParams[5];
 		z2 = *(float*)&ScriptParams[6];
 		if (ped->bInVehicle)
-			UpdateCompareFlag(ped->IsWithinArea(x1, y1, z1, x2, y2, z2));
-		else
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
+		else
+			UpdateCompareFlag(ped->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		if (!ScriptParams[7])
 			return 0;
 		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, -100.0f);
