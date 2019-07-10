@@ -50,7 +50,8 @@ public:
 	void ClearSimButtonPressCheckers();
 	void AffectPadFromKeyBoard();
 	void AffectPadFromMouse();
-	
+	void ClearSettingsAssociatedWithAction(int, int);
+
 };
 
 VALIDATE_SIZE(CControllerConfigManager, 0x143C);
