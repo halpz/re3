@@ -33,7 +33,7 @@ CPhysical::CPhysical(void)
 
 	m_nCollisionRecords = 0;
 	for(i = 0; i < 6; i++)
-		m_aCollisionRecords[0] = nil;
+		m_aCollisionRecords[i] = nil;
 
 	field_EF = false;
 
