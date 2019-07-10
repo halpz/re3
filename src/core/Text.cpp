@@ -210,6 +210,8 @@ AsciiToUnicode(const char *src, uint16 *dst)
 	while((*dst++ = *src++) != '\0');
 }
 
+WRAPPER char UnicodeToAscii(wchar * src) { EAXJMP(0x52C2F0); }
+
 void
 TextCopy(wchar *dst, const wchar *src)
 {

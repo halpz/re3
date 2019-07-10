@@ -24,6 +24,8 @@
 #include "Vehicle.h"
 #include "MBlur.h"
 #include "PlayerSkin.h"
+#include "PlayerInfo.h"
+#include "World.h"
 
 int32 &CMenuManager::OS_Language = *(int32*)0x5F2F78;
 int8 &CMenuManager::m_PrefsUseVibration = *(int8*)0x95CD92;
@@ -50,7 +52,9 @@ int8 &CMenuManager::m_bFrontEnd_ReloadObrTxtGxt = *(int8*)0x628CFC;
 int32 &CMenuManager::m_PrefsMusicVolume = *(int32*)0x5F2E4C;
 int32 &CMenuManager::m_PrefsSfxVolume = *(int32*)0x5F2E48;
 
-uint8 *CMenuManager::m_PrefsSkinFile = (uint8*)0x5F2E74;
+char *CMenuManager::m_PrefsSkinFile = (char*)0x5F2E74;
+
+int32 &CMenuManager::m_KeyPressedCode = *(int32*)0x5F2E70;
 
 CMenuManager &FrontEndMenuManager = *(CMenuManager*)0x8F59D8;
 
@@ -59,11 +63,14 @@ float lodMultiplier = *(float*)0x5F726C;
 
 // Stuff not in CMenuManager:
 int VibrationTime;
-char* pEditString;
-int32 pControlEdit;
+char* pEditString = (char*)0x628D00;
+int32 &pControlEdit = *(int32*)0x628D08;
 int8 DisplayComboButtonErrMsg;
-bool MouseButtonJustClicked;
-bool JoyButtonJustClicked;
+int8 MouseButtonJustClicked;
+int8 JoyButtonJustClicked;
+int32 &nTimeForSomething = *(int32*)0x628D54;
+int32 TypeOfControl = 0;
+int32 *pControlTemp = 0;
 
 // Frontend inputs.
 bool GetPadBack();
@@ -135,12 +142,28 @@ char *MenuFilenames[] = {
 	nil, nil
 };
 
-#if 1
-WRAPPER void CMenuManager::BuildStatLine(char *, void *, uint16, void *) { EAXJMP(0x483870); }
+#if 0
+WRAPPER void CMenuManager::BuildStatLine(char *text, float *stat, bool aFloat, float* stat2) { EAXJMP(0x483870); }
 #else
-void CMenuManager::BuildStatLine(char *, void *, uint16, void *)
+void CMenuManager::BuildStatLine(char *text, float *stat, bool aFloat, float* stat2)
 {
+	if (!text)
+		return;
 
+	if (stat) {
+		if (aFloat)
+			sprintf(gString, "%.2f");
+		else
+			sprintf(gString, "%d");
+	}
+	else if (stat2) {
+		if (aFloat) 
+			sprintf(gString, "%.2f %s %.2f", stat, UnicodeToAscii(TheText.Get("FEST_OO")), stat2);
+		else 
+			sprintf(gString, "%d %s %d", stat, UnicodeToAscii(TheText.Get("FEST_OO")), stat2);
+	}
+
+	wcscpy((wchar_t*)gUString, (wchar_t*)TheText.Get(text));
 }
 #endif
 
@@ -164,11 +187,11 @@ void CMenuManager::CentreMousePointer()
 #endif
 
 #if 1
-WRAPPER void CMenuManager::CheckCodesForControls(int, int) { EAXJMP(0x48A950); }
+WRAPPER int CMenuManager::CheckCodesForControls(int32) { EAXJMP(0x48A950); }
 #else
-void CMenuManager::CheckCodesForControls()
+void CMenuManager::CheckCodesForControls(int, int)
 {
-
+	DisplayComboButtonErrMsg = 0;
 }
 #endif
 
@@ -719,9 +742,9 @@ void CMenuManager::Draw()
 						m_nPrevOption = m_nCurrOption;
 
 						if (GetMouseForward())
-							m_nHoverOption = IGNORE_OPTION;
+							m_nHoverOption = HOVEROPTION_NULL;
 						else
-							m_nHoverOption = ACTIVATE_OPTION;
+							m_nHoverOption = HOVEROPTION_DEFAULT;
 					}
 				}
 			}
@@ -1291,75 +1314,144 @@ WRAPPER void CMenuManager::Process(void) { EAXJMP(0x485100); }
 #else
 void CMenuManager::Process(void)
 {
-	if (m_bSaveMenuActive && TheCamera.GetScreenFadeStatus())
+	if (!m_bSaveMenuActive && TheCamera.GetScreenFadeStatus())
 		return;
 
-	field_113 = 0;
+	field_112 = 0;
+	m_bLanguageLoaded = false;
+	m_bStartGameLoading = false;
 	InitialiseChangedLanguageSettings();
 
+	// 
 	SwitchMenuOnAndOff();
 
-	if (m_bMenuActive) {
-		LoadAllTextures();
-
-		if (m_nCurrScreen == MENUPAGE_DELETING) {
-			bool SlotPopulated = false;
-
-			if (PcSaveHelper.DeleteSlot(m_nCurrSaveSlot)) {
-				PcSaveHelper.PopulateSlotInfo();
-				SlotPopulated = true;
-			}
-
-			if (SlotPopulated) {
-				m_nPrevScreen = m_nCurrScreen;
-				m_nCurrScreen = MENUPAGE_DELETE_SUCCESS;
-				m_nCurrOption = 0;
-				m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
-			}
-			else
-				SaveLoadFileError_SetUpErrorScreen();
-		}
-		if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
-			int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
-			PcSaveHelper.PopulateSlotInfo();
-			if (SaveSlot) {
-				m_nPrevScreen = m_nCurrScreen;
-				m_nCurrScreen = MENUPAGE_SAVE_SUCCESSFUL;
-				m_nCurrOption = 0;
-				m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
-			}
-			else
-				SaveLoadFileError_SetUpErrorScreen();
-		}
-		if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
-			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
-				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == 0;
-				if (m_PrefsVsyncDisp != m_PrefsVsync)
-					m_PrefsVsync = m_PrefsVsyncDisp;
-				DMAudio.Service();
-				m_bStartGameLoading = 1;
-				RequestFrontEndShutdown();
-				m_bLoadingSavedGame = 1;
-				b_FoundRecentSavedGameWantToLoad = 1;
-				DMAudio.SetEffectsFadeVol(0);
-				DMAudio.SetMusicFadeVol(0);
-				DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
-			}
-			else
-				SaveLoadFileError_SetUpErrorScreen();
-		}
-
-		ProcessButtonPresses();
-	}
-	else {
+	// Be able to re-open menu correctly.
+	if (!m_bMenuActive) {
 		if (GetPadExitEnter())
 			RequestFrontEndStartUp();
 
 		UnloadTextures();
-		m_nPrevScreen = MENUPAGE_NONE;
-		m_nCurrScreen = m_nPrevScreen;
-		m_nCurrOption = MENUROW_0;
+		field_452 = 0;
+		SwitchToNewScreen(MENUPAGE_NONE);
+		pEditString = 0;
+		field_113 = 0;
+		return;
 	}
+
+	// Load frontend textures.
+	LoadAllTextures();
+
+	// Set save/delete game pages.
+	if (m_nCurrScreen == MENUPAGE_DELETING) {
+		bool SlotPopulated = false;
+
+		if (PcSaveHelper.DeleteSlot(m_nCurrSaveSlot)) {
+			PcSaveHelper.PopulateSlotInfo();
+			SlotPopulated = true;
+		}
+
+		if (SlotPopulated) {
+			m_nPrevScreen = m_nCurrScreen;
+			m_nCurrScreen = MENUPAGE_DELETE_SUCCESS;
+			m_nCurrOption = 0;
+			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
+		}
+		else
+			SaveLoadFileError_SetUpErrorScreen();
+	}
+	if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
+		int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
+		PcSaveHelper.PopulateSlotInfo();
+		if (SaveSlot) {
+			m_nPrevScreen = m_nCurrScreen;
+			m_nCurrScreen = MENUPAGE_SAVE_SUCCESSFUL;
+			m_nCurrOption = 0;
+			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
+		}
+		else
+			SaveLoadFileError_SetUpErrorScreen();
+	}
+	if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
+		if (CheckSlotDataValid(m_nCurrSaveSlot)) {
+			TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == 0;
+			if (m_PrefsVsyncDisp != m_PrefsVsync)
+				m_PrefsVsync = m_PrefsVsyncDisp;
+			DMAudio.Service();
+			m_bStartGameLoading = 1;
+			RequestFrontEndShutdown();
+			m_bLoadingSavedGame = 1;
+			b_FoundRecentSavedGameWantToLoad = 1;
+			DMAudio.SetEffectsFadeVol(0);
+			DMAudio.SetMusicFadeVol(0);
+			DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
+		}
+		else
+			SaveLoadFileError_SetUpErrorScreen();
+	}
+
+	ProcessButtonPresses();
+
+	// Set binding keys.
+	if (pEditString && !CPad::EditString(pEditString, 0)) {
+		if (!pEditString)
+			strcpy(pEditString, "NoName");
+		pEditString = 0;
+		SaveSettings();
+	}
+
+	if (field_113) {
+		if ((m_nCurrScreen == MENUPAGE_13 || m_nCurrScreen == MENUPAGE_16) && CTimer::GetTimeInMillisecondsPauseMode() > field_558)
+			SwitchToNewScreen(m_nPrevScreen);
+
+		// Reset pad shaking.
+		if (VibrationTime && CTimer::GetTimeInMillisecondsPauseMode() > VibrationTime) {
+			CPad::GetPad(0)->StopPadsShaking();
+			VibrationTime = 0;
+		}
+
+		if (m_bStartGameLoading) {
+			if (m_bGameNotLoaded)
+				DMAudio.Service();
+		}
+	}
+
+	if (!field_456) {
+		JoyButtonJustClicked = 0;
+		CPad::EditCodesForControls(&pControlEdit, 0);
+		MouseButtonJustClicked = 0;
+
+		if (GetMouseForward())
+			MouseButtonJustClicked = 1;
+		else {
+			if (GetMouseBack())
+				MouseButtonJustClicked = 3;
+		}
+
+		JoyButtonJustClicked = ControlsManager.GetJoyButtonJustDown();
+
+		if (JoyButtonJustClicked)
+			TypeOfControl = 3;
+		if (MouseButtonJustClicked)
+			TypeOfControl = 2;
+		if (pControlEdit != 1056)
+			TypeOfControl = 0;
+
+		if (field_534) {
+			if (!m_bKeyChangeNotProcessed) {
+				if (pControlEdit != 1056 || MouseButtonJustClicked || JoyButtonJustClicked)
+					CheckCodesForControls(TypeOfControl);
+
+				field_535 = 1;
+				return;
+			}
+		}
+		else {
+			pControlEdit = 0;
+			field_113 = 0;
+			m_KeyPressedCode = -1;
+		}
+	}
+	field_456 = 0;
 }
 #endif
 
@@ -1368,7 +1460,7 @@ WRAPPER void CMenuManager::ProcessButtonPresses() { EAXJMP(0x4856F0); }
 #else
 void CMenuManager::ProcessButtonPresses()
 {
-	// Update Mouse Position
+	// Update mouse position
 	m_nMouseOldPosX = m_nMousePosX;
 	m_nMouseOldPosY = m_nMousePosY;
 
@@ -1389,6 +1481,70 @@ void CMenuManager::ProcessButtonPresses()
 		m_bShowMouse = true;
 	else if (GetPadInput())
 		m_bShowMouse = false;
+
+	if (m_nCurrScreen == MENUPAGE_MULTIPLAYER_FIND_GAME || m_nCurrScreen == MENUPAGE_SKIN_SELECT || m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+		if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) 
+			field_440 = m_nSkinsTotal;
+
+		if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+			field_440 = m_ControlMethod ? 30 : 25;
+
+			if (field_44C > field_440)
+				field_44C = field_440 - 1;
+		}
+
+		if (!GetPadBack() || m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS || field_535)
+			field_535 = 0;
+		else if (field_536 == 19) {
+			m_nHoverOption = 42;
+			field_113 = 1;
+			field_456 = 1;
+			m_bKeyChangeNotProcessed = 1;
+			//pControlEdit = m_KeyPressedCode;
+		}
+
+		if (GetPadForward()) {
+			switch (field_536) {
+			case 19:
+				if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+					field_113 = 1;
+					field_456 = 1;
+					//pControlEdit = m_KeyPressedCode;
+				}
+				if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
+					strcpy(m_PrefsSkinFile, m_aSkinName);
+					CWorld::Players->SetPlayerSkin(m_PrefsSkinFile);
+					field_536 = 9;
+				}
+
+				m_nHoverOption = HOVEROPTION_NULL;
+				SaveSettings();
+				break;
+			case 21:
+				strcpy(m_PrefsSkinFile, m_aSkinName);
+				CWorld::Players->SetPlayerSkin(m_PrefsSkinFile);
+				field_536 = 9;
+				break;
+			default:
+				break;
+			};
+		}
+
+		bool once = false;
+		if (!once) {
+			once = true;
+			nTimeForSomething = 0;
+		}
+
+		if ((CTimer::GetTimeInMillisecondsPauseMode() - nTimeForSomething) > 200) {
+			field_520 = 0;
+			field_521 = 0;
+			field_522 = 0;
+			field_523 = 0;
+			field_524 = 0;
+			nTimeForSomething = CTimer::GetTimeInMillisecondsPauseMode();
+		}
+	}
 
 	// Get number of menu options.
 	uint8 NumberOfMenuOptions = GetNumberOfMenuOptions();
@@ -1436,6 +1592,14 @@ void CMenuManager::ProcessButtonPresses()
 			RequestFrontEndShutdown();
 			PlayEscSound = true;
 			break;
+		case MENUPAGE_KEYBOARD_CONTROLS:
+			if (!m_bKeyChangeNotProcessed) {
+				m_bKeyChangeNotProcessed = true;
+				field_534 = 0;
+			}
+			else
+				SwitchToNewScreen(aScreens[m_nCurrScreen].m_PreviousPage[0]);
+			break;
 		default:
 			SwitchToNewScreen(aScreens[m_nCurrScreen].m_PreviousPage[0]);
 			PlayEscSound = true;
@@ -1446,17 +1610,34 @@ void CMenuManager::ProcessButtonPresses()
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_EXIT, 0);
 	}
 
-	// TODO: finish hover options.
-	// Set mouse buttons.
+	// Set hover options, how it is supposed to be used isn't really clear yet.
 	if (GetMouseForward()) {
 		switch (m_nHoverOption) {
-		case ACTIVATE_OPTION:
+		case HOVEROPTION_DEFAULT:
 			if (m_nCurrOption || m_nCurrScreen != MENUPAGE_PAUSE_MENU)
 				m_nCurrOption = m_nPrevOption;
 
-			m_nHoverOption = ACTIVATE_OPTION;
+			m_nHoverOption = HOVEROPTION_DEFAULT;
+			break;
+		case HOVEROPTION_12:
+			m_nHoverOption = HOVEROPTION_14;
+			break;
+		case HOVEROPTION_13:
+			m_nHoverOption = HOVEROPTION_15;
+			break;
+		case HOVEROPTION_19:
+			m_nHoverOption = HOVEROPTION_20;
+			break;
+		case HOVEROPTION_CHANGESKIN:
+			if (m_nSkinsTotal > 0) {
+				m_pSelectedSkin = m_sSkin.field_304;
+				strcpy(m_PrefsSkinFile, m_aSkinName);
+				CWorld::Players->SetPlayerSkin(m_PrefsSkinFile);
+				SaveSettings();
+			}
 			break;
 		default:
+			m_nHoverOption = HOVEROPTION_NULL;
 			break;
 		};
 	}
@@ -1495,14 +1676,6 @@ void CMenuManager::ProcessButtonPresses()
 	default:
 		break;
 	};
-
-	// Reset pad shaking.
-	if (VibrationTime != 0) {
-		if (CTimer::GetTimeInMillisecondsPauseMode() > VibrationTime) {
-			CPad::GetPad(0)->StopShaking(0);
-			VibrationTime = 0;
-		}
-	}
 }
 #endif
 
@@ -1682,6 +1855,9 @@ void CMenuManager::ProcessOnOffMenuOptions()
 		break;
 	case MENUACTION_UPDATEMEMCARDSAVE:
 		RequestFrontEndShutdown();
+		break;
+	case MENUACTION_GETKEY:
+		//*pControlEdit = m_KeyPressedCode;
 		break;
 	case MENUACTION_INVVERT:
 		MousePointerStateHelper.bInvertVertically = MousePointerStateHelper.bInvertVertically == false;
@@ -2204,7 +2380,7 @@ void CMenuManager::SetDefaultPreferences(int8 screen)
 		m_PrefsVsync = true;
 		m_PrefsLOD = 1.2f;
 		m_PrefsVsyncDisp = true;
-		lodMultiplier = 1.2;
+		lodMultiplier = 1.2f;
 		CMBlur::BlurOn = true;
 		CMBlur::MotionBlurOpen(Scene.camera);
 		m_PrefsUseVibration = false;

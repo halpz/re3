@@ -21,6 +21,7 @@ WRAPPER void CControllerConfigManager::InitDefaultControlConfigJoyPad(unsigned i
 WRAPPER void CControllerConfigManager::ClearSimButtonPressCheckers() { EAXJMP(0x58D220); }
 WRAPPER void CControllerConfigManager::AffectPadFromKeyBoard() { EAXJMP(0x58D0C0); }
 WRAPPER void CControllerConfigManager::AffectPadFromMouse() { EAXJMP(0x58D1A0); }
+WRAPPER void CControllerConfigManager::ClearSettingsAssociatedWithAction(int, int) { EAXJMP(0x58EB40); }
 
 void CControllerConfigManager::LoadSettings(int32 file)
 {
