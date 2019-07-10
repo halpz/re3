@@ -465,6 +465,7 @@ int     m_iModeObbeCamIsInForCar;
 	void DrawBordersForWideScreen(void);
 	void Restore(void);
 	void SetWidescreenOff(void);
+	void CamShake(float);
 
 	void dtor(void) { this->CCamera::~CCamera(); }
 };

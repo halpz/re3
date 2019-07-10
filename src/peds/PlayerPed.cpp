@@ -10,6 +10,9 @@ CPlayerPed::~CPlayerPed()
 }
 
 WRAPPER void CPlayerPed::ReApplyMoveAnims(void) { EAXJMP(0x4F07C0); }
+WRAPPER void CPlayerPed::SetupPlayerPed(int32) { EAXJMP(0x4EFB60); }
+WRAPPER void CPlayerPed::DeactivatePlayerPed(int32) { EAXJMP(0x4EFC00); }
+WRAPPER void CPlayerPed::ReactivatePlayerPed(int32) { EAXJMP(0x4EFC20); }
 
 void CPlayerPed::ClearWeaponTarget()
 {

@@ -99,7 +99,7 @@ void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
 {
 	for (int i = 0; i < MAX_CLEANUP; i++){
-		if (m_sEntities[i].type == type && m_sEntities[i].id == 0){
+		if (m_sEntities[i].type == type && m_sEntities[i].id == id){
 			m_sEntities[i].id = 0;
 			m_sEntities[i].type = CLEANUP_UNUSED;
 		}
@@ -681,7 +681,699 @@ int8 CRunningScript::ProcessOneCommand()
 	return -1;
 }
 
-WRAPPER int8 CRunningScript::ProcessCommandsFrom0To99(int32 command) { EAXJMP(0x439650); }
+int8 CRunningScript::ProcessCommandsFrom0To99(int32 command)
+{
+	switch (command) {
+	case COMMAND_NOP:
+		return 0;
+	case COMMAND_WAIT:
+		CollectParameters(&m_nIp, 1);
+		m_nWakeTime = CTimer::GetTimeInMilliseconds() + ScriptParams[0];
+		return 1;
+	case COMMAND_GOTO:
+		CollectParameters(&m_nIp, 1);
+		SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : SIZE_MAIN_SCRIPT - ScriptParams[0]);
+		/* Known issue: GOTO to 0. It might have been "better" to use > instead of >= */
+		/* simply because it never makes sense to jump to start of the script */
+		/* but jumping to start of a custom mission is an issue for simple mission-like scripts */
+		/* However, it's not an issue for actual mission scripts, because they follow a structure */
+		/* and never start with a loop. */
+		return 0;
+	case COMMAND_SHAKE_CAM:
+		CollectParameters(&m_nIp, 1);
+		TheCamera.CamShake(ScriptParams[0] / 1000.0f);
+		return 0;
+	case COMMAND_SET_VAR_INT:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr = ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_SET_VAR_FLOAT:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr = *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_SET_LVAR_INT:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr = ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_SET_LVAR_FLOAT:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr = *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_ADD_VAL_TO_INT_VAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr += ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_ADD_VAL_TO_FLOAT_VAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr += *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_ADD_VAL_TO_INT_LVAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr += ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_ADD_VAL_TO_FLOAT_LVAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr += *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_SUB_VAL_FROM_INT_VAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr -= ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_SUB_VAL_FROM_FLOAT_VAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr -= *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_SUB_VAL_FROM_INT_LVAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr -= ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_SUB_VAL_FROM_FLOAT_LVAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr -= *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_MULT_INT_VAR_BY_VAL:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr *= ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_MULT_FLOAT_VAR_BY_VAL:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr *= *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_MULT_INT_LVAR_BY_VAL:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr *= ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_MULT_FLOAT_LVAR_BY_VAL:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr *= *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_DIV_INT_VAR_BY_VAL:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr /= ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_DIV_FLOAT_VAR_BY_VAL:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr /= *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_DIV_INT_LVAR_BY_VAL:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr /= ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_DIV_FLOAT_LVAR_BY_VAL:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr /= *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*ptr > ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_INT_LVAR_GREATER_THAN_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*ptr > ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_NUMBER_GREATER_THAN_INT_VAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(ScriptParams[0] > *ptr);
+		return 0;
+	}
+	case COMMAND_IS_NUMBER_GREATER_THAN_INT_LVAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(ScriptParams[0] > *ptr);
+		return 0;
+	}
+	case COMMAND_IS_INT_VAR_GREATER_THAN_INT_VAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*ptr1 > *ptr2);
+		return 0;
+	}
+	case COMMAND_IS_INT_LVAR_GREATER_THAN_INT_VAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*ptr1 > *ptr2);
+		return 0;
+	}
+	case COMMAND_IS_INT_VAR_GREATER_THAN_INT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*ptr1 > *ptr2);
+		return 0;
+	}
+	case COMMAND_IS_INT_LVAR_GREATER_THAN_INT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*ptr1 > *ptr2);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_VAR_GREATER_THAN_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*(float*)ptr > *(float*)&ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_LVAR_GREATER_THAN_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*(float*)ptr > *(float*)&ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_NUMBER_GREATER_THAN_FLOAT_VAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*(float*)&ScriptParams[0] > *(float*)ptr);
+		return 0;
+	}
+	case COMMAND_IS_NUMBER_GREATER_THAN_FLOAT_LVAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*(float*)&ScriptParams[0] > *(float*)ptr);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_VAR_GREATER_THAN_FLOAT_VAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*(float*)ptr1 > *(float*)ptr2);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_LVAR_GREATER_THAN_FLOAT_VAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*(float*)ptr1 > *(float*)ptr2);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_VAR_GREATER_THAN_FLOAT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*(float*)ptr1 > *(float*)ptr2);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_LVAR_GREATER_THAN_FLOAT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*(float*)ptr1 > *(float*)ptr2);
+		return 0;
+	}
+	case COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*ptr >= ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*ptr >= ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_INT_VAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(ScriptParams[0] >= *ptr);
+		return 0;
+	}
+	case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_INT_LVAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(ScriptParams[0] >= *ptr);
+		return 0;
+	}
+	case COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_INT_VAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*ptr1 >= *ptr2);
+		return 0;
+	}
+	case COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_INT_VAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*ptr1 >= *ptr2);
+		return 0;
+	}
+	case COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_INT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*ptr1 >= *ptr2);
+		return 0;
+	}
+	case COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_INT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*ptr1 >= *ptr2);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*(float*)ptr >= *(float*)&ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*(float*)ptr >= *(float*)&ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_FLOAT_VAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*(float*)&ScriptParams[0] >= *(float*)ptr);
+		return 0;
+	}
+	case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_FLOAT_LVAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*(float*)&ScriptParams[0] >= *(float*)ptr);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_FLOAT_VAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*(float*)ptr1 >= *(float*)ptr2);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_FLOAT_VAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*(float*)ptr1 >= *(float*)ptr2);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_FLOAT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*(float*)ptr1 >= *(float*)ptr2);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_FLOAT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*(float*)ptr1 >= *(float*)ptr2);
+		return 0;
+	}
+	case COMMAND_IS_INT_VAR_EQUAL_TO_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*ptr == ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_INT_LVAR_EQUAL_TO_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*ptr == ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_INT_VAR_EQUAL_TO_INT_VAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*ptr1 == *ptr2);
+		return 0;
+	}
+	case COMMAND_IS_INT_VAR_EQUAL_TO_INT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*ptr1 == *ptr2);
+		return 0;
+	}
+	case COMMAND_IS_INT_LVAR_EQUAL_TO_INT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*ptr1 == *ptr2);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_VAR_EQUAL_TO_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*(float*)ptr == *(float*)&ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_LVAR_EQUAL_TO_NUMBER:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(*(float*)ptr == *(float*)&ScriptParams[0]);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_VAR_EQUAL_TO_FLOAT_VAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		UpdateCompareFlag(*(float*)ptr1 == *(float*)ptr2);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_VAR_EQUAL_TO_FLOAT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*(float*)ptr1 == *(float*)ptr2);
+		return 0;
+	}
+	case COMMAND_IS_FLOAT_LVAR_EQUAL_TO_FLOAT_LVAR:
+	{
+		int32* ptr1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr2 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		UpdateCompareFlag(*(float*)ptr1 == *(float*)ptr2);
+		return 0;
+	}
+	case COMMAND_GOTO_IF_TRUE:
+		CollectParameters(&m_nIp, 1);
+		if (m_bCondResult)
+			SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : SIZE_MAIN_SCRIPT - ScriptParams[0]);
+		/* Check COMMAND_GOTO note. */
+		return 0;
+	case COMMAND_GOTO_IF_FALSE:
+		CollectParameters(&m_nIp, 1);
+		if (!m_bCondResult)
+			SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : SIZE_MAIN_SCRIPT - ScriptParams[0]);
+		/* Check COMMAND_GOTO note. */
+		return 0;
+	case COMMAND_TERMINATE_THIS_SCRIPT:
+		if (m_bMissionFlag)
+			CTheScripts::bAlreadyRunningAMissionScript = false;
+		RemoveScriptFromList(&CTheScripts::pActiveScripts);
+		AddScriptToList(&CTheScripts::pIdleScripts);
+		return 1;
+	case COMMAND_START_NEW_SCRIPT:
+	{
+		CollectParameters(&m_nIp, 1);
+		assert(ScriptParams[0] >= 0);
+		CRunningScript* pNew = CTheScripts::StartNewScript(ScriptParams[0]);
+		int8 type = CTheScripts::Read1ByteFromScript(&m_nIp);
+		float tmp;
+		for (int i = 0; type != ARGUMENT_END; type = CTheScripts::Read1ByteFromScript(&m_nIp), i++) {
+			switch (type) {
+			case ARGUMENT_INT32:
+				pNew->m_anLocalVariables[i] = CTheScripts::Read4BytesFromScript(&m_nIp);
+				break;
+			case ARGUMENT_GLOBALVAR:
+				pNew->m_anLocalVariables[i] = *(int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(&m_nIp)];
+				break;
+			case ARGUMENT_LOCALVAR:
+				pNew->m_anLocalVariables[i] = m_anLocalVariables[CTheScripts::Read2BytesFromScript(&m_nIp)];
+				break;
+			case ARGUMENT_INT8:
+				pNew->m_anLocalVariables[i] = CTheScripts::Read1ByteFromScript(&m_nIp);
+				break;
+			case ARGUMENT_INT16:
+				pNew->m_anLocalVariables[i] = CTheScripts::Read2BytesFromScript(&m_nIp);
+				break;
+			case ARGUMENT_FLOAT:
+				tmp = CTheScripts::ReadFloatFromScript(&m_nIp);
+				pNew->m_anLocalVariables[i] = *(int32*)&tmp;
+				break;
+			default:
+				break;
+			}
+		}
+		return 0;
+	}
+	case COMMAND_GOSUB:
+		CollectParameters(&m_nIp, 1);
+		assert(m_nStackPointer < MAX_STACK_DEPTH);
+		m_anStack[m_nStackPointer++] = m_nIp;
+		SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : SIZE_MAIN_SCRIPT - ScriptParams[0]);
+		return 0;
+	case COMMAND_RETURN:
+		assert(m_nStackPointer > 0); /* No more SSU */
+		SetIP(m_anStack[--m_nStackPointer]);
+		return 0;
+	case COMMAND_LINE:
+		CollectParameters(&m_nIp, 6);
+		/* Something must have been here */
+		return 0;
+	case COMMAND_CREATE_PLAYER:
+	{
+		CollectParameters(&m_nIp, 4);
+		int32 index = ScriptParams[0];
+		assert(index < 1); /* Constant? Also no more double player glitch */
+		debug("&&&&&&&&&&&&&Creating player: %d\n", index);
+		if (!CStreaming::HasModelLoaded(MI_PLAYER)) {
+			CStreaming::RequestSpecialModel(MI_PLAYER, "player", STREAMFLAGS_DONT_REMOVE | STREAMFLAGS_DEPENDENCY);
+			CStreaming::LoadAllRequestedModels(false);
+		}
+		CPlayerPed::SetupPlayerPed(index);
+		CWorld::Players[index].m_pPed->CharCreatedBy = MISSION_CHAR;
+		CPlayerPed::DeactivatePlayerPed(index);
+		CVector pos = *(CVector*)&ScriptParams[1];
+		if (pos.z <= -100.0f)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		pos.z += CWorld::Players[index].m_pPed->GetDistanceFromCentreOfMassToBaseOfModel();
+		CWorld::Players[index].m_pPed->GetPosition() = pos;
+		CTheScripts::ClearSpaceForMissionEntity(pos, CWorld::Players[index].m_pPed);
+		CPlayerPed::ReactivatePlayerPed(index);
+		ScriptParams[0] = index;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_GET_PLAYER_COORDINATES:
+	{
+		CVector pos;
+		CollectParameters(&m_nIp, 1);
+		if (CWorld::Players[ScriptParams[0]].m_pPed->bInVehicle)
+			pos = CWorld::Players[ScriptParams[0]].m_pPed->m_pMyVehicle->GetPosition();
+		else
+			pos = CWorld::Players[ScriptParams[0]].m_pPed->GetPosition();
+		*(CVector*)&ScriptParams[0] = pos;
+		StoreParameters(&m_nIp, 3);
+		return 0;
+	}
+	case COMMAND_SET_PLAYER_COORDINATES:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVector pos = *(CVector*)&ScriptParams[1];
+		int index = ScriptParams[0];
+		if (pos.z <= -100.0f)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CPlayerPed* ped = CWorld::Players[index].m_pPed;
+		if (!ped->bInVehicle) {
+			pos.z += ped->GetDistanceFromCentreOfMassToBaseOfModel();
+			ped->Teleport(pos);
+			CTheScripts::ClearSpaceForMissionEntity(pos, ped);
+			return 0;
+		}
+		pos.z += ped->m_pMyVehicle->GetDistanceFromCentreOfMassToBaseOfModel();
+		if (ped->m_pMyVehicle->IsBoat())
+			ped->m_pMyVehicle->Teleport(pos);
+		else
+			ped->m_pMyVehicle->Teleport(pos);
+		/* I'll keep this condition here but obviously it is absolutely pointless */
+		/* It's clearly present in disassembly so it had to be in original code */
+		CTheScripts::ClearSpaceForMissionEntity(pos, ped->m_pMyVehicle);
+		return 0;
+	}
+	case COMMAND_IS_PLAYER_IN_AREA_2D:
+	{
+		CollectParameters(&m_nIp, 6);
+		CPlayerPed* ped = CWorld::Players[ScriptParams[0]].m_pPed;
+		float x1, y1, x2, y2;
+		x1 = *(float*)&ScriptParams[1];
+		y1 = *(float*)&ScriptParams[2];
+		x2 = *(float*)&ScriptParams[3];
+		y2 = *(float*)&ScriptParams[4];
+		if (!ped->bInVehicle)
+			UpdateCompareFlag(ped->IsWithinArea(x1, y1, x2, y2));
+		else
+			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, x2, y2));
+		if (!ScriptParams[5])
+			return 0;
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, -100.0f);
+		if (CTheScripts::DbgFlag)
+			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
+		return 0;
+	}
+	case COMMAND_IS_PLAYER_IN_AREA_3D:
+	{
+		CollectParameters(&m_nIp, 8);
+		CPlayerPed* ped = CWorld::Players[ScriptParams[0]].m_pPed;
+		float x1, y1, z1, x2, y2, z2;
+		x1 = *(float*)&ScriptParams[1];
+		y1 = *(float*)&ScriptParams[2];
+		z1 = *(float*)&ScriptParams[3];
+		x2 = *(float*)&ScriptParams[4];
+		y2 = *(float*)&ScriptParams[5];
+		z2 = *(float*)&ScriptParams[6];
+		if (ped->bInVehicle)
+			UpdateCompareFlag(ped->IsWithinArea(x1, y1, z1, x2, y2, z2));
+		else
+			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
+		if (!ScriptParams[7])
+			return 0;
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, -100.0f);
+		if (CTheScripts::DbgFlag)
+			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
+		return 0;
+	}
+	case COMMAND_ADD_INT_VAR_TO_INT_VAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_ADD_INT_LVAR_TO_INT_VAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_ADD_INT_VAR_TO_INT_LVAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_ADD_INT_LVAR_TO_INT_LVAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_ADD_FLOAT_VAR_TO_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_ADD_FLOAT_VAR_TO_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_SUB_INT_VAR_FROM_INT_VAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_SUB_INT_LVAR_FROM_INT_LVAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_SUB_FLOAT_VAR_FROM_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_SUB_FLOAT_LVAR_FROM_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	default:
+		break;
+	}
+	return -1;
+}
+
+void CRunningScript::UpdateCompareFlag(bool flag)
+{
+	if (m_bNotFlag)
+		flag = !flag;
+	if (m_nAndOrState == 0){
+		m_bCondResult = flag;
+		return;
+	}
+	if (m_nAndOrState >= 1 && m_nAndOrState <= 8) { /* Maybe enums?*/
+		m_bCondResult &= flag;
+		if (m_nAndOrState == 1){
+			m_nAndOrState = 0;
+			return;
+		}
+	}else if (m_nAndOrState >= 21 && m_nAndOrState <= 28){
+		m_bCondResult |= flag;
+		if (m_nAndOrState == 21) {
+			m_nAndOrState = 0;
+			return;
+		}
+	}else{
+		return;
+	}
+	m_nAndOrState--;
+}
+
+
 WRAPPER int8 CRunningScript::ProcessCommandsFrom100To199(int32 command) { EAXJMP(0x43AEA0); }
 WRAPPER int8 CRunningScript::ProcessCommandsFrom200To299(int32 command) { EAXJMP(0x43D530); }
 WRAPPER int8 CRunningScript::ProcessCommandsFrom300To399(int32 command) { EAXJMP(0x43ED30); }
@@ -696,7 +1388,11 @@ WRAPPER int8 CRunningScript::ProcessCommandsFrom1100To1199(int32 command) { EAXJ
 
 WRAPPER void CTheScripts::DrawScriptSpheres() { EAXJMP(0x44FAC0); }
 WRAPPER void CRunningScript::DoDeatharrestCheck() { EAXJMP(0x452A30); }
+WRAPPER void CTheScripts::DrawDebugSquare(float, float, float, float) { EAXJMP(0x452D00); }
+WRAPPER void CTheScripts::DrawDebugCube(float, float, float, float, float, float) { EAXJMP(0x453100); }
 WRAPPER void CTheScripts::ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2) { EAXJMP(0x4534E0); }
+WRAPPER void CTheScripts::ClearSpaceForMissionEntity(const CVector&, CEntity*) { EAXJMP(0x454060); }
+WRAPPER void CTheScripts::HighlightImportantArea(uint32, float, float, float, float, float) { EAXJMP(0x454320); }
 WRAPPER void CTheScripts::CleanUpThisVehicle(CVehicle*) { EAXJMP(0x4548D0); }
 WRAPPER void CTheScripts::CleanUpThisPed(CPed*) { EAXJMP(0x4547A0); }
 WRAPPER void CTheScripts::CleanUpThisObject(CObject*) { EAXJMP(0x454910); }

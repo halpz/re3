@@ -45,6 +45,10 @@ public:
 	void ClearWeaponTarget();
 	void SetWantedLevel(int32 level);
 	void SetWantedLevelNoDrop(int32 level);
+
+	static void SetupPlayerPed(int32);
+	static void DeactivatePlayerPed(int32);
+	static void ReactivatePlayerPed(int32);
 };
 
 static_assert(sizeof(CPlayerPed) == 0x5F0, "CPlayerPed: error");
