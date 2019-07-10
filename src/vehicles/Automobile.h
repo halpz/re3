@@ -4,6 +4,8 @@
 #include "DamageManager.h"
 #include "Door.h"
 
+class CObject;
+
 class CAutomobile : public CVehicle
 {
 public:
@@ -22,9 +24,7 @@ public:
 	float m_aWheelPosition[4];
 	float m_aWheelSpeed[4];
 	uint8 field_4D8;
-	uint8 m_auto_flagA1 : 1;
-	uint8 m_auto_flagA2 : 1;
-	uint8 m_auto_flagA4 : 1;
+	uint8 m_auto_flagA7 : 1;
 	uint8 bTaxiLight : 1;
 	uint8 m_auto_flagA10 : 1;
 	uint8 m_auto_flagA20 : 1;
@@ -37,7 +37,8 @@ public:
 	float m_aSuspensionLineLength[4];
 	float m_fHeightAboveRoad;
 	float m_fImprovedHandling;
-	uint8 stuff6[32];
+	uint8 stuff6[28];
+	float field_530;
 	CPhysical *m_aGroundPhysical[4];	// physicals touching wheels
 	CVector m_aGroundOffset[4];		// from ground object to colpoint
 	CEntity *m_pBlowUpEntity;
@@ -64,12 +65,15 @@ public:
 	void PreRender(void);
 	void Render(void);
 
+	// from CPhysical
+	int32 ProcessEntityCollision(CEntity *ent, CColPoint *colpoints);
+
 	// from CVehicle
 	void ProcessControlInputs(uint8);
 	void GetComponentWorldPosition(int32 component, CVector &pos);
 	bool IsComponentPresent(int32 component);
 	void SetComponentRotation(int32 component, CVector rotation);
-	void OpenDoor(int32, eDoors door, float);
+	void OpenDoor(int32 component, eDoors door, float openRatio);
 	void ProcessOpenDoor(uint32, uint32, float);
 	bool IsDoorReady(eDoors door);
 	bool IsDoorFullyOpen(eDoors door);
@@ -83,12 +87,23 @@ public:
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
-	void SpawnFlyingComponent(int32 component, uint32 type);
+	void PlayHornIfNecessary(void);
+	void ResetSuspension(void);
+	void SetupSuspensionLines(void);
+	void ScanForCrimes(void);
+	void BlowUpCarsInPath(void);
+	bool HasCarStoppedBecauseOfLight(void);
+	void SetBusDoorTimer(uint32 timer, uint8 type);
+	void ProcessAutoBusDoors(void);
+	void ProcessSwingingDoor(int32 component, eDoors door);
+	void SetupDamageAfterLoad(void);
+	CObject *SpawnFlyingComponent(int32 component, uint32 type);
+	CObject *RemoveBonnetInPedCollision(void);
+	void SetPanelDamage(int32 component, ePanels panel, bool noFlyingComponents = false);
+	void SetBumperDamage(int32 component, ePanels panel, bool noFlyingComponents = false);
+	void SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents = false);
 
-	void SetPanelDamage(int32 component, ePanels panel, bool noFlyingComponents);
-	void SetBumperDamage(int32 component, ePanels panel, bool noFlyingComponents);
-	void SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents);
-
+	void Fix(void);
 	void SetComponentVisibility(RwFrame *frame, uint32 flags);
 	void SetupModelNodes(void);
 	void SetTaxiLight(bool light);

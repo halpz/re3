@@ -306,8 +306,29 @@ enum eMenuAction
 
 enum eCheckHover
 {
-	ACTIVATE_OPTION = 2,
-	IGNORE_OPTION = 42,
+	HOVEROPTION_0,
+	HOVEROPTION_1,
+	HOVEROPTION_DEFAULT,
+	HOVEROPTION_3,
+	HOVEROPTION_4,
+	HOVEROPTION_5,
+	HOVEROPTION_6,
+	HOVEROPTION_7,
+	HOVEROPTION_8,
+	HOVEROPTION_9,
+	HOVEROPTION_10,
+	HOVEROPTION_11,
+	HOVEROPTION_12,
+	HOVEROPTION_13,
+	HOVEROPTION_14,
+	HOVEROPTION_15,
+	HOVEROPTION_16,
+	HOVEROPTION_17,
+	HOVEROPTION_18,
+	HOVEROPTION_19,
+	HOVEROPTION_20,
+	HOVEROPTION_CHANGESKIN,
+	HOVEROPTION_NULL = 42,
 };
 
 enum eMenuColumns
@@ -348,7 +369,7 @@ struct tSkinInfo
 	char skinName[256];
 	char currSkinName[256];
 	char date[256];
-	int field_304;
+	tSkinInfo *field_304;
 };
 
 struct CMenuScreen
@@ -388,7 +409,7 @@ public:
 	int32 m_nMouseTempPosX;
 	int32 m_nMouseTempPosY;
 	bool m_bShowMouse;
- tSkinInfo field_12C;
+	tSkinInfo m_sSkin;
 	tSkinInfo *m_pSelectedSkin;
  tSkinInfo *field_438;
  float field_43C;
@@ -427,7 +448,7 @@ public:
 	int m_nCurrOption;
 	int m_nPrevOption;
 	int m_nPrevScreen;
- int field_558;
+ uint32 field_558;
 	int m_nCurrSaveSlot;
 	int m_nScreenChangeDelayTimer;
 
@@ -450,16 +471,17 @@ public:
 	static int8 &m_bFrontEnd_ReloadObrTxtGxt;
 	static int32 &m_PrefsMusicVolume;
 	static int32 &m_PrefsSfxVolume;
-	static uint8 *m_PrefsSkinFile;
+	static char *m_PrefsSkinFile;
+	static int32 &m_KeyPressedCode;
 
 	static bool &m_bStartUpFrontEndRequested;
 	static bool &m_bShutDownFrontEndRequested;
 	static bool &m_PrefsAllowNastyGame;
 
 public:
-	void BuildStatLine(char *, void *, uint16, void *);
+	void BuildStatLine(char *text, float *stat, bool aFloat, float* stat2);
 	static void CentreMousePointer();
-	void CheckCodesForControls(int, int);
+	int CheckCodesForControls(int32);
 	bool CheckHover(int x1, int x2, int y1, int y2);
 	void CheckSliderMovement(int);
 	int CostructStatLine(int);

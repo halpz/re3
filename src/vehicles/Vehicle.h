@@ -88,12 +88,37 @@ enum eLights
 	VEHLIGHT_REAR_RIGHT,
 };
 
+enum eWheels
+{
+	VEHWHEEL_FRONT_LEFT,
+	VEHWHEEL_FRONT_RIGHT,
+	VEHWHEEL_REAR_LEFT,
+	VEHWHEEL_REAR_RIGHT,
+};
+
 enum
 {
 	CAR_PIECE_WHEEL_LF = 13,
 	CAR_PIECE_WHEEL_LR,
 	CAR_PIECE_WHEEL_RF,
 	CAR_PIECE_WHEEL_RR,
+};
+
+enum tWheelState
+{
+	WHEEL_STATE_0 = 0,
+	WHEEL_STATE_1 = 1,	// constant velocity
+	WHEEL_STATE_2 = 2,	// normal
+	WHEEL_STATE_STATIC = 3,	// not moving
+};
+
+enum eFlightModel
+{
+	FLIGHT_MODEL_DODO,
+	// not used in III
+	FLIGHT_MODEL_RCPLANE,
+	FLIGHT_MODEL_HELI,
+	FLIGHT_MODEL_SEAPLANE
 };
 
 class CVehicle : public CPhysical
@@ -115,7 +140,7 @@ public:
 	int8 m_nGettingOutFlags;
 	uint8 m_nNumMaxPassengers;
 	char field_1CD[19];
-	CEntity *m_pCurSurface;
+	CEntity *m_pCurGroundEntity;
 	CFire *m_pCarFire;
 	float m_fSteerAngle;
 	float m_fGasPedal;
@@ -142,19 +167,19 @@ public:
 	uint8 m_veh_flagB80 : 1;
 
 	uint8 m_veh_flagC1 : 1;
-	uint8 m_veh_flagC2 : 1;		// bIsDamaged
+	uint8 bIsDamaged : 1; // This vehicle has been damaged and is displaying all its components
 	uint8 m_veh_flagC4 : 1;
 	uint8 m_veh_flagC8 : 1;
 	uint8 m_veh_flagC10 : 1;
 	uint8 m_veh_flagC20 : 1;
-	uint8 m_veh_flagC40 : 1;
+	uint8 bCanBeDamaged : 1; // Set to FALSE during cut scenes to avoid explosions
 	uint8 m_veh_flagC80 : 1;
 
 	uint8 m_veh_flagD1 : 1;
 	uint8 m_veh_flagD2 : 1;
-	uint8 m_veh_flagD4 : 1;
-	uint8 m_veh_flagD8 : 1;
-	uint8 bRecordedForReplay : 1;
+	uint8 bVehicleColProcessed : 1;// Has ProcessEntityCollision been processed for this car?
+	uint8 bIsCarParkVehicle : 1; // Car has been created using the special CAR_PARK script command
+	uint8 bHasAlreadyBeenRecorded : 1; // Used for replays
 	uint8 m_veh_flagD20 : 1;
 	uint8 m_veh_flagD40 : 1;
 	uint8 m_veh_flagD80 : 1;
@@ -171,7 +196,7 @@ public:
 	uint32 m_nTimeOfDeath;
 	int16 field_214;
 	int16 m_nBombTimer;        // goes down with each frame
-	CPed *m_pWhoDetonatedMe;
+	CPed *m_pWhoSetMeOnFire;
 	float field_21C;
 	float field_220;
 	eCarLock m_nDoorLock;
@@ -181,11 +206,9 @@ public:
 	int8 field_22B;
 	uint8 m_nCarHornTimer;
 	int8 field_22D;
-	uint8 m_nSirenOrAlarm;
+	bool m_bSirenOrAlarm;
 	int8 field_22F;
-	// TODO: this is an array
-	CStoredCollPoly m_frontCollPoly;     // poly which is under front part of car
-	CStoredCollPoly m_rearCollPoly;      // poly which is under rear part of car
+	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
 	float m_fSteerRatio;
 	eVehicleType m_vehType;
 
@@ -194,6 +217,8 @@ public:
 	static void operator delete(void*, size_t);
 	static void operator delete(void*, int);
 
+	CVehicle(void) {}	// FAKE
+	CVehicle(uint8 CreatedBy);
 	~CVehicle(void);
 	// from CEntity
 	void SetModelIndex(uint32 id);
@@ -224,6 +249,13 @@ public:
 	bool IsTrain(void) { return m_vehType == VEHICLE_TYPE_TRAIN; }
 	bool IsHeli(void) { return m_vehType == VEHICLE_TYPE_HELI; }
 	bool IsPlane(void) { return m_vehType == VEHICLE_TYPE_PLANE; }
+
+	void FlyingControl(eFlightModel flightModel);
+	void ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
+		int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, uint16 wheelStatus);
+	void ExtinguishCarFire(void);
+	void ProcessDelayedExplosion(void);
+	float ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVector &speed, float radius);
 	bool IsLawEnforcementVehicle(void);
 	void ChangeLawEnforcerState(uint8 enable);
 	bool UsesSiren(uint32 id);
@@ -255,7 +287,7 @@ public:
 };
 
 static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");
-static_assert(offsetof(CVehicle, m_pCurSurface) == 0x1E0, "CVehicle: error");
+static_assert(offsetof(CVehicle, m_pCurGroundEntity) == 0x1E0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nAlarmState) == 0x1A0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nLastWeaponDamage) == 0x228, "CVehicle: error");
 

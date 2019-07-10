@@ -454,6 +454,8 @@ int     m_iModeObbeCamIsInForCar;
 	void ProcessMusicFade(void);
 	void SetFadeColour(uint8 r, uint8 g, uint8 b);
 
+	void CamShake(float strength, float x, float y, float z);
+
 	void SetMotionBlur(int r, int g, int b, int a, int type);
 	void SetMotionBlurAlpha(int a);
 	void RenderMotionBlur(void);
@@ -463,6 +465,7 @@ int     m_iModeObbeCamIsInForCar;
 	void DrawBordersForWideScreen(void);
 	void Restore(void);
 	void SetWidescreenOff(void);
+	void CamShake(float);
 
 	void dtor(void) { this->CCamera::~CCamera(); }
 };

@@ -155,6 +155,19 @@ spawnCar(int id)
 #endif
 
 void
+FixCar(void)
+{
+	CVehicle *veh = FindPlayerVehicle();
+	if(veh == nil)
+		return;
+	veh->m_fHealth = 1000.0f;
+	if(!veh->IsCar())
+		return;
+	((CAutomobile*)veh)->Damage.SetEngineStatus(0);
+	((CAutomobile*)veh)->Fix();
+}
+
+void
 DebugMenuPopulate(void)
 {
 	if(DebugMenuLoad()){
@@ -198,6 +211,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Strong grip", StrongGripCheat);
 		DebugMenuAddCmd("Cheats", "Nasty limbs", NastyLimbsCheat);
 
+		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Collision Polys", (int8*)&gbShowCollisionPolys, nil);

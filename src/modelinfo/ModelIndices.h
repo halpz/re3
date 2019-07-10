@@ -164,7 +164,8 @@
 // expand as needed
 enum
 {
-	MI_COP = 1,
+	MI_PLAYER = 0,
+	MI_COP,
 	MI_SWAT,
 	MI_FBI,
 	MI_ARMY,

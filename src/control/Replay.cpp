@@ -290,14 +290,14 @@ void CReplay::RecordThisFrame(void)
 		CPed* p = peds->GetSlot(i);
 		if (!p || !p->m_rwObject)
 			continue;
-		if (!p->bRecordedForReplay){
+		if (!p->bHasAlreadyBeenRecorded){
 			tPedHeaderPacket* ph = (tPedHeaderPacket*)&Record.m_pBase[Record.m_nOffset];
 			ph->type = REPLAYPACKET_PED_HEADER;
 			ph->index = i;
 			ph->mi = p->GetModelIndex();
 			ph->pedtype = p->m_nPedType;
 			Record.m_nOffset += sizeof(*ph);
-			p->bRecordedForReplay = true;
+			p->bHasAlreadyBeenRecorded = true;
 		}
 		StorePedUpdate(p, i);
 	}
@@ -1012,7 +1012,7 @@ void CReplay::ProcessReplayCamera(void)
 	default:
 		break;
 	}
-	TheCamera.m_vecGameCamPos = *TheCamera.GetMatrix().GetPosition();
+	TheCamera.m_vecGameCamPos = TheCamera.GetMatrix().GetPosition();
 	TheCamera.CalculateDerivedValues();
 	RwMatrixUpdate(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
 	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));
@@ -1346,14 +1346,14 @@ void CReplay::MarkEverythingAsNew(void)
 		CVehicle* v = CPools::GetVehiclePool()->GetSlot(i);
 		if (!v)
 			continue;
-		v->bRecordedForReplay = false;
+		v->bHasAlreadyBeenRecorded = false;
 	}
 	i = CPools::GetPedPool()->GetSize();
 	while (i--) {
 		CPed* p = CPools::GetPedPool()->GetSlot(i);
 		if (!p)
 			continue;
-		p->bRecordedForReplay = false;
+		p->bHasAlreadyBeenRecorded = false;
 	}
 }
 #endif

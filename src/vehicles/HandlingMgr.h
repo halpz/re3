@@ -119,7 +119,9 @@ VALIDATE_SIZE(tHandlingData, 0xD8);
 class cHandlingDataMgr
 {
 	float field_0;	// unused it seems
+public:
 	float field_4;	// wheel related
+private:
 	float field_8;	//
 	float field_C;	// unused it seems
 	float field_10;	//

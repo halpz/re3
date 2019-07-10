@@ -62,7 +62,7 @@ CPhysical::CPhysical(void)
 	m_phy_flagA10 = false;
 	m_phy_flagA20 = false;
 
-	m_nLastCollType = 0;
+	m_nSurfaceTouched = SURFACE_DEFAULT;
 }
 
 CPhysical::~CPhysical(void)
@@ -457,7 +457,7 @@ CPhysical::ApplySpringCollision(float springConst, CVector &springDir, CVector &
 	float compression = 1.0f - springRatio;
 	if(compression > 0.0f){
 		float step = min(CTimer::GetTimeStep(), 3.0f);
-		float impulse = -0.008f*m_fMass*step * springConst * compression * bias*2.0f;
+		float impulse = -GRAVITY*m_fMass*step * springConst * compression * bias*2.0f;
 		ApplyMoveForce(springDir*impulse);
 		ApplyTurnForce(springDir*impulse, point);
 	}
@@ -489,7 +489,7 @@ void
 CPhysical::ApplyGravity(void)
 {
 	if(bAffectedByGravity)
-		m_vecMoveSpeed.z -= 0.008f * CTimer::GetTimeStep();
+		m_vecMoveSpeed.z -= GRAVITY * CTimer::GetTimeStep();
 }
 
 void
@@ -1783,7 +1783,7 @@ CPhysical::ProcessShift(void)
 		}
 		bIsStuck = false;
 		bIsInSafePosition = true;
-		m_fDistanceTravelled = (GetPosition() - *matrix.GetPosition()).Magnitude();
+		m_fDistanceTravelled = (GetPosition() - matrix.GetPosition()).Magnitude();
 		RemoveAndAdd();
 	}
 }
@@ -1918,14 +1918,14 @@ CPhysical::ProcessCollision(void)
 	   bHitByTrain ||
 	   m_status == STATUS_PLAYER || IsPed() && ped->IsPlayer()){
 		if(IsVehicle())
-			((CVehicle*)this)->m_veh_flagD4 = true;
+			((CVehicle*)this)->bVehicleColProcessed = true;
 		if(CheckCollision()){
 			GetMatrix() = savedMatrix;
 			return;
 		}
 	}
 	bHitByTrain = false;
-	m_fDistanceTravelled = (GetPosition() - *savedMatrix.GetPosition()).Magnitude();
+	m_fDistanceTravelled = (GetPosition() - savedMatrix.GetPosition()).Magnitude();
 	m_phy_flagA80 = false;
 
 	bIsStuck = false;

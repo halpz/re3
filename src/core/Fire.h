@@ -1,13 +1,13 @@
 #pragma once
-#include "common.h"
-#include "Entity.h"
+
+class CEntity;
 
 class CFire
 {
-	char m_bIsOngoing;
-	char m_bExists;
-	char m_bPropogationFlag;
-	char m_bAudioSet;
+	bool m_bIsOngoing;
+	bool m_bExists;
+	bool m_bPropogationFlag;
+	bool m_bAudioSet;
 	CVector m_vecPos;
 	CEntity *m_pEntity;
 	CEntity *m_pSource;
@@ -21,3 +21,10 @@ class CFire
 public:
 	void Extinguish(void);
 };
+
+class CFireManager
+{
+public:
+	void StartFire(CEntity *entityOnFire, CEntity *culprit, float, uint32);
+};
+extern CFireManager &gFireManager;

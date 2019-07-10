@@ -94,6 +94,8 @@ public:
 	uint16 m_level;	// int16
 	CReference *m_pFirstReference;
 
+	CColModel *GetColModel(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(); }
+
 	CEntity(void);
 	~CEntity(void);
 

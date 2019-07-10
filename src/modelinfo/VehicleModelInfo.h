@@ -107,7 +107,7 @@ public:
 	void SetAtomicRenderCallbacks(void);
 
 	static RwObject *SetAtomicFlagCB(RwObject *object, void *data);
-	static RpAtomic *ClearAtomicFlagCB(RpAtomic *atomic, void *data);
+	static RwObject *ClearAtomicFlagCB(RwObject *atomic, void *data);
 	void SetVehicleComponentFlags(RwFrame *frame, uint32 flags);
 	void PreprocessHierarchy(void);
 	void GetWheelPosn(int32 n, CVector &pos);

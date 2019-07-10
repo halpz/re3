@@ -7,8 +7,10 @@
 #include "Object.h"
 
 WRAPPER void CObject::ObjectDamage(float amount) { EAXJMP(0x4BB240); }
+WRAPPER void CObject::DeleteAllTempObjectInArea(CVector, float) { EAXJMP(0x4BBED0); }
 
 int16 &CObject::nNoTempObjects = *(int16*)0x95CCA2;
+int16 &CObject::nBodyCastHealth = *(int16*)0x5F7D4C;	// 1000
 
 void *CObject::operator new(size_t sz) { return CPools::GetObjectPool()->New();  }
 void CObject::operator delete(void *p, size_t sz) { CPools::GetObjectPool()->Delete((CObject*)p); }
@@ -85,7 +87,13 @@ CObject::RemoveLighting(bool reset)
 		WorldReplaceScorchedLightsWithNormal(Scene.world);
 }
 
-WRAPPER void CObject::DeleteAllTempObjectInArea(CVector, float) { EAXJMP(0x4BBED0); }
+
+void
+CObject::RefModelInfo(int32 modelId)
+{
+	m_nRefModelIndex = modelId;
+	CModelInfo::GetModelInfo(modelId)->AddRef();
+}
 
 class CObject_ : public CObject
 {

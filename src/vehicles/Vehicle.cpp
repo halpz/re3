@@ -1,7 +1,9 @@
 #include "common.h"
 #include "main.h"
 #include "patcher.h"
+#include "General.h"
 #include "Timer.h"
+#include "Pad.h"
 #include "Vehicle.h"
 #include "Pools.h"
 #include "HandlingMgr.h"
@@ -13,6 +15,7 @@
 #include "PointLights.h"
 #include "Renderer.h"
 #include "DMAudio.h"
+#include "MusicManager.h"
 #include "Radar.h"
 
 bool &CVehicle::bWheelsOnlyCheat = *(bool *)0x95CD78;
@@ -26,6 +29,79 @@ void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New()
 void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehiclePool()->New(handle); }
 void CVehicle::operator delete(void *p, size_t sz) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
 void CVehicle::operator delete(void *p, int handle) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
+
+CVehicle::CVehicle(uint8 CreatedBy)
+{
+	int i;
+
+	m_nCurrentGear = 0;
+	field_208 = 0;
+	m_fSteerRatio = 0.0f;
+	m_type = ENTITY_TYPE_VEHICLE;
+	VehicleCreatedBy = CreatedBy;
+	bIsLocked = false;
+	bIsLawEnforcer = false;
+	bIsAmbulanceOnDuty = false;
+	bIsFireTruckOnDuty = false;
+	CCarCtrl::UpdateCarCount(this, false);
+	m_fHealth = 1000.0f;
+	bEngineOn = true;
+	bFreebies = true;
+	pDriver = nil;
+	m_nNumPassengers = 0;
+	m_nNumGettingIn = 0;
+	m_nGettingInFlags = 0;
+	m_nGettingOutFlags = 0;
+	m_nNumMaxPassengers = 8;
+	for(i = 0; i < m_nNumMaxPassengers; i++)
+		pPassengers[i] = nil;
+	m_nBombTimer = 0;
+	m_pWhoSetMeOnFire = nil;
+	field_1FB = 0;
+	m_veh_flagB10 = false;
+	m_veh_flagB40 = false;
+	m_veh_flagB80 = false;
+	m_veh_flagC1 = false;
+	bIsDamaged = false;
+	m_veh_flagC8 = false;
+	m_veh_flagC10 = false;
+	m_veh_flagC4 = false;
+	m_veh_flagC20 = false;
+	bCanBeDamaged = true;
+	m_veh_flagC80 = false;
+	m_veh_flagD1 = false;
+	m_veh_flagD2 = false;
+	m_nGunFiringTime = 0;
+	field_214 = 0;
+	bLightsOn = false;
+	bVehicleColProcessed = false;
+	field_1F9 = 0;
+	bIsCarParkVehicle = false;
+	bHasAlreadyBeenRecorded = false;
+	m_bSirenOrAlarm = 0;
+	m_nCarHornTimer = 0;
+	field_22D = 0;
+	m_nAlarmState = 0;
+	m_nDoorLock = CARLOCK_UNLOCKED;
+	m_nLastWeaponDamage = -1;
+	field_220 = 0.0;
+	field_21C = field_220;
+	m_audioEntityId = DMAudio.CreateEntity(0, this);
+	if(m_audioEntityId)
+		DMAudio.SetEntityStatus(m_audioEntityId, true);
+	m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
+	m_pCurGroundEntity = nil;
+	field_22A = 0;
+	field_22B = 0;
+	field_22F = 0;
+	m_aCollPolys[0].valid = false;
+	m_aCollPolys[1].valid = false;
+	m_autoPilot.m_nCarMission = MISSION_NONE;
+	m_autoPilot.m_nAnimationId = TEMPACT_NONE;
+	m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+	m_autoPilot.m_flag4 = false;
+	m_autoPilot.m_flag10 = false;
+}
 
 CVehicle::~CVehicle()
 {
@@ -92,9 +168,227 @@ CVehicle::RemoveLighting(bool reset)
 float
 CVehicle::GetHeightAboveRoad(void)
 {
-	return -1.0f * CModelInfo::GetModelInfo(GetModelIndex())->GetColModel()->boundingBox.min.z;
+	return -1.0f * GetColModel()->boundingBox.min.z;
 }
 
+void
+CVehicle::FlyingControl(eFlightModel flightModel)
+{
+	switch(flightModel){
+	case FLIGHT_MODEL_DODO:
+	{
+		// This seems pretty magic
+
+		// Move Left/Right
+		float moveSpeed = m_vecMoveSpeed.Magnitude();
+		float sideSpeed = DotProduct(m_vecMoveSpeed, GetRight());
+		float sideImpulse = -1.0f * sideSpeed / moveSpeed;
+		float fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward());
+		float magic = m_vecMoveSpeed.MagnitudeSqr() * sq(fwdSpeed);
+		float turnImpulse = (sideImpulse*0.003f + m_fSteerAngle*0.001f) *
+			magic*m_fTurnMass*CTimer::GetTimeStep();
+		ApplyTurnForce(turnImpulse*GetRight(), -4.0f*GetForward());
+
+		float impulse = sideImpulse*0.2f *
+			magic*m_fMass*CTimer::GetTimeStep();
+		ApplyMoveForce(impulse*GetRight());
+		ApplyTurnForce(impulse*GetRight(), 2.0f*GetUp());
+
+
+		// Move Up/Down
+		moveSpeed = m_vecMoveSpeed.Magnitude();
+		float upSpeed = DotProduct(m_vecMoveSpeed, GetUp());
+		float upImpulse = -1.0f * upSpeed / moveSpeed;
+		turnImpulse = (upImpulse*0.002f + -CPad::GetPad(0)->GetSteeringUpDown()/128.0f*0.001f) *
+			magic*m_fTurnMass*CTimer::GetTimeStep();
+		ApplyTurnForce(turnImpulse*GetUp(), -4.0f*GetForward());
+
+		impulse = (upImpulse*3.5f + 0.5f)*0.05f *
+			magic*m_fMass*CTimer::GetTimeStep();
+		if(GRAVITY*m_fMass*CTimer::GetTimeStep() < impulse &&
+		   GetPosition().z > 100.0f)
+			impulse = 0.9f*GRAVITY*m_fMass*CTimer::GetTimeStep();
+		CVector com = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
+		ApplyMoveForce(impulse*GetUp());
+		ApplyTurnForce(impulse*GetUp(), 2.0f*GetUp() + com);
+
+
+		m_vecTurnSpeed.y *= powf(0.9f, CTimer::GetTimeStep());
+		moveSpeed = m_vecMoveSpeed.MagnitudeSqr();
+		if(moveSpeed > 2.25f)
+			m_vecMoveSpeed *= 1.5f/sqrt(moveSpeed);
+
+		float turnSpeed = m_vecTurnSpeed.MagnitudeSqr();
+		if(turnSpeed > 0.04f)
+			m_vecTurnSpeed *= 0.2f/sqrt(turnSpeed);
+	}
+		break;
+
+	case FLIGHT_MODEL_RCPLANE:
+	case FLIGHT_MODEL_SEAPLANE:
+		assert(0 && "Plane flight model not implemented");
+	case FLIGHT_MODEL_HELI:
+		assert(0 && "Heli flight model not implemented");
+	}
+}
+
+void
+CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
+	int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, uint16 wheelStatus)
+{
+	// BUG: using statics here is probably a bad idea
+	static bool bAlreadySkidding = false;	// this is never reset
+	static bool bBraking;
+	static bool bDriving;
+
+	// how much force we want to apply in these axes
+	float fwd = 0.0f;
+	float right = 0.0f;
+
+	bBraking = brake != 0.0f;
+	if(bBraking)
+		thrust = 0.0f;
+	bDriving = thrust != 0.0f;
+
+	float contactSpeedFwd = DotProduct(wheelContactSpeed, wheelFwd);
+	float contactSpeedRight = DotProduct(wheelContactSpeed, wheelRight);
+
+	if(*wheelState != WHEEL_STATE_0)
+		bAlreadySkidding = true;
+	*wheelState = WHEEL_STATE_0;
+
+	adhesion *= CTimer::GetTimeStep();
+	if(bAlreadySkidding)
+		adhesion *= m_handling->fTractionLoss;
+
+	// moving sideways
+	if(contactSpeedRight != 0.0f){
+		// exert opposing force
+		right = -contactSpeedRight/wheelsOnGround;
+
+		if(wheelStatus == WHEEL_STATUS_BURST){
+			float fwdspeed = min(contactSpeedFwd, 0.3f);
+			right += fwdspeed * CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
+		}
+	}
+
+	if(bDriving){
+		fwd = thrust;
+
+		// limit sideways force (why?)
+		if(right > 0.0f){
+			if(right > adhesion)
+				right = adhesion;
+		}else{
+			if(right < -adhesion)
+				right = -adhesion;
+		}
+	}else if(contactSpeedFwd != 0.0f){
+		fwd = -contactSpeedFwd/wheelsOnGround;
+
+		if(!bBraking){
+			if(m_fGasPedal < 0.01f){
+				if(GetModelIndex() == MI_RCBANDIT)
+					brake = 0.2f * mod_HandlingManager.field_4 / m_fMass;
+				else
+					brake = mod_HandlingManager.field_4 / m_fMass;
+			}
+		}
+
+		if(brake > adhesion){
+			if(fabs(contactSpeedFwd) > 0.005f)
+				*wheelState = WHEEL_STATE_STATIC;
+		}else {
+			if(fwd > 0.0f){
+				if(fwd > brake)
+					fwd = brake;
+			}else{
+				if(fwd < -brake)
+					fwd = -brake;
+			}
+		}
+	}
+
+	if(sq(adhesion) < sq(right) + sq(fwd)){
+		if(*wheelState != WHEEL_STATE_STATIC){
+			if(bDriving && contactSpeedFwd < 0.2f)
+				*wheelState = WHEEL_STATE_1;
+			else
+				*wheelState = WHEEL_STATE_2;
+		}
+
+		float l = sqrt(sq(right) + sq(fwd));
+		float tractionLoss = bAlreadySkidding ? 1.0f : m_handling->fTractionLoss;
+		right *= adhesion * tractionLoss / l;
+		fwd *= adhesion * tractionLoss / l;
+	}
+
+	if(fwd != 0.0f || right != 0.0f){
+		CVector direction = fwd*wheelFwd + right*wheelRight;
+		float speed = direction.Magnitude();
+		direction.Normalise();
+
+		float impulse = speed*m_fMass;
+		float turnImpulse = speed*GetMass(wheelContactPoint, direction);
+
+		ApplyMoveForce(impulse * direction);
+		ApplyTurnForce(turnImpulse * direction, wheelContactPoint);
+	}
+}
+
+float
+CVehicle::ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVector &speed, float radius)
+{
+	float angularVelocity;
+	switch(state){
+	case WHEEL_STATE_1:
+		angularVelocity = -1.1f;	// constant speed forward
+		break;
+	case WHEEL_STATE_STATIC:
+		angularVelocity = 0.0f;		// not moving
+		break;
+	default:
+		angularVelocity = -DotProduct(fwd, speed) / radius;	// forward speed
+		break;
+	}
+	return angularVelocity * CTimer::GetTimeStep();
+}
+
+void
+CVehicle::ExtinguishCarFire(void)
+{
+	m_fHealth = max(m_fHealth, 300.0f);
+	if(m_pCarFire)
+		m_pCarFire->Extinguish();
+	if(IsCar()){
+		CAutomobile *car = (CAutomobile*)this;
+		if(car->Damage.GetEngineStatus() >= 225)
+			car->Damage.SetEngineStatus(215);
+		car->field_530 = 0.0f;
+	}
+}
+
+void
+CVehicle::ProcessDelayedExplosion(void)
+{
+	if(m_nBombTimer == 0)
+		return;
+
+	if(m_nBombTimer == 0){
+		int tick = CTimer::GetTimeStep()/60.0f*1000.0f;
+		if(tick > m_nBombTimer)
+			m_nBombTimer = 0;
+		else
+			m_nBombTimer -= tick;
+
+		if(IsCar() && ((CAutomobile*)this)->m_auto_flagA7 == 4 && (m_nBombTimer & 0xFE00) != 0xFE00)
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_BOMB_TICK, 0.0f);
+
+		if(FindPlayerVehicle() != this && m_pWhoSetMeOnFire == FindPlayerPed())
+			CWorld::Players[CWorld::PlayerInFocus].AwardMoneyForExplosion(this);
+		BlowUpCar(m_pWhoSetMeOnFire);
+	}
+}
 
 bool
 CVehicle::IsLawEnforcementVehicle(void)
@@ -442,7 +736,7 @@ CVehicle::IsSphereTouchingVehicle(float sx, float sy, float sz, float radius)
 	float x, y, z;
 	// sphere relative to vehicle
 	CVector sph = CVector(sx, sy, sz) - GetPosition();
-	CColModel *colmodel = CModelInfo::GetModelInfo(GetModelIndex())->GetColModel();
+	CColModel *colmodel = GetColModel();
 
 	x = DotProduct(sph, GetRight());
 	if(colmodel->boundingBox.min.x - radius > x ||
@@ -477,6 +771,11 @@ STARTPATCHES
 	InjectHook(0x4A7E60, &CVehicle_::RemoveLighting_, PATCH_JUMP);
 	InjectHook(0x417E60, &CVehicle_::GetHeightAboveRoad_, PATCH_JUMP);
 
+	InjectHook(0x552BB0, &CVehicle::FlyingControl, PATCH_JUMP);
+	InjectHook(0x5512E0, &CVehicle::ProcessWheel, PATCH_JUMP);
+	InjectHook(0x551280, &CVehicle::ProcessWheelRotation, PATCH_JUMP);
+	InjectHook(0x552AF0, &CVehicle::ExtinguishCarFire, PATCH_JUMP);
+	InjectHook(0x551C90, &CVehicle::ProcessDelayedExplosion, PATCH_JUMP);
 	InjectHook(0x552880, &CVehicle::IsLawEnforcementVehicle, PATCH_JUMP);
 	InjectHook(0x552820, &CVehicle::ChangeLawEnforcerState, PATCH_JUMP);
 	InjectHook(0x552200, &CVehicle::UsesSiren, PATCH_JUMP);
