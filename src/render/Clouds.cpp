@@ -305,7 +305,7 @@ CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 	float c = Sqrt(mat->right.x * mat->right.x + mat->right.y * mat->right.y);
 	if(c > 1.0f)
 		c = 1.0f;
-	ms_cameraRoll = acos(c);
+	ms_cameraRoll = Acos(c);
 	if(mat->right.z < 0.0f)
 		ms_cameraRoll = -ms_cameraRoll;
 

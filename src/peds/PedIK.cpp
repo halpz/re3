@@ -51,7 +51,7 @@ CPedIK::RotateTorso(AnimBlendFrameData *animBlend, LimbOrientation *limb, bool c
 		float dotProduct = DotProduct(mat->at, inversedForward);
 		if(dotProduct > 1.0f) dotProduct = 1.0f;
 		if(dotProduct < -1.0f) dotProduct = -1.0f;
-		float alpha = acos(dotProduct);
+		float alpha = Acos(dotProduct);
 
 		if(mat->at.z < 0.0f)
 			alpha = -alpha;

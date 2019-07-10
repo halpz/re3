@@ -48,7 +48,7 @@
 #include "RpAnimBlend.h"
 #include "Frontend.h"
 
-#define DEFAULT_VIEWWINDOW (tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
+#define DEFAULT_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
 
 
 GlobalScene &Scene = *(GlobalScene*)0x726768;

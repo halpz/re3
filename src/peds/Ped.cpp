@@ -872,7 +872,7 @@ CPed::Avoid(void)
 					// If so, we want to avoid it, so we turn our body 45 degree and look to somewhere else.
 
 					// Game converts from radians to degress and back again here, doesn't make much sense
-					CVector2D forward(-sin(m_fRotationCur), Cos(m_fRotationCur));
+					CVector2D forward(-Sin(m_fRotationCur), Cos(m_fRotationCur));
 					forward.Normalise();	// this is kinda pointless
 
 					// Move forward 1.25 meters
@@ -2153,7 +2153,7 @@ CPed::CalculateNewVelocity(void)
 
 	CVector2D forward(Sin(m_fRotationCur), Cos(m_fRotationCur));
 
-	m_moved.x = CrossProduct2D(m_vecAnimMoveDelta, forward); // (m_vecAnimMoveDelta.x * Cos(m_fRotationCur)) + -sin(m_fRotationCur) * m_vecAnimMoveDelta.y;
+	m_moved.x = CrossProduct2D(m_vecAnimMoveDelta, forward); // (m_vecAnimMoveDelta.x * Cos(m_fRotationCur)) + -Sin(m_fRotationCur) * m_vecAnimMoveDelta.y;
 	m_moved.y = DotProduct2D(m_vecAnimMoveDelta, forward);  // m_vecAnimMoveDelta.y* Cos(m_fRotationCur) + (m_vecAnimMoveDelta.x * Sin(m_fRotationCur));
 
 	if (CTimer::GetTimeStep() >= 0.01f) {
@@ -2179,7 +2179,7 @@ CPed::CalculateNewVelocity(void)
 	// Interestingly this part is responsible for diagonal walking.
 	if (localWalkAngle > -DEGTORAD(50.0f) && localWalkAngle < DEGTORAD(50.0f)) {
 		TheCamera.Cams[TheCamera.ActiveCam].m_fPlayerVelocity = pedSpeed;
-		m_moved = CVector2D(-sin(walkAngle), Cos(walkAngle)) * pedSpeed;
+		m_moved = CVector2D(-Sin(walkAngle), Cos(walkAngle)) * pedSpeed;
 	}
 
 	CAnimBlendAssociation *idleAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_IDLE_STANCE);
@@ -2239,7 +2239,7 @@ CPed::CanPedDriveOff(void)
 bool
 CPed::CanPedJumpThis(int32 unused)
 {
-	CVector2D forward(-sin(m_fRotationCur), Cos(m_fRotationCur));
+	CVector2D forward(-Sin(m_fRotationCur), Cos(m_fRotationCur));
 	CVector pos = GetPosition();
 	// wat?
 	CVector forwardPos(

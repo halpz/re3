@@ -868,7 +868,7 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D
 {
 	float s, c;
 
-	s = -sin(TheCamera.GetForward().Heading());
+	s = -Sin(TheCamera.GetForward().Heading());
 	c = Cos(TheCamera.GetForward().Heading());
 
 	if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1 || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWNPED) {
@@ -885,7 +885,7 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D
 		else
 			forward = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetPosition() - TheCamera.Cams[TheCamera.ActiveCam].SourceBeforeLookBehind;
 
-		s = -sin(forward.Heading());
+		s = -Sin(forward.Heading());
 		c = Cos(forward.Heading());
 	}
 

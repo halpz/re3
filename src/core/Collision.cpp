@@ -627,7 +627,7 @@ CCollision::ProcessSphereBox(const CColSphere &sph, const CColBox &box, CColPoin
 		dist = sph.center - p;
 		float lensq = dist.MagnitudeSqr();
 		if(lensq < mindistsq){
-			point.normal = dist * (1.0f/sqrt(lensq));
+			point.normal = dist * (1.0f/Sqrt(lensq));
 			point.point = sph.center - point.normal;
 			point.surfaceA = sph.surface;
 			point.pieceA = sph.piece;

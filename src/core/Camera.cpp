@@ -355,8 +355,8 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	// TODO: what's transition beta?
 	if(TheCamera.m_bUseTransitionBeta && ResetStatics){
 		CVector VecDistance;
-		IdealSource.x = TargetCoors.x + GroundDist*cos(m_fTransitionBeta);
-		IdealSource.y = TargetCoors.y + GroundDist*sin(m_fTransitionBeta);
+		IdealSource.x = TargetCoors.x + GroundDist*Cos(m_fTransitionBeta);
+		IdealSource.y = TargetCoors.y + GroundDist*Sin(m_fTransitionBeta);
 		Beta = CGeneral::GetATanOfXY(IdealSource.x - TargetCoors.x, IdealSource.y - TargetCoors.y);
 	}else
 		Beta = CGeneral::GetATanOfXY(Source.x - TargetCoors.x, Source.y - TargetCoors.y);
@@ -799,7 +799,7 @@ CCam::WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation)
 	if(CCullZones::CamNoRain() || CCullZones::PlayerNoRain())
 		AlphaTarget = DEGTORAD(14.0f);
 	WellBufferMe(AlphaTarget, &Alpha, &AlphaSpeed, 0.1f, 0.05f, true);
-	Source.z = TargetCoors.z + CA_MAX_DISTANCE*sin(Alpha);
+	Source.z = TargetCoors.z + CA_MAX_DISTANCE*Sin(Alpha);
 
 	if(FindPlayerVehicle()){
 		m_fUnknownZOffSet = 0.0f;
@@ -945,7 +945,7 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 		CWorld::FindRoofZFor3DCoord(TargetCoors.x - SideX, TargetCoors.y - SideY, CarBottom, &FoundRoofSide2);
 
 		// Now find out at what height we'd like to place the camera
-		float CamGround = CWorld::FindGroundZFor3DCoord(Source.x, Source.y, TargetCoors.z + Length*sin(Alpha + ModeAlpha) + m_fCloseInCarHeightOffset, &FoundCamGround);
+		float CamGround = CWorld::FindGroundZFor3DCoord(Source.x, Source.y, TargetCoors.z + Length*Sin(Alpha + ModeAlpha) + m_fCloseInCarHeightOffset, &FoundCamGround);
 		float CamTargetZ = 0.0f;
 		if(FoundCamGround){
 			// This is the normal case
@@ -992,7 +992,7 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 		}
 
 		// Now do things if CamClear...but what is that anyway?
-		float CamZ = TargetCoors.z + Length*sin(Alpha + DeltaAlpha + ModeAlpha) + m_fCloseInCarHeightOffset;
+		float CamZ = TargetCoors.z + Length*Sin(Alpha + DeltaAlpha + ModeAlpha) + m_fCloseInCarHeightOffset;
 		bool FoundGround, FoundRoof;
 		float CamGround2 = CWorld::FindGroundZFor3DCoord(Source.x, Source.y, CamZ, &FoundGround);
 		if(FoundGround){
@@ -1138,8 +1138,8 @@ CCam::FixCamIfObscured(CVector &TargetCoors, float TargetHeight, float TargetOri
 				Obscured1 = CWorld::ProcessLineOfSight(EntityPos, TempSource, colPoint, ent, true, false, false, true, false, true, true);
 		}else if(m_bFixingBeta){
 			float d = (TempSource - Target).Magnitude();
-			TempSource.x = Target.x - d*cos(TargetOrientation);
-			TempSource.y = Target.y - d*sin(TargetOrientation);
+			TempSource.x = Target.x - d*Cos(TargetOrientation);
+			TempSource.y = Target.y - d*Sin(TargetOrientation);
 
 			// same check again
 			Obscured2 = CWorld::ProcessLineOfSight(Target, TempSource, colPoint, ent, true, false, false, true, false, true, true);

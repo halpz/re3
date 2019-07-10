@@ -2341,7 +2341,7 @@ HRESULT CapturePad(RwInt32 padID)
 			float angle = DEGTORAD((float)js.rgdwPOV[0] / 100.0f);
 
 			leftStickPos.x = Sin(angle);
-			leftStickPos.y = -cos(angle);
+			leftStickPos.y = -Cos(angle);
 		}
 		
 		if ( AllValidWinJoys.m_aJoys[bs.padID].m_bHasAxisR && AllValidWinJoys.m_aJoys[bs.padID].m_bHasAxisZ )

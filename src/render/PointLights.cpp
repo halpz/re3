@@ -213,7 +213,7 @@ CPointLights::RenderFogEffect(void)
 							if(dot > 0.0f && dot < FOG_AREA_LENGTH && linedistsq < sq(FOG_AREA_WIDTH)){
 								float intensity = 158.0f * fogginess;
 								// more intensity the smaller the angle
-								intensity *= dot/sqrt(distsq);
+								intensity *= dot/Sqrt(distsq);
 								// more intensity the closer to light source
 								intensity *= 1.0f - sq(dot/FOG_AREA_LENGTH);
 								// more intensity the closer to line

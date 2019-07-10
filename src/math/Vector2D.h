@@ -13,7 +13,7 @@ public:
 	void Normalise(void){
 		float sq = MagnitudeSqr();
 		if(sq > 0.0f){
-			float invsqrt = 1.0f/sqrt(sq);
+			float invsqrt = 1.0f/Sqrt(sq);
 			x *= invsqrt;
 			y *= invsqrt;
 		}else

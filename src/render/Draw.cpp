@@ -50,8 +50,8 @@ CDraw::ConvertFOV(float hfov)
 	float ar1 = DEFAULT_ASPECT_RATIO;
 	float ar2 = GetAspectRatio();
 	hfov = DEGTORAD(hfov);
-	float vfov = atan(tan(hfov/2) / ar1) *2;
-	hfov = atan(tan(vfov/2) * ar2) *2;
+	float vfov = Atan(tan(hfov/2) / ar1) *2;
+	hfov = Atan(tan(vfov/2) * ar2) *2;
 	return RADTODEG(hfov);
 }
 #endif

@@ -216,11 +216,11 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		m_vecTurnSpeed.y *= Pow(0.9f, CTimer::GetTimeStep());
 		moveSpeed = m_vecMoveSpeed.MagnitudeSqr();
 		if(moveSpeed > 2.25f)
-			m_vecMoveSpeed *= 1.5f/sqrt(moveSpeed);
+			m_vecMoveSpeed *= 1.5f/Sqrt(moveSpeed);
 
 		float turnSpeed = m_vecTurnSpeed.MagnitudeSqr();
 		if(turnSpeed > 0.04f)
-			m_vecTurnSpeed *= 0.2f/sqrt(turnSpeed);
+			m_vecTurnSpeed *= 0.2f/Sqrt(turnSpeed);
 	}
 		break;
 

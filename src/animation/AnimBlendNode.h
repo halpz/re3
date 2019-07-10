@@ -10,7 +10,7 @@ class CAnimBlendNode
 public:
 	// for slerp
 	float theta;		// angle between quaternions
-	float invSin;		// 1/sin(theta)
+	float invSin;		// 1/Sin(theta)
 	// indices into array in sequence
 	int32 frameA;		// next key frame
 	int32 frameB;		// previous key frame

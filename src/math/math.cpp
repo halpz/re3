@@ -14,7 +14,7 @@ CQuaternion::Slerp(const CQuaternion &q1, const CQuaternion &q2, float theta, fl
 		if(theta > PI/2){
 			theta = PI - theta;
 			w1 = Sin((1.0f - t) * theta) * invSin;
-			w2 = -sin(t * theta) * invSin;
+			w2 = -Sin(t * theta) * invSin;
 		}else{
 			w1 = Sin((1.0f - t) * theta) * invSin;
 			w2 = Sin(t * theta) * invSin;

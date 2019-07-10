@@ -30,7 +30,7 @@ public:
 	void Normalise(void) {
 		float sq = MagnitudeSqr();
 		if(sq > 0.0f){
-			float invsqrt = 1.0f/sqrt(sq); // CMaths::RecipSqrt
+			float invsqrt = 1.0f/Sqrt(sq); // CMaths::RecipSqrt
 			x *= invsqrt;
 			y *= invsqrt;
 			z *= invsqrt;

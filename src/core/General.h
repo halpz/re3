@@ -70,12 +70,12 @@ public:
 			if (y > 0.0f)
 				return PI - Atan2(x / y, 1.0f);
 			else
-				return -atan2(x / y, 1.0f);
+				return -Atan2(x / y, 1.0f);
 		} else {
 			if (y > 0.0f)
 				return -(PI + Atan2(x / y, 1.0f));
 			else
-				return -atan2(x / y, 1.0f);
+				return -Atan2(x / y, 1.0f);
 		}
 	}
 
