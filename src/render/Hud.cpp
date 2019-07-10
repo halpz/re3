@@ -173,7 +173,7 @@ void CHud::Draw()
 
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 
-			float fStep = sin((CTimer::GetTimeInMilliseconds() & 1023) * 0.0061328127);
+			float fStep = Sin((CTimer::GetTimeInMilliseconds() & 1023) * 0.0061328127);
 			float fMultBright = SpriteBrightness * 0.03f * (0.25f * fStep + 0.75f);
 			CRect rect;
 #ifndef ASPECT_RATIO_SCALE

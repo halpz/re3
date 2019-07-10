@@ -445,7 +445,7 @@ void
 cAudioManager::CalculateDistance(bool *ptr, float dist)
 {
 	if(*ptr == false) {
-		m_sQueueSample.m_fDistance = sqrt(dist);
+		m_sQueueSample.m_fDistance = Sqrt(dist);
 		*ptr = true;
 	}
 }

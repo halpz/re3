@@ -127,8 +127,8 @@ public:
 	}
 
 	void SetRotateXOnly(float angle){
-		float c = cos(angle);
-		float s = sin(angle);
+		float c = Cos(angle);
+		float s = Sin(angle);
 
 		m_matrix.right.x = 1.0f;
 		m_matrix.right.y = 0.0f;
@@ -149,8 +149,8 @@ public:
 		m_matrix.pos.z = 0.0f;
 	}
 	void SetRotateYOnly(float angle){
-		float c = cos(angle);
-		float s = sin(angle);
+		float c = Cos(angle);
+		float s = Sin(angle);
 
 		m_matrix.right.x = c;
 		m_matrix.right.y = 0.0f;
@@ -171,8 +171,8 @@ public:
 		m_matrix.pos.z = 0.0f;
 	}
 	void SetRotateZOnly(float angle){
-		float c = cos(angle);
-		float s = sin(angle);
+		float c = Cos(angle);
+		float s = Sin(angle);
 
 		m_matrix.right.x = c;
 		m_matrix.right.y = s;
@@ -193,12 +193,12 @@ public:
 		m_matrix.pos.z = 0.0f;
 	}
 	void SetRotate(float xAngle, float yAngle, float zAngle) {
-		float cX = cos(xAngle);
-		float sX = sin(xAngle);
-		float cY = cos(yAngle);
-		float sY = sin(yAngle);
-		float cZ = cos(zAngle);
-		float sZ = sin(zAngle);
+		float cX = Cos(xAngle);
+		float sX = Sin(xAngle);
+		float cY = Cos(yAngle);
+		float sY = Sin(yAngle);
+		float cZ = Cos(zAngle);
+		float sZ = Sin(zAngle);
 
 		m_matrix.right.x = cZ * cY - (sZ * sX) * sY;
 		m_matrix.right.y = (cZ * sX) * sY + sZ * cY;

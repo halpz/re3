@@ -2340,7 +2340,7 @@ HRESULT CapturePad(RwInt32 padID)
 		{
 			float angle = DEGTORAD((float)js.rgdwPOV[0] / 100.0f);
 
-			leftStickPos.x = sin(angle);
+			leftStickPos.x = Sin(angle);
 			leftStickPos.y = -cos(angle);
 		}
 		
@@ -2365,16 +2365,16 @@ HRESULT CapturePad(RwInt32 padID)
 		
 		CPad *pad = CPad::GetPad(bs.padID);
 
-		if ( fabs(leftStickPos.x)  > 0.3f )
+		if ( Abs(leftStickPos.x)  > 0.3f )
 			pad->PCTempJoyState.LeftStickX	= (int32)(leftStickPos.x  * 128.0f);
 		
-		if ( fabs(leftStickPos.y)  > 0.3f )
+		if ( Abs(leftStickPos.y)  > 0.3f )
 			pad->PCTempJoyState.LeftStickY	= (int32)(leftStickPos.y  * 128.0f);
 		
-		if ( fabs(rightStickPos.x) > 0.3f )
+		if ( Abs(rightStickPos.x) > 0.3f )
 			pad->PCTempJoyState.RightStickX = (int32)(rightStickPos.x * 128.0f);
 
-		if ( fabs(rightStickPos.y) > 0.3f )
+		if ( Abs(rightStickPos.y) > 0.3f )
 			pad->PCTempJoyState.RightStickY = (int32)(rightStickPos.y * 128.0f);
 	}
 	

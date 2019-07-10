@@ -33,7 +33,7 @@ CPointLights::AddLight(uint8 type, CVector coors, CVector dir, float radius, flo
 		return;
 
 	dist = coors - TheCamera.GetPosition();
-	if(fabs(dist.x) < MAX_DIST && fabs(dist.y) < MAX_DIST){
+	if(Abs(dist.x) < MAX_DIST && Abs(dist.y) < MAX_DIST){
 		distance = dist.Magnitude();
 		if(distance < MAX_DIST){
 			aLights[NumLights].type = type;
@@ -73,9 +73,9 @@ CPointLights::GenerateLightsAffectingObject(CVector *objCoors)
 		// same weird distance calculation. simplified here
 		dist = aLights[i].coors - *objCoors;
 		radius = aLights[i].radius;
-		if(fabs(dist.x) < radius &&
-		   fabs(dist.y) < radius &&
-		   fabs(dist.z) < radius){
+		if(Abs(dist.x) < radius &&
+		   Abs(dist.y) < radius &&
+		   Abs(dist.z) < radius){
 
 			distance = dist.Magnitude();
 			if(distance < radius){
@@ -217,7 +217,7 @@ CPointLights::RenderFogEffect(void)
 								// more intensity the closer to light source
 								intensity *= 1.0f - sq(dot/FOG_AREA_LENGTH);
 								// more intensity the closer to line
-								intensity *= 1.0f - sq(sqrt(linedistsq) / FOG_AREA_WIDTH);
+								intensity *= 1.0f - sq(Sqrt(linedistsq) / FOG_AREA_WIDTH);
 
 								if(CSprite::CalcScreenCoors(fogcoors, spriteCoors, &spritew, &spriteh, true)){
 									float rotation = (CTimer::GetTimeInMilliseconds()&0x1FFF) * 2*3.14f / 0x1FFF;
@@ -251,11 +251,11 @@ CPointLights::RenderFogEffect(void)
 
 						float dx = xi - aLights[i].coors.x;
 						float dy = yi - aLights[i].coors.y;
-						float lightdist = sqrt(sq(dx) + sq(dy));
+						float lightdist = Sqrt(sq(dx) + sq(dy));
 						if(lightdist < FOG_AREA_RADIUS){
 							dx = xi - TheCamera.GetPosition().x;
 							dy = yi - TheCamera.GetPosition().y;
-							float camdist = sqrt(sq(dx) + sq(dy));
+							float camdist = Sqrt(sq(dx) + sq(dy));
 							if(camdist < MAX_DIST){
 								float intensity;
 								// distance fade

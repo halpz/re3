@@ -262,9 +262,9 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 		model.vertices = (CVector*)RwMalloc(numVertices*sizeof(CVector));
 		for(i = 0; i < numVertices; i++){
 			model.vertices[i] = *(CVector*)buf;
-			if(fabs(model.vertices[i].x) >= 256.0f ||
-			   fabs(model.vertices[i].y) >= 256.0f ||
-			   fabs(model.vertices[i].z) >= 256.0f)
+			if(Abs(model.vertices[i].x) >= 256.0f ||
+			   Abs(model.vertices[i].y) >= 256.0f ||
+			   Abs(model.vertices[i].z) >= 256.0f)
 				printf("%s:Collision volume too big\n", modelname);
 			buf += 12;
 		}

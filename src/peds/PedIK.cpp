@@ -34,8 +34,8 @@ CPedIK::RotateTorso(AnimBlendFrameData *animBlend, LimbOrientation *limb, bool c
 
 	// rotation == 0 -> looking in y direction
 	// left? vector
-	float c = cos(m_ped->m_fRotationCur);
-	float s = sin(m_ped->m_fRotationCur);
+	float c = Cos(m_ped->m_fRotationCur);
+	float s = Sin(m_ped->m_fRotationCur);
 	rightVector.x = -(c*mat->right.x + s*mat->right.y);
 	rightVector.y = -(c*mat->up.x + s*mat->up.y);
 	rightVector.z = -(c*mat->at.x + s*mat->at.y);

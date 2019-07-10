@@ -53,7 +53,7 @@ CDoor::Process(CVehicle *vehicle)
 		break;
 	}
 	fSpeedDiff = clamp(fSpeedDiff, -0.2f, 0.2f);
-	if(fabs(fSpeedDiff) > 0.002f)
+	if(Abs(fSpeedDiff) > 0.002f)
 		m_fAngVel += fSpeedDiff;
 	m_fAngVel *= 0.945f;
 	m_fAngVel = clamp(m_fAngVel, -0.3f, 0.3f);
@@ -76,7 +76,7 @@ CDoor::Process(CVehicle *vehicle)
 float
 CDoor::RetAngleWhenClosed(void)
 {
-	if(fabs(m_fMaxAngle) < fabs(m_fMinAngle))
+	if(Abs(m_fMaxAngle) < Abs(m_fMinAngle))
 		return m_fMaxAngle;
 	else
 		return m_fMinAngle;
@@ -85,7 +85,7 @@ CDoor::RetAngleWhenClosed(void)
 float
 CDoor::RetAngleWhenOpen(void)
 {
-	if(fabs(m_fMaxAngle) < fabs(m_fMinAngle))
+	if(Abs(m_fMaxAngle) < Abs(m_fMinAngle))
 		return m_fMinAngle;
 	else
 		return m_fMaxAngle;
@@ -104,7 +104,7 @@ bool
 CDoor::IsFullyOpen(void)
 {
 	// why -0.5? that's around 28 deg less than fully open
-	if(fabs(m_fAngle) < fabs(RetAngleWhenOpen()) - 0.5f)
+	if(Abs(m_fAngle) < Abs(RetAngleWhenOpen()) - 0.5f)
 		return false;
 	return true;
 }

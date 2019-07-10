@@ -476,7 +476,7 @@ CPhysical::ApplySpringDampening(float damping, CVector &springDir, CVector &poin
 	// what is this?
 	float a = m_fTurnMass / ((point.MagnitudeSqr() + 1.0f) * 2.0f * m_fMass);
 	a = min(a, 1.0f);
-	float b = fabs(impulse / (speedB * m_fMass));
+	float b = Abs(impulse / (speedB * m_fMass));
 	if(a < b)
 		impulse *= a/b;
 
@@ -505,11 +505,11 @@ void
 CPhysical::ApplyAirResistance(void)
 {
 	if(m_fAirResistance > 0.1f){
-		float f = powf(m_fAirResistance, CTimer::GetTimeStep());
+		float f = Pow(m_fAirResistance, CTimer::GetTimeStep());
 		m_vecMoveSpeed *= f;
 		m_vecTurnSpeed *= f;
 	}else{
-		float f = powf(1.0f/(m_fAirResistance*0.5f*m_vecMoveSpeed.MagnitudeSqr() + 1.0f), CTimer::GetTimeStep());
+		float f = Pow(1.0f/(m_fAirResistance*0.5f*m_vecMoveSpeed.MagnitudeSqr() + 1.0f), CTimer::GetTimeStep());
 		m_vecMoveSpeed *= f;
 		m_vecTurnSpeed *= 0.99f;
 	}
@@ -719,7 +719,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 			if(!B->bInfiniteMass){
 				if(fB.z < 0.0f){
 					fB.z = 0.0f;
-					if(fabs(speedA) < 0.01f)
+					if(Abs(speedA) < 0.01f)
 						fB *= 0.5f;
 				}
 				if(ispedcontactA){
@@ -815,9 +815,9 @@ CPhysical::ApplyCollisionAlt(CEntity *B, CColPoint &colpoint, float &impulse, CV
 			float minspeed = 0.0104f * CTimer::GetTimeStep();
 			if((IsObject() || IsVehicle() && GetUp().z < -0.3f) &&
 			   !bHasContacted &&
-			   fabs(m_vecMoveSpeed.x) < minspeed &&
-			   fabs(m_vecMoveSpeed.y) < minspeed &&
-			   fabs(m_vecMoveSpeed.z) < minspeed*2.0f)
+			   Abs(m_vecMoveSpeed.x) < minspeed &&
+			   Abs(m_vecMoveSpeed.y) < minspeed &&
+			   Abs(m_vecMoveSpeed.z) < minspeed*2.0f)
 				e = -1.0f;
 			else
 				e = -(m_fElasticity + 1.0f);
@@ -1150,14 +1150,14 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 				shift += dir * colpoints[mostColliding].depth * 0.5f;
 			}else if(A->IsPed() && B->IsVehicle() && ((CVehicle*)B)->IsBoat()){
 				CVector dir = colpoints[mostColliding].normal;
-				float f = min(fabs(dir.z), 0.9f);
+				float f = min(Abs(dir.z), 0.9f);
 				dir.z = 0.0f;
 				dir.Normalise();
 				shift += dir * colpoints[mostColliding].depth / (1.0f - f);
 				boat = B;
 			}else if(B->IsPed() && A->IsVehicle() && ((CVehicle*)A)->IsBoat()){
 				CVector dir = colpoints[mostColliding].normal * -1.0f;
-				float f = min(fabs(dir.z), 0.9f);
+				float f = min(Abs(dir.z), 0.9f);
 				dir.z = 0.0f;
 				dir.Normalise();
 				B->GetPosition() += dir * colpoints[mostColliding].depth / (1.0f - f);
@@ -1498,8 +1498,8 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 
 						float imp = impulseA;
 						if(A->IsVehicle() && A->GetUp().z < -0.6f &&
-						   fabs(A->m_vecMoveSpeed.x) < 0.05f &&
-						   fabs(A->m_vecMoveSpeed.y) < 0.05f)
+						   Abs(A->m_vecMoveSpeed.x) < 0.05f &&
+						   Abs(A->m_vecMoveSpeed.y) < 0.05f)
 							imp *= 0.1f;
 
 						float turnSpeedDiff = A->m_vecTurnSpeed.MagnitudeSqr();
@@ -1519,8 +1519,8 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 
 						float imp = impulseA;
 						if(A->IsVehicle() && A->GetUp().z < -0.6f &&
-						   fabs(A->m_vecMoveSpeed.x) < 0.05f &&
-						   fabs(A->m_vecMoveSpeed.y) < 0.05f)
+						   Abs(A->m_vecMoveSpeed.x) < 0.05f &&
+						   Abs(A->m_vecMoveSpeed.y) < 0.05f)
 							imp *= 0.1f;
 
 						float turnSpeedDiff = A->m_vecTurnSpeed.MagnitudeSqr();
@@ -1557,8 +1557,8 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 					m_vecTurnSpeed += turnSpeed / numResponses;
 					if(!CWorld::bNoMoreCollisionTorque &&
 					   A->m_status == STATUS_PLAYER && A->IsVehicle() &&
-					   fabs(A->m_vecMoveSpeed.x) > 0.2f &&
-					   fabs(A->m_vecMoveSpeed.y) > 0.2f){
+					   Abs(A->m_vecMoveSpeed.x) > 0.2f &&
+					   Abs(A->m_vecMoveSpeed.y) > 0.2f){
 						A->m_vecMoveFriction.x += moveSpeed.x * -0.3f / numCollisions;
 						A->m_vecMoveFriction.y += moveSpeed.y * -0.3f / numCollisions;
 						A->m_vecTurnFriction += turnSpeed * -0.3f / numCollisions;
@@ -1789,7 +1789,7 @@ CPhysical::ProcessShift(void)
 }
 
 // x is the number of units (m) we would like to step
-#define NUMSTEPS(x) ceil(sqrt(distSq) * (1.0f/(x)))
+#define NUMSTEPS(x) ceil(Sqrt(distSq) * (1.0f/(x)))
 
 void
 CPhysical::ProcessCollision(void)

@@ -146,8 +146,8 @@ CPathFind::PreparePathData(void)
 					numExtern++;
 					if(InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes > numLanes)
 						numLanes = InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes;
-					maxX = max(maxX, fabs(InfoForTileCars[k].x));
-					maxY = max(maxY, fabs(InfoForTileCars[k].y));
+					maxX = max(maxX, Abs(InfoForTileCars[k].x));
+					maxY = max(maxY, Abs(InfoForTileCars[k].y));
 				}else if(InfoForTileCars[k].type == NodeTypeIntern)
 					numIntern++;
 			}
@@ -327,10 +327,10 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				if(tempnodes[k].linkState != 1)
 					continue;
 				dx = tempnodes[k].pos.x - CoorsXFormed.x;
-				if(fabs(dx) < nearestDist){
+				if(Abs(dx) < nearestDist){
 					dy = tempnodes[k].pos.y - CoorsXFormed.y;
-					if(fabs(dy) < nearestDist){
-						nearestDist = max(fabs(dx), fabs(dy));
+					if(Abs(dy) < nearestDist){
+						nearestDist = max(Abs(dx), Abs(dy));
 						nearestId = k;
 					}
 				}
@@ -369,7 +369,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				dx = m_pathNodes[tempnodes[nearestId].link1].pos.x - m_pathNodes[tempnodes[nearestId].link2].pos.x;
 				dy = m_pathNodes[tempnodes[nearestId].link1].pos.y - m_pathNodes[tempnodes[nearestId].link2].pos.y;
 				tempnodes[nearestId].pos = (tempnodes[nearestId].pos + CoorsXFormed)*0.5f;
-				mag = sqrt(dx*dx + dy*dy);
+				mag = Sqrt(dx*dx + dy*dy);
 				tempnodes[nearestId].dirX = dx/mag;
 				tempnodes[nearestId].dirY = dy/mag;
 				// do something when number of lanes doesn't agree
@@ -464,7 +464,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 					posy = (m_pathNodes[i].pos.y + m_pathNodes[j].pos.y)*0.5f;
 					dx = m_pathNodes[j].pos.x - m_pathNodes[i].pos.x;
 					dy = m_pathNodes[j].pos.y - m_pathNodes[i].pos.y;
-					mag = sqrt(dx*dx + dy*dy);
+					mag = Sqrt(dx*dx + dy*dy);
 					dx /= mag;
 					dy /= mag;
 					if(i < j){

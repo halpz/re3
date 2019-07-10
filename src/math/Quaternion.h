@@ -8,7 +8,7 @@ public:
 	CQuaternion(void) {}
 	CQuaternion(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
-	float Magnitude(void) const { return sqrt(x*x + y*y + z*z + w*w); }
+	float Magnitude(void) const { return Sqrt(x*x + y*y + z*z + w*w); }
 	float MagnitudeSqr(void) const { return x*x + y*y + z*z + w*w; }
 
 	const CQuaternion &operator+=(CQuaternion const &right) {

@@ -806,12 +806,12 @@ CEntity::ModifyMatrixForTreeInWind(void)
 	}else if(CWeather::Wind >= 0.2){
 		t = (uintptr)this + CTimer::GetTimeInMilliseconds();
 		f = (t & 0xFFF)/(float)0x1000;
-		flutter = sin(f * 6.28f);
+		flutter = Sin(f * 6.28f);
 		strength = 0.008f;
 	}else{
 		t = (uintptr)this + CTimer::GetTimeInMilliseconds();
 		f = (t & 0xFFF)/(float)0x1000;
-		flutter = sin(f * 6.28f);
+		flutter = Sin(f * 6.28f);
 		strength = 0.005f;
 	}
 
@@ -857,7 +857,7 @@ CEntity::ModifyMatrixForBannerInWind(void)
 	right.z = 0.0f;
 	right.Normalise();
 	up = right * flutter;
-	up.z = sqrt(sq(1.0f) - sq(flutter));
+	up.z = Sqrt(sq(1.0f) - sq(flutter));
 	GetRight() = CrossProduct(GetForward(), up);
 	GetUp() = up;
 

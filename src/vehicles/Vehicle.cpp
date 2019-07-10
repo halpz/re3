@@ -213,7 +213,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		ApplyTurnForce(impulse*GetUp(), 2.0f*GetUp() + com);
 
 
-		m_vecTurnSpeed.y *= powf(0.9f, CTimer::GetTimeStep());
+		m_vecTurnSpeed.y *= Pow(0.9f, CTimer::GetTimeStep());
 		moveSpeed = m_vecMoveSpeed.MagnitudeSqr();
 		if(moveSpeed > 2.25f)
 			m_vecMoveSpeed *= 1.5f/sqrt(moveSpeed);
@@ -296,7 +296,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 		}
 
 		if(brake > adhesion){
-			if(fabs(contactSpeedFwd) > 0.005f)
+			if(Abs(contactSpeedFwd) > 0.005f)
 				*wheelState = WHEEL_STATE_STATIC;
 		}else {
 			if(fwd > 0.0f){
@@ -317,7 +317,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 				*wheelState = WHEEL_STATE_2;
 		}
 
-		float l = sqrt(sq(right) + sq(fwd));
+		float l = Sqrt(sq(right) + sq(fwd));
 		float tractionLoss = bAlreadySkidding ? 1.0f : m_handling->fTractionLoss;
 		right *= adhesion * tractionLoss / l;
 		fwd *= adhesion * tractionLoss / l;
@@ -552,9 +552,9 @@ CVehicle::CanPedExitCar(void)
 		if(m_vecMoveSpeed.MagnitudeSqr() > 0.005f)
 			return false;
 		// if car is slow enough, check turn speed
-		if(fabs(m_vecTurnSpeed.x) > 0.01f ||
-		   fabs(m_vecTurnSpeed.y) > 0.01f ||
-		   fabs(m_vecTurnSpeed.z) > 0.01f)
+		if(Abs(m_vecTurnSpeed.x) > 0.01f ||
+		   Abs(m_vecTurnSpeed.y) > 0.01f ||
+		   Abs(m_vecTurnSpeed.z) > 0.01f)
 			return false;
 		return true;
 	}else{
@@ -564,9 +564,9 @@ CVehicle::CanPedExitCar(void)
 		if(m_vecMoveSpeed.MagnitudeSqr() >= 0.005f)
 			return false;
 		// if car is slow enough, check turn speed
-		if(fabs(m_vecTurnSpeed.x) >= 0.01f ||
-		   fabs(m_vecTurnSpeed.y) >= 0.01f ||
-		   fabs(m_vecTurnSpeed.z) >= 0.01f)
+		if(Abs(m_vecTurnSpeed.x) >= 0.01f ||
+		   Abs(m_vecTurnSpeed.y) >= 0.01f ||
+		   Abs(m_vecTurnSpeed.z) >= 0.01f)
 			return false;
 		return true;
 	}

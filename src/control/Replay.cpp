@@ -1505,9 +1505,9 @@ void CReplay::ProcessLookAroundCam(void)
 	else
 		fAlphaAngleLookAroundCam = max(0.1f, min(1.5f, fAlphaAngleLookAroundCam + y_moved));
 	CVector camera_pt(
-		fDistanceLookAroundCam * sin(fBetaAngleLookAroundCam) * cos(fAlphaAngleLookAroundCam),
-		fDistanceLookAroundCam * cos(fBetaAngleLookAroundCam) * cos(fAlphaAngleLookAroundCam),
-		fDistanceLookAroundCam * sin(fAlphaAngleLookAroundCam)
+		fDistanceLookAroundCam * Sin(fBetaAngleLookAroundCam) * Cos(fAlphaAngleLookAroundCam),
+		fDistanceLookAroundCam * Cos(fBetaAngleLookAroundCam) * Cos(fAlphaAngleLookAroundCam),
+		fDistanceLookAroundCam * Sin(fAlphaAngleLookAroundCam)
 	);
 	CVector focus = CVector(CameraFocusX, CameraFocusY, CameraFocusZ);
 	camera_pt += focus;

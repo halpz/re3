@@ -286,8 +286,8 @@ CCoronas::Render(void)
 			
 				// if distance too big, break streak
 				if(aCoronas[i].hasValue[1]){
-					if(fabs(aCoronas[i].prevX[0] - aCoronas[i].prevX[1]) > 50.0f ||
-					   fabs(aCoronas[i].prevY[0] - aCoronas[i].prevY[1]) > 50.0f)
+					if(Abs(aCoronas[i].prevX[0] - aCoronas[i].prevX[1]) > 50.0f ||
+					   Abs(aCoronas[i].prevY[0] - aCoronas[i].prevY[1]) > 50.0f)
 						aCoronas[i].hasValue[0] = false;
 				}
 			}

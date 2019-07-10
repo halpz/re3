@@ -457,7 +457,7 @@ CCollision::TestLineSphere(const CColLine &line, const CColSphere &sph)
 	// I leave in the strange -2 factors even though they serve no real purpose
 	float projline = -2.0f * DotProduct(v01, v0c);	// project v0c onto line
 	// Square of tangent from p0 multiplied by line length so we can compare with projline.
-	// The length of the tangent would be this: sqrt((c-p0)^2 - r^2).
+	// The length of the tangent would be this: Sqrt((c-p0)^2 - r^2).
 	// Negative if p0 is inside the sphere! This breaks the test!
 	float tansq = 4.0f * linesq *
 		(sph.center.MagnitudeSqr() - 2.0f*DotProduct(sph.center, line.p0) + line.p0.MagnitudeSqr() - sph.radius*sph.radius);
@@ -467,10 +467,10 @@ CCollision::TestLineSphere(const CColLine &line, const CColSphere &sph)
 		return false;
 	// projline (negative in GTA for some reason) is the point on the line
 	// in the middle of the two intersection points (startin from p0).
-	// sqrt(diffsq) somehow works out to be the distance from that
+	// Sqrt(diffsq) somehow works out to be the distance from that
 	// midpoint to the intersection points.
 	// So subtract that and get rid of the awkward scaling:
-	float f = (-projline - sqrt(diffsq)) / (2.0f*linesq);
+	float f = (-projline - Sqrt(diffsq)) / (2.0f*linesq);
 	// f should now be in range [0, 1] for [p0, p1]
 	return f >= 0.0f && f <= 1.0f;
 }
@@ -480,7 +480,7 @@ CCollision::TestSphereTriangle(const CColSphere &sphere,
 	const CVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane)
 {
 	// If sphere and plane don't intersect, no collision
-	if(fabs(plane.CalcPoint(sphere.center)) > sphere.radius)
+	if(Abs(plane.CalcPoint(sphere.center)) > sphere.radius)
 		return false;
 
 	const CVector &va = verts[tri.a];
@@ -669,7 +669,7 @@ CCollision::ProcessSphereBox(const CColSphere &sph, const CColBox &box, CColPoin
 		dist = sph.center - p;
 		float lensq = dist.MagnitudeSqr();
 		if(lensq < mindistsq){
-			float len = sqrt(lensq);
+			float len = Sqrt(lensq);
 			point.point = p;
 			point.normal = dist * (1.0f/len);
 			point.surfaceA = sph.surface;
@@ -816,7 +816,7 @@ CCollision::ProcessLineSphere(const CColLine &line, const CColSphere &sphere, CC
 	if(diffsq < 0.0f)
 		return false;
 	// point of first intersection, in range [0,1] between p0 and p1
-	float t = (projline - sqrt(diffsq)) / linesq;
+	float t = (projline - Sqrt(diffsq)) / linesq;
 	// if not on line or beyond mindist, no intersection
 	if(t < 0.0f || t > 1.0f || t >= mindist)
 		return false;
@@ -1010,7 +1010,7 @@ CCollision::ProcessSphereTriangle(const CColSphere &sphere,
 	// If sphere and plane don't intersect, no collision
 	float planedist = plane.CalcPoint(sphere.center);
 	float distsq = planedist*planedist;
-	if(fabs(planedist) > sphere.radius || distsq > mindistsq)
+	if(Abs(planedist) > sphere.radius || distsq > mindistsq)
 		return false;
 
 	const CVector &va = verts[tri.a];
@@ -1057,7 +1057,7 @@ CCollision::ProcessSphereTriangle(const CColSphere &sphere,
 		else assert(0);
 	}else if(testcase == 3){
 		// center is in triangle
-		dist = fabs(planedist);
+		dist = Abs(planedist);
 		p = sphere.center - normal*planedist;
 	}else
 		assert(0);	// front fell off
@@ -1333,7 +1333,7 @@ CCollision::DistToLine(const CVector *l0, const CVector *l1, const CVector *poin
 	if(dot >= lensq)
 		return (*point - *l1).Magnitude();
 	// distance to line
-	return sqrt((*point - *l0).MagnitudeSqr() - dot*dot/lensq);
+	return Sqrt((*point - *l0).MagnitudeSqr() - dot*dot/lensq);
 }
 
 // same as above but also return the point on the line
@@ -1641,7 +1641,7 @@ CColTrianglePlane::Set(const CVector *v, CColTriangle &tri)
 	normal = CrossProduct(vc-va, vb-va);
 	normal.Normalise();
 	dist = DotProduct(normal, va);
-	CVector an(fabs(normal.x), fabs(normal.y), fabs(normal.z));
+	CVector an(Abs(normal.x), Abs(normal.y), Abs(normal.z));
 	// find out largest component and its direction
 	if(an.x > an.y && an.x > an.z)
 		dir = normal.x < 0.0f ? DIR_X_NEG : DIR_X_POS;

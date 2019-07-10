@@ -670,7 +670,7 @@ int16 CPad::GetSteeringLeftRight(void)
 			int16 axis = NewState.LeftStickX;
 			int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
 			
-			if ( abs(axis) > abs(dpad) )
+			if ( Abs(axis) > Abs(dpad) )
 				return axis;
 			else
 				return dpad;
@@ -703,7 +703,7 @@ int16 CPad::GetSteeringUpDown(void)
 			int16 axis = NewState.LeftStickY;
 			int16 dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
 			
-			if ( abs(axis) > abs(dpad) )
+			if ( Abs(axis) > Abs(dpad) )
 				return axis;
 			else
 				return dpad;
@@ -790,7 +790,7 @@ int16 CPad::GetPedWalkLeftRight(void)
 			int16 axis = NewState.LeftStickX;
 			int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
 			
-			if ( abs(axis) > abs(dpad) )
+			if ( Abs(axis) > Abs(dpad) )
 				return axis;
 			else
 				return dpad;
@@ -824,7 +824,7 @@ int16 CPad::GetPedWalkUpDown(void)
 			int16 axis = NewState.LeftStickY;
 			int16 dpad = (NewState.DPadDown - NewState.DPadUp) / 2;
 			
-			if ( abs(axis) > abs(dpad) )
+			if ( Abs(axis) > Abs(dpad) )
 				return axis;
 			else
 				return dpad;
@@ -854,7 +854,7 @@ int16 CPad::GetAnalogueUpDown(void)
 			int16 axis = NewState.LeftStickY;
 			int16 dpad = (NewState.DPadDown - NewState.DPadUp) / 2;
 			
-			if ( abs(axis) > abs(dpad) )
+			if ( Abs(axis) > Abs(dpad) )
 				return axis;
 			else
 				return dpad;
@@ -1683,7 +1683,7 @@ int16 CPad::SniperModeLookLeftRight(void)
 	int16 axis = NewState.LeftStickX;
 	int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
 	
-	if ( abs(axis) > abs(dpad) )
+	if ( Abs(axis) > Abs(dpad) )
 		return axis;
 	else
 		return dpad;
@@ -1694,7 +1694,7 @@ int16 CPad::SniperModeLookUpDown(void)
 	int16 axis = NewState.LeftStickY;
 	int16 dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
 	
-	if ( abs(axis) > abs(dpad) )
+	if ( Abs(axis) > Abs(dpad) )
 		return axis;
 	else
 		return dpad;
@@ -1704,11 +1704,11 @@ int16 CPad::LookAroundLeftRight(void)
 {
 	float axis = GetPad(0)->NewState.RightStickX;
 	
-	if ( fabs(axis) > 85 && !GetLookBehindForPed() )
+	if ( Abs(axis) > 85 && !GetLookBehindForPed() )
 		return (int16) ( (axis + ( ( axis > 0 ) ? -85 : 85) )
 							* (127.0f / 32.0f) ); // 3.96875f
 
-	else if ( TheCamera.Cams[0].Using3rdPersonMouseCam() && fabs(axis) > 10 )
+	else if ( TheCamera.Cams[0].Using3rdPersonMouseCam() && Abs(axis) > 10 )
 		return (int16) ( (axis + ( ( axis > 0 ) ? -10 : 10) )
 							* (127.0f / 64.0f) ); // 1.984375f
 	
@@ -1719,11 +1719,11 @@ int16 CPad::LookAroundUpDown(void)
 {
 	int16 axis = GetPad(0)->NewState.RightStickY;
 	
-	if ( abs(axis) > 85 && !GetLookBehindForPed() )
+	if ( Abs(axis) > 85 && !GetLookBehindForPed() )
 		return (int16) ( (axis + ( ( axis > 0 ) ? -85 : 85) )
 							* (127.0f / 32.0f) ); // 3.96875f
 
-	else if ( TheCamera.Cams[0].Using3rdPersonMouseCam() && abs(axis) > 40 )
+	else if ( TheCamera.Cams[0].Using3rdPersonMouseCam() && Abs(axis) > 40 )
 		return (int16) ( (axis + ( ( axis > 0 ) ? -40 : 40) )
 							* (127.0f / 64.0f) ); // 1.984375f
 

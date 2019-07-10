@@ -299,8 +299,8 @@ void CParticle::Initialise()
 	{		
 		float angle = DEGTORAD(float(i) * float(360.0f / SIN_COS_TABLE_SIZE));
 
-		m_SinTable[i] = sin(angle);
-		m_CosTable[i] = cos(angle);
+		m_SinTable[i] = Sin(angle);
+		m_CosTable[i] = Cos(angle);
 	}
 	
 	int32 slot = CTxdStore::FindTxdSlot("particle");
@@ -1599,7 +1599,7 @@ void CParticle::Render()
 
 								fTrailLength = fDist;
 								
-								//Float fRot = atan2( vecDist.x / fDist, sqrtf(1.0f - vecDist.x / fDist * (vecDist.x / fDist)) );
+								//Float fRot = Atan2( vecDist.x / fDist, Sqrt(1.0f - vecDist.x / fDist * (vecDist.x / fDist)) );
 								float fRot = asinf(vecDist.x / fDist);
 
 								fRotation = fRot;
@@ -1651,7 +1651,7 @@ void CParticle::Render()
 								
 								fTrailLength = fDist;
 								
-								//Float fRot = atan2(vecDist.x / fDist, sqrt(1.0f - vecDist.x / fDist * (vecDist.x / fDist)));
+								//Float fRot = Atan2(vecDist.x / fDist, Sqrt(1.0f - vecDist.x / fDist * (vecDist.x / fDist)));
 								float fRot = asinf(vecDist.x / fDist);
 								
 								fRotation = fRot;
