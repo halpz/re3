@@ -22,7 +22,10 @@
 #include "WaterLevel.h"
 #include "patcher.h"
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a644c4e9ceb440f53e31dd39f11a9a3c859ffb44
 float TEXTURE_ADDU;
 float TEXTURE_ADDV;
 
@@ -279,8 +282,12 @@ CWaterLevel::GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLeve
 	return true;
 }
 
+<<<<<<< HEAD
 inline float
 _GetWaterDrawDist()
+=======
+inline float _GetWaterDrawDist()
+>>>>>>> a644c4e9ceb440f53e31dd39f11a9a3c859ffb44
 {
 	// if z less then 15.0f return 1200.0f 
 	if ( TheCamera.GetPosition().z < 15.0f )
@@ -293,8 +300,12 @@ _GetWaterDrawDist()
 	return (TheCamera.GetPosition().z + -15.0f) * 800.0f / 45.0f + 1200.0f;
 }
 
+<<<<<<< HEAD
 inline float
 _GetWavyDrawDist()
+=======
+inline float _GetWavyDrawDist()
+>>>>>>> a644c4e9ceb440f53e31dd39f11a9a3c859ffb44
 {
 	if ( FindPlayerVehicle() && FindPlayerVehicle()->IsBoat() )
 		return 120.0f;
@@ -302,8 +313,12 @@ _GetWavyDrawDist()
 		return 70.0f;
 }
 
+<<<<<<< HEAD
 inline void
 _GetCamBounds(bool *bUseCamStartY, bool *bUseCamEndY, bool *bUseCamStartX, bool *bUseCamEndX)
+=======
+inline void _GetCamBounds(bool *bUseCamStartY, bool *bUseCamEndY, bool *bUseCamStartX, bool *bUseCamEndX)
+>>>>>>> a644c4e9ceb440f53e31dd39f11a9a3c859ffb44
 {
 	if ( TheCamera.GetForward().z > -0.8f )
 	{
@@ -324,6 +339,7 @@ _GetCamBounds(bool *bUseCamStartY, bool *bUseCamEndY, bool *bUseCamStartX, bool 
 	}
 }
 
+<<<<<<< HEAD
 float
 SectorRadius(float fSize)
 {
@@ -332,6 +348,14 @@ SectorRadius(float fSize)
 
 void
 CWaterLevel::RenderWater()
+=======
+float SectorRadius(float fSize)
+{
+	return sqrtf(powf(fSize, 2) + powf(fSize, 2)) * 1.0040916293f;
+}
+
+void CWaterLevel::RenderWater()
+>>>>>>> a644c4e9ceb440f53e31dd39f11a9a3c859ffb44
 {
 	bool bUseCamEndX   = false;
 	bool bUseCamStartY = false;
