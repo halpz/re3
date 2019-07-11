@@ -144,7 +144,7 @@ public:
 	CFire *m_pCarFire;
 	float m_fSteerAngle;
 	float m_fGasPedal;
-	float m_fBreakPedal;
+	float m_fBrakePedal;
 	uint8 VehicleCreatedBy;
 
 	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CVehicle.h from R*
@@ -161,7 +161,7 @@ public:
 	uint8 bIsBus: 1; // Is this vehicle a bus
 	uint8 bIsBig: 1; // Is this vehicle a bus
 	uint8 bLowVehicle: 1; // Need this for sporty type cars to use low getting-in/out anims
-	uint8 m_veh_flagB10 : 1;
+	uint8 bComedyControls : 1; // Will make the car hard to control (hopefully in a funny way)
 	uint8 m_veh_flagB20 : 1;
 	uint8 m_veh_flagB40 : 1;
 	uint8 m_veh_flagB80 : 1;
@@ -207,7 +207,7 @@ public:
 	uint8 m_nCarHornTimer;
 	int8 field_22D;
 	bool m_bSirenOrAlarm;
-	int8 field_22F;
+	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
 	float m_fSteerRatio;
 	eVehicleType m_vehType;

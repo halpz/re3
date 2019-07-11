@@ -289,6 +289,10 @@ public:
 
 	// mouse
 	bool GetLeftMouseJustDown() { return !!(NewMouseControllerState.LMB && !OldMouseControllerState.LMB); }
+	bool GetRightMouseJustDown() { return !!(NewMouseControllerState.RMB && !OldMouseControllerState.RMB); }
+	bool GetMiddleMouseJustDown() { return !!(NewMouseControllerState.MMB && !OldMouseControllerState.MMB); }
+	float GetMouseX() { return NewMouseControllerState.x; }
+	float GetMouseY() { return NewMouseControllerState.y; }
 
 	// keyboard
 	

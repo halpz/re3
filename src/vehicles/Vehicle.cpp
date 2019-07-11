@@ -58,7 +58,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nBombTimer = 0;
 	m_pWhoSetMeOnFire = nil;
 	field_1FB = 0;
-	m_veh_flagB10 = false;
+	bComedyControls = false;
 	m_veh_flagB40 = false;
 	m_veh_flagB80 = false;
 	m_veh_flagC1 = false;
@@ -93,7 +93,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_pCurGroundEntity = nil;
 	field_22A = 0;
 	field_22B = 0;
-	field_22F = 0;
+	m_comedyControlState = 0;
 	m_aCollPolys[0].valid = false;
 	m_aCollPolys[1].valid = false;
 	m_autoPilot.m_nCarMission = MISSION_NONE;

@@ -154,7 +154,7 @@ spawnCar(int id)
 }
 #endif
 
-void
+static void
 FixCar(void)
 {
 	CVehicle *veh = FindPlayerVehicle();
@@ -165,6 +165,15 @@ FixCar(void)
 		return;
 	((CAutomobile*)veh)->Damage.SetEngineStatus(0);
 	((CAutomobile*)veh)->Fix();
+}
+
+static void
+ToggleComedy(void)
+{
+	CVehicle *veh = FindPlayerVehicle();
+	if(veh == nil)
+		return;
+	veh->bComedyControls = !veh->bComedyControls;
 }
 
 void
@@ -212,6 +221,8 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Nasty limbs", NastyLimbsCheat);
 
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
+		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
+
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Collision Polys", (int8*)&gbShowCollisionPolys, nil);

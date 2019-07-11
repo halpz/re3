@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "General.h"
+#include "Pad.h"
 #include "ModelIndices.h"
 #include "VisibilityPlugins.h"
 #include "DMAudio.h"
@@ -141,8 +142,134 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 	return numCollisions;
 }
 
+static int16 nLastControlInput;
+static float fMouseCentreRange = 0.35f;
+static float fMouseSteerSens = -0.0035f;
+static float fMouseCentreMult = 0.975f;
 
-WRAPPER void CAutomobile::ProcessControlInputs(uint8) { EAXJMP(0x53B660); }
+void
+CAutomobile::ProcessControlInputs(uint8 pad)
+{
+	float speed = DotProduct(m_vecMoveSpeed, GetForward());
+
+	if(CPad::GetPad(pad)->GetExitVehicle())
+		bIsHandbrakeOn = true;
+	else
+		bIsHandbrakeOn = !!CPad::GetPad(pad)->GetHandBrake();
+
+	// Steer left/right
+	if(CCamera::m_bUseMouse3rdPerson && !CVehicle::m_bDisableMouseSteering){
+		if(CPad::GetPad(pad)->GetMouseX() != 0.0f){
+			m_fSteerRatio += fMouseSteerSens*CPad::GetPad(pad)->GetMouseX();
+			nLastControlInput = 2;
+			if(Abs(m_fSteerRatio) < fMouseCentreRange)
+				m_fSteerRatio *= Pow(fMouseCentreMult, CTimer::GetTimeStep());
+		}else if(CPad::GetPad(pad)->GetSteeringLeftRight() || nLastControlInput != 2){
+			// mouse hasn't move, steer with pad like below
+			m_fSteerRatio += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteerRatio)*
+				0.2f*CTimer::GetTimeStep();
+			nLastControlInput = 0;
+		}
+	}else{
+		m_fSteerRatio += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteerRatio)*
+			0.2f*CTimer::GetTimeStep();
+		nLastControlInput = 0;
+	}
+	m_fSteerRatio = clamp(m_fSteerRatio, -1.0f, 1.0f);
+
+	// Accelerate/Brake
+	float acceleration = (CPad::GetPad(pad)->GetAccelerate() - CPad::GetPad(pad)->GetBrake())/255.0f;
+	if(GetModelIndex() == MI_DODO && acceleration < 0.0f)
+		acceleration *= 0.3f;
+	if(Abs(speed) < 0.01f){
+		// standing still, go into direction we want
+		m_fGasPedal = acceleration;
+		m_fBrakePedal = 0.0f;
+	}else{
+#if 1
+		// simpler than the code below
+		if(speed * acceleration < 0.0f){
+			// if opposite directions, have to brake first
+			m_fGasPedal = 0.0f;
+			m_fBrakePedal = Abs(acceleration);
+		}else{
+			// accelerating in same direction we were already going
+			m_fGasPedal = acceleration;
+			m_fBrakePedal = 0.0f;
+		}
+#else
+		if(speed < 0.0f){
+			// moving backwards currently
+			if(acceleration < 0.0f){
+				// still go backwards
+				m_fGasPedal = acceleration;
+				m_fBrakePedal = 0.0f;
+			}else{
+				// want to go forwards, so brake
+				m_fGasPedal = 0.0f;
+				m_fBrakePedal = acceleration;
+			}
+		}else{
+			// moving forwards currently
+			if(acceleration < 0.0f){
+				// want to go backwards, so brake
+				m_fGasPedal = 0.0f;
+				m_fBrakePedal = -acceleration;
+			}else{
+				// still go forwards
+				m_fGasPedal = acceleration;
+				m_fBrakePedal = 0.0f;
+			}
+		}
+#endif
+	}
+
+	// Actually turn wheels
+	static float fValue;	// why static?
+	if(m_fSteerRatio < 0.0f)
+		fValue = -sq(m_fSteerRatio);
+	else
+		fValue = sq(m_fSteerRatio);
+	m_fSteerAngle = DEGTORAD(m_handling->fSteeringLock) * fValue;
+
+	if(bComedyControls){
+		int rnd = CGeneral::GetRandomNumber() % 10;
+		switch(m_comedyControlState){
+		case 0:
+			if(rnd < 2)
+				m_comedyControlState = 1;
+			else if(rnd < 4)
+				m_comedyControlState = 2;
+			break;
+		case 1:
+			m_fSteerAngle += 0.05f;
+			if(rnd < 2)
+				m_comedyControlState = 0;
+			break;
+		case 2:
+			m_fSteerAngle -= 0.05f;
+			if(rnd < 2)
+				m_comedyControlState = 0;
+			break;
+		}
+	}else
+		m_comedyControlState = 0;
+
+	// Brake if player isn't in control
+	// BUG: game always uses pad 0 here
+	if(CPad::GetPad(pad)->DisablePlayerControls){
+		m_fBrakePedal = 1.0f;
+		bIsHandbrakeOn = true;
+		m_fGasPedal = 0.0f;
+
+		FindPlayerPed()->KeepAreaAroundPlayerClear();
+
+		// slow down car immediately
+		speed = m_vecMoveSpeed.Magnitude();
+		if(speed > 0.28f)
+			m_vecMoveSpeed *= 0.28f/speed;
+	}
+}
 
 void
 CAutomobile::GetComponentWorldPosition(int32 component, CVector &pos)
@@ -1091,7 +1218,7 @@ public:
 
 	int32 ProcessEntityCollision_(CEntity *ent, CColPoint *colpoints){ return CAutomobile::ProcessEntityCollision(ent, colpoints); }
 
-	void ProcessControlInputs_(uint8 x) { CAutomobile::ProcessControlInputs(x); }
+	void ProcessControlInputs_(uint8 pad) { CAutomobile::ProcessControlInputs(pad); }
 	void GetComponentWorldPosition_(int32 component, CVector &pos) { CAutomobile::GetComponentWorldPosition(component, pos); }
 	bool IsComponentPresent_(int32 component) { return CAutomobile::IsComponentPresent(component); }
 	void SetComponentRotation_(int32 component, CVector rotation) { CAutomobile::SetComponentRotation(component, rotation); }
@@ -1115,6 +1242,7 @@ STARTPATCHES
 	InjectHook(0x52D190, &CAutomobile_::SetModelIndex_, PATCH_JUMP);
 	InjectHook(0x535180, &CAutomobile_::Teleport_, PATCH_JUMP);
 	InjectHook(0x53B270, &CAutomobile_::ProcessEntityCollision_, PATCH_JUMP);
+	InjectHook(0x53B660, &CAutomobile_::ProcessControlInputs_, PATCH_JUMP);
 	InjectHook(0x52E5F0, &CAutomobile_::GetComponentWorldPosition_, PATCH_JUMP);
 	InjectHook(0x52E660, &CAutomobile_::IsComponentPresent_, PATCH_JUMP);
 	InjectHook(0x52E680, &CAutomobile_::SetComponentRotation_, PATCH_JUMP);

@@ -45,6 +45,7 @@ public:
 	void ClearWeaponTarget();
 	void SetWantedLevel(int32 level);
 	void SetWantedLevelNoDrop(int32 level);
+	void KeepAreaAroundPlayerClear(void);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);
