@@ -5,7 +5,7 @@
 int32 &TempBufferVerticesStored = *(int32*)0x8F5F78;
 int32 &TempBufferIndicesStored = *(int32*)0x8F1A4C;
 
-RwIm3DVertex *TempVertexBuffer = (RwIm3DVertex*)0x862330;
+RwIm3DVertex *TempBufferRenderVertices = (RwIm3DVertex*)0x862330;
 RwImVertexIndex *TempBufferRenderIndexList = (RwImVertexIndex*)0x846288;
 
 int RenderBuffer::VerticesToBeStored;
@@ -21,12 +21,12 @@ RenderBuffer::ClearRenderBuffer(void)
 void
 RenderBuffer::StartStoring(int numIndices, int numVertices, RwImVertexIndex **indexStart, RwIm3DVertex **vertexStart)
 {
-	if(TempBufferIndicesStored + numIndices >= 1024)
+	if(TempBufferIndicesStored + numIndices >= TEMPBUFFERINDEXSIZE)
 		RenderStuffInBuffer();
-	if(TempBufferVerticesStored + numVertices >= 256)
+	if(TempBufferVerticesStored + numVertices >= TEMPBUFFERVERTSIZE)
 		RenderStuffInBuffer();
         *indexStart = &TempBufferRenderIndexList[TempBufferIndicesStored];
-        *vertexStart = &TempVertexBuffer[TempBufferVerticesStored];
+        *vertexStart = &TempBufferRenderVertices[TempBufferVerticesStored];
         IndicesToBeStored = numIndices;
         VerticesToBeStored = numVertices;
 }
@@ -44,7 +44,7 @@ RenderBuffer::StopStoring(void)
 void
 RenderBuffer::RenderStuffInBuffer(void)
 {
-	if(TempBufferVerticesStored && RwIm3DTransform(TempVertexBuffer, TempBufferVerticesStored, nil, rwIM3D_VERTEXUV)){
+	if(TempBufferVerticesStored && RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, rwIM3D_VERTEXUV)){
 		RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStored);
 		RwIm3DEnd();
 	}
