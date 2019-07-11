@@ -1,9 +1,5 @@
 #pragma once
 
-<<<<<<< HEAD
-=======
-
->>>>>>> a644c4e9ceb440f53e31dd39f11a9a3c859ffb44
 #define WATER_BLOCK_SIZE     LARGE_SECTOR_SIZE
 #define WATER_FINEBLOCK_SIZE HUGE_SECTOR_SIZE
 #define WATER_Z_OFFSET (1.5f)
@@ -28,7 +24,6 @@
 #define WATER_HEIGHT	((WATER_END_Y - WATER_START_Y))
 
 
-<<<<<<< HEAD
 #define WATER_UNSIGN_X(x)                   ( (x) + (WATER_WIDTH /2) )
 #define WATER_UNSIGN_Y(y)                   ( (y) + (WATER_HEIGHT/2) )
 #define WATER_SIGN_X(x)                     ( (x) - (WATER_WIDTH /2) )
@@ -65,44 +60,6 @@
 #define WATER_FROM_EXTRAHUGE_SECTOR_Y(y)    ( ((y) - (MAX_EXTRAHUGE_SECTORS/2)) * EXTRAHUGE_SECTOR_SIZE )
 #define WATER_TO_EXTRAHUGE_SECTOR_X(x)      ( WATER_UNSIGN_X(x)					/ EXTRAHUGE_SECTOR_SIZE )
 #define WATER_TO_EXTRAHUGE_SECTOR_Y(y)      ( WATER_UNSIGN_Y(y)					/ EXTRAHUGE_SECTOR_SIZE )
-=======
-#define WATER_UNSIGN_X(x)					( (x) + (WATER_WIDTH /2) )
-#define WATER_UNSIGN_Y(y)					( (y) + (WATER_HEIGHT/2) )
-#define WATER_SIGN_X(x)						( (x) - (WATER_WIDTH /2) )
-#define WATER_SIGN_Y(y)						( (y) - (WATER_HEIGHT/2) )
-
-// 32
-#define WATER_SMALL_X(x)					( WATER_UNSIGN_X(x)					/ MAX_SMALL_SECTORS     )
-#define WATER_SMALL_Y(y)					( WATER_UNSIGN_Y(y)					/ MAX_SMALL_SECTORS     )
-#define WATER_FROM_SMALL_SECTOR_X(x)		( ((x) - (MAX_SMALL_SECTORS/2)    ) * SMALL_SECTOR_SIZE     )
-#define WATER_FROM_SMALL_SECTOR_Y(y)		( ((y) - (MAX_SMALL_SECTORS/2)    ) * SMALL_SECTOR_SIZE     )
-#define WATER_TO_SMALL_SECTOR_X(x)			( WATER_UNSIGN_X(x)					/ SMALL_SECTOR_SIZE     )
-#define WATER_TO_SMALL_SECTOR_Y(y)			( WATER_UNSIGN_Y(y)					/ SMALL_SECTOR_SIZE     )
-			
-// 64			
-#define WATER_LARGE_X(x)					( WATER_UNSIGN_X(x)					/ MAX_LARGE_SECTORS     )
-#define WATER_LARGE_Y(y)					( WATER_UNSIGN_Y(y)					/ MAX_LARGE_SECTORS     )
-#define WATER_FROM_LARGE_SECTOR_X(x)		( ((x) - (MAX_LARGE_SECTORS/2)    ) * LARGE_SECTOR_SIZE     )
-#define WATER_FROM_LARGE_SECTOR_Y(y)		( ((y) - (MAX_LARGE_SECTORS/2)    ) * LARGE_SECTOR_SIZE     )
-#define WATER_TO_LARGE_SECTOR_X(x)			( WATER_UNSIGN_X(x)					/ LARGE_SECTOR_SIZE     )
-#define WATER_TO_LARGE_SECTOR_Y(y)			( WATER_UNSIGN_Y(y)					/ LARGE_SECTOR_SIZE     )
-				
-// 128				
-#define WATER_HUGE_X(x)						( WATER_UNSIGN_X(x)					/ MAX_HUGE_SECTORS      )
-#define WATER_HUGE_Y(y)						( WATER_UNSIGN_Y(y)					/ MAX_HUGE_SECTORS      )
-#define WATER_FROM_HUGE_SECTOR_X(x)			( ((x) - (MAX_HUGE_SECTORS/2)     ) * HUGE_SECTOR_SIZE      )
-#define WATER_FROM_HUGE_SECTOR_Y(y)			( ((y) - (MAX_HUGE_SECTORS/2)     ) * HUGE_SECTOR_SIZE      )
-#define WATER_TO_HUGE_SECTOR_X(x)			( WATER_UNSIGN_X(x)					/ HUGE_SECTOR_SIZE      )
-#define WATER_TO_HUGE_SECTOR_Y(y)			( WATER_UNSIGN_Y(y)					/ HUGE_SECTOR_SIZE      )
-
-// 256	
-#define WATER_EXTRAHUGE_X(x)				( WATER_UNSIGN_X(x)					/ MAX_EXTRAHUGE_SECTORS )
-#define WATER_EXTRAHUGE_Y(y)				( WATER_UNSIGN_Y(y)					/ MAX_EXTRAHUGE_SECTORS )
-#define WATER_FROM_EXTRAHUGE_SECTOR_X(x)	( ((x) - (MAX_EXTRAHUGE_SECTORS/2)) * EXTRAHUGE_SECTOR_SIZE )
-#define WATER_FROM_EXTRAHUGE_SECTOR_Y(y)	( ((y) - (MAX_EXTRAHUGE_SECTORS/2)) * EXTRAHUGE_SECTOR_SIZE )
-#define WATER_TO_EXTRAHUGE_SECTOR_X(x)		( WATER_UNSIGN_X(x)					/ EXTRAHUGE_SECTOR_SIZE )
-#define WATER_TO_EXTRAHUGE_SECTOR_Y(y)		( WATER_UNSIGN_Y(y)					/ EXTRAHUGE_SECTOR_SIZE )
->>>>>>> a644c4e9ceb440f53e31dd39f11a9a3c859ffb44
 
 
 #define MAX_BOAT_WAKES 8
