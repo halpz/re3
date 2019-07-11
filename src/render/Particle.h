@@ -6,13 +6,13 @@ class CEntity;
 
 class CParticle
 {
+public:
 	enum
 	{
 		RAND_TABLE_SIZE    = 20,
 		SIN_COS_TABLE_SIZE = 1024
 	};
-	
-public:
+
 	CVector   m_vecPosition;
 	CVector   m_vecVelocity;
 	CVector   m_vecScreenPosition;
