@@ -1,6 +1,5 @@
 #pragma once
 
-
 #define WATER_BLOCK_SIZE     LARGE_SECTOR_SIZE
 #define WATER_FINEBLOCK_SIZE HUGE_SECTOR_SIZE
 #define WATER_Z_OFFSET (1.5f)
