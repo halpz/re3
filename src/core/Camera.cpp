@@ -18,10 +18,12 @@ const float DefaultFOV = 70.0f;	// beta: 80.0f
 CCamera &TheCamera = *(CCamera*)0x6FACF8;
 bool &CCamera::m_bUseMouse3rdPerson = *(bool *)0x5F03D8;
 
+WRAPPER void CCamera::CamShake(float strength, float x, float y, float z) { EAXJMP(0x46B200); }
 WRAPPER void CCamera::DrawBordersForWideScreen(void) { EAXJMP(0x46B430); }
 WRAPPER void CCamera::CalculateDerivedValues(void) { EAXJMP(0x46EEA0); }
 WRAPPER void CCamera::Restore(void) { EAXJMP(0x46F990); }
 WRAPPER void CCamera::SetWidescreenOff(void) { EAXJMP(0x46FF10); }
+WRAPPER void CCamera::CamShake(float) { EAXJMP(0x46B100); }
 
 bool
 CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat)
@@ -136,6 +138,15 @@ CCamera::RenderMotionBlur(void)
 		m_motionBlur, m_BlurType, m_imotionBlurAddAlpha);
 }
 
+void
+CCamera::ClearPlayerWeaponMode()
+{
+	PlayerWeaponMode.Mode = 0;
+	PlayerWeaponMode.MaxZoom = 1;
+	PlayerWeaponMode.MinZoom = -1;
+	PlayerWeaponMode.Duration = 0.0f;
+}
+
 
 /*
  *
@@ -159,9 +170,9 @@ WellBufferMe(float Target, float *CurrentValue, float *CurrentSpeed, float MaxSp
 	float TargetSpeed = Delta * MaxSpeed;
 	// Add or subtract absolute depending on sign, genius!
 //	if(TargetSpeed - *CurrentSpeed > 0.0f)
-//		*CurrentSpeed += Acceleration * fabs(TargetSpeed - *CurrentSpeed) * CTimer::GetTimeStep();
+//		*CurrentSpeed += Acceleration * Abs(TargetSpeed - *CurrentSpeed) * CTimer::GetTimeStep();
 //	else
-//		*CurrentSpeed -= Acceleration * fabs(TargetSpeed - *CurrentSpeed) * CTimer::GetTimeStep();
+//		*CurrentSpeed -= Acceleration * Abs(TargetSpeed - *CurrentSpeed) * CTimer::GetTimeStep();
 	// this is simpler:
 	*CurrentSpeed += Acceleration * (TargetSpeed - *CurrentSpeed) * CTimer::GetTimeStep();
 
@@ -238,14 +249,14 @@ CCam::GetPedBetaAngleForClearView(const CVector &Target, float Dist, float BetaO
 
 	for(a = 0.0f; a <= PI; a += DEGTORAD(5.0f)){
 		if(BetaOffset <= 0.0f){
-			ToSource = CVector(cos(Beta + BetaOffset + a), sin(Beta + BetaOffset + a), 0.0f)*Dist;
+			ToSource = CVector(Cos(Beta + BetaOffset + a), Sin(Beta + BetaOffset + a), 0.0f)*Dist;
 			if(!CWorld::ProcessLineOfSight(Target, Target + ToSource,
 						point, ent, checkBuildings, checkVehicles, checkPeds,
 						checkObjects, checkDummies, true, true))
 				return a;
 		}
 		if(BetaOffset >= 0.0f){
-			ToSource = CVector(cos(Beta + BetaOffset - a), sin(Beta + BetaOffset - a), 0.0f)*Dist;
+			ToSource = CVector(Cos(Beta + BetaOffset - a), Sin(Beta + BetaOffset - a), 0.0f)*Dist;
 			if(!CWorld::ProcessLineOfSight(Target, Target + ToSource,
 						point, ent, checkBuildings, checkVehicles, checkPeds,
 						checkObjects, checkDummies, true, true))
@@ -344,8 +355,8 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	// TODO: what's transition beta?
 	if(TheCamera.m_bUseTransitionBeta && ResetStatics){
 		CVector VecDistance;
-		IdealSource.x = TargetCoors.x + GroundDist*cos(m_fTransitionBeta);
-		IdealSource.y = TargetCoors.y + GroundDist*sin(m_fTransitionBeta);
+		IdealSource.x = TargetCoors.x + GroundDist*Cos(m_fTransitionBeta);
+		IdealSource.y = TargetCoors.y + GroundDist*Sin(m_fTransitionBeta);
 		Beta = CGeneral::GetATanOfXY(IdealSource.x - TargetCoors.x, IdealSource.y - TargetCoors.y);
 	}else
 		Beta = CGeneral::GetATanOfXY(Source.x - TargetCoors.x, Source.y - TargetCoors.y);
@@ -489,7 +500,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 		CVector PlayerPos = FindPlayerPed()->GetPosition();
 		float RotationDist = (AngleToGoTo == Center ? CenterDist : LateralDist) * RealGroundDist;
 		// What's going on here? - AngleToGoTo?
-		CVector RotatedSource = PlayerPos + CVector(cos(Beta - AngleToGoTo), sin(Beta - AngleToGoTo), 0.0f) * RotationDist;
+		CVector RotatedSource = PlayerPos + CVector(Cos(Beta - AngleToGoTo), Sin(Beta - AngleToGoTo), 0.0f) * RotationDist;
 
 		CColPoint colpoint;
 		CEntity *entity;
@@ -573,9 +584,9 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 		float ReqSpeed = DeltaBeta * MaxSpeed;
 		// Add or subtract absolute depending on sign, genius!
 		if(ReqSpeed - BetaSpeed > 0.0f)
-			BetaSpeed += SpeedStep * fabs(ReqSpeed - BetaSpeed) * CTimer::GetTimeStep();
+			BetaSpeed += SpeedStep * Abs(ReqSpeed - BetaSpeed) * CTimer::GetTimeStep();
 		else
-			BetaSpeed -= SpeedStep * fabs(ReqSpeed - BetaSpeed) * CTimer::GetTimeStep();
+			BetaSpeed -= SpeedStep * Abs(ReqSpeed - BetaSpeed) * CTimer::GetTimeStep();
 		// this would be simpler:
 		// BetaSpeed += SpeedStep * (ReqSpeed - BetaSpeed) * CTimer::ms_fTimeStep;
 
@@ -593,14 +604,14 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 			BetaSpeed = 0.0f;
 		}
 
-		Source.x = TargetCoors.x + Distance * cos(Beta);
-		Source.y = TargetCoors.y + Distance * sin(Beta);
+		Source.x = TargetCoors.x + Distance * Cos(Beta);
+		Source.y = TargetCoors.y + Distance * Sin(Beta);
 
 		// Check if we can stop rotating
 		DeltaBeta = FixedTargetOrientation - Beta;
 		while(DeltaBeta >= PI) DeltaBeta -= 2*PI;
 		while(DeltaBeta < -PI) DeltaBeta += 2*PI;
-		if(fabs(DeltaBeta) < DEGTORAD(1.0f) && !bBehindPlayerDesired){
+		if(Abs(DeltaBeta) < DEGTORAD(1.0f) && !bBehindPlayerDesired){
 			// Stop rotation
 			PickedASide = false;
 			Rotating = false;
@@ -613,18 +624,18 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	   HackPlayerOnStoppingTrain || Rotating){
 		if(TheCamera.m_bCamDirectlyBehind){
 			Beta = TargetOrientation + PI;
-			Source.x = TargetCoors.x + Distance * cos(Beta);
-			Source.y = TargetCoors.y + Distance * sin(Beta);
+			Source.x = TargetCoors.x + Distance * Cos(Beta);
+			Source.y = TargetCoors.y + Distance * Sin(Beta);
 		}
 		if(TheCamera.m_bCamDirectlyInFront){
 			Beta = TargetOrientation;
-			Source.x = TargetCoors.x + Distance * cos(Beta);
-			Source.y = TargetCoors.y + Distance * sin(Beta);
+			Source.x = TargetCoors.x + Distance * Cos(Beta);
+			Source.y = TargetCoors.y + Distance * Sin(Beta);
 		}
 		if(HackPlayerOnStoppingTrain){
 			Beta = TargetOrientation + PI;
-			Source.x = TargetCoors.x + Distance * cos(Beta);
-			Source.y = TargetCoors.y + Distance * sin(Beta);
+			Source.x = TargetCoors.x + Distance * Cos(Beta);
+			Source.y = TargetCoors.y + Distance * Sin(Beta);
 			m_fDimensionOfHighestNearCar = 0.0f;
 			m_fCamBufferedHeight = 0.0f;
 			m_fCamBufferedHeightSpeed = 0.0f;
@@ -669,9 +680,13 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 		else if(TargetZOffSet == m_fUnknownZOffSet && TargetZOffSet > m_fCamBufferedHeight){
 			// TODO: figure this out
 			bool foo = false;
-			switch(((CPhysical*)CamTargetEntity)->m_nLastCollType)
-			case 2: case 3: case 5:
-			case 11: case 23: case 26:
+			switch(((CPhysical*)CamTargetEntity)->m_nSurfaceTouched)
+			case SURFACE_GRASS:
+			case SURFACE_DIRT:
+			case SURFACE_PAVEMENT:
+			case SURFACE_STEEL:
+			case SURFACE_TIRE:
+			case SURFACE_STONE:
 				foo = true;
 			if(foo)
 				WellBufferMe(TargetHeight, &m_fCamBufferedHeight, &m_fCamBufferedHeightSpeed, 0.4f, 0.05f, false);
@@ -784,7 +799,7 @@ CCam::WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation)
 	if(CCullZones::CamNoRain() || CCullZones::PlayerNoRain())
 		AlphaTarget = DEGTORAD(14.0f);
 	WellBufferMe(AlphaTarget, &Alpha, &AlphaSpeed, 0.1f, 0.05f, true);
-	Source.z = TargetCoors.z + CA_MAX_DISTANCE*sin(Alpha);
+	Source.z = TargetCoors.z + CA_MAX_DISTANCE*Sin(Alpha);
 
 	if(FindPlayerVehicle()){
 		m_fUnknownZOffSet = 0.0f;
@@ -889,7 +904,7 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 		while(deltaBeta >= PI) deltaBeta -= 2*PI;
 		while(deltaBeta < -PI) deltaBeta += 2*PI;
 
-		float BehindCarNess = cos(deltaBeta);	// 1 if behind car, 0 if side, -1 if in front
+		float BehindCarNess = Cos(deltaBeta);	// 1 if behind car, 0 if side, -1 if in front
 		CarAlpha = -CarAlpha * BehindCarNess;
 		if(CarAlpha < -0.01f)
 			CarAlpha = -0.01f;
@@ -924,13 +939,13 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 		Forward = CamTargetEntity->GetForward();	// we actually still have that...
 		Forward.Normalise();	// shouldn't be necessary
 		float CarSideAngle = CGeneral::GetATanOfXY(Forward.x, Forward.y) + PI/2.0f;
-		float SideX = 2.5f * cos(CarSideAngle);
-		float SideY = 2.5f * sin(CarSideAngle);
+		float SideX = 2.5f * Cos(CarSideAngle);
+		float SideY = 2.5f * Sin(CarSideAngle);
 		CWorld::FindRoofZFor3DCoord(TargetCoors.x + SideX, TargetCoors.y + SideY, CarBottom, &FoundRoofSide1);
 		CWorld::FindRoofZFor3DCoord(TargetCoors.x - SideX, TargetCoors.y - SideY, CarBottom, &FoundRoofSide2);
 
 		// Now find out at what height we'd like to place the camera
-		float CamGround = CWorld::FindGroundZFor3DCoord(Source.x, Source.y, TargetCoors.z + Length*sin(Alpha + ModeAlpha) + m_fCloseInCarHeightOffset, &FoundCamGround);
+		float CamGround = CWorld::FindGroundZFor3DCoord(Source.x, Source.y, TargetCoors.z + Length*Sin(Alpha + ModeAlpha) + m_fCloseInCarHeightOffset, &FoundCamGround);
 		float CamTargetZ = 0.0f;
 		if(FoundCamGround){
 			// This is the normal case
@@ -977,7 +992,7 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 		}
 
 		// Now do things if CamClear...but what is that anyway?
-		float CamZ = TargetCoors.z + Length*sin(Alpha + DeltaAlpha + ModeAlpha) + m_fCloseInCarHeightOffset;
+		float CamZ = TargetCoors.z + Length*Sin(Alpha + DeltaAlpha + ModeAlpha) + m_fCloseInCarHeightOffset;
 		bool FoundGround, FoundRoof;
 		float CamGround2 = CWorld::FindGroundZFor3DCoord(Source.x, Source.y, CamZ, &FoundGround);
 		if(FoundGround){
@@ -1027,7 +1042,7 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 
 	WellBufferMe(LastTargetAlphaWithCollisionOn, &Alpha, &AlphaSpeed, LastTopAlphaSpeed, LastAlphaSpeedStep, true);
 
-	Source.z = TargetCoors.z + sin(Alpha + ModeAlpha)*Length + m_fCloseInCarHeightOffset;
+	Source.z = TargetCoors.z + Sin(Alpha + ModeAlpha)*Length + m_fCloseInCarHeightOffset;
 }
 
 // Rotate cam behind the car when the car is moving forward
@@ -1047,7 +1062,7 @@ CCam::RotCamIfInFrontCar(CVector &TargetCoors, float TargetOrientation)
 	while(DeltaBeta >= PI) DeltaBeta -= 2*PI;
 	while(DeltaBeta < -PI) DeltaBeta += 2*PI;
 
-	if(fabs(DeltaBeta) > DEGTORAD(20.0f) && MovingForward && TheCamera.m_uiTransitionState == 0)
+	if(Abs(DeltaBeta) > DEGTORAD(20.0f) && MovingForward && TheCamera.m_uiTransitionState == 0)
 		m_bFixingBeta = true;
 
 	CPad *pad = CPad::GetPad(0);
@@ -1073,14 +1088,14 @@ CCam::RotCamIfInFrontCar(CVector &TargetCoors, float TargetOrientation)
 		if(TheCamera.m_bUseTransitionBeta && &TheCamera.Cams[TheCamera.ActiveCam] == this)
 			Beta = m_fTransitionBeta;
 
-		Source.x = TargetCoors.x - cos(Beta)*Dist;
-		Source.y = TargetCoors.y - sin(Beta)*Dist;
+		Source.x = TargetCoors.x - Cos(Beta)*Dist;
+		Source.y = TargetCoors.y - Sin(Beta)*Dist;
 
 		// Check if we're done
 		DeltaBeta = TargetOrientation - Beta;
 		while(DeltaBeta >= PI) DeltaBeta -= 2*PI;
 		while(DeltaBeta < -PI) DeltaBeta += 2*PI;
-		if(fabs(DeltaBeta) < DEGTORAD(2.0f))
+		if(Abs(DeltaBeta) < DEGTORAD(2.0f))
 			m_bFixingBeta = false;
 	}
 	TheCamera.m_bCamDirectlyBehind = false;
@@ -1123,8 +1138,8 @@ CCam::FixCamIfObscured(CVector &TargetCoors, float TargetHeight, float TargetOri
 				Obscured1 = CWorld::ProcessLineOfSight(EntityPos, TempSource, colPoint, ent, true, false, false, true, false, true, true);
 		}else if(m_bFixingBeta){
 			float d = (TempSource - Target).Magnitude();
-			TempSource.x = Target.x - d*cos(TargetOrientation);
-			TempSource.y = Target.y - d*sin(TargetOrientation);
+			TempSource.x = Target.x - d*Cos(TargetOrientation);
+			TempSource.y = Target.y - d*Sin(TargetOrientation);
 
 			// same check again
 			Obscured2 = CWorld::ProcessLineOfSight(Target, TempSource, colPoint, ent, true, false, false, true, false, true, true);
@@ -1142,14 +1157,14 @@ CCam::FixCamIfObscured(CVector &TargetCoors, float TargetHeight, float TargetOri
 		return false;
 
 	if(Fix1){
-		Source.x = Target.x - cos(Beta)*Dist1;
-		Source.y = Target.y - sin(Beta)*Dist1;
+		Source.x = Target.x - Cos(Beta)*Dist1;
+		Source.y = Target.y - Sin(Beta)*Dist1;
 		if(Mode == MODE_BEHINDCAR)
 			Source = colPoint.point;
 	}else{
 		WellBufferMe(Dist2, &m_fDistanceBeforeChanges, &DistanceSpeed, 0.2f, 0.025f, false);
-		Source.x = Target.x - cos(Beta)*m_fDistanceBeforeChanges;
-		Source.y = Target.y - sin(Beta)*m_fDistanceBeforeChanges;
+		Source.x = Target.x - Cos(Beta)*m_fDistanceBeforeChanges;
+		Source.y = Target.y - Sin(Beta)*m_fDistanceBeforeChanges;
 	}
 
 	if(ResetStatics){

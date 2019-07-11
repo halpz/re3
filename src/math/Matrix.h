@@ -78,10 +78,36 @@ public:
 		return *this;
 	}
 
-	CVector *GetPosition(void){ return (CVector*)&m_matrix.pos; }
-	CVector *GetRight(void) { return (CVector*)&m_matrix.right; }
-	CVector *GetForward(void) { return (CVector*)&m_matrix.up; }
-	CVector *GetUp(void) { return (CVector*)&m_matrix.at; }
+	CVector &GetPosition(void){ return *(CVector*)&m_matrix.pos; }
+	CVector &GetRight(void) { return *(CVector*)&m_matrix.right; }
+	CVector &GetForward(void) { return *(CVector*)&m_matrix.up; }
+	CVector &GetUp(void) { return *(CVector*)&m_matrix.at; }
+
+	void SetTranslate(float x, float y, float z){
+		m_matrix.right.x = 1.0f;
+		m_matrix.right.y = 0.0f;
+		m_matrix.right.z = 0.0f;
+
+		m_matrix.up.x = 0.0f;
+		m_matrix.up.y = 1.0f;
+		m_matrix.up.z = 0.0f;
+
+		m_matrix.at.x = 0.0f;
+		m_matrix.at.y = 0.0f;
+		m_matrix.at.z = 1.0f;
+
+		m_matrix.pos.x = x;
+		m_matrix.pos.y = y;
+		m_matrix.pos.z = z;
+	}
+	void SetTranslate(const CVector &trans){ SetTranslate(trans.x, trans.y, trans.z); }
+	void Translate(float x, float y, float z){
+		m_matrix.pos.x += x;
+		m_matrix.pos.y += y;
+		m_matrix.pos.z += z;
+	}
+	void Translate(const CVector &trans){ Translate(trans.x, trans.y, trans.z); }
+
 	void SetScale(float s){
 		m_matrix.right.x = s;
 		m_matrix.right.y = 0.0f;
@@ -99,9 +125,10 @@ public:
 		m_matrix.pos.y = 0.0f;
 		m_matrix.pos.z = 0.0f;
 	}
+
 	void SetRotateXOnly(float angle){
-		float c = cos(angle);
-		float s = sin(angle);
+		float c = Cos(angle);
+		float s = Sin(angle);
 
 		m_matrix.right.x = 1.0f;
 		m_matrix.right.y = 0.0f;
@@ -122,8 +149,8 @@ public:
 		m_matrix.pos.z = 0.0f;
 	}
 	void SetRotateYOnly(float angle){
-		float c = cos(angle);
-		float s = sin(angle);
+		float c = Cos(angle);
+		float s = Sin(angle);
 
 		m_matrix.right.x = c;
 		m_matrix.right.y = 0.0f;
@@ -144,8 +171,8 @@ public:
 		m_matrix.pos.z = 0.0f;
 	}
 	void SetRotateZOnly(float angle){
-		float c = cos(angle);
-		float s = sin(angle);
+		float c = Cos(angle);
+		float s = Sin(angle);
 
 		m_matrix.right.x = c;
 		m_matrix.right.y = s;
@@ -166,12 +193,12 @@ public:
 		m_matrix.pos.z = 0.0f;
 	}
 	void SetRotate(float xAngle, float yAngle, float zAngle) {
-		float cX = cos(xAngle);
-		float sX = sin(xAngle);
-		float cY = cos(yAngle);
-		float sY = sin(yAngle);
-		float cZ = cos(zAngle);
-		float sZ = sin(zAngle);
+		float cX = Cos(xAngle);
+		float sX = Sin(xAngle);
+		float cY = Cos(yAngle);
+		float sY = Sin(yAngle);
+		float cZ = Cos(zAngle);
+		float sZ = Sin(zAngle);
 
 		m_matrix.right.x = cZ * cY - (sZ * sX) * sY;
 		m_matrix.right.y = (cZ * sX) * sY + sZ * cY;
@@ -190,9 +217,9 @@ public:
 		m_matrix.pos.z = 0.0f;
 	}
 	void Reorthogonalise(void){
-		CVector &r = *GetRight();
-		CVector &f = *GetForward();
-		CVector &u = *GetUp();
+		CVector &r = GetRight();
+		CVector &f = GetForward();
+		CVector &u = GetUp();
 		u = CrossProduct(r, f);
 		u.Normalise();
 		r = CrossProduct(f, u);
@@ -306,6 +333,15 @@ Multiply3x3(const CMatrix &mat, const CVector &vec)
 		mat.m_matrix.right.z * vec.x + mat.m_matrix.up.z * vec.y + mat.m_matrix.at.z * vec.z);
 }
 
+inline CVector
+Multiply3x3(const CVector &vec, const CMatrix &mat)
+{
+	return CVector(
+		mat.m_matrix.right.x * vec.x + mat.m_matrix.right.y * vec.y + mat.m_matrix.right.z * vec.z,
+		mat.m_matrix.up.x * vec.x + mat.m_matrix.up.y * vec.y + mat.m_matrix.up.z * vec.z,
+		mat.m_matrix.at.x * vec.x + mat.m_matrix.at.y * vec.y + mat.m_matrix.at.z * vec.z);
+}
+
 class CCompressedMatrixNotAligned
 {
 	CVector m_vecPos;
@@ -318,24 +354,24 @@ class CCompressedMatrixNotAligned
 public:
 	void CompressFromFullMatrix(CMatrix &other)
 	{
-		m_rightX = 127.0f * other.GetRight()->x;
-		m_rightY = 127.0f * other.GetRight()->y;
-		m_rightZ = 127.0f * other.GetRight()->z;
-		m_upX = 127.0f * other.GetForward()->x;
-		m_upY = 127.0f * other.GetForward()->y;
-		m_upZ = 127.0f * other.GetForward()->z;
-		m_vecPos = *other.GetPosition();
+		m_rightX = 127.0f * other.GetRight().x;
+		m_rightY = 127.0f * other.GetRight().y;
+		m_rightZ = 127.0f * other.GetRight().z;
+		m_upX = 127.0f * other.GetForward().x;
+		m_upY = 127.0f * other.GetForward().y;
+		m_upZ = 127.0f * other.GetForward().z;
+		m_vecPos = other.GetPosition();
 	}
 	void DecompressIntoFullMatrix(CMatrix &other)
 	{
-		other.GetRight()->x = m_rightX / 127.0f;
-		other.GetRight()->y = m_rightY / 127.0f;
-		other.GetRight()->z = m_rightZ / 127.0f;
-		other.GetForward()->x = m_upX / 127.0f;
-		other.GetForward()->y = m_upY / 127.0f;
-		other.GetForward()->z = m_upZ / 127.0f;
-		*other.GetUp() = CrossProduct(*other.GetRight(), *other.GetForward());
-		*other.GetPosition() = m_vecPos;
+		other.GetRight().x = m_rightX / 127.0f;
+		other.GetRight().y = m_rightY / 127.0f;
+		other.GetRight().z = m_rightZ / 127.0f;
+		other.GetForward().x = m_upX / 127.0f;
+		other.GetForward().y = m_upY / 127.0f;
+		other.GetForward().z = m_upZ / 127.0f;
+		other.GetUp() = CrossProduct(other.GetRight(), other.GetForward());
+		other.GetPosition() = m_vecPos;
 		other.Reorthogonalise();
 	}
 };

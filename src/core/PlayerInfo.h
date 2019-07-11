@@ -63,10 +63,13 @@ public:
 	bool m_bFastReload;
 	bool m_bGetOutOfJailFree;
 	bool m_bGetOutOfHospitalFree;
-	uint8 m_aSkinName[32];
+	char m_aSkinName[32];
 	RwTexture *m_pSkinTexture;
 
 	void MakePlayerSafe(bool);
+	void LoadPlayerSkin();
+	void AwardMoneyForExplosion(CVehicle *vehicle);	
+	void SetPlayerSkin(char* skin);
 };
 
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");

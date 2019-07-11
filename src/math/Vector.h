@@ -22,15 +22,15 @@ public:
 		return *((RwV3d*)this);
 	}
 #endif
-	float Heading(void) const { return atan2(-x, y); }
-	float Magnitude(void) const { return sqrt(x*x + y*y + z*z); }
+	float Heading(void) const { return Atan2(-x, y); }
+	float Magnitude(void) const { return Sqrt(x*x + y*y + z*z); }
 	float MagnitudeSqr(void) const { return x*x + y*y + z*z; }
-	float Magnitude2D(void) const { return sqrt(x*x + y*y); }
+	float Magnitude2D(void) const { return Sqrt(x*x + y*y); }
 	float MagnitudeSqr2D(void) const { return x*x + y*y; }
 	void Normalise(void) {
 		float sq = MagnitudeSqr();
 		if(sq > 0.0f){
-			float invsqrt = 1.0f/sqrt(sq); // CMaths::RecipSqrt
+			float invsqrt = 1.0f/Sqrt(sq); // CMaths::RecipSqrt
 			x *= invsqrt;
 			y *= invsqrt;
 			z *= invsqrt;

@@ -51,8 +51,16 @@ CDummy::Remove(void)
 	}
 }
 
+class CDummy_ : public CDummy
+{
+public:
+	void Add_(void) { CDummy::Add(); }
+	void Remove_(void) { CDummy::Remove(); }
+	void dtor(void) { CDummy::~CDummy(); }
+};
+
 STARTPATCHES
-	InjectHook(0x473810, &CDummy::dtor, PATCH_JUMP);
-	InjectHook(0x473860, &CDummy::Add_, PATCH_JUMP);
-	InjectHook(0x473AD0, &CDummy::Remove_, PATCH_JUMP);
+	InjectHook(0x473810, &CDummy_::dtor, PATCH_JUMP);
+	InjectHook(0x473860, &CDummy_::Add_, PATCH_JUMP);
+	InjectHook(0x473AD0, &CDummy_::Remove_, PATCH_JUMP);
 ENDPATCHES

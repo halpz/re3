@@ -97,6 +97,7 @@ extern void **rwengine;
 #define SCREEN_SCALE_AR(a) (a)
 #endif
 
+#include "math/maths.h"
 #include "math/Vector.h"
 #include "math/Vector2D.h"
 #include "math/Matrix.h"

@@ -94,13 +94,15 @@ public:
 	uint16 m_level;	// int16
 	CReference *m_pFirstReference;
 
+	CColModel *GetColModel(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(); }
+
 	CEntity(void);
-	virtual ~CEntity(void);
+	~CEntity(void);
 
 	virtual void Add(void);
 	virtual void Remove(void);
-	virtual void SetModelIndex(uint32 i) { m_modelIndex = i; CreateRwObject(); }
-	virtual void SetModelIndexNoCreate(uint32 i) { m_modelIndex = i; }
+	virtual void SetModelIndex(uint32 id) { m_modelIndex = id; CreateRwObject(); }
+	virtual void SetModelIndexNoCreate(uint32 id) { m_modelIndex = id; }
 	virtual void CreateRwObject(void);
 	virtual void DeleteRwObject(void);
 	virtual CRect GetBoundRect(void);
@@ -145,19 +147,5 @@ public:
 	void ModifyMatrixForTreeInWind(void);
 	void ModifyMatrixForBannerInWind(void);
 	void ProcessLightsForEntity(void);
-
-
-	// to make patching virtual functions possible
-	CEntity *ctor(void) { return ::new (this) CEntity(); }
-	void dtor(void) { this->CEntity::~CEntity(); }
-	void Add_(void) { CEntity::Add(); }
-	void Remove_(void) { CEntity::Remove(); }
-	void SetModelIndex_(uint32 i) { CEntity::SetModelIndex(i); }
-	void CreateRwObject_(void) { CEntity::CreateRwObject(); }
-	void DeleteRwObject_(void) { CEntity::DeleteRwObject(); }
-	CRect GetBoundRect_(void) { return CEntity::GetBoundRect(); }
-	void PreRender_(void) { CEntity::PreRender(); }
-	void Render_(void) { CEntity::Render(); }
-	bool SetupLighting_(void) { return CEntity::SetupLighting(); }
 };
 static_assert(sizeof(CEntity) == 0x64, "CEntity: error");

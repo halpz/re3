@@ -53,7 +53,7 @@ FrameUpdateCallBack(AnimBlendFrameData *frame, void *arg)
 		if(norm == 0.0f)
 			rot.w = 1.0f;
 		else
-			rot *= 1.0f/sqrt(norm);
+			rot *= 1.0f/Sqrt(norm);
 		rot.Get(mat);
 	}
 
@@ -127,7 +127,7 @@ FrameUpdateCallBackWithVelocityExtraction(AnimBlendFrameData *frame, void *arg)
 		if(norm == 0.0f)
 			rot.w = 1.0f;
 		else
-			rot *= 1.0f/sqrt(norm);
+			rot *= 1.0f/Sqrt(norm);
 		rot.Get(mat);
 	}
 
@@ -206,7 +206,7 @@ FrameUpdateCallBackWith3dVelocityExtraction(AnimBlendFrameData *frame, void *arg
 		if(norm == 0.0f)
 			rot.w = 1.0f;
 		else
-			rot *= 1.0f/sqrt(norm);
+			rot *= 1.0f/Sqrt(norm);
 		rot.Get(mat);
 	}
 

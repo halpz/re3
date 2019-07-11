@@ -10,7 +10,6 @@ public:
 
 	CHeli(int, uint8);
 	CHeli* ctor(int, uint8);
-	void dtor(void) { this->CHeli::~CHeli(); }
 
 	static void SpecialHeliPreRender(void);
 };

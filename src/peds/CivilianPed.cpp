@@ -13,7 +13,14 @@ CCivilianPed::CCivilianPed(int pedtype, int mi) : CPed(pedtype)
 	}
 }
 
+class CCivilianPed_ : public CCivilianPed
+{
+public:
+	CCivilianPed *ctor(int pedtype, int mi) { return ::new (this) CCivilianPed(pedtype, mi); };
+	void dtor(void) { CCivilianPed::~CCivilianPed(); }
+};
+
 STARTPATCHES
-	InjectHook(0x4BFF30, &CCivilianPed::ctor, PATCH_JUMP);
-	InjectHook(0x4BFFC0, &CCivilianPed::dtor, PATCH_JUMP);
+	InjectHook(0x4BFF30, &CCivilianPed_::ctor, PATCH_JUMP);
+	InjectHook(0x4BFFC0, &CCivilianPed_::dtor, PATCH_JUMP);
 ENDPATCHES

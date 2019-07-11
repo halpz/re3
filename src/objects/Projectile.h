@@ -7,5 +7,4 @@
 class CProjectile : public CObject
 {
 public:
-	void dtor(void) { this->CProjectile::~CProjectile(); }
 };

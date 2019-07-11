@@ -49,12 +49,5 @@ public:
 	static void FillFrameArray(RpClump *clump, RwFrame **frames);
 	static RwFrame *FillFrameArrayCB(RwFrame *frame, void *data);
 	static RwFrame *GetFrameFromId(RpClump *clump, int32 id);
-
-
-	void DeleteRwObject_(void) { this->CClumpModelInfo::DeleteRwObject(); }
-	RwObject *CreateInstance_1(void) { return this->CClumpModelInfo::CreateInstance(); }
-	RwObject *CreateInstance_2(RwMatrix *m) { return this->CClumpModelInfo::CreateInstance(m); }
-	RwObject *GetRwObject_(void) { return this->CClumpModelInfo::GetRwObject(); }
-	void SetClump_(RpClump *clump) { this->CClumpModelInfo::SetClump(clump); }
 };
 static_assert(sizeof(CClumpModelInfo) == 0x34, "CClumpModelInfo: error");

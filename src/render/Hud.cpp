@@ -173,7 +173,7 @@ void CHud::Draw()
 
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 
-			float fStep = sin((CTimer::GetTimeInMilliseconds() & 1023) * 0.0061328127);
+			float fStep = Sin((CTimer::GetTimeInMilliseconds() & 1023) * 0.0061328127);
 			float fMultBright = SpriteBrightness * 0.03f * (0.25f * fStep + 0.75f);
 			CRect rect;
 #ifndef ASPECT_RATIO_SCALE
@@ -814,8 +814,8 @@ void CHud::Draw()
 	if (!CTimer::GetIsUserPaused()) {
 		CTextLine* IntroText = CTheScripts::IntroTextLines;
 
-		for (int i = 0; i < 2; i++) {
-			if (CTheScripts::IntroTextLines[i].m_awText[0] && CTheScripts::IntroTextLines[i].field_29) {
+		for (int i = 0; i < MAX_NUM_INTRO_TEXT_LINES; i++) {
+			if (CTheScripts::IntroTextLines[i].m_Text[0] && CTheScripts::IntroTextLines[i].m_bTextBeforeFade) {
 				CFont::SetScale(SCREEN_SCALE_X(CTheScripts::IntroTextLines[i].m_fScaleX), SCREEN_SCALE_Y(CTheScripts::IntroTextLines[i].m_fScaleY * 0.5f));
 				CFont::SetColor(CTheScripts::IntroTextLines[i].m_sColor);
 
@@ -855,22 +855,22 @@ void CHud::Draw()
 					CFont::SetPropOff();
 
 				CFont::SetFontStyle(CTheScripts::IntroTextLines[i].m_nFont);
-				CFont::PrintString(SCREEN_SCALE_X(640.0f - CTheScripts::IntroTextLines[i].field_36), SCREEN_SCALE_Y(448.0f - CTheScripts::IntroTextLines[i].field_40), IntroText->m_awText);
+				CFont::PrintString(SCREEN_SCALE_X(640.0f - CTheScripts::IntroTextLines[i].m_fAtX), SCREEN_SCALE_Y(448.0f - CTheScripts::IntroTextLines[i].m_fAtY), IntroText->m_Text);
 			}
 		}
 
 		CScriptRectangle* IntroRect = CTheScripts::IntroRectangles;
 
 		for (int i = 0; i < 16; i++) {
-			if (CTheScripts::IntroRectangles[i].m_bIsUsed && CTheScripts::IntroRectangles[i].m_bIsAntialiased) {
-				if (CTheScripts::IntroRectangles[i].m_wTextureId >= 0) {
+			if (CTheScripts::IntroRectangles[i].m_bIsUsed && CTheScripts::IntroRectangles[i].m_bBeforeFade) {
+				if (CTheScripts::IntroRectangles[i].m_nTextureId >= 0) {
 					CRect rect = {
 						CTheScripts::IntroRectangles[i].m_sRect.left,
 						CTheScripts::IntroRectangles[i].m_sRect.bottom,
 						CTheScripts::IntroRectangles[i].m_sRect.right,
 						CTheScripts::IntroRectangles[i].m_sRect.bottom };
 
-					CTheScripts::ScriptSprites[CTheScripts::IntroRectangles[i].m_wTextureId].Draw(rect, IntroRect->m_sColor);
+					CTheScripts::ScriptSprites[CTheScripts::IntroRectangles[i].m_nTextureId].Draw(rect, IntroRect->m_sColor);
 				}
 				else {
 					CRect rect = {

@@ -12,6 +12,12 @@ CDummyObject::CDummyObject(CObject *obj)
 	m_level = obj->m_level;
 }
 
+class CDummyObject_ : public CDummyObject
+{
+public:
+	void dtor(void) { CDummyObject::~CDummyObject(); }
+};
+
 STARTPATCHES
-	InjectHook(0x4BAB70, &CDummyObject::dtor, PATCH_JUMP);
+	InjectHook(0x4BAB70, &CDummyObject_::dtor, PATCH_JUMP);
 ENDPATCHES

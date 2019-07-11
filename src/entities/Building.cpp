@@ -21,8 +21,15 @@ CBuilding::ReplaceWithNewModel(int32 id)
 			CStreaming::RequestModel(id, STREAMFLAGS_DONT_REMOVE);
 }
 
+class CBuilding_ : public CBuilding
+{
+public:
+	CBuilding *ctor(void) { return ::new (this) CBuilding(); }
+	void dtor(void) { CBuilding::~CBuilding(); }
+};
+
 STARTPATCHES
-	InjectHook(0x4057D0, &CBuilding::ctor, PATCH_JUMP);
-	InjectHook(0x405800, &CBuilding::dtor, PATCH_JUMP);
+	InjectHook(0x4057D0, &CBuilding_::ctor, PATCH_JUMP);
+	InjectHook(0x405800, &CBuilding_::dtor, PATCH_JUMP);
 	InjectHook(0x405850, &CBuilding::ReplaceWithNewModel, PATCH_JUMP);
 ENDPATCHES

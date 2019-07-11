@@ -154,12 +154,20 @@ CSimpleModelInfo::SetupBigBuilding(void)
 	}
 }
 
+class CSimpleModelInfo_ : public CSimpleModelInfo
+{
+public:
+	void DeleteRwObject_(void) { CSimpleModelInfo::DeleteRwObject(); }
+	RwObject *CreateInstance_1(void) { return CSimpleModelInfo::CreateInstance(); }
+	RwObject *CreateInstance_2(RwMatrix *m) { return CSimpleModelInfo::CreateInstance(m); }
+	RwObject *GetRwObject_(void) { return CSimpleModelInfo::GetRwObject(); }
+};
 
 STARTPATCHES
-	InjectHook(0x5179B0, &CSimpleModelInfo::DeleteRwObject_, PATCH_JUMP);
-	InjectHook(0x517B60, &CSimpleModelInfo::CreateInstance_1, PATCH_JUMP);
-	InjectHook(0x517AC0, &CSimpleModelInfo::CreateInstance_2, PATCH_JUMP);
-	InjectHook(0x4A9BA0, &CSimpleModelInfo::GetRwObject_, PATCH_JUMP);
+	InjectHook(0x5179B0, &CSimpleModelInfo_::DeleteRwObject_, PATCH_JUMP);
+	InjectHook(0x517B60, &CSimpleModelInfo_::CreateInstance_1, PATCH_JUMP);
+	InjectHook(0x517AC0, &CSimpleModelInfo_::CreateInstance_2, PATCH_JUMP);
+	InjectHook(0x4A9BA0, &CSimpleModelInfo_::GetRwObject_, PATCH_JUMP);
 	InjectHook(0x517990, &CSimpleModelInfo::Init, PATCH_JUMP);
 	InjectHook(0x517C60, &CSimpleModelInfo::IncreaseAlpha, PATCH_JUMP);
 	InjectHook(0x517950, &CSimpleModelInfo::SetAtomic, PATCH_JUMP);

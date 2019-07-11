@@ -6,32 +6,32 @@ public:
 	static float GetATanOfXY(float x, float y){
 		if(x == 0.0f && y == 0.0f)
 			return 0.0f;
-		float xabs = fabs(x);
-		float yabs = fabs(y);
+		float xabs = Abs(x);
+		float yabs = Abs(y);
 
 		if(xabs < yabs){
 			if(y > 0.0f){
 				if(x > 0.0f)
-					return 0.5f*PI - atan2(x / y, 1.0f);
+					return 0.5f*PI - Atan2(x / y, 1.0f);
 				else
-					return 0.5f*PI + atan2(-x / y, 1.0f);
+					return 0.5f*PI + Atan2(-x / y, 1.0f);
 			}else{
 				if(x > 0.0f)
-					return 1.5f*PI + atan2(x / -y, 1.0f);
+					return 1.5f*PI + Atan2(x / -y, 1.0f);
 				else
-					return 1.5f*PI - atan2(-x / -y, 1.0f);
+					return 1.5f*PI - Atan2(-x / -y, 1.0f);
 			}
 		}else{
 			if(y > 0.0f){
 				if(x > 0.0f)
-					return atan2(y / x, 1.0f);
+					return Atan2(y / x, 1.0f);
 				else
-					return PI - atan2(y / -x, 1.0f);
+					return PI - Atan2(y / -x, 1.0f);
 			}else{
 				if(x > 0.0f)
-					return 2.0f*PI - atan2(-y / x, 1.0f);
+					return 2.0f*PI - Atan2(-y / x, 1.0f);
 				else
-					return PI + atan2(-y / -x, 1.0f);
+					return PI + Atan2(-y / -x, 1.0f);
 			}
 		}
 	}
@@ -68,14 +68,14 @@ public:
 
 		if (x > 0.0f) {
 			if (y > 0.0f)
-				return PI - atan2(x / y, 1.0f);
+				return PI - Atan2(x / y, 1.0f);
 			else
-				return -atan2(x / y, 1.0f);
+				return -Atan2(x / y, 1.0f);
 		} else {
 			if (y > 0.0f)
-				return -(PI + atan2(x / y, 1.0f));
+				return -(PI + Atan2(x / y, 1.0f));
 			else
-				return -atan2(x / y, 1.0f);
+				return -Atan2(x / y, 1.0f);
 		}
 	}
 

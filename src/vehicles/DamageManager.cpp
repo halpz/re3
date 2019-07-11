@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "General.h"
+#include "Vehicle.h"
 #include "DamageManager.h"
 
 

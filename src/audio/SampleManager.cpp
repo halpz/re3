@@ -12,6 +12,33 @@ bool CSampleManager::IsMP3RadioChannelAvailable() {
 	return nNumOfMp3Files != 0;
 }
 
+WRAPPER
+bool CSampleManager::IsSampleBankLoaded(uint8) { EAXJMP(0x567130); }
+
+WRAPPER
+void CSampleManager::UnloadSampleBank(uint8) { EAXJMP(0x567110); }
+
+WRAPPER
+void
+CSampleManager::Terminate()
+{
+	EAXJMP(0x566DC0);
+}
+
+WRAPPER
+bool
+CSampleManager::Initialise()
+{
+	EAXJMP(0x566530);
+}
+
+WRAPPER
+int32
+CSampleManager::GetActiveSamples()
+{
+	EAXJMP(0x565970);
+}
+
 WRAPPER void
 CSampleManager::ReleaseDigitalHandle()
 {
@@ -87,6 +114,7 @@ CSampleManager::StopChannel(int32 id)
 {
 	EAXJMP(0x567BE0);
 }
+
 STARTPATCHES
 InjectHook(0x566490, CSampleManager::IsMP3RadioChannelAvailable, PATCH_JUMP);
 ENDPATCHES

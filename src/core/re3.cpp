@@ -57,27 +57,6 @@ mysrand(unsigned int seed)
 	myrand_seed = seed;
 }
 
-int (*open_script_orig)(const char *path, const char *mode);
-int
-open_script(const char *path, const char *mode)
-{
-	static int scriptToLoad = 1;
-
-	if(GetAsyncKeyState('G') & 0x8000)
-		scriptToLoad = 0;
-	if(GetAsyncKeyState('R') & 0x8000)
-		scriptToLoad = 1;
-	if(GetAsyncKeyState('D') & 0x8000)
-		scriptToLoad = 2;
-
-	switch(scriptToLoad){
-	case 0: return open_script_orig(path, mode);
-	case 1: return open_script_orig("main_freeroam.scm", mode);
-	case 2: return open_script_orig("main_d.scm", mode);
-	}
-	return open_script_orig(path, mode);
-}
-
 int gDbgSurf;
 
 void (*DebugMenuProcess)(void);
@@ -176,6 +155,19 @@ spawnCar(int id)
 #endif
 
 void
+FixCar(void)
+{
+	CVehicle *veh = FindPlayerVehicle();
+	if(veh == nil)
+		return;
+	veh->m_fHealth = 1000.0f;
+	if(!veh->IsCar())
+		return;
+	((CAutomobile*)veh)->Damage.SetEngineStatus(0);
+	((CAutomobile*)veh)->Fix();
+}
+
+void
 DebugMenuPopulate(void)
 {
 	if(DebugMenuLoad()){
@@ -219,6 +211,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Strong grip", StrongGripCheat);
 		DebugMenuAddCmd("Cheats", "Nasty limbs", NastyLimbsCheat);
 
+		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Collision Polys", (int8*)&gbShowCollisionPolys, nil);
@@ -356,7 +349,7 @@ patch()
 	Patch<WORD>(0x5382BF, 0x0EEB);
 	InjectHook(0x5382EC, HeadlightsFix, PATCH_JUMP);
 
-	InterceptCall(&open_script_orig, open_script, 0x438869);
+//	InterceptCall(&open_script_orig, open_script, 0x438869);
 
 //	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x58275E);
 }

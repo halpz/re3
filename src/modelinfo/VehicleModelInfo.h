@@ -10,6 +10,7 @@ enum {
 };
 
 enum {
+	ATOMIC_FLAG_NONE	= 0x0,
 	ATOMIC_FLAG_OK		= 0x1,
 	ATOMIC_FLAG_DAM		= 0x2,
 	ATOMIC_FLAG_LEFT	= 0x4,
@@ -106,7 +107,7 @@ public:
 	void SetAtomicRenderCallbacks(void);
 
 	static RwObject *SetAtomicFlagCB(RwObject *object, void *data);
-	static RpAtomic *ClearAtomicFlagCB(RpAtomic *atomic, void *data);
+	static RwObject *ClearAtomicFlagCB(RwObject *atomic, void *data);
 	void SetVehicleComponentFlags(RwFrame *frame, uint32 flags);
 	void PreprocessHierarchy(void);
 	void GetWheelPosn(int32 n, CVector &pos);
@@ -131,9 +132,5 @@ public:
 	static void ShutdownEnvironmentMaps(void);
 
 	static int GetMaximumNumberOfPassengersFromNumberOfDoors(int id);
-
-	void DeleteRwObject_(void) { this->CVehicleModelInfo::DeleteRwObject(); }
-	RwObject *CreateInstance_(void) { return this->CVehicleModelInfo::CreateInstance(); }
-	void SetClump_(RpClump *clump) { this->CVehicleModelInfo::SetClump(clump); }
 };
 static_assert(sizeof(CVehicleModelInfo) == 0x1F8, "CVehicleModelInfo: error");

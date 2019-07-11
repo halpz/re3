@@ -13,7 +13,7 @@
 
 struct CPathNode;
 
-enum eWaitState : uint32 {
+enum eWaitState {
 	WAITSTATE_FALSE,
 	WAITSTATE_TRAFFIC_LIGHTS,
 	WAITSTATE_CROSS_ROAD,
@@ -74,13 +74,6 @@ enum eObjective : uint32 {
 	OBJECTIVE_MUG_CHAR,
 	OBJECTIVE_FLEE_CAR,
 	OBJECTIVE_35
-};
-
-enum eVehEnter : uint16 {
-	VEHICLE_ENTER_FRONT_RIGHT = 11,
-	VEHICLE_ENTER_REAR_RIGHT = 12,
-	VEHICLE_ENTER_FRONT_LEFT = 15,
-	VEHICLE_ENTER_REAR_LEFT = 16,
 };
 
 enum {
@@ -258,7 +251,7 @@ public:
 	uint8 m_ped_flagI1 : 1;
 	uint8 m_ped_flagI2 : 1;
 	uint8 m_ped_flagI4 : 1;
-	uint8 bRecordedForReplay : 1;
+	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 m_ped_flagI10 : 1;
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;
@@ -299,10 +292,10 @@ public:
 	int32 m_nPrevActionState;
 	eWaitState m_nWaitState;
 	uint32 m_nWaitTimer;
-	void *m_pPathNodesStates[8];
+	void *m_pPathNodesStates[8]; // seems unused
 	CVector2D m_stPathNodeStates[10];
 	uint16 m_nPathNodes;
-	uint8 m_nCurPathNode;
+	int16 m_nCurPathNode;
 	int8 m_nPathState;
 private:
 	int8 _pad2B5[3];
@@ -321,7 +314,7 @@ public:
 	float m_fRotationCur;
 	float m_fRotationDest;
 	float m_headingRate;
-	eVehEnter m_vehEnterType;
+	uint16 m_vehEnterType;
 	uint16 m_walkAroundType;
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
@@ -331,7 +324,7 @@ public:
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
 	uint8 pad_315[3];
-	uint32 field_318;
+	float field_318;
 	uint8 field_31C;
 	uint8 field_31D;
 	int16 m_phoneId;
@@ -351,7 +344,7 @@ public:
 	uint8 pad_351[3];
 	uint32 m_timerUnused;
 	CEntity *m_targetUnused;
-	CWeapon m_weapons[NUM_PED_WEAPONTYPES];
+	CWeapon m_weapons[WEAPONTYPE_TOTAL_INVENTORY_WEAPONS];
 	eWeaponType m_storedWeapon;
 	uint8 m_currentWeapon;			// eWeaponType
 	uint8 m_maxWeaponTypeAllowed;	// eWeaponType
@@ -399,21 +392,19 @@ public:
 	static void operator delete(void*, int);
 
 	CPed(uint32 pedType);
-	virtual ~CPed(void);
+	~CPed(void);
 
-	virtual void SetModelIndex(uint32 mi);
-	virtual void ProcessControl(void);
-	virtual void Teleport(CVector);
-	virtual void PreRender(void);
-	virtual void Render(void);
-	virtual bool SetupLighting(void);
-	virtual void RemoveLighting(bool);
-	virtual void FlagToDestroyWhenNextProcessed(void);
-	virtual int32 ProcessEntityCollision(CEntity*, CColPoint*);
+	void SetModelIndex(uint32 mi);
+	void ProcessControl(void);
+	void Teleport(CVector);
+	void PreRender(void);
+	void Render(void);
+	bool SetupLighting(void);
+	void RemoveLighting(bool);
+	void FlagToDestroyWhenNextProcessed(void);
+	int32 ProcessEntityCollision(CEntity*, CColPoint*);
+
 	virtual void SetMoveAnim(void);
-
-	CPed* ctor(uint32 pedType) { return ::new (this) CPed(pedType); }
-	void dtor(void) { this->CPed::~CPed(); }
 
 	void AddWeaponModel(int id);
 	void AimGun(void);
@@ -423,6 +414,7 @@ public:
 	void SetLookFlag(float direction, bool unknown);
 	void SetLookTimer(int time);
 	void SetDie(AnimationId anim, float arg1, float arg2);
+	void SetDead(void);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
 	void RemoveBodyPart(PedNode nodeId, int8 unknown);
 	void SpawnFlyingComponent(int, int8 unknown);
@@ -465,6 +457,9 @@ public:
 	void RegisterThreatWithGangPeds(CEntity*);
 	bool TurnBody(void);
 	void Chat(void);
+	void MakeChangesForNewWeapon(int8);
+	void CheckAroundForPossibleCollisions(void);
+	bool Seek(void);
 
 	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
@@ -526,29 +521,8 @@ public:
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
-	static uint8 GetVehEnterExitFlag(eVehEnter vehEnter) {
-		switch (vehEnter) {
-			case VEHICLE_ENTER_FRONT_RIGHT:
-				return 4;
-			case VEHICLE_ENTER_REAR_RIGHT:
-				return 8;
-			case VEHICLE_ENTER_FRONT_LEFT:
-				return 1;
-			case VEHICLE_ENTER_REAR_LEFT:
-				return 2;
-			default:
-				return 0;
-		}
-	}
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
-
-	// to make patching virtual functions possible
-	void SetModelIndex_(uint32 mi) { CPed::SetModelIndex(mi); }
-	void FlagToDestroyWhenNextProcessed_(void) { CPed::FlagToDestroyWhenNextProcessed(); }
-	bool SetupLighting_(void) { return CPed::SetupLighting(); }
-	void RemoveLighting_(bool reset) { CPed::RemoveLighting(reset); }
-	void Teleport_(CVector pos) { CPed::Teleport(pos); }
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 &distanceMultToCountPedNear;

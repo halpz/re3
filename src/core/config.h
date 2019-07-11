@@ -30,6 +30,8 @@ enum Config {
 	NUMDUMMIES = 2802, // 2368 on PS2
 	NUMAUDIOSCRIPTOBJECTS = 256,
 
+	NUMTEMPOBJECTS = 30,
+
 	// Link list lengths
 	// TODO: alpha list
 	NUMCOLCACHELINKS = 200,
@@ -114,3 +116,4 @@ enum Config {
 #define FIX_BUGS		// fix bugs in the game, TODO: use this more
 #define KANGAROO_CHEAT
 #define ASPECT_RATIO_SCALE
+#define USE_DEBUG_SCRIPT_LOADER

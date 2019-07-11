@@ -3,11 +3,14 @@
 #include "Lists.h"
 #include "Timer.h"
 #include "Entity.h"
-#include "Treadable.h"
 
 enum {
 	PHYSICAL_MAX_COLLISIONRECORDS = 6
 };
+
+#define GRAVITY (0.008f)
+
+class CTreadable;
 
 class CPhysical : public CEntity
 {
@@ -58,20 +61,21 @@ public:
 	uint8 bHitByTrain : 1;	// from nick
 	uint8 m_phy_flagA80 : 1;
 
-	uint8 m_nLastCollType;
+	uint8 m_nSurfaceTouched;
 	uint8 m_nZoneLevel;
 
 	CPhysical(void);
 	~CPhysical(void);
 
 	// from CEntity
-	virtual void Add(void);
-	virtual void Remove(void);
-	virtual CRect GetBoundRect(void);
-	virtual void ProcessControl(void);
-	virtual int32 ProcessEntityCollision(CEntity *ent, CColPoint *point);
-	virtual void ProcessShift(void);
-	virtual void ProcessCollision(void);
+	void Add(void);
+	void Remove(void);
+	CRect GetBoundRect(void);
+	void ProcessControl(void);
+	void ProcessShift(void);
+	void ProcessCollision(void);
+
+	virtual int32 ProcessEntityCollision(CEntity *ent, CColPoint *colpoints);
 
 	void RemoveAndAdd(void);
 	void AddToMovingList(void);
@@ -106,7 +110,23 @@ public:
 	}
 
 	const CVector &GetMoveSpeed() { return m_vecMoveSpeed; }
+	void SetMoveSpeed(float x, float y, float z) {
+		m_vecMoveSpeed.x = x;
+		m_vecMoveSpeed.y = y;
+		m_vecMoveSpeed.z = z;
+	}
 	const CVector &GetTurnSpeed() { return m_vecTurnSpeed; }
+	void SetTurnSpeed(float x, float y, float z) {
+		m_vecTurnSpeed.x = x;
+		m_vecTurnSpeed.y = y;
+		m_vecTurnSpeed.z = z;
+	}
+	const CVector &GetCenterOfMass() { return m_vecCentreOfMass; }
+	void SetCenterOfMass(float x, float y, float z) {
+		m_vecCentreOfMass.x = x;
+		m_vecCentreOfMass.y = y;
+		m_vecCentreOfMass.z = z;
+	}
 
 	void ApplyMoveSpeed(void);
 	void ApplyTurnSpeed(void);
@@ -137,15 +157,5 @@ public:
 	bool ProcessCollisionSectorList(CPtrList *lists);
 	bool CheckCollision(void);
 	bool CheckCollision_SimpleCar(void);
-
-	// to make patching virtual functions possible
-	void dtor(void) { this->CPhysical::~CPhysical(); }
-	void Add_(void) { CPhysical::Add(); }
-	void Remove_(void) { CPhysical::Remove(); }
-	CRect GetBoundRect_(void) { return CPhysical::GetBoundRect(); }
-	void ProcessControl_(void) { CPhysical::ProcessControl(); }
-	void ProcessShift_(void) { CPhysical::ProcessShift(); }
-	void ProcessCollision_(void) { CPhysical::ProcessCollision(); }
-	int32 ProcessEntityCollision_(CEntity *ent, CColPoint *point) { return CPhysical::ProcessEntityCollision(ent, point); }
 };
 static_assert(sizeof(CPhysical) == 0x128, "CPhysical: error");

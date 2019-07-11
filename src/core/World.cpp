@@ -564,6 +564,82 @@ CWorld::GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bo
 	return true;
 }
 
+void
+CWorld::FindObjectsInRangeSectorList(CPtrList &list, CVector &centre, float distance, bool ignoreZ, short *nextObject, short lastObject, CEntity **objects)
+{
+	float distSqr = distance * distance;
+	float objDistSqr;
+
+	for (CPtrNode *node = list.first; node; node = node->next) {
+		CEntity *object = (CEntity*)node->item;
+		if (object->m_scanCode != CWorld::GetCurrentScanCode()) {
+			object->m_scanCode = CWorld::GetCurrentScanCode();
+
+			CVector diff = centre - object->GetPosition();
+			if (ignoreZ)
+				objDistSqr = diff.MagnitudeSqr2D();
+			else
+				objDistSqr = diff.MagnitudeSqr();
+
+			if (objDistSqr < distSqr && *nextObject < lastObject) {
+				if (objects) {
+					objects[*nextObject] = object;
+				}
+				(*nextObject)++;
+			}
+		}
+	}
+}
+
+void
+CWorld::FindObjectsInRange(CVector &centre, float distance, bool ignoreZ, short *nextObject, short lastObject, CEntity **objects, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies)
+{
+	int minX = GetSectorIndexX(centre.x - distance);
+	if (minX <= 0)
+		minX = 0;
+
+	int minY = GetSectorIndexY(centre.y - distance);
+	if (minY <= 0)
+		minY = 0;
+
+	int maxX = GetSectorIndexX(centre.x + distance);
+	if (maxX >= 100)
+		maxX = 100;
+
+	int maxY = GetSectorIndexY(centre.y + distance);
+	if (maxY >= 100)
+		maxY = 100;
+	
+	AdvanceCurrentScanCode();
+
+	*nextObject = 0;
+	for(int curY = minY; curY <= maxY; curY++) {
+		for(int curX = minX; curX <= maxX; curX++) {
+			CSector *sector = GetSector(curX, curY);
+			if (checkBuildings) {
+				CWorld::FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_BUILDINGS], centre, distance, ignoreZ, nextObject, lastObject, objects);
+				CWorld::FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], centre, distance, ignoreZ, nextObject, lastObject, objects);
+			}
+			if (checkVehicles) {
+				CWorld::FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_VEHICLES], centre, distance, ignoreZ, nextObject, lastObject, objects);
+				CWorld::FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], centre, distance, ignoreZ, nextObject, lastObject, objects);
+			}
+			if (checkPeds) {
+				CWorld::FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_PEDS], centre, distance, ignoreZ, nextObject, lastObject, objects);
+				CWorld::FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_PEDS_OVERLAP], centre, distance, ignoreZ, nextObject, lastObject, objects);
+			}
+			if (checkObjects) {
+				CWorld::FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_OBJECTS], centre, distance, ignoreZ, nextObject, lastObject, objects);
+				CWorld::FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], centre, distance, ignoreZ, nextObject, lastObject, objects);
+			}
+			if (checkDummies) {
+				CWorld::FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_DUMMIES], centre, distance, ignoreZ, nextObject, lastObject, objects);
+				CWorld::FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_DUMMIES_OVERLAP], centre, distance, ignoreZ, nextObject, lastObject, objects);
+			}
+		}
+	}
+}
+
 float
 CWorld::FindGroundZForCoord(float x, float y)
 {
@@ -712,6 +788,8 @@ STARTPATCHES
 	InjectHook(0x4B2000, CWorld::GetIsLineOfSightSectorClear, PATCH_JUMP);
 	InjectHook(0x4B2160, CWorld::GetIsLineOfSightSectorListClear, PATCH_JUMP);
 
+	InjectHook(0x4B2200, CWorld::FindObjectsInRange, PATCH_JUMP);
+	InjectHook(0x4B2540, CWorld::FindObjectsInRangeSectorList, PATCH_JUMP);
 	InjectHook(0x4B3A80, CWorld::FindGroundZForCoord, PATCH_JUMP);
 	InjectHook(0x4B3AE0, CWorld::FindGroundZFor3DCoord, PATCH_JUMP);
 	InjectHook(0x4B3B50, CWorld::FindRoofZFor3DCoord, PATCH_JUMP);

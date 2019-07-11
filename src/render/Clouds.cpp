@@ -53,7 +53,7 @@ CClouds::Shutdown(void)
 void
 CClouds::Update(void)
 {
-	float s = sin(TheCamera.Orientation - 0.85f);
+	float s = Sin(TheCamera.Orientation - 0.85f);
 	CloudRotation += CWeather::Wind*s*0.0025f;
 	IndividualRotation += (CWeather::Wind*CTimer::GetTimeStep() + 0.3f) * 60.0f;
 }
@@ -81,7 +81,7 @@ CClouds::Render(void)
 	float coverage = CWeather::CloudCoverage <= CWeather::Foggyness ? CWeather::Foggyness : CWeather::CloudCoverage;
 
 	// Moon
-	int moonfadeout = abs(minute - 180);	// fully visible at 3AM
+	int moonfadeout = Abs(minute - 180);	// fully visible at 3AM
 	if(moonfadeout < 180){			// fade in/out 3 hours
 		int brightness = (1.0f - coverage) * (180 - moonfadeout);
 		RwV3d pos = { 0.0f, -100.0f, 15.0f };
@@ -169,8 +169,8 @@ CClouds::Render(void)
 	}
 
 	// Fluffy clouds
-	float rot_sin = sin(CloudRotation);
-	float rot_cos = cos(CloudRotation);
+	float rot_sin = Sin(CloudRotation);
+	float rot_cos = Cos(CloudRotation);
 	int fluffyalpha = 160 * (1.0f - CWeather::Foggyness);
 	if(fluffyalpha != 0){
 		static float CoorsOffsetX[37] = {
@@ -210,7 +210,7 @@ CClouds::Render(void)
 			worldpos.z = pos.z;
 
 			if(CSprite::CalcScreenCoors(worldpos, &screenpos, &szx, &szy, false)){
-				float sundist = sqrt(sq(screenpos.x-CCoronas::SunScreenX) + sq(screenpos.y-CCoronas::SunScreenY));
+				float sundist = Sqrt(sq(screenpos.x-CCoronas::SunScreenX) + sq(screenpos.y-CCoronas::SunScreenY));
 				int tr = CTimeCycle::GetFluffyCloudsTopRed();
 				int tg = CTimeCycle::GetFluffyCloudsTopGreen();
 				int tb = CTimeCycle::GetFluffyCloudsTopBlue();
@@ -302,10 +302,10 @@ CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 	int16 botred, int16 botgreen, int16 botblue, int16 alpha)
 {
 	RwMatrix *mat = RwFrameGetLTM(RwCameraGetFrame(TheCamera.m_pRwCamera));
-	float c = sqrt(mat->right.x * mat->right.x + mat->right.y * mat->right.y);
+	float c = Sqrt(mat->right.x * mat->right.x + mat->right.y * mat->right.y);
 	if(c > 1.0f)
 		c = 1.0f;
-	ms_cameraRoll = acos(c);
+	ms_cameraRoll = Acos(c);
 	if(mat->right.z < 0.0f)
 		ms_cameraRoll = -ms_cameraRoll;
 
@@ -424,7 +424,7 @@ CClouds::RenderHorizon(void)
 		SCREEN_HEIGHT/300.0f * max(TheCamera.GetPosition().z, 0.0f);
 	float b = TheCamera.GetUp().z < 0.0f ?
 		SCREEN_HEIGHT :
-		SCREEN_HEIGHT * fabs(TheCamera.GetRight().z);
+		SCREEN_HEIGHT * Abs(TheCamera.GetRight().z);
 	float z2 = z1 + (a + b)*TheCamera.LODDistMultiplier;
 	z2 = min(z2, SCREEN_HEIGHT);
 	CSprite2d::DrawRect(CRect(0, z1, SCREEN_WIDTH, z2),

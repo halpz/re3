@@ -125,8 +125,8 @@ CAnimBlendNode::CalcDeltas(void)
 	float cos = DotProduct(kfA->rotation, kfB->rotation);
 	if(cos > 1.0f)
 		cos = 1.0f;
-	theta = acos(cos);
-	invSin = theta == 0.0f ?  0.0f : 1.0f/sin(theta);
+	theta = Acos(cos);
+	invSin = theta == 0.0f ?  0.0f : 1.0f/Sin(theta);
 }
 
 void

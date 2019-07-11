@@ -299,9 +299,9 @@ CTimeCycle::Update(void)
 
 	float sunAngle = 2*PI*(CClock::GetMinutes() + CClock::GetHours()*60)/(24*60);
 	CVector &sunPos = GetSunPosition();
-	sunPos.x = sinf(sunAngle);
+	sunPos.x = Sin(sunAngle);
 	sunPos.y = 1.0f;
-	sunPos.z = 0.2f - cosf(sunAngle);
+	sunPos.z = 0.2f - Cos(sunAngle);
 	sunPos.Normalise();
 
 	CShadows::CalcPedShadowValues(sunPos, 

@@ -1,21 +1,10 @@
 #pragma once
 
-#include "DamageManager.h"
 #include "Vehicle.h"
+#include "DamageManager.h"
+#include "Door.h"
 
-struct CDoor
-{
-	float m_fAngleWhenOpened;
-	float m_fAngleWhenClosed;
-	char field_8;
-	char field_9;
-	char field_10;
-	char field_11;
-	float m_fAngle;
-	float m_fPreviousAngle;
-	float m_fAngularVelocity;
-	CVector m_vecVelocity;
-};
+class CObject;
 
 class CAutomobile : public CVehicle
 {
@@ -28,20 +17,28 @@ public:
 	float m_aSuspensionSpringRatio[4];
 	float m_aSuspensionSpringRatioPrev[4];
 	float m_aWheelSkidThing[4];
-	int field_49C;
+	float field_49C;
 	bool m_aWheelSkidmarkMuddy[4];
 	bool m_aWheelSkidmarkBloody[4];
 	float m_aWheelRotation[4];
 	float m_aWheelPosition[4];
 	float m_aWheelSpeed[4];
-	uint8 stuff3[12];
+	uint8 field_4D8;
+	uint8 m_auto_flagA7 : 1;
+	uint8 bTaxiLight : 1;
+	uint8 m_auto_flagA10 : 1;
+	uint8 m_auto_flagA20 : 1;
+	uint8 m_auto_flagA40 : 1;
+	uint8 m_auto_flagA80 : 1;
+	uint8 field_4DA[10];
 	uint32 m_nBusDoorTimerEnd;
 	uint32 m_nBusDoorTimerStart;
 	float m_aSuspensionSpringLength[4];
 	float m_aSuspensionLineLength[4];
 	float m_fHeightAboveRoad;
 	float m_fImprovedHandling;
-	uint8 stuff6[32];
+	uint8 stuff6[28];
+	float field_530;
 	CPhysical *m_aGroundPhysical[4];	// physicals touching wheels
 	CVector m_aGroundOffset[4];		// from ground object to colpoint
 	CEntity *m_pBlowUpEntity;
@@ -57,11 +54,66 @@ public:
 	uint8 stuff5[5];
 	int32 m_aWheelState[4];
 
+	static bool &m_sAllTaxiLights;
+
 	CAutomobile(int, uint8);
+
+	// from CEntity
+	void SetModelIndex(uint32 id);
+	void ProcessControl(void);
+	void Teleport(CVector v);
+	void PreRender(void);
+	void Render(void);
+
+	// from CPhysical
+	int32 ProcessEntityCollision(CEntity *ent, CColPoint *colpoints);
+
+	// from CVehicle
+	void ProcessControlInputs(uint8);
+	void GetComponentWorldPosition(int32 component, CVector &pos);
+	bool IsComponentPresent(int32 component);
+	void SetComponentRotation(int32 component, CVector rotation);
+	void OpenDoor(int32 component, eDoors door, float openRatio);
+	void ProcessOpenDoor(uint32, uint32, float);
+	bool IsDoorReady(eDoors door);
+	bool IsDoorFullyOpen(eDoors door);
+	bool IsDoorClosed(eDoors door);
+	bool IsDoorMissing(eDoors door);
+	void RemoveRefsToVehicle(CEntity *ent);
+	void BlowUpCar(CEntity *ent);
+	bool SetUpWheelColModel(CColModel *colModel);
+	void BurstTyre(uint8 tyre);
+	bool IsRoomForPedToLeaveCar(uint32, CVector *);
+	float GetHeightAboveRoad(void);
+	void PlayCarHorn(void);
+
+	void PlayHornIfNecessary(void);
+	void ResetSuspension(void);
+	void SetupSuspensionLines(void);
+	void ScanForCrimes(void);
+	void BlowUpCarsInPath(void);
+	bool HasCarStoppedBecauseOfLight(void);
+	void SetBusDoorTimer(uint32 timer, uint8 type);
+	void ProcessAutoBusDoors(void);
+	void ProcessSwingingDoor(int32 component, eDoors door);
+	void SetupDamageAfterLoad(void);
+	CObject *SpawnFlyingComponent(int32 component, uint32 type);
+	CObject *RemoveBonnetInPedCollision(void);
+	void SetPanelDamage(int32 component, ePanels panel, bool noFlyingComponents = false);
+	void SetBumperDamage(int32 component, ePanels panel, bool noFlyingComponents = false);
+	void SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents = false);
+
+	void Fix(void);
+	void SetComponentVisibility(RwFrame *frame, uint32 flags);
+	void SetupModelNodes(void);
+	void SetTaxiLight(bool light);
+	bool GetAllWheelsOffGround(void);
+	void HideAllComps(void);
+	void ShowAllComps(void);
+	void ReduceHornCounter(void);
+
+	static void SetAllTaxiLights(bool set);
+
 	CAutomobile* ctor(int, uint8);
-	void SetDoorDamage(int32, uint32, bool); /* TODO: eDoors */
-	void SetPanelDamage(int32, uint32, bool); /* TODO: ePanels */
-	void SetBumperDamage(int32, uint32, bool); /* TODO: ePanels */
-	void dtor() { this->CAutomobile::~CAutomobile(); }
 };
 static_assert(sizeof(CAutomobile) == 0x5A8, "CAutomobile: error");

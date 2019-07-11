@@ -414,11 +414,13 @@ CVehicleModelInfo::SetAtomicFlagCB(RwObject *object, void *data)
 	return object;
 }
 
-RpAtomic*
-CVehicleModelInfo::ClearAtomicFlagCB(RpAtomic *atomic, void *data)
+RwObject*
+CVehicleModelInfo::ClearAtomicFlagCB(RwObject *object, void *data)
 {
+	RpAtomic *atomic = (RpAtomic*)object;
+	assert(RwObjectGetType(object) == rpATOMIC);
 	CVisibilityPlugins::ClearAtomicFlag(atomic, (int)data);
-	return atomic;
+	return object;
 }
 
 RwObject*
@@ -1098,10 +1100,18 @@ CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(int id)
 	return n - 1;
 }
 
+class CVehicleModelInfo_ : public CVehicleModelInfo
+{
+public:
+	void DeleteRwObject_(void) { CVehicleModelInfo::DeleteRwObject(); }
+	RwObject *CreateInstance_(void) { return CVehicleModelInfo::CreateInstance(); }
+	void SetClump_(RpClump *clump) { CVehicleModelInfo::SetClump(clump); }
+};
+
 STARTPATCHES
-	InjectHook(0x51FDC0, &CVehicleModelInfo::DeleteRwObject_, PATCH_JUMP);
-	InjectHook(0x51FCB0, &CVehicleModelInfo::CreateInstance_, PATCH_JUMP);
-	InjectHook(0x51FC60, &CVehicleModelInfo::SetClump_, PATCH_JUMP);
+	InjectHook(0x51FDC0, &CVehicleModelInfo_::DeleteRwObject_, PATCH_JUMP);
+	InjectHook(0x51FCB0, &CVehicleModelInfo_::CreateInstance_, PATCH_JUMP);
+	InjectHook(0x51FC60, &CVehicleModelInfo_::SetClump_, PATCH_JUMP);
 
 	InjectHook(0x51FE10, &CVehicleModelInfo::CollapseFramesCB, PATCH_JUMP);
 	InjectHook(0x51FE50, &CVehicleModelInfo::MoveObjectsCB, PATCH_JUMP);

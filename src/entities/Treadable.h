@@ -11,7 +11,6 @@ public:
 	int16 m_nodeIndicesCars[12];
 	int16 m_nodeIndicesPeds[12];
 
-	virtual bool GetIsATreadable(void) { return true; }
-	void dtor(void) { this->CTreadable::~CTreadable(); }
+	bool GetIsATreadable(void) { return true; }
 };
 static_assert(sizeof(CTreadable) == 0x94, "CTreadable: error");

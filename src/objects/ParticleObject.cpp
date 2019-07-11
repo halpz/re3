@@ -18,6 +18,12 @@ void CParticleObject::UpdateAll()
 	((void (__cdecl *)())0x4BCA30)();
 }
 
+class CParticleObject_ : public CParticleObject
+{
+public:
+	void dtor() { CParticleObject::~CParticleObject(); }
+};
+
 STARTPATCHES
-	InjectHook(0x4BC420, &CParticleObject::dtor, PATCH_JUMP);
+	InjectHook(0x4BC420, &CParticleObject_::dtor, PATCH_JUMP);
 ENDPATCHES

@@ -139,12 +139,22 @@ CClumpModelInfo::GetFrameFromId(RpClump *clump, int32 id)
 }
 
 
+class CClumpModelInfo_ : public CClumpModelInfo
+{
+public:
+	void DeleteRwObject_(void) { this->CClumpModelInfo::DeleteRwObject(); }
+	RwObject *CreateInstance_1(void) { return CClumpModelInfo::CreateInstance(); }
+	RwObject *CreateInstance_2(RwMatrix *m) { return CClumpModelInfo::CreateInstance(m); }
+	RwObject *GetRwObject_(void) { return CClumpModelInfo::GetRwObject(); }
+	void SetClump_(RpClump *clump) { CClumpModelInfo::SetClump(clump); }
+};
+
 STARTPATCHES
-	InjectHook(0x4F8800, &CClumpModelInfo::DeleteRwObject_, PATCH_JUMP);
-	InjectHook(0x4F8920, &CClumpModelInfo::CreateInstance_1, PATCH_JUMP);
-	InjectHook(0x4F88A0, &CClumpModelInfo::CreateInstance_2, PATCH_JUMP);
-	InjectHook(0x50C1C0, &CClumpModelInfo::GetRwObject_, PATCH_JUMP);
-	InjectHook(0x4F8830, &CClumpModelInfo::SetClump_, PATCH_JUMP);
+	InjectHook(0x4F8800, &CClumpModelInfo_::DeleteRwObject_, PATCH_JUMP);
+	InjectHook(0x4F8920, &CClumpModelInfo_::CreateInstance_1, PATCH_JUMP);
+	InjectHook(0x4F88A0, &CClumpModelInfo_::CreateInstance_2, PATCH_JUMP);
+	InjectHook(0x50C1C0, &CClumpModelInfo_::GetRwObject_, PATCH_JUMP);
+	InjectHook(0x4F8830, &CClumpModelInfo_::SetClump_, PATCH_JUMP);
 	InjectHook(0x4F8940, &CClumpModelInfo::SetAtomicRendererCB, PATCH_JUMP);
 	InjectHook(0x4F8960, &CClumpModelInfo::FindFrameFromNameCB, PATCH_JUMP);
 	InjectHook(0x4F8A10, &CClumpModelInfo::FindFrameFromNameWithoutIdCB, PATCH_JUMP);

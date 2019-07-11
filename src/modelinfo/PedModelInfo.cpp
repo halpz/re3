@@ -189,9 +189,17 @@ CPedModelInfo::CreateHitColModel(void)
 	m_hitColModel = colmodel;
 }
 
+
+class CPedModelInfo_ : public CPedModelInfo
+{
+public:
+	void DeleteRwObject_(void) { CPedModelInfo::DeleteRwObject(); }
+	void SetClump_(RpClump *clump) { CPedModelInfo::SetClump(clump); }
+};
+
 STARTPATCHES
-	InjectHook(0x510210, &CPedModelInfo::SetClump_, PATCH_JUMP);
-	InjectHook(0x510280, &CPedModelInfo::DeleteRwObject_, PATCH_JUMP);
+	InjectHook(0x510210, &CPedModelInfo_::SetClump_, PATCH_JUMP);
+	InjectHook(0x510280, &CPedModelInfo_::DeleteRwObject_, PATCH_JUMP);
 	InjectHook(0x510390, &CPedModelInfo::SetLowDetailClump, PATCH_JUMP);
 	InjectHook(0x5104D0, &CPedModelInfo::CreateHitColModel, PATCH_JUMP);
 ENDPATCHES

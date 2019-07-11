@@ -10,6 +10,7 @@
 #include "Ped.h"
 #include "PlayerPed.h"
 #include "General.h"
+#include "SurfaceTable.h"
 #include "VisibilityPlugins.h"
 #include "AudioManager.h"
 #include "HandlingMgr.h"
@@ -23,10 +24,12 @@
 #include "Lights.h"
 #include "PointLights.h"
 #include "Pad.h"
+#include "Phones.h"
 
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
 WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4D37D0); }
+WRAPPER void CPed::SetDead(void) { EAXJMP(0x4D3970); }
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 WRAPPER void CPed::RestorePreviousState(void) { EAXJMP(0x4C5E30); }
 WRAPPER void CPed::ClearAttack(void) { EAXJMP(0x4E6790); }
@@ -41,6 +44,8 @@ WRAPPER void CPed::SetMoveAnim(void) { EAXJMP(0x4C5A40); }
 WRAPPER void CPed::SetFollowRoute(int16, int16) { EAXJMP(0x4DD690); }
 WRAPPER void CPed::SetDuck(uint32) { EAXJMP(0x4E4920); }
 WRAPPER void CPed::RegisterThreatWithGangPeds(CEntity*) { EAXJMP(0x4E3870); }
+WRAPPER void CPed::MakeChangesForNewWeapon(int8) { EAXJMP(0x4F2560); }
+WRAPPER bool CPed::Seek(void) { EAXJMP(0x4D1640); }
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -62,7 +67,7 @@ CPed::~CPed(void)
 	CWorld::Remove(this);
 	CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetIndex(this));
 	if (bInVehicle && m_pMyVehicle){
-		uint8 door_flag = GetVehEnterExitFlag(m_vehEnterType);
+		uint8 door_flag = GetVehDoorFlag(m_vehEnterType);
 		if (m_pMyVehicle->pDriver == this)
 			m_pMyVehicle->pDriver = nil;
 		else {
@@ -308,7 +313,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fRotationCur = 0.0f;
 	m_headingRate = 15.0f;
 	m_fRotationDest = 0.0f;
-	m_vehEnterType = VEHICLE_ENTER_FRONT_LEFT;
+	m_vehEnterType = CAR_DOOR_LF;
 	m_walkAroundType = 0;
 	m_pCurrentPhysSurface = nil;
 	m_vecOffsetFromPhysSurface = CVector(0.0f, 0.0f, 0.0f);
@@ -429,7 +434,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagI1 = false;
 	m_ped_flagI2 = false;
 	m_ped_flagI4 = false;
-	bRecordedForReplay = false;
+	bHasAlreadyBeenRecorded = false;
 	m_ped_flagI10 = false;
 #ifdef KANGAROO_CHEAT
 	m_ped_flagI80 = false;
@@ -456,9 +461,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	}
 	m_maxWeaponTypeAllowed = 0;
 	m_currentWeapon = 0;
-	m_storedWeapon = NO_STORED_WEAPON;
+	m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
 
-	for(int i = 0; i < NUM_PED_WEAPONTYPES; i++)
+	for(int i = 0; i < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; i++)
 	{
 		CWeapon &weapon = GetWeapon(i);
 		weapon.m_eWeaponType = WEAPONTYPE_UNARMED;
@@ -546,7 +551,7 @@ CheckForPedsOnGroundToAttack(CPlayerPed *player, CPed **pedOnGround)
 			angleToFace = CGeneral::LimitRadianAngle(angleToFace);
 			player->m_fRotationCur = CGeneral::LimitRadianAngle(player->m_fRotationCur);
 
-			angleDiff = fabs(angleToFace - player->m_fRotationCur);
+			angleDiff = Abs(angleToFace - player->m_fRotationCur);
 
 			if (angleDiff > PI)
 				angleDiff = 2 * PI - angleDiff;
@@ -668,7 +673,7 @@ CPed::AimGun(void)
 			vector.y = pos.y;
 			vector.z = pos.z;
 		} else {
-			vector = *(m_pSeekTarget->GetPosition());
+			vector = m_pSeekTarget->GetPosition();
 		}
 		Say(SOUND_PED_ATTACK);
 
@@ -867,7 +872,7 @@ CPed::Avoid(void)
 					// If so, we want to avoid it, so we turn our body 45 degree and look to somewhere else.
 
 					// Game converts from radians to degress and back again here, doesn't make much sense
-					CVector2D forward(-sin(m_fRotationCur), cos(m_fRotationCur));
+					CVector2D forward(-Sin(m_fRotationCur), Cos(m_fRotationCur));
 					forward.Normalise();	// this is kinda pointless
 
 					// Move forward 1.25 meters
@@ -1333,7 +1338,7 @@ CPed::BeingDraggedFromCar(void)
 		if (animAssoc)
 			animAssoc->blendDelta = -1000.0f;
 
-		if (m_vehEnterType == VEHICLE_ENTER_FRONT_LEFT || m_vehEnterType == VEHICLE_ENTER_REAR_LEFT) {
+		if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR) {
 			if (m_ped_flagF10) {
 				enterAnim = ANIM_CAR_QJACKED;
 			} else if (m_pMyVehicle->bLowVehicle) {
@@ -1341,7 +1346,7 @@ CPed::BeingDraggedFromCar(void)
 			} else {
 				enterAnim = ANIM_CAR_JACKED_LHS;
 			}
-		} else if (m_vehEnterType == VEHICLE_ENTER_FRONT_RIGHT || m_vehEnterType == VEHICLE_ENTER_REAR_RIGHT) {
+		} else if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR) {
 			if (m_pMyVehicle->bLowVehicle)
 				enterAnim = ANIM_CAR_LJACKED_RHS;
 			else
@@ -1388,14 +1393,14 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 	if (ped->m_nPedState != PED_ARRESTED) {
 		ped->m_nLastPedState = PED_NONE;
 		if (dragAssoc)
-			dragAssoc->blendDelta = -1000.0;
+			dragAssoc->blendDelta = -1000.0f;
 	}
 	ped->RestartNonPartialAnims();
 	ped->m_pVehicleAnim = nil;
 	ped->m_pSeekTarget = nil;
 	vehicle = ped->m_pMyVehicle;
 
-	vehicle->m_nGettingOutFlags &= ~GetVehEnterExitFlag(ped->m_vehEnterType);
+	vehicle->m_nGettingOutFlags &= ~GetVehDoorFlag(ped->m_vehEnterType);
 
 	if (vehicle->pDriver == ped) {
 		vehicle->RemoveDriver();
@@ -1427,9 +1432,9 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 
 	// Only uzi can be used on cars, so previous weapon was stored
 	if (ped->IsPlayer() && weaponType == WEAPONTYPE_UZI) {
-		if (ped->m_storedWeapon != NO_STORED_WEAPON) {
+		if (ped->m_storedWeapon != WEAPONTYPE_UNIDENTIFIED) {
 			ped->SetCurrentWeapon(ped->m_storedWeapon);
-			ped->m_storedWeapon = NO_STORED_WEAPON;
+			ped->m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
 		}
 	} else {
 		ped->AddWeaponModel(CWeaponInfo::GetWeaponInfo(weaponType)->m_nModelId);
@@ -1447,7 +1452,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 	float seatOffset;
 
 	vehModel = (CVehicleModelInfo*) CModelInfo::GetModelInfo(veh->m_modelIndex);
-	if (veh->bIsVan && (enterType == VEHICLE_ENTER_REAR_LEFT || enterType == VEHICLE_ENTER_REAR_RIGHT)) {
+	if (veh->bIsVan && (enterType == CAR_DOOR_LR || enterType == CAR_DOOR_RR)) {
 		seatOffset = 0.0f;
 		vehDoorOffset = offsetToOpenVanDoor;
 	} else {
@@ -1460,7 +1465,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 	}
 
 	switch (enterType) {
-		case VEHICLE_ENTER_FRONT_RIGHT:
+		case CAR_DOOR_RF:
 			if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
 				vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_BOAT_RUDDER];
 			else
@@ -1470,13 +1475,13 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 			vehDoorOffset.x = -vehDoorOffset.x;
 			break;
 
-		case VEHICLE_ENTER_REAR_RIGHT:
+		case CAR_DOOR_RR:
 			vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_REAR_SEATS];
 			vehDoorPos.x += seatOffset;
 			vehDoorOffset.x = -vehDoorOffset.x;
 			break;
 
-		case VEHICLE_ENTER_FRONT_LEFT:
+		case CAR_DOOR_LF:
 			if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
 				vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_BOAT_RUDDER];
 			else
@@ -1485,7 +1490,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 			vehDoorPos.x = -(vehDoorPos.x + seatOffset);
 			break;
 
-		case VEHICLE_ENTER_REAR_LEFT:
+		case CAR_DOOR_LR:
 			vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_REAR_SEATS];
 			vehDoorPos.x = -(vehDoorPos.x + seatOffset);
 			break;
@@ -1539,7 +1544,7 @@ CPed::GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType,
 	GetLocalPositionToOpenCarDoor(output, veh, enterType, offset);
 	doorPos = Multiply3x3(vehMat, *output);
 
-	*output = *veh->GetPosition() + doorPos;
+	*output = veh->GetPosition() + doorPos;
 }
 
 void
@@ -1583,7 +1588,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	if (veh->GetUp().z <= -0.8f)
 		vehIsUpsideDown = true;
 
-	if (m_vehEnterType == VEHICLE_ENTER_FRONT_RIGHT || m_vehEnterType == VEHICLE_ENTER_REAR_RIGHT) {
+	if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR) {
 		if (vehIsUpsideDown) {
 			m_fRotationDest = -PI + veh->GetForward().Heading();
 		} else if (veh->bIsBus) {
@@ -1591,7 +1596,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		} else {
 			m_fRotationDest = veh->GetForward().Heading();
 		}
-	} else if (m_vehEnterType == VEHICLE_ENTER_FRONT_LEFT || m_vehEnterType == VEHICLE_ENTER_REAR_LEFT) {
+	} else if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR) {
 		if (vehIsUpsideDown) {
 			m_fRotationDest = veh->GetForward().Heading();
 		} else if (veh->bIsBus) {
@@ -1658,7 +1663,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	CVector neededPos;
 
 	if (phase == LINE_UP_TO_CAR_2) {
-		neededPos = *GetPosition();
+		neededPos = GetPosition();
 	} else {
 		GetPositionToOpenCarDoor(&neededPos, veh, m_vehEnterType, seatPosMult);
 	}
@@ -1762,7 +1767,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		CMatrix vehDoorMat(veh->GetMatrix());
 
 		GetLocalPositionToOpenCarDoor(&output, veh, m_vehEnterType, 0.0f);
-		*vehDoorMat.GetPosition() += Multiply3x3(vehDoorMat, output);
+		vehDoorMat.GetPosition() += Multiply3x3(vehDoorMat, output);
 		GetMatrix() = vehDoorMat;
 	}
 
@@ -1771,12 +1776,12 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 static void
 particleProduceFootDust(CPed *ped, CVector *pos, float size, int times)
 {
-	switch (ped->m_nLastCollType)
+	switch (ped->m_nSurfaceTouched)
 	{
-		case 1:	// somewhere hard
-		case 3:	// soft dirt
-		case 5:	// pavement
-		case 18:// sand
+		case SURFACE_TARMAC:
+		case SURFACE_DIRT:
+		case SURFACE_PAVEMENT:
+		case SURFACE_SAND:
 			for (int i = 0; i < times; ++i) {
 				CVector adjustedPos = *pos;
 				adjustedPos.x += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
@@ -1878,7 +1883,7 @@ CPed::PlayFootSteps(void)
 		}
 	}
 
-	if (m_nLastCollType == 19) { // Water
+	if (m_nSurfaceTouched == SURFACE_PUDDLE) {
 		float pedSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
 		if (pedSpeed > 0.03f && CTimer::GetFrameCounter() % 2 == 0 && pedSpeed > 0.13f) {
 			float particleSize = pedSpeed * 2.0f;
@@ -2054,6 +2059,7 @@ CPed::SetupLighting(void)
 {
 	ActivateDirectional();
 	SetAmbientColoursForPedsCarsAndObjects();
+
 	if (bRenderScorched) {
 		WorldReplaceNormalLightsWithScorched(Scene.world, 0.1f);
 	} else {
@@ -2086,7 +2092,7 @@ CPed::CalculateNewOrientation(void)
 	if (CReplay::IsPlayingBack() || !IsPedInControl())
 		return;
 
-	CVector pos = *GetPosition();
+	CVector pos = GetPosition();
 
 	GetMatrix().SetRotate(0.0f, 0.0f, m_fRotationCur);
 	
@@ -2145,10 +2151,10 @@ CPed::CalculateNewVelocity(void)
 		}
 	}
 
-	CVector2D forward(sin(m_fRotationCur), cos(m_fRotationCur));
+	CVector2D forward(Sin(m_fRotationCur), Cos(m_fRotationCur));
 
-	m_moved.x = CrossProduct2D(m_vecAnimMoveDelta, forward); // (m_vecAnimMoveDelta.x * cos(m_fRotationCur)) + -sin(m_fRotationCur) * m_vecAnimMoveDelta.y;
-	m_moved.y = DotProduct2D(m_vecAnimMoveDelta, forward);  // m_vecAnimMoveDelta.y* cos(m_fRotationCur) + (m_vecAnimMoveDelta.x * sin(m_fRotationCur));
+	m_moved.x = CrossProduct2D(m_vecAnimMoveDelta, forward); // (m_vecAnimMoveDelta.x * Cos(m_fRotationCur)) + -Sin(m_fRotationCur) * m_vecAnimMoveDelta.y;
+	m_moved.y = DotProduct2D(m_vecAnimMoveDelta, forward);  // m_vecAnimMoveDelta.y* Cos(m_fRotationCur) + (m_vecAnimMoveDelta.x * Sin(m_fRotationCur));
 
 	if (CTimer::GetTimeStep() >= 0.01f) {
 		m_moved = m_moved * (1 / CTimer::GetTimeStep());
@@ -2173,7 +2179,7 @@ CPed::CalculateNewVelocity(void)
 	// Interestingly this part is responsible for diagonal walking.
 	if (localWalkAngle > -DEGTORAD(50.0f) && localWalkAngle < DEGTORAD(50.0f)) {
 		TheCamera.Cams[TheCamera.ActiveCam].m_fPlayerVelocity = pedSpeed;
-		m_moved = CVector2D(-sin(walkAngle), cos(walkAngle)) * pedSpeed;
+		m_moved = CVector2D(-Sin(walkAngle), Cos(walkAngle)) * pedSpeed;
 	}
 
 	CAnimBlendAssociation *idleAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_IDLE_STANCE);
@@ -2233,7 +2239,7 @@ CPed::CanPedDriveOff(void)
 bool
 CPed::CanPedJumpThis(int32 unused)
 {
-	CVector2D forward(-sin(m_fRotationCur), cos(m_fRotationCur));
+	CVector2D forward(-Sin(m_fRotationCur), Cos(m_fRotationCur));
 	CVector pos = GetPosition();
 	// wat?
 	CVector forwardPos(
@@ -2270,7 +2276,7 @@ CPed::CanSeeEntity(CEntity *entity, float threshold)
 	else if (ourAngle > 2 * PI)
 		ourAngle -= 2 * PI;
 
-	float neededTurn = fabs(neededAngle - ourAngle);
+	float neededTurn = Abs(neededAngle - ourAngle);
 
 	return neededTurn < threshold || 2 * PI - threshold < neededTurn;
 }
@@ -2695,15 +2701,15 @@ CPed::QuitEnteringCar(void)
 		if (veh->m_nNumGettingIn != 0)
 			veh->m_nNumGettingIn--;
 
-		veh->m_nGettingInFlags = GetVehEnterExitFlag(m_vehEnterType);
+		veh->m_nGettingInFlags = ~GetVehDoorFlag(m_vehEnterType);
 	}
 
 	bUsesCollision = true;
 
 	if (IsPlayer() && GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI) {
-		if (IsPlayer() && m_storedWeapon != NO_STORED_WEAPON) {
+		if (IsPlayer() && m_storedWeapon != WEAPONTYPE_UNIDENTIFIED) {
 			SetCurrentWeapon(m_storedWeapon);
-			m_storedWeapon = NO_STORED_WEAPON;
+			m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
 		}
 	} else {
 		CWeaponInfo *curWeapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
@@ -2805,7 +2811,7 @@ CPed::TurnBody(void)
 	float neededTurn = currentRot - limitedLookDir;
 	m_fRotationDest = limitedLookDir;
 
-	if (fabs(neededTurn) > 0.05f) {
+	if (Abs(neededTurn) > 0.05f) {
 		doneSmoothly = false;
 		currentRot -= neededTurn * 0.2f;
 	}
@@ -2868,6 +2874,38 @@ CPed::Chat(void)
 	}
 }
 
+void
+CPed::CheckAroundForPossibleCollisions(void)
+{
+	CVector ourCentre, objCentre;
+	CEntity *objects[8];
+	int16 maxObject;
+
+	if (CTimer::GetTimeInMilliseconds() <= m_nPedStateTimer)
+		return;
+
+	GetBoundCentre(ourCentre);
+
+	CWorld::FindObjectsInRange(ourCentre, 10.0f, true, &maxObject, 6, objects, false, true, false, true, false);
+	for (int i = 0; i < maxObject; i++) {
+		CEntity *object = objects[i];
+		if (field_31C) {
+			if (gPhoneInfo.PhoneAtThisPosition(object->GetPosition()))
+				break;
+		}
+		object->GetBoundCentre(objCentre);
+		float radius = object->GetBoundRadius();
+		if (radius > 4.5f || radius < 1.0f)
+			radius = 1.0f;
+
+		// According to code, developers gave up calculating Z diff. later.
+		float diff = CVector(ourCentre - objCentre).MagnitudeSqr2D();
+
+		if (sq(radius + 1.0f) > diff)
+			m_fRotationDest += DEGTORAD(22.5f);
+	}
+}
+
 WRAPPER void CPed::PedGetupCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE810); }
 WRAPPER void CPed::PedStaggerCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8D0); }
 WRAPPER void CPed::PedEvadeCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D36E0); }
@@ -2892,9 +2930,28 @@ WRAPPER void CPed::PedLandCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0
 WRAPPER void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4C6580); }
 WRAPPER void CPed::RestoreHeadingRateCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D6550); }
 
+class CPed_ : public CPed
+{
+public:
+	CPed* ctor(uint32 pedType) { return ::new (this) CPed(pedType); }
+	void dtor(void) { CPed::~CPed(); }
+
+	void SetModelIndex_(uint32 mi) { CPed::SetModelIndex(mi); }
+	void FlagToDestroyWhenNextProcessed_(void) { CPed::FlagToDestroyWhenNextProcessed(); }
+	bool SetupLighting_(void) { return CPed::SetupLighting(); }
+	void RemoveLighting_(bool reset) { CPed::RemoveLighting(reset); }
+	void Teleport_(CVector pos) { CPed::Teleport(pos); }
+};
+
 STARTPATCHES
-	InjectHook(0x4C41C0, &CPed::ctor, PATCH_JUMP);
-	InjectHook(0x4C50D0, &CPed::dtor, PATCH_JUMP);
+	InjectHook(0x4C41C0, &CPed_::ctor, PATCH_JUMP);
+	InjectHook(0x4C50D0, &CPed_::dtor, PATCH_JUMP);
+	InjectHook(0x4C52A0, &CPed_::SetModelIndex_, PATCH_JUMP);
+	InjectHook(0x4D6570, &CPed_::FlagToDestroyWhenNextProcessed_, PATCH_JUMP);
+	InjectHook(0x4A7D30, &CPed_::SetupLighting_, PATCH_JUMP);
+	InjectHook(0x4A7DC0, &CPed_::RemoveLighting_, PATCH_JUMP);
+	InjectHook(0x4D3E70, &CPed_::Teleport_, PATCH_JUMP);
+
 	InjectHook(0x4CF8F0, &CPed::AddWeaponModel, PATCH_JUMP);
 	InjectHook(0x4C6AA0, &CPed::AimGun, PATCH_JUMP);
 	InjectHook(0x4EB470, &CPed::ApplyHeadShot, PATCH_JUMP);
@@ -2925,11 +2982,6 @@ STARTPATCHES
 	InjectHook(0x4CC6C0, &CPed::PlayFootSteps, PATCH_JUMP);
 	InjectHook(0x4C5350, &CPed::BuildPedLists, PATCH_JUMP);
 	InjectHook(0x4CF9B0, &CPed::GiveWeapon, PATCH_JUMP);
-	InjectHook(0x4C52A0, &CPed::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x4D6570, &CPed::FlagToDestroyWhenNextProcessed_, PATCH_JUMP);
-	InjectHook(0x4A7D30, &CPed::SetupLighting_, PATCH_JUMP);
-	InjectHook(0x4A7DC0, &CPed::RemoveLighting_, PATCH_JUMP);
-	InjectHook(0x4D3E70, &CPed::Teleport_, PATCH_JUMP);
 	InjectHook(0x4C7EA0, &CPed::CalculateNewOrientation, PATCH_JUMP);
 	InjectHook(0x4C78F0, &CPed::WorkOutHeadingForMovingFirstPerson, PATCH_JUMP);
 	InjectHook(0x4C73F0, &CPed::CalculateNewVelocity, PATCH_JUMP);
@@ -2946,4 +2998,5 @@ STARTPATCHES
 	InjectHook(0x4D3C80, &CPed::ClearChat, PATCH_JUMP);
 	InjectHook(0x4D1390, &CPed::TurnBody, PATCH_JUMP);
 	InjectHook(0x4D3AC0, &CPed::Chat, PATCH_JUMP);
+	InjectHook(0x4D0490, &CPed::CheckAroundForPossibleCollisions, PATCH_JUMP);
 ENDPATCHES

@@ -63,9 +63,17 @@ CPlaceable::IsWithinArea(float x1, float y1, float z1, float x2, float y2, float
 	       z1 <= GetPosition().z && GetPosition().z <= z2;
 }
 
+class CPlaceable_ : public CPlaceable
+{
+public:
+	CPlaceable *ctor(void) { return ::new (this) CPlaceable(); }
+	void dtor(void) { CPlaceable::~CPlaceable(); }
+};
+
 STARTPATCHES
-	InjectHook(0x49F9A0, &CPlaceable::ctor, PATCH_JUMP);
-	InjectHook(0x49F9E0, &CPlaceable::dtor, PATCH_JUMP);
+	InjectHook(0x49F9A0, &CPlaceable_::ctor, PATCH_JUMP);
+	InjectHook(0x49F9E0, &CPlaceable_::dtor, PATCH_JUMP);
+
 	InjectHook(0x49FA00, &CPlaceable::SetHeading, PATCH_JUMP);
 	InjectHook(0x49FA50, (bool (CPlaceable::*)(float, float, float, float))&CPlaceable::IsWithinArea, PATCH_JUMP);
 	InjectHook(0x49FAF0, (bool (CPlaceable::*)(float, float, float, float, float, float))&CPlaceable::IsWithinArea, PATCH_JUMP);

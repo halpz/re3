@@ -12,7 +12,6 @@ public:
 	CPlane(int, uint8);
 	~CPlane(void);
 	CPlane* ctor(int, uint8);
-	void dtor(void) { this->CPlane::~CPlane(); }
 	void FlagToDestroyWhenNextProcessed() { bRemoveFromWorld = true; }
 };
 static_assert(sizeof(CPlane) == 0x29C, "CPlane: error");

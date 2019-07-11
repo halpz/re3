@@ -7,13 +7,13 @@ public:
 	CVector2D(void) {}
 	CVector2D(float x, float y) : x(x), y(y) {}
 	CVector2D(const CVector &v) : x(v.x), y(v.y) {}
-	float Magnitude(void) const { return sqrt(x*x + y*y); }
+	float Magnitude(void) const { return Sqrt(x*x + y*y); }
 	float MagnitudeSqr(void) const { return x*x + y*y; }
 
 	void Normalise(void){
 		float sq = MagnitudeSqr();
 		if(sq > 0.0f){
-			float invsqrt = 1.0f/sqrt(sq);
+			float invsqrt = 1.0f/Sqrt(sq);
 			x *= invsqrt;
 			y *= invsqrt;
 		}else

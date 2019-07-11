@@ -469,8 +469,8 @@ void CRadar::DrawRadarMask()
 
 		// Then generate a quarter of the circle
 		for (int j = 0; j < 7; j++) {
-			in.x = corners[i].x * cos(j * (PI / 2.0f / 6.0f));
-			in.y = corners[i].y * sin(j * (PI / 2.0f / 6.0f));
+			in.x = corners[i].x * Cos(j * (PI / 2.0f / 6.0f));
+			in.y = corners[i].y * Sin(j * (PI / 2.0f / 6.0f));
 			TransformRadarPointToScreenSpace(out[j + 1], in);
 		};
 
@@ -562,8 +562,8 @@ void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float 
 	for (uint32 i = 0; i < 4; i++) {
 		oldPosn[i] = curPosn[i];
 
-		curPosn[i].x = x + (oldPosn[i].x - x) * cosf(angle) + (oldPosn[i].y - y) * sinf(angle);
-		curPosn[i].y = y - (oldPosn[i].x - x) * sinf(angle) + (oldPosn[i].y - y) * cosf(angle);
+		curPosn[i].x = x + (oldPosn[i].x - x) * Cos(angle) + (oldPosn[i].y - y) * Sin(angle);
+		curPosn[i].y = y - (oldPosn[i].x - x) * Sin(angle) + (oldPosn[i].y - y) * Cos(angle);
 	}
 
 	sprite->Draw(curPosn[2].x, curPosn[2].y, curPosn[3].x, curPosn[3].y, curPosn[0].x, curPosn[0].y, curPosn[1].x, curPosn[1].y, CRGBA(255, 255, 255, alpha));
@@ -868,8 +868,8 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D
 {
 	float s, c;
 
-	s = -sin(TheCamera.GetForward().Heading());
-	c = cos(TheCamera.GetForward().Heading());
+	s = -Sin(TheCamera.GetForward().Heading());
+	c = Cos(TheCamera.GetForward().Heading());
 
 	if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1 || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWNPED) {
 		s = 0.0f;
@@ -885,8 +885,8 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D
 		else
 			forward = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetPosition() - TheCamera.Cams[TheCamera.ActiveCam].SourceBeforeLookBehind;
 
-		s = -sin(forward.Heading());
-		c = cos(forward.Heading());
+		s = -Sin(forward.Heading());
+		c = Cos(forward.Heading());
 	}
 
 	out.x = s * in.y + c * in.x;
@@ -915,8 +915,8 @@ void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D
 		c = 1.0f;
 	}
 	else if (TheCamera.GetLookDirection() == LOOKING_FORWARD) {
-		s = sin(TheCamera.GetForward().Heading());
-		c = cos(TheCamera.GetForward().Heading());
+		s = Sin(TheCamera.GetForward().Heading());
+		c = Cos(TheCamera.GetForward().Heading());
 	}
 	else {
 		CVector forward;
@@ -928,8 +928,8 @@ void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D
 		else
 			forward = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetPosition() - TheCamera.Cams[TheCamera.ActiveCam].SourceBeforeLookBehind;
 
-		s = sin(forward.Heading());
-		c = cos(forward.Heading());
+		s = Sin(forward.Heading());
+		c = Cos(forward.Heading());
 	}
 
 	float x = (in.x - vec2DRadarOrigin.x) * (1.0f / m_RadarRange);

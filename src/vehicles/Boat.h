@@ -49,6 +49,7 @@ public:
 	static bool IsSectorAffectedByWake(CVector2D sector, float fSize, CBoat **apBoats);
 	static float IsVertexAffectedByWake(CVector vecVertex, CBoat *pBoat);
 	static void FillBoatList(void);
+
 };
 static_assert(sizeof(CBoat) == 0x484, "CBoat: error");
 

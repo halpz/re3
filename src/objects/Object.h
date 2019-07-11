@@ -60,6 +60,7 @@ public:
 	int8 m_colour1, m_colour2;
 
 	static int16 &nNoTempObjects;
+	static int16 &nBodyCastHealth;
 
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
@@ -72,10 +73,8 @@ public:
 	void RemoveLighting(bool reset);
 
 	void ObjectDamage(float amount);
+	void RefModelInfo(int32 modelId);
 
 	static void DeleteAllTempObjectInArea(CVector, float);
-
-	void dtor(void) { this->CObject::~CObject(); }
-	void Render_(void) { CObject::Render(); }
 };
 static_assert(sizeof(CObject) == 0x198, "CObject: error");

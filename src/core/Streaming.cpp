@@ -2131,8 +2131,8 @@ CStreaming::DeleteRwObjectsAfterDeath(const CVector &pos)
 
 	for(x = 0; x < NUMSECTORS_X; x++)
 		for(y = 0; y < NUMSECTORS_Y; y++)
-			if(fabs(ix - x) > 3.0f &&
-			   fabs(iy - y) > 3.0f){
+			if(Abs(ix - x) > 3.0f &&
+			   Abs(iy - y) > 3.0f){
 				sect = CWorld::GetSector(x, y);
 				DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS]);
 				DeleteRwObjectsInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP]);
@@ -2158,7 +2158,7 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 	ix = CWorld::GetSectorIndexX(TheCamera.GetPosition().x);
 	iy = CWorld::GetSectorIndexX(TheCamera.GetPosition().y);
 
-	if(fabs(TheCamera.GetForward().x) > fabs(TheCamera.GetForward().y)){
+	if(Abs(TheCamera.GetForward().x) > Abs(TheCamera.GetForward().y)){
 		// looking west/east
 
 		ymin = max(iy - 10, 0);
@@ -2312,13 +2312,13 @@ CStreaming::DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y)
 		e = (CEntity*)node->item;
 		if(e->m_rwObject && !e->bStreamingDontDelete && !e->bImBeingRendered){
 			// Now this is pretty weird...
-			if(fabs(CWorld::GetSectorIndexX(e->GetPosition().x) - x) >= 2.0f)
+			if(Abs(CWorld::GetSectorIndexX(e->GetPosition().x) - x) >= 2.0f)
 //			{
 				e->DeleteRwObject();
 //				return;		// BUG?
 //			}
 			else	// FIX?
-			if(fabs(CWorld::GetSectorIndexY(e->GetPosition().y) - y) >= 2.0f)
+			if(Abs(CWorld::GetSectorIndexY(e->GetPosition().y) - y) >= 2.0f)
 				e->DeleteRwObject();
 		}
 	}

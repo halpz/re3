@@ -65,7 +65,6 @@ public:
 	int8 field_1367;
 
 	~CCopPed();
-	void dtor(void) { this->CCopPed::~CCopPed(); }
 
 	void ClearPursuit(void);
 };

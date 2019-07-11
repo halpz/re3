@@ -101,9 +101,15 @@ CBaseModelInfo::Get2dEffect(int n)
 }
 
 
+class CBaseModelInfo_ : public CBaseModelInfo
+{
+public:
+	void Shutdown_(void) { CBaseModelInfo::Shutdown(); }
+};
 STARTPATCHES
 	// can't easily replace ctor at 4F6A50
-	InjectHook(0x4F6A90, &CBaseModelInfo::Shutdown_, PATCH_JUMP);
+	InjectHook(0x4F6A90, &CBaseModelInfo_::Shutdown_, PATCH_JUMP);
+
 	InjectHook(0x4F6AC0, &CBaseModelInfo::DeleteCollisionModel, PATCH_JUMP);
 	InjectHook(0x4F6B70, &CBaseModelInfo::ClearTexDictionary, PATCH_JUMP);
 	InjectHook(0x4F6BA0, &CBaseModelInfo::AddRef, PATCH_JUMP);

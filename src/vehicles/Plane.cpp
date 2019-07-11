@@ -14,6 +14,12 @@ CPlane::~CPlane()
 	DeleteRwObject();
 }
 
+class CPlane_ : public CPlane
+{
+public:
+	void dtor(void) { CPlane::~CPlane(); }
+};
+
 STARTPATCHES
-InjectHook(0x54B270, &CPlane::dtor, PATCH_JUMP);
+	InjectHook(0x54B270, &CPlane_::dtor, PATCH_JUMP);
 ENDPATCHES
