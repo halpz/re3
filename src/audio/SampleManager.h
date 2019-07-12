@@ -13,6 +13,20 @@ struct tSample {
 class CSampleManager
 {
 public:
+	void SetChannelFrequency(int32, int32);
+	void SetChannelEmittingVolume(int32, uint32);
+	void SetChannel3DPosition(int32, float, float, float);
+	void SetChannelLoopCount(int32, int32);
+
+	void SetChannel3DDistances(int32, int32, int32);
+	void SetChannelReverbFlag(int32, uint8);
+
+	int32 GetSampleLength(int32);
+
+	bool InitialiseChannel(int32, int32, uint32, uint32 something = 0);
+
+	void SetChannelLoopPoints(int32, int32, int32);
+
 	bool CheckForAnAudioFileOnCD();
 
 	int32 GetSampleBaseFrequency(int32);
@@ -40,6 +54,8 @@ public:
 	void SetSpeakerConfig(uint32 config);
 
 	bool GetChannelUsedFlag(int32 id);
+
+	void StartChannel(int32 id);
 	void StopChannel(int32 id);
 
 	static bool IsMP3RadioChannelAvailable();
@@ -47,6 +63,6 @@ public:
 
 extern uint32 &nNumOfMp3Files;
 extern uint8 &num3DProvidersAvailable;
-extern uint32* asName3DProviders;
+extern uint32 *asName3DProviders;
 
 extern CSampleManager &cSampleManager;

@@ -103,21 +103,22 @@ char &g_nMissionAudioPlayingStatus = *(char *)0x60ED88;
 void
 cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 {
-	int32 offset;
 	uint32 i = 0;
 	if(sample != 0) {
 		for(; i < sample; i++) {
-			offset = 27 * m_bActiveSampleQueue;
-			if(m_asSamples[offset + m_abSampleQueueIndexTable[i + offset]]
-			       .calculatedVolume > m_asSamples[offset + sample].calculatedVolume)
+			if(m_asSamples[m_bActiveSampleQueue]
+			              [m_abSampleQueueIndexTable[m_bActiveSampleQueue][i]]
+			                  .calculatedVolume >
+			   m_asSamples[m_bActiveSampleQueue][sample].calculatedVolume)
 				break;
 		}
 		if(i < sample) {
-			memmove(&m_abSampleQueueIndexTable[offset + 1 + i],
-			        &m_abSampleQueueIndexTable[offset + i], m_bActiveSamples - i - 1);
+			memmove(&m_abSampleQueueIndexTable[m_bActiveSampleQueue][i + 1],
+			        &m_abSampleQueueIndexTable[m_bActiveSampleQueue][i],
+			        m_bActiveSamples - i - 1);
 		}
 	}
-	m_abSampleQueueIndexTable[27 * m_bActiveSampleQueue + i] = sample;
+	m_abSampleQueueIndexTable[m_bActiveSampleQueue][i] = sample;
 }
 
 void
@@ -193,7 +194,7 @@ cAudioManager::AddReflectionsToRequestedQueue()
 		}
 	}
 }
-#if 0
+#if 1
 WRAPPER void
 cAudioManager::AddReleasingSounds()
 {
@@ -271,17 +272,17 @@ cAudioManager::AddSampleToRequestedQueue()
 {
 	int32 calculatedVolume;
 	tActiveSample *sample;
-	int32 unknown1;
-	uint8 unknown2;
+	uint8 sampleIndex;
 	bool bReflections;
 
 	if(m_sQueueSample.m_nSampleIndex < TOTAL_AUDIO_SAMPLES) {
 		calculatedVolume = m_sQueueSample.field_16 * (maxVolume - m_sQueueSample.m_bVolume);
-		unknown2 = m_bSampleRequestQueuesStatus[m_bActiveSampleQueue];
-		if(unknown2 >= m_bActiveSamples) {
-			unknown1 = 27 * m_bActiveSampleQueue;
-			unknown2 = *(&m_asSamples[53].field_91 + m_bActiveSamples + unknown1);
-			if(m_asSamples[unknown1 + unknown2].calculatedVolume <= calculatedVolume)
+		sampleIndex = m_bSampleRequestQueuesStatus[m_bActiveSampleQueue];
+		if(sampleIndex >= m_bActiveSamples) {
+			sampleIndex = *(&m_asSamples[1][26].field_91 + m_bActiveSamples +
+			                27 * m_bActiveSampleQueue);
+			if(m_asSamples[m_bActiveSampleQueue][sampleIndex].calculatedVolume <=
+			   calculatedVolume)
 				return;
 		} else {
 			++m_bSampleRequestQueuesStatus[m_bActiveSampleQueue];
@@ -302,7 +303,7 @@ cAudioManager::AddSampleToRequestedQueue()
 
 		if(!m_bDynamicAcousticModelingStatus) m_sQueueSample.m_bReverbFlag = 0;
 
-		sample = &m_asSamples[27 * m_bActiveSampleQueue + unknown2];
+		sample = &m_asSamples[m_bActiveSampleQueue][sampleIndex];
 		sample->m_nEntityIndex = m_sQueueSample.m_nEntityIndex;
 		sample->field_4 = m_sQueueSample.field_4;
 		sample->m_nSampleIndex = m_sQueueSample.m_nSampleIndex;
@@ -330,7 +331,7 @@ cAudioManager::AddSampleToRequestedQueue()
 		sample->calculatedVolume = m_sQueueSample.calculatedVolume;
 		sample->field_88 = m_sQueueSample.field_88;
 
-		AddDetailsToRequestedOrderList(unknown2);
+		AddDetailsToRequestedOrderList(sampleIndex);
 		if(bReflections) AddReflectionsToRequestedQueue();
 	}
 }
@@ -383,7 +384,7 @@ void
 cAudioManager::ClearRequestedQueue()
 {
 	for(int32 i = 0; i < m_bActiveSamples; i++) {
-		m_abSampleQueueIndexTable[i + 27 * m_bActiveSampleQueue] = m_bActiveSamples;
+		m_abSampleQueueIndexTable[m_bActiveSampleQueue][i] = m_bActiveSamples;
 	}
 	m_bSampleRequestQueuesStatus[m_bActiveSampleQueue] = 0;
 }
@@ -552,6 +553,21 @@ cAudioManager::GetDistanceSquared(CVector *v)
 {
 	const CVector &c = TheCamera.GetPosition();
 	return sq(v->x - c.x) + sq(v->y - c.y) + sq((v->z - c.z) * 0.2f);
+}
+
+void
+cAudioManager::TranslateEntity(CVector *v1, CVector *v2)
+{
+	const RwMatrix &cM = TheCamera.GetMatrix().m_matrix;
+	const CVector &cV = TheCamera.GetPosition();
+
+	float a = v1->z - cV.z;
+	float b = v1->y - cV.y;
+	float c = v1->x - cV.x;
+
+	v2->x = cM.right.y * b + cM.right.x * c + cM.right.z * a;
+	v2->y = cM.up.y * b + cM.up.x * c + cM.up.z * a;
+	v2->z = cM.at.y * b + cM.at.x * c + cM.at.z * a;
 }
 
 void
@@ -3118,12 +3134,328 @@ cAudioManager::GetGenericFemaleTalkSfx(int16 sound)
 	return sfx;
 }
 
+#if 1
+
 WRAPPER
 void
 cAudioManager::ProcessActiveQueues()
 {
 	EAXJMP(0x57BA60);
 }
+
+#else
+void
+cAudioManager::ProcessActiveQueues()
+{
+	int v3;               // ecx
+	cAudioManager *v4;    // edx
+	tActiveSample *v5;    // ebx
+	cAudioManager *v6;    // edi
+	tActiveSample *v7;    // esi
+	char v8;              // al
+	unsigned __int8 v9;   // dl
+	double v10;           // st7
+	double v11;           // st6
+	float a4;             // ST08_4
+	float a3;             // ST04_4
+	int activeSampleFreq; // ecx
+	int freq;             // edi
+	int newFreq;          // ecx
+	int v17;              // eax
+	char v18;             // al
+	unsigned __int8 v19;  // al
+	float v20;            // ST0C_4
+	int v21;              // edx
+	unsigned __int8 v22;  // bl
+	cAudioManager *v23;   // ebp
+	int v24;              // ecx
+	cAudioManager *v25;   // edx
+	tActiveSample *v26;   // ebx
+	cAudioManager *v27;   // ebp
+	unsigned int v28;     // edi
+	unsigned int v29;     // eax
+	unsigned __int8 v30;  // cl
+	double v31;           // st4
+	double v32;           // st7
+	double v33;           // st6
+	double v34;           // st5
+	float v35;            // ST0C_4
+	float v36;            // ST08_4
+	float v37;            // ST04_4
+	float v38;            // ST0C_4
+	int v39;              // edx
+	int v40;              // [esp+Ch] [ebp-58h]
+	int v41;              // [esp+Ch] [ebp-58h]
+	unsigned int v42;     // [esp+10h] [ebp-54h]
+	int v43;              // [esp+10h] [ebp-54h]
+	char v44;             // [esp+14h] [ebp-50h]
+	unsigned __int8 v45;  // [esp+14h] [ebp-50h]
+	unsigned __int8 l;    // [esp+24h] [ebp-40h]
+	unsigned __int8 j;    // [esp+28h] [ebp-3Ch]
+	unsigned __int8 k;    // [esp+34h] [ebp-30h]
+	unsigned __int8 i;    // [esp+38h] [ebp-2Ch]
+	CVector a2;           // [esp+48h] [ebp-1Ch]
+
+	for(uint32 i = 0; i < m_bActiveSamples; i++) {
+		m_asSamples[m_bActiveSampleQueue][i].m_bIsProcessed = 0;
+		m_asActiveSamples[i].m_bIsProcessed = 0;
+	}
+
+	for(i = 0;; ++i) {
+		v21 = m_bActiveSampleQueue;
+		if(i >= m_bSampleRequestQueuesStatus[v21]) break;
+		v3 = i + 27 * v21;
+		v4 = (this + 2484 * v21);
+		v5 = &v4->m_asSamples[m_abSampleQueueIndexTable[v3]];
+		if(v4->m_asSamples[m_abSampleQueueIndexTable[v3]].m_nSampleIndex != NO_SAMPLE) {
+			v6 = this;
+			for(j = 0;; ++j) {
+				if(j >= m_bActiveSamples) goto LABEL_58;
+				v7 = m_asActiveSamples;
+				if(v5->m_nEntityIndex == m_asActiveSamples[0].m_nEntityIndex &&
+				   v5->field_4 == m_asActiveSamples[0].field_4 &&
+				   v5->m_nSampleIndex == m_asActiveSamples[0].m_nSampleIndex) {
+					break;
+				}
+			LABEL_56:
+				v6 = (v6 + 92);
+			}
+			if(v5->m_nLoopCount) {
+				if(m_nTimeOfRecentCrime & 1) {
+					if(!(j & 1)) {
+						v8 = 0;
+						goto LABEL_17;
+					}
+				LABEL_16:
+					v8 = 1;
+				} else {
+					if(!(j & 1)) goto LABEL_16;
+					v8 = 0;
+				}
+			LABEL_17:
+				if(v8 && !cSampleManager.GetChannelUsedFlag(j)) {
+					v5->m_bLoopEnded = 1;
+					m_asActiveSamples[0].m_bLoopEnded = 1;
+					m_asActiveSamples[0].m_nSampleIndex = NO_SAMPLE;
+					v7->m_nEntityIndex = -5;
+					goto LABEL_56;
+				}
+			}
+			v5->m_bIsProcessed = 1;
+			m_asActiveSamples[0].m_bIsProcessed = 1;
+			v5->field_88 = -1;
+			if(!v5->field_56) {
+				if(v5->m_bIsDistant) {
+					if(field_4) {
+						v9 = v5->m_bEmittingVolume;
+						if(v9 >= 63u)
+							v42 = 63;
+						else
+							v42 = v9;
+						v43 = 2 * v42;
+					} else {
+						v43 = v5->m_bEmittingVolume;
+					}
+					cSampleManager.SetChannelFrequency(j, v5->m_nFrequency);
+					cSampleManager.SetChannelEmittingVolume(j, v43);
+				} else {
+					v10 = m_asActiveSamples[0].m_fDistance;
+					v11 = v5->m_fDistance;
+					m_asActiveSamples[0].m_fDistance = v5->m_fDistance;
+					a4 = v11;
+					a3 = v10;
+					v5->m_nFrequency = ComputeDopplerEffectedFrequency(
+					    v5->m_nFrequency, a3, a4, v5->field_48);
+					activeSampleFreq = m_asActiveSamples[0].m_nFrequency;
+					freq = v5->m_nFrequency;
+					if(freq != activeSampleFreq) {
+						if(freq <= activeSampleFreq) {
+							if(activeSampleFreq - 6000 > freq)
+								freq = activeSampleFreq - 6000;
+							newFreq = freq;
+						} else if(activeSampleFreq + 6000 >= freq) {
+							newFreq = v5->m_nFrequency;
+						} else {
+							newFreq = activeSampleFreq + 6000;
+						}
+						v7->m_nFrequency = newFreq;
+						cSampleManager.SetChannelFrequency(j, newFreq);
+					}
+					v40 = v7->m_bEmittingVolume;
+					v17 = v5->m_bEmittingVolume;
+					if(v17 != v40) {
+						if(v17 <= v40) {
+							if(v40 - 10 > v17) v17 = v40 - 10;
+							v41 = v17;
+						} else if(v40 + 10 >= v17) {
+							v41 = v5->m_bEmittingVolume;
+						} else {
+							v41 = v40 + 10;
+						}
+						if(field_4) {
+							if(v41 >= 63)
+								v18 = 63;
+							else
+								v18 = v41;
+							v19 = 2 * v18;
+						} else {
+							v19 = v41;
+						}
+						cSampleManager.SetChannelEmittingVolume(j, v19);
+						v7->m_bEmittingVolume = v41;
+					}
+					TranslateEntity(&v5->m_vecPos, &a2);
+					cSampleManager.SetChannel3DPosition(j, a2.x, a2.y, a2.z);
+					v20 = 0.25f * v5->m_fSoundIntensity;
+					cSampleManager.SetChannel3DDistances(
+					    j, v5->m_fSoundIntensity, v20);
+				}
+				cSampleManager.SetChannelReverbFlag(j, v5->m_bReverbFlag);
+				continue;
+			}
+			v5->m_bIsProcessed = 0;
+			m_asActiveSamples[0].m_bIsProcessed = 0;
+			goto LABEL_56;
+		}
+	LABEL_58:;
+	}
+	v22 = 0;
+	v23 = this;
+	for(uint32 i = 0; v22 < m_bActiveSamples; i++) {
+		if(v23->m_asActiveSamples[0].m_nSampleIndex != NO_SAMPLE &&
+		   !v23->m_asActiveSamples[0].m_bIsProcessed) {
+			cSampleManager.StopChannel(i);
+			v23->m_asActiveSamples[0].m_nSampleIndex = NO_SAMPLE;
+			v23->m_asActiveSamples[0].m_nEntityIndex = -5;
+		}
+		v23 = (v23 + 92);
+	}
+	for(k = 0; k < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue]; ++k) {
+		v24 = k + 27 * v39;
+		v25 = (this + 2484 * v39);
+		v26 = &v25->m_asSamples[m_abSampleQueueIndexTable[v24]];
+		if(!v25->m_asSamples[m_abSampleQueueIndexTable[v24]].m_bIsProcessed &&
+		   !v25->m_asSamples[m_abSampleQueueIndexTable[v24]].m_bLoopEnded &&
+		   m_asAudioEntities[v26->m_nEntityIndex].m_bIsUsed &&
+		   v25->m_asSamples[m_abSampleQueueIndexTable[v24]].m_nSampleIndex < NO_SAMPLE) {
+			if(v25->m_asSamples[m_abSampleQueueIndexTable[v24]].field_4 > 255u &&
+			   v25->m_asSamples[m_abSampleQueueIndexTable[v24]].m_nLoopCount &&
+			   v25->m_asSamples[m_abSampleQueueIndexTable[v24]].m_bLoopsRemaining) {
+				--v25->m_asSamples[m_abSampleQueueIndexTable[v24]]
+				      .m_bLoopsRemaining;
+				v26->field_76 = 1;
+			} else {
+				v27 = this;
+				for(l = 0; l < m_bActiveSamples; ++l) {
+					if(!v27->m_asActiveSamples[0].m_bIsProcessed) {
+						if(!v26->m_nLoopCount) goto LABEL_80;
+						v28 = v26->m_nFrequency / field_19192;
+						v29 = v26->m_nLoopCount *
+						      cSampleManager.GetSampleLength(
+						          v26->m_nSampleIndex);
+						if(v28) {
+							v26->field_76 = v29 / v28 + 1;
+						LABEL_80:
+							memcpy(v27->m_asActiveSamples, v26, 92);
+							if(!v27->m_asActiveSamples[0].m_bIsDistant)
+								TranslateEntity(
+								    &v27->m_asActiveSamples[0]
+								         .m_vecPos,
+								    &a2);
+							if(field_4) {
+								if(v27->m_asActiveSamples[0]
+								       .m_bEmittingVolume >= 63u)
+									v44 = 63;
+								else
+									v44 =
+									    v27
+									        ->m_asActiveSamples
+									            [0]
+									        .m_bEmittingVolume;
+								v45 = 2 * v44;
+							} else {
+								v45 = v27->m_asActiveSamples[0]
+								          .m_bEmittingVolume;
+							}
+							if(cSampleManager.InitialiseChannel(
+							       l,
+							       v27->m_asActiveSamples[0]
+							           .m_nSampleIndex,
+							       v27->m_asActiveSamples[0]
+							           .m_bBankIndex)) {
+								cSampleManager.SetChannelFrequency(
+								    l, v27->m_asActiveSamples[0]
+								           .m_nFrequency);
+								cSampleManager
+								    .SetChannelEmittingVolume(l,
+								                              v45);
+								cSampleManager.SetChannelLoopPoints(
+								    l,
+								    v27->m_asActiveSamples[0]
+								        .m_nLoopStart,
+								    v27->m_asActiveSamples[0]
+								        .m_nLoopEnd);
+								cSampleManager.SetChannelLoopCount(
+								    l, v27->m_asActiveSamples[0]
+								           .m_nLoopCount);
+								cSampleManager.SetChannelReverbFlag(
+								    l, v27->m_asActiveSamples[0]
+								           .m_bReverbFlag);
+								if(v27->m_asActiveSamples[0]
+								       .m_bIsDistant) {
+									v30 = v27->m_asActiveSamples
+									          [0]
+									              .m_bOffset;
+									if(v30 == 63) {
+										v31 = 0.0f;
+									} else if(v30 >= 63u) {
+										v31 = (v30 - 63) *
+										      15.873f;
+									} else {
+										v31 = -((63 - v30) *
+										        15.873f);
+									}
+									v32 = v31;
+									v33 = 0.0f;
+									v34 = 0.0f;
+									v27->m_asActiveSamples[0]
+									    .m_fSoundIntensity =
+									    100000.0f;
+								} else {
+									v32 = a2.x;
+									v33 = a2.y;
+									v34 = a2.z;
+								}
+								v35 = v34;
+								v36 = v33;
+								v37 = v32;
+								cSampleManager.SetChannel3DPosition(
+								    l, v37, v36, v35);
+								v38 = 0.25f *
+								      v27->m_asActiveSamples[0]
+								          .m_fSoundIntensity;
+								cSampleManager
+								    .SetChannel3DDistances(
+								        l,
+								        v27->m_asActiveSamples[0]
+								            .m_fSoundIntensity,
+								        v38);
+								cSampleManager.StartChannel(l);
+							}
+							v27->m_asActiveSamples[0].m_bIsProcessed =
+							    1;
+							v26->m_bIsProcessed = 1;
+							v26->field_88 = -1;
+							break;
+						}
+					}
+					v27 = (v27 + 92);
+				}
+			}
+		}
+	}
+}
+#endif
 
 #if 1
 bool
@@ -3730,12 +4062,12 @@ WRAPPER
 void
 cAudioManager::ProcessGarages()
 {
-    EAXJMP(0x578C20);
+	EAXJMP(0x578C20);
 }
 
-void cAudioManager::ProcessHomeScriptObject(uint8 sound)
+void
+cAudioManager::ProcessHomeScriptObject(uint8 sound)
 {
-    
 }
 
 void
@@ -3820,7 +4152,7 @@ STARTPATCHES
 InjectHook(0x57B210, &cAudioManager::AddDetailsToRequestedOrderList, PATCH_JUMP);
 InjectHook(0x56AD30, &cAudioManager::AddPlayerCarSample, PATCH_JUMP);
 InjectHook(0x57B300, &cAudioManager::AddReflectionsToRequestedQueue, PATCH_JUMP);
-InjectHook(0x57B8D0, &cAudioManager::AddReleasingSounds, PATCH_JUMP);
+// InjectHook(0x57B8D0, &cAudioManager::AddReleasingSounds, PATCH_JUMP);
 InjectHook(0x57B070, &cAudioManager::AddSampleToRequestedQueue, PATCH_JUMP);
 InjectHook(0x57A8F0, &cAudioManager::AutoDetect3DProviders, PATCH_JUMP);
 // InjectHook(0x580AF0, &cAudioManager::AgeCrimes, PATCH_JUMP);
@@ -3977,6 +4309,7 @@ InjectHook(0x575460, &cAudioManager::GetGenericMaleTalkSfx, PATCH_JUMP);
 InjectHook(0x575510, &cAudioManager::GetGenericFemaleTalkSfx, PATCH_JUMP);
 
 // Process stuff
+// InjectHook(0x57BA60, &cAudioManager::ProcessActiveQueues, PATCH_JUMP);
 InjectHook(0x577B30, &cAudioManager::ProcessAirportScriptObject, PATCH_JUMP);
 InjectHook(0x579250, &cAudioManager::ProcessBridgeMotor, PATCH_JUMP);
 InjectHook(0x579170, &cAudioManager::ProcessBridgeWarning, PATCH_JUMP);

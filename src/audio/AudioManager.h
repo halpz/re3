@@ -7,48 +7,48 @@
 class tActiveSample
 {
 public:
-	int m_nEntityIndex;
-	int field_4;
-	int m_nSampleIndex;
-	char m_bBankIndex;
-	char m_bIsDistant;
-	char field_14;
-	char field_15;
-	int field_16;
-	int m_nFrequency;
+	int32 m_nEntityIndex;
+	int32 field_4;
+	int32 m_nSampleIndex;
+	uint8 m_bBankIndex;
+	uint8 m_bIsDistant;
+	uint8 field_14;
+	uint8 field_15;
+	int32 field_16;
+	int32 m_nFrequency;
 	uint8 m_bVolume;
-	char field_25;
-	char field_26;
-	char field_27;
+	uint8 field_25;
+	uint8 field_26;
+	uint8 field_27;
 	float m_fDistance;
-	int m_nLoopCount;
-	int m_nLoopStart;
-	int m_nLoopEnd;
+	int32 m_nLoopCount;
+	int32 m_nLoopStart;
+	int32 m_nLoopEnd;
 	uint8 m_bEmittingVolume;
-	char field_45;
-	char field_46;
-	char field_47;
+	uint8 field_45;
+	uint8 field_46;
+	uint8 field_47;
 	float field_48;
 	float m_fSoundIntensity;
-	char field_56;
-	char field_57;
-	char field_58;
-	char field_59;
+	uint8 field_56;
+	uint8 field_57;
+	uint8 field_58;
+	uint8 field_59;
 	CVector m_vecPos;
-	char m_bReverbFlag;
-	char m_bLoopsRemaining;
-	char m_bRequireReflection;
+	uint8 m_bReverbFlag;
+	uint8 m_bLoopsRemaining;
+	uint8 m_bRequireReflection;
 	uint8 m_bOffset;
-	int field_76;
-	char m_bIsProcessed;
-	char m_bLoopEnded;
-	char field_82;
-	char field_83;
-	int calculatedVolume;
-	char field_88;
-	char field_89;
-	char field_90;
-	char field_91;
+	int32 field_76;
+	uint8 m_bIsProcessed;
+	uint8 m_bLoopEnded;
+	uint8 field_82;
+	uint8 field_83;
+	int32 calculatedVolume;
+	uint8 field_88;
+	uint8 field_89;
+	uint8 field_90;
+	uint8 field_91;
 };
 
 static_assert(sizeof(tActiveSample) == 0x5c, "tActiveSample: error");
@@ -79,12 +79,12 @@ public:
 	eAudioType m_nType;
 	CPhysical *m_pEntity;
 	bool m_bIsUsed;
-	char m_bStatus;
+	uint8 m_bStatus;
 	int16 m_awAudioEvent[4];
-	char gap_18[2];
+	uint8 gap_18[2];
 	float m_afVolume[4];
-	char field_24;
-	char field_25[3];
+	uint8 field_24;
+	uint8 field_25[3];
 };
 
 static_assert(sizeof(tAudioEntity) == 0x28, "tAudioEntity: error");
@@ -96,9 +96,9 @@ public:
 	int field_4;
 	CVector m_vecPos;
 	float m_fDistance;
-	char m_bVolume;
-	char field_25;
-	char gap_26[2];
+	uint8 m_bVolume;
+	uint8 field_25;
+	uint8 gap_26[2];
 };
 
 static_assert(sizeof(tPedComment) == 0x1c, "tPedComment: error");
@@ -107,10 +107,10 @@ class cPedComments
 {
 public:
 	tPedComment m_asPedComments[40];
-	char field_1120[40];
-	char field_1160[2];
-	char field_1162;
-	char gap_1163[1];
+	uint8 field_1120[40];
+	uint8 field_1160[2];
+	uint8 field_1162;
+	uint8 gap_1163[1];
 };
 
 static_assert(sizeof(cPedComments) == 0x48c, "cPedComments: error");
@@ -122,15 +122,15 @@ class cAudioCollision
 public:
 	CEntity *m_pEntity1;
 	CEntity *m_pEntity2;
-	char m_bSurface1;
-	char m_bSurface2;
-	char field_10;
-	char field_11;
+	uint8 m_bSurface1;
+	uint8 m_bSurface2;
+	uint8 field_10;
+	uint8 field_11;
 	float m_fIntensity1;
 	float m_fIntensity2;
 	CVector m_vecPosition;
 	float m_fDistance;
-	int m_nBaseVolume;
+	int32 m_nBaseVolume;
 };
 
 static_assert(sizeof(cAudioCollision) == 0x28, "cAudioCollision: error");
@@ -140,9 +140,9 @@ class cAudioCollisionManager
 public:
 	cAudioCollision m_asCollisions1[10];
 	cAudioCollision m_asCollisions2[10];
-	char m_bIndicesTable[10];
-	char m_bCollisionsInQueue;
-	char gap_811;
+	uint8 m_bIndicesTable[10];
+	uint8 m_bCollisionsInQueue;
+	uint8 gap_811;
 	cAudioCollision m_sQueue;
 };
 
@@ -152,18 +152,18 @@ class cMissionAudio
 {
 public:
 	CVector m_vecPos;
-	char field_12;
-	char gap_13[3];
+	uint8 field_12;
+	uint8 gap_13[3];
 	int m_nSampleIndex;
-	char m_bLoadingStatus;
-	char m_bPlayStatus;
-	char field_22;
-	char field_23;
+	uint8 m_bLoadingStatus;
+	uint8 m_bPlayStatus;
+	uint8 field_22;
+	uint8 field_23;
 	int field_24;
 	bool m_bIsPlayed;
-	char field_29;
-	char field_30;
-	char field_31;
+	uint8 field_29;
+	uint8 field_30;
+	uint8 field_31;
 };
 
 class cVehicleParams;
@@ -174,50 +174,50 @@ class cAudioManager
 {
 public:
 	bool m_bIsInitialised;
-	char field_1;
-	char field_2;
-	char m_bActiveSamples;
-	char field_4;
+	uint8 field_1;
+	uint8 field_2;
+	uint8 m_bActiveSamples;
+	uint8 field_4;
 	bool m_bDynamicAcousticModelingStatus;
-	char field_6;
-	char field_7;
+	uint8 field_6;
+	uint8 field_7;
 	float speedOfSound;
 	bool m_bTimerJustReset;
-	char field_13;
-	char field_14;
-	char field_15;
-	int m_nTimer;
+	uint8 field_13;
+	uint8 field_14;
+	uint8 field_15;
+	int32 m_nTimer;
 	tActiveSample m_sQueueSample;
 	uint8 m_bActiveSampleQueue;
-	char gap_109[3];
-	tActiveSample m_asSamples[54];
-	char m_abSampleQueueIndexTable[54];
-	char m_bSampleRequestQueuesStatus[2];
+	uint8 gap_109[3];
+	tActiveSample m_asSamples[2][27];
+	uint8 m_abSampleQueueIndexTable[2][27];
+	uint8 m_bSampleRequestQueuesStatus[2];
 	tActiveSample m_asActiveSamples[27];
 	tAudioEntity m_asAudioEntities[200];
-	int m_anAudioEntityIndices[200];
-	int m_nAudioEntitiesTotal;
+	int32 m_anAudioEntityIndices[200];
+	int32 m_nAudioEntitiesTotal;
 	CVector m_avecReflectionsPos[5];
 	float m_afReflectionsDistances[5];
-	int m_anScriptObjectEntityIndices[40];
-	int m_nScriptObjectEntityTotal;
+	int32 m_anScriptObjectEntityIndices[40];
+	int32 m_nScriptObjectEntityTotal;
 	cPedComments m_sPedComments;
-	int m_nFireAudioEntity;
-	int m_nWaterCannonEntity;
-	int m_nPoliceChannelEntity;
-	char gap45B8[444];
-	int m_nFrontEndEntity;
-	int m_nCollisionEntity;
+	int32 m_nFireAudioEntity;
+	int32 m_nWaterCannonEntity;
+	int32 m_nPoliceChannelEntity;
+	uint8 gap45B8[444];
+	int32 m_nFrontEndEntity;
+	int32 m_nCollisionEntity;
 	cAudioCollisionManager m_sCollisionManager;
-	int m_nProjectileEntity;
-	int m_nBridgeEntity;
+	int32 m_nProjectileEntity;
+	int32 m_nBridgeEntity;
 	cMissionAudio m_sMissionAudio;
-	int m_anRandomTable[5];
-	char field_19192;
-	char m_bUserPause;
-	char m_bPreviousUserPause;
-	char field_19195;
-	int m_nTimeOfRecentCrime;
+	int32 m_anRandomTable[5];
+	uint8 field_19192;
+	uint8 m_bUserPause;
+	uint8 m_bPreviousUserPause;
+	uint8 field_19195;
+	int32 m_nTimeOfRecentCrime;
 
 	void AddDetailsToRequestedOrderList(uint8 sample);
 	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 unk1,
@@ -247,6 +247,8 @@ public:
 	float GetDistanceSquared(CVector *v); // todo hook
 
 	// done
+
+	void TranslateEntity(CVector *v1, CVector *v2); // todo hook
 
 	void Initialise();
 	void PostInitialiseGameSpecificSetup();
@@ -419,7 +421,7 @@ public:
 	void ProcessFrontEnd();                  // done
 	void ProcessGarages();                   // todo
 	//	bool ProcessHelicopter(void *); // todo requires CVehicle
-	void ProcessHomeScriptObject(uint8 sound); 
+	void ProcessHomeScriptObject(uint8 sound);
 	//	void ProcessJumbo(void *);
 	//	void ProcessJumboAccel(void *);
 	//	void ProcessJumboDecel(void *);
@@ -460,8 +462,8 @@ public:
 	//	void ProcessVehicleSkidding(void *);
 	void ProcessWaterCannon(int32); // todo
 	void ProcessWeather(int32 id);  // todo
-	//	bool ProcessWetRoadNoise(void *);
-	//	void ProcessWorkShopScriptObject(uint8 sound);
+	                                //	bool ProcessWetRoadNoise(void *);
+	                                //	void ProcessWorkShopScriptObject(uint8 sound);
 };
 
 static_assert(sizeof(cAudioManager) == 0x4B14, "cAudioManager: error");

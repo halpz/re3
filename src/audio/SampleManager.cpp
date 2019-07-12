@@ -15,6 +15,37 @@ CSampleManager::IsMP3RadioChannelAvailable()
 }
 
 WRAPPER
+void CSampleManager::SetChannelFrequency(int32, int32) { EAXJMP(0x5679D0); }
+
+WRAPPER
+void CSampleManager::SetChannelEmittingVolume(int32, uint32) { EAXJMP(0x567820); }
+
+WRAPPER
+void
+CSampleManager::SetChannel3DPosition(int32, float, float, float)
+{
+	EAXJMP(0x567890);
+}
+
+WRAPPER
+void CSampleManager::SetChannelLoopCount(int32, int32) { EAXJMP(0x567AA0); }
+
+WRAPPER
+void CSampleManager::SetChannel3DDistances(int32, int32, int32) { EAXJMP(0x5678D0); }
+
+WRAPPER
+void CSampleManager::SetChannelReverbFlag(int32, uint8) { EAXJMP(0x567630); }
+
+WRAPPER
+int32 CSampleManager::GetSampleLength(int32) { EAXJMP(0x567300); }
+
+WRAPPER
+bool CSampleManager::InitialiseChannel(int32, int32, uint32, uint32) { EAXJMP(0x5676A0); }
+
+WRAPPER
+void CSampleManager::SetChannelLoopPoints(int32, int32, int32) { EAXJMP(0x567A30); }
+
+WRAPPER
 bool
 CSampleManager::CheckForAnAudioFileOnCD()
 {
@@ -124,6 +155,13 @@ bool
 CSampleManager::GetChannelUsedFlag(int32 id)
 {
 	EAXJMP(0x567B00);
+}
+
+WRAPPER
+void
+CSampleManager::StartChannel(int32 id)
+{
+	EAXJMP(0x567B80);
 }
 
 WRAPPER
