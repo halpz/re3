@@ -173,6 +173,7 @@ enum eSound : int16
 };
 
 class CEntity;
+enum eCrimeType;
 
 class cDMAudio
 {
@@ -204,5 +205,6 @@ public:
 	uint8 IsMP3RadioChannelAvailable();
 	void DestroyEntity(int32);
 	void ClearMissionAudio(void);
+	void ReportCrime(eCrimeType crime, const CVector &pos);
 };
 extern cDMAudio &DMAudio;

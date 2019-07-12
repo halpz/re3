@@ -14,6 +14,7 @@ void
 CPools::Initialise(void)
 {
 	// TODO: unused right now
+	assert(0);
 	ms_pPtrNodePool = new CCPtrNodePool(NUMPTRNODES);
 	ms_pEntryInfoNodePool = new CEntryInfoNodePool(NUMENTRYINFOS);
 	ms_pPedPool = new CPedPool(NUMPEDS);
@@ -23,3 +24,10 @@ CPools::Initialise(void)
 	ms_pObjectPool = new CObjectPool(NUMOBJECTS);
 	ms_pDummyPool = new CDummyPool(NUMDUMMIES);
 }
+
+int32 CPools::GetPedRef(CPed *ped) { return ms_pPedPool->GetIndex(ped); }
+CPed *CPools::GetPed(int32 handle) { return ms_pPedPool->GetAt(handle); }
+int32 CPools::GetVehicleRef(CVehicle *vehicle) { return ms_pVehiclePool->GetIndex(vehicle); }
+CVehicle *CPools::GetVehicle(int32 handle) { return ms_pVehiclePool->GetAt(handle); }
+int32 CPools::GetObjectRef(CObject *object) { return ms_pObjectPool->GetIndex(object); }
+CObject *CPools::GetObject(int32 handle) { return ms_pObjectPool->GetAt(handle); }

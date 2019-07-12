@@ -465,3 +465,21 @@ IsPickupModel(int16 id)
 		id == MI_PICKUP_KILLFRENZY ||
 		id == MI_PICKUP_CAMERA;
 }
+
+inline bool
+IsPolicePedModel(int16 id)
+{
+	return id == MI_COP ||
+		id == MI_SWAT ||
+		id == MI_FBI ||
+		id == MI_ARMY;
+}
+
+inline bool
+IsPoliceVehicleModel(int16 id)
+{
+	return id == MI_CHOPPER ||
+		id == MI_PREDATOR ||
+		id == MI_POLICE ||
+		id == MI_ENFORCER;
+}

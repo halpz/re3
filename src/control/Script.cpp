@@ -124,8 +124,8 @@ void CMissionCleanup::Process()
 	CHud::m_ItemToFlash = -1;
 	CHud::SetHelpMessage(nil, false);
 	CUserDisplay::OnscnTimer.m_bDisabled = false;
-	CWorld::Players[0].m_pPed->m_pWanted->m_IsIgnoredByCops = false;
-	CWorld::Players[0].m_pPed->m_pWanted->m_IsIgnoredByEveryOne = false;
+	CWorld::Players[0].m_pPed->m_pWanted->m_bIgnoredByCops = false;
+	CWorld::Players[0].m_pPed->m_pWanted->m_bIgnoredByEveryone = false;
 	CWorld::Players[0].MakePlayerSafe(false);
 	CTheScripts::StoreVehicleIndex = -1;
 	CTheScripts::StoreVehicleWasRandom = true;

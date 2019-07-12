@@ -300,7 +300,7 @@ void CDarkel::Update()
 
 		TimeOfFrenzyStart = CTimer::GetTimeInMilliseconds();
 
-		FindPlayerPed()->m_pWanted->SetWantedLevel(NOTWANTED);
+		FindPlayerPed()->m_pWanted->SetWantedLevel(0);
 
 		if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
 			WeaponType = WEAPONTYPE_UZI;
