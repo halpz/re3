@@ -212,6 +212,8 @@ CWanted::ReportCrimeNow(eCrimeType type, const CVector &coors, bool policeDoesnt
 	wantedLevelDrop = min(CCullZones::GetWantedLevelDrop(), 100);
 
 	chaos = (1.0f - wantedLevelDrop/100.0f) * sensitivity;
+	if (policeDoesntCare)
+		chaos *= 0.333f;
 	switch(type){
 	case CRIME_POSSESSION_GUN:
 		break;
