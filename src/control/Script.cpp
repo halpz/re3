@@ -4,10 +4,15 @@
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "Boat.h"
 #include "Camera.h"
 #include "CarCtrl.h"
+#include "CivilianPed.h"
+#include "CopPed.h"
 #include "DMAudio.h"
+#include "EmergencyPed.h"
 #include "FileMgr.h"
+#include "General.h"
 #include "Hud.h"
 #include "Messages.h"
 #include "ModelIndices.h"
@@ -21,6 +26,7 @@
 #include "User.h"
 #include "Weather.h"
 #include "World.h"
+#include "Zones.h"
 
 uint8 (&CTheScripts::ScriptSpace)[SIZE_SCRIPT_SPACE] = *(uint8(*)[SIZE_SCRIPT_SPACE])*(uintptr*)0x74B248;
 CRunningScript(&CTheScripts::ScriptsArray)[MAX_NUM_SCRIPTS] = *(CRunningScript(*)[MAX_NUM_SCRIPTS])*(uintptr*)0x6F5C08;
@@ -1342,6 +1348,7 @@ int8 CRunningScript::ProcessCommandsFrom0To99(int32 command)
 		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	default:
+		assert(0);
 		break;
 	}
 	return -1;
@@ -1374,7 +1381,468 @@ void CRunningScript::UpdateCompareFlag(bool flag)
 }
 
 
-WRAPPER int8 CRunningScript::ProcessCommandsFrom100To199(int32 command) { EAXJMP(0x43AEA0); }
+int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
+{
+	switch (command) {
+	case COMMAND_SUB_INT_LVAR_FROM_INT_VAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_SUB_INT_VAR_FROM_INT_LVAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_SUB_FLOAT_LVAR_FROM_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_SUB_FLOAT_VAR_FROM_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_MULT_INT_VAR_BY_INT_VAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) *= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_MULT_INT_LVAR_BY_INT_VAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) *= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_MULT_INT_VAR_BY_INT_LVAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) *= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_MULT_INT_LVAR_BY_INT_LVAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) *= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_DIV_INT_VAR_BY_INT_VAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) /= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_DIV_INT_LVAR_BY_INT_VAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) /= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_DIV_INT_VAR_BY_INT_LVAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) /= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_DIV_INT_LVAR_BY_INT_LVAR:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) /= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_ADD_TIMED_VAL_TO_FLOAT_VAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr += CTimer::GetTimeStep() * *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_ADD_TIMED_VAL_TO_FLOAT_LVAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr += CTimer::GetTimeStep() * *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_SUB_TIMED_VAL_FROM_FLOAT_VAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr -= CTimer::GetTimeStep() * *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_SUB_TIMED_VAL_FROM_FLOAT_LVAR:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*(float*)ptr -= CTimer::GetTimeStep() * *(float*)&ScriptParams[0];
+		return 0;
+	}
+	case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_VAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_LVAR:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_SET_VAR_INT_TO_VAR_INT:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_SET_LVAR_INT_TO_VAR_INT:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_SET_VAR_INT_TO_LVAR_INT:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_SET_LVAR_INT_TO_LVAR_INT:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) = *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_SET_VAR_FLOAT_TO_VAR_FLOAT:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_SET_LVAR_FLOAT_TO_VAR_FLOAT:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_SET_VAR_FLOAT_TO_LVAR_FLOAT:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_SET_LVAR_FLOAT_TO_LVAR_FLOAT:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_CSET_VAR_INT_TO_VAR_FLOAT:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_CSET_LVAR_INT_TO_VAR_FLOAT:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_CSET_VAR_INT_TO_LVAR_FLOAT:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_CSET_LVAR_INT_TO_LVAR_FLOAT:
+		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_CSET_VAR_FLOAT_TO_VAR_INT:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_CSET_LVAR_FLOAT_TO_VAR_INT:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_CSET_VAR_FLOAT_TO_LVAR_INT:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		return 0;
+	case COMMAND_CSET_LVAR_FLOAT_TO_LVAR_INT:
+		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) = *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		return 0;
+	case COMMAND_ABS_VAR_INT:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*ptr = abs(*ptr);
+		return 0;
+	}
+	case COMMAND_ABS_LVAR_INT:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*ptr = abs(*ptr);
+		return 0;
+	}
+	case COMMAND_ABS_VAR_FLOAT:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*ptr = abs(*ptr);
+		return 0;
+	}
+	case COMMAND_ABS_LVAR_FLOAT:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*ptr = abs(*ptr);
+		return 0;
+	}
+	case COMMAND_GENERATE_RANDOM_FLOAT:
+	{
+		float* ptr = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CGeneral::GetRandomNumber();
+		CGeneral::GetRandomNumber();
+		CGeneral::GetRandomNumber(); /* To make it EXTRA random! */
+		*ptr = CGeneral::GetRandomNumber() / 65536.0f;
+		/* Between 0 and 0.5 on PC (oh well...), never used in original script. */
+		return 0;
+	}
+	case COMMAND_GENERATE_RANDOM_INT:
+		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = CGeneral::GetRandomNumber();
+		return 0;
+	case COMMAND_CREATE_CHAR:
+	{
+		CollectParameters(&m_nIp, 5);
+		switch (ScriptParams[1]) {
+		case MI_COP:
+			if (ScriptParams[0] = PEDTYPE_COP)
+				ScriptParams[1] = COP_STREET;
+			break;
+		case MI_SWAT:
+			if (ScriptParams[0] = PEDTYPE_COP)
+				ScriptParams[1] = COP_SWAT;
+			break;
+		case MI_FBI:
+			if (ScriptParams[0] = PEDTYPE_COP)
+				ScriptParams[1] = COP_FBI;
+			break;
+		case MI_ARMY:
+			if (ScriptParams[0] = PEDTYPE_COP)
+				ScriptParams[1] = COP_ARMY;
+			break;
+		case MI_MEDIC:
+			if (ScriptParams[0] = PEDTYPE_EMERGENCY)
+				ScriptParams[1] = PEDTYPE_EMERGENCY;
+			break;
+		case MI_FIREMAN:
+			if (ScriptParams[0] = PEDTYPE_FIREMAN)
+				ScriptParams[1] = PEDTYPE_FIREMAN;
+			break;
+		default:
+			break;
+		}
+		CPed* ped;
+		if (ScriptParams[0] == PEDTYPE_COP)
+			ped = new CCopPed((eCopType)ScriptParams[1]);
+		else if (ScriptParams[0] == PEDTYPE_EMERGENCY || ScriptParams[0] == PEDTYPE_FIREMAN)
+			ped = new CEmergencyPed(ScriptParams[1]);
+		else
+			ped = new CCivilianPed(ScriptParams[0], ScriptParams[1]);
+		ped->CharCreatedBy = MISSION_CHAR;
+		ped->bRespondsToThreats = false;
+		ped->m_ped_flagG2 = false;
+		CVector pos = *(CVector*)&ScriptParams[2];
+		if (pos.z <= -100.0f)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		pos.z += 1.0f;
+		ped->GetPosition() = pos;
+		ped->SetOrientation(0.0f, 0.0f, 0.0f);
+		CTheScripts::ClearSpaceForMissionEntity(pos, ped);
+		CWorld::Add(ped);
+		ped->m_level = CTheZones::GetLevelFromPosition(pos);
+		CPopulation::ms_nTotalMissionPeds++;
+		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
+		StoreParameters(&m_nIp, 1);
+		if (m_bIsMissionScript)
+			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+		return 0;
+	}
+	case COMMAND_DELETE_CHAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		if (ped) {
+			if (ped->bInVehicle && ped->m_pMyVehicle) {
+				if (ped->m_pMyVehicle->pDriver == ped) {
+					ped->m_pMyVehicle->RemoveDriver();
+					ped->m_pMyVehicle->m_status = STATUS_ABANDONED;
+					if (ped->m_pMyVehicle->m_nDoorLock == CARLOCK_LOCKED_INITIALLY)
+						ped->m_pMyVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
+					if (ped->m_nPedType == PEDTYPE_COP && ped->m_pMyVehicle->IsLawEnforcementVehicle())
+						ped->m_pMyVehicle->ChangeLawEnforcerState(0);
+				}
+				else {
+					ped->m_pMyVehicle->RemovePassenger(ped);
+				}
+			}
+			CWorld::RemoveReferencesToDeletedObject(ped);
+			delete ped;
+			--CPopulation::ms_nTotalMissionPeds;
+		}
+		if (m_bIsMissionScript)
+			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
+		return 0;
+	}
+	case COMMAND_CHAR_WANDER_DIR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(ped);
+		ped->ClearAll();
+		int8 path = ScriptParams[1];
+		if (ScriptParams[1] < 0 || ScriptParams[1] > 7)
+			path = CGeneral::GetRandomNumberInRange(0, 7);
+		ped->SetWanderPath(path);
+		return 0;
+	}
+	case COMMAND_CHAR_FOLLOW_PATH:
+	{
+		CollectParameters(&m_nIp, 4);
+		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(ped);
+		CVector pos = *(CVector*)&ScriptParams[1];
+		if (pos.z <= -100.0f)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		ped->ClearAll();
+		ped->SetFollowPath(pos);
+		return 0;
+	}
+	case COMMAND_CHAR_SET_IDLE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(ped);
+		ped->m_bScriptObjectiveCompleted = false;
+		ped->SetObjective(OBJECTIVE_IDLE);
+		return 0;
+	}
+	case COMMAND_GET_CHAR_COORDINATES:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(ped);
+		CVehicle* vehicle;
+		CVector pos;
+		/* Seems a bit clumsy but I'll leave original flow */
+		if (ped->bInVehicle)
+			vehicle = ped->m_pMyVehicle;
+		else
+			vehicle = nil;
+		if (vehicle)
+			pos = vehicle->GetPosition();
+		else
+			pos = ped->GetPosition();
+		*(CVector*)&ScriptParams[0] = pos;
+		StoreParameters(&m_nIp, 3);
+		return 0;
+	}
+	case COMMAND_SET_CHAR_COORDINATES:
+	{
+		CollectParameters(&m_nIp, 4);
+		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(ped);
+		CVehicle* vehicle;
+		if (ped->bInVehicle)
+			vehicle = ped->m_pMyVehicle;
+		else
+			vehicle = nil;
+		CVector pos = *(CVector*)&ScriptParams[1];
+		if (pos.z <= -100.0f)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		/* The following block was once again written
+		 * by someone not familiar with virtual functions.
+		 * It doesn't require any ifs at all.
+		 * To keep as close to original as possible, I'll keep it.
+		 * Maybe there was more commented out/debug
+		 * stuff, but I doubt it.
+		 */
+		if (!vehicle){
+			pos.z += ped->GetDistanceFromCentreOfMassToBaseOfModel();
+			ped->Teleport(pos);
+			CTheScripts::ClearSpaceForMissionEntity(pos, ped);
+		}else if (vehicle->IsBoat()){
+			pos.z += vehicle->GetDistanceFromCentreOfMassToBaseOfModel();
+			vehicle->Teleport(pos);
+			CTheScripts::ClearSpaceForMissionEntity(pos, vehicle);
+		}else{
+			pos.z += vehicle->GetDistanceFromCentreOfMassToBaseOfModel();
+			vehicle->Teleport(pos);
+			CTheScripts::ClearSpaceForMissionEntity(pos, vehicle);
+		}
+		/* Short version of this command.
+		 *
+		 * CollectParameters(&m_nIp, 4);
+		 * CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		 * assert(ped);
+		 * CEntity* entityToMove = ped->bInVehicle ? ped->m_pMyVehicle : ped;
+		 * CVector pos = *(CVector*)&ScriptParams[1];
+		 * if (pos.z <= -100.0f)
+		 *	pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		 * pos.z += ped->GetDistanceFromCentreOfMassToBaseOfModel();
+		 * entityToMove->Teleport(pos);
+		 * CTheScripts::ClearSpaceForMissionEntity(pos, entityToMove);
+		 *
+		 */
+		return 0;
+	}
+	case COMMAND_IS_CHAR_STILL_ALIVE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		UpdateCompareFlag(ped && ped->m_status != PED_DEAD && ped->m_status != PED_DIE);
+		return 0;
+	}
+	case COMMAND_IS_CHAR_IN_AREA_2D:
+	{
+		CollectParameters(&m_nIp, 6);
+		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(ped);
+		CVehicle* vehicle;
+		if (ped->bInVehicle)
+			vehicle = ped->m_pMyVehicle;
+		else
+			vehicle = nil;
+		float x1, y1, x2, y2;
+		x1 = *(float*)&ScriptParams[1];
+		y1 = *(float*)&ScriptParams[2];
+		x2 = *(float*)&ScriptParams[3];
+		y2 = *(float*)&ScriptParams[4];
+		if (vehicle)
+			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, x2, y2));
+		else
+			UpdateCompareFlag(ped->IsWithinArea(x1, y1, x2, y2));
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, -100.0f);
+		if (CTheScripts::DbgFlag)
+			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
+		return 0;
+	}
+	case COMMAND_IS_CHAR_IN_AREA_3D:
+	{
+		CollectParameters(&m_nIp, 8);
+		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(ped);
+		CVehicle* vehicle;
+		if (ped->bInVehicle)
+			vehicle = ped->m_pMyVehicle;
+		else
+			vehicle = nil;
+		float x1, y1, z1, x2, y2, z2;
+		x1 = *(float*)&ScriptParams[1];
+		y1 = *(float*)&ScriptParams[2];
+		z1 = *(float*)&ScriptParams[3];
+		x2 = *(float*)&ScriptParams[4];
+		y2 = *(float*)&ScriptParams[5];
+		z2 = *(float*)&ScriptParams[6];
+		if (vehicle)
+			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
+		else
+			UpdateCompareFlag(ped->IsWithinArea(x1, y1, z1, x2, y2, z2));
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, -100.0f);
+		if (CTheScripts::DbgFlag)
+			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
+		return 0;
+	}
+	case COMMAND_CREATE_CAR:
+		CollectParameters(&m_nIp, 4);
+		int32 handle;
+		if (CModelInfo::IsBoatModel(ScriptParams[0])){
+			CBoat* boat = new CBoat(ScriptParams[0], MISSION_VEHICLE);
+			CVector pos = *(CVector*)&ScriptParams[1];
+			if (pos.z <= -100.0f)
+				pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+			pos.z += boat->GetDistanceFromCentreOfMassToBaseOfModel();
+			boat->GetPosition() = pos;
+			CTheScripts::ClearSpaceForMissionEntity(pos, boat);
+			boat->m_status = STATUS_ABANDONED;
+		}else if (CModelInfo::IsBikeModel(ScriptParams[0])){
+			/* Do nothing. No bikes in GTA III. But check is there. */
+		}
+
+	}
+	return -1;
+}
+
 WRAPPER int8 CRunningScript::ProcessCommandsFrom200To299(int32 command) { EAXJMP(0x43D530); }
 WRAPPER int8 CRunningScript::ProcessCommandsFrom300To399(int32 command) { EAXJMP(0x43ED30); }
 WRAPPER int8 CRunningScript::ProcessCommandsFrom400To499(int32 command) { EAXJMP(0x440CB0); }

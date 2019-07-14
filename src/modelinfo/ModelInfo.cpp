@@ -175,6 +175,13 @@ CModelInfo::IsBoatModel(int32 id)
 		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_BOAT;
 }
 
+bool
+CModelInfo::IsBikeModel(int32 id)
+{
+	return GetModelInfo(id)->m_type == MITYPE_VEHICLE &&
+		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_BIKE;
+}
+
 void
 CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
 {

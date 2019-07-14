@@ -210,7 +210,7 @@ public:
 	uint8 m_ped_flagD10 : 1;
 	uint8 m_ped_flagD20 : 1;
 	uint8 m_ped_flagD40 : 1;	// reset when objective changes
-	uint8 m_ped_flagD80 : 1;
+	uint8 m_bScriptObjectiveCompleted : 1;
 
 	uint8 m_ped_flagE1 : 1;
 	uint8 m_ped_flagE2 : 1;
@@ -460,6 +460,9 @@ public:
 	void MakeChangesForNewWeapon(int8);
 	void CheckAroundForPossibleCollisions(void);
 	bool Seek(void);
+	void ClearAll(void);
+	void SetWanderPath(int8);
+	void SetFollowPath(CVector);
 
 	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
