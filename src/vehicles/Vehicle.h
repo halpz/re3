@@ -168,7 +168,7 @@ public:
 
 	uint8 m_veh_flagC1 : 1;
 	uint8 bIsDamaged : 1; // This vehicle has been damaged and is displaying all its components
-	uint8 m_veh_flagC4 : 1;
+	uint8 bHasBeenOwnedByPlayer : 1;
 	uint8 m_veh_flagC8 : 1;
 	uint8 m_veh_flagC10 : 1;
 	uint8 m_veh_flagC20 : 1;

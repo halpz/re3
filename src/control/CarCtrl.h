@@ -9,6 +9,8 @@ public:
 	static void AddToCarArray(int32 id, int32 vehclass);
 	static void UpdateCarCount(CVehicle*, bool);
 	static int32 ChooseCarModel(int32 vehclass);
+	static bool JoinCarWithRoadSystemGotoCoors(CVehicle*, CVector, bool);
+	static void JoinCarWithRoadSystem(CVehicle*);
 
 	static int32 &NumLawEnforcerCars;
 	static int32 &NumAmbulancesOnDuty;

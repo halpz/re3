@@ -72,8 +72,8 @@ public:
 	int8 m_nPreviousDirection;
 	int8 m_nCurrentDirecton;
 	int8 m_nNextDirection;
-	int8 m_nPreviousPathDirection;
-	int8 m_nCurrentPathDirection;
+	int8 m_nPreviousLane;
+	int8 m_nCurrentLane;
 	eCarDrivingStyle m_nDrivingStyle;
 	eCarMission m_nCarMission;
 	eCarTempAction m_nAnimationId;
@@ -101,8 +101,8 @@ public:
 		m_nCurrentPathNodeInfo = m_nNextPathNodeInfo;
 		m_nNextDirection = 1;
 		m_nCurrentDirecton = m_nNextDirection;
-		m_nCurrentPathDirection = 0;
-		m_nPreviousPathDirection = m_nCurrentPathDirection;
+		m_nCurrentLane = 0;
+		m_nPreviousLane = m_nPreviousLane;
 		m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
 		m_nCarMission = MISSION_NONE;
 		m_nAnimationId = TEMPACT_NONE;

@@ -8,11 +8,13 @@
 #include "Camera.h"
 #include "CarCtrl.h"
 #include "CivilianPed.h"
+#include "Clock.h"
 #include "CopPed.h"
 #include "DMAudio.h"
 #include "EmergencyPed.h"
 #include "FileMgr.h"
 #include "General.h"
+#include "HandlingMgr.h"
 #include "Hud.h"
 #include "Messages.h"
 #include "ModelIndices.h"
@@ -23,6 +25,7 @@
 #include "Population.h"
 #include "Replay.h"
 #include "Streaming.h"
+#include "Text.h"
 #include "User.h"
 #include "Weather.h"
 #include "World.h"
@@ -1737,15 +1740,17 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		 * Maybe there was more commented out/debug
 		 * stuff, but I doubt it.
 		 */
-		if (!vehicle){
+		if (!vehicle) {
 			pos.z += ped->GetDistanceFromCentreOfMassToBaseOfModel();
 			ped->Teleport(pos);
 			CTheScripts::ClearSpaceForMissionEntity(pos, ped);
-		}else if (vehicle->IsBoat()){
+		}
+		else if (vehicle->IsBoat()) {
 			pos.z += vehicle->GetDistanceFromCentreOfMassToBaseOfModel();
 			vehicle->Teleport(pos);
 			CTheScripts::ClearSpaceForMissionEntity(pos, vehicle);
-		}else{
+		}
+		else {
 			pos.z += vehicle->GetDistanceFromCentreOfMassToBaseOfModel();
 			vehicle->Teleport(pos);
 			CTheScripts::ClearSpaceForMissionEntity(pos, vehicle);
@@ -1824,9 +1829,10 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		return 0;
 	}
 	case COMMAND_CREATE_CAR:
+	{
 		CollectParameters(&m_nIp, 4);
 		int32 handle;
-		if (CModelInfo::IsBoatModel(ScriptParams[0])){
+		if (CModelInfo::IsBoatModel(ScriptParams[0])) {
 			CBoat* boat = new CBoat(ScriptParams[0], MISSION_VEHICLE);
 			CVector pos = *(CVector*)&ScriptParams[1];
 			if (pos.z <= -100.0f)
@@ -1835,10 +1841,303 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			boat->GetPosition() = pos;
 			CTheScripts::ClearSpaceForMissionEntity(pos, boat);
 			boat->m_status = STATUS_ABANDONED;
-		}else if (CModelInfo::IsBikeModel(ScriptParams[0])){
-			/* Do nothing. No bikes in GTA III. But check is there. */
+			boat->bIsLocked = true;
+			boat->m_autoPilot.m_nCarMission = MISSION_NONE;
+			boat->m_autoPilot.m_nAnimationId = TEMPACT_NONE; /* Animation ID? */
+			boat->m_autoPilot.m_nCruiseSpeed = boat->m_autoPilot.m_fMaxTrafficSpeed = 20.0f;
+			CWorld::Add(boat);
+			handle = CPools::GetVehiclePool()->GetIndex(boat);
 		}
-
+		else {
+			CVehicle* car;
+			if (!CModelInfo::IsBikeModel(ScriptParams[0]))
+				car = new CAutomobile(ScriptParams[0], MISSION_VEHICLE);
+			CVector pos = *(CVector*)&ScriptParams[1];
+			if (pos.z <= -100.0f)
+				pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+			pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
+			car->GetPosition() = pos;
+			CTheScripts::ClearSpaceForMissionEntity(pos, car);
+			car->m_status = STATUS_ABANDONED;
+			car->bIsLocked = true;
+			car->m_autoPilot.m_nCarMission = MISSION_NONE;
+			car->m_autoPilot.m_nAnimationId = TEMPACT_NONE; /* Animation ID? */
+			car->m_autoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
+			car->m_autoPilot.m_nCruiseSpeed = car->m_autoPilot.m_fMaxTrafficSpeed = 9.0f;
+			car->m_autoPilot.m_nPreviousLane = car->m_autoPilot.m_nCurrentLane = 0;
+			car->bEngineOn = false;
+			car->m_level = CTheZones::GetLevelFromPosition(pos);
+			car->bHasBeenOwnedByPlayer = true;
+			CWorld::Add(car);
+			handle = CPools::GetVehiclePool()->GetIndex(car);
+		}
+		ScriptParams[0] = handle;
+		StoreParameters(&m_nIp, 1);
+		if (m_bIsMissionScript)
+			CTheScripts::MissionCleanup.AddEntityToList(handle, CLEANUP_CAR);
+		return 0;
+	}
+	case COMMAND_DELETE_CAR:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		if (car) {
+			CWorld::Remove(car);
+			CWorld::RemoveReferencesToDeletedObject(car);
+			delete car;
+		}
+		if (m_bIsMissionScript)
+			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CAR);
+		return 0;
+	}
+	case COMMAND_CAR_GOTO_COORDINATES:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(car);
+		CVector pos = *(CVector*)&ScriptParams[1];
+		if (pos.z <= -100.0f)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
+		if (CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, pos, false))
+			car->m_autoPilot.m_nCarMission = MISSION_GOTOCOORDS_STRAIGHT;
+		else
+			car->m_autoPilot.m_nCarMission = MISSION_GOTOCOORDS;
+		car->m_status = STATUS_PHYSICS;
+		car->bEngineOn = true;
+		car->m_autoPilot.m_nCruiseSpeed = max(car->m_autoPilot.m_nCruiseSpeed, 6);
+		car->m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+		return 0;
+	}
+	case COMMAND_CAR_WANDER_RANDOMLY:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(car);
+		CCarCtrl::JoinCarWithRoadSystem(car);
+		car->m_autoPilot.m_nCarMission = MISSION_CRUISE;
+		car->bEngineOn = true;
+		car->m_autoPilot.m_nCruiseSpeed = max(car->m_autoPilot.m_nCruiseSpeed, 6);
+		car->m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+		return 0;
+	}
+	case COMMAND_CAR_SET_IDLE:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(car);
+		car->m_autoPilot.m_nCarMission = MISSION_NONE;
+		return 0;
+	}
+	case COMMAND_GET_CAR_COORDINATES:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(car);
+		*(CVector*)&ScriptParams[0] = car->GetPosition();
+		StoreParameters(&m_nIp, 3);
+		return 0;
+	}
+	case COMMAND_SET_CAR_COORDINATES:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(car);
+		CVector pos = *(CVector*)&ScriptParams[1];
+		if (pos.z <= -100.0f)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
+		car->bIsStatic = false;
+		/* Again weird usage of virtual functions. */
+		if (car->IsBoat()) {
+			car->Teleport(pos);
+			CTheScripts::ClearSpaceForMissionEntity(pos, car);
+		}
+		else {
+			car->Teleport(pos);
+			CTheScripts::ClearSpaceForMissionEntity(pos, car);
+			/* May the following be inlined CCarCtrl function? */
+			switch (car->m_autoPilot.m_nCarMission) {
+			case MISSION_CRUISE:
+				CCarCtrl::JoinCarWithRoadSystem(car);
+				break;
+			case MISSION_RAMPLAYER_FARAWAY:
+			case MISSION_RAMPLAYER_CLOSE:
+			case MISSION_BLOCKPLAYER_FARAWAY:
+			case MISSION_BLOCKPLAYER_CLOSE:
+			case MISSION_BLOCKPLAYER_HANDBRAKESTOP:
+				CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, FindPlayerCoors(), false);
+				break;
+			case MISSION_GOTOCOORDS:
+			case MISSION_GOTOCOORDS_STRAIGHT:
+				CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, car->m_autoPilot.m_vecDestinationCoors, false);
+				break;
+			case MISSION_GOTOCOORDS_ACCURATE:
+			case MISSION_GOTO_COORDS_STRAIGHT_ACCURATE:
+				CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, car->m_autoPilot.m_vecDestinationCoors, false);
+				break;
+			case MISSION_RAMCAR_FARAWAY:
+			case MISSION_RAMCAR_CLOSE:
+			case MISSION_BLOCKCAR_FARAWAY:
+			case MISSION_BLOCKCAR_CLOSE:
+			case MISSION_BLOCKCAR_HANDBRAKESTOP:
+				CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, car->m_autoPilot.m_pTargetCar->GetPosition(), false);
+				break;
+			default:
+				break;
+			}
+		}
+		return 0;
+	}
+	case COMMAND_IS_CAR_STILL_ALIVE:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		UpdateCompareFlag(car && car->m_status != STATUS_WRECKED && (car->IsBoat() || !car->bIsInWater));
+		return 0;
+	}
+	case COMMAND_SET_CAR_CRUISE_SPEED:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(car);
+		car->m_autoPilot.m_nCruiseSpeed = min(*(float*)&ScriptParams[1], 60.0f * car->m_handling->TransmissionData.fUnkMaxVelocity);
+		return 0;
+	}
+	case COMMAND_SET_CAR_DRIVING_STYLE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(car);
+		car->m_autoPilot.m_nDrivingStyle = (eCarDrivingStyle)ScriptParams[1];
+		return 0;
+	}
+	case COMMAND_SET_CAR_MISSION:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(car);
+		car->m_autoPilot.m_nCarMission = (eCarMission)ScriptParams[1];
+		car->m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+		car->bEngineOn = true;
+		return 0;
+	}
+	case COMMAND_IS_CAR_IN_AREA_2D:
+	{
+		CollectParameters(&m_nIp, 6);
+		CVehicle* vehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(vehicle);
+		float x1, y1, x2, y2;
+		x1 = *(float*)&ScriptParams[1];
+		y1 = *(float*)&ScriptParams[2];
+		x2 = *(float*)&ScriptParams[3];
+		y2 = *(float*)&ScriptParams[4];
+		UpdateCompareFlag(vehicle->IsWithinArea(x1, y1, x2, y2));
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, -100.0f);
+		if (CTheScripts::DbgFlag)
+			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
+		return 0;
+	}
+	case COMMAND_IS_CAR_IN_AREA_3D:
+	{
+		CollectParameters(&m_nIp, 8);
+		CVehicle* vehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(vehicle);
+		float x1, y1, z1, x2, y2, z2;
+		x1 = *(float*)&ScriptParams[1];
+		y1 = *(float*)&ScriptParams[2];
+		z1 = *(float*)&ScriptParams[3];
+		x2 = *(float*)&ScriptParams[4];
+		y2 = *(float*)&ScriptParams[5];
+		z2 = *(float*)&ScriptParams[6];
+		UpdateCompareFlag(vehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, -100.0f);
+		if (CTheScripts::DbgFlag)
+			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
+		return 0;
+	}
+	case COMMAND_SPECIAL_0:
+	case COMMAND_SPECIAL_1:
+	case COMMAND_SPECIAL_2:
+	case COMMAND_SPECIAL_3:
+	case COMMAND_SPECIAL_4:
+	case COMMAND_SPECIAL_5:
+	case COMMAND_SPECIAL_6:
+	case COMMAND_SPECIAL_7:
+		assert(0);
+		return 0;
+	case COMMAND_PRINT_BIG:
+	{
+		wchar* key = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
+		m_nIp += 8;
+		CollectParameters(&m_nIp, 2);
+		CMessages::AddBigMessage(key, ScriptParams[0], ScriptParams[1] - 1);
+		return 0;
+	}
+	case COMMAND_PRINT:
+	{
+		wchar* key = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
+		m_nIp += 8;
+		CollectParameters(&m_nIp, 2);
+		CMessages::AddMessage(key, ScriptParams[0], ScriptParams[1]);
+		return 0;
+	}
+	case COMMAND_PRINT_NOW:
+	{
+		wchar* key = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
+		m_nIp += 8;
+		CollectParameters(&m_nIp, 2);
+		CMessages::AddMessageJumpQ(key, ScriptParams[0], ScriptParams[1]);
+		return 0;
+	}
+	case COMMAND_PRINT_SOON:
+	{
+		wchar* key = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
+		m_nIp += 8;
+		CollectParameters(&m_nIp, 2);
+		CMessages::AddMessage(key, ScriptParams[0], ScriptParams[1]);
+		return 0;
+	}
+	case COMMAND_CLEAR_PRINTS:
+		CMessages::ClearMessages();
+		return 0;
+	case COMMAND_GET_TIME_OF_DAY:
+		ScriptParams[0] = CClock::GetHours();
+		ScriptParams[1] = CClock::GetMinutes();
+		StoreParameters(&m_nIp, 2);
+		return 0;
+	case COMMAND_SET_TIME_OF_DAY:
+		CollectParameters(&m_nIp, 2);
+		CClock::SetGameClock(ScriptParams[0], ScriptParams[1]);
+		return 0;
+	case COMMAND_GET_MINUTES_TO_TIME_OF_DAY:
+		CollectParameters(&m_nIp, 2);
+		ScriptParams[0] = CClock::GetGameClockMinutesUntil(ScriptParams[0], ScriptParams[1]);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	case COMMAND_IS_POINT_ON_SCREEN:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= -100)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		UpdateCompareFlag(TheCamera.IsSphereVisible(pos, *(float*)&ScriptParams[3]));
+	}
+	case COMMAND_DEBUG_ON:
+		CTheScripts::DbgFlag = true;
+		return 0;
+	case COMMAND_DEBUG_OFF:
+		CTheScripts::DbgFlag = false;
+		return 0;
+	case COMMAND_RETURN_TRUE:
+		UpdateCompareFlag(true);
+		return 0;
+	case COMMAND_RETURN_FALSE:
+		UpdateCompareFlag(false);
+		return 0;
+	default:
+		assert(0);
+		break;
 	}
 	return -1;
 }

@@ -396,7 +396,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagD10 = false;
 	m_ped_flagD20 = false;
 	m_ped_flagD40 = false;
-	m_ped_flagD80 = false;
+	m_bScriptObjectiveCompleted = false;
 
 	m_ped_flagE1 = false;
 	m_ped_flagE2 = false;

@@ -65,7 +65,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bIsDamaged = false;
 	m_veh_flagC8 = false;
 	m_veh_flagC10 = false;
-	m_veh_flagC4 = false;
+	bHasBeenOwnedByPlayer = false;
 	m_veh_flagC20 = false;
 	bCanBeDamaged = true;
 	m_veh_flagC80 = false;
@@ -519,7 +519,7 @@ bool
 CVehicle::CanPedOpenLocks(CPed *ped)
 {
 	if(m_nDoorLock == CARLOCK_LOCKED ||
-	   m_nDoorLock == CARLOCK_COP_CAR ||
+	   m_nDoorLock == CARLOCK_LOCKED_INITIALLY ||
 	   m_nDoorLock == CARLOCK_LOCKED_PLAYER_INSIDE)
 		return false;
 	if(ped->IsPlayer() && m_nDoorLock == CARLOCK_LOCKOUT_PLAYER_ONLY)
