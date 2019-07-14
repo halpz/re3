@@ -35,6 +35,7 @@ public:
 	~CCopPed();
 
 	void ClearPursuit(void);
+	void ProcessControl(void);
 };
 
 static_assert(sizeof(CCopPed) == 0x558, "CCopPed: error");

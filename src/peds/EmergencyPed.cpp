@@ -10,6 +10,8 @@ public:
 	void dtor(void) { CEmergencyPed::~CEmergencyPed(); }
 };
 
+WRAPPER void CEmergencyPed::ProcessControl(void) { EAXJMP(0x4C2F10); }
+
 CEmergencyPed::CEmergencyPed(uint32 type) : CPed(type)
 {
 	switch (type){

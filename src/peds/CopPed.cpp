@@ -3,6 +3,8 @@
 #include "CopPed.h"
 #include "ModelIndices.h"
 
+WRAPPER void CCopPed::ProcessControl() { EAXJMP(0x4C1400);  }
+
 CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 {
 	m_nCopType = copType;

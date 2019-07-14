@@ -15,5 +15,6 @@ public:
 	int32 field_1360;
 
 	CEmergencyPed(uint32);
+	void ProcessControl(void);
 };
 static_assert(sizeof(CEmergencyPed) == 0x554, "CEmergencyPed: error");
