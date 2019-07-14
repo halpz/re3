@@ -26,46 +26,47 @@
 #include "PlayerSkin.h"
 #include "PlayerInfo.h"
 #include "World.h"
+#include "Renderer.h"
 
-#define ALL_ORIGINAL_FRONTEND FALSE
+#define ALL_ORIGINAL_FRONTEND 1
 
-int32 &CMenuManager::OS_Language = *(int32*)0x5F2F78;
+int32 &CMenuManager::OS_Language = *(int32*)0x5F2F78;	// 9
 int8 &CMenuManager::m_PrefsUseVibration = *(int8*)0x95CD92;
 int8 &CMenuManager::m_DisplayControllerOnFoot = *(int8*)0x95CD8D;
-int8 &CMenuManager::m_PrefsVsync = *(int8*)0x5F2E58;
-int8 &CMenuManager::m_PrefsVsyncDisp = *(int8*)0x5F2E5C;
-int8 &CMenuManager::m_PrefsFrameLimiter = *(int8*)0x5F2E60;
-int8 &CMenuManager::m_PrefsShowSubtitles = *(int8*)0x5F2E54;
+int8 &CMenuManager::m_PrefsVsync = *(int8*)0x5F2E58;	// 1
+int8 &CMenuManager::m_PrefsVsyncDisp = *(int8*)0x5F2E5C;	// 1
+int8 &CMenuManager::m_PrefsFrameLimiter = *(int8*)0x5F2E60;	// 1
+int8 &CMenuManager::m_PrefsShowSubtitles = *(int8*)0x5F2E54;	// 1
 int8 &CMenuManager::m_PrefsSpeakers = *(int8*)0x95CD7E;
-int8 &CMenuManager::m_ControlMethod = *(int8*)0x8F5F7C;
-int8 &CMenuManager::m_PrefsDMA = *(int8*)0x5F2F74;
-int8 &CMenuManager::m_PrefsLanguage = *(int8*)0x941238;
+int32 &CMenuManager::m_ControlMethod = *(int32*)0x8F5F7C;
+int8 &CMenuManager::m_PrefsDMA = *(int8*)0x5F2F74;	// 1
+int32 &CMenuManager::m_PrefsLanguage = *(int32*)0x941238;
 
-bool &CMenuManager::m_PrefsAllowNastyGame = *(bool*)0x5F2E64;
+bool &CMenuManager::m_PrefsAllowNastyGame = *(bool*)0x5F2E64;	// true
 bool &CMenuManager::m_bStartUpFrontEndRequested = *(bool*)0x95CCF4;
 bool &CMenuManager::m_bShutDownFrontEndRequested = *(bool*)0x95CD6A;
 
 int8 &CMenuManager::m_PrefsUseWideScreen = *(int8*)0x95CD23;
 int8 &CMenuManager::m_PrefsRadioStation = *(int8*)0x95CDA4;
-int8 &CMenuManager::m_bDisableMouseSteering = *(int8*)0x60252C;
-int32 &CMenuManager::m_PrefsBrightness = *(int32*)0x5F2E50;
+int8 &CMenuManager::m_bDisableMouseSteering = *(int8*)0x60252C;	// 1
+int32 &CMenuManager::m_PrefsBrightness = *(int32*)0x5F2E50;	// 256
 float &CMenuManager::m_PrefsLOD = *(float*)0x8F42C4;
 int8 &CMenuManager::m_bFrontEnd_ReloadObrTxtGxt = *(int8*)0x628CFC;
-int32 &CMenuManager::m_PrefsMusicVolume = *(int32*)0x5F2E4C;
-int32 &CMenuManager::m_PrefsSfxVolume = *(int32*)0x5F2E48;
+int32 &CMenuManager::m_PrefsMusicVolume = *(int32*)0x5F2E4C;	// 102
+int32 &CMenuManager::m_PrefsSfxVolume = *(int32*)0x5F2E48;	// 102
 
-char *CMenuManager::m_PrefsSkinFile = (char*)0x5F2E74;
+char *CMenuManager::m_PrefsSkinFile = (char*)0x5F2E74;	//[256] "$$\"\""
 
-int32 &CMenuManager::m_KeyPressedCode = *(int32*)0x5F2E70;
+int32 &CMenuManager::m_KeyPressedCode = *(int32*)0x5F2E70;	// -1
 
 CMenuManager &FrontEndMenuManager = *(CMenuManager*)0x8F59D8;
 
 // Move this somewhere else.
-float lodMultiplier = *(float*)0x5F726C;
+float &CRenderer::ms_lodDistScale = *(float*)0x5F726C;	// 1.2
 
 // Stuff not in CMenuManager:
 uint32 &VibrationTime = *(uint32*)0x628CF8;
-char* pEditString = (char*)0x628D00;
+char *&pEditString = *(char**)0x628D00;
 int32 *&pControlEdit = *(int32**)0x628D08;
 bool &DisplayComboButtonErrMsg = *(bool*)0x628D14;
 int32 &MouseButtonJustClicked = *(int32*)0x628D0C;
@@ -148,7 +149,7 @@ char *MenuFilenames[] = {
 	nil, nil
 };
 
-#if ALL_ORIGINAL_FRONTEND
+#if 0
 WRAPPER void CMenuManager::BuildStatLine(char *text, float *stat, bool aFloat, float* stat2) { EAXJMP(0x483870); }
 #else
 void CMenuManager::BuildStatLine(char *text, float *stat, bool aFloat, float* stat2)
@@ -176,7 +177,7 @@ void CMenuManager::BuildStatLine(char *text, float *stat, bool aFloat, float* st
 }
 #endif
 
-#if ALL_ORIGINAL_FRONTEND
+#if 0
 WRAPPER void CMenuManager::CentreMousePointer() { EAXJMP(0x48ACE0); }
 #else
 void CMenuManager::CentreMousePointer()
@@ -204,7 +205,7 @@ void CMenuManager::CheckCodesForControls(int, int)
 }
 #endif
 
-#if ALL_ORIGINAL_FRONTEND
+#if 0
 WRAPPER bool CMenuManager::CheckHover(int, int, int, int) { EAXJMP(0x48ACA0); }
 #else
 bool CMenuManager::CheckHover(int x1, int x2, int y1, int y2)
@@ -216,74 +217,35 @@ bool CMenuManager::CheckHover(int x1, int x2, int y1, int y2)
 
 void CMenuManager::CheckSliderMovement(int value)
 {
-	float fBrightness = 0.0f;
-	float fDrawDistance = 0.0f;
-	float fRadioVolume = 0.0f;
-	float fSfxVolume = 0.0f;
-	float fMouseSens = 0.0f;
-
 	switch (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action) {
 	case MENUACTION_BRIGHTNESS:
-		fBrightness = m_PrefsBrightness + (value * (512.0f) / 16.0f);
-
-		if (fBrightness > 511.0f)
-			fBrightness = 511.0f;
-		else if (fBrightness < 0.0f)
-			fBrightness = 0.0f;
-
-		m_PrefsBrightness = fBrightness;
-		SaveSettings();
+		m_PrefsBrightness += m_PrefsBrightness + value * (512/16);
+		m_PrefsBrightness = clamp(m_PrefsBrightness, 0, 511);
 		break;
 	case MENUACTION_DRAWDIST:
-		fDrawDistance = m_PrefsLOD + (value * (1.8f - 0.8f) / 16.0f);
-
-		if (fDrawDistance > 1.8f)
-			fDrawDistance = 1.8f;
-		else if (fDrawDistance < 0.8f)
-			fDrawDistance = 0.8f;
-
-		m_PrefsLOD = fDrawDistance;
-		SaveSettings();
+		m_PrefsLOD += value * ((1.8f - 0.8f)/16.0f);
+		m_PrefsLOD = clamp(m_PrefsLOD, 0.8f, 1.8f);
+		CRenderer::ms_lodDistScale = m_PrefsLOD;
 		break;
 	case MENUACTION_MUSICVOLUME:
-		fRadioVolume = m_PrefsMusicVolume + (value * (128.0f) / 16.0f);
-
-		if (fRadioVolume > 127.0f)
-			fRadioVolume = 127.0f;
-		else if (fRadioVolume < 0.0f)
-			fRadioVolume = 0.0f;
-
-		m_PrefsMusicVolume = fRadioVolume;
-		DMAudio.SetMusicMasterVolume(fRadioVolume);
-		SaveSettings();
+		m_PrefsMusicVolume += value * (128/16);
+		m_PrefsMusicVolume = clamp(m_PrefsMusicVolume, 0, 127);
+		DMAudio.SetMusicMasterVolume(m_PrefsMusicVolume);
 		break;
 	case MENUACTION_SFXVOLUME:
-		fSfxVolume = m_PrefsSfxVolume + (value * (128.0f) / 16.0f);
-
-		if (fSfxVolume > 127)
-			fSfxVolume = 127;
-		else if (fSfxVolume < 0.0f)
-			fSfxVolume = 0.0f;
-
-		m_PrefsSfxVolume = fSfxVolume;
-		DMAudio.SetEffectsMasterVolume(fSfxVolume);
-		SaveSettings();
+		m_PrefsSfxVolume += value * (128/16);
+		m_PrefsSfxVolume = clamp(m_PrefsSfxVolume, 0, 127);
+		DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
 		break;
 	case MENUACTION_MOUSESENS:
-		fMouseSens = TheCamera.m_fMouseAccelHorzntl + (value * (0.005f - 0.0003125f) / 16.0f);
-
-		if (fMouseSens > 0.005f)
-			fMouseSens = 0.005f;
-		else if (fMouseSens < 0.0003125f)
-			fMouseSens = 0.0003125f;
-
-		TheCamera.m_fMouseAccelHorzntl = fMouseSens;
-
-		// BUG: game doesn't set Y Axis.
-		TheCamera.m_fMouseAccelVertical = fMouseSens;
-		SaveSettings();
+		TheCamera.m_fMouseAccelHorzntl += value * 1.0f/200.0f/15.0f;	// ???
+		TheCamera.m_fMouseAccelHorzntl = clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f/3200.0f, 1.0f/200.0f);
+		TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl;
 		break;
+	default:
+		return;
 	}
+	SaveSettings();
 }
 
 #if 1
@@ -470,7 +432,7 @@ void CMenuManager::Draw()
 		CFont::PrintString(SCREEN_SCALE_X(MENUACTION_POS_X), SCREEN_SCALE_Y(MENUACTION_POS_Y), str);
 	}
 
-	for (int i = 0; i < MENUROWS; ++i) {
+	for (int i = 0; i < NUM_MENUROWS; ++i) {
 		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0]) {
 			wchar *textToPrint[MENUCOLUMNS] = { nil, nil };
 			bool Locked = false;
@@ -850,7 +812,7 @@ void CMenuManager::DrawControllerSetupScreen()
 }
 #endif
 
-#if ALL_ORIGINAL_FRONTEND
+#if 0
 WRAPPER void CMenuManager::DrawFrontEnd(void) { EAXJMP(0x47A540); }
 #else
 void CMenuManager::DrawFrontEnd()
@@ -858,7 +820,7 @@ void CMenuManager::DrawFrontEnd()
 	CFont::SetAlphaFade(255.0f);
 
 	if (m_nCurrScreen == MENUPAGE_NONE) {
-		m_nMenuFadeAlpha = 0;
+	//	m_nMenuFadeAlpha = 0;
 
 		if (m_bGameNotLoaded)
 			m_nCurrScreen = MENUPAGE_START_MENU;
@@ -866,31 +828,27 @@ void CMenuManager::DrawFrontEnd()
 			m_nCurrScreen = MENUPAGE_PAUSE_MENU;
 	}
 
-	if (!m_nCurrOption && aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL)
-		m_nCurrOption = MENUROW_1;
+	if (m_nCurrOption == 0 && aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL)
+		m_nCurrOption = 1;
 
 	CMenuManager::DrawFrontEndNormal();
 	CMenuManager::PrintErrorMessage();
 }
 #endif
 
-#if ALL_ORIGINAL_FRONTEND
+#if 0
 WRAPPER void CMenuManager::DrawFrontEndNormal(void) { EAXJMP(0x47A5B0); }
 #else
 void CMenuManager::DrawFrontEndNormal()
 {
-	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
-	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void *)FALSE);
-	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)FALSE);
-	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDSRCALPHA);
-	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDINVSRCALPHA);
-	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void *)rwTEXTUREADDRESSCLAMP);
 
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
 
-	eMenuSprites previousSprite = MENUSPRITE_MAINMENU;
+	LoadSplash(nil);
+
+	eMenuSprites previousSprite = MENUSPRITE_MAINMENU;	// actually uninitialized
 	if (m_nMenuFadeAlpha < 255) {
 		switch (m_nPrevScreen) {
 		case MENUPAGE_STATS:
@@ -930,13 +888,16 @@ void CMenuManager::DrawFrontEndNormal()
 			break;
 		}
 
-		if (m_nPrevScreen == MENUPAGE_NONE)
-			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(0, 0, 0, 255));
+		if (m_nPrevScreen == m_nCurrScreen)
+			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(0, 0, 0, 255-m_nMenuFadeAlpha));
 		else
-			m_aMenuSprites[previousSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
+			m_aMenuSprites[previousSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255-m_nMenuFadeAlpha));
 	}
 
-	eMenuSprites currentSprite = MENUSPRITE_MAINMENU;
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+
+	eMenuSprites currentSprite = MENUSPRITE_MAINMENU;	// actually uninitialized
 	switch (m_nCurrScreen) {
 	case MENUPAGE_STATS:
 	case MENUPAGE_START_MENU:
@@ -975,38 +936,45 @@ void CMenuManager::DrawFrontEndNormal()
 		break;
 	}
 
-	uint32 savedShade;
-	uint32 savedAlpha;
-	RwRenderStateGet(rwRENDERSTATESHADEMODE, &savedShade);
-	RwRenderStateSet(rwRENDERSTATESHADEMODE, reinterpret_cast<void *>(rwSHADEMODEGOURAUD));
-	RwRenderStateGet(rwRENDERSTATEVERTEXALPHAENABLE, &savedAlpha);
-	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void *>(TRUE));
-	if (m_nMenuFadeAlpha >= 255) {
-		m_aMenuSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
+	if (m_nMenuFadeAlpha < 255) {
+		static int LastFade = 0;
+
+		if(CTimer::GetTimeInMillisecondsPauseMode() - LastFade > 10){
+			m_nMenuFadeAlpha += 20;
+			LastFade = CTimer::GetTimeInMillisecondsPauseMode();
+		}
+
+		if (m_nMenuFadeAlpha > 255){
+			m_aMenuSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
+		}else{
+			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+			m_aMenuSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, m_nMenuFadeAlpha));			
+		}
 	}
 	else {
-		if (m_nMenuFadeAlpha < 255) {
-			m_nMenuFadeAlpha += 0.1f * 255.0f;
-
-			if (m_nMenuFadeAlpha >= 255)
-				m_nMenuFadeAlpha = 255;
-
-			m_aMenuSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, m_nMenuFadeAlpha));
+		m_aMenuSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
+		// TODO: what is this? waiting mouse?
+		if(field_518 == 4){
+			if(m_nHoverOption == 3 || m_nHoverOption == 4 || m_nHoverOption == 5 || m_nHoverOption == 6 || m_nHoverOption == 7)
+				field_518 = 2;
+			else
+				field_518 = 1;
 		}
-		else 
-			m_aMenuSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
 	}
 
 	// GTA LOGO
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 	if (m_nCurrScreen == MENUPAGE_START_MENU || m_nCurrScreen == MENUPAGE_PAUSE_MENU) {
 		if (CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
 			m_aMenuSprites[MENUSPRITE_GTA3LOGO].Draw(CRect((SCREEN_WIDTH / 2) - SCREEN_SCALE_X(115.0f), SCREEN_SCALE_Y(70.0f), (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(115.0f), SCREEN_SCALE_Y(180.0f)), CRGBA(255, 255, 255, FadeIn(255)));
 		else
 			m_aMenuSprites[MENUSPRITE_GTALOGO].Draw(CRect((SCREEN_WIDTH / 2) - SCREEN_SCALE_X(95.0f), SCREEN_SCALE_Y(40.0f), (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(95.0f), SCREEN_SCALE_Y(210.0f)), CRGBA(255, 255, 255, FadeIn(255)));
 	}
-	RwRenderStateSet(rwRENDERSTATESHADEMODE, reinterpret_cast<void *>(savedShade));
-	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void *>(savedAlpha));
 
+	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
+	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 	switch (m_nCurrScreen) {
 	case MENUPAGE_SKIN_SELECT:
 		CMenuManager::DrawPlayerSetupScreen();
@@ -1022,8 +990,25 @@ void CMenuManager::DrawFrontEndNormal()
 	CFont::DrawFonts();
 
 	// Draw mouse
-	if (m_bShowMouse)
-		m_aMenuSprites[MENUSPRITE_MOUSE].Draw(m_nMousePosX, m_nMousePosY, SCREEN_SCALE_X(60.0f), SCREEN_SCALE_Y(60.0f), CRGBA(255, 255, 255, 255));
+	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
+	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
+	if (m_bShowMouse) {
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+
+		CRect mouse(0.0f, 0.0f, SCREEN_SCALE_X(75.0f), SCREEN_SCALE_X(75.0f));
+		mouse.Translate(m_nMousePosX, m_nMousePosY);
+		CRect shad = mouse;
+		shad.Translate(SCREEN_SCALE_X(10.0f), SCREEN_SCALE_Y(3.0f));
+		if(field_518 == 4){
+			m_aMenuSprites[MENUSPRITE_MOUSET].Draw(shad, CRGBA(100, 100, 100, 50));
+			m_aMenuSprites[MENUSPRITE_MOUSET].Draw(mouse, CRGBA(255, 255, 255, 255));
+		}else{
+			m_aMenuSprites[MENUSPRITE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
+			m_aMenuSprites[MENUSPRITE_MOUSE].Draw(mouse, CRGBA(255, 255, 255, 255));
+		}
+	}
 }
 #endif
 
@@ -1036,7 +1021,7 @@ void CMenuManager::DrawPlayerSetupScreen()
 }
 #endif
 
-#if ALL_ORIGINAL_FRONTEND
+#if 0
 WRAPPER int CMenuManager::FadeIn(int alpha) { EAXJMP(0x48AC60); }
 #else
 int CMenuManager::FadeIn(int alpha)
@@ -1045,11 +1030,7 @@ int CMenuManager::FadeIn(int alpha)
 		m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS ||
 		m_nCurrScreen == MENUPAGE_DELETING)
 		return alpha;
-
-	if (m_nMenuFadeAlpha >= alpha)
-		return alpha;
-
-	return m_nMenuFadeAlpha;
+	return min(m_nMenuFadeAlpha, alpha);
 }
 #endif
 
@@ -1107,7 +1088,7 @@ void CMenuManager::LoadAllTextures()
 		CMenuManager::CentreMousePointer();
 		DMAudio.ChangeMusicMode(0);
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_STARTING, 0);
-		m_nCurrOption = MENUROW_0;
+		m_nCurrOption = 0;
 		m_PrefsRadioStation = DMAudio.GetRadioInCar();
 
 		if (DMAudio.IsMP3RadioChannelAvailable()) {
@@ -1156,7 +1137,7 @@ void CMenuManager::LoadAllTextures()
 }
 #endif
 
-#if ALL_ORIGINAL_FRONTEND
+#if 0
 WRAPPER void CMenuManager::LoadSettings() { EAXJMP(0x488EE0); }
 #else
 void CMenuManager::LoadSettings()
@@ -1164,46 +1145,47 @@ void CMenuManager::LoadSettings()
 
 	CFileMgr::SetDirMyDocuments();
 
-	uint8 prevLang = m_PrefsLanguage;
+	int32 prevLang = m_PrefsLanguage;
+	CMBlur::BlurOn = true;
 	MousePointerStateHelper.bInvertVertically = true;
 
 	static char Ver;
 	int fileHandle = CFileMgr::OpenFile("gta3.set", "r");
 	if (fileHandle) {
-		CFileMgr::Read(fileHandle, buf(&Ver), sizeof(Ver));
+		CFileMgr::Read(fileHandle, (char*)&Ver, sizeof(Ver));
 
 		if (strncmp(&Ver, "THIS FILE IS NOT VALID YET", 26)) {
 			CFileMgr::Seek(fileHandle, 0, 0);
 			ControlsManager.LoadSettings(fileHandle);
-			CFileMgr::Read(fileHandle, buf(gString), 20);
-			CFileMgr::Read(fileHandle, buf(gString), 20);
-			CFileMgr::Read(fileHandle, buf(gString), 4);
-			CFileMgr::Read(fileHandle, buf(gString), 4);
-			CFileMgr::Read(fileHandle, buf(gString), 1);
-			CFileMgr::Read(fileHandle, buf(gString), 1);
-			CFileMgr::Read(fileHandle, buf(gString), 1);
-			CFileMgr::Read(fileHandle, buf(&TheCamera.m_bHeadBob), 1);
-			CFileMgr::Read(fileHandle, buf(&TheCamera.m_fMouseAccelHorzntl), 4);
-			CFileMgr::Read(fileHandle, buf(&TheCamera.m_fMouseAccelVertical), 4);
-			CFileMgr::Read(fileHandle, buf(&MousePointerStateHelper.bInvertVertically), 1);
-			CFileMgr::Read(fileHandle, buf(&CVehicle::m_bDisableMouseSteering), 1);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsSfxVolume), 1);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsMusicVolume), 1);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsRadioStation), 1);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsSpeakers), 1);
-			CFileMgr::Read(fileHandle, buf(&m_nPrefsAudio3DProviderIndex), 1);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsDMA), 1);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsBrightness), 1);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsLOD), 4);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsShowSubtitles), 1);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsUseWideScreen), 1);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsVsyncDisp), 1);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsFrameLimiter), 1);
-			CFileMgr::Read(fileHandle, buf(&m_nDisplayVideoMode), 1);
-			CFileMgr::Read(fileHandle, buf(&CMBlur::BlurOn), 1);
-			CFileMgr::Read(fileHandle, buf(m_PrefsSkinFile), 256);
-			CFileMgr::Read(fileHandle, buf(&m_ControlMethod), 1);
-			CFileMgr::Read(fileHandle, buf(&m_PrefsLanguage), 1);
+			CFileMgr::Read(fileHandle, gString, 20);
+			CFileMgr::Read(fileHandle, gString, 20);
+			CFileMgr::Read(fileHandle, gString, 4);
+			CFileMgr::Read(fileHandle, gString, 4);
+			CFileMgr::Read(fileHandle, gString, 1);
+			CFileMgr::Read(fileHandle, gString, 1);
+			CFileMgr::Read(fileHandle, gString, 1);
+			CFileMgr::Read(fileHandle, (char*)&TheCamera.m_bHeadBob, 1);
+			CFileMgr::Read(fileHandle, (char*)&TheCamera.m_fMouseAccelHorzntl, 4);
+			CFileMgr::Read(fileHandle, (char*)&TheCamera.m_fMouseAccelVertical, 4);
+			CFileMgr::Read(fileHandle, (char*)&MousePointerStateHelper.bInvertVertically, 1);
+			CFileMgr::Read(fileHandle, (char*)&CVehicle::m_bDisableMouseSteering, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsSfxVolume, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsMusicVolume, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsRadioStation, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsSpeakers, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_nPrefsAudio3DProviderIndex, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsDMA, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsBrightness, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsLOD, 4);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsShowSubtitles, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsUseWideScreen, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsVsyncDisp, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsFrameLimiter, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_nDisplayVideoMode, 1);
+			CFileMgr::Read(fileHandle, (char*)&CMBlur::BlurOn, 1);
+			CFileMgr::Read(fileHandle, m_PrefsSkinFile, 256);
+			CFileMgr::Read(fileHandle, (char*)&m_ControlMethod, 1);
+			CFileMgr::Read(fileHandle, (char*)&m_PrefsLanguage, 1);
 		}
 	}
 
@@ -1211,7 +1193,7 @@ void CMenuManager::LoadSettings()
 	CFileMgr::SetDir("");
 
 	m_PrefsVsync = m_PrefsVsyncDisp;
-	lodMultiplier = m_PrefsLOD;
+	CRenderer::ms_lodDistScale = m_PrefsLOD;
 
 	if (m_nPrefsAudio3DProviderIndex == -1)
 		m_nPrefsAudio3DProviderIndex = -2;
@@ -1228,25 +1210,72 @@ void CMenuManager::LoadSettings()
 		debug("The previously saved language is now in use");
 	}
 
-	/*struct _WIN32_FIND_DATAA FindFileData;
-	HANDLE H = FindFirstFileA("skins\*.bmp", &FindFileData);
-	char Dest;
+	struct _WIN32_FIND_DATAA FindFileData;
+	char skinfile[256+16];	// ?? + 16?
 	bool SkinFound = false;
-
-	for (int i = 1; H != (HANDLE)-1 && i; i = FindNextFileA(H, &FindFileData)) {
-		strcpy(&Dest, buf(m_PrefsSkinFile));
-		strcat(&Dest, ".bmp");
-		if (!strcmp(FindFileData.cFileName, &Dest))
+	HANDLE handle = FindFirstFileA("skins\\*.bmp", &FindFileData);
+	for (int i = 1; handle != (HANDLE)-1 && i; i = FindNextFileA(handle, &FindFileData)) {
+		strcpy(skinfile, m_PrefsSkinFile);
+		strcat(skinfile, ".bmp");
+		if (strcmp(FindFileData.cFileName, skinfile) == 0)
 			SkinFound = true;
 	}
-
-	FindClose(H);
+	FindClose(handle);
 
 	if (!SkinFound) {
 		debug("Default skin set as no other skins are available OR saved skin not found!");
-		strcpy((char *)CMenuManager::m_PrefsSkinFile, "$$\"\"");
+		strcpy(m_PrefsSkinFile, "$$\"\"");
 		strcpy(m_aSkinName, "$$\"\"");
-	}*/
+	}
+}
+#endif
+
+#if 0
+WRAPPER void CMenuManager::SaveSettings() { EAXJMP(0x488CC0); }
+#else
+void CMenuManager::SaveSettings()
+{
+	static char RubbishString[48] = "stuffmorestuffevenmorestuff                 etc";
+
+	CFileMgr::SetDirMyDocuments();
+
+	int fileHandle = CFileMgr::OpenFile("gta3.set", "w");
+	if (fileHandle) {
+
+		ControlsManager.SaveSettings(fileHandle);
+		CFileMgr::Write(fileHandle, RubbishString, 20);
+		CFileMgr::Write(fileHandle, RubbishString, 20);
+		CFileMgr::Write(fileHandle, RubbishString, 4);
+		CFileMgr::Write(fileHandle, RubbishString, 4);
+		CFileMgr::Write(fileHandle, RubbishString, 1);
+		CFileMgr::Write(fileHandle, RubbishString, 1);
+		CFileMgr::Write(fileHandle, RubbishString, 1);
+		CFileMgr::Write(fileHandle, (char*)&TheCamera.m_bHeadBob, 1);
+		CFileMgr::Write(fileHandle, (char*)&TheCamera.m_fMouseAccelHorzntl, 4);
+		CFileMgr::Write(fileHandle, (char*)&TheCamera.m_fMouseAccelVertical, 4);
+		CFileMgr::Write(fileHandle, (char*)&MousePointerStateHelper.bInvertVertically, 1);
+		CFileMgr::Write(fileHandle, (char*)&CVehicle::m_bDisableMouseSteering, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsSfxVolume, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsMusicVolume, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsRadioStation, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsSpeakers, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_nPrefsAudio3DProviderIndex, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsDMA, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsBrightness, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsLOD, sizeof(m_PrefsLOD));
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsShowSubtitles, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsUseWideScreen, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsVsyncDisp, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsFrameLimiter, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_nDisplayVideoMode, 1);
+		CFileMgr::Write(fileHandle, (char*)&CMBlur::BlurOn, 1);
+		CFileMgr::Write(fileHandle, m_PrefsSkinFile, 256);
+		CFileMgr::Write(fileHandle, (char*)&m_ControlMethod, 1);
+		CFileMgr::Write(fileHandle, (char*)&m_PrefsLanguage, 1);
+	}
+
+	CFileMgr::CloseFile(fileHandle);
+	CFileMgr::SetDir("");
 }
 #endif
 
@@ -1310,7 +1339,7 @@ void CMenuManager::PrintStats()
 }
 #endif
 
-#if ALL_ORIGINAL_FRONTEND
+#if 0
 WRAPPER void CMenuManager::Process(void) { EAXJMP(0x485100); }
 #else
 void CMenuManager::Process(void)
@@ -1323,140 +1352,152 @@ void CMenuManager::Process(void)
 	m_bStartGameLoading = false;
 	InitialiseChangedLanguageSettings();
 
-	// 
+	if (CPad::GetPad(0)->GetEscapeJustDown())
+		RequestFrontEndStartUp();
+
 	SwitchMenuOnAndOff();
 
 	// Be able to re-open menu correctly.
-	if (!m_bMenuActive) {
-		if (GetPadExitEnter())
-			RequestFrontEndStartUp();
+	if (m_bMenuActive) {
 
+		// Load frontend textures.
+		LoadAllTextures();
+
+		// Set save/delete game pages.
+		if (m_nCurrScreen == MENUPAGE_DELETING) {
+			bool SlotPopulated = false;
+
+			if (PcSaveHelper.DeleteSlot(m_nCurrSaveSlot)) {
+				PcSaveHelper.PopulateSlotInfo();
+				SlotPopulated = true;
+			}
+
+			if (SlotPopulated) {
+				m_nPrevScreen = m_nCurrScreen;
+				m_nCurrScreen = MENUPAGE_DELETE_SUCCESS;
+				m_nCurrOption = 0;
+				m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
+			}
+			else
+				SaveLoadFileError_SetUpErrorScreen();
+		}
+		if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
+			int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
+			PcSaveHelper.PopulateSlotInfo();
+			if (SaveSlot) {
+				m_nPrevScreen = m_nCurrScreen;
+				m_nCurrScreen = MENUPAGE_SAVE_SUCCESSFUL;
+				m_nCurrOption = 0;
+				m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
+			}
+			else
+				SaveLoadFileError_SetUpErrorScreen();
+		}
+		if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
+			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
+				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == 0;
+				if (m_PrefsVsyncDisp != m_PrefsVsync)
+					m_PrefsVsync = m_PrefsVsyncDisp;
+				DMAudio.Service();
+				m_bStartGameLoading = 1;
+				RequestFrontEndShutdown();
+				m_bLoadingSavedGame = 1;
+				b_FoundRecentSavedGameWantToLoad = 1;
+				DMAudio.SetEffectsFadeVol(0);
+				DMAudio.SetMusicFadeVol(0);
+				DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
+			}
+			else
+				SaveLoadFileError_SetUpErrorScreen();
+		}
+
+		ProcessButtonPresses();
+
+		// Set binding keys.
+		if (pEditString && CPad::EditString(pEditString, 0) == nil) {
+			if (*pEditString == 0)
+				strcpy(pEditString, "NoName");
+			pEditString = nil;
+			SaveSettings();
+		}
+
+		if (field_113) {
+			if (field_456)
+				field_456 = 0;
+			else {
+				pControlEdit = CPad::EditCodesForControls(pControlEdit, 1);
+				JoyButtonJustClicked = 0;
+				MouseButtonJustClicked = 0;
+
+				if (GetMouseClickLeft())
+					MouseButtonJustClicked = 1;
+				else if (GetMouseClickRight())
+					MouseButtonJustClicked = 3;
+				else if (GetMouseClickMiddle())
+					MouseButtonJustClicked = 2;
+				else if (GetMouseWheelUp())
+					MouseButtonJustClicked = 4;
+				else if (GetMouseWheelDown())
+					MouseButtonJustClicked = 5;
+				//XXX two more buttons
+
+				JoyButtonJustClicked = ControlsManager.GetJoyButtonJustDown();
+
+				int32 TypeOfControl = 0;
+				if (JoyButtonJustClicked)
+					TypeOfControl = 3;
+				if (MouseButtonJustClicked)
+					TypeOfControl = 2;
+				if (*pControlEdit != rsNULL)
+					TypeOfControl = 0;
+
+				if (!field_534) {
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
+					pControlEdit = nil;
+					field_113 = 0;
+					m_KeyPressedCode = -1;
+					field_456 = 0;
+				}
+				else if (!m_bKeyChangeNotProcessed) {
+					if (*pControlEdit != rsNULL || MouseButtonJustClicked || JoyButtonJustClicked)
+						CheckCodesForControls(TypeOfControl);
+
+					field_535 = 1;
+				}
+				else {
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+					for (int i = 0; i < 4; i++)
+						ControlsManager.ClearSettingsAssociatedWithAction(m_CurrCntrlAction, i);
+					field_534 = false;
+					m_bKeyChangeNotProcessed = false;
+					pControlEdit = nil;
+					field_113 = 0;
+					m_KeyPressedCode = -1;
+					field_456 = 0;
+				}
+			}
+		}
+
+		if ((m_nCurrScreen == MENUPAGE_13 || m_nCurrScreen == MENUPAGE_16) && CTimer::GetTimeInMillisecondsPauseMode() > field_558) {
+			m_nCurrScreen = m_nPrevScreen;
+			m_nCurrOption = 0;
+		}
+
+		// Reset pad shaking.
+		if (VibrationTime && CTimer::GetTimeInMillisecondsPauseMode() > VibrationTime) {
+			CPad::StopPadsShaking();
+			VibrationTime = 0;
+		}
+
+	} else {
 		UnloadTextures();
 		field_452 = 0;
-		SwitchToNewScreen(MENUPAGE_NONE);
-		pEditString = 0;
-		field_113 = 0;
-		return;
-	}
-
-	// Load frontend textures.
-	LoadAllTextures();
-
-	// Set save/delete game pages.
-	if (m_nCurrScreen == MENUPAGE_DELETING) {
-		int8 DeleteSlot = PcSaveHelper.DeleteSlot(m_nCurrSaveSlot);
-
-		if (DeleteSlot) {
-			SwitchToNewScreen(MENUPAGE_DELETE_SUCCESS);
-			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
-		}
-		else
-			SaveLoadFileError_SetUpErrorScreen();
-	}
-	else if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
-		int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
-
-		if (SaveSlot) {
-			SwitchToNewScreen(MENUPAGE_SAVE_SUCCESSFUL);
-			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
-		}
-		else
-			SaveLoadFileError_SetUpErrorScreen();
-	}
-	else if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
-		int8 CheckSlot = CheckSlotDataValid(m_nCurrSaveSlot);
-
-		if (CheckSlot) {
-			TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == 0;
-			if (m_PrefsVsyncDisp != m_PrefsVsync)
-				m_PrefsVsync = m_PrefsVsyncDisp;
-			DMAudio.Service();
-			m_bStartGameLoading = true;
-			RequestFrontEndShutdown();
-			m_bLoadingSavedGame = true;
-			b_FoundRecentSavedGameWantToLoad = true;
-			DMAudio.SetEffectsFadeVol(0);
-			DMAudio.SetMusicFadeVol(0);
-			DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
-		}
-		else
-			SaveLoadFileError_SetUpErrorScreen();
-	}
-
-	ProcessButtonPresses();
-
-	// Set binding keys.
-	if (pEditString && CPad::EditString(pEditString, 0) != nil) {
-		if (*pEditString == 0)
-			strcpy(pEditString, "NoName");
+		// byte_5F33E4 = 1;	// unused
+		m_nPrevScreen = 0;
+		m_nCurrScreen = m_nPrevScreen;
+		m_nCurrOption = 0;
 		pEditString = nil;
-		SaveSettings();
-	}
-
-	if (field_113) {
-		if (field_456)
-			field_456 = 0;
-		else {
-			pControlEdit = CPad::EditCodesForControls(pControlEdit, 1);
-			JoyButtonJustClicked = 0;
-			MouseButtonJustClicked = 0;
-
-			if (GetMouseClickLeft())
-				MouseButtonJustClicked = 1;
-			else if (GetMouseClickRight())
-				MouseButtonJustClicked = 3;
-			else if (GetMouseClickMiddle())
-				MouseButtonJustClicked = 2;
-			else if (GetMouseWheelUp())
-				MouseButtonJustClicked = 4;
-			else if (GetMouseWheelDown())
-				MouseButtonJustClicked = 5;
-
-			JoyButtonJustClicked = ControlsManager.GetJoyButtonJustDown();
-
-			int32 TypeOfControl = 0;
-			if (JoyButtonJustClicked)
-				TypeOfControl = 3;
-			if (MouseButtonJustClicked)
-				TypeOfControl = 2;
-			if (*pControlEdit != rsNULL)
-				TypeOfControl = 0;
-
-			if (!field_534) {
-				//DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
-				pControlEdit = nil;
-				field_113 = 0;
-				m_KeyPressedCode = -1;
-				field_456 = 0;
-			}
-			else if (!m_bKeyChangeNotProcessed) {
-				if (*pControlEdit != rsNULL || MouseButtonJustClicked || JoyButtonJustClicked)
-					CheckCodesForControls(TypeOfControl);
-
-				field_535 = 1;
-			}
-			else {
-				//DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
-				for (int i = 0; i < 4; i++)
-					ControlsManager.ClearSettingsAssociatedWithAction(m_CurrCntrlAction, i);
-				field_534 = false;
-				m_bKeyChangeNotProcessed = false;
-				pControlEdit = nil;
-				field_113 = 0;
-				m_KeyPressedCode = -1;
-				field_456 = 0;
-			}
-		}
-	}
-
-	if ((m_nCurrScreen == MENUPAGE_13 || m_nCurrScreen == MENUPAGE_16) && CTimer::GetTimeInMillisecondsPauseMode() > field_558) {
-		SwitchToNewScreen(m_nPrevScreen);
-	}
-
-	// Reset pad shaking.
-	if (VibrationTime && CTimer::GetTimeInMillisecondsPauseMode() > VibrationTime) {
-		CPad::StopPadsShaking();
-		VibrationTime = 0;
+		field_113 = 0;
 	}
 
 	if (!m_bStartGameLoading) {
@@ -1585,11 +1626,11 @@ void CMenuManager::ProcessButtonPresses()
 		//field_438 -= 1;
 
 		if (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL) {
-			if (m_nCurrOption < MENUROW_1)
+			if (m_nCurrOption < 1)
 				m_nCurrOption = NumberOfMenuOptions;
 		}
 		else {
-			if (m_nCurrOption < MENUROW_0)
+			if (m_nCurrOption < 0)
 				m_nCurrOption = NumberOfMenuOptions;
 		}
 
@@ -1606,11 +1647,11 @@ void CMenuManager::ProcessButtonPresses()
 
 		if (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL) {
 			if (m_nCurrOption > NumberOfMenuOptions)
-				m_nCurrOption = MENUROW_1;
+				m_nCurrOption = 1;
 		}
 		else {
 			if (m_nCurrOption > NumberOfMenuOptions)
-				m_nCurrOption = MENUROW_0;
+				m_nCurrOption = 0;
 		}
 
 		if (m_nCurrExOption > m_nCurrExSize - 1)
@@ -2161,53 +2202,6 @@ void CMenuManager::SetHelperText(int text)
 #endif
 
 #if ALL_ORIGINAL_FRONTEND
-WRAPPER void CMenuManager::SaveSettings() { EAXJMP(0x488CC0); }
-#else
-void CMenuManager::SaveSettings()
-{
-	CFileMgr::SetDirMyDocuments();
-
-	int fileHandle = CFileMgr::OpenFile("gta3.set", "w");
-	if (fileHandle) {
-
-		ControlsManager.SaveSettings(fileHandle);
-		CFileMgr::Write(fileHandle, buf("stuffmorestuffevenmorestuff                 etc"), 20);
-		CFileMgr::Write(fileHandle, buf("stuffmorestuffevenmorestuff                 etc"), 20);
-		CFileMgr::Write(fileHandle, buf("stuffmorestuffevenmorestuff                 etc"), 4);
-		CFileMgr::Write(fileHandle, buf("stuffmorestuffevenmorestuff                 etc"), 4);
-		CFileMgr::Write(fileHandle, buf("stuffmorestuffevenmorestuff                 etc"), 1);
-		CFileMgr::Write(fileHandle, buf("stuffmorestuffevenmorestuff                 etc"), 1);
-		CFileMgr::Write(fileHandle, buf("stuffmorestuffevenmorestuff                 etc"), 1);
-		CFileMgr::Write(fileHandle, buf(&TheCamera.m_bHeadBob), 1);
-		CFileMgr::Write(fileHandle, buf(&TheCamera.m_fMouseAccelHorzntl), 4);
-		CFileMgr::Write(fileHandle, buf(&TheCamera.m_fMouseAccelVertical), 4);
-		CFileMgr::Write(fileHandle, buf(&MousePointerStateHelper.bInvertVertically), 1);
-		CFileMgr::Write(fileHandle, buf(&CVehicle::m_bDisableMouseSteering), 1);
-		CFileMgr::Write(fileHandle, buf(&m_PrefsSfxVolume), 1);
-		CFileMgr::Write(fileHandle, buf(&m_PrefsMusicVolume), 1);
-		CFileMgr::Write(fileHandle, buf(&m_PrefsRadioStation), 1);
-		CFileMgr::Write(fileHandle, buf(&m_PrefsSpeakers), 1);
-		CFileMgr::Write(fileHandle, buf(&m_nPrefsAudio3DProviderIndex), 1);
-		CFileMgr::Write(fileHandle, buf(&m_PrefsDMA), 1);
-		CFileMgr::Write(fileHandle, buf(&m_PrefsBrightness), 1);
-		CFileMgr::Write(fileHandle, buf(&m_PrefsLOD), sizeof(m_PrefsLOD));
-		CFileMgr::Write(fileHandle, buf(&m_PrefsShowSubtitles), 1);
-		CFileMgr::Write(fileHandle, buf(&m_PrefsUseWideScreen), 1);
-		CFileMgr::Write(fileHandle, buf(&m_PrefsVsyncDisp), 1);
-		CFileMgr::Write(fileHandle, buf(&m_PrefsFrameLimiter), 1);
-		CFileMgr::Write(fileHandle, buf(&m_nDisplayVideoMode), 1);
-		CFileMgr::Write(fileHandle, buf(&CMBlur::BlurOn), 1);
-		CFileMgr::Write(fileHandle, buf(m_PrefsSkinFile), 256);
-		CFileMgr::Write(fileHandle, buf(&m_ControlMethod), 1);
-		CFileMgr::Write(fileHandle, buf(&m_PrefsLanguage), 1);
-	}
-
-	CFileMgr::CloseFile(fileHandle);
-	CFileMgr::SetDir("");
-}
-#endif
-
-#if ALL_ORIGINAL_FRONTEND
 WRAPPER void CMenuManager::ShutdownJustMenu() { EAXJMP(0x488920); }
 #else
 void CMenuManager::ShutdownJustMenu()
@@ -2336,10 +2330,11 @@ void CMenuManager::WaitForUserCD()
 #endif
 
 // New content:
+#if 0
 uint8 CMenuManager::GetNumberOfMenuOptions()
 {
-	uint8 Rows = MENUROW_NONE;
-	for (int i = 0; i < MENUROWS; i++) {
+	uint8 Rows = -1;
+	for (int i = 0; i < NUM_MENUROWS; i++) {
 		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_NOTHING)
 			break;
 
@@ -2371,9 +2366,9 @@ void CMenuManager::SwitchToNewScreen(int32 screen)
 		if (screen) {
 			m_nPrevScreen = m_nCurrScreen;
 			m_nCurrScreen = screen;
-			m_nCurrOption = MENUROW_0;
+			m_nCurrOption = 0;
 			//
-			m_nCurrExOption = MENUROW_0;
+			m_nCurrExOption = 0;
 			m_nCurrExLayer = 19;
 			//
 			m_nMenuFadeAlpha = 0;
@@ -2382,7 +2377,7 @@ void CMenuManager::SwitchToNewScreen(int32 screen)
 		else {
 			m_nPrevScreen = MENUPAGE_NONE;
 			m_nCurrScreen = MENUPAGE_NONE;
-			m_nCurrOption = MENUROW_0;
+			m_nCurrOption = 0;
 		}
 	}
 
@@ -2448,6 +2443,7 @@ void CMenuManager::SetDefaultPreferences(int32 screen)
 		break;
 	}
 }
+#endif
 
 // Frontend inputs.
 bool GetPadBack()
@@ -2598,4 +2594,7 @@ STARTPATCHES
 	for (int i = 1; i < ARRAY_SIZE(aScreens); i++)
 		Patch(0x611930 + sizeof(CMenuScreen) * i, aScreens[i]);
 #endif
+
+	InjectHook(0x488EE0, &CMenuManager::LoadSettings, PATCH_JUMP);
+	InjectHook(0x488CC0, &CMenuManager::SaveSettings, PATCH_JUMP);
 ENDPATCHES

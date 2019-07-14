@@ -43,8 +43,6 @@
 
 #define MENUSLIDER_X 306.0f
 
-#define buf(a) (char*)(a)
-
 enum eLanguages
 {
 	LANGUAGE_AMERICAN,
@@ -339,28 +337,9 @@ enum eMenuColumns
 	MENUCOLUMNS,
 };
 
-enum eMenuRow
+enum
 {
-	MENUROW_NONE = -1,
-	MENUROW_0,
-	MENUROW_1,
-	MENUROW_2,
-	MENUROW_3,
-	MENUROW_4,
-	MENUROW_5,
-	MENUROW_6,
-	MENUROW_7,
-	MENUROW_8,
-	MENUROW_9,
-	MENUROW_10,
-	MENUROW_11,
-	MENUROW_12,
-	MENUROW_13,
-	MENUROW_14,
-	MENUROW_15,
-	MENUROW_16,
-	MENUROW_17,
-	MENUROWS,
+	NUM_MENUROWS = 18,
 };
 
 struct tSkinInfo
@@ -377,7 +356,7 @@ struct CMenuScreen
 	char m_ScreenName[8];
 	int32 unk;
 	int32 m_PreviousPage[2]; // eMenuScreen
-	int32 m_ParentEntry[2]; // eMenuRow
+	int32 m_ParentEntry[2]; // row
 
 	struct CMenuEntry
 	{
@@ -385,7 +364,7 @@ struct CMenuScreen
 		char m_EntryName[8];
 		int32 m_SaveSlot; // eSaveSlot
 		int32 m_TargetMenu; // eMenuScreen
-	} m_aEntries[MENUROWS];
+	} m_aEntries[NUM_MENUROWS];
 };
 
 class CMenuManager
@@ -463,9 +442,9 @@ public:
 	static int8 &m_PrefsFrameLimiter;
 	static int8 &m_PrefsShowSubtitles;
 	static int8 &m_PrefsSpeakers;
-	static int8 &m_ControlMethod;
+	static int32 &m_ControlMethod;
 	static int8 &m_PrefsDMA;
-	static int8 &m_PrefsLanguage;
+	static int32 &m_PrefsLanguage;
 	static int8 &m_bDisableMouseSteering;
 	static int32 &m_PrefsBrightness;
 	static float &m_PrefsLOD;
