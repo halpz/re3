@@ -328,7 +328,7 @@ enum eCheckHover
 	HOVEROPTION_19,
 	HOVEROPTION_20,
 	HOVEROPTION_CHANGESKIN,
-	HOVEROPTION_NULL = 42,
+	HOVEROPTION_42 = 42,
 };
 
 enum eMenuColumns
@@ -413,10 +413,10 @@ public:
 	tSkinInfo *m_pSelectedSkin;
  tSkinInfo *field_438;
  float field_43C;
- int field_440;
+	int m_nCurrExSize;
 	int m_nSkinsTotal;
  char _unk0[4];
- int field_44C;
+	int m_nCurrExOption;
 	bool m_bSkinsFound;
 	bool m_bQuitGameNoCD;
  char field_452;
@@ -439,7 +439,7 @@ public:
  int field_530;
  char field_534;
  char field_535;
- int8 field_536;
+	int8 m_nCurrExLayer;
 	int m_nHelperTextAlpha;
 	int m_nMouseOldPosX;
 	int m_nMouseOldPosY;
@@ -452,6 +452,7 @@ public:
 	int m_nCurrSaveSlot;
 	int m_nScreenChangeDelayTimer;
 
+public:
 	static int32 &OS_Language;
 	static int8 &m_PrefsUseVibration;
 	static int8 &m_DisplayControllerOnFoot;
@@ -516,17 +517,16 @@ public:
 	void SaveSettings();
 	void SetHelperText(int text);
 	void ShutdownJustMenu();
-	static float StretchX(float);
-	static float StretchY(float);
+	float StretchX(float);
+	float StretchY(float);
 	void SwitchMenuOnAndOff();
 	void UnloadTextures();
 	void WaitForUserCD();
 
 	// New content:
 	uint8 GetNumberOfMenuOptions();
-	void SwitchToNewScreen(int8 screen);
-	void SetDefaultPreferences(int8 screen);
-
+	void SwitchToNewScreen(int32 screen);
+	void SetDefaultPreferences(int32 screen);
 };
 
 static_assert(sizeof(CMenuManager) == 0x564, "CMenuManager: error");
