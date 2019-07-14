@@ -27,7 +27,7 @@
 #include "PlayerInfo.h"
 #include "World.h"
 
-#define ALL_ORIGINAL_FRONTEND 1
+#define ALL_ORIGINAL_FRONTEND FALSE
 
 int32 &CMenuManager::OS_Language = *(int32*)0x5F2F78;
 int8 &CMenuManager::m_PrefsUseVibration = *(int8*)0x95CD92;
@@ -74,7 +74,6 @@ int32 &nTimeForSomething = *(int32*)0x628D54;
 //int32 *pControlTemp = 0;
 
 // Frontend inputs.
-
 bool GetPadBack();
 bool GetPadExitEnter();
 bool GetPadForward();
@@ -543,7 +542,7 @@ void CMenuManager::Draw()
 				case AR_16_9:
 					textToPrint[MENUCOLUMN_RIGHT] = (wchar*)L"16:9";
 					break;
-			}
+				}
 #endif
 				break;
 			case MENUACTION_RADIO:
@@ -611,7 +610,7 @@ void CMenuManager::Draw()
 				break;
 			case MENUACTION_MOUSESTEER:
 				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_bDisableMouseSteering ? "FEM_ON" : "FEM_OFF");
-				break;				
+				break;
 			}
 
 			CFont::SetDropShadowPosition(MENUDROP_COLOR_SIZE);
@@ -711,7 +710,7 @@ void CMenuManager::Draw()
 				CFont::SetColor(CRGBA(255, 217, 106, FadeIn(255)));
 				CSprite2d::DrawRect(CRect(SCREEN_STRETCH_X(11.0f), vecPositions.y - SCREEN_STRETCH_Y(fBarSize * 0.13f), SCREEN_STRETCH_FROM_RIGHT(11.0f), vecPositions.y + SCREEN_STRETCH_Y(fBarSize)), CRGBA(100, 200, 50, 50));
 			}
-			else 
+			else
 				CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
 
 			// Draw
@@ -727,35 +726,27 @@ void CMenuManager::Draw()
 			}
 
 			// Mouse support. 
-			// TODO: inputs for these pages.
-			if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
-			}
-			else if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+			static bool bIsMouseInPosition = false;
+			if (m_nMenuFadeAlpha >= 255 && GetMouseInput()) {
+				CVector2D vecInputSize = { SCREEN_SCALE_X(20.0f), SCREEN_SCALE_FROM_RIGHT(20.0f) };
+				if (m_bShowMouse &&
+					((CheckHover(vecInputSize.x, vecInputSize.y, vecPositions.y, vecPositions.y + SCREEN_STRETCH_Y(20.0f)))))
+					bIsMouseInPosition = true;
+				else
+					bIsMouseInPosition = false;
 
-			}
-			else {
-				static bool bIsMouseInPosition = false;
-				if (m_nMenuFadeAlpha >= 255 && GetMouseInput()) {
-					CVector2D vecInputSize = { SCREEN_SCALE_X(20.0f), SCREEN_SCALE_FROM_RIGHT(20.0f) };
-					if (m_bShowMouse &&
-						((CheckHover(vecInputSize.x, vecInputSize.y, vecPositions.y, vecPositions.y + SCREEN_STRETCH_Y(20.0f)))))
-						bIsMouseInPosition = true;
-					else
-						bIsMouseInPosition = false;
-
-					if (bIsMouseInPosition) {
-						if (m_nCurrOption != i) {
-							m_nCurrOption = i;
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
-						}
-
-						m_nPrevOption = m_nCurrOption;
-
-						if (GetMouseForward())
-							m_nHoverOption = HOVEROPTION_NULL;
-						else
-							m_nHoverOption = HOVEROPTION_DEFAULT;
+				if (bIsMouseInPosition) {
+					if (m_nCurrOption != i) {
+						m_nCurrOption = i;
+						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 					}
+
+					m_nPrevOption = m_nCurrOption;
+
+					if (GetMouseForward())
+						m_nHoverOption = HOVEROPTION_42;
+					else
+						m_nHoverOption = HOVEROPTION_DEFAULT;
 				}
 			}
 
@@ -763,16 +754,16 @@ void CMenuManager::Draw()
 			// TODO: CheckHover
 			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
 			case MENUACTION_BRIGHTNESS:
-				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(MENUSLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsBrightness/512.0f);
+				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(MENUSLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsBrightness / 512.0f);
 				break;
 			case MENUACTION_DRAWDIST:
 				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(MENUSLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), (m_PrefsLOD - 0.8f) * 1.0f);
 				break;
 			case MENUACTION_MUSICVOLUME:
-				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(MENUSLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsMusicVolume/128.0f);
+				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(MENUSLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsMusicVolume / 128.0f);
 				break;
 			case MENUACTION_SFXVOLUME:
-				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(MENUSLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsSfxVolume/128.0f);
+				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(MENUSLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), m_PrefsSfxVolume / 128.0f);
 				break;
 			case MENUACTION_MOUSESENS:
 				DisplaySlider(SCREEN_SCALE_FROM_RIGHT(MENUSLIDER_X), vecPositions.y - SCREEN_SCALE_Y(3.0f), SCREEN_SCALE_Y(2.0f), SCREEN_SCALE_Y(18.0f), SCREEN_SCALE_X(256.0f), TheCamera.m_fMouseAccelHorzntl * 200.0f);
@@ -1332,153 +1323,140 @@ void CMenuManager::Process(void)
 	m_bStartGameLoading = false;
 	InitialiseChangedLanguageSettings();
 
-	if (CPad::GetPad(0)->GetEscapeJustDown())
-		RequestFrontEndStartUp();
-
+	// 
 	SwitchMenuOnAndOff();
 
 	// Be able to re-open menu correctly.
-	if (m_bMenuActive) {
+	if (!m_bMenuActive) {
+		if (GetPadExitEnter())
+			RequestFrontEndStartUp();
 
-		// Load frontend textures.
-		LoadAllTextures();
-
-		// Set save/delete game pages.
-		if (m_nCurrScreen == MENUPAGE_DELETING) {
-			bool SlotPopulated = false;
-
-			if (PcSaveHelper.DeleteSlot(m_nCurrSaveSlot)) {
-				PcSaveHelper.PopulateSlotInfo();
-				SlotPopulated = true;
-			}
-
-			if (SlotPopulated) {
-				m_nPrevScreen = m_nCurrScreen;
-				m_nCurrScreen = MENUPAGE_DELETE_SUCCESS;
-				m_nCurrOption = 0;
-				m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
-			}
-			else
-				SaveLoadFileError_SetUpErrorScreen();
-		}
-		if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
-			int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
-			PcSaveHelper.PopulateSlotInfo();
-			if (SaveSlot) {
-				m_nPrevScreen = m_nCurrScreen;
-				m_nCurrScreen = MENUPAGE_SAVE_SUCCESSFUL;
-				m_nCurrOption = 0;
-				m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
-			}
-			else
-				SaveLoadFileError_SetUpErrorScreen();
-		}
-		if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
-			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
-				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == 0;
-				if (m_PrefsVsyncDisp != m_PrefsVsync)
-					m_PrefsVsync = m_PrefsVsyncDisp;
-				DMAudio.Service();
-				m_bStartGameLoading = 1;
-				RequestFrontEndShutdown();
-				m_bLoadingSavedGame = 1;
-				b_FoundRecentSavedGameWantToLoad = 1;
-				DMAudio.SetEffectsFadeVol(0);
-				DMAudio.SetMusicFadeVol(0);
-				DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
-			}
-			else
-				SaveLoadFileError_SetUpErrorScreen();
-		}
-
-		ProcessButtonPresses();
-
-		// Set binding keys.
-		if (pEditString && CPad::EditString(pEditString, 0) == nil) {
-			if (*pEditString == 0)
-				strcpy(pEditString, "NoName");
-			pEditString = nil;
-			SaveSettings();
-		}
-
-		if (field_113) {
-			if (field_456)
-				field_456 = 0;
-			else {
-				pControlEdit = CPad::EditCodesForControls(pControlEdit, 1);
-				JoyButtonJustClicked = 0;
-				MouseButtonJustClicked = 0;
-
-				if (GetMouseClickLeft())
-					MouseButtonJustClicked = 1;
-				else if (GetMouseClickRight())
-					MouseButtonJustClicked = 3;
-				else if (GetMouseClickMiddle())
-					MouseButtonJustClicked = 2;
-				else if (GetMouseWheelUp())
-					MouseButtonJustClicked = 4;
-				else if (GetMouseWheelDown())
-					MouseButtonJustClicked = 5;
-				//XXX two more buttons
-
-				JoyButtonJustClicked = ControlsManager.GetJoyButtonJustDown();
-
-				int32 TypeOfControl = 0;				
-				if (JoyButtonJustClicked)
-					TypeOfControl = 3;
-				if (MouseButtonJustClicked)
-					TypeOfControl = 2;
-				if (*pControlEdit != rsNULL)
-					TypeOfControl = 0;
-
-				if (!field_534) {
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
-					pControlEdit = nil;
-					field_113 = 0;
-					m_KeyPressedCode = -1;
-					field_456 = 0;
-				}
-				else if (!m_bKeyChangeNotProcessed) {
-					if (*pControlEdit != rsNULL || MouseButtonJustClicked || JoyButtonJustClicked)
-						CheckCodesForControls(TypeOfControl);
-
-					field_535 = 1;
-				}
-				else {
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
-					for (int i = 0; i < 4; i++)
-						ControlsManager.ClearSettingsAssociatedWithAction(m_CurrCntrlAction, i);
-					field_534 = false;
-					m_bKeyChangeNotProcessed = false;
-					pControlEdit = nil;
-					field_113 = 0;
-					m_KeyPressedCode = -1;
-					field_456 = 0;
-				}
-			}
-		}
-
-		if ((m_nCurrScreen == MENUPAGE_13 || m_nCurrScreen == MENUPAGE_16) && CTimer::GetTimeInMillisecondsPauseMode() > field_558) {
-			m_nCurrScreen = m_nPrevScreen;
-			m_nCurrOption = 0;
-		}
-
-		// Reset pad shaking.
-		if (VibrationTime && CTimer::GetTimeInMillisecondsPauseMode() > VibrationTime) {
-			CPad::StopPadsShaking();
-			VibrationTime = 0;
-		}
-	}
-	else {
 		UnloadTextures();
 		field_452 = 0;
-		*(bool*)0x5F33E4 = true;
-		// byte_5F33E4 = 1;	// unused
-		m_nPrevScreen = 0;
-		m_nCurrScreen = m_nPrevScreen;
-		m_nCurrOption = 0;
-		pEditString = nil;
+		SwitchToNewScreen(MENUPAGE_NONE);
+		pEditString = 0;
 		field_113 = 0;
+		return;
+	}
+
+	// Load frontend textures.
+	LoadAllTextures();
+
+	// Set save/delete game pages.
+	if (m_nCurrScreen == MENUPAGE_DELETING) {
+		int8 DeleteSlot = PcSaveHelper.DeleteSlot(m_nCurrSaveSlot);
+
+		if (DeleteSlot) {
+			SwitchToNewScreen(MENUPAGE_DELETE_SUCCESS);
+			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
+		}
+		else
+			SaveLoadFileError_SetUpErrorScreen();
+	}
+	else if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
+		int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
+
+		if (SaveSlot) {
+			SwitchToNewScreen(MENUPAGE_SAVE_SUCCESSFUL);
+			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
+		}
+		else
+			SaveLoadFileError_SetUpErrorScreen();
+	}
+	else if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
+		int8 CheckSlot = CheckSlotDataValid(m_nCurrSaveSlot);
+
+		if (CheckSlot) {
+			TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == 0;
+			if (m_PrefsVsyncDisp != m_PrefsVsync)
+				m_PrefsVsync = m_PrefsVsyncDisp;
+			DMAudio.Service();
+			m_bStartGameLoading = true;
+			RequestFrontEndShutdown();
+			m_bLoadingSavedGame = true;
+			b_FoundRecentSavedGameWantToLoad = true;
+			DMAudio.SetEffectsFadeVol(0);
+			DMAudio.SetMusicFadeVol(0);
+			DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
+		}
+		else
+			SaveLoadFileError_SetUpErrorScreen();
+	}
+
+	ProcessButtonPresses();
+
+	// Set binding keys.
+	if (pEditString && CPad::EditString(pEditString, 0) != nil) {
+		if (*pEditString == 0)
+			strcpy(pEditString, "NoName");
+		pEditString = nil;
+		SaveSettings();
+	}
+
+	if (field_113) {
+		if (field_456)
+			field_456 = 0;
+		else {
+			pControlEdit = CPad::EditCodesForControls(pControlEdit, 1);
+			JoyButtonJustClicked = 0;
+			MouseButtonJustClicked = 0;
+
+			if (GetMouseClickLeft())
+				MouseButtonJustClicked = 1;
+			else if (GetMouseClickRight())
+				MouseButtonJustClicked = 3;
+			else if (GetMouseClickMiddle())
+				MouseButtonJustClicked = 2;
+			else if (GetMouseWheelUp())
+				MouseButtonJustClicked = 4;
+			else if (GetMouseWheelDown())
+				MouseButtonJustClicked = 5;
+
+			JoyButtonJustClicked = ControlsManager.GetJoyButtonJustDown();
+
+			int32 TypeOfControl = 0;
+			if (JoyButtonJustClicked)
+				TypeOfControl = 3;
+			if (MouseButtonJustClicked)
+				TypeOfControl = 2;
+			if (*pControlEdit != rsNULL)
+				TypeOfControl = 0;
+
+			if (!field_534) {
+				//DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
+				pControlEdit = nil;
+				field_113 = 0;
+				m_KeyPressedCode = -1;
+				field_456 = 0;
+			}
+			else if (!m_bKeyChangeNotProcessed) {
+				if (*pControlEdit != rsNULL || MouseButtonJustClicked || JoyButtonJustClicked)
+					CheckCodesForControls(TypeOfControl);
+
+				field_535 = 1;
+			}
+			else {
+				//DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+				for (int i = 0; i < 4; i++)
+					ControlsManager.ClearSettingsAssociatedWithAction(m_CurrCntrlAction, i);
+				field_534 = false;
+				m_bKeyChangeNotProcessed = false;
+				pControlEdit = nil;
+				field_113 = 0;
+				m_KeyPressedCode = -1;
+				field_456 = 0;
+			}
+		}
+	}
+
+	if ((m_nCurrScreen == MENUPAGE_13 || m_nCurrScreen == MENUPAGE_16) && CTimer::GetTimeInMillisecondsPauseMode() > field_558) {
+		SwitchToNewScreen(m_nPrevScreen);
+	}
+
+	// Reset pad shaking.
+	if (VibrationTime && CTimer::GetTimeInMillisecondsPauseMode() > VibrationTime) {
+		CPad::StopPadsShaking();
+		VibrationTime = 0;
 	}
 
 	if (!m_bStartGameLoading) {
@@ -1493,15 +1471,12 @@ WRAPPER void CMenuManager::ProcessButtonPresses() { EAXJMP(0x4856F0); }
 #else
 void CMenuManager::ProcessButtonPresses()
 {
-	if(pEditString)
-		return;
-	if(pControlEdit)
+	if (pEditString || pControlEdit)
 		return;
 
 	// Update mouse position
 	m_nMouseOldPosX = m_nMousePosX;
 	m_nMouseOldPosY = m_nMousePosY;
-
 	m_nMousePosX = m_nMouseTempPosX;
 	m_nMousePosY = m_nMouseTempPosY;
 
@@ -1521,57 +1496,26 @@ void CMenuManager::ProcessButtonPresses()
 		m_bShowMouse = false;
 
 	if (m_nCurrScreen == MENUPAGE_MULTIPLAYER_FIND_GAME || m_nCurrScreen == MENUPAGE_SKIN_SELECT || m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
-		if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) 
-			field_440 = m_nSkinsTotal;
+		if (m_nCurrScreen == MENUPAGE_SKIN_SELECT)
+			m_nCurrExSize = m_nSkinsTotal;
 
-		if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
-			field_440 = m_ControlMethod ? 30 : 25;
-
-			if (field_44C > field_440)
-				field_44C = field_440 - 1;
-		}
+		if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS)
+			m_nCurrExSize = m_ControlMethod ? 30 : 25;
 
 		if (!GetPadBack() || m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS || field_535)
 			field_535 = 0;
-		else if (field_536 == 19) {
-			m_nHoverOption = 42;
+		else if (m_nCurrExLayer == 19) {
+			m_nHoverOption = HOVEROPTION_42;
 			field_113 = 1;
 			field_456 = 1;
-			m_bKeyChangeNotProcessed = 1;
+			m_bKeyChangeNotProcessed = true;
 			pControlEdit = &m_KeyPressedCode;
 		}
 
-		if (GetPadForward()) {
-			switch (field_536) {
-			case 19:
-				if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
-					field_113 = 1;
-					field_456 = 1;
-					pControlEdit = &m_KeyPressedCode;
-				}
-				if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
-					strcpy(m_PrefsSkinFile, m_aSkinName);
-					CWorld::Players->SetPlayerSkin(m_PrefsSkinFile);
-					field_536 = 9;
-				}
-
-				m_nHoverOption = HOVEROPTION_NULL;
-				SaveSettings();
-				break;
-			case 21:
-				strcpy(m_PrefsSkinFile, m_aSkinName);
-				CWorld::Players->SetPlayerSkin(m_PrefsSkinFile);
-				field_536 = 9;
-				break;
-			default:
-				break;
-			}
-		}
-
-		bool once = false;
-		if (!once) {
-			once = true;
+		bool Trigger = false;
+		if (!Trigger) {
 			nTimeForSomething = 0;
+			Trigger = true;
 		}
 
 		if ((CTimer::GetTimeInMillisecondsPauseMode() - nTimeForSomething) > 200) {
@@ -1582,6 +1526,52 @@ void CMenuManager::ProcessButtonPresses()
 			field_524 = 0;
 			nTimeForSomething = CTimer::GetTimeInMillisecondsPauseMode();
 		}
+
+		if (CPad::GetPad(0)->NewKeyState.TAB && !CPad::GetPad(0)->OldKeyState.TAB) {
+			switch (m_nCurrExLayer) {
+			case 9:
+				m_nCurrExLayer = 19;
+				break;
+			case 19:
+				m_nCurrExLayer = 21;
+				break;
+			case 21:
+				m_nCurrExLayer = 9;
+				break;
+			}
+			if (m_nCurrScreen == MENUPAGE_SKIN_SELECT && m_nCurrExLayer == 21 && !strcmp(m_aSkinName, m_PrefsSkinFile)) {
+				m_nCurrExLayer = 9;
+			}
+			if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS && m_nCurrExLayer == 21)
+				m_nCurrExLayer = 9;
+		}
+
+		if (GetPadForward()) {
+			switch (m_nCurrExLayer) {
+			case 19:
+				if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+					field_113 = 1;
+					field_456 = 1;
+					pControlEdit = &m_KeyPressedCode;
+				}
+				if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
+					strcpy(m_PrefsSkinFile, m_aSkinName);
+					CWorld::Players->SetPlayerSkin(m_PrefsSkinFile);
+					m_nCurrExLayer = 9;
+				}
+
+				m_nHoverOption = HOVEROPTION_42;
+				SaveSettings();
+				break;
+			case 21:
+				strcpy(m_PrefsSkinFile, m_aSkinName);
+				CWorld::Players->SetPlayerSkin(m_PrefsSkinFile);
+				m_nCurrExLayer = 9;
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 	// Get number of menu options.
@@ -1591,6 +1581,8 @@ void CMenuManager::ProcessButtonPresses()
 	if (GetPadMoveUp()) {
 		m_nPrevOption = m_nCurrOption;
 		m_nCurrOption -= 1;
+		m_nCurrExOption -= 1;
+		//field_438 -= 1;
 
 		if (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL) {
 			if (m_nCurrOption < MENUROW_1)
@@ -1601,11 +1593,16 @@ void CMenuManager::ProcessButtonPresses()
 				m_nCurrOption = NumberOfMenuOptions;
 		}
 
+		if (m_nCurrExOption < 0)
+			m_nCurrExOption = 0;
+
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 	}
 	else if (GetPadMoveDown()) {
 		m_nPrevOption = m_nCurrOption;
 		m_nCurrOption += 1;
+		m_nCurrExOption += 1;
+		//field_438 = += 1;
 
 		if (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL) {
 			if (m_nCurrOption > NumberOfMenuOptions)
@@ -1615,6 +1612,9 @@ void CMenuManager::ProcessButtonPresses()
 			if (m_nCurrOption > NumberOfMenuOptions)
 				m_nCurrOption = MENUROW_0;
 		}
+
+		if (m_nCurrExOption > m_nCurrExSize - 1)
+			m_nCurrExOption = m_nCurrExSize - 1;
 
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 	}
@@ -1637,6 +1637,8 @@ void CMenuManager::ProcessButtonPresses()
 			}
 			else
 				SwitchToNewScreen(aScreens[m_nCurrScreen].m_PreviousPage[0]);
+
+			PlayEscSound = true;
 			break;
 		default:
 			SwitchToNewScreen(aScreens[m_nCurrScreen].m_PreviousPage[0]);
@@ -1675,7 +1677,7 @@ void CMenuManager::ProcessButtonPresses()
 			}
 			break;
 		default:
-			m_nHoverOption = HOVEROPTION_NULL;
+			m_nHoverOption = HOVEROPTION_42;
 			break;
 		}
 	}
@@ -1871,10 +1873,12 @@ void CMenuManager::ProcessOnOffMenuOptions()
 		break;
 	case MENUACTION_UPDATESAVE:
 		PcSaveHelper.PopulateSlotInfo();
-		if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot >= SAVESLOT_1 && aScreens[m_nCurrOption].m_aEntries[m_nCurrOption].m_SaveSlot <= SAVESLOT_8) {
-			m_nCurrSaveSlot = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot - 2;
+		if (!m_bGameNotLoaded) {
+			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot >= SAVESLOT_1 && aScreens[m_nCurrOption].m_aEntries[m_nCurrOption].m_SaveSlot <= SAVESLOT_8) {
+				m_nCurrSaveSlot = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot - 2;
 
-			SwitchToNewScreen(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu);
+				SwitchToNewScreen(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu);
+			}
 		}
 		break;
 	case MENUACTION_CHECKSAVE:
@@ -2120,32 +2124,24 @@ void CMenuManager::SaveLoadFileError_SetUpErrorScreen()
 	case 1:
 	case 2:
 	case 3:
-		m_nPrevScreen = m_nCurrScreen;
-		m_nCurrScreen = MENUPAGE_SAVE_FAILED;
-		m_nCurrOption = MENUROW_0;
+		SwitchToNewScreen(MENUPAGE_SAVE_FAILED);
 		m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
 		break;
 	break;
 	case 4:
 	case 5:
 	case 6:
-		this->m_nPrevScreen = m_nCurrScreen;
-		this->m_nCurrScreen = MENUPAGE_LOAD_FAILED;
-		m_nCurrOption = MENUROW_0;
+		SwitchToNewScreen(MENUPAGE_LOAD_FAILED);
 		m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
 		break;
 	case 7:
-		this->m_nPrevScreen = m_nCurrScreen;
-		this->m_nCurrScreen = MENUPAGE_LOAD_FAILED_2;
-		m_nCurrOption = MENUROW_0;
+		SwitchToNewScreen(MENUPAGE_LOAD_FAILED_2);
 		m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
 		break;
 	case 8:
 	case 9:
 	case 10:
-		m_nPrevScreen = m_nCurrScreen;
-		m_nCurrScreen = MENUPAGE_DELETE_FAILED;
-		m_nCurrOption = MENUROW_0;
+		SwitchToNewScreen(MENUPAGE_DELETE_FAILED);
 		m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
 		break;
 	default:
@@ -2221,7 +2217,6 @@ void CMenuManager::ShutdownJustMenu()
 }
 #endif
 
-// We won't ever use this again.
 #if ALL_ORIGINAL_FRONTEND
 WRAPPER float CMenuManager::StretchX(float) { EAXJMP(0x48ABE0); }
 #else
@@ -2230,7 +2225,11 @@ float CMenuManager::StretchX(float x)
 	if (SCREEN_WIDTH == 640)
 		return x;
 	else
+#ifndef ASPECT_RATIO_SCALE
 		return SCREEN_WIDTH * x * 0.0015625f;
+#else
+		return SCREEN_SCALE_X(x);
+#endif
 }
 #endif
 
@@ -2349,7 +2348,7 @@ uint8 CMenuManager::GetNumberOfMenuOptions()
 	return Rows;
 }
 
-void CMenuManager::SwitchToNewScreen(int8 screen)
+void CMenuManager::SwitchToNewScreen(int32 screen)
 {
 	ResetHelperText();
 
@@ -2373,6 +2372,10 @@ void CMenuManager::SwitchToNewScreen(int8 screen)
 			m_nPrevScreen = m_nCurrScreen;
 			m_nCurrScreen = screen;
 			m_nCurrOption = MENUROW_0;
+			//
+			m_nCurrExOption = MENUROW_0;
+			m_nCurrExLayer = 19;
+			//
 			m_nMenuFadeAlpha = 0;
 			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
 		}
@@ -2386,7 +2389,6 @@ void CMenuManager::SwitchToNewScreen(int8 screen)
 	// Set player skin.
 	if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
 		CPlayerSkin::BeginFrontEndSkinEdit();
-		field_535 = 19;
 		m_bSkinsFound = false;
 	}
 
@@ -2399,7 +2401,7 @@ void CMenuManager::SwitchToNewScreen(int8 screen)
 		DMAudio.StopFrontEndTrack();
 }
 
-void CMenuManager::SetDefaultPreferences(int8 screen)
+void CMenuManager::SetDefaultPreferences(int32 screen)
 {
 	switch (screen) {
 	case MENUPAGE_SOUND_SETTINGS:
@@ -2480,7 +2482,7 @@ bool GetPadMoveUp()
 
 bool GetPadMoveDown()
 {
-	return 
+	return
 		(CPad::GetPad(0)->NewState.DPadDown && !CPad::GetPad(0)->OldState.DPadDown) ||
 		(CPad::GetPad(0)->NewKeyState.DOWN && !CPad::GetPad(0)->OldKeyState.DOWN) ||
 		(CPad::GetPad(0)->NewState.LeftStickY > 0 && !(CPad::GetPad(0)->OldState.LeftStickY > 0));
@@ -2540,7 +2542,7 @@ bool GetMouseForward()
 
 bool GetMouseBack()
 {
-	return GetMouseClickRight;
+	return GetMouseClickRight();
 }
 
 bool GetMousePos()
@@ -2581,7 +2583,8 @@ bool GetMouseInput()
 }
 
 STARTPATCHES
-#ifndef ALL_ORIGINAL_FRONTEND
+#if ALL_ORIGINAL_FRONTEND
+#else
 	InjectHook(0x47A230, &CMenuManager::LoadAllTextures, PATCH_JUMP);
 	InjectHook(0x47A440, &CMenuManager::UnloadTextures, PATCH_JUMP);
 	InjectHook(0x485100, &CMenuManager::Process, PATCH_JUMP);
@@ -2589,6 +2592,8 @@ STARTPATCHES
 	InjectHook(0x48AE60, &CMenuManager::ProcessOnOffMenuOptions, PATCH_JUMP);
 	InjectHook(0x488EE0, &CMenuManager::LoadSettings, PATCH_JUMP);
 	InjectHook(0x488CC0, &CMenuManager::SaveSettings, PATCH_JUMP);
+	InjectHook(0x48ABE0, &CMenuManager::StretchX, PATCH_JUMP);
+	InjectHook(0x48AC20, &CMenuManager::StretchY, PATCH_JUMP);
 
 	for (int i = 1; i < ARRAY_SIZE(aScreens); i++)
 		Patch(0x611930 + sizeof(CMenuScreen) * i, aScreens[i]);
