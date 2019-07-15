@@ -1598,25 +1598,25 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 	case COMMAND_ABS_VAR_INT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
-		*ptr = abs(*ptr);
+		*ptr = ABS(*ptr);
 		return 0;
 	}
 	case COMMAND_ABS_LVAR_INT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
-		*ptr = abs(*ptr);
+		*ptr = ABS(*ptr);
 		return 0;
 	}
 	case COMMAND_ABS_VAR_FLOAT:
 	{
 		float* ptr = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
-		*ptr = abs(*ptr);
+		*ptr = ABS(*ptr);
 		return 0;
 	}
 	case COMMAND_ABS_LVAR_FLOAT:
 	{
 		float* ptr = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
-		*ptr = abs(*ptr);
+		*ptr = ABS(*ptr);
 		return 0;
 	}
 	case COMMAND_GENERATE_RANDOM_FLOAT:
