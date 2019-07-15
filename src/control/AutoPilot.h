@@ -101,8 +101,7 @@ public:
 		m_nCurrentPathNodeInfo = m_nNextPathNodeInfo;
 		m_nNextDirection = 1;
 		m_nCurrentDirecton = m_nNextDirection;
-		m_nCurrentLane = 0;
-		m_nPreviousLane = m_nPreviousLane;
+		m_nPreviousLane = m_nCurrentLane = 0;
 		m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
 		m_nCarMission = MISSION_NONE;
 		m_nAnimationId = TEMPACT_NONE;
