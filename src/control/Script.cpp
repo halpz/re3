@@ -1630,6 +1630,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		return 0;
 	}
 	case COMMAND_GENERATE_RANDOM_INT:
+		/* On PC between 0 and 32767, even though script expects values between 0 and 65536 */
 		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = CGeneral::GetRandomNumber();
 		return 0;
 	case COMMAND_CREATE_CHAR:
@@ -1812,7 +1813,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		 * CVector pos = *(CVector*)&ScriptParams[1];
 		 * if (pos.z <= -100.0f)
 		 *	pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		 * pos.z += ped->GetDistanceFromCentreOfMassToBaseOfModel();
+		 * pos.z += entityToMove->GetDistanceFromCentreOfMassToBaseOfModel();
 		 * entityToMove->Teleport(pos);
 		 * CTheScripts::ClearSpaceForMissionEntity(pos, entityToMove);
 		 *
