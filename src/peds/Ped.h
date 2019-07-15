@@ -198,13 +198,13 @@ public:
 	uint8 bRespondsToThreats : 1;
 	uint8 m_ped_flagC4 : 1;		// false when in bus, bRenderPedInCar?
 	uint8 m_ped_flagC8 : 1;
-	uint8 m_ped_flagC10 : 1;
+	uint8 m_ped_flagC10 : 1;	// related with phone
 	uint8 m_ped_flagC20 : 1;	// just left some body part?
 	uint8 m_ped_flagC40 : 1;
 	uint8 m_ped_flagC80 : 1;
 
 	uint8 m_ped_flagD1 : 1;
-	uint8 m_ped_flagD2 : 1;
+	uint8 m_ped_flagD2 : 1; // seen an event
 	uint8 m_ped_flagD4 : 1;
 	uint8 m_ped_flagD8 : 1;
 	uint8 m_ped_flagD10 : 1;
@@ -328,7 +328,7 @@ public:
 	uint8 field_31C;
 	uint8 field_31D;
 	int16 m_phoneId;
-	uint32 m_lookingForPhone;
+	uint32 m_lookingForPhone; // unused
 	uint32 m_phoneTalkTimer;
 	void *m_lastAccident;
 	int32 m_nPedType;
@@ -459,7 +459,16 @@ public:
 	void Chat(void);
 	void MakeChangesForNewWeapon(int8);
 	void CheckAroundForPossibleCollisions(void);
-	bool Seek(void);
+	void SetSeek(CVector, float);
+	bool MakePhonecall(void);
+	bool FacePhone(void);
+	CPed *CheckForDeadPeds(void);
+	bool CheckForExplosions(CVector2D &area);
+	CPed *CheckForGunShots(void);
+	uint8 CheckForPointBlankPeds(CPed*);
+	bool CheckIfInTheAir(void);
+	void ClearAll(void);
+	void SetPointGunAt(CEntity*);
 
 	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);

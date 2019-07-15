@@ -51,6 +51,17 @@ enum Key
 };
 */
 
+enum {
+	PLAYERCONTROL_ENABLED = 0,
+	PLAYERCONTROL_DISABLED_1 = 1,
+	PLAYERCONTROL_DISABLED_2 = 2,
+	PLAYERCONTROL_DISABLED_4 = 4,
+	PLAYERCONTROL_DISABLED_8 = 8,
+	PLAYERCONTROL_DISABLED_10 = 16,
+	PLAYERCONTROL_DISABLED_20 = 32,
+	PLAYERCONTROL_DISABLED_40 = 64, // used on phone calls
+	PLAYERCONTROL_DISABLED_80 = 128,
+};
 
 class CControllerState
 {
@@ -188,7 +199,7 @@ public:
 	uint8 ShakeFreq;
 	int8 bHornHistory[5];
 	uint8 iCurrHornHistory;
-	bool DisablePlayerControls;
+	uint8 DisablePlayerControls;
 	int8 bApplyBrakes;
 	char _unk[12]; //int32 unk[3];
 	char _pad0[3];
@@ -362,6 +373,8 @@ public:
 	int32 GetLeftShoulder2(void)  { return NewState.LeftShoulder2; }
 	int32 GetRightShoulder1(void) { return NewState.RightShoulder1; }
 	int32 GetRightShoulder2(void) { return NewState.RightShoulder2; }
+
+	bool ArePlayerControlsDisabled(void) { return DisablePlayerControls != PLAYERCONTROL_ENABLED; }
 };
 VALIDATE_SIZE(CPad, 0xFC);
 

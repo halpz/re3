@@ -9,5 +9,6 @@ public:
 	~CCivilianPed(void) { }
 
 	void ProcessControl(void);
+	bool ProcessNearestFreePhone(int);
 };
 static_assert(sizeof(CCivilianPed) == 0x53C, "CCivilianPed: error");

@@ -25,6 +25,7 @@
 #include "PointLights.h"
 #include "Pad.h"
 #include "Phones.h"
+#include "EventList.h"
 
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
@@ -32,7 +33,7 @@ WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4
 WRAPPER void CPed::SetDead(void) { EAXJMP(0x4D3970); }
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 WRAPPER void CPed::RestorePreviousState(void) { EAXJMP(0x4C5E30); }
-WRAPPER void CPed::ClearAttack(void) { EAXJMP(0x4E6790); }
+WRAPPER void CPed::SetPointGunAt(CEntity*) { EAXJMP(0x4E5F70); }
 WRAPPER void CPed::PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *dragAssoc, void *arg) { EAXJMP(0x4E2480); }
 WRAPPER void CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *dragAssoc, void *arg) { EAXJMP(0x4E2920); }
 WRAPPER void CPed::SetPedPositionInCar(void) { EAXJMP(0x4D4970); }
@@ -45,7 +46,7 @@ WRAPPER void CPed::SetFollowRoute(int16, int16) { EAXJMP(0x4DD690); }
 WRAPPER void CPed::SetDuck(uint32) { EAXJMP(0x4E4920); }
 WRAPPER void CPed::RegisterThreatWithGangPeds(CEntity*) { EAXJMP(0x4E3870); }
 WRAPPER void CPed::MakeChangesForNewWeapon(int8) { EAXJMP(0x4F2560); }
-WRAPPER bool CPed::Seek(void) { EAXJMP(0x4D1640); }
+WRAPPER void CPed::SetSeek(CVector, float) { EAXJMP(0x4D14B0); }
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -272,8 +273,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bPedPhysics = true;
 	bUseCollisionRecords = true;
 
-	m_vecAnimMoveDelta.x = 0.0;
-	m_vecAnimMoveDelta.y = 0.0;
+	m_vecAnimMoveDelta.x = 0.0f;
+	m_vecAnimMoveDelta.y = 0.0f;
 	m_fHealth = 100.0f;
 	m_fArmour = 0.0f;
 	m_nPedType = pedType;
@@ -290,9 +291,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bInVehicle = 0;
 	m_pMyVehicle = nil;
 	m_pVehicleAnim = nil;
-	m_vecOffsetSeek.x = 0.0;
-	m_vecOffsetSeek.y = 0.0;
-	m_vecOffsetSeek.z = 0.0;
+	m_vecOffsetSeek.x = 0.0f;
+	m_vecOffsetSeek.y = 0.0f;
+	m_vecOffsetSeek.z = 0.0f;
 	m_pedFormation = 0;
 	m_lastThreatTimer = 0;
 	m_nPedStateTimer = 0;
@@ -907,8 +908,8 @@ CPed::ClearAimFlag(void)
 		m_pedIK.m_flags &= ~CPedIK:: FLAG_4;
 	}
 
-	if (CPed::IsPlayer())
-		((CPlayerPed*)this)->m_fFPSMoveHeading = 0.0;
+	if (IsPlayer())
+		((CPlayerPed*)this)->m_fFPSMoveHeading = 0.0f;
 }
 
 void
@@ -919,14 +920,14 @@ CPed::ClearLookFlag(void) {
 		m_ped_flagI1 = false;
 
 		m_pedIK.m_flags &= ~CPedIK::FLAG_2;
-		if (CPed::IsPlayer())
+		if (IsPlayer())
 			m_lookTimer = CTimer::GetTimeInMilliseconds() + 2000;
 		else
 			m_lookTimer = CTimer::GetTimeInMilliseconds() + 4000;
 
 		if (m_nPedState == PED_LOOK_HEADING || m_nPedState == PED_LOOK_ENTITY) {
-			CPed::RestorePreviousState();
-			CPed::ClearLookFlag();
+			RestorePreviousState();
+			ClearLookFlag();
 		}
 	}
 }
@@ -1739,10 +1740,10 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		float limitedAngle = CGeneral::LimitRadianAngle(m_fRotationDest);
 		float timeUntilStateChange = (m_nPedStateTimer - CTimer::GetTimeInMilliseconds())/600.0f;
 
-		m_vecOffsetSeek.z = 0.0;
+		m_vecOffsetSeek.z = 0.0f;
 		if (timeUntilStateChange <= 0.0f) {
-			m_vecOffsetSeek.x = 0.0;
-			m_vecOffsetSeek.y = 0.0;
+			m_vecOffsetSeek.x = 0.0f;
+			m_vecOffsetSeek.y = 0.0f;
 		} else {
 			neededPos -= timeUntilStateChange * m_vecOffsetSeek;
 		}
@@ -2509,7 +2510,7 @@ CPed::SetObjective(eObjective newObj, void *entity)
 			if (newObj == OBJECTIVE_SOLICIT) {
 				m_objectiveTimer = CTimer::GetTimeInMilliseconds() + 10000;
 			} else if (m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER && CharCreatedBy == MISSION_CHAR &&
-					(m_carInObjective->m_status == STATUS_PLAYER_DISABLED || CPad::GetPad(CWorld::PlayerInFocus)->DisablePlayerControls)) {
+					(m_carInObjective->m_status == STATUS_PLAYER_DISABLED || CPad::GetPad(CWorld::PlayerInFocus)->ArePlayerControlsDisabled())) {
 				SetObjectiveTimer(14000);
 			} else {
 				m_objectiveTimer = 0;
@@ -2906,6 +2907,232 @@ CPed::CheckAroundForPossibleCollisions(void)
 	}
 }
 
+bool
+CPed::MakePhonecall(void)
+{
+	if (CTimer::GetTimeInMilliseconds() <= m_phoneTalkTimer)
+		return false;
+
+	SetIdle();
+	gPhoneInfo.m_aPhones[m_phoneId].m_nState = PHONE_STATE_FREE;
+	m_phoneId = -1;
+	return true;
+}
+
+bool
+CPed::FacePhone(void)
+{
+	// FIX: I don't think this function was working correctly, they confused LimitAngle with LimitRadianAngle etc., so I fixed them
+	float currentRot = m_fRotationCur;
+	float phoneDir = CGeneral::GetRadianAngleBetweenPoints(
+		gPhoneInfo.m_aPhones[m_phoneId].m_vecPos.x,
+		gPhoneInfo.m_aPhones[m_phoneId].m_vecPos.y,
+		GetPosition().x,
+		GetPosition().y);
+
+	SetLookFlag(phoneDir, 0);
+
+	phoneDir = CGeneral::LimitRadianAngle(phoneDir);
+	m_moved = CVector2D(0.0f, 0.0f);
+
+	if (currentRot - PI > phoneDir)
+		phoneDir += 2 * PI;
+	else if (PI + currentRot < phoneDir)
+		phoneDir -= 2 * PI;
+
+	float neededTurn = currentRot - phoneDir;
+
+	if (Abs(neededTurn) <= 0.75f) {
+		SetIdle();
+		ClearLookFlag();
+		m_phoneTalkTimer = CTimer::GetTimeInMilliseconds() + 10000;
+		return true;
+	} else {
+		m_fRotationCur -= neededTurn * 0.2f;
+		return false;
+	}
+}
+
+CPed *
+CPed::CheckForDeadPeds(void)
+{
+	int event;
+	if (CEventList::FindClosestEvent(EVENT_DEAD_PED, GetPosition(), &event)) {
+		int pedHandle = gaEvent[event].entityRef;
+		if (pedHandle && gaEvent[event].entityType == EVENT_ENTITY_PED) {
+			m_ped_flagD2 = true;
+			return CPools::GetPed(pedHandle);
+		}
+	}
+	m_ped_flagD2 = false;
+	return nil;
+}
+
+bool
+CPed::CheckForExplosions(CVector2D &area)
+{
+	int event = 0;
+	if (CEventList::FindClosestEvent(EVENT_EXPLOSION, GetPosition(), &event)) {
+		area.x = gaEvent[event].posn.x;
+		area.y = gaEvent[event].posn.y;
+		CEntity *actualEntity = nil;
+
+		switch (gaEvent[event].entityType) {
+			case EVENT_ENTITY_PED:
+				actualEntity = CPools::GetPed(gaEvent[event].entityRef);
+				break;
+			case EVENT_ENTITY_VEHICLE:
+				actualEntity = CPools::GetVehicle(gaEvent[event].entityRef);
+				break;
+			case EVENT_ENTITY_OBJECT:
+				actualEntity = CPools::GetObject(gaEvent[event].entityRef);
+				break;
+			default:
+				break;
+		}
+
+		if (actualEntity) {
+			m_pEventEntity = actualEntity;
+			m_pEventEntity->RegisterReference((CEntity **) &m_pEventEntity);
+			m_ped_flagD2 = true;
+		} else
+			m_ped_flagD2 = false;
+
+		CEventList::ClearEvent(event);
+		return true;
+	} else if (CEventList::FindClosestEvent(EVENT_FIRE, GetPosition(), &event)) {
+		area.x = gaEvent[event].posn.x;
+		area.y = gaEvent[event].posn.y;
+		CEventList::ClearEvent(event);
+		m_ped_flagD2 = false;
+		return true;
+	}
+
+	m_ped_flagD2 = false;
+	return false;
+}
+
+CPed *
+CPed::CheckForGunShots(void)
+{
+	int event;
+	if (CEventList::FindClosestEvent(EVENT_GUNSHOT, GetPosition(), &event)) {
+		int pedHandle = gaEvent[event].entityRef;
+		if (pedHandle && gaEvent[event].entityType == EVENT_ENTITY_PED) {
+			// Is that a bug?!?
+			m_ped_flagD2 = false;
+			return CPools::GetPed(pedHandle);
+		}
+	}
+	m_ped_flagD2 = false;
+	return nil;
+}
+
+uint8
+CPed::CheckForPointBlankPeds(CPed *pedToVerify)
+{
+	float pbDistance = 1.1f;
+	if (GetWeapon()->IsType2Handed())
+		pbDistance = 1.6f;
+
+	for(int i=0; i<m_numNearPeds; i++)	{
+		CPed *nearPed = m_nearPeds[i];
+
+		if (!pedToVerify || pedToVerify == nearPed) {
+
+			CVector diff = nearPed->GetPosition() - GetPosition();
+			if (diff.Magnitude() < pbDistance) {
+
+				float neededAngle = CGeneral::GetRadianAngleBetweenPoints(
+					nearPed->GetPosition().x, nearPed->GetPosition().y,
+					GetPosition().x, GetPosition().y);
+				neededAngle = CGeneral::LimitRadianAngle(neededAngle);
+				m_fRotationCur = CGeneral::LimitRadianAngle(m_fRotationCur);
+
+				float neededTurn = Abs(neededTurn - m_fRotationCur);
+
+				if (neededTurn > PI)
+					neededTurn = 2*PI - neededTurn;
+
+				PedState nearPedState = nearPed->m_nPedState;
+
+				if (nearPedState == PED_FALL || nearPedState == PED_GETUP || nearPedState == PED_DIE || nearPedState == PED_DEAD || nearPedState == PED_DIVE_AWAY)
+					return 0;
+
+				if (neededTurn < DEGTORAD(60.0f)) {
+					if (pedToVerify == nearPed)
+						return 1;
+					else
+						return 2;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+bool
+CPed::CheckIfInTheAir(void)
+{
+	if (bInVehicle)
+		return false;
+
+	CVector pos = GetPosition();
+	CColPoint foundColPoint;
+	CEntity *foundEntity;
+
+	float startZ = pos.z - 1.54f;
+	bool foundGround = CWorld::ProcessVerticalLine(pos, startZ, foundColPoint, foundEntity, true, true, false, true, false, false, false);
+	if (!foundGround && m_nPedState != PED_JUMP)
+	{
+		pos.z -= 1.04f;
+		if (CWorld::TestSphereAgainstWorld(pos, 0.15f, this, true, false, false, false, false, false))
+			foundGround = true;
+	}
+	return !foundGround;
+}
+
+void
+CPed::ClearAll(void)
+{
+	if (!IsPedInControl() && m_nPedState != PED_DEAD)
+		return;
+
+	m_nPedState = PED_NONE;
+	m_nMoveState = PEDMOVE_NONE;
+	m_pSeekTarget = nil;
+	m_vecSeekVehicle = CVector(0.0f, 0.0f, 0.0f);
+	m_fleeFromPosX = 0.0f;
+	m_fleeFromPosY = 0.0f;
+	m_fleeFrom = nil;
+	m_fleeTimer = 0;
+	bUsesCollision = true;
+	ClearAimFlag();
+	ClearLookFlag();
+	bIsPointingGunAt = false;
+	m_ped_flagC4 = true;
+	m_ped_flagH1 = false;
+	m_pCollidingEntity = nil;
+}
+
+void
+CPed::ClearAttack(void)
+{
+	if (m_nPedState != PED_ATTACK || bIsDucking || m_nWaitState == WAITSTATE_PLAYANIM_DUCK)
+		return;
+
+	if (bIsPointingGunAt) {
+		if (m_pLookTarget)
+			SetPointGunAt(m_pLookTarget);
+		else
+			ClearPointGunAt();
+	} else if (m_objective != OBJECTIVE_NONE) {
+		SetIdle();
+	} else {
+		RestorePreviousState();
+	}
+}
+
 WRAPPER void CPed::PedGetupCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE810); }
 WRAPPER void CPed::PedStaggerCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8D0); }
 WRAPPER void CPed::PedEvadeCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D36E0); }
@@ -2999,4 +3226,13 @@ STARTPATCHES
 	InjectHook(0x4D1390, &CPed::TurnBody, PATCH_JUMP);
 	InjectHook(0x4D3AC0, &CPed::Chat, PATCH_JUMP);
 	InjectHook(0x4D0490, &CPed::CheckAroundForPossibleCollisions, PATCH_JUMP);
+	InjectHook(0x4D3E20, &CPed::MakePhonecall, PATCH_JUMP);
+	InjectHook(0x4D3CC0, &CPed::FacePhone, PATCH_JUMP);
+	InjectHook(0x4D4860, &CPed::CheckForDeadPeds, PATCH_JUMP);
+	InjectHook(0x4D4650, &CPed::CheckForExplosions, PATCH_JUMP);
+	InjectHook(0x4D47D0, &CPed::CheckForGunShots, PATCH_JUMP);
+	InjectHook(0x4E6990, &CPed::CheckForPointBlankPeds, PATCH_JUMP);
+	InjectHook(0x4D0BE0, &CPed::CheckIfInTheAir, PATCH_JUMP);
+	InjectHook(0x4C7F20, &CPed::ClearAll, PATCH_JUMP);
+	InjectHook(0x4E6790, &CPed::ClearAttack, PATCH_JUMP);
 ENDPATCHES
