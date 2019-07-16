@@ -6,7 +6,7 @@ WRAPPER void CCivilianPed::ProcessControl(void) { EAXJMP(0x4BFFE0); }
 
 CCivilianPed::CCivilianPed(int pedtype, int mi) : CPed(pedtype)
 {
-	CPed::SetModelIndex(mi);
+	SetModelIndex(mi);
 	for (int i = 0; i < 10; i++)
 	{
 		m_nearPeds[i] = nil;

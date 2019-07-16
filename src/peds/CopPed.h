@@ -31,9 +31,11 @@ public:
 	int8 field_1366;
 	int8 field_1367;
 
+	CCopPed(eCopType);
 	~CCopPed();
 
 	void ClearPursuit(void);
+	void ProcessControl(void);
 };
 
 static_assert(sizeof(CCopPed) == 0x558, "CCopPed: error");
