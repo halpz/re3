@@ -607,12 +607,12 @@ CWorld::FindObjectsInRange(CVector &centre, float distance, bool ignoreZ, short 
 		minY = 0;
 
 	int maxX = GetSectorIndexX(centre.x + distance);
-	if (maxX >= 100)
-		maxX = 100;
+	if (maxX >= NUMSECTORS_X)
+		maxX = NUMSECTORS_X;
 
 	int maxY = GetSectorIndexY(centre.y + distance);
-	if (maxY >= 100)
-		maxY = 100;
+	if (maxY >= NUMSECTORS_Y)
+		maxY = NUMSECTORS_Y;
 	
 	AdvanceCurrentScanCode();
 
@@ -658,12 +658,12 @@ CWorld::TestSphereAgainstWorld(CVector centre, float distance, CEntity* entityTo
 		minY = 0;
 
 	int maxX = GetSectorIndexX(centre.x + distance);
-	if (maxX >= 100)
-		maxX = 100;
+	if (maxX >= NUMSECTORS_X)
+		maxX = NUMSECTORS_X;
 
 	int maxY = GetSectorIndexY(centre.y + distance);
-	if (maxY >= 100)
-		maxY = 100;
+	if (maxY >= NUMSECTORS_Y)
+		maxY = NUMSECTORS_Y;
 
 	AdvanceCurrentScanCode();
 

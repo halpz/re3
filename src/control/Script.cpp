@@ -1891,9 +1891,9 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			CTheScripts::ClearSpaceForMissionEntity(pos, boat);
 			boat->m_status = STATUS_ABANDONED;
 			boat->bIsLocked = true;
-			boat->m_autoPilot.m_nCarMission = MISSION_NONE;
-			boat->m_autoPilot.m_nAnimationId = TEMPACT_NONE; /* Animation ID? */
-			boat->m_autoPilot.m_nCruiseSpeed = boat->m_autoPilot.m_fMaxTrafficSpeed = 20.0f;
+			boat->AutoPilot.m_nCarMission = MISSION_NONE;
+			boat->AutoPilot.m_nAnimationId = TEMPACT_NONE; /* Animation ID? */
+			boat->AutoPilot.m_nCruiseSpeed = boat->AutoPilot.m_fMaxTrafficSpeed = 20.0f;
 			CWorld::Add(boat);
 			handle = CPools::GetVehiclePool()->GetIndex(boat);
 		}
@@ -1909,11 +1909,11 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			CTheScripts::ClearSpaceForMissionEntity(pos, car);
 			car->m_status = STATUS_ABANDONED;
 			car->bIsLocked = true;
-			car->m_autoPilot.m_nCarMission = MISSION_NONE;
-			car->m_autoPilot.m_nAnimationId = TEMPACT_NONE; /* Animation ID? */
-			car->m_autoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
-			car->m_autoPilot.m_nCruiseSpeed = car->m_autoPilot.m_fMaxTrafficSpeed = 9.0f;
-			car->m_autoPilot.m_nPreviousLane = car->m_autoPilot.m_nCurrentLane = 0;
+			car->AutoPilot.m_nCarMission = MISSION_NONE;
+			car->AutoPilot.m_nAnimationId = TEMPACT_NONE; /* Animation ID? */
+			car->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
+			car->AutoPilot.m_nCruiseSpeed = car->AutoPilot.m_fMaxTrafficSpeed = 9.0f;
+			car->AutoPilot.m_nPreviousLane = car->AutoPilot.m_nCurrentLane = 0;
 			car->bEngineOn = false;
 			car->m_level = CTheZones::GetLevelFromPosition(pos);
 			car->bHasBeenOwnedByPlayer = true;
@@ -1949,13 +1949,13 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
 		if (CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, pos, false))
-			car->m_autoPilot.m_nCarMission = MISSION_GOTOCOORDS_STRAIGHT;
+			car->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_STRAIGHT;
 		else
-			car->m_autoPilot.m_nCarMission = MISSION_GOTOCOORDS;
+			car->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS;
 		car->m_status = STATUS_PHYSICS;
 		car->bEngineOn = true;
-		car->m_autoPilot.m_nCruiseSpeed = max(car->m_autoPilot.m_nCruiseSpeed, 6);
-		car->m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+		car->AutoPilot.m_nCruiseSpeed = max(car->AutoPilot.m_nCruiseSpeed, 6);
+		car->AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
 	case COMMAND_CAR_WANDER_RANDOMLY:
@@ -1964,10 +1964,10 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
 		CCarCtrl::JoinCarWithRoadSystem(car);
-		car->m_autoPilot.m_nCarMission = MISSION_CRUISE;
+		car->AutoPilot.m_nCarMission = MISSION_CRUISE;
 		car->bEngineOn = true;
-		car->m_autoPilot.m_nCruiseSpeed = max(car->m_autoPilot.m_nCruiseSpeed, 6);
-		car->m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+		car->AutoPilot.m_nCruiseSpeed = max(car->AutoPilot.m_nCruiseSpeed, 6);
+		car->AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
 	case COMMAND_CAR_SET_IDLE:
@@ -1975,7 +1975,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
-		car->m_autoPilot.m_nCarMission = MISSION_NONE;
+		car->AutoPilot.m_nCarMission = MISSION_NONE;
 		return 0;
 	}
 	case COMMAND_GET_CAR_COORDINATES:
@@ -2006,7 +2006,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			car->Teleport(pos);
 			CTheScripts::ClearSpaceForMissionEntity(pos, car);
 			/* May the following be inlined CCarCtrl function? */
-			switch (car->m_autoPilot.m_nCarMission) {
+			switch (car->AutoPilot.m_nCarMission) {
 			case MISSION_CRUISE:
 				CCarCtrl::JoinCarWithRoadSystem(car);
 				break;
@@ -2019,18 +2019,18 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 				break;
 			case MISSION_GOTOCOORDS:
 			case MISSION_GOTOCOORDS_STRAIGHT:
-				CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, car->m_autoPilot.m_vecDestinationCoors, false);
+				CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, car->AutoPilot.m_vecDestinationCoors, false);
 				break;
 			case MISSION_GOTOCOORDS_ACCURATE:
 			case MISSION_GOTO_COORDS_STRAIGHT_ACCURATE:
-				CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, car->m_autoPilot.m_vecDestinationCoors, false);
+				CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, car->AutoPilot.m_vecDestinationCoors, false);
 				break;
 			case MISSION_RAMCAR_FARAWAY:
 			case MISSION_RAMCAR_CLOSE:
 			case MISSION_BLOCKCAR_FARAWAY:
 			case MISSION_BLOCKCAR_CLOSE:
 			case MISSION_BLOCKCAR_HANDBRAKESTOP:
-				CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, car->m_autoPilot.m_pTargetCar->GetPosition(), false);
+				CCarCtrl::JoinCarWithRoadSystemGotoCoors(car, car->AutoPilot.m_pTargetCar->GetPosition(), false);
 				break;
 			default:
 				break;
@@ -2050,7 +2050,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
-		car->m_autoPilot.m_nCruiseSpeed = min(*(float*)&ScriptParams[1], 60.0f * car->m_handling->TransmissionData.fUnkMaxVelocity);
+		car->AutoPilot.m_nCruiseSpeed = min(*(float*)&ScriptParams[1], 60.0f * car->m_handling->TransmissionData.fUnkMaxVelocity);
 		return 0;
 	}
 	case COMMAND_SET_CAR_DRIVING_STYLE:
@@ -2058,7 +2058,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
-		car->m_autoPilot.m_nDrivingStyle = (eCarDrivingStyle)ScriptParams[1];
+		car->AutoPilot.m_nDrivingStyle = (eCarDrivingStyle)ScriptParams[1];
 		return 0;
 	}
 	case COMMAND_SET_CAR_MISSION:
@@ -2066,8 +2066,8 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
-		car->m_autoPilot.m_nCarMission = (eCarMission)ScriptParams[1];
-		car->m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+		car->AutoPilot.m_nCarMission = (eCarMission)ScriptParams[1];
+		car->AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 		car->bEngineOn = true;
 		return 0;
 	}

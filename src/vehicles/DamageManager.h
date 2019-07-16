@@ -23,7 +23,8 @@ enum ePanelStatus
 enum eWheelStatus
 {
 	WHEEL_STATUS_OK,
-	WHEEL_STATUS_BURST
+	WHEEL_STATUS_BURST,
+	WHEEL_STATUS_MISSING
 };
 
 enum tComponent

@@ -2733,8 +2733,8 @@ CPed::QuitEnteringCar(void)
 	m_pVehicleAnim = nil;
 	
 	if (veh) {
-		if (veh->m_autoPilot.m_nCruiseSpeed == 0)
-			veh->m_autoPilot.m_nCruiseSpeed = 17;
+		if (veh->AutoPilot.m_nCruiseSpeed == 0)
+			veh->AutoPilot.m_nCruiseSpeed = 17;
 	}
 }
 

@@ -38,7 +38,270 @@ CAutomobile::SetModelIndex(uint32 id)
 	SetupModelNodes();
 }
 
-WRAPPER void CAutomobile::ProcessControl(void) { EAXJMP(0x531470); }
+//WRAPPER void CAutomobile::ProcessControl(void) { EAXJMP(0x531470); }
+void
+CAutomobile::ProcessControl(void)
+{
+	int i;
+	CColModel *colModel;
+
+	if(m_veh_flagC80)
+		colModel = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel;
+	else
+		colModel = GetColModel();
+	bWarnedPeds = false;
+
+	// skip if the collision isn't for the current level
+	if(colModel->level > LEVEL_NONE && colModel->level != CCollision::ms_collisionInMemory)
+		return;
+
+	bool strongGrip = false;
+
+	assert(0 && "some player stuff");
+
+	if(bIsBus)
+		ProcessAutoBusDoors();
+
+	ProcessCarAlarm();
+
+	// Scan if this car is committing a crime that the police can see
+	if(m_status != STATUS_ABANDONED && m_status != STATUS_WRECKED &&
+	   m_status != STATUS_PLAYER && m_status != STATUS_PLAYER_REMOTE && m_status != STATUS_PLAYER_DISABLED){
+		switch(GetModelIndex())
+		case MI_FBICAR:
+		case MI_POLICE:
+		case MI_ENFORCER:
+		case MI_SECURICA:
+		case MI_RHINO:
+		case MI_BARRACKS:
+			ScanForCrimes();
+	}
+
+	// Process driver
+	if(pDriver){
+		if(!bHadDriver && m_bombType == 5){
+			// If someone enters the car and there is a bomb, detonate
+			m_nBombTimer = 1000;
+			m_pBlowUpEntity = field_4DC;
+			if(m_pBlowUpEntity)
+				m_pBlowUpEntity->RegisterReference((CEntity**)&m_pBlowUpEntity);
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_TICK, 1.0f);
+		}
+		bHadDriver = true;
+
+		if(IsUpsideDown() && CanPedEnterCar()){
+			if(!pDriver->IsPlayer() &&
+			   !(pDriver->m_leader && pDriver->m_leader->bInVehicle) &&
+			   pDriver->CharCreatedBy != MISSION_CHAR)
+				pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+		}
+	}else
+		bHadDriver = false;
+
+	// Process passengers
+	if(m_nNumPassengers != 0 && IsUpsideDown() && CanPedEnterCar()){
+		for(i = 0; i < m_nNumMaxPassengers; i++)
+			if(pPassengers[i])
+				if(!pPassengers[i]->IsPlayer() &&
+				   !(pPassengers[i]->m_leader && pPassengers[i]->m_leader->bInVehicle) &&
+				   pPassengers[i]->CharCreatedBy != MISSION_CHAR)
+					pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+	}
+
+	// CRubbish::StirUp
+
+	// blend in clump
+	int clumpAlpha = CVisibilityPlugins::GetClumpAlpha((RpClump*)m_rwObject);
+	if(bFadeOut){
+		clumpAlpha -= 8;
+		if(clumpAlpha < 0)
+			clumpAlpha = 0;
+	}else if(clumpAlpha < 255){
+		clumpAlpha += 16;
+		if(clumpAlpha > 255)
+			clumpAlpha = 255;
+	}
+	CVisibilityPlugins::SetClumpAlpha((RpClump*)m_rwObject, clumpAlpha);
+
+	AutoPilot.m_flag1 = false;
+	AutoPilot.m_flag2 = false;
+
+	// Set Center of Mass to make car more stable
+	if(strongGrip || bCheat3)
+		m_vecCentreOfMass.z = 0.3f*m_aSuspensionSpringLength[0] + -1.0*m_fHeightAboveRoad;
+	else if(m_handling->Flags & HANDLING_NONPLAYER_STABILISER && m_status == STATUS_PHYSICS)
+		m_vecCentreOfMass.z = m_handling->CentreOfMass.z - 0.2f*m_handling->Dimension.z;
+	else
+		m_vecCentreOfMass.z = m_handling->CentreOfMass.z;
+
+	// Process depending on status
+
+	switch(m_status){
+	case STATUS_PLAYER:
+	case STATUS_SIMPLE:
+	case STATUS_PHYSICS:
+	case STATUS_ABANDONED:
+	case STATUS_WRECKED:
+	case STATUS_PLAYER_REMOTE:
+	case STATUS_PLAYER_DISABLED:
+		assert(0);
+	}
+
+	if(GetPosition().z < -0.6f){
+		assert(0);
+	}
+
+	bool skipPhysics = false;
+	if(!bIsStuck){
+		assert(0);
+	}
+
+	// Postpone
+	for(i = 0; i < 4; i++)
+		if(m_aGroundPhysical[i] && !CWorld::bForceProcessControl && m_aGroundPhysical[i]->bIsInSafePosition){
+			bWasPostponed = true;
+			return;
+		}
+
+	// VehicleDamage
+
+	// special control
+	switch(GetModelIndex()){
+	case MI_FIRETRUCK:
+	case MI_RHINO:
+	case MI_YARDIE:
+	default:
+		assert(0);
+	}
+
+	if(skipPhysics){
+		bHasContacted = false;
+		bIsInSafePosition = false;
+		bWasPostponed = false;
+		bHasHitWall = false;
+		m_nCollisionRecords = 0;
+		bHasCollided = false;
+		bVehicleColProcessed = false;
+		m_nDamagePieceType = 0;
+		m_fDamageImpulse = 0.0f;
+		m_pDamageEntity = nil;
+		m_vecTurnFriction = CVector(0.0f, 0.0f, 0.0f);
+		m_vecMoveFriction = CVector(0.0f, 0.0f, 0.0f);
+	}else{
+
+		// This has to be done if ProcessEntityCollision wasn't called
+		if(!bVehicleColProcessed){
+			CMatrix mat(GetMatrix());
+			bIsStuck = false;
+			bHasContacted = false;
+			bIsInSafePosition = false;
+			bWasPostponed = false;
+			bHasHitWall = false;
+			m_fDistanceTravelled = 0.0f;
+			field_EF = false;
+			m_phy_flagA80 = false;
+			ApplyMoveSpeed();
+			ApplyTurnSpeed();
+			for(i = 0; CheckCollision() && i < 5; i++){
+				GetMatrix() = mat;
+				ApplyMoveSpeed();
+				ApplyTurnSpeed();
+			}
+			bIsInSafePosition = true;
+			bIsStuck = false;			
+		}
+
+		CPhysical::ProcessControl();
+
+		ProcessBuoyancy();
+
+		// Rescale spring ratios, i.e. subtract wheel radius
+		for(i = 0; i < 4; i++){
+			// wheel radius in relation to suspension line
+			float wheelRadius = 1.0f - m_aSuspensionSpringLength[i]/m_aSuspensionLineLength[i];
+			// rescale such that 0.0 is fully compressed and 1.0 is fully extended
+			m_aSuspensionSpringRatio[i] = (m_aSuspensionSpringRatio[i]-wheelRadius)/(1.0f-wheelRadius);
+		}
+
+		float fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward());
+		CVector contactPoints[4];	// relative to model
+		CVector contactSpeeds[4];	// speed at contact points
+		CVector springDirections[4];	// normalized, in model space
+
+		for(i = 0; i < 4; i++){
+			// Set spring under certain circumstances
+			if(Damage.GetWheelStatus(i) == WHEEL_STATUS_MISSING)
+				m_aSuspensionSpringRatio[i] = 1.0f;
+			else if(Damage.GetWheelStatus(i) == WHEEL_STATUS_BURST){
+				// wheel more bumpy the faster we are
+				if(CGeneral::GetRandomNumberInRange(0, (uint16)(40*fwdSpeed) + 98) < 100){
+					m_aSuspensionSpringRatio[i] += 0.3f*(m_aSuspensionLineLength[i]-m_aSuspensionSpringLength[i])/m_aSuspensionSpringLength[i];
+					if(m_aSuspensionSpringRatio[i] > 1.0f)
+						m_aSuspensionSpringRatio[i] = 1.0f;
+				}
+			}
+
+			// get points and directions if spring is compressed
+			if(m_aSuspensionSpringRatio[i] < 1.0f){
+				contactPoints[i] = m_aWheelColPoints[i].point - GetPosition();
+				springDirections[i] = Multiply3x3(GetMatrix(), colModel->lines[i].p1 - colModel->lines[i].p0);
+				springDirections[i].Normalise();
+			}
+		}
+
+		// Make springs push up vehicle
+		for(i = 0; i < 4; i++){
+			if(m_aSuspensionSpringRatio[i] < 1.0f){
+				float bias = m_handling->fSuspensionBias;
+				if(i == 1 || i == 3)	// rear
+					bias = 1.0f - bias;
+
+				ApplySpringCollision(m_handling->fSuspensionForceLevel,
+					springDirections[i], contactPoints[i],
+					m_aSuspensionSpringRatio[i], bias);
+				m_aWheelSkidmarkMuddy[i] =
+					m_aWheelColPoints[i].surfaceB == SURFACE_GRASS ||
+					m_aWheelColPoints[i].surfaceB == SURFACE_DIRTTRACK ||
+					m_aWheelColPoints[i].surfaceB == SURFACE_SAND;
+			}else{
+				contactPoints[i] = Multiply3x3(GetMatrix(), colModel->lines[i].p1);
+			}
+		}
+
+		// Get speed at contact points
+		for(i = 0; i < 4; i++){
+			contactSpeeds[i] = GetSpeed(contactPoints[i]);
+			if(m_aGroundPhysical[i]){
+				// subtract movement of physical we're standing on
+				contactSpeeds[i] -= m_aGroundPhysical[i]->GetSpeed(m_aGroundOffset[i]);
+#ifndef FIX_BUGS
+				// this shouldn't be reset because we still need it below
+				m_aGroundPhysical[i] = nil;
+#endif
+			}
+		}
+
+		// dampen springs
+		for(i = 0; i < 4; i++)
+			if(m_aSuspensionSpringRatio[i] < 1.0f)
+				ApplySpringDampening(m_handling->fSuspensionDampingLevel,
+					springDirections[i], contactPoints[i], contactSpeeds[i]);
+
+		// Get speed at contact points again
+		for(i = 0; i < 4; i++){
+			contactSpeeds[i] = GetSpeed(contactPoints[i]);
+			if(m_aGroundPhysical[i]){
+				// subtract movement of physical we're standing on
+				contactSpeeds[i] -= m_aGroundPhysical[i]->GetSpeed(m_aGroundOffset[i]);
+				m_aGroundPhysical[i] = nil;
+			}
+		}
+
+		assert(0);
+	}
+
+	assert(0 && "misc stuff");
+}
 
 void
 CAutomobile::Teleport(CVector pos)
@@ -269,6 +532,11 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 		if(speed > 0.28f)
 			m_vecMoveSpeed *= 0.28f/speed;
 	}
+}
+
+WRAPPER void
+CAutomobile::ProcessBuoyancy(void)
+{ EAXJMP(0x5308D0);
 }
 
 void
@@ -524,7 +792,7 @@ CAutomobile::BlowUpCar(CEntity *culprit)
 
 	m_fHealth = 0.0f;
 	m_nBombTimer = 0;
-	m_auto_flagA7 = 0;
+	m_bombType = 0;
 
 	TheCamera.CamShake(0.7f, GetPosition().x, GetPosition().y, GetPosition().z);
 
@@ -660,8 +928,8 @@ CAutomobile::PlayCarHorn(void)
 void
 CAutomobile::PlayHornIfNecessary(void)
 {
-	if(m_autoPilot.m_flag2 ||
-	   m_autoPilot.m_flag1)
+	if(AutoPilot.m_flag2 ||
+	   AutoPilot.m_flag1)
 		if(!HasCarStoppedBecauseOfLight())
 			PlayCarHorn();
 }
@@ -761,20 +1029,20 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 	if(m_status != STATUS_SIMPLE && m_status != STATUS_PHYSICS)
 		return false;
 
-	if(m_autoPilot.m_nCurrentRouteNode && m_autoPilot.m_nNextRouteNode){
-		CPathNode *curnode = &ThePaths.m_pathNodes[m_autoPilot.m_nCurrentRouteNode];
+	if(AutoPilot.m_nCurrentRouteNode && AutoPilot.m_nNextRouteNode){
+		CPathNode *curnode = &ThePaths.m_pathNodes[AutoPilot.m_nCurrentRouteNode];
 		for(i = 0; i < curnode->numLinks; i++)
-			if(ThePaths.m_connections[curnode->firstLink + i] == m_autoPilot.m_nNextRouteNode)
+			if(ThePaths.m_connections[curnode->firstLink + i] == AutoPilot.m_nNextRouteNode)
 				break;
 		if(i < curnode->numLinks &&
 		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)	// TODO
 			return true;
 	}
 
-	if(m_autoPilot.m_nCurrentRouteNode && m_autoPilot.m_nPrevRouteNode){
-		CPathNode *curnode = &ThePaths.m_pathNodes[m_autoPilot.m_nCurrentRouteNode];
+	if(AutoPilot.m_nCurrentRouteNode && AutoPilot.m_nPrevRouteNode){
+		CPathNode *curnode = &ThePaths.m_pathNodes[AutoPilot.m_nCurrentRouteNode];
 		for(i = 0; i < curnode->numLinks; i++)
-			if(ThePaths.m_connections[curnode->firstLink + i] == m_autoPilot.m_nPrevRouteNode)
+			if(ThePaths.m_connections[curnode->firstLink + i] == AutoPilot.m_nPrevRouteNode)
 				break;
 		if(i < curnode->numLinks &&
 		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)	// TODO

@@ -126,7 +126,7 @@ class CVehicle : public CPhysical
 public:
 	// 0x128
 	tHandlingData *m_handling;
-	CAutoPilot m_autoPilot;
+	CAutoPilot AutoPilot;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
 	uint8 m_aExtras[2];
@@ -162,14 +162,14 @@ public:
 	uint8 bIsBig: 1; // Is this vehicle a bus
 	uint8 bLowVehicle: 1; // Need this for sporty type cars to use low getting-in/out anims
 	uint8 bComedyControls : 1; // Will make the car hard to control (hopefully in a funny way)
-	uint8 m_veh_flagB20 : 1;
+	uint8 bWarnedPeds : 1; // Has scan and warn peds of danger been processed?
 	uint8 m_veh_flagB40 : 1;
 	uint8 m_veh_flagB80 : 1;
 
 	uint8 m_veh_flagC1 : 1;
 	uint8 bIsDamaged : 1; // This vehicle has been damaged and is displaying all its components
-	uint8 bHasBeenOwnedByPlayer : 1;
-	uint8 m_veh_flagC8 : 1;
+	uint8 bHasBeenOwnedByPlayer : 1;// To work out whether stealing it is a crime
+	uint8 bFadeOut : 1; // Fade vehicle out
 	uint8 m_veh_flagC10 : 1;
 	uint8 m_veh_flagC20 : 1;
 	uint8 bCanBeDamaged : 1; // Set to FALSE during cut scenes to avoid explosions
@@ -196,7 +196,7 @@ public:
 	uint32 m_nTimeOfDeath;
 	int16 field_214;
 	int16 m_nBombTimer;        // goes down with each frame
-	CPed *m_pWhoSetMeOnFire;
+	CEntity *m_pBlowUpEntity;
 	float field_21C;
 	float field_220;
 	eCarLock m_nDoorLock;
