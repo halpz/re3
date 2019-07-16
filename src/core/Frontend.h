@@ -43,8 +43,6 @@
 
 #define MENUSLIDER_X 306.0f
 
-#define buf(a) (char*)(a)
-
 enum eLanguages
 {
 	LANGUAGE_AMERICAN,
@@ -328,7 +326,7 @@ enum eCheckHover
 	HOVEROPTION_19,
 	HOVEROPTION_20,
 	HOVEROPTION_CHANGESKIN,
-	HOVEROPTION_NULL = 42,
+	HOVEROPTION_42 = 42,
 };
 
 enum eMenuColumns
@@ -339,28 +337,9 @@ enum eMenuColumns
 	MENUCOLUMNS,
 };
 
-enum eMenuRow
+enum
 {
-	MENUROW_NONE = -1,
-	MENUROW_0,
-	MENUROW_1,
-	MENUROW_2,
-	MENUROW_3,
-	MENUROW_4,
-	MENUROW_5,
-	MENUROW_6,
-	MENUROW_7,
-	MENUROW_8,
-	MENUROW_9,
-	MENUROW_10,
-	MENUROW_11,
-	MENUROW_12,
-	MENUROW_13,
-	MENUROW_14,
-	MENUROW_15,
-	MENUROW_16,
-	MENUROW_17,
-	MENUROWS,
+	NUM_MENUROWS = 18,
 };
 
 struct tSkinInfo
@@ -377,7 +356,7 @@ struct CMenuScreen
 	char m_ScreenName[8];
 	int32 unk;
 	int32 m_PreviousPage[2]; // eMenuScreen
-	int32 m_ParentEntry[2]; // eMenuRow
+	int32 m_ParentEntry[2]; // row
 
 	struct CMenuEntry
 	{
@@ -385,7 +364,7 @@ struct CMenuScreen
 		char m_EntryName[8];
 		int32 m_SaveSlot; // eSaveSlot
 		int32 m_TargetMenu; // eMenuScreen
-	} m_aEntries[MENUROWS];
+	} m_aEntries[NUM_MENUROWS];
 };
 
 class CMenuManager
@@ -413,10 +392,10 @@ public:
 	tSkinInfo *m_pSelectedSkin;
  tSkinInfo *field_438;
  float field_43C;
- int field_440;
+	int m_nCurrExSize;
 	int m_nSkinsTotal;
  char _unk0[4];
- int field_44C;
+	int m_nCurrExOption;
 	bool m_bSkinsFound;
 	bool m_bQuitGameNoCD;
  char field_452;
@@ -439,7 +418,7 @@ public:
  int field_530;
  char field_534;
  char field_535;
- int8 field_536;
+	int8 m_nCurrExLayer;
 	int m_nHelperTextAlpha;
 	int m_nMouseOldPosX;
 	int m_nMouseOldPosY;
@@ -452,6 +431,7 @@ public:
 	int m_nCurrSaveSlot;
 	int m_nScreenChangeDelayTimer;
 
+public:
 	static int32 &OS_Language;
 	static int8 &m_PrefsUseVibration;
 	static int8 &m_DisplayControllerOnFoot;
@@ -462,9 +442,9 @@ public:
 	static int8 &m_PrefsFrameLimiter;
 	static int8 &m_PrefsShowSubtitles;
 	static int8 &m_PrefsSpeakers;
-	static int8 &m_ControlMethod;
+	static int32 &m_ControlMethod;
 	static int8 &m_PrefsDMA;
-	static int8 &m_PrefsLanguage;
+	static int32 &m_PrefsLanguage;
 	static int8 &m_bDisableMouseSteering;
 	static int32 &m_PrefsBrightness;
 	static float &m_PrefsLOD;
@@ -516,17 +496,16 @@ public:
 	void SaveSettings();
 	void SetHelperText(int text);
 	void ShutdownJustMenu();
-	static float StretchX(float);
-	static float StretchY(float);
+	float StretchX(float);
+	float StretchY(float);
 	void SwitchMenuOnAndOff();
 	void UnloadTextures();
 	void WaitForUserCD();
 
 	// New content:
 	uint8 GetNumberOfMenuOptions();
-	void SwitchToNewScreen(int8 screen);
-	void SetDefaultPreferences(int8 screen);
-
+	void SwitchToNewScreen(int32 screen);
+	void SetDefaultPreferences(int32 screen);
 };
 
 static_assert(sizeof(CMenuManager) == 0x564, "CMenuManager: error");

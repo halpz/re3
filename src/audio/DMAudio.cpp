@@ -20,9 +20,9 @@ WRAPPER void cDMAudio::PlayFrontEndSound(uint32, uint32) { EAXJMP(0x57CC20); }
 WRAPPER void cDMAudio::PlayFrontEndTrack(uint32, uint32) { EAXJMP(0x57CC80); }
 WRAPPER void cDMAudio::StopFrontEndTrack() { EAXJMP(0x57CCB0); }
 WRAPPER void cDMAudio::PlayOneShot(int32 audioentity, uint16 sound/*eSound*/, float) { EAXJMP(0x57C840); }
-WRAPPER void cDMAudio::SetMusicMasterVolume(int8) { EAXJMP(0x57C8C0); }
-WRAPPER void cDMAudio::SetEffectsMasterVolume(int8) { EAXJMP(0x57C890); }
-WRAPPER int8 cDMAudio::SetCurrent3DProvider(int8) { EAXJMP(0x57C9B0); }
+WRAPPER void cDMAudio::SetMusicMasterVolume(uint8) { EAXJMP(0x57C8C0); }
+WRAPPER void cDMAudio::SetEffectsMasterVolume(uint8) { EAXJMP(0x57C890); }
+WRAPPER uint8 cDMAudio::SetCurrent3DProvider(uint8) { EAXJMP(0x57C9B0); }
 WRAPPER int32 cDMAudio::SetSpeakerConfig(int32) { EAXJMP(0x57C9D0); }
 
 WRAPPER int32 cDMAudio::GetRadioInCar() { EAXJMP(0x57CE40); }

@@ -23,7 +23,9 @@ class CRenderer
 
 	static CVector &ms_vecCameraPosition;
 	static CVehicle *&m_pFirstPersonVehicle;
+
 public:
+	static float &ms_lodDistScale;	// defined in Frontend.cpp
 	static bool &m_loadingPriority;
 
 	static void Init(void);
