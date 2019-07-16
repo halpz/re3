@@ -48,7 +48,6 @@ WRAPPER void CPed::RegisterThreatWithGangPeds(CEntity*) { EAXJMP(0x4E3870); }
 WRAPPER void CPed::MakeChangesForNewWeapon(int8) { EAXJMP(0x4F2560); }
 WRAPPER void CPed::SetSeek(CVector, float) { EAXJMP(0x4D14B0); }
 WRAPPER bool CPed::Seek(void) { EAXJMP(0x4D1640); }
-WRAPPER void CPed::ClearAll(void) { EAXJMP(0x4C7F20); }
 WRAPPER void CPed::SetWanderPath(int8) { EAXJMP(0x4D2750); }
 WRAPPER void CPed::SetFollowPath(CVector) { EAXJMP(0x4D2EA0); }
 
@@ -3053,7 +3052,7 @@ CPed::CheckForPointBlankPeds(CPed *pedToVerify)
 				neededAngle = CGeneral::LimitRadianAngle(neededAngle);
 				m_fRotationCur = CGeneral::LimitRadianAngle(m_fRotationCur);
 
-				float neededTurn = Abs(neededTurn - m_fRotationCur);
+				float neededTurn = Abs(neededAngle - m_fRotationCur);
 
 				if (neededTurn > PI)
 					neededTurn = 2*PI - neededTurn;
