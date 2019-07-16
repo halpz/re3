@@ -192,9 +192,9 @@ public:
 	void PlayFrontEndTrack(uint32, uint32);
 	void StopFrontEndTrack();
 	void PlayOneShot(int32 audioentity, uint16 sound/*eSound*/, float);
-	void SetMusicMasterVolume(int8);
-	void SetEffectsMasterVolume(int8);
-	int8 SetCurrent3DProvider(int8);
+	void SetMusicMasterVolume(uint8);
+	void SetEffectsMasterVolume(uint8);
+	uint8 SetCurrent3DProvider(uint8);
 	int32 SetSpeakerConfig(int32);
 	int32 GetRadioInCar(void);
 	void SetEffectsFadeVol(uint8);

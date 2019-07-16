@@ -445,6 +445,7 @@ int     m_iModeObbeCamIsInForCar;
 	CVector &GetGameCamPosition(void) { return m_vecGameCamPos; }
 	bool IsPointVisible(const CVector &center, const CMatrix *mat);
 	bool IsSphereVisible(const CVector &center, float radius, const CMatrix *mat);
+	bool IsSphereVisible(const CVector &center, float radius);
 	bool IsBoxVisible(RwV3d *box, const CMatrix *mat);
 	int GetLookDirection(void);
 

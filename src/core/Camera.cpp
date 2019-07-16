@@ -41,6 +41,13 @@ CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat
 }
 
 bool
+CCamera::IsSphereVisible(const CVector &center, float radius)
+{
+	CMatrix mat = m_cameraMatrix;
+	return IsSphereVisible(center, radius, &mat);
+}
+
+bool
 CCamera::IsPointVisible(const CVector &center, const CMatrix *mat)
 {
 	RwV3d c;
@@ -1290,7 +1297,7 @@ CCam::GetWeaponFirstPersonOn()
 }
 
 STARTPATCHES
-	InjectHook(0x42C760, &CCamera::IsSphereVisible, PATCH_JUMP);
+	InjectHook(0x42C760, (bool (CCamera::*)(const CVector &center, float radius, const CMatrix *mat))&CCamera::IsSphereVisible, PATCH_JUMP);
 	InjectHook(0x46FD00, &CCamera::SetFadeColour, PATCH_JUMP);
 
 	InjectHook(0x46FD40, &CCamera::SetMotionBlur, PATCH_JUMP);

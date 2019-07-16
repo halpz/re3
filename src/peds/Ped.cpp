@@ -47,6 +47,10 @@ WRAPPER void CPed::SetDuck(uint32) { EAXJMP(0x4E4920); }
 WRAPPER void CPed::RegisterThreatWithGangPeds(CEntity*) { EAXJMP(0x4E3870); }
 WRAPPER void CPed::MakeChangesForNewWeapon(int8) { EAXJMP(0x4F2560); }
 WRAPPER void CPed::SetSeek(CVector, float) { EAXJMP(0x4D14B0); }
+WRAPPER bool CPed::Seek(void) { EAXJMP(0x4D1640); }
+WRAPPER void CPed::ClearAll(void) { EAXJMP(0x4C7F20); }
+WRAPPER void CPed::SetWanderPath(int8) { EAXJMP(0x4D2750); }
+WRAPPER void CPed::SetFollowPath(CVector) { EAXJMP(0x4D2EA0); }
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -394,7 +398,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagD10 = false;
 	m_ped_flagD20 = false;
 	m_ped_flagD40 = false;
-	m_ped_flagD80 = false;
+	m_bScriptObjectiveCompleted = false;
 
 	m_ped_flagE1 = false;
 	m_ped_flagE2 = false;
@@ -1405,7 +1409,7 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 
 	if (vehicle->pDriver == ped) {
 		vehicle->RemoveDriver();
-		if (vehicle->m_nDoorLock == CARLOCK_COP_CAR)
+		if (vehicle->m_nDoorLock == CARLOCK_LOCKED_INITIALLY)
 			vehicle->m_nDoorLock = CARLOCK_UNLOCKED;
 
 		if (ped->m_nPedType == PEDTYPE_COP && vehicle->IsLawEnforcementVehicle())
