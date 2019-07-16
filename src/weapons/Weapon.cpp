@@ -36,6 +36,12 @@ CWeapon::Reload(void)
 }
 
 bool
+CWeapon::IsType2Handed(void)
+{
+	return m_eWeaponType >= WEAPONTYPE_SHOTGUN &&  m_eWeaponType <= WEAPONTYPE_FLAMETHROWER && m_eWeaponType != WEAPONTYPE_ROCKETLAUNCHER;
+}
+
+bool
 CWeapon::IsTypeMelee(void)
 {
 	return m_eWeaponType == WEAPONTYPE_UNARMED || m_eWeaponType == WEAPONTYPE_BASEBALLBAT;
