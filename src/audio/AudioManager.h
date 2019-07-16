@@ -77,7 +77,7 @@ class tAudioEntity
 {
 public:
 	eAudioType m_nType;
-	CPhysical *m_pEntity;
+	void *m_pEntity;
 	bool m_bIsUsed;
 	uint8 m_bStatus;
 	int16 m_awAudioEvent[4];
@@ -166,9 +166,20 @@ public:
 	uint8 field_31;
 };
 
-class cVehicleParams;
-
 static_assert(sizeof(cMissionAudio) == 0x20, "cMissionAudio: error");
+
+class cVehicleParams;
+class CPlane;
+class CVehicle;
+
+struct cAudioScriptObject {
+	int16 m_wSound;
+	char gap_2[2];
+	CVector m_vecPos;
+	int m_nAudioEntityId;
+};
+
+static_assert(sizeof(cAudioScriptObject) == 0x14, "cAudioScriptObject: error");
 
 class cAudioManager
 {
@@ -219,36 +230,36 @@ public:
 	uint8 field_19195;
 	int32 m_nTimeOfRecentCrime;
 
-	void AddDetailsToRequestedOrderList(uint8 sample);
+	void AddDetailsToRequestedOrderList(uint8 sample); /// ok
 	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 unk1,
-	                        uint8 unk2, bool notLooping);
-	void AddReflectionsToRequestedQueue();
-	void AddReleasingSounds(); // todo
-	void AddSampleToRequestedQueue();
-	void AgeCrimes(); // todo
-	int8 AutoDetect3DProviders();
+	                        uint8 unk2, bool notLooping); /// ok
+	void AddReflectionsToRequestedQueue();                /// ok (check value)
+	void AddReleasingSounds();                            // todo (difficult)
+	void AddSampleToRequestedQueue();                     /// ok
+	void AgeCrimes();                                     // todo
+	int8 AutoDetect3DProviders();                         /// ok
 
-	void CalculateDistance(bool *ptr, float dist);
-	bool CheckForAnAudioFileOnCD();
-	void ClearMissionAudio();
-	void ClearRequestedQueue();
+	void CalculateDistance(bool *ptr, float dist); /// ok
+	bool CheckForAnAudioFileOnCD();                /// ok
+	void ClearMissionAudio();                      /// ok
+	void ClearRequestedQueue();                    /// ok
 	int32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2,
-	                                      float speedMultiplier);
-	int32 ComputePan(float, CVector *); // todo
-	uint32 ComputeVolume(int emittingVolume, float soundIntensity, float distance);
-	int32 CreateEntity(int32 type, CPhysical *entity);
+	                                      float speedMultiplier);                   /// ok
+	int32 ComputePan(float, CVector *);                                             // todo
+	uint32 ComputeVolume(int emittingVolume, float soundIntensity, float distance); /// ok
+	int32 CreateEntity(int32 type, CPhysical *entity);                              /// ok
 
-	void DestroyAllGameCreatedEntities(); // todo, needs cAudioScriptObject
-	void DestroyEntity(int32 id);
-	void DoPoliceRadioCrackle(); // todo hook
+	void DestroyAllGameCreatedEntities(); /// ok
+	void DestroyEntity(int32 id);         /// ok
+	void DoPoliceRadioCrackle();          /// ok
 
-	void GenerateIntegerRandomNumberTable();
+	void GenerateIntegerRandomNumberTable(); /// ok
 
-	float GetDistanceSquared(CVector *v); // todo hook
+	float GetDistanceSquared(CVector *v); /// ok
+
+	void TranslateEntity(CVector *v1, CVector *v2); /// ok
 
 	// done
-
-	void TranslateEntity(CVector *v1, CVector *v2); // todo hook
 
 	void Initialise();
 	void PostInitialiseGameSpecificSetup();
@@ -321,6 +332,8 @@ public:
 
 	void Service();
 	void GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample, uint32 maxOffset);
+
+	void DoJumboVolOffset();
 
 	uint32 GetPlayerTalkSfx(int16 sound);
 	uint32 GetCopTalkSfx(int16 sound);
@@ -400,58 +413,58 @@ public:
 	uint32 GetGenericFemaleTalkSfx(int16 sound);
 
 	void ProcessActiveQueues();                              // todo
-	bool ProcessAirBrakes(cVehicleParams *params);           // todo requires CVehicle
-	void ProcessAirportScriptObject(uint8 sound);            // done
-	bool ProcessBoatEngine(cVehicleParams *params);          // todo requires CVehicle
-	bool ProcessBoatMovingOverWater(cVehicleParams *params); // todo requires CVehicle
-	void ProcessBridge();                                    // todo
-	void ProcessBridgeMotor();                               // done
+	bool ProcessAirBrakes(cVehicleParams *params);           /// ok
+	void ProcessAirportScriptObject(uint8 sound);            /// ok
+	bool ProcessBoatEngine(cVehicleParams *params);          // todo requires CBoat
+	bool ProcessBoatMovingOverWater(cVehicleParams *params); // todo requires CBoat
+	void ProcessBridge();                                    // todo requires CBridge
+	void ProcessBridgeMotor();                               /// ok
 	void ProcessBridgeOneShots();                            // todo requires CBridge
-	void ProcessBridgeWarning();                             // done
+	void ProcessBridgeWarning();                             /// ok
 	bool ProcessCarBombTick(void *);                         // todo requires CVehicle
 	void ProcessCesna(void *);                               // todo requires CPlane
-	void ProcessCinemaScriptObject(uint8 sound);             // done
+	void ProcessCinemaScriptObject(uint8 sound);             /// ok
 	void ProcessCrane();                                     // todo requires CCrane
-	void ProcessDocksScriptObject(uint8 sound);              // done
+	void ProcessDocksScriptObject(uint8 sound);              /// ok
 	//	bool ProcessEngineDamage(void *); //todo requires CVehicle
-	void ProcessEntity(int32 sound);         // done
+	void ProcessEntity(int32 sound);         /// ok
 	void ProcessExplosions(int32 explosion); // todo requires CExplosion
-	void ProcessFireHydrant();               // done
+	void ProcessFireHydrant();               /// ok
 	void ProcessFires(int32 entity);         // todo requires gFireManager
-	void ProcessFrontEnd();                  // done
-	void ProcessGarages();                   // todo
+	void ProcessFrontEnd();                  /// ok
+	void ProcessGarages();                   // todo requires CGarages::aGarages
 	//	bool ProcessHelicopter(void *); // todo requires CVehicle
-	void ProcessHomeScriptObject(uint8 sound);
-	//	void ProcessJumbo(void *);
-	//	void ProcessJumboAccel(void *);
-	//	void ProcessJumboDecel(void *);
-	void ProcessJumboFlying();
-	//	void ProcessJumboLanding(void *);
-	//	void ProcessJumboTakeOff(void *);
-	void ProcessJumboTaxi(); // done
-	//	void ProcessLaunderetteScriptObject(uint8 sound);
-	//	void ProcessLoopingScriptObject(uint8 sound);
+	void ProcessHomeScriptObject(uint8 sound);        /// ok
+	void ProcessJumbo(cVehicleParams *);              /// ok
+	void ProcessJumboAccel(CPlane *);                 // todo
+	void ProcessJumboDecel(CPlane *);                 // todo
+	void ProcessJumboFlying();                        /// ok
+	void ProcessJumboLanding(CPlane *);               // todo
+	void ProcessJumboTakeOff(CPlane *);               // todo
+	void ProcessJumboTaxi();                          /// ok
+	void ProcessLaunderetteScriptObject(uint8 sound); /// ok
+	void ProcessLoopingScriptObject(uint8 sound);     /// ok
 	//	void ProcessMissionAudio();
 	//	void ProcessModelVehicle(void *);
 	//	void ProcessOneShotScriptObject(uint8 sound);
 	void ProcessPed(CPhysical *p); // todo
 	//	void ProcessPedHeadphones(void *);
 	//	void ProcessPedOneShots(void *);
-	void ProcessPhysical(int32 id); // done
+	void ProcessPhysical(int32 id); /// ok
 	void ProcessPlane(void *);      // todo
 	//	void ProcessPlayersVehicleEngine(void *, void *);
-	//	void ProcessPoliceCellBeatingScriptObject(uint8 sound);
-	//	void ProcessPornCinema(uint8 sound);
-	void ProcessProjectiles(); // todo
+	void ProcessPoliceCellBeatingScriptObject(uint8 sound); // todo
+	void ProcessPornCinema(uint8 sound);                    // todo
+	void ProcessProjectiles();                              // todo
 	//	void ProcessRainOnVehicle(void *);
 	//	void ProcessReverb();
 	//	bool ProcessReverseGear(void *);
-	//	void ProcessSawMillScriptObject(uint8 sound);
-	void ProcessScriptObject(int32 id); // todo
-	//	void ProcessShopScriptObject(uint8 sound);
-	//	void ProcessSpecial();
+	void ProcessSawMillScriptObject(uint8 sound); // todo
+	void ProcessScriptObject(int32 id);           // todo
+	void ProcessShopScriptObject(uint8 sound);    // todo
+	void ProcessSpecial();                        /// ok
 	//	bool ProcessTrainNoise(void *);
-	void ProcessVehicle(void *); // todo
+	void ProcessVehicle(CVehicle *); // todo
 	//	bool ProcessVehicleDoors(void *);
 	//	bool ProcessVehicleEngine(void *);
 	//	void ProcessVehicleHorn(void *);
@@ -462,11 +475,10 @@ public:
 	//	void ProcessVehicleSkidding(void *);
 	void ProcessWaterCannon(int32); // todo
 	void ProcessWeather(int32 id);  // todo
-	                                //	bool ProcessWetRoadNoise(void *);
-	                                //	void ProcessWorkShopScriptObject(uint8 sound);
+	//	bool ProcessWetRoadNoise(void *);
+	void ProcessWorkShopScriptObject(uint8 sound); /// ok
 };
 
 static_assert(sizeof(cAudioManager) == 0x4B14, "cAudioManager: error");
 
 extern cAudioManager &AudioManager;
-extern cAudioManager &Players;

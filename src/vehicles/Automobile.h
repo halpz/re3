@@ -61,7 +61,7 @@ public:
 	float m_aSuspensionLineLength[4];
 	float m_fHeightAboveRoad;
 	float m_fTraction;
-	int32 field_514;
+	float m_fVelocityChangeForAudio;
 	float m_randomValues[6];	// used for what?
 	float m_fFireBlowUpTimer;
 	CPhysical *m_aGroundPhysical[4];	// physicals touching wheels

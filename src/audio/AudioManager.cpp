@@ -11,6 +11,7 @@
 #include "MusicManager.h"
 #include "Ped.h"
 #include "Physical.h"
+#include "Plane.h"
 #include "PlayerPed.h"
 #include "SampleManager.h"
 #include "Stats.h"
@@ -194,6 +195,7 @@ cAudioManager::AddReflectionsToRequestedQueue()
 		}
 	}
 }
+
 #if 1
 WRAPPER void
 cAudioManager::AddReleasingSounds()
@@ -456,18 +458,9 @@ cAudioManager::CreateEntity(int32 type, CPhysical *entity)
 	return -3;
 }
 
-#if 1
-WRAPPER
 void
 cAudioManager::DestroyAllGameCreatedEntities()
 {
-	EAXJMP(0x57A830);
-}
-#else
-void
-cAudioManager::DestroyAllGameCreatedEntities()
-{
-	cAudioManager *v1;
 	cAudioScriptObject *entity;
 
 	if(m_bIsInitialised) {
@@ -481,13 +474,10 @@ cAudioManager::DestroyAllGameCreatedEntities()
 				case AUDIOTYPE_GARAGE:
 				case AUDIOTYPE_HYDRANT: cAudioManager::DestroyEntity(i); break;
 				case AUDIOTYPE_ONE_SHOT:
-					entity = m_asAudioEntities[i].m_pEntity;
-					if(entity) {
-						cAudioScriptObject::~cAudioScriptObject(
-						    m_asAudioEntities[i].m_pEntity);
-						cAudioScriptObject::operator delete(entity);
-					}
-					cAudioManager::DestroyEntity(i);
+					entity =
+					    (cAudioScriptObject *)m_asAudioEntities[i].m_pEntity;
+					if(entity) { delete entity; }
+					DestroyEntity(i);
 					break;
 				default: break;
 				}
@@ -496,7 +486,6 @@ cAudioManager::DestroyAllGameCreatedEntities()
 		m_nScriptObjectEntityTotal = 0;
 	}
 }
-#endif
 
 void
 cAudioManager::DestroyEntity(int32 id)
@@ -1009,6 +998,15 @@ cAudioManager::GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample, uint
 	// if exceeded range, then choose first available sample
 	if(*phrase == *prevPhrase && ++*phrase >= sample + maxOffset) *phrase = sample;
 	*prevPhrase = *phrase;
+}
+
+uint8 &jumboVolOffset = *(uint8 *)0x6508ED;
+
+void
+cAudioManager::DoJumboVolOffset()
+{
+	if(!(m_nTimeOfRecentCrime % (m_anRandomTable[0] % 6u + 3)))
+		jumboVolOffset = m_anRandomTable[1] % 60u;
 }
 
 uint32
@@ -3457,13 +3455,6 @@ cAudioManager::ProcessActiveQueues()
 }
 #endif
 
-#if 1
-bool
-cAudioManager::ProcessAirBrakes(cVehicleParams *params)
-{
-	EAXJMP(0x56C940);
-}
-#else
 bool
 cAudioManager::ProcessAirBrakes(cVehicleParams *params)
 {
@@ -3505,7 +3496,6 @@ cAudioManager::ProcessAirBrakes(cVehicleParams *params)
 
 	return 1;
 }
-#endif
 
 void
 cAudioManager::ProcessAirportScriptObject(uint8 sound)
@@ -3547,7 +3537,7 @@ cAudioManager::ProcessAirportScriptObject(uint8 sound)
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.field_56 = 1;
 				m_sQueueSample.field_16 = 3;
-				m_sQueueSample.field_48 = 2.0;
+				m_sQueueSample.field_48 = 2.0f;
 				m_sQueueSample.m_bEmittingVolume = 110;
 				m_sQueueSample.m_nLoopStart = 0;
 				m_sQueueSample.m_nLoopEnd = -1;
@@ -3560,7 +3550,6 @@ cAudioManager::ProcessAirportScriptObject(uint8 sound)
 	}
 }
 
-WRAPPER
 bool
 cAudioManager::ProcessBoatEngine(cVehicleParams *params)
 {
@@ -3599,7 +3588,7 @@ cAudioManager::ProcessBridgeMotor()
 			    cSampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd =
 			    cSampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.field_48 = 2.0;
+			m_sQueueSample.field_48 = 2.0f;
 			m_sQueueSample.m_fSoundIntensity = 400.0f;
 			m_sQueueSample.field_56 = 0;
 			m_sQueueSample.field_76 = 3;
@@ -3700,7 +3689,7 @@ cAudioManager::ProcessCinemaScriptObject(uint8 sound)
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.field_56 = 1;
 				m_sQueueSample.field_16 = 3;
-				m_sQueueSample.field_48 = 2.0;
+				m_sQueueSample.field_48 = 2.0f;
 				m_sQueueSample.m_bEmittingVolume = rand;
 				m_sQueueSample.m_nLoopStart = 0;
 				m_sQueueSample.m_nLoopEnd = -1;
@@ -3761,7 +3750,7 @@ cAudioManager::ProcessDocksScriptObject(uint8 sound)
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.field_56 = 1;
 				m_sQueueSample.field_16 = 3;
-				m_sQueueSample.field_48 = 2.0;
+				m_sQueueSample.field_48 = 2.0f;
 				m_sQueueSample.m_bEmittingVolume = rand;
 				m_sQueueSample.m_nLoopStart = 0;
 				m_sQueueSample.m_nLoopEnd = -1;
@@ -3866,7 +3855,7 @@ cAudioManager::ProcessFireHydrant()
 	bool something = false;
 
 	m_sQueueSample.m_vecPos =
-	    *(CVector *)(m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity + 52);
+	    *(CVector *)((size_t)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity + 52);
 	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
 	if(distSquared < 1225.f) {
 		CalculateDistance(&something, distSquared);
@@ -3884,8 +3873,8 @@ cAudioManager::ProcessFireHydrant()
 			    cSampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd =
 			    cSampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.field_48 = 2.0;
-			m_sQueueSample.m_fSoundIntensity = 35.0;
+			m_sQueueSample.field_48 = 2.0f;
+			m_sQueueSample.m_fSoundIntensity = 35.0f;
 			m_sQueueSample.field_56 = 0;
 			m_sQueueSample.field_76 = 3;
 			m_sQueueSample.m_bReverbFlag = 1;
@@ -4068,6 +4057,110 @@ cAudioManager::ProcessGarages()
 void
 cAudioManager::ProcessHomeScriptObject(uint8 sound)
 {
+	uint32 time;
+	uint8 rand;
+	float dist;
+	float maxDist;
+
+	static uint8 counter = 0;
+
+	time = CTimer::GetTimeInMilliseconds();
+	if(time > audioLogicTimers[6]) {
+		switch(sound) {
+		case SCRIPT_SOUND_HOME_LOOP_S:
+			maxDist = 900.f;
+			m_sQueueSample.m_fSoundIntensity = 30.0f;
+			break;
+		case SCRIPT_SOUND_HOME_LOOP_L:
+			maxDist = 6400.f;
+			m_sQueueSample.m_fSoundIntensity = 80.0f;
+			break;
+		default: break;
+		}
+		dist = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+		if(dist < maxDist) {
+			m_sQueueSample.m_fDistance = sqrt(dist);
+			rand = m_anRandomTable[0] % 30u + 40;
+			m_sQueueSample.m_bVolume = ComputeVolume(
+			    rand, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
+			if(m_sQueueSample.m_bVolume) {
+				m_sQueueSample.m_nSampleIndex =
+				    m_anRandomTable[0] % 5u + AUDIO_SAMPLE_HOME_1;
+				m_sQueueSample.m_bBankIndex = 0;
+				m_sQueueSample.m_nFrequency = cSampleManager.GetSampleBaseFrequency(
+				    m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_nFrequency +=
+				    RandomDisplacement(m_sQueueSample.m_nFrequency >> 4);
+				m_sQueueSample.field_4 = counter++;
+				m_sQueueSample.m_bIsDistant = 0;
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.field_56 = 1;
+				m_sQueueSample.field_16 = 3;
+				m_sQueueSample.field_48 = 0.0f;
+				m_sQueueSample.m_bEmittingVolume = rand;
+				m_sQueueSample.m_nLoopStart = 0;
+				m_sQueueSample.m_nLoopEnd = -1;
+				m_sQueueSample.m_bReverbFlag = 1;
+				m_sQueueSample.m_bRequireReflection = 1;
+				AddSampleToRequestedQueue();
+				audioLogicTimers[6] = time + 1000 + m_anRandomTable[3] % 4000u;
+			}
+		}
+	}
+}
+
+float *PlanePathPosition = (float *)0x8F5FC8;
+float &LandingPoint = *(float *)0x8F2C7C;
+float &TakeOffPoint = *(float *)0x8E28A4;
+
+void
+cAudioManager::ProcessJumbo(cVehicleParams *params)
+{
+	CPlane *plane;
+	float position;
+
+	if(params->m_fDistance < 193600.0f) {
+		CalculateDistance((bool *)params, params->m_fDistance);
+		plane = (CPlane *)params->m_pVehicle;
+		DoJumboVolOffset();
+		position = PlanePathPosition[plane->m_wIndex];
+		if(position <= TakeOffPoint) {
+			if(plane->field_656 <= 0.10334f) {
+				ProcessJumboTaxi();
+				return;
+			}
+
+			ProcessJumboAccel(plane);
+		} else if(300.0f + TakeOffPoint >= position) {
+			ProcessJumboTakeOff(plane);
+		} else if(LandingPoint - 350.0f >= position) {
+			ProcessJumboFlying();
+		} else {
+			if(position > LandingPoint) {
+				if(plane->field_656 > 0.10334f) {
+					ProcessJumboDecel(plane);
+					return;
+				}
+				ProcessJumboTaxi();
+				return;
+			}
+			ProcessJumboLanding(plane);
+		}
+	}
+}
+
+WRAPPER
+void
+cAudioManager::ProcessJumboAccel(CPlane *)
+{
+	EAXJMP(0x56EA40);
+}
+
+WRAPPER
+void
+cAudioManager::ProcessJumboDecel(CPlane *)
+{
+	EAXJMP(0x56EE40);
 }
 
 void
@@ -4076,11 +4169,790 @@ cAudioManager::ProcessJumboFlying()
 	if(SetupJumboFlySound(127u)) SetupJumboEngineSound(63u, 22050);
 }
 
+WRAPPER
+void
+cAudioManager::ProcessJumboLanding(CPlane *)
+{
+	EAXJMP(0x56ED10);
+}
+
+WRAPPER
+void
+cAudioManager::ProcessJumboTakeOff(CPlane *)
+{
+	EAXJMP(0x56EC00);
+}
+
 void
 cAudioManager::ProcessJumboTaxi()
 {
 	if(SetupJumboFlySound(20u)) {
 		if(SetupJumboTaxiSound(75u)) SetupJumboWhineSound(18u, 29500);
+	}
+}
+
+void
+cAudioManager::ProcessLaunderetteScriptObject(uint8 sound)
+{
+	float maxDist;
+	float distSquared;
+
+	switch(sound) {
+	case SCRIPT_SOUND_LAUNDERETTE_LOOP_S:
+	case SCRIPT_SOUND_LAUNDERETTE_LOOP_L:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		break;
+	default: break;
+	}
+	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	if(distSquared < maxDist) {
+		m_sQueueSample.m_fDistance = sqrt(distSquared);
+		m_sQueueSample.m_bVolume = ComputeVolume(45u, m_sQueueSample.m_fSoundIntensity,
+		                                         m_sQueueSample.m_fDistance);
+		if(m_sQueueSample.m_bVolume) {
+			m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_LAUNDERETTE_1;
+			m_sQueueSample.m_bBankIndex = 0;
+			m_sQueueSample.m_nFrequency =
+			    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_LAUNDERETTE_1);
+			m_sQueueSample.field_4 = 0;
+			m_sQueueSample.m_bIsDistant = 0;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.field_56 = 0;
+			m_sQueueSample.field_16 = 5;
+			m_sQueueSample.field_48 = 2.0f;
+			m_sQueueSample.m_bEmittingVolume = 45;
+			m_sQueueSample.m_nLoopStart =
+			    cSampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nLoopEnd =
+			    cSampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_bReverbFlag = 1;
+			m_sQueueSample.m_bRequireReflection = 0;
+			AddSampleToRequestedQueue();
+		}
+		m_sQueueSample.m_bVolume = ComputeVolume(110u, m_sQueueSample.m_fSoundIntensity,
+		                                         m_sQueueSample.m_fDistance);
+		if(m_sQueueSample.m_bVolume) {
+			m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_LAUNDERETTE_2;
+			m_sQueueSample.m_bBankIndex = 0;
+			m_sQueueSample.m_nFrequency =
+			    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_LAUNDERETTE_2);
+			m_sQueueSample.field_4 = 1;
+			m_sQueueSample.m_bIsDistant = 0;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.field_56 = 0;
+			m_sQueueSample.field_16 = 3;
+			m_sQueueSample.field_48 = 2.0f;
+			m_sQueueSample.m_bEmittingVolume = 110;
+			m_sQueueSample.m_nLoopStart =
+			    cSampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nLoopEnd =
+			    cSampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_bReverbFlag = 1;
+			m_sQueueSample.m_bRequireReflection = 0;
+			AddSampleToRequestedQueue();
+		}
+	}
+}
+
+void
+cAudioManager::ProcessLoopingScriptObject(uint8 sound)
+{
+	uint8 emittingVolume;
+	float maxDist;
+	float distSquared;
+
+	switch(sound) {
+	case SCRIPT_SOUND_PARTY_1_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_1;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_1);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_1_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_1;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_1);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_2_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_2;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_2);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_2_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_2;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_2);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_3_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_3;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_3);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_3_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_3;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_3);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_4_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_4;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_4);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_4_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_4;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_4);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_5_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_5;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_5);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_5_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_5;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_5);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_6_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_6;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_6);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_6_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_6;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_6);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_7_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_7;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_7);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_7_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_7;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_7);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_8_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_8;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_8);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_8_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_8;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_8);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_9_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_9;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_9);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_9_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_9;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_9);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_10_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_10;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_10);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_10_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_10;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_10);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_11_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_11;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_11);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_11_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_11;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_11);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_12_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_12;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_12);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_12_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_12;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_12);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_13_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_13;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_13);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_13_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_13;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_13);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_STRIP_CLUB_LOOP_1_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_STRIP_CLUB_1;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_STRIP_CLUB_1);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_STRIP_CLUB_LOOP_1_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_STRIP_CLUB_1;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_STRIP_CLUB_1);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_STRIP_CLUB_LOOP_2_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_STRIP_CLUB_2;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_STRIP_CLUB_2);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_STRIP_CLUB_LOOP_2_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_STRIP_CLUB_2;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_STRIP_CLUB_2);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_WORK_SHOP_LOOP_S:
+	case SCRIPT_SOUND_WORK_SHOP_LOOP_L:
+		cAudioManager::ProcessWorkShopScriptObject(sound);
+		return;
+	case SCRIPT_SOUND_SAWMILL_LOOP_S:
+	case SCRIPT_SOUND_SAWMILL_LOOP_L: cAudioManager::ProcessSawMillScriptObject(sound); return;
+	case SCRIPT_SOUND_38:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_409;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 110;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_409);
+		m_sQueueSample.field_16 = 6;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_39:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_409;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 110;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_409);
+		m_sQueueSample.field_16 = 6;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_LAUNDERETTE_LOOP_S:
+	case SCRIPT_SOUND_LAUNDERETTE_LOOP_L: ProcessLaunderetteScriptObject(sound); return;
+	case SCRIPT_SOUND_CHINATOWN_RESTAURANT_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_CHINATOWN_RESTAURANT;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 110;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_CHINATOWN_RESTAURANT);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_CHINATOWN_RESTAURANT_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_CHINATOWN_RESTAURANT;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 110;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_CHINATOWN_RESTAURANT);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_CIPRIANI_RESAURANT_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_CIPRIANI_RESTAURANT;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 110;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_CIPRIANI_RESTAURANT);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_CIPRIANI_RESAURANT_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_CIPRIANI_RESTAURANT;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 110;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_CIPRIANI_RESTAURANT);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_46:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_414;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 110;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_414);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_47:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_414;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 110;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_414);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_MARCO_BISTRO_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_MARCO_BISTRO;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 110;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_MARCO_BISTRO);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_MARCO_BISTRO_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_MARCO_BISTRO;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 110;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_MARCO_BISTRO);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_AIRPORT_LOOP_S:
+	case SCRIPT_SOUND_AIRPORT_LOOP_L: ProcessAirportScriptObject(sound); return;
+	case SCRIPT_SOUND_SHOP_LOOP_S:
+	case SCRIPT_SOUND_SHOP_LOOP_L: ProcessShopScriptObject(sound); return;
+	case SCRIPT_SOUND_CINEMA_LOOP_S:
+	case SCRIPT_SOUND_CINEMA_LOOP_L: ProcessCinemaScriptObject(sound); return;
+	case SCRIPT_SOUND_DOCKS_LOOP_S:
+	case SCRIPT_SOUND_DOCKS_LOOP_L: cAudioManager::ProcessDocksScriptObject(sound); return;
+	case SCRIPT_SOUND_HOME_LOOP_S:
+	case SCRIPT_SOUND_HOME_LOOP_L: cAudioManager::ProcessHomeScriptObject(sound); return;
+	case SCRIPT_SOUND_FRANKIE_PIANO:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_FRANKIE_PIANO;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_FRANKIE_PIANO);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PARTY_1_LOOP:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_PARTY_1;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_PARTY_1);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PORN_CINEMA_1_S:
+	case SCRIPT_SOUND_PORN_CINEMA_1_L:
+	case SCRIPT_SOUND_PORN_CINEMA_2_S:
+	case SCRIPT_SOUND_PORN_CINEMA_2_L:
+	case SCRIPT_SOUND_PORN_CINEMA_3_S:
+	case SCRIPT_SOUND_PORN_CINEMA_3_L:
+	case SCRIPT_SOUND_MISTY_SEX_S:
+	case SCRIPT_SOUND_MISTY_SEX_L: ProcessPornCinema(sound); return;
+	case SCRIPT_SOUND_BANK_ALARM_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_BANK_ALARM;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 90;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_BANK_ALARM);
+		m_sQueueSample.field_16 = 2;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_BANK_ALARM_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_BANK_ALARM;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 90;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_BANK_ALARM);
+		m_sQueueSample.field_16 = 2;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_POLICE_BALL_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_POLICE_BALL;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_POLICE_BALL);
+		m_sQueueSample.field_16 = 2;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_POLICE_BALL_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_POLICE_BALL;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_POLICE_BALL);
+		m_sQueueSample.field_16 = 2;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_RAVE_LOOP_INDUSTRIAL_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_RAVE_INDUSTRIAL;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_RAVE_INDUSTRIAL);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_RAVE_LOOP_INDUSTRIAL_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_RAVE_INDUSTRIAL;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_RAVE_INDUSTRIAL);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_POLICE_CELL_BEATING_LOOP_S:
+	case SCRIPT_SOUND_POLICE_CELL_BEATING_LOOP_L:
+		cAudioManager::ProcessPoliceCellBeatingScriptObject(sound);
+		return;
+	case SCRIPT_SOUND_RAVE_1_LOOP_S:
+	case SCRIPT_SOUND_RAVE_2_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_RAVE_1;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_RAVE_1_LOOP_L:
+	case SCRIPT_SOUND_RAVE_2_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_RAVE_1;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_RAVE_3_LOOP_S:
+		maxDist = 900.f;
+		m_sQueueSample.m_fSoundIntensity = 30.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_RAVE_2;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_RAVE_2);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_RAVE_3_LOOP_L:
+		maxDist = 6400.f;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_RAVE_2;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_RAVE_2);
+		m_sQueueSample.field_16 = 3;
+		m_sQueueSample.field_76 = 3;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	case SCRIPT_SOUND_PRETEND_FIRE_LOOP:
+		maxDist = 2500.f;
+		m_sQueueSample.m_fSoundIntensity = 50.0f;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_FIRE_ENTITY;
+		m_sQueueSample.m_bBankIndex = 0;
+		emittingVolume = 80;
+		m_sQueueSample.m_nFrequency =
+		    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_FIRE_ENTITY);
+		m_sQueueSample.field_16 = 8;
+		m_sQueueSample.field_76 = 10;
+		m_sQueueSample.field_48 = 2.0f;
+		break;
+	default: return;
+	}
+
+	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	if(distSquared < maxDist) {
+		m_sQueueSample.m_fDistance = Sqrt(distSquared);
+		m_sQueueSample.m_bVolume = ComputeVolume(
+		    emittingVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
+		if(m_sQueueSample.m_bVolume) {
+			m_sQueueSample.field_4 = 0;
+			m_sQueueSample.m_bIsDistant = 0;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.field_56 = 0;
+			m_sQueueSample.m_bReverbFlag = 1;
+			m_sQueueSample.m_bEmittingVolume = emittingVolume;
+			m_sQueueSample.m_nLoopStart =
+			    cSampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nLoopEnd =
+			    cSampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_bRequireReflection = 0;
+			AddSampleToRequestedQueue();
+		}
 	}
 }
 
@@ -4094,11 +4966,15 @@ cAudioManager::ProcessPed(CPhysical *)
 void
 cAudioManager::ProcessPhysical(int32 id)
 {
-	CPhysical *entity = m_asAudioEntities[id].m_pEntity;
+	CPhysical *entity = (CPhysical *)m_asAudioEntities[id].m_pEntity;
 	if(entity) {
 		switch(entity->m_type & 7) {
-		case ENTITY_TYPE_VEHICLE: ProcessVehicle(m_asAudioEntities[id].m_pEntity); break;
-		case ENTITY_TYPE_PED: ProcessPed(m_asAudioEntities[id].m_pEntity); break;
+		case ENTITY_TYPE_VEHICLE:
+			ProcessVehicle((CVehicle *)m_asAudioEntities[id].m_pEntity);
+			break;
+		case ENTITY_TYPE_PED:
+			ProcessPed((CPhysical *)m_asAudioEntities[id].m_pEntity);
+			break;
 		default: return;
 		}
 	}
@@ -4113,9 +4989,30 @@ cAudioManager::ProcessPlane(void *ptr)
 
 WRAPPER
 void
+cAudioManager::ProcessPoliceCellBeatingScriptObject(uint8 sound)
+{
+	EAXJMP(0x578190);
+}
+
+WRAPPER
+void
+cAudioManager::ProcessPornCinema(uint8 sound)
+{
+	EAXJMP(0x577280);
+}
+
+WRAPPER
+void
 cAudioManager::ProcessProjectiles()
 {
 	EAXJMP(0x578A80);
+}
+
+WRAPPER
+void
+cAudioManager::ProcessSawMillScriptObject(uint8 sound)
+{
+	EAXJMP(0x577630);
 }
 
 WRAPPER
@@ -4127,10 +5024,52 @@ cAudioManager::ProcessScriptObject(int32 id)
 
 WRAPPER
 void
-cAudioManager::ProcessVehicle(void *)
+cAudioManager::ProcessShopScriptObject(uint8 sound)
+{
+    EAXJMP(0x577970);
+}
+
+void
+cAudioManager::ProcessSpecial()
+{
+	CPlayerPed *playerPed;
+	ePedState state;
+
+	if(m_bUserPause) {
+		if(!m_bPreviousUserPause) {
+			MusicManager.ChangeMusicMode(0);
+			cSampleManager.SetEffectsFadeVol(maxVolume);
+			cSampleManager.SetMusicFadeVol(maxVolume);
+		}
+	} else {
+		if(m_bPreviousUserPause) {
+			MusicManager.StopFrontEndTrack();
+			MusicManager.ChangeMusicMode(1u);
+		}
+		playerPed = FindPlayerPed();
+		if(playerPed) {
+			state = playerPed->m_nPedState;
+			if(state != PED_ENTER_CAR && state != PED_STEAL_CAR &&
+			   !playerPed->bInVehicle)
+				cSampleManager.StopChannel(m_bActiveSamples);
+		}
+	}
+}
+
+#if 1
+WRAPPER
+void
+cAudioManager::ProcessVehicle(CVehicle *)
 {
 	EAXJMP(0x569A00);
 }
+#else
+void
+cAudioManager::ProcessVehicle(CVehicle *)
+{
+	EAXJMP(0x569A00);
+}
+#endif
 
 WRAPPER
 void cAudioManager::ProcessWaterCannon(int32) { EAXJMP(0x575F30); }
@@ -4140,6 +5079,48 @@ void
 cAudioManager::ProcessWeather(int32 id)
 {
 	EAXJMP(0x578370);
+}
+
+void
+cAudioManager::ProcessWorkShopScriptObject(uint8 sound)
+{
+	float distSquared;
+	float maxDist;
+
+	switch(sound) {
+	case SCRIPT_SOUND_WORK_SHOP_LOOP_S:
+	case SCRIPT_SOUND_WORK_SHOP_LOOP_L:
+		maxDist = 400.f;
+		this->m_sQueueSample.m_fSoundIntensity = 20.0;
+		break;
+	default: break;
+	}
+	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
+	if(distSquared < maxDist) {
+		m_sQueueSample.m_fDistance = sqrt(distSquared);
+		m_sQueueSample.m_bVolume = ComputeVolume(30u, m_sQueueSample.m_fSoundIntensity,
+		                                         m_sQueueSample.m_fDistance);
+		if(m_sQueueSample.m_bVolume) {
+			m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_WORK_SHOP;
+			m_sQueueSample.m_bBankIndex = 0;
+			m_sQueueSample.m_nFrequency =
+			    cSampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_WORK_SHOP);
+			m_sQueueSample.field_4 = 0;
+			m_sQueueSample.m_bIsDistant = 0;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.field_56 = 0;
+			m_sQueueSample.field_16 = 5;
+			m_sQueueSample.field_48 = 2.0;
+			m_sQueueSample.m_bEmittingVolume = 30;
+			m_sQueueSample.m_nLoopStart =
+			    cSampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nLoopEnd =
+			    cSampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_bReverbFlag = 1;
+			m_sQueueSample.m_bRequireReflection = 0;
+			AddSampleToRequestedQueue();
+		}
+	}
 }
 
 WRAPPER void
@@ -4163,6 +5144,15 @@ InjectHook(0x5796A0, &cAudioManager::ClearMissionAudio, PATCH_JUMP);
 InjectHook(0x57C120, &cAudioManager::ClearRequestedQueue, PATCH_JUMP);
 InjectHook(0x57AE00, &cAudioManager::ComputeDopplerEffectedFrequency, PATCH_JUMP);
 InjectHook(0x57ABB0, &cAudioManager::ComputeVolume, PATCH_JUMP);
+InjectHook(0x57A310, &cAudioManager::CreateEntity, PATCH_JUMP);
+
+InjectHook(0x57A830, &cAudioManager::DestroyAllGameCreatedEntities, PATCH_JUMP);
+InjectHook(0x57A400, &cAudioManager::DestroyEntity, PATCH_JUMP);
+InjectHook(0x57F060, &cAudioManager::DoPoliceRadioCrackle, PATCH_JUMP);
+
+InjectHook(0x57C290, &cAudioManager::GenerateIntegerRandomNumberTable, PATCH_JUMP);
+InjectHook(0x569750, &cAudioManager::GetDistanceSquared, PATCH_JUMP);
+InjectHook(0x57AC60, &cAudioManager::TranslateEntity, PATCH_JUMP);
 
 InjectHook(0x57A0E0, &cAudioManager::Initialise, PATCH_JUMP);
 InjectHook(0x569420, &cAudioManager::PostInitialiseGameSpecificSetup, PATCH_JUMP);
@@ -4209,7 +5199,6 @@ InjectHook(0x56CAB0, &cAudioManager::HasAirBrakes, PATCH_JUMP);
 InjectHook(0x56F410, &cAudioManager::GetJumboTaxiFreq, PATCH_JUMP);
 
 InjectHook(0x579650, &cAudioManager::IsMissionAudioSampleFinished, PATCH_JUMP);
-// done
 InjectHook(0x57AF90, &cAudioManager::RandomDisplacement, PATCH_JUMP);
 
 InjectHook(0x57A9E0, &cAudioManager::ReleaseDigitalHandle, PATCH_JUMP);
@@ -4218,14 +5207,10 @@ InjectHook(0x57AA00, &cAudioManager::SetDynamicAcousticModelingStatus, PATCH_JUM
 
 InjectHook(0x57AA50, &cAudioManager::IsAudioInitialised, PATCH_JUMP);
 
-InjectHook(0x57A310, &cAudioManager::CreateEntity, PATCH_JUMP);
-InjectHook(0x57A400, &cAudioManager::DestroyEntity, PATCH_JUMP);
 InjectHook(0x57A4C0, &cAudioManager::SetEntityStatus, PATCH_JUMP);
 
 InjectHook(0x569570, &cAudioManager::PreTerminateGameSpecificShutdown, PATCH_JUMP);
 InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);
-
-InjectHook(0x57C290, &cAudioManager::GenerateIntegerRandomNumberTable, PATCH_JUMP);
 
 InjectHook(0x56AD10, &cAudioManager::PlayerJustGotInCar, PATCH_JUMP);
 InjectHook(0x56AD20, &cAudioManager::PlayerJustLeftCar, PATCH_JUMP);
@@ -4310,6 +5295,7 @@ InjectHook(0x575510, &cAudioManager::GetGenericFemaleTalkSfx, PATCH_JUMP);
 
 // Process stuff
 // InjectHook(0x57BA60, &cAudioManager::ProcessActiveQueues, PATCH_JUMP);
+InjectHook(0x56C940, &cAudioManager::ProcessAirBrakes, PATCH_JUMP);
 InjectHook(0x577B30, &cAudioManager::ProcessAirportScriptObject, PATCH_JUMP);
 InjectHook(0x579250, &cAudioManager::ProcessBridgeMotor, PATCH_JUMP);
 InjectHook(0x579170, &cAudioManager::ProcessBridgeWarning, PATCH_JUMP);
@@ -4318,8 +5304,15 @@ InjectHook(0x577E50, &cAudioManager::ProcessDocksScriptObject, PATCH_JUMP);
 InjectHook(0x569870, &cAudioManager::ProcessEntity, PATCH_JUMP);
 InjectHook(0x578FD0, &cAudioManager::ProcessFireHydrant, PATCH_JUMP);
 InjectHook(0x5785E0, &cAudioManager::ProcessFrontEnd, PATCH_JUMP);
+InjectHook(0x577FE0, &cAudioManager::ProcessHomeScriptObject, PATCH_JUMP);
+InjectHook(0x56E8F0, &cAudioManager::ProcessJumbo, PATCH_JUMP);
+
 InjectHook(0x56ECF0, &cAudioManager::ProcessJumboFlying, PATCH_JUMP);
 InjectHook(0x56EA10, &cAudioManager::ProcessJumboTaxi, PATCH_JUMP);
-InjectHook(0x5699C0, &cAudioManager::ProcessPhysical, PATCH_JUMP);
+InjectHook(0x5777E0, &cAudioManager::ProcessLaunderetteScriptObject, PATCH_JUMP);
+InjectHook(0x576770, &cAudioManager::ProcessLoopingScriptObject, PATCH_JUMP);
 
+InjectHook(0x5699C0, &cAudioManager::ProcessPhysical, PATCH_JUMP);
+InjectHook(0x5697D0, &cAudioManager::ProcessPhysical, PATCH_JUMP);
+InjectHook(0x577530, &cAudioManager::ProcessWorkShopScriptObject, PATCH_JUMP);
 ENDPATCHES
