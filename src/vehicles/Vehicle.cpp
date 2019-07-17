@@ -383,6 +383,9 @@ CVehicle::ProcessDelayedExplosion(void)
 	if(IsCar() && ((CAutomobile*)this)->m_bombType == 4 && (m_nBombTimer & 0xFE00) != 0xFE00)
 		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_BOMB_TICK, 0.0f);
 
+	if (m_nBombTimer != 0)
+		return;
+
 	if(FindPlayerVehicle() != this && m_pBlowUpEntity == FindPlayerPed())
 		CWorld::Players[CWorld::PlayerInFocus].AwardMoneyForExplosion(this);
 	BlowUpCar(m_pBlowUpEntity);
