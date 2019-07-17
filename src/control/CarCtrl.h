@@ -13,6 +13,7 @@ public:
 	static void JoinCarWithRoadSystem(CVehicle*);
 	static void SteerAICarWithPhysics(CVehicle*);
 	static void UpdateCarOnRails(CVehicle*);
+	static bool MapCouldMoveInThisArea(float x, float y);
 
 	static int32 &NumLawEnforcerCars;
 	static int32 &NumAmbulancesOnDuty;

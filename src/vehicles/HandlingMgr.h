@@ -85,7 +85,7 @@ enum
 
 struct tHandlingData
 {
-	int32 nIdentifier;
+	eHandlingId nIdentifier;
 	float fMass;
 	float fInvMass;
 	float fTurnMass;
@@ -136,6 +136,8 @@ public:
 	void ConvertDataToGameUnits(tHandlingData *handling);
 	int32 GetHandlingId(const char *name);
 	tHandlingData *GetHandlingData(eHandlingId id) { return &HandlingData[id]; }
+	bool HasRearWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
+	bool HasFrontWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
 };
 VALIDATE_SIZE(cHandlingDataMgr, 0x3030);
 extern cHandlingDataMgr &mod_HandlingManager;

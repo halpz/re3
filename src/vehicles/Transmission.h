@@ -24,4 +24,5 @@ public:
 
 	void InitGearRatios(void);
 	void CalculateGearForSimpleCar(float speed, uint8 &gear);
+	float CalculateDriveAcceleration(const float &gasPedal, uint8 &gear, float &time, const float &velocity, bool cheat);
 };
