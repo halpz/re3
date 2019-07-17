@@ -56,16 +56,16 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	for(i = 0; i < m_nNumMaxPassengers; i++)
 		pPassengers[i] = nil;
 	m_nBombTimer = 0;
-	m_pWhoSetMeOnFire = nil;
+	m_pBlowUpEntity = nil;
 	field_1FB = 0;
 	bComedyControls = false;
 	m_veh_flagB40 = false;
 	m_veh_flagB80 = false;
 	m_veh_flagC1 = false;
 	bIsDamaged = false;
-	m_veh_flagC8 = false;
+	bFadeOut = false;
 	m_veh_flagC10 = false;
-	m_veh_flagC4 = false;
+	bHasBeenOwnedByPlayer = false;
 	m_veh_flagC20 = false;
 	bCanBeDamaged = true;
 	m_veh_flagC80 = false;
@@ -96,11 +96,11 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_comedyControlState = 0;
 	m_aCollPolys[0].valid = false;
 	m_aCollPolys[1].valid = false;
-	m_autoPilot.m_nCarMission = MISSION_NONE;
-	m_autoPilot.m_nAnimationId = TEMPACT_NONE;
-	m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
-	m_autoPilot.m_flag4 = false;
-	m_autoPilot.m_flag10 = false;
+	AutoPilot.m_nCarMission = MISSION_NONE;
+	AutoPilot.m_nAnimationId = TEMPACT_NONE;
+	AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+	AutoPilot.m_flag4 = false;
+	AutoPilot.m_flag10 = false;
 }
 
 CVehicle::~CVehicle()
@@ -259,7 +259,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 
 	adhesion *= CTimer::GetTimeStep();
 	if(bAlreadySkidding)
-		adhesion *= m_handling->fTractionLoss;
+		adhesion *= pHandling->fTractionLoss;
 
 	// moving sideways
 	if(contactSpeedRight != 0.0f){
@@ -318,7 +318,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 		}
 
 		float l = Sqrt(sq(right) + sq(fwd));
-		float tractionLoss = bAlreadySkidding ? 1.0f : m_handling->fTractionLoss;
+		float tractionLoss = bAlreadySkidding ? 1.0f : pHandling->fTractionLoss;
 		right *= adhesion * tractionLoss / l;
 		fwd *= adhesion * tractionLoss / l;
 	}
@@ -374,20 +374,21 @@ CVehicle::ProcessDelayedExplosion(void)
 	if(m_nBombTimer == 0)
 		return;
 
-	if(m_nBombTimer == 0){
-		int tick = CTimer::GetTimeStep()/60.0f*1000.0f;
-		if(tick > m_nBombTimer)
-			m_nBombTimer = 0;
-		else
-			m_nBombTimer -= tick;
+	int tick = CTimer::GetTimeStep()/60.0f*1000.0f;
+	if(tick > m_nBombTimer)
+		m_nBombTimer = 0;
+	else
+		m_nBombTimer -= tick;
 
-		if(IsCar() && ((CAutomobile*)this)->m_auto_flagA7 == 4 && (m_nBombTimer & 0xFE00) != 0xFE00)
-			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_BOMB_TICK, 0.0f);
+	if(IsCar() && ((CAutomobile*)this)->m_bombType == 4 && (m_nBombTimer & 0xFE00) != 0xFE00)
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_BOMB_TICK, 0.0f);
 
-		if(FindPlayerVehicle() != this && m_pWhoSetMeOnFire == FindPlayerPed())
-			CWorld::Players[CWorld::PlayerInFocus].AwardMoneyForExplosion(this);
-		BlowUpCar(m_pWhoSetMeOnFire);
-	}
+	if (m_nBombTimer != 0)
+		return;
+
+	if(FindPlayerVehicle() != this && m_pBlowUpEntity == FindPlayerPed())
+		CWorld::Players[CWorld::PlayerInFocus].AwardMoneyForExplosion(this);
+	BlowUpCar(m_pBlowUpEntity);
 }
 
 bool
@@ -449,7 +450,7 @@ CVehicle::IsVehicleNormal(void)
 bool
 CVehicle::CarHasRoof(void)
 {
-	if((m_handling->Flags & HANDLING_HAS_NO_ROOF) == 0)
+	if((pHandling->Flags & HANDLING_HAS_NO_ROOF) == 0)
 		return true;
 	if(m_aExtras[0] && m_aExtras[1])
 		return false;
@@ -519,7 +520,7 @@ bool
 CVehicle::CanPedOpenLocks(CPed *ped)
 {
 	if(m_nDoorLock == CARLOCK_LOCKED ||
-	   m_nDoorLock == CARLOCK_COP_CAR ||
+	   m_nDoorLock == CARLOCK_LOCKED_INITIALLY ||
 	   m_nDoorLock == CARLOCK_LOCKED_PLAYER_INSIDE)
 		return false;
 	if(ped->IsPlayer() && m_nDoorLock == CARLOCK_LOCKOUT_PLAYER_ONLY)

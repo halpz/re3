@@ -6,6 +6,12 @@
 
 class CObject;
 
+// Wheels are in order:
+//  FRONT LEFT
+//  REAR LEFT
+//  FRONT RIGHT
+//  REAR RIGHT
+
 class CAutomobile : public CVehicle
 {
 public:
@@ -24,13 +30,15 @@ public:
 	float m_aWheelPosition[4];
 	float m_aWheelSpeed[4];
 	uint8 field_4D8;
-	uint8 m_auto_flagA7 : 1;
+	uint8 m_bombType : 3;
 	uint8 bTaxiLight : 1;
-	uint8 m_auto_flagA10 : 1;
+	uint8 bHadDriver : 1;		// for bombs
 	uint8 m_auto_flagA20 : 1;
 	uint8 m_auto_flagA40 : 1;
 	uint8 m_auto_flagA80 : 1;
-	uint8 field_4DA[10];
+	uint8 field_4DA[2];
+	CEntity *field_4DC;		// blow up entity
+	uint8 field_4E0[4];
 	uint32 m_nBusDoorTimerEnd;
 	uint32 m_nBusDoorTimerStart;
 	float m_aSuspensionSpringLength[4];
@@ -41,7 +49,7 @@ public:
 	float field_530;
 	CPhysical *m_aGroundPhysical[4];	// physicals touching wheels
 	CVector m_aGroundOffset[4];		// from ground object to colpoint
-	CEntity *m_pBlowUpEntity;
+	CEntity *m_pSetOnFireEntity;
 	float m_weaponThingA;	// TODO
 	float m_weaponThingB;	// TODO
 	float m_fCarGunLR;
@@ -87,6 +95,9 @@ public:
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
+	void ProcessBuoyancy(void);
+	void DoDriveByShootings(void);
+	int32 RcbanditCheckHitWheels(void);
 	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);
 	void SetupSuspensionLines(void);

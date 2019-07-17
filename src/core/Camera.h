@@ -445,6 +445,7 @@ int     m_iModeObbeCamIsInForCar;
 	CVector &GetGameCamPosition(void) { return m_vecGameCamPos; }
 	bool IsPointVisible(const CVector &center, const CMatrix *mat);
 	bool IsSphereVisible(const CVector &center, float radius, const CMatrix *mat);
+	bool IsSphereVisible(const CVector &center, float radius);
 	bool IsBoxVisible(RwV3d *box, const CMatrix *mat);
 	int GetLookDirection(void);
 
@@ -465,7 +466,6 @@ int     m_iModeObbeCamIsInForCar;
 	void DrawBordersForWideScreen(void);
 	void Restore(void);
 	void SetWidescreenOff(void);
-	void CamShake(float);
 
 	void dtor(void) { this->CCamera::~CCamera(); }
 };
@@ -478,3 +478,5 @@ static_assert(offsetof(CCamera, m_BlurBlue) == 0x9C, "CCamera: error");
 static_assert(offsetof(CCamera, Cams) == 0x1A4, "CCamera: error");
 static_assert(sizeof(CCamera) == 0xE9D8, "CCamera: wrong size");
 extern CCamera &TheCamera;
+
+void CamShakeNoPos(CCamera*, float);

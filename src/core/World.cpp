@@ -28,6 +28,8 @@ bool &CWorld::bSecondShift = *(bool*)0x95CD54;
 bool &CWorld::bForceProcessControl = *(bool*)0x95CD6C;
 bool &CWorld::bProcessCutsceneOnly = *(bool*)0x95CD8B;
 
+WRAPPER void CWorld::RemoveReferencesToDeletedObject(CEntity*) { EAXJMP(0x4B3BF0); }
+
 void
 CWorld::Add(CEntity *ent)
 {
@@ -605,12 +607,12 @@ CWorld::FindObjectsInRange(CVector &centre, float distance, bool ignoreZ, short 
 		minY = 0;
 
 	int maxX = GetSectorIndexX(centre.x + distance);
-	if (maxX >= 100)
-		maxX = 100;
+	if (maxX >= NUMSECTORS_X)
+		maxX = NUMSECTORS_X;
 
 	int maxY = GetSectorIndexY(centre.y + distance);
-	if (maxY >= 100)
-		maxY = 100;
+	if (maxY >= NUMSECTORS_Y)
+		maxY = NUMSECTORS_Y;
 	
 	AdvanceCurrentScanCode();
 
@@ -656,12 +658,12 @@ CWorld::TestSphereAgainstWorld(CVector centre, float distance, CEntity* entityTo
 		minY = 0;
 
 	int maxX = GetSectorIndexX(centre.x + distance);
-	if (maxX >= 100)
-		maxX = 100;
+	if (maxX >= NUMSECTORS_X)
+		maxX = NUMSECTORS_X;
 
 	int maxY = GetSectorIndexY(centre.y + distance);
-	if (maxY >= 100)
-		maxY = 100;
+	if (maxY >= NUMSECTORS_Y)
+		maxY = NUMSECTORS_Y;
 
 	AdvanceCurrentScanCode();
 

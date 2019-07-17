@@ -41,5 +41,9 @@ public:
 	static void InsertNumberInString(wchar* src, int n1, int n2, int n3, int n4, int n5, int n6, wchar* dst);
 	static void InsertPlayerControlKeysInString(wchar* src);
 	static int GetWideStringLength(wchar *src);
-	static void AddMessage(wchar*, uint32, uint16);
+	static void AddBigMessage(wchar* key, uint32 time, uint16 pos);
+	static void AddMessage(wchar* key, uint32 time, uint16 pos);
+	static void AddMessageJumpQ(wchar* key, uint32 time, uint16 pos);
+	static void AddMessageSoon(wchar* key, uint32 time, uint16 pos);
+	static void ClearMessages();
 };

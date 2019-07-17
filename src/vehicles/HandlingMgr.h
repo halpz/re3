@@ -94,7 +94,7 @@ struct tHandlingData
 	int8 nPercentSubmerged;
 	float fBuoyancy;
 	float fTractionMultiplier;
-	cTransmission TransmissionData;
+	cTransmission Transmission;
 	float fBrakeDeceleration;
 	float fBrakeBias;
 	int8 bABS;

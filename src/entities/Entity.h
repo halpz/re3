@@ -13,14 +13,11 @@ enum eEntityType
 	ENTITY_TYPE_PED,
 	ENTITY_TYPE_OBJECT,
 	ENTITY_TYPE_DUMMY,
-	ENTITY_TYPE_6,
-	ENTITY_TYPE_7,
 };
 
 enum eEntityStatus
 {
-	// from SA MTA! let's hope they didn't change from III
-	STATUS_PLAYER = 0,
+	STATUS_PLAYER,
 	STATUS_PLAYER_PLAYBACKFROMBUFFER,
 	STATUS_SIMPLE,
 	STATUS_PHYSICS,
@@ -32,8 +29,6 @@ enum eEntityStatus
 	STATUS_PLANE,
 	STATUS_PLAYER_REMOTE,
 	STATUS_PLAYER_DISABLED,
-	//STATUS_TRAILER,
-	//STATUS_SIMPLE_TRAILER
 };
 
 class CEntity : public CPlaceable
