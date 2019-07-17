@@ -22,5 +22,6 @@ public:
 
 public:
 	static bool IsModelIndexADoor(uint32 id);
+	static void TriggerMessage(char *text, int16, uint16 time, int16);
 	static void PrintMessages(void);
 };

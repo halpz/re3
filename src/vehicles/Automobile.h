@@ -96,6 +96,8 @@ public:
 	void PlayCarHorn(void);
 
 	void ProcessBuoyancy(void);
+	void DoDriveByShootings(void);
+	int32 RcbanditCheckHitWheels(void);
 	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);
 	void SetupSuspensionLines(void);

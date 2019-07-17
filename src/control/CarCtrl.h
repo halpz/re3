@@ -11,6 +11,8 @@ public:
 	static int32 ChooseCarModel(int32 vehclass);
 	static bool JoinCarWithRoadSystemGotoCoors(CVehicle*, CVector, bool);
 	static void JoinCarWithRoadSystem(CVehicle*);
+	static void SteerAICarWithPhysics(CVehicle*);
+	static void UpdateCarOnRails(CVehicle*);
 
 	static int32 &NumLawEnforcerCars;
 	static int32 &NumAmbulancesOnDuty;

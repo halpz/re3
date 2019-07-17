@@ -1460,7 +1460,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 		seatOffset = 0.0f;
 		vehDoorOffset = offsetToOpenVanDoor;
 	} else {
-		seatOffset = veh->m_handling->fSeatOffsetDistance * seatPosMult;
+		seatOffset = veh->pHandling->fSeatOffsetDistance * seatPosMult;
 		if (veh->bLowVehicle) {
 			vehDoorOffset = offsetToOpenLowCarDoor;
 		} else {

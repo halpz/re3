@@ -259,7 +259,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 
 	adhesion *= CTimer::GetTimeStep();
 	if(bAlreadySkidding)
-		adhesion *= m_handling->fTractionLoss;
+		adhesion *= pHandling->fTractionLoss;
 
 	// moving sideways
 	if(contactSpeedRight != 0.0f){
@@ -318,7 +318,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 		}
 
 		float l = Sqrt(sq(right) + sq(fwd));
-		float tractionLoss = bAlreadySkidding ? 1.0f : m_handling->fTractionLoss;
+		float tractionLoss = bAlreadySkidding ? 1.0f : pHandling->fTractionLoss;
 		right *= adhesion * tractionLoss / l;
 		fwd *= adhesion * tractionLoss / l;
 	}
@@ -450,7 +450,7 @@ CVehicle::IsVehicleNormal(void)
 bool
 CVehicle::CarHasRoof(void)
 {
-	if((m_handling->Flags & HANDLING_HAS_NO_ROOF) == 0)
+	if((pHandling->Flags & HANDLING_HAS_NO_ROOF) == 0)
 		return true;
 	if(m_aExtras[0] && m_aExtras[1])
 		return false;

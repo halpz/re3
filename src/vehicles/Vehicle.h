@@ -125,7 +125,7 @@ class CVehicle : public CPhysical
 {
 public:
 	// 0x128
-	tHandlingData *m_handling;
+	tHandlingData *pHandling;
 	CAutoPilot AutoPilot;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;

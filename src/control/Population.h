@@ -20,4 +20,5 @@ public:
 	static void UpdatePedCount(uint32, bool);
 	static void DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool);
 	static CPed *AddPedInCar(CVehicle *vehicle);
+	static bool IsPointInSafeZone(CVector *coors);
 };

@@ -12,7 +12,12 @@
 #include "World.h"
 #include "SurfaceTable.h"
 #include "HandlingMgr.h"
+#include "Record.h"
+#include "Remote.h"
+#include "Population.h"
 #include "CarCtrl.h"
+#include "CarAI.h"
+#include "Garages.h"
 #include "PathFind.h"
 #include "Ped.h"
 #include "PlayerPed.h"
@@ -55,9 +60,27 @@ CAutomobile::ProcessControl(void)
 	if(colModel->level > LEVEL_NONE && colModel->level != CCollision::ms_collisionInMemory)
 		return;
 
-	bool strongGrip = false;
-
-	assert(0 && "some player stuff");
+	// Improve grip of vehicles in certain cases
+	bool strongGrip1 = false;
+	bool strongGrip2 = false;
+	if(FindPlayerVehicle() && this != FindPlayerVehicle()){
+		switch(AutoPilot.m_nCarMission){
+		case MISSION_RAMPLAYER_FARAWAY:
+		case MISSION_RAMPLAYER_CLOSE:
+		case MISSION_BLOCKPLAYER_FARAWAY:
+		case MISSION_BLOCKPLAYER_CLOSE:
+			if(FindPlayerSpeed().Magnitude() > 0.3f){
+				strongGrip1 = true;
+				if(FindPlayerSpeed().Magnitude() > 0.4f){
+					if(m_vecMoveSpeed.Magnitude() < 0.3f)
+						strongGrip2 = true;
+				}else{
+					if((GetPosition() - FindPlayerCoors()).Magnitude() > 50.0f)
+						strongGrip2 = true;
+				}
+			}
+		}
+	}
 
 	if(bIsBus)
 		ProcessAutoBusDoors();
@@ -127,24 +150,106 @@ CAutomobile::ProcessControl(void)
 	AutoPilot.m_flag2 = false;
 
 	// Set Center of Mass to make car more stable
-	if(strongGrip || bCheat3)
+	if(strongGrip1 || bCheat3)
 		m_vecCentreOfMass.z = 0.3f*m_aSuspensionSpringLength[0] + -1.0*m_fHeightAboveRoad;
-	else if(m_handling->Flags & HANDLING_NONPLAYER_STABILISER && m_status == STATUS_PHYSICS)
-		m_vecCentreOfMass.z = m_handling->CentreOfMass.z - 0.2f*m_handling->Dimension.z;
+	else if(pHandling->Flags & HANDLING_NONPLAYER_STABILISER && m_status == STATUS_PHYSICS)
+		m_vecCentreOfMass.z = pHandling->CentreOfMass.z - 0.2f*pHandling->Dimension.z;
 	else
-		m_vecCentreOfMass.z = m_handling->CentreOfMass.z;
+		m_vecCentreOfMass.z = pHandling->CentreOfMass.z;
 
 	// Process depending on status
 
+	bool playerRemote = false;
 	switch(m_status){
-	case STATUS_PLAYER:
-	case STATUS_SIMPLE:
-	case STATUS_PHYSICS:
-	case STATUS_ABANDONED:
-	case STATUS_WRECKED:
 	case STATUS_PLAYER_REMOTE:
+		if(CPad::GetPad(0)->WeaponJustDown()){
+			BlowUpCar(FindPlayerPed());
+			CRemote::TakeRemoteControlledCarFromPlayer();
+		}
+
+		if(GetModelIndex() == MI_RCBANDIT){
+			CVector pos = GetPosition();
+			// FindPlayerCoors unused
+			if(RcbanditCheckHitWheels() || bIsInWater || CPopulation::IsPointInSafeZone(&pos)){
+				if(CPopulation::IsPointInSafeZone(&pos))
+					CGarages::TriggerMessage("HM2_5", -1, 5000, -1);
+				CRemote::TakeRemoteControlledCarFromPlayer();
+				BlowUpCar(FindPlayerPed());
+			}
+		}
+
+		if(CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle == this)
+			playerRemote = true;
+		// fall through
+	case STATUS_PLAYER:
+		if(playerRemote ||
+		   pDriver && pDriver->GetPedState() != PED_EXIT_CAR && pDriver->GetPedState() != PED_DRAG_FROM_CAR){
+			// process control input if controlled by player
+			if(playerRemote || pDriver->m_nPedType == PEDTYPE_PLAYER1)
+				ProcessControlInputs(0);
+
+			PruneReferences();
+
+			if(m_status == STATUS_PLAYER && CRecordDataForChase::Status != RECORDSTATE_1)
+				DoDriveByShootings();
+		}
+		break;
+
+	case STATUS_SIMPLE:
+		CCarAI::UpdateCarAI(this);
+		CPhysical::ProcessControl();
+		CCarCtrl::UpdateCarOnRails(this);
+
+		m_nWheelsOnGround_2 = 4;
+		m_nWheelsOnGroundPrev = m_nWheelsOnGround;
+		m_nWheelsOnGround = 4;
+
+		pHandling->Transmission.CalculateGearForSimpleCar(AutoPilot.m_fMaxTrafficSpeed/50.0f, m_nCurrentGear);
+
+		{
+		float wheelRot = ProcessWheelRotation(WHEEL_STATE_0, GetForward(), m_vecMoveSpeed, 0.35f);
+		for(i = 0; i < 4; i++)
+			m_aWheelRotation[i] += wheelRot;
+		}
+
+		PlayHornIfNecessary();
+		ReduceHornCounter();
+		bVehicleColProcessed = false;
+		// that's all we do for simple vehicles
+		return;
+
+	case STATUS_PHYSICS:
+		CCarAI::UpdateCarAI(this);
+		CCarCtrl::SteerAICarWithPhysics(this);
+		PlayHornIfNecessary();
+		break;
+
+	case STATUS_ABANDONED:
+		m_fBrakePedal = 0.2f;
+		bIsHandbrakeOn = false;
+
+		m_fSteerAngle = 0.0f;
+		m_fGasPedal = 0.0f;
+		m_nCarHornTimer = 0;
+		break;
+
+	case STATUS_WRECKED:
+		m_fBrakePedal = 0.05f;
+		bIsHandbrakeOn = true;
+
+		m_fSteerAngle = 0.0f;
+		m_fGasPedal = 0.0f;
+		m_nCarHornTimer = 0;
+		break;
+
 	case STATUS_PLAYER_DISABLED:
-		assert(0);
+		m_fBrakePedal = 1.0f;
+		bIsHandbrakeOn = true;
+
+		m_fSteerAngle = 0.0f;
+		m_fGasPedal = 0.0f;
+		m_nCarHornTimer = 0;
+		break;
 	}
 
 	if(GetPosition().z < -0.6f){
@@ -252,11 +357,11 @@ CAutomobile::ProcessControl(void)
 		// Make springs push up vehicle
 		for(i = 0; i < 4; i++){
 			if(m_aSuspensionSpringRatio[i] < 1.0f){
-				float bias = m_handling->fSuspensionBias;
+				float bias = pHandling->fSuspensionBias;
 				if(i == 1 || i == 3)	// rear
 					bias = 1.0f - bias;
 
-				ApplySpringCollision(m_handling->fSuspensionForceLevel,
+				ApplySpringCollision(pHandling->fSuspensionForceLevel,
 					springDirections[i], contactPoints[i],
 					m_aSuspensionSpringRatio[i], bias);
 				m_aWheelSkidmarkMuddy[i] =
@@ -284,7 +389,7 @@ CAutomobile::ProcessControl(void)
 		// dampen springs
 		for(i = 0; i < 4; i++)
 			if(m_aSuspensionSpringRatio[i] < 1.0f)
-				ApplySpringDampening(m_handling->fSuspensionDampingLevel,
+				ApplySpringDampening(pHandling->fSuspensionDampingLevel,
 					springDirections[i], contactPoints[i], contactSpeeds[i]);
 
 		// Get speed at contact points again
@@ -493,7 +598,7 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 		fValue = -sq(m_fSteerRatio);
 	else
 		fValue = sq(m_fSteerRatio);
-	m_fSteerAngle = DEGTORAD(m_handling->fSteeringLock) * fValue;
+	m_fSteerAngle = DEGTORAD(pHandling->fSteeringLock) * fValue;
 
 	if(bComedyControls){
 		int rnd = CGeneral::GetRandomNumber() % 10;
@@ -537,6 +642,16 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 WRAPPER void
 CAutomobile::ProcessBuoyancy(void)
 { EAXJMP(0x5308D0);
+}
+
+WRAPPER void
+CAutomobile::DoDriveByShootings(void)
+{ EAXJMP(0x564000);
+}
+
+WRAPPER int32
+CAutomobile::RcbanditCheckHitWheels(void)
+{ EAXJMP(0x53C990);
 }
 
 void
@@ -962,23 +1077,23 @@ CAutomobile::SetupSuspensionLines(void)
 		m_aWheelPosition[i] = posn.z;
 
 		// uppermost wheel position
-		posn.z += m_handling->fSuspensionUpperLimit;
+		posn.z += pHandling->fSuspensionUpperLimit;
 		colModel->lines[i].p0 = posn;
 
 		// lowermost wheel position
-		posn.z += m_handling->fSuspensionLowerLimit - m_handling->fSuspensionUpperLimit;
+		posn.z += pHandling->fSuspensionLowerLimit - pHandling->fSuspensionUpperLimit;
 		// lowest point on tyre
 		posn.z -= mi->m_wheelScale*0.5f;
 		colModel->lines[i].p1 = posn;
 
 		// this is length of the spring at rest
-		m_aSuspensionSpringLength[i] = m_handling->fSuspensionUpperLimit - m_handling->fSuspensionLowerLimit;
+		m_aSuspensionSpringLength[i] = pHandling->fSuspensionUpperLimit - pHandling->fSuspensionLowerLimit;
 		m_aSuspensionLineLength[i] = colModel->lines[i].p0.z - colModel->lines[i].p1.z;
 	}
 
 	// Compress spring somewhat to get normal height on road
 	m_fHeightAboveRoad = -(colModel->lines[0].p0.z + (colModel->lines[0].p1.z - colModel->lines[0].p0.z)*
-	                                                  (1.0f - 1.0f/(8.0f*m_handling->fSuspensionForceLevel)));
+	                                                  (1.0f - 1.0f/(8.0f*pHandling->fSuspensionForceLevel)));
 	for(i = 0; i < 4; i++)
 		m_aWheelPosition[i] = mi->m_wheelScale*0.5f - m_fHeightAboveRoad;
 
@@ -1129,7 +1244,7 @@ CAutomobile::Fix(void)
 
 	Damage.ResetDamageStatus();
 
-	if(m_handling->Flags & HANDLING_NO_DOORS){
+	if(pHandling->Flags & HANDLING_NO_DOORS){
 		Damage.SetDoorStatus(DOOR_FRONT_LEFT, DOOR_STATUS_MISSING);
 		Damage.SetDoorStatus(DOOR_FRONT_RIGHT, DOOR_STATUS_MISSING);
 		Damage.SetDoorStatus(DOOR_REAR_LEFT, DOOR_STATUS_MISSING);
@@ -1382,7 +1497,7 @@ CAutomobile::SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents
 		return;
 	}
 
-	if(door == DOOR_BOOT && status == DOOR_STATUS_SWINGING && m_handling->Flags & HANDLING_NOSWING_BOOT){
+	if(door == DOOR_BOOT && status == DOOR_STATUS_SWINGING && pHandling->Flags & HANDLING_NOSWING_BOOT){
 		Damage.SetDoorStatus(DOOR_BOOT, DOOR_STATUS_MISSING);
 		status = DOOR_STATUS_MISSING;
 	}

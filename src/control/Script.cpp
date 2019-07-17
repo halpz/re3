@@ -2050,7 +2050,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
-		car->AutoPilot.m_nCruiseSpeed = min(*(float*)&ScriptParams[1], 60.0f * car->m_handling->TransmissionData.fUnkMaxVelocity);
+		car->AutoPilot.m_nCruiseSpeed = min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
 		return 0;
 	}
 	case COMMAND_SET_CAR_DRIVING_STYLE:

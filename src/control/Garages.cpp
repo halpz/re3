@@ -63,6 +63,8 @@ CGarages::IsModelIndexADoor(uint32 id)
 		id == MI_CRUSHERLID;
 }
 
+WRAPPER void CGarages::TriggerMessage(char *text, int16, uint16 time, int16) { EAXJMP(0x426B20); }
+
 #if 0
 WRAPPER void CGarages::PrintMessages(void) { EAXJMP(0x426310); }
 #else

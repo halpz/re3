@@ -35,3 +35,18 @@ cTransmission::InitGearRatios(void)
 
 	Gears[1].fShiftDownVelocity = -0.01f;
 }
+
+void
+cTransmission::CalculateGearForSimpleCar(float speed, uint8 &gear)
+{
+	static tGear *pGearRatio = &Gears[gear];
+	fCurVelocity = speed;
+	if(speed > pGearRatio->fShiftUpVelocity)
+		gear++;
+	else if(speed < pGearRatio->fShiftDownVelocity){
+		if(gear - 1 < 0)
+			gear = 0;
+		else
+			gear--;
+	}
+}

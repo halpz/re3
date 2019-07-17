@@ -20,7 +20,8 @@ public:
 	float fMaxVelocity;
 	float fUnkMaxVelocity;
 	float fMaxReverseVelocity;
-	float field_5C;
+	float fCurVelocity;
 
 	void InitGearRatios(void);
+	void CalculateGearForSimpleCar(float speed, uint8 &gear);
 };

@@ -14,3 +14,5 @@ WRAPPER void CCarCtrl::UpdateCarCount(CVehicle*, bool) { EAXJMP(0x4202E0); }
 WRAPPER int32 CCarCtrl::ChooseCarModel(int32 vehclass) { EAXJMP(0x418110); }
 WRAPPER bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle*, CVector, bool) { EAXJMP(0x41FA00); }
 WRAPPER void CCarCtrl::JoinCarWithRoadSystem(CVehicle*) { EAXJMP(0x41F820); }
+WRAPPER void CCarCtrl::SteerAICarWithPhysics(CVehicle*) { EAXJMP(0x41DA60); }
+WRAPPER void CCarCtrl::UpdateCarOnRails(CVehicle*) { EAXJMP(0x418880); }
