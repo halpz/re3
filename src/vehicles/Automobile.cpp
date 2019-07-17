@@ -1255,7 +1255,7 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 	obj->m_fElasticity = 0.1f;
 	obj->m_fBuoyancy = obj->m_fMass*GRAVITY/0.75f;
 	obj->ObjectCreatedBy = TEMP_OBJECT;
-	obj->bIsStatic = true;
+	obj->bIsStatic = false;
 	obj->bIsPickup = false;
 	obj->bUseVehicleColours = true;
 	obj->m_colour1 = m_currentColour1;

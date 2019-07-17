@@ -710,7 +710,7 @@ int8 CRunningScript::ProcessCommandsFrom0To99(int32 command)
 		return 0;
 	case COMMAND_SHAKE_CAM:
 		CollectParameters(&m_nIp, 1);
-		TheCamera.CamShake(ScriptParams[0] / 1000.0f);
+		CamShakeNoPos(&TheCamera, ScriptParams[0] / 1000.0f);
 		return 0;
 	case COMMAND_SET_VAR_INT:
 	{
