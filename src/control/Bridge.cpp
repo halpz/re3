@@ -46,6 +46,7 @@ void CBridge::Update()
 
 	float liftHeight;
 
+	// Set bridge height and state
 	if (CStats::CommercialPassed)
 	{
 		if (TimeOfBridgeBecomingOperational == 0)
@@ -81,30 +82,6 @@ void CBridge::Update()
 			liftHeight = 25.0;
 			State = STATE_LIFT_PART_IS_UP;
 		}
-
-		// Move bridge part
-		if (liftHeight != OldLift)
-		{
-			pLiftPart->GetPosition().z = DefaultZLiftPart + liftHeight;
-			pLiftPart->GetMatrix().UpdateRW();
-			pLiftPart->UpdateRwFrame();
-			if (pLiftRoad)
-			{
-				pLiftRoad->GetPosition().z = DefaultZLiftRoad + liftHeight;
-				pLiftRoad->GetMatrix().UpdateRW();
-				pLiftRoad->UpdateRwFrame();
-			}
-			pWeight->GetPosition().z = DefaultZLiftWeight - liftHeight;
-			pWeight->GetMatrix().UpdateRW();
-			pWeight->UpdateRwFrame();
-
-			OldLift = liftHeight;
-		}
-
-		if (State == STATE_LIFT_PART_ABOUT_TO_MOVE_UP && OldState == STATE_LIFT_PART_IS_DOWN)
-			ThePaths.SetLinksBridgeLights(-330.0, -230.0, -700.0, -588.0, true);
-		else if (State == STATE_LIFT_PART_IS_DOWN && OldState == STATE_LIFT_PART_MOVING_DOWN)
-			ThePaths.SetLinksBridgeLights(-330.0, -230.0, -700.0, -588.0, false);
 	}
 	else
 	{
@@ -112,6 +89,30 @@ void CBridge::Update()
 		TimeOfBridgeBecomingOperational = 0;
 		State = STATE_BRIDGE_LOCKED;
 	}
+
+	// Move bridge part
+	if (liftHeight != OldLift)
+	{
+		pLiftPart->GetPosition().z = DefaultZLiftPart + liftHeight;
+		pLiftPart->GetMatrix().UpdateRW();
+		pLiftPart->UpdateRwFrame();
+		if (pLiftRoad)
+		{
+			pLiftRoad->GetPosition().z = DefaultZLiftRoad + liftHeight;
+			pLiftRoad->GetMatrix().UpdateRW();
+			pLiftRoad->UpdateRwFrame();
+		}
+		pWeight->GetPosition().z = DefaultZLiftWeight - liftHeight;
+		pWeight->GetMatrix().UpdateRW();
+		pWeight->UpdateRwFrame();
+
+		OldLift = liftHeight;
+	}
+
+	if (State == STATE_LIFT_PART_ABOUT_TO_MOVE_UP && OldState == STATE_LIFT_PART_IS_DOWN)
+		ThePaths.SetLinksBridgeLights(-330.0, -230.0, -700.0, -588.0, true);
+	else if (State == STATE_LIFT_PART_IS_DOWN && OldState == STATE_LIFT_PART_MOVING_DOWN)
+		ThePaths.SetLinksBridgeLights(-330.0, -230.0, -700.0, -588.0, false);
 }
 
 bool CBridge::ShouldLightsBeFlashing() { return State != STATE_LIFT_PART_IS_DOWN; }
