@@ -900,6 +900,7 @@ CAutomobile::BlowUpCar(CEntity *culprit)
 		SetDoorDamage(CAR_DOOR_LR, DOOR_REAR_LEFT);
 		SetDoorDamage(CAR_DOOR_RR, DOOR_REAR_RIGHT);
 		SpawnFlyingComponent(CAR_WHEEL_LF, COMPGROUP_WHEEL);
+		atomic = nil;
 		RwFrameForAllObjects(m_aCarNodes[CAR_WHEEL_LF], GetCurrentAtomicObjectCB, &atomic);
 		if(atomic)
 			RpAtomicSetFlags(atomic, 0);
