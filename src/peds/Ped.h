@@ -13,6 +13,17 @@
 
 struct CPathNode;
 
+enum ePedPieceTypes
+{
+	PEDPIECE_NONE,
+	PEDPIECE_BODY,
+	PEDPIECE_LEFTARM,
+	PEDPIECE_RIGHTARM,
+	PEDPIECE_LEFTLEG,
+	PEDPIECE_RIGHTLEG,
+	PEDPIECE_HEAD,
+};
+
 enum eWaitState {
 	WAITSTATE_FALSE,
 	WAITSTATE_TRAFFIC_LIGHTS,
@@ -196,10 +207,10 @@ public:
 
 	uint8 m_ped_flagC1 : 1;
 	uint8 bRespondsToThreats : 1;
-	uint8 m_ped_flagC4 : 1;		// false when in bus, bRenderPedInCar?
-	uint8 m_ped_flagC8 : 1;
+	uint8 bRenderPedInCar : 1;
+	uint8 bChangedSeat : 1;
 	uint8 m_ped_flagC10 : 1;	// related with phone
-	uint8 m_ped_flagC20 : 1;	// just left some body part?
+	uint8 bBodyPartJustCameOff : 1;
 	uint8 m_ped_flagC40 : 1;
 	uint8 m_ped_flagC80 : 1;
 
@@ -207,7 +218,7 @@ public:
 	uint8 m_ped_flagD2 : 1; // seen an event
 	uint8 m_ped_flagD4 : 1;
 	uint8 m_ped_flagD8 : 1;
-	uint8 m_ped_flagD10 : 1;
+	uint8 bIsPedDieAnimPlaying : 1;
 	uint8 m_ped_flagD20 : 1;
 	uint8 m_ped_flagD40 : 1;	// reset when objective changes
 	uint8 m_bScriptObjectiveCompleted : 1;
@@ -225,7 +236,7 @@ public:
 	uint8 m_ped_flagF2 : 1;
 	uint8 m_ped_flagF4 : 1;
 	uint8 m_ped_flagF8 : 1;
-	uint8 m_ped_flagF10 : 1;
+	uint8 m_ped_flagF10 : 1;	// set before "quickjack"
 	uint8 m_ped_flagF20 : 1;
 	uint8 m_ped_flagF40 : 1;
 	uint8 m_ped_flagF80 : 1;
@@ -249,7 +260,7 @@ public:
 	uint8 m_ped_flagH80 : 1;
 
 	uint8 m_ped_flagI1 : 1;
-	uint8 m_ped_flagI2 : 1;
+	uint8 m_ped_flagI2 : 1; // limbs won't be removed if set
 	uint8 m_ped_flagI4 : 1;
 	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 m_ped_flagI10 : 1;
@@ -416,8 +427,8 @@ public:
 	void SetDie(AnimationId anim, float arg1, float arg2);
 	void SetDead(void);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
-	void RemoveBodyPart(PedNode nodeId, int8 unknown);
-	void SpawnFlyingComponent(int, int8 unknown);
+	void RemoveBodyPart(PedNode nodeId, int8 direction);
+	void SpawnFlyingComponent(int, int8);
 	bool OurPedCanSeeThisOne(CEntity *target);
 	void Avoid(void);
 	void Attack(void);
@@ -472,6 +483,13 @@ public:
 	bool Seek(void);
 	void SetWanderPath(int8);
 	void SetFollowPath(CVector);
+	void ClearAttackByRemovingAnim(void);
+	void SetStoredState(void);
+	void StopNonPartialAnims(void);
+	bool InflictDamage(CEntity*, eWeaponType, float, ePedPieceTypes, uint8);
+	void ClearFlee(void);
+	void ClearFall(void);
+	void SetGetUp(void);
 
 	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
@@ -545,6 +563,7 @@ public:
 	static bool &bNastyLimbsCheat;
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;
+	static CColPoint &ms_tempColPoint;
 };
 
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);

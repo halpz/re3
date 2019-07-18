@@ -603,7 +603,7 @@ CVehicle::SetUpDriver(void)
 	pDriver->bInVehicle = true;
 	pDriver->SetPedState(PED_DRIVING);
 	if(bIsBus)
-		pDriver->m_ped_flagC4 = false;
+		pDriver->bRenderPedInCar = false;
 	return pDriver;
 }
 
@@ -619,7 +619,7 @@ CVehicle::SetupPassenger(int n)
 	pPassengers[n]->bInVehicle = true;
 	pPassengers[n]->SetPedState(PED_DRIVING);
 	if(bIsBus)
-		pPassengers[n]->m_ped_flagC4 = false;
+		pPassengers[n]->bRenderPedInCar = false;
 	return pPassengers[n];
 }
 

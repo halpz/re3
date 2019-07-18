@@ -29,7 +29,7 @@ public:
 	bool m_bHasLockOnTarget;
 	int8 field_1406;
 	int8 field_1407;
-	bool m_bAdrenalineTime;
+	uint32 m_bAdrenalineTime;
 	bool m_bCanBeDamaged;
 	int8 field_1413;
 	int8 field_1414;
@@ -46,6 +46,7 @@ public:
 	void SetWantedLevel(int32 level);
 	void SetWantedLevelNoDrop(int32 level);
 	void KeepAreaAroundPlayerClear(void);
+	void AnnoyPlayerPed(bool);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);

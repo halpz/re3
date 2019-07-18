@@ -141,7 +141,7 @@ void CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapontype, bool he
 }
 #endif
 
-void CDarkel::RegisterKillNotByPlayer()
+void CDarkel::RegisterKillNotByPlayer(CPed* victim, eWeaponType weapontype)
 {
 	++CStats::NumberKillFrenziesPassed;
 }
