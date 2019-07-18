@@ -66,7 +66,7 @@ class CDamageManager
 {
 public:
 
-	float field_0;
+	float m_fWheelDamageEffect;
 	uint8 m_engineStatus;
 	uint8 m_wheelStatus[4];
 	uint8 m_doorStatus[6];

@@ -6,11 +6,24 @@
 
 class CObject;
 
-// Wheels are in order:
-//  FRONT LEFT
-//  REAR LEFT
-//  FRONT RIGHT
-//  REAR RIGHT
+// These are used for all the wheel arrays
+// DON'T confuse with VEHWHEEL, which are vehicle components
+enum {
+	CARWHEEL_FRONT_LEFT,
+	CARWHEEL_REAR_LEFT,
+	CARWHEEL_FRONT_RIGHT,
+	CARWHEEL_REAR_RIGHT
+};
+
+enum eBombType
+{
+	CARBOMB_NONE,
+	CARBOMB_TIMED,
+	CARBOMB_ONIGNITION,
+	CARBOMB_REMOTE,
+	CARBOMB_TIMEDACTIVE,
+	CARBOMB_ONIGNITIONACTIVE,
+};
 
 class CAutomobile : public CVehicle
 {
@@ -22,7 +35,7 @@ public:
 	CColPoint m_aWheelColPoints[4];
 	float m_aSuspensionSpringRatio[4];
 	float m_aSuspensionSpringRatioPrev[4];
-	float m_aWheelSkidThing[4];
+	float m_aWheelTimer[4];		// set to 4.0 when wheel is touching ground, then decremented
 	float field_49C;
 	bool m_aWheelSkidmarkMuddy[4];
 	bool m_aWheelSkidmarkBloody[4];
@@ -44,7 +57,7 @@ public:
 	float m_aSuspensionSpringLength[4];
 	float m_aSuspensionLineLength[4];
 	float m_fHeightAboveRoad;
-	float m_fImprovedHandling;
+	float m_fTraction;
 	uint8 stuff6[28];
 	float field_530;
 	CPhysical *m_aGroundPhysical[4];	// physicals touching wheels
@@ -56,11 +69,11 @@ public:
 	float m_fCarGunUD;
 	float m_fWindScreenRotation;
 	uint8 stuff4[4];
-	uint8 m_nWheelsOnGround_2;
 	uint8 m_nWheelsOnGround;
-	uint8 m_nWheelsOnGroundPrev;
+	uint8 m_nDriveWheelsOnGround;
+	uint8 m_nDriveWheelsOnGroundPrev;
 	uint8 stuff5[5];
-	int32 m_aWheelState[4];
+	tWheelState m_aWheelState[4];
 
 	static bool &m_sAllTaxiLights;
 
@@ -95,6 +108,10 @@ public:
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
+	void FireTruckControl(void);
+	void TankControl(void);
+	void HydraulicControl(void);
+	void VehicleDamage(float impulse, uint16 damagedPiece);
 	void ProcessBuoyancy(void);
 	void DoDriveByShootings(void);
 	int32 RcbanditCheckHitWheels(void);

@@ -718,7 +718,7 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 		}
 		vehicle->bEngineOn = true;
 		if (vehicle->IsCar())
-			((CAutomobile*)vehicle)->m_nWheelsOnGround = 4;
+			((CAutomobile*)vehicle)->m_nDriveWheelsOnGround = 4;
 		CWorld::Remove(vehicle);
 		CWorld::Add(vehicle);
 		if (vehicle->IsBoat())

@@ -9,7 +9,7 @@ class CClock
 	static uint8  &ms_Stored_nGameClockMinutes;
 	static uint16 &ms_Stored_nGameClockSeconds;
 	static uint32 &ms_nMillisecondsPerGameMinute;
-	static int32  &ms_nLastClockTick;
+	static uint32 &ms_nLastClockTick;
 	static bool   &ms_bClockHasBeenStored;
 public:
 

@@ -35,7 +35,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	int i;
 
 	m_nCurrentGear = 0;
-	field_208 = 0;
+	m_fChangeGearTime = 0;
 	m_fSteerRatio = 0.0f;
 	m_type = ENTITY_TYPE_VEHICLE;
 	VehicleCreatedBy = CreatedBy;
@@ -380,7 +380,7 @@ CVehicle::ProcessDelayedExplosion(void)
 	else
 		m_nBombTimer -= tick;
 
-	if(IsCar() && ((CAutomobile*)this)->m_bombType == 4 && (m_nBombTimer & 0xFE00) != 0xFE00)
+	if(IsCar() && ((CAutomobile*)this)->m_bombType == CARBOMB_TIMEDACTIVE && (m_nBombTimer & 0xFE00) != 0xFE00)
 		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_BOMB_TICK, 0.0f);
 
 	if (m_nBombTimer != 0)

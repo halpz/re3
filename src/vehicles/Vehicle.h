@@ -191,7 +191,7 @@ public:
 	float m_fHealth;           // 1000.0f = full health. 0 -> explode
 	uint8 m_nCurrentGear;
 	int8 field_205[3];
-	int field_208;
+	float m_fChangeGearTime;
 	uint32 m_nGunFiringTime;    // last time when gun on vehicle was fired (used on boats)
 	uint32 m_nTimeOfDeath;
 	int16 field_214;

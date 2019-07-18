@@ -1048,8 +1048,6 @@ CStreaming::RemoveReferencedTxds(int32 mem)
 	return false;
 }
 
-// TODO: RemoveCurrentZonesModels
-
 void
 CStreaming::RemoveUnusedModelsInLoadedList(void)
 {

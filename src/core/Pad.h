@@ -197,7 +197,7 @@ public:
 	int16 Mode;
 	int16 ShakeDur;
 	uint8 ShakeFreq;
-	int8 bHornHistory[5];
+	bool bHornHistory[5];
 	uint8 iCurrHornHistory;
 	uint8 DisablePlayerControls;
 	int8 bApplyBrakes;
@@ -377,6 +377,7 @@ public:
 	bool ArePlayerControlsDisabled(void) { return DisablePlayerControls != PLAYERCONTROL_ENABLED; }
 };
 VALIDATE_SIZE(CPad, 0xFC);
+extern CPad *Pads;	//[2]
 
 #define IsButtonJustDown(pad, btn) \
 	(!(pad)->OldState.btn && (pad)->NewState.btn)

@@ -15,7 +15,7 @@ uint8  &CClock::ms_Stored_nGameClockHours = *(uint8*)0x95CD7B;
 uint8  &CClock::ms_Stored_nGameClockMinutes = *(uint8*)0x95CD9B;
 uint16 &CClock::ms_Stored_nGameClockSeconds = *(uint16*)0x95CC9C;
 uint32 &CClock::ms_nMillisecondsPerGameMinute = *(uint32*)0x8F2C64;
-int32  &CClock::ms_nLastClockTick = *(int32*)0x9430E4;
+uint32  &CClock::ms_nLastClockTick = *(uint32*)0x9430E4;
 bool   &CClock::ms_bClockHasBeenStored = *(bool*)0x95CD82;
 
 void
@@ -67,10 +67,7 @@ CClock::Update(void)
 			}
 		}
 	}
-	ms_nGameClockSeconds +=
-			60
-			* (CTimer::GetTimeInMilliseconds() - ms_nLastClockTick)
-			/ ms_nMillisecondsPerGameMinute;
+	ms_nGameClockSeconds = 60 * (CTimer::GetTimeInMilliseconds() - ms_nLastClockTick) / ms_nMillisecondsPerGameMinute;
 }
 
 void
