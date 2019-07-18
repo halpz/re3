@@ -1909,6 +1909,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			CTheScripts::ClearSpaceForMissionEntity(pos, car);
 			car->m_status = STATUS_ABANDONED;
 			car->bIsLocked = true;
+			CCarCtrl::JoinCarWithRoadSystem(car);
 			car->AutoPilot.m_nCarMission = MISSION_NONE;
 			car->AutoPilot.m_nAnimationId = TEMPACT_NONE; /* Animation ID? */
 			car->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
