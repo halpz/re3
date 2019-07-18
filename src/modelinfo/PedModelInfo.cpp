@@ -112,14 +112,14 @@ struct ColNodeInfo
 
 #define NUMPEDINFONODES 8
 ColNodeInfo m_pColNodeInfos[NUMPEDINFONODES] = {
-	{ nil,          PED_HEAD,        PEDPIECE_HEAD,  0.0f,   0.05f, 0.2f },
-	{ "Storso",     PED_TORSO,               PEDPIECE_NONE,  0.0f,   0.15f, 0.2f },
-	{ "Storso",     PED_TORSO,               PEDPIECE_NONE,  0.0f,  -0.05f, 0.3f },
-	{ nil,          PED_MID,       PEDPIECE_BODY,  0.0f,  -0.07f, 0.3f },
-	{ nil,          PED_UPPERARML,   PEDPIECE_LEFTARM,  0.07f, -0.1f,  0.2f },
-	{ nil,          PED_UPPERARMR,   PEDPIECE_RIGHTARM, -0.07f, -0.1f,  0.2f },
-	{ "Slowerlegl", 0,               PEDPIECE_LEFTLEG,  0.0f,   0.07f, 0.25f },
-	{ nil,          PED_LOWERLEGR,   PEDPIECE_RIGHTLEG,  0.0f,   0.07f, 0.25f },
+	{ nil,          PED_HEAD,		PEDPIECE_HEAD,  0.0f,   0.05f, 0.2f },
+	{ "Storso",     0,				PEDPIECE_TORSO,  0.0f,   0.15f, 0.2f },
+	{ "Storso",     0,				PEDPIECE_TORSO,  0.0f,  -0.05f, 0.3f },
+	{ nil,          PED_MID,		PEDPIECE_MID,  0.0f,  -0.07f, 0.3f },
+	{ nil,          PED_UPPERARML,	PEDPIECE_LEFTARM,  0.07f, -0.1f,  0.2f },
+	{ nil,          PED_UPPERARMR,	PEDPIECE_RIGHTARM, -0.07f, -0.1f,  0.2f },
+	{ "Slowerlegl", 0,				PEDPIECE_LEFTLEG,  0.0f,   0.07f, 0.25f },
+	{ nil,          PED_LOWERLEGR,	PEDPIECE_RIGHTLEG,  0.0f,   0.07f, 0.25f },
 };
 
 RwObject*

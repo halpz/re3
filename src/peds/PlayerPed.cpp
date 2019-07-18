@@ -38,24 +38,22 @@ CPlayerPed::SetWantedLevelNoDrop(int32 level)
 	m_pWanted->SetWantedLevelNoDrop(level);
 }
 
-// I don't know actual purpose of parameter
+// I don't know the actual purpose of parameter
 void
 CPlayerPed::AnnoyPlayerPed(bool itsPolice)
 {
-	int8 *temper = &m_pedStats->m_temper;
-	if (*temper >= 52) {
+	if (m_pedStats->m_temper < 52) {
+		m_pedStats->m_temper++;
+	} else {
 		if (itsPolice) {
-			if (*temper < 55) {
-				(*temper)++;
+			if (m_pedStats->m_temper < 55) {
+				m_pedStats->m_temper++;
 			} else {
-				(*temper) = 46;
+				m_pedStats->m_temper = 46;
 			}
 		}
-	} else {
-		(*temper)++;
 	}
 }
-
 
 class CPlayerPed_ : public CPlayerPed
 {

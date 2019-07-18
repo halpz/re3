@@ -15,8 +15,8 @@ struct CPathNode;
 
 enum ePedPieceTypes
 {
-	PEDPIECE_NONE,
-	PEDPIECE_BODY,
+	PEDPIECE_TORSO,
+	PEDPIECE_MID,
 	PEDPIECE_LEFTARM,
 	PEDPIECE_RIGHTARM,
 	PEDPIECE_LEFTLEG,
@@ -260,7 +260,7 @@ public:
 	uint8 m_ped_flagH80 : 1;
 
 	uint8 m_ped_flagI1 : 1;
-	uint8 m_ped_flagI2 : 1; // limbs won't be removed if set
+	uint8 m_ped_flagI2 : 1; // if set, limbs won't came off
 	uint8 m_ped_flagI4 : 1;
 	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 m_ped_flagI10 : 1;

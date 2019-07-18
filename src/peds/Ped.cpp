@@ -3419,11 +3419,11 @@ CPed::InflictDamage(CEntity* damagedBy, eWeaponType method, float damage, ePedPi
 					willLinger = false;
 				} else {
 					switch (pedPiece) {
-						case PEDPIECE_NONE:
+						case PEDPIECE_TORSO:
 							willLinger = false;
 							dieAnim = ANIM_KO_SHOT_FRONT1;
 							break;
-						case PEDPIECE_BODY:
+						case PEDPIECE_MID:
 							willLinger = false;
 							dieAnim = ANIM_KO_SHOT_STOM;
 							break;
@@ -3518,9 +3518,9 @@ CPed::InflictDamage(CEntity* damagedBy, eWeaponType method, float damage, ePedPi
 				switch (random) {
 					case 0:
 						if ((pedPiece != PEDPIECE_LEFTARM || random <= 1)
-							&& (pedPiece != PEDPIECE_BODY || random != 1)) {
+							&& (pedPiece != PEDPIECE_MID || random != 1)) {
 							if (pedPiece == PEDPIECE_RIGHTARM && random > 1
-								|| pedPiece == PEDPIECE_BODY && random == 2)
+								|| pedPiece == PEDPIECE_MID && random == 2)
 						
 								dieAnim = ANIM_KO_SPIN_L;
 							else
@@ -3537,9 +3537,9 @@ CPed::InflictDamage(CEntity* damagedBy, eWeaponType method, float damage, ePedPi
 						break;
 					case 2:
 						if ((pedPiece != PEDPIECE_LEFTARM || random <= 1)
-							&& (pedPiece != PEDPIECE_BODY || random != 1)) {
+							&& (pedPiece != PEDPIECE_MID || random != 1)) {
 							if ((pedPiece != PEDPIECE_RIGHTARM || random <= 1)
-								&& (pedPiece != PEDPIECE_BODY || random != 2)) {
+								&& (pedPiece != PEDPIECE_MID || random != 2)) {
 								dieAnim = ANIM_KO_SKID_BACK;
 							} else {
 								dieAnim = ANIM_KD_RIGHT;
@@ -3697,12 +3697,12 @@ CPed::SetGetUp(void)
 
 			m_ped_flagE20 = false;
 			if (IsPlayer())
-				InflictDamage(nil, WEAPONTYPE_RUNOVERBYCAR, CTimer::GetTimeStep(), PEDPIECE_NONE, 0);
+				InflictDamage(nil, WEAPONTYPE_RUNOVERBYCAR, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 			else {
 				if (!CPad::GetPad(0)->ArePlayerControlsDisabled())
 					return;
 
-				InflictDamage(nil, WEAPONTYPE_RUNOVERBYCAR, 1000.0f, PEDPIECE_NONE, 0);
+				InflictDamage(nil, WEAPONTYPE_RUNOVERBYCAR, 1000.0f, PEDPIECE_TORSO, 0);
 			}
 			return;
 		}
