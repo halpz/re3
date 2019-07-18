@@ -10,6 +10,7 @@
 #include "Rubbish.h"
 #include "Fire.h"
 #include "Explosion.h"
+#include "Particle.h"
 #include "World.h"
 #include "SurfaceTable.h"
 #include "HandlingMgr.h"
@@ -45,6 +46,9 @@ CAutomobile::SetModelIndex(uint32 id)
 	CVehicle::SetModelIndex(id);
 	SetupModelNodes();
 }
+
+CVector vecDAMAGE_ENGINE_POS_SMALL(-0.1f, -0.1f, 0.0f);
+CVector vecDAMAGE_ENGINE_POS_BIG(-0.5f, -0.3f, 0.0f);
 
 //WRAPPER void CAutomobile::ProcessControl(void) { EAXJMP(0x531470); }
 void
@@ -330,12 +334,51 @@ CAutomobile::ProcessControl(void)
 		break;
 	default:
 		if(CVehicle::bCheat3){
-			// strong grip cheat
-			// TODO: make cars jump when horn key is pressed
+			// Make vehicle jump when horn is sounded
+			if(m_status == STATUS_PLAYER && m_vecMoveSpeed.MagnitudeSqr() > sq(0.2f) &&
+			// BUG: game checks [0] four times, instead of all wheels
+			   m_aSuspensionSpringRatio[0] < 1.0f &&
+			   CPad::GetPad(0)->HornJustDown()){
+
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRALIC_1, 0.0f);
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP, 1.0f);
+
+				CParticle::AddParticle(PARTICLE_ENGINE_STEAM,
+					m_aWheelColPoints[0].point + 0.5f*GetUp(),
+					1.3f*m_vecMoveSpeed, nil, 2.5f);
+				CParticle::AddParticle(PARTICLE_ENGINE_SMOKE,
+					m_aWheelColPoints[0].point + 0.5f*GetUp(),
+					1.2f*m_vecMoveSpeed, nil, 2.0f);
+
+				CParticle::AddParticle(PARTICLE_ENGINE_STEAM,
+					m_aWheelColPoints[2].point + 0.5f*GetUp(),
+					1.3f*m_vecMoveSpeed, nil, 2.5f);
+				CParticle::AddParticle(PARTICLE_ENGINE_SMOKE,
+					m_aWheelColPoints[2].point + 0.5f*GetUp(),
+					1.2f*m_vecMoveSpeed, nil, 2.0f);
+
+				CParticle::AddParticle(PARTICLE_ENGINE_STEAM,
+					m_aWheelColPoints[0].point + 0.5f*GetUp() - GetForward(),
+					1.3f*m_vecMoveSpeed, nil, 2.5f);
+				CParticle::AddParticle(PARTICLE_ENGINE_SMOKE,
+					m_aWheelColPoints[0].point + 0.5f*GetUp() - GetForward(),
+					1.2f*m_vecMoveSpeed, nil, 2.0f);
+
+				CParticle::AddParticle(PARTICLE_ENGINE_STEAM,
+					m_aWheelColPoints[2].point + 0.5f*GetUp() - GetForward(),
+					1.3f*m_vecMoveSpeed, nil, 2.5f);
+				CParticle::AddParticle(PARTICLE_ENGINE_SMOKE,
+					m_aWheelColPoints[2].point + 0.5f*GetUp() - GetForward(),
+					1.2f*m_vecMoveSpeed, nil, 2.0f);
+
+				ApplyMoveForce(CVector(0.0f, 0.0f, 1.0f)*m_fMass*0.4f);
+				ApplyTurnForce(GetUp()*m_fMass*0.035f, GetForward()*1.0f);
+			}
 		}
 		break;
 	}
 
+	float brake;
 	if(skipPhysics){
 		bHasContacted = false;
 		bIsInSafePosition = false;
@@ -473,7 +516,7 @@ CAutomobile::ProcessControl(void)
 		   GetModelIndex() == MI_MIAMI_SPARROW)
 			acceleration = 0.0f;
 
-		float brake = m_fBrakePedal * pHandling->fBrakeDeceleration * CTimer::GetTimeStep();
+		brake = m_fBrakePedal * pHandling->fBrakeDeceleration * CTimer::GetTimeStep();
 		bool neutralHandling = !!(pHandling->Flags & HANDLING_NEUTRALHANDLING);
 		float brakeBiasFront = neutralHandling ? 1.0f : 2.0f*pHandling->fBrakeBias;
 		float brakeBiasRear  = neutralHandling ? 1.0f : 2.0f*(1.0f-pHandling->fBrakeBias);
@@ -766,7 +809,7 @@ CAutomobile::ProcessControl(void)
 		for(i = 0; i < 4; i++){
 			float wheelPos = colModel->lines[i].p0.z;
 			if(m_aSuspensionSpringRatio[i] > 0.0f)
-				wheelPos -= m_aSuspensionSpringRatio[i]*m_aSuspensionLineLength[i];
+				wheelPos -= m_aSuspensionSpringRatio[i]*m_aSuspensionSpringLength[i];
 			m_aWheelPosition[i] += (wheelPos - m_aWheelPosition[i])*0.75f;
 		}
 		for(i = 0; i < 4; i++)
@@ -824,7 +867,174 @@ CAutomobile::ProcessControl(void)
 		}
 	}
 
-	assert(0 && "misc stuff");
+
+
+	// Process car on fire
+	// A similar calculation of damagePos is done elsewhere for smoke
+
+	uint8 engineStatus = Damage.GetEngineStatus();
+	CVector damagePos = ((CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()))->m_positions[CAR_POS_HEADLIGHTS];
+
+	switch(Damage.GetDoorStatus(DOOR_BONNET)){
+	case DOOR_STATUS_OK:
+	case DOOR_STATUS_SMASHED:
+		// Bonnet is still there, smoke comes out at the edge
+		damagePos += vecDAMAGE_ENGINE_POS_SMALL;
+		break;
+	case DOOR_STATUS_SWINGING:
+	case DOOR_STATUS_MISSING:
+		// Bonnet is gone, smoke comes out at the engine
+		damagePos += vecDAMAGE_ENGINE_POS_BIG;
+		break;
+	}
+
+	// move fire forward if in first person
+	if(this == FindPlayerVehicle() && TheCamera.GetLookingForwardFirstPerson())
+		if(m_fHealth < 250.0f && m_status != STATUS_WRECKED){
+			if(GetModelIndex() == MI_FIRETRUCK)
+				damagePos += CVector(0.0f, 3.0f, -0.2f);
+			else
+				damagePos += CVector(0.0f, 1.2f, -0.8f);
+		}
+
+	damagePos = GetMatrix()*damagePos;
+	damagePos.z += 0.15f;
+
+	if(m_fHealth < 250.0f && m_status != STATUS_WRECKED){
+		// Car is on fire
+
+		CParticle::AddParticle(PARTICLE_CARFLAME, damagePos,
+			CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.01125f, 0.09f)),
+			nil, 0.9f);
+
+		CVector coors = damagePos;
+		coors.x += CGeneral::GetRandomNumberInRange(-0.5625f, 0.5625f),
+		coors.y += CGeneral::GetRandomNumberInRange(-0.5625f, 0.5625f),
+		coors.z += CGeneral::GetRandomNumberInRange(0.5625f, 2.25f);
+		CParticle::AddParticle(PARTICLE_CARFLAME_SMOKE, coors, CVector(0.0f, 0.0f, 0.0f));
+
+		CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, damagePos, CVector(0.0f, 0.0f, 0.0f), nil, 0.5f);
+
+		// Blow up car after 5 seconds
+		m_fFireBlowUpTimer += CTimer::GetTimeStepInMilliseconds();
+		if(m_fFireBlowUpTimer > 5000.0f){
+			CWorld::Players[CWorld::PlayerInFocus].AwardMoneyForExplosion(this);
+			BlowUpCar(m_pSetOnFireEntity);
+		}
+	}else
+		m_fFireBlowUpTimer = 0.0f;
+
+	// Decrease car health if engine is damaged badly
+	if(engineStatus > 225 && m_fHealth > 250.0f)
+		m_fHealth -= 2.0f;
+
+	ProcessDelayedExplosion();
+
+
+	if(m_bSirenOrAlarm && (CTimer::GetFrameCounter()&7) == 5 &&
+	   UsesSiren(GetModelIndex()) && GetModelIndex() != MI_RCBANDIT)
+		CCarAI::MakeWayForCarWithSiren(this);
+
+
+	// Find out how much to shake the pad depending on suspension and ground surface
+
+	float suspShake = 0.0f;
+	float surfShake = 0.0f;
+	for(i = 0; i < 4; i++){
+		float suspChange = m_aSuspensionSpringRatioPrev[i] - m_aSuspensionSpringRatio[i];
+		if(suspChange > 0.3f){
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP, suspChange);
+			if(suspChange > suspShake)
+				suspShake = suspChange;
+		}
+
+		uint8 surf = m_aWheelColPoints[i].surfaceB;
+		if(surf == SURFACE_DIRT || surf == SURFACE_PUDDLE || surf == SURFACE_HEDGE){
+			if(surfShake < 0.2f)
+				surfShake = 0.3f;
+		}else if(surf == SURFACE_DIRTTRACK || surf == SURFACE_SAND){
+			if(surfShake < 0.1f)
+				surfShake = 0.2f;
+		}else if(surf == SURFACE_GRASS){
+			if(surfShake < 0.05f)
+				surfShake = 0.1f;
+		}
+
+		m_aSuspensionSpringRatioPrev[i] = m_aSuspensionSpringRatio[i];
+		m_aSuspensionSpringRatio[i] = 1.0f;
+	}
+
+	// Shake pad
+
+	if((suspShake > 0.0f || surfShake > 0.0f) && m_status == STATUS_PLAYER){
+		float speed = m_vecMoveSpeed.MagnitudeSqr();
+		if(speed > sq(0.1f)){
+			speed = Sqrt(speed);
+			if(suspShake > 0.0f){
+				uint8 freq = min(200.0f*suspShake*speed*2000.0f/m_fMass + 100.0f, 250.0f);
+				CPad::GetPad(0)->StartShake(20000.0f*CTimer::GetTimeStep()/freq, freq);
+			}else{
+				uint8 freq = min(200.0f*surfShake*speed*2000.0f/m_fMass + 40.0f, 145.0f);
+				CPad::GetPad(0)->StartShake(5000.0f*CTimer::GetTimeStep()/freq, freq);
+			}
+		}
+	}
+
+	bVehicleColProcessed = false;
+
+	if(!bWarnedPeds)
+		CCarCtrl::ScanForPedDanger(this);
+
+
+	// Turn around at the edge of the world
+	// TODO: make the numbers defines
+
+	float heading;
+	if(GetPosition().x > 1900.0f){
+		if(m_vecMoveSpeed.x > 0.0f)
+			m_vecMoveSpeed.x *= -1.0f;
+		heading = GetForward().Heading();
+		if(heading > 0.0f)	// going west
+			SetHeading(-heading);
+	}else if(GetPosition().x < -1900.0f){
+		if(m_vecMoveSpeed.x < 0.0f)
+			m_vecMoveSpeed.x *= -1.0f;
+		heading = GetForward().Heading();
+		if(heading < 0.0f)	// going east
+			SetHeading(-heading);
+	}
+	if(GetPosition().y > 1900.0f){
+		if(m_vecMoveSpeed.y > 0.0f)
+			m_vecMoveSpeed.y *= -1.0f;
+		heading = GetForward().Heading();
+		if(heading < HALFPI && heading > 0.0f)
+			SetHeading(PI-heading);
+		else if(heading > -HALFPI && heading < 0.0f)
+			SetHeading(-PI-heading);
+	}else if(GetPosition().y < -1900.0f){
+		if(m_vecMoveSpeed.y < 0.0f)
+			m_vecMoveSpeed.y *= -1.0f;
+		heading = GetForward().Heading();
+		if(heading > HALFPI)
+			SetHeading(PI-heading);
+		else if(heading < -HALFPI)
+			SetHeading(-PI-heading);
+	}
+
+	if(bInfiniteMass){
+		m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+		m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+		m_vecMoveFriction = CVector(0.0f, 0.0f, 0.0f);
+		m_vecTurnFriction = CVector(0.0f, 0.0f, 0.0f);
+	}else if(!skipPhysics &&
+	         (m_fGasPedal == 0.0f && brake == 0.0f || m_status == STATUS_WRECKED)){
+		if(Abs(m_vecMoveSpeed.x) < 0.005f &&
+		   Abs(m_vecMoveSpeed.y) < 0.005f &&
+		   Abs(m_vecMoveSpeed.z) < 0.005f){
+			m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+			m_vecTurnSpeed.z = 0.0f;
+		}
+	}
 }
 
 void
@@ -1557,7 +1767,7 @@ void
 CAutomobile::ScanForCrimes(void)
 {
 	if(FindPlayerVehicle() && FindPlayerVehicle()->IsCar())
-		if(FindPlayerVehicle()->m_nAlarmState != -1)
+		if(FindPlayerVehicle()->IsAlarmOn())
 			// if player's alarm is on, increase wanted level
 			if((FindPlayerVehicle()->GetPosition() - GetPosition()).MagnitudeSqr() < sq(20.0f))
 				CWorld::Players[CWorld::PlayerInFocus].m_pPed->SetWantedLevelNoDrop(1);
@@ -2064,6 +2274,7 @@ public:
 STARTPATCHES
 	InjectHook(0x52D170, &CAutomobile_::dtor, PATCH_JUMP);
 	InjectHook(0x52D190, &CAutomobile_::SetModelIndex_, PATCH_JUMP);
+	InjectHook(0x531470, &CAutomobile_::ProcessControl_, PATCH_JUMP);
 	InjectHook(0x535180, &CAutomobile_::Teleport_, PATCH_JUMP);
 	InjectHook(0x53B270, &CAutomobile_::ProcessEntityCollision_, PATCH_JUMP);
 	InjectHook(0x53B660, &CAutomobile_::ProcessControlInputs_, PATCH_JUMP);

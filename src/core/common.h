@@ -139,7 +139,8 @@ inline float sq(float x) { return x*x; }
 #define SQR(x) ((x) * (x))
 
 #define PI M_PI
-#define TWOPI PI*2
+#define TWOPI (PI*2)
+#define HALFPI (PI/2)
 #define DEGTORAD(x) ((x) * PI / 180.0f)
 #define RADTODEG(x) ((x) * 180.0f / PI)
 

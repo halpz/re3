@@ -130,7 +130,7 @@ public:
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
 	uint8 m_aExtras[2];
-	int16 m_nAlarmState; // m_nWantedStarsOnEnter on DK22
+	int16 m_nAlarmState;
 	int16 m_nMissionValue;
 	CPed *pDriver;
 	CPed *pPassengers[8];
@@ -188,7 +188,7 @@ public:
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
 	int8 field_1FB;
 	int8 field_1FC[4];
-	float m_fHealth;           // 1000.0f = full health. 0 -> explode
+	float m_fHealth;           // 1000.0f = full health. 250.0f = fire. 0 -> explode
 	uint8 m_nCurrentGear;
 	int8 field_205[3];
 	float m_fChangeGearTime;
@@ -277,6 +277,8 @@ public:
 	void RemoveDriver(void);
 	void ProcessCarAlarm(void);
 	bool IsSphereTouchingVehicle(float sx, float sy, float sz, float radius);
+
+	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
 	
 	static bool &bWheelsOnlyCheat;
 	static bool &bAllDodosCheat;

@@ -14,6 +14,7 @@ public:
 	static void SteerAICarWithPhysics(CVehicle*);
 	static void UpdateCarOnRails(CVehicle*);
 	static bool MapCouldMoveInThisArea(float x, float y);
+	static void ScanForPedDanger(CVehicle *veh);
 
 	static int32 &NumLawEnforcerCars;
 	static int32 &NumAmbulancesOnDuty;

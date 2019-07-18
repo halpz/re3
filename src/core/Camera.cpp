@@ -95,6 +95,14 @@ CCamera::GetLookDirection(void)
 	return LOOKING_FORWARD;;
 }
 
+bool
+CCamera::GetLookingForwardFirstPerson()
+{
+	return Cams[ActiveCam].Mode == CCam::MODE_FIRSTPERSON &&
+		Cams[ActiveCam].DirectionWasLooking == LOOKING_FORWARD;
+}
+
+
 WRAPPER void CCamera::Fade(float timeout, int16 direction) { EAXJMP(0x46B3A0); }
 WRAPPER void CCamera::ProcessFade(void) { EAXJMP(0x46F080); }
 WRAPPER void CCamera::ProcessMusicFade(void) { EAXJMP(0x46F1E0); }

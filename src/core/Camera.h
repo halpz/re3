@@ -448,6 +448,7 @@ int     m_iModeObbeCamIsInForCar;
 	bool IsSphereVisible(const CVector &center, float radius);
 	bool IsBoxVisible(RwV3d *box, const CMatrix *mat);
 	int GetLookDirection(void);
+	bool GetLookingForwardFirstPerson(void);
 
 	void Fade(float timeout, int16 direction);
 	int GetScreenFadeStatus(void);

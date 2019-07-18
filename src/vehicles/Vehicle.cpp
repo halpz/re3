@@ -364,7 +364,7 @@ CVehicle::ExtinguishCarFire(void)
 		CAutomobile *car = (CAutomobile*)this;
 		if(car->Damage.GetEngineStatus() >= 225)
 			car->Damage.SetEngineStatus(215);
-		car->field_530 = 0.0f;
+		car->m_fFireBlowUpTimer = 0.0f;
 	}
 }
 

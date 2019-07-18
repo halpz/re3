@@ -22,6 +22,7 @@ public:
 		return *((RwV3d*)this);
 	}
 #endif
+	// (0,1,0) means no rotation. So get right vector and its atan
 	float Heading(void) const { return Atan2(-x, y); }
 	float Magnitude(void) const { return Sqrt(x*x + y*y + z*z); }
 	float MagnitudeSqr(void) const { return x*x + y*y + z*z; }

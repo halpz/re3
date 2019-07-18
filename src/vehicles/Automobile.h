@@ -59,7 +59,7 @@ public:
 	float m_fHeightAboveRoad;
 	float m_fTraction;
 	uint8 stuff6[28];
-	float field_530;
+	float m_fFireBlowUpTimer;
 	CPhysical *m_aGroundPhysical[4];	// physicals touching wheels
 	CVector m_aGroundOffset[4];		// from ground object to colpoint
 	CEntity *m_pSetOnFireEntity;
