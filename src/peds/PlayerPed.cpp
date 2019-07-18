@@ -38,6 +38,22 @@ CPlayerPed::SetWantedLevelNoDrop(int32 level)
 	m_pWanted->SetWantedLevelNoDrop(level);
 }
 
+// I don't know the actual purpose of parameter
+void
+CPlayerPed::AnnoyPlayerPed(bool itsPolice)
+{
+	if (m_pedStats->m_temper < 52) {
+		m_pedStats->m_temper++;
+	} else {
+		if (itsPolice) {
+			if (m_pedStats->m_temper < 55) {
+				m_pedStats->m_temper++;
+			} else {
+				m_pedStats->m_temper = 46;
+			}
+		}
+	}
+}
 
 class CPlayerPed_ : public CPlayerPed
 {
@@ -48,4 +64,5 @@ public:
 STARTPATCHES
 	InjectHook(0x4EFB30, &CPlayerPed_::dtor, PATCH_JUMP);
 	InjectHook(0x4F28A0, &CPlayerPed::ClearWeaponTarget, PATCH_JUMP);
+	InjectHook(0x4F3700, &CPlayerPed::AnnoyPlayerPed, PATCH_JUMP);
 ENDPATCHES

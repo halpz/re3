@@ -26,10 +26,10 @@
 #include "Pad.h"
 #include "Phones.h"
 #include "EventList.h"
+#include "Darkel.h"
 
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
-WRAPPER void CPed::SetDie(AnimationId anim, float arg1, float arg2) { EAXJMP(0x4D37D0); }
 WRAPPER void CPed::SetDead(void) { EAXJMP(0x4D3970); }
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 WRAPPER void CPed::RestorePreviousState(void) { EAXJMP(0x4C5E30); }
@@ -54,6 +54,7 @@ WRAPPER void CPed::SetFollowPath(CVector) { EAXJMP(0x4D2EA0); }
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
 bool &CPed::bPedCheat3 = *(bool*)0x95CD59;
+CColPoint &CPed::ms_tempColPoint = *(CColPoint*)0x62DB14;
 
 uint16 &CPed::distanceMultToCountPedNear = *(uint16*)0x5F8C98;
 
@@ -383,10 +384,10 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 
 	m_ped_flagC1 = false;
 	bRespondsToThreats = true;
-	m_ped_flagC4 = true;
-	m_ped_flagC8 = false;
+	bRenderPedInCar = true;
+	bChangedSeat = false;
 	m_ped_flagC10 = false;
-	m_ped_flagC20 = false;
+	bBodyPartJustCameOff = false;
 	m_ped_flagC40 = false;
 	m_ped_flagC80 = false;
 
@@ -394,7 +395,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagD2 = false;
 	m_ped_flagD4 = false;
 	m_ped_flagD8 = false;
-	m_ped_flagD10 = false;
+	bIsPedDieAnimPlaying = false;
 	m_ped_flagD20 = false;
 	m_ped_flagD40 = false;
 	m_bScriptObjectiveCompleted = false;
@@ -672,7 +673,7 @@ CPed::AimGun(void)
 
 	if (m_pSeekTarget) {
 		if (m_pSeekTarget->IsPed()) {
-			((CPed*)m_pSeekTarget)->m_pedIK.GetComponentPosition(&pos, PED_TORSO);
+			((CPed*)m_pSeekTarget)->m_pedIK.GetComponentPosition(&pos, PED_MID);
 			vector.x = pos.x;
 			vector.y = pos.y;
 			vector.z = pos.z;
@@ -712,7 +713,7 @@ CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
 			CPed::SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
 		}
 
-		m_ped_flagC20 = true;
+		bBodyPartJustCameOff = true;
 		m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 150;
 
 		CParticle::AddParticle(PARTICLE_TEST, pos2,
@@ -736,7 +737,7 @@ CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
 }
 
 void
-CPed::RemoveBodyPart(PedNode nodeId, int8 unk)
+CPed::RemoveBodyPart(PedNode nodeId, int8 direction)
 {
 	RwFrame *frame;
 	RwV3d pos;
@@ -745,7 +746,7 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 unk)
 	if (frame) {
 		if (CGame::nastyGame) {
 			if (nodeId != PED_HEAD)
-				CPed::SpawnFlyingComponent(nodeId, unk);
+				SpawnFlyingComponent(nodeId, direction);
 
 			RecurseFrameChildrenVisibilityCB(frame, nil);
 			pos.x = 0.0f;
@@ -767,7 +768,7 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 unk)
 						nil, 0.0f, 0, 0, 0, 0);
 				}
 			}
-			m_ped_flagC20 = true;
+			bBodyPartJustCameOff = true;
 			m_bodyPartBleeding = nodeId;
 		}
 	} else {
@@ -1046,184 +1047,186 @@ CPed::Attack(void)
 			weaponAnimAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_WEAPON_THROWU);
 			delayBetweenAnimAndFire = 0.2f;
 		}
+
+		if (!weaponAnimAssoc) {
+			if (lastReloadWasInFuture) {
+				if (ourWeaponFire != WEAPON_FIRE_PROJECTILE || !IsPlayer() || ((CPlayerPed*)this)->field_1380) {
+					if (!CGame::nastyGame || ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), nil) < PED_ON_THE_FLOOR) {
+						weaponAnimAssoc = CAnimManager::BlendAnimation((RpClump*)m_rwObject, ASSOCGRP_STD, ourWeapon->m_AnimToPlay, 8.0f);
+					}
+					else {
+						weaponAnimAssoc = CAnimManager::BlendAnimation((RpClump*)m_rwObject, ASSOCGRP_STD, ourWeapon->m_Anim2ToPlay, 8.0f);
+					}
+
+					weaponAnimAssoc->SetFinishCallback(CPed::FinishedAttackCB, this);
+					weaponAnimAssoc->flags |= ASSOC_RUNNING;
+
+					if (weaponAnimAssoc->currentTime == weaponAnimAssoc->hierarchy->totalLength)
+						weaponAnimAssoc->SetCurrentTime(0.0f);
+
+					if (IsPlayer()) {
+						((CPlayerPed*)this)->field_1376 = 0.0f;
+						((CPlayerPed*)this)->field_1380 = false;
+					}
+				}
+			} else
+				FinishedAttackCB(nil, this);
+
+			return;
+		}
 	}
-	if (weaponAnimAssoc) {
-		animStart = ourWeapon->m_fAnimLoopStart;
-		weaponAnimTime = weaponAnimAssoc->currentTime;
-		if (weaponAnimTime > animStart && weaponAnimTime - weaponAnimAssoc->timeStep <= animStart) {
-			if (ourWeapon->m_bCanAimWithArm)
-				m_pedIK.m_flags |= CPedIK::FLAG_4;
+
+	animStart = ourWeapon->m_fAnimLoopStart;
+	weaponAnimTime = weaponAnimAssoc->currentTime;
+	if (weaponAnimTime > animStart && weaponAnimTime - weaponAnimAssoc->timeStep <= animStart) {
+		if (ourWeapon->m_bCanAimWithArm)
+			m_pedIK.m_flags |= CPedIK::FLAG_4;
+		else
+			m_pedIK.m_flags &= ~CPedIK::FLAG_4;
+	}
+
+	if (weaponAnimTime <= delayBetweenAnimAndFire || weaponAnimTime - weaponAnimAssoc->timeStep > delayBetweenAnimAndFire || !weaponAnimAssoc->IsRunning()) {
+		if (weaponAnimAssoc->speed < 1.0f)
+			weaponAnimAssoc->speed = 1.0f;
+
+	} else {
+		firePos = ourWeapon->m_vecFireOffset;
+		if (ourWeaponType == WEAPONTYPE_BASEBALLBAT) {
+			if (weaponAnimAssoc->animId == ourWeapon->m_Anim2ToPlay)
+				firePos.z = 0.7f * ourWeapon->m_fRadius - 1.0f;
+
+			firePos = GetMatrix() * firePos;
+		} else if (ourWeaponType != WEAPONTYPE_UNARMED) {
+			if (weaponAnimAssoc->animId == ANIM_KICK_FLOOR)
+				frame = GetNodeFrame(PED_FOOTR);
 			else
-				m_pedIK.m_flags &= ~CPedIK::FLAG_4;
-		}
+				frame = GetNodeFrame(PED_HANDR);
 
-		if (weaponAnimTime <= delayBetweenAnimAndFire || weaponAnimTime - weaponAnimAssoc->timeStep > delayBetweenAnimAndFire || !weaponAnimAssoc->IsRunning()) {
-			if (weaponAnimAssoc->speed < 1.0f)
-				weaponAnimAssoc->speed = 1.0f;
-
+			for (; frame; frame = RwFrameGetParent(frame))
+				RwV3dTransformPoints((RwV3d*)firePos, (RwV3d*)firePos, 1, RwFrameGetMatrix(frame));
 		} else {
-			firePos = ourWeapon->m_vecFireOffset;
-			if (ourWeaponType == WEAPONTYPE_BASEBALLBAT) {
-				if (weaponAnimAssoc->animId == ourWeapon->m_Anim2ToPlay)
-					firePos.z = 0.7f * ourWeapon->m_fRadius - 1.0f;
-
-				firePos = GetMatrix() * firePos;
-			} else if (ourWeaponType != WEAPONTYPE_UNARMED) {
-				if (weaponAnimAssoc->animId == ANIM_KICK_FLOOR)
-					frame = GetNodeFrame(PED_FOOTR);
-				else
-					frame = GetNodeFrame(PED_HANDR);
-
-				for (; frame; frame = RwFrameGetParent(frame))
-					RwV3dTransformPoints((RwV3d*)firePos, (RwV3d*)firePos, 1, RwFrameGetMatrix(frame));
-			} else {
-				firePos = GetMatrix() * firePos;
-			}
+			firePos = GetMatrix() * firePos;
+		}
 			
-			GetWeapon()->Fire(this, &firePos);
+		GetWeapon()->Fire(this, &firePos);
 
-			if (ourWeaponType == WEAPONTYPE_MOLOTOV || ourWeaponType == WEAPONTYPE_GRENADE) {
-				RemoveWeaponModel(ourWeapon->m_nModelId);
-			}
-			if (!GetWeapon()->m_nAmmoTotal && ourWeaponFire != WEAPON_FIRE_MELEE && FindPlayerPed() != this) {
-				SelectGunIfArmed();
-			}
-
-			if (GetWeapon()->m_eWeaponState != WEAPONSTATE_MELEE_MADECONTACT) {
-				// If reloading just began, start the animation
-				if (GetWeapon()->m_eWeaponState == WEAPONSTATE_RELOADING && reloadAnim != NUM_ANIMS && !reloadAnimAssoc) {
-					CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, reloadAnim, 8.0f);
-					ClearLookFlag();
-					ClearAimFlag();
-					m_ped_flagA4 = false;
-					bIsPointingGunAt = false;
-					m_lastHitTime = CTimer::GetTimeInMilliseconds();
-					return;
-				}
-			} else {
-				if (weaponAnimAssoc->animId == ANIM_WEAPON_BAT_V || weaponAnimAssoc->animId == ANIM_WEAPON_BAT_H) {
-					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, 1.0f);
-				} else if (weaponAnimAssoc->animId == ANIM_FIGHT_PPUNCH) {
-					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_PUNCH_ATTACK, 0.0f);
-				}
-
-				weaponAnimAssoc->speed = 0.5f;
-
-				// BUG: We currently don't know any situation this cond. could be true.
-				if (m_ped_flagA4 || CTimer::GetTimeInMilliseconds() < m_lastHitTime) {
-					weaponAnimAssoc->callbackType = 0;
-				}
-			}
-
-			lastReloadWasInFuture = false;
+		if (ourWeaponType == WEAPONTYPE_MOLOTOV || ourWeaponType == WEAPONTYPE_GRENADE) {
+			RemoveWeaponModel(ourWeapon->m_nModelId);
+		}
+		if (!GetWeapon()->m_nAmmoTotal && ourWeaponFire != WEAPON_FIRE_MELEE && FindPlayerPed() != this) {
+			SelectGunIfArmed();
 		}
 
-		if (ourWeaponType == WEAPONTYPE_SHOTGUN) {
-			weaponAnimTime = weaponAnimAssoc->currentTime;
-			firePos = ourWeapon->m_vecFireOffset;
-
-			if (weaponAnimTime > 1.0f && weaponAnimTime - weaponAnimAssoc->timeStep <= 1.0f && weaponAnimAssoc->IsRunning()) {
-				for (frame = GetNodeFrame(PED_HANDR); frame; frame = RwFrameGetParent(frame))
-					RwV3dTransformPoints((RwV3d*)firePos, (RwV3d*)firePos, 1, RwFrameGetMatrix(frame));
-
-				CVector gunshellPos(
-					firePos.x - 0.6f * GetForward().x,
-					firePos.y - 0.6f * GetForward().y,
-					firePos.z - 0.15f * GetUp().z
-				);
-
-				CVector2D gunshellRot(
-					GetRight().x,
-					GetRight().y
-				);
-
-				gunshellRot.Normalise();
-				GetWeapon()->AddGunshell(this, gunshellPos, gunshellRot, 0.025f);
-			}
-		}
-		animLoopEnd = ourWeapon->m_fAnimLoopEnd;
-		if (ourWeaponFire == WEAPON_FIRE_MELEE && weaponAnimAssoc->animId == ourWeapon->m_Anim2ToPlay)
-			animLoopEnd = 3.4f/6.0f;
-
-		weaponAnimTime = weaponAnimAssoc->currentTime;
-
-		// Anim loop end, either start the loop again or finish the attack
-		if (weaponAnimTime > animLoopEnd || !weaponAnimAssoc->IsRunning() && ourWeaponFire != WEAPON_FIRE_PROJECTILE) {
-
-			if (weaponAnimTime - 2.0f * weaponAnimAssoc->timeStep <= animLoopEnd
-				&& (m_ped_flagA4 || CTimer::GetTimeInMilliseconds() < m_lastHitTime)
-				&& GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING) {
-
-				weaponAnim = weaponAnimAssoc->animId;
-				if (ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), nil) < PED_ON_THE_FLOOR) {
-					if (weaponAnim != ourWeapon->m_Anim2ToPlay || weaponAnim == ANIM_RBLOCK_CSHOOT) {
-						weaponAnimAssoc->Start(ourWeapon->m_fAnimLoopStart);
-					} else {
-						CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, ourWeapon->m_AnimToPlay, 8.0f);
-					}
-				} else {
-					if (weaponAnim == ourWeapon->m_Anim2ToPlay)
-						weaponAnimAssoc->SetCurrentTime(0.1f);
-					else
-						CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, ourWeapon->m_Anim2ToPlay, 8.0f);
-				}
-			} else {
+		if (GetWeapon()->m_eWeaponState != WEAPONSTATE_MELEE_MADECONTACT) {
+			// If reloading just began, start the animation
+			if (GetWeapon()->m_eWeaponState == WEAPONSTATE_RELOADING && reloadAnim != NUM_ANIMS && !reloadAnimAssoc) {
+				CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, reloadAnim, 8.0f);
+				ClearLookFlag();
 				ClearAimFlag();
+				m_ped_flagA4 = false;
+				bIsPointingGunAt = false;
+				m_lastHitTime = CTimer::GetTimeInMilliseconds();
+				return;
+			}
+		} else {
+			if (weaponAnimAssoc->animId == ANIM_WEAPON_BAT_V || weaponAnimAssoc->animId == ANIM_WEAPON_BAT_H) {
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, 1.0f);
+			} else if (weaponAnimAssoc->animId == ANIM_FIGHT_PPUNCH) {
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_PUNCH_ATTACK, 0.0f);
+			}
 
-				// Echoes of bullets, at the end of the attack. (Bug: doesn't play while reloading)
-				if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep <= ourWeapon->m_fAnimLoopEnd) {
-					switch (ourWeaponType) {
-						case WEAPONTYPE_UZI:
-							DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_UZI_BULLET_ECHO, 0.0f);
-							break;
-						case WEAPONTYPE_AK47:
-							DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
-							break;
-						case WEAPONTYPE_M16:
-							DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_M16_BULLET_ECHO, 0.0f);
-							break;
-						default:
-							break;
-					}
-				}
+			weaponAnimAssoc->speed = 0.5f;
 
-				// Fun fact: removing this part leds to reloading flamethrower
-				if (ourWeaponType == WEAPONTYPE_FLAMETHROWER && weaponAnimAssoc->IsRunning()) {
-					weaponAnimAssoc->flags |= ASSOC_DELETEFADEDOUT;
-					weaponAnimAssoc->flags &= ~ASSOC_RUNNING;
-					weaponAnimAssoc->blendDelta = -4.0f;
-				}
+			// BUG: We currently don't know any situation this cond. could be true.
+			if (m_ped_flagA4 || CTimer::GetTimeInMilliseconds() < m_lastHitTime) {
+				weaponAnimAssoc->callbackType = 0;
 			}
 		}
-		if (weaponAnimAssoc->currentTime > delayBetweenAnimAndFire)
-			lastReloadWasInFuture = false;
 
-		m_ped_flagA4 = lastReloadWasInFuture;
-		return;
+		lastReloadWasInFuture = false;
 	}
 
-	if (lastReloadWasInFuture) {
-		if (ourWeaponFire != WEAPON_FIRE_PROJECTILE || !CPed::IsPlayer() || ((CPlayerPed*)this)->field_1380) {
-			if (!CGame::nastyGame || ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), nil) < PED_ON_THE_FLOOR) {
-				weaponAnimAssoc = CAnimManager::BlendAnimation((RpClump*)m_rwObject, ASSOCGRP_STD, ourWeapon->m_AnimToPlay, 8.0f);
+	if (ourWeaponType == WEAPONTYPE_SHOTGUN) {
+		weaponAnimTime = weaponAnimAssoc->currentTime;
+		firePos = ourWeapon->m_vecFireOffset;
+
+		if (weaponAnimTime > 1.0f && weaponAnimTime - weaponAnimAssoc->timeStep <= 1.0f && weaponAnimAssoc->IsRunning()) {
+			for (frame = GetNodeFrame(PED_HANDR); frame; frame = RwFrameGetParent(frame))
+				RwV3dTransformPoints((RwV3d*)firePos, (RwV3d*)firePos, 1, RwFrameGetMatrix(frame));
+
+			CVector gunshellPos(
+				firePos.x - 0.6f * GetForward().x,
+				firePos.y - 0.6f * GetForward().y,
+				firePos.z - 0.15f * GetUp().z
+			);
+
+			CVector2D gunshellRot(
+				GetRight().x,
+				GetRight().y
+			);
+
+			gunshellRot.Normalise();
+			GetWeapon()->AddGunshell(this, gunshellPos, gunshellRot, 0.025f);
+		}
+	}
+	animLoopEnd = ourWeapon->m_fAnimLoopEnd;
+	if (ourWeaponFire == WEAPON_FIRE_MELEE && weaponAnimAssoc->animId == ourWeapon->m_Anim2ToPlay)
+		animLoopEnd = 3.4f/6.0f;
+
+	weaponAnimTime = weaponAnimAssoc->currentTime;
+
+	// Anim loop end, either start the loop again or finish the attack
+	if (weaponAnimTime > animLoopEnd || !weaponAnimAssoc->IsRunning() && ourWeaponFire != WEAPON_FIRE_PROJECTILE) {
+
+		if (weaponAnimTime - 2.0f * weaponAnimAssoc->timeStep <= animLoopEnd
+			&& (m_ped_flagA4 || CTimer::GetTimeInMilliseconds() < m_lastHitTime)
+			&& GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING) {
+
+			weaponAnim = weaponAnimAssoc->animId;
+			if (ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(((CPlayerPed*)this), nil) < PED_ON_THE_FLOOR) {
+				if (weaponAnim != ourWeapon->m_Anim2ToPlay || weaponAnim == ANIM_RBLOCK_CSHOOT) {
+					weaponAnimAssoc->Start(ourWeapon->m_fAnimLoopStart);
+				} else {
+					CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, ourWeapon->m_AnimToPlay, 8.0f);
+				}
 			} else {
-				weaponAnimAssoc = CAnimManager::BlendAnimation((RpClump*)m_rwObject, ASSOCGRP_STD, ourWeapon->m_Anim2ToPlay, 8.0f);
+				if (weaponAnim == ourWeapon->m_Anim2ToPlay)
+					weaponAnimAssoc->SetCurrentTime(0.1f);
+				else
+					CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, ourWeapon->m_Anim2ToPlay, 8.0f);
+			}
+		} else {
+			ClearAimFlag();
+
+			// Echoes of bullets, at the end of the attack. (Bug: doesn't play while reloading)
+			if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep <= ourWeapon->m_fAnimLoopEnd) {
+				switch (ourWeaponType) {
+					case WEAPONTYPE_UZI:
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_UZI_BULLET_ECHO, 0.0f);
+						break;
+					case WEAPONTYPE_AK47:
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
+						break;
+					case WEAPONTYPE_M16:
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_M16_BULLET_ECHO, 0.0f);
+						break;
+					default:
+						break;
+				}
 			}
 
-			weaponAnimAssoc->SetFinishCallback(CPed::FinishedAttackCB, this);
-			weaponAnimAssoc->flags |= ASSOC_RUNNING;
-
-			if (weaponAnimAssoc->currentTime == weaponAnimAssoc->hierarchy->totalLength)
-				weaponAnimAssoc->SetCurrentTime(0.0f);
-
-			if (CPed::IsPlayer()) {
-				((CPlayerPed*)this)->field_1376 = 0.0f;
-				((CPlayerPed*)this)->field_1380 = false;
+			// Fun fact: removing this part leds to reloading flamethrower
+			if (ourWeaponType == WEAPONTYPE_FLAMETHROWER && weaponAnimAssoc->IsRunning()) {
+				weaponAnimAssoc->flags |= ASSOC_DELETEFADEDOUT;
+				weaponAnimAssoc->flags &= ~ASSOC_RUNNING;
+				weaponAnimAssoc->blendDelta = -4.0f;
 			}
 		}
 	}
-	else
-		CPed::FinishedAttackCB(nil, this);
+	if (weaponAnimAssoc->currentTime > delayBetweenAnimAndFire)
+		lastReloadWasInFuture = false;
+
+	m_ped_flagA4 = lastReloadWasInFuture;
 }
 
 void
@@ -1276,25 +1279,26 @@ CPed::Duck(void)
 void
 CPed::ClearDuck(void)
 {
-	CAnimBlendAssociation *animAssoc;
+	CAnimBlendAssociation* animAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_DUCK_DOWN);
+	if (!animAssoc) {
+		animAssoc = RpAnimBlendClumpGetAssociation((RpClump*)m_rwObject, ANIM_DUCK_LOW);
 
-	animAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_DUCK_DOWN);
-	if (!animAssoc)
-		animAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_DUCK_LOW);
-
-	if (animAssoc) {
-
-		if (bCrouchWhenShooting) {
-
-			if (m_nPedState == PED_ATTACK || m_nPedState == PED_AIM_GUN) {
-				animAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_RBLOCK_CSHOOT);
-				if (!animAssoc || animAssoc->blendDelta < 0.0f) {
-					CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, ANIM_RBLOCK_CSHOOT, 4.0f);
-				}
-			}
+		if (!animAssoc) {
+			bIsDucking = false;
+			return;
 		}
-	} else
-		bIsDucking = false;
+	}
+
+	if (!bCrouchWhenShooting)
+		return;
+
+	if (m_nPedState != PED_ATTACK && m_nPedState != PED_AIM_GUN)
+		return;
+
+	animAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_RBLOCK_CSHOOT);
+	if (!animAssoc || animAssoc->blendDelta < 0.0f) {
+		CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, ANIM_RBLOCK_CSHOOT, 4.0f);
+	}
 }
 
 void
@@ -1563,7 +1567,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	if (CReplay::IsPlayingBack())
 		return;
 
-	if (!m_ped_flagC8 && phase != LINE_UP_TO_CAR_2) {
+	if (!bChangedSeat && phase != LINE_UP_TO_CAR_2) {
 		if (RpAnimBlendClumpGetAssociation((RpClump*)m_rwObject, ANIM_CAR_SIT)) {
 			SetPedPositionInCar();
 			return;
@@ -1580,7 +1584,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 			SetPedPositionInCar();
 			return;
 		}
-		m_ped_flagC8 = 1;
+		bChangedSeat = true;
 	}
 	if (phase == LINE_UP_TO_CAR_START) {
 		m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
@@ -1970,7 +1974,7 @@ CPed::BuildPedLists(void)
 	static CPed *unsortedNearPeds[10];
 	uint16 nextNearPedSlot = 0;
 
-	if ((CTimer::GetFrameCounter() + m_randomSeed) & 15) {
+	if ((CTimer::GetFrameCounter() + m_randomSeed) % 16) {
 
 		for(int i = 0; i < 10; ) {
 			if (m_nearPeds[i]) {
@@ -3113,7 +3117,7 @@ CPed::ClearAll(void)
 	ClearAimFlag();
 	ClearLookFlag();
 	bIsPointingGunAt = false;
-	m_ped_flagC4 = true;
+	bRenderPedInCar = true;
 	m_ped_flagH1 = false;
 	m_pCollidingEntity = nil;
 }
@@ -3133,6 +3137,597 @@ CPed::ClearAttack(void)
 		SetIdle();
 	} else {
 		RestorePreviousState();
+	}
+}
+
+void
+CPed::ClearAttackByRemovingAnim(void)
+{
+	if (m_nPedState != PED_ATTACK || bIsDucking)
+		return;
+
+	CWeaponInfo *weapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
+	CAnimBlendAssociation *weaponAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, weapon->m_AnimToPlay);
+	if (!weaponAssoc) {
+		weaponAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, weapon->m_Anim2ToPlay);
+
+		if (!weaponAssoc && weapon->m_bThrow)
+			weaponAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ANIM_WEAPON_THROWU);
+
+		if (!weaponAssoc) {
+			ClearAttack();
+			return;
+		}
+	}
+	weaponAssoc->blendDelta = -8.0f;
+	weaponAssoc->flags &= ~ASSOC_RUNNING;
+	weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
+	weaponAssoc->SetDeleteCallback(FinishedAttackCB, this);
+}
+
+void
+CPed::StopNonPartialAnims(void)
+{
+	CAnimBlendAssociation* assoc;
+
+	for (assoc = RpAnimBlendClumpGetFirstAssociation((RpClump*)m_rwObject); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
+		if (!assoc->IsPartial())
+			assoc->flags &= ~ASSOC_RUNNING;
+	}
+}
+
+void
+CPed::SetStoredState(void)
+{
+	if (m_nLastPedState != PED_NONE || !CanPedReturnToState())
+		return;
+
+	if (m_nPedState == PED_WANDER_PATH) {
+		m_ped_flagC80 = true;
+		if (m_nMoveState == PEDMOVE_NONE || m_nMoveState == PEDMOVE_STILL)
+			m_nMoveState = PEDMOVE_WALK;
+	}
+	m_nLastPedState = m_nPedState;
+	if (m_nMoveState >= m_nPrevActionState)
+		m_nPrevActionState = m_nMoveState;
+}
+
+void
+CPed::SetDie(AnimationId animId, float delta, float speed)
+{
+	CPlayerPed *player = FindPlayerPed();
+	if (player == this) {
+		if (!player->m_bCanBeDamaged)
+			return;
+	}
+
+	m_threatEntity = nil;
+	if (m_nPedState == PED_DIE || m_nPedState == PED_DEAD)
+		return;
+
+	if (m_nPedState == PED_FALL || m_nPedState == PED_GETUP)
+		delta *=  0.5f;
+
+	SetStoredState();
+	ClearAll();
+	m_fHealth = 0.0f;
+	if (m_nPedState == PED_DRIVING) {
+		if (!IsPlayer())
+			FlagToDestroyWhenNextProcessed();
+	} else if (bInVehicle) {
+		if (m_pVehicleAnim)
+			m_pVehicleAnim->blendDelta = -1000.0f;
+	} else if (m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK) {
+		QuitEnteringCar();
+	}
+
+	m_nPedState = PED_DIE;
+	if (animId == NUM_ANIMS) {
+		bIsPedDieAnimPlaying = false;
+	} else {
+		CAnimBlendAssociation *dieAssoc = CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, animId, delta);
+		if (speed > 0.0f)
+			dieAssoc->speed = speed;
+
+		dieAssoc->flags &= ~ASSOC_FADEOUTWHENDONE;
+		if (dieAssoc->IsRunning()) {
+			dieAssoc->SetFinishCallback(FinishDieAnimCB, this);
+			bIsPedDieAnimPlaying = true;
+		}
+	}
+
+	Say(SOUND_PED_DEATH);
+	if (m_nLastPedState == PED_ENTER_CAR || m_nLastPedState == PED_CARJACK)
+		QuitEnteringCar();
+	if (!bInVehicle)
+		StopNonPartialAnims();
+
+	// ???
+	m_bloodyFootprintCount = CTimer::GetTimeInMilliseconds();
+}
+
+bool
+CPed::InflictDamage(CEntity* damagedBy, eWeaponType method, float damage, ePedPieceTypes pedPiece, uint8 direction)
+{
+	CPlayerPed *player = FindPlayerPed();
+	float dieDelta = 4.0f;
+	float dieSpeed = 0.0f;
+	AnimationId dieAnim = ANIM_KO_SHOT_FRONT1;
+	bool headShot = false;
+	bool willLinger = false;
+	int random;
+
+	if (player == this) {
+		if (!player->m_bCanBeDamaged)
+			return false;
+
+		player->AnnoyPlayerPed(false);
+	}
+
+	if (m_nPedState == PED_DIE || m_nPedState == PED_DEAD)
+		return false;
+
+	if (!bUsesCollision && method != WEAPONTYPE_WATER)
+		return false;
+
+	if (bOnlyDamagedByPlayer && damagedBy != player && damagedBy != FindPlayerVehicle() &&
+		method != WEAPONTYPE_WATER && method != WEAPONTYPE_EXPLOSION)
+		return false;
+
+	float healthImpact;
+	if (IsPlayer())
+		healthImpact = damage * 0.33f;
+	else
+		healthImpact = damage * m_pedStats->m_defendWeakness;
+
+	bool detectDieAnim = true;
+	if (m_nPedState == PED_FALL || m_nPedState == PED_GETUP) {
+		if (!IsPedHeadAbovePos(-0.3f)) {
+			if (RpAnimBlendClumpGetFirstAssociation((RpClump*) m_rwObject, ASSOC_FLAG800))
+				dieAnim = ANIM_FLOOR_HIT_F;
+			else
+				dieAnim = ANIM_FLOOR_HIT;
+			dieDelta *= 2.0f;
+			dieSpeed = 0.5f;
+			detectDieAnim = false;
+		} else if (m_nPedState == PED_FALL) {
+			dieAnim = NUM_ANIMS;
+			detectDieAnim = false;
+		}
+	}
+	if (detectDieAnim) {
+		switch (method) {
+			case WEAPONTYPE_UNARMED:
+				if (bMeleeProof)
+					return false;
+
+				if (m_nPedState == PED_FALL) {
+					if (IsPedHeadAbovePos(-0.3f)) {
+						dieAnim = NUM_ANIMS;
+					} else {
+						if (RpAnimBlendClumpGetFirstAssociation((RpClump*) m_rwObject, ASSOC_FLAG800))
+							dieAnim = ANIM_FLOOR_HIT_F;
+						else
+							dieAnim = ANIM_FLOOR_HIT;
+						dieDelta = dieDelta * 2.0f;
+						dieSpeed = 0.5f;
+					}
+				} else {
+					switch (direction) {
+						case 0:
+							dieAnim = ANIM_KO_SKID_FRONT;
+							break;
+						case 1:
+							dieAnim = ANIM_KO_SPIN_R;
+							break;
+						case 2:
+							dieAnim = ANIM_KO_SKID_BACK;
+							break;
+						case 3:
+							dieAnim = ANIM_KO_SPIN_L;
+							break;
+						default:
+							break;
+					}
+				}
+				break;
+			case WEAPONTYPE_BASEBALLBAT:
+				if (bMeleeProof)
+					return false;
+
+				if (m_nPedState == PED_FALL) {
+					if (IsPedHeadAbovePos(-0.3f)) {
+						dieAnim = NUM_ANIMS;
+					} else {
+						if (RpAnimBlendClumpGetFirstAssociation((RpClump*) m_rwObject, 0x800u))
+							dieAnim = ANIM_FLOOR_HIT_F;
+						else
+							dieAnim = ANIM_FLOOR_HIT;
+						dieDelta = dieDelta * 2.0f;
+						dieSpeed = 0.5f;
+					}
+				} else {
+					switch (direction) {
+						case 0:
+							dieAnim = ANIM_KO_SKID_FRONT;
+							break;
+						case 1:
+							dieAnim = ANIM_KO_SPIN_R;
+							break;
+						case 2:
+							dieAnim = ANIM_KO_SKID_BACK;
+							break;
+						case 3:
+							dieAnim = ANIM_KO_SPIN_L;
+							break;
+						default:
+							break;
+					}
+				}
+				break;
+			case WEAPONTYPE_COLT45:
+			case WEAPONTYPE_UZI:
+			case WEAPONTYPE_SHOTGUN:
+			case WEAPONTYPE_AK47:
+			case WEAPONTYPE_M16:
+			case WEAPONTYPE_SNIPERRIFLE:
+				if (bBulletProof)
+					return false;
+
+				bool dontRemoveLimb;
+				if (IsPlayer() || m_ped_flagI2)
+					dontRemoveLimb = true;
+				else {
+					switch (method)
+					{
+						case WEAPONTYPE_SNIPERRIFLE:
+							dontRemoveLimb = false;
+							break;
+						case WEAPONTYPE_M16:
+							dontRemoveLimb = false;
+							break;
+						case WEAPONTYPE_SHOTGUN:
+							dontRemoveLimb = CGeneral::GetRandomNumberInRange(0,7);
+							break;
+						default:
+							dontRemoveLimb = CGeneral::GetRandomNumberInRange(0,15);
+							break;
+					}
+				}
+
+				if (dontRemoveLimb) {
+					if (method == WEAPONTYPE_SHOTGUN) {
+						switch (direction) {
+							case 0:
+								dieAnim = ANIM_KO_SKID_FRONT;
+								break;
+							case 1:
+								dieAnim = ANIM_KO_SPIN_R;
+								break;
+							case 2:
+								dieAnim = ANIM_KO_SKID_BACK;
+								break;
+							case 3:
+								dieAnim = ANIM_KO_SPIN_L;
+								break;
+							default:
+								break;
+						}
+					} else
+						dieAnim = ANIM_KO_SHOT_FRONT1;
+
+					willLinger = false;
+				} else {
+					switch (pedPiece) {
+						case PEDPIECE_TORSO:
+							willLinger = false;
+							dieAnim = ANIM_KO_SHOT_FRONT1;
+							break;
+						case PEDPIECE_MID:
+							willLinger = false;
+							dieAnim = ANIM_KO_SHOT_STOM;
+							break;
+						case PEDPIECE_LEFTARM:
+							dieAnim = ANIM_KO_SHOT_ARML;
+							RemoveBodyPart(PED_UPPERARML, direction);
+							willLinger = true;
+							break;
+						case PEDPIECE_RIGHTARM:
+							dieAnim = ANIM_KO_SHOT_ARMR;
+							RemoveBodyPart(PED_UPPERARMR, direction);
+							willLinger = true;
+							break;
+						case PEDPIECE_LEFTLEG:
+							dieAnim = ANIM_KO_SHOT_LEGL;
+							RemoveBodyPart(PED_UPPERLEGL, direction);
+							willLinger = true;
+							break;
+						case PEDPIECE_RIGHTLEG:
+							dieAnim = ANIM_KO_SHOT_LEGR;
+							RemoveBodyPart(PED_UPPERLEGR, direction);
+							willLinger = true;
+							break;
+						case PEDPIECE_HEAD:
+							dieAnim = ANIM_KO_SHOT_FACE;
+							RemoveBodyPart(PED_HEAD, direction);
+							headShot = true;
+							willLinger = true;
+							break;
+						default:
+							break;
+					}
+				}
+				break;
+			case WEAPONTYPE_ROCKETLAUNCHER:
+			case WEAPONTYPE_GRENADE:
+			case WEAPONTYPE_EXPLOSION:
+				if (bCanPointGunAtTarget)
+					return false;
+
+				if (CGame::nastyGame && !IsPlayer() && !bInVehicle &&
+					1.0f + healthImpact > m_fArmour + m_fHealth) {
+
+					random = CGeneral::GetRandomNumber();
+					if (random & 1)
+						RemoveBodyPart(PED_UPPERARML, direction);
+					if (random & 2)
+						RemoveBodyPart(PED_UPPERLEGR, direction);
+					if (random & 4)
+						RemoveBodyPart(PED_HEAD, direction);
+					if (random & 8)
+						RemoveBodyPart(PED_UPPERARMR, direction);
+					if (random & 0x10)
+						RemoveBodyPart(PED_UPPERLEGL, direction);
+					if (bBodyPartJustCameOff)
+						willLinger = true;
+				}
+				// fall through
+			case WEAPONTYPE_MOLOTOV:
+				if (m_flagB2)
+					return false;
+
+				switch (direction) {
+					case 0:
+						dieAnim = ANIM_KO_SKID_FRONT;
+						break;
+					case 1:
+						dieAnim = ANIM_KO_SPIN_R;
+						break;
+					case 2:
+						dieAnim = ANIM_KO_SKID_BACK;
+						break;
+					case 3:
+						dieAnim = ANIM_KO_SPIN_L;
+						break;
+					default:
+						break;
+				}
+				break;
+			case WEAPONTYPE_FLAMETHROWER:
+				if (bFireProof)
+					return false;
+
+				dieAnim = ANIM_KO_SHOT_FRONT1;
+				break;
+			case WEAPONTYPE_RAMMEDBYCAR:
+			case WEAPONTYPE_RUNOVERBYCAR:
+				if (bCollisionProof)
+					return false;
+
+				random = CGeneral::GetRandomNumberInRange(0, 3);
+				switch (random) {
+					case 0:
+						if ((pedPiece != PEDPIECE_LEFTARM || random <= 1)
+							&& (pedPiece != PEDPIECE_MID || random != 1)) {
+							if (pedPiece == PEDPIECE_RIGHTARM && random > 1
+								|| pedPiece == PEDPIECE_MID && random == 2)
+						
+								dieAnim = ANIM_KO_SPIN_L;
+							else
+								dieAnim = ANIM_KO_SKID_FRONT;
+						} else
+							dieAnim = ANIM_KO_SPIN_R;
+
+						break;
+					case 1:
+						if (m_nPedState == PED_DIVE_AWAY)
+							dieAnim = ANIM_KD_LEFT;
+						else
+							dieAnim = ANIM_KO_SPIN_R;
+						break;
+					case 2:
+						if ((pedPiece != PEDPIECE_LEFTARM || random <= 1)
+							&& (pedPiece != PEDPIECE_MID || random != 1)) {
+							if ((pedPiece != PEDPIECE_RIGHTARM || random <= 1)
+								&& (pedPiece != PEDPIECE_MID || random != 2)) {
+								dieAnim = ANIM_KO_SKID_BACK;
+							} else {
+								dieAnim = ANIM_KD_RIGHT;
+							}
+						} else
+							dieAnim = ANIM_KD_LEFT;
+						break;
+					case 3:
+						if (m_nPedState == PED_DIVE_AWAY)
+							dieAnim = ANIM_KD_RIGHT;
+						else
+							dieAnim = ANIM_KO_SPIN_L;
+						break;
+					default:
+						break;
+				}
+				if (damagedBy) {
+					CVehicle *vehicle = (CVehicle*)damagedBy;
+					if (method == WEAPONTYPE_RAMMEDBYCAR) {
+						float vehSpeed = vehicle->m_vecMoveSpeed.Magnitude();
+						dieDelta = 8.0f * vehSpeed + 4.0f;
+					} else {
+						float vehSpeed = vehicle->m_vecMoveSpeed.Magnitude();
+						dieDelta = 12.0f * vehSpeed + 4.0f;
+						dieSpeed = 16.0f * vehSpeed + 1.0f;
+					}
+				}
+				break;
+			case WEAPONTYPE_WATER:
+				dieAnim = ANIM_DROWN;
+				break;
+			case WEAPONTYPE_FALL_DAMAGE:
+				if (bCollisionProof)
+					return false;
+
+				switch (direction) {
+					case 0:
+						dieAnim = ANIM_KO_SKID_FRONT;
+						break;
+					case 1:
+						dieAnim = ANIM_KO_SPIN_R;
+						break;
+					case 2:
+						dieAnim = ANIM_KO_SKID_BACK;
+						break;
+					case 3:
+						dieAnim = ANIM_KO_SPIN_L;
+						break;
+					default:
+						break;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
+	if (m_fArmour != 0.0f && method != WEAPONTYPE_WATER) {
+		if (player == this)
+			CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastArmourLoss = CTimer::GetTimeInMilliseconds();
+
+		if (healthImpact < m_fArmour) {
+			m_fArmour = m_fArmour - healthImpact;
+			healthImpact = 0.0f;
+		} else {
+			healthImpact = healthImpact - m_fArmour;
+			m_fArmour = 0.0f;
+		}
+	}
+
+	if (healthImpact != 0.0f) {
+		if (player == this)
+			CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss = CTimer::GetTimeInMilliseconds();
+
+		m_lastWepDam = method;
+	}
+
+	if (m_fHealth - healthImpact >= 1.0f && !willLinger) {
+		m_fHealth -= healthImpact;
+		return false;
+	}
+
+	if (bInVehicle) {
+		if (method != WEAPONTYPE_WATER) {
+			m_fHealth = 1.0f;
+			return false;
+		}
+		m_fHealth = 0.0f;
+		if (player == this)
+			m_pMyVehicle->m_status = STATUS_PLAYER_DISABLED;
+
+		SetDie(NUM_ANIMS, 4.0f, 0.0f);
+		return true;
+	} else {
+		m_fHealth = 0.0f;
+		SetDie(dieAnim, dieDelta, dieSpeed);
+
+		if (damagedBy == player || damagedBy && damagedBy == FindPlayerVehicle()) {
+			CDarkel::RegisterKillByPlayer(this, method, headShot);
+			m_threatEntity = player;
+		} else {
+			CDarkel::RegisterKillNotByPlayer(this, method);
+		}
+		// WAT?
+		if (method == WEAPONTYPE_WATER)
+			bIsInTheAir = false;
+
+		return true;
+	}
+}
+
+void
+CPed::ClearFlee(void)
+{
+	RestorePreviousState();
+	m_ped_flagD20 = false;
+	m_standardTimer = 0;
+	m_fleeTimer = 0;
+}
+
+void
+CPed::ClearFall(void)
+{
+	SetGetUp();
+}
+
+void
+CPed::SetGetUp(void)
+{
+	if (m_nPedState == PED_GETUP && m_ped_flagE20)
+		return;
+
+	if (!CanSetPedState())
+		return;
+
+	if (m_fHealth >= 1.0f || IsPedHeadAbovePos(-0.3f)) {
+		if (m_ped_flagC10) {
+			m_fRotationCur = CGeneral::LimitRadianAngle(m_fRotationCur);
+			m_fRotationCur -= 0.5*PI;
+			m_ped_flagC10 = false;
+		}
+		if (m_nPedState != PED_GETUP) {
+			SetStoredState();
+			m_nPedState = PED_GETUP;
+		}
+
+		CVehicle* collidingVeh = (CVehicle*)m_pCollidingEntity;
+		CVehicle *veh = (CVehicle*)CPedPlacement::IsPositionClearOfCars(&GetPosition());
+		if (veh && veh->m_vehType != VEHICLE_TYPE_BIKE ||
+			collidingVeh && collidingVeh->IsVehicle() && collidingVeh->m_vehType != VEHICLE_TYPE_BIKE
+			&& ((CTimer::GetFrameCounter() + m_randomSeed % 256 + 5) % 8
+				|| CCollision::ProcessColModels(GetMatrix(), *CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(),
+					collidingVeh->GetMatrix(), *CModelInfo::GetModelInfo(collidingVeh->m_modelIndex)->GetColModel(),
+					&ms_tempColPoint, nil, nil) > 0)) {
+
+			m_ped_flagE20 = false;
+			if (IsPlayer())
+				InflictDamage(nil, WEAPONTYPE_RUNOVERBYCAR, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+			else {
+				if (!CPad::GetPad(0)->ArePlayerControlsDisabled())
+					return;
+
+				InflictDamage(nil, WEAPONTYPE_RUNOVERBYCAR, 1000.0f, PEDPIECE_TORSO, 0);
+			}
+			return;
+		}
+		m_ped_flagE20 = true;
+		m_pCollidingEntity = nil;
+		m_ped_flagH1 = false;
+		CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ASSOC_REPEAT);
+		if (animAssoc) {
+			if (RpAnimBlendClumpGetAssociation((RpClump*) m_rwObject, ASSOC_RUNNING)) {
+				CAnimManager::BlendAnimation((RpClump*) m_rwObject, m_animGroup, ANIM_RUN, 8.0f);
+			} else {
+				CAnimManager::BlendAnimation((RpClump*) m_rwObject, m_animGroup, ANIM_IDLE_STANCE, 8.0f);
+			}
+			animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+		}
+
+		if (RpAnimBlendClumpGetFirstAssociation((RpClump*) m_rwObject, ASSOC_FLAG800))
+			animAssoc = CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, ANIM_GETUP_FRONT, 1000.0f);
+		else
+			animAssoc = CAnimManager::BlendAnimation((RpClump*) m_rwObject, ASSOCGRP_STD, ANIM_GETUP1, 1000.0f);
+
+		animAssoc->SetFinishCallback(PedGetupCB,this);
+	} else {
+		m_fHealth = 0.0f;
+		SetDie(NUM_ANIMS, 4.0f, 0.0f);
 	}
 }
 
@@ -3238,4 +3833,12 @@ STARTPATCHES
 	InjectHook(0x4D0BE0, &CPed::CheckIfInTheAir, PATCH_JUMP);
 	InjectHook(0x4C7F20, &CPed::ClearAll, PATCH_JUMP);
 	InjectHook(0x4E6790, &CPed::ClearAttack, PATCH_JUMP);
+	InjectHook(0x4E67F0, &CPed::ClearAttackByRemovingAnim, PATCH_JUMP);
+	InjectHook(0x4D37D0, &CPed::SetDie, PATCH_JUMP);
+	InjectHook(0x4C5D50, &CPed::StopNonPartialAnims, PATCH_JUMP);
+	InjectHook(0x4C5DB0, &CPed::SetStoredState, PATCH_JUMP);
+	InjectHook(0x4EA420, &CPed::InflictDamage, PATCH_JUMP);
+	InjectHook(0x4D1EA0, &CPed::ClearFlee, PATCH_JUMP);
+	InjectHook(0x4D0BB0, &CPed::ClearFall, PATCH_JUMP);
+	InjectHook(0x4D0F20, &CPed::SetGetUp, PATCH_JUMP);
 ENDPATCHES

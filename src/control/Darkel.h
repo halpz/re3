@@ -42,7 +42,7 @@ public:
 	static eKillFrenzyStatus ReadStatus();
 	static void RegisterCarBlownUpByPlayer(CVehicle *vehicle);
 	static void RegisterKillByPlayer(CPed *victim, eWeaponType weapontype, bool headshot = false);
-	static void RegisterKillNotByPlayer();
+	static void RegisterKillNotByPlayer(CPed* victim, eWeaponType weapontype);
 	static void ResetModelsKilledByPlayer();
 	static void ResetOnPlayerDeath();
 	static void StartFrenzy(eWeaponType weaponType, int32 time, int16 kill, int32 modelId0, wchar *text, int32 modelId2, int32 modelId3, int32 modelId4, bool standardSound, bool needHeadShot);

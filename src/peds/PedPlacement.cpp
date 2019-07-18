@@ -35,6 +35,13 @@ CPedPlacement::FindZCoorForPed(CVector* pos)
 		pos->z = 1.04f + zForPed;
 }
 
+CEntity*
+CPedPlacement::IsPositionClearOfCars(CVector* pos)
+{
+	return CWorld::TestSphereAgainstWorld(*pos, 0.25f, false, true, true, false, false, false, false);
+}
+
 STARTPATCHES
 	InjectHook(0x4EE340, &CPedPlacement::FindZCoorForPed, PATCH_JUMP);
+	InjectHook(0x4EE310, &CPedPlacement::IsPositionClearOfCars, PATCH_JUMP);
 ENDPATCHES

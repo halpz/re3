@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "Ped.h"
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
 #include "ModelInfo.h"
@@ -14,7 +15,7 @@ CPedModelInfo::DeleteRwObject(void)
 }
 
 RwObjectNameIdAssocation CPedModelInfo::m_pPedIds[12] = {
-	{ "Smid",	PED_TORSO, 0, },	// that is strange...
+	{ "Smid",	PED_MID, 0, },	// that is strange...
 	{ "Shead",	PED_HEAD, 0, },
 	{ "Supperarml",	PED_UPPERARML, 0, },
 	{ "Supperarmr",	PED_UPPERARMR, 0, },
@@ -109,17 +110,16 @@ struct ColNodeInfo
 	float radius;
 };
 
-// TODO: find out piece types
 #define NUMPEDINFONODES 8
 ColNodeInfo m_pColNodeInfos[NUMPEDINFONODES] = {
-	{ nil,          PED_HEAD,        6,  0.0f,   0.05f, 0.2f },
-	{ "Storso",     0,               0,  0.0f,   0.15f, 0.2f },
-	{ "Storso",     0,               0,  0.0f,  -0.05f, 0.3f },
-	{ nil,          PED_TORSO,       1,  0.0f,  -0.07f, 0.3f },
-	{ nil,          PED_UPPERARML,   2,  0.07f, -0.1f,  0.2f },
-	{ nil,          PED_UPPERARMR,   3, -0.07f, -0.1f,  0.2f },
-	{ "Slowerlegl", 0,               4,  0.0f,   0.07f, 0.25f },
-	{ nil,          PED_LOWERLEGR,   5,  0.0f,   0.07f, 0.25f },
+	{ nil,          PED_HEAD,		PEDPIECE_HEAD,  0.0f,   0.05f, 0.2f },
+	{ "Storso",     0,				PEDPIECE_TORSO,  0.0f,   0.15f, 0.2f },
+	{ "Storso",     0,				PEDPIECE_TORSO,  0.0f,  -0.05f, 0.3f },
+	{ nil,          PED_MID,		PEDPIECE_MID,  0.0f,  -0.07f, 0.3f },
+	{ nil,          PED_UPPERARML,	PEDPIECE_LEFTARM,  0.07f, -0.1f,  0.2f },
+	{ nil,          PED_UPPERARMR,	PEDPIECE_RIGHTARM, -0.07f, -0.1f,  0.2f },
+	{ "Slowerlegl", 0,				PEDPIECE_LEFTLEG,  0.0f,   0.07f, 0.25f },
+	{ nil,          PED_LOWERLEGR,	PEDPIECE_RIGHTLEG,  0.0f,   0.07f, 0.25f },
 };
 
 RwObject*
