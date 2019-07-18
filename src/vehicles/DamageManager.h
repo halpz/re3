@@ -4,6 +4,11 @@
 
 // TODO: move some of this into Vehicle.h
 
+enum eEngineStatus
+{
+	ENGINE_STATUS_ON_FIRE = 225
+};
+
 enum eDoorStatus
 {
 	DOOR_STATUS_OK,

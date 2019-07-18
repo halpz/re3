@@ -18,15 +18,15 @@ CDamageManager::FuckCarCompletely(void)
 {
 	int i;
 
-	m_wheelStatus[0] = 2;
+	m_wheelStatus[0] = WHEEL_STATUS_MISSING;
 	// wheels 1-3 not reset?
 
-	m_doorStatus[0] = 3;
-	m_doorStatus[1] = 3;
-	m_doorStatus[2] = 3;
-	m_doorStatus[3] = 3;
-	m_doorStatus[4] = 3;
-	m_doorStatus[5] = 3;
+	m_doorStatus[0] = DOOR_STATUS_MISSING;
+	m_doorStatus[1] = DOOR_STATUS_MISSING;
+	m_doorStatus[2] = DOOR_STATUS_MISSING;
+	m_doorStatus[3] = DOOR_STATUS_MISSING;
+	m_doorStatus[4] = DOOR_STATUS_MISSING;
+	m_doorStatus[5] = DOOR_STATUS_MISSING;
 
 	for(i = 0; i < 3; i++){
 #ifdef FIX_BUGS
@@ -216,8 +216,8 @@ CDamageManager::ProgressEngineDamage(void)
 {
 	int status = GetEngineStatus();
 	int newstatus = status + 32 + (CGeneral::GetRandomNumber() & 0x1F);
-	if(status < 225 && newstatus > 224)
-		newstatus = 224;
+	if(status < ENGINE_STATUS_ON_FIRE && newstatus > ENGINE_STATUS_ON_FIRE-1)
+		newstatus = ENGINE_STATUS_ON_FIRE-1;
 	SetEngineStatus(newstatus);
 	return true;
 }

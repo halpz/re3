@@ -98,10 +98,23 @@ enum eWheels
 
 enum
 {
-	CAR_PIECE_WHEEL_LF = 13,
+	CAR_PIECE_BONNET = 1,
+	CAR_PIECE_BOOT,
+	CAR_PIECE_BUMP_FRONT,
+	CAR_PIECE_BUMP_REAR,
+	CAR_PIECE_DOOR_LF,
+	CAR_PIECE_DOOR_RF,
+	CAR_PIECE_DOOR_LR,
+	CAR_PIECE_DOOR_RR,
+	CAR_PIECE_WING_LF,
+	CAR_PIECE_WING_RF,
+	CAR_PIECE_WING_LR,
+	CAR_PIECE_WING_RR,
+	CAR_PIECE_WHEEL_LF,
 	CAR_PIECE_WHEEL_LR,
 	CAR_PIECE_WHEEL_RF,
 	CAR_PIECE_WHEEL_RR,
+	CAR_PIECE_WINDSCREEN,
 };
 
 enum tWheelState
@@ -166,7 +179,7 @@ public:
 	uint8 m_veh_flagB40 : 1;
 	uint8 m_veh_flagB80 : 1;
 
-	uint8 m_veh_flagC1 : 1;
+	uint8 bTakeLessDamage : 1; // This vehicle is stronger (takes about 1/4 of damage)
 	uint8 bIsDamaged : 1; // This vehicle has been damaged and is displaying all its components
 	uint8 bHasBeenOwnedByPlayer : 1;// To work out whether stealing it is a crime
 	uint8 bFadeOut : 1; // Fade vehicle out

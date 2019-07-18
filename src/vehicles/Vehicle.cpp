@@ -61,7 +61,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bComedyControls = false;
 	m_veh_flagB40 = false;
 	m_veh_flagB80 = false;
-	m_veh_flagC1 = false;
+	bTakeLessDamage = false;
 	bIsDamaged = false;
 	bFadeOut = false;
 	m_veh_flagC10 = false;
@@ -362,8 +362,8 @@ CVehicle::ExtinguishCarFire(void)
 		m_pCarFire->Extinguish();
 	if(IsCar()){
 		CAutomobile *car = (CAutomobile*)this;
-		if(car->Damage.GetEngineStatus() >= 225)
-			car->Damage.SetEngineStatus(215);
+		if(car->Damage.GetEngineStatus() >= ENGINE_STATUS_ON_FIRE)
+			car->Damage.SetEngineStatus(ENGINE_STATUS_ON_FIRE-10);
 		car->m_fFireBlowUpTimer = 0.0f;
 	}
 }

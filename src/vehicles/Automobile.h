@@ -49,7 +49,9 @@ public:
 	uint8 m_auto_flagA20 : 1;
 	uint8 m_auto_flagA40 : 1;
 	uint8 m_auto_flagA80 : 1;
-	uint8 field_4DA[2];
+	uint8 bNotDamagedUpsideDown : 1;
+	uint8 bMoreResistantToDamage : 1;
+	uint8 field_4DB;
 	CEntity *field_4DC;		// blow up entity
 	uint8 field_4E0[4];
 	uint32 m_nBusDoorTimerEnd;
@@ -115,6 +117,7 @@ public:
 	void ProcessBuoyancy(void);
 	void DoDriveByShootings(void);
 	int32 RcbanditCheckHitWheels(void);
+	void dmgDrawCarCollidingParticles(const CVector &pos, float amount);
 	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);
 	void SetupSuspensionLines(void);
