@@ -175,7 +175,7 @@ CEventList::FindClosestEvent(eEventType type, CVector posn, int32 *event)
 	float mindist = 60.0f;
 
 	for(i = 0; i < NUMEVENTS; i++){
-		if(gaEvent[i].type == EVENT_NULL)
+		if(gaEvent[i].type == type)
 			continue;
 		dist = (posn - gaEvent[i].posn).Magnitude();
 		if(dist < mindist){
