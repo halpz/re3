@@ -7,6 +7,13 @@
 
 float G_aComponentDamage[] = { 2.5f, 1.25f, 3.2f, 1.4f, 2.5f, 2.8f, 0.5f };
 
+CDamageManager::CDamageManager(void)
+{
+	ResetDamageStatus();
+	m_fWheelDamageEffect = 0.75f;
+	field_24 = 1;
+}
+
 void
 CDamageManager::ResetDamageStatus(void)
 {

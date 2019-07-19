@@ -79,6 +79,8 @@ public:
 	uint32 m_panelStatus;
 	uint32 field_24;
 
+	CDamageManager(void);
+
 	void ResetDamageStatus(void);
 	void FuckCarCompletely(void);
 	bool ApplyDamage(tComponent component, float damage, float unused);

@@ -2,6 +2,7 @@
 #include "main.h"
 #include "patcher.h"
 #include "General.h"
+#include "RwHelper.h"
 #include "Pad.h"
 #include "ModelIndices.h"
 #include "VisibilityPlugins.h"
@@ -35,9 +36,152 @@ bool &CAutomobile::m_sAllTaxiLights = *(bool*)0x95CD21;
 
 WRAPPER CAutomobile* CAutomobile::ctor(int, uint8) { EAXJMP(0x52C6B0); }
 
-CAutomobile::CAutomobile(int mi, uint8 CreatedBy)
+CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
+ : CVehicle(CreatedBy)
 {
-	ctor(mi, CreatedBy);
+	int i;
+
+	m_vehType = VEHICLE_TYPE_CAR;
+
+	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(id);
+	m_fFireBlowUpTimer = 0.0f;
+	field_4E0 = 0;
+	bTaxiLight = m_sAllTaxiLights;
+	m_auto_flagA20 = false;
+	m_auto_flagA40 = false;
+	m_auto_flagA80 = false;
+
+	SetModelIndex(id);
+
+	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)mi->m_handlingId);
+
+	field_49C = 20.0f;
+	field_4D8 = 0;
+
+	mi->ChooseVehicleColour(m_currentColour1, m_currentColour2);
+
+	bIsVan = !!(pHandling->Flags & HANDLING_IS_VAN);
+	bIsBig = !!(pHandling->Flags & HANDLING_IS_BIG);
+	bIsBus = !!(pHandling->Flags & HANDLING_IS_BUS);
+	bLowVehicle = !!(pHandling->Flags & HANDLING_IS_LOW);
+
+	// Doors
+	if(bIsBus){
+		Doors[DOOR_FRONT_LEFT].Init(-HALFPI, 0.0f, 0, 2);
+		Doors[DOOR_FRONT_RIGHT].Init(0.0f, HALFPI, 1, 2);
+	}else{
+		Doors[DOOR_FRONT_LEFT].Init(-PI*0.4f, 0.0f, 0, 2);
+		Doors[DOOR_FRONT_RIGHT].Init(0.0f, PI*0.4f, 1, 2);
+	}
+	if(bIsVan){
+		Doors[DOOR_REAR_LEFT].Init(-HALFPI, 0.0f, 1, 2);
+		Doors[DOOR_REAR_RIGHT].Init(0.0f, HALFPI, 0, 2);
+	}else{
+		Doors[DOOR_REAR_LEFT].Init(-PI*0.4f, 0.0f, 0, 2);
+		Doors[DOOR_REAR_RIGHT].Init(0.0f, PI*0.4f, 1, 2);
+	}
+	if(pHandling->Flags & HANDLING_REV_BONNET)
+		Doors[DOOR_BONNET].Init(-PI*0.3f, 0.0f, 1, 0);
+	else
+		Doors[DOOR_BONNET].Init(0.0f, PI*0.3f, 1, 0);
+	if(pHandling->Flags & HANDLING_HANGING_BOOT)
+		Doors[DOOR_BOOT].Init(PI*0.4f, 0.0f, 0, 0);
+	else if(pHandling->Flags & HANDLING_TAILGATE_BOOT)
+		Doors[DOOR_BOOT].Init(0.0, HALFPI, 1, 0);
+	else
+		Doors[DOOR_BOOT].Init(-PI*0.3f, 0.0f, 1, 0);
+	if(pHandling->Flags & HANDLING_NO_DOORS){
+		Damage.SetDoorStatus(DOOR_FRONT_LEFT, DOOR_STATUS_MISSING);
+		Damage.SetDoorStatus(DOOR_FRONT_RIGHT, DOOR_STATUS_MISSING);
+		Damage.SetDoorStatus(DOOR_REAR_LEFT, DOOR_STATUS_MISSING);
+		Damage.SetDoorStatus(DOOR_REAR_RIGHT, DOOR_STATUS_MISSING);
+	}
+
+	for(i = 0; i < 6; i++)
+		m_randomValues[i] = CGeneral::GetRandomNumberInRange(-0.15f, 0.15f);
+
+	m_fMass = pHandling->fMass;
+	m_fTurnMass = pHandling->fTurnMass;
+	m_vecCentreOfMass = pHandling->CentreOfMass;
+	m_fAirResistance = pHandling->Dimension.x*pHandling->Dimension.z/m_fMass;
+	m_fElasticity = 0.05f;
+	m_fBuoyancy = pHandling->fBuoyancy;
+
+	m_nBusDoorTimerEnd = 0;
+	m_nBusDoorTimerStart = 0;
+
+	m_fSteerAngle = 0.0f;
+	m_fGasPedal = 0.0f;
+	m_fBrakePedal = 0.0f;
+	m_pSetOnFireEntity = nil;
+	field_594 = 0;
+	bNotDamagedUpsideDown = false;
+	bMoreResistantToDamage = false;
+	field_514 = 0;
+	field_4E2 = 0;
+
+	for(i = 0; i < 4; i++){
+		m_aGroundPhysical[i] = nil;
+		m_aGroundOffset[i] = CVector(0.0f, 0.0f, 0.0f);
+		m_aSuspensionSpringRatio[i] = 1.0f;
+		m_aSuspensionSpringRatioPrev[i] = m_aSuspensionSpringRatio[i];
+		m_aWheelTimer[i] = 0.0f;
+		m_aWheelRotation[i] = 0.0f;
+		m_aWheelSpeed[i] = 0.0f;
+		m_aWheelState[i] = WHEEL_STATE_0;
+		m_aWheelSkidmarkMuddy[i] = false;
+		m_aWheelSkidmarkBloody[i] = false;
+	}
+
+	m_nWheelsOnGround = 0;
+	m_nDriveWheelsOnGround = 0;
+	m_nDriveWheelsOnGroundPrev = 0;
+	m_fHeightAboveRoad = 0.0f;
+	m_fTraction = 1.0f;
+
+	CColModel *colModel = mi->GetColModel();
+	if(colModel->lines == nil){
+		colModel->lines = (CColLine*)RwMalloc(4*sizeof(CColLine));
+		colModel->numLines = 4;
+	}
+
+	SetupSuspensionLines();
+
+	m_status = STATUS_SIMPLE;
+	bUseCollisionRecords = true;
+
+	m_nNumPassengers = 0;
+
+	m_bombType = CARBOMB_NONE;
+	bHadDriver = false;
+	field_4DC = nil;
+
+	if(m_nDoorLock == CARLOCK_UNLOCKED &&
+	   (id == MI_POLICE || id == MI_ENFORCER || id == MI_RHINO))
+		m_nDoorLock = CARLOCK_LOCKED_INITIALLY;
+
+	m_fCarGunLR = 0.0f;
+	m_fCarGunUD = 0.05f;
+	m_fWindScreenRotation = 0.0f;
+	m_weaponThingA = 0.0f;
+	m_weaponThingB = m_weaponThingA;
+
+	if(GetModelIndex() == MI_DODO){
+		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
+		CMatrix mat1;
+		mat1.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]));
+		CMatrix mat2(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]));
+		mat1.GetPosition() += CVector(mat2.GetPosition().x + 0.1f, 0.0f, mat2.GetPosition().z);
+		mat1.UpdateRW();
+	}else if(GetModelIndex() == MI_MIAMI_SPARROW || GetModelIndex() == MI_MIAMI_RCRAIDER){
+		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
+		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_RF]), 0);
+		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_LB]), 0);
+		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_RB]), 0);
+	}else if(GetModelIndex() == MI_RHINO){
+		bExplosionProof = true;
+		bBulletProof = true;
+	}
 }
 
 
@@ -572,7 +716,7 @@ CAutomobile::ProcessControl(void)
 					m_pBlowUpEntity = FindPlayerPed();
 					CGarages::TriggerMessage("GA_12", -1, 3000, -1);
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_TIMED_ACTIVATED, 1.0f);
-				}else{
+				}else if(m_bombType == CARBOMB_ONIGNITION){
 					m_bombType = CARBOMB_ONIGNITIONACTIVE;
 					CGarages::TriggerMessage("GA_12", -1, 3000, -1);
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_ONIGNITION_ACTIVATED, 1.0f);

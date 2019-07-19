@@ -3461,7 +3461,7 @@ CPed::InflictDamage(CEntity* damagedBy, eWeaponType method, float damage, ePedPi
 			case WEAPONTYPE_ROCKETLAUNCHER:
 			case WEAPONTYPE_GRENADE:
 			case WEAPONTYPE_EXPLOSION:
-				if (bCanPointGunAtTarget)
+				if (bExplosionProof)
 					return false;
 
 				if (CGame::nastyGame && !IsPlayer() && !bInVehicle &&
@@ -3483,7 +3483,7 @@ CPed::InflictDamage(CEntity* damagedBy, eWeaponType method, float damage, ePedPi
 				}
 				// fall through
 			case WEAPONTYPE_MOLOTOV:
-				if (m_flagB2)
+				if (bExplosionProof)
 					return false;
 
 				switch (direction) {

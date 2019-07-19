@@ -42,7 +42,7 @@ CEntity::CEntity(void)
 	bUseCollisionRecords = false;
 
 	bWasPostponed = false;
-	m_flagB2 = false;
+	bExplosionProof = false;
 	bIsVisible = true;
 	bHasCollided = false;
 	bRenderScorched = false;

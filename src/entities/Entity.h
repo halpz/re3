@@ -50,7 +50,7 @@ public:
 
 	// flagsB
 	uint32 bWasPostponed : 1;
-	uint32 m_flagB2 : 1;	// explosion proof?
+	uint32 bExplosionProof : 1;
 	uint32 bIsVisible : 1;
 	uint32 bHasCollided : 1;	//
 	uint32 bRenderScorched : 1;

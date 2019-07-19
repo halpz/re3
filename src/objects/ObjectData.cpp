@@ -93,7 +93,7 @@ CObjectData::SetObjectData(int32 modelId, CObject &object)
 	if(object.m_fMass >= 99998.0){
 		object.bInfiniteMass = true;
 		object.bAffectedByGravity = false;
-		object.m_flagB2 = true;
+		object.bExplosionProof = true;
 	}
 }
 

@@ -53,14 +53,16 @@ public:
 	uint8 bMoreResistantToDamage : 1;
 	uint8 field_4DB;
 	CEntity *field_4DC;		// blow up entity
-	uint8 field_4E0[4];
+	int16 field_4E0;
+	int16 field_4E2;
 	uint32 m_nBusDoorTimerEnd;
 	uint32 m_nBusDoorTimerStart;
 	float m_aSuspensionSpringLength[4];
 	float m_aSuspensionLineLength[4];
 	float m_fHeightAboveRoad;
 	float m_fTraction;
-	uint8 stuff6[28];
+	int32 field_514;
+	float m_randomValues[6];	// used for what?
 	float m_fFireBlowUpTimer;
 	CPhysical *m_aGroundPhysical[4];	// physicals touching wheels
 	CVector m_aGroundOffset[4];		// from ground object to colpoint
@@ -74,12 +76,12 @@ public:
 	uint8 m_nWheelsOnGround;
 	uint8 m_nDriveWheelsOnGround;
 	uint8 m_nDriveWheelsOnGroundPrev;
-	uint8 stuff5[5];
+	int32 field_594;
 	tWheelState m_aWheelState[4];
 
 	static bool &m_sAllTaxiLights;
 
-	CAutomobile(int, uint8);
+	CAutomobile(int32, uint8);
 
 	// from CEntity
 	void SetModelIndex(uint32 id);
