@@ -180,6 +180,8 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 		bExplosionProof = true;
 		bBulletProof = true;
 	}
+
+	*(void**)this = (void*)0x600C1C;
 }
 
 
@@ -1227,7 +1229,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 	// In ProcessControl these will be re-normalized to ignore the tyre radius.
 
 	if(field_EF || m_phy_flagA80 ||
-	   GetModelIndex() == MI_DODO && (ent->m_status == STATUS_PHYSICS || ent->m_status == STATUS_SIMPLE)){
+	   GetModelIndex() == MI_DODO && (ent->IsPed() || ent->IsVehicle())){
 		// don't do line collision
 		for(i = 0; i < 4; i++)
 			m_aSuspensionSpringRatio[i] = prevRatios[i];
