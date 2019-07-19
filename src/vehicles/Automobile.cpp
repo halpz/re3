@@ -34,8 +34,6 @@ RwObject *GetCurrentAtomicObjectCB(RwObject *object, void *data);
 
 bool &CAutomobile::m_sAllTaxiLights = *(bool*)0x95CD21;
 
-WRAPPER CAutomobile* CAutomobile::ctor(int, uint8) { EAXJMP(0x52C6B0); }
-
 CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
  : CVehicle(CreatedBy)
 {
@@ -154,7 +152,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 
 	m_bombType = CARBOMB_NONE;
 	bHadDriver = false;
-	field_4DC = nil;
+	m_pBombRigger = nil;
 
 	if(m_nDoorLock == CARLOCK_UNLOCKED &&
 	   (id == MI_POLICE || id == MI_ENFORCER || id == MI_RHINO))
@@ -257,7 +255,7 @@ CAutomobile::ProcessControl(void)
 		if(!bHadDriver && m_bombType == CARBOMB_ONIGNITIONACTIVE){
 			// If someone enters the car and there is a bomb, detonate
 			m_nBombTimer = 1000;
-			m_pBlowUpEntity = field_4DC;
+			m_pBlowUpEntity = m_pBombRigger;
 			if(m_pBlowUpEntity)
 				m_pBlowUpEntity->RegisterReference((CEntity**)&m_pBlowUpEntity);
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_TICK, 1.0f);
@@ -1476,7 +1474,7 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 		   FindPlayerVehicle() && FindPlayerVehicle() == m_pDamageEntity &&
 		   m_status != STATUS_ABANDONED &&
 		   FindPlayerVehicle()->m_vecMoveSpeed.Magnitude() >= m_vecMoveSpeed.Magnitude() &&
-		   FindPlayerVehicle()->m_vecMoveSpeed.Magnitude() > 0.2f)
+		   FindPlayerVehicle()->m_vecMoveSpeed.Magnitude() > 0.1f)
 			FindPlayerPed()->SetWantedLevelNoDrop(1);
 
 		if(m_status == STATUS_PLAYER && impulse > 50.0f){

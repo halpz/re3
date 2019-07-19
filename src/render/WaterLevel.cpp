@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main.h"
 #include "FileMgr.h"
 #include "TxdStore.h"
 #include "Timer.h"

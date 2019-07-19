@@ -23,11 +23,13 @@
 bool gbShowPedRoadGroups;
 bool gbShowCarRoadGroups;
 bool gbShowCollisionPolys;
+bool gbShowCollisionLines;
 
 bool gbDontRenderBuildings;
 bool gbDontRenderBigBuildings;
 bool gbDontRenderPeds;
 bool gbDontRenderObjects;
+bool gbDontRenderVehicles;
 
 struct EntityInfo
 {
@@ -131,6 +133,10 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 #ifndef MASTER
 	else if(e->IsObject() || e->IsDummy()){
 		if(gbDontRenderObjects)
+			return;
+	}else if(e->IsVehicle()){
+		// re3 addition
+		if(gbDontRenderVehicles)
 			return;
 	}
 #endif
@@ -283,6 +289,21 @@ CRenderer::RenderFadingInEntities(void)
 	DeActivateDirectional();
 	SetAmbientColours();
 	CVisibilityPlugins::RenderFadingEntities();
+}
+
+void
+CRenderer::RenderCollisionLines(void)
+{
+	int i;
+
+	// game doesn't draw fading in entities
+	// this should probably be fixed
+	for(i = 0; i < ms_nNoOfVisibleEntities; i++){
+		CEntity *e = ms_aVisibleEntityPtrs[i];
+		if(Abs(e->GetPosition().x - ms_vecCameraPosition.x) < 100.0f &&
+		   Abs(e->GetPosition().y - ms_vecCameraPosition.y) < 100.0f)
+			CCollision::DrawColModel(e->GetMatrix(), *e->GetColModel());
+	}
 }
 
 enum Visbility

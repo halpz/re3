@@ -77,6 +77,8 @@ enum eSurfaceType
 	SURFACE_LOOSE30,
 	SURFACE_BOLLARD,
 	SURFACE_GATE,
+
+	// These are illegal
 	SURFACE_SAND33,
 	SURFACE_ROAD34,
 };

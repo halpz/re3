@@ -5,11 +5,13 @@ class CEntity;
 extern bool gbShowPedRoadGroups;
 extern bool gbShowCarRoadGroups;
 extern bool gbShowCollisionPolys;
+extern bool gbShowCollisionLines;
 
 extern bool gbDontRenderBuildings;
 extern bool gbDontRenderBigBuildings;
 extern bool gbDontRenderPeds;
 extern bool gbDontRenderObjects;
+extern bool gbDontRenderVehicles;
 
 class CVehicle;
 class CPtrList;
@@ -40,6 +42,8 @@ public:
 	static void RenderOneRoad(CEntity *);
 	static void RenderOneNonRoad(CEntity *);
 	static void RenderFirstPersonVehicle(void);
+
+	static void RenderCollisionLines(void);
 
 	static int32 SetupEntityVisibility(CEntity *ent);
 	static int32 SetupBigBuildingVisibility(CEntity *ent);

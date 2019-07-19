@@ -58,8 +58,6 @@ mysrand(unsigned int seed)
 	myrand_seed = seed;
 }
 
-int gDbgSurf;
-
 void (*DebugMenuProcess)(void);
 void (*DebugMenuRender)(void);
 static void stub(void) { }
@@ -246,12 +244,13 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
+		DebugMenuAddVarBool8("Debug", "Show Collision Lines", (int8*)&gbShowCollisionLines, nil);
 		DebugMenuAddVarBool8("Debug", "Show Collision Polys", (int8*)&gbShowCollisionPolys, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Buildings", (int8*)&gbDontRenderBuildings, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Big Buildings", (int8*)&gbDontRenderBigBuildings, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", (int8*)&gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
-		DebugMenuAddVar("Debug", "Dbg Surface", &gDbgSurf, nil, 1, 0, 34, nil);
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);

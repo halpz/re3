@@ -52,7 +52,7 @@ public:
 	uint8 bNotDamagedUpsideDown : 1;
 	uint8 bMoreResistantToDamage : 1;
 	uint8 field_4DB;
-	CEntity *field_4DC;		// blow up entity
+	CEntity *m_pBombRigger;
 	int16 field_4E0;
 	int16 field_4E2;
 	uint32 m_nBusDoorTimerEnd;
@@ -146,7 +146,5 @@ public:
 	void ReduceHornCounter(void);
 
 	static void SetAllTaxiLights(bool set);
-
-	CAutomobile* ctor(int, uint8);
 };
 static_assert(sizeof(CAutomobile) == 0x5A8, "CAutomobile: error");

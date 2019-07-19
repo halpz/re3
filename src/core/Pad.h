@@ -381,5 +381,3 @@ extern CPad *Pads;	//[2]
 
 #define IsButtonJustDown(pad, btn) \
 	(!(pad)->OldState.btn && (pad)->NewState.btn)
-	
-void LittleTest(void);

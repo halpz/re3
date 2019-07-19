@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main.h"
 #include "patcher.h"
 #include "Fluff.h"
 #include "Camera.h"
@@ -7,7 +8,6 @@
 #include "General.h"
 #include "Timer.h"
 #include "Clock.h"
-#include "Pad.h"
 #include "Weather.h"
 #include "Stats.h"
 #include "math/maths.h"
@@ -705,7 +705,6 @@ void CTowerClock::Render()
 			m_Position.z + Cos(angleHour) * 0.75f * m_fScale;
 		);
 
-		// Stupid thing that does absolutely nothing
 		LittleTest();
 
 		// Draw lines
