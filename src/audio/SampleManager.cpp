@@ -6,7 +6,7 @@ CSampleManager &cSampleManager = *(CSampleManager *)0x7341E0;
 
 uint32 &nNumOfMp3Files = *(uint32 *)0x95CC00;
 uint8 &num3DProvidersAvailable = *(uint8 *)0x734237;
-uint32 *asName3DProviders = (uint32 *)0x734238;
+char **asName3DProviders = (char **)0x734238;
 
 bool
 CSampleManager::IsMP3RadioChannelAvailable()

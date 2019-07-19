@@ -63,6 +63,6 @@ public:
 
 extern uint32 &nNumOfMp3Files;
 extern uint8 &num3DProvidersAvailable;
-extern uint32 *asName3DProviders;
+extern char **asName3DProviders;
 
 extern CSampleManager &cSampleManager;

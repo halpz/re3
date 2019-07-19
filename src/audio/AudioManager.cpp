@@ -794,10 +794,10 @@ cAudioManager::MissionScriptAudioUsesPoliceChannel(int32 soundMission)
 	}
 }
 
-uint8
+char *
 cAudioManager::Get3DProviderName(uint8 id)
 {
-	if(m_bIsInitialised) return 0;
+	if(!m_bIsInitialised) return 0;
 	if(id >= num3DProvidersAvailable) return 0;
 	return asName3DProviders[id];
 }

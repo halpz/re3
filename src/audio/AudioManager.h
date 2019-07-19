@@ -292,7 +292,7 @@ public:
 
 	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission);
 
-	uint8 Get3DProviderName(uint8 id);
+	char* Get3DProviderName(uint8 id);
 
 	bool SetupJumboFlySound(uint8 emittingVol);               /// ok
 	bool SetupJumboRumbleSound(uint8 emittingVol);            /// ok
