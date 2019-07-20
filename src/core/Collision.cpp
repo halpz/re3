@@ -1357,6 +1357,7 @@ CCollision::DistToLine(const CVector *l0, const CVector *l1, const CVector *poin
 void
 CCollision::CalculateTrianglePlanes(CColModel *model)
 {
+	assert(model);
 	if(model->numTriangles == 0)
 		return;
 
@@ -1367,7 +1368,6 @@ CCollision::CalculateTrianglePlanes(CColModel *model)
 		lptr->Remove();
 		ms_colModelCache.head.Insert(lptr);
 	}else{
-		assert(model);
 		lptr = ms_colModelCache.Insert(model);
 		if(lptr == nil){
 			// make room if we have to, remove last in list

@@ -240,7 +240,6 @@ public:
 		m_matrix.at.y = 0.0f;
 		m_matrix.at.z = 1.0f;
 		m_matrix.pos.x = 0.0f;
-		m_matrix.pos.x = 0.0f;
 		m_matrix.pos.y = 0.0f;
 		m_matrix.pos.z = 0.0f;
 	}

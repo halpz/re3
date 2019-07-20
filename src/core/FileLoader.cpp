@@ -361,10 +361,10 @@ CFileLoader::LoadClumpFile(const char *filename)
 			nodename = GetFrameNodeName(RpClumpGetFrame(clump));
 			GetNameAndLOD(nodename, name, &n);
 			mi = (CClumpModelInfo*)CModelInfo::GetModelInfo(name, nil);
-			assert(mi->IsClump());
-			if(mi)
+			if(mi){
+				assert(mi->IsClump());
 				mi->SetClump(clump);
-			else
+			}else
 				RpClumpDestroy(clump);
 		}
 	}

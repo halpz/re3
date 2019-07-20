@@ -775,7 +775,7 @@ HandlePadButtonUp(RsPadButtonStatus *padButtonStatus)
 	bool bCam = false;
 	int16 mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 	if ( mode == CCam::MODE_FLYBY || mode == CCam::MODE_FIXED )
-		bool bCam = true;
+		bCam = true;
 	
 	ControlsManager.UpdateJoyButtonState(padNumber);
 	

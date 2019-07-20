@@ -70,7 +70,7 @@ char VehicleNames[NUMHANDLINGS][14] = {
 
 cHandlingDataMgr::cHandlingDataMgr(void)
 {
-	memset(this, 0, sizeof(this));
+	memset(this, 0, sizeof(*this));
 }
 
 void

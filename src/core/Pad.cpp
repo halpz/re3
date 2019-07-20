@@ -1824,7 +1824,7 @@ char *CPad::EditString(char *pStr, int32 nSize)
 	}
 	
 	// numbers 
-	for ( int32 i = 0; i < ('0' - '9' + 1); i++ )
+	for ( int32 i = 0; i < ('9' - '0' + 1); i++ )
 	{
 		if ( GetPad(0)->GetCharJustDown(i + '0') && pos < nSize - 1 )
 		{
