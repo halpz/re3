@@ -535,7 +535,7 @@ CEntity::ResolveReferences(void)
 		for(ref = m_pFirstReference; ref->next; ref = ref->next)
 			;
 		ref->next = CReferences::pEmptyList;
-		CReferences::pEmptyList = ref;
+		CReferences::pEmptyList = m_pFirstReference;
 		m_pFirstReference = nil;
 	}
 }
