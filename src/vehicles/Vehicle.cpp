@@ -65,6 +65,8 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bIsDamaged = false;
 	bFadeOut = false;
 	m_veh_flagC10 = false;
+	m_nTimeOfDeath = 0;
+	m_pCarFire = nil;
 	bHasBeenOwnedByPlayer = false;
 	m_veh_flagC20 = false;
 	bCanBeDamaged = true;
