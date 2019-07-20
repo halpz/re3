@@ -1919,7 +1919,7 @@ CPed::PlayFootSteps(void)
 bool
 CPed::IsPointerValid(void)
 {
-	int8 pedIndex = CPools::GetPedPool()->GetIndex(this) >> 8;
+	int pedIndex = CPools::GetPedPool()->GetIndex(this) >> 8;
 	if (pedIndex < 0 || pedIndex >= NUMPEDS)
 		return false;
 
