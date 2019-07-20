@@ -8,6 +8,7 @@
 #include "PlayerPed.h"
 #include "Automobile.h"
 #include "DummyPed.h"
+#include "AudioManager.h"
 
 typedef CPool<CPtrNode> CCPtrNodePool;
 typedef CPool<CEntryInfoNode> CEntryInfoNodePool;
@@ -17,6 +18,7 @@ typedef CPool<CBuilding> CBuildingPool;
 typedef CPool<CTreadable> CTreadablePool;
 typedef CPool<CObject, CCutsceneHead> CObjectPool;
 typedef CPool<CDummy, CDummyPed> CDummyPool;
+typedef CPool<cAudioScriptObject, cAudioScriptObject> CAudioScriptObjectPool;
 
 class CPools
 {
@@ -28,7 +30,7 @@ class CPools
 	static CTreadablePool *&ms_pTreadablePool;
 	static CObjectPool *&ms_pObjectPool;
 	static CDummyPool *&ms_pDummyPool;
-	// ms_pAudioScriptObjectPool
+	static CAudioScriptObjectPool *&ms_pAudioScriptObjectPool;
 public:
 	static CCPtrNodePool *GetPtrNodePool(void) { return ms_pPtrNodePool; }
 	static CEntryInfoNodePool *GetEntryInfoNodePool(void) { return ms_pEntryInfoNodePool; }
@@ -38,6 +40,7 @@ public:
 	static CTreadablePool *GetTreadablePool(void) { return ms_pTreadablePool; }
 	static CObjectPool *GetObjectPool(void) { return ms_pObjectPool; }
 	static CDummyPool *GetDummyPool(void) { return ms_pDummyPool; }
+	static CAudioScriptObjectPool *GetAudioScriptObjectPool(void) { return ms_pAudioScriptObjectPool; }
 
 	static void Initialise(void);
 	static int32 GetPedRef(CPed *ped);

@@ -9,6 +9,7 @@ CBuildingPool *&CPools::ms_pBuildingPool = *(CBuildingPool**)0x8F2C04;
 CTreadablePool *&CPools::ms_pTreadablePool = *(CTreadablePool**)0x8F2568;
 CObjectPool *&CPools::ms_pObjectPool = *(CObjectPool**)0x880E28;
 CDummyPool *&CPools::ms_pDummyPool = *(CDummyPool**)0x8F2C18;
+CAudioScriptObjectPool *&CPools::ms_pAudioScriptObjectPool = *(CAudioScriptObjectPool**)0x8F1B6C;
 
 void
 CPools::Initialise(void)
@@ -23,6 +24,7 @@ CPools::Initialise(void)
 	ms_pTreadablePool = new CTreadablePool(NUMTREADABLES);
 	ms_pObjectPool = new CObjectPool(NUMOBJECTS);
 	ms_pDummyPool = new CDummyPool(NUMDUMMIES);
+	ms_pAudioScriptObjectPool = new CAudioScriptObjectPool(NUMAUDIOSCRIPTOBJECTS);
 }
 
 int32 CPools::GetPedRef(CPed *ped) { return ms_pPedPool->GetIndex(ped); }

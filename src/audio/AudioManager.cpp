@@ -13,6 +13,7 @@
 #include "Physical.h"
 #include "Plane.h"
 #include "PlayerPed.h"
+#include "Pools.h"
 #include "SampleManager.h"
 #include "Stats.h"
 #include "Vehicle.h"
@@ -93,6 +94,11 @@ enum eVehicleModel {
 	CAR158,
 	CAR159,
 };
+
+void *cAudioScriptObject::operator new(size_t sz) { return CPools::GetAudioScriptObjectPool()->New(); }
+void *cAudioScriptObject::operator new(size_t sz, int handle) { return CPools::GetAudioScriptObjectPool()->New(handle); }
+void cAudioScriptObject::operator delete(void *p, size_t sz) { CPools::GetAudioScriptObjectPool()->Delete((cAudioScriptObject*)p); }
+void cAudioScriptObject::operator delete(void *p, int handle) { CPools::GetAudioScriptObjectPool()->Delete((cAudioScriptObject*)p); }
 
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
 
