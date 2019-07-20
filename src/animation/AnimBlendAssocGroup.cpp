@@ -116,14 +116,13 @@ CAnimBlendAssocGroup::CreateAssociations(const char *name)
 	for(i = 0; i < animBlock->numAnims; i++){
 		CAnimBlendHierarchy *anim = CAnimManager::GetAnimation(animBlock->firstIndex + i);
 		CBaseModelInfo *model = GetModelFromName(anim->name);
+		assert(model);
 		printf("Associated anim %s with model %s\n", anim->name, model->GetName());
-		if(model){
-			RpClump *clump = (RpClump*)model->CreateInstance();
-			RpAnimBlendClumpInit(clump);
-			assocList[i].Init(clump, anim);
-			RpClumpDestroy(clump);
-			assocList[i].animId = i;
-		}
+		RpClump *clump = (RpClump*)model->CreateInstance();
+		RpAnimBlendClumpInit(clump);
+		assocList[i].Init(clump, anim);
+		RpClumpDestroy(clump);
+		assocList[i].animId = i;
 	}
 	numAssociations = animBlock->numAnims;
 }

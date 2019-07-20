@@ -173,9 +173,8 @@ CWaterLevel::CreateWavyAtomic()
 
 	{
 		wavyMorphTarget = RpGeometryGetMorphTarget(wavyGeometry, 0);
-		wavyVert = RpMorphTargetGetVertices(wavyMorphTarget);
-		
 		ASSERT(wavyMorphTarget != NULL);
+		wavyVert = RpMorphTargetGetVertices(wavyMorphTarget);	
 		ASSERT(wavyVert != NULL);
 		
 		for ( int32 i = 0; i < 9; i++ )
@@ -1149,10 +1148,10 @@ CWaterLevel::AllocateBoatWakeArray()
 	ASSERT(ms_pWavyAtomic != NULL );
 	
 	RpGeometry    *wavyGeometry    = RpAtomicGetGeometry(ms_pWavyAtomic);
+	ASSERT(wavyGeometry    != NULL );
 	RpMorphTarget *wavyMorphTarget = RpGeometryGetMorphTarget(wavyGeometry, 0);
 	RpMaterial    *wavyMaterial    = RpGeometryGetMaterial(wavyGeometry, 0);
 
-	ASSERT(wavyGeometry    != NULL );
 	ASSERT(wavyMorphTarget != NULL );
 	ASSERT(wavyMaterial    != NULL );
 

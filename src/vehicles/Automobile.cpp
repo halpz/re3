@@ -180,8 +180,6 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 		bExplosionProof = true;
 		bBulletProof = true;
 	}
-
-	*(void**)this = (void*)0x600C1C;
 }
 
 
@@ -1443,9 +1441,11 @@ CAutomobile::RcbanditCheckHitWheels(void)
 { EAXJMP(0x53C990);
 }
 
-//WRAPPER void
-//CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
-//{ EAXJMP(0x52F390);
+#if 0
+WRAPPER void
+CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
+{ EAXJMP(0x52F390); }
+#else
 void
 CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 {
@@ -1494,7 +1494,7 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 			return;
 
 		if(m_pDamageEntity){
-			if(m_pDamageEntity->m_status == STATUS_PLAYER_PLAYBACKFROMBUFFER &&
+			if(m_pDamageEntity->IsBuilding() &&
 			   DotProduct(m_vecDamageNormal, GetUp()) > 0.6f)
 				return;
 		}
@@ -1686,6 +1686,7 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 		}
 	}
 }
+#endif
 
 void
 CAutomobile::dmgDrawCarCollidingParticles(const CVector &pos, float amount)
