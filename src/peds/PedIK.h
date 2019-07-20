@@ -9,6 +9,15 @@ struct LimbOrientation
 	float theta;
 };
 
+struct LimbMovementInfo {
+	float maxYaw;
+	float minYaw;
+	float yawD;
+	float maxPitch;
+	float minPitch;
+	float pitchD;
+};
+
 class CPed;
 
 class CPedIK
@@ -28,6 +37,8 @@ public:
 	LimbOrientation m_lowerArmOrient;
 	int32 m_flags;
 
+	static LimbMovementInfo &ms_torsoInfo;
+
 	CPedIK(CPed *ped);
 	bool PointGunInDirection(float phi, float theta);
 	bool PointGunAtPosition(CVector *position);
@@ -36,5 +47,7 @@ public:
 	void RotateTorso(AnimBlendFrameData* animBlend, LimbOrientation* limb, bool changeRoll);
 	void ExtractYawAndPitchLocal(RwMatrixTag*, float*, float*);
 	void ExtractYawAndPitchWorld(RwMatrixTag*, float*, float*);
+	int8 MoveLimb(LimbOrientation &a1, float a2, float a3, LimbMovementInfo &a4);
+	bool RestoreGunPosn(void);
 };
 static_assert(sizeof(CPedIK) == 0x28, "CPedIK: error");

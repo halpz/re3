@@ -228,7 +228,7 @@ public:
 	uint8 bNotAllowedToDuck : 1;
 	uint8 bCrouchWhenShooting : 1;
 	uint8 bIsDucking : 1;	// set if you don't want ped to attack
-	uint8 m_ped_flagE20 : 1;
+	uint8 m_ped_flagE20 : 1;	// getup complete?
 	uint8 bDoBloodyFootprints : 1;
 	uint8 m_ped_flagE80 : 1;
 
@@ -336,7 +336,7 @@ public:
 	bool bInVehicle;
 	uint8 pad_315[3];
 	float field_318;
-	uint8 field_31C;
+	uint8 field_31C; // may be cutscene or phone cutscene status
 	uint8 field_31D;
 	int16 m_phoneId;
 	uint32 m_lookingForPhone; // unused
@@ -481,7 +481,7 @@ public:
 	void ClearAll(void);
 	void SetPointGunAt(CEntity*);
 	bool Seek(void);
-	void SetWanderPath(int8);
+	bool SetWanderPath(int8);
 	void SetFollowPath(CVector);
 	void ClearAttackByRemovingAnim(void);
 	void SetStoredState(void);
@@ -490,6 +490,19 @@ public:
 	void ClearFlee(void);
 	void ClearFall(void);
 	void SetGetUp(void);
+	void ClearInvestigateEvent(void);
+	void ClearLeader(void);
+	void ClearLook(void);
+	void ClearObjective(void);
+	void ClearPause(void);
+	void ClearSeek(void);
+	void ClearWeapons(void);
+	void RestoreGunPosition(void);
+	void RestoreHeadingRate(void);
+	void SetAimFlag(CEntity* to);
+	void SetAimFlag(float angle);
+	void SetAmmo(eWeaponType weaponType, uint32 ammo);
+	void SetEvasiveStep(CEntity*, uint8);
 
 	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
