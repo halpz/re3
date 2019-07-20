@@ -1,20 +1,33 @@
-image: Visual Studio 2017
+version: 1.0.{build}
+image: Visual Studio 2019
 configuration:
-  - DebugCI
-  - ReleaseCI
-platform:
-  - Win32
+- Debug
+- Release
+platform: Win32
 environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
 install:
-  - set PATH=%APPVEYOR_BUILD_FOLDER%/bin;%PATH%
-before_build:
-  - mkdir "%APPVEYOR_BUILD_FOLDER%/build"
-  - cd "%APPVEYOR_BUILD_FOLDER%"
-  - premake5.exe vs2015
+- cmd: >-
+    git submodule update --init --recursive
+    premake-vs2019.cmd
 build:
-  project: c:\projects\re3\build\re3.sln
+  project: build/re3.sln
   verbosity: minimal
+after_build:
+# downloading latest release of UAL to make release with UAL and ASI.
+- ps: >-
+    $releases = "https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases"
+    $name = "Ultimate-ASI-Loader.zip"
+    $latestRelease = Invoke-WebRequest $releases/latest -Headers @{"Accept"="application/json"}
+    $json = $latestRelease.Content | ConvertFrom-Json
+    $latestVersion = $json.tag_name
+    $url = "$releases/download/$latestVersion/$name"
+    Start-FileDownload $url -FileName 'C:\Ultimate-ASI-Loader.zip'
+    7z e c:\Ultimate-ASI-Loader.zip -oc:\Projects\re3\bin\${env:CONFIGURATION}
+    cd "bin\${env:CONFIGURATION}"
+    copy re3.dll re3.asi
+    7z u "RE3_${env:CONFIGURATION}+UAL.zip" re3.asi dinput8.dll
+    Get-ChildItem .\*.zip | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
 artifacts:
-  path: bin/%CONFIGURATION%/re3.dll
-
+- path: bin/%CONFIGURATION%/re3.dll
+  name: re3.dll

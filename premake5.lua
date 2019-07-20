@@ -1,5 +1,5 @@
 workspace "re3"
-	configurations { "DebugCI", "ReleaseCI", "Release", "ReleaseFH", "Debug" }
+	configurations { "Debug", "Release", "ReleaseFH" }
 	location "build"
 
 	files { "src/*.*" }
@@ -38,6 +38,32 @@ workspace "re3"
 	includedirs { "rwsdk/include/d3d8" }
 
 	libdirs { "dxsdk/lib" }
+	
+    pbcommands = { 
+       "setlocal EnableDelayedExpansion",
+       "set file=$(TargetPath)",
+       "FOR %%i IN (\"%file%\") DO (",
+       "set filename=%%~ni",
+       "set fileextension=%%~xi",
+       "set target=!path!!filename!!fileextension!",
+       "if exist \"!target!\" copy /y \"!file!\" \"!target!\"",
+       ")" }
+    
+    function setpaths (gamepath, exepath, scriptspath)
+       scriptspath = scriptspath or ""
+       if (gamepath) then
+          cmdcopy = { "set \"path=" .. gamepath .. scriptspath .. "\"" }
+          table.insert(cmdcopy, pbcommands)
+          postbuildcommands (cmdcopy)
+          debugdir (gamepath)
+          if (exepath) then
+             debugcommand (gamepath .. exepath)
+             dir, file = exepath:match'(.*/)(.*)'
+             debugdir (gamepath .. (dir or ""))
+          end
+       end
+       --targetdir ("bin/%{prj.name}/" .. scriptspath)
+    end
 
 project "re3"
 	kind "SharedLib"
@@ -52,31 +78,18 @@ project "re3"
 		defines { "DEBUG" }
 		staticruntime "on"
 		symbols "On"
-		debugdir "$(GTA_III_RE_DIR)"
-		debugcommand "$(GTA_III_RE_DIR)/gta3.exe"
-		postbuildcommands "copy /y \"$(TargetPath)\" \"$(GTA_III_RE_DIR)\\plugins\\re3.dll\""
+		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
 
 	filter "configurations:Release"
 		defines { "NDEBUG" }
 		optimize "On"
 		staticruntime "on"
-		debugdir "C:/Users/aap/games/gta3_re"
-		debugcommand "C:/Users/aap/games/gta3_re/gta3.exe"
-		postbuildcommands "copy /y \"$(TargetPath)\" \"$(GTA_III_RE_DIR)\\plugins\\re3.dll\""
+		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
+		
 	filter "configurations:ReleaseFH"
 		defines { "NDEBUG" }
 		symbols "Full"
 		optimize "off"
 		staticruntime "on"
-		debugdir "$(GTA_III_DIR)"
-		debugcommand "$(GTA_III_DIR)/gta3.exe"
 		targetextension ".asi"
-		targetdir "$(GTA_III_DIR)/scripts"
-	filter "configurations:DebugCI"
-		defines { "DEBUG" }
-		symbols "On"
-		staticruntime "on"
-	filter "configurations:ReleaseCI"
-		defines { "NDEBUG" }
-		optimize "On"
-		staticruntime "on"
+		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "scripts/")
