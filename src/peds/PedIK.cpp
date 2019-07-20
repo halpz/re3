@@ -8,6 +8,8 @@ WRAPPER bool CPedIK::PointGunAtPosition(CVector *position) { EAXJMP(0x4ED920); }
 WRAPPER void CPedIK::ExtractYawAndPitchLocal(RwMatrixTag*, float*, float*) { EAXJMP(0x4ED2C0); }
 WRAPPER void CPedIK::ExtractYawAndPitchWorld(RwMatrixTag*, float*, float*) { EAXJMP(0x4ED140); }
 
+LimbMovementInfo &CPedIK::ms_torsoInfo = *(LimbMovementInfo*)0x5F9F8C;
+
 CPedIK::CPedIK(CPed *ped)
 {
 	m_ped = ped;
@@ -102,8 +104,61 @@ CPedIK::GetWorldMatrix(RwFrame *source, RwMatrix *destination)
 	return destination;
 }
 
+// A helper function that adjusts "limb" parameter according to limitations. Doesn't move the limb.
+int8
+CPedIK::MoveLimb(LimbOrientation &limb, float approxPhi, float approxTheta, LimbMovementInfo &moveInfo)
+{
+	int result = 1;
+
+	// phi
+
+	if (limb.phi > approxPhi) {
+		limb.phi -= moveInfo.yawD;
+	} else if (limb.phi < approxPhi) {
+		limb.phi += moveInfo.yawD;
+	}
+
+	if (Abs(limb.phi - approxPhi) < moveInfo.yawD) {
+		limb.phi = approxPhi;
+		result = 2;
+	}
+	if (limb.phi > moveInfo.maxYaw || limb.phi < moveInfo.minYaw) {
+		limb.phi = clamp(limb.phi, moveInfo.minYaw, moveInfo.maxYaw);
+		result = 0;
+	}
+
+	// theta
+
+	if (limb.theta > approxTheta) {
+		limb.theta -= moveInfo.pitchD;
+	} else if (limb.theta < approxTheta) {
+		limb.theta += moveInfo.pitchD;
+	}
+
+	if (Abs(limb.theta - approxTheta) < moveInfo.pitchD)
+		limb.theta = approxTheta;
+	else
+		result = 1;
+
+	if (limb.theta > moveInfo.maxPitch || limb.theta < moveInfo.minPitch) {
+		limb.theta = clamp(limb.theta, moveInfo.minPitch, moveInfo.maxPitch);
+		result = 0;
+	}
+	return result;
+}
+
+bool
+CPedIK::RestoreGunPosn(void)
+{
+	int limbStatus = MoveLimb(m_torsoOrient, 0.0f, 0.0f, ms_torsoInfo);
+	RotateTorso(m_ped->m_pFrames[PED_MID], &m_torsoOrient, false);
+	return limbStatus == 2;
+}
+
 STARTPATCHES
 	InjectHook(0x4ED0F0, &CPedIK::GetComponentPosition, PATCH_JUMP);
 	InjectHook(0x4ED060, &CPedIK::GetWorldMatrix, PATCH_JUMP);
 	InjectHook(0x4EDDB0, &CPedIK::RotateTorso, PATCH_JUMP);
+	InjectHook(0x4ED440, &CPedIK::MoveLimb, PATCH_JUMP);
+	InjectHook(0x4EDD70, &CPedIK::RestoreGunPosn, PATCH_JUMP);
 ENDPATCHES
