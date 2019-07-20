@@ -49,7 +49,7 @@ workspace "re3"
        ")" }
     
     function setpaths (gamepath, exepath, scriptspath)
-       scriptspath = scriptspath or "scripts/"
+       scriptspath = scriptspath or ""
        if (gamepath) then
           cmdcopy = { "set \"path=" .. gamepath .. scriptspath .. "\"" }
           table.insert(cmdcopy, pbcommands)
