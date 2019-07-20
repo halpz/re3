@@ -178,6 +178,11 @@ struct cAudioScriptObject {
 	char gap_2[2];
 	CVector m_vecPos;
 	int m_nAudioEntityId;
+
+	static void *operator new(size_t);
+	static void *operator new(size_t, int);
+	static void operator delete(void*, size_t);
+	static void operator delete(void*, int);
 };
 
 static_assert(sizeof(cAudioScriptObject) == 0x14, "cAudioScriptObject: error");
