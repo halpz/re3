@@ -2709,7 +2709,7 @@ CPed::QuitEnteringCar(void)
 		if (veh->m_nNumGettingIn != 0)
 			veh->m_nNumGettingIn--;
 
-		veh->m_nGettingInFlags = ~GetVehDoorFlag(m_vehEnterType);
+		veh->m_nGettingInFlags &= ~GetVehDoorFlag(m_vehEnterType);
 	}
 
 	bUsesCollision = true;
