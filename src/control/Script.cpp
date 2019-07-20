@@ -79,6 +79,7 @@ CMissionCleanup::CMissionCleanup()
 
 void CMissionCleanup::Init()
 {
+	m_nCount = 0;
 	for (int i = 0; i < MAX_CLEANUP; i++){
 		m_sEntities[i].type = CLEANUP_UNUSED;
 		m_sEntities[i].id = 0;
@@ -102,7 +103,7 @@ void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 		return;
 	pNew->id = id;
 	pNew->type = type;
-	m_bCount++;
+	m_nCount++;
 }
 
 void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
@@ -111,6 +112,7 @@ void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
 		if (m_sEntities[i].type == type && m_sEntities[i].id == id){
 			m_sEntities[i].id = 0;
 			m_sEntities[i].type = CLEANUP_UNUSED;
+			m_nCount--;
 		}
 	}
 }
@@ -603,7 +605,7 @@ void CTheScripts::Process()
 	if (UseTextCommands){
 		for (int i = 0; i < MAX_NUM_INTRO_TEXT_LINES; i++)
 			IntroTextLines[i].Reset();
-		NumberOfIntroRectanglesThisFrame = 0;
+		NumberOfIntroTextLinesThisFrame = 0;
 		for (int i = 0; i < MAX_NUM_INTRO_RECTANGLES; i++){
 			IntroRectangles[i].m_bIsUsed = false;
 			IntroRectangles[i].m_bBeforeFade = false;
@@ -1638,27 +1640,27 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CollectParameters(&m_nIp, 5);
 		switch (ScriptParams[1]) {
 		case MI_COP:
-			if (ScriptParams[0] = PEDTYPE_COP)
+			if (ScriptParams[0] == PEDTYPE_COP)
 				ScriptParams[1] = COP_STREET;
 			break;
 		case MI_SWAT:
-			if (ScriptParams[0] = PEDTYPE_COP)
+			if (ScriptParams[0] == PEDTYPE_COP)
 				ScriptParams[1] = COP_SWAT;
 			break;
 		case MI_FBI:
-			if (ScriptParams[0] = PEDTYPE_COP)
+			if (ScriptParams[0] == PEDTYPE_COP)
 				ScriptParams[1] = COP_FBI;
 			break;
 		case MI_ARMY:
-			if (ScriptParams[0] = PEDTYPE_COP)
+			if (ScriptParams[0] == PEDTYPE_COP)
 				ScriptParams[1] = COP_ARMY;
 			break;
 		case MI_MEDIC:
-			if (ScriptParams[0] = PEDTYPE_EMERGENCY)
+			if (ScriptParams[0] == PEDTYPE_EMERGENCY)
 				ScriptParams[1] = PEDTYPE_EMERGENCY;
 			break;
 		case MI_FIREMAN:
-			if (ScriptParams[0] = PEDTYPE_FIREMAN)
+			if (ScriptParams[0] == PEDTYPE_FIREMAN)
 				ScriptParams[1] = PEDTYPE_FIREMAN;
 			break;
 		default:

@@ -137,7 +137,7 @@ enum {
 class CMissionCleanup
 {
 	CMissionCleanupEntity m_sEntities[MAX_CLEANUP];
-	uint8 m_bCount;
+	uint8 m_nCount;
 
 public:
 	CMissionCleanup();
