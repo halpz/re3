@@ -24,6 +24,7 @@ workspace "re3"
 	includedirs { "src/control" }
 	includedirs { "src/core" }
 	includedirs { "src/entities" }
+	includedirs { "src/math" }
 	includedirs { "src/modelinfo" }
 	includedirs { "src/objects" }
 	includedirs { "src/peds" }

@@ -1,16 +1,65 @@
+#include "SampleManager.h"
 #include "common.h"
 #include "patcher.h"
-#include "SampleManager.h"
 
 CSampleManager &cSampleManager = *(CSampleManager *)0x7341E0;
 
 uint32 &nNumOfMp3Files = *(uint32 *)0x95CC00;
 uint8 &num3DProvidersAvailable = *(uint8 *)0x734237;
-uint32 *asName3DProviders = (uint32 *)0x734238;
+char **asName3DProviders = (char **)0x734238;
 
-bool CSampleManager::IsMP3RadioChannelAvailable() {
+bool
+CSampleManager::IsMP3RadioChannelAvailable()
+{
 	return nNumOfMp3Files != 0;
 }
+
+WRAPPER
+void CSampleManager::SetChannelFrequency(int32, int32) { EAXJMP(0x5679D0); }
+
+WRAPPER
+void CSampleManager::SetChannelEmittingVolume(int32, uint32) { EAXJMP(0x567820); }
+
+WRAPPER
+void
+CSampleManager::SetChannel3DPosition(int32, float, float, float)
+{
+	EAXJMP(0x567890);
+}
+
+WRAPPER
+void CSampleManager::SetChannelLoopCount(int32, int32) { EAXJMP(0x567AA0); }
+
+WRAPPER
+void CSampleManager::SetChannel3DDistances(int32, int32, int32) { EAXJMP(0x5678D0); }
+
+WRAPPER
+void CSampleManager::SetChannelReverbFlag(int32, uint8) { EAXJMP(0x567630); }
+
+WRAPPER
+int32 CSampleManager::GetSampleLength(int32) { EAXJMP(0x567300); }
+
+WRAPPER
+bool CSampleManager::InitialiseChannel(int32, int32, uint32, uint32) { EAXJMP(0x5676A0); }
+
+WRAPPER
+void CSampleManager::SetChannelLoopPoints(int32, int32, int32) { EAXJMP(0x567A30); }
+
+WRAPPER
+bool
+CSampleManager::CheckForAnAudioFileOnCD()
+{
+	EAXJMP(0x566EA0);
+}
+
+WRAPPER
+int32 CSampleManager::GetSampleBaseFrequency(int32) { EAXJMP(0x5672A0); }
+
+WRAPPER
+int32 CSampleManager::GetSampleLoopStartOffset(int32) { EAXJMP(0x5672C0); }
+
+WRAPPER
+int32 CSampleManager::GetSampleLoopEndOffset(int32) { EAXJMP(0x5672E0); }
 
 WRAPPER
 bool CSampleManager::IsSampleBankLoaded(uint8) { EAXJMP(0x567130); }
@@ -106,6 +155,13 @@ bool
 CSampleManager::GetChannelUsedFlag(int32 id)
 {
 	EAXJMP(0x567B00);
+}
+
+WRAPPER
+void
+CSampleManager::StartChannel(int32 id)
+{
+	EAXJMP(0x567B80);
 }
 
 WRAPPER

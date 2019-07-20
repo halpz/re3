@@ -320,3 +320,19 @@ inline uint8 GetVehDoorFlag(int32 carnode) {
 		return 0;
 	}
 }
+
+class cTransmission;
+
+class cVehicleParams
+{
+public:
+	char m_bDistanceCalculated;
+	char gap_1[3];
+	float m_fDistance;
+	CVehicle *m_pVehicle;
+	cTransmission *m_pTransmission;
+	int m_nIndex;
+	float m_fVelocityChange;
+};
+
+static_assert(sizeof(cVehicleParams) == 0x18, "CVehicle: error");

@@ -1,7 +1,7 @@
 #include "common.h"
 #include "main.h"
 #include "patcher.h"
-#include "math/Quaternion.h"
+#include "Quaternion.h"
 #include "ModelInfo.h"
 #include "ModelIndices.h"
 #include "TempColModels.h"

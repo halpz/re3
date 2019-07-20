@@ -115,7 +115,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	field_594 = 0;
 	bNotDamagedUpsideDown = false;
 	bMoreResistantToDamage = false;
-	field_514 = 0;
+	m_fVelocityChangeForAudio = 0.f;
 	field_4E2 = 0;
 
 	for(i = 0; i < 4; i++){

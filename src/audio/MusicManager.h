@@ -267,6 +267,9 @@ public:
 	void Initialise();
 	void Terminate();
 
+	void ChangeMusicMode(int32 mode);
+	void StopFrontEndTrack();
+
 	char *Get3DProviderName(char);
 	bool PlayerInCar();
 	void DisplayRadioStationName();
