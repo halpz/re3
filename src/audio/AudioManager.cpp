@@ -172,9 +172,7 @@ cAudioManager::AddReflectionsToRequestedQueue()
 		reflectionDistance = m_afReflectionsDistances[i];
 		if(reflectionDistance > 0.0f && reflectionDistance < 100.f &&
 		   reflectionDistance < m_sQueueSample.m_fSoundIntensity) {
-			m_sQueueSample.m_bLoopsRemaining =
-			    (reflectionDistance *
-			     0.38873f); // @todo assert value, here used from VC
+			m_sQueueSample.m_bLoopsRemaining = (reflectionDistance * 500.f / 1029.f);
 			if(m_sQueueSample.m_bLoopsRemaining > 5u) {
 				m_sQueueSample.m_fDistance = m_afReflectionsDistances[i];
 				m_sQueueSample.m_bEmittingVolume = emittingVolume;
