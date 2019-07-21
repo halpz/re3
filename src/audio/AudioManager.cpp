@@ -287,8 +287,8 @@ cAudioManager::AddSampleToRequestedQueue()
 		calculatedVolume = m_sQueueSample.field_16 * (maxVolume - m_sQueueSample.m_bVolume);
 		sampleIndex = m_bSampleRequestQueuesStatus[m_bActiveSampleQueue];
 		if(sampleIndex >= m_bActiveSamples) {
-			sampleIndex = *(&m_asSamples[1][26].field_91 + m_bActiveSamples +
-			                27 * m_bActiveSampleQueue);
+			sampleIndex =
+			    m_abSampleQueueIndexTable[m_bActiveSampleQueue][m_bActiveSamples - 1];
 			if(m_asSamples[m_bActiveSampleQueue][sampleIndex].calculatedVolume <=
 			   calculatedVolume)
 				return;
