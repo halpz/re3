@@ -82,6 +82,7 @@ public:
 	static void    CreateWavyAtomic();
 	static void    DestroyWavyAtomic();
 	static bool    GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool bDontCheckZ);
+	static bool    GetWaterLevel(CVector coors, float *pfOutLevel, bool bDontCheckZ) { return GetWaterLevel(coors.x, coors.y, coors.z, pfOutLevel, bDontCheckZ); }
 	static bool    GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLevel);
 	static void    RenderWater();
 	static void    RenderOneFlatSmallWaterPoly    (float fX, float fY, float fZ, RwRGBA const &color);

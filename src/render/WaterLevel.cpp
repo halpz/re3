@@ -1240,7 +1240,7 @@ STARTPATCHES
 	InjectHook(0x554FE0, &CWaterLevel::Shutdown, PATCH_JUMP);
 	InjectHook(0x555010, &CWaterLevel::CreateWavyAtomic, PATCH_JUMP);
 	InjectHook(0x5552A0, &CWaterLevel::DestroyWavyAtomic, PATCH_JUMP);
-	InjectHook(0x5552C0, &CWaterLevel::GetWaterLevel, PATCH_JUMP);
+	InjectHook(0x5552C0, (bool (*)(float,float,float,float*,bool))&CWaterLevel::GetWaterLevel, PATCH_JUMP);
 	InjectHook(0x555440, &CWaterLevel::GetWaterLevelNoWaves, PATCH_JUMP);
 	InjectHook(0x5554E0, &CWaterLevel::RenderWater, PATCH_JUMP);
 	InjectHook(0x556C30, &CWaterLevel::RenderOneFlatSmallWaterPoly, PATCH_JUMP);

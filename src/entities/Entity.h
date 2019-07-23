@@ -73,7 +73,7 @@ public:
 	uint32 bRemoveFromWorld : 1;
 	uint32 bHasHitWall : 1;
 	uint32 bImBeingRendered : 1;
-	uint32 m_flagD8 : 1;
+	uint32 m_flagD8 : 1;	// used by cBuoyancy::ProcessBuoyancy
 	uint32 bIsSubway : 1;	// set when subway, but maybe different meaning?
 	uint32 bDrawLast : 1;
 	uint32 m_flagD40 : 1;
