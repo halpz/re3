@@ -117,6 +117,15 @@ public:
 	bool IsObject(void) { return m_type == ENTITY_TYPE_OBJECT; }
 	bool IsDummy(void) { return m_type == ENTITY_TYPE_DUMMY; }
 
+	RpAtomic *GetAtomic(void) {
+		assert(RwObjectGetType(m_rwObject) == rpATOMIC);
+		return (RpAtomic*)m_rwObject;
+	}
+	RpClump *GetClump(void) {
+		assert(RwObjectGetType(m_rwObject) == rpCLUMP);
+		return (RpClump*)m_rwObject;
+	}
+
 	void GetBoundCentre(CVector &out);
 	CVector GetBoundCentre(void) { CVector v; GetBoundCentre(v); return v; }
 	float GetBoundRadius(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingSphere.radius; }

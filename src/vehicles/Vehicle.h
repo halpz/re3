@@ -210,8 +210,8 @@ public:
 	int16 field_214;
 	int16 m_nBombTimer;        // goes down with each frame
 	CEntity *m_pBlowUpEntity;
-	float field_21C;
-	float field_220;
+	float field_21C;	// front Z?
+	float field_220;	// rear Z?
 	eCarLock m_nDoorLock;
 	int8 m_nLastWeaponDamage; // see eWeaponType, -1 if no damage
 	int8 m_nRadioStation;

@@ -67,8 +67,8 @@ public:
 	CPhysical *m_aGroundPhysical[4];	// physicals touching wheels
 	CVector m_aGroundOffset[4];		// from ground object to colpoint
 	CEntity *m_pSetOnFireEntity;
-	float m_weaponThingA;	// TODO
-	float m_weaponThingB;	// TODO
+	float m_weaponDoorTimerLeft;	// still don't know what exactly this is
+	float m_weaponDoorTimerRight;
 	float m_fCarGunLR;
 	float m_fCarGunUD;
 	float m_fWindScreenRotation;
@@ -119,6 +119,8 @@ public:
 	void ProcessBuoyancy(void);
 	void DoDriveByShootings(void);
 	int32 RcbanditCheckHitWheels(void);
+	int32 RcbanditCheck1CarWheels(CPtrList &list);
+	void PlaceOnRoadProperly(void);
 	void dmgDrawCarCollidingParticles(const CVector &pos, float amount);
 	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);

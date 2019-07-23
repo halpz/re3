@@ -23,6 +23,8 @@
 #include "CarAI.h"
 #include "Garages.h"
 #include "PathFind.h"
+#include "AnimManager.h"
+#include "RpAnimBlend.h"
 #include "Ped.h"
 #include "PlayerPed.h"
 #include "Object.h"
@@ -161,8 +163,8 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	m_fCarGunLR = 0.0f;
 	m_fCarGunUD = 0.05f;
 	m_fWindScreenRotation = 0.0f;
-	m_weaponThingA = 0.0f;
-	m_weaponThingB = m_weaponThingA;
+	m_weaponDoorTimerLeft = 0.0f;
+	m_weaponDoorTimerRight = m_weaponDoorTimerLeft;
 
 	if(GetModelIndex() == MI_DODO){
 		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
@@ -193,7 +195,6 @@ CAutomobile::SetModelIndex(uint32 id)
 CVector vecDAMAGE_ENGINE_POS_SMALL(-0.1f, -0.1f, 0.0f);
 CVector vecDAMAGE_ENGINE_POS_BIG(-0.5f, -0.3f, 0.0f);
 
-//WRAPPER void CAutomobile::ProcessControl(void) { EAXJMP(0x531470); }
 void
 CAutomobile::ProcessControl(void)
 {
@@ -1178,6 +1179,10 @@ CAutomobile::ProcessControl(void)
 			m_vecTurnSpeed.z = 0.0f;
 		}
 	}
+
+// TEMP
+if(pDriver)
+	pDriver->m_fHealth = 100.0f;
 }
 
 void
@@ -1431,21 +1436,185 @@ CAutomobile::ProcessBuoyancy(void)
 { EAXJMP(0x5308D0);
 }
 
-WRAPPER void
+void
 CAutomobile::DoDriveByShootings(void)
-{ EAXJMP(0x564000);
+{
+	CAnimBlendAssociation *anim;
+	CWeapon *weapon = pDriver->GetWeapon();
+	if(weapon->m_eWeaponType != WEAPONTYPE_UZI)
+		return;
+
+	weapon->Update(pDriver->m_audioEntityId);
+
+	bool lookingLeft = false;
+	bool lookingRight = false;
+	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1){
+		if(CPad::GetPad(0)->GetLookLeft())
+			lookingLeft = true;
+		if(CPad::GetPad(0)->GetLookRight())
+			lookingRight = true;
+	}else{
+		if(TheCamera.Cams[TheCamera.ActiveCam].LookingLeft)
+			lookingLeft = true;
+		if(TheCamera.Cams[TheCamera.ActiveCam].LookingRight)
+			lookingRight = true;
+	}
+
+	if(lookingLeft || lookingRight){
+		if(lookingLeft){
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_R);
+			if(anim)
+				anim->blendDelta = -1000.0f;
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_L);
+			if(anim == nil || anim->blendDelta < 0.0f)
+				CAnimManager::AddAnimation(pDriver->GetClump(), ASSOCGRP_STD, ANIM_DRIVEBY_L);
+			else
+				anim->SetRun();
+		}else if(pDriver->m_pMyVehicle->pPassengers[0] == nil || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FIRSTPERSON){
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_L);
+			if(anim)
+				anim->blendDelta = -1000.0f;
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_R);
+			if(anim == nil || anim->blendDelta < 0.0f)
+				CAnimManager::AddAnimation(pDriver->GetClump(), ASSOCGRP_STD, ANIM_DRIVEBY_R);
+			else
+				anim->SetRun();
+		}
+
+		if(CPad::GetPad(0)->GetCarGunFired() && CTimer::GetTimeInMilliseconds() > weapon->m_nTimer){
+			weapon->FireFromCar(this, lookingLeft);
+			weapon->m_nTimer = CTimer::GetTimeInMilliseconds() + 70;
+		}
+	}else{
+		weapon->Reload();
+		anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_L);
+		if(anim)
+			anim->blendDelta = -1000.0f;
+		anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_R);
+		if(anim)
+			anim->blendDelta = -1000.0f;
+	}
+
+	// TODO: what is this?
+	if(!lookingLeft && m_weaponDoorTimerLeft > 0.0f){
+		m_weaponDoorTimerLeft = max(m_weaponDoorTimerLeft - CTimer::GetTimeStep()*0.1f, 0.0f);
+		ProcessOpenDoor(CAR_DOOR_LF, NUM_ANIMS, m_weaponDoorTimerLeft);
+	}
+	if(!lookingRight && m_weaponDoorTimerRight > 0.0f){
+		m_weaponDoorTimerRight = max(m_weaponDoorTimerRight - CTimer::GetTimeStep()*0.1f, 0.0f);
+		ProcessOpenDoor(CAR_DOOR_RF, NUM_ANIMS, m_weaponDoorTimerRight);
+	}
 }
 
-WRAPPER int32
+int32
 CAutomobile::RcbanditCheckHitWheels(void)
-{ EAXJMP(0x53C990);
+{
+	int x, xmin, xmax;
+	int y, ymin, ymax;
+
+	xmin = CWorld::GetSectorIndexX(GetPosition().x - 2.0f);
+	if(xmin < 0) xmin = 0;
+	xmax = CWorld::GetSectorIndexX(GetPosition().x + 2.0f);
+	if(xmax > NUMSECTORS_X-1) xmax = NUMSECTORS_X-1;
+	ymin = CWorld::GetSectorIndexX(GetPosition().y - 2.0f);
+	if(ymin < 0) ymin = 0;
+	ymax = CWorld::GetSectorIndexX(GetPosition().y + 2.0f);
+	if(ymax > NUMSECTORS_Y-1) ymax = NUMSECTORS_X-1;
+
+	CWorld::AdvanceCurrentScanCode();
+
+	for(y = ymin; y <= ymax; y++)
+		for(x = xmin; x <= xmax; x++){
+			CSector *s = CWorld::GetSector(x, y);
+			if(RcbanditCheck1CarWheels(s->m_lists[ENTITYLIST_VEHICLES]) ||
+			   RcbanditCheck1CarWheels(s->m_lists[ENTITYLIST_VEHICLES_OVERLAP]))
+				return 1;
+		}
+	return 0;
 }
 
-#if 0
-WRAPPER void
-CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
-{ EAXJMP(0x52F390); }
-#else
+int32
+CAutomobile::RcbanditCheck1CarWheels(CPtrList &list)
+{
+	static CMatrix matW2B;
+	int i;
+	CPtrNode *node;
+	CAutomobile *car;
+	CColModel *colModel = GetColModel();
+	CVehicleModelInfo *mi;
+
+	for(node = list.first; node; node = node->next){
+		car = (CAutomobile*)node->item;
+		if(this != car && car->IsCar() && car->m_scanCode != CWorld::GetCurrentScanCode()){
+			car->m_scanCode = CWorld::GetCurrentScanCode();
+
+			if(Abs(this->GetPosition().x - car->GetPosition().x) < 10.0f &&
+			   Abs(this->GetPosition().y - car->GetPosition().y) < 10.0f){
+				mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(car->GetModelIndex());
+
+				for(i = 0; i < 4; i++){
+					if(car->m_aSuspensionSpringRatioPrev[i] < 1.0f || car->m_status == STATUS_SIMPLE){
+						CVector wheelPos;
+						CColSphere sph;
+						mi->GetWheelPosn(i, wheelPos);
+						matW2B = Invert(GetMatrix());
+						sph.center = matW2B * (car->GetMatrix() * wheelPos);
+						sph.radius = mi->m_wheelScale*0.25f;
+						if(CCollision::TestSphereBox(sph, colModel->boundingBox))
+							return 1;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+void
+CAutomobile::PlaceOnRoadProperly(void)
+{
+	CColPoint point;
+	CEntity *entity;
+	CColModel *colModel = GetColModel();
+	float lenFwd, lenBack;
+	float frontZ, rearZ;
+
+	lenFwd = colModel->boundingBox.max.y;
+	lenBack = -colModel->boundingBox.min.y;
+
+	CVector front(GetPosition().x + GetForward().x*lenFwd,
+	              GetPosition().y + GetForward().y*lenFwd,
+	              GetPosition().z + 5.0f);
+	if(CWorld::ProcessVerticalLine(front, GetPosition().z - 5.0f, point, entity,
+			true, false, false, false, false, false, nil)){
+		frontZ = point.point.z;
+		m_pCurGroundEntity = entity;
+	}else{
+		frontZ = field_21C;
+	}
+
+	CVector rear(GetPosition().x - GetForward().x*lenBack,
+	             GetPosition().y - GetForward().y*lenBack,
+	             GetPosition().z + 5.0f);
+	if(CWorld::ProcessVerticalLine(rear, GetPosition().z - 5.0f, point, entity,
+			true, false, false, false, false, false, nil)){
+		rearZ = point.point.z;
+		m_pCurGroundEntity = entity;
+	}else{
+		rearZ = field_220;
+	}
+
+	float len = lenFwd + lenBack;
+	float angle = Atan((frontZ - rearZ)/len);
+	float c = Cos(angle);
+	float s = Sin(angle);
+
+	GetRight() = CVector((front.y - rear.y)/len, -(front.x - rear.x)/len, 0.0f);
+	GetForward() = CVector(-c*GetRight().y, c*GetRight().x, s);
+	GetUp() = CrossProduct(GetRight(), GetForward());
+	GetPosition() = CVector((front.x + rear.x)/2.0f, (front.y + rear.y)/2.0f, (frontZ + rearZ)/2.0f + GetHeightAboveRoad());
+}
+
 void
 CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 {
@@ -1686,7 +1855,6 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 		}
 	}
 }
-#endif
 
 void
 CAutomobile::dmgDrawCarCollidingParticles(const CVector &pos, float amount)
@@ -2715,6 +2883,7 @@ STARTPATCHES
 	InjectHook(0x53C0E0, &CAutomobile_::BurstTyre_, PATCH_JUMP);
 	InjectHook(0x437690, &CAutomobile_::GetHeightAboveRoad_, PATCH_JUMP);
 	InjectHook(0x53C450, &CAutomobile_::PlayCarHorn_, PATCH_JUMP);
+	InjectHook(0x53E090, &CAutomobile::PlaceOnRoadProperly, PATCH_JUMP);
 	InjectHook(0x52F030, &CAutomobile::dmgDrawCarCollidingParticles, PATCH_JUMP);
 	InjectHook(0x5353A0, &CAutomobile::ResetSuspension, PATCH_JUMP);
 	InjectHook(0x52D210, &CAutomobile::SetupSuspensionLines, PATCH_JUMP);

@@ -158,6 +158,17 @@ ToggleComedy(void)
 	veh->bComedyControls = !veh->bComedyControls;
 }
 
+static void
+PlaceOnRoad(void)
+{
+	CVehicle *veh = FindPlayerVehicle();
+	if(veh == nil)
+		return;
+
+	if(veh->IsCar())
+		((CAutomobile*)veh)->PlaceOnRoadProperly();
+}
+
 static const char *carnames[] = {
 	"landstal", "idaho", "stinger", "linerun", "peren", "sentinel", "patriot", "firetruk", "trash", "stretch", "manana", "infernus", "blista", "pony",
 	"mule", "cheetah", "ambulan", "fbicar", "moonbeam", "esperant", "taxi", "kuruma", "bobcat", "mrwhoop", "bfinject", "corpse", "police", "enforcer",
@@ -241,6 +252,7 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
 		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
+		DebugMenuAddCmd("Debug", "Place Car on Road", PlaceOnRoad);
 
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);

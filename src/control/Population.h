@@ -2,6 +2,7 @@
 
 class CPed;
 class CVehicle;
+enum eLevelName;
 
 struct PedGroup
 {
