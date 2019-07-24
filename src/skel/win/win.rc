@@ -4,11 +4,11 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#if !defined(__GNU_C__)
-#include "afxres.h"
-#else
+//#if !defined(__GNU_C__)
+//#include "afxres.h"
+//#else
 #include "winresrc.h"
-#endif /* !defined(__GNU_C__) */
+//#endif /* !defined(__GNU_C__) */
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS

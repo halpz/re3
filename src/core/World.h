@@ -56,6 +56,7 @@ class CWorld
 	static CPtrList &ms_listMovingEntityPtrs;
 	static CSector (*ms_aSectors)[NUMSECTORS_X];	// [NUMSECTORS_Y][NUMSECTORS_X];
 	static uint16 &ms_nCurrentScanCode;
+	static CColPoint &ms_testSpherePoint;
 
 public:
 	static uint8 &PlayerInFocus;
@@ -94,11 +95,14 @@ public:
 	static bool GetIsLineOfSightSectorClear(CSector &sector, const CColLine &line, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
 	static bool GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
 	
+	static CEntity* TestSphereAgainstWorld(CVector, float, CEntity*, bool, bool, bool, bool, bool, bool);
+	static CEntity* TestSphereAgainstSectorList(CPtrList&, CVector, float, CEntity*, bool);
 	static void FindObjectsInRangeSectorList(CPtrList&, CVector&, float, bool, short*, short, CEntity**);
 	static void FindObjectsInRange(CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool);
 	static float FindGroundZForCoord(float x, float y);
 	static float FindGroundZFor3DCoord(float x, float y, float z, bool *found);
 	static float FindRoofZFor3DCoord(float x, float y, float z, bool *found);
+	static void RemoveReferencesToDeletedObject(CEntity*);
 
 	static float GetSectorX(float f) { return ((f - WORLD_MIN_X)/SECTOR_SIZE_X); }
 	static float GetSectorY(float f) { return ((f - WORLD_MIN_Y)/SECTOR_SIZE_Y); }

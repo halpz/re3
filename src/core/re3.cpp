@@ -10,6 +10,7 @@
 #include "Clock.h"
 #include "World.h"
 #include "Vehicle.h"
+#include "ModelIndices.h"
 #include "Streaming.h"
 #include "PathFind.h"
 #include "Boat.h"
@@ -58,8 +59,6 @@ mysrand(unsigned int seed)
 	myrand_seed = seed;
 }
 
-int gDbgSurf;
-
 void (*DebugMenuProcess)(void);
 void (*DebugMenuRender)(void);
 static void stub(void) { }
@@ -102,60 +101,43 @@ void ChittyChittyBangBangCheat();
 void StrongGripCheat();
 void NastyLimbsCheat();
 
-// needs too much stuff for now
-#if 0
+DebugMenuEntry *carCol1;
+DebugMenuEntry *carCol2;
+
 void
-spawnCar(int id)
+SpawnCar(int id)
 {
 	CVector playerpos;
 	CStreaming::RequestModel(id, 0);
 	CStreaming::LoadAllRequestedModels(false);
 	if(CStreaming::HasModelLoaded(id)){
-		FindPlayerCoors(playerpos);
+		playerpos = FindPlayerCoors();
 		int node = ThePaths.FindNodeClosestToCoors(playerpos, 0, 100.0f, false, false);
 		if(node < 0)
 			return;
 
 		CVehicle *v;
-		if(CModelInfo::IsBoatModel(id)){
-//			CBoat* boat = (CBoat*)CVehicle__new(0x484);
-//			boat = boat->ctor(id, 1);
-//			v = (CVehicle*)(boat);
-		}else{
-//			CAutomobile *au = (CAutomobile*)CVehicle__new(0x5A8);
-//			au = au->ctor(id, 1);
-//			v = (CVehicle*)au;
-		}
-/*
-		// unlock doors
-		FIELD(int, v, 0x224) = 1;
-		// set player owned
-		FIELD(uint8, v, 0x1F7) |= 4;
+		if(CModelInfo::IsBoatModel(id))
+			return;
+		else
+			v = new CAutomobile(id, RANDOM_VEHICLE);
 
-		DebugMenuEntrySetAddress(carCol1, &FIELD(uchar, v, 0x19C));
-		DebugMenuEntrySetAddress(carCol2, &FIELD(uchar, v, 0x19D));
-		//if(id == MODELID_ESPERANTO)
-		//	FIELD(uchar, v, 0x19C) = 54;
+		v->bHasBeenOwnedByPlayer = true;
+		if(carCol1)
+			DebugMenuEntrySetAddress(carCol1, &v->m_currentColour1);
+		if(carCol2)
+			DebugMenuEntrySetAddress(carCol2, &v->m_currentColour2);
 
-		v->matrix.matrix.pos.x = ThePaths.nodes[node].x;
-		v->matrix.matrix.pos.y = ThePaths.nodes[node].y;
-		v->matrix.matrix.pos.z = ThePaths.nodes[node].z + 4.0f;
-		float x = v->matrix.matrix.pos.x;
-		float y = v->matrix.matrix.pos.y;
-		float z = v->matrix.matrix.pos.z;
-		v->matrix.SetRotate(0.0f, 0.0f, 3.49f);
-		v->matrix.matrix.pos.x += x;
-		v->matrix.matrix.pos.y += y;
-		v->matrix.matrix.pos.z += z;
-		v->bfTypeStatus = v->bfTypeStatus & 7 | 0x20;
-		FIELD(int, v, 0x224) = 1;
-*/
+		v->GetPosition() = ThePaths.m_pathNodes[node].pos;
+		v->GetPosition().z += 4.0f;
+		v->SetOrientation(0.0f, 0.0f, 3.49f);
+		v->m_status = STATUS_ABANDONED;
+		v->m_nDoorLock = CARLOCK_UNLOCKED;
 		CWorld::Add(v);
 	}
 }
-#endif
 
-void
+static void
 FixCar(void)
 {
 	CVehicle *veh = FindPlayerVehicle();
@@ -167,6 +149,34 @@ FixCar(void)
 	((CAutomobile*)veh)->Damage.SetEngineStatus(0);
 	((CAutomobile*)veh)->Fix();
 }
+
+static void
+ToggleComedy(void)
+{
+	CVehicle *veh = FindPlayerVehicle();
+	if(veh == nil)
+		return;
+	veh->bComedyControls = !veh->bComedyControls;
+}
+
+static void
+PlaceOnRoad(void)
+{
+	CVehicle *veh = FindPlayerVehicle();
+	if(veh == nil)
+		return;
+
+	if(veh->IsCar())
+		((CAutomobile*)veh)->PlaceOnRoadProperly();
+}
+
+static const char *carnames[] = {
+	"landstal", "idaho", "stinger", "linerun", "peren", "sentinel", "patriot", "firetruk", "trash", "stretch", "manana", "infernus", "blista", "pony",
+	"mule", "cheetah", "ambulan", "fbicar", "moonbeam", "esperant", "taxi", "kuruma", "bobcat", "mrwhoop", "bfinject", "corpse", "police", "enforcer",
+	"securica", "banshee", "predator", "bus", "rhino", "barracks", "train", "chopper", "dodo", "coach", "cabbie", "stallion", "rumpo", "rcbandit",
+	"bellyup", "mrwongs", "mafia", "yardie", "yakuza", "diablos", "columb", "hoods", "airtrain", "deaddodo", "speeder", "reefer", "panlant", "flatbed",
+	"yankee", "escape", "borgnine", "toyz", "ghost",
+};
 
 static std::list<CTweakVar *> TweakVarsList;
 static bool bAddTweakVarsNow = false;
@@ -259,15 +269,48 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Strong grip", StrongGripCheat);
 		DebugMenuAddCmd("Cheats", "Nasty limbs", NastyLimbsCheat);
 
+		static int spawnCarId = MI_LANDSTAL;
+		e = DebugMenuAddVar("Spawn", "Spawn Car ID", &spawnCarId, nil, 1, MI_LANDSTAL, MI_GHOST, carnames);
+		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddCmd("Spawn", "Spawn Car", [](){
+			if(spawnCarId == MI_TRAIN ||
+			   spawnCarId == MI_CHOPPER ||
+			   spawnCarId == MI_AIRTRAIN ||
+			   spawnCarId == MI_DEADDODO ||
+			   spawnCarId == MI_ESCAPE)
+				return;
+			SpawnCar(spawnCarId);
+		});
+		static uint8 dummy;
+		carCol1 = DebugMenuAddVar("Spawn", "First colour", &dummy, nil, 1, 0, 255, nil);
+		carCol2 = DebugMenuAddVar("Spawn", "Second colour", &dummy, nil, 1, 0, 255, nil);
+		DebugMenuAddCmd("Spawn", "Spawn Stinger", [](){ SpawnCar(MI_STINGER); });
+		DebugMenuAddCmd("Spawn", "Spawn Infernus", [](){ SpawnCar(MI_INFERNUS); });
+		DebugMenuAddCmd("Spawn", "Spawn Cheetah", [](){ SpawnCar(MI_CHEETAH); });
+		DebugMenuAddCmd("Spawn", "Spawn Esperanto", [](){ SpawnCar(MI_ESPERANT); });
+		DebugMenuAddCmd("Spawn", "Spawn Stallion", [](){ SpawnCar(MI_STALLION); });
+		DebugMenuAddCmd("Spawn", "Spawn Kuruma", [](){ SpawnCar(MI_KURUMA); });
+		DebugMenuAddCmd("Spawn", "Spawn Taxi", [](){ SpawnCar(MI_TAXI); });
+		DebugMenuAddCmd("Spawn", "Spawn Police", [](){ SpawnCar(MI_POLICE); });
+		DebugMenuAddCmd("Spawn", "Spawn Enforcer", [](){ SpawnCar(MI_ENFORCER); });
+		DebugMenuAddCmd("Spawn", "Spawn Banshee", [](){ SpawnCar(MI_BANSHEE); });
+		DebugMenuAddCmd("Spawn", "Spawn Yakuza", [](){ SpawnCar(MI_YAKUZA); });
+		DebugMenuAddCmd("Spawn", "Spawn Dodo", [](){ SpawnCar(MI_DODO); });
+
+
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
+		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
+		DebugMenuAddCmd("Debug", "Place Car on Road", PlaceOnRoad);
+
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
+		DebugMenuAddVarBool8("Debug", "Show Collision Lines", (int8*)&gbShowCollisionLines, nil);
 		DebugMenuAddVarBool8("Debug", "Show Collision Polys", (int8*)&gbShowCollisionPolys, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Buildings", (int8*)&gbDontRenderBuildings, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Big Buildings", (int8*)&gbDontRenderBigBuildings, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", (int8*)&gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
-		DebugMenuAddVar("Debug", "Dbg Surface", &gDbgSurf, nil, 1, 0, 34, nil);
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);

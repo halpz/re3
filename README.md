@@ -5,8 +5,8 @@ parts of the game [one by one](https://en.wikipedia.org/wiki/Ship_of_Theseus)
 such that we have a working game at all times.
 
 Apparently you can download a binary of the latest version here:
-[Debug](https://ci.appveyor.com/api/projects/aap/re3/artifacts/bin/DebugCI/re3.dll?branch=master&job=Configuration%3A+DebugCI), 
-[Release](https://ci.appveyor.com/api/projects/aap/re3/artifacts/bin/ReleaseCI/re3.dll?branch=master&job=Configuration%3A+ReleaseCI).
+[Debug](https://ci.appveyor.com/api/projects/aap/re3/artifacts/bin/Debug/re3.dll?branch=master&job=Configuration%3A+Debug), 
+[Release](https://ci.appveyor.com/api/projects/aap/re3/artifacts/bin/Release/re3.dll?branch=master&job=Configuration%3A+Release).
 
 Build status:
 [![Build status](https://ci.appveyor.com/api/projects/status/hyiwgegks122h8jg?svg=true)](https://ci.appveyor.com/project/aap/re3/branch/master)

@@ -315,6 +315,11 @@ enum
 	MI_TOYZ,
 	MI_GHOST,
 
+	// leftovers on PC
+	MI_MIAMI_RCBARON = 154,
+	MI_MIAMI_RCRAIDER = 155,
+	MI_MIAMI_SPARROW = 159,
+
 	MI_GRENADE = 170,
 	MI_AK47,
 	MI_BASEBALL_BAT,
@@ -464,4 +469,22 @@ IsPickupModel(int16 id)
 		id == MI_PICKUP_BRIBE ||
 		id == MI_PICKUP_KILLFRENZY ||
 		id == MI_PICKUP_CAMERA;
+}
+
+inline bool
+IsPolicePedModel(int16 id)
+{
+	return id == MI_COP ||
+		id == MI_SWAT ||
+		id == MI_FBI ||
+		id == MI_ARMY;
+}
+
+inline bool
+IsPoliceVehicleModel(int16 id)
+{
+	return id == MI_CHOPPER ||
+		id == MI_PREDATOR ||
+		id == MI_POLICE ||
+		id == MI_ENFORCER;
 }

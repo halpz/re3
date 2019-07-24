@@ -20,7 +20,7 @@ enum eCarLock {
 	CARLOCK_LOCKED,
 	CARLOCK_LOCKOUT_PLAYER_ONLY,
 	CARLOCK_LOCKED_PLAYER_INSIDE,
-	CARLOCK_COP_CAR,
+	CARLOCK_LOCKED_INITIALLY,
 	CARLOCK_FORCE_SHUT_DOORS,
 	CARLOCK_SKIP_SHUT_DOORS
 };
@@ -98,10 +98,23 @@ enum eWheels
 
 enum
 {
-	CAR_PIECE_WHEEL_LF = 13,
+	CAR_PIECE_BONNET = 1,
+	CAR_PIECE_BOOT,
+	CAR_PIECE_BUMP_FRONT,
+	CAR_PIECE_BUMP_REAR,
+	CAR_PIECE_DOOR_LF,
+	CAR_PIECE_DOOR_RF,
+	CAR_PIECE_DOOR_LR,
+	CAR_PIECE_DOOR_RR,
+	CAR_PIECE_WING_LF,
+	CAR_PIECE_WING_RF,
+	CAR_PIECE_WING_LR,
+	CAR_PIECE_WING_RR,
+	CAR_PIECE_WHEEL_LF,
 	CAR_PIECE_WHEEL_LR,
 	CAR_PIECE_WHEEL_RF,
 	CAR_PIECE_WHEEL_RR,
+	CAR_PIECE_WINDSCREEN,
 };
 
 enum tWheelState
@@ -125,12 +138,12 @@ class CVehicle : public CPhysical
 {
 public:
 	// 0x128
-	tHandlingData *m_handling;
-	CAutoPilot m_autoPilot;
+	tHandlingData *pHandling;
+	CAutoPilot AutoPilot;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
 	uint8 m_aExtras[2];
-	int16 m_nAlarmState; // m_nWantedStarsOnEnter on DK22
+	int16 m_nAlarmState;
 	int16 m_nMissionValue;
 	CPed *pDriver;
 	CPed *pPassengers[8];
@@ -144,7 +157,7 @@ public:
 	CFire *m_pCarFire;
 	float m_fSteerAngle;
 	float m_fGasPedal;
-	float m_fBreakPedal;
+	float m_fBrakePedal;
 	uint8 VehicleCreatedBy;
 
 	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CVehicle.h from R*
@@ -161,15 +174,15 @@ public:
 	uint8 bIsBus: 1; // Is this vehicle a bus
 	uint8 bIsBig: 1; // Is this vehicle a bus
 	uint8 bLowVehicle: 1; // Need this for sporty type cars to use low getting-in/out anims
-	uint8 m_veh_flagB10 : 1;
-	uint8 m_veh_flagB20 : 1;
+	uint8 bComedyControls : 1; // Will make the car hard to control (hopefully in a funny way)
+	uint8 bWarnedPeds : 1; // Has scan and warn peds of danger been processed?
 	uint8 m_veh_flagB40 : 1;
 	uint8 m_veh_flagB80 : 1;
 
-	uint8 m_veh_flagC1 : 1;
+	uint8 bTakeLessDamage : 1; // This vehicle is stronger (takes about 1/4 of damage)
 	uint8 bIsDamaged : 1; // This vehicle has been damaged and is displaying all its components
-	uint8 m_veh_flagC4 : 1;
-	uint8 m_veh_flagC8 : 1;
+	uint8 bHasBeenOwnedByPlayer : 1;// To work out whether stealing it is a crime
+	uint8 bFadeOut : 1; // Fade vehicle out
 	uint8 m_veh_flagC10 : 1;
 	uint8 m_veh_flagC20 : 1;
 	uint8 bCanBeDamaged : 1; // Set to FALSE during cut scenes to avoid explosions
@@ -188,17 +201,17 @@ public:
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
 	int8 field_1FB;
 	int8 field_1FC[4];
-	float m_fHealth;           // 1000.0f = full health. 0 -> explode
+	float m_fHealth;           // 1000.0f = full health. 250.0f = fire. 0 -> explode
 	uint8 m_nCurrentGear;
 	int8 field_205[3];
-	int field_208;
+	float m_fChangeGearTime;
 	uint32 m_nGunFiringTime;    // last time when gun on vehicle was fired (used on boats)
 	uint32 m_nTimeOfDeath;
 	int16 field_214;
 	int16 m_nBombTimer;        // goes down with each frame
-	CPed *m_pWhoSetMeOnFire;
-	float field_21C;
-	float field_220;
+	CEntity *m_pBlowUpEntity;
+	float field_21C;	// front Z?
+	float field_220;	// rear Z?
 	eCarLock m_nDoorLock;
 	int8 m_nLastWeaponDamage; // see eWeaponType, -1 if no damage
 	int8 m_nRadioStation;
@@ -207,7 +220,7 @@ public:
 	uint8 m_nCarHornTimer;
 	int8 field_22D;
 	bool m_bSirenOrAlarm;
-	int8 field_22F;
+	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
 	float m_fSteerRatio;
 	eVehicleType m_vehType;
@@ -277,6 +290,8 @@ public:
 	void RemoveDriver(void);
 	void ProcessCarAlarm(void);
 	bool IsSphereTouchingVehicle(float sx, float sy, float sz, float radius);
+
+	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
 	
 	static bool &bWheelsOnlyCheat;
 	static bool &bAllDodosCheat;
@@ -305,3 +320,19 @@ inline uint8 GetVehDoorFlag(int32 carnode) {
 		return 0;
 	}
 }
+
+class cTransmission;
+
+class cVehicleParams
+{
+public:
+	char m_bDistanceCalculated;
+	char gap_1[3];
+	float m_fDistance;
+	CVehicle *m_pVehicle;
+	cTransmission *m_pTransmission;
+	int m_nIndex;
+	float m_fVelocityChange;
+};
+
+static_assert(sizeof(cVehicleParams) == 0x18, "CVehicle: error");

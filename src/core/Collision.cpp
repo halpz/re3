@@ -18,6 +18,7 @@
 #include "CutsceneMgr.h"
 #include "RenderBuffer.h"
 #include "SurfaceTable.h"
+#include "Lines.h"
 #include "Collision.h"
 
 enum Direction
@@ -1356,6 +1357,7 @@ CCollision::DistToLine(const CVector *l0, const CVector *l1, const CVector *poin
 void
 CCollision::CalculateTrianglePlanes(CColModel *model)
 {
+	assert(model);
 	if(model->numTriangles == 0)
 		return;
 
@@ -1366,7 +1368,6 @@ CCollision::CalculateTrianglePlanes(CColModel *model)
 		lptr->Remove();
 		ms_colModelCache.head.Insert(lptr);
 	}else{
-		assert(model);
 		lptr = ms_colModelCache.Insert(model);
 		if(lptr == nil){
 			// make room if we have to, remove last in list
@@ -1387,6 +1388,223 @@ CCollision::CalculateTrianglePlanes(CColModel *model)
 void
 CCollision::DrawColModel(const CMatrix &mat, const CColModel &colModel)
 {
+	int i;
+	CVector min, max;
+	CVector verts[8];
+	CVector c;
+	float r;
+
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
+
+	min = colModel.boundingBox.min;
+	max = colModel.boundingBox.max;
+
+	verts[0] = mat * CVector(min.x, min.y, min.z);
+	verts[1] = mat * CVector(min.x, min.y, max.z);
+	verts[2] = mat * CVector(min.x, max.y, min.z);
+	verts[3] = mat * CVector(min.x, max.y, max.z);
+	verts[4] = mat * CVector(max.x, min.y, min.z);
+	verts[5] = mat * CVector(max.x, min.y, max.z);
+	verts[6] = mat * CVector(max.x, max.y, min.z);
+	verts[7] = mat * CVector(max.x, max.y, max.z);
+
+	CLines::RenderLineWithClipping(
+		verts[0].x, verts[0].y, verts[0].z,
+		verts[1].x, verts[1].y, verts[1].z,
+		0xFF0000FF, 0xFF0000FF);
+	CLines::RenderLineWithClipping(
+		verts[1].x, verts[1].y, verts[1].z,
+		verts[3].x, verts[3].y, verts[3].z,
+		0xFF0000FF, 0xFF0000FF);
+	CLines::RenderLineWithClipping(
+		verts[3].x, verts[3].y, verts[3].z,
+		verts[2].x, verts[2].y, verts[2].z,
+		0xFF0000FF, 0xFF0000FF);
+	CLines::RenderLineWithClipping(
+		verts[2].x, verts[2].y, verts[2].z,
+		verts[0].x, verts[0].y, verts[0].z,
+		0xFF0000FF, 0xFF0000FF);
+
+	CLines::RenderLineWithClipping(
+		verts[4].x, verts[4].y, verts[4].z,
+		verts[5].x, verts[5].y, verts[5].z,
+		0xFF0000FF, 0xFF0000FF);
+	CLines::RenderLineWithClipping(
+		verts[5].x, verts[5].y, verts[5].z,
+		verts[7].x, verts[7].y, verts[7].z,
+		0xFF0000FF, 0xFF0000FF);
+	CLines::RenderLineWithClipping(
+		verts[7].x, verts[7].y, verts[7].z,
+		verts[6].x, verts[6].y, verts[6].z,
+		0xFF0000FF, 0xFF0000FF);
+	CLines::RenderLineWithClipping(
+		verts[6].x, verts[6].y, verts[6].z,
+		verts[4].x, verts[4].y, verts[4].z,
+		0xFF0000FF, 0xFF0000FF);
+
+	CLines::RenderLineWithClipping(
+		verts[0].x, verts[0].y, verts[0].z,
+		verts[4].x, verts[4].y, verts[4].z,
+		0xFF0000FF, 0xFF0000FF);
+	CLines::RenderLineWithClipping(
+		verts[1].x, verts[1].y, verts[1].z,
+		verts[5].x, verts[5].y, verts[5].z,
+		0xFF0000FF, 0xFF0000FF);
+	CLines::RenderLineWithClipping(
+		verts[2].x, verts[2].y, verts[2].z,
+		verts[6].x, verts[6].y, verts[6].z,
+		0xFF0000FF, 0xFF0000FF);
+	CLines::RenderLineWithClipping(
+		verts[3].x, verts[3].y, verts[3].z,
+		verts[7].x, verts[7].y, verts[7].z,
+		0xFF0000FF, 0xFF0000FF);
+
+	for(i = 0; i < colModel.numSpheres; i++){
+		c = mat * colModel.spheres[i].center;
+		r = colModel.spheres[i].radius;
+
+		CLines::RenderLineWithClipping(
+			c.x,   c.y,   c.z-r,
+			c.x-r, c.y-r, c.z,
+			0xFF00FFFF, 0xFF00FFFF);
+		CLines::RenderLineWithClipping(
+			c.x,   c.y,   c.z-r,
+			c.x-r, c.y+r, c.z,
+			0xFF00FFFF, 0xFF00FFFF);
+		CLines::RenderLineWithClipping(
+			c.x,   c.y,   c.z-r,
+			c.x+r, c.y-r, c.z,
+			0xFF00FFFF, 0xFF00FFFF);
+		CLines::RenderLineWithClipping(
+			c.x,   c.y,   c.z-r,
+			c.x+r, c.y+r, c.z,
+			0xFF00FFFF, 0xFF00FFFF);
+		CLines::RenderLineWithClipping(
+			c.x-r, c.y-r, c.z,
+			c.x,   c.y,   c.z+r,
+			0xFF00FFFF, 0xFF00FFFF);
+		CLines::RenderLineWithClipping(
+			c.x-r, c.y+r, c.z,
+			c.x,   c.y,   c.z+r,
+			0xFF00FFFF, 0xFF00FFFF);
+		CLines::RenderLineWithClipping(
+			c.x+r, c.y-r, c.z,
+			c.x,   c.y,   c.z+r,
+			0xFF00FFFF, 0xFF00FFFF);
+		CLines::RenderLineWithClipping(
+			c.x+r, c.y+r, c.z,
+			c.x,   c.y,   c.z+r,
+			0xFF00FFFF, 0xFF00FFFF);
+	}
+
+	for(i = 0; i < colModel.numLines; i++){
+		verts[0] = colModel.lines[i].p0;
+		verts[1] = colModel.lines[i].p1;
+
+		verts[0] = mat * verts[0];
+		verts[1] = mat * verts[1];
+
+		CLines::RenderLineWithClipping(
+			verts[0].x, verts[0].y, verts[0].z,
+			verts[1].x, verts[1].y, verts[1].z,
+			0x00FFFFFF, 0x00FFFFFF);
+	}
+
+	for(i = 0; i < colModel.numBoxes; i++){
+		min = colModel.boxes[i].min;
+		max = colModel.boxes[i].max;
+
+		verts[0] = mat * CVector(min.x, min.y, min.z);
+		verts[1] = mat * CVector(min.x, min.y, max.z);
+		verts[2] = mat * CVector(min.x, max.y, min.z);
+		verts[3] = mat * CVector(min.x, max.y, max.z);
+		verts[4] = mat * CVector(max.x, min.y, min.z);
+		verts[5] = mat * CVector(max.x, min.y, max.z);
+		verts[6] = mat * CVector(max.x, max.y, min.z);
+		verts[7] = mat * CVector(max.x, max.y, max.z);
+
+		CLines::RenderLineWithClipping(
+			verts[0].x, verts[0].y, verts[0].z,
+			verts[1].x, verts[1].y, verts[1].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+		CLines::RenderLineWithClipping(
+			verts[1].x, verts[1].y, verts[1].z,
+			verts[3].x, verts[3].y, verts[3].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+		CLines::RenderLineWithClipping(
+			verts[3].x, verts[3].y, verts[3].z,
+			verts[2].x, verts[2].y, verts[2].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+		CLines::RenderLineWithClipping(
+			verts[2].x, verts[2].y, verts[2].z,
+			verts[0].x, verts[0].y, verts[0].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+
+		CLines::RenderLineWithClipping(
+			verts[4].x, verts[4].y, verts[4].z,
+			verts[5].x, verts[5].y, verts[5].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+		CLines::RenderLineWithClipping(
+			verts[5].x, verts[5].y, verts[5].z,
+			verts[7].x, verts[7].y, verts[7].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+		CLines::RenderLineWithClipping(
+			verts[7].x, verts[7].y, verts[7].z,
+			verts[6].x, verts[6].y, verts[6].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+		CLines::RenderLineWithClipping(
+			verts[6].x, verts[6].y, verts[6].z,
+			verts[4].x, verts[4].y, verts[4].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+
+		CLines::RenderLineWithClipping(
+			verts[0].x, verts[0].y, verts[0].z,
+			verts[4].x, verts[4].y, verts[4].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+		CLines::RenderLineWithClipping(
+			verts[1].x, verts[1].y, verts[1].z,
+			verts[5].x, verts[5].y, verts[5].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+		CLines::RenderLineWithClipping(
+			verts[2].x, verts[2].y, verts[2].z,
+			verts[6].x, verts[6].y, verts[6].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+		CLines::RenderLineWithClipping(
+			verts[3].x, verts[3].y, verts[3].z,
+			verts[7].x, verts[7].y, verts[7].z,
+			0xFFFFFFFF, 0xFFFFFFFF);
+	}
+
+	for(i = 0; i < colModel.numTriangles; i++){
+		colModel.GetTrianglePoint(verts[0], colModel.triangles[i].a);
+		colModel.GetTrianglePoint(verts[1], colModel.triangles[i].b);
+		colModel.GetTrianglePoint(verts[2], colModel.triangles[i].c);
+		verts[0] = mat * verts[0];
+		verts[1] = mat * verts[1];
+		verts[2] = mat * verts[2];
+		CLines::RenderLineWithClipping(
+			verts[0].x, verts[0].y, verts[0].z,
+			verts[1].x, verts[1].y, verts[1].z,
+			0x00FF00FF, 0x00FF00FF);
+		CLines::RenderLineWithClipping(
+			verts[0].x, verts[0].y, verts[0].z,
+			verts[2].x, verts[2].y, verts[2].z,
+			0x00FF00FF, 0x00FF00FF);
+		CLines::RenderLineWithClipping(
+			verts[1].x, verts[1].y, verts[1].z,
+			verts[2].x, verts[2].y, verts[2].z,
+			0x00FF00FF, 0x00FF00FF);
+	}
+
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
 }
 
 void
@@ -1407,7 +1625,6 @@ CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel,
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
-extern int gDbgSurf;
 
 	for(i = 0; i < colModel.numTriangles; i++){
 		colModel.GetTrianglePoint(verts[0], colModel.triangles[i].a);
@@ -1417,7 +1634,7 @@ extern int gDbgSurf;
 		verts[1] = mat * verts[1];
 		verts[2] = mat * verts[2];
 
-		// TODO: surface
+		// game doesn't do this
 		r = 255;
 		g = 128;
 		b = 0;
@@ -1457,10 +1674,15 @@ extern int gDbgSurf;
 			b *= f;
 		}
 
-		// TODO: make some surface types flicker?
-//if(s != gDbgSurf) continue;
+		if(s == SURFACE_SCAFFOLD || s == SURFACE_METAL_FENCE ||
+		   s == SURFACE_BOLLARD || s == SURFACE_METAL_POLE)
+			if(CTimer::GetFrameCounter() & 1){
+				r = 0;
+				g = 0;
+				b = 0;
+			}
 
-		if(s > SURFACE_32){
+		if(s > SURFACE_GATE){
 			r = CGeneral::GetRandomNumber();
 			g = CGeneral::GetRandomNumber();
 			b = CGeneral::GetRandomNumber();
@@ -1533,8 +1755,13 @@ extern int gDbgSurf;
 			b *= f;
 		}
 
-		// TODO: make some surface types flicker?
-//if(s != gDbgSurf) continue;
+		if(s == SURFACE_SCAFFOLD || s == SURFACE_METAL_FENCE ||
+		   s == SURFACE_BOLLARD || s == SURFACE_METAL_POLE)
+			if(CTimer::GetFrameCounter() & 1){
+				r = 0;
+				g = 0;
+				b = 0;
+			}
 
 		RenderBuffer::StartStoring(36, 8, &iptr, &vptr);
 		RwIm3DVertexSetRGBA(&vptr[0], r, g, b, 255);

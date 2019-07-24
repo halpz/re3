@@ -4,6 +4,11 @@
 
 // TODO: move some of this into Vehicle.h
 
+enum eEngineStatus
+{
+	ENGINE_STATUS_ON_FIRE = 225
+};
+
 enum eDoorStatus
 {
 	DOOR_STATUS_OK,
@@ -23,7 +28,8 @@ enum ePanelStatus
 enum eWheelStatus
 {
 	WHEEL_STATUS_OK,
-	WHEEL_STATUS_BURST
+	WHEEL_STATUS_BURST,
+	WHEEL_STATUS_MISSING
 };
 
 enum tComponent
@@ -65,13 +71,15 @@ class CDamageManager
 {
 public:
 
-	float field_0;
+	float m_fWheelDamageEffect;
 	uint8 m_engineStatus;
 	uint8 m_wheelStatus[4];
 	uint8 m_doorStatus[6];
 	uint32 m_lightStatus;
 	uint32 m_panelStatus;
 	uint32 field_24;
+
+	CDamageManager(void);
 
 	void ResetDamageStatus(void);
 	void FuckCarCompletely(void);

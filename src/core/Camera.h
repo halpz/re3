@@ -441,6 +441,7 @@ int     m_iModeObbeCamIsInForCar;
 
 	static bool &m_bUseMouse3rdPerson;
 
+	bool Get_Just_Switched_Status() { return m_bJust_Switched; }
 	inline const CMatrix GetCameraMatrix(void) { return m_cameraMatrix; }
 	CVector &GetGameCamPosition(void) { return m_vecGameCamPos; }
 	bool IsPointVisible(const CVector &center, const CMatrix *mat);
@@ -448,6 +449,7 @@ int     m_iModeObbeCamIsInForCar;
 	bool IsSphereVisible(const CVector &center, float radius);
 	bool IsBoxVisible(RwV3d *box, const CMatrix *mat);
 	int GetLookDirection(void);
+	bool GetLookingForwardFirstPerson(void);
 
 	void Fade(float timeout, int16 direction);
 	int GetScreenFadeStatus(void);
@@ -466,7 +468,6 @@ int     m_iModeObbeCamIsInForCar;
 	void DrawBordersForWideScreen(void);
 	void Restore(void);
 	void SetWidescreenOff(void);
-	void CamShake(float);
 
 	void dtor(void) { this->CCamera::~CCamera(); }
 };
@@ -479,3 +480,5 @@ static_assert(offsetof(CCamera, m_BlurBlue) == 0x9C, "CCamera: error");
 static_assert(offsetof(CCamera, Cams) == 0x1A4, "CCamera: error");
 static_assert(sizeof(CCamera) == 0xE9D8, "CCamera: wrong size");
 extern CCamera &TheCamera;
+
+void CamShakeNoPos(CCamera*, float);

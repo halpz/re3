@@ -188,3 +188,17 @@ cMusicManager::Terminate()
 {
 	EAXJMP(0x57D140);
 }
+
+WRAPPER
+void
+cMusicManager::ChangeMusicMode(int32 mode)
+{
+	EAXJMP(0x57D310);
+}
+
+WRAPPER
+void
+cMusicManager::StopFrontEndTrack()
+{
+	EAXJMP(0x57E3D0);
+}

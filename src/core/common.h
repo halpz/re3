@@ -97,11 +97,11 @@ extern void **rwengine;
 #define SCREEN_SCALE_AR(a) (a)
 #endif
 
-#include "math/maths.h"
-#include "math/Vector.h"
-#include "math/Vector2D.h"
-#include "math/Matrix.h"
-#include "math/Rect.h"
+#include "maths.h"
+#include "Vector.h"
+#include "Vector2D.h"
+#include "Matrix.h"
+#include "Rect.h"
 
 class CRGBA
 {
@@ -139,7 +139,8 @@ inline float sq(float x) { return x*x; }
 #define SQR(x) ((x) * (x))
 
 #define PI M_PI
-#define TWOPI PI*2
+#define TWOPI (PI*2)
+#define HALFPI (PI/2)
 #define DEGTORAD(x) ((x) * PI / 180.0f)
 #define RADTODEG(x) ((x) * 180.0f / PI)
 
@@ -178,6 +179,7 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 
 #define max(a, b)  (((a) > (b)) ? (a) : (b)) 
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
+#define ABS(a)  (((a) < 0) ? (-a) : (a))
 
 
 #define STRINGIFY(x)                    #x

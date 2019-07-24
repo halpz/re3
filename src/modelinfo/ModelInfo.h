@@ -36,5 +36,6 @@ public:
 	}
 
 	static bool IsBoatModel(int32 id);
+	static bool IsBikeModel(int32 id);
 	static void RemoveColModelsFromOtherLevels(eLevelName level);
 };

@@ -13,11 +13,11 @@
 #include "Glass.h"
 #include "Clock.h"
 #include "Weather.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "Bridge.h"
 #include "TrafficLights.h"
 #include "Coronas.h"
-#include "Pointlights.h"
+#include "PointLights.h"
 #include "Shadows.h"
 #include "Pickups.h"
 #include "SpecialFX.h"
@@ -42,7 +42,7 @@ CEntity::CEntity(void)
 	bUseCollisionRecords = false;
 
 	bWasPostponed = false;
-	m_flagB2 = false;
+	bExplosionProof = false;
 	bIsVisible = true;
 	bHasCollided = false;
 	bRenderScorched = false;
@@ -535,7 +535,7 @@ CEntity::ResolveReferences(void)
 		for(ref = m_pFirstReference; ref->next; ref = ref->next)
 			;
 		ref->next = CReferences::pEmptyList;
-		CReferences::pEmptyList = ref;
+		CReferences::pEmptyList = m_pFirstReference;
 		m_pFirstReference = nil;
 	}
 }

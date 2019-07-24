@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Physical.h"
-#include "AnimBlendAssociation.h"
+
+class CPed;
+class CAnimBlendAssociation;
 
 enum {
 	PHONE_STATE_FREE,
@@ -19,7 +21,7 @@ enum {
 struct CPhone
 {
 	CVector m_vecPos;
-	uint16 *m_apMessages[6];
+	wchar *m_apMessages[6];
 	uint32 m_lastTimeRepeatedMsgShown;
 	CEntity *m_pEntity; // it's building pool index in save files
 	int32 m_nState;
@@ -29,10 +31,13 @@ struct CPhone
 static_assert(sizeof(CPhone) == 0x34, "CPhone: error");
 
 class CPhoneInfo {
-	static bool &isPhonePickedUp;
-	static bool &isPhoneBeingPickedUp;
-	static CPhone *&pickedUpPhone;
 public:
+	static bool &isPhonePickedUp;
+	static uint32 &phoneMessagesTimer;
+	static CPhone *&pickedUpPhone;
+	static bool &isPhoneBeingPickedUp;
+	static CPed *&pedWhoPickingUpPhone;
+
 	int32 m_nMax;
 	int32 m_nNum;
 	CPhone m_aPhones[50];
@@ -45,8 +50,12 @@ public:
 	bool HasMessageBeenDisplayed(int);
 	bool IsMessageBeingDisplayed(int);
 	void Load(CPhoneInfo *source, uint8 buffer);
-	void SetPhoneMessage_JustOnce(int phoneId, uint16 *msg1, uint16 *msg2, uint16 *msg3, uint16 *msg4, uint16 *msg5, uint16 *msg6);
-	void SetPhoneMessage_Repeatedly(int phoneId, uint16 *msg1, uint16 *msg2, uint16 *msg3, uint16 *msg4, uint16 *msg5, uint16 *msg6);
+	void SetPhoneMessage_JustOnce(int phoneId, wchar *msg1, wchar *msg2, wchar *msg3, wchar *msg4, wchar *msg5, wchar *msg6);
+	void SetPhoneMessage_Repeatedly(int phoneId, wchar *msg1, wchar *msg2, wchar *msg3, wchar *msg4, wchar *msg5, wchar *msg6);
+	int GrabPhone(float, float);
+	void Initialise(void);
+	void Save(CPhoneInfo*, uint32*);
+	void Shutdown(void);
 };
 
 extern CPhoneInfo &gPhoneInfo;

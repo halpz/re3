@@ -295,6 +295,8 @@ void
 RenderDebugShit(void)
 {
 	// CTheScripts::RenderTheScriptDebugLines()
+	if(gbShowCollisionLines)
+		CRenderer::RenderCollisionLines();
 }
 
 void

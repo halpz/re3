@@ -2,9 +2,12 @@
 
 enum eAspectRatio 
 {
-	AR_AUTO,
+	// Make sure these work the same as FrontEndMenuManager.m_PrefsUseWideScreen
+	// without widescreen support
 	AR_4_3,
 	AR_16_9,
+
+	AR_AUTO,
 };
 
 class CDraw

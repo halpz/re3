@@ -155,7 +155,7 @@ void CPad::Clear(bool bResetPlayerControls)
 	ShakeDur = 0;
 	
 	if ( bResetPlayerControls )
-		DisablePlayerControls = false;
+		DisablePlayerControls = PLAYERCONTROL_ENABLED;
 	
 	bApplyBrakes = false;
 	
@@ -659,7 +659,7 @@ CPad *CPad::GetPad(int32 pad)
 
 int16 CPad::GetSteeringLeftRight(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return 0;
 	
 	switch ( Mode )
@@ -692,7 +692,7 @@ int16 CPad::GetSteeringLeftRight(void)
 
 int16 CPad::GetSteeringUpDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return 0;
 	
 	switch ( Mode )
@@ -725,7 +725,7 @@ int16 CPad::GetSteeringUpDown(void)
 
 int16 CPad::GetCarGunUpDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return 0;
 	
 	switch ( Mode )
@@ -752,7 +752,7 @@ int16 CPad::GetCarGunUpDown(void)
 
 int16 CPad::GetCarGunLeftRight(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return 0;
 	
 	switch ( Mode )
@@ -779,7 +779,7 @@ int16 CPad::GetCarGunLeftRight(void)
 
 int16 CPad::GetPedWalkLeftRight(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return 0;
 	
 	switch ( Mode )
@@ -813,7 +813,7 @@ int16 CPad::GetPedWalkLeftRight(void)
 
 int16 CPad::GetPedWalkUpDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return 0;
 	
 	switch ( Mode )
@@ -876,7 +876,7 @@ int16 CPad::GetAnalogueUpDown(void)
 
 bool CPad::GetLookLeft(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	return !!(NewState.LeftShoulder2 && !NewState.RightShoulder2);
@@ -884,7 +884,7 @@ bool CPad::GetLookLeft(void)
 
 bool CPad::GetLookRight(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	return !!(NewState.RightShoulder2 && !NewState.LeftShoulder2);
@@ -893,7 +893,7 @@ bool CPad::GetLookRight(void)
 
 bool CPad::GetLookBehindForCar(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	return !!(NewState.RightShoulder2 && NewState.LeftShoulder2);
@@ -901,7 +901,7 @@ bool CPad::GetLookBehindForCar(void)
 
 bool CPad::GetLookBehindForPed(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 
 	return !!NewState.RightShock;
@@ -909,7 +909,7 @@ bool CPad::GetLookBehindForPed(void)
 
 bool CPad::GetHorn(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -948,7 +948,7 @@ bool CPad::GetHorn(void)
 
 bool CPad::HornJustDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -988,7 +988,7 @@ bool CPad::HornJustDown(void)
 
 bool CPad::GetCarGunFired(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1015,7 +1015,7 @@ bool CPad::GetCarGunFired(void)
 
 bool CPad::CarGunJustDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1042,7 +1042,7 @@ bool CPad::CarGunJustDown(void)
 
 int16 CPad::GetHandBrake(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return 0;
 	
 	switch ( Mode )
@@ -1075,7 +1075,7 @@ int16 CPad::GetHandBrake(void)
 
 int16 CPad::GetBrake(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return 0;
 	
 	switch ( Mode )
@@ -1113,7 +1113,7 @@ int16 CPad::GetBrake(void)
 
 bool CPad::GetExitVehicle(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1140,7 +1140,7 @@ bool CPad::GetExitVehicle(void)
 
 bool CPad::ExitVehicleJustDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1167,7 +1167,7 @@ bool CPad::ExitVehicleJustDown(void)
 
 int32 CPad::GetWeapon(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1200,7 +1200,7 @@ int32 CPad::GetWeapon(void)
 
 bool CPad::WeaponJustDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1233,7 +1233,7 @@ bool CPad::WeaponJustDown(void)
 
 int16 CPad::GetAccelerate(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return 0;
 	
 	switch ( Mode )
@@ -1319,7 +1319,7 @@ bool CPad::CycleCameraModeDownJustDown(void)
 
 bool CPad::ChangeStationJustDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1359,7 +1359,7 @@ bool CPad::ChangeStationJustDown(void)
 
 bool CPad::CycleWeaponLeftJustDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	return !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2);
@@ -1367,7 +1367,7 @@ bool CPad::CycleWeaponLeftJustDown(void)
 
 bool CPad::CycleWeaponRightJustDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	return !!(NewState.RightShoulder2 && !OldState.RightShoulder2);
@@ -1375,7 +1375,7 @@ bool CPad::CycleWeaponRightJustDown(void)
 
 bool CPad::GetTarget(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1402,7 +1402,7 @@ bool CPad::GetTarget(void)
 
 bool CPad::TargetJustDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1429,7 +1429,7 @@ bool CPad::TargetJustDown(void)
 
 bool CPad::JumpJustDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	return !!(NewState.Square && !OldState.Square);
@@ -1437,7 +1437,7 @@ bool CPad::JumpJustDown(void)
 
 bool CPad::GetSprint(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1464,7 +1464,7 @@ bool CPad::GetSprint(void)
 
 bool CPad::ShiftTargetLeftJustDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	return !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2);
@@ -1472,7 +1472,7 @@ bool CPad::ShiftTargetLeftJustDown(void)
 
 bool CPad::ShiftTargetRightJustDown(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	return !!(NewState.RightShoulder2 && !OldState.RightShoulder2);
@@ -1592,7 +1592,7 @@ bool CPad::GetAnaloguePadRightJustUp(void)
 
 bool CPad::ForceCameraBehindPlayer(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1625,7 +1625,7 @@ bool CPad::ForceCameraBehindPlayer(void)
 
 bool CPad::SniperZoomIn(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1652,7 +1652,7 @@ bool CPad::SniperZoomIn(void)
 
 bool CPad::SniperZoomOut(void)
 {
-	if ( DisablePlayerControls )
+	if ( ArePlayerControlsDisabled() )
 		return false;
 	
 	switch ( Mode )
@@ -1824,7 +1824,7 @@ char *CPad::EditString(char *pStr, int32 nSize)
 	}
 	
 	// numbers 
-	for ( int32 i = 0; i < ('0' - '9' + 1); i++ )
+	for ( int32 i = 0; i < ('9' - '0' + 1); i++ )
 	{
 		if ( GetPad(0)->GetCharJustDown(i + '0') && pos < nSize - 1 )
 		{

@@ -26,6 +26,12 @@ struct CDoor
 	CVector m_vecSpeed;
 
 	CDoor(void);
+	void Init(float minAngle, float maxAngle, int8 dir, int8 axis) {
+		m_fMinAngle = minAngle;
+		m_fMaxAngle = maxAngle;
+		m_nDirn = dir;
+		m_nAxis = axis;
+	}
 	void Open(float ratio);
 	void Process(CVehicle *veh);
 	float RetAngleWhenClosed(void);

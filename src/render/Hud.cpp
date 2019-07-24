@@ -325,7 +325,7 @@ void CHud::Draw()
 			else {
 				Clip = AmmoInClip;
 
-				if (TotalAmmo - AmmoInClip > 9999)
+				if ((TotalAmmo - AmmoInClip) > 9999)
 					Ammo = 9999;
 				else
 					Ammo = TotalAmmo - AmmoInClip;

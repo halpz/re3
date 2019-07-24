@@ -51,6 +51,17 @@ enum Key
 };
 */
 
+enum {
+	PLAYERCONTROL_ENABLED = 0,
+	PLAYERCONTROL_DISABLED_1 = 1,
+	PLAYERCONTROL_DISABLED_2 = 2,
+	PLAYERCONTROL_DISABLED_4 = 4,
+	PLAYERCONTROL_DISABLED_8 = 8,
+	PLAYERCONTROL_DISABLED_10 = 16,
+	PLAYERCONTROL_DISABLED_20 = 32,
+	PLAYERCONTROL_DISABLED_40 = 64, // used on phone calls
+	PLAYERCONTROL_DISABLED_80 = 128,
+};
 
 class CControllerState
 {
@@ -186,9 +197,9 @@ public:
 	int16 Mode;
 	int16 ShakeDur;
 	uint8 ShakeFreq;
-	int8 bHornHistory[5];
+	bool bHornHistory[5];
 	uint8 iCurrHornHistory;
-	bool DisablePlayerControls;
+	uint8 DisablePlayerControls;
 	int8 bApplyBrakes;
 	char _unk[12]; //int32 unk[3];
 	char _pad0[3];
@@ -289,6 +300,10 @@ public:
 
 	// mouse
 	bool GetLeftMouseJustDown() { return !!(NewMouseControllerState.LMB && !OldMouseControllerState.LMB); }
+	bool GetRightMouseJustDown() { return !!(NewMouseControllerState.RMB && !OldMouseControllerState.RMB); }
+	bool GetMiddleMouseJustDown() { return !!(NewMouseControllerState.MMB && !OldMouseControllerState.MMB); }
+	float GetMouseX() { return NewMouseControllerState.x; }
+	float GetMouseY() { return NewMouseControllerState.y; }
 
 	// keyboard
 	
@@ -354,6 +369,13 @@ public:
 	bool GetRightShoulder1JustDown() { return !!(NewState.RightShoulder1 && !OldState.RightShoulder1); }
 	bool GetRightShoulder2JustDown() { return !!(NewState.RightShoulder2 && !OldState.RightShoulder2); }
 	
+/*
+	int32 GetLeftShoulder1(void)  { return NewState.LeftShoulder1; }
+	int32 GetLeftShoulder2(void)  { return NewState.LeftShoulder2; }
+	int32 GetRightShoulder1(void) { return NewState.RightShoulder1; }
+	int32 GetRightShoulder2(void) { return NewState.RightShoulder2; }
+*/
+  
 	bool GetTriangle()       { return !!NewState.Triangle; }
 	bool GetCircle()         { return !!NewState.Circle; }
 	bool GetCross()          { return !!NewState.Cross; }
@@ -366,10 +388,11 @@ public:
 	bool GetLeftShoulder2(void)  { return !!NewState.LeftShoulder2; }
 	bool GetRightShoulder1(void) { return !!NewState.RightShoulder1; }
 	bool GetRightShoulder2(void) { return !!NewState.RightShoulder2; }
+
+  bool ArePlayerControlsDisabled(void) { return DisablePlayerControls != PLAYERCONTROL_ENABLED; }
 };
 VALIDATE_SIZE(CPad, 0xFC);
+extern CPad *Pads;	//[2]
 
 #define IsButtonJustDown(pad, btn) \
 	(!(pad)->OldState.btn && (pad)->NewState.btn)
-	
-void LittleTest(void);

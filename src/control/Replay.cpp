@@ -11,7 +11,7 @@
 #include "FileMgr.h"
 #include "Heli.h"
 #include "main.h"
-#include "math/Matrix.h"
+#include "Matrix.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 #include "Object.h"
@@ -25,7 +25,7 @@
 #include "RpAnimBlend.h"
 #include "RwHelper.h"
 #include "CutsceneMgr.h"
-#include "render/Skidmarks.h"
+#include "Skidmarks.h"
 #include "Streaming.h"
 #include "Timer.h"
 #include "Train.h"
@@ -625,9 +625,9 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 	vp->health = vehicle->m_fHealth / 4.0f; /* Not anticipated that health can be > 1000. */
 	vp->acceleration = vehicle->m_fGasPedal * 100.0f;
 	vp->panels = vehicle->IsCar() ? ((CAutomobile*)vehicle)->Damage.m_panelStatus : 0;
-	vp->velocityX = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetSpeed().x)); /* 8000!? */
-	vp->velocityY = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetSpeed().y));
-	vp->velocityZ = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetSpeed().z));
+	vp->velocityX = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetMoveSpeed().x)); /* 8000!? */
+	vp->velocityY = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetMoveSpeed().y));
+	vp->velocityZ = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetMoveSpeed().z));
 	vp->mi = vehicle->GetModelIndex();
 	vp->primary_color = vehicle->m_currentColour1;
 	vp->secondary_color = vehicle->m_currentColour2;
@@ -718,7 +718,7 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 		}
 		vehicle->bEngineOn = true;
 		if (vehicle->IsCar())
-			((CAutomobile*)vehicle)->m_nWheelsOnGround = 4;
+			((CAutomobile*)vehicle)->m_nDriveWheelsOnGround = 4;
 		CWorld::Remove(vehicle);
 		CWorld::Add(vehicle);
 		if (vehicle->IsBoat())
@@ -850,10 +850,10 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 			TheCamera.GetMatrix().GetPosition() *= split;
 			TheCamera.GetMatrix() += CMatrix(interpolation) * pg->camera_pos;
 			RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-			pm->pos = *(RwV3d*)TheCamera.GetMatrix().GetPosition();
-			pm->at = *(RwV3d*)TheCamera.GetMatrix().GetForward();
-			pm->up = *(RwV3d*)TheCamera.GetMatrix().GetUp();
-			pm->right = *(RwV3d*)TheCamera.GetMatrix().GetRight();
+			pm->pos = *(RwV3d*)TheCamera.GetPosition();
+			pm->at = *(RwV3d*)TheCamera.GetForward();
+			pm->up = *(RwV3d*)TheCamera.GetUp();
+			pm->right = *(RwV3d*)TheCamera.GetRight();
 			CameraFocusX = split * CameraFocusX + interpolation * pg->player_pos.x;
 			CameraFocusY = split * CameraFocusY + interpolation * pg->player_pos.y;
 			CameraFocusZ = split * CameraFocusZ + interpolation * pg->player_pos.z;
@@ -979,15 +979,15 @@ void CReplay::ProcessReplayCamera(void)
 	switch (CameraMode) {
 	case REPLAYCAMMODE_TOPDOWN:
 	{
-		TheCamera.GetMatrix().GetPosition() = CVector(CameraFocusX, CameraFocusY, CameraFocusZ + 15.0f);
-		TheCamera.GetMatrix().GetForward() = CVector(0.0f, 0.0f, -1.0f);
-		TheCamera.GetMatrix().GetUp() = CVector(0.0f, 1.0f, 0.0f);
-		TheCamera.GetMatrix().GetRight() = CVector(1.0f, 0.0f, 0.0f);
+		TheCamera.GetPosition() = CVector(CameraFocusX, CameraFocusY, CameraFocusZ + 15.0f);
+		TheCamera.GetForward() = CVector(0.0f, 0.0f, -1.0f);
+		TheCamera.GetUp() = CVector(0.0f, 1.0f, 0.0f);
+		TheCamera.GetRight() = CVector(1.0f, 0.0f, 0.0f);
 		RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-		pm->pos = *(RwV3d*)&TheCamera.GetMatrix().GetPosition();
-		pm->at = *(RwV3d*)&TheCamera.GetMatrix().GetForward();
-		pm->up = *(RwV3d*)&TheCamera.GetMatrix().GetUp();
-		pm->right = *(RwV3d*)&TheCamera.GetMatrix().GetRight();
+		pm->pos = *(RwV3d*)&TheCamera.GetPosition();
+		pm->at = *(RwV3d*)&TheCamera.GetForward();
+		pm->up = *(RwV3d*)&TheCamera.GetUp();
+		pm->right = *(RwV3d*)&TheCamera.GetRight();
 		break;
 	}
 	case REPLAYCAMMODE_FIXED:
@@ -1113,7 +1113,7 @@ void CReplay::StoreStuffInMem(void)
 	TimeStep = CTimer::GetTimeStep();
 	TimeScale = CTimer::GetTimeScale();
 	int size = CPools::GetPedPool()->GetSize();
-	pPedAnims = (CStoredDetailedAnimationState*)malloc(size * sizeof(CStoredDetailedAnimationState));
+	pPedAnims = new CStoredDetailedAnimationState[size];
 	for (int i = 0; i < size; i++) {
 		CPed* ped = CPools::GetPedPool()->GetSlot(i);
 		if (ped)
@@ -1279,7 +1279,7 @@ void CReplay::RestoreStuffFromMem(void)
 			continue;
 		RetrieveDetailedPedAnimation(ped, &pPedAnims[i]);
 	}
-	free(pPedAnims);
+	delete[] pPedAnims;
 	pPedAnims = nil;
 	DMAudio.ChangeMusicMode(0);
 	DMAudio.SetRadioInCar(OldRadioStation);
@@ -1525,15 +1525,15 @@ void CReplay::ProcessLookAroundCam(void)
 	right.Normalise();
 	CVector up = CrossProduct(forward, right);
 	up.Normalise();
-	TheCamera.GetMatrix().GetForward() = forward;
-	TheCamera.GetMatrix().GetUp() = up;
-	TheCamera.GetMatrix().GetRight() = right;
-	TheCamera.GetMatrix().GetPosition() = camera_pt;
+	TheCamera.GetForward() = forward;
+	TheCamera.GetUp() = up;
+	TheCamera.GetRight() = right;
+	TheCamera.GetPosition() = camera_pt;
 	RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-	pm->pos = *(RwV3d*)&TheCamera.GetMatrix().GetPosition();
-	pm->at = *(RwV3d*)&TheCamera.GetMatrix().GetForward();
-	pm->up = *(RwV3d*)&TheCamera.GetMatrix().GetUp();
-	pm->right = *(RwV3d*)&TheCamera.GetMatrix().GetRight();
+	pm->pos = *(RwV3d*)&TheCamera.GetPosition();
+	pm->at = *(RwV3d*)&TheCamera.GetForward();
+	pm->up = *(RwV3d*)&TheCamera.GetUp();
+	pm->right = *(RwV3d*)&TheCamera.GetRight();
 	TheCamera.CalculateDerivedValues();
 	RwMatrixUpdate(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
 	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));

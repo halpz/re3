@@ -13,6 +13,17 @@
 
 struct CPathNode;
 
+enum ePedPieceTypes
+{
+	PEDPIECE_TORSO,
+	PEDPIECE_MID,
+	PEDPIECE_LEFTARM,
+	PEDPIECE_RIGHTARM,
+	PEDPIECE_LEFTLEG,
+	PEDPIECE_RIGHTLEG,
+	PEDPIECE_HEAD,
+};
+
 enum eWaitState {
 	WAITSTATE_FALSE,
 	WAITSTATE_TRAFFIC_LIGHTS,
@@ -196,28 +207,28 @@ public:
 
 	uint8 m_ped_flagC1 : 1;
 	uint8 bRespondsToThreats : 1;
-	uint8 m_ped_flagC4 : 1;		// false when in bus, bRenderPedInCar?
-	uint8 m_ped_flagC8 : 1;
-	uint8 m_ped_flagC10 : 1;
-	uint8 m_ped_flagC20 : 1;	// just left some body part?
+	uint8 bRenderPedInCar : 1;
+	uint8 bChangedSeat : 1;
+	uint8 m_ped_flagC10 : 1;	// related with phone
+	uint8 bBodyPartJustCameOff : 1;
 	uint8 m_ped_flagC40 : 1;
 	uint8 m_ped_flagC80 : 1;
 
 	uint8 m_ped_flagD1 : 1;
-	uint8 m_ped_flagD2 : 1;
+	uint8 m_ped_flagD2 : 1; // seen an event
 	uint8 m_ped_flagD4 : 1;
 	uint8 m_ped_flagD8 : 1;
-	uint8 m_ped_flagD10 : 1;
+	uint8 bIsPedDieAnimPlaying : 1;
 	uint8 m_ped_flagD20 : 1;
 	uint8 m_ped_flagD40 : 1;	// reset when objective changes
-	uint8 m_ped_flagD80 : 1;
+	uint8 m_bScriptObjectiveCompleted : 1;
 
 	uint8 m_ped_flagE1 : 1;
 	uint8 m_ped_flagE2 : 1;
 	uint8 bNotAllowedToDuck : 1;
 	uint8 bCrouchWhenShooting : 1;
 	uint8 bIsDucking : 1;	// set if you don't want ped to attack
-	uint8 m_ped_flagE20 : 1;
+	uint8 m_ped_flagE20 : 1;	// getup complete?
 	uint8 bDoBloodyFootprints : 1;
 	uint8 m_ped_flagE80 : 1;
 
@@ -225,7 +236,7 @@ public:
 	uint8 m_ped_flagF2 : 1;
 	uint8 m_ped_flagF4 : 1;
 	uint8 m_ped_flagF8 : 1;
-	uint8 m_ped_flagF10 : 1;
+	uint8 m_ped_flagF10 : 1;	// set before "quickjack"
 	uint8 m_ped_flagF20 : 1;
 	uint8 m_ped_flagF40 : 1;
 	uint8 m_ped_flagF80 : 1;
@@ -249,7 +260,7 @@ public:
 	uint8 m_ped_flagH80 : 1;
 
 	uint8 m_ped_flagI1 : 1;
-	uint8 m_ped_flagI2 : 1;
+	uint8 m_ped_flagI2 : 1; // if set, limbs won't came off
 	uint8 m_ped_flagI4 : 1;
 	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 m_ped_flagI10 : 1;
@@ -325,10 +336,10 @@ public:
 	bool bInVehicle;
 	uint8 pad_315[3];
 	float field_318;
-	uint8 field_31C;
+	uint8 field_31C; // may be cutscene or phone cutscene status
 	uint8 field_31D;
 	int16 m_phoneId;
-	uint32 m_lookingForPhone;
+	uint32 m_lookingForPhone; // unused
 	uint32 m_phoneTalkTimer;
 	void *m_lastAccident;
 	int32 m_nPedType;
@@ -416,8 +427,8 @@ public:
 	void SetDie(AnimationId anim, float arg1, float arg2);
 	void SetDead(void);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
-	void RemoveBodyPart(PedNode nodeId, int8 unknown);
-	void SpawnFlyingComponent(int, int8 unknown);
+	void RemoveBodyPart(PedNode nodeId, int8 direction);
+	void SpawnFlyingComponent(int, int8);
 	bool OurPedCanSeeThisOne(CEntity *target);
 	void Avoid(void);
 	void Attack(void);
@@ -459,7 +470,39 @@ public:
 	void Chat(void);
 	void MakeChangesForNewWeapon(int8);
 	void CheckAroundForPossibleCollisions(void);
+	void SetSeek(CVector, float);
+	bool MakePhonecall(void);
+	bool FacePhone(void);
+	CPed *CheckForDeadPeds(void);
+	bool CheckForExplosions(CVector2D &area);
+	CPed *CheckForGunShots(void);
+	uint8 CheckForPointBlankPeds(CPed*);
+	bool CheckIfInTheAir(void);
+	void ClearAll(void);
+	void SetPointGunAt(CEntity*);
 	bool Seek(void);
+	bool SetWanderPath(int8);
+	void SetFollowPath(CVector);
+	void ClearAttackByRemovingAnim(void);
+	void SetStoredState(void);
+	void StopNonPartialAnims(void);
+	bool InflictDamage(CEntity*, eWeaponType, float, ePedPieceTypes, uint8);
+	void ClearFlee(void);
+	void ClearFall(void);
+	void SetGetUp(void);
+	void ClearInvestigateEvent(void);
+	void ClearLeader(void);
+	void ClearLook(void);
+	void ClearObjective(void);
+	void ClearPause(void);
+	void ClearSeek(void);
+	void ClearWeapons(void);
+	void RestoreGunPosition(void);
+	void RestoreHeadingRate(void);
+	void SetAimFlag(CEntity* to);
+	void SetAimFlag(float angle);
+	void SetAmmo(eWeaponType weaponType, uint32 ammo);
+	void SetEvasiveStep(CEntity*, uint8);
 
 	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
@@ -533,6 +576,7 @@ public:
 	static bool &bNastyLimbsCheat;
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;
+	static CColPoint &ms_tempColPoint;
 };
 
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);

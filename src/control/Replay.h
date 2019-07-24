@@ -176,7 +176,7 @@ class CReplay
 		int8 velocityZ;
 		union{
 			int8 car_gun;
-			uint8 wheel_state;
+			int8 wheel_state;
 		};
 		uint8 wheel_susp_dist[4];
 		uint8 wheel_rotation[4];

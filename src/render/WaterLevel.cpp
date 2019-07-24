@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main.h"
 #include "FileMgr.h"
 #include "TxdStore.h"
 #include "Timer.h"
@@ -172,9 +173,8 @@ CWaterLevel::CreateWavyAtomic()
 
 	{
 		wavyMorphTarget = RpGeometryGetMorphTarget(wavyGeometry, 0);
-		wavyVert = RpMorphTargetGetVertices(wavyMorphTarget);
-		
 		ASSERT(wavyMorphTarget != NULL);
+		wavyVert = RpMorphTargetGetVertices(wavyMorphTarget);	
 		ASSERT(wavyVert != NULL);
 		
 		for ( int32 i = 0; i < 9; i++ )
@@ -1148,10 +1148,10 @@ CWaterLevel::AllocateBoatWakeArray()
 	ASSERT(ms_pWavyAtomic != NULL );
 	
 	RpGeometry    *wavyGeometry    = RpAtomicGetGeometry(ms_pWavyAtomic);
+	ASSERT(wavyGeometry    != NULL );
 	RpMorphTarget *wavyMorphTarget = RpGeometryGetMorphTarget(wavyGeometry, 0);
 	RpMaterial    *wavyMaterial    = RpGeometryGetMaterial(wavyGeometry, 0);
 
-	ASSERT(wavyGeometry    != NULL );
 	ASSERT(wavyMorphTarget != NULL );
 	ASSERT(wavyMaterial    != NULL );
 
@@ -1240,7 +1240,7 @@ STARTPATCHES
 	InjectHook(0x554FE0, &CWaterLevel::Shutdown, PATCH_JUMP);
 	InjectHook(0x555010, &CWaterLevel::CreateWavyAtomic, PATCH_JUMP);
 	InjectHook(0x5552A0, &CWaterLevel::DestroyWavyAtomic, PATCH_JUMP);
-	InjectHook(0x5552C0, &CWaterLevel::GetWaterLevel, PATCH_JUMP);
+	InjectHook(0x5552C0, (bool (*)(float,float,float,float*,bool))&CWaterLevel::GetWaterLevel, PATCH_JUMP);
 	InjectHook(0x555440, &CWaterLevel::GetWaterLevelNoWaves, PATCH_JUMP);
 	InjectHook(0x5554E0, &CWaterLevel::RenderWater, PATCH_JUMP);
 	InjectHook(0x556C30, &CWaterLevel::RenderOneFlatSmallWaterPoly, PATCH_JUMP);

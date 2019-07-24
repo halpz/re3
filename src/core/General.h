@@ -36,6 +36,22 @@ public:
 		}
 	}
 
+	static float LimitAngle(float angle)
+	{
+		float result = angle;
+
+		while (result >= 180.0f) {
+			result -= 2 * 180.0f;
+		}
+
+		while (result < -180.0f) {
+			result += 2 * 180.0f;
+		}
+
+		return result;
+	}
+
+
 	static float LimitRadianAngle(float angle)
 	{
 		float result;

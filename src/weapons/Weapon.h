@@ -1,5 +1,4 @@
 #pragma once
-#include "Entity.h"
 
 enum eWeaponType
 {
@@ -46,6 +45,9 @@ enum eWeaponState
 	WEAPONSTATE_MELEE_MADECONTACT
 };
 
+class CEntity;
+class CAutomobile;
+
 class CWeapon
 {
 public:
@@ -61,9 +63,12 @@ public:
 	}
 
 	void Initialise(eWeaponType type, int ammo);
+	void Update(int32 audioEntity);
 	void Reload(void);
 	bool Fire(CEntity*, CVector*);
+	void FireFromCar(CAutomobile *car, bool left);
 	void AddGunshell(CEntity*, CVector const&, CVector2D const&, float);
 	bool IsTypeMelee(void);
+	bool IsType2Handed(void);
 };
 static_assert(sizeof(CWeapon) == 0x18, "CWeapon: error");

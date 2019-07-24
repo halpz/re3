@@ -13,14 +13,11 @@ enum eEntityType
 	ENTITY_TYPE_PED,
 	ENTITY_TYPE_OBJECT,
 	ENTITY_TYPE_DUMMY,
-	ENTITY_TYPE_6,
-	ENTITY_TYPE_7,
 };
 
 enum eEntityStatus
 {
-	// from SA MTA! let's hope they didn't change from III
-	STATUS_PLAYER = 0,
+	STATUS_PLAYER,
 	STATUS_PLAYER_PLAYBACKFROMBUFFER,
 	STATUS_SIMPLE,
 	STATUS_PHYSICS,
@@ -32,8 +29,6 @@ enum eEntityStatus
 	STATUS_PLANE,
 	STATUS_PLAYER_REMOTE,
 	STATUS_PLAYER_DISABLED,
-	//STATUS_TRAILER,
-	//STATUS_SIMPLE_TRAILER
 };
 
 class CEntity : public CPlaceable
@@ -55,7 +50,7 @@ public:
 
 	// flagsB
 	uint32 bWasPostponed : 1;
-	uint32 m_flagB2 : 1;	// explosion proof?
+	uint32 bExplosionProof : 1;
 	uint32 bIsVisible : 1;
 	uint32 bHasCollided : 1;	//
 	uint32 bRenderScorched : 1;
@@ -78,7 +73,7 @@ public:
 	uint32 bRemoveFromWorld : 1;
 	uint32 bHasHitWall : 1;
 	uint32 bImBeingRendered : 1;
-	uint32 m_flagD8 : 1;
+	uint32 m_flagD8 : 1;	// used by cBuoyancy::ProcessBuoyancy
 	uint32 bIsSubway : 1;	// set when subway, but maybe different meaning?
 	uint32 bDrawLast : 1;
 	uint32 m_flagD40 : 1;
@@ -121,6 +116,15 @@ public:
 	bool IsPed(void) { return m_type == ENTITY_TYPE_PED; }
 	bool IsObject(void) { return m_type == ENTITY_TYPE_OBJECT; }
 	bool IsDummy(void) { return m_type == ENTITY_TYPE_DUMMY; }
+
+	RpAtomic *GetAtomic(void) {
+		assert(RwObjectGetType(m_rwObject) == rpATOMIC);
+		return (RpAtomic*)m_rwObject;
+	}
+	RpClump *GetClump(void) {
+		assert(RwObjectGetType(m_rwObject) == rpCLUMP);
+		return (RpClump*)m_rwObject;
+	}
 
 	void GetBoundCentre(CVector &out);
 	CVector GetBoundCentre(void) { CVector v; GetBoundCentre(v); return v; }

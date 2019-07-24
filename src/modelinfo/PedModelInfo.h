@@ -3,8 +3,8 @@
 #include "ClumpModelInfo.h"
 
 enum PedNode {
-	PED_WAIST,
-	PED_TORSO,	// Smid on PS2/PC, Storso on mobile/xbox
+	PED_TORSO,
+	PED_MID,	// Smid on PS2/PC, Storso on mobile/xbox
 	PED_HEAD,
 	PED_UPPERARML,
 	PED_UPPERARMR,

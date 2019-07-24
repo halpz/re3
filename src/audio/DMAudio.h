@@ -96,8 +96,8 @@ enum eSound : int16
 	SOUND_RAMPAGE_FAILED = 91,
 	SOUND_RAMPAGE_KILL = 92,
 	SOUND_RAMPAGE_CAR_BLOWN = 93,
-	_SOUND_EVIDENCE_PICKUP = 94,
-	_SOUND_UNLOAD_GOLD = 95,
+	SOUND_EVIDENCE_PICKUP = 94,
+	SOUND_UNLOAD_GOLD = 95,
 	SOUND_PAGER = 96,
 	SOUND_PED_DEATH = 97,
 	SOUND_PED_DAMAGE = 98,
@@ -141,16 +141,16 @@ enum eSound : int16
 	SOUND_INJURED_PED_MALE_OUCH = 136,
 	SOUND_INJURED_PED_FEMALE = 137,
 	SOUND_8A = 138,
-	_SOUND_RACE_START_3 = 139,
-	_SOUND_RACE_START_2 = 140,
-	_SOUND_RACE_START_1 = 141,
-	_SOUND_RACE_START_GO = 142,
+	SOUND_RACE_START_3 = 139,
+	SOUND_RACE_START_2 = 140,
+	SOUND_RACE_START_1 = 141,
+	SOUND_RACE_START_GO = 142,
 	SOUND_SPLASH = 143,
 	SOUND_WATER_FALL = 144,
 	SOUND_SPLATTER = 145,
 	SOUND_CAR_PED_COLLISION = 146,
 	SOUND_CLOCK_TICK = 147,
-	_SOUND_PART_MISSION_COMPLETE = 148,
+	SOUND_PART_MISSION_COMPLETE = 148,
 	SOUND_FRONTEND_MENU_STARTING = 149,
 	SOUND_FRONTEND_MENU_COMPLETED = 150,
 	SOUND_FRONTEND_MENU_DENIED = 151,
@@ -173,6 +173,7 @@ enum eSound : int16
 };
 
 class CEntity;
+enum eCrimeType;
 
 class cDMAudio
 {
@@ -191,9 +192,9 @@ public:
 	void PlayFrontEndTrack(uint32, uint32);
 	void StopFrontEndTrack();
 	void PlayOneShot(int32 audioentity, uint16 sound/*eSound*/, float);
-	void SetMusicMasterVolume(int8);
-	void SetEffectsMasterVolume(int8);
-	int8 SetCurrent3DProvider(int8);
+	void SetMusicMasterVolume(uint8);
+	void SetEffectsMasterVolume(uint8);
+	uint8 SetCurrent3DProvider(uint8);
 	int32 SetSpeakerConfig(int32);
 	int32 GetRadioInCar(void);
 	void SetEffectsFadeVol(uint8);
@@ -204,5 +205,6 @@ public:
 	uint8 IsMP3RadioChannelAvailable();
 	void DestroyEntity(int32);
 	void ClearMissionAudio(void);
+	void ReportCrime(eCrimeType crime, const CVector &pos);
 };
 extern cDMAudio &DMAudio;
