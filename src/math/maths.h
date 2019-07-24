@@ -12,5 +12,6 @@ inline float Atan(float x) { return atanf(x); }
 inline float Atan2(float y, float x) { return atan2f(y, x); }
 inline float Abs(float x) { return fabs(x); }
 inline float Sqrt(float x) { return sqrtf(x); }
-inline float RecipSqrt(float x) { return 1.0f/Sqrt(x); }
+inline float RecipSqrt(float x, float y) { return x/Sqrt(y); }
+inline float RecipSqrt(float x) { return RecipSqrt(1.0f, x); }
 inline float Pow(float x, float y) { return powf(x, y); }

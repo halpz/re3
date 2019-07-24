@@ -37,8 +37,8 @@ bool CBoat::IsSectorAffectedByWake(CVector2D sector, float fSize, CBoat **apBoat
 		{
 			 float fDist = (WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[j]) * fShapeTime + float(j) * fShapeLength + fSize;
 			 
-			 if ( fabs(pBoat->m_avec2dWakePoints[j].x - sector.x) < fDist
-				&& fabs(pBoat->m_avec2dWakePoints[i].y - sector.y) < fDist )
+			 if ( Abs(pBoat->m_avec2dWakePoints[j].x - sector.x) < fDist
+				&& Abs(pBoat->m_avec2dWakePoints[i].y - sector.y) < fDist )
 			 {
 				 apBoats[numVerts] = pBoat;
 				 numVerts = 1; // += ?
@@ -56,13 +56,12 @@ float CBoat::IsVertexAffectedByWake(CVector vecVertex, CBoat *pBoat)
 	{
 		float fMaxDist = (WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[i]) * fShapeTime + float(i) * fShapeLength;
 		
-		float fX = pBoat->m_avec2dWakePoints[i].x - vecVertex.x;
-		float fY = pBoat->m_avec2dWakePoints[i].y - vecVertex.y;
+		CVector2D vecDist = pBoat->m_avec2dWakePoints[i] - CVector2D(vecVertex);
 		
-		float fDist = fY * fY + fX * fX;
+		float fDist = vecDist.MagnitudeSqr();
 		
 		if ( fDist < SQR(fMaxDist) )
-			return 1.0f - min(fRangeMult * sqrt(fDist / SQR(fMaxDist)) + (WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[i]) * fTimeMult, 1.0f);
+			return 1.0f - min(fRangeMult * Sqrt(fDist / SQR(fMaxDist)) + (WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[i]) * fTimeMult, 1.0f);
 	}
 
 	return 0.0f;
