@@ -323,7 +323,7 @@ _GetCamBounds(bool *bUseCamStartY, bool *bUseCamEndY, bool *bUseCamStartX, bool 
 	}
 }
 
-float
+inline float
 SectorRadius(float fSize)
 {
 	return Sqrt(Pow(fSize, 2) + Pow(fSize, 2));
@@ -424,7 +424,7 @@ CWaterLevel::RenderWater()
 				if ( fHugeSectorMaxRenderDistSqr > fHugeSectorDistToCamSqr )
 				{
 					if ( TheCamera.IsSphereVisible(CVector(vecHugeSectorCentre.x, vecHugeSectorCentre.y, 0.0f), SectorRadius(HUGE_SECTOR_SIZE),
-							&CMatrix(TheCamera.GetCameraMatrix())) )
+							&TheCamera.GetCameraMatrix()) )
 					{
 						if ( fHugeSectorDistToCamSqr >= SQR(500.0f) /*fHugeSectorNearDist*/ )
 						{
@@ -466,7 +466,7 @@ CWaterLevel::RenderWater()
 										if ( fLargeSectorDistToCamSqr < fHugeSectorMaxRenderDistSqr )
 										{
 											if ( TheCamera.IsSphereVisible(CVector(vecLargeSectorCentre.x, vecLargeSectorCentre.y, 0.0f), SectorRadius(LARGE_SECTOR_SIZE), //90.879997f,
-												&CMatrix(TheCamera.GetCameraMatrix())) )
+												&TheCamera.GetCameraMatrix()) )
 											{
 												// Render four small(32x32) sectors, or one large(64x64).
 
@@ -629,7 +629,7 @@ CWaterLevel::RenderWater()
 				if ( fCamDistToSector < fHugeSectorMaxRenderDistSqr )
 				{
 					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE),
-							&CMatrix(TheCamera.GetCameraMatrix())) )
+							&TheCamera.GetCameraMatrix()) )
 					{
 						RenderOneFlatExtraHugeWaterPoly(
 							vecExtraHugeSectorCentre.x - EXTRAHUGE_SECTOR_SIZE/2,
@@ -663,7 +663,7 @@ CWaterLevel::RenderWater()
 				if ( fCamDistToSector < fHugeSectorMaxRenderDistSqr )
 				{
 					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE),
-							&CMatrix(TheCamera.GetCameraMatrix())) )
+							&TheCamera.GetCameraMatrix()) )
 					{
 						RenderOneFlatExtraHugeWaterPoly(
 							vecExtraHugeSectorCentre.x - EXTRAHUGE_SECTOR_SIZE/2,
@@ -687,7 +687,7 @@ CWaterLevel::RenderWater()
 				if ( fCamDistToSector < fHugeSectorMaxRenderDistSqr )
 				{
 					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE),
-							&CMatrix(TheCamera.GetCameraMatrix())) )
+							&TheCamera.GetCameraMatrix()) )
 					{
 						RenderOneFlatExtraHugeWaterPoly(
 							vecExtraHugeSectorCentre.x - EXTRAHUGE_SECTOR_SIZE/2,

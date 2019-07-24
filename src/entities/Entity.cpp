@@ -405,7 +405,7 @@ CEntity::PreRender(void)
 		}else if(GetModelIndex() == MI_MISSILE){
 			CVector pos = GetPosition();
 			float flicker = (CGeneral::GetRandomNumber() & 0xF)/(float)0x10;
-			CShadows::StoreShadowToBeRendered(SHADOWTYPE_2,
+			CShadows::StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE,
 				gpShadowExplosionTex, &pos,
 				8.0f, 0.0f, 0.0f, -8.0f,
 				255, 200.0f*flicker, 160.0f*flicker, 120.0f*flicker,
@@ -758,7 +758,7 @@ CEntity::ProcessLightsForEntity(void)
 		// Light shadow
 		if(effect->light.shadowRange != 0.0f){
 			if(lightOn){
-				CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_2,
+				CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_ADDITIVE,
 					effect->light.shadow, &pos,
 					effect->light.shadowRange, 0.0f,
 					0.0f, -effect->light.shadowRange,
@@ -768,7 +768,7 @@ CEntity::ProcessLightsForEntity(void)
 					effect->col.b*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
 					15.0f, 1.0f, 40.0f, false, 0.0f);
 			}else if(lightFlickering){
-				CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_2,
+				CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_ADDITIVE,
 					effect->light.shadow, &pos,
 					effect->light.shadowRange, 0.0f,
 					0.0f, -effect->light.shadowRange,

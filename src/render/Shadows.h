@@ -9,17 +9,12 @@
 struct RwTexture;
 class CEntity;
 
-enum
-{
-	SHADOWTYPE_2 = 2
-};
-
 enum eShadowType
 {
 	SHADOWTYPE_NONE = 0,
-    SHADOWTYPE_DARK,
-    SHADOWTYPE_ADDITIVE,
-    SHADOWTYPE_INVCOLOR
+	SHADOWTYPE_DARK,
+	SHADOWTYPE_ADDITIVE,
+	SHADOWTYPE_INVCOLOR
 };
 
 enum eShadowTextureType

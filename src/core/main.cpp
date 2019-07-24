@@ -501,7 +501,7 @@ void
 DisplayGameDebugText()
 {
 	static bool bDisplayPosn = false;
-    static bool bDisplayRate = false;
+	static bool bDisplayRate = false;
 
 	{
 		SETTWEAKPATH("GameDebugText");

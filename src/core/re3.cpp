@@ -190,21 +190,6 @@ void CTweakVars::AddDBG(const char *path)
 	bAddTweakVarsNow = true;
 }
 
-//inline DebugMenuEntry *						  DebugMenuAddVar     (const char *path                , name,       ptr,                   trig, step,    lowerBound,     upperBound, const char **strings)
-/*
-inline DebugMenuEntry *
-DebugMenuAddVar
-
-(const char *path,
-const char *name,
-int8_t *ptr,
-TriggerFunc triggerFunc,
-int8_t step,
-int8_t lowerBound,
-int8_t upperBound,
-const char **strings)
-*/
-
 void CTweakSwitch::AddDBG(const char *path)
 {		
 	DebugMenuEntry *e = DebugMenuAddVar(m_pPath == NULL ? path : m_pPath, m_pVarName, (int32_t *)m_pIntVar, m_pFunc, 1, m_nMin, m_nMax, m_aStr);
@@ -232,7 +217,7 @@ TWEAKSWITCH(CWeather::NewWeatherType, 0, 3, wt, NULL);
 
 void
 DebugMenuPopulate(void)
-{	
+{
 	if(DebugMenuLoad()){
 		static const char *weathers[] = {
 			"Sunny", "Cloudy", "Rainy", "Foggy"
