@@ -3,6 +3,7 @@
 enum Config {
 	NUMCDIMAGES = 12,	// gta3.img duplicates (not used on PC)
 	MAX_CDIMAGES = 8,	// additional cdimages
+	MAX_CDCHANNELS = 5,
 
 	MODELINFOSIZE = 5500,
 	TXDSTORESIZE = 850,
@@ -113,7 +114,7 @@ enum Config {
 #	define CHATTYSPLASH	// print what the game is loading
 #endif
 
-#define FIX_BUGS		// fix bugs in the game, TODO: use this more
+//#define FIX_BUGS		// fix bugs in the game, TODO: use this more
 #define KANGAROO_CHEAT
 #define ASPECT_RATIO_SCALE
 #define USE_DEBUG_SCRIPT_LOADER

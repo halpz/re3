@@ -8,8 +8,8 @@ int32 &TempBufferIndicesStored = *(int32*)0x8F1A4C;
 RwIm3DVertex *TempBufferRenderVertices = (RwIm3DVertex*)0x862330;
 RwImVertexIndex *TempBufferRenderIndexList = (RwImVertexIndex*)0x846288;
 
-int RenderBuffer::VerticesToBeStored;
-int RenderBuffer::IndicesToBeStored;
+int &RenderBuffer::VerticesToBeStored = *(int*)0x8F59C4;
+int &RenderBuffer::IndicesToBeStored = *(int*)0x8E28B0;
 
 void
 RenderBuffer::ClearRenderBuffer(void)

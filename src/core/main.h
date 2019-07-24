@@ -17,6 +17,7 @@ extern char *gString2;
 extern wchar *gUString;
 extern wchar *gUString2;
 extern bool &b_FoundRecentSavedGameWantToLoad;
+extern bool gbPrintShite;
 
 class CSprite2d;
 
@@ -26,3 +27,4 @@ void LoadingIslandScreen(const char *levelName);
 CSprite2d *LoadSplash(const char *name);
 char *GetLevelSplashScreen(int level);
 char *GetRandomSplashScreen(void);
+void ValidateVersion();

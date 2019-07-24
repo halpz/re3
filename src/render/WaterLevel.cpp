@@ -238,7 +238,7 @@ CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool
 
 	float fAngle = (CTimer::GetTimeInMilliseconds() & 4095) * (TWOPI / 4096.0f);
 	
-	float fWave = sin
+	float fWave = Sin
 	(
 		/*( WATER_UNSIGN_Y(fY) - float(y) * MAX_HUGE_SECTORS + WATER_UNSIGN_X(fX) - float(x) * MAX_HUGE_SECTORS )*/ // VC
 		(float)( ((int32)fX & (MAX_HUGE_SECTORS-1)) + ((int32)fY & (MAX_HUGE_SECTORS-1)) )
@@ -306,7 +306,7 @@ _GetCamBounds(bool *bUseCamStartY, bool *bUseCamEndY, bool *bUseCamStartX, bool 
 {
 	if ( TheCamera.GetForward().z > -0.8f )
 	{
-		if ( fabsf(TheCamera.GetForward().x) > fabsf(TheCamera.GetForward().y) )
+		if ( Abs(TheCamera.GetForward().x) > Abs(TheCamera.GetForward().y) )
 		{
 			if ( TheCamera.GetForward().x > 0.0f )
 				*bUseCamStartX = true;
@@ -326,7 +326,7 @@ _GetCamBounds(bool *bUseCamStartY, bool *bUseCamEndY, bool *bUseCamStartX, bool 
 float
 SectorRadius(float fSize)
 {
-	return sqrtf(powf(fSize, 2) + powf(fSize, 2));
+	return Sqrt(Pow(fSize, 2) + Pow(fSize, 2));
 }
 
 void
@@ -714,7 +714,7 @@ CWaterLevel::RenderWater()
 		static CVector prev_front(0.0f, 0.0f, 0.0f);
 		static int32 timecounter;
 
-		if ( fabs(prev_pos.x - cur_pos.x) + fabs(prev_pos.y - cur_pos.y) + fabs(prev_pos.z - cur_pos.z) > 1.5f )
+		if ( Abs(prev_pos.x - cur_pos.x) + Abs(prev_pos.y - cur_pos.y) + Abs(prev_pos.z - cur_pos.z) > 1.5f )
 		{
 			prev_pos = cur_pos;
 			timecounter = CTimer::GetTimeInMilliseconds();
@@ -962,8 +962,8 @@ CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &col
 				RwRGBAAssign(&wavyPreLights[9*i+j], &color);
 
 				wavyVertices[9*i+j].z = ( CWeather::Wind * 0.7f + 0.3f )
-										* ( sinf(float(i + j) * DEGTORAD(45.0f) + fAngle) )
-										+ ( CWeather::Wind * 0.2f * sinf(float(j - i) * PI + (2.0f * fAngle)) );
+										* ( Sin(float(i + j) * DEGTORAD(45.0f) + fAngle) )
+										+ ( CWeather::Wind * 0.2f * Sin(float(j - i) * PI + (2.0f * fAngle)) );
 			}
 		}
 		
@@ -1119,7 +1119,7 @@ CWaterLevel::CalcDistanceToWater(float fX, float fY)
 		}
 	}
 
-	return clamp(sqrt(fDistSqr) - 23.0f, 0.0f, fSectorMaxRenderDist);
+	return clamp(Sqrt(fDistSqr) - 23.0f, 0.0f, fSectorMaxRenderDist);
 }
 
 void

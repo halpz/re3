@@ -354,10 +354,18 @@ public:
 	bool GetRightShoulder1JustDown() { return !!(NewState.RightShoulder1 && !OldState.RightShoulder1); }
 	bool GetRightShoulder2JustDown() { return !!(NewState.RightShoulder2 && !OldState.RightShoulder2); }
 	
-	int32 GetLeftShoulder1(void)  { return NewState.LeftShoulder1; }
-	int32 GetLeftShoulder2(void)  { return NewState.LeftShoulder2; }
-	int32 GetRightShoulder1(void) { return NewState.RightShoulder1; }
-	int32 GetRightShoulder2(void) { return NewState.RightShoulder2; }
+	bool GetTriangle()       { return !!NewState.Triangle; }
+	bool GetCircle()         { return !!NewState.Circle; }
+	bool GetCross()          { return !!NewState.Cross; }
+	bool GetSquare()         { return !!NewState.Square; }
+	bool GetDPadUp()         { return !!NewState.DPadUp; }
+	bool GetDPadDown()       { return !!NewState.DPadDown; }
+	bool GetDPadLeft()       { return !!NewState.DPadLeft; }
+	bool GetDPadRight()      { return !!NewState.DPadRight; }
+	bool GetLeftShoulder1(void)  { return !!NewState.LeftShoulder1; }
+	bool GetLeftShoulder2(void)  { return !!NewState.LeftShoulder2; }
+	bool GetRightShoulder1(void) { return !!NewState.RightShoulder1; }
+	bool GetRightShoulder2(void) { return !!NewState.RightShoulder2; }
 };
 VALIDATE_SIZE(CPad, 0xFC);
 
