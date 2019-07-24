@@ -226,6 +226,10 @@ int32 Randomizer;
 int32 nParticleCreationInterval = 1;
 float fParticleScaleLimit       = 0.5f;
 
+SETTWEAKPATH("Particle");
+TWEAKINT32(nParticleCreationInterval, 0, 5, 1);
+TWEAKFLOAT(fParticleScaleLimit, 0.0f, 1.0f, 0.1f);
+TWEAKFUNC(CParticle::ReloadConfig);
 
 void CParticle::ReloadConfig()
 {
@@ -1143,7 +1147,7 @@ void CParticle::Update()
 								{
 									bRemoveParticle = true;
 									
-									int32 randVal = int32(CGeneral::GetRandomNumber());
+									int32 randVal = CGeneral::GetRandomNumber();
 									
 									if ( randVal & 1 )
 									{
@@ -1188,23 +1192,19 @@ void CParticle::Update()
 									
 									if ( randVal == 5 )
 									{
-										int32 randTime = int32(CGeneral::GetRandomNumber());
-										
 										CShadows::AddPermanentShadow(1, gpBloodPoolTex, &vecPosn,
 												0.1f, 0.0f, 0.0f, -0.1f,
 												255,
 												255, 0, 0,
-												4.0f, (randTime & 0xFFF) + 2000, 1.0f);
+												4.0f, (CGeneral::GetRandomNumber() & 4095) + 2000, 1.0f);
 									}
 									else if ( randVal == 2 )
 									{
-										int32 randTime = int32(CGeneral::GetRandomNumber());
-
 										CShadows::AddPermanentShadow(1, gpBloodPoolTex, &vecPosn,
 												0.2f, 0.0f, 0.0f, -0.2f,
 												255,
 												255, 0, 0,
-												4.0f, (randTime & 0xFFF) + 8000, 1.0f);
+												4.0f, (CGeneral::GetRandomNumber() & 4095) + 8000, 1.0f);
 									}
 									continue;
 								}
@@ -1600,7 +1600,7 @@ void CParticle::Render()
 								fTrailLength = fDist;
 								
 								//Float fRot = Atan2( vecDist.x / fDist, Sqrt(1.0f - vecDist.x / fDist * (vecDist.x / fDist)) );
-								float fRot = asinf(vecDist.x / fDist);
+								float fRot = Asin(vecDist.x / fDist);
 
 								fRotation = fRot;
 
@@ -1652,7 +1652,7 @@ void CParticle::Render()
 								fTrailLength = fDist;
 								
 								//Float fRot = Atan2(vecDist.x / fDist, Sqrt(1.0f - vecDist.x / fDist * (vecDist.x / fDist)));
-								float fRot = asinf(vecDist.x / fDist);
+								float fRot = Asin(vecDist.x / fDist);
 								
 								fRotation = fRot;
 								

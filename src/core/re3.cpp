@@ -18,6 +18,7 @@
 #include "debugmenu_public.h"
 
 #include <vector>
+#include <list>
 
 std::vector<int32> usedAddresses;
 
@@ -177,6 +178,53 @@ static const char *carnames[] = {
 	"yankee", "escape", "borgnine", "toyz", "ghost",
 };
 
+static std::list<CTweakVar *> TweakVarsList;
+static bool bAddTweakVarsNow = false;
+static const char *pTweakVarsDefaultPath = NULL;
+
+void CTweakVars::Add(CTweakVar *var)
+{
+	TweakVarsList.push_back(var);
+	
+	if ( bAddTweakVarsNow )
+		var->AddDBG(pTweakVarsDefaultPath);
+}
+
+void CTweakVars::AddDBG(const char *path)
+{
+	pTweakVarsDefaultPath = path;
+
+	for(auto i = TweakVarsList.begin(); i != TweakVarsList.end(); ++i)
+		(*i)->AddDBG(pTweakVarsDefaultPath);
+	
+	bAddTweakVarsNow = true;
+}
+
+void CTweakSwitch::AddDBG(const char *path)
+{		
+	DebugMenuEntry *e = DebugMenuAddVar(m_pPath == NULL ? path : m_pPath, m_pVarName, (int32_t *)m_pIntVar, m_pFunc, 1, m_nMin, m_nMax, m_aStr);
+	DebugMenuEntrySetWrap(e, true);
+}
+	
+void CTweakFunc::AddDBG  (const char *path) { DebugMenuAddCmd     (m_pPath == NULL ? path : m_pPath, m_pVarName, m_pFunc); }
+void CTweakBool::AddDBG  (const char *path) { DebugMenuAddVarBool8(m_pPath == NULL ? path : m_pPath, m_pVarName, (int8_t *)m_pBoolVar,  NULL); }
+void CTweakInt8::AddDBG  (const char *path) { DebugMenuAddVar     (m_pPath == NULL ? path : m_pPath, m_pVarName, (int8_t *)m_pIntVar,   NULL, m_nStep, m_nLoawerBound, m_nUpperBound, NULL); }
+void CTweakUInt8::AddDBG (const char *path) { DebugMenuAddVar     (m_pPath == NULL ? path : m_pPath, m_pVarName, (uint8_t *)m_pIntVar,  NULL, m_nStep, m_nLoawerBound, m_nUpperBound, NULL); }
+void CTweakInt16::AddDBG (const char *path) { DebugMenuAddVar     (m_pPath == NULL ? path : m_pPath, m_pVarName, (int16_t *)m_pIntVar,  NULL, m_nStep, m_nLoawerBound, m_nUpperBound, NULL); }
+void CTweakUInt16::AddDBG(const char *path) { DebugMenuAddVar     (m_pPath == NULL ? path : m_pPath, m_pVarName, (uint16_t *)m_pIntVar, NULL, m_nStep, m_nLoawerBound, m_nUpperBound, NULL); }
+void CTweakInt32::AddDBG (const char *path) { DebugMenuAddVar     (m_pPath == NULL ? path : m_pPath, m_pVarName, (int32_t *)m_pIntVar,  NULL, m_nStep, m_nLoawerBound, m_nUpperBound, NULL); }
+void CTweakUInt32::AddDBG(const char *path) { DebugMenuAddVar     (m_pPath == NULL ? path : m_pPath, m_pVarName, (uint32_t *)m_pIntVar, NULL, m_nStep, m_nLoawerBound, m_nUpperBound, NULL); }
+void CTweakFloat::AddDBG (const char *path) { DebugMenuAddVar     (m_pPath == NULL ? path : m_pPath, m_pVarName, (float *)m_pIntVar,    NULL, m_nStep, m_nLoawerBound, m_nUpperBound); }
+
+/*
+static const char *wt[] = {
+			"Sunny", "Cloudy", "Rainy", "Foggy"
+		};
+
+SETTWEAKPATH("TEST");		
+TWEAKSWITCH(CWeather::NewWeatherType, 0, 3, wt, NULL);
+*/
+
 void
 DebugMenuPopulate(void)
 {
@@ -266,6 +314,8 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
+		
+		CTweakVars::AddDBG("Debug");
 	}
 }
 

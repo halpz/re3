@@ -28,3 +28,9 @@ public:
 
 	static void Init(void);
 };
+
+class C3dMarkers
+{
+public:
+	static void PlaceMarkerSet(uint32 id, uint16 type, CVector& pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);  
+};

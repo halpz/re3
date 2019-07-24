@@ -17,10 +17,10 @@ static_assert(sizeof(CRegisteredPointLight) == 0x2C, "CRegisteredPointLight: err
 
 class CPointLights
 {
-	// Probably have to make this public for shadows later
+public:
 	static int16 &NumLights;
 	static CRegisteredPointLight *aLights;	//[NUMPOINTLIGHTS]
-public:
+
 	enum {
 		LIGHT_POINT,
 		LIGHT_DIRECTIONAL,

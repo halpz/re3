@@ -66,6 +66,12 @@ wchar *gUString2 = (wchar*)0x6EDD70;
 bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
 
 
+char version_name[64];
+
+float FramesPerSecond = 30.0f;
+
+bool gbPrintShite = false;
+
 bool DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
 void DoRWStuffEndOfFrame(void);
 
@@ -173,9 +179,6 @@ Idle(void *arg)
 	}
 
 	RenderMenus();
-#ifndef FINAL
-	PrintGameVersion();
-#endif
 	DoFade();
 	Render2dStuffAfterFade();
 	CCredits::Render();
@@ -211,9 +214,6 @@ FrontendIdle(void)
 
 	DefinedState();
 	RenderMenus();
-#ifndef FINAL
-	PrintGameVersion();
-#endif
 	DoFade();
 	Render2dStuffAfterFade();
 	CFont::DrawFonts();
@@ -475,9 +475,137 @@ DoFade(void)
 	}
 }
 
+float FramesPerSecondCounter;
+int32 FrameSamples;
+
+struct tZonePrint
+{
+  char name[12];
+  CRect rect;
+};
+
+tZonePrint ZonePrint[] =
+{
+	{ "suburban", CRect(-1639.4f,  1014.3f, -226.23f, -1347.9f) },
+	{ "comntop",  CRect(-223.52f,  203.62f,  616.79f, -413.6f)  },
+	{ "comnbtm",  CRect(-227.24f, -413.6f,   620.51f, -911.84f) },
+	{ "comse",    CRect( 200.35f, -911.84f,  620.51f, -1737.3f) },
+	{ "comsw",    CRect(-223.52f, -911.84f,  200.35f, -1737.3f) },
+	{ "industsw", CRect( 744.05f, -473.0f,   1067.5f, -1331.5f) },
+	{ "industne", CRect( 1067.5f,  282.19f,  1915.3f, -473.0f)  },
+	{ "industnw", CRect( 744.05f,  324.95f,  1067.5f, -473.0f)  },
+	{ "industse", CRect( 1070.3f, -473.0f,   1918.1f, -1331.5f) },
+	{ "no zone",  CRect( 0.0f,     0.0f,     0.0f,    0.0f)     }
+};
+
+#ifndef MASTER
+void
+DisplayGameDebugText()
+{
+	static bool bDisplayPosn = false;
+	static bool bDisplayRate = false;
+
+	{
+		SETTWEAKPATH("GameDebugText");
+		TWEAKBOOL(bDisplayPosn);
+		TWEAKBOOL(bDisplayRate);
+	}
+
+
+	char str[200];
+	wchar ustr[200];
+	wchar ver[200];
+	
+	AsciiToUnicode(version_name, ver);
+
+	CFont::SetPropOn();
+	CFont::SetBackgroundOff();
+	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetScale(SCREEN_STRETCH_X(0.5f), SCREEN_STRETCH_Y(0.5f));
+	CFont::SetCentreOff();
+	CFont::SetRightJustifyOff();
+	CFont::SetWrapx(SCREEN_WIDTH);
+	CFont::SetJustifyOff();
+	CFont::SetBackGroundOnlyTextOff();
+	CFont::SetColor(CRGBA(255, 108, 0, 255));
+	CFont::PrintString(10.0f, 10.0f, ver);
+
+	FrameSamples++;
+	FramesPerSecondCounter += 1000.0f / (CTimer::GetTimeStepNonClippedInSeconds() * 1000.0f);	
+	FramesPerSecond = FramesPerSecondCounter / FrameSamples;
+	
+	if ( FrameSamples > 30 )
+	{
+		FramesPerSecondCounter = 0.0f;
+		FrameSamples = 0;
+	}
+  
+	if ( !TheCamera.WorldViewerBeingUsed 
+		&& CPad::GetPad(1)->GetSquare() 
+		&& CPad::GetPad(1)->GetTriangle()
+		&& CPad::GetPad(1)->GetLeftShoulder2JustDown() )
+	{
+		bDisplayPosn = !bDisplayPosn;
+	}
+
+	if ( CPad::GetPad(1)->GetSquare()
+		&& CPad::GetPad(1)->GetTriangle()
+		&& CPad::GetPad(1)->GetRightShoulder2JustDown() )
+	{
+		bDisplayRate = !bDisplayRate;
+	}
+	
+	if ( bDisplayPosn || bDisplayRate )
+	{
+		CVector pos = FindPlayerCoors();
+		int32 ZoneId = ARRAY_SIZE(ZonePrint)-1; // no zone
+		
+		for ( int32 i = 0; i < ARRAY_SIZE(ZonePrint)-1; i++ )
+		{
+			if ( pos.x > ZonePrint[i].rect.left
+				&& pos.x < ZonePrint[i].rect.right
+				&& pos.y > ZonePrint[i].rect.bottom
+				&& pos.y < ZonePrint[i].rect.top )
+			{
+				ZoneId = i;
+			}
+		}
+
+		//NOTE: fps should be 30, but its 29 due to different fp2int conversion 
+		if ( bDisplayRate )
+			sprintf(str, "X:%5.1f, Y:%5.1f, Z:%5.1f, F-%d, %s", pos.x, pos.y, pos.z, (int32)FramesPerSecond, ZonePrint[ZoneId].name);
+		else
+			sprintf(str, "X:%5.1f, Y:%5.1f, Z:%5.1f, %s", pos.x, pos.y, pos.z, ZonePrint[ZoneId].name);
+		
+		AsciiToUnicode(str, ustr);
+		
+		CFont::SetPropOff();
+		CFont::SetBackgroundOff();
+		CFont::SetScale(0.7f, 1.5f);
+		CFont::SetCentreOff();
+		CFont::SetRightJustifyOff();
+		CFont::SetJustifyOff();
+		CFont::SetBackGroundOnlyTextOff();
+		CFont::SetWrapx(640.0f);
+		CFont::SetFontStyle(FONT_HEADING);
+		
+		CFont::SetColor(CRGBA(0, 0, 0, 255));
+		CFont::PrintString(42.0f, 42.0f, ustr);
+		
+		CFont::SetColor(CRGBA(255, 108, 0, 255));
+		CFont::PrintString(40.0f, 40.0f, ustr);
+	}
+}
+#endif
+
 void
 Render2dStuffAfterFade(void)
 {
+#ifndef MASTER
+	DisplayGameDebugText();
+	//PrintGameVersion();
+#endif
+
 	CHud::DrawAfterFade();
 	CFont::DrawFonts();
 }
@@ -871,6 +999,41 @@ void PrintGameVersion()
 	strcpy(gString, "RE3");
 	AsciiToUnicode(gString, gUString);
 	CFont::PrintString(SCREEN_SCALE_X(10.5f), SCREEN_SCALE_Y(8.0f), gUString);
+}
+
+void
+ValidateVersion()
+{
+	int32 file = CFileMgr::OpenFile("models\\coll\\peds.col", "rb");
+	char buff[128];
+
+	if ( file != -1 )
+	{
+		CFileMgr::Seek(file, 100, SEEK_SET);
+		
+		for ( int i = 0; i < 128; i++ )
+		{
+			CFileMgr::Read(file, &buff[i], sizeof(char));
+			buff[i] -= 23;
+			if ( buff[i] == '\0' )
+				break;
+			CFileMgr::Seek(file, 99, SEEK_CUR);
+		}
+		
+		if ( !strncmp(buff, "grandtheftauto3", 15) )
+		{
+			strncpy(version_name, &buff[15], 64);
+			CFileMgr::CloseFile(file);
+			return;
+		}
+	}
+
+	LoadingScreen("Invalid version", NULL, NULL);
+	
+	while(true)
+	{
+		;
+	}
 }
 
 STARTPATCHES
