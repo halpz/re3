@@ -7,12 +7,16 @@
 #include "ModelIndices.h"
 #include "VisibilityPlugins.h"
 #include "DMAudio.h"
+#include "TimeCycle.h"
 #include "Camera.h"
 #include "Darkel.h"
 #include "Rubbish.h"
 #include "Fire.h"
 #include "Explosion.h"
 #include "Particle.h"
+#include "ParticleObject.h"
+#include "WaterLevel.h"
+#include "Floater.h"
 #include "World.h"
 #include "SurfaceTable.h"
 #include "HandlingMgr.h"
@@ -49,7 +53,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	bTaxiLight = m_sAllTaxiLights;
 	m_auto_flagA20 = false;
 	m_auto_flagA40 = false;
-	m_auto_flagA80 = false;
+	bWaterTight = false;
 
 	SetModelIndex(id);
 
@@ -1179,10 +1183,6 @@ CAutomobile::ProcessControl(void)
 			m_vecTurnSpeed.z = 0.0f;
 		}
 	}
-
-// TEMP
-if(pDriver)
-	pDriver->m_fHealth = 100.0f;
 }
 
 void
@@ -1431,9 +1431,130 @@ CAutomobile::HydraulicControl(void)
 { EAXJMP(0x52D4E0);
 }
 
-WRAPPER void
+void
 CAutomobile::ProcessBuoyancy(void)
-{ EAXJMP(0x5308D0);
+{
+	int i;
+	CVector impulse, point;
+
+	if(mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancy, &point, &impulse)){
+		m_flagD8 = true;
+		ApplyMoveForce(impulse);
+		ApplyTurnForce(impulse, point);
+
+		CVector initialSpeed = m_vecMoveSpeed;
+		float timeStep = max(CTimer::GetTimeStep(), 0.01f);
+		float impulseRatio = impulse.z / (GRAVITY * m_fMass * timeStep);
+		float waterResistance = Pow(1.0f - 0.05f*impulseRatio, CTimer::GetTimeStep());
+		m_vecMoveSpeed *= waterResistance;
+		m_vecTurnSpeed *= waterResistance;
+
+		if(impulseRatio > 0.5f){
+			bIsInWater = true;
+			if(m_vecMoveSpeed.z < -0.1f)
+				m_vecMoveSpeed.z = -0.1f;
+
+			if(pDriver){
+				pDriver->bIsInWater = true;
+				if(pDriver->IsPlayer() || !bWaterTight)
+					pDriver->InflictDamage(nil, WEAPONTYPE_WATER, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+			}
+			for(i = 0; i < m_nNumMaxPassengers; i++)
+				if(pPassengers[i]){
+					pPassengers[i]->bIsInWater = true;
+					if(pPassengers[i]->IsPlayer() || !bWaterTight)
+						pPassengers[i]->InflictDamage(nil, WEAPONTYPE_WATER, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+				}
+		}else
+			bIsInWater = false;
+
+		static uint32 nGenerateRaindrops = 0;
+		static uint32 nGenerateWaterCircles = 0;
+
+		if(initialSpeed.z < -0.3f && impulse.z > 0.3f){
+			RwRGBA color;
+			color.red = (0.5f * CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed())*0.45f*255;
+			color.green = (0.5f * CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen())*0.45f*255;
+			color.blue = (0.5f * CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue())*0.45f*255;
+			color.alpha = CGeneral::GetRandomNumberInRange(0, 32) + 128;
+			CParticleObject::AddObject(POBJECT_CAR_WATER_SPLASH, GetPosition(),
+				CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.15f, 0.3f)),
+				0.0f, 75, color, true);
+
+			nGenerateRaindrops = CTimer::GetTimeInMilliseconds() + 300;
+			nGenerateWaterCircles = CTimer::GetTimeInMilliseconds() + 60;
+			if(m_vecMoveSpeed.z < -0.2f)
+				m_vecMoveSpeed.z = -0.2f;
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_WATER_FALL, 0.0f);
+		}
+
+		if(nGenerateWaterCircles > 0 && nGenerateWaterCircles < CTimer::GetTimeInMilliseconds()){
+			CVector pos = GetPosition();
+			float waterLevel = 0.0f;
+			if(CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &waterLevel, false))
+				pos.z = waterLevel;
+			static RwRGBA black;
+			if(pos.z != 0.0f){
+				nGenerateWaterCircles = 0;
+				pos.z += 1.0f;
+				for(i = 0; i < 4; i++){
+					CVector p = pos;
+					p.x += CGeneral::GetRandomNumberInRange(-2.5f, 2.5f);
+					p.y += CGeneral::GetRandomNumberInRange(-2.5f, 2.5f);
+					CParticle::AddParticle(PARTICLE_RAIN_SPLASH_BIGGROW,
+						p, CVector(0.0f, 0.0f, 0.0f),
+						nil, 0.0f, black, 0, 0, 0, 0);
+				}
+			}
+		}
+
+		if(nGenerateRaindrops > 0 && nGenerateRaindrops < CTimer::GetTimeInMilliseconds()){
+			CVector pos = GetPosition();
+			float waterLevel = 0.0f;
+			if(CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &waterLevel, false))
+				pos.z = waterLevel;
+			static RwRGBA black;
+			if(pos.z >= 0.0f){
+				nGenerateRaindrops = 0;
+				pos.z += 0.5;
+				CParticleObject::AddObject(POBJECT_SPLASHES_AROUND,
+					pos, CVector(0.0f, 0.0f, 0.0f), 6.5f, 2500, black, true);
+			}
+		}
+	}else{
+		bIsInWater = false;
+		m_flagD8 = false;
+
+		static RwRGBA splashCol = {155, 155, 185, 196};
+		static RwRGBA smokeCol = {255, 255, 255, 255};
+
+		for(i = 0; i < 4; i++){
+			if(m_aSuspensionSpringRatio[i] < 1.0f && m_aWheelColPoints[i].surfaceB == SURFACE_PUDDLE){
+				CVector pos = m_aWheelColPoints[i].point + 0.3f*GetUp() - GetPosition();
+				CVector vSpeed = GetSpeed(pos);
+				vSpeed.z = 0.0f;
+				float fSpeed = vSpeed.MagnitudeSqr();
+				if(fSpeed > sq(0.05f)){
+					fSpeed = Sqrt(fSpeed);
+					float size = min((fSpeed < 0.15f ? 0.25f : 0.75f)*fSpeed, 0.6f);
+					CVector right = 0.2f*fSpeed*GetRight() + 0.2f*vSpeed;
+
+					CParticle::AddParticle(PARTICLE_PED_SPLASH,
+						pos + GetPosition(), -0.5f*right,
+						nil, size, splashCol,
+						CGeneral::GetRandomNumberInRange(0.0f, 10.0f),
+						CGeneral::GetRandomNumberInRange(0.0f, 90.0f), 1, 0);
+
+					CParticle::AddParticle(PARTICLE_RUBBER_SMOKE,
+						pos + GetPosition(), -0.6f*right,
+						nil, size, smokeCol, 0, 0, 0, 0);
+
+					if((CTimer::GetFrameCounter() & 0xF) == 0)
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_SPLASH, 2000.0f*fSpeed);
+				}
+			}
+		}
+	}
 }
 
 void

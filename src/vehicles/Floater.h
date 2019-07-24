@@ -1,6 +1,6 @@
 #pragma once
 
-class Physical;
+class CPhysical;
 
 enum tWaterLevel
 {
@@ -33,7 +33,7 @@ public:
 	char m_field_B9;
 	bool m_isBoat;
 	float m_volumeUnderWater;
-	CVector m_impulse;
+	CVector m_impulsePoint;
 
 	bool ProcessBuoyancy(CPhysical *phys, float buoyancy, CVector *impulse, CVector *point);
 	void PreCalcSetup(CPhysical *phys, float buoyancy);
