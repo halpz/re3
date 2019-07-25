@@ -240,15 +240,15 @@ void CReplay::Update(void)
 	if (CDraw::FadeValue || !bReplayEnabled)
 		return;
 	if (Mode == MODE_PLAYBACK){
-		if (CPad::NewKeyState.F[0] && !CPad::OldKeyState.F[0])
+		if (CPad::GetPad(0)->GetFJustDown(0))
 			FinishPlayback();
 	}
 	else if (Mode == MODE_RECORD){
-		if (CPad::NewKeyState.F[0] && !CPad::OldKeyState.F[0])
+		if (CPad::GetPad(0)->GetFJustDown(0))
 			TriggerPlayback(REPLAYCAMMODE_ASSTORED, 0.0f, 0.0f, 0.0f, false);
-		if (CPad::NewKeyState.F[1] && !CPad::OldKeyState.F[1])
+		if (CPad::GetPad(0)->GetFJustDown(1))
 			SaveReplayToHD();
-		if (CPad::NewKeyState.F[2] && !CPad::OldKeyState.F[2])
+		if (CPad::GetPad(0)->GetFJustDown(2))
 			PlayReplayFromHD();
 	}
 }

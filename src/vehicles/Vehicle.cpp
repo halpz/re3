@@ -377,12 +377,13 @@ CVehicle::ProcessDelayedExplosion(void)
 		return;
 
 	int tick = CTimer::GetTimeStep()/60.0f*1000.0f;
+	int16 prev = m_nBombTimer;
 	if(tick > m_nBombTimer)
 		m_nBombTimer = 0;
 	else
 		m_nBombTimer -= tick;
 
-	if(IsCar() && ((CAutomobile*)this)->m_bombType == CARBOMB_TIMEDACTIVE && (m_nBombTimer & 0xFE00) != 0xFE00)
+	if(IsCar() && ((CAutomobile*)this)->m_bombType == CARBOMB_TIMEDACTIVE && (m_nBombTimer & 0xFE00) != (prev & 0xFE00))
 		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_BOMB_TICK, 0.0f);
 
 	if (m_nBombTimer != 0)

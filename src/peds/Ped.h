@@ -221,7 +221,7 @@ public:
 	uint8 bIsPedDieAnimPlaying : 1;
 	uint8 m_ped_flagD20 : 1;
 	uint8 m_ped_flagD40 : 1;	// reset when objective changes
-	uint8 m_bScriptObjectiveCompleted : 1;
+	uint8 bScriptObjectiveCompleted : 1;
 
 	uint8 m_ped_flagE1 : 1;
 	uint8 m_ped_flagE2 : 1;
@@ -503,6 +503,7 @@ public:
 	void SetAimFlag(float angle);
 	void SetAmmo(eWeaponType weaponType, uint32 ammo);
 	void SetEvasiveStep(CEntity*, uint8);
+	void GrantAmmo(eWeaponType, uint32);
 
 	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
@@ -559,6 +560,7 @@ public:
 	void SetLeader(CEntity* leader);
 	void SetPedStats(ePedStats);
 	bool IsGangMember(void);
+	void RemoveInCarAnims(void);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }

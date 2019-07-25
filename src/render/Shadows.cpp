@@ -423,7 +423,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 		}
 	}
 
-	ASSERT(false);
+	//ASSERT(false);
 }
 
 void

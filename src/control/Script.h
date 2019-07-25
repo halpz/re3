@@ -78,8 +78,8 @@ class CRunningScript
 	uint32 m_nWakeTime;
 	uint16 m_nAndOrState;
 	bool m_bNotFlag;
-	bool m_bWBCheckEnabled;
-	bool m_bWBChecked;
+	bool m_bDeatharrestEnabled;
+	bool m_bDeatharrestExecuted;
 	bool m_bMissionFlag;
 
 public:
@@ -113,6 +113,40 @@ public:
 	int8 ProcessCommandsFrom1000To1099(int32);
 	int8 ProcessCommandsFrom1100To1199(int32);
 	void UpdateCompareFlag(bool);
+	int16 GetPadState(uint16, uint16);
+	void LocatePlayerCommand(int32, uint32*);
+	void LocatePlayerCharCommand(int32, uint32*);
+	void LocatePlayerCarCommand(int32, uint32*);
+	void LocateCharCommand(int32, uint32*);
+	void LocateCharCharCommand(int32, uint32*);
+	void LocateCharCarCommand(int32, uint32*);
+	void LocateCharObjectCommand(int32, uint32*);
+	void LocateCarCommand(int32, uint32*);
+	void LocateSniperBulletCommand(int32, uint32*);
+	void LocatePlayerInAreaCheckCommand(int32, uint32*);
+	void LocatePlayerInAngledAreaCheckCommand(int32, uint32*);
+	void LocateCharInAreaCheckCommand(int32, uint32*);
+	void LocateCharInAngledAreaCheckCommand(int32, uint32*);
+private:
+	enum {
+		ANDOR_NONE = 0,
+		ANDS_1 = 1,
+		ANDS_2,
+		ANDS_3,
+		ANDS_4,
+		ANDS_5,
+		ANDS_6,
+		ANDS_7,
+		ANDS_8,
+		ORS_1 = 21,
+		ORS_2,
+		ORS_3,
+		ORS_4,
+		ORS_5,
+		ORS_6,
+		ORS_7,
+		ORS_8
+	};
 };
 
 enum {
@@ -337,5 +371,8 @@ public:
 	}
 	static float ReadFloatFromScript(uint32* pIp){
 		return Read2BytesFromScript(pIp) / 16.0f;
+	}
+	static void ReadTextLabelFromScript(uint32* pIp, char* buf){
+		strncpy(buf, (const char*)&CTheScripts::ScriptSpace[*pIp], 8);
 	}
 };

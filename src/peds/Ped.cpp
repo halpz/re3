@@ -47,6 +47,7 @@ WRAPPER void CPed::MakeChangesForNewWeapon(int8) { EAXJMP(0x4F2560); }
 WRAPPER void CPed::SetSeek(CVector, float) { EAXJMP(0x4D14B0); }
 WRAPPER bool CPed::Seek(void) { EAXJMP(0x4D1640); }
 WRAPPER void CPed::SetFollowPath(CVector) { EAXJMP(0x4D2EA0); }
+WRAPPER void CPed::RemoveInCarAnims(void) { EAXJMP(0x4E4E20); }
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -395,7 +396,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bIsPedDieAnimPlaying = false;
 	m_ped_flagD20 = false;
 	m_ped_flagD40 = false;
-	m_bScriptObjectiveCompleted = false;
+	bScriptObjectiveCompleted = false;
 
 	m_ped_flagE1 = false;
 	m_ped_flagE2 = false;
@@ -4039,6 +4040,18 @@ CPed::SetAmmo(eWeaponType weaponType, uint32 ammo)
 }
 
 void
+CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo)
+{
+	if (HasWeapon(weaponType)) {
+		GetWeapon(weaponType).m_nAmmoTotal += ammo;
+	}
+	else {
+		GetWeapon(weaponType).Initialise(weaponType, ammo);
+		m_maxWeaponTypeAllowed++;
+	}
+}
+
+void
 CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 {
 	AnimationId stepAnim;
@@ -4237,5 +4250,6 @@ STARTPATCHES
 	InjectHook(0x4D6540, &CPed::RestoreHeadingRate, PATCH_JUMP);
 	InjectHook(0x4C69E0, (void (CPed::*)(CEntity*)) &CPed::SetAimFlag, PATCH_JUMP);
 	InjectHook(0x4C6960, (void (CPed::*)(float)) &CPed::SetAimFlag, PATCH_JUMP);
+	InjectHook(0x4CFAD0, &CPed::GrantAmmo, PATCH_JUMP);
 	InjectHook(0x4CFB20, &CPed::SetAmmo, PATCH_JUMP);
 ENDPATCHES

@@ -70,6 +70,7 @@ public:
 	void LoadPlayerSkin();
 	void AwardMoneyForExplosion(CVehicle *vehicle);	
 	void SetPlayerSkin(char* skin);
+	CVector& GetPos();
 };
 
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");
