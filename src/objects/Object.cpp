@@ -8,6 +8,7 @@
 
 WRAPPER void CObject::ObjectDamage(float amount) { EAXJMP(0x4BB240); }
 WRAPPER void CObject::DeleteAllTempObjectInArea(CVector, float) { EAXJMP(0x4BBED0); }
+WRAPPER void CObject::Init(void) { EAXJMP(0x4BAEC0); }
 
 int16 &CObject::nNoTempObjects = *(int16*)0x95CCA2;
 int16 &CObject::nBodyCastHealth = *(int16*)0x5F7D4C;	// 1000
@@ -39,6 +40,15 @@ CObject::CObject(void)
 	bUseVehicleColours = false;
 	m_pCurSurface = nil;
 	m_pCollidingEntity = nil;
+}
+
+CObject::CObject(int32 mi, bool createRW)
+{
+	if (createRW)
+		SetModelIndex(mi);
+	else
+		SetModelIndexNoCreate(mi);
+	Init();
 }
 
 CObject::~CObject(void)

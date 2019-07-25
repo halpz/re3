@@ -15,10 +15,14 @@ public:
 	static void UpdateCarOnRails(CVehicle*);
 	static bool MapCouldMoveInThisArea(float x, float y);
 	static void ScanForPedDanger(CVehicle *veh);
+	static void RemoveFromInterestingVehicleList(CVehicle*);
 
 	static int32 &NumLawEnforcerCars;
 	static int32 &NumAmbulancesOnDuty;
 	static int32 &NumFiretrucksOnDuty;
+	static int32 &NumRandomCars;
+	static int32 &NumMissionCars;
+	static int32 &NumParkedCars;
 	static bool &bCarsGeneratedAroundCamera;
 	static float &CarDensityMultiplier;
 };
