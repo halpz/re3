@@ -7,6 +7,7 @@ public:
 	CVector2D(void) {}
 	CVector2D(float x, float y) : x(x), y(y) {}
 	CVector2D(const CVector &v) : x(v.x), y(v.y) {}
+	float Heading(void) const { return Atan2(-x, y); }
 	float Magnitude(void) const { return Sqrt(x*x + y*y); }
 	float MagnitudeSqr(void) const { return x*x + y*y; }
 
