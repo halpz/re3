@@ -104,8 +104,7 @@ CPedIK::GetWorldMatrix(RwFrame *source, RwMatrix *destination)
 	return destination;
 }
 
-// A helper function that adjusts "limb" parameter according to limitations. Doesn't move the limb.
-int8
+uint32
 CPedIK::MoveLimb(LimbOrientation &limb, float approxPhi, float approxTheta, LimbMovementInfo &moveInfo)
 {
 	int result = 1;

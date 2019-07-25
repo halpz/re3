@@ -47,7 +47,7 @@ public:
 	void RotateTorso(AnimBlendFrameData* animBlend, LimbOrientation* limb, bool changeRoll);
 	void ExtractYawAndPitchLocal(RwMatrixTag*, float*, float*);
 	void ExtractYawAndPitchWorld(RwMatrixTag*, float*, float*);
-	int8 MoveLimb(LimbOrientation &a1, float a2, float a3, LimbMovementInfo &a4);
+	uint32 MoveLimb(LimbOrientation &a1, float a2, float a3, LimbMovementInfo &a4);
 	bool RestoreGunPosn(void);
 };
 static_assert(sizeof(CPedIK) == 0x28, "CPedIK: error");
