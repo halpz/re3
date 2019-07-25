@@ -22,7 +22,7 @@ public:
 		int32 m_ContSetOrder;
 	};
 
-	bool field_0;
+	bool firstCapture;
 	char _pad0[3];
 	DIJOYSTATE2 m_OldState;
 	DIJOYSTATE2 m_NewState;
