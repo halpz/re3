@@ -70,5 +70,7 @@ public:
 	void AddGunshell(CEntity*, CVector const&, CVector2D const&, float);
 	bool IsTypeMelee(void);
 	bool IsType2Handed(void);
+
+	static void DoTankDoomAiming(CEntity *playerVehicle, CEntity *playerPed, CVector *start, CVector *end);
 };
 static_assert(sizeof(CWeapon) == 0x18, "CWeapon: error");

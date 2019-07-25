@@ -45,10 +45,10 @@ public:
 	int8 field_225;
 	int8 field_226;
 	int8 field_227;
-	int32 m_nTimeLostRemoteCar;
-	int32 m_nTimeLastHealthLoss;
-	int32 m_nTimeLastArmourLoss;
-	int32 field_240;
+	uint32 m_nTimeLostRemoteCar;
+	uint32 m_nTimeLastHealthLoss;
+	uint32 m_nTimeLastArmourLoss;
+	uint32 m_nTimeTankShotGun;
 	int32 m_nUpsideDownCounter;
 	int32 field_248;
 	int16 m_nTrafficMultiplier;

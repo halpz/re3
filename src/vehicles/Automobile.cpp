@@ -1421,9 +1421,111 @@ CAutomobile::FireTruckControl(void)
 { EAXJMP(0x522590);
 }
 
-WRAPPER void
+void
 CAutomobile::TankControl(void)
-{ EAXJMP(0x53D530);
+{
+	int i;
+
+	// These coords are 1 unit higher then they should be relative to model center
+	CVector turrentBase(0.0f, -1.394f, 2.296f);
+	CVector gunEnd(0.0f, 1.813f, 2.979f);
+	CVector baseToEnd = gunEnd - turrentBase;
+
+	if(this != FindPlayerVehicle())
+		return;
+	if(CWorld::Players[CWorld::PlayerInFocus].m_WBState != WBSTATE_PLAYING)
+		return;
+
+	// Rotate turret
+	float prevAngle = m_fCarGunLR;
+	m_fCarGunLR -= CPad::GetPad(0)->GetCarGunLeftRight() * 0.00015f * CTimer::GetTimeStep();
+	if(m_fCarGunLR < 0.0f)
+		m_fCarGunLR += TWOPI;
+	if(m_fCarGunLR > TWOPI)
+		m_fCarGunLR -= TWOPI;
+	if(m_fCarGunLR != prevAngle)
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_TANK_TURRET_ROTATE, Abs(m_fCarGunLR - prevAngle));
+
+	// Shoot
+	if(CPad::GetPad(0)->CarGunJustDown() &&
+	   CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeTankShotGun + 800){
+		CWorld::Players[CWorld::PlayerInFocus].m_nTimeTankShotGun = CTimer::GetTimeInMilliseconds();
+
+		// more like -sin(angle), cos(angle), i.e. rotated (0,1,0)
+		CVector turretDir = CVector(Sin(-m_fCarGunLR), Cos(-m_fCarGunLR), 0.0f);
+		turretDir = Multiply3x3(GetMatrix(), turretDir);
+
+		float c = Cos(m_fCarGunLR);
+		float s = Sin(m_fCarGunLR);
+		CVector rotatedEnd(
+			c*baseToEnd.x - s*baseToEnd.y,
+			s*baseToEnd.x + c*baseToEnd.y,
+			baseToEnd.z - 1.0f);	// correct offset here
+		rotatedEnd += turrentBase;
+
+		CVector point1 = GetMatrix() * rotatedEnd;
+		CVector point2 = point1 + 60.0f*turretDir;
+		m_vecMoveSpeed -= 0.06f*turretDir;
+		m_vecMoveSpeed.z += 0.05f;
+
+		CWeapon::DoTankDoomAiming(FindPlayerVehicle(), FindPlayerPed(), &point1, &point2);
+		CColPoint colpoint;
+		CEntity *entity = nil;
+		CWorld::ProcessLineOfSight(point1, point2, colpoint, entity, true, true, true, true, true, true, false);
+		if(entity)
+			point2 = colpoint.point - 0.04f*(colpoint.point - point1);
+
+		CExplosion::AddExplosion(nil, FindPlayerPed(), EXPLOSION_TANK_GRENADE, point2, 0);
+
+		// Add particles on the way to the explosion;
+		float shotDist = (point2 - point1).Magnitude();
+		int n = shotDist/4.0f;
+		RwRGBA black = { 0, 0, 0, 0 };
+		for(i = 0; i < n; i++){
+			float f = (float)i/n;
+			CParticle::AddParticle(PARTICLE_HELI_DUST,
+				point1 + f*(point2 - point1),
+				CVector(0.0f, 0.0f, 0.0f),
+				nil, 0.1f, black);
+		}
+
+		// More particles
+		CVector shotDir = point2 - point1;
+		shotDir.Normalise();
+		for(i = 0; i < 15; i++){
+			float f = i/15.0f;
+			CParticle::AddParticle(PARTICLE_GUNSMOKE2, point1,
+				shotDir*CGeneral::GetRandomNumberInRange(0.3f, 1.0f)*f,
+				nil, CGeneral::GetRandomNumberInRange(0.5f, 1.0f)*f, black);
+		}
+
+		// And some gun flashes near the gun
+		CVector flashPos = point1;
+		CVector nullDir(0.0f, 0.0f, 0.0f);
+		int lifeSpan = 250;
+		if(m_vecMoveSpeed.Magnitude() > 0.08f){
+			lifeSpan = 125;
+			flashPos.x += 0.5f*m_vecMoveSpeed.x;
+			flashPos.y += 0.5f*m_vecMoveSpeed.y;
+		}
+		CParticle::AddParticle(PARTICLE_GUNFLASH, flashPos, nullDir, nil, 0.4f, black, 0, 0, 0, lifeSpan);
+		flashPos += 0.3f*shotDir;
+		CParticle::AddParticle(PARTICLE_GUNFLASH, flashPos, nullDir, nil, 0.2f, black, 0, 0, 0, lifeSpan);
+		flashPos += 0.1f*shotDir;
+		CParticle::AddParticle(PARTICLE_GUNFLASH, flashPos, nullDir, nil, 0.15f, black, 0, 0, 0, lifeSpan);
+	}
+
+	// Actually update turret node
+	if(m_aCarNodes[CAR_WINDSCREEN]){
+		CMatrix mat;
+		CVector pos;
+
+		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WINDSCREEN]));
+		pos = mat.GetPosition();
+		mat.SetRotateZ(m_fCarGunLR);
+		mat.Translate(pos);
+		mat.UpdateRW();
+	}
 }
 
 WRAPPER void
@@ -2313,9 +2415,9 @@ CAutomobile::BlowUpCar(CEntity *culprit)
 	gFireManager.StartFire(this, culprit, 0.8f, 1);	// TODO
 	CDarkel::RegisterCarBlownUpByPlayer(this);
 	if(GetModelIndex() == MI_RCBANDIT)
-		CExplosion::AddExplosion(this, culprit, EXPLOSION_4, GetPosition(), 0);	// TODO
+		CExplosion::AddExplosion(this, culprit, EXPLOSION_CAR_QUICK, GetPosition(), 0);
 	else
-		CExplosion::AddExplosion(this, culprit, EXPLOSION_3, GetPosition(), 0);	// TODO
+		CExplosion::AddExplosion(this, culprit, EXPLOSION_CAR, GetPosition(), 0);
 }
 
 bool

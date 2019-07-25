@@ -8,6 +8,7 @@ WRAPPER bool CWeapon::Fire(CEntity*, CVector*) { EAXJMP(0x55C380); }
 WRAPPER void CWeapon::FireFromCar(CAutomobile *car, bool left) { EAXJMP(0x55C940); }
 WRAPPER void CWeapon::AddGunshell(CEntity*, CVector const&, CVector2D const&, float) { EAXJMP(0x55F770); }
 WRAPPER void CWeapon::Update(int32 audioEntity) { EAXJMP(0x563A10); }
+WRAPPER void CWeapon::DoTankDoomAiming(CEntity *playerVehicle, CEntity *playerPed, CVector *start, CVector *end) { EAXJMP(0x563200); }
 
 void
 CWeapon::Initialise(eWeaponType type, int ammo)
