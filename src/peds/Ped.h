@@ -13,6 +13,47 @@
 
 struct CPathNode;
 
+struct FightMove
+{
+	AnimationId animId;
+	float startFireTime;
+	float endFireTime;
+	float comboFollowOnTime;
+	float strikeRadius;
+	uint8 hitLevel;
+	uint8 damage;
+	uint8 flags;
+};
+static_assert(sizeof(FightMove) == 0x18, "FightMove: error");
+
+enum PedFightMoves
+{
+	FIGHTMOVE_NULL,
+	FIGHTMOVE_STDPUNCH,
+	FIGHTMOVE_IDLE,
+	FIGHTMOVE_SHUFFLE_F,
+	FIGHTMOVE_KNEE,
+	FIGHTMOVE_HEADBUTT,
+	FIGHTMOVE_PUNCHJAB,
+	FIGHTMOVE_PUNCHHOOK,
+	FIGHTMOVE_KICK,
+	FIGHTMOVE_LONGKICK,
+	FIGHTMOVE_ROUNDHOUSE,
+	FIGHTMOVE_BODYBLOW,
+	FIGHTMOVE_GROUNDKICK,
+	FIGHTMOVE_HITFRONT,
+	FIGHTMOVE_HITBACK,
+	FIGHTMOVE_HITRIGHT,
+	FIGHTMOVE_HITLEFT,
+	FIGHTMOVE_HITBODY,
+	FIGHTMOVE_HITCHEST,
+	FIGHTMOVE_HITHEAD,
+	FIGHTMOVE_HITBIGSTEP,
+	FIGHTMOVE_HITONFLOOR,
+	FIGHTMOVE_HITBEHIND,
+	FIGHTMOVE_IDLE2NORM
+};
+
 enum ePedPieceTypes
 {
 	PEDPIECE_TORSO,
@@ -209,7 +250,7 @@ public:
 	uint8 bRespondsToThreats : 1;
 	uint8 bRenderPedInCar : 1;
 	uint8 bChangedSeat : 1;
-	uint8 m_ped_flagC10 : 1;	// related with phone
+	uint8 bUpdateAnimHeading : 1;
 	uint8 bBodyPartJustCameOff : 1;
 	uint8 m_ped_flagC40 : 1;
 	uint8 m_ped_flagC80 : 1;
@@ -223,12 +264,12 @@ public:
 	uint8 m_ped_flagD40 : 1;	// reset when objective changes
 	uint8 bScriptObjectiveCompleted : 1;
 
-	uint8 m_ped_flagE1 : 1;
+	uint8 bKindaStayInSamePlace : 1;
 	uint8 m_ped_flagE2 : 1;
 	uint8 bNotAllowedToDuck : 1;
 	uint8 bCrouchWhenShooting : 1;
 	uint8 bIsDucking : 1;	// set if you don't want ped to attack
-	uint8 m_ped_flagE20 : 1;	// getup complete?
+	uint8 bGetUpAnimStarted : 1;
 	uint8 bDoBloodyFootprints : 1;
 	uint8 m_ped_flagE80 : 1;
 
@@ -253,17 +294,17 @@ public:
 	uint8 m_ped_flagH1 : 1;
 	uint8 m_ped_flagH2 : 1;
 	uint8 m_ped_flagH4 : 1;
-	uint8 m_ped_flagH8 : 1;
+	uint8 bClearObjective : 1;
 	uint8 m_ped_flagH10 : 1;
 	uint8 m_ped_flagH20 : 1;
 	uint8 m_ped_flagH40 : 1;
 	uint8 m_ped_flagH80 : 1;
 
 	uint8 m_ped_flagI1 : 1;
-	uint8 m_ped_flagI2 : 1; // if set, limbs won't came off
+	uint8 bNoCriticalHits : 1; // if set, limbs won't came off
 	uint8 m_ped_flagI4 : 1;
 	uint8 bHasAlreadyBeenRecorded : 1;
-	uint8 m_ped_flagI10 : 1;
+	uint8 bIsFell : 1;
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
@@ -299,8 +340,8 @@ public:
 	PedState m_nPedState;
 	PedState m_nLastPedState;
 	eMoveState m_nMoveState;
-	int32 m_nStoredActionState;
-	int32 m_nPrevActionState;
+	int32 m_nStoredMoveState;
+	int32 m_nPrevMoveState;
 	eWaitState m_nWaitState;
 	uint32 m_nWaitTimer;
 	void *m_pPathNodesStates[8]; // seems unused
@@ -363,10 +404,11 @@ public:
 	uint8 m_wepAccuracy;
 	CEntity *m_pPointGunAt;
 	CVector m_vecHitLastPos;
-	uint32 m_lastHitState;
-	uint8 m_fightFlags1;
-	uint8 m_fightFlags2;
-	uint8 pad_4B2[2];
+	PedFightMoves m_lastFightMove;
+	uint8 m_fightButtonPressure;
+	int8 m_fightUnk2;	// TODO
+	uint8 m_fightUnk1; // TODO
+	uint8 pad_4B3;
 	CFire* m_pFire;
 	CEntity *m_pLookTarget;
 	float m_fLookDirection;
@@ -504,6 +546,16 @@ public:
 	void SetAmmo(eWeaponType weaponType, uint32 ammo);
 	void SetEvasiveStep(CEntity*, uint8);
 	void GrantAmmo(eWeaponType, uint32);
+	void SetEvasiveDive(CPhysical*, uint8);
+	void SetAttack(CEntity*);
+	void StartFightAttack(uint8);
+	void LoadFightData(void);
+	void SetWaitState(eWaitState, void*);
+	bool FightStrike(CVector&);
+	int GetLocalDirection(CVector2D&);
+	void StartFightDefend(uint8, uint8, uint8);
+	void PlayHitSound(CPed*);
+	void SetFall(int, AnimationId, uint8);
 
 	// Static methods
 	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
@@ -579,6 +631,8 @@ public:
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;
 	static CColPoint &ms_tempColPoint;
+	static uint16 &unknownFightThing; // TODO
+	static FightMove (&ms_fightMoves)[24];
 };
 
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);

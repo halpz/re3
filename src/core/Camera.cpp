@@ -1304,6 +1304,17 @@ CCam::GetWeaponFirstPersonOn()
 	return false;
 }
 
+float
+CCamera::Find3rdPersonQuickAimPitch(void)
+{
+	float clampedFrontZ = clamp(Cams[ActiveCam].Front.z, -1.0f, 1.0f);
+
+	// float rot = atan2(clampedFrontZ, sqrt(1.0f - sq(clampedFrontZ)));
+	float rot = Asin(clampedFrontZ);
+
+	return -(DEGTORAD(((0.5f - m_f3rdPersonCHairMultY) * 1.8f * 0.5f * Cams[ActiveCam].FOV)) + rot);
+}
+
 STARTPATCHES
 	InjectHook(0x42C760, (bool (CCamera::*)(const CVector &center, float radius, const CMatrix *mat))&CCamera::IsSphereVisible, PATCH_JUMP);
 	InjectHook(0x46FD00, &CCamera::SetFadeColour, PATCH_JUMP);

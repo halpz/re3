@@ -210,7 +210,7 @@ PhonePutDownCB(CAnimBlendAssociation *assoc, void *arg)
 	CPed *ped = (CPed*)arg;
 
 	if (assoc->blendAmount > 0.5f)
-		ped->m_ped_flagC10 = true;
+		ped->bUpdateAnimHeading = true;
 
 	if (ped->m_nPedState == PED_MAKE_CALL)
 		ped->m_nPedState = PED_IDLE;
@@ -244,10 +244,10 @@ PhonePickUpCB(CAnimBlendAssociation *assoc, void *arg)
 
 	CPed *ped = CPhoneInfo::pedWhoPickingUpPhone;
 	ped->m_nMoveState = PEDMOVE_STILL;
-	CAnimManager::BlendAnimation((RpClump*)ped->m_rwObject, ASSOCGRP_STD, ANIM_IDLE_STANCE, 8.0f);
+	CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_IDLE_STANCE, 8.0f);
 
 	if (assoc->blendAmount > 0.5f && ped)
-		CAnimManager::BlendAnimation((RpClump*)ped->m_rwObject, ASSOCGRP_STD, ANIM_PHONE_TALK, 8.0f);
+		CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_PHONE_TALK, 8.0f);
 
 	CPhoneInfo::pedWhoPickingUpPhone = nil;
 }
