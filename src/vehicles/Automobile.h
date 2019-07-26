@@ -108,7 +108,7 @@ public:
 	void BlowUpCar(CEntity *ent);
 	bool SetUpWheelColModel(CColModel *colModel);
 	void BurstTyre(uint8 tyre);
-	bool IsRoomForPedToLeaveCar(uint32, CVector *);
+	bool IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos);
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
@@ -122,6 +122,8 @@ public:
 	int32 RcbanditCheck1CarWheels(CPtrList &list);
 	void PlaceOnRoadProperly(void);
 	void dmgDrawCarCollidingParticles(const CVector &pos, float amount);
+	void AddDamagedVehicleParticles(void);
+	void AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed);
 	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);
 	void SetupSuspensionLines(void);

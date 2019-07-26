@@ -59,6 +59,11 @@ enum
 	CAR_POS_EXHAUST		= 9,
 };
 
+enum
+{
+	BOAT_POS_FRONTSEAT
+};
+
 enum eDoors
 {
 	DOOR_BONNET = 0,
@@ -253,7 +258,7 @@ public:
 	virtual void BlowUpCar(CEntity *ent) {}
 	virtual bool SetUpWheelColModel(CColModel *colModel) { return false; }
 	virtual void BurstTyre(uint8 tyre) {}
-	virtual bool IsRoomForPedToLeaveCar(uint32, CVector *) { return false;}
+	virtual bool IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos) { return false;}
 	virtual float GetHeightAboveRoad(void);
 	virtual void PlayCarHorn(void) {}
 

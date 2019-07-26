@@ -1456,8 +1456,8 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 	ped->m_ped_flagI4 = false;
 }
 
-void
-CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float seatPosMult)
+CVector
+CPed::GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float seatPosMult)
 {
 	CVehicleModelInfo *vehModel; 
 	CVector vehDoorPos;
@@ -1465,7 +1465,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 	float seatOffset;
 
 	vehModel = (CVehicleModelInfo*) CModelInfo::GetModelInfo(veh->m_modelIndex);
-	if (veh->bIsVan && (enterType == CAR_DOOR_LR || enterType == CAR_DOOR_RR)) {
+	if (veh->bIsVan && (component == CAR_DOOR_LR || component == CAR_DOOR_RR)) {
 		seatOffset = 0.0f;
 		vehDoorOffset = offsetToOpenVanDoor;
 	} else {
@@ -1477,63 +1477,63 @@ CPed::GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enter
 		}
 	}
 
-	switch (enterType) {
+	switch (component) {
 		case CAR_DOOR_RF:
 			if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
-				vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_BOAT_RUDDER];
+				vehDoorPos = vehModel->m_positions[BOAT_POS_FRONTSEAT];
 			else
-				vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_FRONT_SEATS];
+				vehDoorPos = vehModel->m_positions[CAR_POS_FRONTSEAT];
 
 			vehDoorPos.x += seatOffset;
 			vehDoorOffset.x = -vehDoorOffset.x;
 			break;
 
 		case CAR_DOOR_RR:
-			vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_REAR_SEATS];
+			vehDoorPos = vehModel->m_positions[CAR_POS_FRONTSEAT];
 			vehDoorPos.x += seatOffset;
 			vehDoorOffset.x = -vehDoorOffset.x;
 			break;
 
 		case CAR_DOOR_LF:
 			if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
-				vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_BOAT_RUDDER];
+				vehDoorPos = vehModel->m_positions[BOAT_POS_FRONTSEAT];
 			else
-				vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_FRONT_SEATS];
+				vehDoorPos = vehModel->m_positions[CAR_POS_FRONTSEAT];
 
 			vehDoorPos.x = -(vehDoorPos.x + seatOffset);
 			break;
 
 		case CAR_DOOR_LR:
-			vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_REAR_SEATS];
+			vehDoorPos = vehModel->m_positions[BOAT_POS_FRONTSEAT];
 			vehDoorPos.x = -(vehDoorPos.x + seatOffset);
 			break;
 
 		default:
 			if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
-				vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_BOAT_RUDDER];
+				vehDoorPos = vehModel->m_positions[BOAT_POS_FRONTSEAT];
 			else
-				vehDoorPos = vehModel->m_positions[VEHICLE_DUMMY_FRONT_SEATS];
+				vehDoorPos = vehModel->m_positions[CAR_POS_FRONTSEAT];
 
 			vehDoorOffset = CVector(0.0f, 0.0f, 0.0f);
 	}
-	*output = vehDoorPos - vehDoorOffset;
+	return vehDoorPos - vehDoorOffset;
 }
 
 // This function was mostly duplicate of GetLocalPositionToOpenCarDoor, so I've used it.
-void
-CPed::GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType)
+CVector
+CPed::GetPositionToOpenCarDoor(CVehicle *veh, uint32 component)
 {
 	CVector localPos;
 	CVector vehDoorPos;
 
-	GetLocalPositionToOpenCarDoor(&localPos, veh, enterType, 1.0f);
+	localPos = GetLocalPositionToOpenCarDoor(veh, component, 1.0f);
 	vehDoorPos = Multiply3x3(veh->GetMatrix(), localPos) + veh->GetPosition();
 
 /*
 	// Not used.
 	CVector localVehDoorOffset;
 
-	if (veh->bIsVan && (enterType == VEHICLE_ENTER_REAR_LEFT || enterType == VEHICLE_ENTER_REAR_RIGHT)) {
+	if (veh->bIsVan && (component == VEHICLE_ENTER_REAR_LEFT || component == VEHICLE_ENTER_REAR_RIGHT)) {
 		localVehDoorOffset = offsetToOpenVanDoor;
 	} else {
 		if (veh->bIsLow) {
@@ -1545,19 +1545,18 @@ CPed::GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType)
 
 	vehDoorPosWithoutOffset = Multiply3x3(veh->GetMatrix(), localPos + localVehDoorOffset) + veh->GetPosition();
 */
-	*output = vehDoorPos;
+	return vehDoorPos;
 }
 
-void
-CPed::GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset)
+CVector
+CPed::GetPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset)
 {	
 	CVector doorPos;
 	CMatrix vehMat(veh->GetMatrix());
 
-	GetLocalPositionToOpenCarDoor(output, veh, enterType, offset);
-	doorPos = Multiply3x3(vehMat, *output);
+	doorPos = Multiply3x3(vehMat, GetLocalPositionToOpenCarDoor(veh, component, offset));
 
-	*output = veh->GetPosition() + doorPos;
+	return veh->GetPosition() + doorPos;
 }
 
 void
@@ -1678,7 +1677,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	if (phase == LINE_UP_TO_CAR_2) {
 		neededPos = GetPosition();
 	} else {
-		GetPositionToOpenCarDoor(&neededPos, veh, m_vehEnterType, seatPosMult);
+		neededPos = GetPositionToOpenCarDoor(veh, m_vehEnterType, seatPosMult);
 	}
 
 	CVector autoZPos = neededPos;
@@ -1776,11 +1775,9 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		// It will be all 0 after rotate.
 		GetPosition() = neededPos;
 	} else {
-		CVector output;
 		CMatrix vehDoorMat(veh->GetMatrix());
 
-		GetLocalPositionToOpenCarDoor(&output, veh, m_vehEnterType, 0.0f);
-		vehDoorMat.GetPosition() += Multiply3x3(vehDoorMat, output);
+		vehDoorMat.GetPosition() += Multiply3x3(vehDoorMat, GetLocalPositionToOpenCarDoor(veh, m_vehEnterType, 0.0f));
 		GetMatrix() = vehDoorMat;
 	}
 
@@ -4822,8 +4819,8 @@ STARTPATCHES
 	InjectHook(0x4CF000, &CPed::PedSetDraggedOutCarCB, PATCH_JUMP);
 	InjectHook(0x4C5D80, &CPed::RestartNonPartialAnims, PATCH_JUMP);
 	InjectHook(0x4E4730, &CPed::GetLocalPositionToOpenCarDoor, PATCH_JUMP);
-	InjectHook(0x4E4660, (void (*)(CVector*, CVehicle*, uint32, float)) CPed::GetPositionToOpenCarDoor, PATCH_JUMP);
-	InjectHook(0x4E1A30, (void (*)(CVector*, CVehicle*, uint32)) CPed::GetPositionToOpenCarDoor, PATCH_JUMP);
+	InjectHook(0x4E4660, (CVector (*)(CVehicle*, uint32, float)) CPed::GetPositionToOpenCarDoor, PATCH_JUMP);
+	InjectHook(0x4E1A30, (CVector (*)(CVehicle*, uint32)) CPed::GetPositionToOpenCarDoor, PATCH_JUMP);
 	InjectHook(0x4DF940, &CPed::LineUpPedWithCar, PATCH_JUMP);
 	InjectHook(0x4CC6C0, &CPed::PlayFootSteps, PATCH_JUMP);
 	InjectHook(0x4C5350, &CPed::BuildPedLists, PATCH_JUMP);

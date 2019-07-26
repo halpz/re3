@@ -558,9 +558,9 @@ public:
 	void SetFall(int, AnimationId, uint8);
 
 	// Static methods
-	static void GetLocalPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float offset);
-	static void GetPositionToOpenCarDoor(CVector *output, CVehicle *veh, uint32 enterType, float seatPosMult);
-	static void GetPositionToOpenCarDoor(CVector* output, CVehicle* veh, uint32 enterType);
+	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
+	static CVector GetPositionToOpenCarDoor(CVehicle *veh, uint32 component, float seatPosMult);
+	static CVector GetPositionToOpenCarDoor(CVehicle* veh, uint32 component);
 
 	// Callbacks
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
