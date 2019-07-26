@@ -2023,11 +2023,11 @@ CColModel::operator=(const CColModel &other)
 		numVerts = 0;
 		for(i = 0; i < other.numTriangles; i++){
 			if(other.triangles[i].a > numVerts)
-				other.triangles[i].a = numVerts;
+				numVerts = other.triangles[i].a;
 			if(other.triangles[i].b > numVerts)
-				other.triangles[i].b = numVerts;
+				numVerts = other.triangles[i].b;
 			if(other.triangles[i].c > numVerts)
-				other.triangles[i].c = numVerts;
+				numVerts = other.triangles[i].c;
 		}
 		numVerts++;
 		if(vertices)

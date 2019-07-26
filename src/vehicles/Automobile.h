@@ -54,7 +54,7 @@ public:
 	uint8 field_4DB;
 	CEntity *m_pBombRigger;
 	int16 field_4E0;
-	int16 field_4E2;
+	uint16 m_hydraulicState;
 	uint32 m_nBusDoorTimerEnd;
 	uint32 m_nBusDoorTimerStart;
 	float m_aSuspensionSpringLength[4];

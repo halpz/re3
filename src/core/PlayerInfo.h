@@ -20,7 +20,7 @@ public:
 	CPlayerPed *m_pPed;
 	CVehicle *m_pRemoteVehicle;
 	CColModel m_ColModel;
-	CVehicle *m_pVehicleEx;
+	CVehicle *m_pVehicleEx;	// vehicle using the col model above
 	char m_aPlayerName[70];
 	int32 m_nMoney;
 	int32 m_nVisibleMoney;

@@ -15,6 +15,7 @@
 #include "Explosion.h"
 #include "Particle.h"
 #include "ParticleObject.h"
+#include "WaterCannon.h"
 #include "WaterLevel.h"
 #include "Floater.h"
 #include "World.h"
@@ -122,7 +123,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	bNotDamagedUpsideDown = false;
 	bMoreResistantToDamage = false;
 	m_fVelocityChangeForAudio = 0.f;
-	field_4E2 = 0;
+	m_hydraulicState = 0;
 
 	for(i = 0; i < 4; i++){
 		m_aGroundPhysical[i] = nil;
@@ -205,7 +206,7 @@ CAutomobile::ProcessControl(void)
 	int i;
 	CColModel *colModel;
 
-	if(m_veh_flagC80)
+	if(bUseSpecialColModel)
 		colModel = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel;
 	else
 		colModel = GetColModel();
@@ -488,7 +489,7 @@ CAutomobile::ProcessControl(void)
 			   m_aSuspensionSpringRatio[0] < 1.0f &&
 			   CPad::GetPad(0)->HornJustDown()){
 
-				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRALIC_1, 0.0f);
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_1, 0.0f);
 				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP, 1.0f);
 
 				CParticle::AddParticle(PARTICLE_ENGINE_STEAM,
@@ -1213,7 +1214,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 	if(m_status != STATUS_SIMPLE)
 		bVehicleColProcessed = true;
 
-	if(m_veh_flagC80)
+	if(bUseSpecialColModel)
 		colModel = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel;
 	else
 		colModel = GetColModel();
@@ -1416,9 +1417,62 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 	}
 }
 
-WRAPPER void
+void
 CAutomobile::FireTruckControl(void)
-{ EAXJMP(0x522590);
+{
+	if(this == FindPlayerVehicle()){
+		if(!CPad::GetPad(0)->GetWeapon())
+			return;
+		m_fCarGunLR += CPad::GetPad(0)->GetCarGunLeftRight()*0.00025f*CTimer::GetTimeStep();
+		m_fCarGunUD += CPad::GetPad(0)->GetCarGunUpDown()*0.0001f*CTimer::GetTimeStep();
+		m_fCarGunUD = clamp(m_fCarGunUD, 0.05f, 0.3f);
+
+		CVector cannonPos(0.0f, 1.5f, 1.9f);
+		cannonPos = GetMatrix() * cannonPos;
+		CVector cannonDir(
+			Sin(m_fCarGunLR) * Cos(m_fCarGunUD),
+			Cos(m_fCarGunLR) * Cos(m_fCarGunUD),
+			Sin(m_fCarGunUD));
+		cannonDir = Multiply3x3(GetMatrix(), cannonDir);
+		cannonDir.z += (CGeneral::GetRandomNumber()&0xF)/1000.0f;
+		CWaterCannons::UpdateOne((uintptr)this, &cannonPos, &cannonDir);
+	}else if(m_status == STATUS_PHYSICS){
+		CFire *fire = gFireManager.FindFurthestFire_NeverMindFireMen(GetPosition(), 10.0f, 35.0f);
+		if(fire == nil)
+			return;
+
+		// Target cannon onto fire
+		float targetAngle = CGeneral::GetATanOfXY(fire->m_vecPos.x-GetPosition().x, fire->m_vecPos.y-GetPosition().y);
+		float fwdAngle = CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
+		float targetCannonAngle = fwdAngle - targetAngle;
+		float angleDelta = CTimer::GetTimeStep()*0.01f;
+		float cannonDelta = targetCannonAngle - m_fCarGunLR;
+		while(cannonDelta < PI) cannonDelta += TWOPI;
+		while(cannonDelta > PI) cannonDelta -= TWOPI;
+		if(Abs(cannonDelta) < angleDelta)
+			m_fCarGunLR = targetCannonAngle;
+		else if(cannonDelta > 0.0f)
+			m_fCarGunLR += angleDelta;
+		else
+			m_fCarGunLR -= angleDelta;
+
+		// Go up and down a bit
+		float upDown = Sin((float)(CTimer::GetTimeInMilliseconds() & 0xFFF)/0x1000 * TWOPI);
+		m_fCarGunUD = 0.2f + 0.2f*upDown;
+
+		// Spray water every once in a while
+		if((CTimer::GetTimeInMilliseconds()>>10) & 3){
+			CVector cannonPos(0.0f, 0.0f, 2.2f);	// different position than player's firetruck!
+			cannonPos = GetMatrix() * cannonPos;
+			CVector cannonDir(
+				Sin(m_fCarGunLR) * Cos(m_fCarGunUD),
+				Cos(m_fCarGunLR) * Cos(m_fCarGunUD),
+				Sin(m_fCarGunUD));
+			cannonDir = Multiply3x3(GetMatrix(), cannonDir);
+			cannonDir.z += (CGeneral::GetRandomNumber()&0xF)/1000.0f;
+			CWaterCannons::UpdateOne((uintptr)this, &cannonPos, &cannonDir);
+		}
+	}
 }
 
 void
@@ -1528,13 +1582,307 @@ CAutomobile::TankControl(void)
 	}
 }
 
-WRAPPER void
+void
 CAutomobile::HydraulicControl(void)
-{ EAXJMP(0x52D4E0);
+{
+	int i;
+	float wheelPositions[4];
+	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
+	CColModel *normalColModel = mi->GetColModel();
+	float wheelRadius = 0.5f*mi->m_wheelScale;
+	CPlayerInfo *playerInfo = &CWorld::Players[CWorld::PlayerInFocus];
+	CColModel *specialColModel = &playerInfo->m_ColModel;
+
+	if(m_status != STATUS_PLAYER){
+		// reset hydraulics for non-player cars
+
+		if(!bUseSpecialColModel)
+			return;
+		if(specialColModel != nil)	// this is always true
+			for(i = 0; i < 4; i++)
+				wheelPositions[i] = specialColModel->lines[i].p0.z - m_aSuspensionSpringRatio[i]*m_aSuspensionLineLength[i];
+		for(i = 0; i < 4; i++){
+			m_aSuspensionSpringLength[i] = pHandling->fSuspensionUpperLimit - pHandling->fSuspensionLowerLimit;
+			m_aSuspensionLineLength[i] = normalColModel->lines[i].p0.z - normalColModel->lines[i].p1.z;
+			m_aSuspensionSpringRatio[i] = (normalColModel->lines[i].p0.z - wheelPositions[i]) / m_aSuspensionLineLength[i];
+			if(m_aSuspensionSpringRatio[i] > 1.0f)
+				m_aSuspensionSpringRatio[i] = 1.0f;
+		}
+
+		if(m_hydraulicState == 0)
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_1, 0.0f);
+		else if(m_hydraulicState >= 100)
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_2, 0.0f);
+
+		if(playerInfo->m_pVehicleEx == this)
+			playerInfo->m_pVehicleEx = nil;
+		bUseSpecialColModel = false;
+		m_hydraulicState = 0;
+		return;
+	}
+
+	// Player car
+
+	float normalUpperLimit = pHandling->fSuspensionUpperLimit;
+	float normalLowerLimit = pHandling->fSuspensionLowerLimit;
+	float normalSpringLength = normalUpperLimit - normalLowerLimit;
+	float extendedUpperLimit = normalUpperLimit - 0.2f;
+	float extendedLowerLimit = normalLowerLimit - 0.2f;
+	float extendedSpringLength = extendedUpperLimit - extendedLowerLimit;
+
+	if(!bUseSpecialColModel){
+		// Init special col model
+
+		if(playerInfo->m_pVehicleEx && playerInfo->m_pVehicleEx == this)
+			playerInfo->m_pVehicleEx->bUseSpecialColModel = false;
+		playerInfo->m_pVehicleEx = this;
+		playerInfo->m_ColModel = *normalColModel;
+		bUseSpecialColModel = true;
+		specialColModel = &playerInfo->m_ColModel;
+
+		if(m_fVelocityChangeForAudio > 0.1f)
+			m_hydraulicState = 20;
+		else{
+			m_hydraulicState = 0;
+			normalUpperLimit += -0.12f;
+			normalSpringLength = normalUpperLimit - (normalLowerLimit+0.14f);
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_2, 0.0f);
+		}
+
+		// Setup suspension
+		float normalLineLength = normalSpringLength + wheelRadius;
+		CVector pos;
+		for(i = 0; i < 4; i++){
+			wheelPositions[i] = normalColModel->lines[i].p0.z - m_aSuspensionSpringRatio[i]*m_aSuspensionLineLength[i];
+			mi->GetWheelPosn(i, pos);
+			pos.z += normalUpperLimit;
+			specialColModel->lines[i].p0 = pos;
+			pos.z -= normalLineLength;
+			specialColModel->lines[i].p1 = pos;
+			m_aSuspensionSpringLength[i] = normalSpringLength;
+			m_aSuspensionLineLength[i] = normalLineLength;
+
+			if(m_aSuspensionSpringRatio[i] < 1.0f){
+				m_aSuspensionSpringRatio[i] = (specialColModel->lines[i].p0.z - wheelPositions[i])/m_aSuspensionLineLength[i];
+				if(m_aSuspensionSpringRatio[i] > 1.0f)
+					m_aSuspensionSpringRatio[i] = 1.0f;
+			}
+		}
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_2, 0.0f);
+
+		// Adjust col model
+		mi->GetWheelPosn(0, pos);
+		float minz = pos.z + extendedLowerLimit - wheelRadius;
+		if(minz < specialColModel->boundingBox.min.z)
+			specialColModel->boundingBox.min.z = minz;
+		float radius = max(specialColModel->boundingBox.min.Magnitude(), specialColModel->boundingBox.max.Magnitude());
+		if(specialColModel->boundingSphere.radius < radius)
+			specialColModel->boundingSphere.radius = radius;
+
+	}
+
+	if(playerInfo->m_WBState != WBSTATE_PLAYING)
+		return;
+
+	bool setPrevRatio = false;
+	if(m_hydraulicState < 20 && m_fVelocityChangeForAudio > 0.2f){
+		if(m_hydraulicState == 0){
+			m_hydraulicState = 20;
+			for(i = 0; i < 4; i++)
+				m_aWheelPosition[i] -= 0.06f;
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_1, 0.0f);
+			setPrevRatio = true;
+		}else{
+			m_hydraulicState++;
+		}
+	}else if(m_hydraulicState != 0){	// must always be true
+		if(m_hydraulicState < 21 && m_fVelocityChangeForAudio < 0.1f){
+			m_hydraulicState--;
+			if(m_hydraulicState == 0)
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_2, 0.0f);
+		}
+	}
+
+	if(CPad::GetPad(0)->HornJustDown()){
+		// Switch between normal and extended
+
+		if(m_hydraulicState < 100)
+			m_hydraulicState = 100;
+		else{
+			if(m_fVelocityChangeForAudio > 0.1f)
+				m_hydraulicState = 20;
+			else
+				m_hydraulicState = 0;
+		}
+
+		if(m_hydraulicState < 100){
+			if(m_hydraulicState == 0){
+				normalUpperLimit += -0.12f;
+				normalLowerLimit += 0.14f;
+				normalSpringLength = normalUpperLimit - normalLowerLimit;
+			}
+
+			// Reset suspension to normal
+			float normalLineLength = normalSpringLength + wheelRadius;
+			CVector pos;
+			for(i = 0; i < 4; i++){
+				wheelPositions[i] = specialColModel->lines[i].p0.z - m_aSuspensionSpringRatio[i]*m_aSuspensionLineLength[i];
+				mi->GetWheelPosn(i, pos);
+				pos.z += normalUpperLimit;
+				specialColModel->lines[i].p0 = pos;
+				pos.z -= normalLineLength;
+				specialColModel->lines[i].p1 = pos;
+				m_aSuspensionSpringLength[i] = normalSpringLength;
+				m_aSuspensionLineLength[i] = normalLineLength;
+
+				if(m_aSuspensionSpringRatio[i] < 1.0f){
+					m_aSuspensionSpringRatio[i] = (specialColModel->lines[i].p0.z - wheelPositions[i])/m_aSuspensionLineLength[i];
+					if(m_aSuspensionSpringRatio[i] > 1.0f)
+						m_aSuspensionSpringRatio[i] = 1.0f;
+				}
+			}
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_2, 0.0f);
+		}else{
+			// Reset suspension to extended
+			float extendedLineLength = extendedSpringLength + wheelRadius;
+			CVector pos;
+			for(i = 0; i < 4; i++){
+				wheelPositions[i] = specialColModel->lines[i].p0.z - m_aSuspensionSpringRatio[i]*m_aSuspensionLineLength[i];
+				mi->GetWheelPosn(i, pos);
+				pos.z += extendedUpperLimit;
+				specialColModel->lines[i].p0 = pos;
+				pos.z -= extendedLineLength;
+				specialColModel->lines[i].p1 = pos;
+				m_aSuspensionSpringLength[i] = extendedSpringLength;
+				m_aSuspensionLineLength[i] = extendedLineLength;
+
+				if(m_aSuspensionSpringRatio[i] < 1.0f){
+					m_aSuspensionSpringRatio[i] = (specialColModel->lines[i].p0.z - wheelPositions[i])/m_aSuspensionLineLength[i];
+					if(m_aSuspensionSpringRatio[i] > 1.0f)
+						m_aSuspensionSpringRatio[i] = 1.0f;
+				}
+
+				setPrevRatio = true;
+				m_aWheelPosition[i] -= 0.05f;
+			}
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_2, 0.0f);
+		}
+	}else{
+		float suspChange[4];
+		float maxDelta = 0.0f;
+		float rear = CPad::GetPad(0)->GetCarGunUpDown()/128.0f;
+		float front = -rear;
+		float right = CPad::GetPad(0)->GetCarGunLeftRight()/128.0f;
+		float left = -right;
+		suspChange[CARWHEEL_FRONT_LEFT] = max(front+left, 0.0f);
+		suspChange[CARWHEEL_REAR_LEFT] = max(rear+left, 0.0f);
+		suspChange[CARWHEEL_FRONT_RIGHT] = max(front+right, 0.0f);
+		suspChange[CARWHEEL_REAR_RIGHT] = max(rear+right, 0.0f);
+
+		if(m_hydraulicState < 100){
+			// Lowered, move wheels up
+
+			if(m_hydraulicState == 0){
+				normalUpperLimit += -0.12f;
+				normalLowerLimit += 0.14f;
+				normalSpringLength = normalUpperLimit - normalLowerLimit;
+			}
+
+			// Set suspension
+			CVector pos;
+			for(i = 0; i < 4; i++){
+				if(suspChange[i] > 1.0f)
+					suspChange[i] = 1.0f;
+
+				float oldZ = specialColModel->lines[i].p1.z;
+				float upperLimit = suspChange[i]*(extendedUpperLimit-normalUpperLimit) + normalUpperLimit;
+				float springLength = suspChange[i]*(extendedSpringLength-normalSpringLength) + normalSpringLength;
+				float lineLength = springLength + wheelRadius;
+
+				wheelPositions[i] = specialColModel->lines[i].p0.z - m_aSuspensionSpringRatio[i]*m_aSuspensionLineLength[i];
+				mi->GetWheelPosn(i, pos);
+				pos.z += upperLimit;
+				specialColModel->lines[i].p0 = pos;
+				pos.z -= lineLength;
+				if(Abs(pos.z - specialColModel->lines[i].p1.z) > Abs(maxDelta))
+					maxDelta = pos.z - specialColModel->lines[i].p1.z;
+				specialColModel->lines[i].p1 = pos;
+				m_aSuspensionSpringLength[i] = springLength;
+				m_aSuspensionLineLength[i] = lineLength;
+
+				if(m_aSuspensionSpringRatio[i] < 1.0f){
+					m_aSuspensionSpringRatio[i] = (specialColModel->lines[i].p0.z - wheelPositions[i])/m_aSuspensionLineLength[i];
+					if(m_aSuspensionSpringRatio[i] > 1.0f)
+						m_aSuspensionSpringRatio[i] = 1.0f;
+					m_aWheelPosition[i] -= (oldZ - specialColModel->lines[i].p1.z)*0.3f;
+				}
+			}
+		}else{
+			if(m_hydraulicState < 104){
+				m_hydraulicState++;
+				for(i = 0; i < 4; i++)
+					m_aWheelPosition[i] -= 0.1f;
+			}
+
+			if(m_fVelocityChangeForAudio < 0.1f){
+				normalUpperLimit += -0.12f;
+				normalLowerLimit += 0.14f;
+				normalSpringLength = normalUpperLimit - normalLowerLimit;
+			}
+
+			// Set suspension
+			CVector pos;
+			for(i = 0; i < 4; i++){
+				if(suspChange[i] > 1.0f)
+					suspChange[i] = 1.0f;
+
+				float upperLimit = suspChange[i]*(normalUpperLimit-extendedUpperLimit) + extendedUpperLimit;
+				float springLength = suspChange[i]*(normalSpringLength-extendedSpringLength) + extendedSpringLength;
+				float lineLength = springLength + wheelRadius;
+
+				wheelPositions[i] = specialColModel->lines[i].p0.z - m_aSuspensionSpringRatio[i]*m_aSuspensionLineLength[i];
+				mi->GetWheelPosn(i, pos);
+				pos.z += upperLimit;
+				specialColModel->lines[i].p0 = pos;
+				pos.z -= lineLength;
+				if(Abs(pos.z - specialColModel->lines[i].p1.z) > Abs(maxDelta))
+					maxDelta = pos.z - specialColModel->lines[i].p1.z;
+				specialColModel->lines[i].p1 = pos;
+				m_aSuspensionSpringLength[i] = springLength;
+				m_aSuspensionLineLength[i] = lineLength;
+
+				if(m_aSuspensionSpringRatio[i] < 1.0f){
+					m_aSuspensionSpringRatio[i] = (specialColModel->lines[i].p0.z - wheelPositions[i])/m_aSuspensionLineLength[i];
+					if(m_aSuspensionSpringRatio[i] > 1.0f)
+						m_aSuspensionSpringRatio[i] = 1.0f;
+				}
+			}
+		}
+
+		float limitDiff = extendedLowerLimit - normalLowerLimit;
+		if(limitDiff != 0.0f && Abs(maxDelta/limitDiff) > 0.01f){
+			float f = (maxDelta + limitDiff)/2.0f/limitDiff;
+			f = clamp(f, 0.0f, 1.0f);
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_3, f);
+			if(f < 0.4f || f > 0.6f)
+				setPrevRatio = true;
+			if(f < 0.25f)
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_2, 0.0f);
+			else if(f > 0.75f)
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_1, 0.0f);
+		}
+	}
+
+	if(setPrevRatio)
+		for(i = 0; i < 4; i++){
+			// wheel radius in relation to suspension line
+			float wheelRadius = 1.0f - m_aSuspensionSpringLength[i]/m_aSuspensionLineLength[i];
+			m_aSuspensionSpringRatioPrev[i] = (m_aSuspensionSpringRatio[i]-wheelRadius)/(1.0f-wheelRadius);
+		}
 }
 
 void
-CAutomobile::ProcessBuoyancy(void)
+CAutomobile::ProcessBuoyancy(void)	
 {
 	int i;
 	CVector impulse, point;

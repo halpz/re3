@@ -186,7 +186,7 @@ public:
 	uint8 m_veh_flagC10 : 1;
 	uint8 m_veh_flagC20 : 1;
 	uint8 bCanBeDamaged : 1; // Set to FALSE during cut scenes to avoid explosions
-	uint8 m_veh_flagC80 : 1;
+	uint8 bUseSpecialColModel : 1;
 
 	uint8 m_veh_flagD1 : 1;
 	uint8 m_veh_flagD2 : 1;
