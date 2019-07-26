@@ -108,7 +108,7 @@ public:
 	void BlowUpCar(CEntity *ent);
 	bool SetUpWheelColModel(CColModel *colModel);
 	void BurstTyre(uint8 tyre);
-	bool IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos);
+	bool IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset);
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 

@@ -2930,7 +2930,7 @@ CAutomobile::BurstTyre(uint8 wheel)
 }
 
 bool
-CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos)
+CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset)
 {
 	CColPoint colpoint;
 	CEntity *ent;
@@ -2957,11 +2957,11 @@ CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos)
 	seatPos = GetMatrix() * seatPos;
 
 	CVector doorPos = CPed::GetPositionToOpenCarDoor(this, component);
-	if(forcedDoorPos){
-		doorPos = *forcedDoorPos;
+	if(doorOffset){
+		CVector off = *doorOffset;
 		if(component == CAR_DOOR_RF || component == CAR_DOOR_RR)
-			doorPos.x = -doorPos.x;
-		doorPos = Multiply3x3(GetMatrix(), doorPos);
+			off.x = -off.x;
+		doorPos += Multiply3x3(GetMatrix(), off);
 	}
 
 	if(GetUp().z < 0.0f){
