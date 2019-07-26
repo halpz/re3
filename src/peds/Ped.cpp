@@ -4588,14 +4588,14 @@ CPed::FightStrike(CVector &touchedNodePos)
 
 			// He can beat us
 			if (sq(maxDistanceToBeBeaten) > potentialAttackDistance.MagnitudeSqr()) {
-				ourCol = CModelInfo::GetModelInfo(m_modelIndex)->GetColModel();
+				ourCol = ((CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex))->GetHitColModel();
 				if (nearPed->m_nPedState == PED_FALL
 					|| nearPed->m_nPedState == PED_DEAD || nearPed->m_nPedState == PED_DIE
 					|| !nearPed->IsPedHeadAbovePos(-0.3f)) {
 					ourCol = &CTempColModels::ms_colModelPedGroundHit;
 				}
 				for (int j = 0; j < ourCol->numSpheres; j++) {
-					attackDistance = nearPed->GetPosition() - ourCol->spheres[j].center;
+					attackDistance = nearPed->GetPosition() + ourCol->spheres[j].center;
 					attackDistance -= touchedNodePos;
 					CColSphere *ourPieces = ourCol->spheres;
 					float maxDistanceToBeat = ourPieces[j].radius + ms_fightMoves[m_lastFightMove].strikeRadius;
