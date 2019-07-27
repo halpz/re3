@@ -176,8 +176,8 @@ public:
 	uint8 bLowVehicle: 1; // Need this for sporty type cars to use low getting-in/out anims
 	uint8 bComedyControls : 1; // Will make the car hard to control (hopefully in a funny way)
 	uint8 bWarnedPeds : 1; // Has scan and warn peds of danger been processed?
-	uint8 m_veh_flagB40 : 1;
-	uint8 m_veh_flagB80 : 1;
+	uint8 bCraneMessageDone : 1; // A crane message has been printed for this car allready
+	uint8 bExtendedRange : 1; // This vehicle needs to be a bit further away to get deleted
 
 	uint8 bTakeLessDamage : 1; // This vehicle is stronger (takes about 1/4 of damage)
 	uint8 bIsDamaged : 1; // This vehicle has been damaged and is displaying all its components

@@ -64,6 +64,8 @@ enum Config {
 	NUMRADARBLIPS = 32,
 	NUMPICKUPS = 336,
 	NUMEVENTS = 64,
+
+	NUM_CARGENS = 160
 };
 
 // We'll use this once we're ready to become independent of the game

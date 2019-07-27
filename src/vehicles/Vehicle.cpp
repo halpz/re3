@@ -59,8 +59,8 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_pBlowUpEntity = nil;
 	field_1FB = 0;
 	bComedyControls = false;
-	m_veh_flagB40 = false;
-	m_veh_flagB80 = false;
+	bCraneMessageDone = false;
+	bExtendedRange = false;
 	bTakeLessDamage = false;
 	bIsDamaged = false;
 	bFadeOut = false;

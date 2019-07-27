@@ -63,6 +63,11 @@ CGarages::IsModelIndexADoor(uint32 id)
 		id == MI_CRUSHERLID;
 }
 
+bool CGarages::HasCarBeenCrushed(int32 handle)
+{
+	return CrushedCarId == handle;
+}
+
 WRAPPER void CGarages::TriggerMessage(char *text, int16, uint16 time, int16) { EAXJMP(0x426B20); }
 
 #if 0

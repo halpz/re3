@@ -29,6 +29,7 @@ bool &CWorld::bForceProcessControl = *(bool*)0x95CD6C;
 bool &CWorld::bProcessCutsceneOnly = *(bool*)0x95CD8B;
 
 WRAPPER void CWorld::RemoveReferencesToDeletedObject(CEntity*) { EAXJMP(0x4B3BF0); }
+WRAPPER void CWorld::FindObjectsKindaColliding(const CVector &, float, bool, int16*, int16, CEntity **, bool, bool, bool, bool, bool){ EAXJMP(0x4B2A30); }
 
 void
 CWorld::Add(CEntity *ent)
