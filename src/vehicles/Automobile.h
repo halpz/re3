@@ -71,7 +71,7 @@ public:
 	float m_weaponDoorTimerRight;
 	float m_fCarGunLR;
 	float m_fCarGunUD;
-	float m_fWindScreenRotation;
+	float m_fPropellerRotation;
 	uint8 stuff4[4];
 	uint8 m_nWheelsOnGround;
 	uint8 m_nDriveWheelsOnGround;
