@@ -20,6 +20,7 @@
 #include "Floater.h"
 #include "World.h"
 #include "SurfaceTable.h"
+#include "Weather.h"
 #include "HandlingMgr.h"
 #include "Record.h"
 #include "Remote.h"
@@ -167,7 +168,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 
 	m_fCarGunLR = 0.0f;
 	m_fCarGunUD = 0.05f;
-	m_fWindScreenRotation = 0.0f;
+	m_fPropellerRotation = 0.0f;
 	m_weaponDoorTimerLeft = 0.0f;
 	m_weaponDoorTimerRight = m_weaponDoorTimerLeft;
 
@@ -206,7 +207,7 @@ CAutomobile::ProcessControl(void)
 	int i;
 	CColModel *colModel;
 
-	if(bUseSpecialColModel)
+	if(bUsingSpecialColModel)
 		colModel = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel;
 	else
 		colModel = GetColModel();
@@ -1202,8 +1203,216 @@ CAutomobile::Teleport(CVector pos)
 }
 
 WRAPPER void CAutomobile::PreRender(void) { EAXJMP(0x535B40); }
-WRAPPER void CAutomobile::Render(void) { EAXJMP(0x539EA0); }
 
+void
+CAutomobile::Render(void)
+{
+	int i;
+	CMatrix mat;
+	CVector pos;
+	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
+
+	if(GetModelIndex() == MI_RHINO && m_aCarNodes[CAR_BONNET]){
+		// Rhino has no bonnet...what are we doing here?
+		CMatrix m;
+		CVector p;
+		m.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_BONNET]));
+		p = m.GetPosition();
+		m.SetRotateZ(m_fCarGunLR);
+		m.Translate(p);
+		m.UpdateRW();
+	}
+
+	CVector contactPoints[4];	// relative to model
+	CVector contactSpeeds[4];	// speed at contact points
+	CVector frontWheelFwd = Multiply3x3(GetMatrix(), CVector(-Sin(m_fSteerAngle), Cos(m_fSteerAngle), 0.0f));
+	CVector rearWheelFwd = GetForward();
+	for(i = 0; i < 4; i++){
+		contactPoints[i] = m_aWheelColPoints[i].point - GetPosition();
+		contactSpeeds[i] = GetSpeed(contactPoints[i]);
+		if(i == CARWHEEL_FRONT_LEFT || i == CARWHEEL_FRONT_RIGHT)
+			m_aWheelSpeed[i] = ProcessWheelRotation(m_aWheelState[i], frontWheelFwd, contactSpeeds[i], 0.5f*mi->m_wheelScale);
+		else
+			m_aWheelSpeed[i] = ProcessWheelRotation(m_aWheelState[i], rearWheelFwd, contactSpeeds[i], 0.5f*mi->m_wheelScale);
+		m_aWheelRotation[i] += m_aWheelSpeed[i];
+	}
+
+	// Rear right wheel
+	mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RB]));
+	pos.x = mat.GetPosition().x;
+	pos.y = mat.GetPosition().y;
+	pos.z = m_aWheelPosition[CARWHEEL_REAR_RIGHT];
+	if(Damage.GetWheelStatus(CARWHEEL_REAR_RIGHT) == WHEEL_STATUS_BURST)
+		mat.SetRotate(m_aWheelRotation[CARWHEEL_REAR_RIGHT], 0.0f, 0.3f*Sin(m_aWheelRotation[CARWHEEL_REAR_RIGHT]));
+	else
+		mat.SetRotateX(m_aWheelRotation[CARWHEEL_REAR_RIGHT]);
+	mat.Scale(mi->m_wheelScale);
+	mat.Translate(pos);
+	mat.UpdateRW();
+	if(CVehicle::bWheelsOnlyCheat)
+		RpAtomicRender((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_RB]));
+
+	// Rear left wheel
+	mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LB]));
+	pos.x = mat.GetPosition().x;
+	pos.y = mat.GetPosition().y;
+	pos.z = m_aWheelPosition[CARWHEEL_REAR_LEFT];
+	if(Damage.GetWheelStatus(CARWHEEL_REAR_LEFT) == WHEEL_STATUS_BURST)
+		mat.SetRotate(-m_aWheelRotation[CARWHEEL_REAR_LEFT], 0.0f, PI+0.3f*Sin(-m_aWheelRotation[CARWHEEL_REAR_LEFT]));
+	else
+		mat.SetRotate(-m_aWheelRotation[CARWHEEL_REAR_LEFT], 0.0f, PI);
+	mat.Scale(mi->m_wheelScale);
+	mat.Translate(pos);
+	mat.UpdateRW();
+	if(CVehicle::bWheelsOnlyCheat)
+		RpAtomicRender((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LB]));
+
+	// Mid right wheel
+	if(m_aCarNodes[CAR_WHEEL_RM]){
+		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RM]));
+		pos.x = mat.GetPosition().x;
+		pos.y = mat.GetPosition().y;
+		pos.z = m_aWheelPosition[CARWHEEL_REAR_RIGHT];
+		if(Damage.GetWheelStatus(CARWHEEL_REAR_RIGHT) == WHEEL_STATUS_BURST)
+			mat.SetRotate(m_aWheelRotation[CARWHEEL_REAR_RIGHT], 0.0f, 0.3f*Sin(m_aWheelRotation[CARWHEEL_REAR_RIGHT]));
+		else
+			mat.SetRotateX(m_aWheelRotation[CARWHEEL_REAR_RIGHT]);
+		mat.Scale(mi->m_wheelScale);
+		mat.Translate(pos);
+		mat.UpdateRW();
+		if(CVehicle::bWheelsOnlyCheat)
+			RpAtomicRender((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_RM]));
+	}
+
+	// Mid left wheel
+	if(m_aCarNodes[CAR_WHEEL_LM]){
+		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LM]));
+		pos.x = mat.GetPosition().x;
+		pos.y = mat.GetPosition().y;
+		pos.z = m_aWheelPosition[CARWHEEL_REAR_LEFT];
+		if(Damage.GetWheelStatus(CARWHEEL_REAR_LEFT) == WHEEL_STATUS_BURST)
+			mat.SetRotate(-m_aWheelRotation[CARWHEEL_REAR_LEFT], 0.0f, PI+0.3f*Sin(-m_aWheelRotation[CARWHEEL_REAR_LEFT]));
+		else
+			mat.SetRotate(-m_aWheelRotation[CARWHEEL_REAR_LEFT], 0.0f, PI);
+		mat.Scale(mi->m_wheelScale);
+		mat.Translate(pos);
+		mat.UpdateRW();
+		if(CVehicle::bWheelsOnlyCheat)
+			RpAtomicRender((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LM]));
+	}
+
+	if(GetModelIndex() == MI_DODO){
+		// Front wheel
+		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]));
+		pos.x = mat.GetPosition().x;
+		pos.y = mat.GetPosition().y;
+		pos.z = m_aWheelPosition[CARWHEEL_FRONT_RIGHT];
+		if(Damage.GetWheelStatus(CARWHEEL_FRONT_RIGHT) == WHEEL_STATUS_BURST)
+			mat.SetRotate(m_aWheelRotation[CARWHEEL_FRONT_RIGHT], 0.0f, m_fSteerAngle+0.3f*Sin(m_aWheelRotation[CARWHEEL_FRONT_RIGHT]));
+		else
+			mat.SetRotate(m_aWheelRotation[CARWHEEL_FRONT_RIGHT], 0.0f, m_fSteerAngle);
+		mat.Scale(mi->m_wheelScale);
+		mat.Translate(pos);
+		mat.UpdateRW();
+		if(CVehicle::bWheelsOnlyCheat)
+			RpAtomicRender((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_RF]));
+
+		// Rotate propeller
+		if(m_aCarNodes[CAR_WINDSCREEN]){
+			mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WINDSCREEN]));
+			pos = mat.GetPosition();
+			mat.SetRotateY(m_fPropellerRotation);
+			mat.Translate(pos);
+			mat.UpdateRW();
+
+			m_fPropellerRotation += m_fGasPedal != 0.0f ? TWOPI/13.0f : TWOPI/26.0f;
+			if(m_fPropellerRotation > TWOPI)
+				m_fPropellerRotation -= TWOPI;
+		}
+
+		// Rudder
+		if(Damage.GetDoorStatus(DOOR_BOOT) != DOOR_STATUS_MISSING && m_aCarNodes[CAR_BOOT]){
+			mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_BOOT]));
+			pos = mat.GetPosition();
+			mat.SetRotate(0.0f, 0.0f, -m_fSteerAngle);
+			mat.Rotate(0.0f, Sin(m_fSteerAngle)*DEGTORAD(22.0f), 0.0f);
+			mat.Translate(pos);
+			mat.UpdateRW();
+		}
+
+		ProcessSwingingDoor(CAR_DOOR_LF, DOOR_FRONT_LEFT);
+		ProcessSwingingDoor(CAR_DOOR_RF, DOOR_FRONT_RIGHT);
+	}else if(GetModelIndex() == MI_RHINO){
+		// Front right wheel
+		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]));
+		pos.x = mat.GetPosition().x;
+		pos.y = mat.GetPosition().y;
+		pos.z = m_aWheelPosition[CARWHEEL_FRONT_RIGHT];
+		// no damaged wheels or steering
+		mat.SetRotate(m_aWheelRotation[CARWHEEL_FRONT_RIGHT], 0.0f, 0.0f);
+		mat.Scale(mi->m_wheelScale);
+		mat.Translate(pos);
+		mat.UpdateRW();
+		if(CVehicle::bWheelsOnlyCheat)
+			RpAtomicRender((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_RF]));
+
+		// Front left wheel
+		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]));
+		pos.x = mat.GetPosition().x;
+		pos.y = mat.GetPosition().y;
+		pos.z = m_aWheelPosition[CARWHEEL_FRONT_LEFT];
+		// no damaged wheels or steering
+		mat.SetRotate(-m_aWheelRotation[CARWHEEL_FRONT_LEFT], 0.0f, PI);
+		mat.Scale(mi->m_wheelScale);
+		mat.Translate(pos);
+		mat.UpdateRW();
+		if(CVehicle::bWheelsOnlyCheat)
+			RpAtomicRender((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]));
+	}else{
+		// Front right wheel
+		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]));
+		pos.x = mat.GetPosition().x;
+		pos.y = mat.GetPosition().y;
+		pos.z = m_aWheelPosition[CARWHEEL_FRONT_RIGHT];
+		if(Damage.GetWheelStatus(CARWHEEL_FRONT_RIGHT) == WHEEL_STATUS_BURST)
+			mat.SetRotate(m_aWheelRotation[CARWHEEL_FRONT_RIGHT], 0.0f, m_fSteerAngle+0.3f*Sin(m_aWheelRotation[CARWHEEL_FRONT_RIGHT]));
+		else
+			mat.SetRotate(m_aWheelRotation[CARWHEEL_FRONT_RIGHT], 0.0f, m_fSteerAngle);
+		mat.Scale(mi->m_wheelScale);
+		mat.Translate(pos);
+		mat.UpdateRW();
+		if(CVehicle::bWheelsOnlyCheat)
+			RpAtomicRender((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_RF]));
+
+		// Front left wheel
+		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]));
+		pos.x = mat.GetPosition().x;
+		pos.y = mat.GetPosition().y;
+		pos.z = m_aWheelPosition[CARWHEEL_FRONT_LEFT];
+		if(Damage.GetWheelStatus(CARWHEEL_FRONT_LEFT) == WHEEL_STATUS_BURST)
+			mat.SetRotate(-m_aWheelRotation[CARWHEEL_FRONT_LEFT], 0.0f, PI+m_fSteerAngle+0.3f*Sin(-m_aWheelRotation[CARWHEEL_FRONT_LEFT]));
+		else
+			mat.SetRotate(-m_aWheelRotation[CARWHEEL_FRONT_LEFT], 0.0f, PI+m_fSteerAngle);
+		mat.Scale(mi->m_wheelScale);
+		mat.Translate(pos);
+		mat.UpdateRW();
+		if(CVehicle::bWheelsOnlyCheat)
+			RpAtomicRender((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]));
+
+		ProcessSwingingDoor(CAR_DOOR_LF, DOOR_FRONT_LEFT);
+		ProcessSwingingDoor(CAR_DOOR_RF, DOOR_FRONT_RIGHT);
+		ProcessSwingingDoor(CAR_DOOR_LR, DOOR_REAR_LEFT);
+		ProcessSwingingDoor(CAR_DOOR_RR, DOOR_REAR_RIGHT);
+		ProcessSwingingDoor(CAR_BONNET, DOOR_BONNET);
+		ProcessSwingingDoor(CAR_BOOT, DOOR_BOOT);
+
+		mi->SetVehicleColour(m_currentColour1, m_currentColour2);
+	}
+
+
+	if(!CVehicle::bWheelsOnlyCheat)
+		CEntity::Render();
+}
 
 int32
 CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
@@ -1214,7 +1423,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 	if(m_status != STATUS_SIMPLE)
 		bVehicleColProcessed = true;
 
-	if(bUseSpecialColModel)
+	if(bUsingSpecialColModel)
 		colModel = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel;
 	else
 		colModel = GetColModel();
@@ -1596,7 +1805,7 @@ CAutomobile::HydraulicControl(void)
 	if(m_status != STATUS_PLAYER){
 		// reset hydraulics for non-player cars
 
-		if(!bUseSpecialColModel)
+		if(!bUsingSpecialColModel)
 			return;
 		if(specialColModel != nil)	// this is always true
 			for(i = 0; i < 4; i++)
@@ -1616,7 +1825,7 @@ CAutomobile::HydraulicControl(void)
 
 		if(playerInfo->m_pVehicleEx == this)
 			playerInfo->m_pVehicleEx = nil;
-		bUseSpecialColModel = false;
+		bUsingSpecialColModel = false;
 		m_hydraulicState = 0;
 		return;
 	}
@@ -1630,14 +1839,14 @@ CAutomobile::HydraulicControl(void)
 	float extendedLowerLimit = normalLowerLimit - 0.2f;
 	float extendedSpringLength = extendedUpperLimit - extendedLowerLimit;
 
-	if(!bUseSpecialColModel){
+	if(!bUsingSpecialColModel){
 		// Init special col model
 
 		if(playerInfo->m_pVehicleEx && playerInfo->m_pVehicleEx == this)
-			playerInfo->m_pVehicleEx->bUseSpecialColModel = false;
+			playerInfo->m_pVehicleEx->bUsingSpecialColModel = false;
 		playerInfo->m_pVehicleEx = this;
 		playerInfo->m_ColModel = *normalColModel;
-		bUseSpecialColModel = true;
+		bUsingSpecialColModel = true;
 		specialColModel = &playerInfo->m_ColModel;
 
 		if(m_fVelocityChangeForAudio > 0.1f)
@@ -2467,6 +2676,110 @@ CAutomobile::dmgDrawCarCollidingParticles(const CVector &pos, float amount)
 }
 
 void
+CAutomobile::AddDamagedVehicleParticles(void)
+{
+	if(this == FindPlayerVehicle() && TheCamera.GetLookingForwardFirstPerson())
+		return;
+
+	uint8 engineStatus = Damage.GetEngineStatus();
+	if(engineStatus < ENGINE_STATUS_STEAM1)
+		return;
+
+	float fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward()) * 180.0f;
+	CVector direction = 0.5f*m_vecMoveSpeed;
+	CVector damagePos = ((CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()))->m_positions[CAR_POS_HEADLIGHTS];
+
+	switch(Damage.GetDoorStatus(DOOR_BONNET)){
+	case DOOR_STATUS_OK:
+	case DOOR_STATUS_SMASHED:
+		// Bonnet is still there, smoke comes out at the edge
+		damagePos += vecDAMAGE_ENGINE_POS_SMALL;
+		break;
+	case DOOR_STATUS_SWINGING:
+	case DOOR_STATUS_MISSING:
+		// Bonnet is gone, smoke comes out at the engine
+		damagePos += vecDAMAGE_ENGINE_POS_BIG;
+		break;
+	}
+
+	if(GetModelIndex() == MI_BFINJECT)
+		damagePos = CVector(0.3f, -1.5f, -0.1f);
+
+	damagePos = GetMatrix()*damagePos;
+	damagePos.z += 0.15f;
+
+	if(engineStatus < ENGINE_STATUS_STEAM2){
+		if(fwdSpeed < 90.0f){
+			direction.z += 0.05f;
+			CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, direction, nil, 0.1f);
+		}
+	}else if(engineStatus < ENGINE_STATUS_SMOKE){
+		if(fwdSpeed < 90.0f)
+			CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, direction, nil, 0.0f);
+	}else if(engineStatus < ENGINE_STATUS_ON_FIRE){
+		if(fwdSpeed < 90.0f){
+			CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, direction, nil, 0.0f);
+			CParticle::AddParticle(PARTICLE_ENGINE_SMOKE, damagePos, 0.3f*direction, nil, 0.0f);
+		}
+	}else if(m_fHealth > 250.0f){
+		if(fwdSpeed < 90.0f)
+			CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, damagePos, 0.2f*direction, nil, 0.0f);
+	}
+}
+
+void
+CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
+{
+	int i;
+	CVector dir;
+	static RwRGBA grassCol = { 8, 24, 8, 255 };
+	static RwRGBA dirtCol = { 64, 64, 64, 255 };
+	static RwRGBA dirttrackCol = { 64, 32, 16, 255 };
+	static RwRGBA waterCol = { 48, 48, 64, 0 };
+
+	if(!belowEffectSpeed)
+		return;
+
+	switch(colpoint->surfaceB){
+	case SURFACE_GRASS:
+		dir.x = -0.05f*m_vecMoveSpeed.x;
+		dir.y = -0.05f*m_vecMoveSpeed.y;
+		for(i = 0; i < 4; i++){
+			dir.z = CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
+			CParticle::AddParticle(PARTICLE_WHEEL_DIRT, colpoint->point, dir, nil,
+				CGeneral::GetRandomNumberInRange(0.02f, 0.1f), grassCol);
+		}
+		break;
+	case SURFACE_DIRT:
+		dir.x = -0.05f*m_vecMoveSpeed.x;
+		dir.y = -0.05f*m_vecMoveSpeed.y;
+		for(i = 0; i < 4; i++){
+			dir.z = CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
+			CParticle::AddParticle(PARTICLE_WHEEL_DIRT, colpoint->point, dir, nil,
+				CGeneral::GetRandomNumberInRange(0.02f, 0.06f), dirtCol);
+		}
+		break;
+	case SURFACE_DIRTTRACK:
+		dir.x = -0.05f*m_vecMoveSpeed.x;
+		dir.y = -0.05f*m_vecMoveSpeed.y;
+		for(i = 0; i < 4; i++){
+			dir.z = CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
+			CParticle::AddParticle(PARTICLE_WHEEL_DIRT, colpoint->point, dir, nil,
+				CGeneral::GetRandomNumberInRange(0.02f, 0.06f), dirttrackCol);
+		}
+		break;
+	default:
+		// Is this even visible?
+		if(CWeather::WetRoads > 0.01f && CTimer::GetFrameCounter() & 1)
+			CParticle::AddParticle(PARTICLE_WATERSPRAY,
+				colpoint->point + CVector(0.0f, 0.0f, 0.25f+0.25f),
+				CVector(0.0f, 0.0f, 1.0f), nil,
+				CGeneral::GetRandomNumberInRange(0.1f, 0.5f), waterCol);
+		break;
+	}
+}
+
+void
 CAutomobile::GetComponentWorldPosition(int32 component, CVector &pos)
 {
 	if(m_aCarNodes[component] == nil){
@@ -2824,7 +3137,64 @@ CAutomobile::BurstTyre(uint8 wheel)
 	}
 }
 
-WRAPPER bool CAutomobile::IsRoomForPedToLeaveCar(uint32, CVector *) { EAXJMP(0x53C5B0); }
+bool
+CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset)
+{
+	CColPoint colpoint;
+	CEntity *ent;
+	colpoint.point = CVector(0.0f, 0.0f, 0.0f);
+	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
+
+	CVector seatPos;
+	switch(component){
+	case CAR_DOOR_RF:
+		seatPos = mi->m_positions[IsBoat() ? BOAT_POS_FRONTSEAT : CAR_POS_FRONTSEAT];
+		break;
+	case CAR_DOOR_LF:
+		seatPos = mi->m_positions[IsBoat() ? BOAT_POS_FRONTSEAT : CAR_POS_FRONTSEAT];
+		seatPos.x = -seatPos.x;
+		break;
+	case CAR_DOOR_RR:
+		seatPos = mi->m_positions[CAR_POS_BACKSEAT];
+		break;
+	case CAR_DOOR_LR:
+		seatPos = mi->m_positions[CAR_POS_BACKSEAT];
+		seatPos.x = -seatPos.x;
+		break;
+	}
+	seatPos = GetMatrix() * seatPos;
+
+	CVector doorPos = CPed::GetPositionToOpenCarDoor(this, component);
+	if(doorOffset){
+		CVector off = *doorOffset;
+		if(component == CAR_DOOR_RF || component == CAR_DOOR_RR)
+			off.x = -off.x;
+		doorPos += Multiply3x3(GetMatrix(), off);
+	}
+
+	if(GetUp().z < 0.0f){
+		seatPos.z += 0.5f;
+		doorPos.z += 0.5f;
+	}
+
+	CVector dist = doorPos - seatPos;
+	float length = dist.Magnitude();
+	CVector pedPos = seatPos + dist*((length+0.6f)/length);
+
+	if(!CWorld::GetIsLineOfSightClear(seatPos, pedPos, true, false, false, true, false, false))
+		return false;
+	if(CWorld::TestSphereAgainstWorld(doorPos, 0.6f, this, true, true, false, true, false, false))
+		return false;
+	if(CWorld::ProcessVerticalLine(doorPos, 1000.0f, colpoint, ent, true, false, false, true, false, false, nil))
+		if(colpoint.point.z > doorPos.z && colpoint.point.z < doorPos.z + 0.6f)
+			return false;
+	float upperZ = colpoint.point.z;
+	if(!CWorld::ProcessVerticalLine(doorPos, -1000.0f, colpoint, ent, true, false, false, true, false, false, nil))
+		return false;
+	if(upperZ != 0.0f && upperZ < colpoint.point.z)
+		return false;
+	return true;
+}
 
 float
 CAutomobile::GetHeightAboveRoad(void)
@@ -3438,6 +3808,7 @@ STARTPATCHES
 	InjectHook(0x52D190, &CAutomobile_::SetModelIndex_, PATCH_JUMP);
 	InjectHook(0x531470, &CAutomobile_::ProcessControl_, PATCH_JUMP);
 	InjectHook(0x535180, &CAutomobile_::Teleport_, PATCH_JUMP);
+	InjectHook(0x539EA0, &CAutomobile_::Render_, PATCH_JUMP);
 	InjectHook(0x53B270, &CAutomobile_::ProcessEntityCollision_, PATCH_JUMP);
 	InjectHook(0x53B660, &CAutomobile_::ProcessControlInputs_, PATCH_JUMP);
 	InjectHook(0x52E5F0, &CAutomobile_::GetComponentWorldPosition_, PATCH_JUMP);
@@ -3452,10 +3823,13 @@ STARTPATCHES
 	InjectHook(0x53BC60, &CAutomobile_::BlowUpCar_, PATCH_JUMP);
 	InjectHook(0x53BF70, &CAutomobile_::SetUpWheelColModel_, PATCH_JUMP);
 	InjectHook(0x53C0E0, &CAutomobile_::BurstTyre_, PATCH_JUMP);
+	InjectHook(0x53C5B0, &CAutomobile_::IsRoomForPedToLeaveCar_, PATCH_JUMP);
 	InjectHook(0x437690, &CAutomobile_::GetHeightAboveRoad_, PATCH_JUMP);
 	InjectHook(0x53C450, &CAutomobile_::PlayCarHorn_, PATCH_JUMP);
 	InjectHook(0x53E090, &CAutomobile::PlaceOnRoadProperly, PATCH_JUMP);
 	InjectHook(0x52F030, &CAutomobile::dmgDrawCarCollidingParticles, PATCH_JUMP);
+	InjectHook(0x535450, &CAutomobile::AddDamagedVehicleParticles, PATCH_JUMP);
+	InjectHook(0x5357D0, &CAutomobile::AddWheelDirtAndWater, PATCH_JUMP);
 	InjectHook(0x5353A0, &CAutomobile::ResetSuspension, PATCH_JUMP);
 	InjectHook(0x52D210, &CAutomobile::SetupSuspensionLines, PATCH_JUMP);
 	InjectHook(0x53E000, &CAutomobile::BlowUpCarsInPath, PATCH_JUMP);

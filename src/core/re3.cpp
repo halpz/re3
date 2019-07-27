@@ -150,6 +150,18 @@ FixCar(void)
 	((CAutomobile*)veh)->Fix();
 }
 
+static int engineStatus;
+static void
+SetEngineStatus(void)
+{
+	CVehicle *veh = FindPlayerVehicle();
+	if(veh == nil)
+		return;
+	if(!veh->IsCar())
+		return;
+	((CAutomobile*)veh)->Damage.SetEngineStatus(engineStatus);
+}
+
 static void
 ToggleComedy(void)
 {
@@ -300,7 +312,8 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Rhino", [](){ SpawnCar(MI_RHINO); });
 		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
 
-
+		DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
+		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
 		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
 		DebugMenuAddCmd("Debug", "Place Car on Road", PlaceOnRoad);

@@ -70,7 +70,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bHasBeenOwnedByPlayer = false;
 	m_veh_flagC20 = false;
 	bCanBeDamaged = true;
-	bUseSpecialColModel = false;
+	bUsingSpecialColModel = false;
 	m_veh_flagD1 = false;
 	m_veh_flagD2 = false;
 	m_nGunFiringTime = 0;

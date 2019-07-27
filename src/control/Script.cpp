@@ -2430,7 +2430,7 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 	{
 		CollectParameters(&m_nIp, 2);
 		bool value = GetPadState(ScriptParams[0], ScriptParams[1]) != 0;
-		if (CGame::playingIntro && ScriptParams[0] && ScriptParams[1] == 12){ /* pad1, start */
+		if (CGame::playingIntro && ScriptParams[0] == 0 && ScriptParams[1] == 12){ /* pad1, start */
 			if (CPad::GetPad(0)->GetLeftMouseJustDown() ||
 				CPad::GetPad(0)->GetPadEnterJustDown() ||
 				CPad::GetPad(0)->GetCharJustDown(' '))

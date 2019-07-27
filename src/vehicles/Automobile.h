@@ -71,7 +71,7 @@ public:
 	float m_weaponDoorTimerRight;
 	float m_fCarGunLR;
 	float m_fCarGunUD;
-	float m_fWindScreenRotation;
+	float m_fPropellerRotation;
 	uint8 stuff4[4];
 	uint8 m_nWheelsOnGround;
 	uint8 m_nDriveWheelsOnGround;
@@ -108,7 +108,7 @@ public:
 	void BlowUpCar(CEntity *ent);
 	bool SetUpWheelColModel(CColModel *colModel);
 	void BurstTyre(uint8 tyre);
-	bool IsRoomForPedToLeaveCar(uint32, CVector *);
+	bool IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset);
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
@@ -122,6 +122,8 @@ public:
 	int32 RcbanditCheck1CarWheels(CPtrList &list);
 	void PlaceOnRoadProperly(void);
 	void dmgDrawCarCollidingParticles(const CVector &pos, float amount);
+	void AddDamagedVehicleParticles(void);
+	void AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed);
 	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);
 	void SetupSuspensionLines(void);

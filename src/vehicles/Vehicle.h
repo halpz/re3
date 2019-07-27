@@ -59,6 +59,11 @@ enum
 	CAR_POS_EXHAUST		= 9,
 };
 
+enum
+{
+	BOAT_POS_FRONTSEAT
+};
+
 enum eDoors
 {
 	DOOR_BONNET = 0,
@@ -186,7 +191,7 @@ public:
 	uint8 m_veh_flagC10 : 1;
 	uint8 m_veh_flagC20 : 1;
 	uint8 bCanBeDamaged : 1; // Set to FALSE during cut scenes to avoid explosions
-	uint8 bUseSpecialColModel : 1;
+	uint8 bUsingSpecialColModel : 1;// Is player vehicle using special collision model, stored in player strucure
 
 	uint8 m_veh_flagD1 : 1;
 	uint8 m_veh_flagD2 : 1;
@@ -253,7 +258,7 @@ public:
 	virtual void BlowUpCar(CEntity *ent) {}
 	virtual bool SetUpWheelColModel(CColModel *colModel) { return false; }
 	virtual void BurstTyre(uint8 tyre) {}
-	virtual bool IsRoomForPedToLeaveCar(uint32, CVector *) { return false;}
+	virtual bool IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos) { return false;}
 	virtual float GetHeightAboveRoad(void);
 	virtual void PlayCarHorn(void) {}
 

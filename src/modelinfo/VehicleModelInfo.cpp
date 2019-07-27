@@ -79,7 +79,7 @@ RwObjectNameIdAssocation boatIds[] = {
 	{ "boat_moving_hi",	1,	VEHICLE_FLAG_COLLAPSE },
 	{ "boat_rudder_hi",	3,	VEHICLE_FLAG_COLLAPSE },
 	{ "windscreen",		2,	VEHICLE_FLAG_WINDSCREEN | VEHICLE_FLAG_COLLAPSE },
-	{ "ped_frontseat",	0,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "ped_frontseat",	BOAT_POS_FRONTSEAT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
 	{ nil, 0, 0 }
 };
 
