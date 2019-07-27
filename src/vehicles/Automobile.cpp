@@ -207,7 +207,7 @@ CAutomobile::ProcessControl(void)
 	int i;
 	CColModel *colModel;
 
-	if(bUseSpecialColModel)
+	if(bUsingSpecialColModel)
 		colModel = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel;
 	else
 		colModel = GetColModel();
@@ -1423,7 +1423,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 	if(m_status != STATUS_SIMPLE)
 		bVehicleColProcessed = true;
 
-	if(bUseSpecialColModel)
+	if(bUsingSpecialColModel)
 		colModel = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel;
 	else
 		colModel = GetColModel();
@@ -1805,7 +1805,7 @@ CAutomobile::HydraulicControl(void)
 	if(m_status != STATUS_PLAYER){
 		// reset hydraulics for non-player cars
 
-		if(!bUseSpecialColModel)
+		if(!bUsingSpecialColModel)
 			return;
 		if(specialColModel != nil)	// this is always true
 			for(i = 0; i < 4; i++)
@@ -1825,7 +1825,7 @@ CAutomobile::HydraulicControl(void)
 
 		if(playerInfo->m_pVehicleEx == this)
 			playerInfo->m_pVehicleEx = nil;
-		bUseSpecialColModel = false;
+		bUsingSpecialColModel = false;
 		m_hydraulicState = 0;
 		return;
 	}
@@ -1839,14 +1839,14 @@ CAutomobile::HydraulicControl(void)
 	float extendedLowerLimit = normalLowerLimit - 0.2f;
 	float extendedSpringLength = extendedUpperLimit - extendedLowerLimit;
 
-	if(!bUseSpecialColModel){
+	if(!bUsingSpecialColModel){
 		// Init special col model
 
 		if(playerInfo->m_pVehicleEx && playerInfo->m_pVehicleEx == this)
-			playerInfo->m_pVehicleEx->bUseSpecialColModel = false;
+			playerInfo->m_pVehicleEx->bUsingSpecialColModel = false;
 		playerInfo->m_pVehicleEx = this;
 		playerInfo->m_ColModel = *normalColModel;
-		bUseSpecialColModel = true;
+		bUsingSpecialColModel = true;
 		specialColModel = &playerInfo->m_ColModel;
 
 		if(m_fVelocityChangeForAudio > 0.1f)
