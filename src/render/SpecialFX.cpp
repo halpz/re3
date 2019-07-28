@@ -11,5 +11,6 @@ CBulletTrace (&CBulletTraces::aTraces)[16] = *(CBulletTrace(*)[16])*(uintptr*)0x
 
 WRAPPER void CBulletTraces::Init(void) { EAXJMP(0x518DE0); }
 
+WRAPPER void CBrightLights::RegisterOne(CVector pos, CVector up, CVector right, CVector fwd, uint8 type, uint8 unk1, uint8 unk2, uint8 unk3) { EAXJMP(0x51A410); }
 
 WRAPPER void C3dMarkers::PlaceMarkerSet(uint32 id, uint16 type, CVector& pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate)  { EAXJMP(0x51BB80); }

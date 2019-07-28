@@ -359,10 +359,10 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 				   ent->GetModelIndex() == MI_RHINO ||
 				   ent->GetModelIndex() == MI_COACH ||
 				   TheCamera.m_bInATunnelAndABigVehicle){
-					ent->m_flagD40 = true;
+					ent->bNoBrightHeadLights = true;
 				}else{
 					m_pFirstPersonVehicle = (CVehicle*)ent;
-					ent->m_flagD40 = false;
+					ent->bNoBrightHeadLights = false;
 				}
 				return VIS_OFFSCREEN;
 			}else{

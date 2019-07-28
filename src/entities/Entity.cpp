@@ -65,7 +65,7 @@ CEntity::CEntity(void)
 	m_flagD8 = false;
 	bIsSubway = false;
 	bDrawLast = false;
-	m_flagD40 = false;
+	bNoBrightHeadLights = false;
 	m_flagD80 = false;
 
 	bDistanceFade = false;

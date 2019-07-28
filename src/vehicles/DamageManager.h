@@ -35,6 +35,12 @@ enum eWheelStatus
 	WHEEL_STATUS_MISSING
 };
 
+enum eLightStatus
+{
+	LIGHT_STATUS_OK,
+	LIGHT_STATUS_BROKEN
+};
+
 enum tComponent
 {
 	COMPONENT_DEFAULT,
