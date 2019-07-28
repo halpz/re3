@@ -255,9 +255,9 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	float contactSpeedFwd = DotProduct(wheelContactSpeed, wheelFwd);
 	float contactSpeedRight = DotProduct(wheelContactSpeed, wheelRight);
 
-	if(*wheelState != WHEEL_STATE_0)
+	if(*wheelState != WHEEL_STATE_NORMAL)
 		bAlreadySkidding = true;
-	*wheelState = WHEEL_STATE_0;
+	*wheelState = WHEEL_STATE_NORMAL;
 
 	adhesion *= CTimer::GetTimeStep();
 	if(bAlreadySkidding)
@@ -299,7 +299,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 
 		if(brake > adhesion){
 			if(Abs(contactSpeedFwd) > 0.005f)
-				*wheelState = WHEEL_STATE_STATIC;
+				*wheelState = WHEEL_STATE_FIXED;
 		}else {
 			if(fwd > 0.0f){
 				if(fwd > brake)
@@ -312,11 +312,11 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	}
 
 	if(sq(adhesion) < sq(right) + sq(fwd)){
-		if(*wheelState != WHEEL_STATE_STATIC){
+		if(*wheelState != WHEEL_STATE_FIXED){
 			if(bDriving && contactSpeedFwd < 0.2f)
-				*wheelState = WHEEL_STATE_1;
+				*wheelState = WHEEL_STATE_SPINNING;
 			else
-				*wheelState = WHEEL_STATE_2;
+				*wheelState = WHEEL_STATE_SKIDDING;
 		}
 
 		float l = Sqrt(sq(right) + sq(fwd));
@@ -343,10 +343,10 @@ CVehicle::ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVec
 {
 	float angularVelocity;
 	switch(state){
-	case WHEEL_STATE_1:
+	case WHEEL_STATE_SPINNING:
 		angularVelocity = -1.1f;	// constant speed forward
 		break;
-	case WHEEL_STATE_STATIC:
+	case WHEEL_STATE_FIXED:
 		angularVelocity = 0.0f;		// not moving
 		break;
 	default:

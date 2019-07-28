@@ -31,7 +31,7 @@ public:
 	void Normalise(void) {
 		float sq = MagnitudeSqr();
 		if(sq > 0.0f){
-			float invsqrt = 1.0f/Sqrt(sq); // CMaths::RecipSqrt
+			float invsqrt = RecipSqrt(sq);
 			x *= invsqrt;
 			y *= invsqrt;
 			z *= invsqrt;
@@ -69,6 +69,10 @@ public:
 
 	CVector operator-() const {
 		return CVector(-x, -y, -z);
+	}
+
+	const bool operator==(CVector const &right) {
+		return x == right.x && y == right.y && z == right.z;
 	}
 
 	bool IsZero(void) { return x == 0.0f && y == 0.0f && z == 0.0f; }

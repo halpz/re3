@@ -29,8 +29,15 @@ public:
 	static void Init(void);
 };
 
+class CBrightLights
+{
+public:
+	static void RegisterOne(CVector pos, CVector up, CVector right, CVector fwd, uint8 type, uint8 unk1 = 0, uint8 unk2 = 0, uint8 unk3 = 0);
+};
+
 class C3dMarkers
 {
 public:
 	static void PlaceMarkerSet(uint32 id, uint16 type, CVector& pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);  
 };
+

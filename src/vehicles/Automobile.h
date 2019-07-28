@@ -123,7 +123,7 @@ public:
 	void PlaceOnRoadProperly(void);
 	void dmgDrawCarCollidingParticles(const CVector &pos, float amount);
 	void AddDamagedVehicleParticles(void);
-	void AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed);
+	int32 AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed);
 	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);
 	void SetupSuspensionLines(void);

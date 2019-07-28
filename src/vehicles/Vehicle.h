@@ -124,10 +124,10 @@ enum
 
 enum tWheelState
 {
-	WHEEL_STATE_0 = 0,
-	WHEEL_STATE_1 = 1,	// constant velocity
-	WHEEL_STATE_2 = 2,	// normal
-	WHEEL_STATE_STATIC = 3,	// not moving
+	WHEEL_STATE_NORMAL,	// standing still or rolling normally
+	WHEEL_STATE_SPINNING,	// rotating but not moving
+	WHEEL_STATE_SKIDDING,
+	WHEEL_STATE_FIXED,	// not rotating
 };
 
 enum eFlightModel

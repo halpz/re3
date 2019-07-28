@@ -1489,7 +1489,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float seatP
 			break;
 
 		case CAR_DOOR_RR:
-			vehDoorPos = vehModel->m_positions[CAR_POS_FRONTSEAT];
+			vehDoorPos = vehModel->m_positions[CAR_POS_BACKSEAT];
 			vehDoorPos.x += seatOffset;
 			vehDoorOffset.x = -vehDoorOffset.x;
 			break;
@@ -1504,7 +1504,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float seatP
 			break;
 
 		case CAR_DOOR_LR:
-			vehDoorPos = vehModel->m_positions[BOAT_POS_FRONTSEAT];
+			vehDoorPos = vehModel->m_positions[CAR_POS_BACKSEAT];
 			vehDoorPos.x = -(vehDoorPos.x + seatOffset);
 			break;
 
