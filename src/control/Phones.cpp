@@ -76,6 +76,7 @@ CPhoneInfo::Load(CPhoneInfo *source, uint8 buffer)
 
 		m_aPhones[phoneId].m_vecPos = phone->m_vecPos;
 		memcpy(m_aPhones[phoneId].m_apMessages, phone->m_apMessages, sizeof(wchar*) * 6);
+		m_aPhones[phoneId].m_lastTimeRepeatedMsgShown = phone->m_lastTimeRepeatedMsgShown;
 		m_aPhones[phoneId].m_pEntity = phone->m_pEntity;
 		m_aPhones[phoneId].m_nState = phone->m_nState;
 		m_aPhones[phoneId].field_30 = phone->field_30;
@@ -183,13 +184,14 @@ CPhoneInfo::Save(CPhoneInfo *destination, uint32 *size)
 
 		phone->m_vecPos = m_aPhones[phoneId].m_vecPos;
 		memcpy(phone->m_apMessages, m_aPhones[phoneId].m_apMessages, sizeof(wchar*) * 6);
+		phone->m_lastTimeRepeatedMsgShown = m_aPhones[phoneId].m_lastTimeRepeatedMsgShown;
 		phone->m_pEntity = m_aPhones[phoneId].m_pEntity;
 		phone->m_nState = m_aPhones[phoneId].m_nState;
 		phone->field_30 = m_aPhones[phoneId].field_30;
 
 		// Convert entity pointer to building pool index while saving
 		if (phone->m_pEntity) {
-			phone->m_pEntity = (CEntity*) CPools::GetBuildingPool()->GetJustIndex((CBuilding*)phone->m_pEntity) + 1;
+			phone->m_pEntity = (CEntity*) (CPools::GetBuildingPool()->GetJustIndex((CBuilding*)phone->m_pEntity) + 1);
 		}
 	}
 }
