@@ -283,18 +283,18 @@ void CTheCarGenerators::SaveAllCarGenerators(uint8 *buffer, uint32 *size)
 void CTheCarGenerators::LoadAllCarGenerators(uint8* buffer, uint32 size)
 {
 	Init();
-	assert(size == 8 + NUM_CARGENS * 72);
+	assert(size == 28 + NUM_CARGENS * 72);
 	assert(buffer[0] == 'C');
 	assert(buffer[1] == 'G');
 	assert(buffer[2] == 'N');
 	assert(buffer[3] == '\0');
 	assert(*(uint32*)(buffer + 4) == size - 8);
-	buffer += 8;
 	NumOfCarGenerators = *(uint32*)(buffer + 12);
 	CurrentActiveCount = *(uint32*)(buffer + 16);
 	ProcessCounter = *(uint8*)(buffer + 20);
 	GenerateEvenIfPlayerIsCloseCounter = *(uint8*)(buffer + 21);
 	assert(*(uint32*)(buffer + 24) == 72 * NUM_CARGENS);
+	buffer += 28;
 	for (int i = 0; i < NUM_CARGENS; i++) {
 		CarGeneratorArray[i].Load(buffer);
 		buffer += 72;
