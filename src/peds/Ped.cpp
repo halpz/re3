@@ -5,7 +5,6 @@
 #include "Particle.h"
 #include "Stats.h"
 #include "World.h"
-#include "DMAudio.h"
 #include "RpAnimBlend.h"
 #include "Ped.h"
 #include "PlayerPed.h"
@@ -33,7 +32,6 @@
 #include "TempColModels.h"
 
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
-WRAPPER void CPed::Say(uint16 audio) { EAXJMP(0x4E5A10); }
 WRAPPER void CPed::SetDead(void) { EAXJMP(0x4D3970); }
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 WRAPPER void CPed::SetPedPositionInCar(void) { EAXJMP(0x4D4970); }
@@ -50,14 +48,16 @@ WRAPPER void CPed::SetSeek(CVector, float) { EAXJMP(0x4D14B0); }
 WRAPPER bool CPed::Seek(void) { EAXJMP(0x4D1640); }
 WRAPPER void CPed::SetFollowPath(CVector) { EAXJMP(0x4D2EA0); }
 WRAPPER void CPed::RemoveInCarAnims(void) { EAXJMP(0x4E4E20); }
-WRAPPER void CPed::SetWaitState(eWaitState, void*) { EAXJMP(0x4D58D0); }
 WRAPPER void CPed::StartFightDefend(uint8, uint8, uint8) { EAXJMP(0x4E7780); }
-WRAPPER void CPed::PlayHitSound(CPed*) { EAXJMP(0x4E8E20); }
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
 bool &CPed::bPedCheat3 = *(bool*)0x95CD59;
+
 CColPoint &CPed::ms_tempColPoint = *(CColPoint*)0x62DB14;
+
+CPedAudioData (&CPed::PedAudioData)[38] = *(CPedAudioData(*)[38]) * (uintptr*)0x5F94C4;
+
 uint16 &CPed::unknownFightThing = *(uint16*)0x95CC58;
 FightMove (&CPed::ms_fightMoves)[24] = * (FightMove(*)[24]) * (uintptr*)0x5F9844;
 
@@ -287,10 +287,10 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fHealth = 100.0f;
 	m_fArmour = 0.0f;
 	m_nPedType = pedType;
-	field_520 = 0;
+	m_currentSoundStart = 0;
 	m_talkTimer = 0;
-	m_talkTypeLast = 167;
-	m_talkType = 167;
+	m_lastQueuedSound = SOUND_TOTAL_PED_SOUNDS;
+	m_queuedSound = SOUND_TOTAL_PED_SOUNDS;
 	m_objective = OBJECTIVE_NONE;
 	m_prevObjective = OBJECTIVE_NONE;
 	CharCreatedBy = RANDOM_CHAR;
@@ -401,7 +401,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagD4 = false;
 	m_ped_flagD8 = false;
 	bIsPedDieAnimPlaying = false;
-	m_ped_flagD20 = false;
+	bIsFleeing = false;
 	m_ped_flagD40 = false;
 	bScriptObjectiveCompleted = false;
 
@@ -1137,7 +1137,7 @@ CPed::Attack(void)
 			if (weaponAnimAssoc->animId == ANIM_WEAPON_BAT_V || weaponAnimAssoc->animId == ANIM_WEAPON_BAT_H) {
 				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, 1.0f);
 			} else if (weaponAnimAssoc->animId == ANIM_FIGHT_PPUNCH) {
-				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_PUNCH_ATTACK, 0.0f);
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_FIGHT_PUNCH_39, 0.0f);
 			}
 
 			weaponAnimAssoc->speed = 0.5f;
@@ -2471,7 +2471,7 @@ CPed::SetObjective(eObjective newObj, void *entity)
 		case OBJECTIVE_KILL_CHAR_ANY_MEANS:
 		case OBJECTIVE_MUG_CHAR:
 			m_pLastPathNode = nil;
-			m_ped_flagD20 = false;
+			bIsFleeing = false;
 			m_vecSeekVehicle = CVector(0.0f, 0.0f, 0.0f);
 			m_pedInObjective = (CPed*)entity;
 			m_pedInObjective->RegisterReference((CEntity**)&m_pedInObjective);
@@ -3659,7 +3659,7 @@ void
 CPed::ClearFlee(void)
 {
 	RestorePreviousState();
-	m_ped_flagD20 = false;
+	bIsFleeing = false;
 	m_standardTimer = 0;
 	m_fleeTimer = 0;
 }
@@ -4748,6 +4748,302 @@ CPed::SetFall(int extraTime, AnimationId animId, uint8 evenIfNotInControl)
 	bIsFell = true;
 }
 
+void
+CPed::SetFlee(CEntity* fleeFrom, int time)
+{
+	if (!IsPedInControl() || bKindaStayInSamePlace || !fleeFrom)
+		return;
+
+	SetStoredState();
+	m_nPedState = PED_FLEE_ENTITY;
+	bIsFleeing = true;
+	SetMoveState(PEDMOVE_RUN);
+	m_fleeFrom = fleeFrom;
+	m_fleeFrom->RegisterReference((CEntity **) &m_fleeFrom);
+
+	if (time <= 0)
+		m_fleeTimer = 0;
+	else
+		m_fleeTimer = CTimer::GetTimeInMilliseconds() + time;
+
+	float angleToFace = CGeneral::GetRadianAngleBetweenPoints(
+			GetPosition().x, GetPosition().y,
+			fleeFrom->GetPosition().x, fleeFrom->GetPosition().y);
+
+	m_fRotationDest = CGeneral::LimitRadianAngle(angleToFace);
+	if (m_fRotationCur - PI > m_fRotationDest) {
+		m_fRotationDest += 2 * PI;
+	} else if (PI + m_fRotationCur < m_fRotationDest) {
+		m_fRotationDest -= 2 * PI;
+	}
+}
+
+void
+CPed::SetFlee(CVector2D &from, int time)
+{
+	if (CTimer::GetTimeInMilliseconds() < m_nPedStateTimer || !IsPedInControl() || bKindaStayInSamePlace)
+		return;
+
+	if (m_nPedState != PED_FLEE_ENTITY) {
+		SetStoredState();
+		m_nPedState = PED_FLEE_POS;
+		SetMoveState(PEDMOVE_RUN);
+		m_fleeFromPosX = from.x;
+		m_fleeFromPosY = from.y;
+	}
+
+	bIsFleeing = true;
+	m_pLastPathNode = nil;
+	m_fleeTimer = CTimer::GetTimeInMilliseconds() + time;
+
+	float angleToFace = CGeneral::GetRadianAngleBetweenPoints(
+		GetPosition().x, GetPosition().y,
+		from.x, from.y);
+
+	m_fRotationDest = CGeneral::LimitRadianAngle(angleToFace);
+	if (m_fRotationCur - PI > m_fRotationDest) {
+		m_fRotationDest += 2 * PI;
+	} else if (PI + m_fRotationCur < m_fRotationDest) {
+		m_fRotationDest -= 2 * PI;
+	}
+}
+
+void
+CPed::SetWaitState(eWaitState state, void *time)
+{
+	AnimationId waitAnim = NUM_ANIMS;
+	CAnimBlendAssociation *animAssoc;
+
+	if (!IsPedInControl())
+		return;
+
+	if (state != m_nWaitState)
+		FinishedWaitCB(nil, this);
+
+	switch (state) {
+		case WAITSTATE_TRAFFIC_LIGHTS:
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 500;
+			SetMoveState(PEDMOVE_STILL);
+			break;
+		case WAITSTATE_CROSS_ROAD:
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 1000;
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_HBHB, 3000.0f);
+			break;
+		case WAITSTATE_CROSS_ROAD_LOOK:
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ROAD_CROSS, 8.0f);
+
+			if (time)
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
+			else
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(2000,5000);
+
+			break;
+		case WAITSTATE_LOOK_PED:
+		case WAITSTATE_LOOK_SHOP:
+		case WAITSTATE_LOOK_ACCIDENT:
+		case WAITSTATE_FACEOFF_GANG:
+			break;
+		case WAITSTATE_DOUBLEBACK:
+			m_headingRate = 0.0f;
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 3500;
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_HBHB, 3000.0f);
+			break;
+		case WAITSTATE_HITWALL:
+			m_headingRate = 2.0f;
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 5000;
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_HIT_WALL, 16.0f);
+			animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+			animAssoc->flags |= ASSOC_FADEOUTWHENDONE;
+			animAssoc->SetDeleteCallback(FinishedWaitCB, this);
+
+			if (m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER && CharCreatedBy == RANDOM_CHAR && m_nPedState == PED_SEEK_CAR) {
+				ClearObjective();
+				RestorePreviousState();
+			}
+			break;
+		case WAITSTATE_TURN180:
+			m_headingRate = 0.0f;
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 5000;
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_TURN_180, 3000.0f);
+			animAssoc->SetFinishCallback(FinishedWaitCB, this);
+			animAssoc->SetDeleteCallback(RestoreHeadingRateCB, this);
+			break;
+		case WAITSTATE_SURPRISE:
+			m_headingRate = 0.0f;
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 2000;
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_HIT_WALL, 3000.0f);
+			animAssoc->SetFinishCallback(FinishedWaitCB, this);
+			break;
+		case WAITSTATE_STUCK:
+			SetMoveState(PEDMOVE_STILL);
+			SetMoveAnim();
+			m_headingRate = 0.0f;
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 5000;
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 3000.0f);
+
+			if (m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER && CharCreatedBy == RANDOM_CHAR && m_nPedState == PED_SEEK_CAR) {
+				ClearObjective();
+				RestorePreviousState();
+			}
+			break;
+		case WAITSTATE_LOOK_ABOUT:
+			SetMoveState(PEDMOVE_STILL);
+			SetMoveAnim();
+			m_headingRate = 0.0f;
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 5000;
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_HBHB, 3000.0f);
+			break;
+		case WAITSTATE_PLAYANIM_COWER:
+			waitAnim = ANIM_HANDSCOWER;
+		case WAITSTATE_PLAYANIM_HANDSUP:
+			if (waitAnim == NUM_ANIMS)
+				waitAnim = ANIM_HANDSUP;
+		case WAITSTATE_PLAYANIM_HANDSCOWER:
+			if (waitAnim == NUM_ANIMS)
+				waitAnim = ANIM_HANDSCOWER;
+			m_headingRate = 0.0f;
+			if (time)
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
+			else
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 3000;
+
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, waitAnim, 3000.0f);
+			animAssoc->SetDeleteCallback(FinishedWaitCB, this);
+			break;
+		case WAITSTATE_PLAYANIM_DUCK:
+			waitAnim = ANIM_DUCK_DOWN;
+		case WAITSTATE_PLAYANIM_TAXI:
+			if (waitAnim == NUM_ANIMS)
+				waitAnim = ANIM_IDLE_TAXI;
+		case WAITSTATE_PLAYANIM_CHAT:
+			if (waitAnim == NUM_ANIMS)
+				waitAnim = ANIM_IDLE_CHAT;
+			if (time)
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
+			else
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 3000;
+
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, waitAnim, 3000.0f);
+			animAssoc->flags &= ~ASSOC_FADEOUTWHENDONE;
+			animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+			animAssoc->SetDeleteCallback(FinishedWaitCB, this);
+			break;
+		case WAITSTATE_FINISH_FLEE:
+			SetMoveState(PEDMOVE_STILL);
+			SetMoveAnim();
+			m_headingRate = 0.0f;
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 2500;
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 3000.0f);
+			break;
+		default:
+			m_nWaitState = WAITSTATE_FALSE;
+			RestoreHeadingRate();
+			return;
+	}
+	m_nWaitState = state;
+}
+
+
+void
+CPed::PlayHitSound(CPed *hitTo)
+{
+	// That was very complicated to reverse for me...
+	// First index is our fight move ID (from 1 to 12, total 12), second is the one of we fight with (from 13 to 22, total 10).
+
+	uint16 hitSoundsByFightMoves[12][10] = {
+		{S39,S42,S43,S43,S39,S39,S39,S39,S39,S42},
+		{NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND},
+		{NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND},
+		{S39,S39,S39,S39,S33,S43,S39,S39,S39,S39},
+		{S39,S39,S39,S39,S35,S39,S38,S38,S39,S39},
+		{S39,S39,S39,S39,S33,S39,S41,S36,S39,S39},
+		{S39,S39,S39,S39,S37,S40,S38,S38,S39,S39},
+		{S39,S39,S39,S39,S34,S43,S44,S37,S39,S39},
+		{S39,S39,S39,S39,S34,S43,S44,S37,S39,S39},
+		{S39,S39,S39,S39,S34,S43,S44,S37,S39,S40},
+		{S39,S39,S39,S39,S33,S39,S41,S37,S39,S40},
+		{S39,S39,S39,S39,S39,S39,S39,S39,S33,S33}
+	};
+
+	// This is why first dimension is between FightMove 1 and 12.
+	if (m_lastFightMove == FIGHTMOVE_NULL || m_lastFightMove >= FIGHTMOVE_HITFRONT)
+		return;
+
+	uint16 soundId;
+
+	// And this is why second dimension is between 13 and 22.
+	if (hitTo->m_lastFightMove <= FIGHTMOVE_GROUNDKICK || hitTo->m_lastFightMove >= FIGHTMOVE_IDLE2NORM) {
+
+		if (hitTo->m_nPedState == PED_DEAD || hitTo->UseGroundColModel()) {	
+			soundId = hitSoundsByFightMoves[m_lastFightMove - FIGHTMOVE_STDPUNCH][FIGHTMOVE_HITONFLOOR - FIGHTMOVE_HITFRONT];
+		} else {
+			soundId = hitSoundsByFightMoves[m_lastFightMove - FIGHTMOVE_STDPUNCH][FIGHTMOVE_HITFRONT - FIGHTMOVE_HITFRONT];
+		}
+	} else {
+		soundId = hitSoundsByFightMoves[m_lastFightMove - FIGHTMOVE_STDPUNCH][hitTo->m_lastFightMove - FIGHTMOVE_HITFRONT];
+	}
+
+	if (soundId != NO_SND)
+		DMAudio.PlayOneShot(m_audioEntityId, soundId, 0.0f);
+}
+
+void
+CPed::Say(uint16 audio)
+{
+	uint16 audioToPlay = audio;
+
+	if (IsPlayer()) {
+		switch (audio) {
+			case SOUND_PED_DEATH:
+				audioToPlay = SOUND_PED_DAMAGE;
+				break;
+			case SOUND_PED_DAMAGE:
+			case SOUND_PED_HIT:
+			case SOUND_PED_LAND:
+				break;
+			case SOUND_PED_BULLET_HIT:
+			case SOUND_PED_CAR_JACKED:
+			case SOUND_PED_DEFEND:
+				audioToPlay = SOUND_PED_HIT;
+				break;
+			default:
+				return;
+		}
+	} else {
+		if (3.0f + TheCamera.GetPosition().z < GetPosition().z)
+			return;
+
+		if (TheCamera.m_CameraAverageSpeed > 1.65f) {
+			return;
+		} else if (TheCamera.m_CameraAverageSpeed > 1.25f) {
+			if (audio != SOUND_PED_DEATH && audio != SOUND_PED_TAXI_WAIT && audio != SOUND_PED_EVADE)
+				return;
+
+		} else if (TheCamera.m_CameraAverageSpeed > 0.9f) {
+			switch (audio) {
+				case SOUND_PED_DEATH:
+				case SOUND_PED_BURNING:
+				case SOUND_PED_FLEE_SPRINT:
+				case SOUND_PED_TAXI_WAIT:
+				case SOUND_PED_EVADE:
+				case SOUND_PED_CAR_COLLISION:
+					break;
+				default:
+					return;
+			}
+		}
+	}
+
+	if (audioToPlay < m_queuedSound) {
+		if (audioToPlay != m_lastQueuedSound || audioToPlay == SOUND_PED_DEATH
+			|| PedAudioData[audioToPlay - SOUND_PED_DEATH].m_nOverrideMaxRandomDelayTime
+				+ m_currentSoundStart
+				+ (uint32) CGeneral::GetRandomNumberInRange(0, PedAudioData[audioToPlay - SOUND_PED_DEATH].m_nMaxRandomDelayTime) <= CTimer::GetTimeInMilliseconds()) {
+			m_queuedSound = audioToPlay;
+		}
+	}
+}
+
 WRAPPER void CPed::PedGetupCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE810); }
 WRAPPER void CPed::PedStaggerCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8D0); }
 WRAPPER void CPed::PedEvadeCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D36E0); }
@@ -4884,4 +5180,9 @@ STARTPATCHES
 	InjectHook(0x4E9870, &CPed::LoadFightData, PATCH_JUMP);
 	InjectHook(0x4E8EC0, &CPed::FightStrike, PATCH_JUMP);
 	InjectHook(0x4CCE20, &CPed::GetLocalDirection, PATCH_JUMP);
+	InjectHook(0x4E8E20, &CPed::PlayHitSound, PATCH_JUMP);
+	InjectHook(0x4E5A10, &CPed::Say, PATCH_JUMP);
+	InjectHook(0x4D58D0, &CPed::SetWaitState, PATCH_JUMP);
+	InjectHook(0x4D1D70, (void (CPed::*)(CEntity*, int)) &CPed::SetFlee, PATCH_JUMP);
+	InjectHook(0x4D1D70, (void (CPed::*)(CVector2D&, int)) &CPed::SetFlee, PATCH_JUMP);
 ENDPATCHES
