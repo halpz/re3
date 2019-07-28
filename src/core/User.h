@@ -52,6 +52,8 @@ class CCurrentVehicle
 
 class CPager
 {
+public:
+	void AddMessage(wchar*, uint16, uint16, uint16);
 };
 
 class CUserDisplay

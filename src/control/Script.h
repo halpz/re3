@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include "Text.h"
 #include "Sprite2d.h"
 
 class CEntity;
@@ -373,6 +374,11 @@ public:
 		return Read2BytesFromScript(pIp) / 16.0f;
 	}
 	static void ReadTextLabelFromScript(uint32* pIp, char* buf){
-		strncpy(buf, (const char*)&CTheScripts::ScriptSpace[*pIp], 8);
+		strncpy(buf, (const char*)&ScriptSpace[*pIp], 8);
+	}
+	static wchar* GetTextByKeyFromScript(uint32* pIp) {
+		wchar* text = TheText.Get((const char*)&ScriptSpace[*pIp]);
+		*pIp += 8;
+		return text;
 	}
 };

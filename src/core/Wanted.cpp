@@ -275,6 +275,9 @@ CWanted::UpdateWantedLevel()
 {
 	int32 CurrWantedLevel = m_nWantedLevel;
 
+	if (m_nChaos > nMaximumWantedLevel)
+		m_nChaos = nMaximumWantedLevel;
+
 	if (m_nChaos >= 0 && m_nChaos < 40) {
 		m_nWantedLevel = 0;
 		m_MaximumLawEnforcerVehicles = 0;
