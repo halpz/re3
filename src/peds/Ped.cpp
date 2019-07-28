@@ -5184,5 +5184,5 @@ STARTPATCHES
 	InjectHook(0x4E5A10, &CPed::Say, PATCH_JUMP);
 	InjectHook(0x4D58D0, &CPed::SetWaitState, PATCH_JUMP);
 	InjectHook(0x4D1D70, (void (CPed::*)(CEntity*, int)) &CPed::SetFlee, PATCH_JUMP);
-	InjectHook(0x4D1D70, (void (CPed::*)(CVector2D&, int)) &CPed::SetFlee, PATCH_JUMP);
+	InjectHook(0x4D1C40, (void (CPed::*)(CVector2D&, int)) &CPed::SetFlee, PATCH_JUMP);
 ENDPATCHES
