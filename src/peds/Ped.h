@@ -10,8 +10,34 @@
 #include "AnimBlendAssociation.h"
 #include "WeaponInfo.h"
 #include "Fire.h"
+#include "DMAudio.h"
 
 struct CPathNode;
+
+struct CPedAudioData
+{
+	int m_nFixedDelayTime;
+	int m_nOverrideFixedDelayTime;
+	int m_nOverrideMaxRandomDelayTime;
+	int m_nMaxRandomDelayTime;
+};
+
+// For hit sounds in fight
+enum {
+	S33 = SOUND_FIGHT_PUNCH_33,
+	S34 = SOUND_FIGHT_KICK_34,
+	S35 = SOUND_FIGHT_HEADBUTT_35,
+	S36 = SOUND_FIGHT_PUNCH_36,
+	S37 = SOUND_FIGHT_PUNCH_37,
+	S38 = SOUND_FIGHT_CLOSE_PUNCH_38,
+	S39 = SOUND_FIGHT_PUNCH_39,
+	S40 = SOUND_FIGHT_PUNCH_OR_KICK_BELOW_40 ,
+	S41 = SOUND_FIGHT_PUNCH_41,
+	S42 = SOUND_FIGHT_PUNCH_FROM_BEHIND_42,
+	S43 = SOUND_FIGHT_KNEE_OR_KICK_43,
+	S44 = SOUND_FIGHT_KICK_44,
+	NO_SND = SOUND_TOTAL_PED_SOUNDS
+};
 
 struct FightMove
 {
@@ -29,6 +55,7 @@ static_assert(sizeof(FightMove) == 0x18, "FightMove: error");
 enum PedFightMoves
 {
 	FIGHTMOVE_NULL,
+	// Attacker
 	FIGHTMOVE_STDPUNCH,
 	FIGHTMOVE_IDLE,
 	FIGHTMOVE_SHUFFLE_F,
@@ -41,6 +68,7 @@ enum PedFightMoves
 	FIGHTMOVE_ROUNDHOUSE,
 	FIGHTMOVE_BODYBLOW,
 	FIGHTMOVE_GROUNDKICK,
+	// Opponent
 	FIGHTMOVE_HITFRONT,
 	FIGHTMOVE_HITBACK,
 	FIGHTMOVE_HITRIGHT,
@@ -260,7 +288,7 @@ public:
 	uint8 m_ped_flagD4 : 1;
 	uint8 m_ped_flagD8 : 1;
 	uint8 bIsPedDieAnimPlaying : 1;
-	uint8 m_ped_flagD20 : 1;
+	uint8 bIsFleeing : 1;
 	uint8 m_ped_flagD40 : 1;	// reset when objective changes
 	uint8 bScriptObjectiveCompleted : 1;
 
@@ -431,11 +459,11 @@ public:
 	uint16 m_numNearPeds;
 	int8 m_lastWepDam;
 	uint8 pad_51F;
-	uint8 field_520;
+	uint8 m_currentSoundStart;
 	uint8 pad_521[3];
 	uint32 m_talkTimer;
-	uint16 m_talkTypeLast;
-	uint16 m_talkType;
+	uint16 m_lastQueuedSound;
+	uint16 m_queuedSound;
 	CVector m_vecSeekPosEx;
 	float m_seekExAngle;
 
@@ -556,6 +584,8 @@ public:
 	void StartFightDefend(uint8, uint8, uint8);
 	void PlayHitSound(CPed*);
 	void SetFall(int, AnimationId, uint8);
+	void SetFlee(CEntity*, int);
+	void SetFlee(CVector2D&, int);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -633,6 +663,7 @@ public:
 	static CColPoint &ms_tempColPoint;
 	static uint16 &unknownFightThing; // TODO
 	static FightMove (&ms_fightMoves)[24];
+	static CPedAudioData (&PedAudioData)[38];
 };
 
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
