@@ -184,7 +184,6 @@ bool CCarGenerator::CheckIfWithinRangeOfAnyPlayer()
 		return false;
 	if (distance < nearclip)
 		return false;
-	debug("Value to test: %f\n", DotProduct2D(direction, FindPlayerSpeed()));
 	return DotProduct2D(direction, FindPlayerSpeed()) <= 0;
 }
 
