@@ -2860,7 +2860,7 @@ CPed::Chat(void)
 			CAnimBlendAssociation *chatAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_CHAT);
 			if (chatAssoc) {
 				chatAssoc->blendDelta = -4.0f;
-				chatAssoc->flags |= ASSOC_FADEOUTWHENDONE;
+				chatAssoc->flags |= ASSOC_DELETEFADEDOUT;
 			}
 			bIsTalking = false;
 		} else
