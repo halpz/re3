@@ -352,7 +352,7 @@ public:
 	uint32 m_pedFormation;
 	uint32 m_fearFlags;
 	CEntity *m_threatEntity;
-	CVector2D m_eventOrThread;
+	CVector2D m_eventOrThreat;
 	uint32 m_eventType;
 	CEntity* m_pEventEntity;
 	float m_fAngleToEvent;
@@ -405,7 +405,7 @@ public:
 	bool bInVehicle;
 	uint8 pad_315[3];
 	float field_318;
-	uint8 field_31C; // may be cutscene or phone cutscene status
+	bool bRunningToPhone;
 	uint8 field_31D;
 	int16 m_phoneId;
 	uint32 m_lookingForPhone; // unused
@@ -437,7 +437,7 @@ public:
 	int8 m_fightUnk2;	// TODO
 	uint8 m_fightUnk1; // TODO
 	uint8 pad_4B3;
-	CFire* m_pFire;
+	CFire *m_pFire;
 	CEntity *m_pLookTarget;
 	float m_fLookDirection;
 	int32 m_wepModelID;
@@ -452,16 +452,16 @@ public:
 	uint32 m_duckTimer;
 	uint32 field_4E8;
 	int32 m_bloodyFootprintCount;
-	uint8 stuff9[2];
+	uint8 m_panicCounter;
+	uint8 m_deadBleeding;
 	int8 m_bodyPartBleeding;		// PedNode
 	uint8 m_field_4F3;
 	CPed *m_nearPeds[10];
 	uint16 m_numNearPeds;
 	int8 m_lastWepDam;
 	uint8 pad_51F;
-	uint8 m_currentSoundStart;
-	uint8 pad_521[3];
-	uint32 m_talkTimer;
+	uint32 m_lastSoundStart;
+	uint32 m_soundStart;
 	uint16 m_lastQueuedSound;
 	uint16 m_queuedSound;
 	CVector m_vecSeekPosEx;
@@ -586,6 +586,9 @@ public:
 	void SetFall(int, AnimationId, uint8);
 	void SetFlee(CEntity*, int);
 	void SetFlee(CVector2D&, int);
+	void RemoveInCarAnims(void);
+	void CollideWithPed(CPed*);
+	void SetDirectionToWalkAroundObject(CEntity*);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -642,7 +645,6 @@ public:
 	void SetLeader(CEntity* leader);
 	void SetPedStats(ePedStats);
 	bool IsGangMember(void);
-	void RemoveInCarAnims(void);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }

@@ -49,6 +49,7 @@ WRAPPER bool CPed::Seek(void) { EAXJMP(0x4D1640); }
 WRAPPER void CPed::SetFollowPath(CVector) { EAXJMP(0x4D2EA0); }
 WRAPPER void CPed::RemoveInCarAnims(void) { EAXJMP(0x4E4E20); }
 WRAPPER void CPed::StartFightDefend(uint8, uint8, uint8) { EAXJMP(0x4E7780); }
+WRAPPER void CPed::SetDirectionToWalkAroundObject(CEntity*) { EAXJMP(0x4CCEB0); }
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -56,6 +57,7 @@ bool &CPed::bPedCheat3 = *(bool*)0x95CD59;
 
 CColPoint &CPed::ms_tempColPoint = *(CColPoint*)0x62DB14;
 
+// TODO: PedAudioData should be hardcoded into exe, and it isn't reversed yet.
 CPedAudioData (&CPed::PedAudioData)[38] = *(CPedAudioData(*)[38]) * (uintptr*)0x5F94C4;
 
 uint16 &CPed::unknownFightThing = *(uint16*)0x95CC58;
@@ -287,8 +289,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fHealth = 100.0f;
 	m_fArmour = 0.0f;
 	m_nPedType = pedType;
-	m_currentSoundStart = 0;
-	m_talkTimer = 0;
+	m_lastSoundStart = 0;
+	m_soundStart = 0;
 	m_lastQueuedSound = SOUND_TOTAL_PED_SOUNDS;
 	m_queuedSound = SOUND_TOTAL_PED_SOUNDS;
 	m_objective = OBJECTIVE_NONE;
@@ -297,7 +299,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_leader = nil;
 	m_pedInObjective = nil;
 	m_carInObjective = nil;
-	bInVehicle = 0;
+	bInVehicle = false;
 	m_pMyVehicle = nil;
 	m_pVehicleAnim = nil;
 	m_vecOffsetSeek.x = 0.0f;
@@ -331,7 +333,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_vecSeekVehicle = CVector(0.0f, 0.0f, 0.0f);
 	m_wepSkills = 0;
 	field_318 = 1.0f;
-	field_31C = 0;
+	bRunningToPhone = false;
 	m_phoneId = -1;
 	m_lastAccident = 0;
 	m_fleeFrom = nil;
@@ -457,7 +459,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	DMAudio.SetEntityStatus(m_audioEntityId, 1);
 	m_fearFlags = CPedType::GetThreats(m_nPedType);
 	m_threatEntity = nil;
-	m_eventOrThread = CVector2D(0.0f, 0.0f);
+	m_eventOrThreat = CVector2D(0.0f, 0.0f);
 	m_pEventEntity = nil;
 	m_fAngleToEvent = 0.0f;
 	m_numNearPeds = 0;
@@ -469,8 +471,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 			m_pPathNodesStates[i] = nil;
 		}
 	}
-	m_maxWeaponTypeAllowed = 0;
-	m_currentWeapon = 0;
+	m_maxWeaponTypeAllowed = WEAPONTYPE_UNARMED;
+	m_currentWeapon = WEAPONTYPE_UNARMED;
 	m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
 
 	for(int i = 0; i < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; i++)
@@ -1616,6 +1618,16 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		} else {
 			m_fRotationDest = veh->GetForward().Heading();
 		}
+	} else {
+		// I don't know will this part ever run(maybe boats?), but the game also handles that. I don't know is it intentional.
+
+		if (vehIsUpsideDown) {
+			m_fRotationDest = veh->GetForward().Heading();
+		} else if (veh->bIsBus) {
+			m_fRotationDest = 0.5f * PI + veh->GetForward().Heading();
+		} else {
+			m_fRotationDest = veh->GetForward().Heading();
+		}
 	}
 
 	if (!bInVehicle)
@@ -1759,9 +1771,9 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 			neededPos -= timeUntilStateChange * m_vecOffsetSeek;
 		}
 
-		if (limitedAngle > PI + m_fRotationCur) {
+		if (PI + m_fRotationCur < limitedAngle) {
 			limitedAngle -= 2 * PI;
-		} else if (limitedAngle < m_fRotationCur - PI) {
+		} else if (m_fRotationCur - PI > limitedAngle) {
 			limitedAngle += 2 * PI;
 		}
 		m_fRotationCur -= (m_fRotationCur - limitedAngle) * (1.0f - timeUntilStateChange);
@@ -1976,7 +1988,7 @@ CPed::BuildPedLists(void)
 	static CPed *unsortedNearPeds[10];
 	uint16 nextNearPedSlot = 0;
 
-	if ((CTimer::GetFrameCounter() + m_randomSeed) % 16) {
+	if ((CTimer::GetFrameCounter() + (m_randomSeed % 256)) % 16) {
 
 		for(int i = 0; i < 10; ) {
 			if (m_nearPeds[i]) {
@@ -2901,7 +2913,7 @@ CPed::CheckAroundForPossibleCollisions(void)
 	CWorld::FindObjectsInRange(ourCentre, 10.0f, true, &maxObject, 6, objects, false, true, false, true, false);
 	for (int i = 0; i < maxObject; i++) {
 		CEntity *object = objects[i];
-		if (field_31C) {
+		if (bRunningToPhone) {
 			if (gPhoneInfo.PhoneAtThisPosition(object->GetPosition()))
 				break;
 		}
@@ -3246,7 +3258,7 @@ CPed::SetDie(AnimationId animId, float delta, float speed)
 	if (!bInVehicle)
 		StopNonPartialAnims();
 
-	// ???
+	// BUG: This is not timer.
 	m_bloodyFootprintCount = CTimer::GetTimeInMilliseconds();
 }
 
@@ -3343,7 +3355,7 @@ CPed::InflictDamage(CEntity* damagedBy, eWeaponType method, float damage, ePedPi
 					if (IsPedHeadAbovePos(-0.3f)) {
 						dieAnim = NUM_ANIMS;
 					} else {
-						if (RpAnimBlendClumpGetFirstAssociation(GetClump(), 0x800u))
+						if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG800))
 							dieAnim = ANIM_FLOOR_HIT_F;
 						else
 							dieAnim = ANIM_FLOOR_HIT;
@@ -3818,7 +3830,7 @@ void
 CPed::ClearSeek(void)
 {
 	SetIdle();
-	field_31C = 0;
+	bRunningToPhone = false;
 }
 
 bool
@@ -4294,7 +4306,7 @@ CPed::SetAttack(CEntity* victim)
 				animAssoc->SetFinishCallback(FinishedAttackCB, this);
 			}
 		} else {
-			StartFightAttack(CGeneral::GetRandomNumber() & 255);
+			StartFightAttack(CGeneral::GetRandomNumber() % 256);
 		}
 		return;
 	}
@@ -5037,10 +5049,221 @@ CPed::Say(uint16 audio)
 	if (audioToPlay < m_queuedSound) {
 		if (audioToPlay != m_lastQueuedSound || audioToPlay == SOUND_PED_DEATH
 			|| PedAudioData[audioToPlay - SOUND_PED_DEATH].m_nOverrideMaxRandomDelayTime
-				+ m_currentSoundStart
+				+ m_lastSoundStart
 				+ (uint32) CGeneral::GetRandomNumberInRange(0, PedAudioData[audioToPlay - SOUND_PED_DEATH].m_nMaxRandomDelayTime) <= CTimer::GetTimeInMilliseconds()) {
 			m_queuedSound = audioToPlay;
 		}
+	}
+}
+
+void
+CPed::CollideWithPed(CPed *collideWith)
+{
+	CAnimBlendAssociation *animAssoc;
+	AnimationId animToRun;
+
+	bool weAreMissionChar = CharCreatedBy == MISSION_CHAR;
+	bool heIsMissionChar = collideWith->CharCreatedBy == MISSION_CHAR;
+	CVector posDiff = collideWith->GetPosition() - GetPosition();
+	int waitTime = 0;
+
+	if (weAreMissionChar || !collideWith->IsPlayer() || collideWith->m_nPedState != PED_MAKE_CALL) {
+		bool weDontLookToHim = DotProduct(posDiff, GetForward()) > 0.0f;
+		bool heLooksToUs = DotProduct(posDiff, collideWith->GetForward()) < 0.0f;
+
+		if (m_nMoveState != PEDMOVE_NONE && m_nMoveState != PEDMOVE_STILL) {
+
+			if ((!IsPlayer() || ((CPlayerPed*)this)->m_fMoveSpeed <= 1.8f)
+				&& (IsPlayer() || heIsMissionChar && weAreMissionChar || m_nMoveState != PEDMOVE_RUN && m_nMoveState != PEDMOVE_SPRINT)) {
+
+				if (m_objective != OBJECTIVE_FOLLOW_PED_IN_FORMATION && m_objective != OBJECTIVE_GOTO_CHAR_ON_FOOT) {
+
+					if (CTimer::GetTimeInMilliseconds() > m_nPedStateTimer) {
+
+						if (heIsMissionChar || !weAreMissionChar && collideWith->m_nMoveState != PEDMOVE_STILL) {
+
+							if (weAreMissionChar && ((m_nPedState == PED_SEEK_POS) || m_nPedState == PED_SEEK_ENTITY)) {
+
+								if (collideWith->m_nMoveState != PEDMOVE_STILL
+									&& (!collideWith->IsPlayer() || collideWith->IsPlayer() && CPad::GetPad(0)->ArePlayerControlsDisabled())) {
+									float weAndCarDist = (GetPosition() - m_vecSeekVehicle).MagnitudeSqr2D();
+									float heAndCarDist = (collideWith->GetPosition() - m_vecSeekVehicle).MagnitudeSqr2D();
+
+									if (weAndCarDist <= heAndCarDist) {
+										waitTime = 1000;
+										collideWith->SetWaitState(WAITSTATE_CROSS_ROAD_LOOK, &waitTime);
+										collideWith->m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + waitTime;
+									} else {
+										waitTime = 500;
+										SetWaitState(WAITSTATE_CROSS_ROAD_LOOK, &waitTime);
+										m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + waitTime;
+									}
+								} else if (collideWith->m_nMoveState == PEDMOVE_STILL) {
+									SetDirectionToWalkAroundObject(collideWith);
+								}
+							} else if (weAreMissionChar || m_pedStats->m_fear <= 100 - collideWith->m_pedStats->m_temper
+									|| (collideWith->IsPlayer() || collideWith->m_nMoveState == PEDMOVE_NONE || collideWith->m_nMoveState == PEDMOVE_STILL) &&
+										(!collideWith->IsPlayer() || ((CPlayerPed*)collideWith)->m_fMoveSpeed <= 1.0f)) {
+								SetDirectionToWalkAroundObject(collideWith);
+								if (!weAreMissionChar)
+									Say(SOUND_PED_CHAT);
+							} else {
+								SetEvasiveStep(collideWith, 2);
+							}
+						} else {
+							if (m_pedStats->m_temper <= m_pedStats->m_fear
+								|| GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED
+								|| weAreMissionChar
+								|| collideWith->m_nPedType == PEDTYPE_CIVFEMALE
+								|| collideWith->m_nPedType == m_nPedType
+								|| collideWith->GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED) {
+								SetDirectionToWalkAroundObject(collideWith);
+								Say(SOUND_PED_CHAT);
+							} else {
+								TurnBody();
+								SetAttack(collideWith);
+							}
+							m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(250, 450);
+						}
+					}
+				} else {
+					if (m_pedInObjective && collideWith == m_pedInObjective && CTimer::GetTimeInMilliseconds() > m_nPedStateTimer) {
+						if (heLooksToUs) {
+							SetEvasiveStep(collideWith, 1);
+							m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 3000;
+						}
+					} else if (weDontLookToHim && IsPedInControl()) {
+
+						if (m_pedStats != collideWith->m_pedStats) {
+
+							if (collideWith->m_pedStats->m_fear <= 100 - m_pedStats->m_temper) {
+
+								if (collideWith->IsPlayer()) {
+									// He's on our right side
+									if (DotProduct(posDiff,GetRight()) <= 0.0f)
+										m_fRotationCur -= m_headingRate;
+									else
+										m_fRotationCur += m_headingRate;
+								} else {
+									// He's on our right side
+									if (DotProduct(posDiff, GetRight()) <= 0.0f)
+										m_fRotationCur -= m_headingRate;
+									else
+										m_fRotationCur += m_headingRate;
+								}
+							} else {
+								SetLookFlag(collideWith, 0);
+								TurnBody();
+								animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT_PPUNCH, 8.0f);
+								animAssoc->flags |= ASSOC_FADEOUTWHENDONE;
+								if (!heIsMissionChar) {
+									int direction = collideWith->GetLocalDirection(CVector2D(posDiff.x, posDiff.y));
+									collideWith->StartFightDefend(direction, 4, 5);
+								}
+							}
+						}
+					}
+				}
+			} else if (collideWith->m_pedStats->m_defendWeakness <= 1.5f || heIsMissionChar) {
+				// He looks us and we're not at his right side
+				if (heLooksToUs && DotProduct(posDiff,collideWith->GetRight()) > 0.0f) {
+					CVector moveForce = GetRight();
+					moveForce.z += 0.1f;
+					ApplyMoveForce(moveForce);
+					if (collideWith->m_nMoveState != PEDMOVE_RUN && collideWith->m_nMoveState != PEDMOVE_SPRINT)
+						animToRun = ANIM_HIT_LEFT;
+					else
+						animToRun = ANIM_SHOT_LEFT_PARTIAL;
+				} else if (heLooksToUs) {
+					CVector moveForce = GetRight() * -1.0f;
+					moveForce.z += 0.1f;
+					ApplyMoveForce(moveForce);
+					if (collideWith->m_nMoveState != PEDMOVE_RUN && collideWith->m_nMoveState != PEDMOVE_SPRINT)
+						animToRun = ANIM_HIT_RIGHT;
+					else
+						animToRun = ANIM_SHOT_RIGHT_PARTIAL;
+				} else {
+					if (collideWith->m_nMoveState != PEDMOVE_RUN && collideWith->m_nMoveState != PEDMOVE_SPRINT)
+						animToRun = ANIM_HIT_BACK;
+					else
+						animToRun = ANIM_SHOT_BACK_PARTIAL;
+				}
+
+				if (collideWith->IsPedInControl() && CTimer::GetTimeInMilliseconds() > collideWith->m_nPedStateTimer) {
+					animAssoc = CAnimManager::BlendAnimation(collideWith->GetClump(), ASSOCGRP_STD, animToRun, 8.0f);
+					animAssoc->flags |= ASSOC_FADEOUTWHENDONE;
+					collideWith->m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 1000;
+					if (m_nPedState == PED_ATTACK)
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_FIGHT_PUNCH_39, 0.0f);
+				}
+			} else {
+				// We're at his right side
+				if (DotProduct(posDiff, collideWith->GetRight()) <= 0.0f) {
+					CVector moveForce = GetRight() * -1.0f;
+					moveForce.z += 0.1f;
+					ApplyMoveForce(moveForce);
+					if (heLooksToUs)
+						animToRun = ANIM_KO_SPIN_L;
+					else
+						animToRun = ANIM_KD_RIGHT;
+				} else {
+					CVector moveForce = GetRight();
+					moveForce.z += 0.1f;
+					ApplyMoveForce(moveForce);
+					if (heLooksToUs)
+						animToRun = ANIM_KO_SPIN_R;
+					else
+						animToRun = ANIM_KD_LEFT;
+				}
+
+				if (m_nPedState == PED_ATTACK && collideWith->IsPedInControl())
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_FIGHT_PUNCH_39, 0.0f);
+
+				collideWith->SetFall(3000, animToRun, 0);
+			}
+		} else {
+			if (!IsPedInControl())
+				return;
+
+			if (collideWith->m_nMoveState == PEDMOVE_NONE || collideWith->m_nMoveState == PEDMOVE_STILL)
+				return;
+
+			if (m_nPedType != collideWith->m_nPedType || m_nPedType == PEDTYPE_CIVMALE || m_nPedType == PEDTYPE_CIVFEMALE) {
+
+				if (!weAreMissionChar && heLooksToUs && m_pedStats->m_fear > 100 - collideWith->m_pedStats->m_temper) {
+
+					if (CGeneral::GetRandomNumber() & 1 && CTimer::GetTimeInMilliseconds() < m_nPedStateTimer){
+						SetEvasiveStep(collideWith, 2);
+						m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 3000;
+					} else if (collideWith->m_nMoveState > PEDMOVE_WALK) {
+						waitTime = 2000;
+						SetWaitState(WAITSTATE_PLAYANIM_DUCK, &waitTime);
+					}
+				}
+			} else if (heLooksToUs
+				&& collideWith->m_nPedState != PED_STEP_AWAY
+				&& m_nPedState != PED_STEP_AWAY
+				&& CTimer::GetTimeInMilliseconds() > m_nPedStateTimer) {
+
+				SetEvasiveStep(collideWith, 1);
+				m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 3000;
+			}
+		}
+
+		if (IsPlayer()) {
+			SetLookFlag(collideWith, 1);
+			SetLookTimer(800);
+		}
+	} else {
+		bool doWeRun = true;
+		if (m_nMoveState != PEDMOVE_RUN && m_nMoveState != PEDMOVE_SPRINT)
+			doWeRun = false;
+
+		SetFlee(collideWith, 5000);
+		bIsFleeing = true;
+		m_pLastPathNode = nil;
+		if (!doWeRun)
+			SetMoveState(PEDMOVE_WALK);
 	}
 }
 
@@ -5185,4 +5408,5 @@ STARTPATCHES
 	InjectHook(0x4D58D0, &CPed::SetWaitState, PATCH_JUMP);
 	InjectHook(0x4D1D70, (void (CPed::*)(CEntity*, int)) &CPed::SetFlee, PATCH_JUMP);
 	InjectHook(0x4D1C40, (void (CPed::*)(CVector2D&, int)) &CPed::SetFlee, PATCH_JUMP);
+	InjectHook(0x4EB9A0, &CPed::CollideWithPed, PATCH_JUMP);
 ENDPATCHES

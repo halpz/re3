@@ -8,6 +8,7 @@ WRAPPER bool CPedIK::PointGunAtPosition(CVector *position) { EAXJMP(0x4ED920); }
 WRAPPER void CPedIK::ExtractYawAndPitchLocal(RwMatrixTag*, float*, float*) { EAXJMP(0x4ED2C0); }
 WRAPPER void CPedIK::ExtractYawAndPitchWorld(RwMatrixTag*, float*, float*) { EAXJMP(0x4ED140); }
 
+// TODO: Hardcoded into exe, reverse it.
 LimbMovementInfo &CPedIK::ms_torsoInfo = *(LimbMovementInfo*)0x5F9F8C;
 
 CPedIK::CPedIK(CPed *ped)
