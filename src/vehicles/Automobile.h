@@ -6,6 +6,39 @@
 
 class CObject;
 
+enum eCarNodes
+{
+	CAR_WHEEL_RF = 1,
+	CAR_WHEEL_RM,
+	CAR_WHEEL_RB,
+	CAR_WHEEL_LF,
+	CAR_WHEEL_LM,
+	CAR_WHEEL_LB,
+	CAR_BUMP_FRONT,
+	CAR_BUMP_REAR,
+	CAR_WING_RF,
+	CAR_WING_RR,
+	CAR_DOOR_RF,
+	CAR_DOOR_RR,
+	CAR_WING_LF,
+	CAR_WING_LR,
+	CAR_DOOR_LF,
+	CAR_DOOR_LR,
+	CAR_BONNET,
+	CAR_BOOT,
+	CAR_WINDSCREEN,
+	NUM_CAR_NODES,
+};
+
+enum eCarPositions
+{
+	CAR_POS_HEADLIGHTS,
+	CAR_POS_TAILLIGHTS,
+	CAR_POS_FRONTSEAT,
+	CAR_POS_BACKSEAT,
+	CAR_POS_EXHAUST		= 9,
+};
+
 // These are used for all the wheel arrays
 // DON'T confuse with VEHWHEEL, which are vehicle components
 enum {
@@ -81,7 +114,7 @@ public:
 
 	static bool &m_sAllTaxiLights;
 
-	CAutomobile(int32, uint8);
+	CAutomobile(int32 id, uint8 CreatedBy);
 
 	// from CEntity
 	void SetModelIndex(uint32 id);
@@ -152,3 +185,18 @@ public:
 	static void SetAllTaxiLights(bool set);
 };
 static_assert(sizeof(CAutomobile) == 0x5A8, "CAutomobile: error");
+
+inline uint8 GetCarDoorFlag(int32 carnode) {
+	switch (carnode) {
+	case CAR_DOOR_LF:
+		return 1;
+	case CAR_DOOR_LR:
+		return 2;
+	case CAR_DOOR_RF:
+		return 4;
+	case CAR_DOOR_RR:
+		return 8;
+	default:
+		return 0;
+	}
+}

@@ -79,7 +79,7 @@ CPed::~CPed(void)
 	CWorld::Remove(this);
 	CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetIndex(this));
 	if (bInVehicle && m_pMyVehicle){
-		uint8 door_flag = GetVehDoorFlag(m_vehEnterType);
+		uint8 door_flag = GetCarDoorFlag(m_vehEnterType);
 		if (m_pMyVehicle->pDriver == this)
 			m_pMyVehicle->pDriver = nil;
 		else {
@@ -1415,7 +1415,7 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 	ped->m_pSeekTarget = nil;
 	vehicle = ped->m_pMyVehicle;
 
-	vehicle->m_nGettingOutFlags &= ~GetVehDoorFlag(ped->m_vehEnterType);
+	vehicle->m_nGettingOutFlags &= ~GetCarDoorFlag(ped->m_vehEnterType);
 
 	if (vehicle->pDriver == ped) {
 		vehicle->RemoveDriver();
@@ -2725,7 +2725,7 @@ CPed::QuitEnteringCar(void)
 		if (veh->m_nNumGettingIn != 0)
 			veh->m_nNumGettingIn--;
 
-		veh->m_nGettingInFlags &= ~GetVehDoorFlag(m_vehEnterType);
+		veh->m_nGettingInFlags &= ~GetCarDoorFlag(m_vehEnterType);
 	}
 
 	bUsesCollision = true;

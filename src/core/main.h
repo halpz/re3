@@ -18,6 +18,7 @@ extern wchar *gUString;
 extern wchar *gUString2;
 extern bool &b_FoundRecentSavedGameWantToLoad;
 extern bool gbPrintShite;
+extern bool gbModelViewer;
 
 class CSprite2d;
 

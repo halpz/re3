@@ -26,39 +26,6 @@ enum eCarLock {
 };
 
 
-enum eCarNodes
-{
-	CAR_WHEEL_RF = 1,
-	CAR_WHEEL_RM,
-	CAR_WHEEL_RB,
-	CAR_WHEEL_LF,
-	CAR_WHEEL_LM,
-	CAR_WHEEL_LB,
-	CAR_BUMP_FRONT,
-	CAR_BUMP_REAR,
-	CAR_WING_RF,
-	CAR_WING_RR,
-	CAR_DOOR_RF,
-	CAR_DOOR_RR,
-	CAR_WING_LF,
-	CAR_WING_LR,
-	CAR_DOOR_LF,
-	CAR_DOOR_LR,
-	CAR_BONNET,
-	CAR_BOOT,
-	CAR_WINDSCREEN,
-	NUM_CAR_NODES,
-};
-
-enum
-{
-	CAR_POS_HEADLIGHTS,
-	CAR_POS_TAILLIGHTS,
-	CAR_POS_FRONTSEAT,
-	CAR_POS_BACKSEAT,
-	CAR_POS_EXHAUST		= 9,
-};
-
 enum
 {
 	BOAT_POS_FRONTSEAT
@@ -310,21 +277,6 @@ static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_pCurGroundEntity) == 0x1E0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nAlarmState) == 0x1A0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nLastWeaponDamage) == 0x228, "CVehicle: error");
-
-inline uint8 GetVehDoorFlag(int32 carnode) {
-	switch (carnode) {
-	case CAR_DOOR_LF:
-		return 1;
-	case CAR_DOOR_LR:
-		return 2;
-	case CAR_DOOR_RF:
-		return 4;
-	case CAR_DOOR_RR:
-		return 8;
-	default:
-		return 0;
-	}
-}
 
 class cTransmission;
 

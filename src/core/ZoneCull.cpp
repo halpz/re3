@@ -186,7 +186,7 @@ CCullZones::MarkSubwayAsInvisible(bool visible)
 	n = CPools::GetVehiclePool()->GetSize();
 	for(i = 0; i < n; i++){
 		v = CPools::GetVehiclePool()->GetSlot(i);
-		if(v && v->IsTrain() && ((CTrain*)v)->m_trackId != 0)
+		if(v && v->IsTrain() && ((CTrain*)v)->m_nTrackId != TRACK_ELTRAIN)
 			v->bIsVisible = visible;
 	}
 }

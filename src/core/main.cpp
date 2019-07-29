@@ -71,6 +71,7 @@ char version_name[64];
 float FramesPerSecond = 30.0f;
 
 bool gbPrintShite = false;
+bool gbModelViewer;
 
 bool DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
 void DoRWStuffEndOfFrame(void);

@@ -11,6 +11,8 @@
 #include "FileMgr.h"
 #include "World.h"
 #include "Vehicle.h"
+#include "Automobile.h"
+#include "Train.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 
@@ -84,13 +86,13 @@ RwObjectNameIdAssocation boatIds[] = {
 };
 
 RwObjectNameIdAssocation trainIds[] = {
-	{ "door_lhs_dummy",	1,	VEHICLE_FLAG_LEFT | VEHICLE_FLAG_COLLAPSE },
-	{ "door_rhs_dummy",	2,	VEHICLE_FLAG_LEFT | VEHICLE_FLAG_COLLAPSE },
-	{ "light_front",	0,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "light_rear",		1,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "ped_left_entry",	2,	VEHICLE_FLAG_DOOR | VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "ped_mid_entry",	3,	VEHICLE_FLAG_DOOR | VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "ped_right_entry",	4,	VEHICLE_FLAG_DOOR | VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "door_lhs_dummy",	TRAIN_DOOR_LHS,	VEHICLE_FLAG_LEFT | VEHICLE_FLAG_COLLAPSE },
+	{ "door_rhs_dummy",	TRAIN_DOOR_RHS,	VEHICLE_FLAG_LEFT | VEHICLE_FLAG_COLLAPSE },
+	{ "light_front",	TRAIN_POS_LIGHT_FRONT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "light_rear",		TRAIN_POS_LIGHT_REAR,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "ped_left_entry",	TRAIN_POS_LEFT_ENTRY,	VEHICLE_FLAG_DOOR | VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "ped_mid_entry",	TRAIN_POS_MID_ENTRY,	VEHICLE_FLAG_DOOR | VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "ped_right_entry",	TRAIN_POS_RIGHT_ENTRY,	VEHICLE_FLAG_DOOR | VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
 	{ nil, 0, 0 }
 };
 

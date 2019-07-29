@@ -142,8 +142,8 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 
 	veh = FindPlayerVehicle();
 	if(veh && veh->IsTrain()){
-		if(((CTrain*)veh)->m_doorState != TRAIN_DOOR_STATE2)
-			return ;
+		if(((CTrain*)veh)->m_nDoorState != TRAIN_DOOR_OPEN)
+			return;
 	}else if(playerCoors.z < 4.0f && !CCullZones::DoINeedToLoadCollision())
 		return;
 

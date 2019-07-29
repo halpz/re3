@@ -58,7 +58,7 @@ public:
 	uint8 bIsInWater : 1;
 	uint8 m_phy_flagA10 : 1;
 	uint8 m_phy_flagA20 : 1;
-	uint8 bHitByTrain : 1;	// from nick
+	uint8 bHitByTrain : 1;
 	uint8 m_phy_flagA80 : 1;
 
 	uint8 m_nSurfaceTouched;

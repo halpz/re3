@@ -394,7 +394,7 @@ public:
 	float m_fRotationCur;
 	float m_fRotationDest;
 	float m_headingRate;
-	uint16 m_vehEnterType;
+	uint16 m_vehEnterType;	// TODO: this is more like a door, not a type
 	uint16 m_walkAroundType;
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;

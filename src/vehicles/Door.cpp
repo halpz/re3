@@ -115,6 +115,60 @@ CDoor::IsClosed(void)
 	return m_fAngle == RetAngleWhenClosed();
 }
 
+
+CTrainDoor::CTrainDoor(void)
+{
+	memset(this, 0, sizeof(*this));
+}
+
+void
+CTrainDoor::Open(float ratio)
+{
+	float open;
+
+	m_fPrevPosn = m_fPosn;
+	open = RetTranslationWhenOpen();
+	if(ratio < 1.0f){
+		m_fPosn = open*ratio;
+	}else{
+		m_nDoorState = DOORST_OPEN;
+		m_fPosn = open;
+	}
+}
+
+float
+CTrainDoor::RetTranslationWhenClosed(void)
+{
+	if(Abs(m_fClosedPosn) < Abs(m_fOpenPosn))
+		return m_fClosedPosn;
+	else
+		return m_fOpenPosn;
+}
+
+float
+CTrainDoor::RetTranslationWhenOpen(void)
+{
+	if(Abs(m_fClosedPosn) < Abs(m_fOpenPosn))
+		return m_fOpenPosn;
+	else
+		return m_fClosedPosn;
+}
+
+bool
+CTrainDoor::IsFullyOpen(void)
+{
+	// 0.5f again...
+	if(Abs(m_fPosn) < Abs(RetTranslationWhenOpen()) - 0.5f)
+		return false;
+	return true;
+}
+
+bool
+CTrainDoor::IsClosed(void)
+{
+	return m_fPosn == RetTranslationWhenClosed();
+}
+
 STARTPATCHES
 	InjectHook(0x545EF0, &CDoor::Open, PATCH_JUMP);
 	InjectHook(0x545BD0, &CDoor::Process, PATCH_JUMP);
@@ -123,4 +177,10 @@ STARTPATCHES
 	InjectHook(0x545F80, &CDoor::GetAngleOpenRatio, PATCH_JUMP);
 	InjectHook(0x546090, &CDoor::IsFullyOpen, PATCH_JUMP);
 	InjectHook(0x546060, &CDoor::IsClosed, PATCH_JUMP);
+
+	InjectHook(0x546200, &CTrainDoor::Open, PATCH_JUMP);
+	InjectHook(0x546180, &CTrainDoor::RetTranslationWhenClosed, PATCH_JUMP);
+	InjectHook(0x5461C0, &CTrainDoor::RetTranslationWhenOpen, PATCH_JUMP);
+	InjectHook(0x546120, &CTrainDoor::IsFullyOpen, PATCH_JUMP);
+	InjectHook(0x5460F0, &CTrainDoor::IsClosed, PATCH_JUMP);
 ENDPATCHES
