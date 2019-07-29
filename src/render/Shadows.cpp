@@ -545,11 +545,7 @@ CShadows::StoreCarLightShadow(CAutomobile *pCar, int32 nID, RwTexture *pTexture,
 		{
 			float fDistToCam = Sqrt(fDistToCamSqr);
 
-#ifndef FIX_BUGS
-			if ( fDistToCam >= (fDrawDistance*(1.0f-(1.0f/4.0f))) && !bSpecialCam ) // BUG: must be 3.0
-#else
-			if ( fDistToCam >= (fDrawDistance*(1.0f-(1.0f/3.0f))) && !bSpecialCam )
-#endif
+			if ( fDistToCam >= (fDrawDistance*(1.0f-(1.0f/4.0f))) && !bSpecialCam ) // BUG? must be 3.0?
 			{
 				//fDistToCam == 0             -> 3
 				//fDistToCam == fDrawDistance -> 0
@@ -607,22 +603,12 @@ CShadows::StoreShadowForPedObject(CEntity *pPedObject, float fDisplacementX, flo
 		{
 			float fDistToCam = Sqrt(fDistToCamSqr);
 
-#ifndef FIX_BUGS
 			//fDistToCam == 0             ->  2
 			//fDistToCam == fDrawDistance -> -2
-			float fMult = 1.0f - (4.0f / fDrawDistance) * (fDistToCam - (fDrawDistance*(1.0f/4.0f))); // BUG: negative
-#else
-			//fDistToCam == 0             ->  4
-			//fDistToCam == fDrawDistance ->  0
-			float fMult = 1.0f - (4.0f / fDrawDistance) * (fDistToCam - (fDrawDistance*(1.0f-(1.0f/4.0f))) );
-#endif
+			float fMult = 1.0f - (4.0f / fDrawDistance) * (fDistToCam - (fDrawDistance*(1.0f/4.0f))); // BUG ? negative
 			int32 nColorStrength;
 
-#ifndef FIX_BUGS
-			if ( fDistToCam >= (fDrawDistance*(1.0f/4.0f)) ) // BUG: negative
-#else
-			if ( fDistToCam >= (fDrawDistance*(1.0f-(1.0f/4.0f))) )
-#endif
+			if ( fDistToCam >= (fDrawDistance*(1.0f/4.0f)) ) // BUG ? negative
 				nColorStrength = (int32)(CTimeCycle::GetShadowStrength() * fMult);
 			else
 				nColorStrength = CTimeCycle::GetShadowStrength();
