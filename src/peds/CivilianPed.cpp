@@ -28,7 +28,7 @@ CCivilianPed::ProcessNearestFreePhone(int unused)
 	if (gPhoneInfo.m_aPhones[phoneId].m_nState != PHONE_STATE_FREE)
 		return false;
 
-	field_31C = 1;
+	bRunningToPhone = true;
 	SetMoveState(PEDMOVE_RUN);
 	SetSeek(gPhoneInfo.m_aPhones[phoneId].m_vecPos, 0.3f);
 	m_phoneId = phoneId;
