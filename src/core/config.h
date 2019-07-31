@@ -121,3 +121,4 @@ enum Config {
 #define KANGAROO_CHEAT
 #define ASPECT_RATIO_SCALE
 #define USE_DEBUG_SCRIPT_LOADER
+#define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher

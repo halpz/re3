@@ -131,7 +131,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	field_594 = 0;
 	bNotDamagedUpsideDown = false;
 	bMoreResistantToDamage = false;
-	m_fVelocityChangeForAudio = 0.f;
+	m_fVelocityChangeForAudio = 0.0f;
 	m_hydraulicState = 0;
 
 	for(i = 0; i < 4; i++){
@@ -4479,6 +4479,7 @@ CAutomobile::SetAllTaxiLights(bool set)
 class CAutomobile_ : public CAutomobile
 {
 public:
+	void ctor(int32 id, uint8 CreatedBy) { ::new (this) CAutomobile(id, CreatedBy); }
 	void dtor() { CAutomobile::~CAutomobile(); }
 	void SetModelIndex_(uint32 id) { CAutomobile::SetModelIndex(id); }
 	void ProcessControl_(void) { CAutomobile::ProcessControl(); }
@@ -4508,6 +4509,7 @@ public:
 };
 
 STARTPATCHES
+	InjectHook(0x52C6B0, &CAutomobile_::ctor, PATCH_JUMP);
 	InjectHook(0x52D170, &CAutomobile_::dtor, PATCH_JUMP);
 	InjectHook(0x52D190, &CAutomobile_::SetModelIndex_, PATCH_JUMP);
 	InjectHook(0x531470, &CAutomobile_::ProcessControl_, PATCH_JUMP);

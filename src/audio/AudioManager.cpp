@@ -17,6 +17,7 @@
 #include "SampleManager.h"
 #include "Stats.h"
 #include "Vehicle.h"
+#include "Plane.h"
 #include "World.h"
 
 uint32 *audioLogicTimers = (uint32 *)0x6508A0;
@@ -4338,10 +4339,6 @@ cAudioManager::ProcessHomeScriptObject(uint8 sound)
 	}
 }
 
-float *PlanePathPosition = (float *)0x8F5FC8;
-float &LandingPoint = *(float *)0x8F2C7C;
-float &TakeOffPoint = *(float *)0x8E28A4;
-
 void
 cAudioManager::ProcessJumbo(cVehicleParams *params)
 {
@@ -4352,9 +4349,9 @@ cAudioManager::ProcessJumbo(cVehicleParams *params)
 		CalculateDistance((bool *)params, params->m_fDistance);
 		plane = (CPlane *)params->m_pVehicle;
 		DoJumboVolOffset();
-		position = PlanePathPosition[plane->m_wIndex];
+		position = PlanePathPosition[plane->m_nPlaneId];
 		if(position <= TakeOffPoint) {
-			if(plane->field_656 <= 0.10334f) {
+			if(plane->m_fSpeed <= 0.10334f) {
 				ProcessJumboTaxi();
 				return;
 			}
@@ -4366,7 +4363,7 @@ cAudioManager::ProcessJumbo(cVehicleParams *params)
 			ProcessJumboFlying();
 		} else {
 			if(position > LandingPoint) {
-				if(plane->field_656 > 0.10334f) {
+				if(plane->m_fSpeed > 0.10334f) {
 					ProcessJumboDecel(plane);
 					return;
 				}
@@ -4387,7 +4384,7 @@ cAudioManager::ProcessJumboAccel(CPlane *plane)
 	float modificator;
 
 	if(SetupJumboFlySound(20u)) {
-		modificator = (plane->field_656 - 0.10334f) * 1.676f;
+		modificator = (plane->m_fSpeed - 0.10334f) * 1.676f;
 		if(modificator > 1.0f) modificator = 1.0f;
 		if(cAudioManager::SetupJumboRumbleSound(maxVolume * modificator) &&
 		   SetupJumboTaxiSound((1.0f - modificator) * 75.f)) {
@@ -4412,7 +4409,7 @@ cAudioManager::ProcessJumboDecel(CPlane *plane)
 	float modificator;
 
 	if(SetupJumboFlySound(20u) && SetupJumboTaxiSound(75u)) {
-		modificator = (plane->field_656 - 0.10334f) * 1.676f;
+		modificator = (plane->m_fSpeed - 0.10334f) * 1.676f;
 		if(modificator > 1.0f) modificator = 1.0f;
 		SetupJumboEngineSound(maxVolume * modificator, 6050.f * modificator + 16000);
 		SetupJumboWhineSound(18u, 29500);
@@ -4428,7 +4425,7 @@ cAudioManager::ProcessJumboFlying()
 void
 cAudioManager::ProcessJumboLanding(CPlane *plane)
 {
-	float modificator = (LandingPoint - PlanePathPosition[plane->m_wIndex]) * 0.0028571f;
+	float modificator = (LandingPoint - PlanePathPosition[plane->m_nPlaneId]) * 0.0028571f;
 	if(SetupJumboFlySound(107.f * modificator + 20)) {
 		if(SetupJumboTaxiSound(75.f * (1.f - modificator))) {
 			SetupJumboEngineSound(maxVolume, 22050);
@@ -4441,7 +4438,7 @@ cAudioManager::ProcessJumboLanding(CPlane *plane)
 void
 cAudioManager::ProcessJumboTakeOff(CPlane *plane)
 {
-	double modificator = (PlanePathPosition[plane->m_wIndex] - TakeOffPoint) * 0.0033333f;
+	double modificator = (PlanePathPosition[plane->m_nPlaneId] - TakeOffPoint) * 0.0033333f;
 
 	if(cAudioManager::SetupJumboFlySound((107.f * modificator) + 20) &&
 	   cAudioManager::SetupJumboRumbleSound(maxVolume * (1.f - modificator))) {

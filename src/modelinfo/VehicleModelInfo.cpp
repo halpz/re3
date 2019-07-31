@@ -13,6 +13,7 @@
 #include "Vehicle.h"
 #include "Automobile.h"
 #include "Train.h"
+#include "Plane.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 
@@ -110,9 +111,9 @@ RwObjectNameIdAssocation heliIds[] = {
 RwObjectNameIdAssocation planeIds[] = {
 	{ "wheel_front_dummy",	2,	0 },
 	{ "wheel_rear_dummy",	3,	0 },
-	{ "light_tailplane",	2,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "light_left",		0,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "light_right",	1,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "light_tailplane",	PLANE_POS_LIGHT_TAIL,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "light_left",		PLANE_POS_LIGHT_LEFT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "light_right",	PLANE_POS_LIGHT_RIGHT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
 	{ nil, 0, 0 }
 };
 

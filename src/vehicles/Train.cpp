@@ -484,8 +484,8 @@ CTrain::InitTrains(void)
 void
 CTrain::Shutdown(void)
 {
-	if(pTrackNodes) delete[] pTrackNodes;
-	if(pTrackNodes_S) delete[] pTrackNodes_S;
+	delete[] pTrackNodes;
+	delete[] pTrackNodes_S;
 	pTrackNodes = nil;
 	pTrackNodes_S = nil;
 }
@@ -582,7 +582,7 @@ CTrain::ReadAndInterpretTrackFile(char *filename, CTrainNode **nodes, int16 *num
 		interpLines[j].speed = 15.0f;
 		interpLines[j].acceleration = -45.0f/32.0f;
 		j++;
-		time += 16.0f/3.0f;
+		time += 80.0f/15.0f;
 		position += 40.0f;	// at station
 
 		// stopping
@@ -601,7 +601,7 @@ CTrain::ReadAndInterpretTrackFile(char *filename, CTrainNode **nodes, int16 *num
 		interpLines[j].speed = 0.0f;
 		interpLines[j].acceleration = 45.0f/32.0f;
 		j++;
-		time += 16.0f/3.0f;
+		time += 80.0f/15.0f;
 		position += 40.0f;	// after station
 	}
 	// last keyframe
@@ -657,7 +657,7 @@ CTrain::UpdateTrains(void)
 			}
 
 			// time offset for each train
-			time += 0x10000;
+			time += 0x20000/2;
 		}
 
 		ProcessTrainAnnouncements();
@@ -687,7 +687,7 @@ CTrain::UpdateTrains(void)
 		}
 
 		// time offset for each train
-		time += 0x10000;
+		time += 0x40000/4;
 	}
 }
 

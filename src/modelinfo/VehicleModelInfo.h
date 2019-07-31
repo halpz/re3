@@ -57,7 +57,10 @@ public:
 	uint8 m_lastColour2;
 	char m_gameName[32];
 	int32 m_vehicleType;
-	int32 m_wheelId;
+	union {
+		int32 m_wheelId;
+		int32 m_planeLodId;
+	};
 	float m_wheelScale;
 	int32 m_numDoors;
 	int32 m_handlingId;
