@@ -5,8 +5,8 @@
 #include "rwcore.h"
 #include "RwHelper.h"
 
-#define CDDEBUG(f, ...)   debug ("%s: " f "\n", "cdvd_stream", __VA_ARGS__)
-#define CDTRACE(f, ...)   printf("%s: " f "\n", "cdvd_stream", __VA_ARGS__)
+#define CDDEBUG(f, ...)   debug ("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
+#define CDTRACE(f, ...)   printf("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
 
 struct CdReadInfo
 {

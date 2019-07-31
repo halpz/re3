@@ -1,4 +1,7 @@
 #pragma once
+
+#include "Wanted.h"
+
 enum eSound : int16
 {
 	SOUND_CAR_DOOR_CLOSE_BONNET = 0,

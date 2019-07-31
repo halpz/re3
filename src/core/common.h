@@ -177,10 +177,10 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 
 #define DEBUGBREAK() __debugbreak();
 
-#define debug(f, ...) re3_debug("[DBG]: " f, __VA_ARGS__)
-#define DEV(f, ...)   re3_debug("[DEV]: " f, __VA_ARGS__)
-#define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, __VA_ARGS__)
-#define Error(f, ...) re3_debug("[ERROR]: " f, __VA_ARGS__)
+#define debug(f, ...) re3_debug("[DBG]: " f, ## __VA_ARGS__)
+#define DEV(f, ...)   re3_debug("[DEV]: " f, ## __VA_ARGS__)
+#define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, ## __VA_ARGS__)
+#define Error(f, ...) re3_debug("[ERROR]: " f, ## __VA_ARGS__)
 
 #define assert(_Expression) (void)( (!!(_Expression)) || (re3_assert(#_Expression, __FILE__, __LINE__, __FUNCTION__), 0) )
 #define ASSERT assert
@@ -199,7 +199,6 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
 #define ABS(a)  (((a) < 0) ? (-(a)) : (a))
 #define norm(value, min, max) (((value) < (min)) ? 0 : (((value) > (max)) ? 1 : (((value) - (min)) / ((max) - (min)))))
-
 
 #define STRINGIFY(x)                    #x
 #define STR(x)                          STRINGIFY(x)

@@ -97,16 +97,9 @@ CPlayerPed::AnnoyPlayerPed(bool annoyedByPassingEntity)
 class CPlayerPed_ : public CPlayerPed
 {
 public:
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 	CPlayerPed* ctor(void) { return ::new (this) CPlayerPed(); }
 	void dtor(void) { CPlayerPed::~CPlayerPed(); }
-=======
-	void dtor(void) { this->~CPlayerPed(); }
->>>>>>> More audio ped
-=======
-	void dtor(void) { CPlayerPed::~CPlayerPed(); }
->>>>>>> fix
 };
 
 STARTPATCHES

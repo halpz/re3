@@ -51,7 +51,7 @@ public:
 	uint8 field_91;
 };
 
-static_assert(sizeof(tActiveSample) == 0x5c, "tActiveSample: error");
+static_assert(sizeof(tActiveSample) == 92, "tActiveSample: error");
 
 enum eAudioType : int32 {
 	AUDIOTYPE_PHYSICAL = 0,
@@ -83,11 +83,11 @@ public:
 	int16 m_awAudioEvent[4];
 	uint8 gap_18[2];
 	float m_afVolume[4];
-	uint8 field_24;
+	uint8 field_24; // is looping
 	uint8 field_25[3];
 };
 
-static_assert(sizeof(tAudioEntity) == 0x28, "tAudioEntity: error");
+static_assert(sizeof(tAudioEntity) == 40, "tAudioEntity: error");
 
 class tPedComment
 {
@@ -101,19 +101,21 @@ public:
 	uint8 gap_26[2];
 };
 
-static_assert(sizeof(tPedComment) == 0x1c, "tPedComment: error");
+static_assert(sizeof(tPedComment) == 28, "tPedComment: error");
 
 class cPedComments
 {
 public:
-	tPedComment m_asPedComments[40];
-	uint8 field_1120[40];
-	uint8 field_1160[2];
-	uint8 field_1162;
+	tPedComment m_asPedComments[2][20];
+	uint8 field_1120[2][20];
+	uint8 nrOfCommentsInBank[2];
+	uint8 activeBank;
 	uint8 gap_1163[1];
+
+	void Add(tPedComment *com); // test
 };
 
-static_assert(sizeof(cPedComments) == 0x48c, "cPedComments: error");
+static_assert(sizeof(cPedComments) == 1164, "cPedComments: error");
 
 class CEntity;
 
@@ -133,7 +135,7 @@ public:
 	int32 m_nBaseVolume;
 };
 
-static_assert(sizeof(cAudioCollision) == 0x28, "cAudioCollision: error");
+static_assert(sizeof(cAudioCollision) == 40, "cAudioCollision: error");
 
 class cAudioCollisionManager
 {
@@ -146,7 +148,7 @@ public:
 	cAudioCollision m_sQueue;
 };
 
-static_assert(sizeof(cAudioCollisionManager) == 0x354, "cAudioCollisionManager: error");
+static_assert(sizeof(cAudioCollisionManager) == 852, "cAudioCollisionManager: error");
 
 class cMissionAudio
 {
@@ -166,12 +168,13 @@ public:
 	uint8 field_31;
 };
 
-static_assert(sizeof(cMissionAudio) == 0x20, "cMissionAudio: error");
+static_assert(sizeof(cMissionAudio) == 32, "cMissionAudio: error");
 
 class cVehicleParams;
 class CPlane;
 class CVehicle;
 class CPed;
+class cPedParams;
 
 class cAudioScriptObject {
 public:
@@ -182,11 +185,11 @@ public:
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
-	static void operator delete(void*, size_t);
-	static void operator delete(void*, int);
+	static void operator delete(void *, size_t);
+	static void operator delete(void *, int);
 };
 
-static_assert(sizeof(cAudioScriptObject) == 0x14, "cAudioScriptObject: error");
+static_assert(sizeof(cAudioScriptObject) == 20, "cAudioScriptObject: error");
 
 enum
 {
@@ -334,7 +337,7 @@ public:
 
 	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission);
 
-	char* Get3DProviderName(uint8 id);
+	char *Get3DProviderName(uint8 id);
 
 	bool SetupJumboFlySound(uint8 emittingVol);               /// ok
 	bool SetupJumboRumbleSound(uint8 emittingVol);            /// ok
@@ -474,7 +477,7 @@ public:
 	void ProcessDocksScriptObject(uint8 sound);              /// ok
 	//	bool ProcessEngineDamage(void *); //todo requires CVehicle
 	void ProcessEntity(int32 sound);         /// ok
-	void ProcessExplosions(int32 explosion); // todo requires CExplosion
+	void ProcessExplosions(int32 explosion); // test
 	void ProcessFireHydrant();               /// ok
 	void ProcessFires(int32 entity);         // todo requires gFireManager
 	void ProcessFrontEnd();                  /// ok
@@ -492,12 +495,12 @@ public:
 	void ProcessLoopingScriptObject(uint8 sound);     /// ok
 	//	void ProcessMissionAudio();
 	//	void ProcessModelVehicle(void *);
-	//	void ProcessOneShotScriptObject(uint8 sound);
-	void ProcessPed(CPhysical *p); // todo
-	//	void ProcessPedHeadphones(void *);
-	//	void ProcessPedOneShots(void *);
-	void ProcessPhysical(int32 id); /// ok
-	void ProcessPlane(void *);      // todo
+	void ProcessOneShotScriptObject(uint8 sound);  // test
+	void ProcessPed(CPhysical *ped);               // test
+	void ProcessPedHeadphones(cPedParams *params); // test
+	void ProcessPedOneShots(cPedParams *params);   // test, remove goto
+	void ProcessPhysical(int32 id);                /// ok
+	void ProcessPlane(void *);                     // todo
 	//	void ProcessPlayersVehicleEngine(void *, void *);
 	void ProcessPoliceCellBeatingScriptObject(uint8 sound); // todo
 	void ProcessPornCinema(uint8 sound);                    /// ok
@@ -506,7 +509,7 @@ public:
 	//	void ProcessReverb();
 	//	bool ProcessReverseGear(void *);
 	void ProcessSawMillScriptObject(uint8 sound); /// ok
-	void ProcessScriptObject(int32 id);           // todo
+	void ProcessScriptObject(int32 id);           // test
 	void ProcessShopScriptObject(uint8 sound);    /// ok
 	void ProcessSpecial();                        /// ok
 	//	bool ProcessTrainNoise(void *);
@@ -523,19 +526,10 @@ public:
 	void ProcessWeather(int32 id);  // todo
 	//	bool ProcessWetRoadNoise(void *);
 	void ProcessWorkShopScriptObject(uint8 sound); /// ok
-	
-	
-	void PlayOneShot(int, unsigned short, float);
-	void SetEffectsFadeVol(unsigned char);
-	void SetMusicFadeVol(unsigned char);
-	int8 SetCurrent3DProvider(unsigned char);
-	void ReportCrime(eCrimeType, CVector const &);
-	void PlaySuspectLastSeen(float, float, float);
-	void ReportCollision(CEntity *, CEntity *, unsigned char, unsigned char, float, float);
-	void ResetTimers(unsigned int);
-	void PreloadMissionAudio(char *);
+
+	void SetupPedComments(cPedParams *params, uint32 sound); // todo hook
 };
 
-static_assert(sizeof(cAudioManager) == 0x4B14, "cAudioManager: error");
+static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
 
 extern cAudioManager &AudioManager;

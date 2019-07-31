@@ -968,16 +968,8 @@ bool CPlane::HasDropOffCesnaBeenShotDown(void) { return DropOffCesnaMissionStatu
 class CPlane_ : public CPlane
 {
 public:
-<<<<<<< HEAD
-<<<<<<< HEAD
 	void ctor(int32 id, uint8 CreatedBy) { ::new (this) CPlane(id, CreatedBy); }
 	void dtor(void) { CPlane::~CPlane(); }
-=======
-	void dtor(void) { this->~CPlane(); }
->>>>>>> More audio ped
-=======
-	void dtor(void) { CPlane::~CPlane(); }
->>>>>>> fix
 };
 
 STARTPATCHES

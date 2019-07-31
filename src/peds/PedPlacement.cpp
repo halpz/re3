@@ -29,7 +29,7 @@ CPedPlacement::FindZCoorForPed(CVector* pos)
 	if (CWorld::ProcessVerticalLine(vec, startZ, foundCol, foundEnt, true, false, false, false, true, false, nil))
 		foundColZ2 = foundCol.point.z;
 
-	zForPed = max(foundColZ, foundColZ2);
+	zForPed = Max(foundColZ, foundColZ2);
 
 	if (zForPed > -99.0f)
 		pos->z = 1.04f + zForPed;
@@ -38,7 +38,7 @@ CPedPlacement::FindZCoorForPed(CVector* pos)
 CEntity*
 CPedPlacement::IsPositionClearOfCars(CVector* pos)
 {
-	return CWorld::TestSphereAgainstWorld(*pos, 0.25f, false, true, true, false, false, false, false);
+	return CWorld::TestSphereAgainstWorld(*pos, 0.25f, nil, true, true, false, false, false, false);
 }
 
 STARTPATCHES

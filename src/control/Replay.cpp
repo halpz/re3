@@ -366,8 +366,8 @@ void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
 	CAnimBlendAssociation* main = RpAnimBlendClumpGetMainAssociation((RpClump*)ped->m_rwObject, &second, &blend_amount);
 	if (main){
 		state->animId = main->animId;
-		state->time = 255.0f / 4.0f * max(0.0f, min(4.0f, main->currentTime));
-		state->speed = 255.0f / 3.0f * max(0.0f, min(3.0f, main->speed));
+		state->time = 255.0f / 4.0f * Max(0.0f, Min(4.0f, main->currentTime));
+		state->speed = 255.0f / 3.0f * Max(0.0f, Min(3.0f, main->speed));
 	}else{
 		state->animId = 3;
 		state->time = 0;
@@ -375,9 +375,9 @@ void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
 	}
 	if (second) {
 		state->secAnimId = second->animId;
-		state->secTime = 255.0f / 4.0f * max(0.0f, min(4.0f, second->currentTime));
-		state->secSpeed = 255.0f / 3.0f * max(0.0f, min(3.0f, second->speed));
-		state->blendAmount = 255.0f / 2.0f * max(0.0f, min(2.0f, blend_amount));
+		state->secTime = 255.0f / 4.0f * Max(0.0f, Min(4.0f, second->currentTime));
+		state->secSpeed = 255.0f / 3.0f * Max(0.0f, Min(3.0f, second->speed));
+		state->blendAmount = 255.0f / 2.0f * Max(0.0f, Min(2.0f, blend_amount));
 	}else{
 		state->secAnimId = 0;
 		state->secTime = 0;
@@ -387,9 +387,9 @@ void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
 	CAnimBlendAssociation* partial = RpAnimBlendClumpGetMainPartialAssociation((RpClump*)ped->m_rwObject);
 	if (partial) {
 		state->partAnimId = partial->animId;
-		state->partAnimTime = 255.0f / 4.0f * max(0.0f, min(4.0f, partial->currentTime));
-		state->partAnimSpeed = 255.0f / 3.0f * max(0.0f, min(3.0f, partial->speed));
-		state->partBlendAmount = 255.0f / 2.0f * max(0.0f, min(2.0f, partial->blendAmount));
+		state->partAnimTime = 255.0f / 4.0f * Max(0.0f, Min(4.0f, partial->currentTime));
+		state->partAnimSpeed = 255.0f / 3.0f * Max(0.0f, Min(3.0f, partial->speed));
+		state->partBlendAmount = 255.0f / 2.0f * Max(0.0f, Min(2.0f, partial->blendAmount));
 	}else{
 		state->partAnimId = 0;
 		state->partAnimTime = 0;
@@ -408,9 +408,9 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 		CAnimBlendAssociation* assoc = RpAnimBlendClumpGetMainAssociation_N((RpClump*)ped->m_rwObject, i);
 		if (assoc){
 			state->aAnimId[i] = assoc->animId;
-			state->aCurTime[i] = 255.0f / 4.0f * max(0.0f, min(4.0f, assoc->currentTime));
-			state->aSpeed[i] = 255.0f / 3.0f * max(0.0f, min(3.0f, assoc->speed));
-			state->aBlendAmount[i] = 255.0f / 2.0f * max(0.0f, min(2.0f, assoc->blendAmount));
+			state->aCurTime[i] = 255.0f / 4.0f * Max(0.0f, Min(4.0f, assoc->currentTime));
+			state->aSpeed[i] = 255.0f / 3.0f * Max(0.0f, Min(3.0f, assoc->speed));
+			state->aBlendAmount[i] = 255.0f / 2.0f * Max(0.0f, Min(2.0f, assoc->blendAmount));
 			state->aFlags[i] = assoc->flags;
 			if (assoc->callbackType == CAnimBlendAssociation::CB_FINISH || assoc->callbackType == CAnimBlendAssociation::CB_DELETE) {
 				state->aFunctionCallbackID[i] = FindCBFunctionID(assoc->callback);
@@ -431,9 +431,9 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 		CAnimBlendAssociation* assoc = RpAnimBlendClumpGetMainPartialAssociation_N((RpClump*)ped->m_rwObject, i);
 		if (assoc) {
 			state->aAnimId2[i] = assoc->animId;
-			state->aCurTime2[i] = 255.0f / 4.0f * max(0.0f, min(4.0f, assoc->currentTime));
-			state->aSpeed2[i] = 255.0f / 3.0f * max(0.0f, min(3.0f, assoc->speed));
-			state->aBlendAmount2[i] = 255.0f / 2.0f * max(0.0f, min(2.0f, assoc->blendAmount));
+			state->aCurTime2[i] = 255.0f / 4.0f * Max(0.0f, Min(4.0f, assoc->currentTime));
+			state->aSpeed2[i] = 255.0f / 3.0f * Max(0.0f, Min(3.0f, assoc->speed));
+			state->aBlendAmount2[i] = 255.0f / 2.0f * Max(0.0f, Min(2.0f, assoc->blendAmount));
 			state->aFlags2[i] = assoc->flags;
 			if (assoc->callbackType == CAnimBlendAssociation::CB_FINISH || assoc->callbackType == CAnimBlendAssociation::CB_DELETE) {
 				state->aFunctionCallbackID2[i] = FindCBFunctionID(assoc->callback);
@@ -625,9 +625,9 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 	vp->health = vehicle->m_fHealth / 4.0f; /* Not anticipated that health can be > 1000. */
 	vp->acceleration = vehicle->m_fGasPedal * 100.0f;
 	vp->panels = vehicle->IsCar() ? ((CAutomobile*)vehicle)->Damage.m_panelStatus : 0;
-	vp->velocityX = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetMoveSpeed().x)); /* 8000!? */
-	vp->velocityY = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetMoveSpeed().y));
-	vp->velocityZ = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetMoveSpeed().z));
+	vp->velocityX = 8000.0f * Max(-4.0f, Min(4.0f, vehicle->GetMoveSpeed().x)); /* 8000!? */
+	vp->velocityY = 8000.0f * Max(-4.0f, Min(4.0f, vehicle->GetMoveSpeed().y));
+	vp->velocityZ = 8000.0f * Max(-4.0f, Min(4.0f, vehicle->GetMoveSpeed().z));
 	vp->mi = vehicle->GetModelIndex();
 	vp->primary_color = vehicle->m_currentColour1;
 	vp->secondary_color = vehicle->m_currentColour2;
@@ -1501,9 +1501,9 @@ void CReplay::ProcessLookAroundCam(void)
 	--FramesActiveLookAroundCam;
 	fBetaAngleLookAroundCam += x_moved;
 	if (CPad::NewMouseControllerState.LMB && CPad::NewMouseControllerState.RMB)
-		fDistanceLookAroundCam = max(3.0f, min(15.0f, fDistanceLookAroundCam + 2.0f * y_moved));
+		fDistanceLookAroundCam = Max(3.0f, Min(15.0f, fDistanceLookAroundCam + 2.0f * y_moved));
 	else
-		fAlphaAngleLookAroundCam = max(0.1f, min(1.5f, fAlphaAngleLookAroundCam + y_moved));
+		fAlphaAngleLookAroundCam = Max(0.1f, Min(1.5f, fAlphaAngleLookAroundCam + y_moved));
 	CVector camera_pt(
 		fDistanceLookAroundCam * Sin(fBetaAngleLookAroundCam) * Cos(fAlphaAngleLookAroundCam),
 		fDistanceLookAroundCam * Cos(fBetaAngleLookAroundCam) * Cos(fAlphaAngleLookAroundCam),

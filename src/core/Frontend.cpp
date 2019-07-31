@@ -1030,7 +1030,7 @@ int CMenuManager::FadeIn(int alpha)
 		m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS ||
 		m_nCurrScreen == MENUPAGE_DELETING)
 		return alpha;
-	return min(m_nMenuFadeAlpha, alpha);
+	return Min(m_nMenuFadeAlpha, alpha);
 }
 #endif
 

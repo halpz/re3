@@ -442,7 +442,7 @@ int     m_iModeObbeCamIsInForCar;
 	static bool &m_bUseMouse3rdPerson;
 
 	bool Get_Just_Switched_Status() { return m_bJust_Switched; }
-	inline const CMatrix GetCameraMatrix(void) { return m_cameraMatrix; }
+	inline const CMatrix& GetCameraMatrix(void) { return m_cameraMatrix; }
 	CVector &GetGameCamPosition(void) { return m_vecGameCamPos; }
 	bool IsPointVisible(const CVector &center, const CMatrix *mat);
 	bool IsSphereVisible(const CVector &center, float radius, const CMatrix *mat);

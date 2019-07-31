@@ -1038,16 +1038,8 @@ void CHeli::ActivateHeli(bool activate) { ScriptHeliOn = activate; }
 class CHeli_ : public CHeli
 {
 public:
-<<<<<<< HEAD
-<<<<<<< HEAD
 	void ctor(int32 id, uint8 CreatedBy) { ::new (this) CHeli(id, CreatedBy); }
 	void dtor(void) { CHeli::~CHeli(); }
-=======
-	void dtor(void) { this->~CHeli(); }
->>>>>>> More audio ped
-=======
-	void dtor(void) { CHeli::~CHeli(); }
->>>>>>> fix
 };
 
 STARTPATCHES

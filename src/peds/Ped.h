@@ -718,6 +718,15 @@ public:
 #endif
 };
 
+class cPedParams
+{
+public:
+	char m_bDistanceCalculated;
+	char gap_1[3];
+	float m_fDistance;
+	CPed *m_pPed;
+};
+
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 
 static_assert(offsetof(CPed, m_nPedState) == 0x224, "CPed: error");

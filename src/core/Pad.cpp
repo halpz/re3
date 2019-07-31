@@ -299,10 +299,10 @@ CControllerState CPad::ReconcileTwoControllersInput(CControllerState const &Stat
 	{ if ( State1.button || State2.button ) ReconState.button = 255; }
 	
 #define _RECONCILE_AXIS_POSITIVE(axis) \
-	{ if ( State1.axis >= 0 && State2.axis >= 0 ) ReconState.axis = max(State1.axis, State2.axis); }
+	{ if ( State1.axis >= 0 && State2.axis >= 0 ) ReconState.axis = Max(State1.axis, State2.axis); }
 
 #define _RECONCILE_AXIS_NEGATIVE(axis) \
-	{ if ( State1.axis <= 0 && State2.axis <= 0 ) ReconState.axis = min(State1.axis, State2.axis); }
+	{ if ( State1.axis <= 0 && State2.axis <= 0 ) ReconState.axis = Min(State1.axis, State2.axis); }
 
 #define _RECONCILE_AXIS(axis) \
 	{ _RECONCILE_AXIS_POSITIVE(axis); _RECONCILE_AXIS_NEGATIVE(axis); }

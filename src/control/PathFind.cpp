@@ -207,8 +207,8 @@ CPathFind::PreparePathData(void)
 					numExtern++;
 					if(InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes > numLanes)
 						numLanes = InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes;
-					maxX = max(maxX, Abs(InfoForTileCars[k].x));
-					maxY = max(maxY, Abs(InfoForTileCars[k].y));
+					maxX = Max(maxX, Abs(InfoForTileCars[k].x));
+					maxY = Max(maxY, Abs(InfoForTileCars[k].y));
 				}else if(InfoForTileCars[k].type == NodeTypeIntern)
 					numIntern++;
 			}
@@ -392,7 +392,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				if(Abs(dx) < nearestDist){
 					dy = tempnodes[k].pos.y - CoorsXFormed.y;
 					if(Abs(dy) < nearestDist){
-						nearestDist = max(Abs(dx), Abs(dy));
+						nearestDist = Max(Abs(dx), Abs(dy));
 						nearestId = k;
 					}
 				}
@@ -501,13 +501,13 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 
 		// Find i inside path segment
 		iseg = 0;
-		for(j = max(oldNumPathNodes, i-12); j < i; j++)
+		for(j = Max(oldNumPathNodes, i-12); j < i; j++)
 			if(m_pathNodes[j].objectIndex == m_pathNodes[i].objectIndex)
 				iseg++;
 
 		istart = 12*m_mapObjects[m_pathNodes[i].objectIndex]->m_modelIndex;
 		// Add links to other internal nodes
-		for(j = max(oldNumPathNodes, i-12); j < min(m_numPathNodes, i+12); j++){
+		for(j = Max(oldNumPathNodes, i-12); j < Min(m_numPathNodes, i+12); j++){
 			if(m_pathNodes[i].objectIndex != m_pathNodes[j].objectIndex || i == j)
 				continue;
 			// N.B.: in every path segment, the externals have to be at the end

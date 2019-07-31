@@ -7,13 +7,9 @@
 #include "ModelIndices.h"
 #include "VisibilityPlugins.h"
 #include "DMAudio.h"
-<<<<<<< HEAD
 #include "Clock.h"
-#include "TimeCycle.h"
-#include "ZoneCull.h"
-=======
 #include "Timecycle.h"
->>>>>>> More audio ped
+#include "ZoneCull.h"
 #include "Camera.h"
 #include "Darkel.h"
 #include "Rubbish.h"
@@ -4483,16 +4479,8 @@ CAutomobile::SetAllTaxiLights(bool set)
 class CAutomobile_ : public CAutomobile
 {
 public:
-<<<<<<< HEAD
-<<<<<<< HEAD
 	void ctor(int32 id, uint8 CreatedBy) { ::new (this) CAutomobile(id, CreatedBy); }
 	void dtor() { CAutomobile::~CAutomobile(); }
-=======
-	void dtor() { this->~CAutomobile(); }
->>>>>>> More audio ped
-=======
-	void dtor() { CAutomobile::~CAutomobile(); }
->>>>>>> fix
 	void SetModelIndex_(uint32 id) { CAutomobile::SetModelIndex(id); }
 	void ProcessControl_(void) { CAutomobile::ProcessControl(); }
 	void Teleport_(CVector v) { CAutomobile::Teleport(v); }
