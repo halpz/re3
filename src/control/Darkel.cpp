@@ -168,7 +168,7 @@ void CDarkel::ResetOnPlayerDeath()
 		WeaponType = WEAPONTYPE_UZI;
 
 	if (WeaponType < WEAPONTYPE_TOTALWEAPONS) {
-		FindPlayerPed()->m_bWeaponSlot = InterruptedWeapon;
+		FindPlayerPed()->m_nSelectedWepSlot = InterruptedWeapon;
 		CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal = AmmoInterruptedWeapon;
 	}
 
@@ -187,7 +187,7 @@ void CDarkel::ResetOnPlayerDeath()
 		WeaponType = WEAPONTYPE_UZI;
 
 	if (WeaponType < WEAPONTYPE_TOTALWEAPONS) {
-		FindPlayerPed()->m_bWeaponSlot = InterruptedWeapon;
+		FindPlayerPed()->m_nSelectedWepSlot = InterruptedWeapon;
 		CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal = AmmoInterruptedWeapon;
 	}
 
@@ -234,8 +234,8 @@ void CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, int16 kill, int32 
 		FindPlayerPed()->GiveWeapon(weaponType, 0);
 		AmmoInterruptedWeapon = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal;
 		FindPlayerPed()->GiveWeapon(weaponType, 30000);
-		FindPlayerPed()->m_bWeaponSlot = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
-		FindPlayerPed()->MakeChangesForNewWeapon(FindPlayerPed()->m_bWeaponSlot);
+		FindPlayerPed()->m_nSelectedWepSlot = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
+		FindPlayerPed()->MakeChangesForNewWeapon(FindPlayerPed()->m_nSelectedWepSlot);
 
 		if (FindPlayerVehicle()) {
 			FindPlayerPed()->m_currentWeapon = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_eWeaponType;
@@ -277,7 +277,7 @@ void CDarkel::Update()
 			WeaponType = WEAPONTYPE_UZI;
 
 		if (WeaponType < WEAPONTYPE_TOTALWEAPONS) {
-			FindPlayerPed()->m_bWeaponSlot = InterruptedWeapon;
+			FindPlayerPed()->m_nSelectedWepSlot = InterruptedWeapon;
 			CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal = AmmoInterruptedWeapon;
 		}
 
@@ -306,7 +306,7 @@ void CDarkel::Update()
 			WeaponType = WEAPONTYPE_UZI;
 
 		if (WeaponType < WEAPONTYPE_TOTALWEAPONS) {
-			FindPlayerPed()->m_bWeaponSlot = InterruptedWeapon;
+			FindPlayerPed()->m_nSelectedWepSlot = InterruptedWeapon;
 			CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_weapons[CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_currentWeapon].m_nAmmoTotal = AmmoInterruptedWeapon;
 		}
 

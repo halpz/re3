@@ -77,7 +77,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	field_214 = 0;
 	bLightsOn = false;
 	bVehicleColProcessed = false;
-	field_1F9 = 0;
+	m_numPedsUseItAsCover = 0;
 	bIsCarParkVehicle = false;
 	bHasAlreadyBeenRecorded = false;
 	m_bSirenOrAlarm = 0;

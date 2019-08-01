@@ -305,10 +305,10 @@ public:
 	uint8 m_ped_flagF2 : 1;
 	uint8 m_ped_flagF4 : 1;
 	uint8 m_ped_flagF8 : 1;
-	uint8 m_ped_flagF10 : 1;	// set before "quickjack"
+	uint8 bWillBeQuickJacked : 1;
 	uint8 m_ped_flagF20 : 1;
 	uint8 m_ped_flagF40 : 1;
-	uint8 m_ped_flagF80 : 1;
+	uint8 bDuckAndCover : 1;
 
 	uint8 m_ped_flagG1 : 1;
 	uint8 m_ped_flagG2 : 1;
@@ -450,7 +450,7 @@ public:
 	uint32 m_hitRecoverTimer;
 	uint32 m_objectiveTimer;
 	uint32 m_duckTimer;
-	uint32 field_4E8;
+	uint32 m_duckAndCoverTimer;
 	int32 m_bloodyFootprintCount;
 	uint8 m_panicCounter;
 	uint8 m_deadBleeding;
@@ -538,9 +538,9 @@ public:
 	void RegisterThreatWithGangPeds(CEntity*);
 	bool TurnBody(void);
 	void Chat(void);
-	void MakeChangesForNewWeapon(int8);
 	void CheckAroundForPossibleCollisions(void);
 	void SetSeek(CVector, float);
+	void SetSeek(CEntity*, float);
 	bool MakePhonecall(void);
 	bool FacePhone(void);
 	CPed *CheckForDeadPeds(void);
@@ -589,6 +589,17 @@ public:
 	void RemoveInCarAnims(void);
 	void CollideWithPed(CPed*);
 	void SetDirectionToWalkAroundObject(CEntity*);
+	void CreateDeadPedMoney(void);
+	void CreateDeadPedWeaponPickups(void);
+	void SetAttackTimer(uint32);
+	void SetBeingDraggedFromCar(CVehicle*, uint32, bool);
+	void SetRadioStation(void);
+	void SetBuyIceCream(void);
+	void SetChat(CEntity*, uint32);
+	void DeadPedMakesTyresBloody(void);
+	void MakeTyresMuddySectorList(CPtrList&);
+	uint8 DoesLOSBulletHitPed(CColPoint &point);
+	bool DuckAndCover(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -645,6 +656,7 @@ public:
 	void SetLeader(CEntity* leader);
 	void SetPedStats(ePedStats);
 	bool IsGangMember(void);
+	void Die(void);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }

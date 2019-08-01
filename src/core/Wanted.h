@@ -33,6 +33,9 @@ public:
 	CVector m_vecPosn;
 	bool m_bReported;
 	bool m_bPoliceDoesntCare;
+
+	CCrimeBeingQd() { };
+	~CCrimeBeingQd() { };
 };
 
 class CWanted

@@ -12,14 +12,14 @@ public:
 	float m_fCurrentStamina;
 	float m_fMaxStamina;
 	float m_fStaminaProgress;
-	bool m_bWeaponSlot;
+	uint8 m_nSelectedWepSlot;
 	bool m_bSpeedTimerFlag;
 	bool m_bShouldEvade;
 	int8 field_1367;
 	int32 m_nSpeedTimer;
 	int32 m_nShotDelay;
-	float field_1376;
-	int8 field_1380;	// set if can't attack, why?
+	float field_1376; // m_fAttackButtonCounter?
+	int8 field_1380;	// bHaveTargetSelected?
 	int8 field_1381;
 	int8 field_1382;
 	int8 field_1383;
@@ -34,19 +34,24 @@ public:
 	int8 field_1413;
 	int8 field_1414;
 	int8 field_1415;
-	CVector field_1416[6];
-	int32 field_1488[6];
+	CVector m_vecSafePos[6]; // safe places from the player, for example behind a tree
+	int32 field_1488[6]; // m_pPedAtSafePos?
 	float m_fWalkAngle;
 	float m_fFPSMoveHeading;
 
+	CPlayerPed();
 	~CPlayerPed();
 
 	void ReApplyMoveAnims(void);
-	void ClearWeaponTarget();
+	void ClearWeaponTarget(void);
 	void SetWantedLevel(int32 level);
 	void SetWantedLevelNoDrop(int32 level);
 	void KeepAreaAroundPlayerClear(void);
 	void AnnoyPlayerPed(bool);
+	void MakeChangesForNewWeapon(int8);
+	void SetInitialState(void);
+	void SetMoveAnim(void);
+	void ProcessControl(void);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);
