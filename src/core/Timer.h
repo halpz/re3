@@ -35,6 +35,7 @@ public:
 
 	static bool GetIsPaused() { return m_UserPause || m_CodePause; }
 	static bool GetIsUserPaused() { return m_UserPause; }
+	static bool GetIsCodePaused() { return m_CodePause; }
 	static void SetCodePause(bool pause) { m_CodePause = pause; }
 	
 	static void Initialise(void);

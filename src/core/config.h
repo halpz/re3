@@ -91,6 +91,7 @@ enum Config {
 #	define RANDOMSPLASH
 #elif defined GTA_PC
 #	define GTA3_1_1_PATCH
+//#	define GTA3_STEAM_PATCH
 #	ifdef GTA_PS2_STUFF
 //#		define USE_PS2_RAND	// this is unsafe until we have the game reversed
 #		define RANDOMSPLASH	// use random splash as on PS2
@@ -112,6 +113,7 @@ enum Config {
 	// not in any game
 #	define NASTY_GAME	// nasty game for all languages
 #	define NO_MOVIES	// disable intro videos
+#   define NO_CDCHECK
 #	define CHATTYSPLASH	// print what the game is loading
 #endif
 

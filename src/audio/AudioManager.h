@@ -187,6 +187,24 @@ struct cAudioScriptObject {
 
 static_assert(sizeof(cAudioScriptObject) == 0x14, "cAudioScriptObject: error");
 
+enum
+{
+	/*
+	REFLECTION_YMAX = 0, top
+	REFLECTION_YMIN = 1, bottom
+	REFLECTION_XMIN = 2, left
+	REFLECTION_XMAX = 3, right
+	REFLECTION_ZMAX = 4,
+	*/
+
+	REFLECTION_TOP = 0,
+	REFLECTION_BOTTOM,
+	REFLECTION_LEFT,
+	REFLECTION_RIGHT,
+	REFLECTION_UP,
+	MAX_REFLECTIONS,
+};
+	
 class cAudioManager
 {
 public:
@@ -234,7 +252,13 @@ public:
 	uint8 m_bUserPause;
 	uint8 m_bPreviousUserPause;
 	uint8 field_19195;
-	int32 m_nTimeOfRecentCrime;
+	uint32 m_FrameCounter;
+	
+	inline uint32 GetFrameCounter(void) { return m_FrameCounter; }
+	float GetReflectionsDistance(int32 idx) { return m_afReflectionsDistances[idx]; }
+	int32 GetRandomTabe(int32 idx) { return m_anRandomTable[idx]; }
+	
+	//
 
 	void AddDetailsToRequestedOrderList(uint8 sample); /// ok
 	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 unk1,
@@ -243,7 +267,7 @@ public:
 	void AddReleasingSounds();                            // todo (difficult)
 	void AddSampleToRequestedQueue();                     /// ok
 	void AgeCrimes();                                     // todo
-	int8 AutoDetect3DProviders();                         /// ok
+	int8 GetCurrent3DProviderIndex();                         /// ok
 
 	void CalculateDistance(bool *ptr, float dist); /// ok
 	bool CheckForAnAudioFileOnCD();                /// ok
@@ -283,8 +307,8 @@ public:
 
 	void SetEffectsMasterVolume(uint8 volume);
 	void SetMusicMasterVolume(uint8 volume);
-	void SetEffectsFadeVol(uint8 volume);
-	void SetMusicFadeVol(uint8 volume);
+	void SetEffectsFadeVolume(uint8 volume);
+	void SetMusicFadeVolume(uint8 volume);
 
 	void SetSpeakerConfig(int32 conf);
 
@@ -324,7 +348,7 @@ public:
 	int32 RandomDisplacement(uint32 seed);
 
 	void ReleaseDigitalHandle();
-	void RequireDigitalHandle();
+	void ReacquireDigitalHandle();
 	void SetDynamicAcousticModelingStatus(bool status);
 
 	bool IsAudioInitialised() const;
