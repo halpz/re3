@@ -17,6 +17,7 @@ workspace "re3"
 	files { "src/skel/win/*.*" }
 	files { "src/vehicles/*.*" }
 	files { "src/weapons/*.*" }
+	files { "eax/*.*" }
 
 	includedirs { "src" }
 	includedirs { "src/animation" }
@@ -33,11 +34,15 @@ workspace "re3"
 	includedirs { "src/skel/win" }
 	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
+	includedirs { "eax" }
 
 	includedirs { "dxsdk/include" }
 	includedirs { "rwsdk/include/d3d8" }
+	includedirs { "milessdk/include" }
+	includedirs { "eax" }
 
 	libdirs { "dxsdk/lib" }
+	libdirs { "milessdk/lib" }
 	
     pbcommands = { 
        "setlocal EnableDelayedExpansion",
