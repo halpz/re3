@@ -7,6 +7,8 @@
 
 cDMAudio &DMAudio = *(cDMAudio*)0x95CDBE;
 
+#define AEHANDLE_IS_FAILED(h) ((h)<0)
+#define AEHANDLE_IS_OK(h)     ((h)>=0)
 
 void
 cDMAudio::Initialise(void)

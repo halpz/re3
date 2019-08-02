@@ -727,10 +727,10 @@ CShadows::RenderStoredShadows(void)
 					float fStartY = shadowPos.y - fHeight;
 					float fEndY   = shadowPos.y + fHeight;
 
-					int32 nStartX = Max(CWorld::GetSectorIndexX(fStartX), 0);
-					int32 nStartY = Max(CWorld::GetSectorIndexY(fStartY), 0);
-					int32 nEndX   = Min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X-1);
-					int32 nEndY   = Min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y-1);
+					int32 nStartX = max(CWorld::GetSectorIndexX(fStartX), 0);
+					int32 nStartY = max(CWorld::GetSectorIndexY(fStartY), 0);
+					int32 nEndX   = min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X-1);
+					int32 nEndY   = min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y-1);
 
 					CWorld::AdvanceCurrentScanCode();
 
@@ -873,10 +873,10 @@ CShadows::GeneratePolysForStaticShadow(int16 nStaticShadowID)
 	float fStartY = shadowPos.y - fHeight;
 	float fEndY   = shadowPos.y + fHeight;
 
-	int32 nStartX = Max(CWorld::GetSectorIndexX(fStartX), 0);
-	int32 nStartY = Max(CWorld::GetSectorIndexY(fStartY), 0);
-	int32 nEndX   = Min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X-1);
-	int32 nEndY   = Min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y-1);
+	int32 nStartX = max(CWorld::GetSectorIndexX(fStartX), 0);
+	int32 nStartY = max(CWorld::GetSectorIndexY(fStartY), 0);
+	int32 nEndX   = min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X-1);
+	int32 nEndY   = min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y-1);
 
 	CWorld::AdvanceCurrentScanCode();
 
@@ -1016,11 +1016,11 @@ CShadows::CastShadowEntity(CEntity *pEntity,  float fStartX, float fStartY, floa
 	Points[3].x = (fLengthRight   - fFrontRight)    - fSideRight;
 	Points[3].y = (fLengthForward - fFrontForward)  - fSideForward;
 
-	float MinX = Min(Min(Points[0].x, Points[1].x), Min(Points[2].x, Points[3].x));
-	float MaxX = Max(Max(Points[0].x, Points[1].x), Max(Points[2].x, Points[3].x));
+	float MinX = min(min(Points[0].x, Points[1].x), min(Points[2].x, Points[3].x));
+	float MaxX = max(max(Points[0].x, Points[1].x), max(Points[2].x, Points[3].x));
 
-	float MinY = Min(Min(Points[0].y, Points[1].y), Min(Points[2].y, Points[3].y));
-	float MaxY = Max(Max(Points[0].y, Points[1].y), Max(Points[2].y, Points[3].y));
+	float MinY = min(min(Points[0].y, Points[1].y), min(Points[2].y, Points[3].y));
+	float MaxY = max(max(Points[0].y, Points[1].y), max(Points[2].y, Points[3].y));
 
 	float MaxZ = pPosn->z - pEntity->GetPosition().z;
 	float MinZ = MaxZ - fZDistance;
@@ -1767,7 +1767,7 @@ CShadows::RenderIndicatorShadow(uint32 nID, uint8 ShadowType, RwTexture *pTextur
 {
 	ASSERT(pPosn != NULL);
 
-	C3dMarkers::PlaceMarkerSet(nID, _TODOCONST(4), *pPosn, Max(fFrontX, -fSideY),
+	C3dMarkers::PlaceMarkerSet(nID, _TODOCONST(4), *pPosn, max(fFrontX, -fSideY),
 			0, 128, 255, 128,
 			2048, 0.2f, 0);
 }

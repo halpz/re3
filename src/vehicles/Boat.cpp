@@ -61,7 +61,7 @@ float CBoat::IsVertexAffectedByWake(CVector vecVertex, CBoat *pBoat)
 		float fDist = vecDist.MagnitudeSqr();
 		
 		if ( fDist < SQR(fMaxDist) )
-			return 1.0f - Min(fRangeMult * Sqrt(fDist / SQR(fMaxDist)) + (WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[i]) * fTimeMult, 1.0f);
+			return 1.0f - min(fRangeMult * Sqrt(fDist / SQR(fMaxDist)) + (WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[i]) * fTimeMult, 1.0f);
 	}
 
 	return 0.0f;

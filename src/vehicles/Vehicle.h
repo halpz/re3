@@ -191,8 +191,8 @@ public:
 	eCarLock m_nDoorLock;
 	int8 m_nLastWeaponDamage; // see eWeaponType, -1 if no damage
 	int8 m_nRadioStation;
-	int8 field_22A;
-	int8 field_22B;
+	uint8 m_bRainAudioCounter;
+	uint8 m_bRainSamplesCounter;
 	uint8 m_nCarHornTimer;
 	int8 field_22D;
 	bool m_bSirenOrAlarm;

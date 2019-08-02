@@ -153,10 +153,10 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 			// on water we expect to be between levels
 			multipleLevels = true;
 		}else{
-			xmin = Max(sx - 1, 0);
-			xmax = Min(sx + 1, NUMSECTORS_X-1);
-			ymin = Max(sy - 1, 0);
-			ymax = Min(sy + 1, NUMSECTORS_Y-1);
+			xmin = max(sx - 1, 0);
+			xmax = min(sx + 1, NUMSECTORS_X-1);
+			ymin = max(sy - 1, 0);
+			ymax = min(sy + 1, NUMSECTORS_Y-1);
 
 			for(x = xmin; x <= xmax; x++)
 				for(y = ymin; y <= ymax; y++){

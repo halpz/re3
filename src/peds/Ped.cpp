@@ -1792,7 +1792,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 			neededPos.z = autoZPos.z;
 			m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 		} else if (neededPos.z <= currentZ && m_pVehicleAnim && vehAnim != ANIM_VAN_CLOSE_L && vehAnim != ANIM_VAN_CLOSE) {
-			adjustedTimeStep = Min(m_pVehicleAnim->timeStep, 0.1f);
+			adjustedTimeStep = min(m_pVehicleAnim->timeStep, 0.1f);
 
 			// Smoothly change ped position
 			neededPos.z = currentZ - (currentZ - neededPos.z) / (m_pVehicleAnim->GetTimeLeft() / adjustedTimeStep);
@@ -1807,12 +1807,12 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 				if (m_pVehicleAnim &&
 					(vehAnim == ANIM_CAR_GETIN_RHS || vehAnim == ANIM_CAR_GETIN_LOW_RHS || vehAnim == ANIM_CAR_GETIN_LHS || vehAnim == ANIM_CAR_GETIN_LOW_LHS
 						|| vehAnim == ANIM_CAR_QJACK || vehAnim == ANIM_VAN_GETIN_L || vehAnim == ANIM_VAN_GETIN)) {
-					adjustedTimeStep = Min(m_pVehicleAnim->timeStep, 0.1f);
+					adjustedTimeStep = min(m_pVehicleAnim->timeStep, 0.1f);
 
 					// Smoothly change ped position
 					neededPos.z = (neededPos.z - currentZ) / (m_pVehicleAnim->GetTimeLeft() / adjustedTimeStep) + currentZ;
 				} else if (m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK) {
-					neededPos.z = Max(currentZ, autoZPos.z);
+					neededPos.z = max(currentZ, autoZPos.z);
 				}
 			}
 		}
@@ -4771,12 +4771,12 @@ CPed::FightStrike(CVector &touchedNodePos)
 
 			float moveMult;
 			if (m_lastFightMove == FIGHTMOVE_GROUNDKICK) {
-				moveMult = Min(damageMult * 0.6f, 4.0f);
+				moveMult = min(damageMult * 0.6f, 4.0f);
 			} else {
 				if (nearPed->m_nPedState != PED_DIE || damageMult >= 20) {
 					moveMult = damageMult;
 				} else {
-					moveMult = Min(damageMult * 2.0f, 14.0f);
+					moveMult = min(damageMult * 2.0f, 14.0f);
 				}
 			}
 

@@ -290,7 +290,7 @@ CTimeCycle::Update(void)
 		TheCamera.SetMotionBlur(m_fCurrentBlurRed, m_fCurrentBlurGreen, m_fCurrentBlurBlue, m_fCurrentBlurAlpha, MBLUR_NORMAL);
 
 	if(m_FogReduction != 0)
-		m_fCurrentFarClip = Max(m_fCurrentFarClip, m_FogReduction/64.0f * 650.0f);
+		m_fCurrentFarClip = max(m_fCurrentFarClip, m_FogReduction/64.0f * 650.0f);
 	m_nCurrentFogColourRed = (m_nCurrentSkyTopRed + 2*m_nCurrentSkyBottomRed) / 3;
 	m_nCurrentFogColourGreen = (m_nCurrentSkyTopGreen + 2*m_nCurrentSkyBottomGreen) / 3;
 	m_nCurrentFogColourBlue = (m_nCurrentSkyTopBlue + 2*m_nCurrentSkyBottomBlue) / 3;
@@ -311,9 +311,9 @@ CTimeCycle::Update(void)
 
 	if(TheCamera.GetForward().z < -0.9f ||
 	   !CWeather::bScriptsForceRain && (CCullZones::PlayerNoRain() || CCullZones::CamNoRain() || CCutsceneMgr::IsRunning()))
-		m_FogReduction = Min(m_FogReduction+1, 64);
+		m_FogReduction = min(m_FogReduction+1, 64);
 	else
-		m_FogReduction = Max(m_FogReduction-1, 0);
+		m_FogReduction = max(m_FogReduction-1, 0);
 }
 
 STARTPATCHES

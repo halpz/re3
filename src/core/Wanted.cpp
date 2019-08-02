@@ -209,7 +209,7 @@ CWanted::ReportCrimeNow(eCrimeType type, const CVector &coors, bool policeDoesnt
 	else
 		sensitivity = m_fCrimeSensitivity;
 
-	wantedLevelDrop = Min(CCullZones::GetWantedLevelDrop(), 100);
+	wantedLevelDrop = min(CCullZones::GetWantedLevelDrop(), 100);
 
 	chaos = (1.0f - wantedLevelDrop/100.0f) * sensitivity;
 	if (policeDoesntCare)

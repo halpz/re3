@@ -117,7 +117,7 @@ public:
 	uint8 m_nWheelsOnGround;
 	uint8 m_nDriveWheelsOnGround;
 	uint8 m_nDriveWheelsOnGroundPrev;
-	int32 field_594;
+	int32 m_fGasPedalAudio;
 	tWheelState m_aWheelState[4];
 
 	static bool &m_sAllTaxiLights;

@@ -374,32 +374,6 @@ delayedPatches10(int a, int b)
 }
 */
 
-<<<<<<< HEAD
-=======
-void __declspec(naked) HeadlightsFix()
-{
-	static const float		fMinusOne = -1.0f;
-	_asm
-	{
-		fld		[esp+708h-690h]
-		fcomp	fMinusOne
-		fnstsw	ax
-		and		ah, 5
-		cmp		ah, 1
-		jnz		HeadlightsFix_DontLimit
-		fld		fMinusOne
-		fstp	[esp+708h-690h]
-
-HeadlightsFix_DontLimit:
-		fld		[esp+708h-690h]
-		fabs
-		fld		st
-		push		0x5382F2
-		retn
-	}
-}
-
->>>>>>> More audio ped
 const int   re3_buffsize = 1024;
 static char re3_buff[re3_buffsize];
 

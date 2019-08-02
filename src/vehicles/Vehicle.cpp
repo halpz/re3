@@ -97,8 +97,8 @@ CVehicle::CVehicle(uint8 CreatedBy)
 		DMAudio.SetEntityStatus(m_audioEntityId, true);
 	m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
 	m_pCurGroundEntity = nil;
-	field_22A = 0;
-	field_22B = 0;
+	m_bRainAudioCounter = 0;
+	m_bRainSamplesCounter = 0;
 	m_comedyControlState = 0;
 	m_aCollPolys[0].valid = false;
 	m_aCollPolys[1].valid = false;
@@ -273,7 +273,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 		right = -contactSpeedRight/wheelsOnGround;
 
 		if(wheelStatus == WHEEL_STATUS_BURST){
-			float fwdspeed = Min(contactSpeedFwd, 0.3f);
+			float fwdspeed = min(contactSpeedFwd, 0.3f);
 			right += fwdspeed * CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
 		}
 	}
@@ -363,7 +363,7 @@ CVehicle::ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVec
 void
 CVehicle::ExtinguishCarFire(void)
 {
-	m_fHealth = Max(m_fHealth, 300.0f);
+	m_fHealth = max(m_fHealth, 300.0f);
 	if(m_pCarFire)
 		m_pCarFire->Extinguish();
 	if(IsCar()){
@@ -638,13 +638,13 @@ CVehicle::SetDriver(CPed *driver)
 
 	if(bFreebies && driver == FindPlayerPed()){
 		if(GetModelIndex() == MI_AMBULAN)
-			FindPlayerPed()->m_fHealth = Min(FindPlayerPed()->m_fHealth + 20.0f, 100.0f);
+			FindPlayerPed()->m_fHealth = min(FindPlayerPed()->m_fHealth + 20.0f, 100.0f);
 		else if(GetModelIndex() == MI_TAXI)
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
 		else if(GetModelIndex() == MI_POLICE)
 			driver->GiveWeapon(WEAPONTYPE_SHOTGUN, 5);
 		else if(GetModelIndex() == MI_ENFORCER)
-			driver->m_fArmour = Max(driver->m_fArmour, 100.0f);
+			driver->m_fArmour = max(driver->m_fArmour, 100.0f);
 		else if(GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE)
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
 		bFreebies = false;

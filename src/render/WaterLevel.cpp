@@ -979,7 +979,7 @@ CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &col
 			SMALL_SECTOR_SIZE / 2,
 			apBoatList) )
 	{
-		float fWakeColor = fAdd1 - Max(255.0f - float(color.blue + color.red + color.green) / 3, fAdd2);
+		float fWakeColor = fAdd1 - max(255.0f - float(color.blue + color.red + color.green) / 3, fAdd2);
 		
 		RpGeometry *wavyGeometry = RpAtomicGetGeometry(ms_pWavyAtomic);	
 		RpGeometry *geom  = apGeomArray[nGeomUsed++];
@@ -1035,9 +1035,9 @@ CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &col
 					
 					RwRGBAAssign(&wakeColor, &color);
 
-					wakeColor.red   = Min(color.red   + int32(fWakeColor * fRedMult   * fDistMult), 255);
-					wakeColor.green = Min(color.green + int32(fWakeColor * fGreenMult * fDistMult), 255);
-					wakeColor.blue  = Min(color.blue  + int32(fWakeColor * fBlueMult  * fDistMult), 255);
+					wakeColor.red   = min(color.red   + int32(fWakeColor * fRedMult   * fDistMult), 255);
+					wakeColor.green = min(color.green + int32(fWakeColor * fGreenMult * fDistMult), 255);
+					wakeColor.blue  = min(color.blue  + int32(fWakeColor * fBlueMult  * fDistMult), 255);
 					
 					RwRGBAAssign(&geomPreLights[9*i+j], &wakeColor);
 
@@ -1114,7 +1114,7 @@ CWaterLevel::CalcDistanceToWater(float fX, float fY)
 					fSectorY + SMALL_SECTOR_SIZE - fY
 				);
 				
-				fDistSqr = Min(vecDist.MagnitudeSqr(), fDistSqr);
+				fDistSqr = min(vecDist.MagnitudeSqr(), fDistSqr);
 			}
 		}
 	}
