@@ -4037,7 +4037,7 @@ cAudioManager::ProcessEntity(int32 id)
 		case AUDIOTYPE_BRIDGE:
 			if(!m_bUserPause) {
 				m_sQueueSample.m_bReverbFlag = 1;
-				cAudioManager::ProcessBridgeOneShots();
+				cAudioManager::ProcessBridge();
 			}
 			break;
 		case AUDIOTYPE_FRONTEND:

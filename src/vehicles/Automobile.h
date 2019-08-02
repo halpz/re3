@@ -48,13 +48,13 @@ public:
 	uint8 bHadDriver : 1;		// for bombs
 	uint8 m_auto_flagA20 : 1;
 	uint8 m_auto_flagA40 : 1;
-	uint8 m_auto_flagA80 : 1;
+	uint8 bWaterTight : 1;	// no damage for non-player peds
 	uint8 bNotDamagedUpsideDown : 1;
 	uint8 bMoreResistantToDamage : 1;
 	uint8 field_4DB;
 	CEntity *m_pBombRigger;
 	int16 field_4E0;
-	int16 field_4E2;
+	uint16 m_hydraulicState;
 	uint32 m_nBusDoorTimerEnd;
 	uint32 m_nBusDoorTimerStart;
 	float m_aSuspensionSpringLength[4];
@@ -71,7 +71,7 @@ public:
 	float m_weaponDoorTimerRight;
 	float m_fCarGunLR;
 	float m_fCarGunUD;
-	float m_fWindScreenRotation;
+	float m_fPropellerRotation;
 	uint8 stuff4[4];
 	uint8 m_nWheelsOnGround;
 	uint8 m_nDriveWheelsOnGround;
@@ -108,7 +108,7 @@ public:
 	void BlowUpCar(CEntity *ent);
 	bool SetUpWheelColModel(CColModel *colModel);
 	void BurstTyre(uint8 tyre);
-	bool IsRoomForPedToLeaveCar(uint32, CVector *);
+	bool IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset);
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
@@ -122,6 +122,8 @@ public:
 	int32 RcbanditCheck1CarWheels(CPtrList &list);
 	void PlaceOnRoadProperly(void);
 	void dmgDrawCarCollidingParticles(const CVector &pos, float amount);
+	void AddDamagedVehicleParticles(void);
+	int32 AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed);
 	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);
 	void SetupSuspensionLines(void);

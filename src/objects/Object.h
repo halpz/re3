@@ -66,6 +66,7 @@ public:
 	static void operator delete(void*, size_t);
 
 	CObject(void);
+	CObject(int32, bool);
 	~CObject(void);
 
 	void Render(void);
@@ -74,6 +75,7 @@ public:
 
 	void ObjectDamage(float amount);
 	void RefModelInfo(int32 modelId);
+	void Init(void);
 
 	static void DeleteAllTempObjectInArea(CVector, float);
 };

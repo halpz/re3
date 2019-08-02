@@ -103,6 +103,7 @@ public:
 	static float FindGroundZFor3DCoord(float x, float y, float z, bool *found);
 	static float FindRoofZFor3DCoord(float x, float y, float z, bool *found);
 	static void RemoveReferencesToDeletedObject(CEntity*);
+	static void FindObjectsKindaColliding(const CVector &, float, bool, int16*, int16, CEntity **, bool, bool, bool, bool, bool);
 
 	static float GetSectorX(float f) { return ((f - WORLD_MIN_X)/SECTOR_SIZE_X); }
 	static float GetSectorY(float f) { return ((f - WORLD_MIN_Y)/SECTOR_SIZE_Y); }

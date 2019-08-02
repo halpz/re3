@@ -40,19 +40,19 @@ CWanted::Initialise()
 bool
 CWanted::AreSwatRequired()
 {
-	return m_nWantedLevel >= 4;
+	return m_nWantedLevel == 4 || m_bSwatRequired;
 }
 
 bool
 CWanted::AreFbiRequired()
 {
-	return m_nWantedLevel >= 5;
+	return m_nWantedLevel == 5 || m_bFbiRequired;
 }
 
 bool
 CWanted::AreArmyRequired()
 {
-	return m_nWantedLevel >= 6;
+	return m_nWantedLevel == 6 || m_bArmyRequired;
 }
 
 int32
@@ -77,6 +77,8 @@ void
 CWanted::SetWantedLevel(int32 level)
 {
 	ClearQdCrimes();
+	if (level > MaximumWantedLevel)
+		level = MaximumWantedLevel;
 	switch (level) {
 	case 0:
 		m_nChaos = 0;
@@ -100,8 +102,6 @@ CWanted::SetWantedLevel(int32 level)
 		m_nChaos = 3220;
 		break;
 	default:
-		if (level > MaximumWantedLevel)
-			m_nChaos = MaximumWantedLevel;
 		break;
 	}
 	UpdateWantedLevel();
@@ -274,6 +274,9 @@ void
 CWanted::UpdateWantedLevel()
 {
 	int32 CurrWantedLevel = m_nWantedLevel;
+
+	if (m_nChaos > nMaximumWantedLevel)
+		m_nChaos = nMaximumWantedLevel;
 
 	if (m_nChaos >= 0 && m_nChaos < 40) {
 		m_nWantedLevel = 0;

@@ -59,8 +59,8 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_pBlowUpEntity = nil;
 	field_1FB = 0;
 	bComedyControls = false;
-	m_veh_flagB40 = false;
-	m_veh_flagB80 = false;
+	bCraneMessageDone = false;
+	bExtendedRange = false;
 	bTakeLessDamage = false;
 	bIsDamaged = false;
 	bFadeOut = false;
@@ -70,7 +70,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bHasBeenOwnedByPlayer = false;
 	m_veh_flagC20 = false;
 	bCanBeDamaged = true;
-	m_veh_flagC80 = false;
+	bUsingSpecialColModel = false;
 	m_veh_flagD1 = false;
 	m_veh_flagD2 = false;
 	m_nGunFiringTime = 0;
@@ -255,9 +255,9 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	float contactSpeedFwd = DotProduct(wheelContactSpeed, wheelFwd);
 	float contactSpeedRight = DotProduct(wheelContactSpeed, wheelRight);
 
-	if(*wheelState != WHEEL_STATE_0)
+	if(*wheelState != WHEEL_STATE_NORMAL)
 		bAlreadySkidding = true;
-	*wheelState = WHEEL_STATE_0;
+	*wheelState = WHEEL_STATE_NORMAL;
 
 	adhesion *= CTimer::GetTimeStep();
 	if(bAlreadySkidding)
@@ -299,7 +299,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 
 		if(brake > adhesion){
 			if(Abs(contactSpeedFwd) > 0.005f)
-				*wheelState = WHEEL_STATE_STATIC;
+				*wheelState = WHEEL_STATE_FIXED;
 		}else {
 			if(fwd > 0.0f){
 				if(fwd > brake)
@@ -312,11 +312,11 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	}
 
 	if(sq(adhesion) < sq(right) + sq(fwd)){
-		if(*wheelState != WHEEL_STATE_STATIC){
+		if(*wheelState != WHEEL_STATE_FIXED){
 			if(bDriving && contactSpeedFwd < 0.2f)
-				*wheelState = WHEEL_STATE_1;
+				*wheelState = WHEEL_STATE_SPINNING;
 			else
-				*wheelState = WHEEL_STATE_2;
+				*wheelState = WHEEL_STATE_SKIDDING;
 		}
 
 		float l = Sqrt(sq(right) + sq(fwd));
@@ -343,10 +343,10 @@ CVehicle::ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVec
 {
 	float angularVelocity;
 	switch(state){
-	case WHEEL_STATE_1:
+	case WHEEL_STATE_SPINNING:
 		angularVelocity = -1.1f;	// constant speed forward
 		break;
-	case WHEEL_STATE_STATIC:
+	case WHEEL_STATE_FIXED:
 		angularVelocity = 0.0f;		// not moving
 		break;
 	default:
@@ -377,12 +377,13 @@ CVehicle::ProcessDelayedExplosion(void)
 		return;
 
 	int tick = CTimer::GetTimeStep()/60.0f*1000.0f;
+	int16 prev = m_nBombTimer;
 	if(tick > m_nBombTimer)
 		m_nBombTimer = 0;
 	else
 		m_nBombTimer -= tick;
 
-	if(IsCar() && ((CAutomobile*)this)->m_bombType == CARBOMB_TIMEDACTIVE && (m_nBombTimer & 0xFE00) != 0xFE00)
+	if(IsCar() && ((CAutomobile*)this)->m_bombType == CARBOMB_TIMEDACTIVE && (m_nBombTimer & 0xFE00) != (prev & 0xFE00))
 		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_BOMB_TICK, 0.0f);
 
 	if (m_nBombTimer != 0)

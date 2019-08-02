@@ -22,7 +22,7 @@ static float fBoatVolumeDistribution[9] = {
 };
 
 bool
-cBuoyancy::ProcessBuoyancy(CPhysical *phys, float buoyancy, CVector *impulse, CVector *point)
+cBuoyancy::ProcessBuoyancy(CPhysical *phys, float buoyancy, CVector *point, CVector *impulse)
 {
 	m_numSteps = 2.0f;
 
@@ -32,7 +32,7 @@ cBuoyancy::ProcessBuoyancy(CPhysical *phys, float buoyancy, CVector *impulse, CV
 
 	PreCalcSetup(phys, buoyancy);
 	SimpleCalcBuoyancy();
-	float f = CalcBuoyancyForce(phys, impulse, point);
+	float f = CalcBuoyancyForce(phys, point, impulse);
 	if(m_isBoat)
 		return true;
 	return f != 0.0f;
@@ -82,7 +82,7 @@ cBuoyancy::PreCalcSetup(CPhysical *phys, float buoyancy)
 	m_haveVolume = false;
 	m_numPartialVolumes = 1.0f;
 	m_volumeUnderWater = 0.0f;
-	m_impulse = CVector(0.0f, 0.0f, 0.0f);
+	m_impulsePoint = CVector(0.0f, 0.0f, 0.0f);
 	m_position = phys->GetPosition();
 	m_positionZ = CVector(0.0f, 0.0f, m_position.z);
 	m_buoyancy = buoyancy;
@@ -148,7 +148,7 @@ cBuoyancy::SimpleSumBuoyancyData(CVector &waterLevel, tWaterLevel waterPosition)
 
 	fFraction = 1.0f/m_numPartialVolumes;
 	fRemainingSlice = 1.0f - fFraction;
-	m_impulse = m_impulse*fRemainingSlice + AverageOfWaterLevel*fThisVolume*fFraction;
+	m_impulsePoint = m_impulsePoint*fRemainingSlice + AverageOfWaterLevel*fThisVolume*fFraction;
 	m_numPartialVolumes += 1.0f;
 	m_haveVolume = true;
 	return fThisVolume;
@@ -175,13 +175,13 @@ cBuoyancy::FindWaterLevel(const CVector &zpos, CVector *waterLevel, tWaterLevel 
 }
 
 bool
-cBuoyancy::CalcBuoyancyForce(CPhysical *phys, CVector *impulse, CVector *point)
+cBuoyancy::CalcBuoyancyForce(CPhysical *phys, CVector *point, CVector *impulse)
 {
 	if(!m_haveVolume)
 		return false;
 
-	*impulse = Multiply3x3(m_matrix, m_impulse);
-	*point = CVector(0.0f, 0.0f, m_volumeUnderWater*m_buoyancy*CTimer::GetTimeStep());
+	*point = Multiply3x3(m_matrix, m_impulsePoint);
+	*impulse = CVector(0.0f, 0.0f, m_volumeUnderWater*m_buoyancy*CTimer::GetTimeStep());
 	return true;
 }
 

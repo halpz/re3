@@ -41,6 +41,7 @@ public:
 	static void DoMoneyEffects(CEntity *ent);
 	static void DoMineEffects(CEntity *ent);
 	static void DoPickUpEffects(CEntity *ent);
+	static void RemoveAllFloatingPickups();
 
 	static CPickup (&aPickUps)[NUMPICKUPS];
 };

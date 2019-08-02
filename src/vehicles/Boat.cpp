@@ -5,7 +5,7 @@
 float &fShapeLength = *(float*)0x600E78;
 float &fShapeTime   = *(float*)0x600E7C;
 float &fRangeMult   = *(float*)0x600E80; //0.6f; // 0.75f gta 3
-float &fTimeMult = *(float*)0xA0FCF4;
+float &fTimeMult = *(float*)0x943008;
 
 float MAX_WAKE_LENGTH = 50.0f;
 float MIN_WAKE_INTERVAL = 1.0f;

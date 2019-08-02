@@ -20,7 +20,7 @@ public:
 	CPlayerPed *m_pPed;
 	CVehicle *m_pRemoteVehicle;
 	CColModel m_ColModel;
-	CVehicle *m_pVehicleEx;
+	CVehicle *m_pVehicleEx;	// vehicle using the col model above
 	char m_aPlayerName[70];
 	int32 m_nMoney;
 	int32 m_nVisibleMoney;
@@ -45,10 +45,10 @@ public:
 	int8 field_225;
 	int8 field_226;
 	int8 field_227;
-	int32 m_nTimeLostRemoteCar;
-	int32 m_nTimeLastHealthLoss;
-	int32 m_nTimeLastArmourLoss;
-	int32 field_240;
+	uint32 m_nTimeLostRemoteCar;
+	uint32 m_nTimeLastHealthLoss;
+	uint32 m_nTimeLastArmourLoss;
+	uint32 m_nTimeTankShotGun;
 	int32 m_nUpsideDownCounter;
 	int32 field_248;
 	int16 m_nTrafficMultiplier;
@@ -70,6 +70,7 @@ public:
 	void LoadPlayerSkin();
 	void AwardMoneyForExplosion(CVehicle *vehicle);	
 	void SetPlayerSkin(char* skin);
+	CVector& GetPos();
 };
 
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");

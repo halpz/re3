@@ -76,7 +76,7 @@ public:
 	uint32 m_flagD8 : 1;	// used by cBuoyancy::ProcessBuoyancy
 	uint32 bIsSubway : 1;	// set when subway, but maybe different meaning?
 	uint32 bDrawLast : 1;
-	uint32 m_flagD40 : 1;
+	uint32 bNoBrightHeadLights : 1;
 	uint32 m_flagD80 : 1;	// CObject visibility?
 
 	// flagsE

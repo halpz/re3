@@ -59,6 +59,11 @@ enum
 	CAR_POS_EXHAUST		= 9,
 };
 
+enum
+{
+	BOAT_POS_FRONTSEAT
+};
+
 enum eDoors
 {
 	DOOR_BONNET = 0,
@@ -119,10 +124,10 @@ enum
 
 enum tWheelState
 {
-	WHEEL_STATE_0 = 0,
-	WHEEL_STATE_1 = 1,	// constant velocity
-	WHEEL_STATE_2 = 2,	// normal
-	WHEEL_STATE_STATIC = 3,	// not moving
+	WHEEL_STATE_NORMAL,	// standing still or rolling normally
+	WHEEL_STATE_SPINNING,	// rotating but not moving
+	WHEEL_STATE_SKIDDING,
+	WHEEL_STATE_FIXED,	// not rotating
 };
 
 enum eFlightModel
@@ -176,8 +181,8 @@ public:
 	uint8 bLowVehicle: 1; // Need this for sporty type cars to use low getting-in/out anims
 	uint8 bComedyControls : 1; // Will make the car hard to control (hopefully in a funny way)
 	uint8 bWarnedPeds : 1; // Has scan and warn peds of danger been processed?
-	uint8 m_veh_flagB40 : 1;
-	uint8 m_veh_flagB80 : 1;
+	uint8 bCraneMessageDone : 1; // A crane message has been printed for this car allready
+	uint8 bExtendedRange : 1; // This vehicle needs to be a bit further away to get deleted
 
 	uint8 bTakeLessDamage : 1; // This vehicle is stronger (takes about 1/4 of damage)
 	uint8 bIsDamaged : 1; // This vehicle has been damaged and is displaying all its components
@@ -186,7 +191,7 @@ public:
 	uint8 m_veh_flagC10 : 1;
 	uint8 m_veh_flagC20 : 1;
 	uint8 bCanBeDamaged : 1; // Set to FALSE during cut scenes to avoid explosions
-	uint8 m_veh_flagC80 : 1;
+	uint8 bUsingSpecialColModel : 1;// Is player vehicle using special collision model, stored in player strucure
 
 	uint8 m_veh_flagD1 : 1;
 	uint8 m_veh_flagD2 : 1;
@@ -253,7 +258,7 @@ public:
 	virtual void BlowUpCar(CEntity *ent) {}
 	virtual bool SetUpWheelColModel(CColModel *colModel) { return false; }
 	virtual void BurstTyre(uint8 tyre) {}
-	virtual bool IsRoomForPedToLeaveCar(uint32, CVector *) { return false;}
+	virtual bool IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos) { return false;}
 	virtual float GetHeightAboveRoad(void);
 	virtual void PlayCarHorn(void) {}
 

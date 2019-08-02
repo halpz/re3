@@ -150,6 +150,18 @@ FixCar(void)
 	((CAutomobile*)veh)->Fix();
 }
 
+static int engineStatus;
+static void
+SetEngineStatus(void)
+{
+	CVehicle *veh = FindPlayerVehicle();
+	if(veh == nil)
+		return;
+	if(!veh->IsCar())
+		return;
+	((CAutomobile*)veh)->Damage.SetEngineStatus(engineStatus);
+}
+
 static void
 ToggleComedy(void)
 {
@@ -295,9 +307,13 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Enforcer", [](){ SpawnCar(MI_ENFORCER); });
 		DebugMenuAddCmd("Spawn", "Spawn Banshee", [](){ SpawnCar(MI_BANSHEE); });
 		DebugMenuAddCmd("Spawn", "Spawn Yakuza", [](){ SpawnCar(MI_YAKUZA); });
+		DebugMenuAddCmd("Spawn", "Spawn Yardie", [](){ SpawnCar(MI_YARDIE); });
 		DebugMenuAddCmd("Spawn", "Spawn Dodo", [](){ SpawnCar(MI_DODO); });
+		DebugMenuAddCmd("Spawn", "Spawn Rhino", [](){ SpawnCar(MI_RHINO); });
+		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
 
-
+		DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
+		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
 		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
 		DebugMenuAddCmd("Debug", "Place Car on Road", PlaceOnRoad);

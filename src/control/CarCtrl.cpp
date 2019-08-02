@@ -7,6 +7,9 @@ int &CCarCtrl::NumAmbulancesOnDuty = *(int*)0x885BB0;
 int &CCarCtrl::NumFiretrucksOnDuty = *(int*)0x9411F0;
 bool &CCarCtrl::bCarsGeneratedAroundCamera = *(bool*)0x95CD8A;
 float& CCarCtrl::CarDensityMultiplier = *(float*)0x5EC8B4;
+int32 &CCarCtrl::NumMissionCars = *(int32*)0x8F1B54;
+int32 &CCarCtrl::NumRandomCars = *(int32*)0x943118;
+int32 &CCarCtrl::NumParkedCars = *(int32*)0x8F29E0;
 
 WRAPPER void CCarCtrl::SwitchVehicleToRealPhysics(CVehicle*) { EAXJMP(0x41F7F0); }
 WRAPPER void CCarCtrl::AddToCarArray(int32 id, int32 vehclass) { EAXJMP(0x4182F0); }
@@ -17,6 +20,7 @@ WRAPPER void CCarCtrl::JoinCarWithRoadSystem(CVehicle*) { EAXJMP(0x41F820); }
 WRAPPER void CCarCtrl::SteerAICarWithPhysics(CVehicle*) { EAXJMP(0x41DA60); }
 WRAPPER void CCarCtrl::UpdateCarOnRails(CVehicle*) { EAXJMP(0x418880); }
 WRAPPER void CCarCtrl::ScanForPedDanger(CVehicle *veh) { EAXJMP(0x418F40); }
+WRAPPER void CCarCtrl::RemoveFromInterestingVehicleList(CVehicle* v) { EAXJMP(0x41F7A0); }
 
 bool
 CCarCtrl::MapCouldMoveInThisArea(float x, float y)

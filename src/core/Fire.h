@@ -4,6 +4,7 @@ class CEntity;
 
 class CFire
 {
+public:
 	bool m_bIsOngoing;
 	bool m_bExists;
 	bool m_bPropogationFlag;
@@ -18,7 +19,6 @@ class CFire
 	int field_28;
 	float field_2C;
 
-public:
 	void Extinguish(void);
 };
 
@@ -26,5 +26,6 @@ class CFireManager
 {
 public:
 	void StartFire(CEntity *entityOnFire, CEntity *culprit, float, uint32);
+	CFire *FindFurthestFire_NeverMindFireMen(CVector coors, float, float);
 };
 extern CFireManager &gFireManager;

@@ -469,6 +469,8 @@ int     m_iModeObbeCamIsInForCar;
 	void Restore(void);
 	void SetWidescreenOff(void);
 
+	float Find3rdPersonQuickAimPitch(void);
+
 	void dtor(void) { this->CCamera::~CCamera(); }
 };
 static_assert(offsetof(CCamera, m_WideScreenOn) == 0x70, "CCamera: error");

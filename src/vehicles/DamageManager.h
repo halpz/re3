@@ -6,6 +6,9 @@
 
 enum eEngineStatus
 {
+	ENGINE_STATUS_STEAM1 = 100,
+	ENGINE_STATUS_STEAM2 = 150,
+	ENGINE_STATUS_SMOKE = 200,
 	ENGINE_STATUS_ON_FIRE = 225
 };
 
@@ -30,6 +33,12 @@ enum eWheelStatus
 	WHEEL_STATUS_OK,
 	WHEEL_STATUS_BURST,
 	WHEEL_STATUS_MISSING
+};
+
+enum eLightStatus
+{
+	LIGHT_STATUS_OK,
+	LIGHT_STATUS_BROKEN
 };
 
 enum tComponent

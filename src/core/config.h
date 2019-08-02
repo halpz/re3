@@ -64,6 +64,8 @@ enum Config {
 	NUMRADARBLIPS = 32,
 	NUMPICKUPS = 336,
 	NUMEVENTS = 64,
+
+	NUM_CARGENS = 160
 };
 
 // We'll use this once we're ready to become independent of the game
@@ -117,7 +119,7 @@ enum Config {
 #	define CHATTYSPLASH	// print what the game is loading
 #endif
 
-//#define FIX_BUGS		// fix bugs in the game, TODO: use this more
+#define FIX_BUGS		// fix bugs in the game, TODO: use this more
 #define KANGAROO_CHEAT
 #define ASPECT_RATIO_SCALE
 #define USE_DEBUG_SCRIPT_LOADER

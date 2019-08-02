@@ -2265,9 +2265,6 @@ HRESULT _InputInitialiseMouse()
 	return S_OK;
 }
 
-//#define SUCCEEDED(Status) ((HRESULT)(Status) >= 0)
-//#define FAILED(Status) ((HRESULT)(Status)<0)
-
 RwV2d leftStickPos;
 RwV2d rightStickPos;
 
@@ -2275,15 +2272,20 @@ HRESULT CapturePad(RwInt32 padID)
 {
 	HRESULT		hr;
 	DIJOYSTATE2 js; 
-	LPDIRECTINPUTDEVICE8 pPad = nil;
+	LPDIRECTINPUTDEVICE8 *pPad = nil;
+
+	if( padID == 0 )
+		pPad = &PSGLOBAL(joy1);
+	else if( padID == 1)
+		pPad = &PSGLOBAL(joy2);
+	else
+		assert("invalid padID");
 	
-	pPad = ( padID == 0 ) ? PSGLOBAL(joy1) : PSGLOBAL(joy2);
-	
-	if ( nil == pPad )
+	if ( nil == (*pPad) )
 		return S_OK;
 	
 	// Poll the device to read the current state
-	hr = pPad->Poll();
+	hr = (*pPad)->Poll();
 	
 	if( FAILED(hr) )
 	{
@@ -2291,9 +2293,9 @@ HRESULT CapturePad(RwInt32 padID)
 		// interrupted. We aren't tracking any state between polls, so
 		// we don't have any special reset that needs to be done. We
 		// just re-acquire and try again.
-		hr = pPad->Acquire();
+		hr = (*pPad)->Acquire();
 		while( hr == DIERR_INPUTLOST ) 
-			hr = pPad->Acquire();
+			hr = (*pPad)->Acquire();
 
 		// hr may be DIERR_OTHERAPPHASPRIO or other errors.	 This
 		// may occur when the app is minimized or in the process of 
@@ -2302,26 +2304,26 @@ HRESULT CapturePad(RwInt32 padID)
 		if( FAILED(hr) )
 			return hr; 
 		
-		hr = pPad->Poll();
+		hr = (*pPad)->Poll();
 		if( FAILED(hr) )
 			return hr; 
 	}
 	
 	// Get the input's device state
-	if( FAILED( hr = pPad->GetDeviceState( sizeof(DIJOYSTATE2), &js ) ) )
+	if( FAILED( hr = (*pPad)->GetDeviceState( sizeof(DIJOYSTATE2), &js ) ) )
 		return hr; // The device should have been acquired during the Poll()
 	
-	if ( ControlsManager.field_0 == true )
+	if ( ControlsManager.firstCapture == true )
 	{
 		memcpy(&ControlsManager.m_OldState, &js, sizeof(DIJOYSTATE2));
 		memcpy(&ControlsManager.m_NewState, &js, sizeof(DIJOYSTATE2));
 		
-		ControlsManager.field_0 = false;
+		ControlsManager.firstCapture = false;
 	}
 	else
 	{
 		memcpy(&ControlsManager.m_OldState, &ControlsManager.m_NewState, sizeof(DIJOYSTATE2));
-		memcpy(&ControlsManager.m_NewState, &js,						 sizeof(DIJOYSTATE2));
+		memcpy(&ControlsManager.m_NewState, &js, sizeof(DIJOYSTATE2));
 	}
 
 	RsPadButtonStatus bs;
@@ -2329,14 +2331,14 @@ HRESULT CapturePad(RwInt32 padID)
 
 	RsPadEventHandler(rsPADBUTTONUP, (void *)&bs);
 	
-	bool deviceAvailable = pPad != nil;
+	bool deviceAvailable = (*pPad) != nil;
 	
 	if ( deviceAvailable )
 	{
 		leftStickPos.x = (float)js.lX / (float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
 		leftStickPos.y = (float)js.lY / (float)((DEVICE_AXIS_MAX - DEVICE_AXIS_MIN) / 2);
 		
-		if (LOWORD(js.rgdwPOV[0]) != -1)
+		if (LOWORD(js.rgdwPOV[0]) != 0xFFFF)
 		{
 			float angle = DEGTORAD((float)js.rgdwPOV[0] / 100.0f);
 
@@ -2548,40 +2550,49 @@ BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, V
 	 
 	static INT Count = 0;
 	
-	LPDIRECTINPUTDEVICE8 pJoystick = nil;
+	LPDIRECTINPUTDEVICE8 *pJoystick = nil;
 	
 	if ( Count == 0 )
-		pJoystick = PSGLOBAL(joy1);
+		pJoystick = &PSGLOBAL(joy1);
 	else if ( Count == 1 )
-		pJoystick = PSGLOBAL(joy2);
+		pJoystick = &PSGLOBAL(joy2);
+	else
+		assert("too many pads");
 	
 	// Obtain an interface to the enumerated joystick. 
-	hr = PSGLOBAL(dinterface)->CreateDevice( pdidInstance->guidInstance, &pJoystick, nil );
+	hr = PSGLOBAL(dinterface)->CreateDevice( pdidInstance->guidInstance, pJoystick, nil );
 	
 	// If it failed, then we can't use this joystick. (Maybe the user unplugged
 	// it while we were in the middle of enumerating it.)
-	if( FAILED(hr) ) 
+	if( hr != S_OK )
 		return DIENUM_CONTINUE;
-	
-	if( FAILED( hr = pJoystick->SetDataFormat( &c_dfDIJoystick2 ) ) )
+
+	hr = (*pJoystick)->SetDataFormat( &c_dfDIJoystick2 );
+	if( hr != S_OK )
 	{
-		pJoystick->Release();
+		(*pJoystick)->Release();
 		return DIENUM_CONTINUE;
 	}
 	
 	++Count;
-	
-	if( FAILED( hr = pJoystick->SetCooperativeLevel( PSGLOBAL(window), DISCL_NONEXCLUSIVE) ) )
+
+	hr = (*pJoystick)->SetCooperativeLevel( PSGLOBAL(window), DISCL_NONEXCLUSIVE|DISCL_FOREGROUND );
+	if( hr != S_OK )
 	{
-		pJoystick->Release();
+		(*pJoystick)->Release();
+#ifdef FIX_BUGS
+		// BUG: enum will be called with Count == 2, which will write to a null pointer
+		// So decrement count again since we're not using this pad
+		--Count;
+#endif
 		return DIENUM_CONTINUE;
 	}
 	
+	// Stop enumeration. Note: we're just taking the first two joysticks we get. You
+	// could store all the enumerated joysticks and let the user pick.
 	if ( Count == 2 )
 		return DIENUM_STOP;
 	
-	// Stop enumeration. Note: we're just taking the first joystick we get. You
-	// could store all the enumerated joysticks and let the user pick.
 	return DIENUM_CONTINUE;
 }
 

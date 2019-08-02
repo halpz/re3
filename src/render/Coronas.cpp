@@ -203,7 +203,7 @@ CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 al
 }
 
 void
-CCoronas::UpdateCoronaCoors(int id, const CVector &coors, float drawDist, float someAngle)
+CCoronas::UpdateCoronaCoors(uint32 id, const CVector &coors, float drawDist, float someAngle)
 {
 	int i;
 

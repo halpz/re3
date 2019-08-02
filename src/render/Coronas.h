@@ -93,7 +93,7 @@ public:
 	static void RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 alpha,
 		const CVector &coors, float size, float drawDist, uint8 type,
 		int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle);
-	static void UpdateCoronaCoors(int id, const CVector &coors, float drawDist, float someAngle);
+	static void UpdateCoronaCoors(uint32 id, const CVector &coors, float drawDist, float someAngle);
 	static void Render(void);
 	static void RenderReflections(void);
 	static void DoSunAndMoon(void);
