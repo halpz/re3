@@ -169,7 +169,7 @@ public:
 	uint8 m_veh_flagD40 : 1;
 	uint8 m_veh_flagD80 : 1;
 
-	int8 field_1F9;
+	int8 m_numPedsUseItAsCover;
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
 	int8 field_1FB;
 	int8 field_1FC[4];

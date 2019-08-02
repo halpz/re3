@@ -1,4 +1,5 @@
 #pragma once
+#include "Weapon.h"
 
 enum ePickupType
 {
@@ -42,8 +43,11 @@ public:
 	static void DoMineEffects(CEntity *ent);
 	static void DoPickUpEffects(CEntity *ent);
 	static void RemoveAllFloatingPickups();
+	static int32 GenerateNewOne(CVector, uint32, uint8, uint32);
+	static int32 GenerateNewOne_WeaponType(CVector, eWeaponType, uint8, uint32);
 
 	static CPickup (&aPickUps)[NUMPICKUPS];
+	static uint16 ms_maxAmmosForWeapons[20];
 };
 
 class CPacManPickups
