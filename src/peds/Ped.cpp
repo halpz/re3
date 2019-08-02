@@ -2264,7 +2264,6 @@ CPed::CanPedJumpThis(int32 unused)
 {
 	CVector2D forward(-Sin(m_fRotationCur), Cos(m_fRotationCur));
 	CVector pos = GetPosition();
-	// wat?
 	CVector forwardPos(
 		forward.x + pos.x,
 		forward.y + pos.y,
@@ -2289,19 +2288,19 @@ CPed::CanSeeEntity(CEntity *entity, float threshold)
 		GetPosition().y);
 
 	if (neededAngle < 0.0f)
-		neededAngle += 2 * PI;
-	else if (neededAngle > 2 * PI)
-		neededAngle -= 2 * PI;
+		neededAngle += TWOPI;
+	else if (neededAngle > TWOPI)
+		neededAngle -= TWOPI;
 
 	float ourAngle = m_fRotationCur;
 	if (ourAngle < 0.0f)
-		ourAngle += 2 * PI;
-	else if (ourAngle > 2 * PI)
-		ourAngle -= 2 * PI;
+		ourAngle += TWOPI;
+	else if (ourAngle > TWOPI)
+		ourAngle -= TWOPI;
 
 	float neededTurn = Abs(neededAngle - ourAngle);
 
-	return neededTurn < threshold || 2 * PI - threshold < neededTurn;
+	return neededTurn < threshold || TWOPI - threshold < neededTurn;
 }
 
 bool
@@ -3660,7 +3659,6 @@ CPed::InflictDamage(CEntity* damagedBy, eWeaponType method, float damage, ePedPi
 		} else {
 			CDarkel::RegisterKillNotByPlayer(this, method);
 		}
-		// WAT?
 		if (method == WEAPONTYPE_WATER)
 			bIsInTheAir = false;
 
@@ -4558,7 +4556,7 @@ CPed::GetLocalDirection(CVector2D &posOffset)
 {
 	float direction;
 
-	for (direction = posOffset.Heading() - m_fRotationCur + DEGTORAD(45.0f); direction < 0.0f; direction += 2 * PI);
+	for (direction = posOffset.Heading() - m_fRotationCur + DEGTORAD(45.0f); direction < 0.0f; direction += TWOPI);
 
 	for (direction = (int)RADTODEG(direction) / 90; direction > 3; direction -= 4);
 
@@ -4961,7 +4959,21 @@ CPed::PlayHitSound(CPed *hitTo)
 {
 	// That was very complicated to reverse for me...
 	// First index is our fight move ID (from 1 to 12, total 12), second is the one of we fight with (from 13 to 22, total 10).
-
+	enum {
+		S33 = SOUND_FIGHT_PUNCH_33,
+		S34 = SOUND_FIGHT_KICK_34,
+		S35 = SOUND_FIGHT_HEADBUTT_35,
+		S36 = SOUND_FIGHT_PUNCH_36,
+		S37 = SOUND_FIGHT_PUNCH_37,
+		S38 = SOUND_FIGHT_CLOSE_PUNCH_38,
+		S39 = SOUND_FIGHT_PUNCH_39,
+		S40 = SOUND_FIGHT_PUNCH_OR_KICK_BELOW_40 ,
+		S41 = SOUND_FIGHT_PUNCH_41,
+		S42 = SOUND_FIGHT_PUNCH_FROM_BEHIND_42,
+		S43 = SOUND_FIGHT_KNEE_OR_KICK_43,
+		S44 = SOUND_FIGHT_KICK_44,
+		NO_SND = SOUND_TOTAL_PED_SOUNDS
+	};
 	uint16 hitSoundsByFightMoves[12][10] = {
 		{S39,S42,S43,S43,S39,S39,S39,S39,S39,S42},
 		{NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND,NO_SND},
@@ -5277,27 +5289,23 @@ CPed::CreateDeadPedMoney(void)
 	if ((skin >= MI_COP && skin <= MI_FIREMAN) || CharCreatedBy == MISSION_CHAR || bInVehicle)
 		return;
 
-	/*
-	 * That was the og output, which is some compiler optimization for mod 60;
-	 * money = rand - 60 * (rand / 60 + (-2004318071i64 * (unsigned __int64)rand >> 32));
-	 */
-
 	int money = CGeneral::GetRandomNumber() % 60;
-	if (money >= 10) {
-		if (money == 43)
-			money = 700;
+	if (money < 10)
+		return;
 
-		int pickupCount = money / 40 + 1;
-		int moneyPerPickup = money / pickupCount;
+	if (money == 43)
+		money = 700;
 
-		for(int i = 0; i < pickupCount; i++) {
-			float pickupX = 1.5f * Sin((CGeneral::GetRandomNumber() % 256) * PI / 128) + GetPosition().x;
-			float pickupY = 1.5f * Cos((CGeneral::GetRandomNumber() % 256) * PI / 128) + GetPosition().y;
-			bool found = false;
-			float groundZ = CWorld::FindGroundZFor3DCoord(pickupX, pickupY, GetPosition().z, &found) + 0.5f;
-			if (found) {
-				CPickups::GenerateNewOne(CVector(pickupX, pickupY, groundZ), MI_MONEY, PICKUP_MONEY, moneyPerPickup + (CGeneral::GetRandomNumber() & 7));
-			}
+	int pickupCount = money / 40 + 1;
+	int moneyPerPickup = money / pickupCount;
+
+	for(int i = 0; i < pickupCount; i++) {
+		float pickupX = 1.5f * Sin((CGeneral::GetRandomNumber() % 256) * PI / 128) + GetPosition().x;
+		float pickupY = 1.5f * Cos((CGeneral::GetRandomNumber() % 256) * PI / 128) + GetPosition().y;
+		bool found = false;
+		float groundZ = CWorld::FindGroundZFor3DCoord(pickupX, pickupY, GetPosition().z, &found) + 0.5f;
+		if (found) {
+			CPickups::GenerateNewOne(CVector(pickupX, pickupY, groundZ), MI_MONEY, PICKUP_MONEY, moneyPerPickup + (CGeneral::GetRandomNumber() & 7));
 		}
 	}
 }
@@ -5316,43 +5324,37 @@ CPed::CreateDeadPedWeaponPickups(void)
 
 		eWeaponType weapon = GetWeapon(i).m_eWeaponType;
 		int weaponAmmo = GetWeapon(i).m_nAmmoTotal;
-		if (weapon != WEAPONTYPE_UNARMED && weapon != WEAPONTYPE_DETONATOR && weaponAmmo != 0) {
+		if (weapon == WEAPONTYPE_UNARMED || weapon == WEAPONTYPE_DETONATOR || weaponAmmo == 0)
+			continue;
 
-			angleToPed = i * 1.75f;
-			pickupPos.x = 1.5f * Sin(angleToPed) + GetPosition().x;
-			pickupPos.y = 1.5f * Cos(angleToPed) + GetPosition().y;
-			pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, GetPosition().z, &found) + 0.5f;
+		angleToPed = i * 1.75f;
+		pickupPos = GetPosition();
+		pickupPos.x += 1.5f * Sin(angleToPed);
+		pickupPos.y += 1.5f * Cos(angleToPed);
+		pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
 
-			// CVector point1(0, pickupPos.y, 0);
+		CVector pedPos = GetPosition();
+		pedPos.z += 0.3f;
 
-			CVector point2 = GetPosition();
-			point2.z += 0.3f;
+		CVector pedToPickup = pickupPos - pedPos;
+		float distance = pedToPickup.Magnitude();
 
-			CVector posDiff = pickupPos - point2;
+		// outer edge of pickup
+		distance = (distance + 0.3f) / distance;
+		CVector pickupPos2 = pedPos;
+		pickupPos2 += distance * pedToPickup;
 
-			float distance = posDiff.Magnitude();
-
-			// I don't know what is this for. Related with Z-axis for sure.
-			float posDiffMult = (distance + 0.3f) / distance;
-
-			CVector point1 = point2;
-			point1 += posDiffMult * posDiff;
-
-			if (!found || CWorld::GetIsLineOfSightClear(point1, point2, true, false, false, false, false, false, false)) {
-
-				// Not PI, it's 3.14f. Funny.
-				angleToPed += 3.14f;
-				pickupPos.x = 1.5f * Sin(angleToPed) + GetPosition().x;
-				pickupPos.y = 1.5f * Cos(angleToPed) + GetPosition().y;
-				pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, GetPosition().z, &found) + 0.5f;
-			}
-			if (found) {
-				if (weaponAmmo >= CPickups::ms_maxAmmosForWeapons[weapon])
-					weaponAmmo = CPickups::ms_maxAmmosForWeapons[weapon];
-
-				CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, weaponAmmo);
-			}
+		// pickup must be on ground and line to its edge must be clear
+		if (!found || CWorld::GetIsLineOfSightClear(pickupPos2, pedPos, true, false, false, false, false, false, false)) {
+			// otherwise try another position (but disregard second check apparently)
+			angleToPed += 3.14f;
+			pickupPos = GetPosition();
+			pickupPos.x = 1.5f * Sin(angleToPed);
+			pickupPos.y = 1.5f * Cos(angleToPed);
+			pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
 		}
+		if (found)
+			CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, min(weaponAmmo, CPickups::ms_maxAmmosForWeapons[weapon]));
 	}
 	ClearWeapons();
 }
@@ -5360,13 +5362,8 @@ CPed::CreateDeadPedWeaponPickups(void)
 void
 CPed::SetAttackTimer(uint32 time)
 {
-	if (CTimer::GetTimeInMilliseconds() <= m_attackTimer)
-		return;
-
-	if (m_lastHitTime <= CTimer::GetTimeInMilliseconds())
-		m_attackTimer = time + CTimer::GetTimeInMilliseconds();
-	else
-		m_attackTimer = time + m_lastHitTime;
+	if (CTimer::GetTimeInMilliseconds() > m_attackTimer)
+		m_attackTimer = max(m_lastHitTime, CTimer::GetTimeInMilliseconds()) + time;
 }
 
 void
@@ -5415,9 +5412,9 @@ CPed::SetBuyIceCream(void)
 		return;
 
 	// Side of the Ice Cream van
-	m_fRotationDest = m_carInObjective->GetForward().Heading() - 0.5 * PI;
+	m_fRotationDest = m_carInObjective->GetForward().Heading() - HALFPI;
 
-	if (Abs(m_fRotationDest - m_fRotationCur) < 0.5 * PI) {
+	if (Abs(m_fRotationDest - m_fRotationCur) < HALFPI) {
 		m_standardTimer = CTimer::GetTimeInMilliseconds() + 3000;
 		m_nPedState = PED_BUY_ICECREAM;
 	}
@@ -5515,22 +5512,13 @@ void
 CPed::DeadPedMakesTyresBloody(void)
 {
 	int minX = CWorld::GetSectorIndexX(GetPosition().x - 2.0f);
-	if (minX <= 0)
-		minX = 0;
-
+	if (minX < 0) minX = 0;
 	int minY = CWorld::GetSectorIndexY(GetPosition().y - 2.0f);
-	if (minY <= 0)
-		minY = 0;
-
-	// BUG: Shouldn't it be NUMSECTORS_X (100)?
+	if (minY < 0) minY = 0;
 	int maxX = CWorld::GetSectorIndexX(GetPosition().x + 2.0f);
-	if (maxX >= 99)
-		maxX = 99;
-
-	// BUG: Shouldn't it be NUMSECTORS_Y (100)?
+	if (maxX > NUMSECTORS_X-1) maxX = NUMSECTORS_X-1;
 	int maxY = CWorld::GetSectorIndexY(GetPosition().y + 2.0f);
-	if (maxY >= 99)
-		maxY = 99;
+	if (maxY > NUMSECTORS_Y-1) maxY = NUMSECTORS_Y-1;
 
 	CWorld::AdvanceCurrentScanCode();
 
