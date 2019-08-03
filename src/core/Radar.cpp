@@ -100,9 +100,9 @@ void CRadar::ChangeBlipBrightness(int32 i, int32 bright)
 #endif
 
 #if 1
-WRAPPER void CRadar::ChangeBlipColour(int32) { EAXJMP(0x4A5770); }
+WRAPPER void CRadar::ChangeBlipColour(int32, int32) { EAXJMP(0x4A5770); }
 #else
-void CRadar::ChangeBlipColour(int32 i)
+void CRadar::ChangeBlipColour(int32 i, int32)
 {
 
 }
@@ -571,9 +571,9 @@ void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float 
 #endif 
 
 #if 1
-WRAPPER int32 CRadar::GetActualBlipArray(int32) { EAXJMP(0x4A41C0); }
+WRAPPER int32 CRadar::GetActualBlipArrayIndex(int32) { EAXJMP(0x4A41C0); }
 #else
-int32 CRadar::GetActualBlipArray(int32 i)
+int32 CRadar::GetActualBlipArrayIndex(int32 i)
 {
 	return int32();
 }
@@ -737,18 +737,18 @@ void CRadar::SetBlipSprite(int32 i, int32 icon)
 #endif
 
 #if 1
-WRAPPER int CRadar::SetCoordBlip(int32, CVector, int32) { EAXJMP(0x4A5590); }
+WRAPPER int32 CRadar::SetCoordBlip(eBlipType, CVector, int32, eBlipDisplay) { EAXJMP(0x4A5590); }
 #else
-int CRadar::SetCoordBlip(int32 type, CVector pos, int32 flag)
+int CRadar::SetCoordBlip(eBlipType type, CVector pos, int32 flag, eBlipDisplay)
 {
 	return 0;
 }
 #endif
 
 #if 1
-WRAPPER int CRadar::SetEntityBlip(int32 type, CVector pos, int32 color, int32 flag) { EAXJMP(0x4A5640); }
+WRAPPER int CRadar::SetEntityBlip(eBlipType type, int32, int32, eBlipDisplay) { EAXJMP(0x4A5640); }
 #else
-int CRadar::SetEntityBlip(int32 type, CVector pos, int32 color, int32 flag)
+int CRadar::SetEntityBlip(eBlipType type, int32, int32, eBlipDisplay)
 {
 	return 0;
 }

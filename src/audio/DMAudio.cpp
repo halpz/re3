@@ -35,3 +35,6 @@ WRAPPER void cDMAudio::SetRadioInCar(int32) { EAXJMP(0x57CE60); }
 WRAPPER void cDMAudio::DestroyEntity(int32) { EAXJMP(0x57C7F0); }
 WRAPPER void cDMAudio::ClearMissionAudio(void) { EAXJMP(0x57CE20); }
 WRAPPER void cDMAudio::ReportCrime(eCrimeType crime, const CVector &pos) { EAXJMP(0x57CAD0); }
+WRAPPER void cDMAudio::CreateOneShotScriptObject(cAudioScriptObject*) { EAXJMP(0x57CB60); }
+WRAPPER int32 cDMAudio::CreateLoopingScriptObject(cAudioScriptObject*) { EAXJMP(0x57CB00); }
+WRAPPER void cDMAudio::DestroyLoopingScriptObject(int32) { EAXJMP(0x57CB40); }

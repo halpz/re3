@@ -62,7 +62,7 @@ CPhysical::CPhysical(void)
 	m_phy_flagA10 = false;
 	m_phy_flagA20 = false;
 
-	m_nSurfaceTouched = SURFACE_DEFAULT;
+	m_nZoneLevel = 0;
 }
 
 CPhysical::~CPhysical(void)

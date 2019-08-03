@@ -174,6 +174,7 @@ enum eSound : int16
 
 class CEntity;
 enum eCrimeType;
+struct cAudioScriptObject;
 
 class cDMAudio
 {
@@ -206,5 +207,8 @@ public:
 	void DestroyEntity(int32);
 	void ClearMissionAudio(void);
 	void ReportCrime(eCrimeType crime, const CVector &pos);
+	void CreateOneShotScriptObject(cAudioScriptObject*);
+	int32 CreateLoopingScriptObject(cAudioScriptObject*);
+	void DestroyLoopingScriptObject(int32);
 };
 extern cDMAudio &DMAudio;

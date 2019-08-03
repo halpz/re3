@@ -98,7 +98,7 @@ public:
 public:
 	static int CalculateBlipAlpha(float dist);
 	static void ChangeBlipBrightness(int32 i, int32 bright);
-	static void ChangeBlipColour(int32 i);
+	static void ChangeBlipColour(int32 i, int32);
 	static void ChangeBlipDisplay(int32 i, int16 flag);
 	static void ChangeBlipScale(int32 i, int16 scale);
 	static void ClearBlip(int32 i);
@@ -113,7 +113,7 @@ public:
 	static void DrawRadarSection(int32 x, int32 y);
 	static void DrawRadarSprite(int32 sprite, float x, float y, int32 alpha);
 	static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int32 alpha);
-	static int32 GetActualBlipArray(int32 i);
+	static int32 GetActualBlipArrayIndex(int32 i);
 	static int32 GetNewUniqueBlipIndex(int32 i);
 	static int32 GetRadarTraceColour(int32 color, bool bright);
 	static void Initialise();
@@ -125,8 +125,8 @@ public:
 	static void RequestMapSection(int32 x, int32 y);
 	static void SaveAllRadarBlips(int32);
 	static void SetBlipSprite(int32 i, int32 icon);
-	static int SetCoordBlip(int32 type, CVector pos, int32 flag);
-	static int SetEntityBlip(int32 type, CVector pos, int32 color, int32 flag);
+	static int32 SetCoordBlip(eBlipType type, CVector pos, int32, eBlipDisplay flag);
+	static int32 SetEntityBlip(eBlipType type, int32, int32, eBlipDisplay);
 	static void SetRadarMarkerState(int32 i, int32 flag);
 	static void ShowRadarMarker(CVector pos, int16 color, float radius);
 	static void ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 green, uint32 blue, uint32 alpha);

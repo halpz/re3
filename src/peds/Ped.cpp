@@ -5349,12 +5349,12 @@ CPed::CreateDeadPedWeaponPickups(void)
 			// otherwise try another position (but disregard second check apparently)
 			angleToPed += 3.14f;
 			pickupPos = GetPosition();
-			pickupPos.x = 1.5f * Sin(angleToPed);
-			pickupPos.y = 1.5f * Cos(angleToPed);
+			pickupPos.x += 1.5f * Sin(angleToPed);
+			pickupPos.y += 1.5f * Cos(angleToPed);
 			pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
 		}
 		if (found)
-			CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, min(weaponAmmo, CPickups::ms_maxAmmosForWeapons[weapon]));
+			CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, min(weaponAmmo, AmmoForWeapon_OnStreet[weapon]));
 	}
 	ClearWeapons();
 }

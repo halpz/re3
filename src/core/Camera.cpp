@@ -24,6 +24,16 @@ WRAPPER void CCamera::CalculateDerivedValues(void) { EAXJMP(0x46EEA0); }
 WRAPPER void CCamera::Restore(void) { EAXJMP(0x46F990); }
 WRAPPER void CCamera::SetWidescreenOff(void) { EAXJMP(0x46FF10); }
 WRAPPER void CamShakeNoPos(CCamera*, float) { EAXJMP(0x46B100); }
+WRAPPER void CCamera::TakeControl(CEntity*, int16, int16, int32) { EAXJMP(0x471500); }
+WRAPPER void CCamera::TakeControlNoEntity(const CVector&, int16, int32) { EAXJMP(0x4715B0); }
+WRAPPER void CCamera::SetCamPositionForFixedMode(const CVector&, const CVector&) { EAXJMP(0x46FCC0); }
+
+
+bool
+CCamera::GetFading()
+{
+	return m_bFading;
+}
 
 bool
 CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat)
