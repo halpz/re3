@@ -20,6 +20,29 @@ public:
 		}else
 			x = 0.0f;
 	}
+	const CVector2D &operator+=(CVector2D const &right) {
+		x += right.x;
+		y += right.y;
+		return *this;
+	}
+
+	const CVector2D &operator-=(CVector2D const &right) {
+		x -= right.x;
+		y -= right.y;
+		return *this;
+	}
+
+	const CVector2D &operator*=(float right) {
+		x *= right;
+		y *= right;
+		return *this;
+	}
+
+	const CVector2D &operator/=(float right) {
+		x /= right;
+		y /= right;
+		return *this;
+	}
 	CVector2D operator-(const CVector2D &rhs) const {
 		return CVector2D(x-rhs.x, y-rhs.y);
 	}

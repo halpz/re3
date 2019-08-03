@@ -106,6 +106,9 @@ enum eFlightModel
 	FLIGHT_MODEL_SEAPLANE
 };
 
+// Or Weapon.h?
+void FireOneInstantHitRound(CVector *shotSource, CVector *shotTarget, int32 damage);
+
 class CVehicle : public CPhysical
 {
 public:

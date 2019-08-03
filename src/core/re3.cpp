@@ -14,6 +14,7 @@
 #include "Streaming.h"
 #include "PathFind.h"
 #include "Boat.h"
+#include "Heli.h"
 #include "Automobile.h"
 #include "debugmenu_public.h"
 
@@ -318,6 +319,12 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
 		DebugMenuAddCmd("Debug", "Place Car on Road", PlaceOnRoad);
 
+		DebugMenuAddVarBool8("Debug", "Catalina Heli On", (int8*)&CHeli::CatalinaHeliOn, nil);
+		DebugMenuAddCmd("Debug", "Catalina Fly By", CHeli::StartCatalinaFlyBy);
+		DebugMenuAddCmd("Debug", "Catalina Take Off", CHeli::CatalinaTakeOff);
+		DebugMenuAddCmd("Debug", "Catalina Fly Away", CHeli::MakeCatalinaHeliFlyAway);
+		DebugMenuAddVarBool8("Debug", "Script Heli On", (int8*)0x95CD43, nil);
+
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Collision Lines", (int8*)&gbShowCollisionLines, nil);
@@ -346,29 +353,6 @@ delayedPatches10(int a, int b)
 	return RsEventHandler_orig(a, b);
 }
 */
-
-void __declspec(naked) HeadlightsFix()
-{
-	static const float		fMinusOne = -1.0f;
-	_asm
-	{
-		fld		[esp+708h-690h]
-		fcomp	fMinusOne
-		fnstsw	ax
-		and		ah, 5
-		cmp		ah, 1
-		jnz		HeadlightsFix_DontLimit
-		fld		fMinusOne
-		fstp	[esp+708h-690h]
-
-HeadlightsFix_DontLimit:
-		fld		[esp+708h-690h]
-		fabs
-		fld		st
-		push		0x5382F2
-		retn
-	}
-}
 
 const int   re3_buffsize = 1024;
 static char re3_buff[re3_buffsize];
@@ -453,10 +437,6 @@ patch()
 	InjectHook(0x59E460, printf, PATCH_JUMP);
 	InjectHook(0x475E00, printf, PATCH_JUMP);	// _Error
 
-
-	// stolen from silentpatch (sorry)
-	Patch<WORD>(0x5382BF, 0x0EEB);
-	InjectHook(0x5382EC, HeadlightsFix, PATCH_JUMP);
 
 //	InterceptCall(&open_script_orig, open_script, 0x438869);
 

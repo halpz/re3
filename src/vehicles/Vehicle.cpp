@@ -30,6 +30,9 @@ void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehicleP
 void CVehicle::operator delete(void *p, size_t sz) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
 void CVehicle::operator delete(void *p, int handle) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
 
+// or Weapon.cpp?
+WRAPPER void FireOneInstantHitRound(CVector *shotSource, CVector *shotTarget, int32 damage) { EAXJMP(0x563B00); }
+
 CVehicle::CVehicle(uint8 CreatedBy)
 {
 	int i;

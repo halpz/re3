@@ -137,15 +137,16 @@ CPlane::ProcessControl(void)
 				colors[6] = CRGBA(0, 0, 0, 255);
 				colors[7] = CRGBA(224, 230, 238, 255);
 
+				CVector dir;
 				for(i = 0; i < 40; i++){
-					int rotSpeed = CGeneral::GetRandomNumberInRange(30.0f, 20.0f);
+					dir.x = CGeneral::GetRandomNumberInRange(-2.0f, 2.0f);
+					dir.y = CGeneral::GetRandomNumberInRange(-2.0f, 2.0f);
+					dir.z = CGeneral::GetRandomNumberInRange(0.0f, 2.0f);
+					int rotSpeed = CGeneral::GetRandomNumberInRange(10, 30);
 					if(CGeneral::GetRandomNumber() & 1)
 						rotSpeed = -rotSpeed;
 					int f = ++nFrameGen & 3;
-					CParticle::AddParticle(PARTICLE_HELI_DEBRIS, GetMatrix() * CVector(0.0f, 0.0f, 0.0f),
-						CVector(CGeneral::GetRandomNumberInRange(-2.0f, 2.0f),
-						        CGeneral::GetRandomNumberInRange(-2.0f, 2.0f),
-						        CGeneral::GetRandomNumberInRange(0.0f, 2.0f)),
+					CParticle::AddParticle(PARTICLE_HELI_DEBRIS, GetMatrix() * CVector(0.0f, 0.0f, 0.0f), dir,
 						nil, CGeneral::GetRandomNumberInRange(0.1f, 1.0f),
 						colors[nFrameGen], rotSpeed, 0, f, 0);
 				}

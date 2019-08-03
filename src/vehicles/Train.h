@@ -20,7 +20,8 @@ enum
 enum eTrainNodes
 {
 	TRAIN_DOOR_LHS = 1,
-	TRAIN_DOOR_RHS
+	TRAIN_DOOR_RHS,
+	NUM_TRAIN_NODES
 };
 
 enum eTrainPositions
@@ -66,7 +67,7 @@ public:
 	uint32 m_nDoorTimer;
 	int16 m_nDoorState;
 	CTrainDoor Doors[2];
-	RwFrame *m_aTrainNodes[3];
+	RwFrame *m_aTrainNodes[NUM_TRAIN_NODES];
 
 	// unused
 	static CVector aStationCoors[3];
