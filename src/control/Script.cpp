@@ -3239,9 +3239,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
-		float angle = pPed->bInVehicle ? 
-			Atan2(-pPed->m_pMyVehicle->GetForward().x, pPed->m_pMyVehicle->GetForward().y) :
-			Atan2(-pPed->GetForward().x, pPed->GetForward().y);
+		float angle = pPed->bInVehicle ? pPed->m_pMyVehicle->GetForward().Heading() : pPed->GetForward().Heading();
 		*(float*)&ScriptParams[0] = CGeneral::LimitAngle(RADTODEG(angle));
 		StoreParameters(&m_nIp, 1);
 		return 0;
@@ -3263,9 +3261,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
-		float angle = pPed->bInVehicle ?
-			Atan2(-pPed->m_pMyVehicle->GetForward().x, pPed->m_pMyVehicle->GetForward().y) :
-			Atan2(-pPed->GetForward().x, pPed->GetForward().y);
+		float angle = pPed->bInVehicle ? pPed->m_pMyVehicle->GetForward().Heading() : pPed->GetForward().Heading();
 		*(float*)&ScriptParams[0] = CGeneral::LimitAngle(RADTODEG(angle));
 		StoreParameters(&m_nIp, 1);
 		return 0;
@@ -3288,7 +3284,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
-		float angle = Atan2(-pVehicle->GetForward().x, pVehicle->GetForward().y);
+		float angle = pVehicle->GetForward().Heading();
 		*(float*)&ScriptParams[0] = CGeneral::LimitAngle(RADTODEG(angle));
 		StoreParameters(&m_nIp, 1);
 		return 0;
@@ -3306,7 +3302,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		assert(pObject);
-		float angle = Atan2(-pObject->GetForward().x, pObject->GetForward().y);
+		float angle = pObject->GetForward().Heading();
 		*(float*)&ScriptParams[0] = CGeneral::LimitAngle(RADTODEG(angle));
 		StoreParameters(&m_nIp, 1);
 		return 0;

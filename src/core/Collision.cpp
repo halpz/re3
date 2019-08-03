@@ -144,7 +144,7 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 	if(veh && veh->IsTrain()){
 		if(((CTrain*)veh)->m_nDoorState != TRAIN_DOOR_OPEN)
 			return;
-	}else if(playerCoors.z < 4.0f && !CCullZones::DoINeedToLoadCollision())
+	}else if(playerCoors.z < -4.0f && !CCullZones::DoINeedToLoadCollision())
 		return;
 
 	// Figure out whose level's collisions we're most likely to be interested in
