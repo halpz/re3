@@ -4869,6 +4869,7 @@ CPed::SetWaitState(eWaitState state, void *time)
 			if (m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER && CharCreatedBy == RANDOM_CHAR && m_nPedState == PED_SEEK_CAR) {
 				ClearObjective();
 				RestorePreviousState();
+				m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 30000;
 			}
 			break;
 		case WAITSTATE_TURN180:
@@ -4894,6 +4895,7 @@ CPed::SetWaitState(eWaitState state, void *time)
 			if (m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER && CharCreatedBy == RANDOM_CHAR && m_nPedState == PED_SEEK_CAR) {
 				ClearObjective();
 				RestorePreviousState();
+				m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 30000;
 			}
 			break;
 		case WAITSTATE_LOOK_ABOUT:
@@ -5692,6 +5694,37 @@ CPed::DuckAndCover(void)
 	return false;
 }
 
+void
+CPed::EndFight(uint8 endType)
+{
+	if (m_nPedState != PED_FIGHT)
+		return;
+
+	m_lastFightMove = FIGHTMOVE_NULL;
+	RestorePreviousState();
+	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
+	if (animAssoc)
+		animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+
+	switch (endType) {
+		case 0:
+			CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 8.0f);
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT2_IDLE, 8.0f);
+			break;
+		case 1:
+			CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 1.0f);
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_WALK_START, 8.0f);
+			break;
+		case 2:
+			CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 8.0f);
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT2_IDLE, 8.0f)->speed = 2.0f;
+			break;
+		default:
+			break;
+	}
+	m_nWaitTimer = 0;
+}
+
 WRAPPER void CPed::PedGetupCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE810); }
 WRAPPER void CPed::PedStaggerCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8D0); }
 WRAPPER void CPed::PedEvadeCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D36E0); }
@@ -5846,4 +5879,5 @@ STARTPATCHES
 	InjectHook(0x4D15A0, (void (CPed::*)(CEntity*, float)) &CPed::SetSeek, PATCH_JUMP);
 	InjectHook(0x4EB5C0, &CPed::DoesLOSBulletHitPed, PATCH_JUMP);
 	InjectHook(0x4E3EC0, &CPed::DuckAndCover, PATCH_JUMP);
+	InjectHook(0x4E8D30, &CPed::EndFight, PATCH_JUMP);
 ENDPATCHES
