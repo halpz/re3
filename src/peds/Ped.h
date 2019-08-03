@@ -583,6 +583,7 @@ public:
 	void MakeTyresMuddySectorList(CPtrList&);
 	uint8 DoesLOSBulletHitPed(CColPoint &point);
 	bool DuckAndCover(void);
+	void EndFight(uint8);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
