@@ -8,7 +8,7 @@
 #include "Camera.h"
 #include "World.h"
 #include "ModelIndices.h"
-#include "SampleManager.h"
+#include "sampman.h"
 #include "Replay.h"
 
 cMusicManager &MusicManager = *(cMusicManager*)0x8F3964;
@@ -57,7 +57,7 @@ void cMusicManager::DisplayRadioStationName()
 		if (MusicManager.m_bPlayerInCar && !MusicManager.m_bPreviousPlayerInCar)
 			pCurrentStation = nil;
 
-		if (cSampleManager.IsMP3RadioChannelAvailable()) {
+		if (SampleManager.IsMP3RadioChannelAvailable()) {
 			gStreamedSound = MusicManager.m_nCurrentStreamedSound;
 
 			if (gStreamedSound != STREAMED_SOUND_CITY_AMBIENT && gStreamedSound != STREAMED_SOUND_WATER_AMBIENT) {
@@ -140,7 +140,7 @@ void cMusicManager::DisplayRadioStationName()
 			return;
 		};
 
-		if (pRetune > CHATTERBOX && !CSampleManager::IsMP3RadioChannelAvailable()) {
+		if (pRetune > CHATTERBOX && !SampleManager.IsMP3RadioChannelAvailable()) {
 			return;
 		}
 

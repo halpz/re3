@@ -16,6 +16,15 @@ enum eRadioStation
 	RADIO_OFF,
 };
 
+enum eMusicMode
+{
+	MUSICMODE_FRONTEND = 0,
+	MUSICMODE_GAME,
+	MUSICMODE_CUTSCENE,
+	MUSICMODE_OFF,
+	MUSICMODE_4,
+};
+
 enum eStreamedSounds
 {
 	STREAMED_SOUND_RADIO_HEAD = 0,
@@ -264,6 +273,10 @@ public:
 	uint8 field_2395;
 
 public:
+	bool IsInitialised() { return m_bIsInitialised; }
+	uint32 GetMusicMode() { return m_nMusicMode; }
+	uint8 GetCurrentTrack() { return m_nCurrentStreamedSound; }
+
 	void Initialise();
 	void Terminate();
 
