@@ -47,8 +47,10 @@ public:
 	static int32 GenerateNewOne_WeaponType(CVector, eWeaponType, uint8, uint32);
 
 	static CPickup (&aPickUps)[NUMPICKUPS];
-	static uint16 ms_maxAmmosForWeapons[20];
 };
+
+extern uint16 AmmoForWeapon[20];
+extern uint16 AmmoForWeapon_OnStreet[20];
 
 class CPacManPickups
 {

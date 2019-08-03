@@ -175,7 +175,6 @@ class CPed;
 
 struct cAudioScriptObject {
 	int16 m_wSound;
-	char gap_2[2];
 	CVector m_vecPos;
 	int m_nAudioEntityId;
 
