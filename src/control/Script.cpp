@@ -3165,6 +3165,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		// Useless call
 		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
 		ScriptParams[0] = CRadar::SetCoordBlip(BLIP_COORD, pos, ScriptParams[3], (eBlipDisplay)ScriptParams[4]);
+		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
 	case COMMAND_CHANGE_BLIP_SCALE:
