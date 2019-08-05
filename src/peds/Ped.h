@@ -22,6 +22,13 @@ struct CPedAudioData
 	int m_nMaxRandomDelayTime;
 };
 
+enum
+{
+	ENDFIGHT_NORMAL,
+	ENDFIGHT_WITH_A_STEP,
+	ENDFIGHT_FAST
+};
+
 struct FightMove
 {
 	AnimationId animId;
@@ -152,7 +159,7 @@ enum PedLineUpPhase {
 
 enum PedOnGroundState {
 	NO_PED,
-	PED_BELOW_PLAYER,
+	PED_IN_FRONT_OF_ATTACKER,
 	PED_ON_THE_FLOOR,
 	PED_DEAD_ON_THE_FLOOR
 };
@@ -241,7 +248,7 @@ public:
 	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
 	uint8 bIsStanding : 1;
 	uint8 m_ped_flagA2 : 1;
-	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
+	uint8 bIsAttacking : 1;		// doesn't reset after fist fight, also stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
 	uint8 bIsPointingGunAt : 1;
 	uint8 bIsLooking : 1;
 	uint8 m_ped_flagA20 : 1;	// "look" method? - probably missing in SA
@@ -418,7 +425,7 @@ public:
 	PedFightMoves m_lastFightMove;
 	uint8 m_fightButtonPressure;
 	int8 m_fightUnk2;	// TODO
-	uint8 m_fightUnk1; // TODO
+	bool m_takeAStepAfterAttack;
 	uint8 pad_4B3;
 	CFire *m_pFire;
 	CEntity *m_pLookTarget;
@@ -429,7 +436,7 @@ public:
 	uint32 m_lookTimer;
 	uint32 m_standardTimer;
 	uint32 m_attackTimer;
-	uint32 m_lastHitTime;
+	uint32 m_lastHitTime; // obviously not correct
 	uint32 m_hitRecoverTimer;
 	uint32 m_objectiveTimer;
 	uint32 m_duckTimer;
@@ -584,6 +591,12 @@ public:
 	uint8 DoesLOSBulletHitPed(CColPoint &point);
 	bool DuckAndCover(void);
 	void EndFight(uint8);
+	void EnterCar(void);
+	uint8 GetNearestTrainPedPosition(CVehicle*, CVector&);
+	uint8 GetNearestTrainDoor(CVehicle*, CVector&);
+	void LineUpPedWithTrain(void);
+	void ExitCar(void);
+	void Fight(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -641,6 +654,9 @@ public:
 	void SetPedStats(ePedStats);
 	bool IsGangMember(void);
 	void Die(void);
+	void EnterTrain(void);
+	void ExitTrain(void);
+	void Fall(void);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
@@ -659,9 +675,13 @@ public:
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;
 	static CColPoint &ms_tempColPoint;
-	static uint16 &unknownFightThing; // TODO
-	static FightMove (&ms_fightMoves)[24];
+	static uint16 &nPlayerInComboMove;
+	static FightMove (&tFightMoves)[24];
 	static CPedAudioData (&PedAudioData)[38];
+
+#ifndef FINAL
+	static bool bUnusedFightThingOnPlayer;
+#endif
 };
 
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);

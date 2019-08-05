@@ -16,6 +16,7 @@
 #include "Boat.h"
 #include "Heli.h"
 #include "Automobile.h"
+#include "Ped.h"
 #include "debugmenu_public.h"
 
 #include <vector>
@@ -334,6 +335,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", (int8*)&gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
+#ifndef FINAL
+		DebugMenuAddVarBool8("Debug", "Toggle unused fight feature", (int8*)&CPed::bUnusedFightThingOnPlayer, nil);
+#endif
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
