@@ -130,6 +130,8 @@ public:
 	void RegisterMapObject(CTreadable *mapObject);
 	int32 FindNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bool disabled, bool betweenLevels);
 	CPathNode** FindNextNodeWandering(uint8, CVector, CPathNode**, CPathNode**, uint8, uint8*);
+	bool NewGenerateCarCreationCoors(float spawnX, float spawnY, float frontX, float frontY, float preferredDistance, float angleLimit /* angle limit between camera direction and vector to spawn */, bool invertAngleLimitTest, CVector* pSpawnPosition, int32* pNode1, int32* pNode2, float* pPositionBetweenNodes, bool ignoreSwitchedOff);
+	bool TestCoorsCloseness(CVector pos1, bool, CVector pos2);
 
 	bool IsPathObject(int id) { return id < PATHNODESIZE && (InfoForTileCars[id*12].type != 0 || InfoForTilePeds[id*12].type != 0); }
 

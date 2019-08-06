@@ -1,4 +1,5 @@
 #pragma once
+#include "Timer.h"
 
 class CVehicle;
 
@@ -62,15 +63,15 @@ public:
 	uint32 m_nCurrentRouteNode;
 	uint32 m_nNextRouteNode;
 	uint32 m_nPrevRouteNode;
-	uint32 m_nTotalSpeedScaleFactor;
-	uint32 m_nSpeedScaleFactor;
+	uint32 m_nTimeEnteredCurve;
+	uint32 m_nCurveSpeedScale;
 	uint32 m_nCurrentPathNodeInfo;
 	uint32 m_nNextPathNodeInfo;
 	uint32 m_nPreviousPathNodeInfo;
 	uint32 m_nTimeToStartMission;
 	uint32 m_nTimeSwitchedToRealPhysics;
 	int8 m_nPreviousDirection;
-	int8 m_nCurrentDirecton;
+	int8 m_nCurrentDirection;
 	int8 m_nNextDirection;
 	int8 m_nPreviousLane;
 	int8 m_nCurrentLane;
@@ -94,13 +95,13 @@ public:
 		m_nPrevRouteNode = 0;
 		m_nNextRouteNode = m_nPrevRouteNode;
 		m_nCurrentRouteNode = m_nNextRouteNode;
-		m_nTotalSpeedScaleFactor = 0;
-		m_nSpeedScaleFactor = 1000;
+		m_nTimeEnteredCurve = 0;
+		m_nCurveSpeedScale = 1000;
 		m_nPreviousPathNodeInfo = 0;
 		m_nNextPathNodeInfo = m_nPreviousPathNodeInfo;
 		m_nCurrentPathNodeInfo = m_nNextPathNodeInfo;
 		m_nNextDirection = 1;
-		m_nCurrentDirecton = m_nNextDirection;
+		m_nCurrentDirection = m_nNextDirection;
 		m_nPreviousLane = m_nCurrentLane = 0;
 		m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
 		m_nCarMission = MISSION_NONE;
