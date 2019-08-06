@@ -22,6 +22,9 @@
 #include "World.h"
 #include "Zones.h"
 
+#define LANE_WIDTH 5.0f
+#define INFINITE_Z 1000000000.0f
+
 int &CCarCtrl::NumLawEnforcerCars = *(int*)0x8F1B38;
 int &CCarCtrl::NumAmbulancesOnDuty = *(int*)0x885BB0;
 int &CCarCtrl::NumFiretrucksOnDuty = *(int*)0x9411F0;
@@ -239,11 +242,12 @@ CCarCtrl::GenerateOneRandomCar()
 		/* Testing if spawn position can reach target position via valid path. */
 		return;
 	int16 idInNode = 0;
-	CPathNode* pNode1 = &ThePaths.m_pathNodes[curNodeId];
-	while (idInNode < pNode1->numLinks &&
-		ThePaths.m_connections[idInNode + pNode1->firstLink] != nextNodeId)
+	CPathNode* pCurNode = &ThePaths.m_pathNodes[curNodeId];
+	CPathNode* pNextNode = &ThePaths.m_pathNodes[nextNodeId];
+	while (idInNode < pCurNode->numLinks &&
+		ThePaths.m_connections[idInNode + pCurNode->firstLink] != nextNodeId)
 		idInNode++;
-	int16 connectionId = ThePaths.m_carPathConnections[idInNode + ThePaths.m_pathNodes[curNodeId].firstLink];
+	int16 connectionId = ThePaths.m_carPathConnections[idInNode + pCurNode->firstLink];
 	CCarPathLink* pPathLink = &ThePaths.m_carPathLinks[connectionId];
 	int16 lanesOnCurrentRoad = pPathLink->pathNodeIndex == nextNodeId ? pPathLink->numLeftLanes : pPathLink->numRightLanes;
 	CVehicleModelInfo* pModelInfo = (CVehicleModelInfo*)CModelInfo::GetModelInfo(carModel);
@@ -316,7 +320,7 @@ CCarCtrl::GenerateOneRandomCar()
 	pCar->AutoPilot.m_nCurrentLane = pCar->AutoPilot.m_nPreviousLane = CGeneral::GetRandomNumber() % lanesOnCurrentRoad;
 	CColBox* boundingBox = &CModelInfo::GetModelInfo(pCar->GetModelIndex())->GetColModel()->boundingBox;
 	float carLength = 1.0f + (boundingBox->max.y - boundingBox->min.y) / 2;
-	float distanceBetweenNodes = (ThePaths.m_pathNodes[curNodeId].pos - ThePaths.m_pathNodes[nextNodeId].pos).Magnitude2D();
+	float distanceBetweenNodes = (pCurNode->pos - pNextNode->pos).Magnitude2D();
 	/* If car is so long that it doesn't fit between two car nodes, place it directly in the middle. */
 	/* Otherwise put it at least in a way that full vehicle length fits between two nodes. */
 	if (distanceBetweenNodes / 2 < carLength)
@@ -324,7 +328,7 @@ CCarCtrl::GenerateOneRandomCar()
 	else
 		positionBetweenNodes = min(1.0f - carLength / distanceBetweenNodes, max(carLength / distanceBetweenNodes, positionBetweenNodes));
 	pCar->AutoPilot.m_nNextDirection = (curNodeId >= nextNodeId) ? 1 : -1;
-	if (ThePaths.m_pathNodes[curNodeId].numLinks == 1){
+	if (pCurNode->numLinks == 1){
 		/* Do not create vehicle if there is nowhere to go. */
 		delete pCar;
 		return;
@@ -332,12 +336,12 @@ CCarCtrl::GenerateOneRandomCar()
 	int16 nextConnection = pCar->AutoPilot.m_nNextPathNodeInfo;
 	int16 newLink;
 	while (nextConnection == pCar->AutoPilot.m_nNextPathNodeInfo){
-		newLink = CGeneral::GetRandomNumber() % ThePaths.m_pathNodes[curNodeId].numLinks;
-		nextConnection = ThePaths.m_carPathConnections[newLink + ThePaths.m_pathNodes[curNodeId].firstLink];
+		newLink = CGeneral::GetRandomNumber() % pCurNode->numLinks;
+		nextConnection = ThePaths.m_carPathConnections[newLink + pCurNode->firstLink];
 	}
 	pCar->AutoPilot.m_nCurrentPathNodeInfo = nextConnection;
-	pCar->AutoPilot.m_nCurrentDirection = (ThePaths.m_connections[newLink + ThePaths.m_pathNodes[curNodeId].firstLink] >= curNodeId) ? 1 : -1;
-	CVector2D vecBetweenNodes = ThePaths.m_pathNodes[nextNodeId].pos - ThePaths.m_pathNodes[curNodeId].pos;
+	pCar->AutoPilot.m_nCurrentDirection = (ThePaths.m_connections[newLink + pCurNode->firstLink] >= curNodeId) ? 1 : -1;
+	CVector2D vecBetweenNodes = pNextNode->pos - pCurNode->pos;
 	float forwardX, forwardY;
 	float distBetweenNodes = vecBetweenNodes.Magnitude();
 	if (distanceBetweenNodes == 0.0f){
@@ -358,16 +362,14 @@ CCarCtrl::GenerateOneRandomCar()
 	float nextPathLinkForwardX = pCar->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pCar->AutoPilot.m_nNextPathNodeInfo].dirX;
 	float nextPathLinkForwardY = pCar->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pCar->AutoPilot.m_nNextPathNodeInfo].dirY;
 
-	/* Selecting lane. */
 	CCarPathLink* pCurrentLink = &ThePaths.m_carPathLinks[pCar->AutoPilot.m_nCurrentPathNodeInfo];
 	float currentLaneCoefficient = (pCurrentLink->numLeftLanes == 0) ? (0.5f - 0.5f * pCurrentLink->numRightLanes) :
 		((pCurrentLink->numRightLanes == 0) ? (0.5f - 0.5f * pCurrentLink->numLeftLanes) : 0.5f);
-	/* 5.0f is most likely lane width. TODO: enum */
-	float roadShiftAlongCurrentNode = (pCar->AutoPilot.m_nPreviousLane + currentLaneCoefficient) * 5.0f;
+	float roadShiftAlongCurrentNode = (pCar->AutoPilot.m_nPreviousLane + currentLaneCoefficient) * LANE_WIDTH;
 	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[pCar->AutoPilot.m_nNextPathNodeInfo];
 	float nextLaneCoefficient = (pNextLink->numLeftLanes == 0) ? (0.5f - 0.5f * pNextLink->numRightLanes) :
 		((pNextLink->numRightLanes == 0) ? (0.5f - 0.5f * pNextLink->numLeftLanes) : 0.5f);
-	float roadShiftAlongNextNode = (pCar->AutoPilot.m_nCurrentLane + nextLaneCoefficient) * 5.0f;
+	float roadShiftAlongNextNode = (pCar->AutoPilot.m_nCurrentLane + nextLaneCoefficient) * LANE_WIDTH;
 	CVector positionOnCurrentLinkIncludingLane(
 		pCurrentLink->posX + roadShiftAlongCurrentNode * currentPathLinkForwardY,
 		pCurrentLink->posY - roadShiftAlongCurrentNode * currentPathLinkForwardX,
@@ -412,11 +414,11 @@ CCarCtrl::GenerateOneRandomCar()
 		&positionIncludingCurve,
 		&directionIncludingCurve
 	);
-	CVector vectorBetweenNodes = ThePaths.m_pathNodes[curNodeId].pos - ThePaths.m_pathNodes[nextNodeId].pos;
+	CVector vectorBetweenNodes = pCurNode->pos - pNextNode->pos;
 	CVector finalPosition = positionIncludingCurve + vectorBetweenNodes * 2.0f / vectorBetweenNodes.Magnitude();
-	finalPosition.z = positionBetweenNodes * ThePaths.m_pathNodes[nextNodeId].pos.z +
-		(1.0f - positionBetweenNodes) * ThePaths.m_pathNodes[curNodeId].pos.z;
-	float groundZ = 1000000000.0f; // TODO: define/enum
+	finalPosition.z = positionBetweenNodes * pNextNode->pos.z +
+		(1.0f - positionBetweenNodes) * pCurNode->pos.z;
+	float groundZ = INFINITE_Z;
 	CColPoint colPoint;
 	CEntity* pEntity;
 	if (CWorld::ProcessVerticalLine(finalPosition, 1000.0f, colPoint, pEntity, true, false, false, false, true, false, nil))
@@ -425,7 +427,7 @@ CCarCtrl::GenerateOneRandomCar()
 		if (ABS(colPoint.point.z - finalPosition.z) < ABS(groundZ - finalPosition.z))
 			groundZ = colPoint.point.z;
 	}
-	if (groundZ == 1000000000.0f || ABS(groundZ - finalPosition.z) > 7.0f) {
+	if (groundZ == INFINITE_Z || ABS(groundZ - finalPosition.z) > 7.0f) {
 		/* Failed to find ground or too far from expected position. */
 		delete pCar;
 		return;
