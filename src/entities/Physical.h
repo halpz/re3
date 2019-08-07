@@ -115,6 +115,9 @@ public:
 		m_vecMoveSpeed.y = y;
 		m_vecMoveSpeed.z = z;
 	}
+	void SetMoveSpeed(const CVector& speed) {
+		m_vecMoveSpeed = speed;
+	}
 	const CVector &GetTurnSpeed() { return m_vecTurnSpeed; }
 	void SetTurnSpeed(float x, float y, float z) {
 		m_vecTurnSpeed.x = x;
