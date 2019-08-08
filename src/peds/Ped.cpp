@@ -32,6 +32,7 @@
 #include "TempColModels.h"
 #include "Pickups.h"
 #include "Train.h"
+#include "TrafficLights.h"
 
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
@@ -51,6 +52,7 @@ WRAPPER void CPed::StartFightDefend(uint8, uint8, uint8) { EAXJMP(0x4E7780); }
 WRAPPER void CPed::SetDirectionToWalkAroundObject(CEntity*) { EAXJMP(0x4CCEB0); }
 WRAPPER void CPed::SetRadioStation(void) { EAXJMP(0x4D7BC0); }
 WRAPPER void CPed::MakeTyresMuddySectorList(CPtrList&) { EAXJMP(0x53CFD0); }
+WRAPPER void CPed::ProcessObjective(void) { EAXJMP(0x4D94E0); }
 
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
@@ -1890,7 +1892,7 @@ CPed::PlayFootSteps(void)
 				CVector2D top(forward * 0.26f);
 				CVector2D right(GetRight() * 0.14f);
 
-				CShadows::AddPermanentShadow(1, gpBloodPoolTex, &footPos,
+				CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpBloodPoolTex, &footPos,
 					top.x, top.y,
 					right.x, right.y,
 					255, 255, 0, 0, 4.0f, 3000.0f, 1.0f);
@@ -6283,13 +6285,513 @@ CPed::Fight(void)
 	}
 }
 
+// Some helper function which doesn't exist in og game.
+inline void
+SelectClosestNodeForSeek(CPed *ped, CPathNode *node, CVector2D closeDist, CVector2D farDist, CPathNode *closeNode, CPathNode *closeNode2, int runCount = 3)
+{
+	for (int i = 0; i < node->numLinks; i++) {
+
+		CPathNode *testNode = &ThePaths.m_pathNodes[ThePaths.m_connections[i + node->firstLink]];
+
+		if (testNode && testNode != closeNode && testNode != closeNode2) {
+			CVector2D posDiff(ped->m_vecSeekVehicle - testNode->pos);
+			float dist = posDiff.MagnitudeSqr();
+
+			if (farDist.MagnitudeSqr() > dist) {
+
+				if (closeDist.MagnitudeSqr() <= dist) {
+					ped->m_pLastPathNode = closeNode;
+					closeDist = posDiff;
+				} else {
+					ped->m_pLastPathNode = (closeNode2 ? closeNode2 : testNode);
+					farDist = posDiff;
+				}
+			}
+
+			if (--runCount > 0)
+				SelectClosestNodeForSeek(ped, testNode, closeDist, farDist, closeNode, (closeNode2 ? closeNode2 : testNode), runCount);
+		}
+	}
+}
+
+bool
+CPed::FindBestCoordsFromNodes(CVector unused, CVector *bestCoords)
+{
+	if (m_pLastPathNode || !bIsFleeing)
+		return false;
+
+	CVector ourPos = GetPosition();
+
+	int closestNodeId = ThePaths.FindNodeClosestToCoors(GetPosition(), 1, 999999.9f, false, false);
+
+	CVector seekObjPos = m_vecSeekVehicle;
+	seekObjPos.z += 1.0f;
+
+	if (CWorld::GetIsLineOfSightClear(ourPos, seekObjPos, true, false, false, true, false, false, false))
+		return false;
+
+	m_pLastPathNode = nil;
+
+	CVector2D seekObjDist (m_vecSeekVehicle - ourPos);
+
+	CPathNode *closestNode = &ThePaths.m_pathNodes[closestNodeId];
+	CVector2D closeDist(m_vecSeekVehicle - closestNode->pos);
+
+	SelectClosestNodeForSeek(this, closestNode, closeDist, seekObjDist, closestNode, nil);
+
+	// Above function decided that going to the next node is more logical than seeking the object.
+	if (m_pLastPathNode) {
+
+		CVector pathToNextNode = m_pLastPathNode->pos - ourPos;
+		if (pathToNextNode.MagnitudeSqr2D() < seekObjDist.MagnitudeSqr()) {
+			*bestCoords = m_pLastPathNode->pos;
+			return true;
+		}
+		m_pLastPathNode = nil;
+	}
+
+	return false;
+}
+
+void
+CPed::FinishDieAnimCB(CAnimBlendAssociation *animAssoc, void *arg)
+{
+	CPed *ped = (CPed*)arg;
+
+	if (ped->bIsPedDieAnimPlaying)
+		ped->bIsPedDieAnimPlaying = false;
+}
+
+void
+CPed::FinishFightMoveCB(CAnimBlendAssociation *animAssoc, void *arg)
+{
+	CPed *ped = (CPed*)arg;
+
+	if (tFightMoves[ped->m_lastFightMove].animId == animAssoc->animId) {
+		ped->m_fightUnk2 = -2;
+		animAssoc->blendDelta = -1000.0f;
+	}
+}
+
+void
+CPed::FinishHitHeadCB(CAnimBlendAssociation *animAssoc, void *arg)
+{
+	CPed *ped = (CPed*)arg;
+
+	if (animAssoc) {
+		animAssoc->blendDelta = -4.0f;
+		animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+	}
+
+	if (ped->m_nPedState == PED_JUMP)
+		ped->RestorePreviousState();
+
+	ped->bIsLanding = false;
+}
+
+void
+CPed::FinishJumpCB(CAnimBlendAssociation *animAssoc, void *arg)
+{
+	CPed* ped = (CPed*)arg;
+
+	ped->m_ped_flagG4 = true;
+	ped->bIsLanding = false;
+
+	animAssoc->blendDelta = -1000.0f;
+}
+
+void
+CPed::FinishLaunchCB(CAnimBlendAssociation *animAssoc, void *arg)
+{
+	CPed *ped = (CPed*)arg;
+
+	if (ped->m_nPedState != PED_JUMP)
+		return;
+
+	CVector forward(0.15f * ped->GetForward() + ped->GetPosition());
+	forward.z += CModelInfo::GetModelInfo(ped->m_modelIndex)->GetColModel()->spheres->center.z + 0.25f;
+
+	CEntity *foundEnt = CWorld::TestSphereAgainstWorld(forward, 0.25f, nil, true, true, false, true, false, false);
+	if (!foundEnt) {
+		// Forward of forward
+		forward += 0.15f * ped->GetForward();
+		forward.z += 0.15f;
+		foundEnt = CWorld::TestSphereAgainstWorld(forward, 0.25f, nil, true, true, false, true, false, false);
+	}
+
+	if (foundEnt) {
+		animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+		CAnimBlendAssociation *handsCoverAssoc = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_HANDSCOWER, 8.0f);
+		handsCoverAssoc->flags &= ~ASSOC_FADEOUTWHENDONE;
+		handsCoverAssoc->SetFinishCallback(FinishHitHeadCB, ped);
+		ped->bIsLanding = true;
+		return;
+	}
+
+	float velocityFromAnim = 0.1f;
+	CAnimBlendAssociation *sprintAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), ANIM_SPRINT);
+
+	if (sprintAssoc) {
+		velocityFromAnim = 0.05f * sprintAssoc->blendAmount + 0.17f;
+	} else {
+		CAnimBlendAssociation *runAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), ANIM_RUN);
+		if (runAssoc) {
+			velocityFromAnim = 0.07f * runAssoc->blendAmount + 0.1f;
+		}
+	}
+
+	if (ped->IsPlayer())
+		ped->ApplyMoveForce(0.0f, 0.0f, 8.5f);
+	else
+		ped->ApplyMoveForce(0.0f, 0.0f, 4.5f);
+	
+	if (sq(velocityFromAnim) > ped->m_vecMoveSpeed.MagnitudeSqr2D()) {
+
+		if (TheCamera.Cams[0].Using3rdPersonMouseCam()) {
+			float fpsAngle = ped->WorkOutHeadingForMovingFirstPerson(ped->m_fRotationCur);
+			ped->m_vecMoveSpeed.x = -velocityFromAnim * sin(fpsAngle);
+			ped->m_vecMoveSpeed.y = velocityFromAnim * cos(fpsAngle);
+		} else {
+			ped->m_vecMoveSpeed.x = -velocityFromAnim * sin(ped->m_fRotationCur);
+			ped->m_vecMoveSpeed.y = velocityFromAnim * cos(ped->m_fRotationCur);
+		}
+	}
+
+	ped->bIsStanding = false;
+	ped->bIsInTheAir = true;
+	animAssoc->blendDelta = -1000.0f;
+	CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_JUMP_GLIDE);
+
+	if (ped->bDoBloodyFootprints) {
+		CVector bloodPos(0.0f, 0.0f, 0.0f);
+		for (RwFrame *i = ped->GetNodeFrame(PED_FOOTL); i; i = RwFrameGetParent(i))
+			RwV3dTransformPoints(bloodPos, bloodPos, 1, RwFrameGetMatrix(i));
+
+		bloodPos.z -= 0.1f;
+		bloodPos += 0.2f * ped->GetForward();
+
+		CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpBloodPoolTex, &bloodPos,
+			0.26f * ped->GetForward().x,
+			0.26f * ped->GetForward().y,
+			0.14f * ped->GetRight().x,
+			0.14f * ped->GetRight().y,
+			255, 255, 0, 0, 4.0f, 3000, 1.0f);
+
+		bloodPos = CVector(0.0f, 0.0f, 0.0f);
+		for (RwFrame* j = ped->GetNodeFrame(PED_FOOTR); j; j = RwFrameGetParent(j))
+			RwV3dTransformPoints(bloodPos, bloodPos, 1, RwFrameGetMatrix(j));
+
+		bloodPos.z -= 0.1f;
+		bloodPos += 0.2f * ped->GetForward();
+		CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpBloodPoolTex, &bloodPos,
+			0.26f * ped->GetForward().x,
+			0.26f * ped->GetForward().y,
+			0.14f * ped->GetRight().x,
+			0.14f * ped->GetRight().y,
+			255, 255, 0, 0, 4.0f, 3000, 1.0f);
+
+		if (ped->m_bloodyFootprintCount <= 40) {
+			ped->m_bloodyFootprintCount = 0;
+			ped->bDoBloodyFootprints = false;
+		} else {
+			ped->m_bloodyFootprintCount -= 40;
+		}
+	}
+}
+
+void
+CPed::FinishedWaitCB(CAnimBlendAssociation *animAssoc, void *arg)
+{
+	CPed* ped = (CPed*)arg;
+
+	ped->m_nWaitTimer = 0;
+	ped->RestoreHeadingRate();
+	ped->Wait();
+}
+
+void
+CPed::Wait(void)
+{
+	AnimationId mustHaveAnim = NUM_ANIMS;
+	CAnimBlendAssociation *animAssoc;
+	CPed *pedWeLook;
+
+	if (m_nPedState == PED_DIE || m_nPedState == PED_DEAD) {
+		m_nWaitState = WAITSTATE_FALSE;
+		RestoreHeadingRate();
+		return;
+	}
+
+	switch (m_nWaitState) {
+
+		case WAITSTATE_TRAFFIC_LIGHTS:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				if (CTrafficLights::LightForPeds() == PED_LIGHTS_WALK) {
+					m_nWaitState = WAITSTATE_FALSE;
+					SetMoveState(PEDMOVE_WALK);
+				}
+			}
+			break;
+
+		case WAITSTATE_CROSS_ROAD:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				if (CGeneral::GetRandomNumber() & 1 || !m_nWaitTimer)
+					m_nWaitState = WAITSTATE_FALSE;
+				else
+					SetWaitState(WAITSTATE_CROSS_ROAD_LOOK, nil);
+
+				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_HBHB);
+				if (animAssoc) {
+					animAssoc->blendDelta = -8.0f;
+					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+				}
+			}
+			break;
+
+		case WAITSTATE_LOOK_PED:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				m_nWaitState = WAITSTATE_FALSE;
+				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ROAD_CROSS);
+				if (animAssoc) {
+					animAssoc->blendDelta = -8.0f;
+					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+				}
+			}
+			break;
+
+		case WAITSTATE_DOUBLEBACK:
+			if (CTimer::GetTimeInMilliseconds() <= m_nWaitTimer) {
+				uint32 timeLeft = m_nWaitTimer - CTimer::GetTimeInMilliseconds();
+				if (timeLeft < 2500 && timeLeft > 2000) {
+					m_nWaitTimer -= 500;
+					CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 4.0f);
+				}
+			} else {
+				m_nWaitState = WAITSTATE_FALSE;
+				SetMoveState(PEDMOVE_WALK);
+			}
+			break;
+
+		case WAITSTATE_HITWALL:
+			if (CTimer::GetTimeInMilliseconds() <= m_nWaitTimer) {
+				if (m_lastThreatTimer > CTimer::GetTimeInMilliseconds()) {
+					m_lastThreatTimer = CTimer::GetTimeInMilliseconds() + 2500;
+				}
+			} else {
+				m_nWaitState = WAITSTATE_FALSE;
+			}
+			break;
+
+		case WAITSTATE_TURN180:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				m_nWaitState = WAITSTATE_FALSE;
+				SetMoveState(PEDMOVE_WALK);
+				m_fRotationCur = m_fRotationCur + PI;
+				if (m_nPedState == PED_INVESTIGATE)
+					ClearInvestigateEvent();
+			}
+
+			if (m_lastThreatTimer > CTimer::GetTimeInMilliseconds()) {
+				m_lastThreatTimer = CTimer::GetTimeInMilliseconds() + 2500;
+			}
+			break;
+
+		case WAITSTATE_SURPRISE:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_HIT_WALL)) {
+					animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 4.0f);
+					animAssoc->SetFinishCallback(FinishedWaitCB, this);
+					m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 5000;
+				} else {
+					m_nWaitState = WAITSTATE_FALSE;
+				}
+			}
+			break;
+
+		case WAITSTATE_STUCK:
+			if (CTimer::GetTimeInMilliseconds() <= m_nWaitTimer)
+				break;
+
+			animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_TIRED);
+
+			if (!animAssoc)
+				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_TURN_180);
+			if (!animAssoc)
+				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_XPRESS_SCRATCH);
+			if (!animAssoc)
+				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ROAD_CROSS);
+
+			if (animAssoc) {
+				if (animAssoc->IsPartial()) {
+					animAssoc->blendDelta = -8.0f;
+					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+				} else {
+					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+					CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 4.0f);
+				}
+
+				if (animAssoc->animId == ANIM_TURN_180) {
+					m_fRotationCur = CGeneral::LimitRadianAngle(PI + m_fRotationCur);
+					m_nWaitState = WAITSTATE_FALSE;
+					SetMoveState(PEDMOVE_WALK);
+					m_nStoredMoveState = PEDMOVE_NONE;
+					m_panicCounter = 0;
+					return;
+				}
+			}
+
+			AnimationId animToRun;
+
+			switch (CGeneral::GetRandomNumber() & 3) {
+				case 0:
+					animToRun = ANIM_ROAD_CROSS;
+					break;
+				case 1:
+					animToRun = ANIM_IDLE_TIRED;
+					break;
+				case 2:
+					animToRun = ANIM_XPRESS_SCRATCH;
+					break;
+				case 3:
+					animToRun = ANIM_TURN_180;
+					break;
+				default:
+					break;
+			}
+
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), m_animGroup, animToRun, 4.0f);
+
+			if (animToRun == ANIM_TURN_180)
+				animAssoc->SetFinishCallback(FinishedWaitCB, this);
+
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(1500, 5000);
+			break;
+
+		case WAITSTATE_LOOK_ABOUT:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				m_nWaitState = WAITSTATE_FALSE;
+				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_HBHB);
+				if (animAssoc) {
+					animAssoc->blendDelta = -8.0f;
+					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+				}
+			}
+			break;
+
+		case WAITSTATE_PLAYANIM_HANDSUP:
+			mustHaveAnim = ANIM_HANDSUP;
+			
+		case WAITSTATE_PLAYANIM_HANDSCOWER:
+			if (mustHaveAnim == NUM_ANIMS)
+				mustHaveAnim = ANIM_HANDSCOWER;
+
+			animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), mustHaveAnim);
+			pedWeLook = (CPed*) m_pLookTarget;
+
+			if ((!m_pLookTarget || !m_pLookTarget->IsPed() || pedWeLook->m_pPointGunAt)
+				&& m_nPedState != PED_FLEE_ENTITY
+				&& m_nPedState != PED_ATTACK
+				&& CTimer::GetTimeInMilliseconds() <= m_nWaitTimer
+				&& animAssoc) {
+
+				TurnBody();
+			} else {
+				m_nWaitState = WAITSTATE_FALSE;
+				m_nWaitTimer = 0;
+				if (m_pLookTarget && m_pLookTarget->IsPed()) {
+
+					if (m_nPedState != PED_FLEE_ENTITY && m_nPedState != PED_ATTACK) {
+
+						if (m_pedStats->m_fear <= 100 - pedWeLook->m_pedStats->m_temper) {
+
+							if (GetWeapon()->IsTypeMelee()) {
+
+								SetObjective(OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE, m_pLookTarget);
+								if (m_nPedState == PED_FLEE_ENTITY || m_nPedState == PED_FLEE_POS) {
+
+									bIsFleeing = true;
+									m_pLastPathNode = nil;
+								}
+								if (m_nMoveState != PEDMOVE_RUN)
+									SetMoveState(PEDMOVE_WALK);
+
+								if (m_nPedType != PEDTYPE_COP) {
+									ProcessObjective();
+									SetMoveState(PEDMOVE_WALK);
+								}
+							} else {
+								SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, m_pLookTarget);
+								SetObjectiveTimer(20000);
+							}
+						} else {
+							SetObjective(OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE, m_pLookTarget);
+							if (m_nPedState == PED_FLEE_ENTITY || m_nPedState == PED_FLEE_POS)
+							{
+								bIsFleeing = true;
+								m_pLastPathNode = nil;
+							}
+							SetMoveState(PEDMOVE_RUN);
+							Say(SOUND_PED_FLEE_RUN);
+						}
+					}
+				}
+				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), mustHaveAnim);
+				if (animAssoc) {
+					animAssoc->blendDelta = -4.0f;
+					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+				}
+			}
+			break;
+		case WAITSTATE_PLAYANIM_COWER:
+			mustHaveAnim = ANIM_HANDSCOWER;
+
+		case WAITSTATE_PLAYANIM_DUCK:
+			if (mustHaveAnim == NUM_ANIMS)
+				mustHaveAnim = ANIM_DUCK_DOWN;
+
+		case WAITSTATE_PLAYANIM_TAXI:
+			if (mustHaveAnim == NUM_ANIMS)
+				mustHaveAnim = ANIM_IDLE_TAXI;
+
+		case WAITSTATE_PLAYANIM_CHAT:
+			if (mustHaveAnim == NUM_ANIMS)
+				mustHaveAnim = ANIM_IDLE_CHAT;
+
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), mustHaveAnim);
+				if (animAssoc) {
+					animAssoc->blendDelta = -4.0f;
+					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+				}
+				m_nWaitState = WAITSTATE_FALSE;
+			}
+			break;
+
+		case WAITSTATE_FINISH_FLEE:
+			animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_TIRED);
+			if (animAssoc) {
+				if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+					CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 4.0f);
+					int timer = 2000;
+					m_nWaitState = WAITSTATE_FALSE;
+					SetWaitState(WAITSTATE_CROSS_ROAD_LOOK, &timer);
+				}
+			} else {
+				m_nWaitState = WAITSTATE_FALSE;
+			}
+			break;
+		default:
+			break;
+	}
+
+	if(!m_nWaitState)
+		RestoreHeadingRate();
+}
+
 WRAPPER void CPed::PedGetupCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE810); }
 WRAPPER void CPed::PedStaggerCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8D0); }
 WRAPPER void CPed::PedEvadeCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D36E0); }
-WRAPPER void CPed::FinishDieAnimCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D3950); }
-WRAPPER void CPed::FinishedWaitCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D6520); }
-WRAPPER void CPed::FinishLaunchCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D7490); }
-WRAPPER void CPed::FinishHitHeadCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D7A80); }
 WRAPPER void CPed::PedAnimGetInCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4DEC80); }
 WRAPPER void CPed::PedAnimDoorOpenCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4DE500); }
 WRAPPER void CPed::PedAnimPullPedOutCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4DEAF0); }
@@ -6302,9 +6804,7 @@ WRAPPER void CPed::PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation* dra
 WRAPPER void CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation* dragAssoc, void* arg) { EAXJMP(0x4E2920); }
 WRAPPER void CPed::PedSetInTrainCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4E3290); }
 WRAPPER void CPed::PedSetOutTrainCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4E36E0); }
-WRAPPER void CPed::FinishFightMoveCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4E9830); }
 WRAPPER void CPed::PedAnimDoorCloseRollingCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4E4B90); }
-WRAPPER void CPed::FinishJumpCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D7A50); }
 WRAPPER void CPed::PedLandCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8A0); }
 WRAPPER void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4C6580); }
 
@@ -6444,4 +6944,12 @@ STARTPATCHES
 	InjectHook(0x4E33D0, &CPed::LineUpPedWithTrain, PATCH_JUMP);
 	InjectHook(0x4E18D0, &CPed::ExitCar, PATCH_JUMP);
 	InjectHook(0x4E7EE0, &CPed::Fight, PATCH_JUMP);
+	InjectHook(0x4D3950, &CPed::FinishDieAnimCB, PATCH_JUMP);
+	InjectHook(0x4E9830, &CPed::FinishFightMoveCB, PATCH_JUMP);
+	InjectHook(0x4D7A80, &CPed::FinishHitHeadCB, PATCH_JUMP);
+	InjectHook(0x4D7A50, &CPed::FinishJumpCB, PATCH_JUMP);
+	InjectHook(0x4D7490, &CPed::FinishLaunchCB, PATCH_JUMP);
+	InjectHook(0x4D6520, &CPed::FinishedWaitCB, PATCH_JUMP);
+	InjectHook(0x4D5D80, &CPed::Wait, PATCH_JUMP);
+	InjectHook(0x4E3A90, &CPed::FindBestCoordsFromNodes, PATCH_JUMP);
 ENDPATCHES

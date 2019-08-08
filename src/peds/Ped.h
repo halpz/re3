@@ -303,7 +303,7 @@ public:
 	uint8 m_ped_flagG1 : 1;
 	uint8 m_ped_flagG2 : 1;
 	uint8 m_ped_flagG4 : 1;
-	uint8 m_ped_flagG8 : 1;
+	uint8 m_ped_flagG8 : 1; // ped starts to go somewhere when set
 	uint8 m_ped_flagG10 : 1;
 	uint8 m_ped_flagG20 : 1;
 	uint8 m_ped_flagG40 : 1;
@@ -408,7 +408,7 @@ public:
 	CEntity *m_fleeFrom;
 	uint32 m_fleeTimer;
 	uint32 field_344;
-	uint32 m_lastThreatTimer;
+	uint32 m_lastThreatTimer; // I don't think so
 	CEntity *m_pCollidingEntity;
 	uint8 m_stateUnused;
 	uint8 pad_351[3];
@@ -597,6 +597,9 @@ public:
 	void LineUpPedWithTrain(void);
 	void ExitCar(void);
 	void Fight(void);
+	bool FindBestCoordsFromNodes(CVector unused, CVector* a6);
+	void Wait(void);
+	void ProcessObjective(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
