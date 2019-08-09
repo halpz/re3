@@ -8,8 +8,7 @@ public:
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
 
-	int16 m_nodeIndicesCars[12];
-	int16 m_nodeIndicesPeds[12];
+	int16 m_nodeIndices[2][12];	// first car, then ped
 
 	bool GetIsATreadable(void) { return true; }
 };

@@ -200,9 +200,9 @@ CRenderer::RenderRoads(void)
 			if(gbShowCarRoadGroups || gbShowPedRoadGroups){
 				int ind = 0;
 				if(gbShowCarRoadGroups)
-					ind += ThePaths.m_pathNodes[t->m_nodeIndicesCars[0]].group;
+					ind += ThePaths.m_pathNodes[t->m_nodeIndices[PATH_CAR][0]].group;
 				if(gbShowPedRoadGroups)
-					ind += ThePaths.m_pathNodes[t->m_nodeIndicesPeds[0]].group;
+					ind += ThePaths.m_pathNodes[t->m_nodeIndices[PATH_PED][0]].group;
 				SetAmbientColoursToIndicateRoadGroup(ind);
 			}
 #endif

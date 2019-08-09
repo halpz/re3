@@ -19,8 +19,7 @@ public:
 
 	int32 m_audioEntityId;
   float unk1;
-	CTreadable *m_carTreadable;
-	CTreadable *m_pedTreadable;
+	CTreadable *m_treadable[2];	// car and ped
 	uint32 m_nLastTimeCollided;
 	CVector m_vecMoveSpeed;		// velocity
 	CVector m_vecTurnSpeed;		// angular velocity

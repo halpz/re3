@@ -3856,7 +3856,7 @@ CPed::SetWanderPath(int8 pathStateDest)
 			if (pathStateDest == 0)
 				pathStateDest = CGeneral::GetRandomNumberInRange(1, 7);
 
-			ThePaths.FindNextNodeWandering(1, GetPosition(), &m_pNextPathNode, &m_pLastPathNode,
+			ThePaths.FindNextNodeWandering(PATH_PED, GetPosition(), &m_pNextPathNode, &m_pLastPathNode,
 				m_nPathState, &nextPathState);
 
 			// Circular loop until we find a node for current m_nPathState
@@ -3869,7 +3869,7 @@ CPed::SetWanderPath(int8 pathStateDest)
 					SetIdle();
 					return false;
 				}
-				ThePaths.FindNextNodeWandering(1, GetPosition(), &m_pNextPathNode, &m_pLastPathNode,
+				ThePaths.FindNextNodeWandering(PATH_PED, GetPosition(), &m_pNextPathNode, &m_pLastPathNode,
 					m_nPathState, &nextPathState);
 			}
 

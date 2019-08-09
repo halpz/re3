@@ -74,6 +74,7 @@ public:
 		return result;
 	}
 
+	// Returns an angle such that x2/y2 looks at x1/y1 with its forward vector if rotated by that angle
 	static float GetRadianAngleBetweenPoints(float x1, float y1, float x2, float y2)
 	{
 		float x = x2 - x1;
