@@ -42,6 +42,7 @@ public:
 	static void GenerateEmergencyServicesCar(void);
 	static int32 ChooseModel(CZoneInfo*, CVector*, int*);
 	static int32 ChoosePoliceCarModel(void);
+	static int32 ChooseGangCarModel(int32 gang);
 
 	static int32 &NumLawEnforcerCars;
 	static int32 &NumAmbulancesOnDuty;
@@ -54,4 +55,7 @@ public:
 	static int8 &CountDownToCarsAtStart;
 	static int32 &MaxNumberOfCarsInUse;
 	static uint32 &LastTimeLawEnforcerCreated;
+	static int32 (&TotalNumOfCarsOfRating)[7];
+	static int32 (&NextCarOfRating)[7];
+	static int32 (&CarArrays)[7][256];
 };

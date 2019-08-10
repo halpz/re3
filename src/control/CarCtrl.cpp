@@ -16,6 +16,7 @@
 #include "PlayerInfo.h"
 #include "PlayerPed.h"
 #include "Timer.h"
+#include "Streaming.h"
 #include "VisibilityPlugins.h"
 #include "Vehicle.h"
 #include "Wanted.h"
@@ -36,11 +37,13 @@ int32 &CCarCtrl::NumParkedCars = *(int32*)0x8F29E0;
 int8 &CCarCtrl::CountDownToCarsAtStart = *(int8*)0x95CD63;
 int32 &CCarCtrl::MaxNumberOfCarsInUse = *(int32*)0x5EC8B8;
 uint32 &CCarCtrl::LastTimeLawEnforcerCreated = *(uint32*)0x8F5FF0;
+int32 (&CCarCtrl::TotalNumOfCarsOfRating)[7] = *(int32(*)[7])*(uintptr*)0x8F1A60;
+int32 (&CCarCtrl::NextCarOfRating)[7] = *(int32(*)[7])*(uintptr*)0x9412AC;
+int32 (&CCarCtrl::CarArrays)[7][256] = *(int32(*)[7][256])*(uintptr*)0x6EB860;
 
 WRAPPER void CCarCtrl::SwitchVehicleToRealPhysics(CVehicle*) { EAXJMP(0x41F7F0); }
 WRAPPER void CCarCtrl::AddToCarArray(int32 id, int32 vehclass) { EAXJMP(0x4182F0); }
 WRAPPER void CCarCtrl::UpdateCarCount(CVehicle*, bool) { EAXJMP(0x4202E0); }
-WRAPPER int32 CCarCtrl::ChooseCarModel(int32 vehclass) { EAXJMP(0x418110); }
 WRAPPER bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle*, CVector, bool) { EAXJMP(0x41FA00); }
 WRAPPER void CCarCtrl::JoinCarWithRoadSystem(CVehicle*) { EAXJMP(0x41F820); }
 WRAPPER void CCarCtrl::SteerAICarWithPhysics(CVehicle*) { EAXJMP(0x41DA60); }
@@ -48,8 +51,8 @@ WRAPPER void CCarCtrl::UpdateCarOnRails(CVehicle*) { EAXJMP(0x418880); }
 WRAPPER void CCarCtrl::ScanForPedDanger(CVehicle *veh) { EAXJMP(0x418F40); }
 WRAPPER void CCarCtrl::RemoveFromInterestingVehicleList(CVehicle* v) { EAXJMP(0x41F7A0); }
 WRAPPER void CCarCtrl::GenerateEmergencyServicesCar(void) { EAXJMP(0x41FC50); }
-WRAPPER int32 CCarCtrl::ChooseModel(CZoneInfo*, CVector*, int*) { EAXJMP(0x417EC0); }
 WRAPPER int32 CCarCtrl::ChoosePoliceCarModel(void) { EAXJMP(0x4181F0); }
+WRAPPER int32 CCarCtrl::ChooseGangCarModel(int32 gang) { EAXJMP(0x4182C0); }
 
 void
 CCarCtrl::GenerateRandomCars()
@@ -512,6 +515,78 @@ CCarCtrl::GenerateOneRandomCar()
 		LastTimeLawEnforcerCreated = CTimer::GetTimeInMilliseconds();
 }
 
+int32
+CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
+	int32 model = -1;;
+	while (model == -1 || !CStreaming::HasModelLoaded(model)){
+		int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
+		if (rnd < pZone->carThreshold[0])
+			model = CCarCtrl::ChooseCarModel((*pClass = POOR));
+		else if (rnd < pZone->carThreshold[1])
+			model = CCarCtrl::ChooseCarModel((*pClass = RICH));
+		else if (rnd < pZone->carThreshold[2])
+			model = CCarCtrl::ChooseCarModel((*pClass = EXEC));
+		else if (rnd < pZone->carThreshold[3])
+			model = CCarCtrl::ChooseCarModel((*pClass = WORKER));
+		else if (rnd < pZone->carThreshold[4])
+			model = CCarCtrl::ChooseCarModel((*pClass = SPECIAL));
+		else if (rnd < pZone->carThreshold[5])
+			model = CCarCtrl::ChooseCarModel((*pClass = BIG));
+		else if (rnd < pZone->copThreshold)
+			*pClass = COPS, model = CCarCtrl::ChoosePoliceCarModel();
+		else if (rnd < pZone->gangThreshold[0])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = MAFIA) - MAFIA);
+		else if (rnd < pZone->gangThreshold[1])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = TRIAD) - MAFIA);
+		else if (rnd < pZone->gangThreshold[2])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = DIABLO) - MAFIA);
+		else if (rnd < pZone->gangThreshold[3])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = YAKUZA) - MAFIA);
+		else if (rnd < pZone->gangThreshold[4])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = YARDIE) - MAFIA);
+		else if (rnd < pZone->gangThreshold[5])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = COLOMB) - MAFIA);
+		else if (rnd < pZone->gangThreshold[6])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = NINES) - MAFIA);
+		else if (rnd < pZone->gangThreshold[7])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = GANG8) - MAFIA);
+		else if (rnd < pZone->gangThreshold[8])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = GANG9) - MAFIA);
+		else
+			model = CCarCtrl::ChooseCarModel((*pClass = TAXI));
+	}
+	return model;
+}
+
+int32
+CCarCtrl::ChooseCarModel(int32 vehclass)
+{
+	int32 model = -1;
+	switch (vehclass) {
+	case POOR:
+	case RICH:
+	case EXEC:
+	case WORKER:
+	case SPECIAL:
+	case BIG:
+	case TAXI:
+	{
+		if (TotalNumOfCarsOfRating[vehclass] == 0)
+			debug("ChooseCarModel : No cars of type %d have been declared\n");
+		model = CarArrays[vehclass][NextCarOfRating[vehclass]];
+		int32 total = TotalNumOfCarsOfRating[vehclass];
+		NextCarOfRating[vehclass] += 1 + CGeneral::GetRandomNumberInRange(0, total - 1);
+		while (NextCarOfRating[vehclass] >= total)
+			NextCarOfRating[vehclass] -= total;
+		//NextCarOfRating[vehclass] %= total;
+		TotalNumOfCarsOfRating[vehclass] = total; /* why... */
+	}
+	default:
+		break;
+	}
+	return model;
+}
+
 bool
 CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 {
@@ -522,4 +597,5 @@ CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 
 STARTPATCHES
 InjectHook(0x416580, &CCarCtrl::GenerateRandomCars, PATCH_JUMP);
+InjectHook(0x417EC0, &CCarCtrl::ChooseModel, PATCH_JUMP);
 ENDPATCHES
