@@ -96,6 +96,21 @@ public:
 		}
 	}
 
+	// should return direction in 0-8 range. fits perfectly to peds' path directions.
+	static int CGeneral::GetNodeHeadingFromVector(float x, float y)
+	{
+		float angle = CGeneral::GetRadianAngleBetweenPoints(x, y, 0.0f, 0.0f);
+		if (angle < 0.0f)
+			angle += TWOPI;
+
+		angle = DEGTORAD(22.5f) + TWOPI - angle;
+
+		if (angle >= TWOPI)
+			angle -= TWOPI;
+
+		return (int)floorf(angle / DEGTORAD(45.0f));
+	}
+
 	// not too sure about all these...
 	static uint16 GetRandomNumber(void)
 		{ return myrand() & MYRAND_MAX; }

@@ -140,6 +140,20 @@ SpawnCar(int id)
 }
 
 static void
+LetThemFollowYou(void) {
+	CPed* player = (CPed*) FindPlayerPed();
+	for (int i = 0; i < player->m_numNearPeds; i++) {
+
+		CPed* nearPed = player->m_nearPeds[i];
+		if (nearPed && !nearPed->IsPlayer()) {
+			nearPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, (void*)player);
+			nearPed->m_pedFormation = rand() & 7;
+			nearPed->bScriptObjectiveCompleted = false;
+		}
+	}
+}
+
+static void
 FixCar(void)
 {
 	CVehicle *veh = FindPlayerVehicle();
@@ -335,6 +349,8 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", (int8*)&gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
+
+		DebugMenuAddCmd("Debug", "Make peds around you follow you", LetThemFollowYou);
 #ifndef FINAL
 		DebugMenuAddVarBool8("Debug", "Toggle unused fight feature", (int8*)&CPed::bUnusedFightThingOnPlayer, nil);
 #endif
