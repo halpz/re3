@@ -33,6 +33,12 @@ enum Config {
 
 	NUMTEMPOBJECTS = 30,
 
+	// Path data
+	NUM_PATHNODES = 4930,
+	NUM_CARPATHLINKS = 2076,
+	NUM_MAPOBJECTS = 1250,
+	NUM_PATHCONNECTIONS = 10260,
+
 	// Link list lengths
 	// TODO: alpha list
 	NUMCOLCACHELINKS = 200,

@@ -18,7 +18,7 @@ public:
 			x *= invsqrt;
 			y *= invsqrt;
 		}else
-			x = 0.0f;
+			x = 1.0f;
 	}
 	const CVector2D &operator+=(CVector2D const &right) {
 		x += right.x;
@@ -52,6 +52,9 @@ public:
 	CVector2D operator*(float t) const {
 		return CVector2D(x*t, y*t);
 	}
+	CVector2D operator/(float t) const {
+		return CVector2D(x/t, y/t);
+	}
 };
 
 inline float
@@ -64,4 +67,27 @@ inline float
 CrossProduct2D(const CVector2D &v1, const CVector2D &v2)
 {
 	return v1.x*v2.y - v1.y*v2.x;
+}
+
+inline float
+Distance2D(const CVector2D &v, float x, float y)
+{
+	return Sqrt((v.x-x)*(v.x-x) + (v.y-y)*(v.y-y));
+}
+
+inline float
+DistanceSqr2D(const CVector2D &v, float x, float y)
+{
+	return (v.x-x)*(v.x-x) + (v.y-y)*(v.y-y);
+}
+
+inline void
+NormalizeXY(float &x, float &y)
+{
+	float l  = Sqrt(x*x + y*y);
+	if(l != 0.0f){
+		x /= l;
+		y /= l;
+	}else
+		x = 1.0f;
 }
