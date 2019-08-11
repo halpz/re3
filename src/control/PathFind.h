@@ -2,6 +2,8 @@
 
 #include "Treadable.h"
 
+class CVehicle;
+
 enum
 {
 	PATH_CAR = 0,

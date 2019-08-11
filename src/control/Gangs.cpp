@@ -25,7 +25,7 @@ void CGangs::Initialize(void)
 	Gang[GANG_8].m_nVehicleMI = -1;
 }
 
-void CGangs::SetGangVehicleModel(int16 gang, int model)
+void CGangs::SetGangVehicleModel(int16 gang, int32 model)
 {
 	GetGangInfo(gang)->m_nVehicleMI = model;
 }

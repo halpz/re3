@@ -159,7 +159,7 @@ public:
 	uint8 bHasBeenOwnedByPlayer : 1;// To work out whether stealing it is a crime
 	uint8 bFadeOut : 1; // Fade vehicle out
 	uint8 m_veh_flagC10 : 1;
-	uint8 m_veh_flagC20 : 1;
+	uint8 bCreateRoadBlockPeds : 1; // If this vehicle gets close enough we will create peds (coppers or gang members) round it
 	uint8 bCanBeDamaged : 1; // Set to FALSE during cut scenes to avoid explosions
 	uint8 bUsingSpecialColModel : 1;// Is player vehicle using special collision model, stored in player strucure
 
@@ -174,8 +174,9 @@ public:
 
 	int8 m_numPedsUseItAsCover;
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
-	int8 field_1FB;
-	int8 field_1FC[4];
+	int8 m_nPacManPickupsCarried;
+	uint8 m_nRoadblockType;
+	int16 m_nRoadblockNode;
 	float m_fHealth;           // 1000.0f = full health. 250.0f = fire. 0 -> explode
 	uint8 m_nCurrentGear;
 	int8 field_205[3];

@@ -1,6 +1,7 @@
 #pragma once
 
 class CEntity;
+class CVehicle;
 
 enum {
 	PED_LIGHTS_WALK,
@@ -13,4 +14,6 @@ class CTrafficLights
 public:
 	static void DisplayActualLight(CEntity *ent);
 	static uint8 LightForPeds(void);
+	static bool ShouldCarStopForLight(CVehicle*, bool);
+	static bool ShouldCarStopForBridge(CVehicle*);
 };
