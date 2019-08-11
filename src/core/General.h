@@ -114,6 +114,8 @@ public:
 	// not too sure about all these...
 	static uint16 GetRandomNumber(void)
 		{ return myrand() & MYRAND_MAX; }
+	static bool GetRandomTrueFalse(void)
+		{ return GetRandomNumber() < MYRAND_MAX / 2; }
 	// Probably don't want to ever reach high
 	static float GetRandomNumberInRange(float low, float high)
 		{ return low + (high - low)*(GetRandomNumber()/float(MYRAND_MAX + 1)); }

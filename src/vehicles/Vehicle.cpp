@@ -60,7 +60,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 		pPassengers[i] = nil;
 	m_nBombTimer = 0;
 	m_pBlowUpEntity = nil;
-	field_1FB = 0;
+	m_nPacManPickupsCarried = 0;
 	bComedyControls = false;
 	bCraneMessageDone = false;
 	bExtendedRange = false;
@@ -71,7 +71,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nTimeOfDeath = 0;
 	m_pCarFire = nil;
 	bHasBeenOwnedByPlayer = false;
-	m_veh_flagC20 = false;
+	bCreateRoadBlockPeds = false;
 	bCanBeDamaged = true;
 	bUsingSpecialColModel = false;
 	m_veh_flagD1 = false;
@@ -102,7 +102,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_aCollPolys[0].valid = false;
 	m_aCollPolys[1].valid = false;
 	AutoPilot.m_nCarMission = MISSION_NONE;
-	AutoPilot.m_nAnimationId = TEMPACT_NONE;
+	AutoPilot.m_nTempAction = TEMPACT_NONE;
 	AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 	AutoPilot.m_flag4 = false;
 	AutoPilot.m_flag10 = false;

@@ -6,8 +6,11 @@
 #include "Camera.h"
 #include "CarAI.h"
 #include "CarGen.h"
+#include "Cranes.h"
 #include "Curves.h"
 #include "CutsceneMgr.h"
+#include "Gangs.h"
+#include "Garages.h"
 #include "General.h"
 #include "IniFile.h"
 #include "ModelIndices.h"
@@ -15,14 +18,20 @@
 #include "Ped.h"
 #include "PlayerInfo.h"
 #include "PlayerPed.h"
+#include "Pools.h"
+#include "Renderer.h"
+#include "RoadBlocks.h"
 #include "Timer.h"
+#include "TrafficLights.h"
+#include "Streaming.h"
 #include "VisibilityPlugins.h"
 #include "Vehicle.h"
 #include "Wanted.h"
 #include "World.h"
 #include "Zones.h"
 
-#define LANE_WIDTH 5.0f
+#define DISTANCE_TO_SPAWN_ROADBLOCK_PEDS 51.0f
+#define DISTANCE_TO_SCAN_FOR_DANGER 11.0f
 #define INFINITE_Z 1000000000.0f
 
 int &CCarCtrl::NumLawEnforcerCars = *(int*)0x8F1B38;
@@ -36,20 +45,22 @@ int32 &CCarCtrl::NumParkedCars = *(int32*)0x8F29E0;
 int8 &CCarCtrl::CountDownToCarsAtStart = *(int8*)0x95CD63;
 int32 &CCarCtrl::MaxNumberOfCarsInUse = *(int32*)0x5EC8B8;
 uint32 &CCarCtrl::LastTimeLawEnforcerCreated = *(uint32*)0x8F5FF0;
+int32 (&CCarCtrl::TotalNumOfCarsOfRating)[7] = *(int32(*)[7])*(uintptr*)0x8F1A60;
+int32 (&CCarCtrl::NextCarOfRating)[7] = *(int32(*)[7])*(uintptr*)0x9412AC;
+int32 (&CCarCtrl::CarArrays)[7][256] = *(int32(*)[7][256])*(uintptr*)0x6EB860;
+CVehicle* (&apCarsToKeep)[MAX_CARS_TO_KEEP] = *(CVehicle*(*)[MAX_CARS_TO_KEEP])0x70D830;
 
 WRAPPER void CCarCtrl::SwitchVehicleToRealPhysics(CVehicle*) { EAXJMP(0x41F7F0); }
-WRAPPER void CCarCtrl::AddToCarArray(int32 id, int32 vehclass) { EAXJMP(0x4182F0); }
 WRAPPER void CCarCtrl::UpdateCarCount(CVehicle*, bool) { EAXJMP(0x4202E0); }
-WRAPPER int32 CCarCtrl::ChooseCarModel(int32 vehclass) { EAXJMP(0x418110); }
 WRAPPER bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle*, CVector, bool) { EAXJMP(0x41FA00); }
 WRAPPER void CCarCtrl::JoinCarWithRoadSystem(CVehicle*) { EAXJMP(0x41F820); }
 WRAPPER void CCarCtrl::SteerAICarWithPhysics(CVehicle*) { EAXJMP(0x41DA60); }
-WRAPPER void CCarCtrl::UpdateCarOnRails(CVehicle*) { EAXJMP(0x418880); }
-WRAPPER void CCarCtrl::ScanForPedDanger(CVehicle *veh) { EAXJMP(0x418F40); }
 WRAPPER void CCarCtrl::RemoveFromInterestingVehicleList(CVehicle* v) { EAXJMP(0x41F7A0); }
 WRAPPER void CCarCtrl::GenerateEmergencyServicesCar(void) { EAXJMP(0x41FC50); }
-WRAPPER int32 CCarCtrl::ChooseModel(CZoneInfo*, CVector*, int*) { EAXJMP(0x417EC0); }
-WRAPPER int32 CCarCtrl::ChoosePoliceCarModel(void) { EAXJMP(0x4181F0); }
+WRAPPER void CCarCtrl::PickNextNodeAccordingStrategy(CVehicle*) { EAXJMP(0x41BA50); }
+WRAPPER void CCarCtrl::DragCarToPoint(CVehicle*, CVector*) { EAXJMP(0x41D450); }
+WRAPPER void CCarCtrl::SlowCarDownForCarsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float) { EAXJMP(0x419B40); }
+WRAPPER void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float) { EAXJMP(0x419300); }
 
 void
 CCarCtrl::GenerateRandomCars()
@@ -289,12 +300,12 @@ CCarCtrl::GenerateOneRandomCar()
 		}
 		pCar->AutoPilot.m_fMaxTrafficSpeed = pCar->AutoPilot.m_nCruiseSpeed;
 		pCar->AutoPilot.m_nCarMission = MISSION_CRUISE;
-		pCar->AutoPilot.m_nAnimationId = TEMPACT_NONE;
+		pCar->AutoPilot.m_nTempAction = TEMPACT_NONE;
 		pCar->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
 		break;
 	}
 	case COPS:
-		pCar->AutoPilot.m_nAnimationId = TEMPACT_NONE;
+		pCar->AutoPilot.m_nTempAction = TEMPACT_NONE;
 		if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel != 0){
 			pCar->AutoPilot.m_nCruiseSpeed = CCarAI::FindPoliceCarSpeedForWantedLevel(pCar);
 			pCar->AutoPilot.m_fMaxTrafficSpeed = pCar->AutoPilot.m_nCruiseSpeed / 2;
@@ -317,7 +328,7 @@ CCarCtrl::GenerateOneRandomCar()
 	if (pCar && pCar->GetModelIndex() == MI_MRWHOOP)
 		pCar->m_bSirenOrAlarm = true;
 	pCar->AutoPilot.m_nNextPathNodeInfo = connectionId;
-	pCar->AutoPilot.m_nCurrentLane = pCar->AutoPilot.m_nPreviousLane = CGeneral::GetRandomNumber() % lanesOnCurrentRoad;
+	pCar->AutoPilot.m_nNextLane = pCar->AutoPilot.m_nCurrentLane = CGeneral::GetRandomNumber() % lanesOnCurrentRoad;
 	CColBox* boundingBox = &CModelInfo::GetModelInfo(pCar->GetModelIndex())->GetColModel()->boundingBox;
 	float carLength = 1.0f + (boundingBox->max.y - boundingBox->min.y) / 2;
 	float distanceBetweenNodes = (pCurNode->pos - pNextNode->pos).Magnitude2D();
@@ -363,27 +374,21 @@ CCarCtrl::GenerateOneRandomCar()
 	float nextPathLinkForwardY = pCar->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pCar->AutoPilot.m_nNextPathNodeInfo].dirY;
 
 	CCarPathLink* pCurrentLink = &ThePaths.m_carPathLinks[pCar->AutoPilot.m_nCurrentPathNodeInfo];
-	float currentLaneCoefficient = (pCurrentLink->numLeftLanes == 0) ? (0.5f - 0.5f * pCurrentLink->numRightLanes) :
-		((pCurrentLink->numRightLanes == 0) ? (0.5f - 0.5f * pCurrentLink->numLeftLanes) : 0.5f);
-	float roadShiftAlongCurrentNode = (pCar->AutoPilot.m_nPreviousLane + currentLaneCoefficient) * LANE_WIDTH;
 	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[pCar->AutoPilot.m_nNextPathNodeInfo];
-	float nextLaneCoefficient = (pNextLink->numLeftLanes == 0) ? (0.5f - 0.5f * pNextLink->numRightLanes) :
-		((pNextLink->numRightLanes == 0) ? (0.5f - 0.5f * pNextLink->numLeftLanes) : 0.5f);
-	float roadShiftAlongNextNode = (pCar->AutoPilot.m_nCurrentLane + nextLaneCoefficient) * LANE_WIDTH;
 	CVector positionOnCurrentLinkIncludingLane(
-		pCurrentLink->posX + roadShiftAlongCurrentNode * currentPathLinkForwardY,
-		pCurrentLink->posY - roadShiftAlongCurrentNode * currentPathLinkForwardX,
+		pCurrentLink->posX + GetOffsetOfLaneFromCenterOfRoad(pCar->AutoPilot.m_nCurrentLane, pCurrentLink) * currentPathLinkForwardY,
+		pCurrentLink->posY - GetOffsetOfLaneFromCenterOfRoad(pCar->AutoPilot.m_nCurrentLane, pCurrentLink) * currentPathLinkForwardX,
 		0.0f);
 	CVector positionOnNextLinkIncludingLane(
-		pNextLink->posX + roadShiftAlongNextNode * nextPathLinkForwardY,
-		pNextLink->posY - roadShiftAlongNextNode * nextPathLinkForwardX,
+		pNextLink->posX + GetOffsetOfLaneFromCenterOfRoad(pCar->AutoPilot.m_nNextLane, pNextLink) * nextPathLinkForwardY,
+		pNextLink->posY - GetOffsetOfLaneFromCenterOfRoad(pCar->AutoPilot.m_nNextLane, pNextLink) * nextPathLinkForwardX,
 		0.0f);
 	float directionCurrentLinkX = pCurrentLink->dirX * pCar->AutoPilot.m_nCurrentDirection;
 	float directionCurrentLinkY = pCurrentLink->dirY * pCar->AutoPilot.m_nCurrentDirection;
 	float directionNextLinkX = pNextLink->dirX * pCar->AutoPilot.m_nNextDirection;
 	float directionNextLinkY = pNextLink->dirY * pCar->AutoPilot.m_nNextDirection;
 	/* We want to make a path between two links that may not have the same forward directions a curve. */
-	pCar->AutoPilot.m_nCurveSpeedScale = CCurves::CalcSpeedScaleFactor(
+	pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve = CCurves::CalcSpeedScaleFactor(
 		&positionOnCurrentLinkIncludingLane,
 		&positionOnNextLinkIncludingLane,
 		directionCurrentLinkX, directionCurrentLinkY,
@@ -393,13 +398,11 @@ CCarCtrl::GenerateOneRandomCar()
 	/* Casting timer to float is very unwanted. In this case it's not awful */
 	/* but in CAutoPilot::ModifySpeed it can even cause crashes (see SilentPatch). */
 	pCar->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
-		(uint32)((0.5f + positionBetweenNodes) * pCar->AutoPilot.m_nCurveSpeedScale);
+		(uint32)((0.5f + positionBetweenNodes) * pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve);
 #else
 	pCar->AutoPilot.m_nTotalSpeedScaleFactor = CTimer::GetTimeInMilliseconds() -
 		(0.5f + positionBetweenNodes) * pCar->AutoPilot.m_nSpeedScaleFactor;
 #endif
-	uint32 timeAlreadyInCurve = CTimer::GetTimeInMilliseconds() - pCar->AutoPilot.m_nTimeEnteredCurve;
-	float positionAlongCurve = (float)timeAlreadyInCurve / pCar->AutoPilot.m_nCurveSpeedScale;
 	CVector directionCurrentLink(directionCurrentLinkX, directionCurrentLinkY, 0.0f);
 	CVector directionNextLink(directionNextLinkX, directionNextLinkY, 0.0f);
 	CVector positionIncludingCurve;
@@ -409,8 +412,8 @@ CCarCtrl::GenerateOneRandomCar()
 		&positionOnNextLinkIncludingLane,
 		&directionCurrentLink,
 		&directionNextLink,
-		positionAlongCurve,
-		pCar->AutoPilot.m_nCurveSpeedScale,
+		GetPositionAlongCurrentCurve(pCar),
+		pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve,
 		&positionIncludingCurve,
 		&directionIncludingCurve
 	);
@@ -512,6 +515,361 @@ CCarCtrl::GenerateOneRandomCar()
 		LastTimeLawEnforcerCreated = CTimer::GetTimeInMilliseconds();
 }
 
+int32
+CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
+	int32 model = -1;;
+	while (model == -1 || !CStreaming::HasModelLoaded(model)){
+		int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
+		if (rnd < pZone->carThreshold[0])
+			model = CCarCtrl::ChooseCarModel((*pClass = POOR));
+		else if (rnd < pZone->carThreshold[1])
+			model = CCarCtrl::ChooseCarModel((*pClass = RICH));
+		else if (rnd < pZone->carThreshold[2])
+			model = CCarCtrl::ChooseCarModel((*pClass = EXEC));
+		else if (rnd < pZone->carThreshold[3])
+			model = CCarCtrl::ChooseCarModel((*pClass = WORKER));
+		else if (rnd < pZone->carThreshold[4])
+			model = CCarCtrl::ChooseCarModel((*pClass = SPECIAL));
+		else if (rnd < pZone->carThreshold[5])
+			model = CCarCtrl::ChooseCarModel((*pClass = BIG));
+		else if (rnd < pZone->copThreshold)
+			*pClass = COPS, model = CCarCtrl::ChoosePoliceCarModel();
+		else if (rnd < pZone->gangThreshold[0])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = MAFIA) - MAFIA);
+		else if (rnd < pZone->gangThreshold[1])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = TRIAD) - MAFIA);
+		else if (rnd < pZone->gangThreshold[2])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = DIABLO) - MAFIA);
+		else if (rnd < pZone->gangThreshold[3])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = YAKUZA) - MAFIA);
+		else if (rnd < pZone->gangThreshold[4])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = YARDIE) - MAFIA);
+		else if (rnd < pZone->gangThreshold[5])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = COLOMB) - MAFIA);
+		else if (rnd < pZone->gangThreshold[6])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = NINES) - MAFIA);
+		else if (rnd < pZone->gangThreshold[7])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = GANG8) - MAFIA);
+		else if (rnd < pZone->gangThreshold[8])
+			model = CCarCtrl::ChooseGangCarModel((*pClass = GANG9) - MAFIA);
+		else
+			model = CCarCtrl::ChooseCarModel((*pClass = TAXI));
+	}
+	return model;
+}
+
+int32
+CCarCtrl::ChooseCarModel(int32 vehclass)
+{
+	int32 model = -1;
+	switch (vehclass) {
+	case POOR:
+	case RICH:
+	case EXEC:
+	case WORKER:
+	case SPECIAL:
+	case BIG:
+	case TAXI:
+	{
+		if (TotalNumOfCarsOfRating[vehclass] == 0)
+			debug("ChooseCarModel : No cars of type %d have been declared\n");
+		model = CarArrays[vehclass][NextCarOfRating[vehclass]];
+		int32 total = TotalNumOfCarsOfRating[vehclass];
+		NextCarOfRating[vehclass] += 1 + CGeneral::GetRandomNumberInRange(0, total - 1);
+		while (NextCarOfRating[vehclass] >= total)
+			NextCarOfRating[vehclass] -= total;
+		//NextCarOfRating[vehclass] %= total;
+		TotalNumOfCarsOfRating[vehclass] = total; /* why... */
+	}
+	default:
+		break;
+	}
+	return model;
+}
+
+int32
+CCarCtrl::ChoosePoliceCarModel(void)
+{
+	if (FindPlayerPed()->m_pWanted->AreSwatRequired() &&
+		CStreaming::HasModelLoaded(MI_ENFORCER) &&
+		CStreaming::HasModelLoaded(MI_POLICE))
+		return ((CGeneral::GetRandomNumber() & 0xF) == 0) ? MI_ENFORCER : MI_POLICE;
+	if (FindPlayerPed()->m_pWanted->AreFbiRequired() &&
+		CStreaming::HasModelLoaded(MI_FBICAR) &&
+		CStreaming::HasModelLoaded(MI_FBI))
+		return MI_FBICAR;
+	if (FindPlayerPed()->m_pWanted->AreArmyRequired() &&
+		CStreaming::HasModelLoaded(MI_RHINO) &&
+		CStreaming::HasModelLoaded(MI_BARRACKS) &&
+		CStreaming::HasModelLoaded(MI_RHINO))
+		return CGeneral::GetRandomTrueFalse() ? MI_BARRACKS : MI_RHINO;
+	return MI_POLICE;
+}
+
+int32
+CCarCtrl::ChooseGangCarModel(int32 gang)
+{
+	if (CStreaming::HasModelLoaded(MI_GANG01 + 2 * gang) &&
+		CStreaming::HasModelLoaded(MI_GANG02 + 2 * gang))
+		return CGangs::GetGangVehicleModel(gang);
+	return -1;
+}
+
+void
+CCarCtrl::AddToCarArray(int32 id, int32 vehclass)
+{
+	CarArrays[vehclass][TotalNumOfCarsOfRating[vehclass]++] = id;
+}
+
+void
+CCarCtrl::RemoveDistantCars()
+{
+	uint32 i = CPools::GetVehiclePool()->GetSize();
+	while (--i){
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+		if (!pVehicle)
+			continue;
+		PossiblyRemoveVehicle(pVehicle);
+		if (pVehicle->bCreateRoadBlockPeds){
+			if ((pVehicle->GetPosition() - FindPlayerCentreOfWorld(CWorld::PlayerInFocus)).Magnitude2D() < DISTANCE_TO_SPAWN_ROADBLOCK_PEDS) {
+				CRoadBlocks::GenerateRoadBlockCopsForCar(pVehicle, pVehicle->m_nRoadblockType, pVehicle->m_nRoadblockNode);
+				pVehicle->bCreateRoadBlockPeds = false;
+			}
+		}
+	}
+}
+
+void
+CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
+{
+	CVector vecPlayerPos = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
+	/* BUG: this variable is initialized only in if-block below but can be used outside of it. */
+	if (!IsThisVehicleInteresting(pVehicle) && !pVehicle->bIsLocked &&
+		pVehicle->CanBeDeleted() && !CCranes::IsThisCarBeingTargettedByAnyCrane(pVehicle)){
+		if (pVehicle->bFadeOut && CVisibilityPlugins::GetClumpAlpha(pVehicle->GetClump()) == 0){
+			CWorld::Remove(pVehicle);
+			delete pVehicle;
+			return;
+		}
+		float distanceToPlayer = (pVehicle->GetPosition() - vecPlayerPos).Magnitude2D();
+		float threshold = 50.0f;
+		if (pVehicle->GetIsOnScreen() ||
+			TheCamera.Cams[TheCamera.ActiveCam].LookingLeft ||
+			TheCamera.Cams[TheCamera.ActiveCam].LookingRight ||
+			TheCamera.Cams[TheCamera.ActiveCam].LookingBehind ||
+			TheCamera.GetLookDirection() == 0 ||
+			pVehicle->VehicleCreatedBy == PARKED_VEHICLE ||
+			pVehicle->GetModelIndex() == MI_AMBULAN ||
+			pVehicle->GetModelIndex() == MI_FIRETRUCK ||
+			pVehicle->bIsLawEnforcer ||
+			pVehicle->bIsCarParkVehicle
+			){
+			threshold = 130.0f * TheCamera.GenerationDistMultiplier;
+		}
+		if (pVehicle->bExtendedRange)
+			threshold *= 1.5f;
+		if (distanceToPlayer > threshold && !CGarages::IsPointWithinHideOutGarage(&pVehicle->GetPosition())){
+			if (pVehicle->GetIsOnScreen() && CRenderer::IsEntityCullZoneVisible(pVehicle)){
+				pVehicle->bFadeOut = true;
+			}else{
+				CWorld::Remove(pVehicle);
+				delete pVehicle;
+			}
+			return;
+		}
+	}
+	if ((pVehicle->m_status == STATUS_SIMPLE || pVehicle->m_status == STATUS_PHYSICS && pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS) &&
+		CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeToStartMission > 5000 &&
+		!pVehicle->GetIsOnScreen() &&
+		(pVehicle->GetPosition() - vecPlayerPos).Magnitude2D() > 25.0f &&
+		!IsThisVehicleInteresting(pVehicle) &&
+		!pVehicle->bIsLocked &&
+		!CTrafficLights::ShouldCarStopForLight(pVehicle, true) &&
+		!CTrafficLights::ShouldCarStopForBridge(pVehicle) &&
+		!CGarages::IsPointWithinHideOutGarage(&pVehicle->GetPosition())){
+		CWorld::Remove(pVehicle);
+		delete pVehicle;
+		return;
+	}
+	if (pVehicle->m_status != STATUS_WRECKED || pVehicle->m_nTimeOfDeath == 0)
+		return;
+	if (CTimer::GetTimeInMilliseconds() > pVehicle->m_nTimeOfDeath + 60000 &&
+		(!pVehicle->GetIsOnScreen() || CRenderer::IsEntityCullZoneVisible(pVehicle))){
+		if ((pVehicle->GetPosition() - vecPlayerPos).MagnitudeSqr() > SQR(7.5f)){
+			if (!CGarages::IsPointWithinHideOutGarage(&pVehicle->GetPosition())){
+				CWorld::Remove(pVehicle);
+				delete pVehicle;
+			}
+		}
+	}
+}
+
+int32
+CCarCtrl::CountCarsOfType(int32 mi)
+{
+	int32 total = 0;
+	uint32 i = CPools::GetVehiclePool()->GetSize();
+	while (i--){
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+		if (!pVehicle)
+			continue;
+		if (pVehicle->GetModelIndex() == mi)
+			total++;
+	}
+	return total;
+}
+
+bool
+CCarCtrl::IsThisVehicleInteresting(CVehicle* pVehicle)
+{
+	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
+		if (apCarsToKeep[i] == pVehicle)
+			return true;
+	}
+	return false;
+}
+
+void
+CCarCtrl::UpdateCarOnRails(CVehicle* pVehicle)
+{
+	if (pVehicle->AutoPilot.m_nTempAction == TEMPACT_WAIT){
+		pVehicle->SetMoveSpeed(0.0f, 0.0f, 0.0f);
+		pVehicle->AutoPilot.ModifySpeed(0.0f);
+		if (CTimer::GetTimeInMilliseconds() > pVehicle->AutoPilot.m_nTempAction){
+			pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
+			pVehicle->AutoPilot.m_nAntiReverseTimer = 0;
+			pVehicle->AutoPilot.m_nTimeToStartMission = 0;
+		}
+		return;
+	}
+	SlowCarOnRailsDownForTrafficAndLights(pVehicle);
+	if (pVehicle->AutoPilot.m_nTimeEnteredCurve + pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve <= CTimer::GetTimeInMilliseconds())
+		PickNextNodeAccordingStrategy(pVehicle);
+	if (pVehicle->m_status == STATUS_PHYSICS)
+		return;
+	CCarPathLink* pCurrentLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];
+	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
+	float currentPathLinkForwardX = pCurrentLink->dirX * pVehicle->AutoPilot.m_nCurrentDirection;
+	float currentPathLinkForwardY = pCurrentLink->dirY * pVehicle->AutoPilot.m_nCurrentDirection;
+	float nextPathLinkForwardX = pNextLink->dirX * pVehicle->AutoPilot.m_nNextDirection;
+	float nextPathLinkForwardY = pNextLink->dirY * pVehicle->AutoPilot.m_nNextDirection;
+	CVector positionOnCurrentLinkIncludingLane(
+		pCurrentLink->posX + GetOffsetOfLaneFromCenterOfRoad(pVehicle->AutoPilot.m_nCurrentLane, pCurrentLink) * currentPathLinkForwardY,
+		pCurrentLink->posY - GetOffsetOfLaneFromCenterOfRoad(pVehicle->AutoPilot.m_nCurrentLane, pCurrentLink) * currentPathLinkForwardX,
+		0.0f);
+	CVector positionOnNextLinkIncludingLane(
+		pNextLink->posX + GetOffsetOfLaneFromCenterOfRoad(pVehicle->AutoPilot.m_nNextLane, pNextLink) * nextPathLinkForwardY,
+		pNextLink->posY - GetOffsetOfLaneFromCenterOfRoad(pVehicle->AutoPilot.m_nNextLane, pNextLink) * nextPathLinkForwardX,
+		0.0f);
+	CVector directionCurrentLink(currentPathLinkForwardX, currentPathLinkForwardY, 0.0f);
+	CVector directionNextLink(nextPathLinkForwardX, nextPathLinkForwardY, 0.0f);
+	CVector positionIncludingCurve;
+	CVector directionIncludingCurve;
+	CCurves::CalcCurvePoint(
+		&positionOnCurrentLinkIncludingLane,
+		&positionOnNextLinkIncludingLane,
+		&directionCurrentLink,
+		&directionNextLink,
+		GetPositionAlongCurrentCurve(pVehicle),
+		pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve,
+		&positionIncludingCurve,
+		&directionIncludingCurve
+	);
+	positionIncludingCurve.z = 15.0f;
+	DragCarToPoint(pVehicle, &positionIncludingCurve);
+	pVehicle->SetMoveSpeed(directionIncludingCurve / 60.0f);
+}
+
+float
+CCarCtrl::FindMaximumSpeedForThisCarInTraffic(CVehicle* pVehicle)
+{
+	if (pVehicle->AutoPilot.m_nDrivingStyle == MISSION_RAMPLAYER_FARAWAY ||
+		pVehicle->AutoPilot.m_nDrivingStyle == MISSION_RAMPLAYER_CLOSE)
+		return pVehicle->AutoPilot.m_nCruiseSpeed;
+	float left = pVehicle->GetPosition().x - DISTANCE_TO_SCAN_FOR_DANGER;
+	float right = pVehicle->GetPosition().x + DISTANCE_TO_SCAN_FOR_DANGER;
+	float top = pVehicle->GetPosition().y - DISTANCE_TO_SCAN_FOR_DANGER;
+	float bottom = pVehicle->GetPosition().y + DISTANCE_TO_SCAN_FOR_DANGER;
+	int xstart = max(0, CWorld::GetSectorIndexX(left));
+	int xend = min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right));
+	int ystart = max(0, CWorld::GetSectorIndexY(top));
+	int yend = min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(bottom));
+	assert(xstart <= xend);
+	assert(ystart <= yend);
+
+	float maxSpeed = pVehicle->AutoPilot.m_nCruiseSpeed;
+
+	CWorld::AdvanceCurrentScanCode();
+
+	for (int y = ystart; y <= yend; y++){
+		for (int x = xstart; x <= xend; x++){
+			CSector* s = CWorld::GetSector(x, y);
+			SlowCarDownForCarsSectorList(s->m_lists[ENTITYLIST_VEHICLES], pVehicle, left, top, right, bottom, &maxSpeed, pVehicle->AutoPilot.m_nCruiseSpeed);
+			SlowCarDownForCarsSectorList(s->m_lists[ENTITYLIST_VEHICLES_OVERLAP], pVehicle, left, top, right, bottom, &maxSpeed, pVehicle->AutoPilot.m_nCruiseSpeed);
+			SlowCarDownForPedsSectorList(s->m_lists[ENTITYLIST_PEDS], pVehicle, left, top, right, bottom, &maxSpeed, pVehicle->AutoPilot.m_nCruiseSpeed);
+			SlowCarDownForPedsSectorList(s->m_lists[ENTITYLIST_PEDS_OVERLAP], pVehicle, left, top, right, bottom, &maxSpeed, pVehicle->AutoPilot.m_nCruiseSpeed);
+		}
+	}
+	pVehicle->bWarnedPeds = true;
+	if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS)
+		return maxSpeed;
+	return (maxSpeed + pVehicle->AutoPilot.m_nDrivingStyle) / 2;
+}
+
+void
+CCarCtrl::ScanForPedDanger(CVehicle* pVehicle)
+{
+	bool storedSlowDownFlag = pVehicle->AutoPilot.m_bSlowedDownBecauseOfPeds;
+	float left = pVehicle->GetPosition().x - DISTANCE_TO_SCAN_FOR_DANGER;
+	float right = pVehicle->GetPosition().x + DISTANCE_TO_SCAN_FOR_DANGER;
+	float top = pVehicle->GetPosition().y - DISTANCE_TO_SCAN_FOR_DANGER;
+	float bottom = pVehicle->GetPosition().y + DISTANCE_TO_SCAN_FOR_DANGER;
+	int xstart = max(0, CWorld::GetSectorIndexX(left));
+	int xend = min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right));
+	int ystart = max(0, CWorld::GetSectorIndexY(top));
+	int yend = min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(bottom));
+	assert(xstart <= xend);
+	assert(ystart <= yend);
+
+	float maxSpeed = pVehicle->AutoPilot.m_nCruiseSpeed;
+
+	CWorld::AdvanceCurrentScanCode();
+
+	for (int y = ystart; y <= yend; y++) {
+		for (int x = xstart; x <= xend; x++) {
+			CSector* s = CWorld::GetSector(x, y);
+			SlowCarDownForPedsSectorList(s->m_lists[ENTITYLIST_PEDS], pVehicle, left, top, right, bottom, &maxSpeed, pVehicle->AutoPilot.m_nCruiseSpeed);
+			SlowCarDownForPedsSectorList(s->m_lists[ENTITYLIST_PEDS_OVERLAP], pVehicle, left, top, right, bottom, &maxSpeed, pVehicle->AutoPilot.m_nCruiseSpeed);
+		}
+	}
+	pVehicle->bWarnedPeds = true;
+	pVehicle->AutoPilot.m_bSlowedDownBecauseOfPeds = storedSlowDownFlag;
+}
+
+void
+CCarCtrl::SlowCarOnRailsDownForTrafficAndLights(CVehicle* pVehicle)
+{
+	float maxSpeed;
+	if (CTrafficLights::ShouldCarStopForLight(pVehicle, false) || CTrafficLights::ShouldCarStopForBridge(pVehicle)){
+		CCarAI::CarHasReasonToStop(pVehicle);
+		maxSpeed = 0.0f;
+	}else{
+		maxSpeed = FindMaximumSpeedForThisCarInTraffic(pVehicle);
+	}
+	float curSpeed = pVehicle->AutoPilot.m_fMaxTrafficSpeed;
+	if (maxSpeed >= curSpeed){
+		if (maxSpeed > curSpeed)
+			pVehicle->AutoPilot.ModifySpeed(min(maxSpeed, curSpeed + 0.05f * CTimer::GetTimeStep()));
+	}else{
+		if (curSpeed == 0.0f)
+			return;
+		if (curSpeed >= 0.1f)
+			pVehicle->AutoPilot.ModifySpeed(max(maxSpeed, curSpeed - 0.5f * CTimer::GetTimeStep()));
+		else if (curSpeed != 0.0f) /* no need to check */
+			pVehicle->AutoPilot.ModifySpeed(0.0f);
+	}
+}
+
 bool
 CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 {
@@ -522,4 +880,8 @@ CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 
 STARTPATCHES
 InjectHook(0x416580, &CCarCtrl::GenerateRandomCars, PATCH_JUMP);
+InjectHook(0x417EC0, &CCarCtrl::ChooseModel, PATCH_JUMP);
+InjectHook(0x418320, &CCarCtrl::RemoveDistantCars, PATCH_JUMP);
+InjectHook(0x418430, &CCarCtrl::PossiblyRemoveVehicle, PATCH_JUMP);
+InjectHook(0x418C10, &CCarCtrl::FindMaximumSpeedForThisCarInTraffic, PATCH_JUMP);
 ENDPATCHES

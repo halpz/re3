@@ -12,4 +12,5 @@ public:
 	static int32 FindPoliceCarSpeedForWantedLevel(CVehicle*);
 	static eCarMission FindPoliceCarMissionForWantedLevel();
 	static void AddPoliceOccupants(CVehicle*);
+	static void CarHasReasonToStop(CVehicle*);
 };

@@ -33,7 +33,8 @@ class CGangs
 {
 public:
 	static void Initialize(void);
-	static void SetGangVehicleModel(int16, int);
+	static void SetGangVehicleModel(int16, int32);
+	static int32 GetGangVehicleModel(int16 gang) { return Gang[gang].m_nVehicleMI; }
 	static void SetGangWeapons(int16, eWeaponType, eWeaponType);
 	static void SetGangPedModelOverride(int16, int8);
 	static int8 GetGangPedModelOverride(int16);

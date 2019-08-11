@@ -1924,7 +1924,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			boat->m_status = STATUS_ABANDONED;
 			boat->bIsLocked = true;
 			boat->AutoPilot.m_nCarMission = MISSION_NONE;
-			boat->AutoPilot.m_nAnimationId = TEMPACT_NONE; /* Animation ID? */
+			boat->AutoPilot.m_nTempAction = TEMPACT_NONE; /* Animation ID? */
 			boat->AutoPilot.m_nCruiseSpeed = boat->AutoPilot.m_fMaxTrafficSpeed = 20.0f;
 			CWorld::Add(boat);
 			handle = CPools::GetVehiclePool()->GetIndex(boat);
@@ -1943,10 +1943,10 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			car->bIsLocked = true;
 			CCarCtrl::JoinCarWithRoadSystem(car);
 			car->AutoPilot.m_nCarMission = MISSION_NONE;
-			car->AutoPilot.m_nAnimationId = TEMPACT_NONE; /* Animation ID? */
+			car->AutoPilot.m_nTempAction = TEMPACT_NONE; /* Animation ID? */
 			car->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
 			car->AutoPilot.m_nCruiseSpeed = car->AutoPilot.m_fMaxTrafficSpeed = 9.0f;
-			car->AutoPilot.m_nPreviousLane = car->AutoPilot.m_nCurrentLane = 0;
+			car->AutoPilot.m_nCurrentLane = car->AutoPilot.m_nNextLane = 0;
 			car->bEngineOn = false;
 			car->m_level = CTheZones::GetLevelFromPosition(pos);
 			car->bHasBeenOwnedByPlayer = true;
