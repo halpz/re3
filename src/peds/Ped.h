@@ -676,17 +676,10 @@ public:
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 &nThreatReactionRangeMultiplier;
 
-	static CVector &vecPedCarDoorAnimOffset;
-	static CVector &vecPedCarDoorLoAnimOffset;
-	static CVector &vecPedVanRearDoorAnimOffset;
-	static CVector &vecPedQuickDraggedOutCarAnimOffset;
 	static bool &bNastyLimbsCheat;
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;
 	static CVector2D &ms_vec2DFleePosition;
-	static CColPoint &aTempPedColPts;
-	static uint16 &nPlayerInComboMove;
-	static FightMove (&tFightMoves)[24];
 	static CPedAudioData (&CommentWaitTime)[38];
 
 #ifndef FINAL

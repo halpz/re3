@@ -53,24 +53,27 @@ WRAPPER void CPed::SetRadioStation(void) { EAXJMP(0x4D7BC0); }
 WRAPPER void CPed::MakeTyresMuddySectorList(CPtrList&) { EAXJMP(0x53CFD0); }
 WRAPPER void CPed::ProcessObjective(void) { EAXJMP(0x4D94E0); }
 
+CPed *gapTempPedList[50];
+uint16 gnNumTempPedList;
+
 bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
 bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
 bool &CPed::bPedCheat3 = *(bool*)0x95CD59;
 
-CColPoint &CPed::aTempPedColPts = *(CColPoint*)0x62DB14;
+CColPoint &aTempPedColPts = *(CColPoint*)0x62DB14;
 
 // TODO: CommentWaitTime should be hardcoded into exe, and it isn't reversed yet.
 CPedAudioData (&CPed::CommentWaitTime)[38] = *(CPedAudioData(*)[38]) * (uintptr*)0x5F94C4;
 
-uint16 &CPed::nPlayerInComboMove = *(uint16*)0x95CC58;
-FightMove (&CPed::tFightMoves)[24] = * (FightMove(*)[24]) * (uintptr*)0x5F9844;
+uint16 nPlayerInComboMove; // 0x95CC58
+FightMove (&tFightMoves)[24] = * (FightMove(*)[24]) * (uintptr*)0x5F9844;
 
 uint16 &CPed::nThreatReactionRangeMultiplier = *(uint16*)0x5F8C98;
 
-CVector &CPed::vecPedCarDoorAnimOffset = *(CVector*)0x62E030;
-CVector &CPed::vecPedCarDoorLoAnimOffset = *(CVector*)0x62E03C;
-CVector &CPed::vecPedVanRearDoorAnimOffset = *(CVector*)0x62E048;
-CVector &CPed::vecPedQuickDraggedOutCarAnimOffset = *(CVector*)0x62E06C;
+CVector &vecPedCarDoorAnimOffset = *(CVector*)0x62E030;
+CVector &vecPedCarDoorLoAnimOffset = *(CVector*)0x62E03C;
+CVector &vecPedVanRearDoorAnimOffset = *(CVector*)0x62E048;
+CVector &vecPedQuickDraggedOutCarAnimOffset = *(CVector*)0x62E06C;
 
 CVector2D &CPed::ms_vec2DFleePosition = *(CVector2D*)0x6EDF70;
 
@@ -1994,9 +1997,6 @@ CPed::SortPeds(CPed **list, int min, int max)
 void
 CPed::BuildPedLists(void)
 {
-	static CPed *gapTempPedList[10]; // unsorted 
-	static int16 gnNumTempPedList;
-
 	if ((CTimer::GetFrameCounter() + (m_randomSeed % 256)) % 16) {
 
 		for(int i = 0; i < 10; ) {
