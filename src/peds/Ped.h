@@ -260,7 +260,7 @@ public:
 	uint8 bIsTalking : 1;
 	uint8 bIsInTheAir : 1;
 	uint8 bIsLanding : 1;
-	uint8 m_ped_flagB20 : 1;
+	uint8 bIsRunning : 1; // not fleeing
 	uint8 m_ped_flagB40 : 1;
 	uint8 m_ped_flagB80 : 1;
 
@@ -370,8 +370,8 @@ public:
 private:
 	int8 _pad2B5[3];
 public:
-	CPathNode *m_pNextPathNode;
 	CPathNode *m_pLastPathNode;
+	CPathNode *m_pNextPathNode;
 	float m_fHealth;
 	float m_fArmour;
 	int16 m_routeLastPoint;
@@ -389,12 +389,12 @@ public:
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
-	CVector m_vecSeekVehicle;
+	CVector m_vecSeekPos;
 	CEntity *m_pSeekTarget;
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
 	uint8 pad_315[3];
-	float field_318;
+	float m_distanceToCountSeekDone;
 	bool bRunningToPhone;
 	uint8 field_31D;
 	int16 m_phoneId;
@@ -407,8 +407,8 @@ public:
 	float m_fleeFromPosY;
 	CEntity *m_fleeFrom;
 	uint32 m_fleeTimer;
-	uint32 field_344;
-	uint32 m_lastThreatTimer; // I don't think so
+	CEntity* m_collidingEntityWhileFleeing;
+	uint32 m_collidingThingTimer;
 	CEntity *m_pCollidingEntity;
 	uint8 m_stateUnused;
 	uint8 pad_351[3];
@@ -600,6 +600,11 @@ public:
 	bool FindBestCoordsFromNodes(CVector unused, CVector* a6);
 	void Wait(void);
 	void ProcessObjective(void);
+	bool SeekFollowingPath(CVector*);
+	void Flee(void);
+	void FollowPath(void);
+	CVector GetFormationPosition(void);
+	void GetNearestDoor(CVehicle*, CVector&);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -669,18 +674,20 @@ public:
 	void SetPedState(PedState state) { m_nPedState = state; }
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
-	static uint16 &distanceMultToCountPedNear;
+	static uint16 &nThreatReactionRangeMultiplier;
 
-	static CVector &offsetToOpenRegularCarDoor;
-	static CVector &offsetToOpenLowCarDoor;
-	static CVector &offsetToOpenVanDoor;
+	static CVector &vecPedCarDoorAnimOffset;
+	static CVector &vecPedCarDoorLoAnimOffset;
+	static CVector &vecPedVanRearDoorAnimOffset;
+	static CVector &vecPedQuickDraggedOutCarAnimOffset;
 	static bool &bNastyLimbsCheat;
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;
-	static CColPoint &ms_tempColPoint;
+	static CVector2D &ms_vec2DFleePosition;
+	static CColPoint &aTempPedColPts;
 	static uint16 &nPlayerInComboMove;
 	static FightMove (&tFightMoves)[24];
-	static CPedAudioData (&PedAudioData)[38];
+	static CPedAudioData (&CommentWaitTime)[38];
 
 #ifndef FINAL
 	static bool bUnusedFightThingOnPlayer;

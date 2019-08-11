@@ -58,6 +58,14 @@ enum eBombType
 	CARBOMB_ONIGNITIONACTIVE,
 };
 
+enum {
+	CAR_DOOR_FLAG_UNKNOWN = 0x0,
+	CAR_DOOR_FLAG_LF = 0x1,
+	CAR_DOOR_FLAG_LR = 0x2,
+	CAR_DOOR_FLAG_RF = 0x4,
+	CAR_DOOR_FLAG_RR = 0x8
+};
+
 class CAutomobile : public CVehicle
 {
 public:
@@ -189,14 +197,14 @@ static_assert(sizeof(CAutomobile) == 0x5A8, "CAutomobile: error");
 inline uint8 GetCarDoorFlag(int32 carnode) {
 	switch (carnode) {
 	case CAR_DOOR_LF:
-		return 1;
+		return CAR_DOOR_FLAG_LF;
 	case CAR_DOOR_LR:
-		return 2;
+		return CAR_DOOR_FLAG_LR;
 	case CAR_DOOR_RF:
-		return 4;
+		return CAR_DOOR_FLAG_RF;
 	case CAR_DOOR_RR:
-		return 8;
+		return CAR_DOOR_FLAG_RR;
 	default:
-		return 0;
+		return CAR_DOOR_FLAG_UNKNOWN;
 	}
 }
