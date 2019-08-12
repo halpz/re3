@@ -266,6 +266,7 @@ public:
 	void RemoveDriver(void);
 	void ProcessCarAlarm(void);
 	bool IsSphereTouchingVehicle(float sx, float sy, float sz, float radius);
+	bool ShufflePassengersToMakeSpace(void);
 
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
 	

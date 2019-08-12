@@ -29,6 +29,13 @@ enum
 	ENDFIGHT_FAST
 };
 
+enum PedRouteType
+{
+	PEDROUTE_STOP_WHEN_DONE = 1,
+	PEDROUTE_GO_BACKWARD_WHEN_DONE,
+	PEDROUTE_GO_TO_START_WHEN_DONE
+};
+
 struct FightMove
 {
 	AnimationId animId;
@@ -335,9 +342,7 @@ public:
 	eObjective m_prevObjective;
 	CPed *m_pedInObjective;
 	CVehicle *m_carInObjective;
-	uint32 field_174;
-	uint32 field_178;
-	uint32 field_17C;
+	CVector m_nextRoutePointPos;
 	CPed *m_leader;
 	uint32 m_pedFormation;
 	uint32 m_fearFlags;
@@ -375,10 +380,10 @@ public:
 	float m_fHealth;
 	float m_fArmour;
 	int16 m_routeLastPoint;
-	uint16 m_routePoints;
-	int16 m_routePos;
+	uint16 m_routeStartPoint;
+	int16 m_routePointsPassed;
 	int16 m_routeType;
-	int16 m_routeCurDir;
+	int16 m_routePointsBeingPassed;
 	uint16 field_2D2;
 	CVector2D m_moved;
 	float m_fRotationCur;
@@ -567,7 +572,6 @@ public:
 	void SetEvasiveDive(CPhysical*, uint8);
 	void SetAttack(CEntity*);
 	void StartFightAttack(uint8);
-	void LoadFightData(void);
 	void SetWaitState(eWaitState, void*);
 	bool FightStrike(CVector&);
 	int GetLocalDirection(CVector2D&);
@@ -605,11 +609,23 @@ public:
 	void FollowPath(void);
 	CVector GetFormationPosition(void);
 	void GetNearestDoor(CVehicle*, CVector&);
+	bool GetNearestPassengerDoor(CVehicle*, CVector&);
+	int GetNextPointOnRoute(void);
+	uint8 GetPedRadioCategory(uint32);
+	int GetWeaponSlot(eWeaponType);
+	void GoToNearestDoor(CVehicle*);
+	bool HaveReachedNextPointOnRoute(float a2);
+	void Idle(void);
+	void InTheAir(void);
+	void SetLanding(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
 	static CVector GetPositionToOpenCarDoor(CVehicle *veh, uint32 component, float seatPosMult);
 	static CVector GetPositionToOpenCarDoor(CVehicle* veh, uint32 component);
+	static void Initialise(void);
+	static void SetAnimOffsetForEnterOrExitVehicle(void);
+	static void LoadFightData(void);
 
 	// Callbacks
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
