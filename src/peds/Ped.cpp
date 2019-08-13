@@ -33,6 +33,7 @@
 #include "Pickups.h"
 #include "Train.h"
 #include "TrafficLights.h"
+#include "PedRoutes.h"
 
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
@@ -65,15 +66,18 @@ CColPoint &aTempPedColPts = *(CColPoint*)0x62DB14;
 // TODO: CommentWaitTime should be hardcoded into exe, and it isn't reversed yet.
 CPedAudioData (&CPed::CommentWaitTime)[38] = *(CPedAudioData(*)[38]) * (uintptr*)0x5F94C4;
 
-uint16 nPlayerInComboMove; // 0x95CC58
+uint16 nPlayerInComboMove;
+
 FightMove (&tFightMoves)[24] = * (FightMove(*)[24]) * (uintptr*)0x5F9844;
 
 uint16 &CPed::nThreatReactionRangeMultiplier = *(uint16*)0x5F8C98;
 
-CVector &vecPedCarDoorAnimOffset = *(CVector*)0x62E030;
-CVector &vecPedCarDoorLoAnimOffset = *(CVector*)0x62E03C;
-CVector &vecPedVanRearDoorAnimOffset = *(CVector*)0x62E048;
+CVector vecPedCarDoorAnimOffset;
+CVector vecPedCarDoorLoAnimOffset;
+CVector vecPedVanRearDoorAnimOffset;
 CVector &vecPedQuickDraggedOutCarAnimOffset = *(CVector*)0x62E06C;
+CVector &vecPedDraggedOutCarAnimOffset = *(CVector*)0x62E060;
+CVector &vecPedTrainDoorAnimOffset = *(CVector*)0x62E054;
 
 CVector2D &CPed::ms_vec2DFleePosition = *(CVector2D*)0x6EDF70;
 
@@ -373,8 +377,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_pLastPathNode = nil;
 	m_pNextPathNode = nil;
 	m_routeLastPoint = -1;
-	m_routePoints = 0;
-	m_routePos = 0;
+	m_routeStartPoint = 0;
+	m_routePointsPassed = 0;
 	m_routeType = 0;
 	m_bodyPartBleeding = -1;
 
@@ -4066,8 +4070,7 @@ CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo)
 {
 	if (HasWeapon(weaponType)) {
 		GetWeapon(weaponType).m_nAmmoTotal += ammo;
-	}
-	else {
+	} else {
 		GetWeapon(weaponType).Initialise(weaponType, ammo);
 		m_maxWeaponTypeAllowed++;
 	}
@@ -7262,6 +7265,403 @@ CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 	}
 }
 
+bool
+CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
+{
+	CVector rfPos, lrPos, rrPos;
+	bool canEnter = false;
+
+	CVehicleModelInfo *vehModel = (CVehicleModelInfo*)CModelInfo::GetModelInfo(veh->m_modelIndex);
+
+	if (veh->m_modelIndex > MI_RHINO || veh->m_modelIndex != MI_BUS) {
+
+		CVector2D rfPosDist(999.0f, 999.0f);
+		CVector2D lrPosDist(999.0f, 999.0f);
+		CVector2D rrPosDist(999.0f, 999.0f);
+
+		if (!veh->pPassengers[0]
+			&& !(veh->m_nGettingInFlags & CAR_DOOR_FLAG_RF)
+			&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_RF, nil)) {
+
+			rfPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
+			canEnter = true;
+			rfPosDist = rfPos - GetPosition();
+		}
+		if (vehModel->m_numDoors == 4) {
+			if (!veh->pPassengers[1]
+				&& !(veh->m_nGettingInFlags & CAR_DOOR_FLAG_LR)
+				&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_LR, nil)) {
+				lrPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_LR);
+				canEnter = true;
+				lrPosDist = lrPos - GetPosition();
+			}
+			if (!veh->pPassengers[2]
+				&& !(veh->m_nGettingInFlags & CAR_DOOR_FLAG_RR)
+				&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_RR, nil)) {
+				rrPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_RR);
+				canEnter = true;
+				rrPosDist = rrPos - GetPosition();
+			}
+
+			// When the door we should enter is blocked by some object.
+			if (!canEnter)
+				veh->ShufflePassengersToMakeSpace();
+		}
+
+		CVector2D nextToCompare = rfPosDist;
+		posToOpen = rfPos;
+		m_vehEnterType = CAR_DOOR_RF;
+		if (lrPosDist.MagnitudeSqr() < nextToCompare.MagnitudeSqr()) {
+			m_vehEnterType = CAR_DOOR_LR;
+			posToOpen = lrPos;
+			nextToCompare = lrPosDist;
+		}
+
+		if (rrPosDist.MagnitudeSqr() < nextToCompare.MagnitudeSqr()) {
+			m_vehEnterType = CAR_DOOR_RR;
+			posToOpen = rrPos;
+		}
+		return canEnter;
+
+	} else {
+		m_vehEnterType = CAR_DOOR_RF;
+		posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
+		return true;
+	}
+}
+
+int
+CPed::GetNextPointOnRoute(void)
+{
+	int16 nextPoint = m_routePointsBeingPassed + m_routePointsPassed + m_routeStartPoint;
+
+	// Route is complete
+	if (nextPoint < 0 || nextPoint > 200 || m_routeLastPoint != CRouteNode::GetRouteThisPointIsOn(nextPoint)) {
+
+		switch (m_routeType) {
+			case PEDROUTE_STOP_WHEN_DONE:
+				nextPoint = -1;
+				break;
+			case PEDROUTE_GO_BACKWARD_WHEN_DONE:
+				m_routePointsBeingPassed = -m_routePointsBeingPassed;
+				nextPoint = m_routePointsBeingPassed + m_routePointsPassed + m_routeStartPoint;
+				break;
+			case PEDROUTE_GO_TO_START_WHEN_DONE:
+				m_routePointsPassed = -1;
+				nextPoint = m_routePointsBeingPassed + m_routePointsPassed + m_routeStartPoint;
+				break;
+			default:
+				break;
+		}
+	}
+	return nextPoint;
+}
+
+// TODO: enum
+uint8
+CPed::GetPedRadioCategory(uint32 modelIndex)
+{
+	switch (modelIndex) {
+		case MI_MALE01:
+		case MI_FEMALE03:
+		case MI_PROSTITUTE2:
+		case MI_WORKER1:
+		case MI_MOD_MAN:
+		case MI_MOD_WOM:
+		case MI_ST_WOM:
+		case MI_FAN_WOM:
+			return 3;
+		case MI_TAXI_D:
+		case MI_PIMP:
+		case MI_MALE02:
+		case MI_FEMALE02:
+		case MI_FATFEMALE01:
+		case MI_FATFEMALE02:
+		case MI_DOCKER1:
+		case MI_WORKER2:
+		case MI_FAN_MAN2:
+			return 9;
+		case MI_GANG01:
+		case MI_GANG02:
+		case MI_SCUM_MAN:
+		case MI_SCUM_WOM:
+		case MI_HOS_WOM:
+		case MI_CONST1:
+			return 1;
+		case MI_GANG03:
+		case MI_GANG04:
+		case MI_GANG07:
+		case MI_GANG08:
+		case MI_CT_MAN2:
+		case MI_CT_WOM2:
+		case MI_B_MAN3:
+		case MI_SHOPPER3:
+			return 4;
+		case MI_GANG05:
+		case MI_GANG06:
+		case MI_GANG11:
+		case MI_GANG12:
+		case MI_CRIMINAL02:
+		case MI_B_WOM2:
+		case MI_ST_MAN:
+		case MI_HOS_MAN:
+			return 5;
+		case MI_FATMALE01:
+		case MI_LI_MAN2:
+		case MI_SHOPPER1:
+		case MI_CAS_MAN:
+			return 6;
+		case MI_PROSTITUTE:
+		case MI_P_WOM2:
+		case MI_LI_WOM2:
+		case MI_B_WOM3:
+		case MI_CAS_WOM:
+			return 2;
+		case MI_P_WOM1:
+		case MI_DOCKER2:
+		case MI_STUD_MAN:
+			return 7;
+		case MI_CT_MAN1:
+		case MI_CT_WOM1:
+		case MI_LI_MAN1:
+		case MI_LI_WOM1:
+		case MI_B_MAN1:
+		case MI_B_MAN2:
+		case MI_B_WOM1:
+		case MI_SHOPPER2:
+		case MI_STUD_WOM:
+			return 8;
+		default:
+			return 0;
+	}
+}
+
+// Some kind of VC leftover I think
+int
+CPed::GetWeaponSlot(eWeaponType weaponType)
+{
+	if (HasWeapon(weaponType))
+		return weaponType;
+	else
+		return -1;
+}
+
+void
+CPed::GoToNearestDoor(CVehicle *veh)
+{
+	CVector posToOpen;
+	GetNearestDoor(veh, posToOpen);
+	SetSeek(posToOpen, 0.5f);
+	SetMoveState(PEDMOVE_RUN);
+}
+
+bool
+CPed::HaveReachedNextPointOnRoute(float distToCountReached)
+{
+	if ((m_nextRoutePointPos - GetPosition()).Magnitude2D() >= distToCountReached)
+		return false;
+
+	m_routePointsPassed += m_routePointsBeingPassed;
+	return true;
+}
+
+void
+CPed::Idle(void)
+{
+	CVehicle *veh = m_pMyVehicle;
+	if (veh && veh->m_nGettingOutFlags && m_vehEnterType) {
+
+		if (veh->m_nGettingOutFlags & GetCarDoorFlag(m_vehEnterType)) {
+
+			if (m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT) {
+
+				CVector doorPos = GetPositionToOpenCarDoor(veh, m_vehEnterType);
+				CVector doorDist = GetPosition() - doorPos;
+
+				if (doorDist.MagnitudeSqr() < 0.25f) {
+					SetMoveState(PEDMOVE_WALK);
+					return;
+				}
+			}
+		}
+	}
+
+	CAnimBlendAssociation *armedIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_ARMED);
+	CAnimBlendAssociation* unarmedIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
+	int waitTime;
+
+	if (m_nMoveState == PEDMOVE_STILL) {
+
+		eWeaponType curWeapon = GetWeapon()->m_eWeaponType;
+		if (!armedIdleAssoc ||
+			CTimer::GetTimeInMilliseconds() <= m_nWaitTimer && curWeapon != WEAPONTYPE_UNARMED && curWeapon != WEAPONTYPE_MOLOTOV && curWeapon != WEAPONTYPE_GRENADE) {
+
+			if ((!GetWeapon()->IsType2Handed() || curWeapon == WEAPONTYPE_SHOTGUN) && curWeapon != WEAPONTYPE_BASEBALLBAT
+				|| !unarmedIdleAssoc || unarmedIdleAssoc->blendAmount <= 0.95f || m_nWaitState != WAITSTATE_FALSE || CTimer::GetTimeInMilliseconds() <= m_nWaitTimer) {
+
+				m_moved = CVector2D(0.0f, 0.0f);
+				return;
+			}
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_ARMED, 3.0f);
+			waitTime = CGeneral::GetRandomNumberInRange(4000, 7500);
+		} else {
+			armedIdleAssoc->blendDelta = -2.0f;
+			armedIdleAssoc->flags |= ASSOC_DELETEFADEDOUT;
+			waitTime = CGeneral::GetRandomNumberInRange(3000, 8500);
+		}
+		m_nWaitTimer = CTimer::GetTimeInMilliseconds() + waitTime;
+	} else {
+		if (armedIdleAssoc) {
+			armedIdleAssoc->blendDelta = -8.0f;
+			armedIdleAssoc->flags |= ASSOC_DELETEFADEDOUT;
+			m_nWaitTimer = 0;
+		}
+		if (!IsPlayer())
+			SetMoveState(PEDMOVE_STILL);
+	}
+	m_moved = CVector2D(0.0f, 0.0f);
+}
+
+void
+CPed::InTheAir(void)
+{
+	CColPoint foundCol;
+	CEntity *foundEnt;
+
+	CVector ourPos = GetPosition();
+	CVector bitBelow = GetPosition();
+	bitBelow.z -= 4.04f;
+
+	if (m_vecMoveSpeed.z < 0.0f && !bIsPedDieAnimPlaying) {
+		if (m_nPedState != PED_DIE && m_nPedState != PED_DEAD) {
+			if (CWorld::ProcessLineOfSight(ourPos, bitBelow, foundCol, foundEnt, true, true, false, true, false, false, false)) {
+				if (GetPosition().z - foundCol.point.z < 1.3f)
+					SetLanding();
+			} else {
+				if (!RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL)) {
+					if (m_vecMoveSpeed.z < -0.1f)
+						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FALL_FALL, 4.0f);
+				}
+			}
+		}
+	}
+}
+
+void
+CPed::SetLanding(void)
+{
+	if (m_nPedState == PED_DIE || m_nPedState == PED_DEAD)
+		return;
+
+	CAnimBlendAssociation *fallAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL);
+	CAnimBlendAssociation *landAssoc;
+
+	RpAnimBlendClumpSetBlendDeltas(GetClump(), ASSOC_PARTIAL, -1000.0f);
+	if (fallAssoc) {
+		landAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_FALL_COLLAPSE);
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_FALL_COLLAPSE, 1.0f);
+
+		if (IsPlayer())
+			Say(SOUND_PED_LAND);
+
+	} else {
+		landAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_FALL_LAND);
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_FALL_LAND, 1.0f);
+	}
+
+	landAssoc->SetFinishCallback(PedLandCB, this);
+	bIsInTheAir = false;
+	bIsLanding = true;
+}
+
+void
+CPed::Initialise(void)
+{
+	debug("Initialising CPed...\n");
+	CPedType::Initialise();
+	LoadFightData();
+	SetAnimOffsetForEnterOrExitVehicle();
+	debug("CPed ready\n");
+}
+
+void
+CPed::SetAnimOffsetForEnterOrExitVehicle(void)
+{
+	// FIX: If there were no translations on enter anims, there were overflows all over this function.
+
+	CAnimBlendHierarchy *enterAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, ANIM_CAR_JACKED_LHS)->hierarchy;
+	CAnimBlendSequence *seq = enterAssoc->sequences;
+	CAnimManager::UncompressAnimation(enterAssoc);
+	if (seq->numFrames > 0) {
+		if (!seq->HasTranslation())
+			vecPedDraggedOutCarAnimOffset = CVector(0.0f, 0.0f, 0.0f);
+		else {
+			KeyFrameTrans* lastFrame = (KeyFrameTrans*)seq->GetKeyFrame(seq->numFrames - 1);
+			vecPedDraggedOutCarAnimOffset = lastFrame->translation;
+		}
+	}
+
+	enterAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, ANIM_CAR_GETIN_LHS)->hierarchy;
+	seq = enterAssoc->sequences;
+	CAnimManager::UncompressAnimation(enterAssoc);
+	if (seq->numFrames > 0) {
+		if (!seq->HasTranslation())
+			vecPedCarDoorAnimOffset = CVector(0.0f, 0.0f, 0.0f);
+		else {
+			KeyFrameTrans* lastFrame = (KeyFrameTrans*)seq->GetKeyFrame(seq->numFrames - 1);
+			vecPedCarDoorAnimOffset = lastFrame->translation;
+		}
+	}
+
+	enterAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, ANIM_CAR_GETIN_LOW_LHS)->hierarchy;
+	seq = enterAssoc->sequences;
+	CAnimManager::UncompressAnimation(enterAssoc);
+	if (seq->numFrames > 0) {
+		if (!seq->HasTranslation())
+			vecPedCarDoorLoAnimOffset = CVector(0.0f, 0.0f, 0.0f);
+		else {
+			KeyFrameTrans* lastFrame = (KeyFrameTrans*)seq->GetKeyFrame(seq->numFrames - 1);
+			vecPedCarDoorLoAnimOffset = lastFrame->translation;
+		}
+	}
+
+	enterAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, ANIM_CAR_QJACKED)->hierarchy;
+	seq = enterAssoc->sequences;
+	CAnimManager::UncompressAnimation(enterAssoc);
+	if (seq->numFrames > 0) {
+		if (!seq->HasTranslation())
+			vecPedQuickDraggedOutCarAnimOffset = CVector(0.0f, 0.0f, 0.0f);
+		else {
+			KeyFrameTrans* lastFrame = (KeyFrameTrans*)seq->GetKeyFrame(seq->numFrames - 1);
+			vecPedQuickDraggedOutCarAnimOffset = lastFrame->translation;
+		}
+	}
+
+	enterAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, ANIM_VAN_GETIN_L)->hierarchy;
+	seq = enterAssoc->sequences;
+	CAnimManager::UncompressAnimation(enterAssoc);
+	if (seq->numFrames > 0) {
+		if (!seq->HasTranslation())
+			vecPedVanRearDoorAnimOffset = CVector(0.0f, 0.0f, 0.0f);
+		else {
+			KeyFrameTrans* lastFrame = (KeyFrameTrans*)seq->GetKeyFrame(seq->numFrames - 1);
+			vecPedVanRearDoorAnimOffset = lastFrame->translation;
+		}
+	}
+
+	enterAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, ANIM_TRAIN_GETOUT)->hierarchy;
+	seq = enterAssoc->sequences;
+	CAnimManager::UncompressAnimation(enterAssoc);
+	if (seq->numFrames > 0) {
+		if (!seq->HasTranslation())
+			vecPedTrainDoorAnimOffset = CVector(0.0f, 0.0f, 0.0f);
+		else {
+			KeyFrameTrans* lastFrame = (KeyFrameTrans*)seq->GetKeyFrame(seq->numFrames - 1);
+			vecPedTrainDoorAnimOffset = lastFrame->translation;
+		}
+	}
+}
+
 WRAPPER void CPed::PedGetupCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE810); }
 WRAPPER void CPed::PedStaggerCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8D0); }
 WRAPPER void CPed::PedEvadeCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D36E0); }
@@ -7389,7 +7789,6 @@ STARTPATCHES
 	InjectHook(0x4D09B0, &CPed::SetFall, PATCH_JUMP);
 	InjectHook(0x4E6220, &CPed::SetAttack, PATCH_JUMP);
 	InjectHook(0x4E7530, &CPed::StartFightAttack, PATCH_JUMP);
-	InjectHook(0x4E9870, &CPed::LoadFightData, PATCH_JUMP);
 	InjectHook(0x4E8EC0, &CPed::FightStrike, PATCH_JUMP);
 	InjectHook(0x4CCE20, &CPed::GetLocalDirection, PATCH_JUMP);
 	InjectHook(0x4E8E20, &CPed::PlayHitSound, PATCH_JUMP);
@@ -7431,4 +7830,14 @@ STARTPATCHES
 	InjectHook(0x4D1ED0, &CPed::Flee, PATCH_JUMP);
 	InjectHook(0x4E1CF0, &CPed::GetNearestDoor, PATCH_JUMP);
 	InjectHook(0x4DF420, &CPed::GetFormationPosition, PATCH_JUMP);
+	InjectHook(0x4E1F30, &CPed::GetNearestPassengerDoor, PATCH_JUMP);
+	InjectHook(0x4D0690, &CPed::Idle, PATCH_JUMP);
+	InjectHook(0x4DD720, &CPed::GetNextPointOnRoute, PATCH_JUMP);
+	InjectHook(0x4D7B50, &CPed::GetPedRadioCategory, PATCH_JUMP);
+	InjectHook(0x4CFA40, &CPed::GetWeaponSlot, PATCH_JUMP);
+	InjectHook(0x4E2220, &CPed::GoToNearestDoor, PATCH_JUMP);
+	InjectHook(0x4DD7B0, &CPed::HaveReachedNextPointOnRoute, PATCH_JUMP);
+	InjectHook(0x4D0D10, &CPed::InTheAir, PATCH_JUMP);
+	InjectHook(0x4C5270, &CPed::Initialise, PATCH_JUMP);
+	InjectHook(0x4D0E40, &CPed::SetLanding, PATCH_JUMP);
 ENDPATCHES
