@@ -110,6 +110,9 @@ InitialiseGame(void)
 void
 TheModelViewer(void)
 {
+#ifdef ASPECT_RATIO_SCALE
+	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
+#endif
 	CAnimViewer::Update();
 	CTimer::Update();
 	SetLightsWithTimeOfDayColour(Scene.world);

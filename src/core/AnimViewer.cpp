@@ -40,11 +40,9 @@ CEntity *CAnimViewer::pTarget = nil;
 
 void
 CAnimViewer::Render(void) {
-	if (pTarget)
-	{
+	if (pTarget) {
 //		pTarget->GetPosition() = CVector(0.0f, 0.0f, 0.0f);
-		if (pTarget)
-		{
+		if (pTarget) {
 			pTarget->Render();
 			CRenderer::RenderOneNonRoad(pTarget);
 		}
@@ -110,16 +108,14 @@ CAnimViewer::Initialise(void) {
 
 	int fd = CFileMgr::OpenFile("DATA\\SPECIAL.TXT", "r");
 	char animGroup[32], modelName[32];
-	if (fd)
-	{
+	if (fd) {
 		for (int lineId = 0; lineId < NUM_OF_SPECIAL_CHARS; lineId++) {
 			if (!CFileMgr::ReadLine(fd, gString, 255))
 				break;
 
 			sscanf(gString, "%s %s", &modelName, &animGroup);
 			int groupId;
-			for (groupId = 0; groupId < NUM_ANIM_ASSOC_GROUPS; groupId++)
-			{
+			for (groupId = 0; groupId < NUM_ANIM_ASSOC_GROUPS; groupId++) {
 				if (!strcmp(animGroup, CAnimManager::GetAnimGroupName((AssocGroupId)groupId)))
 					break;
 			}
@@ -173,16 +169,12 @@ FindMeAModelID(int modelId, int wantedChange)
 	int tryCount = 2;
 	int ogModelId = modelId;
 
-	while(tryCount != 0)
-	{
+	while(tryCount != 0) {
 		modelId += wantedChange;
-		if (modelId < 0 || modelId >= MODELINFOSIZE)
-		{
+		if (modelId < 0 || modelId >= MODELINFOSIZE) {
 			tryCount--;
 			wantedChange = -wantedChange;
-		}
-		else if (modelId != 5 && modelId != 6 && modelId != 405)
-		{
+		} else if (modelId != 5 && modelId != 6 && modelId != 405) {
 			CBaseModelInfo *model = CModelInfo::GetModelInfo(modelId);
 			if (model)
 			{
@@ -223,17 +215,14 @@ CAnimViewer::Update(void)
 	CBaseModelInfo *modelInfo = CModelInfo::GetModelInfo(modelId);
 	CEntity *entity = nil;
 
-	if (modelInfo->m_type == MITYPE_PED)
-	{
+	if (modelInfo->m_type == MITYPE_PED) {
 		int animGroup = ((CPedModelInfo*)modelInfo)->m_animGroup;
 
 		if (animId > ANIM_IDLE_STANCE)
 			animGroup = ASSOCGRP_STD;
 
-		if (reloadIFP)
-		{
-			if (pTarget)
-			{
+		if (reloadIFP) {
+			if (pTarget) {
 				CWorld::Remove(pTarget);
 				if (pTarget)
 					delete pTarget;
@@ -247,24 +236,21 @@ CAnimViewer::Update(void)
 
 			reloadIFP = 0;
 		}
-	}
-	else
-	{
+	} else {
 		animGroup = ASSOCGRP_STD;
 	}
 	CPad::UpdatePads();
 	CPad* pad = CPad::GetPad(0);
 	CStreaming::UpdateForAnimViewer();
 	CStreaming::RequestModel(modelId, 0);
-	if (CStreaming::HasModelLoaded(modelId))
-	{
-		if (!pTarget)
-		{
-			if (modelInfo->m_type == MITYPE_VEHICLE)
-			{
+	if (CStreaming::HasModelLoaded(modelId)) {
+
+		if (!pTarget) {
+
+			if (modelInfo->m_type == MITYPE_VEHICLE) {
+
 				CVehicleModelInfo* veh = (CVehicleModelInfo*)modelInfo;
-				if (veh->m_vehicleType != VEHICLE_TYPE_CAR)
-				{
+				if (veh->m_vehicleType != VEHICLE_TYPE_CAR) {
 					// Not ready yet
 /*					if (veh->m_vehicleType == VEHICLE_TYPE_BOAT)
 					{
@@ -276,26 +262,19 @@ CAnimViewer::Update(void)
 					else
 					{
 */						entity = pTarget = new CObject(modelId, true);
-						if (!modelInfo->GetColModel())
-						{
+						if (!modelInfo->GetColModel()) {
 							modelInfo->SetColModel(&CTempColModels::ms_colModelWheel1);
 						}
 //					}
-				}
-				else
-				{
+				} else {
 					entity = pTarget = new CAutomobile(modelId, RANDOM_VEHICLE);
 					entity->m_status = STATUS_ABANDONED;
 				}
 				entity->bIsStuck = true;
-			}
-			else if (modelInfo->m_type == MITYPE_PED)
-			{
+			} else if (modelInfo->m_type == MITYPE_PED) {
 				pTarget = entity = new CPed(PEDTYPE_CIVMALE);
 				entity->SetModelIndex(modelId);
-			}
-			else
-			{
+			} else {
 				entity = pTarget = new CObject(modelId, true);
 				if (!modelInfo->GetColModel())
 				{
@@ -307,63 +286,49 @@ CAnimViewer::Update(void)
 			CWorld::Add(entity);
 			TheCamera.TakeControl(pTarget, 9, 2, 1);
 		}
-		if (entity &&
-			(entity->m_type == ENTITY_TYPE_VEHICLE || entity->m_type == ENTITY_TYPE_PED || entity->m_type == ENTITY_TYPE_OBJECT))
-		{
-			// Maybe m_vecMoveSpeed or something else? Some structs are different on mobile.
-			((CPhysical*)pTarget)->m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+		if (pTarget->m_type == ENTITY_TYPE_VEHICLE || pTarget->m_type == ENTITY_TYPE_PED || pTarget->m_type == ENTITY_TYPE_OBJECT) {
+			((CPhysical*)pTarget)->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 		}
 		pTarget->GetPosition().z = 0.0f;
 
-		if (modelInfo->m_type != MITYPE_PED)
-		{
-			if (modelInfo->m_type == MITYPE_VEHICLE)
-			{
-				if (pad->NewState.LeftShoulder1 && !pad->OldState.LeftShoulder1)
-				{
+		if (modelInfo->m_type != MITYPE_PED) {
+
+			if (modelInfo->m_type == MITYPE_VEHICLE) {
+
+				if (pad->NewState.LeftShoulder1 && !pad->OldState.LeftShoulder1) {
 					nextModelId = LastPedModelId(modelId);
-				}
-				else
-				{
+				} else {
 					// Start in mobile
 					if (pad->NewState.Square && !pad->OldState.Square)
 						CVehicleModelInfo::LoadVehicleColours();
 				}
 			}
-		}
-		else
-		{
+		} else {
 			((CPed*)pTarget)->bKindaStayInSamePlace = true;
 
 			// Triangle in mobile
 			if (pad->NewState.Square && !pad->OldState.Square) {
 				reloadIFP = 1;
-			} else if (pad->NewState.Cross && !pad->OldState.Cross)
-			{
+
+			} else if (pad->NewState.Cross && !pad->OldState.Cross) {
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
-			}
-			else if (pad->NewState.Circle && !pad->OldState.Circle)
-			{
+
+			} else if (pad->NewState.Circle && !pad->OldState.Circle) {
 				PlayAnimation(pTarget->GetClump(), animGroup, ANIM_IDLE_STANCE);
-			}
-			else if (pad->NewState.DPadUp && pad->OldState.DPadUp == 0)
-			{
+
+			} else if (pad->NewState.DPadUp && pad->OldState.DPadUp == 0) {
 				animId--;
-				if (animId < 0)
-				{
+				if (animId < 0) {
 					animId = NUM_ANIMS - 1;
 				}
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
-			}
-			else if (pad->NewState.DPadDown && !pad->OldState.DPadDown)
-			{
+
+			} else if (pad->NewState.DPadDown && !pad->OldState.DPadDown) {
 				animId = (animId == (NUM_ANIMS - 1) ? 0 : animId + 1);
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
-			}
-			else
-			{
-				if (pad->NewState.Start && !pad->OldState.Start)
-				{
+
+			} else {
+				if (pad->NewState.Start && !pad->OldState.Start) {
 
 				} else {
 					if (pad->NewState.LeftShoulder1 && !pad->OldState.LeftShoulder1) {
@@ -377,19 +342,16 @@ CAnimViewer::Update(void)
 		}
 	}
 
-	if (pad->NewState.DPadLeft && pad->OldState.DPadLeft == 0)
-	{
+	if (pad->NewState.DPadLeft && pad->OldState.DPadLeft == 0) {
 		nextModelId = FindMeAModelID(modelId, -1);
-	} else if (pad->NewState.DPadRight && pad->OldState.DPadRight == 0)
-	{
+	} else if (pad->NewState.DPadRight && pad->OldState.DPadRight == 0) {
 		nextModelId = FindMeAModelID(modelId, 1);
 	}
+	// There were extra codes here to let us change model id by 50, but xbox CPad struct is different, so I couldn't port.
 
-	if (nextModelId != modelId)
-	{
+	if (nextModelId != modelId) {
 		modelId = nextModelId;
-		if (pTarget)
-		{
+		if (pTarget) {
 			CWorld::Remove(pTarget);
 			if (pTarget)
 				delete pTarget;
