@@ -3494,9 +3494,9 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 			break;
 		}
 		cAudioScriptObject* obj = new cAudioScriptObject();
-		obj->m_vecPos = *(CVector*)&ScriptParams[0];
-		obj->m_wSound = ScriptParams[3];
-		obj->m_nAudioEntityId = -5;
+		obj->Posn = *(CVector*)&ScriptParams[0];
+		obj->AudioId = ScriptParams[3];
+		obj->AudioEntity = AEHANDLE_NONE;
 		/* BUG: if audio is not initialized, this object will not be freed. */
 		/* Issue needs to be addressed in CreateOneShotScriptObject. */
 		DMAudio.CreateOneShotScriptObject(obj);
@@ -3506,9 +3506,9 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 	{
 		CollectParameters(&m_nIp, 4);
 		cAudioScriptObject* obj = new cAudioScriptObject();
-		obj->m_vecPos = *(CVector*)&ScriptParams[0];
-		obj->m_wSound = ScriptParams[3];
-		obj->m_nAudioEntityId = DMAudio.CreateLoopingScriptObject(obj);
+		obj->Posn = *(CVector*)&ScriptParams[0];
+		obj->AudioId = ScriptParams[3];
+		obj->AudioEntity = DMAudio.CreateLoopingScriptObject(obj);
 		ScriptParams[0] = CPools::GetAudioScriptObjectPool()->GetIndex(obj);
 		StoreParameters(&m_nIp, 1);
 		return 0;
@@ -3521,7 +3521,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 			debug("REMOVE_SOUND - Sound doesn't exist\n");
 			return 0;
 		}
-		DMAudio.DestroyLoopingScriptObject(obj->m_nAudioEntityId);
+		DMAudio.DestroyLoopingScriptObject(obj->AudioEntity);
 		delete obj;
 		return 0;
 	}
