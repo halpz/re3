@@ -47,6 +47,7 @@
 #include "Text.h"
 #include "RpAnimBlend.h"
 #include "Frontend.h"
+#include "AnimViewer.h"
 
 #define DEFAULT_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
 
@@ -71,9 +72,10 @@ char version_name[64];
 float FramesPerSecond = 30.0f;
 
 bool gbPrintShite = false;
-bool gbModelViewer;
+bool &gbModelViewer = *(bool*)0x95CD93;
 
 bool DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
+bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
 void DoRWStuffEndOfFrame(void);
 
 void RenderScene(void);
@@ -103,6 +105,25 @@ InitialiseGame(void)
 	LoadingScreen(nil, nil, "loadsc0");
 	CGame::Initialise("DATA\\GTA3.DAT");
 }
+
+#ifndef MASTER
+void
+TheModelViewer(void)
+{
+	CAnimViewer::Update();
+	CTimer::Update();
+	SetLightsWithTimeOfDayColour(Scene.world);
+	CRenderer::ConstructRenderList();
+	DoRWStuffStartOfFrame(CTimeCycle::GetSkyTopRed(), CTimeCycle::GetSkyTopGreen(), CTimeCycle::GetSkyTopBlue(),
+		CTimeCycle::GetSkyBottomRed(), CTimeCycle::GetSkyBottomGreen(), CTimeCycle::GetSkyBottomBlue(),
+		255);
+
+	DefinedState();
+	CVisibilityPlugins::InitAlphaEntityList();
+	CAnimViewer::Render();
+	DoRWStuffEndOfFrame();
+}
+#endif
 
 void
 Idle(void *arg)
@@ -975,6 +996,15 @@ AppEventHandler(RsEvent event, void *param)
 
 			return rsEVENTPROCESSED;
 		}
+
+#ifndef MASTER
+		case rsANIMVIEWER:
+		{
+			TheModelViewer();
+
+			return rsEVENTPROCESSED;
+		}
+#endif
 
 		default:
 		{

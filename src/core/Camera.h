@@ -476,6 +476,10 @@ int     m_iModeObbeCamIsInForCar;
 	void SetCamPositionForFixedMode(const CVector&, const CVector&);
 	bool GetFading();
 
+	void Init();
+	void SetRwCamera(RwCamera*);
+	void Process();
+
 	void dtor(void) { this->CCamera::~CCamera(); }
 };
 static_assert(offsetof(CCamera, m_WideScreenOn) == 0x70, "CCamera: error");

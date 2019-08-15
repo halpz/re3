@@ -15,6 +15,8 @@
 
 static RwBool               DefaultVideoMode = TRUE;
 
+bool TurnOnAnimViewer = false;
+
 //RsGlobalType                RsGlobal;
 RsGlobalType &RsGlobal = *(RsGlobalType*)0x8F4360;
 
@@ -144,7 +146,14 @@ rsPreInitCommandLine(RwChar *arg)
 
 		return TRUE;
 	}
+#ifndef MASTER
+	if (!strcmp(arg, RWSTRING("-animviewer")))
+	{
+		TurnOnAnimViewer = TRUE;
 
+		return TRUE;
+	}
+#endif
 	return FALSE;
 }
 
