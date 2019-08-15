@@ -286,6 +286,15 @@ public:
 	char *Get3DProviderName(char);
 	bool PlayerInCar();
 	void DisplayRadioStationName();
+	
+	void PlayAnnouncement(unsigned char);
+	void PlayFrontEndTrack(unsigned char, unsigned char);
+	void PreloadCutSceneMusic(unsigned char);
+	void PlayPreloadedCutSceneMusic(void);
+	void StopCutSceneMusic(void);
+	int32 GetRadioInCar(void);
+	void SetRadioInCar(unsigned int);
+	void SetRadioChannelByScript(unsigned char, int);
 };
 
 static_assert(sizeof(cMusicManager) == 0x95C, "cMusicManager: error");

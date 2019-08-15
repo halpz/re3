@@ -1194,7 +1194,7 @@ cSampleManager::Initialise(void)
 			
 			int32 randval;
 			if ( bUseRandomTable )
-				randval = AudioManager.GetRandomTabe(1);
+				randval = AudioManager.GetRandomNumber(1);
 			else
 				randval = localtm->tm_sec * localtm->tm_min;
 			
@@ -1205,16 +1205,16 @@ cSampleManager::Initialise(void)
 				randmp3 = randmp3->pNext;
 			
 			if ( bUseRandomTable )
-				_CurMP3Pos = AudioManager.GetRandomTabe(0)     % randmp3->nTrackLength;
+				_CurMP3Pos = AudioManager.GetRandomNumber(0)     % randmp3->nTrackLength;
 			else
 			{
 				if ( localtm->tm_sec > 0 )
 				{
 					int32 s = localtm->tm_sec;
-					_CurMP3Pos = s*s*s*s*s*s*s*s                % randmp3->nTrackLength;
+					_CurMP3Pos = s*s*s*s*s*s*s*s                 % randmp3->nTrackLength;
 				}
 				else
-					_CurMP3Pos = AudioManager.GetRandomTabe(0) % randmp3->nTrackLength;
+					_CurMP3Pos = AudioManager.GetRandomNumber(0) % randmp3->nTrackLength;
 			}
 		}
 		else
@@ -1293,7 +1293,7 @@ cSampleManager::CheckForAnAudioFileOnCD(void)
 	strcpy(filepath, m_szCDRomRootPath);
 #endif // #if defined(GTA3_1_1_PATCH)
 
-	strcat(filepath, StreamedNameTable[AudioManager.GetRandomTabe(1) % TOTAL_STREAMED_SOUNDS]);
+	strcat(filepath, StreamedNameTable[AudioManager.GetRandomNumber(1) % TOTAL_STREAMED_SOUNDS]);
 	
 	FILE *f = fopen(filepath, "rb");
 	

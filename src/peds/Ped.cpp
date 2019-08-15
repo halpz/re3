@@ -456,7 +456,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	if ((CGeneral::GetRandomNumber() & 3) == 0)
 		m_ped_flagD1 = true;
 
-	m_audioEntityId = DMAudio.CreateEntity(0, this);
+	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
 	DMAudio.SetEntityStatus(m_audioEntityId, 1);
 	m_fearFlags = CPedType::GetThreats(m_nPedType);
 	m_threatEntity = nil;

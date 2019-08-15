@@ -118,6 +118,15 @@ public:
 	
 	CRGBA(void) { }
 	CRGBA(uint8 r, uint8 g, uint8 b, uint8 a) : r(r), g(g), b(b), a(a) { }
+	
+	CRGBA &CRGBA::operator =(const CRGBA &right)
+	{
+		this->r = right.r;
+		this->g = right.g;
+		this->b = right.b;
+		this->a = right.a;
+		return *this;
+	}
 #ifdef RWCORE_H
 	operator RwRGBA &(void) {
 		return rwRGBA;
@@ -129,6 +138,15 @@ public:
 	
 	operator RwRGBA (void) const {
 		return rwRGBA;
+	}
+
+	CRGBA &CRGBA::operator =(const RwRGBA &right)
+	{
+		this->r = right.red;
+		this->g = right.green;
+		this->b = right.blue;
+		this->a = right.alpha;
+		return *this;
 	}
 #endif
 };

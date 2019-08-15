@@ -59,15 +59,15 @@ enum eAudioType : int32 {
 	AUDIOTYPE_FIRE = 2,
 	AUDIOTYPE_WEATHER = 3,
 	AUDIOTYPE_CRANE = 4,
-	AUDIOTYPE_ONE_SHOT = 5,
+	AUDIOTYPE_SCRIPTOBJECT = 5,
 	AUDIOTYPE_BRIDGE = 6,
 	AUDIOTYPE_COLLISION = 7,
 	AUDIOTYPE_FRONTEND = 8,
 	AUDIOTYPE_PROJECTILE = 9,
 	AUDIOTYPE_GARAGE = 10,
-	AUDIOTYPE_HYDRANT = 11,
-	AUDIOTYPE_WATER_CANNON = 12,
-	AUDIOTYPE_D = 13,
+	AUDIOTYPE_FIREHYDRANT = 11,
+	AUDIOTYPE_WATERCANNON = 12,
+	AUDIOTYPE_POLICERADIO = 13,
 	TOTAL_AUDIO_TYPES = 14,
 };
 
@@ -173,11 +173,12 @@ class CPlane;
 class CVehicle;
 class CPed;
 
-struct cAudioScriptObject {
-	int16 m_wSound;
-	char gap_2[2];
-	CVector m_vecPos;
-	int m_nAudioEntityId;
+class cAudioScriptObject {
+public:
+	int16 AudioId;
+	char _pad0[2];
+	CVector Posn;
+	int32 AudioEntity;
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
@@ -204,6 +205,19 @@ enum
 	REFLECTION_UP,
 	MAX_REFLECTIONS,
 };
+
+enum AudioEntityHandle
+{
+	AEHANDLE_NONE               = -5,
+	AEHANDLE_ERROR_NOAUDIOSYS   = -4,
+	AEHANDLE_ERROR_NOFREESLOT   = -3,
+	AEHANDLE_ERROR_NOENTITY     = -2,
+	AEHANDLE_ERROR_BADAUDIOTYPE = -1,
+};
+
+#define AEHANDLE_IS_FAILED(h) ((h)<0)
+#define AEHANDLE_IS_OK(h)     ((h)>=0)
+
 	
 class cAudioManager
 {
@@ -256,8 +270,7 @@ public:
 	
 	inline uint32 GetFrameCounter(void) { return m_FrameCounter; }
 	float GetReflectionsDistance(int32 idx) { return m_afReflectionsDistances[idx]; }
-	int32 GetRandomTabe(int32 idx) { return m_anRandomTable[idx]; }
-	
+	int32 GetRandomNumber(int32 idx) { return m_anRandomTable[idx]; }
 	//
 
 	void AddDetailsToRequestedOrderList(uint8 sample); /// ok
@@ -277,7 +290,7 @@ public:
 	                                      float speedMultiplier);                   /// ok
 	int32 ComputePan(float, CVector *);                                             // todo
 	uint32 ComputeVolume(int emittingVolume, float soundIntensity, float distance); /// ok
-	int32 CreateEntity(int32 type, CPhysical *entity);                              /// ok
+	int32 CreateEntity(int32 type, void *entity);                              /// ok
 
 	void DestroyAllGameCreatedEntities(); /// ok
 	void DestroyEntity(int32 id);         /// ok
@@ -510,6 +523,17 @@ public:
 	void ProcessWeather(int32 id);  // todo
 	//	bool ProcessWetRoadNoise(void *);
 	void ProcessWorkShopScriptObject(uint8 sound); /// ok
+	
+	
+	void PlayOneShot(int, unsigned short, float);
+	void SetEffectsFadeVol(unsigned char);
+	void SetMusicFadeVol(unsigned char);
+	int8 SetCurrent3DProvider(unsigned char);
+	void ReportCrime(eCrimeType, CVector const &);
+	void PlaySuspectLastSeen(float, float, float);
+	void ReportCollision(CEntity *, CEntity *, unsigned char, unsigned char, float, float);
+	void ResetTimers(unsigned int);
+	void PreloadMissionAudio(char *);
 };
 
 static_assert(sizeof(cAudioManager) == 0x4B14, "cAudioManager: error");
