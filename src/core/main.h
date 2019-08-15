@@ -18,7 +18,7 @@ extern wchar *gUString;
 extern wchar *gUString2;
 extern bool &b_FoundRecentSavedGameWantToLoad;
 extern bool gbPrintShite;
-extern bool gbModelViewer;
+extern bool &gbModelViewer;
 
 class CSprite2d;
 
@@ -30,3 +30,6 @@ char *GetLevelSplashScreen(int level);
 char *GetRandomSplashScreen(void);
 void LittleTest(void);
 void ValidateVersion();
+#ifndef MASTER
+void TheModelViewer(void);
+#endif

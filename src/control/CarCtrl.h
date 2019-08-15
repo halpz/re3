@@ -61,7 +61,7 @@ public:
 	static float FindMaximumSpeedForThisCarInTraffic(CVehicle*);
 	static void SlowCarDownForCarsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float);
 	static void SlowCarDownForPedsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float);
-
+	static void Init(void);
 
 	static float GetOffsetOfLaneFromCenterOfRoad(int8 lane, CCarPathLink* pLink)
 	{

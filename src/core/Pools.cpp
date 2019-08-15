@@ -1,4 +1,5 @@
 #include "common.h"
+#include "patcher.h"
 #include "Pools.h"
 
 CCPtrNodePool *&CPools::ms_pPtrNodePool = *(CCPtrNodePool**)0x943044;
@@ -11,6 +12,9 @@ CObjectPool *&CPools::ms_pObjectPool = *(CObjectPool**)0x880E28;
 CDummyPool *&CPools::ms_pDummyPool = *(CDummyPool**)0x8F2C18;
 CAudioScriptObjectPool *&CPools::ms_pAudioScriptObjectPool = *(CAudioScriptObjectPool**)0x8F1B6C;
 
+WRAPPER void CPools::Initialise(void) { EAXJMP(0x4A1770); }
+
+#if 0
 void
 CPools::Initialise(void)
 {
@@ -26,6 +30,7 @@ CPools::Initialise(void)
 	ms_pDummyPool = new CDummyPool(NUMDUMMIES);
 	ms_pAudioScriptObjectPool = new CAudioScriptObjectPool(NUMAUDIOSCRIPTOBJECTS);
 }
+#endif
 
 int32 CPools::GetPedRef(CPed *ped) { return ms_pPedPool->GetIndex(ped); }
 CPed *CPools::GetPed(int32 handle) { return ms_pPedPool->GetAt(handle); }

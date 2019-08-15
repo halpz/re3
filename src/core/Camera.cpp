@@ -27,7 +27,9 @@ WRAPPER void CamShakeNoPos(CCamera*, float) { EAXJMP(0x46B100); }
 WRAPPER void CCamera::TakeControl(CEntity*, int16, int16, int32) { EAXJMP(0x471500); }
 WRAPPER void CCamera::TakeControlNoEntity(const CVector&, int16, int32) { EAXJMP(0x4715B0); }
 WRAPPER void CCamera::SetCamPositionForFixedMode(const CVector&, const CVector&) { EAXJMP(0x46FCC0); }
-
+WRAPPER void CCamera::Init(void) { EAXJMP(0x46BAD0); }
+WRAPPER void CCamera::SetRwCamera(RwCamera*) { EAXJMP(0x46FEC0); }
+WRAPPER void CCamera::Process(void) { EAXJMP(0x46D3F0); }
 
 bool
 CCamera::GetFading()

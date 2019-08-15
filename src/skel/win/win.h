@@ -17,6 +17,7 @@ enum eGameState
 	GS_FRONTEND,
 	GS_INIT_PLAYING_GAME,
 	GS_PLAYING_GAME,
+	GS_ANIMVIEWER,
 };
 
 enum eWinVersion

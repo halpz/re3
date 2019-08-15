@@ -16,7 +16,8 @@ private:
 	static float &ms_fNearClipZ;
 	static float &ms_fFarClipZ;
 	static float &ms_fFOV;
-	static float ms_fLODDistance;	// unused
+public:
+	static float &ms_fLODDistance;	// set but unused?
 
 #ifdef ASPECT_RATIO_SCALE
 	// we use this variable to scale a lot of 2D elements
@@ -24,7 +25,6 @@ private:
 	static float ms_fAspectRatio;
 #endif
 
-public:
 	static uint8 &FadeValue;
 	static uint8 &FadeRed;
 	static uint8 &FadeGreen;
