@@ -731,10 +731,10 @@ CWaterLevel::RenderWater()
 				
 				float fAngle = CGeneral::GetRandomNumberInRange(90.0f, 150.0f);
 				
-				int32 nSinCosIdx = CGeneral::GetRandomNumber() % CParticle::SIN_COS_TABLE_SIZE-1;
+				int32 nRot = CGeneral::GetRandomNumber() % CParticle::SIN_COS_TABLE_SIZE-1;
 				
-				float fCos = CParticle::m_CosTable[nSinCosIdx];
-				float fSin = CParticle::m_SinTable[nSinCosIdx];
+				float fCos = CParticle::Cos(nRot);
+				float fSin = CParticle::Sin(nRot);
 
 				vecPos.x += (fCos - fSin) * fAngle;
 				vecPos.y += (fSin + fCos) * fAngle;

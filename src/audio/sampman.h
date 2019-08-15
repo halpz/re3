@@ -2,6 +2,8 @@
 #include "common.h"
 #include "AudioSamples.h"
 
+#define MAX_VOLUME 127
+
 struct tSample {
 	int32 nOffset;
 	uint32 nSize;
@@ -10,29 +12,30 @@ struct tSample {
 	int32 nLoopEnd;
 };
 
-#define MAXPROVIDERS 64
+enum
+{
+	SAMPLEBANK_MAIN,
+	SAMPLEBANK_PED,
+	MAX_SAMPLEBANKS,
+};
 
-#define MAXCHANNELS  28
-#define MAXCHANNELS_SURROUND  24
-#define MAX2DCHANNELS  1
-#define CHANNEL2D MAXCHANNELS
+#define MAX_PEDSFX                 7
+#define PED_BLOCKSIZE              79000
 
+#define MAXPROVIDERS               64
 
-#define MAX_MP3STREAMS 2
+#define MAXCHANNELS                28
+#define MAXCHANNELS_SURROUND       24
+#define MAX2DCHANNELS              1
+#define CHANNEL2D                  MAXCHANNELS
 
+#define MAX_MP3STREAMS             2
 
-#define MAX_SAMPLEBANKS 2
-#define MAX_PEDSFX 7
-#define PED_BLOCKSIZE 79000
-
+#define DIGITALRATE                32000
+#define DIGITALBITS                16
+#define DIGITALCHANNELS            2
 
 #define MAX_DIGITAL_MIXER_CHANNELS 32
-
-#define DIGITALRATE       32000
-#define DIGITALBITS       16
-#define DIGITALCHANNELS   2
-
-
 
 class cSampleManager
 {
@@ -98,7 +101,7 @@ public:
 
 	int32 _GetPedCommentSlot(uint32 nComment);
 	
-	int32  GetSampleBaseFrequency (uint32 nSample);
+	int32  GetSampleBaseFrequency  (uint32 nSample);
 	int32  GetSampleLoopStartOffset(uint32 nSample);
 	int32  GetSampleLoopEndOffset  (uint32 nSample);
 	uint32 GetSampleLength         (uint32 nSample);

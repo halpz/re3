@@ -1166,7 +1166,7 @@ void CReplay::RestoreStuffFromMem(void)
 		ped->m_modelIndex = -1;
 		ped->SetModelIndex(mi);
 		ped->m_pVehicleAnim = 0;
-		ped->m_audioEntityId = DMAudio.CreateEntity(0, ped);
+		ped->m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, ped);
 		DMAudio.SetEntityStatus(ped->m_audioEntityId, true);
 		CPopulation::UpdatePedCount(ped->m_nPedType, false);
 		if (ped->m_wepModelID >= 0)
@@ -1204,7 +1204,7 @@ void CReplay::RestoreStuffFromMem(void)
 			car->SetDoorDamage(CAR_DOOR_LR, DOOR_REAR_LEFT, true);
 			car->SetDoorDamage(CAR_DOOR_RR, DOOR_REAR_RIGHT, true);
 		}
-		vehicle->m_audioEntityId = DMAudio.CreateEntity(0, vehicle);
+		vehicle->m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, vehicle);
 		DMAudio.SetEntityStatus(vehicle->m_audioEntityId, true);
 		CCarCtrl::UpdateCarCount(vehicle, false);
 		if ((mi == MI_AIRTRAIN || mi == MI_DEADDODO) && vehicle->m_rwObject){

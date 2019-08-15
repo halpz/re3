@@ -1261,7 +1261,7 @@ void CParticle::Update()
 												nil,
 												particle->m_fSize, color, particle->m_nRotationStep, 0, 0, 0);
 									
-									PlayOneShotScriptObject(_SOUND_BULLET_SHELL_HIT_GROUND_1, particle->m_vecPosition);
+									PlayOneShotScriptObject(_SCRSOUND_BULLET_SHELL_HIT_GROUND_1, particle->m_vecPosition);
 								}
 								break;
 							
@@ -1280,7 +1280,7 @@ void CParticle::Update()
 												nil,
 												particle->m_fSize, color, 0, 0, 0, 0);
 									
-									PlayOneShotScriptObject(_SOUND_BULLET_SHELL_HIT_GROUND_2, particle->m_vecPosition);
+									PlayOneShotScriptObject(_SCRSOUND_BULLET_SHELL_HIT_GROUND_2, particle->m_vecPosition);
 								}
 								break;
 								
@@ -1410,13 +1410,11 @@ void CParticle::Update()
 			
 			if ( particle->m_fCurrentZRadius != 0.0f )
 			{
-				int32 nSinCosIndex = particle->m_nCurrentZRotation % (SIN_COS_TABLE_SIZE - 1);
+				int32 nRot = particle->m_nCurrentZRotation % (SIN_COS_TABLE_SIZE - 1);
 				
-				float fX = (m_CosTable[nSinCosIndex] - m_SinTable[nSinCosIndex])
-							* particle->m_fCurrentZRadius;
+				float fX = (Cos(nRot) - Sin(nRot)) * particle->m_fCurrentZRadius;
 				
-				float fY = (m_SinTable[nSinCosIndex] + m_CosTable[nSinCosIndex])
-							* particle->m_fCurrentZRadius;
+				float fY = (Sin(nRot) + Cos(nRot)) * particle->m_fCurrentZRadius;
 
 				moveStep -= particle->m_vecParticleMovementOffset;
 
