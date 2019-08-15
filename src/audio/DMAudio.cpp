@@ -8,7 +8,6 @@
 cDMAudio &DMAudio = *(cDMAudio*)0x95CDBE;
 
 
-
 void
 cDMAudio::Initialise(void)
 {

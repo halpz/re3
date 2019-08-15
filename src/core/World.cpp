@@ -646,7 +646,7 @@ CWorld::FindObjectsInRange(CVector &centre, float distance, bool ignoreZ, short 
 }
 
 CEntity*
-CWorld::TestSphereAgainstWorld(CVector centre, float distance, CEntity* entityToIgnore, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSomeObjects)
+CWorld::TestSphereAgainstWorld(CVector centre, float distance, CEntity *entityToIgnore, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSomeObjects)
 {
 	CEntity* foundE = nil;
 

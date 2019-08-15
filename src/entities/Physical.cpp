@@ -11,6 +11,7 @@
 #include "ParticleObject.h"
 #include "Particle.h"
 #include "SurfaceTable.h"
+#include "PathFind.h"
 #include "CarCtrl.h"
 #include "DMAudio.h"
 #include "Automobile.h"
@@ -56,13 +57,13 @@ CPhysical::CPhysical(void)
 	m_phy_flagA80 = false;
 
 	m_fDistanceTravelled = 0.0f;
-	m_pedTreadable = nil;
-	m_carTreadable = nil;
+	m_treadable[PATH_CAR] = nil;
+	m_treadable[PATH_PED] = nil;
 
 	m_phy_flagA10 = false;
 	m_phy_flagA20 = false;
 
-	m_nSurfaceTouched = SURFACE_DEFAULT;
+	m_nZoneLevel = 0;
 }
 
 CPhysical::~CPhysical(void)
@@ -267,16 +268,16 @@ CPhysical::AddCollisionRecord_Treadable(CEntity *ent)
 {
 	if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable()){
 		CTreadable *t = (CTreadable*)ent;
-		if(t->m_nodeIndicesPeds[0] >= 0 ||
-		   t->m_nodeIndicesPeds[1] >= 0 ||
-		   t->m_nodeIndicesPeds[2] >= 0 ||
-		   t->m_nodeIndicesPeds[3] >= 0)
-			m_pedTreadable = t;
-		if(t->m_nodeIndicesCars[0] >= 0 ||
-		   t->m_nodeIndicesCars[1] >= 0 ||
-		   t->m_nodeIndicesCars[2] >= 0 ||
-		   t->m_nodeIndicesCars[3] >= 0)
-			m_carTreadable = t;
+		if(t->m_nodeIndices[PATH_PED][0] >= 0 ||
+		   t->m_nodeIndices[PATH_PED][1] >= 0 ||
+		   t->m_nodeIndices[PATH_PED][2] >= 0 ||
+		   t->m_nodeIndices[PATH_PED][3] >= 0)
+			m_treadable[PATH_PED] = t;
+		if(t->m_nodeIndices[PATH_CAR][0] >= 0 ||
+		   t->m_nodeIndices[PATH_CAR][1] >= 0 ||
+		   t->m_nodeIndices[PATH_CAR][2] >= 0 ||
+		   t->m_nodeIndices[PATH_CAR][3] >= 0)
+			m_treadable[PATH_CAR] = t;
 	}
 }
 

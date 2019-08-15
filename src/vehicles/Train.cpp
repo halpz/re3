@@ -67,7 +67,7 @@ CTrain::SetModelIndex(uint32 id)
 	int i;
 
 	CVehicle::SetModelIndex(id);
-	for(i = 0; i < 3; i++)
+	for(i = 0; i < NUM_TRAIN_NODES; i++)
 		m_aTrainNodes[i] = nil;
 	CClumpModelInfo::FillFrameArray(GetClump(), m_aTrainNodes);
 }

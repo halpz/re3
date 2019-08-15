@@ -22,6 +22,20 @@ struct CPedAudioData
 	int m_nMaxRandomDelayTime;
 };
 
+enum
+{
+	ENDFIGHT_NORMAL,
+	ENDFIGHT_WITH_A_STEP,
+	ENDFIGHT_FAST
+};
+
+enum PedRouteType
+{
+	PEDROUTE_STOP_WHEN_DONE = 1,
+	PEDROUTE_GO_BACKWARD_WHEN_DONE,
+	PEDROUTE_GO_TO_START_WHEN_DONE
+};
+
 struct FightMove
 {
 	AnimationId animId;
@@ -152,7 +166,7 @@ enum PedLineUpPhase {
 
 enum PedOnGroundState {
 	NO_PED,
-	PED_BELOW_PLAYER,
+	PED_IN_FRONT_OF_ATTACKER,
 	PED_ON_THE_FLOOR,
 	PED_DEAD_ON_THE_FLOOR
 };
@@ -241,7 +255,7 @@ public:
 	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
 	uint8 bIsStanding : 1;
 	uint8 m_ped_flagA2 : 1;
-	uint8 m_ped_flagA4 : 1;		// stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
+	uint8 bIsAttacking : 1;		// doesn't reset after fist fight, also stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
 	uint8 bIsPointingGunAt : 1;
 	uint8 bIsLooking : 1;
 	uint8 m_ped_flagA20 : 1;	// "look" method? - probably missing in SA
@@ -253,7 +267,7 @@ public:
 	uint8 bIsTalking : 1;
 	uint8 bIsInTheAir : 1;
 	uint8 bIsLanding : 1;
-	uint8 m_ped_flagB20 : 1;
+	uint8 bIsRunning : 1; // not fleeing
 	uint8 m_ped_flagB40 : 1;
 	uint8 m_ped_flagB80 : 1;
 
@@ -296,7 +310,7 @@ public:
 	uint8 m_ped_flagG1 : 1;
 	uint8 m_ped_flagG2 : 1;
 	uint8 m_ped_flagG4 : 1;
-	uint8 m_ped_flagG8 : 1;
+	uint8 m_ped_flagG8 : 1; // ped starts to go somewhere when set
 	uint8 m_ped_flagG10 : 1;
 	uint8 m_ped_flagG20 : 1;
 	uint8 m_ped_flagG40 : 1;
@@ -328,9 +342,7 @@ public:
 	eObjective m_prevObjective;
 	CPed *m_pedInObjective;
 	CVehicle *m_carInObjective;
-	uint32 field_174;
-	uint32 field_178;
-	uint32 field_17C;
+	CVector m_nextRoutePointPos;
 	CPed *m_leader;
 	uint32 m_pedFormation;
 	uint32 m_fearFlags;
@@ -363,15 +375,15 @@ public:
 private:
 	int8 _pad2B5[3];
 public:
-	CPathNode *m_pNextPathNode;
 	CPathNode *m_pLastPathNode;
+	CPathNode *m_pNextPathNode;
 	float m_fHealth;
 	float m_fArmour;
 	int16 m_routeLastPoint;
-	uint16 m_routePoints;
-	int16 m_routePos;
+	uint16 m_routeStartPoint;
+	int16 m_routePointsPassed;
 	int16 m_routeType;
-	int16 m_routeCurDir;
+	int16 m_routePointsBeingPassed;
 	uint16 field_2D2;
 	CVector2D m_moved;
 	float m_fRotationCur;
@@ -382,12 +394,12 @@ public:
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
-	CVector m_vecSeekVehicle;
+	CVector m_vecSeekPos;
 	CEntity *m_pSeekTarget;
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
 	uint8 pad_315[3];
-	float field_318;
+	float m_distanceToCountSeekDone;
 	bool bRunningToPhone;
 	uint8 field_31D;
 	int16 m_phoneId;
@@ -400,8 +412,8 @@ public:
 	float m_fleeFromPosY;
 	CEntity *m_fleeFrom;
 	uint32 m_fleeTimer;
-	uint32 field_344;
-	uint32 m_lastThreatTimer;
+	CEntity* m_collidingEntityWhileFleeing;
+	uint32 m_collidingThingTimer;
 	CEntity *m_pCollidingEntity;
 	uint8 m_stateUnused;
 	uint8 pad_351[3];
@@ -418,7 +430,7 @@ public:
 	PedFightMoves m_lastFightMove;
 	uint8 m_fightButtonPressure;
 	int8 m_fightUnk2;	// TODO
-	uint8 m_fightUnk1; // TODO
+	bool m_takeAStepAfterAttack;
 	uint8 pad_4B3;
 	CFire *m_pFire;
 	CEntity *m_pLookTarget;
@@ -429,7 +441,7 @@ public:
 	uint32 m_lookTimer;
 	uint32 m_standardTimer;
 	uint32 m_attackTimer;
-	uint32 m_lastHitTime;
+	uint32 m_lastHitTime; // obviously not correct
 	uint32 m_hitRecoverTimer;
 	uint32 m_objectiveTimer;
 	uint32 m_duckTimer;
@@ -560,7 +572,6 @@ public:
 	void SetEvasiveDive(CPhysical*, uint8);
 	void SetAttack(CEntity*);
 	void StartFightAttack(uint8);
-	void LoadFightData(void);
 	void SetWaitState(eWaitState, void*);
 	bool FightStrike(CVector&);
 	int GetLocalDirection(CVector2D&);
@@ -583,11 +594,38 @@ public:
 	void MakeTyresMuddySectorList(CPtrList&);
 	uint8 DoesLOSBulletHitPed(CColPoint &point);
 	bool DuckAndCover(void);
+	void EndFight(uint8);
+	void EnterCar(void);
+	uint8 GetNearestTrainPedPosition(CVehicle*, CVector&);
+	uint8 GetNearestTrainDoor(CVehicle*, CVector&);
+	void LineUpPedWithTrain(void);
+	void ExitCar(void);
+	void Fight(void);
+	bool FindBestCoordsFromNodes(CVector unused, CVector* a6);
+	void Wait(void);
+	void ProcessObjective(void);
+	bool SeekFollowingPath(CVector*);
+	void Flee(void);
+	void FollowPath(void);
+	CVector GetFormationPosition(void);
+	void GetNearestDoor(CVehicle*, CVector&);
+	bool GetNearestPassengerDoor(CVehicle*, CVector&);
+	int GetNextPointOnRoute(void);
+	uint8 GetPedRadioCategory(uint32);
+	int GetWeaponSlot(eWeaponType);
+	void GoToNearestDoor(CVehicle*);
+	bool HaveReachedNextPointOnRoute(float a2);
+	void Idle(void);
+	void InTheAir(void);
+	void SetLanding(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
 	static CVector GetPositionToOpenCarDoor(CVehicle *veh, uint32 component, float seatPosMult);
 	static CVector GetPositionToOpenCarDoor(CVehicle* veh, uint32 component);
+	static void Initialise(void);
+	static void SetAnimOffsetForEnterOrExitVehicle(void);
+	static void LoadFightData(void);
 
 	// Callbacks
 	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
@@ -640,6 +678,9 @@ public:
 	void SetPedStats(ePedStats);
 	bool IsGangMember(void);
 	void Die(void);
+	void EnterTrain(void);
+	void ExitTrain(void);
+	void Fall(void);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
@@ -649,18 +690,17 @@ public:
 	void SetPedState(PedState state) { m_nPedState = state; }
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
-	static uint16 &distanceMultToCountPedNear;
+	static uint16 &nThreatReactionRangeMultiplier;
 
-	static CVector &offsetToOpenRegularCarDoor;
-	static CVector &offsetToOpenLowCarDoor;
-	static CVector &offsetToOpenVanDoor;
 	static bool &bNastyLimbsCheat;
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;
-	static CColPoint &ms_tempColPoint;
-	static uint16 &unknownFightThing; // TODO
-	static FightMove (&ms_fightMoves)[24];
-	static CPedAudioData (&PedAudioData)[38];
+	static CVector2D &ms_vec2DFleePosition;
+	static CPedAudioData (&CommentWaitTime)[38];
+
+#ifndef FINAL
+	static bool bUnusedFightThingOnPlayer;
+#endif
 };
 
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);

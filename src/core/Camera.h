@@ -471,6 +471,11 @@ int     m_iModeObbeCamIsInForCar;
 
 	float Find3rdPersonQuickAimPitch(void);
 
+	void TakeControl(CEntity*, int16, int16, int32);
+	void TakeControlNoEntity(const CVector&, int16, int32);
+	void SetCamPositionForFixedMode(const CVector&, const CVector&);
+	bool GetFading();
+
 	void dtor(void) { this->CCamera::~CCamera(); }
 };
 static_assert(offsetof(CCamera, m_WideScreenOn) == 0x70, "CCamera: error");

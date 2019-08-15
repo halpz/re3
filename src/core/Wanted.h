@@ -77,6 +77,8 @@ public:
 	void ReportCrimeNow(eCrimeType type, const CVector &coors, bool policeDoesntCare);
 	void UpdateWantedLevel();
 
+	bool IsIgnored(void) { return m_bIgnoredByCops || m_bIgnoredByEveryone; }
+
 	static int32 WorkOutPolicePresence(CVector posn, float radius);
 	static void SetMaximumWantedLevel(int32 level);
 };

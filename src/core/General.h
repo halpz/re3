@@ -74,6 +74,7 @@ public:
 		return result;
 	}
 
+	// Returns an angle such that x2/y2 looks at x1/y1 with its forward vector if rotated by that angle
 	static float GetRadianAngleBetweenPoints(float x1, float y1, float x2, float y2)
 	{
 		float x = x2 - x1;
@@ -95,9 +96,26 @@ public:
 		}
 	}
 
+	// should return direction in 0-8 range. fits perfectly to peds' path directions.
+	static int CGeneral::GetNodeHeadingFromVector(float x, float y)
+	{
+		float angle = CGeneral::GetRadianAngleBetweenPoints(x, y, 0.0f, 0.0f);
+		if (angle < 0.0f)
+			angle += TWOPI;
+
+		angle = DEGTORAD(22.5f) + TWOPI - angle;
+
+		if (angle >= TWOPI)
+			angle -= TWOPI;
+
+		return (int)floorf(angle / DEGTORAD(45.0f));
+	}
+
 	// not too sure about all these...
 	static uint16 GetRandomNumber(void)
 		{ return myrand() & MYRAND_MAX; }
+	static bool GetRandomTrueFalse(void)
+		{ return GetRandomNumber() < MYRAND_MAX / 2; }
 	// Probably don't want to ever reach high
 	static float GetRandomNumberInRange(float low, float high)
 		{ return low + (high - low)*(GetRandomNumber()/float(MYRAND_MAX + 1)); }

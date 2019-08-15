@@ -5,7 +5,8 @@
 CPickup(&CPickups::aPickUps)[NUMPICKUPS] = *(CPickup(*)[NUMPICKUPS])*(uintptr*)0x878C98;
 
 // 20 ?! Some Miami leftover? (Originally at 0x5ED8D4)
-uint16 CPickups::ms_maxAmmosForWeapons[20] = { 0, 1, 45, 125, 25, 150, 300, 25, 5, 250, 5, 5, 0, 500, 0, 100, 0, 0, 0, 0 };
+uint16 AmmoForWeapon[20] = { 0, 1, 45, 125, 25, 150, 300, 25, 5, 250, 5, 5, 0, 500, 0, 100, 0, 0, 0, 0 };
+uint16 AmmoForWeapon_OnStreet[20] = { 0, 1, 9, 25, 5, 30, 60, 5, 1, 50, 1, 1, 0, 200, 0, 100, 0, 0, 0, 0 };
 
 WRAPPER void CPickups::RenderPickUpText(void) { EAXJMP(0x432440); }
 WRAPPER void CPickups::DoCollectableEffects(CEntity *ent) { EAXJMP(0x431C30); }

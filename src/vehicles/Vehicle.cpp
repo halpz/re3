@@ -30,6 +30,10 @@ void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehicleP
 void CVehicle::operator delete(void *p, size_t sz) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
 void CVehicle::operator delete(void *p, int handle) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
 
+WRAPPER bool CVehicle::ShufflePassengersToMakeSpace(void) { EAXJMP(0x5528A0); }
+// or Weapon.cpp?
+WRAPPER void FireOneInstantHitRound(CVector *shotSource, CVector *shotTarget, int32 damage) { EAXJMP(0x563B00); }
+
 CVehicle::CVehicle(uint8 CreatedBy)
 {
 	int i;
@@ -57,7 +61,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 		pPassengers[i] = nil;
 	m_nBombTimer = 0;
 	m_pBlowUpEntity = nil;
-	field_1FB = 0;
+	m_nPacManPickupsCarried = 0;
 	bComedyControls = false;
 	bCraneMessageDone = false;
 	bExtendedRange = false;
@@ -68,7 +72,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nTimeOfDeath = 0;
 	m_pCarFire = nil;
 	bHasBeenOwnedByPlayer = false;
-	m_veh_flagC20 = false;
+	bCreateRoadBlockPeds = false;
 	bCanBeDamaged = true;
 	bUsingSpecialColModel = false;
 	m_veh_flagD1 = false;
@@ -99,7 +103,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_aCollPolys[0].valid = false;
 	m_aCollPolys[1].valid = false;
 	AutoPilot.m_nCarMission = MISSION_NONE;
-	AutoPilot.m_nAnimationId = TEMPACT_NONE;
+	AutoPilot.m_nTempAction = TEMPACT_NONE;
 	AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 	AutoPilot.m_flag4 = false;
 	AutoPilot.m_flag10 = false;

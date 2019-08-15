@@ -19,8 +19,7 @@ public:
 
 	int32 m_audioEntityId;
   float unk1;
-	CTreadable *m_carTreadable;
-	CTreadable *m_pedTreadable;
+	CTreadable *m_treadable[2];	// car and ped
 	uint32 m_nLastTimeCollided;
 	CVector m_vecMoveSpeed;		// velocity
 	CVector m_vecTurnSpeed;		// angular velocity
@@ -114,6 +113,9 @@ public:
 		m_vecMoveSpeed.x = x;
 		m_vecMoveSpeed.y = y;
 		m_vecMoveSpeed.z = z;
+	}
+	void SetMoveSpeed(const CVector& speed) {
+		m_vecMoveSpeed = speed;
 	}
 	const CVector &GetTurnSpeed() { return m_vecTurnSpeed; }
 	void SetTurnSpeed(float x, float y, float z) {

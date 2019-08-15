@@ -246,7 +246,7 @@ public:
 	void PlayLoadedMissionAudio(void);
 	bool IsMissionAudioSampleFinished(void);
 	void ClearMissionAudio(void);
-	
+
 	int32 GetRadioInCar(void);
 	void SetRadioInCar(uint32 radio);
 	void SetRadioChannel(int8 radio, int32 pos);
