@@ -248,15 +248,15 @@ CFileMgr::OpenFileForWriting(const char *file)
 }
 
 int
-CFileMgr::Read(int fd, char *buf, int len)
+CFileMgr::Read(int fd, const char *buf, int len)
 {
-	return myfread(buf, 1, len, fd);
+	return myfread((void*)buf, 1, len, fd);
 }
 
 int
-CFileMgr::Write(int fd, char *buf, int len)
+CFileMgr::Write(int fd, const char *buf, int len)
 {
-	return myfwrite(buf, 1, len, fd);
+	return myfwrite((void*)buf, 1, len, fd);
 }
 
 bool

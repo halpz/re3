@@ -10,7 +10,7 @@
 #include "Clock.h"
 #include "Weather.h"
 #include "Stats.h"
-#include "math/maths.h"
+#include "maths.h"
 #include "Frontend.h"
 
 uint8 ScrollCharSet[59][5] = {

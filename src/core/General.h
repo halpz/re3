@@ -97,7 +97,7 @@ public:
 	}
 
 	// should return direction in 0-8 range. fits perfectly to peds' path directions.
-	static int CGeneral::GetNodeHeadingFromVector(float x, float y)
+	static int GetNodeHeadingFromVector(float x, float y)
 	{
 		float angle = CGeneral::GetRadianAngleBetweenPoints(x, y, 0.0f, 0.0f);
 		if (angle < 0.0f)

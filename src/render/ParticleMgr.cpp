@@ -91,7 +91,7 @@ void cParticleSystemMgr::LoadParticleData()
 						break;
 
 					case CFG_PARAM_INITIAL_COLOR_VARIATION:
-						entry->m_InitialColorVariation = min(atoi(value), 100);
+						entry->m_InitialColorVariation = Min(atoi(value), 100);
 						break;
 
 					case CFG_PARAM_FADE_DESTINATION_COLOR_R:

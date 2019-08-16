@@ -231,17 +231,17 @@ struct AnimAssocDesc
 
 struct AnimAssocDefinition
 {
-	char *name;
-	char *blockName;
+	char const *name;
+	char const *blockName;
 	int32 modelIndex;
 	int32 numAnims;
-	char **animNames;
+	char const **animNames;
 	AnimAssocDesc *animDescs;
 };
 
 class CAnimManager
 {
-	static AnimAssocDefinition ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_GROUPS];
+	static const AnimAssocDefinition ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_GROUPS];
 	static CAnimBlock *ms_aAnimBlocks;	//[2]
 	static CAnimBlendHierarchy *ms_aAnimations;	//[250]
 	static int32 &ms_numAnimBlocks;

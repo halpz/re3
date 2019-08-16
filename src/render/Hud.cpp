@@ -1128,7 +1128,7 @@ void CHud::DrawAfterFade()
 		switch (OddJob2On) {
 		case 0:
 			OddJob2On = 1;
-			OddJob2XOffset = 380.0;
+			OddJob2XOffset = 380.0f;
 			break;
 		case 1:
 			if (OddJob2XOffset <= 2.0f) {
@@ -1136,27 +1136,27 @@ void CHud::DrawAfterFade()
 				OddJob2On = 2;
 			}
 			else {
-				fStep = 40.0;
-				if ((OddJob2XOffset * 0.16667) <= 40.0)
-					fStep = OddJob2XOffset * 0.16667;
+				fStep = 40.0f;
+				if ((OddJob2XOffset * 0.16667f) <= 40.0f)
+					fStep = OddJob2XOffset * 0.16667f;
 				OddJob2XOffset = OddJob2XOffset - fStep;
 			}
 			break;
 		case 2:
-			OddJob2Timer += (20.0 * CTimer::GetTimeStep());
+			OddJob2Timer += (20.0f * CTimer::GetTimeStep());
 			if (OddJob2Timer > 1500) {
 				OddJob2On = 3;
 			}
 			break;
 		case 3:
-			fStep = 30.0;
-			if ((OddJob2XOffset * 0.2) >= 30.0)
-				fStep = OddJob2XOffset * 0.2;
+			fStep = 30.0f;
+			if ((OddJob2XOffset * 0.2f) >= 30.0f)
+				fStep = OddJob2XOffset * 0.2f;
 
 			OddJob2XOffset = OddJob2XOffset - fStep;
 
-			if (OddJob2XOffset < -380.0) {
-				OddJob2OffTimer = 5000.0;
+			if (OddJob2XOffset < -380.0f) {
+				OddJob2OffTimer = 5000.0f;
 				OddJob2On = 0;
 			}
 			break;

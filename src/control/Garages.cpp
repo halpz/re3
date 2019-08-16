@@ -68,7 +68,7 @@ bool CGarages::HasCarBeenCrushed(int32 handle)
 	return CrushedCarId == handle;
 }
 
-WRAPPER void CGarages::TriggerMessage(char *text, int16, uint16 time, int16) { EAXJMP(0x426B20); }
+WRAPPER void CGarages::TriggerMessage(const char *text, int16, uint16 time, int16) { EAXJMP(0x426B20); }
 WRAPPER bool CGarages::IsPointWithinHideOutGarage(CVector*) { EAXJMP(0x428260); }
 
 #if 0
@@ -97,7 +97,7 @@ void CGarages::PrintMessages()
 				CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, -1, -1, -1, -1, -1, gUString);
 
 				CFont::SetColor(CRGBA(0, 0, 0, 255));
-				CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f + 2.0 - 40.0f), gUString);
+				CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f + 2.0f - 40.0f), gUString);
 
 				CFont::SetColor(CRGBA(89, 115, 150, 255));
 				CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f - 40.0f), gUString);
@@ -107,7 +107,7 @@ void CGarages::PrintMessages()
 			CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, MessageNumberInString2, -1, -1, -1, -1, gUString);
 
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
-			CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f + 2.0 - 40.0f), gUString);
+			CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f + 2.0f - 40.0f), gUString);
 
 			CFont::SetColor(CRGBA(89, 115, 150, 255));
 			CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(-84.0f - 40.0f), gUString);

@@ -158,14 +158,14 @@ release_existing()
 		if ( opened_samples[i] )
 		{
 			AIL_release_3D_sample_handle(opened_samples[i]);
-			opened_samples[i] = NULL;
+			opened_samples[i] = 0;
 		}
 	}
 
 	if ( opened_provider )
 	{
 		AIL_close_3D_provider(opened_provider);
-		opened_provider = NULL;
+		opened_provider = 0;
 	}
 
 	_fPrevEaxRatioDestination = 0.0f;
@@ -879,7 +879,7 @@ cSampleManager::Initialise(void)
 		
 		_maxSamples = 0;
 	
-		opened_provider = NULL;
+		opened_provider = 0;
 		DIG = NULL;
 		
 		for ( int32 i = 0; i < MAXCHANNELS; i++ )
@@ -2020,10 +2020,9 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 		{
 			uint32 i = 0;
 			
-			if ( !_bIsMp3Active ) goto FIND_MP3TRACK;
-			
 			do
 			{
+                if(_bIsMp3Active){
 				if ( ++_CurMP3Index >= nNumMP3s )
 					_CurMP3Index = 0;
 				
@@ -2059,21 +2058,15 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 					AIL_pause_stream(mp3Stream[nStream], 0);
 					return true;
 				}
-				
-				goto NEXT_MP3TRACK;
-				
-FIND_MP3TRACK:
-				if ( nPos > nStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] )
-					position = 0;
-				
-				tMP3Entry *e;
-				if ( !_GetMP3PosFromStreamPos(&position, &e) )
-				{
-					if ( e == NULL )
-					{
-						nFile = 0;
-						goto PLAY_STREAMEDTRACK;
-					}
+		}
+		if(nPos > nStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER]) position = 0;
+
+		tMP3Entry *e;
+		if(!_GetMP3PosFromStreamPos(&position, &e)) {
+			if(e == NULL) {
+				nFile = 0;
+				goto PLAY_STREAMEDTRACK;
+			}
 				}
 				
 				if ( e->pLinkPath != NULL )
@@ -2097,14 +2090,12 @@ FIND_MP3TRACK:
 					return true;
 				}
 				
-NEXT_MP3TRACK:			
 				_bIsMp3Active = false;
 	
 			} while ( ++i < nNumMP3s );
 			
 			position = 0;
 			nFile = 0;
-			goto PLAY_STREAMEDTRACK;
 		}
 		
 PLAY_STREAMEDTRACK:

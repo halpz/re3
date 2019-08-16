@@ -4,14 +4,14 @@
 
 struct RwObjectNameIdAssocation
 {
-	char *name;
+	const char *name;
 	int32 hierId;
 	uint32 flags;
 };
 
 struct RwObjectNameAssociation
 {
-	char *name;
+	const char *name;
 	RwFrame *frame;
 };
 

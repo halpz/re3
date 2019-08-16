@@ -1038,7 +1038,7 @@ CVehicleModelInfo::SetEnvironmentMap(void)
 void
 CVehicleModelInfo::LoadEnvironmentMaps(void)
 {
-	char *texnames[] = {
+	const char *texnames[] = {
 		"reflection01",		// only one used
 		"reflection02",
 		"reflection03",

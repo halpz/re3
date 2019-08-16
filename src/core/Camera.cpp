@@ -209,7 +209,7 @@ WellBufferMe(float Target, float *CurrentValue, float *CurrentSpeed, float MaxSp
 	else if(TargetSpeed > 0.0f && *CurrentSpeed > TargetSpeed)
 		*CurrentSpeed = TargetSpeed;
 
-	*CurrentValue += *CurrentSpeed * min(10.0f, CTimer::GetTimeStep());
+	*CurrentValue += *CurrentSpeed * Min(10.0f, CTimer::GetTimeStep());
 }
 
 void
@@ -697,7 +697,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	// Process height offset to avoid peds and cars
 
 	float TargetZOffSet = m_fUnknownZOffSet + m_fDimensionOfHighestNearCar;
-	TargetZOffSet = max(TargetZOffSet, m_fPedBetweenCameraHeightOffset);
+	TargetZOffSet = Max(TargetZOffSet, m_fPedBetweenCameraHeightOffset);
 	float TargetHeight = CameraTarget.z + TargetZOffSet - Source.z;
 
 	if(TargetHeight > m_fCamBufferedHeight){
@@ -753,7 +753,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 		}
 	}
 
-	TargetCoors.z += min(1.0f, m_fCamBufferedHeight/2.0f);
+	TargetCoors.z += Min(1.0f, m_fCamBufferedHeight/2.0f);
 	m_cvecTargetCoorsForFudgeInter = TargetCoors;
 
 	Front = TargetCoors - Source;
@@ -991,7 +991,7 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 		}
 		if(FoundCamRoof){
 			// Camera is under something
-			float roof = FoundRoofCenter ? min(CamRoof, CarRoof) : CamRoof;
+			float roof = FoundRoofCenter ? Min(CamRoof, CarRoof) : CamRoof;
 			// Same weirdness again?
 			TargetAlpha = CGeneral::GetATanOfXY(CA_MAX_DISTANCE, roof - CamTargetZ - 1.5f);
 			CamClear = false;
@@ -1249,7 +1249,7 @@ void
 CCam::Cam_On_A_String_Unobscured(const CVector &TargetCoors, float BaseDist)
 {
 	CA_MAX_DISTANCE = BaseDist + 0.1f + TheCamera.CarZoomValueSmooth;
-	CA_MIN_DISTANCE = min(BaseDist*0.6f, 3.5f);
+	CA_MIN_DISTANCE = Min(BaseDist*0.6f, 3.5f);
 
 	CVector Dist = Source - TargetCoors;
 

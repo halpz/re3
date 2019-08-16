@@ -397,7 +397,7 @@ CPlane::ProcessControl(void)
 				planePathSpeed = PlanePath3Speed;
 				numPathNodes = NumPath3Nodes;
 				if(CesnaMissionStatus == CESNA_STATUS_LANDED){
-					pDrugRunCesna = false;
+					pDrugRunCesna = nil;
 					FlagToDestroyWhenNextProcessed();
 				}
 			}else if(m_bIsDropOffCesna){
@@ -407,7 +407,7 @@ CPlane::ProcessControl(void)
 				planePathSpeed = PlanePath4Speed;
 				numPathNodes = NumPath4Nodes;
 				if(DropOffCesnaMissionStatus == CESNA_STATUS_LANDED){
-					pDropOffCesna = false;
+					pDropOffCesna = nil;
 					FlagToDestroyWhenNextProcessed();
 				}
 			}else{

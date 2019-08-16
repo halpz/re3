@@ -372,7 +372,7 @@ EAX30_SCENARIO;
 // Array of scenario names							//
 //////////////////////////////////////////////////////
 
-extern char* EAX30_SCENARIO_NAMES[];
+extern const char* EAX30_SCENARIO_NAMES[];
 
 //////////////////////////////////////////////////////
 // Standardised Locations enumerated				//
@@ -402,7 +402,7 @@ EAX30_LOCATION;
 // Array of standardised location names				//
 //////////////////////////////////////////////////////
 
-extern char* EAX30_LOCATION_NAMES[];
+extern const char* EAX30_LOCATION_NAMES[];
 
 //////////////////////////////////////////////////////
 // Number of effects in each scenario				//
@@ -471,7 +471,7 @@ EAX30_ORIGINAL_PRESET_ENUMS;
 // Array of original environment names				//
 //////////////////////////////////////////////////////
 
-extern char* EAX30_ORIGINAL_PRESET_NAMES[];
+extern const char* EAX30_ORIGINAL_PRESET_NAMES[];
 
 //////////////////////////////////////////////////////
 // Original effects matrix							//
@@ -501,7 +501,7 @@ EAX30_SPORTS_PRESET_ENUMS;
 // Array of sport environment names					//
 //////////////////////////////////////////////////////
 
-extern char* EAX30_SPORTS_PRESET_NAMES[];
+extern const char* EAX30_SPORTS_PRESET_NAMES[];
 
 //////////////////////////////////////////////////////
 // Sports effects matrix							//
@@ -529,7 +529,7 @@ EAX30_PREFAB_PRESET_ENUMS;
 // Array of prefab environment names				//
 //////////////////////////////////////////////////////
 
-char* EAX30_PREFAB_PRESET_NAMES[];
+extern const char* EAX30_PREFAB_PRESET_NAMES[];
 
 //////////////////////////////////////////////////////
 // Prefab effects matrix							//
@@ -558,7 +558,7 @@ EAX30_DOMESNPIPES_PRESET_ENUMS;
 // Array of Domes & Pipes environment names			//
 //////////////////////////////////////////////////////
 
-extern char* EAX30_DOMESNPIPES_PRESET_NAMES[];
+extern const char* EAX30_DOMESNPIPES_PRESET_NAMES[];
 
 //////////////////////////////////////////////////////
 // Domes & Pipes effects matrix						//
@@ -586,7 +586,7 @@ EAX30_OUTDOORS_PRESET_ENUMS;
 // Array of Outdoors environment names				//
 //////////////////////////////////////////////////////
 
-extern char* EAX30_OUTDOORS_PRESET_NAMES[];
+extern const char* EAX30_OUTDOORS_PRESET_NAMES[];
 
 //////////////////////////////////////////////////////
 // Outdoors effects matrix							//
@@ -612,7 +612,7 @@ EAX30_MOOD_PRESET_ENUMS;
 // Array of Mood environment names					//
 //////////////////////////////////////////////////////
 
-extern char* EAX30_MOOD_PRESET_NAMES[];
+extern const char* EAX30_MOOD_PRESET_NAMES[];
 
 //////////////////////////////////////////////////////
 // Mood effects matrix								//
@@ -643,7 +643,7 @@ EAX30_DRIVING_PRESET_ENUMS;
 // Array of driving environment names				//
 //////////////////////////////////////////////////////
 
-extern char* EAX30_DRIVING_PRESET_NAMES[];
+extern const char* EAX30_DRIVING_PRESET_NAMES[];
 
 //////////////////////////////////////////////////////
 // Driving effects matrix							//
@@ -672,7 +672,7 @@ EAX30_CITY_PRESET_ENUMS;
 // Array of City environment names					//
 //////////////////////////////////////////////////////
 
-extern char* EAX30_CITY_PRESET_NAMES[];
+extern const char* EAX30_CITY_PRESET_NAMES[];
 
 //////////////////////////////////////////////////////
 // City effects matrix								//
@@ -699,7 +699,7 @@ EAX30_MISC_PRESET_ENUMS;
 // Array of Misc environment names					//
 //////////////////////////////////////////////////////
 
-extern char* EAX30_MISC_PRESET_NAMES[];
+extern const char* EAX30_MISC_PRESET_NAMES[];
 
 //////////////////////////////////////////////////////
 // Misc effects matrix								//

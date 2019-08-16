@@ -316,7 +316,7 @@ CAutomobile::ProcessControl(void)
 
 	// Set Center of Mass to make car more stable
 	if(strongGrip1 || bCheat3)
-		m_vecCentreOfMass.z = 0.3f*m_aSuspensionSpringLength[0] + -1.0*m_fHeightAboveRoad;
+		m_vecCentreOfMass.z = 0.3f*m_aSuspensionSpringLength[0] + -1.0f*m_fHeightAboveRoad;
 	else if(pHandling->Flags & HANDLING_NONPLAYER_STABILISER && m_status == STATUS_PHYSICS)
 		m_vecCentreOfMass.z = pHandling->CentreOfMass.z - 0.2f*pHandling->Dimension.z;
 	else
@@ -691,7 +691,7 @@ CAutomobile::ProcessControl(void)
 			if(m_aSuspensionSpringRatio[i] < 1.0f)
 				m_aWheelTimer[i] = 4.0f;
 			else
-				m_aWheelTimer[i] = max(m_aWheelTimer[i]-CTimer::GetTimeStep(), 0.0f);
+				m_aWheelTimer[i] = Max(m_aWheelTimer[i]-CTimer::GetTimeStep(), 0.0f);
 
 			if(m_aWheelTimer[i] > 0.0f){
 				m_nWheelsOnGround++;
@@ -1009,7 +1009,7 @@ CAutomobile::ProcessControl(void)
 
 		if(m_status != STATUS_PLAYER && m_status != STATUS_PLAYER_REMOTE && m_status != STATUS_PHYSICS){
 			if(GetModelIndex() == MI_MIAMI_RCRAIDER || GetModelIndex() == MI_MIAMI_SPARROW)
-				m_aWheelSpeed[0] = max(m_aWheelSpeed[0]-0.0005f, 0.0f);
+				m_aWheelSpeed[0] = Max(m_aWheelSpeed[0]-0.0005f, 0.0f);
 		}else if((GetModelIndex() == MI_DODO || CVehicle::bAllDodosCheat) &&
 		         m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
 			FlyingControl(FLIGHT_MODEL_DODO);
@@ -1017,7 +1017,7 @@ CAutomobile::ProcessControl(void)
 			FlyingControl(FLIGHT_MODEL_HELI);
 		}else if(GetModelIndex() == MI_MIAMI_RCRAIDER || GetModelIndex() == MI_MIAMI_SPARROW || bAllCarCheat){
 			if(CPad::GetPad(0)->GetCircleJustDown())
-				m_aWheelSpeed[0] = max(m_aWheelSpeed[0]-0.03f, 0.0f);
+				m_aWheelSpeed[0] = Max(m_aWheelSpeed[0]-0.03f, 0.0f);
 			if(m_aWheelSpeed[0] < 0.22f)
 				m_aWheelSpeed[0] += 0.0001f;
 			if(m_aWheelSpeed[0] > 0.15f)
@@ -1129,10 +1129,10 @@ CAutomobile::ProcessControl(void)
 		if(speed > sq(0.1f)){
 			speed = Sqrt(speed);
 			if(suspShake > 0.0f){
-				uint8 freq = min(200.0f*suspShake*speed*2000.0f/m_fMass + 100.0f, 250.0f);
+				uint8 freq = Min(200.0f*suspShake*speed*2000.0f/m_fMass + 100.0f, 250.0f);
 				CPad::GetPad(0)->StartShake(20000.0f*CTimer::GetTimeStep()/freq, freq);
 			}else{
-				uint8 freq = min(200.0f*surfShake*speed*2000.0f/m_fMass + 40.0f, 145.0f);
+				uint8 freq = Min(200.0f*surfShake*speed*2000.0f/m_fMass + 40.0f, 145.0f);
 				CPad::GetPad(0)->StartShake(5000.0f*CTimer::GetTimeStep()/freq, freq);
 			}
 		}
@@ -1591,10 +1591,11 @@ CAutomobile::PreRender(void)
 		break;
 	}
 
-	if(GetModelIndex() == MI_RCBANDIT ||
-	   GetModelIndex() == MI_DODO ||
-	   GetModelIndex() == MI_RHINO)
-		goto nolights;
+	if(GetModelIndex() == MI_RCBANDIT || GetModelIndex() == MI_DODO ||
+	   GetModelIndex() == MI_RHINO) {
+		CShadows::StoreShadowForCar(this);
+		return;
+	}
 
 	// Turn lights on/off
 	bool shouldLightsBeOn = 
@@ -1739,7 +1740,7 @@ CAutomobile::PreRender(void)
 		// Taillight coronas
 		if(behindness > 0.0f){
 			// Behind car
-			float intensity = 0.4f*behindness + 0.4;
+			float intensity = 0.4f*behindness + 0.4f;
 			float size = (behindness + 1.0f)/2.0f;
 
 			if(m_fGasPedal < 0.0f){
@@ -1757,7 +1758,7 @@ CAutomobile::PreRender(void)
 						CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 						CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
 			}else{
-				if(m_fBrakePedal > 0.0){
+				if(m_fBrakePedal > 0.0f){
 					intensity += 0.4f;
 					size += 0.3f;
 				}
@@ -1843,8 +1844,10 @@ CAutomobile::PreRender(void)
 	}else{
 		// Lights off
 
-		if(m_status == STATUS_ABANDONED || m_status == STATUS_WRECKED)
-			goto nolights;
+		if(m_status == STATUS_ABANDONED || m_status == STATUS_WRECKED) {
+			CShadows::StoreShadowForCar(this);
+			return;
+		}
 
 		CVector lightPos = mi->m_positions[CAR_POS_TAILLIGHTS];
 		CVector lightR = GetMatrix() * lightPos;
@@ -1903,7 +1906,6 @@ CAutomobile::PreRender(void)
 		}
 	}
 
-nolights:
 	CShadows::StoreShadowForCar(this);
 }
 
@@ -2586,7 +2588,7 @@ CAutomobile::HydraulicControl(void)
 		float minz = pos.z + extendedLowerLimit - wheelRadius;
 		if(minz < specialColModel->boundingBox.min.z)
 			specialColModel->boundingBox.min.z = minz;
-		float radius = max(specialColModel->boundingBox.min.Magnitude(), specialColModel->boundingBox.max.Magnitude());
+		float radius = Max(specialColModel->boundingBox.min.Magnitude(), specialColModel->boundingBox.max.Magnitude());
 		if(specialColModel->boundingSphere.radius < radius)
 			specialColModel->boundingSphere.radius = radius;
 
@@ -2685,10 +2687,10 @@ CAutomobile::HydraulicControl(void)
 		float front = -rear;
 		float right = CPad::GetPad(0)->GetCarGunLeftRight()/128.0f;
 		float left = -right;
-		suspChange[CARWHEEL_FRONT_LEFT] = max(front+left, 0.0f);
-		suspChange[CARWHEEL_REAR_LEFT] = max(rear+left, 0.0f);
-		suspChange[CARWHEEL_FRONT_RIGHT] = max(front+right, 0.0f);
-		suspChange[CARWHEEL_REAR_RIGHT] = max(rear+right, 0.0f);
+		suspChange[CARWHEEL_FRONT_LEFT] = Max(front+left, 0.0f);
+		suspChange[CARWHEEL_REAR_LEFT] = Max(rear+left, 0.0f);
+		suspChange[CARWHEEL_FRONT_RIGHT] = Max(front+right, 0.0f);
+		suspChange[CARWHEEL_REAR_RIGHT] = Max(rear+right, 0.0f);
 
 		if(m_hydraulicState < 100){
 			// Lowered, move wheels up
@@ -2804,7 +2806,7 @@ CAutomobile::ProcessBuoyancy(void)
 		ApplyTurnForce(impulse, point);
 
 		CVector initialSpeed = m_vecMoveSpeed;
-		float timeStep = max(CTimer::GetTimeStep(), 0.01f);
+		float timeStep = Max(CTimer::GetTimeStep(), 0.01f);
 		float impulseRatio = impulse.z / (GRAVITY * m_fMass * timeStep);
 		float waterResistance = Pow(1.0f - 0.05f*impulseRatio, CTimer::GetTimeStep());
 		m_vecMoveSpeed *= waterResistance;
@@ -2877,7 +2879,7 @@ CAutomobile::ProcessBuoyancy(void)
 			static RwRGBA black;
 			if(pos.z >= 0.0f){
 				nGenerateRaindrops = 0;
-				pos.z += 0.5;
+				pos.z += 0.5f;
 				CParticleObject::AddObject(POBJECT_SPLASHES_AROUND,
 					pos, CVector(0.0f, 0.0f, 0.0f), 6.5f, 2500, black, true);
 			}
@@ -2897,7 +2899,7 @@ CAutomobile::ProcessBuoyancy(void)
 				float fSpeed = vSpeed.MagnitudeSqr();
 				if(fSpeed > sq(0.05f)){
 					fSpeed = Sqrt(fSpeed);
-					float size = min((fSpeed < 0.15f ? 0.25f : 0.75f)*fSpeed, 0.6f);
+					float size = Min((fSpeed < 0.15f ? 0.25f : 0.75f)*fSpeed, 0.6f);
 					CVector right = 0.2f*fSpeed*GetRight() + 0.2f*vSpeed;
 
 					CParticle::AddParticle(PARTICLE_PED_SPLASH,
@@ -2979,11 +2981,11 @@ CAutomobile::DoDriveByShootings(void)
 
 	// TODO: what is this?
 	if(!lookingLeft && m_weaponDoorTimerLeft > 0.0f){
-		m_weaponDoorTimerLeft = max(m_weaponDoorTimerLeft - CTimer::GetTimeStep()*0.1f, 0.0f);
+		m_weaponDoorTimerLeft = Max(m_weaponDoorTimerLeft - CTimer::GetTimeStep()*0.1f, 0.0f);
 		ProcessOpenDoor(CAR_DOOR_LF, NUM_ANIMS, m_weaponDoorTimerLeft);
 	}
 	if(!lookingRight && m_weaponDoorTimerRight > 0.0f){
-		m_weaponDoorTimerRight = max(m_weaponDoorTimerRight - CTimer::GetTimeStep()*0.1f, 0.0f);
+		m_weaponDoorTimerRight = Max(m_weaponDoorTimerRight - CTimer::GetTimeStep()*0.1f, 0.0f);
 		ProcessOpenDoor(CAR_DOOR_RF, NUM_ANIMS, m_weaponDoorTimerRight);
 	}
 }
@@ -3131,7 +3133,7 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 			FindPlayerPed()->SetWantedLevelNoDrop(1);
 
 		if(m_status == STATUS_PLAYER && impulse > 50.0f){
-			uint8 freq = min(0.4f*impulse*2000.0f/m_fMass + 100.0f, 250.0f);
+			uint8 freq = Min(0.4f*impulse*2000.0f/m_fMass + 100.0f, 250.0f);
 			CPad::GetPad(0)->StartShake(40000/freq, freq);
 		}
 
@@ -3284,7 +3286,7 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 
 			if(m_pDamageEntity && m_pDamageEntity == FindPlayerVehicle() && impulse > 10.0f){
 				int money = (doubleMoney ? 2 : 1) * impulse*pHandling->nMonetaryValue/1000000.0f;
-				money = min(money, 40);
+				money = Min(money, 40);
 				if(money > 2){
 					sprintf(gString, "$%d", money);
 					CWorld::Players[CWorld::PlayerInFocus].m_nMoney += money;
@@ -3987,7 +3989,7 @@ CAutomobile::SetupSuspensionLines(void)
 	// adjust col model to include suspension lines
 	if(colModel->boundingBox.min.z > colModel->lines[0].p1.z)
 		colModel->boundingBox.min.z = colModel->lines[0].p1.z;
-	float radius = max(colModel->boundingBox.min.Magnitude(), colModel->boundingBox.max.Magnitude());
+	float radius = Max(colModel->boundingBox.min.Magnitude(), colModel->boundingBox.max.Magnitude());
 	if(colModel->boundingSphere.radius < radius)
 		colModel->boundingSphere.radius = radius;
 

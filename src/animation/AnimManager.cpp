@@ -198,7 +198,7 @@ AnimAssocDesc aStdAnimDescsSide[] = {
 	{ ANIM_IDLE_STANCE, ASSOC_REPEAT },
 	{ ANIM_WALK_START, ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION },
 };
-char *aStdAnimations[] = {
+char const *aStdAnimations[] = {
 	"walk_civi",
 	"run_civi",
 	"sprint_panic",
@@ -373,162 +373,162 @@ char *aStdAnimations[] = {
 	"PHONE_out",
 	"PHONE_talk",
 };
-char *aPlayerAnimations[] = {
+char const *aPlayerAnimations[] = {
 	"walk_player",
 	"run_player",
 	"SPRINT_civi",
 	"IDLE_STANCE",
 	"walk_start",
 };
-char *aPlayerWithRocketAnimations[] = {
+char const *aPlayerWithRocketAnimations[] = {
 	"walk_rocket",
 	"run_rocket",
 	"run_rocket",
 	"idle_rocket",
 	"walk_start_rocket",
 };
-char *aPlayer1ArmedAnimations[] = {
+char const *aPlayer1ArmedAnimations[] = {
 	"walk_player",
 	"run_1armed",
 	"SPRINT_civi",
 	"IDLE_STANCE",
 	"walk_start",
 };
-char *aPlayer2ArmedAnimations[] = {
+char const *aPlayer2ArmedAnimations[] = {
 	"walk_player",
 	"run_armed",
 	"run_armed",
 	"idle_stance",
 	"walk_start",
 };
-char *aPlayerBBBatAnimations[] = {
+char const *aPlayerBBBatAnimations[] = {
 	"walk_player",
 	"run_player",
 	"run_player",
 	"IDLE_STANCE",
 	"walk_start",
 };
-char *aShuffleAnimations[] = {
+char const *aShuffleAnimations[] = {
 	"WALK_shuffle",
 	"RUN_civi",
 	"SPRINT_civi",
 	"IDLE_STANCE",
 };
-char *aOldAnimations[] = {
+char const *aOldAnimations[] = {
 	"walk_old",
 	"run_civi",
 	"sprint_civi",
 	"idle_stance",
 };
-char *aGang1Animations[] = {
+char const *aGang1Animations[] = {
 	"walk_gang1",
 	"run_gang1",
 	"sprint_civi",
 	"idle_stance",
 };
-char *aGang2Animations[] = {
+char const *aGang2Animations[] = {
 	"walk_gang2",
 	"run_gang1",
 	"sprint_civi",
 	"idle_stance",
 };
-char *aFatAnimations[] = {
+char const *aFatAnimations[] = {
 	"walk_fat",
 	"run_civi",
 	"woman_runpanic",
 	"idle_stance",
 };
-char *aOldFatAnimations[] = {
+char const *aOldFatAnimations[] = {
 	"walk_fatold",
 	"run_fatold",
 	"woman_runpanic",
 	"idle_stance",
 };
-char *aStdWomanAnimations[] = {
+char const *aStdWomanAnimations[] = {
 	"woman_walknorm",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char *aWomanShopAnimations[] = {
+char const *aWomanShopAnimations[] = {
 	"woman_walkshop",
 	"woman_run",
 	"woman_run",
 	"woman_idlestance",
 };
-char *aBusyWomanAnimations[] = {
+char const *aBusyWomanAnimations[] = {
 	"woman_walkbusy",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char *aSexyWomanAnimations[] = {
+char const *aSexyWomanAnimations[] = {
 	"woman_walksexy",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char *aOldWomanAnimations[] = {
+char const *aOldWomanAnimations[] = {
 	"woman_walkold",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char *aFatWomanAnimations[] = {
+char const *aFatWomanAnimations[] = {
 	"walk_fat",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char *aPanicChunkyAnimations[] = {
+char const *aPanicChunkyAnimations[] = {
 	"run_fatold",
 	"woman_runpanic",
 	"woman_runpanic",
 	"idle_stance",
 };
-char *aPlayerStrafeBackAnimations[] = {
+char const *aPlayerStrafeBackAnimations[] = {
 	"walk_player_back",
 	"run_player_back",
 	"run_player_back",
 	"IDLE_STANCE",
 	"walk_start_back",
 };
-char *aPlayerStrafeLeftAnimations[] = {
+char const *aPlayerStrafeLeftAnimations[] = {
 	"walk_player_left",
 	"run_left",
 	"run_left",
 	"IDLE_STANCE",
 	"walk_start_left",
 };
-char *aPlayerStrafeRightAnimations[] = {
+char const *aPlayerStrafeRightAnimations[] = {
 	"walk_player_right",
 	"run_right",
 	"run_right",
 	"IDLE_STANCE",
 	"walk_start_right",
 };
-char *aRocketStrafeBackAnimations[] = {
+char const *aRocketStrafeBackAnimations[] = {
 	"walk_rocket_back",
 	"run_rocket_back",
 	"run_rocket_back",
 	"idle_rocket",
 	"walkst_rocket_back",
 };
-char *aRocketStrafeLeftAnimations[] = {
+char const *aRocketStrafeLeftAnimations[] = {
 	"walk_rocket_left",
 	"run_rocket_left",
 	"run_rocket_left",
 	"idle_rocket",
 	"walkst_rocket_left",
 };
-char *aRocketStrafeRightAnimations[] = {
+char const *aRocketStrafeRightAnimations[] = {
 	"walk_rocket_right",
 	"run_rocket_right",
 	"run_rocket_right",
 	"idle_rocket",
 	"walkst_rocket_right",
 };
-AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_GROUPS] = {
+const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_GROUPS] = {
 	{ "man", "ped", MI_COP, 173, aStdAnimations, aStdAnimDescs },
 	{ "player", "ped", MI_COP, 5, aPlayerAnimations, aStdAnimDescs },
 	{ "playerrocket", "ped", MI_COP, 5, aPlayerWithRocketAnimations, aStdAnimDescs },
@@ -749,7 +749,7 @@ CAnimManager::LoadAnimFiles(void)
 		RpClump *clump = (RpClump*)mi->CreateInstance();
 		RpAnimBlendClumpInit(clump);
 		CAnimBlendAssocGroup *group = &CAnimManager::ms_aAnimAssocGroups[i];
-		AnimAssocDefinition *def = &CAnimManager::ms_aAnimAssocDefinitions[i];
+		const AnimAssocDefinition *def = &CAnimManager::ms_aAnimAssocDefinitions[i];
 		group->CreateAssociations(def->blockName, clump, def->animNames, def->numAnims);
 		for(j = 0; j < group->numAssociations; j++)
 			group->GetAnimation(j)->flags |= def->animDescs[j].flags;
