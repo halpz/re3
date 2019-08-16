@@ -537,6 +537,12 @@ void CPad::AddToPCCheatString(char c)
 	if (!_CHEATCMP("OORAGNAK"))
 		KangarooCheat();
 #endif
+
+#ifndef MASTER
+	// "PEDDEBUG"
+	if (!_CHEATCMP("GUBEDDEP"))
+		CPed::SwitchDebugDisplay();
+#endif
 	
 	#undef _CHEATCMP
 }

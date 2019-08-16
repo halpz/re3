@@ -213,7 +213,7 @@ CAnimViewer::Update(void)
 	AssocGroupId animGroup = ASSOCGRP_STD;
 	int nextModelId = modelId;
 	CBaseModelInfo *modelInfo = CModelInfo::GetModelInfo(modelId);
-	CEntity *entity = nil;
+	CEntity *newEntity = nil;
 
 	if (modelInfo->m_type == MITYPE_PED) {
 		int animGroup = ((CPedModelInfo*)modelInfo)->m_animGroup;
@@ -256,34 +256,34 @@ CAnimViewer::Update(void)
 					{
 						v33 = (CBoat*)CVehicle::operator new((CVehicle*)0x488, v6);
 						CBoat::CBoat(v33, modelId, 1u);
-						entity = (int)v33;
+						newEntity = (int)v33;
 						pTarget = (int)v33;
 					}
 					else
 					{
-*/						entity = pTarget = new CObject(modelId, true);
+*/						newEntity = pTarget = new CObject(modelId, true);
 						if (!modelInfo->GetColModel()) {
 							modelInfo->SetColModel(&CTempColModels::ms_colModelWheel1);
 						}
 //					}
 				} else {
-					entity = pTarget = new CAutomobile(modelId, RANDOM_VEHICLE);
-					entity->m_status = STATUS_ABANDONED;
+					newEntity = pTarget = new CAutomobile(modelId, RANDOM_VEHICLE);
+					newEntity->m_status = STATUS_ABANDONED;
 				}
-				entity->bIsStuck = true;
+				newEntity->bIsStuck = true;
 			} else if (modelInfo->m_type == MITYPE_PED) {
-				pTarget = entity = new CPed(PEDTYPE_CIVMALE);
-				entity->SetModelIndex(modelId);
+				pTarget = newEntity = new CPed(PEDTYPE_CIVMALE);
+				newEntity->SetModelIndex(modelId);
 			} else {
-				entity = pTarget = new CObject(modelId, true);
+				newEntity = pTarget = new CObject(modelId, true);
 				if (!modelInfo->GetColModel())
 				{
 					modelInfo->SetColModel(&CTempColModels::ms_colModelWheel1);
 				}
-				entity->bIsStuck = true;
+				newEntity->bIsStuck = true;
 			}
-			entity->GetPosition() = CVector(0.0f, 0.0f, 0.0f);
-			CWorld::Add(entity);
+			newEntity->GetPosition() = CVector(0.0f, 0.0f, 0.0f);
+			CWorld::Add(newEntity);
 			TheCamera.TakeControl(pTarget, 9, 2, 1);
 		}
 		if (pTarget->m_type == ENTITY_TYPE_VEHICLE || pTarget->m_type == ENTITY_TYPE_PED || pTarget->m_type == ENTITY_TYPE_OBJECT) {
