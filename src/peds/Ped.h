@@ -285,7 +285,7 @@ public:
 	uint8 m_ped_flagD4 : 1;
 	uint8 m_ped_flagD8 : 1;
 	uint8 bIsPedDieAnimPlaying : 1;
-	uint8 bIsFleeing : 1;
+	uint8 bUsePedNodeSeek : 1;
 	uint8 m_ped_flagD40 : 1;	// reset when objective changes
 	uint8 bScriptObjectiveCompleted : 1;
 
@@ -325,7 +325,7 @@ public:
 	uint8 m_ped_flagH40 : 1;
 	uint8 m_ped_flagH80 : 1;
 
-	uint8 m_ped_flagI1 : 1;
+	uint8 bShakeFist : 1;  // test shake hand at look entity
 	uint8 bNoCriticalHits : 1; // if set, limbs won't came off
 	uint8 m_ped_flagI4 : 1;
 	uint8 bHasAlreadyBeenRecorded : 1;
