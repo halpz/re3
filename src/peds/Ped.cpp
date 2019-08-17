@@ -39,7 +39,6 @@
 #include "Font.h"
 #include "Text.h"
 
-WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 WRAPPER void CPed::SetPedPositionInCar(void) { EAXJMP(0x4D4970); }
 WRAPPER void CPed::ProcessControl(void) { EAXJMP(0x4C8910); }
@@ -782,7 +781,7 @@ CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
 	);
 
 	if (!CPed::IsPlayer() || evenOnPlayer) {
-		++CStats::HeadShots;
+		++CStats::HeadsPopped;
 
 		// BUG: This condition will always return true.
 		if (m_nPedState != PED_PASSENGER || m_nPedState != PED_TAXI_PASSENGER) {
@@ -4367,7 +4366,7 @@ CPed::SetAttack(CEntity* victim)
 				bIsAttacking = false;
 				animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, curWeapon->m_AnimToPlay, 8.0f);
 				animAssoc->SetRun();
-				if (animAssoc->currentTime != animAssoc->hierarchy->totalLength)
+				if (animAssoc->currentTime == animAssoc->hierarchy->totalLength)
 					animAssoc->SetCurrentTime(0.0f);
 
 				animAssoc->SetFinishCallback(FinishedAttackCB, this);
@@ -4668,12 +4667,19 @@ CPed::FightStrike(CVector &touchedNodePos)
 
 			// He can beat us
 			if (sq(maxDistanceToBeBeaten) > potentialAttackDistance.MagnitudeSqr()) {
-				ourCol = ((CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex))->GetHitColModel();
+
 				if (nearPed->m_nPedState == PED_FALL
 					|| nearPed->m_nPedState == PED_DEAD || nearPed->m_nPedState == PED_DIE
 					|| !nearPed->IsPedHeadAbovePos(-0.3f)) {
 					ourCol = &CTempColModels::ms_colModelPedGroundHit;
+				} else {
+#ifdef ANIMATE_PED_COL_MODEL
+					ourCol = CPedModelInfo::AnimatePedColModel(((CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex))->GetHitColModel(), RpClumpGetFrame(GetClump()));
+#else
+					ourCol = ((CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex))->GetHitColModel();
+#endif
 				}
+
 				for (int j = 0; j < ourCol->numSpheres; j++) {
 					attackDistance = nearPed->GetPosition() + ourCol->spheres[j].center;
 					attackDistance -= touchedNodePos;
@@ -7723,6 +7729,484 @@ CPed::SetAnimOffsetForEnterOrExitVehicle(void)
 	}
 }
 
+void
+CPed::InvestigateEvent(void)
+{
+	CAnimBlendAssociation *animAssoc;
+	AnimationId animToPlay;
+	AssocGroupId animGroup;
+
+	if (m_nWaitState == WAITSTATE_TURN180)
+		return;
+
+	if (CTimer::GetTimeInMilliseconds() > m_standardTimer) {
+
+		if (m_standardTimer) {
+			if (m_eventType < EVENT_ASSAULT_NASTYWEAPON)
+				SetWaitState(WAITSTATE_TURN180, nil);
+
+			m_standardTimer = 0;
+		} else {
+			ClearInvestigateEvent();
+		}
+		return;
+	}
+
+	CVector2D vecDist = m_eventOrThreat - GetPosition();
+	float distSqr = vecDist.MagnitudeSqr();
+	if (sq(m_distanceToCountSeekDone) >= distSqr) {
+
+		m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(vecDist.x, vecDist.y, 0.0f, 0.0f);
+		SetMoveState(PEDMOVE_STILL);
+
+		switch (m_eventType) {
+			case EVENT_DEAD_PED:
+			case EVENT_HIT_AND_RUN:
+			case EVENT_HIT_AND_RUN_COP:
+
+				if (CTimer::GetTimeInMilliseconds() > m_lookTimer) {
+					animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ROAD_CROSS);
+
+					if (animAssoc) {
+						animAssoc->blendDelta = -8.0f;
+						animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+						if (m_pEventEntity)
+							SetLookFlag(m_pEventEntity, 1);
+
+						SetLookTimer(CGeneral::GetRandomNumberInRange(1500, 4000));
+
+					} else if (CGeneral::GetRandomNumber() & 3) {
+						ClearLookFlag();
+						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ROAD_CROSS, 4.0f);
+
+						SetLookTimer(CGeneral::GetRandomNumberInRange(1000, 2500));
+						Say(SOUND_PED_CHAT_EVENT);
+
+					} else {
+						ClearInvestigateEvent();
+					}
+				}
+				break;
+			case EVENT_FIRE:
+			case EVENT_EXPLOSION:
+
+				if (m_ped_flagD1 && CTimer::GetTimeInMilliseconds() > m_lookTimer) {
+					animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_CAM);
+					if (!animAssoc)
+						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
+
+					if (animAssoc && animAssoc->animId == ANIM_IDLE_CAM) {
+						CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 14.0f);
+						SetLookTimer(CGeneral::GetRandomNumberInRange(1000, 2500));
+
+					} else if (CGeneral::GetRandomNumber() & 3) {
+						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_CAM, 4.0f);
+						SetLookTimer(CGeneral::GetRandomNumberInRange(2500, 5000));
+						Say(SOUND_PED_CHAT_EVENT);
+
+					} else {
+						m_standardTimer = 0;
+					}
+
+				} else if (CTimer::GetTimeInMilliseconds() > m_lookTimer) {
+					animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
+					if (!animAssoc)
+						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_HBHB);
+
+					if (!animAssoc)
+						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_XPRESS_SCRATCH);
+
+					if (animAssoc && animAssoc->animId == ANIM_IDLE_STANCE) {
+						if (CGeneral::GetRandomNumber() & 1)
+							animToPlay = ANIM_IDLE_HBHB;
+						else
+							animToPlay = ANIM_XPRESS_SCRATCH;
+
+						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, animToPlay, 4.0f);
+						SetLookTimer(CGeneral::GetRandomNumberInRange(1000, 2500));
+
+					} else if (animAssoc && animAssoc->animId == ANIM_IDLE_HBHB) {
+						animAssoc->blendDelta = -8.0f;
+						animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+						if (CGeneral::GetRandomNumber() & 1) {
+							animToPlay = ANIM_IDLE_STANCE;
+							animGroup = m_animGroup;
+						} else {
+							animToPlay = ANIM_XPRESS_SCRATCH;
+							animGroup = ASSOCGRP_STD;
+						}
+
+						CAnimManager::BlendAnimation(GetClump(), animGroup, animToPlay, 4.0f);
+						SetLookTimer(CGeneral::GetRandomNumberInRange(1000, 2500));
+
+					} else {
+						if (CGeneral::GetRandomNumber() & 1) {
+							animToPlay = ANIM_IDLE_STANCE;
+							animGroup = m_animGroup;
+						} else {
+							animToPlay = ANIM_IDLE_HBHB;
+							animGroup = ASSOCGRP_STD;
+						}
+
+						CAnimManager::BlendAnimation(GetClump(), animGroup, animToPlay, 4.0f);
+						SetLookTimer(CGeneral::GetRandomNumberInRange(1000, 2500));
+					}
+					Say(SOUND_PED_CHAT_EVENT);
+				}
+				break;
+			case EVENT_ASSAULT_NASTYWEAPON_POLICE:
+			case EVENT_ATM:
+
+				m_fRotationDest = m_fAngleToEvent;
+				if (CTimer::GetTimeInMilliseconds() > m_lookTimer) {
+
+					if (m_lookTimer) {
+						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ROAD_CROSS);
+
+						if (animAssoc) {
+							animAssoc->blendDelta = -8.0f;
+							animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+							if (m_eventType == EVENT_ASSAULT_NASTYWEAPON_POLICE)
+								animToPlay = ANIM_IDLE_CHAT;
+							else
+								animToPlay = ANIM_XPRESS_SCRATCH;
+							CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, animToPlay,4.0f);
+							SetLookTimer(CGeneral::GetRandomNumberInRange(2000, 5000));
+
+						} else {
+							animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_CHAT);
+							if (animAssoc) {
+								animAssoc->blendDelta = -8.0f;
+								animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+								ClearInvestigateEvent();
+							} else {
+								animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_XPRESS_SCRATCH);
+								if (animAssoc) {
+									animAssoc->blendDelta = -8.0f;
+									animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+								}
+								ClearInvestigateEvent();
+							}
+						}
+					} else {
+						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ROAD_CROSS, 4.0f);
+						SetLookTimer(CGeneral::GetRandomNumberInRange(1000, 2500));
+					}
+				}
+				break;
+			default:
+				return;
+		}
+	} else {
+		m_vecSeekPos.x = m_eventOrThreat.x;
+		m_vecSeekPos.y = m_eventOrThreat.y;
+		m_vecSeekPos.z = GetPosition().z;
+		Seek();
+
+		if (m_eventType < EVENT_ASSAULT_NASTYWEAPON_POLICE) {
+			if (sq(5.0f + m_distanceToCountSeekDone) < distSqr) {
+				SetMoveState(PEDMOVE_RUN);
+				return;
+			}
+		}
+		if (m_eventType <= EVENT_EXPLOSION || m_eventType >= EVENT_ATM) {
+			SetMoveState(PEDMOVE_WALK);
+			return;
+		}
+		if (distSqr > 1.44f) {
+			SetMoveState(PEDMOVE_WALK);
+			return;
+		}
+
+		for (int i = 0; i < m_numNearPeds; i++) {
+			if ((m_eventOrThreat - m_nearPeds[i]->GetPosition()).MagnitudeSqr() < 0.16f) {
+				SetMoveState(PEDMOVE_STILL);
+				return;
+			}
+		}
+
+		SetMoveState(PEDMOVE_WALK);
+	}
+}
+
+bool
+CPed::IsPedDoingDriveByShooting(void)
+{
+	if (this == FindPlayerPed() && GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI) {
+
+		if (TheCamera.Cams[TheCamera.ActiveCam].LookingLeft || TheCamera.Cams[TheCamera.ActiveCam].LookingRight)
+			return true;
+	}
+	return false;
+}
+
+bool
+CPed::IsPedShootable(void)
+{
+	return m_nPedState <= PED_STATES_NO_ST;
+}
+
+bool
+CPed::IsRoomToBeCarJacked(void)
+{
+	if (!m_pMyVehicle)
+		return false;
+
+	CVector2D offset;
+	if (m_pMyVehicle->bLowVehicle || m_nPedType == PEDTYPE_COP) {
+		offset = vecPedDraggedOutCarAnimOffset;
+	} else {
+		offset = vecPedQuickDraggedOutCarAnimOffset;
+	}
+
+	CVector doorPos(offset.x, offset.y, 0.0f);
+	if (m_pMyVehicle->IsRoomForPedToLeaveCar(CAR_DOOR_LF, &doorPos)) {
+		return true;
+	}
+
+	return false;
+}
+
+void
+CPed::KillPedWithCar(CVehicle* car, float impulse)
+{
+	CVehicleModelInfo* vehModel;
+	CColModel* vehColModel;
+	uint8 damageDir;
+	PedNode nodeToDamage;
+	eWeaponType killMethod;
+
+	if (m_nPedState == PED_FALL || m_nPedState == PED_DIE) {
+		if (!this->m_pCollidingEntity || car->m_status == STATUS_PLAYER)
+			this->m_pCollidingEntity = car;
+		return;
+	}
+
+	if (m_nPedState == PED_DEAD)
+		return;
+
+	if (m_pCurSurface) {
+		if (m_pCurSurface->IsVehicle() && (((CVehicle*)m_pCurSurface)->m_vehType == VEHICLE_TYPE_BOAT || IsPlayer()))
+			return;
+	}
+	CVector distVec = GetPosition() - car->GetPosition();
+
+	if ((impulse > 12.0f || car->m_modelIndex == MI_TRAIN) && !IsPlayer()) {
+		nodeToDamage = PED_TORSO;
+		killMethod = WEAPONTYPE_RAMMEDBYCAR;
+		uint8 randVal = CGeneral::GetRandomNumber() & 3;
+
+		if (car == FindPlayerVehicle()) {
+			float carSpeed = car->m_vecMoveSpeed.Magnitude();
+			uint8 shakeFreq;
+			if (100.0f * carSpeed * 2000.0f / car->m_fMass + 80.0f <= 250.0f) {
+				shakeFreq = 100.0f * carSpeed * 2000.0f / car->m_fMass + 80.0f;
+			} else {
+				shakeFreq = 250.0f;
+			}
+			CPad::GetPad(0)->StartShake(40000 / shakeFreq, shakeFreq);
+		}
+		bIsStanding = false;
+		damageDir = CPed::GetLocalDirection(-m_vecMoveSpeed);
+		vehModel = (CVehicleModelInfo*)CModelInfo::GetModelInfo(car->m_modelIndex);
+		vehColModel = vehModel->GetColModel();
+		float carRightAndDistDotProd = DotProduct(distVec, car->GetRight());
+
+		if (car->m_modelIndex == MI_TRAIN) {
+			killMethod = WEAPONTYPE_RUNOVERBYCAR;
+			nodeToDamage = PED_HEAD;
+			m_vecMoveSpeed = 0.9f * car->m_vecMoveSpeed;
+			m_vecMoveSpeed.z = 0.0;
+			if (damageDir == 1 || damageDir == 3)
+				damageDir = 2;
+			if (CGame::nastyGame)
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLATTER, 0.0f);
+
+		// Car doesn't look to us
+		} else if (DotProduct(car->m_vecMoveSpeed, car->GetForward()) >= 0.0f){
+
+			if (0.99f * vehColModel->boundingBox.max.x < Abs(carRightAndDistDotProd)) {
+
+				// We're at the right of the car
+				if (carRightAndDistDotProd <= 0.0f)
+					nodeToDamage = PED_UPPERARML;
+				else
+					nodeToDamage = PED_UPPERARMR;
+
+				if (fabs(DotProduct(distVec, car->GetForward())) < 0.85f * vehColModel->boundingBox.max.y) {
+					killMethod = WEAPONTYPE_RUNOVERBYCAR;
+					m_vecMoveSpeed = 0.9f * car->m_vecMoveSpeed;
+					m_vecMoveSpeed.z = 0.0;
+					if (damageDir == 1 || damageDir == 3)
+						damageDir = 2;
+					if (CGame::nastyGame)
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLATTER, 0.0f);
+
+				}
+			} else {
+				float carFrontAndDistDotProd = DotProduct(distVec, car->GetForward());
+
+				// carFrontAndDistDotProd <= 0.0 car looks to us
+				if ((carFrontAndDistDotProd <= 0.1 || randVal == 1) && randVal != 0) {
+					killMethod = WEAPONTYPE_RUNOVERBYCAR;
+					nodeToDamage = PED_HEAD;
+					m_vecMoveSpeed = 0.9f * car->m_vecMoveSpeed;
+					m_vecMoveSpeed.z = 0.0;
+					if (damageDir == 1 || damageDir == 3)
+						damageDir = 2;
+
+					if (CGame::nastyGame)
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLATTER, 0.0f);
+
+				} else {
+					nodeToDamage = PED_MID;
+					float vehColMaxY = vehColModel->boundingBox.max.y;
+					float vehColMinY = vehColModel->boundingBox.min.y;
+					float vehColMaxZ = vehColModel->boundingBox.max.z;
+					float carFrontZ = car->GetForward().z;
+
+					// Col. Z of where?
+					float carColZ;
+
+					// TODO: Figure out what these codes do
+					float unk1, unk2;
+
+					if (carFrontZ < -0.2f) {
+						carColZ = (car->GetMatrix() * CVector(0.0f, vehColMinY, vehColMaxZ)).z;
+						unk1 = vehColMaxY - vehColMinY;
+
+					} else if (carFrontZ > 0.1f) {
+						carColZ = (car->GetMatrix() * CVector(0.0f, vehColMaxY, vehColMaxZ)).z;
+						float colZDist = carColZ - GetPosition().z;
+						if (colZDist > 0.0f) {
+							GetPosition().z += 0.5f * colZDist;
+							carColZ += colZDist * 0.25f;
+						}
+						unk1 = vehColMaxY;
+
+					} else {
+						carColZ = (car->GetMatrix() * CVector(0.0f, vehColMaxY, vehColMaxZ)).z;
+						unk1 = vehColMaxY;
+					}
+
+					unk2 = (carColZ - GetPosition().z) / (unk1 / car->m_vecMoveSpeed.Magnitude());
+					float moveForce = ((CGeneral::GetRandomNumber() % 256) * 0.002 + 1.5) * unk2;
+
+					// After this point, distVec isn't distVec anymore.
+					distVec = car->m_vecMoveSpeed;
+					distVec.Normalise();
+					distVec *= 0.2 * moveForce;
+
+					if (damageDir != 1 && damageDir != 3)
+						distVec.z += moveForce;
+					else
+						distVec.z += 1.5f * moveForce;
+
+					m_vecMoveSpeed = distVec;
+					damageDir += 2;
+					if (damageDir > 3)
+						damageDir = damageDir - 4;
+
+					if (car->m_vehType == VEHICLE_TYPE_CAR) {
+						CObject *bonnet = ((CAutomobile*)car)->RemoveBonnetInPedCollision();
+
+						if (bonnet) {
+							if (rand() & 1) {
+								bonnet->m_vecMoveSpeed += Multiply3x3(car->GetMatrix(), CVector(0.1f, 0.0f, 0.5f));
+							} else {
+								bonnet->m_vecMoveSpeed += Multiply3x3(car->GetMatrix(), CVector(-0.1f, 0.0f, 0.5f));
+							}
+							CVector forceDir = car->GetUp() * 10.0f;
+							bonnet->ApplyTurnForce(forceDir, car->GetForward());
+						}
+					}
+				}
+			}
+		}
+
+		if (car->pDriver) {
+			CEventList::RegisterEvent((m_nPedType == PEDTYPE_COP ? EVENT_HIT_AND_RUN_COP : EVENT_HIT_AND_RUN), EVENT_ENTITY_PED, this, car->pDriver, 1000);
+		}
+
+		ePedPieceTypes pieceToDamage;
+		switch (nodeToDamage) {
+			case PED_HEAD:
+				pieceToDamage = PEDPIECE_HEAD;
+				break;
+			case PED_UPPERARML:
+				pieceToDamage = PEDPIECE_LEFTARM;
+				break;
+			case PED_UPPERARMR:
+				pieceToDamage = PEDPIECE_RIGHTARM;
+				break;
+			default:
+				pieceToDamage = PEDPIECE_MID;
+				break;
+		}
+		CPed::InflictDamage(car, killMethod, 1000.0f, pieceToDamage, damageDir);
+
+		if ((m_nPedState == PED_DIE || m_nPedState == PED_DEAD)
+			&& bIsPedDieAnimPlaying
+			&& !m_pCollidingEntity) {
+			m_pCollidingEntity = car;
+		}
+		if (nodeToDamage == PED_MID)
+			m_ped_flagH1 = true;
+		else
+			m_ped_flagH1 = false;
+
+		distVec.Normalise();
+		car->ApplyMoveForce(distVec * -100.0f);
+
+	} else if (m_vecDamageNormal.z < -0.8f && impulse > 3.0f
+		|| impulse > 6.0f && (!IsPlayer() || impulse > 10.0f)) {
+
+		bIsStanding = false;
+		uint8 fallDirection = GetLocalDirection(-car->m_vecMoveSpeed);
+		float damage;
+		if (IsPlayer() && car->m_modelIndex == MI_TRAIN)
+			damage = 150.0f;
+		else
+			damage = 30.0f;
+	
+		CPed::InflictDamage(car, WEAPONTYPE_RAMMEDBYCAR, damage, PEDPIECE_TORSO, fallDirection);
+		CPed::SetFall(1000, (AnimationId)(fallDirection + 25), true);
+
+		// float ok
+		if ((m_nPedState == PED_FALL || m_nPedState == PED_DIE || m_nPedState == PED_DEAD)
+			&& !m_pCollidingEntity
+			&& (!IsPlayer() || m_ped_flagD2 || car->m_modelIndex == MI_TRAIN || m_vecDamageNormal.z < -0.8f)) {
+
+			m_pCollidingEntity = car;
+		}
+
+		m_ped_flagH1 = false;
+		if (car->m_modelIndex != MI_TRAIN && !m_ped_flagD2) {
+			m_vecMoveSpeed = car->m_vecMoveSpeed * 0.75f;
+		}
+		m_vecMoveSpeed.z = 0.0f;
+		distVec.Normalise();
+		car->ApplyMoveForce(distVec * -60.0f);
+	}
+
+	Say(SOUND_PED_DEFEND);
+#ifdef FIX_BUGS
+	// Killing gang members with car wasn't triggering a fight, until now... Taken from VC.
+	if (IsGangMember()) {
+		CPed *driver = car->pDriver;
+		if (driver && driver->IsPlayer()) {
+			RegisterThreatWithGangPeds(driver);
+		}
+	}
+#endif
+}
+
+void
+CPed::Look(void)
+{
+	// UNUSED: This is a perfectly empty function.
+}
+
 WRAPPER void CPed::PedGetupCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE810); }
 WRAPPER void CPed::PedStaggerCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4CE8D0); }
 WRAPPER void CPed::PedEvadeCB(CAnimBlendAssociation *assoc, void *arg) { EAXJMP(0x4D36E0); }
@@ -7901,4 +8385,8 @@ STARTPATCHES
 	InjectHook(0x4D0D10, &CPed::InTheAir, PATCH_JUMP);
 	InjectHook(0x4C5270, &CPed::Initialise, PATCH_JUMP);
 	InjectHook(0x4D0E40, &CPed::SetLanding, PATCH_JUMP);
+	InjectHook(0x4E9B50, &CPed::InvestigateEvent, PATCH_JUMP);
+	InjectHook(0x564BB0, &CPed::IsPedDoingDriveByShooting, PATCH_JUMP);
+	InjectHook(0x4E4D90, &CPed::IsRoomToBeCarJacked, PATCH_JUMP);
+	InjectHook(0x4EC430, &CPed::KillPedWithCar, PATCH_JUMP);
 ENDPATCHES

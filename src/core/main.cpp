@@ -121,9 +121,12 @@ TheModelViewer(void)
 		CTimeCycle::GetSkyBottomRed(), CTimeCycle::GetSkyBottomGreen(), CTimeCycle::GetSkyBottomBlue(),
 		255);
 
+	CSprite2d::InitPerFrame();
+	CFont::InitPerFrame();
 	DefinedState();
 	CVisibilityPlugins::InitAlphaEntityList();
 	CAnimViewer::Render();
+	Render2dStuff();
 	DoRWStuffEndOfFrame();
 }
 #endif

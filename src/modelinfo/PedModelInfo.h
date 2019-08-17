@@ -39,5 +39,6 @@ public:
 	void SetLowDetailClump(RpClump*);
 	void CreateHitColModel(void);
 	CColModel *GetHitColModel(void) { return m_hitColModel; }
+	static CColModel *AnimatePedColModel(CColModel* colmodel, RwFrame* frame);
 };
 static_assert(sizeof(CPedModelInfo) == 0x54, "CPedModelInfo: error");

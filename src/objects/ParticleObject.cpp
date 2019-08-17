@@ -442,13 +442,13 @@ void CParticleObject::UpdateClose(void)
     {
 		this->m_nFrameCounter = 0;
 		
-		int32 randVal; // BUG: unitialised can be used ??!!
+		int32 randVal;
 		if ( this->m_nCreationChance != 0 )
 			randVal = CGeneral::GetRandomNumber() % this->m_nCreationChance;
 		
-		if (   randVal != 0 && this->m_nCreationChance > 0
-			|| randVal == 0 && (this->m_nCreationChance & 128) != 0
-			|| this->m_nCreationChance == 0 )
+		if (   this->m_nCreationChance == 0
+			|| randVal == 0 && this->m_nCreationChance < 0
+			|| randVal != 0 && this->m_nCreationChance > 0)
 		{
 			switch ( this->m_Type )
 			{

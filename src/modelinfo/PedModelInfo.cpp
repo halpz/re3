@@ -189,6 +189,45 @@ CPedModelInfo::CreateHitColModel(void)
 	m_hitColModel = colmodel;
 }
 
+CColModel*
+CPedModelInfo::AnimatePedColModel(CColModel* colmodel, RwFrame* frame)
+{
+	RwObjectNameAssociation nameAssoc;
+	RwObjectIdAssociation idAssoc;
+	RwMatrix* mat = RwMatrixCreate();
+	CColSphere* spheres = colmodel->spheres;
+
+	for (int i = 0; i < NUMPEDINFONODES; i++) {
+		RwFrame* f = nil;
+		if (m_pColNodeInfos[i].name) {
+			nameAssoc.name = m_pColNodeInfos[i].name;
+			nameAssoc.frame = nil;
+			RwFrameForAllChildren(frame, FindFrameFromNameCB, &nameAssoc);
+			f = nameAssoc.frame;
+		}
+		else {
+			idAssoc.id = m_pColNodeInfos[i].pedNode;
+			idAssoc.frame = nil;
+			RwFrameForAllChildren(frame, FindFrameFromIdCB, &idAssoc);
+			f = idAssoc.frame;
+		}
+		if (f) {
+			RwMatrixCopy(mat, RwFrameGetMatrix(f));
+
+			for (f = RwFrameGetParent(f); f; f = RwFrameGetParent(f)) {
+				RwMatrixTransform(mat, &f->modelling, rwCOMBINEPOSTCONCAT);
+				if (RwFrameGetParent(f) == frame)
+					break;
+			}
+
+			spheres[i].center.x = mat->pos.x + m_pColNodeInfos[i].x;
+			spheres[i].center.y = mat->pos.y + 0.0f;
+			spheres[i].center.z = mat->pos.z + m_pColNodeInfos[i].z;
+		}
+	}
+
+	return colmodel;
+}
 
 class CPedModelInfo_ : public CPedModelInfo
 {
