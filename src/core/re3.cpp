@@ -351,7 +351,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
 
 		DebugMenuAddCmd("Debug", "Make peds around you follow you", LetThemFollowYou);
-#ifndef FINAL
+#ifndef MASTER
 		DebugMenuAddVarBool8("Debug", "Toggle unused fight feature", (int8*)&CPed::bUnusedFightThingOnPlayer, nil);
 #endif
 

@@ -440,7 +440,7 @@ cAudioManager::ComputeVolume(int emittingVolume, float soundIntensity, float dis
 }
 
 int32
-cAudioManager::CreateEntity(int32 type, CPhysical *entity)
+cAudioManager::CreateEntity(int32 type, void *entity)
 {
 	if(!m_bIsInitialised) return -4;
 	if(!entity) return -2;
@@ -477,8 +477,8 @@ cAudioManager::DestroyAllGameCreatedEntities()
 				case AUDIOTYPE_WEATHER:
 				case AUDIOTYPE_CRANE:
 				case AUDIOTYPE_GARAGE:
-				case AUDIOTYPE_HYDRANT: cAudioManager::DestroyEntity(i); break;
-				case AUDIOTYPE_ONE_SHOT:
+				case AUDIOTYPE_FIREHYDRANT: cAudioManager::DestroyEntity(i); break;
+				case AUDIOTYPE_SCRIPTOBJECT:
 					entity =
 					    (cAudioScriptObject *)m_asAudioEntities[i].m_pEntity;
 					if(entity) { delete entity; }
@@ -602,10 +602,10 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 	m_nProjectileEntity = CreateEntity(AUDIOTYPE_PROJECTILE, (CPhysical *)1);
 	if(m_nProjectileEntity >= 0) SetEntityStatus(m_nProjectileEntity, 1);
 
-	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATER_CANNON, (CPhysical *)1);
+	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATERCANNON, (CPhysical *)1);
 	if(m_nWaterCannonEntity >= 0) SetEntityStatus(m_nWaterCannonEntity, 1);
 
-	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_D, (CPhysical *)1);
+	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (CPhysical *)1);
 	if(m_nPoliceChannelEntity >= 0) SetEntityStatus(m_nPoliceChannelEntity, 1);
 
 	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (CPhysical *)1);
@@ -4029,7 +4029,7 @@ cAudioManager::ProcessEntity(int32 id)
 				cAudioManager::ProcessCrane();
 			}
 			break;
-		case AUDIOTYPE_ONE_SHOT:
+		case AUDIOTYPE_SCRIPTOBJECT:
 			if(!m_bUserPause) {
 				m_sQueueSample.m_bReverbFlag = 1;
 				cAudioManager::ProcessScriptObject(id);
@@ -4054,13 +4054,13 @@ cAudioManager::ProcessEntity(int32 id)
 		case AUDIOTYPE_GARAGE:
 			if(!m_bUserPause) cAudioManager::ProcessGarages();
 			break;
-		case AUDIOTYPE_HYDRANT:
+		case AUDIOTYPE_FIREHYDRANT:
 			if(!m_bUserPause) {
 				m_sQueueSample.m_bReverbFlag = 1;
 				cAudioManager::ProcessFireHydrant();
 			}
 			break;
-		case AUDIOTYPE_WATER_CANNON:
+		case AUDIOTYPE_WATERCANNON:
 			if(!m_bUserPause) {
 				m_sQueueSample.m_bReverbFlag = 1;
 				cAudioManager::ProcessWaterCannon(id);
@@ -5615,6 +5615,51 @@ WRAPPER void
 cAudioManager::Service()
 {
 	EAXJMP(0x57A2A0);
+}
+
+WRAPPER void cAudioManager::PlayOneShot(int, unsigned short, float)
+{
+	EAXJMP(0x57A500);
+}
+
+WRAPPER void cAudioManager::SetEffectsFadeVol(unsigned char)
+{
+	EAXJMP(0x57A770);
+}
+
+WRAPPER void cAudioManager::SetMusicFadeVol(unsigned char)
+{
+	EAXJMP(0x57A790);
+}
+
+WRAPPER int8 cAudioManager::SetCurrent3DProvider(unsigned char)
+{
+	EAXJMP(0x57A910);
+}
+
+WRAPPER void cAudioManager::ReportCrime(eCrimeType, CVector const &)
+{
+	EAXJMP(0x5803D0);
+}
+
+WRAPPER void cAudioManager::PlaySuspectLastSeen(float, float, float)
+{
+	EAXJMP(0x580500);
+}
+
+WRAPPER void cAudioManager::ReportCollision(CEntity *, CEntity *, unsigned char, unsigned char, float, float)
+{
+	EAXJMP(0x568410);
+}
+
+WRAPPER void cAudioManager::ResetTimers(unsigned int)
+{
+	EAXJMP(0x57A7B0);
+}
+
+WRAPPER void cAudioManager::PreloadMissionAudio(char *)
+{
+	EAXJMP(0x579550);
 }
 
 STARTPATCHES

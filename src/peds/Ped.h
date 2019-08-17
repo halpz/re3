@@ -574,12 +574,12 @@ public:
 	void StartFightAttack(uint8);
 	void SetWaitState(eWaitState, void*);
 	bool FightStrike(CVector&);
-	int GetLocalDirection(CVector2D&);
+	int GetLocalDirection(CVector2D const &);
 	void StartFightDefend(uint8, uint8, uint8);
 	void PlayHitSound(CPed*);
 	void SetFall(int, AnimationId, uint8);
 	void SetFlee(CEntity*, int);
-	void SetFlee(CVector2D&, int);
+	void SetFlee(CVector2D const &, int);
 	void RemoveInCarAnims(void);
 	void CollideWithPed(CPed*);
 	void SetDirectionToWalkAroundObject(CEntity*);
@@ -698,7 +698,9 @@ public:
 	static CVector2D &ms_vec2DFleePosition;
 	static CPedAudioData (&CommentWaitTime)[38];
 
-#ifndef FINAL
+#ifndef MASTER
+	static void SwitchDebugDisplay(void);
+	void DebugRenderOnePedText(void);
 	static bool bUnusedFightThingOnPlayer;
 #endif
 };

@@ -79,7 +79,10 @@ enum RsEvent
 	rsPADANALOGUERIGHTRESET,
 	rsPREINITCOMMANDLINE,
 	rsACTIVATE,
+	rsANIMVIEWER,
 };
+
+extern bool TurnOnAnimViewer;
 
 typedef enum RsEvent RsEvent;
 

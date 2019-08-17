@@ -1,5 +1,4 @@
 #pragma once
-
 enum eSound : int16
 {
 	SOUND_CAR_DOOR_CLOSE_BONNET = 0,
@@ -172,43 +171,84 @@ enum eSound : int16
 	SOUND_TOTAL_PED_SOUNDS = 167,
 };
 
+class cAudioScriptObject;
 class CEntity;
 enum eCrimeType;
-struct cAudioScriptObject;
+enum eAudioType;
 
 class cDMAudio
 {
 public:
+	~cDMAudio()
+	{ }
+
+	void Initialise(void);
 	void Terminate(void);
+	void Service(void);
+	
+	int32 CreateEntity(eAudioType type, void *UID);
+	void DestroyEntity(int32 audioEntity);
+	void SetEntityStatus(int32 audioEntity, uint8 status);
+	void PlayOneShot(int32 audioEntity, uint16 oneShot, float volume);
+	void DestroyAllGameCreatedEntities(void);
+	
+	void SetEffectsMasterVolume(uint8 volume);
+	void SetMusicMasterVolume(uint8 volume);
+	void SetEffectsFadeVol(uint8 volume);
+	void SetMusicFadeVol(uint8 volume);
+	
+	uint8 GetNum3DProvidersAvailable(void);
+	char *Get3DProviderName(uint8 id);
+	
+	int8 GetCurrent3DProviderIndex(void);
+	int8 SetCurrent3DProvider(uint8 which);
+	
+	void SetSpeakerConfig(int32 config);
+	
+	bool IsMP3RadioChannelAvailable(void);
+	
 	void ReleaseDigitalHandle(void);
 	void ReacquireDigitalHandle(void);
-	void Service(void);
-	void ReportCollision(CEntity* A, CEntity* B, uint8 surfA, uint8 surfB, float impulse, float speed);
-	void ResetTimers(uint32 timerval);
-	bool IsAudioInitialised(void);
-	char GetCDAudioDriveLetter(void);
+	
+	void SetDynamicAcousticModelingStatus(uint8 status);
+	
 	bool CheckForAnAudioFileOnCD(void);
+	
+	char GetCDAudioDriveLetter(void);
+	bool IsAudioInitialised(void);
+	
+	void ReportCrime(eCrimeType crime, CVector const &pos);
+	
+	int32 CreateLoopingScriptObject(cAudioScriptObject *scriptObject);
+	void DestroyLoopingScriptObject(int32 audioEntity);
+	void CreateOneShotScriptObject(cAudioScriptObject *scriptObject);
+	
+	void PlaySuspectLastSeen(float x, float y, float z);
+	
+	void ReportCollision(CEntity *entityA, CEntity *entityB, uint8 surfaceTypeA, uint8 surfaceTypeB, float collisionPower, float velocity);
+	
+	void PlayFrontEndSound(uint16 frontend, uint32 volume);
+	void PlayRadioAnnouncement(uint8 announcement);
+	void PlayFrontEndTrack(uint8 track, uint8 frontendFlag);
+	void StopFrontEndTrack(void);
+	
+	void ResetTimers(uint32 time);
+	
 	void ChangeMusicMode(uint8 mode);
-	void PlayFrontEndSound(uint32, uint32);
-	void PlayFrontEndTrack(uint32, uint32);
-	void StopFrontEndTrack();
-	void PlayOneShot(int32 audioentity, uint16 sound/*eSound*/, float);
-	void SetMusicMasterVolume(uint8);
-	void SetEffectsMasterVolume(uint8);
-	uint8 SetCurrent3DProvider(uint8);
-	int32 SetSpeakerConfig(int32);
-	int32 GetRadioInCar(void);
-	void SetEffectsFadeVol(uint8);
-	void SetMusicFadeVol(uint8);
-	int32 CreateEntity(int, void*);
-	void SetEntityStatus(int32 id, uint8 enable);
-	void SetRadioInCar(int32);
-	uint8 IsMP3RadioChannelAvailable();
-	void DestroyEntity(int32);
+	
+	void PreloadCutSceneMusic(uint8 track);
+	void PlayPreloadedCutSceneMusic(void);
+	void StopCutSceneMusic(void);
+	
+	void PreloadMissionAudio(char *missionAudio);
+	uint8 GetMissionAudioLoadingStatus(void);
+	void SetMissionAudioLocation(float x, float y, float z);
+	void PlayLoadedMissionAudio(void);
+	bool IsMissionAudioSampleFinished(void);
 	void ClearMissionAudio(void);
-	void ReportCrime(eCrimeType crime, const CVector &pos);
-	void CreateOneShotScriptObject(cAudioScriptObject*);
-	int32 CreateLoopingScriptObject(cAudioScriptObject*);
-	void DestroyLoopingScriptObject(int32);
+
+	int32 GetRadioInCar(void);
+	void SetRadioInCar(uint32 radio);
+	void SetRadioChannel(int8 radio, int32 pos);
 };
 extern cDMAudio &DMAudio;

@@ -34,6 +34,10 @@
 #include "Train.h"
 #include "TrafficLights.h"
 #include "PedRoutes.h"
+#include "Sprite.h"
+#include "RwHelper.h"
+#include "Font.h"
+#include "Text.h"
 
 WRAPPER void CPed::KillPedWithCar(CVehicle *veh, float impulse) { EAXJMP(0x4EC430); }
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
@@ -81,63 +85,10 @@ CVector &vecPedTrainDoorAnimOffset = *(CVector*)0x62E054;
 
 CVector2D &CPed::ms_vec2DFleePosition = *(CVector2D*)0x6EDF70;
 
-#ifndef FINAL
-bool CPed::bUnusedFightThingOnPlayer = false;
-#endif
-
 void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
 void *CPed::operator new(size_t sz, int handle) { return CPools::GetPedPool()->New(handle); }
 void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }
 void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((CPed*)p); }
-
-CPed::~CPed(void)
-{
-	CWorld::Remove(this);
-	CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetIndex(this));
-	if (bInVehicle && m_pMyVehicle){
-		uint8 door_flag = GetCarDoorFlag(m_vehEnterType);
-		if (m_pMyVehicle->pDriver == this)
-			m_pMyVehicle->pDriver = nil;
-		else {
-			for (int i = 0; i < m_pMyVehicle->m_nNumMaxPassengers; i++) {
-				if (m_pMyVehicle->pPassengers[i] == this)
-					m_pMyVehicle->pPassengers[i] = nil;
-			}
-		}
-		if (m_nPedState == PED_EXIT_CAR || m_nPedState == PED_DRAG_FROM_CAR)
-			m_pMyVehicle->m_nGettingOutFlags &= ~door_flag;
-		bInVehicle = false;
-		m_pMyVehicle = nil;
-	}else if (m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK){
-		QuitEnteringCar();
-	}
-	if (m_pFire)
-		m_pFire->Extinguish();
-	CPopulation::UpdatePedCount(m_nPedType, true);
-	DMAudio.DestroyEntity(m_audioEntityId);
-}
-
-void
-CPed::FlagToDestroyWhenNextProcessed(void)
-{
-	bRemoveFromWorld = true;
-	if (!bInVehicle || !m_pMyVehicle)
-		return;
-	if (m_pMyVehicle->pDriver == this){
-		m_pMyVehicle->pDriver = nil;
-		if (IsPlayer() && m_pMyVehicle->m_status != STATUS_WRECKED)
-			m_pMyVehicle->m_status = STATUS_ABANDONED;
-	}else{
-		m_pMyVehicle->RemovePassenger(this);
-	}
-	bInVehicle = false;
-	m_pMyVehicle = nil;
-	if (CharCreatedBy == MISSION_CHAR)
-		m_nPedState = PED_DEAD;
-	else
-		m_nPedState = PED_NONE;
-	m_pVehicleAnim = nil;
-}
 
 static char ObjectiveText[34][28] = {
 	"No Obj",
@@ -293,6 +244,107 @@ static char WaitStateText[21][16] = {
 	"Play Chat",
 	"Finish Flee",
 };
+
+
+#ifndef MASTER
+int nDisplayDebugInfo = 0;
+bool CPed::bUnusedFightThingOnPlayer = false;
+
+void
+CPed::SwitchDebugDisplay(void)
+{
+	nDisplayDebugInfo = !nDisplayDebugInfo;
+}
+
+void
+CPed::DebugRenderOnePedText(void)
+{
+	if ((GetPosition() - TheCamera.GetPosition()).MagnitudeSqr() < 900.0f) {
+		float width, height;
+		RwV3d screenCoords;
+		CVector bitAbove = GetPosition();
+		bitAbove.z += 2.0f;
+		if (CSprite::CalcScreenCoors(bitAbove, &screenCoords, &width, &height, true)) {
+
+			float lineHeight = SCREEN_SCALE_Y(min(height/100.0f, 0.7f) * 22.0f);
+
+			DefinedState();
+			CFont::SetPropOn();
+			CFont::SetBackgroundOn();
+
+			// Originally both of them were being divided by 60.0f.
+			float xScale = min(width / 190.0f, 0.7f);
+			float yScale = min(height / 80.0f, 0.7f);
+
+			CFont::SetScale(SCREEN_SCALE_X(xScale), SCREEN_SCALE_Y(yScale));
+			CFont::SetCentreOn();
+			CFont::SetCentreSize(SCREEN_WIDTH);
+			CFont::SetJustifyOff();
+			CFont::SetColor(CRGBA(255, 255, 0, 255));
+			CFont::SetBackGroundOnlyTextOn();
+			CFont::SetFontStyle(0);
+			AsciiToUnicode(StateText[m_nPedState], gUString);
+			CFont::PrintString(screenCoords.x, screenCoords.y, gUString);
+			AsciiToUnicode(ObjectiveText[m_objective], gUString);
+			CFont::PrintString(screenCoords.x, screenCoords.y + lineHeight, gUString);
+			AsciiToUnicode(PersonalityTypeText[m_pedStats->m_type], gUString);
+			CFont::PrintString(screenCoords.x, screenCoords.y + 2 * lineHeight, gUString);
+			AsciiToUnicode(WaitStateText[m_nWaitState], gUString);
+			CFont::PrintString(screenCoords.x, screenCoords.y + 3 * lineHeight, gUString);
+			DefinedState();
+		}
+	}
+}
+#endif
+
+CPed::~CPed(void)
+{
+	CWorld::Remove(this);
+	CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetIndex(this));
+	if (bInVehicle && m_pMyVehicle){
+		uint8 door_flag = GetCarDoorFlag(m_vehEnterType);
+		if (m_pMyVehicle->pDriver == this)
+			m_pMyVehicle->pDriver = nil;
+		else {
+			for (int i = 0; i < m_pMyVehicle->m_nNumMaxPassengers; i++) {
+				if (m_pMyVehicle->pPassengers[i] == this)
+					m_pMyVehicle->pPassengers[i] = nil;
+			}
+		}
+		if (m_nPedState == PED_EXIT_CAR || m_nPedState == PED_DRAG_FROM_CAR)
+			m_pMyVehicle->m_nGettingOutFlags &= ~door_flag;
+		bInVehicle = false;
+		m_pMyVehicle = nil;
+	}else if (m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK){
+		QuitEnteringCar();
+	}
+	if (m_pFire)
+		m_pFire->Extinguish();
+	CPopulation::UpdatePedCount(m_nPedType, true);
+	DMAudio.DestroyEntity(m_audioEntityId);
+}
+
+void
+CPed::FlagToDestroyWhenNextProcessed(void)
+{
+	bRemoveFromWorld = true;
+	if (!bInVehicle || !m_pMyVehicle)
+		return;
+	if (m_pMyVehicle->pDriver == this){
+		m_pMyVehicle->pDriver = nil;
+		if (IsPlayer() && m_pMyVehicle->m_status != STATUS_WRECKED)
+			m_pMyVehicle->m_status = STATUS_ABANDONED;
+	}else{
+		m_pMyVehicle->RemovePassenger(this);
+	}
+	bInVehicle = false;
+	m_pMyVehicle = nil;
+	if (CharCreatedBy == MISSION_CHAR)
+		m_nPedState = PED_DEAD;
+	else
+		m_nPedState = PED_NONE;
+	m_pVehicleAnim = nil;
+}
 
 CPed::CPed(uint32 pedType) : m_pedIK(this)
 {
@@ -471,7 +523,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	if ((CGeneral::GetRandomNumber() & 3) == 0)
 		m_ped_flagD1 = true;
 
-	m_audioEntityId = DMAudio.CreateEntity(0, this);
+	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
 	DMAudio.SetEntityStatus(m_audioEntityId, 1);
 	m_fearFlags = CPedType::GetThreats(m_nPedType);
 	m_threatEntity = nil;
@@ -2094,6 +2146,12 @@ CPed::SetupLighting(void)
 {
 	ActivateDirectional();
 	SetAmbientColoursForPedsCarsAndObjects();
+
+#ifndef MASTER
+	// Originally this was being called through iteration of Sectors, but putting it here is better.
+	if (nDisplayDebugInfo && !IsPlayer())
+		DebugRenderOnePedText();
+#endif
 
 	if (bRenderScorched) {
 		WorldReplaceNormalLightsWithScorched(Scene.world, 0.1f);
@@ -4472,7 +4530,7 @@ CPed::StartFightAttack(uint8 buttonPressure)
 	animAssoc->SetFinishCallback(FinishFightMoveCB, this);
 	m_fightUnk2 = 0;
 	m_takeAStepAfterAttack = false;
-#ifndef FINAL
+#ifndef MASTER
 	m_takeAStepAfterAttack = IsPlayer() && bUnusedFightThingOnPlayer;
 #endif
 
@@ -4567,7 +4625,7 @@ CPed::LoadFightData(void)
 
 // Actually GetLocalDirectionTo(Turn/Look)
 int
-CPed::GetLocalDirection(CVector2D &posOffset)
+CPed::GetLocalDirection(CVector2D const &posOffset)
 {
 	float direction;
 
@@ -4804,7 +4862,7 @@ CPed::SetFlee(CEntity* fleeFrom, int time)
 }
 
 void
-CPed::SetFlee(CVector2D &from, int time)
+CPed::SetFlee(CVector2D const &from, int time)
 {
 	if (CTimer::GetTimeInMilliseconds() < m_nPedStateTimer || !IsPedInControl() || bKindaStayInSamePlace)
 		return;
@@ -5186,7 +5244,8 @@ CPed::CollideWithPed(CPed *collideWith)
 								animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT_PPUNCH, 8.0f);
 								animAssoc->flags |= ASSOC_FADEOUTWHENDONE;
 								if (!heIsMissionChar) {
-									int direction = collideWith->GetLocalDirection(CVector2D(posDiff.x, posDiff.y));
+									CVector2D posDiff2D(posDiff);
+									int direction = collideWith->GetLocalDirection(posDiff2D);
 									collideWith->StartFightDefend(direction, 4, 5);
 								}
 							}
@@ -7273,61 +7332,63 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 
 	CVehicleModelInfo *vehModel = (CVehicleModelInfo*)CModelInfo::GetModelInfo(veh->m_modelIndex);
 
-	if (veh->m_modelIndex > MI_RHINO || veh->m_modelIndex != MI_BUS) {
-
-		CVector2D rfPosDist(999.0f, 999.0f);
-		CVector2D lrPosDist(999.0f, 999.0f);
-		CVector2D rrPosDist(999.0f, 999.0f);
-
-		if (!veh->pPassengers[0]
-			&& !(veh->m_nGettingInFlags & CAR_DOOR_FLAG_RF)
-			&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_RF, nil)) {
-
-			rfPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
-			canEnter = true;
-			rfPosDist = rfPos - GetPosition();
-		}
-		if (vehModel->m_numDoors == 4) {
-			if (!veh->pPassengers[1]
-				&& !(veh->m_nGettingInFlags & CAR_DOOR_FLAG_LR)
-				&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_LR, nil)) {
-				lrPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_LR);
-				canEnter = true;
-				lrPosDist = lrPos - GetPosition();
-			}
-			if (!veh->pPassengers[2]
-				&& !(veh->m_nGettingInFlags & CAR_DOOR_FLAG_RR)
-				&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_RR, nil)) {
-				rrPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_RR);
-				canEnter = true;
-				rrPosDist = rrPos - GetPosition();
-			}
-
-			// When the door we should enter is blocked by some object.
-			if (!canEnter)
-				veh->ShufflePassengersToMakeSpace();
-		}
-
-		CVector2D nextToCompare = rfPosDist;
-		posToOpen = rfPos;
-		m_vehEnterType = CAR_DOOR_RF;
-		if (lrPosDist.MagnitudeSqr() < nextToCompare.MagnitudeSqr()) {
-			m_vehEnterType = CAR_DOOR_LR;
-			posToOpen = lrPos;
-			nextToCompare = lrPosDist;
-		}
-
-		if (rrPosDist.MagnitudeSqr() < nextToCompare.MagnitudeSqr()) {
-			m_vehEnterType = CAR_DOOR_RR;
-			posToOpen = rrPos;
-		}
-		return canEnter;
-
-	} else {
-		m_vehEnterType = CAR_DOOR_RF;
-		posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
-		return true;
+	switch (veh->m_modelIndex) {
+		case MI_BUS:
+			m_vehEnterType = CAR_DOOR_RF;
+			posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
+			return true;
+		case MI_RHINO:
+		default:
+			break;
 	}
+
+	CVector2D rfPosDist(999.0f, 999.0f);
+	CVector2D lrPosDist(999.0f, 999.0f);
+	CVector2D rrPosDist(999.0f, 999.0f);
+
+	if (!veh->pPassengers[0]
+		&& !(veh->m_nGettingInFlags & CAR_DOOR_FLAG_RF)
+		&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_RF, nil)) {
+
+		rfPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
+		canEnter = true;
+		rfPosDist = rfPos - GetPosition();
+	}
+	if (vehModel->m_numDoors == 4) {
+		if (!veh->pPassengers[1]
+			&& !(veh->m_nGettingInFlags & CAR_DOOR_FLAG_LR)
+			&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_LR, nil)) {
+			lrPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_LR);
+			canEnter = true;
+			lrPosDist = lrPos - GetPosition();
+		}
+		if (!veh->pPassengers[2]
+			&& !(veh->m_nGettingInFlags & CAR_DOOR_FLAG_RR)
+			&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_RR, nil)) {
+			rrPos = GetPositionToOpenCarDoor(veh, CAR_DOOR_RR);
+			canEnter = true;
+			rrPosDist = rrPos - GetPosition();
+		}
+
+		// When the door we should enter is blocked by some object.
+		if (!canEnter)
+			veh->ShufflePassengersToMakeSpace();
+	}
+
+	CVector2D nextToCompare = rfPosDist;
+	posToOpen = rfPos;
+	m_vehEnterType = CAR_DOOR_RF;
+	if (lrPosDist.MagnitudeSqr() < nextToCompare.MagnitudeSqr()) {
+		m_vehEnterType = CAR_DOOR_LR;
+		posToOpen = lrPos;
+		nextToCompare = lrPosDist;
+	}
+
+	if (rrPosDist.MagnitudeSqr() < nextToCompare.MagnitudeSqr()) {
+		m_vehEnterType = CAR_DOOR_RR;
+		posToOpen = rrPos;
+	}
+	return canEnter;
 }
 
 int
@@ -7795,7 +7856,7 @@ STARTPATCHES
 	InjectHook(0x4E5A10, &CPed::Say, PATCH_JUMP);
 	InjectHook(0x4D58D0, &CPed::SetWaitState, PATCH_JUMP);
 	InjectHook(0x4D1D70, (void (CPed::*)(CEntity*, int)) &CPed::SetFlee, PATCH_JUMP);
-	InjectHook(0x4D1C40, (void (CPed::*)(CVector2D&, int)) &CPed::SetFlee, PATCH_JUMP);
+	InjectHook(0x4D1C40, (void (CPed::*)(CVector2D const &, int)) &CPed::SetFlee, PATCH_JUMP);
 	InjectHook(0x4EB9A0, &CPed::CollideWithPed, PATCH_JUMP);
 	InjectHook(0x433490, &CPed::CreateDeadPedMoney, PATCH_JUMP);
 	InjectHook(0x433660, &CPed::CreateDeadPedWeaponPickups, PATCH_JUMP);

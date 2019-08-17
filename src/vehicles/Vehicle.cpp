@@ -92,7 +92,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nLastWeaponDamage = -1;
 	field_220 = 0.0;
 	field_21C = field_220;
-	m_audioEntityId = DMAudio.CreateEntity(0, this);
+	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
 	if(m_audioEntityId)
 		DMAudio.SetEntityStatus(m_audioEntityId, true);
 	m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;

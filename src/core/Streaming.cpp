@@ -26,6 +26,7 @@
 #include "CutsceneMgr.h"
 #include "CdStream.h"
 #include "Streaming.h"
+#include "main.h"
 
 bool &CStreaming::ms_disableStreaming = *(bool*)0x95CD6E;
 bool &CStreaming::ms_bLoadingBigModel = *(bool*)0x95CDB0;
@@ -2425,6 +2426,19 @@ CStreaming::MemoryCardLoad(uint8 *buffer, uint32 length)
 		if(ms_aInfoForModel[i].m_loadState == STREAMSTATE_LOADED)
 			if(buffer[i] != 0xFF)
 				ms_aInfoForModel[i].m_flags = buffer[i];
+}
+
+void
+CStreaming::UpdateForAnimViewer(void)
+{
+	if (CStreaming::ms_channelError == -1) {
+		CStreaming::AddModelsToRequestList(CVector(0.0f, 0.0f, 0.0f));
+		CStreaming::LoadRequestedModels();
+		sprintf(gString, "Requested %d, memory size %dK\n", CStreaming::ms_numModelsRequested, 2 * CStreaming::ms_memoryUsed);
+	}
+	else {
+		CStreaming::RetryLoadFile(CStreaming::ms_channelError);
+	}
 }
 
 STARTPATCHES

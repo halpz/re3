@@ -28,8 +28,26 @@ bool &CWorld::bSecondShift = *(bool*)0x95CD54;
 bool &CWorld::bForceProcessControl = *(bool*)0x95CD6C;
 bool &CWorld::bProcessCutsceneOnly = *(bool*)0x95CD8B;
 
+bool &CWorld::bDoingCarCollisions = *(bool*)0x95CD8C;
+bool &CWorld::bIncludeCarTyres = *(bool*)0x95CDAA;
+
+WRAPPER void CWorld::Process(void) { EAXJMP(0x4B1A60); }
+WRAPPER void CWorld::ShutDown(void) { EAXJMP(0x4AE450); }
 WRAPPER void CWorld::RemoveReferencesToDeletedObject(CEntity*) { EAXJMP(0x4B3BF0); }
 WRAPPER void CWorld::FindObjectsKindaColliding(const CVector &, float, bool, int16*, int16, CEntity **, bool, bool, bool, bool, bool){ EAXJMP(0x4B2A30); }
+
+void
+CWorld::Initialise()
+{
+	pIgnoreEntity = nil;
+	bDoingCarCollisions = false;
+	bSecondShift = false;
+	bNoMoreCollisionTorque = false;
+	bProcessCutsceneOnly = false;
+	bIncludeDeadPeds = false;
+	bForceProcessControl = false;
+	bIncludeCarTyres = false;
+}
 
 void
 CWorld::Add(CEntity *ent)

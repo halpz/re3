@@ -63,6 +63,7 @@ WRAPPER void CCarCtrl::GenerateEmergencyServicesCar(void) { EAXJMP(0x41FC50); }
 WRAPPER void CCarCtrl::PickNextNodeAccordingStrategy(CVehicle*) { EAXJMP(0x41BA50); }
 WRAPPER void CCarCtrl::DragCarToPoint(CVehicle*, CVector*) { EAXJMP(0x41D450); }
 WRAPPER void CCarCtrl::SlowCarDownForCarsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float) { EAXJMP(0x419B40); }
+WRAPPER void CCarCtrl::Init(void) { EAXJMP(0x41D280); }
 
 void
 CCarCtrl::GenerateRandomCars()

@@ -94,6 +94,7 @@ static psGlobalType &PsGlobal = *(psGlobalType*)0x72CF60;
 #include "Game.h"
 #include "PCSave.h"
 #include "Sprite2d.h"
+#include "AnimViewer.h"
 
 VALIDATE_SIZE(psGlobalType, 0x28);
 
@@ -976,9 +977,9 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			RECT				rect;
 
 			/* redraw window */
-			if (RwInitialised && gGameState == GS_PLAYING_GAME)
+			if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
 			{
-				RsEventHandler(rsIDLE, (void *)TRUE);
+				RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void *)TRUE);
 			}
 
 			/* Manually resize window */
@@ -1917,16 +1918,23 @@ _WinMain(HINSTANCE instance,
 	
 	SetErrorMode(SEM_FAILCRITICALERRORS);
 
-
+	if (!TurnOnAnimViewer) {
 #ifdef NO_MOVIES
-	gGameState = GS_INIT_FRONTEND;
-	TRACE("gGameState = GS_INIT_FRONTEND");
-	
-	LoadingScreen(nil, nil, "loadsc0");
-	if ( !CGame::InitialiseOnceAfterRW() )
-		RsGlobal.quit = TRUE;
-#endif				
-						
+		gGameState = GS_INIT_FRONTEND;
+		TRACE("gGameState = GS_INIT_FRONTEND");
+
+		LoadingScreen(nil, nil, "loadsc0");
+		if (!CGame::InitialiseOnceAfterRW())
+			RsGlobal.quit = TRUE;
+#endif
+	} else {
+#ifndef MASTER
+		CAnimViewer::Initialise();
+		FrontEndMenuManager.m_bGameNotLoaded = false;
+		gGameState = GS_ANIMVIEWER;
+		TurnOnAnimViewer = false;
+#endif
+	}
 	
 	while ( TRUE )
 	{
@@ -2114,6 +2122,18 @@ _WinMain(HINSTANCE instance,
 						}
 						break;
 					}
+#ifndef MASTER
+					case GS_ANIMVIEWER:
+					{
+						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
+						if (RwInitialised)
+						{
+							if (!CMenuManager::m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
+								RsEventHandler(rsANIMVIEWER, (void*)TRUE);
+						}
+						break;
+					}
+#endif
 				}
 			}
 			else
@@ -2158,6 +2178,8 @@ _WinMain(HINSTANCE instance,
 		{
 			if ( gGameState == GS_PLAYING_GAME )
 				CGame::ShutDown();
+			else if ( gGameState == GS_ANIMVIEWER )
+				CAnimViewer::Shutdown();
 			
 			CTimer::Stop();
 			
@@ -2180,6 +2202,8 @@ _WinMain(HINSTANCE instance,
 
 	if ( gGameState == GS_PLAYING_GAME )
 		CGame::ShutDown();
+	else if ( gGameState == GS_ANIMVIEWER )
+		CAnimViewer::Shutdown();
 
 	DMAudio.Terminate();
 	

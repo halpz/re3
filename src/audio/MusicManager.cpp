@@ -202,3 +202,44 @@ cMusicManager::StopFrontEndTrack()
 {
 	EAXJMP(0x57E3D0);
 }
+
+
+WRAPPER void cMusicManager::PlayAnnouncement(unsigned char)
+{
+	EAXJMP(0x57E430);
+}
+
+WRAPPER void cMusicManager::PlayFrontEndTrack(unsigned char, unsigned char)
+{
+	EAXJMP(0x57E2E0);
+}
+
+WRAPPER void cMusicManager::PreloadCutSceneMusic(unsigned char)
+{
+	EAXJMP(0x57E210);
+}
+
+WRAPPER void cMusicManager::PlayPreloadedCutSceneMusic(void)
+{
+	EAXJMP(0x57E290);
+}
+
+WRAPPER void cMusicManager::StopCutSceneMusic(void)
+{
+	EAXJMP(0x57E2B0);
+}
+
+WRAPPER int32 cMusicManager::GetRadioInCar(void)
+{
+	EAXJMP(0x57D1D0);
+}
+
+WRAPPER void cMusicManager::SetRadioInCar(unsigned int)
+{
+	EAXJMP(0x57D2C0);
+}
+
+WRAPPER void cMusicManager::SetRadioChannelByScript(unsigned char, int)
+{
+	EAXJMP(0x57D180);
+}

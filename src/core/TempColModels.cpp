@@ -15,3 +15,5 @@ CColModel &CTempColModels::ms_colModelPedGroundHit = *(CColModel*)0x880480;
 CColModel &CTempColModels::ms_colModelBoot1 = *(CColModel*)0x880670;
 CColModel &CTempColModels::ms_colModelDoor1 = *(CColModel*)0x880850;
 CColModel &CTempColModels::ms_colModelBonnet1 = *(CColModel*)0x8808A8;
+
+WRAPPER void CTempColModels::Initialise(void) { EAXJMP(0x412160); }

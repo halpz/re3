@@ -46,4 +46,5 @@ public:
 	static void AddMessageJumpQ(wchar* key, uint32 time, uint16 pos);
 	static void AddMessageSoon(wchar* key, uint32 time, uint16 pos);
 	static void ClearMessages();
+	static void Init();
 };
