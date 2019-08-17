@@ -419,7 +419,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagD4 = false;
 	m_ped_flagD8 = false;
 	bIsPedDieAnimPlaying = false;
-	bIsFleeing = false;
+	bUsePedNodeSeek = false;
 	m_ped_flagD40 = false;
 	bScriptObjectiveCompleted = false;
 
@@ -459,7 +459,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagH40 = false;
 	m_ped_flagH80 = false;
 
-	m_ped_flagI1 = false;
+	bShakeFist = false;
 	bNoCriticalHits = false;
 	m_ped_flagI4 = false;
 	bHasAlreadyBeenRecorded = false;
@@ -945,7 +945,7 @@ CPed::ClearLookFlag(void) {
 	if (bIsLooking) {
 		bIsLooking = false;
 		bIsRestoringLook = true;
-		m_ped_flagI1 = false;
+		bShakeFist = false;
 
 		m_pedIK.m_flags &= ~CPedIK::FLAG_2;
 		if (IsPlayer())
@@ -2495,7 +2495,7 @@ CPed::SetObjective(eObjective newObj, void *entity)
 		case OBJECTIVE_KILL_CHAR_ANY_MEANS:
 		case OBJECTIVE_MUG_CHAR:
 			m_pNextPathNode = nil;
-			bIsFleeing = false;
+			bUsePedNodeSeek = false;
 			m_vecSeekPos = CVector(0.0f, 0.0f, 0.0f);
 			m_pedInObjective = (CPed*)entity;
 			m_pedInObjective->RegisterReference((CEntity**)&m_pedInObjective);
@@ -3682,7 +3682,7 @@ void
 CPed::ClearFlee(void)
 {
 	RestorePreviousState();
-	bIsFleeing = false;
+	bUsePedNodeSeek = false;
 	m_standardTimer = 0;
 	m_fleeTimer = 0;
 }
@@ -4781,7 +4781,7 @@ CPed::SetFlee(CEntity* fleeFrom, int time)
 
 	SetStoredState();
 	m_nPedState = PED_FLEE_ENTITY;
-	bIsFleeing = true;
+	bUsePedNodeSeek = true;
 	SetMoveState(PEDMOVE_RUN);
 	m_fleeFrom = fleeFrom;
 	m_fleeFrom->RegisterReference((CEntity **) &m_fleeFrom);
@@ -4817,7 +4817,7 @@ CPed::SetFlee(CVector2D &from, int time)
 		m_fleeFromPosY = from.y;
 	}
 
-	bIsFleeing = true;
+	bUsePedNodeSeek = true;
 	m_pNextPathNode = nil;
 	m_fleeTimer = CTimer::GetTimeInMilliseconds() + time;
 
@@ -5289,7 +5289,7 @@ CPed::CollideWithPed(CPed *collideWith)
 			doWeRun = false;
 
 		SetFlee(collideWith, 5000);
-		bIsFleeing = true;
+		bUsePedNodeSeek = true;
 		m_pNextPathNode = nil;
 		if (!doWeRun)
 			SetMoveState(PEDMOVE_WALK);
@@ -6321,7 +6321,7 @@ SelectClosestNodeForSeek(CPed *ped, CPathNode *node, CVector2D closeDist, CVecto
 bool
 CPed::FindBestCoordsFromNodes(CVector unused, CVector *bestCoords)
 {
-	if (m_pNextPathNode || !bIsFleeing)
+	if (m_pNextPathNode || !bUsePedNodeSeek)
 		return false;
 
 	CVector ourPos = GetPosition();
@@ -6713,7 +6713,7 @@ CPed::Wait(void)
 								SetObjective(OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE, m_pLookTarget);
 								if (m_nPedState == PED_FLEE_ENTITY || m_nPedState == PED_FLEE_POS) {
 
-									bIsFleeing = true;
+									bUsePedNodeSeek = true;
 									m_pNextPathNode = nil;
 								}
 								if (m_nMoveState != PEDMOVE_RUN)
@@ -6731,7 +6731,7 @@ CPed::Wait(void)
 							SetObjective(OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE, m_pLookTarget);
 							if (m_nPedState == PED_FLEE_ENTITY || m_nPedState == PED_FLEE_POS)
 							{
-								bIsFleeing = true;
+								bUsePedNodeSeek = true;
 								m_pNextPathNode = nil;
 							}
 							SetMoveState(PEDMOVE_RUN);
@@ -6939,7 +6939,7 @@ CPed::Seek(void)
 		else
 			bScriptObjectiveCompleted = true;
 
-		bIsFleeing = true;
+		bUsePedNodeSeek = true;
 	}
 
 	if (SeekFollowingPath(nil))
@@ -6979,7 +6979,7 @@ CPed::Flee(void)
 		m_fleeTimer = CTimer::GetTimeInMilliseconds() + 5000;
 	}
 
-	if (bIsFleeing) {
+	if (bUsePedNodeSeek) {
 		CPathNode *realLastNode = nil;
 		uint8 nextDirection = 0;
 		uint8 curDirectionShouldBe = 9; // means not defined yet
@@ -7032,7 +7032,7 @@ CPed::Flee(void)
 				m_nPathState = nextDirection;
 				m_standardTimer = CTimer::GetTimeInMilliseconds() + 2000;
 			} else {
-				bIsFleeing = false;
+				bUsePedNodeSeek = false;
 				SetMoveState(PEDMOVE_RUN);
 				Flee();
 			}

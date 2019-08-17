@@ -30,8 +30,11 @@
 #include "World.h"
 #include "Zones.h"
 
+#define GAME_SPEED_TO_METERS_PER_SECOND 50.0f
+
 #define DISTANCE_TO_SPAWN_ROADBLOCK_PEDS 51.0f
 #define DISTANCE_TO_SCAN_FOR_DANGER 11.0f
+#define SAFE_DISTANCE_TO_PED 3.0f
 #define INFINITE_Z 1000000000.0f
 
 int &CCarCtrl::NumLawEnforcerCars = *(int*)0x8F1B38;
@@ -60,7 +63,6 @@ WRAPPER void CCarCtrl::GenerateEmergencyServicesCar(void) { EAXJMP(0x41FC50); }
 WRAPPER void CCarCtrl::PickNextNodeAccordingStrategy(CVehicle*) { EAXJMP(0x41BA50); }
 WRAPPER void CCarCtrl::DragCarToPoint(CVehicle*, CVector*) { EAXJMP(0x41D450); }
 WRAPPER void CCarCtrl::SlowCarDownForCarsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float) { EAXJMP(0x419B40); }
-WRAPPER void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float) { EAXJMP(0x419300); }
 
 void
 CCarCtrl::GenerateRandomCars()
@@ -293,8 +295,8 @@ CCarCtrl::GenerateOneRandomCar()
 			pCar->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(12, 18);
 		else if (carClass == POOR || carClass == SPECIAL)
 			pCar->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(7, 10);
-		CVehicleModelInfo* pVehicleInfo = (CVehicleModelInfo*)CModelInfo::GetModelInfo(pCar->GetModelIndex());
-		if (pVehicleInfo->GetColModel()->boundingBox.max.y - pVehicleInfo->GetColModel()->boundingBox.min.y > 10.0f || carClass == BIG) {
+		CVehicleModelInfo* pVehicleInfo = pCar->GetModelInfo();
+		if (pVehicleInfo->GetColModel()->boundingBox.max.y - pCar->GetModelInfo()->GetColModel()->boundingBox.min.y > 10.0f || carClass == BIG) {
 			pCar->AutoPilot.m_nCruiseSpeed *= 3;
 			pCar->AutoPilot.m_nCruiseSpeed /= 4;
 		}
@@ -481,7 +483,7 @@ CCarCtrl::GenerateOneRandomCar()
 		delete pCar;
 		return;
 	}
-	CVehicleModelInfo* pVehicleModel = (CVehicleModelInfo*)CModelInfo::GetModelInfo(pCar->GetModelIndex());
+	CVehicleModelInfo* pVehicleModel = pCar->GetModelInfo();
 	float radiusToTest = pVehicleModel->GetColModel()->boundingSphere.radius;
 	if (testForCollision){
 		CWorld::FindObjectsKindaColliding(pCar->GetPosition(), radiusToTest + 20.0f, true, &colliding, 2, nil, false, true, false, false, false);
@@ -783,8 +785,8 @@ CCarCtrl::UpdateCarOnRails(CVehicle* pVehicle)
 float
 CCarCtrl::FindMaximumSpeedForThisCarInTraffic(CVehicle* pVehicle)
 {
-	if (pVehicle->AutoPilot.m_nDrivingStyle == MISSION_RAMPLAYER_FARAWAY ||
-		pVehicle->AutoPilot.m_nDrivingStyle == MISSION_RAMPLAYER_CLOSE)
+	if (pVehicle->AutoPilot.m_nCarMission == MISSION_RAMPLAYER_FARAWAY ||
+		pVehicle->AutoPilot.m_nCarMission == MISSION_RAMPLAYER_CLOSE)
 		return pVehicle->AutoPilot.m_nCruiseSpeed;
 	float left = pVehicle->GetPosition().x - DISTANCE_TO_SCAN_FOR_DANGER;
 	float right = pVehicle->GetPosition().x + DISTANCE_TO_SCAN_FOR_DANGER;
@@ -869,6 +871,118 @@ CCarCtrl::SlowCarOnRailsDownForTrafficAndLights(CVehicle* pVehicle)
 			pVehicle->AutoPilot.ModifySpeed(0.0f);
 	}
 }
+#if 0
+WRAPPER void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float) { EAXJMP(0x419300); }
+#else
+void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, float x_inf, float y_inf, float x_sup, float y_sup, float* pSpeed, float curSpeed)
+{
+	float frontOffset = pVehicle->GetModelInfo()->GetColModel()->boundingBox.max.y;
+	float frontSafe = frontOffset + SAFE_DISTANCE_TO_PED;
+	for (CPtrNode* pNode = lst.first; pNode != nil; pNode = pNode->next){
+		CPed* pPed = (CPed*)pNode->item;
+		if (pPed->m_scanCode == CWorld::GetCurrentScanCode())
+			continue;
+		if (!pPed->bUsesCollision)
+			continue;
+		pPed->m_scanCode = CWorld::GetCurrentScanCode();
+		CVector vecPedPos = pPed->GetPosition();
+		if (vecPedPos.x < x_inf || vecPedPos.x > x_sup)
+			continue;
+		if (vecPedPos.y < y_inf || vecPedPos.y > y_sup)
+			continue;
+		if (ABS(vecPedPos.z - pVehicle->GetPosition().z) >= 4.0f)
+			continue;
+		CVector vecToPed = vecPedPos - pVehicle->GetPosition();
+		float dotDirection = DotProduct(pVehicle->GetForward(), vecToPed);
+		float dotVelocity = DotProduct(pVehicle->GetForward(), pVehicle->GetMoveSpeed());
+		if (dotDirection <= frontOffset) /* If already run him over, don't care */
+			continue;
+		float distanceUntilHit = dotDirection - frontOffset;
+		float movementTowardsPedPerSecond = GAME_SPEED_TO_METERS_PER_SECOND * dotVelocity;
+		if (4 * movementTowardsPedPerSecond <= distanceUntilHit)
+			/* If car isn't projected to hit a ped in 4 seconds, don't care */
+			continue;
+		float sidewaysDistance = ABS(DotProduct(pVehicle->GetRight(), vecToPed));
+		float sideLength = pVehicle->GetModelInfo()->GetColModel()->boundingBox.max.x;
+		if (pVehicle->m_vehType == VEHICLE_TYPE_BIKE)
+			sideLength *= 1.6f;
+		if (sideLength + 0.5f < sidewaysDistance)
+			/* If car is far enough taking side into account, don't care */
+			continue;
+		if (pPed->m_type == ENTITY_TYPE_PED){ /* ...how can it not be? */
+			if (pPed->GetPedState() != PED_STEP_AWAY && pPed->GetPedState() != PED_DIVE_AWAY){
+				if (distanceUntilHit < movementTowardsPedPerSecond){
+					/* Very close. Time to evade. */
+					if (pVehicle->GetModelIndex() == MI_RCBANDIT){
+						if (dotVelocity * GAME_SPEED_TO_METERS_PER_SECOND / 2 > distanceUntilHit)
+							pPed->SetEvasiveStep(pVehicle, 0);
+					}else if (dotVelocity > 0.3f){
+						if (sideLength - 0.5f < sidewaysDistance)
+							pPed->SetEvasiveStep(pVehicle, 0);
+						else
+							pPed->SetEvasiveDive(pVehicle, 0);
+					}else{
+						if (sideLength + 0.1f < sidewaysDistance)
+							pPed->SetEvasiveStep(pVehicle, 0);
+						else
+							pPed->SetEvasiveDive(pVehicle, 0);
+					}
+				}else{
+					/* Relatively safe but annoying. */
+					if (pVehicle->m_status == STATUS_PLAYER &&
+					  pPed->GetPedState() != PED_FLEE_ENTITY &&
+					  pPed->CharCreatedBy == RANDOM_CHAR){
+						float angleCarToPed = CGeneral::GetRadianAngleBetweenPoints(
+							pVehicle->GetPosition().x, pVehicle->GetPosition().y,
+							pPed->GetPosition().x, pPed->GetPosition().y
+						);
+						angleCarToPed = CGeneral::LimitRadianAngle(angleCarToPed);
+						pPed->m_headingRate = CGeneral::LimitRadianAngle(pPed->m_headingRate);
+						float visibilityAngle = ABS(angleCarToPed - pPed->m_headingRate);
+						if (visibilityAngle > PI)
+							visibilityAngle = TWOPI - visibilityAngle;
+						if (visibilityAngle < HALFPI || pVehicle->m_nCarHornTimer){
+							/* if ped sees the danger of if car horn is on */
+							pPed->SetFlee(pVehicle, 2000);
+							pPed->bUsePedNodeSeek = false;
+							pPed->SetMoveState(PEDMOVE_RUN);
+						}
+					}else{
+						CPlayerPed* pPlayerPed = (CPlayerPed*)pPed;
+						if (pPlayerPed->IsPlayer() && dotDirection < frontSafe &&
+						  pPlayerPed->IsPedInControl() &&
+						  pPlayerPed->m_fMoveSpeed < 0.1f && pPlayerPed->bIsLooking &&
+						  CTimer::GetTimeInMilliseconds() > pPlayerPed->m_lookTimer) {
+							pPlayerPed->AnnoyPlayerPed(false);
+							pPlayerPed->SetLookFlag(pVehicle, true);
+							pPlayerPed->SetLookTimer(1500);
+							if (pPlayerPed->GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED ||
+								pPlayerPed->GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT ||
+								pPlayerPed->GetWeapon()->m_eWeaponType == WEAPONTYPE_COLT45 ||
+								pPlayerPed->GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI) {
+								pPlayerPed->bShakeFist = true;
+							}
+						}
+					}
+				}
+			}
+		}
+		/* Ped stuff done. Now vehicle stuff. */
+		if (distanceUntilHit < 10.0f){
+			if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS ||
+			  pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_SLOW_DOWN_FOR_CARS){
+				*pSpeed = min(*pSpeed, ABS(distanceUntilHit - 1.0f) * 0.1f * curSpeed);
+				pVehicle->AutoPilot.m_bSlowedDownBecauseOfPeds = true;
+				if (distanceUntilHit < 2.0f){
+					pVehicle->AutoPilot.m_nTempAction = TEMPACT_WAIT;
+					pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 3000;
+				}
+			}
+		}
+	}
+}
+#endif
+
 
 bool
 CCarCtrl::MapCouldMoveInThisArea(float x, float y)
