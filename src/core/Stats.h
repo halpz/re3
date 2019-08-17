@@ -4,7 +4,7 @@ class CStats
 {
 public:
 	static int32 &DaysPassed;
-	static int32 &HeadShots;
+	static int32 &HeadsPopped;
 	static bool& CommercialPassed;
 	static bool& IndustrialPassed;
 	static int32 &NumberKillFrenziesPassed;

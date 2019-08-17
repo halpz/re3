@@ -618,6 +618,9 @@ public:
 	void Idle(void);
 	void InTheAir(void);
 	void SetLanding(void);
+	void InvestigateEvent(void);
+	bool IsPedDoingDriveByShooting(void);
+	bool IsRoomToBeCarJacked(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -681,6 +684,8 @@ public:
 	void EnterTrain(void);
 	void ExitTrain(void);
 	void Fall(void);
+	bool IsPedShootable(void);
+	void Look(void);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
