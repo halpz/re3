@@ -57,8 +57,8 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 
 void CPlayerPed::ClearWeaponTarget()
 {
-	if (!m_nPedType) {
-		m_pPointGunAt = 0;
+	if (m_nPedType == PEDTYPE_PLAYER1) {
+		m_pPointGunAt = nil;
 		TheCamera.ClearPlayerWeaponMode();
 		CWeaponEffects::ClearCrosshair();
 	}
@@ -79,12 +79,12 @@ CPlayerPed::SetWantedLevelNoDrop(int32 level)
 
 // I don't know the actual purpose of parameter
 void
-CPlayerPed::AnnoyPlayerPed(bool itsPolice)
+CPlayerPed::AnnoyPlayerPed(bool annoyedByPassingEntity)
 {
 	if (m_pedStats->m_temper < 52) {
 		m_pedStats->m_temper++;
 	} else {
-		if (itsPolice) {
+		if (annoyedByPassingEntity) {
 			if (m_pedStats->m_temper < 55) {
 				m_pedStats->m_temper++;
 			} else {

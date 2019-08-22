@@ -41,6 +41,12 @@ CMatrix::Rotate(float x, float y, float z)
 }
 
 void
+CMatrix::RotateX(float x)
+{
+	Rotate(x, 0.0f, 0.0f);
+}
+
+void
 CMatrix::Reorthogonalise(void)
 {
 	CVector &r = GetRight();
