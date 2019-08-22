@@ -18,16 +18,21 @@ struct LimbMovementInfo {
 	float pitchD;
 };
 
+enum LimbMoveStatus {
+	ANGLES_SET_TO_MAX, // because given angles were unreachable
+	ONE_ANGLE_COULDNT_BE_SET_EXACTLY, // because it can't be reached in a jiffy
+	ANGLES_SET_EXACTLY
+};
+
 class CPed;
 
 class CPedIK
 {
 public:
-	// TODO
 	enum {
 		FLAG_1 = 1,
-		FLAG_2 = 2,	// related to looking somewhere
-		FLAG_4 = 4,	// aims with arm
+		LOOKING = 2,
+		AIMS_WITH_ARM = 4,
 	};
 
 	CPed *m_ped;
@@ -38,6 +43,7 @@ public:
 	int32 m_flags;
 
 	static LimbMovementInfo &ms_torsoInfo;
+	static LimbMovementInfo &ms_headInfo;
 
 	CPedIK(CPed *ped);
 	bool PointGunInDirection(float phi, float theta);
@@ -47,7 +53,9 @@ public:
 	void RotateTorso(AnimBlendFrameData* animBlend, LimbOrientation* limb, bool changeRoll);
 	void ExtractYawAndPitchLocal(RwMatrixTag*, float*, float*);
 	void ExtractYawAndPitchWorld(RwMatrixTag*, float*, float*);
-	uint32 MoveLimb(LimbOrientation &a1, float a2, float a3, LimbMovementInfo &a4);
+	LimbMoveStatus MoveLimb(LimbOrientation &a1, float a2, float a3, LimbMovementInfo &a4);
 	bool RestoreGunPosn(void);
+	bool LookInDirection(float phi, float theta);
+	bool LookAtPosition(CVector const& pos);
 };
 static_assert(sizeof(CPedIK) == 0x28, "CPedIK: error");
