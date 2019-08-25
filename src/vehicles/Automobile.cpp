@@ -311,7 +311,7 @@ CAutomobile::ProcessControl(void)
 	}
 	CVisibilityPlugins::SetClumpAlpha((RpClump*)m_rwObject, clumpAlpha);
 
-	AutoPilot.m_flag1 = false;
+	AutoPilot.m_bSlowedDownBecauseOfCars = false;
 	AutoPilot.m_bSlowedDownBecauseOfPeds = false;
 
 	// Set Center of Mass to make car more stable
@@ -3931,7 +3931,7 @@ void
 CAutomobile::PlayHornIfNecessary(void)
 {
 	if(AutoPilot.m_bSlowedDownBecauseOfPeds ||
-	   AutoPilot.m_flag1)
+	   AutoPilot.m_bSlowedDownBecauseOfCars)
 		if(!HasCarStoppedBecauseOfLight())
 			PlayCarHorn();
 }

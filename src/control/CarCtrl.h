@@ -62,6 +62,8 @@ public:
 	static void SlowCarDownForCarsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float);
 	static void SlowCarDownForPedsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float);
 	static void Init(void);
+	static void SlowCarDownForOtherCar(CEntity*, CVehicle*, float*, float);
+	static float TestCollisionBetween2MovingRects(CVehicle*, CVehicle*, float, float, CVector*, CVector*, uint8);
 
 	static float GetOffsetOfLaneFromCenterOfRoad(int8 lane, CCarPathLink* pLink)
 	{

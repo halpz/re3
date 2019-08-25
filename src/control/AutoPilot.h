@@ -81,7 +81,7 @@ public:
 	uint32 m_nTimeTempAction;
 	float m_fMaxTrafficSpeed;
 	uint8 m_nCruiseSpeed;
-	uint8 m_flag1 : 1;
+	uint8 m_bSlowedDownBecauseOfCars : 1;
 	uint8 m_bSlowedDownBecauseOfPeds : 1;
 	uint8 m_flag4 : 1;
 	uint8 m_flag8 : 1;
@@ -109,7 +109,7 @@ public:
 		m_nCruiseSpeed = 10;
 		m_fMaxTrafficSpeed = 10.0f;
 		m_bSlowedDownBecauseOfPeds = false;
-		m_flag1 = false;
+		m_bSlowedDownBecauseOfCars = false;
 		m_nPathFindNodesCount = 0;
 		m_pTargetCar = 0;
 		m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();

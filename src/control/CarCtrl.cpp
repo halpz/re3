@@ -31,6 +31,7 @@
 #include "Zones.h"
 
 #define GAME_SPEED_TO_METERS_PER_SECOND 50.0f
+#define GAME_SPEED_TO_CARAI_SPEED 60.0f
 
 #define DISTANCE_TO_SPAWN_ROADBLOCK_PEDS 51.0f
 #define DISTANCE_TO_SCAN_FOR_DANGER 11.0f
@@ -62,7 +63,6 @@ WRAPPER void CCarCtrl::RemoveFromInterestingVehicleList(CVehicle* v) { EAXJMP(0x
 WRAPPER void CCarCtrl::GenerateEmergencyServicesCar(void) { EAXJMP(0x41FC50); }
 WRAPPER void CCarCtrl::PickNextNodeAccordingStrategy(CVehicle*) { EAXJMP(0x41BA50); }
 WRAPPER void CCarCtrl::DragCarToPoint(CVehicle*, CVector*) { EAXJMP(0x41D450); }
-WRAPPER void CCarCtrl::SlowCarDownForCarsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float) { EAXJMP(0x419B40); }
 WRAPPER void CCarCtrl::Init(void) { EAXJMP(0x41D280); }
 
 void
@@ -440,7 +440,7 @@ CCarCtrl::GenerateOneRandomCar()
 	}
 	finalPosition.z = groundZ + pCar->GetHeightAboveRoad();
 	pCar->GetPosition() = finalPosition;
-	pCar->SetMoveSpeed(directionIncludingCurve / 60.0f);
+	pCar->SetMoveSpeed(directionIncludingCurve / GAME_SPEED_TO_CARAI_SPEED);
 	CVector2D speedDifferenceWithTarget = (CVector2D)pCar->GetMoveSpeed() - vecPlayerSpeed;
 	CVector2D distanceToTarget = positionIncludingCurve - vecTargetPos;
 	switch (carClass) {
@@ -780,7 +780,7 @@ CCarCtrl::UpdateCarOnRails(CVehicle* pVehicle)
 	);
 	positionIncludingCurve.z = 15.0f;
 	DragCarToPoint(pVehicle, &positionIncludingCurve);
-	pVehicle->SetMoveSpeed(directionIncludingCurve / 60.0f);
+	pVehicle->SetMoveSpeed(directionIncludingCurve / GAME_SPEED_TO_CARAI_SPEED);
 }
 
 float
@@ -984,6 +984,194 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 }
 #endif
 
+void CCarCtrl::SlowCarDownForCarsSectorList(CPtrList& lst, CVehicle* pVehicle, float x_inf, float y_inf, float x_sup, float y_sup, float* pSpeed, float curSpeed)
+{
+	for (CPtrNode* pNode = lst.first; pNode != nil; pNode = pNode->next){
+		CVehicle* pTestVehicle = (CVehicle*)pNode->item;
+		if (pVehicle == pTestVehicle)
+			continue;
+		if (pTestVehicle->m_scanCode == CWorld::GetCurrentScanCode())
+			continue;
+		if (!pTestVehicle->bUsesCollision)
+			continue;
+		pTestVehicle->m_scanCode = CWorld::GetCurrentScanCode();
+		CVector boundCenter = pTestVehicle->GetBoundCentre();
+		if (boundCenter.x < x_inf || boundCenter.x > x_sup)
+			continue;
+		if (boundCenter.y < y_inf || boundCenter.y > y_sup)
+			continue;
+		if (Abs(boundCenter.z - pVehicle->GetPosition().z) < 5.0f)
+			SlowCarDownForOtherCar(pTestVehicle, pVehicle, pSpeed, curSpeed);
+	}
+}
+
+void CCarCtrl::SlowCarDownForOtherCar(CEntity* pOtherEntity, CVehicle* pVehicle, float* pSpeed, float curSpeed)
+{
+	CVector forwardA = pVehicle->GetForward();
+	((CVector2D)forwardA).Normalise();
+	if (DotProduct2D(pOtherEntity->GetPosition() - pVehicle->GetPosition(), forwardA) < 0.0f)
+		return;
+	CVector forwardB = pOtherEntity->GetForward();
+	((CVector2D)forwardB).Normalise();
+	forwardA.z = forwardB.z = 0.0f;
+	CVehicle* pOtherVehicle = (CVehicle*)pOtherEntity;
+	/* why is the argument CEntity if it's always CVehicle anyway and is casted? */
+	float speedOtherX = GAME_SPEED_TO_CARAI_SPEED * pOtherVehicle->GetMoveSpeed().x;
+	float speedOtherY = GAME_SPEED_TO_CARAI_SPEED * pOtherVehicle->GetMoveSpeed().y;
+	float projectionX = speedOtherX - forwardA.x * curSpeed;
+	float projectionY = speedOtherY - forwardA.y * curSpeed;
+	float proximityA = TestCollisionBetween2MovingRects(pOtherVehicle, pVehicle, projectionX, projectionY, &forwardA, &forwardB, 0);
+	float proximityB = TestCollisionBetween2MovingRects(pVehicle, pOtherVehicle, -projectionX, -projectionY, &forwardB, &forwardA, 1);
+	float minProximity = min(proximityA, proximityB);
+	if (minProximity >= 0.0f && minProximity < 1.0f){
+		minProximity = max(0.0f, (minProximity - 0.2f) * 1.25f);
+		pVehicle->AutoPilot.m_bSlowedDownBecauseOfCars = true;
+		*pSpeed = min(*pSpeed, minProximity * curSpeed);
+	}
+	if (minProximity >= 0.0f && minProximity < 0.5f && pOtherEntity->IsVehicle() &&
+	  CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeToStartMission > 15000 &&
+	  CTimer::GetTimeInMilliseconds() - pOtherVehicle->AutoPilot.m_nTimeToStartMission > 15000){
+		/* If cars are standing for 15 seconds, annoy one of them and make avoid cars. */
+		if (pOtherEntity != FindPlayerVehicle() &&
+		  DotProduct2D(pVehicle->GetForward(), pOtherVehicle->GetForward()) < 0.5f &&
+		  pVehicle < pOtherVehicle){ /* that comparasion though... */
+			*pSpeed = max(curSpeed / 5, *pSpeed);
+			if (pVehicle->m_status == STATUS_SIMPLE){
+				pVehicle->m_status = STATUS_PHYSICS;
+				SwitchVehicleToRealPhysics(pVehicle);
+			}
+			pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
+			pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 1000;
+		}
+	}
+}
+
+#if 0
+WRAPPER float CCarCtrl::TestCollisionBetween2MovingRects(CVehicle* pVehicleA, CVehicle* pVehicleB, float projectionX, float projectionY, CVector* pForwardA, CVector* pForwardB, uint8 id) { EAXJMP(0x41A020); }
+#else
+float CCarCtrl::TestCollisionBetween2MovingRects(CVehicle* pVehicleA, CVehicle* pVehicleB, float projectionX, float projectionY, CVector* pForwardA, CVector* pForwardB, uint8 id)
+{
+	CVector2D vecBToA = pVehicleA->GetPosition() - pVehicleB->GetPosition();
+	float lenB = pVehicleB->GetModelInfo()->GetColModel()->boundingBox.max.y;
+	float widthB = pVehicleB->GetModelInfo()->GetColModel()->boundingBox.max.x;
+	float backLenB = -pVehicleB->GetModelInfo()->GetColModel()->boundingBox.min.y;
+	float lenA = pVehicleA->GetModelInfo()->GetColModel()->boundingBox.max.y;
+	float widthA = pVehicleA->GetModelInfo()->GetColModel()->boundingBox.max.x;
+	float backLenA = -pVehicleA->GetModelInfo()->GetColModel()->boundingBox.min.y;
+	float proximity = 1.0f;
+	float fullWidthB = 2.0f * widthB;
+	float fullLenB = lenB + backLenB;
+	for (int i = 0; i < 4; i++){
+		float testedOffsetX;
+		float testedOffsetY;
+		switch (i) {
+		case 0: /* Front right corner */
+			testedOffsetX = vecBToA.x + widthA * pForwardB->y + lenA * pForwardB->x;
+			testedOffsetY = vecBToA.y + lenA * pForwardB->y - widthA * pForwardB->x;
+			break;
+		case 1: /* Front left corner */
+			testedOffsetX = vecBToA.x + -widthA * pForwardB->x + lenA * pForwardB->x;
+			testedOffsetY = vecBToA.y + lenA * pForwardB->y + widthA * pForwardB->x;
+			break;
+		case 2: /* Rear right corner */
+			testedOffsetX = vecBToA.x + widthA * pForwardB->y - backLenA * pForwardB->x;
+			testedOffsetY = vecBToA.y - backLenA * pForwardB->y - widthA * pForwardB->x;
+			break;
+		case 3: /* Rear left corner */
+			testedOffsetX = vecBToA.x - widthA * pForwardB->y - backLenA * pForwardB->x;
+			testedOffsetY = vecBToA.y - backLenA * pForwardB->y + widthA * pForwardB->x;
+			break;
+		default:
+			break;
+		}
+		/* Testing width collision */
+		float baseWidthProximity = 0.0f;
+		float fullWidthProximity = 1.0f;
+		float widthDistance = testedOffsetX * pForwardA->y - testedOffsetY * pForwardA->x;
+		float widthProjection = projectionX * pForwardA->y - projectionY * pForwardA->x;
+		if (widthDistance > widthB){
+			if (widthProjection < 0.0f){
+				float proximityWidth = -(widthDistance - widthB) / widthProjection;
+				if (proximityWidth < 1.0f){
+					baseWidthProximity = proximityWidth;
+					fullWidthProximity = min(1.0f, proximityWidth - fullWidthB / widthProjection);
+				}else{
+					baseWidthProximity = 1.0f;
+				}
+			}else{
+				baseWidthProximity = 1.0f;
+				fullWidthProximity = 1.0f;
+			}
+		}else if (widthDistance < -widthB){
+			if (widthProjection > 0.0f) {
+				float proximityWidth = -(widthDistance + widthB) / widthProjection;
+				if (proximityWidth < 1.0f) {
+					baseWidthProximity = proximityWidth;
+					fullWidthProximity = min(1.0f, proximityWidth + fullWidthB / widthProjection);
+				}
+				else {
+					baseWidthProximity = 1.0f;
+				}
+			}
+			else {
+				baseWidthProximity = 1.0f;
+				fullWidthProximity = 1.0f;
+			}
+		}else if (widthProjection > 0.0f){
+			fullWidthProximity = (widthB - widthDistance) / widthProjection;
+		}else if (widthProjection < 0.0f){
+			fullWidthProximity = -(widthB + widthDistance) / widthProjection;
+		}
+		/* Testing length collision */
+		float baseLengthProximity = 0.0f;
+		float fullLengthProximity = 1.0f;
+		float lenDistance = testedOffsetX * pForwardA->x + testedOffsetY * pForwardA->y;
+		float lenProjection = projectionX * pForwardA->x + projectionY * pForwardA->y;
+		if (lenDistance > lenB) {
+			if (lenProjection < 0.0f) {
+				float proximityLength = -(lenDistance - lenB) / lenProjection;
+				if (proximityLength < 1.0f) {
+					baseLengthProximity = proximityLength;
+					fullLengthProximity = min(1.0f, proximityLength - fullLenB / lenProjection);
+				}
+				else {
+					baseLengthProximity = 1.0f;
+				}
+			}
+			else {
+				baseLengthProximity = 1.0f;
+				fullLengthProximity = 1.0f;
+			}
+		}
+		else if (lenDistance < -backLenB) {
+			if (lenProjection > 0.0f) {
+				float proximityLength = -(lenDistance + backLenB) / lenProjection;
+				if (proximityLength < 1.0f) {
+					baseLengthProximity = proximityLength;
+					fullLengthProximity = min(1.0f, proximityLength + fullLenB / lenProjection);
+				}
+				else {
+					baseLengthProximity = 1.0f;
+				}
+			}
+			else {
+				baseLengthProximity = 1.0f;
+				fullLengthProximity = 1.0f;
+			}
+		}
+		else if (lenProjection > 0.0f) {
+			fullLengthProximity = (lenB - lenDistance) / lenProjection;
+		}
+		else if (lenProjection < 0.0f) {
+			fullLengthProximity = -(backLenB + lenDistance) / lenProjection;
+		}
+		float baseProximity = max(baseWidthProximity, baseLengthProximity);
+		if (baseProximity < fullWidthProximity && baseProximity < fullLengthProximity)
+			proximity = min(proximity, baseProximity);
+	}
+	return proximity;
+}
+#endif
 
 bool
 CCarCtrl::MapCouldMoveInThisArea(float x, float y)
