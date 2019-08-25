@@ -34,6 +34,8 @@
 #include "Timecycle.h"
 #include "RpAnimBlend.h"
 #include "Shadows.h"
+#include "Radar.h"
+#include "Hud.h"
 
 int CAnimViewer::animTxdSlot = 0;
 CEntity *CAnimViewer::pTarget = nil;
@@ -70,7 +72,8 @@ CAnimViewer::Initialise(void) {
 	}
 
 	gbModelViewer = true;
-	
+	CHud::m_Wants_To_Draw_Hud = false;
+
 	ThePaths.Init();
 	ThePaths.AllocatePathFindInfoMem(4500);
 	CCollision::Init();
@@ -90,6 +93,8 @@ CAnimViewer::Initialise(void) {
 	CStreaming::RequestSpecialModel(MI_PLAYER, "player", STREAMFLAGS_DONT_REMOVE);
 	CStreaming::LoadAllRequestedModels(false);
 	CRenderer::Init();
+	CRadar::Initialise();
+	CRadar::LoadTextures();
 	CVehicleModelInfo::LoadVehicleColours();
 	CAnimManager::LoadAnimFiles();
 	CWorld::PlayerInFocus = 0;
@@ -297,10 +302,15 @@ CAnimViewer::Update(void)
 
 				if (pad->NewState.LeftShoulder1 && !pad->OldState.LeftShoulder1) {
 					nextModelId = LastPedModelId(modelId);
+					AsciiToUnicode("Switched to peds", gUString);
+					CMessages::AddMessage(gUString, 1000, 0);
 				} else {
 					// Start in mobile
-					if (pad->NewState.Square && !pad->OldState.Square)
+					if (pad->NewState.Square && !pad->OldState.Square) {
 						CVehicleModelInfo::LoadVehicleColours();
+						AsciiToUnicode("Carcols.dat reloaded", gUString);
+						CMessages::AddMessage(gUString, 1000, 0);
+					}
 				}
 			}
 		} else {
@@ -309,12 +319,18 @@ CAnimViewer::Update(void)
 			// Triangle in mobile
 			if (pad->NewState.Square && !pad->OldState.Square) {
 				reloadIFP = 1;
+				AsciiToUnicode("IFP reloaded", gUString);
+				CMessages::AddMessage(gUString, 1000, 0);
 
 			} else if (pad->NewState.Cross && !pad->OldState.Cross) {
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
+				AsciiToUnicode("Animation restarted", gUString);
+				CMessages::AddMessage(gUString, 1000, 0);
 
 			} else if (pad->NewState.Circle && !pad->OldState.Circle) {
 				PlayAnimation(pTarget->GetClump(), animGroup, ANIM_IDLE_STANCE);
+				AsciiToUnicode("Idle animation playing", gUString);
+				CMessages::AddMessage(gUString, 1000, 0);
 
 			} else if (pad->NewState.DPadUp && pad->OldState.DPadUp == 0) {
 				animId--;
@@ -323,9 +339,17 @@ CAnimViewer::Update(void)
 				}
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
 
+				sprintf(gString, "Current anim: %d", animId);
+				AsciiToUnicode(gString, gUString);
+				CMessages::AddMessage(gUString, 1000, 0);
+
 			} else if (pad->NewState.DPadDown && !pad->OldState.DPadDown) {
 				animId = (animId == (NUM_ANIMS - 1) ? 0 : animId + 1);
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
+
+				sprintf(gString, "Current anim: %d", animId);
+				AsciiToUnicode(gString, gUString);
+				CMessages::AddMessage(gUString, 1000, 0);
 
 			} else {
 				if (pad->NewState.Start && !pad->OldState.Start) {
@@ -333,9 +357,15 @@ CAnimViewer::Update(void)
 				} else {
 					if (pad->NewState.LeftShoulder1 && !pad->OldState.LeftShoulder1) {
 						nextModelId = LastVehicleModelId(modelId);
+						AsciiToUnicode("Switched to vehicles", gUString);
+						CMessages::AddMessage(gUString, 1000, 0);
 					} else {
-//						if (CPad::GetPad(1)->NewState.LeftShoulder2)
-//							CPedModelInfo::AnimatePedColModelSkinned(CModelInfo::ms_modelInfoPtrs[(pTarget + 96)], pTarget->GetClump()));
+						// Originally it was GetPad(1)->LeftShoulder2
+						if (pad->NewState.Triangle) {
+							CPedModelInfo::AnimatePedColModel(((CPedModelInfo*)CModelInfo::GetModelInfo(pTarget->m_modelIndex))->GetHitColModel(), RpClumpGetFrame(pTarget->GetClump()));
+							AsciiToUnicode("Ped Col model will be animated as long as you hold the button", gUString);
+							CMessages::AddMessage(gUString, 100, 0);
+						}
 					}
 				}
 			}
@@ -344,8 +374,17 @@ CAnimViewer::Update(void)
 
 	if (pad->NewState.DPadLeft && pad->OldState.DPadLeft == 0) {
 		nextModelId = FindMeAModelID(modelId, -1);
+
+		sprintf(gString, "Current model ID: %d", nextModelId);
+		AsciiToUnicode(gString, gUString);
+		CMessages::AddMessage(gUString, 1000, 0);
+
 	} else if (pad->NewState.DPadRight && pad->OldState.DPadRight == 0) {
 		nextModelId = FindMeAModelID(modelId, 1);
+
+		sprintf(gString, "Current model ID: %d", nextModelId);
+		AsciiToUnicode(gString, gUString);
+		CMessages::AddMessage(gUString, 1000, 0);
 	}
 	// There were extra codes here to let us change model id by 50, but xbox CPad struct is different, so I couldn't port.
 

@@ -2,14 +2,16 @@
 #include "patcher.h"
 #include "PedIK.h"
 #include "Ped.h"
+#include "General.h"
 
 WRAPPER bool CPedIK::PointGunInDirection(float phi, float theta) { EAXJMP(0x4ED9B0); }
 WRAPPER bool CPedIK::PointGunAtPosition(CVector *position) { EAXJMP(0x4ED920); }
 WRAPPER void CPedIK::ExtractYawAndPitchLocal(RwMatrixTag*, float*, float*) { EAXJMP(0x4ED2C0); }
 WRAPPER void CPedIK::ExtractYawAndPitchWorld(RwMatrixTag*, float*, float*) { EAXJMP(0x4ED140); }
 
-// TODO: Hardcoded into exe, reverse it.
+// TODO: These are hardcoded into exe, reverse it.
 LimbMovementInfo &CPedIK::ms_torsoInfo = *(LimbMovementInfo*)0x5F9F8C;
+LimbMovementInfo &CPedIK::ms_headInfo = *(LimbMovementInfo*)0x5F9F5C;
 
 CPedIK::CPedIK(CPed *ped)
 {
@@ -105,10 +107,10 @@ CPedIK::GetWorldMatrix(RwFrame *source, RwMatrix *destination)
 	return destination;
 }
 
-uint32
+LimbMoveStatus
 CPedIK::MoveLimb(LimbOrientation &limb, float approxPhi, float approxTheta, LimbMovementInfo &moveInfo)
 {
-	int result = 1;
+	LimbMoveStatus result = ONE_ANGLE_COULDNT_BE_SET_EXACTLY;
 
 	// phi
 
@@ -120,11 +122,12 @@ CPedIK::MoveLimb(LimbOrientation &limb, float approxPhi, float approxTheta, Limb
 
 	if (Abs(limb.phi - approxPhi) < moveInfo.yawD) {
 		limb.phi = approxPhi;
-		result = 2;
+		result = ANGLES_SET_EXACTLY;
 	}
+
 	if (limb.phi > moveInfo.maxYaw || limb.phi < moveInfo.minYaw) {
 		limb.phi = clamp(limb.phi, moveInfo.minYaw, moveInfo.maxYaw);
-		result = 0;
+		result = ANGLES_SET_TO_MAX;
 	}
 
 	// theta
@@ -138,11 +141,11 @@ CPedIK::MoveLimb(LimbOrientation &limb, float approxPhi, float approxTheta, Limb
 	if (Abs(limb.theta - approxTheta) < moveInfo.pitchD)
 		limb.theta = approxTheta;
 	else
-		result = 1;
+		result = ONE_ANGLE_COULDNT_BE_SET_EXACTLY;
 
 	if (limb.theta > moveInfo.maxPitch || limb.theta < moveInfo.minPitch) {
 		limb.theta = clamp(limb.theta, moveInfo.minPitch, moveInfo.maxPitch);
-		result = 0;
+		result = ANGLES_SET_TO_MAX;
 	}
 	return result;
 }
@@ -150,9 +153,71 @@ CPedIK::MoveLimb(LimbOrientation &limb, float approxPhi, float approxTheta, Limb
 bool
 CPedIK::RestoreGunPosn(void)
 {
-	int limbStatus = MoveLimb(m_torsoOrient, 0.0f, 0.0f, ms_torsoInfo);
+	LimbMoveStatus limbStatus = MoveLimb(m_torsoOrient, 0.0f, 0.0f, ms_torsoInfo);
 	RotateTorso(m_ped->m_pFrames[PED_MID], &m_torsoOrient, false);
-	return limbStatus == 2;
+	return limbStatus == ANGLES_SET_EXACTLY;
+}
+
+bool
+CPedIK::LookInDirection(float phi, float theta)
+{
+	bool success = true;
+	AnimBlendFrameData *frameData = m_ped->m_pFrames[PED_HEAD];
+	RwFrame *frame = frameData->frame;
+	RwMatrix *frameMat = RwFrameGetMatrix(frame);
+
+	if (!(frameData->flag & AnimBlendFrameData::IGNORE_ROTATION)) {
+		frameData->flag |= AnimBlendFrameData::IGNORE_ROTATION;
+		CPedIK::ExtractYawAndPitchLocal(frameMat, &m_headOrient.phi, &m_headOrient.theta);
+	}
+
+	RwMatrix *worldMat = RwMatrixCreate();
+	worldMat = CPedIK::GetWorldMatrix(RwFrameGetParent(frame), worldMat);
+
+	float alpha, beta;
+	CPedIK::ExtractYawAndPitchWorld(worldMat, &alpha, &beta);
+	RwMatrixDestroy(worldMat);
+
+	alpha += m_torsoOrient.phi;
+	float neededPhiTurn = CGeneral::LimitRadianAngle(phi - alpha);
+	beta *= cos(neededPhiTurn);
+
+	float neededThetaTurn = CGeneral::LimitRadianAngle(theta - beta);
+	LimbMoveStatus headStatus = CPedIK::MoveLimb(m_headOrient, neededPhiTurn, neededThetaTurn, ms_headInfo);
+	if (headStatus == ANGLES_SET_TO_MAX)
+		success = false;
+
+	if (headStatus != ANGLES_SET_EXACTLY && !(m_flags & LOOKING)) {
+		float remainingTurn = CGeneral::LimitRadianAngle(phi - m_ped->m_fRotationCur);
+		if (CPedIK::MoveLimb(m_torsoOrient, remainingTurn, theta, ms_torsoInfo))
+			success = true;
+	}
+	CMatrix nextFrame = CMatrix(frameMat);
+	CVector framePos = nextFrame.GetPosition();
+
+	nextFrame.SetRotateZ(m_headOrient.theta);
+	nextFrame.RotateX(m_headOrient.phi);
+	nextFrame.GetPosition() += framePos;
+	nextFrame.UpdateRW();
+
+	if (!(m_flags & LOOKING))
+		RotateTorso(m_ped->m_pFrames[PED_MID], &m_torsoOrient, false);
+
+	return success;
+}
+
+bool
+CPedIK::LookAtPosition(CVector const &pos)
+{
+	float phiToFace = CGeneral::GetRadianAngleBetweenPoints(
+		pos.x, pos.y,
+		m_ped->GetPosition().x, m_ped->GetPosition().y);
+
+	float thetaToFace = CGeneral::GetRadianAngleBetweenPoints(
+		pos.z, (m_ped->GetPosition() - pos).Magnitude2D(),
+		m_ped->GetPosition().z, 0.0f);
+
+	return LookInDirection(phiToFace, thetaToFace);
 }
 
 STARTPATCHES
@@ -161,4 +226,6 @@ STARTPATCHES
 	InjectHook(0x4EDDB0, &CPedIK::RotateTorso, PATCH_JUMP);
 	InjectHook(0x4ED440, &CPedIK::MoveLimb, PATCH_JUMP);
 	InjectHook(0x4EDD70, &CPedIK::RestoreGunPosn, PATCH_JUMP);
+	InjectHook(0x4ED620, &CPedIK::LookInDirection, PATCH_JUMP);
+	InjectHook(0x4ED590, &CPedIK::LookAtPosition, PATCH_JUMP);
 ENDPATCHES

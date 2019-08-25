@@ -11,6 +11,7 @@
 #include "WeaponInfo.h"
 #include "Fire.h"
 #include "DMAudio.h"
+#include "EventList.h"
 
 struct CPathNode;
 
@@ -258,7 +259,7 @@ public:
 	uint8 bIsAttacking : 1;		// doesn't reset after fist fight, also stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
 	uint8 bIsPointingGunAt : 1;
 	uint8 bIsLooking : 1;
-	uint8 m_ped_flagA20 : 1;	// "look" method? - probably missing in SA
+	uint8 bKeepTryingToLook : 1; // if we can't look somewhere due to unreachable angles
 	uint8 bIsRestoringLook : 1;
 	uint8 bIsAimingGun : 1;
 
@@ -278,10 +279,10 @@ public:
 	uint8 bUpdateAnimHeading : 1;
 	uint8 bBodyPartJustCameOff : 1;
 	uint8 m_ped_flagC40 : 1;
-	uint8 m_ped_flagC80 : 1;
+	uint8 bFindNewNodeAfterStateRestore : 1;
 
-	uint8 m_ped_flagD1 : 1;
-	uint8 m_ped_flagD2 : 1; // seen an event
+	uint8 m_ped_flagD1 : 1;	// so far only used for reaction type to fire/explosion
+	uint8 m_ped_flagD2 : 1; // set when event has been seen
 	uint8 m_ped_flagD4 : 1;
 	uint8 m_ped_flagD8 : 1;
 	uint8 bIsPedDieAnimPlaying : 1;
@@ -303,7 +304,7 @@ public:
 	uint8 m_ped_flagF4 : 1;
 	uint8 m_ped_flagF8 : 1;
 	uint8 bWillBeQuickJacked : 1;
-	uint8 m_ped_flagF20 : 1;
+	uint8 m_ped_flagF20 : 1; // set when couldn't open locked car door
 	uint8 m_ped_flagF40 : 1;
 	uint8 bDuckAndCover : 1;
 
@@ -329,7 +330,7 @@ public:
 	uint8 bNoCriticalHits : 1; // if set, limbs won't came off
 	uint8 m_ped_flagI4 : 1;
 	uint8 bHasAlreadyBeenRecorded : 1;
-	uint8 bIsFell : 1;
+	uint8 bFallenDown : 1;
 	uint8 m_ped_flagI20 : 1;
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
@@ -367,7 +368,7 @@ public:
 	int32 m_nPrevMoveState;
 	eWaitState m_nWaitState;
 	uint32 m_nWaitTimer;
-	void *m_pPathNodesStates[8]; // seems unused
+	void *m_pPathNodesStates[8]; // seems unused, probably leftover from VC
 	CVector2D m_stPathNodeStates[10];
 	uint16 m_nPathNodes;
 	int16 m_nCurPathNode;
@@ -601,7 +602,7 @@ public:
 	void LineUpPedWithTrain(void);
 	void ExitCar(void);
 	void Fight(void);
-	bool FindBestCoordsFromNodes(CVector unused, CVector* a6);
+	bool FindBestCoordsFromNodes(CVector, CVector*);
 	void Wait(void);
 	void ProcessObjective(void);
 	bool SeekFollowingPath(CVector*);
@@ -614,10 +615,20 @@ public:
 	uint8 GetPedRadioCategory(uint32);
 	int GetWeaponSlot(eWeaponType);
 	void GoToNearestDoor(CVehicle*);
-	bool HaveReachedNextPointOnRoute(float a2);
+	bool HaveReachedNextPointOnRoute(float);
 	void Idle(void);
 	void InTheAir(void);
 	void SetLanding(void);
+	void InvestigateEvent(void);
+	bool IsPedDoingDriveByShooting(void);
+	bool IsRoomToBeCarJacked(void);
+	void SetInvestigateEvent(eEventType, CVector2D, float, uint16, float);
+	bool LookForInterestingNodes(void);
+	void LookForSexyCars(void);
+	void LookForSexyPeds(void);
+	void Mug(void);
+	void MoveHeadToLook(void);
+	void Pause(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -681,6 +692,8 @@ public:
 	void EnterTrain(void);
 	void ExitTrain(void);
 	void Fall(void);
+	bool IsPedShootable(void);
+	void Look(void);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
