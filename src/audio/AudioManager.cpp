@@ -498,7 +498,7 @@ cAudioManager::CreateEntity(int32 type, CPhysical *entity)
 			m_asAudioEntities[i].m_bIsUsed = true;
 			m_asAudioEntities[i].m_bStatus = 0;
 			m_asAudioEntities[i].m_nType = (eAudioType)type;
-			m_asAudioEntities[i].m_pEntity = (void*)entity;
+			m_asAudioEntities[i].m_pEntity = (void *)entity;
 			m_asAudioEntities[i].m_awAudioEvent[0] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[1] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[2] = SOUND_TOTAL_PED_SOUNDS;
@@ -2823,7 +2823,6 @@ cAudioManager::GetNum3DProvidersAvailable() const
 	return 0;
 }
 
-
 int32
 cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 {
@@ -3038,6 +3037,13 @@ cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 	EAXJMP(0x57A500);
 }
 
+WRAPPER
+uint32
+cAudioManager::PlaySuspectLastSeen(float x, float y, float z)
+{
+	EAXJMP(0x580500);
+}
+
 void
 cAudioManager::PlayerJustGotInCar() const
 {
@@ -3092,12 +3098,18 @@ cAudioManager::PostTerminateGameSpecificShutdown()
 	;
 }
 
-
 void
 cAudioManager::PreInitialiseGameSpecificSetup() const
 {
 	BankStartOffset[0] = AUDIO_SAMPLE_VEHICLE_HORN_0;
 	BankStartOffset[1] = AUDIO_SAMPLE_POLICE_COP_1_ARREST_1;
+}
+
+WRAPPER
+void
+cAudioManager::PreloadMissionAudio(char *)
+{
+	EAXJMP(0x579550);
 }
 
 void
@@ -7790,6 +7802,20 @@ cAudioManager::ReleaseDigitalHandle() const
 	if(m_bIsInitialised) { SampleManager.ReleaseDigitalHandle(); }
 }
 
+WRAPPER
+int32
+cAudioManager::ReportCollision(CEntity *a2, CEntity *a3, uint8 a4, uint8 a5, float a6, float a7)
+{
+	EAXJMP(0x568410);
+}
+
+WRAPPER
+int32
+cAudioManager::ReportCrime(eCrimeType crime, const CVector *pos)
+{
+	EAXJMP(0x5803D0);
+}
+
 void
 cAudioManager::ResetAudioLogicTimers(int32 timer)
 {
@@ -7824,12 +7850,21 @@ cAudioManager::ResetPoliceRadio()
 	}
 }
 
+WRAPPER
+void
+cAudioManager::ResetTimers(uint32 a2)
+{
+	EAXJMP(0x57A7B0);
+}
+
 WRAPPER void
 cAudioManager::Service()
 {
 	EAXJMP(0x57A2A0);
 }
 
+WRAPPER
+int8 cAudioManager::SetCurrent3DProvider(uint8) { EAXJMP(0x57A910); }
 
 void
 cAudioManager::SetDynamicAcousticModelingStatus(bool status)
@@ -7890,7 +7925,6 @@ cAudioManager::SetMusicMasterVolume(uint8 volume) const
 {
 	SampleManager.SetMusicMasterVolume(volume);
 }
-
 
 void
 cAudioManager::SetSpeakerConfig(int32 conf) const

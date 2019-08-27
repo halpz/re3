@@ -502,18 +502,18 @@ public:
 	void ReacquireDigitalHandle() const;
 	void ReleaseDigitalHandle() const;
 	int32 ReportCollision(CEntity *a2, CEntity *a3, uint8 a4, uint8 a5, float a6,
-	                      float a7);         // todo
-	int32 ReportCrime(int a2, int *a3);      // todo
-	void ResetAudioLogicTimers(int32 timer); /// ok
-	void ResetPoliceRadio();
-	void ResetTimers(unsigned int a2); // todo
+	                      float a7);                         // todo
+	int32 ReportCrime(eCrimeType crime, const CVector *pos); // todo
+	void ResetAudioLogicTimers(int32 timer);                 /// ok
+	void ResetPoliceRadio();                                 /// ok
+	void ResetTimers(uint32 a2);                             // todo
 
 	void Service();                         // todo
 	void ServiceCollisions();               // todo
 	void ServicePoliceRadio();              // todo
 	void ServicePoliceRadioChannel(int a2); // todo
 	void ServiceSoundEffects();             // todo
-	void SetCurrent3DProvider(uint8);
+	int8 SetCurrent3DProvider(uint8);       // todo
 	void SetDynamicAcousticModelingStatus(bool status);
 	void SetEffectsFadeVolume(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;

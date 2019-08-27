@@ -7,9 +7,6 @@
 
 cDMAudio &DMAudio = *(cDMAudio*)0x95CDBE;
 
-#define AEHANDLE_IS_FAILED(h) ((h)<0)
-#define AEHANDLE_IS_OK(h)     ((h)>=0)
-
 void
 cDMAudio::Initialise(void)
 {
@@ -167,7 +164,7 @@ cDMAudio::IsAudioInitialised(void)
 }
 
 void
-cDMAudio::ReportCrime(eCrimeType crime, CVector const &pos)
+cDMAudio::ReportCrime(eCrimeType crime, const CVector &pos)
 {
 	AudioManager.ReportCrime(crime, &pos);
 }

@@ -174,6 +174,9 @@ enum eSound : int16
 	SOUND_TOTAL_PED_SOUNDS = 167,
 };
 
+#define AEHANDLE_IS_FAILED(h) ((h)<0)
+#define AEHANDLE_IS_OK(h)     ((h)>=0)
+
 class cAudioScriptObject;
 class CEntity;
 enum eCrimeType;
