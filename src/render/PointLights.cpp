@@ -98,7 +98,7 @@ CPointLights::GenerateLightsAffectingObject(CVector *objCoors)
 
 						if(aLights[i].type == LIGHT_DIRECTIONAL){
 							float dot = -DotProduct(dir, aLights[i].dir);
-							intensity *= Max((dot-0.5f)*2.0f, 0.0f);
+							intensity *= max((dot-0.5f)*2.0f, 0.0f);
 						}
 
 						if(intensity > 0.0f)

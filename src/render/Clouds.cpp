@@ -388,7 +388,7 @@ CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 			ms_colourBottom.b = topblue;
 			ms_colourBottom.a = alpha;
 
-			botpos = Min(SCREEN_HEIGHT, topedge);
+			botpos = min(SCREEN_HEIGHT, topedge);
 			CSprite2d::DrawRect(CRect(0, 0, SCREEN_WIDTH, botpos),
 				ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
 		}
@@ -415,18 +415,18 @@ CClouds::RenderHorizon(void)
 	if(ms_horizonZ > SCREEN_HEIGHT)
 		return;
 
-	float z1 = Min(ms_horizonZ + SMALLSTRIPHEIGHT, SCREEN_HEIGHT);
+	float z1 = min(ms_horizonZ + SMALLSTRIPHEIGHT, SCREEN_HEIGHT);
 	CSprite2d::DrawRectXLU(CRect(0, ms_horizonZ, SCREEN_WIDTH, z1),
 		ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
 
 	// This is just weird
 	float a = SCREEN_HEIGHT/400.0f * HORIZSTRIPHEIGHT +
-		SCREEN_HEIGHT/300.0f * Max(TheCamera.GetPosition().z, 0.0f);
+		SCREEN_HEIGHT/300.0f * max(TheCamera.GetPosition().z, 0.0f);
 	float b = TheCamera.GetUp().z < 0.0f ?
 		SCREEN_HEIGHT :
 		SCREEN_HEIGHT * Abs(TheCamera.GetRight().z);
 	float z2 = z1 + (a + b)*TheCamera.LODDistMultiplier;
-	z2 = Min(z2, SCREEN_HEIGHT);
+	z2 = min(z2, SCREEN_HEIGHT);
 	CSprite2d::DrawRect(CRect(0, z1, SCREEN_WIDTH, z2),
 		ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
 }

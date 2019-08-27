@@ -340,7 +340,7 @@ CCarCtrl::GenerateOneRandomCar()
 	if (distanceBetweenNodes / 2 < carLength)
 		positionBetweenNodes = 0.5f;
 	else
-		positionBetweenNodes = Min(1.0f - carLength / distanceBetweenNodes, Max(carLength / distanceBetweenNodes, positionBetweenNodes));
+		positionBetweenNodes = min(1.0f - carLength / distanceBetweenNodes, max(carLength / distanceBetweenNodes, positionBetweenNodes));
 	pCar->AutoPilot.m_nNextDirection = (curNodeId >= nextNodeId) ? 1 : -1;
 	if (pCurNode->numLinks == 1){
 		/* Do not create vehicle if there is nowhere to go. */
@@ -793,10 +793,10 @@ CCarCtrl::FindMaximumSpeedForThisCarInTraffic(CVehicle* pVehicle)
 	float right = pVehicle->GetPosition().x + DISTANCE_TO_SCAN_FOR_DANGER;
 	float top = pVehicle->GetPosition().y - DISTANCE_TO_SCAN_FOR_DANGER;
 	float bottom = pVehicle->GetPosition().y + DISTANCE_TO_SCAN_FOR_DANGER;
-	int xstart = Max(0, CWorld::GetSectorIndexX(left));
-	int xend = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right));
-	int ystart = Max(0, CWorld::GetSectorIndexY(top));
-	int yend = Min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(bottom));
+	int xstart = max(0, CWorld::GetSectorIndexX(left));
+	int xend = min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right));
+	int ystart = max(0, CWorld::GetSectorIndexY(top));
+	int yend = min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(bottom));
 	assert(xstart <= xend);
 	assert(ystart <= yend);
 
@@ -827,10 +827,10 @@ CCarCtrl::ScanForPedDanger(CVehicle* pVehicle)
 	float right = pVehicle->GetPosition().x + DISTANCE_TO_SCAN_FOR_DANGER;
 	float top = pVehicle->GetPosition().y - DISTANCE_TO_SCAN_FOR_DANGER;
 	float bottom = pVehicle->GetPosition().y + DISTANCE_TO_SCAN_FOR_DANGER;
-	int xstart = Max(0, CWorld::GetSectorIndexX(left));
-	int xend = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right));
-	int ystart = Max(0, CWorld::GetSectorIndexY(top));
-	int yend = Min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(bottom));
+	int xstart = max(0, CWorld::GetSectorIndexX(left));
+	int xend = min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right));
+	int ystart = max(0, CWorld::GetSectorIndexY(top));
+	int yend = min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(bottom));
 	assert(xstart <= xend);
 	assert(ystart <= yend);
 
@@ -862,12 +862,12 @@ CCarCtrl::SlowCarOnRailsDownForTrafficAndLights(CVehicle* pVehicle)
 	float curSpeed = pVehicle->AutoPilot.m_fMaxTrafficSpeed;
 	if (maxSpeed >= curSpeed){
 		if (maxSpeed > curSpeed)
-			pVehicle->AutoPilot.ModifySpeed(Min(maxSpeed, curSpeed + 0.05f * CTimer::GetTimeStep()));
+			pVehicle->AutoPilot.ModifySpeed(min(maxSpeed, curSpeed + 0.05f * CTimer::GetTimeStep()));
 	}else{
 		if (curSpeed == 0.0f)
 			return;
 		if (curSpeed >= 0.1f)
-			pVehicle->AutoPilot.ModifySpeed(Max(maxSpeed, curSpeed - 0.5f * CTimer::GetTimeStep()));
+			pVehicle->AutoPilot.ModifySpeed(max(maxSpeed, curSpeed - 0.5f * CTimer::GetTimeStep()));
 		else if (curSpeed != 0.0f) /* no need to check */
 			pVehicle->AutoPilot.ModifySpeed(0.0f);
 	}

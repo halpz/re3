@@ -37,9 +37,9 @@ SetLightsWithTimeOfDayColour(RpWorld *)
 			AmbientLightColourForFrame.green = 1.0f;
 			AmbientLightColourForFrame.blue = 1.0f;
 		}
-		AmbientLightColourForFrame_PedsCarsAndObjects.red = Min(1.0f, AmbientLightColourForFrame.red*1.3f);
-		AmbientLightColourForFrame_PedsCarsAndObjects.green = Min(1.0f, AmbientLightColourForFrame.green*1.3f);
-		AmbientLightColourForFrame_PedsCarsAndObjects.blue = Min(1.0f, AmbientLightColourForFrame.blue*1.3f);
+		AmbientLightColourForFrame_PedsCarsAndObjects.red = min(1.0f, AmbientLightColourForFrame.red*1.3f);
+		AmbientLightColourForFrame_PedsCarsAndObjects.green = min(1.0f, AmbientLightColourForFrame.green*1.3f);
+		AmbientLightColourForFrame_PedsCarsAndObjects.blue = min(1.0f, AmbientLightColourForFrame.blue*1.3f);
 		RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
 	}
 
@@ -70,16 +70,16 @@ SetLightsWithTimeOfDayColour(RpWorld *)
 		float f1 = 2.0f * (CMenuManager::m_PrefsBrightness/256.0f - 1.0f) * 0.6f + 1.0f;
 		float f2 = 3.0f * (CMenuManager::m_PrefsBrightness/256.0f - 1.0f) * 0.6f + 1.0f;
 
-		AmbientLightColourForFrame.red = Min(1.0f, AmbientLightColourForFrame.red * f2);
-		AmbientLightColourForFrame.green = Min(1.0f, AmbientLightColourForFrame.green * f2);
-		AmbientLightColourForFrame.blue = Min(1.0f, AmbientLightColourForFrame.blue * f2);
-		AmbientLightColourForFrame_PedsCarsAndObjects.red = Min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.red * f1);
-		AmbientLightColourForFrame_PedsCarsAndObjects.green = Min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.green * f1);
-		AmbientLightColourForFrame_PedsCarsAndObjects.blue = Min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.blue * f1);
+		AmbientLightColourForFrame.red = min(1.0f, AmbientLightColourForFrame.red * f2);
+		AmbientLightColourForFrame.green = min(1.0f, AmbientLightColourForFrame.green * f2);
+		AmbientLightColourForFrame.blue = min(1.0f, AmbientLightColourForFrame.blue * f2);
+		AmbientLightColourForFrame_PedsCarsAndObjects.red = min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.red * f1);
+		AmbientLightColourForFrame_PedsCarsAndObjects.green = min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.green * f1);
+		AmbientLightColourForFrame_PedsCarsAndObjects.blue = min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.blue * f1);
 #ifdef FIX_BUGS
-		DirectionalLightColourForFrame.red = Min(1.0f, DirectionalLightColourForFrame.red * f1);
-		DirectionalLightColourForFrame.green = Min(1.0f, DirectionalLightColourForFrame.green * f1);
-		DirectionalLightColourForFrame.blue = Min(1.0f, DirectionalLightColourForFrame.blue * f1);
+		DirectionalLightColourForFrame.red = min(1.0f, DirectionalLightColourForFrame.red * f1);
+		DirectionalLightColourForFrame.green = min(1.0f, DirectionalLightColourForFrame.green * f1);
+		DirectionalLightColourForFrame.blue = min(1.0f, DirectionalLightColourForFrame.blue * f1);
 #else
 		DirectionalLightColourForFrame.red = min(1.0f, AmbientLightColourForFrame.red * f1);
 		DirectionalLightColourForFrame.green = min(1.0f, AmbientLightColourForFrame.green * f1);
@@ -193,7 +193,7 @@ AddAnExtraDirectionalLight(RpWorld *world, float dirx, float diry, float dirz, f
 	RwRGBAReal color;
 	RwV3d *dir;
 
-	strength = Max(Max(red, green), blue);
+	strength = max(max(red, green), blue);
 	n = -1;
 	if(NumExtraDirLightsInWorld < NUMEXTRADIRECTIONALS)
 		n = NumExtraDirLightsInWorld;
@@ -221,7 +221,7 @@ AddAnExtraDirectionalLight(RpWorld *world, float dirx, float diry, float dirz, f
 	RwFrameUpdateObjects(RpLightGetFrame(pExtraDirectionals[n]));
 	RpLightSetFlags(pExtraDirectionals[n], rpLIGHTLIGHTATOMICS);
 	LightStrengths[n] = strength;
-	NumExtraDirLightsInWorld = Min(NumExtraDirLightsInWorld+1, NUMEXTRADIRECTIONALS);
+	NumExtraDirLightsInWorld = min(NumExtraDirLightsInWorld+1, NUMEXTRADIRECTIONALS);
 }
 
 void

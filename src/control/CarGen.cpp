@@ -157,7 +157,7 @@ void CCarGenerator::Setup(float x, float y, float z, float angle, int32 mi, int1
 	m_bIsBlocking = false;
 	m_vecInf = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->boundingBox.min;
 	m_vecSup = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->boundingBox.max;
-	m_fSize = Max(m_vecInf.Magnitude(), m_vecSup.Magnitude());
+	m_fSize = max(m_vecInf.Magnitude(), m_vecSup.Magnitude());
 }
 
 bool CCarGenerator::CheckForBlockage()

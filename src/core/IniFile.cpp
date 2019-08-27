@@ -17,10 +17,10 @@ void CIniFile::LoadIniFile()
 	if (f){
 		CFileMgr::ReadLine(f, gString, 200);
 		sscanf(gString, "%f", &PedNumberMultiplier);
-		PedNumberMultiplier = Min(3.0f, Max(0.5f, PedNumberMultiplier));
+		PedNumberMultiplier = min(3.0f, max(0.5f, PedNumberMultiplier));
 		CFileMgr::ReadLine(f, gString, 200);
 		sscanf(gString, "%f", &CarNumberMultiplier);
-		CarNumberMultiplier = Min(3.0f, Max(0.5f, CarNumberMultiplier));
+		CarNumberMultiplier = min(3.0f, max(0.5f, CarNumberMultiplier));
 		CFileMgr::CloseFile(f);
 	}
 	CPopulation::MaxNumberOfPedsInUse = 25.0f * PedNumberMultiplier;

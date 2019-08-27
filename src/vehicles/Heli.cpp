@@ -223,19 +223,19 @@ CHeli::ProcessControl(void)
 		switch(m_heliStatus){
 		case HELI_STATUS_HOVER:
 			groundZ = CWorld::FindGroundZFor3DCoord(GetPosition().x, GetPosition().y, 1000.0f, nil);
-			m_fTargetZ = Max(groundZ, m_fTargetZ) + 8.0f;
+			m_fTargetZ = max(groundZ, m_fTargetZ) + 8.0f;
 			break;
 		case HELI_STATUS_SHOT_DOWN:
 			groundZ = CWorld::FindGroundZFor3DCoord(GetPosition().x, GetPosition().y, 1000.0f, nil);
-			m_fTargetZ = Max(groundZ, m_fTargetZ) + 8.0f + m_fTargetOffset;
+			m_fTargetZ = max(groundZ, m_fTargetZ) + 8.0f + m_fTargetOffset;
 			break;
 		case HELI_STATUS_HOVER2:
 			groundZ = CWorld::FindGroundZFor3DCoord(GetPosition().x, GetPosition().y, 1000.0f, nil);
-			m_fTargetZ = Max(groundZ, m_fTargetZ) + 8.0f + m_fTargetOffset;
+			m_fTargetZ = max(groundZ, m_fTargetZ) + 8.0f + m_fTargetOffset;
 			break;
 		default:
 			groundZ = CWorld::FindGroundZFor3DCoord(GetPosition().x, GetPosition().y, 1000.0f, nil);
-			m_fTargetZ = Max(groundZ, m_fTargetZ) + 12.0f;
+			m_fTargetZ = max(groundZ, m_fTargetZ) + 12.0f;
 			break;
 		}
 
@@ -994,7 +994,7 @@ CHeli::TestBulletCollision(CVector *line0, CVector *line1, CVector *bulletPos, i
 			float distToHeli = (pHelis[i]->GetPosition() - *line0).Magnitude();
 			CVector line = (*line1 - *line0);
 			float lineLength = line.Magnitude();
-			*bulletPos = *line0 + line*Max(1.0f, distToHeli-5.0f);
+			*bulletPos = *line0 + line*max(1.0f, distToHeli-5.0f);
 
 			pHelis[i]->m_nBulletDamage += damage;
 

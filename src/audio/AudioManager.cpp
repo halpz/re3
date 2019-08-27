@@ -31,11 +31,17 @@
 #include "sampman.h"
 
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
+uint32 *audioLogicTimers = (uint32 *)0x6508A0;
+uint8 &jumboVolOffset = *(uint8 *)0x6508ED;
+uint8 &gJumboVolOffsetPercentage = *(uint8 *)0x6508ED;
+char &g_nMissionAudioPlayingStatus = *(char *)0x60ED88;
+int32 *BankStartOffset = (int32 *)0x6FAB70; //[2]
+int32 &g_nMissionAudioSfx = *(int32 *)0x60ED84;
+bool &bPlayerJustEnteredCar = *(bool *)0x6508C4;
+bool &g_bMissionAudioLoadFailed = *(bool *)0x95CD8E;
 
 constexpr int totalAudioEntitiesSlots = 200;
 constexpr int maxVolume = 127;
-
-uint32 *audioLogicTimers = (uint32 *)0x6508A0;
 
 // TODO: where is this used? Is this the right file?
 enum eVehicleModel {
@@ -251,8 +257,6 @@ cAudioScriptObject::operator delete(void *p, int handle)
 	CPools::GetAudioScriptObjectPool()->Delete((cAudioScriptObject *)p);
 }
 
-char &g_nMissionAudioPlayingStatus = *(char *)0x60ED88;
-
 void
 cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 {
@@ -311,8 +315,7 @@ cAudioManager::AddReflectionsToRequestedQueue()
 {
 	float reflectionDistance;
 	int32 noise;
-	uint8 emittingVolume = emittingVolume =
-	    (m_sQueueSample.m_bVolume >> 1) + (m_sQueueSample.m_bVolume >> 3);
+	uint8 emittingVolume = (m_sQueueSample.m_bVolume >> 1) + (m_sQueueSample.m_bVolume >> 3);
 
 	for(uint32 i = 0; i < 5u; i++) {
 		reflectionDistance = m_afReflectionsDistances[i];
@@ -452,9 +455,9 @@ cAudioManager::ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, 
 			float speedOfSource = (dist / field_19195) * speedMultiplier;
 			if(speedOfSound > Abs(speedOfSource)) {
 				if(speedOfSource < 0.0f) {
-					speedOfSource = Max(speedOfSource, -1.5f);
+					speedOfSource = max(speedOfSource, -1.5f);
 				} else {
-					speedOfSource = Min(speedOfSource, 1.5f);
+					speedOfSource = min(speedOfSource, 1.5f);
 				}
 				newFreq = (oldFreq * speedOfSound) / (speedOfSource + speedOfSound);
 			}
@@ -485,7 +488,7 @@ cAudioManager::ComputeVolume(int emittingVolume, float soundIntensity, float dis
 }
 
 int32
-cAudioManager::CreateEntity(int32 type, void *entity)
+cAudioManager::CreateEntity(int32 type, CPhysical *entity)
 {
 	if(!m_bIsInitialised) return -4;
 	if(!entity) return -2;
@@ -495,7 +498,7 @@ cAudioManager::CreateEntity(int32 type, void *entity)
 			m_asAudioEntities[i].m_bIsUsed = true;
 			m_asAudioEntities[i].m_bStatus = 0;
 			m_asAudioEntities[i].m_nType = (eAudioType)type;
-			m_asAudioEntities[i].m_pEntity = entity;
+			m_asAudioEntities[i].m_pEntity = (void*)entity;
 			m_asAudioEntities[i].m_awAudioEvent[0] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[1] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[2] = SOUND_TOTAL_PED_SOUNDS;
@@ -558,6 +561,13 @@ cAudioManager::DestroyEntity(int32 id)
 }
 
 void
+cAudioManager::DoJumboVolOffset() const
+{
+	if(!(m_FrameCounter % (m_anRandomTable[0] % 6u + 3)))
+		jumboVolOffset = m_anRandomTable[1] % 60u;
+}
+
+void
 cAudioManager::DoPoliceRadioCrackle()
 {
 	m_sQueueSample.m_nEntityIndex = m_nPoliceChannelEntity;
@@ -579,573 +589,6 @@ cAudioManager::DoPoliceRadioCrackle()
 	m_sQueueSample.field_76 = 3;
 	m_sQueueSample.m_bRequireReflection = 0;
 	AddSampleToRequestedQueue();
-}
-
-void
-cAudioManager::GenerateIntegerRandomNumberTable()
-{
-	for(int32 i = 0; i < 5; i++) { m_anRandomTable[i] = rand(); }
-}
-
-void
-cAudioManager::TranslateEntity(CVector *v1, CVector *v2) const
-{
-	const RwMatrix &cM = TheCamera.GetMatrix().m_matrix;
-	const CVector &cV = TheCamera.GetPosition();
-
-	float a = v1->z - cV.z;
-	float b = v1->y - cV.y;
-	float c = v1->x - cV.x;
-
-	v2->x = cM.right.y * b + cM.right.x * c + cM.right.z * a;
-	v2->y = cM.up.y * b + cM.up.x * c + cM.up.z * a;
-	v2->z = cM.at.y * b + cM.at.x * c + cM.at.z * a;
-}
-
-void
-cAudioManager::ResetAudioLogicTimers(int32 timer)
-{
-	audioLogicTimers[0] = timer;
-	audioLogicTimers[8] = timer;
-	audioLogicTimers[1] = timer;
-	audioLogicTimers[7] = timer;
-	audioLogicTimers[2] = timer;
-	audioLogicTimers[6] = timer;
-	audioLogicTimers[3] = timer;
-	audioLogicTimers[5] = timer;
-	audioLogicTimers[4] = timer;
-	for(int32 i = 0; i < m_nAudioEntitiesTotal; i++) {
-		if(m_asAudioEntities[m_anAudioEntityIndices[i]].m_nType == AUDIOTYPE_PHYSICAL) {
-			CPed *ped = (CPed *)m_asAudioEntities[m_anAudioEntityIndices[i]].m_pEntity;
-			if(ped->IsPed()) {
-				ped->m_lastSoundStart = timer;
-				ped->m_soundStart = timer + m_anRandomTable[0] % 3000u;
-			}
-		}
-	}
-<<<<<<< HEAD
-}
-
-void
-cAudioManager::PostInitialiseGameSpecificSetup()
-{
-	m_nFireAudioEntity =
-	    CreateEntity(AUDIOTYPE_FIRE,
-	                 (CPhysical *)0x8F31D0); // last is addr of firemanager @todo change
-	if(m_nFireAudioEntity >= 0) SetEntityStatus(m_nFireAudioEntity, 1);
-
-	m_nCollisionEntity = CreateEntity(AUDIOTYPE_COLLISION, (CPhysical *)1);
-	if(m_nCollisionEntity >= 0) SetEntityStatus(m_nCollisionEntity, 1);
-
-	m_nFrontEndEntity = CreateEntity(AUDIOTYPE_FRONTEND, (CPhysical *)1);
-	if(m_nFrontEndEntity >= 0) SetEntityStatus(m_nFrontEndEntity, 1);
-
-	m_nProjectileEntity = CreateEntity(AUDIOTYPE_PROJECTILE, (CPhysical *)1);
-	if(m_nProjectileEntity >= 0) SetEntityStatus(m_nProjectileEntity, 1);
-
-	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATERCANNON, (CPhysical *)1);
-	if(m_nWaterCannonEntity >= 0) SetEntityStatus(m_nWaterCannonEntity, 1);
-
-	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (CPhysical *)1);
-	if(m_nPoliceChannelEntity >= 0) SetEntityStatus(m_nPoliceChannelEntity, 1);
-
-	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (CPhysical *)1);
-	if(m_nBridgeEntity >= 0) SetEntityStatus(m_nBridgeEntity, 1);
-
-	m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
-	m_sMissionAudio.m_bLoadingStatus = 0;
-	m_sMissionAudio.m_bPlayStatus = 0;
-	m_sMissionAudio.field_22 = 0;
-	m_sMissionAudio.m_bIsPlayed = 0;
-	m_sMissionAudio.field_12 = 1;
-	m_sMissionAudio.field_24 = 0;
-	ResetAudioLogicTimers((int32)CTimer::GetTimeInMilliseconds);
-}
-
-WRAPPER
-void
-cAudioManager::InitialisePoliceRadioZones()
-{
-	EAXJMP(0x57EAC0);
-}
-
-WRAPPER
-void
-cAudioManager::ResetAudioLogicTimers(int32 timer)
-{
-	EAXJMP(0x569650);
-=======
-	ClearMissionAudio();
-	SampleManager.StopChannel(28);
->>>>>>> More more more audio
-}
-
-void
-cAudioManager::Terminate()
-{
-	if(m_bIsInitialised) {
-		MusicManager.Terminate();
-
-		for(uint32 i = 0; i < totalAudioEntitiesSlots; i++) {
-			m_asAudioEntities[i].m_bIsUsed = 0;
-			m_anAudioEntityIndices[i] = 200;
-		}
-
-		m_nAudioEntitiesTotal = 0;
-		m_nScriptObjectEntityTotal = 0;
-		PreTerminateGameSpecificShutdown();
-
-		for(uint32 i = 0; i < 2; i++) {
-			if(SampleManager.IsSampleBankLoaded(i)) SampleManager.UnloadSampleBank(i);
-		}
-
-		SampleManager.Terminate();
-
-		m_bIsInitialised = 0;
-		PostTerminateGameSpecificShutdown();
-	}
-}
-
-uint8
-cAudioManager::GetNum3DProvidersAvailable() const
-{
-	if(m_bIsInitialised) return SampleManager.GetNum3DProvidersAvailable();
-	return 0;
-}
-
-bool
-cAudioManager::IsMP3RadioChannelAvailable() const
-{
-	if(m_bIsInitialised) return SampleManager.IsMP3RadioChannelAvailable();
-
-	return 0;
-}
-
-uint8
-cAudioManager::GetCDAudioDriveLetter() const
-{
-	if(m_bIsInitialised) return SampleManager.GetCDAudioDriveLetter();
-
-	return 0;
-}
-
-void
-cAudioManager::SetEffectsMasterVolume(uint8 volume) const
-{
-	SampleManager.SetEffectsMasterVolume(volume);
-}
-
-void
-cAudioManager::SetMusicMasterVolume(uint8 volume) const
-{
-	SampleManager.SetMusicMasterVolume(volume);
-}
-
-void
-cAudioManager::SetEffectsFadeVolume(uint8 volume) const
-{
-	SampleManager.SetEffectsFadeVolume(volume);
-}
-
-void
-cAudioManager::SetMusicFadeVolume(uint8 volume) const
-{
-	SampleManager.SetMusicFadeVolume(volume);
-}
-
-void
-cAudioManager::SetSpeakerConfig(int32 conf) const
-{
-	SampleManager.SetSpeakerConfig(conf);
-}
-
-WRAPPER
-bool cAudioManager::SetupJumboEngineSound(uint8, int32) { EAXJMP(0x56F140); }
-
-int32 *BankStartOffset = (int32 *)0x6FAB70; //[2]
-
-void
-cAudioManager::PreInitialiseGameSpecificSetup() const
-{
-	BankStartOffset[0] = AUDIO_SAMPLE_VEHICLE_HORN_0;
-	BankStartOffset[1] = AUDIO_SAMPLE_POLICE_COP_1_ARREST_1;
-}
-
-int32 &g_nMissionAudioSfx = *(int32 *)0x60ED84;
-
-void
-cAudioManager::SetMissionScriptPoliceAudio(int32 sfx) const
-{
-	if(m_bIsInitialised) {
-		if(g_nMissionAudioPlayingStatus != 1) {
-			g_nMissionAudioPlayingStatus = 0;
-			g_nMissionAudioSfx = sfx;
-		}
-	}
-}
-
-bool
-cAudioManager::UsesSiren(int32 model) const
-{
-	switch(model) {
-	case FIRETRUK:
-	case AMBULAN:
-	case FBICAR:
-	case POLICE:
-	case ENFORCER:
-	case PREDATOR: return true;
-	default: return false;
-	}
-}
-
-bool
-cAudioManager::UsesSirenSwitching(int32 model) const
-{
-	switch(model) {
-	case AMBULAN:
-	case POLICE:
-	case ENFORCER:
-	case PREDATOR: return true;
-	default: return false;
-	}
-}
-
-char *
-cAudioManager::Get3DProviderName(uint8 id) const
-{
-	if(!m_bIsInitialised) return 0;
-	if(id >= SampleManager.GetNum3DProvidersAvailable()) return 0;
-	return SampleManager.Get3DProviderName(id);
-}
-
-bool
-cAudioManager::SetupJumboFlySound(uint8 emittingVol)
-{
-	int32 vol;
-
-	if(m_sQueueSample.m_fDistance >= 440.0f) return 0;
-
-	vol = ComputeVolume(emittingVol, 440.0f, m_sQueueSample.m_fDistance);
-	m_sQueueSample.m_bVolume = vol;
-	if(m_sQueueSample.m_bVolume) {
-		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_JUMBO_FLY_SOUND;
-		m_sQueueSample.m_counter = 0;
-		m_sQueueSample.m_bBankIndex = 0;
-		m_sQueueSample.m_bIsDistant = 0;
-		m_sQueueSample.field_16 = 1;
-		m_sQueueSample.m_bEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopCount = 0;
-		m_sQueueSample.m_nFrequency =
-		    SampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_JUMBO_FLY_SOUND);
-		m_sQueueSample.m_nLoopStart =
-		    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_fSoundIntensity = 440.0f;
-		m_sQueueSample.field_56 = 0;
-		m_sQueueSample.field_48 = 4.0f;
-		m_sQueueSample.m_bReverbFlag = 1;
-		m_sQueueSample.field_76 = 5;
-		m_sQueueSample.m_nLoopEnd =
-		    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-		AddSampleToRequestedQueue();
-	}
-	return 1;
-}
-
-bool
-cAudioManager::SetupJumboRumbleSound(uint8 emittingVol)
-{
-	if(m_sQueueSample.m_fDistance >= 240.f) return 0;
-
-	m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 240.f, m_sQueueSample.m_fDistance);
-
-	if(m_sQueueSample.m_bVolume) {
-		m_sQueueSample.m_counter = 5;
-		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_JUMBO_RUMBLE_SOUND;
-		m_sQueueSample.m_bBankIndex = 0;
-		m_sQueueSample.m_bIsDistant = 1;
-		m_sQueueSample.field_16 = 1;
-		m_sQueueSample.m_nFrequency =
-		    SampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_JUMBO_RUMBLE_SOUND);
-		m_sQueueSample.m_nLoopCount = 0;
-		m_sQueueSample.m_bEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopStart =
-		    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd =
-		    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.field_48 = 4.0f;
-		m_sQueueSample.m_fSoundIntensity = 240.0f;
-		m_sQueueSample.field_56 = 0;
-		m_sQueueSample.field_76 = 12;
-		m_sQueueSample.m_bOffset = 0;
-		m_sQueueSample.m_bReverbFlag = 1;
-		m_sQueueSample.m_bRequireReflection = 0;
-		AddSampleToRequestedQueue();
-		m_sQueueSample.m_counter = 6;
-		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_JUMBO_RUMBLE_SOUND;
-		m_sQueueSample.m_nFrequency += 200;
-		m_sQueueSample.m_bOffset = maxVolume;
-		AddSampleToRequestedQueue();
-	}
-	return 1;
-}
-
-uint8 &gJumboVolOffsetPercentage = *(uint8 *)0x6508ED;
-
-bool
-cAudioManager::SetupJumboTaxiSound(uint8 vol)
-{
-	uint8 emittingVol;
-
-	if(m_sQueueSample.m_fDistance >= 180.f) return 0;
-
-	emittingVol = (vol >> 1) + ((vol >> 1) * m_sQueueSample.m_fDistance * 0.0055556f);
-
-	if(m_sQueueSample.m_fDistance * 0.0055556f < 0.7f)
-		emittingVol -= emittingVol * gJumboVolOffsetPercentage / 100;
-	m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 180.f, m_sQueueSample.m_fDistance);
-
-	if(m_sQueueSample.m_bVolume) {
-		m_sQueueSample.m_counter = 1;
-		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_JUMBO_TAXI_SOUND;
-		m_sQueueSample.m_bBankIndex = 0;
-		m_sQueueSample.m_bIsDistant = 0;
-		m_sQueueSample.field_16 = 1;
-		m_sQueueSample.m_nFrequency = GetJumboTaxiFreq();
-		m_sQueueSample.m_nLoopCount = 0;
-		m_sQueueSample.m_bEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopStart =
-		    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd =
-		    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.field_48 = 4.0f;
-		m_sQueueSample.m_fSoundIntensity = 180.0f;
-		m_sQueueSample.field_56 = 0;
-		m_sQueueSample.field_76 = 4;
-		m_sQueueSample.m_bReverbFlag = 1;
-		m_sQueueSample.m_bRequireReflection = 0;
-		AddSampleToRequestedQueue();
-	}
-	return 1;
-}
-
-bool
-cAudioManager::SetupJumboWhineSound(uint8 emittingVol, int32 freq)
-{
-	if(m_sQueueSample.m_fDistance >= 170.f) return 0;
-
-	m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 170.f, m_sQueueSample.m_fDistance);
-
-	if(m_sQueueSample.m_bVolume) {
-		m_sQueueSample.m_counter = 2;
-		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_JUMBO_WHINE_SOUND;
-		m_sQueueSample.m_bBankIndex = 0;
-		m_sQueueSample.m_bIsDistant = 0;
-		m_sQueueSample.field_16 = 1;
-		m_sQueueSample.m_nFrequency = freq;
-		m_sQueueSample.m_nLoopCount = 0;
-		m_sQueueSample.m_bEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopStart =
-		    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd =
-		    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.field_48 = 4.0f;
-		m_sQueueSample.m_fSoundIntensity = 170.0f;
-		m_sQueueSample.field_56 = 0;
-		m_sQueueSample.field_76 = 4;
-		m_sQueueSample.m_bReverbFlag = 1;
-		m_sQueueSample.m_bRequireReflection = 0;
-		AddSampleToRequestedQueue();
-	}
-	return 1;
-}
-
-void
-cAudioManager::SetMissionAudioLocation(float x, float y, float z)
-{
-	if(m_bIsInitialised) {
-		m_sMissionAudio.field_12 = 0;
-		m_sMissionAudio.m_vecPos.x = x;
-		m_sMissionAudio.m_vecPos.y = y;
-		m_sMissionAudio.m_vecPos.z = z;
-	}
-}
-
-void
-cAudioManager::ResetPoliceRadio()
-{
-	if(m_bIsInitialised) {
-		if(SampleManager.GetChannelUsedFlag(28)) SampleManager.StopChannel(28);
-		InitialisePoliceRadio();
-	}
-}
-
-bool
-cAudioManager::UsesReverseWarning(int32 model) const
-{
-	return model == LINERUN || model == FIRETRUK || model == TRASH || model == BUS ||
-	       model == COACH;
-}
-
-int32
-cAudioManager::RandomDisplacement(uint32 seed) const
-{
-	int32 value;
-
-	static bool bIsEven = true;
-	static uint32 base = 0;
-
-	if(!seed) return 0;
-
-	value = m_anRandomTable[(base + seed) % 5] % seed;
-	base += value;
-
-	if(value % 2) { bIsEven = !bIsEven; }
-	if(!bIsEven) value = -value;
-	return value;
-}
-
-void
-cAudioManager::ReleaseDigitalHandle() const
-{
-	if(m_bIsInitialised) { SampleManager.ReleaseDigitalHandle(); }
-}
-
-void
-cAudioManager::ReacquireDigitalHandle() const
-{
-	if(m_bIsInitialised) { SampleManager.ReacquireDigitalHandle(); }
-}
-
-void
-cAudioManager::SetDynamicAcousticModelingStatus(bool status)
-{
-	m_bDynamicAcousticModelingStatus = status;
-}
-
-bool
-cAudioManager::IsAudioInitialised() const
-{
-	return m_bIsInitialised;
-}
-
-void
-cAudioManager::SetEntityStatus(int32 id, bool status)
-{
-	if(m_bIsInitialised && id >= 0 && id < totalAudioEntitiesSlots) {
-		if(m_asAudioEntities[id].m_bIsUsed) { m_asAudioEntities[id].m_bStatus = status; }
-	}
-}
-
-void
-cAudioManager::GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample, uint32 maxOffset) const
-{
-	*phrase = sample + m_anRandomTable[m_sQueueSample.m_nEntityIndex & 3] % maxOffset;
-
-	// check if the same sfx like last time, if yes, then try use next one,
-	// if exceeded range, then choose first available sample
-	if(*phrase == *prevPhrase && ++*phrase >= sample + maxOffset) *phrase = sample;
-	*prevPhrase = *phrase;
-}
-
-uint8 &jumboVolOffset = *(uint8 *)0x6508ED;
-
-void
-cAudioManager::DoJumboVolOffset() const
-{
-	if(!(m_FrameCounter % (m_anRandomTable[0] % 6u + 3)))
-		jumboVolOffset = m_anRandomTable[1] % 60u;
-}
-
-int32
-cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
-{
-	if(ped->IsPlayer()) return GetPlayerTalkSfx(sound);
-
-	switch(ped->m_modelIndex) {
-	case MI_COP: return GetCopTalkSfx(sound);
-	case MI_SWAT: return GetSwatTalkSfx(sound);
-	case MI_FBI: return GetFBITalkSfx(sound);
-	case MI_ARMY: return GetArmyTalkSfx(sound);
-	case MI_MEDIC: return GetMedicTalkSfx(sound);
-	case MI_FIREMAN: return GetFiremanTalkSfx(sound);
-	case MI_MALE01: return GetNormalMaleTalkSfx(sound);
-	case MI_TAXI_D: return GetTaxiDriverTalkSfx(sound);
-	case MI_PIMP: return GetPimpTalkSfx(sound);
-	case MI_GANG01:
-	case MI_GANG02: return GetMafiaTalkSfx(sound);
-	case MI_GANG03:
-	case MI_GANG04: return GetTriadTalkSfx(sound);
-	case MI_GANG05:
-	case MI_GANG06: return GetDiabloTalkSfx(sound);
-	case MI_GANG07:
-	case MI_GANG08: return GetYakuzaTalkSfx(sound);
-	case MI_GANG09:
-	case MI_GANG10: return GetYardieTalkSfx(sound);
-	case MI_GANG11:
-	case MI_GANG12: return GetColumbianTalkSfx(sound);
-	case MI_GANG13:
-	case MI_GANG14: return GetHoodTalkSfx(sound);
-	case MI_CRIMINAL01: return GetBlackCriminalTalkSfx(sound);
-	case MI_CRIMINAL02: return GetWhiteCriminalTalkSfx(sound);
-	case MI_SPECIAL01:
-	case MI_SPECIAL02:
-	case MI_SPECIAL03:
-	case MI_SPECIAL04: return GetSpecialCharacterTalkSfx(ped->m_modelIndex, sound);
-	case MI_MALE02: return GetMaleNo2TalkSfx(sound);
-	case MI_MALE03:
-	case MI_P_MAN1:
-	case MI_P_MAN2: return GetBlackProjectMaleTalkSfx(sound, ped->m_modelIndex);
-	case MI_FATMALE01: return GetWhiteFatMaleTalkSfx(sound);
-	case MI_FATMALE02: return GetBlackFatMaleTalkSfx(sound);
-	case MI_FEMALE01: return GetBlackCasualFemaleTalkSfx(sound);
-	case MI_FEMALE02:
-	case MI_CAS_WOM: return GetWhiteCasualFemaleTalkSfx(sound);
-	case MI_FEMALE03: return GetFemaleNo3TalkSfx(sound);
-	case MI_FATFEMALE01: return GetBlackFatFemaleTalkSfx(sound);
-	case MI_FATFEMALE02: return GetWhiteFatFemaleTalkSfx(sound);
-	case MI_PROSTITUTE: return GetBlackFemaleProstituteTalkSfx(sound);
-	case MI_PROSTITUTE2: return GetWhiteFemaleProstituteTalkSfx(sound);
-	case MI_P_WOM1: return GetBlackProjectFemaleOldTalkSfx(sound);
-	case MI_P_WOM2: return GetBlackProjectFemaleYoungTalkSfx(sound);
-	case MI_CT_MAN1: return GetChinatownMaleOldTalkSfx(sound);
-	case MI_CT_MAN2: return GetChinatownMaleYoungTalkSfx(sound);
-	case MI_CT_WOM1: return GetChinatownFemaleOldTalkSfx(sound);
-	case MI_CT_WOM2: return GetChinatownFemaleYoungTalkSfx(sound);
-	case MI_LI_MAN1:
-	case MI_LI_MAN2: return GetLittleItalyMaleTalkSfx(sound);
-	case MI_LI_WOM1: return GetLittleItalyFemaleOldTalkSfx(sound);
-	case MI_LI_WOM2: return GetLittleItalyFemaleYoungTalkSfx(sound);
-	case MI_DOCKER1: return GetWhiteDockerMaleTalkSfx(sound);
-	case MI_DOCKER2: return GetBlackDockerMaleTalkSfx(sound);
-	case MI_SCUM_MAN: return GetScumMaleTalkSfx(sound);
-	case MI_SCUM_WOM: return GetScumFemaleTalkSfx(sound);
-	case MI_WORKER1: return GetWhiteWorkerMaleTalkSfx(sound);
-	case MI_WORKER2: return GetBlackWorkerMaleTalkSfx(sound);
-	case MI_B_MAN1:
-	case MI_B_MAN3: return GetBusinessMaleYoungTalkSfx(sound, ped->m_modelIndex);
-	case MI_B_MAN2: return GetBusinessMaleOldTalkSfx(sound);
-	case MI_B_WOM1:
-	case MI_B_WOM2: return GetWhiteBusinessFemaleTalkSfx(sound, ped->m_modelIndex);
-	case MI_B_WOM3: return GetBlackBusinessFemaleTalkSfx(sound);
-	case MI_MOD_MAN: return GetSupermodelMaleTalkSfx(sound);
-	case MI_MOD_WOM: return GetSupermodelFemaleTalkSfx(sound);
-	case MI_ST_MAN: return GetStewardMaleTalkSfx(sound);
-	case MI_ST_WOM: return GetStewardFemaleTalkSfx(sound);
-	case MI_FAN_MAN1:
-	case MI_FAN_MAN2: return GetFanMaleTalkSfx(sound, ped->m_modelIndex);
-	case MI_FAN_WOM: return GetFanFemaleTalkSfx(sound);
-	case MI_HOS_MAN: return GetHospitalMaleTalkSfx(sound);
-	case MI_HOS_WOM: return GetHospitalFemaleTalkSfx(sound);
-	case MI_CONST1: return GetWhiteConstructionWorkerTalkSfx(sound);
-	case MI_CONST2: return GetBlackConstructionWorkerTalkSfx(sound);
-	case MI_SHOPPER1:
-	case MI_SHOPPER2:
-	case MI_SHOPPER3: return GetShopperFemaleTalkSfx(sound, ped->m_modelIndex);
-	case MI_STUD_MAN: return GetStudentMaleTalkSfx(sound);
-	case MI_STUD_WOM: return GetStudentFemaleTalkSfx(sound);
-	case MI_CAS_MAN: return GetCasualMaleOldTalkSfx(sound);
-	default: return GetGenericMaleTalkSfx(sound);
-	}
 }
 
 uint32
@@ -3256,6 +2699,28 @@ cAudioManager::GetGenericFemaleTalkSfx(int16 sound)
 	return sfx;
 }
 
+void
+cAudioManager::GenerateIntegerRandomNumberTable()
+{
+	for(int32 i = 0; i < 5; i++) { m_anRandomTable[i] = rand(); }
+}
+
+char *
+cAudioManager::Get3DProviderName(uint8 id) const
+{
+	if(!m_bIsInitialised) return 0;
+	if(id >= SampleManager.GetNum3DProvidersAvailable()) return 0;
+	return SampleManager.Get3DProviderName(id);
+}
+
+uint8
+cAudioManager::GetCDAudioDriveLetter() const
+{
+	if(m_bIsInitialised) return SampleManager.GetCDAudioDriveLetter();
+
+	return 0;
+}
+
 int8
 cAudioManager::GetCurrent3DProviderIndex() const
 {
@@ -3351,6 +2816,117 @@ cAudioManager::GetMissionScriptPoliceAudioPlayingStatus() const
 	return g_nMissionAudioPlayingStatus;
 }
 
+uint8
+cAudioManager::GetNum3DProvidersAvailable() const
+{
+	if(m_bIsInitialised) return SampleManager.GetNum3DProvidersAvailable();
+	return 0;
+}
+
+
+int32
+cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
+{
+	if(ped->IsPlayer()) return GetPlayerTalkSfx(sound);
+
+	switch(ped->m_modelIndex) {
+	case MI_COP: return GetCopTalkSfx(sound);
+	case MI_SWAT: return GetSwatTalkSfx(sound);
+	case MI_FBI: return GetFBITalkSfx(sound);
+	case MI_ARMY: return GetArmyTalkSfx(sound);
+	case MI_MEDIC: return GetMedicTalkSfx(sound);
+	case MI_FIREMAN: return GetFiremanTalkSfx(sound);
+	case MI_MALE01: return GetNormalMaleTalkSfx(sound);
+	case MI_TAXI_D: return GetTaxiDriverTalkSfx(sound);
+	case MI_PIMP: return GetPimpTalkSfx(sound);
+	case MI_GANG01:
+	case MI_GANG02: return GetMafiaTalkSfx(sound);
+	case MI_GANG03:
+	case MI_GANG04: return GetTriadTalkSfx(sound);
+	case MI_GANG05:
+	case MI_GANG06: return GetDiabloTalkSfx(sound);
+	case MI_GANG07:
+	case MI_GANG08: return GetYakuzaTalkSfx(sound);
+	case MI_GANG09:
+	case MI_GANG10: return GetYardieTalkSfx(sound);
+	case MI_GANG11:
+	case MI_GANG12: return GetColumbianTalkSfx(sound);
+	case MI_GANG13:
+	case MI_GANG14: return GetHoodTalkSfx(sound);
+	case MI_CRIMINAL01: return GetBlackCriminalTalkSfx(sound);
+	case MI_CRIMINAL02: return GetWhiteCriminalTalkSfx(sound);
+	case MI_SPECIAL01:
+	case MI_SPECIAL02:
+	case MI_SPECIAL03:
+	case MI_SPECIAL04: return GetSpecialCharacterTalkSfx(ped->m_modelIndex, sound);
+	case MI_MALE02: return GetMaleNo2TalkSfx(sound);
+	case MI_MALE03:
+	case MI_P_MAN1:
+	case MI_P_MAN2: return GetBlackProjectMaleTalkSfx(sound, ped->m_modelIndex);
+	case MI_FATMALE01: return GetWhiteFatMaleTalkSfx(sound);
+	case MI_FATMALE02: return GetBlackFatMaleTalkSfx(sound);
+	case MI_FEMALE01: return GetBlackCasualFemaleTalkSfx(sound);
+	case MI_FEMALE02:
+	case MI_CAS_WOM: return GetWhiteCasualFemaleTalkSfx(sound);
+	case MI_FEMALE03: return GetFemaleNo3TalkSfx(sound);
+	case MI_FATFEMALE01: return GetBlackFatFemaleTalkSfx(sound);
+	case MI_FATFEMALE02: return GetWhiteFatFemaleTalkSfx(sound);
+	case MI_PROSTITUTE: return GetBlackFemaleProstituteTalkSfx(sound);
+	case MI_PROSTITUTE2: return GetWhiteFemaleProstituteTalkSfx(sound);
+	case MI_P_WOM1: return GetBlackProjectFemaleOldTalkSfx(sound);
+	case MI_P_WOM2: return GetBlackProjectFemaleYoungTalkSfx(sound);
+	case MI_CT_MAN1: return GetChinatownMaleOldTalkSfx(sound);
+	case MI_CT_MAN2: return GetChinatownMaleYoungTalkSfx(sound);
+	case MI_CT_WOM1: return GetChinatownFemaleOldTalkSfx(sound);
+	case MI_CT_WOM2: return GetChinatownFemaleYoungTalkSfx(sound);
+	case MI_LI_MAN1:
+	case MI_LI_MAN2: return GetLittleItalyMaleTalkSfx(sound);
+	case MI_LI_WOM1: return GetLittleItalyFemaleOldTalkSfx(sound);
+	case MI_LI_WOM2: return GetLittleItalyFemaleYoungTalkSfx(sound);
+	case MI_DOCKER1: return GetWhiteDockerMaleTalkSfx(sound);
+	case MI_DOCKER2: return GetBlackDockerMaleTalkSfx(sound);
+	case MI_SCUM_MAN: return GetScumMaleTalkSfx(sound);
+	case MI_SCUM_WOM: return GetScumFemaleTalkSfx(sound);
+	case MI_WORKER1: return GetWhiteWorkerMaleTalkSfx(sound);
+	case MI_WORKER2: return GetBlackWorkerMaleTalkSfx(sound);
+	case MI_B_MAN1:
+	case MI_B_MAN3: return GetBusinessMaleYoungTalkSfx(sound, ped->m_modelIndex);
+	case MI_B_MAN2: return GetBusinessMaleOldTalkSfx(sound);
+	case MI_B_WOM1:
+	case MI_B_WOM2: return GetWhiteBusinessFemaleTalkSfx(sound, ped->m_modelIndex);
+	case MI_B_WOM3: return GetBlackBusinessFemaleTalkSfx(sound);
+	case MI_MOD_MAN: return GetSupermodelMaleTalkSfx(sound);
+	case MI_MOD_WOM: return GetSupermodelFemaleTalkSfx(sound);
+	case MI_ST_MAN: return GetStewardMaleTalkSfx(sound);
+	case MI_ST_WOM: return GetStewardFemaleTalkSfx(sound);
+	case MI_FAN_MAN1:
+	case MI_FAN_MAN2: return GetFanMaleTalkSfx(sound, ped->m_modelIndex);
+	case MI_FAN_WOM: return GetFanFemaleTalkSfx(sound);
+	case MI_HOS_MAN: return GetHospitalMaleTalkSfx(sound);
+	case MI_HOS_WOM: return GetHospitalFemaleTalkSfx(sound);
+	case MI_CONST1: return GetWhiteConstructionWorkerTalkSfx(sound);
+	case MI_CONST2: return GetBlackConstructionWorkerTalkSfx(sound);
+	case MI_SHOPPER1:
+	case MI_SHOPPER2:
+	case MI_SHOPPER3: return GetShopperFemaleTalkSfx(sound, ped->m_modelIndex);
+	case MI_STUD_MAN: return GetStudentMaleTalkSfx(sound);
+	case MI_STUD_WOM: return GetStudentFemaleTalkSfx(sound);
+	case MI_CAS_MAN: return GetCasualMaleOldTalkSfx(sound);
+	default: return GetGenericMaleTalkSfx(sound);
+	}
+}
+
+void
+cAudioManager::GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample, uint32 maxOffset) const
+{
+	*phrase = sample + m_anRandomTable[m_sQueueSample.m_nEntityIndex & 3] % maxOffset;
+
+	// check if the same sfx like last time, if yes, then try use next one,
+	// if exceeded range, then choose first available sample
+	if(*phrase == *prevPhrase && ++*phrase >= sample + maxOffset) *phrase = sample;
+	*prevPhrase = *phrase;
+}
+
 bool
 cAudioManager::HasAirBrakes(int32 model) const
 {
@@ -3403,6 +2979,12 @@ cAudioManager::InterrogateAudioEntities()
 }
 
 bool
+cAudioManager::IsAudioInitialised() const
+{
+	return m_bIsInitialised;
+}
+
+bool
 cAudioManager::IsMissionAudioSampleFinished()
 {
 	if(m_bIsInitialised) return m_sMissionAudio.m_bPlayStatus == 2;
@@ -3410,6 +2992,14 @@ cAudioManager::IsMissionAudioSampleFinished()
 	static int32 cPretendFrame = 1;
 
 	return (cPretendFrame++ & 63) == 0;
+}
+
+bool
+cAudioManager::IsMP3RadioChannelAvailable() const
+{
+	if(m_bIsInitialised) return SampleManager.IsMP3RadioChannelAvailable();
+
+	return 0;
 }
 
 bool
@@ -3448,8 +3038,6 @@ cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 	EAXJMP(0x57A500);
 }
 
-bool &bPlayerJustEnteredCar = *(bool *)0x6508C4;
-
 void
 cAudioManager::PlayerJustGotInCar() const
 {
@@ -3479,10 +3067,10 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 	m_nProjectileEntity = CreateEntity(AUDIOTYPE_PROJECTILE, (CPhysical *)1);
 	if(m_nProjectileEntity >= 0) SetEntityStatus(m_nProjectileEntity, 1);
 
-	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATER_CANNON, (CPhysical *)1);
+	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATERCANNON, (CPhysical *)1);
 	if(m_nWaterCannonEntity >= 0) SetEntityStatus(m_nWaterCannonEntity, 1);
 
-	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_D, (CPhysical *)1);
+	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (CPhysical *)1);
 	if(m_nPoliceChannelEntity >= 0) SetEntityStatus(m_nPoliceChannelEntity, 1);
 
 	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (CPhysical *)1);
@@ -3502,6 +3090,14 @@ void
 cAudioManager::PostTerminateGameSpecificShutdown()
 {
 	;
+}
+
+
+void
+cAudioManager::PreInitialiseGameSpecificSetup() const
+{
+	BankStartOffset[0] = AUDIO_SAMPLE_VEHICLE_HORN_0;
+	BankStartOffset[1] = AUDIO_SAMPLE_POLICE_COP_1_ARREST_1;
 }
 
 void
@@ -3818,7 +3414,7 @@ cAudioManager::ProcessBoatMovingOverWater(cVehicleParams *params)
 	velocityChange = Abs(params->m_fVelocityChange);
 	if(velocityChange <= 0.0005f && params->m_pVehicle->GetPosition().y) return 1;
 
-	velocityChange = Min(0.75f, velocityChange);
+	velocityChange = min(0.75f, velocityChange);
 	multiplier = (velocityChange - 0.0005f) * 1.3342f;
 	CalculateDistance((bool *)params, params->m_fDistance);
 	vol = (30.f * multiplier);
@@ -5556,8 +5152,6 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	}
 }
 
-bool &g_bMissionAudioLoadFailed = *(bool *)0x95CD8E;
-
 void
 cAudioManager::ProcessMissionAudio()
 {
@@ -5571,9 +5165,9 @@ cAudioManager::ProcessMissionAudio()
 	static uint8 nFramesUntilFailedLoad = 0;
 	static uint8 nFramesForPretendPlaying = 0;
 
-	if(this->m_bIsInitialised) {
+	if(m_bIsInitialised) {
 		if(m_sMissionAudio.m_nSampleIndex != 3033) {
-			switch(this->m_sMissionAudio.m_bLoadingStatus) {
+			switch(m_sMissionAudio.m_bLoadingStatus) {
 			case 0:
 				SampleManager.PreloadStreamedFile(m_sMissionAudio.m_nSampleIndex,
 				                                  1u);
@@ -5581,9 +5175,9 @@ cAudioManager::ProcessMissionAudio()
 				nFramesUntilFailedLoad = 0;
 				return;
 			case 1:
-				if(!this->m_sMissionAudio.m_bIsPlayed) return;
+				if(!m_sMissionAudio.m_bIsPlayed) return;
 				if(g_bMissionAudioLoadFailed) {
-					if(this->m_bTimerJustReset) {
+					if(m_bTimerJustReset) {
 						ClearMissionAudio();
 						SampleManager.StopStreamedFile(1u);
 						nFramesForPretendPlaying = 0;
@@ -5591,16 +5185,16 @@ cAudioManager::ProcessMissionAudio()
 						nFramesUntilFailedLoad = 0;
 					} else if(!m_bUserPause) {
 						if(++nFramesForPretendPlaying < 120u) {
-							this->m_sMissionAudio.m_bPlayStatus = 1;
+							m_sMissionAudio.m_bPlayStatus = 1;
 						} else {
-							this->m_sMissionAudio.m_bPlayStatus = 2;
-							this->m_sMissionAudio.m_nSampleIndex = 3033;
+							m_sMissionAudio.m_bPlayStatus = 2;
+							m_sMissionAudio.m_nSampleIndex = 3033;
 						}
 					}
 				} else {
 					if(m_sMissionAudio.m_bPlayStatus) {
 						if(m_sMissionAudio.m_bPlayStatus != 1) return;
-						if(this->m_bTimerJustReset) {
+						if(m_bTimerJustReset) {
 							ClearMissionAudio();
 							SampleManager.StopStreamedFile(1u);
 							return;
@@ -5696,7 +5290,7 @@ cAudioManager::ProcessMissionAudio()
 					nFramesForPretendPlaying = 0;
 					g_bMissionAudioLoadFailed = 1;
 					nFramesUntilFailedLoad = 0;
-					this->m_sMissionAudio.m_bLoadingStatus = 1;
+					m_sMissionAudio.m_bLoadingStatus = 1;
 				}
 				return;
 			default: return;
@@ -6072,7 +5666,7 @@ cAudioManager::ProcessPedHeadphones(cPedParams *params)
 
 	if(params->m_fDistance < 49.f) {
 		ped = params->m_pPed;
-		if(!(ped->m_ped_flagA20) || ped->m_bodyPartBleeding != 2) {
+		if(!ped->bIsAimingGun || ped->m_bodyPartBleeding != 2) {
 			CalculateDistance((bool *)params, params->m_fDistance);
 			if(ped->bInVehicle && ped->m_nPedState == PED_DRIVING) {
 				emittingVol = 10;
@@ -7121,7 +6715,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 		CurrentPretendGear = 1;
 	}
 	if(CReplay::IsPlayingBack()) {
-		accelerateState = 255.f * Max(0.0f, Min(1.0f, automobile->m_fGasPedal));
+		accelerateState = 255.f * max(0.0f, min(1.0f, automobile->m_fGasPedal));
 	} else {
 		accelerateState = Pads->GetAccelerate();
 	}
@@ -7156,9 +6750,9 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 	if(0.0f != velocityChange) {
 		time = params->m_pVehicle->m_vecMoveSpeed.z / velocityChange;
 		if(time <= 0.0f) {
-			freqModifier = Max(-0.2f, time) * -15000.f;
+			freqModifier = max(-0.2f, time) * -15000.f;
 		} else {
-			freqModifier = -(Min(0.2f, time) * 15000.f);
+			freqModifier = -(min(0.2f, time) * 15000.f);
 		}
 		if(params->m_fVelocityChange < -0.001f) freqModifier = -freqModifier;
 	} else {
@@ -7177,10 +6771,10 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 				gasPedalAudio = automobile->m_fGasPedalAudio;
 			} else {
 				gasPedalAudio =
-				    Min(1.0f, params->m_fVelocityChange /
+				    min(1.0f, params->m_fVelocityChange /
 				                  params->m_pTransmission->fMaxReverseVelocity);
 			}
-			gasPedalAudio = Max(0.0f, gasPedalAudio);
+			gasPedalAudio = max(0.0f, gasPedalAudio);
 			automobile->m_fGasPedalAudio = gasPedalAudio;
 		} else if(LastAccel > 0) {
 			if(channelUsed) {
@@ -7210,7 +6804,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 		                   (engineSoundType + AUDIO_SAMPLE_VEHICLE_ENGINE_IDLE_NONE), 0,
 		                   52u, 1);
 
-		CurrentPretendGear = Max(1, currentGear);
+		CurrentPretendGear = max(1, currentGear);
 		LastAccel = accelerateState;
 
 		bHandbrakeOnLastFrame = automobile->bIsHandbrakeOn;
@@ -7665,11 +7259,11 @@ cAudioManager::ProcessScriptObject(int32 id)
 {
 	cAudioScriptObject *entity = (cAudioScriptObject *)m_asAudioEntities[id].m_pEntity;
 	if(entity) {
-		m_sQueueSample.m_vecPos = entity->m_vecPos;
+		m_sQueueSample.m_vecPos = entity->Posn;
 		if(m_asAudioEntities[id].m_Loops == 1)
 			ProcessOneShotScriptObject(m_asAudioEntities[id].m_awAudioEvent[0]);
 		else
-			ProcessLoopingScriptObject(entity->m_wSound);
+			ProcessLoopingScriptObject(entity->AudioId);
 	}
 }
 
@@ -7778,7 +7372,7 @@ cAudioManager::ProcessTrainNoise(cVehicleParams *params)
 	if(params->m_fVelocityChange <= 0.0f) {
 		CalculateDistance((bool *)params, params->m_fDistance);
 		train = (CTrain *)params->m_pVehicle;
-		speedMultipler = Min(1.0f, train->m_fSpeed * 250.f / 51.f);
+		speedMultipler = min(1.0f, train->m_fSpeed * 250.f / 51.f);
 		emittingVol = (75.f * speedMultipler);
 		if(train->m_fWagonPosition == 0.0f) {
 			m_sQueueSample.m_bVolume =
@@ -7871,7 +7465,7 @@ cAudioManager::ProcessVehicleDoors(cVehicleParams *params)
 		if(automobile->Damage.GetDoorStatus(i) == 2) {
 			doorState = automobile->Doors[i].m_nDoorState;
 			if(doorState == 1 || doorState == 2) {
-				velocity = Min(0.3f, Abs(automobile->Doors[i].m_fAngVel));
+				velocity = min(0.3f, Abs(automobile->Doors[i].m_fAngVel));
 				if(velocity > 0.0035f) {
 					emittingVol = (100.f * velocity * 10.f / 3.f);
 					m_sQueueSample.m_bVolume = ComputeVolume(
@@ -7961,7 +7555,7 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams *params)
 				CalculateDistance((bool *)params, params->m_fDistance);
 				emittingVol =
 				    30.f *
-				    Min(1.f,
+				    min(1.f,
 				        velocity / (0.5f * params->m_pTransmission->fMaxVelocity));
 				m_sQueueSample.m_bVolume =
 				    ComputeVolume(emittingVol, 95.f, m_sQueueSample.m_fDistance);
@@ -8011,11 +7605,63 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams *params)
 WRAPPER
 void cAudioManager::ProcessWaterCannon(int32) { EAXJMP(0x575F30); }
 
-WRAPPER
 void
 cAudioManager::ProcessWeather(int32 id)
 {
-	EAXJMP(0x578370);
+	uint8 vol;
+	static uint8 counter = 0;
+
+	if(m_asAudioEntities[id].m_Loops &&
+	   m_asAudioEntities[id].m_awAudioEvent[0] == SOUND_LIGHTNING) {
+		if(m_asAudioEntities[id].m_afVolume[0] >= 10.f) {
+			m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_EXPLOSION_CAR;
+			m_sQueueSample.m_bBankIndex = 0;
+			m_sQueueSample.m_nFrequency = RandomDisplacement(500u) + 4000;
+			vol = (m_asAudioEntities[id].m_afVolume[0] - 10.f) + 40;
+		} else {
+			m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_WEAPON_GRENADE_EXPLOSION;
+			m_sQueueSample.m_bBankIndex = 0;
+			m_sQueueSample.m_nFrequency = RandomDisplacement(500u) + 4000;
+			vol = (m_asAudioEntities[id].m_afVolume[0]) + 35;
+		}
+		m_sQueueSample.m_bVolume = vol;
+		if(TheCamera.SoundDistUp < 20.f) m_sQueueSample.m_bVolume >>= 1;
+		if(counter == 4) counter = 0;
+		m_sQueueSample.m_counter = counter++;
+		m_sQueueSample.field_16 = 0;
+		m_sQueueSample.m_bOffset = (m_anRandomTable[2] & 15) + 55;
+		m_sQueueSample.m_bIsDistant = 1;
+		m_sQueueSample.m_nLoopCount = 1;
+		m_sQueueSample.field_56 = 1;
+		m_sQueueSample.m_bEmittingVolume = m_sQueueSample.m_bVolume;
+		m_sQueueSample.m_nLoopStart = 0;
+		m_sQueueSample.m_nLoopEnd = -1;
+		m_sQueueSample.m_bReverbFlag = 0;
+		m_sQueueSample.m_bRequireReflection = 0;
+		cAudioManager::AddSampleToRequestedQueue();
+	}
+	if(CWeather::Rain > 0.0f && (!CCullZones::CamNoRain() || !CCullZones::PlayerNoRain())) {
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_COLLISION_LOOPING_GRASS;
+		m_sQueueSample.m_nFrequency =
+		    SampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_COLLISION_LOOPING_GRASS);
+		m_sQueueSample.m_bVolume = (uint8)(25.f * CWeather::Rain);
+		m_sQueueSample.m_counter = 4;
+		m_sQueueSample.m_bBankIndex = 0;
+		m_sQueueSample.field_16 = 0;
+		m_sQueueSample.m_bOffset = 63;
+		m_sQueueSample.m_bIsDistant = 1;
+		m_sQueueSample.m_nLoopCount = 0;
+		m_sQueueSample.field_56 = 0;
+		m_sQueueSample.field_76 = 30;
+		m_sQueueSample.m_bReverbFlag = 0;
+		m_sQueueSample.m_bEmittingVolume = m_sQueueSample.m_bVolume;
+		m_sQueueSample.m_nLoopStart =
+		    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nLoopEnd =
+		    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_bRequireReflection = 0;
+		cAudioManager::AddSampleToRequestedQueue();
+	}
 }
 
 bool
@@ -8034,7 +7680,7 @@ cAudioManager::ProcessWetRoadNoise(cVehicleParams *params)
 			if(velChange > 0.f) {
 				CalculateDistance((bool *)params, params->m_fDistance);
 				relativeVelocity =
-				    Min(1.0f,
+				    min(1.0f,
 				        velChange / (0.5f * params->m_pTransmission->fMaxVelocity));
 				emittingVol = 23.0f * relativeVelocity * CWeather::WetRoads;
 				m_sQueueSample.m_bVolume =
@@ -8112,6 +7758,286 @@ cAudioManager::ProcessWorkShopScriptObject(uint8 sound)
 			AddSampleToRequestedQueue();
 		}
 	}
+}
+
+int32
+cAudioManager::RandomDisplacement(uint32 seed) const
+{
+	int32 value;
+
+	static bool bIsEven = true;
+	static uint32 base = 0;
+
+	if(!seed) return 0;
+
+	value = m_anRandomTable[(base + seed) % 5] % seed;
+	base += value;
+
+	if(value % 2) { bIsEven = !bIsEven; }
+	if(!bIsEven) value = -value;
+	return value;
+}
+
+void
+cAudioManager::ReacquireDigitalHandle() const
+{
+	if(m_bIsInitialised) { SampleManager.ReacquireDigitalHandle(); }
+}
+
+void
+cAudioManager::ReleaseDigitalHandle() const
+{
+	if(m_bIsInitialised) { SampleManager.ReleaseDigitalHandle(); }
+}
+
+void
+cAudioManager::ResetAudioLogicTimers(int32 timer)
+{
+	audioLogicTimers[0] = timer;
+	audioLogicTimers[8] = timer;
+	audioLogicTimers[1] = timer;
+	audioLogicTimers[7] = timer;
+	audioLogicTimers[2] = timer;
+	audioLogicTimers[6] = timer;
+	audioLogicTimers[3] = timer;
+	audioLogicTimers[5] = timer;
+	audioLogicTimers[4] = timer;
+	for(int32 i = 0; i < m_nAudioEntitiesTotal; i++) {
+		if(m_asAudioEntities[m_anAudioEntityIndices[i]].m_nType == AUDIOTYPE_PHYSICAL) {
+			CPed *ped = (CPed *)m_asAudioEntities[m_anAudioEntityIndices[i]].m_pEntity;
+			if(ped->IsPed()) {
+				ped->m_lastSoundStart = timer;
+				ped->m_soundStart = timer + m_anRandomTable[0] % 3000u;
+			}
+		}
+	}
+	ClearMissionAudio();
+	SampleManager.StopChannel(28);
+}
+
+void
+cAudioManager::ResetPoliceRadio()
+{
+	if(m_bIsInitialised) {
+		if(SampleManager.GetChannelUsedFlag(28)) SampleManager.StopChannel(28);
+		InitialisePoliceRadio();
+	}
+}
+
+WRAPPER void
+cAudioManager::Service()
+{
+	EAXJMP(0x57A2A0);
+}
+
+
+void
+cAudioManager::SetDynamicAcousticModelingStatus(bool status)
+{
+	m_bDynamicAcousticModelingStatus = status;
+}
+
+void
+cAudioManager::SetEffectsFadeVolume(uint8 volume) const
+{
+	SampleManager.SetEffectsFadeVolume(volume);
+}
+
+void
+cAudioManager::SetEffectsMasterVolume(uint8 volume) const
+{
+	SampleManager.SetEffectsMasterVolume(volume);
+}
+
+void
+cAudioManager::SetEntityStatus(int32 id, bool status)
+{
+	if(m_bIsInitialised && id >= 0 && id < totalAudioEntitiesSlots) {
+		if(m_asAudioEntities[id].m_bIsUsed) { m_asAudioEntities[id].m_bStatus = status; }
+	}
+}
+
+void
+cAudioManager::SetMissionAudioLocation(float x, float y, float z)
+{
+	if(m_bIsInitialised) {
+		m_sMissionAudio.field_12 = 0;
+		m_sMissionAudio.m_vecPos.x = x;
+		m_sMissionAudio.m_vecPos.y = y;
+		m_sMissionAudio.m_vecPos.z = z;
+	}
+}
+
+void
+cAudioManager::SetMissionScriptPoliceAudio(int32 sfx) const
+{
+	if(m_bIsInitialised) {
+		if(g_nMissionAudioPlayingStatus != 1) {
+			g_nMissionAudioPlayingStatus = 0;
+			g_nMissionAudioSfx = sfx;
+		}
+	}
+}
+
+void
+cAudioManager::SetMusicFadeVolume(uint8 volume) const
+{
+	SampleManager.SetMusicFadeVolume(volume);
+}
+
+void
+cAudioManager::SetMusicMasterVolume(uint8 volume) const
+{
+	SampleManager.SetMusicMasterVolume(volume);
+}
+
+
+void
+cAudioManager::SetSpeakerConfig(int32 conf) const
+{
+	SampleManager.SetSpeakerConfig(conf);
+}
+
+WRAPPER
+bool cAudioManager::SetupJumboEngineSound(uint8, int32) { EAXJMP(0x56F140); }
+
+bool
+cAudioManager::SetupJumboFlySound(uint8 emittingVol)
+{
+	int32 vol;
+
+	if(m_sQueueSample.m_fDistance >= 440.0f) return 0;
+
+	vol = ComputeVolume(emittingVol, 440.0f, m_sQueueSample.m_fDistance);
+	m_sQueueSample.m_bVolume = vol;
+	if(m_sQueueSample.m_bVolume) {
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_JUMBO_FLY_SOUND;
+		m_sQueueSample.m_counter = 0;
+		m_sQueueSample.m_bBankIndex = 0;
+		m_sQueueSample.m_bIsDistant = 0;
+		m_sQueueSample.field_16 = 1;
+		m_sQueueSample.m_bEmittingVolume = emittingVol;
+		m_sQueueSample.m_nLoopCount = 0;
+		m_sQueueSample.m_nFrequency =
+		    SampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_JUMBO_FLY_SOUND);
+		m_sQueueSample.m_nLoopStart =
+		    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_fSoundIntensity = 440.0f;
+		m_sQueueSample.field_56 = 0;
+		m_sQueueSample.field_48 = 4.0f;
+		m_sQueueSample.m_bReverbFlag = 1;
+		m_sQueueSample.field_76 = 5;
+		m_sQueueSample.m_nLoopEnd =
+		    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		AddSampleToRequestedQueue();
+	}
+	return 1;
+}
+
+bool
+cAudioManager::SetupJumboRumbleSound(uint8 emittingVol)
+{
+	if(m_sQueueSample.m_fDistance >= 240.f) return 0;
+
+	m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 240.f, m_sQueueSample.m_fDistance);
+
+	if(m_sQueueSample.m_bVolume) {
+		m_sQueueSample.m_counter = 5;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_JUMBO_RUMBLE_SOUND;
+		m_sQueueSample.m_bBankIndex = 0;
+		m_sQueueSample.m_bIsDistant = 1;
+		m_sQueueSample.field_16 = 1;
+		m_sQueueSample.m_nFrequency =
+		    SampleManager.GetSampleBaseFrequency(AUDIO_SAMPLE_JUMBO_RUMBLE_SOUND);
+		m_sQueueSample.m_nLoopCount = 0;
+		m_sQueueSample.m_bEmittingVolume = emittingVol;
+		m_sQueueSample.m_nLoopStart =
+		    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nLoopEnd =
+		    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.field_48 = 4.0f;
+		m_sQueueSample.m_fSoundIntensity = 240.0f;
+		m_sQueueSample.field_56 = 0;
+		m_sQueueSample.field_76 = 12;
+		m_sQueueSample.m_bOffset = 0;
+		m_sQueueSample.m_bReverbFlag = 1;
+		m_sQueueSample.m_bRequireReflection = 0;
+		AddSampleToRequestedQueue();
+		m_sQueueSample.m_counter = 6;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_JUMBO_RUMBLE_SOUND;
+		m_sQueueSample.m_nFrequency += 200;
+		m_sQueueSample.m_bOffset = maxVolume;
+		AddSampleToRequestedQueue();
+	}
+	return 1;
+}
+
+bool
+cAudioManager::SetupJumboTaxiSound(uint8 vol)
+{
+	uint8 emittingVol;
+
+	if(m_sQueueSample.m_fDistance >= 180.f) return 0;
+
+	emittingVol = (vol >> 1) + ((vol >> 1) * m_sQueueSample.m_fDistance * 0.0055556f);
+
+	if(m_sQueueSample.m_fDistance * 0.0055556f < 0.7f)
+		emittingVol -= emittingVol * gJumboVolOffsetPercentage / 100;
+	m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 180.f, m_sQueueSample.m_fDistance);
+
+	if(m_sQueueSample.m_bVolume) {
+		m_sQueueSample.m_counter = 1;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_JUMBO_TAXI_SOUND;
+		m_sQueueSample.m_bBankIndex = 0;
+		m_sQueueSample.m_bIsDistant = 0;
+		m_sQueueSample.field_16 = 1;
+		m_sQueueSample.m_nFrequency = GetJumboTaxiFreq();
+		m_sQueueSample.m_nLoopCount = 0;
+		m_sQueueSample.m_bEmittingVolume = emittingVol;
+		m_sQueueSample.m_nLoopStart =
+		    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nLoopEnd =
+		    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.field_48 = 4.0f;
+		m_sQueueSample.m_fSoundIntensity = 180.0f;
+		m_sQueueSample.field_56 = 0;
+		m_sQueueSample.field_76 = 4;
+		m_sQueueSample.m_bReverbFlag = 1;
+		m_sQueueSample.m_bRequireReflection = 0;
+		AddSampleToRequestedQueue();
+	}
+	return 1;
+}
+
+bool
+cAudioManager::SetupJumboWhineSound(uint8 emittingVol, int32 freq)
+{
+	if(m_sQueueSample.m_fDistance >= 170.f) return 0;
+
+	m_sQueueSample.m_bVolume = ComputeVolume(emittingVol, 170.f, m_sQueueSample.m_fDistance);
+
+	if(m_sQueueSample.m_bVolume) {
+		m_sQueueSample.m_counter = 2;
+		m_sQueueSample.m_nSampleIndex = AUDIO_SAMPLE_JUMBO_WHINE_SOUND;
+		m_sQueueSample.m_bBankIndex = 0;
+		m_sQueueSample.m_bIsDistant = 0;
+		m_sQueueSample.field_16 = 1;
+		m_sQueueSample.m_nFrequency = freq;
+		m_sQueueSample.m_nLoopCount = 0;
+		m_sQueueSample.m_bEmittingVolume = emittingVol;
+		m_sQueueSample.m_nLoopStart =
+		    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nLoopEnd =
+		    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.field_48 = 4.0f;
+		m_sQueueSample.m_fSoundIntensity = 170.0f;
+		m_sQueueSample.field_56 = 0;
+		m_sQueueSample.field_76 = 4;
+		m_sQueueSample.m_bReverbFlag = 1;
+		m_sQueueSample.m_bRequireReflection = 0;
+		AddSampleToRequestedQueue();
+	}
+	return 1;
 }
 
 void
@@ -8240,69 +8166,105 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 	}
 }
 
-WRAPPER void
-cAudioManager::Service()
+void
+cAudioManager::Terminate()
 {
-	EAXJMP(0x57A2A0);
+	if(m_bIsInitialised) {
+		MusicManager.Terminate();
+
+		for(uint32 i = 0; i < totalAudioEntitiesSlots; i++) {
+			m_asAudioEntities[i].m_bIsUsed = 0;
+			m_anAudioEntityIndices[i] = 200;
+		}
+
+		m_nAudioEntitiesTotal = 0;
+		m_nScriptObjectEntityTotal = 0;
+		PreTerminateGameSpecificShutdown();
+
+		for(uint32 i = 0; i < 2; i++) {
+			if(SampleManager.IsSampleBankLoaded(i)) SampleManager.UnloadSampleBank(i);
+		}
+
+		SampleManager.Terminate();
+
+		m_bIsInitialised = 0;
+		PostTerminateGameSpecificShutdown();
+	}
 }
 
-WRAPPER void cAudioManager::PlayOneShot(int, unsigned short, float)
+void
+cAudioManager::TranslateEntity(CVector *v1, CVector *v2) const
 {
-	EAXJMP(0x57A500);
+	const RwMatrix &cM = TheCamera.GetMatrix().m_matrix;
+	const CVector &cV = TheCamera.GetPosition();
+
+	float a = v1->z - cV.z;
+	float b = v1->y - cV.y;
+	float c = v1->x - cV.x;
+
+	v2->x = cM.right.y * b + cM.right.x * c + cM.right.z * a;
+	v2->y = cM.up.y * b + cM.up.x * c + cM.up.z * a;
+	v2->z = cM.at.y * b + cM.at.x * c + cM.at.z * a;
 }
 
-WRAPPER void cAudioManager::SetEffectsFadeVol(unsigned char)
+void
+cAudioManager::UpdateGasPedalAudio(CAutomobile *automobile)
 {
-	EAXJMP(0x57A770);
+	float newGasPedalAudio;
+
+	float gasPedal = Abs(automobile->m_fGasPedal);
+	float gasPedalAudio = automobile->m_fGasPedalAudio;
+
+	if(gasPedalAudio < gasPedal) {
+		newGasPedalAudio = gasPedalAudio + 0.09f;
+		if(gasPedal <= newGasPedalAudio) newGasPedalAudio = gasPedal;
+	} else {
+		newGasPedalAudio = gasPedalAudio - 0.07f;
+		if(gasPedal >= newGasPedalAudio) newGasPedalAudio = gasPedal;
+	}
+	automobile->m_fGasPedalAudio = newGasPedalAudio;
 }
 
-WRAPPER void cAudioManager::SetMusicFadeVol(unsigned char)
+bool
+cAudioManager::UsesReverseWarning(int32 model) const
 {
-	EAXJMP(0x57A790);
+	return model == LINERUN || model == FIRETRUK || model == TRASH || model == BUS ||
+	       model == COACH;
 }
 
-WRAPPER int8 cAudioManager::SetCurrent3DProvider(unsigned char)
+bool
+cAudioManager::UsesSiren(int32 model) const
 {
-	EAXJMP(0x57A910);
+	switch(model) {
+	case FIRETRUK:
+	case AMBULAN:
+	case FBICAR:
+	case POLICE:
+	case ENFORCER:
+	case PREDATOR: return true;
+	default: return false;
+	}
 }
 
-WRAPPER void cAudioManager::ReportCrime(eCrimeType, CVector const &)
+bool
+cAudioManager::UsesSirenSwitching(int32 model) const
 {
-	EAXJMP(0x5803D0);
-}
-
-WRAPPER void cAudioManager::PlaySuspectLastSeen(float, float, float)
-{
-	EAXJMP(0x580500);
-}
-
-WRAPPER void cAudioManager::ReportCollision(CEntity *, CEntity *, unsigned char, unsigned char, float, float)
-{
-	EAXJMP(0x568410);
-}
-
-WRAPPER void cAudioManager::ResetTimers(unsigned int)
-{
-	EAXJMP(0x57A7B0);
-}
-
-WRAPPER void cAudioManager::PreloadMissionAudio(char *)
-{
-	EAXJMP(0x579550);
+	switch(model) {
+	case AMBULAN:
+	case POLICE:
+	case ENFORCER:
+	case PREDATOR: return true;
+	default: return false;
+	}
 }
 
 STARTPATCHES
-InjectHook(0x5755C0, &cPedComments::Add, PATCH_JUMP);
-InjectHook(0x575730, &cPedComments::Process, PATCH_JUMP);
-
 InjectHook(0x57B210, &cAudioManager::AddDetailsToRequestedOrderList, PATCH_JUMP);
 InjectHook(0x56AD30, &cAudioManager::AddPlayerCarSample, PATCH_JUMP);
 InjectHook(0x57B300, &cAudioManager::AddReflectionsToRequestedQueue, PATCH_JUMP);
 // InjectHook(0x57B8D0, &cAudioManager::AddReleasingSounds, PATCH_JUMP);
 InjectHook(0x57B070, &cAudioManager::AddSampleToRequestedQueue, PATCH_JUMP);
-InjectHook(0x57A8F0, &cAudioManager::GetCurrent3DProviderIndex, PATCH_JUMP);
 // InjectHook(0x580AF0, &cAudioManager::AgeCrimes, PATCH_JUMP);
-
 InjectHook(0x5697A0, &cAudioManager::CalculateDistance, PATCH_JUMP);
 InjectHook(0x57AA10, &cAudioManager::CheckForAnAudioFileOnCD, PATCH_JUMP);
 InjectHook(0x5796A0, &cAudioManager::ClearMissionAudio, PATCH_JUMP);
@@ -8310,162 +8272,111 @@ InjectHook(0x57C120, &cAudioManager::ClearRequestedQueue, PATCH_JUMP);
 InjectHook(0x57AE00, &cAudioManager::ComputeDopplerEffectedFrequency, PATCH_JUMP);
 InjectHook(0x57ABB0, &cAudioManager::ComputeVolume, PATCH_JUMP);
 InjectHook(0x57A310, &cAudioManager::CreateEntity, PATCH_JUMP);
-
 InjectHook(0x57A830, &cAudioManager::DestroyAllGameCreatedEntities, PATCH_JUMP);
 InjectHook(0x57A400, &cAudioManager::DestroyEntity, PATCH_JUMP);
 InjectHook(0x57F060, &cAudioManager::DoPoliceRadioCrackle, PATCH_JUMP);
-
 InjectHook(0x57C290, &cAudioManager::GenerateIntegerRandomNumberTable, PATCH_JUMP);
-InjectHook(0x569750, &cAudioManager::GetDistanceSquared, PATCH_JUMP);
-InjectHook(0x57AC60, &cAudioManager::TranslateEntity, PATCH_JUMP);
-
-InjectHook(0x57A0E0, &cAudioManager::Initialise, PATCH_JUMP);
-InjectHook(0x569420, &cAudioManager::PostInitialiseGameSpecificSetup, PATCH_JUMP);
-// InjectHook(0x57EAC0, &cAudioManager::InitialisePoliceRadioZones, PATCH_JUMP);
-InjectHook(0x569650, &cAudioManager::ResetAudioLogicTimers, PATCH_JUMP);
-InjectHook(0x57A150, &cAudioManager::Terminate, PATCH_JUMP);
-
-InjectHook(0x57F050, &cAudioManager::GetMissionScriptPoliceAudioPlayingStatus, PATCH_JUMP);
-InjectHook(0x5795D0, &cAudioManager::GetMissionAudioLoadingStatus, PATCH_JUMP);
-
-InjectHook(0x57A8A0, &cAudioManager::GetNum3DProvidersAvailable, PATCH_JUMP);
-InjectHook(0x57A9C0, &cAudioManager::IsMP3RadioChannelAvailable, PATCH_JUMP);
-InjectHook(0x57AA30, &cAudioManager::GetCDAudioDriveLetter, PATCH_JUMP);
-
-InjectHook(0x57A730, &cAudioManager::SetEffectsMasterVolume, PATCH_JUMP);
-InjectHook(0x57A750, &cAudioManager::SetMusicMasterVolume, PATCH_JUMP);
-InjectHook(0x57A770, &cAudioManager::SetEffectsFadeVolume, PATCH_JUMP);
-InjectHook(0x57A790, &cAudioManager::SetMusicFadeVolume, PATCH_JUMP);
-
-InjectHook(0x57A9A0, &cAudioManager::SetSpeakerConfig, PATCH_JUMP);
-
-InjectHook(0x569400, &cAudioManager::PreInitialiseGameSpecificSetup, PATCH_JUMP);
-
-InjectHook(0x57F020, &cAudioManager::SetMissionScriptPoliceAudio, PATCH_JUMP);
-
-InjectHook(0x56C3C0, &cAudioManager::UsesSiren, PATCH_JUMP);
-InjectHook(0x56C3F0, &cAudioManager::UsesSirenSwitching, PATCH_JUMP);
-
-InjectHook(0x579520, &cAudioManager::MissionScriptAudioUsesPoliceChannel, PATCH_JUMP);
-
 InjectHook(0x57A8C0, &cAudioManager::Get3DProviderName, PATCH_JUMP);
-InjectHook(0x56F230, &cAudioManager::SetupJumboFlySound, PATCH_JUMP);
-InjectHook(0x56F310, &cAudioManager::SetupJumboRumbleSound, PATCH_JUMP);
-InjectHook(0x56EF20, &cAudioManager::SetupJumboTaxiSound, PATCH_JUMP);
-InjectHook(0x56F070, &cAudioManager::SetupJumboWhineSound, PATCH_JUMP);
-
-InjectHook(0x579620, &cAudioManager::PlayLoadedMissionAudio, PATCH_JUMP);
-
-InjectHook(0x5795F0, &cAudioManager::SetMissionAudioLocation, PATCH_JUMP);
-
-InjectHook(0x57EFF0, &cAudioManager::ResetPoliceRadio, PATCH_JUMP);
-
-InjectHook(0x57B030, &cAudioManager::InterrogateAudioEntities, PATCH_JUMP);
-
-InjectHook(0x56C600, &cAudioManager::UsesReverseWarning, PATCH_JUMP);
-InjectHook(0x56CAB0, &cAudioManager::HasAirBrakes, PATCH_JUMP);
-
-InjectHook(0x56F410, &cAudioManager::GetJumboTaxiFreq, PATCH_JUMP);
-
-InjectHook(0x579650, &cAudioManager::IsMissionAudioSampleFinished, PATCH_JUMP);
-InjectHook(0x57AF90, &cAudioManager::RandomDisplacement, PATCH_JUMP);
-
-InjectHook(0x57A9E0, &cAudioManager::ReleaseDigitalHandle, PATCH_JUMP);
-InjectHook(0x57A9F0, &cAudioManager::ReacquireDigitalHandle, PATCH_JUMP);
-InjectHook(0x57AA00, &cAudioManager::SetDynamicAcousticModelingStatus, PATCH_JUMP);
-
-InjectHook(0x57AA50, &cAudioManager::IsAudioInitialised, PATCH_JUMP);
-
-InjectHook(0x57A4C0, &cAudioManager::SetEntityStatus, PATCH_JUMP);
-
-InjectHook(0x569570, &cAudioManager::PreTerminateGameSpecificShutdown, PATCH_JUMP);
-InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);
-
-InjectHook(0x56AD10, &cAudioManager::PlayerJustGotInCar, PATCH_JUMP);
-InjectHook(0x56AD20, &cAudioManager::PlayerJustLeftCar, PATCH_JUMP);
-InjectHook(0x570DB0, &cAudioManager::GetPhrase, PATCH_JUMP);
-
-// Get ped sfx stuff
-InjectHook(0x570960, &cAudioManager::GetPedCommentSfx, PATCH_JUMP);
-
-InjectHook(0x570E00, &cAudioManager::GetPlayerTalkSfx, PATCH_JUMP);
-InjectHook(0x570EA0, &cAudioManager::GetCopTalkSfx, PATCH_JUMP);
-InjectHook(0x570F80, &cAudioManager::GetSwatTalkSfx, PATCH_JUMP);
-InjectHook(0x571040, &cAudioManager::GetFBITalkSfx, PATCH_JUMP);
 InjectHook(0x571110, &cAudioManager::GetArmyTalkSfx, PATCH_JUMP);
-InjectHook(0x5711C0, &cAudioManager::GetMedicTalkSfx, PATCH_JUMP);
-InjectHook(0x5712B0, &cAudioManager::GetFiremanTalkSfx, PATCH_JUMP);
-InjectHook(0x575340, &cAudioManager::GetNormalMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x575190, &cAudioManager::GetTaxiDriverTalkSfx, PATCH_JUMP);
-InjectHook(0x575240, &cAudioManager::GetPimpTalkSfx, PATCH_JUMP);
-InjectHook(0x571510, &cAudioManager::GetMafiaTalkSfx, PATCH_JUMP);
-InjectHook(0x571650, &cAudioManager::GetTriadTalkSfx, PATCH_JUMP);
-InjectHook(0x571770, &cAudioManager::GetDiabloTalkSfx, PATCH_JUMP);
-InjectHook(0x5718D0, &cAudioManager::GetYakuzaTalkSfx, PATCH_JUMP);
-InjectHook(0x5719E0, &cAudioManager::GetYardieTalkSfx, PATCH_JUMP);
-InjectHook(0x571B00, &cAudioManager::GetColumbianTalkSfx, PATCH_JUMP);
-InjectHook(0x571C30, &cAudioManager::GetHoodTalkSfx, PATCH_JUMP);
-InjectHook(0x571D80, &cAudioManager::GetBlackCriminalTalkSfx, PATCH_JUMP);
-InjectHook(0x571E60, &cAudioManager::GetWhiteCriminalTalkSfx, PATCH_JUMP);
-InjectHook(0x571F40, &cAudioManager::GetMaleNo2TalkSfx, PATCH_JUMP);
-InjectHook(0x572AF0, &cAudioManager::GetBlackProjectMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x5725D0, &cAudioManager::GetWhiteFatMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x5726C0, &cAudioManager::GetBlackFatMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x573AB0, &cAudioManager::GetBlackBusinessFemaleTalkSfx, PATCH_JUMP);
 InjectHook(0x572050, &cAudioManager::GetBlackCasualFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x572170, &cAudioManager::GetWhiteCasualFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x572280, &cAudioManager::GetFemaleNo3TalkSfx, PATCH_JUMP);
+InjectHook(0x574380, &cAudioManager::GetBlackConstructionWorkerTalkSfx, PATCH_JUMP);
+InjectHook(0x571D80, &cAudioManager::GetBlackCriminalTalkSfx, PATCH_JUMP);
+InjectHook(0x5735E0, &cAudioManager::GetBlackDockerMaleTalkSfx, PATCH_JUMP);
 InjectHook(0x5724D0, &cAudioManager::GetBlackFatFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x5727B0, &cAudioManager::GetWhiteFatFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x5726C0, &cAudioManager::GetBlackFatMaleTalkSfx, PATCH_JUMP);
 InjectHook(0x5728B0, &cAudioManager::GetBlackFemaleProstituteTalkSfx, PATCH_JUMP);
-InjectHook(0x5729D0, &cAudioManager::GetWhiteFemaleProstituteTalkSfx, PATCH_JUMP);
 InjectHook(0x572C20, &cAudioManager::GetBlackProjectFemaleOldTalkSfx, PATCH_JUMP);
 InjectHook(0x572D20, &cAudioManager::GetBlackProjectFemaleYoungTalkSfx, PATCH_JUMP);
-InjectHook(0x572E10, &cAudioManager::GetChinatownMaleOldTalkSfx, PATCH_JUMP);
-InjectHook(0x572F10, &cAudioManager::GetChinatownMaleYoungTalkSfx, PATCH_JUMP);
+InjectHook(0x572AF0, &cAudioManager::GetBlackProjectMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x5739C0, &cAudioManager::GetBlackWorkerMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x574FF0, &cAudioManager::GetBomberTalkSfx, PATCH_JUMP);
+InjectHook(0x5712C0, &cAudioManager::GetBusinessMaleOldTalkSfx, PATCH_JUMP);
+InjectHook(0x5713E0, &cAudioManager::GetBusinessMaleYoungTalkSfx, PATCH_JUMP);
+InjectHook(0x572040, &cAudioManager::GetCasualMaleOldTalkSfx, PATCH_JUMP);
+InjectHook(0x574FE0, &cAudioManager::GetCatatalinaTalkSfx, PATCH_JUMP);
+InjectHook(0x57AA30, &cAudioManager::GetCDAudioDriveLetter, PATCH_JUMP);
 InjectHook(0x573010, &cAudioManager::GetChinatownFemaleOldTalkSfx, PATCH_JUMP);
 InjectHook(0x5730F0, &cAudioManager::GetChinatownFemaleYoungTalkSfx, PATCH_JUMP);
-InjectHook(0x5731E0, &cAudioManager::GetLittleItalyMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x572E10, &cAudioManager::GetChinatownMaleOldTalkSfx, PATCH_JUMP);
+InjectHook(0x572F10, &cAudioManager::GetChinatownMaleYoungTalkSfx, PATCH_JUMP);
+InjectHook(0x575120, &cAudioManager::GetChunkyTalkSfx, PATCH_JUMP);
+InjectHook(0x571B00, &cAudioManager::GetColumbianTalkSfx, PATCH_JUMP);
+InjectHook(0x570EA0, &cAudioManager::GetCopTalkSfx, PATCH_JUMP);
+InjectHook(0x57A8F0, &cAudioManager::GetCurrent3DProviderIndex, PATCH_JUMP);
+InjectHook(0x569060, &cAudioManager::GetCollisionOneShotRatio, PATCH_JUMP);
+InjectHook(0x5693B0, &cAudioManager::GetCollisionRatio, PATCH_JUMP);
+InjectHook(0x571770, &cAudioManager::GetDiabloTalkSfx, PATCH_JUMP);
+InjectHook(0x569750, &cAudioManager::GetDistanceSquared, PATCH_JUMP);
+InjectHook(0x574DA0, &cAudioManager::GetEightTalkSfx, PATCH_JUMP);
+InjectHook(0x574040, &cAudioManager::GetFanFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x573F60, &cAudioManager::GetFanMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x571040, &cAudioManager::GetFBITalkSfx, PATCH_JUMP);
+InjectHook(0x572280, &cAudioManager::GetFemaleNo3TalkSfx, PATCH_JUMP);
+InjectHook(0x5712B0, &cAudioManager::GetFiremanTalkSfx, PATCH_JUMP);
+InjectHook(0x574E50, &cAudioManager::GetFrankieTalkSfx, PATCH_JUMP);
+InjectHook(0x575510, &cAudioManager::GetGenericFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x575460, &cAudioManager::GetGenericMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x571C30, &cAudioManager::GetHoodTalkSfx, PATCH_JUMP);
+InjectHook(0x5741F0, &cAudioManager::GetHospitalFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x574120, &cAudioManager::GetHospitalMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x56F410, &cAudioManager::GetJumboTaxiFreq, PATCH_JUMP);
 InjectHook(0x573310, &cAudioManager::GetLittleItalyFemaleOldTalkSfx, PATCH_JUMP);
 InjectHook(0x573400, &cAudioManager::GetLittleItalyFemaleYoungTalkSfx, PATCH_JUMP);
-InjectHook(0x5734F0, &cAudioManager::GetWhiteDockerMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x5735E0, &cAudioManager::GetBlackDockerMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x5736D0, &cAudioManager::GetScumMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x5737E0, &cAudioManager::GetScumFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x5738D0, &cAudioManager::GetWhiteWorkerMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x5739C0, &cAudioManager::GetBlackWorkerMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x5713E0, &cAudioManager::GetBusinessMaleYoungTalkSfx, PATCH_JUMP);
-InjectHook(0x5712C0, &cAudioManager::GetBusinessMaleOldTalkSfx, PATCH_JUMP);
-InjectHook(0x5723A0, &cAudioManager::GetWhiteBusinessFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x573AB0, &cAudioManager::GetBlackBusinessFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x573BD0, &cAudioManager::GetSupermodelMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x573CD0, &cAudioManager::GetSupermodelFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x573DC0, &cAudioManager::GetStewardMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x573E90, &cAudioManager::GetStewardFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x573F60, &cAudioManager::GetFanMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x574040, &cAudioManager::GetFanFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x574120, &cAudioManager::GetHospitalMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x5741F0, &cAudioManager::GetHospitalFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x574290, &cAudioManager::GetWhiteConstructionWorkerTalkSfx, PATCH_JUMP);
-InjectHook(0x574380, &cAudioManager::GetBlackConstructionWorkerTalkSfx, PATCH_JUMP);
-InjectHook(0x574480, &cAudioManager::GetShopperFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x574590, &cAudioManager::GetStudentMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x574690, &cAudioManager::GetStudentFemaleTalkSfx, PATCH_JUMP);
-InjectHook(0x572040, &cAudioManager::GetCasualMaleOldTalkSfx, PATCH_JUMP);
-
-InjectHook(0x574790, &cAudioManager::GetSpecialCharacterTalkSfx, PATCH_JUMP);
-InjectHook(0x574DA0, &cAudioManager::GetEightTalkSfx, PATCH_JUMP);
-InjectHook(0x574E50, &cAudioManager::GetFrankieTalkSfx, PATCH_JUMP);
+InjectHook(0x5731E0, &cAudioManager::GetLittleItalyMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x571510, &cAudioManager::GetMafiaTalkSfx, PATCH_JUMP);
+InjectHook(0x571F40, &cAudioManager::GetMaleNo2TalkSfx, PATCH_JUMP);
+InjectHook(0x5711C0, &cAudioManager::GetMedicTalkSfx, PATCH_JUMP);
+InjectHook(0x5795D0, &cAudioManager::GetMissionAudioLoadingStatus, PATCH_JUMP);
+InjectHook(0x57F050, &cAudioManager::GetMissionScriptPoliceAudioPlayingStatus, PATCH_JUMP);
 InjectHook(0x574F00, &cAudioManager::GetMistyTalkSfx, PATCH_JUMP);
+InjectHook(0x575340, &cAudioManager::GetNormalMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x57A8A0, &cAudioManager::GetNum3DProvidersAvailable, PATCH_JUMP);
 InjectHook(0x574FD0, &cAudioManager::GetOJGTalkSfx, PATCH_JUMP);
-InjectHook(0x574FE0, &cAudioManager::GetCatatalinaTalkSfx, PATCH_JUMP);
-InjectHook(0x574FF0, &cAudioManager::GetBomberTalkSfx, PATCH_JUMP);
+InjectHook(0x570960, &cAudioManager::GetPedCommentSfx, PATCH_JUMP);
+InjectHook(0x570DB0, &cAudioManager::GetPhrase, PATCH_JUMP);
+InjectHook(0x575240, &cAudioManager::GetPimpTalkSfx, PATCH_JUMP);
+InjectHook(0x570E00, &cAudioManager::GetPlayerTalkSfx, PATCH_JUMP);
+InjectHook(0x5737E0, &cAudioManager::GetScumFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x5736D0, &cAudioManager::GetScumMaleTalkSfx, PATCH_JUMP);
 InjectHook(0x575060, &cAudioManager::GetSecurityGuardTalkSfx, PATCH_JUMP);
-InjectHook(0x575120, &cAudioManager::GetChunkyTalkSfx, PATCH_JUMP);
-
-InjectHook(0x575460, &cAudioManager::GetGenericMaleTalkSfx, PATCH_JUMP);
-InjectHook(0x575510, &cAudioManager::GetGenericFemaleTalkSfx, PATCH_JUMP);
-
-// Process stuff
+InjectHook(0x574480, &cAudioManager::GetShopperFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x574790, &cAudioManager::GetSpecialCharacterTalkSfx, PATCH_JUMP);
+InjectHook(0x573E90, &cAudioManager::GetStewardFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x573DC0, &cAudioManager::GetStewardMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x574690, &cAudioManager::GetStudentFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x574590, &cAudioManager::GetStudentMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x573CD0, &cAudioManager::GetSupermodelFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x573BD0, &cAudioManager::GetSupermodelMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x570F80, &cAudioManager::GetSwatTalkSfx, PATCH_JUMP);
+InjectHook(0x575190, &cAudioManager::GetTaxiDriverTalkSfx, PATCH_JUMP);
+InjectHook(0x571650, &cAudioManager::GetTriadTalkSfx, PATCH_JUMP);
+InjectHook(0x5723A0, &cAudioManager::GetWhiteBusinessFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x572170, &cAudioManager::GetWhiteCasualFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x574290, &cAudioManager::GetWhiteConstructionWorkerTalkSfx, PATCH_JUMP);
+InjectHook(0x571E60, &cAudioManager::GetWhiteCriminalTalkSfx, PATCH_JUMP);
+InjectHook(0x5734F0, &cAudioManager::GetWhiteDockerMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x5727B0, &cAudioManager::GetWhiteFatFemaleTalkSfx, PATCH_JUMP);
+InjectHook(0x5725D0, &cAudioManager::GetWhiteFatMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x5729D0, &cAudioManager::GetWhiteFemaleProstituteTalkSfx, PATCH_JUMP);
+InjectHook(0x5738D0, &cAudioManager::GetWhiteWorkerMaleTalkSfx, PATCH_JUMP);
+InjectHook(0x5718D0, &cAudioManager::GetYakuzaTalkSfx, PATCH_JUMP);
+InjectHook(0x5719E0, &cAudioManager::GetYardieTalkSfx, PATCH_JUMP);
+InjectHook(0x56CAB0, &cAudioManager::HasAirBrakes, PATCH_JUMP);
+InjectHook(0x57A0E0, &cAudioManager::Initialise, PATCH_JUMP);
+// InjectHook(0x57EAC0, &cAudioManager::InitialisePoliceRadioZones, PATCH_JUMP);
+InjectHook(0x57B030, &cAudioManager::InterrogateAudioEntities, PATCH_JUMP);
+InjectHook(0x57AA50, &cAudioManager::IsAudioInitialised, PATCH_JUMP);
+InjectHook(0x579650, &cAudioManager::IsMissionAudioSampleFinished, PATCH_JUMP);
+InjectHook(0x57A9C0, &cAudioManager::IsMP3RadioChannelAvailable, PATCH_JUMP);
+InjectHook(0x579520, &cAudioManager::MissionScriptAudioUsesPoliceChannel, PATCH_JUMP);
+InjectHook(0x56AD10, &cAudioManager::PlayerJustGotInCar, PATCH_JUMP);
+InjectHook(0x56AD20, &cAudioManager::PlayerJustLeftCar, PATCH_JUMP);
+InjectHook(0x579620, &cAudioManager::PlayLoadedMissionAudio, PATCH_JUMP);
+InjectHook(0x569420, &cAudioManager::PostInitialiseGameSpecificSetup, PATCH_JUMP);
+InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);
+InjectHook(0x569400, &cAudioManager::PreInitialiseGameSpecificSetup, PATCH_JUMP);
+InjectHook(0x569570, &cAudioManager::PreTerminateGameSpecificShutdown, PATCH_JUMP);
 // InjectHook(0x57BA60, &cAudioManager::ProcessActiveQueues, PATCH_JUMP);
 InjectHook(0x56C940, &cAudioManager::ProcessAirBrakes, PATCH_JUMP);
 InjectHook(0x577B30, &cAudioManager::ProcessAirportScriptObject, PATCH_JUMP);
@@ -8515,6 +8426,34 @@ InjectHook(0x56DBF0, &cAudioManager::ProcessTrainNoise, PATCH_JUMP);
 InjectHook(0x56C770, &cAudioManager::ProcessVehicleDoors, PATCH_JUMP);
 InjectHook(0x56C640, &cAudioManager::ProcessVehicleReverseWarning, PATCH_JUMP);
 InjectHook(0x56A230, &cAudioManager::ProcessVehicleRoadNoise, PATCH_JUMP);
+InjectHook(0x578370, &cAudioManager::ProcessWeather, PATCH_JUMP);
+InjectHook(0x56A440, &cAudioManager::ProcessWetRoadNoise, PATCH_JUMP);
 InjectHook(0x577530, &cAudioManager::ProcessWorkShopScriptObject, PATCH_JUMP);
+InjectHook(0x57AF90, &cAudioManager::RandomDisplacement, PATCH_JUMP);
+InjectHook(0x57A9F0, &cAudioManager::ReacquireDigitalHandle, PATCH_JUMP);
+InjectHook(0x57A9E0, &cAudioManager::ReleaseDigitalHandle, PATCH_JUMP);
+InjectHook(0x569650, &cAudioManager::ResetAudioLogicTimers, PATCH_JUMP);
+InjectHook(0x57EFF0, &cAudioManager::ResetPoliceRadio, PATCH_JUMP);
+InjectHook(0x57AA00, &cAudioManager::SetDynamicAcousticModelingStatus, PATCH_JUMP);
+InjectHook(0x57A770, &cAudioManager::SetEffectsFadeVolume, PATCH_JUMP);
+InjectHook(0x57A730, &cAudioManager::SetEffectsMasterVolume, PATCH_JUMP);
+InjectHook(0x57A4C0, &cAudioManager::SetEntityStatus, PATCH_JUMP);
+InjectHook(0x5795F0, &cAudioManager::SetMissionAudioLocation, PATCH_JUMP);
+InjectHook(0x57F020, &cAudioManager::SetMissionScriptPoliceAudio, PATCH_JUMP);
+InjectHook(0x57A790, &cAudioManager::SetMusicFadeVolume, PATCH_JUMP);
+InjectHook(0x57A750, &cAudioManager::SetMusicMasterVolume, PATCH_JUMP);
+InjectHook(0x57A9A0, &cAudioManager::SetSpeakerConfig, PATCH_JUMP);
+InjectHook(0x56F230, &cAudioManager::SetupJumboFlySound, PATCH_JUMP);
+InjectHook(0x56F310, &cAudioManager::SetupJumboRumbleSound, PATCH_JUMP);
+InjectHook(0x56EF20, &cAudioManager::SetupJumboTaxiSound, PATCH_JUMP);
+InjectHook(0x56F070, &cAudioManager::SetupJumboWhineSound, PATCH_JUMP);
 InjectHook(0x570690, &cAudioManager::SetupPedComments, PATCH_JUMP);
+InjectHook(0x57A150, &cAudioManager::Terminate, PATCH_JUMP);
+InjectHook(0x57AC60, &cAudioManager::TranslateEntity, PATCH_JUMP);
+InjectHook(0x56AC80, &cAudioManager::UpdateGasPedalAudio, PATCH_JUMP);
+InjectHook(0x56C600, &cAudioManager::UsesReverseWarning, PATCH_JUMP);
+InjectHook(0x56C3C0, &cAudioManager::UsesSiren, PATCH_JUMP);
+InjectHook(0x56C3F0, &cAudioManager::UsesSirenSwitching, PATCH_JUMP);
+InjectHook(0x5755C0, &cPedComments::Add, PATCH_JUMP);
+InjectHook(0x575730, &cPedComments::Process, PATCH_JUMP);
 ENDPATCHES

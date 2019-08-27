@@ -191,8 +191,7 @@ class CPed;
 class cPedParams;
 class cTransmission;
 
-class cAudioScriptObject
-{
+class cAudioScriptObject {
 public:
 	int16 AudioId;
 	char _pad0[2];
@@ -224,11 +223,12 @@ enum {
 	MAX_REFLECTIONS,
 };
 
-enum AudioEntityHandle {
-	AEHANDLE_NONE = -5,
-	AEHANDLE_ERROR_NOAUDIOSYS = -4,
-	AEHANDLE_ERROR_NOFREESLOT = -3,
-	AEHANDLE_ERROR_NOENTITY = -2,
+enum AudioEntityHandle
+{
+	AEHANDLE_NONE               = -5,
+	AEHANDLE_ERROR_NOAUDIOSYS   = -4,
+	AEHANDLE_ERROR_NOFREESLOT   = -3,
+	AEHANDLE_ERROR_NOENTITY     = -2,
 	AEHANDLE_ERROR_BADAUDIOTYPE = -1,
 };
 
@@ -284,7 +284,7 @@ public:
 	// getters
 	uint32 GetFrameCounter() const { return m_FrameCounter; }
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; }
-	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
+	int32 GetRandomTabe(int32 idx) const { return m_anRandomTable[idx]; }
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample); /// ok
@@ -513,7 +513,6 @@ public:
 	void ServicePoliceRadio();              // todo
 	void ServicePoliceRadioChannel(int a2); // todo
 	void ServiceSoundEffects();             // todo
-	void SetCurrent3DProvider(uint8);
 	void SetDynamicAcousticModelingStatus(bool status);
 	void SetEffectsFadeVolume(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;
