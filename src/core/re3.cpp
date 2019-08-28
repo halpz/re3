@@ -425,7 +425,7 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 	abort();
 }
 
-void re3_debug(char *format, ...)
+void re3_debug(const char *format, ...)
 {
 	va_list va;
 	va_start(va, format);
@@ -435,7 +435,7 @@ void re3_debug(char *format, ...)
 	printf("%s", re3_buff);
 }
 
-void re3_trace(const char *filename, unsigned int lineno, const char *func, char *format, ...)
+void re3_trace(const char *filename, unsigned int lineno, const char *func, const char *format, ...)
 {
 	char buff[re3_buffsize *2];
 	va_list va;

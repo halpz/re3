@@ -1,4 +1,7 @@
 #pragma once
+
+#include "Wanted.h"
+
 enum eSound : int16
 {
 	SOUND_CAR_DOOR_CLOSE_BONNET = 0,
@@ -170,6 +173,9 @@ enum eSound : int16
 	SOUND_TOTAL_SOUNDS = 166,
 	SOUND_TOTAL_PED_SOUNDS = 167,
 };
+
+#define AEHANDLE_IS_FAILED(h) ((h)<0)
+#define AEHANDLE_IS_OK(h)     ((h)>=0)
 
 class cAudioScriptObject;
 class CEntity;

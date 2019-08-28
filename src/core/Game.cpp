@@ -1,7 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "Game.h"
-#include "Main.h"
+#include "main.h"
 #include "CdStream.h"
 #include "FileMgr.h"
 

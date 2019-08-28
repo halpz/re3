@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Game.h"
+
 class CPed;
 class CVehicle;
-enum eLevelName;
 
 struct PedGroup
 {

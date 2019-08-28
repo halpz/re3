@@ -4,7 +4,7 @@
 #include "ModelIndices.h"
 #include "World.h"
 #include "Wanted.h"
-#include "Eventlist.h"
+#include "EventList.h"
 
 int32 CEventList::ms_nFirstFreeSlotIndex;
 //CEvent gaEvent[NUMEVENTS];

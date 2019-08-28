@@ -1661,7 +1661,7 @@ void CenterVideo(void)
 /*
  *****************************************************************************
  */
-void PlayMovieInWindow(int cmdShow, LPTSTR szFile)
+void PlayMovieInWindow(int cmdShow, const char* szFile)
 {
 	WCHAR wFileName[256];
 	HRESULT hr;

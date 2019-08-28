@@ -8,7 +8,7 @@
 #include "VisibilityPlugins.h"
 #include "DMAudio.h"
 #include "Clock.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "ZoneCull.h"
 #include "Camera.h"
 #include "Darkel.h"
@@ -128,7 +128,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	m_fGasPedal = 0.0f;
 	m_fBrakePedal = 0.0f;
 	m_pSetOnFireEntity = nil;
-	field_594 = 0;
+	m_fGasPedalAudio = 0;
 	bNotDamagedUpsideDown = false;
 	bMoreResistantToDamage = false;
 	m_fVelocityChangeForAudio = 0.0f;
@@ -316,7 +316,7 @@ CAutomobile::ProcessControl(void)
 
 	// Set Center of Mass to make car more stable
 	if(strongGrip1 || bCheat3)
-		m_vecCentreOfMass.z = 0.3f*m_aSuspensionSpringLength[0] + -1.0*m_fHeightAboveRoad;
+		m_vecCentreOfMass.z = 0.3f*m_aSuspensionSpringLength[0] + -1.0f*m_fHeightAboveRoad;
 	else if(pHandling->Flags & HANDLING_NONPLAYER_STABILISER && m_status == STATUS_PHYSICS)
 		m_vecCentreOfMass.z = pHandling->CentreOfMass.z - 0.2f*pHandling->Dimension.z;
 	else
@@ -1591,10 +1591,11 @@ CAutomobile::PreRender(void)
 		break;
 	}
 
-	if(GetModelIndex() == MI_RCBANDIT ||
-	   GetModelIndex() == MI_DODO ||
-	   GetModelIndex() == MI_RHINO)
-		goto nolights;
+	if(GetModelIndex() == MI_RCBANDIT || GetModelIndex() == MI_DODO ||
+	   GetModelIndex() == MI_RHINO) {
+		CShadows::StoreShadowForCar(this);
+		return;
+	}
 
 	// Turn lights on/off
 	bool shouldLightsBeOn = 
@@ -1739,7 +1740,7 @@ CAutomobile::PreRender(void)
 		// Taillight coronas
 		if(behindness > 0.0f){
 			// Behind car
-			float intensity = 0.4f*behindness + 0.4;
+			float intensity = 0.4f*behindness + 0.4f;
 			float size = (behindness + 1.0f)/2.0f;
 
 			if(m_fGasPedal < 0.0f){
@@ -1757,7 +1758,7 @@ CAutomobile::PreRender(void)
 						CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 						CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
 			}else{
-				if(m_fBrakePedal > 0.0){
+				if(m_fBrakePedal > 0.0f){
 					intensity += 0.4f;
 					size += 0.3f;
 				}
@@ -1843,8 +1844,10 @@ CAutomobile::PreRender(void)
 	}else{
 		// Lights off
 
-		if(m_status == STATUS_ABANDONED || m_status == STATUS_WRECKED)
-			goto nolights;
+		if(m_status == STATUS_ABANDONED || m_status == STATUS_WRECKED) {
+			CShadows::StoreShadowForCar(this);
+			return;
+		}
 
 		CVector lightPos = mi->m_positions[CAR_POS_TAILLIGHTS];
 		CVector lightR = GetMatrix() * lightPos;
@@ -1903,7 +1906,6 @@ CAutomobile::PreRender(void)
 		}
 	}
 
-nolights:
 	CShadows::StoreShadowForCar(this);
 }
 
@@ -2877,7 +2879,7 @@ CAutomobile::ProcessBuoyancy(void)
 			static RwRGBA black;
 			if(pos.z >= 0.0f){
 				nGenerateRaindrops = 0;
-				pos.z += 0.5;
+				pos.z += 0.5f;
 				CParticleObject::AddObject(POBJECT_SPLASHES_AROUND,
 					pos, CVector(0.0f, 0.0f, 0.0f), 6.5f, 2500, black, true);
 			}

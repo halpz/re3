@@ -119,7 +119,7 @@ bool EAX3ListenerInterpolate(LPEAXLISTENERPROPERTIES lpStart, LPEAXLISTENERPROPE
 	if (lpStart->flReflectionsDelay == lpFinish->flReflectionsDelay)
 		lpResult->flReflectionsDelay = lpStart->flReflectionsDelay;
 	else
-		lpResult->flReflectionsDelay = (float)exp( (log(lpStart->flReflectionsDelay+0.0001) * flInvRatio) + (log(lpFinish->flReflectionsDelay+0.0001) * flRatio) );
+		lpResult->flReflectionsDelay = (float)exp( (log(lpStart->flReflectionsDelay+0.0001f) * flInvRatio) + (log(lpFinish->flReflectionsDelay+0.0001f) * flRatio) );
 
 	// Reflections Pan
 
@@ -155,7 +155,7 @@ bool EAX3ListenerInterpolate(LPEAXLISTENERPROPERTIES lpStart, LPEAXLISTENERPROPE
 	if (lpStart->flReverbDelay == lpFinish->flReverbDelay)
 		lpResult->flReverbDelay = lpStart->flReverbDelay;
 	else
-		lpResult->flReverbDelay = (float)exp( (log(lpStart->flReverbDelay+0.0001) * flInvRatio) + (log(lpFinish->flReverbDelay+0.0001) * flRatio) );
+		lpResult->flReverbDelay = (float)exp( (log(lpStart->flReverbDelay+0.0001f) * flInvRatio) + (log(lpFinish->flReverbDelay+0.0001f) * flRatio) );
 	
 	// Reverb Pan
 
@@ -354,7 +354,7 @@ void Clamp(EAXVECTOR *eaxVector)
 // Array of scenario names							//
 //////////////////////////////////////////////////////
 
-char* EAX30_SCENARIO_NAMES[] =				
+const char* EAX30_SCENARIO_NAMES[] =				
 {	
 	"Castle", 
 	"Factory", 
@@ -376,7 +376,7 @@ char* EAX30_SCENARIO_NAMES[] =
 // Array of standardised location names				//
 //////////////////////////////////////////////////////
 
-char* EAX30_LOCATION_NAMES[] =				
+const char* EAX30_LOCATION_NAMES[] =				
 {	
 	"Hall", 
 	"Large Room", 
@@ -410,7 +410,7 @@ EAXLISTENERPROPERTIES EAX30_STANDARD_PRESETS[EAX30_NUM_STANDARD_SCENARIOS][EAX30
 // Array of original environment names				//
 //////////////////////////////////////////////////////
 
-char* EAX30_ORIGINAL_PRESET_NAMES[] =
+const char* EAX30_ORIGINAL_PRESET_NAMES[] =
 {
 	"Generic",
 	"Padded Cell",
@@ -480,7 +480,7 @@ EAXLISTENERPROPERTIES		EAX30_ORIGINAL_PRESETS[] =
 // Array of sport environment names					//
 //////////////////////////////////////////////////////
 
-char* EAX30_SPORTS_PRESET_NAMES[] =
+const char* EAX30_SPORTS_PRESET_NAMES[] =
 {
 	"Empty Stadium",
 	"Full Stadium", 
@@ -512,7 +512,7 @@ EAXLISTENERPROPERTIES		EAX30_SPORTS_PRESETS[] =
 // Array of prefab environment names				//
 //////////////////////////////////////////////////////
 
-char* EAX30_PREFAB_PRESET_NAMES[] =
+const char* EAX30_PREFAB_PRESET_NAMES[] =
 {
 	"Workshop",
 	"School Room",
@@ -540,7 +540,7 @@ EAXLISTENERPROPERTIES EAX30_PREFAB_PRESETS[] =
 // Array of Domes & Pipes environment names			//
 //////////////////////////////////////////////////////
 
-char* EAX30_DOMESNPIPES_PRESET_NAMES[] =
+const char* EAX30_DOMESNPIPES_PRESET_NAMES[] =
 {
 	"Domed Tomb",
 	"Saint Paul's Dome",
@@ -570,7 +570,7 @@ EAXLISTENERPROPERTIES EAX30_DOMESNPIPES_PRESETS[] =
 // Array of Outdoors environment names				//
 //////////////////////////////////////////////////////
 
-char* EAX30_OUTDOORS_PRESET_NAMES[] =
+const char* EAX30_OUTDOORS_PRESET_NAMES[] =
 {
 	"Backyard", 
 	"Rolling Plains",
@@ -598,7 +598,7 @@ EAXLISTENERPROPERTIES EAX30_OUTDOORS_PRESETS[] =
 // Array of Mood environment names					//
 //////////////////////////////////////////////////////
 
-char* EAX30_MOOD_PRESET_NAMES[] =
+const char* EAX30_MOOD_PRESET_NAMES[] =
 {
 	"Heaven",
 	"Hell",
@@ -622,7 +622,7 @@ EAXLISTENERPROPERTIES EAX30_MOOD_PRESETS[] =
 // Array of driving environment names				//
 //////////////////////////////////////////////////////
 
-char* EAX30_DRIVING_PRESET_NAMES[] =
+const char* EAX30_DRIVING_PRESET_NAMES[] =
 {
 	"Race Commentator",
 	"Pit Garage",
@@ -656,7 +656,7 @@ EAXLISTENERPROPERTIES EAX30_DRIVING_PRESETS[] =
 // Array of City environment names					//
 //////////////////////////////////////////////////////
 
-char* EAX30_CITY_PRESET_NAMES[] =
+const char* EAX30_CITY_PRESET_NAMES[] =
 {
 	"City Streets",
 	"Subway",
@@ -686,7 +686,7 @@ EAXLISTENERPROPERTIES EAX30_CITY_PRESETS[] =
 // Array of Misc environment names					//
 //////////////////////////////////////////////////////
 
-char* EAX30_MISC_PRESET_NAMES[] =
+const char* EAX30_MISC_PRESET_NAMES[] =
 {
 	"Dusty Box Room",
 	"Chapel",

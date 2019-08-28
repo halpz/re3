@@ -1,6 +1,6 @@
 #pragma once
 #include "common.h"
-#include "math/Vector.h"
+#include "Vector.h"
 
 class CMovingThings
 {

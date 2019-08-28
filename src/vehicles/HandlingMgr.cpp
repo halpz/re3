@@ -6,9 +6,9 @@
 
 cHandlingDataMgr &mod_HandlingManager = *(cHandlingDataMgr*)0x728060;
 
-char *HandlingFilename = "HANDLING.CFG";
+const char *HandlingFilename = "HANDLING.CFG";
 
-char VehicleNames[NUMHANDLINGS][14] = {
+const char VehicleNames[NUMHANDLINGS][14] = {
 	"LANDSTAL",
 	"IDAHO",
 	"STINGER",
@@ -199,7 +199,7 @@ cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 	if(handling->fTurnMass < 10.0f)
 		handling->fTurnMass *= 5.0f;
 	handling->fInvMass = 1.0f/handling->fMass;
-	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * 0.008*handling->fMass;
+	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * 0.008f*handling->fMass;
 
 	// What the hell is going on here?
 	specificVolume = handling->Dimension.x*handling->Dimension.z*0.5f / handling->fMass;	// ?
@@ -207,7 +207,7 @@ cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 	b = 100.0f;
 	velocity = handling->Transmission.fMaxVelocity;
 	while(a < b && velocity > 0.0f){
-		velocity -= 0.01;
+		velocity -= 0.01f;
 		a = handling->Transmission.fEngineAcceleration/6.0f;
 		b = -velocity * (1.0f/(specificVolume * sq(velocity) + 1.0f) - 1.0f);
 	}

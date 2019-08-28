@@ -14,7 +14,7 @@
 #include "Shadows.h"
 #include "Coronas.h"
 #include "Explosion.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "TempColModels.h"
 #include "World.h"
 #include "WaterLevel.h"

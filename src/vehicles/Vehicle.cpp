@@ -97,8 +97,8 @@ CVehicle::CVehicle(uint8 CreatedBy)
 		DMAudio.SetEntityStatus(m_audioEntityId, true);
 	m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
 	m_pCurGroundEntity = nil;
-	field_22A = 0;
-	field_22B = 0;
+	m_bRainAudioCounter = 0;
+	m_bRainSamplesCounter = 0;
 	m_comedyControlState = 0;
 	m_aCollPolys[0].valid = false;
 	m_aCollPolys[1].valid = false;

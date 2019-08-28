@@ -575,7 +575,7 @@ public:
 	void StartFightAttack(uint8);
 	void SetWaitState(eWaitState, void*);
 	bool FightStrike(CVector&);
-	int GetLocalDirection(CVector2D const &);
+	int GetLocalDirection(const CVector2D &);
 	void StartFightDefend(uint8, uint8, uint8);
 	void PlayHitSound(CPed*);
 	void SetFall(int, AnimationId, uint8);
@@ -716,6 +716,15 @@ public:
 	void DebugRenderOnePedText(void);
 	static bool bUnusedFightThingOnPlayer;
 #endif
+};
+
+class cPedParams
+{
+public:
+	char m_bDistanceCalculated;
+	char gap_1[3];
+	float m_fDistance;
+	CPed *m_pPed;
 };
 
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);

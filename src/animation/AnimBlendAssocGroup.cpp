@@ -129,7 +129,7 @@ CAnimBlendAssocGroup::CreateAssociations(const char *name)
 
 // Create associations from hierarchies for a given clump
 void
-CAnimBlendAssocGroup::CreateAssociations(const char *blockName, RpClump *clump, char **animNames, int numAssocs)
+CAnimBlendAssocGroup::CreateAssociations(const char *blockName, RpClump *clump, const char **animNames, int numAssocs)
 {
 	int i;
 	CAnimBlock *animBlock;
@@ -157,5 +157,5 @@ STARTPATCHES
 	InjectHook(0x401420, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(uint32))&CAnimBlendAssocGroup::CopyAnimation, PATCH_JUMP);
 	InjectHook(0x4013E0, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(const char*))&CAnimBlendAssocGroup::CopyAnimation, PATCH_JUMP);
 	InjectHook(0x401130, (void (CAnimBlendAssocGroup::*)(const char*))&CAnimBlendAssocGroup::CreateAssociations, PATCH_JUMP);
-	InjectHook(0x401220, (void (CAnimBlendAssocGroup::*)(const char*, RpClump*, char**, int))&CAnimBlendAssocGroup::CreateAssociations, PATCH_JUMP);
+	InjectHook(0x401220, (void (CAnimBlendAssocGroup::*)(const char*, RpClump*, const char**, int))&CAnimBlendAssocGroup::CreateAssociations, PATCH_JUMP);
 ENDPATCHES

@@ -95,7 +95,7 @@ bool GetMouseMoveRight();
 bool GetPadInput();
 bool GetMouseInput();
 
-char *FrontendFilenames[] = {
+const char *FrontendFilenames[] = {
 	"fe2_mainpanel_ul",
 	"fe2_mainpanel_ur",
 	"fe2_mainpanel_dl",
@@ -126,7 +126,7 @@ char *FrontendFilenames[] = {
 	"fe_radio9", // CHATTERBOX
 };					
 
-char *MenuFilenames[] = {
+const char *MenuFilenames[] = {
 	"connection24",	"",
 	"findgame24",	"",
 	"hostgame24",	"",

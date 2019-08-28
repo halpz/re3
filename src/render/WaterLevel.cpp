@@ -9,7 +9,7 @@
 #include "Boat.h"
 #include "World.h"
 #include "General.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "ZoneCull.h"
 #include "Clock.h"
 #include "Particle.h"

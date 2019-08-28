@@ -342,7 +342,7 @@ void CReplay::StorePedUpdate(CPed *ped, int id)
 	tPedUpdatePacket* pp = (tPedUpdatePacket*)&Record.m_pBase[Record.m_nOffset];
 	pp->type = REPLAYPACKET_PED_UPDATE;
 	pp->index = id;
-	pp->heading = 128.0f / M_PI * ped->m_fRotationCur;
+	pp->heading = 128.0f / PI * ped->m_fRotationCur;
 	pp->matrix.CompressFromFullMatrix(ped->GetMatrix());
 	pp->assoc_group_id = ped->m_animGroup;
 	/* 	Would be more sane to use GetJustIndex(ped->m_pMyVehicle) in following assignment */
@@ -464,8 +464,8 @@ void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayB
 		buffer->m_nOffset += sizeof(tPedUpdatePacket);
 		return;
 	}
-	ped->m_fRotationCur = pp->heading * M_PI / 128.0f;
-	ped->m_fRotationDest = pp->heading * M_PI / 128.0f;
+	ped->m_fRotationCur = pp->heading * PI / 128.0f;
+	ped->m_fRotationDest = pp->heading * PI / 128.0f;
 	CMatrix ped_matrix;
 	pp->matrix.DecompressIntoFullMatrix(ped_matrix);
 	ped->GetMatrix() = ped->GetMatrix() * CMatrix(1.0f - interpolation);
@@ -632,17 +632,17 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 	vp->primary_color = vehicle->m_currentColour1;
 	vp->secondary_color = vehicle->m_currentColour2;
 	if (vehicle->GetModelIndex() == MI_RHINO)
-		vp->car_gun = 128.0f / M_PI * ((CAutomobile*)vehicle)->m_fCarGunLR;
+		vp->car_gun = 128.0f / PI * ((CAutomobile*)vehicle)->m_fCarGunLR;
 	else
 		vp->wheel_state = 50.0f * vehicle->m_fSteerAngle;
 	if (vehicle->IsCar()){
 		CAutomobile* car = (CAutomobile*)vehicle;
 		for (int i = 0; i < 4; i++){
 			vp->wheel_susp_dist[i] = 50.0f * car->m_aSuspensionSpringRatio[i];
-			vp->wheel_rotation[i] = 128.0f / M_PI * car->m_aWheelRotation[i];
+			vp->wheel_rotation[i] = 128.0f / PI * car->m_aWheelRotation[i];
 		}
-		vp->door_angles[0] = 127.0f / M_PI * car->Doors[2].m_fAngle;
-		vp->door_angles[1] = 127.0f / M_PI * car->Doors[3].m_fAngle;
+		vp->door_angles[0] = 127.0f / PI * car->Doors[2].m_fAngle;
+		vp->door_angles[1] = 127.0f / PI * car->Doors[3].m_fAngle;
 		vp->door_status = 0;
 		for (int i = 0; i < 6; i++){
 			if (car->Damage.GetDoorStatus(i) == 3)
@@ -675,7 +675,7 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 		ApplyPanelDamageToCar(vp->panels, (CAutomobile*)vehicle, true);
 	vehicle->m_vecMoveSpeed = CVector(vp->velocityX / 8000.0f, vp->velocityY / 8000.0f, vp->velocityZ / 8000.0f);
 	if (vehicle->GetModelIndex() == MI_RHINO) {
-		((CAutomobile*)vehicle)->m_fCarGunLR = vp->car_gun * M_PI / 128.0f;
+		((CAutomobile*)vehicle)->m_fCarGunLR = vp->car_gun * PI / 128.0f;
 		vehicle->m_fSteerAngle = 0.0f;
 	}else{
 		vehicle->m_fSteerAngle = vp->wheel_state / 50.0f;
@@ -684,10 +684,10 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 		CAutomobile* car = (CAutomobile*)vehicle;
 		for (int i = 0; i < 4; i++) {
 			car->m_aSuspensionSpringRatio[i] = vp->wheel_susp_dist[i] / 50.0f;
-			car->m_aWheelRotation[i] = vp->wheel_rotation[i] * M_PI / 128.0f;
+			car->m_aWheelRotation[i] = vp->wheel_rotation[i] * PI / 128.0f;
 		}
-		car->Doors[2].m_fAngle = car->Doors[2].m_fPrevAngle = vp->door_angles[0] * M_PI / 127.0f;
-		car->Doors[3].m_fAngle = car->Doors[3].m_fPrevAngle = vp->door_angles[1] * M_PI / 127.0f;
+		car->Doors[2].m_fAngle = car->Doors[2].m_fPrevAngle = vp->door_angles[0] * PI / 127.0f;
+		car->Doors[3].m_fAngle = car->Doors[3].m_fPrevAngle = vp->door_angles[1] * PI / 127.0f;
 		if (vp->door_angles[0])
 			car->Damage.SetDoorStatus(2, 2);
 		if (vp->door_angles[1])

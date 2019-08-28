@@ -3172,7 +3172,7 @@ CPed::CheckIfInTheAir(void)
 	CEntity *foundEntity;
 
 	float startZ = pos.z - 1.54f;
-	bool foundGround = CWorld::ProcessVerticalLine(pos, startZ, foundColPoint, foundEntity, true, true, false, true, false, false, false);
+	bool foundGround = CWorld::ProcessVerticalLine(pos, startZ, foundColPoint, foundEntity, true, true, false, true, false, false, nil);
 	if (!foundGround && m_nPedState != PED_JUMP)
 	{
 		pos.z -= 1.04f;
@@ -4622,7 +4622,7 @@ CPed::LoadFightData(void)
 
 // Actually GetLocalDirectionTo(Turn/Look)
 int
-CPed::GetLocalDirection(CVector2D const &posOffset)
+CPed::GetLocalDirection(const CVector2D &posOffset)
 {
 	float direction;
 

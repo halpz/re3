@@ -4,7 +4,7 @@
 #include "TxdStore.h"
 #include "Timer.h"
 #include "Camera.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "CutsceneMgr.h"
 #include "Automobile.h"
 #include "Ped.h"

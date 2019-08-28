@@ -1,6 +1,7 @@
 #pragma once
 
 class CEntity;
+class CVector;
 
 enum eExplosionType
 {
@@ -19,5 +20,11 @@ enum eExplosionType
 class CExplosion
 {
 public:
-	static void AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32);
+	static void AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type,
+	                         const CVector &pos, uint32);
+
+	static int8 GetExplosionActiveCounter(uint8 id);
+	static CVector *GetExplosionPosition(uint8 id);
+	static uint8 GetExplosionType(uint8 id);
+	static void ResetExplosionActiveCounter(uint8 id);
 };

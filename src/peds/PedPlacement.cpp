@@ -38,7 +38,7 @@ CPedPlacement::FindZCoorForPed(CVector* pos)
 CEntity*
 CPedPlacement::IsPositionClearOfCars(CVector* pos)
 {
-	return CWorld::TestSphereAgainstWorld(*pos, 0.25f, false, true, true, false, false, false, false);
+	return CWorld::TestSphereAgainstWorld(*pos, 0.25f, nil, true, true, false, false, false, false);
 }
 
 STARTPATCHES

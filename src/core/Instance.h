@@ -7,4 +7,5 @@
 class CInstance : CPlaceable
 {
 public:
+	~CInstance() = default;
 };

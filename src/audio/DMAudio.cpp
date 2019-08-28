@@ -7,7 +7,6 @@
 
 cDMAudio &DMAudio = *(cDMAudio*)0x95CDBE;
 
-
 void
 cDMAudio::Initialise(void)
 {
@@ -29,7 +28,7 @@ cDMAudio::Service(void)
 int32
 cDMAudio::CreateEntity(eAudioType type, void *UID)
 {
-	return AudioManager.CreateEntity(type, UID);
+	return AudioManager.CreateEntity(type, (CPhysical *)UID);
 }
 
 void
@@ -80,7 +79,7 @@ cDMAudio::SetEffectsFadeVol(uint8 volume)
 	uint8 vol = volume;
 	if ( vol > MAX_VOLUME ) vol = MAX_VOLUME;
 	
-	AudioManager.SetEffectsFadeVol(vol);
+	AudioManager.SetEffectsFadeVolume(vol);
 }
 
 void
@@ -89,7 +88,7 @@ cDMAudio::SetMusicFadeVol(uint8 volume)
 	uint8 vol = volume;
 	if ( vol > MAX_VOLUME ) vol = MAX_VOLUME;
 	
-	AudioManager.SetMusicFadeVol(vol);
+	AudioManager.SetMusicFadeVolume(vol);
 }
 
 uint8
@@ -165,15 +164,15 @@ cDMAudio::IsAudioInitialised(void)
 }
 
 void
-cDMAudio::ReportCrime(eCrimeType crime, CVector const &pos)
+cDMAudio::ReportCrime(eCrimeType crime, const CVector &pos)
 {
-	AudioManager.ReportCrime(crime, pos);
+	AudioManager.ReportCrime(crime, &pos);
 }
 
 int32
 cDMAudio::CreateLoopingScriptObject(cAudioScriptObject *scriptObject)
 {
-	int32 audioEntity = AudioManager.CreateEntity(AUDIOTYPE_SCRIPTOBJECT, scriptObject);
+	int32 audioEntity = AudioManager.CreateEntity(AUDIOTYPE_SCRIPTOBJECT, (CPhysical *)scriptObject);
 
 	if ( AEHANDLE_IS_OK(audioEntity) )
 		AudioManager.SetEntityStatus(audioEntity, true);
@@ -190,7 +189,7 @@ cDMAudio::DestroyLoopingScriptObject(int32 audioEntity)
 void
 cDMAudio::CreateOneShotScriptObject(cAudioScriptObject *scriptObject)
 {
-	int32 audioEntity = AudioManager.CreateEntity(AUDIOTYPE_SCRIPTOBJECT, scriptObject);
+	int32 audioEntity = AudioManager.CreateEntity(AUDIOTYPE_SCRIPTOBJECT, (CPhysical *)scriptObject);
 
 	if ( AEHANDLE_IS_OK(audioEntity) )
 	{
