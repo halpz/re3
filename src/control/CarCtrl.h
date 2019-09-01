@@ -65,7 +65,6 @@ public:
 	static void SlowCarDownForOtherCar(CEntity*, CVehicle*, float*, float);
 	static float TestCollisionBetween2MovingRects(CVehicle*, CVehicle*, float, float, CVector*, CVector*, uint8);
 	static float FindAngleToWeaveThroughTraffic(CVehicle*, CPhysical*, float, float);
-	static float FindAngleToWeaveThroughTrafficTest(CVehicle*, CPhysical*, float, float);
 	static void WeaveThroughCarsSectorList(CPtrList&, CVehicle*, CPhysical*, float, float, float, float, float*, float*);
 	static void WeaveForOtherCar(CEntity*, CVehicle*, float*, float*);
 	static void WeaveThroughPedsSectorList(CPtrList&, CVehicle*, CPhysical*, float, float, float, float, float*, float*);
@@ -85,7 +84,6 @@ public:
 		return (float)timeInCurve / pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve;
 	}
 
-	/* Used very often and differs from CGeneral::LimitRadianAngle */
 	static float LimitRadianAngle(float angle)
 	{
 		while (angle < -PI)
