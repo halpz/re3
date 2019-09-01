@@ -64,6 +64,10 @@ WRAPPER void CCarCtrl::GenerateEmergencyServicesCar(void) { EAXJMP(0x41FC50); }
 WRAPPER void CCarCtrl::PickNextNodeAccordingStrategy(CVehicle*) { EAXJMP(0x41BA50); }
 WRAPPER void CCarCtrl::DragCarToPoint(CVehicle*, CVector*) { EAXJMP(0x41D450); }
 WRAPPER void CCarCtrl::Init(void) { EAXJMP(0x41D280); }
+WRAPPER void CCarCtrl::WeaveThroughPedsSectorList(CPtrList&, CVehicle*, CPhysical*, float, float, float, float, float*, float*) { EAXJMP(0x41B1B0); }
+WRAPPER void CCarCtrl::WeaveForPed(CEntity*, CVehicle*, float*, float*) { EAXJMP(0x41B2D0); }
+WRAPPER void CCarCtrl::WeaveThroughObjectsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float*) { EAXJMP(0x41B520); }
+WRAPPER void CCarCtrl::WeaveForObject(CEntity*, CVehicle*, float*, float*) { EAXJMP(0x41B640); }
 
 void
 CCarCtrl::GenerateRandomCars()
@@ -1173,6 +1177,147 @@ float CCarCtrl::TestCollisionBetween2MovingRects(CVehicle* pVehicleA, CVehicle* 
 }
 #endif
 
+float CCarCtrl::FindAngleToWeaveThroughTrafficTest(CVehicle* pVehicle, CPhysical* pTarget, float angleToTarget, float angleForward)
+{
+	float myval = FindAngleToWeaveThroughTraffic(pVehicle, pTarget, angleToTarget, angleForward);
+	DWORD		dwProtect[2];
+	VirtualProtect((void*)(0x41A590), 5, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
+	*(BYTE*)(0x41A590) = 0x53;
+	*(BYTE*)(0x41A591) = 0x56;
+	*(BYTE*)(0x41A592) = 0x57;
+	*(BYTE*)(0x41A593) = 0x55;
+	*(BYTE*)(0x41A594) = 0x83;
+	VirtualProtect((void*)(0x41A590), 5, dwProtect[0], &dwProtect[1]);
+	float gameval = ((float(*)(CVehicle*, CPhysical*, float, float))(0x41A590))(pVehicle, pTarget, angleToTarget, angleForward);
+	VirtualProtect((void*)(0x41A590), 5, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
+	*(BYTE*)(0x41A590) = 0xE9;
+	*(ptrdiff_t*)(0x41A591) = (DWORD)(&CCarCtrl::FindAngleToWeaveThroughTrafficTest) - (0x41A590) - 5;
+	VirtualProtect((void*)(0x41A590), 5, dwProtect[0], &dwProtect[1]);
+	if (myval == gameval)
+		return myval;
+	debug("FindAngleToWeaveThroughTraffic failed! Expected %f, received %f\n", gameval, myval);
+	return gameval;
+}
+
+float CCarCtrl::FindAngleToWeaveThroughTraffic(CVehicle* pVehicle, CPhysical* pTarget, float angleToTarget, float angleForward)
+{
+	float distanceToTest = min(2.0f, pVehicle->GetMoveSpeed().Magnitude2D() * 2.5f + 1.0f) * 12.0f;
+	float left = pVehicle->GetPosition().x - distanceToTest;
+	float right = pVehicle->GetPosition().x + distanceToTest;
+	float top = pVehicle->GetPosition().y - distanceToTest;
+	float bottom = pVehicle->GetPosition().y + distanceToTest;
+	int xstart = max(0, CWorld::GetSectorIndexX(left));
+	int xend = min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right));
+	int ystart = max(0, CWorld::GetSectorIndexY(top));
+	int yend = min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(bottom));
+	assert(xstart <= xend);
+	assert(ystart <= yend);
+
+	float angleToWeaveLeft = angleToTarget;
+	float angleToWeaveRight = angleToTarget;
+
+	CWorld::AdvanceCurrentScanCode();
+
+	float angleToWeaveLeftLastIteration = -9999.9f;
+	float angleToWeaveRightLastIteration = -9999.9f;
+
+	while (angleToWeaveLeft != angleToWeaveLeftLastIteration ||
+		   angleToWeaveRight != angleToWeaveRightLastIteration){
+		angleToWeaveLeftLastIteration = angleToWeaveLeft;
+		angleToWeaveRightLastIteration = angleToWeaveRight;
+		for (int y = ystart; y <= yend; y++) {
+			for (int x = xstart; x <= xend; x++) {
+				CSector* s = CWorld::GetSector(x, y);
+				WeaveThroughCarsSectorList(s->m_lists[ENTITYLIST_VEHICLES], pVehicle, pTarget,
+					left, top, right, bottom, &angleToWeaveLeft, &angleToWeaveRight);
+				WeaveThroughCarsSectorList(s->m_lists[ENTITYLIST_VEHICLES_OVERLAP], pVehicle, pTarget,
+					left, top, right, bottom, &angleToWeaveLeft, &angleToWeaveRight);
+				WeaveThroughPedsSectorList(s->m_lists[ENTITYLIST_PEDS], pVehicle, pTarget,
+					left, top, right, bottom, &angleToWeaveLeft, &angleToWeaveRight);
+				WeaveThroughPedsSectorList(s->m_lists[ENTITYLIST_PEDS_OVERLAP], pVehicle, pTarget,
+					left, top, right, bottom, &angleToWeaveLeft, &angleToWeaveRight);
+				WeaveThroughObjectsSectorList(s->m_lists[ENTITYLIST_OBJECTS], pVehicle,
+					left, top, right, bottom, &angleToWeaveLeft, &angleToWeaveRight);
+				WeaveThroughObjectsSectorList(s->m_lists[ENTITYLIST_OBJECTS_OVERLAP], pVehicle,
+					left, top, right, bottom, &angleToWeaveLeft, &angleToWeaveRight);
+			}
+		}
+	}
+	float angleDiffFromActualToTarget = LimitRadianAngle(angleForward - angleToTarget);
+	float angleToBisectActualToTarget = LimitRadianAngle(angleToTarget + angleDiffFromActualToTarget / 2);
+	float angleDiffLeft = LimitRadianAngle(angleToWeaveLeft - angleToBisectActualToTarget);
+	angleDiffLeft = ABS(angleDiffLeft);
+	float angleDiffRight = LimitRadianAngle(angleToWeaveRight - angleToBisectActualToTarget);
+	angleDiffRight = ABS(angleDiffRight);
+	if (angleDiffLeft > HALFPI && angleDiffRight > HALFPI)
+		return angleToBisectActualToTarget;
+	if (ABS(angleDiffLeft - angleDiffRight) < 0.08f)
+		return angleToWeaveRight;
+	return angleDiffLeft < angleDiffRight ? angleToWeaveLeft : angleToWeaveRight;
+}
+
+void CCarCtrl::WeaveThroughCarsSectorList(CPtrList& lst, CVehicle* pVehicle, CPhysical* pTarget, float x_inf, float y_inf, float x_sup, float y_sup, float* pAngleToWeaveLeft, float* pAngleToWeaveRight)
+{
+	for (CPtrNode* pNode = lst.first; pNode != nil; pNode = pNode->next) {
+		CVehicle* pTestVehicle = (CVehicle*)pNode->item;
+		if (pTestVehicle->m_scanCode == CWorld::GetCurrentScanCode())
+			continue;
+		if (!pTestVehicle->bUsesCollision)
+			continue;
+		if (pTestVehicle == pTarget)
+			continue;
+		pTestVehicle->m_scanCode = CWorld::GetCurrentScanCode();
+		if (pTestVehicle->GetBoundCentre().x < x_inf || pTestVehicle->GetBoundCentre().x > x_sup)
+			continue;
+		if (pTestVehicle->GetBoundCentre().y < y_inf || pTestVehicle->GetBoundCentre().y > y_sup)
+			continue;
+		if (Abs(pTestVehicle->GetPosition().z - pVehicle->GetPosition().z) >= 4.0f)
+			continue;
+		if (pTestVehicle != pVehicle)
+			WeaveForOtherCar(pTestVehicle, pVehicle, pAngleToWeaveLeft, pAngleToWeaveRight);
+	}
+}
+
+void CCarCtrl::WeaveForOtherCar(CEntity* pOtherEntity, CVehicle* pVehicle, float* pAngleToWeaveLeft, float* pAngleToWeaveRight)
+{
+	if (pVehicle->AutoPilot.m_nCarMission == MISSION_RAMPLAYER_CLOSE && pOtherEntity == FindPlayerVehicle())
+		return;
+	if (pVehicle->AutoPilot.m_nCarMission == MISSION_RAMCAR_CLOSE && pOtherEntity == pVehicle->AutoPilot.m_pTargetCar)
+		return;
+	CVehicle* pOtherCar = (CVehicle*)pOtherEntity;
+	CVector2D vecDiff = pOtherCar->GetPosition() - pVehicle->GetPosition();
+	float angleBetweenVehicles = CGeneral::GetATanOfXY(vecDiff.x, vecDiff.y);
+	float distance = vecDiff.Magnitude();
+	if (distance < 1.0f)
+		return;
+	if (DotProduct2D(pVehicle->GetMoveSpeed() - pOtherCar->GetMoveSpeed(), vecDiff) * 110.0f -
+	  pOtherCar->GetModelInfo()->GetColModel()->boundingSphere.radius -
+	  pVehicle->GetModelInfo()->GetColModel()->boundingSphere.radius < distance)
+		return;
+	CVector2D forward = pVehicle->GetForward();
+	forward.Normalise();
+	float forwardAngle = CGeneral::GetATanOfXY(forward.x, forward.y);
+	float angleDiff = angleBetweenVehicles - forwardAngle;
+	float lenProjection = ABS(pOtherCar->GetColModel()->boundingBox.max.y * sin(angleDiff));
+	float widthProjection = ABS(pOtherCar->GetColModel()->boundingBox.max.x * cos(angleDiff));
+	float lengthToEvade = (2.0f * (lenProjection + widthProjection) + 2.4f * pVehicle->GetColModel()->boundingBox.max.x) / distance;
+	float diffToLeftAngle = LimitRadianAngle(angleBetweenVehicles - *pAngleToWeaveLeft);
+	diffToLeftAngle = ABS(diffToLeftAngle);
+	float angleToWeave = lengthToEvade / 2;
+	if (diffToLeftAngle < angleToWeave){
+		*pAngleToWeaveLeft = angleBetweenVehicles - angleToWeave;
+		while (*pAngleToWeaveLeft < -PI)
+			*pAngleToWeaveLeft += TWOPI;
+	}
+	float diffToRightAngle = LimitRadianAngle(angleBetweenVehicles - *pAngleToWeaveRight);
+	diffToRightAngle = ABS(diffToRightAngle);
+	if (diffToRightAngle < angleToWeave){
+		*pAngleToWeaveRight = angleBetweenVehicles + angleToWeave;
+		while (*pAngleToWeaveRight > PI)
+			*pAngleToWeaveRight -= TWOPI;
+	}
+}
+
 bool
 CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 {
@@ -1187,4 +1332,5 @@ InjectHook(0x417EC0, &CCarCtrl::ChooseModel, PATCH_JUMP);
 InjectHook(0x418320, &CCarCtrl::RemoveDistantCars, PATCH_JUMP);
 InjectHook(0x418430, &CCarCtrl::PossiblyRemoveVehicle, PATCH_JUMP);
 InjectHook(0x418C10, &CCarCtrl::FindMaximumSpeedForThisCarInTraffic, PATCH_JUMP);
+InjectHook(0x41A590, &CCarCtrl::FindAngleToWeaveThroughTrafficTest, PATCH_JUMP);
 ENDPATCHES

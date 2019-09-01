@@ -3493,12 +3493,15 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		default:
 			break;
 		}
+#ifdef FIX_BUGS
+		/* BUG: if audio is not initialized, this object will not be freed. */
+		if (!DMAudio.IsAudioInitialised())
+			return 0;
+#endif
 		cAudioScriptObject* obj = new cAudioScriptObject();
 		obj->Posn = *(CVector*)&ScriptParams[0];
 		obj->AudioId = ScriptParams[3];
 		obj->AudioEntity = AEHANDLE_NONE;
-		/* BUG: if audio is not initialized, this object will not be freed. */
-		/* Issue needs to be addressed in CreateOneShotScriptObject. */
 		DMAudio.CreateOneShotScriptObject(obj);
 		return 0;
 	}

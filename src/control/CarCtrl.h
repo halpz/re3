@@ -64,6 +64,14 @@ public:
 	static void Init(void);
 	static void SlowCarDownForOtherCar(CEntity*, CVehicle*, float*, float);
 	static float TestCollisionBetween2MovingRects(CVehicle*, CVehicle*, float, float, CVector*, CVector*, uint8);
+	static float FindAngleToWeaveThroughTraffic(CVehicle*, CPhysical*, float, float);
+	static float FindAngleToWeaveThroughTrafficTest(CVehicle*, CPhysical*, float, float);
+	static void WeaveThroughCarsSectorList(CPtrList&, CVehicle*, CPhysical*, float, float, float, float, float*, float*);
+	static void WeaveForOtherCar(CEntity*, CVehicle*, float*, float*);
+	static void WeaveThroughPedsSectorList(CPtrList&, CVehicle*, CPhysical*, float, float, float, float, float*, float*);
+	static void WeaveForPed(CEntity*, CVehicle*, float*, float*);
+	static void WeaveThroughObjectsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float*);
+	static void WeaveForObject(CEntity*, CVehicle*, float*, float*);
 
 	static float GetOffsetOfLaneFromCenterOfRoad(int8 lane, CCarPathLink* pLink)
 	{
@@ -75,6 +83,16 @@ public:
 	{
 		uint32 timeInCurve = CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeEnteredCurve;
 		return (float)timeInCurve / pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve;
+	}
+
+	/* Used very often and differs from CGeneral::LimitRadianAngle */
+	static float LimitRadianAngle(float angle)
+	{
+		while (angle < -PI)
+			angle += TWOPI;
+		while (angle > PI)
+			angle -= TWOPI;
+		return angle;
 	}
 
 	static int32 &NumLawEnforcerCars;
