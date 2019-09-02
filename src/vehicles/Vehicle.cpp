@@ -105,7 +105,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	AutoPilot.m_nCarMission = MISSION_NONE;
 	AutoPilot.m_nTempAction = TEMPACT_NONE;
 	AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
-	AutoPilot.m_flag4 = false;
+	AutoPilot.m_bStayInCurrentLevel = false;
 	AutoPilot.m_flag10 = false;
 }
 
