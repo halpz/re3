@@ -57,5 +57,6 @@ public:
 	bool RestoreGunPosn(void);
 	bool LookInDirection(float phi, float theta);
 	bool LookAtPosition(CVector const& pos);
+	bool RestoreLookAt(void);
 };
 static_assert(sizeof(CPedIK) == 0x28, "CPedIK: error");
