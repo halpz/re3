@@ -26,7 +26,7 @@ public:
 	int32 m_nVisibleMoney;
 	int32 m_nCollectedPackages;
 	int32 m_nTotalPackages;
-	int32 field_188;
+	uint32 m_nLastBumpPlayerCarTimer;
 	int32 m_nSwitchTaxiTime;
 	bool m_bSwitchTaxi;
 	int8 field_197;

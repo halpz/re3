@@ -23,6 +23,13 @@ struct CPedAudioData
 	int m_nMaxRandomDelayTime;
 };
 
+enum FightState : int8 {
+	FIGHTSTATE_MOVE_FINISHED = -2,
+	FIGHTSTATE_JUST_ATTACKED,
+	FIGHTSTATE_NO_MOVE,
+	FIGHTSTATE_1
+};
+
 enum
 {
 	ENDFIGHT_NORMAL,
@@ -256,7 +263,7 @@ public:
 	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
 	uint8 bIsStanding : 1;
 	uint8 m_ped_flagA2 : 1;
-	uint8 bIsAttacking : 1;		// doesn't reset after fist fight, also stores (CTimer::GetTimeInMilliseconds() < m_lastHitTime)
+	uint8 bIsAttacking : 1;		// doesn't reset after fist fight
 	uint8 bIsPointingGunAt : 1;
 	uint8 bIsLooking : 1;
 	uint8 bKeepTryingToLook : 1; // if we can't look somewhere due to unreachable angles
@@ -268,9 +275,9 @@ public:
 	uint8 bIsTalking : 1;
 	uint8 bIsInTheAir : 1;
 	uint8 bIsLanding : 1;
-	uint8 bIsRunning : 1; // not fleeing
-	uint8 m_ped_flagB40 : 1;
-	uint8 m_ped_flagB80 : 1;
+	uint8 bIsRunning : 1; // on some conditions
+	uint8 bHitSomethingLastFrame : 1;
+	uint8 m_ped_flagB80 : 1; // something related with reaction to colliding vehicle
 
 	uint8 m_ped_flagC1 : 1;
 	uint8 bRespondsToThreats : 1;
@@ -283,7 +290,7 @@ public:
 
 	uint8 m_ped_flagD1 : 1;	// so far only used for reaction type to fire/explosion
 	uint8 m_ped_flagD2 : 1; // set when event has been seen
-	uint8 m_ped_flagD4 : 1;
+	uint8 m_ped_flagD4 : 1; // so far only creates blood pool in hands up state
 	uint8 m_ped_flagD8 : 1;
 	uint8 bIsPedDieAnimPlaying : 1;
 	uint8 bUsePedNodeSeek : 1;
@@ -294,12 +301,12 @@ public:
 	uint8 m_ped_flagE2 : 1;
 	uint8 bNotAllowedToDuck : 1;
 	uint8 bCrouchWhenShooting : 1;
-	uint8 bIsDucking : 1;	// set if you don't want ped to attack
+	uint8 bIsDucking : 1;
 	uint8 bGetUpAnimStarted : 1;
 	uint8 bDoBloodyFootprints : 1;
 	uint8 m_ped_flagE80 : 1;
 
-	uint8 m_ped_flagF1 : 1;
+	uint8 bWanderPathAfterExitingCar : 1;
 	uint8 m_ped_flagF2 : 1;
 	uint8 m_ped_flagF4 : 1;
 	uint8 m_ped_flagF8 : 1;
@@ -311,18 +318,18 @@ public:
 	uint8 m_ped_flagG1 : 1;
 	uint8 m_ped_flagG2 : 1;
 	uint8 m_ped_flagG4 : 1;
-	uint8 m_ped_flagG8 : 1; // ped starts to go somewhere when set
+	uint8 bStartWanderPathOnFoot : 1; // exits the car if he's in it, reset after path found
 	uint8 m_ped_flagG10 : 1;
 	uint8 m_ped_flagG20 : 1;
 	uint8 m_ped_flagG40 : 1;
-	uint8 m_ped_flagG80 : 1;
+	uint8 bFadeOut : 1;
 
 	uint8 m_ped_flagH1 : 1;
 	uint8 m_ped_flagH2 : 1;
 	uint8 m_ped_flagH4 : 1;
 	uint8 bClearObjective : 1;
 	uint8 m_ped_flagH10 : 1;
-	uint8 m_ped_flagH20 : 1;
+	uint8 m_ped_flagH20 : 1; // set if our own vehicle damaged us. I don't know how is that possible
 	uint8 m_ped_flagH40 : 1;
 	uint8 m_ped_flagH80 : 1;
 
@@ -430,7 +437,7 @@ public:
 	CVector m_vecHitLastPos;
 	PedFightMoves m_lastFightMove;
 	uint8 m_fightButtonPressure;
-	int8 m_fightUnk2;	// TODO
+	FightState m_fightState;
 	bool m_takeAStepAfterAttack;
 	uint8 pad_4B3;
 	CFire *m_pFire;
@@ -442,14 +449,14 @@ public:
 	uint32 m_lookTimer;
 	uint32 m_standardTimer;
 	uint32 m_attackTimer;
-	uint32 m_lastHitTime; // obviously not correct
+	uint32 m_shootTimer; // shooting is a part of attack
 	uint32 m_hitRecoverTimer;
 	uint32 m_objectiveTimer;
 	uint32 m_duckTimer;
 	uint32 m_duckAndCoverTimer;
 	int32 m_bloodyFootprintCount;
 	uint8 m_panicCounter;
-	uint8 m_deadBleeding;
+	bool m_deadBleeding;
 	int8 m_bodyPartBleeding;		// PedNode
 	uint8 m_field_4F3;
 	CPed *m_nearPeds[10];
@@ -519,7 +526,7 @@ public:
 	void CalculateNewOrientation(void);
 	float WorkOutHeadingForMovingFirstPerson(float);
 	void CalculateNewVelocity(void);
-	bool CanPedJumpThis(int32);
+	bool CanPedJumpThis(CEntity*);
 	bool CanSeeEntity(CEntity*, float);
 	void RestorePreviousObjective(void);
 	void SetIdle(void);
@@ -629,6 +636,16 @@ public:
 	void Mug(void);
 	void MoveHeadToLook(void);
 	void Pause(void);
+	void ProcessBuoyancy(void);
+	bool ServiceTalkingWhenDead(void);
+	void ServiceTalking(void);
+	void SetJump(void);
+	void UpdatePosition(void);
+	void WanderRange(void);
+	void WanderPath(void);
+	void ReactToPointGun(CEntity*);
+	void SeekCar(void);
+	void SeekBoatPosition(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -694,6 +711,9 @@ public:
 	void Fall(void);
 	bool IsPedShootable(void);
 	void Look(void);
+	void SetInTheAir(void);
+	void RestoreHeadPosition(void);
+	void PointGunAt(void);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
@@ -708,7 +728,7 @@ public:
 	static bool &bNastyLimbsCheat;
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;
-	static CVector2D &ms_vec2DFleePosition;
+	static CVector2D ms_vec2DFleePosition;
 	static CPedAudioData (&CommentWaitTime)[38];
 
 #ifndef MASTER
