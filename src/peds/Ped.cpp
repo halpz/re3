@@ -134,8 +134,8 @@ static char ObjectiveText[34][28] = {
 	"Mug Char",
 };
 
-static char StateText[56][18] = {
-	"None",	// 1
+static char StateText[57][18] = {
+	"None",
 	"Idle",
 	"Look Entity",
 	"Look Heading",
@@ -167,8 +167,9 @@ static char StateText[56][18] = {
 	"Buy IceCream",
 	"Investigate",
 	"Step away",
-	"STATES_NO_AI",
 	"On Fire",
+	"Unknown",
+	"STATES_NO_AI",
 	"Jump",
 	"Fall",
 	"GetUp",
@@ -312,16 +313,14 @@ CPed::~CPed(void)
 		if (m_pMyVehicle->pDriver == this)
 			m_pMyVehicle->pDriver = nil;
 		else {
-			for (int i = 0; i < m_pMyVehicle->m_nNumMaxPassengers; i++) {
-				if (m_pMyVehicle->pPassengers[i] == this)
-					m_pMyVehicle->pPassengers[i] = nil;
-			}
+			// FIX: Passenger counter now decreasing after removing ourself from vehicle.
+			m_pMyVehicle->RemovePassenger(this);
 		}
 		if (m_nPedState == PED_EXIT_CAR || m_nPedState == PED_DRAG_FROM_CAR)
 			m_pMyVehicle->m_nGettingOutFlags &= ~door_flag;
 		bInVehicle = false;
 		m_pMyVehicle = nil;
-	}else if (m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK){
+	} else if (m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK){
 		QuitEnteringCar();
 	}
 	if (m_pFire)
@@ -495,7 +494,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagF4 = false;
 	m_ped_flagF8 = false;
 	bWillBeQuickJacked = false;
-	m_ped_flagF20 = false;
+	bCancelEnteringCar = false;
 	m_ped_flagF40 = false;
 	bDuckAndCover = false;
 
@@ -1498,12 +1497,7 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 		if (ped->m_nPedType == PEDTYPE_COP && vehicle->IsLawEnforcementVehicle())
 			vehicle->ChangeLawEnforcerState(false);
 	} else {
-		for (int i = 0; i < vehicle->m_nNumMaxPassengers; i++) {
-			if (vehicle->pPassengers[i] == ped) {
-				vehicle->pPassengers[i] = nil;
-				vehicle->m_nNumPassengers--;
-			}
-		}
+		vehicle->RemovePassenger(ped);
 	}
 
 	ped->bInVehicle = false;
@@ -1861,7 +1855,6 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		GetPosition() = neededPos;
 	} else {
 		CMatrix vehDoorMat(veh->GetMatrix());
-
 		vehDoorMat.GetPosition() += Multiply3x3(vehDoorMat, GetLocalPositionToOpenCarDoor(veh, m_vehEnterType, 0.0f));
 		GetMatrix() = vehDoorMat;
 	}
@@ -8765,7 +8758,7 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 				animToPlay = ANIM_CAR_DOORLOCKED_LHS;
 
 			ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, animToPlay);
-			ped->m_ped_flagF20 = true;
+			ped->bCancelEnteringCar = true;
 			ped->m_pVehicleAnim->SetFinishCallback(PedAnimDoorOpenCB, ped);
 		}
 	}
@@ -9533,12 +9526,31 @@ CPed::ProcessControl(void)
 				case PED_TAXI_PASSENGER:
 				case PED_OPEN_DOOR:
 				case PED_DEAD:
-				case PED_CARJACK:
 				case PED_DRAG_FROM_CAR:
-				case PED_ENTER_CAR:
-				case PED_STEAL_CAR:
 				case PED_EXIT_CAR:
+				case PED_STEAL_CAR:
 					break;
+				case PED_ENTER_CAR:
+				case PED_CARJACK:
+				{
+#ifdef CANCELLABLE_CAR_ENTER
+					if (!IsPlayer() || !m_pVehicleAnim)
+						break;
+
+					int vehAnim = m_pVehicleAnim->animId;
+
+					int16 padWalkX = CPad::GetPad(0)->GetPedWalkLeftRight();
+					int16 padWalkY = CPad::GetPad(0)->GetPedWalkUpDown();
+					if (Abs(padWalkX) > 0.0f || Abs(padWalkY) > 0.0f) {
+						if (vehAnim == ANIM_CAR_OPEN_LHS || vehAnim == ANIM_CAR_OPEN_RHS || vehAnim == ANIM_COACH_OPEN_L || vehAnim == ANIM_COACH_OPEN_R ||
+							vehAnim == ANIM_VAN_OPEN_L || vehAnim == ANIM_VAN_OPEN) {
+							bCancelEnteringCar = true;
+						} else if (vehAnim == ANIM_CAR_ALIGN_LHS || vehAnim == ANIM_CAR_ALIGN_RHS || vehAnim == ANIM_CAR_ALIGNHI_LHS || vehAnim == ANIM_CAR_ALIGNHI_RHS)
+							SetIdle();
+					}
+#endif
+					break;
+				}
 				case PED_FLEE_POS:
 					ms_vec2DFleePosition.x = m_fleeFromPosX;
 					ms_vec2DFleePosition.y = m_fleeFromPosY;
@@ -9641,7 +9653,7 @@ CPed::ProcessControl(void)
 					if (m_pMyVehicle->bLowVehicle) {
 						sitAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_LSIT);
 
-						if (!sitAssoc || sitAssoc->blendAmount >= 1.0f) {
+						if (!sitAssoc || sitAssoc->blendAmount < 1.0f) {
 							break;
 						}
 
@@ -9651,14 +9663,14 @@ CPed::ProcessControl(void)
 					} else {
 						sitAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_SIT);
 
-						if (!sitAssoc || sitAssoc->blendAmount >= 1.0f) {
+						if (!sitAssoc || sitAssoc->blendAmount < 1.0f) {
 							break;
 						}
+
 						lDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_L);
 						rDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_R);
 						lbAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_LB);
-					}
-					if (lbAssoc) {
+
 						if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FIRSTPERSON
 							&& TheCamera.Cams[TheCamera.ActiveCam].DirectionWasLooking == LOOKING_LEFT) {
 							lbAssoc->blendDelta = -1000.0f;
@@ -9676,8 +9688,7 @@ CPed::ProcessControl(void)
 								lDriveAssoc->blendAmount = 0.0f;
 							if (rDriveAssoc)
 								rDriveAssoc->blendAmount = 0.0f;
-							if (lbAssoc)
-								lbAssoc->blendDelta = -4.0f;
+
 						} else if (steerAngle <= 0.0f) {
 							if (lDriveAssoc)
 								lDriveAssoc->blendAmount = 0.0f;
@@ -9689,8 +9700,6 @@ CPed::ProcessControl(void)
 							else
 								CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_R);
 
-							if (lbAssoc)
-								lbAssoc->blendDelta = -4.0f;
 						} else {
 							if (rDriveAssoc)
 								rDriveAssoc->blendAmount = 0.0f;
@@ -9701,10 +9710,10 @@ CPed::ProcessControl(void)
 								CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_LOW_L);
 							else
 								CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_L);
-
-							if (lbAssoc)
-								lbAssoc->blendDelta = -4.0f;
 						}
+
+						if (lbAssoc)
+							lbAssoc->blendDelta = -4.0f;
 					} else {
 
 						if ((TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_FIRSTPERSON
