@@ -311,7 +311,7 @@ public:
 	uint8 m_ped_flagF4 : 1;
 	uint8 m_ped_flagF8 : 1;
 	uint8 bWillBeQuickJacked : 1;
-	uint8 m_ped_flagF20 : 1; // set when couldn't open locked car door
+	uint8 bCancelEnteringCar : 1; // after door is opened or couldn't be opened due to it's locked
 	uint8 m_ped_flagF40 : 1;
 	uint8 bDuckAndCover : 1;
 
