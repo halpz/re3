@@ -3668,12 +3668,11 @@ CAutomobile::IsDoorReady(eDoors door)
 	if(Doors[door].IsClosed() || IsDoorMissing(door))
 		return true;
 	int doorflag = 0;
-	// TODO: enum?
 	switch(door){
-	case DOOR_FRONT_LEFT: doorflag = 1; break;
-	case DOOR_FRONT_RIGHT: doorflag = 4; break;
-	case DOOR_REAR_LEFT: doorflag = 2; break;
-	case DOOR_REAR_RIGHT: doorflag = 8; break;
+	case DOOR_FRONT_LEFT: doorflag = CAR_DOOR_FLAG_LF; break;
+	case DOOR_FRONT_RIGHT: doorflag = CAR_DOOR_FLAG_RF; break;
+	case DOOR_REAR_LEFT: doorflag = CAR_DOOR_FLAG_LR; break;
+	case DOOR_REAR_RIGHT: doorflag = CAR_DOOR_FLAG_RR; break;
 	}
 	return (doorflag & m_nGettingInFlags) == 0;
 }
@@ -4076,7 +4075,7 @@ CAutomobile::ProcessAutoBusDoors(void)
 	if(CTimer::GetTimeInMilliseconds() < m_nBusDoorTimerEnd){
 		if(m_nBusDoorTimerEnd != 0 && CTimer::GetTimeInMilliseconds() > m_nBusDoorTimerEnd-500){
 			// close door
-			if(!IsDoorMissing(DOOR_FRONT_LEFT) && (m_nGettingInFlags & 1) == 0){
+			if(!IsDoorMissing(DOOR_FRONT_LEFT) && (m_nGettingInFlags & CAR_DOOR_FLAG_LF) == 0){
 				if(IsDoorClosed(DOOR_FRONT_LEFT)){
 					m_nBusDoorTimerEnd = CTimer::GetTimeInMilliseconds();
 					OpenDoor(CAR_DOOR_LF, DOOR_FRONT_LEFT, 0.0f);
@@ -4086,7 +4085,7 @@ CAutomobile::ProcessAutoBusDoors(void)
 				}
 			}
 
-			if(!IsDoorMissing(DOOR_FRONT_RIGHT) && (m_nGettingInFlags & 4) == 0){
+			if(!IsDoorMissing(DOOR_FRONT_RIGHT) && (m_nGettingInFlags & CAR_DOOR_FLAG_RF) == 0){
 				if(IsDoorClosed(DOOR_FRONT_RIGHT)){
 					m_nBusDoorTimerEnd = CTimer::GetTimeInMilliseconds();
 					OpenDoor(CAR_DOOR_RF, DOOR_FRONT_RIGHT, 0.0f);
@@ -4099,9 +4098,9 @@ CAutomobile::ProcessAutoBusDoors(void)
 	}else{
 		// ended
 		if(m_nBusDoorTimerStart){
-			if(!IsDoorMissing(DOOR_FRONT_LEFT) && (m_nGettingInFlags & 1) == 0)
+			if(!IsDoorMissing(DOOR_FRONT_LEFT) && (m_nGettingInFlags & CAR_DOOR_FLAG_LF) == 0)
 				OpenDoor(CAR_DOOR_LF, DOOR_FRONT_LEFT, 0.0f);
-			if(!IsDoorMissing(DOOR_FRONT_RIGHT) && (m_nGettingInFlags & 4) == 0)
+			if(!IsDoorMissing(DOOR_FRONT_RIGHT) && (m_nGettingInFlags & CAR_DOOR_FLAG_RF) == 0)
 				OpenDoor(CAR_DOOR_RF, DOOR_FRONT_RIGHT, 0.0f);
 			m_nBusDoorTimerStart = 0;
 			m_nBusDoorTimerEnd = 0;

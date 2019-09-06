@@ -308,7 +308,7 @@ public:
 
 	uint8 bWanderPathAfterExitingCar : 1;
 	uint8 m_ped_flagF2 : 1;
-	uint8 m_ped_flagF4 : 1;
+	uint8 m_ped_flagF4 : 1; // Unfinished feature from VC
 	uint8 m_ped_flagF8 : 1;
 	uint8 bWillBeQuickJacked : 1;
 	uint8 bCancelEnteringCar : 1; // after door is opened or couldn't be opened due to it's locked
@@ -637,7 +637,6 @@ public:
 	void MoveHeadToLook(void);
 	void Pause(void);
 	void ProcessBuoyancy(void);
-	bool ServiceTalkingWhenDead(void);
 	void ServiceTalking(void);
 	void SetJump(void);
 	void UpdatePosition(void);
@@ -669,7 +668,7 @@ public:
 	static void PedAnimDoorOpenCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedAnimPullPedOutCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedAnimDoorCloseCB(CAnimBlendAssociation *assoc, void *arg);
-	static void SetInCarCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedSetInCarCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetOutCarCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedAnimAlignCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetDraggedOutCarCB(CAnimBlendAssociation *assoc, void *arg);
@@ -714,6 +713,7 @@ public:
 	void SetInTheAir(void);
 	void RestoreHeadPosition(void);
 	void PointGunAt(void);
+	bool ServiceTalkingWhenDead(void);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }

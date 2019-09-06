@@ -4,6 +4,7 @@
 #include "ModelIndices.h"
 
 WRAPPER void CCopPed::ProcessControl() { EAXJMP(0x4C1400);  }
+WRAPPER void CCopPed::SetArrestPlayer(CPed*) { EAXJMP(0x4C2B00); }
 
 CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 {
