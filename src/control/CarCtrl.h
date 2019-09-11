@@ -15,7 +15,7 @@ enum{
 #define FIX_PATHFIND_BUG
 #endif
 
-#undef FIX_PATHFIND_BUG
+#define USE_TREADABLE_PATHFIND
 
 class CCarCtrl
 {
