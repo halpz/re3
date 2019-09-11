@@ -75,7 +75,6 @@ WRAPPER void CCarCtrl::RemoveFromInterestingVehicleList(CVehicle* v) { EAXJMP(0x
 WRAPPER void CCarCtrl::GenerateEmergencyServicesCar(void) { EAXJMP(0x41FC50); }
 WRAPPER void CCarCtrl::DragCarToPoint(CVehicle*, CVector*) { EAXJMP(0x41D450); }
 WRAPPER void CCarCtrl::Init(void) { EAXJMP(0x41D280); }
-WRAPPER bool CCarCtrl::PickNextNodeToFollowPath(CVehicle*) { EAXJMP(0x41CD50); }
 
 void
 CCarCtrl::GenerateRandomCars()
@@ -1648,7 +1647,7 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 	CPathNode* pTargetNode;
 	int16 numNodes;
 	float distanceToTargetNode;
-#ifdef USE_TREADABLE_PATHFIND
+#ifndef REMOVE_TREADABLE_PATHFIND
 	if (pTarget && pTarget->m_pCurGroundEntity->m_type == ENTITY_TYPE_BUILDING &&
 	  ((CBuilding*)pTarget->m_pCurGroundEntity)->GetIsATreadable() &&
 	  ((CTreadable*)pTarget->m_pCurGroundEntity)->m_nodeIndices[0][0] >= 0){
@@ -1681,7 +1680,7 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 			CVector(targetX, targetY, 0.0f),
 #endif
 			&pTargetNode, &numNodes, 1, pVehicle, &distanceToTargetNode, 999999.9f, -1);
-#ifdef USE_TREADABLE_PATHFIND
+#ifndef REMOVE_TREADABLE_PATHFIND
 	}
 #endif
 	int newNextNode;
@@ -1691,6 +1690,7 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 		nextLink = 0;
 		float lowestAngleChange = 10.0f;
 		int numLinks = pCurNode->numLinks;
+		newNextNode = 0;
 		for (int i = 0; i < numLinks; i++){
 			int conNode = ThePaths.m_connections[i + pCurNode->firstLink];
 			if (conNode == prevNode && i > 1)
@@ -1707,8 +1707,8 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 		}
 	}else{
 		nextLink = 0;
-		int idOfTargetNode = pTargetNode - ThePaths.m_pathNodes;
-		for (int i = pCurNode->firstLink; ThePaths.m_connections[i] != idOfTargetNode; i++, nextLink++)
+		newNextNode = pTargetNode - ThePaths.m_pathNodes;
+		for (int i = pCurNode->firstLink; ThePaths.m_connections[i] != newNextNode; i++, nextLink++)
 			;
 	}
 	CPathNode* pNextPathNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nNextRouteNode];
@@ -1716,6 +1716,7 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 	CCarPathLink* pCurLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
 	pVehicle->AutoPilot.m_nPrevRouteNode = pVehicle->AutoPilot.m_nCurrentRouteNode;
 	pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_nNextRouteNode;
+	pVehicle->AutoPilot.m_nNextRouteNode = newNextNode;
 	pVehicle->AutoPilot.m_nTimeEnteredCurve += pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve;
 	pVehicle->AutoPilot.m_nPreviousPathNodeInfo = pVehicle->AutoPilot.m_nCurrentPathNodeInfo;
 	pVehicle->AutoPilot.m_nCurrentPathNodeInfo = pVehicle->AutoPilot.m_nNextPathNodeInfo;
@@ -1781,6 +1782,90 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 		directionNextLinkX, directionNextLinkY
 	) * (1000.0f / pVehicle->AutoPilot.m_fMaxTrafficSpeed);
 	pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve = max(10, pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve);
+}
+
+bool CCarCtrl::PickNextNodeToFollowPath(CVehicle* pVehicle)
+{
+	int curNode = pVehicle->AutoPilot.m_nNextRouteNode;
+	CPathNode* pCurNode = &ThePaths.m_pathNodes[curNode];
+	CPathNode* pTargetNode;
+	int16 numNodes;
+	float distanceToTargetNode;
+	if (pVehicle->AutoPilot.m_nPathFindNodesCount == 0){
+		ThePaths.DoPathSearch(0, pVehicle->GetPosition(), curNode,
+			pVehicle->AutoPilot.m_vecDestinationCoors, pVehicle->AutoPilot.m_aPathFindNodesInfo,
+			&pVehicle->AutoPilot.m_nPathFindNodesCount, NUM_PATH_NODES_IN_AUTOPILOT,
+			pVehicle, nil, 999999.9f, -1);
+		if (pVehicle->AutoPilot.m_nPathFindNodesCount < 1)
+			return true;
+	}
+	CPathNode* pNextPathNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nNextRouteNode];
+	CCarPathLink* pCurLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
+	pVehicle->AutoPilot.m_nPrevRouteNode = pVehicle->AutoPilot.m_nCurrentRouteNode;
+	pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_nNextRouteNode;
+	pVehicle->AutoPilot.m_nNextRouteNode = pVehicle->AutoPilot.m_aPathFindNodesInfo[0] - ThePaths.m_pathNodes;
+	pVehicle->AutoPilot.RemoveOnePathNode();
+	pVehicle->AutoPilot.m_nTimeEnteredCurve += pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve;
+	pVehicle->AutoPilot.m_nPreviousPathNodeInfo = pVehicle->AutoPilot.m_nCurrentPathNodeInfo;
+	pVehicle->AutoPilot.m_nCurrentPathNodeInfo = pVehicle->AutoPilot.m_nNextPathNodeInfo;
+	pVehicle->AutoPilot.m_nPreviousDirection = pVehicle->AutoPilot.m_nCurrentDirection;
+	pVehicle->AutoPilot.m_nCurrentDirection = pVehicle->AutoPilot.m_nNextDirection;
+	pVehicle->AutoPilot.m_nCurrentLane = pVehicle->AutoPilot.m_nNextLane;
+	int nextLink = 0;
+	for (int i = pCurNode->firstLink; ThePaths.m_connections[i] != pVehicle->AutoPilot.m_nNextRouteNode; i++, nextLink++)
+		;
+	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[nextLink + pCurNode->firstLink]];
+	pVehicle->AutoPilot.m_nNextPathNodeInfo = ThePaths.m_carPathConnections[nextLink + pCurNode->firstLink];
+	uint8 lanesOnNextNode;
+	if (curNode >= pVehicle->AutoPilot.m_nNextRouteNode) {
+		pVehicle->AutoPilot.m_nNextDirection = 1;
+		lanesOnNextNode = pNextLink->numLeftLanes;
+	}
+	else {
+		pVehicle->AutoPilot.m_nNextDirection = -1;
+		lanesOnNextNode = pNextLink->numRightLanes;
+	}
+	float currentPathLinkForwardX = pVehicle->AutoPilot.m_nCurrentDirection * pCurLink->dirX;
+	float currentPathLinkForwardY = pVehicle->AutoPilot.m_nCurrentDirection * pCurLink->dirY;
+	float nextPathLinkForwardX = pVehicle->AutoPilot.m_nNextDirection * pNextLink->dirX;
+	float nextPathLinkForwardY = pVehicle->AutoPilot.m_nNextDirection * pNextLink->dirY;
+	if (lanesOnNextNode >= 0) {
+		CVector2D dist = pNextPathNode->pos - pCurNode->pos;
+		if (dist.MagnitudeSqr() >= SQR(7.0f) && (CGeneral::GetRandomNumber() & 0x600) == 0) {
+			if (CGeneral::GetRandomTrueFalse())
+				pVehicle->AutoPilot.m_nNextLane += 1;
+			else
+				pVehicle->AutoPilot.m_nNextLane -= 1;
+		}
+		pVehicle->AutoPilot.m_nNextLane = min(lanesOnNextNode - 1, pVehicle->AutoPilot.m_nNextLane);
+		pVehicle->AutoPilot.m_nNextLane = max(0, pVehicle->AutoPilot.m_nNextLane);
+	}
+	else {
+		pVehicle->AutoPilot.m_nNextLane = pVehicle->AutoPilot.m_nCurrentLane;
+	}
+	if (pVehicle->AutoPilot.m_bStayInFastLane)
+		pVehicle->AutoPilot.m_nNextLane = 0;
+	CVector positionOnCurrentLinkIncludingLane(
+		pCurLink->posX + GetOffsetOfLaneFromCenterOfRoad(pVehicle->AutoPilot.m_nCurrentLane, pCurLink) * currentPathLinkForwardY,
+		pCurLink->posY - GetOffsetOfLaneFromCenterOfRoad(pVehicle->AutoPilot.m_nCurrentLane, pCurLink) * currentPathLinkForwardX,
+		0.0f);
+	CVector positionOnNextLinkIncludingLane(
+		pNextLink->posX + GetOffsetOfLaneFromCenterOfRoad(pVehicle->AutoPilot.m_nNextLane, pNextLink) * nextPathLinkForwardY,
+		pNextLink->posY - GetOffsetOfLaneFromCenterOfRoad(pVehicle->AutoPilot.m_nNextLane, pNextLink) * nextPathLinkForwardX,
+		0.0f);
+	float directionCurrentLinkX = pCurLink->dirX * pVehicle->AutoPilot.m_nCurrentDirection;
+	float directionCurrentLinkY = pCurLink->dirY * pVehicle->AutoPilot.m_nCurrentDirection;
+	float directionNextLinkX = pNextLink->dirX * pVehicle->AutoPilot.m_nNextDirection;
+	float directionNextLinkY = pNextLink->dirY * pVehicle->AutoPilot.m_nNextDirection;
+	/* We want to make a path between two links that may not have the same forward directions a curve. */
+	pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve = CCurves::CalcSpeedScaleFactor(
+		&positionOnCurrentLinkIncludingLane,
+		&positionOnNextLinkIncludingLane,
+		directionCurrentLinkX, directionCurrentLinkY,
+		directionNextLinkX, directionNextLinkY
+	) * (1000.0f / pVehicle->AutoPilot.m_fMaxTrafficSpeed);
+	pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve = max(10, pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve);
+	return false;
 }
 
 bool

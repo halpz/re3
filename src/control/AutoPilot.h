@@ -2,6 +2,7 @@
 #include "Timer.h"
 
 class CVehicle;
+struct CPathNode;
 
 enum eCarMission : uint8
 {
@@ -87,8 +88,8 @@ public:
 	uint8 m_bStayInFastLane : 1;
 	uint8 m_flag10 : 1;
 	CVector m_vecDestinationCoors;
-	void *m_aPathFindNodesInfo[8];
-	uint16 m_nPathFindNodesCount;
+	CPathNode *m_aPathFindNodesInfo[NUM_PATH_NODES_IN_AUTOPILOT];
+	int16 m_nPathFindNodesCount;
 	CVehicle *m_pTargetCar;
 
 	CAutoPilot(void) {
@@ -118,5 +119,6 @@ public:
 	}
 
 	void ModifySpeed(float);
+	void RemoveOnePathNode();
 };
 static_assert(sizeof(CAutoPilot) == 0x70, "CAutoPilot: error");

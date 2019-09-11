@@ -15,8 +15,6 @@ enum{
 #define FIX_PATHFIND_BUG
 #endif
 
-#define USE_TREADABLE_PATHFIND
-
 class CCarCtrl
 {
 	enum eCarClass {

@@ -434,24 +434,26 @@ CVehicle::UsesSiren(uint32 id)
 bool
 CVehicle::IsVehicleNormal(void)
 {
-	if(pDriver && m_nNumPassengers == 0 && m_status != STATUS_WRECKED){
-		switch(GetModelIndex())
-		case MI_FIRETRUCK:
-		case MI_AMBULAN:
-		case MI_TAXI:
-		case MI_POLICE:
-		case MI_ENFORCER:
-		case MI_BUS:
-		case MI_RHINO:
-		case MI_BARRACKS:
-		case MI_DODO:
-		case MI_COACH:
-		case MI_CABBIE:
-		case MI_RCBANDIT:
-		case MI_BORGNINE:
-			return false;
+	if (!pDriver || m_nNumPassengers != 0 || m_status == STATUS_WRECKED)
+		return false;
+	switch (GetModelIndex()){
+	case MI_FIRETRUCK:
+	case MI_AMBULAN:
+	case MI_TAXI:
+	case MI_POLICE:
+	case MI_ENFORCER:
+	case MI_BUS:
+	case MI_RHINO:
+	case MI_BARRACKS:
+	case MI_DODO:
+	case MI_COACH:
+	case MI_CABBIE:
+	case MI_RCBANDIT:
+	case MI_BORGNINE:
+		return false;
+	default:
+		return true;
 	}
-	return false;
 }
 
 bool
