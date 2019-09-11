@@ -50,6 +50,8 @@
 #define PATH_DIRECTION_RIGHT 2
 #define PATH_DIRECTION_LEFT 4
 
+#define ATTEMPTS_TO_FIND_NEXT_NODE 15
+
 int &CCarCtrl::NumLawEnforcerCars = *(int*)0x8F1B38;
 int &CCarCtrl::NumAmbulancesOnDuty = *(int*)0x885BB0;
 int &CCarCtrl::NumFiretrucksOnDuty = *(int*)0x9411F0;
@@ -1485,7 +1487,7 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 	CPathNode* pNextPathNode;
 	bool goingAgainstOneWayRoad;
 	uint8 direction;
-	for(attempt = 0; attempt < 15; attempt++){
+	for(attempt = 0; attempt < ATTEMPTS_TO_FIND_NEXT_NODE; attempt++){
 		if (attempt != 0){
 			if (pVehicle->AutoPilot.m_nNextRouteNode != prevNode){
 				if (direction & allowedDirections){
@@ -1504,9 +1506,9 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 		pNextLink = &ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[nextLink + pCurPathNode->firstLink]];
 		goingAgainstOneWayRoad = pNextLink->pathNodeIndex == curNode ? pNextLink->numRightLanes == 0 : pNextLink->numLeftLanes == 0;
 	}
-	if (attempt >= 15) {
+	if (attempt >= ATTEMPTS_TO_FIND_NEXT_NODE) {
 		/* If we failed 15 times, then remove dead end and current lane limitations */
-		for (attempt = 0; attempt < 15; attempt++) {
+		for (attempt = 0; attempt < ATTEMPTS_TO_FIND_NEXT_NODE; attempt++) {
 			if (attempt != 0) {
 				if (pVehicle->AutoPilot.m_nNextRouteNode != prevNode) {
 					pNextPathNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nNextRouteNode];
@@ -1522,7 +1524,7 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 			goingAgainstOneWayRoad = pNextLink->pathNodeIndex == curNode ? pNextLink->numRightLanes == 0 : pNextLink->numLeftLanes == 0;
 		}
 	}
-	if (attempt >= 15) {
+	if (attempt >= ATTEMPTS_TO_FIND_NEXT_NODE) {
 		/* If we failed again, remove no U-turn limitation and remove randomness */
 		for (nextLink = 0; nextLink < totalLinks; nextLink++) {
 			pVehicle->AutoPilot.m_nNextRouteNode = ThePaths.m_connections[nextLink + pCurPathNode->firstLink];
