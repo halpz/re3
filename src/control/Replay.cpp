@@ -102,7 +102,7 @@ static void(*CBArray_RE3[])(CAnimBlendAssociation*, void*) =
 {
 	nil, &CPed::PedGetupCB, &CPed::PedStaggerCB, &CPed::PedEvadeCB, &CPed::FinishDieAnimCB,
 	&CPed::FinishedWaitCB, &CPed::FinishLaunchCB, &CPed::FinishHitHeadCB, &CPed::PedAnimGetInCB, &CPed::PedAnimDoorOpenCB,
-	&CPed::PedAnimPullPedOutCB, &CPed::PedAnimDoorCloseCB, &CPed::SetInCarCB, &CPed::PedSetOutCarCB, &CPed::PedAnimAlignCB,
+	&CPed::PedAnimPullPedOutCB, &CPed::PedAnimDoorCloseCB, &CPed::PedSetInCarCB, &CPed::PedSetOutCarCB, &CPed::PedAnimAlignCB,
 	&CPed::PedSetDraggedOutCarCB, &CPed::PedAnimStepOutCarCB, &CPed::PedSetInTrainCB, &CPed::PedSetOutTrainCB, &CPed::FinishedAttackCB,
 	&CPed::FinishFightMoveCB, &PhonePutDownCB, &PhonePickUpCB, &CPed::PedAnimDoorCloseRollingCB, &CPed::FinishJumpCB,
 	&CPed::PedLandCB, &FinishFuckUCB, &CPed::RestoreHeadingRateCB, &CPed::PedSetQuickDraggedOutCarPositionCB, &CPed::PedSetDraggedOutCarPositionCB
