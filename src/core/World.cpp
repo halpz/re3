@@ -1114,7 +1114,7 @@ CWorld::Process(void)
 						movingEnt->bIsStuck = true;
 						if (movingEnt->m_status == STATUS_PLAYER) {
 							printf("STUCK: Final Step: Player Entity %d Is Stuck\n", movingEnt->m_modelIndex);
-							movingEnt->m_vecMoveSpeed *= 3.0f;
+							movingEnt->m_vecMoveSpeed *= 0.3f;
 							movingEnt->ApplyMoveSpeed();
 							movingEnt->ApplyTurnSpeed();
 						}
