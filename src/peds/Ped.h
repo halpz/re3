@@ -304,7 +304,7 @@ public:
 	uint8 bIsDucking : 1;
 	uint8 bGetUpAnimStarted : 1;
 	uint8 bDoBloodyFootprints : 1;
-	uint8 m_ped_flagE80 : 1;
+	uint8 m_ped_flagE80 : 1; // bDontDragMeOutCar? bStayInCarOnJack?
 
 	uint8 bWanderPathAfterExitingCar : 1;
 	uint8 m_ped_flagF2 : 1;
@@ -320,8 +320,8 @@ public:
 	uint8 m_ped_flagG4 : 1;
 	uint8 bStartWanderPathOnFoot : 1; // exits the car if he's in it, reset after path found
 	uint8 m_ped_flagG10 : 1;
-	uint8 m_ped_flagG20 : 1;
-	uint8 m_ped_flagG40 : 1;
+	uint8 bBusJacked : 1;
+	uint8 m_ped_flagG40 : 1; // had to exit car due to someone jacked it from RF door
 	uint8 bFadeOut : 1;
 
 	uint8 m_ped_flagH1 : 1;
@@ -329,7 +329,7 @@ public:
 	uint8 m_ped_flagH4 : 1;
 	uint8 bClearObjective : 1;
 	uint8 m_ped_flagH10 : 1;
-	uint8 m_ped_flagH20 : 1; // set if our own vehicle damaged us. I don't know how is that possible
+	uint8 bCollidedWithMyVehicle : 1;
 	uint8 m_ped_flagH40 : 1;
 	uint8 m_ped_flagH80 : 1;
 
