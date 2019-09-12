@@ -25,7 +25,7 @@ class CCarCtrl
 		SPECIAL,
 		BIG,
 		TAXI,
-		CLASS7,
+		TOTAL_CUSTOM_CLASSES,
 		MAFIA,
 		TRIAD,
 		DIABLO,
@@ -65,7 +65,6 @@ public:
 	static float FindMaximumSpeedForThisCarInTraffic(CVehicle*);
 	static void SlowCarDownForCarsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float);
 	static void SlowCarDownForPedsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float);
-	static void Init(void);
 	static void SlowCarDownForOtherCar(CEntity*, CVehicle*, float*, float);
 	static float TestCollisionBetween2MovingRects(CVehicle*, CVehicle*, float, float, CVector*, CVector*, uint8);
 	static float FindAngleToWeaveThroughTraffic(CVehicle*, CPhysical*, float, float);
@@ -83,6 +82,9 @@ public:
 	static bool PickNextNodeToFollowPath(CVehicle*);
 	static void PickNextNodeRandomly(CVehicle*);
 	static uint8 FindPathDirection(int32, int32, int32);
+	static void Init(void);
+	static void ReInit(void);
+	static bool ThisRoadObjectCouldMove(int16);
 
 	static float GetOffsetOfLaneFromCenterOfRoad(int8 lane, CCarPathLink* pLink)
 	{
@@ -111,14 +113,17 @@ public:
 	static int32 &NumRandomCars;
 	static int32 &NumMissionCars;
 	static int32 &NumParkedCars;
+	static int32 &NumPermanentCars;
 	static bool &bCarsGeneratedAroundCamera;
 	static float &CarDensityMultiplier;
 	static int8 &CountDownToCarsAtStart;
 	static int32 &MaxNumberOfCarsInUse;
 	static uint32 &LastTimeLawEnforcerCreated;
-	static int32 (&TotalNumOfCarsOfRating)[7];
-	static int32 (&NextCarOfRating)[7];
-	static int32 (&CarArrays)[7][MAX_CAR_MODELS_IN_ARRAY];
+	static uint32 &LastTimeFireTruckCreated;
+	static uint32 &LastTimeAmbulanceCreated;
+	static int32 (&TotalNumOfCarsOfRating)[TOTAL_CUSTOM_CLASSES];
+	static int32 (&NextCarOfRating)[TOTAL_CUSTOM_CLASSES];
+	static int32 (&CarArrays)[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 };
 
 extern CVehicle* (&apCarsToKeep)[MAX_CARS_TO_KEEP];

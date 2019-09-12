@@ -60,12 +60,15 @@ float& CCarCtrl::CarDensityMultiplier = *(float*)0x5EC8B4;
 int32 &CCarCtrl::NumMissionCars = *(int32*)0x8F1B54;
 int32 &CCarCtrl::NumRandomCars = *(int32*)0x943118;
 int32 &CCarCtrl::NumParkedCars = *(int32*)0x8F29E0;
+int32 &CCarCtrl::NumPermanentCars = *(int32*)0x8F29F0;
 int8 &CCarCtrl::CountDownToCarsAtStart = *(int8*)0x95CD63;
 int32 &CCarCtrl::MaxNumberOfCarsInUse = *(int32*)0x5EC8B8;
 uint32 &CCarCtrl::LastTimeLawEnforcerCreated = *(uint32*)0x8F5FF0;
+uint32 &CCarCtrl::LastTimeFireTruckCreated = *(uint32*)0x941450;
+uint32 &CCarCtrl::LastTimeAmbulanceCreated = *(uint32*)0x880F5C;
 int32 (&CCarCtrl::TotalNumOfCarsOfRating)[7] = *(int32(*)[7])*(uintptr*)0x8F1A60;
-int32 (&CCarCtrl::NextCarOfRating)[7] = *(int32(*)[7])*(uintptr*)0x9412AC;
-int32 (&CCarCtrl::CarArrays)[7][MAX_CAR_MODELS_IN_ARRAY] = *(int32(*)[7][MAX_CAR_MODELS_IN_ARRAY])*(uintptr*)0x6EB860;
+int32 (&CCarCtrl::NextCarOfRating)[TOTAL_CUSTOM_CLASSES] = *(int32(*)[7])*(uintptr*)0x9412AC;
+int32 (&CCarCtrl::CarArrays)[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY] = *(int32(*)[7][MAX_CAR_MODELS_IN_ARRAY])*(uintptr*)0x6EB860;
 CVehicle* (&apCarsToKeep)[MAX_CARS_TO_KEEP] = *(CVehicle*(*)[MAX_CARS_TO_KEEP])*(uintptr*)0x70D830;
 
 WRAPPER void CCarCtrl::SwitchVehicleToRealPhysics(CVehicle*) { EAXJMP(0x41F7F0); }
@@ -75,8 +78,6 @@ WRAPPER void CCarCtrl::JoinCarWithRoadSystem(CVehicle*) { EAXJMP(0x41F820); }
 WRAPPER void CCarCtrl::SteerAICarWithPhysics(CVehicle*) { EAXJMP(0x41DA60); }
 WRAPPER void CCarCtrl::RemoveFromInterestingVehicleList(CVehicle* v) { EAXJMP(0x41F7A0); }
 WRAPPER void CCarCtrl::GenerateEmergencyServicesCar(void) { EAXJMP(0x41FC50); }
-WRAPPER void CCarCtrl::DragCarToPoint(CVehicle*, CVector*) { EAXJMP(0x41D450); }
-WRAPPER void CCarCtrl::Init(void) { EAXJMP(0x41D280); }
 
 void
 CCarCtrl::GenerateRandomCars()
@@ -533,7 +534,7 @@ CCarCtrl::GenerateOneRandomCar()
 
 int32
 CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
-	int32 model = -1;;
+	int32 model = -1;
 	while (model == -1 || !CStreaming::HasModelLoaded(model)){
 		int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
 		if (rnd < pZone->carThreshold[0])
@@ -1790,9 +1791,6 @@ bool CCarCtrl::PickNextNodeToFollowPath(CVehicle* pVehicle)
 {
 	int curNode = pVehicle->AutoPilot.m_nNextRouteNode;
 	CPathNode* pCurNode = &ThePaths.m_pathNodes[curNode];
-	CPathNode* pTargetNode;
-	int16 numNodes;
-	float distanceToTargetNode;
 	if (pVehicle->AutoPilot.m_nPathFindNodesCount == 0){
 		ThePaths.DoPathSearch(0, pVehicle->GetPosition(), curNode,
 			pVehicle->AutoPilot.m_vecDestinationCoors, pVehicle->AutoPilot.m_aPathFindNodesInfo,
@@ -1870,8 +1868,121 @@ bool CCarCtrl::PickNextNodeToFollowPath(CVehicle* pVehicle)
 	return false;
 }
 
-bool
-CCarCtrl::MapCouldMoveInThisArea(float x, float y)
+void CCarCtrl::Init(void)
+{
+	NumRandomCars = 0;
+	NumLawEnforcerCars = 0;
+	NumMissionCars = 0;
+	NumParkedCars = 0;
+	NumPermanentCars = 0;
+	NumAmbulancesOnDuty = 0;
+	NumFiretrucksOnDuty = 0;
+	LastTimeFireTruckCreated = 0;
+	LastTimeAmbulanceCreated = 0;
+	bCarsGeneratedAroundCamera = false;
+	CountDownToCarsAtStart = 2;
+	CarDensityMultiplier = 1.0f;
+	for (int i = 0; i < MAX_CARS_TO_KEEP; i++)
+		apCarsToKeep[i] = nil;
+	for (int i = 0; i < TOTAL_CUSTOM_CLASSES; i++){
+		for (int j = 0; j < MAX_CAR_MODELS_IN_ARRAY; j++)
+			CarArrays[i][j] = 0;
+		NextCarOfRating[i] = 0;
+		TotalNumOfCarsOfRating[i] = 0;
+	}
+}
+
+void CCarCtrl::ReInit(void)
+{
+	NumRandomCars = 0;
+	NumLawEnforcerCars = 0;
+	NumMissionCars = 0;
+	NumParkedCars = 0;
+	NumPermanentCars = 0;
+	NumAmbulancesOnDuty = 0;
+	NumFiretrucksOnDuty = 0;
+	CountDownToCarsAtStart = 2;
+	CarDensityMultiplier = 1.0f;
+	for (int i = 0; i < MAX_CARS_TO_KEEP; i++)
+		apCarsToKeep[i] = nil;
+	for (int i = 0; i < TOTAL_CUSTOM_CLASSES; i++)
+		NextCarOfRating[i] = 0;
+}
+
+void CCarCtrl::DragCarToPoint(CVehicle* pVehicle, CVector* pPoint)
+{
+	CVector2D posBehind = (CVector2D)pVehicle->GetPosition() - 3 * pVehicle->GetForward() / 2;
+	CVector2D posTarget = *pPoint;
+	CVector2D direction = posBehind - posTarget;
+	CVector2D midPos = posTarget + direction * 3 / direction.Magnitude();
+	float actualAheadZ;
+	float actualBehindZ;
+	CColPoint point;
+	CEntity* pRoadObject;
+	if (CCollision::IsStoredPoluStillValidVerticalLine(CVector(posTarget.x, posTarget.y, pVehicle->GetPosition().z - 3.0f),
+	  pVehicle->GetPosition().z - 3.0f, point, &pVehicle->m_aCollPolys[0])){
+		actualAheadZ = point.point.z;
+	}else if (CWorld::ProcessVerticalLine(CVector(posTarget.x, posTarget.y, pVehicle->GetPosition().z + 1.5f),
+	  pVehicle->GetPosition().z - 2.0f, point,
+	  pRoadObject, true, false, false, false, false, false, &pVehicle->m_aCollPolys[0])){
+		actualAheadZ = point.point.z;
+		pVehicle->m_pCurGroundEntity = pRoadObject;
+		if (ThisRoadObjectCouldMove(pRoadObject->GetModelIndex()))
+			pVehicle->m_aCollPolys[0].valid = false;
+	}else if (CWorld::ProcessVerticalLine(CVector(posTarget.x, posTarget.y, pVehicle->GetPosition().z + 3.0f),
+	  pVehicle->GetPosition().z - 3.0f, point,
+	  pRoadObject, true, false, false, false, false, false, &pVehicle->m_aCollPolys[0])) {
+		actualAheadZ = point.point.z;
+		pVehicle->m_pCurGroundEntity = pRoadObject;
+		if (ThisRoadObjectCouldMove(pRoadObject->GetModelIndex()))
+			pVehicle->m_aCollPolys[0].valid = false;
+	}else{
+		actualAheadZ = pVehicle->m_fMapObjectHeightAhead;
+	}
+	pVehicle->m_fMapObjectHeightAhead = actualAheadZ;
+	if (CCollision::IsStoredPoluStillValidVerticalLine(CVector(midPos.x, midPos.y, pVehicle->GetPosition().z - 3.0f),
+	  pVehicle->GetPosition().z - 3.0f, point, &pVehicle->m_aCollPolys[1])){
+		actualBehindZ = point.point.z;
+	}else if (CWorld::ProcessVerticalLine(CVector(midPos.x, midPos.y, pVehicle->GetPosition().z + 1.5f),
+	  pVehicle->GetPosition().z - 2.0f, point,
+	  pRoadObject, true, false, false, false, false, false, &pVehicle->m_aCollPolys[1])){
+		actualBehindZ = point.point.z;
+		pVehicle->m_pCurGroundEntity = pRoadObject;
+		if (ThisRoadObjectCouldMove(pRoadObject->GetModelIndex()))
+			pVehicle->m_aCollPolys[1].valid = false;
+	}else if (CWorld::ProcessVerticalLine(CVector(midPos.x, midPos.y, pVehicle->GetPosition().z + 3.0f),
+	  pVehicle->GetPosition().z - 3.0f, point,
+	  pRoadObject, true, false, false, false, false, false, &pVehicle->m_aCollPolys[1])){
+		actualBehindZ = point.point.z;
+		pVehicle->m_pCurGroundEntity = pRoadObject;
+		if (ThisRoadObjectCouldMove(pRoadObject->GetModelIndex()))
+			pVehicle->m_aCollPolys[0].valid = false;
+	}else{
+		actualBehindZ = pVehicle->m_fMapObjectHeightBehind;
+	}
+	pVehicle->m_fMapObjectHeightBehind = actualBehindZ;
+	float angleZ = Atan2((actualAheadZ - actualBehindZ) / 3, 1.0f);
+	float cosZ = Cos(angleZ);
+	float sinZ = Sin(angleZ);
+	pVehicle->GetRight() = CVector(posTarget.y - midPos.y, -(posTarget.x - midPos.x), 0.0f) / 3;
+	pVehicle->GetForward() = CVector(-cosZ * pVehicle->GetRight().y, cosZ * pVehicle->GetRight().x, sinZ);
+	pVehicle->GetUp() = CrossProduct(pVehicle->GetRight(), pVehicle->GetForward());
+	pVehicle->GetPosition() = (CVector(midPos.x, midPos.y, actualBehindZ)
+		+ CVector(posTarget.x, posTarget.y, actualAheadZ)) / 2;
+	pVehicle->GetPosition().z += pVehicle->GetHeightAboveRoad();
+	debug("right: %f %f %f\n", pVehicle->GetRight().x, pVehicle->GetRight().y, pVehicle->GetRight().z);
+	debug("forward: %f %f %f\n", pVehicle->GetForward().x, pVehicle->GetForward().y, pVehicle->GetForward().z);
+	debug("up: %f %f %f\n", pVehicle->GetUp().x, pVehicle->GetUp().y, pVehicle->GetUp().z);
+	debug("pos: %f %f %f\n", pVehicle->GetPosition().x, pVehicle->GetPosition().y, pVehicle->GetPosition().z);
+}
+
+
+bool CCarCtrl::ThisRoadObjectCouldMove(int16 mi)
+{
+	return mi == MI_BRIDGELIFT || mi == MI_BRIDGEROADSEGMENT;
+}
+
+bool CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 {
 	// bridge moves up and down
 	return x > -342.0f && x < -219.0f &&
@@ -1886,4 +1997,6 @@ InjectHook(0x418430, &CCarCtrl::PossiblyRemoveVehicle, PATCH_JUMP);
 InjectHook(0x418C10, &CCarCtrl::FindMaximumSpeedForThisCarInTraffic, PATCH_JUMP);
 InjectHook(0x41A590, &CCarCtrl::FindAngleToWeaveThroughTraffic, PATCH_JUMP);
 InjectHook(0x41BA50, &CCarCtrl::PickNextNodeAccordingStrategy, PATCH_JUMP);
+InjectHook(0x41D280, &CCarCtrl::Init, PATCH_JUMP);
+InjectHook(0x41D3B0, &CCarCtrl::ReInit, PATCH_JUMP);
 ENDPATCHES

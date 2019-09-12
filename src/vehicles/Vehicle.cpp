@@ -90,8 +90,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nAlarmState = 0;
 	m_nDoorLock = CARLOCK_UNLOCKED;
 	m_nLastWeaponDamage = -1;
-	field_220 = 0.0;
-	field_21C = field_220;
+	m_fMapObjectHeightAhead = m_fMapObjectHeightBehind = 0.0f;
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
 	if(m_audioEntityId)
 		DMAudio.SetEntityStatus(m_audioEntityId, true);
