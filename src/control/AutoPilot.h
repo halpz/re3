@@ -2,6 +2,7 @@
 #include "Timer.h"
 
 class CVehicle;
+struct CPathNode;
 
 enum eCarMission : uint8
 {
@@ -60,9 +61,9 @@ enum eCarDrivingStyle : uint8
 
 class CAutoPilot {
 public:
-	uint32 m_nCurrentRouteNode;
-	uint32 m_nNextRouteNode;
-	uint32 m_nPrevRouteNode;
+	int32 m_nCurrentRouteNode;
+	int32 m_nNextRouteNode;
+	int32 m_nPrevRouteNode;
 	uint32 m_nTimeEnteredCurve;
 	uint32 m_nTimeToSpendOnCurrentCurve;
 	uint32 m_nCurrentPathNodeInfo;
@@ -83,12 +84,12 @@ public:
 	uint8 m_nCruiseSpeed;
 	uint8 m_bSlowedDownBecauseOfCars : 1;
 	uint8 m_bSlowedDownBecauseOfPeds : 1;
-	uint8 m_flag4 : 1;
-	uint8 m_flag8 : 1;
+	uint8 m_bStayInCurrentLevel : 1;
+	uint8 m_bStayInFastLane : 1;
 	uint8 m_flag10 : 1;
 	CVector m_vecDestinationCoors;
-	void *m_aPathFindNodesInfo[8];
-	uint16 m_nPathFindNodesCount;
+	CPathNode *m_aPathFindNodesInfo[NUM_PATH_NODES_IN_AUTOPILOT];
+	int16 m_nPathFindNodesCount;
 	CVehicle *m_pTargetCar;
 
 	CAutoPilot(void) {
@@ -114,9 +115,10 @@ public:
 		m_pTargetCar = 0;
 		m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 		m_nAntiReverseTimer = m_nTimeToStartMission;
-		m_flag8 = false;
+		m_bStayInFastLane = false;
 	}
 
 	void ModifySpeed(float);
+	void RemoveOnePathNode();
 };
 static_assert(sizeof(CAutoPilot) == 0x70, "CAutoPilot: error");

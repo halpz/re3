@@ -11,6 +11,10 @@ enum{
 
 #define LANE_WIDTH 5.0f
 
+#ifdef FIX_BUGS
+#define FIX_PATHFIND_BUG
+#endif
+
 class CCarCtrl
 {
 	enum eCarClass {
@@ -56,7 +60,7 @@ public:
 	static bool IsThisVehicleInteresting(CVehicle*);
 	static int32 CountCarsOfType(int32 mi);
 	static void SlowCarOnRailsDownForTrafficAndLights(CVehicle*);
-	static void PickNextNodeAccordingStrategy(CVehicle*);
+	static bool PickNextNodeAccordingStrategy(CVehicle*);
 	static void DragCarToPoint(CVehicle*, CVector*);
 	static float FindMaximumSpeedForThisCarInTraffic(CVehicle*);
 	static void SlowCarDownForCarsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float);
@@ -71,6 +75,14 @@ public:
 	static void WeaveForPed(CEntity*, CVehicle*, float*, float*);
 	static void WeaveThroughObjectsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float*);
 	static void WeaveForObject(CEntity*, CVehicle*, float*, float*);
+#ifdef FIX_PATHFIND_BUG
+	static void PickNextNodeToChaseCar(CVehicle*, float, float, float, CVehicle*);
+#else
+	static void PickNextNodeToChaseCar(CVehicle*, float, float, CVehicle*);
+#endif
+	static bool PickNextNodeToFollowPath(CVehicle*);
+	static void PickNextNodeRandomly(CVehicle*);
+	static uint8 FindPathDirection(int32, int32, int32);
 
 	static float GetOffsetOfLaneFromCenterOfRoad(int8 lane, CCarPathLink* pLink)
 	{

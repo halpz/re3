@@ -71,7 +71,9 @@ enum Config {
 	NUMPICKUPS = 336,
 	NUMEVENTS = 64,
 
-	NUM_CARGENS = 160
+	NUM_CARGENS = 160,
+
+	NUM_PATH_NODES_IN_AUTOPILOT = 8,
 };
 
 // We'll use this once we're ready to become independent of the game
@@ -132,3 +134,4 @@ enum Config {
 #define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher
 #define ANIMATE_PED_COL_MODEL
 #define CANCELLABLE_CAR_ENTER
+//#define REMOVE_TREADABLE_PATHFIND
