@@ -114,6 +114,10 @@ public:
 	static float GetWorldX(int x) { return x*SECTOR_SIZE_X + WORLD_MIN_X; }
 	static float GetWorldY(int y) { return y*SECTOR_SIZE_Y + WORLD_MIN_Y; }
 
+	static void RemoveEntityInsteadOfProcessingIt(CEntity* ent);
+	static void RemoveFallenPeds();
+	static void RemoveFallenCars();
+
 	static void Initialise();
 	static void ShutDown();
 	static void Process();

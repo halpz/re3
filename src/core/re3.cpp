@@ -141,10 +141,9 @@ SpawnCar(int id)
 
 static void
 LetThemFollowYou(void) {
-	CPed* player = (CPed*) FindPlayerPed();
+	CPed *player = (CPed*) FindPlayerPed();
 	for (int i = 0; i < player->m_numNearPeds; i++) {
-
-		CPed* nearPed = player->m_nearPeds[i];
+		CPed *nearPed = player->m_nearPeds[i];
 		if (nearPed && !nearPed->IsPlayer()) {
 			nearPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, (void*)player);
 			nearPed->m_pedFormation = rand() & 7;

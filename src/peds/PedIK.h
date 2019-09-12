@@ -31,7 +31,7 @@ class CPedIK
 public:
 	enum {
 		FLAG_1 = 1,
-		LOOKING = 2,
+		LOOKING = 2, // looking while in car?
 		AIMS_WITH_ARM = 4,
 	};
 
@@ -44,6 +44,8 @@ public:
 
 	static LimbMovementInfo &ms_torsoInfo;
 	static LimbMovementInfo &ms_headInfo;
+	static LimbMovementInfo &ms_upperArmInfo;
+	static LimbMovementInfo &ms_lowerArmInfo;
 
 	CPedIK(CPed *ped);
 	bool PointGunInDirection(float phi, float theta);
