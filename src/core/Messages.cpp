@@ -15,6 +15,7 @@ WRAPPER void CMessages::AddMessageJumpQ(wchar* key, uint32 time, uint16 pos) { E
 WRAPPER void CMessages::AddMessageSoon(wchar* key, uint32 time, uint16 pos) { EAXJMP(0x529AF0); }
 WRAPPER void CMessages::ClearMessages() { EAXJMP(0x529CE0); }
 WRAPPER void CMessages::Init() { EAXJMP(0x529310); }
+WRAPPER void CMessages::Process() { EAXJMP(0x529580); }
 tPreviousBrief *CMessages::PreviousBriefs = (tPreviousBrief *)0x713C08;
 tMessage *CMessages::BriefMessages = (tMessage *)0x8786E0;
 tBigMessage *CMessages::BIGMessages = (tBigMessage *)0x773628;

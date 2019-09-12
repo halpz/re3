@@ -8,6 +8,7 @@
 WRAPPER void CPlayerInfo::MakePlayerSafe(bool) { EAXJMP(0x4A1400); }
 WRAPPER void CPlayerInfo::LoadPlayerSkin() { EAXJMP(0x4A1700); }
 WRAPPER void CPlayerInfo::AwardMoneyForExplosion(CVehicle *vehicle) { EAXJMP(0x4A15F0); }
+WRAPPER void CPlayerInfo::Process(void) { EAXJMP(0x49FD30); }
 
 void CPlayerInfo::SetPlayerSkin(char *skin)
 {

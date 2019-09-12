@@ -714,6 +714,7 @@ public:
 	void RestoreHeadPosition(void);
 	void PointGunAt(void);
 	bool ServiceTalkingWhenDead(void);
+	void SetPedPositionInTrain(void);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }

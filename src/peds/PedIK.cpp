@@ -13,6 +13,8 @@ WRAPPER bool CPedIK::RestoreLookAt(void) { EAXJMP(0x4ED810); }
 // TODO: These are hardcoded into exe, reverse it.
 LimbMovementInfo &CPedIK::ms_torsoInfo = *(LimbMovementInfo*)0x5F9F8C;
 LimbMovementInfo &CPedIK::ms_headInfo = *(LimbMovementInfo*)0x5F9F5C;
+LimbMovementInfo &CPedIK::ms_upperArmInfo = *(LimbMovementInfo*)0x5F9FA4;
+LimbMovementInfo &CPedIK::ms_lowerArmInfo = *(LimbMovementInfo*)0x5F9FBC;
 
 CPedIK::CPedIK(CPed *ped)
 {

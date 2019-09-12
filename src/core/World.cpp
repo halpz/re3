@@ -12,6 +12,13 @@
 #include "TempColModels.h"
 #include "World.h"
 #include "ModelIndices.h"
+#include "References.h"
+#include "CutsceneMgr.h"
+#include "Record.h"
+#include "RpAnimBlend.h"
+#include "Messages.h"
+#include "Replay.h"
+#include "Population.h"
 
 CPtrList *CWorld::ms_bigBuildingsList = (CPtrList*)0x6FAB60;
 CPtrList &CWorld::ms_listMovingEntityPtrs = *(CPtrList*)0x8F433C;
@@ -31,7 +38,6 @@ bool &CWorld::bProcessCutsceneOnly = *(bool*)0x95CD8B;
 bool &CWorld::bDoingCarCollisions = *(bool*)0x95CD8C;
 bool &CWorld::bIncludeCarTyres = *(bool*)0x95CDAA;
 
-WRAPPER void CWorld::Process(void) { EAXJMP(0x4B1A60); }
 WRAPPER void CWorld::ShutDown(void) { EAXJMP(0x4AE450); }
 WRAPPER void CWorld::RemoveReferencesToDeletedObject(CEntity*) { EAXJMP(0x4B3BF0); }
 WRAPPER void CWorld::FindObjectsKindaColliding(const CVector &, float, bool, int16*, int16, CEntity **, bool, bool, bool, bool, bool){ EAXJMP(0x4B2A30); }
@@ -930,6 +936,244 @@ FindPlayerHeading(void)
 	return CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetForward().Heading();
 }
 
+void
+CWorld::RemoveEntityInsteadOfProcessingIt(CEntity* ent)
+{
+	if (ent->IsPed()) {
+		if (FindPlayerPed() == ent)
+			CWorld::Remove(ent);
+		else
+			CPopulation::RemovePed(ent);
+	} else {
+		CWorld::Remove(ent);
+		delete ent;
+	}
+}
+
+void
+CWorld::RemoveFallenPeds(void)
+{
+	int poolSize = CPools::GetPedPool()->GetSize();
+	for(int poolIndex = poolSize-1; poolIndex >= 0; poolIndex--) {
+		CPed *ped = CPools::GetPedPool()->GetSlot(poolIndex);
+		if (ped) {
+			if (ped->GetPosition().z < -100.0f) {
+				if (ped->CharCreatedBy != RANDOM_CHAR || ped->IsPlayer()) {
+					int closestNode = ThePaths.FindNodeClosestToCoors(ped->GetPosition(), PATH_PED, 999999.9f, false, false);
+					CVector newPos = ThePaths.m_pathNodes[closestNode].pos;
+					newPos.z += 2.0f;
+					ped->Teleport(newPos);
+					ped->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+				} else {
+					CPopulation::RemovePed(ped);
+				}
+			}
+		}
+	}
+}
+
+void
+CWorld::RemoveFallenCars(void)
+{
+	int poolSize = CPools::GetVehiclePool()->GetSize();
+	for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
+		CVehicle* veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
+		if (veh) {
+			if (veh->GetPosition().z < -100.0f) {
+				if (veh->VehicleCreatedBy == MISSION_VEHICLE || veh == FindPlayerVehicle() || (veh->pDriver && veh->pDriver->IsPlayer())) {
+					int closestNode = ThePaths.FindNodeClosestToCoors(veh->GetPosition(), PATH_CAR, 999999.9f, false, false);
+					CVector newPos = ThePaths.m_pathNodes[closestNode].pos;
+					newPos.z += 3.0f;
+					veh->Teleport(newPos);
+					veh->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+				} else if (veh->VehicleCreatedBy == RANDOM_VEHICLE || veh->VehicleCreatedBy == PARKED_VEHICLE) {
+					CWorld::Remove(veh);
+					delete veh;
+				}
+			}
+		}
+	}
+}
+
+void
+CWorld::Process(void)
+{
+	if (!(CTimer::GetFrameCounter() & 63))
+		CReferences::PruneAllReferencesInWorld();
+
+	if (CWorld::bProcessCutsceneOnly) {
+		for (int i = 0; i < NUMCUTSCENEOBJECTS; i++) {
+			CCutsceneObject *csObj = CCutsceneMgr::GetCutsceneObject(i);
+			if (csObj && csObj->m_entryInfoList.first) {
+				if (csObj->m_rwObject && RwObjectGetType(csObj->m_rwObject) == rpCLUMP
+					&& RpAnimBlendClumpGetFirstAssociation(csObj->GetClump())) {
+					RpAnimBlendClumpUpdateAnimations(csObj->GetClump(), 0.02f * (csObj->m_type == ENTITY_TYPE_OBJECT ? CTimer::GetTimeStepNonClipped() : CTimer::GetTimeStep()));
+				}
+				csObj->ProcessControl();
+				csObj->ProcessCollision();
+				csObj->GetMatrix().UpdateRW();
+				csObj->UpdateRwFrame();
+			}
+		}
+		CRecordDataForChase::ProcessControlCars();
+		CRecordDataForChase::SaveOrRetrieveCarPositions();
+	} else {
+		for (CPtrNode *node = ms_listMovingEntityPtrs.first; node; node = node->next) {
+			CEntity *movingEnt = (CEntity*)node->item;
+			if (movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP
+				&& RpAnimBlendClumpGetFirstAssociation(movingEnt->GetClump())) {
+				RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(), 0.02f * (movingEnt->m_type == ENTITY_TYPE_OBJECT ? CTimer::GetTimeStepNonClipped() : CTimer::GetTimeStep()));
+			}
+		}
+		for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
+			CPhysical* movingEnt = (CPhysical*)node->item;
+			if (movingEnt->bRemoveFromWorld) {
+				RemoveEntityInsteadOfProcessingIt(movingEnt);
+			} else {
+				movingEnt->ProcessControl();
+				if (movingEnt->bIsStatic) {
+					movingEnt->RemoveFromMovingList();
+				}
+			}
+		}
+		CWorld::bForceProcessControl = 1;
+		for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
+			CPhysical* movingEnt = (CPhysical*)node->item;
+			if (movingEnt->bWasPostponed) {
+				if (movingEnt->bRemoveFromWorld) {
+					RemoveEntityInsteadOfProcessingIt(movingEnt);
+				} else {
+					movingEnt->ProcessControl();
+					if (movingEnt->bIsStatic) {
+						movingEnt->RemoveFromMovingList();
+					}
+				}
+			}
+		}
+		CWorld::bForceProcessControl = 0;
+		if (CReplay::IsPlayingBack()) {
+			for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
+				CEntity* movingEnt = (CEntity*)node->item;
+				movingEnt->bIsInSafePosition = true;
+				movingEnt->GetMatrix().UpdateRW();
+				movingEnt->UpdateRwFrame();
+			}
+		} else {
+			CWorld::bNoMoreCollisionTorque = 0;
+			for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
+				CEntity* movingEnt = (CEntity*)node->item;
+				if (!movingEnt->bIsInSafePosition) {
+					movingEnt->ProcessCollision();
+					movingEnt->GetMatrix().UpdateRW();
+					movingEnt->UpdateRwFrame();
+				}
+			}
+			CWorld::bNoMoreCollisionTorque = 1;
+			for (int i = 0; i < 4; i++) {
+				for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
+					CEntity* movingEnt = (CEntity*)node->item;
+					if (!movingEnt->bIsInSafePosition) {
+						movingEnt->ProcessCollision();
+						movingEnt->GetMatrix().UpdateRW();
+						movingEnt->UpdateRwFrame();
+					}
+				}
+			}
+			for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
+				CEntity* movingEnt = (CEntity*)node->item;
+				if (!movingEnt->bIsInSafePosition) {
+					movingEnt->bIsStuck = true;
+					movingEnt->ProcessCollision();
+					movingEnt->GetMatrix().UpdateRW();
+					movingEnt->UpdateRwFrame();
+					if (!movingEnt->bIsInSafePosition) {
+						movingEnt->bIsStuck = true;
+					}
+				}
+			}
+			CWorld::bSecondShift = 0;
+			for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
+				CEntity* movingEnt = (CEntity*)node->item;
+				if (!movingEnt->bIsInSafePosition) {
+					movingEnt->ProcessShift();
+					movingEnt->GetMatrix().UpdateRW();
+					movingEnt->UpdateRwFrame();
+					if (!movingEnt->bIsInSafePosition) {
+						movingEnt->bIsStuck = true;
+					}
+				}
+			}
+			CWorld::bSecondShift = 1;
+			for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
+				CPhysical* movingEnt = (CPhysical*)node->item;
+				if (!movingEnt->bIsInSafePosition) {
+					movingEnt->ProcessShift();
+					movingEnt->GetMatrix().UpdateRW();
+					movingEnt->UpdateRwFrame();
+					if (!movingEnt->bIsInSafePosition) {
+						movingEnt->bIsStuck = true;
+						if (movingEnt->m_status == STATUS_PLAYER) {
+							printf("STUCK: Final Step: Player Entity %d Is Stuck\n", movingEnt->m_modelIndex);
+							movingEnt->m_vecMoveSpeed *= 3.0f;
+							movingEnt->ApplyMoveSpeed();
+							movingEnt->ApplyTurnSpeed();
+						}
+					}
+				}
+			}
+		}
+		for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
+			CPed* movingPed = (CPed*)node->item;
+			if (movingPed->IsPed()) {
+				if (movingPed->bInVehicle && movingPed->m_nPedState != PED_EXIT_TRAIN
+					|| movingPed->m_nPedState == PED_ENTER_CAR || movingPed->m_nPedState == PED_CARJACK) {
+					CVehicle *movingCar = movingPed->m_pMyVehicle;
+					if (movingCar) {
+						if (movingCar->IsTrain()) {
+							movingPed->SetPedPositionInTrain();
+						} else {
+							switch (movingPed->m_nPedState) {
+								case PED_ENTER_CAR:
+								case PED_CARJACK:
+									movingPed->EnterCar();
+									break;
+								case PED_DRAG_FROM_CAR:
+									movingPed->BeingDraggedFromCar();
+									break;
+								case PED_EXIT_CAR:
+									movingPed->ExitCar();
+									break;
+								case PED_ARRESTED:
+									if (movingPed->m_nLastPedState == PED_DRAG_FROM_CAR) {
+										movingPed->BeingDraggedFromCar();
+										break;
+									}
+									// fall through
+								default:
+									movingPed->SetPedPositionInCar();
+									break;
+							}
+						}
+						movingPed->GetMatrix().UpdateRW();
+						movingPed->UpdateRwFrame();
+					} else {
+						movingPed->bInVehicle = false;
+						movingPed->QuitEnteringCar();
+					}
+				}
+			}
+		}
+		CMessages::Process();
+		Players[PlayerInFocus].Process();
+		CRecordDataForChase::SaveOrRetrieveCarPositions();
+		if ((CTimer::GetFrameCounter() & 7) == 1) {
+			CWorld::RemoveFallenPeds();
+		} else if ((CTimer::GetFrameCounter() & 7) == 5) {
+			CWorld::RemoveFallenCars();
+		}
+	}
+}
+
 STARTPATCHES
 	InjectHook(0x4AE930, CWorld::Add, PATCH_JUMP);
 	InjectHook(0x4AE9D0, CWorld::Remove, PATCH_JUMP);
@@ -951,4 +1195,6 @@ STARTPATCHES
 	InjectHook(0x4B3A80, CWorld::FindGroundZForCoord, PATCH_JUMP);
 	InjectHook(0x4B3AE0, CWorld::FindGroundZFor3DCoord, PATCH_JUMP);
 	InjectHook(0x4B3B50, CWorld::FindRoofZFor3DCoord, PATCH_JUMP);
+
+	InjectHook(0x4B1A60, CWorld::Process, PATCH_JUMP);
 ENDPATCHES
