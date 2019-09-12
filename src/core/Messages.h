@@ -47,4 +47,5 @@ public:
 	static void AddMessageSoon(wchar* key, uint32 time, uint16 pos);
 	static void ClearMessages();
 	static void Init();
+	static void Process();
 };

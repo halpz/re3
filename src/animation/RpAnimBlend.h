@@ -34,6 +34,7 @@ CAnimBlendAssociation *RpAnimBlendClumpGetMainAssociation_N(RpClump *clump, int 
 CAnimBlendAssociation *RpAnimBlendClumpGetMainPartialAssociation_N(RpClump *clump, int n);
 CAnimBlendAssociation *RpAnimBlendClumpGetFirstAssociation(RpClump *clump, uint32 mask);
 CAnimBlendAssociation *RpAnimBlendClumpGetFirstAssociation(RpClump *clump);
+void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float timeDelta);
 
 
 extern CAnimBlendClumpData *&gpAnimBlendClump;

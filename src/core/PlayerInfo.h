@@ -71,6 +71,7 @@ public:
 	void AwardMoneyForExplosion(CVehicle *vehicle);	
 	void SetPlayerSkin(char* skin);
 	CVector& GetPos();
+	void Process(void);
 };
 
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");
