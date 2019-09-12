@@ -500,7 +500,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagG4 = false;
 	bStartWanderPathOnFoot = false;
 	m_ped_flagG10 = false;
-	m_ped_flagG20 = false;
+	bBusJacked = false;
 	m_ped_flagG40 = false;
 	bFadeOut = false;
 
@@ -509,7 +509,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_ped_flagH4 = false;
 	bClearObjective = false;
 	m_ped_flagH10 = false;
-	m_ped_flagH20 = false;
+	bCollidedWithMyVehicle = false;
 	m_ped_flagH40 = false;
 	m_ped_flagH80 = false;
 
@@ -8872,7 +8872,7 @@ CPed::ProcessControl(void)
 		if (m_fHealth <= 1.0f && m_nPedState <= PED_STATES_NO_AI && !bIsInTheAir && !bIsLanding)
 			SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
 
-		m_ped_flagH20 = false;
+		bCollidedWithMyVehicle = false;
 
 		CEntity *collidingEnt = m_pDamageEntity;
 		if (!bUsesCollision || m_fDamageImpulse <= 0.0f || m_nPedState == PED_DIE || !collidingEnt) {
@@ -9100,7 +9100,7 @@ CPed::ProcessControl(void)
 					float collidingVehSpeedSqr = collidingVeh->m_vecMoveSpeed.MagnitudeSqr();
 
 					if (collidingVeh == m_pMyVehicle)
-						m_ped_flagH20 = true;
+						bCollidedWithMyVehicle = true;
 
 					if (collidingVehSpeedSqr <= 1.0f / 400.0f) {
 						if (!IsPedInControl()
@@ -10219,7 +10219,7 @@ CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 					veh->bIsHandbrakeOn = true;
 					veh->m_status = STATUS_PLAYER_DISABLED;
 				}
-				driver->m_ped_flagG20 = true;
+				driver->bBusJacked = true;
 				veh->m_veh_flagC10 = false;
 				PedSetInCarCB(nil, ped);
 				if (ped->m_nPedType == PEDTYPE_COP
@@ -10456,6 +10456,7 @@ CPed::PedAnimStepOutCarCB(CAnimBlendAssociation* animAssoc, void* arg)
 	}
 
 	if (ped->m_ped_flagE80 || ped->m_ped_flagG40) {
+		// POTENTIAL BUG? Why DOOR_FRONT_LEFT instead of door variable? or vice versa?
 		if (!veh->IsDoorMissing(door))
 			((CAutomobile*)veh)->Damage.SetDoorStatus(DOOR_FRONT_LEFT, DOOR_STATUS_SWINGING);
 	} else {

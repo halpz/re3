@@ -331,7 +331,7 @@ CWorld::ProcessVerticalLine(const CVector &point1, float z2, CColPoint &point, C
 {
 	AdvanceCurrentScanCode();
 	CVector point2(point1.x, point1.y, z2);
-	return CWorld::ProcessVerticalLineSector(*GetSector(GetSectorIndexX(point1.x), GetSectorIndexX(point1.y)),
+	return ProcessVerticalLineSector(*GetSector(GetSectorIndexX(point1.x), GetSectorIndexX(point1.y)),
 		CColLine(point1, point2), point, entity,
 		checkBuildings, checkVehicles, checkPeds, checkObjects, checkDummies, ignoreSeeThrough, poly);
 }
@@ -605,8 +605,8 @@ CWorld::FindObjectsInRangeSectorList(CPtrList &list, CVector &centre, float dist
 
 	for (CPtrNode *node = list.first; node; node = node->next) {
 		CEntity *object = (CEntity*)node->item;
-		if (object->m_scanCode != CWorld::GetCurrentScanCode()) {
-			object->m_scanCode = CWorld::GetCurrentScanCode();
+		if (object->m_scanCode != GetCurrentScanCode()) {
+			object->m_scanCode = GetCurrentScanCode();
 
 			CVector diff = centre - object->GetPosition();
 			if (ignoreZ)
@@ -941,11 +941,11 @@ CWorld::RemoveEntityInsteadOfProcessingIt(CEntity* ent)
 {
 	if (ent->IsPed()) {
 		if (FindPlayerPed() == ent)
-			CWorld::Remove(ent);
+			Remove(ent);
 		else
 			CPopulation::RemovePed(ent);
 	} else {
-		CWorld::Remove(ent);
+		Remove(ent);
 		delete ent;
 	}
 }
@@ -987,7 +987,7 @@ CWorld::RemoveFallenCars(void)
 					veh->Teleport(newPos);
 					veh->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 				} else if (veh->VehicleCreatedBy == RANDOM_VEHICLE || veh->VehicleCreatedBy == PARKED_VEHICLE) {
-					CWorld::Remove(veh);
+					Remove(veh);
 					delete veh;
 				}
 			}
@@ -1001,7 +1001,7 @@ CWorld::Process(void)
 	if (!(CTimer::GetFrameCounter() & 63))
 		CReferences::PruneAllReferencesInWorld();
 
-	if (CWorld::bProcessCutsceneOnly) {
+	if (bProcessCutsceneOnly) {
 		for (int i = 0; i < NUMCUTSCENEOBJECTS; i++) {
 			CCutsceneObject *csObj = CCutsceneMgr::GetCutsceneObject(i);
 			if (csObj && csObj->m_entryInfoList.first) {
@@ -1036,7 +1036,7 @@ CWorld::Process(void)
 				}
 			}
 		}
-		CWorld::bForceProcessControl = 1;
+		bForceProcessControl = true;
 		for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 			CPhysical* movingEnt = (CPhysical*)node->item;
 			if (movingEnt->bWasPostponed) {
@@ -1050,7 +1050,7 @@ CWorld::Process(void)
 				}
 			}
 		}
-		CWorld::bForceProcessControl = 0;
+		bForceProcessControl = false;
 		if (CReplay::IsPlayingBack()) {
 			for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 				CEntity* movingEnt = (CEntity*)node->item;
@@ -1059,7 +1059,7 @@ CWorld::Process(void)
 				movingEnt->UpdateRwFrame();
 			}
 		} else {
-			CWorld::bNoMoreCollisionTorque = 0;
+			bNoMoreCollisionTorque = false;
 			for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 				CEntity* movingEnt = (CEntity*)node->item;
 				if (!movingEnt->bIsInSafePosition) {
@@ -1068,7 +1068,7 @@ CWorld::Process(void)
 					movingEnt->UpdateRwFrame();
 				}
 			}
-			CWorld::bNoMoreCollisionTorque = 1;
+			bNoMoreCollisionTorque = true;
 			for (int i = 0; i < 4; i++) {
 				for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 					CEntity* movingEnt = (CEntity*)node->item;
@@ -1091,7 +1091,7 @@ CWorld::Process(void)
 					}
 				}
 			}
-			CWorld::bSecondShift = 0;
+			bSecondShift = false;
 			for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 				CEntity* movingEnt = (CEntity*)node->item;
 				if (!movingEnt->bIsInSafePosition) {
@@ -1103,7 +1103,7 @@ CWorld::Process(void)
 					}
 				}
 			}
-			CWorld::bSecondShift = 1;
+			bSecondShift = true;
 			for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 				CPhysical* movingEnt = (CPhysical*)node->item;
 				if (!movingEnt->bIsInSafePosition) {
@@ -1167,9 +1167,9 @@ CWorld::Process(void)
 		Players[PlayerInFocus].Process();
 		CRecordDataForChase::SaveOrRetrieveCarPositions();
 		if ((CTimer::GetFrameCounter() & 7) == 1) {
-			CWorld::RemoveFallenPeds();
+			RemoveFallenPeds();
 		} else if ((CTimer::GetFrameCounter() & 7) == 5) {
-			CWorld::RemoveFallenCars();
+			RemoveFallenCars();
 		}
 	}
 }
