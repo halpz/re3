@@ -67,6 +67,7 @@ int32 (&CCarCtrl::TotalNumOfCarsOfRating)[7] = *(int32(*)[7])*(uintptr*)0x8F1A60
 int32 (&CCarCtrl::NextCarOfRating)[7] = *(int32(*)[7])*(uintptr*)0x9412AC;
 int32 (&CCarCtrl::CarArrays)[7][MAX_CAR_MODELS_IN_ARRAY] = *(int32(*)[7][MAX_CAR_MODELS_IN_ARRAY])*(uintptr*)0x6EB860;
 CVehicle* (&apCarsToKeep)[MAX_CARS_TO_KEEP] = *(CVehicle*(*)[MAX_CARS_TO_KEEP])*(uintptr*)0x70D830;
+uint32 (&aCarsToKeepTime)[MAX_CARS_TO_KEEP] = *(uint32(*)[MAX_CARS_TO_KEEP])*(uintptr*)0x87F9A8;
 
 WRAPPER void CCarCtrl::SwitchVehicleToRealPhysics(CVehicle*) { EAXJMP(0x41F7F0); }
 WRAPPER void CCarCtrl::UpdateCarCount(CVehicle*, bool) { EAXJMP(0x4202E0); }
@@ -743,6 +744,34 @@ CCarCtrl::IsThisVehicleInteresting(CVehicle* pVehicle)
 			return true;
 	}
 	return false;
+}
+
+void
+CCarCtrl::RegisterVehicleOfInterest(CVehicle* pVehicle)
+{
+	for(int i = 0; i < MAX_CARS_TO_KEEP; i++) {
+		if (apCarsToKeep[i] == pVehicle) {
+			aCarsToKeepTime[i] = CTimer::GetTimeInMilliseconds();
+			return;
+		}
+	}
+	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
+		if (!apCarsToKeep[i]) {
+			apCarsToKeep[i] = pVehicle;
+			aCarsToKeepTime[i] = CTimer::GetTimeInMilliseconds();
+			return;
+		}
+	}
+	uint32 oldestCarWeKeepTime = UINT_MAX;
+	int oldestCarWeKeepIndex = 0;
+	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
+		if (apCarsToKeep[i] && aCarsToKeepTime[i] < oldestCarWeKeepTime) {
+			oldestCarWeKeepTime = aCarsToKeepTime[i];
+			oldestCarWeKeepIndex = i;
+		}
+	}
+	apCarsToKeep[oldestCarWeKeepIndex] = pVehicle;
+	aCarsToKeepTime[oldestCarWeKeepIndex] = CTimer::GetTimeInMilliseconds();
 }
 
 void
