@@ -75,6 +75,9 @@ enum Config {
 	NUM_CARGENS = 160,
 
 	NUM_PATH_NODES_IN_AUTOPILOT = 8,
+
+	NUM_ACCIDENTS = 20,
+	NUM_FIRES = 40
 };
 
 // We'll use this once we're ready to become independent of the game

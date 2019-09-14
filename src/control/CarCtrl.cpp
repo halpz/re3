@@ -2,6 +2,7 @@
 #include "patcher.h"
 #include "CarCtrl.h"
 
+#include "AccidentManager.h"
 #include "Automobile.h"
 #include "Camera.h"
 #include "CarAI.h"
@@ -81,20 +82,13 @@ int32 &CCarCtrl::NumPermanentCars = *(int32*)0x8F29F0;
 int8 &CCarCtrl::CountDownToCarsAtStart = *(int8*)0x95CD63;
 int32 &CCarCtrl::MaxNumberOfCarsInUse = *(int32*)0x5EC8B8;
 uint32 &CCarCtrl::LastTimeLawEnforcerCreated = *(uint32*)0x8F5FF0;
-uint32 &CCarCtrl::LastTimeFireTruckCreated = *(uint32*)0x941450;
-uint32 &CCarCtrl::LastTimeAmbulanceCreated = *(uint32*)0x880F5C;
+uint32 &CCarCtrl::LastTimeFireTruckCreated = *(uint32*)0x880F5C;
+uint32 &CCarCtrl::LastTimeAmbulanceCreated = *(uint32*)0x941450;
 int32 (&CCarCtrl::TotalNumOfCarsOfRating)[TOTAL_CUSTOM_CLASSES] = *(int32(*)[TOTAL_CUSTOM_CLASSES])*(uintptr*)0x8F1A60;
 int32 (&CCarCtrl::NextCarOfRating)[TOTAL_CUSTOM_CLASSES] = *(int32(*)[TOTAL_CUSTOM_CLASSES])*(uintptr*)0x9412AC;
 int32 (&CCarCtrl::CarArrays)[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY] = *(int32(*)[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY])*(uintptr*)0x6EB860;
 CVehicle* (&apCarsToKeep)[MAX_CARS_TO_KEEP] = *(CVehicle*(*)[MAX_CARS_TO_KEEP])*(uintptr*)0x70D830;
 uint32 (&aCarsToKeepTime)[MAX_CARS_TO_KEEP] = *(uint32(*)[MAX_CARS_TO_KEEP])*(uintptr*)0x87F9A8;
-
-WRAPPER void CCarCtrl::SwitchVehicleToRealPhysics(CVehicle*) { EAXJMP(0x41F7F0); }
-WRAPPER void CCarCtrl::UpdateCarCount(CVehicle*, bool) { EAXJMP(0x4202E0); }
-WRAPPER bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle*, CVector, bool) { EAXJMP(0x41FA00); }
-WRAPPER void CCarCtrl::JoinCarWithRoadSystem(CVehicle*) { EAXJMP(0x41F820); }
-WRAPPER void CCarCtrl::RemoveFromInterestingVehicleList(CVehicle* v) { EAXJMP(0x41F7A0); }
-WRAPPER void CCarCtrl::GenerateEmergencyServicesCar(void) { EAXJMP(0x41FC50); }
 
 void
 CCarCtrl::GenerateRandomCars()
@@ -751,44 +745,6 @@ CCarCtrl::CountCarsOfType(int32 mi)
 			total++;
 	}
 	return total;
-}
-
-bool
-CCarCtrl::IsThisVehicleInteresting(CVehicle* pVehicle)
-{
-	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
-		if (apCarsToKeep[i] == pVehicle)
-			return true;
-	}
-	return false;
-}
-
-void
-CCarCtrl::RegisterVehicleOfInterest(CVehicle* pVehicle)
-{
-	for(int i = 0; i < MAX_CARS_TO_KEEP; i++) {
-		if (apCarsToKeep[i] == pVehicle) {
-			aCarsToKeepTime[i] = CTimer::GetTimeInMilliseconds();
-			return;
-		}
-	}
-	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
-		if (!apCarsToKeep[i]) {
-			apCarsToKeep[i] = pVehicle;
-			aCarsToKeepTime[i] = CTimer::GetTimeInMilliseconds();
-			return;
-		}
-	}
-	uint32 oldestCarWeKeepTime = UINT_MAX;
-	int oldestCarWeKeepIndex = 0;
-	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
-		if (apCarsToKeep[i] && aCarsToKeepTime[i] < oldestCarWeKeepTime) {
-			oldestCarWeKeepTime = aCarsToKeepTime[i];
-			oldestCarWeKeepIndex = i;
-		}
-	}
-	apCarsToKeep[oldestCarWeKeepIndex] = pVehicle;
-	aCarsToKeepTime[oldestCarWeKeepIndex] = CTimer::GetTimeInMilliseconds();
 }
 
 void
@@ -1651,7 +1607,7 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 	) * (1000.0f / pVehicle->AutoPilot.m_fMaxTrafficSpeed);
 	if (pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve < 10)
 		/* Oh hey there Obbe */
-		debug("fout\n");
+		printf("fout\n");
 	pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve = max(10, pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve);
 }
 
@@ -2484,6 +2440,305 @@ void CCarCtrl::SteerAIBoatWithPhysicsHeadingForTarget(CBoat* pBoat, float target
 	*pSwerve = angleDiff;
 }
 
+void
+CCarCtrl::RegisterVehicleOfInterest(CVehicle* pVehicle)
+{
+	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
+		if (apCarsToKeep[i] == pVehicle) {
+			aCarsToKeepTime[i] = CTimer::GetTimeInMilliseconds();
+			return;
+		}
+	}
+	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
+		if (!apCarsToKeep[i]) {
+			apCarsToKeep[i] = pVehicle;
+			aCarsToKeepTime[i] = CTimer::GetTimeInMilliseconds();
+			return;
+		}
+	}
+	uint32 oldestCarWeKeepTime = UINT_MAX;
+	int oldestCarWeKeepIndex = 0;
+	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
+		if (apCarsToKeep[i] && aCarsToKeepTime[i] < oldestCarWeKeepTime) {
+			oldestCarWeKeepTime = aCarsToKeepTime[i];
+			oldestCarWeKeepIndex = i;
+		}
+	}
+	apCarsToKeep[oldestCarWeKeepIndex] = pVehicle;
+	aCarsToKeepTime[oldestCarWeKeepIndex] = CTimer::GetTimeInMilliseconds();
+}
+
+bool
+CCarCtrl::IsThisVehicleInteresting(CVehicle* pVehicle)
+{
+	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
+		if (apCarsToKeep[i] == pVehicle)
+			return true;
+	}
+	return false;
+}
+
+void CCarCtrl::RemoveFromInterestingVehicleList(CVehicle* pVehicle)
+{
+	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
+		if (apCarsToKeep[i] == pVehicle)
+			apCarsToKeep[i] = nil;
+	}
+}
+
+void CCarCtrl::ClearInterestingVehicleList()
+{
+	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
+		apCarsToKeep[i] = nil;
+	}
+}
+
+void CCarCtrl::SwitchVehicleToRealPhysics(CVehicle* pVehicle)
+{
+	pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
+	pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
+	pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
+	pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds();
+}
+
+void CCarCtrl::JoinCarWithRoadSystem(CVehicle* pVehicle)
+{
+	pVehicle->AutoPilot.m_nPrevRouteNode = pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_nNextRouteNode = 0;
+	pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_nPreviousPathNodeInfo = pVehicle->AutoPilot.m_nNextPathNodeInfo = 0;
+	int nodeId = ThePaths.FindNodeClosestToCoorsFavourDirection(pVehicle->GetPosition(), 0, pVehicle->GetForward().x, pVehicle->GetForward().y);
+	CPathNode* pNode = &ThePaths.m_pathNodes[nodeId];
+	int prevNodeId = -1;
+	float minDistance = 999999.9f;
+	for (int i = 0; i < pNode->numLinks; i++){
+		int candidateId = ThePaths.m_connections[i + pNode->firstLink];
+		CPathNode* pCandidateNode = &ThePaths.m_pathNodes[candidateId];
+		float distance = (pCandidateNode->pos - pNode->pos).Magnitude2D();
+		if (distance < minDistance){
+			minDistance = distance;
+			prevNodeId = candidateId;
+		}
+	}
+	if (prevNodeId < 0)
+		return;
+	CVector2D forward = pVehicle->GetForward();
+	CPathNode* pPrevNode = &ThePaths.m_pathNodes[prevNodeId];
+	if (forward.x == 0.0f && forward.y == 0.0f)
+		forward.x = 1.0f;
+	if (DotProduct2D(pNode->pos - pPrevNode->pos, forward) < 0.0f){
+		int tmp;
+		tmp = prevNodeId;
+		prevNodeId = nodeId;
+		nodeId = tmp;
+	}
+	pVehicle->AutoPilot.m_nPrevRouteNode = 0;
+	pVehicle->AutoPilot.m_nCurrentRouteNode = prevNodeId;
+	pVehicle->AutoPilot.m_nNextRouteNode = nodeId;
+	pVehicle->AutoPilot.m_nPathFindNodesCount = 0;
+	FindLinksToGoWithTheseNodes(pVehicle);
+	pVehicle->AutoPilot.m_nNextLane = pVehicle->AutoPilot.m_nCurrentLane = 0;
+}
+
+bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* pVehicle, CVector vecTarget, bool isProperNow)
+{
+	pVehicle->AutoPilot.m_vecDestinationCoors = vecTarget;
+	ThePaths.DoPathSearch(0, pVehicle->GetPosition(), -1, vecTarget, pVehicle->AutoPilot.m_aPathFindNodesInfo,
+		&pVehicle->AutoPilot.m_nPathFindNodesCount, NUM_PATH_NODES_IN_AUTOPILOT, pVehicle, nil, 999999.9f, -1);
+	ThePaths.RemoveBadStartNode(pVehicle->GetPosition(),
+		pVehicle->AutoPilot.m_aPathFindNodesInfo, &pVehicle->AutoPilot.m_nPathFindNodesCount);
+	if (pVehicle->AutoPilot.m_nPathFindNodesCount < 2){
+		pVehicle->AutoPilot.m_nPrevRouteNode = pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_nNextRouteNode = 0;
+		return 1;
+	}
+	pVehicle->AutoPilot.m_nPrevRouteNode = 0;
+	pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_aPathFindNodesInfo[0] - ThePaths.m_pathNodes;
+	pVehicle->AutoPilot.RemoveOnePathNode();
+	pVehicle->AutoPilot.m_nNextRouteNode = pVehicle->AutoPilot.m_aPathFindNodesInfo[0] - ThePaths.m_pathNodes;
+	pVehicle->AutoPilot.RemoveOnePathNode();
+	FindLinksToGoWithTheseNodes(pVehicle);
+	pVehicle->AutoPilot.m_nNextLane = pVehicle->AutoPilot.m_nCurrentLane = 0;
+	return 0;
+}
+
+void CCarCtrl::FindLinksToGoWithTheseNodes(CVehicle* pVehicle)
+{
+	int nextLink;
+	CPathNode* pCurNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nCurrentRouteNode];
+	for (nextLink = 0; nextLink < 12; nextLink++)
+		if (ThePaths.m_connections[nextLink + pCurNode->firstLink] != pVehicle->AutoPilot.m_nNextRouteNode)
+			break;
+	pVehicle->AutoPilot.m_nNextPathNodeInfo = ThePaths.m_carPathConnections[nextLink + pCurNode->firstLink];
+	pVehicle->AutoPilot.m_nNextDirection = (pVehicle->AutoPilot.m_nCurrentRouteNode >= pVehicle->AutoPilot.m_nNextRouteNode) ? 1 : -1;
+	int curLink;
+	int curConnection;
+	if (pCurNode->numLinks == 1) {
+		curLink = 0;
+		curConnection = ThePaths.m_carPathConnections[pCurNode->firstLink];
+	}else{
+		curConnection = pVehicle->AutoPilot.m_nNextPathNodeInfo;
+		while (curConnection == pVehicle->AutoPilot.m_nNextPathNodeInfo){
+			curLink = CGeneral::GetRandomNumber() % pCurNode->numLinks;
+			curConnection = ThePaths.m_carPathConnections[curLink + pCurNode->firstLink];
+		}
+	}
+	pVehicle->AutoPilot.m_nCurrentPathNodeInfo = curConnection;
+	pVehicle->AutoPilot.m_nCurrentDirection = (ThePaths.m_connections[curLink + pCurNode->firstLink] >= pVehicle->AutoPilot.m_nCurrentRouteNode) ? 1 : -1;
+}
+
+void CCarCtrl::GenerateEmergencyServicesCar(void)
+{
+	if (FindPlayerPed()->m_pWanted->m_nWantedLevel > 3)
+		return;
+	if (NumFiretrucksOnDuty + NumAmbulancesOnDuty + NumParkedCars + NumMissionCars +
+		NumLawEnforcerCars + NumRandomCars > MaxNumberOfCarsInUse)
+		return;
+	if (NumAmbulancesOnDuty == 0){
+		if (gAccidentManager.CountActiveAccidents() < 2){
+			if (CStreaming::HasModelLoaded(MI_AMBULAN))
+				CStreaming::SetModelIsDeletable(MI_MEDIC);
+		}else{
+			float distance = 30.0f;
+			CAccident* pNearestAccident = gAccidentManager.FindNearestAccident(FindPlayerCoors(), &distance);
+			if (pNearestAccident){
+				if (CountCarsOfType(MI_AMBULAN) < 2 && CTimer::GetTimeInMilliseconds() > LastTimeAmbulanceCreated + 30000){
+					CStreaming::RequestModel(MI_AMBULAN, STREAMFLAGS_DEPENDENCY);
+					CStreaming::RequestModel(MI_MEDIC, STREAMFLAGS_DONT_REMOVE);
+					if (CStreaming::HasModelLoaded(MI_AMBULAN) && CStreaming::HasModelLoaded(MI_MEDIC)){
+						if (GenerateOneEmergencyServicesCar(MI_AMBULAN, pNearestAccident->m_pVictim->GetPosition()))
+							LastTimeAmbulanceCreated = CTimer::GetTimeInMilliseconds();
+					}
+				}
+			}
+		}
+	}
+	if (NumFiretrucksOnDuty == 0){
+		if (gFireManager.GetTotalActiveFires() < 3){
+			if (CStreaming::HasModelLoaded(MI_FIRETRUCK))
+				CStreaming::SetModelIsDeletable(MI_FIREMAN);
+		}else{
+			float distance = 30.0f;
+			CFire* pNearestFire = gFireManager.FindNearestFire(FindPlayerCoors(), &distance);
+			if (pNearestFire) {
+				if (CountCarsOfType(MI_FIRETRUCK) < 2 && CTimer::GetTimeInMilliseconds() > LastTimeFireTruckCreated + 30000){
+					CStreaming::RequestModel(MI_FIRETRUCK, STREAMFLAGS_DEPENDENCY);
+					CStreaming::RequestModel(MI_FIREMAN, STREAMFLAGS_DONT_REMOVE);
+					if (CStreaming::HasModelLoaded(MI_FIRETRUCK) && CStreaming::HasModelLoaded(MI_FIREMAN)){
+						if (GenerateOneEmergencyServicesCar(MI_FIRETRUCK, pNearestFire->m_vecPos))
+							LastTimeFireTruckCreated = CTimer::GetTimeInMilliseconds();
+					}
+				}
+			}
+		}
+	}
+}
+
+bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 mi, CVector vecPos)
+{
+	CVector pPlayerPos = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
+	bool created = false;
+	int attempts = 0;
+	CVector spawnPos;
+	int curNode, nextNode;
+	float posBetweenNodes;
+	while (!created && attempts < 5){
+		if (ThePaths.NewGenerateCarCreationCoors(pPlayerPos.x, pPlayerPos.y, 0.707f, 0.707f,
+		  120.0f, -1.0f, true, &spawnPos, &curNode, &nextNode, &posBetweenNodes, false)){
+			int16 colliding[2];
+			CWorld::FindObjectsKindaColliding(spawnPos, 10.0f, true, colliding, 2, nil, false, true, true, false, false);
+			if (colliding[0] == 0)
+				created = true;
+		}
+		attempts += 1;
+	}
+	if (attempts >= 5)
+		return nil;
+	CAutomobile* pVehicle = new CAutomobile(mi, RANDOM_VEHICLE);
+	pVehicle->AutoPilot.m_vecDestinationCoors = vecPos;
+	pVehicle->GetPosition() = spawnPos;
+	pVehicle->AutoPilot.m_nCarMission = (JoinCarWithRoadSystemGotoCoors(pVehicle, vecPos, false)) ? MISSION_GOTOCOORDS_STRAIGHT : MISSION_GOTOCOORDS;
+	pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed = 25;
+	pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
+	pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
+	CVector2D direction = vecPos - spawnPos;
+	direction.Normalise();
+	pVehicle->GetForward() = CVector(direction.x, direction.y, 0.0f);
+	pVehicle->GetRight() = CVector(direction.y, -direction.x, 0.0f);
+	pVehicle->GetUp() = CVector(0.0f, 0.0f, 1.0f);
+	spawnPos.z = posBetweenNodes * ThePaths.m_pathNodes[curNode].pos.z + (1.0f - posBetweenNodes) * ThePaths.m_pathNodes[nextNode].pos.z;
+	float groundZ = INFINITE_Z;
+	CColPoint colPoint;
+	CEntity* pEntity;
+	if (CWorld::ProcessVerticalLine(spawnPos, 1000.0f, colPoint, pEntity, true, false, false, false, true, false, nil))
+		groundZ = colPoint.point.z;
+	if (CWorld::ProcessVerticalLine(spawnPos, -1000.0f, colPoint, pEntity, true, false, false, false, true, false, nil)) {
+		if (ABS(colPoint.point.z - spawnPos.z) < ABS(groundZ - spawnPos.z))
+			groundZ = colPoint.point.z;
+	}
+	if (groundZ == INFINITE_Z) {
+		delete pVehicle;
+		return false;
+	}
+	spawnPos.z = groundZ + pVehicle->GetDistanceFromCentreOfMassToBaseOfModel();
+	pVehicle->GetPosition() = spawnPos;
+	pVehicle->SetMoveSpeed(CVector(0.0f, 0.0f, 0.0f));
+	pVehicle->m_status = STATUS_PHYSICS;
+	switch (mi){
+	case MI_FIRETRUCK:
+		pVehicle->bIsFireTruckOnDuty = true;
+		++NumFiretrucksOnDuty;
+		CCarAI::AddFiretruckOccupants(pVehicle);
+		break;
+	case MI_AMBULAN:
+		pVehicle->bIsAmbulanceOnDuty = true;
+		++NumAmbulancesOnDuty;
+		CCarAI::AddAmbulanceOccupants(pVehicle);
+		break;
+	}
+	pVehicle->m_bSirenOrAlarm = true;
+	CWorld::Add(pVehicle);
+	printf("CREATED EMERGENCY VEHICLE\n");
+	return true;
+}
+
+void CCarCtrl::UpdateCarCount(CVehicle* pVehicle, bool remove)
+{
+	if (remove){
+		switch (pVehicle->VehicleCreatedBy){
+		case RANDOM_VEHICLE:
+			if (pVehicle->bIsLawEnforcer)
+				--NumLawEnforcerCars;
+			--NumRandomCars;
+			return;
+		case MISSION_VEHICLE:
+			--NumMissionCars;
+			return;
+		case PARKED_VEHICLE:
+			--NumParkedCars;
+			return;
+		case PERMANENT_VEHICLE:
+			--NumPermanentCars;;
+			return;
+		}
+	}
+	else{
+		switch (pVehicle->VehicleCreatedBy){
+		case RANDOM_VEHICLE:
+			if (pVehicle->bIsLawEnforcer)
+				++NumLawEnforcerCars;
+			++NumRandomCars;
+			return;
+		case MISSION_VEHICLE:
+			++NumMissionCars;
+			return;
+		case PARKED_VEHICLE:
+			++NumParkedCars;
+			return;
+		case PERMANENT_VEHICLE:
+			++NumPermanentCars;;
+			return;
+		}
+	}
+}
+
 bool CCarCtrl::ThisRoadObjectCouldMove(int16 mi)
 {
 	return mi == MI_BRIDGELIFT || mi == MI_BRIDGEROADSEGMENT;
@@ -2503,4 +2758,12 @@ InjectHook(0x418320, &CCarCtrl::RemoveDistantCars, PATCH_JUMP);
 InjectHook(0x418430, &CCarCtrl::PossiblyRemoveVehicle, PATCH_JUMP);
 InjectHook(0x41D280, &CCarCtrl::Init, PATCH_JUMP);
 InjectHook(0x41D3B0, &CCarCtrl::ReInit, PATCH_JUMP);
+InjectHook(0x41E250, &CCarCtrl::SteerAIBoatWithPhysics, PATCH_JUMP);
+InjectHook(0x41F6E0, &CCarCtrl::RegisterVehicleOfInterest, PATCH_JUMP);
+InjectHook(0x41F780, &CCarCtrl::IsThisVehicleInteresting, PATCH_JUMP);
+InjectHook(0x41F7A0, &CCarCtrl::RemoveFromInterestingVehicleList, PATCH_JUMP);
+InjectHook(0x41F7D0, &CCarCtrl::ClearInterestingVehicleList, PATCH_JUMP);
+InjectHook(0x41F7F0, &CCarCtrl::SwitchVehicleToRealPhysics, PATCH_JUMP);
+InjectHook(0x41F820, &CCarCtrl::JoinCarWithRoadSystem, PATCH_JUMP);
+InjectHook(0x41FA00, &CCarCtrl::JoinCarWithRoadSystemGotoCoors, PATCH_JUMP);
 ENDPATCHES

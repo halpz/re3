@@ -6,7 +6,7 @@ class CFire
 {
 public:
 	bool m_bIsOngoing;
-	bool m_bExists;
+	bool m_bIsScriptFire;
 	bool m_bPropogationFlag;
 	bool m_bAudioSet;
 	CVector m_vecPos;
@@ -16,7 +16,7 @@ public:
 	int m_nStartTime;
 	int field_20;
 	int field_24;
-	int field_28;
+	uint32 m_nFiremenPuttingOut;
 	float field_2C;
 
 	void Extinguish(void);
@@ -24,8 +24,15 @@ public:
 
 class CFireManager
 {
+	enum {
+		MAX_FIREMEN_ATTENDING = 2,
+	};
+	uint32 m_nTotalFires;
+	CFire m_aFires[NUM_FIRES];
 public:
 	void StartFire(CEntity *entityOnFire, CEntity *culprit, float, uint32);
 	CFire *FindFurthestFire_NeverMindFireMen(CVector coors, float, float);
+	CFire *FindNearestFire(CVector, float*);
+	uint32 GetTotalActiveFires() const { return m_nTotalFires; }
 };
 extern CFireManager &gFireManager;
