@@ -58,6 +58,7 @@ public:
 	static void RemoveDistantCars(void);
 	static void PossiblyRemoveVehicle(CVehicle*);
 	static bool IsThisVehicleInteresting(CVehicle*);
+	static void RegisterVehicleOfInterest(CVehicle*);
 	static int32 CountCarsOfType(int32 mi);
 	static void SlowCarOnRailsDownForTrafficAndLights(CVehicle*);
 	static bool PickNextNodeAccordingStrategy(CVehicle*);

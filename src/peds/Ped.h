@@ -277,7 +277,7 @@ public:
 	uint8 bIsLanding : 1;
 	uint8 bIsRunning : 1; // on some conditions
 	uint8 bHitSomethingLastFrame : 1;
-	uint8 m_ped_flagB80 : 1; // something related with reaction to colliding vehicle
+	uint8 m_ped_flagB80 : 1; // bIsNearCar? something related with reaction to colliding vehicle
 
 	uint8 m_ped_flagC1 : 1;
 	uint8 bRespondsToThreats : 1;
@@ -288,9 +288,9 @@ public:
 	uint8 m_ped_flagC40 : 1;
 	uint8 bFindNewNodeAfterStateRestore : 1;
 
-	uint8 m_ped_flagD1 : 1;	// so far only used for reaction type to fire/explosion
-	uint8 m_ped_flagD2 : 1; // set when event has been seen
-	uint8 m_ped_flagD4 : 1; // so far only creates blood pool in hands up state
+	uint8 bHasACamera : 1; // does ped possess a camera to document accidents involves fire/explosion
+	uint8 m_ped_flagD2 : 1; // set when ped witnessed an event
+	uint8 m_ped_flagD4 : 1; // bPedIsBleeding? so far only creates blood pool in hands up state
 	uint8 m_ped_flagD8 : 1;
 	uint8 bIsPedDieAnimPlaying : 1;
 	uint8 bUsePedNodeSeek : 1;
@@ -304,11 +304,11 @@ public:
 	uint8 bIsDucking : 1;
 	uint8 bGetUpAnimStarted : 1;
 	uint8 bDoBloodyFootprints : 1;
-	uint8 m_ped_flagE80 : 1; // bDontDragMeOutCar? bStayInCarOnJack?
+	uint8 bFleeAfterExitingCar : 1;
 
 	uint8 bWanderPathAfterExitingCar : 1;
 	uint8 m_ped_flagF2 : 1;
-	uint8 m_ped_flagF4 : 1; // Unfinished feature from VC
+	uint8 m_ped_flagF4 : 1; // Unfinished feature from VC, probably bDontDragMeOutCar
 	uint8 m_ped_flagF8 : 1;
 	uint8 bWillBeQuickJacked : 1;
 	uint8 bCancelEnteringCar : 1; // after door is opened or couldn't be opened due to it's locked
@@ -317,14 +317,14 @@ public:
 
 	uint8 m_ped_flagG1 : 1;
 	uint8 m_ped_flagG2 : 1;
-	uint8 m_ped_flagG4 : 1;
+	uint8 m_ped_flagG4 : 1; // bStillOnValidPoly?
 	uint8 bStartWanderPathOnFoot : 1; // exits the car if he's in it, reset after path found
-	uint8 m_ped_flagG10 : 1;
+	uint8 m_ped_flagG10 : 1; // bOnBoat? (but not in the sense of driving)
 	uint8 bBusJacked : 1;
-	uint8 m_ped_flagG40 : 1; // had to exit car due to someone jacked it from RF door
+	uint8 bGonnaKillTheCarJacker : 1; // only set when car is jacked from right door
 	uint8 bFadeOut : 1;
 
-	uint8 m_ped_flagH1 : 1;
+	uint8 bKnockedUpIntoAir : 1; // has ped been knocked up into the air by a car collision
 	uint8 m_ped_flagH2 : 1;
 	uint8 m_ped_flagH4 : 1;
 	uint8 bClearObjective : 1;
@@ -645,6 +645,7 @@ public:
 	void ReactToPointGun(CEntity*);
 	void SeekCar(void);
 	void SeekBoatPosition(void);
+	bool PositionPedOutOfCollision(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -722,6 +723,7 @@ public:
 	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
+	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 &nThreatReactionRangeMultiplier;

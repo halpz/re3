@@ -29,7 +29,7 @@ public:
 	bool m_bHasLockOnTarget;
 	int8 field_1406;
 	int8 field_1407;
-	uint32 m_bAdrenalineTime;
+	uint32 m_nAdrenalineTime;
 	bool m_bCanBeDamaged;
 	int8 field_1413;
 	int8 field_1414;
@@ -52,6 +52,7 @@ public:
 	void SetInitialState(void);
 	void SetMoveAnim(void);
 	void ProcessControl(void);
+	void ClearAdrenaline(void);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);

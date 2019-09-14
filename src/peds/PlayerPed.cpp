@@ -94,6 +94,15 @@ CPlayerPed::AnnoyPlayerPed(bool annoyedByPassingEntity)
 	}
 }
 
+void
+CPlayerPed::ClearAdrenaline(void)
+{
+	if (m_bAdrenalineActive && m_nAdrenalineTime != 0) {
+		m_nAdrenalineTime = 0;
+		CTimer::SetTimeStep(1.0f);
+	}
+}
+
 class CPlayerPed_ : public CPlayerPed
 {
 public:
