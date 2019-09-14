@@ -11,6 +11,7 @@ WRAPPER void CCarAI::MakeWayForCarWithSiren(CVehicle *veh) { EAXJMP(0x416280); }
 WRAPPER eCarMission CCarAI::FindPoliceCarMissionForWantedLevel() { EAXJMP(0x415E30); }
 WRAPPER int32 CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle*) { EAXJMP(0x415EB0); }
 WRAPPER void CCarAI::AddPoliceOccupants(CVehicle*) { EAXJMP(0x415C60); }
+WRAPPER void CCarAI::TellOccupantsToLeaveCar(CVehicle*) { EAXJMP(0x415D20); }
 
 void CCarAI::CarHasReasonToStop(CVehicle* pVehicle)
 {

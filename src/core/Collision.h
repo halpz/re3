@@ -148,9 +148,8 @@ public:
 	static bool ProcessLineOfSight(const CColLine &line, const CMatrix &matrix, CColModel &model, CColPoint &point, float &mindist, bool ignoreSeeThrough);
 	static bool ProcessVerticalLine(const CColLine &line, const CMatrix &matrix, CColModel &model, CColPoint &point, float &mindist, bool ignoreSeeThrough, CStoredCollPoly *poly);
 	static int32 ProcessColModels(const CMatrix &matrixA, CColModel &modelA, const CMatrix &matrixB, CColModel &modelB, CColPoint *spherepoints, CColPoint *linepoints, float *linedists);
-
 	// TODO:
-	// CCollision::IsStoredPolyStillValidVerticalLine
+	static bool IsStoredPolyStillValidVerticalLine(const CVector &pos, float z, CColPoint &point, CStoredCollPoly *poly);
 
 	static float DistToLine(const CVector *l0, const CVector *l1, const CVector *point);
 	static float DistToLine(const CVector *l0, const CVector *l1, const CVector *point, CVector &closest);

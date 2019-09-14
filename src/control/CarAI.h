@@ -13,4 +13,5 @@ public:
 	static eCarMission FindPoliceCarMissionForWantedLevel();
 	static void AddPoliceOccupants(CVehicle*);
 	static void CarHasReasonToStop(CVehicle*);
+	static void TellOccupantsToLeaveCar(CVehicle*);
 };
