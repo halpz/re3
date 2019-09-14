@@ -3074,7 +3074,7 @@ CAutomobile::PlaceOnRoadProperly(void)
 		frontZ = point.point.z;
 		m_pCurGroundEntity = entity;
 	}else{
-		frontZ = field_21C;
+		frontZ = m_fMapObjectHeightAhead;
 	}
 
 	CVector rear(GetPosition().x - GetForward().x*lenBack,
@@ -3085,7 +3085,7 @@ CAutomobile::PlaceOnRoadProperly(void)
 		rearZ = point.point.z;
 		m_pCurGroundEntity = entity;
 	}else{
-		rearZ = field_220;
+		rearZ = m_fMapObjectHeightBehind;
 	}
 
 	float len = lenFwd + lenBack;

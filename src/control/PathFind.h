@@ -75,6 +75,15 @@ struct CCarPathLink
 
 	uint8 bBridgeLights : 1;
 	// more?
+
+	float OneWayLaneOffset()
+	{
+		if (numLeftLanes == 0)
+			return 0.5f - 0.5f * numRightLanes;
+		if (numRightLanes == 0)
+			return 0.5f - 0.5f * numLeftLanes;
+		return 0.5f;
+	}
 };
 
 struct CPathInfoForObject

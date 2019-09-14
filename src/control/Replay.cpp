@@ -960,6 +960,7 @@ void CReplay::EmptyReplayBuffer(void)
 {
 	if (Mode == MODE_PLAYBACK)
 		return;
+	Record.m_nOffset = 0;
 	for (int i = 0; i < 8; i++){
 		BufferStatus[i] = REPLAYBUFFER_UNUSED;
 	}
