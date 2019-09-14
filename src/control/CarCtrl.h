@@ -96,6 +96,9 @@ public:
 	static void SteerAICarWithPhysicsTryingToBlockTarget_Stop(CVehicle*, float, float, float, float, float*, float*, float*, bool*);
 	static void SteerAIBoatWithPhysicsHeadingForTarget(CBoat*, float, float, float*, float*, float*);
 	static bool ThisRoadObjectCouldMove(int16);
+	static void ClearInterestingVehicleList();
+	static void FindLinksToGoWithTheseNodes(CVehicle*);
+	static bool GenerateOneEmergencyServicesCar(uint32, CVector);
 
 	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle)
 	{
