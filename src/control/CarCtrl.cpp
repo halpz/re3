@@ -2019,16 +2019,13 @@ void CCarCtrl::DragCarToPoint(CVehicle* pVehicle, CVector* pPoint)
 
 float CCarCtrl::FindSpeedMultiplier(float angleChange, float minAngle, float maxAngle, float coef)
 {
-	float actual = ((float(*)(float, float, float, float))(0x41D980))(angleChange, minAngle, maxAngle, coef);
 	float angle = Abs(LimitRadianAngle(angleChange));
 	float n = angle - minAngle;
 	n = max(0.0f, n);
 	float d = maxAngle - minAngle;
 	float mult = 1.0f - n / d * (1.0f - coef);
 	if (n > d)
-		return coef == actual ? coef : ASSERT(0), coef;
-	if (ABS(mult - actual) > 0.01f)
-		ASSERT(0);
+		return coef;
 	return mult;
 }
 
