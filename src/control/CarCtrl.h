@@ -1,5 +1,6 @@
 #pragma once
 #include "PathFind.h"
+#include "Boat.h"
 #include "Vehicle.h"
 
 class CZoneInfo;
@@ -44,7 +45,6 @@ public:
 	static int32 ChooseCarModel(int32 vehclass);
 	static bool JoinCarWithRoadSystemGotoCoors(CVehicle*, CVector, bool);
 	static void JoinCarWithRoadSystem(CVehicle*);
-	static void SteerAICarWithPhysics(CVehicle*);
 	static void UpdateCarOnRails(CVehicle*);
 	static bool MapCouldMoveInThisArea(float x, float y);
 	static void ScanForPedDanger(CVehicle *veh);
@@ -84,13 +84,17 @@ public:
 	static uint8 FindPathDirection(int32, int32, int32);
 	static void Init(void);
 	static void ReInit(void);
+	static float FindSpeedMultiplier(float, float, float, float);
+	static void SteerAICarWithPhysics(CVehicle*);
+	static void SteerAICarWithPhysics_OnlyMission(CVehicle*, float*, float*, float*, bool*);
+	static void SteerAIBoatWithPhysics(CBoat*);
+	static float FindMaxSteerAngle(CVehicle*);
+	static void SteerAICarWithPhysicsFollowPath(CVehicle*, float*, float*, float*, bool*);
+	static void SteerAICarWithPhysicsHeadingForTarget(CVehicle*, CPhysical*, float, float, float*, float*, float*, bool*);
+	static void SteerAICarWithPhysicsTryingToBlockTarget(CVehicle*, float, float, float, float, float*, float*, float*, bool*);
+	static void SteerAICarWithPhysicsTryingToBlockTarget_Stop(CVehicle*, float, float, float, float, float*, float*, float*, bool*);
+	static void SteerAIBoatWithPhysicsHeadingForTarget(CBoat*, float, float, float*, float*, float*);
 	static bool ThisRoadObjectCouldMove(int16);
-
-	static float GetOffsetOfLaneFromCenterOfRoad(int8 lane, CCarPathLink* pLink)
-	{
-		return (lane + ((pLink->numLeftLanes == 0) ? (0.5f - 0.5f * pLink->numRightLanes) :
-			((pLink->numRightLanes == 0) ? (0.5f - 0.5f * pLink->numLeftLanes) : 0.5f))) * LANE_WIDTH;
-	}
 
 	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle)
 	{

@@ -78,7 +78,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_veh_flagD1 = false;
 	m_veh_flagD2 = false;
 	m_nGunFiringTime = 0;
-	field_214 = 0;
+	m_nTimeBlocked = 0;
 	bLightsOn = false;
 	bVehicleColProcessed = false;
 	m_numPedsUseItAsCover = 0;
