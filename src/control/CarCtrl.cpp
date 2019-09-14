@@ -1964,7 +1964,7 @@ void CCarCtrl::DragCarToPoint(CVehicle* pVehicle, CVector* pPoint)
 	float actualBehindZ;
 	CColPoint point;
 	CEntity* pRoadObject;
-	if (CCollision::IsStoredPoluStillValidVerticalLine(CVector(posTarget.x, posTarget.y, pVehicle->GetPosition().z - 3.0f),
+	if (CCollision::IsStoredPolyStillValidVerticalLine(CVector(posTarget.x, posTarget.y, pVehicle->GetPosition().z - 3.0f),
 	  pVehicle->GetPosition().z - 3.0f, point, &pVehicle->m_aCollPolys[0])){
 		actualAheadZ = point.point.z;
 	}else if (CWorld::ProcessVerticalLine(CVector(posTarget.x, posTarget.y, pVehicle->GetPosition().z + 1.5f),
@@ -1985,7 +1985,7 @@ void CCarCtrl::DragCarToPoint(CVehicle* pVehicle, CVector* pPoint)
 		actualAheadZ = pVehicle->m_fMapObjectHeightAhead;
 	}
 	pVehicle->m_fMapObjectHeightAhead = actualAheadZ;
-	if (CCollision::IsStoredPoluStillValidVerticalLine(CVector(midPos.x, midPos.y, pVehicle->GetPosition().z - 3.0f),
+	if (CCollision::IsStoredPolyStillValidVerticalLine(CVector(midPos.x, midPos.y, pVehicle->GetPosition().z - 3.0f),
 	  pVehicle->GetPosition().z - 3.0f, point, &pVehicle->m_aCollPolys[1])){
 		actualBehindZ = point.point.z;
 	}else if (CWorld::ProcessVerticalLine(CVector(midPos.x, midPos.y, pVehicle->GetPosition().z + 1.5f),

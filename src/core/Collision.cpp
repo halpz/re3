@@ -34,7 +34,7 @@ enum Direction
 eLevelName &CCollision::ms_collisionInMemory = *(eLevelName*)0x8F6250;
 CLinkList<CColModel*> &CCollision::ms_colModelCache = *(CLinkList<CColModel*>*)0x95CB58;
 
-WRAPPER bool CCollision::IsStoredPoluStillValidVerticalLine(const CVector &pos, float z, CColPoint &point, CStoredCollPoly *poly) { EAXJMP(0x4105A0); }
+WRAPPER bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector &pos, float z, CColPoint &point, CStoredCollPoly *poly) { EAXJMP(0x4105A0); }
 
 void
 CCollision::Init(void)
