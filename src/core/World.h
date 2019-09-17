@@ -56,9 +56,10 @@ class CWorld
 	static CPtrList &ms_listMovingEntityPtrs;
 	static CSector (*ms_aSectors)[NUMSECTORS_X];	// [NUMSECTORS_Y][NUMSECTORS_X];
 	static uint16 &ms_nCurrentScanCode;
-	static CColPoint &ms_testSpherePoint;
 
 public:
+	static CColPoint& ms_testSpherePoint;
+
 	static uint8 &PlayerInFocus;
 	static CPlayerInfo *Players;
 	static CEntity *&pIgnoreEntity;

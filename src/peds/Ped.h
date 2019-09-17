@@ -14,6 +14,7 @@
 #include "EventList.h"
 
 struct CPathNode;
+class CAccident;
 
 struct CPedAudioData
 {
@@ -57,6 +58,7 @@ struct FightMove
 };
 static_assert(sizeof(FightMove) == 0x18, "FightMove: error");
 
+// TO-DO: This is eFightState on mobile.
 enum PedFightMoves
 {
 	FIGHTMOVE_NULL,
@@ -169,7 +171,7 @@ enum {
 enum PedLineUpPhase {
 	LINE_UP_TO_CAR_START,
 	LINE_UP_TO_CAR_END,
-	LINE_UP_TO_CAR_2
+	LINE_UP_TO_CAR_2 // Buggy. Used for cops arresting you from passenger door
 };
 
 enum PedOnGroundState {
@@ -330,7 +332,7 @@ public:
 	uint8 bClearObjective : 1;
 	uint8 m_ped_flagH10 : 1;
 	uint8 bCollidedWithMyVehicle : 1;
-	uint8 m_ped_flagH40 : 1;
+	uint8 bRichFromMugging : 1; // ped has lots of cash from mugging people - will drop money if someone points gun to him
 	uint8 m_ped_flagH80 : 1;
 
 	uint8 bShakeFist : 1;  // test shake hand at look entity
@@ -411,9 +413,9 @@ public:
 	bool bRunningToPhone;
 	uint8 field_31D;
 	int16 m_phoneId;
-	uint32 m_lookingForPhone; // unused
+	eCrimeType m_crimeToReportOnPhone;
 	uint32 m_phoneTalkTimer;
-	void *m_lastAccident;
+	CAccident *m_lastAccident;
 	int32 m_nPedType;
 	CPedStats *m_pedStats;
 	float m_fleeFromPosX;
@@ -646,6 +648,8 @@ public:
 	void SeekCar(void);
 	void SeekBoatPosition(void);
 	bool PositionPedOutOfCollision(void);
+	bool RunToReportCrime(eCrimeType);
+	bool PlacePedOnDryLand(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -724,6 +728,7 @@ public:
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	void GiveWeaponBackAfterExitingCar(void);
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 &nThreatReactionRangeMultiplier;
