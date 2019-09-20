@@ -650,6 +650,7 @@ public:
 	bool PositionPedOutOfCollision(void);
 	bool RunToReportCrime(eCrimeType);
 	bool PlacePedOnDryLand(void);
+	bool PossiblyFindBetterPosToSeekCar(CVector*, CVehicle*);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -728,7 +729,7 @@ public:
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
-	void GiveWeaponBackAfterExitingCar(void);
+	void ReplaceWeaponWhenExitingVehicle(void);
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 &nThreatReactionRangeMultiplier;
