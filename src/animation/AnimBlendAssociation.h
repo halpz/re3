@@ -13,12 +13,13 @@ enum {
 	ASSOC_PARTIAL = 0x10,
 	ASSOC_MOVEMENT = 0x20,	// ???
 	ASSOC_HAS_TRANSLATION = 0x40,
-	ASSOC_FLAG80 = 0x80, // walking and running have it
+	ASSOC_FLAG80 = 0x80, // used for footstep sound calculation
 	ASSOC_FLAG100 = 0x100,
 	ASSOC_FLAG200 = 0x200,
 	ASSOC_FLAG400 = 0x400,	// not seen yet
-	ASSOC_FLAG800 = 0x800,
+	ASSOC_FLAG800 = 0x800, // anims that we fall to front. 0x1000 in VC
 	ASSOC_HAS_X_TRANSLATION = 0x1000,
+	// 0x2000 is vehicle anims in VC
 };
 
 // Anim hierarchy associated with a clump
