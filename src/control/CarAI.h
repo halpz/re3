@@ -16,4 +16,5 @@ public:
 	static void AddFiretruckOccupants(CVehicle*);
 	static void CarHasReasonToStop(CVehicle*);
 	static void TellOccupantsToLeaveCar(CVehicle*);
+	static float GetCarToGoToCoors(CVehicle*, CVector*);
 };
