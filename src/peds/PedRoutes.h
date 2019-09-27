@@ -3,5 +3,6 @@
 class CRouteNode
 {
 public:
-	static int16 GetRouteThisPointIsOn(int16 point);
+	static int16 GetRouteThisPointIsOn(int16);
+	static CVector GetPointPosition(int16);
 };

@@ -129,7 +129,7 @@ enum eObjective : uint32 {
 	OBJECTIVE_IDLE,
 	OBJECTIVE_FLEE_TILL_SAFE,
 	OBJECTIVE_GUARD_SPOT,
-	OBJECTIVE_GUARD_AREA,
+	OBJECTIVE_GUARD_AREA,	// not implemented
 	OBJECTIVE_WAIT_IN_CAR,
 	OBJECTIVE_WAIT_IN_CAR_THEN_GETOUT,
 	OBJECTIVE_KILL_CHAR_ON_FOOT,
@@ -141,15 +141,15 @@ enum eObjective : uint32 {
 	OBJECTIVE_LEAVE_VEHICLE,
 	OBJECTIVE_ENTER_CAR_AS_PASSENGER,
 	OBJECTIVE_ENTER_CAR_AS_DRIVER,
-	OBJECTIVE_FOLLOW_CAR_IN_CAR,
-	OBJECTIVE_FIRE_AT_OBJ_FROM_VEHICLE,
-	OBJECTIVE_DESTROY_OBJ,
+	OBJECTIVE_FOLLOW_CAR_IN_CAR, // seems not implemented so far
+	OBJECTIVE_FIRE_AT_OBJ_FROM_VEHICLE,	// not implemented
+	OBJECTIVE_DESTROY_OBJ,	// not implemented
 	OBJECTIVE_DESTROY_CAR,
 	OBJECTIVE_GOTO_AREA_ANY_MEANS,
 	OBJECTIVE_GOTO_AREA_ON_FOOT,
 	OBJECTIVE_RUN_TO_AREA,
-	OBJECTIVE_23,
-	OBJECTIVE_24,
+	OBJECTIVE_23,	// not implemented
+	OBJECTIVE_24,	// not implemented
 	OBJECTIVE_FIGHT_CHAR,
 	OBJECTIVE_SET_LEADER,
 	OBJECTIVE_FOLLOW_ROUTE,
@@ -160,7 +160,9 @@ enum eObjective : uint32 {
 	OBJECTIVE_STEAL_ANY_CAR,
 	OBJECTIVE_MUG_CHAR,
 	OBJECTIVE_FLEE_CAR,
-	OBJECTIVE_35
+#ifdef VC_PED_PORTS
+	OBJECTIVE_LEAVE_CAR_AND_DIE
+#endif
 };
 
 enum {
@@ -469,8 +471,8 @@ public:
 	uint32 m_soundStart;
 	uint16 m_lastQueuedSound;
 	uint16 m_queuedSound;
-	CVector m_vecSeekPosEx;
-	float m_seekExAngle;
+	CVector m_vecSeekPosEx; // used in objectives
+	float m_distanceToCountSeekDoneEx; // used in objectives
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
@@ -651,6 +653,11 @@ public:
 	bool RunToReportCrime(eCrimeType);
 	bool PlacePedOnDryLand(void);
 	bool PossiblyFindBetterPosToSeekCar(CVector*, CVehicle*);
+	void UpdateFromLeader(void);
+	int ScanForThreats(void);
+	void SetEnterCar(CVehicle*, uint32);
+	bool WarpPedToNearEntityOffScreen(CEntity*);
+	void SetExitCar(CVehicle*, uint32);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -721,6 +728,10 @@ public:
 	void PointGunAt(void);
 	bool ServiceTalkingWhenDead(void);
 	void SetPedPositionInTrain(void);
+	void SetShootTimer(uint32);
+	void SetSeekCar(CVehicle*, uint32);
+	void SetSeekBoatPosition(CVehicle*);
+	void SetExitTrain(CVehicle*);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
@@ -733,6 +744,9 @@ public:
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 &nThreatReactionRangeMultiplier;
+
+	// set by 0481:set_enter_car_range_multiplier opcode
+	static uint16 &nEnterCarRangeMultiplier;
 
 	static bool &bNastyLimbsCheat;
 	static bool &bPedCheat2;

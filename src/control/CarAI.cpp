@@ -14,6 +14,7 @@ WRAPPER void CCarAI::AddPoliceOccupants(CVehicle*) { EAXJMP(0x415C60); }
 WRAPPER void CCarAI::AddAmbulanceOccupants(CVehicle*) { EAXJMP(0x415CE0); }
 WRAPPER void CCarAI::AddFiretruckOccupants(CVehicle*) { EAXJMP(0x415D00); }
 WRAPPER void CCarAI::TellOccupantsToLeaveCar(CVehicle*) { EAXJMP(0x415D20); }
+WRAPPER float CCarAI::GetCarToGoToCoors(CVehicle*, CVector*) { EAXJMP(0x415B10); }
 
 void CCarAI::CarHasReasonToStop(CVehicle* pVehicle)
 {
