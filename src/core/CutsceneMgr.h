@@ -1,6 +1,8 @@
 #pragma once
 #include "CutsceneObject.h"
 
+#define CUTSCENENAMESIZE 8
+
 class CDirectory;
 class CAnimBlendAssocGroup;
 class CCutsceneHead;
@@ -16,7 +18,7 @@ class CCutsceneMgr
 	static bool &ms_animLoaded;
 	static bool &ms_useLodMultiplier;
 
-	static char(&ms_cutsceneName)[8];
+	static char(&ms_cutsceneName)[CUTSCENENAMESIZE];
 	static CAnimBlendAssocGroup &ms_cutsceneAssociations;
 	static CVector &ms_cutsceneOffset;
 	static float &ms_cutsceneTimer;

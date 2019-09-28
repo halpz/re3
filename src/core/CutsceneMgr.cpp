@@ -123,7 +123,7 @@ int32 &CCutsceneMgr::ms_numCutsceneObjs = *(int32*)0x942FA4;
 bool &CCutsceneMgr::ms_loaded = *(bool*)0x95CD95;
 bool &CCutsceneMgr::ms_animLoaded = *(bool*)0x95CDA0;
 bool &CCutsceneMgr::ms_useLodMultiplier = *(bool*)0x95CD74;
-char(&CCutsceneMgr::ms_cutsceneName)[8] = *(char(*)[8]) *(uintptr*)0x70D9D0;
+char(&CCutsceneMgr::ms_cutsceneName)[CUTSCENENAMESIZE] = *(char(*)[CUTSCENENAMESIZE]) *(uintptr*)0x70D9D0;
 CAnimBlendAssocGroup &CCutsceneMgr::ms_cutsceneAssociations = *(CAnimBlendAssocGroup*)0x709C58;
 CVector &CCutsceneMgr::ms_cutsceneOffset = *(CVector*)0x8F2C0C;
 float &CCutsceneMgr::ms_cutsceneTimer = *(float*)0x941548;
@@ -141,7 +141,7 @@ CCutsceneMgr::Initialise(void)
 	ms_cutsceneProcessing = false;
 	ms_useLodMultiplier = false;
 
-	ms_pCutsceneDir = new CDirectory(512);
+	ms_pCutsceneDir = new CDirectory(CUTSCENEDIRSIZE);
 	ms_pCutsceneDir->ReadDirFile("ANIM\\CUTS.DIR");
 }
 
@@ -224,7 +224,7 @@ void
 CCutsceneMgr::SetHeadAnim(const char *animName, CObject *pObject)
 {
 	CCutsceneHead *pCutsceneHead = (CCutsceneHead*)pObject;
-	char szAnim[16];
+	char szAnim[CUTSCENENAMESIZE * 2];
 
 	sprintf(szAnim, "%s_%s", ms_cutsceneName, animName);
 	pCutsceneHead->PlayAnimation(szAnim);
