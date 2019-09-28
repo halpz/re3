@@ -2383,7 +2383,7 @@ void CMenuManager::SwitchToNewScreen(int32 screen)
 
 	// Set player skin.
 	if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
-		CPlayerSkin::BeginFrontEndSkinEdit();
+		CPlayerSkin::BeginFrontendSkinEdit();
 		m_bSkinsFound = false;
 	}
 
