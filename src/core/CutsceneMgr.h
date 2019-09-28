@@ -27,7 +27,7 @@ public:
 	static bool IsRunning(void) { return ms_running; }
 	static bool IsCutsceneProcessing(void) { return ms_cutsceneProcessing; }
 	static CCutsceneObject* GetCutsceneObject(int id) { return ms_pCutsceneObjects[id]; }
-	static int GetCutsceneTimeInMilleseconds() { return 1000.0f * ms_cutsceneTimer; }
+	static int GetCutsceneTimeInMilleseconds(void) { return 1000.0f * ms_cutsceneTimer; }
 	static char *GetCutsceneName(void) { return ms_cutsceneName; }
 	static bool HasCutsceneFinished(void);
 

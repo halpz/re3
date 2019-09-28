@@ -329,41 +329,41 @@ CCutsceneMgr::CreateCutsceneObject(int modelId)
 void
 CCutsceneMgr::DeleteCutsceneData(void)
 {
-	if (ms_loaded) {
-		ms_cutsceneProcessing = false;
-		ms_useLodMultiplier = false;
+	if (!ms_loaded) return;
 
-		for (--ms_numCutsceneObjs; ms_numCutsceneObjs >= 0; ms_numCutsceneObjs--) {
-			CWorld::Remove(ms_pCutsceneObjects[ms_numCutsceneObjs]);
-			ms_pCutsceneObjects[ms_numCutsceneObjs]->DeleteRwObject();
-			if (ms_pCutsceneObjects[ms_numCutsceneObjs])
-				delete ms_pCutsceneObjects[ms_numCutsceneObjs];
-		}
-		ms_numCutsceneObjs = 0;
+	ms_cutsceneProcessing = false;
+	ms_useLodMultiplier = false;
 
-		if (ms_animLoaded)
-			CAnimManager::RemoveLastAnimFile();
-
-		ms_animLoaded = false;
-		TheCamera.RestoreWithJumpCut();
-		TheCamera.SetWideScreenOff();
-		ms_running = false;
-		ms_loaded = false;
-
-		FindPlayerPed()->bIsVisible = true;
-		CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_80;
-		CWorld::Players[CWorld::PlayerInFocus].MakePlayerSafe(false);
-
-		if (strcmpi(ms_cutsceneName, "end")) {
-			DMAudio.StopCutSceneMusic();
-			if (strcmpi(ms_cutsceneName, "bet"))
-				DMAudio.ChangeMusicMode(1);
-		}
-		CTimer::Stop();
-		//TheCamera.GetScreenFadeStatus() == 2; // what for??
-		CGame::DrasticTidyUpMemory();
-		CTimer::Update();
+	for (--ms_numCutsceneObjs; ms_numCutsceneObjs >= 0; ms_numCutsceneObjs--) {
+		CWorld::Remove(ms_pCutsceneObjects[ms_numCutsceneObjs]);
+		ms_pCutsceneObjects[ms_numCutsceneObjs]->DeleteRwObject();
+		if (ms_pCutsceneObjects[ms_numCutsceneObjs])
+			delete ms_pCutsceneObjects[ms_numCutsceneObjs];
 	}
+	ms_numCutsceneObjs = 0;
+
+	if (ms_animLoaded)
+		CAnimManager::RemoveLastAnimFile();
+
+	ms_animLoaded = false;
+	TheCamera.RestoreWithJumpCut();
+	TheCamera.SetWideScreenOff();
+	ms_running = false;
+	ms_loaded = false;
+
+	FindPlayerPed()->bIsVisible = true;
+	CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_80;
+	CWorld::Players[CWorld::PlayerInFocus].MakePlayerSafe(false);
+
+	if (strcmpi(ms_cutsceneName, "end")) {
+		DMAudio.StopCutSceneMusic();
+		if (strcmpi(ms_cutsceneName, "bet"))
+			DMAudio.ChangeMusicMode(1);
+	}
+	CTimer::Stop();
+	//TheCamera.GetScreenFadeStatus() == 2; // what for??
+	CGame::DrasticTidyUpMemory();
+	CTimer::Update();
 }
 
 void
@@ -395,20 +395,20 @@ CCutsceneMgr::Update(void)
 		break;
 	}
 
-	if (ms_running) {
-		ms_cutsceneTimer += CTimer::GetTimeStepNonClipped() * 0.02;
-		if (strcmpi(ms_cutsceneName, "end") && TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FLYBY && ms_cutsceneLoadStatus == CUTSCENE_LOADING_0) {
-			if (CPad::GetPad(0)->GetCrossJustDown()
-				|| (CGame::playingIntro && CPad::GetPad(0)->GetStartJustDown())
-				|| CPad::GetPad(0)->GetLeftMouseJustDown()
-				|| CPad::GetPad(0)->GetPadEnterJustDown() || CPad::GetPad(0)->GetEnterJustDown() // NOTE: In original code it's a single CPad method
-				|| CPad::GetPad(0)->GetCharJustDown(VK_SPACE))
-				FinishCutscene();
-		}
+	if (!ms_running) return;
+
+	ms_cutsceneTimer += CTimer::GetTimeStepNonClipped() * 0.02;
+	if (strcmpi(ms_cutsceneName, "end") && TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FLYBY && ms_cutsceneLoadStatus == CUTSCENE_LOADING_0) {
+		if (CPad::GetPad(0)->GetCrossJustDown()
+			|| (CGame::playingIntro && CPad::GetPad(0)->GetStartJustDown())
+			|| CPad::GetPad(0)->GetLeftMouseJustDown()
+			|| CPad::GetPad(0)->GetPadEnterJustDown() || CPad::GetPad(0)->GetEnterJustDown() // NOTE: In original code it's a single CPad method
+			|| CPad::GetPad(0)->GetCharJustDown(VK_SPACE))
+			FinishCutscene();
 	}
 }
 
-bool CCutsceneMgr::HasCutsceneFinished() { return TheCamera.GetPositionAlongSpline() == 1.0; }
+bool CCutsceneMgr::HasCutsceneFinished(void) { return TheCamera.GetPositionAlongSpline() == 1.0; }
 
 STARTPATCHES
 InjectHook(0x4045D0, &CCutsceneMgr::Initialise, PATCH_JUMP);
