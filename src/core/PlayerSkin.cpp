@@ -43,7 +43,7 @@ LoadPlayerDff(void)
 	uint8 *buffer;
 	bool streamWasAdded = false;
 
-	if (!CdStreamGetNumImages()) {
+	if (CdStreamGetNumImages() == 0) {
 		CdStreamAddImage("models\\gta3.img");
 		streamWasAdded = true;
 	}
