@@ -30,6 +30,12 @@ WRAPPER void CCamera::SetCamPositionForFixedMode(const CVector&, const CVector&)
 WRAPPER void CCamera::Init(void) { EAXJMP(0x46BAD0); }
 WRAPPER void CCamera::SetRwCamera(RwCamera*) { EAXJMP(0x46FEC0); }
 WRAPPER void CCamera::Process(void) { EAXJMP(0x46D3F0); }
+WRAPPER void CCamera::LoadPathSplines(int file) { EAXJMP(0x46D1D0); }
+WRAPPER uint32 CCamera::GetCutSceneFinishTime(void) { EAXJMP(0x46B920); }
+WRAPPER void CCamera::FinishCutscene(void) { EAXJMP(0x46B560); }
+WRAPPER void CCamera::SetCamCutSceneOffSet(const CVector&) { EAXJMP(0x46FC30); };
+WRAPPER void CCamera::TakeControlWithSpline(short) { EAXJMP(0x471620); };
+WRAPPER void CCamera::RestoreWithJumpCut(void) { EAXJMP(0x46FAE0); };
 
 bool
 CCamera::GetFading()

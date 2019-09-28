@@ -444,6 +444,7 @@ int     m_iModeObbeCamIsInForCar;
 	bool Get_Just_Switched_Status() { return m_bJust_Switched; }
 	inline const CMatrix& GetCameraMatrix(void) { return m_cameraMatrix; }
 	CVector &GetGameCamPosition(void) { return m_vecGameCamPos; }
+	float GetPositionAlongSpline(void) { return m_fPositionAlongSpline; }
 	bool IsPointVisible(const CVector &center, const CMatrix *mat);
 	bool IsSphereVisible(const CVector &center, float radius, const CMatrix *mat);
 	bool IsSphereVisible(const CVector &center, float radius);
@@ -479,6 +480,16 @@ int     m_iModeObbeCamIsInForCar;
 	void Init();
 	void SetRwCamera(RwCamera*);
 	void Process();
+
+	void LoadPathSplines(int file);
+	uint32 GetCutSceneFinishTime(void);
+	void FinishCutscene(void);
+
+	void SetCamCutSceneOffSet(const CVector&);
+	void TakeControlWithSpline(short);
+	void SetWideScreenOn(void) { m_WideScreenOn = true; }
+	void SetWideScreenOff(void) { m_WideScreenOn = false; }
+	void RestoreWithJumpCut(void);
 
 	void dtor(void) { this->CCamera::~CCamera(); }
 };
