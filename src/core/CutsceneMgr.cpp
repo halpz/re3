@@ -148,8 +148,7 @@ CCutsceneMgr::Initialise(void)
 void
 CCutsceneMgr::Shutdown(void)
 {
-	if (ms_pCutsceneDir)
-		delete ms_pCutsceneDir;
+	delete ms_pCutsceneDir;
 }
 
 void
@@ -234,7 +233,7 @@ CCutsceneMgr::SetHeadAnim(const char *animName, CObject *pObject)
 void
 CCutsceneMgr::FinishCutscene()
 {
-	CCutsceneMgr::ms_cutsceneTimer = TheCamera.GetCutSceneFinishTime() * 0.001;
+	CCutsceneMgr::ms_cutsceneTimer = TheCamera.GetCutSceneFinishTime() * 0.001f;
 	TheCamera.FinishCutscene();
 
 	FindPlayerPed()->bIsVisible = true;
@@ -337,8 +336,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 	for (--ms_numCutsceneObjs; ms_numCutsceneObjs >= 0; ms_numCutsceneObjs--) {
 		CWorld::Remove(ms_pCutsceneObjects[ms_numCutsceneObjs]);
 		ms_pCutsceneObjects[ms_numCutsceneObjs]->DeleteRwObject();
-		if (ms_pCutsceneObjects[ms_numCutsceneObjs])
-			delete ms_pCutsceneObjects[ms_numCutsceneObjs];
+		delete ms_pCutsceneObjects[ms_numCutsceneObjs];
 	}
 	ms_numCutsceneObjs = 0;
 
@@ -397,7 +395,7 @@ CCutsceneMgr::Update(void)
 
 	if (!ms_running) return;
 
-	ms_cutsceneTimer += CTimer::GetTimeStepNonClipped() * 0.02;
+	ms_cutsceneTimer += CTimer::GetTimeStepNonClipped() * 0.02f;
 	if (strcmpi(ms_cutsceneName, "end") && TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FLYBY && ms_cutsceneLoadStatus == CUTSCENE_LOADING_0) {
 		if (CPad::GetPad(0)->GetCrossJustDown()
 			|| (CGame::playingIntro && CPad::GetPad(0)->GetStartJustDown())
@@ -408,7 +406,7 @@ CCutsceneMgr::Update(void)
 	}
 }
 
-bool CCutsceneMgr::HasCutsceneFinished(void) { return TheCamera.GetPositionAlongSpline() == 1.0; }
+bool CCutsceneMgr::HasCutsceneFinished(void) { return TheCamera.GetPositionAlongSpline() == 1.0f; }
 
 STARTPATCHES
 InjectHook(0x4045D0, &CCutsceneMgr::Initialise, PATCH_JUMP);
