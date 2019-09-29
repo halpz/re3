@@ -266,7 +266,7 @@ public:
 
 	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
 	uint8 bIsStanding : 1;
-	uint8 m_ped_flagA2 : 1;
+	uint8 m_ped_flagA2 : 1;	// bWasStanding?
 	uint8 bIsAttacking : 1;		// doesn't reset after fist fight
 	uint8 bIsPointingGunAt : 1;
 	uint8 bIsLooking : 1;
@@ -281,9 +281,9 @@ public:
 	uint8 bIsLanding : 1;
 	uint8 bIsRunning : 1; // on some conditions
 	uint8 bHitSomethingLastFrame : 1;
-	uint8 m_ped_flagB80 : 1; // bIsNearCar? something related with reaction to colliding vehicle
+	uint8 m_ped_flagB80 : 1; // bIsNearCar? it's sure that it's related with cars and used for deciding whether we should move
 
-	uint8 m_ped_flagC1 : 1;
+	uint8 m_ped_flagC1 : 1;	// bCanPedEnterSeekedCar?
 	uint8 bRespondsToThreats : 1;
 	uint8 bRenderPedInCar : 1;
 	uint8 bChangedSeat : 1;
@@ -294,15 +294,15 @@ public:
 
 	uint8 bHasACamera : 1; // does ped possess a camera to document accidents involves fire/explosion
 	uint8 m_ped_flagD2 : 1; // set when ped witnessed an event
-	uint8 m_ped_flagD4 : 1; // bPedIsBleeding? so far only creates blood pool in hands up state
-	uint8 m_ped_flagD8 : 1;
+	uint8 bPedIsBleeding : 1;
+	uint8 bStopAndShoot : 1; // Ped cannot reach target to attack with fist, need to use gun
 	uint8 bIsPedDieAnimPlaying : 1;
 	uint8 bUsePedNodeSeek : 1;
-	uint8 m_ped_flagD40 : 1;	// reset when objective changes
+	uint8 bObjectiveCompleted : 1;
 	uint8 bScriptObjectiveCompleted : 1;
 
 	uint8 bKindaStayInSamePlace : 1;
-	uint8 m_ped_flagE2 : 1;
+	uint8 m_ped_flagE2 : 1; // bBeingChasedByPolice?
 	uint8 bNotAllowedToDuck : 1;
 	uint8 bCrouchWhenShooting : 1;
 	uint8 bIsDucking : 1;
@@ -316,7 +316,7 @@ public:
 	uint8 m_ped_flagF8 : 1;
 	uint8 bWillBeQuickJacked : 1;
 	uint8 bCancelEnteringCar : 1; // after door is opened or couldn't be opened due to it's locked
-	uint8 m_ped_flagF40 : 1;
+	uint8 bObstacleShowedUpDuringKillObjective : 1;
 	uint8 bDuckAndCover : 1;
 
 	uint8 m_ped_flagG1 : 1;
@@ -328,7 +328,7 @@ public:
 	uint8 bGonnaKillTheCarJacker : 1; // only set when car is jacked from right door
 	uint8 bFadeOut : 1;
 
-	uint8 bKnockedUpIntoAir : 1; // has ped been knocked up into the air by a car collision
+	uint8 bKnockedUpIntoAir : 1; // NOT CERTAIN - has ped been knocked up into the air by a car collision
 	uint8 m_ped_flagH2 : 1;
 	uint8 m_ped_flagH4 : 1;
 	uint8 bClearObjective : 1;
@@ -339,7 +339,7 @@ public:
 
 	uint8 bShakeFist : 1;  // test shake hand at look entity
 	uint8 bNoCriticalHits : 1; // if set, limbs won't came off
-	uint8 m_ped_flagI4 : 1;
+	uint8 m_ped_flagI4 : 1; // seems like related with cars
 	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 bFallenDown : 1;
 	uint8 m_ped_flagI20 : 1;
@@ -402,7 +402,7 @@ public:
 	float m_fRotationDest;
 	float m_headingRate;
 	uint16 m_vehEnterType;	// TODO: this is more like a door, not a type
-	uint16 m_walkAroundType;
+	int16 m_walkAroundType;
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
@@ -530,7 +530,6 @@ public:
 	void CalculateNewOrientation(void);
 	float WorkOutHeadingForMovingFirstPerson(float);
 	void CalculateNewVelocity(void);
-	bool CanPedJumpThis(CEntity*);
 	bool CanSeeEntity(CEntity*, float);
 	void RestorePreviousObjective(void);
 	void SetIdle(void);
@@ -732,6 +731,11 @@ public:
 	void SetSeekCar(CVehicle*, uint32);
 	void SetSeekBoatPosition(CVehicle*);
 	void SetExitTrain(CVehicle*);
+#ifdef VC_PED_PORTS
+	bool CanPedJumpThis(CEntity*, CVector*);
+#else
+	bool CanPedJumpThis(CEntity*);
+#endif
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }

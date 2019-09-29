@@ -35,7 +35,7 @@ public:
 	int8 field_1414;
 	int8 field_1415;
 	CVector m_vecSafePos[6]; // safe places from the player, for example behind a tree
-	int32 field_1488[6]; // m_pPedAtSafePos?
+	CPed *m_pPedAtSafePos[6];
 	float m_fWalkAngle;
 	float m_fFPSMoveHeading;
 

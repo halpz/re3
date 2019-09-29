@@ -51,7 +51,7 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	field_1413 = 0;
 	for (int i = 0; i < 6; i++) {
 		m_vecSafePos[i] = CVector(0.0f, 0.0f, 0.0f);
-		field_1488[i] = 0;
+		m_pPedAtSafePos[i] = nil;
 	}
 }
 
