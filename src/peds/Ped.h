@@ -667,8 +667,6 @@ public:
 	static void LoadFightData(void);
 
 	// Callbacks
-	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
-	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
 	static void PedGetupCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedStaggerCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedEvadeCB(CAnimBlendAssociation *assoc, void *arg);
