@@ -1,7 +1,7 @@
 #pragma once
 #include "Weapon.h"
 
-enum ePickupType
+enum ePickupType : uint8
 {
 	PICKUP_NONE = 0,
 	PICKUP_IN_SHOP = 1,
@@ -26,6 +26,7 @@ class CObject;
 class CPickup
 {
 	ePickupType m_eType;
+	bool m_bRemoved;
 	uint16 m_wQuantity;
 	CObject *m_pObject;
 	uint32 m_nTimer;
@@ -33,6 +34,8 @@ class CPickup
 	int16 m_wIndex;
 	CVector m_vecPos;
 };
+
+static_assert(sizeof(CPickup) == 0x1C, "CPickup: error");
 
 class CPickups
 {
