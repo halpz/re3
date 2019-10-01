@@ -829,6 +829,22 @@ CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
 	}
 }
 
+static RwObject*
+SetPedAtomicVisibilityCB(RwObject* object, void* data)
+{
+	if (data == nil)
+		RpAtomicSetFlags(object, 0);
+	return object;
+}
+
+static RwFrame*
+RecurseFrameChildrenVisibilityCB(RwFrame* frame, void* data)
+{
+	RwFrameForAllObjects(frame, SetPedAtomicVisibilityCB, data);
+	RwFrameForAllChildren(frame, RecurseFrameChildrenVisibilityCB, nil);
+	return frame;
+}
+
 void
 CPed::RemoveBodyPart(PedNode nodeId, int8 direction)
 {
@@ -846,13 +862,13 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 direction)
 			pos.y = 0.0f;
 			pos.z = 0.0f;
 
-			for (frame = RwFrameGetParent(frame); frame; frame = RwFrameGetParent(frame))
+			for (; frame; frame = RwFrameGetParent(frame))
 				RwV3dTransformPoints(&pos, &pos, 1, RwFrameGetMatrix(frame));
 
 			if (CEntity::GetIsOnScreen()) {
 				CParticle::AddParticle(PARTICLE_TEST, pos,
 					CVector(0.0f, 0.0f, 0.0f),
-					nil, 0.2f, 0, 0, 0, 0);
+					nil, 0.1f, 0, 0, 0, 0);
 
 				for (int i = 0; i < 16; i++) {
 					CParticle::AddParticle(PARTICLE_BLOOD_SMALL,
@@ -867,22 +883,6 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 direction)
 	} else {
 		printf("Trying to remove ped component");
 	}
-}
-
-RwObject*
-CPed::SetPedAtomicVisibilityCB(RwObject *object, void *data)
-{
-	if (data == nil)
-		RpAtomicSetFlags(object, 0);
-	return object;
-}
-
-RwFrame*
-CPed::RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data)
-{
-	RwFrameForAllObjects(frame, SetPedAtomicVisibilityCB, data);
-	RwFrameForAllChildren(frame, RecurseFrameChildrenVisibilityCB, nil);
-	return frame;
 }
 
 void
@@ -3552,7 +3552,56 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 			case WEAPONTYPE_BASEBALLBAT:
 				if (bMeleeProof)
 					return false;
+#ifdef VC_PED_PORTS
+				if (/*method != WEAPONTYPE_KATANA || */
+					damagedBy != FindPlayerPed()
+					|| FindPlayerPed()->m_nPedState != PED_FIGHT
+					/*|| FindPlayerPed()->m_lastFightMove != 28 && FindPlayerPed()->m_lastFightMove != 29 */
+					|| CGeneral::GetRandomNumber() & 3) {
 
+					if (m_nPedState == PED_FALL) {
+						if (IsPedHeadAbovePos(-0.3f)) {
+							dieAnim = NUM_ANIMS;
+						} else {
+							if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG800))
+								dieAnim = ANIM_FLOOR_HIT_F;
+							else
+								dieAnim = ANIM_FLOOR_HIT;
+							dieDelta = dieDelta * 2.0f;
+							dieSpeed = 0.5f;
+						}
+					} else if (damagedBy != FindPlayerPed()) { // || FindPlayerPed()->m_lastFightMove != 29)
+						//if (damagedBy != FindPlayerPed() || FindPlayerPed()->m_lastFightMove != 30) {
+							switch (direction) {
+								case 0:
+									dieAnim = ANIM_KO_SKID_FRONT;
+									break;
+								case 1:
+									dieAnim = ANIM_KO_SPIN_R;
+									break;
+								case 2:
+									dieAnim = ANIM_KO_SKID_BACK;
+									break;
+								case 3:
+									dieAnim = ANIM_KO_SPIN_L;
+									break;
+								default:
+									break;
+							}
+						//} else {
+						//	dieAnim = ANIM_KO_SHOT_STOM;
+						//}
+					} else {
+						dieAnim = ANIM_KO_SHOT_FACE;
+					}
+				} else {
+					dieAnim = ANIM_KO_SHOT_FACE;
+					// SpawnFlyingComponent in VC
+					RemoveBodyPart(PED_HEAD, direction);
+					headShot = true;
+					willLinger = true;
+				}
+#else
 				if (m_nPedState == PED_FALL) {
 					if (IsPedHeadAbovePos(-0.3f)) {
 						dieAnim = NUM_ANIMS;
@@ -3582,6 +3631,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 							break;
 					}
 				}
+#endif
 				break;
 			case WEAPONTYPE_COLT45:
 			case WEAPONTYPE_UZI:
@@ -3596,8 +3646,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 				if (IsPlayer() || bNoCriticalHits)
 					dontRemoveLimb = true;
 				else {
-					switch (method)
-					{
+					switch (method) {
 						case WEAPONTYPE_SNIPERRIFLE:
 							dontRemoveLimb = false;
 							break;
