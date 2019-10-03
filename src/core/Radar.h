@@ -47,8 +47,8 @@ enum eRadarSprite
 
 struct CBlip
 {
-	int32 m_nColor;
-	int16 m_eBlipType; // eBlipType
+	uint32 m_nColor;
+	uint16 m_eBlipType; // eBlipType
 	int32 m_nEntityHandle;
 	CVector2D m_vec2DPos;
 	CVector m_vecPos;
@@ -57,8 +57,8 @@ struct CBlip
 	bool m_bInUse;
 	float m_Radius;
 	int16 m_wScale;
-	int16 m_eBlipDisplay; // eBlipDisplay
-	int16 m_IconID; // eRadarSprite
+	uint16 m_eBlipDisplay; // eBlipDisplay
+	uint16 m_IconID; // eRadarSprite
 };
 static_assert(sizeof(CBlip) == 0x30, "CBlip: error");
 
@@ -72,7 +72,7 @@ class CRadar
 {
 public:
 	static float &m_RadarRange;
-	static CBlip *ms_RadarTrace;	//[NUMRADARBLIPS]
+	static CBlip (&ms_RadarTrace)[NUMRADARBLIPS];
 	static CSprite2d *AsukaSprite;
 	static CSprite2d *BombSprite;
 	static CSprite2d *CatSprite;
@@ -96,13 +96,13 @@ public:
 	static CSprite2d *RadarSprites[21];
 
 public:
-	static int CalculateBlipAlpha(float dist);
+	static uint8 CalculateBlipAlpha(float dist);
 	static void ChangeBlipBrightness(int32 i, int32 bright);
 	static void ChangeBlipColour(int32 i, int32);
-	static void ChangeBlipDisplay(int32 i, int16 flag);
-	static void ChangeBlipScale(int32 i, int16 scale);
+	static void ChangeBlipDisplay(int32 i, eBlipDisplay display);
+	static void ChangeBlipScale(int32 i, int32 scale);
 	static void ClearBlip(int32 i);
-	static void ClearBlipForEntity(int16 type, int32 id);
+	static void ClearBlipForEntity(eBlipType type, int32 id);
 	static int ClipRadarPoly(CVector2D *out, const CVector2D *in);
 	static bool DisplayThisBlip(int32 i);
 	static void Draw3dMarkers();
@@ -111,11 +111,11 @@ public:
 	static void DrawRadarMap();
 	static void DrawRadarMask();
 	static void DrawRadarSection(int32 x, int32 y);
-	static void DrawRadarSprite(int32 sprite, float x, float y, int32 alpha);
+	static void DrawRadarSprite(uint16 sprite, float x, float y, uint8 alpha);
 	static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int32 alpha);
 	static int32 GetActualBlipArrayIndex(int32 i);
 	static int32 GetNewUniqueBlipIndex(int32 i);
-	static int32 GetRadarTraceColour(int32 color, bool bright);
+	static uint32 GetRadarTraceColour(uint32 color, bool bright);
 	static void Initialise();
 	static float LimitRadarPoint(CVector2D &point);
 	static void LoadAllRadarBlips(int32);
@@ -125,11 +125,11 @@ public:
 	static void RequestMapSection(int32 x, int32 y);
 	static void SaveAllRadarBlips(int32);
 	static void SetBlipSprite(int32 i, int32 icon);
-	static int32 SetCoordBlip(eBlipType type, CVector pos, int32, eBlipDisplay flag);
+	static int32 SetCoordBlip(eBlipType type, CVector pos, int32, eBlipDisplay);
 	static int32 SetEntityBlip(eBlipType type, int32, int32, eBlipDisplay);
-	static void SetRadarMarkerState(int32 i, int32 flag);
-	static void ShowRadarMarker(CVector pos, int16 color, float radius);
-	static void ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 green, uint32 blue, uint32 alpha);
+	static void SetRadarMarkerState(int32 i, bool flag);
+	static void ShowRadarMarker(CVector pos, uint32 color, float radius);
+	static void ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha);
 	static void Shutdown();
 	static void StreamRadarSections(const CVector &posn);
 	static void StreamRadarSections(int32 x, int32 y);
