@@ -192,9 +192,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 			case PICKUP_IN_SHOP:
 				if (CWorld::Players[playerId].m_nMoney < CostOfWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())]) {
 					CGarages::TriggerMessage("PU_MONY", -1, 6000, -1);
-				}
-				else
-				{
+				} else {
 					CWorld::Players[playerId].m_nMoney -= CostOfWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())];
 					if (!CPickups::GivePlayerGoodiesWithPickUpMI(m_pObject->GetModelIndex(), playerId)) {
 						player->GiveWeapon(CPickups::WeaponForModel(m_pObject->GetModelIndex()), AmmoForWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())]);
@@ -215,9 +213,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 							player->m_nSelectedWepSlot = player->GetWeaponSlot(CPickups::WeaponForModel(m_pObject->GetModelIndex()));
 						}
 						DMAudio.PlayFrontEndSound(SOUND_PICKUP_WEAPON, m_pObject->GetModelIndex() - MI_GRENADE);
-					}
-					else if (m_pObject->GetModelIndex() == MI_PICKUP_CAMERA && vehicle != nil)
-					{
+					} else if (m_pObject->GetModelIndex() == MI_PICKUP_CAMERA && vehicle != nil) {
 						DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
 						CPickups::bPickUpcamActivated = true;
 						CPickups::pPlayerVehicle = FindPlayerVehicle();
