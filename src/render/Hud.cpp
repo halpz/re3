@@ -336,23 +336,6 @@ void CHud::Draw()
 
 		AsciiToUnicode(sTemp, sPrint);
 
-		CFont::SetBackgroundOff();
-		CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
-		CFont::SetJustifyOff();
-		CFont::SetCentreOn();
-		CFont::SetCentreSize(SCREEN_SCALE_X(640.0f));
-		CFont::SetPropOn();
-		CFont::SetFontStyle(FONT_BANK);
-
-		if (!CDarkel::FrenzyOnGoing()) {
-			if (WeaponType) {
-				if (WeaponType != WEAPONTYPE_BASEBALLBAT) {
-					CFont::SetColor(CRGBA(0, 0, 0, 255));
-					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(66.0f), SCREEN_SCALE_Y(73.0f), sPrint);
-				}
-			}
-		}
-
 		/*
 			DrawWeaponIcon
 		*/
@@ -367,6 +350,19 @@ void CHud::Draw()
 			1.0f,
 			1.0f,
 			1.0f);
+
+		CFont::SetBackgroundOff();
+		CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
+		CFont::SetJustifyOff();
+		CFont::SetCentreOn();
+		CFont::SetCentreSize(SCREEN_SCALE_X(640.0f));
+		CFont::SetPropOn();
+		CFont::SetFontStyle(FONT_BANK);
+
+		if (!CDarkel::FrenzyOnGoing() && WeaponType != WEAPONTYPE_UNARMED && WeaponType != WEAPONTYPE_BASEBALLBAT) {
+			CFont::SetColor(CRGBA(0, 0, 0, 255));
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(66.0f), SCREEN_SCALE_Y(73.0f), sPrint);
+		}
 
 		/*
 			DrawHealth
