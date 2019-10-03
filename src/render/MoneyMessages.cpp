@@ -14,10 +14,10 @@ void
 CMoneyMessage::Render()
 {
 	const float MAX_SCALE = 4.0f;
-	uint32 dwLifeTime = CTimer::GetTimeInMilliseconds() - m_nTimeRegistered;
-	if (dwLifeTime >= MONEY_MESSAGE_LIFETIME_MS) m_nTimeRegistered = 0;
+	uint32 nLifeTime = CTimer::GetTimeInMilliseconds() - m_nTimeRegistered;
+	if (nLifeTime >= MONEY_MESSAGE_LIFETIME_MS) m_nTimeRegistered = 0;
 	else {
-		float fLifeTime = (float)dwLifeTime / MONEY_MESSAGE_LIFETIME_MS;
+		float fLifeTime = (float)nLifeTime / MONEY_MESSAGE_LIFETIME_MS;
 		RwV3d vecOut;
 		float fDistX, fDistY;
 		if (CSprite::CalcScreenCoors(m_vecPosition + CVector(0.0f, 0.0f, fLifeTime), &vecOut, &fDistX, &fDistY, true)) {
