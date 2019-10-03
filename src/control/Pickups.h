@@ -31,11 +31,11 @@ class CPickup
 public:
 	ePickupType m_eType;
 	bool m_bRemoved;
-	uint16 m_wQuantity;
+	uint16 m_nQuantity;
 	CObject *m_pObject;
 	uint32 m_nTimer;
 	int16 m_eModelIndex;
-	uint16 m_wIndex;
+	uint16 m_nIndex;
 	CVector m_vecPos;
 
 	CObject *GiveUsAPickUpObject(int32 handle);

@@ -89,7 +89,7 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 	object->bUsesCollision = false;
 	object->bIsPickup = true;
 
-	object->field_172 = m_eModelIndex == MI_PICKUP_BONUS ? m_wQuantity : 0;
+	object->field_172 = m_eModelIndex == MI_PICKUP_BONUS ? m_nQuantity : 0;
 
 	switch (m_eType)
 	{
@@ -202,7 +202,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				case PICKUP_ON_STREET_SLOW:
 					if (!CPickups::GivePlayerGoodiesWithPickUpMI(m_pObject->GetModelIndex(), playerId)) {
 						if (CPickups::WeaponForModel(m_pObject->GetModelIndex())) {
-							player->GiveWeapon(CPickups::WeaponForModel(m_pObject->GetModelIndex()), m_wQuantity != 0 ? m_wQuantity : AmmoForWeapon_OnStreet[CPickups::WeaponForModel(m_pObject->GetModelIndex())]);
+							player->GiveWeapon(CPickups::WeaponForModel(m_pObject->GetModelIndex()), m_nQuantity != 0 ? m_nQuantity : AmmoForWeapon_OnStreet[CPickups::WeaponForModel(m_pObject->GetModelIndex())]);
 							if (player->m_nSelectedWepSlot == player->GetWeaponSlot(WEAPONTYPE_UNARMED)) {
 								player->m_nSelectedWepSlot = player->GetWeaponSlot(CPickups::WeaponForModel(m_pObject->GetModelIndex()));
 							}
@@ -232,7 +232,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				case PICKUP_ONCE_TIMEOUT:
 					if (!CPickups::GivePlayerGoodiesWithPickUpMI(m_pObject->GetModelIndex(), playerId)) {
 						if (CPickups::WeaponForModel(m_pObject->GetModelIndex())) {
-							player->GiveWeapon(CPickups::WeaponForModel(m_pObject->GetModelIndex()), m_wQuantity != 0 ? m_wQuantity : AmmoForWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())]);
+							player->GiveWeapon(CPickups::WeaponForModel(m_pObject->GetModelIndex()), m_nQuantity != 0 ? m_nQuantity : AmmoForWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())]);
 							if (player->m_nSelectedWepSlot == player->GetWeaponSlot(WEAPONTYPE_UNARMED))
 								player->m_nSelectedWepSlot = player->GetWeaponSlot(CPickups::WeaponForModel(m_pObject->GetModelIndex()));
 						}
@@ -256,8 +256,8 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 					DMAudio.PlayFrontEndSound(SOUND_PICKUP_HIDDEN_PACKAGE, 0);
 					return true;
 				case PICKUP_MONEY:
-					CWorld::Players[playerId].m_nMoney += m_wQuantity;
-					sprintf(gString, "$%d", m_wQuantity);
+					CWorld::Players[playerId].m_nMoney += m_nQuantity;
+					sprintf(gString, "$%d", m_nQuantity);
 #ifdef MONEY_MESSAGES
 					CMoneyMessages::RegisterOne(m_vecPos + CVector(0.0f, 0.0f, 1.0f), gString, 0, 255, 0, 0.5f, 0.5f);
 #endif
@@ -368,7 +368,7 @@ CPickups::Init(void)
 	NumMessages = 0;
 	for (int i = 0; i < NUMPICKUPS; i++) {
 		aPickUps[i].m_eType = PICKUP_NONE;
-		aPickUps[i].m_wIndex = 1;
+		aPickUps[i].m_nIndex = 1;
 		aPickUps[i].m_pObject = nil;
 	}
 
@@ -409,7 +409,7 @@ CPickups::GetActualPickupIndex(int32 index)
 	if (index == -1) return -1;
 
 	// doesn't look nice
-	if ((uint16)((index & 0xFFFF0000) >> 16) != aPickUps[(uint16)index].m_wIndex) return -1;
+	if ((uint16)((index & 0xFFFF0000) >> 16) != aPickUps[(uint16)index].m_nIndex) return -1;
 	return (uint16)index;
 }
 
@@ -525,7 +525,7 @@ CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quan
 
 	aPickUps[slot].m_eType = (ePickupType)type;
 	aPickUps[slot].m_bRemoved = false;
-	aPickUps[slot].m_wQuantity = quantity;
+	aPickUps[slot].m_nQuantity = quantity;
 	if (type == PICKUP_ONCE_TIMEOUT)
 		aPickUps[slot].m_nTimer = CTimer::GetTimeInMilliseconds() + 20000;
 	else if (type == PICKUP_MONEY)
@@ -554,11 +554,11 @@ CPickups::GenerateNewOne_WeaponType(CVector pos, eWeaponType weaponType, uint8 t
 int32
 CPickups::GetNewUniquePickupIndex(int32 slot)
 {
-	if (aPickUps[slot].m_wIndex >= 0xFFFE)
-		aPickUps[slot].m_wIndex = 1;
+	if (aPickUps[slot].m_nIndex >= 0xFFFE)
+		aPickUps[slot].m_nIndex = 1;
 	else
-		aPickUps[slot].m_wIndex++;
-	return slot | (aPickUps[slot].m_wIndex << 16);
+		aPickUps[slot].m_nIndex++;
+	return slot | (aPickUps[slot].m_nIndex << 16);
 }
 
 int32
@@ -612,7 +612,7 @@ CPickups::FindColourIndexForWeaponMI(int32 model)
 void
 CPickups::AddToCollectedPickupsArray(int32 index)
 {
-	aPickUpsCollected[CollectedPickUpIndex++] = index | (aPickUps[index].m_wIndex << 16);
+	aPickUpsCollected[CollectedPickUpIndex++] = index | (aPickUps[index].m_nIndex << 16);
 	if (CollectedPickUpIndex >= NUMCOLLECTEDPICKUPS)
 		CollectedPickUpIndex = 0;
 }
