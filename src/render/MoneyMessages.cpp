@@ -55,7 +55,7 @@ void
 CMoneyMessages::Render()
 {
 	for (int32 i = 0; i < NUMMONEYMESSAGES; i++) {
-		if (aMoneyMessages[i].m_nTimeRegistered)
+		if (aMoneyMessages[i].m_nTimeRegistered != 0)
 			aMoneyMessages[i].Render();
 	}
 }
