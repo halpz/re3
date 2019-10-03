@@ -1707,7 +1707,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		ped->SetOrientation(0.0f, 0.0f, 0.0f);
 		CTheScripts::ClearSpaceForMissionEntity(pos, ped);
 		CWorld::Add(ped);
-		ped->m_level = CTheZones::GetLevelFromPosition(pos);
+		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
 		CPopulation::ms_nTotalMissionPeds++;
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
 		StoreParameters(&m_nIp, 1);
@@ -1948,7 +1948,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 			car->AutoPilot.m_nCruiseSpeed = car->AutoPilot.m_fMaxTrafficSpeed = 9.0f;
 			car->AutoPilot.m_nCurrentLane = car->AutoPilot.m_nNextLane = 0;
 			car->bEngineOn = false;
-			car->m_level = CTheZones::GetLevelFromPosition(pos);
+			car->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
 			car->bHasBeenOwnedByPlayer = true;
 			CWorld::Add(car);
 			handle = CPools::GetVehiclePool()->GetIndex(car);
@@ -2748,7 +2748,7 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 		AnimationId anim = pVehicle->bLowVehicle ? ANIM_CAR_LSIT : ANIM_CAR_SIT;
 		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
 		pPed->StopNonPartialAnims();
-		pPed->m_level = CTheZones::GetLevelFromPosition(pPed->GetPosition());
+		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
 		CWorld::Add(pPed);
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);

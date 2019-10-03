@@ -319,20 +319,20 @@ public:
 	uint8 bObstacleShowedUpDuringKillObjective : 1;
 	uint8 bDuckAndCover : 1;
 
-	uint8 m_ped_flagG1 : 1;
+	uint8 bStillOnValidPoly : 1;
 	uint8 m_ped_flagG2 : 1;
-	uint8 m_ped_flagG4 : 1; // bStillOnValidPoly?
+	uint8 m_ped_flagG4 : 1; // bResetWalkAnims?
 	uint8 bStartWanderPathOnFoot : 1; // exits the car if he's in it, reset after path found
-	uint8 m_ped_flagG10 : 1; // bOnBoat? (but not in the sense of driving)
+	uint8 bOnBoat : 1; // not just driver, may be just standing
 	uint8 bBusJacked : 1;
 	uint8 bGonnaKillTheCarJacker : 1; // only set when car is jacked from right door
 	uint8 bFadeOut : 1;
 
 	uint8 bKnockedUpIntoAir : 1; // NOT CERTAIN - has ped been knocked up into the air by a car collision
-	uint8 m_ped_flagH2 : 1;
+	uint8 bHitSteepSlope : 1; // has ped collided/is standing on a steep slope (surface type)
 	uint8 m_ped_flagH4 : 1;
 	uint8 bClearObjective : 1;
-	uint8 m_ped_flagH10 : 1;
+	uint8 m_ped_flagH10 : 1; // bTryingToReachDryLand? reset when we landed on something not vehicle and object
 	uint8 bCollidedWithMyVehicle : 1;
 	uint8 bRichFromMugging : 1; // ped has lots of cash from mugging people - will drop money if someone points gun to him
 	uint8 m_ped_flagH80 : 1;

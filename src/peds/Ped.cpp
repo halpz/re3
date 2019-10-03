@@ -48,7 +48,6 @@
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 WRAPPER void CPed::SetPedPositionInCar(void) { EAXJMP(0x4D4970); }
 WRAPPER void CPed::PreRender(void) { EAXJMP(0x4CFDD0); }
-WRAPPER int32 CPed::ProcessEntityCollision(CEntity*, CColPoint*) { EAXJMP(0x4CBB30); }
 WRAPPER void CPed::SetMoveAnim(void) { EAXJMP(0x4C5A40); }
 WRAPPER void CPed::SetFollowRoute(int16, int16) { EAXJMP(0x4DD690); }
 WRAPPER void CPed::SetDuck(uint32) { EAXJMP(0x4E4920); }
@@ -68,7 +67,10 @@ WRAPPER void CPed::SetEnterCar(CVehicle*, uint32) { EAXJMP(0x4E0920); }
 WRAPPER bool CPed::WarpPedToNearEntityOffScreen(CEntity*) { EAXJMP(0x4E5570); }
 WRAPPER void CPed::SetExitCar(CVehicle*, uint32) { EAXJMP(0x4E1010); }
 
+#define FEET_OFFSET 1.04f
+
 #define NEW_WALK_AROUND_ALGORITHM
+#define CANCELLABLE_CAR_ENTER
 
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
@@ -512,17 +514,17 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bObstacleShowedUpDuringKillObjective = false;
 	bDuckAndCover = false;
 
-	m_ped_flagG1 = false;
+	bStillOnValidPoly = false;
 	m_ped_flagG2 = true;
 	m_ped_flagG4 = false;
 	bStartWanderPathOnFoot = false;
-	m_ped_flagG10 = false;
+	bOnBoat = false;
 	bBusJacked = false;
 	bGonnaKillTheCarJacker = false;
 	bFadeOut = false;
 
 	bKnockedUpIntoAir = false;
-	m_ped_flagH2 = false;
+	bHitSteepSlope = false;
 	m_ped_flagH4 = false;
 	bClearObjective = false;
 	m_ped_flagH10 = false;
@@ -1891,7 +1893,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 
 	bool stillGettingInOut = false;
 	if (CTimer::GetTimeInMilliseconds() < m_nPedStateTimer)
-		stillGettingInOut = veh->m_vehType != VEHICLE_TYPE_BOAT || m_ped_flagG10;
+		stillGettingInOut = veh->m_vehType != VEHICLE_TYPE_BOAT || bOnBoat;
 
 	if (!stillGettingInOut) {
 		m_fRotationCur = m_fRotationDest;
@@ -2429,6 +2431,7 @@ CPed::CanPedJumpThis(CEntity *unused, CVector *damageNormal = nil)
 	return CWorld::GetIsLineOfSightClear(pos, forwardPos, true, false, false, true, false, false, false);
 }
 #else
+bool
 CPed::CanPedJumpThis(CEntity *unused)
 {
 	CVector2D forward(-Sin(m_fRotationCur), Cos(m_fRotationCur));
@@ -3310,7 +3313,7 @@ CPed::CheckIfInTheAir(void)
 	bool foundGround = CWorld::ProcessVerticalLine(pos, startZ, foundColPoint, foundEntity, true, true, false, true, false, false, nil);
 	if (!foundGround && m_nPedState != PED_JUMP)
 	{
-		pos.z -= 1.04f;
+		pos.z -= FEET_OFFSET;
 		if (CWorld::TestSphereAgainstWorld(pos, 0.15f, this, true, false, false, false, false, false))
 			foundGround = true;
 	}
@@ -9976,8 +9979,8 @@ CPed::ProcessControl(void)
 					offsetToCheck = GetPosition();
 					offsetToCheck.z += 0.5f;
 
-					if (CWorld::ProcessVerticalLine(offsetToCheck, GetPosition().z - 1.04f, foundCol, foundEnt, true, true, false, true, false, false, false)) {
-						GetPosition().z = 1.04f + foundCol.point.z;
+					if (CWorld::ProcessVerticalLine(offsetToCheck, GetPosition().z - FEET_OFFSET, foundCol, foundEnt, true, true, false, true, false, false, false)) {
+						GetPosition().z = FEET_OFFSET + foundCol.point.z;
 						GetMatrix().UpdateRW();
 						SetLanding();
 						bIsStanding = true;
@@ -11802,7 +11805,7 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 
 	ped->ReplaceWeaponWhenExitingVehicle();
 
-	ped->m_ped_flagG10 = false;
+	ped->bOnBoat = false;
 	if (ped->bBusJacked) {
 		ped->SetFall(1500, ANIM_KO_SKID_BACK, false);
 		ped->bBusJacked = false;
@@ -13518,8 +13521,7 @@ LocalPosForWalkAround(CVector2D colMin, CVector2D colMax, int walkAround) {
 		case 7:
 			return CVector(colMin.x, colMin.y, 0.0f);
 		default:
-		// case 9:
-			return CVector(0.0f, 0.0f, 0.0f); // just a placeholder, supposed to be -GetForward();
+			return CVector(0.0f, 0.0f, 0.0f);
 	}
 }
 #endif
@@ -13588,11 +13590,11 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 		objUpsideDown = false;
 	}
 	float oldRotDest = m_fRotationDest;
+#ifndef NEW_WALK_AROUND_ALGORITHM
 	float angleToFaceObjCenter = (objColCenter - GetPosition()).Heading();
 	float angleDiffBtwObjCenterAndForward = CGeneral::LimitRadianAngle(dirToSet - angleToFaceObjCenter);
-
-	// What is the purpose of using this?
 	float objTopRightHeading = Atan2(adjustedColMax.x - adjustedColMin.x, adjustedColMax.y - adjustedColMin.y);
+#endif
 
 	if (IsPlayer()) {
 		if (FindPlayerPed()->m_fMoveSpeed <= 0.0f)
@@ -13641,7 +13643,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			collidingThingChanged = false;
 		} else {		
 #else
-			CVector cornerToGo;
+			CVector cornerToGo = CVector(10.0f, 10.0f, 10.0f);
 			int dirToGo;
 			m_walkAroundType = 0;
 #endif
@@ -13669,10 +13671,10 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			else {
 				CVector tl = obj->GetMatrix() * CVector(adjustedColMin.x, adjustedColMax.y, 0.0f) - GetPosition();
 				cornerToGo = tl;
-				dirToGo = GetLocalDirection(tl);
 				if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
 					m_walkAroundType = 1;
 				} else {
+					dirToGo = GetLocalDirection(tl);
 					if (dirToGo == 1)
 						m_walkAroundType = 0; // ALL of the next turns will be right turn
 					else if (dirToGo == 3)
@@ -13703,10 +13705,10 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				CVector tr = obj->GetMatrix() * CVector(adjustedColMax.x, adjustedColMax.y, 0.0f) - GetPosition();
 				if (tr.Magnitude2D() < cornerToGo.Magnitude2D()) {
 					cornerToGo = tr;
-					dirToGo = GetLocalDirection(tr);
 					if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
 						m_walkAroundType = 2;
 					} else {
+						dirToGo = GetLocalDirection(tr);
 						if (dirToGo == 1)
 							m_walkAroundType = 2; // ALL of the next turns will be right turn
 						else if (dirToGo == 3)
@@ -13738,10 +13740,10 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				CVector br = obj->GetMatrix() * CVector(adjustedColMax.x, adjustedColMin.y, 0.0f) - GetPosition();
 				if (br.Magnitude2D() < cornerToGo.Magnitude2D()) {
 					cornerToGo = br;
-					dirToGo = GetLocalDirection(br);
 					if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
 						m_walkAroundType = 5;
 					} else {
+						dirToGo = GetLocalDirection(br);
 						if (dirToGo == 1)
 							m_walkAroundType = 4; // ALL of the next turns will be right turn
 						else if (dirToGo == 3)
@@ -13773,10 +13775,10 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				CVector bl = obj->GetMatrix() * CVector(adjustedColMin.x, adjustedColMin.y, 0.0f) - GetPosition();
 				if (bl.Magnitude2D() < cornerToGo.Magnitude2D()) {
 					cornerToGo = bl;
-					dirToGo = GetLocalDirection(bl);
 					if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
 						m_walkAroundType = 6;
 					} else {
+						dirToGo = GetLocalDirection(bl);
 						if (dirToGo == 1)
 							m_walkAroundType = 6; // ALL of the next turns will be right turn
 						else if (dirToGo == 3)
@@ -13786,7 +13788,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			}
 #else
 		}
-#endif
+
 		if (entityOnTopLeftOfObj && entityOnTopRightOfObj && entityOnBottomRightOfObj && entityOnBottomLeftOfObj) {
 			collidingThingChanged = false;
 			entityOnTopLeftOfObj = 0;
@@ -13795,7 +13797,6 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			entityOnBottomRightOfObj = 0;
 		}
 
-#ifndef NEW_WALK_AROUND_ALGORITHM
 		if (!collidingThingChanged) {
 			m_walkAroundType = 0;
 		} else {
@@ -13879,15 +13880,25 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			nextWalkAround = 7;
 	}
 
-	if (CGeneral::GetRandomNumber() & 1){
-		bool nextRouteIsClear = CWorld::GetIsLineOfSightClear(GetPosition(), objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, nextWalkAround),
-													true, true, true, true, true, true, false);
-		if(nextRouteIsClear)
-			m_walkAroundType = nextWalkAround;
-	} else {
-		bool currentRouteIsClear = CWorld::GetIsLineOfSightClear(GetPosition(), objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, m_walkAroundType),
+	CVector nextPosToHead = objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, nextWalkAround);
+	bool nextRouteIsClear = CWorld::GetIsLineOfSightClear(GetPosition(), nextPosToHead, true, true, true, true, true, true, false);
+
+	if(nextRouteIsClear)
+		m_walkAroundType = nextWalkAround;
+	else {
+		CVector posToHead = objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, m_walkAroundType);
+		bool currentRouteIsClear = CWorld::GetIsLineOfSightClear(GetPosition(), posToHead,
 			true, true, true, true, true, true, false);
-		if (!currentRouteIsClear) {
+
+		/* Either;
+		 *	- Some obstacle came in and it's impossible to reach current destination
+		 *	- We reached to the destination, but since next route is not clear, we're turning around us
+		 */
+		if (!currentRouteIsClear ||
+			((posToHead - GetPosition()).Magnitude2D() < 0.8f &&
+				!CWorld::GetIsLineOfSightClear(GetPosition() + GetForward(), nextPosToHead,
+				true, true, true, true, true, true, false))) {
+
 			// Change both target and direction (involves changing even/oddness)
 			if (m_walkAroundType % 2 == 0) {
 				m_walkAroundType -= 2;
@@ -13897,7 +13908,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 					m_walkAroundType += 1;
 			} else {
 				m_walkAroundType += 2;
-				if (m_walkAroundType > 6)
+				if (m_walkAroundType > 7)
 					m_walkAroundType = 0;
 				else
 					m_walkAroundType -= 1;
@@ -14030,6 +14041,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 	m_actionY = localPosToHead.y;
 	localPosToHead -= GetPosition();
 	m_fRotationDest = CGeneral::LimitRadianAngle(localPosToHead.Heading());
+
 	if (m_fRotationDest != m_fRotationCur && bHitSomethingLastFrame) {
 		if (m_fRotationDest == oldRotDest) {
 			m_fRotationDest = oldRotDest;
@@ -14047,6 +14059,243 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 	m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 280.0f * dist * checkIntervalInTime;
 }
 
+int32
+CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
+{
+	bool collidedWithBoat = false;
+	bool belowTorsoCollided = false;
+	float gravityEffect = -0.15f * CTimer::GetTimeStep();
+	CColPoint intersectionPoint;
+	CColLine ourLine;
+
+	CColModel *ourCol = CModelInfo::GetModelInfo(m_modelIndex)->GetColModel();
+	CColModel *hisCol = CModelInfo::GetModelInfo(collidingEnt->m_modelIndex)->GetColModel();
+
+	if (!bUsesCollision)
+		return false;
+
+	if (collidingEnt->IsVehicle() && ((CVehicle*)collidingEnt)->IsBoat())
+		collidedWithBoat = true;
+
+	if (!field_EF && !m_phy_flagA80
+#ifdef VC_PED_PORTS
+		&& !collidingEnt->IsPed()
+#endif
+		) {
+		if (!bCollisionProcessed) {
+#ifdef VC_PED_PORTS
+			m_pCurrentPhysSurface = nil;
+#endif
+			if (bIsStanding) {
+				bIsStanding = false;
+				m_ped_flagA2 = true;
+			}
+			bCollisionProcessed = true;
+			m_fCollisionSpeed += m_vecMoveSpeed.Magnitude2D() * CTimer::GetTimeStep();
+			bStillOnValidPoly = false;
+			if (IsPlayer() || m_fCollisionSpeed >= 1.0f
+				&& (m_fCollisionSpeed >= 2.0f || m_nPedState != PED_WANDER_PATH)) {
+				m_collPoly.valid = false;
+				m_fCollisionSpeed = 0.0f;
+				bHitSteepSlope = false;
+			} else {
+				CVector pos = GetPosition();
+				float potentialGroundZ = GetPosition().z - FEET_OFFSET;
+				if (m_ped_flagA2) {
+					pos.z += -0.25f;
+					potentialGroundZ += gravityEffect;
+				}
+				if (CCollision::IsStoredPolyStillValidVerticalLine(pos, potentialGroundZ, intersectionPoint, &m_collPoly)) {
+					bStillOnValidPoly = true;
+					// VC conditionally sets GetPosition().z here with nonexisting flag in III
+					GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
+					m_vecMoveSpeed.z = 0.0f;
+					bIsStanding = true;
+				} else {
+					m_collPoly.valid = false;
+					m_fCollisionSpeed = 0.0f;
+					bHitSteepSlope = false;
+				}
+			}
+		}
+
+		if (!bStillOnValidPoly) {
+			CVector potentialCenter = GetPosition();
+			potentialCenter.z = GetPosition().z - 0.52f;
+
+			// 0.52f should be a ped's approx. radius
+			float totalRadiusWhenCollided = collidingEnt->GetBoundRadius() + 0.52f - gravityEffect;
+			if (m_ped_flagA2) {
+				if (collidedWithBoat) {
+					potentialCenter.z += 2.0f * gravityEffect;
+					totalRadiusWhenCollided += Abs(gravityEffect);
+				} else {
+					potentialCenter.z += gravityEffect;
+				}
+			}
+			if (sq(totalRadiusWhenCollided) > (potentialCenter - collidingEnt->GetBoundCentre()).MagnitudeSqr()) {
+				ourLine.p0 = GetPosition();
+				ourLine.p1 = GetPosition();
+				ourLine.p1.z = GetPosition().z - FEET_OFFSET;
+				if (m_ped_flagA2) {
+					ourLine.p1.z = ourLine.p1.z + gravityEffect;
+					ourLine.p0.z = ourLine.p0.z + -0.25f;
+				}
+				float minDist = 1.0f;
+				belowTorsoCollided = CCollision::ProcessVerticalLine(ourLine, collidingEnt->GetMatrix(), *hisCol,
+					intersectionPoint, minDist, false, &m_collPoly);
+
+				if (collidedWithBoat && m_ped_flagA2 && !belowTorsoCollided) {
+					ourLine.p0.z = ourLine.p1.z;
+					ourLine.p1.z = ourLine.p1.z + gravityEffect;
+					belowTorsoCollided = CCollision::ProcessVerticalLine(ourLine, collidingEnt->GetMatrix(), *hisCol,
+						intersectionPoint, minDist, false, &m_collPoly);
+				}
+				if (belowTorsoCollided) {
+#ifndef VC_PED_PORTS
+					if (!collidingEnt->IsPed()) {
+#endif
+						if (!bIsStanding
+							|| FEET_OFFSET + intersectionPoint.point.z > GetPosition().z
+							|| collidedWithBoat && 3.12f + intersectionPoint.point.z > GetPosition().z) {
+
+							if (!collidingEnt->IsVehicle() && !collidingEnt->IsObject()) {
+								m_pCurSurface = collidingEnt;
+								collidingEnt->RegisterReference((CEntity**)&m_pCurSurface);
+								m_ped_flagH10 = false;
+								bOnBoat = false;
+							} else {
+								m_pCurrentPhysSurface = collidingEnt;
+								collidingEnt->RegisterReference((CEntity**)m_pCurrentPhysSurface);
+								m_vecOffsetFromPhysSurface = intersectionPoint.point - collidingEnt->GetPosition();
+								m_pCurSurface = collidingEnt;
+								collidingEnt->RegisterReference((CEntity**)&m_pCurSurface);
+								m_collPoly.valid = false;
+								if (collidingEnt->IsVehicle() && ((CVehicle*)collidingEnt)->IsBoat()) {
+									bOnBoat = true;
+								} else {
+									bOnBoat = false;
+								}
+							}
+							// VC conditionally sets GetPosition().z here with nonexisting flag in III
+							GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
+							m_nSurfaceTouched = intersectionPoint.surfaceB;
+							if (m_nSurfaceTouched == SURFACE_STONE) {
+								bHitSteepSlope = true;
+								m_vecDamageNormal = intersectionPoint.normal;
+							}
+						}
+#ifdef VC_PED_PORTS
+						float upperSpeedLimit = 0.33f;
+						float lowerSpeedLimit = -0.25f;
+						float speed = m_vecMoveSpeed.Magnitude2D();
+						if (m_nPedState == PED_IDLE) {
+							upperSpeedLimit *= 2.0f;
+							lowerSpeedLimit *= 1.5f;
+						}
+						if (m_ped_flagA2
+							|| (speed <= upperSpeedLimit /* || (bfFlagsL >> 5) & 1 */) && m_vecMoveSpeed.z >= lowerSpeedLimit
+							|| m_pCollidingEntity == collidingEnt) {
+
+							if (!m_ped_flagA2 && RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL)
+								&& -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
+								InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 15.0f, PEDPIECE_TORSO, 2);
+							}
+						} else {
+							float damage = 100.0f * max(speed - 0.25f, 0.0f);
+							float damage2 = damage;
+							if (m_vecMoveSpeed.z < -0.25f)
+								damage += (-0.25f - m_vecMoveSpeed.z) * 150.0f;
+
+							uint8 dir = 2; // from backward
+							if (m_vecMoveSpeed.x > 0.01f || m_vecMoveSpeed.x < -0.01f
+								|| m_vecMoveSpeed.y > 0.01f || m_vecMoveSpeed.y < -0.01f) {
+								CVector2D offset = -m_vecMoveSpeed;
+								dir = GetLocalDirection(offset);
+							}
+							InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, damage, PEDPIECE_TORSO, dir);
+							if (IsPlayer() && damage2 > 5.0f)
+								Say(SOUND_PED_LAND);
+						}
+#else
+						float speedSqr = m_vecMoveSpeed.MagnitudeSqr();
+						if (m_ped_flagA2
+							|| m_vecMoveSpeed.z >= -0.25f && speedSqr <= 0.25f) {
+							if (!m_ped_flagA2 && RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL)
+								&& -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
+								InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 15.0f, PEDPIECE_TORSO, 2);
+							}
+						} else {
+							if (speedSqr == 0.0f)
+								speedSqr = sq(m_vecMoveSpeed.z);
+
+							uint8 dir = 2; // from backward
+							if (m_vecMoveSpeed.x > 0.01f || m_vecMoveSpeed.x < -0.01f
+								|| m_vecMoveSpeed.y > 0.01f || m_vecMoveSpeed.y < -0.01f) {
+								CVector2D offset = -m_vecMoveSpeed;
+								dir = GetLocalDirection(offset);
+							}
+							InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 350.0f * sq(speedSqr), PEDPIECE_TORSO, dir);
+						}
+#endif
+						m_vecMoveSpeed.z = 0.0f;
+						bIsStanding = true;
+#ifndef VC_PED_PORTS
+					} else {
+						bOnBoat = false;
+					}
+#endif
+				} else {
+					bOnBoat = false;
+				}
+			}
+		}
+	}
+
+	int ourCollidedSpheres = CCollision::ProcessColModels(GetMatrix(), *ourCol, collidingEnt->GetMatrix(), *hisCol, collidingPoints, nil, nil);
+	if (ourCollidedSpheres > 0 || belowTorsoCollided) {
+		AddCollisionRecord(collidingEnt);
+		if (!collidingEnt->IsBuilding())
+			((CPhysical*)collidingEnt)->AddCollisionRecord(this);
+
+		if (ourCollidedSpheres > 0 && (collidingEnt->IsBuilding() || collidingEnt->bIsStatic)) {
+			bHasHitWall = true;
+		}
+	}
+	if (collidingEnt->IsBuilding() || collidingEnt->bIsStatic) 	{
+
+		if (m_ped_flagA2) {
+			CVector sphereNormal;
+			float normalLength;
+			for(int sphere = 0; sphere < ourCollidedSpheres; sphere++) {
+				sphereNormal = collidingPoints[sphere].normal;
+#ifdef VC_PED_PORTS
+				if (sphereNormal.z >= -1.0f || !IsPlayer()) {
+#endif
+					normalLength = sphereNormal.Magnitude2D();
+					if (normalLength != 0.0f) {
+						sphereNormal.x = sphereNormal.x / normalLength;
+						sphereNormal.y = sphereNormal.y / normalLength;
+					}
+#ifdef VC_PED_PORTS
+				} else {
+					float speed = m_vecMoveSpeed.Magnitude2D();
+					sphereNormal.x = -m_vecMoveSpeed.x / max(0.001f, speed);
+					sphereNormal.y = -m_vecMoveSpeed.y / max(0.001f, speed);
+					GetPosition().z -= 0.05f;
+					// VC sets bKnockedUpIntoAir here
+				}
+#endif
+				sphereNormal.Normalise();
+				collidingPoints[sphere].normal = sphereNormal;
+				if (collidingPoints[sphere].surfaceB == SURFACE_STONE)
+					bHitSteepSlope = true;
+			}
+		}
+	}
+	return ourCollidedSpheres;
+}
+
 class CPed_ : public CPed
 {
 public:
@@ -14060,6 +14309,7 @@ public:
 	void Teleport_(CVector pos) { CPed::Teleport(pos); }
 	void ProcessControl_(void) { CPed::ProcessControl(); }
 	void Render_(void) { CPed::Render(); }
+	int32 ProcessEntityCollision_(CEntity *collidingEnt, CColPoint *collidingPoints) { return CPed::ProcessEntityCollision(collidingEnt, collidingPoints); }
 };
 
 STARTPATCHES
@@ -14072,6 +14322,7 @@ STARTPATCHES
 	InjectHook(0x4D3E70, &CPed_::Teleport_, PATCH_JUMP);
 	InjectHook(0x4C8910, &CPed_::ProcessControl_, PATCH_JUMP);
 	InjectHook(0x4D03F0, &CPed_::Render_, PATCH_JUMP);
+	InjectHook(0x4CBB30, &CPed_::ProcessEntityCollision_, PATCH_JUMP);
 
 	InjectHook(0x4CF8F0, &CPed::AddWeaponModel, PATCH_JUMP);
 	InjectHook(0x4C6AA0, &CPed::AimGun, PATCH_JUMP);
