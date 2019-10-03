@@ -13,6 +13,7 @@ CDummyPool *&CPools::ms_pDummyPool = *(CDummyPool**)0x8F2C18;
 CAudioScriptObjectPool *&CPools::ms_pAudioScriptObjectPool = *(CAudioScriptObjectPool**)0x8F1B6C;
 
 WRAPPER void CPools::Initialise(void) { EAXJMP(0x4A1770); }
+WRAPPER void CPools::MakeSureSlotInObjectPoolIsEmpty(int32 handle) { EAXJMP(0x4A2DB0); }
 
 #if 0
 void

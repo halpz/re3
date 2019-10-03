@@ -14,7 +14,9 @@ int16 &CObject::nNoTempObjects = *(int16*)0x95CCA2;
 int16 &CObject::nBodyCastHealth = *(int16*)0x5F7D4C;	// 1000
 
 void *CObject::operator new(size_t sz) { return CPools::GetObjectPool()->New();  }
+void *CObject::operator new(size_t sz, int handle) { return CPools::GetObjectPool()->New(handle);};
 void CObject::operator delete(void *p, size_t sz) { CPools::GetObjectPool()->Delete((CObject*)p); }
+void CObject::operator delete(void *p, int handle) { CPools::GetObjectPool()->Delete((CObject*)p); }
 
 CObject::CObject(void)
 {
@@ -32,7 +34,7 @@ CObject::CObject(void)
 	field_172 = 0;
 	bIsPickup = false;
 	m_obj_flag2 = false;
-	m_obj_flag4 = false;
+	bOutOfStock = false;
 	m_obj_flag8 = false;
 	m_obj_flag10 = false;
 	bHasBeenDamaged = false;

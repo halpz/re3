@@ -34,13 +34,13 @@ public:
 	int8 ObjectCreatedBy;
 	int8 bIsPickup : 1;
 	int8 m_obj_flag2 : 1;
-	int8 m_obj_flag4 : 1;
+	int8 bOutOfStock : 1;
 	int8 m_obj_flag8 : 1;
 	int8 m_obj_flag10 : 1;
 	int8 bHasBeenDamaged : 1;
 	int8 bUseVehicleColours : 1;
 	int8 m_obj_flag80 : 1;
-  int8 field_172;
+  int8 field_172; // car for a bonus pickup?
   int8 field_173;
 	float m_fCollisionDamageMultiplier;
 	uint8 m_nCollisionDamageEffect;
@@ -63,7 +63,9 @@ public:
 	static int16 &nBodyCastHealth;
 
 	static void *operator new(size_t);
+	static void *operator new(size_t, int);
 	static void operator delete(void*, size_t);
+	static void operator delete(void*, int);
 
 	CObject(void);
 	CObject(int32, bool);
