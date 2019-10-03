@@ -124,6 +124,18 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 }
 
 bool
+CPickup::CanBePickedUp(CPlayerPed *player)
+{
+	assert(m_pObject != nil);
+	bool cannotBePickedUp =
+		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > 99.5f)
+		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > 99.5f)
+		|| (m_pObject->GetModelIndex() == MI_PICKUP_BRIBE && player->m_pWanted->m_nWantedLevel == 0)
+		|| (m_pObject->GetModelIndex() == MI_PICKUP_KILLFRENZY && (CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame));
+	return !cannotBePickedUp;
+}
+
+bool
 CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 {
 	float waterLevel;
@@ -173,107 +185,102 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 		}
 
 		// if we didn't then we've got nothing to do
-		if (isPickupTouched) {
-			if ((m_pObject->GetModelIndex() != MI_PICKUP_BODYARMOUR  || player->m_fArmour <= 99.5f)
-				&& (m_pObject->GetModelIndex() != MI_PICKUP_HEALTH || player->m_fHealth <= 99.5f)
-				&& (m_pObject->GetModelIndex() != MI_PICKUP_BRIBE || player->m_pWanted->m_nWantedLevel)
-				&& (m_pObject->GetModelIndex() != MI_PICKUP_KILLFRENZY || !CTheScripts::IsPlayerOnAMission() && !CDarkel::FrenzyOnGoing() && CGame::nastyGame)) {
-				CPad::GetPad(0)->StartShake(120, 100);
-				switch (m_eType)
+		if (isPickupTouched && CanBePickedUp(player)) {
+			CPad::GetPad(0)->StartShake(120, 100);
+			switch (m_eType)
+			{
+			case PICKUP_IN_SHOP:
+				if (CWorld::Players[playerId].m_nMoney < CostOfWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())]) {
+					CGarages::TriggerMessage("PU_MONY", -1, 6000, -1);
+				}
+				else
 				{
-				case PICKUP_IN_SHOP:
-					if (CWorld::Players[playerId].m_nMoney < CostOfWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())]) {
-						CGarages::TriggerMessage("PU_MONY", -1, 6000, -1);
-					}
-					else
-					{
-						CWorld::Players[playerId].m_nMoney -= CostOfWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())];
-						if (!CPickups::GivePlayerGoodiesWithPickUpMI(m_pObject->GetModelIndex(), playerId)) {
-							player->GiveWeapon(CPickups::WeaponForModel(m_pObject->GetModelIndex()), AmmoForWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())]);
-							player->m_nSelectedWepSlot = player->GetWeaponSlot(CPickups::WeaponForModel(m_pObject->GetModelIndex()));
-							DMAudio.PlayFrontEndSound(SOUND_PICKUP_WEAPON_BOUGHT, m_pObject->GetModelIndex() - MI_GRENADE);
-						}
-						RemoveKeepType();
-						m_nTimer = CTimer::GetTimeInMilliseconds() + 5000;
-						return true;
-					}
-					break;
-				case PICKUP_ON_STREET:
-				case PICKUP_ON_STREET_SLOW:
+					CWorld::Players[playerId].m_nMoney -= CostOfWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())];
 					if (!CPickups::GivePlayerGoodiesWithPickUpMI(m_pObject->GetModelIndex(), playerId)) {
-						if (CPickups::WeaponForModel(m_pObject->GetModelIndex())) {
-							player->GiveWeapon(CPickups::WeaponForModel(m_pObject->GetModelIndex()), m_nQuantity != 0 ? m_nQuantity : AmmoForWeapon_OnStreet[CPickups::WeaponForModel(m_pObject->GetModelIndex())]);
-							if (player->m_nSelectedWepSlot == player->GetWeaponSlot(WEAPONTYPE_UNARMED)) {
-								player->m_nSelectedWepSlot = player->GetWeaponSlot(CPickups::WeaponForModel(m_pObject->GetModelIndex()));
-							}
-							DMAudio.PlayFrontEndSound(SOUND_PICKUP_WEAPON, m_pObject->GetModelIndex() - MI_GRENADE);
-						}
-						else if (MI_PICKUP_CAMERA == m_pObject->GetModelIndex() && vehicle)
-						{
-							DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
-							CPickups::bPickUpcamActivated = true;
-							CPickups::pPlayerVehicle = FindPlayerVehicle();
-							CPickups::StaticCamCoors = m_pObject->GetPosition();
-							CPickups::StaticCamStartTime = CTimer::GetTimeInMilliseconds();
-						}
+						player->GiveWeapon(CPickups::WeaponForModel(m_pObject->GetModelIndex()), AmmoForWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())]);
+						player->m_nSelectedWepSlot = player->GetWeaponSlot(CPickups::WeaponForModel(m_pObject->GetModelIndex()));
+						DMAudio.PlayFrontEndSound(SOUND_PICKUP_WEAPON_BOUGHT, m_pObject->GetModelIndex() - MI_GRENADE);
 					}
-					if (m_eType == PICKUP_ON_STREET) {
-						m_nTimer = CTimer::GetTimeInMilliseconds() + 30000;
-					} else if (m_eType == PICKUP_ON_STREET_SLOW) {
-						if (MI_PICKUP_BRIBE == m_pObject->m_modelIndex)
-							m_nTimer = CTimer::GetTimeInMilliseconds() + 300000;
-						else
-							m_nTimer = CTimer::GetTimeInMilliseconds() + 720000;
-					}
-
 					RemoveKeepType();
+					m_nTimer = CTimer::GetTimeInMilliseconds() + 5000;
 					return true;
-				case PICKUP_ONCE:
-				case PICKUP_ONCE_TIMEOUT:
-					if (!CPickups::GivePlayerGoodiesWithPickUpMI(m_pObject->GetModelIndex(), playerId)) {
-						if (CPickups::WeaponForModel(m_pObject->GetModelIndex())) {
-							player->GiveWeapon(CPickups::WeaponForModel(m_pObject->GetModelIndex()), m_nQuantity != 0 ? m_nQuantity : AmmoForWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())]);
-							if (player->m_nSelectedWepSlot == player->GetWeaponSlot(WEAPONTYPE_UNARMED))
-								player->m_nSelectedWepSlot = player->GetWeaponSlot(CPickups::WeaponForModel(m_pObject->GetModelIndex()));
+				}
+				break;
+			case PICKUP_ON_STREET:
+			case PICKUP_ON_STREET_SLOW:
+				if (!CPickups::GivePlayerGoodiesWithPickUpMI(m_pObject->GetModelIndex(), playerId)) {
+					if (CPickups::WeaponForModel(m_pObject->GetModelIndex())) {
+						player->GiveWeapon(CPickups::WeaponForModel(m_pObject->GetModelIndex()), m_nQuantity != 0 ? m_nQuantity : AmmoForWeapon_OnStreet[CPickups::WeaponForModel(m_pObject->GetModelIndex())]);
+						if (player->m_nSelectedWepSlot == player->GetWeaponSlot(WEAPONTYPE_UNARMED)) {
+							player->m_nSelectedWepSlot = player->GetWeaponSlot(CPickups::WeaponForModel(m_pObject->GetModelIndex()));
 						}
 						DMAudio.PlayFrontEndSound(SOUND_PICKUP_WEAPON, m_pObject->GetModelIndex() - MI_GRENADE);
 					}
-					Remove();
-					return true;
-				case PICKUP_COLLECTABLE1:
-					CWorld::Players[playerId].m_nCollectedPackages++;
-					CWorld::Players[playerId].m_nMoney += 1000;
-
-					if (CWorld::Players[playerId].m_nCollectedPackages == CWorld::Players[playerId].m_nTotalPackages) {
-						printf("All collectables have been picked up\n");
-						CGarages::TriggerMessage("CO_ALL", -1, 5000, -1);
-						CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 1000000;
+					else if (m_pObject->GetModelIndex() == MI_PICKUP_CAMERA && vehicle != nil)
+					{
+						DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
+						CPickups::bPickUpcamActivated = true;
+						CPickups::pPlayerVehicle = FindPlayerVehicle();
+						CPickups::StaticCamCoors = m_pObject->GetPosition();
+						CPickups::StaticCamStartTime = CTimer::GetTimeInMilliseconds();
 					}
-					else
-						CGarages::TriggerMessage("CO_ONE", CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages, 5000, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
-
-					Remove();
-					DMAudio.PlayFrontEndSound(SOUND_PICKUP_HIDDEN_PACKAGE, 0);
-					return true;
-				case PICKUP_MONEY:
-					CWorld::Players[playerId].m_nMoney += m_nQuantity;
-					sprintf(gString, "$%d", m_nQuantity);
-#ifdef MONEY_MESSAGES
-					CMoneyMessages::RegisterOne(m_vecPos + CVector(0.0f, 0.0f, 1.0f), gString, 0, 255, 0, 0.5f, 0.5f);
-#endif
-					Remove();
-					DMAudio.PlayFrontEndSound(SOUND_PICKUP_MONEY, 0);
-					return true;
-				//case PICKUP_IN_SHOP_OUT_OF_STOCK:
-				//case PICKUP_MINE_INACTIVE:
-				//case PICKUP_MINE_ARMED:
-				//case PICKUP_NAUTICAL_MINE_INACTIVE:
-				//case PICKUP_NAUTICAL_MINE_ARMED:
-				//case PICKUP_FLOATINGPACKAGE:
-				//case PICKUP_FLOATINGPACKAGE_FLOATING:
-				default:
-					break;
 				}
+				if (m_eType == PICKUP_ON_STREET) {
+					m_nTimer = CTimer::GetTimeInMilliseconds() + 30000;
+				} else if (m_eType == PICKUP_ON_STREET_SLOW) {
+					if (MI_PICKUP_BRIBE == m_pObject->m_modelIndex)
+						m_nTimer = CTimer::GetTimeInMilliseconds() + 300000;
+					else
+						m_nTimer = CTimer::GetTimeInMilliseconds() + 720000;
+				}
+
+				RemoveKeepType();
+				return true;
+			case PICKUP_ONCE:
+			case PICKUP_ONCE_TIMEOUT:
+				if (!CPickups::GivePlayerGoodiesWithPickUpMI(m_pObject->GetModelIndex(), playerId)) {
+					if (CPickups::WeaponForModel(m_pObject->GetModelIndex())) {
+						player->GiveWeapon(CPickups::WeaponForModel(m_pObject->GetModelIndex()), m_nQuantity != 0 ? m_nQuantity : AmmoForWeapon[CPickups::WeaponForModel(m_pObject->GetModelIndex())]);
+						if (player->m_nSelectedWepSlot == player->GetWeaponSlot(WEAPONTYPE_UNARMED))
+							player->m_nSelectedWepSlot = player->GetWeaponSlot(CPickups::WeaponForModel(m_pObject->GetModelIndex()));
+					}
+					DMAudio.PlayFrontEndSound(SOUND_PICKUP_WEAPON, m_pObject->GetModelIndex() - MI_GRENADE);
+				}
+				Remove();
+				return true;
+			case PICKUP_COLLECTABLE1:
+				CWorld::Players[playerId].m_nCollectedPackages++;
+				CWorld::Players[playerId].m_nMoney += 1000;
+
+				if (CWorld::Players[playerId].m_nCollectedPackages == CWorld::Players[playerId].m_nTotalPackages) {
+					printf("All collectables have been picked up\n");
+					CGarages::TriggerMessage("CO_ALL", -1, 5000, -1);
+					CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 1000000;
+				}
+				else
+					CGarages::TriggerMessage("CO_ONE", CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages, 5000, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
+
+				Remove();
+				DMAudio.PlayFrontEndSound(SOUND_PICKUP_HIDDEN_PACKAGE, 0);
+				return true;
+			case PICKUP_MONEY:
+				CWorld::Players[playerId].m_nMoney += m_nQuantity;
+				sprintf(gString, "$%d", m_nQuantity);
+#ifdef MONEY_MESSAGES
+				CMoneyMessages::RegisterOne(m_vecPos + CVector(0.0f, 0.0f, 1.0f), gString, 0, 255, 0, 0.5f, 0.5f);
+#endif
+				Remove();
+				DMAudio.PlayFrontEndSound(SOUND_PICKUP_MONEY, 0);
+				return true;
+			//case PICKUP_IN_SHOP_OUT_OF_STOCK:
+			//case PICKUP_MINE_INACTIVE:
+			//case PICKUP_MINE_ARMED:
+			//case PICKUP_NAUTICAL_MINE_INACTIVE:
+			//case PICKUP_NAUTICAL_MINE_ARMED:
+			//case PICKUP_FLOATINGPACKAGE:
+			//case PICKUP_FLOATINGPACKAGE_FLOATING:
+			default:
+				break;
 			}
 		}
 	} else {
