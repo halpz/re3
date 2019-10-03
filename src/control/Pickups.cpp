@@ -657,7 +657,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 		entity->m_flagD80 = CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame;
 
 	if (!entity->m_flagD80) {
-		float s = Sin((float)(((uint16)CTimer::GetTimeInMilliseconds() + (uint16)entity) & 0x7FF) * DEGTORAD(360.0f / 0x800));
+		float s = Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x7FF) * DEGTORAD(360.0f / 0x800));
 		float modifiedSin = 0.3 * (s + 1.0f);
 
 
@@ -735,7 +735,7 @@ CPickups::DoMineEffects(CEntity *entity)
 	const float MAXDIST = 20.0f;
 
 	if (dist < MAXDIST) {
-		float s = Sin((float)(((uint16)CTimer::GetTimeInMilliseconds() + (uint16)entity) & 0x1FF) * DEGTORAD(360.0f / 0x200));
+		float s = Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x1FF) * DEGTORAD(360.0f / 0x200));
 
 		int32 red = (MAXDIST - dist) * (0.5f * s + 0.5f) / MAXDIST * 64.0f;
 		CShadows::StoreStaticShadow((uintptr)entity, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &pos,
@@ -757,7 +757,7 @@ CPickups::DoMoneyEffects(CEntity *entity)
 	const float MAXDIST = 20.0f;
 
 	if (dist < MAXDIST) {
-		float s = Sin((float)(((uint16)CTimer::GetTimeInMilliseconds() + (uint16)entity) & 0x3FF) * DEGTORAD(360.0f / 0x400));
+		float s = Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x3FF) * DEGTORAD(360.0f / 0x400));
 
 		int32 green = (MAXDIST - dist) * (0.2f * s + 0.3f) / MAXDIST * 64.0f;
 		CShadows::StoreStaticShadow((uintptr)entity, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &pos,
@@ -779,7 +779,7 @@ CPickups::DoCollectableEffects(CEntity *entity)
 	const float MAXDIST = 14.0f;
 
 	if (dist < MAXDIST) {
-		float s = Sin((float)(((uint16)CTimer::GetTimeInMilliseconds() + (uint16)entity) & 0x7FF) * DEGTORAD(360.0f / 0x800));
+		float s = Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x7FF) * DEGTORAD(360.0f / 0x800));
 
 		int32 color = (MAXDIST - dist) * (0.5f * s + 0.5f) / MAXDIST * 255.0f;
 		CShadows::StoreStaticShadow((uintptr)entity, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &pos,
