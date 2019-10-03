@@ -139,5 +139,4 @@ enum Config {
 #define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher
 #define ANIMATE_PED_COL_MODEL
 //#define REMOVE_TREADABLE_PATHFIND
-#define CANCELLABLE_CAR_ENTER
 #define VC_PED_PORTS
