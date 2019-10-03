@@ -16,8 +16,7 @@
 #include "Streaming.h"
 
 float &CRadar::m_RadarRange = *(float*)0x8E281C;
-CBlip *CRadar::ms_RadarTrace = (CBlip*)0x6ED5E0;
-
+CBlip (&CRadar::ms_RadarTrace)[NUMRADARBLIPS] = *(CBlip(*)[NUMRADARBLIPS]) * (uintptr*)0x6ED5E0;
 CVector2D &vec2DRadarOrigin = *(CVector2D*)0x6299B8;
 int *gRadarTxdIds = (int*)0x6299C0;
 
@@ -78,13 +77,13 @@ static_assert(RADAR_TILE_SIZE == (WORLD_SIZE_Y / RADAR_NUM_TILES), "CRadar: not 
 #if 0
 WRAPPER void CRadar::CalculateBlipAlpha(float) { EAXJMP(0x4A4F90); }
 #else
-int CRadar::CalculateBlipAlpha(float dist)
+uint8 CRadar::CalculateBlipAlpha(float dist)
 {
 	if (dist <= 1.0f)
 		return 255;
 
 	if (dist <= 5.0f)
-		return (((1.0f - ((dist * 0.25f) - 0.25f)) * 255.0f) + (((dist * 0.25f) - 0.25f) * 128.0f));
+		return (128.0f * ((dist - 1.0f) / 4.0f)) + ((1.0f - (dist - 1.0f) / 4.0f) * 255.0f);
 
 	return 128;
 }
@@ -109,18 +108,18 @@ void CRadar::ChangeBlipColour(int32 i, int32)
 #endif
 
 #if 1
-WRAPPER void CRadar::ChangeBlipDisplay(int32, int16) { EAXJMP(0x4A5810); }
+WRAPPER void CRadar::ChangeBlipDisplay(int32, eBlipDisplay) { EAXJMP(0x4A5810); }
 #else
-void CRadar::ChangeBlipDisplay(int32 i, int16 flag)
+void CRadar::ChangeBlipDisplay(int32 i, eBlipDisplay display)
 {
 
 }
 #endif
 
 #if 1
-WRAPPER void CRadar::ChangeBlipScale(int32, int16) { EAXJMP(0x4A57E0); }
+WRAPPER void CRadar::ChangeBlipScale(int32, int32) { EAXJMP(0x4A57E0); }
 #else
-void CRadar::ChangeBlipScale(int32 i, int16 scale)
+void CRadar::ChangeBlipScale(int32 i, int32 scale)
 {
 
 }
@@ -136,17 +135,17 @@ void CRadar::ClearBlip(int32 i)
 #endif
 
 #if 0
-WRAPPER void CRadar::ClearBlipForEntity(int16, int32) { EAXJMP(0x4A56C0); }
+WRAPPER void CRadar::ClearBlipForEntity(eBlipType, int32) { EAXJMP(0x4A56C0); }
 #else
-void CRadar::ClearBlipForEntity(int16 type, int32 id)
+void CRadar::ClearBlipForEntity(eBlipType type, int32 id)
 {
 	for (int i = 0; i < NUMRADARBLIPS; i++) {
 		if (type == ms_RadarTrace[i].m_eBlipType && id == ms_RadarTrace[i].m_nEntityHandle) {
-			SetRadarMarkerState(i, 0);
-			ms_RadarTrace[i].m_bInUse = 0;
-			ms_RadarTrace[i].m_eBlipType = 0;
-			ms_RadarTrace[i].m_eBlipDisplay = 0;
-			ms_RadarTrace[i].m_IconID = 0;
+			SetRadarMarkerState(i, false);
+			ms_RadarTrace[i].m_bInUse = false;
+			ms_RadarTrace[i].m_eBlipType = BLIP_NONE;
+			ms_RadarTrace[i].m_eBlipDisplay = BLIP_DISPLAY_NEITHER;
+			ms_RadarTrace[i].m_IconID = RADAR_SPRITE_NONE;
 		}
 	};
 }
@@ -291,82 +290,176 @@ void CRadar::DrawBlips()
 		TransformRadarPointToScreenSpace(out, in);
 		DrawRadarSprite(RADAR_SPRITE_NORTH, out.x, out.y, 255);
 
-		/*
-			DrawEntityBlip
-		*/
-		for (int i = 0; i < NUMRADARBLIPS; i++) {
-			if (ms_RadarTrace[i].m_bInUse) {
-				if (ms_RadarTrace[i].m_eBlipType <= BLIP_OBJECT) {
-					CEntity *e = nil;
-					switch (ms_RadarTrace[i].m_eBlipType) {
-					case BLIP_CAR:
-						e = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[i].m_nEntityHandle);
-						break;
-					case BLIP_CHAR:
-						e = CPools::GetPedPool()->GetAt(ms_RadarTrace[i].m_nEntityHandle);
-						break;
-					case BLIP_OBJECT:
-						e = CPools::GetObjectPool()->GetAt(ms_RadarTrace[i].m_nEntityHandle);
-						break;
-					};
+		CEntity *blipEntity = nil;
+		for(int blipId = 0; blipId < NUMRADARBLIPS; blipId++) {
+			if (!ms_RadarTrace[blipId].m_bInUse)
+				continue;
 
-					if (e) {
-						if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
-							if (CTheScripts::DbgFlag) {
-								ShowRadarMarker(e->GetPosition(), GetRadarTraceColour(ms_RadarTrace[i].m_nColor, ms_RadarTrace[i].m_bDim), ms_RadarTrace->m_Radius);
+			switch (ms_RadarTrace[blipId].m_eBlipType) {
+				case BLIP_CAR:
+				case BLIP_CHAR:
+				case BLIP_OBJECT:
+					if (ms_RadarTrace[blipId].m_IconID == RADAR_SPRITE_BOMB || ms_RadarTrace[blipId].m_IconID == RADAR_SPRITE_SAVE
+						|| ms_RadarTrace[blipId].m_IconID == RADAR_SPRITE_SPRAY || ms_RadarTrace[blipId].m_IconID == RADAR_SPRITE_WEAPON) {
 
-								ms_RadarTrace[i].m_Radius = ms_RadarTrace[i].m_Radius - 0.1f;
-								if (ms_RadarTrace[i].m_Radius >= 1.0f)
-									ms_RadarTrace[i].m_Radius = 5.0;
+						switch (ms_RadarTrace[blipId].m_eBlipType) {
+							case BLIP_CAR:
+								blipEntity = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
+								break;
+							case BLIP_CHAR:
+								blipEntity = CPools::GetPedPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
+								if (blipEntity && ((CPed*)blipEntity)->bInVehicle && ((CPed*)blipEntity)->m_pMyVehicle) {
+									blipEntity = ((CPed*)blipEntity)->m_pMyVehicle;
+								}
+								break;
+							case BLIP_OBJECT:
+								blipEntity = CPools::GetObjectPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
+								break;
+							default:
+								break;
+						}
+						if (blipEntity) {
+							uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
+							if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
+								if (CTheScripts::DbgFlag) {
+									ShowRadarMarker(blipEntity->GetPosition(), color, ms_RadarTrace[blipId].m_Radius);
+									ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
+									if (ms_RadarTrace[blipId].m_Radius < 1.0f)
+										ms_RadarTrace[blipId].m_Radius = 5.0f;
+								}
+							}
+							if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
+								TransformRealWorldPointToRadarSpace(in, blipEntity->GetPosition());
+								float dist = LimitRadarPoint(in);
+								TransformRadarPointToScreenSpace(out, in);
+								if (ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_NONE) {
+									DrawRadarSprite(ms_RadarTrace[blipId].m_IconID, out.x, out.y, CalculateBlipAlpha(dist));
+								} else {
+									ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
+								}
 							}
 						}
-						if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
-							vec2d = e->GetPosition();
-							TransformRealWorldPointToRadarSpace(in, vec2d);
-							float dist = LimitRadarPoint(in);
-							int a = CalculateBlipAlpha(dist);
-							TransformRadarPointToScreenSpace(out, in);
-
-							int32 col = GetRadarTraceColour(ms_RadarTrace[i].m_nColor, ms_RadarTrace[i].m_bDim);
-
-							if (ms_RadarTrace[i].m_IconID)
-								DrawRadarSprite(ms_RadarTrace[i].m_IconID, out.x, out.y, a);
-							else
-								ShowRadarTrace(out.x, out.y, ms_RadarTrace[i].m_wScale, ((col >> 24)), ((col >> 16) & 0xFF), ((col >> 8)), 255);
-						}
 					}
-				}
+					break;
+				case BLIP_COORD:
+				case BLIP_CONTACT_POINT:
+					if ((ms_RadarTrace[blipId].m_IconID == RADAR_SPRITE_BOMB || ms_RadarTrace[blipId].m_IconID == RADAR_SPRITE_SAVE
+						|| ms_RadarTrace[blipId].m_IconID == RADAR_SPRITE_SPRAY || ms_RadarTrace[blipId].m_IconID == RADAR_SPRITE_WEAPON)
+						&& (ms_RadarTrace[blipId].m_eBlipType != BLIP_CONTACT_POINT || !CTheScripts::IsPlayerOnAMission())) {
 
-				/*
-					DrawCoordBlip
-				*/
-				if (ms_RadarTrace[i].m_eBlipType >= BLIP_COORD) {
-					if (ms_RadarTrace[i].m_eBlipType != BLIP_CONTACT_POINT || ms_RadarTrace[i].m_eBlipType == BLIP_CONTACT_POINT && DisplayThisBlip(i) || !CTheScripts::IsPlayerOnAMission()) {
-						if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
+						uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
+						if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 							if (CTheScripts::DbgFlag) {
-								ShowRadarMarker(ms_RadarTrace[i].m_vecPos, GetRadarTraceColour(ms_RadarTrace[i].m_nColor, ms_RadarTrace[i].m_bDim), ms_RadarTrace->m_Radius);
-								ms_RadarTrace[i].m_Radius = ms_RadarTrace[i].m_Radius - 0.1f;
-								if (ms_RadarTrace[i].m_Radius >= 1.0f)
-									ms_RadarTrace[i].m_Radius = 5.0f;
+								ShowRadarMarker(ms_RadarTrace[blipId].m_vecPos, color, ms_RadarTrace[blipId].m_Radius);
+								ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
+								if (ms_RadarTrace[blipId].m_Radius < 1.0f)
+									ms_RadarTrace[blipId].m_Radius = 5.0f;
 							}
 						}
-
-						if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
-							TransformRealWorldPointToRadarSpace(in, ms_RadarTrace[i].m_vec2DPos);
+						if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
+							TransformRealWorldPointToRadarSpace(in, ms_RadarTrace[blipId].m_vec2DPos);
 							float dist = LimitRadarPoint(in);
-							int a = CalculateBlipAlpha(dist);
 							TransformRadarPointToScreenSpace(out, in);
-
-							int32 col = GetRadarTraceColour(ms_RadarTrace[i].m_nColor, ms_RadarTrace[i].m_bDim);
-
-							if (ms_RadarTrace[i].m_IconID)
-								DrawRadarSprite(ms_RadarTrace[i].m_IconID, out.x, out.y, a);
-							else
-								ShowRadarTrace(out.x, out.y, ms_RadarTrace[i].m_wScale, ((col >> 24)), ((col >> 16) & 0xFF), ((col >> 8)), 255);
+							if (ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_NONE) {
+								DrawRadarSprite(ms_RadarTrace[blipId].m_IconID, out.x, out.y, CalculateBlipAlpha(dist));
+							} else {
+								ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
+							}
 						}
 					}
-				}
-			};
+					break;
+				default:
+					break;
+			}
+		}
+		for(int blipId = 0; blipId < NUMRADARBLIPS; blipId++) {
+			if (!ms_RadarTrace[blipId].m_bInUse)
+				continue;
+
+			switch (ms_RadarTrace[blipId].m_eBlipType) {
+				case BLIP_CAR:
+				case BLIP_CHAR:
+				case BLIP_OBJECT:
+					if (ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_BOMB && ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_SAVE
+						&& ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_SPRAY && ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_WEAPON) {
+
+						switch (ms_RadarTrace[blipId].m_eBlipType) {
+							case BLIP_CAR:
+								blipEntity = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
+								break;
+							case BLIP_CHAR:
+								blipEntity = CPools::GetPedPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
+								if (blipEntity && ((CPed*)blipEntity)->bInVehicle && ((CPed*)blipEntity)->m_pMyVehicle) {
+									blipEntity = ((CPed*)blipEntity)->m_pMyVehicle;
+								}
+								break;
+							case BLIP_OBJECT:
+								blipEntity = CPools::GetObjectPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
+								break;
+							default:
+								break;
+						}
+
+						if (blipEntity) {
+							uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
+							if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
+								if (CTheScripts::DbgFlag) {
+									ShowRadarMarker(blipEntity->GetPosition(), color, ms_RadarTrace[blipId].m_Radius);
+									ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
+									if (ms_RadarTrace[blipId].m_Radius < 1.0f)
+										ms_RadarTrace[blipId].m_Radius = 5.0f;
+								}
+							}
+							if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
+								TransformRealWorldPointToRadarSpace(in, blipEntity->GetPosition());
+								float dist = LimitRadarPoint(in);
+								TransformRadarPointToScreenSpace(out, in);
+								if (ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_NONE)
+									DrawRadarSprite(ms_RadarTrace[blipId].m_IconID, out.x, out.y, CalculateBlipAlpha(dist));
+								else
+									ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
+							}
+						}
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		for (int blipId = 0; blipId < NUMRADARBLIPS; blipId++) {
+			if (!ms_RadarTrace[blipId].m_bInUse)
+				continue;
+
+			switch (ms_RadarTrace[blipId].m_eBlipType) {
+				case BLIP_COORD:
+				case BLIP_CONTACT_POINT:
+					if (ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_BOMB && ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_SAVE
+						&& ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_SPRAY && ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_WEAPON
+						&& (ms_RadarTrace[blipId].m_eBlipType != BLIP_CONTACT_POINT || !CTheScripts::IsPlayerOnAMission())) {
+
+						uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
+						if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
+							if (CTheScripts::DbgFlag) {
+								ShowRadarMarker(ms_RadarTrace[blipId].m_vecPos, color, ms_RadarTrace[blipId].m_Radius);
+								ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
+								if (ms_RadarTrace[blipId].m_Radius < 1.0f)
+									ms_RadarTrace[blipId].m_Radius = 5.0f;
+							}
+						}
+						if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BLIP_ONLY) {
+							TransformRealWorldPointToRadarSpace(in, ms_RadarTrace[blipId].m_vec2DPos);
+							float dist = LimitRadarPoint(in);
+							TransformRadarPointToScreenSpace(out, in);
+							if (ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_NONE)
+								DrawRadarSprite(ms_RadarTrace[blipId].m_IconID, out.x, out.y, CalculateBlipAlpha(dist));
+							else
+								ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
+						}
+					}
+					break;
+				default:
+					break;
+			}
 		}
 	}
 }
@@ -531,9 +624,9 @@ void CRadar::DrawRadarSection(int32 x, int32 y)
 #endif
 
 #if 0
-WRAPPER void CRadar::DrawRadarSprite(int32 sprite, float x, float y, int32 alpha) { EAXJMP(0x4A5EF0); }
+WRAPPER void CRadar::DrawRadarSprite(uint16 sprite, float x, float y, uint8 alpha) { EAXJMP(0x4A5EF0); }
 #else
-void CRadar::DrawRadarSprite(int32 sprite, float x, float y, int32 alpha)
+void CRadar::DrawRadarSprite(uint16 sprite, float x, float y, uint8 alpha)
 {
 	RadarSprites[sprite]->Draw(CRect(x - SCREEN_SCALE_X(8.0f), y - SCREEN_SCALE_Y(8.0f), x + SCREEN_SCALE_X(8.0f), y + SCREEN_SCALE_Y(8.0f)), CRGBA(255, 255, 255, alpha));
 }
@@ -570,12 +663,17 @@ void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float 
 }
 #endif 
 
-#if 1
+#if 0
 WRAPPER int32 CRadar::GetActualBlipArrayIndex(int32) { EAXJMP(0x4A41C0); }
 #else
 int32 CRadar::GetActualBlipArrayIndex(int32 i)
 {
-	return int32();
+	if (i == -1)
+		return -1;
+	else if ((i & 0xFFFF0000) >> 16 != ms_RadarTrace[(uint16)i].m_BlipIndex)
+		return -1;
+	else
+		return (uint16)i;
 }
 #endif
 
@@ -589,9 +687,9 @@ int32 CRadar::GetNewUniqueBlipIndex(int32 i)
 #endif
 
 #if 0
-WRAPPER int32 CRadar::GetRadarTraceColour(int32 color, bool bright) { EAXJMP(0x4A5BB0); }
+WRAPPER uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright) { EAXJMP(0x4A5BB0); }
 #else
-int32 CRadar::GetRadarTraceColour(int32 color, bool bright)
+uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright)
 {
 	int32 c;
 	switch (color) {
@@ -605,13 +703,13 @@ int32 CRadar::GetRadarTraceColour(int32 color, bool bright)
 		if (bright)
 			c = 0x5FA06AFF;
 		else
-			c = 0x7F00FF;
+			c = 0x007F00FF;
 		break;
 	case 2:
 		if (bright)
 			c = 0x80A7F3FF;
 		else
-			c = 0x007FFF;
+			c = 0x00007FFF;
 		break;
 	case 3:
 		if (bright)
@@ -633,9 +731,9 @@ int32 CRadar::GetRadarTraceColour(int32 color, bool bright)
 		break;
 	case 6:
 		if (bright)
-			c = 0xFFFFFF;
+			c = 0x00FFFFFF;
 		else
-			c = 0x7F7FFF;
+			c = 0x007F7FFF;
 		break;
 	default:
 		c = color;
@@ -727,37 +825,70 @@ void CRadar::SaveAllRadarBlips(int32)
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CRadar::SetBlipSprite(int32, int32) { EAXJMP(0x4A5840); }
 #else
 void CRadar::SetBlipSprite(int32 i, int32 icon)
 {
-
-}
-#endif
-
-#if 1
-WRAPPER int32 CRadar::SetCoordBlip(eBlipType, CVector, int32, eBlipDisplay) { EAXJMP(0x4A5590); }
-#else
-int CRadar::SetCoordBlip(eBlipType type, CVector pos, int32 flag, eBlipDisplay)
-{
-	return 0;
-}
-#endif
-
-#if 1
-WRAPPER int CRadar::SetEntityBlip(eBlipType type, int32, int32, eBlipDisplay) { EAXJMP(0x4A5640); }
-#else
-int CRadar::SetEntityBlip(eBlipType type, int32, int32, eBlipDisplay)
-{
-	return 0;
+	int index = CRadar::GetActualBlipArrayIndex(i);
+	if (index != -1) {
+		ms_RadarTrace[index].m_IconID = icon;
+	}
 }
 #endif
 
 #if 0
-WRAPPER void CRadar::SetRadarMarkerState(int32, int32) { EAXJMP(0x4A5C60); }
+WRAPPER int32 CRadar::SetCoordBlip(eBlipType, CVector, int32, eBlipDisplay display) { EAXJMP(0x4A5590); }
 #else
-void CRadar::SetRadarMarkerState(int32 counter, int32 flag)
+int CRadar::SetCoordBlip(eBlipType type, CVector pos, int32 color, eBlipDisplay display)
+{
+	int nextBlip;
+	for (nextBlip = 0; nextBlip < NUMRADARBLIPS; nextBlip++) {
+		if (!ms_RadarTrace[nextBlip].m_bInUse)
+			break;
+	}
+	ms_RadarTrace[nextBlip].m_eBlipType = type;
+	ms_RadarTrace[nextBlip].m_nColor = color;
+	ms_RadarTrace[nextBlip].m_bDim = 1;
+	ms_RadarTrace[nextBlip].m_bInUse = 1;
+	ms_RadarTrace[nextBlip].m_Radius = 1.0f;
+	ms_RadarTrace[nextBlip].m_vec2DPos = pos;
+	ms_RadarTrace[nextBlip].m_vecPos = pos;
+	ms_RadarTrace[nextBlip].m_nEntityHandle = 0;
+	ms_RadarTrace[nextBlip].m_wScale = 1;
+	ms_RadarTrace[nextBlip].m_eBlipDisplay = display;
+	ms_RadarTrace[nextBlip].m_IconID = RADAR_SPRITE_NONE;
+	return CRadar::GetNewUniqueBlipIndex(nextBlip);
+}
+#endif
+
+#if 0
+WRAPPER int CRadar::SetEntityBlip(eBlipType type, int32, int32, eBlipDisplay) { EAXJMP(0x4A5640); }
+#else
+int CRadar::SetEntityBlip(eBlipType type, int32 handle, int32 color, eBlipDisplay display)
+{
+	int nextBlip;
+	for (nextBlip = 0; nextBlip < NUMRADARBLIPS; nextBlip++) {
+		if (!ms_RadarTrace[nextBlip].m_bInUse)
+			break;
+	}
+	ms_RadarTrace[nextBlip].m_eBlipType = type;
+	ms_RadarTrace[nextBlip].m_nColor = color;
+	ms_RadarTrace[nextBlip].m_bDim = 1;
+	ms_RadarTrace[nextBlip].m_bInUse = 1;
+	ms_RadarTrace[nextBlip].m_Radius = 1.0f;
+	ms_RadarTrace[nextBlip].m_nEntityHandle = handle;
+	ms_RadarTrace[nextBlip].m_wScale = 1;
+	ms_RadarTrace[nextBlip].m_eBlipDisplay = display;
+	ms_RadarTrace[nextBlip].m_IconID = RADAR_SPRITE_NONE;
+	return CRadar::GetNewUniqueBlipIndex(nextBlip);
+}
+#endif
+
+#if 0
+WRAPPER void CRadar::SetRadarMarkerState(int32, bool) { EAXJMP(0x4A5C60); }
+#else
+void CRadar::SetRadarMarkerState(int32 counter, bool flag)
 {
 	CEntity *e;
 	switch (ms_RadarTrace[counter].m_eBlipType) {
@@ -780,11 +911,11 @@ void CRadar::SetRadarMarkerState(int32 counter, int32 flag)
 #endif
 
 #if 0
-WRAPPER void CRadar::ShowRadarMarker(CVector pos, int16 color, float radius) { EAXJMP(0x4A59C0); }
+WRAPPER void CRadar::ShowRadarMarker(CVector pos, uint32 color, float radius) { EAXJMP(0x4A59C0); }
 #else
-void CRadar::ShowRadarMarker(CVector pos, int16 color, float radius) {
-	float f1 = radius * 0.5f;
-	float f2 = radius * 1.4f;
+void CRadar::ShowRadarMarker(CVector pos, uint32 color, float radius) {
+	float f1 = radius * 1.4f;
+	float f2 = radius * 0.5f;
 	CVector p1, p2;
 
 	p1 = pos + TheCamera.GetUp()*f1;
@@ -806,10 +937,13 @@ void CRadar::ShowRadarMarker(CVector pos, int16 color, float radius) {
 #endif
 
 #if 0
-WRAPPER void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 green, uint32 blue, uint32 alpha) { EAXJMP(0x4A5870); }
+WRAPPER void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha) { EAXJMP(0x4A5870); }
 #else
-void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint32 red, uint32 green, uint32 blue, uint32 alpha) 
+void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha)
 {
+	if (!CHud::m_Wants_To_Draw_Hud || TheCamera.m_WideScreenOn)
+		return;
+
 	CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size + 1.0f), y - SCREEN_SCALE_Y(size + 1.0f), SCREEN_SCALE_X(size + 1.0f) + x, SCREEN_SCALE_Y(size + 1.0f) + y), CRGBA(0, 0, 0, alpha));
 	CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size), y - SCREEN_SCALE_Y(size), SCREEN_SCALE_X(size) + x, SCREEN_SCALE_Y(size) + y), CRGBA(red, green, blue, alpha));
 }
@@ -1076,7 +1210,7 @@ STARTPATCHES
 //	InjectHook(0x4A3F60, CRadar::Shutdown, PATCH_JUMP);
 //	InjectHook(0x4A4030, CRadar::LoadTextures, PATCH_JUMP);
 //	InjectHook(0x4A4180, CRadar::GetNewUniqueBlipIndex, PATCH_JUMP);
-//	InjectHook(0x4A41C0, CRadar::GetActualBlipArrayIndex, PATCH_JUMP);
+	InjectHook(0x4A41C0, CRadar::GetActualBlipArrayIndex, PATCH_JUMP);
 	InjectHook(0x4A4200, CRadar::DrawMap, PATCH_JUMP);
 	InjectHook(0x4A42F0, CRadar::DrawBlips, PATCH_JUMP);
 //	InjectHook(0x4A4C70, CRadar::Draw3dMarkers, PATCH_JUMP);
@@ -1086,18 +1220,18 @@ STARTPATCHES
 	InjectHook(0x4A50D0, CRadar::TransformRealWorldPointToRadarSpace, PATCH_JUMP);
 	InjectHook(0x4A5300, CRadar::TransformRadarPointToRealWorldSpace, PATCH_JUMP);
 	InjectHook(0x4A5530, CRadar::TransformRealWorldToTexCoordSpace, PATCH_JUMP);
-//	InjectHook(0x4A5590, CRadar::SetCoordBlip, PATCH_JUMP);
-//	InjectHook(0x4A5640, CRadar::SetEntityBlip, PATCH_JUMP);
+	InjectHook(0x4A5590, CRadar::SetCoordBlip, PATCH_JUMP);
+	InjectHook(0x4A5640, CRadar::SetEntityBlip, PATCH_JUMP);
 	InjectHook(0x4A56C0, CRadar::ClearBlipForEntity, PATCH_JUMP);
 //	InjectHook(0x4A5720, CRadar::ClearBlip, PATCH_JUMP);
 //	InjectHook(0x4A5770, CRadar::ChangeBlipColour, PATCH_JUMP);
 //	InjectHook(0x4A57A0, CRadar::ChangeBlipBrightness, PATCH_JUMP);
 //	InjectHook(0x4A57E0, CRadar::ChangeBlipScale, PATCH_JUMP);
 //	InjectHook(0x4A5810, CRadar::ChangeBlipDisplay, PATCH_JUMP);
-//	InjectHook(0x4A5840, CRadar::SetBlipSprite, PATCH_JUMP);
+	InjectHook(0x4A5840, CRadar::SetBlipSprite, PATCH_JUMP);
 	InjectHook(0x4A5870, CRadar::ShowRadarTrace, PATCH_JUMP);
 	InjectHook(0x4A59C0, CRadar::ShowRadarMarker, PATCH_JUMP);
-	//InjectHook(0x4A5BB0, CRadar::GetRadarTraceColour, PATCH_JUMP);
+	InjectHook(0x4A5BB0, CRadar::GetRadarTraceColour, PATCH_JUMP);
 	InjectHook(0x4A5C60, CRadar::SetRadarMarkerState, PATCH_JUMP);
 	InjectHook(0x4A5D10, CRadar::DrawRotatingRadarSprite, PATCH_JUMP);
 	InjectHook(0x4A5EF0, CRadar::DrawRadarSprite, PATCH_JUMP);
