@@ -69,9 +69,6 @@ WRAPPER void CPed::SetExitCar(CVehicle*, uint32) { EAXJMP(0x4E1010); }
 
 #define FEET_OFFSET 1.04f
 
-#define NEW_WALK_AROUND_ALGORITHM
-#define CANCELLABLE_CAR_ENTER
-
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
 
@@ -13506,19 +13503,29 @@ CPed::SetExitTrain(CVehicle* train)
 
 #ifdef NEW_WALK_AROUND_ALGORITHM
 CVector
-LocalPosForWalkAround(CVector2D colMin, CVector2D colMax, int walkAround) {
+LocalPosForWalkAround(CVector2D colMin, CVector2D colMax, int walkAround, uint32 enterDoorNode, bool itsVan) {
 	switch (walkAround) {
 		case 0:
+			if (enterDoorNode == CAR_DOOR_LF) 
+				return CVector(colMin.x, colMax.y - 1.0f, 0.0f);
 		case 1:
 			return CVector(colMin.x, colMax.y, 0.0f);
 		case 2:
 		case 3:
+			if (walkAround == 3 && enterDoorNode == CAR_DOOR_RF)
+				return CVector(colMax.x, colMax.y - 1.0f, 0.0f);
+
 			return CVector(colMax.x, colMax.y, 0.0f);
 		case 4:
+			if (enterDoorNode == CAR_DOOR_RR && !itsVan)
+				return CVector(colMax.x, colMin.y + 1.0f, 0.0f);
 		case 5:
 			return CVector(colMax.x, colMin.y, 0.0f);
 		case 6:
 		case 7:
+			if (walkAround == 7 && enterDoorNode == CAR_DOOR_LR && !itsVan)
+				return CVector(colMin.x, colMin.y + 1.0f, 0.0f);
+
 			return CVector(colMin.x, colMin.y, 0.0f);
 		default:
 			return CVector(0.0f, 0.0f, 0.0f);
@@ -13537,8 +13544,8 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 	CVector objColCenter = (objColMin + objColMax) / 2.0f;
 	CMatrix objMat(obj->GetMatrix());
 	float dirToSet = obj->GetForward().Heading();
-	bool objIsSeekTargetAndVan = false;
-	bool objIsSeekTarget = false;
+	bool goingToEnterCarAndItsVan = false;
+	bool goingToEnterCar = false;
 	bool objUpsideDown = false;
 
 	float checkIntervalInDist = (objColMax.y - objColMin.y) * 0.1f;
@@ -13620,12 +13627,12 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 	if (m_pSeekTarget == obj && obj->IsVehicle()) {
 		if (m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER || m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER
 			|| m_objective == OBJECTIVE_SOLICIT) {
-			objIsSeekTarget = true;
+			goingToEnterCar = true;
 			if (IsPlayer())
 				checkIntervalInTime = 0.0f;
 
 			if (((CVehicle*)obj)->bIsVan)
-				objIsSeekTargetAndVan = true;
+				goingToEnterCarAndItsVan = true;
 		}
 	}
 
@@ -13671,7 +13678,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			else {
 				CVector tl = obj->GetMatrix() * CVector(adjustedColMin.x, adjustedColMax.y, 0.0f) - GetPosition();
 				cornerToGo = tl;
-				if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
+				if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
 					m_walkAroundType = 1;
 				} else {
 					dirToGo = GetLocalDirection(tl);
@@ -13705,7 +13712,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				CVector tr = obj->GetMatrix() * CVector(adjustedColMax.x, adjustedColMax.y, 0.0f) - GetPosition();
 				if (tr.Magnitude2D() < cornerToGo.Magnitude2D()) {
 					cornerToGo = tr;
-					if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
+					if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
 						m_walkAroundType = 2;
 					} else {
 						dirToGo = GetLocalDirection(tr);
@@ -13740,7 +13747,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				CVector br = obj->GetMatrix() * CVector(adjustedColMax.x, adjustedColMin.y, 0.0f) - GetPosition();
 				if (br.Magnitude2D() < cornerToGo.Magnitude2D()) {
 					cornerToGo = br;
-					if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
+					if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
 						m_walkAroundType = 5;
 					} else {
 						dirToGo = GetLocalDirection(br);
@@ -13775,7 +13782,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				CVector bl = obj->GetMatrix() * CVector(adjustedColMin.x, adjustedColMin.y, 0.0f) - GetPosition();
 				if (bl.Magnitude2D() < cornerToGo.Magnitude2D()) {
 					cornerToGo = bl;
-					if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
+					if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
 						m_walkAroundType = 6;
 					} else {
 						dirToGo = GetLocalDirection(bl);
@@ -13803,7 +13810,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			if (Abs(angleDiffBtwObjCenterAndForward) >= objTopRightHeading) {
 				if (PI - objTopRightHeading >= Abs(angleDiffBtwObjCenterAndForward)) {
 					if ((angleDiffBtwObjCenterAndForward <= 0.0f || objUpsideDown) && (angleDiffBtwObjCenterAndForward < 0.0f || !objUpsideDown)) {
-						if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
+						if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
 							m_walkAroundType = 0;
 						} else {
 							if (CGeneral::LimitRadianAngle(m_fRotationDest - angleToFaceObjCenter) >= 0.0f) {
@@ -13821,7 +13828,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 							}
 						}
 					} else {
-						if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
+						if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
 							m_walkAroundType = 0;
 						} else {
 							if (CGeneral::LimitRadianAngle(m_fRotationDest - angleToFaceObjCenter) <= 0.0f) {
@@ -13839,7 +13846,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 							}
 						}
 					}
-				} else if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)
+				} else if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)
 					|| CGeneral::LimitRadianAngle(m_fRotationDest - angleToFaceObjCenter) < 0.0f) {
 					if (entityOnTopLeftOfObj == 1 || entityOnTopLeftOfObj && !entityOnTopRightOfObj && !entityOnBottomRightOfObj) {
 						m_walkAroundType = 3;
@@ -13847,7 +13854,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				} else if (entityOnTopRightOfObj == 1 || entityOnTopRightOfObj && !entityOnTopLeftOfObj && !entityOnBottomLeftOfObj) {
 					m_walkAroundType = 4;
 				}
-			} else if (objIsSeekTarget && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)
+			} else if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)
 				|| CGeneral::LimitRadianAngle(m_fRotationDest - angleToFaceObjCenter) > 0.0f) {
 				if (entityOnBottomLeftOfObj == 1 || entityOnBottomLeftOfObj && !entityOnTopRightOfObj && !entityOnBottomRightOfObj) {
 					m_walkAroundType = 2;
@@ -13880,13 +13887,13 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			nextWalkAround = 7;
 	}
 
-	CVector nextPosToHead = objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, nextWalkAround);
+	CVector nextPosToHead = objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, nextWalkAround, goingToEnterCar ? m_vehEnterType : 0, goingToEnterCarAndItsVan);
 	bool nextRouteIsClear = CWorld::GetIsLineOfSightClear(GetPosition(), nextPosToHead, true, true, true, true, true, true, false);
 
 	if(nextRouteIsClear)
 		m_walkAroundType = nextWalkAround;
 	else {
-		CVector posToHead = objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, m_walkAroundType);
+		CVector posToHead = objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, m_walkAroundType, goingToEnterCar ? m_vehEnterType : 0, goingToEnterCarAndItsVan);
 		bool currentRouteIsClear = CWorld::GetIsLineOfSightClear(GetPosition(), posToHead,
 			true, true, true, true, true, true, false);
 
@@ -13916,11 +13923,11 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 		}
 	}
 
-	localPosToHead = LocalPosForWalkAround(adjustedColMin, adjustedColMax, m_walkAroundType);
+	localPosToHead = LocalPosForWalkAround(adjustedColMin, adjustedColMax, m_walkAroundType, goingToEnterCar ? m_vehEnterType : 0, goingToEnterCarAndItsVan);
 #else
 	if (Abs(angleDiffBtwObjCenterAndForward) < objTopRightHeading) {
-		if (objIsSeekTarget) {
-			if (objIsSeekTargetAndVan) {
+		if (goingToEnterCar) {
+			if (goingToEnterCarAndItsVan) {
 				if (m_vehEnterType == CAR_DOOR_LR || m_vehEnterType == CAR_DOOR_RR)
 					return;
 			}
@@ -13953,9 +13960,9 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 	} else {
 		if (PI - objTopRightHeading >= Abs(angleDiffBtwObjCenterAndForward)) {
 			if (angleDiffBtwObjCenterAndForward <= 0.0f) {
-				if (!objIsSeekTarget || !objIsSeekTargetAndVan || m_vehEnterType != CAR_DOOR_LR && m_vehEnterType != CAR_DOOR_RR) {
-					if (objIsSeekTarget) {
-						if (m_vehEnterType == CAR_DOOR_RF || (m_vehEnterType == CAR_DOOR_RR && !objIsSeekTargetAndVan))
+				if (!goingToEnterCar || !goingToEnterCarAndItsVan || m_vehEnterType != CAR_DOOR_LR && m_vehEnterType != CAR_DOOR_RR) {
+					if (goingToEnterCar) {
+						if (m_vehEnterType == CAR_DOOR_RF || (m_vehEnterType == CAR_DOOR_RR && !goingToEnterCarAndItsVan))
 							return;
 					}
 					if (m_walkAroundType == 4 || m_walkAroundType == 3
@@ -13977,14 +13984,14 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 					localPosToHead.z = 0.0f;
 					localPosToHead.y = adjustedColMin.y;
 				}
-			} else if (objIsSeekTarget && objIsSeekTargetAndVan && (m_vehEnterType == CAR_DOOR_LR || m_vehEnterType == CAR_DOOR_RR)) {
+			} else if (goingToEnterCar && goingToEnterCarAndItsVan && (m_vehEnterType == CAR_DOOR_LR || m_vehEnterType == CAR_DOOR_RR)) {
 				m_fRotationDest = CGeneral::LimitRadianAngle(PI + dirToSet);
 				localPosToHead.x = adjustedColMin.x;
 				localPosToHead.z = 0.0f;
 				localPosToHead.y = adjustedColMin.y;
 			} else {
-				if (objIsSeekTarget) {
-					if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR && !objIsSeekTargetAndVan)
+				if (goingToEnterCar) {
+					if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR && !goingToEnterCarAndItsVan)
 						return;
 				}
 				if (m_walkAroundType == 1 || m_walkAroundType == 2
@@ -14002,7 +14009,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				}
 			}
 		} else {
-			if (objIsSeekTarget && (!objIsSeekTargetAndVan || m_vehEnterType != CAR_DOOR_LR && m_vehEnterType != CAR_DOOR_RR)) {
+			if (goingToEnterCar && (!goingToEnterCarAndItsVan || m_vehEnterType != CAR_DOOR_LR && m_vehEnterType != CAR_DOOR_RR)) {
 				if (m_vehEnterType != CAR_DOOR_LF && m_vehEnterType != CAR_DOOR_LR && (!entityOnTopRightOfObj || entityOnTopLeftOfObj)) {
 
 					m_fRotationDest = CGeneral::LimitRadianAngle(dirToSet - HALFPI);

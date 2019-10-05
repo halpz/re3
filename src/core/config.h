@@ -32,6 +32,7 @@ enum Config {
 	NUMDUMMIES = 2802, // 2368 on PS2
 	NUMAUDIOSCRIPTOBJECTS = 256,
 	NUMCUTSCENEOBJECTS = 50,
+	NUMDEFAULTMODELS = 200,
 
 	NUMTEMPOBJECTS = 30,
 
@@ -138,11 +139,25 @@ enum Config {
 #endif
 
 #define FIX_BUGS		// fix bugs in the game, TODO: use this more
+
+// Pad
 #define KANGAROO_CHEAT
+
+// Hud
 #define ASPECT_RATIO_SCALE
+
+// Script
 #define USE_DEBUG_SCRIPT_LOADER
+
+// Vehicles
 #define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher
-#define ANIMATE_PED_COL_MODEL
 //#define REMOVE_TREADABLE_PATHFIND
-#define VC_PED_PORTS
+
+// Pickups
 //#define MONEY_MESSAGES
+
+// Peds
+#define ANIMATE_PED_COL_MODEL
+#define VC_PED_PORTS
+#define NEW_WALK_AROUND_ALGORITHM
+#define CANCELLABLE_CAR_ENTER
