@@ -61,7 +61,7 @@ public:
 	static wchar *m_PagerMessage;
 	static bool &m_Wants_To_Draw_Hud;
 	static bool &m_Wants_To_Draw_3dMarkers;
-	static wchar(*m_BigMessage)[128];
+	static wchar(&m_BigMessage)[6][128];
 	static int16 &m_ItemToFlash;
 
 	// These aren't really in CHud
