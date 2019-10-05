@@ -328,7 +328,7 @@ public:
 	uint8 bGonnaKillTheCarJacker : 1; // only set when car is jacked from right door
 	uint8 bFadeOut : 1;
 
-	uint8 bKnockedUpIntoAir : 1; // NOT CERTAIN - has ped been knocked up into the air by a car collision
+	uint8 m_ped_flagH1 : 1;
 	uint8 bHitSteepSlope : 1; // has ped collided/is standing on a steep slope (surface type)
 	uint8 m_ped_flagH4 : 1;
 	uint8 bClearObjective : 1;
@@ -342,7 +342,11 @@ public:
 	uint8 m_ped_flagI4 : 1; // seems like related with cars
 	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 bFallenDown : 1;
+#ifdef VC_PED_PORTS
+	uint8 bKnockedUpIntoAir : 1; // has ped been knocked up into the air by a car collision
+#else
 	uint8 m_ped_flagI20 : 1;
+#endif
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
 

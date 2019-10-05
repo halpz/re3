@@ -520,7 +520,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bGonnaKillTheCarJacker = false;
 	bFadeOut = false;
 
-	bKnockedUpIntoAir = false;
+	m_ped_flagH1 = false;
 	bHitSteepSlope = false;
 	m_ped_flagH4 = false;
 	bClearObjective = false;
@@ -536,6 +536,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bFallenDown = false;
 #ifdef KANGAROO_CHEAT
 	m_ped_flagI80 = false;
+#endif
+#ifdef VC_PED_PORTS
+	bKnockedUpIntoAir = false;
 #endif
 
 	if ((CGeneral::GetRandomNumber() & 3) == 0)
@@ -3336,7 +3339,7 @@ CPed::ClearAll(void)
 	ClearLookFlag();
 	bIsPointingGunAt = false;
 	bRenderPedInCar = true;
-	bKnockedUpIntoAir = false;
+	m_ped_flagH1 = false;
 	m_pCollidingEntity = nil;
 }
 
@@ -4021,7 +4024,7 @@ CPed::SetGetUp(void)
 		}
 		bGetUpAnimStarted = true;
 		m_pCollidingEntity = nil;
-		bKnockedUpIntoAir = false;
+		m_ped_flagH1 = false;
 		CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_SPRINT);
 		if (animAssoc) {
 			if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_RUN)) {
@@ -7965,7 +7968,11 @@ CPed::InTheAir(void)
 	if (m_vecMoveSpeed.z < 0.0f && !bIsPedDieAnimPlaying) {
 		if (!DyingOrDead()) {
 			if (CWorld::ProcessLineOfSight(ourPos, bitBelow, foundCol, foundEnt, true, true, false, true, false, false, false)) {
-				if (GetPosition().z - foundCol.point.z < 1.3f)
+				if (GetPosition().z - foundCol.point.z < 1.3f
+#ifdef VC_PED_PORTS
+					|| bIsStanding
+#endif
+					)
 					SetLanding();
 			} else {
 				if (!RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL)) {
@@ -8514,9 +8521,9 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 			m_pCollidingEntity = car;
 		}
 		if (nodeToDamage == PED_MID)
-			bKnockedUpIntoAir = true;
+			m_ped_flagH1 = true;
 		else
-			bKnockedUpIntoAir = false;
+			m_ped_flagH1 = false;
 
 		distVec.Normalise();
 
@@ -8547,7 +8554,7 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 			m_pCollidingEntity = car;
 		}
 
-		bKnockedUpIntoAir = false;
+		m_ped_flagH1 = false;
 		if (car->m_modelIndex != MI_TRAIN && !bHasHitWall) {
 			m_vecMoveSpeed = car->m_vecMoveSpeed * 0.75f;
 		}
@@ -9857,29 +9864,54 @@ CPed::ProcessControl(void)
 					if (m_nCollisionRecords == 1 && m_aCollisionRecords[0] != nil && m_aCollisionRecords[0]->m_type == ENTITY_TYPE_BUILDING
 						&& m_nPedStateTimer > 50.0f / (2.0f * adjustedTs) && m_nPedStateTimer * 1.0f / 250.0f > Abs(forceDir.z)) {
 						offsetToCheck.x = -forceDir.y;
+#ifdef VC_PED_PORTS
+						offsetToCheck.z = 1.0f;
+#else
 						offsetToCheck.z = 0.0f;
+#endif
 						offsetToCheck.y = forceDir.x;
 						offsetToCheck.Normalise();
 
 						CVector posToCheck = GetPosition() + offsetToCheck;
-						float lastCollidingColZ;
 
-						if (CWorld::ProcessVerticalLine(posToCheck, -20.0f, foundCol, foundEnt, true, false, false, false, false, false, false)) {
-							lastCollidingColZ = foundCol.point.z;
+						// These are either obstacle or ground to land, I don't know which one.
+						float obstacleForFlyingZ, obstacleForFlyingOtherDirZ;
+						CColPoint obstacleForFlying, obstacleForFlyingOtherDir;
+
+						// Check is there any room for being knocked up in reverse direction of force
+						if (CWorld::ProcessVerticalLine(posToCheck, -20.0f, obstacleForFlying, foundEnt, true, false, false, false, false, false, false)) {
+							obstacleForFlyingZ = obstacleForFlying.point.z;
 						} else {
-							lastCollidingColZ = 500.0f;
+							obstacleForFlyingZ = 500.0f;
 						}
 						
 						posToCheck = GetPosition() - offsetToCheck;
-						float lastCollidingColInOtherDirZ;
 
-						if (CWorld::ProcessVerticalLine(posToCheck, -20.0f, foundCol, foundEnt, true, false, false, false, false, false, false)) {
-							lastCollidingColInOtherDirZ = foundCol.point.z;
+						// Now check for direction of force this time
+						if (CWorld::ProcessVerticalLine(posToCheck, -20.0f, obstacleForFlyingOtherDir, foundEnt, true, false, false, false, false, false, false)) {
+							obstacleForFlyingOtherDirZ = obstacleForFlyingOtherDir.point.z;
 						} else {
-							lastCollidingColInOtherDirZ = 501.0f;
+							obstacleForFlyingOtherDirZ = 501.0f;
+						}
+#ifdef VC_PED_PORTS
+						uint8 flyDir = 0;
+						float feetZ = GetPosition().z - FEET_OFFSET;
+						if ((obstacleForFlyingZ <= feetZ || obstacleForFlyingOtherDirZ >= 500.0f) && (obstacleForFlyingZ <= feetZ || obstacleForFlyingOtherDirZ <= feetZ)) {
+							if (obstacleForFlyingOtherDirZ > feetZ && obstacleForFlyingZ < 499.0f)
+								flyDir = 2;
+						} else {
+							flyDir = 1;
 						}
 
-						if (lastCollidingColZ < lastCollidingColInOtherDirZ) {
+						if (flyDir != 0 && !bKnockedUpIntoAir) {
+							GetPosition() = (flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point);
+							GetPosition().z += FEET_OFFSET;
+							GetMatrix().UpdateRW();
+							SetLanding();
+							bIsStanding = true;
+						}
+#endif
+						if (obstacleForFlyingZ < obstacleForFlyingOtherDirZ) {
 							offsetToCheck *= -1.0f;
 						}
 						offsetToCheck.z = 1.0f;
@@ -9977,8 +10009,17 @@ CPed::ProcessControl(void)
 					offsetToCheck.z += 0.5f;
 
 					if (CWorld::ProcessVerticalLine(offsetToCheck, GetPosition().z - FEET_OFFSET, foundCol, foundEnt, true, true, false, true, false, false, false)) {
+#ifdef VC_PED_PORTS
+						if (!bKnockedUpIntoAir || FEET_OFFSET + foundCol.point.z < GetPosition().z) {
+							GetPosition().z = FEET_OFFSET + foundCol.point.z;
+							GetMatrix().UpdateRW();
+							if (bKnockedUpIntoAir)
+								bKnockedUpIntoAir = false;
+						}
+#else
 						GetPosition().z = FEET_OFFSET + foundCol.point.z;
 						GetMatrix().UpdateRW();
+#endif
 						SetLanding();
 						bIsStanding = true;
 					}
@@ -10041,8 +10082,18 @@ CPed::ProcessControl(void)
 			PlayFootSteps();
 			if (IsPedInControl() && !bIsStanding && !m_pDamageEntity && CheckIfInTheAir()) {
 				SetInTheAir();
+#ifdef VC_PED_PORTS
+				bKnockedUpIntoAir = true;
+#endif
 			}
-
+#ifdef VC_PED_PORTS
+			if (bKnockedUpIntoAir) {
+				CVector posToCheck = GetPosition();
+				posToCheck.z += 0.9f;
+				if (!CWorld::TestSphereAgainstWorld(posToCheck, 0.2f, this, true, true, false, true, false, false))
+					bKnockedUpIntoAir = false;
+			}
+#endif
 			ProcessObjective();
 			if (!bIsAimingGun) {
 				if (bIsRestoringGun)
@@ -13531,6 +13582,19 @@ LocalPosForWalkAround(CVector2D colMin, CVector2D colMax, int walkAround, uint32
 			return CVector(0.0f, 0.0f, 0.0f);
 	}
 }
+
+bool
+CanWeSeeTheCorner(CVector2D dist, CVector2D fwdOffset)
+{
+	// because if dist is more then 5 unit, fov isn't important, we want shortest way
+	if (dist.Magnitude() > 5.0f)
+		return true;
+
+	if (DotProduct2D(dist, fwdOffset) < 0.0f)
+		return false;
+
+	return true;
+}
 #endif
 
 // This function looks completely same on VC.
@@ -13677,10 +13741,11 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 #ifdef NEW_WALK_AROUND_ALGORITHM
 			else {
 				CVector tl = obj->GetMatrix() * CVector(adjustedColMin.x, adjustedColMax.y, 0.0f) - GetPosition();
-				cornerToGo = tl;
 				if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
+					cornerToGo = tl;
 					m_walkAroundType = 1;
-				} else {
+				} else if(CanWeSeeTheCorner(tl, GetForward())){
+					cornerToGo = tl;
 					dirToGo = GetLocalDirection(tl);
 					if (dirToGo == 1)
 						m_walkAroundType = 0; // ALL of the next turns will be right turn
@@ -13711,10 +13776,11 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			else {
 				CVector tr = obj->GetMatrix() * CVector(adjustedColMax.x, adjustedColMax.y, 0.0f) - GetPosition();
 				if (tr.Magnitude2D() < cornerToGo.Magnitude2D()) {
-					cornerToGo = tr;
 					if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
+						cornerToGo = tr;
 						m_walkAroundType = 2;
-					} else {
+					} else if (CanWeSeeTheCorner(tr, GetForward())) {
+						cornerToGo = tr;
 						dirToGo = GetLocalDirection(tr);
 						if (dirToGo == 1)
 							m_walkAroundType = 2; // ALL of the next turns will be right turn
@@ -13746,10 +13812,11 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			else {
 				CVector br = obj->GetMatrix() * CVector(adjustedColMax.x, adjustedColMin.y, 0.0f) - GetPosition();
 				if (br.Magnitude2D() < cornerToGo.Magnitude2D()) {
-					cornerToGo = br;
 					if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
+						cornerToGo = br;
 						m_walkAroundType = 5;
-					} else {
+					} else if (CanWeSeeTheCorner(br, GetForward())) {
+						cornerToGo = br;
 						dirToGo = GetLocalDirection(br);
 						if (dirToGo == 1)
 							m_walkAroundType = 4; // ALL of the next turns will be right turn
@@ -13781,10 +13848,11 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			else {
 				CVector bl = obj->GetMatrix() * CVector(adjustedColMin.x, adjustedColMin.y, 0.0f) - GetPosition();
 				if (bl.Magnitude2D() < cornerToGo.Magnitude2D()) {
-					cornerToGo = bl;
 					if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
+						cornerToGo = bl;
 						m_walkAroundType = 6;
-					} else {
+					} else if (CanWeSeeTheCorner(bl, GetForward())) {
+						cornerToGo = bl;
 						dirToGo = GetLocalDirection(bl);
 						if (dirToGo == 1)
 							m_walkAroundType = 6; // ALL of the next turns will be right turn
@@ -14114,8 +14182,16 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 				}
 				if (CCollision::IsStoredPolyStillValidVerticalLine(pos, potentialGroundZ, intersectionPoint, &m_collPoly)) {
 					bStillOnValidPoly = true;
-					// VC conditionally sets GetPosition().z here with nonexisting flag in III
+#ifdef VC_PED_PORTS
+					if(!bKnockedUpIntoAir || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
+						GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
+						if (bKnockedUpIntoAir)
+							bKnockedUpIntoAir = false;
+					}
+#else
 					GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
+#endif
+
 					m_vecMoveSpeed.z = 0.0f;
 					bIsStanding = true;
 				} else {
@@ -14184,8 +14260,15 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 									bOnBoat = false;
 								}
 							}
-							// VC conditionally sets GetPosition().z here with nonexisting flag in III
+#ifdef VC_PED_PORTS
+							if (!bKnockedUpIntoAir || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
+								GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
+								if (bKnockedUpIntoAir)
+									bKnockedUpIntoAir = false;
+							}
+#else
 							GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
+#endif
 							m_nSurfaceTouched = intersectionPoint.surfaceB;
 							if (m_nSurfaceTouched == SURFACE_STONE) {
 								bHitSteepSlope = true;
@@ -14290,7 +14373,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 					sphereNormal.x = -m_vecMoveSpeed.x / max(0.001f, speed);
 					sphereNormal.y = -m_vecMoveSpeed.y / max(0.001f, speed);
 					GetPosition().z -= 0.05f;
-					// VC sets bKnockedUpIntoAir here
+					bKnockedUpIntoAir = true;
 				}
 #endif
 				sphereNormal.Normalise();
