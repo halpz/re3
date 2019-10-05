@@ -92,9 +92,11 @@ extern void **rwengine;
 #define SCREEN_SCALE_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_SCALE_Y(a))
 
 #ifdef ASPECT_RATIO_SCALE
-#define SCREEN_SCALE_AR(a) ((a) * (4.0f / 3.0f) / SCREEN_ASPECT_RATIO)
+#define SCREEN_SCALE_AR(a) ((a) * DEFAULT_ASPECT_RATIO / SCREEN_ASPECT_RATIO)
+#define SCREEN_SCALE_AR2(a) ((a) / (DEFAULT_ASPECT_RATIO / SCREEN_ASPECT_RATIO))
 #else
 #define SCREEN_SCALE_AR(a) (a)
+#define SCREEN_SCALE_AR2(a) (a)
 #endif
 
 #include "maths.h"
