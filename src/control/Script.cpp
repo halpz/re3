@@ -130,7 +130,7 @@ void CMissionCleanup::Process()
 	CCarCtrl::CarDensityMultiplier = 1.0;
 	FindPlayerPed()->m_pWanted->m_fCrimeSensitivity = 1.0f;
 	TheCamera.Restore();
-	TheCamera.SetWidescreenOff();
+	TheCamera.SetWideScreenOff();
 	DMAudio.ClearMissionAudio();
 	CWeather::ReleaseWeather();
 	for (int i = 0; i < NUM_OF_SPECIAL_CHARS; i++)

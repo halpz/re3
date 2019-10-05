@@ -1719,8 +1719,10 @@ CStreaming::RetryLoadFile(int32 ch)
 	}
 
 	switch(ms_channel[ch].state){
+	case CHANNELSTATE_ERROR:
+		ms_channel[ch].numTries++;
+		if (CdStreamGetStatus(ch) == STREAM_READING || CdStreamGetStatus(ch) == STREAM_WAITING) break;
 	case CHANNELSTATE_IDLE:
-streamread:
 		CdStreamRead(ch, ms_pStreamingBuffer[ch], ms_channel[ch].position, ms_channel[ch].size);
 		ms_channel[ch].state = CHANNELSTATE_READING;
 		ms_channel[ch].field24 = -600;
@@ -1730,11 +1732,6 @@ streamread:
 			ms_channelError = -1;
 			CTimer::SetCodePause(false);
 		}
-		break;
-	case CHANNELSTATE_ERROR:
-		ms_channel[ch].numTries++;
-		if(CdStreamGetStatus(ch) != STREAM_READING && CdStreamGetStatus(ch) != STREAM_WAITING)
-			goto streamread;
 		break;
 	}
 }
