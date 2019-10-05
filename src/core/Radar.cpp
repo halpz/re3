@@ -277,6 +277,10 @@ void CRadar::DrawBlips()
 		float angle;
 		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1)
 			angle = PI + FindPlayerHeading();
+#ifdef FIX_BUGS
+		else if (TheCamera.GetLookDirection() != LOOKING_FORWARD)
+			angle = FindPlayerHeading() - (PI + (TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetPosition() - TheCamera.Cams[TheCamera.ActiveCam].SourceBeforeLookBehind).Heading());
+#endif
 		else
 			angle = FindPlayerHeading() - (PI + TheCamera.GetForward().Heading());
 
