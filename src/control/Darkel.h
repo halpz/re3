@@ -26,7 +26,7 @@ private:
 	static int8 &bNeedHeadShot;
 	static int8 &bProperKillFrenzy;
 	static eKillFrenzyStatus &Status;
-	static int16 *RegisteredKills;
+	static uint16 (&RegisteredKills)[NUMDEFAULTMODELS];
 	static int32 &ModelToKill;
 	static int32 &ModelToKill2;
 	static int32 &ModelToKill3;
@@ -34,18 +34,18 @@ private:
 	static wchar *pStartMessage;
 
 public:
-	static int32 CalcFade(uint32 time, int32 min, uint32 max);
+	static uint8 CalcFade(uint32 time, uint32 min, uint32 max);
 	static void DrawMessages(void);
 	static bool FrenzyOnGoing();
 	static void Init();
-	static int16 QueryModelsKilledByPlayer(int32 modelId);
-	static eKillFrenzyStatus ReadStatus();
+	static uint16 QueryModelsKilledByPlayer(int32 modelId);
+	static uint16 ReadStatus();
 	static void RegisterCarBlownUpByPlayer(CVehicle *vehicle);
 	static void RegisterKillByPlayer(CPed *victim, eWeaponType weapontype, bool headshot = false);
 	static void RegisterKillNotByPlayer(CPed* victim, eWeaponType weapontype);
 	static void ResetModelsKilledByPlayer();
 	static void ResetOnPlayerDeath();
-	static void StartFrenzy(eWeaponType weaponType, int32 time, int16 kill, int32 modelId0, wchar *text, int32 modelId2, int32 modelId3, int32 modelId4, bool standardSound, bool needHeadShot);
+	static void StartFrenzy(eWeaponType weaponType, int32 time, uint16 kill, int32 modelId0, wchar *text, int32 modelId2, int32 modelId3, int32 modelId4, bool standardSound, bool needHeadShot);
 	static void Update();
 
 };

@@ -1021,7 +1021,7 @@ CStreaming::RemoveAllUnusedModels(void)
 	for(i = 0; i < MAXVEHICLESLOADED; i++)
 		RemoveLoadedVehicle();
 
-	for(i = NUM_DEFAULT_MODELS; i < MODELINFOSIZE; i++){
+	for(i = NUMDEFAULTMODELS; i < MODELINFOSIZE; i++){
 		if(ms_aInfoForModel[i].m_loadState == STREAMSTATE_LOADED &&
 		   ms_aInfoForModel[i].m_flags & STREAMFLAGS_DONT_REMOVE &&
 		   CModelInfo::GetModelInfo(i)->m_refCount == 0){
@@ -2408,8 +2408,8 @@ CStreaming::MemoryCardSave(uint8 *buffer, uint32 *length)
 {
 	int i;
 
-	*length = NUM_DEFAULT_MODELS;
-	for(i = 0; i < NUM_DEFAULT_MODELS; i++)
+	*length = NUMDEFAULTMODELS;
+	for(i = 0; i < NUMDEFAULTMODELS; i++)
 		if(ms_aInfoForModel[i].m_loadState == STREAMSTATE_LOADED)
 			buffer[i] = ms_aInfoForModel[i].m_flags;
 		else
@@ -2421,7 +2421,7 @@ CStreaming::MemoryCardLoad(uint8 *buffer, uint32 length)
 {
 	uint32 i;
 
-	assert(length == NUM_DEFAULT_MODELS);
+	assert(length == NUMDEFAULTMODELS);
 	for(i = 0; i < length; i++)
 		if(ms_aInfoForModel[i].m_loadState == STREAMSTATE_LOADED)
 			if(buffer[i] != 0xFF)
