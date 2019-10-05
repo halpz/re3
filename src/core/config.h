@@ -143,8 +143,9 @@ enum Config {
 // Pad
 #define KANGAROO_CHEAT
 
-// Hud
+// Hud & radar
 #define ASPECT_RATIO_SCALE
+#define TRIANGULAR_BLIPS
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER
@@ -161,6 +162,3 @@ enum Config {
 #define VC_PED_PORTS
 #define NEW_WALK_AROUND_ALGORITHM
 #define CANCELLABLE_CAR_ENTER
-
-// Blips
-#define TRIANGULAR_BLIPS
