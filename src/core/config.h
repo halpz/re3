@@ -161,3 +161,6 @@ enum Config {
 #define VC_PED_PORTS
 #define NEW_WALK_AROUND_ALGORITHM
 #define CANCELLABLE_CAR_ENTER
+
+// Blips
+#define TRIANGULAR_BLIPS

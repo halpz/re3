@@ -47,5 +47,7 @@ public:
 	static void DrawRect(const CRect &r, const CRGBA &col);
 	static void DrawRectXLU(const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3);
 
+	static void Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA &color);
+
 	static RwIm2DVertex* GetVertices() { return maVertices; };
 };

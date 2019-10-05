@@ -335,7 +335,18 @@ void CRadar::DrawBlips()
 								if (ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_NONE) {
 									DrawRadarSprite(ms_RadarTrace[blipId].m_IconID, out.x, out.y, CalculateBlipAlpha(dist));
 								} else {
+#ifdef TRIANGULAR_BLIPS
+									CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+									CVector &blipPos = blipEntity->GetPosition();
+									uint8 mode = BLIP_MODE_TRIANGULAR_UP;
+									if (blipPos.z - pos.z <= 2.0f) {
+										if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;
+										else mode = BLIP_MODE_SQUARE;
+									}
+									ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
+#else
 									ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
+#endif
 								}
 							}
 						}
@@ -363,7 +374,18 @@ void CRadar::DrawBlips()
 							if (ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_NONE) {
 								DrawRadarSprite(ms_RadarTrace[blipId].m_IconID, out.x, out.y, CalculateBlipAlpha(dist));
 							} else {
+#ifdef TRIANGULAR_BLIPS
+								CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+								CVector &blipPos = ms_RadarTrace[blipId].m_vecPos;
+								uint8 mode = BLIP_MODE_TRIANGULAR_UP;
+								if (blipPos.z - pos.z <= 2.0f) {
+									if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;
+									else mode = BLIP_MODE_SQUARE;
+								}
+								ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
+#else
 								ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
+#endif
 							}
 						}
 					}
@@ -417,7 +439,20 @@ void CRadar::DrawBlips()
 								if (ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_NONE)
 									DrawRadarSprite(ms_RadarTrace[blipId].m_IconID, out.x, out.y, CalculateBlipAlpha(dist));
 								else
+#ifdef TRIANGULAR_BLIPS
+								{
+									CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+									CVector &blipPos = blipEntity->GetPosition();
+									uint8 mode = BLIP_MODE_TRIANGULAR_UP;
+									if (blipPos.z - pos.z <= 2.0f) {
+										if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;
+										else mode = BLIP_MODE_SQUARE;
+									}
+									ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
+								}
+#else
 									ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
+#endif
 							}
 						}
 					}
@@ -453,7 +488,20 @@ void CRadar::DrawBlips()
 							if (ms_RadarTrace[blipId].m_IconID != RADAR_SPRITE_NONE)
 								DrawRadarSprite(ms_RadarTrace[blipId].m_IconID, out.x, out.y, CalculateBlipAlpha(dist));
 							else
+#ifdef TRIANGULAR_BLIPS
+							{
+								CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+								CVector &blipPos = ms_RadarTrace[blipId].m_vecPos;
+								uint8 mode = BLIP_MODE_TRIANGULAR_UP;
+								if (blipPos.z - pos.z <= 2.0f) {
+									if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;
+									else mode = BLIP_MODE_SQUARE;
+								}
+								ShowRadarTraceWithHeight(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255, mode);
+							}
+#else
 								ShowRadarTrace(out.x, out.y, ms_RadarTrace[blipId].m_wScale, (uint8)(color >> 24), (uint8)(color >> 16), (uint8)(color >> 8), 255);
+#endif
 						}
 					}
 					break;
@@ -948,6 +996,30 @@ void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 gree
 	CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size), y - SCREEN_SCALE_Y(size), SCREEN_SCALE_X(size) + x, SCREEN_SCALE_Y(size) + y), CRGBA(red, green, blue, alpha));
 }
 #endif
+
+void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint8 mode)
+{
+	if (!CHud::m_Wants_To_Draw_Hud || TheCamera.m_WideScreenOn)
+		return;
+
+	switch (mode)
+	{
+	case BLIP_MODE_TRIANGULAR_UP:
+		// size++; // VC does size + 1 for triangles
+		CSprite2d::Draw2DPolygon(x + SCREEN_SCALE_X(size + 3.0f), y + SCREEN_SCALE_Y(size + 2.0f), x - (SCREEN_SCALE_X(size + 3.0f)), y + SCREEN_SCALE_Y(size + 2.0f), x, y - (SCREEN_SCALE_Y(size + 3.0f)), x, y - (SCREEN_SCALE_Y(size + 3.0f)), CRGBA(0, 0, 0, alpha));
+		CSprite2d::Draw2DPolygon(x + SCREEN_SCALE_X(size + 1.0f), y + SCREEN_SCALE_Y(size + 1.0f), x - (SCREEN_SCALE_X(size + 1.0f)), y + SCREEN_SCALE_Y(size + 1.0f), x, y - (SCREEN_SCALE_Y(size + 1.0f)), x, y - (SCREEN_SCALE_Y(size + 1.0f)), CRGBA(red, green, blue, alpha));
+		break;
+	case BLIP_MODE_TRIANGULAR_DOWN:
+		// size++; // VC does size + 1 for triangles
+		CSprite2d::Draw2DPolygon(x, y + SCREEN_SCALE_Y(size + 2.0f), x, y + SCREEN_SCALE_Y(size + 3.0f), x + SCREEN_SCALE_X(size + 3.0f), y - (SCREEN_SCALE_Y(size + 2.0f)), x - (SCREEN_SCALE_X(size + 3.0f)), y - (SCREEN_SCALE_Y(size + 2.0f)), CRGBA(0, 0, 0, alpha));
+		CSprite2d::Draw2DPolygon(x, y + SCREEN_SCALE_Y(size + 1.0f), x, y + SCREEN_SCALE_Y(size + 1.0f), x + SCREEN_SCALE_X(size + 1.0f), y - (SCREEN_SCALE_Y(size + 1.0f)), x - (SCREEN_SCALE_X(size + 1.0f)), y - (SCREEN_SCALE_Y(size + 1.0f)), CRGBA(red, green, blue, alpha));
+		break;
+	case BLIP_MODE_SQUARE:
+		CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size + 1.0f), y - SCREEN_SCALE_Y(size + 1.0f), SCREEN_SCALE_X(size + 1.0f) + x, SCREEN_SCALE_Y(size + 1.0f) + y), CRGBA(0, 0, 0, alpha));
+		CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size), y - SCREEN_SCALE_Y(size), SCREEN_SCALE_X(size) + x, SCREEN_SCALE_Y(size) + y), CRGBA(red, green, blue, alpha));
+		break;
+	}
+}
 
 #if 1
 WRAPPER void CRadar::Shutdown() { EAXJMP(0x4A3F60); }

@@ -45,6 +45,13 @@ enum eRadarSprite
 	RADAR_SPRITE_COUNT = 21,
 };
 
+enum
+{
+	BLIP_MODE_TRIANGULAR_UP = 0,
+	BLIP_MODE_TRIANGULAR_DOWN,
+	BLIP_MODE_SQUARE,
+};
+
 struct CBlip
 {
 	uint32 m_nColor;
@@ -130,6 +137,7 @@ public:
 	static void SetRadarMarkerState(int32 i, bool flag);
 	static void ShowRadarMarker(CVector pos, uint32 color, float radius);
 	static void ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha);
+	static void ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint8 mode);
 	static void Shutdown();
 	static void StreamRadarSections(const CVector &posn);
 	static void StreamRadarSections(int32 x, int32 y);

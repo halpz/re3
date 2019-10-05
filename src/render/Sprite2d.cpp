@@ -457,6 +457,20 @@ CSprite2d::DrawRectXLU(const CRect &r, const CRGBA &c0, const CRGBA &c1, const C
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 }
 
+void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA &color)
+{
+	SetVertices(x1, y1, x2, y2, x3, y3, x4, y4, color, color, color, color);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, 0);
+	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)(color.a != 255));
+	RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::maVertices, 4);
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEGOURAUD);
+}
+
 STARTPATCHES
 #define C4 const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&
 #define F8 float, float, float, float, float, float, float, float
