@@ -368,6 +368,7 @@ public:
 	bool GetLeftShoulder2JustDown()  { return !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2); }
 	bool GetRightShoulder1JustDown() { return !!(NewState.RightShoulder1 && !OldState.RightShoulder1); }
 	bool GetRightShoulder2JustDown() { return !!(NewState.RightShoulder2 && !OldState.RightShoulder2); }
+	bool GetStartJustDown()          { return !!(NewState.Start && !OldState.Start); }
 	
 /*
 	int32 GetLeftShoulder1(void)  { return NewState.LeftShoulder1; }

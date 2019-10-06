@@ -696,7 +696,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 		}
 		if (pVehicle->bExtendedRange)
 			threshold *= 1.5f;
-		if (distanceToPlayer > threshold && !CGarages::IsPointWithinHideOutGarage(&pVehicle->GetPosition())){
+		if (distanceToPlayer > threshold && !CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
 			if (pVehicle->GetIsOnScreen() && CRenderer::IsEntityCullZoneVisible(pVehicle)){
 				pVehicle->bFadeOut = true;
 			}else{
@@ -712,9 +712,10 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 		(pVehicle->GetPosition() - vecPlayerPos).Magnitude2D() > 25.0f &&
 		!IsThisVehicleInteresting(pVehicle) &&
 		!pVehicle->bIsLocked &&
+		pVehicle->CanBeDeleted() &&
 		!CTrafficLights::ShouldCarStopForLight(pVehicle, true) &&
 		!CTrafficLights::ShouldCarStopForBridge(pVehicle) &&
-		!CGarages::IsPointWithinHideOutGarage(&pVehicle->GetPosition())){
+		!CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
 		CWorld::Remove(pVehicle);
 		delete pVehicle;
 		return;
@@ -724,7 +725,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 	if (CTimer::GetTimeInMilliseconds() > pVehicle->m_nTimeOfDeath + 60000 &&
 		(!pVehicle->GetIsOnScreen() || !CRenderer::IsEntityCullZoneVisible(pVehicle))){
 		if ((pVehicle->GetPosition() - vecPlayerPos).MagnitudeSqr() > SQR(7.5f)){
-			if (!CGarages::IsPointWithinHideOutGarage(&pVehicle->GetPosition())){
+			if (!CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
 				CWorld::Remove(pVehicle);
 				delete pVehicle;
 			}
@@ -1322,7 +1323,7 @@ void CCarCtrl::WeaveThroughPedsSectorList(CPtrList& lst, CVehicle* pVehicle, CPh
 			continue;
 		if (pPed->GetPosition().y < y_inf || pPed->GetPosition().y > y_sup)
 			continue;
-		if (Abs(pPed->GetPosition().z - pPed->GetPosition().z) >= PED_HEIGHT_DIFF_TO_CONSIDER_WEAVING)
+		if (Abs(pPed->GetPosition().z - pVehicle->GetPosition().z) >= PED_HEIGHT_DIFF_TO_CONSIDER_WEAVING)
 			continue;
 		if (pPed->m_pCurSurface != pVehicle)
 			WeaveForPed(pPed, pVehicle, pAngleToWeaveLeft, pAngleToWeaveRight);

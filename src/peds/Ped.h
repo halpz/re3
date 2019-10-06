@@ -14,6 +14,7 @@
 #include "EventList.h"
 
 struct CPathNode;
+class CAccident;
 
 struct CPedAudioData
 {
@@ -57,6 +58,7 @@ struct FightMove
 };
 static_assert(sizeof(FightMove) == 0x18, "FightMove: error");
 
+// TO-DO: This is eFightState on mobile.
 enum PedFightMoves
 {
 	FIGHTMOVE_NULL,
@@ -127,7 +129,7 @@ enum eObjective : uint32 {
 	OBJECTIVE_IDLE,
 	OBJECTIVE_FLEE_TILL_SAFE,
 	OBJECTIVE_GUARD_SPOT,
-	OBJECTIVE_GUARD_AREA,
+	OBJECTIVE_GUARD_AREA,	// not implemented
 	OBJECTIVE_WAIT_IN_CAR,
 	OBJECTIVE_WAIT_IN_CAR_THEN_GETOUT,
 	OBJECTIVE_KILL_CHAR_ON_FOOT,
@@ -139,15 +141,15 @@ enum eObjective : uint32 {
 	OBJECTIVE_LEAVE_VEHICLE,
 	OBJECTIVE_ENTER_CAR_AS_PASSENGER,
 	OBJECTIVE_ENTER_CAR_AS_DRIVER,
-	OBJECTIVE_FOLLOW_CAR_IN_CAR,
-	OBJECTIVE_FIRE_AT_OBJ_FROM_VEHICLE,
-	OBJECTIVE_DESTROY_OBJ,
+	OBJECTIVE_FOLLOW_CAR_IN_CAR, // seems not implemented so far
+	OBJECTIVE_FIRE_AT_OBJ_FROM_VEHICLE,	// not implemented
+	OBJECTIVE_DESTROY_OBJ,	// not implemented
 	OBJECTIVE_DESTROY_CAR,
 	OBJECTIVE_GOTO_AREA_ANY_MEANS,
 	OBJECTIVE_GOTO_AREA_ON_FOOT,
 	OBJECTIVE_RUN_TO_AREA,
-	OBJECTIVE_23,
-	OBJECTIVE_24,
+	OBJECTIVE_23,	// not implemented
+	OBJECTIVE_24,	// not implemented
 	OBJECTIVE_FIGHT_CHAR,
 	OBJECTIVE_SET_LEADER,
 	OBJECTIVE_FOLLOW_ROUTE,
@@ -158,7 +160,9 @@ enum eObjective : uint32 {
 	OBJECTIVE_STEAL_ANY_CAR,
 	OBJECTIVE_MUG_CHAR,
 	OBJECTIVE_FLEE_CAR,
-	OBJECTIVE_35
+#ifdef VC_PED_PORTS
+	OBJECTIVE_LEAVE_CAR_AND_DIE
+#endif
 };
 
 enum {
@@ -169,7 +173,7 @@ enum {
 enum PedLineUpPhase {
 	LINE_UP_TO_CAR_START,
 	LINE_UP_TO_CAR_END,
-	LINE_UP_TO_CAR_2
+	LINE_UP_TO_CAR_2 // Buggy. Used for cops arresting you from passenger door
 };
 
 enum PedOnGroundState {
@@ -262,7 +266,7 @@ public:
 
 	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
 	uint8 bIsStanding : 1;
-	uint8 m_ped_flagA2 : 1;
+	uint8 m_ped_flagA2 : 1;	// bWasStanding?
 	uint8 bIsAttacking : 1;		// doesn't reset after fist fight
 	uint8 bIsPointingGunAt : 1;
 	uint8 bIsLooking : 1;
@@ -277,9 +281,9 @@ public:
 	uint8 bIsLanding : 1;
 	uint8 bIsRunning : 1; // on some conditions
 	uint8 bHitSomethingLastFrame : 1;
-	uint8 m_ped_flagB80 : 1; // bIsNearCar? something related with reaction to colliding vehicle
+	uint8 m_ped_flagB80 : 1; // bIsNearCar? it's sure that it's related with cars and used for deciding whether we should move
 
-	uint8 m_ped_flagC1 : 1;
+	uint8 m_ped_flagC1 : 1;	// bCanPedEnterSeekedCar?
 	uint8 bRespondsToThreats : 1;
 	uint8 bRenderPedInCar : 1;
 	uint8 bChangedSeat : 1;
@@ -290,15 +294,15 @@ public:
 
 	uint8 bHasACamera : 1; // does ped possess a camera to document accidents involves fire/explosion
 	uint8 m_ped_flagD2 : 1; // set when ped witnessed an event
-	uint8 m_ped_flagD4 : 1; // bPedIsBleeding? so far only creates blood pool in hands up state
-	uint8 m_ped_flagD8 : 1;
+	uint8 bPedIsBleeding : 1;
+	uint8 bStopAndShoot : 1; // Ped cannot reach target to attack with fist, need to use gun
 	uint8 bIsPedDieAnimPlaying : 1;
 	uint8 bUsePedNodeSeek : 1;
-	uint8 m_ped_flagD40 : 1;	// reset when objective changes
+	uint8 bObjectiveCompleted : 1;
 	uint8 bScriptObjectiveCompleted : 1;
 
 	uint8 bKindaStayInSamePlace : 1;
-	uint8 m_ped_flagE2 : 1;
+	uint8 m_ped_flagE2 : 1; // bBeingChasedByPolice?
 	uint8 bNotAllowedToDuck : 1;
 	uint8 bCrouchWhenShooting : 1;
 	uint8 bIsDucking : 1;
@@ -312,33 +316,37 @@ public:
 	uint8 m_ped_flagF8 : 1;
 	uint8 bWillBeQuickJacked : 1;
 	uint8 bCancelEnteringCar : 1; // after door is opened or couldn't be opened due to it's locked
-	uint8 m_ped_flagF40 : 1;
+	uint8 bObstacleShowedUpDuringKillObjective : 1;
 	uint8 bDuckAndCover : 1;
 
-	uint8 m_ped_flagG1 : 1;
+	uint8 bStillOnValidPoly : 1;
 	uint8 m_ped_flagG2 : 1;
-	uint8 m_ped_flagG4 : 1; // bStillOnValidPoly?
+	uint8 m_ped_flagG4 : 1; // bResetWalkAnims?
 	uint8 bStartWanderPathOnFoot : 1; // exits the car if he's in it, reset after path found
-	uint8 m_ped_flagG10 : 1; // bOnBoat? (but not in the sense of driving)
+	uint8 bOnBoat : 1; // not just driver, may be just standing
 	uint8 bBusJacked : 1;
 	uint8 bGonnaKillTheCarJacker : 1; // only set when car is jacked from right door
 	uint8 bFadeOut : 1;
 
-	uint8 bKnockedUpIntoAir : 1; // has ped been knocked up into the air by a car collision
-	uint8 m_ped_flagH2 : 1;
+	uint8 m_ped_flagH1 : 1;
+	uint8 bHitSteepSlope : 1; // has ped collided/is standing on a steep slope (surface type)
 	uint8 m_ped_flagH4 : 1;
 	uint8 bClearObjective : 1;
-	uint8 m_ped_flagH10 : 1;
+	uint8 m_ped_flagH10 : 1; // bTryingToReachDryLand? reset when we landed on something not vehicle and object
 	uint8 bCollidedWithMyVehicle : 1;
-	uint8 m_ped_flagH40 : 1;
+	uint8 bRichFromMugging : 1; // ped has lots of cash from mugging people - will drop money if someone points gun to him
 	uint8 m_ped_flagH80 : 1;
 
 	uint8 bShakeFist : 1;  // test shake hand at look entity
 	uint8 bNoCriticalHits : 1; // if set, limbs won't came off
-	uint8 m_ped_flagI4 : 1;
+	uint8 m_ped_flagI4 : 1; // seems like related with cars
 	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 bFallenDown : 1;
+#ifdef VC_PED_PORTS
+	uint8 bKnockedUpIntoAir : 1; // has ped been knocked up into the air by a car collision
+#else
 	uint8 m_ped_flagI20 : 1;
+#endif
 	uint8 m_ped_flagI40 : 1;
 	uint8 m_ped_flagI80 : 1;
 
@@ -398,7 +406,7 @@ public:
 	float m_fRotationDest;
 	float m_headingRate;
 	uint16 m_vehEnterType;	// TODO: this is more like a door, not a type
-	uint16 m_walkAroundType;
+	int16 m_walkAroundType;
 	CEntity *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
@@ -411,9 +419,9 @@ public:
 	bool bRunningToPhone;
 	uint8 field_31D;
 	int16 m_phoneId;
-	uint32 m_lookingForPhone; // unused
+	eCrimeType m_crimeToReportOnPhone;
 	uint32 m_phoneTalkTimer;
-	void *m_lastAccident;
+	CAccident *m_lastAccident;
 	int32 m_nPedType;
 	CPedStats *m_pedStats;
 	float m_fleeFromPosX;
@@ -467,8 +475,8 @@ public:
 	uint32 m_soundStart;
 	uint16 m_lastQueuedSound;
 	uint16 m_queuedSound;
-	CVector m_vecSeekPosEx;
-	float m_seekExAngle;
+	CVector m_vecSeekPosEx; // used in objectives
+	float m_distanceToCountSeekDoneEx; // used in objectives
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
@@ -526,7 +534,6 @@ public:
 	void CalculateNewOrientation(void);
 	float WorkOutHeadingForMovingFirstPerson(float);
 	void CalculateNewVelocity(void);
-	bool CanPedJumpThis(CEntity*);
 	bool CanSeeEntity(CEntity*, float);
 	void RestorePreviousObjective(void);
 	void SetIdle(void);
@@ -646,6 +653,14 @@ public:
 	void SeekCar(void);
 	void SeekBoatPosition(void);
 	bool PositionPedOutOfCollision(void);
+	bool RunToReportCrime(eCrimeType);
+	bool PlacePedOnDryLand(void);
+	bool PossiblyFindBetterPosToSeekCar(CVector*, CVehicle*);
+	void UpdateFromLeader(void);
+	int ScanForThreats(void);
+	void SetEnterCar(CVehicle*, uint32);
+	bool WarpPedToNearEntityOffScreen(CEntity*);
+	void SetExitCar(CVehicle*, uint32);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -656,8 +671,6 @@ public:
 	static void LoadFightData(void);
 
 	// Callbacks
-	static RwObject *SetPedAtomicVisibilityCB(RwObject *object, void *data);
-	static RwFrame *RecurseFrameChildrenVisibilityCB(RwFrame *frame, void *data);
 	static void PedGetupCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedStaggerCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedEvadeCB(CAnimBlendAssociation *assoc, void *arg);
@@ -716,6 +729,15 @@ public:
 	void PointGunAt(void);
 	bool ServiceTalkingWhenDead(void);
 	void SetPedPositionInTrain(void);
+	void SetShootTimer(uint32);
+	void SetSeekCar(CVehicle*, uint32);
+	void SetSeekBoatPosition(CVehicle*);
+	void SetExitTrain(CVehicle*);
+#ifdef VC_PED_PORTS
+	bool CanPedJumpThis(CEntity*, CVector*);
+#else
+	bool CanPedJumpThis(CEntity*);
+#endif
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
@@ -724,9 +746,13 @@ public:
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	void ReplaceWeaponWhenExitingVehicle(void);
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 &nThreatReactionRangeMultiplier;
+
+	// set by 0481:set_enter_car_range_multiplier opcode
+	static uint16 &nEnterCarRangeMultiplier;
 
 	static bool &bNastyLimbsCheat;
 	static bool &bPedCheat2;

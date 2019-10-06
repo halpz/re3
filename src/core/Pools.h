@@ -49,4 +49,5 @@ public:
 	static CVehicle *GetVehicle(int32 handle);
 	static int32 GetObjectRef(CObject *object);
 	static CObject *GetObject(int32 handle);
+	static void MakeSureSlotInObjectPoolIsEmpty(int32 handle);
 };

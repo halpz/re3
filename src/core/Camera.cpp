@@ -22,7 +22,6 @@ WRAPPER void CCamera::CamShake(float strength, float x, float y, float z) { EAXJ
 WRAPPER void CCamera::DrawBordersForWideScreen(void) { EAXJMP(0x46B430); }
 WRAPPER void CCamera::CalculateDerivedValues(void) { EAXJMP(0x46EEA0); }
 WRAPPER void CCamera::Restore(void) { EAXJMP(0x46F990); }
-WRAPPER void CCamera::SetWidescreenOff(void) { EAXJMP(0x46FF10); }
 WRAPPER void CamShakeNoPos(CCamera*, float) { EAXJMP(0x46B100); }
 WRAPPER void CCamera::TakeControl(CEntity*, int16, int16, int32) { EAXJMP(0x471500); }
 WRAPPER void CCamera::TakeControlNoEntity(const CVector&, int16, int32) { EAXJMP(0x4715B0); }
@@ -30,6 +29,10 @@ WRAPPER void CCamera::SetCamPositionForFixedMode(const CVector&, const CVector&)
 WRAPPER void CCamera::Init(void) { EAXJMP(0x46BAD0); }
 WRAPPER void CCamera::SetRwCamera(RwCamera*) { EAXJMP(0x46FEC0); }
 WRAPPER void CCamera::Process(void) { EAXJMP(0x46D3F0); }
+WRAPPER void CCamera::LoadPathSplines(int file) { EAXJMP(0x46D1D0); }
+WRAPPER uint32 CCamera::GetCutSceneFinishTime(void) { EAXJMP(0x46B920); }
+WRAPPER void CCamera::FinishCutscene(void) { EAXJMP(0x46B560); }
+WRAPPER void CCamera::RestoreWithJumpCut(void) { EAXJMP(0x46FAE0); };
 
 bool
 CCamera::GetFading()
@@ -1326,6 +1329,25 @@ CCamera::Find3rdPersonQuickAimPitch(void)
 
 	return -(DEGTORAD(((0.5f - m_f3rdPersonCHairMultY) * 1.8f * 0.5f * Cams[ActiveCam].FOV)) + rot);
 }
+
+void
+CCamera::SetCamCutSceneOffSet(const CVector &pos)
+{
+	m_vecCutSceneOffset = pos;
+};
+
+void
+CCamera::TakeControlWithSpline(short nSwitch)
+{
+	m_iModeToGoTo = CCam::MODE_FLYBY;
+	m_bLookingAtPlayer = false;
+	m_bLookingAtVector = false;
+	m_bcutsceneFinished = false;
+	m_iTypeOfSwitch = nSwitch;
+	m_bStartInterScript = true;
+
+	//FindPlayerPed(); // unused
+};
 
 STARTPATCHES
 	InjectHook(0x42C760, (bool (CCamera::*)(const CVector &center, float radius, const CMatrix *mat))&CCamera::IsSphereVisible, PATCH_JUMP);

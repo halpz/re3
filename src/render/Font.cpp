@@ -134,10 +134,10 @@ CFont::PrintChar(float x, float y, uint16 c)
 	if(Details.style == 0 || Details.style == 2){
 		if(Details.dropShadowPosition != 0){
 			CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
-				CRect(x + Details.dropShadowPosition,
-				      y + Details.dropShadowPosition,
-				      x + Details.dropShadowPosition + 32.0f * Details.scaleX * 1.0f,
-				      y + Details.dropShadowPosition + 40.0f * Details.scaleY * 0.5f),
+				CRect(x + SCREEN_SCALE_X(Details.dropShadowPosition),
+				      y + SCREEN_SCALE_Y(Details.dropShadowPosition),
+				      x + SCREEN_SCALE_X(Details.dropShadowPosition) + 32.0f * Details.scaleX * 1.0f,
+				      y + SCREEN_SCALE_Y(Details.dropShadowPosition) + 40.0f * Details.scaleY * 0.5f),
 				Details.dropColor,
 				xoff/16.0f,                 yoff/12.8f,
 				(xoff+1.0f)/16.0f - 0.001f, yoff/12.8f,

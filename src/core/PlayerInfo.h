@@ -68,6 +68,7 @@ public:
 
 	void MakePlayerSafe(bool);
 	void LoadPlayerSkin();
+	void DeletePlayerSkin();
 	void AwardMoneyForExplosion(CVehicle *vehicle);	
 	void SetPlayerSkin(char* skin);
 	CVector& GetPos();

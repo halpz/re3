@@ -61,7 +61,7 @@ public:
 	uint8 m_phy_flagA80 : 1;
 
 	uint8 m_nSurfaceTouched;
-	uint8 m_nZoneLevel;
+	int8 m_nZoneLevel;
 
 	CPhysical(void);
 	~CPhysical(void);

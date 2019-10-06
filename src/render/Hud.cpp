@@ -46,7 +46,7 @@ wchar *CHud::m_Message = (wchar*)0x72E318;
 wchar *CHud::m_PagerMessage = (wchar*)0x878840;
 bool &CHud::m_Wants_To_Draw_Hud = *(bool*)0x95CD89;
 bool &CHud::m_Wants_To_Draw_3dMarkers = *(bool*)0x95CD62;
-wchar(*CHud::m_BigMessage)[128] = (wchar(*)[128])0x664CE0;
+wchar(&CHud::m_BigMessage)[6][128] = *(wchar(*)[6][128])*(uintptr*)0x664CE0;
 int16 &CHud::m_ItemToFlash = *(int16*)0x95CC82;
 
 // These aren't really in CHud
@@ -68,53 +68,35 @@ int16 &CHud::PagerTimer = *(int16*)0x95CC3A;
 int16 &CHud::PagerOn = *(int16*)0x95CCA0;
 
 CSprite2d *CHud::Sprites = (CSprite2d*)0x95CB9C;
-char *WeaponFilenames[] = {
-	"fist",
-	"fistm",
-	"bat",
-	"batm",
-	"pistol",
-	"pistolm",
-	"uzi",
-	"uzim",
-	"shotgun",
-	"shotgunm",
-	"ak47",
-	"ak47m",
-	"m16",
-	"m16m",
-	"sniper",
-	"sniperm",
-	"rocket",
-	"rocketm",
-	"flame",
-	"flamem",
-	"molotov",
-	"molotovm",
-	"grenade",
-	"grenadem",
-	"detonator",
-	"detonator_mask",
-	"",
-	"",
-	"",
-	"",
-	"radardisc",
-	"radardiscm",
-	"pager",
-	"pagerm",
-	"",
-	"",
-	"",
-	"",
-	"bleeder",
-	"",
-	"sitesniper",
-	"sitesniperm",
-	"siteM16",
-	"siteM16m",
-	"siterocket",
-	"siterocketm"
+
+struct
+{
+	const char *name;
+	const char *mask;
+} WeaponFilenames[] = {
+	{"fist", "fistm"},
+	{"bat", "batm"},
+	{"pistol", "pistolm" },
+	{"uzi", "uzim"},
+	{"shotgun", "shotgunm"},
+	{"ak47", "ak47m"},
+	{"m16", "m16m"},
+	{"sniper", "sniperm"},
+	{"rocket", "rocketm"},
+	{"flame", "flamem"},
+	{"molotov", "molotovm"},
+	{"grenade", "grenadem"},
+	{"detonator", "detonator_mask"},
+	{"", ""},
+	{"", ""},
+	{"radardisc", "radardiscm"},
+	{"pager", "pagerm"},
+	{"", ""},
+	{"", ""},
+	{"bleeder", ""},
+	{"sitesniper", "sitesniperm"},
+	{"siteM16", "siteM16m"},
+	{"siterocket", "siterocketm"}
 };
 
 RwTexture *&gpSniperSightTex = *(RwTexture**)0x8F5834;
@@ -336,23 +318,6 @@ void CHud::Draw()
 
 		AsciiToUnicode(sTemp, sPrint);
 
-		CFont::SetBackgroundOff();
-		CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
-		CFont::SetJustifyOff();
-		CFont::SetCentreOn();
-		CFont::SetCentreSize(SCREEN_SCALE_X(640.0f));
-		CFont::SetPropOn();
-		CFont::SetFontStyle(FONT_BANK);
-
-		if (!CDarkel::FrenzyOnGoing()) {
-			if (WeaponType) {
-				if (WeaponType != WEAPONTYPE_BASEBALLBAT) {
-					CFont::SetColor(CRGBA(0, 0, 0, 255));
-					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(66.0f), SCREEN_SCALE_Y(73.0f), sPrint);
-				}
-			}
-		}
-
 		/*
 			DrawWeaponIcon
 		*/
@@ -367,6 +332,19 @@ void CHud::Draw()
 			1.0f,
 			1.0f,
 			1.0f);
+
+		CFont::SetBackgroundOff();
+		CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
+		CFont::SetJustifyOff();
+		CFont::SetCentreOn();
+		CFont::SetCentreSize(SCREEN_SCALE_X(640.0f));
+		CFont::SetPropOn();
+		CFont::SetFontStyle(FONT_BANK);
+
+		if (!CDarkel::FrenzyOnGoing() && WeaponType != WEAPONTYPE_UNARMED && WeaponType != WEAPONTYPE_BASEBALLBAT) {
+			CFont::SetColor(CRGBA(0, 0, 0, 255));
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(66.0f), SCREEN_SCALE_Y(73.0f), sPrint);
+		}
 
 		/*
 			DrawHealth
@@ -896,15 +874,17 @@ void CHud::Draw()
 			CFont::SetPropOn();
 			CFont::SetFontStyle(FONT_BANK);
 
-			if (TheCamera.m_WideScreenOn)
-				CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(120.0f));
-			else
-				CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(280.0f));
+			float offsetX = SCREEN_SCALE_X(40.0f) + SCREEN_SCALE_X(8.0f);
+			float center = SCREEN_SCALE_FROM_RIGHT(50.0f) - SCREEN_SCALE_X(8.0f) - offsetX;
+			CFont::SetCentreSize(center);
 
-			CFont::SetDropShadowPosition(1);
+			const int16 shadow = 1;
+			CFont::SetDropShadowPosition(shadow);
 			CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 			CFont::SetColor(CRGBA(235, 235, 235, 255));
-			CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_SCALE_FROM_BOTTOM(64.0f), m_Message);
+
+			// I'm not sure shadow substaction was intentional here, might be a leftover if CFont::PrintString was used for a shadow draw call
+			CFont::PrintString(center / 2.0f + offsetX - SCREEN_SCALE_X(shadow), SCREEN_SCALE_Y(4.0f) + SCREEN_SCALE_FROM_BOTTOM(68.0f) - SCREEN_SCALE_Y(shadow), m_Message);
 			CFont::SetDropShadowPosition(0);
 		}
 
@@ -924,11 +904,11 @@ void CHud::Draw()
 				CFont::SetFontStyle(FONT_HEADING);
 
 				if (BigMessageX[0] >= (SCREEN_WIDTH - 20)) {
-					BigMessageInUse[0] += (CTimer::GetTimeStepInSeconds() * 120.0f);
+					BigMessageInUse[0] += CTimer::GetTimeStep();
 
 					if (BigMessageInUse[0] >= 120.0f) {
 						BigMessageInUse[0] = 120.0;
-						BigMessageAlpha[0] += (CTimer::GetTimeStepInSeconds() * -255.0f);
+						BigMessageAlpha[0] -= (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 					}
 
 					if (BigMessageAlpha[0] <= 0.0f) {
@@ -937,18 +917,22 @@ void CHud::Draw()
 					}
 				}
 				else {
-					BigMessageX[0] += (CTimer::GetTimeStepInSeconds() * 255.0f);
-					BigMessageAlpha[0] += (CTimer::GetTimeStepInSeconds() * 255.0f);
+					BigMessageX[0] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
+					BigMessageAlpha[0] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 
 					if (BigMessageAlpha[0] >= 255.0f)
 						BigMessageAlpha[0] = 255.0f;
 				}
 
 				CFont::SetColor(CRGBA(0, 0, 0, BigMessageAlpha[0]));
-				CFont::PrintString(SCREEN_WIDTH / 2, (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(20.0f - 2.0f), m_BigMessage[0]);
+#ifdef FIX_BUGS
+				CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(18.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[0]);
+#else
+				CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(20.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[0]);
+#endif
 
 				CFont::SetColor(CRGBA(85, 119, 133, BigMessageAlpha[0]));
-				CFont::PrintString(SCREEN_WIDTH / 2, (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(20.0f), m_BigMessage[0]);
+				CFont::PrintString(SCREEN_WIDTH / 2, (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(18.0f), m_BigMessage[0]);
 			}
 			else {
 				BigMessageAlpha[0] = 0.0f;
@@ -1103,7 +1087,7 @@ void CHud::DrawAfterFade()
 		DrawBigMessage2
 	*/
 	// Oddjob
-	if (m_BigMessage[4][0]) {
+	if (m_BigMessage[3][0]) {
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
 		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
@@ -1113,70 +1097,90 @@ void CHud::DrawAfterFade()
 		CFont::SetFontStyle(FONT_BANK);
 
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::PrintString(SCREEN_SCALE_X(2.0f) + (SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f), m_BigMessage[4]);
+		CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[3]);
 
 		CFont::SetColor(CRGBA(89, 115, 150, 255));
-		CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f), m_BigMessage[4]);
+		CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f), m_BigMessage[3]);
+	}
+
+	if (!m_BigMessage[1][0] && m_BigMessage[4][0]) {
+		CFont::SetJustifyOff();
+		CFont::SetBackgroundOff();
+		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
+		CFont::SetCentreOn();
+		CFont::SetPropOn();
+		CFont::SetCentreSize(SCREEN_SCALE_X(620.0f));
+		CFont::SetColor(CRGBA(0, 0, 0, 255));
+		CFont::SetFontStyle(FONT_BANK);
+
+		CFont::PrintString((SCREEN_WIDTH / 2) - SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f) - SCREEN_SCALE_Y(2.0f), m_BigMessage[3]);
+
+		CFont::SetColor(CRGBA(89, 115, 150, 255));
+		CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f), m_BigMessage[3]);
 	}
 
 	// Oddjob result
 	if (OddJob2OffTimer > 0)
-		OddJob2OffTimer = OddJob2OffTimer - CTimer::GetTimeStepInMilliseconds();
+		OddJob2OffTimer -= CTimer::GetTimeStepInMilliseconds();
 
 	static float fStep;
-	if (!m_BigMessage[1][0] && m_BigMessage[4][0] && m_BigMessage[5][0] && OddJob2OffTimer <= 0.0f) {
-		switch (OddJob2On) {
-		case 0:
-			OddJob2On = 1;
-			OddJob2XOffset = 380.0f;
-			break;
-		case 1:
-			if (OddJob2XOffset <= 2.0f) {
-				OddJob2Timer = 0;
-				OddJob2On = 2;
-			}
-			else {
-				fStep = 40.0f;
-				if ((OddJob2XOffset * 0.16667f) <= 40.0f)
-					fStep = OddJob2XOffset * 0.16667f;
+	if (m_BigMessage[5][0] && OddJob2OffTimer <= 0.0f) {
+		if (OddJob2On <= 3) {
+			switch (OddJob2On) {
+			case 0:
+				OddJob2On = 1;
+				OddJob2XOffset = 380.0f;
+				break;
+			case 1:
+				if (OddJob2XOffset <= 2.0f) {
+					OddJob2Timer = 0;
+					OddJob2On = 2;
+				}
+				else {
+					fStep = 40.0f;
+					if ((OddJob2XOffset / 6.0f) <= 40.0f)
+						fStep = OddJob2XOffset / 6.0f;
+					OddJob2XOffset = OddJob2XOffset - fStep;
+				}
+				break;
+			case 2:
+				OddJob2Timer += (20.0f * CTimer::GetTimeStep());
+				if (OddJob2Timer > 1500) {
+					OddJob2On = 3;
+				}
+				break;
+			case 3:
+				fStep = 30.0f;
+				if ((OddJob2XOffset / 5.0f) >= 30.0f)
+					fStep = OddJob2XOffset / 5.0f;
+
 				OddJob2XOffset = OddJob2XOffset - fStep;
-			}
-			break;
-		case 2:
-			OddJob2Timer += (20.0f * CTimer::GetTimeStep());
-			if (OddJob2Timer > 1500) {
-				OddJob2On = 3;
-			}
-			break;
-		case 3:
-			fStep = 30.0f;
-			if ((OddJob2XOffset * 0.2f) >= 30.0f)
-				fStep = OddJob2XOffset * 0.2f;
 
-			OddJob2XOffset = OddJob2XOffset - fStep;
-
-			if (OddJob2XOffset < -380.0f) {
-				OddJob2OffTimer = 5000.0f;
-				OddJob2On = 0;
+				if (OddJob2XOffset < -380.0f) {
+					OddJob2OffTimer = 5000.0f;
+					OddJob2On = 0;
+				}
+				break;
+			default:
+				break;
 			}
-			break;
-		default:
-			break;
 		}
 
-		CFont::SetJustifyOff();
-		CFont::SetBackgroundOff();
-		CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.2f));
-		CFont::SetCentreOn();
-		CFont::SetPropOn();
-		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
-		CFont::SetFontStyle(FONT_BANK);
+		if (!m_BigMessage[1][0]) {
+			CFont::SetJustifyOff();
+			CFont::SetBackgroundOff();
+			CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.2f));
+			CFont::SetCentreOn();
+			CFont::SetPropOn();
+			CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
+			CFont::SetColor(CRGBA(0, 0, 0, 255));
+			CFont::SetFontStyle(FONT_BANK);
 
-		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::PrintString(SCREEN_SCALE_X(2.0f) + (SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(20.0f + 2.0f), m_BigMessage[5]);
+			CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(20.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[5]);
 
-		CFont::SetColor(CRGBA(156, 91, 40, 255));
-		CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(20.0f + 2.0f), m_BigMessage[5]);
+			CFont::SetColor(CRGBA(156, 91, 40, 255));
+			CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(20.0f), m_BigMessage[5]);
+		}
 	}
 
 	/*
@@ -1193,15 +1197,15 @@ void CHud::DrawAfterFade()
 				CFont::SetScale(SCREEN_SCALE_X(1.04f), SCREEN_SCALE_Y(1.6f));
 
 			CFont::SetPropOn();
-			CFont::SetRightJustifyWrap(-500);
+			CFont::SetRightJustifyWrap(-500.0f);
 			CFont::SetRightJustifyOn();
 			CFont::SetFontStyle(FONT_HEADING);
 			if (BigMessageX[1] >= (SCREEN_WIDTH - 20)) {
-				BigMessageInUse[1] += (CTimer::GetTimeStepInSeconds() * 120.0f);
+				BigMessageInUse[1] += CTimer::GetTimeStep();
 
 				if (BigMessageInUse[1] >= 120.0f) {
 					BigMessageInUse[1] = 120.0;
-					BigMessageAlpha[1] += (CTimer::GetTimeStepInSeconds() * -255.0f);
+					BigMessageAlpha[1] -= (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 				}
 				if (BigMessageAlpha[1] <= 0) {
 					m_BigMessage[1][0] = 0;
@@ -1209,15 +1213,15 @@ void CHud::DrawAfterFade()
 				}
 			}
 			else {
-				BigMessageX[1] += (CTimer::GetTimeStepInSeconds() * 255.0f);
-				BigMessageAlpha[1] += (CTimer::GetTimeStepInSeconds() * 255.0f);
+				BigMessageX[1] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
+				BigMessageAlpha[1] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 
 				if (BigMessageAlpha[1] >= 255.0f)
 					BigMessageAlpha[1] = 255.0f;
 			}
 
 			CFont::SetColor(CRGBA(40, 40, 40, BigMessageAlpha[1]));
-			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f - 2.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), m_BigMessage[1]);
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f) + SCREEN_SCALE_X(2.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[1]);
 
 			CFont::SetColor(CRGBA(220, 172, 2, BigMessageAlpha[1]));
 			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), m_BigMessage[1]);
@@ -1276,9 +1280,8 @@ void CHud::GetRidOfAllHudMessages()
 
 void CHud::Initialise()
 {
-	debug("Init CHud");
-
-	ReInitialise();
+	m_Wants_To_Draw_Hud = true;
+	m_Wants_To_Draw_3dMarkers = true;
 
 	int HudTXD = CTxdStore::AddTxdSlot("hud");
 	CTxdStore::LoadTxd(HudTXD, "MODELS/HUD.TXD");
@@ -1286,12 +1289,31 @@ void CHud::Initialise()
 	CTxdStore::PopCurrentTxd();
 	CTxdStore::SetCurrentTxd(HudTXD);
 
-	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames) / 2; i++) {
-		Sprites[i].SetTexture(WeaponFilenames[i * 2]);
+	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames); i++) {
+		Sprites[i].SetTexture(WeaponFilenames[i].name, WeaponFilenames[i].mask);
 	}
 
-	gpSniperSightTex = RwTextureRead("sitesniper", nil);
-	gpRocketSightTex = RwTextureRead("siterocket", nil);
+	GetRidOfAllHudMessages();
+
+	if (gpSniperSightTex == nil)
+		gpSniperSightTex = RwTextureRead("sitesniper", nil);
+	if (gpRocketSightTex == nil)
+		gpRocketSightTex = RwTextureRead("siterocket", nil);
+
+	CounterOnLastFrame = 0;
+	m_ItemToFlash = ITEM_NONE;
+	OddJob2Timer = 0;
+	OddJob2OffTimer = 0.0f;
+	OddJob2On = 0;
+	OddJob2XOffset = 0.0f;
+	CounterFlashTimer = 0;
+	TimerOnLastFrame = 0;
+	TimerFlashTimer = 0;
+	SpriteBrightness = 0;
+	PagerOn = 0;
+	PagerTimer = 0;
+	PagerSoundPlayed = 0;
+	PagerXOffset = 150.0f;
 
 	CTxdStore::PopCurrentTxd();
 }
@@ -1328,7 +1350,7 @@ WRAPPER void CHud::SetBigMessage(wchar *message, int16 style) { EAXJMP(0x50A250)
 #else
 void CHud::SetBigMessage(wchar *message, int16 style)
 {
-	int i;
+	int i = 0;
 
 	if (style == 5) {
 		for (i = 0; i < 128; i++) {
@@ -1379,7 +1401,7 @@ WRAPPER void CHud::SetMessage(wchar *message) { EAXJMP(0x50A210); }
 #else
 void CHud::SetMessage(wchar *message)
 {
-	int i;
+	int i = 0;
 	for (i = 0; i < 256; i++) {
 		if (message[i] == 0)
 			break;
@@ -1395,7 +1417,7 @@ WRAPPER void CHud::SetPagerMessage(wchar *message) { EAXJMP(0x50A320); }
 #else
 void CHud::SetPagerMessage(wchar *message)
 {
-	int i;
+	int i = 0;
 	for (i = 0; i < 256; i++) {
 		if (message[i] == 0)
 			break;
@@ -1428,7 +1450,7 @@ void CHud::Shutdown()
 {
 	debug("Shutdown CHud");
 
-	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames) / 2; ++i) {
+	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames); ++i) {
 		Sprites[i].Delete();
 	}
 

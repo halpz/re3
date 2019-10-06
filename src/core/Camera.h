@@ -380,11 +380,11 @@ uint32    unknown;
 	CVector m_RealPreviousCameraPosition;
 	CVector m_cvecAimingTargetCoors;
 	CVector m_vecFixedModeVector;
+	CVector m_vecFixedModeSource;
+	CVector m_vecFixedModeUpOffSet;
+	CVector m_vecCutSceneOffset;
 
-	// one of those has to go
-  CVector m_vecFixedModeSource;
-  CVector m_vecFixedModeUpOffSet;
-//  CVector m_vecCutSceneOffset;
+  // one of those has to go
   CVector m_cvecStartingSourceForInterPol;
   CVector m_cvecStartingTargetForInterPol;
   CVector m_cvecStartingUpForInterPol;
@@ -394,7 +394,7 @@ uint32    unknown;
   CVector m_vecSourceWhenInterPol;
   CVector m_vecTargetWhenInterPol;
   CVector m_vecUpWhenInterPol;
-  CVector m_vecClearGeometryVec;
+  //CVector m_vecClearGeometryVec;
 
 	CVector m_vecGameCamPos;
 	CVector SourceDuringInter;
@@ -444,6 +444,7 @@ int     m_iModeObbeCamIsInForCar;
 	bool Get_Just_Switched_Status() { return m_bJust_Switched; }
 	inline const CMatrix& GetCameraMatrix(void) { return m_cameraMatrix; }
 	CVector &GetGameCamPosition(void) { return m_vecGameCamPos; }
+	float GetPositionAlongSpline(void) { return m_fPositionAlongSpline; }
 	bool IsPointVisible(const CVector &center, const CMatrix *mat);
 	bool IsSphereVisible(const CVector &center, float radius, const CMatrix *mat);
 	bool IsSphereVisible(const CVector &center, float radius);
@@ -467,7 +468,8 @@ int     m_iModeObbeCamIsInForCar;
 
 	void DrawBordersForWideScreen(void);
 	void Restore(void);
-	void SetWidescreenOff(void);
+	void SetWideScreenOn(void) { m_WideScreenOn = true; }
+	void SetWideScreenOff(void) { m_WideScreenOn = false; }
 
 	float Find3rdPersonQuickAimPitch(void);
 
@@ -480,6 +482,14 @@ int     m_iModeObbeCamIsInForCar;
 	void SetRwCamera(RwCamera*);
 	void Process();
 
+	void LoadPathSplines(int file);
+	uint32 GetCutSceneFinishTime(void);
+	void FinishCutscene(void);
+
+	void SetCamCutSceneOffSet(const CVector&);
+	void TakeControlWithSpline(short);
+	void RestoreWithJumpCut(void);
+
 	void dtor(void) { this->CCamera::~CCamera(); }
 };
 static_assert(offsetof(CCamera, m_WideScreenOn) == 0x70, "CCamera: error");
@@ -489,6 +499,7 @@ static_assert(offsetof(CCamera, m_uiTransitionState) == 0x89, "CCamera: error");
 static_assert(offsetof(CCamera, m_uiTimeTransitionStart) == 0x94, "CCamera: error");
 static_assert(offsetof(CCamera, m_BlurBlue) == 0x9C, "CCamera: error");
 static_assert(offsetof(CCamera, Cams) == 0x1A4, "CCamera: error");
+static_assert(offsetof(CCamera, m_vecCutSceneOffset) == 0x6F8, "CCamera: error");
 static_assert(sizeof(CCamera) == 0xE9D8, "CCamera: wrong size");
 extern CCamera &TheCamera;
 

@@ -204,6 +204,22 @@ public:
 		m_matrix.at.y = 0.0f;
 		m_matrix.at.z = 1.0f;
 	}
+	void SetRotateZOnlyScaled(float angle, float scale) {
+		float c = Cos(angle);
+		float s = Sin(angle);
+
+		m_matrix.right.x = c * scale;
+		m_matrix.right.y = s * scale;
+		m_matrix.right.z = 0.0f;
+
+		m_matrix.up.x = -s * scale;
+		m_matrix.up.y = c * scale;
+		m_matrix.up.z = 0.0f;
+
+		m_matrix.at.x = 0.0f;
+		m_matrix.at.y = 0.0f;
+		m_matrix.at.z = scale;
+	}
 	void SetRotateZ(float angle){
 		SetRotateZOnly(angle);
 		m_matrix.pos.x = 0.0f;
@@ -213,6 +229,7 @@ public:
 	void SetRotate(float xAngle, float yAngle, float zAngle);
 	void Rotate(float x, float y, float z);
 	void RotateX(float x);
+	void RotateZ(float z);
 
 	void Reorthogonalise(void);
 	void CopyOnlyMatrix(CMatrix *other){
