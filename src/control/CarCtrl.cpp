@@ -2404,7 +2404,7 @@ void CCarCtrl::SteerAICarWithPhysicsTryingToBlockTarget_Stop(CVehicle* pVehicle,
 #ifdef FIX_BUGS
 			pVehicle->m_nTimeBlocked += CTimer::GetTimeStepInMilliseconds();
 #else
-			pVehicle->m_nTimeBlocked += 16.66f * CTimer::GetTimeStep(); // very doubtful constant
+			pVehicle->m_nTimeBlocked += 1000.0f / 60.0f * CTimer::GetTimeStep(); // very doubtful constant
 #endif
 		else
 			pVehicle->m_nTimeBlocked = 0;

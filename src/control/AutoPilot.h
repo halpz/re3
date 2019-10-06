@@ -86,7 +86,7 @@ public:
 	uint8 m_bSlowedDownBecauseOfPeds : 1;
 	uint8 m_bStayInCurrentLevel : 1;
 	uint8 m_bStayInFastLane : 1;
-	uint8 m_flag10 : 1;
+	uint8 m_bIgnorePathfinding : 1;
 	CVector m_vecDestinationCoors;
 	CPathNode *m_aPathFindNodesInfo[NUM_PATH_NODES_IN_AUTOPILOT];
 	int16 m_nPathFindNodesCount;

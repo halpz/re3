@@ -105,7 +105,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	AutoPilot.m_nTempAction = TEMPACT_NONE;
 	AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 	AutoPilot.m_bStayInCurrentLevel = false;
-	AutoPilot.m_flag10 = false;
+	AutoPilot.m_bIgnorePathfinding = false;
 }
 
 CVehicle::~CVehicle()
