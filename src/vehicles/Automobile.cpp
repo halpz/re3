@@ -1934,7 +1934,7 @@ CAutomobile::Render(void)
 	CVector rearWheelFwd = GetForward();
 	for(i = 0; i < 4; i++){
 		if (m_aWheelTimer[i] > 0.0f) {
-			contactPoints[i] = m_aWheelColPoints[0].point - GetPosition();
+			contactPoints[i] = m_aWheelColPoints[i].point - GetPosition();
 			contactSpeeds[i] = GetSpeed(contactPoints[i]);
 			if (i == CARWHEEL_FRONT_LEFT || i == CARWHEEL_FRONT_RIGHT)
 				m_aWheelSpeed[i] = ProcessWheelRotation(m_aWheelState[i], frontWheelFwd, contactSpeeds[i], 0.5f*mi->m_wheelScale);
