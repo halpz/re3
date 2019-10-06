@@ -388,7 +388,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_vecOffsetSeek.x = 0.0f;
 	m_vecOffsetSeek.y = 0.0f;
 	m_vecOffsetSeek.z = 0.0f;
-	m_pedFormation = FORMATION_REAR;
+	m_pedFormation = FORMATION_UNDEFINED;
 	m_collidingThingTimer = 0;
 	m_nPedStateTimer = 0;
 	m_actionX = 0;
@@ -2686,7 +2686,7 @@ CPed::SetObjective(eObjective newObj, void *entity)
 		case OBJECTIVE_FOLLOW_PED_IN_FORMATION:
 			m_pedInObjective = (CPed*)entity;
 			m_pedInObjective->RegisterReference((CEntity**)&m_pedInObjective);
-			m_pedFormation = FORMATION_REAR_LEFT;
+			m_pedFormation = FORMATION_REAR;
 			break;
 		case OBJECTIVE_LEAVE_VEHICLE:
 #ifdef VC_PED_PORTS
@@ -14395,6 +14395,9 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 void
 CPed::SetFormation(eFormation type)
 {
+	// FIX: Formations in GetFormationPosition were in range 1-8, whereas in here it's 0-7.
+	//      To not change the behaviour, range in here tweaked by 1 with the use of enum.
+
 	switch (m_pedFormation) {
 		case FORMATION_REAR:
 		case FORMATION_REAR_LEFT:

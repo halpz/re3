@@ -146,7 +146,7 @@ LetThemFollowYou(void) {
 		CPed *nearPed = player->m_nearPeds[i];
 		if (nearPed && !nearPed->IsPlayer()) {
 			nearPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, (void*)player);
-			nearPed->m_pedFormation = (eFormation)(rand() & 7);
+			nearPed->m_pedFormation = (eFormation)(1 + (rand() & 7));
 			nearPed->bScriptObjectiveCompleted = false;
 		}
 	}
