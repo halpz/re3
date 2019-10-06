@@ -1,3 +1,5 @@
+#pragma once
+
 #define MODELINDICES \
 	X("fire_hydrant",	MI_FIRE_HYDRANT, 0x5F5A00) \
 	X("bagelstnd02",	MI_BAGELSTAND2, 0x5F59FC) \
@@ -352,6 +354,8 @@ enum
 
 	MI_AIRTRAIN_VLO = 198,
 	MI_LOPOLYGUY,
+
+	NUM_DEFAULT_MODELS
 };
 
 enum{

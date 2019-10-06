@@ -24,6 +24,18 @@ struct CPedAudioData
 	int m_nMaxRandomDelayTime;
 };
 
+enum eFormation
+{
+	FORMATION_REAR,
+	FORMATION_REAR_LEFT,
+	FORMATION_REAR_RIGHT,
+	FORMATION_FRONT_LEFT,
+	FORMATION_FRONT_RIGHT,
+	FORMATION_LEFT,
+	FORMATION_RIGHT,
+	FORMATION_FRONT
+};
+
 enum FightState : int8 {
 	FIGHTSTATE_MOVE_FINISHED = -2,
 	FIGHTSTATE_JUST_ATTACKED,
@@ -360,7 +372,7 @@ public:
 	CVehicle *m_carInObjective;
 	CVector m_nextRoutePointPos;
 	CPed *m_leader;
-	uint32 m_pedFormation;
+	eFormation m_pedFormation;
 	uint32 m_fearFlags;
 	CEntity *m_threatEntity;
 	CVector2D m_eventOrThreat;
@@ -398,7 +410,7 @@ public:
 	int16 m_routeLastPoint;
 	uint16 m_routeStartPoint;
 	int16 m_routePointsPassed;
-	int16 m_routeType;
+	int16 m_routeType;	// See PedRouteType
 	int16 m_routePointsBeingPassed;
 	uint16 field_2D2;
 	CVector2D m_moved;
@@ -434,7 +446,7 @@ public:
 	uint8 m_stateUnused;
 	uint8 pad_351[3];
 	uint32 m_timerUnused;
-	CEntity *m_targetUnused;
+	CVector2D *m_wanderRangeBounds;	// array with 2 CVector2D (actually unused CRange2D class) - unused
 	CWeapon m_weapons[WEAPONTYPE_TOTAL_INVENTORY_WEAPONS];
 	eWeaponType m_storedWeapon;
 	uint8 m_currentWeapon;			// eWeaponType
@@ -542,7 +554,6 @@ public:
 	void SetObjective(eObjective, int16, int16);
 	void ClearChat(void);
 	void InformMyGangOfAttack(CEntity*);
-	void SetFollowRoute(int16, int16);
 	void ReactToAttack(CEntity*);
 	void SetDuck(uint32);
 	void RegisterThreatWithGangPeds(CEntity*);
@@ -647,11 +658,9 @@ public:
 	void ServiceTalking(void);
 	void SetJump(void);
 	void UpdatePosition(void);
-	void WanderRange(void);
 	void WanderPath(void);
 	void ReactToPointGun(CEntity*);
 	void SeekCar(void);
-	void SeekBoatPosition(void);
 	bool PositionPedOutOfCollision(void);
 	bool RunToReportCrime(eCrimeType);
 	bool PlacePedOnDryLand(void);
@@ -661,6 +670,10 @@ public:
 	void SetEnterCar(CVehicle*, uint32);
 	bool WarpPedToNearEntityOffScreen(CEntity*);
 	void SetExitCar(CVehicle*, uint32);
+	void SetFormation(eFormation);
+	bool WillChat(CPed*);
+	void SetEnterTrain(CVehicle*, uint32);
+	void SetEnterCar_AllClear(CVehicle*, uint32, uint32);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -733,6 +746,9 @@ public:
 	void SetSeekCar(CVehicle*, uint32);
 	void SetSeekBoatPosition(CVehicle*);
 	void SetExitTrain(CVehicle*);
+	void WanderRange(void);
+	void SetFollowRoute(int16, int16);
+	void SeekBoatPosition(void);
 #ifdef VC_PED_PORTS
 	bool CanPedJumpThis(CEntity*, CVector*);
 #else

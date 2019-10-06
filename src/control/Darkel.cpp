@@ -28,8 +28,8 @@ int8 &CDarkel::InterruptedWeapon = *(int8*)0x95CD60;
 int8 &CDarkel::bStandardSoundAndMessages = *(int8*)0x95CDB6;
 int8 &CDarkel::bNeedHeadShot = *(int8*)0x95CDCA;
 int8 &CDarkel::bProperKillFrenzy = *(int8*)0x95CD98;
-eKillFrenzyStatus &CDarkel::Status = *(eKillFrenzyStatus*)0x95CCB4;
-uint16 (&CDarkel::RegisteredKills)[NUMDEFAULTMODELS] = *(uint16(*)[NUMDEFAULTMODELS]) * (uintptr*)0x6EDBE0;
+uint16 &CDarkel::Status = *(uint16*)0x95CCB4;
+uint16 (&CDarkel::RegisteredKills)[NUM_DEFAULT_MODELS] = *(uint16(*)[NUM_DEFAULT_MODELS]) * (uintptr*)0x6EDBE0;
 int32 &CDarkel::ModelToKill = *(int32*)0x8F2C78;
 int32 &CDarkel::ModelToKill2 = *(int32*)0x885B40;
 int32 &CDarkel::ModelToKill3 = *(int32*)0x885B3C;
@@ -185,7 +185,7 @@ CDarkel::RegisterKillNotByPlayer(CPed* victim, eWeaponType weapontype)
 void
 CDarkel::ResetModelsKilledByPlayer()
 {
-	for (int i = 0; i < NUMDEFAULTMODELS; i++)
+	for (int i = 0; i < NUM_DEFAULT_MODELS; i++)
 		RegisteredKills[i] = 0;
 }
 
