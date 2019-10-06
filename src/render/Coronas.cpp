@@ -227,7 +227,6 @@ CCoronas::UpdateCoronaCoors(uint32 id, const CVector &coors, float drawDist, flo
 
 static RwIm2DVertex vertexbufferX[2];
 
-// TODO? not sure streaks look quite right...
 void
 CCoronas::Render(void)
 {
@@ -394,12 +393,15 @@ CCoronas::Render(void)
 			if(!aCoronas[i].hasValue[j] || !aCoronas[i].hasValue[j+1])
 				continue;
 
+			int mod1 = (float)(6 - j) / 6 * 128;
+			int mod2 = (float)(6 - (j+1)) / 6 * 128;
+
 			RwIm2DVertexSetScreenX(&vertexbufferX[0], aCoronas[i].prevX[j]);
 			RwIm2DVertexSetScreenY(&vertexbufferX[0], aCoronas[i].prevY[j]);
-			RwIm2DVertexSetIntRGBA(&vertexbufferX[0], aCoronas[i].prevRed[j], aCoronas[i].prevGreen[j], aCoronas[i].prevBlue[j], 255);
+			RwIm2DVertexSetIntRGBA(&vertexbufferX[0], aCoronas[i].prevRed[j] * mod1 / 256, aCoronas[i].prevGreen[j] * mod1 / 256, aCoronas[i].prevBlue[j] * mod1 / 256, 255);
 			RwIm2DVertexSetScreenX(&vertexbufferX[1], aCoronas[i].prevX[j+1]);
 			RwIm2DVertexSetScreenY(&vertexbufferX[1], aCoronas[i].prevY[j+1]);
-			RwIm2DVertexSetIntRGBA(&vertexbufferX[1], aCoronas[i].prevRed[j+1], aCoronas[i].prevGreen[j+1], aCoronas[i].prevBlue[j+1], 255);
+			RwIm2DVertexSetIntRGBA(&vertexbufferX[1], aCoronas[i].prevRed[j+1] * mod2 / 256, aCoronas[i].prevGreen[j+1] * mod2 / 256, aCoronas[i].prevBlue[j+1] * mod2 / 256, 255);
 
 			// BUG: game doesn't do this
 			RwIm2DVertexSetScreenZ(&vertexbufferX[0], RwIm2DGetNearScreenZ());
