@@ -1,10 +1,11 @@
 #pragma once
 #include "Weapon.h"
+#include "ModelIndices.h"
 
 class CVehicle;
 class CPed;
 
-enum eKillFrenzyStatus
+enum
 {
 	KILLFRENZY_NONE,
 	KILLFRENZY_ONGOING,
@@ -25,8 +26,8 @@ private:
 	static int8 &bStandardSoundAndMessages;
 	static int8 &bNeedHeadShot;
 	static int8 &bProperKillFrenzy;
-	static eKillFrenzyStatus &Status;
-	static uint16 (&RegisteredKills)[NUMDEFAULTMODELS];
+	static uint16 &Status;
+	static uint16 (&RegisteredKills)[NUM_DEFAULT_MODELS];
 	static int32 &ModelToKill;
 	static int32 &ModelToKill2;
 	static int32 &ModelToKill3;

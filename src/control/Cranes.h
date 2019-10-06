@@ -7,4 +7,5 @@ class CCranes
 {
 public:
 	static bool IsThisCarBeingTargettedByAnyCrane(CVehicle*);
+	static bool IsThisCarBeingCarriedByAnyCrane(CVehicle*);
 };

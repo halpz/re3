@@ -44,26 +44,23 @@
 #include "WaterLevel.h"
 #include "CarAI.h"
 #include "Zones.h"
+#include "Cranes.h"
+#include "MusicManager.h"
 
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 WRAPPER void CPed::SetPedPositionInCar(void) { EAXJMP(0x4D4970); }
 WRAPPER void CPed::PreRender(void) { EAXJMP(0x4CFDD0); }
 WRAPPER void CPed::SetMoveAnim(void) { EAXJMP(0x4C5A40); }
-WRAPPER void CPed::SetFollowRoute(int16, int16) { EAXJMP(0x4DD690); }
-WRAPPER void CPed::SetDuck(uint32) { EAXJMP(0x4E4920); }
 WRAPPER void CPed::SetFollowPath(CVector) { EAXJMP(0x4D2EA0); }
 WRAPPER void CPed::StartFightDefend(uint8, uint8, uint8) { EAXJMP(0x4E7780); }
-WRAPPER void CPed::SetRadioStation(void) { EAXJMP(0x4D7BC0); }
 WRAPPER void CPed::ProcessBuoyancy(void) { EAXJMP(0x4C7FF0); }
 WRAPPER void CPed::ServiceTalking(void) { EAXJMP(0x4E5870); }
 WRAPPER void CPed::UpdatePosition(void) { EAXJMP(0x4C7A00); }
-WRAPPER void CPed::WanderRange(void) { EAXJMP(0x4D26C0); }
 WRAPPER void CPed::WanderPath(void) { EAXJMP(0x4D28D0); }
 WRAPPER void CPed::SeekCar(void) { EAXJMP(0x4D3F90); }
-WRAPPER void CPed::SeekBoatPosition(void) { EAXJMP(0x4E4C70); }
 WRAPPER void CPed::UpdateFromLeader(void) {	EAXJMP(0x4D8F30); }
 WRAPPER int CPed::ScanForThreats(void) { EAXJMP(0x4C5FE0); }
-WRAPPER void CPed::SetEnterCar(CVehicle*, uint32) { EAXJMP(0x4E0920); }
+WRAPPER void CPed::SetEnterCar_AllClear(CVehicle*, uint32, uint32) { EAXJMP(0x4E0A40); }
 WRAPPER bool CPed::WarpPedToNearEntityOffScreen(CEntity*) { EAXJMP(0x4E5570); }
 WRAPPER void CPed::SetExitCar(CVehicle*, uint32) { EAXJMP(0x4E1010); }
 
@@ -391,7 +388,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_vecOffsetSeek.x = 0.0f;
 	m_vecOffsetSeek.y = 0.0f;
 	m_vecOffsetSeek.z = 0.0f;
-	m_pedFormation = 0;
+	m_pedFormation = FORMATION_REAR;
 	m_collidingThingTimer = 0;
 	m_nPedStateTimer = 0;
 	m_actionX = 0;
@@ -440,7 +437,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_pLookTarget = nil;
 	m_fLookDirection = 0.0f;
 	m_pCurSurface = nil;
-	m_targetUnused = nil;
+	m_wanderRangeBounds = nil;
 	m_nPathNodes = 0;
 	m_nCurPathNode = 0;
 	m_nPathState = 0;
@@ -2689,7 +2686,7 @@ CPed::SetObjective(eObjective newObj, void *entity)
 		case OBJECTIVE_FOLLOW_PED_IN_FORMATION:
 			m_pedInObjective = (CPed*)entity;
 			m_pedInObjective->RegisterReference((CEntity**)&m_pedInObjective);
-			m_pedFormation = 1;
+			m_pedFormation = FORMATION_REAR_LEFT;
 			break;
 		case OBJECTIVE_LEAVE_VEHICLE:
 #ifdef VC_PED_PORTS
@@ -6325,8 +6322,14 @@ CPed::ExitCar(void)
 void
 CPed::Fall(void)
 {
-	if (m_getUpTimer != -1 && CTimer::GetTimeInMilliseconds() > m_getUpTimer)
+	if (m_getUpTimer != -1 && CTimer::GetTimeInMilliseconds() > m_getUpTimer
+#ifdef VC_PED_PORTS
+		&& bIsStanding
+#endif
+		)
 		ClearFall();
+
+	// VC plays animations ANIM_STD_FALL_ONBACK and ANIM_STD_FALL_ONFRONT in here, which doesn't exist in III.
 }
 
 void
@@ -7612,28 +7615,28 @@ CPed::GetFormationPosition(void)
 
 	CVector formationOffset;
 	switch (m_pedFormation) {
-		case 1:
+		case FORMATION_REAR:
 			formationOffset = CVector(0.0f, -1.5f, 0.0f);
 			break;
-		case 2:
+		case FORMATION_REAR_LEFT:
 			formationOffset = CVector(-1.5f, -1.5f, 0.0f);
 			break;
-		case 3:
+		case FORMATION_REAR_RIGHT:
 			formationOffset = CVector(1.5f, -1.5f, 0.0f);
 			break;
-		case 4:
+		case FORMATION_FRONT_LEFT:
 			formationOffset = CVector(-1.5f, 1.5f, 0.0f);
 			break;
-		case 5:
+		case FORMATION_FRONT_RIGHT:
 			formationOffset = CVector(1.5f, 1.5f, 0.0f);
 			break;
-		case 6:
+		case FORMATION_LEFT:
 			formationOffset = CVector(-1.5f, 0.0f, 0.0f);
 			break;
-		case 7:
+		case FORMATION_RIGHT:
 			formationOffset = CVector(1.5f, 0.0f, 0.0f);
 			break;
-		case 8:
+		case FORMATION_FRONT:
 			formationOffset = CVector(0.0f, 1.5f, 0.0f);
 			break;
 		default:
@@ -7769,7 +7772,7 @@ CPed::GetNextPointOnRoute(void)
 	int16 nextPoint = m_routePointsBeingPassed + m_routePointsPassed + m_routeStartPoint;
 
 	// Route is complete
-	if (nextPoint < 0 || nextPoint > 200 || m_routeLastPoint != CRouteNode::GetRouteThisPointIsOn(nextPoint)) {
+	if (nextPoint < 0 || nextPoint > NUMPEDROUTES || m_routeLastPoint != CRouteNode::GetRouteThisPointIsOn(nextPoint)) {
 
 		switch (m_routeType) {
 			case PEDROUTE_STOP_WHEN_DONE:
@@ -7790,7 +7793,7 @@ CPed::GetNextPointOnRoute(void)
 	return nextPoint;
 }
 
-// TODO: enum
+// These categories are purely random, most of ped models have no correlation. So I don't think making an enum.
 uint8
 CPed::GetPedRadioCategory(uint32 modelIndex)
 {
@@ -10083,7 +10086,7 @@ CPed::ProcessControl(void)
 			if (IsPedInControl() && !bIsStanding && !m_pDamageEntity && CheckIfInTheAir()) {
 				SetInTheAir();
 #ifdef VC_PED_PORTS
-				bKnockedUpIntoAir = true;
+				bKnockedUpIntoAir = false;
 #endif
 			}
 #ifdef VC_PED_PORTS
@@ -10416,7 +10419,9 @@ CPed::ProcessControl(void)
 			ServiceTalking();
 			if (bInVehicle && !m_pMyVehicle)
 				bInVehicle = false;
+#ifndef VC_PED_PORTS
 			m_pCurrentPhysSurface = nil;
+#endif
 		} else {
 			if (bIsStanding && (!m_pCurrentPhysSurface || IsPlayer())
 				|| bIsInWater || !bUsesCollision) {
@@ -13538,18 +13543,19 @@ CPed::SetSeekBoatPosition(CVehicle *boat)
 void
 CPed::SetExitTrain(CVehicle* train)
 {
-	if (m_nPedState != PED_EXIT_TRAIN && train->m_status == STATUS_TRAIN_NOT_MOVING && ((CTrain*)train)->Doors[0].IsFullyOpen()) {
-		/*
-		// Not used
-		CVector exitPos;
-		GetNearestTrainPedPosition(train, exitPos);
-		*/
-		m_nPedState = PED_EXIT_TRAIN;
-		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_TRAIN_GETOUT, 4.0f);
-		m_pVehicleAnim->SetFinishCallback(PedSetOutTrainCB, this);
-		bUsesCollision = false;
-		LineUpPedWithTrain();
-	}
+	if (m_nPedState == PED_EXIT_TRAIN || train->m_status != STATUS_TRAIN_NOT_MOVING || !((CTrain*)train)->Doors[0].IsFullyOpen())
+		return;
+
+	/*
+	// Not used
+	CVector exitPos;
+	GetNearestTrainPedPosition(train, exitPos);
+	*/
+	m_nPedState = PED_EXIT_TRAIN;
+	m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_TRAIN_GETOUT, 4.0f);
+	m_pVehicleAnim->SetFinishCallback(PedSetOutTrainCB, this);
+	bUsesCollision = false;
+	LineUpPedWithTrain();
 }
 
 #ifdef NEW_WALK_AROUND_ALGORITHM
@@ -14386,6 +14392,243 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 	return ourCollidedSpheres;
 }
 
+void
+CPed::SetFormation(eFormation type)
+{
+	switch (m_pedFormation) {
+		case FORMATION_REAR:
+		case FORMATION_REAR_LEFT:
+		case FORMATION_REAR_RIGHT:
+		case FORMATION_FRONT_LEFT:
+		case FORMATION_FRONT_RIGHT:
+		case FORMATION_LEFT:
+		case FORMATION_RIGHT:
+		case FORMATION_FRONT:
+			break;
+		default:
+			Error("Unknown formation type, PedAI.cpp");
+			break;
+	}
+	m_pedFormation = type;
+}
+
+void
+CPed::SetFollowRoute(int16 currentPoint, int16 routeType)
+{
+	m_routeLastPoint = currentPoint;
+	m_routeStartPoint = CRouteNode::GetRouteStart(currentPoint);
+	m_routePointsPassed = 0;
+	m_routeType = routeType;
+	m_routePointsBeingPassed = 1;
+	m_objective = OBJECTIVE_FOLLOW_ROUTE;
+	m_nextRoutePointPos = CRouteNode::GetPointPosition(GetNextPointOnRoute());
+}
+
+// "Wander range" state is unused in game, and you can't use it without SetWanderRange anyway
+void
+CPed::WanderRange(void)
+{
+	bool arrived = Seek();
+	if (arrived) {
+		Idle();
+		if (((m_randomSeed % 256) + 3 * CTimer::GetFrameCounter()) % 1000 > 997) {
+
+			int xDiff = Abs(m_wanderRangeBounds[1].x - m_wanderRangeBounds[0].x);
+			int yDiff = Abs(m_wanderRangeBounds[1].y - m_wanderRangeBounds[0].y);
+
+			CVector newCoords(
+				(CGeneral::GetRandomNumber() % xDiff) + m_wanderRangeBounds[0].x,
+				(CGeneral::GetRandomNumber() % yDiff) + m_wanderRangeBounds[0].y,
+				GetPosition().z);
+
+			SetSeek(newCoords, 2.5f);
+		}
+	}
+}
+
+bool
+CPed::WillChat(CPed *stranger)
+{
+	if (m_pNextPathNode && m_pLastPathNode) {
+		if (m_pNextPathNode != m_pLastPathNode && ThePaths.TestCrossesRoad(m_pNextPathNode, m_pLastPathNode)) {
+			return false;
+		}
+	}
+	if (m_nSurfaceTouched == SURFACE_TARMAC)
+		return false;
+	if (this == stranger)
+		return false;
+	if (m_nPedType == stranger->m_nPedType)
+		return true;
+	if (m_nPedType == PEDTYPE_CRIMINAL)
+		return false;
+	if ((IsGangMember() || stranger->IsGangMember()) && m_nPedType != stranger->m_nPedType)
+		return false;
+	return true;
+}
+
+void
+CPed::SetEnterTrain(CVehicle *train, uint32 unused)
+{
+	if (m_nPedState == PED_ENTER_TRAIN || !((CTrain*)train)->Doors[0].IsFullyOpen())
+		return;
+
+	/*
+	// Not used
+	CVector enterPos;
+	GetNearestTrainPedPosition(train, enterPos);
+	*/
+	m_fRotationCur = train->GetForward().Heading() - HALFPI;
+	m_pMyVehicle = train;
+	m_pMyVehicle->RegisterReference((CEntity **) &m_pMyVehicle);
+
+	m_nPedState = PED_ENTER_TRAIN;
+	m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_TRAIN_GETIN, 4.0f);
+	m_pVehicleAnim->SetFinishCallback(PedSetInTrainCB, this);
+	bUsesCollision = false;
+	LineUpPedWithTrain();
+	if (IsPlayer()) {
+		if (((CPlayerPed*)this)->m_bAdrenalineActive)
+			((CPlayerPed*)this)->ClearAdrenaline();
+	}
+}
+
+void
+CPed::SetDuck(uint32 time)
+{
+	if (bIsDucking || CTimer::GetTimeInMilliseconds() <= m_duckTimer)
+		return;
+
+	if (bCrouchWhenShooting && (m_nPedState == PED_ATTACK || m_nPedState == PED_AIM_GUN)) {
+		CAnimBlendAssociation *duckAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DUCK_LOW);
+		if (!duckAssoc || duckAssoc->blendDelta < 0.0f) {
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DUCK_LOW, 4.0f);
+			bIsDucking = true;
+			m_duckTimer = CTimer::GetTimeInMilliseconds() + time;
+		}
+	} else {
+		CAnimBlendAssociation *duckAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DUCK_DOWN);
+		if (!duckAssoc || duckAssoc->blendDelta < 0.0f) {
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DUCK_DOWN, 4.0f);
+			bIsDucking = true;
+			m_duckTimer = CTimer::GetTimeInMilliseconds() + time;
+		}
+	}
+}
+
+void
+CPed::SeekBoatPosition(void)
+{
+	if (m_carInObjective && !m_carInObjective->pDriver) {
+		CVehicleModelInfo *boatModel = m_carInObjective->GetModelInfo();
+
+		CVector enterOffset;
+		if (boatModel->m_vehicleType == VEHICLE_TYPE_BOAT)
+			enterOffset = boatModel->m_positions[BOAT_POS_FRONTSEAT];
+		else
+			enterOffset = boatModel->m_positions[CAR_POS_FRONTSEAT];
+
+		enterOffset.x = 0.0f;
+		CMatrix boatMat(m_carInObjective->GetMatrix());
+		SetMoveState(PEDMOVE_WALK);
+		m_vecSeekPos = boatMat * enterOffset;
+		if (Seek()) {
+			// We arrived to the boat
+			m_vehEnterType = 0;
+			SetEnterCar(m_carInObjective, 0);
+		}
+	} else
+		RestorePreviousState();
+}
+
+void
+CPed::SetEnterCar(CVehicle *car, uint32 unused)
+{
+	if (CCranes::IsThisCarBeingCarriedByAnyCrane(car)) {
+		RestorePreviousState();
+		RestorePreviousObjective();
+	} else {
+		uint8 doorFlag;
+		eDoors door;
+		switch (m_vehEnterType) {
+			case CAR_DOOR_RF:
+				doorFlag = CAR_DOOR_FLAG_RF;
+				door = DOOR_FRONT_RIGHT;
+				break;
+			case CAR_DOOR_RR:
+				doorFlag = CAR_DOOR_FLAG_RR;
+				door = DOOR_REAR_RIGHT;
+				break;
+			case CAR_DOOR_LF:
+				doorFlag = CAR_DOOR_FLAG_LF;
+				door = DOOR_FRONT_LEFT;
+				break;
+			case CAR_DOOR_LR:
+				doorFlag = CAR_DOOR_FLAG_LR;
+				door = DOOR_REAR_LEFT;
+				break;
+			default:
+				doorFlag = CAR_DOOR_FLAG_UNKNOWN;
+				break;
+		}
+		if (!IsPedInControl() || m_fHealth <= 0.0f
+			|| doorFlag & car->m_nGettingInFlags || doorFlag & car->m_nGettingOutFlags
+			|| car->m_veh_flagC10 || m_pVehicleAnim
+			|| doorFlag && !car->IsDoorReady(door) && !car->IsDoorFullyOpen(door))
+			SetMoveState(PEDMOVE_STILL);
+		else
+			SetEnterCar_AllClear(car, m_vehEnterType, doorFlag);
+	}
+}
+
+void
+CPed::SetRadioStation(void)
+{
+	uint8 radiosPerRadioCategories[10][4] = {
+		{JAH_RADIO, RISE_FM, GAME_FM, MSX_FM},
+		{HEAD_RADIO, DOUBLE_CLEF, LIPS_106, FLASHBACK},
+		{RISE_FM, GAME_FM, MSX_FM, FLASHBACK},
+		{HEAD_RADIO, RISE_FM, LIPS_106, MSX_FM},
+		{HEAD_RADIO, RISE_FM, MSX_FM, FLASHBACK},
+		{JAH_RADIO, RISE_FM, LIPS_106, FLASHBACK},
+		{HEAD_RADIO, RISE_FM, LIPS_106, FLASHBACK},
+		{HEAD_RADIO, JAH_RADIO, LIPS_106, FLASHBACK},
+		{HEAD_RADIO, DOUBLE_CLEF, LIPS_106, FLASHBACK},
+		{CHATTERBOX, HEAD_RADIO, LIPS_106, GAME_FM}
+	};
+	uint8 orderInCat;
+
+	if (IsPlayer() || !m_pMyVehicle || m_pMyVehicle->pDriver != this)
+		return;
+
+	uint8 category = GetPedRadioCategory(m_modelIndex);
+	if (DMAudio.IsMP3RadioChannelAvailable()) {
+		if (CGeneral::GetRandomNumber() & 15) {
+			for (orderInCat = 0; orderInCat < 4; orderInCat++) {
+				if (m_pMyVehicle->m_nRadioStation == radiosPerRadioCategories[category][orderInCat])
+					break;
+			}
+		} else {
+			m_pMyVehicle->m_nRadioStation = USERTRACK;
+		}
+	} else {
+		for (orderInCat = 0; orderInCat < 4; orderInCat++) {
+			if (m_pMyVehicle->m_nRadioStation == radiosPerRadioCategories[category][orderInCat])
+				break;
+		}
+	}
+	if (orderInCat == 4) {
+		if (DMAudio.IsMP3RadioChannelAvailable()) {
+			if (CGeneral::GetRandomNumber() & 15)
+				m_pMyVehicle->m_nRadioStation = radiosPerRadioCategories[category][CGeneral::GetRandomNumber() & 3];
+			else
+				m_pMyVehicle->m_nRadioStation = USERTRACK;
+		} else {
+			m_pMyVehicle->m_nRadioStation = radiosPerRadioCategories[category][CGeneral::GetRandomNumber() & 3];
+		}
+	}
+}
+
 class CPed_ : public CPed
 {
 public:
@@ -14589,4 +14832,10 @@ STARTPATCHES
 	InjectHook(0x4D6A00, &CPed::PossiblyFindBetterPosToSeekCar, PATCH_JUMP);
 	InjectHook(0x4D94E0, &CPed::ProcessObjective, PATCH_JUMP);
 	InjectHook(0x4CCEB0, &CPed::SetDirectionToWalkAroundObject, PATCH_JUMP);
+	InjectHook(0x4DF3E0, &CPed::SetFormation, PATCH_JUMP);
+	InjectHook(0x4C7340, &CPed::WillChat, PATCH_JUMP);
+	InjectHook(0x4E32D0, &CPed::SetEnterTrain, PATCH_JUMP);
+	InjectHook(0x4E4920, &CPed::SetDuck, PATCH_JUMP);
+	InjectHook(0x4E0920, &CPed::SetEnterCar, PATCH_JUMP);
+	InjectHook(0x4D7BC0, &CPed::SetRadioStation, PATCH_JUMP);
 ENDPATCHES

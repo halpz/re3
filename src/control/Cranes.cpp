@@ -3,3 +3,4 @@
 #include "Cranes.h"
 
 WRAPPER bool CCranes::IsThisCarBeingTargettedByAnyCrane(CVehicle*) { EAXJMP(0x5451E0); }
+WRAPPER bool CCranes::IsThisCarBeingCarriedByAnyCrane(CVehicle*) { EAXJMP(0x545190); }

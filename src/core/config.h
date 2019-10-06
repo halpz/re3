@@ -32,7 +32,6 @@ enum Config {
 	NUMDUMMIES = 2802, // 2368 on PS2
 	NUMAUDIOSCRIPTOBJECTS = 256,
 	NUMCUTSCENEOBJECTS = 50,
-	NUMDEFAULTMODELS = 200,
 
 	NUMTEMPOBJECTS = 30,
 
@@ -84,7 +83,9 @@ enum Config {
 	NUM_PATH_NODES_IN_AUTOPILOT = 8,
 
 	NUM_ACCIDENTS = 20,
-	NUM_FIRES = 40
+	NUM_FIRES = 40,
+
+	NUMPEDROUTES = 200,
 };
 
 // We'll use this once we're ready to become independent of the game
