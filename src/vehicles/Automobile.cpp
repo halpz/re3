@@ -1933,13 +1933,15 @@ CAutomobile::Render(void)
 	CVector frontWheelFwd = Multiply3x3(GetMatrix(), CVector(-Sin(m_fSteerAngle), Cos(m_fSteerAngle), 0.0f));
 	CVector rearWheelFwd = GetForward();
 	for(i = 0; i < 4; i++){
-		contactPoints[i] = m_aWheelColPoints[i].point - GetPosition();
-		contactSpeeds[i] = GetSpeed(contactPoints[i]);
-		if(i == CARWHEEL_FRONT_LEFT || i == CARWHEEL_FRONT_RIGHT)
-			m_aWheelSpeed[i] = ProcessWheelRotation(m_aWheelState[i], frontWheelFwd, contactSpeeds[i], 0.5f*mi->m_wheelScale);
-		else
-			m_aWheelSpeed[i] = ProcessWheelRotation(m_aWheelState[i], rearWheelFwd, contactSpeeds[i], 0.5f*mi->m_wheelScale);
-		m_aWheelRotation[i] += m_aWheelSpeed[i];
+		if (m_aWheelTimer[i] > 0.0f) {
+			contactPoints[i] = m_aWheelColPoints[0].point - GetPosition();
+			contactSpeeds[i] = GetSpeed(contactPoints[i]);
+			if (i == CARWHEEL_FRONT_LEFT || i == CARWHEEL_FRONT_RIGHT)
+				m_aWheelSpeed[i] = ProcessWheelRotation(m_aWheelState[i], frontWheelFwd, contactSpeeds[i], 0.5f*mi->m_wheelScale);
+			else
+				m_aWheelSpeed[i] = ProcessWheelRotation(m_aWheelState[i], rearWheelFwd, contactSpeeds[i], 0.5f*mi->m_wheelScale);
+			m_aWheelRotation[i] += m_aWheelSpeed[i];
+		}
 	}
 
 	// Rear right wheel
