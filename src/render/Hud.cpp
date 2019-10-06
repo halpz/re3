@@ -134,7 +134,7 @@ void CHud::Draw()
 		/*
 			Draw Crosshairs
 		*/
-		if (TheCamera.Cams->Using3rdPersonMouseCam() && (!CPad::GetPad(0)->GetLookBehindForPed() || TheCamera.m_bPlayerIsInGarage) || Mode == 40) {
+		if (TheCamera.Cams->Using3rdPersonMouseCam() && (!CPad::GetPad(0)->GetLookBehindForPed() || TheCamera.m_bPlayerIsInGarage) || Mode == CCam::MODE_FIRSTPERSONPEDONPC_40) {
 			if (CWorld::Players[CWorld::PlayerInFocus].m_pPed) {
 				int32 State = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_nPedState;
 				if (State != PED_ENTER_CAR && State != PED_CARJACK) {
@@ -1137,10 +1137,10 @@ void CHud::DrawAfterFade()
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 		CFont::SetFontStyle(FONT_BANK);
 
-		CFont::PrintString((SCREEN_WIDTH / 2) - SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f) - SCREEN_SCALE_Y(2.0f), m_BigMessage[3]);
+		CFont::PrintString((SCREEN_WIDTH / 2) - SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f) - SCREEN_SCALE_Y(2.0f), m_BigMessage[4]);
 
 		CFont::SetColor(CRGBA(89, 115, 150, 255));
-		CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f), m_BigMessage[3]);
+		CFont::PrintString((SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f), m_BigMessage[4]);
 	}
 
 	// Oddjob result
