@@ -137,10 +137,14 @@ CPlayerSkin::RenderFrontendSkinEdit(void)
 {
 	static float rotation = 0.0f;
 	RwRGBAReal AmbientColor = { 0.65f, 0.65f, 0.65f, 1.0f };
-	const RwV3d pos = { 1.35f, 0.35f, 7.725f };
+	RwV3d pos = { 1.35f, 0.35f, 7.725f };
 	const RwV3d axis1 = { 1.0f, 0.0f, 0.0f };
 	const RwV3d axis2 = { 0.0f, 0.0f, 1.0f };
 	static uint32 LastFlash = 0;
+
+#ifdef ASPECT_RATIO_SCALE
+	pos.x = 1.35f * (SCREEN_ASPECT_RATIO / DEFAULT_ASPECT_RATIO);
+#endif
 
 	RwFrame *frame = RpClumpGetFrame(gpPlayerClump);
 

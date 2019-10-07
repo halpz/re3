@@ -199,7 +199,11 @@ Idle(void *arg)
 		Render2dStuff();
 	}else{
 		float viewWindow = DEFAULT_VIEWWINDOW;
+#ifdef ASPECT_RATIO_SCALE
+		CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
+#else
 		CameraSize(Scene.camera, nil, viewWindow, DEFAULT_ASPECT_RATIO);
+#endif
 		CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 		RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 		if(!RsCameraBeginUpdate(Scene.camera))
@@ -234,7 +238,11 @@ FrontendIdle(void)
 		return;
 
 	float viewWindow = DEFAULT_VIEWWINDOW;
+#ifdef ASPECT_RATIO_SCALE
+	CameraSize(Scene.camera, nil, viewWindow, SCREEN_ASPECT_RATIO);
+#else
 	CameraSize(Scene.camera, nil, viewWindow, DEFAULT_ASPECT_RATIO);
+#endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 	if(!RsCameraBeginUpdate(Scene.camera))
