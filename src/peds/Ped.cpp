@@ -11521,9 +11521,8 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 void
 CPed::PedSetInTrainCB(CAnimBlendAssociation* animAssoc, void* arg)
 {
-	CPed* ped = (CPed*)arg;
-
-	CVehicle* veh = ped->m_pMyVehicle;
+	CPed *ped = (CPed*)arg;
+	CTrain *veh = (CTrain*)ped->m_pMyVehicle;
 
 	if (!veh)
 		return;
