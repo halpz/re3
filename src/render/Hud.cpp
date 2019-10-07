@@ -107,14 +107,9 @@ WRAPPER void CHud::Draw(void) { EAXJMP(0x5052A0); }
 #else
 void CHud::Draw()
 {
-	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
-	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSMIRROR);
-	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)FALSE);
-	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
-	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
+	// disable hud via second controller
+	if (CPad::GetPad(1)->GetStartJustDown())
+		m_Wants_To_Draw_Hud = !m_Wants_To_Draw_Hud;
 
 	if (CReplay::IsPlayingBack())
 		return;
