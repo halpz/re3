@@ -126,6 +126,7 @@ enum Config {
 	// only in master builds
 #else
 	// not in master builds
+	#define VALIDATE_SAVE_SIZE
 #endif
 
 #ifdef FINAL

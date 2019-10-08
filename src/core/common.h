@@ -317,3 +317,54 @@ _TWEEKCLASS(CTweakUInt32, uint32);
 _TWEEKCLASS(CTweakFloat, float);
 
 #undef _TWEEKCLASS
+
+#ifdef VALIDATE_SAVE_SIZE
+static int32 _bufBytesRead;
+#define INITSAVEBUF _bufBytesRead = 0;
+#define VALIDATESAVEBUF(b) assert(_bufBytesRead == b);
+#else
+#define INITSAVEBUF
+#define VALIDATESAVEBUF(b)
+#endif
+
+inline void SkipSaveBuf(uint8 *&buf, int32 skip)
+{
+	buf += skip;
+#ifdef VALIDATE_SAVE_SIZE
+	_bufBytesRead += skip;
+#endif
+}
+
+template<typename T>
+inline const T ReadSaveBuf(uint8 *&buf)
+{
+	T &value = *(T*)buf;
+	SkipSaveBuf(buf, sizeof(T));
+	return value;
+}
+
+template<typename T>
+inline T *WriteSaveBuf(uint8 *&buf, const T &value)
+{
+	T *p = (T*)buf;
+	*p = value;
+	SkipSaveBuf(buf, sizeof(T));
+	return p;
+}
+
+
+#define SAVE_HEADER_SIZE (4*sizeof(char)+sizeof(uint32))
+
+#define WriteSaveHeader(buf,a,b,c,d,size) \
+	WriteSaveBuf(buf, a);\
+	WriteSaveBuf(buf, b);\
+	WriteSaveBuf(buf, c);\
+	WriteSaveBuf(buf, d);\
+	WriteSaveBuf(buf, size);
+
+#define CheckSaveHeader(buf,a,b,c,d,size)\
+	assert(ReadSaveBuf<char>(buf) == a);\
+	assert(ReadSaveBuf<char>(buf) == b);\
+	assert(ReadSaveBuf<char>(buf) == c);\
+	assert(ReadSaveBuf<char>(buf) == d);\
+	assert(ReadSaveBuf<uint32>(buf) == size);

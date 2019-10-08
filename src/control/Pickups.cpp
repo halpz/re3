@@ -961,53 +961,47 @@ CPickups::RenderPickUpText()
 }
 
 void
-CPickups::Load(uint8 *buffer, uint32 size)
+CPickups::Load(uint8 *buf, uint32 size)
 {
+INITSAVEBUF
+
 	for (int32 i = 0; i < NUMPICKUPS; i++) {
-		CPickup *buf_pickup = (CPickup*)buffer;
-		aPickUps[i] = *buf_pickup;
+		aPickUps[i] = ReadSaveBuf<CPickup>(buf);
 
 		if (aPickUps[i].m_eType != PICKUP_NONE && aPickUps[i].m_pObject != nil)
 			aPickUps[i].m_pObject = CPools::GetObjectPool()->GetSlot((int32)aPickUps[i].m_pObject - 1);
-
-		buffer += sizeof(CPickup);
 	}
 
-	CollectedPickUpIndex = *(uint16*)buffer;
-	buffer += sizeof(uint16);
+	CollectedPickUpIndex = ReadSaveBuf<uint16>(buf);
+	ReadSaveBuf<uint16>(buf);
 	NumMessages = 0;
-	buffer += sizeof(uint16);
 
-	for (uint16 i = 0; i < NUMCOLLECTEDPICKUPS; i++) {
-		aPickUpsCollected[i] = *(int32*)buffer;
-		buffer += sizeof(int32);
-	}
+	for (uint16 i = 0; i < NUMCOLLECTEDPICKUPS; i++)
+		aPickUpsCollected[i] = ReadSaveBuf<int32>(buf);
+
+VALIDATESAVEBUF(size)
 }
 
 void
-CPickups::Save(uint8 *buffer, uint32 *size)
+CPickups::Save(uint8 *buf, uint32 *size)
 {
-	*size = sizeof(CPickup) * NUMPICKUPS;
-	*size += sizeof(uint32) * NUMCOLLECTEDPICKUPS + 4;
+	*size = sizeof(CPickup) * NUMPICKUPS + sizeof(uint16) + sizeof(uint16) + sizeof(uint32) * NUMCOLLECTEDPICKUPS;
+
+INITSAVEBUF
 
 	for (int32 i = 0; i < NUMPICKUPS; i++) {
-		CPickup *buf_pickup = (CPickup*)buffer;
-		*buf_pickup = aPickUps[i];
+		CPickup *buf_pickup = WriteSaveBuf(buf, aPickUps[i]);
 		if (buf_pickup->m_eType != PICKUP_NONE && buf_pickup->m_pObject != nil)
 			buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex(buf_pickup->m_pObject) + 1);
-
-		buffer += sizeof(CPickup);
 	}
 
-	*(uint16*)buffer = CollectedPickUpIndex;
-	buffer += sizeof(uint16);
-	*(uint16*)buffer = 0; // possibly was NumMessages
-	buffer += sizeof(uint16);
+	WriteSaveBuf(buf, CollectedPickUpIndex);
+	WriteSaveBuf(buf, (uint16)0); // possibly was NumMessages
 
-	for (uint16 i = 0; i < NUMCOLLECTEDPICKUPS; i++) {
-		*(int32*)buffer = aPickUpsCollected[i];
-		buffer += sizeof(int32);
-	}
+	for (uint16 i = 0; i < NUMCOLLECTEDPICKUPS; i++)
+		WriteSaveBuf(buf, aPickUpsCollected[i]);
+
+VALIDATESAVEBUF(*size)
 }
 
 STARTPATCHES

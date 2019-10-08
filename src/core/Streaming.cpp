@@ -2401,28 +2401,28 @@ CStreaming::LoadScene(const CVector &pos)
 }
 
 void
-CStreaming::MemoryCardSave(uint8 *buffer, uint32 *length)
+CStreaming::MemoryCardSave(uint8 *buf, uint32 *size)
 {
 	int i;
 
-	*length = NUM_DEFAULT_MODELS;
+	*size = NUM_DEFAULT_MODELS;
 	for(i = 0; i < NUM_DEFAULT_MODELS; i++)
 		if(ms_aInfoForModel[i].m_loadState == STREAMSTATE_LOADED)
-			buffer[i] = ms_aInfoForModel[i].m_flags;
+			buf[i] = ms_aInfoForModel[i].m_flags;
 		else
-			buffer[i] = 0xFF;
+			buf[i] = 0xFF;
 }
 
 void 
-CStreaming::MemoryCardLoad(uint8 *buffer, uint32 length)
+CStreaming::MemoryCardLoad(uint8 *buf, uint32 size)
 {
 	uint32 i;
 
-	assert(length == NUM_DEFAULT_MODELS);
-	for(i = 0; i < length; i++)
+	assert(size == NUM_DEFAULT_MODELS);
+	for(i = 0; i < size; i++)
 		if(ms_aInfoForModel[i].m_loadState == STREAMSTATE_LOADED)
-			if(buffer[i] != 0xFF)
-				ms_aInfoForModel[i].m_flags = buffer[i];
+			if(buf[i] != 0xFF)
+				ms_aInfoForModel[i].m_flags = buf[i];
 }
 
 void
