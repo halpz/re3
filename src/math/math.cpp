@@ -136,7 +136,7 @@ MultiplyInverse(const CMatrix &mat, const CVector &vec)
 		mat.m_matrix.at.x * v.x + mat.m_matrix.at.y * v.y + mat.m_matrix.at.z * v.z);
 }
 
-CVector
+const CVector
 Multiply3x3(const CMatrix &mat, const CVector &vec)
 {
 	return CVector(
@@ -145,7 +145,7 @@ Multiply3x3(const CMatrix &mat, const CVector &vec)
 		mat.m_matrix.right.z * vec.x + mat.m_matrix.up.z * vec.y + mat.m_matrix.at.z * vec.z);
 }
 
-CVector
+const CVector
 Multiply3x3(const CVector &vec, const CMatrix &mat)
 {
 	return CVector(

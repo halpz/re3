@@ -997,7 +997,7 @@ void CMenuManager::DrawFrontEndNormal()
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 
-		CRect mouse(0.0f, 0.0f, SCREEN_SCALE_X(75.0f), SCREEN_SCALE_X(75.0f));
+		CRect mouse(0.0f, 0.0f, SCREEN_SCALE_X(75.0f), SCREEN_SCALE_Y(75.0f));
 		mouse.Translate(m_nMousePosX, m_nMousePosY);
 		CRect shad = mouse;
 		shad.Translate(SCREEN_SCALE_X(10.0f), SCREEN_SCALE_Y(3.0f));

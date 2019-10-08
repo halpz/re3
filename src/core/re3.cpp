@@ -146,7 +146,7 @@ LetThemFollowYou(void) {
 		CPed *nearPed = player->m_nearPeds[i];
 		if (nearPed && !nearPed->IsPlayer()) {
 			nearPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, (void*)player);
-			nearPed->m_pedFormation = rand() & 7;
+			nearPed->m_pedFormation = (eFormation)(1 + (rand() & 7));
 			nearPed->bScriptObjectiveCompleted = false;
 		}
 	}
@@ -349,7 +349,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", (int8*)&gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
 
-		DebugMenuAddCmd("Debug", "Make peds around you follow you", LetThemFollowYou);
+		DebugMenuAddCmd("Debug", "Make peds follow you in formation", LetThemFollowYou);
 #ifndef MASTER
 		DebugMenuAddVarBool8("Debug", "Toggle unused fight feature", (int8*)&CPed::bUnusedFightThingOnPlayer, nil);
 #endif

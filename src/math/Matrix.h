@@ -256,8 +256,8 @@ CMatrix &Invert(const CMatrix &src, CMatrix &dst);
 CVector operator*(const CMatrix &mat, const CVector &vec);
 CMatrix operator*(const CMatrix &m1, const CMatrix &m2);
 CVector MultiplyInverse(const CMatrix &mat, const CVector &vec);
-CVector Multiply3x3(const CMatrix &mat, const CVector &vec);
-CVector Multiply3x3(const CVector &vec, const CMatrix &mat);
+const CVector Multiply3x3(const CMatrix &mat, const CVector &vec);
+const CVector Multiply3x3(const CVector &vec, const CMatrix &mat);
 
 inline CMatrix
 Invert(const CMatrix &matrix)
