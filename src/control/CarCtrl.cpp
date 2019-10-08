@@ -629,7 +629,7 @@ CCarCtrl::ChoosePoliceCarModel(void)
 	if (FindPlayerPed()->m_pWanted->AreArmyRequired() &&
 		CStreaming::HasModelLoaded(MI_RHINO) &&
 		CStreaming::HasModelLoaded(MI_BARRACKS) &&
-		CStreaming::HasModelLoaded(MI_RHINO))
+		CStreaming::HasModelLoaded(MI_ARMY))
 		return CGeneral::GetRandomTrueFalse() ? MI_BARRACKS : MI_RHINO;
 	return MI_POLICE;
 }
@@ -1516,7 +1516,7 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 				if (pVehicle->AutoPilot.m_nNextRouteNode != prevNode) {
 					pNextPathNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nNextRouteNode];
 					if ((!pNextPathNode->bDisabled || pPrevPathNode->bDisabled) &&
-						(!pNextPathNode->bBetweenLevels || pNextPathNode->bBetweenLevels || !pVehicle->AutoPilot.m_bStayInCurrentLevel) &&
+						(!pNextPathNode->bBetweenLevels || pPrevPathNode->bBetweenLevels || !pVehicle->AutoPilot.m_bStayInCurrentLevel) &&
 						!goingAgainstOneWayRoad)
 						break;
 				}
@@ -1536,7 +1536,7 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 			if (!goingAgainstOneWayRoad) {
 				pNextPathNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nNextRouteNode];
 				if ((!pNextPathNode->bDisabled || pPrevPathNode->bDisabled) &&
-					(!pNextPathNode->bBetweenLevels || pNextPathNode->bBetweenLevels || !pVehicle->AutoPilot.m_bStayInCurrentLevel))
+					(!pNextPathNode->bBetweenLevels || pPrevPathNode->bBetweenLevels || !pVehicle->AutoPilot.m_bStayInCurrentLevel))
 					/* Nice way to exit loop but this will fail because this is used for indexing! */
 					nextLink = 1000;
 			}
@@ -1559,7 +1559,7 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 	pVehicle->AutoPilot.m_nCurrentDirection = pVehicle->AutoPilot.m_nNextDirection;
 	pVehicle->AutoPilot.m_nCurrentLane = pVehicle->AutoPilot.m_nNextLane;
 	pVehicle->AutoPilot.m_nNextPathNodeInfo = ThePaths.m_carPathConnections[nextLink + pCurPathNode->firstLink];
-	uint8 lanesOnNextNode;
+	int8 lanesOnNextNode;
 	if (curNode >= pVehicle->AutoPilot.m_nNextRouteNode){
 		pVehicle->AutoPilot.m_nNextDirection = 1;
 		lanesOnNextNode = pNextLink->numLeftLanes;
@@ -1729,7 +1729,7 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 	pVehicle->AutoPilot.m_nCurrentDirection = pVehicle->AutoPilot.m_nNextDirection;
 	pVehicle->AutoPilot.m_nCurrentLane = pVehicle->AutoPilot.m_nNextLane;
 	pVehicle->AutoPilot.m_nNextPathNodeInfo = ThePaths.m_carPathConnections[nextLink + pCurNode->firstLink];
-	uint8 lanesOnNextNode;
+	int8 lanesOnNextNode;
 	if (curNode >= pVehicle->AutoPilot.m_nNextRouteNode) {
 		pVehicle->AutoPilot.m_nNextDirection = 1;
 		lanesOnNextNode = pNextLink->numLeftLanes;
@@ -1818,7 +1818,7 @@ bool CCarCtrl::PickNextNodeToFollowPath(CVehicle* pVehicle)
 		;
 	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[nextLink + pCurNode->firstLink]];
 	pVehicle->AutoPilot.m_nNextPathNodeInfo = ThePaths.m_carPathConnections[nextLink + pCurNode->firstLink];
-	uint8 lanesOnNextNode;
+	int8 lanesOnNextNode;
 	if (curNode >= pVehicle->AutoPilot.m_nNextRouteNode) {
 		pVehicle->AutoPilot.m_nNextDirection = 1;
 		lanesOnNextNode = pNextLink->numLeftLanes;
@@ -2103,10 +2103,8 @@ void CCarCtrl::SteerAICarWithPhysics_OnlyMission(CVehicle* pVehicle, float* pSwe
 	case MISSION_GOTOCOORDS_ACCURATE:
 	case MISSION_RAMCAR_FARAWAY:
 	case MISSION_BLOCKCAR_FARAWAY:
-	{
 		SteerAICarWithPhysicsFollowPath(pVehicle, pSwerve, pAccel, pBrake, pHandbrake);
 		return;
-	}
 	case MISSION_RAMPLAYER_CLOSE:
 	{
 		CVector2D targetPos = FindPlayerCoors();
@@ -2565,7 +2563,7 @@ void CCarCtrl::FindLinksToGoWithTheseNodes(CVehicle* pVehicle)
 	int nextLink;
 	CPathNode* pCurNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nCurrentRouteNode];
 	for (nextLink = 0; nextLink < 12; nextLink++)
-		if (ThePaths.m_connections[nextLink + pCurNode->firstLink] != pVehicle->AutoPilot.m_nNextRouteNode)
+		if (ThePaths.m_connections[nextLink + pCurNode->firstLink] == pVehicle->AutoPilot.m_nNextRouteNode)
 			break;
 	pVehicle->AutoPilot.m_nNextPathNodeInfo = ThePaths.m_carPathConnections[nextLink + pCurNode->firstLink];
 	pVehicle->AutoPilot.m_nNextDirection = (pVehicle->AutoPilot.m_nCurrentRouteNode >= pVehicle->AutoPilot.m_nNextRouteNode) ? 1 : -1;
