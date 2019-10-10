@@ -187,7 +187,7 @@ bool CCarGenerator::CheckIfWithinRangeOfAnyPlayer()
 	return DotProduct2D(direction, FindPlayerSpeed()) <= 0;
 }
 
-void CCarGenerator::Save(uint8 *buffer)
+void CCarGenerator::Save(uint8 *&buffer)
 {
 	WriteSaveBuf(buffer, m_nModelIndex);
 	WriteSaveBuf(buffer, m_vecPos);
@@ -214,7 +214,7 @@ void CCarGenerator::Save(uint8 *buffer)
 
 }
 
-void CCarGenerator::Load(uint8 *buffer)
+void CCarGenerator::Load(uint8 *&buffer)
 {
 	m_nModelIndex = ReadSaveBuf<uint32>(buffer);
 	m_vecPos = ReadSaveBuf<CVector>(buffer);
