@@ -158,19 +158,16 @@ public:
 	uint8 bIsDamaged : 1; // This vehicle has been damaged and is displaying all its components
 	uint8 bHasBeenOwnedByPlayer : 1;// To work out whether stealing it is a crime
 	uint8 bFadeOut : 1; // Fade vehicle out
-	uint8 m_veh_flagC10 : 1;
+	uint8 bIsBeingCarJacked : 1; // Fade vehicle out
 	uint8 bCreateRoadBlockPeds : 1; // If this vehicle gets close enough we will create peds (coppers or gang members) round it
 	uint8 bCanBeDamaged : 1; // Set to FALSE during cut scenes to avoid explosions
 	uint8 bUsingSpecialColModel : 1;// Is player vehicle using special collision model, stored in player strucure
 
-	uint8 m_veh_flagD1 : 1;
-	uint8 m_veh_flagD2 : 1;
+	uint8 bOccupantsHaveBeenGenerated : 1;  // Is true if the occupants have already been generated. (Shouldn't happen again)
+	uint8 bGunSwitchedOff : 1;  // Level designers can use this to switch off guns on boats
 	uint8 bVehicleColProcessed : 1;// Has ProcessEntityCollision been processed for this car?
 	uint8 bIsCarParkVehicle : 1; // Car has been created using the special CAR_PARK script command
 	uint8 bHasAlreadyBeenRecorded : 1; // Used for replays
-	uint8 m_veh_flagD20 : 1;
-	uint8 m_veh_flagD40 : 1;
-	uint8 m_veh_flagD80 : 1;
 
 	int8 m_numPedsUseItAsCover;
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)

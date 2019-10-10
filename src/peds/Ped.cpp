@@ -2914,7 +2914,7 @@ CPed::QuitEnteringCar(void)
 	
 	if (veh) {
 		if (m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER || m_nPedState == PED_CARJACK)
-			veh->m_veh_flagC10 = false;
+			veh->bIsBeingCarJacked = false;
 
 		if (veh->m_nNumGettingIn != 0)
 			veh->m_nNumGettingIn--;
@@ -10517,7 +10517,7 @@ CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 							|| !veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, nil))))) {
 
 			if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER)
-				veh->m_veh_flagC10 = false;
+				veh->bIsBeingCarJacked = false;
 
 			ped->m_objective = OBJECTIVE_ENTER_CAR_AS_PASSENGER;
 			PedSetInCarCB(nil, ped);
@@ -10881,7 +10881,7 @@ CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 				veh->m_status = STATUS_PLAYER_DISABLED;
 			}
 			driver->bBusJacked = true;
-			veh->m_veh_flagC10 = false;
+			veh->bIsBeingCarJacked = false;
 			PedSetInCarCB(nil, ped);
 			if (ped->m_nPedType == PEDTYPE_COP
 				|| ped->m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT
@@ -11337,7 +11337,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 		}
 	}
 	if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER)
-		veh->m_veh_flagC10 = false;
+		veh->bIsBeingCarJacked = false;
 
 	if (veh->m_nNumGettingIn)
 		--veh->m_nNumGettingIn;
@@ -12996,7 +12996,7 @@ CPed::ProcessObjective(void)
 								if (m_carInObjective->pDriver) {
 									if (m_carInObjective->pDriver->m_objective == OBJECTIVE_KILL_CHAR_ANY_MEANS && m_carInObjective->pDriver != m_pedInObjective) {
 										SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, m_carInObjective);
-										m_carInObjective->m_veh_flagC10 = false;
+										m_carInObjective->bIsBeingCarJacked = false;
 									}
 								}
 							}
@@ -13004,7 +13004,7 @@ CPed::ProcessObjective(void)
 							if (m_carInObjective->pDriver) {
 								if (m_carInObjective->pDriver->m_nPedType == m_nPedType) {
 									SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, m_carInObjective);
-									m_carInObjective->m_veh_flagC10 = false;
+									m_carInObjective->bIsBeingCarJacked = false;
 								}
 							}
 						}
@@ -14575,7 +14575,7 @@ CPed::SetEnterCar(CVehicle *car, uint32 unused)
 		}
 		if (!IsPedInControl() || m_fHealth <= 0.0f
 			|| doorFlag & car->m_nGettingInFlags || doorFlag & car->m_nGettingOutFlags
-			|| car->m_veh_flagC10 || m_pVehicleAnim
+			|| car->bIsBeingCarJacked || m_pVehicleAnim
 			|| doorFlag && !car->IsDoorReady(door) && !car->IsDoorFullyOpen(door))
 			SetMoveState(PEDMOVE_STILL);
 		else

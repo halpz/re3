@@ -31,9 +31,6 @@
 #include "World.h"
 #include "Zones.h"
 
-#define GAME_SPEED_TO_METERS_PER_SECOND 50.0f
-#define GAME_SPEED_TO_CARAI_SPEED 60.0f
-
 #define DISTANCE_TO_SPAWN_ROADBLOCK_PEDS 51.0f
 #define DISTANCE_TO_SCAN_FOR_DANGER 11.0f
 #define SAFE_DISTANCE_TO_PED 3.0f
@@ -53,7 +50,6 @@
 
 #define ATTEMPTS_TO_FIND_NEXT_NODE 15
 
-#define TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING 2500
 #define DISTANCE_TO_SWITCH_FROM_BLOCK_TO_STOP 5.0f
 #define DISTANCE_TO_SWITCH_FROM_STOP_TO_BLOCK 10.0f
 #define MAX_SPEED_TO_ACCOUNT_IN_INTERCEPTING 0.13f
@@ -428,7 +424,7 @@ CCarCtrl::GenerateOneRandomCar()
 	pCar->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
 		(uint32)((0.5f + positionBetweenNodes) * pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve);
 #else
-	pCar->AutoPilot.m_nTotalSpeedScaleFactor = CTimer::GetTimeInMilliseconds() -
+	pCar->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
 		(0.5f + positionBetweenNodes) * pCar->AutoPilot.m_nSpeedScaleFactor;
 #endif
 	CVector directionCurrentLink(directionCurrentLinkX, directionCurrentLinkY, 0.0f);
@@ -629,7 +625,7 @@ CCarCtrl::ChoosePoliceCarModel(void)
 	if (FindPlayerPed()->m_pWanted->AreArmyRequired() &&
 		CStreaming::HasModelLoaded(MI_RHINO) &&
 		CStreaming::HasModelLoaded(MI_BARRACKS) &&
-		CStreaming::HasModelLoaded(MI_RHINO))
+		CStreaming::HasModelLoaded(MI_ARMY))
 		return CGeneral::GetRandomTrueFalse() ? MI_BARRACKS : MI_RHINO;
 	return MI_POLICE;
 }
@@ -1516,7 +1512,7 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 				if (pVehicle->AutoPilot.m_nNextRouteNode != prevNode) {
 					pNextPathNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nNextRouteNode];
 					if ((!pNextPathNode->bDisabled || pPrevPathNode->bDisabled) &&
-						(!pNextPathNode->bBetweenLevels || pNextPathNode->bBetweenLevels || !pVehicle->AutoPilot.m_bStayInCurrentLevel) &&
+						(!pNextPathNode->bBetweenLevels || pPrevPathNode->bBetweenLevels || !pVehicle->AutoPilot.m_bStayInCurrentLevel) &&
 						!goingAgainstOneWayRoad)
 						break;
 				}
@@ -1536,7 +1532,7 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 			if (!goingAgainstOneWayRoad) {
 				pNextPathNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nNextRouteNode];
 				if ((!pNextPathNode->bDisabled || pPrevPathNode->bDisabled) &&
-					(!pNextPathNode->bBetweenLevels || pNextPathNode->bBetweenLevels || !pVehicle->AutoPilot.m_bStayInCurrentLevel))
+					(!pNextPathNode->bBetweenLevels || pPrevPathNode->bBetweenLevels || !pVehicle->AutoPilot.m_bStayInCurrentLevel))
 					/* Nice way to exit loop but this will fail because this is used for indexing! */
 					nextLink = 1000;
 			}
@@ -1559,7 +1555,7 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 	pVehicle->AutoPilot.m_nCurrentDirection = pVehicle->AutoPilot.m_nNextDirection;
 	pVehicle->AutoPilot.m_nCurrentLane = pVehicle->AutoPilot.m_nNextLane;
 	pVehicle->AutoPilot.m_nNextPathNodeInfo = ThePaths.m_carPathConnections[nextLink + pCurPathNode->firstLink];
-	uint8 lanesOnNextNode;
+	int8 lanesOnNextNode;
 	if (curNode >= pVehicle->AutoPilot.m_nNextRouteNode){
 		pVehicle->AutoPilot.m_nNextDirection = 1;
 		lanesOnNextNode = pNextLink->numLeftLanes;
@@ -1729,7 +1725,7 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 	pVehicle->AutoPilot.m_nCurrentDirection = pVehicle->AutoPilot.m_nNextDirection;
 	pVehicle->AutoPilot.m_nCurrentLane = pVehicle->AutoPilot.m_nNextLane;
 	pVehicle->AutoPilot.m_nNextPathNodeInfo = ThePaths.m_carPathConnections[nextLink + pCurNode->firstLink];
-	uint8 lanesOnNextNode;
+	int8 lanesOnNextNode;
 	if (curNode >= pVehicle->AutoPilot.m_nNextRouteNode) {
 		pVehicle->AutoPilot.m_nNextDirection = 1;
 		lanesOnNextNode = pNextLink->numLeftLanes;
@@ -1818,7 +1814,7 @@ bool CCarCtrl::PickNextNodeToFollowPath(CVehicle* pVehicle)
 		;
 	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[nextLink + pCurNode->firstLink]];
 	pVehicle->AutoPilot.m_nNextPathNodeInfo = ThePaths.m_carPathConnections[nextLink + pCurNode->firstLink];
-	uint8 lanesOnNextNode;
+	int8 lanesOnNextNode;
 	if (curNode >= pVehicle->AutoPilot.m_nNextRouteNode) {
 		pVehicle->AutoPilot.m_nNextDirection = 1;
 		lanesOnNextNode = pNextLink->numLeftLanes;
@@ -2103,10 +2099,8 @@ void CCarCtrl::SteerAICarWithPhysics_OnlyMission(CVehicle* pVehicle, float* pSwe
 	case MISSION_GOTOCOORDS_ACCURATE:
 	case MISSION_RAMCAR_FARAWAY:
 	case MISSION_BLOCKCAR_FARAWAY:
-	{
 		SteerAICarWithPhysicsFollowPath(pVehicle, pSwerve, pAccel, pBrake, pHandbrake);
 		return;
-	}
 	case MISSION_RAMPLAYER_CLOSE:
 	{
 		CVector2D targetPos = FindPlayerCoors();
@@ -2405,12 +2399,12 @@ void CCarCtrl::SteerAICarWithPhysicsTryingToBlockTarget_Stop(CVehicle* pVehicle,
 #ifdef FIX_BUGS
 			pVehicle->m_nTimeBlocked += CTimer::GetTimeStepInMilliseconds();
 #else
-			pVehicle->m_nTimeBlocked += 16.66f * CTimer::GetTimeStep(); // very doubtful constant
+			pVehicle->m_nTimeBlocked += 1000.0f / 60.0f * CTimer::GetTimeStep(); // very doubtful constant
 #endif
 		else
 			pVehicle->m_nTimeBlocked = 0;
-		if ((FindPlayerVehicle() == nil || FindPlayerVehicle()->IsUpsideDown() ||
-		  FindPlayerVehicle()->GetMoveSpeed().Magnitude() < 0.05f) &&
+		if (FindPlayerVehicle() == nil || FindPlayerVehicle()->IsUpsideDown() ||
+		  FindPlayerVehicle()->GetMoveSpeed().Magnitude() < 0.05f &&
 		  pVehicle->m_nTimeBlocked > TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING){
 			if (pVehicle->bIsLawEnforcer && distanceToTargetSqr < SQR(DISTANCE_TO_SWITCH_FROM_STOP_TO_BLOCK)){
 				CCarAI::TellOccupantsToLeaveCar(pVehicle);
@@ -2565,7 +2559,7 @@ void CCarCtrl::FindLinksToGoWithTheseNodes(CVehicle* pVehicle)
 	int nextLink;
 	CPathNode* pCurNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nCurrentRouteNode];
 	for (nextLink = 0; nextLink < 12; nextLink++)
-		if (ThePaths.m_connections[nextLink + pCurNode->firstLink] != pVehicle->AutoPilot.m_nNextRouteNode)
+		if (ThePaths.m_connections[nextLink + pCurNode->firstLink] == pVehicle->AutoPilot.m_nNextRouteNode)
 			break;
 	pVehicle->AutoPilot.m_nNextPathNodeInfo = ThePaths.m_carPathConnections[nextLink + pCurNode->firstLink];
 	pVehicle->AutoPilot.m_nNextDirection = (pVehicle->AutoPilot.m_nCurrentRouteNode >= pVehicle->AutoPilot.m_nNextRouteNode) ? 1 : -1;

@@ -68,15 +68,15 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bTakeLessDamage = false;
 	bIsDamaged = false;
 	bFadeOut = false;
-	m_veh_flagC10 = false;
+	bIsBeingCarJacked = false;
 	m_nTimeOfDeath = 0;
 	m_pCarFire = nil;
 	bHasBeenOwnedByPlayer = false;
 	bCreateRoadBlockPeds = false;
 	bCanBeDamaged = true;
 	bUsingSpecialColModel = false;
-	m_veh_flagD1 = false;
-	m_veh_flagD2 = false;
+	bOccupantsHaveBeenGenerated = false;
+	bGunSwitchedOff = false;
 	m_nGunFiringTime = 0;
 	m_nTimeBlocked = 0;
 	bLightsOn = false;
@@ -105,7 +105,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	AutoPilot.m_nTempAction = TEMPACT_NONE;
 	AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 	AutoPilot.m_bStayInCurrentLevel = false;
-	AutoPilot.m_flag10 = false;
+	AutoPilot.m_bIgnorePathfinding = false;
 }
 
 CVehicle::~CVehicle()
