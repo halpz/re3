@@ -52,7 +52,7 @@ CTrain::CTrain(int32 id, uint8 CreatedBy)
 
 	m_bProcessDoor = true;
 	m_bTrainStopping = false;
-
+	m_nTrackId = TRACK_ELTRAIN;
 	m_nNumMaxPassengers = 5;
 	m_nDoorTimer = CTimer::GetTimeInMilliseconds();
 	m_nDoorState = TRAIN_DOOR_CLOSED;
