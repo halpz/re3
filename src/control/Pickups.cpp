@@ -18,7 +18,7 @@
 #include "Garages.h"
 #include "Explosion.h"
 #include "WaterLevel.h"
-#include "MoneyMessages.h"
+#include "SpecialFX.h"
 #include "PointLights.h"
 #include "Sprite.h"
 #include "Font.h"
