@@ -86,8 +86,8 @@ public:
 	static int32 GetNewUniquePickupIndex(int32 slot);
 	static void PassTime(uint32 time);
 	static bool GivePlayerGoodiesWithPickUpMI(int16 modelIndex, int playerIndex);
-	static void Load(uint8 *buffer, uint32 size);
-	static void Save(uint8 *buffer, uint32 *size);
+	static void Load(uint8 *buf, uint32 size);
+	static void Save(uint8 *buf, uint32 *size);
 
 	static CPickup(&aPickUps)[NUMPICKUPS];
 

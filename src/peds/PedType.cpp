@@ -181,56 +181,25 @@ CPedType::FindPedFlag(char *type)
 }
 
 void
-CPedType::Save(uint8 *buffer, uint32 *length)
+CPedType::Save(uint8 *buf, uint32 *size)
 {
-	int i;
-
-	*length = 8 + NUM_PEDTYPES*32;
-
-	buffer[0] = 'P';
-	buffer[1] = 'T';
-	buffer[2] = 'P';
-	buffer[3] = '\0';
-	*(uint32*)(buffer+4) = *length - 8;
-	buffer += 8;
-
-	for(i = 0; i < NUM_PEDTYPES; i++){
-		*(uint32*)(buffer) = ms_apPedType[i]->m_flag;
-		*(float*)(buffer+4) = ms_apPedType[i]->unknown1;
-		*(float*)(buffer+8) = ms_apPedType[i]->unknown2;
-		*(float*)(buffer+12) = ms_apPedType[i]->unknown3;
-		*(float*)(buffer+16) = ms_apPedType[i]->unknown4;
-		*(float*)(buffer+20) = ms_apPedType[i]->unknown5;
-		*(uint32*)(buffer+24) = ms_apPedType[i]->m_threats;
-		*(uint32*)(buffer+28) = ms_apPedType[i]->m_avoid;
-		buffer += 32;
-	}
+	*size = sizeof(CPedType) * NUM_PEDTYPES + SAVE_HEADER_SIZE;
+INITSAVEBUF
+	WriteSaveHeader(buf, 'P','T','P','\0', *size - SAVE_HEADER_SIZE);
+	for(int i = 0; i < NUM_PEDTYPES; i++)
+		WriteSaveBuf(buf, *ms_apPedType[i]);
+VALIDATESAVEBUF(*size)
 }
 
 void
-CPedType::Load(uint8 *buffer, uint32 length)
+CPedType::Load(uint8 *buf, uint32 size)
 {
-	int i;
+INITSAVEBUF
+	CheckSaveHeader(buf, 'P','T','P','\0', size - SAVE_HEADER_SIZE);
 
-	assert(length == 8 + NUM_PEDTYPES*32);
-	assert(buffer[0] == 'P');
-	assert(buffer[1] == 'T');
-	assert(buffer[2] == 'P');
-	assert(buffer[3] == '\0');
-	assert(*(uint32*)(buffer+4) == length - 8);
-	buffer += 8;
-
-	for(i = 0; i < NUM_PEDTYPES; i++){
-		ms_apPedType[i]->m_flag = *(uint32*)(buffer);
-		ms_apPedType[i]->unknown1 = *(float*)(buffer+4);
-		ms_apPedType[i]->unknown2 = *(float*)(buffer+8);
-		ms_apPedType[i]->unknown3 = *(float*)(buffer+12);
-		ms_apPedType[i]->unknown4 = *(float*)(buffer+16);
-		ms_apPedType[i]->unknown5 = *(float*)(buffer+20);
-		ms_apPedType[i]->m_threats = *(uint32*)(buffer+24);
-		ms_apPedType[i]->m_avoid = *(uint32*)(buffer+28);
-		buffer += 32;
-	}
+	for(int i = 0; i < NUM_PEDTYPES; i++)
+		*ms_apPedType[i] = ReadSaveBuf<CPedType>(buf);
+VALIDATESAVEBUF(size)
 }
 
 STARTPATCHES

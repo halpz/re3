@@ -186,8 +186,8 @@ public:
 	void FindNextNodeWandering(uint8, CVector, CPathNode**, CPathNode**, uint8, uint8*);
 	void DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector target, CPathNode **nodes, int16 *numNodes, int16 maxNumNodes, CVehicle *vehicle, float *dist, float distLimit, int32 forcedTargetNode);
 	bool TestCoorsCloseness(CVector target, uint8 type, CVector start);
-	void Save(uint8 *buffer, uint32 *length);
-	void Load(uint8 *buffer, uint32 length);
+	void Save(uint8 *buf, uint32 *size);
+	void Load(uint8 *buf, uint32 size);
 };
 static_assert(sizeof(CPathFind) == 0x49bf4, "CPathFind: error");
 

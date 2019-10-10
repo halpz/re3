@@ -187,48 +187,57 @@ bool CCarGenerator::CheckIfWithinRangeOfAnyPlayer()
 	return DotProduct2D(direction, FindPlayerSpeed()) <= 0;
 }
 
-void CCarGenerator::Save(uint8* buffer)
+void CCarGenerator::Save(uint8 *&buffer)
 {
-	*(uint32*)(buffer) = m_nModelIndex;
-	*(CVector*)(buffer + 4) = m_vecPos;
-	*(float*)(buffer + 16) = m_fAngle;
-	*(int16*)(buffer + 20) = m_nColor1;
-	*(int16*)(buffer + 22) = m_nColor2;
-	*(bool*)(buffer + 24) = m_bForceSpawn;
-	*(uint8*)(buffer + 25) = m_nAlarm;
-	*(uint8*)(buffer + 26) = m_nDoorlock;
-	*(uint8*)(buffer + 27) = 0;
-	*(uint16*)(buffer + 28) = m_nMinDelay;
-	*(uint16*)(buffer + 30) = m_nMaxDelay;
-	*(uint32*)(buffer + 32) = m_nTimer;
-	*(int32*)(buffer + 36) = m_nVehicleHandle;
-	*(uint16*)(buffer + 40) = m_nUsesRemaining;
-	*(bool*)(buffer + 42) = m_bIsBlocking;
-	*(uint8*)(buffer + 43) = 0;
-	*(CVector*)(buffer + 44) = m_vecInf;
-	*(CVector*)(buffer + 56) = m_vecSup;
-	*(float*)(buffer + 68) = m_fSize;
+	WriteSaveBuf(buffer, m_nModelIndex);
+	WriteSaveBuf(buffer, m_vecPos);
+	WriteSaveBuf(buffer, m_fAngle);
+	WriteSaveBuf(buffer, m_nColor1);
+	WriteSaveBuf(buffer, m_nColor2);
+	WriteSaveBuf(buffer, m_bForceSpawn);
+	WriteSaveBuf(buffer, m_nAlarm);
+	WriteSaveBuf(buffer, m_nDoorlock);
+	WriteSaveBuf(buffer, (uint8)0);
+	WriteSaveBuf(buffer, m_nMinDelay);
+	WriteSaveBuf(buffer, m_nMaxDelay);
+	WriteSaveBuf(buffer, m_nTimer);
+	WriteSaveBuf(buffer, m_nVehicleHandle);
+	WriteSaveBuf(buffer, m_nUsesRemaining);
+	WriteSaveBuf(buffer, m_bIsBlocking);
+	WriteSaveBuf(buffer, (uint8)0);
+	WriteSaveBuf(buffer, m_vecInf);
+	WriteSaveBuf(buffer, m_vecSup);
+	WriteSaveBuf(buffer, m_fSize);
+
+	// or
+	//WriteSaveBuf(buffer, *this);
+
 }
 
-void CCarGenerator::Load(uint8* buffer)
+void CCarGenerator::Load(uint8 *&buffer)
 {
-	m_nModelIndex = *(uint32*)(buffer);
-	m_vecPos = *(CVector*)(buffer + 4);
-	m_fAngle = *(float*)(buffer + 16);
-	m_nColor1 = *(int16*)(buffer + 20);
-	m_nColor2 = *(int16*)(buffer + 22);
-	m_bForceSpawn = *(bool*)(buffer + 24);
-	m_nAlarm = *(uint8*)(buffer + 25);
-	m_nDoorlock = *(uint8*)(buffer + 26);
-	m_nMinDelay = *(uint16*)(buffer + 28);
-	m_nMaxDelay = *(uint16*)(buffer + 30);
-	m_nTimer = *(uint32*)(buffer + 32);
-	m_nVehicleHandle = *(int32*)(buffer + 36);
-	m_nUsesRemaining = *(uint16*)(buffer + 40);
-	m_bIsBlocking = *(bool*)(buffer + 42);
-	m_vecInf = *(CVector*)(buffer + 44);
-	m_vecSup = *(CVector*)(buffer + 56);
-	m_fSize = *(float*)(buffer + 68);
+	m_nModelIndex = ReadSaveBuf<uint32>(buffer);
+	m_vecPos = ReadSaveBuf<CVector>(buffer);
+	m_fAngle = ReadSaveBuf<float>(buffer);
+	m_nColor1 = ReadSaveBuf<int16>(buffer);
+	m_nColor2 = ReadSaveBuf<int16>(buffer);
+	m_bForceSpawn = ReadSaveBuf<uint8>(buffer);
+	m_nAlarm = ReadSaveBuf<uint8>(buffer);
+	m_nDoorlock = ReadSaveBuf<uint8>(buffer);
+	ReadSaveBuf<uint8>(buffer);
+	m_nMinDelay = ReadSaveBuf<uint16>(buffer);
+	m_nMaxDelay = ReadSaveBuf<uint16>(buffer);
+	m_nTimer = ReadSaveBuf<uint32>(buffer);
+	m_nVehicleHandle = ReadSaveBuf<int32>(buffer);
+	m_nUsesRemaining = ReadSaveBuf<uint16>(buffer);
+	m_bIsBlocking = ReadSaveBuf<bool>(buffer);
+	ReadSaveBuf<uint8>(buffer);
+	m_vecInf = ReadSaveBuf<CVector>(buffer);
+	m_vecSup = ReadSaveBuf<CVector>(buffer);
+	m_fSize = ReadSaveBuf<float>(buffer);
+
+	// or
+	//*this = ReadSaveBuf<CCarGenerator>(buffer);
 }
 
 void CTheCarGenerators::Process()
@@ -259,45 +268,40 @@ void CTheCarGenerators::Init()
 
 void CTheCarGenerators::SaveAllCarGenerators(uint8 *buffer, uint32 *size)
 {
-	*size = 28 + 72 * NUM_CARGENS;
-	buffer[0] = 'C';
-	buffer[1] = 'G';
-	buffer[2] = 'N';
-	buffer[3] = '\0';
-	*(uint32*)(buffer + 4) = *size - 8;
-	*(uint32*)(buffer + 8) = 12; /* what is this? */
-	*(uint32*)(buffer + 12) = NumOfCarGenerators;
-	*(uint32*)(buffer + 16) = CurrentActiveCount;
-	*(uint8*)(buffer + 20) = ProcessCounter;
-	*(uint8*)(buffer + 21) = GenerateEvenIfPlayerIsCloseCounter;
-	*(uint16*)(buffer + 22) = 0;
-	*(uint32*)(buffer + 24) = 72 * NUM_CARGENS;
-	buffer += 28;
+	*size = 20 + sizeof(CarGeneratorArray) + SAVE_HEADER_SIZE;
+INITSAVEBUF
+	WriteSaveHeader(buffer, 'C','G','N','\0', *size - SAVE_HEADER_SIZE);
+
+	WriteSaveBuf(buffer, 12); /* what is this? */
+	WriteSaveBuf(buffer, NumOfCarGenerators);
+	WriteSaveBuf(buffer, CurrentActiveCount);
+	WriteSaveBuf(buffer, ProcessCounter);
+	WriteSaveBuf(buffer, GenerateEvenIfPlayerIsCloseCounter);
+	WriteSaveBuf(buffer, (int16)0);
+	WriteSaveBuf(buffer, sizeof(CarGeneratorArray));
 	for (int i = 0; i < NUM_CARGENS; i++){
 		CarGeneratorArray[i].Save(buffer);
-		buffer += 72;
 	}
+VALIDATESAVEBUF(*size)
 }
 
 void CTheCarGenerators::LoadAllCarGenerators(uint8* buffer, uint32 size)
 {
 	Init();
-	assert(size == 28 + NUM_CARGENS * 72);
-	assert(buffer[0] == 'C');
-	assert(buffer[1] == 'G');
-	assert(buffer[2] == 'N');
-	assert(buffer[3] == '\0');
-	assert(*(uint32*)(buffer + 4) == size - 8);
-	NumOfCarGenerators = *(uint32*)(buffer + 12);
-	CurrentActiveCount = *(uint32*)(buffer + 16);
-	ProcessCounter = *(uint8*)(buffer + 20);
-	GenerateEvenIfPlayerIsCloseCounter = *(uint8*)(buffer + 21);
-	assert(*(uint32*)(buffer + 24) == 72 * NUM_CARGENS);
-	buffer += 28;
+INITSAVEBUF
+	assert(size == 20 + sizeof(CarGeneratorArray) + SAVE_HEADER_SIZE);
+	CheckSaveHeader(buffer, 'C','G','N','\0', size - SAVE_HEADER_SIZE);
+	ReadSaveBuf<uint32>(buffer);
+	NumOfCarGenerators = ReadSaveBuf<uint32>(buffer);
+	CurrentActiveCount = ReadSaveBuf<uint32>(buffer);
+	ProcessCounter = ReadSaveBuf<uint8>(buffer);
+	GenerateEvenIfPlayerIsCloseCounter = ReadSaveBuf<uint8>(buffer);
+	ReadSaveBuf<int16>(buffer);
+	assert(ReadSaveBuf<uint32>(buffer) == sizeof(CarGeneratorArray));
 	for (int i = 0; i < NUM_CARGENS; i++) {
 		CarGeneratorArray[i].Load(buffer);
-		buffer += 72;
 	}
+VALIDATESAVEBUF(size)
 }
 
 STARTPATCHES

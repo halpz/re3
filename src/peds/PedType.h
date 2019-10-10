@@ -79,8 +79,8 @@ public:
 	static void LoadPedData(void);
 	static int32 FindPedType(char *type);
 	static uint32 FindPedFlag(char *type);
-	static void Save(uint8 *buffer, uint32 *length);
-	static void Load(uint8 *buffer, uint32 length);
+	static void Save(uint8 *buf, uint32 *size);
+	static void Load(uint8 *buf, uint32 size);
 
 	static uint32 GetFlag(int type) { return ms_apPedType[type]->m_flag; }
 	static uint32 GetAvoid(int type) { return ms_apPedType[type]->m_avoid; }

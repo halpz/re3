@@ -1409,40 +1409,40 @@ CPathFind::TestCoorsCloseness(CVector target, uint8 type, CVector start)
 }
 
 void
-CPathFind::Save(uint8 *buffer, uint32 *length)
+CPathFind::Save(uint8 *buf, uint32 *size)
 {
 	int i;
 	int n = m_numPathNodes/8 + 1;
 
-	*length = 2*n;
+	*size = 2*n;
 
 	for(i = 0; i < m_numPathNodes; i++)
 		if(m_pathNodes[i].bDisabled)
-			buffer[i/8] |= 1 << i%8;
+			buf[i/8] |= 1 << i%8;
 		else
-			buffer[i/8] &= ~(1 << i%8);
+			buf[i/8] &= ~(1 << i%8);
 
 	for(i = 0; i < m_numPathNodes; i++)
 		if(m_pathNodes[i].bBetweenLevels)
-			buffer[i/8 + n] |= 1 << i%8;
+			buf[i/8 + n] |= 1 << i%8;
 		else
-			buffer[i/8 + n] &= ~(1 << i%8);
+			buf[i/8 + n] &= ~(1 << i%8);
 }
 
 void
-CPathFind::Load(uint8 *buffer, uint32 length)
+CPathFind::Load(uint8 *buf, uint32 size)
 {
 	int i;
 	int n = m_numPathNodes/8 + 1;
 
 	for(i = 0; i < m_numPathNodes; i++)
-		if(buffer[i/8] & (1 << i%8))
+		if(buf[i/8] & (1 << i%8))
 			m_pathNodes[i].bDisabled = true;
 		else
 			m_pathNodes[i].bDisabled = false;
 
 	for(i = 0; i < m_numPathNodes; i++)
-		if(buffer[i/8 + n] & (1 << i%8))
+		if(buf[i/8 + n] & (1 << i%8))
 			m_pathNodes[i].bBetweenLevels = true;
 		else
 			m_pathNodes[i].bBetweenLevels = false;
