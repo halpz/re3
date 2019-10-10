@@ -129,7 +129,20 @@ CVector &CCutsceneMgr::ms_cutsceneOffset = *(CVector*)0x8F2C0C;
 float &CCutsceneMgr::ms_cutsceneTimer = *(float*)0x941548;
 uint32 &CCutsceneMgr::ms_cutsceneLoadStatus = *(uint32*)0x95CB40;
 
-WRAPPER RpAtomic* CalculateBoundingSphereRadiusCB(RpAtomic * atomic, void *data) { EAXJMP(0x404B40); }
+RpAtomic *
+CalculateBoundingSphereRadiusCB(RpAtomic *atomic, void *data)
+{
+	float radius = RpAtomicGetBoundingSphereMacro(atomic)->radius;
+	RwV3d center = RpAtomicGetBoundingSphereMacro(atomic)->center;
+
+	for (RwFrame *frame = RpAtomicGetFrame(atomic); RwFrameGetParent(frame); frame = RwFrameGetParent(frame))
+		RwV3dTransformPoints(&center, &center, 1, RwFrameGetMatrix(frame));
+
+	float size = RwV3dLength(&center) + radius;
+	if (size > *(float *)data)
+		*(float *)data = size;
+	return atomic;
+}
 
 void
 CCutsceneMgr::Initialise(void)
@@ -312,7 +325,7 @@ CCutsceneMgr::CreateCutsceneObject(int modelId)
 		pModelInfo->SetColModel(pColModel);
 		clump = (RpClump*)pModelInfo->GetRwObject();
 		assert(RwObjectGetType(clump) == rpCLUMP);
-		RpClumpForAllAtomics(clump, (RpAtomicCallBack)CalculateBoundingSphereRadiusCB, &radius);
+		RpClumpForAllAtomics(clump, CalculateBoundingSphereRadiusCB, &radius);
 
 		pColModel->boundingSphere.radius = radius;
 		pColModel->boundingBox.min = CVector(-radius, -radius, -radius);
@@ -409,17 +422,18 @@ CCutsceneMgr::Update(void)
 bool CCutsceneMgr::HasCutsceneFinished(void) { return TheCamera.GetPositionAlongSpline() == 1.0f; }
 
 STARTPATCHES
-InjectHook(0x4045D0, &CCutsceneMgr::Initialise, PATCH_JUMP);
-InjectHook(0x404630, &CCutsceneMgr::Shutdown, PATCH_JUMP);
-InjectHook(0x404650, &CCutsceneMgr::LoadCutsceneData, PATCH_JUMP);
-InjectHook(0x405140, &CCutsceneMgr::FinishCutscene, PATCH_JUMP);
-InjectHook(0x404D80, &CCutsceneMgr::SetHeadAnim, PATCH_JUMP);
-InjectHook(0x404DC0, &CCutsceneMgr::SetupCutsceneToStart, PATCH_JUMP);
-InjectHook(0x404D20, &CCutsceneMgr::SetCutsceneAnim, PATCH_JUMP);
-InjectHook(0x404CD0, &CCutsceneMgr::AddCutsceneHead, PATCH_JUMP);
-InjectHook(0x404BE0, &CCutsceneMgr::CreateCutsceneObject, PATCH_JUMP);
-InjectHook(0x4048E0, &CCutsceneMgr::DeleteCutsceneData, PATCH_JUMP);
-InjectHook(0x404EE0, &CCutsceneMgr::Update, PATCH_JUMP);
-InjectHook(0x4051B0, &CCutsceneMgr::GetCutsceneTimeInMilleseconds, PATCH_JUMP);
-InjectHook(0x4051F0, &CCutsceneMgr::HasCutsceneFinished, PATCH_JUMP);
+	InjectHook(0x4045D0, &CCutsceneMgr::Initialise, PATCH_JUMP);
+	InjectHook(0x404630, &CCutsceneMgr::Shutdown, PATCH_JUMP);
+	InjectHook(0x404650, &CCutsceneMgr::LoadCutsceneData, PATCH_JUMP);
+	InjectHook(0x405140, &CCutsceneMgr::FinishCutscene, PATCH_JUMP);
+	InjectHook(0x404D80, &CCutsceneMgr::SetHeadAnim, PATCH_JUMP);
+	InjectHook(0x404DC0, &CCutsceneMgr::SetupCutsceneToStart, PATCH_JUMP);
+	InjectHook(0x404D20, &CCutsceneMgr::SetCutsceneAnim, PATCH_JUMP);
+	InjectHook(0x404CD0, &CCutsceneMgr::AddCutsceneHead, PATCH_JUMP);
+	InjectHook(0x404BE0, &CCutsceneMgr::CreateCutsceneObject, PATCH_JUMP);
+	InjectHook(0x4048E0, &CCutsceneMgr::DeleteCutsceneData, PATCH_JUMP);
+	InjectHook(0x404EE0, &CCutsceneMgr::Update, PATCH_JUMP);
+	InjectHook(0x4051B0, &CCutsceneMgr::GetCutsceneTimeInMilleseconds, PATCH_JUMP);
+	InjectHook(0x4051F0, &CCutsceneMgr::HasCutsceneFinished, PATCH_JUMP);
+	InjectHook(0x404B40, &CalculateBoundingSphereRadiusCB, PATCH_JUMP);
 ENDPATCHES
