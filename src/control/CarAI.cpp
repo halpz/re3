@@ -6,8 +6,10 @@
 #include "AutoPilot.h"
 #include "CarCtrl.h"
 #include "General.h"
+#include "HandlingMgr.h"
 #include "ModelIndices.h"
 #include "PlayerPed.h"
+#include "Pools.h"
 #include "Timer.h"
 #include "TrafficLights.h"
 #include "Vehicle.h"
@@ -67,7 +69,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			}
 			break;
 		case MISSION_RAMPLAYER_CLOSE:
-			if (FindSwitchDistanceFar(pVehicle) < (FindPlayerCoors() - pVehicle->GetPosition()).Magnitude2D() ||
+			if (FindSwitchDistanceFar(pVehicle) >= (FindPlayerCoors() - pVehicle->GetPosition()).Magnitude2D() ||
 				pVehicle->AutoPilot.m_bIgnorePathfinding) {
 				if (FindPlayerVehicle()) {
 					if (pVehicle->GetHasCollidedWith(FindPlayerVehicle())) {
@@ -92,7 +94,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 				else
 					pVehicle->m_nTimeBlocked = 0;
 				if (!FindPlayerVehicle() || FindPlayerVehicle()->IsUpsideDown() ||
-					FindPlayerVehicle()->GetMoveSpeed().Magnitude() < 0.05f && pVehicle->m_nTimeBlocked > 2500) {
+					FindPlayerVehicle()->GetMoveSpeed().Magnitude() < 0.05f && pVehicle->m_nTimeBlocked > TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING) {
 					if (pVehicle->bIsLawEnforcer &&
 						(pVehicle->GetModelIndex() != MI_RHINO || pVehicle->m_randomSeed > 10000) &&
 						(FindPlayerCoors() - pVehicle->GetPosition()).Magnitude2D() < 10.0f) {
@@ -137,7 +139,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			}
 			break;
 		case MISSION_BLOCKPLAYER_CLOSE:
-			if (FindSwitchDistanceFar(pVehicle) < (FindPlayerCoors() - pVehicle->GetPosition()).Magnitude2D() ||
+			if (FindSwitchDistanceFar(pVehicle) >= (FindPlayerCoors() - pVehicle->GetPosition()).Magnitude2D() ||
 				pVehicle->AutoPilot.m_bIgnorePathfinding) {
 				if (FindPlayerVehicle() && FindPlayerVehicle()->GetMoveSpeed().Magnitude() < 0.05f)
 #ifdef FIX_BUGS
@@ -148,7 +150,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 				else
 					pVehicle->m_nTimeBlocked = 0;
 				if (!FindPlayerVehicle() || FindPlayerVehicle()->IsUpsideDown() ||
-					FindPlayerVehicle()->GetMoveSpeed().Magnitude() < 0.05f && pVehicle->m_nTimeBlocked > 2500) {
+					FindPlayerVehicle()->GetMoveSpeed().Magnitude() < 0.05f && pVehicle->m_nTimeBlocked > TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING) {
 					if (pVehicle->bIsLawEnforcer &&
 						(pVehicle->GetModelIndex() != MI_RHINO || pVehicle->m_randomSeed > 10000) &&
 						(FindPlayerCoors() - pVehicle->GetPosition()).Magnitude2D() < 10.0f) {
@@ -343,7 +345,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 	}
 	float flatSpeed = pVehicle->GetMoveSpeed().MagnitudeSqr2D();
 	if (flatSpeed > SQR(0.018f)){
-		pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds();
+		pVehicle->AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 		pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 	}
 	if (pVehicle->m_status == STATUS_PHYSICS && pVehicle->AutoPilot.m_nTempAction == TEMPACT_NONE){
@@ -371,8 +373,8 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 		}
 	}
 	if ((pVehicle->m_randomSeed & 7) == 0){
-		if (CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeTempAction > 30000 &&
-		  CTimer::GetPreviousTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeTempAction <= 30000 &&
+		if (CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeToStartMission > 30000 &&
+		  CTimer::GetPreviousTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeToStartMission <= 30000 &&
 		  pVehicle->AutoPilot.m_nCarMission == MISSION_CRUISE &&
 		  !CTrafficLights::ShouldCarStopForBridge(pVehicle)){
 			pVehicle->m_status = STATUS_PHYSICS;
@@ -392,7 +394,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 		case MISSION_RAMPLAYER_CLOSE:
 		case MISSION_BLOCKPLAYER_FARAWAY:
 		case MISSION_BLOCKPLAYER_CLOSE:
-			if (FindPlayerSpeed().Magnitude() > pVehicle->GetMoveSpeed().Magnitude()){
+			if (FindPlayerVehicle() && FindPlayerSpeed().Magnitude() > pVehicle->GetMoveSpeed().Magnitude()){
 				if (FindPlayerSpeed().Magnitude() > 0.1f){
 					if (DotProduct2D(FindPlayerVehicle()->GetForward(), pVehicle->GetForward()) > 0.0f){
 						CVector2D dist = pVehicle->GetPosition() - FindPlayerCoors();
@@ -428,17 +430,203 @@ void CCarAI::CarHasReasonToStop(CVehicle* pVehicle)
 	pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 }
 
-WRAPPER float CCarAI::GetCarToGoToCoors(CVehicle*, CVector*) { EAXJMP(0x413E50); }
-WRAPPER void CCarAI::AddPoliceOccupants(CVehicle*) { EAXJMP(0x415C60); }
-WRAPPER void CCarAI::AddAmbulanceOccupants(CVehicle*) { EAXJMP(0x415CE0); }
-WRAPPER void CCarAI::AddFiretruckOccupants(CVehicle*) { EAXJMP(0x415D00); }
-WRAPPER void CCarAI::TellOccupantsToLeaveCar(CVehicle*) { EAXJMP(0x415D20); }
-WRAPPER void CCarAI::TellCarToRamOtherCar(CVehicle*, CVehicle*) { EAXJMP(0x415D90); }
-WRAPPER void CCarAI::TellCarToBlockOtherCar(CVehicle*, CVehicle*) { EAXJMP(0x415DE0); }
-WRAPPER eCarMission CCarAI::FindPoliceCarMissionForWantedLevel() { EAXJMP(0x415E30); }
-WRAPPER int32 CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle*) { EAXJMP(0x415EB0); }
-WRAPPER void CCarAI::MellowOutChaseSpeed(CVehicle*) { EAXJMP(0x416050); }
-WRAPPER void CCarAI::MakeWayForCarWithSiren(CVehicle *veh) { EAXJMP(0x416280); }
+float CCarAI::GetCarToGoToCoors(CVehicle* pVehicle, CVector* pTarget)
+{
+	if (pVehicle->AutoPilot.m_nCarMission != MISSION_GOTOCOORDS && pVehicle->AutoPilot.m_nCarMission != MISSION_GOTOCOORDS_STRAIGHT){
+		pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
+		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
+		pVehicle->AutoPilot.m_nCruiseSpeed = 20;
+		pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
+		pVehicle->m_status = STATUS_PHYSICS;
+		pVehicle->AutoPilot.m_nCarMission = (CCarCtrl::JoinCarWithRoadSystemGotoCoors(pVehicle, *pTarget, false)) ?
+			MISSION_GOTOCOORDS_STRAIGHT : MISSION_GOTOCOORDS;
+	}else if (Abs(pTarget->x - pVehicle->AutoPilot.m_vecDestinationCoors.x) > 2.0f ||
+	  Abs(pTarget->x - pVehicle->AutoPilot.m_vecDestinationCoors.x) > 2.0f){
+		pVehicle->AutoPilot.m_vecDestinationCoors = *pTarget;
+	}
+	return (pVehicle->GetPosition() - *pTarget).Magnitude2D();
+}
+
+void CCarAI::AddPoliceOccupants(CVehicle* pVehicle)
+{
+	if (pVehicle->bOccupantsHaveBeenGenerated)
+		return;
+	switch (pVehicle->GetModelIndex()){
+	case MI_FBICAR:
+	case MI_ENFORCER:
+		pVehicle->SetUpDriver();
+		for (int i = 0; i < 3; i++)
+			pVehicle->SetupPassenger(i);
+		return;
+	case MI_POLICE:
+	case MI_RHINO:
+	case MI_BARRACKS:
+		pVehicle->SetUpDriver();
+		if (FindPlayerPed()->m_pWanted->m_nWantedLevel > 1)
+			pVehicle->SetupPassenger(0);
+		return;
+	default:
+		return;
+	}
+}
+
+void CCarAI::AddAmbulanceOccupants(CVehicle* pVehicle)
+{
+	pVehicle->SetUpDriver();
+	pVehicle->SetupPassenger(1);
+}
+
+void CCarAI::AddFiretruckOccupants(CVehicle* pVehicle)
+{
+	pVehicle->SetUpDriver();
+	pVehicle->SetupPassenger(0);
+}
+
+void CCarAI::TellOccupantsToLeaveCar(CVehicle* pVehicle)
+{
+	if (pVehicle->pDriver){
+		pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+		if (pVehicle->GetModelIndex())
+			pVehicle->pDriver->Say(SOUND_PED_LEAVE_VEHICLE);
+	}
+	for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++){
+		if (pVehicle->pPassengers[i])
+			pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+	}
+}
+
+void CCarAI::TellCarToRamOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
+{
+	pVehicle->AutoPilot.m_pTargetCar = pTarget;
+	pTarget->RegisterReference((CEntity**)&pVehicle->AutoPilot.m_pTargetCar);
+	pVehicle->AutoPilot.m_nCarMission = MISSION_RAMCAR_FARAWAY;
+	pVehicle->bEngineOn = true;
+	pVehicle->AutoPilot.m_nCruiseSpeed = min(6, pVehicle->AutoPilot.m_nCruiseSpeed);
+}
+
+void CCarAI::TellCarToBlockOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
+{
+	pVehicle->AutoPilot.m_pTargetCar = pTarget;
+	pTarget->RegisterReference((CEntity**)&pVehicle->AutoPilot.m_pTargetCar);
+	pVehicle->AutoPilot.m_nCarMission = MISSION_BLOCKCAR_FARAWAY;
+	pVehicle->bEngineOn = true;
+	pVehicle->AutoPilot.m_nCruiseSpeed = min(6, pVehicle->AutoPilot.m_nCruiseSpeed);
+}
+eCarMission CCarAI::FindPoliceCarMissionForWantedLevel()
+{
+	switch (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel){
+	case 0:
+	case 1: return MISSION_BLOCKPLAYER_FARAWAY;
+	case 2: return (CGeneral::GetRandomNumber() & 3) >= 3 ? MISSION_RAMPLAYER_FARAWAY : MISSION_BLOCKPLAYER_FARAWAY;
+	case 3: return (CGeneral::GetRandomNumber() & 3) >= 2 ? MISSION_RAMPLAYER_FARAWAY : MISSION_BLOCKPLAYER_FARAWAY;
+	case 4: 
+	case 5:
+	case 6: return (CGeneral::GetRandomNumber() & 3) >= 1 ? MISSION_RAMPLAYER_FARAWAY : MISSION_BLOCKPLAYER_FARAWAY;
+	default: return MISSION_BLOCKPLAYER_FARAWAY;
+	}
+}
+
+int32 CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle* pVehicle)
+{
+	switch (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel) {
+	case 0: return CGeneral::GetRandomNumberInRange(12, 16);
+	case 1: return 25;
+	case 2: return 34;
+	case 3: return GAME_SPEED_TO_CARAI_SPEED * pVehicle->pHandling->Transmission.fMaxVelocity * 0.9f;
+	case 4: return GAME_SPEED_TO_CARAI_SPEED * pVehicle->pHandling->Transmission.fMaxVelocity * 1.2f;
+	case 5: return GAME_SPEED_TO_CARAI_SPEED * pVehicle->pHandling->Transmission.fMaxVelocity * 1.25f;
+	case 6: return GAME_SPEED_TO_CARAI_SPEED * pVehicle->pHandling->Transmission.fMaxVelocity * 1.3f;
+	default: return 0;
+	}
+}
+
+void CCarAI::MellowOutChaseSpeed(CVehicle* pVehicle)
+{
+	if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel == 1){
+		float distanceToPlayer = (pVehicle->GetPosition() - FindPlayerCoors()).Magnitude();
+		if (FindPlayerVehicle()){
+			if (distanceToPlayer < 10.0f)
+				pVehicle->AutoPilot.m_nCruiseSpeed = 15;
+			else if (distanceToPlayer < 20.0f)
+				pVehicle->AutoPilot.m_nCruiseSpeed = 22;
+			else
+				pVehicle->AutoPilot.m_nCruiseSpeed = 25;
+		}else{
+			if (distanceToPlayer < 20.0f)
+				pVehicle->AutoPilot.m_nCruiseSpeed = 5;
+			else if (distanceToPlayer < 40.0f)
+				pVehicle->AutoPilot.m_nCruiseSpeed = 13;
+			else
+				pVehicle->AutoPilot.m_nCruiseSpeed = 25;
+		}
+	}else if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel == 2){
+		float distanceToPlayer = (pVehicle->GetPosition() - FindPlayerCoors()).Magnitude();
+		if (FindPlayerVehicle()) {
+			if (distanceToPlayer < 10.0f)
+				pVehicle->AutoPilot.m_nCruiseSpeed = 27;
+			else if (distanceToPlayer < 20.0f)
+				pVehicle->AutoPilot.m_nCruiseSpeed = 30;
+			else
+				pVehicle->AutoPilot.m_nCruiseSpeed = 34;
+		}
+		else {
+			if (distanceToPlayer < 20.0f)
+				pVehicle->AutoPilot.m_nCruiseSpeed = 5;
+			else if (distanceToPlayer < 40.0f)
+				pVehicle->AutoPilot.m_nCruiseSpeed = 18;
+			else
+				pVehicle->AutoPilot.m_nCruiseSpeed = 34;
+		}
+	}
+}
+
+void CCarAI::MakeWayForCarWithSiren(CVehicle *pVehicle)
+{
+	float flatSpeed = pVehicle->GetMoveSpeed().Magnitude2D();
+	if (flatSpeed < 0.1f)
+		return;
+	CVector2D forward = pVehicle->GetMoveSpeed() / flatSpeed;
+	float projection = flatSpeed * 45 + 20;
+	int i = CPools::GetVehiclePool()->GetSize();
+	while (i--) {
+		CVehicle* vehicle = CPools::GetVehiclePool()->GetSlot(i);
+		if (!vehicle)
+			continue;
+		if (vehicle->m_vehType != VEHICLE_TYPE_CAR && vehicle->m_vehType != VEHICLE_TYPE_BIKE)
+			continue;
+		if (vehicle->m_status != STATUS_SIMPLE && vehicle->m_status != STATUS_PHYSICS)
+			continue;
+		if (vehicle->VehicleCreatedBy != RANDOM_VEHICLE)
+			continue;
+		if (vehicle->bIsLawEnforcer || vehicle->bIsAmbulanceOnDuty || vehicle->bIsFireTruckOnDuty)
+			continue;
+		if (vehicle == pVehicle)
+			continue;
+		if (Abs(pVehicle->GetPosition().z - vehicle->GetPosition().z) >= 5.0f)
+			continue;
+		CVector2D distance = vehicle->GetPosition() - pVehicle->GetPosition();
+		if (distance.Magnitude() >= projection)
+			continue;
+		if (vehicle->GetMoveSpeed().Magnitude2D() <= 0.05f)
+			continue;
+		float correlation = DotProduct2D(forward, distance) / distance.Magnitude();
+		if (correlation <= 0.0f)
+			continue;
+		if (correlation > 0.8f && DotProduct2D(forward, vehicle->GetForward()) > 0.7f){
+			if (vehicle->AutoPilot.m_nTempAction != TEMPACT_SWERVELEFT && vehicle->AutoPilot.m_nTempAction != TEMPACT_SWERVERIGHT){
+				vehicle->AutoPilot.m_nTempAction = (distance.x * forward.y - distance.y * forward.x > 0.0f) ?
+					TEMPACT_SWERVELEFT : TEMPACT_SWERVERIGHT;
+				vehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 2000;
+			}
+			vehicle->m_status = STATUS_PHYSICS;
+		}else{
+			if (DotProduct2D(vehicle->GetMoveSpeed(), distance) < 0.0f && vehicle->AutoPilot.m_nTempAction != TEMPACT_WAIT){
+				vehicle->AutoPilot.m_nTempAction = TEMPACT_WAIT;
+				vehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 2000;
+			}
+		}
+	}
+}
 
 STARTPATCHES
 ENDPATCHES

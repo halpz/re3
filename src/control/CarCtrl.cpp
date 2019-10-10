@@ -31,9 +31,6 @@
 #include "World.h"
 #include "Zones.h"
 
-#define GAME_SPEED_TO_METERS_PER_SECOND 50.0f
-#define GAME_SPEED_TO_CARAI_SPEED 60.0f
-
 #define DISTANCE_TO_SPAWN_ROADBLOCK_PEDS 51.0f
 #define DISTANCE_TO_SCAN_FOR_DANGER 11.0f
 #define SAFE_DISTANCE_TO_PED 3.0f
@@ -53,7 +50,6 @@
 
 #define ATTEMPTS_TO_FIND_NEXT_NODE 15
 
-#define TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING 2500
 #define DISTANCE_TO_SWITCH_FROM_BLOCK_TO_STOP 5.0f
 #define DISTANCE_TO_SWITCH_FROM_STOP_TO_BLOCK 10.0f
 #define MAX_SPEED_TO_ACCOUNT_IN_INTERCEPTING 0.13f
@@ -2407,8 +2403,8 @@ void CCarCtrl::SteerAICarWithPhysicsTryingToBlockTarget_Stop(CVehicle* pVehicle,
 #endif
 		else
 			pVehicle->m_nTimeBlocked = 0;
-		if ((FindPlayerVehicle() == nil || FindPlayerVehicle()->IsUpsideDown() ||
-		  FindPlayerVehicle()->GetMoveSpeed().Magnitude() < 0.05f) &&
+		if (FindPlayerVehicle() == nil || FindPlayerVehicle()->IsUpsideDown() ||
+		  FindPlayerVehicle()->GetMoveSpeed().Magnitude() < 0.05f &&
 		  pVehicle->m_nTimeBlocked > TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING){
 			if (pVehicle->bIsLawEnforcer && distanceToTargetSqr < SQR(DISTANCE_TO_SWITCH_FROM_STOP_TO_BLOCK)){
 				CCarAI::TellOccupantsToLeaveCar(pVehicle);
