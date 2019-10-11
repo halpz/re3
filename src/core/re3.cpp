@@ -447,6 +447,10 @@ void re3_trace(const char *filename, unsigned int lineno, const char *func, cons
 	OutputDebugStringA(buff);
 }
 
+#ifdef VALIDATE_SAVE_SIZE
+int32 _bufBytesRead;
+#endif
+
 void
 patch()
 {

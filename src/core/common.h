@@ -319,7 +319,7 @@ _TWEEKCLASS(CTweakFloat, float);
 #undef _TWEEKCLASS
 
 #ifdef VALIDATE_SAVE_SIZE
-static int32 _bufBytesRead;
+extern int32 _bufBytesRead;
 #define INITSAVEBUF _bufBytesRead = 0;
 #define VALIDATESAVEBUF(b) assert(_bufBytesRead == b);
 #else
