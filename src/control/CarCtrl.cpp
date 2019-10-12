@@ -1649,7 +1649,8 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 	int16 numNodes;
 	float distanceToTargetNode;
 #ifndef REMOVE_TREADABLE_PATHFIND
-	if (pTarget && pTarget->m_pCurGroundEntity->m_type == ENTITY_TYPE_BUILDING &&
+	if (pTarget && pTarget->m_pCurGroundEntity &&
+	  pTarget->m_pCurGroundEntity->m_type == ENTITY_TYPE_BUILDING &&
 	  ((CBuilding*)pTarget->m_pCurGroundEntity)->GetIsATreadable() &&
 	  ((CTreadable*)pTarget->m_pCurGroundEntity)->m_nodeIndices[0][0] >= 0){
 		CTreadable* pCurrentMapObject = (CTreadable*)pTarget->m_pCurGroundEntity;
