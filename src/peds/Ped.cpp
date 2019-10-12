@@ -14586,7 +14586,7 @@ CPed::SetEnterCar(CVehicle *car, uint32 unused)
 void
 CPed::SetRadioStation(void)
 {
-	uint8 radiosPerRadioCategories[10][4] = {
+	static const uint8 radiosPerRadioCategories[10][4] = {
 		{JAH_RADIO, RISE_FM, GAME_FM, MSX_FM},
 		{HEAD_RADIO, DOUBLE_CLEF, LIPS_106, FLASHBACK},
 		{RISE_FM, GAME_FM, MSX_FM, FLASHBACK},
@@ -14598,7 +14598,7 @@ CPed::SetRadioStation(void)
 		{HEAD_RADIO, DOUBLE_CLEF, LIPS_106, FLASHBACK},
 		{CHATTERBOX, HEAD_RADIO, LIPS_106, GAME_FM}
 	};
-	uint8 orderInCat;
+	uint8 orderInCat = 0; // BUG: this wasn't initialized
 
 	if (IsPlayer() || !m_pMyVehicle || m_pMyVehicle->pDriver != this)
 		return;
