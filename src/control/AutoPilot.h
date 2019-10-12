@@ -69,8 +69,8 @@ public:
 	uint32 m_nCurrentPathNodeInfo;
 	uint32 m_nNextPathNodeInfo;
 	uint32 m_nPreviousPathNodeInfo;
-	uint32 m_nTimeToStartMission;
 	uint32 m_nAntiReverseTimer;
+	uint32 m_nTimeToStartMission;
 	int8 m_nPreviousDirection;
 	int8 m_nCurrentDirection;
 	int8 m_nNextDirection;
