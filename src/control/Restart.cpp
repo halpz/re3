@@ -36,9 +36,9 @@ CRestart::Initialise()
 
 	for (int i = 0; i < NUM_RESTART_POINTS; i++) {
 		HospitalRestartPoints[i] = CVector(0.0f, 0.0f, 0.0f);
-		HospitalRestartHeadings[0] = 0.0f;
+		HospitalRestartHeadings[i] = 0.0f;
 		PoliceRestartPoints[i] = CVector(0.0f, 0.0f, 0.0f);
-		PoliceRestartHeadings[0] = 0.0f;
+		PoliceRestartHeadings[i] = 0.0f;
 	}
 }
 
