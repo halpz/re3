@@ -441,7 +441,7 @@ float CCarAI::GetCarToGoToCoors(CVehicle* pVehicle, CVector* pTarget)
 		pVehicle->AutoPilot.m_nCarMission = (CCarCtrl::JoinCarWithRoadSystemGotoCoors(pVehicle, *pTarget, false)) ?
 			MISSION_GOTOCOORDS_STRAIGHT : MISSION_GOTOCOORDS;
 	}else if (Abs(pTarget->x - pVehicle->AutoPilot.m_vecDestinationCoors.x) > 2.0f ||
-	  Abs(pTarget->x - pVehicle->AutoPilot.m_vecDestinationCoors.x) > 2.0f){
+	  Abs(pTarget->y - pVehicle->AutoPilot.m_vecDestinationCoors.y) > 2.0f){
 		pVehicle->AutoPilot.m_vecDestinationCoors = *pTarget;
 	}
 	return (pVehicle->GetPosition() - *pTarget).Magnitude2D();
