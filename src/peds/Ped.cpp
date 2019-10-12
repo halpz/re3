@@ -6136,7 +6136,7 @@ CPed::EndFight(uint8 endType)
 void
 CPed::EnterCar(void)
 {
-	if (!m_pMyVehicle->IsWrecked() && m_fHealth > 0.0f) {
+	if (IsNotInWreckedVehicle() && m_fHealth > 0.0f) {
 		CVehicle *veh = (CVehicle*)m_pSeekTarget;
 
 		// Not used.
@@ -9024,7 +9024,7 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 	if (animAssoc)
 		animAssoc->blendDelta = -1000.0f;
 
-	if (veh->IsWrecked())
+	if (!ped->IsNotInWreckedVehicle())
 		return;
 
 	if (ped->m_nPedState != PED_ENTER_CAR && ped->m_nPedState != PED_CARJACK) {
@@ -10486,7 +10486,7 @@ CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 
 	CAutomobile *veh = (CAutomobile*)(ped->m_pMyVehicle);
 	
-	if (veh->IsWrecked() || ped->DyingOrDead())
+	if (!ped->IsNotInWreckedVehicle() || ped->DyingOrDead())
 		return;
 
 	if (ped->m_nPedState == PED_CARJACK || ped->m_nPedState == PED_ENTER_CAR) {
@@ -10579,7 +10579,7 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 	if (animAssoc)
 		animAssoc->blendDelta = -1000.0f;
 
-	if (veh->IsWrecked())
+	if (!ped->IsNotInWreckedVehicle())
 		return;
 
 	if (ped->m_nPedState != PED_CARJACK && ped->m_nPedState != PED_ENTER_CAR) {
@@ -10818,7 +10818,7 @@ CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 	if (animAssoc)
 		animAssoc->blendDelta = -1000.0f;
 
-	if (veh->IsWrecked() || ped->DyingOrDead())
+	if (!ped->IsNotInWreckedVehicle() || ped->DyingOrDead())
 		return;
 
 	if (ped->m_nPedState != PED_CARJACK && ped->m_nPedState != PED_ENTER_CAR) {
@@ -10959,7 +10959,7 @@ CPed::PedAnimPullPedOutCB(CAnimBlendAssociation* animAssoc, void* arg)
 		animAssoc->blendDelta = -1000.0f;
 
 	if (ped->m_nPedState == PED_CARJACK || ped->m_nPedState == PED_ENTER_CAR) {
-		if (veh->IsWrecked())
+		if (!ped->IsNotInWreckedVehicle())
 			return;
 
 		bool isLow = veh->bLowVehicle;
@@ -11324,7 +11324,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 	if (!veh)
 		return;
 
-	if (veh->IsWrecked() || ped->DyingOrDead())
+	if (!ped->IsNotInWreckedVehicle() || ped->DyingOrDead())
 		return;
 
 	ped->bInVehicle = true;
@@ -14631,6 +14631,12 @@ CPed::SetRadioStation(void)
 			m_pMyVehicle->m_nRadioStation = radiosPerRadioCategories[category][CGeneral::GetRandomNumber() & 3];
 		}
 	}
+}
+
+bool
+CPed::IsNotInWreckedVehicle()
+{
+	return m_pMyVehicle != nil && !m_pMyVehicle->IsWrecked();
 }
 
 class CPed_ : public CPed

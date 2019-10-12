@@ -128,7 +128,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	m_fGasPedal = 0.0f;
 	m_fBrakePedal = 0.0f;
 	m_pSetOnFireEntity = nil;
-	m_fGasPedalAudio = 0;
+	m_fGasPedalAudio = 0.0f;
 	bNotDamagedUpsideDown = false;
 	bMoreResistantToDamage = false;
 	m_fVelocityChangeForAudio = 0.0f;

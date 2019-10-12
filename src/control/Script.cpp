@@ -1988,7 +1988,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		car->m_status = STATUS_PHYSICS;
 		car->bEngineOn = true;
 		car->AutoPilot.m_nCruiseSpeed = max(car->AutoPilot.m_nCruiseSpeed, 6);
-		car->AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+		car->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
 	case COMMAND_CAR_WANDER_RANDOMLY:
@@ -2000,7 +2000,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		car->AutoPilot.m_nCarMission = MISSION_CRUISE;
 		car->bEngineOn = true;
 		car->AutoPilot.m_nCruiseSpeed = max(car->AutoPilot.m_nCruiseSpeed, 6);
-		car->AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+		car->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
 	case COMMAND_CAR_SET_IDLE:
@@ -2100,7 +2100,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
 		car->AutoPilot.m_nCarMission = (eCarMission)ScriptParams[1];
-		car->AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
+		car->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		car->bEngineOn = true;
 		return 0;
 	}

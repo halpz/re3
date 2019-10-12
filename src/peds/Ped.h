@@ -766,6 +766,7 @@ public:
 	void SetPedState(PedState state) { m_nPedState = state; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
 	void ReplaceWeaponWhenExitingVehicle(void);
+	bool IsNotInWreckedVehicle();
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 &nThreatReactionRangeMultiplier;
