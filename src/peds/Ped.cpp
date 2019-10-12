@@ -63,6 +63,8 @@ WRAPPER int CPed::ScanForThreats(void) { EAXJMP(0x4C5FE0); }
 WRAPPER void CPed::SetEnterCar_AllClear(CVehicle*, uint32, uint32) { EAXJMP(0x4E0A40); }
 WRAPPER bool CPed::WarpPedToNearEntityOffScreen(CEntity*) { EAXJMP(0x4E5570); }
 WRAPPER void CPed::SetExitCar(CVehicle*, uint32) { EAXJMP(0x4E1010); }
+WRAPPER void CPed::SetObjective(eObjective, CVector) { EAXJMP(0x4D8A90); }
+WRAPPER void CPed::SetObjective(eObjective, CVector, float) { EAXJMP(0x4D8770); }
 
 #define FEET_OFFSET 1.04f
 
