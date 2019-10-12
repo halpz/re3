@@ -399,10 +399,10 @@ CParticleObject::UpdateAll(void)
 			{
 				nextpobj = pobj->m_pNext;
 				
-				if ( counter == counter )
+				if ( counter == frame )
 				{
 					pobj->UpdateFar();
-					counter += 32;
+					frame += 32;
 				}
 				
 				counter++;
