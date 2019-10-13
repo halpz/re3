@@ -478,7 +478,7 @@ public:
 	int32 m_bloodyFootprintCount;
 	uint8 m_panicCounter;
 	bool m_deadBleeding;
-	int8 m_bodyPartBleeding;		// PedNode
+	int8 m_bodyPartBleeding;		// PedNode, but -1 if there isn't
 	uint8 m_field_4F3;
 	CPed *m_nearPeds[10];
 	uint16 m_numNearPeds;
@@ -675,6 +675,7 @@ public:
 	bool WillChat(CPed*);
 	void SetEnterTrain(CVehicle*, uint32);
 	void SetEnterCar_AllClear(CVehicle*, uint32, uint32);
+	void SetSolicit(uint32 time);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);

@@ -35,7 +35,7 @@ public:
 	float m_volumeUnderWater;
 	CVector m_impulsePoint;
 
-	bool ProcessBuoyancy(CPhysical *phys, float buoyancy, CVector *impulse, CVector *point);
+	bool ProcessBuoyancy(CPhysical *phys, float buoyancy, CVector *point, CVector *impulse);
 	void PreCalcSetup(CPhysical *phys, float buoyancy);
 	void SimpleCalcBuoyancy(void);
 	float SimpleSumBuoyancyData(CVector &waterLevel, tWaterLevel waterPosition);
