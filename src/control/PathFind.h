@@ -4,6 +4,11 @@
 
 class CVehicle;
 
+class CPedPath {
+public:
+	static bool CalcPedRoute(uint8, CVector, CVector, CVector*, int16*, int16);
+};
+
 enum
 {
 	PATH_CAR = 0,
