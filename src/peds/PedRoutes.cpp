@@ -27,3 +27,19 @@ CRouteNode::GetPointPosition(int16 point)
 {
 	return gaRoutes[point].m_pos;
 }
+
+void
+CRouteNode::AddRoutePoint(int16 route, CVector pos)
+{
+	uint16 point;
+	for (point = 0; point < NUMPEDROUTES; point++) {
+		if (gaRoutes[point].m_route == -1)
+			break;
+	}
+#ifdef FIX_BUGS
+	if (point == NUMPEDROUTES)
+		return;
+#endif
+	gaRoutes[point].m_route = route;
+	gaRoutes[point].m_pos = pos;
+}

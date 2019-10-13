@@ -9,4 +9,5 @@ public:
 	static int16 GetRouteThisPointIsOn(int16);
 	static CVector GetPointPosition(int16);
 	static int16 GetRouteStart(int16);
+	static void AddRoutePoint(int16, CVector);
 };
