@@ -574,7 +574,7 @@ public:
 	void SetPointGunAt(CEntity*);
 	bool Seek(void);
 	bool SetWanderPath(int8);
-	void SetFollowPath(CVector);
+	bool SetFollowPath(CVector);
 	void ClearAttackByRemovingAnim(void);
 	void SetStoredState(void);
 	void StopNonPartialAnims(void);

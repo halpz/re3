@@ -9,6 +9,8 @@
 
 CPathFind &ThePaths = *(CPathFind*)0x8F6754;
 
+WRAPPER bool CPedPath::CalcPedRoute(uint8, CVector, CVector, CVector*, int16*, int16) { EAXJMP(0x42E680); }
+
 enum
 {
 	NodeTypeExtern = 1,
@@ -1197,9 +1199,9 @@ CPathFind::FindNextNodeWandering(uint8 type, CVector coors, CPathNode **lastNode
 		CTreadable *obj = FindRoadObjectClosestToCoors(coors, type);
 		float nodeDist = 1000000000.0f;
 		for(i = 0; i < 12; i++){
-			if(obj->m_nodeIndices[i] < 0)
+			if(obj->m_nodeIndices[type][i] < 0)
 				break;
-			float dist = (coors - m_pathNodes[obj->m_nodeIndices[type][i]].pos).Magnitude2D();
+			float dist = (coors - m_pathNodes[obj->m_nodeIndices[type][i]].pos).MagnitudeSqr();
 			if(dist < nodeDist){
 				nodeDist = dist;
 				node = &m_pathNodes[obj->m_nodeIndices[type][i]];
@@ -1207,12 +1209,12 @@ CPathFind::FindNextNodeWandering(uint8 type, CVector coors, CPathNode **lastNode
 		}
 	}
 
-	CVector2D vCurDir(Cos(curDir*PI/4.0f), Sin(curDir*PI/4.0f));
+	CVector2D vCurDir(Sin(curDir*PI/4.0f), Cos(curDir * PI / 4.0f));
 	*nextNode = 0;
 	float bestDot = -999999.0f;
 	for(i = 0; i < node->numLinks; i++){
 		int next = m_connections[node->firstLink+i];
-		if(node->bDisabled || m_pathNodes[next].bDisabled)
+		if(!node->bDisabled && m_pathNodes[next].bDisabled)
 			continue;
 		CVector pedCoors = coors;
 		pedCoors.z += 1.0f;
@@ -1221,9 +1223,9 @@ CPathFind::FindNextNodeWandering(uint8 type, CVector coors, CPathNode **lastNode
 		if(!CWorld::GetIsLineOfSightClear(pedCoors, nodeCoors, true, false, false, false, false, false))
 			continue;
 		CVector2D nodeDir = m_pathNodes[next].pos - node->pos;
-		nodeDir /= nodeDir.Magnitude();
+		nodeDir.Normalise();
 		float dot = DotProduct2D(nodeDir, vCurDir);
-		if(dot > bestDot){
+		if(dot >= bestDot){
 			*nextNode = &m_pathNodes[next];
 			bestDot = dot;
 

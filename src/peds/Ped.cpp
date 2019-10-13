@@ -53,7 +53,6 @@
 WRAPPER void CPed::SpawnFlyingComponent(int, int8) { EAXJMP(0x4EB060); }
 WRAPPER void CPed::SetPedPositionInCar(void) { EAXJMP(0x4D4970); }
 WRAPPER void CPed::SetMoveAnim(void) { EAXJMP(0x4C5A40); }
-WRAPPER void CPed::SetFollowPath(CVector) { EAXJMP(0x4D2EA0); }
 WRAPPER void CPed::StartFightDefend(uint8, uint8, uint8) { EAXJMP(0x4E7780); }
 WRAPPER void CPed::ServiceTalking(void) { EAXJMP(0x4E5870); }
 WRAPPER void CPed::UpdatePosition(void) { EAXJMP(0x4C7A00); }
@@ -14879,6 +14878,37 @@ CPed::SetSolicit(uint32 time)
 	}
 }
 
+bool
+CPed::SetFollowPath(CVector dest)
+{
+	if (m_nPedState == PED_FOLLOW_PATH)
+		return false;
+
+	if (FindPlayerPed() != this)
+		return false;
+
+	if ((dest - GetPosition()).Magnitude() <= 2.0f)
+		return false;
+
+	CVector pointPoses[7];
+	int16 pointsFound;
+	CPedPath::CalcPedRoute(0, GetPosition(), dest, pointPoses, &pointsFound, 7);
+	for(int i = 0; i < pointsFound; i++) {
+		m_stPathNodeStates[i].x = pointPoses[i].x;
+		m_stPathNodeStates[i].y = pointPoses[i].y;
+	}
+
+	m_nCurPathNode = 0;
+	m_nPathNodes = pointsFound;
+	if (m_nPathNodes < 1)
+		return false;
+
+	SetStoredState();
+	m_nPedState = PED_FOLLOW_PATH;
+	SetMoveState(PEDMOVE_WALK);
+	return true;
+}
+
 class CPed_ : public CPed
 {
 public:
@@ -15092,4 +15122,5 @@ STARTPATCHES
 	InjectHook(0x4D7BC0, &CPed::SetRadioStation, PATCH_JUMP);
 	InjectHook(0x4C7FF0, &CPed::ProcessBuoyancy, PATCH_JUMP);
 	InjectHook(0x4D6620, &CPed::SetSolicit, PATCH_JUMP);
+	InjectHook(0x4D2EA0, &CPed::SetFollowPath, PATCH_JUMP);
 ENDPATCHES
