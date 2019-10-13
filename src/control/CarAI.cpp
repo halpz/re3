@@ -250,7 +250,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			else if (distance > 35.0f && !pVehicle->AutoPilot.m_bIgnorePathfinding && (CTimer::GetFrameCounter() & 7) == 0) {
 				pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 				pVehicle->AutoPilot.m_nCarMission = (CCarCtrl::JoinCarWithRoadSystemGotoCoors(pVehicle, pVehicle->AutoPilot.m_vecDestinationCoors, true)) ?
-					MISSION_GOTOCOORDS_STRAIGHT : MISSION_GOTOCOORDS;
+					MISSION_GOTO_COORDS_STRAIGHT_ACCURATE : MISSION_GOTOCOORDS_ACCURATE;
 			}
 			break;
 		}
