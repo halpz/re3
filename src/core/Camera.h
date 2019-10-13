@@ -468,8 +468,8 @@ int     m_iModeObbeCamIsInForCar;
 
 	void DrawBordersForWideScreen(void);
 	void Restore(void);
-	void SetWideScreenOn(void) { m_WideScreenOn = true; }
-	void SetWideScreenOff(void) { m_WideScreenOn = false; }
+	void SetWideScreenOn(void);
+	void SetWideScreenOff(void);
 
 	float Find3rdPersonQuickAimPitch(void);
 

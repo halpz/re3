@@ -898,9 +898,9 @@ CPlane::TestRocketCollision(CVector *rocketPos)
 		CPlane *plane = (CPlane*)CPools::GetVehiclePool()->GetSlot(i);
 		if(plane &&
 #ifdef EXPLODING_AIRTRAIN
-		   (plane->GetModelIndex() == MI_AIRTRAIN || plane->GetModelIndex() == MI_DODO) &&
+		   (plane->GetModelIndex() == MI_AIRTRAIN || plane->GetModelIndex() == MI_DEADDODO) &&
 #else
-		   plane->GetModelIndex() != MI_AIRTRAIN && plane->GetModelIndex() == MI_DODO &&	// strange check
+		   plane->GetModelIndex() != MI_AIRTRAIN && plane->GetModelIndex() == MI_DEADDODO &&	// strange check
 #endif
 		   !plane->m_bHasBeenHit && (*rocketPos - plane->GetPosition()).Magnitude() < 25.0f){
 			plane->m_nFrameWhenHit = CTimer::GetFrameCounter();

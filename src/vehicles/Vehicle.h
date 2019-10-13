@@ -266,7 +266,6 @@ public:
 	bool ShufflePassengersToMakeSpace(void);
 
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
-	bool IsWrecked(void) { return m_status == STATUS_WRECKED; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
 	
 	static bool &bWheelsOnlyCheat;
