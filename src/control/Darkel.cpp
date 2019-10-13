@@ -282,7 +282,7 @@ CDarkel::Update()
 		return;
 
 	int32 FrameTime = TimeLimit - (CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart);
-	if ((TimeLimit - (CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart)) > 0 || TimeLimit < 0) {
+	if (FrameTime > 0 || TimeLimit < 0) {
 
 		DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_ONGOING, FrameTime);
 
