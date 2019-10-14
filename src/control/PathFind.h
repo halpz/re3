@@ -15,6 +15,12 @@ enum
 	PATH_PED = 1,
 };
 
+enum
+{
+	SWITCH_OFF = 0,
+	SWITCH_ON = 1,
+};
+
 struct CPathNode
 {
 	CVector pos;
