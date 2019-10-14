@@ -794,7 +794,7 @@ CPathFind::SwitchRoadsOffInArea(float x1, float x2, float y1, float y2, float z1
 {
 	int i;
 
-	for(i = 0; i < m_numPathNodes; i++)
+	for(i = 0; i < m_numCarPathNodes; i++)
 		if (x1 <= m_pathNodes[i].pos.x && m_pathNodes[i].pos.x <= x2 &&
 			y1 <= m_pathNodes[i].pos.y && m_pathNodes[i].pos.y <= y2 &&
 			z1 <= m_pathNodes[i].pos.z && m_pathNodes[i].pos.z <= z2 &&
@@ -821,7 +821,8 @@ CPathFind::SwitchRoadsInAngledArea(float x1, float y1, float z1, float x2, float
 	int i;
 	int firstNode, lastNode;
 
-	if(type == PATH_CAR){
+	// this is NOT PATH_CAR
+	if(type != 0){
 		firstNode = 0;
 		lastNode = m_numCarPathNodes;
 	}else{
@@ -830,9 +831,9 @@ CPathFind::SwitchRoadsInAngledArea(float x1, float y1, float z1, float x2, float
 	}
 
 	if(z1 > z2){
-		float tmp = z1;
-		z1 = z2;
-		z2 = tmp;
+		float tmp = z2;
+		z2 = z1;
+		z1 = tmp;
 	}
 
 	// angle of vector from p2 to p1
