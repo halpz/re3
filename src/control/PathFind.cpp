@@ -794,10 +794,11 @@ CPathFind::SwitchRoadsOffInArea(float x1, float x2, float y1, float y2, float z1
 {
 	int i;
 
-	for(i = 0; i < m_numPathNodes; i++)
-		if(x1 < m_pathNodes[i].pos.x && m_pathNodes[i].pos.x < x2 &&
-		   y1 < m_pathNodes[i].pos.y && m_pathNodes[i].pos.y < y2 &&
-		   z1 < m_pathNodes[i].pos.z && m_pathNodes[i].pos.z < z2)
+	for(i = 0; i < m_numCarPathNodes; i++)
+		if (x1 <= m_pathNodes[i].pos.x && m_pathNodes[i].pos.x <= x2 &&
+			y1 <= m_pathNodes[i].pos.y && m_pathNodes[i].pos.y <= y2 &&
+			z1 <= m_pathNodes[i].pos.z && m_pathNodes[i].pos.z <= z2 &&
+			disable != m_pathNodes[i].bDisabled)
 			SwitchOffNodeAndNeighbours(i, disable);
 }
 
@@ -807,19 +808,21 @@ CPathFind::SwitchPedRoadsOffInArea(float x1, float x2, float y1, float y2, float
 	int i;
 
 	for(i = m_numCarPathNodes; i < m_numPathNodes; i++)
-		if(x1 < m_pathNodes[i].pos.x && m_pathNodes[i].pos.x < x2 &&
-		   y1 < m_pathNodes[i].pos.y && m_pathNodes[i].pos.y < y2 &&
-		   z1 < m_pathNodes[i].pos.z && m_pathNodes[i].pos.z < z2)
+		if(x1 <= m_pathNodes[i].pos.x && m_pathNodes[i].pos.x <= x2 &&
+		   y1 <= m_pathNodes[i].pos.y && m_pathNodes[i].pos.y <= y2 &&
+		   z1 <= m_pathNodes[i].pos.z && m_pathNodes[i].pos.z <= z2 &&
+			disable != m_pathNodes[i].bDisabled)
 			SwitchOffNodeAndNeighbours(i, disable);
 }
 
 void
-CPathFind::SwitchRoadsInAngledArea(float x1, float y1, float z1, float x2, float y2, float z2, float length, uint8 type, uint8 enable)
+CPathFind::SwitchRoadsInAngledArea(float x1, float y1, float z1, float x2, float y2, float z2, float length, uint8 type, uint8 mode)
 {
 	int i;
 	int firstNode, lastNode;
 
-	if(type == PATH_CAR){
+	// this is NOT PATH_CAR
+	if(type != 0){
 		firstNode = 0;
 		lastNode = m_numCarPathNodes;
 	}else{
@@ -828,25 +831,25 @@ CPathFind::SwitchRoadsInAngledArea(float x1, float y1, float z1, float x2, float
 	}
 
 	if(z1 > z2){
-		float tmp = z1;
-		z1 = z2;
-		z2 = tmp;
+		float tmp = z2;
+		z2 = z1;
+		z1 = tmp;
 	}
 
 	// angle of vector from p2 to p1
 	float angle = CGeneral::GetRadianAngleBetweenPoints(x1, y1, x2, y2) + HALFPI;
-	while(angle < TWOPI) angle += TWOPI;
+	while(angle < 0.0f) angle += TWOPI;
 	while(angle > TWOPI) angle -= TWOPI;
 	// vector from p1 to p2
 	CVector2D v12(x2 - x1, y2 - y1);
 	float len12 = v12.Magnitude();
-	CVector2D vn12 = v12/len12;
-	// vector from p2 to new point p3
-	CVector2D v23(-Sin(angle)*length, Cos(angle)*length);
-	float len23 = v23.Magnitude();	// obivously just 'length' but whatever
-	CVector2D vn23 = v23/len23;
+	v12 /= len12;
 
-	bool disable = !enable;
+	// vector from p2 to new point p3
+	CVector2D v23(Sin(angle)*length, -(Cos(angle)*length));
+	v23 /= v23.Magnitude();	// obivously just 'length' but whatever
+
+	bool disable = mode == SWITCH_OFF;
 	for(i = firstNode; i < lastNode; i++){
 		if(m_pathNodes[i].pos.z < z1 || m_pathNodes[i].pos.z > z2)
 			continue;
@@ -855,7 +858,7 @@ CPathFind::SwitchRoadsInAngledArea(float x1, float y1, float z1, float x2, float
 		if(dot < 0.0f || dot > len12)
 			continue;
 		dot = DotProduct2D(d, v23);
-		if(dot < 0.0f || dot > len23)
+		if(dot < 0.0f || dot > length)
 			continue;
 		if(m_pathNodes[i].bDisabled != disable)
 			SwitchOffNodeAndNeighbours(i, disable);
