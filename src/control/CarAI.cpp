@@ -588,7 +588,7 @@ void CCarAI::MakeWayForCarWithSiren(CVehicle *pVehicle)
 	CVector2D forward = pVehicle->GetMoveSpeed() / flatSpeed;
 	float projection = flatSpeed * 45 + 20;
 	int i = CPools::GetVehiclePool()->GetSize();
-	while (i--) {
+	while (--i >= 0) {
 		CVehicle* vehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!vehicle)
 			continue;
