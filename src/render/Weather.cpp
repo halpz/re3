@@ -33,3 +33,15 @@ void CWeather::ReleaseWeather()
 {
 	ForcedWeatherType = -1;
 }
+
+void CWeather::ForceWeather(int16 weather)
+{
+	ForcedWeatherType = weather;
+}
+
+void CWeather::ForceWeatherNow(int16 weather)
+{
+	OldWeatherType = weather;
+	NewWeatherType = weather;
+	ForcedWeatherType = weather;
+}

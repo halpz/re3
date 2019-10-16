@@ -553,6 +553,8 @@ public:
 	void SetObjective(eObjective, void*);
 	void SetObjective(eObjective);
 	void SetObjective(eObjective, int16, int16);
+	void SetObjective(eObjective, CVector);
+	void SetObjective(eObjective, CVector, float);
 	void ClearChat(void);
 	void InformMyGangOfAttack(CEntity*);
 	void ReactToAttack(CEntity*);

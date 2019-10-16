@@ -36,4 +36,6 @@ public:
 	static void RenderRainStreaks(void);
 	
 	static void ReleaseWeather();
+	static void ForceWeather(int16);
+	static void ForceWeatherNow(int16);
 };

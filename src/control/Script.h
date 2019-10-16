@@ -124,10 +124,10 @@ public:
 	void LocateCharObjectCommand(int32, uint32*);
 	void LocateCarCommand(int32, uint32*);
 	void LocateSniperBulletCommand(int32, uint32*);
-	void LocatePlayerInAreaCheckCommand(int32, uint32*);
-	void LocatePlayerInAngledAreaCheckCommand(int32, uint32*);
-	void LocateCharInAreaCheckCommand(int32, uint32*);
-	void LocateCharInAngledAreaCheckCommand(int32, uint32*);
+	void PlayerInAreaCheckCommand(int32, uint32*);
+	void PlayerInAngledAreaCheckCommand(int32, uint32*);
+	void CharInAreaCheckCommand(int32, uint32*);
+	void CarInAreaCheckCommand(int32, uint32*);
 private:
 	enum {
 		ANDOR_NONE = 0,
@@ -348,6 +348,7 @@ public:
 	static void HighlightImportantArea(uint32, float, float, float, float, float);
 	static void DrawDebugSquare(float, float, float, float);
 	static void DrawDebugCube(float, float, float, float, float, float);
+	static bool IsVehicleStopped(CVehicle*);
 
 	static int32 Read4BytesFromScript(uint32* pIp){
 		int32 retval = 0;

@@ -10,9 +10,14 @@ WRAPPER void CMessages::InsertNumberInString(wchar* src, int n1, int n2, int n3,
 WRAPPER void CMessages::InsertPlayerControlKeysInString(wchar* src) { EAXJMP(0x52A490); }
 WRAPPER int CMessages::GetWideStringLength(wchar* src) { EAXJMP(0x529490); }
 WRAPPER void CMessages::AddBigMessage(wchar* key, uint32 time, uint16 pos) { EAXJMP(0x529EB0);  }
+WRAPPER void CMessages::AddBigMessageWithNumber(wchar* key, uint32 time, uint16 pos, int n1, int n2, int n3, int n4, int n5, int n6) { EAXJMP(0x52AD10); }
+WRAPPER void CMessages::AddBigMessageWithNumberQ(wchar* key, uint32 time, uint16 pos, int n1, int n2, int n3, int n4, int n5, int n6) { EAXJMP(0x52AE00); }
 WRAPPER void CMessages::AddMessage(wchar* key, uint32 time, uint16 pos) { EAXJMP(0x529900); }
 WRAPPER void CMessages::AddMessageJumpQ(wchar* key, uint32 time, uint16 pos) { EAXJMP(0x529A10); }
 WRAPPER void CMessages::AddMessageSoon(wchar* key, uint32 time, uint16 pos) { EAXJMP(0x529AF0); }
+WRAPPER void CMessages::AddMessageWithNumber(wchar* key, uint32 time, uint16 pos, int n1, int n2, int n3, int n4, int n5, int n6) { EAXJMP(0x52A850); }
+WRAPPER void CMessages::AddMessageJumpQWithNumber(wchar* key, uint32 time, uint16 pos, int n1, int n2, int n3, int n4, int n5, int n6) { EAXJMP(0x52A9A0); }
+WRAPPER void CMessages::AddMessageSoonWithNumber(wchar* key, uint32 time, uint16 pos, int n1, int n2, int n3, int n4, int n5, int n6) { EAXJMP(0x52AAC0); }
 WRAPPER void CMessages::ClearMessages() { EAXJMP(0x529CE0); }
 WRAPPER void CMessages::Init() { EAXJMP(0x529310); }
 WRAPPER void CMessages::Process() { EAXJMP(0x529580); }
