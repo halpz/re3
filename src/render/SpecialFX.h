@@ -35,10 +35,56 @@ public:
 	static void RegisterOne(CVector pos, CVector up, CVector right, CVector fwd, uint8 type, uint8 unk1 = 0, uint8 unk2 = 0, uint8 unk3 = 0);
 };
 
+enum
+{
+	MARKERTYPE_0 = 0,
+	MARKERTYPE_ARROW,
+	MARKERTYPE_2,
+	MARKERTYPE_3,
+	MARKERTYPE_CYLINDER,
+	NUMMARKERTYPES,
+
+	MARKERTYPE_INVALID = 0x101
+};
+
+
+class C3dMarker
+{
+public:
+	CMatrix m_Matrix;
+	RpAtomic *m_pAtomic;
+	RpMaterial *m_pMaterial;
+	uint16 m_nType;
+	bool m_bIsUsed;
+	uint32 m_nIdentifier;
+	RwRGBA m_Color;
+	uint16 m_nPulsePeriod;
+	uint16 m_nRotateRate;
+	uint32 m_nStartTime;
+	float m_fPulseFraction;
+	float m_fStdSize;
+	float m_fSize;
+	float m_fBrightness;
+	float m_fCameraRange;
+
+	bool AddMarker(uint32 identifier, uint16 type, float fSize, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+	void DeleteMarkerObject();
+	void Render();
+};
+
 class C3dMarkers
 {
 public:
-	static void PlaceMarkerSet(uint32 id, uint16 type, CVector& pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);  
+	static void Init();
+	static void Shutdown();
+	static C3dMarker *PlaceMarker(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+	static void PlaceMarkerSet(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+	static void Render();
+	static void Update();
+
+	static C3dMarker(&m_aMarkerArray)[NUM3DMARKERS];
+	static int32 &NumActiveMarkers;
+	static RpClump* (&m_pRpClumpArray)[NUMMARKERTYPES];
 };
 
 class CMoneyMessage
