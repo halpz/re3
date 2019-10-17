@@ -43,7 +43,7 @@ class CWanted
 public:
 	int32 m_nChaos;
 	int32 m_nLastUpdateTime;
-	int32 m_nLastWantedLevelChange;
+	uint32 m_nLastWantedLevelChange;
 	float m_fCrimeSensitivity;
 	uint8 m_CurrentCops;
 	uint8 m_MaxCops;

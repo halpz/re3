@@ -1280,9 +1280,8 @@ cSampleManager::Terminate(void)
 bool
 cSampleManager::CheckForAnAudioFileOnCD(void)
 {
-	char filepath[MAX_PATH];
-
 #if !defined(GTA3_STEAM_PATCH) && !defined(NO_CDCHECK)
+	char filepath[MAX_PATH];
 	
 #if defined(GTA3_1_1_PATCH)
 	if (_bUseHDDAudio)
