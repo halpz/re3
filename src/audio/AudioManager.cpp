@@ -7376,12 +7376,12 @@ bool
 cAudioManager::ProcessTrainNoise(cVehicleParams *params)
 {
 	CTrain *train;
-	int32 emittingVol;
+	uint8 emittingVol;
 	float speedMultipler;
 
 	if(params->m_fDistance >= 90000.f) return 0;
 
-	if(params->m_fVelocityChange <= 0.0f) {
+	if(params->m_fVelocityChange > 0.0f) {
 		CalculateDistance((bool *)params, params->m_fDistance);
 		train = (CTrain *)params->m_pVehicle;
 		speedMultipler = min(1.0f, train->m_fSpeed * 250.f / 51.f);
@@ -7427,11 +7427,8 @@ cAudioManager::ProcessTrainNoise(cVehicleParams *params)
 				    100 * m_sQueueSample.m_nEntityIndex % 987;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_bEmittingVolume = emittingVol;
-				m_sQueueSample.m_nLoopStart =
-				    SampleManager.GetSampleLoopStartOffset(
-				        m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(
-				    m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.field_48 = 6.0f;
 				m_sQueueSample.m_fSoundIntensity = 70.0f;
 				m_sQueueSample.field_56 = 0;
