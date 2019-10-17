@@ -179,7 +179,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 	C3dMarker *pMarker;
 
 	pMarker = nil;
-	float dist = sqrt((pos.x - FindPlayerCentreOfWorld(0).x) * (pos.x - FindPlayerCentreOfWorld(0).x) + (pos.y - FindPlayerCentreOfWorld(0).y) * (pos.y - FindPlayerCentreOfWorld(0).y));
+	float dist = Sqrt((pos.x - FindPlayerCentreOfWorld(0).x) * (pos.x - FindPlayerCentreOfWorld(0).x) + (pos.y - FindPlayerCentreOfWorld(0).y) * (pos.y - FindPlayerCentreOfWorld(0).y));
 
 	if (type != MARKERTYPE_ARROW && type != MARKERTYPE_CYLINDER) return nil;
 
@@ -234,7 +234,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 				pMarker->m_Color.alpha = a;
 			}
 		}
-		float someSin = sinf(TWOPI * (float)((pMarker->m_nPulsePeriod - 1) & (CTimer::GetTimeInMilliseconds() - pMarker->m_nStartTime)) / (float)pMarker->m_nPulsePeriod);
+		float someSin = Sin(TWOPI * (float)((pMarker->m_nPulsePeriod - 1) & (CTimer::GetTimeInMilliseconds() - pMarker->m_nStartTime)) / (float)pMarker->m_nPulsePeriod);
 		pMarker->m_fSize = pMarker->m_fStdSize - pulseFraction * pMarker->m_fStdSize * someSin;
 
 		if (type == MARKERTYPE_ARROW) {
