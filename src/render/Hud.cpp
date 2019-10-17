@@ -755,7 +755,7 @@ void CHud::Draw()
 					PagerXOffset -= fStep * CTimer::GetTimeStep();
 				}
 				if (!PagerSoundPlayed) {
-					DMAudio.PlayFrontEndSound(96, 0);
+					DMAudio.PlayFrontEndSound(SOUND_PAGER, 0);
 					PagerSoundPlayed = 1;
 				}
 			}

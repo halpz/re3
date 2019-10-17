@@ -986,7 +986,7 @@ VALIDATESAVEBUF(size)
 void
 CPickups::Save(uint8 *buf, uint32 *size)
 {
-	*size = sizeof(CPickup) * NUMPICKUPS + sizeof(uint16) + sizeof(uint16) + sizeof(uint32) * NUMCOLLECTEDPICKUPS;
+	*size = sizeof(aPickUps) + sizeof(uint16) + sizeof(uint16) + sizeof(aPickUpsCollected);
 
 INITSAVEBUF
 

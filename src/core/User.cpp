@@ -125,8 +125,7 @@ void COnscreenTimerEntry::Process() {
 		*timerPtr = (uint32)newTime;
 		uint32 oldTimeSeconds = oldTime / 1000;
 		if(oldTimeSeconds <= 11 && newTime / 1000 != oldTimeSeconds) {
-			// TODO: use an enum here
-			DMAudio.PlayFrontEndSound(0x93, newTime / 1000);
+			DMAudio.PlayFrontEndSound(SOUND_CLOCK_TICK, newTime / 1000);
 		}
 	}
 }
