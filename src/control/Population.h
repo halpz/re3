@@ -40,6 +40,7 @@ public:
 	static uint32& ms_nNumGang8;
 
 	static void Initialise();
+	static void Update(void);
 	static void LoadPedGroups();
 	static void UpdatePedCount(uint32, bool);
 	static void DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool);

@@ -31,6 +31,7 @@ uint32& CPopulation::ms_nNumGang9 = *(uint32*)0x8F1B10;
 uint32& CPopulation::ms_nNumGang7 = *(uint32*)0x8F1B28;
 uint32& CPopulation::ms_nNumGang8 = *(uint32*)0x8F1B0C;
 
+WRAPPER void CPopulation::Update(void) { EAXJMP(0x4F39A0); }
 WRAPPER void CPopulation::LoadPedGroups() { EAXJMP(0x4F3870); }
 WRAPPER void CPopulation::UpdatePedCount(uint32, bool) { EAXJMP(0x4F5A60); }
 WRAPPER void CPopulation::DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool) { EAXJMP(0x4F6200); }
