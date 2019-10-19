@@ -21,10 +21,10 @@ class CCutsceneMgr
 	static CAnimBlendAssocGroup &ms_cutsceneAssociations;
 	static CVector &ms_cutsceneOffset;
 	static float &ms_cutsceneTimer;
+	static bool &ms_cutsceneProcessing;
 public:
 	static CDirectory *&ms_pCutsceneDir;
 	static uint32 &ms_cutsceneLoadStatus;
-	static bool &ms_cutsceneProcessing;
 
 	static bool IsRunning(void) { return ms_running; }
 	static bool IsCutsceneProcessing(void) { return ms_cutsceneProcessing; }

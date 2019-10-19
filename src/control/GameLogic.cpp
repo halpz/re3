@@ -67,7 +67,7 @@ CGameLogic::Update()
 	CVector vecRestartPos;
 	float fRestartFloat;
 
-	if (CCutsceneMgr::ms_cutsceneProcessing) return;
+	if (CCutsceneMgr::IsCutsceneProcessing()) return;
 
 	CPlayerInfo &pPlayerInfo = CWorld::Players[CWorld::PlayerInFocus];
 	switch (pPlayerInfo.m_WBState) {

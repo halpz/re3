@@ -107,8 +107,7 @@ const struct {
 int
 FindCutsceneAudioTrackId(const char *szCutsceneName)
 {
-	for (int i = 0; musicNameIdAssoc[i].szTrackName; i++)
-	{
+	for (int i = 0; musicNameIdAssoc[i].szTrackName; i++) {
 		if (!strcmpi(musicNameIdAssoc[i].szTrackName, szCutsceneName))
 			return musicNameIdAssoc[i].iTrackId;
 	}
