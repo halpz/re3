@@ -84,7 +84,7 @@ void CGame::Process(void)
 	CPad::UpdatePads();
 	TheCamera.SetMotionBlurAlpha(0);
 	if (TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_SNIPER || TheCamera.m_BlurType == MBLUR_NORMAL)
-		TheCamera.SetMotionBlur(0, 0, 0, 0, 0);
+		TheCamera.SetMotionBlur(0, 0, 0, 0, MBLUR_NONE);
 	CCutsceneMgr::Update();
 	if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused())
 		FrontEndMenuManager.Process();
