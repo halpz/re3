@@ -100,7 +100,7 @@ CPlayerPed::ClearAdrenaline(void)
 {
 	if (m_bAdrenalineActive && m_nAdrenalineTime != 0) {
 		m_nAdrenalineTime = 0;
-		CTimer::SetTimeStep(1.0f);
+		CTimer::SetTimeScale(1.0f);
 	}
 }
 
