@@ -21,6 +21,8 @@ public:
 	CKeyEntry *entries;
 	int numEntries;
 
+	CKeyArray(void) : entries(nil), numEntries(0) {}
+	~CKeyArray(void) { Unload(); }
 	void Load(uint32 length, uint8 *data, int *offset);
 	void Unload(void);
 	void Update(wchar *chars);
@@ -34,6 +36,8 @@ public:
 	wchar *chars;
 	int numChars;
 
+	CData(void) : chars(nil), numChars(0) {}
+	~CData(void) { Unload(); }
 	void Load(uint32 length, uint8 *data, int *offset);
 	void Unload(void);
 };
@@ -42,10 +46,9 @@ class CText
 {
 	CKeyArray keyArray;
 	CData data;
-	int8 encoding;
+	char encoding;
 public:
 	CText(void);
-	~CText(void);
 	void Load(void);
 	void Unload(void);
 	wchar *Get(const char *key);
