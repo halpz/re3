@@ -19,12 +19,12 @@ CPager::Process()
 	if (m_messages[0].m_pText != nil && m_messages[0].m_nCurrentPosition >= (int32)m_messages[0].m_nStringLength) {
 		m_messages[0].m_pText = nil;
 		uint16 i = 0;
-		while (i < 7) {
+		while (i < NUMPAGERMESSAGES-1) {
 			if (m_messages[i + 1].m_pText == nil) break;
 			m_messages[i] = m_messages[i + 1];
 		}
 		m_messages[i].m_pText = nil;
-		if (m_messages[0].m_pText)
+		if (m_messages[0].m_pText != nil)
 			CMessages::AddToPreviousBriefArray(
 				m_messages[0].m_pText,
 				m_messages[0].m_nNumber[0],
@@ -56,7 +56,7 @@ CPager::Display()
 
 	wchar *pText = m_messages[0].m_pText;
 	uint16 i = 0;
-	if (pText) {
+	if (pText != nil) {
 		CMessages::InsertNumberInString(
 			pText,
 			m_messages[0].m_nNumber[0],
@@ -86,12 +86,12 @@ void
 CPager::AddMessage(wchar *str, uint16 speed, uint16 priority, uint16 a5)
 {
 	uint16 size = CMessages::GetWideStringLength(str);
-	for (int i = 0; i < 8; i++) {
+	for (int32 i = 0; i < NUMPAGERMESSAGES; i++) {
 		if (m_messages[i].m_pText) {
 			if (m_messages[i].m_nPriority >= priority)
 				continue;
 
-			for (int j = 7; j > i; j--)
+			for (int j = NUMPAGERMESSAGES-1; j > i; j--)
 				m_messages[j] = m_messages[j-1];
 
 		}
@@ -130,12 +130,12 @@ CPager::AddMessageWithNumber(wchar *str, int32 n1, int32 n2, int32 n3, int32 n4,
 
 	CMessages::InsertNumberInString(str, n1, n2, n3, n4, n5, n6, nstr);
 	uint16 size = CMessages::GetWideStringLength(nstr);
-	for (int i = 0; i < 8; i++) {
+	for (int32 i = 0; i < NUMPAGERMESSAGES; i++) {
 		if (m_messages[i].m_pText) {
 			if (m_messages[i].m_nPriority >= priority)
 				continue;
 
-			for (int j = 7; j > i; j--)
+			for (int j = NUMPAGERMESSAGES-1; j > i; j--)
 				m_messages[j] = m_messages[j - 1];
 
 		}
@@ -170,14 +170,14 @@ CPager::AddMessageWithNumber(wchar *str, int32 n1, int32 n2, int32 n3, int32 n4,
 void
 CPager::ClearMessages()
 {
-	for (int i = 0; i < 8; i++)
+	for (int32 i = 0; i < NUMPAGERMESSAGES; i++)
 		m_messages[i].m_pText = nil;
 }
 
 void
 CPager::RestartCurrentMessage()
 {
-	if (m_messages[0].m_pText) {
+	if (m_messages[0].m_pText != nil) {
 		m_messages[0].m_nCurrentPosition = -(m_nNumDisplayLetters + 10);
 		m_messages[0].m_nTimeToChangePosition = CTimer::GetTimeInMilliseconds() + m_messages[0].m_nSpeedMs;
 	}

@@ -662,12 +662,12 @@ void CRunningScript::Process()
 	if (!CPad::GetPad(0)->GetCrossJustDown())
 		return;
 	m_nWakeTime = 0;
-	for (int i = 0; i < 6; i++){ /* TODO: add constant for number of messages */
-		if (CMessages::BIGMessages[i].m_Current.m_pText)
-			CMessages::BIGMessages[i].m_Current.m_nStartTime = 0;
-		if (CMessages::BriefMessages[0].m_pText)
-			CMessages::BriefMessages[0].m_nStartTime = 0;
+	for (int i = 0; i < NUMBIGMESSAGES; i++){
+		if (CMessages::BIGMessages[i].m_Stack[0].m_pText != nil)
+			CMessages::BIGMessages[i].m_Stack[0].m_nStartTime = 0;
 	}
+	if (CMessages::BriefMessages[0].m_pText != nil)
+		CMessages::BriefMessages[0].m_nStartTime = 0;
 }
 
 int8 CRunningScript::ProcessOneCommand()
@@ -2183,7 +2183,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		wchar* key = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
 		m_nIp += 8;
 		CollectParameters(&m_nIp, 2);
-		CMessages::AddMessage(key, ScriptParams[0], ScriptParams[1]);
+		CMessages::AddMessageSoon(key, ScriptParams[0], ScriptParams[1]);
 		return 0;
 	}
 	case COMMAND_CLEAR_PRINTS:

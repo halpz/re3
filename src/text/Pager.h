@@ -8,16 +8,15 @@ struct PagerMessage {
 	uint16 m_nPriority;
 	uint32 m_nTimeToChangePosition;
 	int16 field_10;
-private:
-	char _pad12[2];
-public:
 	int32 m_nNumber[6];
 };
+
+#define NUMPAGERMESSAGES 8
 
 class CPager
 {
 	int16 m_nNumDisplayLetters;
-	PagerMessage m_messages[8];
+	PagerMessage m_messages[NUMPAGERMESSAGES];
 public:
 	void Init();
 	void Process();
