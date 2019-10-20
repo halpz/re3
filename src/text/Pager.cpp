@@ -72,8 +72,7 @@ CPager::Display()
 				if (!outstr1[pos]) break;
 
 				outstr2[i] = outstr1[pos];
-			}
-			else {
+			} else {
 				outstr2[i] = ' ';
 			}
 		}

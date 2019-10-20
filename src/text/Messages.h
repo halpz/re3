@@ -32,7 +32,7 @@ public:
 	static tMessage(&BriefMessages)[NUMBRIEFMESSAGES];
 	static tBigMessage(&BIGMessages)[NUMBIGMESSAGES];
 	static tPreviousBrief(&PreviousBriefs)[NUMPREVIOUSBRIEFS];
-
+	static char PreviousMissionTitle[16]; // unused
 public:
 	static void Init(void);
 	static uint16 GetWideStringLength(wchar *src);
@@ -61,4 +61,9 @@ public:
 	static void ClearThisPrint(wchar *str);
 	static void ClearThisBigPrint(wchar *str);
 	static void ClearAllMessagesDisplayedByGame(void);
+
+	// unused or cut
+	//static void AddMessageSoonWithString(wchar*, uint32, uint16, wchar*);
+	//static void CutString(int16, char*, char**);
+	//static void PrintString(char*, int16, int16, int16);
 };
