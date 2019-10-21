@@ -153,8 +153,8 @@ CPhoneInfo::Initialise(void)
 	pickedUpPhone = nil;
 	m_nMax = 0;
 	m_nNum = 0;
-	for (int v5 = pool->GetSize() - 1; v5 >= 0; v5--) {
-		CBuilding *building = pool->GetSlot(v5);
+	for (int i = pool->GetSize() - 1; i >= 0; i--) {
+		CBuilding *building = pool->GetSlot(i);
 		if (building) {
 			if (building->m_modelIndex == MI_PHONEBOOTH1) {
 				CPhone *maxPhone = &m_aPhones[m_nMax];

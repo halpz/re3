@@ -44,7 +44,20 @@ public:
 			m_flags[i].free = 1;
 		}
 	}
-	int GetSize(void) { return m_size; }
+	~CPool() {
+		Flush();
+	}
+	void Flush() {
+		if (m_size > 0) {
+			free(m_entries);
+			free(m_flags);
+			m_entries = nil;
+			m_flags = nil;
+			m_size = 0;
+			m_allocPtr = 0;
+		}
+	}
+	int GetSize(void) const { return m_size; }
 	T *New(void){
 		bool wrapped = false;
 		do
@@ -101,12 +114,14 @@ public:
 				n++;
 		return n;
 	}
+	bool IsFreeSlot(int i) { return !!m_flags[i].free; }
 	void ClearStorage(uint8 *&flags, U *&entries){
 		free(flags);
 		free(entries);
 		flags = nil;
 		entries = nil;
 	}
+	uint32 GetMaxEntrySize() const { return sizeof(U); }
 	void CopyBack(uint8 *&flags, U *&entries){
 		memcpy(m_flags, flags, sizeof(uint8)*m_size);
 		memcpy(m_entries, entries, sizeof(U)*m_size);

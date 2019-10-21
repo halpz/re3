@@ -1156,7 +1156,7 @@ void CReplay::RestoreStuffFromMem(void)
 	FindPlayerPed()->m_pWanted = new CWanted(PlayerWanted); /* Nice memory leak */
 	CWorld::Players[0] = PlayerInfo;
 	int i = CPools::GetPedPool()->GetSize();
-	while (i--){
+	while (--i >= 0) {
 		CPed* ped = CPools::GetPedPool()->GetSlot(i);
 		if (!ped)
 			continue;
@@ -1174,7 +1174,7 @@ void CReplay::RestoreStuffFromMem(void)
 			ped->AddWeaponModel(ped->m_wepModelID);
 	}
 	i = CPools::GetVehiclePool()->GetSize();
-	while (i--){
+	while (--i >= 0) {
 		CVehicle* vehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!vehicle)
 			continue;
@@ -1233,7 +1233,7 @@ void CReplay::RestoreStuffFromMem(void)
 	}
 	PrintElementsInPtrList();
 	i = CPools::GetObjectPool()->GetSize();
-	while (i--){
+	while (--i >= 0) {
 		CObject* object = CPools::GetObjectPool()->GetSlot(i);
 		if (!object)
 			continue;
@@ -1248,7 +1248,7 @@ void CReplay::RestoreStuffFromMem(void)
 			object->GetMatrix().AttachRW(RwFrameGetMatrix(RpAtomicGetFrame(object->m_rwObject)), false);
 	}
 	i = CPools::GetDummyPool()->GetSize();
-	while (i--){
+	while (--i >= 0) {
 		CDummy* dummy = CPools::GetDummyPool()->GetSlot(i);
 		if (!dummy)
 			continue;
@@ -1294,7 +1294,7 @@ WRAPPER void CReplay::EmptyPedsAndVehiclePools(void) { EAXJMP(0x5970E0); }
 void CReplay::EmptyPedsAndVehiclePools(void)
 {
 	int i = CPools::GetVehiclePool()->GetSize();
-	while (i--) {
+	while (--i >= 0) {
 		CVehicle* v = CPools::GetVehiclePool()->GetSlot(i);
 		if (!v)
 			continue;
@@ -1302,7 +1302,7 @@ void CReplay::EmptyPedsAndVehiclePools(void)
 		delete v;
 	}
 	i = CPools::GetPedPool()->GetSize();
-	while (i--) {
+	while (--i >= 0) {
 		CPed* p = CPools::GetPedPool()->GetSlot(i);
 		if (!p)
 			continue;
@@ -1319,7 +1319,7 @@ void CReplay::EmptyAllPools(void)
 {
 	EmptyPedsAndVehiclePools();
 	int i = CPools::GetObjectPool()->GetSize();
-	while (i--) {
+	while (--i >= 0) {
 		CObject* o = CPools::GetObjectPool()->GetSlot(i);
 		if (!o)
 			continue;
@@ -1327,7 +1327,7 @@ void CReplay::EmptyAllPools(void)
 		delete o;
 	}
 	i = CPools::GetDummyPool()->GetSize();
-	while (i--) {
+	while (--i >= 0) {
 		CDummy* d = CPools::GetDummyPool()->GetSlot(i);
 		if (!d)
 			continue;
@@ -1343,14 +1343,14 @@ WRAPPER void CReplay::MarkEverythingAsNew(void) { EAXJMP(0x597280); }
 void CReplay::MarkEverythingAsNew(void)
 {
 	int i = CPools::GetVehiclePool()->GetSize();
-	while (i--) {
+	while (--i >= 0) {
 		CVehicle* v = CPools::GetVehiclePool()->GetSlot(i);
 		if (!v)
 			continue;
 		v->bHasAlreadyBeenRecorded = false;
 	}
 	i = CPools::GetPedPool()->GetSize();
-	while (i--) {
+	while (--i >= 0) {
 		CPed* p = CPools::GetPedPool()->GetSlot(i);
 		if (!p)
 			continue;

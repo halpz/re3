@@ -123,8 +123,7 @@ void CBridge::FindBridgeEntities()
 	pLiftRoad = nil;
 	pLiftPart = nil;
 
-	for (int i = 1; i < CPools::GetBuildingPool()->GetSize(); ++i)
-	{
+	for (int i = CPools::GetBuildingPool()->GetSize()-1; i >= 0; i--) {
 		CBuilding* entry = CPools::GetBuildingPool()->GetSlot(i);
 		if (entry)
 		{
