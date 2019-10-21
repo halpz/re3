@@ -48,6 +48,7 @@
 #include "TimeCycle.h"
 #include "TrafficLights.h"
 #include "Train.h"
+#include "TxdStore.h"
 #include "User.h"
 #include "WaterCannon.h"
 #include "Weapon.h"
@@ -175,14 +176,26 @@ void CGame::ReloadIPLs(void)
 	CTimer::Update();
 }
 
+#if 0
+WRAPPER void CGame::FinalShutdown(void) { EAXJMP(0x48BEC0); }
+#else
+void
+CGame::FinalShutdown(void)
+{
+	CTxdStore::Shutdown();
+	CPedStats::Shutdown();
+	CdStreamShutdown();
+}
+#endif
+
 WRAPPER bool CGame::InitialiseRenderWare(void) { EAXJMP(0x48BBA0); }
 WRAPPER void CGame::ShutdownRenderWare(void) { EAXJMP(0x48BCB0); }
-WRAPPER void CGame::FinalShutdown(void) { EAXJMP(0x48BEC0); }
 WRAPPER void CGame::ShutDown(void) { EAXJMP(0x48C3A0); }
 WRAPPER void CGame::ShutDownForRestart(void) { EAXJMP(0x48C6B0); }
 WRAPPER void CGame::InitialiseWhenRestarting(void) { EAXJMP(0x48C740); }
 WRAPPER bool CGame::InitialiseOnceAfterRW(void) { EAXJMP(0x48BD50); }
 
 STARTPATCHES
-InjectHook(0x48C850, CGame::Process, PATCH_JUMP);
+	InjectHook(0x48C850, CGame::Process, PATCH_JUMP);
+	InjectHook(0x48BEC0, CGame::FinalShutdown, PATCH_JUMP);
 ENDPATCHES
