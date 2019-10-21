@@ -14,6 +14,7 @@ CPager& CUserDisplay::Pager = *(CPager*)0x8F2744;
 CCurrentVehicle& CUserDisplay::CurrentVehicle = *(CCurrentVehicle*)0x8F5FE8;
 
 WRAPPER void CPager::AddMessage(wchar*, uint16, uint16, uint16) { EAXJMP(0x52B940); }
+WRAPPER void CPager::AddMessageWithNumber(wchar*, int, int, int, int, int, uint16, uint16, uint16) { EAXJMP(0x52BB50); }
 
 void COnscreenTimer::Init() {
 	m_bDisabled = false;

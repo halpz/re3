@@ -54,6 +54,7 @@ class CPager
 {
 public:
 	void AddMessage(wchar*, uint16, uint16, uint16);
+	void AddMessageWithNumber(wchar*, int, int, int, int, int, uint16, uint16, uint16);
 };
 
 class CUserDisplay

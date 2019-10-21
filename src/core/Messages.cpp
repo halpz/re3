@@ -10,6 +10,7 @@ WRAPPER void CMessages::InsertNumberInString(wchar* src, int n1, int n2, int n3,
 WRAPPER void CMessages::InsertPlayerControlKeysInString(wchar* src) { EAXJMP(0x52A490); }
 WRAPPER int CMessages::GetWideStringLength(wchar* src) { EAXJMP(0x529490); }
 WRAPPER void CMessages::AddBigMessage(wchar* key, uint32 time, uint16 pos) { EAXJMP(0x529EB0);  }
+WRAPPER void CMessages::AddBigMessageQ(wchar* key, uint32 time, uint16 pos) { EAXJMP(0x529F60); }
 WRAPPER void CMessages::AddBigMessageWithNumber(wchar* key, uint32 time, uint16 pos, int n1, int n2, int n3, int n4, int n5, int n6) { EAXJMP(0x52AD10); }
 WRAPPER void CMessages::AddBigMessageWithNumberQ(wchar* key, uint32 time, uint16 pos, int n1, int n2, int n3, int n4, int n5, int n6) { EAXJMP(0x52AE00); }
 WRAPPER void CMessages::AddMessage(wchar* key, uint32 time, uint16 pos) { EAXJMP(0x529900); }

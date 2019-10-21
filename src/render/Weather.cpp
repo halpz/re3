@@ -27,6 +27,11 @@ float &CWeather::Rainbow = *(float*)0x940598;
 bool &CWeather::bScriptsForceRain = *(bool*)0x95CD7D;
 bool &CWeather::Stored_StateStored = *(bool*)0x95CDC1;
 
+float &CWeather::Stored_InterpolationValue = *(float*)0x942F54;
+int16 &CWeather::Stored_OldWeatherType = *(int16*)0x95CC68;
+int16 &CWeather::Stored_NewWeatherType = *(int16*)0x95CCAE;
+float &CWeather::Stored_Rain = *(float*)0x885B4C;
+
 WRAPPER void CWeather::RenderRainStreaks(void) { EAXJMP(0x524550); }
 
 void CWeather::ReleaseWeather()
@@ -44,4 +49,24 @@ void CWeather::ForceWeatherNow(int16 weather)
 	OldWeatherType = weather;
 	NewWeatherType = weather;
 	ForcedWeatherType = weather;
+}
+
+void CWeather::StoreWeatherState()
+{
+	Stored_StateStored = true;
+	Stored_InterpolationValue = InterpolationValue;
+	Stored_Rain = Rain;
+	Stored_NewWeatherType = NewWeatherType;
+	Stored_OldWeatherType = OldWeatherType;
+}
+
+void CWeather::RestoreWeatherState()
+{
+#ifdef FIX_BUGS // it's not used anyway though
+	Stored_StateStored = false;
+#endif
+	InterpolationValue = Stored_InterpolationValue;
+	Rain = Stored_Rain;
+	NewWeatherType = Stored_NewWeatherType;
+	OldWeatherType = Stored_OldWeatherType;
 }

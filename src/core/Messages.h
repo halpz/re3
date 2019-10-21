@@ -42,6 +42,7 @@ public:
 	static void InsertPlayerControlKeysInString(wchar* src);
 	static int GetWideStringLength(wchar *src);
 	static void AddBigMessage(wchar* key, uint32 time, uint16 pos);
+	static void AddBigMessageQ(wchar* key, uint32 time, uint16 pos);
 	static void AddBigMessageWithNumber(wchar* key, uint32 time, uint16 pos, int n1, int n2, int n3, int n4, int n5, int n6);
 	static void AddBigMessageWithNumberQ(wchar* key, uint32 time, uint16 pos, int n1, int n2, int n3, int n4, int n5, int n6);
 	static void AddMessage(wchar* key, uint32 time, uint16 pos);

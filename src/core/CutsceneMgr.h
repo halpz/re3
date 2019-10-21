@@ -31,6 +31,7 @@ public:
 	static CCutsceneObject* GetCutsceneObject(int id) { return ms_pCutsceneObjects[id]; }
 	static int GetCutsceneTimeInMilleseconds(void) { return 1000.0f * ms_cutsceneTimer; }
 	static char *GetCutsceneName(void) { return ms_cutsceneName; }
+	static void SetCutsceneOffset(const CVector& vec) { ms_cutsceneOffset = vec; }
 	static bool HasCutsceneFinished(void);
 
 	static void Initialise(void);
