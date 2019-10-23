@@ -22,6 +22,7 @@ WRAPPER void CControllerConfigManager::ClearSimButtonPressCheckers() { EAXJMP(0x
 WRAPPER void CControllerConfigManager::AffectPadFromKeyBoard() { EAXJMP(0x58D0C0); }
 WRAPPER void CControllerConfigManager::AffectPadFromMouse() { EAXJMP(0x58D1A0); }
 WRAPPER void CControllerConfigManager::ClearSettingsAssociatedWithAction(int, int) { EAXJMP(0x58EB40); }
+WRAPPER void CControllerConfigManager::GetWideStringOfCommandKeys(uint16, wchar*, uint16) { EAXJMP(0x58F460); }
 
 void CControllerConfigManager::LoadSettings(int32 file)
 {

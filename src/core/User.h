@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Pager.h"
+
 class COnscreenTimerEntry
 {
 public:
@@ -48,12 +50,6 @@ class CPlaceName
 
 class CCurrentVehicle
 {
-};
-
-class CPager
-{
-public:
-	void AddMessage(wchar*, uint16, uint16, uint16);
 };
 
 class CUserDisplay

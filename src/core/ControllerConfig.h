@@ -9,9 +9,63 @@ enum eControllerType
 	OPTIONAL_EXTRA,
 	MOUSE,
 	JOYSTICK,
+	TOTAL_CONTROLLER_TYPES
+};
+
+enum e_ControllerAction
+{
+	PED_FIREWEAPON = 0,
+	PED_CYCLE_WEAPON_RIGHT,
+	PED_CYCLE_WEAPON_LEFT,
+	GO_FORWARD,
+	GO_BACK,
+	GO_LEFT,
+	GO_RIGHT,
+	PED_SNIPER_ZOOM_IN,
+	PED_SNIPER_ZOOM_OUT,
+	VEHICLE_ENTER_EXIT,
+	CAMERA_CHANGE_VIEW_ALL_SITUATIONS,
+	PED_JUMPING,
+	PED_SPRINT,
+	PED_LOOKBEHIND,
+	//PED_DUCK,				// VC
+	//PED_ANSWER_PHONE,		// VC
+	VEHICLE_ACCELERATE,
+	VEHICLE_BRAKE,
+	VEHICLE_CHANGE_RADIO_STATION,
+	VEHICLE_HORN,
+	TOGGLE_SUBMISSIONS,
+	VEHICLE_HANDBRAKE,
+	PED_1RST_PERSON_LOOK_LEFT,
+	PED_1RST_PERSON_LOOK_RIGHT,
+	VEHICLE_LOOKLEFT,
+	VEHICLE_LOOKRIGHT,
+	VEHICLE_LOOKBEHIND,
+	VEHICLE_TURRETLEFT,
+	VEHICLE_TURRETRIGHT,
+	VEHICLE_TURRETUP,
+	VEHICLE_TURRETDOWN,
+	PED_CYCLE_TARGET_LEFT,
+	PED_CYCLE_TARGET_RIGHT,
+	PED_CENTER_CAMERA_BEHIND_PLAYER,
+	PED_LOCK_TARGET,
+	NETWORK_TALK,
+	PED_1RST_PERSON_LOOK_UP,
+	PED_1RST_PERSON_LOOK_DOWN,
+
+	CONTROLLERACTION_36, // unk, unused?
+
+	TOGGLE_DPAD,
+	SWITCH_DEBUG_CAM_ON,
+	TAKE_SCREEN_SHOT,
+	SHOW_MOUSE_POINTER_TOGGLE,
+
+	TOTAL_CONTROL_ACTIONS
 };
 
 class CMouseControllerState;
+
+#define ACTIONNAME_LENGTH 40
 
 class CControllerConfigManager
 {
@@ -23,16 +77,13 @@ public:
 	};
 
 	bool firstCapture;
-	char _pad0[3];
 	DIJOYSTATE2 m_OldState;
 	DIJOYSTATE2 m_NewState;
-	wchar m_aActionNames[41][40];
+	wchar m_aActionNames[TOTAL_CONTROL_ACTIONS][ACTIONNAME_LENGTH];
 	bool m_aButtonStates[17];
-	char _pad1[3];
-	tControllerConfigBind m_aSettings[41][4];
+	tControllerConfigBind m_aSettings[TOTAL_CONTROL_ACTIONS][TOTAL_CONTROLLER_TYPES];
 	uint8 m_aSimCheckers[4][4];
 	bool m_bMouseAssociated;
-	char _pad2[3];
 	
 	void UpdateJoyButtonState(int padnumber);
 	void UpdateJoyInConfigMenus_ButtonDown(int button, int padnumber);
@@ -52,6 +103,7 @@ public:
 	void AffectPadFromMouse();
 	void ClearSettingsAssociatedWithAction(int, int);
 
+	void GetWideStringOfCommandKeys(uint16, wchar*, uint16);
 };
 
 VALIDATE_SIZE(CControllerConfigManager, 0x143C);
