@@ -669,7 +669,7 @@ public:
 	bool PlacePedOnDryLand(void);
 	bool PossiblyFindBetterPosToSeekCar(CVector*, CVehicle*);
 	void UpdateFromLeader(void);
-	int ScanForThreats(void);
+	uint32 ScanForThreats(void);
 	void SetEnterCar(CVehicle*, uint32);
 	bool WarpPedToNearEntityOffScreen(CEntity*);
 	void SetExitCar(CVehicle*, uint32);
@@ -678,6 +678,7 @@ public:
 	void SetEnterTrain(CVehicle*, uint32);
 	void SetEnterCar_AllClear(CVehicle*, uint32, uint32);
 	void SetSolicit(uint32 time);
+	void ScanForInterestingStuff(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);

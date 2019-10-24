@@ -80,12 +80,15 @@ WRAPPER void CGame::Initialise(const char *datFile) { EAXJMP(0x48BED0); }
 #if 0
 WRAPPER void CGame::Process(void) { EAXJMP(0x48C850); }
 #else
+extern void (*DebugMenuProcess)(void);
 void CGame::Process(void) 
 {
 	CPad::UpdatePads();
 	TheCamera.SetMotionBlurAlpha(0);
 	if (TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_SNIPER || TheCamera.m_BlurType == MBLUR_NORMAL)
 		TheCamera.SetMotionBlur(0, 0, 0, 0, MBLUR_NONE);
+
+	DebugMenuProcess();
 	CCutsceneMgr::Update();
 	if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused())
 		FrontEndMenuManager.Process();
