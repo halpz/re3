@@ -12,6 +12,10 @@
 #include "ParticleObject.h"
 #include "Particle.h"
 
+#ifndef MASTER
+bool CParticle::bEnableBannedParticles = false;
+#endif
+
 #define MAX_PARTICLES_ON_SCREEN   (1000)
 
 
@@ -768,7 +772,9 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 {
 	if ( CTimer::GetIsPaused() )
 		return NULL;
-
+#ifndef MASTER
+	if(!bEnableBannedParticles)
+#endif
 	if ( ( type == PARTICLE_ENGINE_SMOKE
 		|| type == PARTICLE_ENGINE_SMOKE2
 		|| type == PARTICLE_ENGINE_STEAM
@@ -781,7 +787,7 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 	{
 		return nil;
 	}
-	
+
 	CParticle *pParticle = m_pUnusedListHead;
 	
 	if ( pParticle == nil )
@@ -1455,7 +1461,10 @@ void CParticle::Render()
 		RwRaster **frames = psystem->m_ppRaster;
 		
 		tParticleType type = psystem->m_Type;
-	
+
+#ifndef MASTER
+		if (!bEnableBannedParticles)
+#endif
 		if ( type == PARTICLE_ENGINE_SMOKE
 			|| type == PARTICLE_ENGINE_SMOKE2
 			|| type == PARTICLE_ENGINE_STEAM
