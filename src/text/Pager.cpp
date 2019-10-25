@@ -22,6 +22,7 @@ CPager::Process()
 		while (i < NUMPAGERMESSAGES-1) {
 			if (m_messages[i + 1].m_pText == nil) break;
 			m_messages[i] = m_messages[i + 1];
+			i++;
 		}
 		m_messages[i].m_pText = nil;
 		if (m_messages[0].m_pText != nil)
