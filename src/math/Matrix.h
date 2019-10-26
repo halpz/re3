@@ -249,7 +249,15 @@ public:
 CMatrix &Invert(const CMatrix &src, CMatrix &dst);
 CVector operator*(const CMatrix &mat, const CVector &vec);
 CMatrix operator*(const CMatrix &m1, const CMatrix &m2);
-CVector MultiplyInverse(const CMatrix &mat, const CVector &vec);
+inline CVector MultiplyInverse(const CMatrix &mat, const CVector &vec)
+{
+	CVector v(vec.x - mat.m_matrix.pos.x, vec.y - mat.m_matrix.pos.y, vec.z - mat.m_matrix.pos.z);
+	return CVector(
+		mat.m_matrix.right.x * v.x + mat.m_matrix.right.y * v.y + mat.m_matrix.right.z * v.z,
+		mat.m_matrix.up.x * v.x + mat.m_matrix.up.y * v.y + mat.m_matrix.up.z * v.z,
+		mat.m_matrix.at.x * v.x + mat.m_matrix.at.y * v.y + mat.m_matrix.at.z * v.z);
+}
+
 const CVector Multiply3x3(const CMatrix &mat, const CVector &vec);
 const CVector Multiply3x3(const CVector &vec, const CMatrix &mat);
 

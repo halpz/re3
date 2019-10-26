@@ -9109,18 +9109,9 @@ cAudioManager::Terminate()
 }
 
 void
-cAudioManager::TranslateEntity(CVector *v1, CVector *v2) const
+cAudioManager::TranslateEntity(CVector *in, CVector *out) const
 {
-	const RwMatrix &cM = TheCamera.GetMatrix().m_matrix;
-	const CVector &cV = TheCamera.GetPosition();
-
-	float a = v1->z - cV.z;
-	float b = v1->y - cV.y;
-	float c = v1->x - cV.x;
-
-	v2->x = cM.right.y * b + cM.right.x * c + cM.right.z * a;
-	v2->y = cM.up.y * b + cM.up.x * c + cM.up.z * a;
-	v2->z = cM.at.y * b + cM.at.x * c + cM.at.z * a;
+	*out = MultiplyInverse(TheCamera.GetMatrix(), *in);
 }
 
 void
