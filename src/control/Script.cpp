@@ -4384,7 +4384,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 	{
 		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 4);
-		CUserDisplay::Pager.AddMessageWithNumber(text, ScriptParams[0], -1, -1, -1, -1,
+		CUserDisplay::Pager.AddMessageWithNumber(text, ScriptParams[0], -1, -1, -1, -1, -1,
 			ScriptParams[1], ScriptParams[2], ScriptParams[3]);
 		return 0;
 	}
