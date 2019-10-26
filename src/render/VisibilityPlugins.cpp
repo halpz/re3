@@ -44,7 +44,7 @@ CVisibilityPlugins::Initialise(void)
 	m_alphaList.Init(20);
 	m_alphaList.head.item.sort = 0.0f;
 	m_alphaList.tail.item.sort = 100000000.0f;
-	m_alphaEntityList.Init(150);
+	m_alphaEntityList.Init(350);	// TODO: set back to 150 when things are fixed
 	m_alphaEntityList.head.item.sort = 0.0f;
 	m_alphaEntityList.tail.item.sort = 100000000.0f;
 }
