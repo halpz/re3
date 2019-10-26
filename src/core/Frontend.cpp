@@ -11,7 +11,6 @@
 #include "Timer.h"
 #include "Game.h"
 #include "DMAudio.h"
-#include "MusicManager.h"
 #include "FileMgr.h"
 #include "Streaming.h"
 #include "TxdStore.h"
@@ -535,7 +534,7 @@ void CMenuManager::Draw()
 				if (m_nPrefsAudio3DProviderIndex == -1)
 					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEA_NAH");
 				else {
-					char *provider = MusicManager.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
+					char *provider = DMAudio.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
 					AsciiToUnicode(provider, gUString);
 					textToPrint[MENUCOLUMN_RIGHT] = gUString;
 				}
@@ -1086,7 +1085,7 @@ void CMenuManager::LoadAllTextures()
 {
 	if (!m_bSpritesLoaded) {
 		CMenuManager::CentreMousePointer();
-		DMAudio.ChangeMusicMode(0);
+		DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_STARTING, 0);
 		m_nCurrOption = 0;
 		m_PrefsRadioStation = DMAudio.GetRadioInCar();
@@ -2133,7 +2132,7 @@ WRAPPER void CMenuManager::RequestFrontEndShutdown() { EAXJMP(0x488750); }
 void CMenuManager::RequestFrontEndShutdown()
 {
 	m_bShutDownFrontEndRequested = true;
-	DMAudio.ChangeMusicMode(1);
+	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 }
 #endif
 

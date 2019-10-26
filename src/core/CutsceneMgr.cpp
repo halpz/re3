@@ -17,7 +17,6 @@
 #include "RpAnimBlend.h"
 #include "ModelIndices.h"
 #include "TempColModels.h"
-#include "MusicManager.h"
 
 const struct {
 	const char *szTrackName;
@@ -209,7 +208,7 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	CFileMgr::CloseFile(file);
 
 	if (strcmpi(ms_cutsceneName, "end")) {
-		DMAudio.ChangeMusicMode(2);
+		DMAudio.ChangeMusicMode(MUSICMODE_CUTSCENE);
 		int trackId = FindCutsceneAudioTrackId(szCutsceneName);
 		if (trackId != -1) {
 			printf("Start preload audio %s\n", szCutsceneName);
@@ -368,7 +367,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 	if (strcmpi(ms_cutsceneName, "end")) {
 		DMAudio.StopCutSceneMusic();
 		if (strcmpi(ms_cutsceneName, "bet"))
-			DMAudio.ChangeMusicMode(1);
+			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	}
 	CTimer::Stop();
 	//TheCamera.GetScreenFadeStatus() == 2; // what for??

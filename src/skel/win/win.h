@@ -90,4 +90,5 @@ void HandleExit();
 #endif                          /* __cplusplus */
 
 
+extern DWORD &_dwOperatingSystemVersion;
 #endif /* (!defined(_PLATFORM_WIN_H)) */

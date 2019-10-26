@@ -1,3 +1,4 @@
+#include "common.h"
 #include "MusicManager.h"
 #include "Camera.h"
 #include "Font.h"
@@ -14,12 +15,6 @@ cMusicManager &MusicManager = *(cMusicManager *)0x8F3964;
 int32 &gNumRetunePresses = *(int32 *)0x650B80;
 wchar *pCurrentStation = (wchar *)0x650B9C;
 uint8 &cDisplay = *(uint8 *)0x650BA1;
-
-WRAPPER char *
-cMusicManager::Get3DProviderName(char)
-{
-	EAXJMP(0x57A8C0);
-}
 
 bool
 cMusicManager::PlayerInCar()
@@ -183,19 +178,19 @@ cMusicManager::StopFrontEndTrack()
 }
 
 WRAPPER void
-cMusicManager::PlayAnnouncement(unsigned char)
+cMusicManager::PlayAnnouncement(uint8)
 {
 	EAXJMP(0x57E430);
 }
 
 WRAPPER void
-cMusicManager::PlayFrontEndTrack(unsigned char, unsigned char)
+cMusicManager::PlayFrontEndTrack(uint8, uint8)
 {
 	EAXJMP(0x57E2E0);
 }
 
 WRAPPER void
-cMusicManager::PreloadCutSceneMusic(unsigned char)
+cMusicManager::PreloadCutSceneMusic(uint8)
 {
 	EAXJMP(0x57E210);
 }
@@ -219,13 +214,13 @@ cMusicManager::GetRadioInCar(void)
 }
 
 WRAPPER void
-cMusicManager::SetRadioInCar(unsigned int)
+cMusicManager::SetRadioInCar(uint32)
 {
 	EAXJMP(0x57D2C0);
 }
 
 WRAPPER void
-cMusicManager::SetRadioChannelByScript(unsigned char, int)
+cMusicManager::SetRadioChannelByScript(uint8, int32)
 {
 	EAXJMP(0x57D180);
 }
