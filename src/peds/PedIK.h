@@ -42,10 +42,11 @@ public:
 	LimbOrientation m_lowerArmOrient;
 	int32 m_flags;
 
-	static LimbMovementInfo &ms_torsoInfo;
-	static LimbMovementInfo &ms_headInfo;
-	static LimbMovementInfo &ms_upperArmInfo;
-	static LimbMovementInfo &ms_lowerArmInfo;
+	static LimbMovementInfo ms_torsoInfo;
+	static LimbMovementInfo ms_headInfo;
+	static LimbMovementInfo ms_headRestoreInfo;
+	static LimbMovementInfo ms_upperArmInfo;
+	static LimbMovementInfo ms_lowerArmInfo;
 
 	CPedIK(CPed *ped);
 	bool PointGunInDirection(float phi, float theta);
