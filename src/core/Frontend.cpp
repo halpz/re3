@@ -1085,7 +1085,7 @@ void CMenuManager::LoadAllTextures()
 {
 	if (!m_bSpritesLoaded) {
 		CMenuManager::CentreMousePointer();
-		DMAudio.ChangeMusicMode(0);
+		DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_STARTING, 0);
 		m_nCurrOption = 0;
 		m_PrefsRadioStation = DMAudio.GetRadioInCar();
@@ -2132,7 +2132,7 @@ WRAPPER void CMenuManager::RequestFrontEndShutdown() { EAXJMP(0x488750); }
 void CMenuManager::RequestFrontEndShutdown()
 {
 	m_bShutDownFrontEndRequested = true;
-	DMAudio.ChangeMusicMode(1);
+	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 }
 #endif
 

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "audio_enums.h"
 
 #include "AudioManager.h"
 
@@ -7128,14 +7129,14 @@ cAudioManager::ProcessSpecial()
 {
 	if(m_bUserPause) {
 		if(!m_bPreviousUserPause) {
-			MusicManager.ChangeMusicMode(0);
+			MusicManager.ChangeMusicMode(MUSICMODE_FRONTEND);
 			SampleManager.SetEffectsFadeVolume(maxVolume);
 			SampleManager.SetMusicFadeVolume(maxVolume);
 		}
 	} else {
 		if(m_bPreviousUserPause) {
 			MusicManager.StopFrontEndTrack();
-			MusicManager.ChangeMusicMode(1);
+			MusicManager.ChangeMusicMode(MUSICMODE_GAME);
 		}
 		CPlayerPed *playerPed = FindPlayerPed();
 		if(playerPed) {
