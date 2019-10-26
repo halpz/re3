@@ -9174,7 +9174,7 @@ void
 cAudioManager::AdjustSamplesVolume()
 {
 	for(int i = 0; i < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue]; i++) {
-		tActiveSample *pSample = &m_asSamples[i][(int32)m_abSampleQueueIndexTable[i] + 1];
+		tActiveSample* pSample = &m_asSamples[m_bActiveSampleQueue][m_abSampleQueueIndexTable[m_bActiveSampleQueue][i] + 1];
 
 		if(!pSample->m_bBankIndex) // all non-speech sounds on PC
 			pSample->m_bEmittingVolume = ComputeEmittingVolume(
