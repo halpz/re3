@@ -124,6 +124,8 @@ public:
 
 	static void Initialise();
 	static void ShutDown();
+	static void RepositionCertainDynamicObjects();
+	static void RemoveStaticObjects();
 	static void Process();
 };
 

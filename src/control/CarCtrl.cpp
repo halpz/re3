@@ -648,8 +648,7 @@ CCarCtrl::AddToCarArray(int32 id, int32 vehclass)
 void
 CCarCtrl::RemoveDistantCars()
 {
-	uint32 i = CPools::GetVehiclePool()->GetSize();
-	while (--i){
+	for (int i = CPools::GetVehiclePool()->GetSize()-1; i >= 0; i--) {
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!pVehicle)
 			continue;
@@ -733,8 +732,7 @@ int32
 CCarCtrl::CountCarsOfType(int32 mi)
 {
 	int32 total = 0;
-	uint32 i = CPools::GetVehiclePool()->GetSize();
-	while (i--){
+	for (int i = CPools::GetVehiclePool()->GetSize()-1; i >= 0; i--) {
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!pVehicle)
 			continue;

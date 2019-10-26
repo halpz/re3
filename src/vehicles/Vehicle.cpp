@@ -15,7 +15,6 @@
 #include "PointLights.h"
 #include "Renderer.h"
 #include "DMAudio.h"
-#include "MusicManager.h"
 #include "Radar.h"
 
 bool &CVehicle::bWheelsOnlyCheat = *(bool *)0x95CD78;

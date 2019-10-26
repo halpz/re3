@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Pager.h"
+
 class COnscreenTimerEntry
 {
 public:
@@ -50,13 +52,6 @@ class CCurrentVehicle
 {
 };
 
-class CPager
-{
-public:
-	void AddMessage(wchar*, uint16, uint16, uint16);
-	void AddMessageWithNumber(wchar*, int, int, int, int, int, uint16, uint16, uint16);
-};
-
 class CUserDisplay
 {
 public:
@@ -64,4 +59,6 @@ public:
 	static COnscreenTimer &OnscnTimer;
 	static CPager &Pager;
 	static CCurrentVehicle &CurrentVehicle;
+
+	static void Process(void);
 };

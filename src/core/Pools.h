@@ -43,11 +43,13 @@ public:
 	static CAudioScriptObjectPool *GetAudioScriptObjectPool(void) { return ms_pAudioScriptObjectPool; }
 
 	static void Initialise(void);
+	static void ShutDown(void);
 	static int32 GetPedRef(CPed *ped);
 	static CPed *GetPed(int32 handle);
 	static int32 GetVehicleRef(CVehicle *vehicle);
 	static CVehicle *GetVehicle(int32 handle);
 	static int32 GetObjectRef(CObject *object);
 	static CObject *GetObject(int32 handle);
-	static void MakeSureSlotInObjectPoolIsEmpty(int32 handle);
+	static void CheckPoolsEmpty();
+	static void MakeSureSlotInObjectPoolIsEmpty(int32 slot);
 };

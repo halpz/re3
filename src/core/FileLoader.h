@@ -9,7 +9,7 @@ public:
 	static char *LoadLine(int fd);
 	static RwTexDictionary *LoadTexDictionary(const char *filename);
 	static void LoadCollisionFile(const char *filename);
-	static void LoadCollisionModel(uint8 *buf, CColModel &model, char *name);
+	static void LoadCollisionModel(uint8 *buf, struct CColModel &model, char *name);
 	static void LoadModelFile(const char *filename);
 	static RpAtomic *FindRelatedModelInfoCB(RpAtomic *atomic, void *data);
 	static void LoadClumpFile(const char *filename);
@@ -39,4 +39,6 @@ public:
 	static void LoadPickup(const char *line);
 
 	static void LoadMapZones(const char *filename);
+
+	static void ReloadPaths(const char *filename);
 };

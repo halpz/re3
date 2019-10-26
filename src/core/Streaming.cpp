@@ -226,7 +226,7 @@ CStreaming::Init(void)
         CModelInfo::GetModelInfo("IslandLODsubIND", &islandLODsubInd);
         CModelInfo::GetModelInfo("IslandLODsubCOM", &islandLODsubCom);
 
-	for(i = 0; i < CPools::GetBuildingPool()->GetSize(); i++){
+	for(i = CPools::GetBuildingPool()->GetSize()-1; i >= 0; i--){
 		CBuilding *building = CPools::GetBuildingPool()->GetSlot(i);
 		if(building == nil)
 			continue;
@@ -682,8 +682,8 @@ CStreaming::RequestBigBuildings(eLevelName level)
 	int i, n;
 	CBuilding *b;
 
-	n = CPools::GetBuildingPool()->GetSize();
-	for(i = 0; i < n; i++){
+	n = CPools::GetBuildingPool()->GetSize()-1;
+	for(i = n; i >= 0; i--){
 		b = CPools::GetBuildingPool()->GetSlot(i);
 		if(b && b->bIsBIGBuilding && b->m_level == level)
 			RequestModel(b->GetModelIndex(), STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_PRIORITY);
@@ -837,8 +837,8 @@ CStreaming::RemoveBuildings(eLevelName level)
 	CEntity *e;
 	CBaseModelInfo *mi;
 
-	n = CPools::GetBuildingPool()->GetSize();
-	for(i = 0; i < n; i++){
+	n = CPools::GetBuildingPool()->GetSize()-1;
+	for(i = n; i >= 0; i--){
 		e = CPools::GetBuildingPool()->GetSlot(i);
 		if(e && e->m_level == level){
 			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
@@ -850,8 +850,8 @@ CStreaming::RemoveBuildings(eLevelName level)
 		}
 	}
 
-	n = CPools::GetTreadablePool()->GetSize();
-	for(i = 0; i < n; i++){
+	n = CPools::GetTreadablePool()->GetSize()-1;
+	for(i = n; i >= 0; i--){
 		e = CPools::GetTreadablePool()->GetSlot(i);
 		if(e && e->m_level == level){
 			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
@@ -863,8 +863,8 @@ CStreaming::RemoveBuildings(eLevelName level)
 		}
 	}
 
-	n = CPools::GetObjectPool()->GetSize();
-	for(i = 0; i < n; i++){
+	n = CPools::GetObjectPool()->GetSize()-1;
+	for(i = n; i >= 0; i--){
 		e = CPools::GetObjectPool()->GetSlot(i);
 		if(e && e->m_level == level){
 			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
@@ -876,8 +876,8 @@ CStreaming::RemoveBuildings(eLevelName level)
 		}
 	}
 
-	n = CPools::GetDummyPool()->GetSize();
-	for(i = 0; i < n; i++){
+	n = CPools::GetDummyPool()->GetSize()-1;
+	for(i = n; i >= 0; i--){
 		e = CPools::GetDummyPool()->GetSlot(i);
 		if(e && e->m_level == level){
 			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
@@ -951,8 +951,8 @@ CStreaming::RemoveBigBuildings(eLevelName level)
 	CEntity *e;
 	CBaseModelInfo *mi;
 
-	n = CPools::GetBuildingPool()->GetSize();
-	for(i = 0; i < n; i++){
+	n = CPools::GetBuildingPool()->GetSize()-1;
+	for(i = n; i >= 0; i--){
 		e = CPools::GetBuildingPool()->GetSlot(i);
 		if(e && e->bIsBIGBuilding && e->m_level == level){
 			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
@@ -1172,8 +1172,8 @@ CStreaming::HaveAllBigBuildingsLoaded(eLevelName level)
 			return;
 	}
 
-	n = CPools::GetBuildingPool()->GetSize();
-	for(i = 0; i < n; i++){
+	n = CPools::GetBuildingPool()->GetSize()-1;
+	for(i = n; i >= 0; i--){
 		e = CPools::GetBuildingPool()->GetSlot(i);
 		if(e && e->bIsBIGBuilding && e->m_level == level &&
 		   ms_aInfoForModel[e->GetModelIndex()].m_loadState != STREAMSTATE_LOADED)

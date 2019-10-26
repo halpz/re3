@@ -30,6 +30,8 @@ public:
 	static bool IsPointWithinHideOutGarage(CVector&);
 	static bool IsPointWithinAnyGarage(CVector&);
 	static void PlayerArrestedOrDied();
+	static void Init(void);
+	static void Update(void);
 	static int16 AddOne(float, float, float, float, float, float, uint8, uint32);
 	static void SetTargetCarForMissonGarage(int16, CVehicle*);
 	static bool HasCarBeenDroppedOffYet(int16);

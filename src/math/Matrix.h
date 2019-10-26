@@ -127,20 +127,14 @@ public:
 	}
 	void Scale(float scale)
 	{
-		// GTA treats this as 4x4 floats
-		m_matrix.right.x *= scale;
-		m_matrix.right.y *= scale;
-		m_matrix.right.z *= scale;
-		m_matrix.up.x *= scale;
-		m_matrix.up.y *= scale;
-		m_matrix.up.z *= scale;
-		m_matrix.at.x *= scale;
-		m_matrix.at.y *= scale;
-		m_matrix.at.z *= scale;
-		m_matrix.pos.x *= scale;
-		m_matrix.pos.y *= scale;
-		m_matrix.pos.z *= scale;
-		m_matrix.flags = 0;
+		float *pFloatMatrix = (float*)&m_matrix;
+		for (int i = 0; i < 3; i++)
+#ifdef FIX_BUGS // BUGFIX from VC
+			for (int j = 0; j < 3; j++)
+#else
+			for (int j = 0; j < 4; j++)
+#endif
+				pFloatMatrix[i * 4 + j] *= scale;
 	}
 
 

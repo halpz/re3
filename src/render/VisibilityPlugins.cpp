@@ -7,6 +7,7 @@
 #include "Renderer.h"
 #include "Camera.h"
 #include "VisibilityPlugins.h"
+#include "World.h"
 
 #define FADE_DISTANCE 20.0f
 
@@ -43,7 +44,7 @@ CVisibilityPlugins::Initialise(void)
 	m_alphaList.Init(20);
 	m_alphaList.head.item.sort = 0.0f;
 	m_alphaList.tail.item.sort = 100000000.0f;
-	m_alphaEntityList.Init(350);	// TODO: set back to 150 when things are fixed
+	m_alphaEntityList.Init(150);
 	m_alphaEntityList.head.item.sort = 0.0f;
 	m_alphaEntityList.tail.item.sort = 100000000.0f;
 }
@@ -498,14 +499,11 @@ CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic *atomic)
 	return atomic;
 }
 
-// TODO: this is part of a struct
-static RwTexture *&playerskin = *(RwTexture**)0x941428;
-
 RpAtomic*
 CVisibilityPlugins::RenderPlayerCB(RpAtomic *atomic)
 {
-	if(playerskin)
-		RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), SetTextureCB, playerskin);
+	if(CWorld::Players[0].m_pSkinTexture)
+		RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), SetTextureCB, CWorld::Players[0].m_pSkinTexture);
 	AtomicDefaultRenderCallBack(atomic);
 	return atomic;
 }
@@ -607,22 +605,30 @@ CVisibilityPlugins::DefaultVisibilityCB(RpClump *clump)
 bool
 CVisibilityPlugins::FrustumSphereCB(RpClump *clump)
 {
-	// TODO, but unused
-	return true;
+	RwSphere sphere;
+	RwFrame *frame = RpClumpGetFrame(clump);
+
+	CClumpModelInfo *modelInfo = (CClumpModelInfo*)GetFrameHierarchyId(frame);
+	sphere.radius = modelInfo->GetColModel()->boundingSphere.radius;
+	sphere.center.x = modelInfo->GetColModel()->boundingSphere.center.x;
+	sphere.center.y = modelInfo->GetColModel()->boundingSphere.center.y;
+	sphere.center.z = modelInfo->GetColModel()->boundingSphere.center.z;
+	RwV3dTransformPoints(&sphere.center, &sphere.center, 1, RwFrameGetLTM(frame));
+	return RwCameraFrustumTestSphere(ms_pCamera, &sphere) != rwSPHEREOUTSIDE;
 }
 
 bool
 CVisibilityPlugins::VehicleVisibilityCB(RpClump *clump)
 {
-	// TODO, but unused
-	return true;
+	if (GetDistanceSquaredFromCamera(RpClumpGetFrame(clump)) <= ms_vehicleLod1Dist)
+		return FrustumSphereCB(clump);
+	return false;
 }
 
 bool
 CVisibilityPlugins::VehicleVisibilityCB_BigVehicle(RpClump *clump)
 {
-	// TODO, but unused
-	return true;
+	return FrustumSphereCB(clump);
 }
 
 

@@ -1,5 +1,15 @@
+#pragma warning( push )
+#pragma warning( disable : 4005)
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
+#pragma warning( pop )
 #include "common.h"
+#include "win.h"
 #include "patcher.h"
+#include "Timer.h"
+
+float &texLoadTime = *(float*)0x8F1B50;
+int32 &texNumLoaded = *(int32*)0x8F252C;
 
 RwTexture*
 RwTextureGtaStreamRead(RwStream *stream)
@@ -10,11 +20,15 @@ RwTextureGtaStreamRead(RwStream *stream)
 	if(!RwStreamFindChunk(stream, rwID_TEXTURENATIVE, &size, &version))
 		return nil;
 
-	// TODO: unused timing
+	float preloadTime = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
 
 	if(!RWSRCGLOBAL(stdFunc[rwSTANDARDNATIVETEXTUREREAD](stream, &tex, size)))
 		return nil;
- 
+
+	if (gGameState == GS_INIT_PLAYING_GAME) {
+		texLoadTime = (texNumLoaded * texLoadTime + (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond() - preloadTime) / (float)(texNumLoaded+1);
+		texNumLoaded++;
+	}
 	return tex;
 }
 

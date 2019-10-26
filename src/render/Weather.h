@@ -38,6 +38,7 @@ public:
 	static float &Stored_Rain;
 
 	static void RenderRainStreaks(void);
+	static void Update(void);
 	
 	static void ReleaseWeather();
 	static void ForceWeather(int16);

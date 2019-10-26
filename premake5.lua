@@ -15,6 +15,7 @@ workspace "re3"
 	files { "src/render/*.*" }
 	files { "src/skel/*.*" }
 	files { "src/skel/win/*.*" }
+	files { "src/text/*.*" }
 	files { "src/vehicles/*.*" }
 	files { "src/weapons/*.*" }
 	files { "eax/*.*" }
@@ -32,6 +33,7 @@ workspace "re3"
 	includedirs { "src/render" }
 	includedirs { "src/skel/" }
 	includedirs { "src/skel/win" }
+	includedirs { "src/text" }
 	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
 	includedirs { "eax" }

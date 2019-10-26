@@ -47,6 +47,7 @@ uint8 aWeaponBlues[] = { 0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255, 0, 128, 25
 float aWeaponScale[] = { 1.0f, 2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f, 1.0f, 1.0f, 1.0f };
 
 WRAPPER void CPacManPickups::Render(void) { EAXJMP(0x432F60); }
+WRAPPER void CPacManPickups::Update(void) { EAXJMP(0x432800); }
 
 
 void
@@ -296,7 +297,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 			m_pObject->UpdateRwFrame();
 
 			bool touched = false;
-			for (int32 i = CPools::GetVehiclePool()->GetSize(); i > 0; i--) { // TODO: check if i > 0 is not a R* mistake
+			for (int32 i = CPools::GetVehiclePool()->GetSize()-1; i >= 0; i--) {
 				CVehicle *vehicle = CPools::GetVehiclePool()->GetSlot(i);
 				if (vehicle != nil && vehicle->IsSphereTouchingVehicle(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z, 1.5f)) {
 					touched = true;
@@ -323,7 +324,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 			if (CTimer::GetTimeInMilliseconds() > m_nTimer)
 				explode = true;
 			else {// added else here since vehicle lookup is useless
-				for (int32 i = CPools::GetVehiclePool()->GetSize(); i > 0; i--) { // TODO: check if i > 0 is not a R* mistake
+				for (int32 i = CPools::GetVehiclePool()->GetSize()-1; i >= 0; i--) {
 					CVehicle *vehicle = CPools::GetVehiclePool()->GetSlot(i);
 					if (vehicle != nil && vehicle->IsSphereTouchingVehicle(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z, 1.5f)) {
 						explode = true;

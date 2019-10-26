@@ -15,6 +15,8 @@ CPhone *&CPhoneInfo::pickedUpPhone = *(CPhone**)0x6283B0;
 bool &CPhoneInfo::isPhoneBeingPickedUp = *(bool*)0x6283B4;
 CPed *&CPhoneInfo::pedWhoPickingUpPhone = *(CPed**)0x6283B8;
 
+WRAPPER void CPhoneInfo::Update(void) { EAXJMP(0x42F7A0); }
+
 int
 CPhoneInfo::FindNearestFreePhone(CVector *pos)
 {
@@ -151,8 +153,8 @@ CPhoneInfo::Initialise(void)
 	pickedUpPhone = nil;
 	m_nMax = 0;
 	m_nNum = 0;
-	for (int v5 = pool->GetSize() - 1; v5 >= 0; v5--) {
-		CBuilding *building = pool->GetSlot(v5);
+	for (int i = pool->GetSize() - 1; i >= 0; i--) {
+		CBuilding *building = pool->GetSlot(i);
 		if (building) {
 			if (building->m_modelIndex == MI_PHONEBOOTH1) {
 				CPhone *maxPhone = &m_aPhones[m_nMax];

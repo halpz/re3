@@ -11,18 +11,8 @@ CText &TheText = *(CText*)0x941520;
 
 CText::CText(void)
 {
-	keyArray.entries = nil;
-	keyArray.numEntries = 0;
-	data.chars = nil;
-	data.numChars = 0;
-	encoding = 101;
+	encoding = 'e';
 	memset(WideErrorString, 0, sizeof(WideErrorString));
-}
-
-CText::~CText(void)
-{
-	data.Unload();
-	keyArray.Unload();
 }
 
 void
@@ -96,12 +86,64 @@ CText::Get(const char *key)
 	return keyArray.Search(key);
 }
 
+wchar UpperCaseTable[128] = {
+	128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138,
+	139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+	150, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137,
+	138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148,
+	149, 173, 173, 175, 176, 177, 178, 179, 180, 181, 182,
+	183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193,
+	194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204,
+	205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215,
+	216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226,
+	227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237,
+	238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248,
+	249, 250, 251, 252, 253, 254, 255
+};
+
+wchar FrenchUpperCaseTable[128] = {
+	128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138,
+	139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
+	150, 65, 65, 65, 65, 132, 133, 69, 69, 69, 69, 73, 73,
+	73, 73, 79, 79, 79, 79, 85, 85, 85, 85, 173, 173, 175,
+	176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186,
+	187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197,
+	198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208,
+	209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
+	220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230,
+	231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241,
+	242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252,
+	253, 254, 255
+};
+
 wchar
 CText::GetUpperCase(wchar c)
 {
-	// TODO: do this depending on encoding
-	if(islower(c))
-		return toupper(c);
+	switch (encoding)
+	{
+	case 'e':
+		if (c >= 'a' && c <= 'z')
+			return c - 32;
+		break;
+	case 'f':
+		if (c >= 'a' && c <= 'z')
+			return c - 32;
+
+		if (c >= 128 && c <= 255)
+			return FrenchUpperCaseTable[c-128];
+		break;
+	case 'g':
+	case 'i':
+	case 's':
+		if (c >= 'a' && c <= 'z')
+			return c - 32;
+
+		if (c >= 128 && c <= 255)
+			return UpperCaseTable[c-128];
+		break;
+	default:
+		break;
+	}
 	return c;
 }
 
@@ -205,7 +247,7 @@ CData::Unload(void)
 }
 
 void
-AsciiToUnicode(const char *src, uint16 *dst)
+AsciiToUnicode(const char *src, wchar *dst)
 {
 	while((*dst++ = *src++) != '\0');
 }
@@ -215,8 +257,8 @@ UnicodeToAscii(wchar *src)
 {
 	static char aStr[256];
 	int len;
-	for(len = 0; src && *src != 0 && len < 256-1; len++, src++)
-		if(*src < 256)
+	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
+		if(*src < 128)
 			aStr[len] = *src;
 		else
 			aStr[len] = '#';
@@ -227,10 +269,9 @@ UnicodeToAscii(wchar *src)
 char*
 UnicodeToAsciiForSaveLoad(wchar *src)
 {
-	// exact same code as above
 	static char aStr[256];
 	int len;
-	for(len = 0; src && *src != 0 && len < 256-1; len++, src++)
+	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
 		if(*src < 256)
 			aStr[len] = *src;
 		else
@@ -249,7 +290,7 @@ int
 UnicodeStrlen(const wchar *str)
 {
 	int len;
-	for(len = 0; *str != 0; len++, str++);
+	for(len = 0; *str != '\0'; len++, str++);
 	return len;
 }
 
@@ -264,6 +305,8 @@ STARTPATCHES
 	InjectHook(0x52C3C0, &CText::Load, PATCH_JUMP);
 	InjectHook(0x52C580, &CText::Unload, PATCH_JUMP);
 	InjectHook(0x52C5A0, &CText::Get, PATCH_JUMP);
+	InjectHook(0x52C220, &CText::GetUpperCase, PATCH_JUMP);
+	InjectHook(0x52C2C0, &CText::UpperCase, PATCH_JUMP);
 
 	InjectHook(0x52BE70, &CKeyArray::Load, PATCH_JUMP);
 	InjectHook(0x52BF60, &CKeyArray::Unload, PATCH_JUMP);
