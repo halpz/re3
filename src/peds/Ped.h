@@ -294,9 +294,9 @@ public:
 	uint8 bIsLanding : 1;
 	uint8 bIsRunning : 1; // on some conditions
 	uint8 bHitSomethingLastFrame : 1;
-	uint8 m_ped_flagB80 : 1; // bIsNearCar? it's sure that it's related with cars and used for deciding whether we should move
+	uint8 bVehEnterDoorIsBlocked : 1; // because someone else enters/exits from there
 
-	uint8 m_ped_flagC1 : 1;	// bCanPedEnterSeekedCar?
+	uint8 bCanPedEnterSeekedCar : 1;
 	uint8 bRespondsToThreats : 1;
 	uint8 bRenderPedInCar : 1;
 	uint8 bChangedSeat : 1;
@@ -679,6 +679,8 @@ public:
 	void SetEnterCar_AllClear(CVehicle*, uint32, uint32);
 	void SetSolicit(uint32 time);
 	void ScanForInterestingStuff(void);
+	void WarpPedIntoCar(CVehicle*);
+	void SetCarJack(CVehicle*);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
