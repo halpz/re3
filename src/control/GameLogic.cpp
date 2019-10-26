@@ -30,7 +30,7 @@ CGameLogic::InitAtStartOfGame()
 void
 CGameLogic::PassTime(uint32 time)
 {
-	uint8 minutes, hours, days;
+	int32 minutes, hours, days;
 
 	minutes = time + CClock::GetMinutes();
 	hours = CClock::GetHours();
