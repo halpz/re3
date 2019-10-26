@@ -48,7 +48,16 @@ bool &bPlayerJustEnteredCar = *(bool *)0x6508C4;
 bool &g_bMissionAudioLoadFailed = *(bool *)0x95CD8E;
 uint32 *gMinTimeToNextReport = (uint32 *)0x8E2828;
 uint8 &gSpecialSuspectLastSeenReport = *(uint8 *)0x95CD4D;
-bool **hornPatternsArray = (bool **)0x606AB8;
+bool hornPatternsArray[8][44] = {
+	{false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false},
+	{false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false},
+	{false, false, true, true, true, true, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false},
+	{false, false, true, true, true, true, true, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, false},
+	{false, false, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
+	{false, false, true, true, true, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
+	{false, false, true, true, true, true, false, false, false, false, true, true, true, false, false, true, true, true, false, false, true, true, true, true, true, true, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, false, false},
+	{false, false, true, true, true, true, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false},
+};
 
 constexpr int totalAudioEntitiesSlots = 200;
 constexpr int maxVolume = 127;
