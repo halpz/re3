@@ -3680,6 +3680,7 @@ int8 CRunningScript::ProcessCommandsFrom400To499(int32 command)
 		CPlayerPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pPed);
 		pPed->m_nSelectedWepSlot = pPed->GiveWeapon((eWeaponType)ScriptParams[1], ScriptParams[2]);
+		return 0;
 	}
 	case COMMAND_GIVE_WEAPON_TO_CHAR:
 	{
