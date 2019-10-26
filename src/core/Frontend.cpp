@@ -11,7 +11,6 @@
 #include "Timer.h"
 #include "Game.h"
 #include "DMAudio.h"
-#include "MusicManager.h"
 #include "FileMgr.h"
 #include "Streaming.h"
 #include "TxdStore.h"
@@ -535,7 +534,7 @@ void CMenuManager::Draw()
 				if (m_nPrefsAudio3DProviderIndex == -1)
 					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEA_NAH");
 				else {
-					char *provider = MusicManager.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
+					char *provider = DMAudio.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
 					AsciiToUnicode(provider, gUString);
 					textToPrint[MENUCOLUMN_RIGHT] = gUString;
 				}

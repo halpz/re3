@@ -582,8 +582,8 @@ cAudioManager::ComputePan(float dist, CVector *vec)
 	return min(107, panTable[index] + 63);
 }
 
-uint32
-cAudioManager::ComputeVolume(int emittingVolume, float soundIntensity, float distance) const
+uint8
+cAudioManager::ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const
 {
 	float newSoundIntensity;
 	if(soundIntensity <= 0.0f) return 0;
