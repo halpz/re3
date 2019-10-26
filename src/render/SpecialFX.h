@@ -60,7 +60,7 @@ public:
 	uint32 m_nIdentifier;
 	RwRGBA m_Color;
 	uint16 m_nPulsePeriod;
-	uint16 m_nRotateRate;
+	int16 m_nRotateRate;
 	uint32 m_nStartTime;
 	float m_fPulseFraction;
 	float m_fStdSize;
