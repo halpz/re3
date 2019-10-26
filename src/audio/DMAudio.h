@@ -1,6 +1,6 @@
 #pragma once
 
-#include "audio.h"
+#include "audio_enums.h"
 #include "Wanted.h"
 
 enum eSound : int16
