@@ -26,6 +26,12 @@ MatchModelString(const char *modelname, int16 id)
 #undef X
 }
 
+void
+TestModelIndices(void)
+{
+	;
+}
+
 STARTPATCHES
 	InjectHook(0x48EB60, InitModelIndices, PATCH_JUMP);
 	InjectHook(0x48F030, MatchModelString, PATCH_JUMP);

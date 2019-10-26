@@ -365,6 +365,7 @@ enum{
 
 void InitModelIndices(void);
 void MatchModelString(const char *name, int16 id);
+void TestModelIndices(void);
 
 inline bool
 IsGlass(int16 id)
@@ -462,7 +463,6 @@ IsPickupModel(int16 id)
 		id == MI_UZI ||
 		id == MI_M16 ||
 		id == MI_FLAMETHROWER ||
-		id >= MI_M16 && id <= MI_FLAMETHROWER ||
 		id == MI_PICKUP_ADRENALINE ||
 		id == MI_PICKUP_BODYARMOUR ||
 		id == MI_PICKUP_INFO ||
