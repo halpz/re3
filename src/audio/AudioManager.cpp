@@ -415,47 +415,47 @@ cAudioManager::AddReleasingSounds()
 {
 	bool toProcess[44];
 
-	for(int32 i = 0; i < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue]; i++) {
-		tActiveSample &sample =
-		    m_asSamples[!m_bActiveSampleQueue][m_abSampleQueueIndexTable[!m_bActiveSampleQueue][i]];
-		if(!m_asSamples[!m_bActiveSampleQueue][m_abSampleQueueIndexTable[!m_bActiveSampleQueue][i]]
-		        .m_bLoopEnded) {
-			toProcess[i] = false;
-			for(int32 j = 0; j < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue]; j++) {
-				if(sample.m_nEntityIndex ==
-				       m_asSamples[m_bActiveSampleQueue]
-				                  [m_abSampleQueueIndexTable[m_bActiveSampleQueue][j]]
-				                      .m_nEntityIndex &&
-				   sample.m_counter == m_asSamples[m_bActiveSampleQueue]
-				                                  [m_abSampleQueueIndexTable[m_bActiveSampleQueue][j]]
-				                                      .m_counter) {
-					toProcess[i] = true;
-					break;
-				}
+	int8 queue = m_bActiveSampleQueue == 0;
+
+	for(int32 i = 0; i < m_bSampleRequestQueuesStatus[queue]; i++) {
+		tActiveSample &sample = m_asSamples[queue][m_abSampleQueueIndexTable[queue][i]];
+		if (sample.m_bLoopEnded) continue;
+
+		toProcess[i] = false;
+		for(int32 j = 0; j < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue]; j++) {
+			if(sample.m_nEntityIndex ==
+				    m_asSamples[m_bActiveSampleQueue]
+				                [m_abSampleQueueIndexTable[m_bActiveSampleQueue][j]]
+				                    .m_nEntityIndex &&
+				sample.m_counter == m_asSamples[m_bActiveSampleQueue]
+				                                [m_abSampleQueueIndexTable[m_bActiveSampleQueue][j]]
+				                                    .m_counter) {
+				toProcess[i] = true;
+				break;
 			}
-			if(!toProcess[i]) {
-				if(sample.m_counter <= 255u || !sample.m_bLoopsRemaining) {
-					if(!sample.field_76) continue;
-					if(!sample.m_nLoopCount) {
-						if(sample.field_88 == -1) {
-							sample.field_88 = sample.m_bVolume / sample.field_76;
-							if(sample.field_88 <= 0) sample.field_88 = 1;
-						}
-						if(sample.m_bVolume <= sample.field_88) {
-							sample.field_76 = 0;
-							continue;
-						}
-						sample.m_bVolume -= sample.field_88;
+		}
+		if(!toProcess[i]) {
+			if(sample.m_counter <= 255u || !sample.m_bLoopsRemaining) {
+				if(!sample.field_76) continue;
+				if(!sample.m_nLoopCount) {
+					if(sample.field_88 == -1) {
+						sample.field_88 = sample.m_bVolume / sample.field_76;
+						if(sample.field_88 <= 0) sample.field_88 = 1;
 					}
-					--sample.field_76;
-					if(field_2) {
-						if(sample.field_16 < 20) ++sample.field_16;
+					if(sample.m_bVolume <= sample.field_88) {
+						sample.field_76 = 0;
+						continue;
 					}
-					sample.field_56 = 0;
+					sample.m_bVolume -= sample.field_88;
 				}
-				memcpy(&m_sQueueSample, &sample, 92);
-				AddSampleToRequestedQueue();
+				--sample.field_76;
+				if(field_2) {
+					if(sample.field_16 < 20) ++sample.field_16;
+				}
+				sample.field_56 = 0;
 			}
+			memcpy(&m_sQueueSample, &sample, sizeof(sample));
+			AddSampleToRequestedQueue();
 		}
 	}
 }
