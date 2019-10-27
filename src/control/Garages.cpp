@@ -78,6 +78,15 @@ WRAPPER void CGarages::PlayerArrestedOrDied() { EAXJMP(0x427F60); }
 WRAPPER int16 CGarages::AddOne(float, float, float, float, float, float, uint8, uint32) { EAXJMP(0x421FA0); }
 WRAPPER void CGarages::SetTargetCarForMissonGarage(int16, CVehicle*) { EAXJMP(0x426BD0); }
 WRAPPER bool CGarages::HasCarBeenDroppedOffYet(int16) { EAXJMP(0x426C20); }
+WRAPPER void CGarages::DeActivateGarage(int16) { EAXJMP(0x426C40); }
+WRAPPER void CGarages::ActivateGarage(int16) { EAXJMP(0x426C60); }
+
+int32 CGarages::QueryCarsCollected(int16 garage)
+{
+	return 0;
+}
+
+WRAPPER bool CGarages::HasThisCarBeenCollected(int16 garage, uint8 id) { EAXJMP(0x426D50); }
 
 #if 0
 WRAPPER void CGarages::PrintMessages(void) { EAXJMP(0x426310); }

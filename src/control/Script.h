@@ -8,6 +8,7 @@ class CBuilding;
 class CVehicle;
 class CPed;
 class CObject;
+class CPlayerInfo;
 
 struct CScriptRectangle 
 {
@@ -339,6 +340,9 @@ public:
 	static void Process();
 	static CRunningScript* StartTestScript();
 	static bool IsPlayerOnAMission();
+	static bool IsPedStopped(CPed*);
+	static bool IsPlayerStopped(CPlayerInfo*);
+	static bool IsVehicleStopped(CVehicle*);
 
 	static void ReadObjectNamesFromScript();
 	static void UpdateObjectIndices();
@@ -348,7 +352,6 @@ public:
 	static void HighlightImportantArea(uint32, float, float, float, float, float);
 	static void DrawDebugSquare(float, float, float, float);
 	static void DrawDebugCube(float, float, float, float, float, float);
-	static bool IsVehicleStopped(CVehicle*);
 
 	static int32 Read4BytesFromScript(uint32* pIp){
 		int32 retval = 0;

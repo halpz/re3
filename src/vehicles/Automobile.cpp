@@ -61,8 +61,8 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	m_fFireBlowUpTimer = 0.0f;
 	field_4E0 = 0;
 	bTaxiLight = m_sAllTaxiLights;
-	m_auto_flagA20 = false;
-	m_auto_flagA40 = false;
+	bFixedColour = false;
+	bBigWheels = false;
 	bWaterTight = false;
 
 	SetModelIndex(id);

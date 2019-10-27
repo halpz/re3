@@ -35,4 +35,8 @@ public:
 	static int16 AddOne(float, float, float, float, float, float, uint8, uint32);
 	static void SetTargetCarForMissonGarage(int16, CVehicle*);
 	static bool HasCarBeenDroppedOffYet(int16);
+	static void ActivateGarage(int16);
+	static void DeActivateGarage(int16);
+	static int32 QueryCarsCollected(int16);
+	static bool HasThisCarBeenCollected(int16, uint8);
 };
