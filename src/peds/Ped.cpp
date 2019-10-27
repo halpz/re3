@@ -4646,10 +4646,10 @@ CPed::SetAttack(CEntity *victim)
 			CPad::GetPad(0)->ResetAverageWeapon();
 
 		if ((curWeapon->m_eWeaponFire == WEAPON_FIRE_INSTANT_HIT || GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER)
-			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16FIRSTPERSON_34
-			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_FIRSTPERSONPEDONPC_41
+			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
+			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON_RUNABOUT
 			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
-			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER_RUN_AROUND
+			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER_RUNABOUT
 			&& CheckForPointBlankPeds(victimPed) != 0) {
 			ClearAimFlag();
 
@@ -9191,10 +9191,10 @@ CPed::ProcessControl(void)
 								if (!nearPed->bIsLooking && nearPed->m_nPedState != PED_ATTACK) {
 									int16 camMode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 									if (camMode != CCam::MODE_SNIPER
-										&& camMode != CCam::MODE_ROCKET
-										&& camMode != CCam::MODE_M16FIRSTPERSON_34
-										&& camMode != CCam::MODE_FIRSTPERSON
-										&& camMode != CCam::MODE_M16FIRSTPERSON_44
+										&& camMode != CCam::MODE_ROCKETLAUNCHER
+										&& camMode != CCam::MODE_M16_1STPERSON
+										&& camMode != CCam::MODE_1STPERSON
+										&& camMode != CCam::MODE_HELICANNON_1STPERSON
 										&& !TheCamera.Cams[TheCamera.ActiveCam].GetWeaponFirstPersonOn()) {
 
 										nearPed->SetLookFlag(this, true);
@@ -10333,7 +10333,7 @@ CPed::ProcessControl(void)
 						lbAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_LB);
 
 						if (lbAssoc &&
-							TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FIRSTPERSON
+							TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON
 							&& TheCamera.Cams[TheCamera.ActiveCam].DirectionWasLooking == LOOKING_LEFT) {
 							lbAssoc->blendDelta = -1000.0f;
 						}
@@ -10378,7 +10378,7 @@ CPed::ProcessControl(void)
 							lbAssoc->blendDelta = -4.0f;
 					} else {
 
-						if ((TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_FIRSTPERSON
+						if ((TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_1STPERSON
 							|| TheCamera.Cams[TheCamera.ActiveCam].DirectionWasLooking != LOOKING_LEFT)
 							&& (!lbAssoc || lbAssoc->blendAmount < 1.0f)) {
 							CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_LB, 4.0f);

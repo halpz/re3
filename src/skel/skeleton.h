@@ -180,6 +180,14 @@ enum RsKeyCodes
 	rsAPPS           = 1055,
 	
 	rsNULL           = 1056,
+
+	rsMOUSELEFTBUTTON      = 1,
+	rsMOUSMIDDLEBUTTON     = 2,
+	rsMOUSERIGHTBUTTON     = 3,
+	rsMOUSEWHEELUPBUTTON   = 4,
+	rsMOUSEWHEELDOWNBUTTON = 5,
+	rsMOUSEX1BUTTON        = 6,
+	rsMOUSEX2BUTTON        = 7,
 };
 typedef enum RsKeyCodes RsKeyCodes;
 

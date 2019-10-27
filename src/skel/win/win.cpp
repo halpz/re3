@@ -115,38 +115,11 @@ DWORD _dwMemAvailVideo;
 DWORD &_dwOperatingSystemVersion = *(DWORD*)0x70F290;
 
 RwUInt32 &gGameState = *(RwUInt32*)0x8F5838;
-
-enum eJoypadState
-{
-	JOYPAD_UNUSED,
-	JOYPAD_ATTACHED,
-};
-
-struct tJoy
-{
-	eJoypadState m_State;
-	bool m_bInitialised;
-	bool m_bHasAxisZ;
-	bool m_bHasAxisR;
-	char _pad0;
-	int32 m_nVendorID;
-	int32 m_nProductID;
-};
-
-class CJoySticks
-{
-public:
-	tJoy m_aJoys[2];
-	
-	CJoySticks();
-	void ClearJoyInfo(int joyID);
-};
-
-static CJoySticks AllValidWinJoys;
+CJoySticks AllValidWinJoys;
 
 CJoySticks::CJoySticks()
 {
-	for (int i = 0; i < _TODOCONST(2); i++)
+	for (int i = 0; i < MAX_JOYSTICKS; i++)
 	{
 		ClearJoyInfo(i);
 	}
@@ -154,7 +127,6 @@ CJoySticks::CJoySticks()
 
 void CJoySticks::ClearJoyInfo(int joyID)
 {
-	
 	m_aJoys[joyID].m_State = JOYPAD_UNUSED;
 	m_aJoys[joyID].m_bInitialised = false;
 	m_aJoys[joyID].m_bHasAxisZ = false;
@@ -641,14 +613,14 @@ psInitialise(void)
 	
 	GetVersionEx(&verInfo);
 	
-	_dwOperatingSystemVersion = 0;
+	_dwOperatingSystemVersion = OS_WIN95;
 	
 	if ( verInfo.dwPlatformId == VER_PLATFORM_WIN32_NT )
 	{
 		if ( verInfo.dwMajorVersion == 4 )
 		{
 			debug("Operating System is WinNT\n");
-			_dwOperatingSystemVersion = oS_WINNT;
+			_dwOperatingSystemVersion = OS_WINNT;
 		}
 		else if ( verInfo.dwMajorVersion == 5 )
 		{
@@ -2337,12 +2309,12 @@ HRESULT CapturePad(RwInt32 padID)
 	if( FAILED( hr = (*pPad)->GetDeviceState( sizeof(DIJOYSTATE2), &js ) ) )
 		return hr; // The device should have been acquired during the Poll()
 	
-	if ( ControlsManager.firstCapture == true )
+	if ( ControlsManager.m_bFirstCapture == true )
 	{
 		memcpy(&ControlsManager.m_OldState, &js, sizeof(DIJOYSTATE2));
 		memcpy(&ControlsManager.m_NewState, &js, sizeof(DIJOYSTATE2));
 		
-		ControlsManager.firstCapture = false;
+		ControlsManager.m_bFirstCapture = false;
 	}
 	else
 	{
