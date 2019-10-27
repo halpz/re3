@@ -97,6 +97,9 @@ public:
 	static void AddJetExplosion(CVector const &vecPos, float fPower, float fSize);
 	static void AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatrix);
 
+#ifndef MASTER
+	static bool bEnableBannedParticles;
+#endif
 };
 
 VALIDATE_SIZE(CParticle, 0x68);

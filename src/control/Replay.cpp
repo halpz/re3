@@ -1036,7 +1036,7 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 	bAllowLookAroundCam = true;
 	bPlayingBackFromFile = false;
 	OldRadioStation = DMAudio.GetRadioInCar();
-	DMAudio.ChangeMusicMode(0);
+	DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
 	DMAudio.SetEffectsFadeVol(0);
 	DMAudio.SetMusicFadeVol(0);
 	int current;
@@ -1282,9 +1282,9 @@ void CReplay::RestoreStuffFromMem(void)
 	}
 	delete[] pPedAnims;
 	pPedAnims = nil;
-	DMAudio.ChangeMusicMode(0);
+	DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
 	DMAudio.SetRadioInCar(OldRadioStation);
-	DMAudio.ChangeMusicMode(1);
+	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 }
 #endif
 

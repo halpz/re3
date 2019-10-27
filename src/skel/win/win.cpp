@@ -2134,7 +2134,7 @@ _WinMain(HINSTANCE instance,
 		CPad::ResetCheats();
 		CPad::StopPadsShaking();
 		
-		DMAudio.ChangeMusicMode(_TODOCONST(3));
+		DMAudio.ChangeMusicMode(MUSICMODE_OFF);
 		
 		CTimer::Stop();
 		
@@ -2142,7 +2142,7 @@ _WinMain(HINSTANCE instance,
 		{
 			CGame::ShutDownForRestart();
 			CGame::InitialiseWhenRestarting();
-			DMAudio.ChangeMusicMode(_TODOCONST(1));
+			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
 			FrontEndMenuManager.m_bLoadingSavedGame = false;
 		}

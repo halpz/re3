@@ -94,6 +94,8 @@ class CControllerState;
 #define JOY_BUTTONS 16
 #define MAX_BUTTONS (JOY_BUTTONS+1)
 
+#define ACTIONNAME_LENGTH 40
+
 class CControllerConfigManager
 {
 public:

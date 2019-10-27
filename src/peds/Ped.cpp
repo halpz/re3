@@ -45,7 +45,6 @@
 #include "CarAI.h"
 #include "Zones.h"
 #include "Cranes.h"
-#include "MusicManager.h"
 #include "Timecycle.h"
 #include "ParticleObject.h"
 #include "Floater.h"
@@ -57,13 +56,13 @@ WRAPPER void CPed::StartFightDefend(uint8, uint8, uint8) { EAXJMP(0x4E7780); }
 WRAPPER void CPed::ServiceTalking(void) { EAXJMP(0x4E5870); }
 WRAPPER void CPed::UpdatePosition(void) { EAXJMP(0x4C7A00); }
 WRAPPER void CPed::WanderPath(void) { EAXJMP(0x4D28D0); }
-WRAPPER void CPed::SeekCar(void) { EAXJMP(0x4D3F90); }
 WRAPPER void CPed::UpdateFromLeader(void) {	EAXJMP(0x4D8F30); }
-WRAPPER int CPed::ScanForThreats(void) { EAXJMP(0x4C5FE0); }
 WRAPPER void CPed::SetEnterCar_AllClear(CVehicle*, uint32, uint32) { EAXJMP(0x4E0A40); }
 WRAPPER bool CPed::WarpPedToNearEntityOffScreen(CEntity*) { EAXJMP(0x4E5570); }
 WRAPPER void CPed::SetObjective(eObjective, CVector) { EAXJMP(0x4D8A90); }
 WRAPPER void CPed::SetObjective(eObjective, CVector, float) { EAXJMP(0x4D8770); }
+WRAPPER void CPed::WarpPedIntoCar(CVehicle*) { EAXJMP(0x4D7D20); }
+WRAPPER void CPed::SetCarJack(CVehicle*) { EAXJMP(0x4E0220); }
 
 #define FEET_OFFSET 1.04f
 
@@ -471,9 +470,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bIsLanding = false;
 	bIsRunning = false;
 	bHitSomethingLastFrame = false;
-	m_ped_flagB80 = false;
+	bVehEnterDoorIsBlocked = false;
 
-	m_ped_flagC1 = false;
+	bCanPedEnterSeekedCar = false;
 	bRespondsToThreats = true;
 	bRenderPedInCar = true;
 	bChangedSeat = false;
@@ -3245,7 +3244,7 @@ CPed::CheckForGunShots(void)
 	int event;
 	if (CEventList::FindClosestEvent(EVENT_GUNSHOT, GetPosition(), &event)) {
 		if (gaEvent[event].entityType == EVENT_ENTITY_PED) {
-			// Is that a bug?!? (same on VC)
+			// Probably due to we don't want peds to go gunshot area? (same on VC)
 			m_ped_flagD2 = false;
 			return CPools::GetPed(gaEvent[event].entityRef);
 		}
@@ -8571,11 +8570,15 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 		Say(SOUND_PED_DEFEND);
 	}
 
-#if defined FIX_BUGS || defined VC_PED_PORTS
+#ifdef VC_PED_PORTS
 	// Killing gang members with car wasn't triggering a fight, until now... Taken from VC.
 	if (IsGangMember()) {
 		CPed *driver = car->pDriver;
-		if (driver && driver->IsPlayer()) {
+		if (driver && driver->IsPlayer()
+#ifdef FIX_BUGS
+			&& (CharCreatedBy != MISSION_CHAR || bRespondsToThreats) && (!m_leader || m_leader != driver)
+#endif
+			) {
 			RegisterThreatWithGangPeds(driver);
 		}
 	}
@@ -9511,7 +9514,7 @@ CPed::ProcessControl(void)
 								|| m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER)) {
 
 							if (collidingVeh != m_pCurrentPhysSurface || IsPlayer()) {
-								if (!m_ped_flagB80) {
+								if (!bVehEnterDoorIsBlocked) {
 									if (collidingVeh->m_status != STATUS_PLAYER || CharCreatedBy == MISSION_CHAR) {
 
 										// VC calls SetDirectionToWalkAroundVehicle instead if ped is in PED_SEEK_CAR.
@@ -9697,7 +9700,7 @@ CPed::ProcessControl(void)
 								}
 							}
 
-						} else if (!m_ped_flagB80) {
+						} else if (!bVehEnterDoorIsBlocked) {
 							if (collidingVeh->m_status != STATUS_PLAYER || CharCreatedBy == MISSION_CHAR) {
 
 								SetDirectionToWalkAroundObject(collidingVeh);
@@ -12163,7 +12166,7 @@ CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 
 		// ?!? I think it's absurd to use this unless another function like SeekCar finds next pos. with it and we're trying to simulate it's behaviour.
 		// On every run it returns another pos. for ped, with same distance to the veh.
-		// Sequence of positions are not guarenteed, it depends on global pos. (So sometimes it returns positions to make ped draw circle, sometimes don't)
+		// Sequence of positions are not guaranteed, it depends on global pos. (So sometimes it returns positions to make ped draw circle, sometimes don't)
 		helperPos = veh->GetMatrix() * helperPos;
 
 		float vehForwardHeading = veh->GetForward().Heading();
@@ -12357,7 +12360,7 @@ CPed::ProcessObjective(void)
 						SetLookTimer(CGeneral::GetRandomNumberInRange(500, 1500));
 
 						// Second condition is pointless and isn't there in Mobile.
-						if (threatType == 0x100000 || (threatType == 0x800000 && m_threatEntity) || m_threatEntity) {
+						if (threatType == PED_FLAG_GUN || (threatType == PED_FLAG_EXPLOSION && m_threatEntity) || m_threatEntity) {
 							if (m_threatEntity->IsPed())
 								SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, m_threatEntity);
 						}
@@ -13029,7 +13032,7 @@ CPed::ProcessObjective(void)
 						} else {
 							SetSeekBoatPosition(m_carInObjective);
 						}
-						if (m_nMoveState == PEDMOVE_STILL && !m_ped_flagB80)
+						if (m_nMoveState == PEDMOVE_STILL && !bVehEnterDoorIsBlocked)
 							SetMoveState(PEDMOVE_RUN);
 
 						if (m_carInObjective && m_carInObjective->m_fHealth > 0.0f) {
@@ -15236,6 +15239,505 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 	}
 }
 
+void
+CPed::ScanForInterestingStuff(void)
+{
+	if (!IsPedInControl())
+		return;
+
+	if (m_objective != OBJECTIVE_NONE)
+		return;
+
+	if (CharCreatedBy == MISSION_CHAR)
+		return;
+
+	LookForSexyPeds();
+	LookForSexyCars();
+	if (LookForInterestingNodes())
+		return;
+
+	if (m_nPedType == PEDTYPE_CRIMINAL && m_hitRecoverTimer < CTimer::GetTimeInMilliseconds()) {
+		if (CGeneral::GetRandomNumber() % 100 >= 10) {
+			if (m_objective != OBJECTIVE_MUG_CHAR && !(CGeneral::GetRandomNumber() & 7)) {
+				CPed *charToMug = nil;
+				for (int i = 0; i < m_numNearPeds; ++i) {
+					CPed *nearPed = m_nearPeds[i];
+
+					if ((nearPed->GetPosition() - GetPosition()).MagnitudeSqr() > 49.0f)
+						break;
+
+					if ((nearPed->m_nPedType == PEDTYPE_CIVFEMALE || nearPed->m_nPedType == PEDTYPE_CIVMALE
+						|| nearPed->m_nPedType == PEDTYPE_CRIMINAL || nearPed->m_nPedType == PEDTYPE_UNUSED1
+						|| nearPed->m_nPedType == PEDTYPE_PROSTITUTE)
+						&& nearPed->CharCreatedBy != MISSION_CHAR
+						&& nearPed->IsPedShootable()
+						&& nearPed->m_objective != OBJECTIVE_MUG_CHAR) {
+						charToMug = nearPed;
+						break;
+					}
+				}
+				if (charToMug)
+					SetObjective(OBJECTIVE_MUG_CHAR, charToMug);
+
+				m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 5000;
+			}
+		} else {
+			int mostExpensiveVehAround = -1;
+			int bestMonetaryValue = 0;
+
+			CVector pos = GetPosition();
+			int16 lastVehicle;
+			CEntity *vehicles[8];
+			CWorld::FindObjectsInRange(pos, 10.0f, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
+
+			for (int i = 0; i < lastVehicle; i++) {
+				CVehicle* veh = (CVehicle*)vehicles[i];
+
+				if (veh->VehicleCreatedBy != MISSION_VEHICLE) {
+					if (veh->m_vecMoveSpeed.Magnitude() <= 0.1f && veh->IsVehicleNormal()
+						&& veh->IsCar() && bestMonetaryValue < veh->pHandling->nMonetaryValue) {
+						mostExpensiveVehAround = i;
+						bestMonetaryValue = veh->pHandling->nMonetaryValue;
+					}
+				}
+			}
+			if (bestMonetaryValue > 2000 && mostExpensiveVehAround != -1 && vehicles[mostExpensiveVehAround]) {
+				SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, vehicles[mostExpensiveVehAround]);
+				m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 5000;
+				return;
+			}
+			m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 5000;
+		}
+	}
+
+	if (m_nPedState == PEDTYPE_CIVFEMALE) {
+#ifndef VC_PED_PORTS
+		if (CTimer::GetTimeInMilliseconds() > m_standardTimer) {
+
+			// += 2 is weird
+			for (int i = 0; i < m_numNearPeds; i += 2) {
+				if (m_nearPeds[i]->m_nPedState == PED_WANDER_PATH && WillChat(m_nearPeds[i])) {
+					if (CGeneral::GetRandomNumberInRange(0, 100) >= 100)
+						m_standardTimer = CTimer::GetTimeInMilliseconds() + 30000;
+					else {
+						if ((GetPosition() - m_nearPeds[i]->GetPosition()).Magnitude() >= 1.8f) {
+							m_standardTimer = CTimer::GetTimeInMilliseconds() + 30000;
+						} else if (CanSeeEntity(m_nearPeds[i], DEGTORAD(60.0f))) {
+							int time = CGeneral::GetRandomNumber() % 4000 + 10000;
+							SetChat(m_nearPeds[i], time);
+							m_nearPeds[i]->SetChat(this, time);
+							return;
+						}
+					}
+				}
+			}
+		}
+#else
+		if (CGeneral::GetRandomNumberInRange(0.0f, 1.0f) >= 0.5f) {
+			m_standardTimer = CTimer::GetTimeInMilliseconds() + 200;
+		} else {
+			if (CTimer::GetTimeInMilliseconds() > m_standardTimer) {
+				for (int i = 0; i < m_numNearPeds; i ++) {
+					if (m_nearPeds[i]->m_nPedState == PED_WANDER_PATH) {
+						if ((GetPosition() - m_nearPeds[i]->GetPosition()).Magnitude() < 1.8f
+							&& CanSeeEntity(m_nearPeds[i], DEGTORAD(60.0f)
+							&& m_nearPeds[i]->CanSeeEntity(this, DEGTORAD(60.0f)))
+							&& WillChat(m_nearPeds[i])) {
+
+							int time = CGeneral::GetRandomNumber() % 4000 + 10000;
+							SetChat(m_nearPeds[i], time);
+							m_nearPeds[i]->SetChat(this, time);
+							return;
+						}
+					}
+				}
+			}
+		}
+#endif
+	}
+
+	// Parts below aren't there in VC, they're in somewhere else.
+	if (!CGame::noProstitutes && m_nPedType == PEDTYPE_PROSTITUTE && CharCreatedBy != MISSION_CHAR
+		&& m_objectiveTimer < CTimer::GetTimeInMilliseconds() && !CTheScripts::IsPlayerOnAMission()) {
+
+		CVector pos = GetPosition();
+		int16 lastVehicle;
+		CEntity* vehicles[8];
+		CWorld::FindObjectsInRange(pos, 15.0f, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
+
+		for (int i = 0; i < lastVehicle; i++) {
+			CVehicle* veh = (CVehicle*)vehicles[i];
+
+			if (veh->IsVehicleNormal()) {
+				if (veh->IsCar()) {
+					if ((GetPosition() - veh->GetPosition()).Magnitude() < 5.0f && veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, nil)) {
+						SetObjective(OBJECTIVE_SOLICIT, veh);
+						Say(SOUND_PED_SOLICIT);
+						return;
+					}
+				}
+			}
+		}
+	}
+	if (m_nPedType == PEDTYPE_CIVMALE || m_nPedType == PEDTYPE_CIVFEMALE) {
+		CVector pos = GetPosition();
+		int16 lastVehicle;
+		CEntity* vehicles[8];
+		CWorld::FindObjectsInRange(pos, 15.0f, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
+
+		for (int i = 0; i < lastVehicle; i++) {
+			CVehicle* veh = (CVehicle*)vehicles[i];
+
+			if (veh->m_modelIndex == MI_MRWHOOP) {
+				if (veh->m_status != STATUS_ABANDONED && veh->m_status != STATUS_WRECKED) {
+					if ((GetPosition() - veh->GetPosition()).Magnitude() < 5.0f) {
+						SetObjective(OBJECTIVE_BUY_ICE_CREAM, veh);
+						return;
+					}
+				}
+			}
+		}
+	}
+}
+
+uint32
+CPed::ScanForThreats(void)
+{
+	int fearFlags = m_fearFlags;
+	CVector ourPos = GetPosition();
+	float closestPedDist = 60.0f;
+	CVector2D explosionPos = GetPosition();
+	if (fearFlags & PED_FLAG_EXPLOSION && CheckForExplosions(explosionPos)) {
+		m_eventOrThreat = explosionPos;
+		return PED_FLAG_EXPLOSION;
+	}
+	
+	CPed *shooter = nil;
+	if ((fearFlags & PED_FLAG_GUN) && (shooter = CheckForGunShots()) && (m_nPedType != shooter->m_nPedType || m_nPedType == PEDTYPE_CIVMALE || m_nPedType == PEDTYPE_CIVFEMALE)) {
+		if (!IsGangMember()) {
+			m_threatEntity = shooter;
+			m_threatEntity->RegisterReference((CEntity **) &m_threatEntity);
+			return PED_FLAG_GUN;
+		}
+
+		if (CPedType::GetFlag(shooter->m_nPedType) & fearFlags) {
+			m_threatEntity = shooter;
+			m_threatEntity->RegisterReference((CEntity **) &m_threatEntity);
+			return CPedType::GetFlag(shooter->m_nPedType);
+		}
+	}
+
+	CPed *deadPed = nil;
+	if (fearFlags & PED_FLAG_DEADPEDS && CharCreatedBy != MISSION_CHAR
+		&& (deadPed = CheckForDeadPeds()) != nil && (deadPed->GetPosition() - ourPos).MagnitudeSqr() < 400.0f) {
+		m_pEventEntity = deadPed;
+		m_pEventEntity->RegisterReference((CEntity **) &m_pEventEntity);
+		return PED_FLAG_DEADPEDS;
+	} else {
+		uint32 flagsOfSomePed = 0;
+
+		CPed *pedToFearFrom = nil;
+#ifndef VC_PED_PORTS
+		for (int i = 0; i < m_numNearPeds; i++) {
+			if (CharCreatedBy != RANDOM_CHAR || m_nearPeds[i]->CharCreatedBy != MISSION_CHAR || m_nearPeds[i]->IsPlayer()) {
+				CPed *nearPed = m_nearPeds[i];
+
+				// BUG: WTF Rockstar?! Putting this here will result in returning the flags of farthest ped to us, since m_nearPeds is sorted by distance.
+				// Fixed at the bottom of the function.
+				flagsOfSomePed = CPedType::GetFlag(nearPed->m_nPedType);
+
+				if (CPedType::GetFlag(nearPed->m_nPedType) & fearFlags) {
+					if (nearPed->m_fHealth > 0.0f && OurPedCanSeeThisOne(m_nearPeds[i])) {
+						// FIX: Taken from VC
+#ifdef FIX_BUGS
+						float nearPedDistSqr = (nearPed->GetPosition() - ourPos).MagnitudeSqr2D();
+#else
+						float nearPedDistSqr = (CVector2D(ourPos) - explosionPos).MagnitudeSqr();
+#endif
+						if (sq(closestPedDist) > nearPedDistSqr) {
+							closestPedDist = Sqrt(nearPedDistSqr);
+							pedToFearFrom = m_nearPeds[i];
+						}
+					}
+				}
+			}
+		}
+#else
+		bool weSawOurEnemy = false;
+		bool weMaySeeOurEnemy = false;
+		float closestEnemyDist = 60.0f;
+		if ((CTimer::GetFrameCounter() + (uint8)m_randomSeed + 16) & 4) {
+
+			for (int i = 0; i < m_numNearPeds; ++i) {
+				if (CharCreatedBy == RANDOM_CHAR && m_nearPeds[i]->CharCreatedBy == MISSION_CHAR && !m_nearPeds[i]->IsPlayer()) {
+						continue;
+				}
+
+				// BUG: Explained at the same occurence of this bug above. Fixed at the bottom of the function.
+				flagsOfSomePed = CPedType::GetFlag(m_nearPeds[i]->m_nPedType);
+
+				if (flagsOfSomePed & fearFlags) {
+					if (m_nearPeds[i]->m_fHealth > 0.0f) {
+
+						// VC also has ability to include objects to line of sight check here (via last bit of flagsL)
+						if (OurPedCanSeeThisOne(m_nearPeds[i])) {
+							if (m_nearPeds[i]->m_nPedState == PED_ATTACK) {
+								if (m_nearPeds[i]->m_pedInObjective == this) {
+
+									float enemyDistSqr = (m_nearPeds[i]->GetPosition() - ourPos).MagnitudeSqr2D();
+									if (sq(closestEnemyDist) > enemyDistSqr) {
+										float enemyDist = Sqrt(enemyDistSqr);
+										weSawOurEnemy = true;
+										closestPedDist = enemyDist;
+										closestEnemyDist = enemyDist;
+										pedToFearFrom = m_nearPeds[i];
+									}
+								}
+							} else {
+								float nearPedDistSqr = (m_nearPeds[i]->GetPosition() - ourPos).MagnitudeSqr2D();
+								if (sq(closestPedDist) > nearPedDistSqr && !weSawOurEnemy) {
+									closestPedDist = Sqrt(nearPedDistSqr);
+									pedToFearFrom = m_nearPeds[i];
+								}
+							}
+						} else if (!weSawOurEnemy) {
+							CPed *nearPed = m_nearPeds[i];
+							if (nearPed->m_nPedState == PED_ATTACK) {
+								CColPoint foundCol;
+								CEntity *foundEnt;
+
+								// We don't see him yet but he's behind a ped, vehicle or object
+								// VC also has ability to include objects to line of sight check here (via last bit of flagsL)
+								if (!CWorld::ProcessLineOfSight(ourPos, nearPed->GetPosition(), foundCol, foundEnt,
+									true, false, false, false, false, false, false)) {
+
+									if (nearPed->m_pedInObjective == this) {
+										float enemyDistSqr = (m_nearPeds[i]->GetPosition() - ourPos).MagnitudeSqr2D();
+										if (sq(closestEnemyDist) > enemyDistSqr) {
+											float enemyDist = Sqrt(enemyDistSqr);
+											weMaySeeOurEnemy = true;
+											closestPedDist = enemyDist;
+											closestEnemyDist = enemyDist;
+											pedToFearFrom = m_nearPeds[i];
+										}
+									} else if (!nearPed->GetWeapon()->IsTypeMelee() && !weMaySeeOurEnemy) {
+										float nearPedDistSqr = (m_nearPeds[i]->GetPosition() - ourPos).MagnitudeSqr2D();
+										if (sq(closestPedDist) > nearPedDistSqr) {
+											weMaySeeOurEnemy = true;
+											closestPedDist = Sqrt(nearPedDistSqr);
+											pedToFearFrom = m_nearPeds[i];
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+#endif
+		int16 lastVehicle;
+		CEntity* vehicles[8];
+		CWorld::FindObjectsInRange(ourPos, 20.0f, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
+		CVehicle* foundVeh = nil;
+		for (int i = 0; i < lastVehicle; i++) {
+			CVehicle* nearVeh = (CVehicle*)vehicles[i];
+
+			CPed *driver = nearVeh->pDriver;
+			if (driver) {
+
+				// BUG: Same bug as above. Fixed at the bottom of function.
+				flagsOfSomePed = CPedType::GetFlag(driver->m_nPedType);
+				if (CPedType::GetFlag(driver->m_nPedType) & fearFlags) {
+					if (driver->m_fHealth > 0.0f && OurPedCanSeeThisOne(nearVeh->pDriver)) {
+						// FIX: Taken from VC
+#ifdef FIX_BUGS
+						float driverDistSqr = (driver->GetPosition() - ourPos).MagnitudeSqr2D();
+#else
+						float driverDistSqr = (CVector2D(ourPos) - explosionPos).MagnitudeSqr();
+#endif
+						if (sq(closestPedDist) > driverDistSqr) {
+							closestPedDist = Sqrt(driverDistSqr);
+							pedToFearFrom = nearVeh->pDriver;
+						}
+					}
+				}
+			}
+		}
+		m_threatEntity = pedToFearFrom;
+		if (m_threatEntity)
+			m_threatEntity->RegisterReference((CEntity **) &m_threatEntity);
+
+#ifdef FIX_BUGS
+		if (pedToFearFrom)
+			flagsOfSomePed = CPedType::GetFlag(((CPed*)m_threatEntity)->m_nPedType);
+		else
+			flagsOfSomePed = 0;
+#endif
+
+		return flagsOfSomePed;
+	}
+}
+
+void
+CPed::SeekCar(void)
+{
+	CVehicle *vehToSeek = m_carInObjective;
+	CVector dest(0.0f, 0.0f, 0.0f);
+	if (!vehToSeek) {
+		RestorePreviousState();
+		return;
+	}
+
+	if (m_objective != OBJECTIVE_ENTER_CAR_AS_PASSENGER) {
+		if (m_vehEnterType && m_objective != OBJECTIVE_ENTER_CAR_AS_DRIVER) {
+			if (IsRoomToBeCarJacked()) {
+				dest = GetPositionToOpenCarDoor(vehToSeek, m_vehEnterType);
+			} else if (m_nPedType == PEDTYPE_COP) {
+				dest = GetPositionToOpenCarDoor(vehToSeek, CAR_DOOR_RF);
+			} else {
+				SetMoveState(PEDMOVE_STILL);
+			}
+		} else
+			GetNearestDoor(vehToSeek, dest);
+	} else {
+		if (m_hitRecoverTimer > CTimer::GetTimeInMilliseconds()) {
+			SetMoveState(PEDMOVE_STILL);
+			return;
+		}
+		if (vehToSeek->m_modelIndex == MI_COACH) {
+			GetNearestDoor(vehToSeek, dest);
+		} else {
+			if (vehToSeek->IsTrain()) {
+				if (vehToSeek->m_status != STATUS_TRAIN_NOT_MOVING) {
+					RestorePreviousObjective();
+					RestorePreviousState();
+					return;
+				}
+				if (!GetNearestTrainDoor(vehToSeek, dest)) {
+					RestorePreviousObjective();
+					RestorePreviousState();
+					return;
+				}
+			} else {
+				if (!GetNearestPassengerDoor(vehToSeek, dest)) {
+					if (vehToSeek->m_nNumPassengers == vehToSeek->m_nNumMaxPassengers) {
+						RestorePreviousObjective();
+						RestorePreviousState();
+					} else {
+						SetMoveState(PEDMOVE_STILL);
+					}
+					bVehEnterDoorIsBlocked = true;
+					return;
+				}
+				bVehEnterDoorIsBlocked = false;
+			}
+		}
+	}
+
+	if (dest.x == 0.0f && dest.y == 0.0f) {
+		if ((!IsPlayer() && CharCreatedBy != MISSION_CHAR) || vehToSeek->VehicleCreatedBy != MISSION_VEHICLE || vehToSeek->pDriver) {
+			RestorePreviousState();
+			if (IsPlayer()) {
+				ClearObjective();
+			} else if (CharCreatedBy == RANDOM_CHAR) {
+				m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 30000;
+			}
+			SetMoveState(PEDMOVE_STILL);
+			TheCamera.ClearPlayerWeaponMode();
+			CCarCtrl::RemoveFromInterestingVehicleList(vehToSeek);
+			return;
+		}
+		dest = vehToSeek->GetPosition();
+		if (bCollidedWithMyVehicle) {
+			WarpPedIntoCar(m_pMyVehicle);
+			return;
+		}
+	}
+	bool foundBetterPosToSeek = PossiblyFindBetterPosToSeekCar(&dest, vehToSeek);
+	m_vecSeekPos = dest;
+	float distToDest = (m_vecSeekPos - GetPosition()).MagnitudeSqr();
+#ifndef VC_PED_PORTS
+	if (bIsRunning)
+		SetMoveState(PEDMOVE_RUN);
+#else
+	if (bIsRunning ||
+		vehToSeek->pDriver && distToDest > 4.0f && (Abs(vehToSeek->m_vecMoveSpeed.x) > 0.01f || Abs(vehToSeek->m_vecMoveSpeed.y) > 0.01f))
+		SetMoveState(PEDMOVE_RUN);
+#endif
+	else if (distToDest < 4.0f)
+		SetMoveState(PEDMOVE_WALK);
+
+	if (distToDest >= 1.0f)
+		bCanPedEnterSeekedCar = false;
+	else if (2.0f * vehToSeek->GetColModel()->boundingBox.max.x > distToDest)
+		bCanPedEnterSeekedCar = true;
+
+	if (vehToSeek->m_nGettingInFlags & GetCarDoorFlag(m_vehEnterType))
+		bVehEnterDoorIsBlocked = true;
+	else
+		bVehEnterDoorIsBlocked = false;
+
+	if (Seek()) {
+		if (!foundBetterPosToSeek) {
+			if (1.5f + GetPosition().z > dest.z && GetPosition().z - 0.5f < dest.z) {
+				if (vehToSeek->IsTrain()) {
+					SetEnterTrain(vehToSeek, m_vehEnterType);
+				} else {
+					m_fRotationCur = m_fRotationDest;
+					if (!bVehEnterDoorIsBlocked) {
+						vehToSeek->bIsStatic = false;
+						if (m_objective == OBJECTIVE_SOLICIT) {
+							SetSolicit(1000);
+						} else if (m_objective == OBJECTIVE_BUY_ICE_CREAM) {
+							SetBuyIceCream();
+						} else if (vehToSeek->m_nNumGettingIn < vehToSeek->m_nNumMaxPassengers + 1
+							&& vehToSeek->CanPedEnterCar()) {
+
+							switch (vehToSeek->m_status) {
+								case STATUS_PLAYER:
+								case STATUS_SIMPLE:
+								case STATUS_PHYSICS:
+								case STATUS_PLAYER_DISABLED:
+									if (!vehToSeek->bIsBus && (!m_leader || m_leader != vehToSeek->pDriver) &&
+										(m_vehEnterType == CAR_DOOR_LF && vehToSeek->pDriver || m_vehEnterType == CAR_DOOR_RF && vehToSeek->pPassengers[0] || m_vehEnterType == CAR_DOOR_LR && vehToSeek->pPassengers[1] || m_vehEnterType == CAR_DOOR_RR && vehToSeek->pPassengers[2])) {
+										SetCarJack(vehToSeek);
+										if (m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER && m_vehEnterType != CAR_DOOR_LF)
+											vehToSeek->pDriver->bFleeAfterExitingCar = true;
+									} else {
+										SetEnterCar(vehToSeek, m_vehEnterType);
+									}
+									break;
+								case STATUS_ABANDONED:
+									if (m_vehEnterType == CAR_DOOR_RF && vehToSeek->pPassengers[0]) {
+										if (vehToSeek->pPassengers[0]->m_ped_flagF4) {
+											if (IsPlayer())
+												CPed::SetEnterCar(vehToSeek, m_vehEnterType);
+										} else {
+											SetCarJack(vehToSeek);
+										}
+									} else {
+										SetEnterCar(vehToSeek, m_vehEnterType);
+									}
+									break;
+								case STATUS_WRECKED:
+									SetIdle();
+									break;
+								default:
+									return;
+							}
+						} else {
+							RestorePreviousState();
+						}
+					} else {
+						SetMoveState(PEDMOVE_STILL);
+					}
+				}
+			}
+		}
+	}
+}
+
 class CPed_ : public CPed
 {
 public:
@@ -15451,4 +15953,7 @@ STARTPATCHES
 	InjectHook(0x4D6620, &CPed::SetSolicit, PATCH_JUMP);
 	InjectHook(0x4D2EA0, &CPed::SetFollowPath, PATCH_JUMP);
 	InjectHook(0x4E1010, &CPed::SetExitCar, PATCH_JUMP);
+	InjectHook(0x4C5FE0, &CPed::ScanForThreats, PATCH_JUMP);
+	InjectHook(0x4C6C10, &CPed::ScanForInterestingStuff, PATCH_JUMP);
+	InjectHook(0x4D3F90, &CPed::SeekCar, PATCH_JUMP);
 ENDPATCHES

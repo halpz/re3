@@ -637,6 +637,7 @@ void CHud::Draw()
 		/*
 			DrawOnScreenTimer
 		*/
+		
 		wchar sTimer[16];
 
 		if (!CUserDisplay::OnscnTimer.m_sEntries[0].m_bTimerProcessed)
@@ -697,7 +698,7 @@ void CHud::Draw()
 				if (CTimer::GetFrameCounter() & 4 || !CounterFlashTimer) {
 					if (CUserDisplay::OnscnTimer.m_sEntries[0].m_nType) {
 						CSprite2d::DrawRect(CRect(SCREEN_SCALE_FROM_RIGHT(27.0f) - SCREEN_SCALE_X(100.0f) / 2 + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(8.0f), SCREEN_SCALE_FROM_RIGHT(27.0f) + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(11.0f) + SCREEN_SCALE_Y(8.0f)), CRGBA(0, 106, 164, 80));
-						CSprite2d::DrawRect(CRect(SCREEN_SCALE_FROM_RIGHT(27.0f) - SCREEN_SCALE_X(100.0f) / 2 + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(8.0f), SCREEN_SCALE_X(atoi(CUserDisplay::OnscnTimer.m_sEntries[0].m_bCounterBuffer)) / 2 + SCREEN_SCALE_FROM_RIGHT(27.0f) - SCREEN_SCALE_X(100.0f) / 2 + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(11.0f) + SCREEN_SCALE_Y(8.0f)), CRGBA(0, 106, 164, 255));
+						CSprite2d::DrawRect(CRect(SCREEN_SCALE_FROM_RIGHT(27.0f) - SCREEN_SCALE_X(100.0f) / 2 + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(8.0f), SCREEN_SCALE_X(atoi(CUserDisplay::OnscnTimer.m_sEntries[0].m_bCounterBuffer)) / 2 + SCREEN_SCALE_FROM_RIGHT(27.0f + 50.0f) + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(11.0f) + SCREEN_SCALE_Y(8.0f)), CRGBA(0, 106, 164, 255));
 					} else {
 						AsciiToUnicode(CUserDisplay::OnscnTimer.m_sEntries[0].m_bCounterBuffer, sTimer);
 						CFont::SetPropOn();

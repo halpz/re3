@@ -127,20 +127,14 @@ public:
 	}
 	void Scale(float scale)
 	{
-		// GTA treats this as 4x4 floats
-		m_matrix.right.x *= scale;
-		m_matrix.right.y *= scale;
-		m_matrix.right.z *= scale;
-		m_matrix.up.x *= scale;
-		m_matrix.up.y *= scale;
-		m_matrix.up.z *= scale;
-		m_matrix.at.x *= scale;
-		m_matrix.at.y *= scale;
-		m_matrix.at.z *= scale;
-		m_matrix.pos.x *= scale;
-		m_matrix.pos.y *= scale;
-		m_matrix.pos.z *= scale;
-		m_matrix.flags = 0;
+		float *pFloatMatrix = (float*)&m_matrix;
+		for (int i = 0; i < 3; i++)
+#ifdef FIX_BUGS // BUGFIX from VC
+			for (int j = 0; j < 3; j++)
+#else
+			for (int j = 0; j < 4; j++)
+#endif
+				pFloatMatrix[i * 4 + j] *= scale;
 	}
 
 
@@ -255,7 +249,15 @@ public:
 CMatrix &Invert(const CMatrix &src, CMatrix &dst);
 CVector operator*(const CMatrix &mat, const CVector &vec);
 CMatrix operator*(const CMatrix &m1, const CMatrix &m2);
-CVector MultiplyInverse(const CMatrix &mat, const CVector &vec);
+inline CVector MultiplyInverse(const CMatrix &mat, const CVector &vec)
+{
+	CVector v(vec.x - mat.m_matrix.pos.x, vec.y - mat.m_matrix.pos.y, vec.z - mat.m_matrix.pos.z);
+	return CVector(
+		mat.m_matrix.right.x * v.x + mat.m_matrix.right.y * v.y + mat.m_matrix.right.z * v.z,
+		mat.m_matrix.up.x * v.x + mat.m_matrix.up.y * v.y + mat.m_matrix.up.z * v.z,
+		mat.m_matrix.at.x * v.x + mat.m_matrix.at.y * v.y + mat.m_matrix.at.z * v.z);
+}
+
 const CVector Multiply3x3(const CMatrix &mat, const CVector &vec);
 const CVector Multiply3x3(const CVector &vec, const CMatrix &mat);
 

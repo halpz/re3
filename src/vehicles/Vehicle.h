@@ -191,7 +191,7 @@ public:
 	uint8 m_bRainAudioCounter;
 	uint8 m_bRainSamplesCounter;
 	uint8 m_nCarHornTimer;
-	int8 field_22D;
+	int8 field_22D; // last horn?
 	bool m_bSirenOrAlarm;
 	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
@@ -286,7 +286,7 @@ class cTransmission;
 class cVehicleParams
 {
 public:
-	char m_bDistanceCalculated;
+	uint8 m_bDistancECalculated;
 	char gap_1[3];
 	float m_fDistance;
 	CVehicle *m_pVehicle;

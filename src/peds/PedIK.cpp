@@ -10,11 +10,11 @@ WRAPPER void CPedIK::ExtractYawAndPitchLocal(RwMatrixTag*, float*, float*) { EAX
 WRAPPER void CPedIK::ExtractYawAndPitchWorld(RwMatrixTag*, float*, float*) { EAXJMP(0x4ED140); }
 WRAPPER bool CPedIK::RestoreLookAt(void) { EAXJMP(0x4ED810); }
 
-// TODO: These are hardcoded into exe, reverse it.
-LimbMovementInfo &CPedIK::ms_torsoInfo = *(LimbMovementInfo*)0x5F9F8C;
-LimbMovementInfo &CPedIK::ms_headInfo = *(LimbMovementInfo*)0x5F9F5C;
-LimbMovementInfo &CPedIK::ms_upperArmInfo = *(LimbMovementInfo*)0x5F9FA4;
-LimbMovementInfo &CPedIK::ms_lowerArmInfo = *(LimbMovementInfo*)0x5F9FBC;
+LimbMovementInfo CPedIK::ms_torsoInfo = { DEGTORAD(50.0f), DEGTORAD(-50.0f), DEGTORAD(15.0f), DEGTORAD(45.0f), DEGTORAD(-45.0f), DEGTORAD(7.0f) };
+LimbMovementInfo CPedIK::ms_headInfo = { DEGTORAD(90.0f), DEGTORAD(-90.0f), DEGTORAD(10.0f), DEGTORAD(45.0f), DEGTORAD(-45.0f), DEGTORAD(5.0f) };
+LimbMovementInfo CPedIK::ms_headRestoreInfo = { DEGTORAD(90.0f), DEGTORAD(-90.0f), DEGTORAD(10.0f), DEGTORAD(45.0f), DEGTORAD(-45.0f), DEGTORAD(5.0f) };
+LimbMovementInfo CPedIK::ms_upperArmInfo = { DEGTORAD(20.0f), DEGTORAD(-100.0f), DEGTORAD(20.0f), DEGTORAD(70.0f), DEGTORAD(-70.0f), DEGTORAD(10.0f) };
+LimbMovementInfo CPedIK::ms_lowerArmInfo = { DEGTORAD(80.0f), DEGTORAD(0.0f), DEGTORAD(20.0f), DEGTORAD(90.0f), DEGTORAD(-90.0f), DEGTORAD(5.0f) };
 
 CPedIK::CPedIK(CPed *ped)
 {

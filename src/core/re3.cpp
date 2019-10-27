@@ -18,6 +18,7 @@
 #include "Automobile.h"
 #include "Ped.h"
 #include "debugmenu_public.h"
+#include "Particle.h"
 
 #include <vector>
 #include <list>
@@ -352,6 +353,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Make peds follow you in formation", LetThemFollowYou);
 #ifndef MASTER
 		DebugMenuAddVarBool8("Debug", "Toggle unused fight feature", (int8*)&CPed::bUnusedFightThingOnPlayer, nil);
+		DebugMenuAddVarBool8("Debug", "Toggle banned particles", (int8*)&CParticle::bEnableBannedParticles, nil);
 #endif
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
