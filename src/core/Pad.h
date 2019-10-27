@@ -248,13 +248,13 @@ public:
 	static int32 *EditCodesForControls(int32 *pRsKeys, int32 nSize);
 
 	// mouse
-	bool GetLeftMouseJustDown()   { return !!(NewMouseControllerState.LMB && !OldMouseControllerState.LMB); }
-	bool GetRightMouseJustDown()  { return !!(NewMouseControllerState.RMB && !OldMouseControllerState.RMB); }
-	bool GetMiddleMouseJustDown() { return !!(NewMouseControllerState.MMB && !OldMouseControllerState.MMB); }
-	bool GetMouseWheelUp()        { return !!(NewMouseControllerState.WHEELUP && !OldMouseControllerState.WHEELUP); }
-	bool GetMouseWheelDown()      { return !!(NewMouseControllerState.WHEELDN && !OldMouseControllerState.WHEELDN);}
-	bool GetMouseX1()             { return !!(NewMouseControllerState.MXB1    && !OldMouseControllerState.MXB1); }
-	bool GetMouseX2()             { return !!(NewMouseControllerState.MXB2    && !OldMouseControllerState.MXB2); }
+	bool GetLeftMouseJustDown()           { return !!(NewMouseControllerState.LMB && !OldMouseControllerState.LMB); }
+	bool GetRightMouseJustDown()          { return !!(NewMouseControllerState.RMB && !OldMouseControllerState.RMB); }
+	bool GetMiddleMouseJustDown()         { return !!(NewMouseControllerState.MMB && !OldMouseControllerState.MMB); }
+	bool GetMouseWheelUpJustDown()        { return !!(NewMouseControllerState.WHEELUP && !OldMouseControllerState.WHEELUP); }
+	bool GetMouseWheelDownJustDown()      { return !!(NewMouseControllerState.WHEELDN && !OldMouseControllerState.WHEELDN);}
+	bool GetMouseX1JustDown()             { return !!(NewMouseControllerState.MXB1    && !OldMouseControllerState.MXB1); }
+	bool GetMouseX2JustDown()             { return !!(NewMouseControllerState.MXB2    && !OldMouseControllerState.MXB2); }
 
 
 	bool GetLeftMouse()         { return NewMouseControllerState.LMB; }
