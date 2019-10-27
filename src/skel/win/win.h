@@ -24,10 +24,12 @@ enum eWinVersion
 {
 	OS_WIN95 = 0,
 	OS_WIN98,
-	oS_WINNT,
+	OS_WINNT,
 	OS_WIN2000,
 	OS_WINXP,
 };
+
+extern DWORD &_dwOperatingSystemVersion;
 
 extern RwUInt32 &gGameState;
 
@@ -49,6 +51,41 @@ typedef struct
 psGlobalType;
 
 #define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
+
+enum eJoypads
+{
+	JOYSTICK1 = 0,
+	JOYSTICK2,
+	MAX_JOYSTICKS
+};
+
+enum eJoypadState
+{
+	JOYPAD_UNUSED,
+	JOYPAD_ATTACHED,
+};
+
+struct tJoy
+{
+	eJoypadState m_State;
+	bool         m_bInitialised;
+	bool         m_bHasAxisZ;
+	bool         m_bHasAxisR;
+	char _pad0;
+	int          m_nVendorID;
+	int          m_nProductID;
+};
+
+class CJoySticks
+{
+public:
+	tJoy m_aJoys[MAX_JOYSTICKS];
+	
+	CJoySticks();
+	void ClearJoyInfo(int joyID);
+};
+
+extern CJoySticks AllValidWinJoys;
 
 #ifdef    __cplusplus
 extern "C"

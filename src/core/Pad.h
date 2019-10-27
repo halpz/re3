@@ -1,56 +1,5 @@
 #pragma once
 
-// same as RW skeleton
-/*
-enum Key
-{
-	// ascii...
-
-	KEY_ESC   = 128,
-
-	KEY_F1    = 129,
-	KEY_F2    = 130,
-	KEY_F3    = 131,
-	KEY_F4    = 132,
-	KEY_F5    = 133,
-	KEY_F6    = 134,
-	KEY_F7    = 135,
-	KEY_F8    = 136,
-	KEY_F9    = 137,
-	KEY_F10   = 138,
-	KEY_F11   = 139,
-	KEY_F12   = 140,
-
-	KEY_INS   = 141,
-	KEY_DEL   = 142,
-	KEY_HOME  = 143,
-	KEY_END   = 144,
-	KEY_PGUP  = 145,
-	KEY_PGDN  = 146,
-
-	KEY_UP    = 147,
-	KEY_DOWN  = 148,
-	KEY_LEFT  = 149,
-	KEY_RIGHT = 150,
-
-	// some stuff ommitted
-
-	KEY_BACKSP = 168,
-	KEY_TAB    = 169,
-	KEY_CAPSLK = 170,
-	KEY_ENTER  = 171,
-	KEY_LSHIFT = 172,
-	KEY_RSHIFT = 173,
-	KEY_LCTRL  = 174,
-	KEY_RCTRL  = 175,
-	KEY_LALT   = 176,
-	KEY_RALT   = 177,
-
-	KEY_NULL,	// unused
-	KEY_NUMKEYS
-};
-*/
-
 enum {
 	PLAYERCONTROL_ENABLED = 0,
 	PLAYERCONTROL_DISABLED_1 = 1,
@@ -299,61 +248,130 @@ public:
 	static int32 *EditCodesForControls(int32 *pRsKeys, int32 nSize);
 
 	// mouse
-	bool GetLeftMouseJustDown() { return !!(NewMouseControllerState.LMB && !OldMouseControllerState.LMB); }
-	bool GetRightMouseJustDown() { return !!(NewMouseControllerState.RMB && !OldMouseControllerState.RMB); }
-	bool GetMiddleMouseJustDown() { return !!(NewMouseControllerState.MMB && !OldMouseControllerState.MMB); }
+	bool GetLeftMouseJustDown()           { return !!(NewMouseControllerState.LMB && !OldMouseControllerState.LMB); }
+	bool GetRightMouseJustDown()          { return !!(NewMouseControllerState.RMB && !OldMouseControllerState.RMB); }
+	bool GetMiddleMouseJustDown()         { return !!(NewMouseControllerState.MMB && !OldMouseControllerState.MMB); }
+	bool GetMouseWheelUpJustDown()        { return !!(NewMouseControllerState.WHEELUP && !OldMouseControllerState.WHEELUP); }
+	bool GetMouseWheelDownJustDown()      { return !!(NewMouseControllerState.WHEELDN && !OldMouseControllerState.WHEELDN);}
+	bool GetMouseX1JustDown()             { return !!(NewMouseControllerState.MXB1    && !OldMouseControllerState.MXB1); }
+	bool GetMouseX2JustDown()             { return !!(NewMouseControllerState.MXB2    && !OldMouseControllerState.MXB2); }
+
+
+	bool GetLeftMouse()         { return NewMouseControllerState.LMB; }
+	bool GetRightMouse()        { return NewMouseControllerState.RMB; }
+	bool GetMiddleMouse()       { return NewMouseControllerState.MMB; }
+	bool GetMouseWheelUp()      { return NewMouseControllerState.WHEELUP; }
+	bool GetMouseWheelDown()    { return NewMouseControllerState.WHEELDN; }
+	bool GetMouseX1()           { return NewMouseControllerState.MXB1; }
+	bool GetMouseX2()           { return NewMouseControllerState.MXB2; }
+
+	bool GetLeftMouseUp()       { return !OldMouseControllerState.LMB; }
+	bool GetRightMouseUp()      { return !OldMouseControllerState.RMB; }
+	bool GetMiddleMouseUp()     { return !OldMouseControllerState.MMB; }
+	bool GetMouseWheelUpUp()    { return !OldMouseControllerState.WHEELUP; }
+	bool GetMouseWheelDownUp()  { return !OldMouseControllerState.WHEELDN; }
+	bool GetMouseX1Up()         { return !OldMouseControllerState.MXB1; }
+	bool GetMouseX2Up()         { return !OldMouseControllerState.MXB2; }
+
+
 	float GetMouseX() { return NewMouseControllerState.x; }
 	float GetMouseY() { return NewMouseControllerState.y; }
 
 	// keyboard
 	
 	bool GetCharJustDown(int32 c) { return !!(NewKeyState.VK_KEYS[c] && !OldKeyState.VK_KEYS[c]); }
-	bool GetFJustDown(int32 n)   { return !!(NewKeyState.F[n] && !OldKeyState.F[n]); }
-	bool GetEscapeJustDown()     { return !!(NewKeyState.ESC && !OldKeyState.ESC); }
-	bool GetInsertJustDown()     { return !!(NewKeyState.INS && !OldKeyState.INS); }
-	bool GetDeleteJustDown()     { return !!(NewKeyState.DEL && !OldKeyState.DEL); }
-	bool GetHomeJustDown()       { return !!(NewKeyState.HOME && !OldKeyState.HOME); }
-	bool GetEndJustDown()        { return !!(NewKeyState.END && !OldKeyState.END); }
-	bool GetPageUpJustDown()     { return !!(NewKeyState.PGUP && !OldKeyState.PGUP); }
-	bool GetPageDownJustDown()   { return !!(NewKeyState.PGDN && !OldKeyState.PGDN); }
-	bool GetUpJustDown()         { return !!(NewKeyState.UP && !OldKeyState.UP); }
-	bool GetDownJustDown()       { return !!(NewKeyState.DOWN && !OldKeyState.DOWN); }
-	bool GetLeftJustDown()       { return !!(NewKeyState.LEFT && !OldKeyState.LEFT); }
-	bool GetRightJustDown()      { return !!(NewKeyState.RIGHT && !OldKeyState.RIGHT); }
-	bool GetScrollLockJustDown() { return !!(NewKeyState.SCROLLLOCK && !OldKeyState.SCROLLLOCK); }
-	bool GetPauseJustDown()      { return !!(NewKeyState.PAUSE && !OldKeyState.PAUSE); }
-	bool GetNumLockJustDown()    { return !!(NewKeyState.NUMLOCK && !OldKeyState.NUMLOCK); }
-	bool GetDivideJustDown()     { return !!(NewKeyState.DIV && !OldKeyState.DIV); }
-	bool GetTimesJustDown()      { return !!(NewKeyState.MUL && !OldKeyState.MUL); }
-	bool GetMinusJustDown()      { return !!(NewKeyState.SUB && !OldKeyState.SUB); }
-	bool GetPlusJustDown()       { return !!(NewKeyState.ADD && !OldKeyState.ADD); }
-	bool GetPadEnterJustDown()   { return !!(NewKeyState.ENTER && !OldKeyState.ENTER); } //  GetEnterJustDown
-	bool GetPadDelJustDown()     { return !!(NewKeyState.DECIMAL && !OldKeyState.DECIMAL); }
-	bool GetPad1JustDown()       { return !!(NewKeyState.NUM1 && !OldKeyState.NUM1); }
-	bool GetPad2JustDown()       { return !!(NewKeyState.NUM2 && !OldKeyState.NUM2); }
-	bool GetPad3JustDown()       { return !!(NewKeyState.NUM3 && !OldKeyState.NUM3); }
-	bool GetPad4JustDown()       { return !!(NewKeyState.NUM4 && !OldKeyState.NUM4); }
-	bool GetPad5JustDown()       { return !!(NewKeyState.NUM5 && !OldKeyState.NUM5); }
-	bool GetPad6JustDown()       { return !!(NewKeyState.NUM6 && !OldKeyState.NUM6); }
-	bool GetPad7JustDown()       { return !!(NewKeyState.NUM7 && !OldKeyState.NUM7); }
-	bool GetPad8JustDown()       { return !!(NewKeyState.NUM8 && !OldKeyState.NUM8); }
-	bool GetPad9JustDown()       { return !!(NewKeyState.NUM9 && !OldKeyState.NUM9); }
-	bool GetPad0JustDown()       { return !!(NewKeyState.NUM0 && !OldKeyState.NUM0); }
-	bool GetBackspaceJustDown()  { return !!(NewKeyState.BACKSP && !OldKeyState.BACKSP); }
-	bool GetTabJustDown()        { return !!(NewKeyState.TAB && !OldKeyState.TAB); }
-	bool GetCapsLockJustDown()   { return !!(NewKeyState.CAPSLOCK && !OldKeyState.CAPSLOCK); }
-	bool GetEnterJustDown()      { return !!(NewKeyState.EXTENTER && !OldKeyState.EXTENTER); }
-	bool GetLeftShiftJustDown()  { return !!(NewKeyState.LSHIFT && !OldKeyState.LSHIFT); }
-	bool GetShiftJustDown()      { return !!(NewKeyState.SHIFT && !OldKeyState.SHIFT); }
-	bool GetRightShiftJustDown() { return !!(NewKeyState.RSHIFT && !OldKeyState.RSHIFT); }
-	bool GetLeftCtrlJustDown()   { return !!(NewKeyState.LCTRL && !OldKeyState.LCTRL); }
-	bool GetRightCtrlJustDown()  { return !!(NewKeyState.RCTRL && !OldKeyState.RCTRL); }
-	bool GetLeftAltJustDown()    { return !!(NewKeyState.LALT && !OldKeyState.LALT); }
-	bool GetRightAltJustDown()   { return !!(NewKeyState.RALT && !OldKeyState.RALT); }
-	bool GetLeftWinJustDown()    { return !!(NewKeyState.LWIN && !OldKeyState.LWIN); }
-	bool GetRightWinJustDown()   { return !!(NewKeyState.RWIN && !OldKeyState.RWIN); }
-	bool GetAppsJustDown()       { return !!(NewKeyState.APPS && !OldKeyState.APPS); }
-	
+	bool GetFJustDown(int32 n)    { return !!(NewKeyState.F[n] && !OldKeyState.F[n]); }
+	bool GetEscapeJustDown()      { return !!(NewKeyState.ESC && !OldKeyState.ESC); }
+	bool GetInsertJustDown()      { return !!(NewKeyState.INS && !OldKeyState.INS); }
+	bool GetDeleteJustDown()      { return !!(NewKeyState.DEL && !OldKeyState.DEL); }
+	bool GetHomeJustDown()        { return !!(NewKeyState.HOME && !OldKeyState.HOME); }
+	bool GetEndJustDown()         { return !!(NewKeyState.END && !OldKeyState.END); }
+	bool GetPageUpJustDown()      { return !!(NewKeyState.PGUP && !OldKeyState.PGUP); }
+	bool GetPageDownJustDown()    { return !!(NewKeyState.PGDN && !OldKeyState.PGDN); }
+	bool GetUpJustDown()          { return !!(NewKeyState.UP && !OldKeyState.UP); }
+	bool GetDownJustDown()        { return !!(NewKeyState.DOWN && !OldKeyState.DOWN); }
+	bool GetLeftJustDown()        { return !!(NewKeyState.LEFT && !OldKeyState.LEFT); }
+	bool GetRightJustDown()       { return !!(NewKeyState.RIGHT && !OldKeyState.RIGHT); }
+	bool GetScrollLockJustDown()  { return !!(NewKeyState.SCROLLLOCK && !OldKeyState.SCROLLLOCK); }
+	bool GetPauseJustDown()       { return !!(NewKeyState.PAUSE && !OldKeyState.PAUSE); }
+	bool GetNumLockJustDown()     { return !!(NewKeyState.NUMLOCK && !OldKeyState.NUMLOCK); }
+	bool GetDivideJustDown()      { return !!(NewKeyState.DIV && !OldKeyState.DIV); }
+	bool GetTimesJustDown()       { return !!(NewKeyState.MUL && !OldKeyState.MUL); }
+	bool GetMinusJustDown()       { return !!(NewKeyState.SUB && !OldKeyState.SUB); }
+	bool GetPlusJustDown()        { return !!(NewKeyState.ADD && !OldKeyState.ADD); }
+	bool GetPadEnterJustDown()    { return !!(NewKeyState.ENTER && !OldKeyState.ENTER); } //  GetEnterJustDown
+	bool GetPadDelJustDown()      { return !!(NewKeyState.DECIMAL && !OldKeyState.DECIMAL); }
+	bool GetPad1JustDown()        { return !!(NewKeyState.NUM1 && !OldKeyState.NUM1); }
+	bool GetPad2JustDown()        { return !!(NewKeyState.NUM2 && !OldKeyState.NUM2); }
+	bool GetPad3JustDown()        { return !!(NewKeyState.NUM3 && !OldKeyState.NUM3); }
+	bool GetPad4JustDown()        { return !!(NewKeyState.NUM4 && !OldKeyState.NUM4); }
+	bool GetPad5JustDown()        { return !!(NewKeyState.NUM5 && !OldKeyState.NUM5); }
+	bool GetPad6JustDown()        { return !!(NewKeyState.NUM6 && !OldKeyState.NUM6); }
+	bool GetPad7JustDown()        { return !!(NewKeyState.NUM7 && !OldKeyState.NUM7); }
+	bool GetPad8JustDown()        { return !!(NewKeyState.NUM8 && !OldKeyState.NUM8); }
+	bool GetPad9JustDown()        { return !!(NewKeyState.NUM9 && !OldKeyState.NUM9); }
+	bool GetPad0JustDown()        { return !!(NewKeyState.NUM0 && !OldKeyState.NUM0); }
+	bool GetBackspaceJustDown()   { return !!(NewKeyState.BACKSP && !OldKeyState.BACKSP); }
+	bool GetTabJustDown()         { return !!(NewKeyState.TAB && !OldKeyState.TAB); }
+	bool GetCapsLockJustDown()    { return !!(NewKeyState.CAPSLOCK && !OldKeyState.CAPSLOCK); }
+	bool GetEnterJustDown()       { return !!(NewKeyState.EXTENTER && !OldKeyState.EXTENTER); }
+	bool GetLeftShiftJustDown()   { return !!(NewKeyState.LSHIFT && !OldKeyState.LSHIFT); }
+	bool GetShiftJustDown()       { return !!(NewKeyState.SHIFT && !OldKeyState.SHIFT); }
+	bool GetRightShiftJustDown()  { return !!(NewKeyState.RSHIFT && !OldKeyState.RSHIFT); }
+	bool GetLeftCtrlJustDown()    { return !!(NewKeyState.LCTRL && !OldKeyState.LCTRL); }
+	bool GetRightCtrlJustDown()   { return !!(NewKeyState.RCTRL && !OldKeyState.RCTRL); }
+	bool GetLeftAltJustDown()     { return !!(NewKeyState.LALT && !OldKeyState.LALT); }
+	bool GetRightAltJustDown()    { return !!(NewKeyState.RALT && !OldKeyState.RALT); }
+	bool GetLeftWinJustDown()     { return !!(NewKeyState.LWIN && !OldKeyState.LWIN); }
+	bool GetRightWinJustDown()    { return !!(NewKeyState.RWIN && !OldKeyState.RWIN); }
+	bool GetAppsJustDown()        { return !!(NewKeyState.APPS && !OldKeyState.APPS); }
+								  
+	bool GetChar(int32 c)         { return NewKeyState.VK_KEYS[c]; }
+	bool GetF(int32 n)            { return NewKeyState.F[n]; }
+	bool GetEscape()              { return NewKeyState.ESC; }
+	bool GetInsert()              { return NewKeyState.INS; }
+	bool GetDelete()              { return NewKeyState.DEL; }
+	bool GetHome()                { return NewKeyState.HOME; }
+	bool GetEnd()                 { return NewKeyState.END; }
+	bool GetPageUp()              { return NewKeyState.PGUP; }
+	bool GetPageDown()            { return NewKeyState.PGDN; }
+	bool GetUp()                  { return NewKeyState.UP; }
+	bool GetDown()                { return NewKeyState.DOWN; }
+	bool GetLeft()                { return NewKeyState.LEFT; }
+	bool GetRight()               { return NewKeyState.RIGHT; }
+	bool GetScrollLock()          { return NewKeyState.SCROLLLOCK; }
+	bool GetPause()               { return NewKeyState.PAUSE; }
+	bool GetNumLock()             { return NewKeyState.NUMLOCK; }
+	bool GetDivide()              { return NewKeyState.DIV; }
+	bool GetTimes()               { return NewKeyState.MUL; }
+	bool GetMinus()               { return NewKeyState.SUB; }
+	bool GetPlus()                { return NewKeyState.ADD; }
+	bool GetPadEnter()            { return NewKeyState.ENTER; } //  GetEnterJustDown
+	bool GetPadDel()              { return NewKeyState.DECIMAL; }
+	bool GetPad1()                { return NewKeyState.NUM1; }
+	bool GetPad2()                { return NewKeyState.NUM2; }
+	bool GetPad3()                { return NewKeyState.NUM3; }
+	bool GetPad4()                { return NewKeyState.NUM4; }
+	bool GetPad5()                { return NewKeyState.NUM5; }
+	bool GetPad6()                { return NewKeyState.NUM6; }
+	bool GetPad7()                { return NewKeyState.NUM7; }
+	bool GetPad8()                { return NewKeyState.NUM8; }
+	bool GetPad9()                { return NewKeyState.NUM9; }
+	bool GetPad0()                { return NewKeyState.NUM0; }
+	bool GetBackspace()           { return NewKeyState.BACKSP; }
+	bool GetTab()                 { return NewKeyState.TAB; }
+	bool GetCapsLock()            { return NewKeyState.CAPSLOCK; }
+	bool GetEnter()               { return NewKeyState.EXTENTER; }
+	bool GetLeftShift()           { return NewKeyState.LSHIFT; }
+	bool GetShift()               { return NewKeyState.SHIFT; }
+	bool GetRightShift()          { return NewKeyState.RSHIFT; }
+	bool GetLeftCtrl()            { return NewKeyState.LCTRL; }
+	bool GetRightCtrl()           { return NewKeyState.RCTRL; }
+	bool GetLeftAlt()             { return NewKeyState.LALT; }
+	bool GetRightAlt()            { return NewKeyState.RALT; }
+	bool GetLeftWin()             { return NewKeyState.LWIN; }
+	bool GetRightWin()            { return NewKeyState.RWIN; }
+	bool GetApps()                { return NewKeyState.APPS; }
 	// pad
 
 	bool GetTriangleJustDown()       { return !!(NewState.Triangle && !OldState.Triangle); }
@@ -369,22 +387,15 @@ public:
 	bool GetRightShoulder1JustDown() { return !!(NewState.RightShoulder1 && !OldState.RightShoulder1); }
 	bool GetRightShoulder2JustDown() { return !!(NewState.RightShoulder2 && !OldState.RightShoulder2); }
 	bool GetStartJustDown()          { return !!(NewState.Start && !OldState.Start); }
-	
-/*
-	int32 GetLeftShoulder1(void)  { return NewState.LeftShoulder1; }
-	int32 GetLeftShoulder2(void)  { return NewState.LeftShoulder2; }
-	int32 GetRightShoulder1(void) { return NewState.RightShoulder1; }
-	int32 GetRightShoulder2(void) { return NewState.RightShoulder2; }
-*/
   
-	bool GetTriangle()       { return !!NewState.Triangle; }
-	bool GetCircle()         { return !!NewState.Circle; }
-	bool GetCross()          { return !!NewState.Cross; }
-	bool GetSquare()         { return !!NewState.Square; }
-	bool GetDPadUp()         { return !!NewState.DPadUp; }
-	bool GetDPadDown()       { return !!NewState.DPadDown; }
-	bool GetDPadLeft()       { return !!NewState.DPadLeft; }
-	bool GetDPadRight()      { return !!NewState.DPadRight; }
+	bool GetTriangle()           { return !!NewState.Triangle; }
+	bool GetCircle()             { return !!NewState.Circle; }
+	bool GetCross()              { return !!NewState.Cross; }
+	bool GetSquare()             { return !!NewState.Square; }
+	bool GetDPadUp()             { return !!NewState.DPadUp; }
+	bool GetDPadDown()           { return !!NewState.DPadDown; }
+	bool GetDPadLeft()           { return !!NewState.DPadLeft; }
+	bool GetDPadRight()          { return !!NewState.DPadRight; }
 	bool GetLeftShoulder1(void)  { return !!NewState.LeftShoulder1; }
 	bool GetLeftShoulder2(void)  { return !!NewState.LeftShoulder2; }
 	bool GetRightShoulder1(void) { return !!NewState.RightShoulder1; }
@@ -392,8 +403,6 @@ public:
 
   bool ArePlayerControlsDisabled(void) { return DisablePlayerControls != PLAYERCONTROL_ENABLED; }
 };
+
 VALIDATE_SIZE(CPad, 0xFC);
 extern CPad *Pads;	//[2]
-
-#define IsButtonJustDown(pad, btn) \
-	(!(pad)->OldState.btn && (pad)->NewState.btn)

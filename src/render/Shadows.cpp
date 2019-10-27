@@ -532,8 +532,8 @@ CShadows::StoreCarLightShadow(CAutomobile *pCar, int32 nID, RwTexture *pTexture,
 
 	float fDistToCamSqr = (*pPosn - TheCamera.GetPosition()).MagnitudeSqr2D();
 
-	bool bSpecialCam =     TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1
-						|| TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWNPED
+	bool bSpecialCam =     TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN
+						|| TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED
 						|| CCutsceneMgr::IsRunning();
 
 	float fDrawDistance = 27.0f;

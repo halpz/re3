@@ -1466,7 +1466,7 @@ void CMenuManager::Process(void)
 				else {
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 					for (int i = 0; i < 4; i++)
-						ControlsManager.ClearSettingsAssociatedWithAction(m_CurrCntrlAction, i);
+						ControlsManager.ClearSettingsAssociatedWithAction((e_ControllerAction)m_CurrCntrlAction, (eControllerType)i);
 					field_534 = false;
 					m_bKeyChangeNotProcessed = false;
 					pControlEdit = nil;

@@ -353,7 +353,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 	}else{
 		if(mi->m_type != MITYPE_SIMPLE){
 			if(FindPlayerVehicle() == ent &&
-			   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FIRSTPERSON){
+			   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON){
 				// Player's vehicle in first person mode
 				if(TheCamera.Cams[TheCamera.ActiveCam].DirectionWasLooking == LOOKING_FORWARD ||
 				   ent->GetModelIndex() == MI_RHINO ||
@@ -642,8 +642,8 @@ CRenderer::ScanWorld(void)
 	RwV3dTransformPoints((RwV3d*)vectors, (RwV3d*)vectors, 9, cammatrix);
 
 	m_loadingPriority = false;
-	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1 ||
-	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWNPED){
+	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
+	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED){
 		CRect rect;
 		int x1, x2, y1, y2;
 		LimitFrustumVector(vectors[CORNER_FAR_TOPLEFT], vectors[CORNER_CAM], -100.0f);
@@ -753,8 +753,8 @@ CRenderer::RequestObjectsInFrustum(void)
 	vectors[CORNER_PRIO_RIGHT].z = vectors[CORNER_LOD_RIGHT].z;
 	RwV3dTransformPoints((RwV3d*)vectors, (RwV3d*)vectors, 9, cammatrix);
 
-	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1 ||
-	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWNPED){
+	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
+	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED){
 		CRect rect;
 		int x1, x2, y1, y2;
 		LimitFrustumVector(vectors[CORNER_FAR_TOPLEFT], vectors[CORNER_CAM], -100.0f);

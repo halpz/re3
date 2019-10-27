@@ -275,7 +275,7 @@ void CRadar::DrawBlips()
 		TransformRadarPointToScreenSpace(out, in);
 
 		float angle;
-		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1)
+		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN)
 			angle = PI + FindPlayerHeading();
 #ifdef FIX_BUGS
 		else if (TheCamera.GetLookDirection() != LOOKING_FORWARD)
@@ -1081,14 +1081,14 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D
 	s = -Sin(TheCamera.GetForward().Heading());
 	c = Cos(TheCamera.GetForward().Heading());
 
-	if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1 || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWNPED) {
+	if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED) {
 		s = 0.0f;
 		c = 1.0f;
 	}
 	else if (TheCamera.GetLookDirection() != LOOKING_FORWARD) {
 		CVector forward;
 
-		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FIRSTPERSON) {
+		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON) {
 			forward = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetForward();
 			forward.Normalise();	// a bit useless...
 		}
@@ -1120,7 +1120,7 @@ WRAPPER void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const C
 void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D &in)
 {
 	float s, c;
-	if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1 || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWNPED) {
+	if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED) {
 		s = 0.0f;
 		c = 1.0f;
 	}
@@ -1131,7 +1131,7 @@ void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D
 	else {
 		CVector forward;
 
-		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FIRSTPERSON) {
+		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON) {
 			forward = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetForward();
 			forward.Normalise();	// a bit useless...
 		}

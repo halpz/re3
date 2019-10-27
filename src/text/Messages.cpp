@@ -442,7 +442,7 @@ CMessages::InsertPlayerControlKeysInString(wchar *str)
 	for (i = 0; i < strSize;) {
 		if (str[i] == '~' && str[i + 1] == 'k' && str[i + 2] == '~') {
 			i += 4;
-			for (int32 cont = 0; cont < TOTAL_CONTROL_ACTIONS; cont++) {
+			for (int32 cont = 0; cont < MAX_CONTROLLERACTIONS; cont++) {
 				uint16 contSize = GetWideStringLength(ControlsManager.m_aActionNames[cont]);
 				if (contSize != 0) {
 					if (WideStringCompare(&str[i], ControlsManager.m_aActionNames[cont], contSize)) {
