@@ -14275,7 +14275,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 								bOnBoat = false;
 							} else {
 								m_pCurrentPhysSurface = collidingEnt;
-								collidingEnt->RegisterReference((CEntity**)m_pCurrentPhysSurface);
+								collidingEnt->RegisterReference((CEntity**)&m_pCurrentPhysSurface);
 								m_vecOffsetFromPhysSurface = intersectionPoint.point - collidingEnt->GetPosition();
 								m_pCurSurface = collidingEnt;
 								collidingEnt->RegisterReference((CEntity**)&m_pCurSurface);
@@ -14301,7 +14301,8 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 								m_vecDamageNormal = intersectionPoint.normal;
 							}
 						}
-#ifdef VC_PED_PORTS
+						// VC code is working perfectly, but we don't want mega jumps to damage us significantly :shrug:
+#if 0 // #ifdef VC_PED_PORTS
 						float upperSpeedLimit = 0.33f;
 						float lowerSpeedLimit = -0.25f;
 						float speed = m_vecMoveSpeed.Magnitude2D();
@@ -14309,49 +14310,48 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							upperSpeedLimit *= 2.0f;
 							lowerSpeedLimit *= 1.5f;
 						}
-						if (m_ped_flagA2
-							|| (speed <= upperSpeedLimit /* || (bfFlagsL >> 5) & 1 */) && m_vecMoveSpeed.z >= lowerSpeedLimit
-							|| m_pCollidingEntity == collidingEnt) {
+						if (!m_ped_flagA2) {
+							if ((speed <= upperSpeedLimit /* || (bfFlagsL >> 5) & 1 */) && m_vecMoveSpeed.z >= lowerSpeedLimit
+								|| m_pCollidingEntity == collidingEnt) {
 
-							if (!m_ped_flagA2 && RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL)
-								&& -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
-								InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 15.0f, PEDPIECE_TORSO, 2);
-							}
-						} else {
-							float damage = 100.0f * max(speed - 0.25f, 0.0f);
-							float damage2 = damage;
-							if (m_vecMoveSpeed.z < -0.25f)
-								damage += (-0.25f - m_vecMoveSpeed.z) * 150.0f;
+								if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL) && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
+									InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 15.0f, PEDPIECE_TORSO, 2);
+								}
+							} else {
+								float damage = 100.0f * max(speed - 0.25f, 0.0f);
+								float damage2 = damage;
+								if (m_vecMoveSpeed.z < -0.25f)
+									damage += (-0.25f - m_vecMoveSpeed.z) * 150.0f;
 
-							uint8 dir = 2; // from backward
-							if (m_vecMoveSpeed.x > 0.01f || m_vecMoveSpeed.x < -0.01f
-								|| m_vecMoveSpeed.y > 0.01f || m_vecMoveSpeed.y < -0.01f) {
-								CVector2D offset = -m_vecMoveSpeed;
-								dir = GetLocalDirection(offset);
+								uint8 dir = 2; // from backward
+								if (m_vecMoveSpeed.x > 0.01f || m_vecMoveSpeed.x < -0.01f || m_vecMoveSpeed.y > 0.01f || m_vecMoveSpeed.y < -0.01f) {
+									CVector2D offset = -m_vecMoveSpeed;
+									dir = GetLocalDirection(offset);
+								}
+								InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, damage, PEDPIECE_TORSO, dir);
+								if (IsPlayer() && damage2 > 5.0f)
+									Say(SOUND_PED_LAND);
 							}
-							InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, damage, PEDPIECE_TORSO, dir);
-							if (IsPlayer() && damage2 > 5.0f)
-								Say(SOUND_PED_LAND);
 						}
 #else
-						float speedSqr = m_vecMoveSpeed.MagnitudeSqr();
-						if (m_ped_flagA2
-							|| m_vecMoveSpeed.z >= -0.25f && speedSqr <= 0.25f) {
-							if (!m_ped_flagA2 && RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL)
-								&& -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
-								InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 15.0f, PEDPIECE_TORSO, 2);
-							}
-						} else {
-							if (speedSqr == 0.0f)
-								speedSqr = sq(m_vecMoveSpeed.z);
+						float speedSqr = 0.0f;
+						if (!m_ped_flagA2) {
+							if (m_vecMoveSpeed.z >= -0.25f && (speedSqr = m_vecMoveSpeed.MagnitudeSqr()) <= 0.25f) {
 
-							uint8 dir = 2; // from backward
-							if (m_vecMoveSpeed.x > 0.01f || m_vecMoveSpeed.x < -0.01f
-								|| m_vecMoveSpeed.y > 0.01f || m_vecMoveSpeed.y < -0.01f) {
-								CVector2D offset = -m_vecMoveSpeed;
-								dir = GetLocalDirection(offset);
+								if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL) && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
+									InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 15.0f, PEDPIECE_TORSO, 2);
+								}
+							} else {
+								if (speedSqr == 0.0f)
+									speedSqr = sq(m_vecMoveSpeed.z);
+
+								uint8 dir = 2; // from backward
+								if (m_vecMoveSpeed.x > 0.01f || m_vecMoveSpeed.x < -0.01f || m_vecMoveSpeed.y > 0.01f || m_vecMoveSpeed.y < -0.01f) {
+									CVector2D offset = -m_vecMoveSpeed;
+									dir = GetLocalDirection(offset);
+								}
+								InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 350.0f * sq(speedSqr), PEDPIECE_TORSO, dir);
 							}
-							InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 350.0f * sq(speedSqr), PEDPIECE_TORSO, dir);
 						}
 #endif
 						m_vecMoveSpeed.z = 0.0f;
