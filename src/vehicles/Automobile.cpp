@@ -2934,7 +2934,7 @@ CAutomobile::DoDriveByShootings(void)
 
 	bool lookingLeft = false;
 	bool lookingRight = false;
-	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1){
+	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN){
 		if(CPad::GetPad(0)->GetLookLeft())
 			lookingLeft = true;
 		if(CPad::GetPad(0)->GetLookRight())
@@ -2956,7 +2956,7 @@ CAutomobile::DoDriveByShootings(void)
 				CAnimManager::AddAnimation(pDriver->GetClump(), ASSOCGRP_STD, ANIM_DRIVEBY_L);
 			else
 				anim->SetRun();
-		}else if(pDriver->m_pMyVehicle->pPassengers[0] == nil || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FIRSTPERSON){
+		}else if(pDriver->m_pMyVehicle->pPassengers[0] == nil || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON){
 			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_L);
 			if(anim)
 				anim->blendDelta = -1000.0f;

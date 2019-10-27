@@ -97,8 +97,8 @@ CVisibilityPlugins::SetRenderWareCamera(RwCamera *camera)
 	ms_pCamera = camera;
 	ms_pCameraPosn = RwMatrixGetPos(RwFrameGetMatrix(RwCameraGetFrame(camera)));
 
-	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN1 ||
-	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWNPED)
+	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
+	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED)
 		ms_cullCompsDist = 1000000.0f;
 	else
 		ms_cullCompsDist = sq(TheCamera.LODDistMultiplier * 20.0f);

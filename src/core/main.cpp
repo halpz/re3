@@ -379,9 +379,9 @@ Render2dStuff(void)
 	bool firstPersonWeapon = false;
 	int cammode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 	if(cammode == CCam::MODE_SNIPER ||
-	   cammode == CCam::MODE_SNIPER_RUN_AROUND ||
-	   cammode == CCam::MODE_ROCKET ||
-	   cammode == CCam::MODE_ROCKET_RUN_AROUND)
+	   cammode == CCam::MODE_SNIPER_RUNABOUT ||
+	   cammode == CCam::MODE_ROCKETLAUNCHER ||
+	   cammode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT)
 		firstPersonWeapon = true;
 
 	// Draw black border for sniper and rocket launcher

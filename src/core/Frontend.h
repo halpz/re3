@@ -342,6 +342,12 @@ enum
 	NUM_MENUROWS = 18,
 };
 
+enum eControlMethod
+{
+	CONTROL_STANDART = 0,
+	CONTROL_CLASSIC,
+};
+
 struct tSkinInfo
 {
 	int field_0;
@@ -430,6 +436,9 @@ public:
  uint32 field_558;
 	int m_nCurrSaveSlot;
 	int m_nScreenChangeDelayTimer;
+
+public:
+	bool GetIsMenuActive() {return !!m_bMenuActive;}
 
 public:
 	static int32 &OS_Language;

@@ -102,8 +102,8 @@ CCamera::IsBoxVisible(RwV3d *box, const CMatrix *mat)
 int
 CCamera::GetLookDirection(void)
 {
-	if(Cams[ActiveCam].Mode == CCam::MODE_CAMONASTRING ||
-	   Cams[ActiveCam].Mode == CCam::MODE_FIRSTPERSON ||
+	if(Cams[ActiveCam].Mode == CCam::MODE_CAM_ON_A_STRING ||
+	   Cams[ActiveCam].Mode == CCam::MODE_1STPERSON ||
 	   Cams[ActiveCam].Mode == CCam::MODE_BEHINDBOAT ||
 	   Cams[ActiveCam].Mode == CCam::MODE_FOLLOWPED)
 		return Cams[ActiveCam].DirectionWasLooking;
@@ -113,7 +113,7 @@ CCamera::GetLookDirection(void)
 bool
 CCamera::GetLookingForwardFirstPerson()
 {
-	return Cams[ActiveCam].Mode == CCam::MODE_FIRSTPERSON &&
+	return Cams[ActiveCam].Mode == CCam::MODE_1STPERSON &&
 		Cams[ActiveCam].DirectionWasLooking == LOOKING_FORWARD;
 }
 
@@ -1145,7 +1145,7 @@ CCam::FixCamIfObscured(CVector &TargetCoors, float TargetHeight, float TargetOri
 
 	if(Mode == MODE_BEHINDCAR)
 		Target.z += TargetHeight/2.0f;
-	if(Mode == MODE_CAMONASTRING){
+	if(Mode == MODE_CAM_ON_A_STRING){
 		UseEntityPos = true;
 		Target.z += TargetHeight/2.0f;
 		EntityPos = CamTargetEntity->GetPosition();
@@ -1306,7 +1306,7 @@ CCam::Using3rdPersonMouseCam()
 		(Mode == MODE_FOLLOWPED ||
 			TheCamera.m_bPlayerIsInGarage &&
 			FindPlayerPed() && FindPlayerPed()->m_nPedState != PED_DRIVING &&
-			Mode != MODE_TOPDOWN1 && this->CamTargetEntity == FindPlayerPed());
+			Mode != MODE_TOPDOWN && this->CamTargetEntity == FindPlayerPed());
 }
 
 bool
