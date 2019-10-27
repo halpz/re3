@@ -493,6 +493,11 @@ CCredits::Render(void)
 		bCreditsGoing = false;
 }
 
+bool CCredits::AreCreditsDone(void)
+{
+	return !bCreditsGoing;
+}
+
 STARTPATCHES
 	InjectHook(0x4FE7A0, CCredits::Init, PATCH_JUMP);
 	InjectHook(0x4FE760, CCredits::Start, PATCH_JUMP);
