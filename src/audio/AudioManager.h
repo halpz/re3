@@ -449,7 +449,7 @@ public:
 	                                      float speedMultiplier) const;                   /// ok
 	int32 ComputePan(float, CVector *);                                                   /// ok
 	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const; /// ok
-	int32 CreateEntity(int32 type, CPhysical *entity);                                    /// ok
+	int32 CreateEntity(int32 type, void* entity);                                    /// ok
 
 	void DestroyAllGameCreatedEntities(); /// ok
 	void DestroyEntity(int32 id);         /// ok
@@ -653,7 +653,7 @@ public:
 	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2,
 	                     float collisionPower, float intensity2); /// ok
 	void ReportCrime(int32 crime, const CVector *pos);            /// ok
-	void ResetAudioLogicTimers(int32 timer);                      /// ok
+	void ResetAudioLogicTimers(uint32 timer);                      /// ok
 	void ResetPoliceRadio();                                      /// ok
 	void ResetTimers(uint32 time);                                /// ok
 
@@ -666,7 +666,7 @@ public:
 	void SetDynamicAcousticModelingStatus(bool status);
 	void SetEffectsFadeVolume(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;
-	void SetEntityStatus(int32 id, bool status);
+	void SetEntityStatus(int32 id, uint8 status);
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(cAudioCollision *audioCollision); /// ok
 	void SetMissionAudioLocation(float x, float y, float z);
 	void SetMissionScriptPoliceAudio(int32 sfx) const;

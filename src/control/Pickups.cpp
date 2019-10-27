@@ -660,7 +660,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 
 	if (!entity->m_flagD80) {
 		float s = Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x7FF) * DEGTORAD(360.0f / 0x800));
-		float modifiedSin = 0.3 * (s + 1.0f);
+		float modifiedSin = 0.3f * (s + 1.0f);
 
 
 		int16 colorId;

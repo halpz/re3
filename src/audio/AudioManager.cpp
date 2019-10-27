@@ -38,7 +38,15 @@
 #include "sampman.h"
 
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
-uint32 *audioLogicTimers = (uint32 *)0x6508A0;
+uint32 &gPornNextTime = *(uint32*)0x6508A0;
+uint32 &gSawMillNextTime = *(uint32*)0x6508A4;
+uint32 &gShopNextTime = *(uint32*)0x6508A8;
+uint32 &gAirportNextTime = *(uint32*)0x6508AC;
+uint32 &gCinemaNextTime = *(uint32*)0x6508B0;
+uint32 &gDocksNextTime = *(uint32*)0x6508B4;
+uint32 &gHomeNextTime = *(uint32*)0x6508B8;
+uint32 &gCellNextTime = *(uint32*)0x6508BC;
+uint32 &gNextCryTime = *(uint32*)0x6508C0;
 uint8 &jumboVolOffset = *(uint8 *)0x6508ED;
 uint8 &gJumboVolOffsetPercentage = *(uint8 *)0x6508ED;
 char &g_nMissionAudioPlayingStatus = *(char *)0x60ED88;
@@ -625,7 +633,7 @@ cAudioManager::ComputeVolume(uint8 emittingVolume, float soundIntensity, float d
 }
 
 int32
-cAudioManager::CreateEntity(int32 type, CPhysical *entity)
+cAudioManager::CreateEntity(int32 type, void *entity)
 {
 	if(!m_bIsInitialised) return -4;
 	if(!entity) return -2;
@@ -635,7 +643,7 @@ cAudioManager::CreateEntity(int32 type, CPhysical *entity)
 			m_asAudioEntities[i].m_bIsUsed = true;
 			m_asAudioEntities[i].m_bStatus = 0;
 			m_asAudioEntities[i].m_nType = (eAudioType)type;
-			m_asAudioEntities[i].m_pEntity = (void *)entity;
+			m_asAudioEntities[i].m_pEntity = entity;
 			m_asAudioEntities[i].m_awAudioEvent[0] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[1] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[2] = SOUND_TOTAL_PED_SOUNDS;
@@ -2610,9 +2618,8 @@ char *SubZo3Label = (char *)0x6E9870;
 void
 cAudioManager::InitialisePoliceRadioZones()
 {
-	for(int32 i = 0; i < 36; i++) {
-		for(int32 j = 0; j < 8; j++) { ZoneSfx[i].m_aName[j] = 0; }
-	}
+	for(int32 i = 0; i < NUMAUDIOZONES; i++)
+		memset(ZoneSfx[i].m_aName, 0, 8);
 
 	strcpy(ZoneSfx[0].m_aName, "HOSPI_2");
 	ZoneSfx[0].m_nSampleIndex = SFX_POLICE_RADIO_ROCKFORD;
@@ -2988,26 +2995,25 @@ cAudioManager::PlayerJustLeftCar(void) const
 void
 cAudioManager::PostInitialiseGameSpecificSetup()
 {
-	m_nFireAudioEntity = CreateEntity(AUDIOTYPE_FIRE,
-	                                  (CPhysical *)0x8F31D0); // last is addr of firemanager @todo change
+	m_nFireAudioEntity = CreateEntity(AUDIOTYPE_FIRE, &gFireManager);
 	if(m_nFireAudioEntity >= 0) SetEntityStatus(m_nFireAudioEntity, 1);
 
-	m_nCollisionEntity = CreateEntity(AUDIOTYPE_COLLISION, (CPhysical *)1);
+	m_nCollisionEntity = CreateEntity(AUDIOTYPE_COLLISION, (void*)1);
 	if(m_nCollisionEntity >= 0) SetEntityStatus(m_nCollisionEntity, 1);
 
-	m_nFrontEndEntity = CreateEntity(AUDIOTYPE_FRONTEND, (CPhysical *)1);
+	m_nFrontEndEntity = CreateEntity(AUDIOTYPE_FRONTEND, (void*)1);
 	if(m_nFrontEndEntity >= 0) SetEntityStatus(m_nFrontEndEntity, 1);
 
-	m_nProjectileEntity = CreateEntity(AUDIOTYPE_PROJECTILE, (CPhysical *)1);
+	m_nProjectileEntity = CreateEntity(AUDIOTYPE_PROJECTILE, (void*)1);
 	if(m_nProjectileEntity >= 0) SetEntityStatus(m_nProjectileEntity, 1);
 
-	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATERCANNON, (CPhysical *)1);
+	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATERCANNON, (void*)1);
 	if(m_nWaterCannonEntity >= 0) SetEntityStatus(m_nWaterCannonEntity, 1);
 
-	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (CPhysical *)1);
+	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (void*)1);
 	if(m_nPoliceChannelEntity >= 0) SetEntityStatus(m_nPoliceChannelEntity, 1);
 
-	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (CPhysical *)1);
+	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (void*)1);
 	if(m_nBridgeEntity >= 0) SetEntityStatus(m_nBridgeEntity, 1);
 
 	m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
@@ -3017,7 +3023,7 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 	m_sMissionAudio.m_bIsPlayed = 0;
 	m_sMissionAudio.field_12 = 1;
 	m_sMissionAudio.field_24 = 0;
-	ResetAudioLogicTimers((int32)CTimer::GetTimeInMilliseconds);
+	ResetAudioLogicTimers(CTimer::GetTimeInMilliseconds());
 }
 
 void
@@ -3129,7 +3135,7 @@ cAudioManager::ProcessAirportScriptObject(uint8 sound)
 	static uint8 counter = 0;
 
 	uint32 time = CTimer::GetTimeInMilliseconds();
-	if(time > audioLogicTimers[3]) {
+	if(time > gAirportNextTime) {
 		switch(sound) {
 		case SCRIPT_SOUND_AIRPORT_LOOP_S:
 			maxDist = 900.f;
@@ -3164,7 +3170,7 @@ cAudioManager::ProcessAirportScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[3] = time + 10000 + m_anRandomTable[3] % 20000;
+				gAirportNextTime = time + 10000 + m_anRandomTable[3] % 20000;
 			}
 		}
 	}
@@ -3539,7 +3545,7 @@ cAudioManager::ProcessCinemaScriptObject(uint8 sound)
 	static uint8 counter = 0;
 
 	uint32 time = CTimer::GetTimeInMilliseconds();
-	if(time > audioLogicTimers[4]) {
+	if(time > gCinemaNextTime) {
 		switch(sound) {
 		case SCRIPT_SOUND_CINEMA_LOOP_S:
 			maxDist = 900.f;
@@ -3575,7 +3581,7 @@ cAudioManager::ProcessCinemaScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[4] = time + 1000 + m_anRandomTable[3] % 4000;
+				gCinemaNextTime = time + 1000 + m_anRandomTable[3] % 4000;
 			}
 		}
 	}
@@ -3599,7 +3605,7 @@ cAudioManager::ProcessDocksScriptObject(uint8 sound)
 	static uint32 counter = 0;
 
 	time = CTimer::GetTimeInMilliseconds();
-	if(time > audioLogicTimers[5]) {
+	if(time > gDocksNextTime) {
 		switch(sound) {
 		case SCRIPT_SOUND_DOCKS_LOOP_S:
 			maxDist = 900.f;
@@ -3634,7 +3640,7 @@ cAudioManager::ProcessDocksScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[5] = time + 10000 + m_anRandomTable[3] % 40000;
+				gDocksNextTime = time + 10000 + m_anRandomTable[3] % 40000;
 			}
 		}
 	}
@@ -4118,7 +4124,7 @@ cAudioManager::ProcessHomeScriptObject(uint8 sound)
 	static uint8 counter = 0;
 
 	time = CTimer::GetTimeInMilliseconds();
-	if(time > audioLogicTimers[6]) {
+	if(time > gHomeNextTime) {
 		switch(sound) {
 		case SCRIPT_SOUND_HOME_LOOP_S:
 			maxDist = 900.f;
@@ -4154,7 +4160,7 @@ cAudioManager::ProcessHomeScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 1;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[6] = time + 1000 + m_anRandomTable[3] % 4000;
+				gHomeNextTime = time + 1000 + m_anRandomTable[3] % 4000;
 			}
 		}
 	}
@@ -6678,7 +6684,7 @@ cAudioManager::ProcessPoliceCellBeatingScriptObject(uint8 sound)
 
 	static uint8 counter = 0;
 
-	if(time > audioLogicTimers[7]) {
+	if(time > gCellNextTime) {
 		switch(sound) {
 		case SCRIPT_SOUND_POLICE_CELL_BEATING_LOOP_S:
 			maxDist = 900.f;
@@ -6723,7 +6729,7 @@ cAudioManager::ProcessPoliceCellBeatingScriptObject(uint8 sound)
 				params.m_pPed = 0;
 				SetupPedComments(&params, SOUND_8A);
 			}
-			audioLogicTimers[7] = time + 500 + m_anRandomTable[3] % 1500;
+			gCellNextTime = time + 500 + m_anRandomTable[3] % 1500;
 		}
 	}
 }
@@ -6812,7 +6818,7 @@ cAudioManager::ProcessPornCinema(uint8 sound)
 		}
 
 		time = CTimer::GetTimeInMilliseconds();
-		if(time > audioLogicTimers[0]) {
+		if(time > gPornNextTime) {
 			m_sQueueSample.m_bVolume =
 			    ComputeVolume(90, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
@@ -6832,7 +6838,7 @@ cAudioManager::ProcessPornCinema(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[0] = time + 2000 + m_anRandomTable[3] % 6000;
+				gPornNextTime = time + 2000 + m_anRandomTable[3] % 6000;
 			}
 		}
 	}
@@ -7037,7 +7043,7 @@ cAudioManager::ProcessSawMillScriptObject(uint8 sound)
 			AddSampleToRequestedQueue();
 		}
 		time = CTimer::GetTimeInMilliseconds();
-		if(time > audioLogicTimers[1]) {
+		if(time > gSawMillNextTime) {
 			m_sQueueSample.m_bVolume =
 			    ComputeVolume(70, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
@@ -7056,7 +7062,7 @@ cAudioManager::ProcessSawMillScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[1] = time + 2000 + m_anRandomTable[3] % 4000;
+				gSawMillNextTime = time + 2000 + m_anRandomTable[3] % 4000;
 			}
 		}
 	}
@@ -7115,7 +7121,7 @@ cAudioManager::ProcessShopScriptObject(uint8 sound)
 			AddSampleToRequestedQueue();
 		}
 		time = CTimer::GetTimeInMilliseconds();
-		if(time > audioLogicTimers[2]) {
+		if(time > gShopNextTime) {
 			m_sQueueSample.m_bVolume =
 			    ComputeVolume(70, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
@@ -7136,7 +7142,7 @@ cAudioManager::ProcessShopScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[2] = time + 3000 + m_anRandomTable[3] % 7000;
+				gShopNextTime = time + 3000 + m_anRandomTable[3] % 7000;
 			}
 		}
 	}
@@ -7924,17 +7930,17 @@ cAudioManager::ReportCrime(int32 type, const CVector *pos)
 }
 
 void
-cAudioManager::ResetAudioLogicTimers(int32 timer)
+cAudioManager::ResetAudioLogicTimers(uint32 timer)
 {
-	audioLogicTimers[0] = timer;
-	audioLogicTimers[8] = timer;
-	audioLogicTimers[1] = timer;
-	audioLogicTimers[7] = timer;
-	audioLogicTimers[2] = timer;
-	audioLogicTimers[6] = timer;
-	audioLogicTimers[3] = timer;
-	audioLogicTimers[5] = timer;
-	audioLogicTimers[4] = timer;
+	gPornNextTime = timer;
+	gNextCryTime = timer;
+	gSawMillNextTime = timer;
+	gCellNextTime = timer;
+	gShopNextTime = timer;
+	gHomeNextTime = timer;
+	gAirportNextTime = timer;
+	gDocksNextTime = timer;
+	gCinemaNextTime = timer;
 	for(int32 i = 0; i < m_nAudioEntitiesTotal; i++) {
 		if(m_asAudioEntities[m_anAudioEntityIndices[i]].m_nType == AUDIOTYPE_PHYSICAL) {
 			CPed *ped = (CPed *)m_asAudioEntities[m_anAudioEntityIndices[i]].m_pEntity;
@@ -8219,7 +8225,7 @@ cAudioManager::SetEffectsMasterVolume(uint8 volume) const
 }
 
 void
-cAudioManager::SetEntityStatus(int32 id, bool status)
+cAudioManager::SetEntityStatus(int32 id, uint8 status)
 {
 	if(m_bIsInitialised && id >= 0 && id < totalAudioEntitiesSlots && m_asAudioEntities[id].m_bIsUsed) {
 		m_asAudioEntities[id].m_bStatus = status;
@@ -8823,10 +8829,10 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 			                            SFX_POLICE_HELI_1;
 			break;
 		case SOUND_PED_BODYCAST_HIT:
-			if(CTimer::GetTimeInMilliseconds() <= audioLogicTimers[8]) return;
+			if(CTimer::GetTimeInMilliseconds() <= gNextCryTime) return;
 			maxDist = 2500.f;
 			soundIntensity = 50.f;
-			audioLogicTimers[8] = CTimer::GetTimeInMilliseconds() + 500;
+			gNextCryTime = CTimer::GetTimeInMilliseconds() + 500;
 			pedComment.m_nSampleIndex =
 			    (m_anRandomTable[m_sQueueSample.m_nEntityIndex & 3] & 3) + SFX_PLASTER_BLOKE_1;
 			break;
