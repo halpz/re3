@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "FileMgr.h"
 #include "PedStats.h"
 
@@ -112,7 +113,7 @@ CPedStats::GetPedStatType(char *name)
 	int type;
 
 	for(type = 0; type < NUM_PEDSTATS; type++)
-		if(strcmp(ms_apPedStats[type]->m_name, name) == 0)
+		if(!CGeneral::faststrcmp(ms_apPedStats[type]->m_name, name))
 			return type;
 	return NUM_PEDSTATS;
 }

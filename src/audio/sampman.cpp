@@ -116,7 +116,7 @@ typedef struct provider_stuff
 
 static int __cdecl comp(const provider_stuff*s1,const provider_stuff*s2)
 {
-  return( _stricmp(s1->name,s2->name) );
+  return(strcasecmp(s1->name, s2->name));
 }
 
 static void

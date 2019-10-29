@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "FileMgr.h"
 #include "Directory.h"
 
@@ -49,7 +50,7 @@ CDirectory::FindItem(const char *name, uint32 &offset, uint32 &size)
 	int i;
 
 	for(i = 0; i < numEntries; i++)
-		if(strcmpi(entries[i].name, name) == 0){
+		if(!CGeneral::faststricmp(entries[i].name, name)){
 			offset = entries[i].offset;
 			size = entries[i].size;
 			return true;

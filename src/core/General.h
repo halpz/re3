@@ -104,6 +104,29 @@ public:
 		return (int)floorf(angle / DEGTORAD(45.0f));
 	}
 
+	// Unlike usual string comparison functions, these don't care about greater or lesser
+	static bool faststrcmp(const char *str1, const char *str2)
+	{
+		for (; *str1; str1++, str2++) {
+			if (*str1 != *str2)
+				return true;
+		}
+		return *str2 != '\0';
+	}
+
+	static bool faststricmp(const char *str1, const char *str2)
+	{
+		for (; *str1; str1++, str2++) {
+#if MUCH_SLOWER
+			if (toupper(*str1) != toupper(*str2))
+#else
+			if (__ascii_toupper(*str1) != __ascii_toupper(*str2))
+#endif
+				return true;
+		}
+		return *str2 != '\0';
+	}
+
 	// not too sure about all these...
 	static uint16 GetRandomNumber(void)
 		{ return myrand() & MYRAND_MAX; }

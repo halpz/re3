@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "templates.h"
+#include "General.h"
 #include "Streaming.h"
 #include "RwHelper.h"
 #include "TxdStore.h"
@@ -61,7 +62,7 @@ CTxdStore::FindTxdSlot(const char *name)
 	int size = ms_pTxdPool->GetSize();
 	for(int i = 0; i < size; i++){
 		defname = GetTxdName(i);
-		if(defname && _strcmpi(defname, name) == 0)
+		if(defname && !CGeneral::faststricmp(defname, name))
 			return i;
 	}
 	return -1;

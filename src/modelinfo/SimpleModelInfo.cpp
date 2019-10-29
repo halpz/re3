@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "Camera.h"
 #include "ModelInfo.h"
 
@@ -131,7 +132,7 @@ CSimpleModelInfo::FindRelatedModel(void)
 	for(i = 0; i < MODELINFOSIZE; i++){
 		mi = CModelInfo::GetModelInfo(i);
 		if(mi && mi != this &&
-		   strcmp(GetName()+3, mi->GetName()+3) == 0){
+		   !CGeneral::faststrcmp(GetName()+3, mi->GetName()+3)){
 			assert(mi->IsSimple());
 			this->SetRelatedModel((CSimpleModelInfo*)mi);
 			return;

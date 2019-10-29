@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "audio_enums.h"
 
 #include "AudioManager.h"
@@ -2130,16 +2131,16 @@ uint32
 cAudioManager::GetSpecialCharacterTalkSfx(int32 modelIndex, int32 sound)
 {
 	char *modelName = CModelInfo::GetModelInfo(modelIndex)->GetName();
-	if(strcmpi(modelName, "eight") == 0 || strcmpi(modelName, "eight2") == 0) { return GetEightTalkSfx(sound); }
-	if(strcmpi(modelName, "frankie") == 0) { return GetFrankieTalkSfx(sound); }
-	if(strcmpi(modelName, "misty") == 0) { return GetMistyTalkSfx(sound); }
-	if(strcmpi(modelName, "ojg") == 0 || strcmpi(modelName, "ojg_p") == 0) { return GetOJGTalkSfx(sound); }
-	if(strcmpi(modelName, "cat") == 0) { return GetCatatalinaTalkSfx(sound); }
-	if(strcmpi(modelName, "bomber") == 0) { return GetBomberTalkSfx(sound); }
-	if(strcmpi(modelName, "s_guard") == 0) { return GetSecurityGuardTalkSfx(sound); }
-	if(strcmpi(modelName, "chunky") == 0) { return GetChunkyTalkSfx(sound); }
-	if(strcmpi(modelName, "asuka") == 0) { return GetGenericFemaleTalkSfx(sound); }
-	if(strcmpi(modelName, "maria") == 0) { return GetGenericFemaleTalkSfx(sound); }
+	if(!CGeneral::faststricmp(modelName, "eight") || !CGeneral::faststricmp(modelName, "eight2")) { return GetEightTalkSfx(sound); }
+	if(!CGeneral::faststricmp(modelName, "frankie")) { return GetFrankieTalkSfx(sound); }
+	if(!CGeneral::faststricmp(modelName, "misty")) { return GetMistyTalkSfx(sound); }
+	if(!CGeneral::faststricmp(modelName, "ojg") || !CGeneral::faststricmp(modelName, "ojg_p")) { return GetOJGTalkSfx(sound); }
+	if(!CGeneral::faststricmp(modelName, "cat")) { return GetCatatalinaTalkSfx(sound); }
+	if(!CGeneral::faststricmp(modelName, "bomber")) { return GetBomberTalkSfx(sound); }
+	if(!CGeneral::faststricmp(modelName, "s_guard")) { return GetSecurityGuardTalkSfx(sound); }
+	if(!CGeneral::faststricmp(modelName, "chunky")) { return GetChunkyTalkSfx(sound); }
+	if(!CGeneral::faststricmp(modelName, "asuka")) { return GetGenericFemaleTalkSfx(sound); }
+	if(!CGeneral::faststricmp(modelName, "maria")) { return GetGenericFemaleTalkSfx(sound); }
 
 	return GetGenericMaleTalkSfx(sound);
 }
@@ -3100,7 +3101,7 @@ int32
 FindMissionAudioSfx(const char *name)
 {
 	for(uint32 i = 0; i < ARRAY_SIZE(MissionAudioNameSfxAssoc); ++i) {
-		if(strcmpi(MissionAudioNameSfxAssoc[i].m_pName, name) == 0) return MissionAudioNameSfxAssoc[i].m_nId;
+		if(!CGeneral::faststricmp(MissionAudioNameSfxAssoc[i].m_pName, name)) return MissionAudioNameSfxAssoc[i].m_nId;
 	}
 	debug("Can't find mission audio %s", name);
 	return NO_SAMPLE;
