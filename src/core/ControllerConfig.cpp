@@ -1355,7 +1355,7 @@ bool CControllerConfigManager::GetIsKeyboardKeyJustDown(RsKeyCodes keycode)
 			return true;
 		break;
 	case rsENTER:
-		if (CPad::GetPad(PAD1)->GetEnterJustDown())
+		if (CPad::GetPad(PAD1)->GetReturnJustDown())
 			return true;
 		break;
 	case rsLSHIFT:

@@ -1969,11 +1969,11 @@ _WinMain(HINSTANCE instance,
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetLeftMouseJustDown() )
 							++gGameState;
-						else if ( CPad::GetPad(0)->GetPadEnterJustDown() || CPad::GetPad(0)->GetEnterJustDown() )
+						else if ( CPad::GetPad(0)->GetEnterJustDown() )
 							++gGameState;
-						else if ( CPad::GetPad(0)->GetCharJustDown(' ') )
+						else if ( CPad::GetPad(0)->GetCharJustDown(VK_SPACE) )
 							++gGameState;
-						else if ( CPad::GetPad(0)->GetLeftAltJustDown() || CPad::GetPad(0)->GetRightAltJustDown() )
+						else if ( CPad::GetPad(0)->GetAltJustDown() )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetTabJustDown() )
 							++gGameState;
@@ -2005,11 +2005,11 @@ _WinMain(HINSTANCE instance,
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetLeftMouseJustDown() )
 							++gGameState;
-						else if ( CPad::GetPad(0)->GetPadEnterJustDown() || CPad::GetPad(0)->GetEnterJustDown() )
+						else if ( CPad::GetPad(0)->GetEnterJustDown() )
 							++gGameState;
-						else if ( CPad::GetPad(0)->GetCharJustDown(' ') )
+						else if ( CPad::GetPad(0)->GetCharJustDown(VK_SPACE) )
 							++gGameState;
-						else if ( CPad::GetPad(0)->GetLeftAltJustDown() || CPad::GetPad(0)->GetRightAltJustDown() )
+						else if ( CPad::GetPad(0)->GetAltJustDown() )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetTabJustDown() )
 							++gGameState;
