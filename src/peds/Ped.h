@@ -58,6 +58,15 @@ enum PedRouteType
 	PEDROUTE_GO_TO_START_WHEN_DONE
 };
 
+enum FightMoveHitLevel
+{
+	HITLEVEL_NULL,
+	HITLEVEL_GROUND,
+	HITLEVEL_LOW,
+	HITLEVEL_MEDIUM,
+	HITLEVEL_HIGH
+};
+
 struct FightMove
 {
 	AnimationId animId;
@@ -65,7 +74,7 @@ struct FightMove
 	float endFireTime;
 	float comboFollowOnTime;
 	float strikeRadius;
-	uint8 hitLevel;
+	uint8 hitLevel; // FightMoveHitLevel
 	uint8 damage;
 	uint8 flags;
 };
@@ -99,7 +108,8 @@ enum PedFightMoves
 	FIGHTMOVE_HITBIGSTEP,
 	FIGHTMOVE_HITONFLOOR,
 	FIGHTMOVE_HITBEHIND,
-	FIGHTMOVE_IDLE2NORM
+	FIGHTMOVE_IDLE2NORM,
+	NUM_FIGHTMOVES
 };
 
 enum ePedPieceTypes
@@ -681,6 +691,7 @@ public:
 	void ScanForInterestingStuff(void);
 	void WarpPedIntoCar(CVehicle*);
 	void SetCarJack(CVehicle*);
+	void WarpPedToNearLeaderOffScreen(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
