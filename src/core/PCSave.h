@@ -19,3 +19,5 @@ extern C_PcSave PcSaveHelper;
 extern int *Slots;
 extern int *SlotFileName;
 extern int *SlotSaveDate;
+
+const char TopLineEmptyFile[] = "THIS FILE IS NOT VALID YET";

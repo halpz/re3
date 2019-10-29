@@ -16,6 +16,7 @@
 #include "ModelIndices.h"
 #include "Camera.h"
 #include "win.h"
+#include "PCSave.h"
 
 CControllerConfigManager &ControlsManager = *(CControllerConfigManager*)0x8F43A4;
 
@@ -75,7 +76,7 @@ void CControllerConfigManager::LoadSettings(int32 file)
 		char buff[29];
 		CFileMgr::Read(file, buff, sizeof(buff));
 
-		if (!strcmp(buff, "THIS FILE IS NOT VALID YET"))
+		if (!strncmp(buff, TopLineEmptyFile, sizeof(TopLineEmptyFile)-1))
 			bValid = false;
 		else
 			CFileMgr::Seek(file, 0, 0);
