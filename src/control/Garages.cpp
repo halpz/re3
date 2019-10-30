@@ -75,6 +75,9 @@ WRAPPER void CGarages::TriggerMessage(const char *text, int16, uint16 time, int1
 WRAPPER bool CGarages::IsPointWithinHideOutGarage(CVector&) { EAXJMP(0x428260); }
 WRAPPER bool CGarages::IsPointWithinAnyGarage(CVector&) { EAXJMP(0x428320); }
 WRAPPER void CGarages::PlayerArrestedOrDied() { EAXJMP(0x427F60); }
+WRAPPER int16 CGarages::AddOne(float, float, float, float, float, float, uint8, uint32) { EAXJMP(0x421FA0); }
+WRAPPER void CGarages::SetTargetCarForMissonGarage(int16, CVehicle*) { EAXJMP(0x426BD0); }
+WRAPPER bool CGarages::HasCarBeenDroppedOffYet(int16) { EAXJMP(0x426C20); }
 
 #if 0
 WRAPPER void CGarages::PrintMessages(void) { EAXJMP(0x426310); }

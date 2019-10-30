@@ -32,6 +32,10 @@ public:
 
 	static bool &bScriptsForceRain;
 	static bool &Stored_StateStored;
+	static float &Stored_InterpolationValue;
+	static int16 &Stored_OldWeatherType;
+	static int16 &Stored_NewWeatherType;
+	static float &Stored_Rain;
 
 	static void RenderRainStreaks(void);
 	static void Update(void);
@@ -39,4 +43,6 @@ public:
 	static void ReleaseWeather();
 	static void ForceWeather(int16);
 	static void ForceWeatherNow(int16);
+	static void StoreWeatherState();
+	static void RestoreWeatherState();
 };
