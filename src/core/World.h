@@ -120,6 +120,8 @@ public:
 	static void RemoveFallenPeds();
 	static void RemoveFallenCars();
 
+	static void StopAllLawEnforcersInTheirTracks();
+
 	static void Initialise();
 	static void ShutDown();
 	static void RepositionCertainDynamicObjects();

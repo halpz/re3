@@ -999,6 +999,19 @@ CWorld::RemoveFallenCars(void)
 }
 
 void
+CWorld::StopAllLawEnforcersInTheirTracks(void)
+{
+	int poolSize = CPools::GetVehiclePool()->GetSize();
+	for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
+		CVehicle* veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
+		if (veh) {
+			if (veh->bIsLawEnforcer)
+				veh->SetMoveSpeed(0.0f, 0.0f, 0.0f);
+		}
+	}
+}
+
+void
 CWorld::Process(void)
 {
 	if (!(CTimer::GetFrameCounter() & 63))

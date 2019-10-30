@@ -72,6 +72,22 @@ CPlayerInfo::ArrestPlayer()
 	CStats::TimesArrested++;
 }
 
+bool
+CPlayerInfo::IsPlayerInRemoteMode()
+{
+	return m_pRemoteVehicle || m_bInRemoteMode;
+}
+
+void
+CPlayerInfo::PlayerFailedCriticalMission()
+{
+	if (m_WBState != WBSTATE_PLAYING)
+		return;
+	m_WBState = WBSTATE_FAILED_CRITICAL_MISSION;
+	m_nWBTime = CTimer::GetTimeInMilliseconds();
+	CDarkel::ResetOnPlayerDeath();
+}
+
 STARTPATCHES
 InjectHook(0x4A1700, &CPlayerInfo::LoadPlayerSkin, PATCH_JUMP);
 InjectHook(0x4A1750, &CPlayerInfo::DeletePlayerSkin, PATCH_JUMP);

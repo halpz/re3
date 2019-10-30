@@ -75,6 +75,8 @@ public:
 	void Process(void);
 	void KillPlayer(void);
 	void ArrestPlayer(void);
+	bool IsPlayerInRemoteMode(void);
+	void PlayerFailedCriticalMission(void);
 };
 
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");
