@@ -4676,7 +4676,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPlayerPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pPed);
-		pPed->m_fHealth = *(float*)&ScriptParams[1];
+		pPed->m_fHealth = ScriptParams[1];
 		return 0;
 	}
 	case COMMAND_SET_CHAR_HEALTH:
@@ -4684,9 +4684,8 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
-		float health = *(float*)&ScriptParams[1];
-		if (health != 0.0f) {
-			pPed->m_fHealth = *(float*)&ScriptParams[1];
+		if (ScriptParams[1]) {
+			pPed->m_fHealth = ScriptParams[1];
 		}
 		else if (pPed->bInVehicle) {
 			pPed->SetDead();
@@ -4703,7 +4702,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
-		pVehicle->m_fHealth = *(float*)&ScriptParams[1];
+		pVehicle->m_fHealth = ScriptParams[1];
 		return 0;
 	}
 	case COMMAND_GET_PLAYER_HEALTH:
@@ -4839,7 +4838,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		CPed* pSourcePed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pSourcePed);
 		pSourcePed->ClearLookFlag();
-		pSourcePed->bIsRestoringLook = false;
+		pSourcePed->bKeepTryingToLook = false;
 		if (pSourcePed->GetPedState() == PED_LOOK_HEADING || pSourcePed->GetPedState() == PED_LOOK_ENTITY)
 			pSourcePed->RestorePreviousState();
 		return 0;
@@ -4850,7 +4849,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		CPed* pSourcePed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pSourcePed);
 		pSourcePed->ClearLookFlag();
-		pSourcePed->bIsRestoringLook = false;
+		pSourcePed->bKeepTryingToLook = false;
 		if (pSourcePed->GetPedState() == PED_LOOK_HEADING || pSourcePed->GetPedState() == PED_LOOK_ENTITY)
 			pSourcePed->RestorePreviousState();
 		return 0;
