@@ -19,9 +19,9 @@ class CPtrList;
 class CRenderer
 {
 	static int32 &ms_nNoOfVisibleEntities;
-	static CEntity **ms_aVisibleEntityPtrs;	// [2000];
+	static CEntity *(&ms_aVisibleEntityPtrs)[NUMVISIBLEENTITIES];
 	static int32 &ms_nNoOfInVisibleEntities;
-	static CEntity **ms_aInVisibleEntityPtrs;	// [150];
+	static CEntity *(&ms_aInVisibleEntityPtrs)[NUMINVISIBLEENTITIES];
 
 	static CVector &ms_vecCameraPosition;
 	static CVehicle *&m_pFirstPersonVehicle;

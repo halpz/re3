@@ -87,6 +87,9 @@ enum Config {
 	NUM_FIRES = 40,
 
 	NUMPEDROUTES = 200,
+
+	NUMVISIBLEENTITIES = 2000,
+	NUMINVISIBLEENTITIES = 150,
 };
 
 // We'll use this once we're ready to become independent of the game
