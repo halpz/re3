@@ -1,3 +1,5 @@
+class CEntity;
+
 class CCullZone
 {
 public:
@@ -11,9 +13,7 @@ public:
 
 	// TODO: figure these out:
 	int32 m_indexStart;
-	int16 unk2;
-	int16 unk3;
-	int16 unk4;
+	int16 m_groupIndexCount[3];
 	int16 m_numBuildings;
 	int16 m_numTreadablesPlus10m;
 	int16 m_numTreadables;
@@ -25,6 +25,32 @@ public:
 	static void DoStuffEnteringZone_OneBuilding(uint16 i);
 	static void DoStuffEnteringZone_OneTreadablePlus10m(uint16 i);
 	static void DoStuffEnteringZone_OneTreadable(uint16 i);
+
+
+	static bool TestLine(CVector a1, CVector a2);
+	float CalcDistToCullZoneSquared(float x, float y);
+	float CalcDistToCullZone(float x, float y) { return Sqrt(CalcDistToCullZoneSquared(x, y)); };
+	bool IsEntityCloseEnoughToZone(CEntity* entity, bool checkLevel);
+
+	void GetGroupStartAndSize(int32 groupid, int32 &start, int32 &size) {
+		switch (groupid) {
+		case 1:
+			start = m_groupIndexCount[0] + m_indexStart;
+			size = m_groupIndexCount[1];
+			break;
+		case 2:
+			start = m_groupIndexCount[0] + m_groupIndexCount[1] + m_indexStart;
+			size = m_groupIndexCount[2];
+			break;
+		default:
+			start = m_indexStart;
+			size = m_groupIndexCount[0];
+			break;
+		}
+	}
+
+	void FindTestPoints() {}; // todo
+	bool TestEntityVisibilityFromCullZone(CEntity*, float, CEntity*) { return false; }; // todo
 };
 
 enum eZoneAttribs
@@ -55,12 +81,12 @@ class CCullZones
 {
 public:
 	static int32     &NumCullZones;
-	static CCullZone *aZones;	// [NUMCULLZONES];
+	static CCullZone (&aZones)[NUMCULLZONES];
 	static int32     &NumAttributeZones;
-	static CAttributeZone *aAttributeZones;	// [NUMATTRIBZONES];
-	static uint16    *aIndices;	// [NUMZONEINDICES];
-	static int16     *aPointersToBigBuildingsForBuildings;	// [NUMBUILDINGS];
-	static int16     *aPointersToBigBuildingsForTreadables;	// [NUMTREADABLES];
+	static CAttributeZone(&aAttributeZones)[NUMATTRIBZONES];
+	static uint16        (&aIndices)[NUMZONEINDICES];
+	static int16         (&aPointersToBigBuildingsForBuildings)[NUMBUILDINGS];
+	static int16         (&aPointersToBigBuildingsForTreadables)[NUMTREADABLES];
 
 	static int32 &CurrentWantedLevelDrop_Player;
 	static int32 &CurrentFlags_Camera;
@@ -91,4 +117,10 @@ public:
 	static bool PlayerNoRain(void) { return (CurrentFlags_Player & ATTRZONE_NORAIN) != 0; }
 	static bool CamNoRain(void) { return (CurrentFlags_Camera & ATTRZONE_NORAIN) != 0; }
 	static int32 GetWantedLevelDrop(void) { return CurrentWantedLevelDrop_Player; }
+
+	static void BuildListForBigBuildings();
+	static void DoVisibilityTestCullZone(int zoneId, bool doIt);
+	static bool DoWeHaveMoreThanXOccurencesOfSet(int32 count, uint16 *set);
+
+	static void CompressIndicesArray() {};// todo
 };

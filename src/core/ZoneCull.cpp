@@ -9,14 +9,15 @@
 #include "World.h"
 #include "FileMgr.h"
 #include "ZoneCull.h"
+#include "Zones.h"
 
 int32     &CCullZones::NumCullZones = *(int*)0x8F2564;
-CCullZone *CCullZones::aZones = (CCullZone*)0x864750;	// [NUMCULLZONES];
+CCullZone(&CCullZones::aZones)[NUMCULLZONES] = *(CCullZone(*)[NUMCULLZONES])*(uintptr*)0x864750;
 int32     &CCullZones::NumAttributeZones = *(int*)0x8E29D0;
-CAttributeZone *CCullZones::aAttributeZones = (CAttributeZone*)0x709C60;	// [NUMATTRIBZONES];
-uint16    *CCullZones::aIndices = (uint16*)0x847330;	// [NUMZONEINDICES];
-int16     *CCullZones::aPointersToBigBuildingsForBuildings = (int16*)0x86C9D0;	// [NUMBUILDINGS];
-int16     *CCullZones::aPointersToBigBuildingsForTreadables = (int16*)0x8F1B8C;	// [NUMTREADABLES];
+CAttributeZone (&CCullZones::aAttributeZones)[NUMATTRIBZONES] = *(CAttributeZone(*)[NUMATTRIBZONES])*(uintptr*)0x709C60;
+uint16    (&CCullZones::aIndices)[NUMZONEINDICES] = *(uint16(*)[NUMZONEINDICES])*(uintptr*)0x847330;
+int16     (&CCullZones::aPointersToBigBuildingsForBuildings)[NUMBUILDINGS] = *(int16(*)[NUMBUILDINGS])*(uintptr*)0x86C9D0;
+int16     (&CCullZones::aPointersToBigBuildingsForTreadables)[NUMTREADABLES] = *(int16(*)[NUMTREADABLES])*(uintptr*)0x8F1B8C;
 
 int32 &CCullZones::CurrentWantedLevelDrop_Player = *(int32*)0x880DA8;
 int32 &CCullZones::CurrentFlags_Camera = *(int32*)0x940718;
@@ -47,6 +48,30 @@ CCullZones::Init(void)
 		aPointersToBigBuildingsForTreadables[i] = -1;
 }
 
+bool CCullZone::TestLine(CVector vec1, CVector vec2)
+{
+	CColPoint colPoint;
+	CEntity *entity;
+
+	if (CWorld::ProcessLineOfSight(vec1, vec2, colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	if (CWorld::ProcessLineOfSight(CVector(vec1.x + 0.05f, vec1.y, vec1.z), CVector(vec2.x + 0.05f, vec2.y, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	if (CWorld::ProcessLineOfSight(CVector(vec1.x - 0.05f, vec1.y, vec1.z), CVector(vec2.x - 0.05f, vec2.y, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	if (CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y + 0.05f, vec1.z), CVector(vec2.x, vec2.y + 0.05f, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	if (CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y - 0.05f, vec1.z), CVector(vec2.x, vec2.y - 0.05f, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	if (CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y, vec1.z + 0.05f), CVector(vec2.x, vec2.y, vec2.z + 0.05f), colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	return CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y, vec1.z - 0.05f), CVector(vec2.x, vec2.y, vec2.z - 0.05f), colPoint, entity, true, false, false, false, false, true, false);
+}
+
+
+uint16* pTempArrayIndices;
+int TempEntityIndicesUsed;
+
 void
 CCullZones::ResolveVisibilities(void)
 {
@@ -55,16 +80,135 @@ CCullZones::ResolveVisibilities(void)
 	CFileMgr::SetDir("");
 	fd = CFileMgr::OpenFile("DATA\\cullzone.dat", "rb");
 	if(fd > 0){
-		CFileMgr::Read(fd, (char*)&NumCullZones, 4);
-		CFileMgr::Read(fd, (char*)aZones, NUMCULLZONES*sizeof(CCullZone));
-		CFileMgr::Read(fd, (char*)&NumAttributeZones, 4);
-		CFileMgr::Read(fd, (char*)aAttributeZones, NUMATTRIBZONES*sizeof(CAttributeZone));
-		CFileMgr::Read(fd, (char*)aIndices, NUMZONEINDICES*2);
-		CFileMgr::Read(fd, (char*)aPointersToBigBuildingsForBuildings, NUMBUILDINGS*2);
-		CFileMgr::Read(fd, (char*)aPointersToBigBuildingsForTreadables, NUMTREADABLES*2);
+		CFileMgr::Read(fd, (char*)&NumCullZones, sizeof(NumCullZones));
+		CFileMgr::Read(fd, (char*)aZones, sizeof(aZones));
+		CFileMgr::Read(fd, (char*)&NumAttributeZones, sizeof(NumAttributeZones));
+		CFileMgr::Read(fd, (char*)aAttributeZones, sizeof(aAttributeZones));
+		CFileMgr::Read(fd, (char*)aIndices, sizeof(aIndices));
+		CFileMgr::Read(fd, (char*)aPointersToBigBuildingsForBuildings, sizeof(aPointersToBigBuildingsForBuildings));
+		CFileMgr::Read(fd, (char*)aPointersToBigBuildingsForTreadables, sizeof(aPointersToBigBuildingsForTreadables));
 		CFileMgr::CloseFile(fd);
 	}else{
 		// TODO: implement code from mobile to generate data here
+		EntityIndicesUsed = 0;
+		BuildListForBigBuildings();
+		pTempArrayIndices = new uint16[140000];
+		TempEntityIndicesUsed = 0;
+
+		for (int i = 0; i < NumCullZones; i++) {
+			DoVisibilityTestCullZone(i, true);
+		}
+
+		CompressIndicesArray();
+		delete[] pTempArrayIndices;
+
+		fd = CFileMgr::OpenFileForWriting("data\\cullzone.dat");
+		if (fd != 0) {
+			CFileMgr::Write(fd, (char*)&NumCullZones, sizeof(NumCullZones));
+			CFileMgr::Write(fd, (char*)aZones, sizeof(aZones));
+			CFileMgr::Write(fd, (char*)&NumAttributeZones, sizeof(NumAttributeZones));
+			CFileMgr::Write(fd, (char*)&aAttributeZones, sizeof(aAttributeZones));
+			CFileMgr::Write(fd, (char*)&aIndices, sizeof(aIndices));
+			CFileMgr::Write(fd, (char*)&aPointersToBigBuildingsForBuildings, sizeof(aPointersToBigBuildingsForBuildings));
+			CFileMgr::Write(fd, (char*)&aPointersToBigBuildingsForTreadables, sizeof(aPointersToBigBuildingsForTreadables));
+			CFileMgr::CloseFile(fd);
+		}
+	}
+}
+
+void
+CCullZones::BuildListForBigBuildings()
+{
+	for (int i = CPools::GetBuildingPool()->GetSize()-1; i >= 0; i--) {
+		CBuilding *building = CPools::GetBuildingPool()->GetSlot(i);
+		if (building == nil || !building->bIsBIGBuilding) continue;
+		CSimpleModelInfo *nonlod = (CSimpleModelInfo*)((CSimpleModelInfo *)CModelInfo::GetModelInfo(building->GetModelIndex()))->m_atomics[2];
+		if (nonlod == nil) continue;
+
+		for (int j = i; j >= 0; j--) {
+			CBuilding *building2 = CPools::GetBuildingPool()->GetSlot(j);
+			if (building2 == nil || building2->bIsBIGBuilding) continue;
+			if (CModelInfo::GetModelInfo(building2->GetModelIndex()) == nonlod) {
+				if ((building2->GetPosition() - building->GetPosition()).Magnitude() < 5.0f) {
+					aPointersToBigBuildingsForBuildings[j] = i;
+				}
+			}
+		}
+
+		for (int j = CPools::GetTreadablePool()->GetSize()-1; j >= 0; j--) {
+			CTreadable *treadable = CPools::GetTreadablePool()->GetSlot(j);
+			if (treadable == nil || treadable->bIsBIGBuilding) continue;
+			if (CModelInfo::GetModelInfo(treadable->GetModelIndex()) == nonlod) {
+				if ((treadable->GetPosition() - building->GetPosition()).Magnitude() < 5.0f) {
+					aPointersToBigBuildingsForTreadables[j] = i;
+				}
+			}
+		}
+	}
+}
+
+void
+CCullZones::DoVisibilityTestCullZone(int zoneId, bool doIt)
+{
+	aZones[zoneId].m_groupIndexCount[0] = 0;
+	aZones[zoneId].m_groupIndexCount[1] = 0;
+	aZones[zoneId].m_groupIndexCount[2] = 0;
+	aZones[zoneId].m_indexStart = TempEntityIndicesUsed;
+	aZones[zoneId].FindTestPoints();
+
+	if (!doIt) return;
+
+	for (int i = CPools::GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
+		CBuilding *building = CPools::GetBuildingPool()->GetSlot(i);
+		if (building != nil && !building->bIsBIGBuilding && aZones[zoneId].IsEntityCloseEnoughToZone(building, aPointersToBigBuildingsForBuildings[i] != -1)) {
+			CBuilding *building2 = nil;
+			if (aPointersToBigBuildingsForBuildings[i] != -1)
+				building2 = CPools::GetBuildingPool()->GetSlot(aPointersToBigBuildingsForBuildings[i]);
+
+			if (!aZones[zoneId].TestEntityVisibilityFromCullZone(building, 0.0f, building2)) {
+				pTempArrayIndices[TempEntityIndicesUsed++] = i;
+				aZones[zoneId].m_groupIndexCount[0]++;
+			}
+		}
+	}
+
+	for (int i = CPools::GetTreadablePool()->GetSize() - 1; i >= 0; i--) {
+		CTreadable* building = CPools::GetTreadablePool()->GetSlot(i);
+		if (building != nil && aZones[zoneId].IsEntityCloseEnoughToZone(building, aPointersToBigBuildingsForTreadables[i] != -1)) {
+			CTreadable* building2 = nil;
+			if (aPointersToBigBuildingsForTreadables[i] != -1)
+				building2 = CPools::GetTreadablePool()->GetSlot(aPointersToBigBuildingsForTreadables[i]);
+
+			if (!aZones[zoneId].TestEntityVisibilityFromCullZone(building, 10.0f, building2)) {
+				pTempArrayIndices[TempEntityIndicesUsed++] = i;
+				aZones[zoneId].m_groupIndexCount[1]++;
+			}
+		}
+	}
+
+	for (int i = CPools::GetTreadablePool()->GetSize() - 1; i >= 0; i--) {
+		CTreadable *building = CPools::GetTreadablePool()->GetSlot(i);
+		if (building != nil && aZones[zoneId].CalcDistToCullZoneSquared(building->GetPosition().x, building->GetPosition().y) < 40000.0f) {
+			int start = aZones[zoneId].m_groupIndexCount[0] + aZones[zoneId].m_indexStart;
+			int end = aZones[zoneId].m_groupIndexCount[1] + start;
+
+			bool alreadyAdded = false;
+
+			for (int k = start; k < end; k++) {
+				if (aIndices[k] == i)
+					alreadyAdded = true;
+			}
+
+			if (!alreadyAdded) {
+				CBuilding *building2 = nil;
+				if (aPointersToBigBuildingsForTreadables[i] != -1)
+					building2 = CPools::GetBuildingPool()->GetSlot(aPointersToBigBuildingsForTreadables[i]);
+				if (!aZones[zoneId].TestEntityVisibilityFromCullZone(building, 0.0f, building2)) {
+					pTempArrayIndices[TempEntityIndicesUsed++] = i;
+					aZones[zoneId].m_groupIndexCount[2]++;
+				}
+			}
+		}
 	}
 }
 
@@ -221,9 +365,9 @@ CCullZones::AddCullZone(CVector const &position,
 		cull->maxy = maxy;
 		cull->minz = minz;
 		cull->maxz = maxz;
-		cull->unk2 = 0;
-		cull->unk3 = 0;
-		cull->unk4 = 0;
+		cull->m_groupIndexCount[0] = 0;
+		cull->m_groupIndexCount[1] = 0;
+		cull->m_groupIndexCount[2] = 0;
 		cull->m_indexStart = 0;
 	}
 	if(flag & ~ATTRZONE_NOTCULLZONE){
@@ -355,6 +499,79 @@ CCullZone::DoStuffEnteringZone_OneTreadable(uint16 i)
 		for(j = 0; j < 3; j++)
 			DoStuffLeavingZone_OneBuilding(CCullZones::aIndices[i+j]);
 	}
+}
+
+float
+CCullZone::CalcDistToCullZoneSquared(float x, float y)
+{
+	float rx, ry;
+	float temp;
+
+	temp = minx;
+	if (temp <= x) {
+		temp = maxx;
+		if (x <= temp)
+			rx = 0.0f;
+		else
+			rx = sq(x - temp);
+	} else
+		rx = sq(x - temp);
+
+	temp = miny;
+	if (temp <= y) {
+		temp = maxy;
+		if (y <= temp)
+			ry = 0.0f;
+		else
+			ry = sq(y - temp);
+	} else
+		ry = sq(y - temp);
+
+	return rx + ry;
+}
+
+bool
+CCullZone::IsEntityCloseEnoughToZone(CEntity *entity, bool checkLevel)
+{
+	CVector &pos = entity->GetPosition();
+
+	CSimpleModelInfo *minfo = (CSimpleModelInfo*)CModelInfo::GetModelInfo(entity->GetModelIndex());
+	float distToZone = CalcDistToCullZone(pos.x, pos.y);
+	float lodDist;
+	if (minfo->m_isSubway)
+		lodDist = minfo->GetLargestLodDistance() + 30.0f;
+	else
+		lodDist = minfo->GetLargestLodDistance() + 50.0f;
+
+	if (lodDist > distToZone) return true;
+	if (!checkLevel) return false;
+	return CTheZones::GetLevelFromPosition(pos) == CTheZones::GetLevelFromPosition(CVector(minx, miny, minz));
+}
+
+bool
+CCullZones::DoWeHaveMoreThanXOccurencesOfSet(int32 count, uint16 *set)
+{
+	int32 curCount;
+	int32 start;
+	int32 size;
+
+	for (int i = 0; i < NumCullZones; i++) {
+		curCount = 0;
+		for (int group = 0; group < 3; group++) {
+			aZones[i].GetGroupStartAndSize(group, start, size);
+
+			int unk = 0; // TODO: figure out
+			for (int j = 0; j < size; j++) {
+				for (int k = 0; k < 3; k++) {
+					if (set[k] == pTempArrayIndices[start+j])
+						unk++;
+				}
+			}
+			if (unk == 3 && ++curCount >= count)
+				return true;
+		}
+	}
+	return false;
 }
 
 STARTPATCHES
