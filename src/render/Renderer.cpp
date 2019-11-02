@@ -40,9 +40,9 @@ struct EntityInfo
 CLinkList<EntityInfo> &gSortedVehiclesAndPeds = *(CLinkList<EntityInfo>*)0x629AC0;
 
 int32 &CRenderer::ms_nNoOfVisibleEntities = *(int32*)0x940730;
-CEntity **CRenderer::ms_aVisibleEntityPtrs = (CEntity**)0x6E9920;
+CEntity *(&CRenderer::ms_aVisibleEntityPtrs)[NUMVISIBLEENTITIES] = *(CEntity * (*)[NUMVISIBLEENTITIES]) * (uintptr*)0x6E9920;
+CEntity *(&CRenderer::ms_aInVisibleEntityPtrs)[NUMINVISIBLEENTITIES] = *(CEntity * (*)[NUMINVISIBLEENTITIES]) * (uintptr*)0x880B50;
 int32 &CRenderer::ms_nNoOfInVisibleEntities = *(int32*)0x8F1B78;
-CEntity **CRenderer::ms_aInVisibleEntityPtrs = (CEntity**)0x880B50;
 
 CVector &CRenderer::ms_vecCameraPosition = *(CVector*)0x8E2C3C;
 CVehicle *&CRenderer::m_pFirstPersonVehicle = *(CVehicle**)0x885B80;
@@ -73,9 +73,9 @@ CRenderer::PreRender(void)
 	for(i = 0; i < ms_nNoOfInVisibleEntities; i++)
 		ms_aInVisibleEntityPtrs[i]->PreRender();
 
-	for(node = CVisibilityPlugins::m_alphaEntityList.tail.prev;
-	    node != &CVisibilityPlugins::m_alphaEntityList.head;
-	    node = node->prev)
+	for(node = CVisibilityPlugins::m_alphaEntityList.head.next;
+	    node != &CVisibilityPlugins::m_alphaEntityList.tail;
+	    node = node->next)
 		((CEntity*)node->item.entity)->PreRender();
 
 	CHeli::SpecialHeliPreRender();
@@ -983,7 +983,7 @@ CRenderer::ScanSectorList(CPtrList *lists)
 					dy = ms_vecCameraPosition.y - ent->GetPosition().y;
 					if(dx > -65.0f && dx < 65.0f &&
 					   dy > -65.0f && dy < 65.0f &&
-					   ms_nNoOfInVisibleEntities < 150)
+					   ms_nNoOfInVisibleEntities < NUMINVISIBLEENTITIES - 1)
 						ms_aInVisibleEntityPtrs[ms_nNoOfInVisibleEntities++] = ent;
 					break;
 				case VIS_STREAMME:
@@ -1033,7 +1033,7 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 					dy = ms_vecCameraPosition.y - ent->GetPosition().y;
 					if(dx > -65.0f && dx < 65.0f &&
 					   dy > -65.0f && dy < 65.0f &&
-					   ms_nNoOfInVisibleEntities < 150)
+					   ms_nNoOfInVisibleEntities < NUMINVISIBLEENTITIES - 1)
 						ms_aInVisibleEntityPtrs[ms_nNoOfInVisibleEntities++] = ent;
 					break;
 				case VIS_STREAMME:
@@ -1078,7 +1078,7 @@ CRenderer::ScanSectorList_Subway(CPtrList *lists)
 				dy = ms_vecCameraPosition.y - ent->GetPosition().y;
 				if(dx > -65.0f && dx < 65.0f &&
 				   dy > -65.0f && dy < 65.0f &&
-				   ms_nNoOfInVisibleEntities < 150)
+				   ms_nNoOfInVisibleEntities < NUMINVISIBLEENTITIES - 1)
 					ms_aInVisibleEntityPtrs[ms_nNoOfInVisibleEntities++] = ent;
 				break;
 			}
@@ -1160,8 +1160,12 @@ CRenderer::IsEntityCullZoneVisible(CEntity *ent)
 		return IsVehicleCullZoneVisible(ent);
 	case ENTITY_TYPE_PED:
 		ped = (CPed*)ent;
-		if(ped->bInVehicle)
-			return ped->m_pMyVehicle && IsVehicleCullZoneVisible(ped->m_pMyVehicle);
+		if (ped->bInVehicle) {
+			if (ped->m_pMyVehicle)
+				return IsVehicleCullZoneVisible(ped->m_pMyVehicle);
+			else
+				return true;
+		}
 		return !(ped->m_pCurSurface && ped->m_pCurSurface->bZoneCulled2);
 	case ENTITY_TYPE_OBJECT:
 		obj = (CObject*)ent;
