@@ -354,6 +354,7 @@ DebugMenuPopulate(void)
 #ifndef MASTER
 		DebugMenuAddVarBool8("Debug", "Toggle unused fight feature", (int8*)&CPed::bUnusedFightThingOnPlayer, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle banned particles", (int8*)&CParticle::bEnableBannedParticles, nil);
+		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", (int8*)&CPed::bPopHeadsOnHeadshot, nil);
 #endif
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
