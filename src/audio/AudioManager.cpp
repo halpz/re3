@@ -9289,11 +9289,75 @@ cAudioManager::UpdateGasPedalAudio(CAutomobile *automobile)
 	automobile->m_fGasPedalAudio = newGasPedalAudio;
 }
 
-WRAPPER
 void
 cAudioManager::UpdateReflections()
 {
-	EAXJMP(0x57B470);
+	const CVector &camPos = TheCamera.GetPosition();
+	CColPoint colpoint;
+	CEntity *ent;
+
+	if(m_nTimeOfRecentCrime & 7) {
+		if(((uint8)m_nTimeOfRecentCrime + 1) & 7) {
+			if(((uint8)m_nTimeOfRecentCrime + 2) & 7) {
+				if(((uint8)m_nTimeOfRecentCrime + 3) & 7) {
+					if(!(((uint8)m_nTimeOfRecentCrime + 4) & 7)) {
+						m_avecReflectionsPos[4] = camPos;
+						m_avecReflectionsPos[4].z += 50.f;
+						if(CWorld::ProcessVerticalLine(
+						       camPos, m_avecReflectionsPos[4].z, colpoint,
+						       ent, true, false, false, false, true, false,
+						       false)) {
+							m_afReflectionsDistances[4] =
+							    colpoint.point.z - camPos.z;
+						} else {
+							m_afReflectionsDistances[4] = 50.0f;
+						}
+					}
+				} else {
+					m_avecReflectionsPos[3] = camPos;
+					m_avecReflectionsPos[3].x += 50.f;
+					if(CWorld::ProcessLineOfSight(
+					       camPos, m_avecReflectionsPos[3], colpoint, ent, true,
+					       false, false, true, false, true, true)) {
+						m_afReflectionsDistances[3] =
+						    Distance(camPos, colpoint.point);
+					} else {
+						m_afReflectionsDistances[3] = 50.0f;
+					}
+				}
+			} else {
+				m_avecReflectionsPos[2] = camPos;
+				m_avecReflectionsPos[2].x -= 50.f;
+				if(CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[2],
+				                              colpoint, ent, true, false, false,
+				                              true, false, true, true)) {
+					m_afReflectionsDistances[2] =
+					    Distance(camPos, colpoint.point);
+				} else {
+					m_afReflectionsDistances[2] = 50.0f;
+				}
+			}
+		} else {
+			m_avecReflectionsPos[1] = camPos;
+			m_avecReflectionsPos[1].y -= 50.f;
+			if(CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[1], colpoint,
+			                              ent, true, false, false, true, false, true,
+			                              true)) {
+				m_afReflectionsDistances[1] = Distance(camPos, colpoint.point);
+			} else {
+				m_afReflectionsDistances[1] = 50.0f;
+			}
+		}
+	} else {
+		m_avecReflectionsPos[0] = camPos;
+		m_avecReflectionsPos[0].y += 50.f;
+		if(CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[0], colpoint, ent, true,
+		                              false, false, true, false, true, true)) {
+			m_afReflectionsDistances[0] = Distance(camPos, colpoint.point);
+		} else {
+			m_afReflectionsDistances[0] = 50.0f;
+		}
+	}
 }
 
 bool
@@ -9570,6 +9634,7 @@ InjectHook(0x57FCC0, &cAudioManager::SetupSuspectLastSeenReport, PATCH_JUMP);
 InjectHook(0x57A150, &cAudioManager::Terminate, PATCH_JUMP);
 InjectHook(0x57AC60, &cAudioManager::TranslateEntity, PATCH_JUMP);
 InjectHook(0x56AC80, &cAudioManager::UpdateGasPedalAudio, PATCH_JUMP);
+InjectHook(0x57B470, &cAudioManager::UpdateReflections, PATCH_JUMP);
 InjectHook(0x56C600, &cAudioManager::UsesReverseWarning, PATCH_JUMP);
 InjectHook(0x56C3C0, &cAudioManager::UsesSiren, PATCH_JUMP);
 InjectHook(0x56C3F0, &cAudioManager::UsesSirenSwitching, PATCH_JUMP);

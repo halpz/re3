@@ -689,7 +689,7 @@ public:
 	void TranslateEntity(CVector *v1, CVector *v2) const;
 
 	void UpdateGasPedalAudio(CAutomobile *automobile);
-	void UpdateReflections(); // todo
+	void UpdateReflections();
 	bool UsesReverseWarning(int32 model) const;
 	bool UsesSiren(int32 model) const;
 	bool UsesSirenSwitching(int32 model) const;
