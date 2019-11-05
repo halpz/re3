@@ -78,21 +78,6 @@ public:
 	bool IsZero(void) { return x == 0.0f && y == 0.0f && z == 0.0f; }
 };
 
-inline float
-DotProduct(const CVector &v1, const CVector &v2)
-{
-	return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
-}
-
-inline CVector
-CrossProduct(const CVector &v1, const CVector &v2)
-{
-	return CVector(
-		v1.y*v2.z - v1.z*v2.y,
-		v1.z*v2.x - v1.x*v2.z,
-		v1.x*v2.y - v1.y*v2.x);
-}
-
 inline CVector operator+(const CVector &left, const CVector &right)
 {
 	return CVector(left.x + right.x, left.y + right.y, left.z + right.z);
@@ -116,4 +101,25 @@ inline CVector operator*(float left, const CVector &right)
 inline CVector operator/(const CVector &left, float right)
 {
 	return CVector(left.x / right, left.y / right, left.z / right);
+}
+
+inline float
+DotProduct(const CVector &v1, const CVector &v2)
+{
+	return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
+}
+
+inline CVector
+CrossProduct(const CVector &v1, const CVector &v2)
+{
+	return CVector(
+		v1.y*v2.z - v1.z*v2.y,
+		v1.z*v2.x - v1.x*v2.z,
+		v1.x*v2.y - v1.y*v2.x);
+}
+
+inline float
+Distance(const CVector &v1, const CVector &v2)
+{
+	return (v2 - v1).Magnitude();
 }
