@@ -27,7 +27,7 @@ This includes both starting new game and loading save game.
 
 There are various settings at the very bottom of `config.h`, you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
 
-https://github.com/GTAmodding/re3/blob/readme/src/core/config.h
+https://github.com/GTAmodding/re3/tree/master/src/core/config.h
 
 ## I want to contribute, where should I start?
 
