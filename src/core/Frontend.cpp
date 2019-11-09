@@ -1148,12 +1148,12 @@ void CMenuManager::LoadSettings()
 	CMBlur::BlurOn = true;
 	MousePointerStateHelper.bInvertVertically = true;
 
-	static char Ver;
+	char Ver[50];
 	int fileHandle = CFileMgr::OpenFile("gta3.set", "r");
 	if (fileHandle) {
-		CFileMgr::Read(fileHandle, (char*)&Ver, sizeof(Ver));
+		CFileMgr::Read(fileHandle, Ver, 29);
 
-		if (strncmp(&Ver, "THIS FILE IS NOT VALID YET", 26)) {
+		if (strncmp(Ver, TopLineEmptyFile, sizeof(TopLineEmptyFile) - 1)) {
 			CFileMgr::Seek(fileHandle, 0, 0);
 			ControlsManager.LoadSettings(fileHandle);
 			CFileMgr::Read(fileHandle, gString, 20);

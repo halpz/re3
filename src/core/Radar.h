@@ -55,7 +55,7 @@ enum
 struct CBlip
 {
 	uint32 m_nColor;
-	uint16 m_eBlipType; // eBlipType
+	uint32 m_eBlipType; // eBlipType
 	int32 m_nEntityHandle;
 	CVector2D m_vec2DPos;
 	CVector m_vecPos;
@@ -78,7 +78,7 @@ static_assert(sizeof(CBlip) == 0x30, "CBlip: error");
 class CRadar
 {
 public:
-	static float &m_RadarRange;
+	static float &m_radarRange;
 	static CBlip (&ms_RadarTrace)[NUMRADARBLIPS];
 	static CSprite2d *AsukaSprite;
 	static CSprite2d *BombSprite;

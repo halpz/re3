@@ -299,7 +299,7 @@ public:
 	bool GetTimesJustDown()       { return !!(NewKeyState.MUL && !OldKeyState.MUL); }
 	bool GetMinusJustDown()       { return !!(NewKeyState.SUB && !OldKeyState.SUB); }
 	bool GetPlusJustDown()        { return !!(NewKeyState.ADD && !OldKeyState.ADD); }
-	bool GetPadEnterJustDown()    { return !!(NewKeyState.ENTER && !OldKeyState.ENTER); } //  GetEnterJustDown
+	bool GetPadEnterJustDown()    { return !!(NewKeyState.ENTER && !OldKeyState.ENTER); }
 	bool GetPadDelJustDown()      { return !!(NewKeyState.DECIMAL && !OldKeyState.DECIMAL); }
 	bool GetPad1JustDown()        { return !!(NewKeyState.NUM1 && !OldKeyState.NUM1); }
 	bool GetPad2JustDown()        { return !!(NewKeyState.NUM2 && !OldKeyState.NUM2); }
@@ -314,7 +314,7 @@ public:
 	bool GetBackspaceJustDown()   { return !!(NewKeyState.BACKSP && !OldKeyState.BACKSP); }
 	bool GetTabJustDown()         { return !!(NewKeyState.TAB && !OldKeyState.TAB); }
 	bool GetCapsLockJustDown()    { return !!(NewKeyState.CAPSLOCK && !OldKeyState.CAPSLOCK); }
-	bool GetEnterJustDown()       { return !!(NewKeyState.EXTENTER && !OldKeyState.EXTENTER); }
+	bool GetReturnJustDown()       { return !!(NewKeyState.EXTENTER && !OldKeyState.EXTENTER); }
 	bool GetLeftShiftJustDown()   { return !!(NewKeyState.LSHIFT && !OldKeyState.LSHIFT); }
 	bool GetShiftJustDown()       { return !!(NewKeyState.SHIFT && !OldKeyState.SHIFT); }
 	bool GetRightShiftJustDown()  { return !!(NewKeyState.RSHIFT && !OldKeyState.RSHIFT); }
@@ -325,6 +325,8 @@ public:
 	bool GetLeftWinJustDown()     { return !!(NewKeyState.LWIN && !OldKeyState.LWIN); }
 	bool GetRightWinJustDown()    { return !!(NewKeyState.RWIN && !OldKeyState.RWIN); }
 	bool GetAppsJustDown()        { return !!(NewKeyState.APPS && !OldKeyState.APPS); }
+	bool GetEnterJustDown()       { return GetPadEnterJustDown() || GetReturnJustDown(); }
+	bool GetAltJustDown()         { return GetLeftAltJustDown() || GetRightAltJustDown(); }
 								  
 	bool GetChar(int32 c)         { return NewKeyState.VK_KEYS[c]; }
 	bool GetF(int32 n)            { return NewKeyState.F[n]; }

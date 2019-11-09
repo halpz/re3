@@ -16,6 +16,7 @@
 #include "ModelIndices.h"
 #include "Camera.h"
 #include "win.h"
+#include "PCSave.h"
 
 CControllerConfigManager &ControlsManager = *(CControllerConfigManager*)0x8F43A4;
 
@@ -75,7 +76,7 @@ void CControllerConfigManager::LoadSettings(int32 file)
 		char buff[29];
 		CFileMgr::Read(file, buff, sizeof(buff));
 
-		if (!strcmp(buff, "THIS FILE IS NOT VALID YET"))
+		if (!strncmp(buff, TopLineEmptyFile, sizeof(TopLineEmptyFile)-1))
 			bValid = false;
 		else
 			CFileMgr::Seek(file, 0, 0);
@@ -109,7 +110,7 @@ void CControllerConfigManager::InitDefaultControlConfiguration()
 		SetControllerKeyAssociatedWithAction(VEHICLE_HORN,                        rsRSHIFT,   KEYBOARD);
 	}																              
 	else															              
-		SetControllerKeyAssociatedWithAction(VEHICLE_HORN,                        rsSHIFT,    OPTIONAL_EXTRA);
+		SetControllerKeyAssociatedWithAction(VEHICLE_HORN,                        rsSHIFT,    OPTIONAL_EXTRA); // BUG: must be KEYBOARD ?
 																	              
 	SetControllerKeyAssociatedWithAction    (VEHICLE_HANDBRAKE,                   rsRCTRL,    KEYBOARD);
 	SetControllerKeyAssociatedWithAction    (VEHICLE_HANDBRAKE,                   ' ',        OPTIONAL_EXTRA);
@@ -162,11 +163,11 @@ void CControllerConfigManager::InitDefaultControlConfiguration()
 #ifndef FIX_BUGS
 		SetControllerKeyAssociatedWithAction(PED_SPRINT,                          rsRSHIFT,   OPTIONAL_EXTRA); // BUG: must be KEYBOARD
 #else
-		SetControllerKeyAssociatedWithAction(PED_SPRINT,                          rsRSHIFT,   KEYBOARD); // BUG: must be KEYBOARD ?
+		SetControllerKeyAssociatedWithAction(PED_SPRINT,                          rsRSHIFT,   KEYBOARD);
 #endif
 	}																	          
 	else																          
-		SetControllerKeyAssociatedWithAction(PED_SPRINT,                          rsSHIFT,    OPTIONAL_EXTRA);
+		SetControllerKeyAssociatedWithAction(PED_SPRINT,                          rsSHIFT,    OPTIONAL_EXTRA); // BUG: must be KEYBOARD ?
 																		          
 	SetControllerKeyAssociatedWithAction    (PED_CYCLE_TARGET_LEFT,               '[',        KEYBOARD);
 
@@ -351,115 +352,48 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 
 void CControllerConfigManager::InitialiseControllerActionNameArray()
 {
-	wchar buff[40+2];
+	wchar buf[ACTIONNAME_LENGTH + 2];
 
-	AsciiToUnicode("PED_LOOKBEHIND",                    buff);
-	CMessages::WideStringCopy(m_aActionNames[PED_LOOKBEHIND],                    buff, sizeof(m_aActionNames[PED_LOOKBEHIND]));
-																	             
-	AsciiToUnicode("PED_CYCLE_WEAPON_LEFT",             buff);					             
-	CMessages::WideStringCopy(m_aActionNames[PED_CYCLE_WEAPON_LEFT],             buff, sizeof(m_aActionNames[PED_CYCLE_WEAPON_LEFT]));
-																	             
-	AsciiToUnicode("PED_CYCLE_WEAPON_RIGHT",            buff);					             
-	CMessages::WideStringCopy(m_aActionNames[PED_CYCLE_WEAPON_RIGHT],            buff, sizeof(m_aActionNames[PED_CYCLE_WEAPON_RIGHT]));
-																	             
-	AsciiToUnicode("PED_LOCK_TARGET",                   buff);						             
-	CMessages::WideStringCopy(m_aActionNames[PED_LOCK_TARGET],                   buff, sizeof(m_aActionNames[PED_LOCK_TARGET]));
-																	             
-	AsciiToUnicode("PED_JUMPING",                       buff);							             
-	CMessages::WideStringCopy(m_aActionNames[PED_JUMPING],                       buff, sizeof(m_aActionNames[PED_JUMPING]));
-																	             
-	AsciiToUnicode("PED_SPRINT",                        buff);								             
-	CMessages::WideStringCopy(m_aActionNames[PED_SPRINT],                        buff, sizeof(m_aActionNames[PED_SPRINT]));
-																	             
-	AsciiToUnicode("PED_CYCLE_TARGET_LEFT",             buff);					             
-	CMessages::WideStringCopy(m_aActionNames[PED_CYCLE_TARGET_LEFT],             buff, sizeof(m_aActionNames[PED_CYCLE_TARGET_LEFT]));
-																	             
-	AsciiToUnicode("PED_CYCLE_TARGET_RIGHT",            buff);					             
-	CMessages::WideStringCopy(m_aActionNames[PED_CYCLE_TARGET_RIGHT],            buff, sizeof(m_aActionNames[PED_CYCLE_TARGET_RIGHT]));
-																			     
-	AsciiToUnicode("PED_CENTER_CAMERA_BEHIND_PLAYER",   buff);				     
-	CMessages::WideStringCopy(m_aActionNames[PED_CENTER_CAMERA_BEHIND_PLAYER],   buff, sizeof(m_aActionNames[PED_CENTER_CAMERA_BEHIND_PLAYER]));
-																			     
-	AsciiToUnicode("VEHICLE_LOOKBEHIND",                buff);								     
-	CMessages::WideStringCopy(m_aActionNames[VEHICLE_LOOKBEHIND],                buff, sizeof(m_aActionNames[VEHICLE_LOOKBEHIND]));
-																			     
-	AsciiToUnicode("VEHICLE_LOOKLEFT",                  buff);								     
-	CMessages::WideStringCopy(m_aActionNames[VEHICLE_LOOKLEFT],                  buff, sizeof(m_aActionNames[VEHICLE_LOOKLEFT]));
-																			     
-	AsciiToUnicode("VEHICLE_LOOKRIGHT",                 buff);								     
-	CMessages::WideStringCopy(m_aActionNames[VEHICLE_LOOKRIGHT],                 buff, sizeof(m_aActionNames[VEHICLE_LOOKRIGHT]));
-																			     
-	AsciiToUnicode("VEHICLE_HORN",                      buff);									     
-	CMessages::WideStringCopy(m_aActionNames[VEHICLE_HORN],                      buff, sizeof(m_aActionNames[VEHICLE_HORN]));
-																			     
-	AsciiToUnicode("VEHICLE_HANDBRAKE",                 buff);								     
-	CMessages::WideStringCopy(m_aActionNames[VEHICLE_HANDBRAKE],                 buff, sizeof(m_aActionNames[VEHICLE_HANDBRAKE]));
-																			     
-	AsciiToUnicode("VEHICLE_ACCELERATE",                buff);								     
-	CMessages::WideStringCopy(m_aActionNames[VEHICLE_ACCELERATE],                buff, sizeof(m_aActionNames[VEHICLE_ACCELERATE]));
-																			     
-	AsciiToUnicode("VEHICLE_BRAKE",                     buff);									     
-	CMessages::WideStringCopy(m_aActionNames[VEHICLE_BRAKE],                     buff, sizeof(m_aActionNames[VEHICLE_BRAKE]));
-																			     
-	AsciiToUnicode("VEHICLE_CHANGE_RADIO_STATION",      buff);					     
-	CMessages::WideStringCopy(m_aActionNames[VEHICLE_CHANGE_RADIO_STATION],      buff, sizeof(m_aActionNames[VEHICLE_CHANGE_RADIO_STATION]));
-																			     
-	AsciiToUnicode("TOGGLE_SUBMISSIONS",                buff);								     
-	CMessages::WideStringCopy(m_aActionNames[TOGGLE_SUBMISSIONS],                buff, sizeof(m_aActionNames[TOGGLE_SUBMISSIONS]));
-																			     
-	AsciiToUnicode("PED_SNIPER_ZOOM_IN",                buff);								     
-	CMessages::WideStringCopy(m_aActionNames[PED_SNIPER_ZOOM_IN],                buff, sizeof(m_aActionNames[PED_SNIPER_ZOOM_IN]));
-																			     
-	AsciiToUnicode("PED_SNIPER_ZOOM_OUT",               buff);							     
-	CMessages::WideStringCopy(m_aActionNames[PED_SNIPER_ZOOM_OUT],               buff, sizeof(m_aActionNames[PED_SNIPER_ZOOM_OUT]));
-																			     
-	AsciiToUnicode("PED_1RST_PERSON_LOOK_LEFT",         buff);						     
-	CMessages::WideStringCopy(m_aActionNames[PED_1RST_PERSON_LOOK_LEFT],         buff, sizeof(m_aActionNames[PED_1RST_PERSON_LOOK_LEFT]));
-																			     
-	AsciiToUnicode("PED_1RST_PERSON_LOOK_RIGHT",        buff);						     
-	CMessages::WideStringCopy(m_aActionNames[PED_1RST_PERSON_LOOK_RIGHT],        buff, sizeof(m_aActionNames[PED_1RST_PERSON_LOOK_RIGHT]));
-																			     
-	AsciiToUnicode("PED_1RST_PERSON_LOOK_UP",           buff);						     
-	CMessages::WideStringCopy(m_aActionNames[PED_1RST_PERSON_LOOK_UP],           buff, sizeof(m_aActionNames[PED_1RST_PERSON_LOOK_UP]));
-																			     
-	AsciiToUnicode("PED_1RST_PERSON_LOOK_DOWN",         buff);						     
-	CMessages::WideStringCopy(m_aActionNames[PED_1RST_PERSON_LOOK_DOWN],         buff, sizeof(m_aActionNames[PED_1RST_PERSON_LOOK_DOWN]));
-																			     
-	AsciiToUnicode("SHOW_MOUSE_POINTER_TOGGLE",         buff);						     
-	CMessages::WideStringCopy(m_aActionNames[SHOW_MOUSE_POINTER_TOGGLE],         buff, sizeof(m_aActionNames[SHOW_MOUSE_POINTER_TOGGLE]));
+#define SETACTIONNAME(name) AsciiToUnicode(#name, buf); CMessages::WideStringCopy(m_aActionNames[name], buf, ACTIONNAME_LENGTH);
 
-	AsciiToUnicode("CAMERA_CHANGE_VIEW_ALL_SITUATIONS", buff);
-	CMessages::WideStringCopy(m_aActionNames[CAMERA_CHANGE_VIEW_ALL_SITUATIONS], buff, sizeof(m_aActionNames[CAMERA_CHANGE_VIEW_ALL_SITUATIONS]));
+	SETACTIONNAME(PED_LOOKBEHIND);
+	SETACTIONNAME(PED_CYCLE_WEAPON_LEFT);
+	SETACTIONNAME(PED_CYCLE_WEAPON_RIGHT);
+	SETACTIONNAME(PED_LOCK_TARGET);
+	SETACTIONNAME(PED_JUMPING);
+	SETACTIONNAME(PED_SPRINT);
+	SETACTIONNAME(PED_CYCLE_TARGET_LEFT);
+	SETACTIONNAME(PED_CYCLE_TARGET_RIGHT);
+	SETACTIONNAME(PED_CENTER_CAMERA_BEHIND_PLAYER);
+	SETACTIONNAME(VEHICLE_LOOKBEHIND);
+	SETACTIONNAME(VEHICLE_LOOKLEFT);
+	SETACTIONNAME(VEHICLE_LOOKRIGHT);
+	SETACTIONNAME(VEHICLE_HORN);
+	SETACTIONNAME(VEHICLE_HANDBRAKE);
+	SETACTIONNAME(VEHICLE_ACCELERATE);
+	SETACTIONNAME(VEHICLE_BRAKE);
+	SETACTIONNAME(VEHICLE_CHANGE_RADIO_STATION);
+	SETACTIONNAME(TOGGLE_SUBMISSIONS);
+	SETACTIONNAME(PED_SNIPER_ZOOM_IN);
+	SETACTIONNAME(PED_SNIPER_ZOOM_OUT);
+	SETACTIONNAME(PED_1RST_PERSON_LOOK_LEFT);
+	SETACTIONNAME(PED_1RST_PERSON_LOOK_RIGHT);
+	SETACTIONNAME(PED_1RST_PERSON_LOOK_UP);
+	SETACTIONNAME(PED_1RST_PERSON_LOOK_DOWN);
+	SETACTIONNAME(SHOW_MOUSE_POINTER_TOGGLE);
+	SETACTIONNAME(CAMERA_CHANGE_VIEW_ALL_SITUATIONS);
+	SETACTIONNAME(PED_FIREWEAPON);
+	SETACTIONNAME(VEHICLE_ENTER_EXIT);
+	SETACTIONNAME(GO_LEFT);
+	SETACTIONNAME(GO_RIGHT);
+	SETACTIONNAME(GO_FORWARD);
+	SETACTIONNAME(GO_BACK);
+	SETACTIONNAME(NETWORK_TALK);
+	SETACTIONNAME(TOGGLE_DPAD);
+	SETACTIONNAME(SWITCH_DEBUG_CAM_ON);
+	SETACTIONNAME(TAKE_SCREEN_SHOT);
 
-	AsciiToUnicode("PED_FIREWEAPON",                    buff);
-	CMessages::WideStringCopy(m_aActionNames[PED_FIREWEAPON],                    buff, sizeof(m_aActionNames[PED_FIREWEAPON]));
-
-	AsciiToUnicode("VEHICLE_ENTER_EXIT",                buff);
-	CMessages::WideStringCopy(m_aActionNames[VEHICLE_ENTER_EXIT],                buff, sizeof(m_aActionNames[VEHICLE_ENTER_EXIT]));
-
-	AsciiToUnicode("GO_LEFT",                           buff);
-	CMessages::WideStringCopy(m_aActionNames[GO_LEFT],                           buff, sizeof(m_aActionNames[GO_LEFT]));
-
-	AsciiToUnicode("GO_RIGHT",                          buff);
-	CMessages::WideStringCopy(m_aActionNames[GO_RIGHT],                          buff, sizeof(m_aActionNames[GO_RIGHT]));
-
-	AsciiToUnicode("GO_FORWARD",                        buff);
-	CMessages::WideStringCopy(m_aActionNames[GO_FORWARD],                        buff, sizeof(m_aActionNames[GO_FORWARD]));
-
-	AsciiToUnicode("GO_BACK",                           buff);
-	CMessages::WideStringCopy(m_aActionNames[GO_BACK],                           buff, sizeof(m_aActionNames[GO_BACK]));
-
-	AsciiToUnicode("NETWORK_TALK",                      buff);
-	CMessages::WideStringCopy(m_aActionNames[NETWORK_TALK],                      buff, sizeof(m_aActionNames[NETWORK_TALK]));
-
-	AsciiToUnicode("TOGGLE_DPAD",                       buff);
-	CMessages::WideStringCopy(m_aActionNames[TOGGLE_DPAD],                       buff, sizeof(m_aActionNames[TOGGLE_DPAD]));
-
-	AsciiToUnicode("SWITCH_DEBUG_CAM_ON",               buff);
-	CMessages::WideStringCopy(m_aActionNames[SWITCH_DEBUG_CAM_ON],               buff, sizeof(m_aActionNames[SWITCH_DEBUG_CAM_ON]));
-
-	AsciiToUnicode("TAKE_SCREEN_SHOT",                  buff);
-	CMessages::WideStringCopy(m_aActionNames[TAKE_SCREEN_SHOT],                  buff, sizeof(m_aActionNames[TAKE_SCREEN_SHOT]));
+#undef SETACTIONNAME
 }
 
 void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown(int32 button, int32 padnumber)
@@ -1422,7 +1356,7 @@ bool CControllerConfigManager::GetIsKeyboardKeyJustDown(RsKeyCodes keycode)
 			return true;
 		break;
 	case rsENTER:
-		if (CPad::GetPad(PAD1)->GetEnterJustDown())
+		if (CPad::GetPad(PAD1)->GetReturnJustDown())
 			return true;
 		break;
 	case rsLSHIFT:

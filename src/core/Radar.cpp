@@ -15,7 +15,7 @@
 #include "World.h"
 #include "Streaming.h"
 
-float &CRadar::m_RadarRange = *(float*)0x8E281C;
+float &CRadar::m_radarRange = *(float*)0x8E281C;
 CBlip (&CRadar::ms_RadarTrace)[NUMRADARBLIPS] = *(CBlip(*)[NUMRADARBLIPS]) * (uintptr*)0x6ED5E0;
 CVector2D &vec2DRadarOrigin = *(CVector2D*)0x6299B8;
 int *gRadarTxdIds = (int*)0x6299C0;
@@ -288,7 +288,7 @@ void CRadar::DrawBlips()
 
 		CVector2D vec2d;
 		vec2d.x = vec2DRadarOrigin.x;
-		vec2d.y = M_SQRT2 * m_RadarRange + vec2DRadarOrigin.y;
+		vec2d.y = M_SQRT2 * m_radarRange + vec2DRadarOrigin.y;
 		TransformRealWorldPointToRadarSpace(in, vec2d);
 		LimitRadarPoint(in);
 		TransformRadarPointToScreenSpace(out, in);
@@ -527,14 +527,14 @@ void CRadar::DrawMap()
 		if (FindPlayerVehicle()) {
 			float speed = FindPlayerSpeed().Magnitude();
 			if (speed < RADAR_MIN_SPEED)
-				m_RadarRange = RADAR_MIN_RANGE;
+				m_radarRange = RADAR_MIN_RANGE;
 			else if (speed < RADAR_MAX_SPEED)
-				m_RadarRange = (speed - RADAR_MIN_SPEED)/(RADAR_MAX_SPEED-RADAR_MIN_SPEED) * (RADAR_MAX_RANGE-RADAR_MIN_RANGE) + RADAR_MIN_RANGE;
+				m_radarRange = (speed - RADAR_MIN_SPEED)/(RADAR_MAX_SPEED-RADAR_MIN_SPEED) * (RADAR_MAX_RANGE-RADAR_MIN_RANGE) + RADAR_MIN_RANGE;
 			else
-				m_RadarRange = RADAR_MAX_RANGE;
+				m_radarRange = RADAR_MAX_RANGE;
 		}
 		else
-			m_RadarRange = RADAR_MIN_RANGE;
+			m_radarRange = RADAR_MIN_RANGE;
 
 		vec2DRadarOrigin = CVector2D(FindPlayerCentreOfWorld_NoSniperShift());
 		DrawRadarMap();
@@ -795,12 +795,89 @@ uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright)
 }
 #endif
 
-#if 1
+const char* gRadarTexNames[] = {
+	"radar00",
+	"radar01",
+	"radar02",
+	"radar03",
+	"radar04",
+	"radar05",
+	"radar06",
+	"radar07",
+	"radar08",
+	"radar09",
+	"radar10",
+	"radar11",
+	"radar12",
+	"radar13",
+	"radar14",
+	"radar15",
+	"radar16",
+	"radar17",
+	"radar18",
+	"radar19",
+	"radar20",
+	"radar21",
+	"radar22",
+	"radar23",
+	"radar24",
+	"radar25",
+	"radar26",
+	"radar27",
+	"radar28",
+	"radar29",
+	"radar30",
+	"radar31",
+	"radar32",
+	"radar33",
+	"radar34",
+	"radar35",
+	"radar36",
+	"radar37",
+	"radar38",
+	"radar39",
+	"radar40",
+	"radar41",
+	"radar42",
+	"radar43",
+	"radar44",
+	"radar45",
+	"radar46",
+	"radar47",
+	"radar48",
+	"radar49",
+	"radar50",
+	"radar51",
+	"radar52",
+	"radar53",
+	"radar54",
+	"radar55",
+	"radar56",
+	"radar57",
+	"radar58",
+	"radar59",
+	"radar60",
+	"radar61",
+};
+
+#if 0
 WRAPPER void CRadar::Initialise() { EAXJMP(0x4A3EF0); }
 #else
-void CRadar::Initialise()
+void
+CRadar::Initialise()
 {
+	for (int i = 0; i < NUMRADARBLIPS; i++) {
+		ms_RadarTrace[i].m_BlipIndex = 1;
+		SetRadarMarkerState(i, false);
+		ms_RadarTrace[i].m_bInUse = false;
+		ms_RadarTrace[i].m_eBlipType = BLIP_NONE;
+		ms_RadarTrace[i].m_eBlipDisplay = BLIP_DISPLAY_NEITHER;
+		ms_RadarTrace[i].m_IconID = RADAR_SPRITE_NONE;
+	}
 
+	m_radarRange = 350.0f;
+	for (int i = 0; i < 64; i++) 
+		gRadarTxdIds[i] = CTxdStore::FindTxdSlot(gRadarTexNames[i]);
 }
 #endif
 
@@ -1102,7 +1179,7 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D
 	out.x = s * in.y + c * in.x;
 	out.y = c * in.y - s * in.x;
 
-	out = out * m_RadarRange + vec2DRadarOrigin;
+	out = out * m_radarRange + vec2DRadarOrigin;
 }
 #endif
 
@@ -1142,8 +1219,8 @@ void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D
 		c = Cos(forward.Heading());
 	}
 
-	float x = (in.x - vec2DRadarOrigin.x) * (1.0f / m_RadarRange);
-	float y = (in.y - vec2DRadarOrigin.y) * (1.0f / m_RadarRange);
+	float x = (in.x - vec2DRadarOrigin.x) * (1.0f / m_radarRange);
+	float y = (in.y - vec2DRadarOrigin.y) * (1.0f / m_radarRange);
 
 	out.x = s * y + c * x;
 	out.y = c * y - s * x;

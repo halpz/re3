@@ -1855,7 +1855,7 @@ char *CPad::EditString(char *pStr, int32 nSize)
 	}
 
 	// extenter/up/down
-	if ( GetPad(0)->GetEnterJustDown() || GetPad(0)->GetUpJustDown() || GetPad(0)->GetDownJustDown() )
+	if ( GetPad(0)->GetReturnJustDown() || GetPad(0)->GetUpJustDown() || GetPad(0)->GetDownJustDown() )
 		return nil;
 	
 	return pStr;
@@ -1976,7 +1976,7 @@ int32 *CPad::EditCodesForControls(int32 *pRsKeys, int32 nSize)
 	if ( GetPad(0)->GetCapsLockJustDown() )
 		*pRsKeys = rsCAPSLK;
 	
-	if ( GetPad(0)->GetEnterJustDown() )
+	if ( GetPad(0)->GetReturnJustDown() )
 		*pRsKeys = rsENTER;
 	
 	if ( GetPad(0)->GetLeftShiftJustDown() )

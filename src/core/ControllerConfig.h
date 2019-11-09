@@ -117,7 +117,7 @@ public:
 	DIJOYSTATE2           m_OldState;
 	DIJOYSTATE2           m_NewState;
 #endif
-	wchar                 m_aActionNames[MAX_CONTROLLERACTIONS][40];
+	wchar                 m_aActionNames[MAX_CONTROLLERACTIONS][ACTIONNAME_LENGTH];
 	bool                  m_aButtonStates[MAX_BUTTONS];
 	char _pad1[3];
 	tControllerConfigBind m_aSettings[MAX_CONTROLLERACTIONS][MAX_CONTROLLERTYPES];

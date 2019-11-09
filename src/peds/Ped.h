@@ -15,6 +15,7 @@
 
 struct CPathNode;
 class CAccident;
+class CObject;
 
 struct CPedAudioData
 {
@@ -58,6 +59,15 @@ enum PedRouteType
 	PEDROUTE_GO_TO_START_WHEN_DONE
 };
 
+enum FightMoveHitLevel
+{
+	HITLEVEL_NULL,
+	HITLEVEL_GROUND,
+	HITLEVEL_LOW,
+	HITLEVEL_MEDIUM,
+	HITLEVEL_HIGH
+};
+
 struct FightMove
 {
 	AnimationId animId;
@@ -65,7 +75,7 @@ struct FightMove
 	float endFireTime;
 	float comboFollowOnTime;
 	float strikeRadius;
-	uint8 hitLevel;
+	uint8 hitLevel; // FightMoveHitLevel
 	uint8 damage;
 	uint8 flags;
 };
@@ -99,7 +109,8 @@ enum PedFightMoves
 	FIGHTMOVE_HITBIGSTEP,
 	FIGHTMOVE_HITONFLOOR,
 	FIGHTMOVE_HITBEHIND,
-	FIGHTMOVE_IDLE2NORM
+	FIGHTMOVE_IDLE2NORM,
+	NUM_FIGHTMOVES
 };
 
 enum ePedPieceTypes
@@ -352,7 +363,7 @@ public:
 
 	uint8 bShakeFist : 1;  // test shake hand at look entity
 	uint8 bNoCriticalHits : 1; // if set, limbs won't came off
-	uint8 m_ped_flagI4 : 1; // seems like related with cars
+	uint8 m_ped_flagI4 : 1; // we've been put to car by script? - related with cars
 	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 bFallenDown : 1;
 #ifdef VC_PED_PORTS
@@ -420,7 +431,7 @@ public:
 	float m_headingRate;
 	uint16 m_vehEnterType;	// TODO: this is more like a door, not a type
 	int16 m_walkAroundType;
-	CEntity *m_pCurrentPhysSurface;
+	CPhysical *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
 	CEntity *m_pCurSurface;
 	CVector m_vecSeekPos;
@@ -522,7 +533,6 @@ public:
 	void SetDead(void);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
 	void RemoveBodyPart(PedNode nodeId, int8 direction);
-	void SpawnFlyingComponent(int, int8);
 	bool OurPedCanSeeThisOne(CEntity *target);
 	void Avoid(void);
 	void Attack(void);
@@ -660,7 +670,6 @@ public:
 	void ProcessBuoyancy(void);
 	void ServiceTalking(void);
 	void SetJump(void);
-	void UpdatePosition(void);
 	void WanderPath(void);
 	void ReactToPointGun(CEntity*);
 	void SeekCar(void);
@@ -681,6 +690,7 @@ public:
 	void ScanForInterestingStuff(void);
 	void WarpPedIntoCar(CVehicle*);
 	void SetCarJack(CVehicle*);
+	void WarpPedToNearLeaderOffScreen(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -756,6 +766,8 @@ public:
 	void WanderRange(void);
 	void SetFollowRoute(int16, int16);
 	void SeekBoatPosition(void);
+	void UpdatePosition(void);
+	CObject *SpawnFlyingComponent(int, int8);
 #ifdef VC_PED_PORTS
 	bool CanPedJumpThis(CEntity*, CVector*);
 #else
@@ -785,9 +797,12 @@ public:
 	static CPedAudioData (&CommentWaitTime)[38];
 
 #ifndef MASTER
+	static bool bUnusedFightThingOnPlayer;
+	static bool bPopHeadsOnHeadshot;
+
+	// Mobile things
 	static void SwitchDebugDisplay(void);
 	void DebugRenderOnePedText(void);
-	static bool bUnusedFightThingOnPlayer;
 #endif
 };
 

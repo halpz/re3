@@ -38,11 +38,18 @@
 #include "sampman.h"
 
 cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
-uint32 *audioLogicTimers = (uint32 *)0x6508A0;
+uint32 &gPornNextTime = *(uint32*)0x6508A0;
+uint32 &gSawMillNextTime = *(uint32*)0x6508A4;
+uint32 &gShopNextTime = *(uint32*)0x6508A8;
+uint32 &gAirportNextTime = *(uint32*)0x6508AC;
+uint32 &gCinemaNextTime = *(uint32*)0x6508B0;
+uint32 &gDocksNextTime = *(uint32*)0x6508B4;
+uint32 &gHomeNextTime = *(uint32*)0x6508B8;
+uint32 &gCellNextTime = *(uint32*)0x6508BC;
+uint32 &gNextCryTime = *(uint32*)0x6508C0;
 uint8 &jumboVolOffset = *(uint8 *)0x6508ED;
 uint8 &gJumboVolOffsetPercentage = *(uint8 *)0x6508ED;
 char &g_nMissionAudioPlayingStatus = *(char *)0x60ED88;
-int32 *BankStartOffset = (int32 *)0x6FAB70; //[2]
 int32 &g_nMissionAudioSfx = *(int32 *)0x60ED84;
 bool &bPlayerJustEnteredCar = *(bool *)0x6508C4;
 bool &g_bMissionAudioLoadFailed = *(bool *)0x95CD8E;
@@ -415,47 +422,47 @@ cAudioManager::AddReleasingSounds()
 {
 	bool toProcess[44];
 
-	for(int32 i = 0; i < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue]; i++) {
-		tActiveSample &sample =
-		    m_asSamples[!m_bActiveSampleQueue][m_abSampleQueueIndexTable[!m_bActiveSampleQueue][i]];
-		if(!m_asSamples[!m_bActiveSampleQueue][m_abSampleQueueIndexTable[!m_bActiveSampleQueue][i]]
-		        .m_bLoopEnded) {
-			toProcess[i] = false;
-			for(int32 j = 0; j < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue]; j++) {
-				if(sample.m_nEntityIndex ==
-				       m_asSamples[m_bActiveSampleQueue]
-				                  [m_abSampleQueueIndexTable[m_bActiveSampleQueue][j]]
-				                      .m_nEntityIndex &&
-				   sample.m_counter == m_asSamples[m_bActiveSampleQueue]
-				                                  [m_abSampleQueueIndexTable[m_bActiveSampleQueue][j]]
-				                                      .m_counter) {
-					toProcess[i] = true;
-					break;
-				}
+	int8 queue = m_bActiveSampleQueue == 0;
+
+	for(int32 i = 0; i < m_bSampleRequestQueuesStatus[queue]; i++) {
+		tActiveSample &sample = m_asSamples[queue][m_abSampleQueueIndexTable[queue][i]];
+		if (sample.m_bLoopEnded) continue;
+
+		toProcess[i] = false;
+		for(int32 j = 0; j < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue]; j++) {
+			if(sample.m_nEntityIndex ==
+				    m_asSamples[m_bActiveSampleQueue]
+				                [m_abSampleQueueIndexTable[m_bActiveSampleQueue][j]]
+				                    .m_nEntityIndex &&
+				sample.m_counter == m_asSamples[m_bActiveSampleQueue]
+				                                [m_abSampleQueueIndexTable[m_bActiveSampleQueue][j]]
+				                                    .m_counter) {
+				toProcess[i] = true;
+				break;
 			}
-			if(!toProcess[i]) {
-				if(sample.m_counter <= 255u || !sample.m_bLoopsRemaining) {
-					if(!sample.field_76) continue;
-					if(!sample.m_nLoopCount) {
-						if(sample.field_88 == -1) {
-							sample.field_88 = sample.m_bVolume / sample.field_76;
-							if(sample.field_88 <= 0) sample.field_88 = 1;
-						}
-						if(sample.m_bVolume <= sample.field_88) {
-							sample.field_76 = 0;
-							continue;
-						}
-						sample.m_bVolume -= sample.field_88;
+		}
+		if(!toProcess[i]) {
+			if(sample.m_counter <= 255u || !sample.m_bLoopsRemaining) {
+				if(!sample.field_76) continue;
+				if(!sample.m_nLoopCount) {
+					if(sample.field_88 == -1) {
+						sample.field_88 = sample.m_bVolume / sample.field_76;
+						if(sample.field_88 <= 0) sample.field_88 = 1;
 					}
-					--sample.field_76;
-					if(field_2) {
-						if(sample.field_16 < 20) ++sample.field_16;
+					if(sample.m_bVolume <= sample.field_88) {
+						sample.field_76 = 0;
+						continue;
 					}
-					sample.field_56 = 0;
+					sample.m_bVolume -= sample.field_88;
 				}
-				memcpy(&m_sQueueSample, &sample, 92);
-				AddSampleToRequestedQueue();
+				--sample.field_76;
+				if(field_2) {
+					if(sample.field_16 < 20) ++sample.field_16;
+				}
+				sample.field_56 = 0;
 			}
+			memcpy(&m_sQueueSample, &sample, sizeof(sample));
+			AddSampleToRequestedQueue();
 		}
 	}
 }
@@ -625,7 +632,7 @@ cAudioManager::ComputeVolume(uint8 emittingVolume, float soundIntensity, float d
 }
 
 int32
-cAudioManager::CreateEntity(int32 type, CPhysical *entity)
+cAudioManager::CreateEntity(int32 type, void *entity)
 {
 	if(!m_bIsInitialised) return -4;
 	if(!entity) return -2;
@@ -635,7 +642,7 @@ cAudioManager::CreateEntity(int32 type, CPhysical *entity)
 			m_asAudioEntities[i].m_bIsUsed = true;
 			m_asAudioEntities[i].m_bStatus = 0;
 			m_asAudioEntities[i].m_nType = (eAudioType)type;
-			m_asAudioEntities[i].m_pEntity = (void *)entity;
+			m_asAudioEntities[i].m_pEntity = entity;
 			m_asAudioEntities[i].m_awAudioEvent[0] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[1] = SOUND_TOTAL_PED_SOUNDS;
 			m_asAudioEntities[i].m_awAudioEvent[2] = SOUND_TOTAL_PED_SOUNDS;
@@ -2123,16 +2130,16 @@ uint32
 cAudioManager::GetSpecialCharacterTalkSfx(int32 modelIndex, int32 sound)
 {
 	char *modelName = CModelInfo::GetModelInfo(modelIndex)->GetName();
-	if(strcmp(modelName, "eight") == 0 || strcmp(modelName, "eight2") == 0) { return GetEightTalkSfx(sound); }
-	if(strcmp(modelName, "frankie") == 0) { return GetFrankieTalkSfx(sound); }
-	if(strcmp(modelName, "misty") == 0) { return GetMistyTalkSfx(sound); }
-	if(strcmp(modelName, "ojg") == 0 || strcmp(modelName, "ojg_p") == 0) { return GetOJGTalkSfx(sound); }
-	if(strcmp(modelName, "cat") == 0) { return GetCatatalinaTalkSfx(sound); }
-	if(strcmp(modelName, "bomber") == 0) { return GetBomberTalkSfx(sound); }
-	if(strcmp(modelName, "s_guard") == 0) { return GetSecurityGuardTalkSfx(sound); }
-	if(strcmp(modelName, "chunky") == 0) { return GetChunkyTalkSfx(sound); }
-	if(strcmp(modelName, "asuka") == 0) { return GetGenericFemaleTalkSfx(sound); }
-	if(strcmp(modelName, "maria") == 0) { return GetGenericFemaleTalkSfx(sound); }
+	if(strcmpi(modelName, "eight") == 0 || strcmpi(modelName, "eight2") == 0) { return GetEightTalkSfx(sound); }
+	if(strcmpi(modelName, "frankie") == 0) { return GetFrankieTalkSfx(sound); }
+	if(strcmpi(modelName, "misty") == 0) { return GetMistyTalkSfx(sound); }
+	if(strcmpi(modelName, "ojg") == 0 || strcmpi(modelName, "ojg_p") == 0) { return GetOJGTalkSfx(sound); }
+	if(strcmpi(modelName, "cat") == 0) { return GetCatatalinaTalkSfx(sound); }
+	if(strcmpi(modelName, "bomber") == 0) { return GetBomberTalkSfx(sound); }
+	if(strcmpi(modelName, "s_guard") == 0) { return GetSecurityGuardTalkSfx(sound); }
+	if(strcmpi(modelName, "chunky") == 0) { return GetChunkyTalkSfx(sound); }
+	if(strcmpi(modelName, "asuka") == 0) { return GetGenericFemaleTalkSfx(sound); }
+	if(strcmpi(modelName, "maria") == 0) { return GetGenericFemaleTalkSfx(sound); }
 
 	return GetGenericMaleTalkSfx(sound);
 }
@@ -2610,9 +2617,8 @@ char *SubZo3Label = (char *)0x6E9870;
 void
 cAudioManager::InitialisePoliceRadioZones()
 {
-	for(int32 i = 0; i < 36; i++) {
-		for(int32 j = 0; j < 8; j++) { ZoneSfx[i].m_aName[j] = 0; }
-	}
+	for(int32 i = 0; i < NUMAUDIOZONES; i++)
+		memset(ZoneSfx[i].m_aName, 0, 8);
 
 	strcpy(ZoneSfx[0].m_aName, "HOSPI_2");
 	ZoneSfx[0].m_nSampleIndex = SFX_POLICE_RADIO_ROCKFORD;
@@ -2988,26 +2994,25 @@ cAudioManager::PlayerJustLeftCar(void) const
 void
 cAudioManager::PostInitialiseGameSpecificSetup()
 {
-	m_nFireAudioEntity = CreateEntity(AUDIOTYPE_FIRE,
-	                                  (CPhysical *)0x8F31D0); // last is addr of firemanager @todo change
+	m_nFireAudioEntity = CreateEntity(AUDIOTYPE_FIRE, &gFireManager);
 	if(m_nFireAudioEntity >= 0) SetEntityStatus(m_nFireAudioEntity, 1);
 
-	m_nCollisionEntity = CreateEntity(AUDIOTYPE_COLLISION, (CPhysical *)1);
+	m_nCollisionEntity = CreateEntity(AUDIOTYPE_COLLISION, (void*)1);
 	if(m_nCollisionEntity >= 0) SetEntityStatus(m_nCollisionEntity, 1);
 
-	m_nFrontEndEntity = CreateEntity(AUDIOTYPE_FRONTEND, (CPhysical *)1);
+	m_nFrontEndEntity = CreateEntity(AUDIOTYPE_FRONTEND, (void*)1);
 	if(m_nFrontEndEntity >= 0) SetEntityStatus(m_nFrontEndEntity, 1);
 
-	m_nProjectileEntity = CreateEntity(AUDIOTYPE_PROJECTILE, (CPhysical *)1);
+	m_nProjectileEntity = CreateEntity(AUDIOTYPE_PROJECTILE, (void*)1);
 	if(m_nProjectileEntity >= 0) SetEntityStatus(m_nProjectileEntity, 1);
 
-	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATERCANNON, (CPhysical *)1);
+	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATERCANNON, (void*)1);
 	if(m_nWaterCannonEntity >= 0) SetEntityStatus(m_nWaterCannonEntity, 1);
 
-	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (CPhysical *)1);
+	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (void*)1);
 	if(m_nPoliceChannelEntity >= 0) SetEntityStatus(m_nPoliceChannelEntity, 1);
 
-	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (CPhysical *)1);
+	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (void*)1);
 	if(m_nBridgeEntity >= 0) SetEntityStatus(m_nBridgeEntity, 1);
 
 	m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
@@ -3017,7 +3022,7 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 	m_sMissionAudio.m_bIsPlayed = 0;
 	m_sMissionAudio.field_12 = 1;
 	m_sMissionAudio.field_24 = 0;
-	ResetAudioLogicTimers((int32)CTimer::GetTimeInMilliseconds);
+	ResetAudioLogicTimers(CTimer::GetTimeInMilliseconds());
 }
 
 void
@@ -3033,11 +3038,92 @@ cAudioManager::PreInitialiseGameSpecificSetup() const
 	BankStartOffset[1] = SFX_COP_VOICE_1_ARREST_1;
 }
 
-WRAPPER
-void
-cAudioManager::PreloadMissionAudio(char *)
+struct MissionAudioData {
+	const char *m_pName;
+	int32 m_nId;
+};
+
+constexpr MissionAudioData MissionAudioNameSfxAssoc[] = {
+    {"lib_a1", STREAMED_SOUND_MISSION_LIB_A1},   {"lib_a2", STREAMED_SOUND_MISSION_LIB_A2},
+    {"lib_a", STREAMED_SOUND_MISSION_LIB_A},     {"lib_b", STREAMED_SOUND_MISSION_LIB_B},
+    {"lib_c", STREAMED_SOUND_MISSION_LIB_C},     {"lib_d", STREAMED_SOUND_MISSION_LIB_D},
+    {"l2_a", STREAMED_SOUND_MISSION_L2_A},       {"j4t_1", STREAMED_SOUND_MISSION_J4T_1},
+    {"j4t_2", STREAMED_SOUND_MISSION_J4T_2},     {"j4t_3", STREAMED_SOUND_MISSION_J4T_3},
+    {"j4t_4", STREAMED_SOUND_MISSION_J4T_4},     {"j4_a", STREAMED_SOUND_MISSION_J4_A},
+    {"j4_b", STREAMED_SOUND_MISSION_J4_B},       {"j4_c", STREAMED_SOUND_MISSION_J4_C},
+    {"j4_d", STREAMED_SOUND_MISSION_J4_D},       {"j4_e", STREAMED_SOUND_MISSION_J4_E},
+    {"j4_f", STREAMED_SOUND_MISSION_J4_F},       {"j6_1", STREAMED_SOUND_MISSION_J6_1},
+    {"j6_a", STREAMED_SOUND_MISSION_J6_A},       {"j6_b", STREAMED_SOUND_MISSION_J6_B},
+    {"j6_c", STREAMED_SOUND_MISSION_J6_C},       {"j6_d", STREAMED_SOUND_MISSION_J6_D},
+    {"t4_a", STREAMED_SOUND_MISSION_T4_A},       {"s1_a", STREAMED_SOUND_MISSION_S1_A},
+    {"s1_a1", STREAMED_SOUND_MISSION_S1_A1},     {"s1_b", STREAMED_SOUND_MISSION_S1_B},
+    {"s1_c", STREAMED_SOUND_MISSION_S1_C},       {"s1_c1", STREAMED_SOUND_MISSION_S1_C1},
+    {"s1_d", STREAMED_SOUND_MISSION_S1_D},       {"s1_e", STREAMED_SOUND_MISSION_S1_E},
+    {"s1_f", STREAMED_SOUND_MISSION_S1_F},       {"s1_g", STREAMED_SOUND_MISSION_S1_G},
+    {"s1_h", STREAMED_SOUND_MISSION_S1_H},       {"s1_i", STREAMED_SOUND_MISSION_S1_I},
+    {"s1_j", STREAMED_SOUND_MISSION_S1_J},       {"s1_k", STREAMED_SOUND_MISSION_S1_K},
+    {"s1_l", STREAMED_SOUND_MISSION_S1_L},       {"s3_a", STREAMED_SOUND_MISSION_S3_A},
+    {"s3_b", STREAMED_SOUND_MISSION_S3_B},       {"el3_a", STREAMED_SOUND_MISSION_EL3_A},
+    {"mf1_a", STREAMED_SOUND_MISSION_MF1_A},     {"mf2_a", STREAMED_SOUND_MISSION_MF2_A},
+    {"mf3_a", STREAMED_SOUND_MISSION_MF3_A},     {"mf3_b", STREAMED_SOUND_MISSION_MF3_B},
+    {"mf3_b1", STREAMED_SOUND_MISSION_MF3_B1},   {"mf3_c", STREAMED_SOUND_MISSION_MF3_C},
+    {"mf4_a", STREAMED_SOUND_MISSION_MF4_A},     {"mf4_b", STREAMED_SOUND_MISSION_MF4_B},
+    {"mf4_c", STREAMED_SOUND_MISSION_MF4_C},     {"a1_a", STREAMED_SOUND_MISSION_A1_A},
+    {"a3_a", STREAMED_SOUND_MISSION_A3_A},       {"a5_a", STREAMED_SOUND_MISSION_A5_A},
+    {"a4_a", STREAMED_SOUND_MISSION_A4_A},       {"a4_b", STREAMED_SOUND_MISSION_A4_B},
+    {"a4_c", STREAMED_SOUND_MISSION_A4_C},       {"a4_d", STREAMED_SOUND_MISSION_A4_D},
+    {"k1_a", STREAMED_SOUND_MISSION_K1_A},       {"k3_a", STREAMED_SOUND_MISSION_K3_A},
+    {"r1_a", STREAMED_SOUND_MISSION_R1_A},       {"r2_a", STREAMED_SOUND_MISSION_R2_A},
+    {"r2_b", STREAMED_SOUND_MISSION_R2_B},       {"r2_c", STREAMED_SOUND_MISSION_R2_C},
+    {"r2_d", STREAMED_SOUND_MISSION_R2_D},       {"r2_e", STREAMED_SOUND_MISSION_R2_E},
+    {"r2_f", STREAMED_SOUND_MISSION_R2_F},       {"r2_g", STREAMED_SOUND_MISSION_R2_G},
+    {"r2_h", STREAMED_SOUND_MISSION_R2_H},       {"r5_a", STREAMED_SOUND_MISSION_R5_A},
+    {"r6_a", STREAMED_SOUND_MISSION_R6_A},       {"r6_a1", STREAMED_SOUND_MISSION_R6_A1},
+    {"r6_b", STREAMED_SOUND_MISSION_R6_B},       {"lo2_a", STREAMED_SOUND_MISSION_LO2_A},
+    {"lo6_a", STREAMED_SOUND_MISSION_LO6_A},     {"yd2_a", STREAMED_SOUND_MISSION_YD2_A},
+    {"yd2_b", STREAMED_SOUND_MISSION_YD2_B},     {"yd2_c", STREAMED_SOUND_MISSION_YD2_C},
+    {"yd2_c1", STREAMED_SOUND_MISSION_YD2_C1},   {"yd2_d", STREAMED_SOUND_MISSION_YD2_D},
+    {"yd2_e", STREAMED_SOUND_MISSION_YD2_E},     {"yd2_f", STREAMED_SOUND_MISSION_YD2_F},
+    {"yd2_g", STREAMED_SOUND_MISSION_YD2_G},     {"yd2_h", STREAMED_SOUND_MISSION_YD2_H},
+    {"yd2_ass", STREAMED_SOUND_MISSION_YD2_ASS}, {"yd2_ok", STREAMED_SOUND_MISSION_YD2_OK},
+    {"h5_a", STREAMED_SOUND_MISSION_H5_A},       {"h5_b", STREAMED_SOUND_MISSION_H5_B},
+    {"h5_c", STREAMED_SOUND_MISSION_H5_C},       {"ammu_a", STREAMED_SOUND_MISSION_AMMU_A},
+    {"ammu_b", STREAMED_SOUND_MISSION_AMMU_B},   {"ammu_c", STREAMED_SOUND_MISSION_AMMU_C},
+    {"door_1", STREAMED_SOUND_MISSION_DOOR_1},   {"door_2", STREAMED_SOUND_MISSION_DOOR_2},
+    {"door_3", STREAMED_SOUND_MISSION_DOOR_3},   {"door_4", STREAMED_SOUND_MISSION_DOOR_4},
+    {"door_5", STREAMED_SOUND_MISSION_DOOR_5},   {"door_6", STREAMED_SOUND_MISSION_DOOR_6},
+    {"t3_a", STREAMED_SOUND_MISSION_T3_A},       {"t3_b", STREAMED_SOUND_MISSION_T3_B},
+    {"t3_c", STREAMED_SOUND_MISSION_T3_C},       {"k1_b", STREAMED_SOUND_MISSION_K1_B},
+    {"c_1", STREAMED_SOUND_MISSION_CAT1}};
+
+int32
+FindMissionAudioSfx(const char *name)
 {
-	EAXJMP(0x579550);
+	for(uint32 i = 0; i < ARRAY_SIZE(MissionAudioNameSfxAssoc); ++i) {
+		if(strcmpi(MissionAudioNameSfxAssoc[i].m_pName, name) == 0) return MissionAudioNameSfxAssoc[i].m_nId;
+	}
+	debug("Can't find mission audio %s", name);
+	return NO_SAMPLE;
+}
+
+void
+cAudioManager::PreloadMissionAudio(const char *name)
+{
+	if(m_bIsInitialised) {
+		int32 missionAudioSfx = FindMissionAudioSfx(name);
+		if(missionAudioSfx != NO_SAMPLE) {
+			m_sMissionAudio.m_nSampleIndex = missionAudioSfx;
+			m_sMissionAudio.m_bLoadingStatus = 0;
+			m_sMissionAudio.m_bPlayStatus = 0;
+			m_sMissionAudio.field_22 = 0;
+			m_sMissionAudio.field_24 =
+			    field_19192 * SampleManager.GetStreamedFileLength(missionAudioSfx) / 1000;
+			m_sMissionAudio.field_24 *= 4;
+			m_sMissionAudio.m_bIsPlayed = 0;
+			m_sMissionAudio.field_12 = 1;
+			g_bMissionAudioLoadFailed = 0;
+		}
+	}
 }
 
 void
@@ -3129,7 +3215,7 @@ cAudioManager::ProcessAirportScriptObject(uint8 sound)
 	static uint8 counter = 0;
 
 	uint32 time = CTimer::GetTimeInMilliseconds();
-	if(time > audioLogicTimers[3]) {
+	if(time > gAirportNextTime) {
 		switch(sound) {
 		case SCRIPT_SOUND_AIRPORT_LOOP_S:
 			maxDist = 900.f;
@@ -3164,7 +3250,7 @@ cAudioManager::ProcessAirportScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[3] = time + 10000 + m_anRandomTable[3] % 20000;
+				gAirportNextTime = time + 10000 + m_anRandomTable[3] % 20000;
 			}
 		}
 	}
@@ -3539,7 +3625,7 @@ cAudioManager::ProcessCinemaScriptObject(uint8 sound)
 	static uint8 counter = 0;
 
 	uint32 time = CTimer::GetTimeInMilliseconds();
-	if(time > audioLogicTimers[4]) {
+	if(time > gCinemaNextTime) {
 		switch(sound) {
 		case SCRIPT_SOUND_CINEMA_LOOP_S:
 			maxDist = 900.f;
@@ -3575,7 +3661,7 @@ cAudioManager::ProcessCinemaScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[4] = time + 1000 + m_anRandomTable[3] % 4000;
+				gCinemaNextTime = time + 1000 + m_anRandomTable[3] % 4000;
 			}
 		}
 	}
@@ -3599,7 +3685,7 @@ cAudioManager::ProcessDocksScriptObject(uint8 sound)
 	static uint32 counter = 0;
 
 	time = CTimer::GetTimeInMilliseconds();
-	if(time > audioLogicTimers[5]) {
+	if(time > gDocksNextTime) {
 		switch(sound) {
 		case SCRIPT_SOUND_DOCKS_LOOP_S:
 			maxDist = 900.f;
@@ -3634,7 +3720,7 @@ cAudioManager::ProcessDocksScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[5] = time + 10000 + m_anRandomTable[3] % 40000;
+				gDocksNextTime = time + 10000 + m_anRandomTable[3] % 40000;
 			}
 		}
 	}
@@ -3887,16 +3973,20 @@ void
 cAudioManager::ProcessFrontEnd()
 {
 	bool processed;
+	bool processedPickup;
+	bool processedMission;
 	int16 sample;
 
-	static uint32 counter = 0;
+	static uint8 counter = 0;
+	static uint32 cPickupNextFrame = 0;
+	static uint32 cPartMisComNextFrame = 0;
 
 	for(uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
+		processedPickup = 0;
 		processed = 0;
+		processedMission = 0;
 		switch(m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i]) {
-		case SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM:
-			m_sQueueSample.m_nSampleIndex = SFX_ERROR_FIRE_RIFLE;
-			break;
+		case SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM: m_sQueueSample.m_nSampleIndex = SFX_ERROR_FIRE_RIFLE; break;
 		case SOUND_WEAPON_ROCKET_SHOT_NO_ZOOM:
 			m_sQueueSample.m_nSampleIndex = SFX_ERROR_FIRE_ROCKET_LAUNCHER;
 			break;
@@ -3904,7 +3994,7 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_GARAGE_BAD_VEHICLE:
 		case SOUND_3C:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_ERROR_LEFT;
-			processed = 1;
+			processed = true;
 			break;
 		case SOUND_GARAGE_OPENING:
 		case SOUND_GARAGE_BOMB1_SET:
@@ -3920,16 +4010,19 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_EVIDENCE_PICKUP:
 		case SOUND_UNLOAD_GOLD:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_2_LEFT;
-			processed = 1;
+			processedPickup = true;
+			processed = true;
 			break;
 		case SOUND_PICKUP_WEAPON_BOUGHT:
 		case SOUND_PICKUP_WEAPON:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_1_LEFT;
-			processed = 1;
+			processedPickup = true;
+			processed = true;
 			break;
 		case SOUND_4A:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_ERROR_LEFT;
-			processed = 1;
+			processedPickup = true;
+			processed = true;
 			break;
 		case SOUND_PICKUP_BONUS:
 		case SOUND_PICKUP_MONEY:
@@ -3938,58 +4031,63 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_PICKUP_PACMAN_PACKAGE:
 		case SOUND_PICKUP_FLOAT_PACKAGE:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_3_LEFT;
-			processed = 1;
+			processedPickup = true;
+			processed = true;
 			break;
 		case SOUND_PAGER: m_sQueueSample.m_nSampleIndex = SFX_PAGER; break;
 		case SOUND_RACE_START_3:
 		case SOUND_RACE_START_2:
 		case SOUND_RACE_START_1:
 		case SOUND_CLOCK_TICK: m_sQueueSample.m_nSampleIndex = SFX_TIMER_BEEP; break;
-		case SOUND_RACE_START_GO:
-			m_sQueueSample.m_nSampleIndex = SFX_PART_MISSION_COMPLETE;
-			break;
+		case SOUND_RACE_START_GO: m_sQueueSample.m_nSampleIndex = SFX_PART_MISSION_COMPLETE; break;
 		case SOUND_PART_MISSION_COMPLETE:
 			m_sQueueSample.m_nSampleIndex = SFX_PART_MISSION_COMPLETE;
+			processedMission = true;
 			break;
 		case SOUND_FRONTEND_MENU_STARTING:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_START_BUTTON_LEFT;
+			processed = true;
 			break;
 		case SOUND_FRONTEND_MENU_COMPLETED:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_PAGE_CHANGE_AND_BACK_LEFT;
+			processed = true;
 			break;
 		case SOUND_FRONTEND_MENU_DENIED:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_HIGHLIGHT_LEFT;
+			processed = true;
 			break;
 		case SOUND_FRONTEND_MENU_SUCCESS:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_SELECT_LEFT;
+			processed = true;
 			break;
 		case SOUND_FRONTEND_EXIT:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_SUB_MENU_BACK_LEFT;
+			processed = true;
 			break;
 		case SOUND_9A:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_STEREO_LEFT;
+			processed = true;
 			break;
 		case SOUND_9B: m_sQueueSample.m_nSampleIndex = SFX_MONO; break;
 		case SOUND_FRONTEND_AUDIO_TEST:
-			m_sQueueSample.m_nSampleIndex =
-			    m_anRandomTable[0] % 3 + SFX_NOISE_BURST_1;
+			m_sQueueSample.m_nSampleIndex = m_anRandomTable[0] % 3 + SFX_NOISE_BURST_1;
 			break;
 		case SOUND_FRONTEND_FAIL:
-			processed = 1;
 			m_sQueueSample.m_nSampleIndex = SFX_ERROR_LEFT;
+			processed = true;
 			break;
 		case SOUND_FRONTEND_NO_RADIO:
-		case SOUND_FRONTEND_RADIO_CHANGE:
-			m_sQueueSample.m_nSampleIndex = SFX_RADIO_CLICK;
-			break;
+		case SOUND_FRONTEND_RADIO_CHANGE: m_sQueueSample.m_nSampleIndex = SFX_RADIO_CLICK; break;
 		case SOUND_A0: m_sQueueSample.m_nSampleIndex = SFX_INFO; break;
 		default: continue;
+		}
+
+		if(processedPickup) {
+			if(m_nTimeOfRecentCrime <= cPickupNextFrame) continue;
+			cPickupNextFrame = m_nTimeOfRecentCrime + 5;
+		} else if(processedMission) {
+			if(m_nTimeOfRecentCrime <= cPartMisComNextFrame) continue;
+			cPartMisComNextFrame = m_nTimeOfRecentCrime + 5;
 		}
 
 		sample = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i];
@@ -4106,7 +4204,7 @@ cAudioManager::ProcessHomeScriptObject(uint8 sound)
 	static uint8 counter = 0;
 
 	time = CTimer::GetTimeInMilliseconds();
-	if(time > audioLogicTimers[6]) {
+	if(time > gHomeNextTime) {
 		switch(sound) {
 		case SCRIPT_SOUND_HOME_LOOP_S:
 			maxDist = 900.f;
@@ -4142,7 +4240,7 @@ cAudioManager::ProcessHomeScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 1;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[6] = time + 1000 + m_anRandomTable[3] % 4000;
+				gHomeNextTime = time + 1000 + m_anRandomTable[3] % 4000;
 			}
 		}
 	}
@@ -5507,7 +5605,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 	static uint8 iSound = 21;
 
 	weapon = nil;
-	for(uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_Loops; i++) {
+	for(uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
 		noReflection = 0;
 		processed = 0;
 		m_sQueueSample.m_bRequireReflection = 0;
@@ -6666,7 +6764,7 @@ cAudioManager::ProcessPoliceCellBeatingScriptObject(uint8 sound)
 
 	static uint8 counter = 0;
 
-	if(time > audioLogicTimers[7]) {
+	if(time > gCellNextTime) {
 		switch(sound) {
 		case SCRIPT_SOUND_POLICE_CELL_BEATING_LOOP_S:
 			maxDist = 900.f;
@@ -6711,7 +6809,7 @@ cAudioManager::ProcessPoliceCellBeatingScriptObject(uint8 sound)
 				params.m_pPed = 0;
 				SetupPedComments(&params, SOUND_8A);
 			}
-			audioLogicTimers[7] = time + 500 + m_anRandomTable[3] % 1500;
+			gCellNextTime = time + 500 + m_anRandomTable[3] % 1500;
 		}
 	}
 }
@@ -6800,7 +6898,7 @@ cAudioManager::ProcessPornCinema(uint8 sound)
 		}
 
 		time = CTimer::GetTimeInMilliseconds();
-		if(time > audioLogicTimers[0]) {
+		if(time > gPornNextTime) {
 			m_sQueueSample.m_bVolume =
 			    ComputeVolume(90, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
@@ -6820,7 +6918,7 @@ cAudioManager::ProcessPornCinema(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[0] = time + 2000 + m_anRandomTable[3] % 6000;
+				gPornNextTime = time + 2000 + m_anRandomTable[3] % 6000;
 			}
 		}
 	}
@@ -7025,7 +7123,7 @@ cAudioManager::ProcessSawMillScriptObject(uint8 sound)
 			AddSampleToRequestedQueue();
 		}
 		time = CTimer::GetTimeInMilliseconds();
-		if(time > audioLogicTimers[1]) {
+		if(time > gSawMillNextTime) {
 			m_sQueueSample.m_bVolume =
 			    ComputeVolume(70, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
@@ -7044,7 +7142,7 @@ cAudioManager::ProcessSawMillScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[1] = time + 2000 + m_anRandomTable[3] % 4000;
+				gSawMillNextTime = time + 2000 + m_anRandomTable[3] % 4000;
 			}
 		}
 	}
@@ -7103,7 +7201,7 @@ cAudioManager::ProcessShopScriptObject(uint8 sound)
 			AddSampleToRequestedQueue();
 		}
 		time = CTimer::GetTimeInMilliseconds();
-		if(time > audioLogicTimers[2]) {
+		if(time > gShopNextTime) {
 			m_sQueueSample.m_bVolume =
 			    ComputeVolume(70, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
@@ -7124,7 +7222,7 @@ cAudioManager::ProcessShopScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = 1;
 				m_sQueueSample.m_bRequireReflection = 0;
 				AddSampleToRequestedQueue();
-				audioLogicTimers[2] = time + 3000 + m_anRandomTable[3] % 7000;
+				gShopNextTime = time + 3000 + m_anRandomTable[3] % 7000;
 			}
 		}
 	}
@@ -7912,17 +8010,17 @@ cAudioManager::ReportCrime(int32 type, const CVector *pos)
 }
 
 void
-cAudioManager::ResetAudioLogicTimers(int32 timer)
+cAudioManager::ResetAudioLogicTimers(uint32 timer)
 {
-	audioLogicTimers[0] = timer;
-	audioLogicTimers[8] = timer;
-	audioLogicTimers[1] = timer;
-	audioLogicTimers[7] = timer;
-	audioLogicTimers[2] = timer;
-	audioLogicTimers[6] = timer;
-	audioLogicTimers[3] = timer;
-	audioLogicTimers[5] = timer;
-	audioLogicTimers[4] = timer;
+	gPornNextTime = timer;
+	gNextCryTime = timer;
+	gSawMillNextTime = timer;
+	gCellNextTime = timer;
+	gShopNextTime = timer;
+	gHomeNextTime = timer;
+	gAirportNextTime = timer;
+	gDocksNextTime = timer;
+	gCinemaNextTime = timer;
 	for(int32 i = 0; i < m_nAudioEntitiesTotal; i++) {
 		if(m_asAudioEntities[m_anAudioEntityIndices[i]].m_nType == AUDIOTYPE_PHYSICAL) {
 			CPed *ped = (CPed *)m_asAudioEntities[m_anAudioEntityIndices[i]].m_pEntity;
@@ -8207,7 +8305,7 @@ cAudioManager::SetEffectsMasterVolume(uint8 volume) const
 }
 
 void
-cAudioManager::SetEntityStatus(int32 id, bool status)
+cAudioManager::SetEntityStatus(int32 id, uint8 status)
 {
 	if(m_bIsInitialised && id >= 0 && id < totalAudioEntitiesSlots && m_asAudioEntities[id].m_bIsUsed) {
 		m_asAudioEntities[id].m_bStatus = status;
@@ -8811,10 +8909,10 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 			                            SFX_POLICE_HELI_1;
 			break;
 		case SOUND_PED_BODYCAST_HIT:
-			if(CTimer::GetTimeInMilliseconds() <= audioLogicTimers[8]) return;
+			if(CTimer::GetTimeInMilliseconds() <= gNextCryTime) return;
 			maxDist = 2500.f;
 			soundIntensity = 50.f;
-			audioLogicTimers[8] = CTimer::GetTimeInMilliseconds() + 500;
+			gNextCryTime = CTimer::GetTimeInMilliseconds() + 500;
 			pedComment.m_nSampleIndex =
 			    (m_anRandomTable[m_sQueueSample.m_nEntityIndex & 3] & 3) + SFX_PLASTER_BLOKE_1;
 			break;
@@ -8869,46 +8967,124 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 void
 cAudioManager::SetupSuspectLastSeenReport()
 {
-	CAutomobile *automobile;
+	CVehicle *veh;
 	uint8 color1;
-	int32 index;
 	int32 main_color;
 	int32 sample;
 
 	int32 color_pre_modifier;
 	int32 color_post_modifier;
 
-	constexpr int32 colors[] = {
-	    3032, 248,  3032, 3032, 249,  3032, 3032, 250,  3032, 3032, 251,  3032, 258,  250,  3032, 3032, 252,  3032,
-	    3032, 253,  3032, 260,  250,  3032, 259,  250,  254,  259,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032,
-	    258,  251,  3032, 3032, 251,  3032, 3032, 251,  3032, 3032, 251,  3032, 3032, 251,  3032, 3032, 251,  3032,
-	    3032, 251,  3032, 259,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 3032, 255,  3032,
-	    3032, 255,  3032, 3032, 255,  3032, 3032, 255,  3032, 3032, 255,  3032, 3032, 255,  3032, 259,  3032, 3032,
-	    258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 3032, 253,  3032, 3032, 253,  3032, 3032, 253,  3032,
-	    3032, 253,  3032, 3032, 253,  3032, 3032, 253,  3032, 259,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032,
-	    258,  3032, 3032, 3032, 256,  3032, 3032, 256,  3032, 3032, 256,  3032, 3032, 256,  3032, 3032, 256,  3032,
-	    3032, 256,  3032, 259,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 3032, 250,  3032,
-	    3032, 250,  3032, 3032, 250,  3032, 3032, 250,  3032, 3032, 250,  3032, 3032, 250,  3032, 259,  3032, 3032,
-	    258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 3032, 252,  3032, 3032, 252,  3032, 3032, 252,  3032,
-	    3032, 252,  3032, 3032, 252,  3032, 3032, 252,  3032, 259,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032,
-	    258,  3032, 3032, 3032, 257,  3032, 3032, 257,  3032, 3032, 257,  3032, 3032, 257,  3032, 3032, 257,  3032,
-	    3032, 257,  3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032,
-	    259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032, 259,  3032, 3032,
-	    258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032, 258,  3032, 3032};
+	constexpr int32 gCarColourTable[][3] = {
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_BLACK, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_WHITE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_BLUE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_RED, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, SFX_POLICE_RADIO_BLUE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_PURPLE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_YELLOW, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_BRIGHT, SFX_POLICE_RADIO_BLUE, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, SFX_POLICE_RADIO_BLUE, SFX_POLICE_RADIO_GREY},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, SFX_POLICE_RADIO_RED, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_RED, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_RED, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_RED, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_RED, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_RED, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_RED, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_ORANGE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_ORANGE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_ORANGE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_ORANGE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_ORANGE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_ORANGE, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_YELLOW, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_YELLOW, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_YELLOW, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_YELLOW, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_YELLOW, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_YELLOW, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_GREEN, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_GREEN, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_GREEN, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_GREEN, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_GREEN, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_GREEN, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_BLUE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_BLUE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_BLUE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_BLUE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_BLUE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_BLUE, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_PURPLE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_PURPLE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_PURPLE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_PURPLE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_PURPLE, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_PURPLE, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_SILVER, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_SILVER, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_SILVER, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_SILVER, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_SILVER, TOTAL_AUDIO_SAMPLES},
+		{TOTAL_AUDIO_SAMPLES, SFX_POLICE_RADIO_SILVER, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_LIGHT, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES},
+		{SFX_POLICE_RADIO_DARK, TOTAL_AUDIO_SAMPLES, TOTAL_AUDIO_SAMPLES}
+	};
 
-	if(MusicManager.m_nMusicMode != 2) {
-		automobile = (CAutomobile *)FindPlayerVehicle();
-		if(automobile) {
+	if(MusicManager.m_nMusicMode != MUSICMODE_CUTSCENE) {
+		veh = FindPlayerVehicle();
+		if(veh) {
 			if(60 - policeChannelTimer > 9) {
-				color1 = automobile->m_currentColour1;
-				if(color1 >= 95) {
+				color1 = veh->m_currentColour1;
+				if(color1 >= ARRAY_SIZE(gCarColourTable)) {
 					debug("\n *** UNKNOWN CAR COLOUR %d *** ", color1);
 				} else {
-					index = 3 * color1;
-					main_color = colors[index + 1]; // todo refactor struct
-					color_pre_modifier = colors[index];
-					color_post_modifier = colors[index + 2];
-					switch(automobile->m_modelIndex) {
+					main_color = gCarColourTable[color1][1];
+					color_pre_modifier = gCarColourTable[color1][0];
+					color_post_modifier = gCarColourTable[color1][2];
+					switch(veh->m_modelIndex) {
 					case MI_LANDSTAL:
 					case MI_BLISTA: sample = SFX_POLICE_RADIO_CRUISER; break;
 					case MI_IDAHO:
@@ -8959,7 +9135,7 @@ cAudioManager::SetupSuspectLastSeenReport()
 						break;
 					default:
 						debug("\n *** UNKNOWN CAR MODEL INDEX %d *** ",
-						      automobile->m_modelIndex);
+						      veh->m_modelIndex);
 						return;
 					}
 					if(policeChannelTimer != 60) {
@@ -8995,17 +9171,17 @@ cAudioManager::SetupSuspectLastSeenReport()
 						++policeChannelTimer;
 						policeChannelTimerSeconds = (policeChannelTimerSeconds + 1) % 60;
 					}
-					if(color_pre_modifier != 3032 && policeChannelTimer != 60) {
+					if(color_pre_modifier != TOTAL_AUDIO_SAMPLES && policeChannelTimer != 60) {
 						crimesSamples[policeChannelTimerSeconds] = color_pre_modifier;
 						++policeChannelTimer;
 						policeChannelTimerSeconds = (policeChannelTimerSeconds + 1) % 60;
 					}
-					if(main_color != 3032 && policeChannelTimer != 60) {
+					if(main_color != TOTAL_AUDIO_SAMPLES && policeChannelTimer != 60) {
 						crimesSamples[policeChannelTimerSeconds] = main_color;
 						++policeChannelTimer;
 						policeChannelTimerSeconds = (policeChannelTimerSeconds + 1) % 60;
 					}
-					if(color_post_modifier != 3032 && policeChannelTimer != 60) {
+					if(color_post_modifier != TOTAL_AUDIO_SAMPLES && policeChannelTimer != 60) {
 						crimesSamples[policeChannelTimerSeconds] = color_post_modifier;
 						++policeChannelTimer;
 						policeChannelTimerSeconds = (policeChannelTimerSeconds + 1) % 60;
@@ -9113,11 +9289,75 @@ cAudioManager::UpdateGasPedalAudio(CAutomobile *automobile)
 	automobile->m_fGasPedalAudio = newGasPedalAudio;
 }
 
-WRAPPER
 void
 cAudioManager::UpdateReflections()
 {
-	EAXJMP(0x57B470);
+	const CVector &camPos = TheCamera.GetPosition();
+	CColPoint colpoint;
+	CEntity *ent;
+
+	if(m_nTimeOfRecentCrime & 7) {
+		if(((uint8)m_nTimeOfRecentCrime + 1) & 7) {
+			if(((uint8)m_nTimeOfRecentCrime + 2) & 7) {
+				if(((uint8)m_nTimeOfRecentCrime + 3) & 7) {
+					if(!(((uint8)m_nTimeOfRecentCrime + 4) & 7)) {
+						m_avecReflectionsPos[4] = camPos;
+						m_avecReflectionsPos[4].z += 50.f;
+						if(CWorld::ProcessVerticalLine(
+						       camPos, m_avecReflectionsPos[4].z, colpoint,
+						       ent, true, false, false, false, true, false,
+						       false)) {
+							m_afReflectionsDistances[4] =
+							    colpoint.point.z - camPos.z;
+						} else {
+							m_afReflectionsDistances[4] = 50.0f;
+						}
+					}
+				} else {
+					m_avecReflectionsPos[3] = camPos;
+					m_avecReflectionsPos[3].x += 50.f;
+					if(CWorld::ProcessLineOfSight(
+					       camPos, m_avecReflectionsPos[3], colpoint, ent, true,
+					       false, false, true, false, true, true)) {
+						m_afReflectionsDistances[3] =
+						    Distance(camPos, colpoint.point);
+					} else {
+						m_afReflectionsDistances[3] = 50.0f;
+					}
+				}
+			} else {
+				m_avecReflectionsPos[2] = camPos;
+				m_avecReflectionsPos[2].x -= 50.f;
+				if(CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[2],
+				                              colpoint, ent, true, false, false,
+				                              true, false, true, true)) {
+					m_afReflectionsDistances[2] =
+					    Distance(camPos, colpoint.point);
+				} else {
+					m_afReflectionsDistances[2] = 50.0f;
+				}
+			}
+		} else {
+			m_avecReflectionsPos[1] = camPos;
+			m_avecReflectionsPos[1].y -= 50.f;
+			if(CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[1], colpoint,
+			                              ent, true, false, false, true, false, true,
+			                              true)) {
+				m_afReflectionsDistances[1] = Distance(camPos, colpoint.point);
+			} else {
+				m_afReflectionsDistances[1] = 50.0f;
+			}
+		}
+	} else {
+		m_avecReflectionsPos[0] = camPos;
+		m_avecReflectionsPos[0].y += 50.f;
+		if(CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[0], colpoint, ent, true,
+		                              false, false, true, false, true, true)) {
+			m_afReflectionsDistances[0] = Distance(camPos, colpoint.point);
+		} else {
+			m_afReflectionsDistances[0] = 50.0f;
+		}
+	}
 }
 
 bool
@@ -9299,6 +9539,7 @@ InjectHook(0x580500, &cAudioManager::PlaySuspectLastSeen, PATCH_JUMP);
 InjectHook(0x569420, &cAudioManager::PostInitialiseGameSpecificSetup, PATCH_JUMP);
 InjectHook(0x569640, &cAudioManager::PostTerminateGameSpecificShutdown, PATCH_JUMP);
 InjectHook(0x569400, &cAudioManager::PreInitialiseGameSpecificSetup, PATCH_JUMP);
+InjectHook(0x579550, &cAudioManager::PreloadMissionAudio, PATCH_JUMP);
 InjectHook(0x569570, &cAudioManager::PreTerminateGameSpecificShutdown, PATCH_JUMP);
 // InjectHook(0x57BA60, &cAudioManager::ProcessActiveQueues, PATCH_JUMP);
 InjectHook(0x56C940, &cAudioManager::ProcessAirBrakes, PATCH_JUMP);
@@ -9393,6 +9634,7 @@ InjectHook(0x57FCC0, &cAudioManager::SetupSuspectLastSeenReport, PATCH_JUMP);
 InjectHook(0x57A150, &cAudioManager::Terminate, PATCH_JUMP);
 InjectHook(0x57AC60, &cAudioManager::TranslateEntity, PATCH_JUMP);
 InjectHook(0x56AC80, &cAudioManager::UpdateGasPedalAudio, PATCH_JUMP);
+InjectHook(0x57B470, &cAudioManager::UpdateReflections, PATCH_JUMP);
 InjectHook(0x56C600, &cAudioManager::UsesReverseWarning, PATCH_JUMP);
 InjectHook(0x56C3C0, &cAudioManager::UsesSiren, PATCH_JUMP);
 InjectHook(0x56C3F0, &cAudioManager::UsesSirenSwitching, PATCH_JUMP);

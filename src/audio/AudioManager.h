@@ -449,7 +449,7 @@ public:
 	                                      float speedMultiplier) const;                   /// ok
 	int32 ComputePan(float, CVector *);                                                   /// ok
 	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const; /// ok
-	int32 CreateEntity(int32 type, CPhysical *entity);                                    /// ok
+	int32 CreateEntity(int32 type, void* entity);                                    /// ok
 
 	void DestroyAllGameCreatedEntities(); /// ok
 	void DestroyEntity(int32 id);         /// ok
@@ -576,8 +576,8 @@ public:
 	void PlayerJustLeftCar() const;                        /// ok
 	void PostInitialiseGameSpecificSetup();                /// ok
 	void PostTerminateGameSpecificShutdown();              /// ok
-	void PreInitialiseGameSpecificSetup() const;           // ok
-	void PreloadMissionAudio(char *);                      // todo
+	void PreInitialiseGameSpecificSetup() const;           /// ok
+	void PreloadMissionAudio(const char *name);            /// ok
 	void PreTerminateGameSpecificShutdown();               /// ok
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();                              // todo
@@ -653,7 +653,7 @@ public:
 	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2,
 	                     float collisionPower, float intensity2); /// ok
 	void ReportCrime(int32 crime, const CVector *pos);            /// ok
-	void ResetAudioLogicTimers(int32 timer);                      /// ok
+	void ResetAudioLogicTimers(uint32 timer);                      /// ok
 	void ResetPoliceRadio();                                      /// ok
 	void ResetTimers(uint32 time);                                /// ok
 
@@ -666,7 +666,7 @@ public:
 	void SetDynamicAcousticModelingStatus(bool status);
 	void SetEffectsFadeVolume(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;
-	void SetEntityStatus(int32 id, bool status);
+	void SetEntityStatus(int32 id, uint8 status);
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(cAudioCollision *audioCollision); /// ok
 	void SetMissionAudioLocation(float x, float y, float z);
 	void SetMissionScriptPoliceAudio(int32 sfx) const;
@@ -689,7 +689,7 @@ public:
 	void TranslateEntity(CVector *v1, CVector *v2) const;
 
 	void UpdateGasPedalAudio(CAutomobile *automobile);
-	void UpdateReflections(); // todo
+	void UpdateReflections();
 	bool UsesReverseWarning(int32 model) const;
 	bool UsesSiren(int32 model) const;
 	bool UsesSirenSwitching(int32 model) const;

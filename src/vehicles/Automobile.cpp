@@ -2474,8 +2474,8 @@ CAutomobile::TankControl(void)
 		int lifeSpan = 250;
 		if(m_vecMoveSpeed.Magnitude() > 0.08f){
 			lifeSpan = 125;
-			flashPos.x += 0.5f*m_vecMoveSpeed.x;
-			flashPos.y += 0.5f*m_vecMoveSpeed.y;
+			flashPos.x += 5.0f*m_vecMoveSpeed.x;
+			flashPos.y += 5.0f*m_vecMoveSpeed.y;
 		}
 		CParticle::AddParticle(PARTICLE_GUNFLASH, flashPos, nullDir, nil, 0.4f, black, 0, 0, 0, lifeSpan);
 		flashPos += 0.3f*shotDir;
@@ -4210,7 +4210,7 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 	if(atomic == nil)
 		return nil;
 
-	obj = new CObject;
+	obj = new CObject();
 	if(obj == nil)
 		return nil;
 

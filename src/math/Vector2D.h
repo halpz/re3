@@ -49,9 +49,6 @@ public:
 	CVector2D operator+(const CVector2D &rhs) const {
 		return CVector2D(x+rhs.x, y+rhs.y);
 	}
-	CVector2D operator*(float t) const {
-		return CVector2D(x*t, y*t);
-	}
 	CVector2D operator/(float t) const {
 		return CVector2D(x/t, y/t);
 	}
@@ -90,4 +87,14 @@ NormalizeXY(float &x, float &y)
 		y /= l;
 	}else
 		x = 1.0f;
+}
+
+inline CVector2D operator*(const CVector2D &left, float right)
+{
+	return CVector2D(left.x * right, left.y * right);
+}
+
+inline CVector2D operator*(float left, const CVector2D &right)
+{
+	return CVector2D(left * right.x, left * right.y);
 }

@@ -411,7 +411,7 @@ CCutsceneMgr::Update(void)
 		if (CPad::GetPad(0)->GetCrossJustDown()
 			|| (CGame::playingIntro && CPad::GetPad(0)->GetStartJustDown())
 			|| CPad::GetPad(0)->GetLeftMouseJustDown()
-			|| CPad::GetPad(0)->GetPadEnterJustDown() || CPad::GetPad(0)->GetEnterJustDown() // NOTE: In original code it's a single CPad method
+			|| CPad::GetPad(0)->GetEnterJustDown()
 			|| CPad::GetPad(0)->GetCharJustDown(VK_SPACE))
 			FinishCutscene();
 	}
