@@ -162,6 +162,6 @@ enum Config {
 
 // Peds
 #define ANIMATE_PED_COL_MODEL
-//#define VC_PED_PORTS
+#define VC_PED_PORTS
 #define NEW_WALK_AROUND_ALGORITHM
 #define CANCELLABLE_CAR_ENTER
