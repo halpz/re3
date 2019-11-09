@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
 #include "ModelInfo.h"
@@ -86,7 +87,7 @@ CClumpModelInfo::FindFrameFromNameCB(RwFrame *frame, void *data)
 {
 	RwObjectNameAssociation *assoc = (RwObjectNameAssociation*)data;
 
-	if(_strcmpi(GetFrameNodeName(frame), assoc->name) != 0){
+	if(CGeneral::faststricmp(GetFrameNodeName(frame), assoc->name)){
 		RwFrameForAllChildren(frame, FindFrameFromNameCB, assoc);
 		return assoc->frame ? nil : frame;
 	}else{
@@ -101,7 +102,7 @@ CClumpModelInfo::FindFrameFromNameWithoutIdCB(RwFrame *frame, void *data)
 	RwObjectNameAssociation *assoc = (RwObjectNameAssociation*)data;
 
 	if(CVisibilityPlugins::GetFrameHierarchyId(frame) ||
-	   _strcmpi(GetFrameNodeName(frame), assoc->name) != 0){
+		CGeneral::faststricmp(GetFrameNodeName(frame), assoc->name)){
 		RwFrameForAllChildren(frame, FindFrameFromNameWithoutIdCB, assoc);
 		return assoc->frame ? nil : frame;
 	}else{

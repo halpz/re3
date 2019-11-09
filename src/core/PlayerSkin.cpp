@@ -28,7 +28,7 @@ FindPlayerDff(uint32 &offset, uint32 &size)
 	do {
 		if (!CFileMgr::Read(file, (char*)&info, sizeof(CDirectory::DirectoryInfo)))
 			return;
-	} while (strcmpi("player.dff", info.name));
+	} while (strcasecmp("player.dff", info.name) != 0);
 
 	offset = info.offset;
 	size = info.size;
@@ -94,7 +94,7 @@ CPlayerSkin::GetSkinTexture(const char *texName)
 	CTxdStore::PopCurrentTxd();
 	if (tex) return tex;
 
-	if (!strcmp(DEFAULT_SKIN_NAME, texName))
+	if (strcmp(DEFAULT_SKIN_NAME, texName) == 0)
 		sprintf(gString, "models\\generic\\player.bmp");
 	else
 		sprintf(gString, "skins\\%s.bmp", texName);

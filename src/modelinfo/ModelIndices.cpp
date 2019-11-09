@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "ModelIndices.h"
 
 #define X(name, var, addr) int16 &var = *(int16*)addr;
@@ -18,7 +19,7 @@ void
 MatchModelString(const char *modelname, int16 id)
 {
 #define X(name, var, addr) \
-	if(strcmp(name, modelname) == 0){ \
+	if(!CGeneral::faststrcmp(name, modelname)){ \
 		var = id; \
 		return; \
 	}

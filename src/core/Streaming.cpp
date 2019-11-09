@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "Pad.h"
 #include "Hud.h"
 #include "Text.h"
@@ -347,7 +348,7 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 		if(direntry.size > (uint32)ms_streamingBufferSize)
 			ms_streamingBufferSize = direntry.size;
 
-		if(strcmp(dot+1, "DFF") == 0 || strcmp(dot+1, "dff") == 0){
+		if(!CGeneral::faststrcmp(dot+1, "DFF") || !CGeneral::faststrcmp(dot+1, "dff")){
 			if(CModelInfo::GetModelInfo(direntry.name, &modelId)){
 				if(ms_aInfoForModel[modelId].GetCdPosnAndSize(posn, size)){
 					debug("%s appears more than once in %s\n", direntry.name, dirname);
@@ -364,20 +365,20 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 				ms_pExtraObjectsDir->AddItem(direntry);
 				lastID = -1;
 			}
-		}else if(strcmp(dot+1, "TXD") == 0 || strcmp(dot+1, "txd") == 0){
+		}else if(!CGeneral::faststrcmp(dot+1, "TXD") || !CGeneral::faststrcmp(dot+1, "txd")){
 			txdId = CTxdStore::FindTxdSlot(direntry.name);
 			if(txdId == -1)
 				txdId = CTxdStore::AddTxdSlot(direntry.name);
-				if(ms_aInfoForModel[txdId + STREAM_OFFSET_TXD].GetCdPosnAndSize(posn, size)){
-					debug("%s appears more than once in %s\n", direntry.name, dirname);
-					lastID = -1;
-				}else{
-					direntry.offset |= imgSelector;
-					ms_aInfoForModel[txdId + STREAM_OFFSET_TXD].SetCdPosnAndSize(direntry.offset, direntry.size);
-					if(lastID != -1)
-						ms_aInfoForModel[lastID].m_nextID = txdId + STREAM_OFFSET_TXD;
-					lastID = txdId + STREAM_OFFSET_TXD;
-				}
+			if(ms_aInfoForModel[txdId + STREAM_OFFSET_TXD].GetCdPosnAndSize(posn, size)){
+				debug("%s appears more than once in %s\n", direntry.name, dirname);
+				lastID = -1;
+			}else{
+				direntry.offset |= imgSelector;
+				ms_aInfoForModel[txdId + STREAM_OFFSET_TXD].SetCdPosnAndSize(direntry.offset, direntry.size);
+				if(lastID != -1)
+					ms_aInfoForModel[lastID].m_nextID = txdId + STREAM_OFFSET_TXD;
+				lastID = txdId + STREAM_OFFSET_TXD;
+			}
 		}else
 			lastID = -1;
 	}
@@ -720,7 +721,7 @@ CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flag
 	uint32 pos, size;
 
 	mi = CModelInfo::GetModelInfo(modelId);
-	if(strcmp(mi->GetName(), modelName) == 0){
+	if(!CGeneral::faststrcmp(mi->GetName(), modelName)){
 		// Already have the correct name, just request it
 		RequestModel(modelId, flags);
 		return;

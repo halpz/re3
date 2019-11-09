@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "ModelInfo.h"
 #include "AnimManager.h"
 #include "RpAnimBlend.h"
@@ -38,7 +39,7 @@ CAnimBlendAssocGroup::GetAnimation(const char *name)
 {
 	int i;
 	for(i = 0; i < numAssociations; i++)
-		if(strcmpi(assocList[i].hierarchy->name, name) == 0)
+		if(!CGeneral::faststricmp(assocList[i].hierarchy->name, name))
 			return &assocList[i];
 	return nil;
 }
@@ -64,7 +65,7 @@ CAnimBlendAssocGroup::CopyAnimation(const char *name)
 	return new CAnimBlendAssociation(*anim);
 }
 
-int
+bool
 strcmpIgnoringDigits(const char *s1, const char *s2)
 {
 	char c1, c2;
@@ -75,13 +76,13 @@ strcmpIgnoringDigits(const char *s1, const char *s2)
 		if(c1) s1++;
 		if(c2) s2++;
 		if(c1 == '\0' && c2 == '\0')
-			return 1;
-		if(islower(c1)) c1 = toupper(c1);
-		if(islower(c2)) c2 = toupper(c2);
-		if(isdigit(c1) && isdigit(c2))
+			return true;
+		if(__ascii_iswdigit(c1) && __ascii_iswdigit(c2))
 			continue;
+		c1 = __ascii_toupper(c1);
+		c2 = __ascii_toupper(c2);
 		if(c1 != c2)
-			return 0;
+			return false;
 	}
 }
 

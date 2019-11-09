@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "ModelInfo.h"
 #include "ModelIndices.h"
 #include "FileMgr.h"
@@ -605,7 +606,7 @@ CAnimManager::GetAnimationBlock(const char *name)
 	int i;
 
 	for(i = 0; i < ms_numAnimBlocks; i++)
-		if(strcmpi(ms_aAnimBlocks[i].name, name) == 0)
+		if(strcasecmp(ms_aAnimBlocks[i].name, name) == 0)
 			return &ms_aAnimBlocks[i];
 	return nil;
 }
@@ -617,7 +618,7 @@ CAnimManager::GetAnimation(const char *name, CAnimBlock *animBlock)
 	CAnimBlendHierarchy *hier = &ms_aAnimations[animBlock->firstIndex];
 
 	for(i = 0; i < animBlock->numAnims; i++){
-		if(strcmpi(hier->name, name) == 0)
+		if(!CGeneral::faststricmp(hier->name, name))
 			return hier;
 		hier++;
 	}

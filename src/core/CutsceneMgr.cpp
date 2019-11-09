@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "CutsceneMgr.h"
 #include "Directory.h"
 #include "Camera.h"
@@ -107,7 +108,7 @@ int
 FindCutsceneAudioTrackId(const char *szCutsceneName)
 {
 	for (int i = 0; musicNameIdAssoc[i].szTrackName; i++) {
-		if (!strcmpi(musicNameIdAssoc[i].szTrackName, szCutsceneName))
+		if (!CGeneral::faststricmp(musicNameIdAssoc[i].szTrackName, szCutsceneName))
 			return musicNameIdAssoc[i].iTrackId;
 	}
 	return -1;
@@ -171,7 +172,7 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	CPlayerPed *pPlayerPed;
 
 	ms_cutsceneProcessing = true;
-	if (!strcmpi(szCutsceneName, "jb"))
+	if (!strcasecmp(szCutsceneName, "jb"))
 		ms_useLodMultiplier = true;
 	CTimer::Stop();
 
@@ -207,7 +208,7 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 
 	CFileMgr::CloseFile(file);
 
-	if (strcmpi(ms_cutsceneName, "end")) {
+	if (CGeneral::faststricmp(ms_cutsceneName, "end")) {
 		DMAudio.ChangeMusicMode(MUSICMODE_CUTSCENE);
 		int trackId = FindCutsceneAudioTrackId(szCutsceneName);
 		if (trackId != -1) {
@@ -364,9 +365,9 @@ CCutsceneMgr::DeleteCutsceneData(void)
 	CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_80;
 	CWorld::Players[CWorld::PlayerInFocus].MakePlayerSafe(false);
 
-	if (strcmpi(ms_cutsceneName, "end")) {
+	if (CGeneral::faststricmp(ms_cutsceneName, "end")) {
 		DMAudio.StopCutSceneMusic();
-		if (strcmpi(ms_cutsceneName, "bet"))
+		if (CGeneral::faststricmp(ms_cutsceneName, "bet"))
 			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	}
 	CTimer::Stop();
@@ -389,7 +390,7 @@ CCutsceneMgr::Update(void)
 	switch (ms_cutsceneLoadStatus) {
 	case CUTSCENE_LOADING_AUDIO:
 		SetupCutsceneToStart();
-		if (strcmpi(ms_cutsceneName, "end"))
+		if (CGeneral::faststricmp(ms_cutsceneName, "end"))
 			DMAudio.PlayPreloadedCutSceneMusic();
 		ms_cutsceneLoadStatus++;
 		break;
@@ -407,7 +408,7 @@ CCutsceneMgr::Update(void)
 	if (!ms_running) return;
 
 	ms_cutsceneTimer += CTimer::GetTimeStepNonClipped() * 0.02f;
-	if (strcmpi(ms_cutsceneName, "end") && TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FLYBY && ms_cutsceneLoadStatus == CUTSCENE_LOADING_0) {
+	if (CGeneral::faststricmp(ms_cutsceneName, "end") && TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FLYBY && ms_cutsceneLoadStatus == CUTSCENE_LOADING_0) {
 		if (CPad::GetPad(0)->GetCrossJustDown()
 			|| (CGame::playingIntro && CPad::GetPad(0)->GetStartJustDown())
 			|| CPad::GetPad(0)->GetLeftMouseJustDown()
