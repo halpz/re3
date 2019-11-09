@@ -29,12 +29,10 @@ void **rwengine = *(void***)0x5A10E1;
 
 DebugMenuAPI gDebugMenuAPI;
 
-WRAPPER void *gtanew(uint32 sz) { EAXJMP(0x5A0690); }
-WRAPPER void gtadelete(void *p) { EAXJMP(0x5A07E0); }
-
-// overload our own new/delete with GTA's functions
-void *operator new(size_t sz) { return gtanew(sz); }
-void operator delete(void *ptr) noexcept { gtadelete(ptr); }
+STARTPATCHES
+	InjectHook(0x5A07E0, (void (*)(void*)) &operator delete, PATCH_JUMP);
+	InjectHook(0x5A0690, (void* (*)(size_t)) &operator new, PATCH_JUMP);
+ENDPATCHES
 
 #ifdef USE_PS2_RAND
 unsigned __int64 myrand_seed = 1;

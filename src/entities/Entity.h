@@ -84,7 +84,7 @@ public:
 	uint32 m_flagE2 : 1;
 
 	uint16 m_scanCode;
-	int16 m_randomSeed;
+	uint16 m_randomSeed;
 	int16 m_modelIndex;
 	uint16 m_level;	// int16
 	CReference *m_pFirstReference;

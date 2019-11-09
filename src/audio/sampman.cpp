@@ -35,7 +35,7 @@ int32 _nSampleDataEndOffset;
 
 int32 nPedSlotSfx    [MAX_PEDSFX];
 int32 nPedSlotSfxAddr[MAX_PEDSFX];
-int32 nCurrentPedSlot;
+uint8 nCurrentPedSlot;
 
 uint8 nChannelVolume[MAXCHANNELS+MAX2DCHANNELS];
 
@@ -1437,7 +1437,7 @@ cSampleManager::IsSampleBankLoaded(uint8 nBank)
 bool
 cSampleManager::IsPedCommentLoaded(uint32 nComment)
 {
-	int32 slot;
+	uint8 slot;
 
 	for ( int32 i = 0; i < _TODOCONST(3); i++ )
 	{
@@ -1452,7 +1452,7 @@ cSampleManager::IsPedCommentLoaded(uint32 nComment)
 int32
 cSampleManager::_GetPedCommentSlot(uint32 nComment)
 {
-	int32 slot;
+	uint8 slot;
 
 	for ( int32 i = 0; i < _TODOCONST(3); i++ )
 	{

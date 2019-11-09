@@ -200,7 +200,7 @@ void CUpsideDownCarCheck::Init()
 {
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
 		m_sCars[i].m_nVehicleIndex = -1;
-		m_sCars[i].m_nVehicleIndex = 0;
+		m_sCars[i].m_nUpsideDownTimer = 0;
 	}
 }
 
@@ -216,6 +216,10 @@ void CUpsideDownCarCheck::UpdateTimers()
 {
 	uint32 timeStep = CTimer::GetTimeStepInMilliseconds();
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
+#ifdef FIX_BUGS
+		if (m_sCars[i].m_nVehicleIndex == -1)
+			continue;
+#endif
 		CVehicle* v = CPools::GetVehiclePool()->GetAt(m_sCars[i].m_nVehicleIndex);
 		if (v){
 			if (IsCarUpsideDown(m_sCars[i].m_nVehicleIndex))
@@ -3424,7 +3428,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		assert(pPed);
 		// Useless call.
 		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		int handle = CRadar::SetEntityBlip(BLIP_CHAR, ScriptParams[0], 0, BLIP_DISPLAY_BOTH);
+		int handle = CRadar::SetEntityBlip(BLIP_CHAR, ScriptParams[0], 1, BLIP_DISPLAY_BOTH);
 		CRadar::ChangeBlipScale(handle, 3);
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
@@ -3437,7 +3441,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		assert(pObject);
 		// Useless call.
 		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		int handle = CRadar::SetEntityBlip(BLIP_OBJECT, ScriptParams[0], 0, BLIP_DISPLAY_BOTH);
+		int handle = CRadar::SetEntityBlip(BLIP_OBJECT, ScriptParams[0], 6, BLIP_DISPLAY_BOTH);
 		CRadar::ChangeBlipScale(handle, 3);
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);

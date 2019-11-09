@@ -16,7 +16,7 @@ enum {
 	ASSOC_FLAG80 = 0x80, // used for footstep sound calculation
 	ASSOC_FLAG100 = 0x100,
 	ASSOC_FLAG200 = 0x200,
-	ASSOC_FLAG400 = 0x400,	// not seen yet
+	ASSOC_FLAG400 = 0x400,	// unused, blending it with move anims makes them stop. 0x800 in VC
 	ASSOC_FLAG800 = 0x800, // anims that we fall to front. 0x1000 in VC
 	ASSOC_HAS_X_TRANSLATION = 0x1000,
 	// 0x2000 is vehicle anims in VC
