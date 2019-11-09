@@ -7,10 +7,10 @@
 #define MENUHEADER_WIDTH 0.84f
 #define MENUHEADER_HEIGHT 1.6f
 
-#define MENUACTION_POS_X 20.0f
+#define MENUACTION_POS_X 40.0f
 #define MENUACTION_POS_Y 37.5f
-#define MENUACTION_WIDTH 0.675f
-#define MENUACTION_HEIGHT 0.81f
+#define MENUACTION_WIDTH 0.405f
+#define MENUACTION_HEIGHT 0.63f
 
 #define MENUCOLUMN_POS_X MENUHEADER_POS_X + 16.0f
 #define MENUCOLUMN_MAX_Y 149.0f
@@ -466,9 +466,13 @@ public:
 	static bool &m_bStartUpFrontEndRequested;
 	static bool &m_bShutDownFrontEndRequested;
 	static bool &m_PrefsAllowNastyGame;
+	
+	static float &headingYStart;
+	static float &unkX;
+	static float &unkY;
 
 public:
-	void BuildStatLine(char *text, float *stat, bool aFloat, float* stat2);
+	static void BuildStatLine(char *text, void *stat, uint8 aFloat, void *stat2);
 	static void CentreMousePointer();
 	int CheckCodesForControls(int32);
 	bool CheckHover(int x1, int x2, int y1, int y2);

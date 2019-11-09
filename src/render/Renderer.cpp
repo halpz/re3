@@ -24,6 +24,8 @@ bool gbShowPedRoadGroups;
 bool gbShowCarRoadGroups;
 bool gbShowCollisionPolys;
 bool gbShowCollisionLines;
+bool gbShowCullZoneDebugStuff;
+bool gbBigWhiteDebugLightSwitchedOn;
 
 bool gbDontRenderBuildings;
 bool gbDontRenderBigBuildings;

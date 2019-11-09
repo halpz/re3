@@ -1014,7 +1014,7 @@ CAutomobile::ProcessControl(void)
 		         m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
 			FlyingControl(FLIGHT_MODEL_DODO);
 		}else if(GetModelIndex() == MI_MIAMI_RCBARON){
-			FlyingControl(FLIGHT_MODEL_HELI);
+			FlyingControl(FLIGHT_MODEL_RCPLANE);
 		}else if(GetModelIndex() == MI_MIAMI_RCRAIDER || GetModelIndex() == MI_MIAMI_SPARROW || bAllCarCheat){
 			if(CPad::GetPad(0)->GetCircleJustDown())
 				m_aWheelSpeed[0] = max(m_aWheelSpeed[0]-0.03f, 0.0f);

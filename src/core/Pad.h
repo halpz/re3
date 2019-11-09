@@ -166,7 +166,7 @@ public:
 	static CKeyboardState &OldKeyState;
 	static CKeyboardState &NewKeyState;
 	static CKeyboardState &TempKeyState;
-	static char KeyBoardCheatString[18];
+	static char KeyBoardCheatString[20];
 	static CMouseControllerState &OldMouseControllerState;
 	static CMouseControllerState &NewMouseControllerState;
 	static CMouseControllerState &PCTempMouseControllerState;

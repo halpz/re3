@@ -49,11 +49,8 @@
 #include "ParticleObject.h"
 #include "Floater.h"
 
-WRAPPER void CPed::SetMoveAnim(void) { EAXJMP(0x4C5A40); }
 WRAPPER void CPed::WanderPath(void) { EAXJMP(0x4D28D0); }
-WRAPPER void CPed::SetEnterCar_AllClear(CVehicle*, uint32, uint32) { EAXJMP(0x4E0A40); }
 WRAPPER bool CPed::WarpPedToNearEntityOffScreen(CEntity*) { EAXJMP(0x4E5570); }
-WRAPPER void CPed::SetObjective(eObjective, CVector) { EAXJMP(0x4D8A90); }
 WRAPPER void CPed::SetObjective(eObjective, CVector, float) { EAXJMP(0x4D8770); }
 WRAPPER void CPed::SetCarJack(CVehicle*) { EAXJMP(0x4E0220); }
 WRAPPER void CPed::WarpPedToNearLeaderOffScreen(void) { EAXJMP(0x4E52A0); }
@@ -574,9 +571,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fAngleToEvent = 0.0f;
 	m_numNearPeds = 0;
 
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < ARRAY_SIZE(m_nearPeds); i++) {
 		m_nearPeds[i] = nil;
-		if (i < 8) {
+		if (i < ARRAY_SIZE(m_pPathNodesStates)) {
 			m_pPathNodesStates[i] = nil;
 		}
 	}
@@ -2148,7 +2145,7 @@ CPed::BuildPedLists(void)
 {
 	if ((CTimer::GetFrameCounter() + (m_randomSeed % 256)) % 16) {
 
-		for(int i = 0; i < 10; ) {
+		for(int i = 0; i < ARRAY_SIZE(m_nearPeds); ) {
 			if (m_nearPeds[i]) {
 				if (m_nearPeds[i]->IsPointerValid()) {
 					float distSqr = (GetPosition() - m_nearPeds[i]->GetPosition()).MagnitudeSqr2D();
@@ -2159,7 +2156,7 @@ CPed::BuildPedLists(void)
 				}
 
 				// If we arrive here, the ped we're checking isn't "near", so we should remove it.
-				for (int j = i; j < 9; j++) {
+				for (int j = i; j < ARRAY_SIZE(m_nearPeds) - 1; j++) {
 					m_nearPeds[j] = m_nearPeds[j + 1];
 					m_nearPeds[j + 1] = nil;
 				}
@@ -2194,14 +2191,14 @@ CPed::BuildPedLists(void)
 		}
 		gapTempPedList[gnNumTempPedList] = nil;
 		SortPeds(gapTempPedList, 0, gnNumTempPedList - 1);
-		for (m_numNearPeds = 0; m_numNearPeds < 10; m_numNearPeds++) {
+		for (m_numNearPeds = 0; m_numNearPeds < ARRAY_SIZE(m_nearPeds); m_numNearPeds++) {
 			CPed *ped = gapTempPedList[m_numNearPeds];
 			if (!ped)
 				break;
 
 			m_nearPeds[m_numNearPeds] = ped;
 		}
-		for (int pedToClear = m_numNearPeds; pedToClear < 10; pedToClear++)
+		for (int pedToClear = m_numNearPeds; pedToClear < ARRAY_SIZE(m_nearPeds); pedToClear++)
 			m_nearPeds[pedToClear] = nil;
 	}
 }
@@ -3946,7 +3943,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					}
 					*/
 				}
-				for (int i = 0; i < 8; i++) {
+				for (int i = 0; i < ARRAY_SIZE(m_pMyVehicle->pPassengers); i++) {
 					CPed* passenger = m_pMyVehicle->pPassengers[i];
 					if (passenger && passenger != this && damagedBy)
 						passenger->ReactToAttack(damagedBy);
@@ -5499,7 +5496,7 @@ CPed::CollideWithPed(CPed *collideWith)
 
 									int colliderIsAtPlayerSafePosID = -1;
 									int weAreAtPlayerSafePosID = -1;
-									for (int i = 0; i < 6; i++) {
+									for (int i = 0; i < ARRAY_SIZE(((CPlayerPed*)m_pedInObjective)->m_pPedAtSafePos); i++) {
 										CPed *pedAtSafePos = ((CPlayerPed*)m_pedInObjective)->m_pPedAtSafePos[i];
 										if (pedAtSafePos == this) {
 											weAreAtPlayerSafePosID = i;
@@ -5924,7 +5921,12 @@ void
 CPed::SetSeek(CVector pos, float distanceToCountDone)
 {
 	if (!IsPedInControl()
+		// FIX: Directly comparing floats are bad.
+#ifdef FIX_BUGS
+		|| (m_nPedState == PED_SEEK_POS && Abs(m_vecSeekPos.x - pos.x) < 0.01f && Abs(m_vecSeekPos.y - pos.y) < 0.01f))
+#else
 		|| (m_nPedState == PED_SEEK_POS && m_vecSeekPos.x == pos.x && m_vecSeekPos.y == pos.y))
+#endif
 		return;
 
 	if (GetWeapon()->m_eWeaponType == WEAPONTYPE_M16
@@ -10334,6 +10336,29 @@ CPed::ProcessControl(void)
 						break;
 					}
 
+					CPad* pad = CPad::GetPad(0);
+
+#ifdef CAR_AIRBREAK
+					if (!pad->ArePlayerControlsDisabled()) {
+						if (pad->GetHorn()) {
+							if (pad->GetAccelerate()) {
+								m_pMyVehicle->ApplyMoveForce(GetForward() * 30.0f);
+							} else if (pad->GetBrake()) {
+								m_pMyVehicle->ApplyMoveForce(-GetForward() * 30.0f);
+							} else {
+								int16 lr = pad->GetSteeringLeftRight();
+								if (lr < 0) {
+									//m_pMyVehicle->ApplyTurnForce(20.0f * -GetRight(), GetForward());
+									m_pMyVehicle->ApplyMoveForce(-GetRight() * 30.0f);
+								} else if (lr > 0) {
+									m_pMyVehicle->ApplyMoveForce(GetRight() * 30.0f);
+								} else {
+									m_pMyVehicle->ApplyMoveForce(0.0f, 0.0f, 50.0f);
+								}
+							}
+						}
+					}
+#endif
 					float steerAngle = m_pMyVehicle->m_fSteerAngle;
 					CAnimBlendAssociation *lDriveAssoc;
 					CAnimBlendAssociation *rDriveAssoc;
@@ -11369,7 +11394,11 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 			}
 		}
 	}
-	if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER)
+	if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER
+#ifdef VC_PED_PORTS
+		|| ped->m_nPedState == PED_CARJACK
+#endif
+		)
 		veh->bIsBeingCarJacked = false;
 
 	if (veh->m_nNumGettingIn)
@@ -11380,6 +11409,9 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 
 	if (veh->IsBoat()) {
 		if (ped->IsPlayer()) {
+#ifdef VC_PED_PORTS
+			CCarCtrl::RegisterVehicleOfInterest(veh);
+#endif
 			if (veh->m_status == STATUS_SIMPLE) {
 				veh->m_vecMoveSpeed = CVector(0.0f, 0.0f, -0.00001f);
 				veh->m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
@@ -11423,8 +11455,12 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 	if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER) {
 		for (int i = 0; i < veh->m_nNumMaxPassengers; ++i) {
 			CPed *passenger = veh->pPassengers[i];
-			if (passenger && passenger->CharCreatedBy == RANDOM_CHAR)
+			if (passenger && passenger->CharCreatedBy == RANDOM_CHAR) {
 				passenger->SetObjective(OBJECTIVE_LEAVE_VEHICLE, veh);
+#ifdef VC_PED_PORTS
+				passenger->m_leaveCarTimer = CTimer::GetTimeInMilliseconds();
+#endif
+			}
 		}
 	} else if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER) {
 		if (ped->m_nPedState == PED_CARJACK) {
@@ -16554,6 +16590,264 @@ CPed::WarpPedIntoCar(CVehicle *car)
 	bChangedSeat = true;
 }
 
+void
+CPed::SetObjective(eObjective newObj, CVector dest)
+{
+	if (DyingOrDead())
+		return;
+
+	if (m_prevObjective != OBJECTIVE_NONE && m_prevObjective == newObj)
+		return;
+
+	SetObjectiveTimer(0);
+	if (m_objective == newObj) {
+		if (newObj == OBJECTIVE_GOTO_AREA_ANY_MEANS || newObj == OBJECTIVE_GOTO_AREA_ON_FOOT || newObj == OBJECTIVE_RUN_TO_AREA) {
+			if (m_nextRoutePointPos == dest)
+				return;
+		} else if (newObj == OBJECTIVE_GUARD_SPOT) {
+			if (m_vecSeekPosEx == dest)
+				return;
+		}
+	}
+
+#ifdef VC_PED_PORTS
+	ClearPointGunAt();
+#endif
+	bObjectiveCompleted = false;
+	switch (newObj) {
+		case OBJECTIVE_GUARD_SPOT:
+			m_vecSeekPosEx = dest;
+			m_distanceToCountSeekDoneEx = 5.0f;
+			SetMoveState(PEDMOVE_STILL);
+			break;
+		case OBJECTIVE_GUARD_AREA:
+		case OBJECTIVE_WAIT_IN_CAR:
+		case OBJECTIVE_WAIT_IN_CAR_THEN_GETOUT:
+		case OBJECTIVE_KILL_CHAR_ON_FOOT:
+		case OBJECTIVE_KILL_CHAR_ANY_MEANS:
+		case OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE:
+		case OBJECTIVE_FLEE_CHAR_ON_FOOT_ALWAYS:
+		case OBJECTIVE_GOTO_CHAR_ON_FOOT:
+		case OBJECTIVE_FOLLOW_PED_IN_FORMATION:
+		case OBJECTIVE_LEAVE_VEHICLE:
+		case OBJECTIVE_ENTER_CAR_AS_PASSENGER:
+		case OBJECTIVE_ENTER_CAR_AS_DRIVER:
+		case OBJECTIVE_FOLLOW_CAR_IN_CAR:
+		case OBJECTIVE_FIRE_AT_OBJ_FROM_VEHICLE:
+		case OBJECTIVE_DESTROY_OBJ:
+		case OBJECTIVE_DESTROY_CAR:
+			break;
+		case OBJECTIVE_GOTO_AREA_ANY_MEANS:
+		case OBJECTIVE_GOTO_AREA_ON_FOOT:
+			bIsRunning = false;
+			m_pNextPathNode = nil;
+			m_nextRoutePointPos = dest;
+			m_vecSeekPos = m_nextRoutePointPos;
+			m_distanceToCountSeekDone = 0.5f;
+			bUsePedNodeSeek = true;
+			if (sq(m_distanceToCountSeekDone) > (m_nextRoutePointPos - GetPosition()).MagnitudeSqr2D())
+				return;
+			break;
+		case OBJECTIVE_RUN_TO_AREA:
+			bIsRunning = true;
+			m_pNextPathNode = nil;
+			m_nextRoutePointPos = dest;
+			m_vecSeekPos = m_nextRoutePointPos;
+			m_distanceToCountSeekDone = 0.5f;
+			bUsePedNodeSeek = true;
+			if (sq(m_distanceToCountSeekDone) > (m_nextRoutePointPos - GetPosition()).MagnitudeSqr2D())
+				return;
+			break;
+	}
+
+	if (IsTemporaryObjective(m_objective)) {
+		m_prevObjective = newObj;
+	} else {
+		if (m_objective != newObj)
+			SetStoredObjective();
+
+		m_objective = newObj;
+	}
+}
+
+void
+CPed::SetMoveAnim(void)
+{
+	if (m_nStoredMoveState == m_nMoveState || !IsPedInControl())
+		return;
+
+	if (m_nMoveState == PEDMOVE_NONE) {
+		m_nStoredMoveState = PEDMOVE_NONE;
+		return;
+	}
+
+	AssocGroupId animGroupToUse;
+	if (m_leader && m_leader->IsPlayer())
+		animGroupToUse = ASSOCGRP_PLAYER;
+	else
+		animGroupToUse = m_animGroup;
+
+	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG400);
+	if (!animAssoc) {
+		CAnimBlendAssociation *fightIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
+		animAssoc = fightIdleAssoc;
+		if (fightIdleAssoc && m_nPedState == PED_FIGHT)
+			return;
+
+		if (fightIdleAssoc) {
+			CAnimBlendAssociation *idleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
+			if (!idleAssoc || idleAssoc->blendDelta <= 0.0f) {
+				animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+				animAssoc = CAnimManager::BlendAnimation(GetClump(), animGroupToUse, ANIM_IDLE_STANCE, 8.0f);
+			}
+		}
+	}
+	if (!animAssoc) {
+		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_TIRED);
+		if (animAssoc)
+			if (m_nWaitState == WAITSTATE_STUCK || m_nWaitState == WAITSTATE_FINISH_FLEE)
+				return;
+
+		if (animAssoc) {
+			CAnimBlendAssociation *idleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
+			if (!idleAssoc || idleAssoc->blendDelta <= 0.0f) {
+				animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+				animAssoc = CAnimManager::BlendAnimation(GetClump(), animGroupToUse, ANIM_IDLE_STANCE, 4.0f);
+			}
+		}
+	}
+	if (!animAssoc) {
+		m_nStoredMoveState = m_nMoveState;
+		if (m_nMoveState == PEDMOVE_WALK || m_nMoveState == PEDMOVE_RUN || m_nMoveState == PEDMOVE_SPRINT) {
+			for (CAnimBlendAssociation *assoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_PARTIAL);
+				assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ASSOC_PARTIAL)) {
+
+				if (!(assoc->flags & ASSOC_FADEOUTWHENDONE)) {
+					assoc->blendDelta = -2.0f;
+					assoc->flags |= ASSOC_DELETEFADEDOUT;
+				}
+			}
+
+			ClearAimFlag();
+			ClearLookFlag();
+		}
+
+		switch (m_nMoveState) {
+			case PEDMOVE_STILL:
+				animAssoc = CAnimManager::BlendAnimation(GetClump(), animGroupToUse, ANIM_IDLE_STANCE, 4.0f);
+				break;
+			case PEDMOVE_WALK:
+				animAssoc = CAnimManager::BlendAnimation(GetClump(), animGroupToUse, ANIM_WALK, 1.0f);
+				break;
+			case PEDMOVE_RUN:
+				if (m_nPedState == PED_FLEE_ENTITY) {
+					animAssoc = CAnimManager::BlendAnimation(GetClump(), animGroupToUse, ANIM_RUN, 3.0f);
+				} else {
+					animAssoc = CAnimManager::BlendAnimation(GetClump(), animGroupToUse, ANIM_RUN, 1.0f);
+				}
+				break;
+			case PEDMOVE_SPRINT:
+				animAssoc = CAnimManager::BlendAnimation(GetClump(), animGroupToUse, ANIM_SPRINT, 1.0f);
+				break;
+			default:
+				break;
+		}
+
+		if (animAssoc) {
+			if (m_leader) {
+				CAnimBlendAssociation *walkAssoc = RpAnimBlendClumpGetAssociation(m_leader->GetClump(), ANIM_WALK);
+				if (!walkAssoc)
+					walkAssoc = RpAnimBlendClumpGetAssociation(m_leader->GetClump(), ANIM_RUN);
+
+				if (!walkAssoc)
+					walkAssoc = RpAnimBlendClumpGetAssociation(m_leader->GetClump(), ANIM_SPRINT);
+
+				if (walkAssoc) {
+					animAssoc->speed = walkAssoc->speed;
+				} else {
+					if (CharCreatedBy == MISSION_CHAR)
+						animAssoc->speed = 1.0f;
+					else
+						animAssoc->speed = 1.2f - m_randomSeed * 0.4f / MYRAND_MAX;
+							
+				}
+			} else {
+				if (CharCreatedBy == MISSION_CHAR)
+					animAssoc->speed = 1.0f;
+				else
+					animAssoc->speed = 1.2f - m_randomSeed * 0.4f / MYRAND_MAX;
+			}
+		}
+	}
+}
+
+void
+CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
+{
+	float zDiff = 0.0f;
+	if (!IsPlayer() || GetWeapon()->m_eWeaponType != WEAPONTYPE_UZI) {
+		// RemoveWeaponWhenEnteringVehicle in VC
+		if (IsPlayer() && HasWeapon(WEAPONTYPE_UZI) && GetWeapon(WEAPONTYPE_UZI).m_nAmmoTotal > 0) {
+			if (m_storedWeapon == WEAPONTYPE_UNIDENTIFIED)
+				m_storedWeapon = GetWeapon()->m_eWeaponType;
+			SetCurrentWeapon(WEAPONTYPE_UZI);
+		} else {
+			CWeaponInfo *ourWeapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
+			RemoveWeaponModel(ourWeapon->m_nModelId);
+		}
+	}
+	car->m_nGettingInFlags |= doorFlag;
+	bVehEnterDoorIsBlocked = false;
+	if (m_nPedState != PED_SEEK_CAR && m_nPedState != PED_SEEK_IN_BOAT)
+		SetStoredState();
+
+	m_pSeekTarget = car;
+	m_pSeekTarget->RegisterReference((CEntity **) &m_pSeekTarget);
+	m_vehEnterType = doorNode;
+	m_nPedState = PED_ENTER_CAR;
+	if (m_vehEnterType == CAR_DOOR_RF && m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER && car->m_vehType != VEHICLE_TYPE_BIKE) {
+		car->bIsBeingCarJacked = true;
+	}
+
+	m_pMyVehicle = (CVehicle*)m_pSeekTarget;
+	m_pMyVehicle->RegisterReference((CEntity**) &m_pMyVehicle);
+	((CVehicle*)m_pSeekTarget)->m_nNumGettingIn++;
+	bUsesCollision = false;
+	CVector doorOpenPos = GetPositionToOpenCarDoor(car, m_vehEnterType);
+
+	// Because buses have stairs
+	if (!m_pMyVehicle->bIsBus)
+		zDiff = max(0.0f, doorOpenPos.z - GetPosition().z);
+
+	m_vecOffsetSeek = doorOpenPos - GetPosition();
+	m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 600;
+	if (car->IsBoat()) {
+		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
+#ifdef VC_PED_PORTS
+		m_ped_flagI4 = true;
+		PedSetInCarCB(nil, this);
+#else
+		m_pVehicleAnim->SetFinishCallback(PedSetInCarCB, this);
+#endif
+		if (IsPlayer())
+			CWaterLevel::AllocateBoatWakeArray();
+	} else {
+		if (m_vehEnterType != CAR_DOOR_LF && m_vehEnterType != CAR_DOOR_LR) {
+			if (zDiff <= 4.4f) {
+				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ALIGN_RHS, 4.0f);
+			} else {
+				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ALIGNHI_RHS, 4.0f);
+			}
+		} else if (zDiff <= 4.4f) {
+			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ALIGN_LHS, 4.0f);
+		} else {
+			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ALIGNHI_LHS, 4.0f);
+		}
+		m_pVehicleAnim->SetFinishCallback(PedAnimAlignCB, this);
+		car->AutoPilot.m_nCruiseSpeed = 0;
+	}
+}
+
 class CPed_ : public CPed
 {
 public:
@@ -16569,6 +16863,7 @@ public:
 	void Render_(void) { CPed::Render(); }
 	void PreRender_(void) { CPed::PreRender(); }
 	int32 ProcessEntityCollision_(CEntity *collidingEnt, CColPoint *collidingPoints) { return CPed::ProcessEntityCollision(collidingEnt, collidingPoints); }
+	void SetMoveAnim_(void) { CPed::SetMoveAnim(); }
 };
 
 STARTPATCHES
@@ -16583,6 +16878,7 @@ STARTPATCHES
 	InjectHook(0x4D03F0, &CPed_::Render_, PATCH_JUMP);
 	InjectHook(0x4CBB30, &CPed_::ProcessEntityCollision_, PATCH_JUMP);
 	InjectHook(0x4CFDD0, &CPed_::PreRender_, PATCH_JUMP);
+	InjectHook(0x4C5A40, &CPed_::SetMoveAnim_, PATCH_JUMP);
 
 	InjectHook(0x4CF8F0, &CPed::AddWeaponModel, PATCH_JUMP);
 	InjectHook(0x4C6AA0, &CPed::AimGun, PATCH_JUMP);
@@ -16622,6 +16918,7 @@ STARTPATCHES
 	InjectHook(0x4D82C0, (void (CPed::*)(eObjective)) &CPed::SetObjective, PATCH_JUMP);
 	InjectHook(0x4D83E0, (void (CPed::*)(eObjective, void*)) &CPed::SetObjective, PATCH_JUMP);
 	InjectHook(0x4D89A0, (void (CPed::*)(eObjective, int16, int16)) &CPed::SetObjective, PATCH_JUMP);
+	InjectHook(0x4D8A90, (void (CPed::*)(eObjective, CVector)) &CPed::SetObjective, PATCH_JUMP);
 	InjectHook(0x4DDEC0, &CPed::ReactToAttack, PATCH_JUMP);
 	InjectHook(0x4D0600, &CPed::SetIdle, PATCH_JUMP);
 	InjectHook(0x4E0E00, &CPed::QuitEnteringCar, PATCH_JUMP);
@@ -16777,4 +17074,5 @@ STARTPATCHES
 	InjectHook(0x4D8F30, &CPed::UpdateFromLeader, PATCH_JUMP);
 	InjectHook(0x4D4970, &CPed::SetPedPositionInCar, PATCH_JUMP);
 	InjectHook(0x4D7D20, &CPed::WarpPedIntoCar, PATCH_JUMP);
+	InjectHook(0x4E0A40, &CPed::SetEnterCar_AllClear, PATCH_JUMP);
 ENDPATCHES

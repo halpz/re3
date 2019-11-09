@@ -363,7 +363,7 @@ public:
 
 	uint8 bShakeFist : 1;  // test shake hand at look entity
 	uint8 bNoCriticalHits : 1; // if set, limbs won't came off
-	uint8 m_ped_flagI4 : 1; // we've been put to car by script? - related with cars
+	uint8 m_ped_flagI4 : 1; // we've been put to car by script or without align phase? - related with cars
 	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 bFallenDown : 1;
 #ifdef VC_PED_PORTS
@@ -499,8 +499,8 @@ public:
 	uint32 m_soundStart;
 	uint16 m_lastQueuedSound;
 	uint16 m_queuedSound;
-	CVector m_vecSeekPosEx; // used in objectives
-	float m_distanceToCountSeekDoneEx; // used in objectives
+	CVector m_vecSeekPosEx; // used for OBJECTIVE_GUARD_SPOT
+	float m_distanceToCountSeekDoneEx; // used for OBJECTIVE_GUARD_SPOT
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
