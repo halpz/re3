@@ -2602,7 +2602,7 @@ cAudioManager::InitialisePoliceRadio()
 
 	SampleManager.SetChannelReverbFlag(policeChannel, 0);
 	gSpecialSuspectLastSeenReport = 0;
-	for(int32 i = 0; i < 18; i++) { gMinTimeToNextReport[i] = m_nTimeOfRecentCrime; }
+	for(int32 i = 0; i < 17; i++) { gMinTimeToNextReport[i] = m_nTimeOfRecentCrime; }
 }
 
 struct tPoliceRadioZone {
