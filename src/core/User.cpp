@@ -140,7 +140,7 @@ bool COnscreenTimerEntry::ProcessForDisplay() {
 
 	if(m_nTimerOffset != 0) {
 		m_bTimerProcessed = true;
-		ProcessForDisplayTimer();
+		ProcessForDisplayClock();
 	}
 
 	if(m_nCounterOffset != 0) {
@@ -150,21 +150,21 @@ bool COnscreenTimerEntry::ProcessForDisplay() {
 	return true;
 }
 
-int COnscreenTimerEntry::ProcessForDisplayTimer() {
+void COnscreenTimerEntry::ProcessForDisplayClock() {
 	uint32 time = *(uint32*)&CTheScripts::ScriptSpace[m_nTimerOffset];
-	return sprintf(m_bTimerBuffer, "%02d:%02d", time / 1000 / 60,
+	sprintf(m_bTimerBuffer, "%02d:%02d", time / 1000 / 60,
 				   time / 1000 % 60);
 }
 
-int COnscreenTimerEntry::ProcessForDisplayCounter() {
+void COnscreenTimerEntry::ProcessForDisplayCounter() {
 	uint32 counter = *(uint32*)&CTheScripts::ScriptSpace[m_nCounterOffset];
-	return sprintf(m_bCounterBuffer, "%d", counter);
+	sprintf(m_bCounterBuffer, "%d", counter);
 }
 
 STARTPATCHES
 	InjectHook(0x429160, &COnscreenTimerEntry::Process, PATCH_JUMP);
 	InjectHook(0x429110, &COnscreenTimerEntry::ProcessForDisplay, PATCH_JUMP);
-	InjectHook(0x429080, &COnscreenTimerEntry::ProcessForDisplayTimer, PATCH_JUMP);
+	InjectHook(0x429080, &COnscreenTimerEntry::ProcessForDisplayClock, PATCH_JUMP);
 	InjectHook(0x4290F0, &COnscreenTimerEntry::ProcessForDisplayCounter, PATCH_JUMP);
 
 	InjectHook(0x429220, &COnscreenTimer::Init, PATCH_JUMP);
