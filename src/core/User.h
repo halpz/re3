@@ -18,8 +18,8 @@ public:
 	void Process();
 	bool ProcessForDisplay();
 
-	int ProcessForDisplayTimer();
-	int ProcessForDisplayCounter();
+	void ProcessForDisplayClock();
+	void ProcessForDisplayCounter();
 };
 
 static_assert(sizeof(COnscreenTimerEntry) == 0x74, "COnscreenTimerEntry: error");

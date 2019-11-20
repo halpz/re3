@@ -2307,17 +2307,23 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 		assert(pCurrent); // GetIndex(0) doesn't look good
 		int handle = CPools::GetVehiclePool()->GetIndex(pCurrent);
 		if (handle != CTheScripts::StoreVehicleIndex && m_bIsMissionScript){
-			CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
-			if (pOld){
-				CCarCtrl::RemoveFromInterestingVehicleList(pOld);
-				if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom){
-					pOld->VehicleCreatedBy = RANDOM_VEHICLE;
-					pOld->bIsLocked = false;
-					CCarCtrl::NumRandomCars++;
-					CCarCtrl::NumMissionCars--;
-					CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+#ifdef FIX_BUGS
+			if (CTheScripts::StoreVehicleIndex != -1)
+#endif
+			{
+				CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
+				if (pOld){
+					CCarCtrl::RemoveFromInterestingVehicleList(pOld);
+					if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom){
+						pOld->VehicleCreatedBy = RANDOM_VEHICLE;
+						pOld->bIsLocked = false;
+						CCarCtrl::NumRandomCars++;
+						CCarCtrl::NumMissionCars--;
+						CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+					}
 				}
 			}
+
 			CTheScripts::StoreVehicleIndex = handle;
 			switch (pCurrent->VehicleCreatedBy){
 			case RANDOM_VEHICLE:
@@ -2357,17 +2363,23 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 		assert(pCurrent); // Here pCurrent shouldn't be NULL anyway
 		int handle = CPools::GetVehiclePool()->GetIndex(pCurrent);
 		if (handle != CTheScripts::StoreVehicleIndex && m_bIsMissionScript) {
-			CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
-			if (pOld) {
-				CCarCtrl::RemoveFromInterestingVehicleList(pOld);
-				if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom) {
-					pOld->VehicleCreatedBy = RANDOM_VEHICLE;
-					pOld->bIsLocked = false;
-					CCarCtrl::NumRandomCars++;
-					CCarCtrl::NumMissionCars--;
-					CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+#ifdef FIX_BUGS
+			if (CTheScripts::StoreVehicleIndex != -1)
+#endif
+			{
+				CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
+				if (pOld){
+					CCarCtrl::RemoveFromInterestingVehicleList(pOld);
+					if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom){
+						pOld->VehicleCreatedBy = RANDOM_VEHICLE;
+						pOld->bIsLocked = false;
+						CCarCtrl::NumRandomCars++;
+						CCarCtrl::NumMissionCars--;
+						CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+					}
 				}
 			}
+
 			CTheScripts::StoreVehicleIndex = handle;
 			switch (pCurrent->VehicleCreatedBy) {
 			case RANDOM_VEHICLE:
