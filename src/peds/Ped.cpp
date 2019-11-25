@@ -272,10 +272,14 @@ static char WaitStateText[][16] = {
 	"Finish Flee",
 };
 
-#ifndef MASTER
-int nDisplayDebugInfo = 0;
+#ifdef TOGGLEABLE_BETA_FEATURES
 bool CPed::bUnusedFightThingOnPlayer = false;
 bool CPed::bPopHeadsOnHeadshot = false;
+bool CPed::bMakePedsRunToPhonesToReportCrimes = false;
+#endif
+
+#ifndef MASTER
+int nDisplayDebugInfo = 0;
 
 void
 CPed::SwitchDebugDisplay(void)
@@ -286,7 +290,7 @@ CPed::SwitchDebugDisplay(void)
 void
 CPed::DebugRenderOnePedText(void)
 {
-	if ((GetPosition() - TheCamera.GetPosition()).MagnitudeSqr() < 900.0f) {
+	if ((GetPosition() - TheCamera.GetPosition()).MagnitudeSqr() < sq(30.0f)) {
 		float width, height;
 		RwV3d screenCoords;
 		CVector bitAbove = GetPosition();
@@ -300,7 +304,7 @@ CPed::DebugRenderOnePedText(void)
 			CFont::SetBackgroundOn();
 
 			// Originally both of them were being divided by 60.0f.
-			float xScale = min(width / 190.0f, 0.7f);
+			float xScale = min(width / 240.0f, 0.7f);
 			float yScale = min(height / 80.0f, 0.7f);
 
 			CFont::SetScale(SCREEN_SCALE_X(xScale), SCREEN_SCALE_Y(yScale));
@@ -866,7 +870,7 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 direction)
 	frame = GetNodeFrame(nodeId);
 	if (frame) {
 		if (CGame::nastyGame) {
-#ifndef MASTER
+#ifdef TOGGLEABLE_BETA_FEATURES
 			if (bPopHeadsOnHeadshot || nodeId != PED_HEAD)
 #else
 			if (nodeId != PED_HEAD)
@@ -2998,7 +3002,7 @@ CPed::ReactToAttack(CEntity *attacker)
 
 			CCarCtrl::SwitchVehicleToRealPhysics(m_pMyVehicle);
 			m_pMyVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
-			m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 60.0f * m_pMyVehicle->pHandling->Transmission.fUnkMaxVelocity;
+			m_pMyVehicle->AutoPilot.m_nCruiseSpeed = GAME_SPEED_TO_CARAI_SPEED * m_pMyVehicle->pHandling->Transmission.fUnkMaxVelocity;
 			m_pMyVehicle->m_status = STATUS_PHYSICS;
 		}
 	} else
@@ -3046,7 +3050,7 @@ bool
 CPed::TurnBody(void)
 {
 	float lookDir;
-	bool doneSmoothly = true;
+	bool turnDone = true;
 
 	if (m_pLookTarget) {
 		CVector &lookPos = m_pLookTarget->GetPosition();
@@ -3071,18 +3075,19 @@ CPed::TurnBody(void)
 	m_fRotationDest = limitedLookDir;
 
 	if (Abs(neededTurn) > 0.05f) {
-		doneSmoothly = false;
+		turnDone = false;
 		currentRot -= neededTurn * 0.2f;
 	}
 
 	m_fRotationCur = currentRot;
 	m_fLookDirection = limitedLookDir;
-	return doneSmoothly;
+	return turnDone;
 }
 
 void
 CPed::Chat(void)
 {
+	// We're already looking to our partner
 	if (bIsLooking && TurnBody())
 		ClearLookFlag();
 
@@ -3157,7 +3162,7 @@ CPed::CheckAroundForPossibleCollisions(void)
 		if (radius > 4.5f || radius < 1.0f)
 			radius = 1.0f;
 
-		// According to code, developers gave up calculating Z diff. later.
+		// Developers gave up calculating Z diff. later according to asm.
 		float diff = CVector(ourCentre - objCentre).MagnitudeSqr2D();
 
 		if (sq(radius + 1.0f) > diff)
@@ -3168,6 +3173,15 @@ CPed::CheckAroundForPossibleCollisions(void)
 bool
 CPed::MakePhonecall(void)
 {
+#ifdef TOGGLEABLE_BETA_FEATURES
+	if (bMakePedsRunToPhonesToReportCrimes)
+		if (!IsPlayer() && CTimer::GetTimeInMilliseconds() > m_phoneTalkTimer - 7000 && bRunningToPhone) {
+
+			FindPlayerPed()->m_pWanted->RegisterCrime_Immediately(m_crimeToReportOnPhone, GetPosition(),
+				(m_crimeToReportOnPhone == CRIME_POSSESSION_GUN ? (int)m_threatEntity : (int)((CPed*)m_pEventEntity)->m_threatEntity), false);
+			bRunningToPhone = false;
+		}
+#endif
 	if (CTimer::GetTimeInMilliseconds() <= m_phoneTalkTimer)
 		return false;
 
@@ -3180,8 +3194,22 @@ CPed::MakePhonecall(void)
 bool
 CPed::FacePhone(void)
 {
-	// FIX: I don't think this function was working correctly, they confused LimitAngle with LimitRadianAngle etc., so I fixed them
-	float currentRot = m_fRotationCur;
+	// FIX: This function was broken since it's left unused early in development.
+#ifdef FIX_BUGS
+	float phoneDir = CGeneral::GetRadianAngleBetweenPoints(
+		gPhoneInfo.m_aPhones[m_phoneId].m_vecPos.x, gPhoneInfo.m_aPhones[m_phoneId].m_vecPos.y,
+		GetPosition().x, GetPosition().y);
+
+	SetLookFlag(phoneDir, false);
+	bool turnDone = TurnBody();
+	if (turnDone) {
+		SetIdle();
+		ClearLookFlag();
+		m_phoneTalkTimer = CTimer::GetTimeInMilliseconds() + 10000;
+	}
+	return turnDone;
+#else
+	float currentRot = RADTODEG(m_fRotationCur);
 	float phoneDir = CGeneral::GetRadianAngleBetweenPoints(
 		gPhoneInfo.m_aPhones[m_phoneId].m_vecPos.x,
 		gPhoneInfo.m_aPhones[m_phoneId].m_vecPos.y,
@@ -3189,14 +3217,13 @@ CPed::FacePhone(void)
 		GetPosition().y);
 
 	SetLookFlag(phoneDir, false);
-
-	phoneDir = CGeneral::LimitRadianAngle(phoneDir);
+	phoneDir = CGeneral::LimitAngle(phoneDir);
 	m_moved = CVector2D(0.0f, 0.0f);
 
-	if (currentRot - PI > phoneDir)
-		phoneDir += 2 * PI;
-	else if (PI + currentRot < phoneDir)
-		phoneDir -= 2 * PI;
+	if (currentRot - 180.0f > phoneDir)
+		phoneDir += 2 * 180.0f;
+	else if (180.0f + currentRot < phoneDir)
+		phoneDir -= 2 * 180.0f;
 
 	float neededTurn = currentRot - phoneDir;
 
@@ -3206,9 +3233,10 @@ CPed::FacePhone(void)
 		m_phoneTalkTimer = CTimer::GetTimeInMilliseconds() + 10000;
 		return true;
 	} else {
-		m_fRotationCur -= neededTurn * 0.2f;
+		m_fRotationCur = DEGTORAD(currentRot - neededTurn * 0.2f);
 		return false;
 	}
+#endif
 }
 
 CPed *
@@ -4292,7 +4320,7 @@ CPed::RestorePreviousState(void)
 				if (!bFindNewNodeAfterStateRestore) {
 					if (m_pNextPathNode) {
 						CVector diff = m_pNextPathNode->pos - GetPosition();
-						if (diff.MagnitudeSqr() < 49.0f) {
+						if (diff.MagnitudeSqr() < sq(7.0f)) {
 							SetMoveState(PEDMOVE_WALK);
 							break;
 						}
@@ -4581,7 +4609,7 @@ CPed::SetEvasiveDive(CPhysical *reason, uint8 onlyRandomJump)
 
 	if (reason->IsVehicle() && m_nPedType == PEDTYPE_COP) {
 		if (veh->pDriver && veh->pDriver->IsPlayer()) {
-			CWanted *wanted = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted;
+			CWanted *wanted = FindPlayerPed()->m_pWanted;
 			wanted->RegisterCrime_Immediately(CRIME_RECKLESS_DRIVING, GetPosition(), (int)this, false);
 			wanted->RegisterCrime_Immediately(CRIME_SPEEDING, GetPosition(), (int)this, false);
 		}
@@ -4796,7 +4824,7 @@ CPed::StartFightAttack(uint8 buttonPressure)
 	animAssoc->SetFinishCallback(FinishFightMoveCB, this);
 	m_fightState = FIGHTSTATE_NO_MOVE;
 	m_takeAStepAfterAttack = false;
-#ifndef MASTER
+#ifdef TOGGLEABLE_BETA_FEATURES
 	m_takeAStepAfterAttack = IsPlayer() && bUnusedFightThingOnPlayer;
 #endif
 
@@ -5879,6 +5907,13 @@ CPed::SetDead(void)
 	m_fHealth = 0.0f;
 	if (m_nPedState == PED_DRIVING)
 		bIsVisible = false;
+
+#ifdef TOGGLEABLE_BETA_FEATURES
+	if (bRunningToPhone) {
+		if (gPhoneInfo.m_aPhones[m_phoneId].m_nState == PHONE_STATE_REPORTING_CRIME)
+			gPhoneInfo.m_aPhones[m_phoneId].m_nState = PHONE_STATE_FREE;
+	}
+#endif
 
 	m_nPedState = PED_DEAD;
 	m_pVehicleAnim = nil;
@@ -7426,7 +7461,7 @@ CPed::Flee(void)
 	if (CTimer::GetTimeInMilliseconds() > m_fleeTimer && m_fleeTimer) {
 		bool mayFinishFleeing = true;
 		if (m_nPedState == PED_FLEE_ENTITY) {
-			if ((CVector2D(GetPosition()) - ms_vec2DFleePosition).MagnitudeSqr() < 900.0f)
+			if ((CVector2D(GetPosition()) - ms_vec2DFleePosition).MagnitudeSqr() < sq(30.0f))
 				mayFinishFleeing = false;
 		}
 
@@ -7946,7 +7981,7 @@ CPed::Idle(void)
 				CVector doorPos = GetPositionToOpenCarDoor(veh, m_vehEnterType);
 				CVector doorDist = GetPosition() - doorPos;
 
-				if (doorDist.MagnitudeSqr() < 0.25f) {
+				if (doorDist.MagnitudeSqr() < sq(0.5f)) {
 					SetMoveState(PEDMOVE_WALK);
 					return;
 				}
@@ -8324,7 +8359,7 @@ CPed::InvestigateEvent(void)
 		}
 
 		for (int i = 0; i < m_numNearPeds; i++) {
-			if ((m_eventOrThreat - m_nearPeds[i]->GetPosition()).MagnitudeSqr() < 0.16f) {
+			if ((m_eventOrThreat - m_nearPeds[i]->GetPosition()).MagnitudeSqr() < sq(0.4f)) {
 				SetMoveState(PEDMOVE_STILL);
 				return;
 			}
@@ -8531,6 +8566,10 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 
 		if (car->pDriver) {
 			CEventList::RegisterEvent((m_nPedType == PEDTYPE_COP ? EVENT_HIT_AND_RUN_COP : EVENT_HIT_AND_RUN), EVENT_ENTITY_PED, this, car->pDriver, 1000);
+#ifdef TOGGLEABLE_BETA_FEATURES
+			if (bMakePedsRunToPhonesToReportCrimes)
+				m_ped_flagI40 = true;
+#endif
 		}
 
 		ePedPieceTypes pieceToDamage;
@@ -8659,7 +8698,7 @@ CPed::LookForInterestingNodes(void)
 							objMat = &veh->GetMatrix();
 							effectPos = veh->GetMatrix() * effect->pos;
 							effectDist = effectPos - GetPosition();
-							if (effectDist.MagnitudeSqr() < 64.0f) {
+							if (effectDist.MagnitudeSqr() < sq(8.0f)) {
 								found = true;
 								break;
 							}
@@ -8677,7 +8716,7 @@ CPed::LookForInterestingNodes(void)
 							objMat = &obj->GetMatrix();
 							effectPos = obj->GetMatrix() * effect->pos;
 							effectDist = effectPos - GetPosition();
-							if (effectDist.MagnitudeSqr() < 64.0f) {
+							if (effectDist.MagnitudeSqr() < sq(8.0f)) {
 								found = true;
 								break;
 							}
@@ -8695,7 +8734,7 @@ CPed::LookForInterestingNodes(void)
 							objMat = &building->GetMatrix();
 							effectPos = building->GetMatrix() * effect->pos;
 							effectDist = effectPos - GetPosition();
-							if (effectDist.MagnitudeSqr() < 64.0f) {
+							if (effectDist.MagnitudeSqr() < sq(8.0f)) {
 								found = true;
 								break;
 							}
@@ -8713,7 +8752,7 @@ CPed::LookForInterestingNodes(void)
 							objMat = &building->GetMatrix();
 							effectPos = building->GetMatrix() * effect->pos;
 							effectDist = effectPos - GetPosition();
-							if (effectDist.MagnitudeSqr() < 64.0f) {
+							if (effectDist.MagnitudeSqr() < sq(8.0f)) {
 								found = true;
 								break;
 							}
@@ -10343,6 +10382,11 @@ CPed::ProcessControl(void)
 #ifdef CAR_AIRBREAK
 					if (!pad->ArePlayerControlsDisabled()) {
 						if (pad->GetHorn()) {
+							float c = Cos(m_fRotationCur);
+							float s = Sin(m_fRotationCur);
+							m_pMyVehicle->GetRight() = CVector(c, 0.0f, 0.0f);
+							m_pMyVehicle->GetForward() = CVector(0.0f, s, 0.0f);
+							m_pMyVehicle->GetUp() = CVector(0.0f, 0.0f, 1.0f);
 							if (pad->GetAccelerate()) {
 								m_pMyVehicle->ApplyMoveForce(GetForward() * 30.0f);
 							} else if (pad->GetBrake()) {
@@ -10461,7 +10505,7 @@ CPed::ProcessControl(void)
 				if (CGame::nastyGame) {
 					if (!(CTimer::GetFrameCounter() & 3)) {
 						CVector cameraDist = GetPosition() - TheCamera.GetPosition();
-						if (cameraDist.MagnitudeSqr() < 2500.0f) {
+						if (cameraDist.MagnitudeSqr() < sq(50.0f)) {
 
 							float length = (CGeneral::GetRandomNumber() & 127) * 0.0015f + 0.15f;
 							CVector bloodPos(
@@ -11617,12 +11661,20 @@ CPed::PedStaggerCB(CAnimBlendAssociation* animAssoc, void* arg)
 }
 
 // It's "CPhoneInfo::ProcessNearestFreePhone" in PC IDB, but it's not true, someone made it up.
-// TO-DO: No peds run to phones to report crimes. Make this work.
 bool
 CPed::RunToReportCrime(eCrimeType crimeToReport)
 {
+#ifdef TOGGLEABLE_BETA_FEATURES
+	if (!bMakePedsRunToPhonesToReportCrimes)
+		return false;
+
+	if (bRunningToPhone)
+		return true;
+#else
+	// They changed true into false to make this function unusable. So running to phone actually starts but first frame after that cancels it.
 	if (m_nPedState == PED_SEEK_POS)
 		return false;
+#endif
 
 	CVector pos = GetPosition();
 	int phoneId = gPhoneInfo.FindNearestFreePhone(&pos);
@@ -11634,8 +11686,11 @@ CPed::RunToReportCrime(eCrimeType crimeToReport)
 		return false;
 
 	bRunningToPhone = true;
+	SetSeek(gPhoneInfo.m_aPhones[phoneId].m_vecPos, 0.7f); // original: 0.35f
 	SetMoveState(PEDMOVE_RUN);
-	SetSeek(gPhoneInfo.m_aPhones[phoneId].m_vecPos, 0.3f);
+#ifdef FIX_BUGS
+	bIsRunning = true;
+#endif
 	m_phoneId = phoneId;
 	m_crimeToReportOnPhone = crimeToReport;
 	return true;
@@ -11688,7 +11743,7 @@ CPed::RegisterThreatWithGangPeds(CEntity *attacker)
 					if (nearVehDriver && nearVehDriver != this && nearVehDriver->m_nPedType == m_nPedType) {
 
 						if (nearVeh->IsVehicleNormal() && nearVeh->IsCar()) {
-							nearVeh->AutoPilot.m_nCruiseSpeed = 60.0f * nearVeh->pHandling->Transmission.fUnkMaxVelocity * 0.8f;
+							nearVeh->AutoPilot.m_nCruiseSpeed = GAME_SPEED_TO_CARAI_SPEED * nearVeh->pHandling->Transmission.fUnkMaxVelocity * 0.8f;
 							nearVeh->AutoPilot.m_nCarMission = MISSION_RAMPLAYER_FARAWAY;
 							nearVeh->m_status = STATUS_PHYSICS;
 							nearVeh->AutoPilot.m_nTempAction = TEMPACT_NONE;
@@ -12338,7 +12393,7 @@ CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 
 	helperPos = GetPosition() - foundPos;
 	helperPos.z = 0.0f;
-	if (helperPos.MagnitudeSqr() <= 0.25f)
+	if (helperPos.MagnitudeSqr() <= sq(0.5f))
 		return false;
 
 	pos->x = foundPos.x;
@@ -12468,16 +12523,16 @@ CPed::ProcessObjective(void)
 					}
 					if (bInVehicle && m_pMyVehicle) {
 						if (distWithTarget.Magnitude() >= 20.0f
-							|| m_pMyVehicle->m_vecMoveSpeed.MagnitudeSqr() >= 0.0004f) {
+							|| m_pMyVehicle->m_vecMoveSpeed.MagnitudeSqr() >= sq(0.02f)) {
 							if (m_pMyVehicle->pDriver == this
 								&& !m_pMyVehicle->m_nGettingInFlags) {
 								m_pMyVehicle->m_status = STATUS_PHYSICS;
 								m_pMyVehicle->AutoPilot.m_nPrevRouteNode = 0;
 								if (m_nPedType == PEDTYPE_COP) {
-									m_pMyVehicle->AutoPilot.m_nCruiseSpeed = (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel * 0.1f + 0.6f) * (60.0f * m_pMyVehicle->pHandling->Transmission.fUnkMaxVelocity);
+									m_pMyVehicle->AutoPilot.m_nCruiseSpeed = (FindPlayerPed()->m_pWanted->m_nWantedLevel * 0.1f + 0.6f) * (GAME_SPEED_TO_CARAI_SPEED * m_pMyVehicle->pHandling->Transmission.fUnkMaxVelocity);
 									m_pMyVehicle->AutoPilot.m_nCarMission = CCarAI::FindPoliceCarMissionForWantedLevel();
 								} else {
-									m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 60.0f * m_pMyVehicle->pHandling->Transmission.fUnkMaxVelocity * 0.8f;
+									m_pMyVehicle->AutoPilot.m_nCruiseSpeed = GAME_SPEED_TO_CARAI_SPEED * m_pMyVehicle->pHandling->Transmission.fUnkMaxVelocity * 0.8f;
 									m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_RAMPLAYER_FARAWAY;
 								}
 								m_pMyVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
@@ -13221,7 +13276,7 @@ CPed::ProcessObjective(void)
 				if (bInVehicle && m_pMyVehicle) {
 					CCarAI::GetCarToGoToCoors(m_pMyVehicle, &m_nextRoutePointPos);
 					CCarCtrl::RegisterVehicleOfInterest(m_pMyVehicle);
-					if (distWithTarget.MagnitudeSqr() < 400.0f) {
+					if (distWithTarget.MagnitudeSqr() < sq(20.0f)) {
 						m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 0;
 						CPed::ForceStoredObjective(OBJECTIVE_GOTO_AREA_ANY_MEANS);
 						SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
@@ -13460,8 +13515,8 @@ CPed::ProcessObjective(void)
 						return;
 					}
 					float distWithTargetScSqr = distWithTarget.MagnitudeSqr();
-					if (distWithTargetScSqr <= 100.0f) {
-						if (distWithTargetScSqr <= 1.96f) {
+					if (distWithTargetScSqr <= sq(10.0f)) {
+						if (distWithTargetScSqr <= sq(1.4f)) {
 							CAnimBlendAssociation *reloadAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_AK_RELOAD);
 							m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(
 								m_pedInObjective->GetPosition().x, m_pedInObjective->GetPosition().y,
@@ -13724,15 +13779,19 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 	if (m_nMoveState == PEDMOVE_NONE || m_nMoveState == PEDMOVE_STILL)
 		return;
 
-	if (CharCreatedBy != MISSION_CHAR && obj->m_modelIndex == MI_PHONEBOOTH1) {
-		bool isRunning = m_nMoveState == PEDMOVE_RUN || m_nMoveState == PEDMOVE_SPRINT;
-		SetFlee(obj, 5000);
-		bUsePedNodeSeek = true;
-		m_pNextPathNode = nil;
-		if (!isRunning)
-			SetMoveState(PEDMOVE_WALK);
-		return;
-	}
+#ifdef TOGGLEABLE_BETA_FEATURES
+	if (!bMakePedsRunToPhonesToReportCrimes)
+#endif
+		if (CharCreatedBy != MISSION_CHAR && obj->m_modelIndex == MI_PHONEBOOTH1) {
+			bool isRunning = m_nMoveState == PEDMOVE_RUN || m_nMoveState == PEDMOVE_SPRINT;
+			SetFlee(obj, 5000);
+			bUsePedNodeSeek = true;
+			m_pNextPathNode = nil;
+			if (!isRunning)
+				SetMoveState(PEDMOVE_WALK);
+			return;
+		}
+
 	CVector2D adjustedColMin(objColMin.x - 0.35f, objColMin.y - 0.35f);
 	CVector2D adjustedColMax(objColMax.x + 0.35f, objColMax.y + 0.35f);
 
@@ -14427,7 +14486,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 #else
 						float speedSqr = 0.0f;
 						if (!m_ped_flagA2) {
-							if (m_vecMoveSpeed.z >= -0.25f && (speedSqr = m_vecMoveSpeed.MagnitudeSqr()) <= 0.25f) {
+							if (m_vecMoveSpeed.z >= -0.25f && (speedSqr = m_vecMoveSpeed.MagnitudeSqr()) <= sq(0.5f)) {
 
 								if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL) && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
 									InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 15.0f, PEDPIECE_TORSO, 2);
@@ -15354,7 +15413,7 @@ CPed::ScanForInterestingStuff(void)
 				for (int i = 0; i < m_numNearPeds; ++i) {
 					CPed *nearPed = m_nearPeds[i];
 
-					if ((nearPed->GetPosition() - GetPosition()).MagnitudeSqr() > 49.0f)
+					if ((nearPed->GetPosition() - GetPosition()).MagnitudeSqr() > sq(7.0f))
 						break;
 
 					if ((nearPed->m_nPedType == PEDTYPE_CIVFEMALE || nearPed->m_nPedType == PEDTYPE_CIVMALE
@@ -15520,7 +15579,7 @@ CPed::ScanForThreats(void)
 
 	CPed *deadPed = nil;
 	if (fearFlags & PED_FLAG_DEADPEDS && CharCreatedBy != MISSION_CHAR
-		&& (deadPed = CheckForDeadPeds()) != nil && (deadPed->GetPosition() - ourPos).MagnitudeSqr() < 400.0f) {
+		&& (deadPed = CheckForDeadPeds()) != nil && (deadPed->GetPosition() - ourPos).MagnitudeSqr() < sq(20.0f)) {
 		m_pEventEntity = deadPed;
 		m_pEventEntity->RegisterReference((CEntity **) &m_pEventEntity);
 		return PED_FLAG_DEADPEDS;
@@ -15747,21 +15806,21 @@ CPed::SeekCar(void)
 	}
 	bool foundBetterPosToSeek = PossiblyFindBetterPosToSeekCar(&dest, vehToSeek);
 	m_vecSeekPos = dest;
-	float distToDest = (m_vecSeekPos - GetPosition()).MagnitudeSqr();
+	float distToDestSqr = (m_vecSeekPos - GetPosition()).MagnitudeSqr();
 #ifndef VC_PED_PORTS
 	if (bIsRunning)
 		SetMoveState(PEDMOVE_RUN);
 #else
 	if (bIsRunning ||
-		vehToSeek->pDriver && distToDest > 4.0f && (Abs(vehToSeek->m_vecMoveSpeed.x) > 0.01f || Abs(vehToSeek->m_vecMoveSpeed.y) > 0.01f))
+		vehToSeek->pDriver && distToDestSqr > sq(2.0f) && (Abs(vehToSeek->m_vecMoveSpeed.x) > 0.01f || Abs(vehToSeek->m_vecMoveSpeed.y) > 0.01f))
 		SetMoveState(PEDMOVE_RUN);
 #endif
-	else if (distToDest < 4.0f)
+	else if (distToDestSqr < sq(2.0f))
 		SetMoveState(PEDMOVE_WALK);
 
-	if (distToDest >= 1.0f)
+	if (distToDestSqr >= 1.0f)
 		bCanPedEnterSeekedCar = false;
-	else if (2.0f * vehToSeek->GetColModel()->boundingBox.max.x > distToDest)
+	else if (2.0f * vehToSeek->GetColModel()->boundingBox.max.x > distToDestSqr)
 		bCanPedEnterSeekedCar = true;
 
 	if (vehToSeek->m_nGettingInFlags & GetCarDoorFlag(m_vehEnterType))
@@ -17145,6 +17204,46 @@ CPed::SetCarJack(CVehicle* car)
 							SetCarJack_AllClear(car, m_vehEnterType, doorFlag);
 }
 
+void
+CPed::Solicit(void)
+{
+	if (m_standardTimer >= CTimer::GetTimeInMilliseconds() && m_carInObjective) {
+		CVector doorPos = GetPositionToOpenCarDoor(m_carInObjective, m_vehEnterType, 0.0f);
+		SetMoveState(PEDMOVE_STILL);
+
+		// Game uses GetAngleBetweenPoints and converts it to radian
+		m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(
+			doorPos.x, doorPos.y,
+			GetPosition().x, GetPosition().y);
+
+		if (m_fRotationDest < 0.0f) {
+			m_fRotationDest = m_fRotationDest + TWOPI;
+		} else if (m_fRotationDest > TWOPI) {
+			m_fRotationDest = m_fRotationDest - TWOPI;
+		}
+
+		if ((GetPosition() - doorPos).MagnitudeSqr() <= 1.0f)
+			return;
+		CAnimBlendAssociation *talkAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_HOOKERTALK);
+		if (talkAssoc) {
+			talkAssoc->blendDelta = -1000.0f;
+			talkAssoc->flags |= ASSOC_DELETEFADEDOUT;
+		}
+		RestorePreviousState();
+		RestorePreviousObjective();
+		SetObjectiveTimer(10000);
+	} else if (!m_carInObjective) {
+		RestorePreviousState();
+		RestorePreviousObjective();
+		SetObjectiveTimer(10000);
+	} else if (CWorld::Players[CWorld::PlayerInFocus].m_nMoney <= 100) {
+		m_carInObjective = nil;
+	} else {
+		m_pVehicleAnim = nil;
+		SetLeader(m_carInObjective->pDriver);
+	}
+}
+
 class CPed_ : public CPed
 {
 public:
@@ -17377,4 +17476,5 @@ STARTPATCHES
 	InjectHook(0x4E5570, &CPed::WarpPedToNearEntityOffScreen, PATCH_JUMP);
 	InjectHook(0x4E52A0, &CPed::WarpPedToNearLeaderOffScreen, PATCH_JUMP);
 	InjectHook(0x4E0220, &CPed::SetCarJack, PATCH_JUMP);
+	InjectHook(0x4D6780, &CPed::Solicit, PATCH_JUMP);
 ENDPATCHES

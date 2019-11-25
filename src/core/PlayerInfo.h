@@ -27,13 +27,13 @@ public:
 	int32 m_nCollectedPackages;
 	int32 m_nTotalPackages;
 	uint32 m_nLastBumpPlayerCarTimer;
-	int32 m_nSwitchTaxiTime;
+	uint32 m_nSwitchTaxiTime;
 	bool m_bSwitchTaxi;
 	int8 field_197;
 	int8 field_198;
 	int8 field_199;
-	int32 m_nNextSexFrequencyUpdateTime;
-	int32 m_nNextSexMoneyUpdateTime;
+	uint32 m_nNextSexFrequencyUpdateTime;
+	uint32 m_nNextSexMoneyUpdateTime;
 	int32 m_nSexFrequency;
 	CCivilianPed *m_pHooker;
 	int8 m_WBState; // eWastedBustedState
@@ -55,7 +55,7 @@ public:
 	int8 field_254;
 	int8 field_255;
 	float m_fRoadDensity;
-	int32 m_nPreviousTimeRewardedForExplosion;
+	uint32 m_nPreviousTimeRewardedForExplosion;
 	int32 m_nExplosionsSinceLastReward;
 	int32 field_268;
 	int32 field_272;

@@ -87,6 +87,7 @@ enum Config {
 	NUM_FIRES = 40,
 
 	NUMPEDROUTES = 200,
+	NUMPHONES = 50,
 
 	NUMVISIBLEENTITIES = 2000,
 	NUMINVISIBLEENTITIES = 150,
@@ -145,6 +146,7 @@ enum Config {
 #endif
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
+#define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. doesn't have too many things
 
 // Pad
 #define KANGAROO_CHEAT
