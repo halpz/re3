@@ -72,7 +72,7 @@ CPhoneInfo::Load(uint8 *buf, uint32 size)
 INITSAVEBUF
 	m_nMax = ReadSaveBuf<int32>(buf);
 	m_nNum = ReadSaveBuf<int32>(buf);
-	for (int i = 0; i < 50; i++) {
+	for (int i = 0; i < NUMPHONES; i++) {
 		m_aPhones[i] = ReadSaveBuf<CPhone>(buf);
 		// It's saved as building pool index in save file, convert it to true entity
 		if (m_aPhones[i].m_pEntity) {
@@ -174,7 +174,7 @@ CPhoneInfo::Save(uint8 *buf, uint32 *size)
 INITSAVEBUF
 	WriteSaveBuf(buf, m_nMax);
 	WriteSaveBuf(buf, m_nNum);
-	for(int phoneId = 0; phoneId < 50; phoneId++) {
+	for(int phoneId = 0; phoneId < NUMPHONES; phoneId++) {
 		CPhone* phone = WriteSaveBuf(buf, m_aPhones[phoneId]);
 
 		// Convert entity pointer to building pool index while saving

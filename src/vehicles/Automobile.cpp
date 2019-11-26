@@ -1918,7 +1918,7 @@ CAutomobile::Render(void)
 	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
 
 	if(GetModelIndex() == MI_RHINO && m_aCarNodes[CAR_BONNET]){
-		// Rhino has no bonnet...what are we doing here?
+		// Rotate Rhino turret
 		CMatrix m;
 		CVector p;
 		m.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_BONNET]));

@@ -7,7 +7,7 @@ class CAnimBlendAssociation;
 
 enum {
 	PHONE_STATE_FREE,
-	PHONE_STATE_1,
+	PHONE_STATE_REPORTING_CRIME, // CCivilianPed::ProcessControl sets it but unused
 	PHONE_STATE_2,
 	PHONE_STATE_MESSAGE_REMOVED,
 	PHONE_STATE_ONETIME_MESSAGE_SET,
@@ -18,14 +18,18 @@ enum {
 	PHONE_STATE_9
 };
 
-struct CPhone
+class CPhone
 {
+public:
 	CVector m_vecPos;
 	wchar *m_apMessages[6];
 	uint32 m_lastTimeRepeatedMsgShown;
-	CEntity *m_pEntity; // it's building pool index in save files
+	CEntity *m_pEntity; // stored as building pool index in save files
 	int32 m_nState;
 	uint8 field_30;
+
+	CPhone() { }
+	~CPhone() { }
 };
 
 static_assert(sizeof(CPhone) == 0x34, "CPhone: error");
@@ -40,7 +44,7 @@ public:
 
 	int32 m_nMax;
 	int32 m_nNum;
-	CPhone m_aPhones[50];
+	CPhone m_aPhones[NUMPHONES];
 
 	CPhoneInfo() { }
 	~CPhoneInfo() { }

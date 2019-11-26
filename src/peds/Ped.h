@@ -246,6 +246,8 @@ enum PedState
 	PED_UNKNOWN,	// HANG_OUT in Fire_Head's idb
 
 	PED_STATES_NO_AI,
+
+	// One of these states isn't on PS2 - start
 	PED_JUMP,
 	PED_FALL,
 	PED_GETUP,
@@ -256,6 +258,8 @@ enum PedState
 	PED_ENTER_TRAIN,
 	PED_EXIT_TRAIN,
 	PED_ARREST_PLAYER,
+	// One of these states isn't on PS2 - end
+
 	PED_DRIVING,
 	PED_PASSENGER,
 	PED_TAXI_PASSENGER,
@@ -371,8 +375,8 @@ public:
 #else
 	uint8 m_ped_flagI20 : 1;
 #endif
-	uint8 m_ped_flagI40 : 1;
-	uint8 m_ped_flagI80 : 1;
+	uint8 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
+	uint8 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 
 	uint8 stuff10[3];
 	uint8 CharCreatedBy;
@@ -407,7 +411,7 @@ public:
 	int32 m_nPrevMoveState;
 	eWaitState m_nWaitState;
 	uint32 m_nWaitTimer;
-	void *m_pPathNodesStates[8]; // seems unused, probably leftover from VC
+	void *m_pPathNodesStates[8]; // unused, probably leftover from VC
 	CVector2D m_stPathNodeStates[10];
 	uint16 m_nPathNodes;
 	int16 m_nCurPathNode;
@@ -691,6 +695,7 @@ public:
 	void WarpPedIntoCar(CVehicle*);
 	void SetCarJack(CVehicle*);
 	bool WarpPedToNearLeaderOffScreen(void);
+	void Solicit(void);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -798,10 +803,13 @@ public:
 	static CVector2D ms_vec2DFleePosition;
 	static CPedAudioData (&CommentWaitTime)[38];
 
-#ifndef MASTER
+#ifdef TOGGLEABLE_BETA_FEATURES
 	static bool bUnusedFightThingOnPlayer;
 	static bool bPopHeadsOnHeadshot;
+	static bool bMakePedsRunToPhonesToReportCrimes;
+#endif
 
+#ifndef MASTER
 	// Mobile things
 	static void SwitchDebugDisplay(void);
 	void DebugRenderOnePedText(void);

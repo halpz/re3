@@ -12,7 +12,7 @@
 #include "ParticleObject.h"
 #include "Particle.h"
 
-#ifndef MASTER
+#ifdef TOGGLEABLE_BETA_FEATURES
 bool CParticle::bEnableBannedParticles = false;
 #endif
 
@@ -772,7 +772,7 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 {
 	if ( CTimer::GetIsPaused() )
 		return NULL;
-#ifndef MASTER
+#ifdef TOGGLEABLE_BETA_FEATURES
 	if(!bEnableBannedParticles)
 #endif
 	if ( ( type == PARTICLE_ENGINE_SMOKE
@@ -1462,7 +1462,7 @@ void CParticle::Render()
 		
 		tParticleType type = psystem->m_Type;
 
-#ifndef MASTER
+#ifdef TOGGLEABLE_BETA_FEATURES
 		if (!bEnableBannedParticles)
 #endif
 		if ( type == PARTICLE_ENGINE_SMOKE
