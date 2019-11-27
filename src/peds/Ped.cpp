@@ -9244,7 +9244,7 @@ CPed::ProcessControl(void)
 				float timeDependentDist;
 				if (remainingBloodyFpTime >= 2000) {
 					if (remainingBloodyFpTime <= 7000)
-						timeDependentDist = (remainingBloodyFpTime - 2000) / 5000 * 0.75f;
+						timeDependentDist = (remainingBloodyFpTime - 2000) / 5000.0f * 0.75f;
 					else
 						timeDependentDist = 0.75f;
 				} else {
@@ -9288,8 +9288,8 @@ CPed::ProcessControl(void)
 					} else {
 						CShadows::StoreStaticShadow(
 							(uintptr)this + 17, SHADOWTYPE_DARK, gpBloodPoolTex, &bloodPos,
-							(remainingBloodyFpTime - 2000) / 5000 * 0.75f, 0.0f,
-							0.0f, (remainingBloodyFpTime - 2000) / 5000 * -0.75f,
+							(remainingBloodyFpTime - 2000) / 5000.0f * 0.75f, 0.0f,
+							0.0f, (remainingBloodyFpTime - 2000) / 5000.0f * -0.75f,
 							255, 255, 0, 0, 4.0f, 1.0f, 40.0f, false, 0.0f);
 					}
 				}
