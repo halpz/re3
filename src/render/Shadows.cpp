@@ -1516,11 +1516,11 @@ CShadows::UpdatePermanentShadows(void)
 				aPermanentShadows[i].m_nType = SHADOWTYPE_NONE;
 			else
 			{
-				if ( timePassed >= (aPermanentShadows[i].m_nLifeTime*(1-(1/4))) )
+				if ( timePassed >= (aPermanentShadows[i].m_nLifeTime * 3 / 4) )
 				{
 					// timePassed == 0                                -> 4
 					// timePassed == aPermanentShadows[i].m_nLifeTime -> 0
-					float fMult = 1.0f - (timePassed - (aPermanentShadows[i].m_nLifeTime*(1-(1/4)))) / (aPermanentShadows[i].m_nLifeTime / 4);
+					float fMult = 1.0f - float(timePassed - (aPermanentShadows[i].m_nLifeTime * 3 / 4)) / (aPermanentShadows[i].m_nLifeTime / 4);
 
 					StoreStaticShadow((uint32)&aPermanentShadows[i],
 						aPermanentShadows[i].m_nType,
