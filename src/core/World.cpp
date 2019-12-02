@@ -859,8 +859,8 @@ FindPlayerPed(void)
 CVehicle*
 FindPlayerVehicle(void)
 {
-	CPlayerPed *ped = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
-	if(ped->bInVehicle && ped->m_pMyVehicle)
+	CPlayerPed *ped = FindPlayerPed();
+	if(ped->InVehicle())
 		return ped->m_pMyVehicle;
 	else
 		return nil;
@@ -878,8 +878,8 @@ FindPlayerTrain(void)
 CEntity*
 FindPlayerEntity(void)
 {
-	CPlayerPed *ped = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
-	if(ped->bInVehicle && ped->m_pMyVehicle)
+	CPlayerPed *ped = FindPlayerPed();
+	if(ped->InVehicle())
 		return ped->m_pMyVehicle;
 	else
 		return ped;
@@ -888,8 +888,8 @@ FindPlayerEntity(void)
 CVector
 FindPlayerCoors(void)
 {
-	CPlayerPed *ped = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
-	if(ped->bInVehicle && ped->m_pMyVehicle)
+	CPlayerPed *ped = FindPlayerPed();
+	if(ped->InVehicle())
 		return ped->m_pMyVehicle->GetPosition();
 	else
 		return ped->GetPosition();
@@ -898,8 +898,8 @@ FindPlayerCoors(void)
 CVector&
 FindPlayerSpeed(void)
 {
-	CPlayerPed *ped = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
-	if(ped->bInVehicle && ped->m_pMyVehicle)
+	CPlayerPed *ped = FindPlayerPed();
+	if(ped->InVehicle())
 		return ped->m_pMyVehicle->m_vecMoveSpeed;
 	else
 		return ped->m_vecMoveSpeed;
@@ -926,7 +926,7 @@ FindPlayerCentreOfWorld_NoSniperShift(void)
 		return CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->GetPosition();
 	if(FindPlayerVehicle())
 		return FindPlayerVehicle()->GetPosition();
-	return CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetPosition();
+	return FindPlayerPed()->GetPosition();
 }
 
 float
@@ -936,7 +936,7 @@ FindPlayerHeading(void)
 		return CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->GetForward().Heading();
 	if(FindPlayerVehicle())
 		return FindPlayerVehicle()->GetForward().Heading();
-	return CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetForward().Heading();
+	return FindPlayerPed()->GetForward().Heading();
 }
 
 void
@@ -1007,6 +1007,30 @@ CWorld::StopAllLawEnforcersInTheirTracks(void)
 		if (veh) {
 			if (veh->bIsLawEnforcer)
 				veh->SetMoveSpeed(0.0f, 0.0f, 0.0f);
+		}
+	}
+}
+
+void
+CWorld::SetAllCarsCanBeDamaged(bool toggle)
+{
+	int poolSize = CPools::GetVehiclePool()->GetSize();
+	for (int poolIndex = 0; poolIndex < poolSize; poolIndex++) {
+		CVehicle *veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
+		if (veh)
+			veh->bCanBeDamaged = toggle;
+	}
+}
+
+void
+CWorld::ExtinguishAllCarFiresInArea(CVector point, float range)
+{
+	int poolSize = CPools::GetVehiclePool()->GetSize();
+	for (int poolIndex = 0; poolIndex < poolSize; poolIndex++) {
+		CVehicle* veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
+		if (veh) {
+			if ((point - veh->GetPosition()).MagnitudeSqr() < sq(range))
+				veh->ExtinguishCarFire();
 		}
 	}
 }
@@ -1211,6 +1235,10 @@ STARTPATCHES
 	InjectHook(0x4B3A80, CWorld::FindGroundZForCoord, PATCH_JUMP);
 	InjectHook(0x4B3AE0, CWorld::FindGroundZFor3DCoord, PATCH_JUMP);
 	InjectHook(0x4B3B50, CWorld::FindRoofZFor3DCoord, PATCH_JUMP);
+
+	InjectHook(0x4B5BC0, CWorld::StopAllLawEnforcersInTheirTracks, PATCH_JUMP);
+	InjectHook(0x4B53F0, CWorld::SetAllCarsCanBeDamaged, PATCH_JUMP);
+	InjectHook(0x4B5460, CWorld::ExtinguishAllCarFiresInArea, PATCH_JUMP);
 
 	InjectHook(0x4B1A60, CWorld::Process, PATCH_JUMP);
 ENDPATCHES

@@ -346,7 +346,7 @@ void CReplay::StorePedUpdate(CPed *ped, int id)
 	pp->matrix.CompressFromFullMatrix(ped->GetMatrix());
 	pp->assoc_group_id = ped->m_animGroup;
 	/* 	Would be more sane to use GetJustIndex(ped->m_pMyVehicle) in following assignment */
-	if (ped->bInVehicle && ped->m_pMyVehicle)
+	if (ped->InVehicle())
 		pp->vehicle_index = (CPools::GetVehiclePool()->GetIndex(ped->m_pMyVehicle) >> 8) + 1;
 	else
 		pp->vehicle_index = 0;

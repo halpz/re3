@@ -19,15 +19,6 @@ CCivilianPed::CCivilianPed(int pedtype, int mi) : CPed(pedtype)
 void
 CCivilianPed::CivilianAI(void)
 {
-#ifdef TOGGLEABLE_BETA_FEATURES
-	if (bRunningToPhone && m_nPedState != PED_SEEK_POS && m_nPedState != PED_FALL && m_nPedState != PED_GETUP &&
-		m_nPedState != PED_DIVE_AWAY && m_nPedState != PED_MAKE_CALL && m_nPedState != PED_FACE_PHONE) {
-		bRunningToPhone = false;
-		if (gPhoneInfo.m_aPhones[m_phoneId].m_nState == PHONE_STATE_REPORTING_CRIME)
-			gPhoneInfo.m_aPhones[m_phoneId].m_nState = PHONE_STATE_FREE;
-	}
-#endif
-
 	if (CTimer::GetTimeInMilliseconds() <= m_fleeTimer || m_objective != OBJECTIVE_NONE && !bRespondsToThreats
 		|| !IsPedInControl())  {
 
@@ -248,17 +239,27 @@ CCivilianPed::ProcessControl(void)
 			if (Seek()) {
 				if ((m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA) && m_pNextPathNode) {
 					m_pNextPathNode = nil;
+#ifdef TOGGLEABLE_BETA_FEATURES
+				} else if (bRunningToPhone && m_objective < OBJECTIVE_FLEE_TILL_SAFE) {
+					if (!isPhoneAvailable(m_phoneId)) {
+						RestorePreviousState();
+						crimeReporters[m_phoneId] = nil;
+						m_phoneId = -1;
+						bRunningToPhone = false;
+					} else {
+						crimeReporters[m_phoneId] = this;
+						m_nPedState = PED_FACE_PHONE;
+					}
+#else
 				} else if (bRunningToPhone) {
 					if (gPhoneInfo.m_aPhones[m_phoneId].m_nState != PHONE_STATE_FREE) {
 						RestorePreviousState();
 						m_phoneId = -1;
-#ifdef FIX_BUGS
-						bRunningToPhone = false;
-#endif
 					} else {
 						gPhoneInfo.m_aPhones[m_phoneId].m_nState = PHONE_STATE_REPORTING_CRIME;
 						m_nPedState = PED_FACE_PHONE;
 					}
+#endif
 				} else if (m_objective != OBJECTIVE_KILL_CHAR_ANY_MEANS && m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT) {
 					if (m_objective == OBJECTIVE_FOLLOW_PED_IN_FORMATION) {
 						if (m_moved.Magnitude() == 0.0f) {
@@ -275,12 +276,6 @@ CCivilianPed::ProcessControl(void)
 					}
 				}
 			}
-#ifdef TOGGLEABLE_BETA_FEATURES
-			else if (bRunningToPhone) {
-				// Designed for running to phone, but never used
-				CheckAroundForPossibleCollisions();
-			}
-#endif
 			break;
 		case PED_FACE_PHONE:
 			if (FacePhone())

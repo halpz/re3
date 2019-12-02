@@ -5,6 +5,9 @@
 CFireManager &gFireManager = *(CFireManager*)0x8F31D0;
 
 WRAPPER void CFire::Extinguish(void) { EAXJMP(0x479D40); }
+WRAPPER void CFireManager::StartFire(CEntity* entityOnFire, CEntity* culprit, float, uint32) { EAXJMP(0x479590); }
+WRAPPER void CFireManager::Update(void) { EAXJMP(0x479310); }
+WRAPPER CFire* CFireManager::FindFurthestFire_NeverMindFireMen(CVector coors, float, float) { EAXJMP(0x479430); }
 
 CFire* CFireManager::FindNearestFire(CVector vecPos, float* pDistance)
 {
@@ -31,6 +34,18 @@ CFire* CFireManager::FindNearestFire(CVector vecPos, float* pDistance)
 	return nil;
 }
 
-WRAPPER void CFireManager::StartFire(CEntity *entityOnFire, CEntity *culprit, float, uint32) { EAXJMP(0x479590); }
-WRAPPER void CFireManager::Update(void) { EAXJMP(0x479310); }
-WRAPPER CFire *CFireManager::FindFurthestFire_NeverMindFireMen(CVector coors, float, float) { EAXJMP(0x479430); }
+void
+CFireManager::ExtinguishPoint(CVector point, float range)
+{
+	for (int i = 0; i < NUM_FIRES; i++) {
+		if (m_aFires[i].m_bIsOngoing) {
+			if ((point - m_aFires[i].m_vecPos).MagnitudeSqr() < sq(range))
+				m_aFires[i].Extinguish();
+		}
+	}
+}
+
+STARTPATCHES
+	InjectHook(0x479DB0, &CFireManager::ExtinguishPoint, PATCH_JUMP);
+	InjectHook(0x479340, &CFireManager::FindNearestFire, PATCH_JUMP);
+ENDPATCHES
