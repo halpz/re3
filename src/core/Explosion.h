@@ -27,4 +27,5 @@ public:
 	static CVector *GetExplosionPosition(uint8 id);
 	static uint8 GetExplosionType(uint8 id);
 	static void ResetExplosionActiveCounter(uint8 id);
+	static void RemoveAllExplosionsInArea(CVector, float);
 };

@@ -46,7 +46,6 @@ CBulletInfo
 CBulletTraces
 CCam
 CCamera
-CCivilianPed
 CCopPed
 CCrane
 CCranes
@@ -64,9 +63,7 @@ CGlass
 CMenuManager
 CMotionBlurStreaks
 CPacManPickups
-CPed - being worked on
 CPedIK
-CPhoneInfo - one function left
 CPlayerInfo
 CPlayerPed
 CProjectile

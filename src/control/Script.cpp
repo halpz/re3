@@ -1734,7 +1734,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		if (ped) {
-			if (ped->bInVehicle && ped->m_pMyVehicle) {
+			if (ped->InVehicle()) {
 				if (ped->m_pMyVehicle->pDriver == ped) {
 					ped->m_pMyVehicle->RemoveDriver();
 					ped->m_pMyVehicle->m_status = STATUS_ABANDONED;
@@ -4947,7 +4947,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		assert(pPed);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[1]);
 		bool isTouching = false;
-		if (pPed->bInVehicle && pPed->m_pMyVehicle)
+		if (pPed->InVehicle())
 			isTouching = false;
 		else if (pPed->GetHasCollidedWith(pObject))
 			isTouching = true;
@@ -5090,7 +5090,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 	case COMMAND_HAS_PHONE_DISPLAYED_MESSAGE:
 	{
 		CollectParameters(&m_nIp, 1);
-		gPhoneInfo.HasMessageBeenDisplayed(ScriptParams[0]);
+		UpdateCompareFlag(gPhoneInfo.HasMessageBeenDisplayed(ScriptParams[0]));
 		return 0;
 	}
 	case COMMAND_TURN_PHONE_OFF:

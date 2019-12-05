@@ -243,7 +243,7 @@ enum PedState
 	PED_STEP_AWAY,
 	PED_ON_FIRE,
 
-	PED_UNKNOWN,	// HANG_OUT in Fire_Head's idb
+	PED_UNKNOWN,	// Same with IDLE, but also infects up to 5 peds with same pedType and WANDER_PATH, so they become stone too. HANG_OUT in Fire_Head's idb
 
 	PED_STATES_NO_AI,
 
@@ -787,6 +787,7 @@ public:
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
 	void ReplaceWeaponWhenExitingVehicle(void);
 	void RemoveWeaponWhenEnteringVehicle(void);
 	bool IsNotInWreckedVehicle();

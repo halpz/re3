@@ -337,7 +337,7 @@ CPed::~CPed(void)
 {
 	CWorld::Remove(this);
 	CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetIndex(this));
-	if (bInVehicle && m_pMyVehicle){
+	if (InVehicle()){
 		uint8 door_flag = GetCarDoorFlag(m_vehEnterType);
 		if (m_pMyVehicle->pDriver == this)
 			m_pMyVehicle->pDriver = nil;
@@ -362,7 +362,7 @@ void
 CPed::FlagToDestroyWhenNextProcessed(void)
 {
 	bRemoveFromWorld = true;
-	if (!bInVehicle || !m_pMyVehicle)
+	if (!InVehicle())
 		return;
 	if (m_pMyVehicle->pDriver == this){
 		m_pMyVehicle->pDriver = nil;
@@ -2397,7 +2397,7 @@ CPed::CalculateNewVelocity(void)
 bool
 CPed::CanBeDeleted(void)
 {
-	if (this->bInVehicle)
+	if (bInVehicle)
 		return false;
 
 	switch (CharCreatedBy) {
@@ -2993,7 +2993,7 @@ CPed::ReactToAttack(CEntity *attacker)
 	}
 
 #ifdef VC_PED_PORTS
-	if (m_nPedState == PED_DRIVING && bInVehicle && m_pMyVehicle
+	if (m_nPedState == PED_DRIVING && InVehicle()
 		&& (m_pMyVehicle->pDriver == this || m_pMyVehicle->pDriver && m_pMyVehicle->pDriver->m_nPedState == PED_DRIVING)) {
 
 		if (m_pMyVehicle->VehicleCreatedBy == RANDOM_VEHICLE
@@ -3187,6 +3187,9 @@ CPed::MakePhonecall(void)
 
 	SetIdle();
 	gPhoneInfo.m_aPhones[m_phoneId].m_nState = PHONE_STATE_FREE;
+#ifdef TOGGLEABLE_BETA_FEATURES
+	crimeReporters[m_phoneId] = nil;
+#endif
 	m_phoneId = -1;
 	return true;
 }
@@ -4297,7 +4300,7 @@ CPed::RestorePreviousState(void)
 	if (m_nPedState == PED_GETUP && !bGetUpAnimStarted)
 		return;
 
-	if (bInVehicle && m_pMyVehicle) {
+	if (InVehicle()) {
 		m_nPedState = PED_DRIVING;
 		m_nLastPedState = PED_NONE;
 	} else {
@@ -5907,13 +5910,6 @@ CPed::SetDead(void)
 	m_fHealth = 0.0f;
 	if (m_nPedState == PED_DRIVING)
 		bIsVisible = false;
-
-#ifdef TOGGLEABLE_BETA_FEATURES
-	if (bRunningToPhone) {
-		if (gPhoneInfo.m_aPhones[m_phoneId].m_nState == PHONE_STATE_REPORTING_CRIME)
-			gPhoneInfo.m_aPhones[m_phoneId].m_nState = PHONE_STATE_FREE;
-	}
-#endif
 
 	m_nPedState = PED_DEAD;
 	m_pVehicleAnim = nil;
@@ -10384,8 +10380,8 @@ CPed::ProcessControl(void)
 						if (pad->GetHorn()) {
 							float c = Cos(m_fRotationCur);
 							float s = Sin(m_fRotationCur);
-							m_pMyVehicle->GetRight() = CVector(c, 0.0f, 0.0f);
-							m_pMyVehicle->GetForward() = CVector(0.0f, s, 0.0f);
+							m_pMyVehicle->GetRight() = CVector(1.0f, 0.0f, 0.0f);
+							m_pMyVehicle->GetForward() = CVector(0.0f, 1.0f, 0.0f);
 							m_pMyVehicle->GetUp() = CVector(0.0f, 0.0f, 1.0f);
 							if (pad->GetAccelerate()) {
 								m_pMyVehicle->ApplyMoveForce(GetForward() * 30.0f);
@@ -11682,15 +11678,14 @@ CPed::RunToReportCrime(eCrimeType crimeToReport)
 	if (phoneId == -1)
 		return false;
 
-	if (gPhoneInfo.m_aPhones[phoneId].m_nState != PHONE_STATE_FREE)
+	CPhone *phone = &gPhoneInfo.m_aPhones[phoneId];
+	if (phone->m_nState != PHONE_STATE_FREE)
 		return false;
 
 	bRunningToPhone = true;
-	SetSeek(gPhoneInfo.m_aPhones[phoneId].m_vecPos, 0.7f); // original: 0.35f
+	SetSeek(phone->m_pEntity->GetPosition() - phone->m_pEntity->GetForward(), 1.3f); // original: phone.m_vecPos, 0.3f
 	SetMoveState(PEDMOVE_RUN);
-#ifdef FIX_BUGS
-	bIsRunning = true;
-#endif
+	bIsRunning = true; // not there in original
 	m_phoneId = phoneId;
 	m_crimeToReportOnPhone = crimeToReport;
 	return true;
@@ -12404,11 +12399,8 @@ CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 void
 CPed::Render(void)
 {
-	if (!bInVehicle
-		|| m_nPedState == PED_EXIT_CAR
-		|| m_nPedState == PED_DRAG_FROM_CAR
-		|| bRenderPedInCar &&
-			sq(25.0f * TheCamera.LODDistMultiplier) >= (TheCamera.GetPosition() - GetPosition()).MagnitudeSqr()) {
+	if (!bInVehicle || m_nPedState == PED_EXIT_CAR || m_nPedState == PED_DRAG_FROM_CAR ||
+		bRenderPedInCar && sq(25.0f * TheCamera.LODDistMultiplier) >= (TheCamera.GetPosition() - GetPosition()).MagnitudeSqr()) {
 		CEntity::Render();
 	}
 }
@@ -12438,7 +12430,7 @@ CPed::ProcessObjective(void)
 		}
 
 		if (m_pedInObjective) {
-			if (m_pedInObjective->bInVehicle && m_pedInObjective->m_nPedState != PED_DRAG_FROM_CAR && m_pedInObjective->m_pMyVehicle) {
+			if (m_pedInObjective->InVehicle() && m_pedInObjective->m_nPedState != PED_DRAG_FROM_CAR) {
 				targetCarOrHisPos = m_pedInObjective->m_pMyVehicle->GetPosition();
 			} else {
 				targetCarOrHisPos = m_pedInObjective->GetPosition();
@@ -12465,7 +12457,7 @@ CPed::ProcessObjective(void)
 				SetMoveState(PEDMOVE_STILL);
 				break;
 			case OBJECTIVE_FLEE_TILL_SAFE:
-				if (bInVehicle && m_pMyVehicle) {
+				if (InVehicle()) {
 					SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
 					bFleeAfterExitingCar = true;
 				} else if (m_nPedState != PED_FLEE_POS) {
@@ -12521,7 +12513,7 @@ CPed::ProcessObjective(void)
 						SetObjective(OBJECTIVE_FLEE_TILL_SAFE);
 						break;
 					}
-					if (bInVehicle && m_pMyVehicle) {
+					if (InVehicle()) {
 						if (distWithTarget.Magnitude() >= 20.0f
 							|| m_pMyVehicle->m_vecMoveSpeed.MagnitudeSqr() >= sq(0.02f)) {
 							if (m_pMyVehicle->pDriver == this
@@ -12619,7 +12611,7 @@ CPed::ProcessObjective(void)
 			case OBJECTIVE_KILL_CHAR_ON_FOOT:
 			{
 				bool killPlayerInNoPoliceZone = false;
-				if (m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT && bInVehicle && m_pMyVehicle) {
+				if (m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT && InVehicle()) {
 					SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
 					break;
 				}
@@ -12974,7 +12966,7 @@ CPed::ProcessObjective(void)
 			case OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE:
 			case OBJECTIVE_FLEE_CHAR_ON_FOOT_ALWAYS:
 			{
-				if (bInVehicle && m_pMyVehicle) {
+				if (InVehicle()) {
 					if (m_nPedState == PED_DRIVING)
 						SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
 				} else if (m_nPedState != PED_FLEE_ENTITY) {
@@ -13273,12 +13265,12 @@ CPed::ProcessObjective(void)
 			{
 				distWithTarget = m_nextRoutePointPos - GetPosition();
 				distWithTarget.z = 0.0f;
-				if (bInVehicle && m_pMyVehicle) {
+				if (InVehicle()) {
 					CCarAI::GetCarToGoToCoors(m_pMyVehicle, &m_nextRoutePointPos);
 					CCarCtrl::RegisterVehicleOfInterest(m_pMyVehicle);
 					if (distWithTarget.MagnitudeSqr() < sq(20.0f)) {
 						m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 0;
-						CPed::ForceStoredObjective(OBJECTIVE_GOTO_AREA_ANY_MEANS);
+						ForceStoredObjective(OBJECTIVE_GOTO_AREA_ANY_MEANS);
 						SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
 					}
 					break;
@@ -13322,7 +13314,7 @@ CPed::ProcessObjective(void)
 			case OBJECTIVE_RUN_TO_AREA:
 			{
 				if ((m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA)
-					&& bInVehicle && m_pMyVehicle) {
+					&& InVehicle()) {
 					SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
 				} else {
 					distWithTarget = m_nextRoutePointPos - GetPosition();
@@ -13583,7 +13575,7 @@ CPed::ProcessObjective(void)
 				// fall through
 			case OBJECTIVE_LEAVE_VEHICLE:
 				if (CTimer::GetTimeInMilliseconds() > m_leaveCarTimer) {
-					if (bInVehicle && m_pMyVehicle) {
+					if (InVehicle()) {
 						if (m_nPedState != PED_EXIT_CAR && m_nPedState != PED_DRAG_FROM_CAR && m_nPedState != PED_EXIT_TRAIN
 							&& (m_nPedType != PEDTYPE_COP
 								|| m_pMyVehicle->m_vecMoveSpeed.MagnitudeSqr2D() < 0.000025f)) {
@@ -13601,7 +13593,7 @@ CPed::ProcessObjective(void)
 			case OBJECTIVE_LEAVE_CAR_AND_DIE:
 			{
 				if (CTimer::GetTimeInMilliseconds() > m_leaveCarTimer) {
-					if (bInVehicle && m_pMyVehicle) {
+					if (InVehicle()) {
 						if (m_nPedState != PED_EXIT_CAR && m_nPedState != PED_DRAG_FROM_CAR
 							&& m_nPedState != PED_EXIT_TRAIN) {
 							// VC calls SetExitBoat for boats, which is not seperate func. in III but housed in CPlayerInfo::Process.
@@ -14802,7 +14794,7 @@ CPed::SetRadioStation(void)
 	}
 }
 
-bool
+inline bool
 CPed::IsNotInWreckedVehicle()
 {
 	return m_pMyVehicle != nil && m_pMyVehicle->m_status != STATUS_WRECKED;
@@ -16178,7 +16170,7 @@ CPed::UpdateFromLeader(void)
 		return;
 
 	CVector leaderDist;
-	if (m_leader->bInVehicle && m_leader->m_pMyVehicle)
+	if (m_leader->InVehicle())
 		leaderDist = m_leader->m_pMyVehicle->GetPosition() - GetPosition();
 	else
 		leaderDist = m_leader->GetPosition() - GetPosition();

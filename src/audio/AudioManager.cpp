@@ -5536,12 +5536,12 @@ cAudioManager::ProcessPedHeadphones(cPedParams *params)
 
 	if(params->m_fDistance < 49.f) {
 		ped = params->m_pPed;
-		if(!ped->bIsAimingGun || ped->m_bodyPartBleeding != 2) {
+		if(!ped->bIsAimingGun || ped->m_bodyPartBleeding != PED_HEAD) {
 			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 			if(ped->bInVehicle && ped->m_nPedState == PED_DRIVING) {
 				emittingVol = 10;
 				veh = ped->m_pMyVehicle;
-				if(veh && veh->m_type == 0) {
+				if(veh && veh->IsCar()) {
 					for(int32 i = 2; i < 6; i++) {
 						if(!veh->IsDoorClosed((eDoors)i) || veh->IsDoorMissing((eDoors)i)) {
 							emittingVol = 42;
@@ -6451,7 +6451,7 @@ cAudioManager::ProcessPhysical(int32 id)
 {
 	CPhysical *entity = (CPhysical *)m_asAudioEntities[id].m_pEntity;
 	if(entity) {
-		switch(entity->m_type & 7) {
+		switch(entity->m_type) {
 		case ENTITY_TYPE_VEHICLE: ProcessVehicle((CVehicle *)m_asAudioEntities[id].m_pEntity); break;
 		case ENTITY_TYPE_PED: ProcessPed((CPhysical *)m_asAudioEntities[id].m_pEntity); break;
 		default: return;

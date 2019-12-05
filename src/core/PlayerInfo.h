@@ -10,6 +10,8 @@ enum eWastedBustedState
 	WBSTATE_FAILED_CRITICAL_MISSION,
 };
 
+class CEntity;
+class CPed;
 class CVehicle;
 class CPlayerPed;
 class CCivilianPed;
@@ -40,7 +42,7 @@ public:
 	int8 field_217;
 	int8 field_218;
 	int8 field_219;
-	int32 m_nWBTime;
+	uint32 m_nWBTime;
 	bool m_bInRemoteMode;
 	int8 field_225;
 	int8 field_226;
@@ -77,6 +79,17 @@ public:
 	void ArrestPlayer(void);
 	bool IsPlayerInRemoteMode(void);
 	void PlayerFailedCriticalMission(void);
+	void Clear(void);
+	void BlowUpRCBuggy(void);
+	void CancelPlayerEnteringCars(CVehicle*);
+	bool IsRestartingAfterDeath(void);
+	bool IsRestartingAfterArrest(void);
+	void EvaluateCarPosition(CEntity*, CPed*, float, float*, CVehicle**);
+	void LoadPlayerInfo(uint8 *buf, uint32 size);
+	void SavePlayerInfo(uint8 *buf, uint32* size);
+
+	~CPlayerInfo() { };
+	void dtor(void) { this->CPlayerInfo::~CPlayerInfo(); }
 };
 
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");

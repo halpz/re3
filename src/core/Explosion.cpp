@@ -3,6 +3,7 @@
 #include "Explosion.h"
 
 WRAPPER void CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32) { EAXJMP(0x5591C0); }
+WRAPPER void CExplosion::RemoveAllExplosionsInArea(CVector, float) { EAXJMP(0x55AD40); }
 
 WRAPPER
 int8 CExplosion::GetExplosionActiveCounter(uint8 id)

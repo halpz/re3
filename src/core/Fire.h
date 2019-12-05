@@ -34,6 +34,8 @@ public:
 	void Update(void);
 	CFire *FindFurthestFire_NeverMindFireMen(CVector coors, float, float);
 	CFire *FindNearestFire(CVector, float*);
+	void ExtinguishPoint(CVector, float);
+
 	uint32 GetTotalActiveFires() const { return m_nTotalFires; }
 };
 extern CFireManager &gFireManager;
