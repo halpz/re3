@@ -12,6 +12,8 @@ int32 *CStats::PedsKilledOfThisType = (int32*)0x880DBC;
 int32 &CStats::TimesDied = *(int32*)0x8E2BDC;
 int32 &CStats::TimesArrested = *(int32*)0x8E2BEC;
 int32 &CStats::KillsSinceLastCheckpoint = *(int32*)0x8F2C8C;
+int32& CStats::DistanceTravelledInVehicle = *(int32*)0x940574;
+int32& CStats::DistanceTravelledOnFoot = *(int32*)0x941518;
 
 void CStats::AnotherKillFrenzyPassed()
 {

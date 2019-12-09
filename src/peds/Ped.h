@@ -360,7 +360,7 @@ public:
 	uint8 bHitSteepSlope : 1; // has ped collided/is standing on a steep slope (surface type)
 	uint8 m_ped_flagH4 : 1;
 	uint8 bClearObjective : 1;
-	uint8 m_ped_flagH10 : 1; // bTryingToReachDryLand? reset when we landed on something not vehicle and object
+	uint8 bTryingToReachDryLand : 1;
 	uint8 bCollidedWithMyVehicle : 1;
 	uint8 bRichFromMugging : 1; // ped has lots of cash from mugging people - will drop money if someone points gun to him
 	uint8 m_ped_flagH80 : 1;
@@ -696,6 +696,7 @@ public:
 	void SetCarJack(CVehicle*);
 	bool WarpPedToNearLeaderOffScreen(void);
 	void Solicit(void);
+	void SetExitBoat(CVehicle*);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
