@@ -64,7 +64,6 @@ CMenuManager
 CMotionBlurStreaks
 CPacManPickups
 CPedIK
-CPlayerInfo
 CPlayerPed
 CProjectile
 CProjectileInfo

@@ -29,8 +29,8 @@ public:
 	int32 m_nCollectedPackages;
 	int32 m_nTotalPackages;
 	uint32 m_nLastBumpPlayerCarTimer;
-	uint32 m_nSwitchTaxiTime;
-	bool m_bSwitchTaxi;
+	uint32 m_nUnusedTaxiTimer;
+	bool m_bUnusedTaxiThing;
 	int8 field_197;
 	int8 field_198;
 	int8 field_199;
@@ -87,6 +87,7 @@ public:
 	void EvaluateCarPosition(CEntity*, CPed*, float, float*, CVehicle**);
 	void LoadPlayerInfo(uint8 *buf, uint32 size);
 	void SavePlayerInfo(uint8 *buf, uint32* size);
+	void FindClosestCarSectorList(CPtrList&, CPed*, float, float, float, float, float*, CVehicle**);
 
 	~CPlayerInfo() { };
 	void dtor(void) { this->CPlayerInfo::~CPlayerInfo(); }

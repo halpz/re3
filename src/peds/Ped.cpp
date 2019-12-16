@@ -540,7 +540,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bHitSteepSlope = false;
 	m_ped_flagH4 = false;
 	bClearObjective = false;
-	m_ped_flagH10 = false;
+	bTryingToReachDryLand = false;
 	bCollidedWithMyVehicle = false;
 	bRichFromMugging = false;
 	m_ped_flagH80 = false;
@@ -1926,7 +1926,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	if (!stillGettingInOut) {
 		m_fRotationCur = m_fRotationDest;
 	} else {
-		float limitedAngle = CGeneral::LimitRadianAngle(m_fRotationDest);
+		float limitedDest = CGeneral::LimitRadianAngle(m_fRotationDest);
 		float timeUntilStateChange = (m_nPedStateTimer - CTimer::GetTimeInMilliseconds())/600.0f;
 
 		m_vecOffsetSeek.z = 0.0f;
@@ -1937,12 +1937,12 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 			neededPos -= timeUntilStateChange * m_vecOffsetSeek;
 		}
 
-		if (PI + m_fRotationCur < limitedAngle) {
-			limitedAngle -= 2 * PI;
-		} else if (m_fRotationCur - PI > limitedAngle) {
-			limitedAngle += 2 * PI;
+		if (PI + m_fRotationCur < limitedDest) {
+			limitedDest -= 2 * PI;
+		} else if (m_fRotationCur - PI > limitedDest) {
+			limitedDest += 2 * PI;
 		}
-		m_fRotationCur -= (m_fRotationCur - limitedAngle) * (1.0f - timeUntilStateChange);
+		m_fRotationCur -= (m_fRotationCur - limitedDest) * (1.0f - timeUntilStateChange);
 	}
 
 	if (seatPosMult > 0.2f || vehIsUpsideDown) {
@@ -10902,6 +10902,12 @@ CPed::RemoveInCarAnims(void)
 			animAssoc->blendDelta = -1000.0f;
 	}
 
+#ifdef VC_PED_PORTS
+	animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_BOAT);
+	if (animAssoc)
+		animAssoc->blendDelta = -1000.0f;
+#endif
+
 	animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_LB);
 	if (animAssoc)
 		animAssoc->blendDelta = -1000.0f;
@@ -13581,6 +13587,10 @@ CPed::ProcessObjective(void)
 								|| m_pMyVehicle->m_vecMoveSpeed.MagnitudeSqr2D() < 0.000025f)) {
 							if (m_pMyVehicle->IsTrain())
 								SetExitTrain(m_pMyVehicle);
+#ifdef VC_PED_PORTS
+							else if (m_pMyVehicle->IsBoat())
+								SetExitBoat(m_pMyVehicle);
+#endif
 							else
 								SetExitCar(m_pMyVehicle, 0);
 						}
@@ -13594,13 +13604,10 @@ CPed::ProcessObjective(void)
 			{
 				if (CTimer::GetTimeInMilliseconds() > m_leaveCarTimer) {
 					if (InVehicle()) {
-						if (m_nPedState != PED_EXIT_CAR && m_nPedState != PED_DRAG_FROM_CAR
-							&& m_nPedState != PED_EXIT_TRAIN) {
-							// VC calls SetExitBoat for boats, which is not seperate func. in III but housed in CPlayerInfo::Process.
-							// This obj. will probably break/crash game if ped was in boat.
-							if (m_pMyVehicle->IsTrain())
-								SetExitTrain(m_pMyVehicle);
-							else if (m_pMyVehicle->bIsBus || m_pMyVehicle->IsBoat())
+						if (m_nPedState != PED_EXIT_CAR && m_nPedState != PED_DRAG_FROM_CAR && m_nPedState != PED_EXIT_TRAIN) {
+							if (m_pMyVehicle->IsBoat())
+								SetExitBoat(m_pMyVehicle);
+							else if (m_pMyVehicle->bIsBus)
 								SetExitCar(m_pMyVehicle, 0);
 							else {
 								eCarNodes doorNode = CAR_DOOR_LF;
@@ -14413,7 +14420,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							if (!collidingEnt->IsVehicle() && !collidingEnt->IsObject()) {
 								m_pCurSurface = collidingEnt;
 								collidingEnt->RegisterReference((CEntity**)&m_pCurSurface);
-								m_ped_flagH10 = false;
+								bTryingToReachDryLand = false;
 								bOnBoat = false;
 							} else {
 								m_pCurrentPhysSurface = (CPhysical*)collidingEnt;
@@ -14912,9 +14919,9 @@ CPed::ProcessBuoyancy(void)
 		bIsInWater = true;
 		ApplyMoveForce(buoyancyImpulse);
 		if (!DyingOrDead()) {
-			if (m_ped_flagH10) {
+			if (bTryingToReachDryLand) {
 				if (buoyancyImpulse.z / m_fMass > 0.0032f * CTimer::GetTimeStep()) {
-					m_ped_flagH10 = false;
+					bTryingToReachDryLand = false;
 					CVector pos = GetPosition();
 					if (PlacePedOnDryLand()) {
 						if (m_fHealth > 20.0f)
@@ -16873,8 +16880,8 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 	if (car->IsBoat()) {
 		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
 #ifdef VC_PED_PORTS
-		m_ped_flagI4 = true;
 		PedSetInCarCB(nil, this);
+		m_ped_flagI4 = true;
 #else
 		m_pVehicleAnim->SetFinishCallback(PedSetInCarCB, this);
 #endif
@@ -17234,6 +17241,89 @@ CPed::Solicit(void)
 		m_pVehicleAnim = nil;
 		SetLeader(m_carInObjective->pDriver);
 	}
+}
+
+// Seperate function in VC, more logical. Not sure is it inlined in III.
+void
+CPed::SetExitBoat(CVehicle *boat)
+{
+#ifndef VC_PED_PORTS
+	m_nPedState = PED_IDLE;
+	CVector firstPos = GetPosition();
+	CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 100.0f);
+	if (boat->m_modelIndex == MI_SPEEDER && boat->IsUpsideDown()) {
+		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_CRAWLOUT_RHS, 8.0f);
+		m_pVehicleAnim->SetFinishCallback(CPed::PedSetOutCarCB, this);
+		m_vehEnterType = CAR_DOOR_RF;
+		m_nPedState = PED_EXIT_CAR;
+	} else {
+		m_vehEnterType = CAR_DOOR_RF;
+		CPed::PedSetOutCarCB(nil, this);
+		bIsStanding = true;
+		m_pCurSurface = boat;
+		m_pCurSurface->RegisterReference((CEntity**)&m_pCurSurface);
+	}
+	GetPosition() = firstPos;
+	SetMoveState(PEDMOVE_STILL);
+	m_vecMoveSpeed = boat->m_vecMoveSpeed;
+	bTryingToReachDryLand = true;
+#else
+	m_nPedState = PED_IDLE;
+	CVector newPos = GetPosition();
+	RemoveInCarAnims();
+	CColModel* boatCol = boat->GetColModel();
+	if (boat->IsUpsideDown()) {
+		newPos = { 0.0f, 0.0f, boatCol->boundingBox.min.z };
+		newPos = boat->GetMatrix() * newPos;
+		newPos.z += 1.0f;
+		m_vehEnterType = CAR_DOOR_RF;
+		PedSetOutCarCB(nil, this);
+		bIsStanding = true;
+		m_pCurSurface = boat;
+		m_pCurSurface->RegisterReference((CEntity**)&m_pCurSurface);
+		m_pCurrentPhysSurface = boat;
+	} else {
+/*		if (boat->m_modelIndex != MI_SKIMMER || boat->bIsInWater) {
+			if (boat->m_modelIndex == MI_SKIMMER)
+				newPos.z += 2.0f
+*/
+			m_vehEnterType = CAR_DOOR_RF;
+			PedSetOutCarCB(nil, this);
+			bIsStanding = true;
+			m_pCurSurface = boat;
+			m_pCurSurface->RegisterReference((CEntity**)&m_pCurSurface);
+			m_pCurrentPhysSurface = boat;
+			CColPoint foundCol;
+			CEntity *foundEnt = nil;
+			if (CWorld::ProcessVerticalLine(newPos, newPos.z - 1.4f, foundCol, foundEnt, false, true, false, false, false, false, nil))
+				newPos.z = FEET_OFFSET + foundCol.point.z;
+/*		// VC specific
+		} else {
+			m_vehEnterType = CAR_DOOR_RF;
+			PedSetOutCarCB(nil, this);
+			bIsStanding = true;
+			SetMoveState(PEDMOVE_STILL);
+			bTryingToReachDryLand = true;
+			float upMult = 1.04f + boatCol->boundingBox.min.z;
+			float rightMult = 0.6f * boatCol->boundingBox.max.x;
+			newPos = upMult * boat->GetUp() + rightMult * boat->GetRight() + boat->GetPosition();
+			GetPosition() = newPos;
+			if (m_pMyVehicle) {
+				PositionPedOutOfCollision();
+			} else {
+				m_pMyVehicle = boat;
+				PositionPedOutOfCollision();
+				m_pMyVehicle = nil;
+			}
+			return;
+		}
+*/	}
+	GetPosition() = newPos;
+	SetMoveState(PEDMOVE_STILL);
+	m_vecMoveSpeed = boat->m_vecMoveSpeed;
+#endif
+	// Not there in VC.
+	CWaterLevel::FreeBoatWakeArray();
 }
 
 class CPed_ : public CPed
