@@ -8,7 +8,8 @@ CAccidentManager& gAccidentManager = *(CAccidentManager*)0x87FD10;
 
 WRAPPER void CAccidentManager::Update(void) { EAXJMP(0x456710); }
 
-uint16 CAccidentManager::CountActiveAccidents()
+uint16
+CAccidentManager::CountActiveAccidents()
 {
 	uint16 accidents = 0;
 	for (int i = 0; i < NUM_ACCIDENTS; i++){
@@ -18,7 +19,8 @@ uint16 CAccidentManager::CountActiveAccidents()
 	return accidents;
 }
 
-CAccident* CAccidentManager::FindNearestAccident(CVector vecPos, float* pDistance)
+CAccident*
+CAccidentManager::FindNearestAccident(CVector vecPos, float* pDistance)
 {
 	for (int i = 0; i < MAX_MEDICS_TO_ATTEND_ACCIDENT; i++){
 		int accidentId = -1;
@@ -44,4 +46,14 @@ CAccident* CAccidentManager::FindNearestAccident(CVector vecPos, float* pDistanc
 			return &m_aAccidents[accidentId];
 	}
 	return nil;
+}
+
+bool
+CAccidentManager::UnattendedAccidents(void)
+{
+	for (int i = 0; i < NUM_ACCIDENTS; i++) {
+		if (m_aAccidents[i].m_pVictim && m_aAccidents[i].m_nMedicsAttending == 0)
+			return true;
+	}
+	return false;
 }
