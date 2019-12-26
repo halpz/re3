@@ -41,6 +41,7 @@ public:
 
 	CPlayerPed();
 	~CPlayerPed();
+	void SetMoveAnim() { };
 
 	void ReApplyMoveAnims(void);
 	void ClearWeaponTarget(void);
@@ -50,10 +51,11 @@ public:
 	void AnnoyPlayerPed(bool);
 	void MakeChangesForNewWeapon(int8);
 	void SetInitialState(void);
-	void SetMoveAnim(void);
 	void ProcessControl(void);
 	void ClearAdrenaline(void);
+	void UseSprintEnergy(void);
 	class CPlayerInfo *GetPlayerInfoForThisPlayerPed();
+	void SetRealMoveAnim(void);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);
