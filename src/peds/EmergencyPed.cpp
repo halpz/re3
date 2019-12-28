@@ -345,7 +345,6 @@ CEmergencyPed::MedicAI(void)
 				}
 				break;
 			case EMERGENCY_PED_PERFORM_CPR:
-				m_pRevivedPed = m_pRevivedPed;
 				if (!m_pRevivedPed || m_pRevivedPed->m_fHealth > 0.0f) {
 					m_nEmergencyPedState = EMERGENCY_PED_DETERMINE_NEXT_STATE;
 					break;

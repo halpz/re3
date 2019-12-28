@@ -51,7 +51,6 @@ CCrane
 CCranes
 CCullZone
 CCullZones
-CEmergencyPed
 CExplosion
 CFallingGlassPane
 CFire
@@ -64,6 +63,7 @@ CMenuManager
 CMotionBlurStreaks
 CPacManPickups
 CPedIK
+CPedPath
 CPlayerPed
 CProjectile
 CProjectileInfo

@@ -529,7 +529,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 
 	bStillOnValidPoly = false;
 	m_ped_flagG2 = true;
-	m_ped_flagG4 = false;
+	bResetWalkAnims = false;
 	bStartWanderPathOnFoot = false;
 	bOnBoat = false;
 	bBusJacked = false;
@@ -6856,7 +6856,7 @@ CPed::FinishJumpCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
 	CPed *ped = (CPed*)arg;
 
-	ped->m_ped_flagG4 = true;
+	ped->bResetWalkAnims = true;
 	ped->bIsLanding = false;
 
 	animAssoc->blendDelta = -1000.0f;

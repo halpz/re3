@@ -349,7 +349,7 @@ public:
 
 	uint8 bStillOnValidPoly : 1;
 	uint8 m_ped_flagG2 : 1;
-	uint8 m_ped_flagG4 : 1; // bResetWalkAnims?
+	uint8 bResetWalkAnims : 1;
 	uint8 bStartWanderPathOnFoot : 1; // exits the car if he's in it, reset after path found
 	uint8 bOnBoat : 1; // not just driver, may be just standing
 	uint8 bBusJacked : 1;

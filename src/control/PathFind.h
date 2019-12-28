@@ -36,7 +36,7 @@ struct CPathNode
 	uint8 bDisabled : 1;
 	uint8 bBetweenLevels : 1;
 
-	uint8 group;
+	int8 group;
 /*	For reference VC:
 	int16 prevIndex;
 	int16 nextIndex;

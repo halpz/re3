@@ -309,7 +309,7 @@ CPathFind::CountFloodFillGroups(uint8 type)
 				if(m_pathNodes[l].group == 0){
 					m_pathNodes[l].group = n;
 					if(m_pathNodes[l].group == 0)
-						m_pathNodes[l].group = 0x80;	// ???
+						m_pathNodes[l].group = INT8_MIN;
 					m_pathNodes[l].next = node;
 					node = &m_pathNodes[l];
 				}

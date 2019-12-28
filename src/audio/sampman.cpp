@@ -352,7 +352,11 @@ _ResolveLink(char const *path, char *out)
 						OutputDebugString(fd.cFileName);
 						
 						strcpy(out, filepath);
-						
+						// FIX: Release the objects. Taken from SA.
+#ifdef FIX_BUGS
+						ppf->Release();
+						psl->Release();
+#endif
 						return true;
 					}
 				}
