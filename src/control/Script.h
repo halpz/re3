@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include "PedType.h"
 #include "Text.h"
 #include "Sprite2d.h"
 
@@ -90,6 +91,27 @@ public:
 	void UpdateTimers(float timeStep){
 		m_anLocalVariables[NUM_LOCAL_VARS] += timeStep;
 		m_anLocalVariables[NUM_LOCAL_VARS + 1] += timeStep;
+	}
+
+	bool ThisIsAValidRandomPed(uint32 pedtype){
+		switch (pedtype){
+		case PEDTYPE_CIVMALE:
+		case PEDTYPE_CIVFEMALE:
+		case PEDTYPE_GANG1:
+		case PEDTYPE_GANG2:
+		case PEDTYPE_GANG3:
+		case PEDTYPE_GANG4:
+		case PEDTYPE_GANG5:
+		case PEDTYPE_GANG6:
+		case PEDTYPE_GANG7:
+		case PEDTYPE_GANG8:
+		case PEDTYPE_GANG9:
+		case PEDTYPE_CRIMINAL:
+		case PEDTYPE_PROSTITUTE:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	void CollectParameters(uint32*, int16);

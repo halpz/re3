@@ -39,4 +39,5 @@ public:
 	static void DeActivateGarage(int16);
 	static int32 QueryCarsCollected(int16);
 	static bool HasThisCarBeenCollected(int16, uint8);
+	static void ChangeGarageType(int16, int8); //TODO: eGarageType
 };

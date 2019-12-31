@@ -87,6 +87,7 @@ int32 CGarages::QueryCarsCollected(int16 garage)
 }
 
 WRAPPER bool CGarages::HasThisCarBeenCollected(int16 garage, uint8 id) { EAXJMP(0x426D50); }
+WRAPPER void CGarages::ChangeGarageType(int16 garage, int8 type) { EAXJMP(0x4222A0); }
 
 #if 0
 WRAPPER void CGarages::PrintMessages(void) { EAXJMP(0x426310); }
