@@ -204,7 +204,7 @@ void CUpsideDownCarCheck::Init()
 {
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
 		m_sCars[i].m_nVehicleIndex = -1;
-		m_sCars[i].m_nVehicleIndex = 0;
+		m_sCars[i].m_nUpsideDownTimer = 0;
 	}
 }
 
@@ -220,6 +220,10 @@ void CUpsideDownCarCheck::UpdateTimers()
 {
 	uint32 timeStep = CTimer::GetTimeStepInMilliseconds();
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
+#ifdef FIX_BUGS
+		if (m_sCars[i].m_nVehicleIndex == -1)
+			continue;
+#endif
 		CVehicle* v = CPools::GetVehiclePool()->GetAt(m_sCars[i].m_nVehicleIndex);
 		if (v){
 			if (IsCarUpsideDown(m_sCars[i].m_nVehicleIndex))
@@ -1744,7 +1748,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		if (ped) {
-			if (ped->bInVehicle && ped->m_pMyVehicle) {
+			if (ped->InVehicle()) {
 				if (ped->m_pMyVehicle->pDriver == ped) {
 					ped->m_pMyVehicle->RemoveDriver();
 					ped->m_pMyVehicle->m_status = STATUS_ABANDONED;
@@ -2317,17 +2321,23 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 		assert(pCurrent); // GetIndex(0) doesn't look good
 		int handle = CPools::GetVehiclePool()->GetIndex(pCurrent);
 		if (handle != CTheScripts::StoreVehicleIndex && m_bIsMissionScript){
-			CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
-			if (pOld){
-				CCarCtrl::RemoveFromInterestingVehicleList(pOld);
-				if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom){
-					pOld->VehicleCreatedBy = RANDOM_VEHICLE;
-					pOld->bIsLocked = false;
-					CCarCtrl::NumRandomCars++;
-					CCarCtrl::NumMissionCars--;
-					CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+#ifdef FIX_BUGS
+			if (CTheScripts::StoreVehicleIndex != -1)
+#endif
+			{
+				CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
+				if (pOld){
+					CCarCtrl::RemoveFromInterestingVehicleList(pOld);
+					if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom){
+						pOld->VehicleCreatedBy = RANDOM_VEHICLE;
+						pOld->bIsLocked = false;
+						CCarCtrl::NumRandomCars++;
+						CCarCtrl::NumMissionCars--;
+						CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+					}
 				}
 			}
+
 			CTheScripts::StoreVehicleIndex = handle;
 			switch (pCurrent->VehicleCreatedBy){
 			case RANDOM_VEHICLE:
@@ -2367,17 +2377,23 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 		assert(pCurrent); // Here pCurrent shouldn't be NULL anyway
 		int handle = CPools::GetVehiclePool()->GetIndex(pCurrent);
 		if (handle != CTheScripts::StoreVehicleIndex && m_bIsMissionScript) {
-			CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
-			if (pOld) {
-				CCarCtrl::RemoveFromInterestingVehicleList(pOld);
-				if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom) {
-					pOld->VehicleCreatedBy = RANDOM_VEHICLE;
-					pOld->bIsLocked = false;
-					CCarCtrl::NumRandomCars++;
-					CCarCtrl::NumMissionCars--;
-					CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+#ifdef FIX_BUGS
+			if (CTheScripts::StoreVehicleIndex != -1)
+#endif
+			{
+				CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
+				if (pOld){
+					CCarCtrl::RemoveFromInterestingVehicleList(pOld);
+					if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom){
+						pOld->VehicleCreatedBy = RANDOM_VEHICLE;
+						pOld->bIsLocked = false;
+						CCarCtrl::NumRandomCars++;
+						CCarCtrl::NumMissionCars--;
+						CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+					}
 				}
 			}
+
 			CTheScripts::StoreVehicleIndex = handle;
 			switch (pCurrent->VehicleCreatedBy) {
 			case RANDOM_VEHICLE:
@@ -3438,7 +3454,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		assert(pPed);
 		// Useless call.
 		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		int handle = CRadar::SetEntityBlip(BLIP_CHAR, ScriptParams[0], 0, BLIP_DISPLAY_BOTH);
+		int handle = CRadar::SetEntityBlip(BLIP_CHAR, ScriptParams[0], 1, BLIP_DISPLAY_BOTH);
 		CRadar::ChangeBlipScale(handle, 3);
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
@@ -3451,7 +3467,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		assert(pObject);
 		// Useless call.
 		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		int handle = CRadar::SetEntityBlip(BLIP_OBJECT, ScriptParams[0], 0, BLIP_DISPLAY_BOTH);
+		int handle = CRadar::SetEntityBlip(BLIP_OBJECT, ScriptParams[0], 6, BLIP_DISPLAY_BOTH);
 		CRadar::ChangeBlipScale(handle, 3);
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
@@ -4948,7 +4964,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		assert(pPed);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[1]);
 		bool isTouching = false;
-		if (pPed->bInVehicle && pPed->m_pMyVehicle)
+		if (pPed->InVehicle())
 			isTouching = false;
 		else if (pPed->GetHasCollidedWith(pObject))
 			isTouching = true;
@@ -5089,7 +5105,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 	case COMMAND_HAS_PHONE_DISPLAYED_MESSAGE:
 	{
 		CollectParameters(&m_nIp, 1);
-		gPhoneInfo.HasMessageBeenDisplayed(ScriptParams[0]);
+		UpdateCompareFlag(gPhoneInfo.HasMessageBeenDisplayed(ScriptParams[0]));
 		return 0;
 	}
 	case COMMAND_TURN_PHONE_OFF:

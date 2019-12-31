@@ -35,12 +35,13 @@ public:
 	void Update(void);
 	CFire *FindFurthestFire_NeverMindFireMen(CVector coors, float, float);
 	CFire *FindNearestFire(CVector, float*);
-	uint32 GetTotalActiveFires() const;
+	uint32 GetTotalActiveFires() const { return m_nTotalFires; }
 	void ExtinguishPoint(CVector, float);
 	int32 StartScriptFire(const CVector& pos, CEntity* culprit, float, uint8);
 	bool IsScriptFireExtinguish(int16);
 	void RemoveScriptFire(int16);
 	void RemoveAllScriptFires(void);
 	void SetScriptFireAudio(int16, bool);
+	void ExtinguishPoint(CVector, float);
 };
 extern CFireManager &gFireManager;

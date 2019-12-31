@@ -243,9 +243,11 @@ enum PedState
 	PED_STEP_AWAY,
 	PED_ON_FIRE,
 
-	PED_UNKNOWN,	// HANG_OUT in Fire_Head's idb
+	PED_UNKNOWN,	// Same with IDLE, but also infects up to 5 peds with same pedType and WANDER_PATH, so they become stone too. HANG_OUT in Fire_Head's idb
 
 	PED_STATES_NO_AI,
+
+	// One of these states isn't on PS2 - start
 	PED_JUMP,
 	PED_FALL,
 	PED_GETUP,
@@ -256,6 +258,8 @@ enum PedState
 	PED_ENTER_TRAIN,
 	PED_EXIT_TRAIN,
 	PED_ARREST_PLAYER,
+	// One of these states isn't on PS2 - end
+
 	PED_DRIVING,
 	PED_PASSENGER,
 	PED_TAXI_PASSENGER,
@@ -363,7 +367,7 @@ public:
 
 	uint8 bShakeFist : 1;  // test shake hand at look entity
 	uint8 bNoCriticalHits : 1; // if set, limbs won't came off
-	uint8 m_ped_flagI4 : 1; // we've been put to car by script? - related with cars
+	uint8 m_ped_flagI4 : 1; // we've been put to car by script or without align phase? - related with cars
 	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 bFallenDown : 1;
 #ifdef VC_PED_PORTS
@@ -371,8 +375,8 @@ public:
 #else
 	uint8 m_ped_flagI20 : 1;
 #endif
-	uint8 m_ped_flagI40 : 1;
-	uint8 m_ped_flagI80 : 1;
+	uint8 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
+	uint8 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 
 	uint8 stuff10[3];
 	uint8 CharCreatedBy;
@@ -407,11 +411,11 @@ public:
 	int32 m_nPrevMoveState;
 	eWaitState m_nWaitState;
 	uint32 m_nWaitTimer;
-	void *m_pPathNodesStates[8]; // seems unused, probably leftover from VC
+	void *m_pPathNodesStates[8]; // unused, probably leftover from VC
 	CVector2D m_stPathNodeStates[10];
 	uint16 m_nPathNodes;
 	int16 m_nCurPathNode;
-	int8 m_nPathState;
+	int8 m_nPathDir;
 private:
 	int8 _pad2B5[3];
 public:
@@ -499,8 +503,8 @@ public:
 	uint32 m_soundStart;
 	uint16 m_lastQueuedSound;
 	uint16 m_queuedSound;
-	CVector m_vecSeekPosEx; // used in objectives
-	float m_distanceToCountSeekDoneEx; // used in objectives
+	CVector m_vecSeekPosEx; // used for OBJECTIVE_GUARD_SPOT
+	float m_distanceToCountSeekDoneEx; // used for OBJECTIVE_GUARD_SPOT
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
@@ -690,7 +694,9 @@ public:
 	void ScanForInterestingStuff(void);
 	void WarpPedIntoCar(CVehicle*);
 	void SetCarJack(CVehicle*);
-	void WarpPedToNearLeaderOffScreen(void);
+	bool WarpPedToNearLeaderOffScreen(void);
+	void Solicit(void);
+	void SetExitBoat(CVehicle*);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -768,6 +774,7 @@ public:
 	void SeekBoatPosition(void);
 	void UpdatePosition(void);
 	CObject *SpawnFlyingComponent(int, int8);
+	void SetCarJack_AllClear(CVehicle*, uint32, uint32);
 #ifdef VC_PED_PORTS
 	bool CanPedJumpThis(CEntity*, CVector*);
 #else
@@ -781,7 +788,9 @@ public:
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
 	void ReplaceWeaponWhenExitingVehicle(void);
+	void RemoveWeaponWhenEnteringVehicle(void);
 	bool IsNotInWreckedVehicle();
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
@@ -796,10 +805,13 @@ public:
 	static CVector2D ms_vec2DFleePosition;
 	static CPedAudioData (&CommentWaitTime)[38];
 
-#ifndef MASTER
+#ifdef TOGGLEABLE_BETA_FEATURES
 	static bool bUnusedFightThingOnPlayer;
 	static bool bPopHeadsOnHeadshot;
+	static bool bMakePedsRunToPhonesToReportCrimes;
+#endif
 
+#ifndef MASTER
 	// Mobile things
 	static void SwitchDebugDisplay(void);
 	void DebugRenderOnePedText(void);
@@ -809,7 +821,7 @@ public:
 class cPedParams
 {
 public:
-	char m_bDistanceCalculated;
+	bool m_bDistanceCalculated;
 	char gap_1[3];
 	float m_fDistance;
 	CPed *m_pPed;

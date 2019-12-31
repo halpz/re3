@@ -9,6 +9,7 @@
 #include "CutsceneMgr.h"
 #include "Streaming.h"
 #include "CutsceneHead.h"
+#include "CdStream.h"
 
 
 CCutsceneHead::CCutsceneHead(CObject *obj)
@@ -94,7 +95,7 @@ CCutsceneHead::PlayAnimation(const char *animName)
 		stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "ANIM\\CUTS.IMG");
 		assert(stream);
 
-		CStreaming::MakeSpaceFor(size*2048);
+		CStreaming::MakeSpaceFor(size * CDSTREAM_SECTOR_SIZE);
 		CStreaming::ImGonnaUseStreamingMemory();
 
 		RwStreamSkip(stream, offset*2048);

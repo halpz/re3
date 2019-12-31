@@ -1443,39 +1443,36 @@ bool CControllerConfigManager::GetIsMouseButtonDown(RsKeyCodes keycode)
 
 bool CControllerConfigManager::GetIsMouseButtonUp(RsKeyCodes keycode)
 {
-	if (keycode > rsMOUSEX2BUTTON)
+	switch (keycode)
 	{
-		switch (keycode)
-		{
-		case rsMOUSELEFTBUTTON:
-			if (CPad::GetPad(PAD1)->GetLeftMouseUp())
-				return true;
-			break;
-		case rsMOUSMIDDLEBUTTON:
-			if (CPad::GetPad(PAD1)->GetMiddleMouseUp())
-				return true;
-			break;
-		case rsMOUSERIGHTBUTTON:
-			if (CPad::GetPad(PAD1)->GetRightMouseUp())
-				return true;
-			break;
-		case rsMOUSEWHEELUPBUTTON:
-			if (CPad::GetPad(PAD1)->GetMouseWheelUpUp())
-				return true;
-			break;
-		case rsMOUSEWHEELDOWNBUTTON:
-			if (CPad::GetPad(PAD1)->GetMouseWheelDownUp())
-				return true;
-			break;
-		case rsMOUSEX1BUTTON:
-			if (CPad::GetPad(PAD1)->GetMouseX1Up())
-				return true;
-			break;
-		case rsMOUSEX2BUTTON:
-			if (CPad::GetPad(PAD1)->GetMouseX2Up())
-				return true;
-			break;
-		}
+	case rsMOUSELEFTBUTTON:
+		if (CPad::GetPad(PAD1)->GetLeftMouseUp())
+			return true;
+		break;
+	case rsMOUSMIDDLEBUTTON:
+		if (CPad::GetPad(PAD1)->GetMiddleMouseUp())
+			return true;
+		break;
+	case rsMOUSERIGHTBUTTON:
+		if (CPad::GetPad(PAD1)->GetRightMouseUp())
+			return true;
+		break;
+	case rsMOUSEWHEELUPBUTTON:
+		if (CPad::GetPad(PAD1)->GetMouseWheelUpUp())
+			return true;
+		break;
+	case rsMOUSEWHEELDOWNBUTTON:
+		if (CPad::GetPad(PAD1)->GetMouseWheelDownUp())
+			return true;
+		break;
+	case rsMOUSEX1BUTTON:
+		if (CPad::GetPad(PAD1)->GetMouseX1Up())
+			return true;
+		break;
+	case rsMOUSEX2BUTTON:
+		if (CPad::GetPad(PAD1)->GetMouseX2Up())
+			return true;
+		break;
 	}
 
 	return false;
@@ -1662,9 +1659,6 @@ void CControllerConfigManager::DeleteMatchingActionInitiators(e_ControllerAction
 
 bool CControllerConfigManager::GetIsKeyBlank(int32 key, eControllerType type)
 {
-	if (type > JOYSTICK)
-		return true;
-
 	switch (type)
 	{
 	case KEYBOARD:
@@ -1755,27 +1749,24 @@ e_ControllerActionType CControllerConfigManager::GetActionType(e_ControllerActio
 
 void CControllerConfigManager::ClearSettingsAssociatedWithAction(e_ControllerAction action, eControllerType type)
 {
-	if (type <= JOYSTICK)
+	switch (type)
 	{
-		switch (type)
-		{
-		case KEYBOARD:
-			m_aSettings[action][type].m_Key = rsNULL;
-			m_aSettings[action][type].m_ContSetOrder = SETORDER_NONE;
-			break;
-		case OPTIONAL_EXTRA:
-			m_aSettings[action][type].m_Key = rsNULL;
-			m_aSettings[action][type].m_ContSetOrder = SETORDER_NONE;
-			break;
-		case MOUSE:
-			m_aSettings[action][type].m_Key = 0;
-			m_aSettings[action][type].m_ContSetOrder = SETORDER_NONE;
-			break;
-		case JOYSTICK:
-			m_aSettings[action][type].m_Key = 0;
-			m_aSettings[action][type].m_ContSetOrder = SETORDER_NONE;
-			break;
-		}
+	case KEYBOARD:
+		m_aSettings[action][type].m_Key = rsNULL;
+		m_aSettings[action][type].m_ContSetOrder = SETORDER_NONE;
+		break;
+	case OPTIONAL_EXTRA:
+		m_aSettings[action][type].m_Key = rsNULL;
+		m_aSettings[action][type].m_ContSetOrder = SETORDER_NONE;
+		break;
+	case MOUSE:
+		m_aSettings[action][type].m_Key = 0;
+		m_aSettings[action][type].m_ContSetOrder = SETORDER_NONE;
+		break;
+	case JOYSTICK:
+		m_aSettings[action][type].m_Key = 0;
+		m_aSettings[action][type].m_ContSetOrder = SETORDER_NONE;
+		break;
 	}
 
 	ResetSettingOrder(action);
@@ -2257,6 +2248,7 @@ void CControllerConfigManager::UpdateJoyButtonState(int32 padnumber)
 	for (int32 i = 0; i < MAX_BUTTONS; i++)
 		m_aButtonStates[i] = false;
 
+#ifdef __DINPUT_INCLUDED__
 	for (int32 i = 0; i < MAX_BUTTONS; i++)
 	{
 		if (m_NewState.rgbButtons[i] & 0x80)
@@ -2264,6 +2256,7 @@ void CControllerConfigManager::UpdateJoyButtonState(int32 padnumber)
 		else
 			m_aButtonStates[i] = false;
 	}
+#endif
 }
 
 bool CControllerConfigManager::GetIsActionAButtonCombo(e_ControllerAction action)

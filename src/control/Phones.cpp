@@ -6,16 +6,146 @@
 #include "Ped.h"
 #include "Pad.h"
 #include "Messages.h"
+#include "Camera.h"
+#include "World.h"
+#include "General.h"
+#include "AudioScriptObject.h"
+#include "RpAnimBlend.h"
 
 CPhoneInfo &gPhoneInfo = *(CPhoneInfo*)0x732A20;
 
-bool &CPhoneInfo::isPhonePickedUp = *(bool*)0x6283AC;
-uint32 &CPhoneInfo::phoneMessagesTimer = *(uint32*)0x6283A8;
-CPhone *&CPhoneInfo::pickedUpPhone = *(CPhone**)0x6283B0;
-bool &CPhoneInfo::isPhoneBeingPickedUp = *(bool*)0x6283B4;
-CPed *&CPhoneInfo::pedWhoPickingUpPhone = *(CPed**)0x6283B8;
+bool &CPhoneInfo::bDisplayingPhoneMessage = *(bool*)0x6283AC;  // is phone picked up
+uint32 &CPhoneInfo::PhoneEnableControlsTimer = *(uint32*)0x6283A8;
+CPhone *&CPhoneInfo::pPhoneDisplayingMessages = *(CPhone**)0x6283B0;
+bool &CPhoneInfo::bPickingUpPhone = *(bool*)0x6283B4;
+CPed *&CPhoneInfo::pCallBackPed = *(CPed**)0x6283B8; // ped who picking up the phone (reset after pickup cb)
 
-WRAPPER void CPhoneInfo::Update(void) { EAXJMP(0x42F7A0); }
+/*
+	Entering phonebooth cutscene, showing messages and triggering these things
+	by checking coordinates happens in here - blue mission marker is cosmetic.
+
+	Repeated message means after the script set the messages for a particular phone,
+	player can pick the phone again with the same messages appearing,
+	after 60 seconds of last phone pick-up.
+*/
+
+#ifdef TOGGLEABLE_BETA_FEATURES
+CPed* crimeReporters[NUMPHONES] = {};
+bool
+isPhoneAvailable(int m_phoneId)
+{
+	return gPhoneInfo.m_aPhones[m_phoneId].m_nState == PHONE_STATE_FREE && 
+		(crimeReporters[m_phoneId] == nil || !crimeReporters[m_phoneId]->IsPointerValid() || !crimeReporters[m_phoneId]->bRunningToPhone || crimeReporters[m_phoneId]->m_objective > OBJECTIVE_IDLE ||
+			crimeReporters[m_phoneId]->m_nLastPedState != PED_SEEK_POS &&
+			(crimeReporters[m_phoneId]->m_nPedState != PED_MAKE_CALL && crimeReporters[m_phoneId]->m_nPedState != PED_FACE_PHONE && crimeReporters[m_phoneId]->m_nPedState != PED_SEEK_POS));
+}
+#endif
+
+void
+CPhoneInfo::Update(void)
+{
+	CPlayerPed *player = FindPlayerPed();
+	CPlayerInfo *playerInfo = &CWorld::Players[CWorld::PlayerInFocus];
+	if (bDisplayingPhoneMessage && CTimer::GetTimeInMilliseconds() > PhoneEnableControlsTimer) {
+		playerInfo->MakePlayerSafe(false);
+		TheCamera.SetWideScreenOff();
+		pPhoneDisplayingMessages = nil;
+		bDisplayingPhoneMessage = false;
+		CAnimBlendAssociation *talkAssoc = RpAnimBlendClumpGetAssociation(player->GetClump(), ANIM_PHONE_TALK);
+		if (talkAssoc && talkAssoc->blendAmount > 0.5f) {
+			CAnimBlendAssociation *endAssoc = CAnimManager::BlendAnimation(player->GetClump(), ASSOCGRP_STD, ANIM_PHONE_OUT, 8.0f);
+			endAssoc->flags &= ~ASSOC_DELETEFADEDOUT;
+			endAssoc->SetFinishCallback(PhonePutDownCB, player);
+		} else {
+			CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_40;
+			if (player->m_nPedState == PED_MAKE_CALL)
+				player->m_nPedState = PED_IDLE;
+		}
+	}
+	bool notInCar;
+	CVector playerPos;
+	if (FindPlayerVehicle()) {
+		notInCar = false;
+		playerPos = FindPlayerVehicle()->GetPosition();
+	} else {
+		notInCar = true;
+		playerPos = player->GetPosition();
+	}
+	bool phoneRings = false;
+	bool scratchTheCabinet;
+	for(int phoneId = 0; phoneId < m_nScriptPhonesMax; phoneId++) {
+		if (m_aPhones[phoneId].m_visibleToCam) {
+			switch (m_aPhones[phoneId].m_nState) {
+				case PHONE_STATE_ONETIME_MESSAGE_SET:
+				case PHONE_STATE_REPEATED_MESSAGE_SET:
+				case PHONE_STATE_REPEATED_MESSAGE_SHOWN_ONCE:
+					if (bPickingUpPhone) {
+						scratchTheCabinet = false;
+						phoneRings = false;
+					} else {
+						scratchTheCabinet = (CTimer::GetTimeInMilliseconds() / 1880) % 2 == 1;
+						phoneRings = (CTimer::GetPreviousTimeInMilliseconds() / 1880) % 2 == 1;
+					}
+					if (scratchTheCabinet) {
+						m_aPhones[phoneId].m_pEntity->GetUp().z = (CGeneral::GetRandomNumber() % 1024) / 16000.0f + 1.0f;
+						if (!phoneRings)
+							PlayOneShotScriptObject(_SCRSOUND_PHONE_RING, m_aPhones[phoneId].m_pEntity->GetPosition());
+					} else {
+						m_aPhones[phoneId].m_pEntity->GetUp().z = 1.0f;
+					}
+					m_aPhones[phoneId].m_pEntity->GetMatrix().UpdateRW();
+					m_aPhones[phoneId].m_pEntity->UpdateRwFrame();
+					if (notInCar && !bPickingUpPhone && player->IsPedInControl()) {
+						CVector2D distToPhone = playerPos - m_aPhones[phoneId].m_vecPos;
+						if (Abs(distToPhone.x) < 1.0f && Abs(distToPhone.y) < 1.0f) {
+							if (DotProduct2D(distToPhone, m_aPhones[phoneId].m_pEntity->GetForward()) / distToPhone.Magnitude() < -0.85f) {
+								CVector2D distToPhoneObj = playerPos - m_aPhones[phoneId].m_pEntity->GetPosition();
+								float angleToFace = CGeneral::GetATanOfXY(distToPhoneObj.x, distToPhoneObj.y) + HALFPI;
+								if (angleToFace > TWOPI)
+									angleToFace = angleToFace - TWOPI;
+								player->m_fRotationCur = angleToFace;
+								player->m_fRotationDest = angleToFace;
+								player->SetHeading(angleToFace);
+								player->m_nPedState = PED_MAKE_CALL;
+								CPad::GetPad(0)->DisablePlayerControls |= PLAYERCONTROL_DISABLED_40;
+								TheCamera.SetWideScreenOn();
+								playerInfo->MakePlayerSafe(true);
+								CAnimBlendAssociation *phonePickAssoc = CAnimManager::BlendAnimation(player->GetClump(), ASSOCGRP_STD, ANIM_PHONE_IN, 4.0f);
+								phonePickAssoc->SetFinishCallback(PhonePickUpCB, &m_aPhones[phoneId]);
+								bPickingUpPhone = true;
+								pCallBackPed = player;
+							}
+						}
+					}
+					break;
+				case PHONE_STATE_REPEATED_MESSAGE_STARTED:
+					if (CTimer::GetTimeInMilliseconds() - m_aPhones[phoneId].m_repeatedMessagePickupStart > 60000)
+						m_aPhones[phoneId].m_nState = PHONE_STATE_REPEATED_MESSAGE_SHOWN_ONCE;
+					break;
+				case PHONE_STATE_9:
+					scratchTheCabinet = (CTimer::GetTimeInMilliseconds() / 1880) % 2 == 1;
+					phoneRings = (CTimer::GetPreviousTimeInMilliseconds() / 1880) % 2 == 1;
+					if (scratchTheCabinet) {
+						m_aPhones[phoneId].m_pEntity->GetUp().z = (CGeneral::GetRandomNumber() % 1024) / 16000.0f + 1.0f;
+						if (!phoneRings)
+							PlayOneShotScriptObject(_SCRSOUND_PHONE_RING, m_aPhones[phoneId].m_pEntity->GetPosition());
+					} else {
+						m_aPhones[phoneId].m_pEntity->GetUp().z = 1.0f;
+					}
+					m_aPhones[phoneId].m_pEntity->GetMatrix().UpdateRW();
+					m_aPhones[phoneId].m_pEntity->UpdateRwFrame();
+					break;
+				default:
+					break;
+			}
+			if (CVector2D(TheCamera.GetPosition() - m_aPhones[phoneId].m_vecPos).MagnitudeSqr() > sq(100.0f))
+				m_aPhones[phoneId].m_visibleToCam = false;
+		} else if (!((CTimer::GetFrameCounter() + m_aPhones[phoneId].m_pEntity->m_randomSeed) % 16)) {
+			if (CVector2D(TheCamera.GetPosition() - m_aPhones[phoneId].m_vecPos).MagnitudeSqr() < sq(60.0f))
+				m_aPhones[phoneId].m_visibleToCam = true;
+		}
+	}
+}
 
 int
 CPhoneInfo::FindNearestFreePhone(CVector *pos)
@@ -25,7 +155,11 @@ CPhoneInfo::FindNearestFreePhone(CVector *pos)
 
 	for (int phoneId = 0; phoneId < m_nMax; phoneId++) {
 
-		if (gPhoneInfo.m_aPhones[phoneId].m_nState == PHONE_STATE_FREE) {
+		if (gPhoneInfo.m_aPhones[phoneId].m_nState == PHONE_STATE_FREE
+#ifdef TOGGLEABLE_BETA_FEATURES
+			&& isPhoneAvailable(phoneId)
+#endif
+			) {
 			float phoneDist = (m_aPhones[phoneId].m_vecPos - *pos).Magnitude2D();
 
 			if (phoneDist < nearestPhoneDist) {
@@ -50,20 +184,20 @@ CPhoneInfo::PhoneAtThisPosition(CVector pos)
 bool
 CPhoneInfo::HasMessageBeenDisplayed(int phoneId)
 {
-	if (isPhonePickedUp)
+	if (bDisplayingPhoneMessage)
 		return false;
 	
 	int state = m_aPhones[phoneId].m_nState;
 
 	return state == PHONE_STATE_REPEATED_MESSAGE_SHOWN_ONCE || 
-		state == PHONE_STATE_ONETIME_MESSAGE_SHOWN ||
-		state == PHONE_STATE_REPEATED_MESSAGE_SHOWN;
+		state == PHONE_STATE_ONETIME_MESSAGE_STARTED ||
+		state == PHONE_STATE_REPEATED_MESSAGE_STARTED;
 }
 
 bool
 CPhoneInfo::IsMessageBeingDisplayed(int phoneId)
 {
-	return pickedUpPhone == &m_aPhones[phoneId];
+	return pPhoneDisplayingMessages == &m_aPhones[phoneId];
 }
 
 void
@@ -71,8 +205,8 @@ CPhoneInfo::Load(uint8 *buf, uint32 size)
 {
 INITSAVEBUF
 	m_nMax = ReadSaveBuf<int32>(buf);
-	m_nNum = ReadSaveBuf<int32>(buf);
-	for (int i = 0; i < 50; i++) {
+	m_nScriptPhonesMax = ReadSaveBuf<int32>(buf);
+	for (int i = 0; i < NUMPHONES; i++) {
 		m_aPhones[i] = ReadSaveBuf<CPhone>(buf);
 		// It's saved as building pool index in save file, convert it to true entity
 		if (m_aPhones[i].m_pEntity) {
@@ -127,7 +261,7 @@ CPhoneInfo::GrabPhone(float xPos, float yPos)
 	CVector pos(xPos, yPos, 0.0f);
 	float nearestPhoneDist = 100.0f;
 
-	for (int phoneId = m_nNum; phoneId < m_nMax; phoneId++) {
+	for (int phoneId = m_nScriptPhonesMax; phoneId < m_nMax; phoneId++) {
 		float phoneDistance = (m_aPhones[phoneId].m_vecPos - pos).Magnitude2D();
 		if (phoneDistance < nearestPhoneDist) {
 			nearestPhoneDist = phoneDistance;
@@ -136,23 +270,23 @@ CPhoneInfo::GrabPhone(float xPos, float yPos)
 	}
 	m_aPhones[nearestPhoneId].m_nState = PHONE_STATE_MESSAGE_REMOVED;
 
-	CPhone oldFirstPhone = m_aPhones[m_nNum];
-	m_aPhones[m_nNum] = m_aPhones[nearestPhoneId];
+	CPhone oldFirstPhone = m_aPhones[m_nScriptPhonesMax];
+	m_aPhones[m_nScriptPhonesMax] = m_aPhones[nearestPhoneId];
 	m_aPhones[nearestPhoneId] = oldFirstPhone;
-	m_nNum++;
-	return m_nNum - 1;
+	m_nScriptPhonesMax++;
+	return m_nScriptPhonesMax - 1;
 }
 
 void
 CPhoneInfo::Initialise(void)
 {
 	CBuildingPool *pool = CPools::GetBuildingPool();
-	pedWhoPickingUpPhone = nil;
-	isPhonePickedUp = false;
-	isPhoneBeingPickedUp = false;
-	pickedUpPhone = nil;
+	pCallBackPed = nil;
+	bDisplayingPhoneMessage = false;
+	bPickingUpPhone = false;
+	pPhoneDisplayingMessages = nil;
 	m_nMax = 0;
-	m_nNum = 0;
+	m_nScriptPhonesMax = 0;
 	for (int i = pool->GetSize() - 1; i >= 0; i--) {
 		CBuilding *building = pool->GetSlot(i);
 		if (building) {
@@ -173,8 +307,8 @@ CPhoneInfo::Save(uint8 *buf, uint32 *size)
 	*size = sizeof(CPhoneInfo);
 INITSAVEBUF
 	WriteSaveBuf(buf, m_nMax);
-	WriteSaveBuf(buf, m_nNum);
-	for(int phoneId = 0; phoneId < 50; phoneId++) {
+	WriteSaveBuf(buf, m_nScriptPhonesMax);
+	for(int phoneId = 0; phoneId < NUMPHONES; phoneId++) {
 		CPhone* phone = WriteSaveBuf(buf, m_aPhones[phoneId]);
 
 		// Convert entity pointer to building pool index while saving
@@ -189,7 +323,7 @@ void
 CPhoneInfo::Shutdown(void)
 {
 	m_nMax = 0;
-	m_nNum = 0;
+	m_nScriptPhonesMax = 0;
 }
 
 void
@@ -221,26 +355,26 @@ PhonePickUpCB(CAnimBlendAssociation *assoc, void *arg)
 		}
 	}
 
-	CPhoneInfo::isPhoneBeingPickedUp = false;
-	CPhoneInfo::isPhonePickedUp = true;
-	CPhoneInfo::pickedUpPhone = phone;
-	CPhoneInfo::phoneMessagesTimer = CTimer::GetTimeInMilliseconds() + messagesDisplayTime;
+	CPhoneInfo::bPickingUpPhone = false;
+	CPhoneInfo::bDisplayingPhoneMessage = true;
+	CPhoneInfo::pPhoneDisplayingMessages = phone;
+	CPhoneInfo::PhoneEnableControlsTimer = CTimer::GetTimeInMilliseconds() + messagesDisplayTime;
 
 	if (phone->m_nState == PHONE_STATE_ONETIME_MESSAGE_SET) {
-		phone->m_nState = PHONE_STATE_ONETIME_MESSAGE_SHOWN;
+		phone->m_nState = PHONE_STATE_ONETIME_MESSAGE_STARTED;
 	} else {
-		phone->m_nState = PHONE_STATE_REPEATED_MESSAGE_SHOWN;
-		phone->m_lastTimeRepeatedMsgShown = CTimer::GetTimeInMilliseconds();
+		phone->m_nState = PHONE_STATE_REPEATED_MESSAGE_STARTED;
+		phone->m_repeatedMessagePickupStart = CTimer::GetTimeInMilliseconds();
 	}
 
-	CPed *ped = CPhoneInfo::pedWhoPickingUpPhone;
+	CPed *ped = CPhoneInfo::pCallBackPed;
 	ped->m_nMoveState = PEDMOVE_STILL;
 	CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_IDLE_STANCE, 8.0f);
 
 	if (assoc->blendAmount > 0.5f && ped)
 		CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_PHONE_TALK, 8.0f);
 
-	CPhoneInfo::pedWhoPickingUpPhone = nil;
+	CPhoneInfo::pCallBackPed = nil;
 }
 
 STARTPATCHES
@@ -255,6 +389,7 @@ STARTPATCHES
 	InjectHook(0x42F710, &CPhoneInfo::Shutdown, PATCH_JUMP);
 	InjectHook(0x42F640, &CPhoneInfo::Initialise, PATCH_JUMP);
 	InjectHook(0x42FDB0, &CPhoneInfo::GrabPhone, PATCH_JUMP);
+	InjectHook(0x42F7A0, &CPhoneInfo::Update, PATCH_JUMP);
 	InjectHook(0x42F570, &PhonePutDownCB, PATCH_JUMP);
 	InjectHook(0x42F470, &PhonePickUpCB, PATCH_JUMP);
 ENDPATCHES

@@ -312,7 +312,7 @@ void CRadar::DrawBlips()
 								break;
 							case BLIP_CHAR:
 								blipEntity = CPools::GetPedPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
-								if (blipEntity && ((CPed*)blipEntity)->bInVehicle && ((CPed*)blipEntity)->m_pMyVehicle) {
+								if (blipEntity && ((CPed*)blipEntity)->InVehicle()) {
 									blipEntity = ((CPed*)blipEntity)->m_pMyVehicle;
 								}
 								break;
@@ -415,7 +415,7 @@ void CRadar::DrawBlips()
 								break;
 							case BLIP_CHAR:
 								blipEntity = CPools::GetPedPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
-								if (blipEntity && ((CPed*)blipEntity)->bInVehicle && ((CPed*)blipEntity)->m_pMyVehicle) {
+								if (blipEntity && ((CPed*)blipEntity)->InVehicle()) {
 									blipEntity = ((CPed*)blipEntity)->m_pMyVehicle;
 								}
 								break;

@@ -3004,6 +3004,13 @@ BOOL _InputIsExtended(INT flag)
 	return (flag & 0x1000000) != 0;
 }
 
+#if (defined(_MSC_VER))
+int strcasecmp(const char *str1, const char *str2)
+{
+	return _strcmpi(str1, str2);
+}
+#endif
+
 
 STARTPATCHES	
 	//InjectHook(0x580B30, &CJoySticks::CJoySticks, PATCH_JUMP);

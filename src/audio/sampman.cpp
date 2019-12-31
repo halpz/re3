@@ -35,7 +35,7 @@ int32 _nSampleDataEndOffset;
 
 int32 nPedSlotSfx    [MAX_PEDSFX];
 int32 nPedSlotSfxAddr[MAX_PEDSFX];
-int32 nCurrentPedSlot;
+uint8 nCurrentPedSlot;
 
 uint8 nChannelVolume[MAXCHANNELS+MAX2DCHANNELS];
 
@@ -116,7 +116,7 @@ typedef struct provider_stuff
 
 static int __cdecl comp(const provider_stuff*s1,const provider_stuff*s2)
 {
-  return( _stricmp(s1->name,s2->name) );
+  return(strcasecmp(s1->name, s2->name));
 }
 
 static void
@@ -352,7 +352,11 @@ _ResolveLink(char const *path, char *out)
 						OutputDebugString(fd.cFileName);
 						
 						strcpy(out, filepath);
-						
+						// FIX: Release the objects. Taken from SA.
+#ifdef FIX_BUGS
+						ppf->Release();
+						psl->Release();
+#endif
 						return true;
 					}
 				}
@@ -1437,7 +1441,7 @@ cSampleManager::IsSampleBankLoaded(uint8 nBank)
 bool
 cSampleManager::IsPedCommentLoaded(uint32 nComment)
 {
-	int32 slot;
+	uint8 slot;
 
 	for ( int32 i = 0; i < _TODOCONST(3); i++ )
 	{
@@ -1452,7 +1456,7 @@ cSampleManager::IsPedCommentLoaded(uint32 nComment)
 int32
 cSampleManager::_GetPedCommentSlot(uint32 nComment)
 {
-	int32 slot;
+	uint8 slot;
 
 	for ( int32 i = 0; i < _TODOCONST(3); i++ )
 	{

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
 #include "AnimBlendClumpData.h"
@@ -320,7 +321,7 @@ void
 FrameFindCallBack(AnimBlendFrameData *frame, void *arg)
 {
 	char *nodename = GetFrameNodeName(frame->frame);
-	if(strcmpi(nodename, (char*)arg) == 0)
+	if(!CGeneral::faststricmp(nodename, (char*)arg))
 		pFrameDataFound = frame;
 }
 

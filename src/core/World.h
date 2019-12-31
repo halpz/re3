@@ -121,6 +121,8 @@ public:
 	static void RemoveFallenCars();
 
 	static void StopAllLawEnforcersInTheirTracks();
+	static void SetAllCarsCanBeDamaged(bool);
+	static void ExtinguishAllCarFiresInArea(CVector, float);
 
 	static void Initialise();
 	static void ShutDown();

@@ -21,6 +21,7 @@ class CAccidentManager
 	};
 public:
 	uint16 CountActiveAccidents();
+	bool UnattendedAccidents();
 	CAccident* FindNearestAccident(CVector, float*);
 	void Update(void);
 };

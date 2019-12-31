@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "Ped.h"
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
@@ -60,7 +61,7 @@ FindPedFrameFromNameCB(RwFrame *frame, void *data)
 {
 	RwObjectNameAssociation *assoc = (RwObjectNameAssociation*)data;
 
-	if(_strcmpi(GetFrameNodeName(frame)+1, assoc->name+1) != 0){
+	if(CGeneral::faststricmp(GetFrameNodeName(frame)+1, assoc->name+1)){
 		RwFrameForAllChildren(frame, FindPedFrameFromNameCB, assoc);
 		return assoc->frame ? nil : frame;
 	}else{

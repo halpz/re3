@@ -36,7 +36,7 @@ CKeyboardState &CPad::OldKeyState = *(CKeyboardState*)0x6F1E70;
 CKeyboardState &CPad::NewKeyState = *(CKeyboardState*)0x6E60D0;
 CKeyboardState &CPad::TempKeyState = *(CKeyboardState*)0x774DE8;
 
-char CPad::KeyBoardCheatString[18];
+char CPad::KeyBoardCheatString[20];
 
 CMouseControllerState &CPad::OldMouseControllerState = *(CMouseControllerState*)0x8472A0;
 CMouseControllerState &CPad::NewMouseControllerState = *(CMouseControllerState*)0x8809F0;
@@ -427,7 +427,7 @@ void CPad::StartShake_Train(float fX, float fY)
 
 void CPad::AddToPCCheatString(char c)
 {
-	for ( int32 i = ARRAY_SIZE(KeyBoardCheatString); i >= 0; i-- )
+	for ( int32 i = ARRAY_SIZE(KeyBoardCheatString) - 2; i >= 0; i-- )
 		KeyBoardCheatString[i + 1] = KeyBoardCheatString[i];
 	
 	KeyBoardCheatString[0] = c;

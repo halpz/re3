@@ -5,42 +5,46 @@
 class CPed;
 class CAnimBlendAssociation;
 
-enum {
+enum PhoneState {
 	PHONE_STATE_FREE,
-	PHONE_STATE_1,
+	PHONE_STATE_REPORTING_CRIME, // CCivilianPed::ProcessControl sets it but unused
 	PHONE_STATE_2,
 	PHONE_STATE_MESSAGE_REMOVED,
 	PHONE_STATE_ONETIME_MESSAGE_SET,
 	PHONE_STATE_REPEATED_MESSAGE_SET,
 	PHONE_STATE_REPEATED_MESSAGE_SHOWN_ONCE,
-	PHONE_STATE_ONETIME_MESSAGE_SHOWN,
-	PHONE_STATE_REPEATED_MESSAGE_SHOWN,
-	PHONE_STATE_9
+	PHONE_STATE_ONETIME_MESSAGE_STARTED,
+	PHONE_STATE_REPEATED_MESSAGE_STARTED,
+	PHONE_STATE_9 // just rings, picking being handled via script. most of the time game uses this
 };
 
-struct CPhone
+class CPhone
 {
+public:
 	CVector m_vecPos;
 	wchar *m_apMessages[6];
-	uint32 m_lastTimeRepeatedMsgShown;
-	CEntity *m_pEntity; // it's building pool index in save files
-	int32 m_nState;
-	uint8 field_30;
+	uint32 m_repeatedMessagePickupStart;
+	CEntity *m_pEntity; // stored as building pool index in save files
+	PhoneState m_nState;
+	bool m_visibleToCam;
+
+	CPhone() { }
+	~CPhone() { }
 };
 
 static_assert(sizeof(CPhone) == 0x34, "CPhone: error");
 
 class CPhoneInfo {
 public:
-	static bool &isPhonePickedUp;
-	static uint32 &phoneMessagesTimer;
-	static CPhone *&pickedUpPhone;
-	static bool &isPhoneBeingPickedUp;
-	static CPed *&pedWhoPickingUpPhone;
+	static bool &bDisplayingPhoneMessage;
+	static uint32 &PhoneEnableControlsTimer;
+	static CPhone *&pPhoneDisplayingMessages;
+	static bool &bPickingUpPhone;
+	static CPed *&pCallBackPed;
 
 	int32 m_nMax;
-	int32 m_nNum;
-	CPhone m_aPhones[50];
+	int32 m_nScriptPhonesMax;
+	CPhone m_aPhones[NUMPHONES];
 
 	CPhoneInfo() { }
 	~CPhoneInfo() { }
@@ -63,3 +67,8 @@ extern CPhoneInfo &gPhoneInfo;
 
 void PhonePutDownCB(CAnimBlendAssociation *assoc, void *arg);
 void PhonePickUpCB(CAnimBlendAssociation *assoc, void *arg);
+
+#ifdef TOGGLEABLE_BETA_FEATURES
+extern CPed *crimeReporters[NUMPHONES];
+bool isPhoneAvailable(int);
+#endif

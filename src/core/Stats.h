@@ -14,6 +14,8 @@ public:
 	static int32 &TimesDied;
 	static int32 &TimesArrested;
 	static int32 &KillsSinceLastCheckpoint;
+	static int32 &DistanceTravelledInVehicle;
+	static int32 &DistanceTravelledOnFoot;
 	static int32 &ProgressMade;
 	static int32 &TotalProgressInGame;
 	static float &MaximumJumpDistance;

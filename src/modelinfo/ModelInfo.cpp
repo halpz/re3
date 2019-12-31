@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "General.h"
 #include "TempColModels.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
@@ -159,7 +160,7 @@ CModelInfo::GetModelInfo(const char *name, int *id)
 	CBaseModelInfo *modelinfo;
 	for(int i = 0; i < MODELINFOSIZE; i++){
 		modelinfo = CModelInfo::ms_modelInfoPtrs[i];
-	 	if(modelinfo && _strcmpi(modelinfo->GetName(), name) == 0){
+	 	if(modelinfo && !CGeneral::faststricmp(modelinfo->GetName(), name)){
 			if(id)
 				*id = i;
 			return modelinfo;

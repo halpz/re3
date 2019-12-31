@@ -29,12 +29,10 @@ void **rwengine = *(void***)0x5A10E1;
 
 DebugMenuAPI gDebugMenuAPI;
 
-WRAPPER void *gtanew(uint32 sz) { EAXJMP(0x5A0690); }
-WRAPPER void gtadelete(void *p) { EAXJMP(0x5A07E0); }
-
-// overload our own new/delete with GTA's functions
-void *operator new(size_t sz) { return gtanew(sz); }
-void operator delete(void *ptr) noexcept { gtadelete(ptr); }
+STARTPATCHES
+	InjectHook(0x5A07E0, (void (*)(void*)) &operator delete, PATCH_JUMP);
+	InjectHook(0x5A0690, (void* (*)(size_t)) &operator new, PATCH_JUMP);
+ENDPATCHES
 
 #ifdef USE_PS2_RAND
 unsigned __int64 myrand_seed = 1;
@@ -351,10 +349,11 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
 
 		DebugMenuAddCmd("Debug", "Make peds follow you in formation", LetThemFollowYou);
-#ifndef MASTER
+#ifdef TOGGLEABLE_BETA_FEATURES
 		DebugMenuAddVarBool8("Debug", "Toggle unused fight feature", (int8*)&CPed::bUnusedFightThingOnPlayer, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle banned particles", (int8*)&CParticle::bEnableBannedParticles, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", (int8*)&CPed::bPopHeadsOnHeadshot, nil);
+		DebugMenuAddVarBool8("Debug", "Toggle peds running to phones to report crimes", (int8*)&CPed::bMakePedsRunToPhonesToReportCrimes, nil);
 #endif
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);

@@ -1014,7 +1014,7 @@ CAutomobile::ProcessControl(void)
 		         m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
 			FlyingControl(FLIGHT_MODEL_DODO);
 		}else if(GetModelIndex() == MI_MIAMI_RCBARON){
-			FlyingControl(FLIGHT_MODEL_HELI);
+			FlyingControl(FLIGHT_MODEL_RCPLANE);
 		}else if(GetModelIndex() == MI_MIAMI_RCRAIDER || GetModelIndex() == MI_MIAMI_SPARROW || bAllCarCheat){
 			if(CPad::GetPad(0)->GetCircleJustDown())
 				m_aWheelSpeed[0] = max(m_aWheelSpeed[0]-0.03f, 0.0f);
@@ -1918,7 +1918,7 @@ CAutomobile::Render(void)
 	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
 
 	if(GetModelIndex() == MI_RHINO && m_aCarNodes[CAR_BONNET]){
-		// Rhino has no bonnet...what are we doing here?
+		// Rotate Rhino turret
 		CMatrix m;
 		CVector p;
 		m.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_BONNET]));

@@ -7,7 +7,7 @@ enum {
 	PLAYERCONTROL_DISABLED_4 = 4,
 	PLAYERCONTROL_DISABLED_8 = 8,
 	PLAYERCONTROL_DISABLED_10 = 16,
-	PLAYERCONTROL_DISABLED_20 = 32,
+	PLAYERCONTROL_DISABLED_20 = 32, // used on CPlayerInfo::MakePlayerSafe
 	PLAYERCONTROL_DISABLED_40 = 64, // used on phone calls
 	PLAYERCONTROL_DISABLED_80 = 128,
 };
@@ -166,7 +166,7 @@ public:
 	static CKeyboardState &OldKeyState;
 	static CKeyboardState &NewKeyState;
 	static CKeyboardState &TempKeyState;
-	static char KeyBoardCheatString[18];
+	static char KeyBoardCheatString[20];
 	static CMouseControllerState &OldMouseControllerState;
 	static CMouseControllerState &NewMouseControllerState;
 	static CMouseControllerState &PCTempMouseControllerState;
