@@ -5294,10 +5294,10 @@ int8 CRunningScript::ProcessCommandsFrom600To699(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		if (ScriptParams[0] != 0){
-			CWorld::Players[CWorld::PlayerInFocus].m_nSwitchTaxiTime = CTimer::GetTimeInMilliseconds();
-			CWorld::Players[CWorld::PlayerInFocus].m_bSwitchTaxi = true;
+			CWorld::Players[CWorld::PlayerInFocus].m_nUnusedTaxiTimer = CTimer::GetTimeInMilliseconds();
+			CWorld::Players[CWorld::PlayerInFocus].m_bUnusedTaxiThing = true;
 		}else{
-			CWorld::Players[CWorld::PlayerInFocus].m_bSwitchTaxi = false;
+			CWorld::Players[CWorld::PlayerInFocus].m_bUnusedTaxiThing = false;
 		}
 		return 0;
 	}

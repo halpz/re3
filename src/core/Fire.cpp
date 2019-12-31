@@ -5,7 +5,6 @@
 CFireManager &gFireManager = *(CFireManager*)0x8F31D0;
 
 WRAPPER void CFire::Extinguish(void) { EAXJMP(0x479D40); }
-WRAPPER void CFireManager::StartFire(CEntity* entityOnFire, CEntity* culprit, float, uint32) { EAXJMP(0x479590); }
 WRAPPER void CFireManager::Update(void) { EAXJMP(0x479310); }
 WRAPPER CFire* CFireManager::FindFurthestFire_NeverMindFireMen(CVector coors, float, float) { EAXJMP(0x479430); }
 
@@ -13,8 +12,6 @@ uint32 CFireManager::GetTotalActiveFires() const
 {
 	return m_nTotalFires;
 }
-
-WRAPPER void CFireManager::Update(void) { EAXJMP(0x479310); }
 
 CFire* CFireManager::FindNearestFire(CVector vecPos, float* pDistance)
 {
@@ -52,7 +49,6 @@ CFireManager::ExtinguishPoint(CVector point, float range)
 	}
 }
 
-WRAPPER CFire *CFireManager::FindFurthestFire_NeverMindFireMen(CVector coors, float, float) { EAXJMP(0x479430); }
 WRAPPER void CFireManager::StartFire(CEntity *entityOnFire, CEntity *culprit, float, uint32) { EAXJMP(0x479590); }
 WRAPPER void CFireManager::StartFire(CVector, float, uint8) { EAXJMP(0x479500); }
 WRAPPER int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* culprit, float, uint8) { EAXJMP(0x479E60); }
