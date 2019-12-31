@@ -42,6 +42,5 @@ public:
 	void RemoveScriptFire(int16);
 	void RemoveAllScriptFires(void);
 	void SetScriptFireAudio(int16, bool);
-	void ExtinguishPoint(CVector, float);
 };
 extern CFireManager &gFireManager;
