@@ -5712,7 +5712,7 @@ int8 CRunningScript::ProcessCommandsFrom700To799(int32 command)
 	}
 	case COMMAND_BOAT_STOP:
 	{
-		CollectParameters(&m_nIp, 4);
+		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		assert(pVehicle->m_vehType == VEHICLE_TYPE_BOAT);
