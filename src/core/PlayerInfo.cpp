@@ -435,7 +435,7 @@ CPlayerInfo::Process(void)
 			if (CPad::GetPad(0)->ExitVehicleJustDown()) {
 				bool weAreOnBoat = false;
 				float lastClosestness = 0.0f;
-				CVehicle *carBelow;
+				CVehicle *carBelow = nil;
 				CEntity *surfaceBelow = m_pPed->m_pCurrentPhysSurface;
 				if (surfaceBelow && surfaceBelow->IsVehicle()) {
 					carBelow = (CVehicle*)surfaceBelow;
