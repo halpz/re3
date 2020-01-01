@@ -1090,7 +1090,7 @@ CAutomobile::ProcessControl(void)
 
 
 	if(m_bSirenOrAlarm && (CTimer::GetFrameCounter()&7) == 5 &&
-	   UsesSiren(GetModelIndex()) && GetModelIndex() != MI_RCBANDIT)
+	   UsesSiren(GetModelIndex()) && GetModelIndex() != MI_MRWHOOP)
 		CCarAI::MakeWayForCarWithSiren(this);
 
 

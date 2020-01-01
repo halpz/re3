@@ -2544,7 +2544,7 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 	{
 		CollectParameters(&m_nIp, 4);
 		int mi = ScriptParams[0] >= 0 ? ScriptParams[0] : CTheScripts::UsedObjectArray[-ScriptParams[0]].index;
-		CObject* pObj = new CObject(mi, 0);
+		CObject* pObj = new CObject(mi, false);
 		pObj->ObjectCreatedBy = MISSION_OBJECT;
 		CVector pos = *(CVector*)&ScriptParams[1];
 		if (pos.z <= -100.0f)
@@ -5305,8 +5305,8 @@ int8 CRunningScript::ProcessCommandsFrom600To699(int32 command)
 	{
 		CollectParameters(&m_nIp, 4);
 		int mi = ScriptParams[0] >= 0 ? ScriptParams[0] : CTheScripts::UsedObjectArray[-ScriptParams[0]].index;
-		CObject* pObj = new CObject(mi, 0);
-		pObj->ObjectCreatedBy = MISSION_OBJECT;
+		CObject* pObj = new CObject(mi, false);
+;		pObj->ObjectCreatedBy = MISSION_OBJECT;
 		CVector pos = *(CVector*)&ScriptParams[1];
 		if (pos.z <= -100.0f)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
@@ -5380,7 +5380,7 @@ int8 CRunningScript::ProcessCommandsFrom600To699(int32 command)
 	case COMMAND_ADD_PARTICLE_EFFECT:
 	{
 		CollectParameters(&m_nIp, 5);
-		CVector pos = *(CVector*)&ScriptParams[0];
+		CVector pos = *(CVector*)&ScriptParams[1];
 		if (pos.z <= 100.0f)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CParticleObject::AddObject(ScriptParams[0], pos, ScriptParams[4] != 0);
