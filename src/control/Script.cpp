@@ -7812,7 +7812,7 @@ void CTheScripts::AddToInvisibilitySwapArray(CEntity* pEntity, bool remove)
 {
 	int i = 0;
 	bool found = false;
-	while (i < 20 && !found) {
+	while (i < MAX_NUM_INVISIBILITY_SETTINGS && !found) {
 		if (InvisibilitySettingArray[i] == pEntity)
 			found = true;
 		else
@@ -7824,9 +7824,9 @@ void CTheScripts::AddToInvisibilitySwapArray(CEntity* pEntity, bool remove)
 	}
 	else if (!remove) {
 		int j = 0;
-		while (i < 20 && !found) {
+		while (i < MAX_NUM_INVISIBILITY_SETTINGS && !found) {
 			if (InvisibilitySettingArray[i] == nil)
-				found = false;
+				found = true;
 			else
 				i++;
 		}
