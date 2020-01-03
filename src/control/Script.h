@@ -114,6 +114,8 @@ public:
 		}
 	}
 
+	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
+
 	void CollectParameters(uint32*, int16);
 	int32 CollectNextParameterWithoutIncreasingPC(uint32);
 	int32* GetPointerToScriptVariable(uint32*, int16);
@@ -374,6 +376,7 @@ public:
 	static void HighlightImportantArea(uint32, float, float, float, float, float);
 	static void DrawDebugSquare(float, float, float, float);
 	static void DrawDebugCube(float, float, float, float, float, float);
+	static void AddToInvisibilitySwapArray(CEntity*, bool);
 
 	static int32 Read4BytesFromScript(uint32* pIp){
 		int32 retval = 0;

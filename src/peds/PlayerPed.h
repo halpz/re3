@@ -56,6 +56,7 @@ public:
 	void UseSprintEnergy(void);
 	class CPlayerInfo *GetPlayerInfoForThisPlayerPed();
 	void SetRealMoveAnim(void);
+	void MakeObjectTargettable(int32);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);

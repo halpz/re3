@@ -6,7 +6,9 @@
 #include "Timer.h"
 #include "Font.h"
 #include "Messages.h"
+#include "PlayerPed.h"
 #include "Text.h"
+#include "World.h"
 
 int32 &CGarages::BankVansCollected = *(int32 *)0x8F1B34;
 bool &CGarages::BombsAreFree = *(bool *)0x95CD7A;
@@ -24,6 +26,8 @@ uint32 &CGarages::NumGarages = *(uint32 *)0x8F29F4;
 bool &CGarages::PlayerInGarage = *(bool *)0x95CD83;
 int32 &CGarages::PoliceCarsCollected = *(int32 *)0x941444;
 uint32 &CGarages::GarageToBeTidied = *(uint32 *)0x623570;
+
+CGarage(&CGarages::Garages)[NUM_GARAGES] = *(CGarage(*)[NUM_GARAGES])(uintptr*)0x72BCD0;
 
 WRAPPER void CGarages::Init(void) { EAXJMP(0x421C60); }
 WRAPPER void CGarages::Update(void) { EAXJMP(0x421E40); }
@@ -86,8 +90,27 @@ int32 CGarages::QueryCarsCollected(int16 garage)
 	return 0;
 }
 
+void CGarages::GivePlayerDetonator()
+{
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_DETONATOR, 1);
+	FindPlayerPed()->m_weapons[FindPlayerPed()->GetWeaponSlot(WEAPONTYPE_DETONATOR)].m_eWeaponState = WEAPONSTATE_READY;
+}
+
 WRAPPER bool CGarages::HasThisCarBeenCollected(int16 garage, uint8 id) { EAXJMP(0x426D50); }
-WRAPPER void CGarages::ChangeGarageType(int16 garage, int8 type) { EAXJMP(0x4222A0); }
+WRAPPER void CGarages::ChangeGarageType(int16 garage, eGarageType type) { EAXJMP(0x4222A0); }
+WRAPPER bool CGarages::HasResprayHappened(int16 garage) { EAXJMP(0x4274F0); }
+
+void CGarage::OpenThisGarage()
+{
+	if (m_eGarageState == GS_FULLYCLOSED || m_eGarageState == GS_CLOSING || m_eGarageState == GS_CLOSEDCONTAINSCAR)
+		m_eGarageState = GS_OPENING;
+}
+
+void CGarage::CloseThisGarage()
+{
+	if (m_eGarageState == GS_OPENED || m_eGarageState == GS_OPENING)
+		m_eGarageState = GS_CLOSING;
+}
 
 #if 0
 WRAPPER void CGarages::PrintMessages(void) { EAXJMP(0x426310); }

@@ -7,6 +7,7 @@ public:
 	static int32 &HeadsPopped;
 	static bool& CommercialPassed;
 	static bool& IndustrialPassed;
+	static bool& SuburbanPassed;
 	static int32 &NumberKillFrenziesPassed;
 	static int32 &PeopleKilledByOthers;
 	static int32 &HelisDestroyed;

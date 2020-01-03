@@ -340,7 +340,7 @@ public:
 
 	uint8 bWanderPathAfterExitingCar : 1;
 	uint8 bIsLeader : 1;
-	uint8 bDontDragMeOutCar : 1;
+	uint8 bDontDragMeOutCar : 1; // unfinished feature
 	uint8 m_ped_flagF8 : 1;
 	uint8 bWillBeQuickJacked : 1;
 	uint8 bCancelEnteringCar : 1; // after door is opened or couldn't be opened due to it's locked
