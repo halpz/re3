@@ -45,7 +45,7 @@ CWeapon::Reload(void)
 bool
 CWeapon::IsType2Handed(void)
 {
-	return m_eWeaponType >= WEAPONTYPE_SHOTGUN &&  m_eWeaponType <= WEAPONTYPE_FLAMETHROWER && m_eWeaponType != WEAPONTYPE_ROCKETLAUNCHER;
+	return m_eWeaponType >= WEAPONTYPE_SHOTGUN && m_eWeaponType <= WEAPONTYPE_FLAMETHROWER && m_eWeaponType != WEAPONTYPE_ROCKETLAUNCHER;
 }
 
 bool
@@ -86,6 +86,18 @@ CWeapon::HitsGround(CEntity *holder, CVector *firePos, CEntity *aimingTo)
 	}
 
 	return false;
+}
+
+bool
+CWeapon::HasWeaponAmmoToBeUsed(void)
+{
+	switch (m_eWeaponType) {
+		case WEAPONTYPE_UNARMED:
+		case WEAPONTYPE_BASEBALLBAT:
+			return true;
+		default:
+			return m_nAmmoTotal != 0;
+	}
 }
 
 STARTPATCHES
