@@ -11,6 +11,10 @@
 #include "Stats.h"
 #include "Font.h"
 #include "Text.h"
+#include "Vehicle.h"
+
+#define FRENZY_ANY_PED -1
+#define FRENZY_ANY_CAR -2
 
 int32 &CDarkel::TimeLimit = *(int32*)0x885BAC;
 int32 &CDarkel::PreviousTime = *(int32*)0x885B00;
@@ -157,29 +161,57 @@ CDarkel::ReadStatus()
 	return Status;
 }
 
-#if 1
+#if 0
 WRAPPER void CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle) { EAXJMP(0x421070); }
 #else
-int32 CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle)
+void
+CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle)
 {
-	return 0;
+	if (FrenzyOnGoing()) {
+		int32 model = vehicle->GetModelIndex();
+		if (ModelToKill == FRENZY_ANY_CAR || ModelToKill == model || ModelToKill2 == model || ModelToKill3 == model || ModelToKill4 == model) {
+			KillsNeeded--;
+			DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_CAR_BLOWN, 0);
+		}
+	}
+	RegisteredKills[vehicle->GetModelIndex()]++;
+	CStats::CarsExploded++;
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapontype, bool headshot) { EAXJMP(0x420F60); }
 #else
-void CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapontype, bool headshot)
+void
+CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapon, bool headshot)
 {
-
-	
+	if (FrenzyOnGoing() && (weapon == WeaponType
+			|| weapon == WEAPONTYPE_EXPLOSION
+			|| weapon == WEAPONTYPE_UZI_DRIVEBY && WeaponType == WEAPONTYPE_UZI
+			|| weapon == WEAPONTYPE_RAMMEDBYCAR && WeaponType == WEAPONTYPE_RUNOVERBYCAR
+			|| weapon == WEAPONTYPE_RUNOVERBYCAR && WeaponType == WEAPONTYPE_RAMMEDBYCAR
+			|| weapon == WEAPONTYPE_FLAMETHROWER && WeaponType == WEAPONTYPE_MOLOTOV)) {
+		int32 model = victim->GetModelIndex();
+		if (ModelToKill == FRENZY_ANY_PED || ModelToKill == model || ModelToKill2 == model || ModelToKill3 == model || ModelToKill4 == model) {
+			if (!bNeedHeadShot || headshot) {
+				KillsNeeded--;
+				DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_KILL, 0);
+			}
+		}
+	}
+	CStats::PeopleKilledByPlayer++;
+	RegisteredKills[victim->GetModelIndex()]++;
+	CStats::PedsKilledOfThisType[victim->bChrisCriminal ? PEDTYPE_CRIMINAL : victim->m_nPedType]++;
+	if (headshot)
+		CStats::HeadsPopped++;
+	CStats::KillsSinceLastCheckpoint++;
 }
 #endif
 
 void
 CDarkel::RegisterKillNotByPlayer(CPed* victim, eWeaponType weapontype)
 {
-	++CStats::PeopleKilledByOthers;
+	CStats::PeopleKilledByOthers++;
 }
 
 void
@@ -367,6 +399,6 @@ STARTPATCHES
 	InjectHook(0x421060, CDarkel::RegisterKillNotByPlayer, PATCH_JUMP);
 	InjectHook(0x421310, CDarkel::ResetModelsKilledByPlayer, PATCH_JUMP);
 	InjectHook(0x420920, CDarkel::DrawMessages, PATCH_JUMP);
-	//InjectHook(0x421070, CDarkel::RegisterCarBlownUpByPlayer, PATCH_JUMP);
-	//InjectHook(0x420F60, CDarkel::RegisterKillByPlayer, PATCH_JUMP);
+	InjectHook(0x421070, CDarkel::RegisterCarBlownUpByPlayer, PATCH_JUMP);
+	InjectHook(0x420F60, CDarkel::RegisterKillByPlayer, PATCH_JUMP);
 ENDPATCHES
