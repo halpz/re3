@@ -15892,7 +15892,7 @@ void
 CPed::ServiceTalking(void)
 {
 	if (!bBodyPartJustCameOff || m_bodyPartBleeding != PED_HEAD) {
-		if (strcmpi(CModelInfo::GetModelInfo(m_modelIndex)->GetName(), "bomber")) {
+		if (CGeneral::faststricmp(CModelInfo::GetModelInfo(m_modelIndex)->GetName(), "bomber")) {
 			if (m_nPedState == PED_ON_FIRE)
 				m_queuedSound = SOUND_PED_BURNING;
 		} else {
