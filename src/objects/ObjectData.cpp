@@ -57,7 +57,7 @@ CObjectData::Initialise(const char *filename)
 			&ms_aObjectInfo[id].m_fCollisionDamageMultiplier,
 			&damageEffect, &responseCase, &camAvoid);
 
-		ms_aObjectInfo[id].m_fBuoyancy = 100.0f/percentSubmerged * 0.008*ms_aObjectInfo[id].m_fMass;
+		ms_aObjectInfo[id].m_fBuoyancy = 100.0f/percentSubmerged * GRAVITY *ms_aObjectInfo[id].m_fMass;
 		ms_aObjectInfo[id].m_nCollisionDamageEffect = damageEffect;
 		ms_aObjectInfo[id].m_nSpecialCollisionResponseCases = responseCase;
 		ms_aObjectInfo[id].m_bCameraToAvoidThisObject = camAvoid;

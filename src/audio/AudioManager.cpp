@@ -8,7 +8,6 @@
 #include "Automobile.h"
 #include "Boat.h"
 #include "Bridge.h"
-#include "CProjectileInfo.h"
 #include "Camera.h"
 #include "DMAudio.h"
 #include "Entity.h"
@@ -25,6 +24,8 @@
 #include "Plane.h"
 #include "PlayerPed.h"
 #include "Pools.h"
+#include "Projectile.h"
+#include "ProjectileInfo.h"
 #include "Replay.h"
 #include "Stats.h"
 #include "SurfaceTable.h"
@@ -6954,7 +6955,7 @@ cAudioManager::ProcessProjectiles()
 			}
 			m_sQueueSample.field_48 = 4.0;
 			m_sQueueSample.field_76 = 3;
-			m_sQueueSample.m_vecPos = CProjectileInfo::ms_apProjectile[i].GetPosition();
+			m_sQueueSample.m_vecPos = CProjectileInfo::ms_apProjectile[i]->GetPosition();
 			float distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
 			if(distSquared < maxDist) {
 				m_sQueueSample.m_fDistance = Sqrt(distSquared);

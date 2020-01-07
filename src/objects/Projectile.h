@@ -7,4 +7,5 @@
 class CProjectile : public CObject
 {
 public:
+	CProjectile(int32);
 };
