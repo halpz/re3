@@ -1,180 +1,135 @@
 #include "common.h"
 #include "patcher.h"
 
-#include "DMAudio.h"
 #include "Hud.h"
-#include "Replay.h"
-#include "Timer.h"
-#include "Script.h"
+#include "PlayerPed.h"
+#include "Text.h"
 #include "User.h"
+#include "Vehicle.h"
+#include "World.h"
+#include "Zones.h"
 
 CPlaceName& CUserDisplay::PlaceName = *(CPlaceName*)0x8F29BC;
 COnscreenTimer& CUserDisplay::OnscnTimer = *(COnscreenTimer*)0x862238;
 CPager& CUserDisplay::Pager = *(CPager*)0x8F2744;
 CCurrentVehicle& CUserDisplay::CurrentVehicle = *(CCurrentVehicle*)0x8F5FE8;
 
-WRAPPER void CUserDisplay::Process(void) { EAXJMP(0x4AD690); }
-
-void COnscreenTimer::Init() {
-	m_bDisabled = false;
-	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
-		m_sEntries[i].m_nTimerOffset = 0;
-		m_sEntries[i].m_nCounterOffset = 0;
-
-		for(uint32 j = 0; j < 10; j++) {
-			m_sEntries[i].m_aTimerText[j] = 0;
-			m_sEntries[i].m_aCounterText[j] = 0;
-		}
-
-		m_sEntries[i].m_nType = 0;
-		m_sEntries[i].m_bTimerProcessed = 0;
-		m_sEntries[i].m_bCounterProcessed = 0;
-	}
+CPlaceName::CPlaceName()
+{
+	Init();
 }
 
-void COnscreenTimer::Process() {
-	if(!CReplay::IsPlayingBack() && !m_bDisabled) {
-		for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
-			m_sEntries[i].Process();
-		}
-	}
+void
+CPlaceName::Init()
+{
+	m_pZone = nil;
+	m_pZone2 = nil;
+	m_nAdditionalTimer = 0;
 }
 
-void COnscreenTimer::ProcessForDisplay() {
-	if(CHud::m_Wants_To_Draw_Hud) {
-		m_bProcessed = false;
-		for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
-			if(m_sEntries[i].ProcessForDisplay()) {
-				m_bProcessed = true;
+void
+CPlaceName::Process()
+{
+	CVector pos = CWorld::Players[CWorld::PlayerInFocus].GetPos();
+	CZone *navigZone = CTheZones::FindSmallestZonePositionType(&pos, ZONE_TYPE1);
+	CZone *audioZone = CTheZones::FindSmallestZonePositionType(&pos, ZONE_AUDIO);
+
+	if (navigZone == nil) m_pZone = nil;
+	if (audioZone == nil) m_pZone2 = nil;
+
+	if (navigZone == m_pZone) {
+		if (audioZone == m_pZone2 || m_pZone != nil) {
+			if (navigZone != nil || audioZone != nil) {
+				if (m_nAdditionalTimer != 0)
+					m_nAdditionalTimer--;
+			} else {
+				m_nAdditionalTimer = 0;
+				m_pZone = nil;
+				m_pZone2 = nil;
 			}
+		} else {
+			m_pZone2 = audioZone;
+			m_nAdditionalTimer = 250;
 		}
-	}
-}
-
-void COnscreenTimer::ClearCounter(uint32 offset) {
-	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
-		if(offset == m_sEntries[i].m_nCounterOffset) {
-			m_sEntries[i].m_nCounterOffset = 0;
-			m_sEntries[i].m_aCounterText[0] = 0;
-			m_sEntries[i].m_nType = 0;
-			m_sEntries[i].m_bCounterProcessed = 0;
-		}
-	}
-}
-
-void COnscreenTimer::ClearClock(uint32 offset) {
-	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
-		if(offset == m_sEntries[i].m_nTimerOffset) {
-			m_sEntries[i].m_nTimerOffset = 0;
-			m_sEntries[i].m_aTimerText[0] = 0;
-			m_sEntries[i].m_bTimerProcessed = 0;
-		}
-	}
-}
-
-void COnscreenTimer::AddCounter(uint32 offset, uint16 type, char* text) {
-	uint32 i = 0;
-	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
-		if(m_sEntries[i].m_nCounterOffset == 0) {
-			break;
-		}
-		return;
-	}
-
-	m_sEntries[i].m_nCounterOffset = offset;
-	if(text) {
-		strncpy(m_sEntries[i].m_aCounterText, text, 10);
 	} else {
-		m_sEntries[i].m_aCounterText[0] = 0;
+		m_pZone = navigZone;
+		m_nAdditionalTimer = 250;
 	}
-
-	m_sEntries[i].m_nType = type;
+	Display();
 }
 
-void COnscreenTimer::AddClock(uint32 offset, char* text) {
-	uint32 i = 0;
-	for(uint32 i = 0; i < NUMONSCREENTIMERENTRIES; i++) {
-		if(m_sEntries[i].m_nTimerOffset == 0) {
-			break;
-		}
-		return;
-	}
-
-	m_sEntries[i].m_nTimerOffset = offset;
-	if(text) {
-		strncpy(m_sEntries[i].m_aTimerText, text, 10);
-	} else {
-		m_sEntries[i].m_aTimerText[0] = 0;
-	}
+void
+CPlaceName::Display()
+{
+	wchar *text;
+	if (m_pZone != nil)
+		text = m_pZone->GetTranslatedName();
+	else if (m_pZone2 != nil)
+		text = m_pZone2->GetTranslatedName();
+#ifdef FIX_BUGS
+	else
+		text = nil;
+#endif
+	CHud::SetZoneName(text);
 }
 
-void COnscreenTimerEntry::Process() {
-	if(m_nTimerOffset == 0) {
-		return;
-	}
-
-	uint32* timerPtr = (uint32*)&CTheScripts::ScriptSpace[m_nTimerOffset];
-	uint32 oldTime = *timerPtr;
-	int32 newTime = int32(oldTime - uint32(20.0f * CTimer::GetTimeStep()));
-	if(newTime < 0) {
-		*timerPtr = 0;
-		m_bTimerProcessed = 0;
-		m_nTimerOffset = 0;
-		m_aTimerText[0] = 0;
-	} else {
-		*timerPtr = (uint32)newTime;
-		uint32 oldTimeSeconds = oldTime / 1000;
-		if(oldTimeSeconds <= 11 && newTime / 1000 != oldTimeSeconds) {
-			DMAudio.PlayFrontEndSound(SOUND_CLOCK_TICK, newTime / 1000);
-		}
-	}
+CCurrentVehicle::CCurrentVehicle()
+{
+	Init();
 }
 
-bool COnscreenTimerEntry::ProcessForDisplay() {
-	m_bTimerProcessed = false;
-	m_bCounterProcessed = false;
-
-	if(m_nTimerOffset == 0 && m_nCounterOffset == 0) {
-		return false;
-	}
-
-	if(m_nTimerOffset != 0) {
-		m_bTimerProcessed = true;
-		ProcessForDisplayClock();
-	}
-
-	if(m_nCounterOffset != 0) {
-		m_bCounterProcessed = true;
-		ProcessForDisplayCounter();
-	}
-	return true;
+void
+CCurrentVehicle::Init()
+{
+	m_pCurrentVehicle = nil;
 }
 
-void COnscreenTimerEntry::ProcessForDisplayClock() {
-	uint32 time = *(uint32*)&CTheScripts::ScriptSpace[m_nTimerOffset];
-	sprintf(m_bTimerBuffer, "%02d:%02d", time / 1000 / 60,
-				   time / 1000 % 60);
+void
+CCurrentVehicle::Process()
+{
+	if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->InVehicle())
+		m_pCurrentVehicle = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pMyVehicle;
+	else
+		m_pCurrentVehicle = nil;
+	Display();
 }
 
-void COnscreenTimerEntry::ProcessForDisplayCounter() {
-	uint32 counter = *(uint32*)&CTheScripts::ScriptSpace[m_nCounterOffset];
+void
+CCurrentVehicle::Display()
+{
+	wchar *text = nil;
+	if (m_pCurrentVehicle != nil)
+		text = TheText.Get(((CVehicleModelInfo*)CModelInfo::GetModelInfo(m_pCurrentVehicle->GetModelIndex()))->m_gameName);
+	CHud::SetVehicleName(text);
+}
 
-	assert(!m_nType || counter <= 100);
+void
+CUserDisplay::Init()
+{
+	PlaceName.Init();
+	OnscnTimer.Init();
+	Pager.Init();
+	CurrentVehicle.Init();
+}
 
-	sprintf(m_bCounterBuffer, "%d", counter);
+void
+CUserDisplay::Process()
+{
+	PlaceName.Process();
+	OnscnTimer.Process();
+	Pager.Process();
+	CurrentVehicle.Process();
 }
 
 STARTPATCHES
-	InjectHook(0x429160, &COnscreenTimerEntry::Process, PATCH_JUMP);
-	InjectHook(0x429110, &COnscreenTimerEntry::ProcessForDisplay, PATCH_JUMP);
-	InjectHook(0x429080, &COnscreenTimerEntry::ProcessForDisplayClock, PATCH_JUMP);
-	InjectHook(0x4290F0, &COnscreenTimerEntry::ProcessForDisplayCounter, PATCH_JUMP);
+	InjectHook(0x4AD4C0, &CPlaceName::Init, PATCH_JUMP);
+	InjectHook(0x4AD4E0, &CPlaceName::Process, PATCH_JUMP);
+	InjectHook(0x4AD5B0, &CPlaceName::Display, PATCH_JUMP);
 
-	InjectHook(0x429220, &COnscreenTimer::Init, PATCH_JUMP);
-	InjectHook(0x429320, &COnscreenTimer::Process, PATCH_JUMP);
-	InjectHook(0x4292E0, &COnscreenTimer::ProcessForDisplay, PATCH_JUMP);
-	InjectHook(0x429450, &COnscreenTimer::ClearCounter, PATCH_JUMP);
-	InjectHook(0x429410, &COnscreenTimer::ClearClock, PATCH_JUMP);
-	InjectHook(0x4293B0, &COnscreenTimer::AddCounter, PATCH_JUMP);
-	InjectHook(0x429350, &COnscreenTimer::AddClock, PATCH_JUMP);
+	InjectHook(0x4AD5F0, &CCurrentVehicle::Init, PATCH_JUMP);
+	InjectHook(0x4AD600, &CCurrentVehicle::Process, PATCH_JUMP);
+	InjectHook(0x4AD630, &CCurrentVehicle::Display, PATCH_JUMP);
+
+	InjectHook(0x4AD660, &CUserDisplay::Init, PATCH_JUMP);
+	InjectHook(0x4AD690, &CUserDisplay::Process, PATCH_JUMP);
 ENDPATCHES
