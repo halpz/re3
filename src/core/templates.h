@@ -61,12 +61,21 @@ public:
 	T *New(void){
 		bool wrapped = false;
 		do
+#ifdef FIX_BUGS
+			if (++m_allocPtr >= m_size) {
+				m_allocPtr = 0;
+				if (wrapped)
+					return nil;
+				wrapped = true;
+			}
+#else
 			if(++m_allocPtr == m_size){
 				if(wrapped)
 					return nil;
 				wrapped = true;
 				m_allocPtr = 0;
 			}
+#endif
 		while(!m_flags[m_allocPtr].free);
 		m_flags[m_allocPtr].free = 0;
 		m_flags[m_allocPtr].id++;

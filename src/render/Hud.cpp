@@ -1474,8 +1474,6 @@ void CHud::SetZoneName(wchar *name)
 
 void CHud::Shutdown()
 {
-	debug("Shutdown CHud");
-
 	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames); ++i) {
 		Sprites[i].Delete();
 	}

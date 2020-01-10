@@ -530,6 +530,7 @@ public:
 	void SwitchMenuOnAndOff();
 	void UnloadTextures();
 	void WaitForUserCD();
+	void PrintController();
 
 	// New content:
 	uint8 GetNumberOfMenuOptions();
