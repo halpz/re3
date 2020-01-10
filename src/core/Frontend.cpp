@@ -30,6 +30,8 @@
 
 #define ALL_ORIGINAL_FRONTEND 1
 
+WRAPPER void CMenuManager::PrintController(void) { EAXJMP(0x483990); }
+
 int32 &CMenuManager::OS_Language = *(int32*)0x5F2F78;	// 9
 int8 &CMenuManager::m_PrefsUseVibration = *(int8*)0x95CD92;
 int8 &CMenuManager::m_DisplayControllerOnFoot = *(int8*)0x95CD8D;
@@ -518,16 +520,10 @@ void CMenuManager::Draw()
 		case MENUPAGE_DELETE_SLOT_CONFIRM:
 		case MENUPAGE_SAVE_OVERWRITE_CONFIRM:
 		case MENUPAGE_EXIT:
-#ifdef PS2_SAVE_DIALOG
-		case MENUPAGE_SAVE:
-			columnWidth = 280;
-			CFont::SetFontStyle(FONT_BANK);
-#else
 			columnWidth = 320;
-			CFont::SetFontStyle(FONT_HEADING);
-#endif
 			headerHeight = 60;
 			lineHeight = 24;
+			CFont::SetFontStyle(FONT_HEADING);
 			CFont::SetScale(MENU_X(actionTextScaleX = 0.75f), MENU_Y(actionTextScaleY = 0.9f));
 			CFont::SetCentreOn();
 			break;
@@ -547,6 +543,15 @@ void CMenuManager::Draw()
 			CFont::SetScale(MENU_X(actionTextScaleX = 0.75f), MENU_Y(actionTextScaleY = 0.9f));
 			CFont::SetCentreOn();
 			break;
+#ifdef PS2_SAVE_DIALOG
+		case MENUPAGE_SAVE:
+			columnWidth = 180;
+			headerHeight = 60;
+			lineHeight = 24;
+			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetScale(MENU_X(actionTextScaleX = 0.75f), MENU_Y(actionTextScaleY = 0.9f));
+			break;
+#endif
 		default:
 			columnWidth = 320;
 			headerHeight = 40;
@@ -586,7 +591,7 @@ void CMenuManager::Draw()
 				if (Slots[i-1] != 1)
 					textToPrint[MENUCOLUMN_RIGHT] = GetSavedGameDateAndTime(i - 1);
 
-				if (!textToPrint[MENUCOLUMN_LEFT]) {
+				if (textToPrint[MENUCOLUMN_LEFT][0] == '\0') {
 					sprintf(gString, "FEM_SL%d", i);
 					textToPrint[MENUCOLUMN_LEFT] = TheText.Get(gString);
 				}
@@ -761,12 +766,11 @@ void CMenuManager::Draw()
 				if (m_nPrefsAudio3DProviderIndex == -1)
 					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEA_NAH");
 				else {
-					char* provider = DMAudio.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
+					char *provider = DMAudio.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
 
 					if (!strcmp(strupr(provider), "DIRECTSOUND3D HARDWARE SUPPORT")) {
 						strcpy(provider, "DSOUND3D HARDWARE SUPPORT");
-					}
-					else if (!strcmp(strupr(provider), "DIRECTSOUND3D SOFTWARE EMULATION")) {
+					} else if (!strcmp(strupr(provider), "DIRECTSOUND3D SOFTWARE EMULATION")) {
 						strcpy(provider, "DSOUND3D SOFTWARE EMULATION");
 					}
 					wchar temp[64];
@@ -1051,10 +1055,11 @@ void CMenuManager::Draw()
 		DisplayHelperText();
 		break;
 	}
-/*
+
 	if (m_nCurrScreen == MENUPAGE_CONTROLLER_SETTINGS) {
 		PrintController();
-	} else if (m_nCurrScreen == MENUPAGE_SKIN_SELECT_OLD) {
+	}
+/*	else if (m_nCurrScreen == MENUPAGE_SKIN_SELECT_OLD) {
 		CSprite2d::DrawRect(CRect(StretchX(180), MENU_Y(98), StretchX(230), MENU_Y(123)), CRGBA(255, 255, 255, FadeIn(255)));
 		CSprite2d::DrawRect(CRect(StretchX(181), MENU_Y(99), StretchX(229), MENU_Y(233)), CRGBA(Player color from PickNewPlayerColour, FadeIn(255)));
 	}
@@ -1121,7 +1126,7 @@ void CMenuManager::DrawFrontEndSaveZone()
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
 
 	// Not original dimensions, have been changed to fit PC screen & PC menu layout.
-	CSprite2d::DrawRect(CRect(MENU_X_LEFT_ALIGNED(25.0f), MENU_Y(40.0f), MENU_X_RIGHT_ALIGNED(25.0f), SCREEN_SCALE_FROM_BOTTOM(40.0f)), CRGBA(0, 0, 0, 175));
+	CSprite2d::DrawRect(CRect(MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(50.0f), MENU_X_RIGHT_ALIGNED(30.0f), SCREEN_SCALE_FROM_BOTTOM(50.0f)), CRGBA(0, 0, 0, 175));
 
 	m_nMenuFadeAlpha = 255;
 	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
