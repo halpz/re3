@@ -39,7 +39,6 @@ to reverse at the time, calling the original functions is acceptable.
 ### Unreversed / incomplete classes (at least the ones we know)
 ```
 CAudioManager, cDMAudio, cSampleManager and all audio - being worked on
-CAccidentManager
 CBoat
 CBrightLights
 CBulletInfo

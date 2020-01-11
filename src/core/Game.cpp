@@ -2,7 +2,7 @@
 #include "patcher.h"
 #include "Game.h"
 #include "main.h"
-#include "AccidentManager.h"
+#include "Accident.h"
 #include "Antennas.h"
 #include "Bridge.h"
 #include "Camera.h"

@@ -20,10 +20,13 @@ class CAccidentManager
 		MAX_MEDICS_TO_ATTEND_ACCIDENT = 2
 	};
 public:
+	CAccident *GetNextFreeAccident();
+	void ReportAccident(CPed *ped);
+	void Update();
+	CAccident *FindNearestAccident(CVector vecPos, float *pDistance);
 	uint16 CountActiveAccidents();
 	bool UnattendedAccidents();
-	CAccident* FindNearestAccident(CVector, float*);
-	void Update(void);
+	bool WorkToDoForMedics();
 };
 
 extern CAccidentManager& gAccidentManager;

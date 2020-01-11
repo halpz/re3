@@ -2,7 +2,7 @@
 #include "patcher.h"
 #include "CarCtrl.h"
 
-#include "AccidentManager.h"
+#include "Accident.h"
 #include "Automobile.h"
 #include "Camera.h"
 #include "CarAI.h"
