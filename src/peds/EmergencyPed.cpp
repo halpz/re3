@@ -6,7 +6,7 @@
 #include "Fire.h"
 #include "General.h"
 #include "CarCtrl.h"
-#include "AccidentManager.h"
+#include "Accident.h"
 
 CEmergencyPed::CEmergencyPed(uint32 type) : CPed(type)
 {
