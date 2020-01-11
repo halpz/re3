@@ -573,8 +573,6 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 	if (CDarkel::FrenzyOnGoing())
 		goto switchDetectDone;
 
-	// The fact that m_nSelectedWepSlot is int8 makes below loops circular loop.
-
 	if (padUsed->CycleWeaponRightJustDown() && !m_pPointGunAt) {
 
 		if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
@@ -596,12 +594,14 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
 			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER) {
 
-			for (m_nSelectedWepSlot = m_currentWeapon - 1; m_nSelectedWepSlot >= 0; --m_nSelectedWepSlot) {
+			for (m_nSelectedWepSlot = m_currentWeapon - 1; ; --m_nSelectedWepSlot) {
+				if (m_nSelectedWepSlot < WEAPONTYPE_UNARMED)
+					m_nSelectedWepSlot = WEAPONTYPE_DETONATOR;
+
 				if (HasWeapon(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed()) {
 					goto switchDetectDone;
 				}
 			}
-			m_nSelectedWepSlot = WEAPONTYPE_DETONATOR;
 		}
 	} else if (CWeaponInfo::GetWeaponInfo((eWeaponType)m_currentWeapon)->m_eWeaponFire != WEAPON_FIRE_MELEE) {
 		if (GetWeapon(m_currentWeapon).m_nAmmoTotal <= 0) {

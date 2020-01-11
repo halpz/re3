@@ -812,7 +812,7 @@ void CMenuManager::Draw()
 				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_PrefsDMA ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_MOUSESTEER:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_bDisableMouseSteering ? "FEM_ON" : "FEM_OFF");
+				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
 				break;
 			}
 

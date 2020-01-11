@@ -75,7 +75,7 @@ void CTimer::Shutdown(void)
 	;
 }
 
-#if 1
+#if 0
 WRAPPER void CTimer::Update(void) { EAXJMP(0x4ACF70); }
 #else
 void CTimer::Update(void)
@@ -87,22 +87,22 @@ void CTimer::Update(void)
 		LARGE_INTEGER pc;
 		QueryPerformanceCounter(&pc);
 		
-		int32 updInCycles = (pc.LowPart - _oldPerfCounter.LowPart) & 0x7FFFFFFF;
+		int32 updInCycles = (pc.LowPart - _oldPerfCounter.LowPart); // & 0x7FFFFFFF; pointless
 		
 		_oldPerfCounter = pc;
 		
-		double updInCyclesScaled = (double)updInCycles * ms_fTimeScale;
+		float updInCyclesScaled = updInCycles * ms_fTimeScale;
 		
 		double upd = updInCyclesScaled / (double)_nCyclesPerMS;
 
-		m_snTimeInMillisecondsPauseMode = (Int64)(m_snTimeInMillisecondsPauseMode + upd);
+		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + upd;
 		
 		if ( GetIsPaused() )
 			ms_fTimeStep = 0.0f;
 		else
 		{
-			m_snTimeInMilliseconds = (Int64)(m_snTimeInMilliseconds + upd);
-			m_snTimeInMillisecondsNonClipped = (Int64)(m_snTimeInMillisecondsNonClipped + upd);
+			m_snTimeInMilliseconds = m_snTimeInMilliseconds + upd;
+			m_snTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped + upd;
 			ms_fTimeStep = updInCyclesScaled / (double)_nCyclesPerMS / 20.0;
 		}
 	}
@@ -116,14 +116,14 @@ void CTimer::Update(void)
 		
 		oldPcTimer = timer;
 		
-		m_snTimeInMillisecondsPauseMode = (Int64)(m_snTimeInMillisecondsPauseMode + upd);
+		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + upd;
 															 
 		if ( GetIsPaused() )
 			ms_fTimeStep = 0.0f;
 		else
 		{
-			m_snTimeInMilliseconds = (Int64)(m_snTimeInMilliseconds + upd);
-			m_snTimeInMillisecondsNonClipped = (Int64)(m_snTimeInMillisecondsNonClipped + upd);
+			m_snTimeInMilliseconds = m_snTimeInMilliseconds + upd;
+			m_snTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped + upd;
 			ms_fTimeStep = upd / 1000.0f * 50.0f;
 		}
 	}
@@ -192,7 +192,7 @@ uint32 CTimer::GetCurrentTimeInCycles(void)
 	{
 		LARGE_INTEGER pc;
 		QueryPerformanceCounter(&pc);
-		return (pc.LowPart - _oldPerfCounter.LowPart) & 0x7FFFFFFF;
+		return (pc.LowPart - _oldPerfCounter.LowPart); // & 0x7FFFFFFF; pointless
 	}
 	else
 		return RsTimer() - oldPcTimer;
@@ -218,7 +218,7 @@ void CTimer::EndUserPause(void)
 	m_UserPause = false;
 }
 
-#if 0
+#if 1
 STARTPATCHES	
 	InjectHook(0x4ACE60, CTimer::Initialise, PATCH_JUMP);
 	InjectHook(0x4ACF60, CTimer::Shutdown, PATCH_JUMP);
