@@ -13,7 +13,7 @@ public:
 	float m_fCurrentStamina;
 	float m_fMaxStamina;
 	float m_fStaminaProgress;
-	uint8 m_nSelectedWepSlot;	// eWeaponType
+	int8 m_nSelectedWepSlot;	// eWeaponType
 	bool m_bSpeedTimerFlag;
 	bool m_bShouldEvade;
 	int8 field_1367;
