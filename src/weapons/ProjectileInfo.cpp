@@ -13,8 +13,8 @@
 #include "Weapon.h"
 #include "World.h"
 
-CProjectileInfo (&gaProjectileInfo)[32] = *(CProjectileInfo(*)[32])*(uintptr*)0x64ED50;
-CProjectile* (&CProjectileInfo::ms_apProjectile)[32] = *(CProjectile*(*)[32])*(uintptr*)0x87C748;
+CProjectileInfo (&gaProjectileInfo)[NUM_PROJECTILES] = *(CProjectileInfo(*)[NUM_PROJECTILES])*(uintptr*)0x64ED50;
+CProjectile* (&CProjectileInfo::ms_apProjectile)[NUM_PROJECTILES] = *(CProjectile*(*)[NUM_PROJECTILES])*(uintptr*)0x87C748;
 
 void
 CProjectileInfo::Initialise()
@@ -69,7 +69,7 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 			matrix.GetPosition() = pos;
 		} else if (ped->m_pSeekTarget != nil) {
 				float ry = CGeneral::GetRadianAngleBetweenPoints(1.0f, ped->m_pSeekTarget->GetPosition().z, 1.0f, pos.z);
-				float rz = atan2(-ped->GetForward().x, ped->GetForward().y);
+				float rz = Atan2(-ped->GetForward().x, ped->GetForward().y);
 				vy = 0.35f * speed + 0.15f;
 				matrix.SetTranslate(0.0f, 1.0f, 1.0f);
 				matrix.Rotate(0.0f, ry, rz);
@@ -90,7 +90,7 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 		float scale = 0.22f * speed + 0.15f;
 		if (scale >= 0.2f)
 			scale = 0.2f;
-		float angle = atan2(-ped->GetForward().x, ped->GetForward().y);
+		float angle = Atan2(-ped->GetForward().x, ped->GetForward().y);
 		matrix.SetTranslate(0.0f, 0.0f, 0.0f);
 		matrix.RotateZ(angle);
 		matrix.GetPosition() += pos;
@@ -105,7 +105,7 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 		float scale = 0.0f;
 		if (speed != 0.0f)
 			scale = 0.22f * speed + 0.15f;
-		float angle = atan2(-ped->GetForward().x, ped->GetForward().y);;
+		float angle = Atan2(-ped->GetForward().x, ped->GetForward().y);
 		matrix.SetTranslate(0.0f, 0.0f, 0.0f);
 		matrix.RotateZ(angle);
 		matrix.GetPosition() += pos;
@@ -170,7 +170,7 @@ CProjectileInfo::RemoveProjectile(CProjectileInfo *info, CProjectile *projectile
 }
 
 void
-CProjectileInfo::RemoveNotAdd(CEntity* entity, eWeaponType weaponType, CVector pos)
+CProjectileInfo::RemoveNotAdd(CEntity *entity, eWeaponType weaponType, CVector pos)
 {
 	switch (weaponType)
 	{
@@ -213,6 +213,9 @@ CProjectileInfo::Update()
 					|| !CWorld::GetIsLineOfSightClear(gaProjectileInfo[i].m_vecPos, pos, true, true, true, true, false, false)
 					|| gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER && (CHeli::TestRocketCollision(&pos) || CPlane::TestRocketCollision(&pos))) {
 					RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
+#ifdef FIX_BUGS
+					ms_apProjectile[i] = nil;
+#endif
 				}
 				CWorld::pIgnoreEntity = nil;
 			} else if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_MOLOTOV) {
@@ -226,12 +229,18 @@ CProjectileInfo::Update()
 						|| !CWorld::GetIsLineOfSightClear(gaProjectileInfo[i].m_vecPos, pos, true, true, true, true, false, false)
 						|| gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER && (CHeli::TestRocketCollision(&pos) || CPlane::TestRocketCollision(&pos))) {
 						RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
+#ifdef FIX_BUGS
+						ms_apProjectile[i] = nil;
+#endif
 					}
 				}
 				CWorld::pIgnoreEntity = nil;
 			}
 		} else {
 			RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
+#ifdef FIX_BUGS
+			ms_apProjectile[i] = nil;
+#endif
 		}
 
 		gaProjectileInfo[i].m_vecPos = ms_apProjectile[i]->GetPosition();
@@ -252,6 +261,9 @@ CProjectileInfo::IsProjectileInRange(float x1, float x2, float y1, float y2, flo
 						gaProjectileInfo[i].m_bInUse = false;
 						CWorld::Remove(ms_apProjectile[i]);
 						delete ms_apProjectile[i];
+#ifdef FIX_BUGS
+						ms_apProjectile[i] = nil;
+#endif
 					}
 				}
 			}
@@ -268,12 +280,15 @@ CProjectileInfo::RemoveAllProjectiles()
 			gaProjectileInfo[i].m_bInUse = false;
 			CWorld::Remove(ms_apProjectile[i]);
 			delete ms_apProjectile[i];
+#ifdef FIX_BUGS
+			ms_apProjectile[i] = nil;
+#endif
 		}
 	}
 }
 
 bool
-CProjectileInfo::RemoveIfThisIsAProjectile(CObject* object)
+CProjectileInfo::RemoveIfThisIsAProjectile(CObject *object)
 {
 	int i = 0;
 	while (ms_apProjectile[i++] != object) {

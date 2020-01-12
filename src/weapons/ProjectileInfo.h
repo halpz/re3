@@ -16,17 +16,17 @@ public:
 
 public:
 	static CProjectileInfo* GetProjectileInfo(int32 id);
-	static CProjectile* (&ms_apProjectile)[32];
+	static CProjectile* (&ms_apProjectile)[NUM_PROJECTILES];
 
 	static void Initialise();
 	static void Shutdown();
-	static bool AddProjectile(CEntity *ped, eWeaponType weapon, CVector pos, float a4);
-	static void RemoveProjectile(CProjectileInfo*, CProjectile*);
+	static bool AddProjectile(CEntity *ped, eWeaponType weapon, CVector pos, float speed);
+	static void RemoveProjectile(CProjectileInfo *info, CProjectile *projectile);
 	static void RemoveNotAdd(CEntity *entity, eWeaponType weaponType, CVector pos);
 	static bool RemoveIfThisIsAProjectile(CObject *pObject);
-	static void RemoveAllProjectiles(void);
+	static void RemoveAllProjectiles();
 	static void Update();
 	static bool IsProjectileInRange(float x1, float x2, float y1, float y2, float z1, float z2, bool remove);
 };
 
-extern CProjectileInfo (&gaProjectileInfo)[32];
+extern CProjectileInfo (&gaProjectileInfo)[NUM_PROJECTILES];
