@@ -64,7 +64,6 @@ CPacManPickups
 CPedIK
 CPedPath
 CPlayerPed
-CProjectileInfo
 CRoadBlocks
 CRunningScript - being worked on
 CStats
