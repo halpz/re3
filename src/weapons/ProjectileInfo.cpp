@@ -88,7 +88,7 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 	{
 		time = CTimer::GetTimeInMilliseconds() + 2000;
 		float scale = 0.22f * speed + 0.15f;
-		if (scale >= 0.2f)
+		if (scale < 0.2f)
 			scale = 0.2f;
 		float angle = Atan2(-ped->GetForward().x, ped->GetForward().y);
 		matrix.SetTranslate(0.0f, 0.0f, 0.0f);
