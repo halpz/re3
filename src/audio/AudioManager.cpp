@@ -427,7 +427,7 @@ cAudioManager::AddReleasingSounds()
 	int8 queue = m_bActiveSampleQueue == 0;
 
 	for(int32 i = 0; i < m_bSampleRequestQueuesStatus[queue]; i++) {
-		tActiveSample &sample = m_asSamples[queue][m_abSampleQueueIndexTable[queue][i]];
+		tSound &sample = m_asSamples[queue][m_abSampleQueueIndexTable[queue][i]];
 		if (sample.m_bLoopEnded) continue;
 
 		toProcess[i] = false;
@@ -9438,7 +9438,7 @@ void
 cAudioManager::AdjustSamplesVolume()
 {
 	for(int i = 0; i < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue]; i++) {
-		tActiveSample* pSample = &m_asSamples[m_bActiveSampleQueue][m_abSampleQueueIndexTable[m_bActiveSampleQueue][i] + 1];
+		tSound* pSample = &m_asSamples[m_bActiveSampleQueue][m_abSampleQueueIndexTable[m_bActiveSampleQueue][i] + 1];
 
 		if(!pSample->m_bBankIndex) // all non-speech sounds on PC
 			pSample->m_bEmittingVolume = ComputeEmittingVolume(

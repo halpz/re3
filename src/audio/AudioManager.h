@@ -131,7 +131,7 @@ enum eScriptSounds : int16
 	SCRIPT_SOUND_GUNSHELL_DROP_SOFT = 123,
 };
 
-class tActiveSample
+class tSound
 {
 public:
 	int32 m_nEntityIndex;
@@ -180,7 +180,7 @@ public:
 	// no methods
 };
 
-static_assert(sizeof(tActiveSample) == 92, "tActiveSample: error");
+static_assert(sizeof(tSound) == 92, "tSound: error");
 
 enum eAudioType : int32
 {
@@ -363,14 +363,14 @@ enum AudioEntityHandle {
 	AEHANDLE_ERROR_BADAUDIOTYPE = -1,
 };
 
-struct Crime {
+struct cAMCrime {
 	int32 type;
 	CVector position;
 	uint16 timer;
 	uint16 gap;
 };
 
-static_assert(sizeof(Crime) == 20, "Crime: error ");
+static_assert(sizeof(cAMCrime) == 20, "cAMCrime: error ");
 
 class cAudioManager
 {
@@ -389,13 +389,13 @@ public:
 	uint8 field_14;
 	uint8 field_15;
 	int32 m_nTimer;
-	tActiveSample m_sQueueSample;
+	tSound m_sQueueSample;
 	bool m_bActiveSampleQueue;
 	uint8 gap_109[3];
-	tActiveSample m_asSamples[2][27];
+	tSound m_asSamples[2][27];
 	uint8 m_abSampleQueueIndexTable[2][27];
 	uint8 m_bSampleRequestQueuesStatus[2];
-	tActiveSample m_asActiveSamples[27];
+	tSound m_asActiveSamples[27];
 	tAudioEntity m_asAudioEntities[200];
 	int32 m_anAudioEntityIndices[200];
 	int32 m_nAudioEntitiesTotal;
@@ -412,7 +412,7 @@ public:
 	uint8 policeChannelTimerSeconds;
 	uint8 policeChannelCounterSeconds;
 	uint8 gap30;
-	Crime crimes[10];
+	cAMCrime crimes[10];
 	int32 m_nFrontEndEntity;
 	int32 m_nCollisionEntity;
 	cAudioCollisionManager m_sCollisionManager;
