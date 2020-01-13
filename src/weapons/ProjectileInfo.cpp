@@ -213,9 +213,6 @@ CProjectileInfo::Update()
 					|| !CWorld::GetIsLineOfSightClear(gaProjectileInfo[i].m_vecPos, pos, true, true, true, true, false, false)
 					|| gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER && (CHeli::TestRocketCollision(&pos) || CPlane::TestRocketCollision(&pos))) {
 					RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
-#ifdef FIX_BUGS
-					ms_apProjectile[i] = nil;
-#endif
 				}
 				CWorld::pIgnoreEntity = nil;
 			} else if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_MOLOTOV) {
@@ -229,18 +226,12 @@ CProjectileInfo::Update()
 						|| !CWorld::GetIsLineOfSightClear(gaProjectileInfo[i].m_vecPos, pos, true, true, true, true, false, false)
 						|| gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER && (CHeli::TestRocketCollision(&pos) || CPlane::TestRocketCollision(&pos))) {
 						RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
-#ifdef FIX_BUGS
-						ms_apProjectile[i] = nil;
-#endif
 					}
 				}
 				CWorld::pIgnoreEntity = nil;
 			}
 		} else {
 			RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
-#ifdef FIX_BUGS
-			ms_apProjectile[i] = nil;
-#endif
 		}
 
 		gaProjectileInfo[i].m_vecPos = ms_apProjectile[i]->GetPosition();
@@ -261,9 +252,6 @@ CProjectileInfo::IsProjectileInRange(float x1, float x2, float y1, float y2, flo
 						gaProjectileInfo[i].m_bInUse = false;
 						CWorld::Remove(ms_apProjectile[i]);
 						delete ms_apProjectile[i];
-#ifdef FIX_BUGS
-						ms_apProjectile[i] = nil;
-#endif
 					}
 				}
 			}
@@ -280,9 +268,6 @@ CProjectileInfo::RemoveAllProjectiles()
 			gaProjectileInfo[i].m_bInUse = false;
 			CWorld::Remove(ms_apProjectile[i]);
 			delete ms_apProjectile[i];
-#ifdef FIX_BUGS
-			ms_apProjectile[i] = nil;
-#endif
 		}
 	}
 }
