@@ -40,6 +40,7 @@
 #include "PointLights.h"
 #include "Pools.h"
 #include "Population.h"
+#include "PowerPoints.h"
 #include "ProjectileInfo.h"
 #include "Record.h"
 #include "Remote.h"
@@ -4684,7 +4685,41 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CGarages::BombsAreFree = (ScriptParams[0] != 0);
 		return 0;
-		//case COMMAND_SET_POWERPOINT:
+#ifdef GTA_PS2
+	case COMMAND_SET_POWERPOINT:
+	{
+		CollectParameters(&m_nIp, 7);
+		float f1 = *(float*)&ScriptParams[0];
+		float f2 = *(float*)&ScriptParams[1];
+		float f3 = *(float*)&ScriptParams[2];
+		float f4 = *(float*)&ScriptParams[3];
+		float f5 = *(float*)&ScriptParams[4];
+		float f6 = *(float*)&ScriptParams[5];
+		float temp;
+
+		if (f1 > f4) {
+			temp = f1;
+			f1 = f4;
+			f4 = temp;
+		}
+
+		if (f2 > f5) {
+			temp = f2;
+			f2 = f5;
+			f5 = temp;
+		}
+
+		if (f3 > f6) {
+			temp = f3;
+			f3 = f6;
+			f6 = temp;
+		}
+
+		CPowerPoints::GenerateNewOne(f1, f2, f3, f4, f5, f6, *(uint8*)&ScriptParams[6]);
+
+		return 0;
+	}
+#endif // GTA_PS2
 	case COMMAND_SET_ALL_TAXI_LIGHTS:
 		CollectParameters(&m_nIp, 1);
 		CAutomobile::SetAllTaxiLights(ScriptParams[0] != 0);
