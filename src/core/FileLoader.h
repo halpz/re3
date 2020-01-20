@@ -23,6 +23,8 @@ public:
 
 	static void LoadObjectTypes(const char *filename);
 	static void LoadObject(const char *line);
+	static int LoadMLO(const char *line);
+	static void LoadMLOInstance(int id, const char *line);
 	static void LoadTimeObject(const char *line);
 	static void LoadClumpObject(const char *line);
 	static void LoadVehicleObject(const char *line);

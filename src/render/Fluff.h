@@ -2,21 +2,36 @@
 #include "common.h"
 #include "Vector.h"
 
+class CMovingThing
+{
+public:
+	CMovingThing *m_pNext;
+	CMovingThing *m_pPrev;
+	int16 m_nType;
+	int16 field_A;
+	CVector m_vecPosn;
+	CEntity* m_pEntity;
+
+	void Update();
+	void AddToList(CMovingThing *pThing);
+	void RemoveFromList();
+	int16 SizeList();
+};
+
+#define NUMMOVINGTHINGS 128
+
 class CMovingThings
 {
 public:
+	static CMovingThing StartCloseList;
+	static CMovingThing EndCloseList;
+	static int16 Num;
+	static CMovingThing aMovingThings[NUMMOVINGTHINGS];
+
 	static void Init();
 	static void Shutdown();
 	static void Update();
 	static void Render();
-};
-
-class CMovingThing
-{
-public:
-	void Update();
-	void AddToList();
-	void RemoveFromList();
 };
 
 class CScrollBar
