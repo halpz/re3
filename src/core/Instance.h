@@ -4,8 +4,10 @@
 
 // unused
 
-class CInstance : CPlaceable
+class CInstance : public CPlaceable
 {
+public:
+	int m_modelIndex;
 public:
 	~CInstance() = default;
 };

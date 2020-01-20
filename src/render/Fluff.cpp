@@ -1,6 +1,7 @@
 #include "common.h"
 #include "main.h"
 #include "patcher.h"
+#include "Entity.h"
 #include "Fluff.h"
 #include "Camera.h"
 #include "Sprite.h"
@@ -90,12 +91,19 @@ enum eScrollBarTypes
 CScrollBar    aScrollBars[11];
 CTowerClock   aTowerClocks[2];
 CDigitalClock aDigitalClocks[3];
+
+CMovingThing CMovingThings::StartCloseList;
+CMovingThing CMovingThings::EndCloseList;
+int16 CMovingThings::Num;
+CMovingThing CMovingThings::aMovingThings[NUMMOVINGTHINGS];
  
 void CMovingThings::Init()
 {
-	/*
-	 * Some unused code about CMovingThing was here...
-	 */
+	StartCloseList.m_pNext = &CMovingThings::EndCloseList;
+	StartCloseList.m_pPrev = nil;
+	EndCloseList.m_pNext = nil;
+	EndCloseList.m_pPrev = &CMovingThings::StartCloseList;
+	Num = 0;
 	
 	// Initialize scroll bars
 	 aScrollBars[0].Init(CVector(  228.3f,    -669.0f,     39.0f  ), SCROLL_BUSINESS,       0.0,     0.5,     0.5,   255, 128, 0,   0.3);
@@ -144,11 +152,22 @@ void CMovingThings::Shutdown()
 
 void CMovingThings::Update()
 {
-	/*
-	 * Some unused code about CMovingThing was here...
-	 */
+	const int TIME_SPAN = 64; // frames to process all aMovingThings
 
-	int i;
+	int16 i;
+
+	int block = CTimer::GetFrameCounter() % TIME_SPAN;
+
+	for (i = (block * NUMMOVINGTHINGS) / TIME_SPAN; i < ((block + 1) * NUMMOVINGTHINGS) / TIME_SPAN; i++) {
+		if (aMovingThings[i].field_A == 1)
+			aMovingThings[i].Update();
+	}
+
+	for (i = 0; i < CMovingThings::Num; i++) {
+		if (aMovingThings[i].field_A == 0)
+			aMovingThings[i].Update();
+	}
+
 	for (i = 0; i < 11; ++i)
 	{
 		if (aScrollBars[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
@@ -187,9 +206,50 @@ void CMovingThings::Render()
 }
 
 // ---------- CMovingThing ----------
-WRAPPER void CMovingThing::Update()         { EAXJMP(0x4FF290); }
-WRAPPER void CMovingThing::AddToList()      { EAXJMP(0x4FF320); }
-WRAPPER void CMovingThing::RemoveFromList() { EAXJMP(0x4FF340); }
+void CMovingThing::Update()
+{
+	m_pEntity->GetMatrix().UpdateRW();
+	m_pEntity->UpdateRwFrame();
+	
+	if (SQR(m_pEntity->GetPosition().x - TheCamera.GetPosition().x) + SQR(m_pEntity->GetPosition().y - TheCamera.GetPosition().y) < 40000.0f) {
+		if (field_A == 1) {
+			AddToList(&CMovingThings::StartCloseList);
+			field_A = 0;
+		}
+	} else {
+		if (field_A == 0) {
+			RemoveFromList();
+			field_A = 1;
+		}
+	}
+}
+
+void CMovingThing::AddToList(CMovingThing *pThing)
+{
+	m_pNext = pThing->m_pNext;
+	m_pPrev = pThing;
+	pThing->m_pNext = this;
+	m_pNext->m_pPrev = this;
+}
+
+void CMovingThing::RemoveFromList()
+{
+	m_pNext->m_pPrev = m_pPrev;
+	m_pPrev->m_pNext = m_pNext;
+}
+
+int16 CMovingThing::SizeList()
+{
+	CMovingThing *next = m_pNext;
+	int16 count = 0;
+
+	while (next != nil) {
+		next = next->m_pNext;
+		count++;
+	}
+
+	return count;
+}
 
 // ---------- Find message functions ----------
 const char* FindTunnelMessage()
@@ -806,6 +866,10 @@ void CDigitalClock::Render()
 }
 
 STARTPATCHES
+InjectHook(0x4FF290, &CMovingThing::Update, PATCH_JUMP);
+InjectHook(0x4FF320, &CMovingThing::AddToList, PATCH_JUMP);
+InjectHook(0x4FF340, &CMovingThing::RemoveFromList, PATCH_JUMP);
+
 InjectHook(0x4FE7C0, &CMovingThings::Init,     PATCH_JUMP);
 InjectHook(0x4FF020, &CMovingThings::Shutdown, PATCH_JUMP);
 InjectHook(0x4FF0D0, &CMovingThings::Update,   PATCH_JUMP);

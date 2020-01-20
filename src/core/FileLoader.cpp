@@ -511,11 +511,11 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	int pathIndex;
 	char pathTypeStr[20];
 	int id, pathType;
-//	int mlo;
+	int mlo;
 
 	section = NONE;
 	pathIndex = -1;
-//	mlo = 0;
+	mlo = 0;
 	debug("Loading object types from %s...\n", filename);
 
 	fd = CFileMgr::OpenFile(filename, "rb");
@@ -536,12 +536,12 @@ CFileLoader::LoadObjectTypes(const char *filename)
 		}else switch(section){
 		case OBJS:
 			if(strncmp(line, "sta", 3) == 0)
-				assert(0);	// LoadMLO
+				mlo = LoadMLO(line);
 			else
 				LoadObject(line);
 			break;
 		case MLO:
-			assert(0);	// LoadMLOInstance
+			LoadMLOInstance(mlo, line);
 			break;
 		case TOBJ:
 			LoadTimeObject(line);
@@ -642,6 +642,57 @@ CFileLoader::LoadObject(const char *line)
 	mi->m_firstDamaged = damaged;
 	mi->SetTexDictionary(txd);
 	MatchModelString(model, id);
+}
+
+int
+CFileLoader::LoadMLO(const char *line)
+{
+	char smth[8];
+	char name[24];
+	int modelIndex;
+	float someFloat;
+
+	sscanf(line, "%s %s %d %f", smth, name, &modelIndex, &someFloat);
+	CMloModelInfo *minfo = CModelInfo::AddMloModel(modelIndex);
+	minfo->SetName(name);
+	minfo->field_34 = someFloat;
+	int instId = CModelInfo::GetMloInstanceStore()->allocPtr;
+	minfo->firstInstance = instId;
+	minfo->lastInstance = instId;
+	minfo->SetTexDictionary("generic");
+	return modelIndex;
+}
+
+void
+CFileLoader::LoadMLOInstance(int id, const char *line)
+{
+	char name[24];
+	RwV3d pos, scale, rot;
+	float angle;
+	int modelIndex;
+
+	CMloModelInfo *minfo = (CMloModelInfo*)CModelInfo::GetModelInfo(id);
+	sscanf(line, "%d %s %f %f %f %f %f %f %f %f %f %f",
+		&modelIndex,
+		name,
+		&pos.x, &pos.y, &pos.z,
+		&scale.x, &scale.y, &scale.z,
+		&rot.x, &rot.y, &rot.z,
+		&angle);
+	float rad = 2.0f * (PI / 2.0f - atan2(angle, sqrt(1.0f - SQR(angle))));
+	CInstance *inst = CModelInfo::GetMloInstanceStore()->alloc();
+	minfo->lastInstance++;
+
+	RwMatrix *matrix = RwMatrixCreate();
+	RwMatrixScale(matrix, &scale, rwCOMBINEREPLACE);
+	RwMatrixRotate(matrix, &rot, -RADTODEG(rad), rwCOMBINEPOSTCONCAT);
+	RwMatrixTranslate(matrix, &pos, rwCOMBINEPOSTCONCAT);
+
+	inst->GetMatrix() = CMatrix(matrix);
+	inst->GetMatrix().UpdateRW();
+
+	inst->m_modelIndex = modelIndex;
+	RwMatrixDestroy(matrix);
 }
 
 void
