@@ -507,27 +507,14 @@ float
 CCullZone::CalcDistToCullZoneSquared(float x, float y)
 {
 	float rx, ry;
-	float temp;
 
-	temp = minx;
-	if (temp <= x) {
-		temp = maxx;
-		if (x <= temp)
-			rx = 0.0f;
-		else
-			rx = sq(x - temp);
-	} else
-		rx = sq(x - temp);
+	if (x < minx) rx = sq(x - minx);
+	else if (x > maxx) rx = sq(x - maxx);
+	else rx = 0.0f;
 
-	temp = miny;
-	if (temp <= y) {
-		temp = maxy;
-		if (y <= temp)
-			ry = 0.0f;
-		else
-			ry = sq(y - temp);
-	} else
-		ry = sq(y - temp);
+	if (y < miny) ry = sq(y - miny);
+	else if (y > maxy) ry = sq(y - maxy);
+	else ry = 0.0f;
 
 	return rx + ry;
 }
