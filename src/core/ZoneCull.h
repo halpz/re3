@@ -11,7 +11,6 @@ public:
 	float minz;
 	float maxz;
 
-	// TODO: figure these out:
 	int32 m_indexStart;
 	int16 m_groupIndexCount[3];
 	int16 m_numBuildings;

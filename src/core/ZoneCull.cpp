@@ -89,6 +89,7 @@ CCullZones::ResolveVisibilities(void)
 		CFileMgr::Read(fd, (char*)aPointersToBigBuildingsForTreadables, sizeof(aPointersToBigBuildingsForTreadables));
 		CFileMgr::CloseFile(fd);
 	}else{
+#if 0
 		// TODO: implement code from mobile to generate data here
 		EntityIndicesUsed = 0;
 		BuildListForBigBuildings();
@@ -113,6 +114,7 @@ CCullZones::ResolveVisibilities(void)
 			CFileMgr::Write(fd, (char*)&aPointersToBigBuildingsForTreadables, sizeof(aPointersToBigBuildingsForTreadables));
 			CFileMgr::CloseFile(fd);
 		}
+#endif
 	}
 }
 
