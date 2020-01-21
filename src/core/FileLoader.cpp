@@ -96,7 +96,7 @@ CFileLoader::LoadLevel(const char *filename)
 			LoadObjectTypes(line + 4);
 		}else if(strncmp(line, "IPL", 3) == 0){
 			if(!objectsLoaded){
-				// CModelInfo::ConstructMloClumps();
+				CModelInfo::ConstructMloClumps();
 				CObjectData::Initialise("DATA\\OBJECT.DAT");
 				objectsLoaded = true;
 			}

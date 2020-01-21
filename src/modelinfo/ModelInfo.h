@@ -46,4 +46,5 @@ public:
 	static bool IsBikeModel(int32 id);
 	static void RemoveColModelsFromOtherLevels(eLevelName level);
 	static CStore<CInstance, MLOINSTANCESIZE>* CModelInfo::GetMloInstanceStore();
+	static void ConstructMloClumps();
 };

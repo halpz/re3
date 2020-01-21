@@ -121,7 +121,7 @@ CModelInfo::AddMloModel(int id)
 	CMloModelInfo *modelinfo;
 	modelinfo = CModelInfo::ms_mloModelStore.alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
-	modelinfo->m_clump = 0;
+	modelinfo->m_clump = nil;
 	modelinfo->firstInstance = 0;
 	modelinfo->lastInstance = 0;
 	return modelinfo;
@@ -218,11 +218,17 @@ CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
 	}
 }
 
-
 CStore<CInstance, MLOINSTANCESIZE>*
 CModelInfo::GetMloInstanceStore()
 {
 	return &CModelInfo::ms_mloInstanceStore;
+}
+
+void
+CModelInfo::ConstructMloClumps()
+{
+	for (int i = 0; i < ms_mloModelStore.allocPtr; i++)
+		ms_mloModelStore.store[i].ConstructClump();
 }
 
 STARTPATCHES

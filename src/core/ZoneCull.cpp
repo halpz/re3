@@ -473,8 +473,8 @@ CCullZone::DoStuffEnteringZone_OneTreadablePlus10m(uint16 i)
 	int j;
 
 	if(i < 6000){
-		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled = true;;
-		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled2 = true;;
+		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled = true;
+		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled2 = true;
 		bb = CCullZones::aPointersToBigBuildingsForTreadables[i];
 		if(bb != -1)
 			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = true;
@@ -492,7 +492,7 @@ CCullZone::DoStuffEnteringZone_OneTreadable(uint16 i)
 	int j;
 
 	if(i < 6000){
-		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled = true;;
+		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled = true;
 		bb = CCullZones::aPointersToBigBuildingsForTreadables[i];
 		if(bb != -1)
 			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = true;
