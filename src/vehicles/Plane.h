@@ -59,8 +59,8 @@ public:
 	static bool TestRocketCollision(CVector *rocketPos);
 	static void CreateIncomingCesna(void);
 	static void CreateDropOffCesna(void);
-	static CVector FindDrugPlaneCoordinates(void);
-	static CVector FindDropOffCesnaCoordinates(void);
+	static const CVector FindDrugPlaneCoordinates(void);
+	static const CVector FindDropOffCesnaCoordinates(void);
 	static bool HasCesnaLanded(void);
 	static bool HasCesnaBeenDestroyed(void);
 	static bool HasDropOffCesnaBeenShotDown(void);
