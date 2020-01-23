@@ -93,16 +93,32 @@ CModelInfo::ShutDown(void)
 	int i;
 	for(i = 0; i < ms_simpleModelStore.allocPtr; i++)
 		ms_simpleModelStore.store[i].Shutdown();
+	for(i = 0; i < ms_mloInstanceStore.allocPtr; i++)
+		ms_mloInstanceStore.store[i].Shutdown();
 	for(i = 0; i < ms_timeModelStore.allocPtr; i++)
 		ms_timeModelStore.store[i].Shutdown();
 	for(i = 0; i < ms_clumpModelStore.allocPtr; i++)
 		ms_clumpModelStore.store[i].Shutdown();
-	for(i = 0; i < ms_pedModelStore.allocPtr; i++)
-		ms_pedModelStore.store[i].Shutdown();
 	for(i = 0; i < ms_vehicleModelStore.allocPtr; i++)
 		ms_vehicleModelStore.store[i].Shutdown();
+	for(i = 0; i < ms_pedModelStore.allocPtr; i++)
+		ms_pedModelStore.store[i].Shutdown();
+	for(i = 0; i < ms_xtraCompsModelStore.allocPtr; i++)
+		ms_xtraCompsModelStore.store[i].Shutdown();
+	for(i = 0; i < ms_mloInstanceStore.allocPtr; i++)
+		ms_mloInstanceStore.store[i].Shutdown();
 	for(i = 0; i < ms_2dEffectStore.allocPtr; i++)
 		ms_2dEffectStore.store[i].Shutdown();
+
+	ms_2dEffectStore.clear();
+	ms_simpleModelStore.clear();
+	ms_mloInstanceStore.clear();
+	ms_mloModelStore.clear();
+	ms_xtraCompsModelStore.clear();
+	ms_timeModelStore.clear();
+	ms_pedModelStore.clear();
+	ms_clumpModelStore.clear();
+	ms_vehicleModelStore.clear();
 }
 
 CSimpleModelInfo*

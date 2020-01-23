@@ -10,4 +10,5 @@ public:
 	int m_modelIndex;
 public:
 	~CInstance() = default;
+	void Shutdown();
 };
