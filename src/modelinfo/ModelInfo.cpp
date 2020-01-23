@@ -218,10 +218,10 @@ CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
 	}
 }
 
-CStore<CInstance, MLOINSTANCESIZE>*
+CStore<CInstance, MLOINSTANCESIZE>&
 CModelInfo::GetMloInstanceStore()
 {
-	return &CModelInfo::ms_mloInstanceStore;
+	return CModelInfo::ms_mloInstanceStore;
 }
 
 void

@@ -959,7 +959,7 @@ CPlane::CreateDropOffCesna(void)
 }
 
 CVector CPlane::FindDrugPlaneCoordinates(void) { return pDrugRunCesna->GetPosition(); }
-CVector CPlane::FindDropOffCesnaCoordinates(void) { return pDrugRunCesna->GetPosition(); }
+CVector CPlane::FindDropOffCesnaCoordinates(void) { return pDropOffCesna->GetPosition(); }
 bool CPlane::HasCesnaLanded(void) { return CesnaMissionStatus == CESNA_STATUS_LANDED; }
 bool CPlane::HasCesnaBeenDestroyed(void) { return CesnaMissionStatus == CESNA_STATUS_DESTROYED; }
 bool CPlane::HasDropOffCesnaBeenShotDown(void) { return DropOffCesnaMissionStatus == CESNA_STATUS_DESTROYED; }

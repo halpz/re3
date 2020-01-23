@@ -6,9 +6,7 @@ class CSolid : public CEntity
 {
 public:
 	CSolid(void) {
-		bRemoveFromWorld = true;
-		bHasHitWall = false;
-		bImBeingRendered = false;
-		m_flagE2 = true;
+		m_type = ENTITY_TYPE_BUILDING;
+		bUsesCollision = true;
 	}
 };

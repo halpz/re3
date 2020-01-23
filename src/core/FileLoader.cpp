@@ -656,7 +656,7 @@ CFileLoader::LoadMLO(const char *line)
 	CMloModelInfo *minfo = CModelInfo::AddMloModel(modelIndex);
 	minfo->SetName(name);
 	minfo->field_34 = someFloat;
-	int instId = CModelInfo::GetMloInstanceStore()->allocPtr;
+	int instId = CModelInfo::GetMloInstanceStore().allocPtr;
 	minfo->firstInstance = instId;
 	minfo->lastInstance = instId;
 	minfo->SetTexDictionary("generic");
@@ -680,7 +680,7 @@ CFileLoader::LoadMLOInstance(int id, const char *line)
 		&rot.x, &rot.y, &rot.z,
 		&angle);
 	float rad = 2.0f * (PI / 2.0f - Atan2(angle, Sqrt(1.0f - SQR(angle))));
-	CInstance *inst = CModelInfo::GetMloInstanceStore()->alloc();
+	CInstance *inst = CModelInfo::GetMloInstanceStore().alloc();
 	minfo->lastInstance++;
 
 	RwMatrix *matrix = RwMatrixCreate();
