@@ -2,6 +2,8 @@
 
 #include "DMAudio.h"
 #include "common.h"
+#include "AudioCollision.h"
+#include "PoliceRadio.h"
 
 enum eScriptSounds : int16
 {
@@ -182,25 +184,6 @@ public:
 
 static_assert(sizeof(tSound) == 92, "tSound: error");
 
-enum eAudioType : int32
-{
-	AUDIOTYPE_PHYSICAL = 0,
-	AUDIOTYPE_EXPLOSION = 1,
-	AUDIOTYPE_FIRE = 2,
-	AUDIOTYPE_WEATHER = 3,
-	AUDIOTYPE_CRANE = 4,
-	AUDIOTYPE_SCRIPTOBJECT = 5,
-	AUDIOTYPE_BRIDGE = 6,
-	AUDIOTYPE_COLLISION = 7,
-	AUDIOTYPE_FRONTEND = 8,
-	AUDIOTYPE_PROJECTILE = 9,
-	AUDIOTYPE_GARAGE = 10,
-	AUDIOTYPE_FIREHYDRANT = 11,
-	AUDIOTYPE_WATERCANNON = 12,
-	AUDIOTYPE_POLICERADIO = 13,
-	TOTAL_AUDIO_TYPES = 14,
-};
-
 class CPhysical;
 class CAutomobile;
 
@@ -256,42 +239,6 @@ static_assert(sizeof(cPedComments) == 1164, "cPedComments: error");
 
 class CEntity;
 
-class cAudioCollision
-{
-public:
-	CEntity *m_pEntity1;
-	CEntity *m_pEntity2;
-	uint8 m_bSurface1;
-	uint8 m_bSurface2;
-	uint8 field_10;
-	uint8 field_11;
-	float m_fIntensity1;
-	float m_fIntensity2;
-	CVector m_vecPosition;
-	float m_fDistance;
-	int32 m_nBaseVolume;
-
-	// no methods
-};
-
-static_assert(sizeof(cAudioCollision) == 40, "cAudioCollision: error");
-
-class cAudioCollisionManager
-{
-public:
-	cAudioCollision m_asCollisions1[10];
-	cAudioCollision m_asCollisions2[10];
-	uint8 m_bIndicesTable[10];
-	uint8 m_bCollisionsInQueue;
-	uint8 gap_811;
-	cAudioCollision m_sQueue;
-
-	// reversed all methods
-	void AddCollisionToRequestedQueue(); /// ok
-};
-
-static_assert(sizeof(cAudioCollisionManager) == 852, "cAudioCollisionManager: error");
-
 class cMissionAudio
 {
 public:
@@ -320,24 +267,6 @@ class CPed;
 class cPedParams;
 class cTransmission;
 
-class cAudioScriptObject
-{
-public:
-	int16 AudioId;
-	char _pad0[2];
-	CVector Posn;
-	int32 AudioEntity;
-
-	void Reset(); /// ok
-
-	static void *operator new(size_t);
-	static void *operator new(size_t, int);
-	static void operator delete(void *, size_t);
-	static void operator delete(void *, int);
-};
-
-static_assert(sizeof(cAudioScriptObject) == 20, "cAudioScriptObject: error");
-
 enum {
 	/*
 	REFLECTION_YMAX = 0, top
@@ -354,23 +283,6 @@ enum {
 	REFLECTION_UP,
 	MAX_REFLECTIONS,
 };
-
-enum AudioEntityHandle {
-	AEHANDLE_NONE = -5,
-	AEHANDLE_ERROR_NOAUDIOSYS = -4,
-	AEHANDLE_ERROR_NOFREESLOT = -3,
-	AEHANDLE_ERROR_NOENTITY = -2,
-	AEHANDLE_ERROR_BADAUDIOTYPE = -1,
-};
-
-struct cAMCrime {
-	int32 type;
-	CVector position;
-	uint16 timer;
-	uint16 gap;
-};
-
-static_assert(sizeof(cAMCrime) == 20, "cAMCrime: error ");
 
 class cAudioManager
 {
@@ -407,12 +319,7 @@ public:
 	int32 m_nFireAudioEntity;
 	int32 m_nWaterCannonEntity;
 	int32 m_nPoliceChannelEntity;
-	int32 crimesSamples[60];
-	uint8 policeChannelTimer;
-	uint8 policeChannelTimerSeconds;
-	uint8 policeChannelCounterSeconds;
-	uint8 gap30;
-	cAMCrime crimes[10];
+	cPoliceRadioQueue m_sPoliceRadioQueue;
 	int32 m_nFrontEndEntity;
 	int32 m_nCollisionEntity;
 	cAudioCollisionManager m_sCollisionManager;
@@ -546,7 +453,7 @@ public:
 	float GetDistanceSquared(CVector *v) const;                        /// ok
 	int32 GetJumboTaxiFreq() const;                                    /// ok
 	bool GetMissionAudioLoadingStatus() const;                         /// ok
-	char GetMissionScriptPoliceAudioPlayingStatus() const;             /// ok
+	int8 GetMissionScriptPoliceAudioPlayingStatus() const;             /// ok
 	uint8 GetNum3DProvidersAvailable() const;
 	int32 GetPedCommentSfx(CPed *ped, int32 sound);
 	void GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample, uint32 maxOffset) const;
@@ -658,7 +565,7 @@ public:
 	void ResetTimers(uint32 time);                                /// ok
 
 	void Service();                                    /// ok
-	void ServiceCollisions();                          // todo
+	void ServiceCollisions();                          /// ok
 	void ServicePoliceRadio();                         /// ok
 	void ServicePoliceRadioChannel(int32 wantedLevel); /// ok
 	void ServiceSoundEffects();                        /// ok
@@ -696,8 +603,13 @@ public:
 
 	// only used in pc
 	void AdjustSamplesVolume(); /// ok
-	int32 ComputeEmittingVolume(uint8 emittingVolume, float intensity,
+	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity,
 	                            float dist); /// ok
+public:
+	static const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+	static const int policeChannel = channels + 1;
+	static const int allChannels = channels + 2;
+	static const int maxVolume = 127;
 };
 
 static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");

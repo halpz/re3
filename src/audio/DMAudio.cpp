@@ -3,6 +3,7 @@
 #include "DMAudio.h"
 #include "MusicManager.h"
 #include "AudioManager.h"
+#include "AudioScriptObject.h"
 #include "sampman.h"
 
 cDMAudio &DMAudio = *(cDMAudio*)0x95CDBE;

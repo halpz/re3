@@ -128,4 +128,21 @@ enum
 	_SCRSOUND_BULLET_SHELL_HIT_GROUND_2  = 123,
 };
 
+class cAudioScriptObject
+{
+public:
+	int16 AudioId;
+	CVector Posn;
+	int32 AudioEntity;
+
+	void Reset(); /// ok
+
+	static void* operator new(size_t);
+	static void* operator new(size_t, int);
+	static void operator delete(void*, size_t);
+	static void operator delete(void*, int);
+};
+
+static_assert(sizeof(cAudioScriptObject) == 20, "cAudioScriptObject: error");
+
 extern void PlayOneShotScriptObject(uint8 id, CVector const &pos);
