@@ -8,7 +8,7 @@
 #include "PlayerPed.h"
 #include "Automobile.h"
 #include "DummyPed.h"
-#include "AudioManager.h"
+#include "AudioScriptObject.h"
 
 typedef CPool<CPtrNode> CCPtrNodePool;
 typedef CPool<CEntryInfoNode> CEntryInfoNodePool;
@@ -18,7 +18,7 @@ typedef CPool<CBuilding> CBuildingPool;
 typedef CPool<CTreadable> CTreadablePool;
 typedef CPool<CObject, CCutsceneHead> CObjectPool;
 typedef CPool<CDummy, CDummyPed> CDummyPool;
-typedef CPool<cAudioScriptObject, cAudioScriptObject> CAudioScriptObjectPool;
+typedef CPool<cAudioScriptObject> CAudioScriptObjectPool;
 
 class CPools
 {
