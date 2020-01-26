@@ -38,7 +38,7 @@ to reverse at the time, calling the original functions is acceptable.
 
 ### Unreversed / incomplete classes (at least the ones we know)
 ```
-CAudioManager, cDMAudio, cSampleManager and all audio - being worked on
+cAudioManager - being worked on
 CBoat
 CBrightLights
 CBulletInfo
@@ -46,6 +46,7 @@ CBulletTraces
 CCam
 CCamera
 CCopPed
+CCoronas
 CCrane
 CCranes
 CCullZone
@@ -60,20 +61,32 @@ CGarages
 CGlass
 CMenuManager
 CMotionBlurStreaks
+CObject
 CPacManPickups
 CPedIK
 CPedPath
 CPlayerPed
+CPopulation
+CRadar
+CRecordDataForChase
+CRemote
+CReplay
 CRoadBlocks
-CRunningScript - being worked on
+CRubbish
+CSceneEdit
+CRunningScript, CTheScripts - being worked on
+CSkidmarks
 CShotInfo
-CStats
 CSpecialFX
+CStats
 CTrafficLights
+CWanted
 CWaterCannon
 CWaterCannons
 CWeapon
 CWeaponEffects
+CWeather
+CWorld
 ```
 
 ### Coding style
