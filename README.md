@@ -46,7 +46,6 @@ CBulletTraces
 CCam
 CCamera
 CCopPed
-CCoronas
 CCrane
 CCranes
 CCullZone
