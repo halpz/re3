@@ -753,7 +753,7 @@ void CMenuManager::Draw()
 				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(TheCamera.m_bHeadBob ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_INVVERT:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(MousePointerStateHelper.bInvertVertically ? "FEM_ON" : "FEM_OFF");
+				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(MousePointerStateHelper.bInvertVertically ? "FEM_OFF" : "FEM_ON");
 				break;
 			case MENUACTION_SCREENRES: {
 				RwChar* res = _psGetVideoModeList()[m_nDisplayVideoMode];
