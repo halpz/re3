@@ -2,23 +2,6 @@
 
 #include "PCSave.h"
 
-class CDate
-{
-public:
-	int m_nSecond;
-	int m_nMinute;
-	int m_nHour;
-	int m_nDay;
-	int m_nMonth;
-	int m_nYear;
-	
-	CDate();
-	bool operator>(const CDate &right);
-	bool operator<(const CDate &right);
-	bool operator==(const CDate &right);
-	void PopulateDateFields(int8 &second, int8 &minute, int8 &hour, int8 &day, int8 &month, int16 year);
-};
-
 #define SLOT_COUNT (8)
 
 bool GenericSave(int file);
@@ -38,7 +21,7 @@ bool CheckDataNotCorrupt(int32 slot, char *name);
 bool RestoreForStartLoad();
 int align4bytes(int32 size);
 
-extern CDate& CompileDateAndTime;
+extern class CDate& CompileDateAndTime;
 
 extern char (&DefaultPCSaveFileName)[260];
 extern char (&ValidSaveName)[260];
