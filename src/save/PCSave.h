@@ -33,6 +33,6 @@ public:
 	void PopulateSlotInfo();
 	bool DeleteSlot(int32 slot);
 	bool SaveSlot(int32 slot);
-	bool PcClassSaveRoutine(int32 a2, uint8 *a3, uint32 a4);
+	bool PcClassSaveRoutine(int32 a2, uint8 *data, uint32 size);
 	static void SetSaveDirectory(const char *path);
 };

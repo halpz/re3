@@ -48,22 +48,22 @@ C_PcSave::SaveSlot(int32 slot)
 }
 
 bool
-C_PcSave::PcClassSaveRoutine(int32 file, uint8 *a3, uint32 a4)
+C_PcSave::PcClassSaveRoutine(int32 file, uint8 *data, uint32 size)
 {
-	CFileMgr::Write(file, (const char*)&a4, 4);
+	CFileMgr::Write(file, (const char*)&size, 4);
 	if (CFileMgr::GetErrorReadWrite(file)) {
 		nErrorCode = SAVESTATUS_ERR_SAVE_WRITE;
 		strncpy(SaveFileNameJustSaved, ValidSaveName, 259);
 		return false;
 	}
 
-	CFileMgr::Write(file, (const char*)a3, align4bytes(a4));
-	CheckSum += ((uint8*)&a4)[0];
-	CheckSum += ((uint8*)&a4)[1];
-	CheckSum += ((uint8*)&a4)[2];
-	CheckSum += ((uint8*)&a4)[3];
-	for (int i = 0; i < align4bytes(a4); i++) {
-		CheckSum += *a3++;
+	CFileMgr::Write(file, (const char*)data, align4bytes(size));
+	CheckSum += ((uint8*)&size)[0];
+	CheckSum += ((uint8*)&size)[1];
+	CheckSum += ((uint8*)&size)[2];
+	CheckSum += ((uint8*)&size)[3];
+	for (int i = 0; i < align4bytes(size); i++) {
+		CheckSum += *data++;
 	}
 	if (CFileMgr::GetErrorReadWrite(file)) {
 		nErrorCode = SAVESTATUS_ERR_SAVE_WRITE;
@@ -84,14 +84,14 @@ C_PcSave::PopulateSlotInfo()
 	}
 	for (int i = 0; i < SLOT_COUNT; i++) {
 		char savename[52];
-		char v13[68];
+		int8 data[68];
 		sprintf(savename, "%s%i%s", DefaultPCSaveFileName, i + 1, ".b");
 		int file = CFileMgr::OpenFile(savename, "rb");
 		if (file != 0) {
-			CFileMgr::Read(file, v13, 68);
-			if (strncmp(v13, TopLineEmptyFile, sizeof(TopLineEmptyFile)-1)) {
+			CFileMgr::Read(file, (char*)data, 68);
+			if (strncmp((char*)data, TopLineEmptyFile, sizeof(TopLineEmptyFile)-1)) {
 				Slots[i + 1] = SLOT_OK;
-				memcpy(SlotFileName[i], &v13[4], 24 * sizeof(wchar));
+				memcpy(SlotFileName[i], &data[4], 24 * sizeof(wchar));
 				
 				SlotFileName[i][24] = '\0';
 			}
@@ -99,9 +99,9 @@ C_PcSave::PopulateSlotInfo()
 		}
 		if (Slots[i + 1] == SLOT_OK) {
 			if (CheckDataNotCorrupt(i, savename)) {
-				_SYSTEMTIME st = *(_SYSTEMTIME*)&v13[52];
+				_SYSTEMTIME st = *(_SYSTEMTIME*)&data[52];
 				const char *month;
-				switch (*(uint16*)&v13[54])
+				switch (*(uint16*)&data[54])
 				{
 				case 1: month = "JAN"; break;
 				case 2: month = "FEB"; break;
