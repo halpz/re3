@@ -1037,7 +1037,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 					FindNextWeaponLockOnTarget(m_pPointGunAt, false);
 			}
 			TheCamera.SetNewPlayerWeaponMode(CCam::MODE_SYPHON, 0, 0);
-			TheCamera.UpdateAimingCoors(GetPosition());
+			TheCamera.UpdateAimingCoors(m_pPointGunAt->GetPosition());
 		} else if (weaponInfo->m_bCanAim && !CCamera::m_bUseMouse3rdPerson) {
 			if (padUsed->TargetJustDown())
 				FindWeaponLockOnTarget();
