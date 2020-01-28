@@ -791,7 +791,7 @@ CPed::AimGun(void)
 		}
 		Say(SOUND_PED_ATTACK);
 
-		bCanPointGunAtTarget = m_pedIK.PointGunAtPosition(&vector);
+		bCanPointGunAtTarget = m_pedIK.PointGunAtPosition(vector);
 		if (m_pLookTarget != m_pSeekTarget) {
 			SetLookFlag(m_pSeekTarget, true);
 		}
