@@ -497,6 +497,8 @@ int     m_iModeObbeCamIsInForCar;
 	void SetNewPlayerWeaponMode(int16, int16, int16);
 	void UpdateAimingCoors(CVector const &);
 
+	void SetPercentAlongCutScene(float);
+
 	void dtor(void) { this->CCamera::~CCamera(); }
 };
 static_assert(offsetof(CCamera, m_WideScreenOn) == 0x70, "CCamera: error");
