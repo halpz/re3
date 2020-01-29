@@ -344,11 +344,11 @@ void
 CPedIK::ExtractYawAndPitchWorld(RwMatrixTag *mat, float *yaw, float *pitch)
 {
 	float f = clamp(DotProduct(mat->up, CVector(0.0f, 1.0f, 0.0f)), -1.0f, 1.0f);
-	*yaw = HALFPI - Atan2(f, Sqrt(1.0f - f * f));
+	*yaw = Acos(f);
 	if (mat->up.x > 0.0f) *yaw = -*yaw;
 
 	f = clamp(DotProduct(mat->right, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
-	*pitch = HALFPI - Atan2(f, Sqrt(1.0f - f * f));
+	*pitch = Acos(f);
 	if (mat->up.z > 0.0f) *pitch = -*pitch;
 }
 
@@ -356,11 +356,11 @@ void
 CPedIK::ExtractYawAndPitchLocal(RwMatrixTag *mat, float *yaw, float *pitch)
 {
 	float f = clamp(DotProduct(mat->at, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
-	*yaw = HALFPI - Atan2(f, Sqrt(1.0f - f * f));
+	*yaw = Acos(f);
 	if (mat->at.y > 0.0f) *yaw = -*yaw;
 
 	f = clamp(DotProduct(mat->right, CVector(1.0f, 0.0f, 0.0f)), -1.0f, 1.0f);
-	*pitch = HALFPI - Atan2(f, Sqrt(1.0f - f * f));
+	*pitch = Acos(f);
 	if (mat->up.x > 0.0f) *pitch = -*pitch;
 }
 
