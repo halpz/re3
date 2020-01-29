@@ -62,7 +62,6 @@ CMenuManager
 CMotionBlurStreaks
 CObject
 CPacManPickups
-CPedIK
 CPedPath
 CPlayerPed
 CPopulation
