@@ -161,12 +161,11 @@ bool
 CPedIK::LookInDirection(float phi, float theta)
 {
 	bool success = true;
-	AnimBlendFrameData *frameData = m_ped->m_pFrames[PED_HEAD];
-	RwFrame *frame = frameData->frame;
+	RwFrame *frame = m_ped->GetNodeFrame(PED_HEAD);
 	RwMatrix *frameMat = RwFrameGetMatrix(frame);
 
-	if (!(frameData->flag & AnimBlendFrameData::IGNORE_ROTATION)) {
-		frameData->flag |= AnimBlendFrameData::IGNORE_ROTATION;
+	if (!(m_ped->m_pFrames[PED_HEAD]->flag & AnimBlendFrameData::IGNORE_ROTATION)) {
+		m_ped->m_pFrames[PED_HEAD]->flag |= AnimBlendFrameData::IGNORE_ROTATION;
 		CPedIK::ExtractYawAndPitchLocal(frameMat, &m_headOrient.phi, &m_headOrient.theta);
 	}
 
@@ -223,19 +222,19 @@ bool
 CPedIK::PointGunInDirection(float phi, float theta)
 {
 	bool result = true;
-	bool b1 = false;
+	bool armPointedToGun = false;
 	float angle = CGeneral::LimitRadianAngle(phi - m_ped->m_fRotationCur);
 	m_flags &= (~FLAG_1);
 	m_flags |= LOOKING;
 	if (m_flags & AIMS_WITH_ARM) {
-		b1 = PointGunInDirectionUsingArm(angle, theta);
+		armPointedToGun = PointGunInDirectionUsingArm(angle, theta);
 		angle = CGeneral::LimitRadianAngle(angle - m_upperArmOrient.phi);
 	}
-	if (b1) {
+	if (armPointedToGun) {
 		if (m_flags & AIMS_WITH_ARM && m_torsoOrient.phi * m_upperArmOrient.phi < 0.0f)
 			MoveLimb(m_torsoOrient, 0.0f, m_torsoOrient.theta, ms_torsoInfo);
 	} else {
-		RwMatrix *matrix = GetWorldMatrix(RwFrameGetParent(m_ped->m_pFrames[PED_UPPERARMR]->frame), RwMatrixCreate());
+		RwMatrix *matrix = GetWorldMatrix(RwFrameGetParent(m_ped->GetNodeFrame(PED_UPPERARMR)), RwMatrixCreate());
 		float yaw, pitch;
 		ExtractYawAndPitchWorld(matrix, &yaw, &pitch);
 		RwMatrixDestroy(matrix);
@@ -256,7 +255,7 @@ bool
 CPedIK::PointGunInDirectionUsingArm(float phi, float theta)
 {
 	bool result = false;
-	RwFrame *frame = m_ped->m_pFrames[PED_UPPERARMR]->frame;
+	RwFrame *frame = m_ped->GetNodeFrame(PED_UPPERARMR);
 	RwMatrix *matrix = GetWorldMatrix(RwFrameGetParent(frame), RwMatrixCreate());
 
 	RwV3d upVector = { matrix->right.z, matrix->up.z, matrix->at.z };
@@ -315,7 +314,7 @@ bool
 CPedIK::RestoreLookAt(void)
 {
 	bool result = false;
-	RwMatrix *mat = RwFrameGetMatrix(m_ped->m_pFrames[PED_HEAD]->frame);
+	RwMatrix *mat = RwFrameGetMatrix(m_ped->GetNodeFrame(PED_HEAD));
 	if (m_ped->m_pFrames[PED_HEAD]->flag & AnimBlendFrameData::IGNORE_ROTATION) {
 		m_ped->m_pFrames[PED_HEAD]->flag &= (~AnimBlendFrameData::IGNORE_ROTATION);
 	} else {

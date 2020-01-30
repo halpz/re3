@@ -1404,7 +1404,8 @@ CCamera::SetRwCamera(RwCamera *cam)
 	CMBlur::MotionBlurOpen(m_pRwCamera);
 }
 
-uint32 CCamera::GetCutSceneFinishTime(void)
+uint32
+CCamera::GetCutSceneFinishTime(void)
 {
 	int cam = ActiveCam;
 	if (Cams[cam].Mode == CCam::MODE_FLYBY)
