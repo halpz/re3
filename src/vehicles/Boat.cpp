@@ -106,7 +106,7 @@ CBoat::Render()
 		matrix.Attach(&m_aBoatNodes[1]->modelling);
 
 		CVector pos = matrix.GetPosition();
-		matrix.SetRotateZOnly(m_fMovingHiRotation);
+		matrix.SetRotateZ(m_fMovingHiRotation);
 		matrix.Translate(pos);
 
 		matrix.UpdateRW();
