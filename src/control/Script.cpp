@@ -701,33 +701,33 @@ int8 CRunningScript::ProcessOneCommand()
 	m_bNotFlag = (command & 0x8000);
 	command &= 0x7FFF;
 	if (command < 100)
-		return ProcessCommandsFrom0To99(command);
+		return ProcessCommands0To99(command);
 	if (command < 200)
-		return ProcessCommandsFrom100To199(command);
+		return ProcessCommands100To199(command);
 	if (command < 300)
-		return ProcessCommandsFrom200To299(command);
+		return ProcessCommands200To299(command);
 	if (command < 400)
-		return ProcessCommandsFrom300To399(command);
+		return ProcessCommands300To399(command);
 	if (command < 500)
-		return ProcessCommandsFrom400To499(command);
+		return ProcessCommands400To499(command);
 	if (command < 600)
-		return ProcessCommandsFrom500To599(command);
+		return ProcessCommands500To599(command);
 	if (command < 700)
-		return ProcessCommandsFrom600To699(command);
+		return ProcessCommands600To699(command);
 	if (command < 800)
-		return ProcessCommandsFrom700To799(command);
+		return ProcessCommands700To799(command);
 	if (command < 900)
-		return ProcessCommandsFrom800To899(command);
+		return ProcessCommands800To899(command);
 	if (command < 1000)
-		return ProcessCommandsFrom900To999(command);
+		return ProcessCommands900To999(command);
 	if (command < 1100)
-		return ProcessCommandsFrom1000To1099(command);
+		return ProcessCommands1000To1099(command);
 	if (command < 1200)
-		return ProcessCommandsFrom1100To1199(command);
+		return ProcessCommands1100To1199(command);
 	return -1;
 }
 
-int8 CRunningScript::ProcessCommandsFrom0To99(int32 command)
+int8 CRunningScript::ProcessCommands0To99(int32 command)
 {
 	switch (command) {
 	case COMMAND_NOP:
@@ -1433,7 +1433,7 @@ void CRunningScript::UpdateCompareFlag(bool flag)
 }
 
 
-int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
+int8 CRunningScript::ProcessCommands100To199(int32 command)
 {
 	switch (command) {
 	case COMMAND_SUB_INT_LVAR_FROM_INT_VAR:
@@ -2261,7 +2261,7 @@ int8 CRunningScript::ProcessCommandsFrom100To199(int32 command)
 	return -1;
 }
 
-int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
+int8 CRunningScript::ProcessCommands200To299(int32 command)
 { 
 	switch (command) {
 	/* Special commands. 
@@ -2848,9 +2848,9 @@ int8 CRunningScript::ProcessCommandsFrom200To299(int32 command)
 }
 
 #if 0
-WRAPPER int8 CRunningScript::ProcessCommandsFrom300To399(int32 command) { EAXJMP(0x43ED30); }
+WRAPPER int8 CRunningScript::ProcessCommand300To399(int32 command) { EAXJMP(0x43ED30); }
 #else
-int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
+int8 CRunningScript::ProcessCommands300To399(int32 command)
 {
 	switch (command) {
 	/* Not implemented.
@@ -3584,9 +3584,9 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 #endif
 
 #if 0
-WRAPPER int8 CRunningScript::ProcessCommandsFrom400To499(int32 command) { EAXJMP(0x440CB0); }
+WRAPPER int8 CRunningScript::ProcessCommands400To499(int32 command) { EAXJMP(0x440CB0); }
 #else
-int8 CRunningScript::ProcessCommandsFrom400To499(int32 command)
+int8 CRunningScript::ProcessCommands400To499(int32 command)
 {
 	switch (command) {
 	case COMMAND_ADD_UPSIDEDOWN_CAR_CHECK:
@@ -3760,10 +3760,10 @@ int8 CRunningScript::ProcessCommandsFrom400To499(int32 command)
 	case COMMAND_SET_CURRENT_PLAYER_WEAPON:
 	{
 		CollectParameters(&m_nIp, 2);
-		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		CPlayerPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		for (int i = 0; i < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; i++){
 			if (pPed->m_weapons[i].m_eWeaponType == ScriptParams[1])
-				pPed->m_currentWeapon = i;
+				pPed->m_nSelectedWepSlot = i;
 		}
 		return 0;
 	}
@@ -3773,7 +3773,7 @@ int8 CRunningScript::ProcessCommandsFrom400To499(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		for (int i = 0; i < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; i++) {
 			if (pPed->m_weapons[i].m_eWeaponType == ScriptParams[1])
-				pPed->m_currentWeapon = i;
+				pPed->SetCurrentWeapon(i);
 		}
 		return 0;
 	}
@@ -4374,9 +4374,9 @@ int8 CRunningScript::ProcessCommandsFrom400To499(int32 command)
 #endif
 
 #if 0
-WRAPPER int8 CRunningScript::ProcessCommandsFrom500To599(int32 command) { EAXJMP(0x4429C0); }
+WRAPPER int8 CRunningScript::ProcessCommands500To599(int32 command) { EAXJMP(0x4429C0); }
 #else
-int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
+int8 CRunningScript::ProcessCommands500To599(int32 command)
 {
 	switch (command) {
 	case COMMAND_IS_CAR_UPSIDEDOWN:
@@ -5205,9 +5205,9 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 #endif
 
 #if 0
-WRAPPER int8 CRunningScript::ProcessCommandsFrom600To699(int32 command) { EAXJMP(0x444B20); }
+WRAPPER int8 CRunningScript::ProcessCommands600To699(int32 command) { EAXJMP(0x444B20); }
 #else
-int8 CRunningScript::ProcessCommandsFrom600To699(int32 command)
+int8 CRunningScript::ProcessCommands600To699(int32 command)
 {
 	switch (command){
 	/* Collective commands are not implemented until LCS.
@@ -5563,9 +5563,9 @@ int8 CRunningScript::ProcessCommandsFrom600To699(int32 command)
 #endif
 
 #if 0
-WRAPPER int8 CRunningScript::ProcessCommandsFrom700To799(int32 command) { EAXJMP(0x4458A0); }
+WRAPPER int8 CRunningScript::ProcessCommands700To799(int32 command) { EAXJMP(0x4458A0); }
 #else
-int8 CRunningScript::ProcessCommandsFrom700To799(int32 command)
+int8 CRunningScript::ProcessCommands700To799(int32 command)
 {
 	switch (command){
 	case COMMAND_SET_SWAT_REQUIRED:
@@ -6431,9 +6431,9 @@ int8 CRunningScript::ProcessCommandsFrom700To799(int32 command)
 #endif
 
 #if 0
-WRAPPER int8 CRunningScript::ProcessCommandsFrom800To899(int32 command) { EAXJMP(0x448240); }
+WRAPPER int8 CRunningScript::ProcessCommands800To899(int32 command) { EAXJMP(0x448240); }
 #else
-int8 CRunningScript::ProcessCommandsFrom800To899(int32 command)
+int8 CRunningScript::ProcessCommands800To899(int32 command)
 {
 	CMatrix tmp_matrix;
 	switch (command) {
@@ -7517,9 +7517,9 @@ int8 CRunningScript::ProcessCommandsFrom800To899(int32 command)
 #endif
 
 #if 1
-WRAPPER int8 CRunningScript::ProcessCommandsFrom900To999(int32 command) { EAXJMP(0x44CB80); }
+WRAPPER int8 CRunningScript::ProcessCommands900To999(int32 command) { EAXJMP(0x44CB80); }
 #else
-int8 CRunningScript::ProcessCommandsFrom900To999(int32 command)
+int8 CRunningScript::ProcessCommands900To999(int32 command)
 {
 	switch (command){
 	case COMMAND_PRINT_STRING_IN_STRING_NOW:
@@ -7630,9 +7630,9 @@ int8 CRunningScript::ProcessCommandsFrom900To999(int32 command)
 #endif
 
 #if 1
-WRAPPER int8 CRunningScript::ProcessCommandsFrom1000To1099(int32 command) { EAXJMP(0x588490); }
+WRAPPER int8 CRunningScript::ProcessCommands1000To1099(int32 command) { EAXJMP(0x588490); }
 #else
-int8 CRunningScript::ProcessCommandsFrom1000To1099(int32 command)
+int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 {
 	switch (command){
 	case COMMAND_FLASH_RADAR_BLIP:
@@ -7743,9 +7743,9 @@ int8 CRunningScript::ProcessCommandsFrom1000To1099(int32 command)
 #endif
 
 #if 1
-WRAPPER int8 CRunningScript::ProcessCommandsFrom1100To1199(int32 command) { EAXJMP(0x589D00); }
+WRAPPER int8 CRunningScript::ProcessCommands1100To1199(int32 command) { EAXJMP(0x589D00); }
 #else
-int8 CRunningScript::ProcessCommandsFrom1100To1199(int32 command)
+int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 {
 	switch (command) {
 	case COMMAND_LOAD_COLLISION_WITH_SCREEN:

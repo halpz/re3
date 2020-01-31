@@ -796,8 +796,8 @@ CCarCtrl::UpdateCarOnRails(CVehicle* pVehicle)
 float
 CCarCtrl::FindMaximumSpeedForThisCarInTraffic(CVehicle* pVehicle)
 {
-	if (pVehicle->AutoPilot.m_nCarMission == MISSION_RAMPLAYER_FARAWAY ||
-		pVehicle->AutoPilot.m_nCarMission == MISSION_RAMPLAYER_CLOSE)
+	if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_AVOID_CARS ||
+		pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_PLOUGH_THROUGH)
 		return pVehicle->AutoPilot.m_nCruiseSpeed;
 	float left = pVehicle->GetPosition().x - DISTANCE_TO_SCAN_FOR_DANGER;
 	float right = pVehicle->GetPosition().x + DISTANCE_TO_SCAN_FOR_DANGER;
@@ -826,7 +826,7 @@ CCarCtrl::FindMaximumSpeedForThisCarInTraffic(CVehicle* pVehicle)
 	pVehicle->bWarnedPeds = true;
 	if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS)
 		return maxSpeed;
-	return (maxSpeed + pVehicle->AutoPilot.m_nDrivingStyle) / 2;
+	return (maxSpeed + pVehicle->AutoPilot.m_nCruiseSpeed) / 2;
 }
 
 void
@@ -873,13 +873,11 @@ CCarCtrl::SlowCarOnRailsDownForTrafficAndLights(CVehicle* pVehicle)
 	if (maxSpeed >= curSpeed){
 		if (maxSpeed > curSpeed)
 			pVehicle->AutoPilot.ModifySpeed(min(maxSpeed, curSpeed + 0.05f * CTimer::GetTimeStep()));
-	}else{
-		if (curSpeed == 0.0f)
-			return;
-		if (curSpeed >= 0.1f)
-			pVehicle->AutoPilot.ModifySpeed(max(maxSpeed, curSpeed - 0.5f * CTimer::GetTimeStep()));
-		else if (curSpeed != 0.0f) /* no need to check */
+	}else if (curSpeed != 0.0f) {
+		if (curSpeed < 0.1f)
 			pVehicle->AutoPilot.ModifySpeed(0.0f);
+		else
+			pVehicle->AutoPilot.ModifySpeed(max(maxSpeed, curSpeed - 0.5f * CTimer::GetTimeStep()));
 	}
 }
 #if 0
