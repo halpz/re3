@@ -153,13 +153,13 @@ CheckDataNotCorrupt(int32 slot, char *name)
 	int32 blocknum = 0;
 	eLevelName level = LEVEL_NONE;
 	CheckSum = 0;
-	uint32 bytes_pocessed = 0;
+	uint32 bytes_processed = 0;
 	sprintf(filename, "%s%i%s", DefaultPCSaveFileName, slot + 1, ".b");
 	int file = CFileMgr::OpenFile(filename, "rb");
 	if (file == 0)
 		return false;
 	strcpy(name, filename);
-	while (SIZE_OF_ONE_GAME_IN_BYTES - sizeof(uint32) - bytes_pocessed > 0 && blocknum < 40) {
+	while (SIZE_OF_ONE_GAME_IN_BYTES - sizeof(uint32) > bytes_processed && blocknum < 40) {
 		int32 blocksize;
 		if (!ReadDataFromFile(file, (uint8*)&blocksize, sizeof(blocksize))) {
 			CloseFile(file);
@@ -179,7 +179,7 @@ CheckDataNotCorrupt(int32 slot, char *name)
 		uint8 *_work_buf = work_buff;
 		for (int i = 0; i < align4bytes(blocksize); i++) {
 			CheckSum += *_work_buf++;
-			bytes_pocessed++;
+			bytes_processed++;
 		}
 
 		if (blocknum == 0)
