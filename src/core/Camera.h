@@ -239,6 +239,20 @@ enum
 	MBLUR_UNUSED,		// pinkish
 };
 
+enum
+{
+	NONE = 0,
+	INTERPOLATION,
+	JUMP_CUT
+};
+
+enum
+{
+	CAM_CONTROLLER_0,
+	CAM_CONTROLLER_1,
+	CAM_CONTROLLER_2
+};
+
 struct CCamera : public CPlaceable
 {
 	bool m_bAboveGroundTrainNodesLoaded;

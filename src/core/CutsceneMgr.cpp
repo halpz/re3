@@ -256,7 +256,7 @@ void
 CCutsceneMgr::SetupCutsceneToStart(void)
 {
 	TheCamera.SetCamCutSceneOffSet(ms_cutsceneOffset);
-	TheCamera.TakeControlWithSpline(2);
+	TheCamera.TakeControlWithSpline(JUMP_CUT);
 	TheCamera.SetWideScreenOn();
 
 	ms_cutsceneOffset.z++;

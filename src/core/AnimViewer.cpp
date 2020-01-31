@@ -289,7 +289,7 @@ CAnimViewer::Update(void)
 			}
 			newEntity->GetPosition() = CVector(0.0f, 0.0f, 0.0f);
 			CWorld::Add(newEntity);
-			TheCamera.TakeControl(pTarget, 9, 2, 1);
+			TheCamera.TakeControl(pTarget, CCam::MODE_MODELVIEW, JUMP_CUT, CAM_CONTROLLER_1);
 		}
 		if (pTarget->m_type == ENTITY_TYPE_VEHICLE || pTarget->m_type == ENTITY_TYPE_PED || pTarget->m_type == ENTITY_TYPE_OBJECT) {
 			((CPhysical*)pTarget)->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
