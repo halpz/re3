@@ -5826,16 +5826,17 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		assert(pVehicle->m_vehType == VEHICLE_TYPE_BOAT);
 		CBoat* pBoat = (CBoat*)pVehicle;
 		pBoat->AutoPilot.m_nCruiseSpeed = ScriptParams[1];
+		return 0;
 	}
 	case COMMAND_GET_RANDOM_CHAR_IN_AREA:
 	{
 		CollectParameters(&m_nIp, 4);
 		int ped_handle = -1;
 		CVector pos = FindPlayerCoors();
-		float x1 = *(float*)&ScriptParams[1];
-		float y1 = *(float*)&ScriptParams[2];
-		float x2 = *(float*)&ScriptParams[3];
-		float y2 = *(float*)&ScriptParams[4];
+		float x1 = *(float*)&ScriptParams[0];
+		float y1 = *(float*)&ScriptParams[1];
+		float x2 = *(float*)&ScriptParams[2];
+		float y2 = *(float*)&ScriptParams[3];
 		int i = CPools::GetPedPool()->GetSize();
 		while (--i && ped_handle == -1){
 			CPed* pPed = CPools::GetPedPool()->GetSlot(i);
