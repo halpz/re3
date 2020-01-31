@@ -15,7 +15,7 @@
 #include "Streaming.h"
 #include "TxdStore.h"
 #include "General.h"
-#include "PCSave.h"
+#include "GenericGameStorage.h"
 #include "Script.h"
 #include "Camera.h"
 #include "MenuScreens.h"
@@ -448,7 +448,7 @@ void CMenuManager::Draw()
 				str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
 			break;
 		case MENUPAGE_SAVE_OVERWRITE_CONFIRM:
-			if (Slots[m_nCurrSaveSlot] == 1)
+			if (Slots[m_nCurrSaveSlot] == SLOT_EMPTY)
 				str = TheText.Get("FESZ_QZ");
 			else
 				str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
@@ -588,7 +588,7 @@ void CMenuManager::Draw()
 				CFont::SetRightJustifyOff();
 				textToPrint[MENUCOLUMN_LEFT] = GetNameOfSavedGame(i - 1);
 
-				if (Slots[i-1] != 1)
+				if (Slots[i-1] != SLOT_EMPTY)
 					textToPrint[MENUCOLUMN_RIGHT] = GetSavedGameDateAndTime(i - 1);
 
 				if (textToPrint[MENUCOLUMN_LEFT][0] == '\0') {
@@ -2228,40 +2228,37 @@ void CMenuManager::ResetHelperText()
 
 void CMenuManager::SaveLoadFileError_SetUpErrorScreen()
 {
-	// TO-DO: Enum
-	switch (PcSaveHelper.m_nHelper) {
-		case 1:
-		case 2:
-		case 3:
+	switch (PcSaveHelper.nErrorCode) {
+		case SAVESTATUS_ERR_SAVE_CREATE:
+		case SAVESTATUS_ERR_SAVE_WRITE:
+		case SAVESTATUS_ERR_SAVE_CLOSE:
 			m_nPrevScreen = m_nCurrScreen;
 			m_nCurrScreen = MENUPAGE_SAVE_FAILED;
 			m_nCurrOption = 0;
 			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
 			break;
-		case 4:
-		case 5:	
-		case 6:
+		case SAVESTATUS_ERR_LOAD_OPEN:
+		case SAVESTATUS_ERR_LOAD_READ:
+		case SAVESTATUS_ERR_LOAD_CLOSE:
 			m_nPrevScreen = m_nCurrScreen;
 			m_nCurrScreen = MENUPAGE_LOAD_FAILED;
 			m_nCurrOption = 0;
 			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
 			break;
-		case 7:
+		case SAVESTATUS_ERR_DATA_INVALID:
 			m_nPrevScreen = m_nCurrScreen;
 			m_nCurrScreen = MENUPAGE_LOAD_FAILED_2;
 			m_nCurrOption = 0;
 			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
 			break;
-		case 8:
-		case 9:
-		case 10:
+		case SAVESTATUS_DELETEFAILED8:
+		case SAVESTATUS_DELETEFAILED9:
+		case SAVESTATUS_DELETEFAILED10:
 			m_nPrevScreen = m_nCurrScreen;
 			m_nCurrScreen = MENUPAGE_DELETE_FAILED;
 			m_nCurrOption = 0;
 			m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode();
 			break;
-		default:
-			return;
 	}
 }
 

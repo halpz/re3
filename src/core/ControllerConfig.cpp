@@ -16,7 +16,7 @@
 #include "ModelIndices.h"
 #include "Camera.h"
 #include "win.h"
-#include "PCSave.h"
+#include "GenericGameStorage.h"
 
 CControllerConfigManager &ControlsManager = *(CControllerConfigManager*)0x8F43A4;
 

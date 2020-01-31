@@ -13,6 +13,7 @@ workspace "re3"
 	files { "src/objects/*.*" }
 	files { "src/peds/*.*" }
 	files { "src/render/*.*" }
+	files { "src/save/*.*" }
 	files { "src/skel/*.*" }
 	files { "src/skel/win/*.*" }
 	files { "src/text/*.*" }
@@ -31,6 +32,7 @@ workspace "re3"
 	includedirs { "src/objects" }
 	includedirs { "src/peds" }
 	includedirs { "src/render" }
+	includedirs { "src/save/" }
 	includedirs { "src/skel/" }
 	includedirs { "src/skel/win" }
 	includedirs { "src/text" }
