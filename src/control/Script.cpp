@@ -6734,7 +6734,7 @@ int8 CRunningScript::ProcessCommandsFrom800To899(int32 command)
 		}
 		int16 total;
 		CWorld::FindObjectsIntersectingCube(CVector(infX, infY, infZ), CVector(supX, supY, supZ), &total, 2, nil,
-			ScriptParams[7], ScriptParams[8], ScriptParams[9], ScriptParams[10], ScriptParams[11]);
+			!!ScriptParams[6], !!ScriptParams[7], !!ScriptParams[8], !!ScriptParams[9], !!ScriptParams[10]);
 		UpdateCompareFlag(total > 0);
 		return 0;
 	}
