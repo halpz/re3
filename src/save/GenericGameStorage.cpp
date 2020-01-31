@@ -15,6 +15,7 @@
 #include "Streaming.h"
 #include "World.h"
 
+const int SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 
 char (&DefaultPCSaveFileName)[260] = *(char(*)[260])*(uintptr*)0x8E28C0;
 char (&ValidSaveName)[260] = *(char(*)[260])*(uintptr*)0x8E2CBC;
@@ -29,6 +30,9 @@ CDate &CompileDateAndTime = *(CDate*)0x72BCB8;
 
 C_PcSave &PcSaveHelper = *(C_PcSave*)0x8E2C60;
 
+#define ReadDataFromBufferPointer(buf, to) memcpy(&to, buf, sizeof(to)); buf += align4bytes(sizeof(to));
+#define WriteDataToBufferPointer(buf, from) memcpy(buf, &from, sizeof(from)); buf += align4bytes(sizeof(from));
+
 WRAPPER bool GenericSave(int file) { EAXJMP(0x58F8D0); }
 WRAPPER bool GenericLoad() { EAXJMP(0x590A00); }
 
@@ -40,7 +44,7 @@ ReadInSizeofSaveFileBuffer(int32 &file, uint32 &size)
 		PcSaveHelper.nErrorCode = SAVESTATUS_ERR_LOAD_OPEN;
 		return false;
 	}
-	CFileMgr::Read(file, (const char*)&size, 4);
+	CFileMgr::Read(file, (const char*)&size, sizeof(size));
 	if (CFileMgr::GetErrorReadWrite(file)) {
 		PcSaveHelper.nErrorCode = SAVESTATUS_ERR_LOAD_READ;
 		if (!CloseFile(file))
@@ -98,14 +102,14 @@ void
 MakeSpaceForSizeInBufferPointer(uint8 *&presize, uint8 *&buf, uint8 *&postsize)
 {
 	presize = buf;
-	buf += 4;
+	buf += sizeof(uint32);
 	postsize = buf;
 }
 
 void
 CopySizeAndPreparePointer(uint8 *&buf, uint8 *&postbuf, uint8 *&postbuf2, uint32 &unused, uint32 &size)
 {
-	*(uint32*)buf = size;
+	memcpy(buf, &size, sizeof(size));
 	size = align4bytes(size);
 	postbuf2 += size;
 	postbuf = postbuf2;
@@ -155,14 +159,14 @@ CheckDataNotCorrupt(int32 slot, char *name)
 	if (file == 0)
 		return false;
 	strcpy(name, filename);
-	while (201729 - bytes_pocessed > 4 && blocknum < 40) {
+	while (SIZE_OF_ONE_GAME_IN_BYTES - sizeof(uint32) - bytes_pocessed > 0 && blocknum < 40) {
 		int32 blocksize;
-		if (!ReadDataFromFile(file, (uint8*)&blocksize, 4)) {
+		if (!ReadDataFromFile(file, (uint8*)&blocksize, sizeof(blocksize))) {
 			CloseFile(file);
 			return false;
 		}
 		if (blocksize > align4bytes(sizeof(work_buff)))
-			blocksize = sizeof(work_buff) - 4;
+			blocksize = sizeof(work_buff) - sizeof(uint32);
 		if (!ReadDataFromFile(file, work_buff, align4bytes(blocksize))) {
 			CloseFile(file);
 			return false;
@@ -179,11 +183,11 @@ CheckDataNotCorrupt(int32 slot, char *name)
 		}
 
 		if (blocknum == 0)
-			level = *(eLevelName*)&work_buff[4];
+			memcpy(&level, work_buff+4, sizeof(level));
 		blocknum++;
 	}
 	int32 _checkSum;
-	if (ReadDataFromFile(file, (uint8*)&_checkSum, 4)) {
+	if (ReadDataFromFile(file, (uint8*)&_checkSum, sizeof(_checkSum))) {
 		if (CloseFile(file)) {
 			if (CheckSum == _checkSum) {
 				m_LevelToLoad = level;
@@ -208,16 +212,19 @@ RestoreForStartLoad()
 		PcSaveHelper.nErrorCode = SAVESTATUS_ERR_LOAD_OPEN;
 		return false;
 	}
-	ReadDataFromFile(file, buf, 999);
+	ReadDataFromFile(file, buf, sizeof(buf));
 	if (CFileMgr::GetErrorReadWrite(file)) {
 		PcSaveHelper.nErrorCode = SAVESTATUS_ERR_LOAD_READ;
 		if (!CloseFile(file))
 			PcSaveHelper.nErrorCode = SAVESTATUS_ERR_LOAD_CLOSE;
 		return false;
 	} else {
-		CGame::currLevel = *(eLevelName*)&buf[72];
-		TheCamera.GetPosition() = *(CVector*)&buf[76];
-		CStreaming::RemoveUnusedBigBuildings(*(eLevelName*)&buf[72]);
+		uint8 *_buf = buf + sizeof(int32) + sizeof(wchar[24]) + sizeof(SYSTEMTIME) + sizeof(SIZE_OF_ONE_GAME_IN_BYTES);
+		ReadDataFromBufferPointer(_buf, CGame::currLevel);
+		ReadDataFromBufferPointer(_buf, TheCamera.GetPosition().x);
+		ReadDataFromBufferPointer(_buf, TheCamera.GetPosition().y);
+		ReadDataFromBufferPointer(_buf, TheCamera.GetPosition().z);
+		CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
 		CStreaming::RemoveUnusedBuildings(CGame::currLevel);
 		CCollision::SortOutCollisionAfterLoad();
 		CStreaming::RequestBigBuildings(CGame::currLevel);

@@ -50,7 +50,7 @@ C_PcSave::SaveSlot(int32 slot)
 bool
 C_PcSave::PcClassSaveRoutine(int32 file, uint8 *data, uint32 size)
 {
-	CFileMgr::Write(file, (const char*)&size, 4);
+	CFileMgr::Write(file, (const char*)&size, sizeof(size));
 	if (CFileMgr::GetErrorReadWrite(file)) {
 		nErrorCode = SAVESTATUS_ERR_SAVE_WRITE;
 		strncpy(SaveFileNameJustSaved, ValidSaveName, 259);
@@ -84,14 +84,18 @@ C_PcSave::PopulateSlotInfo()
 	}
 	for (int i = 0; i < SLOT_COUNT; i++) {
 		char savename[52];
-		int8 data[68];
+		struct {
+			int size;
+			wchar FileName[24];
+			_SYSTEMTIME SaveDateTime;
+		} header;
 		sprintf(savename, "%s%i%s", DefaultPCSaveFileName, i + 1, ".b");
 		int file = CFileMgr::OpenFile(savename, "rb");
 		if (file != 0) {
-			CFileMgr::Read(file, (char*)data, 68);
-			if (strncmp((char*)data, TopLineEmptyFile, sizeof(TopLineEmptyFile)-1)) {
+			CFileMgr::Read(file, (char*)&header, sizeof(header));
+			if (strncmp((char*)&header, TopLineEmptyFile, sizeof(TopLineEmptyFile)-1) != 0) {
 				Slots[i + 1] = SLOT_OK;
-				memcpy(SlotFileName[i], &data[4], 24 * sizeof(wchar));
+				memcpy(SlotFileName[i], &header.FileName, sizeof(header.FileName));
 				
 				SlotFileName[i][24] = '\0';
 			}
@@ -99,9 +103,10 @@ C_PcSave::PopulateSlotInfo()
 		}
 		if (Slots[i + 1] == SLOT_OK) {
 			if (CheckDataNotCorrupt(i, savename)) {
-				_SYSTEMTIME st = *(_SYSTEMTIME*)&data[52];
+				_SYSTEMTIME st;
+				memcpy(&st, &header.SaveDateTime, sizeof(_SYSTEMTIME));
 				const char *month;
-				switch (*(uint16*)&data[54])
+				switch (st.wMonth)
 				{
 				case 1: month = "JAN"; break;
 				case 2: month = "FEB"; break;
