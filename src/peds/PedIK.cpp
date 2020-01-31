@@ -1,14 +1,10 @@
 #include "common.h"
 #include "patcher.h"
+#include "Camera.h"
 #include "PedIK.h"
 #include "Ped.h"
 #include "General.h"
-
-WRAPPER bool CPedIK::PointGunInDirection(float phi, float theta) { EAXJMP(0x4ED9B0); }
-WRAPPER bool CPedIK::PointGunAtPosition(CVector *position) { EAXJMP(0x4ED920); }
-WRAPPER void CPedIK::ExtractYawAndPitchLocal(RwMatrixTag*, float*, float*) { EAXJMP(0x4ED2C0); }
-WRAPPER void CPedIK::ExtractYawAndPitchWorld(RwMatrixTag*, float*, float*) { EAXJMP(0x4ED140); }
-WRAPPER bool CPedIK::RestoreLookAt(void) { EAXJMP(0x4ED810); }
+#include "RwHelper.h"
 
 LimbMovementInfo CPedIK::ms_torsoInfo = { DEGTORAD(50.0f), DEGTORAD(-50.0f), DEGTORAD(15.0f), DEGTORAD(45.0f), DEGTORAD(-45.0f), DEGTORAD(7.0f) };
 LimbMovementInfo CPedIK::ms_headInfo = { DEGTORAD(90.0f), DEGTORAD(-90.0f), DEGTORAD(10.0f), DEGTORAD(45.0f), DEGTORAD(-45.0f), DEGTORAD(5.0f) };
@@ -165,12 +161,11 @@ bool
 CPedIK::LookInDirection(float phi, float theta)
 {
 	bool success = true;
-	AnimBlendFrameData *frameData = m_ped->m_pFrames[PED_HEAD];
-	RwFrame *frame = frameData->frame;
+	RwFrame *frame = m_ped->GetNodeFrame(PED_HEAD);
 	RwMatrix *frameMat = RwFrameGetMatrix(frame);
 
-	if (!(frameData->flag & AnimBlendFrameData::IGNORE_ROTATION)) {
-		frameData->flag |= AnimBlendFrameData::IGNORE_ROTATION;
+	if (!(m_ped->m_pFrames[PED_HEAD]->flag & AnimBlendFrameData::IGNORE_ROTATION)) {
+		m_ped->m_pFrames[PED_HEAD]->flag |= AnimBlendFrameData::IGNORE_ROTATION;
 		CPedIK::ExtractYawAndPitchLocal(frameMat, &m_headOrient.phi, &m_headOrient.theta);
 	}
 
@@ -223,6 +218,151 @@ CPedIK::LookAtPosition(CVector const &pos)
 	return LookInDirection(phiToFace, thetaToFace);
 }
 
+bool
+CPedIK::PointGunInDirection(float phi, float theta)
+{
+	bool result = true;
+	bool armPointedToGun = false;
+	float angle = CGeneral::LimitRadianAngle(phi - m_ped->m_fRotationCur);
+	m_flags &= (~FLAG_1);
+	m_flags |= LOOKING;
+	if (m_flags & AIMS_WITH_ARM) {
+		armPointedToGun = PointGunInDirectionUsingArm(angle, theta);
+		angle = CGeneral::LimitRadianAngle(angle - m_upperArmOrient.phi);
+	}
+	if (armPointedToGun) {
+		if (m_flags & AIMS_WITH_ARM && m_torsoOrient.phi * m_upperArmOrient.phi < 0.0f)
+			MoveLimb(m_torsoOrient, 0.0f, m_torsoOrient.theta, ms_torsoInfo);
+	} else {
+		RwMatrix *matrix = GetWorldMatrix(RwFrameGetParent(m_ped->GetNodeFrame(PED_UPPERARMR)), RwMatrixCreate());
+		float yaw, pitch;
+		ExtractYawAndPitchWorld(matrix, &yaw, &pitch);
+		RwMatrixDestroy(matrix);
+		LimbMoveStatus status = MoveLimb(m_torsoOrient, angle, theta, ms_torsoInfo);
+		if (status == ANGLES_SET_TO_MAX)
+			result = false;
+		else if (status == ANGLES_SET_EXACTLY)
+			m_flags |= FLAG_1;
+	}
+	if (TheCamera.Cams[TheCamera.ActiveCam].Using3rdPersonMouseCam() && m_flags & AIMS_WITH_ARM)
+		RotateTorso(m_ped->m_pFrames[PED_MID], &m_torsoOrient, true);
+	else
+		RotateTorso(m_ped->m_pFrames[PED_MID], &m_torsoOrient, false);
+	return result;
+}
+
+bool
+CPedIK::PointGunInDirectionUsingArm(float phi, float theta)
+{
+	bool result = false;
+	RwFrame *frame = m_ped->GetNodeFrame(PED_UPPERARMR);
+	RwMatrix *matrix = GetWorldMatrix(RwFrameGetParent(frame), RwMatrixCreate());
+
+	RwV3d upVector = { matrix->right.z, matrix->up.z, matrix->at.z };
+
+	float yaw, pitch;
+	ExtractYawAndPitchWorld(matrix, &yaw, &pitch);
+	RwMatrixDestroy(matrix);
+
+	RwV3d rightVector = { 0.0f, 0.0f, 1.0f };
+	RwV3d forwardVector = { 1.0f, 0.0f, 0.0f };
+
+	float uaPhi = phi - m_torsoOrient.phi - DEGTORAD(15.0f);
+	LimbMoveStatus uaStatus = MoveLimb(m_upperArmOrient, uaPhi, CGeneral::LimitRadianAngle(theta - pitch), ms_upperArmInfo);
+	if (uaStatus == ANGLES_SET_EXACTLY) {
+		m_flags |= FLAG_1;
+		result = true;
+	}
+	if (uaStatus == ANGLES_SET_TO_MAX) {
+		float laPhi = uaPhi - m_upperArmOrient.phi;
+
+		LimbMoveStatus laStatus;
+		if (laPhi > 0.0f)
+			laStatus = MoveLimb(m_lowerArmOrient, laPhi, -DEGTORAD(45.0f), ms_lowerArmInfo);
+		else
+			laStatus = MoveLimb(m_lowerArmOrient, laPhi, 0.0f, ms_lowerArmInfo);
+
+		if (laStatus == ANGLES_SET_EXACTLY) {
+			m_flags |= FLAG_1;
+			result = true;
+		}
+		RwFrame *child = GetFirstChild(frame);
+		RwV3d pos = RwFrameGetMatrix(child)->pos;
+		RwMatrixRotate(RwFrameGetMatrix(child), &forwardVector, RADTODEG(m_lowerArmOrient.theta), rwCOMBINEPOSTCONCAT);
+		RwMatrixRotate(RwFrameGetMatrix(child), &rightVector, RADTODEG(-m_lowerArmOrient.phi), rwCOMBINEPOSTCONCAT);
+		RwFrameGetMatrix(child)->pos = pos;
+	}
+
+	RwV3d pos = RwFrameGetMatrix(frame)->pos;
+	RwMatrixRotate(RwFrameGetMatrix(frame), &rightVector, RADTODEG(m_upperArmOrient.theta), rwCOMBINEPOSTCONCAT);
+	RwMatrixRotate(RwFrameGetMatrix(frame), &upVector, RADTODEG(m_upperArmOrient.phi), rwCOMBINEPOSTCONCAT);
+	RwFrameGetMatrix(frame)->pos = pos;
+	return result;
+}
+
+bool
+CPedIK::PointGunAtPosition(CVector const& position)
+{
+	return PointGunInDirection(
+		CGeneral::GetRadianAngleBetweenPoints(position.x, position.y, m_ped->GetPosition().x, m_ped->GetPosition().y),
+		CGeneral::GetRadianAngleBetweenPoints(position.z, Distance2D(m_ped->GetPosition(), position.x, position.y),
+		m_ped->GetPosition().z,
+		0.0f));
+}
+
+bool
+CPedIK::RestoreLookAt(void)
+{
+	bool result = false;
+	RwMatrix *mat = RwFrameGetMatrix(m_ped->GetNodeFrame(PED_HEAD));
+	if (m_ped->m_pFrames[PED_HEAD]->flag & AnimBlendFrameData::IGNORE_ROTATION) {
+		m_ped->m_pFrames[PED_HEAD]->flag &= (~AnimBlendFrameData::IGNORE_ROTATION);
+	} else {
+		float yaw, pitch;
+		ExtractYawAndPitchLocal(mat, &yaw, &pitch);
+		if (MoveLimb(m_headOrient, yaw, pitch, ms_headRestoreInfo) == ANGLES_SET_EXACTLY)
+			result = true;
+	}
+
+	CMatrix matrix(mat);
+	CVector pos = matrix.GetPosition();
+	matrix.SetRotateZ(m_headOrient.theta);
+	matrix.RotateX(m_headOrient.phi);
+	matrix.Translate(pos);
+	matrix.UpdateRW();
+
+	if (!(m_flags & LOOKING))
+		MoveLimb(m_torsoOrient, 0.0f, 0.0f, ms_torsoInfo);
+	if (!(m_flags & LOOKING))
+		RotateTorso(m_ped->m_pFrames[PED_MID], &m_torsoOrient, false);
+
+	return result;
+}
+
+void
+CPedIK::ExtractYawAndPitchWorld(RwMatrixTag *mat, float *yaw, float *pitch)
+{
+	float f = clamp(DotProduct(mat->up, CVector(0.0f, 1.0f, 0.0f)), -1.0f, 1.0f);
+	*yaw = Acos(f);
+	if (mat->up.x > 0.0f) *yaw = -*yaw;
+
+	f = clamp(DotProduct(mat->right, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
+	*pitch = Acos(f);
+	if (mat->up.z > 0.0f) *pitch = -*pitch;
+}
+
+void
+CPedIK::ExtractYawAndPitchLocal(RwMatrixTag *mat, float *yaw, float *pitch)
+{
+	float f = clamp(DotProduct(mat->at, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
+	*yaw = Acos(f);
+	if (mat->at.y > 0.0f) *yaw = -*yaw;
+
+	f = clamp(DotProduct(mat->right, CVector(1.0f, 0.0f, 0.0f)), -1.0f, 1.0f);
+	*pitch = Acos(f);
+	if (mat->up.x > 0.0f) *pitch = -*pitch;
+}
+
 STARTPATCHES
 	InjectHook(0x4ED0F0, &CPedIK::GetComponentPosition, PATCH_JUMP);
 	InjectHook(0x4ED060, &CPedIK::GetWorldMatrix, PATCH_JUMP);
@@ -231,4 +371,10 @@ STARTPATCHES
 	InjectHook(0x4EDD70, &CPedIK::RestoreGunPosn, PATCH_JUMP);
 	InjectHook(0x4ED620, &CPedIK::LookInDirection, PATCH_JUMP);
 	InjectHook(0x4ED590, &CPedIK::LookAtPosition, PATCH_JUMP);
+	InjectHook(0x4ED9B0, &CPedIK::PointGunInDirection, PATCH_JUMP);
+	InjectHook(0x4EDB20, &CPedIK::PointGunInDirectionUsingArm, PATCH_JUMP);
+	InjectHook(0x4ED920, &CPedIK::PointGunAtPosition, PATCH_JUMP);
+	InjectHook(0x4ED810, &CPedIK::RestoreLookAt, PATCH_JUMP);
+	InjectHook(0x4ED140, &CPedIK::ExtractYawAndPitchWorld, PATCH_JUMP);
+	InjectHook(0x4ED2C0, &CPedIK::ExtractYawAndPitchLocal, PATCH_JUMP);
 ENDPATCHES

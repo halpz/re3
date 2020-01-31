@@ -25,16 +25,11 @@ WRAPPER void CCamera::Restore(void) { EAXJMP(0x46F990); }
 WRAPPER void CamShakeNoPos(CCamera*, float) { EAXJMP(0x46B100); }
 WRAPPER void CCamera::TakeControl(CEntity*, int16, int16, int32) { EAXJMP(0x471500); }
 WRAPPER void CCamera::TakeControlNoEntity(const CVector&, int16, int32) { EAXJMP(0x4715B0); }
-WRAPPER void CCamera::SetCamPositionForFixedMode(const CVector&, const CVector&) { EAXJMP(0x46FCC0); }
 WRAPPER void CCamera::Init(void) { EAXJMP(0x46BAD0); }
-WRAPPER void CCamera::SetRwCamera(RwCamera*) { EAXJMP(0x46FEC0); }
 WRAPPER void CCamera::Process(void) { EAXJMP(0x46D3F0); }
 WRAPPER void CCamera::LoadPathSplines(int file) { EAXJMP(0x46D1D0); }
-WRAPPER uint32 CCamera::GetCutSceneFinishTime(void) { EAXJMP(0x46B920); }
-WRAPPER void CCamera::FinishCutscene(void) { EAXJMP(0x46B560); }
 WRAPPER void CCamera::RestoreWithJumpCut(void) { EAXJMP(0x46FAE0); };
-WRAPPER void CCamera::SetZoomValueFollowPedScript(int16) { EAXJMP(0x46FF30); }
-WRAPPER void CCamera::SetZoomValueCamStringScript(int16) { EAXJMP(0x46FF90); }
+WRAPPER void CCamera::SetPercentAlongCutScene(float) { EAXJMP(0x46FE20); };
 
 bool
 CCamera::GetFading()
@@ -1394,6 +1389,68 @@ CCamera::UpdateAimingCoors(CVector const &coors)
 	m_cvecAimingTargetCoors = coors;
 }
 
+void
+CCamera::SetCamPositionForFixedMode(const CVector &Source, const CVector &UpOffSet)
+{
+	m_vecFixedModeSource = Source;
+	m_vecFixedModeUpOffSet = UpOffSet;
+}
+
+void
+CCamera::SetRwCamera(RwCamera *cam)
+{
+	m_pRwCamera = cam;
+	m_viewMatrix.Attach(&m_pRwCamera->viewMatrix, false);
+	CMBlur::MotionBlurOpen(m_pRwCamera);
+}
+
+uint32
+CCamera::GetCutSceneFinishTime(void)
+{
+	int cam = ActiveCam;
+	if (Cams[cam].Mode == CCam::MODE_FLYBY)
+		return Cams[cam].m_uiFinishTime;
+	cam = (cam + 1) % 2;
+	if (Cams[cam].Mode == CCam::MODE_FLYBY)
+		return Cams[cam].m_uiFinishTime;
+
+	return 0;
+}
+
+void
+CCamera::FinishCutscene(void)
+{
+	SetPercentAlongCutScene(100.0f);
+	m_fPositionAlongSpline = 1.0f;
+	m_bcutsceneFinished = true;
+}
+
+void
+CCamera::SetZoomValueFollowPedScript(int16 mode)
+{
+	switch (mode) {
+	case 0: m_fPedZoomValueScript = 0.25f; break;
+	case 1: m_fPedZoomValueScript = 1.5f; break;
+	case 2: m_fPedZoomValueScript = 2.9f; break;
+	default: m_fPedZoomValueScript = m_fPedZoomValueScript; break;
+	}
+
+	m_bUseScriptZoomValuePed = true;
+}
+
+void
+CCamera::SetZoomValueCamStringScript(int16 mode)
+{
+	switch (mode) {
+	case 0: m_fCarZoomValueScript = 0.05f; break;
+	case 1: m_fCarZoomValueScript = 1.9f; break;
+	case 2: m_fCarZoomValueScript = 3.9f; break;
+	default: m_fCarZoomValueScript = m_fCarZoomValueScript; break;
+	}
+
+	m_bUseScriptZoomValueCar = true;
+}
+
 STARTPATCHES
 	InjectHook(0x42C760, (bool (CCamera::*)(const CVector &center, float radius, const CMatrix *mat))&CCamera::IsSphereVisible, PATCH_JUMP);
 	InjectHook(0x46FD00, &CCamera::SetFadeColour, PATCH_JUMP);
@@ -1406,6 +1463,14 @@ STARTPATCHES
 
 	InjectHook(0x46FF00, &CCamera::SetWideScreenOn, PATCH_JUMP);
 	InjectHook(0x46FF10, &CCamera::SetWideScreenOff, PATCH_JUMP);
+
+	InjectHook(0x46FCC0, &CCamera::SetCamPositionForFixedMode, PATCH_JUMP);
+	InjectHook(0x46FEC0, &CCamera::SetRwCamera, PATCH_JUMP);
+	InjectHook(0x46B920, &CCamera::GetCutSceneFinishTime, PATCH_JUMP);
+	InjectHook(0x46B560, &CCamera::FinishCutscene, PATCH_JUMP);
+	InjectHook(0x46FF30, &CCamera::SetZoomValueFollowPedScript, PATCH_JUMP);
+	InjectHook(0x46FF90, &CCamera::SetZoomValueCamStringScript, PATCH_JUMP);
+
 
 	InjectHook(0x456F40, WellBufferMe, PATCH_JUMP);
 	InjectHook(0x4582F0, &CCam::GetVectorsReadyForRW, PATCH_JUMP);

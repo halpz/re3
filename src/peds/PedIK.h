@@ -50,13 +50,14 @@ public:
 
 	CPedIK(CPed *ped);
 	bool PointGunInDirection(float phi, float theta);
-	bool PointGunAtPosition(CVector *position);
+	bool PointGunInDirectionUsingArm(float phi, float theta);
+	bool PointGunAtPosition(CVector const& position);
 	void GetComponentPosition(RwV3d *pos, PedNode node);
 	static RwMatrix *GetWorldMatrix(RwFrame *source, RwMatrix *destination);
 	void RotateTorso(AnimBlendFrameData* animBlend, LimbOrientation* limb, bool changeRoll);
-	void ExtractYawAndPitchLocal(RwMatrixTag*, float*, float*);
-	void ExtractYawAndPitchWorld(RwMatrixTag*, float*, float*);
-	LimbMoveStatus MoveLimb(LimbOrientation &a1, float a2, float a3, LimbMovementInfo &a4);
+	void ExtractYawAndPitchLocal(RwMatrixTag *mat, float *yaw, float *pitch);
+	void ExtractYawAndPitchWorld(RwMatrixTag *mat, float *yaw, float *pitch);
+	LimbMoveStatus MoveLimb(LimbOrientation &limb, float approxPhi, float approxTheta, LimbMovementInfo &moveInfo);
 	bool RestoreGunPosn(void);
 	bool LookInDirection(float phi, float theta);
 	bool LookAtPosition(CVector const& pos);

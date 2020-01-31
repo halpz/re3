@@ -679,7 +679,7 @@ CFileLoader::LoadMLOInstance(int id, const char *line)
 		&scale.x, &scale.y, &scale.z,
 		&rot.x, &rot.y, &rot.z,
 		&angle);
-	float rad = 2.0f * (PI / 2.0f - Atan2(angle, Sqrt(1.0f - SQR(angle))));
+	float rad = Acos(angle) * 2.0f;
 	CInstance *inst = CModelInfo::GetMloInstanceStore().alloc();
 	minfo->lastInstance++;
 
