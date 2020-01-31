@@ -588,7 +588,7 @@ void CMenuManager::Draw()
 				CFont::SetRightJustifyOff();
 				textToPrint[MENUCOLUMN_LEFT] = GetNameOfSavedGame(i - 1);
 
-				if (Slots[i-1] != SLOT_EMPTY)
+				if (Slots[i] != SLOT_EMPTY)
 					textToPrint[MENUCOLUMN_RIGHT] = GetSavedGameDateAndTime(i - 1);
 
 				if (textToPrint[MENUCOLUMN_LEFT][0] == '\0') {
