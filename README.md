@@ -68,7 +68,6 @@ CPlayerPed
 CPopulation
 CRadar
 CRecordDataForChase
-CRemote
 CRoadBlocks
 CRubbish
 CSceneEdit

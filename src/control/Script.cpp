@@ -3081,7 +3081,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 	{
 		CollectParameters(&m_nIp, 3);
 		// ScriptParams[0] is unused.
-		TheCamera.TakeControl(nil, ScriptParams[1], ScriptParams[2], 1);
+		TheCamera.TakeControl(nil, ScriptParams[1], ScriptParams[2], CAM_CONTROLLER_1);
 		return 0;
 	}
 	case COMMAND_POINT_CAMERA_AT_CAR:
@@ -3089,7 +3089,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		CollectParameters(&m_nIp, 3);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
-		TheCamera.TakeControl(pVehicle, ScriptParams[1], ScriptParams[2], 1);
+		TheCamera.TakeControl(pVehicle, ScriptParams[1], ScriptParams[2], CAM_CONTROLLER_1);
 		return 0;
 	}
 	case COMMAND_POINT_CAMERA_AT_CHAR:
@@ -3097,7 +3097,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		CollectParameters(&m_nIp, 3);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
-		TheCamera.TakeControl(pPed, ScriptParams[1], ScriptParams[2], 1);
+		TheCamera.TakeControl(pPed, ScriptParams[1], ScriptParams[2], CAM_CONTROLLER_1);
 		return 0;
 	}
 	case COMMAND_RESTORE_CAMERA:
@@ -3148,7 +3148,7 @@ int8 CRunningScript::ProcessCommandsFrom300To399(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[0];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		TheCamera.TakeControlNoEntity(pos, ScriptParams[3], 1);
+		TheCamera.TakeControlNoEntity(pos, ScriptParams[3], CAM_CONTROLLER_1);
 		return 0;
 	}
 	case COMMAND_ADD_BLIP_FOR_CAR_OLD:

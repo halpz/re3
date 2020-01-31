@@ -2541,7 +2541,7 @@ bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* pVehicle, CVector vecTar
 		pVehicle->AutoPilot.m_aPathFindNodesInfo, &pVehicle->AutoPilot.m_nPathFindNodesCount);
 	if (pVehicle->AutoPilot.m_nPathFindNodesCount < 2){
 		pVehicle->AutoPilot.m_nPrevRouteNode = pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_nNextRouteNode = 0;
-		return 1;
+		return true;
 	}
 	pVehicle->AutoPilot.m_nPrevRouteNode = 0;
 	pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_aPathFindNodesInfo[0] - ThePaths.m_pathNodes;
@@ -2550,7 +2550,7 @@ bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* pVehicle, CVector vecTar
 	pVehicle->AutoPilot.RemoveOnePathNode();
 	FindLinksToGoWithTheseNodes(pVehicle);
 	pVehicle->AutoPilot.m_nNextLane = pVehicle->AutoPilot.m_nCurrentLane = 0;
-	return 0;
+	return false;
 }
 
 void CCarCtrl::FindLinksToGoWithTheseNodes(CVehicle* pVehicle)
