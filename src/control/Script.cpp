@@ -5046,7 +5046,7 @@ int8 CRunningScript::ProcessCommandsFrom500To599(int32 command)
 		return 0;
 	}
 	case COMMAND_IS_PLAYER_IN_REMOTE_MODE:
-		CollectParameters(&m_nIp, 2);
+		CollectParameters(&m_nIp, 1);
 		UpdateCompareFlag(CWorld::Players[ScriptParams[0]].IsPlayerInRemoteMode());
 		return 0;
 	case COMMAND_ARM_CAR_WITH_BOMB:
