@@ -8369,5 +8369,4 @@ InjectHook(0x57C320, &cAudioManager::ComputeEmittingVolume, PATCH_JUMP);
 
 InjectHook(0x5755C0, &cPedComments::Add, PATCH_JUMP);
 InjectHook(0x575730, &cPedComments::Process, PATCH_JUMP);
-InjectHook(0x57C430, &cAudioScriptObject::Reset, PATCH_JUMP);
 ENDPATCHES
