@@ -1366,7 +1366,11 @@ void CReplay::SaveReplayToHD(void)
 {
 	CFileMgr::SetDirMyDocuments();
 	int fw = CFileMgr::OpenFileForWriting("replay.rep");
-	if (fw < 0){
+#ifdef FIX_BUGS
+	if (fw == 0) {
+#else
+	if (fw < 0){ // BUG?
+#endif
 		debug("Couldn't open replay.rep for writing");
 		CFileMgr::SetDir("");
 		return;
@@ -1397,7 +1401,7 @@ void PlayReplayFromHD(void)
 {
 	CFileMgr::SetDirMyDocuments();
 	int fr = CFileMgr::OpenFile("replay.rep", "rb");
-	if (fr < 0) {
+	if (fr == 0) {
 		debug("Couldn't open replay.rep for reading");
 		/* Forgot to SetDir? */
 		return;
