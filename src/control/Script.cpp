@@ -7238,7 +7238,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		assert(pObject);
-		UpdateCompareFlag(pObject->bHasBeenDamaged || !pObject->bIsVisible);
+		UpdateCompareFlag(pObject->bRenderDamaged || !pObject->bIsVisible);
 		return 0;
 	}
 	case COMMAND_START_KILL_FRENZY_HEADSHOT:
