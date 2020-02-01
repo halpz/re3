@@ -7200,7 +7200,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		if (total == 0)
 			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(CTheZones::FindZoneForPoint(pos)), pos, range, true, &total, 16, apEntities);
 		CEntity* pClosestEntity = nil;
-		float min_dist = 2 * range;
+		float min_dist = 2.0f * range;
 		for (int i = 0; i < total; i++) {
 			float dist = (apEntities[i]->GetPosition() - pos).Magnitude();
 			if (dist < min_dist) {
@@ -7859,7 +7859,7 @@ void CTheScripts::AddToInvisibilitySwapArray(CEntity* pEntity, bool remove)
 			InvisibilitySettingArray[i] = nil;
 	}
 	else if (!remove) {
-		int j = 0;
+		i = 0;
 		while (i < MAX_NUM_INVISIBILITY_SETTINGS && !found) {
 			if (InvisibilitySettingArray[i] == nil)
 				found = true;
