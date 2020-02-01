@@ -2421,8 +2421,8 @@ void CCarCtrl::SteerAIBoatWithPhysicsHeadingForTarget(CBoat* pBoat, float target
 	float angleForward = CGeneral::GetATanOfXY(forward.x, forward.y);
 	float angleDiff = LimitRadianAngle(angleToTarget - angleForward);
 	angleDiff = min(DEFAULT_MAX_STEER_ANGLE, max(-DEFAULT_MAX_STEER_ANGLE, angleDiff));
-	float currentSpeed = pBoat->GetMoveSpeed().Magnitude(); // +0.0f for some reason
-	float speedDiff = pBoat->AutoPilot.m_nCruiseSpeed - currentSpeed;
+	float currentSpeed = pBoat->GetMoveSpeed().Magnitude2D(); // +0.0f for some reason
+	float speedDiff = pBoat->AutoPilot.m_nCruiseSpeed - currentSpeed * 60.0f;
 	if (speedDiff > 0.0f){
 		float accRemaining = speedDiff / pBoat->AutoPilot.m_nCruiseSpeed;
 		*pAccel = (accRemaining > 0.25f) ? 1.0f : 1.0f - (0.25f - accRemaining) * 4.0f;

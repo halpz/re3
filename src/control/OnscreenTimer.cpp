@@ -19,7 +19,7 @@ void COnscreenTimer::Init() {
 			m_sEntries[i].m_aCounterText[j] = 0;
 		}
 
-		m_sEntries[i].m_nType = 0;
+		m_sEntries[i].m_nType = COUNTER_DISPLAY_NUMBER;
 		m_sEntries[i].m_bTimerProcessed = 0;
 		m_sEntries[i].m_bCounterProcessed = 0;
 	}
@@ -49,7 +49,7 @@ void COnscreenTimer::ClearCounter(uint32 offset) {
 		if(offset == m_sEntries[i].m_nCounterOffset) {
 			m_sEntries[i].m_nCounterOffset = 0;
 			m_sEntries[i].m_aCounterText[0] = 0;
-			m_sEntries[i].m_nType = 0;
+			m_sEntries[i].m_nType = COUNTER_DISPLAY_NUMBER;
 			m_sEntries[i].m_bCounterProcessed = 0;
 		}
 	}

@@ -1,5 +1,11 @@
 #pragma once
 
+enum
+{
+	COUNTER_DISPLAY_NUMBER,
+	COUNTER_DISPLAY_BAR,
+};
+
 class COnscreenTimerEntry
 {
 public:

@@ -701,14 +701,7 @@ void CHud::Draw()
 				}
 
 				if (CTimer::GetFrameCounter() & 4 || !CounterFlashTimer) {
-					if (CUserDisplay::OnscnTimer.m_sEntries[0].m_nType) {
-						int counter = atoi(CUserDisplay::OnscnTimer.m_sEntries[0].m_bCounterBuffer);
-#ifdef FIX_BUGS
-						counter = min(counter, 100);
-#endif
-						CSprite2d::DrawRect(CRect(SCREEN_SCALE_FROM_RIGHT(TIMER_RIGHT_OFFSET) - SCREEN_SCALE_X(100.0f) / 2 + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(8.0f), SCREEN_SCALE_FROM_RIGHT(TIMER_RIGHT_OFFSET) + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(11.0f) + SCREEN_SCALE_Y(8.0f)), CRGBA(0, 106, 164, 80));
-						CSprite2d::DrawRect(CRect(SCREEN_SCALE_FROM_RIGHT(TIMER_RIGHT_OFFSET) - SCREEN_SCALE_X(100.0f) / 2 + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(8.0f), SCREEN_SCALE_X(counter) / 2.0f + SCREEN_SCALE_FROM_RIGHT(TIMER_RIGHT_OFFSET + 50.0f) + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(11.0f) + SCREEN_SCALE_Y(8.0f)), CRGBA(0, 106, 164, 255));
-					} else {
+					if (CUserDisplay::OnscnTimer.m_sEntries[0].m_nType == COUNTER_DISPLAY_NUMBER) {
 						AsciiToUnicode(CUserDisplay::OnscnTimer.m_sEntries[0].m_bCounterBuffer, sTimer);
 						CFont::SetPropOn();
 
@@ -728,6 +721,13 @@ void CHud::Draw()
 
 						CFont::SetColor(CRGBA(0, 106, 164, 255));
 						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(TIMER_RIGHT_OFFSET), SCREEN_SCALE_Y(132.0f), sTimer);
+					} else {
+						int counter = atoi(CUserDisplay::OnscnTimer.m_sEntries[0].m_bCounterBuffer);
+#ifdef FIX_BUGS
+						counter = min(counter, 100);
+#endif
+						CSprite2d::DrawRect(CRect(SCREEN_SCALE_FROM_RIGHT(TIMER_RIGHT_OFFSET) - SCREEN_SCALE_X(100.0f) / 2 + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(8.0f), SCREEN_SCALE_FROM_RIGHT(TIMER_RIGHT_OFFSET) + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(11.0f) + SCREEN_SCALE_Y(8.0f)), CRGBA(0, 106, 164, 80));
+						CSprite2d::DrawRect(CRect(SCREEN_SCALE_FROM_RIGHT(TIMER_RIGHT_OFFSET) - SCREEN_SCALE_X(100.0f) / 2 + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(8.0f), SCREEN_SCALE_X(counter) / 2.0f + SCREEN_SCALE_FROM_RIGHT(TIMER_RIGHT_OFFSET + 50.0f) + SCREEN_SCALE_X(4.0f), SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(11.0f) + SCREEN_SCALE_Y(8.0f)), CRGBA(0, 106, 164, 255));
 					}
 
 					if (CUserDisplay::OnscnTimer.m_sEntries[0].m_aCounterText[0]) {
