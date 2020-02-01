@@ -5654,6 +5654,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	}
 	case COMMAND_GET_NUMBER_OF_POWER_PILLS_CARRIED:
 		ScriptParams[0] = CPacManPickups::QueryPowerPillsCarriedByPlayer();
+		StoreParameters(&m_nIp, 1);
 		return 0;
 	case COMMAND_CLEAR_NUMBER_OF_POWER_PILLS_CARRIED:
 		CPacManPickups::ResetPowerPillsCarriedByPlayer();
