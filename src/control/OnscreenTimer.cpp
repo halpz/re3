@@ -151,9 +151,6 @@ void COnscreenTimerEntry::ProcessForDisplayClock() {
 
 void COnscreenTimerEntry::ProcessForDisplayCounter() {
 	uint32 counter = *(uint32*)&CTheScripts::ScriptSpace[m_nCounterOffset];
-
-	assert(!m_nType || counter <= 100);
-
 	sprintf(m_bCounterBuffer, "%d", counter);
 }
 
