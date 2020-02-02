@@ -4328,7 +4328,7 @@ CAutomobile::RemoveBonnetInPedCollision(void)
 {
 	CObject *obj;
 
-	if(Damage.GetDoorStatus(DOOR_BONNET) != DOOR_STATUS_SWINGING &&
+	if(Damage.GetDoorStatus(DOOR_BONNET) == DOOR_STATUS_SWINGING &&
 	   Doors[DOOR_BONNET].RetAngleWhenOpen()*0.4f < Doors[DOOR_BONNET].m_fAngle){
 		// BUG? why not COMPGROUP_BONNET?
 		obj = SpawnFlyingComponent(CAR_BONNET, COMPGROUP_DOOR);
