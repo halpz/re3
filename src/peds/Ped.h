@@ -824,7 +824,6 @@ public:
 	static CPedAudioData (&CommentWaitTime)[38];
 
 #ifdef TOGGLEABLE_BETA_FEATURES
-	static bool bUnusedFightThingOnPlayer;
 	static bool bPopHeadsOnHeadshot;
 	static bool bMakePedsRunToPhonesToReportCrimes;
 #endif

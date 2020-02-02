@@ -93,11 +93,11 @@ int32 CGarages::QueryCarsCollected(int16 garage)
 void CGarages::GivePlayerDetonator()
 {
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_DETONATOR, 1);
-	FindPlayerPed()->m_weapons[FindPlayerPed()->GetWeaponSlot(WEAPONTYPE_DETONATOR)].m_eWeaponState = WEAPONSTATE_READY;
+	FindPlayerPed()->GetWeapon(FindPlayerPed()->GetWeaponSlot(WEAPONTYPE_DETONATOR)).m_eWeaponState = WEAPONSTATE_READY;
 }
 
 WRAPPER bool CGarages::HasThisCarBeenCollected(int16 garage, uint8 id) { EAXJMP(0x426D50); }
-WRAPPER void CGarages::ChangeGarageType(int16 garage, eGarageType type) { EAXJMP(0x4222A0); }
+WRAPPER void CGarages::ChangeGarageType(int16 garage, eGarageType type, int32 unk) { EAXJMP(0x4222A0); }
 WRAPPER bool CGarages::HasResprayHappened(int16 garage) { EAXJMP(0x4274F0); }
 
 void CGarage::OpenThisGarage()
