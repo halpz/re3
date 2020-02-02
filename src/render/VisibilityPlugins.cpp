@@ -248,7 +248,7 @@ CVisibilityPlugins::RenderFadingAtomic(RpAtomic *atomic, float camdist)
 			RpGeometrySetFlags(geo, flags | rpGEOMETRYMODULATEMATERIALCOLOR);
 			RpGeometryForAllMaterials(geo, SetAlphaCB, (void*)alpha);
 			if(geo != RpAtomicGetGeometry(atomic))
-				RpAtomicSetGeometry(atomic, geo, 0);
+				RpAtomicSetGeometry(atomic, geo, rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 			AtomicDefaultRenderCallBack(atomic);
 			RpGeometryForAllMaterials(geo, SetAlphaCB, (void*)255);
 			RpGeometrySetFlags(geo, flags);

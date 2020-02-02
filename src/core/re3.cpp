@@ -350,7 +350,6 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddCmd("Debug", "Make peds follow you in formation", LetThemFollowYou);
 #ifdef TOGGLEABLE_BETA_FEATURES
-		DebugMenuAddVarBool8("Debug", "Toggle unused fight feature", (int8*)&CPed::bUnusedFightThingOnPlayer, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle banned particles", (int8*)&CParticle::bEnableBannedParticles, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", (int8*)&CPed::bPopHeadsOnHeadshot, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle peds running to phones to report crimes", (int8*)&CPed::bMakePedsRunToPhonesToReportCrimes, nil);

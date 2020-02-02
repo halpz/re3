@@ -273,7 +273,6 @@ static char WaitStateText[][16] = {
 };
 
 #ifdef TOGGLEABLE_BETA_FEATURES
-bool CPed::bUnusedFightThingOnPlayer = false;
 bool CPed::bPopHeadsOnHeadshot = false;
 bool CPed::bMakePedsRunToPhonesToReportCrimes = false;
 #endif
@@ -1068,6 +1067,7 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 	if (attackAssoc) {
 		switch (attackAssoc->animId) {
 			case ANIM_WEAPON_START_THROW:
+				// what?!
 				if ((!ped->IsPlayer() || ((CPlayerPed*)ped)->m_bHaveTargetSelected) && ped->IsPlayer()) {
 					attackAssoc->blendDelta = -1000.0f;
 					newAnim = CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_WEAPON_THROWU);
@@ -1929,13 +1929,13 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		float limitedDest = CGeneral::LimitRadianAngle(m_fRotationDest);
 		float timeUntilStateChange = (m_nPedStateTimer - CTimer::GetTimeInMilliseconds())/600.0f;
 
-		m_vecOffsetSeek.z = 0.0f;
 		if (timeUntilStateChange <= 0.0f) {
 			m_vecOffsetSeek.x = 0.0f;
 			m_vecOffsetSeek.y = 0.0f;
-		} else {
-			neededPos -= timeUntilStateChange * m_vecOffsetSeek;
 		}
+		m_vecOffsetSeek.z = 0.0f;
+
+		neededPos -= timeUntilStateChange * m_vecOffsetSeek;
 
 		if (PI + m_fRotationCur < limitedDest) {
 			limitedDest -= 2 * PI;
@@ -4827,10 +4827,6 @@ CPed::StartFightAttack(uint8 buttonPressure)
 	animAssoc->SetFinishCallback(FinishFightMoveCB, this);
 	m_fightState = FIGHTSTATE_NO_MOVE;
 	m_takeAStepAfterAttack = false;
-#ifdef TOGGLEABLE_BETA_FEATURES
-	m_takeAStepAfterAttack = IsPlayer() && bUnusedFightThingOnPlayer;
-#endif
-
 	bIsAttacking = true;
 
 	if (IsPlayer())

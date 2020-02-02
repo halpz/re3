@@ -6176,7 +6176,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	}
 	case COMMAND_CHANGE_GARAGE_TYPE:
 		CollectParameters(&m_nIp, 2);
-		CGarages::ChangeGarageType(ScriptParams[0], (eGarageType)ScriptParams[1]);
+		CGarages::ChangeGarageType(ScriptParams[0], (eGarageType)ScriptParams[1], 0);
 		return 0;
 	case COMMAND_ACTIVATE_CRUSHER_CRANE:
 	{
