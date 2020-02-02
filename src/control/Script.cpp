@@ -46,10 +46,12 @@
 #include "Remote.h"
 #include "Restart.h"
 #include "Replay.h"
+#include "RpAnimBlend.h"
 #include "Shadows.h"
 #include "Stats.h"
 #include "Streaming.h"
 #include "Text.h"
+#include "TxdStore.h"
 #include "User.h"
 #include "WaterLevel.h"
 #include "Weather.h"
@@ -7523,107 +7525,440 @@ WRAPPER int8 CRunningScript::ProcessCommands900To999(int32 command) { EAXJMP(0x4
 #else
 int8 CRunningScript::ProcessCommands900To999(int32 command)
 {
-	switch (command){
+	char txd[52];
+	switch (command) {
 	case COMMAND_PRINT_STRING_IN_STRING_NOW:
-	case COMMAND_PRINT_STRING_IN_STRING_SOON:
+	{
+		wchar* source = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* str = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 2);
+		CMessages::AddMessageJumpQWithString(source, ScriptParams[0], ScriptParams[1], str);
+		return 0;
+	}
+	//case COMMAND_PRINT_STRING_IN_STRING_SOON:
 	case COMMAND_SET_5_REPEATED_PHONE_MESSAGES:
+	{
+		CollectParameters(&m_nIp, 1);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text5 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		gPhoneInfo.SetPhoneMessage_Repeatedly(ScriptParams[0], text1, text2, text3, text4, text5, nil);
+		return 0;
+	}
 	case COMMAND_SET_5_PHONE_MESSAGES:
+	{
+		CollectParameters(&m_nIp, 1);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text5 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		gPhoneInfo.SetPhoneMessage_JustOnce(ScriptParams[0], text1, text2, text3, text4, text5, nil);
+		return 0;
+	}
 	case COMMAND_SET_6_REPEATED_PHONE_MESSAGES:
+	{
+		CollectParameters(&m_nIp, 1);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text5 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text6 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		gPhoneInfo.SetPhoneMessage_Repeatedly(ScriptParams[0], text1, text2, text3, text4, text5, text6);
+		return 0;
+	}
 	case COMMAND_SET_6_PHONE_MESSAGES:
+	{
+		CollectParameters(&m_nIp, 1);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text5 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text6 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		gPhoneInfo.SetPhoneMessage_JustOnce(ScriptParams[0], text1, text2, text3, text4, text5, text6);
+		return 0;
+	}
 	case COMMAND_IS_POINT_OBSCURED_BY_A_MISSION_ENTITY:
+	{
+		CollectParameters(&m_nIp, 6);
+		float infX = *(float*)&ScriptParams[0] - *(float*)&ScriptParams[3];
+		float supX = *(float*)&ScriptParams[0] + *(float*)&ScriptParams[3];
+		float infY = *(float*)&ScriptParams[1] - *(float*)&ScriptParams[4];
+		float supY = *(float*)&ScriptParams[1] + *(float*)&ScriptParams[4];
+		float infZ = *(float*)&ScriptParams[2] - *(float*)&ScriptParams[5];
+		float supZ = *(float*)&ScriptParams[2] + *(float*)&ScriptParams[5];
+		if (infX > supX) {
+			float tmp = infX;
+			infX = supX;
+			supX = tmp;
+		}
+		if (infY > supY) {
+			float tmp = infY;
+			infY = supY;
+			supY = tmp;
+		}
+		if (infZ > supZ) {
+			float tmp = infZ;
+			infZ = supZ;
+			supZ = tmp;
+		}
+		int16 total;
+		CWorld::FindMissionEntitiesIntersectingCube(CVector(infX, infY, infZ), CVector(supX, supY, supZ), &total, 2, nil, true, true, true);
+		UpdateCompareFlag(total > 0);
+		return 0;
+	}
 	case COMMAND_LOAD_ALL_MODELS_NOW:
+		CTimer::Stop();
+		CStreaming::LoadAllRequestedModels(false);
+		CTimer::Resume();
+		return 0;
 	case COMMAND_ADD_TO_OBJECT_VELOCITY:
+	{
+		CollectParameters(&m_nIp, 4);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		pObject->SetMoveSpeed(pObject->GetMoveSpeed() + 0.02f * *(CVector*)&ScriptParams[1]);
+		return 0;
+	}
 	case COMMAND_DRAW_SPRITE:
+	{
+		CollectParameters(&m_nIp, 9);
+		CTheScripts::IntroRectangles[CTheScripts::NumberOfIntroRectanglesThisFrame].m_bIsUsed = true;
+		CTheScripts::IntroRectangles[CTheScripts::NumberOfIntroRectanglesThisFrame].m_nTextureId = ScriptParams[0] - 1;
+		CTheScripts::IntroRectangles[CTheScripts::NumberOfIntroRectanglesThisFrame].m_sRect = CRect(
+			*(float*)&ScriptParams[1], *(float*)&ScriptParams[2], *(float*)&ScriptParams[1] + *(float*)&ScriptParams[3], *(float*)&ScriptParams[2] + *(float*)&ScriptParams[4]);
+		CTheScripts::IntroRectangles[CTheScripts::NumberOfIntroRectanglesThisFrame].m_sColor = CRGBA(ScriptParams[5], ScriptParams[6], ScriptParams[7], ScriptParams[8]);
+		CTheScripts::NumberOfIntroRectanglesThisFrame++;
+		return 0;
+	}
 	case COMMAND_DRAW_RECT:
+	{
+		CollectParameters(&m_nIp, 8);
+		CTheScripts::IntroRectangles[CTheScripts::NumberOfIntroRectanglesThisFrame].m_bIsUsed = true;
+		CTheScripts::IntroRectangles[CTheScripts::NumberOfIntroRectanglesThisFrame].m_nTextureId = -1;
+		CTheScripts::IntroRectangles[CTheScripts::NumberOfIntroRectanglesThisFrame].m_sRect = CRect(
+			*(float*)&ScriptParams[0], *(float*)&ScriptParams[1], *(float*)&ScriptParams[0] + *(float*)&ScriptParams[2], *(float*)&ScriptParams[1] + *(float*)&ScriptParams[3]);
+		CTheScripts::IntroRectangles[CTheScripts::NumberOfIntroRectanglesThisFrame].m_sColor = CRGBA(ScriptParams[4], ScriptParams[5], ScriptParams[6], ScriptParams[7]);
+		CTheScripts::NumberOfIntroRectanglesThisFrame++;
+		return 0;
+	}
 	case COMMAND_LOAD_SPRITE:
+	{
+		CollectParameters(&m_nIp, 1);
+		strncpy(txd, (char*)&CTheScripts::ScriptSpace[m_nIp], 8);
+		for (int i = 0; i < 8; i++)
+			txd[i] = tolower(txd[i]);
+		m_nIp += 8;
+		int slot = CTxdStore::FindTxdSlot("script");
+		CTxdStore::PushCurrentTxd();
+		CTxdStore::SetCurrentTxd(slot);
+		CTheScripts::ScriptSprites[ScriptParams[0] - 1].SetTexture(txd);
+		CTxdStore::PopCurrentTxd();
+		return 0;
+	}
 	case COMMAND_LOAD_TEXTURE_DICTIONARY:
+	{
+		strcpy(txd, "models\\");
+		strncpy(txd + sizeof("models\\"), (char*)&CTheScripts::ScriptSpace[m_nIp], 8);
+		strcat(txd, ".txd");
+		m_nIp += 8;
+		int slot = CTxdStore::FindTxdSlot("script");
+		if (slot == -1)
+			slot = CTxdStore::AddTxdSlot("script");
+		CTxdStore::LoadTxd(slot, txd);
+		CTxdStore::AddRef(slot);
+		return 0;
+	}
 	case COMMAND_REMOVE_TEXTURE_DICTIONARY:
+	{
+		for (int i = 0; i < ARRAY_SIZE(CTheScripts::ScriptSprites); i++)
+			CTheScripts::ScriptSprites[i].Delete();
+		CTxdStore::RemoveTxd(CTxdStore::FindTxdSlot("script"));
+		return 0;
+	}
 	case COMMAND_SET_OBJECT_DYNAMIC:
+	{
+		CollectParameters(&m_nIp, 2);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		if (ScriptParams[1]) {
+			if (pObject->bIsStatic) {
+				pObject->bIsStatic = true;
+				pObject->AddToMovingList();
+			}
+		}
+		else {
+			if (!pObject->bIsStatic) {
+				pObject->bIsStatic = false;
+				pObject->RemoveFromMovingList();
+			}
+		}
+		return 0;
+	}
 	case COMMAND_SET_CHAR_ANIM_SPEED:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		CAnimBlendAssociation* pAssoc = RpAnimBlendClumpGetFirstAssociation(pPed->GetClump());
+		if (pAssoc)
+			pAssoc->speed = *(float*)&ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_PLAY_MISSION_PASSED_TUNE:
+	{
+		CollectParameters(&m_nIp, 1);
+		DMAudio.ChangeMusicMode(0);
+		DMAudio.PlayFrontEndTrack(ScriptParams[0] + STREAMED_SOUND_MISSION_COMPLETED - 1, 0);
+		return 0;
+	}
 	case COMMAND_CLEAR_AREA:
+	{
+		CollectParameters(&m_nIp, 5);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CWorld::ClearExcitingStuffFromArea(pos, *(float*)&ScriptParams[3], ScriptParams[4]);
+		return 0;
+	}
 	case COMMAND_FREEZE_ONSCREEN_TIMER:
+		CollectParameters(&m_nIp, 1);
+		CUserDisplay::OnscnTimer.m_bDisabled = ScriptParams[0] != 0;
+		return 0;
 	case COMMAND_SWITCH_CAR_SIREN:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		pVehicle->m_bSirenOrAlarm = ScriptParams[1] != 0;
+		return 0;
+	}
 	case COMMAND_SWITCH_PED_ROADS_ON_ANGLED:
+	{
+		CollectParameters(&m_nIp, 7);
+		ThePaths.SwitchRoadsInAngledArea(*(float*)&ScriptParams[0], *(float*)&ScriptParams[1], *(float*)&ScriptParams[2],
+			*(float*)&ScriptParams[3], *(float*)&ScriptParams[4], *(float*)&ScriptParams[5], *(float*)&ScriptParams[6], 0, 1);
+		return 0;
+	}
 	case COMMAND_SWITCH_PED_ROADS_OFF_ANGLED:
+		CollectParameters(&m_nIp, 7);
+		ThePaths.SwitchRoadsInAngledArea(*(float*)&ScriptParams[0], *(float*)&ScriptParams[1], *(float*)&ScriptParams[2],
+			*(float*)&ScriptParams[3], *(float*)&ScriptParams[4], *(float*)&ScriptParams[5], *(float*)&ScriptParams[6], 0, 0);
+		return 0;
 	case COMMAND_SWITCH_ROADS_ON_ANGLED:
+		CollectParameters(&m_nIp, 7);
+		ThePaths.SwitchRoadsInAngledArea(*(float*)&ScriptParams[0], *(float*)&ScriptParams[1], *(float*)&ScriptParams[2],
+			*(float*)&ScriptParams[3], *(float*)&ScriptParams[4], *(float*)&ScriptParams[5], *(float*)&ScriptParams[6], 1, 1);
+		return 0;
 	case COMMAND_SWITCH_ROADS_OFF_ANGLED:
+		CollectParameters(&m_nIp, 7);
+		ThePaths.SwitchRoadsInAngledArea(*(float*)&ScriptParams[0], *(float*)&ScriptParams[1], *(float*)&ScriptParams[2],
+			*(float*)&ScriptParams[3], *(float*)&ScriptParams[4], *(float*)&ScriptParams[5], *(float*)&ScriptParams[6], 1, 0);
+		return 0;
 	case COMMAND_SET_CAR_WATERTIGHT:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		assert(pVehicle->m_vehType == VEHICLE_TYPE_CAR);
+		CAutomobile* pCar = (CAutomobile*)pVehicle;
+		pCar->bWaterTight = ScriptParams[1] != 0;
+		return 0;
+	}
 	case COMMAND_ADD_MOVING_PARTICLE_EFFECT:
+	{
+		CollectParameters(&m_nIp, 12);
+		CVector pos = *(CVector*)&ScriptParams[1];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		float size = max(0.0f, *(float*)&ScriptParams[7]);
+		eParticleObjectType type = (eParticleObjectType)ScriptParams[0];
+		RwRGBA color;
+		if (type == POBJECT_SMOKE_TRAIL){
+			color.alpha = -1;
+			color.red = ScriptParams[8];
+			color.green = ScriptParams[9];
+			color.blue = ScriptParams[10];
+		}else{
+			color.alpha = color.red = color.blue = color.green = 0;
+		}
+		CVector target = *(CVector*)&ScriptParams[4];
+		CParticleObject::AddObject(type, pos, target, size, ScriptParams[11], color, 1);
+		return 0;
+	}
 	case COMMAND_SET_CHAR_CANT_BE_DRAGGED_OUT:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		pPed->bDontDragMeOutCar = ScriptParams[1] != 0;
+		return 0;
+	}
 	case COMMAND_TURN_CAR_TO_FACE_COORD:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		const CVector& pos = pVehicle->GetPosition();
+		float heading = CGeneral::GetATanOfXY(pos.y - *(float*)&ScriptParams[2], pos.x - *(float*)&ScriptParams[1]) + HALFPI;
+		if (heading > TWOPI)
+			heading -= TWOPI;
+		pVehicle->SetHeading(heading);
+		return 0;
+	}
 	case COMMAND_IS_CRANE_LIFTING_CAR:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[2]);
+		UpdateCompareFlag(CCranes::IsThisCarPickedUp(*(float*)&ScriptParams[0], *(float*)&ScriptParams[1], pVehicle));
+		return 0;
+	}
 	case COMMAND_DRAW_SPHERE:
+		return 0;
 	case COMMAND_SET_CAR_STATUS:
+		return 0;
 	case COMMAND_IS_CHAR_MALE:
+		return 0;
 	case COMMAND_SCRIPT_NAME:
+		return 0;
 	case COMMAND_CHANGE_GARAGE_TYPE_WITH_CAR_MODEL:
+		return 0;
 	case COMMAND_FIND_DRUG_PLANE_COORDINATES:
+		return 0;
 	case COMMAND_SAVE_INT_TO_DEBUG_FILE:
+		return 0;
 	case COMMAND_SAVE_FLOAT_TO_DEBUG_FILE:
+		return 0;
 	case COMMAND_SAVE_NEWLINE_TO_DEBUG_FILE:
+		return 0;
 	case COMMAND_POLICE_RADIO_MESSAGE:
+		return 0;
 	case COMMAND_SET_CAR_STRONG:
+		return 0;
 	case COMMAND_REMOVE_ROUTE:
+		return 0;
 	case COMMAND_SWITCH_RUBBISH:
+		return 0;
 	case COMMAND_REMOVE_PARTICLE_EFFECTS_IN_AREA:
+		return 0;
 	case COMMAND_SWITCH_STREAMING:
+		return 0;
 	case COMMAND_IS_GARAGE_OPEN:
+		return 0;
 	case COMMAND_IS_GARAGE_CLOSED:
+		return 0;
 	case COMMAND_START_CATALINA_HELI:
+		return 0;
 	case COMMAND_CATALINA_HELI_TAKE_OFF:
+		return 0;
 	case COMMAND_REMOVE_CATALINA_HELI:
+		return 0;
 	case COMMAND_HAS_CATALINA_HELI_BEEN_SHOT_DOWN:
+		return 0;
 	case COMMAND_SWAP_NEAREST_BUILDING_MODEL:
+		return 0;
 	case COMMAND_SWITCH_WORLD_PROCESSING:
+		return 0;
 	case COMMAND_REMOVE_ALL_PLAYER_WEAPONS:
+		return 0;
 	case COMMAND_GRAB_CATALINA_HELI:
+		return 0;
 	case COMMAND_CLEAR_AREA_OF_CARS:
+		return 0;
 	case COMMAND_SET_ROTATING_GARAGE_DOOR:
+		return 0;
 	case COMMAND_ADD_SPHERE:
+		return 0;
 	case COMMAND_REMOVE_SPHERE:
+		return 0;
 	case COMMAND_CATALINA_HELI_FLY_AWAY:
+		return 0;
 	case COMMAND_SET_EVERYONE_IGNORE_PLAYER:
+		return 0;
 	case COMMAND_STORE_CAR_CHAR_IS_IN_NO_SAVE:
+		return 0;
 	case COMMAND_STORE_CAR_PLAYER_IS_IN_NO_SAVE:
+		return 0;
 	case COMMAND_IS_PHONE_DISPLAYING_MESSAGE:
+		return 0;
 	case COMMAND_DISPLAY_ONSCREEN_TIMER_WITH_STRING:
+		return 0;
 	case COMMAND_DISPLAY_ONSCREEN_COUNTER_WITH_STRING:
+		return 0;
 	case COMMAND_CREATE_RANDOM_CAR_FOR_CAR_PARK:
+		return 0;
 	case COMMAND_IS_COLLISION_IN_MEMORY:
+		return 0;
 	case COMMAND_SET_WANTED_MULTIPLIER:
+		return 0;
 	case COMMAND_SET_CAMERA_IN_FRONT_OF_PLAYER:
+		return 0;
 	case COMMAND_IS_CAR_VISIBLY_DAMAGED:
+		return 0;
 	case COMMAND_DOES_OBJECT_EXIST:
+		return 0;
 	case COMMAND_LOAD_SCENE:
+		return 0;
 	case COMMAND_ADD_STUCK_CAR_CHECK:
+		return 0;
 	case COMMAND_REMOVE_STUCK_CAR_CHECK:
+		return 0;
 	case COMMAND_IS_CAR_STUCK:
+		return 0;
 	case COMMAND_LOAD_MISSION_AUDIO:
+		return 0;
 	case COMMAND_HAS_MISSION_AUDIO_LOADED:
+		return 0;
 	case COMMAND_PLAY_MISSION_AUDIO:
+		return 0;
 	case COMMAND_HAS_MISSION_AUDIO_FINISHED:
+		return 0;
 	case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING:
+		return 0;
 	case COMMAND_HAS_IMPORT_GARAGE_SLOT_BEEN_FILLED:
+		return 0;
 	case COMMAND_CLEAR_THIS_PRINT:
+		return 0;
 	case COMMAND_CLEAR_THIS_BIG_PRINT:
+		return 0;
 	case COMMAND_SET_MISSION_AUDIO_POSITION:
+		return 0;
 	case COMMAND_ACTIVATE_SAVE_MENU:
+		return 0;
 	case COMMAND_HAS_SAVE_GAME_FINISHED:
+		return 0;
 	case COMMAND_NO_SPECIAL_CAMERA_FOR_THIS_GARAGE:
+		return 0;
 	case COMMAND_ADD_BLIP_FOR_PICKUP_OLD:
+		return 0;
 	case COMMAND_ADD_BLIP_FOR_PICKUP:
+		return 0;
 	case COMMAND_ADD_SPRITE_BLIP_FOR_PICKUP:
+		return 0;
 	case COMMAND_SET_PED_DENSITY_MULTIPLIER:
+		return 0;
 	case COMMAND_FORCE_RANDOM_PED_TYPE:
+		return 0;
 	case COMMAND_SET_TEXT_DRAW_BEFORE_FADE:
+		return 0;
 	case COMMAND_GET_COLLECTABLE1S_COLLECTED:
+		return 0;
 	case COMMAND_REGISTER_EL_BURRO_TIME:
+		return 0;
 	case COMMAND_SET_SPRITES_DRAW_BEFORE_FADE:
+		return 0;
 	case COMMAND_SET_TEXT_RIGHT_JUSTIFY:
+		return 0;
 	case COMMAND_PRINT_HELP:
+		return 0;
 	case COMMAND_CLEAR_HELP:
+		return 0;
 	case COMMAND_FLASH_HUD_OBJECT:
+		return 0;
 	default:
 		assert(0);
 	}
@@ -7638,105 +7973,205 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 {
 	switch (command){
 	case COMMAND_FLASH_RADAR_BLIP:
+		return 0;
 	case COMMAND_IS_CHAR_IN_CONTROL:
+		return 0;
 	case COMMAND_SET_GENERATE_CARS_AROUND_CAMERA:
+		return 0;
 	case COMMAND_CLEAR_SMALL_PRINTS:
+		return 0;
 	case COMMAND_HAS_MILITARY_CRANE_COLLECTED_ALL_CARS:
+		return 0;
 	case COMMAND_SET_UPSIDEDOWN_CAR_NOT_DAMAGED:
+		return 0;
 	case COMMAND_CAN_PLAYER_START_MISSION:
+		return 0;
 	case COMMAND_MAKE_PLAYER_SAFE_FOR_CUTSCENE:
+		return 0;
 	case COMMAND_USE_TEXT_COMMANDS:
+		return 0;
 	case COMMAND_SET_THREAT_FOR_PED_TYPE:
+		return 0;
 	case COMMAND_CLEAR_THREAT_FOR_PED_TYPE:
+		return 0;
 	case COMMAND_GET_CAR_COLOURS:
+		return 0;
 	case COMMAND_SET_ALL_CARS_CAN_BE_DAMAGED:
+		return 0;
 	case COMMAND_SET_CAR_CAN_BE_DAMAGED:
+		return 0;
 	case COMMAND_MAKE_PLAYER_UNSAFE:
+		return 0;
 	case COMMAND_LOAD_COLLISION:
+		return 0;
 	case COMMAND_GET_BODY_CAST_HEALTH:
+		return 0;
 	case COMMAND_SET_CHARS_CHATTING:
+		return 0;
 	case COMMAND_MAKE_PLAYER_SAFE:
+		return 0;
 	case COMMAND_SET_CAR_STAYS_IN_CURRENT_LEVEL:
+		return 0;
 	case COMMAND_SET_CHAR_STAYS_IN_CURRENT_LEVEL:
+		return 0;
 	case COMMAND_REGISTER_4X4_ONE_TIME:
+		return 0;
 	case COMMAND_REGISTER_4X4_TWO_TIME:
+		return 0;
 	case COMMAND_REGISTER_4X4_THREE_TIME:
+		return 0;
 	case COMMAND_REGISTER_4X4_MAYHEM_TIME:
+		return 0;
 	case COMMAND_REGISTER_LIFE_SAVED:
+		return 0;
 	case COMMAND_REGISTER_CRIMINAL_CAUGHT:
+		return 0;
 	case COMMAND_REGISTER_AMBULANCE_LEVEL:
+		return 0;
 	case COMMAND_REGISTER_FIRE_EXTINGUISHED:
+		return 0;
 	case COMMAND_TURN_PHONE_ON:
+		return 0;
 	case COMMAND_REGISTER_LONGEST_DODO_FLIGHT:
+		return 0;
 	case COMMAND_REGISTER_DEFUSE_BOMB_TIME:
+		return 0;
 	case COMMAND_SET_TOTAL_NUMBER_OF_KILL_FRENZIES:
+		return 0;
 	case COMMAND_BLOW_UP_RC_BUGGY:
+		return 0;
 	case COMMAND_REMOVE_CAR_FROM_CHASE:
+		return 0;
 	case COMMAND_IS_FRENCH_GAME:
+		return 0;
 	case COMMAND_IS_GERMAN_GAME:
+		return 0;
 	case COMMAND_CLEAR_MISSION_AUDIO:
+		return 0;
 	case COMMAND_SET_FADE_IN_AFTER_NEXT_ARREST:
+		return 0;
 	case COMMAND_SET_FADE_IN_AFTER_NEXT_DEATH:
+		return 0;
 	case COMMAND_SET_GANG_PED_MODEL_PREFERENCE:
+		return 0;
 	case COMMAND_SET_CHAR_USE_PEDNODE_SEEK:
+		return 0;
 	case COMMAND_SWITCH_VEHICLE_WEAPONS:
+		return 0;
 	case COMMAND_SET_GET_OUT_OF_JAIL_FREE:
+		return 0;
 	case COMMAND_SET_FREE_HEALTH_CARE:
+		return 0;
 	case COMMAND_IS_CAR_DOOR_CLOSED:
+		return 0;
 	case COMMAND_LOAD_AND_LAUNCH_MISSION:
+		return 0;
 	case COMMAND_LOAD_AND_LAUNCH_MISSION_INTERNAL:
+		return 0;
 	case COMMAND_SET_OBJECT_DRAW_LAST:
+		return 0;
 	case COMMAND_GET_AMMO_IN_PLAYER_WEAPON:
+		return 0;
 	case COMMAND_GET_AMMO_IN_CHAR_WEAPON:
+		return 0;
 	case COMMAND_REGISTER_KILL_FRENZY_PASSED:
+		return 0;
 	case COMMAND_SET_CHAR_SAY:
+		return 0;
 	case COMMAND_SET_NEAR_CLIP:
+		return 0;
 	case COMMAND_SET_RADIO_CHANNEL:
+		return 0;
 	case COMMAND_OVERRIDE_HOSPITAL_LEVEL:
+		return 0;
 	case COMMAND_OVERRIDE_POLICE_STATION_LEVEL:
+		return 0;
 	case COMMAND_FORCE_RAIN:
+		return 0;
 	case COMMAND_DOES_GARAGE_CONTAIN_CAR:
+		return 0;
 	case COMMAND_SET_CAR_TRACTION:
+		return 0;
 	case COMMAND_ARE_MEASUREMENTS_IN_METRES:
+		return 0;
 	case COMMAND_CONVERT_METRES_TO_FEET:
+		return 0;
 	case COMMAND_MARK_ROADS_BETWEEN_LEVELS:
+		return 0;
 	case COMMAND_MARK_PED_ROADS_BETWEEN_LEVELS:
+		return 0;
 	case COMMAND_SET_CAR_AVOID_LEVEL_TRANSITIONS:
+		return 0;
 	case COMMAND_SET_CHAR_AVOID_LEVEL_TRANSITIONS:
+		return 0;
 	case COMMAND_IS_THREAT_FOR_PED_TYPE:
+		return 0;
 	case COMMAND_CLEAR_AREA_OF_CHARS:
+		return 0;
 	case COMMAND_SET_TOTAL_NUMBER_OF_MISSIONS:
+		return 0;
 	case COMMAND_CONVERT_METRES_TO_FEET_INT:
+		return 0;
 	case COMMAND_REGISTER_FASTEST_TIME:
+		return 0;
 	case COMMAND_REGISTER_HIGHEST_SCORE:
+		return 0;
 	case COMMAND_WARP_CHAR_INTO_CAR_AS_PASSENGER:
+		return 0;
 	case COMMAND_IS_CAR_PASSENGER_SEAT_FREE:
+		return 0;
 	case COMMAND_GET_CHAR_IN_CAR_PASSENGER_SEAT:
+		return 0;
 	case COMMAND_SET_CHAR_IS_CHRIS_CRIMINAL:
+		return 0;
 	case COMMAND_START_CREDITS:
+		return 0;
 	case COMMAND_STOP_CREDITS:
+		return 0;
 	case COMMAND_ARE_CREDITS_FINISHED:
+		return 0;
 	case COMMAND_CREATE_SINGLE_PARTICLE:
+		return 0;
 	case COMMAND_SET_CHAR_IGNORE_LEVEL_TRANSITIONS:
+		return 0;
 	case COMMAND_GET_CHASE_CAR:
+		return 0;
 	case COMMAND_START_BOAT_FOAM_ANIMATION:
+		return 0;
 	case COMMAND_UPDATE_BOAT_FOAM_ANIMATION:
+		return 0;
 	case COMMAND_SET_MUSIC_DOES_FADE:
+		return 0;
 	case COMMAND_SET_INTRO_IS_PLAYING:
+		return 0;
 	case COMMAND_SET_PLAYER_HOOKER:
+		return 0;
 	case COMMAND_PLAY_END_OF_GAME_TUNE:
+		return 0;
 	case COMMAND_STOP_END_OF_GAME_TUNE:
+		return 0;
 	case COMMAND_GET_CAR_MODEL:
+		return 0;
 	case COMMAND_IS_PLAYER_SITTING_IN_CAR:
+		return 0;
 	case COMMAND_IS_PLAYER_SITTING_IN_ANY_CAR:
+		return 0;
 	case COMMAND_SET_SCRIPT_FIRE_AUDIO:
+		return 0;
 	case COMMAND_ARE_ANY_CAR_CHEATS_ACTIVATED:
+		return 0;
 	case COMMAND_SET_CHAR_SUFFERS_CRITICAL_HITS:
+		return 0;
 	case COMMAND_IS_PLAYER_LIFTING_A_PHONE:
+		return 0;
 	case COMMAND_IS_CHAR_SITTING_IN_CAR:
+		return 0;
 	case COMMAND_IS_CHAR_SITTING_IN_ANY_CAR:
+		return 0;
 	case COMMAND_IS_PLAYER_ON_FOOT:
+		return 0;
 	case COMMAND_IS_CHAR_ON_FOOT:
+		return 0;
 	default:
 		assert(0);
 	}
@@ -7751,59 +8186,113 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 {
 	switch (command) {
 	case COMMAND_LOAD_COLLISION_WITH_SCREEN:
+		return 0;
 	case COMMAND_LOAD_SPLASH_SCREEN:
+		return 0;
 	case COMMAND_SET_CAR_IGNORE_LEVEL_TRANSITIONS:
+		return 0;
 	case COMMAND_MAKE_CRAIGS_CAR_A_BIT_STRONGER:
+		return 0;
 	case COMMAND_SET_JAMES_CAR_ON_PATH_TO_PLAYER:
+		return 0;
 	case COMMAND_LOAD_END_OF_GAME_TUNE:
+		return 0;
 	case COMMAND_ENABLE_PLAYER_CONTROL_CAMERA:
+		return 0;
 	case COMMAND_SET_OBJECT_ROTATION:
+		return 0;
 	case COMMAND_GET_DEBUG_CAMERA_COORDINATES:
+		return 0;
 	case COMMAND_GET_DEBUG_CAMERA_FRONT_VECTOR:
+		return 0;
 	case COMMAND_IS_PLAYER_TARGETTING_ANY_CHAR:
+		return 0;
 	case COMMAND_IS_PLAYER_TARGETTING_CHAR:
+		return 0;
 	case COMMAND_IS_PLAYER_TARGETTING_OBJECT:
+		return 0;
 	case COMMAND_TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME:
+		return 0;
 	case COMMAND_DISPLAY_TEXT_WITH_NUMBER:
+		return 0;
 	case COMMAND_DISPLAY_TEXT_WITH_2_NUMBERS:
+		return 0;
 	case COMMAND_FAIL_CURRENT_MISSION:
+		return 0;
 	case COMMAND_GET_CLOSEST_OBJECT_OF_TYPE:
+		return 0;
 	case COMMAND_PLACE_OBJECT_RELATIVE_TO_OBJECT:
+		return 0;
 	case COMMAND_SET_ALL_OCCUPANTS_OF_CAR_LEAVE_CAR:
+		return 0;
 	case COMMAND_SET_INTERPOLATION_PARAMETERS:
+		return 0;
 	case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING_TOWARDS_POINT:
+		return 0;
 	case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING_AWAY_POINT:
+		return 0;
 	case COMMAND_GET_DEBUG_CAMERA_POINT_AT:
+		return 0;
 	case COMMAND_ATTACH_CHAR_TO_CAR:
+		return 0;
 	case COMMAND_DETACH_CHAR_FROM_CAR:
+		return 0;
 	case COMMAND_SET_CAR_STAY_IN_FAST_LANE:
+		return 0;
 	case COMMAND_CLEAR_CHAR_LAST_WEAPON_DAMAGE:
+		return 0;
 	case COMMAND_CLEAR_CAR_LAST_WEAPON_DAMAGE:
+		return 0;
 	case COMMAND_GET_RANDOM_COP_IN_AREA:
+		return 0;
 	case COMMAND_GET_RANDOM_COP_IN_ZONE:
+		return 0;
 	case COMMAND_SET_CHAR_OBJ_FLEE_CAR:
+		return 0;
 	case COMMAND_GET_DRIVER_OF_CAR:
+		return 0;
 	case COMMAND_GET_NUMBER_OF_FOLLOWERS:
+		return 0;
 	case COMMAND_GIVE_REMOTE_CONTROLLED_MODEL_TO_PLAYER:
+		return 0;
 	case COMMAND_GET_CURRENT_PLAYER_WEAPON:
+		return 0;
 	case COMMAND_GET_CURRENT_CHAR_WEAPON:
+		return 0;
 	case COMMAND_LOCATE_CHAR_ANY_MEANS_OBJECT_2D:
+		return 0;
 	case COMMAND_LOCATE_CHAR_ON_FOOT_OBJECT_2D:
+		return 0;
 	case COMMAND_LOCATE_CHAR_IN_CAR_OBJECT_2D:
+		return 0;
 	case COMMAND_LOCATE_CHAR_ANY_MEANS_OBJECT_3D:
+		return 0;
 	case COMMAND_LOCATE_CHAR_ON_FOOT_OBJECT_3D:
+		return 0;
 	case COMMAND_LOCATE_CHAR_IN_CAR_OBJECT_3D:
+		return 0;
 	case COMMAND_SET_CAR_TEMP_ACTION:
+		return 0;
 	case COMMAND_SET_CAR_HANDBRAKE_TURN_RIGHT:
+		return 0;
 	case COMMAND_SET_CAR_HANDBRAKE_STOP:
+		return 0;
 	case COMMAND_IS_CHAR_ON_ANY_BIKE:
+		return 0;
 	case COMMAND_LOCATE_SNIPER_BULLET_2D:
+		return 0;
 	case COMMAND_LOCATE_SNIPER_BULLET_3D:
+		return 0;
 	case COMMAND_GET_NUMBER_OF_SEATS_IN_MODEL:
+		return 0;
 	case COMMAND_IS_PLAYER_ON_ANY_BIKE:
+		return 0;
 	case COMMAND_IS_CHAR_LYING_DOWN:
+		return 0;
 	case COMMAND_CAN_CHAR_SEE_DEAD_CHAR:
+		return 0;
 	case COMMAND_SET_ENTER_CAR_RANGE_MULTIPLIER:
+		return 0;
 	default:
 		assert(0);
 	}
