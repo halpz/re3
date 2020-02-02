@@ -5826,7 +5826,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		assert(pVehicle);
 		assert(pVehicle->m_vehType == VEHICLE_TYPE_BOAT);
 		CBoat* pBoat = (CBoat*)pVehicle;
-		pBoat->AutoPilot.m_nCruiseSpeed = ScriptParams[1];
+		pBoat->AutoPilot.m_nCruiseSpeed = *(float*)&ScriptParams[1];
 		return 0;
 	}
 	case COMMAND_GET_RANDOM_CHAR_IN_AREA:
