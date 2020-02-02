@@ -5625,7 +5625,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			pVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_ACCURATE;
 		pVehicle->m_status = STATUS_PHYSICS;
 		pVehicle->bEngineOn = true;
-		pVehicle->AutoPilot.m_nCruiseSpeed = min(6, pVehicle->AutoPilot.m_nCruiseSpeed);
+		pVehicle->AutoPilot.m_nCruiseSpeed = max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
 		pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
