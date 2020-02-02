@@ -4406,7 +4406,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPlayerPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pPed);
-		if (ScriptParams[0]) {
+		if (ScriptParams[1]) {
 			pPed->m_pWanted->m_bIgnoredByCops = true;
 			CWorld::StopAllLawEnforcersInTheirTracks();
 		}
@@ -5828,7 +5828,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		assert(pVehicle);
 		assert(pVehicle->m_vehType == VEHICLE_TYPE_BOAT);
 		CBoat* pBoat = (CBoat*)pVehicle;
-		pBoat->AutoPilot.m_nCruiseSpeed = ScriptParams[1];
+		pBoat->AutoPilot.m_nCruiseSpeed = *(float*)&ScriptParams[1];
 		return 0;
 	}
 	case COMMAND_GET_RANDOM_CHAR_IN_AREA:
