@@ -501,7 +501,7 @@ void CCarAI::TellCarToRamOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
 	pTarget->RegisterReference((CEntity**)&pVehicle->AutoPilot.m_pTargetCar);
 	pVehicle->AutoPilot.m_nCarMission = MISSION_RAMCAR_FARAWAY;
 	pVehicle->bEngineOn = true;
-	pVehicle->AutoPilot.m_nCruiseSpeed = min(6, pVehicle->AutoPilot.m_nCruiseSpeed);
+	pVehicle->AutoPilot.m_nCruiseSpeed = max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
 }
 
 void CCarAI::TellCarToBlockOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
@@ -510,7 +510,7 @@ void CCarAI::TellCarToBlockOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
 	pTarget->RegisterReference((CEntity**)&pVehicle->AutoPilot.m_pTargetCar);
 	pVehicle->AutoPilot.m_nCarMission = MISSION_BLOCKCAR_FARAWAY;
 	pVehicle->bEngineOn = true;
-	pVehicle->AutoPilot.m_nCruiseSpeed = min(6, pVehicle->AutoPilot.m_nCruiseSpeed);
+	pVehicle->AutoPilot.m_nCruiseSpeed = max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
 }
 eCarMission CCarAI::FindPoliceCarMissionForWantedLevel()
 {
