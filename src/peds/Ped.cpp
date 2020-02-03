@@ -718,7 +718,7 @@ CheckForPedsOnGroundToAttack(CPed *attacker, CPed **pedOnGround)
 	}
 
 	if (pedOnGround)
-		* pedOnGround = currentPed;
+		*pedOnGround = currentPed;
 
 	return stateToReturn;
 }
@@ -11060,6 +11060,7 @@ CPed::PedAnimPullPedOutCB(CAnimBlendAssociation* animAssoc, void* arg)
 		int padNo;
 		if (ped->IsPlayer()) {
 
+			// BUG? This will cause crash if m_nPedType is bigger then 1, there are only 2 pads
 			switch (ped->m_nPedType) {
 				case PEDTYPE_PLAYER1:
 					padNo = 0;
@@ -11073,9 +11074,6 @@ CPed::PedAnimPullPedOutCB(CAnimBlendAssociation* animAssoc, void* arg)
 				case PEDTYPE_PLAYER4:
 					padNo = 3;
 					break;
-				default:
-					// FIX: that was "break"
-					return;
 			}
 			CPad *pad = CPad::GetPad(padNo);
 
@@ -11175,6 +11173,7 @@ CPed::PedAnimStepOutCarCB(CAnimBlendAssociation* animAssoc, void* arg)
 	int padNo;
 	if (ped->IsPlayer()) {
 
+		// BUG? This will cause crash if m_nPedType is bigger then 1, there are only 2 pads
 		switch (ped->m_nPedType) {
 			case PEDTYPE_PLAYER1:
 				padNo = 0;
@@ -11188,9 +11187,6 @@ CPed::PedAnimStepOutCarCB(CAnimBlendAssociation* animAssoc, void* arg)
 			case PEDTYPE_PLAYER4:
 				padNo = 3;
 				break;
-			default:
-				// FIX: that was "break"
-				return;
 		}
 		CPad* pad = CPad::GetPad(padNo);
 		bool engineIsIntact = false;
@@ -11417,6 +11413,34 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 	if (!veh)
 		return;
 
+#ifdef VC_PED_PORTS
+	// Situation of entering car as a driver while there is already a driver exiting atm.
+	CPed *driver = veh->pDriver;
+	if (driver && driver->m_nPedState == PED_DRIVING && !veh->bIsBus && driver->m_objective == OBJECTIVE_LEAVE_VEHICLE
+		&& (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER || ped->m_nPedState == PED_CARJACK)) {
+
+		if (!ped->IsPlayer() && (ped->CharCreatedBy != MISSION_CHAR || driver->IsPlayer())) {
+			ped->QuitEnteringCar();
+			return;
+		}
+		if (driver->CharCreatedBy == MISSION_CHAR) {
+			PedSetOutCarCB(nil, veh->pDriver);
+			if (driver->m_pMyVehicle) {
+				driver->PositionPedOutOfCollision();
+			} else {
+				driver->m_pMyVehicle = veh;
+				driver->PositionPedOutOfCollision();
+				driver->m_pMyVehicle = nil;
+			}
+			veh->pDriver = nil;
+		} else {
+			driver->SetDead();
+			driver->FlagToDestroyWhenNextProcessed();
+			veh->pDriver = nil;
+		}
+	}
+#endif
+
 	if (!ped->IsNotInWreckedVehicle() || ped->DyingOrDead())
 		return;
 
@@ -11446,7 +11470,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 
 	if (veh->IsBoat()) {
 		if (ped->IsPlayer()) {
-#ifdef VC_PED_PORTS
+#if defined(FIX_BUGS) || defined(VC_PED_PORTS)
 			CCarCtrl::RegisterVehicleOfInterest(veh);
 #endif
 			if (veh->m_status == STATUS_SIMPLE) {
@@ -11499,7 +11523,10 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 #endif
 			}
 		}
-	} else if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER) {
+	}
+	// This shouldn't happen at all. Passengers can't enter with PED_CARJACK. Even though they did, we shouldn't call AddPassenger in here and SetDriver in below.
+#ifndef VC_PED_PORTS
+	else if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER) {
 		if (ped->m_nPedState == PED_CARJACK) {
 			veh->AddPassenger(ped, 0);
 			ped->m_nPedState = PED_DRIVING;
@@ -11509,6 +11536,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 			veh->AutoPilot.m_nCruiseSpeed = 17;
 		}
 	}
+#endif
 
 	if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER || ped->m_nPedState == PED_CARJACK) {
 		veh->SetDriver(ped);
@@ -11572,6 +11600,10 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 			ped->m_prevObjective = OBJECTIVE_NONE;
 
 		ped->RestorePreviousObjective();
+#ifdef VC_PED_PORTS
+		if(veh->pDriver && ped->CharCreatedBy == RANDOM_CHAR)
+			veh->AutoPilot.m_nCruiseSpeed = 17;
+#endif
 	}
 
 	veh->m_nGettingInFlags &= ~GetCarDoorFlag(ped->m_vehEnterType);
@@ -13098,13 +13130,22 @@ CPed::ProcessObjective(void)
 						m_objectiveTimer = 0;
 					}
 				}
+				// fall through
 			}
 			case OBJECTIVE_ENTER_CAR_AS_DRIVER:
 			{
 				if (!m_carInObjective || bInVehicle) {
-					bObjectiveCompleted = true;
-					bScriptObjectiveCompleted = true;
-					RestorePreviousState();
+#ifdef VC_PED_PORTS
+					if (bInVehicle && m_pMyVehicle != m_carInObjective)
+					{
+						SetExitCar(m_pMyVehicle, 0);
+					}
+#endif
+					{
+						bObjectiveCompleted = true;
+						bScriptObjectiveCompleted = true;
+						RestorePreviousState();
+					}
 				} else {
 					if (m_leaveCarTimer > CTimer::GetTimeInMilliseconds()) {
 						SetMoveState(PEDMOVE_STILL);
