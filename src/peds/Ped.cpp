@@ -2120,18 +2120,16 @@ CPed::SortPeds(CPed **list, int min, int max)
 	int left = max;
 	int right;
 	for(right = min; right <= left; ){
-		// Those 1.0s are my addition to make sure loop always run for first time.
-		for (float rightDist = middleDist-1.0f; middleDist > rightDist; right++) {
+		float rightDist, leftDist;
+		do {
 			rightDiff = GetPosition() - list[right]->GetPosition();
 			rightDist = rightDiff.Magnitude();
-		}
-		right--;
+		} while (middleDist > rightDist && ++right);
 
-		for (float leftDist = middleDist+1.0f; middleDist < leftDist; left--) {
+		do {
 			leftDiff = GetPosition() - list[left]->GetPosition();
 			leftDist = leftDiff.Magnitude();
-		}
-		left++;
+		} while (middleDist < leftDist && left--);
 
 		if (right <= left) {
 			CPed *ped = list[right];
@@ -13136,10 +13134,9 @@ CPed::ProcessObjective(void)
 			{
 				if (!m_carInObjective || bInVehicle) {
 #ifdef VC_PED_PORTS
-					if (bInVehicle && m_pMyVehicle != m_carInObjective)
-					{
+					if (bInVehicle && m_pMyVehicle != m_carInObjective) {
 						SetExitCar(m_pMyVehicle, 0);
-					}
+					} else
 #endif
 					{
 						bObjectiveCompleted = true;
