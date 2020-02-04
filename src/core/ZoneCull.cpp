@@ -462,7 +462,7 @@ CCullZone::DoStuffEnteringZone_OneBuilding(uint16 i)
 	}else{
 		i -= 6000;
 		for(j = 0; j < 3; j++)
-			DoStuffLeavingZone_OneBuilding(CCullZones::aIndices[i+j]);
+			DoStuffEnteringZone_OneBuilding(CCullZones::aIndices[i+j]);
 	}
 }
 
@@ -481,7 +481,7 @@ CCullZone::DoStuffEnteringZone_OneTreadablePlus10m(uint16 i)
 	}else{
 		i -= 6000;
 		for(j = 0; j < 3; j++)
-			DoStuffLeavingZone_OneBuilding(CCullZones::aIndices[i+j]);
+			DoStuffEnteringZone_OneTreadablePlus10m(CCullZones::aIndices[i+j]);
 	}
 }
 
@@ -499,7 +499,7 @@ CCullZone::DoStuffEnteringZone_OneTreadable(uint16 i)
 	}else{
 		i -= 6000;
 		for(j = 0; j < 3; j++)
-			DoStuffLeavingZone_OneBuilding(CCullZones::aIndices[i+j]);
+			DoStuffEnteringZone_OneTreadable(CCullZones::aIndices[i+j]);
 	}
 }
 
