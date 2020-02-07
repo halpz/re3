@@ -8141,7 +8141,7 @@ cAudioManager::AdjustSamplesVolume()
 	for(int i = 0; i < m_bSampleRequestQueuesStatus[m_bActiveSampleQueue]; i++) {
 		tSound* pSample = &m_asSamples[m_bActiveSampleQueue][m_abSampleQueueIndexTable[m_bActiveSampleQueue][i] + 1];
 
-		if(!pSample->m_bBankIndex) // all non-speech sounds on PC
+		if(!pSample->m_bIsDistant)
 			pSample->m_bEmittingVolume = ComputeEmittingVolume(
 			    pSample->m_bEmittingVolume, pSample->m_fSoundIntensity, pSample->m_fDistance);
 	}
