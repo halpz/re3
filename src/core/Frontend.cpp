@@ -448,7 +448,7 @@ void CMenuManager::Draw()
 				str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
 			break;
 		case MENUPAGE_SAVE_OVERWRITE_CONFIRM:
-			if (Slots[m_nCurrSaveSlot] == SLOT_EMPTY)
+			if (Slots[m_nCurrSaveSlot + 1] == SLOT_EMPTY)
 				str = TheText.Get("FESZ_QZ");
 			else
 				str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);

@@ -28,8 +28,6 @@ char SaveFileNameJustSaved[260];
 int (&Slots)[SLOT_COUNT+1] = *(int(*)[SLOT_COUNT+1])*(uintptr*)0x72803C;
 CDate &CompileDateAndTime = *(CDate*)0x72BCB8;
 
-C_PcSave &PcSaveHelper = *(C_PcSave*)0x8E2C60;
-
 #define ReadDataFromBufferPointer(buf, to) memcpy(&to, buf, sizeof(to)); buf += align4bytes(sizeof(to));
 #define WriteDataToBufferPointer(buf, from) memcpy(buf, &from, sizeof(from)); buf += align4bytes(sizeof(from));
 
