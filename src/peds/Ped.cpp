@@ -4534,7 +4534,7 @@ CPed::SetEvasiveDive(CPhysical *reason, uint8 onlyRandomJump)
 		}
 	} else {
 		if (IsPlayer()) {
-			((CPlayerPed*)this)->m_bShouldEvade = 5;
+			((CPlayerPed*)this)->m_nEvadeAmount = 5;
 			((CPlayerPed*)this)->m_pEvadingFrom = reason;
 			reason->RegisterReference((CEntity**) &((CPlayerPed*)this)->m_pEvadingFrom);
 			return;

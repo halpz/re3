@@ -36,7 +36,7 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_fMaxStamina = 150.0f;
 	m_fCurrentStamina = m_fMaxStamina;
 	m_fStaminaProgress = 0.0f;
-	m_bShouldEvade = false;
+	m_nEvadeAmount = 0;
 	field_1367 = 0;
 	m_nShotDelay = 0;
 	field_1376 = 0.0f;
@@ -230,7 +230,7 @@ CPlayerPed::SetInitialState(void)
 	m_animGroup = ASSOCGRP_PLAYER;
 	m_fMoveSpeed = 0.0f;
 	m_nSelectedWepSlot = WEAPONTYPE_UNARMED;
-	m_bShouldEvade = false;
+	m_nEvadeAmount = 0;
 	m_pEvadingFrom = nil;
 	bIsPedDieAnimPlaying = false;
 	SetRealMoveAnim();
@@ -661,9 +661,9 @@ CPlayerPed::PlayerControlFighter(CPad *padUsed)
 	}
 
 	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy && padUsed->JumpJustDown()) {
-		if (m_bShouldEvade && m_pEvadingFrom) {
+		if (m_nEvadeAmount != 0 && m_pEvadingFrom) {
 			SetEvasiveDive((CPhysical*)m_pEvadingFrom, 1);
-			m_bShouldEvade = false;
+			m_nEvadeAmount = 0;
 			m_pEvadingFrom = nil;
 		} else {
 			SetJump();
@@ -710,9 +710,9 @@ CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 		&& padUsed->JumpJustDown() && m_nPedState != PED_JUMP) {
 		ClearAttack();
 		ClearWeaponTarget();
-		if (m_bShouldEvade && m_pEvadingFrom) {
+		if (m_nEvadeAmount != 0 && m_pEvadingFrom) {
 			SetEvasiveDive((CPhysical*)m_pEvadingFrom, 1);
-			m_bShouldEvade = false;
+			m_nEvadeAmount = 0;
 			m_pEvadingFrom = nil;
 		} else {
 			SetJump();
@@ -1129,9 +1129,9 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 		&& padUsed->JumpJustDown() && m_nPedState != PED_JUMP) {
 		ClearAttack();
 		ClearWeaponTarget();
-		if (m_bShouldEvade && m_pEvadingFrom) {
+		if (m_nEvadeAmount != 0 && m_pEvadingFrom) {
 			SetEvasiveDive((CPhysical*)m_pEvadingFrom, 1);
-			m_bShouldEvade = false;
+			m_nEvadeAmount = 0;
 			m_pEvadingFrom = nil;
 		} else {
 			SetJump();
@@ -1142,10 +1142,10 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 void
 CPlayerPed::ProcessControl(void)
 {
-	if (m_bShouldEvade)
-		m_bShouldEvade = false;  //--m_bShouldEvade;
+	if (m_nEvadeAmount != 0)
+		--m_nEvadeAmount;
 
-	if (!m_bShouldEvade)
+	if (m_nEvadeAmount == 0)
 		m_pEvadingFrom = nil;
 
 	if (m_pCurrentPhysSurface && m_pCurrentPhysSurface->IsVehicle() && ((CVehicle*)m_pCurrentPhysSurface)->IsBoat()) {
