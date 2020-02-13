@@ -389,6 +389,8 @@ public:
 	bool GetRightShoulder1JustDown() { return !!(NewState.RightShoulder1 && !OldState.RightShoulder1); }
 	bool GetRightShoulder2JustDown() { return !!(NewState.RightShoulder2 && !OldState.RightShoulder2); }
 	bool GetStartJustDown()          { return !!(NewState.Start && !OldState.Start); }
+	bool GetLeftStickXJustDown() { return !!(NewState.LeftStickX && !OldState.LeftStickX); }
+	bool GetLeftStickYJustDown() { return !!(NewState.LeftStickY && !OldState.LeftStickY); }
   
 	bool GetTriangle()           { return !!NewState.Triangle; }
 	bool GetCircle()             { return !!NewState.Circle; }

@@ -17,7 +17,7 @@ public:
 	bool m_bSpeedTimerFlag;
 	bool m_bShouldEvade;
 	int8 field_1367;
-	int32 m_nSpeedTimer;
+	uint32 m_nSpeedTimer;
 	int32 m_nShotDelay;
 	float field_1376;	// m_fAttackButtonCounter?
 	bool m_bHaveTargetSelected;	// may have better name
@@ -75,6 +75,7 @@ public:
 	bool FindWeaponLockOnTarget(void);
 	void ProcessAnimGroups(void);
 	void ProcessPlayerWeapon(CPad*);
+	void PlayerControlZelda(CPad*);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);
