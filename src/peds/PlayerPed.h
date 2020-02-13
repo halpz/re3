@@ -15,7 +15,7 @@ public:
 	float m_fStaminaProgress;
 	int8 m_nSelectedWepSlot;	// eWeaponType
 	bool m_bSpeedTimerFlag;
-	bool m_bShouldEvade;
+	uint8 m_nEvadeAmount;
 	int8 field_1367;
 	uint32 m_nSpeedTimer;
 	int32 m_nShotDelay;
