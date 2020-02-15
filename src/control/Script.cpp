@@ -7906,12 +7906,12 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_REMOVE_PARTICLE_EFFECTS_IN_AREA:
 	{
 		CollectParameters(&m_nIp, 6);
-		float x1 = *(float*)&ScriptParams[1];
-		float y1 = *(float*)&ScriptParams[2];
-		float z1 = *(float*)&ScriptParams[3];
-		float x2 = *(float*)&ScriptParams[4];
-		float y2 = *(float*)&ScriptParams[5];
-		float z2 = *(float*)&ScriptParams[6];
+		float x1 = *(float*)&ScriptParams[0];
+		float y1 = *(float*)&ScriptParams[1];
+		float z1 = *(float*)&ScriptParams[2];
+		float x2 = *(float*)&ScriptParams[3];
+		float y2 = *(float*)&ScriptParams[4];
+		float z2 = *(float*)&ScriptParams[5];
 		CParticleObject* tmp = CParticleObject::pCloseListHead;
 		while (tmp) {
 			CParticleObject* next = tmp->m_pNext;
@@ -7999,10 +7999,12 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		return 0;
 	}
 	case COMMAND_GRAB_CATALINA_HELI:
+	{
 		CHeli* pHeli = CHeli::FindPointerToCatalinasHeli();
 		ScriptParams[0] = pHeli ? CPools::GetVehiclePool()->GetIndex(pHeli) : -1;
 		StoreParameters(&m_nIp, 1);
 		return 0;
+	}
 	case COMMAND_CLEAR_AREA_OF_CARS:
 	{
 		CollectParameters(&m_nIp, 6);
@@ -8089,6 +8091,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		UpdateCompareFlag(gPhoneInfo.IsMessageBeingDisplayed(ScriptParams[0]));
 		return 0;
 	case COMMAND_DISPLAY_ONSCREEN_TIMER_WITH_STRING:
+	{
 		assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
 		int16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
@@ -8096,7 +8099,9 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		m_nIp += 8;
 		CUserDisplay::OnscnTimer.AddClock(var, onscreen_str);
 		return 0;
+	}
 	case COMMAND_DISPLAY_ONSCREEN_COUNTER_WITH_STRING:
+	{
 		assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
 		int16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 1);
@@ -8105,6 +8110,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		m_nIp += 8;
 		CUserDisplay::OnscnTimer.AddCounter(var, ScriptParams[0], onscreen_str);
 		return 0;
+	}
 	case COMMAND_CREATE_RANDOM_CAR_FOR_CAR_PARK:
 	{
 		CollectParameters(&m_nIp, 4);
@@ -8312,13 +8318,17 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		return 0;
 	}
 	case COMMAND_CLEAR_THIS_PRINT:
+	{
 		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CMessages::ClearThisPrint(text);
 		return 0;
+	}
 	case COMMAND_CLEAR_THIS_BIG_PRINT:
+	{
 		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CMessages::ClearThisBigPrint(text);
 		return 0;
+	}
 	case COMMAND_SET_MISSION_AUDIO_POSITION:
 	{
 		CollectParameters(&m_nIp, 3);
@@ -8396,17 +8406,19 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_bRightJustify = ScriptParams[0] != 0;
 		return 0;
 	case COMMAND_PRINT_HELP:
+	{
 		if (CCamera::m_bUseMouse3rdPerson && (
 			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "HELP15", 7) == 0 ||
 			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_2A", 7) == 0 ||
 			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_3A", 7) == 0 ||
-			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_4A", 7) == 0)){
+			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_4A", 7) == 0)) {
 			m_nIp += 8;
 			return 0;
 		}
 		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CHud::SetHelpMessage(text, false);
 		return 0;
+	}
 	case COMMAND_CLEAR_HELP:
 		CHud::SetHelpMessage(nil, false);
 		return 0;
@@ -8789,10 +8801,11 @@ int32 CTheScripts::GetActualScriptSphereIndex(int32 index)
 	if (index == -1)
 		return -1;
 	uint16 check = (uint32)index >> 16;
-	uint16 array_idx = (uint32)index & (0xFFFF);
+	uint16 array_idx = index & (0xFFFF);
+	assert(array_idx < ARRAY_SIZE(ScriptSphereArray));
 	if (check != ScriptSphereArray[array_idx].m_Index)
 		return -1;
-	return index;
+	return array_idx;
 }
 
 int32 CTheScripts::AddScriptSphere(int32 id, CVector pos, float radius)
@@ -8818,8 +8831,8 @@ int32 CTheScripts::GetNewUniqueScriptSphereIndex(int32 index)
 	if (ScriptSphereArray[index].m_Index >= 0xFFFE)
 		ScriptSphereArray[index].m_Index = 1;
 	else
-		ScriptSphereArray[index].m_Index = 1;
-	return index | ScriptSphereArray[index].m_Index << 16;
+		ScriptSphereArray[index].m_Index++;
+	return (uint16)index | ScriptSphereArray[index].m_Index << 16;
 }
 
 void CTheScripts::RemoveScriptSphere(int32 index)
