@@ -43,3 +43,28 @@ CRouteNode::AddRoutePoint(int16 route, CVector pos)
 	gaRoutes[point].m_route = route;
 	gaRoutes[point].m_pos = pos;
 }
+
+void
+CRouteNode::RemoveRoute(int16 route)
+{
+	uint16 first_point, last_point, i;
+	for (first_point = 0; first_point < NUMPEDROUTES; first_point++) {
+		if (gaRoutes[first_point].m_route == route)
+			break;
+	}
+	if (first_point == NUMPEDROUTES)
+		return;
+	for (last_point = first_point; last_point < NUMPEDROUTES; last_point++)
+		if (gaRoutes[last_point].m_route != route)
+			break;
+	uint16 diff = last_point - first_point;
+#ifdef FIX_BUGS	
+	for (i = first_point; i < NUMPEDROUTES - diff; i++)
+		gaRoutes[i] = gaRoutes[i + diff];
+#else
+	for (i = 0; i < diff; i++)
+		gaRoutes[first_point + i] = gaRoutes[last_point + i];
+#endif
+	for (i = NUMPEDROUTES - diff; i < NUMPEDROUTES; i++)
+		gaRoutes[i].m_route = -1;
+}

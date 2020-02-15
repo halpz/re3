@@ -49,6 +49,7 @@ WRAPPER void CWorld::FindObjectsIntersectingAngledCollisionBox(const CColBox &, 
 WRAPPER void CWorld::FindObjectsOfTypeInRange(uint32, CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool) { EAXJMP(0x4B2600); }
 WRAPPER void CWorld::FindObjectsOfTypeInRangeSectorList(uint32, CPtrList&, CVector&, float, bool, short*, short, CEntity**) { EAXJMP(0x4B2960); }
 WRAPPER void CWorld::FindMissionEntitiesIntersectingCube(const CVector&, const CVector&, int16*, int16, CEntity**, bool, bool, bool) { EAXJMP(0x4B3680); }
+WRAPPER void CWorld::ClearCarsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B50E0); }
 
 void
 CWorld::Initialise()

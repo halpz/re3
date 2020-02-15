@@ -377,6 +377,12 @@ public:
 	static void DrawDebugSquare(float, float, float, float);
 	static void DrawDebugCube(float, float, float, float, float, float);
 	static void AddToInvisibilitySwapArray(CEntity*, bool);
+	static void AddToBuildingSwapArray(CBuilding*, int32, int32);
+
+	static int32 GetActualScriptSphereIndex(int32 index);
+	static int32 AddScriptSphere(int32 id, CVector pos, float radius);
+	static int32 GetNewUniqueScriptSphereIndex(int32 index);
+	static void RemoveScriptSphere(int32 index);
 
 	static int32 Read4BytesFromScript(uint32* pIp){
 		int32 retval = 0;

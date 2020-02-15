@@ -32,8 +32,14 @@ int32 &CStats::MissionsGiven = *(int32*)0x9430E8;
 int32 &CStats::MissionsPassed = *(int32*)0x940768;
 char(&CStats::LastMissionPassedName)[8] = *(char(*)[8])*(uintptr*)0x70D828;
 int32 &CStats::TotalLegitimateKills = *(int32*)0x8F6004;
+int32 &CStats::ElBurroTime = *(int32*)0x8E2A6C;
 
 void CStats::AnotherKillFrenzyPassed()
 {
 	++NumberKillFrenziesPassed;
+}
+
+void CStats::RegisterElBurroTime(int32 time)
+{
+	ElBurroTime = (ElBurroTime && ElBurroTime < time) ? ElBurroTime : time;
 }
