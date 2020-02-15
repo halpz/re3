@@ -140,7 +140,7 @@ public:
 	int32 m_counter;
 	int32 m_nSampleIndex;
 	uint8 m_bBankIndex;
-	uint8 m_bIsDistant;
+	bool m_bIsDistant;
 	uint8 field_14;
 	uint8 field_15;
 	int32 field_16;
@@ -164,9 +164,9 @@ public:
 	uint8 field_58;
 	uint8 field_59;
 	CVector m_vecPos;
-	uint8 m_bReverbFlag;
+	bool m_bReverbFlag;
 	uint8 m_bLoopsRemaining;
-	uint8 m_bRequireReflection;
+	bool m_bRequireReflection;
 	uint8 m_bOffset;
 	int32 field_76;
 	uint8 m_bIsProcessed;
@@ -337,6 +337,7 @@ public:
 	uint32 GetFrameCounter() const { return m_nTimeOfRecentCrime; }
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; }
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
+	bool IsMissionAudioPlaying() const { return m_sMissionAudio.m_bPlayStatus == 1; }
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample); /// ok (check once more)

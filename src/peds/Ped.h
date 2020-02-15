@@ -530,8 +530,8 @@ public:
 	void AimGun(void);
 	void KillPedWithCar(CVehicle *veh, float impulse);
 	void Say(uint16 audio);
-	void SetLookFlag(CEntity *target, bool unknown);
-	void SetLookFlag(float direction, bool unknown);
+	void SetLookFlag(CEntity *target, bool keepTryingToLook);
+	void SetLookFlag(float direction, bool keepTryingToLook);
 	void SetLookTimer(int time);
 	void SetDie(AnimationId anim, float arg1, float arg2);
 	void SetDead(void);
@@ -824,7 +824,6 @@ public:
 	static CPedAudioData (&CommentWaitTime)[38];
 
 #ifdef TOGGLEABLE_BETA_FEATURES
-	static bool bUnusedFightThingOnPlayer;
 	static bool bPopHeadsOnHeadshot;
 	static bool bMakePedsRunToPhonesToReportCrimes;
 #endif

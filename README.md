@@ -63,7 +63,6 @@ CMotionBlurStreaks
 CObject
 CPacManPickups
 CPedPath
-CPlayerPed
 CPopulation
 CRadar
 CRecordDataForChase

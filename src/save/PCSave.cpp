@@ -8,6 +8,8 @@
 
 const char* _psGetUserFilesFolder();
 
+C_PcSave &PcSaveHelper = *(C_PcSave*)0x8E2C60;
+
 void
 C_PcSave::SetSaveDirectory(const char *path)
 {

@@ -150,8 +150,8 @@ cAudioManager::SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter)
 			if(m_sQueueSample.m_bVolume) {
 				m_sQueueSample.m_counter = counter;
 				m_sQueueSample.m_vecPos = col->m_vecPosition;
-				m_sQueueSample.m_bBankIndex = 0;
-				m_sQueueSample.m_bIsDistant = 0;
+				m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_bIsDistant = false;
 				m_sQueueSample.field_16 = 7;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_bEmittingVolume = emittingVol;
@@ -163,8 +163,8 @@ cAudioManager::SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter)
 				m_sQueueSample.m_fSoundIntensity = 60.0f;
 				m_sQueueSample.field_56 = 0;
 				m_sQueueSample.field_76 = 5;
-				m_sQueueSample.m_bReverbFlag = 1;
-				m_sQueueSample.m_bRequireReflection = 0;
+				m_sQueueSample.m_bReverbFlag = true;
+				m_sQueueSample.m_bRequireReflection = false;
 				AddSampleToRequestedQueue();
 			}
 		}
@@ -269,8 +269,8 @@ cAudioManager::SetUpOneShotCollisionSound(cAudioCollision *col)
 				m_sQueueSample.m_counter = counter++;
 				if(counter >= 255) counter = 28;
 				m_sQueueSample.m_vecPos = col->m_vecPosition;
-				m_sQueueSample.m_bBankIndex = 0;
-				m_sQueueSample.m_bIsDistant = 0;
+				m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_bIsDistant = false;
 				m_sQueueSample.field_16 = 11;
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.m_bEmittingVolume = emittingVol;
@@ -279,8 +279,8 @@ cAudioManager::SetUpOneShotCollisionSound(cAudioCollision *col)
 				m_sQueueSample.field_48 = 4.0f;
 				m_sQueueSample.m_fSoundIntensity = 60.0f;
 				m_sQueueSample.field_56 = 1;
-				m_sQueueSample.m_bReverbFlag = 1;
-				m_sQueueSample.m_bRequireReflection = 0;
+				m_sQueueSample.m_bReverbFlag = true;
+				m_sQueueSample.m_bRequireReflection = false;
 				AddSampleToRequestedQueue();
 			}
 		}
@@ -320,8 +320,8 @@ cAudioManager::ServiceCollisions()
 		if (!someArr2[i]) {
 			m_sCollisionManager.m_asCollisions2[i].m_pEntity1 = nil;
 			m_sCollisionManager.m_asCollisions2[i].m_pEntity2 = nil;
-			m_sCollisionManager.m_asCollisions2[i].m_bSurface1 = 0;
-			m_sCollisionManager.m_asCollisions2[i].m_bSurface2 = 0;
+			m_sCollisionManager.m_asCollisions2[i].m_bSurface1 = SURFACE_DEFAULT;
+			m_sCollisionManager.m_asCollisions2[i].m_bSurface2 = SURFACE_DEFAULT;
 			m_sCollisionManager.m_asCollisions2[i].m_fIntensity2 = 0.0f;
 			m_sCollisionManager.m_asCollisions2[i].m_fIntensity1 = 0.0f;
 			m_sCollisionManager.m_asCollisions2[i].m_vecPosition = CVector(0.0f, 0.0f, 0.0f);

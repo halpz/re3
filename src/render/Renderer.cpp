@@ -413,7 +413,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 		// Make sure our atomic uses the right geometry and not
 		// that of an atomic for another draw distance.
 		if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
-			RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), 0);
+			RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 		mi->IncreaseAlpha();
 		if(ent->m_rwObject == nil || !ent->bIsVisible)
 			return VIS_INVISIBLE;
@@ -463,7 +463,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 	assert(ent->m_rwObject);
 	RpAtomic *rwobj = (RpAtomic*)ent->m_rwObject;
 	if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
-		RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), 0);
+		RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 	mi->IncreaseAlpha();
 	if(ent->m_rwObject == nil || !ent->bIsVisible)
 		return VIS_INVISIBLE;
@@ -528,7 +528,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 		// Make sure our atomic uses the right geometry and not
 		// that of an atomic for another draw distance.
 		if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
-			RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), 0);
+			RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 		if(!ent->IsVisibleComplex())
 			return 0;
 		if(mi->m_drawLast){
@@ -558,7 +558,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 	assert(ent->m_rwObject);
 	RpAtomic *rwobj = (RpAtomic*)ent->m_rwObject;
 	if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
-		RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), 0);
+		RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 	if(ent->IsVisibleComplex())
 		CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
 	return 0;

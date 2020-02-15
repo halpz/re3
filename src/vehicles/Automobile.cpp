@@ -3885,6 +3885,9 @@ CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset)
 	}
 
 	CVector dist = doorPos - seatPos;
+
+	// Removing that makes this func. return false for van doors.
+	doorPos.z += 0.5f;
 	float length = dist.Magnitude();
 	CVector pedPos = seatPos + dist*((length+0.6f)/length);
 
@@ -4193,6 +4196,7 @@ GetCurrentAtomicObjectCB(RwObject *object, void *data)
 }
 
 CColPoint aTempPedColPts[32];	// this name doesn't make any sense
+								// they probably copied it from Ped (both serves same purpose) and didn't change the name
 
 CObject*
 CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)

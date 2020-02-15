@@ -44,7 +44,7 @@ CVisibilityPlugins::Initialise(void)
 	m_alphaList.Init(20);
 	m_alphaList.head.item.sort = 0.0f;
 	m_alphaList.tail.item.sort = 100000000.0f;
-	m_alphaEntityList.Init(350);	// TODO: set back to 150 when things are fixed
+	m_alphaEntityList.Init(150);
 	m_alphaEntityList.head.item.sort = 0.0f;
 	m_alphaEntityList.tail.item.sort = 100000000.0f;
 }
@@ -248,7 +248,7 @@ CVisibilityPlugins::RenderFadingAtomic(RpAtomic *atomic, float camdist)
 			RpGeometrySetFlags(geo, flags | rpGEOMETRYMODULATEMATERIALCOLOR);
 			RpGeometryForAllMaterials(geo, SetAlphaCB, (void*)alpha);
 			if(geo != RpAtomicGetGeometry(atomic))
-				RpAtomicSetGeometry(atomic, geo, 0);
+				RpAtomicSetGeometry(atomic, geo, rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 			AtomicDefaultRenderCallBack(atomic);
 			RpGeometryForAllMaterials(geo, SetAlphaCB, (void*)255);
 			RpGeometrySetFlags(geo, flags);

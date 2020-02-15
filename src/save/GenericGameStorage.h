@@ -35,4 +35,3 @@ extern int (&Slots)[SLOT_COUNT+1];
 extern char SaveFileNameJustSaved[260]; // 8F2570
 
 const char TopLineEmptyFile[] = "THIS FILE IS NOT VALID YET";
-extern C_PcSave &PcSaveHelper;
