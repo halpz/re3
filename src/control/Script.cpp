@@ -1729,7 +1729,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		else if (ScriptParams[0] == PEDTYPE_EMERGENCY || ScriptParams[0] == PEDTYPE_FIREMAN)
 			ped = new CEmergencyPed(ScriptParams[1]);
 		else
-			ped = new CCivilianPed(ScriptParams[0], ScriptParams[1]);
+			ped = new CCivilianPed((ePedType)ScriptParams[0], ScriptParams[1]);
 		ped->CharCreatedBy = MISSION_CHAR;
 		ped->bRespondsToThreats = false;
 		ped->bAllowMedicsToReviveMe = false;
@@ -2768,7 +2768,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		else if (ScriptParams[1] == PEDTYPE_EMERGENCY || ScriptParams[1] == PEDTYPE_FIREMAN)
 			pPed = new CEmergencyPed(ScriptParams[2]);
 		else
-			pPed = new CCivilianPed(ScriptParams[1], ScriptParams[2]);
+			pPed = new CCivilianPed((ePedType)ScriptParams[1], ScriptParams[2]);
 		pPed->CharCreatedBy = MISSION_CHAR;
 		pPed->bRespondsToThreats = false;
 		pPed->bAllowMedicsToReviveMe = false;
@@ -3963,7 +3963,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		else if (ScriptParams[1] == PEDTYPE_EMERGENCY || ScriptParams[1] == PEDTYPE_FIREMAN)
 			pPed = new CEmergencyPed(ScriptParams[2]);
 		else
-			pPed = new CCivilianPed(ScriptParams[1], ScriptParams[2]);
+			pPed = new CCivilianPed((ePedType)ScriptParams[1], ScriptParams[2]);
 		pPed->CharCreatedBy = MISSION_CHAR;
 		pPed->bRespondsToThreats = false;
 		pPed->bAllowMedicsToReviveMe = false;
@@ -7360,7 +7360,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CZoneInfo zoneinfo;
 		CTheZones::GetZoneInfoForTimeOfDay(&CWorld::Players[CWorld::PlayerInFocus].GetPos(), &zoneinfo);
 		int mi;
-		int pedtype = PEDTYPE_COP;
+		ePedType pedtype = PEDTYPE_COP;
 		int attempt = 0;
 		while (pedtype != PEDTYPE_CIVMALE && pedtype != PEDTYPE_CIVFEMALE && attempt < 5) {
 			mi = CPopulation::ChooseCivilianOccupation(zoneinfo.pedGroup);

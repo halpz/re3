@@ -450,7 +450,7 @@ public:
 	eCrimeType m_crimeToReportOnPhone;
 	uint32 m_phoneTalkTimer;
 	CAccident *m_lastAccident;
-	int32 m_nPedType;
+	uint32 m_nPedType;
 	CPedStats *m_pedStats;
 	float m_fleeFromPosX;
 	float m_fleeFromPosY;
