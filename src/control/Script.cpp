@@ -2197,7 +2197,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 	case COMMAND_PRINT_BIG:
 	{
 		wchar* key = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 2);
 		CMessages::AddBigMessage(key, ScriptParams[0], ScriptParams[1] - 1);
 		return 0;
@@ -2205,7 +2205,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 	case COMMAND_PRINT:
 	{
 		wchar* key = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 2);
 		CMessages::AddMessage(key, ScriptParams[0], ScriptParams[1]);
 		return 0;
@@ -2213,7 +2213,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 	case COMMAND_PRINT_NOW:
 	{
 		wchar* key = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 2);
 		CMessages::AddMessageJumpQ(key, ScriptParams[0], ScriptParams[1]);
 		return 0;
@@ -2221,7 +2221,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 	case COMMAND_PRINT_SOON:
 	{
 		wchar* key = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 2);
 		CMessages::AddMessageSoon(key, ScriptParams[0], ScriptParams[1]);
 		return 0;
@@ -2704,7 +2704,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		int zoneToCheck = CTheZones::FindZoneByLabelAndReturnIndex(label);
 		if (zoneToCheck != -1)
-			m_nIp += 8; /* why only if zone != 1? */
+			m_nIp += KEY_LENGTH_IN_SCRIPT; /* why only if zone != 1? */
 		CVector pos = pPlayer->GetPos();
 		CZone* pZone = CTheZones::GetZone(zoneToCheck);
 		UpdateCompareFlag(CTheZones::PointLiesWithinZone(pos, pZone));
@@ -3031,7 +3031,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	{
 		char label[12];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 16);
 		int zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
 		if (zone < 0) {
@@ -3056,7 +3056,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		int zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
 		if (zone != -1)
-			m_nIp += 8;
+			m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CVector pos = pPed->bInVehicle ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
 		UpdateCompareFlag(CTheZones::PointLiesWithinZone(pos, CTheZones::GetZone(zone)));
 		return 0;
@@ -3080,7 +3080,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		char label[12];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		int16 zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 2);
 		if (zone < 0) {
 			debug("Couldn't find zone - %s\n", label);
@@ -3122,7 +3122,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	{
 		char label[12];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 10);
 		int16 zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
 		if (zone < 0) {
@@ -5020,11 +5020,11 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		char name[16];
-		strncpy(name, (char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		for (int i = 0; i < 8; i++)
+		strncpy(name, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			name[i] = tolower(name[i]);
 		CStreaming::RequestSpecialChar(ScriptParams[0] - 1, name, STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		return 0;
 	}
 	case COMMAND_HAS_SPECIAL_CHARACTER_LOADED:
@@ -5891,11 +5891,11 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	}
 	case COMMAND_GET_RANDOM_CHAR_IN_ZONE:
 	{
-		char zone[8];
-		strncpy(zone, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
+		char zone[KEY_LENGTH_IN_SCRIPT];
+		strncpy(zone, (const char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
 		int nZone = CTheZones::FindZoneByLabelAndReturnIndex(zone);
 		if (nZone != -1)
-			m_nIp += 8;
+			m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CZone* pZone = CTheZones::GetZone(nZone);
 		int ped_handle = -1;
 		CVector pos = FindPlayerCoors();
@@ -5992,9 +5992,9 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	}
 	case COMMAND_LOAD_CUTSCENE:
 	{
-		char name[8];
-		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		m_nIp += 8;
+		char name[KEY_LENGTH_IN_SCRIPT];
+		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CCutsceneMgr::LoadCutsceneData(name);
 		return 0;
 	}
@@ -6009,11 +6009,11 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	case COMMAND_SET_CUTSCENE_ANIM:
 	{
 		CollectParameters(&m_nIp, 1);
-		char name[8];
+		char name[KEY_LENGTH_IN_SCRIPT];
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		assert(pObject);
-		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		m_nIp += 8;
+		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CCutsceneMgr::SetCutsceneAnim(name, pObject);
 		return 0;
 	}
@@ -6127,12 +6127,12 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	case COMMAND_LOAD_SPECIAL_MODEL:
 	{
 		CollectParameters(&m_nIp, 1);
-		char name[8];
-		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		for (int i = 0; i < 8; i++)
+		char name[KEY_LENGTH_IN_SCRIPT];
+		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			name[i] = tolower(name[i]);
 		CStreaming::RequestSpecialModel(ScriptParams[0], name, STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		return 0;
 	}
 	case COMMAND_CREATE_CUTSCENE_HEAD:
@@ -6150,9 +6150,9 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CObject* pCutHead = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		assert(pCutHead);
-		char name[8];
-		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		m_nIp += 8;
+		char name[KEY_LENGTH_IN_SCRIPT];
+		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CTimer::Stop();
 		CCutsceneMgr::SetHeadAnim(name, pCutHead);
 		CTimer::Update();
@@ -6374,10 +6374,10 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		return 0;
 	case COMMAND_REGISTER_MISSION_PASSED:
 	{
-		char name[8];
-		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		m_nIp += 8;
-		strncpy(CStats::LastMissionPassedName, name, 8);
+		char name[KEY_LENGTH_IN_SCRIPT];
+		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		strncpy(CStats::LastMissionPassedName, name, KEY_LENGTH_IN_SCRIPT);
 		++CStats::MissionsPassed;
 		CStats::CheckPointReachedSuccessfully();
 		return 0;
@@ -6506,9 +6506,9 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	}
 	case COMMAND_SET_ZONE_GROUP:
 	{
-		char zone[8];
+		char zone[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 2);
 		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
 		if (zone_id < 0) {
@@ -6568,11 +6568,11 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	}
 	case COMMAND_GET_RANDOM_CAR_OF_TYPE_IN_ZONE:
 	{
-		char zone[8];
+		char zone[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
 		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
 		if (zone_id != -1)
-			m_nIp += 8;
+			m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CZone* pZone = CTheZones::GetZone(zone_id);
 		CollectParameters(&m_nIp, 1);
 		int handle = -1;
@@ -7012,16 +7012,16 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
-		char name[8];
+		char name[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, name);
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			name[i] = tolower(name[i]);
 		int mi = pPed->GetModelIndex();
 		pPed->DeleteRwObject();
 		if (pPed->IsPlayer())
 			mi = 0;
 		CStreaming::RequestSpecialModel(mi, name, STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CWorld::Remove(pPed);
 		return 0;
 	}
@@ -7074,11 +7074,11 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_IS_EXPLOSION_IN_ZONE:
 	{
 		CollectParameters(&m_nIp, 1);
-		char zone[8];
+		char zone[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
 		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
 		if (zone_id != -1)
-			m_nIp += 8;
+			m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CZone* pZone = CTheZones::GetZone(zone_id);
 		UpdateCompareFlag(CExplosion::TestForExplosionInArea((eExplosionType)ScriptParams[0],
 			pZone->minx, pZone->maxx, pZone->miny, pZone->maxy, pZone->minz, pZone->maxz));
@@ -7536,14 +7536,14 @@ WRAPPER int8 CRunningScript::ProcessCommands900To999(int32 command) { EAXJMP(0x4
 int8 CRunningScript::ProcessCommands900To999(int32 command)
 {
 	char str[52];
-	char onscreen_str[8];
+	char onscreen_str[KEY_LENGTH_IN_SCRIPT];
 	switch (command) {
 	case COMMAND_PRINT_STRING_IN_STRING_NOW:
 	{
 		wchar* source = CTheScripts::GetTextByKeyFromScript(&m_nIp);
-		wchar* str = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* pstr = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 2);
-		CMessages::AddMessageJumpQWithString(source, ScriptParams[0], ScriptParams[1], str);
+		CMessages::AddMessageJumpQWithString(source, ScriptParams[0], ScriptParams[1], pstr);
 		return 0;
 	}
 	//case COMMAND_PRINT_STRING_IN_STRING_SOON:
@@ -7660,10 +7660,10 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_LOAD_SPRITE:
 	{
 		CollectParameters(&m_nIp, 1);
-		strncpy(str, (char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		for (int i = 0; i < 8; i++)
+		strncpy(str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			str[i] = tolower(str[i]);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		int slot = CTxdStore::FindTxdSlot("script");
 		CTxdStore::PushCurrentTxd();
 		CTxdStore::SetCurrentTxd(slot);
@@ -7674,9 +7674,9 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_LOAD_TEXTURE_DICTIONARY:
 	{
 		strcpy(str, "models\\");
-		strncpy(str + sizeof("models\\"), (char*)&CTheScripts::ScriptSpace[m_nIp], 8);
+		strncpy(str + sizeof("models\\"), (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
 		strcat(str, ".txd");
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		int slot = CTxdStore::FindTxdSlot("script");
 		if (slot == -1)
 			slot = CTxdStore::AddTxdSlot("script");
@@ -7723,7 +7723,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_PLAY_MISSION_PASSED_TUNE:
 	{
 		CollectParameters(&m_nIp, 1);
-		DMAudio.ChangeMusicMode(0);
+		DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
 		DMAudio.PlayFrontEndTrack(ScriptParams[0] + STREAMED_SOUND_MISSION_COMPLETED - 1, 0);
 		return 0;
 	}
@@ -7857,11 +7857,11 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	}
 	case COMMAND_SCRIPT_NAME:
 	{
-		strncpy(str, (char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		for (int i = 0; i < 8; i++)
+		strncpy(str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			str[i] = tolower(str[i]);
-		m_nIp += 8;
-		strncpy(m_abScriptName, str, 8);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		strncpy(m_abScriptName, str, KEY_LENGTH_IN_SCRIPT);
 		return 0;
 	}
 	case COMMAND_CHANGE_GARAGE_TYPE_WITH_CAR_MODEL:
@@ -8095,8 +8095,8 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
 		int16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
-		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		m_nIp += 8;
+		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CUserDisplay::OnscnTimer.AddClock(var, onscreen_str);
 		return 0;
 	}
@@ -8106,8 +8106,8 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		int16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 1);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
-		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		m_nIp += 8;
+		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CUserDisplay::OnscnTimer.AddCounter(var, ScriptParams[0], onscreen_str);
 		return 0;
 	}
@@ -8284,10 +8284,10 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		UpdateCompareFlag(CTheScripts::StuckCars.HasCarBeenStuckForAWhile(ScriptParams[0]));
 		return 0;
 	case COMMAND_LOAD_MISSION_AUDIO:
-		strncpy(str, (char*)&CTheScripts::ScriptSpace[m_nIp], 8);
-		for (int i = 0; i < 8; i++)
+		strncpy(str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
+		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			str[i] = tolower(str[i]);
-		m_nIp += 8;
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		DMAudio.PreloadMissionAudio(str);
 		return 0;
 	case COMMAND_HAS_MISSION_AUDIO_LOADED:
@@ -8412,7 +8412,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_2A", 7) == 0 ||
 			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_3A", 7) == 0 ||
 			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_4A", 7) == 0)) {
-			m_nIp += 8;
+			m_nIp += KEY_LENGTH_IN_SCRIPT;
 			return 0;
 		}
 		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
