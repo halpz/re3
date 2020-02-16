@@ -163,6 +163,8 @@ enum Config {
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER	// makes game load main_freeroam.scm by default
+#define USE_MEASUREMENTS_IN_METERS // makes game use meters instead of feet in script
+#define USE_PRECISE_MEASUREMENT_CONVERTION // makes game convert feet to meeters more precisely
 
 // Vehicles
 #define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher

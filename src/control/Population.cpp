@@ -38,6 +38,7 @@ WRAPPER void CPopulation::UpdatePedCount(uint32, bool) { EAXJMP(0x4F5A60); }
 WRAPPER void CPopulation::DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool) { EAXJMP(0x4F6200); }
 WRAPPER CPed *CPopulation::AddPedInCar(CVehicle *vehicle) { EAXJMP(0x4F5800); }
 WRAPPER bool CPopulation::IsPointInSafeZone(CVector *coors) { EAXJMP(0x4F60C0); }
+WRAPPER void CPopulation::ConvertToRealObject(CDummyObject* obj) { EAXJMP(0x4F45A0); }
 
 void
 CPopulation::Initialise()

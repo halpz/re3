@@ -162,6 +162,7 @@ public:
 	static void SetGarageDoorToRotate(int16);
 	static bool HasImportExportGarageCollectedThisCar(int16, int8);
 	static void SetLeaveCameraForThisGarage(int16);
+	static bool IsThisCarWithinGarageArea(int16, CEntity*);
 
 	static int GetCarsCollectedIndexForGarageType(eGarageType type) { return type - GARAGE_COLLECTCARS_1; }
 };

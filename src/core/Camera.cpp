@@ -30,6 +30,7 @@ WRAPPER void CCamera::Process(void) { EAXJMP(0x46D3F0); }
 WRAPPER void CCamera::LoadPathSplines(int file) { EAXJMP(0x46D1D0); }
 WRAPPER void CCamera::RestoreWithJumpCut(void) { EAXJMP(0x46FAE0); };
 WRAPPER void CCamera::SetPercentAlongCutScene(float) { EAXJMP(0x46FE20); };
+WRAPPER void CCamera::SetParametersForScriptInterpolation(float, float, int32) { EAXJMP(0x46FDE0); }
 
 bool
 CCamera::GetFading()
@@ -152,6 +153,13 @@ void
 CCamera::SetMotionBlurAlpha(int a)
 {
 	m_imotionBlurAddAlpha = a;
+}
+
+void
+CCamera::SetNearClipScript(float clip)
+{
+	m_fNearClipScript = clip;
+	m_bUseNearClipScript = true;
 }
 
 void

@@ -893,7 +893,7 @@ CPathFind::MarkRoadsBetweenLevelsInArea(float x1, float x2, float y1, float y2, 
 }
 
 void
-CPathFind::MarkPedRoadsBetweenLevelsInArea(float x1, float x2, float y1, float y2, float z1, float z2)
+CPathFind::PedMarkRoadsBetweenLevelsInArea(float x1, float x2, float y1, float y2, float z1, float z2)
 {
 	int i;
 
@@ -1476,7 +1476,7 @@ STARTPATCHES
 	InjectHook(0x42DB50, &CPathFind::SwitchRoadsInAngledArea, PATCH_JUMP);
 	InjectHook(0x42E140, &CPathFind::MarkRoadsBetweenLevelsNodeAndNeighbours, PATCH_JUMP);
 	InjectHook(0x42DF50, &CPathFind::MarkRoadsBetweenLevelsInArea, PATCH_JUMP);
-	InjectHook(0x42E040, &CPathFind::MarkPedRoadsBetweenLevelsInArea, PATCH_JUMP);
+	InjectHook(0x42E040, &CPathFind::PedMarkRoadsBetweenLevelsInArea, PATCH_JUMP);
 	InjectHook(0x42CC30, &CPathFind::FindNodeClosestToCoors, PATCH_JUMP);
 	InjectHook(0x42CDC0, &CPathFind::FindNodeClosestToCoorsFavourDirection, PATCH_JUMP);
 	InjectHook(0x42CFC0, &CPathFind::FindNodeOrientationForCarPlacement, PATCH_JUMP);

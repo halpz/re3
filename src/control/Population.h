@@ -4,6 +4,7 @@
 
 class CPed;
 class CVehicle;
+class CDummyObject;
 
 struct PedGroup
 {
@@ -48,4 +49,5 @@ public:
 	static bool IsPointInSafeZone(CVector *coors);
 	static void RemovePed(CEntity* ent);
 	static int32 ChooseCivilianOccupation(int32);
+	static void ConvertToRealObject(CDummyObject*);
 };
