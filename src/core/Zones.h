@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Game.h"
+#include "Gangs.h"
 
 enum eZoneType
 {
@@ -38,12 +39,12 @@ public:
 	int16 carDensity;
 	int16 carThreshold[6];
 	int16 copThreshold;
-	int16 gangThreshold[9];
+	int16 gangThreshold[NUM_GANGS];
 
 	// Ped data
 	uint16 pedDensity;
 	uint16 copDensity;
-	uint16 gangDensity[9];
+	uint16 gangDensity[NUM_GANGS];
 	uint16 pedGroup;
 };
 

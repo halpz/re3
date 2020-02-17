@@ -8,7 +8,19 @@
 #include "Gangs.h"
 #include "ModelIndices.h"
 #include "Zones.h"
-#include "Ped.h"
+#include "CivilianPed.h"
+#include "EmergencyPed.h"
+#include "Replay.h"
+#include "CutsceneMgr.h"
+#include "CarCtrl.h"
+#include "IniFile.h"
+#include "VisibilityPlugins.h"
+#include "PedPlacement.h"
+
+#define CREATION_DIST_MULT_TO_DIST 40.0f
+#define CREATION_RANGE 10.0f // Being added over the CREATION_DIST_MULT_TO_DIST.
+#define OFFSCREEN_CREATION_MULT 0.5f
+// Also there are some hardcoded values in GeneratePedsAtStartOfGame.
 
 // TO-DO: These are hard-coded, reverse them.
 // More clearly they're transition areas between zones.
@@ -25,7 +37,7 @@ uint32& CPopulation::ms_nNumCivFemale = *(uint32*)0x8F5F44;
 uint32& CPopulation::ms_nNumCop = *(uint32*)0x885AFC;
 bool& CPopulation::bZoneChangeHasHappened = *(bool*)0x95CD79;
 uint32& CPopulation::ms_nNumEmergency = *(uint32*)0x94071C;
-uint32& CPopulation::m_CountDownToPedsAtStart = *(uint32*)0x95CD4F;
+int8& CPopulation::m_CountDownToPedsAtStart = *(int8*)0x95CD4F;
 uint32& CPopulation::ms_nNumGang1 = *(uint32*)0x8F1B1C;
 uint32& CPopulation::ms_nNumGang2 = *(uint32*)0x8F1B14;
 uint32& CPopulation::ms_nTotalPeds = *(uint32*)0x95CB50;
@@ -43,9 +55,9 @@ CVector &CPopulation::RegenerationPoint_a = *(CVector*)0x8E2AA4;
 CVector &CPopulation::RegenerationPoint_b = *(CVector*)0x8E2A98;
 CVector &CPopulation::RegenerationForward = *(CVector*)0x8F1AD4;
 
-WRAPPER void CPopulation::Update(void) { EAXJMP(0x4F39A0); }
 WRAPPER CPed *CPopulation::AddPedInCar(CVehicle *vehicle) { EAXJMP(0x4F5800); }
-WRAPPER bool CPopulation::IsPointInSafeZone(CVector *coors) { EAXJMP(0x4F60C0); }
+WRAPPER void CPopulation::ManagePopulation(void) { EAXJMP(0x4F3B90); }
+WRAPPER void CPopulation::MoveCarsAndPedsOutOfAbandonedZones(void) { EAXJMP(0x4F5BE0); }
 
 void
 CPopulation::Initialise()
@@ -97,11 +109,11 @@ CPopulation::ChooseCivilianOccupation(int32 group)
 	return ms_pPedGroups[group].models[CGeneral::GetRandomNumberInRange(0, NUMMODELSPERPEDGROUP)];
 }
 
-int32
+eCopType
 CPopulation::ChoosePolicePedOccupation()
 {
 	CGeneral::GetRandomNumber();
-	return 0;
+	return COP_STREET;
 }
 
 void
@@ -385,9 +397,333 @@ CPopulation::FindClosestZoneForCoors(CVector *coors, int *safeZoneOut, eLevelNam
 	*safeZoneOut = closestSafeZone;
 }
 
+void
+CPopulation::Update()
+{
+	if (!CReplay::IsPlayingBack()) {
+		ManagePopulation();
+		MoveCarsAndPedsOutOfAbandonedZones();
+		if (m_CountDownToPedsAtStart != 0) {
+			if (--m_CountDownToPedsAtStart == 0)
+				GeneratePedsAtStartOfGame();
+		} else {
+			ms_nTotalCivPeds = ms_nNumCivFemale + ms_nNumCivMale;
+			ms_nTotalGangPeds = ms_nNumGang9 + ms_nNumGang8 + ms_nNumGang7
+				+ ms_nNumGang6 + ms_nNumGang5 + ms_nNumGang4 + ms_nNumGang3
+				+ ms_nNumGang2 + ms_nNumGang1;
+			ms_nTotalPeds = ms_nNumDummy + ms_nNumEmergency + ms_nNumCop
+				+ ms_nTotalGangPeds + ms_nNumCivFemale + ms_nNumCivMale;
+			if (!CCutsceneMgr::IsRunning()) {
+				float pcdm = PedCreationDistMultiplier();
+				AddToPopulation(pcdm * (CREATION_DIST_MULT_TO_DIST * TheCamera.GenerationDistMultiplier),
+					pcdm * ((CREATION_DIST_MULT_TO_DIST + CREATION_RANGE) * TheCamera.GenerationDistMultiplier),
+					pcdm * (CREATION_DIST_MULT_TO_DIST + CREATION_RANGE) * OFFSCREEN_CREATION_MULT - CREATION_RANGE,
+					pcdm * (CREATION_DIST_MULT_TO_DIST + CREATION_RANGE) * OFFSCREEN_CREATION_MULT);
+			}
+		}
+	}
+}
+
+void
+CPopulation::GeneratePedsAtStartOfGame()
+{
+	for (int i = 0; i < 50; i++) {
+		ms_nTotalCivPeds = ms_nNumCivFemale + ms_nNumCivMale;
+		ms_nTotalGangPeds = ms_nNumGang9 + ms_nNumGang8 + ms_nNumGang7
+			+ ms_nNumGang6 + ms_nNumGang5 + ms_nNumGang4
+			+ ms_nNumGang3 + ms_nNumGang2 + ms_nNumGang1;
+		ms_nTotalPeds = ms_nNumDummy + ms_nNumEmergency + ms_nNumCop
+			+ ms_nTotalGangPeds + ms_nNumCivFemale + ms_nNumCivMale;
+
+		// Min dist is 10.0f only for start of the game (naturally)
+		AddToPopulation(10.0f, PedCreationDistMultiplier() * (CREATION_DIST_MULT_TO_DIST + CREATION_RANGE),
+			10.0f, PedCreationDistMultiplier() * (CREATION_DIST_MULT_TO_DIST + CREATION_RANGE));
+	}
+}
+
+bool
+CPopulation::IsPointInSafeZone(CVector *coors)
+{
+	for (int i = 0; i < ARRAY_SIZE(aSafeZones); i++) {
+		if (coors->x > aSafeZones[i].x1 && coors->x < aSafeZones[i].x2) {
+			if (coors->y > aSafeZones[i].y1 && coors->y < aSafeZones[i].y2) {
+				if (coors->z > aSafeZones[i].z1 && coors->z < aSafeZones[i].z2)
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+// More speed = wider area to spawn peds
+float
+CPopulation::PedCreationDistMultiplier()
+{
+	CVehicle *veh = FindPlayerVehicle();
+	if (!veh)
+		return 1.0f;
+
+	float vehSpeed = veh->m_vecMoveSpeed.Magnitude2D();
+	return clamp(vehSpeed - 0.1f + 1.0f, 1.0f, 1.5f);
+}
+
+CPed*
+CPopulation::AddPed(ePedType pedType, uint32 mi, CVector const &coors)
+{
+	switch (pedType) {
+		case PEDTYPE_CIVMALE:
+		case PEDTYPE_CIVFEMALE:
+		{
+			CCivilianPed *ped = new CCivilianPed(pedType, mi);
+			ped->GetPosition() = coors;
+			ped->SetOrientation(0.0f, 0.0f, 0.0f);
+			CWorld::Add(ped);
+			if (ms_bGivePedsWeapons) {
+				eWeaponType weapon = (eWeaponType)CGeneral::GetRandomNumberInRange(WEAPONTYPE_UNARMED, WEAPONTYPE_DETONATOR);
+				if (weapon != WEAPONTYPE_UNARMED) {
+					ped->SetCurrentWeapon(ped->GiveWeapon(weapon, 25001));
+				}
+			}
+			return ped;
+		}
+		case PEDTYPE_COP:
+		{
+			CCopPed *ped = new CCopPed((eCopType)mi);
+			ped->GetPosition() = coors;
+			ped->SetOrientation(0.0f, 0.0f, 0.0f);
+			CWorld::Add(ped);
+			return ped;
+		}
+		case PEDTYPE_GANG1:
+		case PEDTYPE_GANG2:
+		case PEDTYPE_GANG3:
+		case PEDTYPE_GANG4:
+		case PEDTYPE_GANG5:
+		case PEDTYPE_GANG6:
+		case PEDTYPE_GANG7:
+		case PEDTYPE_GANG8:
+		case PEDTYPE_GANG9:
+		{
+			CCivilianPed *ped = new CCivilianPed(pedType, mi);
+			ped->GetPosition() = coors;
+			ped->SetOrientation(0.0f, 0.0f, 0.0f);
+			CWorld::Add(ped);
+
+			uint32 weapon;
+			if (CGeneral::GetRandomNumberInRange(0, 100) >= 50)
+				weapon = ped->GiveWeapon(CGangs::GetGangWeapon2(pedType - PEDTYPE_GANG1), 25001);
+			else
+				weapon = ped->GiveWeapon(CGangs::GetGangWeapon1(pedType - PEDTYPE_GANG1), 25001);
+			ped->SetCurrentWeapon(weapon);
+			return ped;
+		}
+		case PEDTYPE_EMERGENCY:
+		{
+			CEmergencyPed *ped = new CEmergencyPed(PEDTYPE_EMERGENCY);
+			ped->GetPosition() = coors;
+			ped->SetOrientation(0.0f, 0.0f, 0.0f);
+			CWorld::Add(ped);
+			return ped;
+		}
+		case PEDTYPE_FIREMAN:
+		{
+			CEmergencyPed *ped = new CEmergencyPed(PEDTYPE_FIREMAN);
+			ped->GetPosition() = coors;
+			ped->SetOrientation(0.0f, 0.0f, 0.0f);
+			CWorld::Add(ped);
+			return ped;
+		}
+		case PEDTYPE_CRIMINAL:
+		case PEDTYPE_PROSTITUTE:
+		{
+			CCivilianPed *ped = new CCivilianPed(pedType, mi);
+			ped->GetPosition() = coors;
+			ped->SetOrientation(0.0f, 0.0f, 0.0f);
+			CWorld::Add(ped);
+			return ped;
+		}
+		default:
+			Error("Unknown ped type, AddPed, Population.cpp");
+			return nil;
+	}
+}
+
+void
+CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScreen, float maxDistOffScreen)
+{
+	uint32 pedTypeToAdd;
+	int32 modelToAdd;
+	int pedAmount;
+
+	CZoneInfo zoneInfo;
+	CPed *gangLeader = nil;
+	bool addCop = false;
+	CPlayerInfo *playerInfo = &CWorld::Players[CWorld::PlayerInFocus];
+	CVector playerCentreOfWorld = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
+	CTheZones::GetZoneInfoForTimeOfDay(&playerCentreOfWorld, &zoneInfo);
+	CWanted *wantedInfo = playerInfo->m_pPed->m_pWanted;
+	if (wantedInfo->m_nWantedLevel > 2) {
+		if (ms_nNumCop < wantedInfo->m_MaxCops && !playerInfo->m_pPed->bInVehicle
+			&& (CCarCtrl::NumLawEnforcerCars >= wantedInfo->m_MaximumLawEnforcerVehicles
+				|| CCarCtrl::NumRandomCars >= playerInfo->m_nTrafficMultiplier * CCarCtrl::CarDensityMultiplier
+				|| CCarCtrl::NumFiretrucksOnDuty + CCarCtrl::NumAmbulancesOnDuty + CCarCtrl::NumParkedCars
+				+ CCarCtrl::NumMissionCars + CCarCtrl::NumLawEnforcerCars + CCarCtrl::NumRandomCars >= CCarCtrl::MaxNumberOfCarsInUse)) {
+			addCop = true;
+			minDist = PedCreationDistMultiplier() * CREATION_DIST_MULT_TO_DIST;
+			maxDist = PedCreationDistMultiplier() * (CREATION_DIST_MULT_TO_DIST + CREATION_RANGE);
+		}
+	}
+	// Yeah, float
+	float maxPossiblePedsForArea = (zoneInfo.pedDensity + zoneInfo.carDensity) * playerInfo->m_fRoadDensity * PedDensityMultiplier * CIniFile::PedNumberMultiplier;
+	maxPossiblePedsForArea = min(maxPossiblePedsForArea, MaxNumberOfPedsInUse);
+
+	if (ms_nTotalPeds < maxPossiblePedsForArea || addCop) {
+		int decisionThreshold = CGeneral::GetRandomNumberInRange(0, 1000);
+		if (decisionThreshold < zoneInfo.copDensity || addCop) {
+			pedTypeToAdd = PEDTYPE_COP;
+			modelToAdd = ChoosePolicePedOccupation();
+		} else {
+			int16 density = zoneInfo.copDensity;
+			for (int i = 0; i < NUM_GANGS; i++) {
+				density += zoneInfo.gangDensity[i];
+				if (decisionThreshold < density) {
+					pedTypeToAdd = PEDTYPE_GANG1 + i;
+					break;
+				}
+
+				if (i == NUM_GANGS - 1) {
+					modelToAdd = ChooseCivilianOccupation(zoneInfo.pedGroup);
+					if (modelToAdd == -1)
+						return;
+					pedTypeToAdd = ((CPedModelInfo*)CModelInfo::GetModelInfo(modelToAdd))->m_pedType;
+				}
+
+			}
+		}
+		if (!addCop && m_AllRandomPedsThisType > PEDTYPE_PLAYER1)
+			pedTypeToAdd = m_AllRandomPedsThisType;
+
+		if (pedTypeToAdd >= PEDTYPE_GANG1 && pedTypeToAdd <= PEDTYPE_GANG9) {
+			int randVal = CGeneral::GetRandomNumber() % 100;
+			if (randVal < 50)
+				return;
+
+			if (randVal < 57) {
+				pedAmount = 1;
+			} else if (randVal >= 74) {
+				if (randVal >= 85)
+					pedAmount = 4;
+				else
+					pedAmount = 3;
+			} else {
+				pedAmount = 2;
+			}
+		} else
+			pedAmount = 1;
+
+		CVector generatedCoors;
+		int node1, node2;
+		float randomPos;
+		bool foundCoors = !!ThePaths.GeneratePedCreationCoors(playerCentreOfWorld.x, playerCentreOfWorld.y, minDist, maxDist, minDistOffScreen, maxDistOffScreen,
+			&generatedCoors, &node1, &node2, &randomPos, nil);
+
+		if (!foundCoors)
+			return;
+
+		for (int i = 0; i < pedAmount; ++i) {
+			if (pedTypeToAdd >= PEDTYPE_GANG1 && pedTypeToAdd <= PEDTYPE_GANG9)
+				modelToAdd = ChooseGangOccupation(pedTypeToAdd - PEDTYPE_GANG1);
+
+			if (pedTypeToAdd == PEDTYPE_COP) {
+				// Unused code, ChoosePolicePedOccupation returns COP_STREET. Spawning FBI/SWAT/Army done in somewhere else.
+				if (modelToAdd != COP_STREET) {
+					if (modelToAdd == COP_FBI) {
+						if (!CModelInfo::GetModelInfo(MI_FBI)->GetRwObject())
+							return;
+
+					} else if (modelToAdd == COP_SWAT) {
+						if (!CModelInfo::GetModelInfo(MI_SWAT)->GetRwObject())
+							return;
+
+					} else if (modelToAdd == COP_ARMY && !CModelInfo::GetModelInfo(MI_ARMY)->GetRwObject()) {
+						return;
+					}
+				} else if (!CModelInfo::GetModelInfo(MI_COP)->GetRwObject()) {
+					return;
+				}
+			} else if (!CModelInfo::GetModelInfo(modelToAdd)->GetRwObject()) {
+				return;
+			}
+			generatedCoors.z += 0.7f;
+
+			// What? How can this not be met?
+			if (i < pedAmount) {
+				//rand()
+				if (gangLeader) {
+					// Align gang members in formation. (btw i can't be 0 in here)
+					float offsetMin = i * 0.75f;
+					float offsetMax = (i + 1.0f) * 0.75f - offsetMin;
+					float xOffset = CGeneral::GetRandomNumberInRange(offsetMin, offsetMin + offsetMax);
+					float yOffset = CGeneral::GetRandomNumberInRange(offsetMin, offsetMin + offsetMax);
+					if (CGeneral::GetRandomNumber() & 1)
+						xOffset = -xOffset;
+					if (CGeneral::GetRandomNumber() & 1)
+						yOffset = -yOffset;
+					generatedCoors.x = xOffset + gangLeader->GetPosition().x;
+					generatedCoors.y = yOffset + gangLeader->GetPosition().y;
+				}
+			}
+			if (!CPedPlacement::IsPositionClearForPed(&generatedCoors))
+				break;
+
+			// Why no love for last gang member?!
+			if (i + 1 < pedAmount) {
+				bool foundGround;
+				float groundZ = CWorld::FindGroundZFor3DCoord(generatedCoors.x, generatedCoors.y, 2.0f + generatedCoors.z, &foundGround) + 0.7f;
+				if (!foundGround)
+					return;
+
+				generatedCoors.z = max(generatedCoors.z, groundZ);
+			}
+			bool farEnoughToAdd = true;
+			CMatrix mat(TheCamera.GetCameraMatrix());
+			if (TheCamera.IsSphereVisible(generatedCoors, 2.0f, &mat)) {
+				if (PedCreationDistMultiplier() * CREATION_DIST_MULT_TO_DIST > (generatedCoors - playerCentreOfWorld).Magnitude2D())
+					farEnoughToAdd = false;
+			}
+			if (!farEnoughToAdd)
+				break;
+			CPed *newPed = AddPed((ePedType)pedTypeToAdd, modelToAdd, generatedCoors);
+			newPed->SetWanderPath(CGeneral::GetRandomNumberInRange(0, 8));
+
+			if (i != 0) {
+				// Gang member
+				newPed->SetLeader(gangLeader);
+				newPed->m_nPedState = PED_UNKNOWN;
+				gangLeader->m_nPedState = PED_UNKNOWN;
+				newPed->m_fRotationCur = CGeneral::GetRadianAngleBetweenPoints(
+					gangLeader->GetPosition().x, gangLeader->GetPosition().y,
+					newPed->GetPosition().x, newPed->GetPosition().y);
+				newPed->m_fRotationDest = newPed->m_fRotationCur;
+			} else {
+				gangLeader = newPed;
+			}
+			CVisibilityPlugins::SetClumpAlpha(newPed->GetClump(), 0);
+			/*
+			// Pointless, this is already a for loop
+			if (i + 1 > pedAmount)
+				break;
+			if (pedAmount <= 1)
+				break; */
+		}
+	}
+}
+
 STARTPATCHES
 	InjectHook(0x4F3770, &CPopulation::Initialise, PATCH_JUMP);
 	InjectHook(0x4F5780, &CPopulation::ChooseGangOccupation, PATCH_JUMP);
 	InjectHook(0x4F6200, &CPopulation::DealWithZoneChange, PATCH_JUMP);
 	InjectHook(0x4F6010, &CPopulation::FindCollisionZoneForCoors, PATCH_JUMP);
+	InjectHook(0x4F6410, &CPopulation::PedCreationDistMultiplier, PATCH_JUMP);
+	InjectHook(0x4F5280, &CPopulation::AddPed, PATCH_JUMP);
 ENDPATCHES
