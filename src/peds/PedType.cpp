@@ -120,7 +120,7 @@ CPedType::LoadPedData(void)
 	delete[] buf;
 }
 
-int32
+ePedType
 CPedType::FindPedType(char *type)
 {
 	if(strcmp(type, "PLAYER1") == 0) return PEDTYPE_PLAYER1;

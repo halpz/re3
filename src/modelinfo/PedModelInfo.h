@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ClumpModelInfo.h"
+#include "PedType.h"
 
 enum PedNode {
 	PED_TORSO,
@@ -22,7 +23,7 @@ class CPedModelInfo : public CClumpModelInfo
 {
 public:
 	uint32 m_animGroup;
-	uint32 m_pedType;
+	ePedType m_pedType;
 	uint32 m_pedStatType;
 	uint32 m_carsCanDrive;
 	CColModel *m_hitColModel;

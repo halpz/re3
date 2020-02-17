@@ -819,7 +819,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 					CStreaming::RequestModel(ph->mi, 0);
 				}
 				else {
-					CPed* new_p = new(ph->index << 8) CCivilianPed(ph->pedtype, ph->mi);
+					CPed* new_p = new(ph->index << 8) CCivilianPed((ePedType)ph->pedtype, ph->mi);
 					new_p->m_status = STATUS_PLAYER_PLAYBACKFROMBUFFER;
 					new_p->GetMatrix().SetUnity();
 					CWorld::Add(new_p);
@@ -1169,7 +1169,7 @@ void CReplay::RestoreStuffFromMem(void)
 		ped->m_pVehicleAnim = 0;
 		ped->m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, ped);
 		DMAudio.SetEntityStatus(ped->m_audioEntityId, true);
-		CPopulation::UpdatePedCount(ped->m_nPedType, false);
+		CPopulation::UpdatePedCount((ePedType)ped->m_nPedType, false);
 		if (ped->m_wepModelID >= 0)
 			ped->AddWeaponModel(ped->m_wepModelID);
 	}
