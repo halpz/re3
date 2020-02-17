@@ -42,6 +42,11 @@ enum eGarageType : int8
 	GARAGE_MISSION_KEEPCAR_REMAINCLOSED,
 };
 
+enum
+{
+	TOTAL_COLLECTCARS_GARAGES = GARAGE_COLLECTCARS_3 - GARAGE_COLLECTCARS_1 + 1
+};
+
 class CStoredCar
 {
 	int32 m_nModelIndex;
@@ -64,6 +69,7 @@ static_assert(sizeof(CStoredCar) == 0x28, "CStoredCar");
 
 class CGarage
 {
+public:
 	eGarageType m_eGarageType;
 	eGarageState m_eGarageState;
 	char field_2;
@@ -101,9 +107,11 @@ class CGarage
 	CVehicle *m_pTarget;
 	int field_96;
 	CStoredCar m_sStoredCar;
-public:
+
 	void OpenThisGarage();
 	void CloseThisGarage();
+	bool IsOpen() { return m_eGarageState == GS_OPENED || m_eGarageState == GS_OPENEDCONTAINSCAR; }
+	bool IsClosed() { return m_eGarageState == GS_FULLYCLOSED; }
 };
 
 static_assert(sizeof(CGarage) == 140, "CGarage");
@@ -115,7 +123,7 @@ public:
 	static bool &BombsAreFree;
 	static bool &RespraysAreFree;
 	static int32 &CarsCollected;
-	static int32 &CarTypesCollected;
+	static int32 (&CarTypesCollected)[TOTAL_COLLECTCARS_GARAGES];
 	static int32 &CrushedCarId;
 	static uint32 &LastTimeHelpMessage;
 	static int32 &MessageNumberInString;
@@ -149,4 +157,11 @@ public:
 	static void ChangeGarageType(int16, eGarageType, int32);
 	static bool HasResprayHappened(int16);
 	static void GivePlayerDetonator();
+	static bool IsGarageOpen(int16);
+	static bool IsGarageClosed(int16);
+	static void SetGarageDoorToRotate(int16);
+	static bool HasImportExportGarageCollectedThisCar(int16, int8);
+	static void SetLeaveCameraForThisGarage(int16);
+
+	static int GetCarsCollectedIndexForGarageType(eGarageType type) { return type - GARAGE_COLLECTCARS_1; }
 };

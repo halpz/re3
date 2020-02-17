@@ -11,6 +11,8 @@ class CPed;
 class CObject;
 class CPlayerInfo;
 
+#define KEY_LENGTH_IN_SCRIPT 8
+
 struct CScriptRectangle 
 {
 	int8 m_bIsUsed;
@@ -377,6 +379,12 @@ public:
 	static void DrawDebugSquare(float, float, float, float);
 	static void DrawDebugCube(float, float, float, float, float, float);
 	static void AddToInvisibilitySwapArray(CEntity*, bool);
+	static void AddToBuildingSwapArray(CBuilding*, int32, int32);
+
+	static int32 GetActualScriptSphereIndex(int32 index);
+	static int32 AddScriptSphere(int32 id, CVector pos, float radius);
+	static int32 GetNewUniqueScriptSphereIndex(int32 index);
+	static void RemoveScriptSphere(int32 index);
 
 	static int32 Read4BytesFromScript(uint32* pIp){
 		int32 retval = 0;
@@ -403,11 +411,11 @@ public:
 		return Read2BytesFromScript(pIp) / 16.0f;
 	}
 	static void ReadTextLabelFromScript(uint32* pIp, char* buf){
-		strncpy(buf, (const char*)&ScriptSpace[*pIp], 8);
+		strncpy(buf, (const char*)&ScriptSpace[*pIp], KEY_LENGTH_IN_SCRIPT);
 	}
 	static wchar* GetTextByKeyFromScript(uint32* pIp) {
 		wchar* text = TheText.Get((const char*)&ScriptSpace[*pIp]);
-		*pIp += 8;
+		*pIp += KEY_LENGTH_IN_SCRIPT;
 		return text;
 	}
 };

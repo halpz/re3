@@ -14,7 +14,7 @@ int32 &CGarages::BankVansCollected = *(int32 *)0x8F1B34;
 bool &CGarages::BombsAreFree = *(bool *)0x95CD7A;
 bool &CGarages::RespraysAreFree = *(bool *)0x95CD1D;
 int32 &CGarages::CarsCollected = *(int32 *)0x880E18;
-int32 &CGarages::CarTypesCollected = *(int32 *)0x8E286C;
+int32 (&CGarages::CarTypesCollected)[TOTAL_COLLECTCARS_GARAGES] = *(int32 (*)[TOTAL_COLLECTCARS_GARAGES])(uintptr*)0x8E286C;
 int32 &CGarages::CrushedCarId = *(int32 *)0x943060;
 uint32 &CGarages::LastTimeHelpMessage = *(uint32 *)0x8F1B58;
 int32 &CGarages::MessageNumberInString = *(int32 *)0x885BA8;
@@ -97,7 +97,7 @@ void CGarages::GivePlayerDetonator()
 }
 
 WRAPPER bool CGarages::HasThisCarBeenCollected(int16 garage, uint8 id) { EAXJMP(0x426D50); }
-WRAPPER void CGarages::ChangeGarageType(int16 garage, eGarageType type, int32 unk) { EAXJMP(0x4222A0); }
+WRAPPER void CGarages::ChangeGarageType(int16 garage, eGarageType type, int32 mi) { EAXJMP(0x4222A0); }
 WRAPPER bool CGarages::HasResprayHappened(int16 garage) { EAXJMP(0x4274F0); }
 
 void CGarage::OpenThisGarage()
@@ -106,10 +106,39 @@ void CGarage::OpenThisGarage()
 		m_eGarageState = GS_OPENING;
 }
 
+bool CGarages::IsGarageOpen(int16 garage)
+{
+	return Garages[garage].IsOpen();
+}
+
+bool CGarages::IsGarageClosed(int16 garage)
+{
+	return Garages[garage].IsClosed();
+}
+
 void CGarage::CloseThisGarage()
 {
 	if (m_eGarageState == GS_OPENED || m_eGarageState == GS_OPENING)
 		m_eGarageState = GS_CLOSING;
+}
+
+void CGarages::SetGarageDoorToRotate(int16 garage)
+{
+	if (Garages[garage].m_bRotatedDoor)
+		return;
+	Garages[garage].m_bRotatedDoor = true;
+	Garages[garage].m_fDoorHeight /= 2.0f;
+	Garages[garage].m_fDoorHeight -= 0.1f;
+}
+
+bool CGarages::HasImportExportGarageCollectedThisCar(int16 garage, int8 car)
+{
+	return CarTypesCollected[GetCarsCollectedIndexForGarageType(Garages[garage].m_eGarageType)] & (1 << car);
+}
+
+void CGarages::SetLeaveCameraForThisGarage(int16 garage)
+{
+	Garages[garage].m_bCameraFollowsPlayer = true;
 }
 
 #if 0

@@ -265,9 +265,16 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			break;
 		case MISSION_RAMCAR_CLOSE:
 			if (pVehicle->AutoPilot.m_pTargetCar){
-				/* PlayerPed? */
-				if (FindPlayerPed()->m_pWanted->m_bIgnoredByEveryone || pVehicle->bIsLawEnforcer &&
-				  (FindPlayerPed()->m_pWanted->m_nWantedLevel == 0 || FindPlayerPed()->m_pWanted->m_bIgnoredByCops || CCullZones::NoPolice())){
+				if
+#ifdef FIX_BUGS
+				    (FindPlayerVehicle() == pVehicle->AutoPilot.m_pTargetCar &&
+#endif
+					(FindPlayerPed()->m_pWanted->m_bIgnoredByEveryone || pVehicle->bIsLawEnforcer &&
+				  (FindPlayerPed()->m_pWanted->m_nWantedLevel == 0 || FindPlayerPed()->m_pWanted->m_bIgnoredByCops || CCullZones::NoPolice()))
+#ifdef FIX_BUGS
+					)
+#endif
+				{
 					CCarCtrl::JoinCarWithRoadSystem(pVehicle);
 					pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
 					pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;

@@ -1285,7 +1285,7 @@ CPlayerPed::ProcessControl(void)
 			// fall through
 		case PED_SEEK_POS:
 			switch (m_nMoveState) {
-				case PEDMOVE_STILL:
+				case PEDMOVE_WALK:
 					m_fMoveSpeed = 1.0f;
 					break;
 				case PEDMOVE_RUN:

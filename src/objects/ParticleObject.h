@@ -40,7 +40,7 @@ enum eParticleObjectState
 enum tParticleType;
 class CParticle;
 
-class CParticleObject : CPlaceable
+class CParticleObject : public CPlaceable
 {
 public:
 	CParticleObject    *m_pNext;

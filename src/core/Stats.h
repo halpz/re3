@@ -34,9 +34,11 @@ public:
 	static int32 &MissionsPassed;
 	static char (&LastMissionPassedName)[8];
 	static int32 &TotalLegitimateKills;
+	static int32 &ElBurroTime;
 
 public:
 	static void AnotherKillFrenzyPassed();
 	static void CheckPointReachedUnsuccessfully() { KillsSinceLastCheckpoint = 0; };
 	static void CheckPointReachedSuccessfully() { TotalLegitimateKills += KillsSinceLastCheckpoint; KillsSinceLastCheckpoint = 0; };
+	static void RegisterElBurroTime(int32);
 };

@@ -627,6 +627,7 @@ CVehicle::SetupPassenger(int n)
 	pPassengers[n]->SetPedState(PED_DRIVING);
 	if(bIsBus)
 		pPassengers[n]->bRenderPedInCar = false;
+	++m_nNumPassengers;
 	return pPassengers[n];
 }
 
