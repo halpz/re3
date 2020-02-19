@@ -2,6 +2,7 @@
 
 #include "Game.h"
 #include "PedType.h"
+#include "CopPed.h"
 
 class CPed;
 class CVehicle;
@@ -42,7 +43,7 @@ public:
 	static uint32 &ms_nNumCop;
 	static bool &bZoneChangeHasHappened;
 	static uint32 &ms_nNumEmergency;
-	static uint32& m_CountDownToPedsAtStart;
+	static int8& m_CountDownToPedsAtStart;
 	static uint32& ms_nNumGang1;
 	static uint32& ms_nNumGang2;
 	static uint32& ms_nTotalPeds;
@@ -69,8 +70,14 @@ public:
 	static bool IsPointInSafeZone(CVector *coors);
 	static void RemovePed(CPed *ent);
 	static int32 ChooseCivilianOccupation(int32);
-	static int32 ChoosePolicePedOccupation();
+	static eCopType ChoosePolicePedOccupation();
 	static int32 ChooseGangOccupation(int);
 	static void FindCollisionZoneForCoors(CVector*, int*, eLevelName*);
 	static void FindClosestZoneForCoors(CVector*, int*, eLevelName, eLevelName);
+	static void GeneratePedsAtStartOfGame();
+	static float PedCreationDistMultiplier();
+	static CPed *AddPed(ePedType pedType, uint32 mi, CVector const &coors);
+	static void AddToPopulation(float, float, float, float);
+	static void ManagePopulation(void);
+	static void MoveCarsAndPedsOutOfAbandonedZones(void);
 };
