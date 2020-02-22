@@ -1,7 +1,5 @@
 #pragma once
 
-#include "rwplcore.h"
-
 class CSpecialFX
 {
 public:
