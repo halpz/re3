@@ -47,9 +47,9 @@ CDoor::Process(CVehicle *vehicle)
 
 	case 2:	// z-axis
 		if(m_nDirn)
-			fSpeedDiff = -(vecSpeedDiff.x + vecSpeedDiff.y);
+			fSpeedDiff = -(vecSpeedDiff.y + vecSpeedDiff.x);
 		else
-			fSpeedDiff = vecSpeedDiff.x + vecSpeedDiff.y;
+			fSpeedDiff = vecSpeedDiff.y - vecSpeedDiff.x;
 		break;
 	}
 	fSpeedDiff = clamp(fSpeedDiff, -0.2f, 0.2f);

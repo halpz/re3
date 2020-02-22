@@ -119,7 +119,7 @@ CDamageManager::GetComponentGroup(tComponent component, tComponentGroup *compone
 		return true;
 	}else if(component >= COMPONENT_DEFAULT){
 		*componentGroup = COMPGROUP_DEFAULT;
-		*subComp = component - COMPONENT_DEFAULT;
+		*subComp = COMPONENT_DEFAULT;
 		return true;
 	}else
 		return false;
@@ -141,7 +141,7 @@ bool
 CDamageManager::ProgressDoorDamage(uint8 door)
 {
 	int status = GetDoorStatus(door);
-	if(status == 3)
+	if(status == PANEL_STATUS_MISSING)
 		return false;
 	SetDoorStatus(door, status+1);
 	return true;
@@ -163,7 +163,7 @@ bool
 CDamageManager::ProgressPanelDamage(uint8 panel)
 {
 	int status = GetPanelStatus(panel);
-	if(status == 3)
+	if(status == DOOR_STATUS_MISSING)
 		return false;
 	SetPanelStatus(panel, status+1);
 	return true;
@@ -197,7 +197,7 @@ bool
 CDamageManager::ProgressWheelDamage(uint8 wheel)
 {
 	int status = GetWheelStatus(wheel);
-	if(status == 3)
+	if(status == WHEEL_STATUS_MISSING)
 		return false;
 	SetWheelStatus(wheel, status+1);
 	return true;

@@ -9,7 +9,7 @@ enum {
 	PLAYERCONTROL_DISABLED_10 = 16,
 	PLAYERCONTROL_DISABLED_20 = 32, // used on CPlayerInfo::MakePlayerSafe
 	PLAYERCONTROL_DISABLED_40 = 64, // used on phone calls
-	PLAYERCONTROL_DISABLED_80 = 128,
+	PLAYERCONTROL_DISABLED_80 = 128,// used on cutscenes
 };
 
 class CControllerState

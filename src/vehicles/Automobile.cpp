@@ -2177,7 +2177,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 						if(phys->bIsStatic){
 							phys->bIsStatic = false;
 							phys->m_nStaticFrames = 0;
-							phys->ApplyMoveForce(m_vecMoveSpeed / speed);
+							phys->ApplyMoveForce(m_vecMoveSpeed / Sqrt(speed));
 							phys->AddToMovingList();
 						}
 					}
@@ -2318,7 +2318,7 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 
 	// Brake if player isn't in control
 	// BUG: game always uses pad 0 here
-	if(CPad::GetPad(pad)->DisablePlayerControls){
+	if(CPad::GetPad(pad)->ArePlayerControlsDisabled()){
 		m_fBrakePedal = 1.0f;
 		bIsHandbrakeOn = true;
 		m_fGasPedal = 0.0f;
