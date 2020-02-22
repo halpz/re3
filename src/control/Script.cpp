@@ -75,10 +75,10 @@
 #define SPHERE_MARKER_PULSE_FRACTION 0.1f
 
 #ifdef USE_PRECISE_MEASUREMENT_CONVERTION
-#define METERS_IN_FEET 0.3048f
+#define METERS_IN_FOOT 0.3048f
 #define FEET_IN_METER 3.28084f
 #else
-#define METERS_IN_FEET 0.3f
+#define METERS_IN_FOOT 0.3f
 #define FEET_IN_METER 3.33f
 #endif
 
@@ -509,27 +509,6 @@ int open_script()
 	return CFileMgr::OpenFile("main.scm", "rb");
 }
 #endif
-
-void CTextLine::Reset()
-{
-	m_fScaleX = 0.48f;
-	m_fScaleY = 1.12f;
-	m_sColor = CRGBA(225, 225, 225, 255);
-	m_bJustify = false;
-	m_bRightJustify = false;
-	m_bCentered = false;
-	m_bBackground = false;
-	m_bBackgroundOnly = false;
-	m_fWrapX = 182.0f; /* TODO: scaling as bugfix */
-	m_fCenterSize = 640.0f; /* --||-- */
-	m_sBackgroundColor = CRGBA(128, 128, 128, 128);
-	m_bTextProportional = true;
-	m_bTextBeforeFade = false;
-	m_nFont = 2; /* enum? */
-	m_fAtX = 0.0f;
-	m_fAtY = 0.0f;
-	memset(&m_Text, 0, sizeof(m_Text));
-}
 
 void CTheScripts::Init()
 {
@@ -1433,33 +1412,6 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 	}
 	return -1;
 }
-
-void CRunningScript::UpdateCompareFlag(bool flag)
-{
-	if (m_bNotFlag)
-		flag = !flag;
-	if (m_nAndOrState == ANDOR_NONE){
-		m_bCondResult = flag;
-		return;
-	}
-	if (m_nAndOrState >= ANDS_1 && m_nAndOrState <= ANDS_8){
-		m_bCondResult &= flag;
-		if (m_nAndOrState == ANDS_1){
-			m_nAndOrState = ANDOR_NONE;
-			return;
-		}
-	}else if (m_nAndOrState >= ORS_1 && m_nAndOrState <= ORS_8){
-		m_bCondResult |= flag;
-		if (m_nAndOrState == ORS_1) {
-			m_nAndOrState = ANDOR_NONE;
-			return;
-		}
-	}else{
-		return;
-	}
-	m_nAndOrState--;
-}
-
 
 int8 CRunningScript::ProcessCommands100To199(int32 command)
 {
@@ -8831,7 +8783,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		float fMeterValue = *(float*)&ScriptParams[0];
-		float fFeetValue = fMeterValue / METERS_IN_FEET;
+		float fFeetValue = fMeterValue / METERS_IN_FOOT;
 		*(float*)&ScriptParams[0] = fFeetValue;
 		StoreParameters(&m_nIp, 1);
 		return 0;
@@ -9716,33 +9668,13 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	return -1;
 }
 
-int16 CRunningScript::GetPadState(uint16 pad, uint16 button)
+int32 CTheScripts::GetNewUniqueScriptSphereIndex(int32 index)
 {
-	CPad* pPad = CPad::GetPad(pad);
-	switch (button){
-	case 0: return pPad->NewState.LeftStickX;
-	case 1: return pPad->NewState.LeftStickY;
-	case 2: return pPad->NewState.RightStickX;
-	case 3: return pPad->NewState.RightStickY;
-	case 4: return pPad->NewState.LeftShoulder1;
-	case 5: return pPad->NewState.LeftShoulder2;
-	case 6: return pPad->NewState.RightShoulder1;
-	case 7: return pPad->NewState.RightShoulder2;
-	case 8: return pPad->NewState.DPadUp;
-	case 9: return pPad->NewState.DPadDown;
-	case 10: return pPad->NewState.DPadLeft;
-	case 11: return pPad->NewState.DPadRight;
-	case 12: return pPad->NewState.Start;
-	case 13: return pPad->NewState.Select;
-	case 14: return pPad->NewState.Square;
-	case 15: return pPad->NewState.Triangle;
-	case 16: return pPad->NewState.Cross;
-	case 17: return pPad->NewState.Circle;
-	case 18: return pPad->NewState.LeftShock;
-	case 19: return pPad->NewState.RightShock;
-	default: break;
-	}
-	return 0;
+	if (ScriptSphereArray[index].m_Index >= 0xFFFE)
+		ScriptSphereArray[index].m_Index = 1;
+	else
+		ScriptSphereArray[index].m_Index++;
+	return (uint16)index | ScriptSphereArray[index].m_Index << 16;
 }
 
 int32 CTheScripts::GetActualScriptSphereIndex(int32 index)
@@ -9755,6 +9687,15 @@ int32 CTheScripts::GetActualScriptSphereIndex(int32 index)
 	if (check != ScriptSphereArray[array_idx].m_Index)
 		return -1;
 	return array_idx;
+}
+
+void CTheScripts::DrawScriptSpheres()
+{
+	for (int i = 0; i < MAX_NUM_SCRIPT_SPHERES; i++) {
+		if (ScriptSphereArray[i].m_bInUse)
+			C3dMarkers::PlaceMarkerSet(ScriptSphereArray[i].m_Id, 4, ScriptSphereArray[i].m_vecCenter, ScriptSphereArray[i].m_fRadius,
+				SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B, SPHERE_MARKER_A, SPHERE_MARKER_PULSE_PERIOD, SPHERE_MARKER_PULSE_FRACTION, 0);
+	}
 }
 
 int32 CTheScripts::AddScriptSphere(int32 id, CVector pos, float radius)
@@ -9775,15 +9716,6 @@ int32 CTheScripts::AddScriptSphere(int32 id, CVector pos, float radius)
 	return GetNewUniqueScriptSphereIndex(i);
 }
 
-int32 CTheScripts::GetNewUniqueScriptSphereIndex(int32 index)
-{
-	if (ScriptSphereArray[index].m_Index >= 0xFFFE)
-		ScriptSphereArray[index].m_Index = 1;
-	else
-		ScriptSphereArray[index].m_Index++;
-	return (uint16)index | ScriptSphereArray[index].m_Index << 16;
-}
-
 void CTheScripts::RemoveScriptSphere(int32 index)
 {
 	index = GetActualScriptSphereIndex(index);
@@ -9793,9 +9725,39 @@ void CTheScripts::RemoveScriptSphere(int32 index)
 	ScriptSphereArray[index].m_Id = 0;
 }
 
-bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle)
+void CTheScripts::AddToBuildingSwapArray(CBuilding* pBuilding, int32 old_model, int32 new_model)
 {
-	return 0.01f * CTimer::GetTimeStep() >= pVehicle->m_fDistanceTravelled;
+	int i = 0;
+	bool found = false;
+	while (i < MAX_NUM_BUILDING_SWAPS && !found) {
+		if (BuildingSwapArray[i].m_pBuilding == pBuilding)
+			found = true;
+		else
+			i++;
+	}
+	if (found) {
+		if (BuildingSwapArray[i].m_nOldModel == new_model) {
+			BuildingSwapArray[i].m_pBuilding = nil;
+			BuildingSwapArray[i].m_nOldModel = BuildingSwapArray[i].m_nNewModel = -1;
+		}
+		else {
+			BuildingSwapArray[i].m_nNewModel = new_model;
+		}
+	}
+	else {
+		i = 0;
+		while (i < MAX_NUM_BUILDING_SWAPS && !found) {
+			if (BuildingSwapArray[i].m_pBuilding == nil)
+				found = true;
+			else
+				i++;
+		}
+		if (found) {
+			BuildingSwapArray[i].m_pBuilding = pBuilding;
+			BuildingSwapArray[i].m_nNewModel = new_model;
+			BuildingSwapArray[i].m_nOldModel = old_model;
+		}
+	}
 }
 
 void CTheScripts::AddToInvisibilitySwapArray(CEntity* pEntity, bool remove)
@@ -9825,41 +9787,138 @@ void CTheScripts::AddToInvisibilitySwapArray(CEntity* pEntity, bool remove)
 	}
 }
 
-void CTheScripts::AddToBuildingSwapArray(CBuilding* pBuilding, int32 old_model, int32 new_model)
+WRAPPER void CTheScripts::UndoBuildingSwaps() { EAXJMP(0x44FD10); }
+WRAPPER void CTheScripts::UndoEntityVisibilitySettings() { EAXJMP(0x44FD60); }
+
+void CRunningScript::UpdateCompareFlag(bool flag)
 {
-	int i = 0;
-	bool found = false;
-	while (i < MAX_NUM_BUILDING_SWAPS && !found) {
-		if (BuildingSwapArray[i].m_pBuilding == pBuilding)
-			found = true;
-		else
-			i++;
+	if (m_bNotFlag)
+		flag = !flag;
+	if (m_nAndOrState == ANDOR_NONE) {
+		m_bCondResult = flag;
+		return;
 	}
-	if (found) {
-		if (BuildingSwapArray[i].m_nOldModel == new_model) {
-			BuildingSwapArray[i].m_pBuilding = nil;
-			BuildingSwapArray[i].m_nOldModel = BuildingSwapArray[i].m_nNewModel = -1;
-		}else{
-			BuildingSwapArray[i].m_nNewModel = new_model;
+	if (m_nAndOrState >= ANDS_1 && m_nAndOrState <= ANDS_8) {
+		m_bCondResult &= flag;
+		if (m_nAndOrState == ANDS_1) {
+			m_nAndOrState = ANDOR_NONE;
+			return;
+		}
+	}
+	else if (m_nAndOrState >= ORS_1 && m_nAndOrState <= ORS_8) {
+		m_bCondResult |= flag;
+		if (m_nAndOrState == ORS_1) {
+			m_nAndOrState = ANDOR_NONE;
+			return;
 		}
 	}
 	else {
-		i = 0;
-		while (i < MAX_NUM_BUILDING_SWAPS && !found) {
-			if (BuildingSwapArray[i].m_pBuilding == nil)
-				found = true;
-			else
-				i++;
+		return;
+	}
+	m_nAndOrState--;
+}
+
+void CRunningScript::LocatePlayerCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug, decided = false;
+	float X, Y, Z, dX, dY, dZ;
+	switch (command) {
+	case COMMAND_LOCATE_PLAYER_ANY_MEANS_3D:
+	case COMMAND_LOCATE_PLAYER_ON_FOOT_3D:
+	case COMMAND_LOCATE_PLAYER_IN_CAR_3D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_ANY_MEANS_3D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_ON_FOOT_3D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_IN_CAR_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 8 : 6);
+	CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+	switch (command) {
+	case COMMAND_LOCATE_STOPPED_PLAYER_ANY_MEANS_2D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_ANY_MEANS_3D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_IN_CAR_2D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_IN_CAR_3D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_ON_FOOT_2D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_ON_FOOT_3D:
+		if (!CTheScripts::IsPlayerStopped(pPlayerInfo)) {
+			result = false;
+			decided = true;
 		}
-		if (found) {
-			BuildingSwapArray[i].m_pBuilding = pBuilding;
-			BuildingSwapArray[i].m_nNewModel = new_model;
-			BuildingSwapArray[i].m_nOldModel = old_model;
+		break;
+	default:
+		break;
+	}
+	X = *(float*)&ScriptParams[1];
+	Y = *(float*)&ScriptParams[2];
+	if (b3D) {
+		Z = *(float*)&ScriptParams[3];
+		dX = *(float*)&ScriptParams[4];
+		dY = *(float*)&ScriptParams[5];
+		dZ = *(float*)&ScriptParams[6];
+		debug = ScriptParams[7];
+	} else {
+		dX = *(float*)&ScriptParams[3];
+		dY = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	if (!decided) {
+		CVector pos = pPlayerInfo->GetPos();
+		result = false;
+		bool in_area;
+		if (b3D) {
+			in_area = X - dX <= pos.x &&
+				X + dX >= pos.x &&
+				Y - dY <= pos.y &&
+				Y + dY >= pos.y &&
+				Z - dZ <= pos.z &&
+				Z + dZ >= pos.z;
+		} else {
+			in_area = X - dX <= pos.x &&
+				X + dX >= pos.x &&
+				Y - dY <= pos.y &&
+				Y + dY >= pos.y;
 		}
+		if (in_area) {
+			switch (command) {
+			case COMMAND_LOCATE_PLAYER_ANY_MEANS_2D:
+			case COMMAND_LOCATE_PLAYER_ANY_MEANS_3D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_ANY_MEANS_2D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_ANY_MEANS_3D:
+				result = true;
+				break;
+			case COMMAND_LOCATE_PLAYER_ON_FOOT_2D:
+			case COMMAND_LOCATE_PLAYER_ON_FOOT_3D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_ON_FOOT_2D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_ON_FOOT_3D:
+				result = !pPlayerInfo->m_pPed->bInVehicle;
+				break;
+			case COMMAND_LOCATE_PLAYER_IN_CAR_2D:
+			case COMMAND_LOCATE_PLAYER_IN_CAR_3D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_IN_CAR_2D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_IN_CAR_3D:
+				result = pPlayerInfo->m_pPed->bInVehicle;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
+		else
+			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
 	}
 }
 
-WRAPPER void CRunningScript::LocatePlayerCommand(int32, uint32*) { EAXJMP(0x44FE10); }
 WRAPPER void CRunningScript::LocatePlayerCharCommand(int32, uint32*) { EAXJMP(0x4501E0); }
 WRAPPER void CRunningScript::LocatePlayerCarCommand(int32, uint32*) { EAXJMP(0x450540); }
 WRAPPER void CRunningScript::LocateCharCommand(int32, uint32*) { EAXJMP(0x450870); }
@@ -9872,22 +9931,62 @@ WRAPPER void CRunningScript::PlayerInAreaCheckCommand(int32, uint32*) { EAXJMP(0
 WRAPPER void CRunningScript::PlayerInAngledAreaCheckCommand(int32, uint32*) { EAXJMP(0x451E50); }
 WRAPPER void CRunningScript::CharInAreaCheckCommand(int32, uint32*) { EAXJMP(0x4523B0); }
 WRAPPER void CRunningScript::CarInAreaCheckCommand(int32, uint32*) { EAXJMP(0x452750); }
-
-WRAPPER void CTheScripts::DrawScriptSpheres() { EAXJMP(0x44FAC0); }
 WRAPPER void CRunningScript::DoDeatharrestCheck() { EAXJMP(0x452A30); }
+
+int16 CRunningScript::GetPadState(uint16 pad, uint16 button)
+{
+	CPad* pPad = CPad::GetPad(pad);
+	switch (button) {
+	case 0: return pPad->NewState.LeftStickX;
+	case 1: return pPad->NewState.LeftStickY;
+	case 2: return pPad->NewState.RightStickX;
+	case 3: return pPad->NewState.RightStickY;
+	case 4: return pPad->NewState.LeftShoulder1;
+	case 5: return pPad->NewState.LeftShoulder2;
+	case 6: return pPad->NewState.RightShoulder1;
+	case 7: return pPad->NewState.RightShoulder2;
+	case 8: return pPad->NewState.DPadUp;
+	case 9: return pPad->NewState.DPadDown;
+	case 10: return pPad->NewState.DPadLeft;
+	case 11: return pPad->NewState.DPadRight;
+	case 12: return pPad->NewState.Start;
+	case 13: return pPad->NewState.Select;
+	case 14: return pPad->NewState.Square;
+	case 15: return pPad->NewState.Triangle;
+	case 16: return pPad->NewState.Cross;
+	case 17: return pPad->NewState.Circle;
+	case 18: return pPad->NewState.LeftShock;
+	case 19: return pPad->NewState.RightShock;
+	default: break;
+	}
+	return 0;
+}
+
 WRAPPER void CTheScripts::DrawDebugSquare(float, float, float, float) { EAXJMP(0x452D00); }
+WRAPPER void CTheScripts::DrawDebugAngledSquare(float, float, float, float, float, float, float, float) { EAXJMP(0x452F00); }
 WRAPPER void CTheScripts::DrawDebugCube(float, float, float, float, float, float) { EAXJMP(0x453100); }
+WRAPPER void CTheScripts::DrawDebugAngledCube(float, float, float, float, float, float, float, float, float, float) { EAXJMP(0x4532F0); }
 WRAPPER void CTheScripts::ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2) { EAXJMP(0x4534E0); }
+WRAPPER void CTheScripts::RenderTheScriptDebugLines() { EAXJMP(0x453550); }
+WRAPPER void CTheScripts::SaveAllScripts(uint8*, uint32*) { EAXJMP(0x4535E0); }
+WRAPPER void CTheScripts::LoadAllScripts(uint8*, uint32) { EAXJMP(0x453B30); }
 WRAPPER void CTheScripts::ClearSpaceForMissionEntity(const CVector&, CEntity*) { EAXJMP(0x454060); }
 WRAPPER void CTheScripts::HighlightImportantArea(uint32, float, float, float, float, float) { EAXJMP(0x454320); }
+WRAPPER void CTheScripts::HighlightImportantAngledArea(uint32, float, float, float, float, float, float, float, float, float) { EAXJMP(0x454430); }
+WRAPPER bool CTheScripts::IsPedStopped(CPed*) { EAXJMP(0x454670); }
+WRAPPER bool CTheScripts::IsPlayerStopped(CPlayerInfo*) { EAXJMP(0x4546C0); }
+
+bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle)
+{
+	return 0.01f * CTimer::GetTimeStep() >= pVehicle->m_fDistanceTravelled;
+}
+
 WRAPPER void CTheScripts::CleanUpThisVehicle(CVehicle*) { EAXJMP(0x4548D0); }
 WRAPPER void CTheScripts::CleanUpThisPed(CPed*) { EAXJMP(0x4547A0); }
 WRAPPER void CTheScripts::CleanUpThisObject(CObject*) { EAXJMP(0x454910); }
 WRAPPER void CTheScripts::ReadObjectNamesFromScript() { EAXJMP(0x454960); }
 WRAPPER void CTheScripts::UpdateObjectIndices() { EAXJMP(0x454AD0); }
 WRAPPER void CTheScripts::ReadMultiScriptFileOffsetsFromScript() { EAXJMP(0x454BC0); }
-WRAPPER bool CTheScripts::IsPedStopped(CPed*) { EAXJMP(0x454670); }
-WRAPPER bool CTheScripts::IsPlayerStopped(CPlayerInfo*) { EAXJMP(0x4546C0); }
 
 STARTPATCHES
 InjectHook(0x437AE0, &CMissionCleanup::Init, PATCH_JUMP);

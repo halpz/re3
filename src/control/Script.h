@@ -48,7 +48,26 @@ struct CTextLine
 	float m_fAtY;
 	wchar m_Text[SCRIPT_TEXT_MAX_LENGTH];
 
-	void Reset();
+	void Reset()
+	{
+		m_fScaleX = 0.48f;
+		m_fScaleY = 1.12f;
+		m_sColor = CRGBA(225, 225, 225, 255);
+		m_bJustify = false;
+		m_bRightJustify = false;
+		m_bCentered = false;
+		m_bBackground = false;
+		m_bBackgroundOnly = false;
+		m_fWrapX = 182.0f; /* TODO: scaling as bugfix */
+		m_fCenterSize = 640.0f; /* --||-- */
+		m_sBackgroundColor = CRGBA(128, 128, 128, 128);
+		m_bTextProportional = true;
+		m_bTextBeforeFade = false;
+		m_nFont = 2; /* enum? */
+		m_fAtX = 0.0f;
+		m_fAtY = 0.0f;
+		memset(&m_Text, 0, sizeof(m_Text));
+	}
 };
 
 static_assert(sizeof(CTextLine) == 0x414, "Script.h: error");
@@ -378,10 +397,18 @@ public:
 	static void DrawScriptSpheres();
 	static void ClearSpaceForMissionEntity(const CVector&, CEntity*);
 	static void HighlightImportantArea(uint32, float, float, float, float, float);
+	static void HighlightImportantAngledArea(uint32, float, float, float, float, float, float, float, float, float);
 	static void DrawDebugSquare(float, float, float, float);
+	static void DrawDebugAngledSquare(float, float, float, float, float, float, float, float);
 	static void DrawDebugCube(float, float, float, float, float, float);
+	static void DrawDebugAngledCube(float, float, float, float, float, float, float, float, float, float);
+	static void RenderTheScriptDebugLines();
+	static void SaveAllScripts(uint8*, uint32*);
+	static void LoadAllScripts(uint8*, uint32);
 	static void AddToInvisibilitySwapArray(CEntity*, bool);
 	static void AddToBuildingSwapArray(CBuilding*, int32, int32);
+	static void UndoBuildingSwaps();
+	static void UndoEntityVisibilitySettings();
 
 	static int32 GetActualScriptSphereIndex(int32 index);
 	static int32 AddScriptSphere(int32 id, CVector pos, float radius);
