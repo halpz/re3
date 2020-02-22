@@ -386,13 +386,15 @@ CMoneyMessages::RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8
 	aMoneyMessages[nIndex].m_fOpacity = fOpacity;
 }
 
+CRGBA FoamColour(255, 255, 255, 255);
+unsigned int CSpecialParticleStuff::BoatFromStart;
+
 void CSpecialParticleStuff::CreateFoamAroundObject(CMatrix* pMatrix, float innerFw, float innerRg, float innerUp, int32 particles)
 {
-	int attempts = 0;
 	float outerFw = innerFw + 5.0f;
 	float outerRg = innerRg + 5.0f;
 	float outerUp = innerUp + 5.0f;
-	while (particles > 0 && attempts < 1000) {
+	for (int attempts = 0; particles > 0 && attempts < 1000; attempts++) {
 		CVector pos;
 		int rnd = CGeneral::GetRandomNumber();
 		pos.x = (int8)(rnd - 128) / 110.0f;
@@ -400,20 +402,20 @@ void CSpecialParticleStuff::CreateFoamAroundObject(CMatrix* pMatrix, float inner
 		pos.z = 0.0f;
 		if (DotProduct2D(pos, TheCamera.GetForward()) >= 0)
 			continue;
+		// was there any point in adding it here?
 		pos += pMatrix->GetPosition();
 		pos.z = 2.0f;
-		// was there any point in adding it here?
-		float fw = DotProduct(pMatrix->GetForward(), pos - pMatrix->GetPosition());
+		float fw = Abs(DotProduct(pMatrix->GetForward(), pos - pMatrix->GetPosition()));
 		if (fw >= outerFw)
 			continue;
-		float rg = DotProduct(pMatrix->GetRight(), pos - pMatrix->GetPosition());
+		float rg = Abs(DotProduct(pMatrix->GetRight(), pos - pMatrix->GetPosition()));
 		if (rg >= outerRg)
 			continue;
-		float up = DotProduct(pMatrix->GetUp(), pos - pMatrix->GetPosition());
+		float up = Abs(DotProduct(pMatrix->GetUp(), pos - pMatrix->GetPosition()));
 		if (up >= outerUp)
 			continue;
 		if (fw > innerFw || rg > innerRg || up > innerUp) {
-			CParticle::AddParticle(PARTICLE_STEAM2, pos, CVector(0.0f, 0.0f, 0.0f), nil, 4.0f, 1, 0, 0, 0);
+			CParticle::AddParticle(PARTICLE_STEAM2, pos, CVector(0.0f, 0.0f, 0.0f), nil, 4.0f, FoamColour, 1, 0, 0, 0);
 			particles--;
 		}
 	}
@@ -423,9 +425,6 @@ void CSpecialParticleStuff::StartBoatFoamAnimation()
 {
 	BoatFromStart = CTimer::GetTimeInMilliseconds();
 }
-
-CRGBA FoamColour(255, 255, 255, 255);
-unsigned int CSpecialParticleStuff::BoatFromStart;
 
 void CSpecialParticleStuff::UpdateBoatFoamAnimation(CMatrix* pMatrix)
 {
@@ -441,7 +440,7 @@ void CSpecialParticleStuff::UpdateBoatFoamAnimation(CMatrix* pMatrix)
 		CVector pos = *pMatrix * CVector(X, Y, Z);
 		CParticle::AddParticle(PARTICLE_STEAM_NY, pos, CVector(0.0f, 0.0f, 0.0f),
 			nil, FrameInAnimation * 0.5f + 2.0f, FoamColour, 1, 0, 0, 0);
-		if (++FrameInAnimation)
+		if (++FrameInAnimation > 15)
 			FrameInAnimation = 0;
 	}
 	if ((cur & 0x3FF) < (prev & 0x3FF)) {

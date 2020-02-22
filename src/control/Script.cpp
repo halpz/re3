@@ -9006,9 +9006,9 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	case COMMAND_UPDATE_BOAT_FOAM_ANIMATION:
 	{
 		CollectParameters(&m_nIp, 1);
-		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
-		assert(pVehicle->m_vehType == VEHICLE_TYPE_BOAT);
-		CSpecialParticleStuff::UpdateBoatFoamAnimation(&pVehicle->GetMatrix());
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		CSpecialParticleStuff::UpdateBoatFoamAnimation(&pObject->GetMatrix());
 		return 0;
 	}
 	case COMMAND_SET_MUSIC_DOES_FADE:
