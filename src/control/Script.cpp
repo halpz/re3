@@ -8952,7 +8952,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
-		assert(ScriptParams[1] >= 0 && ScriptParams[1] < 8);
+		assert(ScriptParams[1] >= 0 && ScriptParams[1] < ARRAY_SIZE(pVehicle->pPassengers));
 		CPed* pPassenger = pVehicle->pPassengers[ScriptParams[1]];
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPassenger);
 		StoreParameters(&m_nIp, 1);
@@ -9380,7 +9380,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 			pVehicle->pDriver->bScriptObjectiveCompleted = false;
 			pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
 		}
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < ARRAY_SIZE(pVehicle->pPassengers); i++)
 		{
 			if (pVehicle->pPassengers[i]) {
 				pVehicle->pPassengers[i]->bScriptObjectiveCompleted = false;
