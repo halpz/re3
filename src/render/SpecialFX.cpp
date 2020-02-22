@@ -389,7 +389,8 @@ CMoneyMessages::RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8
 CRGBA FoamColour(255, 255, 255, 255);
 unsigned int CSpecialParticleStuff::BoatFromStart;
 
-void CSpecialParticleStuff::CreateFoamAroundObject(CMatrix* pMatrix, float innerFw, float innerRg, float innerUp, int32 particles)
+void
+CSpecialParticleStuff::CreateFoamAroundObject(CMatrix* pMatrix, float innerFw, float innerRg, float innerUp, int32 particles)
 {
 	float outerFw = innerFw + 5.0f;
 	float outerRg = innerRg + 5.0f;
@@ -397,8 +398,8 @@ void CSpecialParticleStuff::CreateFoamAroundObject(CMatrix* pMatrix, float inner
 	for (int attempts = 0; particles > 0 && attempts < 1000; attempts++) {
 		CVector pos;
 		int rnd = CGeneral::GetRandomNumber();
-		pos.x = (int8)(rnd - 128) / 110.0f;
-		pos.y = (int8)((rnd >> 8) - 128) / 110.0f;
+		pos.x = (int8)(rnd - 128) * innerFw / 110.0f;
+		pos.y = (int8)((rnd >> 8) - 128) * innerFw / 110.0f;
 		pos.z = 0.0f;
 		if (DotProduct2D(pos, TheCamera.GetForward()) >= 0)
 			continue;
@@ -421,12 +422,14 @@ void CSpecialParticleStuff::CreateFoamAroundObject(CMatrix* pMatrix, float inner
 	}
 }
 
-void CSpecialParticleStuff::StartBoatFoamAnimation()
+void
+CSpecialParticleStuff::StartBoatFoamAnimation()
 {
 	BoatFromStart = CTimer::GetTimeInMilliseconds();
 }
 
-void CSpecialParticleStuff::UpdateBoatFoamAnimation(CMatrix* pMatrix)
+void
+CSpecialParticleStuff::UpdateBoatFoamAnimation(CMatrix* pMatrix)
 {
 	static int32 FrameInAnimation = 0;
 	static float X, Y, Z, dX, dY, dZ;
