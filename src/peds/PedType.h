@@ -1,7 +1,7 @@
 #pragma once
 
 // Index into the PedType array
-enum
+enum ePedType
 {
 	PEDTYPE_PLAYER1,
 	PEDTYPE_PLAYER2,
@@ -77,7 +77,7 @@ public:
 	static void Initialise(void);
 	static void Shutdown(void);
 	static void LoadPedData(void);
-	static int32 FindPedType(char *type);
+	static ePedType FindPedType(char *type);
 	static uint32 FindPedFlag(char *type);
 	static void Save(uint8 *buf, uint32 *size);
 	static void Load(uint8 *buf, uint32 size);

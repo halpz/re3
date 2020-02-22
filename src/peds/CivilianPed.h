@@ -5,7 +5,7 @@
 class CCivilianPed : public CPed
 {
 public:
-	CCivilianPed(int, int);
+	CCivilianPed(ePedType, uint32);
 	~CCivilianPed(void) { }
 
 	void CivilianAI(void);

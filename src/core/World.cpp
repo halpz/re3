@@ -952,7 +952,7 @@ CWorld::RemoveEntityInsteadOfProcessingIt(CEntity* ent)
 		if (FindPlayerPed() == ent)
 			Remove(ent);
 		else
-			CPopulation::RemovePed(ent);
+			CPopulation::RemovePed((CPed*)ent);
 	} else {
 		Remove(ent);
 		delete ent;

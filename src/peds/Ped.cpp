@@ -353,7 +353,7 @@ CPed::~CPed(void)
 	}
 	if (m_pFire)
 		m_pFire->Extinguish();
-	CPopulation::UpdatePedCount(m_nPedType, true);
+	CPopulation::UpdatePedCount((ePedType)m_nPedType, true);
 	DMAudio.DestroyEntity(m_audioEntityId);
 }
 
@@ -594,7 +594,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_collPoly.valid = false;
 	m_fCollisionSpeed = 0.0f;
 	m_wepModelID = -1;
-	CPopulation::UpdatePedCount(m_nPedType, false);
+	CPopulation::UpdatePedCount((ePedType)m_nPedType, false);
 }
 
 uint32

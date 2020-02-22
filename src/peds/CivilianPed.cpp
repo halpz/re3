@@ -8,7 +8,7 @@
 #include "Vehicle.h"
 #include "SurfaceTable.h"
 
-CCivilianPed::CCivilianPed(int pedtype, int mi) : CPed(pedtype)
+CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 {
 	SetModelIndex(mi);
 	for (int i = 0; i < ARRAY_SIZE(m_nearPeds); i++) {
@@ -380,7 +380,7 @@ CCivilianPed::ProcessControl(void)
 class CCivilianPed_ : public CCivilianPed
 {
 public:
-	CCivilianPed *ctor(int pedtype, int mi) { return ::new (this) CCivilianPed(pedtype, mi); };
+	CCivilianPed *ctor(ePedType pedtype, uint32 mi) { return ::new (this) CCivilianPed(pedtype, mi); };
 	void dtor(void) { CCivilianPed::~CCivilianPed(); }
 	void ProcessControl_(void) { CCivilianPed::ProcessControl(); }
 };
