@@ -186,7 +186,7 @@ public:
 	void SwitchRoadsInAngledArea(float x1, float y1, float z1, float x2, float y2, float z2, float length, uint8 type, uint8 enable);
 	void MarkRoadsBetweenLevelsNodeAndNeighbours(int32 nodeId);
 	void MarkRoadsBetweenLevelsInArea(float x1, float x2, float y1, float y2, float z1, float z2);
-	void MarkPedRoadsBetweenLevelsInArea(float x1, float x2, float y1, float y2, float z1, float z2);
+	void PedMarkRoadsBetweenLevelsInArea(float x1, float x2, float y1, float y2, float z1, float z2);
 	int32 FindNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bool ignoreDisabled = false, bool ignoreBetweenLevels = false);
 	int32 FindNodeClosestToCoorsFavourDirection(CVector coors, uint8 type, float dirX, float dirY);
 	float FindNodeOrientationForCarPlacement(int32 nodeId);

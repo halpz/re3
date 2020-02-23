@@ -1,5 +1,7 @@
 #pragma once
 
+class CVehicle;
+
 enum {
 	RECORDSTATE_0,
 	RECORDSTATE_1,
@@ -16,6 +18,8 @@ public:
 	static void SaveOrRetrieveCarPositions(void);
 	static void StartChaseScene(float);
 	static void CleanUpChaseScene();
+	static void RemoveCarFromChase(int32);
+	static CVehicle* TurnChaseCarIntoScriptCar(int32);
 };
 
 

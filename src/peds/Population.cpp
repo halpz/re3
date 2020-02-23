@@ -16,6 +16,7 @@
 #include "IniFile.h"
 #include "VisibilityPlugins.h"
 #include "PedPlacement.h"
+#include "DummyObject.h"
 
 #define CREATION_DIST_MULT_TO_DIST 40.0f
 #define CREATION_RANGE 10.0f // Being added over the CREATION_DIST_MULT_TO_DIST.
@@ -58,6 +59,7 @@ CVector &CPopulation::RegenerationForward = *(CVector*)0x8F1AD4;
 WRAPPER CPed *CPopulation::AddPedInCar(CVehicle *vehicle) { EAXJMP(0x4F5800); }
 WRAPPER void CPopulation::ManagePopulation(void) { EAXJMP(0x4F3B90); }
 WRAPPER void CPopulation::MoveCarsAndPedsOutOfAbandonedZones(void) { EAXJMP(0x4F5BE0); }
+WRAPPER void CPopulation::ConvertToRealObject(CDummyObject* obj) { EAXJMP(0x4F45A0); }
 
 void
 CPopulation::Initialise()

@@ -485,6 +485,7 @@ int     m_iModeObbeCamIsInForCar;
 	void Restore(void);
 	void SetWideScreenOn(void);
 	void SetWideScreenOff(void);
+	void SetNearClipScript(float);
 
 	float Find3rdPersonQuickAimPitch(void);
 
@@ -512,6 +513,7 @@ int     m_iModeObbeCamIsInForCar;
 	void UpdateAimingCoors(CVector const &);
 
 	void SetPercentAlongCutScene(float);
+	void SetParametersForScriptInterpolation(float, float, int32);
 
 	void dtor(void) { this->CCamera::~CCamera(); }
 };

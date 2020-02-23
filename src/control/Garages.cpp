@@ -99,6 +99,7 @@ void CGarages::GivePlayerDetonator()
 WRAPPER bool CGarages::HasThisCarBeenCollected(int16 garage, uint8 id) { EAXJMP(0x426D50); }
 WRAPPER void CGarages::ChangeGarageType(int16 garage, eGarageType type, int32 mi) { EAXJMP(0x4222A0); }
 WRAPPER bool CGarages::HasResprayHappened(int16 garage) { EAXJMP(0x4274F0); }
+WRAPPER bool CGarages::IsThisCarWithinGarageArea(int16 garage, CEntity* pCar) { EAXJMP(0x427570); }
 
 void CGarage::OpenThisGarage()
 {

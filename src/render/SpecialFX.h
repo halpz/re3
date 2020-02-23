@@ -110,3 +110,12 @@ public:
 	static void Render();
 	static void	RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8 bGreen, uint8 bBlue, float fSize, float fOpacity);
 };
+
+class CSpecialParticleStuff
+{
+	static uint32 BoatFromStart;
+public:
+	static void CreateFoamAroundObject(CMatrix*, float, float, float, int32);
+	static void StartBoatFoamAnimation();
+	static void UpdateBoatFoamAnimation(CMatrix*);
+};

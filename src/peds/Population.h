@@ -6,6 +6,7 @@
 
 class CPed;
 class CVehicle;
+class CDummyObject;
 
 struct PedGroup
 {
@@ -80,4 +81,5 @@ public:
 	static void AddToPopulation(float, float, float, float);
 	static void ManagePopulation(void);
 	static void MoveCarsAndPedsOutOfAbandonedZones(void);
+	static void ConvertToRealObject(CDummyObject* obj);
 };

@@ -26,6 +26,7 @@ public:
 	static CDirectory *&ms_pCutsceneDir;
 	static uint32 &ms_cutsceneLoadStatus;
 
+	static void SetRunning(bool running) { ms_running = running; }
 	static bool IsRunning(void) { return ms_running; }
 	static bool IsCutsceneProcessing(void) { return ms_cutsceneProcessing; }
 	static CCutsceneObject* GetCutsceneObject(int id) { return ms_pCutsceneObjects[id]; }

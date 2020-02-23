@@ -139,7 +139,9 @@ public:
 	int8 ProcessCommands800To899(int32);
 	int8 ProcessCommands900To999(int32);
 	int8 ProcessCommands1000To1099(int32);
+#ifndef GTA_PS2
 	int8 ProcessCommands1100To1199(int32);
+#endif
 	void UpdateCompareFlag(bool);
 	int16 GetPadState(uint16, uint16);
 	void LocatePlayerCommand(int32, uint32*);

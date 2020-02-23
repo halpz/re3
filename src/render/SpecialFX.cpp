@@ -11,6 +11,9 @@
 #include "Lights.h"
 #include "VisibilityPlugins.h"
 #include "World.h"
+#include "Particle.h"
+#include "General.h"
+#include "Camera.h"
 
 WRAPPER void CSpecialFX::Render(void) { EAXJMP(0x518DC0); }
 WRAPPER void CSpecialFX::Update(void) { EAXJMP(0x518D40); }
@@ -381,6 +384,79 @@ CMoneyMessages::RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8
 	aMoneyMessages[nIndex].m_Colour.blue = bBlue;
 	aMoneyMessages[nIndex].m_fSize = fSize;
 	aMoneyMessages[nIndex].m_fOpacity = fOpacity;
+}
+
+CRGBA FoamColour(255, 255, 255, 255);
+unsigned int CSpecialParticleStuff::BoatFromStart;
+
+void
+CSpecialParticleStuff::CreateFoamAroundObject(CMatrix* pMatrix, float innerFw, float innerRg, float innerUp, int32 particles)
+{
+	float outerFw = innerFw + 5.0f;
+	float outerRg = innerRg + 5.0f;
+	float outerUp = innerUp + 5.0f;
+	for (int attempts = 0; particles > 0 && attempts < 1000; attempts++) {
+		CVector pos;
+		int rnd = CGeneral::GetRandomNumber();
+		pos.x = (int8)(rnd - 128) * innerFw / 110.0f;
+		pos.y = (int8)((rnd >> 8) - 128) * innerFw / 110.0f;
+		pos.z = 0.0f;
+		if (DotProduct2D(pos, TheCamera.GetForward()) >= 0)
+			continue;
+		// was there any point in adding it here?
+		pos += pMatrix->GetPosition();
+		pos.z = 2.0f;
+		float fw = Abs(DotProduct(pMatrix->GetForward(), pos - pMatrix->GetPosition()));
+		if (fw >= outerFw)
+			continue;
+		float rg = Abs(DotProduct(pMatrix->GetRight(), pos - pMatrix->GetPosition()));
+		if (rg >= outerRg)
+			continue;
+		float up = Abs(DotProduct(pMatrix->GetUp(), pos - pMatrix->GetPosition()));
+		if (up >= outerUp)
+			continue;
+		if (fw > innerFw || rg > innerRg || up > innerUp) {
+			CParticle::AddParticle(PARTICLE_STEAM2, pos, CVector(0.0f, 0.0f, 0.0f), nil, 4.0f, FoamColour, 1, 0, 0, 0);
+			particles--;
+		}
+	}
+}
+
+void
+CSpecialParticleStuff::StartBoatFoamAnimation()
+{
+	BoatFromStart = CTimer::GetTimeInMilliseconds();
+}
+
+void
+CSpecialParticleStuff::UpdateBoatFoamAnimation(CMatrix* pMatrix)
+{
+	static int32 FrameInAnimation = 0;
+	static float X, Y, Z, dX, dY, dZ;
+	CreateFoamAroundObject(pMatrix, 107.0f, 24.1f, 30.5f, 2);
+	uint32 prev = CTimer::GetPreviousTimeInMilliseconds();
+	uint32 cur = CTimer::GetTimeInMilliseconds();
+	if (FrameInAnimation != 0) {
+		X += dX;
+		Y += dY;
+		Z += dZ;
+		CVector pos = *pMatrix * CVector(X, Y, Z);
+		CParticle::AddParticle(PARTICLE_STEAM_NY, pos, CVector(0.0f, 0.0f, 0.0f),
+			nil, FrameInAnimation * 0.5f + 2.0f, FoamColour, 1, 0, 0, 0);
+		if (++FrameInAnimation > 15)
+			FrameInAnimation = 0;
+	}
+	if ((cur & 0x3FF) < (prev & 0x3FF)) {
+		FrameInAnimation = 1;
+		int rnd = CGeneral::GetRandomNumber();
+		X = (int8)(rnd - 128) * 0.2f;
+		Y = (int8)((rnd >> 8) - 128) * 0.2f;
+		Z = 10.0f;
+		rnd = CGeneral::GetRandomNumber();
+		dX = (int8)(rnd - 128) * 0.02f;
+		dY = (int8)((rnd >> 8) - 128) * 0.02f;
+		dZ = 2.0f;
+	}
 }
 
 STARTPATCHES
