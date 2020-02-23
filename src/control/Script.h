@@ -269,9 +269,15 @@ public:
 	static CRunningScript* StartTestScript();
 	static bool IsPlayerOnAMission();
 	static void ClearSpaceForMissionEntity(const CVector&, CEntity*);
-	static void ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2);
+
 	static void UndoBuildingSwaps();
 	static void UndoEntityVisibilitySettings();
+
+	static void ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2);
+	static void RenderTheScriptDebugLines();
+
+	static void SaveAllScripts(uint8*, uint32*);
+	static void LoadAllScripts(uint8*, uint32);
 
 	static bool IsDebugOn() { return DbgFlag; };
 	static void InvertDebugFlag() { DbgFlag = !DbgFlag; }
@@ -303,9 +309,7 @@ private:
 	static void DrawDebugAngledSquare(float, float, float, float, float, float, float, float);
 	static void DrawDebugCube(float, float, float, float, float, float);
 	static void DrawDebugAngledCube(float, float, float, float, float, float, float, float, float, float);
-	static void RenderTheScriptDebugLines();
-	static void SaveAllScripts(uint8*, uint32*);
-	static void LoadAllScripts(uint8*, uint32);
+
 	static void AddToInvisibilitySwapArray(CEntity*, bool);
 	static void AddToBuildingSwapArray(CBuilding*, int32, int32);
 
