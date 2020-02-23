@@ -11,6 +11,8 @@ class CPed;
 class CObject;
 class CPlayerInfo;
 
+class CRunningScript;
+
 #define KEY_LENGTH_IN_SCRIPT 8
 
 struct CScriptRectangle 
@@ -79,123 +81,6 @@ struct CScriptSphere
 	uint32 m_Id;
 	CVector m_vecCenter;
 	float m_fRadius;
-};
-
-enum {
-	MAX_STACK_DEPTH = 6,
-	NUM_LOCAL_VARS = 16,
-	NUM_TIMERS = 2
-};
-
-class CRunningScript
-{
-	CRunningScript *next;
-	CRunningScript *prev;
-	char m_abScriptName[8];
-	uint32 m_nIp;
-	uint32 m_anStack[MAX_STACK_DEPTH];
-	uint16 m_nStackPointer;
-	int32 m_anLocalVariables[NUM_LOCAL_VARS + NUM_TIMERS];
-	bool m_bCondResult;
-	bool m_bIsMissionScript;
-	bool m_bSkipWakeTime;
-	uint32 m_nWakeTime;
-	uint16 m_nAndOrState;
-	bool m_bNotFlag;
-	bool m_bDeatharrestEnabled;
-	bool m_bDeatharrestExecuted;
-	bool m_bMissionFlag;
-
-public:
-	void SetIP(uint32 ip) { m_nIp = ip; }
-	CRunningScript* GetNext() { return next; }
-	void UpdateTimers(float timeStep){
-		m_anLocalVariables[NUM_LOCAL_VARS] += timeStep;
-		m_anLocalVariables[NUM_LOCAL_VARS + 1] += timeStep;
-	}
-
-	bool ThisIsAValidRandomPed(uint32 pedtype){
-		switch (pedtype){
-		case PEDTYPE_CIVMALE:
-		case PEDTYPE_CIVFEMALE:
-		case PEDTYPE_GANG1:
-		case PEDTYPE_GANG2:
-		case PEDTYPE_GANG3:
-		case PEDTYPE_GANG4:
-		case PEDTYPE_GANG5:
-		case PEDTYPE_GANG6:
-		case PEDTYPE_GANG7:
-		case PEDTYPE_GANG8:
-		case PEDTYPE_GANG9:
-		case PEDTYPE_CRIMINAL:
-		case PEDTYPE_PROSTITUTE:
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
-
-	void CollectParameters(uint32*, int16);
-	int32 CollectNextParameterWithoutIncreasingPC(uint32);
-	int32* GetPointerToScriptVariable(uint32*, int16);
-	void StoreParameters(uint32*, int16);
-	void Init();
-	void RemoveScriptFromList(CRunningScript**);
-	void AddScriptToList(CRunningScript**);
-	void Process();
-	int8 ProcessOneCommand();
-	void DoDeatharrestCheck();
-	int8 ProcessCommands0To99(int32);
-	int8 ProcessCommands100To199(int32);
-	int8 ProcessCommands200To299(int32);
-	int8 ProcessCommands300To399(int32);
-	int8 ProcessCommands400To499(int32);
-	int8 ProcessCommands500To599(int32);
-	int8 ProcessCommands600To699(int32);
-	int8 ProcessCommands700To799(int32);
-	int8 ProcessCommands800To899(int32);
-	int8 ProcessCommands900To999(int32);
-	int8 ProcessCommands1000To1099(int32);
-#ifndef GTA_PS2
-	int8 ProcessCommands1100To1199(int32);
-#endif
-	void UpdateCompareFlag(bool);
-	int16 GetPadState(uint16, uint16);
-	void LocatePlayerCommand(int32, uint32*);
-	void LocatePlayerCharCommand(int32, uint32*);
-	void LocatePlayerCarCommand(int32, uint32*);
-	void LocateCharCommand(int32, uint32*);
-	void LocateCharCharCommand(int32, uint32*);
-	void LocateCharCarCommand(int32, uint32*);
-	void LocateCharObjectCommand(int32, uint32*);
-	void LocateCarCommand(int32, uint32*);
-	void LocateSniperBulletCommand(int32, uint32*);
-	void PlayerInAreaCheckCommand(int32, uint32*);
-	void PlayerInAngledAreaCheckCommand(int32, uint32*);
-	void CharInAreaCheckCommand(int32, uint32*);
-	void CarInAreaCheckCommand(int32, uint32*);
-private:
-	enum {
-		ANDOR_NONE = 0,
-		ANDS_1 = 1,
-		ANDS_2,
-		ANDS_3,
-		ANDS_4,
-		ANDS_5,
-		ANDS_6,
-		ANDS_7,
-		ANDS_8,
-		ORS_1 = 21,
-		ORS_2,
-		ORS_3,
-		ORS_4,
-		ORS_5,
-		ORS_6,
-		ORS_7,
-		ORS_8
-	};
 };
 
 enum {
@@ -337,7 +222,6 @@ enum {
 
 class CTheScripts
 {
-public:
 	static uint8(&ScriptSpace)[SIZE_SCRIPT_SPACE];
 	static CRunningScript(&ScriptsArray)[MAX_NUM_SCRIPTS];
 	static int32(&BaseBriefIdForContact)[MAX_NUM_CONTACTS];
@@ -377,16 +261,34 @@ public:
 	static bool &UseTextCommands;
 	static uint16 &CommandsExecuted;
 	static uint16 &ScriptsUpdated;
+
 public:
+	static void Init();
+	static void Process();
+
+	static CRunningScript* StartTestScript();
+	static bool IsPlayerOnAMission();
+	static void ClearSpaceForMissionEntity(const CVector&, CEntity*);
 	static void ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2);
+	static void UndoBuildingSwaps();
+	static void UndoEntityVisibilitySettings();
+
+	static bool IsDebugOn() { return DbgFlag; };
+	static void InvertDebugFlag() { DbgFlag = !DbgFlag; }
+
+	static int32* GetPointerToScriptVariable(int32 offset) { return (int32*)&ScriptSpace[offset]; }
+
+	static void ResetCountdownToMakePlayerUnsafe() { CountdownToMakePlayerUnsafe = 0; }
+	static bool IsCountdownToMakePlayerUnsafeOn() { return CountdownToMakePlayerUnsafe != 0; }
+
+private:
+
+	static CRunningScript* StartNewScript(uint32);
+
 	static void CleanUpThisVehicle(CVehicle*);
 	static void CleanUpThisPed(CPed*);
 	static void CleanUpThisObject(CObject*);
-	static void Init();
-	static CRunningScript* StartNewScript(uint32);
-	static void Process();
-	static CRunningScript* StartTestScript();
-	static bool IsPlayerOnAMission();
+
 	static bool IsPedStopped(CPed*);
 	static bool IsPlayerStopped(CPlayerInfo*);
 	static bool IsVehicleStopped(CVehicle*);
@@ -395,7 +297,6 @@ public:
 	static void UpdateObjectIndices();
 	static void ReadMultiScriptFileOffsetsFromScript();
 	static void DrawScriptSpheres();
-	static void ClearSpaceForMissionEntity(const CVector&, CEntity*);
 	static void HighlightImportantArea(uint32, float, float, float, float, float);
 	static void HighlightImportantAngledArea(uint32, float, float, float, float, float, float, float, float, float);
 	static void DrawDebugSquare(float, float, float, float);
@@ -407,44 +308,169 @@ public:
 	static void LoadAllScripts(uint8*, uint32);
 	static void AddToInvisibilitySwapArray(CEntity*, bool);
 	static void AddToBuildingSwapArray(CBuilding*, int32, int32);
-	static void UndoBuildingSwaps();
-	static void UndoEntityVisibilitySettings();
 
 	static int32 GetActualScriptSphereIndex(int32 index);
 	static int32 AddScriptSphere(int32 id, CVector pos, float radius);
 	static int32 GetNewUniqueScriptSphereIndex(int32 index);
 	static void RemoveScriptSphere(int32 index);
 
-	static int32 Read4BytesFromScript(uint32* pIp){
+	friend class CRunningScript;
+	friend class CHud;
+	friend void CMissionCleanup::Process();
+};
+
+
+enum {
+	MAX_STACK_DEPTH = 6,
+	NUM_LOCAL_VARS = 16,
+	NUM_TIMERS = 2
+};
+
+class CRunningScript
+{
+	enum {
+		ANDOR_NONE = 0,
+		ANDS_1 = 1,
+		ANDS_2,
+		ANDS_3,
+		ANDS_4,
+		ANDS_5,
+		ANDS_6,
+		ANDS_7,
+		ANDS_8,
+		ORS_1 = 21,
+		ORS_2,
+		ORS_3,
+		ORS_4,
+		ORS_5,
+		ORS_6,
+		ORS_7,
+		ORS_8
+	};
+
+	CRunningScript* next;
+	CRunningScript* prev;
+	char m_abScriptName[8];
+	uint32 m_nIp;
+	uint32 m_anStack[MAX_STACK_DEPTH];
+	uint16 m_nStackPointer;
+	int32 m_anLocalVariables[NUM_LOCAL_VARS + NUM_TIMERS];
+	bool m_bCondResult;
+	bool m_bIsMissionScript;
+	bool m_bSkipWakeTime;
+	uint32 m_nWakeTime;
+	uint16 m_nAndOrState;
+	bool m_bNotFlag;
+	bool m_bDeatharrestEnabled;
+	bool m_bDeatharrestExecuted;
+	bool m_bMissionFlag;
+
+public:
+	void SetIP(uint32 ip) { m_nIp = ip; }
+	CRunningScript* GetNext() const { return next; }
+	void UpdateTimers(float timeStep) {
+		m_anLocalVariables[NUM_LOCAL_VARS] += timeStep;
+		m_anLocalVariables[NUM_LOCAL_VARS + 1] += timeStep;
+	}
+
+	static int32 Read4BytesFromScript(uint32* pIp) {
 		int32 retval = 0;
-		for (int i = 0; i < 4; i++){
-			retval |= ScriptSpace[(*pIp)++] << (8 * i);
+		for (int i = 0; i < 4; i++) {
+			retval |= CTheScripts::ScriptSpace[(*pIp)++] << (8 * i);
 		}
 		return retval;
 	}
-	static int16 Read2BytesFromScript(uint32* pIp){
+	static int16 Read2BytesFromScript(uint32* pIp) {
 		int16 retval = 0;
-		for (int i = 0; i < 2; i++){
-			retval |= ScriptSpace[(*pIp)++] << (8 * i);
+		for (int i = 0; i < 2; i++) {
+			retval |= CTheScripts::ScriptSpace[(*pIp)++] << (8 * i);
 		}
 		return retval;
 	}
-	static int8 Read1ByteFromScript(uint32* pIp){
+	static int8 Read1ByteFromScript(uint32* pIp) {
 		int8 retval = 0;
-		for (int i = 0; i < 1; i++){
-			retval |= ScriptSpace[(*pIp)++] << (8 * i);
+		for (int i = 0; i < 1; i++) {
+			retval |= CTheScripts::ScriptSpace[(*pIp)++] << (8 * i);
 		}
 		return retval;
 	}
-	static float ReadFloatFromScript(uint32* pIp){
+	static float ReadFloatFromScript(uint32* pIp) {
 		return Read2BytesFromScript(pIp) / 16.0f;
 	}
-	static void ReadTextLabelFromScript(uint32* pIp, char* buf){
-		strncpy(buf, (const char*)&ScriptSpace[*pIp], KEY_LENGTH_IN_SCRIPT);
+	static void ReadTextLabelFromScript(uint32* pIp, char* buf) {
+		strncpy(buf, (const char*)&CTheScripts::ScriptSpace[*pIp], KEY_LENGTH_IN_SCRIPT);
 	}
 	static wchar* GetTextByKeyFromScript(uint32* pIp) {
-		wchar* text = TheText.Get((const char*)&ScriptSpace[*pIp]);
+		wchar* text = TheText.Get((const char*)&CTheScripts::ScriptSpace[*pIp]);
 		*pIp += KEY_LENGTH_IN_SCRIPT;
 		return text;
+	}
+
+	void Init();
+	void Process();
+
+	void RemoveScriptFromList(CRunningScript**);
+	void AddScriptToList(CRunningScript**);
+
+private:
+	void CollectParameters(uint32*, int16);
+	int32 CollectNextParameterWithoutIncreasingPC(uint32);
+	int32* GetPointerToScriptVariable(uint32*, int16);
+	void StoreParameters(uint32*, int16);
+
+	int8 ProcessOneCommand();
+	void DoDeatharrestCheck();
+	void UpdateCompareFlag(bool);
+	int16 GetPadState(uint16, uint16);
+
+	int8 ProcessCommands0To99(int32);
+	int8 ProcessCommands100To199(int32);
+	int8 ProcessCommands200To299(int32);
+	int8 ProcessCommands300To399(int32);
+	int8 ProcessCommands400To499(int32);
+	int8 ProcessCommands500To599(int32);
+	int8 ProcessCommands600To699(int32);
+	int8 ProcessCommands700To799(int32);
+	int8 ProcessCommands800To899(int32);
+	int8 ProcessCommands900To999(int32);
+	int8 ProcessCommands1000To1099(int32);
+#ifndef GTA_PS2
+	int8 ProcessCommands1100To1199(int32);
+#endif
+	void LocatePlayerCommand(int32, uint32*);
+	void LocatePlayerCharCommand(int32, uint32*);
+	void LocatePlayerCarCommand(int32, uint32*);
+	void LocateCharCommand(int32, uint32*);
+	void LocateCharCharCommand(int32, uint32*);
+	void LocateCharCarCommand(int32, uint32*);
+	void LocateCharObjectCommand(int32, uint32*);
+	void LocateCarCommand(int32, uint32*);
+	void LocateSniperBulletCommand(int32, uint32*);
+	void PlayerInAreaCheckCommand(int32, uint32*);
+	void PlayerInAngledAreaCheckCommand(int32, uint32*);
+	void CharInAreaCheckCommand(int32, uint32*);
+	void CarInAreaCheckCommand(int32, uint32*);
+
+	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
+
+	bool ThisIsAValidRandomPed(uint32 pedtype) {
+		switch (pedtype) {
+		case PEDTYPE_CIVMALE:
+		case PEDTYPE_CIVFEMALE:
+		case PEDTYPE_GANG1:
+		case PEDTYPE_GANG2:
+		case PEDTYPE_GANG3:
+		case PEDTYPE_GANG4:
+		case PEDTYPE_GANG5:
+		case PEDTYPE_GANG6:
+		case PEDTYPE_GANG7:
+		case PEDTYPE_GANG8:
+		case PEDTYPE_GANG9:
+		case PEDTYPE_CRIMINAL:
+		case PEDTYPE_PROSTITUTE:
+			return true;
+		default:
+			return false;
+		}
 	}
 };

@@ -732,7 +732,7 @@ void CMenuManager::Draw()
 				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(gString);
 				break;
 			case MENUACTION_SETDBGFLAG:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(CTheScripts::DbgFlag ? "FEM_ON" : "FEM_OFF");
+				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(CTheScripts::IsDebugOn() ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_SWITCHBIGWHITEDEBUGLIGHT:
 				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(gbBigWhiteDebugLightSwitchedOn ? "FEM_ON" : "FEM_OFF");
@@ -2150,7 +2150,7 @@ void CMenuManager::ProcessOnOffMenuOptions()
 		SaveSettings();
 		break;
 	case MENUACTION_SETDBGFLAG:
-		CTheScripts::DbgFlag = !CTheScripts::DbgFlag;
+		CTheScripts::InvertDebugFlag();
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		break;
 	case MENUACTION_SWITCHBIGWHITEDEBUGLIGHT:

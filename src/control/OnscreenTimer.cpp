@@ -106,18 +106,18 @@ void COnscreenTimerEntry::Process() {
 		return;
 	}
 
-	uint32* timerPtr = (uint32*)&CTheScripts::ScriptSpace[m_nTimerOffset];
-	uint32 oldTime = *timerPtr;
-	int32 newTime = int32(oldTime - uint32(20.0f * CTimer::GetTimeStep()));
+	int32* timerPtr = CTheScripts::GetPointerToScriptVariable(m_nTimerOffset);
+	int32 oldTime = *timerPtr;
+	int32 newTime = oldTime - int32(CTimer::GetTimeStepInSeconds() * 1000);
 	if(newTime < 0) {
 		*timerPtr = 0;
 		m_bTimerProcessed = 0;
 		m_nTimerOffset = 0;
 		m_aTimerText[0] = 0;
 	} else {
-		*timerPtr = (uint32)newTime;
-		uint32 oldTimeSeconds = oldTime / 1000;
-		if(oldTimeSeconds <= 11 && newTime / 1000 != oldTimeSeconds) {
+		*timerPtr = newTime;
+		int32 oldTimeSeconds = oldTime / 1000;
+		if(oldTimeSeconds < 12 && newTime / 1000 != oldTimeSeconds) {
 			DMAudio.PlayFrontEndSound(SOUND_CLOCK_TICK, newTime / 1000);
 		}
 	}
@@ -144,13 +144,13 @@ bool COnscreenTimerEntry::ProcessForDisplay() {
 }
 
 void COnscreenTimerEntry::ProcessForDisplayClock() {
-	uint32 time = *(uint32*)&CTheScripts::ScriptSpace[m_nTimerOffset];
+	uint32 time = *CTheScripts::GetPointerToScriptVariable(m_nTimerOffset);
 	sprintf(m_bTimerBuffer, "%02d:%02d", time / 1000 / 60,
 				   time / 1000 % 60);
 }
 
 void COnscreenTimerEntry::ProcessForDisplayCounter() {
-	uint32 counter = *(uint32*)&CTheScripts::ScriptSpace[m_nCounterOffset];
+	uint32 counter = *CTheScripts::GetPointerToScriptVariable(m_nCounterOffset);
 	sprintf(m_bCounterBuffer, "%d", counter);
 }
 

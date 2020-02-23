@@ -325,7 +325,7 @@ void CRadar::DrawBlips()
 						if (blipEntity) {
 							uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
 							if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
-								if (CTheScripts::DbgFlag) {
+								if (CTheScripts::IsDebugOn()) {
 									ShowRadarMarker(blipEntity->GetPosition(), color, ms_RadarTrace[blipId].m_Radius);
 									ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
 									if (ms_RadarTrace[blipId].m_Radius < 1.0f)
@@ -364,7 +364,7 @@ void CRadar::DrawBlips()
 
 						uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
 						if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
-							if (CTheScripts::DbgFlag) {
+							if (CTheScripts::IsDebugOn()) {
 								ShowRadarMarker(ms_RadarTrace[blipId].m_vecPos, color, ms_RadarTrace[blipId].m_Radius);
 								ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
 								if (ms_RadarTrace[blipId].m_Radius < 1.0f)
@@ -429,7 +429,7 @@ void CRadar::DrawBlips()
 						if (blipEntity) {
 							uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
 							if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
-								if (CTheScripts::DbgFlag) {
+								if (CTheScripts::IsDebugOn()) {
 									ShowRadarMarker(blipEntity->GetPosition(), color, ms_RadarTrace[blipId].m_Radius);
 									ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
 									if (ms_RadarTrace[blipId].m_Radius < 1.0f)
@@ -478,7 +478,7 @@ void CRadar::DrawBlips()
 
 						uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
 						if (ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[blipId].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
-							if (CTheScripts::DbgFlag) {
+							if (CTheScripts::IsDebugOn()) {
 								ShowRadarMarker(ms_RadarTrace[blipId].m_vecPos, color, ms_RadarTrace[blipId].m_Radius);
 								ms_RadarTrace[blipId].m_Radius = ms_RadarTrace[blipId].m_Radius - 0.1f;
 								if (ms_RadarTrace[blipId].m_Radius < 1.0f)
