@@ -83,6 +83,14 @@ struct CScriptSphere
 	float m_fRadius;
 };
 
+struct CStoredLine
+{
+	CVector vecInf;
+	CVector vecSup;
+	uint32 color1;
+	uint32 color2;
+};
+
 enum {
 	CLEANUP_UNUSED = 0,
 	CLEANUP_CAR,
@@ -217,7 +225,8 @@ enum {
 	MAX_NUM_USED_OBJECTS = 200,
 	MAX_NUM_MISSION_SCRIPTS = 120,
 	MAX_NUM_BUILDING_SWAPS = 25,
-	MAX_NUM_INVISIBILITY_SETTINGS = 20
+	MAX_NUM_INVISIBILITY_SETTINGS = 20,
+	MAX_NUM_STORED_LINES = 1024
 };
 
 class CTheScripts
@@ -235,6 +244,7 @@ class CTheScripts
 	static int32(&MultiScriptArray)[MAX_NUM_MISSION_SCRIPTS];
 	static tBuildingSwap(&BuildingSwapArray)[MAX_NUM_BUILDING_SWAPS];
 	static CEntity*(&InvisibilitySettingArray)[MAX_NUM_INVISIBILITY_SETTINGS];
+	static CStoredLine(&aStoredLines)[MAX_NUM_STORED_LINES];
 	static bool &DbgFlag;
 	static uint32 &OnAMissionFlag;
 	static CMissionCleanup &MissionCleanup;
@@ -258,7 +268,7 @@ class CTheScripts
 	static uint16 &NumScriptDebugLines;
 	static uint16 &NumberOfIntroRectanglesThisFrame;
 	static uint16 &NumberOfIntroTextLinesThisFrame;
-	static bool &UseTextCommands;
+	static uint8 &UseTextCommands;
 	static uint16 &CommandsExecuted;
 	static uint16 &ScriptsUpdated;
 
@@ -273,7 +283,7 @@ public:
 	static void UndoBuildingSwaps();
 	static void UndoEntityVisibilitySettings();
 
-	static void ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2);
+	static void ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, uint32 col, uint32 col2);
 	static void RenderTheScriptDebugLines();
 
 	static void SaveAllScripts(uint8*, uint32*);

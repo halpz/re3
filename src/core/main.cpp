@@ -48,6 +48,7 @@
 #include "RpAnimBlend.h"
 #include "Frontend.h"
 #include "AnimViewer.h"
+#include "Script.h"
 
 #define DEFAULT_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
 
@@ -356,7 +357,7 @@ RenderScene(void)
 void
 RenderDebugShit(void)
 {
-	// CTheScripts::RenderTheScriptDebugLines()
+	CTheScripts::RenderTheScriptDebugLines();
 	if(gbShowCollisionLines)
 		CRenderer::RenderCollisionLines();
 }
