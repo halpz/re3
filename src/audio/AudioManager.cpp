@@ -4676,7 +4676,7 @@ cAudioManager::ProcessMissionAudio()
 									--nCheckPlayingDelay;
 								} else if(GetMissionScriptPoliceAudioPlayingStatus() ==
 								              2 ||
-								          --m_sMissionAudio.field_24) {
+								          m_sMissionAudio.field_24-- == 0) {
 									m_sMissionAudio.m_bPlayStatus = 2;
 									m_sMissionAudio.m_nSampleIndex = 3033;
 									SampleManager.StopStreamedFile(1);
