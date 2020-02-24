@@ -704,9 +704,6 @@ int8 CRunningScript::ProcessOneCommand()
 	int32 command = Read2BytesFromScript(&m_nIp);
 	m_bNotFlag = (command & 0x8000);
 	command &= 0x7FFF;
-	if (command >= 1000)
-		debug("Time: %d, Script: %s, Command: %d\n", CTheScripts::CommandsExecuted, m_abScriptName, command);
-	debug("IntroSomething: %d\n", CTheScripts::NumberOfIntroTextLinesThisFrame);
 	if (command < 100)
 		return ProcessCommands0To99(command);
 	if (command < 200)
