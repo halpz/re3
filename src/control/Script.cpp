@@ -3757,7 +3757,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPlayerInfo* pPlayer = &CWorld::Players[ScriptParams[0]];
 		if (ScriptParams[1]){
-			if (CReplay::IsPlayingBack() || CTheScripts::DelayMakingPlayerUnsafeThisTime){
+			if (CGame::playingIntro || CTheScripts::DelayMakingPlayerUnsafeThisTime){
 				CTheScripts::CountdownToMakePlayerUnsafe = 50;
 				if (CTheScripts::DelayMakingPlayerUnsafeThisTime)
 					CTheScripts::DelayMakingPlayerUnsafeThisTime--;

@@ -55,6 +55,21 @@ CObject::CObject(int32 mi, bool createRW)
 	Init();
 }
 
+CObject::CObject(CDummyObject *dummy)
+{
+	SetModelIndexNoCreate(dummy->m_modelIndex);
+
+	if (dummy->m_rwObject)
+		AttachToRwObject(dummy->m_rwObject);
+	else
+		GetMatrix() = dummy->GetMatrix();
+
+	m_objectMatrix = dummy->GetMatrix();
+	dummy->DetachFromRwObject();
+	Init();
+	m_level = dummy->m_level;
+}
+
 CObject::~CObject(void)
 {
 	CRadar::ClearBlipForEntity(BLIP_OBJECT, CPools::GetObjectPool()->GetIndex(this));
@@ -109,14 +124,37 @@ CObject::RefModelInfo(int32 modelId)
 	CModelInfo::GetModelInfo(modelId)->AddRef();
 }
 
+bool
+CObject::CanBeDeleted(void)
+{
+	switch (ObjectCreatedBy) {
+		case GAME_OBJECT:
+			return true;
+		case MISSION_OBJECT:
+			return false;
+		case TEMP_OBJECT:
+			return true;
+		case CUTSCENE_OBJECT:
+			return false;
+		default:
+			return true;
+	}
+}
+
 class CObject_ : public CObject
 {
 public:
-	void dtor(void) { this->CObject::~CObject(); }
+	CObject *ctor(void) { return ::new (this) CObject(); }
+	CObject *ctor(int32 mi, bool createRW) { return ::new (this) CObject(mi, createRW); }
+	CObject *ctor(CDummyObject *dummy) { return ::new (this) CObject(dummy); }
+	void dtor(void) { CObject::~CObject(); }
 	void Render_(void) { CObject::Render(); }
 };
 
 STARTPATCHES
+	InjectHook(0x4BABD0, (CObject* (CObject::*)(void)) &CObject_::ctor, PATCH_JUMP);
+	InjectHook(0x4BACE0, (CObject* (CObject::*)(int32, bool)) &CObject_::ctor, PATCH_JUMP);
+	InjectHook(0x4BAD50, (CObject* (CObject::*)(CDummyObject*)) &CObject_::ctor, PATCH_JUMP);
 	InjectHook(0x4BAE00, &CObject_::dtor, PATCH_JUMP);
 	InjectHook(0x4BB1E0, &CObject_::Render_, PATCH_JUMP);
 ENDPATCHES

@@ -340,14 +340,6 @@ enum eCheckHover
 	HOVEROPTION_42,
 };
 
-enum eMenuColumns
-{ 
-	MENUCOLUMN_LEFT,
-	MENUCOLUMN_CENTER,
-	MENUCOLUMN_RIGHT,
-	MENUCOLUMNS,
-};
-
 enum
 {
 	NUM_MENUROWS = 18,

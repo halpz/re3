@@ -1519,7 +1519,7 @@ CPed::BeingDraggedFromCar(void)
 #ifdef VC_PED_PORTS
 	if (m_objective == OBJECTIVE_LEAVE_CAR_AND_DIE) {
 		if (m_pMyVehicle) {
-			m_pMyVehicle->ProcessOpenDoor(m_vehEnterType, NUM_ANIMS, m_pVehicleAnim->currentTime);
+			m_pMyVehicle->ProcessOpenDoor(m_vehEnterType, NUM_ANIMS, m_pVehicleAnim->currentTime * 5.0f);
 		}
 	}
 #endif
@@ -2954,6 +2954,11 @@ CPed::QuitEnteringCar(void)
 		if (veh->m_nNumGettingIn != 0)
 			veh->m_nNumGettingIn--;
 
+#ifdef VC_PED_PORTS
+		if (m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER || m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER)
+			RestorePreviousObjective();
+#endif
+
 		veh->m_nGettingInFlags &= ~GetCarDoorFlag(m_vehEnterType);
 	}
 
@@ -2965,7 +2970,7 @@ CPed::QuitEnteringCar(void)
 		animAssoc = m_pVehicleAnim;
 		if (animAssoc) {
 			animAssoc->blendDelta = -4.0f;
-			animAssoc->flags |= ASSOC_FADEOUTWHENDONE;
+			animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 			animAssoc = m_pVehicleAnim;
 			animAssoc->flags &= ~ASSOC_RUNNING;
 		}
@@ -4161,7 +4166,10 @@ CPed::ClearObjective(void)
 {
 	if (IsPedInControl() || m_nPedState == PED_DRIVING) {
 		m_objective = OBJECTIVE_NONE;
-
+#ifdef VC_PED_PORTS
+		m_pedInObjective = nil;
+		m_carInObjective = nil;
+#endif
 		if (m_nPedState == PED_DRIVING && m_pMyVehicle) {
 
 			if (m_pMyVehicle->pDriver != this) {
@@ -13603,7 +13611,10 @@ CPed::ProcessObjective(void)
 					if (InVehicle()) {
 						if (m_nPedState != PED_EXIT_CAR && m_nPedState != PED_DRAG_FROM_CAR && m_nPedState != PED_EXIT_TRAIN
 							&& (m_nPedType != PEDTYPE_COP
-								|| m_pMyVehicle->m_vecMoveSpeed.MagnitudeSqr2D() < 0.000025f)) {
+#ifdef VC_PED_PORTS
+								|| m_pMyVehicle->IsBoat()
+#endif
+								|| m_pMyVehicle->m_vecMoveSpeed.MagnitudeSqr2D() < sq(0.005f))) {
 							if (m_pMyVehicle->IsTrain())
 								SetExitTrain(m_pMyVehicle);
 #ifdef VC_PED_PORTS
