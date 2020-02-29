@@ -67,7 +67,7 @@ public:
 	static void LoadPedGroups();
 	static void UpdatePedCount(ePedType, bool);
 	static void DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool);
-	static CPed *AddPedInCar(CVehicle *vehicle);
+	static CPed *AddPedInCar(CVehicle *car);
 	static bool IsPointInSafeZone(CVector *coors);
 	static void RemovePed(CPed *ent);
 	static int32 ChooseCivilianOccupation(int32);
@@ -81,5 +81,9 @@ public:
 	static void AddToPopulation(float, float, float, float);
 	static void ManagePopulation(void);
 	static void MoveCarsAndPedsOutOfAbandonedZones(void);
-	static void ConvertToRealObject(CDummyObject* obj);
+	static void ConvertToRealObject(CDummyObject*);
+	static void ConvertToDummyObject(CObject*);
+	static void ConvertAllObjectsToDummyObjects(void);
+	static bool TestRoomForDummyObject(CObject*);
+	static bool TestSafeForRealObject(CDummyObject*);
 };
