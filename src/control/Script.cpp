@@ -29,6 +29,7 @@
 #include "HandlingMgr.h"
 #include "Heli.h"
 #include "Hud.h"
+#include "Lines.h"
 #include "main.h"
 #include "Messages.h"
 #include "ModelIndices.h"
@@ -75,10 +76,10 @@
 #define SPHERE_MARKER_PULSE_FRACTION 0.1f
 
 #ifdef USE_PRECISE_MEASUREMENT_CONVERTION
-#define METERS_IN_FEET 0.3048f
+#define METERS_IN_FOOT 0.3048f
 #define FEET_IN_METER 3.28084f
 #else
-#define METERS_IN_FEET 0.3f
+#define METERS_IN_FOOT 0.3f
 #define FEET_IN_METER 3.33f
 #endif
 
@@ -95,6 +96,7 @@ tUsedObject(&CTheScripts::UsedObjectArray)[MAX_NUM_USED_OBJECTS] = *(tUsedObject
 int32(&CTheScripts::MultiScriptArray)[MAX_NUM_MISSION_SCRIPTS] = *(int32(*)[MAX_NUM_MISSION_SCRIPTS])*(uintptr*)0x6F0558;
 tBuildingSwap(&CTheScripts::BuildingSwapArray)[MAX_NUM_BUILDING_SWAPS] = *(tBuildingSwap(*)[MAX_NUM_BUILDING_SWAPS])*(uintptr*)0x880E30;
 CEntity*(&CTheScripts::InvisibilitySettingArray)[MAX_NUM_INVISIBILITY_SETTINGS] = *(CEntity*(*)[MAX_NUM_INVISIBILITY_SETTINGS])*(uintptr*)0x8620F0;
+CStoredLine (&CTheScripts::aStoredLines)[MAX_NUM_STORED_LINES] = *(CStoredLine(*)[MAX_NUM_STORED_LINES])*(uintptr*)0x743018;
 bool &CTheScripts::DbgFlag = *(bool*)0x95CD87;
 uint32 &CTheScripts::OnAMissionFlag = *(uint32*)0x8F1B64;
 int32 &CTheScripts::StoreVehicleIndex = *(int32*)0x8F5F3C;
@@ -115,7 +117,7 @@ uint8 &CTheScripts::DelayMakingPlayerUnsafeThisTime = *(uint8*)0x95CD88;
 uint16 &CTheScripts::NumScriptDebugLines = *(uint16*)0x95CC42;
 uint16 &CTheScripts::NumberOfIntroRectanglesThisFrame = *(uint16*)0x95CC88;
 uint16 &CTheScripts::NumberOfIntroTextLinesThisFrame = *(uint16*)0x95CC32;
-bool &CTheScripts::UseTextCommands = *(bool*)0x95CD57;
+uint8 &CTheScripts::UseTextCommands = *(uint8*)0x95CD57;
 CMissionCleanup (&CTheScripts::MissionCleanup) = *(CMissionCleanup*)0x8F2A24;
 CUpsideDownCarCheck (&CTheScripts::UpsideDownCars) = *(CUpsideDownCarCheck*)0x6EE450;
 CStuckCarCheck (&CTheScripts::StuckCars) = *(CStuckCarCheck*)0x87C588;
@@ -383,16 +385,21 @@ void CRunningScript::CollectParameters(uint32* pIp, int16 total)
 {
 	for (int16 i = 0; i < total; i++){
 		float tmp;
+		uint16 varIndex;
 		switch (CTheScripts::Read1ByteFromScript(pIp))
 		{
 		case ARGUMENT_INT32:
 			ScriptParams[i] = CTheScripts::Read4BytesFromScript(pIp);
 			break;
 		case ARGUMENT_GLOBALVAR:
-			ScriptParams[i] = *((int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(pIp)]);
+			varIndex = CTheScripts::Read2BytesFromScript(pIp);
+			assert(varIndex >= 8 && varIndex < CTheScripts::GetSizeOfVariableSpace());
+			ScriptParams[i] = *((int32*)&CTheScripts::ScriptSpace[varIndex]);
 			break;
 		case ARGUMENT_LOCALVAR:
-			ScriptParams[i] = m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
+			varIndex = CTheScripts::Read2BytesFromScript(pIp);
+			assert(varIndex >= 0 && varIndex < ARRAY_SIZE(m_anLocalVariables));
+			ScriptParams[i] = m_anLocalVariables[varIndex];
 			break;
 		case ARGUMENT_INT8:
 			ScriptParams[i] = CTheScripts::Read1ByteFromScript(pIp);
@@ -472,7 +479,7 @@ void CRunningScript::Init()
 {
 	strcpy(m_abScriptName, "noname");
 	next = prev = nil;
-	m_nIp = 0;
+	SetIP(0);
 	for (int i = 0; i < MAX_STACK_DEPTH; i++)
 		m_anStack[i] = 0;
 	m_nStackPointer = 0;
@@ -509,27 +516,6 @@ int open_script()
 	return CFileMgr::OpenFile("main.scm", "rb");
 }
 #endif
-
-void CTextLine::Reset()
-{
-	m_fScaleX = 0.48f;
-	m_fScaleY = 1.12f;
-	m_sColor = CRGBA(225, 225, 225, 255);
-	m_bJustify = false;
-	m_bRightJustify = false;
-	m_bCentered = false;
-	m_bBackground = false;
-	m_bBackgroundOnly = false;
-	m_fWrapX = 182.0f; /* TODO: scaling as bugfix */
-	m_fCenterSize = 640.0f; /* --||-- */
-	m_sBackgroundColor = CRGBA(128, 128, 128, 128);
-	m_bTextProportional = true;
-	m_bTextBeforeFade = false;
-	m_nFont = 2; /* enum? */
-	m_fAtX = 0.0f;
-	m_fAtY = 0.0f;
-	memset(&m_Text, 0, sizeof(m_Text));
-}
 
 void CTheScripts::Init()
 {
@@ -582,7 +568,7 @@ void CTheScripts::Init()
 	ReadMultiScriptFileOffsetsFromScript();
 	FailCurrentMission = 0;
 	CountdownToMakePlayerUnsafe = 0;
-	DbgFlag = 0;
+	DbgFlag = false;
 	DelayMakingPlayerUnsafeThisTime = 1;
 	NumScriptDebugLines = 0;
 	for (int i = 0; i < MAX_NUM_SCRIPT_SPHERES; i++){
@@ -596,7 +582,7 @@ void CTheScripts::Init()
 		IntroTextLines[i].Reset();
 	}
 	NumberOfIntroTextLinesThisFrame = 0;
-	UseTextCommands = false;
+	UseTextCommands = 0;
 	for (int i = 0; i < MAX_NUM_INTRO_RECTANGLES; i++){
 		IntroRectangles[i].m_bIsUsed = false;
 		IntroRectangles[i].m_bBeforeFade = false;
@@ -698,7 +684,7 @@ void CRunningScript::Process()
 	if (m_bIsMissionScript)
 		DoDeatharrestCheck();
 	if (m_bMissionFlag && CTheScripts::FailCurrentMission == 1 && m_nStackPointer == 1)
-		m_nIp = m_anStack[--m_nStackPointer];
+		SetIP(m_anStack[--m_nStackPointer]);
 	if (CTimer::GetTimeInMilliseconds() >= m_nWakeTime){
 		while (!ProcessOneCommand())
 			;
@@ -1296,7 +1282,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		CollectParameters(&m_nIp, 4);
 		int32 index = ScriptParams[0];
 		assert(index < 1); /* Constant? Also no more double player glitch */
-		debug("&&&&&&&&&&&&&Creating player: %d\n", index);
+		printf("&&&&&&&&&&&&&Creating player: %d\n", index);
 		if (!CStreaming::HasModelLoaded(MI_PLAYER)) {
 			CStreaming::RequestSpecialModel(MI_PLAYER, "player", STREAMFLAGS_DONT_REMOVE | STREAMFLAGS_DEPENDENCY);
 			CStreaming::LoadAllRequestedModels(false);
@@ -1433,33 +1419,6 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 	}
 	return -1;
 }
-
-void CRunningScript::UpdateCompareFlag(bool flag)
-{
-	if (m_bNotFlag)
-		flag = !flag;
-	if (m_nAndOrState == ANDOR_NONE){
-		m_bCondResult = flag;
-		return;
-	}
-	if (m_nAndOrState >= ANDS_1 && m_nAndOrState <= ANDS_8){
-		m_bCondResult &= flag;
-		if (m_nAndOrState == ANDS_1){
-			m_nAndOrState = ANDOR_NONE;
-			return;
-		}
-	}else if (m_nAndOrState >= ORS_1 && m_nAndOrState <= ORS_8){
-		m_bCondResult |= flag;
-		if (m_nAndOrState == ORS_1) {
-			m_nAndOrState = ANDOR_NONE;
-			return;
-		}
-	}else{
-		return;
-	}
-	m_nAndOrState--;
-}
-
 
 int8 CRunningScript::ProcessCommands100To199(int32 command)
 {
@@ -2502,9 +2461,9 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 	{
 		CollectParameters(&m_nIp, 2);
 		bool value = GetPadState(ScriptParams[0], ScriptParams[1]) != 0;
-		if (CGame::playingIntro && ScriptParams[0] == 0 && ScriptParams[1] == 12){ /* pad1, start */
+		if (CGame::playingIntro && ScriptParams[0] == 0 && ScriptParams[1] == 12) {
 			if (CPad::GetPad(0)->GetLeftMouseJustDown() ||
-				CPad::GetPad(0)->GetPadEnterJustDown() ||
+				CPad::GetPad(0)->GetEnterJustDown() ||
 				CPad::GetPad(0)->GetCharJustDown(' '))
 				value = true;
 		}
@@ -5724,7 +5683,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		CollectParameters(&m_nIp, 2);
 		assert(m_nStackPointer < MAX_STACK_DEPTH);
 		m_anStack[m_nStackPointer++] = m_nIp;
-		m_nIp = ScriptParams[0];
+		SetIP(ScriptParams[0]);
 		// ScriptParams[1] == filename
 		return 0;
 	}
@@ -8510,7 +8469,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	}
 	case COMMAND_USE_TEXT_COMMANDS:
 		CollectParameters(&m_nIp, 1);
-		CTheScripts::UseTextCommands = ScriptParams[0] != 0 ? 2 : 1;
+		CTheScripts::UseTextCommands = (ScriptParams[0] != 0) ? 2 : 1;
 		return 0;
 	case COMMAND_SET_THREAT_FOR_PED_TYPE:
 		CollectParameters(&m_nIp, 2);
@@ -8839,7 +8798,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		float fMeterValue = *(float*)&ScriptParams[0];
-		float fFeetValue = fMeterValue / METERS_IN_FEET;
+		float fFeetValue = fMeterValue / METERS_IN_FOOT;
 		*(float*)&ScriptParams[0] = fFeetValue;
 		StoreParameters(&m_nIp, 1);
 		return 0;
@@ -9724,33 +9683,13 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	return -1;
 }
 
-int16 CRunningScript::GetPadState(uint16 pad, uint16 button)
+int32 CTheScripts::GetNewUniqueScriptSphereIndex(int32 index)
 {
-	CPad* pPad = CPad::GetPad(pad);
-	switch (button){
-	case 0: return pPad->NewState.LeftStickX;
-	case 1: return pPad->NewState.LeftStickY;
-	case 2: return pPad->NewState.RightStickX;
-	case 3: return pPad->NewState.RightStickY;
-	case 4: return pPad->NewState.LeftShoulder1;
-	case 5: return pPad->NewState.LeftShoulder2;
-	case 6: return pPad->NewState.RightShoulder1;
-	case 7: return pPad->NewState.RightShoulder2;
-	case 8: return pPad->NewState.DPadUp;
-	case 9: return pPad->NewState.DPadDown;
-	case 10: return pPad->NewState.DPadLeft;
-	case 11: return pPad->NewState.DPadRight;
-	case 12: return pPad->NewState.Start;
-	case 13: return pPad->NewState.Select;
-	case 14: return pPad->NewState.Square;
-	case 15: return pPad->NewState.Triangle;
-	case 16: return pPad->NewState.Cross;
-	case 17: return pPad->NewState.Circle;
-	case 18: return pPad->NewState.LeftShock;
-	case 19: return pPad->NewState.RightShock;
-	default: break;
-	}
-	return 0;
+	if (ScriptSphereArray[index].m_Index >= UINT16_MAX - 1)
+		ScriptSphereArray[index].m_Index = 1;
+	else
+		ScriptSphereArray[index].m_Index++;
+	return (uint16)index | ScriptSphereArray[index].m_Index << 16;
 }
 
 int32 CTheScripts::GetActualScriptSphereIndex(int32 index)
@@ -9763,6 +9702,15 @@ int32 CTheScripts::GetActualScriptSphereIndex(int32 index)
 	if (check != ScriptSphereArray[array_idx].m_Index)
 		return -1;
 	return array_idx;
+}
+
+void CTheScripts::DrawScriptSpheres()
+{
+	for (int i = 0; i < MAX_NUM_SCRIPT_SPHERES; i++) {
+		if (ScriptSphereArray[i].m_bInUse)
+			C3dMarkers::PlaceMarkerSet(ScriptSphereArray[i].m_Id, 4, ScriptSphereArray[i].m_vecCenter, ScriptSphereArray[i].m_fRadius,
+				SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B, SPHERE_MARKER_A, SPHERE_MARKER_PULSE_PERIOD, SPHERE_MARKER_PULSE_FRACTION, 0);
+	}
 }
 
 int32 CTheScripts::AddScriptSphere(int32 id, CVector pos, float radius)
@@ -9783,15 +9731,6 @@ int32 CTheScripts::AddScriptSphere(int32 id, CVector pos, float radius)
 	return GetNewUniqueScriptSphereIndex(i);
 }
 
-int32 CTheScripts::GetNewUniqueScriptSphereIndex(int32 index)
-{
-	if (ScriptSphereArray[index].m_Index >= 0xFFFE)
-		ScriptSphereArray[index].m_Index = 1;
-	else
-		ScriptSphereArray[index].m_Index++;
-	return (uint16)index | ScriptSphereArray[index].m_Index << 16;
-}
-
 void CTheScripts::RemoveScriptSphere(int32 index)
 {
 	index = GetActualScriptSphereIndex(index);
@@ -9801,9 +9740,39 @@ void CTheScripts::RemoveScriptSphere(int32 index)
 	ScriptSphereArray[index].m_Id = 0;
 }
 
-bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle)
+void CTheScripts::AddToBuildingSwapArray(CBuilding* pBuilding, int32 old_model, int32 new_model)
 {
-	return 0.01f * CTimer::GetTimeStep() >= pVehicle->m_fDistanceTravelled;
+	int i = 0;
+	bool found = false;
+	while (i < MAX_NUM_BUILDING_SWAPS && !found) {
+		if (BuildingSwapArray[i].m_pBuilding == pBuilding)
+			found = true;
+		else
+			i++;
+	}
+	if (found) {
+		if (BuildingSwapArray[i].m_nOldModel == new_model) {
+			BuildingSwapArray[i].m_pBuilding = nil;
+			BuildingSwapArray[i].m_nOldModel = BuildingSwapArray[i].m_nNewModel = -1;
+		}
+		else {
+			BuildingSwapArray[i].m_nNewModel = new_model;
+		}
+	}
+	else {
+		i = 0;
+		while (i < MAX_NUM_BUILDING_SWAPS && !found) {
+			if (BuildingSwapArray[i].m_pBuilding == nil)
+				found = true;
+			else
+				i++;
+		}
+		if (found) {
+			BuildingSwapArray[i].m_pBuilding = pBuilding;
+			BuildingSwapArray[i].m_nNewModel = new_model;
+			BuildingSwapArray[i].m_nOldModel = old_model;
+		}
+	}
 }
 
 void CTheScripts::AddToInvisibilitySwapArray(CEntity* pEntity, bool remove)
@@ -9833,93 +9802,1446 @@ void CTheScripts::AddToInvisibilitySwapArray(CEntity* pEntity, bool remove)
 	}
 }
 
-void CTheScripts::AddToBuildingSwapArray(CBuilding* pBuilding, int32 old_model, int32 new_model)
+void CTheScripts::UndoBuildingSwaps()
 {
-	int i = 0;
-	bool found = false;
-	while (i < MAX_NUM_BUILDING_SWAPS && !found) {
-		if (BuildingSwapArray[i].m_pBuilding == pBuilding)
-			found = true;
-		else
-			i++;
-	}
-	if (found) {
-		if (BuildingSwapArray[i].m_nOldModel == new_model) {
+	for (int i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
+		if (BuildingSwapArray[i].m_pBuilding) {
+			BuildingSwapArray[i].m_pBuilding->ReplaceWithNewModel(BuildingSwapArray[i].m_nOldModel);
 			BuildingSwapArray[i].m_pBuilding = nil;
 			BuildingSwapArray[i].m_nOldModel = BuildingSwapArray[i].m_nNewModel = -1;
-		}else{
-			BuildingSwapArray[i].m_nNewModel = new_model;
-		}
-	}
-	else {
-		i = 0;
-		while (i < MAX_NUM_BUILDING_SWAPS && !found) {
-			if (BuildingSwapArray[i].m_pBuilding == nil)
-				found = true;
-			else
-				i++;
-		}
-		if (found) {
-			BuildingSwapArray[i].m_pBuilding = pBuilding;
-			BuildingSwapArray[i].m_nNewModel = new_model;
-			BuildingSwapArray[i].m_nOldModel = old_model;
 		}
 	}
 }
 
-WRAPPER void CRunningScript::LocatePlayerCommand(int32, uint32*) { EAXJMP(0x44FE10); }
-WRAPPER void CRunningScript::LocatePlayerCharCommand(int32, uint32*) { EAXJMP(0x4501E0); }
-WRAPPER void CRunningScript::LocatePlayerCarCommand(int32, uint32*) { EAXJMP(0x450540); }
-WRAPPER void CRunningScript::LocateCharCommand(int32, uint32*) { EAXJMP(0x450870); }
-WRAPPER void CRunningScript::LocateCharCharCommand(int32, uint32*) { EAXJMP(0x450BF0); }
-WRAPPER void CRunningScript::LocateCharCarCommand(int32, uint32*) { EAXJMP(0x450F30); }
-WRAPPER void CRunningScript::LocateCharObjectCommand(int32, uint32*) { EAXJMP(0x451260); }
-WRAPPER void CRunningScript::LocateCarCommand(int32, uint32*) { EAXJMP(0x451590); }
-WRAPPER void CRunningScript::LocateSniperBulletCommand(int32, uint32*) { EAXJMP(0x4518A0); }
-WRAPPER void CRunningScript::PlayerInAreaCheckCommand(int32, uint32*) { EAXJMP(0x451A60); }
-WRAPPER void CRunningScript::PlayerInAngledAreaCheckCommand(int32, uint32*) { EAXJMP(0x451E50); }
-WRAPPER void CRunningScript::CharInAreaCheckCommand(int32, uint32*) { EAXJMP(0x4523B0); }
-WRAPPER void CRunningScript::CarInAreaCheckCommand(int32, uint32*) { EAXJMP(0x452750); }
+void CTheScripts::UndoEntityVisibilitySettings()
+{
+	for (int i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++) {
+		if (InvisibilitySettingArray[i]) {
+			InvisibilitySettingArray[i]->bIsVisible = true;
+			InvisibilitySettingArray[i] = nil;
+		}
+	}
+}
 
-WRAPPER void CTheScripts::DrawScriptSpheres() { EAXJMP(0x44FAC0); }
-WRAPPER void CRunningScript::DoDeatharrestCheck() { EAXJMP(0x452A30); }
-WRAPPER void CTheScripts::DrawDebugSquare(float, float, float, float) { EAXJMP(0x452D00); }
-WRAPPER void CTheScripts::DrawDebugCube(float, float, float, float, float, float) { EAXJMP(0x453100); }
-WRAPPER void CTheScripts::ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, int col, int col2) { EAXJMP(0x4534E0); }
+void CRunningScript::UpdateCompareFlag(bool flag)
+{
+	if (m_bNotFlag)
+		flag = !flag;
+	if (m_nAndOrState == ANDOR_NONE) {
+		m_bCondResult = flag;
+		return;
+	}
+	if (m_nAndOrState >= ANDS_1 && m_nAndOrState <= ANDS_8) {
+		m_bCondResult &= flag;
+		if (m_nAndOrState == ANDS_1) {
+			m_nAndOrState = ANDOR_NONE;
+			return;
+		}
+	}
+	else if (m_nAndOrState >= ORS_1 && m_nAndOrState <= ORS_8) {
+		m_bCondResult |= flag;
+		if (m_nAndOrState == ORS_1) {
+			m_nAndOrState = ANDOR_NONE;
+			return;
+		}
+	}
+	else {
+		return;
+	}
+	m_nAndOrState--;
+}
+
+void CRunningScript::LocatePlayerCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug, decided = false;
+	float X, Y, Z, dX, dY, dZ;
+	switch (command) {
+	case COMMAND_LOCATE_PLAYER_ANY_MEANS_3D:
+	case COMMAND_LOCATE_PLAYER_ON_FOOT_3D:
+	case COMMAND_LOCATE_PLAYER_IN_CAR_3D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_ANY_MEANS_3D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_ON_FOOT_3D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_IN_CAR_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 8 : 6);
+	CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+	switch (command) {
+	case COMMAND_LOCATE_STOPPED_PLAYER_ANY_MEANS_2D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_ANY_MEANS_3D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_IN_CAR_2D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_IN_CAR_3D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_ON_FOOT_2D:
+	case COMMAND_LOCATE_STOPPED_PLAYER_ON_FOOT_3D:
+		if (!CTheScripts::IsPlayerStopped(pPlayerInfo)) {
+			result = false;
+			decided = true;
+		}
+		break;
+	default:
+		break;
+	}
+	X = *(float*)&ScriptParams[1];
+	Y = *(float*)&ScriptParams[2];
+	if (b3D) {
+		Z = *(float*)&ScriptParams[3];
+		dX = *(float*)&ScriptParams[4];
+		dY = *(float*)&ScriptParams[5];
+		dZ = *(float*)&ScriptParams[6];
+		debug = ScriptParams[7];
+	} else {
+		dX = *(float*)&ScriptParams[3];
+		dY = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	if (!decided) {
+		CVector pos = pPlayerInfo->GetPos();
+		result = false;
+		bool in_area;
+		if (b3D) {
+			in_area = X - dX <= pos.x &&
+				X + dX >= pos.x &&
+				Y - dY <= pos.y &&
+				Y + dY >= pos.y &&
+				Z - dZ <= pos.z &&
+				Z + dZ >= pos.z;
+		} else {
+			in_area = X - dX <= pos.x &&
+				X + dX >= pos.x &&
+				Y - dY <= pos.y &&
+				Y + dY >= pos.y;
+		}
+		if (in_area) {
+			switch (command) {
+			case COMMAND_LOCATE_PLAYER_ANY_MEANS_2D:
+			case COMMAND_LOCATE_PLAYER_ANY_MEANS_3D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_ANY_MEANS_2D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_ANY_MEANS_3D:
+				result = true;
+				break;
+			case COMMAND_LOCATE_PLAYER_ON_FOOT_2D:
+			case COMMAND_LOCATE_PLAYER_ON_FOOT_3D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_ON_FOOT_2D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_ON_FOOT_3D:
+				result = !pPlayerInfo->m_pPed->bInVehicle;
+				break;
+			case COMMAND_LOCATE_PLAYER_IN_CAR_2D:
+			case COMMAND_LOCATE_PLAYER_IN_CAR_3D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_IN_CAR_2D:
+			case COMMAND_LOCATE_STOPPED_PLAYER_IN_CAR_3D:
+				result = pPlayerInfo->m_pPed->bInVehicle;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
+		else
+			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
+	}
+}
+
+void CRunningScript::LocatePlayerCharCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug;
+	float X, Y, Z, dX, dY, dZ;
+	switch (command) {
+	case COMMAND_LOCATE_PLAYER_ANY_MEANS_CHAR_3D:
+	case COMMAND_LOCATE_PLAYER_ON_FOOT_CHAR_3D:
+	case COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 6 : 5);
+	CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+	CPed* pTarget = CPools::GetPedPool()->GetAt(ScriptParams[1]);
+	assert(pTarget);
+	CVector pos = pPlayerInfo->GetPos();
+	if (pTarget->bInVehicle) {
+		X = pTarget->m_pMyVehicle->GetPosition().x;
+		Y = pTarget->m_pMyVehicle->GetPosition().y;
+		Z = pTarget->m_pMyVehicle->GetPosition().z;
+	} else {
+		X = pTarget->GetPosition().x;
+		Y = pTarget->GetPosition().y;
+		Z = pTarget->GetPosition().z;
+	}
+	dX = *(float*)&ScriptParams[2];
+	dY = *(float*)&ScriptParams[3];
+	if (b3D) {
+		dZ = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	else {
+		debug = ScriptParams[4];
+	}
+	result = false;
+	bool in_area;
+	if (b3D) {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y &&
+			Z - dZ <= pos.z &&
+			Z + dZ >= pos.z;
+	}
+	else {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y;
+	}
+	if (in_area) {
+		switch (command) {
+		case COMMAND_LOCATE_PLAYER_ANY_MEANS_CHAR_2D:
+		case COMMAND_LOCATE_PLAYER_ANY_MEANS_CHAR_3D:
+			result = true;
+			break;
+		case COMMAND_LOCATE_PLAYER_ON_FOOT_CHAR_2D:
+		case COMMAND_LOCATE_PLAYER_ON_FOOT_CHAR_3D:
+			result = !pPlayerInfo->m_pPed->bInVehicle;
+			break;
+		case COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_2D:
+		case COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_3D:
+			result = pPlayerInfo->m_pPed->bInVehicle;
+			break;
+		default:
+			assert(false);
+			break;
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+#ifdef FIX_BUGS
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+#else
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : -100.0f);
+#endif
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
+		else
+			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
+	}
+}
+
+void CRunningScript::LocatePlayerCarCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug;
+	float X, Y, Z, dX, dY, dZ;
+	switch (command) {
+	case COMMAND_LOCATE_PLAYER_ANY_MEANS_CAR_3D:
+	case COMMAND_LOCATE_PLAYER_ON_FOOT_CAR_3D:
+	case COMMAND_LOCATE_PLAYER_IN_CAR_CAR_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 6 : 5);
+	CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+	CVehicle* pTarget = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+	assert(pTarget);
+	CVector pos = pPlayerInfo->GetPos();
+	X = pTarget->GetPosition().x;
+	Y = pTarget->GetPosition().y;
+	Z = pTarget->GetPosition().z;
+	dX = *(float*)&ScriptParams[2];
+	dY = *(float*)&ScriptParams[3];
+	if (b3D) {
+		dZ = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	else {
+		debug = ScriptParams[4];
+	}
+	result = false;
+	bool in_area;
+	if (b3D) {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y &&
+			Z - dZ <= pos.z &&
+			Z + dZ >= pos.z;
+	}
+	else {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y;
+	}
+	if (in_area) {
+		switch (command) {
+		case COMMAND_LOCATE_PLAYER_ANY_MEANS_CAR_2D:
+		case COMMAND_LOCATE_PLAYER_ANY_MEANS_CAR_3D:
+			result = true;
+			break;
+		case COMMAND_LOCATE_PLAYER_ON_FOOT_CAR_2D:
+		case COMMAND_LOCATE_PLAYER_ON_FOOT_CAR_3D:
+			result = !pPlayerInfo->m_pPed->bInVehicle;
+			break;
+		case COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_2D:
+		case COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_3D:
+			result = pPlayerInfo->m_pPed->bInVehicle;
+			break;
+		default:
+			assert(false);
+			break;
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
+		else
+			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
+	}
+}
+
+void CRunningScript::LocateCharCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug, decided = false;
+	float X, Y, Z, dX, dY, dZ;
+	switch (command) {
+	case COMMAND_LOCATE_CHAR_ANY_MEANS_3D:
+	case COMMAND_LOCATE_CHAR_ON_FOOT_3D:
+	case COMMAND_LOCATE_CHAR_IN_CAR_3D:
+	case COMMAND_LOCATE_STOPPED_CHAR_ANY_MEANS_3D:
+	case COMMAND_LOCATE_STOPPED_CHAR_ON_FOOT_3D:
+	case COMMAND_LOCATE_STOPPED_CHAR_IN_CAR_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 8 : 6);
+	CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+	assert(pPed);
+	CVector pos = pPed->bInVehicle ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
+	switch (command) {
+	case COMMAND_LOCATE_STOPPED_CHAR_ANY_MEANS_2D:
+	case COMMAND_LOCATE_STOPPED_CHAR_ANY_MEANS_3D:
+	case COMMAND_LOCATE_STOPPED_CHAR_IN_CAR_2D:
+	case COMMAND_LOCATE_STOPPED_CHAR_IN_CAR_3D:
+	case COMMAND_LOCATE_STOPPED_CHAR_ON_FOOT_2D:
+	case COMMAND_LOCATE_STOPPED_CHAR_ON_FOOT_3D:
+		if (!CTheScripts::IsPedStopped(pPed)) {
+			result = false;
+			decided = true;
+		}
+		break;
+	default:
+		break;
+	}
+	X = *(float*)&ScriptParams[1];
+	Y = *(float*)&ScriptParams[2];
+	if (b3D) {
+		Z = *(float*)&ScriptParams[3];
+		dX = *(float*)&ScriptParams[4];
+		dY = *(float*)&ScriptParams[5];
+		dZ = *(float*)&ScriptParams[6];
+		debug = ScriptParams[7];
+	}
+	else {
+		dX = *(float*)&ScriptParams[3];
+		dY = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	if (!decided) {
+		result = false;
+		bool in_area;
+		if (b3D) {
+			in_area = X - dX <= pos.x &&
+				X + dX >= pos.x &&
+				Y - dY <= pos.y &&
+				Y + dY >= pos.y &&
+				Z - dZ <= pos.z &&
+				Z + dZ >= pos.z;
+		}
+		else {
+			in_area = X - dX <= pos.x &&
+				X + dX >= pos.x &&
+				Y - dY <= pos.y &&
+				Y + dY >= pos.y;
+		}
+		if (in_area) {
+			switch (command) {
+			case COMMAND_LOCATE_CHAR_ANY_MEANS_2D:
+			case COMMAND_LOCATE_CHAR_ANY_MEANS_3D:
+			case COMMAND_LOCATE_STOPPED_CHAR_ANY_MEANS_2D:
+			case COMMAND_LOCATE_STOPPED_CHAR_ANY_MEANS_3D:
+				result = true;
+				break;
+			case COMMAND_LOCATE_CHAR_ON_FOOT_2D:
+			case COMMAND_LOCATE_CHAR_ON_FOOT_3D:
+			case COMMAND_LOCATE_STOPPED_CHAR_ON_FOOT_2D:
+			case COMMAND_LOCATE_STOPPED_CHAR_ON_FOOT_3D:
+				result = !pPed->bInVehicle;
+				break;
+			case COMMAND_LOCATE_CHAR_IN_CAR_2D:
+			case COMMAND_LOCATE_CHAR_IN_CAR_3D:
+			case COMMAND_LOCATE_STOPPED_CHAR_IN_CAR_2D:
+			case COMMAND_LOCATE_STOPPED_CHAR_IN_CAR_3D:
+				result = pPed->bInVehicle;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
+		else
+			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
+	}
+}
+
+void CRunningScript::LocateCharCharCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug;
+	float X, Y, Z, dX, dY, dZ;
+	switch (command) {
+	case COMMAND_LOCATE_CHAR_ANY_MEANS_CHAR_3D:
+	case COMMAND_LOCATE_CHAR_ON_FOOT_CHAR_3D:
+	case COMMAND_LOCATE_CHAR_IN_CAR_CHAR_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 6 : 5);
+	CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+	assert(pPed);
+	CPed* pTarget = CPools::GetPedPool()->GetAt(ScriptParams[1]);
+	assert(pTarget);
+	CVector pos = pPed->bInVehicle ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
+	if (pTarget->bInVehicle) {
+		X = pTarget->m_pMyVehicle->GetPosition().x;
+		Y = pTarget->m_pMyVehicle->GetPosition().y;
+		Z = pTarget->m_pMyVehicle->GetPosition().z;
+	}
+	else {
+		X = pTarget->GetPosition().x;
+		Y = pTarget->GetPosition().y;
+		Z = pTarget->GetPosition().z;
+	}
+	dX = *(float*)&ScriptParams[2];
+	dY = *(float*)&ScriptParams[3];
+	if (b3D) {
+		dZ = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	else {
+		debug = ScriptParams[4];
+	}
+	result = false;
+	bool in_area;
+	if (b3D) {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y &&
+			Z - dZ <= pos.z &&
+			Z + dZ >= pos.z;
+	}
+	else {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y;
+	}
+	if (in_area) {
+		switch (command) {
+		case COMMAND_LOCATE_CHAR_ANY_MEANS_CHAR_2D:
+		case COMMAND_LOCATE_CHAR_ANY_MEANS_CHAR_3D:
+			result = true;
+			break;
+		case COMMAND_LOCATE_CHAR_ON_FOOT_CHAR_2D:
+		case COMMAND_LOCATE_CHAR_ON_FOOT_CHAR_3D:
+			result = !pPed->bInVehicle;
+			break;
+		case COMMAND_LOCATE_CHAR_IN_CAR_CHAR_2D:
+		case COMMAND_LOCATE_CHAR_IN_CAR_CHAR_3D:
+			result = pPed->bInVehicle;
+			break;
+		default:
+			assert(false);
+			break;
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+#ifdef FIX_BUGS
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+#else
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : -100.0f);
+#endif
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
+		else
+			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
+	}
+}
+
+void CRunningScript::LocateCharCarCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug;
+	float X, Y, Z, dX, dY, dZ;
+	switch (command) {
+	case COMMAND_LOCATE_CHAR_ANY_MEANS_CAR_3D:
+	case COMMAND_LOCATE_CHAR_ON_FOOT_CAR_3D:
+	case COMMAND_LOCATE_CHAR_IN_CAR_CAR_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 6 : 5);
+	CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+	assert(pPed);
+	CVehicle* pTarget = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+	assert(pTarget);
+	CVector pos = pPed->bInVehicle ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
+	X = pTarget->GetPosition().x;
+	Y = pTarget->GetPosition().y;
+	Z = pTarget->GetPosition().z;
+	dX = *(float*)&ScriptParams[2];
+	dY = *(float*)&ScriptParams[3];
+	if (b3D) {
+		dZ = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	else {
+		debug = ScriptParams[4];
+	}
+	result = false;
+	bool in_area;
+	if (b3D) {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y &&
+			Z - dZ <= pos.z &&
+			Z + dZ >= pos.z;
+	}
+	else {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y;
+	}
+	if (in_area) {
+		switch (command) {
+		case COMMAND_LOCATE_CHAR_ANY_MEANS_CAR_2D:
+		case COMMAND_LOCATE_CHAR_ANY_MEANS_CAR_3D:
+			result = true;
+			break;
+		case COMMAND_LOCATE_CHAR_ON_FOOT_CAR_2D:
+		case COMMAND_LOCATE_CHAR_ON_FOOT_CAR_3D:
+			result = !pPed->bInVehicle;
+			break;
+		case COMMAND_LOCATE_CHAR_IN_CAR_CHAR_2D:
+		case COMMAND_LOCATE_CHAR_IN_CAR_CHAR_3D:
+			result = pPed->bInVehicle;
+			break;
+		default:
+			assert(false);
+			break;
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
+		else
+			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
+	}
+}
+
+void CRunningScript::LocateCharObjectCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug;
+	float X, Y, Z, dX, dY, dZ;
+	switch (command) {
+	case COMMAND_LOCATE_CHAR_ANY_MEANS_OBJECT_3D:
+	case COMMAND_LOCATE_CHAR_ON_FOOT_OBJECT_3D:
+	case COMMAND_LOCATE_CHAR_IN_CAR_OBJECT_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 6 : 5);
+	CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+	assert(pPed);
+	CObject* pTarget = CPools::GetObjectPool()->GetAt(ScriptParams[1]);
+	assert(pTarget);
+	CVector pos = pPed->bInVehicle ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
+	X = pTarget->GetPosition().x;
+	Y = pTarget->GetPosition().y;
+	Z = pTarget->GetPosition().z;
+	dX = *(float*)&ScriptParams[2];
+	dY = *(float*)&ScriptParams[3];
+	if (b3D) {
+		dZ = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	else {
+		debug = ScriptParams[4];
+	}
+	result = false;
+	bool in_area;
+	if (b3D) {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y &&
+			Z - dZ <= pos.z &&
+			Z + dZ >= pos.z;
+	}
+	else {
+		in_area = X - dX <= pos.x &&
+			X + dX >= pos.x &&
+			Y - dY <= pos.y &&
+			Y + dY >= pos.y;
+	}
+	if (in_area) {
+		switch (command) {
+		case COMMAND_LOCATE_CHAR_ANY_MEANS_OBJECT_2D:
+		case COMMAND_LOCATE_CHAR_ANY_MEANS_OBJECT_3D:
+			result = true;
+			break;
+		case COMMAND_LOCATE_CHAR_ON_FOOT_OBJECT_2D:
+		case COMMAND_LOCATE_CHAR_ON_FOOT_OBJECT_3D:
+			result = !pPed->bInVehicle;
+			break;
+		case COMMAND_LOCATE_CHAR_IN_CAR_OBJECT_2D:
+		case COMMAND_LOCATE_CHAR_IN_CAR_OBJECT_3D:
+			result = pPed->bInVehicle;
+			break;
+		default:
+			assert(false);
+			break;
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
+		else
+			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
+	}
+}
+
+void CRunningScript::LocateCarCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug, decided = false;
+	float X, Y, Z, dX, dY, dZ;
+	switch (command) {
+	case COMMAND_LOCATE_CAR_3D:
+	case COMMAND_LOCATE_STOPPED_CAR_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 8 : 6);
+	CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+	assert(pVehicle);
+	CVector pos = pVehicle->GetPosition();
+	switch (command) {
+	case COMMAND_LOCATE_STOPPED_CAR_2D:
+	case COMMAND_LOCATE_STOPPED_CAR_3D:
+		if (!CTheScripts::IsVehicleStopped(pVehicle)) {
+			result = false;
+			decided = true;
+		}
+		break;
+	default:
+		break;
+	}
+	X = *(float*)&ScriptParams[1];
+	Y = *(float*)&ScriptParams[2];
+	if (b3D) {
+		Z = *(float*)&ScriptParams[3];
+		dX = *(float*)&ScriptParams[4];
+		dY = *(float*)&ScriptParams[5];
+		dZ = *(float*)&ScriptParams[6];
+		debug = ScriptParams[7];
+	}
+	else {
+		dX = *(float*)&ScriptParams[3];
+		dY = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	if (!decided) {
+		result = false;
+		bool in_area;
+		if (b3D) {
+			in_area = X - dX <= pos.x &&
+				X + dX >= pos.x &&
+				Y - dY <= pos.y &&
+				Y + dY >= pos.y &&
+				Z - dZ <= pos.z &&
+				Z + dZ >= pos.z;
+		}
+		else {
+			in_area = X - dX <= pos.x &&
+				X + dX >= pos.x &&
+				Y - dY <= pos.y &&
+				Y + dY >= pos.y;
+		}
+		result = in_area;
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
+		else
+			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
+	}
+}
+
+void CRunningScript::LocateSniperBulletCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug;
+	float X, Y, Z, dX, dY, dZ;
+	switch (command) {
+	case COMMAND_LOCATE_SNIPER_BULLET_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 7 : 5);
+	X = *(float*)&ScriptParams[0];
+	Y = *(float*)&ScriptParams[1];
+	if (b3D) {
+		Z = *(float*)&ScriptParams[2];
+		dX = *(float*)&ScriptParams[3];
+		dY = *(float*)&ScriptParams[4];
+		dZ = *(float*)&ScriptParams[5];
+		debug = ScriptParams[6];
+	}
+	else {
+		dX = *(float*)&ScriptParams[2];
+		dY = *(float*)&ScriptParams[3];
+		debug = ScriptParams[4];
+	}
+	result = CBulletInfo::TestForSniperBullet(X - dX, X + dX, Y - dY, Y + dY, b3D ? Z - dZ : -1000.0f, b3D ? Z + dZ : 1000.0f);
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
+		else
+			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
+	}
+}
+
+void CRunningScript::PlayerInAreaCheckCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug, decided = false;
+	float infX, infY, infZ, supX, supY, supZ;
+	switch (command) {
+	case COMMAND_IS_PLAYER_IN_AREA_3D:
+	case COMMAND_IS_PLAYER_IN_AREA_ON_FOOT_3D:
+	case COMMAND_IS_PLAYER_IN_AREA_IN_CAR_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_AREA_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_AREA_ON_FOOT_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_AREA_IN_CAR_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 8 : 6);
+	CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+	switch (command) {
+	case COMMAND_IS_PLAYER_STOPPED_IN_AREA_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_AREA_ON_FOOT_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_AREA_IN_CAR_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_AREA_2D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_AREA_ON_FOOT_2D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_AREA_IN_CAR_2D:
+		if (!CTheScripts::IsPlayerStopped(pPlayerInfo)) {
+			result = false;
+			decided = true;
+		}
+		break;
+	default:
+		break;
+	}
+	infX = *(float*)&ScriptParams[1];
+	infY = *(float*)&ScriptParams[2];
+	if (b3D) {
+		infZ = *(float*)&ScriptParams[3];
+		supX = *(float*)&ScriptParams[4];
+		supY = *(float*)&ScriptParams[5];
+		supZ = *(float*)&ScriptParams[6];
+		if (infZ > supZ) {
+			infZ = *(float*)&ScriptParams[6];
+			supZ = *(float*)&ScriptParams[3];
+		}
+		debug = ScriptParams[7];
+	}
+	else {
+		supX = *(float*)&ScriptParams[3];
+		supY = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	if (infX > supX) {
+		float tmp = infX;
+		infX = supX;
+		supX = tmp;
+	}
+	if (infY > supY) {
+		float tmp = infY;
+		infY = supY;
+		supY = tmp;
+	}
+	if (!decided) {
+		CVector pos = pPlayerInfo->GetPos();
+		result = false;
+		bool in_area;
+		if (b3D) {
+			in_area = infX <= pos.x &&
+				supX >= pos.x &&
+				infY <= pos.y &&
+				supY >= pos.y &&
+				infZ <= pos.z &&
+				supZ >= pos.z;
+		}
+		else {
+			in_area = infX <= pos.x &&
+				supX >= pos.x &&
+				infY <= pos.y &&
+				supY >= pos.y;
+		}
+		if (in_area) {
+			switch (command) {
+			case COMMAND_IS_PLAYER_IN_AREA_2D:
+			case COMMAND_IS_PLAYER_IN_AREA_3D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_AREA_2D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_AREA_3D:
+				result = true;
+				break;
+			case COMMAND_IS_PLAYER_IN_AREA_ON_FOOT_2D:
+			case COMMAND_IS_PLAYER_IN_AREA_ON_FOOT_3D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_AREA_ON_FOOT_2D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_AREA_ON_FOOT_3D:
+				result = !pPlayerInfo->m_pPed->bInVehicle;
+				break;
+			case COMMAND_IS_PLAYER_IN_AREA_IN_CAR_2D:
+			case COMMAND_IS_PLAYER_IN_AREA_IN_CAR_3D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_AREA_IN_CAR_2D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_AREA_IN_CAR_3D:
+				result = pPlayerInfo->m_pPed->bInVehicle;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
+		else
+			CTheScripts::DrawDebugSquare(infX, infY, supX, supY);
+	}
+}
+
+void CRunningScript::PlayerInAngledAreaCheckCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug, decided = false;
+	float infX, infY, infZ, supX, supY, supZ, side2length;
+	switch (command) {
+	case COMMAND_IS_PLAYER_IN_ANGLED_AREA_3D:
+	case COMMAND_IS_PLAYER_IN_ANGLED_AREA_ON_FOOT_3D:
+	case COMMAND_IS_PLAYER_IN_ANGLED_AREA_IN_CAR_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_ON_FOOT_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_IN_CAR_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 9 : 7);
+	CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+	switch (command) {
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_ON_FOOT_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_IN_CAR_3D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_2D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_ON_FOOT_2D:
+	case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_IN_CAR_2D:
+		if (!CTheScripts::IsPlayerStopped(pPlayerInfo)) {
+			result = false;
+			decided = true;
+		}
+		break;
+	default:
+		break;
+	}
+	infX = *(float*)&ScriptParams[1];
+	infY = *(float*)&ScriptParams[2];
+	if (b3D) {
+		infZ = *(float*)&ScriptParams[3];
+		supX = *(float*)&ScriptParams[4];
+		supY = *(float*)&ScriptParams[5];
+		supZ = *(float*)&ScriptParams[6];
+		if (infZ > supZ) {
+			infZ = *(float*)&ScriptParams[6];
+			supZ = *(float*)&ScriptParams[3];
+		}
+		side2length = *(float*)&ScriptParams[7];
+		debug = ScriptParams[8];
+	}
+	else {
+		supX = *(float*)&ScriptParams[3];
+		supY = *(float*)&ScriptParams[4];
+		side2length = *(float*)&ScriptParams[5];
+		debug = ScriptParams[6];
+	}
+	float initAngle = CGeneral::GetRadianAngleBetweenPoints(infX, infY, supX, supY) + HALFPI;
+	while (initAngle < 0.0f)
+		initAngle += TWOPI;
+	while (initAngle > TWOPI)
+		initAngle -= TWOPI;
+	// it looks like the idea is to use a rectangle using the diagonal of the rectangle as
+	// the side of new rectangle, with "length" being the length of second side
+	float rotatedSupX = supX + side2length * sin(initAngle);
+	float rotatedSupY = supY - side2length * cos(initAngle);
+	float rotatedInfX = infX + side2length * sin(initAngle);
+	float rotatedInfY = infY - side2length * cos(initAngle);
+	float side1X = supX - infX;
+	float side1Y = supY - infY;
+	float side1Length = CVector2D(side1X, side1Y).Magnitude();
+	float side2X = rotatedInfX - infX;
+	float side2Y = rotatedInfY - infY;
+	float side2Length = CVector2D(side2X, side2Y).Magnitude(); // == side2length?
+	if (!decided) {
+		CVector pos = pPlayerInfo->GetPos();
+		result = false;
+		float X = pos.x - infX;
+		float Y = pos.y - infY;
+		float positionAlongSide1 = X * side1X / side1Length + Y * side1Y / side1Length;
+		bool in_area = false;
+		if (positionAlongSide1 >= 0.0f && positionAlongSide1 <= side1Length) {
+			float positionAlongSide2 = X * side2X / side2Length + Y * side2Y / side2Length;
+			if (positionAlongSide2 >= 0.0f && positionAlongSide2 <= side2Length) {
+				in_area = !b3D || pos.z >= infZ && pos.z <= supZ;
+			}
+		}
+
+		if (in_area) {
+			switch (command) {
+			case COMMAND_IS_PLAYER_IN_ANGLED_AREA_2D:
+			case COMMAND_IS_PLAYER_IN_ANGLED_AREA_3D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_2D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_3D:
+				result = true;
+				break;
+			case COMMAND_IS_PLAYER_IN_ANGLED_AREA_ON_FOOT_2D:
+			case COMMAND_IS_PLAYER_IN_ANGLED_AREA_ON_FOOT_3D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_ON_FOOT_2D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_ON_FOOT_3D:
+				result = !pPlayerInfo->m_pPed->bInVehicle;
+				break;
+			case COMMAND_IS_PLAYER_IN_ANGLED_AREA_IN_CAR_2D:
+			case COMMAND_IS_PLAYER_IN_ANGLED_AREA_IN_CAR_3D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_IN_CAR_2D:
+			case COMMAND_IS_PLAYER_STOPPED_IN_ANGLED_AREA_IN_CAR_3D:
+				result = pPlayerInfo->m_pPed->bInVehicle;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantAngledArea((uint32)this + m_nIp, infX, infY, supX, supY,
+			rotatedSupX, rotatedSupY, rotatedInfX, rotatedInfY, b3D ? (infZ + supZ) / 2 : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugAngledCube(infX, infY, infZ, supX, supY, supZ,
+				rotatedSupX, rotatedSupY, rotatedInfX, rotatedInfY);
+		else
+			CTheScripts::DrawDebugAngledSquare(infX, infY, supX, supY,
+				rotatedSupX, rotatedSupY, rotatedInfX, rotatedInfY);
+	}
+}
+
+void CRunningScript::CharInAreaCheckCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug, decided = false;
+	float infX, infY, infZ, supX, supY, supZ;
+	switch (command) {
+	case COMMAND_IS_CHAR_IN_AREA_3D:
+	case COMMAND_IS_CHAR_IN_AREA_ON_FOOT_3D:
+	case COMMAND_IS_CHAR_IN_AREA_IN_CAR_3D:
+	case COMMAND_IS_CHAR_STOPPED_IN_AREA_3D:
+	case COMMAND_IS_CHAR_STOPPED_IN_AREA_ON_FOOT_3D:
+	case COMMAND_IS_CHAR_STOPPED_IN_AREA_IN_CAR_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 8 : 6);
+	CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+	assert(pPed);
+	CVector pos = pPed->bInVehicle ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
+	switch (command) {
+	case COMMAND_IS_CHAR_STOPPED_IN_AREA_3D:
+	case COMMAND_IS_CHAR_STOPPED_IN_AREA_ON_FOOT_3D:
+	case COMMAND_IS_CHAR_STOPPED_IN_AREA_IN_CAR_3D:
+	case COMMAND_IS_CHAR_STOPPED_IN_AREA_2D:
+	case COMMAND_IS_CHAR_STOPPED_IN_AREA_ON_FOOT_2D:
+	case COMMAND_IS_CHAR_STOPPED_IN_AREA_IN_CAR_2D:
+		if (!CTheScripts::IsPedStopped(pPed)) {
+			result = false;
+			decided = true;
+		}
+		break;
+	default:
+		break;
+	}
+	infX = *(float*)&ScriptParams[1];
+	infY = *(float*)&ScriptParams[2];
+	if (b3D) {
+		infZ = *(float*)&ScriptParams[3];
+		supX = *(float*)&ScriptParams[4];
+		supY = *(float*)&ScriptParams[5];
+		supZ = *(float*)&ScriptParams[6];
+		if (infZ > supZ) {
+			infZ = *(float*)&ScriptParams[6];
+			supZ = *(float*)&ScriptParams[3];
+		}
+		debug = ScriptParams[7];
+	}
+	else {
+		supX = *(float*)&ScriptParams[3];
+		supY = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	if (infX > supX) {
+		float tmp = infX;
+		infX = supX;
+		supX = tmp;
+	}
+	if (infY > supY) {
+		float tmp = infY;
+		infY = supY;
+		supY = tmp;
+	}
+	if (!decided) {
+		result = false;
+		bool in_area;
+		if (b3D) {
+			in_area = infX <= pos.x &&
+				supX >= pos.x &&
+				infY <= pos.y &&
+				supY >= pos.y &&
+				infZ <= pos.z &&
+				supZ >= pos.z;
+		}
+		else {
+			in_area = infX <= pos.x &&
+				supX >= pos.x &&
+				infY <= pos.y &&
+				supY >= pos.y;
+		}
+		if (in_area) {
+			switch (command) {
+			case COMMAND_IS_CHAR_IN_AREA_2D:
+			case COMMAND_IS_CHAR_IN_AREA_3D:
+			case COMMAND_IS_CHAR_STOPPED_IN_AREA_2D:
+			case COMMAND_IS_CHAR_STOPPED_IN_AREA_3D:
+				result = true;
+				break;
+			case COMMAND_IS_CHAR_IN_AREA_ON_FOOT_2D:
+			case COMMAND_IS_CHAR_IN_AREA_ON_FOOT_3D:
+			case COMMAND_IS_CHAR_STOPPED_IN_AREA_ON_FOOT_2D:
+			case COMMAND_IS_CHAR_STOPPED_IN_AREA_ON_FOOT_3D:
+				result = !pPed->bInVehicle;
+				break;
+			case COMMAND_IS_CHAR_IN_AREA_IN_CAR_2D:
+			case COMMAND_IS_CHAR_IN_AREA_IN_CAR_3D:
+			case COMMAND_IS_CHAR_STOPPED_IN_AREA_IN_CAR_2D:
+			case COMMAND_IS_CHAR_STOPPED_IN_AREA_IN_CAR_3D:
+				result = pPed->bInVehicle;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
+		else
+			CTheScripts::DrawDebugSquare(infX, infY, supX, supY);
+	}
+}
+
+void CRunningScript::CarInAreaCheckCommand(int32 command, uint32* pIp)
+{
+	bool b3D, result, debug, decided = false;
+	float infX, infY, infZ, supX, supY, supZ;
+	switch (command) {
+	case COMMAND_IS_CAR_IN_AREA_3D:
+	case COMMAND_IS_CAR_STOPPED_IN_AREA_3D:
+		b3D = true;
+		break;
+	default:
+		b3D = false;
+		break;
+	}
+	CollectParameters(pIp, b3D ? 8 : 6);
+	CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+	assert(pVehicle);
+	CVector pos = pVehicle->GetPosition();
+	switch (command) {
+	case COMMAND_IS_CAR_STOPPED_IN_AREA_3D:
+	case COMMAND_IS_CAR_STOPPED_IN_AREA_2D:
+		if (!CTheScripts::IsVehicleStopped(pVehicle)) {
+			result = false;
+			decided = true;
+		}
+		break;
+	default:
+		break;
+	}
+	infX = *(float*)&ScriptParams[1];
+	infY = *(float*)&ScriptParams[2];
+	if (b3D) {
+		infZ = *(float*)&ScriptParams[3];
+		supX = *(float*)&ScriptParams[4];
+		supY = *(float*)&ScriptParams[5];
+		supZ = *(float*)&ScriptParams[6];
+		if (infZ > supZ) {
+			infZ = *(float*)&ScriptParams[6];
+			supZ = *(float*)&ScriptParams[3];
+		}
+		debug = ScriptParams[7];
+	}
+	else {
+		supX = *(float*)&ScriptParams[3];
+		supY = *(float*)&ScriptParams[4];
+		debug = ScriptParams[5];
+	}
+	if (infX > supX) {
+		float tmp = infX;
+		infX = supX;
+		supX = tmp;
+	}
+	if (infY > supY) {
+		float tmp = infY;
+		infY = supY;
+		supY = tmp;
+	}
+	if (!decided) {
+		result = false;
+		bool in_area;
+		if (b3D) {
+			in_area = infX <= pos.x &&
+				supX >= pos.x &&
+				infY <= pos.y &&
+				supY >= pos.y &&
+				infZ <= pos.z &&
+				supZ >= pos.z;
+		}
+		else {
+			in_area = infX <= pos.x &&
+				supX >= pos.x &&
+				infY <= pos.y &&
+				supY >= pos.y;
+		}
+		if (in_area) {
+			switch (command) {
+			case COMMAND_IS_CAR_IN_AREA_2D:
+			case COMMAND_IS_CAR_IN_AREA_3D:
+			case COMMAND_IS_CAR_STOPPED_IN_AREA_2D:
+			case COMMAND_IS_CAR_STOPPED_IN_AREA_3D:
+				result = true;
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+	}
+	UpdateCompareFlag(result);
+	if (debug)
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : -100.0f);
+	if (CTheScripts::DbgFlag) {
+		if (b3D)
+			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
+		else
+			CTheScripts::DrawDebugSquare(infX, infY, supX, supY);
+	}
+}
+
+void CRunningScript::DoDeatharrestCheck()
+{
+	if (!m_bDeatharrestEnabled)
+		return;
+	if (!CTheScripts::IsPlayerOnAMission())
+		return;
+	CPlayerInfo* pPlayer = &CWorld::Players[CWorld::PlayerInFocus];
+	if (!pPlayer->IsRestartingAfterDeath() && !pPlayer->IsRestartingAfterArrest() && !CTheScripts::UpsideDownCars.AreAnyCarsUpsideDown())
+		return;
+	assert(m_nStackPointer > 0);
+	while (m_nStackPointer > 1)
+		--m_nStackPointer;
+	m_nIp = m_anStack[--m_nStackPointer];
+	int16 messageId;
+	if (pPlayer->IsRestartingAfterDeath())
+		messageId = 0;
+	else if (pPlayer->IsRestartingAfterArrest())
+		messageId = 5;
+	else
+		messageId = 10;
+	messageId += CGeneral::GetRandomNumberInRange(0, 5);
+	bool found = false;
+	for (int16 contact = 0; !found && contact < MAX_NUM_CONTACTS; contact++) {
+		int contactFlagOffset = CTheScripts::OnAMissionForContactFlag[contact];
+		if (contactFlagOffset && CTheScripts::ScriptSpace[contactFlagOffset] == 1) {
+			messageId += CTheScripts::BaseBriefIdForContact[contact];
+		}
+	}
+	if (!found)
+		messageId = 8001;
+	char tmp[16];
+	sprintf(tmp, "%d", messageId);
+	CMessages::ClearSmallMessagesOnly();
+	wchar* text = TheText.Get(tmp);
+	// ...and do nothing about it
+	*(int32*)&CTheScripts::ScriptSpace[CTheScripts::OnAMissionFlag] = 0;
+	m_bDeatharrestExecuted = true;
+	m_nWakeTime = 0;
+}
+
+int16 CRunningScript::GetPadState(uint16 pad, uint16 button)
+{
+	CPad* pPad = CPad::GetPad(pad);
+	switch (button) {
+	case 0: return pPad->NewState.LeftStickX;
+	case 1: return pPad->NewState.LeftStickY;
+	case 2: return pPad->NewState.RightStickX;
+	case 3: return pPad->NewState.RightStickY;
+	case 4: return pPad->NewState.LeftShoulder1;
+	case 5: return pPad->NewState.LeftShoulder2;
+	case 6: return pPad->NewState.RightShoulder1;
+	case 7: return pPad->NewState.RightShoulder2;
+	case 8: return pPad->NewState.DPadUp;
+	case 9: return pPad->NewState.DPadDown;
+	case 10: return pPad->NewState.DPadLeft;
+	case 11: return pPad->NewState.DPadRight;
+	case 12: return pPad->NewState.Start;
+	case 13: return pPad->NewState.Select;
+	case 14: return pPad->NewState.Square;
+	case 15: return pPad->NewState.Triangle;
+	case 16: return pPad->NewState.Cross;
+	case 17: return pPad->NewState.Circle;
+	case 18: return pPad->NewState.LeftShock;
+	case 19: return pPad->NewState.RightShock;
+	default: break;
+	}
+	return 0;
+}
+
+uint32 DbgLineColour = 0x0000FFFF; // r = 0, g = 0, b = 255, a = 255
+
+void CTheScripts::DrawDebugSquare(float infX, float infY, float supX, float supY)
+{
+	CColPoint tmpCP;
+	CEntity* tmpEP;
+	CVector p1, p2, p3, p4;
+	p1 = CVector(infX, infY, -1000.0f);
+	CWorld::ProcessVerticalLine(p1, 1000.0f, tmpCP, tmpEP, true, false, false, false, true, false, nil);
+	p1.z = 2.0f + tmpCP.point.z;
+	p2 = CVector(supX, supY, -1000.0f);
+	CWorld::ProcessVerticalLine(p2, 1000.0f, tmpCP, tmpEP, true, false, false, false, true, false, nil);
+	p2.z = 2.0f + tmpCP.point.z;
+	p3 = CVector(infX, supY, -1000.0f);
+	CWorld::ProcessVerticalLine(p3, 1000.0f, tmpCP, tmpEP, true, false, false, false, true, false, nil);
+	p3.z = 2.0f + tmpCP.point.z;
+	p4 = CVector(supX, infY, -1000.0f);
+	CWorld::ProcessVerticalLine(p4, 1000.0f, tmpCP, tmpEP, true, false, false, false, true, false, nil);
+	p4.z = 2.0f + tmpCP.point.z;
+	CTheScripts::ScriptDebugLine3D(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(p2.x, p2.y, p2.z, p3.x, p3.y, p3.z, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(p3.x, p3.y, p3.z, p4.x, p4.y, p4.z, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(p4.x, p4.y, p4.z, p1.x, p1.y, p1.z, DbgLineColour, DbgLineColour);
+}
+
+void CTheScripts::DrawDebugAngledSquare(float infX, float infY, float supX, float supY, float rotSupX, float rotSupY, float rotInfX, float rotInfY)
+{
+	CColPoint tmpCP;
+	CEntity* tmpEP;
+	CVector p1, p2, p3, p4;
+	p1 = CVector(infX, infY, -1000.0f);
+	CWorld::ProcessVerticalLine(p1, 1000.0f, tmpCP, tmpEP, true, false, false, false, true, false, nil);
+	p1.z = 2.0f + tmpCP.point.z;
+	p2 = CVector(supX, supY, -1000.0f);
+	CWorld::ProcessVerticalLine(p2, 1000.0f, tmpCP, tmpEP, true, false, false, false, true, false, nil);
+	p2.z = 2.0f + tmpCP.point.z;
+	p3 = CVector(rotSupX, rotSupY, -1000.0f);
+	CWorld::ProcessVerticalLine(p3, 1000.0f, tmpCP, tmpEP, true, false, false, false, true, false, nil);
+	p3.z = 2.0f + tmpCP.point.z;
+	p4 = CVector(rotInfX, rotInfY, -1000.0f);
+	CWorld::ProcessVerticalLine(p4, 1000.0f, tmpCP, tmpEP, true, false, false, false, true, false, nil);
+	p4.z = 2.0f + tmpCP.point.z;
+	CTheScripts::ScriptDebugLine3D(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(p2.x, p2.y, p2.z, p3.x, p3.y, p3.z, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(p3.x, p3.y, p3.z, p4.x, p4.y, p4.z, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(p4.x, p4.y, p4.z, p1.x, p1.y, p1.z, DbgLineColour, DbgLineColour);
+}
+
+void CTheScripts::DrawDebugCube(float infX, float infY, float infZ, float supX, float supY, float supZ)
+{
+	CTheScripts::ScriptDebugLine3D(infX, infY, infZ, supX, infY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(supX, infY, infZ, supX, supY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(supX, supY, infZ, infX, supY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(infX, supY, infZ, infX, infY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(infX, infY, supZ, supX, infY, supZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(supX, infY, supZ, supX, supY, supZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(supX, supY, supZ, infX, supY, supZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(infX, supY, supZ, infX, infY, supZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(infX, infY, supZ, infX, infY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(supX, infY, supZ, supX, infY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(supX, supY, supZ, supX, supY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(infX, supY, supZ, infX, supY, infZ, DbgLineColour, DbgLineColour);
+}
+
+void CTheScripts::DrawDebugAngledCube(float infX, float infY, float infZ, float supX, float supY, float supZ, float rotSupX, float rotSupY, float rotInfX, float rotInfY)
+{
+	CTheScripts::ScriptDebugLine3D(infX, infY, infZ, supX, infY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(supX, infY, infZ, rotSupX, rotSupY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(rotSupX, rotSupY, infZ, rotInfX, rotInfY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(rotInfX, rotInfY, infZ, infX, infY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(infX, infY, supZ, supX, infY, supZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(supX, infY, supZ, rotSupX, rotSupY, supZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(rotSupX, rotSupY, rotInfX, rotInfY, supY, supZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(rotInfX, rotInfY, supZ, infX, infY, supZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(infX, infY, supZ, infX, infY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(supX, infY, supZ, supX, infY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(rotSupX, rotSupY, supZ, rotSupX, rotSupY, infZ, DbgLineColour, DbgLineColour);
+	CTheScripts::ScriptDebugLine3D(rotInfX, rotInfY, supZ, rotInfX, rotInfY, infZ, DbgLineColour, DbgLineColour);
+}
+
+void CTheScripts::ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, uint32 col, uint32 col2)
+{
+	if (NumScriptDebugLines >= MAX_NUM_STORED_LINES)
+		return;
+	aStoredLines[NumScriptDebugLines].vecInf = CVector(x1, y1, z1);
+	aStoredLines[NumScriptDebugLines].vecSup = CVector(x2, y2, z2);
+	aStoredLines[NumScriptDebugLines].color1 = col;
+	aStoredLines[NumScriptDebugLines++].color2 = col2;
+}
+
+void CTheScripts::RenderTheScriptDebugLines()
+{
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)1);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)1);
+	for (int i = 0; i < NumScriptDebugLines; i++) {
+		CLines::RenderLineWithClipping(
+			aStoredLines[i].vecInf.x,
+			aStoredLines[i].vecInf.y,
+			aStoredLines[i].vecInf.z,
+			aStoredLines[i].vecSup.x,
+			aStoredLines[i].vecSup.y,
+			aStoredLines[i].vecSup.z,
+			aStoredLines[i].color1,
+			aStoredLines[i].color2);
+	}
+	NumScriptDebugLines = 0;
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)0);
+}
+
+WRAPPER void CTheScripts::SaveAllScripts(uint8*, uint32*) { EAXJMP(0x4535E0); }
+WRAPPER void CTheScripts::LoadAllScripts(uint8*, uint32) { EAXJMP(0x453B30); }
 WRAPPER void CTheScripts::ClearSpaceForMissionEntity(const CVector&, CEntity*) { EAXJMP(0x454060); }
 WRAPPER void CTheScripts::HighlightImportantArea(uint32, float, float, float, float, float) { EAXJMP(0x454320); }
+WRAPPER void CTheScripts::HighlightImportantAngledArea(uint32, float, float, float, float, float, float, float, float, float) { EAXJMP(0x454430); }
+WRAPPER bool CTheScripts::IsPedStopped(CPed*) { EAXJMP(0x454670); }
+WRAPPER bool CTheScripts::IsPlayerStopped(CPlayerInfo*) { EAXJMP(0x4546C0); }
+
+bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle)
+{
+	return 0.01f * CTimer::GetTimeStep() >= pVehicle->m_fDistanceTravelled;
+}
+
 WRAPPER void CTheScripts::CleanUpThisVehicle(CVehicle*) { EAXJMP(0x4548D0); }
 WRAPPER void CTheScripts::CleanUpThisPed(CPed*) { EAXJMP(0x4547A0); }
 WRAPPER void CTheScripts::CleanUpThisObject(CObject*) { EAXJMP(0x454910); }
 WRAPPER void CTheScripts::ReadObjectNamesFromScript() { EAXJMP(0x454960); }
 WRAPPER void CTheScripts::UpdateObjectIndices() { EAXJMP(0x454AD0); }
 WRAPPER void CTheScripts::ReadMultiScriptFileOffsetsFromScript() { EAXJMP(0x454BC0); }
-WRAPPER bool CTheScripts::IsPedStopped(CPed*) { EAXJMP(0x454670); }
-WRAPPER bool CTheScripts::IsPlayerStopped(CPlayerInfo*) { EAXJMP(0x4546C0); }
 
 STARTPATCHES
-InjectHook(0x437AE0, &CMissionCleanup::Init, PATCH_JUMP);
-InjectHook(0x437BA0, &CMissionCleanup::AddEntityToList, PATCH_JUMP);
-InjectHook(0x437BD0, &CMissionCleanup::RemoveEntityFromList, PATCH_JUMP);
-InjectHook(0x437C10, &CMissionCleanup::Process, PATCH_JUMP);
-InjectHook(0x437DC0, &CUpsideDownCarCheck::Init, PATCH_JUMP);
-InjectHook(0x437EE0, &CUpsideDownCarCheck::UpdateTimers, PATCH_JUMP);
-InjectHook(0x437F80, &CUpsideDownCarCheck::AreAnyCarsUpsideDown, PATCH_JUMP);
-InjectHook(0x437FB0, &CUpsideDownCarCheck::AddCarToCheck, PATCH_JUMP);
-InjectHook(0x437FE0, &CUpsideDownCarCheck::RemoveCarFromCheck, PATCH_JUMP);
-InjectHook(0x438010, &CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile, PATCH_JUMP);
-InjectHook(0x438050, &CStuckCarCheck::Init, PATCH_JUMP);
-InjectHook(0x4380A0, &CStuckCarCheck::Process, PATCH_JUMP);
-InjectHook(0x4381C0, &CStuckCarCheck::AddCarToCheck, PATCH_JUMP);
-InjectHook(0x438240, &CStuckCarCheck::RemoveCarFromCheck, PATCH_JUMP);
-InjectHook(0x4382A0, &CStuckCarCheck::HasCarBeenStuckForAWhile, PATCH_JUMP);
-InjectHook(0x4382E0, &CRunningScript::CollectParameters, PATCH_JUMP);
-InjectHook(0x438460, &CRunningScript::CollectNextParameterWithoutIncreasingPC, PATCH_JUMP);
-InjectHook(0x4385A0, &CRunningScript::StoreParameters, PATCH_JUMP);
-InjectHook(0x438640, &CRunningScript::GetPointerToScriptVariable, PATCH_JUMP);
 InjectHook(0x438790, &CTheScripts::Init, PATCH_JUMP);
-InjectHook(0x439000, &CTheScripts::StartNewScript, PATCH_JUMP);
 InjectHook(0x439040, &CTheScripts::Process, PATCH_JUMP);
 InjectHook(0x439400, &CTheScripts::StartTestScript, PATCH_JUMP);
 InjectHook(0x439410, &CTheScripts::IsPlayerOnAMission, PATCH_JUMP);
+InjectHook(0x44FD10, &CTheScripts::UndoBuildingSwaps, PATCH_JUMP);
+InjectHook(0x44FD60, &CTheScripts::UndoEntityVisibilitySettings, PATCH_JUMP);
+InjectHook(0x4534E0, &CTheScripts::ScriptDebugLine3D, PATCH_JUMP);
+InjectHook(0x453550, &CTheScripts::RenderTheScriptDebugLines, PATCH_JUMP);
+//InjectHook(0x4535E0, &CTheScripts::SaveAllScripts, PATCH_JUMP);
+//InjectHook(0x453B30, &CTheScripts::LoadAllScripts, PATCH_JUMP);
+//InjectHook(0x454060, &CTheScripts::ClearSpaceForMissionEntity, PATCH_JUMP);
 ENDPATCHES

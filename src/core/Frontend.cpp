@@ -735,7 +735,7 @@ void CMenuManager::Draw()
 				rightText = TheText.Get(gString);
 				break;
 			case MENUACTION_SETDBGFLAG:
-				rightText = TheText.Get(CTheScripts::DbgFlag ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(CTheScripts::IsDebugOn() ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_SWITCHBIGWHITEDEBUGLIGHT:
 				rightText = TheText.Get(gbBigWhiteDebugLightSwitchedOn ? "FEM_ON" : "FEM_OFF");
@@ -2148,7 +2148,7 @@ void CMenuManager::ProcessOnOffMenuOptions()
 		SaveSettings();
 		break;
 	case MENUACTION_SETDBGFLAG:
-		CTheScripts::DbgFlag = !CTheScripts::DbgFlag;
+		CTheScripts::InvertDebugFlag();
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		break;
 	case MENUACTION_SWITCHBIGWHITEDEBUGLIGHT:
