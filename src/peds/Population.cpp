@@ -17,6 +17,7 @@
 #include "VisibilityPlugins.h"
 #include "PedPlacement.h"
 #include "DummyObject.h"
+#include "Script.h"
 
 #define CREATION_DIST_MULT_TO_DIST 40.0f
 #define CREATION_RANGE 10.0f // Being added over the CREATION_DIST_MULT_TO_DIST.
@@ -56,10 +57,8 @@ CVector &CPopulation::RegenerationPoint_a = *(CVector*)0x8E2AA4;
 CVector &CPopulation::RegenerationPoint_b = *(CVector*)0x8E2A98;
 CVector &CPopulation::RegenerationForward = *(CVector*)0x8F1AD4;
 
-WRAPPER CPed *CPopulation::AddPedInCar(CVehicle *vehicle) { EAXJMP(0x4F5800); }
 WRAPPER void CPopulation::ManagePopulation(void) { EAXJMP(0x4F3B90); }
-WRAPPER void CPopulation::MoveCarsAndPedsOutOfAbandonedZones(void) { EAXJMP(0x4F5BE0); }
-WRAPPER void CPopulation::ConvertToRealObject(CDummyObject* obj) { EAXJMP(0x4F45A0); }
+WRAPPER bool CPopulation::TestSafeForRealObject(CDummyObject*) { EAXJMP(0x4F4700); }
 
 void
 CPopulation::Initialise()
@@ -470,13 +469,13 @@ CPopulation::PedCreationDistMultiplier()
 }
 
 CPed*
-CPopulation::AddPed(ePedType pedType, uint32 mi, CVector const &coors)
+CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors)
 {
 	switch (pedType) {
 		case PEDTYPE_CIVMALE:
 		case PEDTYPE_CIVFEMALE:
 		{
-			CCivilianPed *ped = new CCivilianPed(pedType, mi);
+			CCivilianPed *ped = new CCivilianPed(pedType, miOrCopType);
 			ped->GetPosition() = coors;
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
@@ -490,7 +489,7 @@ CPopulation::AddPed(ePedType pedType, uint32 mi, CVector const &coors)
 		}
 		case PEDTYPE_COP:
 		{
-			CCopPed *ped = new CCopPed((eCopType)mi);
+			CCopPed *ped = new CCopPed((eCopType)miOrCopType);
 			ped->GetPosition() = coors;
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
@@ -506,7 +505,7 @@ CPopulation::AddPed(ePedType pedType, uint32 mi, CVector const &coors)
 		case PEDTYPE_GANG8:
 		case PEDTYPE_GANG9:
 		{
-			CCivilianPed *ped = new CCivilianPed(pedType, mi);
+			CCivilianPed *ped = new CCivilianPed(pedType, miOrCopType);
 			ped->GetPosition() = coors;
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
@@ -538,7 +537,7 @@ CPopulation::AddPed(ePedType pedType, uint32 mi, CVector const &coors)
 		case PEDTYPE_CRIMINAL:
 		case PEDTYPE_PROSTITUTE:
 		{
-			CCivilianPed *ped = new CCivilianPed(pedType, mi);
+			CCivilianPed *ped = new CCivilianPed(pedType, miOrCopType);
 			ped->GetPosition() = coors;
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
@@ -721,6 +720,291 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 	}
 }
 
+CPed*
+CPopulation::AddPedInCar(CVehicle* car)
+{
+	int defaultModel = MI_MALE01;
+	bool imSureThatModelIsLoaded = true;
+	CVector coors = FindPlayerCoors();
+	CZoneInfo zoneInfo;
+	int pedType;
+
+	// May be eCopType, model index or non-sense(for medic), AddPed knows that by looking to ped type.
+	int preferredModel;
+
+	CTheZones::GetZoneInfoForTimeOfDay(&coors, &zoneInfo);
+	switch (car->m_modelIndex) {
+		case MI_FIRETRUCK:
+			preferredModel = 0;
+			pedType = PEDTYPE_FIREMAN;
+			break;
+		case MI_AMBULAN:
+			preferredModel = 0;
+			pedType = PEDTYPE_EMERGENCY;
+			break;
+		case MI_FBICAR:
+			preferredModel = COP_FBI;
+			pedType = PEDTYPE_COP;
+			break;
+		case MI_POLICE:
+			preferredModel = COP_STREET;
+			pedType = PEDTYPE_COP;
+			break;
+		case MI_ENFORCER:
+			preferredModel = COP_SWAT;
+			pedType = PEDTYPE_COP;
+			break;
+		case MI_RHINO:
+		case MI_BARRACKS:
+			preferredModel = COP_ARMY;
+			pedType = PEDTYPE_COP;
+			break;
+		case MI_TAXI:
+		case MI_CABBIE:
+		case MI_BORGNINE:
+			if (CGeneral::GetRandomTrueFalse()) {
+				pedType = PEDTYPE_CIVMALE;
+				preferredModel = MI_TAXI_D;
+				break;
+			}
+			defaultModel = MI_TAXI_D;
+
+			// fall through
+		default:
+			int gangOfPed = GANG_MAFIA;
+			imSureThatModelIsLoaded = false;
+
+			while (gangOfPed < NUM_GANGS && CGangs::GetGangInfo(gangOfPed)->m_nVehicleMI != car->m_modelIndex)
+				gangOfPed++;
+
+			if (gangOfPed < NUM_GANGS) {
+				pedType = gangOfPed + PEDTYPE_GANG1;
+				preferredModel = ChooseGangOccupation(gangOfPed);
+			} else if (gangOfPed == NUM_GANGS) {
+				CVehicleModelInfo *carModelInfo = ((CVehicleModelInfo*)CModelInfo::GetModelInfo(car->m_modelIndex));
+				int i = 15;
+				for(; i >= 0; i--) {
+					// Should return random model each time
+					preferredModel = ChooseCivilianOccupation(zoneInfo.pedGroup);
+					if (preferredModel == -1)
+						preferredModel = defaultModel;
+
+					if (((CPedModelInfo*)CModelInfo::GetModelInfo(preferredModel))->m_carsCanDrive & (1 << carModelInfo->m_vehicleClass))
+						break;
+				}
+				if (i == -1)
+					preferredModel = defaultModel;
+
+				pedType = ((CPedModelInfo*)CModelInfo::GetModelInfo(preferredModel))->m_pedType;
+			}
+			break;
+	}
+	if (!imSureThatModelIsLoaded && !((CPedModelInfo*)CModelInfo::GetModelInfo(preferredModel))->GetRwObject()) {
+		preferredModel = defaultModel;
+		pedType = ((CPedModelInfo*)CModelInfo::GetModelInfo(defaultModel))->m_pedType;
+	}
+
+	CPed *newPed = CPopulation::AddPed((ePedType)pedType, preferredModel, car->GetPosition());
+	newPed->bUsesCollision = false;
+
+	// what??
+	if (pedType != PEDTYPE_COP) {
+		newPed->SetCurrentWeapon(WEAPONTYPE_COLT45);
+		newPed->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(newPed->GetWeapon()->m_eWeaponType)->m_nModelId);
+	}
+	/*
+	// Miami leftover
+	if (car->m_vehType == VEHICLE_TYPE_BIKE) {
+		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, *((CBike*)car + 308h), 100.0f);
+	} else */
+
+	// FIX: Make peds comfortable while driving car/boat
+#ifdef FIX_BUGS
+	{
+		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, car->GetDriverAnim(), 100.0f);
+	}
+#else
+	{
+		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
+	}
+#endif
+	
+	newPed->StopNonPartialAnims();
+	return newPed;
+}
+
+void
+CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
+{
+	eLevelName level;
+	int zone;
+	int frame = CTimer::GetFrameCounter() & 7;
+	if (frame == 1) {
+		int movedVehicleCount = 0;
+		int poolSize = CPools::GetVehiclePool()->GetSize();
+		for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
+
+			CVehicle* veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
+			if (veh && veh->m_nZoneLevel == LEVEL_NONE && veh->IsCar()) {
+
+				if(veh->m_status != STATUS_ABANDONED && veh->m_status != STATUS_WRECKED && veh->m_status != STATUS_PLAYER &&
+					veh->m_status != STATUS_PLAYER_REMOTE) {
+
+					CVector vehPos(veh->GetPosition());
+					CPopulation::FindCollisionZoneForCoors(&vehPos, &zone, &level);
+
+					// Level 0 is transition zones, and we don't wanna touch cars on transition zones.
+					if (level != LEVEL_NONE && level != CCollision::ms_collisionInMemory && vehPos.z > -4.0f) {
+						if (veh->bIsLocked || !veh->CanBeDeleted()) {
+							switch (movedVehicleCount & 3) {
+								case 0:
+									veh->GetPosition() = RegenerationPoint_a;
+									break;
+								case 1:
+									veh->GetPosition() = RegenerationPoint_b;
+									break;
+								case 2:
+									veh->GetPosition() = CVector(RegenerationPoint_a.x, RegenerationPoint_b.y, RegenerationPoint_a.z);
+									break;
+								case 3:
+									veh->GetPosition() = CVector(RegenerationPoint_b.x, RegenerationPoint_a.y, RegenerationPoint_a.z);
+									break;
+								default:
+									break;
+							}
+							veh->GetPosition().z += (movedVehicleCount / 4) * 7.0f;
+							veh->GetForward() = RegenerationForward;
+							((CAutomobile*)veh)->PlaceOnRoadProperly();
+							CCarCtrl::JoinCarWithRoadSystem(veh);
+							CTheScripts::ClearSpaceForMissionEntity(veh->GetPosition(), veh);
+							++movedVehicleCount;
+						} else {
+							CWorld::Remove(veh);
+							delete veh;
+						}
+					}
+				}
+			}
+		}
+	} else if (frame == 5) {
+		int poolSize = CPools::GetPedPool()->GetSize();
+		for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
+
+			CPed *ped = CPools::GetPedPool()->GetSlot(poolIndex);
+			if (ped && ped->m_nZoneLevel == LEVEL_NONE && !ped->bInVehicle) {
+
+				CVector pedPos(ped->GetPosition());
+				CPopulation::FindCollisionZoneForCoors(&pedPos, &zone, &level);
+
+				// Level 0 is transition zones, and we don't wanna touch peds on transition zones.
+				if (level != LEVEL_NONE && level != CCollision::ms_collisionInMemory && pedPos.z > -4.0f) {
+					if (ped->CanBeDeleted()) {
+						CWorld::Remove(ped);
+						delete ped;
+					} else if (ped->m_nPedType != PEDTYPE_PLAYER1 && ped->m_nPedType != PEDTYPE_PLAYER2) {
+						ped->GetPosition() = RegenerationPoint_a;
+
+						bool foundGround;
+						float groundZ = CWorld::FindGroundZFor3DCoord(ped->GetPosition().x, ped->GetPosition().y,
+							ped->GetPosition().z + 2.0f, &foundGround);
+
+						if (foundGround) {
+							ped->GetPosition().z = 1.0f + groundZ;
+							//ped->GetPosition().z += 0.0f;
+							CTheScripts::ClearSpaceForMissionEntity(ped->GetPosition(), ped);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void
+CPopulation::ConvertAllObjectsToDummyObjects()
+{
+	int poolSize = CPools::GetObjectPool()->GetSize();
+	for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
+
+		CObject *obj = CPools::GetObjectPool()->GetSlot(poolIndex);
+
+		if (obj) {
+			if (obj->CanBeDeleted())
+				ConvertToDummyObject(obj);
+		}
+	}
+}
+
+void
+CPopulation::ConvertToRealObject(CDummyObject *dummy)
+{
+	if (!TestSafeForRealObject(dummy))
+		return;
+
+	CObject *obj = new CObject(dummy);
+	if (!obj)
+		return;
+
+	bool makeInvisible;
+	CWorld::Remove(dummy);
+	delete dummy;
+	CWorld::Add(obj);
+	int16 mi = obj->m_modelIndex;
+	if (mi == MI_GLASS1 || mi == MI_GLASS2 || mi == MI_GLASS3 || mi == MI_GLASS4 ||
+		mi == MI_GLASS5 || mi == MI_GLASS6 || mi == MI_GLASS7 || mi == MI_GLASS8)
+		makeInvisible = true;
+	else
+		makeInvisible = false;
+
+	if (makeInvisible) {
+		obj->bIsVisible = false;
+	} else if (obj->m_modelIndex == MI_BUOY) {
+		obj->bIsStatic = false;
+		obj->m_vecMoveSpeed = CVector(0.0f, 0.0f, -0.001f);
+		obj->m_flagD8 = true;
+		obj->AddToMovingList();
+	}
+}
+
+void
+CPopulation::ConvertToDummyObject(CObject *obj)
+{
+	CDummyObject *dummy = new CDummyObject(obj);
+	if (!dummy)
+		return;
+
+	dummy->GetMatrix() = obj->GetMatrix();
+	dummy->GetMatrix().UpdateRW();
+	dummy->UpdateRwFrame();
+
+	bool makeInvisible;
+	int16 mi = obj->m_modelIndex;
+	if (mi == MI_GLASS1 || mi == MI_GLASS2 || mi == MI_GLASS3 || mi == MI_GLASS4 ||
+		mi == MI_GLASS5 || mi == MI_GLASS6 || mi == MI_GLASS7 || mi == MI_GLASS8)
+		makeInvisible = true;
+	else
+		makeInvisible = false;
+
+	if (makeInvisible) {
+		dummy->bIsVisible = false;
+	}
+
+	CWorld::Remove(obj);
+	delete obj;
+	CWorld::Add(dummy);
+}
+
+bool
+CPopulation::TestRoomForDummyObject(CObject *obj)
+{
+	int16 collidingObjs;
+	CWorld::FindObjectsKindaColliding(obj->GetPosition(),
+		CModelInfo::GetModelInfo(obj->m_modelIndex)->GetColModel()->boundingSphere.radius,
+		false, &collidingObjs, 2, nil, false, true, true, false, false);
+
+	return collidingObjs == 0;
+}
+
 STARTPATCHES
 	InjectHook(0x4F3770, &CPopulation::Initialise, PATCH_JUMP);
 	InjectHook(0x4F5780, &CPopulation::ChooseGangOccupation, PATCH_JUMP);
@@ -728,4 +1012,8 @@ STARTPATCHES
 	InjectHook(0x4F6010, &CPopulation::FindCollisionZoneForCoors, PATCH_JUMP);
 	InjectHook(0x4F6410, &CPopulation::PedCreationDistMultiplier, PATCH_JUMP);
 	InjectHook(0x4F5280, &CPopulation::AddPed, PATCH_JUMP);
+	InjectHook(0x4F4470, &CPopulation::ConvertToRealObject, PATCH_JUMP);
+	InjectHook(0x4F4690, &CPopulation::TestRoomForDummyObject, PATCH_JUMP);
+	InjectHook(0x4F45A0, &CPopulation::ConvertToDummyObject, PATCH_JUMP);
+	InjectHook(0x4F4410, &CPopulation::ConvertAllObjectsToDummyObjects, PATCH_JUMP);
 ENDPATCHES

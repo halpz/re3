@@ -3,6 +3,7 @@
 #include "Physical.h"
 #include "AutoPilot.h"
 #include "ModelIndices.h"
+#include "AnimManager.h"
 
 class CPed;
 class CFire;
@@ -269,7 +270,8 @@ public:
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
 	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE; }
-	
+	AnimationId GetDriverAnim(void) { return IsCar() && bLowVehicle ? ANIM_CAR_LSIT : (IsBoat() && GetModelIndex() != MI_SPEEDER ? ANIM_DRIVE_BOAT : ANIM_CAR_SIT); }
+
 	static bool &bWheelsOnlyCheat;
 	static bool &bAllDodosCheat;
 	static bool &bCheat3;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Physical.h"
+#include "DummyObject.h"
 
 enum {
 	GAME_OBJECT = 1,
@@ -69,6 +70,7 @@ public:
 
 	CObject(void);
 	CObject(int32, bool);
+	CObject(CDummyObject*);
 	~CObject(void);
 
 	void ProcessControl(void);
@@ -80,6 +82,7 @@ public:
 	void ObjectDamage(float amount);
 	void RefModelInfo(int32 modelId);
 	void Init(void);
+	bool CanBeDeleted(void);
 
 	static void DeleteAllTempObjectInArea(CVector, float);
 };

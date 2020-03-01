@@ -237,7 +237,8 @@ static char PersonalityTypeText[][18] = {
 	"Geek Girl",
 	"Old Girl",
 	"Tough Girl",
-	"Tramp",
+	"Tramp Male",
+	"Tramp Female",
 	"Tourist",
 	"Prostitute",
 	"Criminal",
@@ -246,6 +247,8 @@ static char PersonalityTypeText[][18] = {
 	"Psycho",
 	"Steward",
 	"Sports Fan",
+	"Shopper",
+	"Old Shopper"
 };
 
 static char WaitStateText[][16] = {
@@ -1519,7 +1522,7 @@ CPed::BeingDraggedFromCar(void)
 #ifdef VC_PED_PORTS
 	if (m_objective == OBJECTIVE_LEAVE_CAR_AND_DIE) {
 		if (m_pMyVehicle) {
-			m_pMyVehicle->ProcessOpenDoor(m_vehEnterType, NUM_ANIMS, m_pVehicleAnim->currentTime);
+			m_pMyVehicle->ProcessOpenDoor(m_vehEnterType, NUM_ANIMS, m_pVehicleAnim->currentTime * 5.0f);
 		}
 	}
 #endif
@@ -2954,6 +2957,11 @@ CPed::QuitEnteringCar(void)
 		if (veh->m_nNumGettingIn != 0)
 			veh->m_nNumGettingIn--;
 
+#ifdef VC_PED_PORTS
+		if (m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER || m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER)
+			RestorePreviousObjective();
+#endif
+
 		veh->m_nGettingInFlags &= ~GetCarDoorFlag(m_vehEnterType);
 	}
 
@@ -2965,7 +2973,7 @@ CPed::QuitEnteringCar(void)
 		animAssoc = m_pVehicleAnim;
 		if (animAssoc) {
 			animAssoc->blendDelta = -4.0f;
-			animAssoc->flags |= ASSOC_FADEOUTWHENDONE;
+			animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 			animAssoc = m_pVehicleAnim;
 			animAssoc->flags &= ~ASSOC_RUNNING;
 		}
@@ -4161,7 +4169,10 @@ CPed::ClearObjective(void)
 {
 	if (IsPedInControl() || m_nPedState == PED_DRIVING) {
 		m_objective = OBJECTIVE_NONE;
-
+#ifdef VC_PED_PORTS
+		m_pedInObjective = nil;
+		m_carInObjective = nil;
+#endif
 		if (m_nPedState == PED_DRIVING && m_pMyVehicle) {
 
 			if (m_pMyVehicle->pDriver != this) {
@@ -13603,7 +13614,10 @@ CPed::ProcessObjective(void)
 					if (InVehicle()) {
 						if (m_nPedState != PED_EXIT_CAR && m_nPedState != PED_DRAG_FROM_CAR && m_nPedState != PED_EXIT_TRAIN
 							&& (m_nPedType != PEDTYPE_COP
-								|| m_pMyVehicle->m_vecMoveSpeed.MagnitudeSqr2D() < 0.000025f)) {
+#ifdef VC_PED_PORTS
+								|| m_pMyVehicle->IsBoat()
+#endif
+								|| m_pMyVehicle->m_vecMoveSpeed.MagnitudeSqr2D() < sq(0.005f))) {
 							if (m_pMyVehicle->IsTrain())
 								SetExitTrain(m_pMyVehicle);
 #ifdef VC_PED_PORTS
@@ -16651,6 +16665,14 @@ CPed::WarpPedIntoCar(CVehicle *car)
 		car->bEngineOn = true;
 		DMAudio.PlayOneShot(car->m_audioEntityId, SOUND_CAR_ENGINE_START, 1.0f);
 	}
+
+#ifdef VC_PED_PORTS
+	RpAnimBlendClumpSetBlendDeltas(GetClump(), ASSOC_PARTIAL, -1000.0f);
+
+	// VC uses AddInCarAnims but we don't have that
+	m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, car->GetDriverAnim(), 100.0f);
+	RemoveWeaponWhenEnteringVehicle();
+#else
 	if (car->IsBoat()) {
 		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
 		CWeaponInfo *ourWeapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
@@ -16664,6 +16686,8 @@ CPed::WarpPedIntoCar(CVehicle *car)
 		else
 			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
 	}
+#endif
+
 	StopNonPartialAnims();
 	if (car->bIsBus)
 		bRenderPedInCar = false;
@@ -16893,11 +16917,17 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 	m_vecOffsetSeek = doorOpenPos - GetPosition();
 	m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 600;
 	if (car->IsBoat()) {
-		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
 #ifdef VC_PED_PORTS
+		// VC checks for handling flag, but we can't do that
+		if(car->GetModelIndex() == MI_SPEEDER)
+			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
+		else
+			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
+
 		PedSetInCarCB(nil, this);
 		m_ped_flagI4 = true;
 #else
+		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
 		m_pVehicleAnim->SetFinishCallback(PedSetInCarCB, this);
 #endif
 		if (IsPlayer())
