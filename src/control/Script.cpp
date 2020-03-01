@@ -385,25 +385,30 @@ void CRunningScript::CollectParameters(uint32* pIp, int16 total)
 {
 	for (int16 i = 0; i < total; i++){
 		float tmp;
-		switch (Read1ByteFromScript(pIp))
+		uint16 varIndex;
+		switch (CTheScripts::Read1ByteFromScript(pIp))
 		{
 		case ARGUMENT_INT32:
-			ScriptParams[i] = Read4BytesFromScript(pIp);
+			ScriptParams[i] = CTheScripts::Read4BytesFromScript(pIp);
 			break;
 		case ARGUMENT_GLOBALVAR:
-			ScriptParams[i] = *((int32*)&CTheScripts::ScriptSpace[Read2BytesFromScript(pIp)]);
+			varIndex = CTheScripts::Read2BytesFromScript(pIp);
+			assert(varIndex >= 8 && varIndex < CTheScripts::GetSizeOfVariableSpace());
+			ScriptParams[i] = *((int32*)&CTheScripts::ScriptSpace[varIndex]);
 			break;
 		case ARGUMENT_LOCALVAR:
-			ScriptParams[i] = m_anLocalVariables[Read2BytesFromScript(pIp)];
+			varIndex = CTheScripts::Read2BytesFromScript(pIp);
+			assert(varIndex >= 0 && varIndex < ARRAY_SIZE(m_anLocalVariables));
+			ScriptParams[i] = m_anLocalVariables[varIndex];
 			break;
 		case ARGUMENT_INT8:
-			ScriptParams[i] = Read1ByteFromScript(pIp);
+			ScriptParams[i] = CTheScripts::Read1ByteFromScript(pIp);
 			break;
 		case ARGUMENT_INT16:
-			ScriptParams[i] = Read2BytesFromScript(pIp);
+			ScriptParams[i] = CTheScripts::Read2BytesFromScript(pIp);
 			break;
 		case ARGUMENT_FLOAT:
-			tmp = ReadFloatFromScript(pIp);
+			tmp = CTheScripts::ReadFloatFromScript(pIp);
 			ScriptParams[i] = *(int32*)&tmp;
 			break;
 		default:
@@ -417,20 +422,20 @@ int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 {
 	uint32* pIp = &ip;
 	float tmp;
-	switch (Read1ByteFromScript(pIp))
+	switch (CTheScripts::Read1ByteFromScript(pIp))
 	{
 	case ARGUMENT_INT32:
-		return Read4BytesFromScript(pIp);
+		return CTheScripts::Read4BytesFromScript(pIp);
 	case ARGUMENT_GLOBALVAR:
-		return *((int32*)&CTheScripts::ScriptSpace[Read2BytesFromScript(pIp)]);
+		return *((int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(pIp)]);
 	case ARGUMENT_LOCALVAR:
-		return m_anLocalVariables[Read2BytesFromScript(pIp)];
+		return m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
 	case ARGUMENT_INT8:
-		return Read1ByteFromScript(pIp);
+		return CTheScripts::Read1ByteFromScript(pIp);
 	case ARGUMENT_INT16:
-		return Read2BytesFromScript(pIp);
+		return CTheScripts::Read2BytesFromScript(pIp);
 	case ARGUMENT_FLOAT:
-		tmp = ReadFloatFromScript(pIp);
+		tmp = CTheScripts::ReadFloatFromScript(pIp);
 		return *(int32*)&tmp;
 	default:
 		assert(0);
@@ -441,12 +446,12 @@ int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 void CRunningScript::StoreParameters(uint32* pIp, int16 number)
 {
 	for (int16 i = 0; i < number; i++){
-		switch (Read1ByteFromScript(pIp)) {
+		switch (CTheScripts::Read1ByteFromScript(pIp)) {
 		case ARGUMENT_GLOBALVAR:
-			*(int32*)&CTheScripts::ScriptSpace[Read2BytesFromScript(pIp)] = ScriptParams[i];
+			*(int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(pIp)] = ScriptParams[i];
 			break;
 		case ARGUMENT_LOCALVAR:
-			m_anLocalVariables[Read2BytesFromScript(pIp)] = ScriptParams[i];
+			m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)] = ScriptParams[i];
 			break;
 		default:
 			assert(0);
@@ -456,14 +461,14 @@ void CRunningScript::StoreParameters(uint32* pIp, int16 number)
 
 int32 *CRunningScript::GetPointerToScriptVariable(uint32* pIp, int16 type)
 {
-	switch (Read1ByteFromScript(pIp))
+	switch (CTheScripts::Read1ByteFromScript(pIp))
 	{
 	case ARGUMENT_GLOBALVAR:
 		assert(type == VAR_GLOBAL);
-		return (int32*)&CTheScripts::ScriptSpace[Read2BytesFromScript(pIp)];
+		return (int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(pIp)];
 	case ARGUMENT_LOCALVAR:
 		assert(type == VAR_LOCAL);
-		return &m_anLocalVariables[Read2BytesFromScript(pIp)];
+		return &m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
 	default:
 		assert(0);
 	}
@@ -701,7 +706,7 @@ void CRunningScript::Process()
 int8 CRunningScript::ProcessOneCommand()
 {
 	++CTheScripts::CommandsExecuted;
-	int32 command = Read2BytesFromScript(&m_nIp);
+	int32 command = CTheScripts::Read2BytesFromScript(&m_nIp);
 	m_bNotFlag = (command & 0x8000);
 	command &= 0x7FFF;
 	if (command < 100)
@@ -1229,27 +1234,27 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		CollectParameters(&m_nIp, 1);
 		assert(ScriptParams[0] >= 0);
 		CRunningScript* pNew = CTheScripts::StartNewScript(ScriptParams[0]);
-		int8 type = Read1ByteFromScript(&m_nIp);
+		int8 type = CTheScripts::Read1ByteFromScript(&m_nIp);
 		float tmp;
-		for (int i = 0; type != ARGUMENT_END; type = Read1ByteFromScript(&m_nIp), i++) {
+		for (int i = 0; type != ARGUMENT_END; type = CTheScripts::Read1ByteFromScript(&m_nIp), i++) {
 			switch (type) {
 			case ARGUMENT_INT32:
-				pNew->m_anLocalVariables[i] = Read4BytesFromScript(&m_nIp);
+				pNew->m_anLocalVariables[i] = CTheScripts::Read4BytesFromScript(&m_nIp);
 				break;
 			case ARGUMENT_GLOBALVAR:
-				pNew->m_anLocalVariables[i] = *(int32*)&CTheScripts::ScriptSpace[Read2BytesFromScript(&m_nIp)];
+				pNew->m_anLocalVariables[i] = *(int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(&m_nIp)];
 				break;
 			case ARGUMENT_LOCALVAR:
-				pNew->m_anLocalVariables[i] = m_anLocalVariables[Read2BytesFromScript(&m_nIp)];
+				pNew->m_anLocalVariables[i] = m_anLocalVariables[CTheScripts::Read2BytesFromScript(&m_nIp)];
 				break;
 			case ARGUMENT_INT8:
-				pNew->m_anLocalVariables[i] = Read1ByteFromScript(&m_nIp);
+				pNew->m_anLocalVariables[i] = CTheScripts::Read1ByteFromScript(&m_nIp);
 				break;
 			case ARGUMENT_INT16:
-				pNew->m_anLocalVariables[i] = Read2BytesFromScript(&m_nIp);
+				pNew->m_anLocalVariables[i] = CTheScripts::Read2BytesFromScript(&m_nIp);
 				break;
 			case ARGUMENT_FLOAT:
-				tmp = ReadFloatFromScript(&m_nIp);
+				tmp = CTheScripts::ReadFloatFromScript(&m_nIp);
 				pNew->m_anLocalVariables[i] = *(int32*)&tmp;
 				break;
 			default:
@@ -2671,7 +2676,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPlayerInfo* pPlayer = &CWorld::Players[ScriptParams[0]];
 		char label[12];
-		ReadTextLabelFromScript(&m_nIp, label);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		int zoneToCheck = CTheZones::FindZoneByLabelAndReturnIndex(label);
 		if (zoneToCheck != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT; /* why only if zone != 1? */
@@ -2966,7 +2971,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	}
 	case COMMAND_ADD_PAGER_MESSAGE:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 3);
 		CUserDisplay::Pager.AddMessage(text, ScriptParams[0], ScriptParams[1], ScriptParams[2]);
 		return 0;
@@ -2975,21 +2980,21 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	{
 		assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
-		CUserDisplay::OnscnTimer.AddClock(Read2BytesFromScript(&m_nIp), nil);
+		CUserDisplay::OnscnTimer.AddClock(CTheScripts::Read2BytesFromScript(&m_nIp), nil);
 		return 0;
 	}
 	case COMMAND_CLEAR_ONSCREEN_TIMER:
 	{
 		assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
-		CUserDisplay::OnscnTimer.ClearClock(Read2BytesFromScript(&m_nIp));
+		CUserDisplay::OnscnTimer.ClearClock(CTheScripts::Read2BytesFromScript(&m_nIp));
 		return 0;
 	}
 	case COMMAND_DISPLAY_ONSCREEN_COUNTER:
 	{
 		assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
-		int32 counter = Read2BytesFromScript(&m_nIp);
+		int32 counter = CTheScripts::Read2BytesFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 1);
 		CUserDisplay::OnscnTimer.AddCounter(counter, ScriptParams[0], nil);
 		return 0;
@@ -2998,13 +3003,13 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	{
 		assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
-		CUserDisplay::OnscnTimer.ClearCounter(Read2BytesFromScript(&m_nIp));
+		CUserDisplay::OnscnTimer.ClearCounter(CTheScripts::Read2BytesFromScript(&m_nIp));
 		return 0;
 	}
 	case COMMAND_SET_ZONE_CAR_INFO:
 	{
 		char label[12];
-		ReadTextLabelFromScript(&m_nIp, label);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 16);
 		int zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
@@ -3027,7 +3032,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		char label[12];
-		ReadTextLabelFromScript(&m_nIp, label);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		int zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
 		if (zone != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
@@ -3038,7 +3043,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	case COMMAND_SET_CAR_DENSITY:
 	{
 		char label[12];
-		ReadTextLabelFromScript(&m_nIp, label);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		int16 zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
 		m_nIp += 8;
 		CollectParameters(&m_nIp, 2);
@@ -3052,7 +3057,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	case COMMAND_SET_PED_DENSITY:
 	{
 		char label[12];
-		ReadTextLabelFromScript(&m_nIp, label);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		int16 zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 2);
@@ -3095,7 +3100,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	case COMMAND_SET_ZONE_PED_INFO:
 	{
 		char label[12];
-		ReadTextLabelFromScript(&m_nIp, label);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 10);
 		int16 zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
@@ -3387,11 +3392,11 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	case COMMAND_GET_CAMERA_POSITION_ALONG_SPLINE:
 	*/
 	case COMMAND_DECLARE_MISSION_FLAG:
-		CTheScripts::OnAMissionFlag = Read2BytesFromScript(&++m_nIp);
+		CTheScripts::OnAMissionFlag = CTheScripts::Read2BytesFromScript(&++m_nIp);
 		return 0;
 	case COMMAND_DECLARE_MISSION_FLAG_FOR_CONTACT:
 		CollectParameters(&m_nIp, 1);
-		CTheScripts::OnAMissionForContactFlag[ScriptParams[0]] = Read2BytesFromScript(&++m_nIp);
+		CTheScripts::OnAMissionForContactFlag[ScriptParams[0]] = CTheScripts::Read2BytesFromScript(&++m_nIp);
 		return 0;
 	case COMMAND_DECLARE_BASE_BRIEF_ID_FOR_CONTACT:
 		CollectParameters(&m_nIp, 2);
@@ -4201,21 +4206,21 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 	}
 	case COMMAND_PRINT_WITH_NUMBER_BIG:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 3);
 		CMessages::AddBigMessageWithNumber(text, ScriptParams[1], ScriptParams[2] - 1, ScriptParams[0], -1, -1, -1, -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_NUMBER:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 3);
 		CMessages::AddMessageWithNumber(text, ScriptParams[1], ScriptParams[2], ScriptParams[0], -1, -1, -1, -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_NUMBER_NOW:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 3);
 		CMessages::AddMessageJumpQWithNumber(text, ScriptParams[1], ScriptParams[2], ScriptParams[0], -1, -1, -1, -1, -1);
 		return 0;
@@ -4405,7 +4410,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	}
 	case COMMAND_ADD_PAGER_MESSAGE_WITH_NUMBER:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 4);
 		CUserDisplay::Pager.AddMessageWithNumber(text, ScriptParams[0], -1, -1, -1, -1, -1,
 			ScriptParams[1], ScriptParams[2], ScriptParams[3]);
@@ -4413,7 +4418,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	}
 	case COMMAND_START_KILL_FRENZY:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 8);
 		CDarkel::StartFrenzy((eWeaponType)ScriptParams[0], ScriptParams[1], ScriptParams[2],
 			ScriptParams[3], text, ScriptParams[4], ScriptParams[5],
@@ -4590,14 +4595,14 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	}
 	case COMMAND_PRINT_BIG_Q:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 2);
 		CMessages::AddBigMessageQ(text, ScriptParams[0], ScriptParams[1] - 1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_NUMBER_BIG_Q:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 3);
 		CMessages::AddBigMessageWithNumberQ(text, ScriptParams[1], ScriptParams[2] - 1,
 			ScriptParams[0], -1, -1, -1, -1, -1);
@@ -5114,14 +5119,14 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	case COMMAND_SET_REPEATED_PHONE_MESSAGE:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_Repeatedly(ScriptParams[0], text, nil, nil, nil, nil, nil);
 		return 0;
 	}
 	case COMMAND_SET_PHONE_MESSAGE:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_JustOnce(ScriptParams[0], text, nil, nil, nil, nil, nil);
 		return 0;
 	}
@@ -6191,105 +6196,105 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	}
 	case COMMAND_PRINT_WITH_2_NUMBERS:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 4);
 		CMessages::AddMessageWithNumber(text, ScriptParams[2], ScriptParams[3], ScriptParams[0], ScriptParams[1], -1, -1, -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_2_NUMBERS_NOW:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 4);
 		CMessages::AddMessageJumpQWithNumber(text, ScriptParams[2], ScriptParams[3], ScriptParams[0], ScriptParams[1], -1, -1, -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_2_NUMBERS_SOON:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 4);
 		CMessages::AddMessageSoonWithNumber(text, ScriptParams[2], ScriptParams[3], ScriptParams[0], ScriptParams[1], -1, -1, -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_3_NUMBERS:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 5);
 		CMessages::AddMessageWithNumber(text, ScriptParams[3], ScriptParams[4], ScriptParams[0], ScriptParams[1], ScriptParams[2], -1, -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_3_NUMBERS_NOW:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 5);
 		CMessages::AddMessageJumpQWithNumber(text, ScriptParams[3], ScriptParams[4], ScriptParams[0], ScriptParams[1], ScriptParams[2], -1, -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_3_NUMBERS_SOON:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 5);
 		CMessages::AddMessageSoonWithNumber(text, ScriptParams[3], ScriptParams[4], ScriptParams[0], ScriptParams[1], ScriptParams[2], -1, -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_4_NUMBERS:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 6);
 		CMessages::AddMessageWithNumber(text, ScriptParams[4], ScriptParams[5], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_4_NUMBERS_NOW:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 6);
 		CMessages::AddMessageJumpQWithNumber(text, ScriptParams[4], ScriptParams[5], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_4_NUMBERS_SOON:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 6);
 		CMessages::AddMessageSoonWithNumber(text, ScriptParams[4], ScriptParams[5], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_5_NUMBERS:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 7);
 		CMessages::AddMessageWithNumber(text, ScriptParams[5], ScriptParams[6], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_5_NUMBERS_NOW:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 7);
 		CMessages::AddMessageJumpQWithNumber(text, ScriptParams[5], ScriptParams[6], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_5_NUMBERS_SOON:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 7);
 		CMessages::AddMessageSoonWithNumber(text, ScriptParams[5], ScriptParams[6], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_6_NUMBERS:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 8);
 		CMessages::AddMessageWithNumber(text, ScriptParams[6], ScriptParams[7], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], ScriptParams[5]);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_6_NUMBERS_NOW:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 8);
 		CMessages::AddMessageJumpQWithNumber(text, ScriptParams[6], ScriptParams[7], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], ScriptParams[5]);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_6_NUMBERS_SOON:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 8);
 		CMessages::AddMessageSoonWithNumber(text, ScriptParams[6], ScriptParams[7], ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], ScriptParams[5]);
 		return 0;
@@ -6485,7 +6490,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_SET_ZONE_GROUP:
 	{
 		char zone[KEY_LENGTH_IN_SCRIPT];
-		ReadTextLabelFromScript(&m_nIp, zone);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 2);
 		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
@@ -6547,7 +6552,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_GET_RANDOM_CAR_OF_TYPE_IN_ZONE:
 	{
 		char zone[KEY_LENGTH_IN_SCRIPT];
-		ReadTextLabelFromScript(&m_nIp, zone);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
 		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
 		if (zone_id != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
@@ -6746,7 +6751,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_DISPLAY_TEXT:
 	{
 		CollectParameters(&m_nIp, 2);
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fAtX = *(float*)&ScriptParams[0];
 		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fAtY = *(float*)&ScriptParams[1];
 		uint16 len = CMessages::GetWideStringLength(text);
@@ -6991,7 +6996,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		char name[KEY_LENGTH_IN_SCRIPT];
-		ReadTextLabelFromScript(&m_nIp, name);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, name);
 		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			name[i] = tolower(name[i]);
 		int mi = pPed->GetModelIndex();
@@ -7053,7 +7058,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		char zone[KEY_LENGTH_IN_SCRIPT];
-		ReadTextLabelFromScript(&m_nIp, zone);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
 		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
 		if (zone_id != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
@@ -7234,7 +7239,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	}
 	case COMMAND_START_KILL_FRENZY_HEADSHOT:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 8);
 		CDarkel::StartFrenzy((eWeaponType)ScriptParams[0], ScriptParams[1], ScriptParams[2],
 			ScriptParams[3], text, ScriptParams[4], ScriptParams[5],
@@ -7288,35 +7293,35 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	//case COMMAND_SET_AUDIO_STREAM:
 	case COMMAND_PRINT_WITH_2_NUMBERS_BIG:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 4);
 		CMessages::AddBigMessageWithNumber(text, ScriptParams[2], ScriptParams[3] - 1, ScriptParams[0], ScriptParams[1], -1, -1, -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_3_NUMBERS_BIG:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 5);
 		CMessages::AddBigMessageWithNumber(text, ScriptParams[3], ScriptParams[4] - 1, ScriptParams[0], ScriptParams[1], ScriptParams[2], -1, -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_4_NUMBERS_BIG:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 6);
 		CMessages::AddBigMessageWithNumber(text, ScriptParams[4], ScriptParams[5] - 1, ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], -1, -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_5_NUMBERS_BIG:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 7);
 		CMessages::AddBigMessageWithNumber(text, ScriptParams[5], ScriptParams[6] - 1, ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], -1);
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_6_NUMBERS_BIG:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 8);
 		CMessages::AddBigMessageWithNumber(text, ScriptParams[6], ScriptParams[7] - 1, ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3], ScriptParams[4], ScriptParams[5]);
 		return 0;
@@ -7338,8 +7343,8 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		return 0;
 	case COMMAND_PRINT_STRING_IN_STRING:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
-		wchar* string = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* string = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 2);
 		CMessages::AddMessageWithString(text, ScriptParams[0], ScriptParams[1], string);
 		return 0;
@@ -7394,54 +7399,54 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_SET_2_REPEATED_PHONE_MESSAGES:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text1 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text2 = GetTextByKeyFromScript(&m_nIp);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_Repeatedly(ScriptParams[0], text1, text2, nil, nil, nil, nil);
 		return 0;
 	}
 	case COMMAND_SET_2_PHONE_MESSAGES:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text1 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text2 = GetTextByKeyFromScript(&m_nIp);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_JustOnce(ScriptParams[0], text1, text2, nil, nil, nil, nil);
 		return 0;
 	}
 	case COMMAND_SET_3_REPEATED_PHONE_MESSAGES:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text1 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text2 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text3 = GetTextByKeyFromScript(&m_nIp);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_Repeatedly(ScriptParams[0], text1, text2, text3, nil, nil, nil);
 		return 0;
 	}
 	case COMMAND_SET_3_PHONE_MESSAGES:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text1 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text2 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text3 = GetTextByKeyFromScript(&m_nIp);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_JustOnce(ScriptParams[0], text1, text2, text3, nil, nil, nil);
 		return 0;
 	}
 	case COMMAND_SET_4_REPEATED_PHONE_MESSAGES:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text1 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text2 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text3 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text4 = GetTextByKeyFromScript(&m_nIp);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_Repeatedly(ScriptParams[0], text1, text2, text3, text4, nil, nil);
 		return 0;
 	}
 	case COMMAND_SET_4_PHONE_MESSAGES:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text1 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text2 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text3 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text4 = GetTextByKeyFromScript(&m_nIp);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_JustOnce(ScriptParams[0], text1, text2, text3, text4, nil, nil);
 		return 0;
 	}
@@ -7518,8 +7523,8 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	switch (command) {
 	case COMMAND_PRINT_STRING_IN_STRING_NOW:
 	{
-		wchar* source = GetTextByKeyFromScript(&m_nIp);
-		wchar* pstr = GetTextByKeyFromScript(&m_nIp);
+		wchar* source = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* pstr = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 2);
 		CMessages::AddMessageJumpQWithString(source, ScriptParams[0], ScriptParams[1], pstr);
 		return 0;
@@ -7528,46 +7533,46 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_SET_5_REPEATED_PHONE_MESSAGES:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text1 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text2 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text3 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text4 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text5 = GetTextByKeyFromScript(&m_nIp);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text5 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_Repeatedly(ScriptParams[0], text1, text2, text3, text4, text5, nil);
 		return 0;
 	}
 	case COMMAND_SET_5_PHONE_MESSAGES:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text1 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text2 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text3 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text4 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text5 = GetTextByKeyFromScript(&m_nIp);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text5 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_JustOnce(ScriptParams[0], text1, text2, text3, text4, text5, nil);
 		return 0;
 	}
 	case COMMAND_SET_6_REPEATED_PHONE_MESSAGES:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text1 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text2 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text3 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text4 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text5 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text6 = GetTextByKeyFromScript(&m_nIp);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text5 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text6 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_Repeatedly(ScriptParams[0], text1, text2, text3, text4, text5, text6);
 		return 0;
 	}
 	case COMMAND_SET_6_PHONE_MESSAGES:
 	{
 		CollectParameters(&m_nIp, 1);
-		wchar* text1 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text2 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text3 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text4 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text5 = GetTextByKeyFromScript(&m_nIp);
-		wchar* text6 = GetTextByKeyFromScript(&m_nIp);
+		wchar* text1 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text2 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text3 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text4 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text5 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		wchar* text6 = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		gPhoneInfo.SetPhoneMessage_JustOnce(ScriptParams[0], text1, text2, text3, text4, text5, text6);
 		return 0;
 	}
@@ -8071,7 +8076,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_DISPLAY_ONSCREEN_TIMER_WITH_STRING:
 	{
 		assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
-		int16 var = Read2BytesFromScript(&m_nIp);
+		int16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
 		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
@@ -8081,7 +8086,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_DISPLAY_ONSCREEN_COUNTER_WITH_STRING:
 	{
 		assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
-		int16 var = Read2BytesFromScript(&m_nIp);
+		int16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 1);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
 		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
@@ -8297,13 +8302,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	}
 	case COMMAND_CLEAR_THIS_PRINT:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CMessages::ClearThisPrint(text);
 		return 0;
 	}
 	case COMMAND_CLEAR_THIS_BIG_PRINT:
 	{
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CMessages::ClearThisBigPrint(text);
 		return 0;
 	}
@@ -8393,7 +8398,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
 			return 0;
 		}
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CHud::SetHelpMessage(text, false);
 		return 0;
 	}
@@ -9134,7 +9139,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CTimer::Update();
 		return 0;
 	case COMMAND_LOAD_SPLASH_SCREEN:
-		ReadTextLabelFromScript(&m_nIp, tmp);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, tmp);
 		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			tmp[i] = tolower(tmp[i]);
 		m_nIp += 8;
@@ -9236,7 +9241,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	}
 	case COMMAND_TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME:
 	{
-		ReadTextLabelFromScript(&m_nIp, tmp);
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, tmp);
 		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			tmp[i] = tolower(tmp[i]);
 		m_nIp += 8;
@@ -9254,7 +9259,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	case COMMAND_DISPLAY_TEXT_WITH_NUMBER:
 	{
 		CollectParameters(&m_nIp, 2);
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fAtX = *(float*)&ScriptParams[0];
 		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fAtY = *(float*)&ScriptParams[1];
 		CollectParameters(&m_nIp, 1);
@@ -9265,7 +9270,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	case COMMAND_DISPLAY_TEXT_WITH_2_NUMBERS:
 	{
 		CollectParameters(&m_nIp, 2);
-		wchar* text = GetTextByKeyFromScript(&m_nIp);
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fAtX = *(float*)&ScriptParams[0];
 		CTheScripts::IntroTextLines[CTheScripts::NumberOfIntroTextLinesThisFrame].m_fAtY = *(float*)&ScriptParams[1];
 		CollectParameters(&m_nIp, 2);
@@ -9680,7 +9685,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 
 int32 CTheScripts::GetNewUniqueScriptSphereIndex(int32 index)
 {
-	if (ScriptSphereArray[index].m_Index >= 0xFFFE)
+	if (ScriptSphereArray[index].m_Index >= UINT16_MAX - 1)
 		ScriptSphereArray[index].m_Index = 1;
 	else
 		ScriptSphereArray[index].m_Index++;
