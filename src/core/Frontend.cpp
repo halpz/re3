@@ -580,23 +580,26 @@ void CMenuManager::Draw()
 	float usableLineHeight = lineHeight * 0.9f; // also height of biggest bar in slider
 	float freeSpaceInLine = lineHeight * 0.1f; // also height of smallest bar in slider(weird)
 	bool foundTheHoveringItem = false;
+	wchar unicodeTemp[64];
+
 	for (int i = 0; i < NUM_MENUROWS; ++i) {
 		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0] != '\0') {
-			wchar *textToPrint[MENUCOLUMNS] = { nil, nil, nil };
+			wchar *rightText = nil;
+			wchar *leftText;
 
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot >= SAVESLOT_1 && aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot <= SAVESLOT_8) {
 				CFont::SetRightJustifyOff();
-				textToPrint[MENUCOLUMN_LEFT] = GetNameOfSavedGame(i - 1);
+				leftText = GetNameOfSavedGame(i - 1);
 
 				if (Slots[i] != SLOT_EMPTY)
-					textToPrint[MENUCOLUMN_RIGHT] = GetSavedGameDateAndTime(i - 1);
+					rightText = GetSavedGameDateAndTime(i - 1);
 
-				if (textToPrint[MENUCOLUMN_LEFT][0] == '\0') {
+				if (leftText[0] == '\0') {
 					sprintf(gString, "FEM_SL%d", i);
-					textToPrint[MENUCOLUMN_LEFT] = TheText.Get(gString);
+					leftText = TheText.Get(gString);
 				}
 			} else {
-				textToPrint[MENUCOLUMN_LEFT] = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName);
+				leftText = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName);
 			}
 
 			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
@@ -605,28 +608,28 @@ void CMenuManager::Draw()
 					case MENUPAGE_MULTIPLAYER_MAP:
 						switch (sthWithButtons) {
 							case 0:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEM_MA0");
+								rightText = TheText.Get("FEM_MA0");
 								break;
 							case 1:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEM_MA1");
+								rightText = TheText.Get("FEM_MA1");
 								break;
 							case 2:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEM_MA2");
+								rightText = TheText.Get("FEM_MA2");
 								break;
 							case 3:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEM_MA3");
+								rightText = TheText.Get("FEM_MA3");
 								break;
 							case 4:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEM_MA4");
+								rightText = TheText.Get("FEM_MA4");
 								break;
 							case 5:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEM_MA5");
+								rightText = TheText.Get("FEM_MA5");
 								break;
 							case 6:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEM_MA6");
+								rightText = TheText.Get("FEM_MA6");
 								break;
 							case 7:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEM_MA7");
+								rightText = TheText.Get("FEM_MA7");
 								break;
 							default:
 								break;
@@ -635,28 +638,28 @@ void CMenuManager::Draw()
 					case MENUPAGE_MULTIPLAYER_MODE:
 						switch (sthWithButtons2) {
 							case 0:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEN_TY0");
+								rightText = TheText.Get("FEN_TY0");
 								break;
 							case 1:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEN_TY1");
+								rightText = TheText.Get("FEN_TY1");
 								break;
 							case 2:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEN_TY2");
+								rightText = TheText.Get("FEN_TY2");
 								break;
 							case 3:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEN_TY3");
+								rightText = TheText.Get("FEN_TY3");
 								break;
 							case 4:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEN_TY4");
+								rightText = TheText.Get("FEN_TY4");
 								break;
 							case 5:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEN_TY5");
+								rightText = TheText.Get("FEN_TY5");
 								break;
 							case 6:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEN_TY6");
+								rightText = TheText.Get("FEN_TY6");
 								break;
 							case 7:
-								textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEN_TY7");
+								rightText = TheText.Get("FEN_TY7");
 								break;
 							default:
 								break;
@@ -669,57 +672,57 @@ void CMenuManager::Draw()
 			}
 			case MENUACTION_CTRLVIBRATION:
 				if (CMenuManager::m_PrefsUseVibration)
-					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEM_ON");
+					rightText = TheText.Get("FEM_ON");
 				else
-					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEM_OFF");
+					rightText = TheText.Get("FEM_OFF");
 				break;
 			case MENUACTION_CTRLCONFIG:
 				switch (CPad::GetPad(0)->Mode) {
 				case 0:
-					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEC_CF1");
+					rightText = TheText.Get("FEC_CF1");
 					break;
 				case 1:
-					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEC_CF2");
+					rightText = TheText.Get("FEC_CF2");
 					break;
 				case 2:
-					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEC_CF3");
+					rightText = TheText.Get("FEC_CF3");
 					break;
 				case 3:
-					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEC_CF4");
+					rightText = TheText.Get("FEC_CF4");
 					break;
 				}
 				break;
 			case MENUACTION_CTRLDISPLAY:
 				if (m_DisplayControllerOnFoot)
-					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEC_ONF");
+					rightText = TheText.Get("FEC_ONF");
 				else
-					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEC_INC");
+					rightText = TheText.Get("FEC_INC");
 				break;
 			case MENUACTION_FRAMESYNC:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_PrefsVsyncDisp ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(m_PrefsVsyncDisp ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_FRAMELIMIT:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_PrefsFrameLimiter ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(m_PrefsFrameLimiter ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_TRAILS:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(CMBlur::BlurOn ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(CMBlur::BlurOn ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_SUBTITLES:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_PrefsShowSubtitles ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(m_PrefsShowSubtitles ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_WIDESCREEN:
 #ifndef ASPECT_RATIO_SCALE
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_PrefsUseWideScreen ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(m_PrefsUseWideScreen ? "FEM_ON" : "FEM_OFF");
 #else
 				switch (m_PrefsUseWideScreen) {
 				case AR_AUTO:
-					textToPrint[MENUCOLUMN_RIGHT] = (wchar*)L"AUTO";
+					rightText = (wchar*)L"AUTO";
 					break;
 				case AR_4_3:
-					textToPrint[MENUCOLUMN_RIGHT] = (wchar*)L"4:3";
+					rightText = (wchar*)L"4:3";
 					break;
 				case AR_16_9:
-					textToPrint[MENUCOLUMN_RIGHT] = (wchar*)L"16:9";
+					rightText = (wchar*)L"16:9";
 					break;
 				}
 #endif
@@ -729,42 +732,39 @@ void CMenuManager::Draw()
 					break;
 
 				sprintf(gString, "FEA_FM%d", m_PrefsRadioStation);
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(gString);
+				rightText = TheText.Get(gString);
 				break;
 			case MENUACTION_SETDBGFLAG:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(CTheScripts::IsDebugOn() ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(CTheScripts::IsDebugOn() ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_SWITCHBIGWHITEDEBUGLIGHT:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(gbBigWhiteDebugLightSwitchedOn ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(gbBigWhiteDebugLightSwitchedOn ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_PEDROADGROUPS:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(gbShowPedRoadGroups ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(gbShowPedRoadGroups ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_CARROADGROUPS:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(gbShowCarRoadGroups ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(gbShowCarRoadGroups ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_COLLISIONPOLYS:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(gbShowCollisionPolys ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(gbShowCollisionPolys ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_SHOWCULL:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(gbShowCullZoneDebugStuff ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(gbShowCullZoneDebugStuff ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_SHOWHEADBOB:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(TheCamera.m_bHeadBob ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(TheCamera.m_bHeadBob ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_INVVERT:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(MousePointerStateHelper.bInvertVertically ? "FEM_OFF" : "FEM_ON");
+				rightText = TheText.Get(MousePointerStateHelper.bInvertVertically ? "FEM_OFF" : "FEM_ON");
 				break;
-			case MENUACTION_SCREENRES: {
-				RwChar* res = _psGetVideoModeList()[m_nDisplayVideoMode];
-				wchar temp[32];
-				AsciiToUnicode(res, temp);
-				textToPrint[MENUCOLUMN_RIGHT] = temp;
+			case MENUACTION_SCREENRES:
+				AsciiToUnicode(_psGetVideoModeList()[m_nDisplayVideoMode], unicodeTemp);
+				rightText = unicodeTemp;
 				break;
-			}
-			case MENUACTION_AUDIOHW: {
+			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex == -1)
-					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEA_NAH");
+					rightText = TheText.Get("FEA_NAH");
 				else {
 					char *provider = DMAudio.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
 
@@ -773,25 +773,23 @@ void CMenuManager::Draw()
 					} else if (!strcmp(strupr(provider), "DIRECTSOUND3D SOFTWARE EMULATION")) {
 						strcpy(provider, "DSOUND3D SOFTWARE EMULATION");
 					}
-					wchar temp[64];
-					AsciiToUnicode(provider, temp);
-					textToPrint[MENUCOLUMN_RIGHT] = temp;
+					AsciiToUnicode(provider, unicodeTemp);
+					rightText = unicodeTemp;
 				}
 				break;
-			}
 			case MENUACTION_SPEAKERCONF: {
 				if (m_nPrefsAudio3DProviderIndex == -1)
-					textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEA_NAH");
+					rightText = TheText.Get("FEA_NAH");
 				else {
 					switch (m_PrefsSpeakers) {
 					case 0:
-						textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEA_2SP");
+						rightText = TheText.Get("FEA_2SP");
 						break;
 					case 1:
-						textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEA_EAR");
+						rightText = TheText.Get("FEA_EAR");
 						break;
 					case 2:
-						textToPrint[MENUCOLUMN_RIGHT] = TheText.Get("FEA_4SP");
+						rightText = TheText.Get("FEA_4SP");
 						break;
 					}
 				}
@@ -800,19 +798,19 @@ void CMenuManager::Draw()
 			case MENUACTION_CTRLMETHOD: {
 				switch (m_ControlMethod) {
 				case 0:
-					textToPrint[MENUCOLUMN_LEFT] = TheText.Get("FET_SCN");
+					leftText = TheText.Get("FET_SCN");
 					break;
 				case 1:
-					textToPrint[MENUCOLUMN_LEFT] = TheText.Get("FET_CCN");
+					leftText = TheText.Get("FET_CCN");
 					break;
 				}
 				break;
 			}
 			case MENUACTION_DYNAMICACOUSTIC:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_PrefsDMA ? "FEM_ON" : "FEM_OFF");
+				rightText = TheText.Get(m_PrefsDMA ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_MOUSESTEER:
-				textToPrint[MENUCOLUMN_RIGHT] = TheText.Get(m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
+				rightText = TheText.Get(m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
 				break;
 			}
 
@@ -885,8 +883,8 @@ void CMenuManager::Draw()
 
 				float itemY = MENU_Y(textLayer + nextItemY);
 				float itemX = MENU_X_LEFT_ALIGNED(textLayer + columnWidth);
-				CFont::PrintString(itemX, itemY, textToPrint[MENUCOLUMN_LEFT]);
-				if (textToPrint[MENUCOLUMN_RIGHT]) {
+				CFont::PrintString(itemX, itemY, leftText);
+				if (rightText) {
 					if (!CFont::Details.centre)
 						CFont::SetRightJustifyOn();
 					
@@ -894,7 +892,7 @@ void CMenuManager::Draw()
 						&& !m_bGameNotLoaded && textLayer == 1) {
 						CFont::SetColor(CRGBA(155, 117, 6, FadeIn(255)));
 					}
-					CFont::PrintString(MENU_X_RIGHT_ALIGNED(columnWidth - textLayer), itemY, textToPrint[MENUCOLUMN_RIGHT]);
+					CFont::PrintString(MENU_X_RIGHT_ALIGNED(columnWidth - textLayer), itemY, rightText);
 				}
 				if (i == m_nCurrOption && itemsAreSelectable) {
 					CFont::SetColor(CRGBA(255, 217, 106, FadeIn(255)));
@@ -1017,7 +1015,7 @@ void CMenuManager::Draw()
 				}
 			}
 
-			nextYToUse += lineHeight * CFont::GetNumberLines(menuXYpadding, nextYToUse, textToPrint[MENUCOLUMN_LEFT]);
+			nextYToUse += lineHeight * CFont::GetNumberLines(menuXYpadding, nextYToUse, leftText);
 
 			// Radio icons.
 			// TO-DO: This is missing/broken

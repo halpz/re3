@@ -79,7 +79,11 @@ void
 CPlayerPed::MakeObjectTargettable(int32 handle)
 {
 	for (int i = 0; i < ARRAY_SIZE(m_nTargettableObjects); i++) {
-		if (CPools::GetObjectPool()->GetAt(m_nTargettableObjects[i]) == nil) {
+		if (
+#ifdef FIX_BUGS
+			m_nTargettableObjects[i] == -1 ||
+#endif
+			CPools::GetObjectPool()->GetAt(m_nTargettableObjects[i]) == nil) {
 			m_nTargettableObjects[i] = handle;
 			return;
 		}
