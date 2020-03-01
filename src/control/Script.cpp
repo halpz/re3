@@ -11199,8 +11199,170 @@ void CTheScripts::RenderTheScriptDebugLines()
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)0);
 }
 
-WRAPPER void CTheScripts::SaveAllScripts(uint8*, uint32*) { EAXJMP(0x4535E0); }
-WRAPPER void CTheScripts::LoadAllScripts(uint8*, uint32) { EAXJMP(0x453B30); }
+#define SCRIPT_DATA_SIZE sizeof(CTheScripts::OnAMissionFlag) + sizeof(CTheScripts::BaseBriefIdForContact) + sizeof(CTheScripts::OnAMissionForContactFlag) +\
+	sizeof(CTheScripts::CollectiveArray) + 4 * sizeof(uint32) * MAX_NUM_BUILDING_SWAPS + 2 * sizeof(uint32) * MAX_NUM_INVISIBILITY_SETTINGS + 5 * sizeof(uint32)
+
+void CTheScripts::SaveAllScripts(uint8* buf, uint32* size)
+{
+INITSAVEBUF
+	uint32 var_space = ScriptSpace[6] << 24 | ScriptSpace[5] << 16 | ScriptSpace[4] << 8 | ScriptSpace[3];
+	// = *(uint32*)&ScriptSpace[3];
+	uint32 running_scripts = 0;
+	for (CRunningScript* pScript = pActiveScripts; pScript; pScript = pScript->GetNext())
+		running_scripts++;
+	*size = sizeof(CRunningScript) * running_scripts + var_space + SCRIPT_DATA_SIZE + SAVE_HEADER_SIZE + 3 * sizeof(uint32);
+	WriteSaveHeader(buf, 'S', 'C', 'R', '\0', *size - SAVE_HEADER_SIZE);
+	WriteSaveBuf(buf, var_space);
+	for (uint32 i = 0; i < var_space; i++)
+		WriteSaveBuf(buf, ScriptSpace[i]);
+	static_assert(SCRIPT_DATA_SIZE == 968, "CTheScripts::SaveAllScripts");
+	uint32 script_data_size = SCRIPT_DATA_SIZE;
+	WriteSaveBuf(buf, script_data_size);
+	WriteSaveBuf(buf, OnAMissionFlag);
+	for (uint32 i = 0; i < MAX_NUM_CONTACTS; i++) {
+		WriteSaveBuf(buf, OnAMissionForContactFlag[i]);
+		WriteSaveBuf(buf, BaseBriefIdForContact[i]);
+	}
+	for (uint32 i = 0; i < MAX_NUM_COLLECTIVES; i++)
+		WriteSaveBuf(buf, CollectiveArray[i]);
+	WriteSaveBuf(buf, NextFreeCollectiveIndex);
+	for (uint32 i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
+		CBuilding* pBuilding = BuildingSwapArray[i].m_pBuilding;
+		uint32 type, handle;
+		if (!pBuilding) {
+			type = 0;
+			handle = 0;
+		} else if (pBuilding->GetIsATreadable()) {
+			type = 1;
+			handle = CPools::GetTreadablePool()->GetJustIndex((CTreadable*)pBuilding) + 1;
+		} else {
+			type = 2;
+			handle = CPools::GetBuildingPool()->GetJustIndex(pBuilding) + 1;
+		}
+		WriteSaveBuf(buf, type);
+		WriteSaveBuf(buf, handle);
+		WriteSaveBuf(buf, BuildingSwapArray[i].m_nNewModel);
+		WriteSaveBuf(buf, BuildingSwapArray[i].m_nOldModel);
+	}
+	for (uint32 i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++) {
+		CEntity* pEntity = InvisibilitySettingArray[i];
+		uint32 type, handle;
+		if (!pEntity) {
+			type = 0;
+			handle = 0;
+		} else {
+			switch (pEntity->m_type) {
+			case ENTITY_TYPE_BUILDING:
+				if (((CBuilding*)pEntity)->GetIsATreadable()) {
+					type = 1;
+					handle = CPools::GetTreadablePool()->GetJustIndex((CTreadable*)pEntity) + 1;
+				} else {
+					type = 2;
+					handle = CPools::GetBuildingPool()->GetJustIndex((CBuilding*)pEntity) + 1;
+				}
+				break;
+			case ENTITY_TYPE_OBJECT:
+				type = 3;
+				handle = CPools::GetObjectPool()->GetJustIndex((CObject*)pEntity) + 1;
+				break;
+			case ENTITY_TYPE_DUMMY:
+				type = 4;
+				handle = CPools::GetDummyPool()->GetJustIndex((CDummy*)pEntity) + 1;
+			}
+		}
+		WriteSaveBuf(buf, type);
+		WriteSaveBuf(buf, handle);
+	}
+	WriteSaveBuf(buf, bUsingAMultiScriptFile);
+	WriteSaveBuf(buf, (uint8)0);
+	WriteSaveBuf(buf, (uint16)0);
+	WriteSaveBuf(buf, MainScriptSize);
+	WriteSaveBuf(buf, LargestMissionScriptSize);
+	WriteSaveBuf(buf, NumberOfMissionScripts);
+	WriteSaveBuf(buf, (uint16)0);
+	WriteSaveBuf(buf, running_scripts);
+	for (CRunningScript* pScript = pActiveScripts; pScript; pScript = pScript->GetNext())
+		WriteSaveBuf(buf, *pScript);
+VALIDATESAVEBUF(*size)
+}
+
+void CTheScripts::LoadAllScripts(uint8* buf, uint32 size)
+{
+	Init();
+INITSAVEBUF
+	CheckSaveHeader(buf, 'S', 'C', 'R', '\0', size - SAVE_HEADER_SIZE);
+	uint32 var_space = ReadSaveBuf<uint32>(buf);
+	for (uint32 i = 0; i < var_space; i++)
+		ScriptSpace[i] = ReadSaveBuf<uint8>(buf);
+	assert(ReadSaveBuf<uint32>(buf) == SCRIPT_DATA_SIZE);
+	OnAMissionFlag = ReadSaveBuf<uint32>(buf);
+	for (uint32 i = 0; i < MAX_NUM_CONTACTS; i++) {
+		OnAMissionForContactFlag[i] = ReadSaveBuf<uint32>(buf);
+		BaseBriefIdForContact[i] = ReadSaveBuf<uint32>(buf);
+	}
+	for (uint32 i = 0; i < MAX_NUM_COLLECTIVES; i++)
+		CollectiveArray[i] = ReadSaveBuf<tCollectiveData>(buf);
+	NextFreeCollectiveIndex = ReadSaveBuf<uint32>(buf);
+	for (uint32 i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
+		uint32 type = ReadSaveBuf<uint32>(buf);
+		uint32 handle = ReadSaveBuf<uint32>(buf);
+		switch (type) {
+		case 0:
+			BuildingSwapArray[i].m_pBuilding = nil;
+			break;
+		case 1:
+			BuildingSwapArray[i].m_pBuilding = CPools::GetBuildingPool()->GetSlot(handle - 1);
+			break;
+		case 2:
+			BuildingSwapArray[i].m_pBuilding = CPools::GetTreadablePool()->GetSlot(handle - 1);
+			break;
+		default:
+			assert(false);
+		}
+		BuildingSwapArray[i].m_nNewModel = ReadSaveBuf<uint32>(buf);
+		BuildingSwapArray[i].m_nOldModel = ReadSaveBuf<uint32>(buf);
+		if (BuildingSwapArray[i].m_pBuilding)
+			BuildingSwapArray[i].m_pBuilding->ReplaceWithNewModel(BuildingSwapArray[i].m_nNewModel);
+	}
+	for (uint32 i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++) {
+		uint32 type = ReadSaveBuf<uint32>(buf);
+		uint32 handle = ReadSaveBuf<uint32>(buf);
+		switch (type) {
+		case 0:
+			InvisibilitySettingArray[i] = nil;
+			break;
+		case 1:
+			InvisibilitySettingArray[i] = CPools::GetBuildingPool()->GetSlot(handle - 1);
+			break;
+		case 2:
+			InvisibilitySettingArray[i] = CPools::GetTreadablePool()->GetSlot(handle - 1);
+			break;
+		case 3:
+			InvisibilitySettingArray[i] = CPools::GetObjectPool()->GetSlot(handle - 1);
+			break;
+		case 4:
+			InvisibilitySettingArray[i] = CPools::GetDummyPool()->GetSlot(handle - 1);
+		default:
+			assert(false);
+		}
+		if (InvisibilitySettingArray[i])
+			InvisibilitySettingArray[i]->bIsVisible = false;
+		assert(ReadSaveBuf<bool>(buf) == bUsingAMultiScriptFile);
+		ReadSaveBuf<uint8>(buf);
+		ReadSaveBuf<uint16>(buf);
+		assert(ReadSaveBuf<uint32>(buf) == MainScriptSize);
+		assert(ReadSaveBuf<uint32>(buf) == LargestMissionScriptSize);
+		assert(ReadSaveBuf<uint16>(buf) == NumberOfMissionScripts);
+		ReadSaveBuf<uint16>(buf);
+		uint32 running_scripts = ReadSaveBuf<uint32>(buf);
+		for (uint32 i = 0; i < running_scripts; i++)
+			StartNewScript(0)->BuildFromSaved(ReadSaveBuf<CRunningScript>(buf));
+	}
+VALIDATESAVEBUF(size)
+}
+
+#undef SCRIPT_DATA_SIZE
+
 WRAPPER void CTheScripts::ClearSpaceForMissionEntity(const CVector&, CEntity*) { EAXJMP(0x454060); }
 WRAPPER void CTheScripts::HighlightImportantArea(uint32, float, float, float, float, float) { EAXJMP(0x454320); }
 WRAPPER void CTheScripts::HighlightImportantAngledArea(uint32, float, float, float, float, float, float, float, float, float) { EAXJMP(0x454430); }
@@ -11228,7 +11390,7 @@ InjectHook(0x44FD10, &CTheScripts::UndoBuildingSwaps, PATCH_JUMP);
 InjectHook(0x44FD60, &CTheScripts::UndoEntityVisibilitySettings, PATCH_JUMP);
 InjectHook(0x4534E0, &CTheScripts::ScriptDebugLine3D, PATCH_JUMP);
 InjectHook(0x453550, &CTheScripts::RenderTheScriptDebugLines, PATCH_JUMP);
-//InjectHook(0x4535E0, &CTheScripts::SaveAllScripts, PATCH_JUMP);
+InjectHook(0x4535E0, &CTheScripts::SaveAllScripts, PATCH_JUMP);
 //InjectHook(0x453B30, &CTheScripts::LoadAllScripts, PATCH_JUMP);
 //InjectHook(0x454060, &CTheScripts::ClearSpaceForMissionEntity, PATCH_JUMP);
 ENDPATCHES

@@ -382,6 +382,14 @@ class CRunningScript
 public:
 	void SetIP(uint32 ip) { m_nIp = ip; }
 	CRunningScript* GetNext() const { return next; }
+	void BuildFromSaved(const CRunningScript& pSaved)
+	{
+		CRunningScript* n = next;
+		CRunningScript* p = prev;
+		*this = pSaved;
+		next = n;
+		prev = p;
+	}
 	void UpdateTimers(float timeStep) {
 		m_anLocalVariables[NUM_LOCAL_VARS] += timeStep;
 		m_anLocalVariables[NUM_LOCAL_VARS + 1] += timeStep;
