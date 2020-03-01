@@ -237,7 +237,8 @@ static char PersonalityTypeText[][18] = {
 	"Geek Girl",
 	"Old Girl",
 	"Tough Girl",
-	"Tramp",
+	"Tramp Male",
+	"Tramp Female",
 	"Tourist",
 	"Prostitute",
 	"Criminal",
@@ -246,6 +247,8 @@ static char PersonalityTypeText[][18] = {
 	"Psycho",
 	"Steward",
 	"Sports Fan",
+	"Shopper",
+	"Old Shopper"
 };
 
 static char WaitStateText[][16] = {
@@ -16662,6 +16665,14 @@ CPed::WarpPedIntoCar(CVehicle *car)
 		car->bEngineOn = true;
 		DMAudio.PlayOneShot(car->m_audioEntityId, SOUND_CAR_ENGINE_START, 1.0f);
 	}
+
+#ifdef VC_PED_PORTS
+	RpAnimBlendClumpSetBlendDeltas(GetClump(), ASSOC_PARTIAL, -1000.0f);
+
+	// VC uses AddInCarAnims but we don't have that
+	m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, car->GetDriverAnim(), 100.0f);
+	RemoveWeaponWhenEnteringVehicle();
+#else
 	if (car->IsBoat()) {
 		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
 		CWeaponInfo *ourWeapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
@@ -16675,6 +16686,8 @@ CPed::WarpPedIntoCar(CVehicle *car)
 		else
 			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
 	}
+#endif
+
 	StopNonPartialAnims();
 	if (car->bIsBus)
 		bRenderPedInCar = false;
@@ -16904,11 +16917,17 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 	m_vecOffsetSeek = doorOpenPos - GetPosition();
 	m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 600;
 	if (car->IsBoat()) {
-		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
 #ifdef VC_PED_PORTS
+		// VC checks for handling flag, but we can't do that
+		if(car->GetModelIndex() == MI_SPEEDER)
+			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
+		else
+			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
+
 		PedSetInCarCB(nil, this);
 		m_ped_flagI4 = true;
 #else
+		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
 		m_pVehicleAnim->SetFinishCallback(PedSetInCarCB, this);
 #endif
 		if (IsPlayer())
