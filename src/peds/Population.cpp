@@ -820,15 +820,14 @@ CPopulation::AddPedInCar(CVehicle* car)
 
 	// FIX: Make peds comfortable while driving car/boat
 #ifdef FIX_BUGS
-	if (car->IsBoat()) {
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
-	} else if (car->IsVehicle() && ((CVehicle*)car)->bLowVehicle) {
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ANIM_CAR_LSIT, 100.0f);
-	} else
-#endif
+	{
+		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, car->GetDriverAnim(), 100.0f);
+	}
+#else
 	{
 		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
 	}
+#endif
 	
 	newPed->StopNonPartialAnims();
 	return newPed;

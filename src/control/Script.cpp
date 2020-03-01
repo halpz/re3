@@ -2815,7 +2815,11 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 			pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
 		pVehicle->bEngineOn = true;
 		pPed->bUsesCollision = false;
+#ifdef FIX_BUGS
+		AnimationId anim = pVehicle->GetDriverAnim();
+#else
 		AnimationId anim = pVehicle->bLowVehicle ? ANIM_CAR_LSIT : ANIM_CAR_SIT;
+#endif
 		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
 		pPed->StopNonPartialAnims();
 		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
@@ -4009,7 +4013,11 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		pPed->SetPedState(PED_DRIVING);
 		pVehicle->m_status = STATUS_PHYSICS;
 		pPed->bUsesCollision = false;
+#ifdef FIX_BUGS
+		AnimationId anim = pVehicle->GetDriverAnim();
+#else
 		AnimationId anim = pVehicle->bLowVehicle ? ANIM_CAR_LSIT : ANIM_CAR_SIT;
+#endif
 		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
 		pPed->StopNonPartialAnims();
 		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
