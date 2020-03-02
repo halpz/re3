@@ -23,6 +23,11 @@ enum {
 };
 
 enum {
+	ATTRACTORFLAG_ICECREAM,
+	ATTRACTORFLAG_STARE
+};
+
+enum {
 	LIGHTFLAG_LOSCHECK = 1,
 	// same order as CPointLights flags, must start at 2
 	LIGHTFLAG_FOG_NORMAL = 2,	// can have light and fog
@@ -68,7 +73,7 @@ public:
 
 	C2dEffect(void) {}
 	void Shutdown(void){
-		if(type == 0){	// TODO: enum
+		if(type == EFFECT_LIGHT){
 			if(light.corona)
 				RwTextureDestroy(light.corona);
 			if(light.shadow)

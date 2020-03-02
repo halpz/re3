@@ -376,7 +376,7 @@ CEmergencyPed::MedicAI(void)
 					m_pRevivedPed->SetMoveState(PEDMOVE_WALK);
 					m_pRevivedPed->RestartNonPartialAnims();
 					m_pRevivedPed->bIsPedDieAnimPlaying = false;
-					m_pRevivedPed->m_ped_flagH1 = false;
+					m_pRevivedPed->bKnockedUpIntoAir = false;
 					m_pRevivedPed->m_pCollidingEntity = nil;
 				}
 				break;

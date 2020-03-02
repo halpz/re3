@@ -151,7 +151,7 @@ CCivilianPed::CivilianAI(void)
 			SetLookFlag(angleToFace, true);
 			SetLookTimer(500);
 		} else if (eventDistSqr < sq(40.0f)) {
-			if (m_ped_flagD2) {
+			if (bGonnaInvestigateEvent) {
 				if (CharCreatedBy != MISSION_CHAR && !IsGangMember())
 					SetInvestigateEvent(EVENT_EXPLOSION, m_eventOrThreat, 6.0f, 30000, 0.0f);
 

@@ -1016,7 +1016,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 			}
 		}
 	} else {
-		m_pedIK.m_flags &= ~CPedIK::LOOKING;
+		m_pedIK.m_flags &= ~CPedIK::LOOKAROUND_HEAD_ONLY;
 		if (m_nPedState == PED_ATTACK) {
 			m_bHaveTargetSelected = true;
 			bIsAttacking = false;
