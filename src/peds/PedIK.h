@@ -30,8 +30,8 @@ class CPedIK
 {
 public:
 	enum {
-		FLAG_1 = 1,
-		LOOKING = 2, // looking while in car?
+		GUN_POINTED_SUCCESSFULLY = 1, // set but unused
+		LOOKAROUND_HEAD_ONLY = 2,
 		AIMS_WITH_ARM = 4,
 	};
 

@@ -387,7 +387,7 @@ CPlayerInfo::Process(void)
 
 	// Because vehicle enter/exit use same key binding.
 	bool enterOrExitVeh;
-	if (m_pPed->m_ped_flagI4 && m_pPed->bInVehicle)
+	if (m_pPed->bVehExitWillBeInstant && m_pPed->bInVehicle)
 		enterOrExitVeh = CPad::GetPad(0)->ExitVehicleJustDown();
 	else
 		enterOrExitVeh = CPad::GetPad(0)->GetExitVehicle();

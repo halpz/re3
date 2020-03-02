@@ -207,6 +207,12 @@ enum PedOnGroundState {
 	PED_DEAD_ON_THE_FLOOR
 };
 
+enum PointBlankNecessity : uint8 {
+	NO_POINT_BLANK_PED,
+	POINT_BLANK_FOR_WANTED_PED,
+	POINT_BLANK_FOR_SOMEONE_ELSE
+};
+
 enum PedState
 {
 	PED_NONE,
@@ -321,7 +327,7 @@ public:
 	uint8 bFindNewNodeAfterStateRestore : 1;
 
 	uint8 bHasACamera : 1; // does ped possess a camera to document accidents involves fire/explosion
-	uint8 m_ped_flagD2 : 1; // set when ped witnessed an event
+	uint8 bGonnaInvestigateEvent : 1;
 	uint8 bPedIsBleeding : 1;
 	uint8 bStopAndShoot : 1; // Ped cannot reach target to attack with fist, need to use gun
 	uint8 bIsPedDieAnimPlaying : 1;
@@ -356,7 +362,7 @@ public:
 	uint8 bGonnaKillTheCarJacker : 1; // only set when car is jacked from right door
 	uint8 bFadeOut : 1;
 
-	uint8 m_ped_flagH1 : 1;
+	uint8 bKnockedUpIntoAir : 1; // has ped been knocked up into the air by a car collision
 	uint8 bHitSteepSlope : 1; // has ped collided/is standing on a steep slope (surface type)
 	uint8 bCullExtraFarAway : 1; // special ped only gets culled if it's extra far away (for roadblocks)
 	uint8 bClearObjective : 1;
@@ -367,11 +373,11 @@ public:
 
 	uint8 bShakeFist : 1;  // test shake hand at look entity
 	uint8 bNoCriticalHits : 1; // if set, limbs won't came off
-	uint8 m_ped_flagI4 : 1; // we've been put to car by script or without align phase? - related with cars
+	uint8 bVehExitWillBeInstant : 1;
 	uint8 bHasAlreadyBeenRecorded : 1;
 	uint8 bFallenDown : 1;
 #ifdef VC_PED_PORTS
-	uint8 bKnockedUpIntoAir : 1; // has ped been knocked up into the air by a car collision
+	uint8 bSomeVCflag1 : 1;
 #else
 	uint8 m_ped_flagI20 : 1;
 #endif
@@ -471,7 +477,7 @@ public:
 	uint8 m_wepAccuracy;
 	CEntity *m_pPointGunAt;
 	CVector m_vecHitLastPos;
-	PedFightMoves m_lastFightMove;
+	uint32 m_lastFightMove;
 	uint8 m_fightButtonPressure;
 	FightState m_fightState;
 	bool m_takeAStepAfterAttack;
@@ -584,7 +590,7 @@ public:
 	CPed *CheckForDeadPeds(void);
 	bool CheckForExplosions(CVector2D &area);
 	CPed *CheckForGunShots(void);
-	uint8 CheckForPointBlankPeds(CPed*);
+	PointBlankNecessity CheckForPointBlankPeds(CPed*);
 	bool CheckIfInTheAir(void);
 	void ClearAll(void);
 	void SetPointGunAt(CEntity*);

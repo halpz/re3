@@ -952,9 +952,9 @@ CFileLoader::Load2dEffect(const char *line)
 		effect->light.lightType = lightType;
 		effect->light.roadReflection = roadReflection;
 		effect->light.flareType = flare;
-		// TODO: check out the flags
-		if(flags & 4)
-			flags &= ~2;
+
+		if(flags & LIGHTFLAG_FOG_ALWAYS)
+			flags &= ~LIGHTFLAG_FOG_NORMAL;
 		effect->light.flags = flags;
 		break;
 

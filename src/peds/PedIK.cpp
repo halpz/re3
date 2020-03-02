@@ -185,7 +185,7 @@ CPedIK::LookInDirection(float phi, float theta)
 	if (headStatus == ANGLES_SET_TO_MAX)
 		success = false;
 
-	if (headStatus != ANGLES_SET_EXACTLY && !(m_flags & LOOKING)) {
+	if (headStatus != ANGLES_SET_EXACTLY && !(m_flags & LOOKAROUND_HEAD_ONLY)) {
 		float remainingTurn = CGeneral::LimitRadianAngle(phi - m_ped->m_fRotationCur);
 		if (CPedIK::MoveLimb(m_torsoOrient, remainingTurn, theta, ms_torsoInfo))
 			success = true;
@@ -198,7 +198,7 @@ CPedIK::LookInDirection(float phi, float theta)
 	nextFrame.GetPosition() += framePos;
 	nextFrame.UpdateRW();
 
-	if (!(m_flags & LOOKING))
+	if (!(m_flags & LOOKAROUND_HEAD_ONLY))
 		RotateTorso(m_ped->m_pFrames[PED_MID], &m_torsoOrient, false);
 
 	return success;
@@ -224,8 +224,8 @@ CPedIK::PointGunInDirection(float phi, float theta)
 	bool result = true;
 	bool armPointedToGun = false;
 	float angle = CGeneral::LimitRadianAngle(phi - m_ped->m_fRotationCur);
-	m_flags &= (~FLAG_1);
-	m_flags |= LOOKING;
+	m_flags &= (~GUN_POINTED_SUCCESSFULLY);
+	m_flags |= LOOKAROUND_HEAD_ONLY;
 	if (m_flags & AIMS_WITH_ARM) {
 		armPointedToGun = PointGunInDirectionUsingArm(angle, theta);
 		angle = CGeneral::LimitRadianAngle(angle - m_upperArmOrient.phi);
@@ -242,7 +242,7 @@ CPedIK::PointGunInDirection(float phi, float theta)
 		if (status == ANGLES_SET_TO_MAX)
 			result = false;
 		else if (status == ANGLES_SET_EXACTLY)
-			m_flags |= FLAG_1;
+			m_flags |= GUN_POINTED_SUCCESSFULLY;
 	}
 	if (TheCamera.Cams[TheCamera.ActiveCam].Using3rdPersonMouseCam() && m_flags & AIMS_WITH_ARM)
 		RotateTorso(m_ped->m_pFrames[PED_MID], &m_torsoOrient, true);
@@ -270,7 +270,7 @@ CPedIK::PointGunInDirectionUsingArm(float phi, float theta)
 	float uaPhi = phi - m_torsoOrient.phi - DEGTORAD(15.0f);
 	LimbMoveStatus uaStatus = MoveLimb(m_upperArmOrient, uaPhi, CGeneral::LimitRadianAngle(theta - pitch), ms_upperArmInfo);
 	if (uaStatus == ANGLES_SET_EXACTLY) {
-		m_flags |= FLAG_1;
+		m_flags |= GUN_POINTED_SUCCESSFULLY;
 		result = true;
 	}
 	if (uaStatus == ANGLES_SET_TO_MAX) {
@@ -283,7 +283,7 @@ CPedIK::PointGunInDirectionUsingArm(float phi, float theta)
 			laStatus = MoveLimb(m_lowerArmOrient, laPhi, 0.0f, ms_lowerArmInfo);
 
 		if (laStatus == ANGLES_SET_EXACTLY) {
-			m_flags |= FLAG_1;
+			m_flags |= GUN_POINTED_SUCCESSFULLY;
 			result = true;
 		}
 		RwFrame *child = GetFirstChild(frame);
@@ -331,9 +331,9 @@ CPedIK::RestoreLookAt(void)
 	matrix.Translate(pos);
 	matrix.UpdateRW();
 
-	if (!(m_flags & LOOKING))
+	if (!(m_flags & LOOKAROUND_HEAD_ONLY))
 		MoveLimb(m_torsoOrient, 0.0f, 0.0f, ms_torsoInfo);
-	if (!(m_flags & LOOKING))
+	if (!(m_flags & LOOKAROUND_HEAD_ONLY))
 		RotateTorso(m_ped->m_pFrames[PED_MID], &m_torsoOrient, false);
 
 	return result;
