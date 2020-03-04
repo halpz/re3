@@ -9285,7 +9285,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	{
 		CollectParameters(&m_nIp, 5);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		float range = *(float*)&ScriptParams[3];
 		int mi = ScriptParams[4] < 0 ? CTheScripts::UsedObjectArray[-ScriptParams[4]].index : ScriptParams[4];
@@ -9364,7 +9364,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	{
 		CollectParameters(&m_nIp, 5);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		float destX = *(float*)&ScriptParams[3];
 		float destY = *(float*)&ScriptParams[4];
@@ -9379,7 +9379,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	{
 		CollectParameters(&m_nIp, 5);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		float destX = *(float*)&ScriptParams[3];
 		float destY = *(float*)&ScriptParams[4];
@@ -9943,7 +9943,7 @@ void CRunningScript::LocatePlayerCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10027,9 +10027,9 @@ void CRunningScript::LocatePlayerCharCommand(int32 command, uint32* pIp)
 	UpdateCompareFlag(result);
 	if (debug)
 #ifdef FIX_BUGS
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 #else
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : MAP_Z_LOW_LIMIT);
 #endif
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
@@ -10107,7 +10107,7 @@ void CRunningScript::LocatePlayerCarCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10211,7 +10211,7 @@ void CRunningScript::LocateCharCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10297,9 +10297,9 @@ void CRunningScript::LocateCharCharCommand(int32 command, uint32* pIp)
 	UpdateCompareFlag(result);
 	if (debug)
 #ifdef FIX_BUGS
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 #else
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : MAP_Z_LOW_LIMIT);
 #endif
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
@@ -10378,7 +10378,7 @@ void CRunningScript::LocateCharCarCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10456,7 +10456,7 @@ void CRunningScript::LocateCharObjectCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10528,7 +10528,7 @@ void CRunningScript::LocateCarCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10567,7 +10567,7 @@ void CRunningScript::LocateSniperBulletCommand(int32 command, uint32* pIp)
 	result = CBulletInfo::TestForSniperBullet(X - dX, X + dX, Y - dY, Y + dY, b3D ? Z - dZ : -1000.0f, b3D ? Z + dZ : 1000.0f);
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10684,7 +10684,7 @@ void CRunningScript::PlayerInAreaCheckCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
@@ -10807,7 +10807,7 @@ void CRunningScript::PlayerInAngledAreaCheckCommand(int32 command, uint32* pIp)
 	UpdateCompareFlag(result);
 	if (debug)
 		CTheScripts::HighlightImportantAngledArea((uint32)this + m_nIp, infX, infY, supX, supY,
-			rotatedSupX, rotatedSupY, rotatedInfX, rotatedInfY, b3D ? (infZ + supZ) / 2 : -100.0f);
+			rotatedSupX, rotatedSupY, rotatedInfX, rotatedInfY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugAngledCube(infX, infY, infZ, supX, supY, supZ,
@@ -10927,7 +10927,7 @@ void CRunningScript::CharInAreaCheckCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
@@ -11025,7 +11025,7 @@ void CRunningScript::CarInAreaCheckCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
@@ -11461,7 +11461,7 @@ void CTheScripts::HighlightImportantArea(uint32 id, float x1, float y1, float x2
 	CVector center;
 	center.x = (infX + supX) / 2;
 	center.y = (infY + supY) / 2;
-	center.z = (z <= 100.0f) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
+	center.z = (z <= MAP_Z_LOW_LIMIT) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
 	CShadows::RenderIndicatorShadow(id, 2, gpGoalTex, &center, supX - center.x, 0.0f, 0.0f, center.y - supY, 0);
 }
 
@@ -11493,7 +11493,7 @@ void CTheScripts::HighlightImportantAngledArea(uint32 id, float x1, float y1, fl
 	CVector center;
 	center.x = (infX + supX) / 2;
 	center.y = (infY + supY) / 2;
-	center.z = (z <= 100.0f) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
+	center.z = (z <= MAP_Z_LOW_LIMIT) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
 	CShadows::RenderIndicatorShadow(id, 2, gpGoalTex, &center, supX - center.x, 0.0f, 0.0f, center.y - supY, 0);
 }
 
@@ -11592,9 +11592,58 @@ void CTheScripts::CleanUpThisObject(CObject* pObject)
 	++CObject::nNoTempObjects;
 }
 
-WRAPPER void CTheScripts::ReadObjectNamesFromScript() { EAXJMP(0x454960); }
-WRAPPER void CTheScripts::UpdateObjectIndices() { EAXJMP(0x454AD0); }
-WRAPPER void CTheScripts::ReadMultiScriptFileOffsetsFromScript() { EAXJMP(0x454BC0); }
+void CTheScripts::ReadObjectNamesFromScript()
+{
+	int32 varSpace = GetSizeOfVariableSpace();
+	uint32 ip = varSpace + 8;
+	NumberOfUsedObjects = Read2BytesFromScript(&ip);
+	ip += 2;
+	for (uint16 i = 0; i < NumberOfUsedObjects; i++) {
+		for (int j = 0; j < USED_OBJECT_NAME_LENGTH; j++)
+			UsedObjectArray[i].name[j] = ScriptSpace[ip++];
+		UsedObjectArray[i].index = 0;
+	}
+}
+
+void CTheScripts::UpdateObjectIndices()
+{
+	char name[USED_OBJECT_NAME_LENGTH];
+	char error[112];
+	for (int i = 1; i < NumberOfUsedObjects; i++) {
+		bool found = false;
+		for (int j = 0; j < MODELINFOSIZE && !found; j++) {
+			CBaseModelInfo* pModel = CModelInfo::GetModelInfo(j);
+			if (!pModel)
+				continue;
+			strcpy(name, pModel->GetName());
+			for (int k = 0; k < USED_OBJECT_NAME_LENGTH; k++)
+				name[k] = toupper(name[k]);
+			if (strcmp(name, UsedObjectArray[i].name) == 0) {
+				found = true;
+				UsedObjectArray[i].index = j;
+			}
+		}
+		if (!found) {
+			sprintf(error, "CTheScripts::UpdateObjectIndices - Couldn't find %s", UsedObjectArray[i].name);
+			debug("%s\n", error);
+		}
+	}
+}
+
+void CTheScripts::ReadMultiScriptFileOffsetsFromScript()
+{
+	int32 varSpace = GetSizeOfVariableSpace();
+	uint32 ip = varSpace + 3;
+	int32 objectSize = Read4BytesFromScript(&ip);
+	ip = objectSize + 8;
+	MainScriptSize = Read4BytesFromScript(&ip);
+	LargestMissionScriptSize = Read4BytesFromScript(&ip);
+	NumberOfMissionScripts = Read2BytesFromScript(&ip);
+	ip += 2;
+	for (int i = 0; i < NumberOfMissionScripts; i++) {
+		MultiScriptArray[i] = Read4BytesFromScript(&ip);
+	}
+}
 
 STARTPATCHES
 InjectHook(0x438790, &CTheScripts::Init, PATCH_JUMP);
