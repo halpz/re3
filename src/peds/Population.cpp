@@ -973,7 +973,7 @@ CPopulation::ConvertToDummyObject(CObject *obj)
 	if (!dummy)
 		return;
 
-	dummy->GetMatrix() = obj->GetMatrix();
+	dummy->GetMatrix() = obj->m_objectMatrix;
 	dummy->GetMatrix().UpdateRW();
 	dummy->UpdateRwFrame();
 
@@ -998,7 +998,7 @@ bool
 CPopulation::TestRoomForDummyObject(CObject *obj)
 {
 	int16 collidingObjs;
-	CWorld::FindObjectsKindaColliding(obj->GetPosition(),
+	CWorld::FindObjectsKindaColliding(obj->m_objectMatrix.GetPosition(),
 		CModelInfo::GetModelInfo(obj->m_modelIndex)->GetColModel()->boundingSphere.radius,
 		false, &collidingObjs, 2, nil, false, true, true, false, false);
 
