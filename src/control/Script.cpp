@@ -11440,47 +11440,158 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntit
 	}
 }
 
-void CTheScripts::HighlightImportantArea(uint32 id, float X1, float Y1, float X2, float Y2, float Z)
+void CTheScripts::HighlightImportantArea(uint32 id, float x1, float y1, float x2, float y2, float z)
 {
 	float infX, infY, supX, supY;
-	if (X1 < X2) {
-		infX = X1;
-		supX = X2;
+	if (x1 < x2) {
+		infX = x1;
+		supX = x2;
 	} else {
-		infX = X2;
-		supX = X1;
+		infX = x2;
+		supX = x1;
 	}
-	if (Y1 < Y2) {
-		infY = Y1;
-		supY = Y2;
+	if (y1 < y2) {
+		infY = y1;
+		supY = y2;
 	}
 	else {
-		infY = Y2;
-		supY = Y1;
+		infY = y2;
+		supY = y1;
 	}
 	CVector center;
 	center.x = (infX + supX) / 2;
 	center.y = (infY + supY) / 2;
-	center.z = (Z <= 100.0f) ? CWorld::FindGroundZForCoord(center.x, center.y) : Z;
+	center.z = (z <= 100.0f) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
 	CShadows::RenderIndicatorShadow(id, 2, gpGoalTex, &center, supX - center.x, 0.0f, 0.0f, center.y - supY, 0);
 }
 
-WRAPPER void CTheScripts::HighlightImportantAngledArea(uint32 id, float, float, float, float, float, float, float, float, float)
+void CTheScripts::HighlightImportantAngledArea(uint32 id, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float z)
 {
-	EAXJMP(0x454430);
+	float infX, infY, supX, supY, X, Y;
+	X = (x1 + x2) / 2;
+	Y = (y1 + y2) / 2;
+	supX = infX = X;
+	supY = infY = Y;
+	X = (x2 + x3) / 2;
+	Y = (y2 + y3) / 2;
+	infX = min(infX, X);
+	supX = max(supX, X);
+	infY = min(infY, Y);
+	supY = max(supY, Y);
+	X = (x3 + x4) / 2;
+	Y = (y3 + y4) / 2;
+	infX = min(infX, X);
+	supX = max(supX, X);
+	infY = min(infY, Y);
+	supY = max(supY, Y);
+	X = (x4 + x1) / 2;
+	Y = (y4 + y1) / 2;
+	infX = min(infX, X);
+	supX = max(supX, X);
+	infY = min(infY, Y);
+	supY = max(supY, Y);
+	CVector center;
+	center.x = (infX + supX) / 2;
+	center.y = (infY + supY) / 2;
+	center.z = (z <= 100.0f) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
+	CShadows::RenderIndicatorShadow(id, 2, gpGoalTex, &center, supX - center.x, 0.0f, 0.0f, center.y - supY, 0);
 }
 
-WRAPPER bool CTheScripts::IsPedStopped(CPed*) { EAXJMP(0x454670); }
-WRAPPER bool CTheScripts::IsPlayerStopped(CPlayerInfo*) { EAXJMP(0x4546C0); }
+bool CTheScripts::IsPedStopped(CPed* pPed)
+{
+	if (pPed->bInVehicle)
+		return IsVehicleStopped(pPed->m_pMyVehicle);
+	return pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL;
+}
+
+bool CTheScripts::IsPlayerStopped(CPlayerInfo* pPlayer)
+{
+	CPed* pPed = pPlayer->m_pPed;
+	if (pPed->bInVehicle)
+		return IsVehicleStopped(pPed->m_pMyVehicle);
+	if (RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_RUN_STOP) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_RUN_STOP_R) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_LAUNCH) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_GLIDE))
+		return false;
+	return pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL;
+}
 
 bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle)
 {
 	return 0.01f * CTimer::GetTimeStep() >= pVehicle->m_fDistanceTravelled;
 }
 
-WRAPPER void CTheScripts::CleanUpThisVehicle(CVehicle*) { EAXJMP(0x4548D0); }
-WRAPPER void CTheScripts::CleanUpThisPed(CPed*) { EAXJMP(0x4547A0); }
-WRAPPER void CTheScripts::CleanUpThisObject(CObject*) { EAXJMP(0x454910); }
+void CTheScripts::CleanUpThisPed(CPed* pPed)
+{
+	if (!pPed)
+		return;
+	if (pPed->CharCreatedBy != MISSION_CHAR)
+		return;
+	pPed->CharCreatedBy = RANDOM_CHAR;
+	if (pPed->m_nPedType == PEDTYPE_PROSTITUTE)
+		pPed->m_objectiveTimer = CTimer::GetTimeInMilliseconds() + 30000;
+	if (pPed->bInVehicle) {
+		if (pPed->m_pMyVehicle->pDriver == pPed) {
+			if (pPed->m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR) {
+				CCarCtrl::JoinCarWithRoadSystem(pPed->m_pMyVehicle);
+				pPed->m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
+			}
+		}
+		else {
+			if (pPed->m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR) {
+				pPed->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pPed->m_pMyVehicle);
+				pPed->bWanderPathAfterExitingCar = true;
+			}
+		}
+	}
+	bool flees = false;
+	PedState state;
+	eMoveState ms;
+	if (pPed->m_nPedState == PED_FLEE_ENTITY || pPed->m_nPedState == PED_FLEE_POS) {
+		ms = pPed->m_nMoveState;
+		state = pPed->m_nPedState;
+		flees = true;
+	}
+	pPed->ClearObjective();
+	pPed->bRespondsToThreats = true;
+	pPed->bScriptObjectiveCompleted = false;
+	pPed->ClearLeader();
+	if (pPed->IsPedInControl())
+		pPed->SetWanderPath(CGeneral::GetRandomNumber() & 7);
+	if (flees) {
+		pPed->m_nPedState = state;
+		pPed->SetMoveState(ms);
+	}
+	--CPopulation::ms_nTotalMissionPeds;
+}
+
+void CTheScripts::CleanUpThisVehicle(CVehicle* pVehicle)
+{
+	if (!pVehicle)
+		return;
+	if (pVehicle->VehicleCreatedBy != MISSION_VEHICLE)
+		return;
+	pVehicle->bIsLocked = false;
+	CCarCtrl::RemoveFromInterestingVehicleList(pVehicle);
+	pVehicle->VehicleCreatedBy = RANDOM_VEHICLE;
+	++CCarCtrl::NumRandomCars;
+	--CCarCtrl::NumMissionCars;
+}
+
+void CTheScripts::CleanUpThisObject(CObject* pObject)
+{
+	if (!pObject)
+		return;
+	if (pObject->ObjectCreatedBy != MISSION_OBJECT)
+		return;
+	pObject->ObjectCreatedBy = TEMP_OBJECT;
+	pObject->m_nEndOfLifeTime = CTimer::GetTimeInMilliseconds() + 20000;
+	pObject->m_nRefModelIndex = -1;
+	pObject->bUseVehicleColours = false;
+	++CObject::nNoTempObjects;
+}
+
 WRAPPER void CTheScripts::ReadObjectNamesFromScript() { EAXJMP(0x454960); }
 WRAPPER void CTheScripts::UpdateObjectIndices() { EAXJMP(0x454AD0); }
 WRAPPER void CTheScripts::ReadMultiScriptFileOffsetsFromScript() { EAXJMP(0x454BC0); }
@@ -11496,5 +11607,5 @@ InjectHook(0x4534E0, &CTheScripts::ScriptDebugLine3D, PATCH_JUMP);
 InjectHook(0x453550, &CTheScripts::RenderTheScriptDebugLines, PATCH_JUMP);
 InjectHook(0x4535E0, &CTheScripts::SaveAllScripts, PATCH_JUMP);
 InjectHook(0x453B30, &CTheScripts::LoadAllScripts, PATCH_JUMP);
-//InjectHook(0x454060, &CTheScripts::ClearSpaceForMissionEntity, PATCH_JUMP);
+InjectHook(0x454060, &CTheScripts::ClearSpaceForMissionEntity, PATCH_JUMP);
 ENDPATCHES
