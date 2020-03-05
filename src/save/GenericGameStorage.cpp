@@ -2,18 +2,27 @@
 #include "main.h"
 #include "patcher.h"
 #include "Camera.h"
+#include "CarGen.h"
 #include "Clock.h"
 #include "Date.h"
 #include "FileMgr.h"
 #include "GameLogic.h"
+#include "Gangs.h"
 #include "Garages.h"
 #include "GenericGameStorage.h"
+#include "PathFind.h"
 #include "PCSave.h"
+#include "Phones.h"
+#include "Pickups.h"
 #include "PlayerPed.h"
 #include "Pools.h"
+#include "Radar.h"
+#include "Restart.h"
 #include "Script.h"
+#include "Stats.h"
 #include "Streaming.h"
 #include "World.h"
+#include "Zones.h"
 
 const int SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 
@@ -31,8 +40,81 @@ CDate &CompileDateAndTime = *(CDate*)0x72BCB8;
 #define ReadDataFromBufferPointer(buf, to) memcpy(&to, buf, sizeof(to)); buf += align4bytes(sizeof(to));
 #define WriteDataToBufferPointer(buf, from) memcpy(buf, &from, sizeof(from)); buf += align4bytes(sizeof(from));
 
-WRAPPER bool GenericSave(int file) { EAXJMP(0x58F8D0); }
+//WRAPPER bool GenericSave(int file) { EAXJMP(0x58F8D0); }
 WRAPPER bool GenericLoad() { EAXJMP(0x590A00); }
+
+bool
+GenericSave(int file)
+{
+	/*char *tmpSaveName;
+	wchar saveName[24];
+	SYSTEMTIME saveTime;*/
+
+	// TODO: Use GetLastMissionPassedName() to get this
+	//tmpSaveName = CStats::LastMissionPassedName;
+
+	//AsciiToUnicode(tmpSaveName, saveName);
+
+	//// TODO: some stuff here
+
+	//memcpy(work_buff, saveName, 0x30);
+	//GetLocalTime((SYSTEMTIME *)(work_buff + 0x30));
+	//*((uint32 *)(work_buff + 0x40)) = SIZE_OF_ONE_GAME_IN_BYTES;
+	//*((uint32 *)(work_buff + 0x44)) = CGame::currLevel;
+	//
+	//PcSaveHelper.PcClassSaveRoutine(file, work_buff, 0xE8);
+
+
+	uint8 *buf;
+	uint8 *tmpbuf;
+	uint8 *postsize;
+	uint32 size;
+	uint32 reserved;
+	bool result;
+
+	// TODO: simplevars and scripts
+
+	for (int i = 1; i < 19; i++) {
+		buf = work_buff;
+		size = 0;
+		reserved = 0;
+		MakeSpaceForSizeInBufferPointer(tmpbuf, buf, postsize);
+		switch (i) {
+		case 1: break;
+		case 2: break;
+		case 3: break;
+		case 4: break;
+		case 5: ThePaths.Save(buf, &size); break;
+		case 6: break;
+		case 7: CPickups::Save(buf, &size); break;
+		case 8: gPhoneInfo.Save(buf, &size); break;
+		case 9: CRestart::SaveAllRestartPoints(buf, &size); break;
+		case 10: CRadar::SaveAllRadarBlips(buf, &size); break;
+		case 11: CTheZones::SaveAllZones(buf, &size); break;
+		case 12: CGangs::SaveAllGangData(buf, &size); break;
+		case 13: CTheCarGenerators::SaveAllCarGenerators(buf, &size); break;
+		case 14: break;
+		case 15: break;
+		case 16: break;
+		case 17: break;
+		case 18: break;
+		case 19: break;
+		}
+
+		CopySizeAndPreparePointer(tmpbuf, buf, postsize, reserved, size);
+		result = PcSaveHelper.PcClassSaveRoutine(file, work_buff, size);
+		if (!result)
+		{
+			return false;
+		}
+	}
+
+	
+	
+	// TODO: padding
+	
+	return true;
+}
 
 bool
 ReadInSizeofSaveFileBuffer(int32 &file, uint32 &size)
