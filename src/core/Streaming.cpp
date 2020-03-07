@@ -1287,7 +1287,7 @@ CStreaming::StreamVehiclesAndPeds(void)
 	if(timeBeforeNextLoad >= 0)
 		timeBeforeNextLoad--;
 	else if(ms_numVehiclesLoaded <= desiredNumVehiclesLoaded){
-		for(i = 0; i <= 10; i++){
+		for(i = 1; i <= 10; i++){
 			model =  CCarCtrl::ChooseCarModel(modelQualityClass);
 			modelQualityClass++;
 			if(modelQualityClass >= NUM_VEHICLE_CLASSES)
@@ -1893,9 +1893,9 @@ CStreaming::AddModelsToRequestList(const CVector &pos)
 
 	CWorld::AdvanceCurrentScanCode();
 
-	for(iy = iymin; iy < iymax; iy++){
+	for(iy = iymin; iy <= iymax; iy++){
 		dy = iy - CWorld::GetSectorIndexY(pos.y);
-		for(ix = ixmin; ix < ixmax; ix++){
+		for(ix = ixmin; ix <= ixmax; ix++){
 
 			if(CRenderer::m_loadingPriority && ms_numModelsRequested > 5)
 				return;
@@ -2124,7 +2124,7 @@ CStreaming::DeleteRwObjectsAfterDeath(const CVector &pos)
 	CSector *sect;
 
 	ix = CWorld::GetSectorIndexX(pos.x);
-	iy = CWorld::GetSectorIndexX(pos.y);
+	iy = CWorld::GetSectorIndexY(pos.y);
 
 	for(x = 0; x < NUMSECTORS_X; x++)
 		for(y = 0; y < NUMSECTORS_Y; y++)
@@ -2153,13 +2153,13 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 		return;
 
 	ix = CWorld::GetSectorIndexX(TheCamera.GetPosition().x);
-	iy = CWorld::GetSectorIndexX(TheCamera.GetPosition().y);
+	iy = CWorld::GetSectorIndexY(TheCamera.GetPosition().y);
 
 	if(Abs(TheCamera.GetForward().x) > Abs(TheCamera.GetForward().y)){
 		// looking west/east
 
 		ymin = max(iy - 10, 0);
-		ymax = min(iy + 10, NUMSECTORS_Y);
+		ymax = min(iy + 10, NUMSECTORS_Y - 1);
 		assert(ymin <= ymax);
 
 		// Delete a block of sectors that we know is behind the camera
@@ -2170,8 +2170,8 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 			inc = 1;
 		}else{
 			// looking west
-			xmax = min(ix + 2, NUMSECTORS_X);
-			xmin = min(ix + 10, NUMSECTORS_X);
+			xmax = min(ix + 2, NUMSECTORS_X - 1);
+			xmin = min(ix + 10, NUMSECTORS_X - 1);
 			inc = -1;
 		}
 		for(y = ymin; y <= ymax; y++){
@@ -2192,8 +2192,8 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 			inc = 1;
 		}else{
 			// looking west
-			xmax = min(ix - 10, NUMSECTORS_X);
-			xmin = min(ix + 2, NUMSECTORS_X);
+			xmax = min(ix - 10, NUMSECTORS_X - 1);
+			xmin = min(ix + 2, NUMSECTORS_X - 1);
 			inc = -1;
 		}
 		for(y = ymin; y <= ymax; y++){
@@ -2223,7 +2223,7 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 		// looking north/south
 
 		xmin = max(ix - 10, 0);
-		xmax = min(ix + 10, NUMSECTORS_X);
+		xmax = min(ix + 10, NUMSECTORS_X - 1);
 		assert(xmin <= xmax);
 
 		// Delete a block of sectors that we know is behind the camera
@@ -2234,8 +2234,8 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 			inc = 1;
 		}else{
 			// looking south
-			ymax = min(iy + 2, NUMSECTORS_Y);
-			ymin = min(iy + 10, NUMSECTORS_Y);
+			ymax = min(iy + 2, NUMSECTORS_Y - 1);
+			ymin = min(iy + 10, NUMSECTORS_Y - 1);
 			inc = -1;
 		}
 		for(x = xmin; x <= xmax; x++){
@@ -2256,8 +2256,8 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 			inc = 1;
 		}else{
 			// looking south
-			ymax = min(iy - 10, NUMSECTORS_Y);
-			ymin = min(iy + 2, NUMSECTORS_Y);
+			ymax = min(iy - 10, NUMSECTORS_Y - 1);
+			ymin = min(iy + 2, NUMSECTORS_Y - 1);
 			inc = -1;
 		}
 		for(x = xmin; x <= xmax; x++){

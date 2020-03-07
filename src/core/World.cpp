@@ -143,9 +143,9 @@ CWorld::ProcessLineOfSight(const CVector &point1, const CVector &point2, CColPoi
 	dist = 1.0f;
 
 	xstart = GetSectorIndexX(point1.x);
-	ystart = GetSectorIndexX(point1.y);
+	ystart = GetSectorIndexY(point1.y);
 	xend = GetSectorIndexX(point2.x);
-	yend = GetSectorIndexX(point2.y);
+	yend = GetSectorIndexY(point2.y);
 
 #define LOSARGS CColLine(point1, point2), point, dist, entity, checkBuildings, checkVehicles, checkPeds, checkObjects, checkDummies, ignoreSeeThrough, ignoreSomeObjects
 
@@ -416,9 +416,9 @@ CWorld::GetIsLineOfSightClear(const CVector &point1, const CVector &point2, bool
 	AdvanceCurrentScanCode();
 
 	xstart = GetSectorIndexX(point1.x);
-	ystart = GetSectorIndexX(point1.y);
+	ystart = GetSectorIndexY(point1.y);
 	xend = GetSectorIndexX(point2.x);
-	yend = GetSectorIndexX(point2.y);
+	yend = GetSectorIndexY(point2.y);
 
 #define LOSARGS CColLine(point1, point2), checkBuildings, checkVehicles, checkPeds, checkObjects, checkDummies, ignoreSeeThrough, ignoreSomeObjects
 
@@ -638,20 +638,24 @@ void
 CWorld::FindObjectsInRange(CVector &centre, float distance, bool ignoreZ, short *nextObject, short lastObject, CEntity **objects, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies)
 {
 	int minX = GetSectorIndexX(centre.x - distance);
-	if (minX <= 0)
-		minX = 0;
+	if (minX <= 0) minX = 0;
 
 	int minY = GetSectorIndexY(centre.y - distance);
-	if (minY <= 0)
-		minY = 0;
+	if (minY <= 0) minY = 0;
 
 	int maxX = GetSectorIndexX(centre.x + distance);
-	if (maxX >= NUMSECTORS_X)
-		maxX = NUMSECTORS_X;
+#ifdef FIX_BUGS
+	if (maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X - 1;
+#else
+	if (maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X;
+#endif
 
 	int maxY = GetSectorIndexY(centre.y + distance);
-	if (maxY >= NUMSECTORS_Y)
-		maxY = NUMSECTORS_Y;
+#ifdef FIX_BUGS
+	if (maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y - 1;
+#else
+	if (maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y;
+#endif
 	
 	AdvanceCurrentScanCode();
 
@@ -689,20 +693,24 @@ CWorld::TestSphereAgainstWorld(CVector centre, float distance, CEntity *entityTo
 	CEntity* foundE = nil;
 
 	int minX = GetSectorIndexX(centre.x - distance);
-	if (minX <= 0)
-		minX = 0;
+	if (minX <= 0) minX = 0;
 
 	int minY = GetSectorIndexY(centre.y - distance);
-	if (minY <= 0)
-		minY = 0;
+	if (minY <= 0) minY = 0;
 
 	int maxX = GetSectorIndexX(centre.x + distance);
-	if (maxX >= NUMSECTORS_X)
-		maxX = NUMSECTORS_X;
+#ifdef FIX_BUGS
+	if (maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X - 1;
+#else
+	if (maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X;
+#endif
 
 	int maxY = GetSectorIndexY(centre.y + distance);
-	if (maxY >= NUMSECTORS_Y)
-		maxY = NUMSECTORS_Y;
+#ifdef FIX_BUGS
+	if (maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y - 1;
+#else
+	if (maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y;
+#endif
 
 	AdvanceCurrentScanCode();
 
@@ -1171,8 +1179,7 @@ CWorld::Process(void)
 		for (CPtrNode* node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 			CPed* movingPed = (CPed*)node->item;
 			if (movingPed->IsPed()) {
-				if (movingPed->bInVehicle && movingPed->m_nPedState != PED_EXIT_TRAIN
-					|| movingPed->m_nPedState == PED_ENTER_CAR || movingPed->m_nPedState == PED_CARJACK) {
+				if (movingPed->bInVehicle && movingPed->m_nPedState != PED_EXIT_TRAIN || movingPed->EnteringCar()) {
 					CVehicle *movingCar = movingPed->m_pMyVehicle;
 					if (movingCar) {
 						if (movingCar->IsTrain()) {

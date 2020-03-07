@@ -3002,9 +3002,9 @@ CAutomobile::RcbanditCheckHitWheels(void)
 	if(xmin < 0) xmin = 0;
 	xmax = CWorld::GetSectorIndexX(GetPosition().x + 2.0f);
 	if(xmax > NUMSECTORS_X-1) xmax = NUMSECTORS_X-1;
-	ymin = CWorld::GetSectorIndexX(GetPosition().y - 2.0f);
+	ymin = CWorld::GetSectorIndexY(GetPosition().y - 2.0f);
 	if(ymin < 0) ymin = 0;
-	ymax = CWorld::GetSectorIndexX(GetPosition().y + 2.0f);
+	ymax = CWorld::GetSectorIndexY(GetPosition().y + 2.0f);
 	if(ymax > NUMSECTORS_Y-1) ymax = NUMSECTORS_X-1;
 
 	CWorld::AdvanceCurrentScanCode();

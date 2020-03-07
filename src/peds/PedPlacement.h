@@ -1,7 +1,6 @@
 #pragma once
 
-class CVector;
-class CEntity;
+#include "Ped.h"
 
 class CPedPlacement {
 public:
