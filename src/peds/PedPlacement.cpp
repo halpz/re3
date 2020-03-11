@@ -32,7 +32,7 @@ CPedPlacement::FindZCoorForPed(CVector* pos)
 	zForPed = max(foundColZ, foundColZ2);
 
 	if (zForPed > -99.0f)
-		pos->z = 1.04f + zForPed;
+		pos->z = FEET_OFFSET + zForPed;
 }
 
 CEntity*

@@ -130,12 +130,9 @@ void CHud::Draw()
 			Draw Crosshairs
 		*/
 		if (TheCamera.Cams->Using3rdPersonMouseCam() && (!CPad::GetPad(0)->GetLookBehindForPed() || TheCamera.m_bPlayerIsInGarage) || Mode == CCam::MODE_1STPERSON_RUNABOUT) {
-			if (FindPlayerPed()) {
-				int32 State = FindPlayerPed()->m_nPedState;
-				if (State != PED_ENTER_CAR && State != PED_CARJACK) {
-					if ((WeaponType >= WEAPONTYPE_COLT45 && WeaponType <= WEAPONTYPE_M16) || WeaponType == WEAPONTYPE_FLAMETHROWER)
-						Mode_RunAround = 1;
-				}
+			if (FindPlayerPed() && !FindPlayerPed()->EnteringCar()) {
+				if ((WeaponType >= WEAPONTYPE_COLT45 && WeaponType <= WEAPONTYPE_M16) || WeaponType == WEAPONTYPE_FLAMETHROWER)
+					Mode_RunAround = 1;
 			}
 		}
 

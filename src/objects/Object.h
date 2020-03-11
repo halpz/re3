@@ -52,7 +52,7 @@ public:
   int8 field_17D;
   int8 field_17E;
   int8 field_17F;
-	int32 m_nEndOfLifeTime;
+	uint32 m_nEndOfLifeTime;
 	int16 m_nRefModelIndex;
   int8 field_186;
   int8 field_187;

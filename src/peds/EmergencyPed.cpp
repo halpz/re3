@@ -303,7 +303,7 @@ CEmergencyPed::MedicAI(void)
 				if (!m_pRevivedPed || m_pRevivedPed->m_fHealth > 0.0f || m_pRevivedPed->bFadeOut) {
 					m_nEmergencyPedState = EMERGENCY_PED_DETERMINE_NEXT_STATE;
 				} else {
-					m_pRevivedPed->m_bloodyFootprintCount = CTimer::GetTimeInMilliseconds();
+					m_pRevivedPed->m_bloodyFootprintCountOrDeathTime = CTimer::GetTimeInMilliseconds();
 					SetMoveState(PEDMOVE_STILL);
 					m_nPedState = PED_CPR;
 					m_nLastPedState = PED_CPR;
