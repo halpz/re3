@@ -30,6 +30,8 @@
 #include "Zones.h"
 
 #define BLOCK_COUNT 20
+#define SIZE_OF_SIMPLEVARS 0xBC
+
 const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 
 char (&DefaultPCSaveFileName)[260] = *(char(*)[260])*(uintptr*)0x8E28C0;
@@ -57,9 +59,9 @@ do {\
 	MakeSpaceForSizeInBufferPointer(presize, buf, postsize);\
 	save_func(buf, &size);\
 	CopySizeAndPreparePointer(presize, buf, postsize, reserved, size);\
-	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, size))\
+	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, size + 4))\
 		return false;\
-	blockSizes[blockIndex++] = size;\
+	totalSize += size;\
 } while (0)
 
 bool
@@ -70,8 +72,6 @@ GenericSave(int file)
 	uint32 reserved;
 
 	uint32 totalSize;
-	uint32 blockSizes[BLOCK_COUNT];
-	uint32 blockIndex;
 	uint32 i;
 	
 	wchar *lastMissionPassed;
@@ -83,7 +83,7 @@ GenericSave(int file)
 	CheckSum = 0;
 	buf = work_buff;
 	reserved = 0;
-	blockIndex = 0;
+	totalSize = 0;
 
 	// Save simple vars
 INITSAVEBUF
@@ -135,7 +135,7 @@ INITSAVEBUF
 	WriteSaveBuf(buf, CWeather::WeatherTypeInList);
 	WriteSaveBuf(buf, TheCamera.CarZoomIndicator);
 	WriteSaveBuf(buf, TheCamera.PedZoomIndicator);
-VALIDATESAVEBUF(0xBC);
+VALIDATESAVEBUF(SIZE_OF_SIMPLEVARS);
 
 	// Save scripts, block is nested within the same block as simple vars for some reason
 	presize = buf;
@@ -143,10 +143,9 @@ VALIDATESAVEBUF(0xBC);
 	postsize = buf;
 	CTheScripts::SaveAllScripts(buf, &size);
 	CopySizeAndPreparePointer(presize, buf, postsize, reserved, size);
-	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, size))
+	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, size + SIZE_OF_SIMPLEVARS + 4))
 		return false;
-	blockSizes[0] = size + 0xBC;
-	blockIndex++;
+	totalSize += size + SIZE_OF_SIMPLEVARS;
 
 	// Save the rest
 	WRITE_BLOCK(CPools::SavePedPool);
@@ -169,10 +168,6 @@ VALIDATESAVEBUF(0xBC);
 	WRITE_BLOCK(CStreaming::MemoryCardSave);
 	WRITE_BLOCK(CPedType::Save);
 
-	totalSize = 0;
-	for (i = 0; i < BLOCK_COUNT; i++)
-		totalSize += blockSizes[i];
-
 	// Write padding
 	i = 0;
 	do {
@@ -188,10 +183,10 @@ VALIDATESAVEBUF(0xBC);
 	} while (i < 4);
 	
 	// Write checksum and close
-	CFileMgr::Write(file, (const char *) &CheckSum, 4);
+	CFileMgr::Write(file, (const char *) &CheckSum, sizeof(CheckSum));
 	if (CFileMgr::GetErrorReadWrite(file)) {
 		PcSaveHelper.nErrorCode = SAVESTATUS_ERR_SAVE_WRITE;
-		if (CFileMgr::CloseFile(file) == 0)
+		if (CloseFile(file))
 			PcSaveHelper.nErrorCode = SAVESTATUS_ERR_SAVE_CLOSE;
 		return false;
 	}
