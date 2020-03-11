@@ -9285,7 +9285,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	{
 		CollectParameters(&m_nIp, 5);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		float range = *(float*)&ScriptParams[3];
 		int mi = ScriptParams[4] < 0 ? CTheScripts::UsedObjectArray[-ScriptParams[4]].index : ScriptParams[4];
@@ -9364,7 +9364,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	{
 		CollectParameters(&m_nIp, 5);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		float destX = *(float*)&ScriptParams[3];
 		float destY = *(float*)&ScriptParams[4];
@@ -9379,7 +9379,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	{
 		CollectParameters(&m_nIp, 5);
 		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= -100.0f)
+		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		float destX = *(float*)&ScriptParams[3];
 		float destY = *(float*)&ScriptParams[4];
@@ -9943,7 +9943,7 @@ void CRunningScript::LocatePlayerCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10027,9 +10027,9 @@ void CRunningScript::LocatePlayerCharCommand(int32 command, uint32* pIp)
 	UpdateCompareFlag(result);
 	if (debug)
 #ifdef FIX_BUGS
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 #else
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : MAP_Z_LOW_LIMIT);
 #endif
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
@@ -10107,7 +10107,7 @@ void CRunningScript::LocatePlayerCarCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10211,7 +10211,7 @@ void CRunningScript::LocateCharCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10297,9 +10297,9 @@ void CRunningScript::LocateCharCharCommand(int32 command, uint32* pIp)
 	UpdateCompareFlag(result);
 	if (debug)
 #ifdef FIX_BUGS
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 #else
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : MAP_Z_LOW_LIMIT);
 #endif
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
@@ -10378,7 +10378,7 @@ void CRunningScript::LocateCharCarCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10456,7 +10456,7 @@ void CRunningScript::LocateCharObjectCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10528,7 +10528,7 @@ void CRunningScript::LocateCarCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10567,7 +10567,7 @@ void CRunningScript::LocateSniperBulletCommand(int32 command, uint32* pIp)
 	result = CBulletInfo::TestForSniperBullet(X - dX, X + dX, Y - dY, Y + dY, b3D ? Z - dZ : -1000.0f, b3D ? Z + dZ : 1000.0f);
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10684,7 +10684,7 @@ void CRunningScript::PlayerInAreaCheckCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
@@ -10807,7 +10807,7 @@ void CRunningScript::PlayerInAngledAreaCheckCommand(int32 command, uint32* pIp)
 	UpdateCompareFlag(result);
 	if (debug)
 		CTheScripts::HighlightImportantAngledArea((uint32)this + m_nIp, infX, infY, supX, supY,
-			rotatedSupX, rotatedSupY, rotatedInfX, rotatedInfY, b3D ? (infZ + supZ) / 2 : -100.0f);
+			rotatedSupX, rotatedSupY, rotatedInfX, rotatedInfY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugAngledCube(infX, infY, infZ, supX, supY, supZ,
@@ -10927,7 +10927,7 @@ void CRunningScript::CharInAreaCheckCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
@@ -11025,7 +11025,7 @@ void CRunningScript::CarInAreaCheckCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : -100.0f);
+		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
@@ -11212,25 +11212,438 @@ void CTheScripts::RenderTheScriptDebugLines()
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)0);
 }
 
-WRAPPER void CTheScripts::SaveAllScripts(uint8*, uint32*) { EAXJMP(0x4535E0); }
-WRAPPER void CTheScripts::LoadAllScripts(uint8*, uint32) { EAXJMP(0x453B30); }
-WRAPPER void CTheScripts::ClearSpaceForMissionEntity(const CVector&, CEntity*) { EAXJMP(0x454060); }
-WRAPPER void CTheScripts::HighlightImportantArea(uint32, float, float, float, float, float) { EAXJMP(0x454320); }
-WRAPPER void CTheScripts::HighlightImportantAngledArea(uint32, float, float, float, float, float, float, float, float, float) { EAXJMP(0x454430); }
-WRAPPER bool CTheScripts::IsPedStopped(CPed*) { EAXJMP(0x454670); }
-WRAPPER bool CTheScripts::IsPlayerStopped(CPlayerInfo*) { EAXJMP(0x4546C0); }
+#define SCRIPT_DATA_SIZE sizeof(CTheScripts::OnAMissionFlag) + sizeof(CTheScripts::BaseBriefIdForContact) + sizeof(CTheScripts::OnAMissionForContactFlag) +\
+	sizeof(CTheScripts::CollectiveArray) + 4 * sizeof(uint32) * MAX_NUM_BUILDING_SWAPS + 2 * sizeof(uint32) * MAX_NUM_INVISIBILITY_SETTINGS + 5 * sizeof(uint32)
+
+void CTheScripts::SaveAllScripts(uint8* buf, uint32* size)
+{
+INITSAVEBUF
+	uint32 varSpace = GetSizeOfVariableSpace();
+	uint32 runningScripts = 0;
+	for (CRunningScript* pScript = pActiveScripts; pScript; pScript = pScript->GetNext())
+		runningScripts++;
+	*size = sizeof(CRunningScript) * runningScripts + varSpace + SCRIPT_DATA_SIZE + SAVE_HEADER_SIZE + 3 * sizeof(uint32);
+	WriteSaveHeader(buf, 'S', 'C', 'R', '\0', *size - SAVE_HEADER_SIZE);
+	WriteSaveBuf(buf, varSpace);
+	for (uint32 i = 0; i < varSpace; i++)
+		WriteSaveBuf(buf, ScriptSpace[i]);
+	static_assert(SCRIPT_DATA_SIZE == 968, "CTheScripts::SaveAllScripts");
+	uint32 script_data_size = SCRIPT_DATA_SIZE;
+	WriteSaveBuf(buf, script_data_size);
+	WriteSaveBuf(buf, OnAMissionFlag);
+	for (uint32 i = 0; i < MAX_NUM_CONTACTS; i++) {
+		WriteSaveBuf(buf, OnAMissionForContactFlag[i]);
+		WriteSaveBuf(buf, BaseBriefIdForContact[i]);
+	}
+	for (uint32 i = 0; i < MAX_NUM_COLLECTIVES; i++)
+		WriteSaveBuf(buf, CollectiveArray[i]);
+	WriteSaveBuf(buf, NextFreeCollectiveIndex);
+	for (uint32 i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
+		CBuilding* pBuilding = BuildingSwapArray[i].m_pBuilding;
+		uint32 type, handle;
+		if (!pBuilding) {
+			type = 0;
+			handle = 0;
+		} else if (pBuilding->GetIsATreadable()) {
+			type = 1;
+			handle = CPools::GetTreadablePool()->GetJustIndex((CTreadable*)pBuilding) + 1;
+		} else {
+			type = 2;
+			handle = CPools::GetBuildingPool()->GetJustIndex(pBuilding) + 1;
+		}
+		WriteSaveBuf(buf, type);
+		WriteSaveBuf(buf, handle);
+		WriteSaveBuf(buf, BuildingSwapArray[i].m_nNewModel);
+		WriteSaveBuf(buf, BuildingSwapArray[i].m_nOldModel);
+	}
+	for (uint32 i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++) {
+		CEntity* pEntity = InvisibilitySettingArray[i];
+		uint32 type, handle;
+		if (!pEntity) {
+			type = 0;
+			handle = 0;
+		} else {
+			switch (pEntity->m_type) {
+			case ENTITY_TYPE_BUILDING:
+				if (((CBuilding*)pEntity)->GetIsATreadable()) {
+					type = 1;
+					handle = CPools::GetTreadablePool()->GetJustIndex((CTreadable*)pEntity) + 1;
+				} else {
+					type = 2;
+					handle = CPools::GetBuildingPool()->GetJustIndex((CBuilding*)pEntity) + 1;
+				}
+				break;
+			case ENTITY_TYPE_OBJECT:
+				type = 3;
+				handle = CPools::GetObjectPool()->GetJustIndex((CObject*)pEntity) + 1;
+				break;
+			case ENTITY_TYPE_DUMMY:
+				type = 4;
+				handle = CPools::GetDummyPool()->GetJustIndex((CDummy*)pEntity) + 1;
+			}
+		}
+		WriteSaveBuf(buf, type);
+		WriteSaveBuf(buf, handle);
+	}
+	WriteSaveBuf(buf, bUsingAMultiScriptFile);
+	WriteSaveBuf(buf, (uint8)0);
+	WriteSaveBuf(buf, (uint16)0);
+	WriteSaveBuf(buf, MainScriptSize);
+	WriteSaveBuf(buf, LargestMissionScriptSize);
+	WriteSaveBuf(buf, NumberOfMissionScripts);
+	WriteSaveBuf(buf, (uint16)0);
+	WriteSaveBuf(buf, runningScripts);
+	for (CRunningScript* pScript = pActiveScripts; pScript; pScript = pScript->GetNext())
+		WriteSaveBuf(buf, *pScript);
+VALIDATESAVEBUF(*size)
+}
+
+void CTheScripts::LoadAllScripts(uint8* buf, uint32 size)
+{
+	Init();
+INITSAVEBUF
+	CheckSaveHeader(buf, 'S', 'C', 'R', '\0', size - SAVE_HEADER_SIZE);
+	uint32 varSpace = ReadSaveBuf<uint32>(buf);
+	for (uint32 i = 0; i < varSpace; i++)
+		ScriptSpace[i] = ReadSaveBuf<uint8>(buf);
+	assert(ReadSaveBuf<uint32>(buf) == SCRIPT_DATA_SIZE);
+	OnAMissionFlag = ReadSaveBuf<uint32>(buf);
+	for (uint32 i = 0; i < MAX_NUM_CONTACTS; i++) {
+		OnAMissionForContactFlag[i] = ReadSaveBuf<uint32>(buf);
+		BaseBriefIdForContact[i] = ReadSaveBuf<uint32>(buf);
+	}
+	for (uint32 i = 0; i < MAX_NUM_COLLECTIVES; i++)
+		CollectiveArray[i] = ReadSaveBuf<tCollectiveData>(buf);
+	NextFreeCollectiveIndex = ReadSaveBuf<uint32>(buf);
+	for (uint32 i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
+		uint32 type = ReadSaveBuf<uint32>(buf);
+		uint32 handle = ReadSaveBuf<uint32>(buf);
+		switch (type) {
+		case 0:
+			BuildingSwapArray[i].m_pBuilding = nil;
+			break;
+		case 1:
+			BuildingSwapArray[i].m_pBuilding = CPools::GetTreadablePool()->GetSlot(handle - 1);
+			break;
+		case 2:
+			BuildingSwapArray[i].m_pBuilding = CPools::GetBuildingPool()->GetSlot(handle - 1);
+			break;
+		default:
+			assert(false);
+		}
+		BuildingSwapArray[i].m_nNewModel = ReadSaveBuf<uint32>(buf);
+		BuildingSwapArray[i].m_nOldModel = ReadSaveBuf<uint32>(buf);
+		if (BuildingSwapArray[i].m_pBuilding)
+			BuildingSwapArray[i].m_pBuilding->ReplaceWithNewModel(BuildingSwapArray[i].m_nNewModel);
+	}
+	for (uint32 i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++) {
+		uint32 type = ReadSaveBuf<uint32>(buf);
+		uint32 handle = ReadSaveBuf<uint32>(buf);
+		switch (type) {
+		case 0:
+			InvisibilitySettingArray[i] = nil;
+			break;
+		case 1:
+			InvisibilitySettingArray[i] = CPools::GetTreadablePool()->GetSlot(handle - 1);
+			break;
+		case 2:
+			InvisibilitySettingArray[i] = CPools::GetBuildingPool()->GetSlot(handle - 1);
+			break;
+		case 3:
+			InvisibilitySettingArray[i] = CPools::GetObjectPool()->GetSlot(handle - 1);
+			break;
+		case 4:
+			InvisibilitySettingArray[i] = CPools::GetDummyPool()->GetSlot(handle - 1);
+		default:
+			assert(false);
+		}
+		if (InvisibilitySettingArray[i])
+			InvisibilitySettingArray[i]->bIsVisible = false;
+	}
+	assert(ReadSaveBuf<bool>(buf) == bUsingAMultiScriptFile);
+	ReadSaveBuf<uint8>(buf);
+	ReadSaveBuf<uint16>(buf);
+	assert(ReadSaveBuf<uint32>(buf) == MainScriptSize);
+	assert(ReadSaveBuf<uint32>(buf) == LargestMissionScriptSize);
+	assert(ReadSaveBuf<uint16>(buf) == NumberOfMissionScripts);
+	ReadSaveBuf<uint16>(buf);
+	uint32 runningScripts = ReadSaveBuf<uint32>(buf);
+	for (uint32 i = 0; i < runningScripts; i++)
+		StartNewScript(0)->BuildFromSaved(ReadSaveBuf<CRunningScript>(buf));
+VALIDATESAVEBUF(size)
+}
+
+#undef SCRIPT_DATA_SIZE
+
+void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntity)
+{
+	static CColPoint aTempColPoints[32];
+	int16 entities = 0;
+	CEntity* aEntities[16];
+	CWorld::FindObjectsKindaColliding(pos, pEntity->GetBoundRadius(), false, &entities, 16, aEntities, false, true, true, false, false);
+	if (entities <= 0)
+		return;
+	for (uint16 i = 0; i < entities; i++) {
+		if (aEntities[i] != pEntity && aEntities[i]->IsPed() && ((CPed*)aEntities[i])->bInVehicle)
+			aEntities[i] = nil;
+	}
+	for (uint16 i = 0; i < entities; i++) {
+		if (aEntities[i] == pEntity || !aEntities[i])
+			continue;
+		CEntity* pFound = aEntities[i];
+		int cols;
+		if (CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel()->numLines <= 0)
+			cols = CCollision::ProcessColModels(pEntity->GetMatrix(), *CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel(),
+				pFound->GetMatrix(), *CModelInfo::GetModelInfo(pFound->GetModelIndex())->GetColModel(), aTempColPoints, nil, nil);
+		else {
+			float lines[4];
+			lines[0] = lines[1] = lines[2] = lines[3] = 1.0f;
+			CColPoint tmp;
+			cols = CCollision::ProcessColModels(pEntity->GetMatrix(), *CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel(),
+				pFound->GetMatrix(), *CModelInfo::GetModelInfo(pFound->GetModelIndex())->GetColModel(), aTempColPoints, &tmp, lines);
+		}
+		if (cols <= 0)
+			continue;
+		switch (pFound->m_type) {
+		case ENTITY_TYPE_VEHICLE:
+		{
+			printf("Will try to delete a vehicle where a mission entity should be\n");
+			CVehicle* pVehicle = (CVehicle*)pFound;
+			if (pVehicle->bIsLocked || !pVehicle->CanBeDeleted())
+				break;
+			if (pVehicle->pDriver) {
+				CPopulation::RemovePed(pVehicle->pDriver);
+				pVehicle->pDriver = nil;
+			}
+			for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++) {
+				if (pVehicle->pPassengers[i]) {
+					CPopulation::RemovePed(pVehicle->pPassengers[i]);
+					pVehicle->pPassengers[i] = 0;
+					pVehicle->m_nNumPassengers--;
+				}
+			}
+			CCarCtrl::RemoveFromInterestingVehicleList(pVehicle);
+			CWorld::Remove(pVehicle);
+			delete pVehicle;
+			break;
+		}
+		case ENTITY_TYPE_PED:
+		{
+			CPed* pPed = (CPed*)pFound;
+			if (pPed->IsPlayer() || !pPed->CanBeDeleted())
+				break;
+			CPopulation::RemovePed(pPed);
+			printf("Deleted a ped where a mission entity should be\n");
+			break;
+		}
+		}
+	}
+}
+
+void CTheScripts::HighlightImportantArea(uint32 id, float x1, float y1, float x2, float y2, float z)
+{
+	float infX, infY, supX, supY;
+	if (x1 < x2) {
+		infX = x1;
+		supX = x2;
+	} else {
+		infX = x2;
+		supX = x1;
+	}
+	if (y1 < y2) {
+		infY = y1;
+		supY = y2;
+	}
+	else {
+		infY = y2;
+		supY = y1;
+	}
+	CVector center;
+	center.x = (infX + supX) / 2;
+	center.y = (infY + supY) / 2;
+	center.z = (z <= MAP_Z_LOW_LIMIT) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
+	CShadows::RenderIndicatorShadow(id, 2, gpGoalTex, &center, supX - center.x, 0.0f, 0.0f, center.y - supY, 0);
+}
+
+void CTheScripts::HighlightImportantAngledArea(uint32 id, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float z)
+{
+	float infX, infY, supX, supY, X, Y;
+	X = (x1 + x2) / 2;
+	Y = (y1 + y2) / 2;
+	supX = infX = X;
+	supY = infY = Y;
+	X = (x2 + x3) / 2;
+	Y = (y2 + y3) / 2;
+	infX = min(infX, X);
+	supX = max(supX, X);
+	infY = min(infY, Y);
+	supY = max(supY, Y);
+	X = (x3 + x4) / 2;
+	Y = (y3 + y4) / 2;
+	infX = min(infX, X);
+	supX = max(supX, X);
+	infY = min(infY, Y);
+	supY = max(supY, Y);
+	X = (x4 + x1) / 2;
+	Y = (y4 + y1) / 2;
+	infX = min(infX, X);
+	supX = max(supX, X);
+	infY = min(infY, Y);
+	supY = max(supY, Y);
+	CVector center;
+	center.x = (infX + supX) / 2;
+	center.y = (infY + supY) / 2;
+	center.z = (z <= MAP_Z_LOW_LIMIT) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
+	CShadows::RenderIndicatorShadow(id, 2, gpGoalTex, &center, supX - center.x, 0.0f, 0.0f, center.y - supY, 0);
+}
+
+bool CTheScripts::IsPedStopped(CPed* pPed)
+{
+	if (pPed->bInVehicle)
+		return IsVehicleStopped(pPed->m_pMyVehicle);
+	return pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL;
+}
+
+bool CTheScripts::IsPlayerStopped(CPlayerInfo* pPlayer)
+{
+	CPed* pPed = pPlayer->m_pPed;
+	if (pPed->bInVehicle)
+		return IsVehicleStopped(pPed->m_pMyVehicle);
+	if (RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_RUN_STOP) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_RUN_STOP_R) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_LAUNCH) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_GLIDE))
+		return false;
+	return pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL;
+}
 
 bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle)
 {
 	return 0.01f * CTimer::GetTimeStep() >= pVehicle->m_fDistanceTravelled;
 }
 
-WRAPPER void CTheScripts::CleanUpThisVehicle(CVehicle*) { EAXJMP(0x4548D0); }
-WRAPPER void CTheScripts::CleanUpThisPed(CPed*) { EAXJMP(0x4547A0); }
-WRAPPER void CTheScripts::CleanUpThisObject(CObject*) { EAXJMP(0x454910); }
-WRAPPER void CTheScripts::ReadObjectNamesFromScript() { EAXJMP(0x454960); }
-WRAPPER void CTheScripts::UpdateObjectIndices() { EAXJMP(0x454AD0); }
-WRAPPER void CTheScripts::ReadMultiScriptFileOffsetsFromScript() { EAXJMP(0x454BC0); }
+void CTheScripts::CleanUpThisPed(CPed* pPed)
+{
+	if (!pPed)
+		return;
+	if (pPed->CharCreatedBy != MISSION_CHAR)
+		return;
+	pPed->CharCreatedBy = RANDOM_CHAR;
+	if (pPed->m_nPedType == PEDTYPE_PROSTITUTE)
+		pPed->m_objectiveTimer = CTimer::GetTimeInMilliseconds() + 30000;
+	if (pPed->bInVehicle) {
+		if (pPed->m_pMyVehicle->pDriver == pPed) {
+			if (pPed->m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR) {
+				CCarCtrl::JoinCarWithRoadSystem(pPed->m_pMyVehicle);
+				pPed->m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
+			}
+		}
+		else {
+			if (pPed->m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR) {
+				pPed->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pPed->m_pMyVehicle);
+				pPed->bWanderPathAfterExitingCar = true;
+			}
+		}
+	}
+	bool flees = false;
+	PedState state;
+	eMoveState ms;
+	if (pPed->m_nPedState == PED_FLEE_ENTITY || pPed->m_nPedState == PED_FLEE_POS) {
+		ms = pPed->m_nMoveState;
+		state = pPed->m_nPedState;
+		flees = true;
+	}
+	pPed->ClearObjective();
+	pPed->bRespondsToThreats = true;
+	pPed->bScriptObjectiveCompleted = false;
+	pPed->ClearLeader();
+	if (pPed->IsPedInControl())
+		pPed->SetWanderPath(CGeneral::GetRandomNumber() & 7);
+	if (flees) {
+		pPed->m_nPedState = state;
+		pPed->SetMoveState(ms);
+	}
+	--CPopulation::ms_nTotalMissionPeds;
+}
+
+void CTheScripts::CleanUpThisVehicle(CVehicle* pVehicle)
+{
+	if (!pVehicle)
+		return;
+	if (pVehicle->VehicleCreatedBy != MISSION_VEHICLE)
+		return;
+	pVehicle->bIsLocked = false;
+	CCarCtrl::RemoveFromInterestingVehicleList(pVehicle);
+	pVehicle->VehicleCreatedBy = RANDOM_VEHICLE;
+	++CCarCtrl::NumRandomCars;
+	--CCarCtrl::NumMissionCars;
+}
+
+void CTheScripts::CleanUpThisObject(CObject* pObject)
+{
+	if (!pObject)
+		return;
+	if (pObject->ObjectCreatedBy != MISSION_OBJECT)
+		return;
+	pObject->ObjectCreatedBy = TEMP_OBJECT;
+	pObject->m_nEndOfLifeTime = CTimer::GetTimeInMilliseconds() + 20000;
+	pObject->m_nRefModelIndex = -1;
+	pObject->bUseVehicleColours = false;
+	++CObject::nNoTempObjects;
+}
+
+void CTheScripts::ReadObjectNamesFromScript()
+{
+	int32 varSpace = GetSizeOfVariableSpace();
+	uint32 ip = varSpace + 8;
+	NumberOfUsedObjects = Read2BytesFromScript(&ip);
+	ip += 2;
+	for (uint16 i = 0; i < NumberOfUsedObjects; i++) {
+		for (int j = 0; j < USED_OBJECT_NAME_LENGTH; j++)
+			UsedObjectArray[i].name[j] = ScriptSpace[ip++];
+		UsedObjectArray[i].index = 0;
+	}
+}
+
+void CTheScripts::UpdateObjectIndices()
+{
+	char name[USED_OBJECT_NAME_LENGTH];
+	char error[112];
+	for (int i = 1; i < NumberOfUsedObjects; i++) {
+		bool found = false;
+		for (int j = 0; j < MODELINFOSIZE && !found; j++) {
+			CBaseModelInfo* pModel = CModelInfo::GetModelInfo(j);
+			if (!pModel)
+				continue;
+			strcpy(name, pModel->GetName());
+			for (int k = 0; k < USED_OBJECT_NAME_LENGTH; k++)
+				name[k] = toupper(name[k]);
+			if (strcmp(name, UsedObjectArray[i].name) == 0) {
+				found = true;
+				UsedObjectArray[i].index = j;
+			}
+		}
+		if (!found) {
+			sprintf(error, "CTheScripts::UpdateObjectIndices - Couldn't find %s", UsedObjectArray[i].name);
+			debug("%s\n", error);
+		}
+	}
+}
+
+void CTheScripts::ReadMultiScriptFileOffsetsFromScript()
+{
+	int32 varSpace = GetSizeOfVariableSpace();
+	uint32 ip = varSpace + 3;
+	int32 objectSize = Read4BytesFromScript(&ip);
+	ip = objectSize + 8;
+	MainScriptSize = Read4BytesFromScript(&ip);
+	LargestMissionScriptSize = Read4BytesFromScript(&ip);
+	NumberOfMissionScripts = Read2BytesFromScript(&ip);
+	ip += 2;
+	for (int i = 0; i < NumberOfMissionScripts; i++) {
+		MultiScriptArray[i] = Read4BytesFromScript(&ip);
+	}
+}
 
 STARTPATCHES
 InjectHook(0x438790, &CTheScripts::Init, PATCH_JUMP);
@@ -11241,7 +11654,7 @@ InjectHook(0x44FD10, &CTheScripts::UndoBuildingSwaps, PATCH_JUMP);
 InjectHook(0x44FD60, &CTheScripts::UndoEntityVisibilitySettings, PATCH_JUMP);
 InjectHook(0x4534E0, &CTheScripts::ScriptDebugLine3D, PATCH_JUMP);
 InjectHook(0x453550, &CTheScripts::RenderTheScriptDebugLines, PATCH_JUMP);
-//InjectHook(0x4535E0, &CTheScripts::SaveAllScripts, PATCH_JUMP);
-//InjectHook(0x453B30, &CTheScripts::LoadAllScripts, PATCH_JUMP);
-//InjectHook(0x454060, &CTheScripts::ClearSpaceForMissionEntity, PATCH_JUMP);
+InjectHook(0x4535E0, &CTheScripts::SaveAllScripts, PATCH_JUMP);
+InjectHook(0x453B30, &CTheScripts::LoadAllScripts, PATCH_JUMP);
+InjectHook(0x454060, &CTheScripts::ClearSpaceForMissionEntity, PATCH_JUMP);
 ENDPATCHES
