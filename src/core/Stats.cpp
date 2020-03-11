@@ -1,5 +1,8 @@
 #include "common.h"
+#include "patcher.h"
 #include "Stats.h"
+
+WRAPPER void CStats::SaveStats(uint8 *buf, uint32 *size) { EAXJMP(0x4ab3e0); }
 
 int32 &CStats::DaysPassed = *(int32*)0x8F2BB8;
 int32 &CStats::HeadsPopped = *(int32*)0x8F647C;

@@ -3,6 +3,8 @@
 #include "AudioScriptObject.h"
 #include "Pools.h"
 
+WRAPPER void cAudioScriptObject::SaveAllAudioScriptObjects(uint8 *buf, uint32 *size) { EAXJMP(0x57c460); }
+
 void
 cAudioScriptObject::Reset()
 {
