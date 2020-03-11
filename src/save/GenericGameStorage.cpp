@@ -3,6 +3,7 @@
 #include "patcher.h"
 #include "Camera.h"
 #include "CarGen.h"
+#include "Cranes.h"
 #include "Clock.h"
 #include "Date.h"
 #include "FileMgr.h"
@@ -10,6 +11,7 @@
 #include "Gangs.h"
 #include "Garages.h"
 #include "GenericGameStorage.h"
+#include "Pad.h"
 #include "PathFind.h"
 #include "PCSave.h"
 #include "Phones.h"
@@ -21,10 +23,11 @@
 #include "Script.h"
 #include "Stats.h"
 #include "Streaming.h"
+#include "Weather.h"
 #include "World.h"
 #include "Zones.h"
 
-const int SIZE_OF_ONE_GAME_IN_BYTES = 201729;
+const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 
 char (&DefaultPCSaveFileName)[260] = *(char(*)[260])*(uintptr*)0x8E28C0;
 char (&ValidSaveName)[260] = *(char(*)[260])*(uintptr*)0x8E2CBC;
@@ -46,33 +49,85 @@ WRAPPER bool GenericLoad() { EAXJMP(0x590A00); }
 bool
 GenericSave(int file)
 {
-	/*char *tmpSaveName;
-	wchar saveName[24];
-	SYSTEMTIME saveTime;*/
-
-	// TODO: Use GetLastMissionPassedName() to get this
-	//tmpSaveName = CStats::LastMissionPassedName;
-
-	//AsciiToUnicode(tmpSaveName, saveName);
-
-	//// TODO: some stuff here
-
-	//memcpy(work_buff, saveName, 0x30);
-	//GetLocalTime((SYSTEMTIME *)(work_buff + 0x30));
-	//*((uint32 *)(work_buff + 0x40)) = SIZE_OF_ONE_GAME_IN_BYTES;
-	//*((uint32 *)(work_buff + 0x44)) = CGame::currLevel;
-	//
-	//PcSaveHelper.PcClassSaveRoutine(file, work_buff, 0xE8);
-
+	static const int NameBufferSize = 0x30;
+	static const int MaxNameLength = 22;
+	static const char *NameSuffix = "'...\0";
 
 	uint8 *buf;
 	uint8 *tmpbuf;
 	uint8 *postsize;
 	uint32 size;
 	uint32 reserved;
-	bool result;
+	wchar *saveName;
+	wchar suffix[6];
+	wchar nameBuf[MaxNameLength] = { 0 };
+	int nameLen;
+	CPad *currPad;
 
-	// TODO: simplevars and scripts
+	CheckSum = 0;
+	buf = work_buff;
+
+	saveName = TheText.Get(CStats::LastMissionPassedName);
+	if (saveName[0] != '\0') {
+		AsciiToUnicode(NameSuffix, suffix);
+		TextCopy(nameBuf, saveName);
+		nameLen = UnicodeStrlen(nameBuf);
+		nameBuf[nameLen] = '\0';
+		if (nameLen > MaxNameLength)
+			TextCopy(nameBuf + MaxNameLength, suffix);
+	}
+
+	memcpy(buf, saveName, NameBufferSize);
+	buf += NameBufferSize;
+	GetLocalTime((LPSYSTEMTIME) buf);
+	buf += sizeof(SYSTEMTIME);
+	WriteSaveBuf(buf, SIZE_OF_ONE_GAME_IN_BYTES);
+	WriteSaveBuf(buf, CGame::currLevel);
+	WriteSaveBuf(buf, TheCamera.m_matrix.m_matrix.pos.x);
+	WriteSaveBuf(buf, TheCamera.m_matrix.m_matrix.pos.y);
+	WriteSaveBuf(buf, TheCamera.m_matrix.m_matrix.pos.z);
+	WriteSaveBuf(buf, CClock::ms_nMillisecondsPerGameMinute);
+	WriteSaveBuf(buf, CClock::ms_nLastClockTick);
+	WriteSaveBuf(buf, CClock::ms_nGameClockHours);
+	buf += 3;
+	WriteSaveBuf(buf, CClock::ms_nGameClockMinutes);		// TOOD: aligned WriteSaveBuf?
+	buf += 3;
+	currPad = CPad::GetPad(0);
+	WriteSaveBuf(buf, currPad->Mode);
+	buf += 2;
+	WriteSaveBuf(buf, CTimer::m_snTimeInMilliseconds);
+	WriteSaveBuf(buf, CTimer::ms_fTimeScale);
+	WriteSaveBuf(buf, CTimer::ms_fTimeStep);
+	WriteSaveBuf(buf, CTimer::ms_fTimeStepNonClipped);
+	WriteSaveBuf(buf, CTimer::m_FrameCounter);
+	WriteSaveBuf(buf, 1.0f);		// CTimeStep::ms_fTimeStep;
+	WriteSaveBuf(buf, 1.0f);		// CTimeStep::ms_fFramesPerUpdate;
+	WriteSaveBuf(buf, 1.0f);		// CTimeStep::ms_fTimeScale;
+	WriteSaveBuf(buf, CWeather::OldWeatherType);
+	buf += 2;
+	WriteSaveBuf(buf, CWeather::NewWeatherType);
+	buf += 2;
+	WriteSaveBuf(buf, CWeather::ForcedWeatherType);
+	buf += 2;
+	WriteSaveBuf(buf, CWeather::InterpolationValue);
+	WriteSaveBuf(buf, CompileDateAndTime.m_nSecond);
+	WriteSaveBuf(buf, CompileDateAndTime.m_nMinute);
+	WriteSaveBuf(buf, CompileDateAndTime.m_nHour);
+	WriteSaveBuf(buf, CompileDateAndTime.m_nDay);
+	WriteSaveBuf(buf, CompileDateAndTime.m_nMonth);
+	WriteSaveBuf(buf, CompileDateAndTime.m_nYear);
+	WriteSaveBuf(buf, CWeather::WeatherTypeInList);
+	WriteSaveBuf(buf, TheCamera.m_fCarZoomValueScript);		// TODO: unconfirmed
+	WriteSaveBuf(buf, TheCamera.m_fPedZoomValueScript);		// TODO: unconfirmed
+
+	size = 0;
+	reserved = 0;
+
+	MakeSpaceForSizeInBufferPointer(tmpbuf, buf, postsize);
+	CTheScripts::SaveAllScripts(buf, &size);
+	CopySizeAndPreparePointer(tmpbuf, buf, postsize, reserved, size);
+	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, size))
+		return false;
 
 	for (int i = 1; i < 19; i++) {
 		buf = work_buff;
@@ -80,12 +135,12 @@ GenericSave(int file)
 		reserved = 0;
 		MakeSpaceForSizeInBufferPointer(tmpbuf, buf, postsize);
 		switch (i) {
-		case 1: break;
-		case 2: break;
-		case 3: break;
-		case 4: break;
+		case 1: CPools::SavePedPool(buf, &size); break;
+		case 2: CGarages::Save(buf, &size); break;
+		case 3: CPools::SaveVehiclePool(buf, &size); break;
+		case 4: CPools::SaveObjectPool(buf, &size); break;
 		case 5: ThePaths.Save(buf, &size); break;
-		case 6: break;
+		case 6: CCranes::Save(buf, &size); break;
 		case 7: CPickups::Save(buf, &size); break;
 		case 8: gPhoneInfo.Save(buf, &size); break;
 		case 9: CRestart::SaveAllRestartPoints(buf, &size); break;
@@ -102,11 +157,8 @@ GenericSave(int file)
 		}
 
 		CopySizeAndPreparePointer(tmpbuf, buf, postsize, reserved, size);
-		result = PcSaveHelper.PcClassSaveRoutine(file, work_buff, size);
-		if (!result)
-		{
+		if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, size))
 			return false;
-		}
 	}
 
 	
@@ -163,7 +215,7 @@ DoGameSpecificStuffAfterSucessLoad()
 	StillToFadeOut = true;
 	JustLoadedDontFadeInYet = true;
 	CTheScripts::Process();
-}
+ }
 
 bool
 CheckSlotDataValid(int32 slot)
