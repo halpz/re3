@@ -241,7 +241,7 @@ DoGameSpecificStuffAfterSucessLoad()
 	StillToFadeOut = true;
 	JustLoadedDontFadeInYet = true;
 	CTheScripts::Process();
- }
+}
 
 bool
 CheckSlotDataValid(int32 slot)
