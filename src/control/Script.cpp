@@ -11212,8 +11212,8 @@ void CTheScripts::RenderTheScriptDebugLines()
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)0);
 }
 
-WRAPPER void CTheScripts::SaveAllScripts(uint8*, uint32*) { EAXJMP(0x4535E0); }
-WRAPPER void CTheScripts::LoadAllScripts(uint8*, uint32) { EAXJMP(0x453B30); }
+WRAPPER void CTheScripts::SaveAllScripts(uint8 *buf, uint32 *size) { EAXJMP(0x4535E0); }
+WRAPPER void CTheScripts::LoadAllScripts(uint8 *buf, uint32 size) { EAXJMP(0x453B30); }
 WRAPPER void CTheScripts::ClearSpaceForMissionEntity(const CVector&, CEntity*) { EAXJMP(0x454060); }
 WRAPPER void CTheScripts::HighlightImportantArea(uint32, float, float, float, float, float) { EAXJMP(0x454320); }
 WRAPPER void CTheScripts::HighlightImportantAngledArea(uint32, float, float, float, float, float, float, float, float, float) { EAXJMP(0x454430); }

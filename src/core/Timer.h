@@ -2,6 +2,7 @@
 
 class CTimer
 {
+public:
 	static uint32 &m_snTimeInMilliseconds;
 	static uint32 &m_snTimeInMillisecondsPauseMode;
 	static uint32 &m_snTimeInMillisecondsNonClipped;
@@ -12,7 +13,7 @@ class CTimer
 	static float &ms_fTimeStepNonClipped;
 	static bool  &m_UserPause;
 	static bool  &m_CodePause;
-public:
+
 	static float GetTimeStep(void) { return ms_fTimeStep; }
 	static void SetTimeStep(float ts) { ms_fTimeStep = ts; }
 	static float GetTimeStepInSeconds() { return ms_fTimeStep / 50.0f; }
