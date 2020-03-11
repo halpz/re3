@@ -178,6 +178,7 @@ public:
 extern RwTexture *&gpBloodPoolTex;
 extern RwTexture *&gpShadowExplosionTex;
 extern RwTexture *&gpShadowHeadLightsTex;
+extern RwTexture *&gpGoalTex;
 extern RwTexture *&gpOutline1Tex;
 extern RwTexture *&gpOutline2Tex;
 extern RwTexture *&gpOutline3Tex;

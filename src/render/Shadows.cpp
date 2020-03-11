@@ -40,6 +40,7 @@ RwTexture *&gpGoalMarkerTex = *(RwTexture **)0x94142C;
 RwTexture *&gpWalkDontTex = *(RwTexture **)0x95CB4C;
 RwTexture *&gpCrackedGlassTex = *(RwTexture **)0x95CB94;
 RwTexture *&gpPostShadowTex = *(RwTexture **)0x8F59D4;
+RwTexture *&gpGoalTex = *(RwTexture**)0x94142C;
 
 #if 1
 int16            CShadows::ShadowsStoredToBeRendered;
