@@ -63,7 +63,6 @@ CMotionBlurStreaks
 CObject
 CPacManPickups
 CPedPath
-CRadar
 CRecordDataForChase
 CRoadBlocks
 CRubbish

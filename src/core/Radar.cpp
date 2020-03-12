@@ -14,55 +14,56 @@
 #include "TxdStore.h"
 #include "World.h"
 #include "Streaming.h"
+#include "SpecialFX.h"
 
 float &CRadar::m_radarRange = *(float*)0x8E281C;
 CBlip (&CRadar::ms_RadarTrace)[NUMRADARBLIPS] = *(CBlip(*)[NUMRADARBLIPS]) * (uintptr*)0x6ED5E0;
 CVector2D &vec2DRadarOrigin = *(CVector2D*)0x6299B8;
-int *gRadarTxdIds = (int*)0x6299C0;
+int32 gRadarTxdIds[64];// = (int*)0x6299C0;
 
-CSprite2d *CRadar::AsukaSprite = (CSprite2d*)0x8F1A40;
-CSprite2d *CRadar::BombSprite = (CSprite2d*)0x8F5FB4;
-CSprite2d *CRadar::CatSprite = (CSprite2d*)0x885B24;
-CSprite2d *CRadar::CentreSprite = (CSprite2d*)0x8F6268;
-CSprite2d *CRadar::CopcarSprite = (CSprite2d*)0x8F1A2C;
-CSprite2d *CRadar::DonSprite = (CSprite2d*)0x8F2BE0;
-CSprite2d *CRadar::EightSprite = (CSprite2d*)0x8F2BCC;
-CSprite2d *CRadar::ElSprite = (CSprite2d*)0x8F1B80;
-CSprite2d *CRadar::IceSprite = (CSprite2d*)0x9415FC;
-CSprite2d *CRadar::JoeySprite = (CSprite2d*)0x8F2C00;
-CSprite2d *CRadar::KenjiSprite = (CSprite2d*)0x8F2C68;
-CSprite2d *CRadar::LizSprite = (CSprite2d*)0x8F5830;
-CSprite2d *CRadar::LuigiSprite = (CSprite2d*)0x8F1A3C;
-CSprite2d *CRadar::NorthSprite = (CSprite2d*)0x8F6274;
-CSprite2d *CRadar::RaySprite = (CSprite2d*)0x8E2A7C;
-CSprite2d *CRadar::SalSprite = (CSprite2d*)0x8F29EC;
-CSprite2d *CRadar::SaveSprite = (CSprite2d*)0x8F5F74;
-CSprite2d *CRadar::SpraySprite = (CSprite2d*)0x94307C;
-CSprite2d *CRadar::TonySprite = (CSprite2d*)0x885B58;
-CSprite2d *CRadar::WeaponSprite = (CSprite2d*)0x941534;
+CSprite2d CRadar::AsukaSprite;// = *(CSprite2d*)0x8F1A40;
+CSprite2d CRadar::BombSprite;// = (CSprite2d*)0x8F5FB4;
+CSprite2d CRadar::CatSprite;// = (CSprite2d*)0x885B24;
+CSprite2d CRadar::CentreSprite;// = (CSprite2d*)0x8F6268;
+CSprite2d CRadar::CopcarSprite;// = (CSprite2d*)0x8F1A2C;
+CSprite2d CRadar::DonSprite;// = (CSprite2d*)0x8F2BE0;
+CSprite2d CRadar::EightSprite;// = (CSprite2d*)0x8F2BCC;
+CSprite2d CRadar::ElSprite;// = (CSprite2d*)0x8F1B80;
+CSprite2d CRadar::IceSprite;// = (CSprite2d*)0x9415FC;
+CSprite2d CRadar::JoeySprite;// = (CSprite2d*)0x8F2C00;
+CSprite2d CRadar::KenjiSprite;// = (CSprite2d*)0x8F2C68;
+CSprite2d CRadar::LizSprite;// = (CSprite2d*)0x8F5830;
+CSprite2d CRadar::LuigiSprite;// = (CSprite2d*)0x8F1A3C;
+CSprite2d CRadar::NorthSprite;// = (CSprite2d*)0x8F6274;
+CSprite2d CRadar::RaySprite;// = (CSprite2d*)0x8E2A7C;
+CSprite2d CRadar::SalSprite;// = (CSprite2d*)0x8F29EC;
+CSprite2d CRadar::SaveSprite;// = (CSprite2d*)0x8F5F74;
+CSprite2d CRadar::SpraySprite;// = (CSprite2d*)0x94307C;
+CSprite2d CRadar::TonySprite;// = (CSprite2d*)0x885B58;
+CSprite2d CRadar::WeaponSprite;// = (CSprite2d*)0x941534;
 
 CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = { 
 	nil,
-	AsukaSprite,
-	BombSprite,
-	CatSprite,
-	CentreSprite,
-	CopcarSprite,
-	DonSprite,
-	EightSprite,
-	ElSprite,
-	IceSprite,
-	JoeySprite,
-	KenjiSprite,
-	LizSprite,
-	LuigiSprite,
-	NorthSprite,
-	RaySprite,
-	SalSprite,
-	SaveSprite,
-	SpraySprite,
-	TonySprite,
-	WeaponSprite
+	&AsukaSprite,
+	&BombSprite,
+	&CatSprite,
+	&CentreSprite,
+	&CopcarSprite,
+	&DonSprite,
+	&EightSprite,
+	&ElSprite,
+	&IceSprite,
+	&JoeySprite,
+	&KenjiSprite,
+	&LizSprite,
+	&LuigiSprite,
+	&NorthSprite,
+	&RaySprite,
+	&SalSprite,
+	&SaveSprite,
+	&SpraySprite,
+	&TonySprite,
+	&WeaponSprite
 };
 
 #define RADAR_NUM_TILES (8)
@@ -89,48 +90,63 @@ uint8 CRadar::CalculateBlipAlpha(float dist)
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CRadar::ChangeBlipBrightness(int32, int32) { EAXJMP(0x4A57A0); }
 #else
 void CRadar::ChangeBlipBrightness(int32 i, int32 bright)
 {
-
+	int index = GetActualBlipArrayIndex(i);
+	if (index != -1)
+		ms_RadarTrace[index].m_bDim = bright != 1;
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CRadar::ChangeBlipColour(int32, int32) { EAXJMP(0x4A5770); }
 #else
-void CRadar::ChangeBlipColour(int32 i, int32)
+void CRadar::ChangeBlipColour(int32 i, int32 color)
 {
-
+	int index = GetActualBlipArrayIndex(i);
+	if (index != -1)
+		ms_RadarTrace[index].m_nColor = color;
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CRadar::ChangeBlipDisplay(int32, eBlipDisplay) { EAXJMP(0x4A5810); }
 #else
 void CRadar::ChangeBlipDisplay(int32 i, eBlipDisplay display)
 {
-
+	int index = GetActualBlipArrayIndex(i);
+	if (index != -1)
+		ms_RadarTrace[index].m_eBlipDisplay = display;
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CRadar::ChangeBlipScale(int32, int32) { EAXJMP(0x4A57E0); }
 #else
 void CRadar::ChangeBlipScale(int32 i, int32 scale)
 {
-
+	int index = GetActualBlipArrayIndex(i);
+	if (index != -1)
+		ms_RadarTrace[index].m_wScale = scale;
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CRadar::ClearBlip(int32) { EAXJMP(0x4A5720); }
 #else
 void CRadar::ClearBlip(int32 i)
 {
-
+	int index = GetActualBlipArrayIndex(i);
+	if (index != -1) {
+		SetRadarMarkerState(index, false);
+		ms_RadarTrace[index].m_bInUse = false;
+		ms_RadarTrace[index].m_eBlipType = BLIP_NONE;
+		ms_RadarTrace[index].m_eBlipDisplay = BLIP_DISPLAY_NEITHER;
+		ms_RadarTrace[index].m_IconID = RADAR_SPRITE_NONE;
+	}
 }
 #endif
 
@@ -247,12 +263,59 @@ bool CRadar::DisplayThisBlip(int32 counter)
 	}
 }
 
-#if 1
+#if 0
 WRAPPER void CRadar::Draw3dMarkers() { EAXJMP(0x4A4C70); }
 #else
 void CRadar::Draw3dMarkers()
 {
-
+	for (int i = 0; i < NUMRADARBLIPS; i++) {
+		if (ms_RadarTrace[i].m_bInUse) {
+			switch (ms_RadarTrace[i].m_eBlipType) {
+			case BLIP_CAR:
+			{
+				CEntity *entity = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[i].m_nEntityHandle);
+				if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
+					CVector pos = entity->GetPosition();
+					pos.z += 1.2f * CModelInfo::GetModelInfo(entity->GetModelIndex())->GetColModel()->boundingBox.max.z + 2.5f;
+					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 2.5f, 0, 128, 255, 255, 1024, 0.2f, 5);
+				}
+				break;
+			}
+			case BLIP_CHAR:
+			{
+				CEntity *entity = CPools::GetPedPool()->GetAt(ms_RadarTrace[i].m_nEntityHandle);
+				if (entity != nil) {
+					if (((CPed*)entity)->InVehicle())
+						entity = ((CPed * )entity)->m_pMyVehicle;
+				}
+				if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
+					CVector pos = entity->GetPosition();
+					pos.z += 3.0f;
+					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 1.5f, 0, 128, 255, 255, 1024, 0.2f, 5);
+				}
+				break;
+			}
+			case BLIP_OBJECT:
+			{
+				CEntity *entity = CPools::GetObjectPool()->GetAt(ms_RadarTrace[i].m_nEntityHandle);
+				if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
+					CVector pos = entity->GetPosition();
+					pos.z += CModelInfo::GetModelInfo(entity->GetModelIndex())->GetColModel()->boundingBox.max.z + 1.0f + 1.0f;
+					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 1.0f, 0, 128, 255, 255, 1024, 0.2f, 5);
+				}
+				break;
+			}
+			case BLIP_COORD:
+				break;
+			case BLIP_CONTACT_POINT:
+				if (!CTheScripts::IsPlayerOnAMission()) {
+					if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY)
+						C3dMarkers::PlaceMarkerSet(i | (ms_RadarTrace[i].m_BlipIndex << 16), 4, ms_RadarTrace[i].m_vecPos, 2.0f, 0, 128, 255, 128, 2048, 0.2f, 0);
+				}
+				break;
+			}
+		}
+	}
 }
 #endif
 
@@ -284,7 +347,7 @@ void CRadar::DrawBlips()
 		else
 			angle = FindPlayerHeading() - (PI + TheCamera.GetForward().Heading());
 
-		DrawRotatingRadarSprite(CentreSprite, out.x, out.y, angle, 255);
+		DrawRotatingRadarSprite(&CentreSprite, out.x, out.y, angle, 255);
 
 		CVector2D vec2d;
 		vec2d.x = vec2DRadarOrigin.x;
@@ -312,8 +375,9 @@ void CRadar::DrawBlips()
 								break;
 							case BLIP_CHAR:
 								blipEntity = CPools::GetPedPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
-								if (blipEntity && ((CPed*)blipEntity)->InVehicle()) {
-									blipEntity = ((CPed*)blipEntity)->m_pMyVehicle;
+								if (blipEntity != nil) {
+									if (((CPed*)blipEntity)->InVehicle())
+										blipEntity = ((CPed*)blipEntity)->m_pMyVehicle;
 								}
 								break;
 							case BLIP_OBJECT:
@@ -415,8 +479,9 @@ void CRadar::DrawBlips()
 								break;
 							case BLIP_CHAR:
 								blipEntity = CPools::GetPedPool()->GetAt(ms_RadarTrace[blipId].m_nEntityHandle);
-								if (blipEntity && ((CPed*)blipEntity)->InVehicle()) {
-									blipEntity = ((CPed*)blipEntity)->m_pMyVehicle;
+								if (blipEntity != nil) {
+									if (((CPed*)blipEntity)->InVehicle())
+										blipEntity = ((CPed*)blipEntity)->m_pMyVehicle;
 								}
 								break;
 							case BLIP_OBJECT:
@@ -729,12 +794,16 @@ int32 CRadar::GetActualBlipArrayIndex(int32 i)
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER int32 CRadar::GetNewUniqueBlipIndex(int32) { EAXJMP(0x4A4180); }
 #else
 int32 CRadar::GetNewUniqueBlipIndex(int32 i)
 {
-	return int32();
+	if (ms_RadarTrace[i].m_BlipIndex >= UINT16_MAX - 1)
+		ms_RadarTrace[i].m_BlipIndex = 1;
+	else
+		ms_RadarTrace[i].m_BlipIndex++;
+	return i | (ms_RadarTrace[i].m_BlipIndex << 16);
 }
 #endif
 
@@ -796,68 +865,14 @@ uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright)
 #endif
 
 const char* gRadarTexNames[] = {
-	"radar00",
-	"radar01",
-	"radar02",
-	"radar03",
-	"radar04",
-	"radar05",
-	"radar06",
-	"radar07",
-	"radar08",
-	"radar09",
-	"radar10",
-	"radar11",
-	"radar12",
-	"radar13",
-	"radar14",
-	"radar15",
-	"radar16",
-	"radar17",
-	"radar18",
-	"radar19",
-	"radar20",
-	"radar21",
-	"radar22",
-	"radar23",
-	"radar24",
-	"radar25",
-	"radar26",
-	"radar27",
-	"radar28",
-	"radar29",
-	"radar30",
-	"radar31",
-	"radar32",
-	"radar33",
-	"radar34",
-	"radar35",
-	"radar36",
-	"radar37",
-	"radar38",
-	"radar39",
-	"radar40",
-	"radar41",
-	"radar42",
-	"radar43",
-	"radar44",
-	"radar45",
-	"radar46",
-	"radar47",
-	"radar48",
-	"radar49",
-	"radar50",
-	"radar51",
-	"radar52",
-	"radar53",
-	"radar54",
-	"radar55",
-	"radar56",
-	"radar57",
-	"radar58",
-	"radar59",
-	"radar60",
-	"radar61",
+	"radar00", "radar01", "radar02", "radar03", "radar04", "radar05", "radar06", "radar07",
+	"radar08", "radar09", "radar10", "radar11", "radar12", "radar13", "radar14", "radar15",
+	"radar16", "radar17", "radar18", "radar19", "radar20", "radar21", "radar22", "radar23",
+	"radar24", "radar25", "radar26", "radar27", "radar28", "radar29", "radar30", "radar31",
+	"radar32", "radar33", "radar34", "radar35", "radar36", "radar37", "radar38", "radar39",
+	"radar40", "radar41", "radar42", "radar43", "radar44", "radar45", "radar46", "radar47",
+	"radar48", "radar49", "radar50", "radar51", "radar52", "radar53", "radar54", "radar55",
+	"radar56", "radar57", "radar58", "radar59", "radar60", "radar61", "radar62", "radar63",
 };
 
 #if 0
@@ -898,40 +913,72 @@ float CRadar::LimitRadarPoint(CVector2D &point)
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CRadar::LoadAllRadarBlips(int32) { EAXJMP(0x4A6F30); }
 #else
-void CRadar::LoadAllRadarBlips(int32)
+void CRadar::LoadAllRadarBlips(uint8 *buf, uint32 size)
 {
+	Initialise();
+INITSAVEBUF
+	CheckSaveHeader(buf, 'R', 'D', 'R', '\0', size - SAVE_HEADER_SIZE);
 
-}
-#endif
+	for (int i = 0; i < NUMRADARBLIPS; i++)
+		ms_RadarTrace[i] = ReadSaveBuf<CBlip>(buf);
 
-#if 1
-WRAPPER void CRadar::LoadTextures() { EAXJMP(0x4A4030); }
-#else
-void CRadar::LoadTextures()
-{
-
-}
-#endif
-
-#if 1
-WRAPPER void CRadar::RemoveRadarSections() { EAXJMP(0x4A60E0); }
-#else
-void CRadar::RemoveRadarSections()
-{
-
+VALIDATESAVEBUF(size);
 }
 #endif
 
 #if 0
-WRAPPER void CRadar::RemoveMapSection(int32, int32) { EAXJMP(0x00); }
+WRAPPER void CRadar::LoadTextures() { EAXJMP(0x4A4030); }
 #else
-void CRadar::RemoveMapSection(int32 x, int32 y)
+void
+CRadar::LoadTextures()
+{
+	CTxdStore::PushCurrentTxd();
+	CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("hud"));
+	AsukaSprite.SetTexture("radar_asuka");
+	BombSprite.SetTexture("radar_bomb");
+	CatSprite.SetTexture("radar_cat");
+	CentreSprite.SetTexture("radar_centre");
+	CopcarSprite.SetTexture("radar_copcar");
+	DonSprite.SetTexture("radar_don");
+	EightSprite.SetTexture("radar_eight");
+	ElSprite.SetTexture("radar_el");
+	IceSprite.SetTexture("radar_ice");
+	JoeySprite.SetTexture("radar_joey");
+	KenjiSprite.SetTexture("radar_kenji");
+	LizSprite.SetTexture("radar_liz");
+	LuigiSprite.SetTexture("radar_luigi");
+	NorthSprite.SetTexture("radar_north");
+	RaySprite.SetTexture("radar_ray");
+	SalSprite.SetTexture("radar_sal");
+	SaveSprite.SetTexture("radar_save");
+	SpraySprite.SetTexture("radar_spray");
+	TonySprite.SetTexture("radar_tony");
+	WeaponSprite.SetTexture("radar_weapon");
+	CTxdStore::PopCurrentTxd();
+}
+#endif
+
+#if 0
+WRAPPER void RemoveMapSection(int32, int32) { EAXJMP(0x00); }
+#else
+void RemoveMapSection(int32 x, int32 y)
 {
 	if (x >= 0 && x <= 7 && y >= 0 && y <= 7)
 		CStreaming::RemoveTxd(gRadarTxdIds[x + RADAR_NUM_TILES * y]);
+}
+#endif
+
+#if 0
+WRAPPER void CRadar::RemoveRadarSections() { EAXJMP(0x4A60E0); }
+#else
+void CRadar::RemoveRadarSections()
+{
+	for (int i = 0; i < 8; i++)
+		for (int j = 0; j < 8; j++)
+			RemoveMapSection(i, j);
 }
 #endif
 
@@ -945,12 +992,19 @@ void CRadar::RequestMapSection(int32 x, int32 y)
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CRadar::SaveAllRadarBlips(int32) { EAXJMP(0x4A6E30); }
 #else
-void CRadar::SaveAllRadarBlips(int32)
+void CRadar::SaveAllRadarBlips(uint8 *buf, uint32 *size)
 {
+	*size = SAVE_HEADER_SIZE + sizeof(ms_RadarTrace);
+INITSAVEBUF
+	WriteSaveHeader(buf, 'R', 'D', 'R', '\0', *size - SAVE_HEADER_SIZE);
 
+	for (int i = 0; i < NUMRADARBLIPS; i++)
+		WriteSaveBuf(buf, ms_RadarTrace[i]);
+
+VALIDATESAVEBUF(*size);
 }
 #endif
 
@@ -1010,7 +1064,7 @@ int CRadar::SetEntityBlip(eBlipType type, int32 handle, int32 color, eBlipDispla
 	ms_RadarTrace[nextBlip].m_wScale = 1;
 	ms_RadarTrace[nextBlip].m_eBlipDisplay = display;
 	ms_RadarTrace[nextBlip].m_IconID = RADAR_SPRITE_NONE;
-	return CRadar::GetNewUniqueBlipIndex(nextBlip);
+	return GetNewUniqueBlipIndex(nextBlip);
 }
 #endif
 
@@ -1102,21 +1156,41 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, 
 	}
 }
 
-#if 1
+#if 0
 WRAPPER void CRadar::Shutdown() { EAXJMP(0x4A3F60); }
 #else
 void CRadar::Shutdown()
 {
-
+	AsukaSprite.Delete();
+	BombSprite.Delete();
+	CatSprite.Delete();
+	CentreSprite.Delete();
+	CopcarSprite.Delete();
+	DonSprite.Delete();
+	EightSprite.Delete();
+	ElSprite.Delete();
+	IceSprite.Delete();
+	JoeySprite.Delete();
+	KenjiSprite.Delete();
+	LizSprite.Delete();
+	LuigiSprite.Delete();
+	NorthSprite.Delete();
+	RaySprite.Delete();
+	SalSprite.Delete();
+	SaveSprite.Delete();
+	SpraySprite.Delete();
+	TonySprite.Delete();
+	WeaponSprite.Delete();
+	RemoveRadarSections();
 }
 #endif
 
-#if 1
+#if 0
 WRAPPER void CRadar::StreamRadarSections(const CVector &posn) { EAXJMP(0x4A6B60); }
 #else
 void CRadar::StreamRadarSections(const CVector &posn)
 {
-
+	StreamRadarSections(floorf((2000.0f + posn.x) / 500.0f), ceilf(7.0f - (2000.0f + posn.y) / 500.0f));
 }
 #endif
 
@@ -1359,14 +1433,14 @@ int CRadar::LineRadarBoxCollision(CVector2D &out, const CVector2D &p1, const CVe
 #endif
 
 STARTPATCHES
-//	InjectHook(0x4A3EF0, CRadar::Initialise, PATCH_JUMP);
-//	InjectHook(0x4A3F60, CRadar::Shutdown, PATCH_JUMP);
-//	InjectHook(0x4A4030, CRadar::LoadTextures, PATCH_JUMP);
-//	InjectHook(0x4A4180, CRadar::GetNewUniqueBlipIndex, PATCH_JUMP);
+	InjectHook(0x4A3EF0, CRadar::Initialise, PATCH_JUMP);
+	InjectHook(0x4A3F60, CRadar::Shutdown, PATCH_JUMP);
+	InjectHook(0x4A4030, CRadar::LoadTextures, PATCH_JUMP);
+	InjectHook(0x4A4180, CRadar::GetNewUniqueBlipIndex, PATCH_JUMP);
 	InjectHook(0x4A41C0, CRadar::GetActualBlipArrayIndex, PATCH_JUMP);
 	InjectHook(0x4A4200, CRadar::DrawMap, PATCH_JUMP);
 	InjectHook(0x4A42F0, CRadar::DrawBlips, PATCH_JUMP);
-//	InjectHook(0x4A4C70, CRadar::Draw3dMarkers, PATCH_JUMP);
+	InjectHook(0x4A4C70, CRadar::Draw3dMarkers, PATCH_JUMP);
 	InjectHook(0x4A4F30, CRadar::LimitRadarPoint, PATCH_JUMP);
 	InjectHook(0x4A4F90, CRadar::CalculateBlipAlpha, PATCH_JUMP);
 	InjectHook(0x4A5040, CRadar::TransformRadarPointToScreenSpace, PATCH_JUMP);
@@ -1376,11 +1450,11 @@ STARTPATCHES
 	InjectHook(0x4A5590, CRadar::SetCoordBlip, PATCH_JUMP);
 	InjectHook(0x4A5640, CRadar::SetEntityBlip, PATCH_JUMP);
 	InjectHook(0x4A56C0, CRadar::ClearBlipForEntity, PATCH_JUMP);
-//	InjectHook(0x4A5720, CRadar::ClearBlip, PATCH_JUMP);
-//	InjectHook(0x4A5770, CRadar::ChangeBlipColour, PATCH_JUMP);
-//	InjectHook(0x4A57A0, CRadar::ChangeBlipBrightness, PATCH_JUMP);
-//	InjectHook(0x4A57E0, CRadar::ChangeBlipScale, PATCH_JUMP);
-//	InjectHook(0x4A5810, CRadar::ChangeBlipDisplay, PATCH_JUMP);
+	InjectHook(0x4A5720, CRadar::ClearBlip, PATCH_JUMP);
+	InjectHook(0x4A5770, CRadar::ChangeBlipColour, PATCH_JUMP);
+	InjectHook(0x4A57A0, CRadar::ChangeBlipBrightness, PATCH_JUMP);
+	InjectHook(0x4A57E0, CRadar::ChangeBlipScale, PATCH_JUMP);
+	InjectHook(0x4A5810, CRadar::ChangeBlipDisplay, PATCH_JUMP);
 	InjectHook(0x4A5840, CRadar::SetBlipSprite, PATCH_JUMP);
 	InjectHook(0x4A5870, CRadar::ShowRadarTrace, PATCH_JUMP);
 	InjectHook(0x4A59C0, CRadar::ShowRadarMarker, PATCH_JUMP);
@@ -1388,15 +1462,15 @@ STARTPATCHES
 	InjectHook(0x4A5C60, CRadar::SetRadarMarkerState, PATCH_JUMP);
 	InjectHook(0x4A5D10, CRadar::DrawRotatingRadarSprite, PATCH_JUMP);
 	InjectHook(0x4A5EF0, CRadar::DrawRadarSprite, PATCH_JUMP);
-//	InjectHook(0x4A60E0, CRadar::RemoveRadarSections, PATCH_JUMP);
-//	InjectHook(0x4A6100, CRadar::StreamRadarSections, PATCH_JUMP);
+	InjectHook(0x4A60E0, CRadar::RemoveRadarSections, PATCH_JUMP);
+	InjectHook(0x4A6100, (void (*)(int32, int32))&CRadar::StreamRadarSections, PATCH_JUMP);
 	InjectHook(0x4A64A0, CRadar::ClipRadarPoly, PATCH_JUMP);
 	InjectHook(0x4A67E0, CRadar::DrawRadarSection, PATCH_JUMP);
 	InjectHook(0x4A69C0, CRadar::DrawRadarMask, PATCH_JUMP);
-//	InjectHook(0x4A6B60, CRadar::StreamRadarSections, PATCH_JUMP);
+	InjectHook(0x4A6B60, (void (*)(const CVector&))&CRadar::StreamRadarSections, PATCH_JUMP);
 	InjectHook(0x4A6C20, CRadar::DrawRadarMap, PATCH_JUMP);
-//	InjectHook(0x4A6E30, CRadar::SaveAllRadarBlips, PATCH_JUMP);
-//	InjectHook(0x4A6F30, CRadar::LoadAllRadarBlips, PATCH_JUMP);
+	InjectHook(0x4A6E30, CRadar::SaveAllRadarBlips, PATCH_JUMP);
+	InjectHook(0x4A6F30, CRadar::LoadAllRadarBlips, PATCH_JUMP);
 
 	InjectHook(0x4A61C0, CRadar::GetTextureCorners, PATCH_JUMP);
 	InjectHook(0x4A6160, CRadar::IsPointInsideRadar, PATCH_JUMP);
