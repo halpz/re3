@@ -25,6 +25,8 @@
 #include "Script.h"
 #include "Stats.h"
 #include "Streaming.h"
+#include "Timer.h"
+#include "TimeStep.h"
 #include "Weather.h"
 #include "World.h"
 #include "Zones.h"
@@ -93,7 +95,7 @@ INITSAVEBUF
 		TextCopy(saveName, lastMissionPassed);
 		int len = UnicodeStrlen(saveName);
 		saveName[len] = '\0';
-		if (22 < len)
+		if (len > 22)
 			TextCopy(saveName + 18, suffix);
 		saveName[23] = '\0';
 	}
@@ -119,9 +121,9 @@ INITSAVEBUF
 	WriteSaveBuf(buf, CTimer::ms_fTimeStep);
 	WriteSaveBuf(buf, CTimer::ms_fTimeStepNonClipped);
 	WriteSaveBuf(buf, CTimer::m_FrameCounter);
-	WriteSaveBuf(buf, 1.0f);		// CTimeStep::ms_fTimeStep;
-	WriteSaveBuf(buf, 1.0f);		// CTimeStep::ms_fFramesPerUpdate;
-	WriteSaveBuf(buf, 1.0f);		// CTimeStep::ms_fTimeScale;
+	WriteSaveBuf(buf, CTimeStep::ms_fTimeStep);
+	WriteSaveBuf(buf, CTimeStep::ms_fFramesPerUpdate);
+	WriteSaveBuf(buf, CTimeStep::ms_fTimeScale);
 	WriteSaveBuf(buf, (int32) CWeather::OldWeatherType);
 	WriteSaveBuf(buf, (int32) CWeather::NewWeatherType);
 	WriteSaveBuf(buf, (int32) CWeather::ForcedWeatherType);
