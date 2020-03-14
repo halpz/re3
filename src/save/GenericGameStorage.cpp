@@ -100,43 +100,43 @@ INITSAVEBUF
 		saveName[23] = '\0';
 	}
 	WriteDataToBufferPointer(buf, saveName);
-#ifdef VALIDATE_SAVE_SIZE
-	_saveBufCount += sizeof(saveName);
-#endif
 	GetLocalTime(&saveTime);
-	WriteSaveBuf(buf, saveTime);
-	WriteSaveBuf(buf, SIZE_OF_ONE_GAME_IN_BYTES);
-	WriteSaveBuf(buf, CGame::currLevel);
-	WriteSaveBuf(buf, TheCamera.m_matrix.m_matrix.pos.x);
-	WriteSaveBuf(buf, TheCamera.m_matrix.m_matrix.pos.y);
-	WriteSaveBuf(buf, TheCamera.m_matrix.m_matrix.pos.z);
-	WriteSaveBuf(buf, CClock::ms_nMillisecondsPerGameMinute);
-	WriteSaveBuf(buf, CClock::ms_nLastClockTick);
-	WriteSaveBuf(buf, (uint32) CClock::ms_nGameClockHours);
-	WriteSaveBuf(buf, (uint32) CClock::ms_nGameClockMinutes);
+	WriteDataToBufferPointer(buf, saveTime);
+	WriteDataToBufferPointer(buf, SIZE_OF_ONE_GAME_IN_BYTES);
+	WriteDataToBufferPointer(buf, CGame::currLevel);
+	WriteDataToBufferPointer(buf, TheCamera.m_matrix.m_matrix.pos.x);
+	WriteDataToBufferPointer(buf, TheCamera.m_matrix.m_matrix.pos.y);
+	WriteDataToBufferPointer(buf, TheCamera.m_matrix.m_matrix.pos.z);
+	WriteDataToBufferPointer(buf, CClock::ms_nMillisecondsPerGameMinute);
+	WriteDataToBufferPointer(buf, CClock::ms_nLastClockTick);
+	WriteDataToBufferPointer(buf, CClock::ms_nGameClockHours);
+	WriteDataToBufferPointer(buf, CClock::ms_nGameClockMinutes);
 	currPad = CPad::GetPad(0);
-	WriteSaveBuf(buf, (uint32) currPad->Mode);
-	WriteSaveBuf(buf, CTimer::m_snTimeInMilliseconds);
-	WriteSaveBuf(buf, CTimer::ms_fTimeScale);
-	WriteSaveBuf(buf, CTimer::ms_fTimeStep);
-	WriteSaveBuf(buf, CTimer::ms_fTimeStepNonClipped);
-	WriteSaveBuf(buf, CTimer::m_FrameCounter);
-	WriteSaveBuf(buf, CTimeStep::ms_fTimeStep);
-	WriteSaveBuf(buf, CTimeStep::ms_fFramesPerUpdate);
-	WriteSaveBuf(buf, CTimeStep::ms_fTimeScale);
-	WriteSaveBuf(buf, (int32) CWeather::OldWeatherType);
-	WriteSaveBuf(buf, (int32) CWeather::NewWeatherType);
-	WriteSaveBuf(buf, (int32) CWeather::ForcedWeatherType);
-	WriteSaveBuf(buf, CWeather::InterpolationValue);
-	WriteSaveBuf(buf, CompileDateAndTime.m_nSecond);
-	WriteSaveBuf(buf, CompileDateAndTime.m_nMinute);
-	WriteSaveBuf(buf, CompileDateAndTime.m_nHour);
-	WriteSaveBuf(buf, CompileDateAndTime.m_nDay);
-	WriteSaveBuf(buf, CompileDateAndTime.m_nMonth);
-	WriteSaveBuf(buf, CompileDateAndTime.m_nYear);
-	WriteSaveBuf(buf, CWeather::WeatherTypeInList);
-	WriteSaveBuf(buf, TheCamera.CarZoomIndicator);
-	WriteSaveBuf(buf, TheCamera.PedZoomIndicator);
+	WriteDataToBufferPointer(buf, currPad->Mode);
+	WriteDataToBufferPointer(buf, CTimer::m_snTimeInMilliseconds);
+	WriteDataToBufferPointer(buf, CTimer::ms_fTimeScale);
+	WriteDataToBufferPointer(buf, CTimer::ms_fTimeStep);
+	WriteDataToBufferPointer(buf, CTimer::ms_fTimeStepNonClipped);
+	WriteDataToBufferPointer(buf, CTimer::m_FrameCounter);
+	WriteDataToBufferPointer(buf, CTimeStep::ms_fTimeStep);
+	WriteDataToBufferPointer(buf, CTimeStep::ms_fFramesPerUpdate);
+	WriteDataToBufferPointer(buf, CTimeStep::ms_fTimeScale);
+	WriteDataToBufferPointer(buf, CWeather::OldWeatherType);
+	WriteDataToBufferPointer(buf, CWeather::NewWeatherType);
+	WriteDataToBufferPointer(buf, CWeather::ForcedWeatherType);
+	WriteDataToBufferPointer(buf, CWeather::InterpolationValue);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nSecond);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nMinute);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nHour);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nDay);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nMonth);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nYear);
+	WriteDataToBufferPointer(buf, CWeather::WeatherTypeInList);
+	WriteDataToBufferPointer(buf, TheCamera.CarZoomIndicator);
+	WriteDataToBufferPointer(buf, TheCamera.PedZoomIndicator);
+#ifdef VALIDATE_SAVE_SIZE
+	_saveBufCount = buf - work_buff;
+#endif
 VALIDATESAVEBUF(SIZE_OF_SIMPLEVARS);
 
 	// Save scripts, block is nested within the same block as simple vars for some reason
