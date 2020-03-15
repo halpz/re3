@@ -735,7 +735,7 @@ CPlayerPed::KeepAreaAroundPlayerClear(void)
 				if (nearPed->m_objective == OBJECTIVE_NONE) {
 					nearPed->SetFindPathAndFlee(this, 5000, true);
 				} else {
-					if (nearPed->m_nPedState == PED_ENTER_CAR || nearPed->m_nPedState == PED_CARJACK)
+					if (nearPed->EnteringCar())
 						nearPed->QuitEnteringCar();
 
 					nearPed->ClearObjective();
@@ -750,7 +750,7 @@ CPlayerPed::KeepAreaAroundPlayerClear(void)
 	CVector pos = GetPosition();
 	int16 lastVehicle;
 	CEntity *vehicles[8];
-	CWorld::FindObjectsInRange(pos, 15.0f, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
+	CWorld::FindObjectsInRange(pos, CHECK_NEARBY_THINGS_MAX_DIST, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
 
 	for (int i = 0; i < lastVehicle; i++) {
 		CVehicle *veh = (CVehicle*)vehicles[i];
@@ -1181,7 +1181,7 @@ CPlayerPed::ProcessControl(void)
 	}
 	if (m_nPedState == PED_DIE) {
 		ClearWeaponTarget();
-		if (CTimer::GetTimeInMilliseconds() > (uint32)m_bloodyFootprintCount + 4000)
+		if (CTimer::GetTimeInMilliseconds() > m_bloodyFootprintCountOrDeathTime + 4000)
 			SetDead();
 		return;
 	}

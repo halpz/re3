@@ -13,11 +13,14 @@
 #include "DMAudio.h"
 #include "EventList.h"
 
+#define FEET_OFFSET	1.04f
+#define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
+
 struct CPathNode;
 class CAccident;
 class CObject;
 
-struct CPedAudioData
+struct PedAudioData
 {
 	int m_nFixedDelayTime;
 	int m_nOverrideFixedDelayTime;
@@ -81,7 +84,7 @@ struct FightMove
 };
 static_assert(sizeof(FightMove) == 0x18, "FightMove: error");
 
-// TO-DO: This is eFightState on mobile.
+// TODO: This is eFightState on mobile.
 enum PedFightMoves
 {
 	FIGHTMOVE_NULL,
@@ -359,7 +362,7 @@ public:
 	uint8 bStartWanderPathOnFoot : 1; // exits the car if he's in it, reset after path found
 	uint8 bOnBoat : 1; // not just driver, may be just standing
 	uint8 bBusJacked : 1;
-	uint8 bGonnaKillTheCarJacker : 1; // only set when car is jacked from right door
+	uint8 bGonnaKillTheCarJacker : 1; // only set when car is jacked from right door and when arrested by police
 	uint8 bFadeOut : 1;
 
 	uint8 bKnockedUpIntoAir : 1; // has ped been knocked up into the air by a car collision
@@ -496,7 +499,7 @@ public:
 	uint32 m_objectiveTimer;
 	uint32 m_duckTimer;
 	uint32 m_duckAndCoverTimer;
-	int32 m_bloodyFootprintCount;
+	uint32 m_bloodyFootprintCountOrDeathTime;	// Death time when bDoBloodyFootprints is false. Weird decision
 	uint8 m_panicCounter;
 	bool m_deadBleeding;
 	int8 m_bodyPartBleeding;		// PedNode, but -1 if there isn't
@@ -791,10 +794,13 @@ public:
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
+
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
 	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
+	bool EnteringCar(void) { return m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK; }
+
 	void ReplaceWeaponWhenExitingVehicle(void);
 	void RemoveWeaponWhenEnteringVehicle(void);
 	bool IsNotInWreckedVehicle();
@@ -827,7 +833,6 @@ public:
 	static bool &bPedCheat2;
 	static bool &bPedCheat3;
 	static CVector2D ms_vec2DFleePosition;
-	static CPedAudioData (&CommentWaitTime)[38];
 
 #ifdef TOGGLEABLE_BETA_FEATURES
 	static bool bPopHeadsOnHeadshot;

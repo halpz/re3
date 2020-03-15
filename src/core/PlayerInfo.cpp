@@ -153,7 +153,7 @@ void
 CPlayerInfo::CancelPlayerEnteringCars(CVehicle *car)
 {
 	if (!car || car == m_pPed->m_pMyVehicle) {
-		if (m_pPed->m_nPedState == PED_CARJACK || m_pPed->m_nPedState == PED_ENTER_CAR)
+		if (m_pPed->EnteringCar())
 			m_pPed->QuitEnteringCar();
 	}
 	if (m_pPed->m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER || m_pPed->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER)

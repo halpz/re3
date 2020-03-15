@@ -37,6 +37,9 @@ public:
 	void ClearPursuit(void);
 	void ProcessControl(void);
 	void SetArrestPlayer(CPed*);
+	void SetPursuit(bool);
+	void ArrestPlayer(void);
+	void ScanForCrimes(void);
 };
 
 static_assert(sizeof(CCopPed) == 0x558, "CCopPed: error");

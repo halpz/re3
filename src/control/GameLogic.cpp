@@ -249,7 +249,7 @@ CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed *pPlayerPed, CVector
 	pPlayerPed->m_fHealth = 100.0f;
 	pPlayerPed->m_fArmour = 0.0f;
 	pPlayerPed->bIsVisible = true;
-	pPlayerPed->m_bloodyFootprintCount = 0;
+	pPlayerPed->m_bloodyFootprintCountOrDeathTime = 0;
 	pPlayerPed->bDoBloodyFootprints = false;
 	pPlayerPed->ClearAdrenaline();
 	pPlayerPed->m_fCurrentStamina = pPlayerPed->m_fMaxStamina;

@@ -18,11 +18,13 @@
 #include "PedPlacement.h"
 #include "DummyObject.h"
 #include "Script.h"
+#include "Shadows.h"
 
-#define CREATION_DIST_MULT_TO_DIST 40.0f
-#define CREATION_RANGE 10.0f // Being added over the CREATION_DIST_MULT_TO_DIST.
-#define OFFSCREEN_CREATION_MULT 0.5f
-// Also there are some hardcoded values in GeneratePedsAtStartOfGame.
+#define MIN_CREATION_DIST		40.0f // not for start of the game (look at the GeneratePedsAtStartOfGame)
+#define CREATION_RANGE			10.0f // added over the MIN_CREATION_DIST.
+#define OFFSCREEN_CREATION_MULT	0.5f
+#define PED_REMOVE_DIST			(MIN_CREATION_DIST + CREATION_RANGE + 1.0f)
+#define PED_REMOVE_DIST_SPECIAL	(MIN_CREATION_DIST + CREATION_RANGE + 15.0f) // for peds with bCullExtraFarAway flag
 
 // TO-DO: These are hard-coded, reverse them.
 // More clearly they're transition areas between zones.
@@ -56,9 +58,6 @@ uint32& CPopulation::ms_nNumGang8 = *(uint32*)0x8F1B0C;
 CVector &CPopulation::RegenerationPoint_a = *(CVector*)0x8E2AA4;
 CVector &CPopulation::RegenerationPoint_b = *(CVector*)0x8E2A98;
 CVector &CPopulation::RegenerationForward = *(CVector*)0x8F1AD4;
-
-WRAPPER void CPopulation::ManagePopulation(void) { EAXJMP(0x4F3B90); }
-WRAPPER bool CPopulation::TestSafeForRealObject(CDummyObject*) { EAXJMP(0x4F4700); }
 
 void
 CPopulation::Initialise()
@@ -416,10 +415,10 @@ CPopulation::Update()
 				+ ms_nTotalGangPeds + ms_nNumCivFemale + ms_nNumCivMale;
 			if (!CCutsceneMgr::IsRunning()) {
 				float pcdm = PedCreationDistMultiplier();
-				AddToPopulation(pcdm * (CREATION_DIST_MULT_TO_DIST * TheCamera.GenerationDistMultiplier),
-					pcdm * ((CREATION_DIST_MULT_TO_DIST + CREATION_RANGE) * TheCamera.GenerationDistMultiplier),
-					pcdm * (CREATION_DIST_MULT_TO_DIST + CREATION_RANGE) * OFFSCREEN_CREATION_MULT - CREATION_RANGE,
-					pcdm * (CREATION_DIST_MULT_TO_DIST + CREATION_RANGE) * OFFSCREEN_CREATION_MULT);
+				AddToPopulation(pcdm * (MIN_CREATION_DIST * TheCamera.GenerationDistMultiplier),
+					pcdm * ((MIN_CREATION_DIST + CREATION_RANGE) * TheCamera.GenerationDistMultiplier),
+					pcdm * (MIN_CREATION_DIST + CREATION_RANGE) * OFFSCREEN_CREATION_MULT - CREATION_RANGE,
+					pcdm * (MIN_CREATION_DIST + CREATION_RANGE) * OFFSCREEN_CREATION_MULT);
 			}
 		}
 	}
@@ -437,8 +436,8 @@ CPopulation::GeneratePedsAtStartOfGame()
 			+ ms_nTotalGangPeds + ms_nNumCivFemale + ms_nNumCivMale;
 
 		// Min dist is 10.0f only for start of the game (naturally)
-		AddToPopulation(10.0f, PedCreationDistMultiplier() * (CREATION_DIST_MULT_TO_DIST + CREATION_RANGE),
-			10.0f, PedCreationDistMultiplier() * (CREATION_DIST_MULT_TO_DIST + CREATION_RANGE));
+		AddToPopulation(10.0f, PedCreationDistMultiplier() * (MIN_CREATION_DIST + CREATION_RANGE),
+			10.0f, PedCreationDistMultiplier() * (MIN_CREATION_DIST + CREATION_RANGE));
 	}
 }
 
@@ -570,13 +569,13 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 				|| CCarCtrl::NumFiretrucksOnDuty + CCarCtrl::NumAmbulancesOnDuty + CCarCtrl::NumParkedCars
 				+ CCarCtrl::NumMissionCars + CCarCtrl::NumLawEnforcerCars + CCarCtrl::NumRandomCars >= CCarCtrl::MaxNumberOfCarsInUse)) {
 			addCop = true;
-			minDist = PedCreationDistMultiplier() * CREATION_DIST_MULT_TO_DIST;
-			maxDist = PedCreationDistMultiplier() * (CREATION_DIST_MULT_TO_DIST + CREATION_RANGE);
+			minDist = PedCreationDistMultiplier() * MIN_CREATION_DIST;
+			maxDist = PedCreationDistMultiplier() * (MIN_CREATION_DIST + CREATION_RANGE);
 		}
 	}
 	// Yeah, float
-	float maxPossiblePedsForArea = (zoneInfo.pedDensity + zoneInfo.carDensity) * playerInfo->m_fRoadDensity * PedDensityMultiplier * CIniFile::PedNumberMultiplier;
-	maxPossiblePedsForArea = min(maxPossiblePedsForArea, MaxNumberOfPedsInUse);
+	float maxPossiblePedsForArea = 10.0f * (zoneInfo.pedDensity + zoneInfo.carDensity) * playerInfo->m_fRoadDensity * PedDensityMultiplier * CIniFile::PedNumberMultiplier;
+	// maxPossiblePedsForArea = min(maxPossiblePedsForArea, MaxNumberOfPedsInUse);
 
 	if (ms_nTotalPeds < maxPossiblePedsForArea || addCop) {
 		int decisionThreshold = CGeneral::GetRandomNumberInRange(0, 1000);
@@ -689,7 +688,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 			bool farEnoughToAdd = true;
 			CMatrix mat(TheCamera.GetCameraMatrix());
 			if (TheCamera.IsSphereVisible(generatedCoors, 2.0f, &mat)) {
-				if (PedCreationDistMultiplier() * CREATION_DIST_MULT_TO_DIST > (generatedCoors - playerCentreOfWorld).Magnitude2D())
+				if (PedCreationDistMultiplier() * MIN_CREATION_DIST > (generatedCoors - playerCentreOfWorld).Magnitude2D())
 					farEnoughToAdd = false;
 			}
 			if (!farEnoughToAdd)
@@ -927,7 +926,6 @@ CPopulation::ConvertAllObjectsToDummyObjects()
 	for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
 
 		CObject *obj = CPools::GetObjectPool()->GetSlot(poolIndex);
-
 		if (obj) {
 			if (obj->CanBeDeleted())
 				ConvertToDummyObject(obj);
@@ -970,8 +968,6 @@ void
 CPopulation::ConvertToDummyObject(CObject *obj)
 {
 	CDummyObject *dummy = new CDummyObject(obj);
-	if (!dummy)
-		return;
 
 	dummy->GetMatrix() = obj->m_objectMatrix;
 	dummy->GetMatrix().UpdateRW();
@@ -1003,6 +999,163 @@ CPopulation::TestRoomForDummyObject(CObject *obj)
 		false, &collidingObjs, 2, nil, false, true, true, false, false);
 
 	return collidingObjs == 0;
+}
+
+bool
+CPopulation::TestSafeForRealObject(CDummyObject *dummy)
+{
+	CPtrNode *ptrNode;
+	CColModel *dummyCol = dummy->GetColModel();
+	float colRadius = dummy->GetBoundRadius();
+	CVector colCentre = dummy->GetBoundCentre();
+
+	int minX = CWorld::GetSectorIndexX(dummy->GetPosition().x - colRadius);
+	if (minX < 0) minX = 0;
+	int minY = CWorld::GetSectorIndexY(dummy->GetPosition().y - colRadius);
+	if (minY < 0) minY = 0;
+	int maxX = CWorld::GetSectorIndexX(dummy->GetPosition().x + colRadius);
+#ifdef FIX_BUGS
+	if (maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X - 1;
+#else
+	if (maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X;
+#endif
+
+	int maxY = CWorld::GetSectorIndexY(dummy->GetPosition().y + colRadius);
+#ifdef FIX_BUGS
+	if (maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y - 1;
+#else
+	if (maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y;
+#endif
+
+	static CColPoint aTempColPoints;
+
+	for (int curY = minY; curY <= maxY; curY++) {
+		for (int curX = minX; curX <= maxX; curX++) {
+			CSector *sector = CWorld::GetSector(curX, curY);
+
+			for (ptrNode = sector->m_lists[ENTITYLIST_VEHICLES].first; ptrNode; ptrNode = ptrNode->next) {
+				CVehicle *veh = (CVehicle*)ptrNode->item;
+				if (veh->m_scanCode != CWorld::GetCurrentScanCode()) {
+					if (veh->GetIsTouching(colCentre, colRadius)) {
+						veh->m_scanCode = CWorld::GetCurrentScanCode();
+						if (CCollision::ProcessColModels(dummy->GetMatrix(), *dummyCol, veh->GetMatrix(), *veh->GetColModel(), &aTempColPoints, nil, nil) > 0)
+							return false;
+					}
+				}
+			}
+
+			for (ptrNode = sector->m_lists[ENTITYLIST_VEHICLES_OVERLAP].first; ptrNode; ptrNode = ptrNode->next) {
+				CVehicle *veh = (CVehicle*)ptrNode->item;
+				if (veh->m_scanCode != CWorld::GetCurrentScanCode()) {
+					if (veh->GetIsTouching(colCentre, colRadius)) {
+						veh->m_scanCode = CWorld::GetCurrentScanCode();
+						if (CCollision::ProcessColModels(dummy->GetMatrix(), *dummyCol, veh->GetMatrix(), *veh->GetColModel(), &aTempColPoints, nil, nil) > 0)
+							return false;
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
+void
+CPopulation::ManagePopulation(void)
+{
+	int frameMod32 = CTimer::GetFrameCounter() & 31;
+	CVector playerPos = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
+
+	// Why this code is here?! Delete temporary objects when they got too far, and convert others to "dummy" objects. (like lamp posts)
+	int objectPoolSize = CPools::GetObjectPool()->GetSize();
+	for (int i = objectPoolSize * frameMod32 / 32; i < objectPoolSize * (frameMod32 + 1) / 32; i++) {
+		CObject *obj = CPools::GetObjectPool()->GetSlot(i);
+		if (obj && obj->CanBeDeleted()) {
+			if ((obj->GetPosition() - playerPos).Magnitude() <= 80.0f ||
+				(obj->m_objectMatrix.GetPosition() - playerPos).Magnitude() <= 80.0f) {
+				if (obj->ObjectCreatedBy == TEMP_OBJECT && CTimer::GetTimeInMilliseconds() > obj->m_nEndOfLifeTime) {
+					CWorld::Remove(obj);
+					delete obj;
+				}
+			} else {
+				if (obj->ObjectCreatedBy == TEMP_OBJECT) {
+					CWorld::Remove(obj);
+					delete obj;
+				} else if (obj->ObjectCreatedBy != CUTSCENE_OBJECT && TestRoomForDummyObject(obj)) {
+					ConvertToDummyObject(obj);
+				}
+			}
+		}
+	}
+
+	// Convert them back to real objects. Dummy objects don't have collisions, so they need to be converted.
+	int dummyPoolSize = CPools::GetDummyPool()->GetSize();
+	for (int i = dummyPoolSize * frameMod32 / 32; i < dummyPoolSize * (frameMod32 + 1) / 32; i++) {
+		CDummy *dummy = CPools::GetDummyPool()->GetSlot(i);
+		if (dummy) {
+			if ((dummy->GetPosition() - playerPos).Magnitude() < 80.0f)
+				ConvertToRealObject((CDummyObject*)dummy);
+		}
+	}
+
+	int pedPoolSize = CPools::GetPedPool()->GetSize();
+	for (int poolIndex = pedPoolSize-1; poolIndex >= 0; poolIndex--) {
+		CPed *ped = CPools::GetPedPool()->GetSlot(poolIndex);
+
+		if (ped && !ped->IsPlayer() && ped->CanBeDeleted() && !ped->bInVehicle) {
+			if (ped->m_nPedState == PED_DEAD && CTimer::GetTimeInMilliseconds() - ped->m_bloodyFootprintCountOrDeathTime > 60000)
+				ped->bFadeOut = true;
+
+			if (ped->bFadeOut && CVisibilityPlugins::GetClumpAlpha(ped->GetClump()) == 0) {
+				RemovePed(ped);
+				continue;
+			}
+
+			float dist = (ped->GetPosition() - playerPos).Magnitude2D();
+			bool pedIsFarAway = false;
+			if (PedCreationDistMultiplier() * (PED_REMOVE_DIST_SPECIAL * TheCamera.GenerationDistMultiplier) < dist
+				|| (!ped->bCullExtraFarAway && PedCreationDistMultiplier() * PED_REMOVE_DIST * TheCamera.GenerationDistMultiplier < dist)
+				|| (PedCreationDistMultiplier() * (MIN_CREATION_DIST + CREATION_RANGE) * OFFSCREEN_CREATION_MULT < dist
+				&& !ped->GetIsOnScreen()
+				&& TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_SNIPER
+				&& TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_SNIPER_RUNABOUT
+				&& !TheCamera.Cams[TheCamera.ActiveCam].LookingLeft
+				&& !TheCamera.Cams[TheCamera.ActiveCam].LookingRight
+				&& !TheCamera.Cams[TheCamera.ActiveCam].LookingBehind))
+				pedIsFarAway = true;
+
+			if (!pedIsFarAway)
+				continue;
+
+			if (ped->m_nPedState == PED_DEAD && !ped->bFadeOut) {
+				CVector pedPos = ped->GetPosition();
+
+				float randAngle = (uint8) CGeneral::GetRandomNumber() * (3.14f / 128.0f); // Not PI, 3.14
+				switch (CGeneral::GetRandomNumber() % 3) {
+					case 0:
+						CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpOutline1Tex, &pedPos,
+							0.9f * Cos(randAngle), 0.9f * Sin(randAngle), 0.9f * Sin(randAngle), -0.9f * Cos(randAngle),
+							255, 255, 255, 255, 4.0f, 40000, 1.0f);
+						break;
+					case 1:
+						CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpOutline2Tex, &pedPos,
+							0.9f * Cos(randAngle), 0.9f * Sin(randAngle), 0.9f * Sin(randAngle), -0.9f * Cos(randAngle),
+							255, 255, 255, 255, 4.0f, 40000, 1.0f);
+						break;
+					case 2:
+						CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpOutline3Tex, &pedPos,
+							0.9f * Cos(randAngle), 0.9f * Sin(randAngle), 0.9f * Sin(randAngle), -0.9f * Cos(randAngle),
+							255, 255, 255, 255, 4.0f, 40000, 1.0f);
+						break;
+					default:
+						break;
+				}
+			}
+			if (ped->GetIsOnScreen())
+				ped->bFadeOut = true;
+			else
+				RemovePed(ped);
+		}
+	}
 }
 
 STARTPATCHES
