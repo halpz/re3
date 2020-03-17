@@ -141,6 +141,8 @@ public:
 	static void* operator new(size_t, int);
 	static void operator delete(void*, size_t);
 	static void operator delete(void*, int);
+
+	static void SaveAllAudioScriptObjects(uint8 *buf, uint32 *size);
 };
 
 static_assert(sizeof(cAudioScriptObject) == 20, "cAudioScriptObject: error");

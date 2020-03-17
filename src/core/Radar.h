@@ -130,7 +130,7 @@ public:
 	static void RemoveRadarSections();
 	static void RemoveMapSection(int32 x, int32 y);
 	static void RequestMapSection(int32 x, int32 y);
-	static void SaveAllRadarBlips(int32);
+	static void SaveAllRadarBlips(uint8 *buf, uint32 *size);
 	static void SetBlipSprite(int32 i, int32 icon);
 	static int32 SetCoordBlip(eBlipType type, CVector pos, int32, eBlipDisplay);
 	static int32 SetEntityBlip(eBlipType type, int32, int32, eBlipDisplay);

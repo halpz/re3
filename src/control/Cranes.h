@@ -14,4 +14,7 @@ public:
 	static void DeActivateCrane(float, float);
 	static void InitCranes(void);
 	static void UpdateCranes(void);
+	static void Save(uint8*, uint32*);
 };
+
+void CranesLoad(uint8*, uint32);	// is this really outside CCranes?

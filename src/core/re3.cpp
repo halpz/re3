@@ -449,7 +449,7 @@ void re3_trace(const char *filename, unsigned int lineno, const char *func, cons
 }
 
 #ifdef VALIDATE_SAVE_SIZE
-int32 _bufBytesRead;
+int32 _saveBufCount;
 #endif
 
 void

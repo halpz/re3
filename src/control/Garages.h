@@ -147,6 +147,8 @@ public:
 	static void PlayerArrestedOrDied();
 	static void Init(void);
 	static void Update(void);
+	static void Load(uint8 *buf, uint32 size);
+	static void Save(uint8 *buf, uint32 *size);
 	static int16 AddOne(float, float, float, float, float, float, uint8, uint32);
 	static void SetTargetCarForMissonGarage(int16, CVehicle*);
 	static bool HasCarBeenDroppedOffYet(int16);

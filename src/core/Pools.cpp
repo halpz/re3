@@ -14,6 +14,13 @@ CObjectPool *&CPools::ms_pObjectPool = *(CObjectPool**)0x880E28;
 CDummyPool *&CPools::ms_pDummyPool = *(CDummyPool**)0x8F2C18;
 CAudioScriptObjectPool *&CPools::ms_pAudioScriptObjectPool = *(CAudioScriptObjectPool**)0x8F1B6C;
 
+WRAPPER void CPools::LoadObjectPool(uint8* buf, uint32 size) { EAXJMP(0x4a2550); }
+WRAPPER void CPools::LoadPedPool(uint8* buf, uint32 size) { EAXJMP(0x4a2b50); }
+WRAPPER void CPools::LoadVehiclePool(uint8* buf, uint32 size) { EAXJMP(0x4a1b40); }
+WRAPPER void CPools::SaveObjectPool(uint8* buf, uint32 *size) { EAXJMP(0x4a22d0); }
+WRAPPER void CPools::SavePedPool(uint8* buf, uint32 *size) { EAXJMP(0x4a29b0); }
+WRAPPER void CPools::SaveVehiclePool(uint8* buf, uint32 *size) { EAXJMP(0x4a2080); }
+
 void
 CPools::Initialise(void)
 {
@@ -67,7 +74,7 @@ CPools::CheckPoolsEmpty()
 {
 	assert(ms_pPedPool->GetNoOfUsedSpaces() == 0);
 	assert(ms_pVehiclePool->GetNoOfUsedSpaces() == 0);
-	printf("pools have beem cleared \n");
+	printf("pools have been cleared\n");
 }
 
 

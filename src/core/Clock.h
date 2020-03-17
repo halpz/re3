@@ -2,6 +2,7 @@
 
 class CClock
 {
+public:
 	static uint8  &ms_nGameClockHours;
 	static uint8  &ms_nGameClockMinutes;
 	static uint16 &ms_nGameClockSeconds;
@@ -11,7 +12,6 @@ class CClock
 	static uint32 &ms_nMillisecondsPerGameMinute;
 	static uint32 &ms_nLastClockTick;
 	static bool   &ms_bClockHasBeenStored;
-public:
 
 	static void Initialise(uint32 scale);
 	static void Update(void);
