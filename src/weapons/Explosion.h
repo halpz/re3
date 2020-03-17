@@ -19,7 +19,23 @@ enum eExplosionType
 
 class CExplosion
 {
+	eExplosionType m_ExplosionType;
+	CVector m_vecPosition;
+	float m_fRadius;
+	float m_fPropagationRate;
+	CEntity *m_pCreatorEntity;
+	CEntity *m_pVictimEntity;
+	float m_fStopTime;
+	bool m_bActive;
+	int8 m_bActiveCounter;
+	int32 m_nStartTime;
+	uint32 m_nParticlesExpireTime;
+	float m_fPower;
+	int32 field_34;
+	int32 field_38;
 public:
+	static void Initialise();
+	static void Shutdown();
 	static void AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type,
 	                         const CVector &pos, uint32);
 
@@ -30,3 +46,5 @@ public:
 	static void RemoveAllExplosionsInArea(CVector, float);
 	static bool TestForExplosionInArea(eExplosionType, float, float, float, float, float, float);
 };
+
+extern CExplosion (&gaExplosion)[48];
