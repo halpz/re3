@@ -3,7 +3,8 @@
 #include "ModelIndices.h"
 #include "Gangs.h"
 
-CGangInfo(&CGangs::Gang)[NUM_GANGS] = *(CGangInfo(*)[NUM_GANGS])*(uintptr*)0x6EDF78;
+//CGangInfo(&CGangs::Gang)[NUM_GANGS] = *(CGangInfo(*)[NUM_GANGS])*(uintptr*)0x6EDF78;
+CGangInfo CGangs::Gang[NUM_GANGS];
 
 CGangInfo::CGangInfo() :
 	m_nVehicleMI(MI_BUS),
@@ -30,11 +31,11 @@ void CGangs::SetGangVehicleModel(int16 gang, int32 model)
 	GetGangInfo(gang)->m_nVehicleMI = model;
 }
 
-void CGangs::SetGangWeapons(int16 gang, eWeaponType weapon1, eWeaponType weapon2)
+void CGangs::SetGangWeapons(int16 gang, int32 weapon1, int32 weapon2)
 {
 	CGangInfo *gi = GetGangInfo(gang);
-	gi->m_Weapon1 = weapon1;
-	gi->m_Weapon2 = weapon2;
+	gi->m_Weapon1 = (eWeaponType)weapon1;
+	gi->m_Weapon2 = (eWeaponType)weapon2;
 }
 
 void CGangs::SetGangPedModelOverride(int16 gang, int8 ovrd)
@@ -64,11 +65,11 @@ void CGangs::LoadAllGangData(uint8 *buf, uint32 size)
 	Initialize();
 
 INITSAVEBUF
+	// original: SkipSaveBuf(buf, SAVE_HEADER_SIZE);
+	CheckSaveHeader(buf, 'G','N','G','\0', size - SAVE_HEADER_SIZE);
 
-	WriteSaveHeader(buf, 'G','N','G','\0', size - SAVE_HEADER_SIZE);
 	for (int i = 0; i < NUM_GANGS; i++)
 		Gang[i] = ReadSaveBuf<CGangInfo>(buf);
-
 VALIDATESAVEBUF(size);
 }
 

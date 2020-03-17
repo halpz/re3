@@ -256,6 +256,11 @@ public:
 	bool GetMouseX1JustDown()             { return !!(NewMouseControllerState.MXB1    && !OldMouseControllerState.MXB1); }
 	bool GetMouseX2JustDown()             { return !!(NewMouseControllerState.MXB2    && !OldMouseControllerState.MXB2); }
 
+	bool GetLeftMouseJustUp() { return !!(!NewMouseControllerState.LMB && OldMouseControllerState.LMB); }
+	bool GetRightMouseJustUp() { return !!(!NewMouseControllerState.RMB && OldMouseControllerState.RMB); }
+	bool GetMiddleMouseJustUp() { return !!(!NewMouseControllerState.MMB && OldMouseControllerState.MMB); }
+	bool GetMouseWheelUpJustUp() { return !!(!NewMouseControllerState.WHEELUP && OldMouseControllerState.WHEELUP); }
+	bool GetMouseWheelDownJustUp() { return !!(!NewMouseControllerState.WHEELDN && OldMouseControllerState.WHEELDN); }
 
 	bool GetLeftMouse()         { return NewMouseControllerState.LMB; }
 	bool GetRightMouse()        { return NewMouseControllerState.RMB; }
@@ -328,6 +333,12 @@ public:
 	bool GetEnterJustDown()       { return GetPadEnterJustDown() || GetReturnJustDown(); }
 	bool GetAltJustDown()         { return GetLeftAltJustDown() || GetRightAltJustDown(); }
 								  
+	bool GetLeftJustUp() { return !!(!NewKeyState.LEFT && OldKeyState.LEFT); }
+	bool GetRightJustUp() { return !!(!NewKeyState.RIGHT && OldKeyState.RIGHT); }
+	bool GetEnterJustUp() { return GetPadEnterJustUp() || GetReturnJustUp(); }
+	bool GetReturnJustUp() { return !!(!NewKeyState.EXTENTER && OldKeyState.EXTENTER); }
+	bool GetPadEnterJustUp() { return !!(!NewKeyState.ENTER && OldKeyState.ENTER); }
+
 	bool GetChar(int32 c)         { return NewKeyState.VK_KEYS[c]; }
 	bool GetF(int32 n)            { return NewKeyState.F[n]; }
 	bool GetEscape()              { return NewKeyState.ESC; }
@@ -392,6 +403,13 @@ public:
 	bool GetLeftStickXJustDown() { return !!(NewState.LeftStickX && !OldState.LeftStickX); }
 	bool GetLeftStickYJustDown() { return !!(NewState.LeftStickY && !OldState.LeftStickY); }
   
+	bool GetCrossJustUp() { return !!(!NewState.Cross && OldState.Cross); }
+	bool GetSquareJustUp() { return !!(!NewState.Square && OldState.Square); }
+	bool GetDPadUpJustUp() { return !!(!NewState.DPadUp && OldState.DPadUp); }
+	bool GetDPadDownJustUp() { return !!(!NewState.DPadDown && OldState.DPadDown); }
+	bool GetDPadLeftJustUp() { return !!(!NewState.DPadLeft && OldState.DPadLeft); }
+	bool GetDPadRightJustUp() { return !!(!NewState.DPadRight && OldState.DPadRight); }
+
 	bool GetTriangle()           { return !!NewState.Triangle; }
 	bool GetCircle()             { return !!NewState.Circle; }
 	bool GetCross()              { return !!NewState.Cross; }

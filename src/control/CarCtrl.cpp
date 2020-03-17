@@ -596,10 +596,10 @@ CCarCtrl::ChooseCarModel(int32 vehclass)
 	case TAXI:
 	{
 		if (TotalNumOfCarsOfRating[vehclass] == 0)
-			debug("ChooseCarModel : No cars of type %d have been declared\n");
+			debug("ChooseCarModel : No cars of type %d have been declared\n", vehclass);
 		model = CarArrays[vehclass][NextCarOfRating[vehclass]];
 		int32 total = TotalNumOfCarsOfRating[vehclass];
-		NextCarOfRating[vehclass] += 1 + CGeneral::GetRandomNumberInRange(0, total - 1);
+		NextCarOfRating[vehclass] += CGeneral::GetRandomNumberInRange(1, total);
 		while (NextCarOfRating[vehclass] >= total)
 			NextCarOfRating[vehclass] -= total;
 		//NextCarOfRating[vehclass] %= total;

@@ -30,7 +30,8 @@
 // More clearly they're transition areas between zones.
 RegenerationPoint (&aSafeZones)[8] = *(RegenerationPoint(*)[8]) * (uintptr*)0x5FA578;
 
-PedGroup (&CPopulation::ms_pPedGroups)[NUMPEDGROUPS] = *(PedGroup(*)[NUMPEDGROUPS]) * (uintptr*)0x6E9248;
+//PedGroup (&CPopulation::ms_pPedGroups)[NUMPEDGROUPS] = *(PedGroup(*)[NUMPEDGROUPS]) * (uintptr*)0x6E9248;
+PedGroup CPopulation::ms_pPedGroups[NUMPEDGROUPS];
 bool &CPopulation::ms_bGivePedsWeapons = *(bool*)0x95CCF6;
 int32 &CPopulation::m_AllRandomPedsThisType = *(int32*)0x5FA570;
 float &CPopulation::PedDensityMultiplier = *(float*)0x5FA56C;
@@ -80,7 +81,7 @@ CPopulation::Initialise()
 	ms_nNumDummy = 0;
 
 	m_AllRandomPedsThisType = -1;
-	PedDensityMultiplier = 1.0;
+	PedDensityMultiplier = 1.0f;
 	bZoneChangeHasHappened = false;
 	m_CountDownToPedsAtStart = 2;
 	
@@ -511,9 +512,9 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors)
 
 			uint32 weapon;
 			if (CGeneral::GetRandomNumberInRange(0, 100) >= 50)
-				weapon = ped->GiveWeapon(CGangs::GetGangWeapon2(pedType - PEDTYPE_GANG1), 25001);
+				weapon = ped->GiveWeapon(CGangs::GetGangInfo(pedType - PEDTYPE_GANG1)->m_Weapon2, 25001);
 			else
-				weapon = ped->GiveWeapon(CGangs::GetGangWeapon1(pedType - PEDTYPE_GANG1), 25001);
+				weapon = ped->GiveWeapon(CGangs::GetGangInfo(pedType - PEDTYPE_GANG1)->m_Weapon1, 25001);
 			ped->SetCurrentWeapon(weapon);
 			return ped;
 		}
@@ -770,7 +771,7 @@ CPopulation::AddPedInCar(CVehicle* car)
 
 			// fall through
 		default:
-			int gangOfPed = GANG_MAFIA;
+			int gangOfPed = 0;
 			imSureThatModelIsLoaded = false;
 
 			while (gangOfPed < NUM_GANGS && CGangs::GetGangInfo(gangOfPed)->m_nVehicleMI != car->m_modelIndex)

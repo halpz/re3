@@ -259,17 +259,17 @@ CCopPed::ScanForCrimes(void)
 		}
 	}
 
-	// Look for stolen cop cars (it was broken until now)
+	// Look for stolen cop cars
 	if (!m_bIsInPursuit) {
 		CPlayerPed *player = FindPlayerPed();
-#ifdef FIX_BUGS
-		if ((player->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER || player->m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER)
-#else
 		if ((m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER || m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER)
-#endif
-			&& player->m_pWanted->m_nWantedLevel == 0 && player->m_pMyVehicle) {
+			&& player->m_pWanted->m_nWantedLevel == 0) {
 
-			if (player->m_pMyVehicle->bIsLawEnforcer)
+			if (player->m_pMyVehicle
+#ifdef FIX_BUGS
+				&& m_pMyVehicle == player->m_pMyVehicle
+#endif
+				&& player->m_pMyVehicle->bIsLawEnforcer)
 				player->SetWantedLevelNoDrop(1);
 		}
 	}

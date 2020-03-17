@@ -212,7 +212,7 @@ enum eMenuAction
 	MENUACTION_LANG_GER,
 	MENUACTION_LANG_ITA,
 	MENUACTION_LANG_SPA,
-	MENUACTION_UPDATESAVE,
+	MENUACTION_POPULATESLOTS_CHANGEMENU,
 	MENUACTION_CHECKSAVE,
 	MENUACTION_UNK24,
 	MENUACTION_NEWGAME,
@@ -239,7 +239,7 @@ enum eMenuAction
 	MENUACTION_PARSEHEAP,
 	MENUACTION_SHOWCULL,
 	MENUACTION_MEMCARDSAVECONFIRM,
-	MENUACTION_UPDATEMEMCARDSAVE,
+	MENUACTION_RESUME_FROM_SAVEZONE,
 	MENUACTION_UNK50,
 	MENUACTION_DEBUGSTREAM,
 	MENUACTION_MPMAP_LIBERTY,
@@ -272,7 +272,7 @@ enum eMenuAction
 	MENUACTION_SHOWHEADBOB,
 	MENUACTION_UNK80,
 	MENUACTION_INVVERT,
-	MENUACTION_CANCLEGAME,
+	MENUACTION_CANCELGAME,
 	MENUACTION_MP_PLAYERNUMBER,
 	MENUACTION_MOUSESENS,
 	MENUACTION_CHECKMPGAMES,
@@ -283,7 +283,7 @@ enum eMenuAction
 	MENUACTION_MP_LAN,
 	MENUACTION_MP_INTERNET,
 	MENUACTION_RESUME,
-	MENUACTION_DONTCANCLE,
+	MENUACTION_DONTCANCEL,
 	MENUACTION_SCREENRES,
 	MENUACTION_AUDIOHW,
 	MENUACTION_SPEAKERCONF,
@@ -307,27 +307,37 @@ enum eCheckHover
 {
 	HOVEROPTION_0,
 	HOVEROPTION_1,
-	HOVEROPTION_DEFAULT,
+	HOVEROPTION_RANDOM_ITEM,
 	HOVEROPTION_3,
 	HOVEROPTION_4,
 	HOVEROPTION_5,
 	HOVEROPTION_6,
 	HOVEROPTION_7,
 	HOVEROPTION_8,
-	HOVEROPTION_9,
+	HOVEROPTION_BACK,	// used in controller setup
 	HOVEROPTION_10,
 	HOVEROPTION_11,
-	HOVEROPTION_12,
-	HOVEROPTION_13,
-	HOVEROPTION_14,
-	HOVEROPTION_15,
-	HOVEROPTION_16,
-	HOVEROPTION_17,
-	HOVEROPTION_18,
+	HOVEROPTION_OVER_SCROLL_UP,
+	HOVEROPTION_OVER_SCROLL_DOWN,
+	HOVEROPTION_CLICKED_SCROLL_UP,
+	HOVEROPTION_CLICKED_SCROLL_DOWN,
+	HOVEROPTION_HOLDING_SCROLLBAR,
+	HOVEROPTION_PAGEUP,
+	HOVEROPTION_PAGEDOWN,
 	HOVEROPTION_19,
 	HOVEROPTION_20,
 	HOVEROPTION_CHANGESKIN,
-	HOVEROPTION_INCREASE_BRIGHTNESS = 32,
+	HOVEROPTION_RADIO_0,
+	HOVEROPTION_RADIO_1,
+	HOVEROPTION_RADIO_2,
+	HOVEROPTION_RADIO_3,
+	HOVEROPTION_RADIO_4,
+	HOVEROPTION_RADIO_5,
+	HOVEROPTION_RADIO_6,
+	HOVEROPTION_RADIO_7,
+	HOVEROPTION_RADIO_8,
+	HOVEROPTION_RADIO_9,
+	HOVEROPTION_INCREASE_BRIGHTNESS,
 	HOVEROPTION_DECREASE_BRIGHTNESS,
 	HOVEROPTION_INCREASE_DRAWDIST,
 	HOVEROPTION_DECREASE_DRAWDIST,
@@ -337,7 +347,7 @@ enum eCheckHover
 	HOVEROPTION_DECREASE_SFXVOLUME,
 	HOVEROPTION_INCREASE_MOUSESENS,
 	HOVEROPTION_DECREASE_MOUSESENS,
-	HOVEROPTION_42,
+	HOVEROPTION_NOT_HOVERING,
 };
 
 enum
@@ -353,11 +363,17 @@ enum eControlMethod
 
 struct tSkinInfo
 {
-	int field_0;
+	int32 field_0;
 	char skinName[256];
 	char currSkinName[256];
 	char date[256];
 	tSkinInfo *field_304;
+};
+
+struct BottomBarOption
+{
+	char name[8];
+	int32 screenId;
 };
 
 struct CMenuScreen
@@ -387,8 +403,8 @@ public:
 	int32 m_nHelperTextMsgId;
 	bool m_bLanguageLoaded;
 	bool m_bMenuActive;
- char field_112;
- char field_113;
+	bool m_bMenuNotProcessed;
+	bool m_bWaitingForNewKeyBind;
 	bool m_bStartGameLoading;
 	bool m_bFirstTime;
 	bool m_bGameNotLoaded;
@@ -399,46 +415,46 @@ public:
 	bool m_bShowMouse;
 	tSkinInfo m_sSkin;
 	tSkinInfo *m_pSelectedSkin;
- tSkinInfo *field_438;
- float field_43C;
-	int m_nCurrExSize;
-	int m_nSkinsTotal;
+	int32 m_nFirstVisibleRowOnList;
+	float m_nCurListItemY;
+	int32 m_nTotalListRow;
+	int32 m_nSkinsTotal;
  char _unk0[4];
-	int m_nCurrExOption;
+	int32 m_nSelectedListRow;
 	bool m_bSkinsFound;
 	bool m_bQuitGameNoCD;
  bool m_bRenderGameInMenu;
 	bool m_bSaveMenuActive;
 	bool m_bLoadingSavedGame;
  char field_455;
- char field_456;
+	bool m_bStartWaitingForKeyBind;
 	bool m_bSpritesLoaded;
 	CSprite2d m_aFrontEndSprites[28];
 	CSprite2d m_aMenuSprites[20];
- int field_518;
-	int m_nMenuFadeAlpha;
- char field_520;
- char field_521;
- char field_522;
- char field_523;
- char field_524;
-	int m_CurrCntrlAction;
+ int32 field_518;
+	int32 m_nMenuFadeAlpha;
+	bool m_bPressedPgUpOnList;
+	bool m_bPressedPgDnOnList;
+	bool m_bPressedUpOnList;
+	bool m_bPressedDownOnList;
+	bool m_bPressedScrollButton;
+	int32 m_CurrCntrlAction;
  char _unk1[4];
- int field_530;
- char field_534;
- char field_535;
-	int8 m_nCurrExLayer;
-	int m_nHelperTextAlpha;
-	int m_nMouseOldPosX;
-	int m_nMouseOldPosY;
-	int m_nHoverOption;
-	int m_nCurrScreen;
-	int m_nCurrOption;
-	int m_nPrevOption;
-	int m_nPrevScreen;
+ int32 field_530;
+	 bool m_bKeyIsOK;
+ bool field_535;
+	int8 m_nCurrExLayer;	// TODO: What's that?
+	int32 m_nHelperTextAlpha;
+	int32 m_nMouseOldPosX;
+	int32 m_nMouseOldPosY;
+	int32 m_nHoverOption;
+	int32 m_nCurrScreen;
+	int32 m_nCurrOption;
+	int32 m_nPrevOption;
+	int32 m_nPrevScreen;
  uint32 field_558;
-	int m_nCurrSaveSlot;
-	int m_nScreenChangeDelayTimer;
+	int32 m_nCurrSaveSlot;
+	int32 m_nScreenChangeDelayTimer;
 
 public:
 	bool GetIsMenuActive() {return !!m_bMenuActive;}
@@ -473,8 +489,8 @@ public:
 	static float &menuXYpadding;
 	static float &actionTextScaleX;
 	static float &actionTextScaleY;
-	static int &sthWithButtons;
-	static int &sthWithButtons2;
+	static int32 &sthWithButtons;
+	static int32 &sthWithButtons2;
 
 public:
 	static void BuildStatLine(char *text, void *stat, uint8 aFloat, void *stat2);
@@ -510,7 +526,7 @@ public:
 	void Process();
 	void ProcessButtonPresses();
 	void ProcessOnOffMenuOptions();
-	static void RequestFrontEndShutdown();
+	static void RequestFrontEndShutDown();
 	static void RequestFrontEndStartUp();
 	void ResetHelperText();
 	void SaveLoadFileError_SetUpErrorScreen();
@@ -526,8 +542,6 @@ public:
 
 	// New content:
 	uint8 GetNumberOfMenuOptions();
-	void SwitchToNewScreen(int32 screen);
-	void SetDefaultPreferences(int32 screen);
 };
 
 static_assert(sizeof(CMenuManager) == 0x564, "CMenuManager: error");
