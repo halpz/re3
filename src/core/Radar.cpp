@@ -993,7 +993,7 @@ void CRadar::RequestMapSection(int32 x, int32 y)
 #endif
 
 #if 0
-WRAPPER void CRadar::SaveAllRadarBlips(int32) { EAXJMP(0x4A6E30); }
+WRAPPER void CRadar::SaveAllRadarBlips(uint8 *buf, uint32 *size) { EAXJMP(0x4A6E30); }
 #else
 void CRadar::SaveAllRadarBlips(uint8 *buf, uint32 *size)
 {

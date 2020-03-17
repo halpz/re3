@@ -31,6 +31,8 @@ CGarage(&CGarages::Garages)[NUM_GARAGES] = *(CGarage(*)[NUM_GARAGES])(uintptr*)0
 
 WRAPPER void CGarages::Init(void) { EAXJMP(0x421C60); }
 WRAPPER void CGarages::Update(void) { EAXJMP(0x421E40); }
+WRAPPER void CGarages::Load(uint8* buf, uint32 size) { EAXJMP(0x428940); }
+WRAPPER void CGarages::Save(uint8* buf, uint32 *size) { EAXJMP(0x4284e0); }
 
 bool
 CGarages::IsModelIndexADoor(uint32 id)

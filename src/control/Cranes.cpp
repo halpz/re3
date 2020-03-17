@@ -10,3 +10,5 @@ WRAPPER void CCranes::ActivateCrane(float, float, float, float, float, float, fl
 WRAPPER void CCranes::DeActivateCrane(float, float) { EAXJMP(0x543890); }
 WRAPPER void CCranes::InitCranes(void) { EAXJMP(0x543360); }
 WRAPPER void CCranes::UpdateCranes(void) { EAXJMP(0x5439E0); }
+WRAPPER void CCranes::Save(uint8*, uint32*) { EAXJMP(0x545210); }
+WRAPPER void CranesLoad(uint8*, uint32) { EAXJMP(0x5454d0); }

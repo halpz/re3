@@ -1,21 +1,40 @@
 #include "common.h"
 #include "main.h"
 #include "patcher.h"
+#include "AudioScriptObject.h"
 #include "Camera.h"
+#include "CarGen.h"
+#include "Cranes.h"
 #include "Clock.h"
 #include "Date.h"
 #include "FileMgr.h"
 #include "GameLogic.h"
+#include "Gangs.h"
 #include "Garages.h"
 #include "GenericGameStorage.h"
+#include "Pad.h"
+#include "ParticleObject.h"
+#include "PathFind.h"
 #include "PCSave.h"
+#include "Phones.h"
+#include "Pickups.h"
 #include "PlayerPed.h"
 #include "Pools.h"
+#include "Radar.h"
+#include "Restart.h"
 #include "Script.h"
+#include "Stats.h"
 #include "Streaming.h"
+#include "Timer.h"
+#include "TimeStep.h"
+#include "Weather.h"
 #include "World.h"
+#include "Zones.h"
 
-const int SIZE_OF_ONE_GAME_IN_BYTES = 201729;
+#define BLOCK_COUNT 20
+#define SIZE_OF_SIMPLEVARS 0xBC
+
+const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 
 char (&DefaultPCSaveFileName)[260] = *(char(*)[260])*(uintptr*)0x8E28C0;
 char (&ValidSaveName)[260] = *(char(*)[260])*(uintptr*)0x8E2CBC;
@@ -31,8 +50,151 @@ CDate &CompileDateAndTime = *(CDate*)0x72BCB8;
 #define ReadDataFromBufferPointer(buf, to) memcpy(&to, buf, sizeof(to)); buf += align4bytes(sizeof(to));
 #define WriteDataToBufferPointer(buf, from) memcpy(buf, &from, sizeof(from)); buf += align4bytes(sizeof(from));
 
-WRAPPER bool GenericSave(int file) { EAXJMP(0x58F8D0); }
+//WRAPPER bool GenericSave(int file) { EAXJMP(0x58F8D0); }
 WRAPPER bool GenericLoad() { EAXJMP(0x590A00); }
+
+
+#define WRITE_BLOCK(save_func)\
+do {\
+	buf = work_buff;\
+	reserved = 0;\
+	MakeSpaceForSizeInBufferPointer(presize, buf, postsize);\
+	save_func(buf, &size);\
+	CopySizeAndPreparePointer(presize, buf, postsize, reserved, size);\
+	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, size + 4))\
+		return false;\
+	totalSize += size;\
+} while (0)
+
+bool
+GenericSave(int file)
+{
+	uint8 *buf, *presize, *postsize;
+	uint32 size;
+	uint32 reserved;
+
+	uint32 totalSize;
+	uint32 i;
+	
+	wchar *lastMissionPassed;
+	wchar suffix[6];
+	wchar saveName[24];
+	SYSTEMTIME saveTime;
+	CPad *currPad;
+
+	CheckSum = 0;
+	buf = work_buff;
+	reserved = 0;
+	totalSize = 0;
+
+	// Save simple vars
+INITSAVEBUF
+	lastMissionPassed = TheText.Get(CStats::LastMissionPassedName);
+	if (*lastMissionPassed) {
+		AsciiToUnicode("'...", suffix);
+		TextCopy(saveName, lastMissionPassed);
+		int len = UnicodeStrlen(saveName);
+		saveName[len] = '\0';
+		if (len > 22)
+			TextCopy(saveName + 18, suffix);
+		saveName[23] = '\0';
+	}
+	WriteDataToBufferPointer(buf, saveName);
+	GetLocalTime(&saveTime);
+	WriteDataToBufferPointer(buf, saveTime);
+	WriteDataToBufferPointer(buf, SIZE_OF_ONE_GAME_IN_BYTES);
+	WriteDataToBufferPointer(buf, CGame::currLevel);
+	WriteDataToBufferPointer(buf, TheCamera.m_matrix.m_matrix.pos.x);
+	WriteDataToBufferPointer(buf, TheCamera.m_matrix.m_matrix.pos.y);
+	WriteDataToBufferPointer(buf, TheCamera.m_matrix.m_matrix.pos.z);
+	WriteDataToBufferPointer(buf, CClock::ms_nMillisecondsPerGameMinute);
+	WriteDataToBufferPointer(buf, CClock::ms_nLastClockTick);
+	WriteDataToBufferPointer(buf, CClock::ms_nGameClockHours);
+	WriteDataToBufferPointer(buf, CClock::ms_nGameClockMinutes);
+	currPad = CPad::GetPad(0);
+	WriteDataToBufferPointer(buf, currPad->Mode);
+	WriteDataToBufferPointer(buf, CTimer::m_snTimeInMilliseconds);
+	WriteDataToBufferPointer(buf, CTimer::ms_fTimeScale);
+	WriteDataToBufferPointer(buf, CTimer::ms_fTimeStep);
+	WriteDataToBufferPointer(buf, CTimer::ms_fTimeStepNonClipped);
+	WriteDataToBufferPointer(buf, CTimer::m_FrameCounter);
+	WriteDataToBufferPointer(buf, CTimeStep::ms_fTimeStep);
+	WriteDataToBufferPointer(buf, CTimeStep::ms_fFramesPerUpdate);
+	WriteDataToBufferPointer(buf, CTimeStep::ms_fTimeScale);
+	WriteDataToBufferPointer(buf, CWeather::OldWeatherType);
+	WriteDataToBufferPointer(buf, CWeather::NewWeatherType);
+	WriteDataToBufferPointer(buf, CWeather::ForcedWeatherType);
+	WriteDataToBufferPointer(buf, CWeather::InterpolationValue);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nSecond);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nMinute);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nHour);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nDay);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nMonth);
+	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nYear);
+	WriteDataToBufferPointer(buf, CWeather::WeatherTypeInList);
+	WriteDataToBufferPointer(buf, TheCamera.CarZoomIndicator);
+	WriteDataToBufferPointer(buf, TheCamera.PedZoomIndicator);
+#ifdef VALIDATE_SAVE_SIZE
+	_saveBufCount = buf - work_buff;
+#endif
+VALIDATESAVEBUF(SIZE_OF_SIMPLEVARS);
+
+	// Save scripts, block is nested within the same block as simple vars for some reason
+	presize = buf;
+	buf += 4;
+	postsize = buf;
+	CTheScripts::SaveAllScripts(buf, &size);
+	CopySizeAndPreparePointer(presize, buf, postsize, reserved, size);
+	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, size + SIZE_OF_SIMPLEVARS + 4))
+		return false;
+	totalSize += size + SIZE_OF_SIMPLEVARS;
+
+	// Save the rest
+	WRITE_BLOCK(CPools::SavePedPool);
+	WRITE_BLOCK(CGarages::Save);
+	WRITE_BLOCK(CPools::SaveVehiclePool);
+	WRITE_BLOCK(CPools::SaveObjectPool);
+	WRITE_BLOCK(ThePaths.Save);
+	WRITE_BLOCK(CCranes::Save);
+	WRITE_BLOCK(CPickups::Save);
+	WRITE_BLOCK(gPhoneInfo.Save);
+	WRITE_BLOCK(CRestart::SaveAllRestartPoints);
+	WRITE_BLOCK(CRadar::SaveAllRadarBlips);
+	WRITE_BLOCK(CTheZones::SaveAllZones);
+	WRITE_BLOCK(CGangs::SaveAllGangData);
+	WRITE_BLOCK(CTheCarGenerators::SaveAllCarGenerators);
+	WRITE_BLOCK(CParticleObject::SaveParticle);
+	WRITE_BLOCK(cAudioScriptObject::SaveAllAudioScriptObjects);
+	WRITE_BLOCK(CWorld::Players[CWorld::PlayerInFocus].SavePlayerInfo);
+	WRITE_BLOCK(CStats::SaveStats);
+	WRITE_BLOCK(CStreaming::MemoryCardSave);
+	WRITE_BLOCK(CPedType::Save);
+
+	// Write padding
+	i = 0;
+	do {
+		size = align4bytes(SIZE_OF_ONE_GAME_IN_BYTES - totalSize - 4);
+		if (size > sizeof(work_buff))
+			size = sizeof(work_buff);
+		if (size > 4) {
+			if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, size))
+				return false;
+			totalSize += size;
+		}
+		i++;
+	} while (i < 4);
+	
+	// Write checksum and close
+	CFileMgr::Write(file, (const char *) &CheckSum, sizeof(CheckSum));
+	if (CFileMgr::GetErrorReadWrite(file)) {
+		PcSaveHelper.nErrorCode = SAVESTATUS_ERR_SAVE_WRITE;
+		if (CloseFile(file))
+			PcSaveHelper.nErrorCode = SAVESTATUS_ERR_SAVE_CLOSE;
+		return false;
+	}
+	
+	return true;
+}
 
 bool
 ReadInSizeofSaveFileBuffer(int32 &file, uint32 &size)
@@ -246,7 +408,7 @@ align4bytes(int32 size)
 }
 
 STARTPATCHES
-	//InjectHook(0x58F8D0, GenericSave, PATCH_JUMP);
+	InjectHook(0x58F8D0, GenericSave, PATCH_JUMP);
 	//InjectHook(0x590A00, GenericLoad, PATCH_JUMP);
 	InjectHook(0x591910, ReadInSizeofSaveFileBuffer, PATCH_JUMP);
 	InjectHook(0x591990, ReadDataFromFile, PATCH_JUMP);

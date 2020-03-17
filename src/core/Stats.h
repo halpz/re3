@@ -73,4 +73,5 @@ public:
 	static void CheckPointReachedUnsuccessfully() { KillsSinceLastCheckpoint = 0; };
 	static void CheckPointReachedSuccessfully() { TotalLegitimateKills += KillsSinceLastCheckpoint; KillsSinceLastCheckpoint = 0; };
 	static void RegisterElBurroTime(int32);
+	static void SaveStats(uint8 *buf, uint32 *size);
 };

@@ -8106,6 +8106,8 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 			if (model != -1)
 				break;
 			model = CStreaming::ms_vehiclesLoaded[index];
+			if (model == -1)
+				continue;
 			// desperatly want to believe this was inlined :|
 			CBaseModelInfo* pInfo = CModelInfo::GetModelInfo(model);
 			assert(pInfo->m_type == MITYPE_VEHICLE);

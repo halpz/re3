@@ -52,4 +52,10 @@ public:
 	static CObject *GetObject(int32 handle);
 	static void CheckPoolsEmpty();
 	static void MakeSureSlotInObjectPoolIsEmpty(int32 slot);
+	static void LoadObjectPool(uint8 *buf, uint32 size);
+	static void LoadPedPool(uint8 *buf, uint32 size);
+	static void LoadVehiclePool(uint8 *buf, uint32 size);
+	static void SaveObjectPool(uint8 *buf, uint32 *size);
+	static void SavePedPool(uint8 *buf, uint32 *size);
+	static void SaveVehiclePool(uint8 *buf, uint32 *size);
 };

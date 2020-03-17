@@ -168,6 +168,10 @@ enum Config {
 #define USE_MEASUREMENTS_IN_METERS // makes game use meters instead of feet in script
 #define USE_PRECISE_MEASUREMENT_CONVERTION // makes game convert feet to meeters more precisely
 
+// Replay
+//#define DONT_FIX_REPLAY_BUGS // keeps various bugs in CReplay, some of which are fairly cool!
+//#define USE_BETA_REPLAY_MODE // adds another replay mode, a few seconds slomo (caution: buggy!)
+
 // Vehicles
 #define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher
 //#define REMOVE_TREADABLE_PATHFIND

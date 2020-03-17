@@ -321,9 +321,9 @@ _TWEEKCLASS(CTweakFloat, float);
 #undef _TWEEKCLASS
 
 #ifdef VALIDATE_SAVE_SIZE
-extern int32 _bufBytesRead;
-#define INITSAVEBUF _bufBytesRead = 0;
-#define VALIDATESAVEBUF(b) assert(_bufBytesRead == b);
+extern int32 _saveBufCount;
+#define INITSAVEBUF _saveBufCount = 0;
+#define VALIDATESAVEBUF(b) assert(_saveBufCount == b);
 #else
 #define INITSAVEBUF
 #define VALIDATESAVEBUF(b)
@@ -333,7 +333,7 @@ inline void SkipSaveBuf(uint8 *&buf, int32 skip)
 {
 	buf += skip;
 #ifdef VALIDATE_SAVE_SIZE
-	_bufBytesRead += skip;
+	_saveBufCount += skip;
 #endif
 }
 

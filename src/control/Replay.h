@@ -10,6 +10,12 @@
 #include "World.h"
 #include "common.h"
 
+#ifdef FIX_BUGS
+#ifndef DONT_FIX_REPLAY_BUGS
+#define FIX_REPLAY_BUGS
+#endif
+#endif
+
 struct CAddressInReplayBuffer
 {
 	uint32 m_nOffset;
@@ -32,20 +38,31 @@ struct CStoredAnimationState
 	uint8 partBlendAmount;
 };
 
+enum {
+	NUM_MAIN_ANIMS_IN_REPLAY = 3,
+	NUM_PARTIAL_ANIMS_IN_REPLAY = 6
+};
+
 struct CStoredDetailedAnimationState
 {
-	uint8 aAnimId[3];
-	uint8 aCurTime[3];
-	uint8 aSpeed[3];
-	uint8 aBlendAmount[3];
-	uint8 aFunctionCallbackID[3];
-	uint16 aFlags[3];
-	uint8 aAnimId2[6];
-	uint8 aCurTime2[6];
-	uint8 aSpeed2[6];
-	uint8 aBlendAmount2[6];
-	uint8 aFunctionCallbackID2[6];
-	uint16 aFlags2[6];
+	uint8 aAnimId[NUM_MAIN_ANIMS_IN_REPLAY];
+	uint8 aCurTime[NUM_MAIN_ANIMS_IN_REPLAY];
+	uint8 aSpeed[NUM_MAIN_ANIMS_IN_REPLAY];
+	uint8 aBlendAmount[NUM_MAIN_ANIMS_IN_REPLAY];
+#ifdef FIX_REPLAY_BUGS
+	int8 aBlendDelta[NUM_MAIN_ANIMS_IN_REPLAY];
+#endif
+	uint8 aFunctionCallbackID[NUM_MAIN_ANIMS_IN_REPLAY];
+	uint16 aFlags[NUM_MAIN_ANIMS_IN_REPLAY];
+	uint8 aAnimId2[NUM_PARTIAL_ANIMS_IN_REPLAY];
+	uint8 aCurTime2[NUM_PARTIAL_ANIMS_IN_REPLAY];
+	uint8 aSpeed2[NUM_PARTIAL_ANIMS_IN_REPLAY];
+	uint8 aBlendAmount2[NUM_PARTIAL_ANIMS_IN_REPLAY];
+#ifdef FIX_REPLAY_BUGS
+	int8 aBlendDelta2[NUM_PARTIAL_ANIMS_IN_REPLAY];
+#endif
+	uint8 aFunctionCallbackID2[NUM_PARTIAL_ANIMS_IN_REPLAY];
+	uint16 aFlags2[NUM_PARTIAL_ANIMS_IN_REPLAY];
 };
 
 void PlayReplayFromHD(void);
@@ -80,6 +97,11 @@ class CReplay
 		REPLAYBUFFER_UNUSED = 0,
 		REPLAYBUFFER_PLAYBACK = 1,
 		REPLAYBUFFER_RECORD = 2
+	};
+
+	enum {
+		NUM_REPLAYBUFFERS = 8,
+		REPLAYBUFFERSIZE = 100000
 	};
 
 
@@ -209,8 +231,8 @@ private:
 	static CStoredDetailedAnimationState *&pPedAnims;
 	static uint8 *&pPickups;
 	static uint8 *&pReferences;
-	static uint8 (&BufferStatus)[8];
-	static uint8 (&Buffers)[8][100000];
+	static uint8 (&BufferStatus)[NUM_REPLAYBUFFERS];
+	static uint8 (&Buffers)[NUM_REPLAYBUFFERS][REPLAYBUFFERSIZE];
 	static bool &bPlayingBackFromFile;
 	static bool &bReplayEnabled;
 	static uint32 &SlowMotion;
@@ -274,6 +296,8 @@ private:
 	static void RetrievePedAnimation(CPed *ped, CStoredAnimationState *state);
 	static void RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state);
 	static void PlaybackThisFrame(void);
+	static void TriggerPlaybackLastCoupleOfSeconds(uint32, uint8, float, float, float, uint32);
+	static bool FastForwardToTime(uint32);
 	static void StoreCarUpdate(CVehicle *vehicle, int id);
 	static void ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressInReplayBuffer *buffer);
 	static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer);
