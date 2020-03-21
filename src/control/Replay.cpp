@@ -280,7 +280,7 @@ void CReplay::RecordThisFrame(void)
 		}
 		memory_required += sizeof(tPedUpdatePacket);
 	}
-	for (uint8 i = 0; i < 16; i++) {
+	for (uint8 i = 0; i < CBulletTraces::NUM_BULLET_TRACES; i++) {
 		if (!CBulletTraces::aTraces[i].m_bInUse)
 			continue;
 		memory_required += sizeof(tBulletTracePacket);
@@ -340,7 +340,7 @@ void CReplay::RecordThisFrame(void)
 		}
 		StorePedUpdate(p, i);
 	}
-	for (uint8 i = 0; i < 16; i++){
+	for (uint8 i = 0; i < CBulletTraces::NUM_BULLET_TRACES; i++){
 		if (!CBulletTraces::aTraces[i].m_bInUse)
 			continue;
 		tBulletTracePacket* bt = (tBulletTracePacket*)&Record.m_pBase[Record.m_nOffset];
@@ -348,8 +348,8 @@ void CReplay::RecordThisFrame(void)
 		bt->index = i;
 		bt->frames = CBulletTraces::aTraces[i].m_framesInUse;
 		bt->lifetime = CBulletTraces::aTraces[i].m_lifeTime;
-		bt->inf = CBulletTraces::aTraces[i].m_vecInf;
-		bt->sup = CBulletTraces::aTraces[i].m_vecSup;
+		bt->inf = CBulletTraces::aTraces[i].m_vecCurrentPos;
+		bt->sup = CBulletTraces::aTraces[i].m_vecTargetPos;
 		Record.m_nOffset += sizeof(*bt);
 	}
 	tEndOfFramePacket* eof = (tEndOfFramePacket*)&Record.m_pBase[Record.m_nOffset];
@@ -995,8 +995,8 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 			CBulletTraces::aTraces[pb->index].m_bInUse = true;
 			CBulletTraces::aTraces[pb->index].m_framesInUse = pb->frames;
 			CBulletTraces::aTraces[pb->index].m_lifeTime = pb->lifetime;
-			CBulletTraces::aTraces[pb->index].m_vecInf = pb->inf;
-			CBulletTraces::aTraces[pb->index].m_vecSup = pb->sup;
+			CBulletTraces::aTraces[pb->index].m_vecCurrentPos = pb->inf;
+			CBulletTraces::aTraces[pb->index].m_vecTargetPos = pb->sup;
 			buffer->m_nOffset += sizeof(tBulletTracePacket);
 		}
 		default:

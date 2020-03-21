@@ -15,19 +15,27 @@ public:
 
 struct CBulletTrace
 {
-	CVector m_vecInf;
-	CVector m_vecSup;
+	CVector m_vecCurrentPos;
+	CVector m_vecTargetPos;
 	bool m_bInUse;
 	uint8 m_framesInUse;
 	uint8 m_lifeTime;
+
+	void Update(void);
 };
 
 class CBulletTraces
 {
 public:
-	static CBulletTrace (&aTraces)[16];
+	enum {
+		NUM_BULLET_TRACES = 16
+	};
+	static CBulletTrace (&aTraces)[NUM_BULLET_TRACES];
 
 	static void Init(void);
+	static void AddTrace(CVector*, CVector*);
+	static void Render(void);
+	static void Update(void);
 };
 
 class CBrightLights

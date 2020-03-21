@@ -14,6 +14,8 @@
 #include "Particle.h"
 #include "General.h"
 #include "Camera.h"
+#include "Shadows.h"
+#include "main.h"
 
 WRAPPER void CSpecialFX::Render(void) { EAXJMP(0x518DC0); }
 WRAPPER void CSpecialFX::Update(void) { EAXJMP(0x518D40); }
@@ -21,9 +23,101 @@ WRAPPER void CSpecialFX::Update(void) { EAXJMP(0x518D40); }
 WRAPPER void CMotionBlurStreaks::RegisterStreak(int32 id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2) { EAXJMP(0x519460); }
 
 
-CBulletTrace (&CBulletTraces::aTraces)[16] = *(CBulletTrace(*)[16])*(uintptr*)0x72B1B8;
+CBulletTrace (&CBulletTraces::aTraces)[NUM_BULLET_TRACES] = *(CBulletTrace(*)[NUM_BULLET_TRACES])*(uintptr*)0x72B1B8;
+RxObjSpace3DVertex (&TraceVertices)[6] = *(RxObjSpace3DVertex(*)[6])*(uintptr*)0x649884;
+RwImVertexIndex (&TraceIndexList)[12] = *(RwImVertexIndex(*)[12])*(uintptr*)0x64986C;
 
-WRAPPER void CBulletTraces::Init(void) { EAXJMP(0x518DE0); }
+void CBulletTraces::Init(void)
+{
+	for (int i = 0; i < NUM_BULLET_TRACES; i++)
+		aTraces[i].m_bInUse = false;
+}
+
+void CBulletTraces::AddTrace(CVector* vecStart, CVector* vecTarget)
+{
+	int index;
+	for (index = 0; index < NUM_BULLET_TRACES; index++) {
+		if (!aTraces[index].m_bInUse)
+			break;
+	}
+	if (index == NUM_BULLET_TRACES)
+		return;
+	aTraces[index].m_vecCurrentPos = *vecStart;
+	aTraces[index].m_vecTargetPos = *vecTarget;
+	aTraces[index].m_bInUse = true;
+	aTraces[index].m_framesInUse = 0;
+	aTraces[index].m_lifeTime = 25 + CGeneral::GetRandomNumber() % 32;
+}
+
+void CBulletTraces::Render(void)
+{
+	for (int i = 0; i < NUM_BULLET_TRACES; i++) {
+		if (!aTraces[i].m_bInUse)
+			continue;
+		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)0);
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)2);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)2);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpShadowExplosionTex->raster);
+		CVector inf = aTraces[i].m_vecCurrentPos;
+		CVector sup = aTraces[i].m_vecTargetPos;
+		CVector center = (inf + sup) / 2;
+		CVector screenPos = CrossProduct(TheCamera.GetForward(), (sup - inf));
+		screenPos.Normalise();
+		screenPos /= 20;
+		uint8 intensity = aTraces[i].m_lifeTime;
+		uint32 color = 0xFF << 24 | intensity << 16 | intensity << 8 | intensity;
+		TraceVertices[0].color = color;
+		TraceVertices[1].color = color;
+		TraceVertices[2].color = color;
+		TraceVertices[3].color = color;
+		TraceVertices[4].color = color;
+		TraceVertices[5].color = color;
+		// cast to satisfy compiler
+		TraceVertices[0].objVertex = (const CVector&)(inf + screenPos);
+		TraceVertices[1].objVertex = (const CVector&)(inf - screenPos);
+		TraceVertices[2].objVertex = (const CVector&)(center + screenPos);
+		TraceVertices[3].objVertex = (const CVector&)(center - screenPos);
+		TraceVertices[4].objVertex = (const CVector&)(sup + screenPos);
+		TraceVertices[5].objVertex = (const CVector&)(sup - screenPos);
+		LittleTest();
+		if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, 1)) {
+			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
+			RwIm3DEnd();
+		}
+	}
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)1);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)5);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)6);
+}
+
+void CBulletTraces::Update(void)
+{
+	for (int i = 0; i < NUM_BULLET_TRACES; i++) {
+		if (aTraces[i].m_bInUse)
+			aTraces[i].Update();
+	}
+}
+
+void CBulletTrace::Update(void)
+{
+	if (m_framesInUse == 0) {
+		m_framesInUse++;
+		return;
+	}
+	if (m_framesInUse > 60) {
+		m_bInUse = false;
+		return;
+	}
+	CVector diff = m_vecCurrentPos - m_vecTargetPos;
+	float remaining = diff.Magnitude();
+	if (remaining > 0.8f)
+		m_vecCurrentPos = m_vecTargetPos + (remaining - 0.8f) / remaining * diff;
+	else
+		m_bInUse = false;
+	if (--m_lifeTime == 0)
+		m_bInUse = false;
+	m_framesInUse++;
+}
 
 WRAPPER void CBrightLights::RegisterOne(CVector pos, CVector up, CVector right, CVector fwd, uint8 type, uint8 unk1, uint8 unk2, uint8 unk3) { EAXJMP(0x51A410); }
 
@@ -460,6 +554,11 @@ CSpecialParticleStuff::UpdateBoatFoamAnimation(CMatrix* pMatrix)
 }
 
 STARTPATCHES
+	InjectHook(0x518DE0, &CBulletTraces::Init, PATCH_JUMP);
+	InjectHook(0x518E90, &CBulletTraces::AddTrace, PATCH_JUMP);
+	InjectHook(0x518F20, &CBulletTraces::Render, PATCH_JUMP);
+	InjectHook(0x519240, &CBulletTraces::Update, PATCH_JUMP);
+
 	InjectHook(0x51B070, &C3dMarker::AddMarker, PATCH_JUMP);
 	InjectHook(0x51B170, &C3dMarker::DeleteMarkerObject, PATCH_JUMP);
 	InjectHook(0x51B1B0, &C3dMarker::Render, PATCH_JUMP);
