@@ -24,6 +24,10 @@ void CGangs::Initialize(void)
 	Gang[GANG_HOODS].m_nVehicleMI = MI_HOODS;
 	Gang[GANG_7].m_nVehicleMI = -1;
 	Gang[GANG_8].m_nVehicleMI = -1;
+#ifdef FIX_BUGS
+	for (int i = 0; i < NUM_GANGS; i++)
+		Gang[i].m_nPedModelOverride = -1;
+#endif
 }
 
 void CGangs::SetGangVehicleModel(int16 gang, int32 model)

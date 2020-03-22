@@ -1250,10 +1250,6 @@ void CReplay::RestoreStuffFromMem(void)
 	memcpy(CRadar::ms_RadarTrace, pRadarBlips, sizeof(CBlip) * NUMRADARBLIPS);
 	delete[] pRadarBlips;
 	pRadarBlips = nil;
-#ifdef FIX_REPLAY_BUGS
-	// NB: can only be used with fixed bug at the start of PlayBackThisFrameInterpolation
-	delete FindPlayerPed()->m_pWanted;
-#endif
 	FindPlayerPed()->m_pWanted = new CWanted(PlayerWanted);
 	CWorld::Players[0] = PlayerInfo;
 	int i = CPools::GetPedPool()->GetSize();

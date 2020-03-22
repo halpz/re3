@@ -6,8 +6,6 @@ struct CGangInfo
 {
 	int32 m_nVehicleMI;
 	int8 m_nPedModelOverride;
-	int8 field_5;
-	int16 field_6;
 	eWeaponType m_Weapon1;
 	eWeaponType m_Weapon2;
 
@@ -44,6 +42,5 @@ public:
 	static CGangInfo *GetGangInfo(int16 gang) { return &Gang[gang]; }
 
 private:
-
 	static CGangInfo Gang[NUM_GANGS];
 };
