@@ -143,6 +143,7 @@ _rpMatFXD3D8AtomicMatFXEnvRender_ps2(RxD3D8InstanceData *inst, int flags, int se
 		RwD3D8SetTexture(texture, 0);
 	else
 		RwD3D8SetTexture(nil, 0);
+	RwD3D8SetPixelShader(0);
 	RwD3D8SetVertexShader(inst->vertexShader);
 	RwD3D8SetStreamSource(0, inst->vertexBuffer, inst->stride);
 	RwD3D8SetIndices(inst->indexBuffer, inst->baseIndex);
