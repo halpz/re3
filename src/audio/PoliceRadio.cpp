@@ -11,6 +11,9 @@
 #include "Vehicle.h"
 #include "World.h"
 
+const int maxVolume = 127;
+const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+const int policeChannel = channels + 1;
 
 struct tPoliceRadioZone {
 	char m_aName[8];
@@ -91,7 +94,7 @@ cAudioManager::InitialisePoliceRadio()
 	SampleManager.SetChannelReverbFlag(policeChannel, 0);
 	gSpecialSuspectLastSeenReport = false;
 	for (int32 i = 0; i < ARRAY_SIZE(gMinTimeToNextReport); i++)
-		gMinTimeToNextReport[i] = m_nTimeOfRecentCrime;
+		gMinTimeToNextReport[i] = m_FrameCounter;
 }
 
 void
@@ -670,7 +673,7 @@ cAudioManager::ReportCrime(int32 type, const CVector *pos)
 {
 	int32 lastCrime = ARRAY_SIZE(m_sPoliceRadioQueue.crimes);
 	if (m_bIsInitialised && MusicManager.m_nMusicMode != MUSICMODE_CUTSCENE && FindPlayerPed()->m_pWanted->m_nWantedLevel > 0 &&
-		(type > CRIME_NONE || type < NUM_CRIME_TYPES) && m_nTimeOfRecentCrime >= gMinTimeToNextReport[type]) {
+		(type > CRIME_NONE || type < NUM_CRIME_TYPES) && m_FrameCounter >= gMinTimeToNextReport[type]) {
 		for (int32 i = 0; i < ARRAY_SIZE(m_sPoliceRadioQueue.crimes); i++) {
 			if (m_sPoliceRadioQueue.crimes[i].type) {
 				if (m_sPoliceRadioQueue.crimes[i].type == type) {
@@ -687,7 +690,7 @@ cAudioManager::ReportCrime(int32 type, const CVector *pos)
 			m_sPoliceRadioQueue.crimes[lastCrime].type = type;
 			m_sPoliceRadioQueue.crimes[lastCrime].position = *pos;
 			m_sPoliceRadioQueue.crimes[lastCrime].timer = 0;
-			gMinTimeToNextReport[type] = m_nTimeOfRecentCrime + 500;
+			gMinTimeToNextReport[type] = m_FrameCounter + 500;
 		}
 	}
 }

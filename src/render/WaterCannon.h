@@ -23,4 +23,5 @@ public:
 	static void Init(void);
 };
 
-extern CWaterCannon *aCannons;
+extern CWaterCannon (&aCannons)[NUM_WATERCANNONS];
+

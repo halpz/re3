@@ -2,6 +2,7 @@
 
 #include "DMAudio.h"
 #include "common.h"
+#include "config.h"
 #include "AudioCollision.h"
 #include "PoliceRadio.h"
 
@@ -53,8 +54,8 @@ enum eScriptSounds : int16
 	SCRIPT_SOUND_CHINATOWN_RESTAURANT_L = 43,
 	SCRIPT_SOUND_CIPRIANI_RESAURANT_S = 44,
 	SCRIPT_SOUND_CIPRIANI_RESAURANT_L = 45,
-	SCRIPT_SOUND_46 = 46,
-	SCRIPT_SOUND_47 = 47,
+	SCRIPT_SOUND_46_S = 46,
+	SCRIPT_SOUND_47_L = 47,
 	SCRIPT_SOUND_MARCO_BISTRO_S = 48,
 	SCRIPT_SOUND_MARCO_BISTRO_L = 49,
 	SCRIPT_SOUND_AIRPORT_LOOP_S = 50,
@@ -194,9 +195,9 @@ public:
 	void *m_pEntity;
 	bool m_bIsUsed;
 	uint8 m_bStatus;
-	int16 m_awAudioEvent[4];
+	int16 m_awAudioEvent[NUM_AUDIOENTITY_EVENTS];
 	uint8 gap_18[2];
-	float m_afVolume[4];
+	float m_afVolume[NUM_AUDIOENTITY_EVENTS];
 	uint8 m_AudioEvents;
 	uint8 field_25[3];
 
@@ -224,9 +225,9 @@ static_assert(sizeof(tPedComment) == 28, "tPedComment: error");
 class cPedComments
 {
 public:
-	tPedComment m_asPedComments[2][20];
-	uint8 indexMap[2][20];
-	uint8 nrOfCommentsInBank[2];
+	tPedComment m_asPedComments[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
+	uint8 indexMap[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
+	uint8 nrOfCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 activeBank;
 	uint8 gap_1163[1];
 
@@ -304,16 +305,16 @@ public:
 	tSound m_sQueueSample;
 	bool m_bActiveSampleQueue;
 	uint8 gap_109[3];
-	tSound m_asSamples[2][27];
-	uint8 m_abSampleQueueIndexTable[2][27];
-	uint8 m_bSampleRequestQueuesStatus[2];
-	tSound m_asActiveSamples[27];
-	tAudioEntity m_asAudioEntities[200];
-	int32 m_anAudioEntityIndices[200];
+	tSound m_asSamples[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
+	uint8 m_abSampleQueueIndexTable[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
+	uint8 m_bSampleRequestQueuesStatus[NUM_SOUNDS_SAMPLES_BANKS];
+	tSound m_asActiveSamples[NUM_SOUNDS_SAMPLES_SLOTS];
+	tAudioEntity m_asAudioEntities[NUM_AUDIOENTITIES];
+	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
 	int32 m_nAudioEntitiesTotal;
-	CVector m_avecReflectionsPos[5];
-	float m_afReflectionsDistances[5];
-	int32 m_anScriptObjectEntityIndices[40];
+	CVector m_avecReflectionsPos[NUM_AUDIO_REFLECTIONS];
+	float m_afReflectionsDistances[NUM_AUDIO_REFLECTIONS];
+	int32 m_anScriptObjectEntityIndices[NUM_SCRIPT_MAX_ENTITIES];
 	int32 m_nScriptObjectEntityTotal;
 	cPedComments m_sPedComments;
 	int32 m_nFireAudioEntity;
@@ -331,10 +332,10 @@ public:
 	uint8 m_bUserPause;
 	uint8 m_bPreviousUserPause;
 	uint8 field_19195; // time?
-	uint32 m_nTimeOfRecentCrime;
+	uint32 m_FrameCounter;
 
 	// getters
-	uint32 GetFrameCounter() const { return m_nTimeOfRecentCrime; }
+	uint32 GetFrameCounter() const { return m_FrameCounter; }
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; }
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
 	bool IsMissionAudioPlaying() const { return m_sMissionAudio.m_bPlayStatus == 1; }
@@ -354,10 +355,10 @@ public:
 	void ClearMissionAudio();                            /// ok
 	void ClearRequestedQueue();                          /// ok
 	int32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2,
-	                                      float speedMultiplier) const;                   /// ok
-	int32 ComputePan(float, CVector *);                                                   /// ok
+	                                      float speedMultiplier) const;                    /// ok
+	int32 ComputePan(float, CVector *);                                                    /// ok
 	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const; /// ok
-	int32 CreateEntity(int32 type, void* entity);                                    /// ok
+	int32 CreateEntity(int32 type, void *entity);                                          /// ok
 
 	void DestroyAllGameCreatedEntities(); /// ok
 	void DestroyEntity(int32 id);         /// ok
@@ -498,17 +499,17 @@ public:
 	void ProcessBridgeOneShots();                            /// ok
 	void ProcessBridgeWarning();                             /// ok
 	bool ProcessCarBombTick(cVehicleParams *params);         /// ok
-	void ProcessCesna(void *);                               // todo requires CPlane
+	void ProcessCesna(cVehicleParams *params);               /// ok
 	void ProcessCinemaScriptObject(uint8 sound);             /// ok
-	void ProcessCrane();                                     // todo requires CCrane
+	void ProcessCrane();                                     /// ok
 	void ProcessDocksScriptObject(uint8 sound);              /// ok
 	bool ProcessEngineDamage(cVehicleParams *params);        /// ok
 	void ProcessEntity(int32 sound);                         /// ok
 	void ProcessExplosions(int32 explosion);                 /// ok
 	void ProcessFireHydrant();                               /// ok
-	void ProcessFires(int32 entity);                         // todo requires gFireManager
+	void ProcessFires(int32 entity);                         /// ok
 	void ProcessFrontEnd();                                  /// ok
-	void ProcessGarages();                                   // todo requires CGarages::aGarages
+	void ProcessGarages();                                   /// ok
 	bool ProcessHelicopter(cVehicleParams *params);          /// ok
 	void ProcessHomeScriptObject(uint8 sound);               /// ok
 	void ProcessJumbo(cVehicleParams *);                     /// ok
@@ -535,7 +536,7 @@ public:
 	void ProcessProjectiles();                                 /// ok
 	void ProcessRainOnVehicle(cVehicleParams *params);         /// ok
 	void ProcessReverb() const;                                /// ok
-	bool ProcessReverseGear(cVehicleParams *a2);               /// ok
+	bool ProcessReverseGear(cVehicleParams *params);           /// ok
 	void ProcessSawMillScriptObject(uint8 sound);              /// ok
 	void ProcessScriptObject(int32 id);                        /// ok
 	void ProcessShopScriptObject(uint8 sound);                 /// ok
@@ -558,12 +559,12 @@ public:
 	int32 RandomDisplacement(uint32 seed) const;
 	void ReacquireDigitalHandle() const;
 	void ReleaseDigitalHandle() const;
-	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2,
-	                     float collisionPower, float intensity2); /// ok
-	void ReportCrime(int32 crime, const CVector *pos);            /// ok
-	void ResetAudioLogicTimers(uint32 timer);                      /// ok
-	void ResetPoliceRadio();                                      /// ok
-	void ResetTimers(uint32 time);                                /// ok
+	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2, float collisionPower,
+	                     float intensity2);            /// ok
+	void ReportCrime(int32 crime, const CVector *pos); /// ok
+	void ResetAudioLogicTimers(uint32 timer);          /// ok
+	void ResetPoliceRadio();                           /// ok
+	void ResetTimers(uint32 time);                     /// ok
 
 	void Service();                                    /// ok
 	void ServiceCollisions();                          /// ok
@@ -585,7 +586,7 @@ public:
 	void SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter); /// ok
 	void SetUpOneShotCollisionSound(cAudioCollision *col);                /// ok
 	bool SetupCrimeReport();                                              /// ok
-	bool SetupJumboEngineSound(uint8 a2, int32 a3);                       // todo
+	bool SetupJumboEngineSound(uint8 vol, int32 freq);                    /// ok
 	bool SetupJumboFlySound(uint8 emittingVol);                           /// ok
 	bool SetupJumboRumbleSound(uint8 emittingVol);                        /// ok
 	bool SetupJumboTaxiSound(uint8 vol);                                  /// ok
@@ -606,11 +607,6 @@ public:
 	void AdjustSamplesVolume(); /// ok
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity,
 	                            float dist); /// ok
-public:
-	static const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
-	static const int policeChannel = channels + 1;
-	static const int allChannels = channels + 2;
-	static const int maxVolume = 127;
 };
 
 static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");

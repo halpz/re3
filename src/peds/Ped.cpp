@@ -7642,21 +7642,21 @@ CPed::Flee(void)
 		else if (PI + angleToFleeEntity < angleToFleeDamagingThing)
 			angleToFleeDamagingThing -= TWOPI;
 
-		if (damagingThingPriorityMult <= 1.0) {
+		if (damagingThingPriorityMult <= 1.0f) {
 			// Range [0.0, 1.0]
 
-			double angleToFleeBoth = (angleToFleeDamagingThing + angleToFleeEntity) * 0.5;
+			float angleToFleeBoth = (angleToFleeDamagingThing + angleToFleeEntity) * 0.5f;
 
 			if (m_fRotationDest - PI > angleToFleeBoth)
 				angleToFleeBoth += TWOPI;
 			else if (PI + m_fRotationDest < angleToFleeBoth)
 				angleToFleeBoth -= TWOPI;
 	
-			m_fRotationDest = (1.0 - damagingThingPriorityMult) * m_fRotationDest + damagingThingPriorityMult * angleToFleeBoth;
+			m_fRotationDest = (1.0f - damagingThingPriorityMult) * m_fRotationDest + damagingThingPriorityMult * angleToFleeBoth;
 		} else {
 			// Range (1.0, 1.5]
 
-			double adjustedMult = (damagingThingPriorityMult - 1.0) * 2.0;
+			double adjustedMult = (damagingThingPriorityMult - 1.0f) * 2.0f;
 			m_fRotationDest = angleToFleeEntity * (1.0 - adjustedMult) + adjustedMult * angleToFleeDamagingThing;
 		}
 	} else {
@@ -10169,7 +10169,7 @@ CPed::ProcessControl(void)
 		}
 
 		if (!bIsStanding && m_vecMoveSpeed.z > 0.25f) {
-			double airResistance = Pow(0.95, CTimer::GetTimeStep());
+			float airResistance = Pow(0.95f, CTimer::GetTimeStep());
 
 			m_vecMoveSpeed *= airResistance;
 		}
@@ -15048,7 +15048,7 @@ CPed::ProcessBuoyancy(void)
 				m_vecMoveSpeed.y *= speedMult;
 				if (m_vecMoveSpeed.z >= -0.1f) {
 					if (m_vecMoveSpeed.z < -0.04f)
-						m_vecMoveSpeed.z = -0.02;
+						m_vecMoveSpeed.z = -0.02f;
 				} else {
 					m_vecMoveSpeed.z = -0.01f;
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLASH, 0.0f);
