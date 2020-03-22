@@ -1,24 +1,24 @@
 #pragma once
-#include "common.h"
 
 class CConsole
 {
-	enum {
-		MAX_MESSAGE_LENGTH = 40
+	enum
+	{
+		MAX_LINES = 8, // BUG? only shows 7
+		MAX_STR_LEN = 40,
 	};
-	uint8 m_nActiveMessages;
-	uint8 m_nCurrentMessage;
-	wchar m_asMessages[NUM_CONSOLEMESSAGES][MAX_MESSAGE_LENGTH];
-	uint32 m_anTimeStart[NUM_CONSOLEMESSAGES];
-	uint8 m_anColourRed[NUM_CONSOLEMESSAGES];
-	uint8 m_anColourGreen[NUM_CONSOLEMESSAGES];
-	uint8 m_anColourBlue[NUM_CONSOLEMESSAGES];
 
+	uint8 m_nLineCount;
+	uint8 m_nCurrentLine;
+	wchar Buffers[MAX_LINES][MAX_STR_LEN];
+	uint32 m_aTimer[MAX_LINES];
+	uint8 m_aRed[MAX_LINES];
+	uint8 m_aGreen[MAX_LINES];
+	uint8 m_aBlue[MAX_LINES];
 public:
-	void Init() { m_nCurrentMessage = 0; m_nActiveMessages = 0; }
+	void AddLine(char *s, uint8 r, uint8 g, uint8 b);
+	void AddOneLine(char *s, uint8 r, uint8 g, uint8 b);
 	void Display();
 };
 
-extern CConsole& TheConsole;
-
-static_assert(sizeof(CConsole) == 0x2BC, "CConsole: error");
+extern CConsole &TheConsole;
