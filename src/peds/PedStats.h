@@ -69,11 +69,11 @@ public:
 	float m_defendWeakness;
 	int16 m_flags;
 
-	static CPedStats* (&ms_apPedStats)[NUM_PEDSTATS];
+	static CPedStats *ms_apPedStats[NUM_PEDSTATS];
 
 	static void Initialise(void);
 	static void Shutdown(void);
 	static void LoadPedStats(void);
-	static int32 GetPedStatType(char *name);
+	static ePedStats GetPedStatType(char *name);
 };
 static_assert(sizeof(CPedStats) == 0x34, "CPedStats: error");

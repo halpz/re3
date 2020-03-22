@@ -2,6 +2,7 @@
 
 #include "ClumpModelInfo.h"
 #include "PedType.h"
+#include "PedStats.h"
 
 enum PedNode {
 	PED_TORSO,
@@ -24,7 +25,7 @@ class CPedModelInfo : public CClumpModelInfo
 public:
 	uint32 m_animGroup;
 	ePedType m_pedType;
-	uint32 m_pedStatType;
+	ePedStats m_pedStatType;
 	uint32 m_carsCanDrive;
 	CColModel *m_hitColModel;
 	RpAtomic *m_head;

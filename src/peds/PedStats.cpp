@@ -4,7 +4,8 @@
 #include "FileMgr.h"
 #include "PedStats.h"
 
-CPedStats *(&CPedStats::ms_apPedStats)[NUM_PEDSTATS] = *(CPedStats *(*)[NUM_PEDSTATS]) *(uintptr*)0x9404D4;
+//CPedStats *(&CPedStats::ms_apPedStats)[NUM_PEDSTATS] = *(CPedStats *(*)[NUM_PEDSTATS]) *(uintptr*)0x9404D4;
+CPedStats *CPedStats::ms_apPedStats[NUM_PEDSTATS];
 
 void
 CPedStats::Initialise(void)
@@ -68,9 +69,9 @@ CPedStats::LoadPedStats(void)
 				line[linelen++] = ' ';
 			else
 				line[linelen++] = buf[bp];
-			line[linelen] = '\0';
 		}
 		bp++;
+		line[linelen] = '\0';
 
 		// skip white space
 		for(lp = 0; line[lp] <= ' '; lp++);
@@ -107,14 +108,13 @@ CPedStats::LoadPedStats(void)
 	delete[] buf;
 }
 
-int32
+ePedStats
 CPedStats::GetPedStatType(char *name)
 {
-	int type;
-
-	for(type = 0; type < NUM_PEDSTATS; type++)
+	for(uint16 type = 0; type < NUM_PEDSTATS; type++)
 		if(!CGeneral::faststrcmp(ms_apPedStats[type]->m_name, name))
-			return type;
+			return (ePedStats) type;
+
 	return NUM_PEDSTATS;
 }
 
