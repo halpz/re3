@@ -27,10 +27,7 @@ struct CBulletTrace
 class CBulletTraces
 {
 public:
-	enum {
-		NUM_BULLET_TRACES = 16
-	};
-	static CBulletTrace (&aTraces)[NUM_BULLET_TRACES];
+	static CBulletTrace (&aTraces)[NUMBULLETTRACES];
 
 	static void Init(void);
 	static void AddTrace(CVector*, CVector*);

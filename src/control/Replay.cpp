@@ -280,7 +280,7 @@ void CReplay::RecordThisFrame(void)
 		}
 		memory_required += sizeof(tPedUpdatePacket);
 	}
-	for (uint8 i = 0; i < CBulletTraces::NUM_BULLET_TRACES; i++) {
+	for (uint8 i = 0; i < NUMBULLETTRACES; i++) {
 		if (!CBulletTraces::aTraces[i].m_bInUse)
 			continue;
 		memory_required += sizeof(tBulletTracePacket);
@@ -340,7 +340,7 @@ void CReplay::RecordThisFrame(void)
 		}
 		StorePedUpdate(p, i);
 	}
-	for (uint8 i = 0; i < CBulletTraces::NUM_BULLET_TRACES; i++){
+	for (uint8 i = 0; i < NUMBULLETTRACES; i++){
 		if (!CBulletTraces::aTraces[i].m_bInUse)
 			continue;
 		tBulletTracePacket* bt = (tBulletTracePacket*)&Record.m_pBase[Record.m_nOffset];

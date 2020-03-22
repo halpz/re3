@@ -23,24 +23,24 @@ WRAPPER void CSpecialFX::Update(void) { EAXJMP(0x518D40); }
 WRAPPER void CMotionBlurStreaks::RegisterStreak(int32 id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2) { EAXJMP(0x519460); }
 
 
-CBulletTrace (&CBulletTraces::aTraces)[NUM_BULLET_TRACES] = *(CBulletTrace(*)[NUM_BULLET_TRACES])*(uintptr*)0x72B1B8;
+CBulletTrace (&CBulletTraces::aTraces)[NUMBULLETTRACES] = *(CBulletTrace(*)[NUMBULLETTRACES])*(uintptr*)0x72B1B8;
 RxObjSpace3DVertex (&TraceVertices)[6] = *(RxObjSpace3DVertex(*)[6])*(uintptr*)0x649884;
 RwImVertexIndex (&TraceIndexList)[12] = *(RwImVertexIndex(*)[12])*(uintptr*)0x64986C;
 
 void CBulletTraces::Init(void)
 {
-	for (int i = 0; i < NUM_BULLET_TRACES; i++)
+	for (int i = 0; i < NUMBULLETTRACES; i++)
 		aTraces[i].m_bInUse = false;
 }
 
 void CBulletTraces::AddTrace(CVector* vecStart, CVector* vecTarget)
 {
 	int index;
-	for (index = 0; index < NUM_BULLET_TRACES; index++) {
+	for (index = 0; index < NUMBULLETTRACES; index++) {
 		if (!aTraces[index].m_bInUse)
 			break;
 	}
-	if (index == NUM_BULLET_TRACES)
+	if (index == NUMBULLETTRACES)
 		return;
 	aTraces[index].m_vecCurrentPos = *vecStart;
 	aTraces[index].m_vecTargetPos = *vecTarget;
@@ -51,7 +51,7 @@ void CBulletTraces::AddTrace(CVector* vecStart, CVector* vecTarget)
 
 void CBulletTraces::Render(void)
 {
-	for (int i = 0; i < NUM_BULLET_TRACES; i++) {
+	for (int i = 0; i < NUMBULLETTRACES; i++) {
 		if (!aTraces[i].m_bInUse)
 			continue;
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)0);
@@ -61,24 +61,18 @@ void CBulletTraces::Render(void)
 		CVector inf = aTraces[i].m_vecCurrentPos;
 		CVector sup = aTraces[i].m_vecTargetPos;
 		CVector center = (inf + sup) / 2;
-		CVector screenPos = CrossProduct(TheCamera.GetForward(), (sup - inf));
-		screenPos.Normalise();
-		screenPos /= 20;
+		CVector width = CrossProduct(TheCamera.GetForward(), (sup - inf));
+		width.Normalise();
+		width /= 20;
 		uint8 intensity = aTraces[i].m_lifeTime;
-		uint32 color = 0xFF << 24 | intensity << 16 | intensity << 8 | intensity;
-		TraceVertices[0].color = color;
-		TraceVertices[1].color = color;
-		TraceVertices[2].color = color;
-		TraceVertices[3].color = color;
-		TraceVertices[4].color = color;
-		TraceVertices[5].color = color;
-		// cast to satisfy compiler
-		TraceVertices[0].objVertex = (const CVector&)(inf + screenPos);
-		TraceVertices[1].objVertex = (const CVector&)(inf - screenPos);
-		TraceVertices[2].objVertex = (const CVector&)(center + screenPos);
-		TraceVertices[3].objVertex = (const CVector&)(center - screenPos);
-		TraceVertices[4].objVertex = (const CVector&)(sup + screenPos);
-		TraceVertices[5].objVertex = (const CVector&)(sup - screenPos);
+		for (int i = 0; i < ARRAY_SIZE(TraceVertices); i++)
+			RwIm3DVertexSetRGBA(&TraceVertices[i], intensity, intensity, intensity, 0xFF);
+		RwIm3DVertexSetPos(&TraceVertices[0], inf.x + width.x, inf.y + width.y, inf.z + width.z);
+		RwIm3DVertexSetPos(&TraceVertices[1], inf.x - width.x, inf.y - width.y, inf.z - width.z);
+		RwIm3DVertexSetPos(&TraceVertices[2], center.x + width.x, center.y + width.y, center.z + width.z);
+		RwIm3DVertexSetPos(&TraceVertices[3], center.x - width.x, center.y - width.y, center.z - width.z);
+		RwIm3DVertexSetPos(&TraceVertices[4], sup.x + width.x, sup.y + width.y, sup.z + width.z);
+		RwIm3DVertexSetPos(&TraceVertices[5], sup.x - width.x, sup.y - width.y, sup.z - width.z);
 		LittleTest();
 		if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, 1)) {
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
@@ -92,7 +86,7 @@ void CBulletTraces::Render(void)
 
 void CBulletTraces::Update(void)
 {
-	for (int i = 0; i < NUM_BULLET_TRACES; i++) {
+	for (int i = 0; i < NUMBULLETTRACES; i++) {
 		if (aTraces[i].m_bInUse)
 			aTraces[i].Update();
 	}
