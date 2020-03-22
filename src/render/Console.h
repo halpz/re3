@@ -19,6 +19,7 @@ public:
 	void AddLine(char *s, uint8 r, uint8 g, uint8 b);
 	void AddOneLine(char *s, uint8 r, uint8 g, uint8 b);
 	void Display();
+	void Init() { m_nCurrentLine = 0; m_nLineCount = 0; }
 };
 
 extern CConsole &TheConsole;
