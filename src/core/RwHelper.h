@@ -12,6 +12,12 @@ RwTexture *GetFirstTexture(RwTexDictionary *txd);
 RwTexDictionary *RwTexDictionaryGtaStreamRead(RwStream *stream);
 RwTexDictionary *RwTexDictionaryGtaStreamRead1(RwStream *stream);
 RwTexDictionary *RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary *texDict);
+void ReadVideoCardCapsFile(uint32&, uint32&, uint32&, uint32&);
+bool CheckVideoCardCaps(void);
+void WriteVideoCardCapsFile(void);
+void ConvertingTexturesScreen(uint32, uint32, const char*);
+void DealWithTxdWriteError(uint32, uint32, const char*);
+bool ConvertTextures(); // not a real name
 
 bool RpClumpGtaStreamRead1(RwStream *stream);
 RpClump *RpClumpGtaStreamRead2(RwStream *stream);

@@ -135,3 +135,5 @@ void CStats::SetTotalNumberMissions(int32 total)
 {
 	TotalNumberMissions = total;
 }
+
+WRAPPER void CStats::Init() { EAXJMP(0x4AAC60); }

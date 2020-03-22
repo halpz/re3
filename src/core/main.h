@@ -32,6 +32,7 @@ char *GetLevelSplashScreen(int level);
 char *GetRandomSplashScreen(void);
 void LittleTest(void);
 void ValidateVersion();
+void ResetLoadingScreenBar(void);
 #ifndef MASTER
 void TheModelViewer(void);
 #endif

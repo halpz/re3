@@ -10,4 +10,5 @@ public:
 	static void WindowRespondsToSoftCollision(CEntity *ent, float amount);
 	static void Render(void);
 	static void Update(void);
+	static void Init(void);
 };

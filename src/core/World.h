@@ -63,7 +63,7 @@ public:
 	static CColPoint& ms_testSpherePoint;
 
 	static uint8 &PlayerInFocus;
-	static CPlayerInfo *Players;
+	static CPlayerInfo (&Players)[NUMPLAYERS];
 	static CEntity *&pIgnoreEntity;
 	static bool &bIncludeDeadPeds;
 	static bool &bNoMoreCollisionTorque;
@@ -134,6 +134,7 @@ public:
 	static void ExtinguishAllCarFiresInArea(CVector, float);
 
 	static void Initialise();
+	static void AddParticles();
 	static void ShutDown();
 	static void RepositionCertainDynamicObjects();
 	static void RemoveStaticObjects();

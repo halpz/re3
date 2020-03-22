@@ -20,7 +20,7 @@ public:
 	static bool &playingIntro;
 	static char *aDatFile;	//[32];
 
-	static void Initialise(const char *datFile);
+	static bool Initialise(const char *datFile);
 	static bool InitialiseOnceBeforeRW(void);
 	static bool InitialiseRenderWare(void);
 	static bool InitialiseOnceAfterRW(void);
