@@ -1,6 +1,8 @@
 #pragma once
 
 enum Config {
+	NUMPLAYERS = 1,
+
 	NUMCDIMAGES = 12, // gta3.img duplicates (not used on PC)
 	MAX_CDIMAGES = 8, // additional cdimages
 	MAX_CDCHANNELS = 5,

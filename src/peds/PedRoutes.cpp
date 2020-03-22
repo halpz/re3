@@ -5,6 +5,15 @@
 
 CRouteNode (&gaRoutes)[NUMPEDROUTES] = *(CRouteNode(*)[NUMPEDROUTES]) * (uintptr*)0x62E090;
 
+void
+CRouteNode::Initialise()
+{
+	for (int i = 0; i < NUMPEDROUTES; i++) {
+		gaRoutes[i].m_route = -1;
+		gaRoutes[i].m_pos = CVector(0.0f, 0.0f, 0.0f);
+	}
+}
+
 int16
 CRouteNode::GetRouteThisPointIsOn(int16 point)
 {

@@ -34,6 +34,7 @@ float &CWeather::Stored_Rain = *(float*)0x885B4C;
 
 WRAPPER void CWeather::RenderRainStreaks(void) { EAXJMP(0x524550); }
 WRAPPER void CWeather::Update(void) { EAXJMP(0x522C10); }
+WRAPPER void CWeather::Init(void) { EAXJMP(0x522BA0); }
 
 void CWeather::ReleaseWeather()
 {

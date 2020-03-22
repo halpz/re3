@@ -12,10 +12,13 @@
 #include "Clock.h"
 #include "Clouds.h"
 #include "Collision.h"
+#include "Console.h"
 #include "Coronas.h"
 #include "Cranes.h"
+#include "Credits.h"
 #include "CutsceneMgr.h"
 #include "Darkel.h"
+#include "Debug.h"
 #include "EventList.h"
 #include "FileLoader.h"
 #include "FileMgr.h"
@@ -27,6 +30,8 @@
 #include "Garages.h"
 #include "Glass.h"
 #include "Heli.h"
+#include "IniFile.h"
+#include "Messages.h"
 #include "Pad.h"
 #include "Particle.h"
 #include "Phones.h"
@@ -36,14 +41,18 @@
 #include "Record.h"
 #include "Renderer.h"
 #include "Replay.h"
+#include "Restart.h"
 #include "RoadBlocks.h"
+#include "PedRoutes.h"
 #include "Rubbish.h"
+#include "RwHelper.h"
 #include "SceneEdit.h"
 #include "Script.h"
 #include "Shadows.h"
 #include "Skidmarks.h"
 #include "SpecialFX.h"
 #include "Sprite2d.h"
+#include "Stats.h"
 #include "Streaming.h"
 #include "TimeCycle.h"
 #include "TrafficLights.h"
@@ -51,7 +60,9 @@
 #include "TxdStore.h"
 #include "User.h"
 #include "WaterCannon.h"
+#include "WaterLevel.h"
 #include "Weapon.h"
+#include "WeaponEffects.h"
 #include "Weather.h"
 #include "World.h"
 #include "ZoneCull.h"
@@ -76,7 +87,151 @@ CGame::InitialiseOnceBeforeRW(void)
 	return true;
 }
 
-WRAPPER void CGame::Initialise(const char *datFile) { EAXJMP(0x48BED0); }
+int &gameTxdSlot = *(int*)0x628D88;
+
+bool CGame::Initialise(const char* datFile)
+{
+	ResetLoadingScreenBar();
+	strcpy(aDatFile, datFile);
+	CPools::Initialise();
+	CIniFile::LoadIniFile();
+	currLevel = LEVEL_INDUSTRIAL;
+	LoadingScreen("Loading the Game", "Loading generic textures", GetRandomSplashScreen());
+	gameTxdSlot = CTxdStore::AddTxdSlot("generic");
+	CTxdStore::Create(gameTxdSlot);
+	CTxdStore::AddRef(gameTxdSlot);
+	LoadingScreen("Loading the Game", "Loading particles", nil);
+	int particleTxdSlot = CTxdStore::AddTxdSlot("particle");
+	CTxdStore::LoadTxd(particleTxdSlot, "MODELS/PARTICLE.TXD");
+	CTxdStore::AddRef(particleTxdSlot);
+	CTxdStore::SetCurrentTxd(gameTxdSlot);
+	LoadingScreen("Loading the Game", "Setup game variables", nil);
+	CGameLogic::InitAtStartOfGame();
+	CReferences::Init();
+	TheCamera.Init();
+	TheCamera.SetRwCamera(Scene.camera);
+	CDebug::DebugInitTextBuffer();
+	ThePaths.Init();
+	ThePaths.AllocatePathFindInfoMem(4500);
+	CWeather::Init();
+	CCullZones::Init();
+	CCollision::Init();
+	CTheZones::Init();
+	CUserDisplay::Init();
+	CMessages::Init();
+	CMessages::ClearAllMessagesDisplayedByGame();
+	CRecordDataForGame::Init();
+	CRestart::Initialise();
+	CWorld::Initialise();
+	CParticle::Initialise();
+	CAnimManager::Initialise();
+	CCutsceneMgr::Initialise();
+	CCarCtrl::Init();
+	InitModelIndices();
+	CModelInfo::Initialise();
+	CPickups::Init();
+	CTheCarGenerators::Init();
+	CdStreamAddImage("MODELS\\GTA3.IMG");
+	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
+	CFileLoader::LoadLevel(datFile);
+	CWorld::AddParticles();
+	CVehicleModelInfo::LoadVehicleColours();
+	CVehicleModelInfo::LoadEnvironmentMaps();
+	CTheZones::PostZoneCreation();
+	LoadingScreen("Loading the Game", "Setup paths", GetRandomSplashScreen());
+	ThePaths.PreparePathData();
+	for (int i = 0; i < NUMPLAYERS; i++)
+		CWorld::Players[i].Clear();
+	CWorld::Players[0].LoadPlayerSkin();
+	TestModelIndices();
+	LoadingScreen("Loading the Game", "Setup water", nil);
+	CWaterLevel::Initialise("DATA\\WATER.DAT");
+	TheConsole.Init();
+	CDraw::SetFOV(120.0f);
+	CDraw::ms_fLODDistance = 500.0f;
+	LoadingScreen("Loading the Game", "Setup streaming", nil);
+	int txdHandle = CFileMgr::OpenFile("MODELS\\TXD.IMG", "r");
+	if (txdHandle)
+		CFileMgr::CloseFile(txdHandle);
+	if (!CheckVideoCardCaps() && txdHandle) {
+		CdStreamAddImage("MODELS\\TXD.IMG");
+		CStreaming::Init();
+	} else {
+		CStreaming::Init();
+		if (ConvertTextures()) {
+			CStreaming::Shutdown();
+			CdStreamAddImage("MODELS\\TXD.IMG");
+			CStreaming::Init();
+		}
+	}
+	CStreaming::LoadInitialVehicles();
+	CStreaming::LoadInitialPeds();
+	CStreaming::RequestBigBuildings(LEVEL_NONE);
+	CStreaming::LoadAllRequestedModels(false);
+	printf("Streaming uses %dK of its memory", CStreaming::ms_memoryUsed / 1024);
+	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
+	CAnimManager::LoadAnimFiles();
+	CPed::Initialise();
+	CRouteNode::Initialise();
+	CEventList::Initialise();
+	LoadingScreen("Loading the Game", "Find big buildings", nil);
+	CRenderer::Init();
+	LoadingScreen("Loading the Game", "Setup game variables", nil);
+	CRadar::Initialise();
+	CRadar::LoadTextures();
+	CWeapon::InitialiseWeapons();
+	LoadingScreen("Loading the Game", "Setup traffic lights", nil);
+	CTrafficLights::ScanForLightsOnMap();
+	CRoadBlocks::Init();
+	LoadingScreen("Loading the Game", "Setup game variables", nil);
+	CPopulation::Initialise();
+	CWorld::PlayerInFocus = 0;
+	CCoronas::Init();
+	CShadows::Init();
+	CWeaponEffects::Init();
+	CSkidmarks::Init();
+	CAntennas::Init();
+	CGlass::Init();
+	gPhoneInfo.Initialise();
+	CSceneEdit::Init();
+	LoadingScreen("Loading the Game", "Load scripts", nil);
+	CTheScripts::Init();
+	CGangs::Initialize();
+	LoadingScreen("Loading the Game", "Setup game variables", nil);
+	CClock::Initialise(1000);
+	CHeli::InitHelis();
+	CCranes::InitCranes();
+	CMovingThings::Init();
+	CDarkel::Init();
+	CStats::Init();
+	CPacManPickups::Init();
+	CRubbish::Init();
+	CClouds::Init();
+	CSpecialFX::Init();
+	CWaterCannons::Init();
+	CBridge::Init();
+	CGarages::Init();
+	LoadingScreen("Loading the Game", "Position dynamic objects", nil);
+	CWorld::RepositionCertainDynamicObjects();
+	LoadingScreen("Loading the Game", "Initialise vehicle paths", nil);
+	CCullZones::ResolveVisibilities();
+	CTrain::InitTrains();
+	CPlane::InitPlanes();
+	CCredits::Init();
+	CRecordDataForChase::Init();
+	CReplay::Init();
+	LoadingScreen("Loading the Game", "Start script", nil);
+	CTheScripts::StartTestScript();
+	CTheScripts::Process();
+	TheCamera.Process();
+	LoadingScreen("Loading the Game", "Load scene", nil);
+	CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+	CCollision::ms_collisionInMemory = CGame::currLevel;
+	for (int i = 0; i < MAX_PADS; i++)
+		CPad::GetPad(i)->Clear(true);
+	return true;
+}
+
 #if 0
 WRAPPER void CGame::Process(void) { EAXJMP(0x48C850); }
 #else

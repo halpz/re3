@@ -27,7 +27,7 @@ uint16 &CWorld::ms_nCurrentScanCode = *(uint16*)0x95CC64;
 CColPoint &CWorld::ms_testSpherePoint = *(CColPoint*)0x6E64C0;
 
 uint8 &CWorld::PlayerInFocus = *(uint8 *)0x95CD61;
-CPlayerInfo *CWorld::Players = (CPlayerInfo *)0x9412F0;
+CPlayerInfo (&CWorld::Players)[NUMPLAYERS] = *(CPlayerInfo (*)[NUMPLAYERS])*(uintptr*)0x9412F0;
 bool &CWorld::bNoMoreCollisionTorque = *(bool*)0x95CDCC;
 CEntity *&CWorld::pIgnoreEntity	= *(CEntity**)0x8F6494;
 bool &CWorld::bIncludeDeadPeds = *(bool*)0x95CD8F;
@@ -38,6 +38,7 @@ bool &CWorld::bProcessCutsceneOnly = *(bool*)0x95CD8B;
 bool &CWorld::bDoingCarCollisions = *(bool*)0x95CD8C;
 bool &CWorld::bIncludeCarTyres = *(bool*)0x95CDAA;
 
+WRAPPER void CWorld::AddParticles(void) { EAXJMP(0x4B4010); }
 WRAPPER void CWorld::ShutDown(void) { EAXJMP(0x4AE450); }
 WRAPPER void CWorld::RepositionCertainDynamicObjects() { EAXJMP(0x4B42B0); }
 WRAPPER void CWorld::RemoveStaticObjects() { EAXJMP(0x4B4D50); }

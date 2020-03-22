@@ -49,6 +49,7 @@
 #include "Frontend.h"
 #include "AnimViewer.h"
 #include "Script.h"
+#include "Debug.h"
 #include "Console.h"
 
 #define DEFAULT_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
@@ -324,7 +325,7 @@ DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16
 void
 DoRWStuffEndOfFrame(void)
 {
-	// CDebug::DebugDisplayTextBuffer();
+	CDebug::DebugDisplayTextBuffer();
 	// FlushObrsPrintfs();
 	RwCameraEndUpdate(Scene.camera);
 	RsCameraShowRaster(Scene.camera);
@@ -725,6 +726,12 @@ DestroySplashScreen(void)
 float NumberOfChunksLoaded;
 #define TOTALNUMCHUNKS 73.0f
 
+void
+ResetLoadingScreenBar()
+{
+	NumberOfChunksLoaded = 0.0f;
+}
+
 // TODO: compare with PS2
 void
 LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
@@ -790,12 +797,6 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		CFont::DrawFonts();
  		DoRWStuffEndOfFrame();
 	}
-}
-
-void
-ResetLoadingScreenBar(void)
-{
-	NumberOfChunksLoaded = 0.0f;
 }
 
 void

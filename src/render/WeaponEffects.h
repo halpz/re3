@@ -19,4 +19,5 @@ public:
 	static void Render(void);
 	static void ClearCrossHair();
 	static void MarkTarget(CVector, uint8, uint8, uint8, uint8, float);
+	static void Init(void);
 };

@@ -20,6 +20,7 @@ public:
 	static void CleanUpChaseScene();
 	static void RemoveCarFromChase(int32);
 	static CVehicle* TurnChaseCarIntoScriptCar(int32);
+	static void Init(void);
 };
 
 
@@ -29,4 +30,5 @@ public:
 	static uint16 &RecordingState;
 
 	static void SaveOrRetrieveDataForThisFrame(void);
+	static void Init(void);
 };

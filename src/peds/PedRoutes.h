@@ -11,4 +11,5 @@ public:
 	static int16 GetRouteStart(int16);
 	static void AddRoutePoint(int16, CVector);
 	static void RemoveRoute(int16);
+	static void Initialise(void);
 };

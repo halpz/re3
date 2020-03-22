@@ -20,6 +20,7 @@ public:
 	static void Update();
 	static void UpdateOne(uint32 id, CVector *pos, CVector *dir);
 	static void Render(void);
+	static void Init(void);
 };
 
 extern CWaterCannon (&aCannons)[NUM_WATERCANNONS];

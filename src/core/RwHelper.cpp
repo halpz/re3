@@ -347,6 +347,13 @@ CameraCreate(RwInt32 width, RwInt32 height, RwBool zBuffer)
 	return (nil);
 }
 
+WRAPPER void ReadVideoCardCapsFile(uint32&, uint32&, uint32&, uint32&) { EAXJMP(0x5926C0); }
+WRAPPER bool CheckVideoCardCaps(void) { EAXJMP(0x592740); }
+WRAPPER void WriteVideoCardCapsFile(void) { EAXJMP(0x5927D0); }
+WRAPPER void ConvertingTexturesScreen(uint32, uint32, const char*) { EAXJMP(0x592880); }
+WRAPPER void DealWithTxdWriteError(uint32, uint32, const char*) { EAXJMP(0x592BF0); }
+WRAPPER bool ConvertTextures() { EAXJMP(0x592C70); }
+
 STARTPATCHES
 	//InjectHook(0x526450, GetFirstObjectCallback, PATCH_JUMP);
 	InjectHook(0x526460, GetFirstObject, PATCH_JUMP);
