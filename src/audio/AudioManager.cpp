@@ -3651,7 +3651,7 @@ void cAudioManager::ProcessFires(int32)
 					m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
 					emittingVol = 100;
 					m_sQueueSample.m_nFrequency =
-					    8 / 10 * SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE);
+					    8 * SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE) / 10;
 					m_sQueueSample.m_nFrequency += i * ((uint32)m_sQueueSample.m_nFrequency >> 6);
 					m_sQueueSample.field_16 = 6;
 					break;
