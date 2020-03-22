@@ -63,9 +63,9 @@ CPedType::LoadPedData(void)
 				line[linelen++] = ' ';
 			else
 				line[linelen++] = buf[bp];
-			line[linelen] = '\0';
 		}
 		bp++;
+		line[linelen] = '\0';
 
 		// skip white space
 		for(lp = 0; line[lp] <= ' '; lp++);
@@ -74,7 +74,7 @@ CPedType::LoadPedData(void)
 		   line[lp] == '#')
 			continue;
 
-		// FIX: game just uses line here
+		// Game uses just "line" here since sscanf already trims whitespace, but this is safer
 		sscanf(&line[lp], "%s", word);
 
 		if(strncmp(word, "Threat", 7) == 0){
@@ -195,7 +195,8 @@ void
 CPedType::Load(uint8 *buf, uint32 size)
 {
 INITSAVEBUF
-	CheckSaveHeader(buf, 'P','T','P','\0', size - SAVE_HEADER_SIZE);
+	// original: SkipSaveBuf(buf, SAVE_HEADER_SIZE);
+	CheckSaveHeader(buf, 'P', 'T', 'P', '\0', size - SAVE_HEADER_SIZE);
 
 	for(int i = 0; i < NUM_PEDTYPES; i++)
 		*ms_apPedType[i] = ReadSaveBuf<CPedType>(buf);

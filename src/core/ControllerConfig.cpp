@@ -2327,7 +2327,7 @@ void CControllerConfigManager::ResetSettingOrder(e_ControllerAction action)
 
 		bool init = false;
 
-		if (isexist)
+		if (!isexist)
 		{
 			for (int32 k = 0; k < MAX_CONTROLLERTYPES; k++)
 			{

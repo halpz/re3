@@ -14,7 +14,7 @@ int32 &CGarages::BankVansCollected = *(int32 *)0x8F1B34;
 bool &CGarages::BombsAreFree = *(bool *)0x95CD7A;
 bool &CGarages::RespraysAreFree = *(bool *)0x95CD1D;
 int32 &CGarages::CarsCollected = *(int32 *)0x880E18;
-int32 (&CGarages::CarTypesCollected)[TOTAL_COLLECTCARS_GARAGES] = *(int32 (*)[TOTAL_COLLECTCARS_GARAGES])(uintptr*)0x8E286C;
+int32 (&CGarages::CarTypesCollected)[TOTAL_COLLECTCARS_GARAGES] = *(int32 (*)[TOTAL_COLLECTCARS_GARAGES])*(uintptr*)0x8E286C;
 int32 &CGarages::CrushedCarId = *(int32 *)0x943060;
 uint32 &CGarages::LastTimeHelpMessage = *(uint32 *)0x8F1B58;
 int32 &CGarages::MessageNumberInString = *(int32 *)0x885BA8;
@@ -27,7 +27,7 @@ bool &CGarages::PlayerInGarage = *(bool *)0x95CD83;
 int32 &CGarages::PoliceCarsCollected = *(int32 *)0x941444;
 uint32 &CGarages::GarageToBeTidied = *(uint32 *)0x623570;
 
-CGarage(&CGarages::Garages)[NUM_GARAGES] = *(CGarage(*)[NUM_GARAGES])(uintptr*)0x72BCD0;
+CGarage(&CGarages::Garages)[NUM_GARAGES] = *(CGarage(*)[NUM_GARAGES])*(uintptr*)0x72BCD0;
 
 WRAPPER void CGarages::Init(void) { EAXJMP(0x421C60); }
 WRAPPER void CGarages::Update(void) { EAXJMP(0x421E40); }

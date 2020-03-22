@@ -33,7 +33,7 @@ struct RegenerationPoint
 class CPopulation
 {
 public:
-	static PedGroup (&ms_pPedGroups)[NUMPEDGROUPS];
+	static PedGroup ms_pPedGroups[NUMPEDGROUPS];
 	static bool &ms_bGivePedsWeapons;
 	static int32 &m_AllRandomPedsThisType;
 	static float &PedDensityMultiplier;
