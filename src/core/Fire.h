@@ -40,7 +40,7 @@ public:
 	CFire *FindFurthestFire_NeverMindFireMen(CVector coords, float minRange, float maxRange);
 	CFire *FindNearestFire(CVector vecPos, float *pDistance);
 	CFire *GetNextFreeFire(void);
-	uint32 GetTotalActiveFires() const;
+	uint32 GetTotalActiveFires(void) const;
 	void ExtinguishPoint(CVector point, float range);
 	int32 StartScriptFire(const CVector &pos, CEntity *target, float strength, bool propagation);
 	bool IsScriptFireExtinguish(int16 index);
