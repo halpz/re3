@@ -1,5 +1,7 @@
 #pragma once
 
+#include "PedType.h"
+
 class CStats
 {
 public:
@@ -8,14 +10,14 @@ public:
 		TOTAL_HIGHEST_SCORES = 16
 	};
 	static int32 &DaysPassed;
-	static int32 &HeadsPopped;
+    static int32 &HeadsPopped;
 	static bool& CommercialPassed;
 	static bool& IndustrialPassed;
 	static bool& SuburbanPassed;
 	static int32 &NumberKillFrenziesPassed;
 	static int32 &PeopleKilledByOthers;
 	static int32 &HelisDestroyed;
-	static int32 *PedsKilledOfThisType;	//[NUM_PEDTYPES]
+	static int32(&PedsKilledOfThisType)[ePedType::NUM_PEDTYPES];
 	static int32 &TimesDied;
 	static int32 &TimesArrested;
 	static int32 &KillsSinceLastCheckpoint;
@@ -50,7 +52,14 @@ public:
 	static int32 &LongestFlightInDodo;
 	static int32 &TimeTakenDefuseMission;
 	static int32 &TotalNumberKillFrenzies;
-	static int32 &TotalNumberMissions;
+    static int32 &TotalNumberMissions;
+    static int32 &ShotsMade;
+    static int32 &KgsOfExplosivesUsed;
+    static int32 &InstantHitsFiredByPlayer;
+    static int32 &InstantHitsHitByPlayer;
+    static int32 &BestTimeBombDefusal;
+    static int32 &mmRain;
+    static int32 &CarsCrushed;
 	static int32(&FastestTimes)[TOTAL_FASTEST_TIMES];
 	static int32(&HighestScores)[TOTAL_HIGHEST_SCORES];
 
