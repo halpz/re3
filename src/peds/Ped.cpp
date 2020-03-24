@@ -2213,15 +2213,18 @@ CPed::BuildPedLists(void)
 		}
 	} else {
 		CVector centre = CEntity::GetBoundCentre();
-		CRect rect(
-			CWorld::GetSectorX(centre.x - 20.0f),
-			CWorld::GetSectorY(centre.y - 20.0f),
-			CWorld::GetSectorX(centre.x + 20.0f),
-			CWorld::GetSectorY(centre.y + 20.0f));
+		CRect rect(centre.x - 20.0f,
+			centre.y - 20.0f,
+			centre.x + 20.0f,
+			centre.y + 20.0f);
+		int xstart = CWorld::GetSectorIndexX(rect.left);
+		int ystart = CWorld::GetSectorIndexY(rect.top);
+		int xend = CWorld::GetSectorIndexX(rect.right);
+		int yend = CWorld::GetSectorIndexY(rect.bottom);
 		gnNumTempPedList = 0;
 
-		for(int y = rect.top; y <= rect.bottom; y++) {
-			for(int x = rect.left; x <= rect.right; x++) {
+		for(int y = ystart; y <= yend; y++) {
+			for(int x = xstart; x <= xend; x++) {
 				for (CPtrNode *pedPtrNode = CWorld::GetSector(x,y)->m_lists[ENTITYLIST_PEDS].first; pedPtrNode; pedPtrNode = pedPtrNode->next) {
 					CPed *ped = (CPed*)pedPtrNode->item;
 					if (ped != this && !ped->bInVehicle) {
@@ -2229,6 +2232,7 @@ CPed::BuildPedLists(void)
 						if (nThreatReactionRangeMultiplier * 30.0f > dist) {
 							gapTempPedList[gnNumTempPedList] = ped;
 							gnNumTempPedList++;
+							assert(gnNumTempPedList < ARRAYSIZE(gapTempPedList));
 						}
 					}
 				}
