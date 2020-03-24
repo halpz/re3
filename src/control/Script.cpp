@@ -499,7 +499,7 @@ void CRunningScript::Init()
 #ifdef USE_DEBUG_SCRIPT_LOADER
 int open_script()
 {
-	static int scriptToLoad = 1;
+	static int scriptToLoad = 0;
 
 	if (GetAsyncKeyState('G') & 0x8000)
 		scriptToLoad = 0;
