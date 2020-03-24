@@ -575,7 +575,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 		}
 	}
 	// Yeah, float
-	float maxPossiblePedsForArea = 10.0f * (zoneInfo.pedDensity + zoneInfo.carDensity) * playerInfo->m_fRoadDensity * PedDensityMultiplier * CIniFile::PedNumberMultiplier;
+	float maxPossiblePedsForArea = (zoneInfo.pedDensity + zoneInfo.carDensity) * playerInfo->m_fRoadDensity * PedDensityMultiplier * CIniFile::PedNumberMultiplier;
 	// maxPossiblePedsForArea = min(maxPossiblePedsForArea, MaxNumberOfPedsInUse);
 
 	if (ms_nTotalPeds < maxPossiblePedsForArea || addCop) {
@@ -637,19 +637,19 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 
 			if (pedTypeToAdd == PEDTYPE_COP) {
 				// Unused code, ChoosePolicePedOccupation returns COP_STREET. Spawning FBI/SWAT/Army done in somewhere else.
-				if (modelToAdd != COP_STREET) {
-					if (modelToAdd == COP_FBI) {
-						if (!CModelInfo::GetModelInfo(MI_FBI)->GetRwObject())
-							return;
-
-					} else if (modelToAdd == COP_SWAT) {
-						if (!CModelInfo::GetModelInfo(MI_SWAT)->GetRwObject())
-							return;
-
-					} else if (modelToAdd == COP_ARMY && !CModelInfo::GetModelInfo(MI_ARMY)->GetRwObject()) {
+				if (modelToAdd == COP_STREET) {
+					if (!CModelInfo::GetModelInfo(MI_COP)->GetRwObject())
 						return;
-					}
-				} else if (!CModelInfo::GetModelInfo(MI_COP)->GetRwObject()) {
+
+				} else if (modelToAdd == COP_FBI) {
+					if (!CModelInfo::GetModelInfo(MI_FBI)->GetRwObject())
+						return;
+
+				} else if (modelToAdd == COP_SWAT) {
+					if (!CModelInfo::GetModelInfo(MI_SWAT)->GetRwObject())
+						return;
+
+				} else if (modelToAdd == COP_ARMY && !CModelInfo::GetModelInfo(MI_ARMY)->GetRwObject()) {
 					return;
 				}
 			} else if (!CModelInfo::GetModelInfo(modelToAdd)->GetRwObject()) {
