@@ -31,7 +31,7 @@ CFire::CFire()
 	m_nExtinguishTime = 0;
 	m_nStartTime = 0;
 	field_20 = 1;
-	field_24 = 0;
+	m_nNextTimeToAddFlames = 0;
 	m_fStrength = 0.8f;
 }
 
@@ -95,8 +95,8 @@ CFire::ProcessFire(void)
 		FindPlayerPed()->DoStuffToGoOnFire();
 		gFireManager.StartFire(FindPlayerPed(), m_pSource, 0.8f, 1);
 	}
-	if (CTimer::m_snTimeInMilliseconds > field_24) { /* set to 0 when a newfire starts, related to time */
-		field_24 = CTimer::m_snTimeInMilliseconds + 80;
+	if (CTimer::m_snTimeInMilliseconds > m_nNextTimeToAddFlames) {
+		m_nNextTimeToAddFlames = CTimer::m_snTimeInMilliseconds + 80;
 		firePos = m_vecPos;
 
 		if (veh && veh->IsVehicle() && veh->IsCar()) {
@@ -122,7 +122,7 @@ CFire::ProcessFire(void)
 		if (CTimer::m_snTimeInMilliseconds > m_nStartTime)
 			m_nStartTime = CTimer::m_snTimeInMilliseconds + 400;
 
-		nRandNumber = CGeneral::GetRandomNumber();
+		nRandNumber = CGeneral::GetRandomNumber() & 127;
 		lightpos.x = m_vecPos.x;
 		lightpos.y = m_vecPos.y;
 		lightpos.z = m_vecPos.z + 5.0f;
@@ -162,7 +162,7 @@ CFire::Extinguish(void)
 		if (m_pEntity) {
 			if (m_pEntity->IsPed()) {
 				((CPed *)m_pEntity)->RestorePreviousState();
-				((CPed *)m_pEntity)->m_pFire = 0;
+				((CPed *)m_pEntity)->m_pFire = nil;
 			} else if (m_pEntity->IsVehicle()) {
 				((CVehicle *)m_pEntity)->m_pCarFire = nil;
 			}
@@ -186,7 +186,7 @@ CFireManager::StartFire(CVector pos, float size, bool propagation)
 		fire->m_nStartTime = CTimer::m_snTimeInMilliseconds + 400;
 		fire->m_pEntity = nil;
 		fire->m_pSource = nil;
-		fire->field_24 = 0;
+		fire->m_nNextTimeToAddFlames = 0;
 		fire->ReportThisFire();
 		fire->m_fStrength = size;
 	}
