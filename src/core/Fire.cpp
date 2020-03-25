@@ -25,8 +25,8 @@ CFire::CFire()
 	m_bPropagationFlag = true;
 	m_bAudioSet = true;
 	m_vecPos = CVector(0.0f, 0.0f, 0.0f);
-	m_pEntity = 0;
-	m_pSource = 0;
+	m_pEntity = nil;
+	m_pSource = nil;
 	m_nFiremenPuttingOut = 0;
 	m_nExtinguishTime = 0;
 	m_nStartTime = 0;
