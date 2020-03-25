@@ -18,12 +18,12 @@
 
 CFireManager &gFireManager = *(CFireManager*)0x8F31D0;
 
-CFire::CFire(void)
+CFire::CFire()
 {
-	m_bIsOngoing = 0;
-	m_bIsScriptFire = 0;
-	m_bPropagationFlag = 1;
-	m_bAudioSet = 1;
+	m_bIsOngoing = false;
+	m_bIsScriptFire = false;
+	m_bPropagationFlag = true;
+	m_bAudioSet = true;
 	m_vecPos = CVector(0.0f, 0.0f, 0.0f);
 	m_pEntity = 0;
 	m_pSource = 0;
@@ -35,7 +35,7 @@ CFire::CFire(void)
 	m_fStrength = 0.8f;
 }
 
-CFire::~CFire(void) {}
+CFire::~CFire() {}
 
 class CFire_ : public CFire {
 public:
@@ -49,16 +49,13 @@ CFire::ProcessFire(void)
 	float fDamagePlayer;
 	float fDamagePeds;
 	float fDamageVehicle;
-	CVehicle *pCurrentVehicle;
-	char nRandNumber;
+	int8 nRandNumber;
 	float fGreen;
 	float fRed;
 	CVector lightpos;
 	CVector firePos;
-	CVector vecProduct;
-
-	CEntity *pCurrentEntity = (CPed *)m_pEntity;
-	CPed *ped = (CPed *)pCurrentEntity;
+	CPed *ped = (CPed *)m_pEntity;
+	CVehicle *veh = (CVehicle*)m_pEntity;
 
 	if (m_pEntity) {
 		m_vecPos = m_pEntity->GetPosition();
@@ -70,35 +67,32 @@ CFire::ProcessFire(void)
 			}
 			if (ped->m_nMoveState != PEDMOVE_RUN)
 				m_vecPos.z -= 1.0f;
-
 			if (ped->bInVehicle && ped->m_pMyVehicle) {
 				if (ped->m_pMyVehicle->IsCar())
 					ped->m_pMyVehicle->m_fHealth = 75.0f;
-			} else if (pCurrentEntity == (CPed *)FindPlayerPed()) {
+			} else if (m_pEntity == (CPed *)FindPlayerPed()) {
 				fDamagePlayer = 1.2f * CTimer::GetTimeStep();
 
-				((CPlayerPed *)pCurrentEntity)->InflictDamage(
+				((CPlayerPed *)m_pEntity)->InflictDamage(
 					(CPlayerPed *)m_pSource, WEAPONTYPE_FLAMETHROWER,
 						fDamagePlayer, PEDPIECE_TORSO, 0);
 			} else {
 				fDamagePeds = 1.2f * CTimer::GetTimeStep();
 
-				if (((CPlayerPed *)pCurrentEntity)->InflictDamage(
+				if (((CPlayerPed *)m_pEntity)->InflictDamage(
 					(CPlayerPed *)m_pSource, WEAPONTYPE_FLAMETHROWER,
-						fDamagePeds, PEDPIECE_TORSO, 0))
-
-					pCurrentEntity->bRenderScorched = true;
+					fDamagePeds, PEDPIECE_TORSO, 0)) {
+					m_pEntity->bRenderScorched = true;
+				}
 			}
-		} else if (pCurrentEntity->IsVehicle()) {
-			CVehicle *pCurrentVehicle = (CVehicle*)m_pEntity;
-
-			if (pCurrentVehicle->m_pCarFire != this) {
+		} else if (m_pEntity->IsVehicle()) {
+			if (veh->m_pCarFire != this) {
 				Extinguish();
 				return;
 			}
 			if (!m_bIsScriptFire) {
 				fDamageVehicle = 1.2f * CTimer::GetTimeStep();
-				pCurrentVehicle->InflictDamage((CVehicle *)m_pSource, WEAPONTYPE_FLAMETHROWER, fDamageVehicle);
+				veh->InflictDamage((CVehicle *)m_pSource, WEAPONTYPE_FLAMETHROWER, fDamageVehicle);
 			}
 		}
 	}
@@ -110,10 +104,9 @@ CFire::ProcessFire(void)
 	if (CTimer::m_snTimeInMilliseconds > field_24) { /* set to 0 when a newfire starts, related to time */
 		field_24 = CTimer::m_snTimeInMilliseconds + 80;
 		firePos = m_vecPos;
-		pCurrentVehicle = (CVehicle *)m_pEntity;
 
-		if (pCurrentVehicle && pCurrentVehicle->IsVehicle() && (pCurrentVehicle->IsCar())) {
-			CVehicleModelInfo *mi = ((CVehicleModelInfo*)CModelInfo::GetModelInfo(pCurrentVehicle->GetModelIndex()));
+		if (veh && veh->IsVehicle() && veh->IsCar()) {
+			CVehicleModelInfo *mi = ((CVehicleModelInfo*)CModelInfo::GetModelInfo(veh->GetModelIndex()));
 			CVector ModelInfo = mi->m_positions[CAR_POS_HEADLIGHTS];
 			ModelInfo = m_pEntity->GetMatrix() * ModelInfo;
 
@@ -124,7 +117,7 @@ CFire::ProcessFire(void)
 
 		CParticle::AddParticle(PARTICLE_CARFLAME, firePos,
 			CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.0125f, 0.1f) * m_fStrength),
-			0, m_fStrength, 0, 0, 0, 0);
+				0, m_fStrength, 0, 0, 0, 0);
 
 		rand(); rand(); rand(); /* unsure why these three rands are called */
 
@@ -135,8 +128,7 @@ CFire::ProcessFire(void)
 		if (CTimer::m_snTimeInMilliseconds > m_nStartTime)
 			m_nStartTime = CTimer::m_snTimeInMilliseconds + 400;
 
-		nRandNumber = rand() & 127;
-
+		nRandNumber = CGeneral::GetRandomNumber();
 		lightpos.x = m_vecPos.x;
 		lightpos.y = m_vecPos.y;
 		lightpos.z = m_vecPos.z + 5.0f;
@@ -166,22 +158,19 @@ CFire::ReportThisFire(void)
 void
 CFire::Extinguish(void)
 {
-	CPed *pCurrentEntity;
-
 	if (m_bIsOngoing) {
 		if (!m_bIsScriptFire)
 			gFireManager.m_nTotalFires--;
 
 		m_nExtinguishTime = 0;
 		m_bIsOngoing = false;
-		pCurrentEntity = (CPed *)m_pEntity;
 
-		if (pCurrentEntity) {
-			if (pCurrentEntity->IsObject()) {
-				pCurrentEntity->RestorePreviousState();
-				pCurrentEntity->m_pFire = 0;
-			} else if (pCurrentEntity->IsPed()) {
-				pCurrentEntity->m_vecOffsetSeek.x = 0.0;
+		if (m_pEntity) {
+			if (m_pEntity->IsPed()) {
+				((CPed *)m_pEntity)->RestorePreviousState();
+				((CPed *)m_pEntity)->m_pFire = 0;
+			} else if (m_pEntity->IsVehicle()) {
+				((CVehicle *)m_pEntity)->m_pCarFire = nil;
 			}
 			m_pEntity = nil;
 		}
@@ -191,96 +180,104 @@ CFire::Extinguish(void)
 void
 CFireManager::StartFire(CVector pos, float size, bool propagation)
 {
-	CFire *pCurrentFire = GetNextFreeFire();
+	CFire *fire = GetNextFreeFire();
 
-	if (pCurrentFire) {
-		pCurrentFire->m_bIsOngoing = true;
-		pCurrentFire->m_bIsScriptFire = false;
-		pCurrentFire->m_bPropagationFlag = propagation;
-		pCurrentFire->m_bAudioSet = true;
-		pCurrentFire->m_vecPos = pos;
-		pCurrentFire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds + 10000;
-		pCurrentFire->m_nStartTime = CTimer::m_snTimeInMilliseconds + 400;
-		pCurrentFire->m_pEntity = nil;
-		pCurrentFire->m_pSource = nil;
-		pCurrentFire->field_24 = 0;
-		pCurrentFire->ReportThisFire();
-		pCurrentFire->m_fStrength = size;
+	if (fire) {
+		fire->m_bIsOngoing = true;
+		fire->m_bIsScriptFire = false;
+		fire->m_bPropagationFlag = propagation;
+		fire->m_bAudioSet = true;
+		fire->m_vecPos = pos;
+		fire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds + 10000;
+		fire->m_nStartTime = CTimer::m_snTimeInMilliseconds + 400;
+		fire->m_pEntity = nil;
+		fire->m_pSource = nil;
+		fire->field_24 = 0;
+		fire->ReportThisFire();
+		fire->m_fStrength = size;
 	}
 }
 
-void
+CFire *
 CFireManager::StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength, bool propagation)
 {
 	CPed *ped = (CPed *)entityOnFire;
 	CVehicle *veh = (CVehicle *)entityOnFire;
-	CFire *fire = GetNextFreeFire();
-
-	if (!fire)
-		return;
-	if (entityOnFire->IsPed() && (ped->m_pFire || !ped->IsPedInControl())) {
-		return;
-	} else if (entityOnFire->IsVehicle() && veh->m_pCarFire || veh->IsCar() && ((CAutomobile *)veh)->Damage.GetEngineStatus() >= 225) {
-		return;
-	}
-
+	
 	if (entityOnFire->IsPed()) {
-		ped->m_pFire = fire;
-		if (ped != FindPlayerPed()) {
-			if (fleeFrom) {
-				ped->SetFlee(fleeFrom, 10000);
-			} else {
-				ped->SetFlee(ped->GetPosition(), 10000);
-				ped->m_fleeFrom = nil;
-			}
-			ped->bDrawLast = false;
-			ped->SetMoveState(PEDMOVE_SPRINT);
-			ped->SetMoveAnim();
-			ped->m_nPedState = PED_ON_FIRE;
-		}
-		if (fleeFrom) {
-			if (ped->m_nPedType == PEDTYPE_COP) {
-				CEventList::RegisterEvent(EVENT_COP_SET_ON_FIRE, EVENT_ENTITY_PED,
-					entityOnFire, (CPed *)fleeFrom, 10000);
-			} else {
-				CEventList::RegisterEvent(EVENT_PED_SET_ON_FIRE, EVENT_ENTITY_PED,
-					entityOnFire, (CPed *)fleeFrom, 10000);
-			}
-		}
-	} else {
-		if (entityOnFire->IsVehicle()) {
-			veh->m_pCarFire = fire;
-			if (fleeFrom) {
-				CEventList::RegisterEvent(EVENT_CAR_SET_ON_FIRE, EVENT_ENTITY_VEHICLE,
-					entityOnFire, (CPed *)fleeFrom, 10000);
-			}
-		}
-	}
-
-	fire->m_bIsOngoing = true;
-	fire->m_bIsScriptFire = false;
-	fire->m_vecPos = ped->GetPosition();
-
-	if (entityOnFire && entityOnFire->IsPed() && ped->IsPlayer()) {
-		fire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds + 3333;
+		if (ped->m_pFire)
+			return nil;
+		if (!ped->IsPedInControl())
+			return nil;
 	} else if (entityOnFire->IsVehicle()) {
-		fire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds
-			+ 4000 + (signed int)((double)(unsigned __int16)rand() * 0.000030517578 * 1000.0f); //this needs to be simplified
-	} else {
-		fire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds
-			+ 10000 + (signed int)((double)(unsigned __int16)rand() * 0.000030517578 * 1000.0f);
+		if (veh->m_pCarFire)
+			return nil;
+		if (veh->IsCar() &&  ((CAutomobile *)veh)->Damage.GetEngineStatus() >= 225)
+			return nil;
 	}
-	fire->m_nStartTime = CTimer::m_snTimeInMilliseconds + 400;
-	fire->m_pEntity = entityOnFire;
-	entityOnFire->RegisterReference(&fire->m_pEntity);
-	fire->m_pSource = fleeFrom;
-	if (fleeFrom)
-		fleeFrom->RegisterReference(&fire->m_pSource);
-	fire->ReportThisFire();
-	fire->field_24 = 0;
-	fire->m_fStrength = strength;
-	fire->m_bPropagationFlag = propagation;
-	fire->m_bAudioSet = true;
+	CFire *fire = GetNextFreeFire();
+	
+	if (fire) {
+		if (entityOnFire->IsPed()) {
+			ped->m_pFire = fire;
+			if (ped != FindPlayerPed()) {
+				if (fleeFrom) {
+					ped->SetFlee(fleeFrom, 10000);
+				} else {
+					CVector2D pos = entityOnFire->GetPosition();
+					ped->SetFlee(pos, 10000);
+					ped->m_fleeFrom = nil;
+				}
+				ped->bDrawLast = false;
+				ped->SetMoveState(PEDMOVE_SPRINT);
+				ped->SetMoveAnim();
+				ped->m_nPedState = PED_ON_FIRE;
+			}
+			if (fleeFrom) {
+				if (ped->m_nPedType == PEDTYPE_COP) {
+					CEventList::RegisterEvent(EVENT_COP_SET_ON_FIRE, EVENT_ENTITY_PED,
+						entityOnFire, (CPed *)fleeFrom, 10000);
+				} else {
+					CEventList::RegisterEvent(EVENT_PED_SET_ON_FIRE, EVENT_ENTITY_PED,
+						entityOnFire, (CPed *)fleeFrom, 10000);
+				}
+			}
+		} else {
+			if (entityOnFire->IsVehicle()) {
+				veh->m_pCarFire = fire;
+				if (fleeFrom) {
+					CEventList::RegisterEvent(EVENT_CAR_SET_ON_FIRE, EVENT_ENTITY_VEHICLE,
+						entityOnFire, (CPed *)fleeFrom, 10000);	
+				}
+			}
+		}
+
+		fire->m_bIsOngoing = true;
+		fire->m_bIsScriptFire = false;
+		fire->m_vecPos = entityOnFire->GetPosition();
+
+		if (entityOnFire && entityOnFire->IsPed() && ped->IsPlayer()) {
+			fire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds + 3333;
+		} else if (entityOnFire->IsVehicle()) {
+			fire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds + CGeneral::GetRandomNumberInRange(4000, 5000);
+		} else {
+			fire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds + CGeneral::GetRandomNumberInRange(10000, 11000);
+		}
+		fire->m_nStartTime = CTimer::m_snTimeInMilliseconds + 400;
+		fire->m_pEntity = entityOnFire;
+
+		entityOnFire->RegisterReference(&fire->m_pEntity);
+		fire->m_pSource = fleeFrom;
+
+		if (fleeFrom)
+			fleeFrom->RegisterReference(&fire->m_pSource);
+		fire->ReportThisFire();
+		fire->field_24 = 0;
+		fire->m_fStrength = strength;
+		fire->m_bPropagationFlag = propagation;
+		fire->m_bAudioSet = true;
+	}
+	return fire;
 }
 
 void
@@ -292,8 +289,7 @@ CFireManager::Update(void)
 	}
 }
 
-CFire *
-CFireManager::FindNearestFire(CVector vecPos, float *pDistance)
+CFire* CFireManager::FindNearestFire(CVector vecPos, float *pDistance)
 {
 	for (int i = 0; i < MAX_FIREMEN_ATTENDING; i++) {
 		int fireId = -1;
@@ -454,7 +450,7 @@ STARTPATCHES
 	InjectHook(0x4798B0, &CFire::ReportThisFire, PATCH_JUMP);
 	InjectHook(0x479D40, &CFire::Extinguish, PATCH_JUMP);
 	InjectHook(0x479500, (void(CFireManager::*)(CVector pos, float size, bool propagation))&CFireManager::StartFire, PATCH_JUMP);
-	InjectHook(0x479590, (void(CFireManager::*)(CEntity *, CEntity *, float, bool))&CFireManager::StartFire, PATCH_JUMP);
+	InjectHook(0x479590, (CFire *(CFireManager::*)(CEntity *, CEntity *, float, bool))&CFireManager::StartFire, PATCH_JUMP);
 	InjectHook(0x479310, &CFireManager::Update, PATCH_JUMP);
 	InjectHook(0x479430, &CFireManager::FindFurthestFire_NeverMindFireMen, PATCH_JUMP);
 	InjectHook(0x479340, &CFireManager::FindNearestFire, PATCH_JUMP);
