@@ -15,7 +15,7 @@ public:
 	uint32 m_nExtinguishTime;
 	uint32 m_nStartTime;
 	int32 field_20;
-	uint32 field_24;
+	uint32 m_nNextTimeToAddFlames;
 	uint32 m_nFiremenPuttingOut;
 	float m_fStrength;
 
