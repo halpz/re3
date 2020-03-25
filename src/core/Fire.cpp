@@ -95,8 +95,8 @@ CFire::ProcessFire(void)
 		FindPlayerPed()->DoStuffToGoOnFire();
 		gFireManager.StartFire(FindPlayerPed(), m_pSource, 0.8f, 1);
 	}
-	if (CTimer::m_snTimeInMilliseconds > m_nNextTimeToAddFlames) {
-		m_nNextTimeToAddFlames = CTimer::m_snTimeInMilliseconds + 80;
+	if (CTimer::GetTimeInMilliseconds() > m_nNextTimeToAddFlames) {
+		m_nNextTimeToAddFlames = CTimer::GetTimeInMilliseconds() + 80;
 		firePos = m_vecPos;
 
 		if (veh && veh->IsVehicle() && veh->IsCar()) {
@@ -118,9 +118,9 @@ CFire::ProcessFire(void)
 		CParticle::AddParticle(PARTICLE_CARFLAME_SMOKE, firePos,
 			CVector(0.0f, 0.0f, 0.0f), 0, 0.0, 0, 0, 0, 0);
 	}
-	if (CTimer::m_snTimeInMilliseconds < m_nExtinguishTime || m_bIsScriptFire) {
-		if (CTimer::m_snTimeInMilliseconds > m_nStartTime)
-			m_nStartTime = CTimer::m_snTimeInMilliseconds + 400;
+	if (CTimer::GetTimeInMilliseconds() < m_nExtinguishTime || m_bIsScriptFire) {
+		if (CTimer::GetTimeInMilliseconds() > m_nStartTime)
+			m_nStartTime = CTimer::GetTimeInMilliseconds() + 400;
 
 		nRandNumber = CGeneral::GetRandomNumber() & 127;
 		lightpos.x = m_vecPos.x;
@@ -182,8 +182,8 @@ CFireManager::StartFire(CVector pos, float size, bool propagation)
 		fire->m_bPropagationFlag = propagation;
 		fire->m_bAudioSet = true;
 		fire->m_vecPos = pos;
-		fire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds + 10000;
-		fire->m_nStartTime = CTimer::m_snTimeInMilliseconds + 400;
+		fire->m_nExtinguishTime = CTimer::GetTimeInMilliseconds() + 10000;
+		fire->m_nStartTime = CTimer::GetTimeInMilliseconds() + 400;
 		fire->m_pEntity = nil;
 		fire->m_pSource = nil;
 		fire->m_nNextTimeToAddFlames = 0;
@@ -251,13 +251,13 @@ CFireManager::StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength
 		fire->m_vecPos = entityOnFire->GetPosition();
 
 		if (entityOnFire && entityOnFire->IsPed() && ped->IsPlayer()) {
-			fire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds + 3333;
+			fire->m_nExtinguishTime = CTimer::GetTimeInMilliseconds() + 3333;
 		} else if (entityOnFire->IsVehicle()) {
-			fire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds + CGeneral::GetRandomNumberInRange(4000, 5000);
+			fire->m_nExtinguishTime = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(4000, 5000);
 		} else {
-			fire->m_nExtinguishTime = CTimer::m_snTimeInMilliseconds + CGeneral::GetRandomNumberInRange(10000, 11000);
+			fire->m_nExtinguishTime = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(10000, 11000);
 		}
-		fire->m_nStartTime = CTimer::m_snTimeInMilliseconds + 400;
+		fire->m_nStartTime = CTimer::GetTimeInMilliseconds() + 400;
 		fire->m_pEntity = entityOnFire;
 
 		entityOnFire->RegisterReference(&fire->m_pEntity);
@@ -383,7 +383,7 @@ CFireManager::StartScriptFire(const CVector &pos, CEntity *target, float strengt
 	fire->m_bPropagationFlag = propagation;
 	fire->m_bAudioSet = true;
 	fire->m_vecPos = pos;
-	fire->m_nStartTime = CTimer::m_snTimeInMilliseconds + 400;
+	fire->m_nStartTime = CTimer::GetTimeInMilliseconds() + 400;
 	fire->m_pEntity = target;
 
 	if (target)
