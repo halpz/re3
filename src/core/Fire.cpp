@@ -37,12 +37,6 @@ CFire::CFire()
 
 CFire::~CFire() {}
 
-class CFire_ : public CFire {
-public:
-	void ctor() { ::new(this) CFire(); }
-	void dtor() { CFire::CFire(); }
-};
-
 void
 CFire::ProcessFire(void)
 {
@@ -444,8 +438,6 @@ CFireManager::SetScriptFireAudio(int16 index, bool state)
 }
 
 STARTPATCHES
-	InjectHook(0x479220, &CFire_::ctor, PATCH_JUMP);
-	InjectHook(0x479280, &CFire_::dtor, PATCH_JUMP);
 	InjectHook(0x4798D0, &CFire::ProcessFire, PATCH_JUMP);
 	InjectHook(0x4798B0, &CFire::ReportThisFire, PATCH_JUMP);
 	InjectHook(0x479D40, &CFire::Extinguish, PATCH_JUMP);
