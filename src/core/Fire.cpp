@@ -266,7 +266,7 @@ CFireManager::StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength
 		if (fleeFrom)
 			fleeFrom->RegisterReference(&fire->m_pSource);
 		fire->ReportThisFire();
-		fire->field_24 = 0;
+		fire->m_nNextTimeToAddFlames = 0;
 		fire->m_fStrength = strength;
 		fire->m_bPropagationFlag = propagation;
 		fire->m_bAudioSet = true;
@@ -389,7 +389,7 @@ CFireManager::StartScriptFire(const CVector &pos, CEntity *target, float strengt
 	if (target)
 		target->RegisterReference(&fire->m_pEntity);
 	fire->m_pSource = nil;
-	fire->field_24 = 0;
+	fire->m_nNextTimeToAddFlames = 0;
 	fire->m_fStrength = strength;
 	if (target) {
 		if (target->IsPed()) {
