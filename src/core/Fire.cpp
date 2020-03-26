@@ -410,7 +410,7 @@ CFireManager::StartScriptFire(const CVector &pos, CEntity *target, float strengt
 bool
 CFireManager::IsScriptFireExtinguish(int16 index)
 {
-	return m_aFires[index].m_bIsOngoing ? false : true;
+	return !m_aFires[index].m_bIsOngoing;
 }
 
 void
