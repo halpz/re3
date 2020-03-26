@@ -116,7 +116,7 @@ CFire::ProcessFire(void)
 		rand(); rand(); rand(); /* unsure why these three rands are called */
 
 		CParticle::AddParticle(PARTICLE_CARFLAME_SMOKE, firePos,
-			CVector(0.0f, 0.0f, 0.0f), 0, 0.0, 0, 0, 0, 0);
+			CVector(0.0f, 0.0f, 0.0f), 0, 0.0f, 0, 0, 0, 0);
 	}
 	if (CTimer::GetTimeInMilliseconds() < m_nExtinguishTime || m_bIsScriptFire) {
 		if (CTimer::GetTimeInMilliseconds() > m_nStartTime)
@@ -129,14 +129,14 @@ CFire::ProcessFire(void)
 
 		if (!m_pEntity) {
 			CShadows::StoreStaticShadow((uint32)this, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &lightpos,
-				7.0, 0.0, 0.0, -7.0, 0, nRandNumber / 2, nRandNumber / 2,
-				0, 10.0, 1.0, 40.0, 0, 0.0);
+				7.0f, 0.0f, 0.0f, -7.0f, 0, nRandNumber / 2, nRandNumber / 2,
+				0, 10.0f, 1.0f, 40.0f, 0, 0.0f);
 		}
 		fGreen = nRandNumber / 128;
 		fRed = nRandNumber / 128;
 
 		CPointLights::AddLight(0, m_vecPos, CVector(0.0f, 0.0f, 0.0f),
-			12.0, fRed, fGreen, 0, 0, 0);
+			12.0f, fRed, fGreen, 0, 0, 0);
 	} else {
 		Extinguish();
 	}
@@ -312,7 +312,7 @@ CFire *
 CFireManager::FindFurthestFire_NeverMindFireMen(CVector coords, float minRange, float maxRange)
 {
 	int furthestFire = -1;
-	float lastFireDist = 0.0;
+	float lastFireDist = 0.0f;
 	float fireDist;
 
 	for (int i = 0; i < NUM_FIRES; i++) {
