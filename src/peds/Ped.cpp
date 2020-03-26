@@ -2720,6 +2720,10 @@ CPed::SetObjective(eObjective newObj, void *entity)
 			return;
 	}
 
+#ifdef VC_PED_PORTS
+	SetObjectiveTimer(0);
+	ClearPointGunAt();
+#endif
 	bObjectiveCompleted = false;
 	if (!IsTemporaryObjective(m_objective) || IsTemporaryObjective(newObj)) {
 		if (m_objective != newObj) {
@@ -3444,8 +3448,12 @@ CPed::ClearAll(void)
 	m_fleeFrom = nil;
 	m_fleeTimer = 0;
 	bUsesCollision = true;
+#ifdef VC_PED_PORTS
+	ClearPointGunAt();
+#else
 	ClearAimFlag();
 	ClearLookFlag();
+#endif
 	bIsPointingGunAt = false;
 	bRenderPedInCar = true;
 	bKnockedUpIntoAir = false;
