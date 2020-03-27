@@ -12177,11 +12177,11 @@ CPed::PlacePedOnDryLand(void)
 	if (!CWorld::TestSphereAgainstWorld(potentialGround, 5.0f, nil, true, false, false, false, false, false))
 		return false;
 
-	CVector potentialGroundDist = CWorld::ms_testSpherePoint.point - GetPosition();
+	CVector potentialGroundDist = gaTempSphereColPoints[0].point - GetPosition();
 	potentialGroundDist.z = 0.0f;
 	potentialGroundDist.Normalise();
 
-	CVector posToCheck = 0.5f * potentialGroundDist + CWorld::ms_testSpherePoint.point;
+	CVector posToCheck = 0.5f * potentialGroundDist + gaTempSphereColPoints[0].point;
 	posToCheck.z = 3.0f + waterLevel;
 
 	if (CWorld::ProcessVerticalLine(posToCheck, waterLevel - 1.0f, foundCol, foundEnt, true, true, false, true, false, false, false)) {
