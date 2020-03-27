@@ -2,7 +2,7 @@
 #include "patcher.h"
 #include "SceneEdit.h"
 
-int &CSceneEdit::m_bCameraFollowActor = *(int*)0x940590;
+int32 &CSceneEdit::m_bCameraFollowActor = *(int*)0x940590;
 bool &CSceneEdit::m_bRecording = *(bool*)0x95CD1F;
 CVector &CSceneEdit::m_vecCurrentPosition = *(CVector*)0x943064;
 CVector &CSceneEdit::m_vecCamHeading = *(CVector*)0x942F8C;

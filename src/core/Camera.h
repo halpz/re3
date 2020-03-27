@@ -206,6 +206,21 @@ struct CCam
 	void ProcessPedsDeadBaby(void);
 	bool ProcessArrestCamOne(void);
 	bool ProcessArrestCamTwo(void);
+
+	/* Some of the unused PS2 cams */
+	void Process_Chris_With_Binding_PlusRotation(const CVector &CameraTarget, float, float, float);
+	void Process_ReactionCam(const CVector &CameraTarget, float TargetOrientation, float, float);
+	void Process_FollowPed_WithBinding(const CVector &CameraTarget, float TargetOrientation, float, float);
+	// TODO:
+	// CCam::Process_CushyPillows_Arse
+	// CCam::Process_Look_At_Cars
+	// CCam::Process_CheesyZoom
+	// CCam::Process_Aiming
+	// CCam::Process_Bill	// same as BehindCar due to unused variables
+	// CCam::Process_Im_The_Passenger_Woo_Woo
+	// CCam::Process_Blood_On_The_Tracks
+	// CCam::Process_Cam_Running_Side_Train
+	// CCam::Process_Cam_On_Train_Roof
 };
 static_assert(sizeof(CCam) == 0x1A4, "CCam: wrong size");
 static_assert(offsetof(CCam, Alpha) == 0xA8, "CCam: error");

@@ -176,9 +176,15 @@ CCam::Process(void)
 	case MODE_CAM_ON_A_STRING:
 		Process_Cam_On_A_String(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
-//	case MODE_REACTION:
-//	case MODE_FOLLOW_PED_WITH_BIND:
-//	case MODE_CHRIS:
+	case MODE_REACTION:
+		Process_ReactionCam(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
+	case MODE_FOLLOW_PED_WITH_BIND:
+		Process_FollowPed_WithBinding(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
+	case MODE_CHRIS:
+		Process_Chris_With_Binding_PlusRotation(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
 	case MODE_BEHINDBOAT:
 		Process_BehindBoat(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
@@ -883,7 +889,7 @@ CCam::PrintMode(void)
 			break;
 		case MODE_REACTION:
 			sprintf(buf, "Debug:- Cam Choice2. Reaction Cam On A String ");
-			sprintf(buf, "        Uses Locking Button LeftShoulder 1. ");
+			sprintf(buf, "        Uses Locking Button LeftShoulder 1. ");	// lie
 			break;
 		case MODE_FOLLOW_PED_WITH_BIND:
 			sprintf(buf, "Debug:- Cam Choice3. Game ReactionCam with Locking ");
@@ -4090,6 +4096,277 @@ CCam::ProcessArrestCamTwo(void)
 		}
 	}
 	return false;
+}
+
+
+/*
+ * Unused PS2 cams
+ */
+
+void
+CCam::Process_Chris_With_Binding_PlusRotation(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	static float AngleToBinned = 0.0f;
+	static float StartingAngleLastChange = 0.0f;
+	static float FixedTargetOrientation = 0.0f;
+	static float DeadZoneReachedOnePrevious;
+
+	FOV = DefaultFOV;	// missing in game
+
+	bool FixOrientation = true;
+	if(ResetStatics){
+		Rotating = false;
+		DeadZoneReachedOnePrevious = 0.0f;
+		FixedTargetOrientation = 0.0f;
+		ResetStatics = false;
+	}
+
+	CVector TargetCoors = CameraTarget;
+
+	float StickX = CPad::GetPad(0)->GetRightStickX();
+	float StickY = CPad::GetPad(0)->GetRightStickY();
+	float StickAngle;
+	if(StickX != 0.0 || StickY != 0.0f)	// BUG: game checks StickX twice
+		StickAngle = CGeneral::GetATanOfXY(StickX, StickY);	// result unused?
+	else
+		FixOrientation = false;
+
+	CVector Dist = Source - TargetCoors;
+	Source.z = TargetCoors.z + 0.75f;
+	float Length = Dist.Magnitude2D();
+	if(Length > 2.5f){
+		Source.x = TargetCoors.x + Dist.x/Length * 2.5f;
+		Source.y = TargetCoors.y + Dist.y/Length * 2.5f;
+	}else if(Length < 2.4f){
+		Source.x = TargetCoors.x + Dist.x/Length * 2.4f;
+		Source.y = TargetCoors.y + Dist.y/Length * 2.4f;
+	}
+
+	Beta = CGeneral::GetATanOfXY(Dist.x, Dist.y);
+	if(CPad::GetPad(0)->GetLeftShoulder1()){
+		FixedTargetOrientation = TargetOrientation;
+		Rotating = true;
+	}
+
+	if(FixOrientation){
+		Rotating = true;
+		FixedTargetOrientation = StickX/128.0f + Beta - PI;
+	}
+
+	if(Rotating){
+		Dist = Source - TargetCoors;
+		Length = Dist.Magnitude2D();
+		// inlined
+		WellBufferMe(FixedTargetOrientation+PI, &Beta, &BetaSpeed, 0.1f, 0.06f, true);
+
+		Source.x = TargetCoors.x + Length*Cos(Beta);
+		Source.y = TargetCoors.y + Length*Sin(Beta);
+
+		float DeltaBeta = FixedTargetOrientation+PI - Beta;
+		while(DeltaBeta >= PI) DeltaBeta -= 2*PI;
+		while(DeltaBeta < -PI) DeltaBeta += 2*PI;
+		if(Abs(DeltaBeta) < 0.06f)
+			Rotating = false;
+	}
+
+	Front = TargetCoors - Source;
+	Front.Normalise();
+	CVector Front2 = Front;
+	Front2.Normalise();	// What?
+	// FIX: the meaning of this value must have changed somehow
+	Source -= Front2 * TheCamera.m_fPedZoomValueSmooth*1.5f;
+//	Source += Front2 * TheCamera.m_fPedZoomValueSmooth;
+
+	GetVectorsReadyForRW();
+}
+
+void
+CCam::Process_ReactionCam(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	static float AngleToBinned = 0.0f;
+	static float StartingAngleLastChange = 0.0f;
+	static float FixedTargetOrientation;
+	static float DeadZoneReachedOnePrevious;
+	static uint32 TimeOfLastChange;
+	uint32 Time;
+	bool DontBind = false;	// BUG: left uninitialized
+
+	FOV = DefaultFOV;	// missing in game
+
+	if(ResetStatics){
+		Rotating = false;
+		DeadZoneReachedOnePrevious = 0.0f;
+		FixedTargetOrientation = 0.0f;
+		ResetStatics = false;
+		DontBind = false;
+	}
+
+	CVector TargetCoors = CameraTarget;
+
+	CVector Dist = Source - TargetCoors;
+	Source.z = TargetCoors.z + 0.75f;
+	float Length = Dist.Magnitude2D();
+	if(Length > 2.5f){
+		Source.x = TargetCoors.x + Dist.x/Length * 2.5f;
+		Source.y = TargetCoors.y + Dist.y/Length * 2.5f;
+	}else if(Length < 2.4f){
+		Source.x = TargetCoors.x + Dist.x/Length * 2.4f;
+		Source.y = TargetCoors.y + Dist.y/Length * 2.4f;
+	}
+
+	Beta = CGeneral::GetATanOfXY(Dist.x, Dist.y);
+
+	float StickX = CPad::GetPad(0)->GetLeftStickX();
+	float StickY = CPad::GetPad(0)->GetLeftStickY();
+	float StickAngle;
+	if(StickX != 0.0 || StickY != 0.0f){
+		StickAngle = CGeneral::GetATanOfXY(StickX, StickY);
+		while(StickAngle >= PI) StickAngle -= 2*PI;
+		while(StickAngle < -PI) StickAngle += 2*PI;
+	}else
+		StickAngle = 1000.0f;
+
+	if(Abs(StickAngle-AngleToBinned) > DEGTORAD(15.0f)){
+		DontBind = true;
+		Time = CTimer::GetTimeInMilliseconds();
+	}
+
+	if(CTimer::GetTimeInMilliseconds()-TimeOfLastChange > 200){
+		if(Abs(HALFPI-StickAngle) > DEGTORAD(50.0f)){
+			FixedTargetOrientation = TargetOrientation;
+			Rotating = true;
+			TimeOfLastChange = CTimer::GetTimeInMilliseconds();
+		}
+	}
+
+	// These two together don't make much sense.
+	// Only prevents rotation for one frame
+	AngleToBinned = StickAngle;
+	if(DontBind)
+		TimeOfLastChange = Time;
+
+	if(Rotating){
+		Dist = Source - TargetCoors;
+		Length = Dist.Magnitude2D();
+		// inlined
+		WellBufferMe(FixedTargetOrientation+PI, &Beta, &BetaSpeed, 0.1f, 0.06f, true);
+
+		Source.x = TargetCoors.x + Length*Cos(Beta);
+		Source.y = TargetCoors.y + Length*Sin(Beta);
+
+		float DeltaBeta = FixedTargetOrientation+PI - Beta;
+		while(DeltaBeta >= PI) DeltaBeta -= 2*PI;
+		while(DeltaBeta < -PI) DeltaBeta += 2*PI;
+		if(Abs(DeltaBeta) < 0.06f)
+			Rotating = false;
+	}
+
+	Front = TargetCoors - Source;
+	Front.Normalise();
+	CVector Front2 = Front;
+	Front2.Normalise();	// What?
+	// FIX: the meaning of this value must have changed somehow
+	Source -= Front2 * TheCamera.m_fPedZoomValueSmooth*1.5f;
+//	Source += Front2 * TheCamera.m_fPedZoomValueSmooth;
+
+	GetVectorsReadyForRW();
+}
+
+void
+CCam::Process_FollowPed_WithBinding(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	static float AngleToBinned = 0.0f;
+	static float StartingAngleLastChange = 0.0f;
+	static float FixedTargetOrientation;
+	static float DeadZoneReachedOnePrevious;
+	static uint32 TimeOfLastChange;
+	uint32 Time;
+	bool DontBind = false;
+
+	FOV = DefaultFOV;	// missing in game
+
+	if(ResetStatics){
+		Rotating = false;
+		DeadZoneReachedOnePrevious = 0.0f;
+		FixedTargetOrientation = 0.0f;
+		ResetStatics = false;
+	}
+
+	CVector TargetCoors = CameraTarget;
+
+	CVector Dist = Source - TargetCoors;
+	Source.z = TargetCoors.z + 0.75f;
+	float Length = Dist.Magnitude2D();
+	if(Length > 2.5f){
+		Source.x = TargetCoors.x + Dist.x/Length * 2.5f;
+		Source.y = TargetCoors.y + Dist.y/Length * 2.5f;
+	}else if(Length < 2.4f){
+		Source.x = TargetCoors.x + Dist.x/Length * 2.4f;
+		Source.y = TargetCoors.y + Dist.y/Length * 2.4f;
+	}
+
+	Beta = CGeneral::GetATanOfXY(Dist.x, Dist.y);
+
+	float StickX = CPad::GetPad(0)->GetLeftStickX();
+	float StickY = CPad::GetPad(0)->GetLeftStickY();
+	float StickAngle;
+	if(StickX != 0.0 || StickY != 0.0f){
+		StickAngle = CGeneral::GetATanOfXY(StickX, StickY);
+		while(StickAngle >= PI) StickAngle -= 2*PI;
+		while(StickAngle < -PI) StickAngle += 2*PI;
+	}else
+		StickAngle = 1000.0f;
+
+	if(Abs(StickAngle-AngleToBinned) > DEGTORAD(15.0f)){
+		DontBind = true;
+		Time = CTimer::GetTimeInMilliseconds();
+	}
+
+	if(CTimer::GetTimeInMilliseconds()-TimeOfLastChange > 200){
+		if(Abs(HALFPI-StickAngle) > DEGTORAD(50.0f)){
+			FixedTargetOrientation = TargetOrientation;
+			Rotating = true;
+			TimeOfLastChange = CTimer::GetTimeInMilliseconds();
+		}
+	}
+
+	if(CPad::GetPad(0)->GetLeftShoulder1JustDown()){
+		FixedTargetOrientation = TargetOrientation;
+		Rotating = true;
+		TimeOfLastChange = CTimer::GetTimeInMilliseconds();
+	}
+
+	// These two together don't make much sense.
+	// Only prevents rotation for one frame
+	AngleToBinned = StickAngle;
+	if(DontBind)
+		TimeOfLastChange = Time;
+
+	if(Rotating){
+		Dist = Source - TargetCoors;
+		Length = Dist.Magnitude2D();
+		// inlined
+		WellBufferMe(FixedTargetOrientation+PI, &Beta, &BetaSpeed, 0.1f, 0.06f, true);
+
+		Source.x = TargetCoors.x + Length*Cos(Beta);
+		Source.y = TargetCoors.y + Length*Sin(Beta);
+
+		float DeltaBeta = FixedTargetOrientation+PI - Beta;
+		while(DeltaBeta >= PI) DeltaBeta -= 2*PI;
+		while(DeltaBeta < -PI) DeltaBeta += 2*PI;
+		if(Abs(DeltaBeta) < 0.06f)
+			Rotating = false;
+	}
+
+	Front = TargetCoors - Source;
+	Front.Normalise();
+	CVector Front2 = Front;
+	Front2.Normalise();	// What?
+	// FIX: the meaning of this value must have changed somehow
+	Source -= Front2 * TheCamera.m_fPedZoomValueSmooth*1.5f;
+//	Source += Front2 * TheCamera.m_fPedZoomValueSmooth;
+
+	GetVectorsReadyForRW();
 }
 
 STARTPATCHES

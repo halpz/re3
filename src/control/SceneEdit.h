@@ -3,7 +3,7 @@
 class CSceneEdit
 {
 public:
-	static int &m_bCameraFollowActor;
+	static int32 &m_bCameraFollowActor;
 	static bool &m_bRecording;
 	static CVector &m_vecCurrentPosition;
 	static CVector &m_vecCamHeading;
