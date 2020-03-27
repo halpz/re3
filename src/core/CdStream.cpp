@@ -43,6 +43,7 @@ BOOL _gbCdStreamOverlapped;
 BOOL _gbCdStreamAsync;
 DWORD _gdwCdStreamFlags;
 
+DWORD WINAPI CdStreamThread(LPVOID lpThreadParameter);
 
 void
 CdStreamInitThread(void)

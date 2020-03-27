@@ -1,3 +1,4 @@
+#define WITHWINDOWS	// for our script loading hack
 #include "common.h"
 #include "patcher.h"
 

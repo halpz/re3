@@ -198,7 +198,7 @@ CStreaming::Init(void)
 	// PC only, figure out how much memory we got
 #ifdef GTA_PC
 #define MB (1024*1024)
-	extern DWORD &_dwMemAvailPhys;
+	extern unsigned long &_dwMemAvailPhys;
 	ms_memoryAvailable = (_dwMemAvailPhys - 10*MB)/2;
 	if(ms_memoryAvailable < 50*MB)
 		ms_memoryAvailable = 50*MB;

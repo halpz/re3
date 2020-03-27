@@ -1,3 +1,4 @@
+#define WITHWINDOWS	// just for VK_SPACE
 #include "common.h"
 #include "patcher.h"
 #include "General.h"

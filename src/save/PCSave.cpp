@@ -1,3 +1,4 @@
+#define WITHWINDOWS
 #include "common.h"
 #include "patcher.h"
 #include "FileMgr.h"
