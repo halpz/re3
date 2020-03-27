@@ -71,7 +71,7 @@ InjectHook_internal(uint32 address, uint32 hook, int type)
 		break;
 	}
 
-	*(ptrdiff_t*)(address + 1) = hook - address - 5;
+	*(ptrdiff_t*)(address + 1) = (uintptr_t)hook - (uintptr_t)address - 5;
 	if(type == PATCH_NOTHING)
 		VirtualProtect((void*)(address + 1), 4, protect[0], &protect[1]);
 	else

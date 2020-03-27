@@ -117,16 +117,10 @@ Nop(AT address, unsigned int nCount)
 	Unprotect_internal();
 }
 
-template<typename AT, typename HT> inline void
-InjectHook(AT address, HT hook, unsigned int nType=PATCH_NOTHING)
+template <typename T> inline void
+InjectHook(uintptr_t address, T hook, unsigned int nType = PATCH_NOTHING)
 {
-	uint32		uiHook;
-	_asm
-	{
-		mov		eax, hook
-		mov		uiHook, eax
-	}
-	InjectHook_internal((uint32)address, uiHook, nType);
+	InjectHook_internal(address, reinterpret_cast<uintptr_t>((void *&)hook), nType);
 }
 
 inline void ExtractCall(void *dst, uint32_t a)
