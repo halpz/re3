@@ -174,6 +174,7 @@ enum Config {
 #define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
 
 // Pad
+#define XINPUT
 #define KANGAROO_CHEAT
 #define REGISTER_START_BUTTON // currently only in menu sadly. resumes the game
 
