@@ -7,7 +7,7 @@
 #include "common.h"
 #ifdef XINPUT
 #include <Xinput.h>
-#pragma comment( lib, "Xinput.lib" )
+#pragma comment( lib, "Xinput9_1_0.lib" )
 #endif
 #include "patcher.h"
 #include "Pad.h"
@@ -590,6 +590,24 @@ void CPad::AffectFromXinput(uint32 pad)
 			PCTempJoyState.RightStickX = (int32)(rx * 128.0f);
 			PCTempJoyState.RightStickY = (int32)(ry * 128.0f);
 		}
+
+		XINPUT_VIBRATION VibrationState;
+
+		memset(&VibrationState, 0, sizeof(XINPUT_VIBRATION));
+
+		uint16 iLeftMotor = (uint16)((float)ShakeFreq / 255.0f * (float)0xffff);
+		uint16 iRightMotor = (uint16)((float)ShakeFreq / 255.0f * (float)0xffff);
+		
+		if (ShakeDur < CTimer::GetTimeStepInMilliseconds())
+			ShakeDur = 0;
+		else
+			ShakeDur -= CTimer::GetTimeStepInMilliseconds();
+		if (ShakeDur == 0) ShakeFreq = 0;
+
+		VibrationState.wLeftMotorSpeed = iLeftMotor;
+		VibrationState.wRightMotorSpeed = iRightMotor;
+
+		XInputSetState(pad, &VibrationState);
 	}
 }
 #endif
@@ -617,6 +635,7 @@ void CPad::UpdatePads(void)
 	if ( bUpdate )
 	{
 		GetPad(0)->Update(0);
+		GetPad(1)->Update(0);
 	}
 
 #if defined(MASTER) && !defined(XINPUT)
