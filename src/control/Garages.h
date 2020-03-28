@@ -1,6 +1,7 @@
 #pragma once
 #include "Automobile.h"
 #include "audio_enums.h"
+#include "Camera.h"
 #include "config.h"
 
 class CVehicle;
@@ -63,9 +64,13 @@ class CStoredCar
 	int8 m_nVariationA;
 	int8 m_nVariationB;
 	int8 m_nCarBombType;
+public:
+	void Init() { m_nModelIndex = 0; }
 };
 
 static_assert(sizeof(CStoredCar) == 0x28, "CStoredCar");
+
+#define SWITCH_GARAGE_DISTANCE_CLOSE 40.0f
 
 class CGarage
 {
@@ -73,24 +78,25 @@ public:
 	eGarageType m_eGarageType;
 	eGarageState m_eGarageState;
 	char field_2;
-	char m_bClosingWithoutTargetCar;
-	char m_bDeactivated;
-	char m_bResprayHappened;
-	char field_6;
-	char field_7;
+	bool m_bClosingWithoutTargetCar;
+	bool m_bDeactivated;
+	bool m_bResprayHappened;
 	int m_nTargetModelIndex;
 	CEntity *m_pDoor1;
 	CEntity *m_pDoor2;
-	char m_bDoor1PoolIndex;
-	char m_bDoor2PoolIndex;
-	char m_bIsDoor1Object;
-	char m_bIsDoor2Object;
+	uint8 m_bDoor1PoolIndex;
+	uint8 m_bDoor2PoolIndex;
+	bool m_bIsDoor1Object;
+	bool m_bIsDoor2Object;
 	char field_24;
-	char m_bRotatedDoor;
-	char m_bCameraFollowsPlayer;
-	char field_27;
-	CVector m_vecInf;
-	CVector m_vecSup;
+	bool m_bRotatedDoor;
+	bool m_bCameraFollowsPlayer;
+	float m_fX1;
+	float m_fX2;
+	float m_fY1;
+	float m_fY2;
+	float m_fZ1;
+	float m_fZ2;
 	float m_fDoorPos;
 	float m_fDoorHeight;
 	float m_fDoor1X;
@@ -99,7 +105,7 @@ public:
 	float m_fDoor2Y;
 	float m_fDoor1Z;
 	float m_fDoor2Z;
-	int m_nDoorOpenTime;
+	uint32 m_nTimeToStartAction;
 	char m_bCollectedCarsState;
 	char field_89;
 	char field_90;
@@ -112,6 +118,33 @@ public:
 	void CloseThisGarage();
 	bool IsOpen() { return m_eGarageState == GS_OPENED || m_eGarageState == GS_OPENEDCONTAINSCAR; }
 	bool IsClosed() { return m_eGarageState == GS_FULLYCLOSED; }
+	bool IsUsed() { return m_eGarageType != GARAGE_NONE; }
+	void Update();
+	float GetGarageCenterX() { return (m_fX1 + m_fX2) / 2; }
+	float GetGarageCenterY() { return (m_fY1 + m_fY2) / 2; }
+	bool IsClose()
+	{ 
+#ifdef FIX_BUGS
+		return Abs(TheCamera.GetPosition().x - GetGarageCenterX()) > SWITCH_GARAGE_DISTANCE_CLOSE ||
+			Abs(TheCamera.GetPosition().y - GetGarageCenterY()) > SWITCH_GARAGE_DISTANCE_CLOSE;
+#else
+		return Abs(TheCamera.GetPosition().x - m_fX1) > SWITCH_GARAGE_DISTANCE_CLOSE || 
+			Abs(TheCamera.GetPosition().y - m_fY1) > SWITCH_GARAGE_DISTANCE_CLOSE;
+#endif
+	}
+	void TidyUpGarageClose();
+	void TidyUpGarage();
+	void RefreshDoorPointers(bool);
+	void UpdateCrusherAngle();
+	void UpdateDoorsHeight();
+	bool IsEntityEntirelyInside3D(CEntity*, float);
+	bool IsEntityEntirelyOutside(CEntity*, float);
+	float CalcDistToGarageRectangleSquared(float, float);
+	bool IsAnyOtherCarTouchingGarage(CVehicle* pException);
+	bool IsStaticPlayerCarEntirelyInside();
+	bool IsPlayerOutsideGarage();
+	bool IsCarSprayable();
+	void CenterCarInGarage(CVehicle*);
 };
 
 static_assert(sizeof(CGarage) == 140, "CGarage");
@@ -135,9 +168,19 @@ public:
 	static bool &PlayerInGarage;
 	static int32 &PoliceCarsCollected;
 	static uint32 &GarageToBeTidied;
-	static CGarage(&Garages)[NUM_GARAGES];
-
+	static CGarage(&aGarages)[NUM_GARAGES];
+	static CStoredCar(&aCarsInSafeHouse1)[NUM_GARAGE_STORED_CARS];
+	static CStoredCar(&aCarsInSafeHouse2)[NUM_GARAGE_STORED_CARS];
+	static CStoredCar(&aCarsInSafeHouse3)[NUM_GARAGE_STORED_CARS];
+	static int32 &AudioEntity;
+	static bool &bCamShouldBeOutisde;
 public:
+	static void Init(void);
+#ifndef PS2
+	static void Shutdown(void);
+#endif
+	static int16 AddOne(float X1, float Y1, float Z1, float X2, float Y2, float Z2, eGarageType type, int32 targetId);
+
 	static bool IsModelIndexADoor(uint32 id);
 	static void TriggerMessage(const char *text, int16, uint16 time, int16);
 	static void PrintMessages(void);
@@ -145,11 +188,10 @@ public:
 	static bool IsPointWithinHideOutGarage(CVector&);
 	static bool IsPointWithinAnyGarage(CVector&);
 	static void PlayerArrestedOrDied();
-	static void Init(void);
+
 	static void Update(void);
 	static void Load(uint8 *buf, uint32 size);
 	static void Save(uint8 *buf, uint32 *size);
-	static int16 AddOne(float, float, float, float, float, float, uint8, uint32);
 	static void SetTargetCarForMissonGarage(int16, CVehicle*);
 	static bool HasCarBeenDroppedOffYet(int16);
 	static void ActivateGarage(int16);
@@ -166,5 +208,9 @@ public:
 	static void SetLeaveCameraForThisGarage(int16);
 	static bool IsThisCarWithinGarageArea(int16, CEntity*);
 
+	static int GetBombTypeForGarageType(eGarageType type) { return type - GARAGE_BOMBSHOP1 + 1; }
 	static int GetCarsCollectedIndexForGarageType(eGarageType type) { return type - GARAGE_COLLECTCARS_1; }
+
+private:
+	static float FindDoorHeightForMI(int32);
 };

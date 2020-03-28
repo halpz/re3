@@ -3889,7 +3889,7 @@ cAudioManager::ProcessGarages()
 				CalculateDistance(distCalculated, distSquared);                                        \
 				m_sQueueSample.m_bVolume = ComputeVolume(60, 80.f, m_sQueueSample.m_fDistance);        \
 				if(m_sQueueSample.m_bVolume) {                                                         \
-					if(CGarages::Garages[i].m_eGarageType == GARAGE_CRUSHER) {                     \
+					if(CGarages::aGarages[i].m_eGarageType == GARAGE_CRUSHER) {                     \
 						m_sQueueSample.m_nSampleIndex = SFX_COL_CAR_PANEL_2;                   \
 						m_sQueueSample.m_nFrequency = 6735;                                    \
 					} else if(m_asAudioEntities[m_sQueueSample.m_nEntityIndex]                     \
@@ -3925,20 +3925,20 @@ cAudioManager::ProcessGarages()
 	}
 
 	for(uint32 i = 0; i < CGarages::NumGarages; ++i) {
-		if(CGarages::Garages[i].m_eGarageType == GARAGE_NONE) continue;
-		entity = CGarages::Garages[i].m_pDoor1;
+		if(CGarages::aGarages[i].m_eGarageType == GARAGE_NONE) continue;
+		entity = CGarages::aGarages[i].m_pDoor1;
 		if(!entity) continue;
 		m_sQueueSample.m_vecPos = entity->GetPosition();
 		distCalculated = false;
 		distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
 		if(distSquared < 6400.f) {
-			state = CGarages::Garages[i].m_eGarageState;
+			state = CGarages::aGarages[i].m_eGarageState;
 			if(state == GS_OPENING || state == GS_CLOSING || state == GS_AFTERDROPOFF) {
 				CalculateDistance(distCalculated, distSquared);
 				m_sQueueSample.m_bVolume = ComputeVolume(90u, 80.f, m_sQueueSample.m_fDistance);
 				if(m_sQueueSample.m_bVolume) {
-					if(CGarages::Garages[i].m_eGarageType == GARAGE_CRUSHER) {
-						if(CGarages::Garages[i].m_eGarageState == GS_AFTERDROPOFF) {
+					if(CGarages::aGarages[i].m_eGarageType == GARAGE_CRUSHER) {
+						if(CGarages::aGarages[i].m_eGarageState == GS_AFTERDROPOFF) {
 							if(!(m_FrameCounter & 1)) {
 								LOOP_HELPER
 								continue;

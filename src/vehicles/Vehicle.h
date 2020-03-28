@@ -300,3 +300,5 @@ public:
 };
 
 static_assert(sizeof(cVehicleParams) == 0x18, "cVehicleParams: error");
+
+void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);

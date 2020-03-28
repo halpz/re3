@@ -48,6 +48,7 @@ int32& CStats::LongestFlightInDodo = *(int32*)0x8F5FE4;
 int32& CStats::TimeTakenDefuseMission = *(int32*)0x880E24;
 int32& CStats::TotalNumberKillFrenzies = *(int32*)0x8E2884;
 int32& CStats::TotalNumberMissions = *(int32*)0x8E2820;
+int32& CStats::KgOfExplosivesUsed = *(int32*)0x8F2510;
 int32(&CStats::FastestTimes)[CStats::TOTAL_FASTEST_TIMES] = *(int32(*)[CStats::TOTAL_FASTEST_TIMES])*(uintptr*)0x6E9128;
 int32(&CStats::HighestScores)[CStats::TOTAL_HIGHEST_SCORES] = *(int32(*)[CStats::TOTAL_HIGHEST_SCORES]) * (uintptr*)0x8622B0;
 
