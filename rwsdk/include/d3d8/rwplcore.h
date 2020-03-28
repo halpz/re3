@@ -3906,8 +3906,8 @@ MACRO_STOP
 #pragma warning( disable : 344 )
 #endif /* (defined(__ICL)) */
 
-
-#include <windows.h>
+//nobody needed that - AAP
+//#include <windows.h>
 
 #if (defined(RWDEBUG))
 #if (defined(RWMEMDEBUG) && !defined(_CRTDBG_MAP_ALLOC))

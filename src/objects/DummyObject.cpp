@@ -12,6 +12,8 @@ CDummyObject::CDummyObject(CObject *obj)
 	m_level = obj->m_level;
 }
 
+#include <new>
+
 class CDummyObject_ : public CDummyObject
 {
 public:

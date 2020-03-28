@@ -49,9 +49,5 @@ public:
 	void SetNumberOfBones(int n) { SetNumberOfFrames(n); }
 #endif
 	void ForAllFrames(void (*cb)(AnimBlendFrameData*, void*), void *arg);
-
-
-	CAnimBlendClumpData *ctor(void) { return ::new (this) CAnimBlendClumpData(); }
-	void dtor(void) { this->CAnimBlendClumpData::~CAnimBlendClumpData(); }
 };
 static_assert(sizeof(CAnimBlendClumpData) == 0x14, "CAnimBlendClumpData: error");

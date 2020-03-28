@@ -4483,6 +4483,8 @@ CAutomobile::SetAllTaxiLights(bool set)
 	m_sAllTaxiLights = set;
 }
 
+#include <new>
+
 class CAutomobile_ : public CAutomobile
 {
 public:

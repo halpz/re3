@@ -89,3 +89,49 @@ CDebug::DebugDisplayTextBuffer()
 	}
 #endif
 }
+
+
+// custom
+
+CDebug::ScreenStr CDebug::ms_aScreenStrs[MAX_SCREEN_STRS];
+int CDebug::ms_nScreenStrs;
+
+void
+CDebug::DisplayScreenStrings()
+{
+	int i;
+	
+
+	CFont::SetPropOn();
+	CFont::SetBackgroundOff();
+	CFont::SetScale(1.0f, 1.0f);
+	CFont::SetCentreOff();
+	CFont::SetRightJustifyOff();
+	CFont::SetJustifyOff();
+	CFont::SetRightJustifyWrap(0.0f);
+	CFont::SetWrapx(9999.0f);
+	CFont::SetBackGroundOnlyTextOff();
+	CFont::SetFontStyle(FONT_BANK);
+
+	for(i = 0; i < ms_nScreenStrs; i++){
+		AsciiToUnicode(ms_aScreenStrs[i].str, gUString);
+		CFont::SetColor(CRGBA(0, 0, 0, 255));
+		CFont::PrintString(ms_aScreenStrs[i].x, ms_aScreenStrs[i].y, gUString);
+		CFont::SetColor(CRGBA(255, 255, 255, 255));
+		CFont::PrintString(ms_aScreenStrs[i].x+1, ms_aScreenStrs[i].y+1, gUString);
+	}
+	CFont::DrawFonts();
+
+	ms_nScreenStrs = 0;
+}
+
+void
+CDebug::PrintAt(const char *str, int x, int y)
+{
+	if(ms_nScreenStrs >= MAX_SCREEN_STRS)
+		return;
+	strncpy(ms_aScreenStrs[ms_nScreenStrs].str, str, 256);
+	ms_aScreenStrs[ms_nScreenStrs].x = x*12;
+	ms_aScreenStrs[ms_nScreenStrs].y = y*22;
+	ms_nScreenStrs++;
+}

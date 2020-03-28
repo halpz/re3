@@ -8,9 +8,12 @@
 #pragma warning(disable: 4996)  // POSIX names
 
 #include <stdint.h>
+#include <string.h>
 #include <math.h>
-//#include <assert.h>
-#include <new>
+
+#ifdef WITHWINDOWS
+#include <Windows.h>
+#endif
 
 #ifdef WITHD3D
 #include <windows.h>
@@ -28,6 +31,16 @@
 #endif
 #ifdef near
 #undef near
+#endif
+
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(a) (sizeof(a) / sizeof(*(a)))
 #endif
 
 typedef uint8_t uint8;

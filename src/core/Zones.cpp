@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include <ctype.h>
 
 #include "Zones.h"
 

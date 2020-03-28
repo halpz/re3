@@ -85,9 +85,5 @@ public:
 	static CAnimBlendAssociation *FromLink(CAnimBlendLink *l) {
 		return (CAnimBlendAssociation*)((uint8*)l - offsetof(CAnimBlendAssociation, link));
 	}
-
-	CAnimBlendAssociation *ctor1(void) { return ::new (this) CAnimBlendAssociation(); }
-	CAnimBlendAssociation *ctor2(CAnimBlendAssociation &other) { return ::new (this) CAnimBlendAssociation(other); }
-	void dtor(void) { this->CAnimBlendAssociation::~CAnimBlendAssociation(); }
 };
 static_assert(sizeof(CAnimBlendAssociation) == 0x40, "CAnimBlendAssociation: error");

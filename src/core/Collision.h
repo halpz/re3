@@ -35,8 +35,6 @@ struct CColLine
 	CColLine(void) { };
 	CColLine(const CVector &p0, const CVector &p1) { this->p0 = p0; this->p1 = p1; };
 	void Set(const CVector &p0, const CVector &p1);
-
-	CColLine *ctor(CVector *p0, CVector *p1) { return ::new (this) CColLine(*p0, *p1); }
 };
 
 struct CColTriangle
@@ -106,8 +104,6 @@ struct CColModel
 	void SetLinkPtr(CLink<CColModel*>*);
 	void GetTrianglePoint(CVector &v, int i) const;
 
-	CColModel *ctor(void) { return ::new (this) CColModel(); }
-	void dtor(void) { this->CColModel::~CColModel(); }
 	CColModel& operator=(const CColModel& other);
 };
 

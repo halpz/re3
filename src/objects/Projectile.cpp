@@ -14,6 +14,8 @@ CProjectile::CProjectile(int32 model) : CObject()
 	ObjectCreatedBy = MISSION_OBJECT;
 }
 
+#include <new>
+
 class CProjectile_ : public CProjectile
 {
 public:

@@ -39,7 +39,6 @@ int32 CdStreamSync(int32 channel);
 void AddToQueue(Queue *queue, int32 item);
 int32 GetFirstInQueue(Queue *queue);
 void RemoveFirstInQueue(Queue *queue);
-DWORD WINAPI CdStreamThread(LPVOID lpThreadParameter);
 bool CdStreamAddImage(char const *path);
 char *CdStreamGetImageName(int32 cd);
 void CdStreamRemoveImages(void);

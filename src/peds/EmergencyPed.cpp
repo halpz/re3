@@ -413,6 +413,8 @@ CEmergencyPed::MedicAI(void)
 	}
 }
 
+#include <new>
+
 class CEmergencyPed_ : public CEmergencyPed
 {
 public:

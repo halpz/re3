@@ -2061,6 +2061,19 @@ CColModel::operator=(const CColModel &other)
 	return *this;
 }
 
+#include <new>
+struct CColLine_ : public CColLine
+{
+	CColLine *ctor(CVector *p0, CVector *p1) { return ::new (this) CColLine(*p0, *p1); }
+};
+
+struct CColModel_ : public CColModel
+{
+	CColModel *ctor(void) { return ::new (this) CColModel(); }
+	void dtor(void) { this->CColModel::~CColModel(); }
+};
+
+
 STARTPATCHES
 	InjectHook(0x4B9C30, (CMatrix& (*)(const CMatrix &src, CMatrix &dst))Invert, PATCH_JUMP);
 
@@ -2099,15 +2112,15 @@ STARTPATCHES
 
 	InjectHook(0x411E40, (void (CColSphere::*)(float, const CVector&, uint8, uint8))&CColSphere::Set, PATCH_JUMP);
 	InjectHook(0x40B2A0, &CColBox::Set, PATCH_JUMP);
-	InjectHook(0x40B320, &CColLine::ctor, PATCH_JUMP);
+	InjectHook(0x40B320, &CColLine_::ctor, PATCH_JUMP);
 	InjectHook(0x40B350, &CColLine::Set, PATCH_JUMP);
 	InjectHook(0x411E70, &CColTriangle::Set, PATCH_JUMP);
 
 	InjectHook(0x411EA0, &CColTrianglePlane::Set, PATCH_JUMP);
 	InjectHook(0x412140, &CColTrianglePlane::GetNormal, PATCH_JUMP);
 
-	InjectHook(0x411680, &CColModel::ctor, PATCH_JUMP);
-	InjectHook(0x4116E0, &CColModel::dtor, PATCH_JUMP);
+	InjectHook(0x411680, &CColModel_::ctor, PATCH_JUMP);
+	InjectHook(0x4116E0, &CColModel_::dtor, PATCH_JUMP);
 	InjectHook(0x411D80, &CColModel::RemoveCollisionVolumes, PATCH_JUMP);
 	InjectHook(0x411CB0, &CColModel::CalculateTrianglePlanes, PATCH_JUMP);
 	InjectHook(0x411D10, &CColModel::RemoveTrianglePlanes, PATCH_JUMP);

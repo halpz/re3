@@ -1414,6 +1414,8 @@ CPlayerPed::ProcessControl(void)
 	}
 }
 
+#include <new>
+
 class CPlayerPed_ : public CPlayerPed
 {
 public:
