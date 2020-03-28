@@ -89,9 +89,9 @@ public:
 	CEntity *m_pDoor2;
 	uint8 m_bDoor1PoolIndex;
 	uint8 m_bDoor2PoolIndex;
-	bool m_bIsDoor1Object;
-	bool m_bIsDoor2Object;
-	char field_24;
+	bool m_bDoor1IsDummy;
+	bool m_bDoor2IsDummy;
+	bool m_bRecreateDoorOnNextRefresh;
 	bool m_bRotatedDoor;
 	bool m_bCameraFollowsPlayer;
 	float m_fX1;
