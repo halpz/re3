@@ -203,6 +203,15 @@ CAnimBlendAssociation::UpdateBlend(float timeDelta)
 	return true;
 }
 
+#include <new>
+
+class CAnimBlendAssociation_ : public CAnimBlendAssociation
+{
+public:
+	CAnimBlendAssociation *ctor1(void) { return ::new (this) CAnimBlendAssociation(); }
+	CAnimBlendAssociation *ctor2(CAnimBlendAssociation &other) { return ::new (this) CAnimBlendAssociation(other); }
+	void dtor(void) { this->CAnimBlendAssociation::~CAnimBlendAssociation(); }
+};
 
 STARTPATCHES
 	InjectHook(0x4016A0, &CAnimBlendAssociation::AllocateAnimBlendNodeArray, PATCH_JUMP);
@@ -219,7 +228,7 @@ STARTPATCHES
 	InjectHook(0x4031F0, &CAnimBlendAssociation::UpdateTime, PATCH_JUMP);
 	InjectHook(0x4032B0, &CAnimBlendAssociation::UpdateBlend, PATCH_JUMP);
 
-	InjectHook(0x401460, &CAnimBlendAssociation::ctor1, PATCH_JUMP);
-	InjectHook(0x4014C0, &CAnimBlendAssociation::ctor2, PATCH_JUMP);
-	InjectHook(0x401520, &CAnimBlendAssociation::dtor, PATCH_JUMP);
+	InjectHook(0x401460, &CAnimBlendAssociation_::ctor1, PATCH_JUMP);
+	InjectHook(0x4014C0, &CAnimBlendAssociation_::ctor2, PATCH_JUMP);
+	InjectHook(0x401520, &CAnimBlendAssociation_::dtor, PATCH_JUMP);
 ENDPATCHES

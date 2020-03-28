@@ -377,6 +377,8 @@ CCivilianPed::ProcessControl(void)
 		Avoid();
 }
 
+#include <new>
+
 class CCivilianPed_ : public CCivilianPed
 {
 public:

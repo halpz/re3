@@ -10,8 +10,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
-//#include <assert.h>
-#include <new>
 
 #ifdef WITHWINDOWS
 #include <Windows.h>

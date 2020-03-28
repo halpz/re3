@@ -1034,6 +1034,7 @@ bool CHeli::HasCatalinaBeenShotDown(void) { return CatalinaHasBeenShotDown; }
 
 void CHeli::ActivateHeli(bool activate) { ScriptHeliOn = activate; }
 
+#include <new>
 
 class CHeli_ : public CHeli
 {

@@ -691,6 +691,8 @@ CTrain::UpdateTrains(void)
 	}
 }
 
+#include <new>
+
 class CTrain_ : public CTrain
 {
 public:

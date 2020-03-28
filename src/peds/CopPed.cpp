@@ -551,6 +551,8 @@ CCopPed::CopAI(void)
 	}
 }
 
+#include <new>
+
 class CCopPed_ : public CCopPed
 {
 public:

@@ -17455,6 +17455,8 @@ CPed::SetExitBoat(CVehicle *boat)
 	CWaterLevel::FreeBoatWakeArray();
 }
 
+#include <new>
+
 class CPed_ : public CPed
 {
 public:

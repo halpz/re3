@@ -141,6 +141,8 @@ CObject::CanBeDeleted(void)
 	}
 }
 
+#include <new>
+
 class CObject_ : public CObject
 {
 public:

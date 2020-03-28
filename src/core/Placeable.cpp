@@ -63,6 +63,8 @@ CPlaceable::IsWithinArea(float x1, float y1, float z1, float x2, float y2, float
 	       z1 <= GetPosition().z && GetPosition().z <= z2;
 }
 
+#include <new>
+
 class CPlaceable_ : public CPlaceable
 {
 public:
