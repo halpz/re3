@@ -1601,7 +1601,7 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 			entity = nil;
 	}
 
-	if(CamTargetEntity->GetClump()){
+	if(CamTargetEntity->m_rwObject){
 		// what's going on here?
 		if(RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_WEAPON_PUMP) ||
 		   RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_WEAPON_THROW) ||
