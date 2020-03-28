@@ -167,7 +167,7 @@ void CGarages::Update(void)
 	}
 	if ((CTimer::GetFrameCounter() & 0xF) != 0xC)
 		return;
-	if (++GarageToBeTidied >= 32)
+	if (++GarageToBeTidied >= NUM_GARAGES)
 		GarageToBeTidied = 0;
 	if (!aGarages[GarageToBeTidied].IsUsed())
 		return;
