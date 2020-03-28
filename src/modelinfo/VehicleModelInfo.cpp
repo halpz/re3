@@ -1113,6 +1113,8 @@ public:
 };
 
 STARTPATCHES
+	InjectHook(0x427820, &CVehicleModelInfo::SetComponentsToUse, PATCH_JUMP);
+
 	InjectHook(0x51FDC0, &CVehicleModelInfo_::DeleteRwObject_, PATCH_JUMP);
 	InjectHook(0x51FCB0, &CVehicleModelInfo_::CreateInstance_, PATCH_JUMP);
 	InjectHook(0x51FC60, &CVehicleModelInfo_::SetClump_, PATCH_JUMP);

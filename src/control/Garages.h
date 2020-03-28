@@ -66,6 +66,9 @@ class CStoredCar
 	int8 m_nCarBombType;
 public:
 	void Init() { m_nModelIndex = 0; }
+	CStoredCar(const CStoredCar& other);
+	void StoreCar(CVehicle*);
+	CVehicle* RestoreCar();
 };
 
 static_assert(sizeof(CStoredCar) == 0x28, "CStoredCar");
@@ -139,12 +142,30 @@ public:
 	void UpdateDoorsHeight();
 	bool IsEntityEntirelyInside3D(CEntity*, float);
 	bool IsEntityEntirelyOutside(CEntity*, float);
+	bool IsEntityEntirelyInside(CEntity*);
 	float CalcDistToGarageRectangleSquared(float, float);
+	float CalcSmallestDistToGarageDoorSquared(float, float);
 	bool IsAnyOtherCarTouchingGarage(CVehicle* pException);
 	bool IsStaticPlayerCarEntirelyInside();
 	bool IsPlayerOutsideGarage();
-	bool IsCarSprayable();
+	bool IsAnyCarBlockingDoor();
 	void CenterCarInGarage(CVehicle*);
+	bool DoesCraigNeedThisCar(int32);
+	void MarkThisCarAsCollectedForCraig(int32);
+	bool HasCraigCollectedThisCar(int32);
+	bool IsGarageEmpty();
+	void UpdateCrusherShake(float, float);
+	int32 CountCarsWithCenterPointWithinGarage(CEntity* pException);
+	void RemoveCarsBlockingDoorNotInside();
+	void StoreAndRemoveCarsForThisHideout(CStoredCar*, int32);
+	bool RestoreCarsForThisHideout(CStoredCar*);
+	bool IsEntityTouching3D(CEntity*);
+	bool EntityHasASphereWayOutsideGarage(CEntity*, float);
+	bool IsAnyOtherPedTouchingGarage(CPed* pException);
+	void BuildRotatedDoorMatrix(CEntity*, float);
+	void FindDoorsEntities();
+	void FindDoorsEntitiesSectorList(CPtrList&, bool);
+	void PlayerArrestedOrDied();
 };
 
 static_assert(sizeof(CGarage) == 140, "CGarage");
@@ -207,6 +228,13 @@ public:
 	static bool HasImportExportGarageCollectedThisCar(int16, int8);
 	static void SetLeaveCameraForThisGarage(int16);
 	static bool IsThisCarWithinGarageArea(int16, CEntity*);
+	static bool IsCarSprayable(CVehicle*);
+	static int32 FindMaxNumStoredCarsForGarage(eGarageType);
+	static int32 CountCarsInHideoutGarage(eGarageType);
+	static bool IsPointInAGarageCameraZone(CVector);
+	static bool CameraShouldBeOutside();
+	static void CloseHideOutGaragesBeforeSave();
+	static void SetAllDoorsBackToOriginalHeight();
 
 	static int GetBombTypeForGarageType(eGarageType type) { return type - GARAGE_BOMBSHOP1 + 1; }
 	static int GetCarsCollectedIndexForGarageType(eGarageType type) { return type - GARAGE_COLLECTCARS_1; }

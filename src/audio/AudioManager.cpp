@@ -3732,7 +3732,7 @@ cAudioManager::ProcessFrontEnd()
 			break;
 		case SOUND_GARAGE_NO_MONEY:
 		case SOUND_GARAGE_BAD_VEHICLE:
-		case SOUND_3C:
+		case SOUND_GARAGE_BOMB_ALREADY_SET:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_ERROR_LEFT;
 			stereo = true;
 			break;
