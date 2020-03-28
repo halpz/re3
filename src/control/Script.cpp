@@ -9819,7 +9819,7 @@ void CTheScripts::UndoBuildingSwaps()
 	}
 }
 
-void CTheScripts::UndoEntityVisibilitySettings()
+void CTheScripts::UndoEntityInvisibilitySettings()
 {
 	for (int i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++) {
 		if (InvisibilitySettingArray[i]) {
@@ -11657,7 +11657,7 @@ InjectHook(0x439040, &CTheScripts::Process, PATCH_JUMP);
 InjectHook(0x439400, &CTheScripts::StartTestScript, PATCH_JUMP);
 InjectHook(0x439410, &CTheScripts::IsPlayerOnAMission, PATCH_JUMP);
 InjectHook(0x44FD10, &CTheScripts::UndoBuildingSwaps, PATCH_JUMP);
-InjectHook(0x44FD60, &CTheScripts::UndoEntityVisibilitySettings, PATCH_JUMP);
+InjectHook(0x44FD60, &CTheScripts::UndoEntityInvisibilitySettings, PATCH_JUMP);
 InjectHook(0x4534E0, &CTheScripts::ScriptDebugLine3D, PATCH_JUMP);
 InjectHook(0x453550, &CTheScripts::RenderTheScriptDebugLines, PATCH_JUMP);
 InjectHook(0x4535E0, &CTheScripts::SaveAllScripts, PATCH_JUMP);

@@ -90,7 +90,6 @@ void DoFade(void);
 void Render2dStuffAfterFade(void);
 
 CSprite2d *LoadSplash(const char *name);
-void DestroySplashScreen(void);
 
 
 extern void (*DebugMenuProcess)(void);
@@ -327,7 +326,7 @@ DoRWStuffEndOfFrame(void)
 {
 	CDebug::DisplayScreenStrings();	// custom
 	CDebug::DebugDisplayTextBuffer();
-	// FlushObrsPrintfs();
+	FlushObrsPrintfs();
 	RwCameraEndUpdate(Scene.camera);
 	RsCameraShowRaster(Scene.camera);
 }

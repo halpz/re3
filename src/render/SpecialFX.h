@@ -6,6 +6,7 @@ public:
 	static void Render(void);
 	static void Update(void);
 	static void Init(void);
+	static void Shutdown(void);
 };
 
 class CMotionBlurStreaks

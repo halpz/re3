@@ -14,7 +14,7 @@ CGangInfo::CGangInfo() :
 	m_Weapon2(WEAPONTYPE_UNARMED)
 {}
 
-void CGangs::Initialize(void)
+void CGangs::Initialise(void)
 {
 	Gang[GANG_MAFIA].m_nVehicleMI = MI_MAFIA;
 	Gang[GANG_TRIAD].m_nVehicleMI = MI_BELLYUP;
@@ -67,7 +67,7 @@ VALIDATESAVEBUF(*size);
 
 void CGangs::LoadAllGangData(uint8 *buf, uint32 size)
 {
-	Initialize();
+	Initialise();
 
 INITSAVEBUF
 	// original: SkipSaveBuf(buf, SAVE_HEADER_SIZE);
@@ -79,7 +79,7 @@ VALIDATESAVEBUF(size);
 }
 
 STARTPATCHES
-	InjectHook(0x4C3FB0, CGangs::Initialize, PATCH_JUMP);
+	InjectHook(0x4C3FB0, CGangs::Initialise, PATCH_JUMP);
 	InjectHook(0x4C4010, CGangs::SetGangVehicleModel, PATCH_JUMP);
 	InjectHook(0x4C4030, CGangs::SetGangWeapons, PATCH_JUMP);
 	InjectHook(0x4C4050, CGangs::SetGangPedModelOverride, PATCH_JUMP);

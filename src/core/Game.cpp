@@ -1,7 +1,14 @@
+#pragma warning( push )
+#pragma warning( disable : 4005)
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
+#pragma warning( pop )
 #include "common.h"
+#include "win.h"
 #include "patcher.h"
 #include "Game.h"
 #include "main.h"
+#include "RwHelper.h"
 #include "Accident.h"
 #include "Antennas.h"
 #include "Bridge.h"
@@ -17,6 +24,7 @@
 #include "Cranes.h"
 #include "Credits.h"
 #include "CutsceneMgr.h"
+#include "DMAudio.h"
 #include "Darkel.h"
 #include "Debug.h"
 #include "EventList.h"
@@ -28,26 +36,32 @@
 #include "Frontend.h"
 #include "GameLogic.h"
 #include "Garages.h"
+#include "GenericGameStorage.h"
 #include "Glass.h"
+#include "HandlingMgr.h"
 #include "Heli.h"
+#include "Hud.h"
 #include "IniFile.h"
+#include "Lights.h"
+#include "MBlur.h"
 #include "Messages.h"
 #include "Pad.h"
 #include "Particle.h"
+#include "ParticleObject.h"
+#include "PedRoutes.h"
 #include "Phones.h"
 #include "Pickups.h"
 #include "Plane.h"
+#include "PlayerSkin.h"
 #include "Population.h"
+#include "Radar.h"
 #include "Record.h"
+#include "References.h"
 #include "Renderer.h"
 #include "Replay.h"
-#include "References.h"
-#include "Radar.h"
 #include "Restart.h"
 #include "RoadBlocks.h"
-#include "PedRoutes.h"
 #include "Rubbish.h"
-#include "RwHelper.h"
 #include "SceneEdit.h"
 #include "Script.h"
 #include "Shadows.h"
@@ -56,11 +70,14 @@
 #include "Sprite2d.h"
 #include "Stats.h"
 #include "Streaming.h"
+#include "SurfaceTable.h"
+#include "TempColModels.h"
 #include "TimeCycle.h"
 #include "TrafficLights.h"
 #include "Train.h"
 #include "TxdStore.h"
 #include "User.h"
+#include "VisibilityPlugins.h"
 #include "WaterCannon.h"
 #include "WaterLevel.h"
 #include "Weapon.h"
@@ -69,6 +86,10 @@
 #include "World.h"
 #include "ZoneCull.h"
 #include "Zones.h"
+
+
+
+#define DEFAULT_VIEWWINDOW (0.7f)
 
 eLevelName &CGame::currLevel = *(eLevelName*)0x941514;
 bool &CGame::bDemoMode = *(bool*)0x5F4DD0;
@@ -79,6 +100,7 @@ bool &CGame::noProstitutes = *(bool*)0x95CDCF;
 bool &CGame::playingIntro = *(bool*)0x95CDC2;
 char *CGame::aDatFile = (char*)0x773A48;
 
+int &gameTxdSlot = *(int*)0x628D88;
 
 bool
 CGame::InitialiseOnceBeforeRW(void)
@@ -89,7 +111,143 @@ CGame::InitialiseOnceBeforeRW(void)
 	return true;
 }
 
-int &gameTxdSlot = *(int*)0x628D88;
+bool
+CGame::InitialiseRenderWare(void)
+{
+	_TexturePoolsInitialise();
+	
+	CTxdStore::Initialise();
+	CVisibilityPlugins::Initialise();
+	
+	/* Create camera */
+	Scene.camera = CameraCreate(RsGlobal.width, RsGlobal.height, TRUE);
+	ASSERT(Scene.camera != NULL);
+	if (!Scene.camera)
+	{
+		return (false);
+	}
+	
+	RwCameraSetFarClipPlane(Scene.camera, (RwReal) (2000.0));
+	RwCameraSetNearClipPlane(Scene.camera, (RwReal) (0.9));
+	
+	CameraSize(Scene.camera, NULL, DEFAULT_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
+	
+	/* Create a world */
+	RwBBox  bbox;
+	
+	bbox.sup.x = bbox.sup.y = bbox.sup.z = (RwReal)(10000.0);
+	bbox.inf.x = bbox.inf.y = bbox.inf.z = (RwReal)(-10000.0);
+
+	Scene.world = RpWorldCreate(&bbox);
+	ASSERT(Scene.world != NULL);
+	if (!Scene.world)
+	{
+		CameraDestroy(Scene.camera);
+		Scene.camera = NULL;
+		return (false);
+	}
+	
+	/* Add the camera to the world */
+	RpWorldAddCamera(Scene.world, Scene.camera);
+	LightsCreate(Scene.world);
+	
+	CreateDebugFont();
+	
+	CFont::Initialise();
+	CHud::Initialise();
+	CPlayerSkin::Initialise();
+	
+	return (true);
+}
+
+void CGame::ShutdownRenderWare(void)
+{
+	CMBlur::MotionBlurClose();
+	DestroySplashScreen();
+	CHud::Shutdown();
+	CFont::Shutdown();
+	
+	for ( int32 i = 0; i < NUMPLAYERS; i++ )
+		CWorld::Players[i].DeletePlayerSkin();
+	
+	CPlayerSkin::Shutdown();
+	
+	DestroyDebugFont();
+	
+	/* Destroy world */
+	LightsDestroy(Scene.world);
+	RpWorldRemoveCamera(Scene.world, Scene.camera);
+	RpWorldDestroy(Scene.world);
+	
+	/* destroy camera */
+	CameraDestroy(Scene.camera);
+	
+	Scene.world = NULL;
+	Scene.camera = NULL;
+	
+	CVisibilityPlugins::Shutdown();
+	
+	_TexturePoolsShutdown();
+}
+
+bool CGame::InitialiseOnceAfterRW(void)
+{
+	TheText.Load();
+	DMAudio.Initialise();
+	CTimer::Initialise();
+	CTempColModels::Initialise();
+	mod_HandlingManager.Initialise();
+	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
+	CPedStats::Initialise();
+	CTimeCycle::Initialise();
+
+	if ( DMAudio.GetNum3DProvidersAvailable() == 0 )
+		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = -1;
+
+	if ( FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -99 || FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -2 )
+	{
+		CMenuManager::m_PrefsSpeakers = 0;
+		
+		for ( int32 i = 0; i < DMAudio.GetNum3DProvidersAvailable(); i++ )
+		{
+			wchar buff[64];
+			
+			char *name = DMAudio.Get3DProviderName(i);
+			AsciiToUnicode(name, buff);
+			char *providername = UnicodeToAscii(buff);
+			strupr(providername);
+			
+			if ( !strcmp(providername, "MILES FAST 2D POSITIONAL AUDIO") )
+			{
+				FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = i;
+				break;
+			}
+		}
+	}
+
+	DMAudio.SetCurrent3DProvider(FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);
+	DMAudio.SetSpeakerConfig(CMenuManager::m_PrefsSpeakers);
+	DMAudio.SetDynamicAcousticModelingStatus(CMenuManager::m_PrefsDMA);
+	DMAudio.SetMusicMasterVolume(CMenuManager::m_PrefsMusicVolume);
+	DMAudio.SetEffectsMasterVolume(CMenuManager::m_PrefsSfxVolume);
+	DMAudio.SetEffectsFadeVol(127);
+	DMAudio.SetMusicFadeVol(127);
+	CWorld::Players[0].SetPlayerSkin(CMenuManager::m_PrefsSkinFile);
+  
+	return true;
+}
+
+#if 0
+WRAPPER void CGame::FinalShutdown(void) { EAXJMP(0x48BEC0); }
+#else
+void
+CGame::FinalShutdown(void)
+{	
+	CTxdStore::Shutdown();
+	CPedStats::Shutdown();
+	CdStreamShutdown();
+}
+#endif
 
 bool CGame::Initialise(const char* datFile)
 {
@@ -160,7 +318,7 @@ bool CGame::Initialise(const char* datFile)
 		CStreaming::Init();
 	} else {
 		CStreaming::Init();
-		if (ConvertTextures()) {
+		if (CreateTxdImageForVideoCard()) {
 			CStreaming::Shutdown();
 			CdStreamAddImage("MODELS\\TXD.IMG");
 			CStreaming::Init();
@@ -198,7 +356,7 @@ bool CGame::Initialise(const char* datFile)
 	CSceneEdit::Init();
 	LoadingScreen("Loading the Game", "Load scripts", nil);
 	CTheScripts::Init();
-	CGangs::Initialize();
+	CGangs::Initialise();
 	LoadingScreen("Loading the Game", "Setup game variables", nil);
 	CClock::Initialise(1000);
 	CHeli::InitHelis();
@@ -227,11 +385,223 @@ bool CGame::Initialise(const char* datFile)
 	CTheScripts::Process();
 	TheCamera.Process();
 	LoadingScreen("Loading the Game", "Load scene", nil);
-	CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
-	CCollision::ms_collisionInMemory = CGame::currLevel;
+	CModelInfo::RemoveColModelsFromOtherLevels(currLevel);
+	CCollision::ms_collisionInMemory = currLevel;
 	for (int i = 0; i < MAX_PADS; i++)
 		CPad::GetPad(i)->Clear(true);
 	return true;
+}
+
+bool CGame::ShutDown(void)
+{
+	CReplay::FinishPlayback();
+	CPlane::Shutdown();
+	CTrain::Shutdown();
+	CSpecialFX::Shutdown();
+	CGarages::Shutdown();
+	CMovingThings::Shutdown();
+	gPhoneInfo.Shutdown();
+	CWeapon::ShutdownWeapons();
+	CPedType::Shutdown();
+	CMBlur::MotionBlurClose();
+	
+	for (int32 i = 0; i < NUMPLAYERS; i++)
+	{
+		if ( CWorld::Players[i].m_pPed )
+		{
+			CWorld::Remove(CWorld::Players[i].m_pPed);
+			delete CWorld::Players[i].m_pPed;
+			CWorld::Players[i].m_pPed = NULL;
+		}
+		
+		CWorld::Players[i].Clear();
+	}
+	
+	CRenderer::Shutdown();
+	CWorld::ShutDown();
+	DMAudio.DestroyAllGameCreatedEntities();
+	CModelInfo::ShutDown();
+	CAnimManager::Shutdown();
+	CCutsceneMgr::Shutdown();
+	CVehicleModelInfo::DeleteVehicleColourTextures();
+	CVehicleModelInfo::ShutdownEnvironmentMaps();
+	CRadar::Shutdown();
+	CStreaming::Shutdown();
+	CTxdStore::GameShutdown();
+	CCollision::Shutdown();
+	CWaterLevel::Shutdown();
+	CRubbish::Shutdown();
+	CClouds::Shutdown();
+	CShadows::Shutdown();
+	CCoronas::Shutdown();
+	CSkidmarks::Shutdown();
+	CWeaponEffects::Shutdown();
+	CParticle::Shutdown();
+	CPools::ShutDown();
+	CTxdStore::RemoveTxdSlot(gameTxdSlot);
+	CdStreamRemoveImages();
+	return true;
+}
+
+void CGame::ReInitGameObjectVariables(void)
+{
+	CGameLogic::InitAtStartOfGame();
+	TheCamera.CCamera::Init();
+	TheCamera.SetRwCamera(Scene.camera);
+	CDebug::DebugInitTextBuffer();
+	CWeather::Init();
+	CUserDisplay::Init();
+	CMessages::Init();
+	CRestart::Initialise();
+	CWorld::bDoingCarCollisions = false;
+	CHud::ReInitialise();
+	CRadar::Initialise();
+	CCarCtrl::ReInit();
+	CTimeCycle::Initialise();
+	CDraw::SetFOV(120.0f);
+	CDraw::ms_fLODDistance = 500.0f;
+	CStreaming::RequestBigBuildings(LEVEL_NONE);
+	CStreaming::LoadAllRequestedModels(false);
+	CPed::Initialise();
+	CEventList::Initialise();
+	CWeapon::InitialiseWeapons();
+	CPopulation::Initialise();
+	
+	for (int i = 0; i < NUMPLAYERS; i++)
+		CWorld::Players[i].Clear();
+	
+	CWorld::PlayerInFocus = 0;
+	CAntennas::Init();
+	CGlass::Init();
+	gPhoneInfo.Initialise();
+	CTheScripts::Init();
+	CGangs::Initialise();
+	CTimer::Initialise();
+	CClock::Initialise(1000);
+	CTheCarGenerators::Init();
+	CHeli::InitHelis();
+	CMovingThings::Init();
+	CDarkel::Init();
+	CStats::Init();
+	CPickups::Init();
+	CPacManPickups::Init();
+	CGarages::Init();
+	CSpecialFX::Init();
+	CWaterCannons::Init();
+	CParticle::ReloadConfig();
+	CCullZones::ResolveVisibilities();
+  
+	if ( !FrontEndMenuManager.m_bLoadingSavedGame )
+	{
+		CCranes::InitCranes();
+		CTheScripts::StartTestScript();
+		CTheScripts::Process();
+		TheCamera.Process();
+		CTrain::InitTrains();
+		CPlane::InitPlanes();
+	}
+	
+	for (int32 i = 0; i < MAX_PADS; i++)
+		CPad::GetPad(i)->Clear(true);
+}
+
+void CGame::ReloadIPLs(void)
+{
+	CTimer::Stop();
+	CWorld::RemoveStaticObjects();
+	ThePaths.Init();
+	CCullZones::Init();
+	CFileLoader::ReloadPaths("GTA3.IDE");
+	CFileLoader::LoadScene("INDUST.IPL");
+	CFileLoader::LoadScene("COMMER.IPL");
+	CFileLoader::LoadScene("SUBURBAN.IPL");
+	CFileLoader::LoadScene("CULL.IPL");
+	ThePaths.PreparePathData();
+	CTrafficLights::ScanForLightsOnMap();
+	CRoadBlocks::Init();
+	CCranes::InitCranes();
+	CGarages::Init();
+	CWorld::RepositionCertainDynamicObjects();
+	CCullZones::ResolveVisibilities();
+	CRenderer::SortBIGBuildings();
+	CTimer::Update();
+}
+
+void CGame::ShutDownForRestart(void)
+{
+	CReplay::FinishPlayback();
+	CReplay::EmptyReplayBuffer();
+	DMAudio.DestroyAllGameCreatedEntities();
+	
+	for (int i = 0; i < NUMPLAYERS; i++)
+		CWorld::Players[i].Clear();
+  
+	CGarages::SetAllDoorsBackToOriginalHeight();
+	CTheScripts::UndoBuildingSwaps();
+	CTheScripts::UndoEntityInvisibilitySettings();
+	CWorld::ClearForRestart();
+	CTimer::Shutdown();
+	CStreaming::FlushRequestList();
+	CStreaming::DeleteAllRwObjects();
+	CStreaming::RemoveAllUnusedModels();
+	CStreaming::ms_disableStreaming = false;
+	CRadar::RemoveRadarSections();
+	FrontEndMenuManager.UnloadTextures();
+	CParticleObject::RemoveAllParticleObjects();
+	CPedType::Shutdown();
+	CSpecialFX::Shutdown();
+	TidyUpMemory(true, false);
+}
+
+void CGame::InitialiseWhenRestarting(void)
+{
+	CRect rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	CRGBA color(255, 255, 255, 255);
+	
+	CTimer::Initialise();
+	CSprite2d::SetRecipNearClip();
+	
+	b_FoundRecentSavedGameWantToLoad = false;
+	
+	TheCamera.Init();
+	
+	if ( FrontEndMenuManager.m_bLoadingSavedGame == true )
+	{
+		RestoreForStartLoad();
+		CStreaming::LoadScene(TheCamera.GetPosition());
+	}
+	
+	ReInitGameObjectVariables();
+	
+	if ( FrontEndMenuManager.m_bLoadingSavedGame == true )
+	{
+		if ( GenericLoad() == true )
+		{
+			DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
+			CTrain::InitTrains();
+			CPlane::InitPlanes();
+		}
+		else
+		{
+			for ( int32 i = 0; i < 50; i++ )
+			{
+				HandleExit();
+				FrontEndMenuManager.MessageScreen("FED_LFL"); // Loading save game has failed. The game will restart now. 
+			}
+			
+			ShutDownForRestart();
+			CTimer::Stop();
+			CTimer::Initialise();
+			FrontEndMenuManager.m_bLoadingSavedGame = false;
+			ReInitGameObjectVariables();
+			currLevel = LEVEL_INDUSTRIAL;
+			CCollision::SortOutCollisionAfterLoad();
+		}
+	}
+	
+	CTimer::Update();
+	
+	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 }
 
 #if 0
@@ -314,48 +684,33 @@ void CGame::Process(void)
 }
 #endif
 
-void CGame::ReloadIPLs(void)
+void CGame::DrasticTidyUpMemory(bool)
 {
-	CTimer::Stop();
-	CWorld::RemoveStaticObjects();
-	ThePaths.Init();
-	CCullZones::Init();
-	CFileLoader::ReloadPaths("GTA3.IDE");
-	CFileLoader::LoadScene("INDUST.IPL");
-	CFileLoader::LoadScene("COMMER.IPL");
-	CFileLoader::LoadScene("SUBURBAN.IPL");
-	CFileLoader::LoadScene("CULL.IPL");
-	ThePaths.PreparePathData();
-	CTrafficLights::ScanForLightsOnMap();
-	CRoadBlocks::Init();
-	CCranes::InitCranes();
-	CGarages::Init();
-	CWorld::RepositionCertainDynamicObjects();
-	CCullZones::ResolveVisibilities();
-	CRenderer::SortBIGBuildings();
-	CTimer::Update();
-}
-
-#if 0
-WRAPPER void CGame::FinalShutdown(void) { EAXJMP(0x48BEC0); }
-#else
-void
-CGame::FinalShutdown(void)
-{
-	CTxdStore::Shutdown();
-	CPedStats::Shutdown();
-	CdStreamShutdown();
-}
+#ifdef PS2
+	// meow
 #endif
+}
 
-WRAPPER bool CGame::InitialiseRenderWare(void) { EAXJMP(0x48BBA0); }
-WRAPPER void CGame::ShutdownRenderWare(void) { EAXJMP(0x48BCB0); }
-WRAPPER void CGame::ShutDown(void) { EAXJMP(0x48C3A0); }
-WRAPPER void CGame::ShutDownForRestart(void) { EAXJMP(0x48C6B0); }
-WRAPPER void CGame::InitialiseWhenRestarting(void) { EAXJMP(0x48C740); }
-WRAPPER bool CGame::InitialiseOnceAfterRW(void) { EAXJMP(0x48BD50); }
+void CGame::TidyUpMemory(bool, bool)
+{
+#ifdef PS2
+	// meow
+#endif
+}
 
 STARTPATCHES
-	InjectHook(0x48C850, CGame::Process, PATCH_JUMP);
+	InjectHook(0x48BB80, CGame::InitialiseOnceBeforeRW, PATCH_JUMP);
+	InjectHook(0x48BBA0, CGame::InitialiseRenderWare, PATCH_JUMP);
+	InjectHook(0x48BCB0, CGame::ShutdownRenderWare, PATCH_JUMP);
+	InjectHook(0x48BD50, CGame::InitialiseOnceAfterRW, PATCH_JUMP);
 	InjectHook(0x48BEC0, CGame::FinalShutdown, PATCH_JUMP);
+	InjectHook(0x48BED0, CGame::Initialise, PATCH_JUMP);
+	InjectHook(0x48C3A0, CGame::ShutDown, PATCH_JUMP);
+	InjectHook(0x48C4B0, CGame::ReInitGameObjectVariables, PATCH_JUMP);
+	InjectHook(0x48C620, CGame::ReloadIPLs, PATCH_JUMP);
+	InjectHook(0x48C6B0, CGame::ShutDownForRestart, PATCH_JUMP);
+	InjectHook(0x48C740, CGame::InitialiseWhenRestarting, PATCH_JUMP);
+	InjectHook(0x48C850, CGame::Process, PATCH_JUMP);
+	InjectHook(0x48CA10, CGame::DrasticTidyUpMemory, PATCH_JUMP);
+	InjectHook(0x48CA20, CGame::TidyUpMemory, PATCH_JUMP);
 ENDPATCHES

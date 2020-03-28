@@ -2823,13 +2823,13 @@ CAutomobile::ProcessBuoyancy(void)
 			if(pDriver){
 				pDriver->bIsInWater = true;
 				if(pDriver->IsPlayer() || !bWaterTight)
-					pDriver->InflictDamage(nil, WEAPONTYPE_WATER, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+					pDriver->InflictDamage(nil, WEAPONTYPE_DROWNING, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 			}
 			for(i = 0; i < m_nNumMaxPassengers; i++)
 				if(pPassengers[i]){
 					pPassengers[i]->bIsInWater = true;
 					if(pPassengers[i]->IsPlayer() || !bWaterTight)
-						pPassengers[i]->InflictDamage(nil, WEAPONTYPE_WATER, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+						pPassengers[i]->InflictDamage(nil, WEAPONTYPE_DROWNING, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 				}
 		}else
 			bIsInWater = false;

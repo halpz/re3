@@ -146,6 +146,7 @@ public:
 	static bool IsPointWithinAnyGarage(CVector&);
 	static void PlayerArrestedOrDied();
 	static void Init(void);
+	static void Shutdown(void);
 	static void Update(void);
 	static void Load(uint8 *buf, uint32 size);
 	static void Save(uint8 *buf, uint32 *size);
@@ -167,4 +168,6 @@ public:
 	static bool IsThisCarWithinGarageArea(int16, CEntity*);
 
 	static int GetCarsCollectedIndexForGarageType(eGarageType type) { return type - GARAGE_COLLECTCARS_1; }
+	
+	static void SetAllDoorsBackToOriginalHeight();
 };

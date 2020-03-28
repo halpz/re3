@@ -183,7 +183,7 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	ms_pCutsceneDir->ReadDirFile("ANIM\\CUTS.DIR");
 
 	CStreaming::RemoveUnusedModelsInLoadedList();
-	CGame::DrasticTidyUpMemory();
+	CGame::DrasticTidyUpMemory(true);
 
 	strcpy(ms_cutsceneName, szCutsceneName);
 	file = CFileMgr::OpenFile("ANIM\\CUTS.IMG", "rb");
@@ -374,8 +374,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	}
 	CTimer::Stop();
-	//TheCamera.GetScreenFadeStatus() == 2; // what for??
-	CGame::DrasticTidyUpMemory();
+	CGame::DrasticTidyUpMemory(TheCamera.GetScreenFadeStatus() == 2);
 	CTimer::Update();
 }
 
