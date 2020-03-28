@@ -7,6 +7,8 @@
 #include "Streaming.h"
 #include "Replay.h"
 #include "Camera.h"
+#include "DMAudio.h"
+#include "Wanted.h"
 #include "Coronas.h"
 #include "Particle.h"
 #include "Explosion.h"

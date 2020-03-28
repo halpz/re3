@@ -2,11 +2,11 @@
 
 #include "Game.h"
 #include "PedType.h"
-#include "CopPed.h"
 
 class CPed;
 class CVehicle;
 class CDummyObject;
+class CObject;
 
 struct PedGroup
 {
@@ -71,7 +71,7 @@ public:
 	static bool IsPointInSafeZone(CVector *coors);
 	static void RemovePed(CPed *ent);
 	static int32 ChooseCivilianOccupation(int32);
-	static eCopType ChoosePolicePedOccupation();
+	static int32 ChoosePolicePedOccupation();
 	static int32 ChooseGangOccupation(int);
 	static void FindCollisionZoneForCoors(CVector*, int*, eLevelName*);
 	static void FindClosestZoneForCoors(CVector*, int*, eLevelName, eLevelName);

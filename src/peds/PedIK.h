@@ -1,6 +1,5 @@
 #pragma once
 #include "common.h"
-#include "PedModelInfo.h"
 #include "AnimBlendClumpData.h"
 
 struct LimbOrientation
@@ -52,7 +51,7 @@ public:
 	bool PointGunInDirection(float phi, float theta);
 	bool PointGunInDirectionUsingArm(float phi, float theta);
 	bool PointGunAtPosition(CVector const& position);
-	void GetComponentPosition(RwV3d *pos, PedNode node);
+	void GetComponentPosition(RwV3d *pos, uint32 node);
 	static RwMatrix *GetWorldMatrix(RwFrame *source, RwMatrix *destination);
 	void RotateTorso(AnimBlendFrameData* animBlend, LimbOrientation* limb, bool changeRoll);
 	void ExtractYawAndPitchLocal(RwMatrixTag *mat, float *yaw, float *pitch);

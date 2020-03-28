@@ -7,13 +7,21 @@
 #include "World.h"
 #include "RpAnimBlend.h"
 #include "Ped.h"
+#include "Wanted.h"
 #include "PlayerPed.h"
+#include "PedType.h"
+#include "AnimBlendClumpData.h"
+#include "AnimBlendAssociation.h"
+#include "Fire.h"
+#include "DMAudio.h"
 #include "General.h"
 #include "SurfaceTable.h"
 #include "VisibilityPlugins.h"
 #include "AudioManager.h"
 #include "HandlingMgr.h"
 #include "Replay.h"
+#include "Camera.h"
+#include "Radar.h"
 #include "PedPlacement.h"
 #include "Shadows.h"
 #include "Weather.h"
@@ -552,7 +560,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bScriptObjectiveCompleted = false;
 
 	bKindaStayInSamePlace = false;
-	m_ped_flagE2 = false;
+	bBeingChasedByPolice = false;
 	bNotAllowedToDuck = false;
 	bCrouchWhenShooting = false;
 	bIsDucking = false;
@@ -9597,7 +9605,7 @@ CPed::ProcessControl(void)
 												float neededTurnToCriminal = angleToLookCriminal - angleToFace;
 
 												if (neededTurnToCriminal > DEGTORAD(150.0f) && neededTurnToCriminal < DEGTORAD(210.0f)) {
-													((CCopPed*)this)->m_bZoneDisabledButClose = true;
+													((CCopPed*)this)->m_bStopAndShootDisabledZone = true;
 												}
 											}
 										}

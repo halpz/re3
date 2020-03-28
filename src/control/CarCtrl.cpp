@@ -19,6 +19,7 @@
 #include "Ped.h"
 #include "PlayerInfo.h"
 #include "PlayerPed.h"
+#include "Wanted.h"
 #include "Pools.h"
 #include "Renderer.h"
 #include "RoadBlocks.h"
@@ -27,7 +28,7 @@
 #include "Streaming.h"
 #include "VisibilityPlugins.h"
 #include "Vehicle.h"
-#include "Wanted.h"
+#include "Fire.h"
 #include "World.h"
 #include "Zones.h"
 

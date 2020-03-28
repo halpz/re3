@@ -4,6 +4,8 @@
 #include "Phones.h"
 #include "General.h"
 #include "PlayerPed.h"
+#include "Wanted.h"
+#include "DMAudio.h"
 #include "World.h"
 #include "Vehicle.h"
 #include "SurfaceTable.h"

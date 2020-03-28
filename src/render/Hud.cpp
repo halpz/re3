@@ -11,6 +11,7 @@
 #include "Pad.h"
 #include "Radar.h"
 #include "Replay.h"
+#include "Wanted.h"
 #include "Sprite.h"
 #include "Sprite2d.h"
 #include "Text.h"

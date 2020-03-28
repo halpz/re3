@@ -5,6 +5,7 @@
 #include "SpecialFX.h"
 #include "CarCtrl.h"
 #include "CivilianPed.h"
+#include "Wanted.h"
 #include "Clock.h"
 #include "DMAudio.h"
 #include "Draw.h"
@@ -22,6 +23,8 @@
 #include "Pools.h"
 #include "Population.h"
 #include "Replay.h"
+#include "References.h"
+#include "Pools.h"
 #include "RpAnimBlend.h"
 #include "RwHelper.h"
 #include "CutsceneMgr.h"
@@ -33,6 +36,8 @@
 #include "Zones.h"
 #include "Font.h"
 #include "Text.h"
+#include "Camera.h"
+#include "Radar.h"
 
 uint8 &CReplay::Mode = *(uint8*)0x95CD5B;
 CAddressInReplayBuffer &CReplay::Record = *(CAddressInReplayBuffer*)0x942F7C;

@@ -38,13 +38,12 @@ to reverse at the time, calling the original functions is acceptable.
 
 ### Unreversed / incomplete classes (at least the ones we know)
 ```
-cAudioManager - being worked on
+cAudioManager - WIP
 CBoat
 CBrightLights
 CBulletInfo
 CBulletTraces
 CCamera
-CCopPed
 CCrane
 CCranes
 CCullZone
@@ -57,7 +56,7 @@ CGame
 CGarage
 CGarages
 CGlass
-CMenuManager
+CMenuManager - WIP
 CMotionBlurStreaks
 CObject
 CPacManPickups
