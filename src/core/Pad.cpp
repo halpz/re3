@@ -574,8 +574,9 @@ void CPad::AffectFromXinput(uint32 pad)
 		PCTempJoyState.RightShoulder2 = xstate.Gamepad.bRightTrigger;
 
 		PCTempJoyState.Select = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 255 : 0;
+#ifdef REGISTER_START_BUTTON
 		PCTempJoyState.Start = (xstate.Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 255 : 0;
-
+#endif
 		float lx = (float)xstate.Gamepad.sThumbLX / (float)0x7FFF;
 		float ly = (float)xstate.Gamepad.sThumbLY / (float)0x7FFF;
 		float rx = (float)xstate.Gamepad.sThumbRX / (float)0x7FFF;

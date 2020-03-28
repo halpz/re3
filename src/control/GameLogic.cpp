@@ -9,6 +9,7 @@
 #include "CutsceneMgr.h"
 #include "World.h"
 #include "PlayerPed.h"
+#include "Wanted.h"
 #include "Camera.h"
 #include "Messages.h"
 #include "CarCtrl.h"

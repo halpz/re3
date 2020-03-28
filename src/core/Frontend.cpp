@@ -94,7 +94,6 @@ int32 *&pControlEdit = *(int32**)0x628D08;
 bool &DisplayComboButtonErrMsg = *(bool*)0x628D14;
 int32 &MouseButtonJustClicked = *(int32*)0x628D0C;
 int32 &JoyButtonJustClicked = *(int32*)0x628D10;
-uint32 &nTimeForSomething = *(uint32*)0x628D54;
 bool &holdingScrollBar = *(bool*)0x628D59;
 //int32 *pControlTemp = 0;
 
@@ -2202,15 +2201,15 @@ CMenuManager::ProcessButtonPresses(void)
 			field_535 = false;
 		}
 
-		static int nTimeForSomething = 0;
+		static uint32 lastTimeClickedScrollButton = 0;
 
-		if (CTimer::GetTimeInMillisecondsPauseMode() - nTimeForSomething >= 200) {
+		if (CTimer::GetTimeInMillisecondsPauseMode() - lastTimeClickedScrollButton >= 200) {
 			m_bPressedPgUpOnList = false;
 			m_bPressedPgDnOnList = false;
 			m_bPressedUpOnList = false;
 			m_bPressedDownOnList = false;
 			m_bPressedScrollButton = false;
-			nTimeForSomething = CTimer::GetTimeInMillisecondsPauseMode();
+			lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
 		}
 
 		if (CPad::GetPad(0)->GetTabJustDown()) {
@@ -2249,7 +2248,7 @@ CMenuManager::ProcessButtonPresses(void)
 			m_nCurrExLayer = 19;
 			if (!m_bPressedUpOnList) {
 				m_bPressedUpOnList = true;
-				nTimeForSomething = CTimer::GetTimeInMillisecondsPauseMode();
+				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 				ScrollUpListByOne();
 			}
@@ -2271,7 +2270,7 @@ CMenuManager::ProcessButtonPresses(void)
 			m_nCurrExLayer = 19;
 			if (!m_bPressedDownOnList) {
 				m_bPressedDownOnList = true;
-				nTimeForSomething = CTimer::GetTimeInMillisecondsPauseMode();
+				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 				ScrollDownListByOne();
 			}
@@ -2286,7 +2285,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_nCurrExLayer = 19;
 				if (!m_bPressedPgUpOnList) {
 					m_bPressedPgUpOnList = true;
-					nTimeForSomething = CTimer::GetTimeInMillisecondsPauseMode();
+					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
 					m_bShowMouse = false;
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 					PageUpList(false);
@@ -2298,7 +2297,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_nCurrExLayer = 19;
 				if (!m_bPressedPgDnOnList) {
 					m_bPressedPgDnOnList = true;
-					nTimeForSomething = CTimer::GetTimeInMillisecondsPauseMode();
+					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
 					m_bShowMouse = false;
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 					PageDownList(false);
@@ -2384,7 +2383,7 @@ CMenuManager::ProcessButtonPresses(void)
 				case HOVEROPTION_CLICKED_SCROLL_UP:
 					if (!m_bPressedScrollButton) {
 						m_bPressedScrollButton = true;
-						nTimeForSomething = CTimer::GetTimeInMillisecondsPauseMode();
+						lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
 						ScrollUpListByOne();
 					}
 					break;
@@ -2392,7 +2391,7 @@ CMenuManager::ProcessButtonPresses(void)
 				case HOVEROPTION_CLICKED_SCROLL_DOWN:
 					if (!m_bPressedScrollButton) {
 						m_bPressedScrollButton = true;
-						nTimeForSomething = CTimer::GetTimeInMillisecondsPauseMode();
+						lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
 						ScrollDownListByOne();
 					}
 					break;
@@ -3593,7 +3592,7 @@ void CMenuManager::SwitchMenuOnAndOff()
 		PcSaveHelper.PopulateSlotInfo();
 		m_nCurrOption = 0;
 	}
-/*	// PS2 leftover?
+/*	// PS2 leftover
 	if (m_nCurrScreen != MENUPAGE_SOUND_SETTINGS && gMusicPlaying)
 	{
 		DMAudio.StopFrontEndTrack();

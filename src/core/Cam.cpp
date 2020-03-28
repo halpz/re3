@@ -1530,7 +1530,7 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 		CamDist = fBaseDist + Cos(Alpha)*fAngleDist;
 
 	if(TheCamera.m_bUseTransitionBeta)
-		Beta = -CGeneral::GetATanOfXY(-Cos(m_fTransitionBeta), -Sin(m_fTransitionBeta));
+		Beta = CGeneral::GetATanOfXY(-Cos(m_fTransitionBeta), -Sin(m_fTransitionBeta));
 
 	if(TheCamera.m_bCamDirectlyBehind)
 		Beta = TheCamera.m_PedOrientForBehindOrInFront;

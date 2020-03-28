@@ -17,10 +17,10 @@ public:
 	int8 field_1343;
 	float m_fDistanceToTarget;
 	int8 m_bIsInPursuit;
-	int8 m_bIsDisabledCop; // What disabled cop actually is?
+	int8 m_bIsDisabledCop;
 	int8 field_1350;
 	bool m_bBeatingSuspect;
-	int8 m_bZoneDisabledButClose;
+	int8 m_bStopAndShootDisabledZone;
 	int8 m_bZoneDisabled;
 	int8 field_1354;
 	int8 field_1355;

@@ -16,6 +16,7 @@
 #include "Renderer.h"
 #include "DMAudio.h"
 #include "Radar.h"
+#include "Fire.h"
 #include "Darkel.h"
 
 bool &CVehicle::bWheelsOnlyCheat = *(bool *)0x95CD78;

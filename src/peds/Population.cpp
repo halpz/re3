@@ -4,6 +4,8 @@
 #include "General.h"
 #include "World.h"
 #include "Population.h"
+#include "CopPed.h"
+#include "Wanted.h"
 #include "FileMgr.h"
 #include "Gangs.h"
 #include "ModelIndices.h"
@@ -11,6 +13,7 @@
 #include "CivilianPed.h"
 #include "EmergencyPed.h"
 #include "Replay.h"
+#include "Camera.h"
 #include "CutsceneMgr.h"
 #include "CarCtrl.h"
 #include "IniFile.h"
@@ -110,7 +113,8 @@ CPopulation::ChooseCivilianOccupation(int32 group)
 	return ms_pPedGroups[group].models[CGeneral::GetRandomNumberInRange(0, NUMMODELSPERPEDGROUP)];
 }
 
-eCopType
+// returns eCopType
+int32
 CPopulation::ChoosePolicePedOccupation()
 {
 	CGeneral::GetRandomNumber();
@@ -512,9 +516,9 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors)
 
 			uint32 weapon;
 			if (CGeneral::GetRandomNumberInRange(0, 100) >= 50)
-				weapon = ped->GiveWeapon(CGangs::GetGangInfo(pedType - PEDTYPE_GANG1)->m_Weapon2, 25001);
+				weapon = ped->GiveWeapon((eWeaponType)CGangs::GetGangInfo(pedType - PEDTYPE_GANG1)->m_Weapon2, 25001);
 			else
-				weapon = ped->GiveWeapon(CGangs::GetGangInfo(pedType - PEDTYPE_GANG1)->m_Weapon1, 25001);
+				weapon = ped->GiveWeapon((eWeaponType)CGangs::GetGangInfo(pedType - PEDTYPE_GANG1)->m_Weapon1, 25001);
 			ped->SetCurrentWeapon(weapon);
 			return ped;
 		}

@@ -3,6 +3,7 @@
 #include "main.h"
 #include "Darkel.h"
 #include "PlayerPed.h"
+#include "Wanted.h"
 #include "Timer.h"
 #include "DMAudio.h"
 #include "Population.h"

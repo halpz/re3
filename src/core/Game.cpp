@@ -41,6 +41,8 @@
 #include "Record.h"
 #include "Renderer.h"
 #include "Replay.h"
+#include "References.h"
+#include "Radar.h"
 #include "Restart.h"
 #include "RoadBlocks.h"
 #include "PedRoutes.h"

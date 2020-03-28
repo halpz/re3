@@ -10,6 +10,7 @@
 #include "TxdStore.h"
 #include "ModelIndices.h"
 #include "Pools.h"
+#include "Wanted.h"
 #include "Directory.h"
 #include "RwHelper.h"
 #include "World.h"

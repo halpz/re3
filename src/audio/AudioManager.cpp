@@ -20,6 +20,7 @@
 #include "MusicManager.h"
 #include "Pad.h"
 #include "Ped.h"
+#include "Fire.h"
 #include "Physical.h"
 #include "Placeable.h"
 #include "Plane.h"
@@ -7533,8 +7534,8 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams *params)
 void cAudioManager::ProcessWaterCannon(int32)
 {
 	for(int32 i = 0; i < NUM_WATERCANNONS; i++) {
-		if(aCannons[i].m_nId) {
-			m_sQueueSample.m_vecPos = aCannons[0].m_avecPos[aCannons[i].m_wIndex];
+		if(CWaterCannons::aCannons[i].m_nId) {
+			m_sQueueSample.m_vecPos = CWaterCannons::aCannons[0].m_avecPos[CWaterCannons::aCannons[i].m_nCur];
 			float distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
 			if(distSquared < 900.f) {
 				m_sQueueSample.m_fDistance = Sqrt(distSquared);

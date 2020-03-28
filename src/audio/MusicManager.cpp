@@ -8,6 +8,7 @@
 #include "Hud.h"
 #include "ModelIndices.h"
 #include "Replay.h"
+#include "Pad.h"
 #include "Text.h"
 #include "Timer.h"
 #include "World.h"

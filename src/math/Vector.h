@@ -38,6 +38,14 @@ public:
 		}else
 			x = 1.0f;
 	}
+	
+	void Normalise(float norm) {
+		float sq = MagnitudeSqr();
+		float invsqrt = RecipSqrt(norm, sq);
+		x *= invsqrt;
+		y *= invsqrt;
+		z *= invsqrt;
+	}
 
 	const CVector &operator+=(CVector const &right) {
 		x += right.x;

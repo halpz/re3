@@ -3,15 +3,19 @@
 #include "World.h"
 #include "PlayerPed.h"
 #include "CopPed.h"
+#include "Wanted.h"
+#include "DMAudio.h"
 #include "ModelIndices.h"
 #include "Vehicle.h"
 #include "RpAnimBlend.h"
+#include "AnimBlendAssociation.h"
 #include "General.h"
 #include "ZoneCull.h"
 #include "PathFind.h"
 #include "RoadBlocks.h"
-
-WRAPPER void CCopPed::ProcessControl() { EAXJMP(0x4C1400); }
+#include "CarCtrl.h"
+#include "Renderer.h"
+#include "Camera.h"
 
 CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 {
@@ -62,12 +66,12 @@ CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 	field_1356 = 0;
 	m_attackTimer = 0;
 	m_bBeatingSuspect = false;
-	m_bZoneDisabledButClose = false;
+	m_bStopAndShootDisabledZone = false;
 	m_bZoneDisabled = false;
 	field_1364 = -1;
 	m_pPointGunAt = nil;
 
-	// VC also initializes in here, but it keeps object
+	// VC also initializes in here, but as nil
 #ifdef FIX_BUGS
 	m_wRoadblockNode = -1;
 #endif
@@ -171,7 +175,7 @@ CCopPed::ClearPursuit(void)
 	bIsRunning = false;
 	bNotAllowedToDuck = false;
 	bKindaStayInSamePlace = false;
-	m_bZoneDisabledButClose = false;
+	m_bStopAndShootDisabledZone = false;
 	m_bZoneDisabled = false;
 	ClearObjective();
 	if (IsPedInControl()) {
@@ -213,7 +217,7 @@ CCopPed::SetPursuit(bool ignoreCopLimit)
 			SetObjectiveTimer(0);
 			bNotAllowedToDuck = true;
 			bIsRunning = true;
-			m_bZoneDisabledButClose = false;
+			m_bStopAndShootDisabledZone = false;
 		}
 	}
 }
@@ -315,13 +319,15 @@ CCopPed::CopAI(void)
 			m_prevObjective = OBJECTIVE_NONE;
 			m_nLastPedState = PED_NONE;
 			SetAttackTimer(0);
+
+			// Safe distance for disabled zone? Or to just make game easier?
 			if (m_fDistanceToTarget > 15.0f)
-				m_bZoneDisabledButClose = true;
+				m_bStopAndShootDisabledZone = true;
 		}
 	} else if (m_bZoneDisabled && !CCullZones::NoPolice()) {
 		m_bZoneDisabled = false;
 		m_bIsDisabledCop = false;
-		m_bZoneDisabledButClose = false;
+		m_bStopAndShootDisabledZone = false;
 		bKindaStayInSamePlace = false;
 		bCrouchWhenShooting = false;
 		bDuckAndCover = false;
@@ -524,7 +530,7 @@ CCopPed::CopAI(void)
 										if (!anotherCopChasesHim) {
 											SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, nearPed);
 											nearPed->SetObjective(OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE, this);
-											nearPed->m_ped_flagE2 = true;
+											nearPed->bBeingChasedByPolice = true;
 											return;
 										}
 									}
@@ -551,6 +557,186 @@ CCopPed::CopAI(void)
 	}
 }
 
+void
+CCopPed::ProcessControl(void)
+{
+	if (m_nZoneLevel > LEVEL_NONE && m_nZoneLevel != CCollision::ms_collisionInMemory)
+		return;
+
+	CPed::ProcessControl();
+	if (bWasPostponed)
+		return;
+
+	if (m_nPedState == PED_DEAD) {
+		ClearPursuit();
+		m_objective = OBJECTIVE_NONE;
+		return;
+	}
+	if (m_nPedState == PED_DIE)
+		return;
+
+	if (m_nPedState == PED_ARREST_PLAYER) {
+		ArrestPlayer();
+		return;
+	}
+	GetWeapon()->Update(m_audioEntityId);
+	if (m_moved.Magnitude() > 0.0f)
+		Avoid();
+
+	CPhysical *playerOrHisVeh = FindPlayerVehicle() ? (CPhysical*)FindPlayerVehicle() : (CPhysical*)FindPlayerPed();
+	CPlayerPed *player = FindPlayerPed();
+
+	m_fDistanceToTarget = (playerOrHisVeh->GetPosition() - GetPosition()).Magnitude();
+	if (player->m_nPedState == PED_ARRESTED || player->DyingOrDead()) {
+		if (m_fDistanceToTarget < 5.0f) {
+			SetArrestPlayer(player);
+			return;
+		}
+		if (IsPedInControl())
+			SetIdle();
+	}
+	if (m_bIsInPursuit) {
+		if (player->m_nPedState != PED_ARRESTED && !player->DyingOrDead()) {
+			switch (m_nCopType) {
+				case COP_FBI:
+					Say(SOUND_PED_PURSUIT_FBI);
+					break;
+				case COP_SWAT:
+					Say(SOUND_PED_PURSUIT_SWAT);
+					break;
+				case COP_ARMY:
+					Say(SOUND_PED_PURSUIT_ARMY);
+					break;
+				default:
+					Say(SOUND_PED_PURSUIT_COP);
+					break;
+			}
+		}
+	}
+
+	if (IsPedInControl()) {
+		CopAI();
+		/* switch (m_nCopType)
+		{
+			case COP_FBI:
+				CopAI();
+				break;
+			case COP_SWAT:
+				CopAI();
+				break;
+			case COP_ARMY:
+				CopAI();
+				break;
+			default:
+				CopAI();
+				break;
+		} */
+	} else if (InVehicle()) {
+		if (m_pMyVehicle->pDriver == this && m_pMyVehicle->AutoPilot.m_nCarMission == MISSION_NONE &&
+			CanPedDriveOff() && m_pMyVehicle->VehicleCreatedBy != MISSION_VEHICLE) {
+
+			CCarCtrl::JoinCarWithRoadSystem(m_pMyVehicle);
+			m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
+			m_pMyVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
+			m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 17;
+		}
+	}
+	if (IsPedInControl() || m_nPedState == PED_DRIVING)
+		ScanForCrimes();
+
+	// They may have used goto to jump here in case of PED_ATTACK.
+	if (m_nPedState == PED_IDLE || m_nPedState == PED_ATTACK) {
+		if (m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT &&
+			player && player->EnteringCar() && m_fDistanceToTarget < 1.3f) {
+			SetArrestPlayer(player);
+		}
+	} else {
+		if (m_nPedState == PED_SEEK_POS) {
+			if (player->m_nPedState == PED_ARRESTED) {
+				SetIdle();
+				SetLookFlag(player, false);
+				SetLookTimer(1000);
+				RestorePreviousObjective();
+			} else {
+				if (player->m_pMyVehicle && player->m_pMyVehicle->m_nNumGettingIn != 0) {
+					// This is 1.3f when arresting in car without seeking first (in above)
+#if defined(VC_PED_PORTS) || defined(FIX_BUGS)
+					m_distanceToCountSeekDone = 1.3f;
+#else
+					m_distanceToCountSeekDone = 2.0f;
+#endif
+				}
+
+				if (bDuckAndCover) {
+					if (!bNotAllowedToDuck && Seek()) {
+						SetMoveState(PEDMOVE_STILL);
+						SetMoveAnim();
+						SetPointGunAt(m_pedInObjective);
+					}
+				} else if (Seek()) {
+					CVehicle *playerVeh = FindPlayerVehicle();
+					if (!playerVeh && player && player->EnteringCar()) {
+						SetArrestPlayer(player);
+					} else if (1.5f + GetPosition().z <= m_vecSeekPos.z || GetPosition().z - 0.3f >= m_vecSeekPos.z) {
+						SetMoveState(PEDMOVE_STILL);
+					} else if (playerVeh && playerVeh->CanPedEnterCar() && playerVeh->m_nNumGettingIn == 0) {
+						SetCarJack(playerVeh);
+					}
+				}
+			}
+		} else if (m_nPedState == PED_SEEK_ENTITY) {
+			if (!m_pSeekTarget) {
+				RestorePreviousState();
+			} else {
+				m_vecSeekPos = m_pSeekTarget->GetPosition();
+				if (Seek()) {
+					if (m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT && m_fDistanceToTarget < 2.5f && player) {
+						if (player->m_nPedState == PED_ARRESTED || player->m_nPedState == PED_ENTER_CAR ||
+							(player->m_nPedState == PED_CARJACK && m_fDistanceToTarget < 1.3f)) {
+							SetArrestPlayer(player);
+						} else
+							RestorePreviousState();
+					} else {
+						RestorePreviousState();
+					}
+
+				}
+			}
+		}
+	}
+	if (!m_bStopAndShootDisabledZone)
+		return;
+
+	bool dontShoot = false;
+	if (GetIsOnScreen() && CRenderer::IsEntityCullZoneVisible(this)) {
+		if (((CTimer::GetFrameCounter() + m_randomSeed) & 0x1F) == 17) {
+			CEntity *foundBuilding = nil;
+			CColPoint foundCol;
+			CVector lookPos = GetPosition() + CVector(0.0f, 0.0f, 0.7f);
+			CVector camPos = TheCamera.GetGameCamPosition();
+			CWorld::ProcessLineOfSight(camPos, lookPos, foundCol, foundBuilding,
+				true, false, false, false, false, false, false);
+
+			// He's at least 15.0 far, in disabled zone, collided into somewhere (that's why m_bStopAndShootDisabledZone set),
+			// and now has building on front of him. He's stupid, we don't need him.
+			if (foundBuilding) {
+				FlagToDestroyWhenNextProcessed();
+				dontShoot = true;
+			}
+		}
+	} else {
+		FlagToDestroyWhenNextProcessed();
+		dontShoot = true;
+	}
+
+	if (!dontShoot) {
+		bStopAndShoot = true;
+		bKindaStayInSamePlace = true;
+		bIsPointingGunAt = true;
+		SetAttack(m_pedInObjective);
+	}
+}
+
 #include <new>
 
 class CCopPed_ : public CCopPed
@@ -558,11 +744,13 @@ class CCopPed_ : public CCopPed
 public:
 	CCopPed *ctor(eCopType type) { return ::new (this) CCopPed(type); };
 	void dtor(void) { CCopPed::~CCopPed(); }
+	void ProcessControl_(void) { CCopPed::ProcessControl(); }
 };
 
 STARTPATCHES
 	InjectHook(0x4C11B0, &CCopPed_::ctor, PATCH_JUMP);
 	InjectHook(0x4C13E0, &CCopPed_::dtor, PATCH_JUMP);
+	InjectHook(0x4C1400, &CCopPed_::ProcessControl_, PATCH_JUMP);
 	InjectHook(0x4C28C0, &CCopPed::ClearPursuit, PATCH_JUMP);
 	InjectHook(0x4C2B00, &CCopPed::SetArrestPlayer, PATCH_JUMP);
 	InjectHook(0x4C27D0, &CCopPed::SetPursuit, PATCH_JUMP);
