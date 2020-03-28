@@ -20,6 +20,7 @@
 #include "MusicManager.h"
 #include "Pad.h"
 #include "Ped.h"
+#include "Fire.h"
 #include "Physical.h"
 #include "Placeable.h"
 #include "Plane.h"

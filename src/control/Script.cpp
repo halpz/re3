@@ -53,6 +53,8 @@
 #include "Restart.h"
 #include "Replay.h"
 #include "RpAnimBlend.h"
+#include "AnimBlendAssociation.h"
+#include "Fire.h"
 #include "Rubbish.h"
 #include "Shadows.h"
 #include "SpecialFX.h"
@@ -65,6 +67,7 @@
 #include "Weather.h"
 #include "World.h"
 #include "Zones.h"
+#include "Radar.h"
 
 #define PICKUP_PLACEMENT_OFFSET 0.5f
 #define PED_FIND_Z_OFFSET 5.0f

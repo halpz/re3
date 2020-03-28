@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Ped.h"
-#include "Wanted.h"
-#include "Pad.h"
+
+class CPad;
+class CCopPed;
+class CWanted;
 
 class CPlayerPed : public CPed
 {

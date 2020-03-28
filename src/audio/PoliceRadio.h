@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Wanted.h"
+
 struct cAMCrime {
 	int32 type;
 	CVector position;

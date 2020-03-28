@@ -5,6 +5,7 @@
 #include "Pools.h"
 #include "Radar.h"
 #include "Object.h"
+#include "DummyObject.h"
 
 WRAPPER void CObject::ObjectDamage(float amount) { EAXJMP(0x4BB240); }
 WRAPPER void CObject::DeleteAllTempObjectInArea(CVector, float) { EAXJMP(0x4BBED0); }

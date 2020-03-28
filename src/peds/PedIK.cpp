@@ -80,7 +80,7 @@ CPedIK::RotateTorso(AnimBlendFrameData *animBlend, LimbOrientation *limb, bool c
 }
 
 void
-CPedIK::GetComponentPosition(RwV3d *pos, PedNode node)
+CPedIK::GetComponentPosition(RwV3d *pos, uint32 node)
 {
 	RwFrame *f;
 	RwMatrix *mat;

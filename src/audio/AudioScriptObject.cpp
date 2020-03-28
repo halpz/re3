@@ -2,6 +2,7 @@
 #include "patcher.h"
 #include "AudioScriptObject.h"
 #include "Pools.h"
+#include "DMAudio.h"
 
 WRAPPER void cAudioScriptObject::SaveAllAudioScriptObjects(uint8 *buf, uint32 *size) { EAXJMP(0x57c460); }
 

@@ -1,20 +1,16 @@
 #pragma once
 
-#include "Camera.h"
-#include "Ped.h"
 #include "Pools.h"
-#include "Radar.h"
-#include "References.h"
-#include "Vehicle.h"
-#include "Wanted.h"
 #include "World.h"
-#include "common.h"
 
 #ifdef FIX_BUGS
 #ifndef DONT_FIX_REPLAY_BUGS
 #define FIX_REPLAY_BUGS
 #endif
 #endif
+
+class CVehicle;
+struct CReference;
 
 struct CAddressInReplayBuffer
 {

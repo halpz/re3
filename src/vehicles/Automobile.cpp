@@ -39,6 +39,7 @@
 #include "PathFind.h"
 #include "AnimManager.h"
 #include "RpAnimBlend.h"
+#include "AnimBlendAssociation.h"
 #include "Ped.h"
 #include "PlayerPed.h"
 #include "Object.h"

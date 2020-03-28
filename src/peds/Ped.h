@@ -3,14 +3,9 @@
 #include "Physical.h"
 #include "Weapon.h"
 #include "PedStats.h"
-#include "PedType.h"
 #include "PedIK.h"
 #include "AnimManager.h"
-#include "AnimBlendClumpData.h"
-#include "AnimBlendAssociation.h"
 #include "WeaponInfo.h"
-#include "Fire.h"
-#include "DMAudio.h"
 #include "EventList.h"
 
 #define FEET_OFFSET	1.04f
@@ -19,6 +14,10 @@
 struct CPathNode;
 class CAccident;
 class CObject;
+class CFire;
+struct AnimBlendFrameData;
+class CAnimBlendAssociation;
+enum eCrimeType;
 
 struct PedAudioData
 {
@@ -339,7 +338,7 @@ public:
 	uint8 bScriptObjectiveCompleted : 1;
 
 	uint8 bKindaStayInSamePlace : 1;
-	uint8 m_ped_flagE2 : 1; // bBeingChasedByPolice?
+	uint8 bBeingChasedByPolice : 1; // Unused VC leftover. Should've been set for criminal/gang members
 	uint8 bNotAllowedToDuck : 1;
 	uint8 bCrouchWhenShooting : 1;
 	uint8 bIsDucking : 1;

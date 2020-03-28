@@ -212,7 +212,7 @@ CEventList::ReportCrimeForEvent(eEventType type, int32 crimeId, bool copsDontCar
 
 #ifdef VC_PED_PORTS
 	if (crime == CRIME_HIT_PED && ((CPed*)crimeId)->IsPointerValid() &&
-		FindPlayerPed()->m_pWanted->m_nWantedLevel == 0 && ((CPed*)crimeId)->m_ped_flagE2) {
+		FindPlayerPed()->m_pWanted->m_nWantedLevel == 0 && ((CPed*)crimeId)->bBeingChasedByPolice) {
 
 		if(!((CPed*)crimeId)->DyingOrDead()) {
 			sprintf(gString, "$50 Good Citizen Bonus!");

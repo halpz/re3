@@ -1,13 +1,11 @@
 #pragma once
 
-#include "Weapon.h"
-
 struct CGangInfo
 {
 	int32 m_nVehicleMI;
 	int8 m_nPedModelOverride;
-	eWeaponType m_Weapon1;
-	eWeaponType m_Weapon2;
+	int32 m_Weapon1;
+	int32 m_Weapon2;
 
 	CGangInfo();
 };

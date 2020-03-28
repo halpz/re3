@@ -11,6 +11,7 @@
 #include "General.h"
 #include "AudioScriptObject.h"
 #include "RpAnimBlend.h"
+#include "AnimBlendAssociation.h"
 
 CPhoneInfo &gPhoneInfo = *(CPhoneInfo*)0x732A20;
 

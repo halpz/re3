@@ -10,6 +10,7 @@
 #include "Coronas.h"
 #include "World.h"
 #include "Ped.h"
+#include "DMAudio.h"
 #include "HandlingMgr.h"
 #include "Train.h"
 

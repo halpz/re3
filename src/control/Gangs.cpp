@@ -2,6 +2,7 @@
 #include "patcher.h"
 #include "ModelIndices.h"
 #include "Gangs.h"
+#include "Weapon.h"
 
 //CGangInfo(&CGangs::Gang)[NUM_GANGS] = *(CGangInfo(*)[NUM_GANGS])*(uintptr*)0x6EDF78;
 CGangInfo CGangs::Gang[NUM_GANGS];
@@ -38,8 +39,8 @@ void CGangs::SetGangVehicleModel(int16 gang, int32 model)
 void CGangs::SetGangWeapons(int16 gang, int32 weapon1, int32 weapon2)
 {
 	CGangInfo *gi = GetGangInfo(gang);
-	gi->m_Weapon1 = (eWeaponType)weapon1;
-	gi->m_Weapon2 = (eWeaponType)weapon2;
+	gi->m_Weapon1 = weapon1;
+	gi->m_Weapon2 = weapon2;
 }
 
 void CGangs::SetGangPedModelOverride(int16 gang, int8 ovrd)
