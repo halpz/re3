@@ -29,17 +29,17 @@ void CWaterCannon::Init(void)
 	for ( int32 i = 0; i < NUM_SEGMENTPOINTS; i++ )
 		m_abUsed[i] = false;
 	
-	WaterCannonVertices[0].u = 0.0f;
-	WaterCannonVertices[0].v = 0.0f;
+	RwIm3DVertexSetU(&WaterCannonVertices[0], 0.0f);
+	RwIm3DVertexSetV(&WaterCannonVertices[0], 0.0f);
 	
-	WaterCannonVertices[1].u = 1.0f;
-	WaterCannonVertices[1].v = 0.0f;
+	RwIm3DVertexSetU(&WaterCannonVertices[1], 1.0f);
+	RwIm3DVertexSetV(&WaterCannonVertices[1], 0.0f);
 	
-	WaterCannonVertices[2].u = 0.0f;
-	WaterCannonVertices[2].v = 0.0f;
+	RwIm3DVertexSetU(&WaterCannonVertices[2], 0.0f);
+	RwIm3DVertexSetV(&WaterCannonVertices[2], 0.0f);
 	
-	WaterCannonVertices[3].u = 1.0f;
-	WaterCannonVertices[3].v = 0.0f;
+	RwIm3DVertexSetU(&WaterCannonVertices[3], 1.0f);
+	RwIm3DVertexSetV(&WaterCannonVertices[3], 0.0f);
 	
 	WaterCannonIndexList[0]  = 0;
 	WaterCannonIndexList[1]  = 1;
@@ -118,11 +118,11 @@ void CWaterCannon::Render(void)
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void *)gpWaterRaster);
 	
 	float v = float(CGeneral::GetRandomNumber() & 255) / 256;
-	
-	WaterCannonVertices[0].v = v;
-	WaterCannonVertices[1].v = v;
-	WaterCannonVertices[2].v = v;
-	WaterCannonVertices[3].v = v;
+		
+	RwIm3DVertexSetV(&WaterCannonVertices[0], v);
+	RwIm3DVertexSetV(&WaterCannonVertices[1], v);
+	RwIm3DVertexSetV(&WaterCannonVertices[2], v);
+	RwIm3DVertexSetV(&WaterCannonVertices[3], v);
 	
 	int16 pointA = m_nCur % -NUM_SEGMENTPOINTS;
 	
