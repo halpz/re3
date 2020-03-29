@@ -103,9 +103,6 @@ struct
 RwTexture *&gpSniperSightTex = *(RwTexture**)0x8F5834;
 RwTexture *&gpRocketSightTex = *(RwTexture**)0x8E2C20;
 
-#if 0
-WRAPPER void CHud::Draw(void) { EAXJMP(0x5052A0); }
-#else
 void CHud::Draw()
 {
 	// disable hud via second controller
@@ -1004,12 +1001,7 @@ void CHud::Draw()
 		}
 	}
 }
-#endif
 
-
-#if 0
-WRAPPER void CHud::DrawAfterFade(void) { EAXJMP(0x509030); }
-#else
 void CHud::DrawAfterFade()
 {
 	if (CTimer::GetIsUserPaused() || CReplay::IsPlayingBack())
@@ -1261,11 +1253,7 @@ void CHud::DrawAfterFade()
 		BigMessageInUse[1] = 0.0f;
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CHud::GetRidOfAllHudMessages(void) { EAXJMP(0x504F90); }
-#else
 void CHud::GetRidOfAllHudMessages()
 {
 	m_ZoneState = 0;
@@ -1301,7 +1289,6 @@ void CHud::GetRidOfAllHudMessages()
 			m_BigMessage[i][j] = 0;
 	}
 }
-#endif
 
 void CHud::Initialise()
 {
@@ -1343,9 +1330,6 @@ void CHud::Initialise()
 	CTxdStore::PopCurrentTxd();
 }
 
-#if 0
-WRAPPER void CHud::ReInitialise(void) { EAXJMP(0x504CC0); }
-#else
 void CHud::ReInitialise() {
 	m_Wants_To_Draw_Hud = true;
 	m_Wants_To_Draw_3dMarkers = true;
@@ -1367,12 +1351,9 @@ void CHud::ReInitialise() {
 	PagerSoundPlayed = 0;
 	PagerXOffset = 150.0f;
 }
-#endif
 
 wchar LastBigMessage[6][128];
-#if 0
-WRAPPER void CHud::SetBigMessage(wchar *message, int16 style) { EAXJMP(0x50A250); }
-#else
+
 void CHud::SetBigMessage(wchar *message, int16 style)
 {
 	int i = 0;
@@ -1400,11 +1381,7 @@ void CHud::SetBigMessage(wchar *message, int16 style)
 	LastBigMessage[style][i] = 0;
 	m_BigMessage[style][i] = 0;
 }
-#endif
 
-#if 0
-WRAPPER void CHud::SetHelpMessage(wchar *message, bool quick) { EAXJMP(0x5051E0); }
-#else
 void CHud::SetHelpMessage(wchar *message, bool quick)
 {
 	if (!CReplay::IsPlayingBack()) {
@@ -1419,11 +1396,7 @@ void CHud::SetHelpMessage(wchar *message, bool quick)
 		m_HelpMessageQuick = quick;
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CHud::SetMessage(wchar *message) { EAXJMP(0x50A210); }
-#else
 void CHud::SetMessage(wchar *message)
 {
 	int i = 0;
@@ -1435,11 +1408,7 @@ void CHud::SetMessage(wchar *message)
 	}
 	m_Message[i] = 0;
 }
-#endif
 
-#if 0
-WRAPPER void CHud::SetPagerMessage(wchar *message) { EAXJMP(0x50A320); }
-#else
 void CHud::SetPagerMessage(wchar *message)
 {
 	int i = 0;
@@ -1451,25 +1420,16 @@ void CHud::SetPagerMessage(wchar *message)
 	}
 	m_PagerMessage[i] = 0;
 }
-#endif
 
-#if 0
-WRAPPER void CHud::SetVehicleName(wchar *name) { EAXJMP(0x505290); }
-#else
 void CHud::SetVehicleName(wchar *name)
 {
 	m_VehicleName = name;
 }
-#endif
 
-#if 0
-WRAPPER void CHud::SetZoneName(wchar *name) { EAXJMP(0x5051D0); }
-#else
 void CHud::SetZoneName(wchar *name)
 {
 	m_pZoneName = name;
 }
-#endif
 
 void CHud::Shutdown()
 {

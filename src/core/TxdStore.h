@@ -13,7 +13,7 @@ class CTxdStore
 	static CPool<TxdDef,TxdDef> *&ms_pTxdPool;
 	static RwTexDictionary *&ms_pStoredTxd;
 public:
-	static void Initialize(void);
+	static void Initialise(void);
 	static void Shutdown(void);
 	static void GameShutdown(void);
 	static int AddTxdSlot(const char *name);

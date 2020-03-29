@@ -352,7 +352,25 @@ WRAPPER bool CheckVideoCardCaps(void) { EAXJMP(0x592740); }
 WRAPPER void WriteVideoCardCapsFile(void) { EAXJMP(0x5927D0); }
 WRAPPER void ConvertingTexturesScreen(uint32, uint32, const char*) { EAXJMP(0x592880); }
 WRAPPER void DealWithTxdWriteError(uint32, uint32, const char*) { EAXJMP(0x592BF0); }
-WRAPPER bool ConvertTextures() { EAXJMP(0x592C70); }
+WRAPPER bool CreateTxdImageForVideoCard() { EAXJMP(0x592C70); }
+
+void CreateDebugFont()
+{
+	;
+}
+
+void DestroyDebugFont()
+{
+	;
+}
+
+void FlushObrsPrintfs()
+{
+	;
+}
+
+WRAPPER void _TexturePoolsInitialise() { EAXJMP(0x598B10); }
+WRAPPER void _TexturePoolsShutdown() { EAXJMP(0x598B30); }
 
 STARTPATCHES
 	//InjectHook(0x526450, GetFirstObjectCallback, PATCH_JUMP);

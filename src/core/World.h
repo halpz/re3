@@ -135,6 +135,7 @@ public:
 	static void Initialise();
 	static void AddParticles();
 	static void ShutDown();
+	static void ClearForRestart(void);
 	static void RepositionCertainDynamicObjects();
 	static void RemoveStaticObjects();
 	static void Process();

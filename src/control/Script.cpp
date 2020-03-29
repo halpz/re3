@@ -2842,9 +2842,6 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 	return -1;
 }
 
-#if 0
-WRAPPER int8 CRunningScript::ProcessCommand300To399(int32 command) { EAXJMP(0x43ED30); }
-#else
 int8 CRunningScript::ProcessCommands300To399(int32 command)
 {
 	switch (command) {
@@ -3576,11 +3573,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	}
 	return -1;
 }
-#endif
 
-#if 0
-WRAPPER int8 CRunningScript::ProcessCommands400To499(int32 command) { EAXJMP(0x440CB0); }
-#else
 int8 CRunningScript::ProcessCommands400To499(int32 command)
 {
 	switch (command) {
@@ -4370,11 +4363,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 	}
 	return -1;
 }
-#endif
 
-#if 0
-WRAPPER int8 CRunningScript::ProcessCommands500To599(int32 command) { EAXJMP(0x4429C0); }
-#else
 int8 CRunningScript::ProcessCommands500To599(int32 command)
 {
 	switch (command) {
@@ -5201,11 +5190,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	}
 	return -1;
 }
-#endif
 
-#if 0
-WRAPPER int8 CRunningScript::ProcessCommands600To699(int32 command) { EAXJMP(0x444B20); }
-#else
 int8 CRunningScript::ProcessCommands600To699(int32 command)
 {
 	switch (command){
@@ -5559,11 +5544,7 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 	}
 	return -1;
 }
-#endif
 
-#if 0
-WRAPPER int8 CRunningScript::ProcessCommands700To799(int32 command) { EAXJMP(0x4458A0); }
-#else
 int8 CRunningScript::ProcessCommands700To799(int32 command)
 {
 	switch (command){
@@ -6429,11 +6410,6 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	}
 	return -1;
 }
-#endif
-
-#if 0
-WRAPPER int8 CRunningScript::ProcessCommands800To899(int32 command) { EAXJMP(0x448240); }
-#else
 int8 CRunningScript::ProcessCommands800To899(int32 command)
 {
 	CMatrix tmp_matrix;
@@ -7515,11 +7491,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	}
 	return -1;
 }
-#endif
 
-#if 0
-WRAPPER int8 CRunningScript::ProcessCommands900To999(int32 command) { EAXJMP(0x44CB80); }
-#else
 int8 CRunningScript::ProcessCommands900To999(int32 command)
 {
 	char str[52];
@@ -8420,7 +8392,6 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	}
 	return -1;
 }
-#endif
 
 int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 {
@@ -9819,7 +9790,7 @@ void CTheScripts::UndoBuildingSwaps()
 	}
 }
 
-void CTheScripts::UndoEntityVisibilitySettings()
+void CTheScripts::UndoEntityInvisibilitySettings()
 {
 	for (int i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++) {
 		if (InvisibilitySettingArray[i]) {
@@ -11657,7 +11628,7 @@ InjectHook(0x439040, &CTheScripts::Process, PATCH_JUMP);
 InjectHook(0x439400, &CTheScripts::StartTestScript, PATCH_JUMP);
 InjectHook(0x439410, &CTheScripts::IsPlayerOnAMission, PATCH_JUMP);
 InjectHook(0x44FD10, &CTheScripts::UndoBuildingSwaps, PATCH_JUMP);
-InjectHook(0x44FD60, &CTheScripts::UndoEntityVisibilitySettings, PATCH_JUMP);
+InjectHook(0x44FD60, &CTheScripts::UndoEntityInvisibilitySettings, PATCH_JUMP);
 InjectHook(0x4534E0, &CTheScripts::ScriptDebugLine3D, PATCH_JUMP);
 InjectHook(0x453550, &CTheScripts::RenderTheScriptDebugLines, PATCH_JUMP);
 InjectHook(0x4535E0, &CTheScripts::SaveAllScripts, PATCH_JUMP);
