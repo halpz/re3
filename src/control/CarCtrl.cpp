@@ -881,9 +881,7 @@ CCarCtrl::SlowCarOnRailsDownForTrafficAndLights(CVehicle* pVehicle)
 			pVehicle->AutoPilot.ModifySpeed(max(maxSpeed, curSpeed - 0.5f * CTimer::GetTimeStep()));
 	}
 }
-#if 0
-WRAPPER void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList&, CVehicle*, float, float, float, float, float*, float) { EAXJMP(0x419300); }
-#else
+
 void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, float x_inf, float y_inf, float x_sup, float y_sup, float* pSpeed, float curSpeed)
 {
 	float frontOffset = pVehicle->GetModelInfo()->GetColModel()->boundingBox.max.y;
@@ -991,7 +989,6 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 		}
 	}
 }
-#endif
 
 void CCarCtrl::SlowCarDownForCarsSectorList(CPtrList& lst, CVehicle* pVehicle, float x_inf, float y_inf, float x_sup, float y_sup, float* pSpeed, float curSpeed)
 {
@@ -1055,9 +1052,6 @@ void CCarCtrl::SlowCarDownForOtherCar(CEntity* pOtherEntity, CVehicle* pVehicle,
 	}
 }
 
-#if 0
-WRAPPER float CCarCtrl::TestCollisionBetween2MovingRects(CVehicle* pVehicleA, CVehicle* pVehicleB, float projectionX, float projectionY, CVector* pForwardA, CVector* pForwardB, uint8 id) { EAXJMP(0x41A020); }
-#else
 float CCarCtrl::TestCollisionBetween2MovingRects(CVehicle* pVehicleA, CVehicle* pVehicleB, float projectionX, float projectionY, CVector* pForwardA, CVector* pForwardB, uint8 id)
 {
 	CVector2D vecBToA = pVehicleA->GetPosition() - pVehicleB->GetPosition();
@@ -1180,7 +1174,6 @@ float CCarCtrl::TestCollisionBetween2MovingRects(CVehicle* pVehicleA, CVehicle* 
 	}
 	return proximity;
 }
-#endif
 
 float CCarCtrl::FindAngleToWeaveThroughTraffic(CVehicle* pVehicle, CPhysical* pTarget, float angleToTarget, float angleForward)
 {

@@ -113,9 +113,6 @@ static void(*CBArray_RE3[])(CAnimBlendAssociation*, void*) =
 	&CPed::PedLandCB, &FinishFuckUCB, &CPed::RestoreHeadingRateCB, &CPed::PedSetQuickDraggedOutCarPositionCB, &CPed::PedSetDraggedOutCarPositionCB
 };
 
-#if 0
-WRAPPER uint8 FindCBFunctionID(void(*f)(CAnimBlendAssociation*, void*)) { EAXJMP(0x584E70); }
-#else
 static uint8 FindCBFunctionID(void(*f)(CAnimBlendAssociation*, void*))
 {
 	for (int i = 0; i < sizeof(CBArray) / sizeof(*CBArray); i++){
@@ -128,16 +125,12 @@ static uint8 FindCBFunctionID(void(*f)(CAnimBlendAssociation*, void*))
 	}
 	return 0;
 }
-#endif
 
 static void(*FindCBFunction(uint8 id))(CAnimBlendAssociation*, void*)
 {
 	return CBArray_RE3[id];
 }
 
-#if 0
-WRAPPER static void ApplyPanelDamageToCar(uint32, CAutomobile*, bool) { EAXJMP(0x584EA0); }
-#else
 static void ApplyPanelDamageToCar(uint32 panels, CAutomobile* vehicle, bool flying)
 {
 	if(vehicle->Damage.GetPanelStatus(VEHPANEL_FRONT_LEFT) != CDamageManager::GetPanelStatus(panels, VEHPANEL_FRONT_LEFT)){
@@ -169,7 +162,6 @@ static void ApplyPanelDamageToCar(uint32 panels, CAutomobile* vehicle, bool flyi
 		vehicle->SetPanelDamage(CAR_BUMP_REAR, VEHBUMPER_REAR, flying);
 	}
 }
-#endif
 
 void PrintElementsInPtrList(void) 
 {
@@ -262,9 +254,6 @@ void CReplay::Update(void)
 	}
 }
 
-#if 0
-WRAPPER void CReplay::RecordThisFrame(void) { EAXJMP(0x5932B0); }
-#else
 void CReplay::RecordThisFrame(void)
 {
 #ifdef FIX_REPLAY_BUGS
@@ -377,11 +366,7 @@ void CReplay::RecordThisFrame(void)
 	MarkEverythingAsNew();
 #endif
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::StorePedUpdate(CPed *ped, int id) { EAXJMP(0x5935B0); }
-#else
 void CReplay::StorePedUpdate(CPed *ped, int id)
 {
 	tPedUpdatePacket* pp = (tPedUpdatePacket*)&Record.m_pBase[Record.m_nOffset];
@@ -399,11 +384,7 @@ void CReplay::StorePedUpdate(CPed *ped, int id)
 	StorePedAnimation(ped, &pp->anim_state);
 	Record.m_nOffset += sizeof(tPedUpdatePacket);
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state) { EAXJMP(0x593670); }
-#else
 void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
 {
 	CAnimBlendAssociation* second;
@@ -442,11 +423,7 @@ void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
 		state->partBlendAmount = 0;
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state) { EAXJMP(0x593BB0); }
-#else
 void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state)
 {
 	for (int i = 0; i < NUM_MAIN_ANIMS_IN_REPLAY; i++){
@@ -503,10 +480,7 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 		}
 	}
 }
-#endif
-#if 0
-WRAPPER void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayBuffer *buffer) { EAXJMP(0x594050); }
-#else
+
 void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayBuffer *buffer)
 {
 	tPedUpdatePacket *pp = (tPedUpdatePacket*)&buffer->m_pBase[buffer->m_nOffset];
@@ -543,11 +517,7 @@ void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayB
 	CWorld::Add(ped);
 	buffer->m_nOffset += sizeof(tPedUpdatePacket);
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state) { EAXJMP(0x5942A0); }
-#else
 void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
 {
 	CAnimBlendAssociation* anim1 = CAnimManager::BlendAnimation(
@@ -585,11 +555,7 @@ void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
 		}
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state) { EAXJMP(0x5944B0); }
-#else
 void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state)
 {
 #ifdef FIX_REPLAY_BUGS
@@ -658,11 +624,7 @@ void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationSt
 			anim->SetDeleteCallback(FindCBFunction(callback & 0x7F), ped);
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::PlaybackThisFrame(void) { EAXJMP(0x5946B0); }
-#else
 void CReplay::PlaybackThisFrame(void)
 {
 	static int FrameSloMo = 0;
@@ -687,7 +649,6 @@ void CReplay::PlaybackThisFrame(void)
 	DMAudio.SetEffectsFadeVol(0);
 	DMAudio.SetMusicFadeVol(0);
 }
-#endif
 
 // next two functions are only found in mobile version
 // most likely they were optimized out for being unused
@@ -712,9 +673,6 @@ bool CReplay::FastForwardToTime(uint32 start)
 	return true;
 }
 
-#if 0
-WRAPPER void CReplay::StoreCarUpdate(CVehicle *vehicle, int id) { EAXJMP(0x5947F0); }
-#else
 void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 {
 	tVehicleUpdatePacket* vp = (tVehicleUpdatePacket*)&Record.m_pBase[Record.m_nOffset];
@@ -750,11 +708,7 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 	}
 	Record.m_nOffset += sizeof(tVehicleUpdatePacket);
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressInReplayBuffer *buffer) { EAXJMP(0x594D10); }
-#else
 void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressInReplayBuffer *buffer)
 {
 	tVehicleUpdatePacket* vp = (tVehicleUpdatePacket*)&buffer->m_pBase[buffer->m_nOffset];
@@ -824,11 +778,7 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 			((CBoat*)vehicle)->m_bIsAnchored = false;
 	}
 }
-#endif
 
-#if 0
-WRAPPER bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer) { EAXJMP(0x595240); }
-#else
 bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer){
 	/* Mistake. Not even sure what this is even doing here...
 	 * PlayerWanted is a backup to restore at the end of replay.
@@ -1028,10 +978,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 	ProcessReplayCamera();
 	return false;
 }
-#endif
-#if 0
-WRAPPER void CReplay::FinishPlayback(void) { EAXJMP(0x595B20); }
-#else
+
 void CReplay::FinishPlayback(void)
 {
 	if (Mode != MODE_PLAYBACK)
@@ -1053,11 +1000,7 @@ void CReplay::FinishPlayback(void)
 	DMAudio.SetEffectsFadeVol(127);
 	DMAudio.SetMusicFadeVol(127);
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::EmptyReplayBuffer(void) { EAXJMP(0x595BD0); }
-#else
 void CReplay::EmptyReplayBuffer(void)
 {
 	if (Mode == MODE_PLAYBACK)
@@ -1072,11 +1015,7 @@ void CReplay::EmptyReplayBuffer(void)
 	Record.m_pBase[Record.m_nOffset] = 0;
 	MarkEverythingAsNew();
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::ProcessReplayCamera(void) { EAXJMP(0x595C40); }
-#else
 void CReplay::ProcessReplayCamera(void)
 {
 	switch (CameraMode) {
@@ -1120,11 +1059,7 @@ void CReplay::ProcessReplayCamera(void)
 	RwMatrixUpdate(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
 	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene) { EAXJMP(0x596030); }
-#else
 void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene)
 {
 	if (Mode != MODE_RECORD)
@@ -1174,11 +1109,7 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 	if (cam_mode == REPLAYCAMMODE_ASSTORED)
 		TheCamera.CarZoomIndicator = 5.0f;
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::StoreStuffInMem(void) { EAXJMP(0x5961F0); }
-#else
 void CReplay::StoreStuffInMem(void)
 {
 	CPools::GetVehiclePool()->Store(pBuf0, pBuf1);
@@ -1223,11 +1154,7 @@ void CReplay::StoreStuffInMem(void)
 			StoreDetailedPedAnimation(ped, &pPedAnims[i]);
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::RestoreStuffFromMem(void) { EAXJMP(0x5966E0); }
-#else
 void CReplay::RestoreStuffFromMem(void)
 {
 	CPools::GetVehiclePool()->CopyBack(pBuf0, pBuf1);
@@ -1388,11 +1315,7 @@ void CReplay::RestoreStuffFromMem(void)
 	DMAudio.SetRadioInCar(OldRadioStation);
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::EmptyPedsAndVehiclePools(void) { EAXJMP(0x5970E0); }
-#else
 void CReplay::EmptyPedsAndVehiclePools(void)
 {
 	int i = CPools::GetVehiclePool()->GetSize();
@@ -1412,11 +1335,7 @@ void CReplay::EmptyPedsAndVehiclePools(void)
 		delete p;
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::EmptyAllPools(void) { EAXJMP(0x5971B0); }
-#else
 void CReplay::EmptyAllPools(void)
 {
 	EmptyPedsAndVehiclePools();
@@ -1437,11 +1356,7 @@ void CReplay::EmptyAllPools(void)
 		delete d;
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::MarkEverythingAsNew(void) { EAXJMP(0x597280); }
-#else
 void CReplay::MarkEverythingAsNew(void)
 {
 	int i = CPools::GetVehiclePool()->GetSize();
@@ -1459,11 +1374,7 @@ void CReplay::MarkEverythingAsNew(void)
 		p->bHasAlreadyBeenRecorded = false;
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::SaveReplayToHD(void) { EAXJMP(0x597330); }
-#else
 void CReplay::SaveReplayToHD(void)
 {
 	CFileMgr::SetDirMyDocuments();
@@ -1494,11 +1405,7 @@ void CReplay::SaveReplayToHD(void)
 	CFileMgr::CloseFile(fw);
 	CFileMgr::SetDir("");
 }
-#endif
 
-#if 0
-WRAPPER void PlayReplayFromHD(void) { EAXJMP(0x597420); }
-#else
 void PlayReplayFromHD(void)
 {
 	CFileMgr::SetDirMyDocuments();
@@ -1530,11 +1437,7 @@ void PlayReplayFromHD(void)
 	CReplay::bAllowLookAroundCam = true;
 	CReplay::StreamAllNecessaryCarsAndPeds();
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::StreamAllNecessaryCarsAndPeds(void) { EAXJMP(0x597560); }
-#else
 void CReplay::StreamAllNecessaryCarsAndPeds(void)
 {
 	for (int slot = 0; slot < NUM_REPLAYBUFFERS; slot++) {
@@ -1555,11 +1458,7 @@ void CReplay::StreamAllNecessaryCarsAndPeds(void)
 	}
 	CStreaming::LoadAllRequestedModels(false);
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::FindFirstFocusCoordinate(CVector *coord) { EAXJMP(0x5975E0); }
-#else
 void CReplay::FindFirstFocusCoordinate(CVector *coord)
 {
 	*coord = CVector(0.0f, 0.0f, 0.0f);
@@ -1574,11 +1473,7 @@ void CReplay::FindFirstFocusCoordinate(CVector *coord)
 		}
 	}
 }
-#endif
 
-#if 0
-WRAPPER bool CReplay::ShouldStandardCameraBeProcessed(void) { EAXJMP(0x597680); }
-#else
 bool CReplay::ShouldStandardCameraBeProcessed(void)
 {
 	if (Mode != MODE_PLAYBACK)
@@ -1587,11 +1482,7 @@ bool CReplay::ShouldStandardCameraBeProcessed(void)
 		return false;
 	return FindPlayerVehicle() != nil;
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::ProcessLookAroundCam(void) { EAXJMP(0x5976C0); }
-#else
 void CReplay::ProcessLookAroundCam(void)
 {
 	if (!bAllowLookAroundCam)
@@ -1647,11 +1538,7 @@ void CReplay::ProcessLookAroundCam(void)
 	RwMatrixUpdate(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
 	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));
 }
-#endif
 
-#if 0
-WRAPPER size_t CReplay::FindSizeOfPacket(uint8 type) { EAXJMP(0x597CC0); }
-#else
 size_t CReplay::FindSizeOfPacket(uint8 type)
 {
 	switch (type) {
@@ -1669,11 +1556,7 @@ size_t CReplay::FindSizeOfPacket(uint8 type)
 	}
 	return 0;
 }
-#endif
 
-#if 0
-WRAPPER void CReplay::Display(void) { EAXJMP(0x595EE0); }
-#else
 void CReplay::Display()
 {
 	static int TimeCount = 0;
@@ -1691,7 +1574,6 @@ void CReplay::Display()
 	if (Mode == MODE_PLAYBACK)
 		CFont::PrintString(SCREEN_SCALE_X(63.5f), SCREEN_SCALE_Y(30.0f), TheText.Get("REPLAY"));
 }
-#endif
 
 STARTPATCHES
 InjectHook(0x592FE0, &CReplay::Init, PATCH_JUMP);

@@ -75,9 +75,6 @@ static_assert(RADAR_TILE_SIZE == (WORLD_SIZE_Y / RADAR_NUM_TILES), "CRadar: not 
 #define RADAR_MIN_SPEED (0.3f)
 #define RADAR_MAX_SPEED (0.9f)
 
-#if 0
-WRAPPER void CRadar::CalculateBlipAlpha(float) { EAXJMP(0x4A4F90); }
-#else
 uint8 CRadar::CalculateBlipAlpha(float dist)
 {
 	if (dist <= 1.0f)
@@ -88,55 +85,35 @@ uint8 CRadar::CalculateBlipAlpha(float dist)
 
 	return 128;
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::ChangeBlipBrightness(int32, int32) { EAXJMP(0x4A57A0); }
-#else
 void CRadar::ChangeBlipBrightness(int32 i, int32 bright)
 {
 	int index = GetActualBlipArrayIndex(i);
 	if (index != -1)
 		ms_RadarTrace[index].m_bDim = bright != 1;
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::ChangeBlipColour(int32, int32) { EAXJMP(0x4A5770); }
-#else
 void CRadar::ChangeBlipColour(int32 i, int32 color)
 {
 	int index = GetActualBlipArrayIndex(i);
 	if (index != -1)
 		ms_RadarTrace[index].m_nColor = color;
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::ChangeBlipDisplay(int32, eBlipDisplay) { EAXJMP(0x4A5810); }
-#else
 void CRadar::ChangeBlipDisplay(int32 i, eBlipDisplay display)
 {
 	int index = GetActualBlipArrayIndex(i);
 	if (index != -1)
 		ms_RadarTrace[index].m_eBlipDisplay = display;
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::ChangeBlipScale(int32, int32) { EAXJMP(0x4A57E0); }
-#else
 void CRadar::ChangeBlipScale(int32 i, int32 scale)
 {
 	int index = GetActualBlipArrayIndex(i);
 	if (index != -1)
 		ms_RadarTrace[index].m_wScale = scale;
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::ClearBlip(int32) { EAXJMP(0x4A5720); }
-#else
 void CRadar::ClearBlip(int32 i)
 {
 	int index = GetActualBlipArrayIndex(i);
@@ -148,11 +125,7 @@ void CRadar::ClearBlip(int32 i)
 		ms_RadarTrace[index].m_IconID = RADAR_SPRITE_NONE;
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::ClearBlipForEntity(eBlipType, int32) { EAXJMP(0x4A56C0); }
-#else
 void CRadar::ClearBlipForEntity(eBlipType type, int32 id)
 {
 	for (int i = 0; i < NUMRADARBLIPS; i++) {
@@ -165,11 +138,7 @@ void CRadar::ClearBlipForEntity(eBlipType type, int32 id)
 		}
 	};
 }
-#endif
 
-#if 0
-WRAPPER int CRadar::ClipRadarPoly(CVector2D *poly, const CVector2D *in) { EAXJMP(0x4A64A0); }
-#else
 // Why not a proper clipping algorithm?
 int CRadar::ClipRadarPoly(CVector2D *poly, const CVector2D *rect)
 {
@@ -249,7 +218,6 @@ int CRadar::ClipRadarPoly(CVector2D *poly, const CVector2D *rect)
 
 	return n;
 }
-#endif
 
 bool CRadar::DisplayThisBlip(int32 counter)
 {
@@ -263,9 +231,6 @@ bool CRadar::DisplayThisBlip(int32 counter)
 	}
 }
 
-#if 0
-WRAPPER void CRadar::Draw3dMarkers() { EAXJMP(0x4A4C70); }
-#else
 void CRadar::Draw3dMarkers()
 {
 	for (int i = 0; i < NUMRADARBLIPS; i++) {
@@ -317,12 +282,7 @@ void CRadar::Draw3dMarkers()
 		}
 	}
 }
-#endif
 
-
-#if 0
-WRAPPER void CRadar::DrawBlips() { EAXJMP(0x4A42F0); }
-#else
 void CRadar::DrawBlips()
 {
 	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
@@ -580,12 +540,7 @@ void CRadar::DrawBlips()
 		}
 	}
 }
-#endif
 
-
-#if 0
-WRAPPER void CRadar::DrawMap () { EAXJMP(0x4A4200); }
-#else
 void CRadar::DrawMap()
 {
 	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
@@ -605,11 +560,7 @@ void CRadar::DrawMap()
 		DrawRadarMap();
 	}
 }
-#endif 
 
-#if 0
-WRAPPER void CRadar::DrawRadarMap() { EAXJMP(0x4A6C20); }
-#else
 void CRadar::DrawRadarMap()
 {
 	// Game calculates an unused CRect here
@@ -642,11 +593,7 @@ void CRadar::DrawRadarMap()
 	DrawRadarSection(x, y + 1);
 	DrawRadarSection(x + 1, y + 1);
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::DrawRadarMask() { EAXJMP(0x4A69C0); }
-#else
 void CRadar::DrawRadarMask() 
 { 
 	CVector2D corners[4] = {
@@ -690,11 +637,7 @@ void CRadar::DrawRadarMask()
 
 	RwD3D8SetRenderState(rwRENDERSTATESTENCILFUNCTION, rwSTENCILFUNCTIONGREATER);
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::DrawRadarSection(int32, int32) { EAXJMP(0x4A67E0); }
-#else
 void CRadar::DrawRadarSection(int32 x, int32 y)
 {
 	int i;
@@ -738,20 +681,12 @@ void CRadar::DrawRadarSection(int32 x, int32 y)
 //	if(numVertices > 2)
 	RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::GetVertices(), numVertices);
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::DrawRadarSprite(uint16 sprite, float x, float y, uint8 alpha) { EAXJMP(0x4A5EF0); }
-#else
 void CRadar::DrawRadarSprite(uint16 sprite, float x, float y, uint8 alpha)
 {
 	RadarSprites[sprite]->Draw(CRect(x - SCREEN_SCALE_X(8.0f), y - SCREEN_SCALE_Y(8.0f), x + SCREEN_SCALE_X(8.0f), y + SCREEN_SCALE_Y(8.0f)), CRGBA(255, 255, 255, alpha));
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int32 alpha) { EAXJMP(0x4A5D10); }
-#else
 void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int32 alpha)
 {
 	CVector curPosn[4];
@@ -778,11 +713,7 @@ void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float 
 
 	sprite->Draw(curPosn[2].x, curPosn[2].y, curPosn[3].x, curPosn[3].y, curPosn[0].x, curPosn[0].y, curPosn[1].x, curPosn[1].y, CRGBA(255, 255, 255, alpha));
 }
-#endif 
 
-#if 0
-WRAPPER int32 CRadar::GetActualBlipArrayIndex(int32) { EAXJMP(0x4A41C0); }
-#else
 int32 CRadar::GetActualBlipArrayIndex(int32 i)
 {
 	if (i == -1)
@@ -792,11 +723,7 @@ int32 CRadar::GetActualBlipArrayIndex(int32 i)
 	else
 		return (uint16)i;
 }
-#endif
 
-#if 0
-WRAPPER int32 CRadar::GetNewUniqueBlipIndex(int32) { EAXJMP(0x4A4180); }
-#else
 int32 CRadar::GetNewUniqueBlipIndex(int32 i)
 {
 	if (ms_RadarTrace[i].m_BlipIndex >= UINT16_MAX - 1)
@@ -805,11 +732,7 @@ int32 CRadar::GetNewUniqueBlipIndex(int32 i)
 		ms_RadarTrace[i].m_BlipIndex++;
 	return i | (ms_RadarTrace[i].m_BlipIndex << 16);
 }
-#endif
 
-#if 0
-WRAPPER uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright) { EAXJMP(0x4A5BB0); }
-#else
 uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright)
 {
 	int32 c;
@@ -862,7 +785,6 @@ uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright)
 	};
 	return c;
 }
-#endif
 
 const char* gRadarTexNames[] = {
 	"radar00", "radar01", "radar02", "radar03", "radar04", "radar05", "radar06", "radar07",
@@ -875,9 +797,6 @@ const char* gRadarTexNames[] = {
 	"radar56", "radar57", "radar58", "radar59", "radar60", "radar61", "radar62", "radar63",
 };
 
-#if 0
-WRAPPER void CRadar::Initialise() { EAXJMP(0x4A3EF0); }
-#else
 void
 CRadar::Initialise()
 {
@@ -894,11 +813,7 @@ CRadar::Initialise()
 	for (int i = 0; i < 64; i++) 
 		gRadarTxdIds[i] = CTxdStore::FindTxdSlot(gRadarTexNames[i]);
 }
-#endif
 
-#if 0
-WRAPPER float CRadar::LimitRadarPoint(CVector2D &point) { EAXJMP(0x4A4F30); }
-#else
 float CRadar::LimitRadarPoint(CVector2D &point)
 {
 	float dist, invdist;
@@ -911,11 +826,7 @@ float CRadar::LimitRadarPoint(CVector2D &point)
 	}
 	return dist;
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::LoadAllRadarBlips(int32) { EAXJMP(0x4A6F30); }
-#else
 void CRadar::LoadAllRadarBlips(uint8 *buf, uint32 size)
 {
 	Initialise();
@@ -927,11 +838,7 @@ INITSAVEBUF
 
 VALIDATESAVEBUF(size);
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::LoadTextures() { EAXJMP(0x4A4030); }
-#else
 void
 CRadar::LoadTextures()
 {
@@ -959,42 +866,26 @@ CRadar::LoadTextures()
 	WeaponSprite.SetTexture("radar_weapon");
 	CTxdStore::PopCurrentTxd();
 }
-#endif
 
-#if 0
-WRAPPER void RemoveMapSection(int32, int32) { EAXJMP(0x00); }
-#else
 void RemoveMapSection(int32 x, int32 y)
 {
 	if (x >= 0 && x <= 7 && y >= 0 && y <= 7)
 		CStreaming::RemoveTxd(gRadarTxdIds[x + RADAR_NUM_TILES * y]);
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::RemoveRadarSections() { EAXJMP(0x4A60E0); }
-#else
 void CRadar::RemoveRadarSections()
 {
 	for (int i = 0; i < 8; i++)
 		for (int j = 0; j < 8; j++)
 			RemoveMapSection(i, j);
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::RequestMapSection(int32, int32) { EAXJMP(0x00); }
-#else
 void CRadar::RequestMapSection(int32 x, int32 y)
 {
 	ClipRadarTileCoords(x, y);
 	CStreaming::RequestTxd(gRadarTxdIds[x + RADAR_NUM_TILES * y], STREAMFLAGS_DONT_REMOVE | STREAMFLAGS_DEPENDENCY);
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::SaveAllRadarBlips(uint8 *buf, uint32 *size) { EAXJMP(0x4A6E30); }
-#else
 void CRadar::SaveAllRadarBlips(uint8 *buf, uint32 *size)
 {
 	*size = SAVE_HEADER_SIZE + sizeof(ms_RadarTrace);
@@ -1006,11 +897,7 @@ INITSAVEBUF
 
 VALIDATESAVEBUF(*size);
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::SetBlipSprite(int32, int32) { EAXJMP(0x4A5840); }
-#else
 void CRadar::SetBlipSprite(int32 i, int32 icon)
 {
 	int index = CRadar::GetActualBlipArrayIndex(i);
@@ -1018,11 +905,7 @@ void CRadar::SetBlipSprite(int32 i, int32 icon)
 		ms_RadarTrace[index].m_IconID = icon;
 	}
 }
-#endif
 
-#if 0
-WRAPPER int32 CRadar::SetCoordBlip(eBlipType, CVector, int32, eBlipDisplay display) { EAXJMP(0x4A5590); }
-#else
 int CRadar::SetCoordBlip(eBlipType type, CVector pos, int32 color, eBlipDisplay display)
 {
 	int nextBlip;
@@ -1043,11 +926,7 @@ int CRadar::SetCoordBlip(eBlipType type, CVector pos, int32 color, eBlipDisplay 
 	ms_RadarTrace[nextBlip].m_IconID = RADAR_SPRITE_NONE;
 	return CRadar::GetNewUniqueBlipIndex(nextBlip);
 }
-#endif
 
-#if 0
-WRAPPER int CRadar::SetEntityBlip(eBlipType type, int32, int32, eBlipDisplay) { EAXJMP(0x4A5640); }
-#else
 int CRadar::SetEntityBlip(eBlipType type, int32 handle, int32 color, eBlipDisplay display)
 {
 	int nextBlip;
@@ -1066,11 +945,7 @@ int CRadar::SetEntityBlip(eBlipType type, int32 handle, int32 color, eBlipDispla
 	ms_RadarTrace[nextBlip].m_IconID = RADAR_SPRITE_NONE;
 	return GetNewUniqueBlipIndex(nextBlip);
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::SetRadarMarkerState(int32, bool) { EAXJMP(0x4A5C60); }
-#else
 void CRadar::SetRadarMarkerState(int32 counter, bool flag)
 {
 	CEntity *e;
@@ -1091,11 +966,7 @@ void CRadar::SetRadarMarkerState(int32 counter, bool flag)
 	if (e)
 		e->bHasBlip = flag;
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::ShowRadarMarker(CVector pos, uint32 color, float radius) { EAXJMP(0x4A59C0); }
-#else
 void CRadar::ShowRadarMarker(CVector pos, uint32 color, float radius) {
 	float f1 = radius * 1.4f;
 	float f2 = radius * 0.5f;
@@ -1117,11 +988,7 @@ void CRadar::ShowRadarMarker(CVector pos, uint32 color, float radius) {
 	p2 = pos - TheCamera.GetRight()*f2;
 	CTheScripts::ScriptDebugLine3D(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, color, color);
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha) { EAXJMP(0x4A5870); }
-#else
 void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha)
 {
 	if (!CHud::m_Wants_To_Draw_Hud || TheCamera.m_WideScreenOn)
@@ -1130,7 +997,6 @@ void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 gree
 	CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size + 1.0f), y - SCREEN_SCALE_Y(size + 1.0f), SCREEN_SCALE_X(size + 1.0f) + x, SCREEN_SCALE_Y(size + 1.0f) + y), CRGBA(0, 0, 0, alpha));
 	CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size), y - SCREEN_SCALE_Y(size), SCREEN_SCALE_X(size) + x, SCREEN_SCALE_Y(size) + y), CRGBA(red, green, blue, alpha));
 }
-#endif
 
 void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint8 mode)
 {
@@ -1156,9 +1022,6 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, 
 	}
 }
 
-#if 0
-WRAPPER void CRadar::Shutdown() { EAXJMP(0x4A3F60); }
-#else
 void CRadar::Shutdown()
 {
 	AsukaSprite.Delete();
@@ -1183,20 +1046,12 @@ void CRadar::Shutdown()
 	WeaponSprite.Delete();
 	RemoveRadarSections();
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::StreamRadarSections(const CVector &posn) { EAXJMP(0x4A6B60); }
-#else
 void CRadar::StreamRadarSections(const CVector &posn)
 {
 	StreamRadarSections(floorf((2000.0f + posn.x) / 500.0f), ceilf(7.0f - (2000.0f + posn.y) / 500.0f));
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::StreamRadarSections(int32 x, int32 y) { EAXJMP(0x4A6100); }
-#else
 void CRadar::StreamRadarSections(int32 x, int32 y)
 {
 	for (int i = 0; i < RADAR_NUM_TILES; ++i) {
@@ -1208,11 +1063,7 @@ void CRadar::StreamRadarSections(int32 x, int32 y)
 		};
 	};
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::TransformRealWorldToTexCoordSpace(CVector2D &out, const CVector2D &in, int32 x, int32 y) { EAXJMP(0x4A5530); }
-#else
 void CRadar::TransformRealWorldToTexCoordSpace(CVector2D &out, const CVector2D &in, int32 x, int32 y)
 {
 	out.x = in.x - (x * RADAR_TILE_SIZE + WORLD_MIN_X);
@@ -1220,11 +1071,7 @@ void CRadar::TransformRealWorldToTexCoordSpace(CVector2D &out, const CVector2D &
 	out.x /= RADAR_TILE_SIZE;
 	out.y /= RADAR_TILE_SIZE;
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D &in) { EAXJMP(0x4A5300); }
-#else
 void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D &in)
 {
 	float s, c;
@@ -1255,7 +1102,6 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D
 
 	out = out * m_radarRange + vec2DRadarOrigin;
 }
-#endif
 
 // Radar space goes from -1.0 to 1.0 in x and y, top right is (1.0, 1.0)
 void CRadar::TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &in)
@@ -1265,9 +1111,6 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &i
 	out.y = (1.0f - in.y)*0.5f*SCREEN_SCALE_Y(RADAR_HEIGHT) + SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT);
 }
 
-#if 0
-WRAPPER void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D &in) { EAXJMP(0x4A50D0); }
-#else
 void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D &in)
 {
 	float s, c;
@@ -1299,11 +1142,7 @@ void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D
 	out.x = s * y + c * x;
 	out.y = c * y - s * x;
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::GetTextureCorners(int32 x, int32 y, CVector2D *out) { EAXJMP(0x4A61C0); };
-#else
 // Transform from section indices to world coordinates
 void CRadar::GetTextureCorners(int32 x, int32 y, CVector2D *out)
 {
@@ -1326,11 +1165,7 @@ void CRadar::GetTextureCorners(int32 x, int32 y, CVector2D *out)
 	out[3].x = RADAR_TILE_SIZE * (x);
 	out[3].y = RADAR_TILE_SIZE * (y);
 }
-#endif
 
-#if 0
-WRAPPER void CRadar::ClipRadarTileCoords(int32 &, int32 &) { EAXJMP(0x00); };
-#else
 void CRadar::ClipRadarTileCoords(int32 &x, int32 &y)
 {
 	if (x < 0)
@@ -1342,24 +1177,16 @@ void CRadar::ClipRadarTileCoords(int32 &x, int32 &y)
 	if (y > RADAR_NUM_TILES-1)
 		y = RADAR_NUM_TILES-1;
 }
-#endif
 
 
-#if 0
-WRAPPER bool CRadar::IsPointInsideRadar(const CVector2D &) { EAXJMP(0x4A6160); }
-#else
 bool CRadar::IsPointInsideRadar(const CVector2D &point)
 {
 	if (point.x < -1.0f || point.x > 1.0f) return false;
 	if (point.y < -1.0f || point.y > 1.0f) return false;
 	return true;
 }
-#endif
 
 // clip line p1,p2 against (-1.0, 1.0) in x and y, set out to clipped point closest to p1
-#if 0
-WRAPPER int CRadar::LineRadarBoxCollision(CVector2D &, const CVector2D &, const CVector2D &) { EAXJMP(0x4A6250); }
-#else
 int CRadar::LineRadarBoxCollision(CVector2D &out, const CVector2D &p1, const CVector2D &p2)
 {
 	float d1, d2;
@@ -1430,7 +1257,6 @@ int CRadar::LineRadarBoxCollision(CVector2D &out, const CVector2D &p1, const CVe
 
 	return edge;
 }
-#endif
 
 STARTPATCHES
 	InjectHook(0x4A3EF0, CRadar::Initialise, PATCH_JUMP);

@@ -234,9 +234,6 @@ bool CGame::Initialise(const char* datFile)
 	return true;
 }
 
-#if 0
-WRAPPER void CGame::Process(void) { EAXJMP(0x48C850); }
-#else
 extern void (*DebugMenuProcess)(void);
 void CGame::Process(void) 
 {
@@ -312,7 +309,6 @@ void CGame::Process(void)
 		}
 	}
 }
-#endif
 
 void CGame::ReloadIPLs(void)
 {
@@ -336,9 +332,6 @@ void CGame::ReloadIPLs(void)
 	CTimer::Update();
 }
 
-#if 0
-WRAPPER void CGame::FinalShutdown(void) { EAXJMP(0x48BEC0); }
-#else
 void
 CGame::FinalShutdown(void)
 {
@@ -346,7 +339,6 @@ CGame::FinalShutdown(void)
 	CPedStats::Shutdown();
 	CdStreamShutdown();
 }
-#endif
 
 WRAPPER bool CGame::InitialiseRenderWare(void) { EAXJMP(0x48BBA0); }
 WRAPPER void CGame::ShutdownRenderWare(void) { EAXJMP(0x48BCB0); }
