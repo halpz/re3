@@ -3619,11 +3619,11 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	if (DyingOrDead())
 		return false;
 
-	if (!bUsesCollision && method != WEAPONTYPE_WATER)
+	if (!bUsesCollision && method != WEAPONTYPE_DROWNING)
 		return false;
 
 	if (bOnlyDamagedByPlayer && damagedBy != player && damagedBy != FindPlayerVehicle() &&
-		method != WEAPONTYPE_WATER && method != WEAPONTYPE_EXPLOSION)
+		method != WEAPONTYPE_DROWNING && method != WEAPONTYPE_EXPLOSION)
 		return false;
 
 	float healthImpact;
@@ -3969,10 +3969,10 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					}
 				}
 				break;
-			case WEAPONTYPE_WATER:
+			case WEAPONTYPE_DROWNING:
 				dieAnim = ANIM_DROWN;
 				break;
-			case WEAPONTYPE_FALL_DAMAGE:
+			case WEAPONTYPE_FALL:
 				if (bCollisionProof)
 					return false;
 
@@ -3998,7 +3998,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		}
 	}
 
-	if (m_fArmour != 0.0f && method != WEAPONTYPE_WATER) {
+	if (m_fArmour != 0.0f && method != WEAPONTYPE_DROWNING) {
 		if (player == this)
 			CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastArmourLoss = CTimer::GetTimeInMilliseconds();
 
@@ -4024,7 +4024,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	}
 
 	if (bInVehicle) {
-		if (method != WEAPONTYPE_WATER) {
+		if (method != WEAPONTYPE_DROWNING) {
 #ifdef VC_PED_PORTS
 			if (m_pMyVehicle) {
 				if (m_pMyVehicle->IsCar() && m_pMyVehicle->pDriver == this) {
@@ -4091,7 +4091,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		} else {
 			CDarkel::RegisterKillNotByPlayer(this, method);
 		}
-		if (method == WEAPONTYPE_WATER)
+		if (method == WEAPONTYPE_DROWNING)
 			bIsInTheAir = false;
 
 		return true;
@@ -14575,7 +14575,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 								|| m_pCollidingEntity == collidingEnt) {
 
 								if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL) && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
-									InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 15.0f, PEDPIECE_TORSO, 2);
+									InflictDamage(collidingEnt, WEAPONTYPE_FALL, 15.0f, PEDPIECE_TORSO, 2);
 								}
 							} else {
 								float damage = 100.0f * max(speed - 0.25f, 0.0f);
@@ -14588,7 +14588,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 									CVector2D offset = -m_vecMoveSpeed;
 									dir = GetLocalDirection(offset);
 								}
-								InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, damage, PEDPIECE_TORSO, dir);
+								InflictDamage(collidingEnt, WEAPONTYPE_FALL, damage, PEDPIECE_TORSO, dir);
 								if (IsPlayer() && damage2 > 5.0f)
 									Say(SOUND_PED_LAND);
 							}
@@ -14599,7 +14599,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							if (m_vecMoveSpeed.z >= -0.25f && (speedSqr = m_vecMoveSpeed.MagnitudeSqr()) <= sq(0.5f)) {
 
 								if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL) && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
-									InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 15.0f, PEDPIECE_TORSO, 2);
+									InflictDamage(collidingEnt, WEAPONTYPE_FALL, 15.0f, PEDPIECE_TORSO, 2);
 								}
 							} else {
 								if (speedSqr == 0.0f)
@@ -14610,7 +14610,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 									CVector2D offset = -m_vecMoveSpeed;
 									dir = GetLocalDirection(offset);
 								}
-								InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 350.0f * sq(speedSqr), PEDPIECE_TORSO, dir);
+								InflictDamage(collidingEnt, WEAPONTYPE_FALL, 350.0f * sq(speedSqr), PEDPIECE_TORSO, dir);
 							}
 						}
 #endif
@@ -15036,7 +15036,7 @@ CPed::ProcessBuoyancy(void)
 					CVector pos = GetPosition();
 					if (PlacePedOnDryLand()) {
 						if (m_fHealth > 20.0f)
-							InflictDamage(nil, WEAPONTYPE_WATER, 15.0f, PEDPIECE_TORSO, false);
+							InflictDamage(nil, WEAPONTYPE_DROWNING, 15.0f, PEDPIECE_TORSO, false);
 
 						if (bIsInTheAir) {
 							RpAnimBlendClumpSetBlendDeltas(GetClump(), ASSOC_PARTIAL, -1000.0f);
@@ -15058,7 +15058,7 @@ CPed::ProcessBuoyancy(void)
 				m_vecMoveSpeed.y *= speedMult;
 				m_vecMoveSpeed.z *= speedMult;
 				bIsStanding = false;
-				InflictDamage(nil, WEAPONTYPE_WATER, 3.0f * CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+				InflictDamage(nil, WEAPONTYPE_DROWNING, 3.0f * CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 			}
 			if (buoyancyImpulse.z / m_fMass > 0.002f * CTimer::GetTimeStep()) {
 				if (speedMult == 0.0f) {

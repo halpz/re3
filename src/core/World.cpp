@@ -39,6 +39,7 @@ bool &CWorld::bProcessCutsceneOnly = *(bool*)0x95CD8B;
 bool &CWorld::bDoingCarCollisions = *(bool*)0x95CD8C;
 bool &CWorld::bIncludeCarTyres = *(bool*)0x95CDAA;
 
+WRAPPER void CWorld::ClearForRestart(void) { EAXJMP(0x4AE850); }
 WRAPPER void CWorld::AddParticles(void) { EAXJMP(0x4B4010); }
 WRAPPER void CWorld::ShutDown(void) { EAXJMP(0x4AE450); }
 WRAPPER void CWorld::RepositionCertainDynamicObjects() { EAXJMP(0x4B42B0); }
