@@ -45,7 +45,8 @@ enum eGarageType : int8
 
 enum
 {
-	TOTAL_COLLECTCARS_GARAGES = GARAGE_COLLECTCARS_3 - GARAGE_COLLECTCARS_1 + 1
+	TOTAL_COLLECTCARS_GARAGES = GARAGE_COLLECTCARS_3 - GARAGE_COLLECTCARS_1 + 1,
+	TOTAL_COLLECTCARS_CARS = 16
 };
 
 class CStoredCar
@@ -151,7 +152,7 @@ public:
 	bool IsAnyCarBlockingDoor();
 	void CenterCarInGarage(CVehicle*);
 	bool DoesCraigNeedThisCar(int32);
-	void MarkThisCarAsCollectedForCraig(int32);
+	bool MarkThisCarAsCollectedForCraig(int32);
 	bool HasCraigCollectedThisCar(int32);
 	bool IsGarageEmpty();
 	void UpdateCrusherShake(float, float);
@@ -181,7 +182,7 @@ public:
 	static int32 &CrushedCarId;
 	static uint32 &LastTimeHelpMessage;
 	static int32 &MessageNumberInString;
-	static const char *MessageIDString;
+	static char(&MessageIDString)[8];
 	static int32 &MessageNumberInString2;
 	static uint32 &MessageStartTime;
 	static uint32 &MessageEndTime;
