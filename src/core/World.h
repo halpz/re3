@@ -130,6 +130,7 @@ public:
 	static void StopAllLawEnforcersInTheirTracks();
 	static void SetAllCarsCanBeDamaged(bool);
 	static void ExtinguishAllCarFiresInArea(CVector, float);
+	static void SetCarsOnFire(float, float, float, float, CEntity*);
 
 	static void Initialise();
 	static void AddParticles();

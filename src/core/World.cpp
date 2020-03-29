@@ -19,6 +19,7 @@
 #include "Messages.h"
 #include "Replay.h"
 #include "Population.h"
+#include "Fire.h"
 
 CColPoint *gaTempSphereColPoints = (CColPoint*)0x6E64C0;	// [32]
 
@@ -1048,6 +1049,19 @@ CWorld::ExtinguishAllCarFiresInArea(CVector point, float range)
 		if (veh) {
 			if ((point - veh->GetPosition()).MagnitudeSqr() < sq(range))
 				veh->ExtinguishCarFire();
+		}
+	}
+}
+
+void
+CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity *reason)
+{
+	int poolSize = CPools::GetVehiclePool()->GetSize();
+	for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
+		CVehicle *veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
+		if (veh && veh->m_status != STATUS_WRECKED && !veh->m_pCarFire && !veh->bFireProof) {
+			if (Abs(veh->GetPosition().z - z) < 5.0f && Abs(veh->GetPosition().x - x) < radius && Abs(veh->GetPosition().y - y) < radius)
+					gFireManager.StartFire(veh, reason, 0.8f, true);
 		}
 	}
 }
