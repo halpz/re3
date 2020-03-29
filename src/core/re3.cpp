@@ -372,6 +372,10 @@ DebugMenuPopulate(void)
 
 		extern bool PrintDebugCode;
 		extern int16 &DebugCamMode;
+#ifdef FREE_CAM
+		extern bool bFreeCam;
+		DebugMenuAddVarBool8("Cam", "Free Cam", (int8*)&bFreeCam, nil);
+#endif
 		DebugMenuAddVarBool8("Cam", "Print Debug Code", (int8*)&PrintDebugCode, nil);
 		DebugMenuAddVar("Cam", "Cam Mode", &DebugCamMode, nil, 1, 0, CCam::MODE_EDITOR, nil);
 		DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });
