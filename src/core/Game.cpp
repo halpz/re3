@@ -121,29 +121,29 @@ CGame::InitialiseRenderWare(void)
 	
 	/* Create camera */
 	Scene.camera = CameraCreate(RsGlobal.width, RsGlobal.height, TRUE);
-	ASSERT(Scene.camera != NULL);
+	ASSERT(Scene.camera != nil);
 	if (!Scene.camera)
 	{
 		return (false);
 	}
 	
-	RwCameraSetFarClipPlane(Scene.camera, (RwReal) (2000.0));
-	RwCameraSetNearClipPlane(Scene.camera, (RwReal) (0.9));
+	RwCameraSetFarClipPlane(Scene.camera, 2000.0f);
+	RwCameraSetNearClipPlane(Scene.camera, 0.9f);
 	
-	CameraSize(Scene.camera, NULL, DEFAULT_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
+	CameraSize(Scene.camera, nil, DEFAULT_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 	
 	/* Create a world */
 	RwBBox  bbox;
 	
-	bbox.sup.x = bbox.sup.y = bbox.sup.z = (RwReal)(10000.0);
-	bbox.inf.x = bbox.inf.y = bbox.inf.z = (RwReal)(-10000.0);
+	bbox.sup.x = bbox.sup.y = bbox.sup.z = 10000.0f;
+	bbox.inf.x = bbox.inf.y = bbox.inf.z = -10000.0f;
 
 	Scene.world = RpWorldCreate(&bbox);
-	ASSERT(Scene.world != NULL);
+	ASSERT(Scene.world != nil);
 	if (!Scene.world)
 	{
 		CameraDestroy(Scene.camera);
-		Scene.camera = NULL;
+		Scene.camera = nil;
 		return (false);
 	}
 	
@@ -182,8 +182,8 @@ void CGame::ShutdownRenderWare(void)
 	/* destroy camera */
 	CameraDestroy(Scene.camera);
 	
-	Scene.world = NULL;
-	Scene.camera = NULL;
+	Scene.world = nil;
+	Scene.camera = nil;
 	
 	CVisibilityPlugins::Shutdown();
 	
@@ -233,7 +233,7 @@ bool CGame::InitialiseOnceAfterRW(void)
 	DMAudio.SetEffectsFadeVol(127);
 	DMAudio.SetMusicFadeVol(127);
 	CWorld::Players[0].SetPlayerSkin(CMenuManager::m_PrefsSkinFile);
-  
+
 	return true;
 }
 
@@ -411,7 +411,7 @@ bool CGame::ShutDown(void)
 		{
 			CWorld::Remove(CWorld::Players[i].m_pPed);
 			delete CWorld::Players[i].m_pPed;
-			CWorld::Players[i].m_pPed = NULL;
+			CWorld::Players[i].m_pPed = nil;
 		}
 		
 		CWorld::Players[i].Clear();
@@ -490,7 +490,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CWaterCannons::Init();
 	CParticle::ReloadConfig();
 	CCullZones::ResolveVisibilities();
-  
+
 	if ( !FrontEndMenuManager.m_bLoadingSavedGame )
 	{
 		CCranes::InitCranes();
@@ -535,7 +535,7 @@ void CGame::ShutDownForRestart(void)
 	
 	for (int i = 0; i < NUMPLAYERS; i++)
 		CWorld::Players[i].Clear();
-  
+
 	CGarages::SetAllDoorsBackToOriginalHeight();
 	CTheScripts::UndoBuildingSwaps();
 	CTheScripts::UndoEntityInvisibilitySettings();

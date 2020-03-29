@@ -22,24 +22,24 @@ CWeaponEffects::~CWeaponEffects()
 void
 CWeaponEffects::Init(void)
 {
-    gCrossHair.m_bActive = false;
-    gCrossHair.m_vecPos = CVector(0.0f, 0.0f, 0.0f);
-    gCrossHair.m_nRed = 0;
-    gCrossHair.m_nGreen = 0;
-    gCrossHair.m_nBlue = 0;
-    gCrossHair.m_nAlpha = 255;
-    gCrossHair.m_fSize = 1.0f;
-    gCrossHair.m_fRotation = 0.0f;
+	gCrossHair.m_bActive = false;
+	gCrossHair.m_vecPos = CVector(0.0f, 0.0f, 0.0f);
+	gCrossHair.m_nRed = 0;
+	gCrossHair.m_nGreen = 0;
+	gCrossHair.m_nBlue = 0;
+	gCrossHair.m_nAlpha = 255;
+	gCrossHair.m_fSize = 1.0f;
+	gCrossHair.m_fRotation = 0.0f;
 	
 	
 	CTxdStore::PushCurrentTxd();
-	int32 slut = CTxdStore::FindTxdSlot("particle");
-	CTxdStore::SetCurrentTxd(slut);
+	int32 slot = CTxdStore::FindTxdSlot("particle");
+	CTxdStore::SetCurrentTxd(slot);
 	
 	gpCrossHairTex    = RwTextureRead("crosshair", NULL);
 	gpCrossHairRaster = RwTextureGetRaster(gpCrossHairTex);
 	
-    CTxdStore::PopCurrentTxd();
+	CTxdStore::PopCurrentTxd();
 }
 
 void
@@ -51,13 +51,13 @@ CWeaponEffects::Shutdown(void)
 void
 CWeaponEffects::MarkTarget(CVector pos, uint8 red, uint8 green, uint8 blue, uint8 alpha, float size)
 {
-    gCrossHair.m_bActive = true;
-    gCrossHair.m_vecPos = pos;
-    gCrossHair.m_nRed = red;
-    gCrossHair.m_nGreen = green;
-    gCrossHair.m_nBlue = blue;
-    gCrossHair.m_nAlpha = alpha;
-    gCrossHair.m_fSize = size;
+	gCrossHair.m_bActive = true;
+	gCrossHair.m_vecPos = pos;
+	gCrossHair.m_nRed = red;
+	gCrossHair.m_nGreen = green;
+	gCrossHair.m_nBlue = blue;
+	gCrossHair.m_nAlpha = alpha;
+	gCrossHair.m_fSize = size;
 }
 
 void
