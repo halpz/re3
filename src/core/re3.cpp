@@ -22,61 +22,7 @@
 #include "Console.h"
 #include "Debug.h"
 
-#include <algorithm>
-#include <vector>
 #include <list>
-
-std::vector<int32> usedAddresses;
-
-static DWORD protect[2];
-static uint32 protect_address;
-static uint32 protect_size;
-
-void
-Protect_internal(uint32 address, uint32 size)
-{
-	protect_address = address;
-	protect_size = size;
-	VirtualProtect((void*)address, size, PAGE_EXECUTE_READWRITE, &protect[0]);
-}
-
-void
-Unprotect_internal(void)
-{
-	VirtualProtect((void*)protect_address, protect_size, protect[0], &protect[1]);
-}
-
-void
-InjectHook_internal(uint32 address, uint32 hook, int type)
-{
-	if(std::any_of(usedAddresses.begin(), usedAddresses.end(),
-	               [address](uint32 value) { return (int32)value == address; })) {
-		debug("Used address %#06x twice when injecting hook\n", address);
-	}
-
-	usedAddresses.push_back((int32)address);
-
-
-	switch(type){
-	case PATCH_JUMP:
-		VirtualProtect((void*)address, 5, PAGE_EXECUTE_READWRITE, &protect[0]);
-		*(uint8*)address = 0xE9;
-		break;
-	case PATCH_CALL:
-		VirtualProtect((void*)address, 5, PAGE_EXECUTE_READWRITE, &protect[0]);
-		*(uint8*)address = 0xE8;
-		break;
-	default:
-		VirtualProtect((void*)((uint32)address + 1), 4, PAGE_EXECUTE_READWRITE, &protect[0]);
-		break;
-	}
-
-	*(ptrdiff_t*)(address + 1) = hook - address - 5;
-	if(type == PATCH_NOTHING)
-		VirtualProtect((void*)(address + 1), 4, protect[0], &protect[1]);
-	else
-		VirtualProtect((void*)address, 5, protect[0], &protect[1]);
-}
 
 void **rwengine = *(void***)0x5A10E1;
 
@@ -426,6 +372,10 @@ DebugMenuPopulate(void)
 
 		extern bool PrintDebugCode;
 		extern int16 &DebugCamMode;
+#ifdef FREE_CAM
+		extern bool bFreeCam;
+		DebugMenuAddVarBool8("Cam", "Free Cam", (int8*)&bFreeCam, nil);
+#endif
 		DebugMenuAddVarBool8("Cam", "Print Debug Code", (int8*)&PrintDebugCode, nil);
 		DebugMenuAddVar("Cam", "Cam Mode", &DebugCamMode, nil, 1, 0, CCam::MODE_EDITOR, nil);
 		DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });

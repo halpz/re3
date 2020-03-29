@@ -2056,7 +2056,13 @@ _WinMain(HINSTANCE instance,
 					{
 						GetWindowPlacement(PSGLOBAL(window), &wp);
 						
-						if ( wp.showCmd != SW_SHOWMINIMIZED )
+						// Famous transparent menu bug. Also see the fix in Frontend.cpp
+#ifdef FIX_BUGS
+						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
+						if ((1000.0f / 100.0f) < ms && wp.showCmd != SW_SHOWMINIMIZED)
+#else
+						if (wp.showCmd != SW_SHOWMINIMIZED)
+#endif
 							RsEventHandler(rsFRONTENDIDLE, nil);
 
 						if ( !FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bLoadingSavedGame )
