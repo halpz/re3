@@ -4,7 +4,7 @@ enum {
 	PLAYERCONTROL_ENABLED = 0,
 	PLAYERCONTROL_DISABLED_1 = 1,
 	PLAYERCONTROL_DISABLED_2 = 2,
-	PLAYERCONTROL_DISABLED_4 = 4,
+	PLAYERCONTROL_GARAGE = 4,
 	PLAYERCONTROL_DISABLED_8 = 8,
 	PLAYERCONTROL_DISABLED_10 = 16,
 	PLAYERCONTROL_DISABLED_20 = 32, // used on CPlayerInfo::MakePlayerSafe
@@ -433,7 +433,10 @@ public:
 	int16 GetRightStickX(void)    { return NewState.RightStickX; }
 	int16 GetRightStickY(void)    { return NewState.RightStickY; }
 
-  bool ArePlayerControlsDisabled(void) { return DisablePlayerControls != PLAYERCONTROL_ENABLED; }
+	bool ArePlayerControlsDisabled(void) { return DisablePlayerControls != PLAYERCONTROL_ENABLED; }
+	void SetDisablePlayerControls(uint8 who) { DisablePlayerControls |= who; }
+	void SetEnablePlayerControls(uint8 who) { DisablePlayerControls &= ~who; }
+	bool IsPlayerControlsDisabledBy(uint8 who) { return DisablePlayerControls & who; }
 };
 
 VALIDATE_SIZE(CPad, 0xFC);

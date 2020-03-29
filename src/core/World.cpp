@@ -55,6 +55,7 @@ WRAPPER void CWorld::FindObjectsOfTypeInRangeSectorList(uint32, CPtrList&, CVect
 WRAPPER void CWorld::FindMissionEntitiesIntersectingCube(const CVector&, const CVector&, int16*, int16, CEntity**, bool, bool, bool) { EAXJMP(0x4B3680); }
 WRAPPER void CWorld::ClearCarsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B50E0); }
 WRAPPER void CWorld::ClearPedsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B52B0); }
+WRAPPER void CWorld::CallOffChaseForArea(float, float, float, float) { EAXJMP(0x4B5530); }
 
 void
 CWorld::Initialise()

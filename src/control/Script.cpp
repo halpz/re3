@@ -4622,7 +4622,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 			infZ = *(float*)&ScriptParams[5];
 			supZ = *(float*)&ScriptParams[2];
 		}
-		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, supX, supY, supZ, ScriptParams[6], 0);
+		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, supX, supY, supZ, (eGarageType)ScriptParams[6], 0);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -4647,7 +4647,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 			infZ = *(float*)&ScriptParams[5];
 			supZ = *(float*)&ScriptParams[2];
 		}
-		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, supX, supY, supZ, ScriptParams[6], ScriptParams[7]);
+		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, supX, supY, supZ, (eGarageType)ScriptParams[6], ScriptParams[7]);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -7110,13 +7110,13 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_OPEN_GARAGE:
 	{
 		CollectParameters(&m_nIp, 1);
-		CGarages::Garages[ScriptParams[0]].OpenThisGarage();
+		CGarages::aGarages[ScriptParams[0]].OpenThisGarage();
 		return 0;
 	}
 	case COMMAND_CLOSE_GARAGE:
 	{
 		CollectParameters(&m_nIp, 1);
-		CGarages::Garages[ScriptParams[0]].CloseThisGarage();
+		CGarages::aGarages[ScriptParams[0]].CloseThisGarage();
 		return 0;
 	}
 	case COMMAND_WARP_CHAR_FROM_CAR_TO_COORD:
