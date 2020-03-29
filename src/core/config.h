@@ -206,4 +206,6 @@ enum Config {
 // #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER
 
+// Camera
 #define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future
+//#define FREE_CAM		// Rotating cam
