@@ -49,8 +49,6 @@ CCullZone
 CCullZones
 CExplosion
 CFallingGlassPane
-CFire
-CFireManager
 CGarage
 CGarages
 CGlass
