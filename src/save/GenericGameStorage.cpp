@@ -51,7 +51,6 @@ CDate &CompileDateAndTime = *(CDate*)0x72BCB8;
 #define ReadDataFromBufferPointer(buf, to) memcpy(&to, buf, sizeof(to)); buf += align4bytes(sizeof(to));
 #define WriteDataToBufferPointer(buf, from) memcpy(buf, &from, sizeof(from)); buf += align4bytes(sizeof(from));
 
-//WRAPPER bool GenericSave(int file) { EAXJMP(0x58F8D0); }
 WRAPPER bool GenericLoad() { EAXJMP(0x590A00); }
 
 

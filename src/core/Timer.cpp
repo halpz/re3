@@ -75,9 +75,6 @@ void CTimer::Shutdown(void)
 	;
 }
 
-#if 0
-WRAPPER void CTimer::Update(void) { EAXJMP(0x4ACF70); }
-#else
 void CTimer::Update(void)
 {
 	m_snPreviousTimeInMilliseconds = m_snTimeInMilliseconds;
@@ -149,7 +146,6 @@ void CTimer::Update(void)
   
 	m_FrameCounter++;
 }
-#endif
 
 void CTimer::Suspend(void)
 {
