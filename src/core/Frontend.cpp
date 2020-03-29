@@ -1354,23 +1354,39 @@ void CMenuManager::DrawFrontEndNormal()
 
 	m_aFrontEndSprites[currentSprite].Draw(CRect(MENU_X_LEFT_ALIGNED(50.0f), MENU_Y(50.0f), MENU_X_RIGHT_ALIGNED(50.0f), SCREEN_SCALE_FROM_BOTTOM(95.0f)), CRGBA(255, 255, 255, m_nMenuFadeAlpha > 255 ? 255 : m_nMenuFadeAlpha));
 
+	static float fadeAlpha = 0.0f;
+	static int lastState = 0;
+
+	// reverseAlpha = PS2 fading (wait for 255->0, then change screen)
 	if (m_nMenuFadeAlpha < 255) {
-		static uint32 LastFade = 0;
+		if (lastState == 1 && !reverseAlpha)
+			fadeAlpha = 0.f;
 
 		if (m_nMenuFadeAlpha <= 0 && reverseAlpha) {
 			reverseAlpha = false;
 			ChangeScreen(pendingScreen, pendingOption, true, false);
 		} else {
-			if (!reverseAlpha)
-				m_nMenuFadeAlpha += min((CTimer::GetTimeInMillisecondsPauseMode() - LastFade) / 33.0f, 1.0f) * 20.0f;
-			else
-				m_nMenuFadeAlpha = max(0, m_nMenuFadeAlpha - min((CTimer::GetTimeInMillisecondsPauseMode() - LastFade) / 33.0f, 1.0f) * 30.0f);
+			float timestep = CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
 
-			LastFade = CTimer::GetTimeInMillisecondsPauseMode();
+			// +20 per every 33 ms (1000.f/30.f - original frame limiter fps)
+			if (!reverseAlpha)
+				fadeAlpha += (timestep * 100.f) * 20.f / 33.f;
+			else
+				fadeAlpha = max(0.0f, fadeAlpha - (timestep * 100.f) * 30.f / 33.f);
+
+			m_nMenuFadeAlpha = fadeAlpha;
 		} 
+		lastState = 0;
 	} else {
-		if (reverseAlpha)
-			m_nMenuFadeAlpha -= 20;
+		if (lastState == 0) fadeAlpha = 255.f;
+
+		if (reverseAlpha) {
+			float timestep = CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
+			fadeAlpha -= (timestep * 100.f) * 30.f / 33.f;
+
+			m_nMenuFadeAlpha = fadeAlpha;
+		}
+		lastState = 1;
 
 		// TODO: what is this? waiting mouse?
 		if(field_518 == 4){
@@ -1568,13 +1584,20 @@ void CMenuManager::DrawFrontEndNormal()
 	}
 
 	if (m_nMenuFadeAlpha < 255) {
+
+		// Famous transparent menu bug
+#ifdef FIX_BUGS
+		static float fadeAlpha = 0.0f;
+		if (m_nMenuFadeAlpha == 0 && fadeAlpha > 1.0f) fadeAlpha = 0.0f;
+
+		float timestep = CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
+
+		// +20 per every 33 ms (1000.f/30.f - original frame limiter fps)
+		fadeAlpha += (timestep * 100.f) * 20.f / 33.f;
+		m_nMenuFadeAlpha = fadeAlpha;
+#else
 		static uint32 LastFade = 0;
 
-		// Famous transparent menu bug. 33.0f = 1000.f/30.f (original frame limiter fps)
-#ifdef FIX_BUGS
-		m_nMenuFadeAlpha += min((CTimer::GetTimeInMillisecondsPauseMode() - LastFade) / 33.0f, 1.0f) * 20.0f;
-		LastFade = CTimer::GetTimeInMillisecondsPauseMode();
-#else
 		if(CTimer::GetTimeInMillisecondsPauseMode() - LastFade > 10){
 			m_nMenuFadeAlpha += 20;
 			LastFade = CTimer::GetTimeInMillisecondsPauseMode();
