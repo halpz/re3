@@ -394,7 +394,9 @@ bool CGame::ShutDown(void)
 	CPlane::Shutdown();
 	CTrain::Shutdown();
 	CSpecialFX::Shutdown();
+#ifndef PS2
 	CGarages::Shutdown();
+#endif
 	CMovingThings::Shutdown();
 	gPhoneInfo.Shutdown();
 	CWeapon::ShutdownWeapons();
