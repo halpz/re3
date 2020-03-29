@@ -57,7 +57,7 @@ CGameLogic::SortOutStreamingAndMemory(const CVector &pos)
 	CStreaming::FlushRequestList();
 	CStreaming::DeleteRwObjectsAfterDeath(pos);
 	CStreaming::RemoveUnusedModelsInLoadedList();
-	CGame::DrasticTidyUpMemory();
+	CGame::DrasticTidyUpMemory(true);
 	CStreaming::LoadScene(pos);
 	CTimer::Update();
 }

@@ -6,9 +6,6 @@
 #include "Curves.h"
 #include "PathFind.h"
 
-#if 0
-WRAPPER void CAutoPilot::ModifySpeed(float) { EAXJMP(0x4137B0); }
-#else
 void CAutoPilot::ModifySpeed(float speed)
 {
 	m_fMaxTrafficSpeed = max(0.01f, speed);
@@ -41,7 +38,6 @@ void CAutoPilot::ModifySpeed(float speed)
 	m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() - positionBetweenNodes * m_nSpeedScaleFactor;
 #endif
 }
-#endif
 
 void CAutoPilot::RemoveOnePathNode()
 {

@@ -1694,9 +1694,6 @@ int CMenuManager::GetStartOptionsCntrlConfigScreens()
 }
 #endif
 
-#if DONT_USE_SUSPICIOUS_FUNCS
-WRAPPER void CMenuManager::InitialiseChangedLanguageSettings() { EAXJMP(0x47A4D0); }
-#else
 void CMenuManager::InitialiseChangedLanguageSettings()
 {
 	if (m_bFrontEnd_ReloadObrTxtGxt) {
@@ -1719,7 +1716,6 @@ void CMenuManager::InitialiseChangedLanguageSettings()
 		}
 	}
 }
-#endif
 
 void CMenuManager::LoadAllTextures()
 {

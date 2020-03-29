@@ -10,4 +10,5 @@ public:
 	static void Update(void);
 	static void SetVisibility(bool);
 	static void Init(void);
+	static void Shutdown(void);
 };

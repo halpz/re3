@@ -10,7 +10,7 @@ CPool<TxdDef,TxdDef> *&CTxdStore::ms_pTxdPool = *(CPool<TxdDef,TxdDef>**)0x8F5FB
 RwTexDictionary *&CTxdStore::ms_pStoredTxd = *(RwTexDictionary**)0x9405BC;
 
 void
-CTxdStore::Initialize(void)
+CTxdStore::Initialise(void)
 {
 	if(ms_pTxdPool == nil)
 		ms_pTxdPool = new CPool<TxdDef,TxdDef>(TXDSTORESIZE);
@@ -187,7 +187,7 @@ CTxdStore::RemoveTxd(int slot)
 }
 
 STARTPATCHES
-	InjectHook(0x527440, CTxdStore::Initialize, PATCH_JUMP);
+	InjectHook(0x527440, CTxdStore::Initialise, PATCH_JUMP);
 	InjectHook(0x527470, CTxdStore::Shutdown, PATCH_JUMP);
 	InjectHook(0x527490, CTxdStore::GameShutdown, PATCH_JUMP);
 	InjectHook(0x5274E0, CTxdStore::AddTxdSlot, PATCH_JUMP);

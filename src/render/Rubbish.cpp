@@ -7,3 +7,4 @@ WRAPPER void CRubbish::StirUp(CVehicle *veh) { EAXJMP(0x512690); }
 WRAPPER void CRubbish::Update(void) { EAXJMP(0x511B90); }
 WRAPPER void CRubbish::SetVisibility(bool) { EAXJMP(0x512AA0); }
 WRAPPER void CRubbish::Init(void) { EAXJMP(0x511940); }
+WRAPPER void CRubbish::Shutdown(void) { EAXJMP(0x511B50); }

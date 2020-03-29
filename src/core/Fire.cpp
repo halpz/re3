@@ -113,7 +113,7 @@ CFire::ProcessFire(void)
 			CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.0125f, 0.1f) * m_fStrength),
 				0, m_fStrength, 0, 0, 0, 0);
 
-		rand(); rand(); rand(); /* unsure why these three rands are called */
+		CGeneral::GetRandomNumber(); CGeneral::GetRandomNumber(); CGeneral::GetRandomNumber(); /* unsure why these three rands are called */
 
 		CParticle::AddParticle(PARTICLE_CARFLAME_SMOKE, firePos,
 			CVector(0.0f, 0.0f, 0.0f), 0, 0.0f, 0, 0, 0, 0);
@@ -129,8 +129,10 @@ CFire::ProcessFire(void)
 
 		if (!m_pEntity) {
 			CShadows::StoreStaticShadow((uint32)this, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &lightpos,
-				7.0f, 0.0f, 0.0f, -7.0f, 0, nRandNumber / 2, nRandNumber / 2,
-				0, 10.0f, 1.0f, 40.0f, 0, 0.0f);
+				7.0f, 0.0f, 0.0f, -7.0f,
+				255,                                        // this is 0 on PC which results in no shadow
+				nRandNumber / 2, nRandNumber / 2, 0,
+				10.0f, 1.0f, 40.0f, 0, 0.0f);
 		}
 		fGreen = nRandNumber / 128;
 		fRed = nRandNumber / 128;

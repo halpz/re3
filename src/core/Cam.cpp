@@ -28,6 +28,7 @@ const float DefaultFOV = 70.0f;	// beta: 80.0f
 
 bool PrintDebugCode = false;
 int16 &DebugCamMode = *(int16*)0x95CCF2;
+bool bFreeCam = false;
 
 void
 CCam::Init(void)
@@ -138,6 +139,11 @@ CCam::Process(void)
 		if(CCamera::m_bUseMouse3rdPerson)
 			Process_FollowPedWithMouse(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		else
+#ifdef FREE_CAM
+			if(bFreeCam)
+				Process_FollowPed_Rotation(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+			else
+#endif
 			Process_FollowPed(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
 //	case MODE_AIMING:
@@ -4369,7 +4375,209 @@ CCam::Process_FollowPed_WithBinding(const CVector &CameraTarget, float TargetOri
 	GetVectorsReadyForRW();
 }
 
+#ifdef FREE_CAM
+void
+CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	FOV = DefaultFOV;
+
+	const float MinDist = 2.0f;
+	const float MaxDist = 2.0f + TheCamera.m_fPedZoomValueSmooth;
+	const float BaseOffset = 0.75f;	// base height of camera above target
+
+	CVector TargetCoors = CameraTarget;
+
+	TargetCoors.z += m_fSyphonModeTargetZOffSet;
+	TargetCoors = DoAverageOnVector(TargetCoors);
+	TargetCoors.z += BaseOffset;	// add offset so alpha evens out to 0
+//	TargetCoors.z += m_fRoadOffSet;
+
+	CVector Dist = Source - TargetCoors;
+	CVector ToCam;
+
+	bool Shooting = false;
+	if(((CPed*)CamTargetEntity)->GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED)
+		if(CPad::GetPad(0)->GetWeapon())
+			Shooting = true;
+	if(((CPed*)CamTargetEntity)->GetWeapon()->m_eWeaponType == WEAPONTYPE_DETONATOR ||
+	   ((CPed*)CamTargetEntity)->GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT)
+		Shooting = false;
+
+
+	if(ResetStatics){
+		// Coming out of top down here probably
+		// so keep Beta, reset alpha and calculate vectors
+		Beta = CGeneral::GetATanOfXY(Dist.x, Dist.y);
+		Alpha = 0.0f;
+
+		Dist = MaxDist*CVector(Cos(Alpha) * Cos(Beta), Cos(Alpha) * Sin(Beta), Sin(Alpha));
+		Source = TargetCoors + Dist;
+
+		ResetStatics = false;
+	}
+
+	// Drag the camera along at the look-down offset
+	float CamDist = Dist.Magnitude();
+	if(CamDist == 0.0f)
+		Dist = CVector(1.0f, 1.0f, 0.0f);
+	else if(CamDist < MinDist)
+		Dist *= MinDist/CamDist;
+	else if(CamDist > MaxDist)
+		Dist *= MaxDist/CamDist;
+	CamDist = Dist.Magnitude();
+
+	// Beta = 0 is looking east, HALFPI is north, &c.
+	// Alpha positive is looking up
+	float GroundDist = Dist.Magnitude2D();
+	Beta = CGeneral::GetATanOfXY(-Dist.x, -Dist.y);
+	Alpha = CGeneral::GetATanOfXY(GroundDist, -Dist.z);
+	while(Beta >= PI) Beta -= 2.0f*PI;
+	while(Beta < -PI) Beta += 2.0f*PI;
+	while(Alpha >= PI) Alpha -= 2.0f*PI;
+	while(Alpha < -PI) Alpha += 2.0f*PI;
+
+	// Look around
+	bool UseMouse = false;
+	float MouseX = CPad::GetPad(0)->GetMouseX();
+	float MouseY = CPad::GetPad(0)->GetMouseY();
+	float LookLeftRight, LookUpDown;
+	if((MouseX != 0.0f || MouseY != 0.0f) && !CPad::GetPad(0)->ArePlayerControlsDisabled()){
+		UseMouse = true;
+		LookLeftRight = -2.5f*MouseX;
+		LookUpDown = 4.0f*MouseY;
+	}else{
+		LookLeftRight = -CPad::GetPad(0)->LookAroundLeftRight();
+		LookUpDown = CPad::GetPad(0)->LookAroundUpDown();
+	}
+	float AlphaOffset, BetaOffset;
+	if(UseMouse){
+		BetaOffset = LookLeftRight * TheCamera.m_fMouseAccelHorzntl * FOV/80.0f;
+		AlphaOffset = LookUpDown * TheCamera.m_fMouseAccelVertical * FOV/80.0f;
+	}else{
+		BetaOffset = LookLeftRight * fStickSens * (0.5f/10.0f) * FOV/80.0f * CTimer::GetTimeStep();
+		AlphaOffset = LookUpDown * fStickSens * (0.3f/10.0f) * FOV/80.0f * CTimer::GetTimeStep();
+	}
+
+	// Stop centering once stick has been touched
+	if(BetaOffset)
+		Rotating = false;
+
+	Beta += BetaOffset;
+	Alpha += AlphaOffset;
+	while(Beta >= PI) Beta -= 2.0f*PI;
+	while(Beta < -PI) Beta += 2.0f*PI;
+	if(Alpha > DEGTORAD(45.0f)) Alpha = DEGTORAD(45.0f);
+	if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+
+
+	float BetaDiff = TargetOrientation+PI - Beta;
+	while(BetaDiff >= PI) BetaDiff -= 2.0f*PI;
+	while(BetaDiff < -PI) BetaDiff += 2.0f*PI;
+	float TargetAlpha = Alpha;
+	// 12deg to account for our little height offset. we're not working on the true alpha here
+	const float AlphaLimitUp = DEGTORAD(15.0f) + DEGTORAD(12.0f);
+	const float AlphaLimitDown = -DEGTORAD(15.0f) + DEGTORAD(12.0f);
+	if(Abs(BetaDiff) < DEGTORAD(25.0f) && ((CPed*)CamTargetEntity)->GetMoveSpeed().Magnitude2D() > 0.01f){
+		// Limit alpha when player is walking towards camera
+		if(TargetAlpha > AlphaLimitUp) TargetAlpha = AlphaLimitUp;
+		if(TargetAlpha < AlphaLimitDown) TargetAlpha = AlphaLimitDown;
+	}
+
+	WellBufferMe(TargetAlpha, &Alpha, &AlphaSpeed, 0.2f, 0.1f, true);
+
+	if(CPad::GetPad(0)->ForceCameraBehindPlayer() || Shooting){
+		m_fTargetBeta = TargetOrientation;
+		Rotating = true;
+	}
+
+	if(Rotating){
+		WellBufferMe(m_fTargetBeta, &Beta, &BetaSpeed, 0.1f, 0.06f, true);
+		float DeltaBeta = m_fTargetBeta - Beta;
+		while(DeltaBeta >= PI) DeltaBeta -= 2*PI;
+		while(DeltaBeta < -PI) DeltaBeta += 2*PI;
+		if(Abs(DeltaBeta) < 0.06f)
+			Rotating = false;
+	}
+
+
+	Front = CVector(Cos(Alpha) * Cos(Beta), Cos(Alpha) * Sin(Beta), Sin(Alpha));
+	Source = TargetCoors - Front*CamDist;
+	TargetCoors.z -= BaseOffset;	// now get back to the real target coors again
+
+	m_cvecTargetCoorsForFudgeInter = TargetCoors;
+
+
+	Front = TargetCoors - Source;
+	Front.Normalise();
+
+
+
+	/*
+	 * Handle collisions - taken from FollowPedWithMouse
+	 */
+
+	CEntity *entity;
+	CColPoint colPoint;
+	// Clip Source and fix near clip
+	CWorld::pIgnoreEntity = CamTargetEntity;
+	entity = nil;
+	if(CWorld::ProcessLineOfSight(TargetCoors, Source, colPoint, entity, true, true, true, true, false, false, true)){
+		float PedColDist = (TargetCoors - colPoint.point).Magnitude();
+		float ColCamDist = CamDist - PedColDist;
+		if(entity->IsPed() && ColCamDist > 1.0f){
+			// Ped in the way but not clipping through
+			if(CWorld::ProcessLineOfSight(colPoint.point, Source, colPoint, entity, true, true, true, true, false, false, true)){
+				PedColDist = (TargetCoors - colPoint.point).Magnitude();
+				Source = colPoint.point;
+				if(PedColDist < 0.9f + 0.3f)
+					RwCameraSetNearClipPlane(Scene.camera, max(PedColDist-0.3f, 0.05f));
+			}else{
+				RwCameraSetNearClipPlane(Scene.camera, min(ColCamDist-0.35f, 0.9f));
+			}
+		}else{
+			Source = colPoint.point;
+			if(PedColDist < 0.9f + 0.3f)
+				RwCameraSetNearClipPlane(Scene.camera, max(PedColDist-0.3f, 0.05f));
+		}
+	}
+	CWorld::pIgnoreEntity = nil;
+
+	float ViewPlaneHeight = Tan(DEGTORAD(FOV) / 2.0f);
+	float ViewPlaneWidth = ViewPlaneHeight * CDraw::FindAspectRatio() * fTweakFOV;
+	float Near = RwCameraGetNearClipPlane(Scene.camera);
+	float radius = ViewPlaneWidth*Near;
+	entity = CWorld::TestSphereAgainstWorld(Source + Front*Near, radius, nil, true, true, false, true, false, false);
+	int i = 0;
+	while(entity){
+		CVector CamToCol = gaTempSphereColPoints[0].point - Source;
+		float frontDist = DotProduct(CamToCol, Front);
+		float dist = (CamToCol - Front*frontDist).Magnitude() / ViewPlaneWidth;
+
+		// Try to decrease near clip
+		dist = max(min(Near, dist), 0.1f);
+		if(dist < Near)
+			RwCameraSetNearClipPlane(Scene.camera, dist);
+
+		// Move forward a bit
+		if(dist == 0.1f)
+			Source += (TargetCoors - Source)*0.3f;
+
+		// Keep testing
+		entity = CWorld::TestSphereAgainstWorld(Source + Front*Near, radius, nil, true, true, false, true, false, false);
+
+		i++;
+		if(i > 5)
+			entity = nil;
+	}
+
+	GetVectorsReadyForRW();
+}
+#endif
+
 STARTPATCHES
+#ifdef FREE_CAM
+	Nop(0x468E7B, 0x468E90-0x468E7B);	// disable first person
+#endif
 	InjectHook(0x456F40, WellBufferMe, PATCH_JUMP);
 	InjectHook(0x458410, &CCam::Init, PATCH_JUMP);
 	InjectHook(0x4582F0, &CCam::GetVectorsReadyForRW, PATCH_JUMP);
