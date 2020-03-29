@@ -237,9 +237,6 @@ bool CGame::InitialiseOnceAfterRW(void)
 	return true;
 }
 
-#if 0
-WRAPPER void CGame::FinalShutdown(void) { EAXJMP(0x48BEC0); }
-#else
 void
 CGame::FinalShutdown(void)
 {	
@@ -247,7 +244,6 @@ CGame::FinalShutdown(void)
 	CPedStats::Shutdown();
 	CdStreamShutdown();
 }
-#endif
 
 bool CGame::Initialise(const char* datFile)
 {
@@ -604,9 +600,6 @@ void CGame::InitialiseWhenRestarting(void)
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 }
 
-#if 0
-WRAPPER void CGame::Process(void) { EAXJMP(0x48C850); }
-#else
 extern void (*DebugMenuProcess)(void);
 void CGame::Process(void) 
 {
@@ -682,7 +675,6 @@ void CGame::Process(void)
 		}
 	}
 }
-#endif
 
 void CGame::DrasticTidyUpMemory(bool)
 {
