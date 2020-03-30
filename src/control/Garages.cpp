@@ -1859,7 +1859,10 @@ void CGarages::SetLeaveCameraForThisGarage(int16 garage)
 	aGarages[garage].m_bCameraFollowsPlayer = true;
 }
 
-WRAPPER bool CGarages::IsThisCarWithinGarageArea(int16 garage, CEntity * pCar) { EAXJMP(0x427570); }
+bool CGarages::IsThisCarWithinGarageArea(int16 garage, CEntity * pCar)
+{
+	aGarages[garage].IsEntityEntirelyInside3D(pCar, 0.0f);
+}
 
 bool CGarages::HasCarBeenCrushed(int32 handle)
 {
