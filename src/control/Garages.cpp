@@ -1861,7 +1861,7 @@ void CGarages::SetLeaveCameraForThisGarage(int16 garage)
 
 bool CGarages::IsThisCarWithinGarageArea(int16 garage, CEntity * pCar)
 {
-	aGarages[garage].IsEntityEntirelyInside3D(pCar, 0.0f);
+	return aGarages[garage].IsEntityEntirelyInside3D(pCar, 0.0f);
 }
 
 bool CGarages::HasCarBeenCrushed(int32 handle)
