@@ -67,6 +67,8 @@ class CStoredCar
 	int8 m_nCarBombType;
 public:
 	void Init() { m_nModelIndex = 0; }
+	void Clear() { m_nModelIndex = 0; }
+	bool HasCar() { return m_nModelIndex != 0; }
 	CStoredCar(const CStoredCar& other);
 	void StoreCar(CVehicle*);
 	CVehicle* RestoreCar();
@@ -81,7 +83,7 @@ class CGarage
 public:
 	eGarageType m_eGarageType;
 	eGarageState m_eGarageState;
-	char field_2;
+	bool field_2;
 	bool m_bClosingWithoutTargetCar;
 	bool m_bDeactivated;
 	bool m_bResprayHappened;
@@ -110,13 +112,10 @@ public:
 	float m_fDoor1Z;
 	float m_fDoor2Z;
 	uint32 m_nTimeToStartAction;
-	char m_bCollectedCarsState;
-	char field_89;
-	char field_90;
-	char field_91;
+	uint8 m_bCollectedCarsState;
 	CVehicle *m_pTarget;
-	int field_96;
-	CStoredCar m_sStoredCar;
+	void* field_96;
+	CStoredCar m_sStoredCar; // not needed
 
 	void OpenThisGarage();
 	void CloseThisGarage();
@@ -126,7 +125,7 @@ public:
 	void Update();
 	float GetGarageCenterX() { return (m_fX1 + m_fX2) / 2; }
 	float GetGarageCenterY() { return (m_fY1 + m_fY2) / 2; }
-	bool IsClose()
+	bool IsFar()
 	{ 
 #ifdef FIX_BUGS
 		return Abs(TheCamera.GetPosition().x - GetGarageCenterX()) > SWITCH_GARAGE_DISTANCE_CLOSE ||
