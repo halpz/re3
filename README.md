@@ -49,8 +49,6 @@ CCullZone
 CCullZones
 CExplosion
 CFallingGlassPane
-CGarage
-CGarages
 CGlass
 CMenuManager - WIP
 CMotionBlurStreaks
