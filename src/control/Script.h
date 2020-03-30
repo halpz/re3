@@ -281,7 +281,7 @@ public:
 	static void ClearSpaceForMissionEntity(const CVector&, CEntity*);
 
 	static void UndoBuildingSwaps();
-	static void UndoEntityVisibilitySettings();
+	static void UndoEntityInvisibilitySettings();
 
 	static void ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, uint32 col, uint32 col2);
 	static void RenderTheScriptDebugLines();

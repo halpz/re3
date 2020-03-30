@@ -17,6 +17,7 @@
 #include "DMAudio.h"
 #include "Radar.h"
 #include "Fire.h"
+#include "Darkel.h"
 
 bool &CVehicle::bWheelsOnlyCheat = *(bool *)0x95CD78;
 bool &CVehicle::bAllDodosCheat = *(bool *)0x95CD75;
@@ -763,6 +764,29 @@ CVehicle::IsSphereTouchingVehicle(float sx, float sy, float sz, float radius)
 		return false;
 
 	return true;
+}
+
+void
+DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle)
+{
+	if (pVehicle->pDriver) {
+#ifndef FIX_BUGS
+		// this just isn't fair
+		CDarkel::RegisterKillByPlayer(pVehicle->pDriver, WEAPONTYPE_UNIDENTIFIED);
+#endif
+		pVehicle->pDriver->FlagToDestroyWhenNextProcessed();
+	}
+	for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++) {
+		if (pVehicle->pPassengers[i]) {
+#ifndef FIX_BUGS
+			// this just isn't fair
+			CDarkel::RegisterKillByPlayer(pVehicle->pPassengers[i], WEAPONTYPE_UNIDENTIFIED);
+#endif
+			pVehicle->pPassengers[i]->FlagToDestroyWhenNextProcessed();
+		}
+	}
+	CWorld::Remove(pVehicle);
+	delete pVehicle;
 }
 
 

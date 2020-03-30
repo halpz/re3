@@ -221,6 +221,9 @@ struct CCam
 	// CCam::Process_Blood_On_The_Tracks
 	// CCam::Process_Cam_Running_Side_Train
 	// CCam::Process_Cam_On_Train_Roof
+
+	// custom stuff
+	void Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrientation, float, float);
 };
 static_assert(sizeof(CCam) == 0x1A4, "CCam: wrong size");
 static_assert(offsetof(CCam, Alpha) == 0xA8, "CCam: error");

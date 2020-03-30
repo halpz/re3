@@ -100,6 +100,7 @@ enum Config {
 	NUMPHONES = 50,
 	NUMPEDGROUPS = 31,
 	NUMMODELSPERPEDGROUP = 8,
+	NUMSHOTINFOS = 100,
 
 	NUMROADBLOCKS = 600,
 
@@ -116,6 +117,8 @@ enum Config {
 
 	NUM_AUDIO_REFLECTIONS = 5,
 	NUM_SCRIPT_MAX_ENTITIES = 40,
+
+	NUM_GARAGE_STORED_CARS = 6
 };
 
 // We'll use this once we're ready to become independent of the game
@@ -207,4 +210,6 @@ enum Config {
 // #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER
 
+// Camera
 #define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future
+//#define FREE_CAM		// Rotating cam

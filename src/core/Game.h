@@ -23,19 +23,20 @@ public:
 	static bool &playingIntro;
 	static char *aDatFile;	//[32];
 
-	static bool Initialise(const char *datFile);
 	static bool InitialiseOnceBeforeRW(void);
 	static bool InitialiseRenderWare(void);
-	static bool InitialiseOnceAfterRW(void);
-	static void InitialiseWhenRestarting(void);
-	static void ShutDown(void);
 	static void ShutdownRenderWare(void);
+	static bool InitialiseOnceAfterRW(void);
 	static void FinalShutdown(void);
-	static void ShutDownForRestart(void);
-	static void Process(void);
+	static bool Initialise(const char *datFile);
+	static bool ShutDown(void);
+	static void ReInitGameObjectVariables(void);
 	static void ReloadIPLs(void);
-
+	static void ShutDownForRestart(void);
+	static void InitialiseWhenRestarting(void);
+	static void Process(void);
+	
 	// NB: these do something on PS2
-	static void TidyUpMemory(bool, bool) {}
-	static void DrasticTidyUpMemory(void) {}
+	static void TidyUpMemory(bool, bool);
+	static void DrasticTidyUpMemory(bool);
 };

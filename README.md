@@ -42,7 +42,6 @@ cAudioManager - WIP
 CBoat
 CBrightLights
 CBulletInfo
-CBulletTraces
 CCamera
 CCrane
 CCranes
@@ -50,9 +49,6 @@ CCullZone
 CCullZones
 CExplosion
 CFallingGlassPane
-CFire
-CFireManager
-CGame
 CGarage
 CGarages
 CGlass
@@ -66,15 +62,10 @@ CRoadBlocks
 CRubbish
 CSceneEdit
 CSkidmarks
-CShotInfo
 CSpecialFX
 CStats
 CTrafficLights
-CWanted
-CWaterCannon
-CWaterCannons
 CWeapon
-CWeaponEffects
 CWeather
 CWorld
 ```

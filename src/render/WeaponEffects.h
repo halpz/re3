@@ -3,21 +3,25 @@
 class CWeaponEffects
 {
 public:
-	bool m_bCrosshair;
-	int8 gap_1[3];
+	bool m_bActive;
+	char _pad[3];
 	CVector m_vecPos;
-	uint8 m_red;
-	uint8 m_green;
-	uint8 m_blue;
-	uint8 m_alpha;
-	float m_size;
-	int32 field_24;
-	RwTexture *m_pTexture;
-	RwRaster *m_pRaster;
+	uint8 m_nRed;
+	uint8 m_nGreen;
+	uint8 m_nBlue;
+	uint8 m_nAlpha;
+	float m_fSize;
+	float m_fRotation;
 
 public:
-	static void Render(void);
-	static void ClearCrossHair();
-	static void MarkTarget(CVector, uint8, uint8, uint8, uint8, float);
+	CWeaponEffects();
+	~CWeaponEffects();
+
 	static void Init(void);
+	static void Shutdown(void);
+	static void MarkTarget(CVector pos, uint8 red, uint8 green, uint8 blue, uint8 alpha, float size);
+	static void ClearCrossHair(void);
+	static void Render(void);
 };
+
+VALIDATE_SIZE(CWeaponEffects, 0x1C);

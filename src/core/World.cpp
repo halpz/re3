@@ -19,6 +19,7 @@
 #include "Messages.h"
 #include "Replay.h"
 #include "Population.h"
+#include "Fire.h"
 
 CColPoint *gaTempSphereColPoints = (CColPoint*)0x6E64C0;	// [32]
 
@@ -39,6 +40,7 @@ bool &CWorld::bProcessCutsceneOnly = *(bool*)0x95CD8B;
 bool &CWorld::bDoingCarCollisions = *(bool*)0x95CD8C;
 bool &CWorld::bIncludeCarTyres = *(bool*)0x95CDAA;
 
+WRAPPER void CWorld::ClearForRestart(void) { EAXJMP(0x4AE850); }
 WRAPPER void CWorld::AddParticles(void) { EAXJMP(0x4B4010); }
 WRAPPER void CWorld::ShutDown(void) { EAXJMP(0x4AE450); }
 WRAPPER void CWorld::RepositionCertainDynamicObjects() { EAXJMP(0x4B42B0); }
@@ -53,6 +55,7 @@ WRAPPER void CWorld::FindObjectsOfTypeInRangeSectorList(uint32, CPtrList&, CVect
 WRAPPER void CWorld::FindMissionEntitiesIntersectingCube(const CVector&, const CVector&, int16*, int16, CEntity**, bool, bool, bool) { EAXJMP(0x4B3680); }
 WRAPPER void CWorld::ClearCarsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B50E0); }
 WRAPPER void CWorld::ClearPedsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B52B0); }
+WRAPPER void CWorld::CallOffChaseForArea(float, float, float, float) { EAXJMP(0x4B5530); }
 
 void
 CWorld::Initialise()
@@ -1047,6 +1050,19 @@ CWorld::ExtinguishAllCarFiresInArea(CVector point, float range)
 		if (veh) {
 			if ((point - veh->GetPosition()).MagnitudeSqr() < sq(range))
 				veh->ExtinguishCarFire();
+		}
+	}
+}
+
+void
+CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity *reason)
+{
+	int poolSize = CPools::GetVehiclePool()->GetSize();
+	for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
+		CVehicle *veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
+		if (veh && veh->m_status != STATUS_WRECKED && !veh->m_pCarFire && !veh->bFireProof) {
+			if (Abs(veh->GetPosition().z - z) < 5.0f && Abs(veh->GetPosition().x - x) < radius && Abs(veh->GetPosition().y - y) < radius)
+					gFireManager.StartFire(veh, reason, 0.8f, true);
 		}
 	}
 }
