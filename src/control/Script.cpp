@@ -4671,7 +4671,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		return 0;
 	case COMMAND_SET_FREE_BOMBS:
 		CollectParameters(&m_nIp, 1);
-		CGarages::BombsAreFree = (ScriptParams[0] != 0);
+		CGarages::SetFreeBombs(ScriptParams[0] != 0);
 		return 0;
 #ifdef GTA_PS2
 	case COMMAND_SET_POWERPOINT:
@@ -6662,7 +6662,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	}
 	case COMMAND_SET_FREE_RESPRAYS:
 		CollectParameters(&m_nIp, 1);
-		CGarages::RespraysAreFree = (ScriptParams[0] != 0);
+		CGarages::SetFreeResprays(ScriptParams[0] != 0);
 		return 0;
 	case COMMAND_SET_PLAYER_VISIBLE:
 	{
@@ -7110,13 +7110,13 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_OPEN_GARAGE:
 	{
 		CollectParameters(&m_nIp, 1);
-		CGarages::aGarages[ScriptParams[0]].OpenThisGarage();
+		CGarages::OpenGarage(ScriptParams[0]);
 		return 0;
 	}
 	case COMMAND_CLOSE_GARAGE:
 	{
 		CollectParameters(&m_nIp, 1);
-		CGarages::aGarages[ScriptParams[0]].CloseThisGarage();
+		CGarages::CloseGarage(ScriptParams[1]);
 		return 0;
 	}
 	case COMMAND_WARP_CHAR_FROM_CAR_TO_COORD:

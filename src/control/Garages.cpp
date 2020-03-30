@@ -489,7 +489,7 @@ void CGarage::Update()
 					DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB_ALREADY_SET, 1);
 					break;
 				}
-				if (!CGarages::BombsAreFree && CWorld::Players[CWorld::PlayerInFocus].m_nMoney >= BOMB_PRICE) {
+				if (!CGarages::BombsAreFree && CWorld::Players[CWorld::PlayerInFocus].m_nMoney < BOMB_PRICE) {
 					CGarages::TriggerMessage("GA_4", -1, 4000, -1); // "Car bombs are $1000 each"
 					m_eGarageState = GS_OPENEDCONTAINSCAR;
 					DMAudio.PlayFrontEndSound(SOUND_GARAGE_NO_MONEY, 1);
@@ -1973,23 +1973,23 @@ bool CGarages::IsPointInAGarageCameraZone(CVector point)
 	for (int i = 0; i < NUM_GARAGES; i++) {
 		switch (aGarages[i].m_eGarageType) {
 		case GARAGE_NONE:
-			continue;
+			break;
 		case GARAGE_COLLECTCARS_1:
 		case GARAGE_COLLECTCARS_2:
 		case GARAGE_COLLECTCARS_3:
-			if (aGarages[i].m_fX1 - MARGIN_FOR_CAMERA_COLLECTCARS < point.x ||
-				aGarages[i].m_fX2 - MARGIN_FOR_CAMERA_COLLECTCARS > point.x ||
-				aGarages[i].m_fY1 - MARGIN_FOR_CAMERA_COLLECTCARS < point.y ||
-				aGarages[i].m_fY2 - MARGIN_FOR_CAMERA_COLLECTCARS > point.y)
-				continue;
-			return true;
+			if (aGarages[i].m_fX1 - MARGIN_FOR_CAMERA_COLLECTCARS <= point.x &&
+				aGarages[i].m_fX2 + MARGIN_FOR_CAMERA_COLLECTCARS >= point.x &&
+				aGarages[i].m_fY1 - MARGIN_FOR_CAMERA_COLLECTCARS <= point.y &&
+				aGarages[i].m_fY2 + MARGIN_FOR_CAMERA_COLLECTCARS >= point.y)
+				return true;
+			break;
 		default:
-			if (aGarages[i].m_fX1 - MARGIN_FOR_CAMERA_DEFAULT < point.x ||
-				aGarages[i].m_fX2 - MARGIN_FOR_CAMERA_DEFAULT > point.x ||
-				aGarages[i].m_fY1 - MARGIN_FOR_CAMERA_DEFAULT < point.y ||
-				aGarages[i].m_fY2 - MARGIN_FOR_CAMERA_DEFAULT > point.y)
-				continue;
-			return true;
+			if (aGarages[i].m_fX1 - MARGIN_FOR_CAMERA_DEFAULT <= point.x &&
+				aGarages[i].m_fX2 + MARGIN_FOR_CAMERA_DEFAULT >= point.x &&
+				aGarages[i].m_fY1 - MARGIN_FOR_CAMERA_DEFAULT <= point.y &&
+				aGarages[i].m_fY2 + MARGIN_FOR_CAMERA_DEFAULT >= point.y)
+				return true;
+			break;
 		}
 	}
 	return false;
