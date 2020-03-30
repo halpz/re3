@@ -7,19 +7,16 @@
 #include "ZoneCull.h"
 #include "Darkel.h"
 #include "DMAudio.h"
+#include "CopPed.h"
 #include "Wanted.h"
+#include "General.h"
 
 int32 &CWanted::MaximumWantedLevel = *(int32*)0x5F7714;	// 6
 int32 &CWanted::nMaximumWantedLevel = *(int32*)0x5F7718;	// 6400
 
-WRAPPER void CWanted::Reset() { EAXJMP(0x4AD790) };
-WRAPPER void CWanted::Update() { EAXJMP(0x4AD7B0) };
-
 void
 CWanted::Initialise()
 {
-	int i;
-
 	m_nChaos = 0;
 	m_nLastUpdateTime = 0;
 	m_nLastWantedLevelChange = 0;
@@ -34,10 +31,12 @@ CWanted::Initialise()
 	m_bArmyRequired = false;
 	m_fCrimeSensitivity = 1.0f;
 	m_nWantedLevel = 0;
-        m_CopsBeatingSuspect = 0;
-	for(i = 0; i < 10; i++)
+	m_CopsBeatingSuspect = 0;
+
+	for (int i = 0; i < ARRAY_SIZE(m_pCops); i++)
 		m_pCops[i] = nil;
-        ClearQdCrimes();
+
+	ClearQdCrimes();
 }
 
 bool
@@ -61,7 +60,7 @@ CWanted::AreArmyRequired()
 int32
 CWanted::NumOfHelisRequired()
 {
-	if (m_bIgnoredByCops)
+	if (m_bIgnoredByCops || m_bIgnoredByEveryone)
 		return 0;
 
 	switch (m_nWantedLevel) {
@@ -79,9 +78,10 @@ CWanted::NumOfHelisRequired()
 void
 CWanted::SetWantedLevel(int32 level)
 {
-	ClearQdCrimes();
 	if (level > MaximumWantedLevel)
 		level = MaximumWantedLevel;
+
+	ClearQdCrimes();
 	switch (level) {
 	case 0:
 		m_nChaos = 0;
@@ -360,10 +360,107 @@ CWanted::WorkOutPolicePresence(CVector posn, float radius)
 	return numPolice;
 }
 
+void
+CWanted::Update(void)
+{
+	if (CTimer::GetTimeInMilliseconds() - m_nLastUpdateTime > 1000) {
+		if (m_nWantedLevel > 1) {
+			m_nLastUpdateTime = CTimer::GetTimeInMilliseconds();
+		} else {
+			float radius = 18.0f;
+			CVector playerPos = FindPlayerCoors();
+			if (WorkOutPolicePresence(playerPos, radius) == 0) {
+				m_nLastUpdateTime = CTimer::GetTimeInMilliseconds();
+				m_nChaos = max(0, m_nChaos - 1);
+				UpdateWantedLevel();
+			}
+		}
+		UpdateCrimesQ();
+		bool orderMessedUp = false;
+		int currCopNum = 0;
+		bool foundEmptySlot = false;
+		for (int i = 0; i < ARRAY_SIZE(m_pCops); i++) {
+			if (m_pCops[i]) {
+				++currCopNum;
+				if (foundEmptySlot)
+					orderMessedUp = true;
+			} else {
+				foundEmptySlot = true;
+			}
+		}
+		if (currCopNum != m_CurrentCops) {
+			printf("CopPursuit total messed up: re-setting\n");
+			m_CurrentCops = currCopNum;
+		}
+		if (orderMessedUp) {
+			printf("CopPursuit pointer list messed up: re-sorting\n");
+			bool fixed = true;
+			for (int i = 0; i < ARRAY_SIZE(m_pCops); i++) {
+				if (!m_pCops[i]) {
+					for (int j = i; j < ARRAY_SIZE(m_pCops); j++) {
+						if (m_pCops[j]) {
+							m_pCops[i] = m_pCops[j];
+							m_pCops[j] = nil;
+							fixed = false;
+							break;
+						}
+					}
+					if (fixed)
+						break;
+				}
+			}
+		}
+	}
+}
+
+void
+CWanted::ResetPolicePursuit(void)
+{
+	for(int i = 0; i < ARRAY_SIZE(m_pCops); i++) {
+		CCopPed *cop = m_pCops[i];
+		if (!cop)
+			continue;
+
+		cop->m_bIsInPursuit = false;
+		cop->m_objective = OBJECTIVE_NONE;
+		cop->m_prevObjective = OBJECTIVE_NONE;
+		cop->m_nLastPedState = PED_NONE;
+		if (!cop->DyingOrDead()) {
+			cop->SetWanderPath(CGeneral::GetRandomNumberInRange(0.0f, 8.0f));
+		}
+		m_pCops[i] = nil;
+	}
+	m_CurrentCops = 0;
+}
+
+void
+CWanted::Reset(void)
+{
+	ResetPolicePursuit();
+	Initialise();
+}
+
+void
+CWanted::UpdateCrimesQ(void)
+{
+	for(int i = 0; i < ARRAY_SIZE(m_aCrimes); i++) {
+
+		CCrimeBeingQd &crime = m_aCrimes[i];
+		if (crime.m_nType != CRIME_NONE) {
+			if (CTimer::GetTimeInMilliseconds() > crime.m_nTime + 500 && !crime.m_bReported) {
+				ReportCrimeNow(crime.m_nType, crime.m_vecPosn, crime.m_bPoliceDoesntCare);
+				crime.m_bReported = true;
+			}
+			if (CTimer::GetTimeInMilliseconds() > crime.m_nTime + 10000)
+				crime.m_nType = CRIME_NONE;
+		}
+	}
+}
+
 STARTPATCHES
 	InjectHook(0x4AD6E0, &CWanted::Initialise, PATCH_JUMP);
-//	InjectHook(0x4AD790, &CWanted::Reset, PATCH_JUMP);
-//	InjectHook(0x4AD7B0, &CWanted::Update, PATCH_JUMP);
+	InjectHook(0x4AD790, &CWanted::Reset, PATCH_JUMP);
+	InjectHook(0x4AD7B0, &CWanted::Update, PATCH_JUMP);
 	InjectHook(0x4AD900, &CWanted::UpdateWantedLevel, PATCH_JUMP);
 	InjectHook(0x4AD9F0, &CWanted::RegisterCrime, PATCH_JUMP);
 	InjectHook(0x4ADA10, &CWanted::RegisterCrime_Immediately, PATCH_JUMP);
@@ -374,10 +471,10 @@ STARTPATCHES
 	InjectHook(0x4ADBC0, &CWanted::AreFbiRequired, PATCH_JUMP);
 	InjectHook(0x4ADBE0, &CWanted::AreArmyRequired, PATCH_JUMP);
 	InjectHook(0x4ADC00, &CWanted::NumOfHelisRequired, PATCH_JUMP);
-//	InjectHook(0x4ADC40, &CWanted::ResetPolicePursuit, PATCH_JUMP);
+	InjectHook(0x4ADC40, &CWanted::ResetPolicePursuit, PATCH_JUMP);
 	InjectHook(0x4ADD00, &CWanted::WorkOutPolicePresence, PATCH_JUMP);
 	InjectHook(0x4ADF20, &CWanted::ClearQdCrimes, PATCH_JUMP);
 	InjectHook(0x4ADFD0, &CWanted::AddCrimeToQ, PATCH_JUMP);
-//	InjectHook(0x4AE090, &CWanted::UpdateCrimesQ, PATCH_JUMP);
+	InjectHook(0x4AE090, &CWanted::UpdateCrimesQ, PATCH_JUMP);
 	InjectHook(0x4AE110, &CWanted::ReportCrimeNow, PATCH_JUMP);
 ENDPATCHES

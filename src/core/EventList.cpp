@@ -209,21 +209,9 @@ CEventList::ReportCrimeForEvent(eEventType type, int32 crimeId, bool copsDontCar
 	case EVENT_CAR_SET_ON_FIRE: crime = CRIME_VEHICLE_BURNED; break;
 	default: crime = CRIME_NONE; break;
 	}
-
-#ifdef VC_PED_PORTS
-	if (crime == CRIME_HIT_PED && ((CPed*)crimeId)->IsPointerValid() &&
-		FindPlayerPed()->m_pWanted->m_nWantedLevel == 0 && ((CPed*)crimeId)->bBeingChasedByPolice) {
-
-		if(!((CPed*)crimeId)->DyingOrDead()) {
-			sprintf(gString, "$50 Good Citizen Bonus!");
-			AsciiToUnicode(gString, gUString);
-			CMessages::AddBigMessage(gUString, 5000, 0);
-			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 50;
-		}
-	} else
-#endif
-		if(crime == CRIME_NONE)
-			return;
+	
+	if(crime == CRIME_NONE)
+		return;
 
 	CVector playerPedCoors = FindPlayerPed()->GetPosition();
 	CVector playerCoors = FindPlayerCoors();

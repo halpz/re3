@@ -30,7 +30,7 @@ class CCrimeBeingQd
 public:
 	eCrimeType m_nType;
 	uint32 m_nId;
-	int32 m_nTime;
+	uint32 m_nTime;
 	CVector m_vecPosn;
 	bool m_bReported;
 	bool m_bPoliceDoesntCare;
@@ -78,6 +78,8 @@ public:
 	void ReportCrimeNow(eCrimeType type, const CVector &coors, bool policeDoesntCare);
 	void UpdateWantedLevel();
 	void Reset();
+	void ResetPolicePursuit();
+	void UpdateCrimesQ();
 	void Update();
 
 	bool IsIgnored(void) { return m_bIgnoredByCops || m_bIgnoredByEveryone; }
