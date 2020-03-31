@@ -51,6 +51,9 @@ enum eLanguages
 	LANGUAGE_GERMAN,
 	LANGUAGE_ITALIAN,
 	LANGUAGE_SPANISH,
+#ifdef MORE_LANGUAGES
+	LANGUAGE_RUSSIAN,
+#endif
 };
 
 enum eFrontendSprites
@@ -301,6 +304,9 @@ enum eMenuAction
 	MENUACTION_UNK108,
 	MENUACTION_UNK109,
 	MENUACTION_UNK110,
+#ifdef MORE_LANGUAGES
+	MENUACTION_LANG_RUS,
+#endif
 };
 
 enum eCheckHover
@@ -473,7 +479,6 @@ public:
 	static int32 &m_ControlMethod;
 	static int8 &m_PrefsDMA;
 	static int32 &m_PrefsLanguage;
-	static int8 &m_bDisableMouseSteering;
 	static int32 &m_PrefsBrightness;
 	static float &m_PrefsLOD;
 	static int8 &m_bFrontEnd_ReloadObrTxtGxt;
@@ -491,6 +496,12 @@ public:
 	static float &actionTextScaleY;
 	static int32 &sthWithButtons;
 	static int32 &sthWithButtons2;
+
+#ifndef MASTER
+	static bool m_PrefsMarketing;
+	static bool m_PrefsDisableTutorials;
+#endif // !MASTER
+
 
 public:
 	static void BuildStatLine(char *text, void *stat, uint8 aFloat, void *stat2);

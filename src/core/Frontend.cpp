@@ -64,7 +64,6 @@ bool &CMenuManager::m_bShutDownFrontEndRequested = *(bool*)0x95CD6A;
 
 int8 &CMenuManager::m_PrefsUseWideScreen = *(int8*)0x95CD23;
 int8 &CMenuManager::m_PrefsRadioStation = *(int8*)0x95CDA4;
-int8 &CMenuManager::m_bDisableMouseSteering = *(int8*)0x60252C;	// 1
 int32 &CMenuManager::m_PrefsBrightness = *(int32*)0x5F2E50;	// 256
 float &CMenuManager::m_PrefsLOD = *(float*)0x8F42C4;
 int8 &CMenuManager::m_bFrontEnd_ReloadObrTxtGxt = *(int8*)0x628CFC;
@@ -96,6 +95,11 @@ int32 &MouseButtonJustClicked = *(int32*)0x628D0C;
 int32 &JoyButtonJustClicked = *(int32*)0x628D10;
 bool &holdingScrollBar = *(bool*)0x628D59;
 //int32 *pControlTemp = 0;
+
+#ifndef MASTER
+bool CMenuManager::m_PrefsMarketing = false;
+bool CMenuManager::m_PrefsDisableTutorials = false;
+#endif // !MASTER
 
 // 0x5F311C
 const char* FrontendFilenames[][2] = {
@@ -968,7 +972,7 @@ void CMenuManager::Draw()
 				rightText = TheText.Get(m_PrefsDMA ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_MOUSESTEER:
-				rightText = TheText.Get(m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
+				rightText = TheText.Get(CVehicle::m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
 				break;
 			}
 
@@ -1727,6 +1731,17 @@ void CMenuManager::InitialiseChangedLanguageSettings()
 		CTimer::Update();
 		CGame::frenchGame = false;
 		CGame::germanGame = false;
+#ifdef MORE_LANGUAGES
+		switch (CMenuManager::m_PrefsLanguage) {
+		case LANGUAGE_RUSSIAN:
+			CFont::ReloadFonts(FONT_LANGSET_RUSSIAN);
+			break;
+		default:
+			CFont::ReloadFonts(FONT_LANGSET_EFIGS);
+			break;
+		}
+#endif
+
 		switch (CMenuManager::m_PrefsLanguage) {
 		case LANGUAGE_FRENCH:
 			CGame::frenchGame = true;
@@ -1734,6 +1749,11 @@ void CMenuManager::InitialiseChangedLanguageSettings()
 		case LANGUAGE_GERMAN:
 			CGame::germanGame = true;
 			break;
+#ifdef MORE_LANGUAGES
+		case LANGUAGE_RUSSIAN:
+			CGame::russianGame = true;
+			break;
+#endif
 		default:
 			break;
 		}
@@ -2935,6 +2955,14 @@ CMenuManager::ProcessButtonPresses(void)
 					CMenuManager::InitialiseChangedLanguageSettings();
 					SaveSettings();
 					break;
+#ifdef MORE_LANGUAGES
+				case MENUACTION_LANG_RUS:
+					m_PrefsLanguage = LANGUAGE_RUSSIAN;
+					m_bFrontEnd_ReloadObrTxtGxt = true;
+					CMenuManager::InitialiseChangedLanguageSettings();
+					SaveSettings();
+					break;
+#endif
 				case MENUACTION_POPULATESLOTS_CHANGEMENU:
 					PcSaveHelper.PopulateSlotInfo();
 
@@ -3141,7 +3169,7 @@ CMenuManager::ProcessButtonPresses(void)
 						CMenuManager::m_ControlMethod = CONTROL_STANDART;
 						MousePointerStateHelper.bInvertVertically = false;
 						TheCamera.m_fMouseAccelHorzntl = 0.0025f;
-						m_bDisableMouseSteering = true;
+						CVehicle::m_bDisableMouseSteering = true;
 						TheCamera.m_bHeadBob = false;
 						SaveSettings();
 					}
@@ -3460,7 +3488,7 @@ void CMenuManager::ProcessOnOffMenuOptions()
 		SaveSettings();
 		break;
 	case MENUACTION_MOUSESTEER:
-		m_bDisableMouseSteering = !m_bDisableMouseSteering;
+		CVehicle::m_bDisableMouseSteering = !CVehicle::m_bDisableMouseSteering;
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		SaveSettings();
 		break;

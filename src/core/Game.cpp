@@ -99,6 +99,9 @@ bool &CGame::germanGame = *(bool*)0x95CD1E;
 bool &CGame::noProstitutes = *(bool*)0x95CDCF;
 bool &CGame::playingIntro = *(bool*)0x95CDC2;
 char *CGame::aDatFile = (char*)0x773A48;
+#ifdef MORE_LANGUAGES
+bool CGame::russianGame = false;
+#endif
 
 int &gameTxdSlot = *(int*)0x628D88;
 
