@@ -59,6 +59,10 @@
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
+#ifdef FREE_CAM
+extern bool bFreeMouseCam;
+#endif
+
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
 
@@ -807,6 +811,10 @@ CPed::IsPedInControl(void)
 bool
 CPed::CanStrafeOrMouseControl(void)
 {
+#ifdef FREE_CAM
+	if (bFreeMouseCam)
+		return false;
+#endif
 	return m_nPedState == PED_NONE || m_nPedState == PED_IDLE || m_nPedState == PED_FLEE_POS || m_nPedState == PED_FLEE_ENTITY ||
 		m_nPedState == PED_ATTACK || m_nPedState == PED_FIGHT || m_nPedState == PED_AIM_GUN || m_nPedState == PED_JUMP;
 }
@@ -6984,7 +6992,11 @@ CPed::FinishLaunchCB(CAnimBlendAssociation *animAssoc, void *arg)
 #endif
 		) {
 
+#ifdef FREE_CAM
+		if (TheCamera.Cams[0].Using3rdPersonMouseCam() && !bFreeMouseCam) {
+#else
 		if (TheCamera.Cams[0].Using3rdPersonMouseCam()) {
+#endif
 			float fpsAngle = ped->WorkOutHeadingForMovingFirstPerson(ped->m_fRotationCur);
 			ped->m_vecMoveSpeed.x = -velocityFromAnim * Sin(fpsAngle);
 			ped->m_vecMoveSpeed.y = velocityFromAnim * Cos(fpsAngle);

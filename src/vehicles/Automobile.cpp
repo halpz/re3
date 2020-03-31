@@ -2339,9 +2339,16 @@ CAutomobile::FireTruckControl(void)
 	if(this == FindPlayerVehicle()){
 		if(!CPad::GetPad(0)->GetWeapon())
 			return;
-		m_fCarGunLR += CPad::GetPad(0)->GetCarGunLeftRight()*0.00025f*CTimer::GetTimeStep();
-		m_fCarGunUD += CPad::GetPad(0)->GetCarGunUpDown()*0.0001f*CTimer::GetTimeStep();
+#ifdef FREE_CAM
+		extern bool bFreeMouseCam;
+		if (!bFreeMouseCam)
+#endif 
+		{
+			m_fCarGunLR += CPad::GetPad(0)->GetCarGunLeftRight() * 0.00025f * CTimer::GetTimeStep();
+			m_fCarGunUD += CPad::GetPad(0)->GetCarGunUpDown() * 0.0001f * CTimer::GetTimeStep();
+		}
 		m_fCarGunUD = clamp(m_fCarGunUD, 0.05f, 0.3f);
+
 
 		CVector cannonPos(0.0f, 1.5f, 1.9f);
 		cannonPos = GetMatrix() * cannonPos;
@@ -2408,7 +2415,12 @@ CAutomobile::TankControl(void)
 
 	// Rotate turret
 	float prevAngle = m_fCarGunLR;
-	m_fCarGunLR -= CPad::GetPad(0)->GetCarGunLeftRight() * 0.00015f * CTimer::GetTimeStep();
+#ifdef FREE_CAM
+	extern bool bFreeMouseCam;
+	if(!bFreeMouseCam)
+#endif
+		m_fCarGunLR -= CPad::GetPad(0)->GetCarGunLeftRight() * 0.00015f * CTimer::GetTimeStep();
+
 	if(m_fCarGunLR < 0.0f)
 		m_fCarGunLR += TWOPI;
 	if(m_fCarGunLR > TWOPI)
