@@ -21,8 +21,11 @@
 #include "User.h"
 #include "World.h"
 
-wchar *CHud::m_HelpMessage = (wchar*)0x86B888;
-wchar *CHud::m_LastHelpMessage = (wchar*)0x6E8F28;
+//wchar *CHud::m_HelpMessage = (wchar*)0x86B888;
+//wchar *CHud::m_LastHelpMessage = (wchar*)0x6E8F28;
+wchar CHud::m_HelpMessage[256];
+wchar CHud::m_LastHelpMessage[256];
+
 int32 &CHud::m_HelpMessageState = *(int32*)0x880E1C;
 int32 &CHud::m_HelpMessageTimer = *(int32*)0x880FA4;
 int32 &CHud::m_HelpMessageFadeTimer = *(int32*)0x8F6258;
@@ -661,7 +664,7 @@ void CHud::Draw()
 					CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
 					CFont::SetRightJustifyOn();
 					CFont::SetRightJustifyWrap(0.0f);
-					CFont::SetFontStyle(FONT_HEADING);
+					CFont::SetFontStyle(FONTJAP(FONT_HEADING));
 					CFont::SetPropOff();
 					CFont::SetBackGroundOnlyTextOn();
 					CFont::SetColor(CRGBA(0, 0, 0, 255));
@@ -702,7 +705,7 @@ void CHud::Draw()
 						CFont::SetCentreOff();
 						CFont::SetRightJustifyOn();
 						CFont::SetRightJustifyWrap(0.0f);
-						CFont::SetFontStyle(FONT_HEADING);
+						CFont::SetFontStyle(FONTJAP(FONT_HEADING));
 						CFont::SetColor(CRGBA(244, 20, 20, 255));
 						CFont::SetWrapx(SCREEN_SCALE_X(640.0f));
 						CFont::SetPropOff();
@@ -857,7 +860,7 @@ void CHud::Draw()
 				else
 					CFont::SetPropOff();
 
-				CFont::SetFontStyle(CTheScripts::IntroTextLines[i].m_nFont);
+				CFont::SetFontStyle(FONTJAP(CTheScripts::IntroTextLines[i].m_nFont));
 				CFont::PrintString(SCREEN_SCALE_X(640.0f - CTheScripts::IntroTextLines[i].m_fAtX), SCREEN_SCALE_Y(448.0f - CTheScripts::IntroTextLines[i].m_fAtY), IntroText->m_Text);
 			}
 		}
@@ -897,7 +900,7 @@ void CHud::Draw()
 			CFont::SetScale(SCREEN_SCALE_X(0.48f), SCREEN_SCALE_Y(1.120f));
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
-			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetFontStyle(FONTJAP(FONT_BANK));
 
 			float offsetX = SCREEN_SCALE_X(40.0f) + SCREEN_SCALE_X(8.0f);
 			float center = SCREEN_SCALE_FROM_RIGHT(50.0f) - SCREEN_SCALE_X(8.0f) - offsetX;
@@ -1085,12 +1088,17 @@ void CHud::DrawAfterFade()
 
 			if (CGame::germanGame)
 				CFont::SetScale(SCREEN_SCALE_X(0.52f * 0.85f), SCREEN_SCALE_Y(1.1f * 0.85f));
+			else if (CFont::LanguageSet == FONT_LANGSET_JAPANESE)
+				CFont::SetScale(SCREEN_SCALE_X(0.52f) * 1.35f, SCREEN_SCALE_Y(1.1f) * 1.25f);
 			else
 				CFont::SetScale(SCREEN_SCALE_X(0.52f), SCREEN_SCALE_Y(1.1f));
 
 			CFont::SetJustifyOff();
-			CFont::SetWrapx(SCREEN_SCALE_X(200.0f + 26.0f - 4.0f));
-			CFont::SetFontStyle(FONT_BANK);
+			if (CFont::LanguageSet == FONT_LANGSET_JAPANESE) 
+				CFont::SetWrapx(SCREEN_SCALE_X(229.0f + 26.0f - 4.0f));
+			else
+				CFont::SetWrapx(SCREEN_SCALE_X(200.0f + 26.0f - 4.0f));
+			CFont::SetFontStyle(FONTJAP(FONT_BANK));
 			CFont::SetBackgroundOn();
 			CFont::SetBackGroundOnlyTextOff();
 			CFont::SetBackgroundColor(CRGBA(0, 0, 0, fAlpha * 0.8f));
@@ -1113,7 +1121,7 @@ void CHud::DrawAfterFade()
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetCentreSize(SCREEN_SCALE_X(600.0f));
-		CFont::SetFontStyle(FONT_BANK);
+		CFont::SetFontStyle(FONTJAP(FONT_BANK));
 
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 		CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[3]);
@@ -1130,7 +1138,7 @@ void CHud::DrawAfterFade()
 		CFont::SetPropOn();
 		CFont::SetCentreSize(SCREEN_SCALE_X(620.0f));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::SetFontStyle(FONT_BANK);
+		CFont::SetFontStyle(FONTJAP(FONT_BANK));
 
 		CFont::PrintString((SCREEN_WIDTH / 2) - SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f) - SCREEN_SCALE_Y(2.0f), m_BigMessage[4]);
 
@@ -1193,7 +1201,7 @@ void CHud::DrawAfterFade()
 			CFont::SetPropOn();
 			CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
-			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetFontStyle(FONTJAP(FONT_BANK));
 
 			CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(20.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[5]);
 

@@ -12,6 +12,8 @@
 
 #include "ControllerConfig.h"
 
+#include "Font.h"
+
 tMessage(&CMessages::BriefMessages)[NUMBRIEFMESSAGES] = *(tMessage(*)[NUMBRIEFMESSAGES])*(uintptr*)0x8786E0;
 tPreviousBrief(&CMessages::PreviousBriefs)[NUMPREVIOUSBRIEFS] = *(tPreviousBrief(*)[NUMPREVIOUSBRIEFS])*(uintptr*)0x713C08;
 tBigMessage(&CMessages::BIGMessages)[NUMBIGMESSAGES] = *(tBigMessage(*)[NUMBIGMESSAGES])*(uintptr*)0x773628;
@@ -53,6 +55,13 @@ CMessages::WideStringCopy(wchar *dst, wchar *src, uint16 size)
 	dst[i] = '\0';
 }
 
+wchar jappy(wchar c)
+{
+	if (CFont::LanguageSet == FONT_LANGSET_JAPANESE)
+		return c & 0x7fff;
+	return c;
+}
+
 bool
 CMessages::WideStringCompare(wchar *str1, wchar *str2, uint16 size)
 {
@@ -62,10 +71,10 @@ CMessages::WideStringCompare(wchar *str1, wchar *str2, uint16 size)
 		return false;
 
 	for (int32 i = 0; i < size; i++) {
-		if (!str1[i])
+		if (!jappy(str1[i]))
 			break;
 
-		if (str1[i] != str2[i])
+		if (jappy(str1[i]) != jappy(str2[i]))
 			return false;
 	}
 	return true;
@@ -371,7 +380,10 @@ CMessages::InsertNumberInString(wchar *str, int32 n1, int32 n2, int32 n3, int32 
 	int32 i = 0;
 
 	for (int32 c = 0; c < size;) {
-		if (str[c] == '~' && str[c + 1] == '1' && str[c + 2] == '~') {
+		if ((CFont::LanguageSet == FONT_LANGSET_JAPANESE && str[c] == (0x8000 | '~') && str[c + 1] == (0x8000 | '1') && str[c + 2] == (0x8000 | '~')) ||
+			(CFont::LanguageSet != FONT_LANGSET_JAPANESE && str[c] == '~' && str[c + 1] == '1' && str[c + 2] == '~'))
+		{
+			//if (str[c] == '~' && str[c + 1] == '1' && str[c + 2] == '~') {
 			switch (i) {
 			case 0: sprintf(numStr, "%d", n1); break;
 			case 1: sprintf(numStr, "%d", n2); break;
@@ -409,7 +421,10 @@ CMessages::InsertStringInString(wchar *str1, wchar *str2)
 	wchar *_str1 = str1;
 	uint16 i;
 	for (i = 0; i < total_size; ) {
-		if (*_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~') {
+		if ((CFont::LanguageSet == FONT_LANGSET_JAPANESE && *_str1 == (0x8000 | '~') && *(_str1 + 1) == (0x8000 | 'a') && *(_str1 + 2) == (0x8000 | '~'))
+			|| (CFont::LanguageSet != FONT_LANGSET_JAPANESE && *_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~'))
+		{
+			//if (*_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~') {
 			_str1 += 3;
 			for (int j = 0; j < str2_size; j++) {
 				tempstr[i++] = str2[j];
@@ -440,7 +455,8 @@ CMessages::InsertPlayerControlKeysInString(wchar *str)
 
 	wchar *_outstr = outstr;
 	for (i = 0; i < strSize;) {
-		if (str[i] == '~' && str[i + 1] == 'k' && str[i + 2] == '~') {
+		if ((CFont::LanguageSet == FONT_LANGSET_JAPANESE && str[i] == (0x8000 | '~') && str[i + 1] == (0x8000 | 'k') && str[i + 2] == (0x8000 | '~')) ||
+			(CFont::LanguageSet != FONT_LANGSET_JAPANESE && str[i] == '~' && str[i + 1] == 'k' && str[i + 2] == '~')) {
 			i += 4;
 			for (int32 cont = 0; cont < MAX_CONTROLLERACTIONS; cont++) {
 				uint16 contSize = GetWideStringLength(ControlsManager.m_aActionNames[cont]);

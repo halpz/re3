@@ -35,8 +35,8 @@ class CHud
 public:
 	static CSprite2d *Sprites;
 	static int32 &SpriteBrightness;
-	static wchar *m_HelpMessage;
-	static wchar *m_LastHelpMessage;
+	static wchar m_HelpMessage[256];
+	static wchar m_LastHelpMessage[256];
 	static int32 &m_HelpMessageState;
 	static int32 &m_HelpMessageTimer;
 	static int32 &m_HelpMessageFadeTimer;

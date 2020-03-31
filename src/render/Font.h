@@ -31,6 +31,9 @@ enum {
 	FONT_BANK,
 	FONT_PAGER,
 	FONT_HEADING,
+#ifdef MORE_LANGUAGES
+	FONT_JAPANESE,
+#endif
 };
 
 enum {
@@ -43,21 +46,27 @@ enum {
 enum
 {
 	FONT_LANGSET_EFIGS,
-	FONT_LANGSET_RUSSIAN
+	FONT_LANGSET_RUSSIAN,
+	FONT_LANGSET_JAPANESE
 };
 #endif
+
+#define FONTJAP(style) (CFont::LanguageSet == FONT_LANGSET_JAPANESE ? FONT_JAPANESE : style)
 
 class CFont
 {
 #ifdef MORE_LANGUAGES
 	static int16 Size[2][3][193];
+public:
 	static uint8 LanguageSet;
+private:
 	static int32 Slot;
+	static CSprite2d Sprite[4];
 #else
 	static int16 Size[3][193];
+	static CSprite2d* Sprite;	//[3]
 #endif
 	static int16 &NewLine;
-	static CSprite2d *Sprite;	//[3]
 public:
 	static CFontDetails& Details;
 
@@ -68,17 +77,25 @@ public:
 	static void PrintString(float x, float y, wchar *s);
 	static int GetNumberLines(float xstart, float ystart, wchar *s);
 	static void GetTextRect(CRect *rect, float xstart, float ystart, wchar *s);
+#ifdef MORE_LANGUAGES
+	static bool PrintString(float x, float y, wchar *start, wchar* &end, float spwidth, float japX);
+#else
 	static void PrintString(float x, float y, wchar *start, wchar *end, float spwidth);
+#endif
 	static float GetCharacterWidth(wchar c);
 	static float GetCharacterSize(wchar c);
 	static float GetStringWidth(wchar *s, bool spaces = false);
-	static wchar *GetNextSpace(wchar *s);
-	static wchar *ParseToken(wchar *s, wchar*);
+	static uint16 *GetNextSpace(wchar *s);
+#ifdef MORE_LANGUAGES
+	static uint16 *ParseToken(wchar *s, wchar*, bool japShit = false);
+#else
+	static uint16 *ParseToken(wchar *s, wchar*);
+#endif
 	static void DrawFonts(void);
-	static wchar character_code(uint8 c);
+	static uint16 character_code(uint8 c);
 
 	static CFontDetails GetDetails() { return Details; }
-	static void SetScale(float x, float y) { Details.scaleX = x; Details.scaleY = y; }
+	static void SetScale(float x, float y);
 	static void SetSlantRefPoint(float x, float y) { Details.slantRefX = x; Details.slantRefY = y; }
 	static void SetSlant(float s) { Details.slant = s; }
 	static void SetJustifyOn(void) {
@@ -137,19 +154,11 @@ public:
 	static void SetRightJustifyWrap(float wrap) { Details.rightJustifyWrap = wrap; }
 	static void SetAlphaFade(float fade) { Details.alphaFade = fade; }
 	static void SetDropShadowPosition(int16 pos) { Details.dropShadowPosition = pos; }
+	static void SetBackgroundColor(CRGBA col);
+	static void SetColor(CRGBA col);
+	static void SetDropColor(CRGBA col);
 
-	// TODO: really just CRGBA but that isn't passed correctly
-	static void SetBackgroundColor(const CRGBA &col) { Details.backgroundColor = col; }
-	static void SetColor(const CRGBA &col) {
-		Details.color = col;
-		if(Details.alphaFade < 255.0f)
-			Details.color.a *= Details.alphaFade/255.0f;
-	}
-	static void SetDropColor(const CRGBA &col) {
-		Details.dropColor = col;
-		if(Details.alphaFade < 255.0f)
-			Details.dropColor.a *= Details.alphaFade/255.0f;
-	}
-
+#ifdef MORE_LANGUAGES
 	static void ReloadFonts(uint8 set);
+#endif
 };

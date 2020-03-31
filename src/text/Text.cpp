@@ -47,6 +47,9 @@ CText::Load(void)
 	case LANGUAGE_RUSSIAN:
 		sprintf(filename, "RUSSIAN.GXT");
 		break;
+	case LANGUAGE_JAPANESE:
+		sprintf(filename, "JAPANESE.GXT");
+		break;
 #endif
 	}
 
@@ -257,13 +260,15 @@ AsciiToUnicode(const char *src, wchar *dst)
 	while((*dst++ = *src++) != '\0');
 }
 
+#include "Game.h"
+
 char*
 UnicodeToAscii(wchar *src)
 {
 	static char aStr[256];
 	int len;
 	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
-		if(*src < 128)
+		if(*src < 128 || (CGame::russianGame && *src < 256))
 			aStr[len] = *src;
 		else
 			aStr[len] = '#';
@@ -321,4 +326,6 @@ STARTPATCHES
 
 	InjectHook(0x52C120, &CData::Load, PATCH_JUMP);
 	InjectHook(0x52C200, &CData::Unload, PATCH_JUMP);
+
+	InjectHook(0x52C2F0, &UnicodeToAscii, PATCH_JUMP);
 ENDPATCHES

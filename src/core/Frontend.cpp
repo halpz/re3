@@ -576,7 +576,7 @@ void CMenuManager::Draw()
 	if (aScreens[m_nCurrScreen].m_ScreenName[0] != '\0') {
 		
 		CFont::SetRightJustifyOn();
-		CFont::SetFontStyle(FONT_HEADING);
+		CFont::SetFontStyle(FONTJAP(FONT_HEADING));
 #ifdef PS2_LIKE_MENU
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 		CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(1.3f));
@@ -590,7 +590,7 @@ void CMenuManager::Draw()
 		nextYToUse += 24.0f + 10.0f;
 	}
 
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONTJAP(FONT_BANK));
 	CFont::SetScale(MENU_X(0.9f * actionTextScaleX), MENU_Y(0.9f * actionTextScaleY));
 	CFont::SetRightJustifyOff(); // AG used SetAlignment(ALIGN_LEFT);
 	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
@@ -646,7 +646,7 @@ void CMenuManager::Draw()
 			columnWidth = 320;
 			headerHeight = 240;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONTJAP(FONT_HEADING));
 			CFont::SetScale(MENU_X(actionTextScaleX = 0.75f), MENU_Y(actionTextScaleY = 0.9f));
 			CFont::SetCentreOn();
 			break;
@@ -663,7 +663,7 @@ void CMenuManager::Draw()
 			columnWidth = 50;
 			headerHeight = 0;
 			lineHeight = 20;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONTJAP(FONT_HEADING));
 			CFont::SetScale(MENU_X(actionTextScaleX = 0.55f), MENU_Y(actionTextScaleY = 0.8f));
 			CFont::SetRightJustifyOff();
 			break;
@@ -673,7 +673,7 @@ void CMenuManager::Draw()
 			columnWidth = 120;
 			headerHeight = 38;
 			lineHeight = 20;
-			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetFontStyle(FONTJAP(FONT_BANK));
 			CFont::SetScale(MENU_X(actionTextScaleX = 0.45f), MENU_Y(actionTextScaleY = 0.7f));
 			CFont::SetRightJustifyOff();
 			break;
@@ -685,7 +685,7 @@ void CMenuManager::Draw()
 			columnWidth = 320;
 			headerHeight = 60;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONTJAP(FONT_HEADING));
 			CFont::SetScale(MENU_X(actionTextScaleX = 0.75f), MENU_Y(actionTextScaleY = 0.9f));
 			CFont::SetCentreOn();
 			break;
@@ -693,7 +693,7 @@ void CMenuManager::Draw()
 			columnWidth = 320;
 			headerHeight = 140;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONTJAP(FONT_HEADING));
 			CFont::SetScale(MENU_X(actionTextScaleX = 0.75f), MENU_Y(actionTextScaleY = 0.9f));
 			CFont::SetCentreOn();
 			break;
@@ -701,7 +701,7 @@ void CMenuManager::Draw()
 			columnWidth = 320;
 			headerHeight = 117;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONTJAP(FONT_HEADING));
 			CFont::SetScale(MENU_X(actionTextScaleX = 0.75f), MENU_Y(actionTextScaleY = 0.9f));
 			CFont::SetCentreOn();
 			break;
@@ -710,7 +710,7 @@ void CMenuManager::Draw()
 			columnWidth = 180;
 			headerHeight = 60;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetFontStyle(FONTJAP(FONT_BANK));
 			CFont::SetScale(MENU_X(actionTextScaleX = 0.75f), MENU_Y(actionTextScaleY = 0.9f));
 			break;
 #endif
@@ -718,7 +718,7 @@ void CMenuManager::Draw()
 			columnWidth = 320;
 			headerHeight = 40;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONTJAP(FONT_HEADING));
 			CFont::SetScale(MENU_X(actionTextScaleX = 0.75f), MENU_Y(actionTextScaleY = 0.9f));
 			CFont::SetCentreOn();
 			break;
@@ -1735,6 +1735,9 @@ void CMenuManager::InitialiseChangedLanguageSettings()
 		switch (CMenuManager::m_PrefsLanguage) {
 		case LANGUAGE_RUSSIAN:
 			CFont::ReloadFonts(FONT_LANGSET_RUSSIAN);
+			break;
+		case LANGUAGE_JAPANESE:
+			CFont::ReloadFonts(FONT_LANGSET_JAPANESE);
 			break;
 		default:
 			CFont::ReloadFonts(FONT_LANGSET_EFIGS);
@@ -2958,6 +2961,12 @@ CMenuManager::ProcessButtonPresses(void)
 #ifdef MORE_LANGUAGES
 				case MENUACTION_LANG_RUS:
 					m_PrefsLanguage = LANGUAGE_RUSSIAN;
+					m_bFrontEnd_ReloadObrTxtGxt = true;
+					CMenuManager::InitialiseChangedLanguageSettings();
+					SaveSettings();
+					break;
+				case MENUACTION_LANG_JAP:
+					m_PrefsLanguage = LANGUAGE_JAPANESE;
 					m_bFrontEnd_ReloadObrTxtGxt = true;
 					CMenuManager::InitialiseChangedLanguageSettings();
 					SaveSettings();
