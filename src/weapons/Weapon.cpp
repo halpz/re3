@@ -14,6 +14,7 @@ WRAPPER void CWeapon::AddGunshell(CEntity*, CVector const&, CVector2D const&, fl
 WRAPPER void CWeapon::Update(int32 audioEntity) { EAXJMP(0x563A10); }
 WRAPPER void CWeapon::DoTankDoomAiming(CEntity *playerVehicle, CEntity *playerPed, CVector *start, CVector *end) { EAXJMP(0x563200); }
 WRAPPER void CWeapon::InitialiseWeapons(void) { EAXJMP(0x55C2D0); }
+WRAPPER void FireOneInstantHitRound(CVector* shotSource, CVector* shotTarget, int32 damage) { EAXJMP(0x563B00); }
 
 void
 CWeapon::Initialise(eWeaponType type, int ammo)
