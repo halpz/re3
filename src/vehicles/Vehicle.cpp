@@ -31,10 +31,17 @@ void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehicleP
 void CVehicle::operator delete(void *p, size_t sz) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
 void CVehicle::operator delete(void *p, int handle) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
 
-WRAPPER bool CVehicle::ShufflePassengersToMakeSpace(void) { EAXJMP(0x5528A0); }
-// or Weapon.cpp?
-WRAPPER void FireOneInstantHitRound(CVector *shotSource, CVector *shotTarget, int32 damage) { EAXJMP(0x563B00); }
-WRAPPER void CVehicle::InflictDamage(CEntity *damagedBy, uint32 weaponType, float damage) { EAXJMP(0x551950); }
+#ifdef FIX_BUGS
+// I think they meant that
+#define DAMAGE_FLEE_IN_CAR_PROBABILITY_VALUE (MYRAND_MAX * 35 / 100)
+#define DAMAGE_FLEE_ON_FOOT_PROBABILITY_VALUE (MYRAND_MAX * 70 / 100)
+#else
+#define DAMAGE_FLEE_IN_CAR_PROBABILITY_VALUE (35000)
+#define DAMAGE_FLEE_ON_FOOT_PROBABILITY_VALUE (70000)
+#endif
+#define DAMAGE_HEALTH_TO_FLEE_ALWAYS (200.0f)
+#define DAMAGE_HEALTH_TO_CATCH_FIRE (250.0f)
+
 
 CVehicle::CVehicle(uint8 CreatedBy)
 {
@@ -362,6 +369,119 @@ CVehicle::ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVec
 }
 
 void
+CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage)
+{
+	if (!bCanBeDamaged)
+		return;
+	if (bOnlyDamagedByPlayer && (damagedBy != FindPlayerPed() && damagedBy != FindPlayerVehicle()))
+		return;
+	bool bFrightensDriver = false;
+	switch (weaponType) {
+	case WEAPONTYPE_UNARMED:
+	case WEAPONTYPE_BASEBALLBAT:
+		if (bMeleeProof)
+			return;
+		break;
+	case WEAPONTYPE_COLT45:
+	case WEAPONTYPE_UZI:
+	case WEAPONTYPE_SHOTGUN:
+	case WEAPONTYPE_AK47:
+	case WEAPONTYPE_M16:
+	case WEAPONTYPE_SNIPERRIFLE:
+	case WEAPONTYPE_TOTAL_INVENTORY_WEAPONS:
+	case WEAPONTYPE_UZI_DRIVEBY:
+		if (bBulletProof)
+			return;
+		bFrightensDriver = true;
+		break;
+	case WEAPONTYPE_ROCKETLAUNCHER:
+	case WEAPONTYPE_MOLOTOV:
+	case WEAPONTYPE_GRENADE:
+	case WEAPONTYPE_EXPLOSION:
+		if (bExplosionProof)
+			return;
+		bFrightensDriver = true;
+		break;
+	case WEAPONTYPE_FLAMETHROWER:
+		if (bFireProof)
+			return;
+		break;
+	case WEAPONTYPE_RAMMEDBYCAR:
+		if (bCollisionProof)
+			return;
+		break;
+	default:
+		break;
+	}
+	if (m_fHealth > 0.0f) {
+		if (VehicleCreatedBy == RANDOM_VEHICLE && pDriver &&
+			(m_status == STATUS_SIMPLE || m_status == STATUS_PHYSICS) &&
+			AutoPilot.m_nCarMission == MISSION_CRUISE) {
+			if (m_randomSeed < DAMAGE_FLEE_IN_CAR_PROBABILITY_VALUE) {
+				CCarCtrl::SwitchVehicleToRealPhysics(this);
+				AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
+				AutoPilot.m_nCruiseSpeed = GAME_SPEED_TO_CARAI_SPEED * pHandling->Transmission.fUnkMaxVelocity;
+				m_status = STATUS_PHYSICS;
+			}
+		}
+		m_nLastWeaponDamage = weaponType;
+		float oldHealth = m_fHealth;
+		if (m_fHealth > damage) {
+			m_fHealth -= damage;
+			if (VehicleCreatedBy == RANDOM_VEHICLE &&
+				(m_fHealth < DAMAGE_HEALTH_TO_FLEE_ALWAYS ||
+					bFrightensDriver && m_randomSeed > DAMAGE_FLEE_ON_FOOT_PROBABILITY_VALUE)) {
+				switch (m_status) {
+				case STATUS_SIMPLE:
+				case STATUS_PHYSICS:
+					if (pDriver) {
+						m_status = STATUS_ABANDONED;
+						pDriver->bFleeAfterExitingCar = true;
+						pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+					}
+					for (int i = 0; i < m_nNumMaxPassengers; i++) {
+						if (pPassengers[i]) {
+							pPassengers[i]->bFleeAfterExitingCar = true;
+							pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+						}
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			if (oldHealth > DAMAGE_HEALTH_TO_CATCH_FIRE && m_fHealth < DAMAGE_HEALTH_TO_CATCH_FIRE) {
+				if (IsCar()) {
+					CAutomobile* pThisCar = (CAutomobile*)this;
+					pThisCar->Damage.SetEngineStatus(ENGINE_STATUS_ON_FIRE);
+					pThisCar->m_pSetOnFireEntity = damagedBy;
+					if (damagedBy)
+						damagedBy->RegisterReference((CEntity**)&pThisCar->m_pSetOnFireEntity);
+				}
+			}
+		}
+		else {
+			m_fHealth = 0.0f;
+			if (weaponType == WEAPONTYPE_EXPLOSION) {
+				// between 1000 and 3047. Also not very nice: can't be saved by respray or cheat
+				m_nBombTimer = 1000 + CGeneral::GetRandomNumber() & 0x7FF;
+				m_pBlowUpEntity = damagedBy;
+				if (damagedBy)
+					damagedBy->RegisterReference((CEntity**)&m_pBlowUpEntity);
+			}
+			else
+				BlowUpCar(damagedBy);
+		}
+	}
+#ifdef FIX_BUGS // removing dumb case when shooting police car in player's own garage gives wanted level
+	if (GetModelIndex() == MI_POLICE && damagedBy == FindPlayerPed() && !bHasBeenOwnedByPlayer)
+#else
+	if (GetModelIndex() == MI_POLICE && damagedBy == FindPlayerPed())
+#endif
+		FindPlayerPed()->SetWantedLevelNoDrop(1);
+}
+
+void
 CVehicle::ExtinguishCarFire(void)
 {
 	m_fHealth = max(m_fHealth, 300.0f);
@@ -373,6 +493,65 @@ CVehicle::ExtinguishCarFire(void)
 			car->Damage.SetEngineStatus(ENGINE_STATUS_ON_FIRE-10);
 		car->m_fFireBlowUpTimer = 0.0f;
 	}
+}
+
+bool
+CVehicle::ShufflePassengersToMakeSpace(void)
+{
+	if (m_nNumPassengers >= m_nNumMaxPassengers)
+		return false;
+	if (pPassengers[1] &&
+		!(m_nGettingInFlags & CAR_DOOR_FLAG_LR) &&
+		IsRoomForPedToLeaveCar(COMPONENT_DOOR_REAR_LEFT, nil)) {
+		if (!pPassengers[2] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RR)) {
+			pPassengers[2] = pPassengers[1];
+			pPassengers[1] = nil;
+			pPassengers[2]->m_vehEnterType = CAR_DOOR_RR;
+			return true;
+		}
+		if (!pPassengers[0] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RF)) {
+			pPassengers[0] = pPassengers[1];
+			pPassengers[1] = nil;
+			pPassengers[0]->m_vehEnterType = CAR_DOOR_RF;
+			return true;
+		}
+		return false;
+	}
+	if (pPassengers[2] &&
+		!(m_nGettingInFlags & CAR_DOOR_FLAG_RR) &&
+		IsRoomForPedToLeaveCar(COMPONENT_DOOR_REAR_RIGHT, nil)) {
+		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
+			pPassengers[1] = pPassengers[2];
+			pPassengers[2] = nil;
+			pPassengers[1]->m_vehEnterType = CAR_DOOR_LR;
+			return true;
+		}
+		if (!pPassengers[0] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RF)) {
+			pPassengers[0] = pPassengers[2];
+			pPassengers[2] = nil;
+			pPassengers[0]->m_vehEnterType = CAR_DOOR_RF;
+			return true;
+		}
+		return false;
+	}
+	if (pPassengers[0] &&
+		!(m_nGettingInFlags & CAR_DOOR_FLAG_RF) &&
+		IsRoomForPedToLeaveCar(COMPONENT_DOOR_FRONT_RIGHT, nil)) {
+		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
+			pPassengers[1] = pPassengers[0];
+			pPassengers[0] = nil;
+			pPassengers[1]->m_vehEnterType = CAR_DOOR_LR;
+			return true;
+		}
+		if (!pPassengers[2] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RR)) {
+			pPassengers[2] = pPassengers[0];
+			pPassengers[0] = nil;
+			pPassengers[2]->m_vehEnterType = CAR_DOOR_RR;
+			return true;
+		}
+		return false;
+	}
+	return false;
 }
 
 void
@@ -831,4 +1010,5 @@ STARTPATCHES
 	InjectHook(0x551EB0, &CVehicle::RemovePassenger, PATCH_JUMP);
 	InjectHook(0x5525A0, &CVehicle::ProcessCarAlarm, PATCH_JUMP);
 	InjectHook(0x552620, &CVehicle::IsSphereTouchingVehicle, PATCH_JUMP);
+	InjectHook(0x551950, &CVehicle::InflictDamage, PATCH_JUMP);
 ENDPATCHES

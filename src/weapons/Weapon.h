@@ -81,3 +81,5 @@ public:
 	static void UpdateWeapons(void);
 };
 static_assert(sizeof(CWeapon) == 0x18, "CWeapon: error");
+
+void FireOneInstantHitRound(CVector* shotSource, CVector* shotTarget, int32 damage);
