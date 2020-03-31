@@ -23,12 +23,18 @@
 #include "SceneEdit.h"
 #include "Debug.h"
 #include "Camera.h"
+#include "DMAudio.h"
 
 const float DefaultFOV = 70.0f;	// beta: 80.0f
 
 bool PrintDebugCode = false;
 int16 &DebugCamMode = *(int16*)0x95CCF2;
-bool bFreeCam = false;
+
+#ifdef FREE_CAM
+bool bFreePadCam = false;
+bool bFreeMouseCam = false;
+int nPreviousMode = -1;
+#endif
 
 void
 CCam::Init(void)
@@ -140,7 +146,7 @@ CCam::Process(void)
 			Process_FollowPedWithMouse(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		else
 #ifdef FREE_CAM
-			if(bFreeCam)
+			if(bFreePadCam)
 				Process_FollowPed_Rotation(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 			else
 #endif
@@ -180,7 +186,12 @@ CCam::Process(void)
 		Process_FlyBy(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
 	case MODE_CAM_ON_A_STRING:
-		Process_Cam_On_A_String(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+#ifdef FREE_CAM
+		if(bFreeMouseCam || bFreePadCam)
+			Process_FollowCar_SA(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		else
+#endif
+			Process_Cam_On_A_String(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
 	case MODE_REACTION:
 		Process_ReactionCam(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
@@ -192,7 +203,12 @@ CCam::Process(void)
 		Process_Chris_With_Binding_PlusRotation(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
 	case MODE_BEHINDBOAT:
-		Process_BehindBoat(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+#ifdef FREE_CAM
+		if (bFreeMouseCam || bFreePadCam)
+			Process_FollowCar_SA(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		else
+#endif
+			Process_BehindBoat(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
 	case MODE_PLAYER_FALLEN_WATER:
 		Process_Player_Fallen_Water(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
@@ -244,6 +260,9 @@ CCam::Process(void)
 		Up = CVector(0.0f, 0.0f, 1.0f);
 	}
 
+#ifdef FREE_CAM
+	nPreviousMode = Mode;
+#endif
 	CVector TargetToCam = Source - m_cvecTargetCoorsForFudgeInter;
 	float DistOnGround = TargetToCam.Magnitude2D();
 	m_fTrueBeta = CGeneral::GetATanOfXY(TargetToCam.x, TargetToCam.y);
@@ -1530,7 +1549,12 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 	TargetCoors.z += fTranslateCamUp;
 	TargetCoors = DoAverageOnVector(TargetCoors);
 
+	// SA code
+#ifdef FREE_CAM
+	if((bFreeMouseCam && Alpha > 0.0f) || (!bFreeMouseCam && Alpha > fBaseDist))
+#else
 	if(Alpha > fBaseDist)	// comparing an angle against a distance?
+#endif
 		CamDist = fBaseDist + Cos(min(Alpha*fFalloff, HALFPI))*fAngleDist;
 	else
 		CamDist = fBaseDist + Cos(Alpha)*fAngleDist;
@@ -4441,7 +4465,7 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 	float MouseX = CPad::GetPad(0)->GetMouseX();
 	float MouseY = CPad::GetPad(0)->GetMouseY();
 	float LookLeftRight, LookUpDown;
-	if((MouseX != 0.0f || MouseY != 0.0f) && !CPad::GetPad(0)->ArePlayerControlsDisabled()){
+	if(bFreeMouseCam && (MouseX != 0.0f || MouseY != 0.0f) && !CPad::GetPad(0)->ArePlayerControlsDisabled()){
 		UseMouse = true;
 		LookLeftRight = -2.5f*MouseX;
 		LookUpDown = 4.0f*MouseY;
@@ -4571,6 +4595,645 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 	}
 
 	GetVectorsReadyForRW();
+}
+
+// LCS cam hehe
+void
+CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation, float, float)
+{
+	// Missing things on III CCam
+	static CVector m_aTargetHistoryPosOne;
+	static CVector m_aTargetHistoryPosTwo;
+	static CVector m_aTargetHistoryPosThree;
+	static int m_nCurrentHistoryPoints = 0;
+	static float lastBeta = -9999.0f;
+	static float lastAlpha = -9999.0f;
+	static float stepsLeftToChangeBetaByMouse;
+	static float dontCollideWithCars;
+	static bool alphaCorrected;
+	static float heightIncreaseMult;
+
+	if (!CamTargetEntity->IsVehicle())
+		return;
+
+	CVehicle* car = (CVehicle*)CamTargetEntity;
+	CVector TargetCoors = CameraTarget;
+	uint8 camSetArrPos = 0;
+
+	// We may need those later
+	bool isPlane = car->m_modelIndex == MI_DODO;
+	bool isHeli = false;
+	bool isBike = false;
+	bool isCar = car->IsCar() && !isPlane && !isHeli && !isBike;
+
+	CPad* pad = CPad::GetPad(0);
+
+	// Next direction is non-existent in III
+	uint8 nextDirectionIsForward = !(pad->GetLookBehindForCar() || pad->GetLookBehindForPed() || pad->GetLookLeft() || pad->GetLookRight()) &&
+		DirectionWasLooking == LOOKING_FORWARD;
+
+	if (car->m_modelIndex == MI_FIRETRUCK) {
+		camSetArrPos = 7;
+	} else if (car->m_modelIndex == MI_RCBANDIT) {
+		camSetArrPos = 5;
+	} else if (car->IsBoat()) {
+		camSetArrPos = 4;
+	} else if (isBike) {
+		camSetArrPos = 1;
+	} else if (isPlane) {
+		camSetArrPos = 3;
+	} else if (isHeli) {
+		camSetArrPos = 2;
+	}
+
+	// LCS one but index 1(firetruck) moved to last
+	float CARCAM_SET[][15] = {
+		{1.3f, 1.0f, 0.4f, 10.0f, 15.0f, 0.5f, 1.0f, 1.0f, 0.85f, 0.2f, 0.075f, 0.05f, 0.8f, DEGTORAD(45.0f), DEGTORAD(89.0f)}, // cars
+		{1.1f, 1.0f, 0.1f, 10.0f, 11.0f, 0.5f, 1.0f, 1.0f, 0.85f, 0.2f, 0.075f, 0.05f, 0.75f, DEGTORAD(45.0f), DEGTORAD(89.0f)}, // bike
+		{1.1f, 1.0f, 0.2f, 10.0f, 15.0f, 0.05f, 0.05f, 0.0f, 0.9f, 0.05f, 0.01f, 0.05f, 1.0f, DEGTORAD(10.0f), DEGTORAD(70.0f)}, // heli (SA values)
+		{1.1f, 3.5f, 0.2f, 10.0f, 25.0f, 0.5f, 1.0f, 1.0f, 0.75f, 0.1f, 0.005f, 0.2f, 1.0f, DEGTORAD(89.0f), DEGTORAD(89.0f)}, // plane (SA values)
+		{0.9f, 1.0f, 0.1f, 10.0f, 15.0f, 0.5f, 1.0f, 0.0f, 0.9f, 0.05f, 0.005f, 0.05f, 1.0f, -0.2f, DEGTORAD(70.0f)}, // boat
+		{1.1f, 1.0f, 0.2f, 10.0f, 5.0f, 0.5f, 1.0f, 1.0f, 0.75f, 0.1f, 0.005f, 0.2f, 1.0f, DEGTORAD(45.0f), DEGTORAD(89.0f)}, // rc cars
+		{1.1f, 1.0f, 0.2f, 10.0f, 5.0f, 0.5f, 1.0f, 1.0f, 0.75f, 0.1f, 0.005f, 0.2f, 1.0f, DEGTORAD(20.0f), DEGTORAD(70.0f)}, // rc heli/planes
+		{1.3f, 1.0f, 0.4f, 10.0f, 15.0f, 0.5f, 1.0f, 1.0f, 0.85f, 0.2f, 0.075f, 0.05f, 0.8f, -0.18f, DEGTORAD(40.0f)}, // firetruck...
+	};
+
+	// RC Heli/planes use same alpha values with heli/planes (LCS firetruck will fallback to 0)
+	uint8 alphaArrPos = (camSetArrPos > 4 ? (isPlane ? 3 : (isHeli ? 2 : 0)) : camSetArrPos);
+	float zoomModeAlphaOffset = 0.0f;
+	static float ZmOneAlphaOffsetLCS[] = { 0.12f, 0.08f, 0.15f, 0.08f, 0.08f };
+	static float ZmTwoAlphaOffsetLCS[] = { 0.1f, 0.08f, 0.3f, 0.08f, 0.08f };
+	static float ZmThreeAlphaOffsetLCS[] = { 0.065f, 0.05f, 0.15f, 0.06f, 0.08f };
+
+	if (isHeli && car->m_status == STATUS_PLAYER_REMOTE)
+		zoomModeAlphaOffset = ZmTwoAlphaOffsetLCS[alphaArrPos];
+	else {
+		switch ((int)TheCamera.CarZoomIndicator) {
+			// near
+		case 1:
+			zoomModeAlphaOffset = ZmOneAlphaOffsetLCS[alphaArrPos];
+			break;
+			// mid
+		case 2:
+			zoomModeAlphaOffset = ZmTwoAlphaOffsetLCS[alphaArrPos];
+			break;
+			// far
+		case 3:
+			zoomModeAlphaOffset = ZmThreeAlphaOffsetLCS[alphaArrPos];
+			break;
+		default:
+			break;
+		}
+	}
+
+	CColModel* carCol = (CColModel*)car->GetColModel();
+	float colMaxZ = carCol->boundingBox.max.z;  // As opposed to LCS and SA, VC does this: carCol->boundingBox.max.z - carCol->boundingBox.min.z;
+	float approxCarLength = 2.0f * Abs(carCol->boundingBox.min.y); // SA taxi min.y = -2.95, max.z = 0.883502f
+
+	float newDistance = TheCamera.CarZoomValueSmooth + CARCAM_SET[camSetArrPos][1] + approxCarLength;
+
+	float minDistForThisCar = approxCarLength * CARCAM_SET[camSetArrPos][3];
+
+	if (!isHeli || car->m_status == STATUS_PLAYER_REMOTE) {
+		float radiusToStayOutside = colMaxZ * CARCAM_SET[camSetArrPos][0] - CARCAM_SET[camSetArrPos][2];
+		if (radiusToStayOutside > 0.0f) {
+			TargetCoors.z += radiusToStayOutside;
+			newDistance += radiusToStayOutside;
+			zoomModeAlphaOffset += 0.3f / newDistance * radiusToStayOutside;
+		}
+	} else {
+		// 0.6f = fTestShiftHeliCamTarget
+		TargetCoors.x += 0.6f * car->GetUp().x * colMaxZ;
+		TargetCoors.y += 0.6f * car->GetUp().y * colMaxZ;
+		TargetCoors.z += 0.6f * car->GetUp().z * colMaxZ;
+	}
+
+	float minDistForVehType = CARCAM_SET[camSetArrPos][4];
+
+	if ((int)TheCamera.CarZoomIndicator == 1 && (camSetArrPos < 2 || camSetArrPos == 7)) {
+		minDistForVehType = minDistForVehType * 0.65f;
+	}
+
+	float nextDistance = max(newDistance, minDistForVehType);
+
+	CA_MAX_DISTANCE = newDistance;
+	CA_MIN_DISTANCE = 3.5f;
+
+	if (ResetStatics) {
+		FOV = DefaultFOV;
+
+		// GTA 3 has this in veh. camera
+		if (TheCamera.m_bIdleOn)
+			TheCamera.m_uiTimeWeEnteredIdle = CTimer::GetTimeInMilliseconds();
+	} else {
+		if (isCar || isBike) {
+			// 0.4f: CAR_FOV_START_SPEED
+			if (DotProduct(car->GetForward(), car->m_vecMoveSpeed) > 0.4f)
+				FOV += (DotProduct(car->GetForward(), car->m_vecMoveSpeed) - 0.4f) * CTimer::GetTimeStep();
+		}
+
+		if (FOV > DefaultFOV)
+			// 0.98f: CAR_FOV_FADE_MULT
+			FOV = pow(0.98f, CTimer::GetTimeStep()) * (FOV - DefaultFOV) + DefaultFOV;
+
+		if (FOV <= DefaultFOV + 30.0f) {
+			if (FOV < DefaultFOV)
+				FOV = DefaultFOV;
+		} else
+			FOV = DefaultFOV + 30.0f;
+	}
+
+	// WORKAROUND: I still don't know how looking behind works (m_bCamDirectlyInFront is unused in III, they seem to use m_bUseTransitionBeta)
+	if (pad->GetLookBehindForCar())
+		if (DirectionWasLooking == LOOKING_FORWARD || !LookingBehind)
+			TheCamera.m_bCamDirectlyInFront = true;
+
+	// Taken from RotCamIfInFrontCar, because we don't call it anymore
+	if (!(pad->GetLookBehindForCar() || pad->GetLookBehindForPed() || pad->GetLookLeft() || pad->GetLookRight()))
+		if (DirectionWasLooking != LOOKING_FORWARD)
+			TheCamera.m_bCamDirectlyBehind = true;
+
+	// Called when we just entered the car, just started to look behind or returned back from looking left, right or behind
+	if (ResetStatics || TheCamera.m_bCamDirectlyBehind || TheCamera.m_bCamDirectlyInFront) {
+		ResetStatics = false;
+		Rotating = false;
+		m_bCollisionChecksOn = true;
+		// TheCamera.m_bResetOldMatrix = 1;
+
+		// Garage exit cam is not working well in III...
+		// if (!TheCamera.m_bJustCameOutOfGarage) // && !sthForScript)
+		// {
+		Alpha = 0.0f;
+		Beta = car->GetForward().Heading() - HALFPI;
+		if (TheCamera.m_bCamDirectlyInFront) {
+			Beta += PI;
+		}
+		// }
+
+		BetaSpeed = 0.0;
+		AlphaSpeed = 0.0;
+		Distance = 1000.0;
+
+		Front.x = -(cos(Beta) * cos(Alpha));
+		Front.y = -(sin(Beta) * cos(Alpha));
+		Front.z = sin(Alpha);
+
+		m_aTargetHistoryPosOne = TargetCoors - nextDistance * Front;
+
+		m_aTargetHistoryPosTwo = TargetCoors - newDistance * Front;
+
+		m_nCurrentHistoryPoints = 0;
+		if (!TheCamera.m_bJustCameOutOfGarage) // && !sthForScript)
+			Alpha = -zoomModeAlphaOffset;
+	}
+
+	Front = TargetCoors - m_aTargetHistoryPosOne;
+	Front.Normalise();
+
+	// Code that makes cam rotate around the car
+	float camRightHeading = Front.Heading() - HALFPI;
+	if (camRightHeading < -PI)
+		camRightHeading = camRightHeading + TWOPI;
+
+	float velocityRightHeading;
+	if (car->m_vecMoveSpeed.Magnitude2D() <= 0.02f)
+		velocityRightHeading = camRightHeading;
+	else
+		velocityRightHeading = car->m_vecMoveSpeed.Heading() - HALFPI;
+
+	if (velocityRightHeading < camRightHeading - PI)
+		velocityRightHeading = velocityRightHeading + TWOPI;
+	else if (velocityRightHeading > camRightHeading + PI)
+		velocityRightHeading = velocityRightHeading - TWOPI;
+
+	float betaChangeMult1 = CTimer::GetTimeStep() * CARCAM_SET[camSetArrPos][10];
+	float betaChangeLimit = CTimer::GetTimeStep() * CARCAM_SET[camSetArrPos][11];
+
+	float betaChangeMult2 = (car->m_vecMoveSpeed - DotProduct(car->m_vecMoveSpeed, Front) * Front).Magnitude();
+
+	float betaChange = min(1.0f, betaChangeMult1 * betaChangeMult2) * (velocityRightHeading - camRightHeading);
+	if (betaChange <= betaChangeLimit) {
+		if (betaChange < -betaChangeLimit)
+			betaChange = -betaChangeLimit;
+	} else {
+		betaChange = betaChangeLimit;
+	}
+	float targetBeta = camRightHeading + betaChange;
+
+	if (targetBeta < Beta - HALFPI)
+		targetBeta += TWOPI;
+	else if (targetBeta > Beta + PI)
+		targetBeta -= TWOPI;
+
+	float carPosChange = (TargetCoors - m_aTargetHistoryPosTwo).Magnitude();
+	if (carPosChange < newDistance && newDistance > minDistForThisCar) {
+		newDistance = max(minDistForThisCar, carPosChange);
+	}
+	float maxAlphaAllowed = CARCAM_SET[camSetArrPos][13];
+
+	// Originally this is to prevent camera enter into car while we're stopping, but what about moving???
+	// This is also original LCS and SA bug, or some attempt to fix lag. We'll never know
+
+	// if (car->m_vecMoveSpeed.MagnitudeSqr() < sq(0.2f))
+		if (car->m_modelIndex != MI_FIRETRUCK) {
+			// if (!isBike || GetMysteriousWheelRelatedThingBike(car) > 3)
+				// if (!isHeli && (!isPlane || car->GetWheelsOnGround())) {
+
+					CVector left = CrossProduct(car->GetForward(), CVector(0.0f, 0.0f, 1.0f));
+					left.Normalise();
+					CVector up = CrossProduct(left, car->GetForward());
+					up.Normalise();
+					float lookingUp = DotProduct(up, Front);
+					if (lookingUp > 0.0f) {
+						float v88 = Asin(Abs(Sin(Beta - (car->GetForward().Heading() - HALFPI))));
+						float v200;
+						if (v88 <= Atan2(carCol->boundingBox.max.x, -carCol->boundingBox.min.y)) {
+							v200 = (1.5f - carCol->boundingBox.min.y) / Cos(v88);
+						} else {
+							float a6g = 1.2f + carCol->boundingBox.max.x;
+							v200 = a6g / Cos(max(0.0f, HALFPI - v88));
+						}
+						maxAlphaAllowed = Cos(Beta - (car->GetForward().Heading() - HALFPI)) * Atan2(car->GetForward().z, car->GetForward().Magnitude2D())
+							+ Atan2(TargetCoors.z - car->GetPosition().z + car->GetHeightAboveRoad(), v200 * 1.2f);
+
+						if (isCar && ((CAutomobile*)car)->m_nWheelsOnGround > 1 && Abs(DotProduct(car->m_vecTurnSpeed, car->GetForward())) < 0.05f) {
+							maxAlphaAllowed += Cos(Beta - (car->GetForward().Heading() - HALFPI) + HALFPI) * Atan2(car->GetRight().z, car->GetRight().Magnitude2D());
+						}
+					}
+				}
+
+	float targetAlpha = Asin(clamp(Front.z, -1.0f, 1.0f)) - zoomModeAlphaOffset;
+	if (targetAlpha <= maxAlphaAllowed) {
+		if (targetAlpha < -CARCAM_SET[camSetArrPos][14])
+			targetAlpha = -CARCAM_SET[camSetArrPos][14];
+	} else {
+		targetAlpha = maxAlphaAllowed;
+	}
+	float maxAlphaBlendAmount = CTimer::GetTimeStep() * CARCAM_SET[camSetArrPos][6];
+	float targetAlphaBlendAmount = (1.0f - pow(CARCAM_SET[camSetArrPos][5], CTimer::GetTimeStep())) * (targetAlpha - Alpha);
+	if (targetAlphaBlendAmount <= maxAlphaBlendAmount) {
+		if (targetAlphaBlendAmount < -maxAlphaBlendAmount)
+			targetAlphaBlendAmount = -maxAlphaBlendAmount;
+	} else {
+		targetAlphaBlendAmount = maxAlphaBlendAmount;
+	}
+
+	// Using GetCarGun(LR/UD) will give us same unprocessed RightStick value as SA
+	float stickX = -(pad->GetCarGunLeftRight());
+	float stickY = pad->GetCarGunUpDown();
+
+	// In SA this checks for m_bUseMouse3rdPerson so num2/num8 do not move camera when Keyboard & Mouse controls are used.
+	if (CCamera::m_bUseMouse3rdPerson)
+		stickY = 0.0f;
+
+	float xMovement = Abs(stickX) * (FOV / 80.0f * 5.f / 70.f) * stickX * 0.007f * 0.007f;
+	float yMovement = Abs(stickY) * (FOV / 80.0f * 3.f / 70.f) * stickY * 0.007f * 0.007f;
+
+	bool correctAlpha = true;
+	//	if (SA checks if we aren't in work car, why?) {
+	if (!isCar || car->m_modelIndex != MI_YARDIE) {
+		correctAlpha = false;
+	}
+	else {
+		xMovement = 0.0f;
+		yMovement = 0.0f;
+	}
+	//	} else
+	//		yMovement = 0.0;
+
+	if (!nextDirectionIsForward) {
+		yMovement = 0.0;
+		xMovement = 0.0;
+	}
+
+	if (camSetArrPos == 0 || camSetArrPos == 7) {
+		// This is not working on cars as SA
+		// Because III/VC doesn't have any buttons tied to LeftStick if you're not in Classic Configuration, using Dodo or using GInput/Pad, so :shrug:
+		if (Abs(pad->GetSteeringUpDown()) > 120.0f) {
+			if (car->pDriver && car->pDriver->m_objective != OBJECTIVE_LEAVE_VEHICLE) {
+				yMovement += Abs(pad->GetSteeringUpDown()) * (FOV / 80.0f * 3.f / 70.f) * pad->GetSteeringUpDown() * 0.007f * 0.007f * 0.5;
+			}
+		}
+	}
+
+	if (yMovement > 0.0)
+		yMovement = yMovement * 0.5;
+
+	bool mouseChangesBeta = false;
+
+	// FIX: Disable mouse movement in drive-by, it's buggy. Original SA bug.
+	if (bFreeMouseCam && CCamera::m_bUseMouse3rdPerson && !pad->ArePlayerControlsDisabled() && nextDirectionIsForward) {
+		float mouseY = pad->GetMouseY() * 2.0f;
+		float mouseX = pad->GetMouseX() * -2.0f;
+
+		// If you want an ability to toggle free cam while steering with mouse, you can add an OR after DisableMouseSteering.
+		// There was a pad->NewState.m_bVehicleMouseLook in SA, which doesn't exists in III.
+
+		if ((mouseX != 0.0 || mouseY != 0.0) && (CVehicle::m_bDisableMouseSteering)) {
+			yMovement = mouseY * FOV / 80.0f * TheCamera.m_fMouseAccelHorzntl; // Same as SA, horizontal sensitivity.
+			BetaSpeed = 0.0;
+			AlphaSpeed = 0.0;
+			xMovement = mouseX * FOV / 80.0f * TheCamera.m_fMouseAccelHorzntl;
+			targetAlpha = Alpha;
+			stepsLeftToChangeBetaByMouse = 1.0f * 50.0f;
+			mouseChangesBeta = true;
+		} else if (stepsLeftToChangeBetaByMouse > 0.0f) {
+			// Finish rotation by decreasing speed when we stopped moving mouse
+			BetaSpeed = 0.0;
+			AlphaSpeed = 0.0;
+			yMovement = 0.0;
+			xMovement = 0.0;
+			targetAlpha = Alpha;
+			stepsLeftToChangeBetaByMouse = max(0.0f, stepsLeftToChangeBetaByMouse - CTimer::GetTimeStep());
+			mouseChangesBeta = true;
+		}
+	}
+
+	if (correctAlpha) {
+		if (nPreviousMode != MODE_CAM_ON_A_STRING)
+			alphaCorrected = false;
+
+		if (!alphaCorrected && Abs(zoomModeAlphaOffset + Alpha) > 0.05f) {
+			yMovement = (-zoomModeAlphaOffset - Alpha) * 0.05f;
+		} else
+			alphaCorrected = true;
+	}
+	float alphaSpeedFromStickY = yMovement * CARCAM_SET[camSetArrPos][12];
+	float betaSpeedFromStickX = xMovement * CARCAM_SET[camSetArrPos][12];
+
+	float newAngleSpeedMaxBlendAmount = CARCAM_SET[camSetArrPos][9];
+	float angleChangeStep = pow(CARCAM_SET[camSetArrPos][8], CTimer::GetTimeStep());
+	float targetBetaWithStickBlendAmount = betaSpeedFromStickX + (targetBeta - Beta) / max(CTimer::GetTimeStep(), 1.0f);
+
+	if (targetBetaWithStickBlendAmount < -newAngleSpeedMaxBlendAmount)
+		targetBetaWithStickBlendAmount = -newAngleSpeedMaxBlendAmount;
+	else if (targetBetaWithStickBlendAmount > newAngleSpeedMaxBlendAmount)
+		targetBetaWithStickBlendAmount = newAngleSpeedMaxBlendAmount;
+
+	float angleChangeStepLeft = 1.0f - angleChangeStep;
+	BetaSpeed = targetBetaWithStickBlendAmount * angleChangeStepLeft + angleChangeStep * BetaSpeed;
+	if (Abs(BetaSpeed) < 0.0001f)
+		BetaSpeed = 0.0f;
+
+	float betaChangePerFrame;
+	if (mouseChangesBeta)
+		betaChangePerFrame = betaSpeedFromStickX;
+	else
+		betaChangePerFrame = CTimer::GetTimeStep() * BetaSpeed;
+	Beta = betaChangePerFrame + Beta;
+
+	if (TheCamera.m_bJustCameOutOfGarage) {
+		float invHeading = Atan2(Front.y, Front.x);
+		if (invHeading < 0.0f)
+			invHeading += TWOPI;
+
+		Beta = invHeading + PI;
+	}
+
+	Beta = CGeneral::LimitRadianAngle(Beta);
+	if (Beta < 0.0f)
+		Beta += TWOPI;
+
+	if ((camSetArrPos <= 1 || camSetArrPos == 7) && targetAlpha < Alpha && carPosChange >= newDistance) {
+		if (isCar && ((CAutomobile*)car)->m_nWheelsOnGround > 1)
+			// || isBike && GetMysteriousWheelRelatedThingBike(car) > 1)
+			alphaSpeedFromStickY += (targetAlpha - Alpha) * 0.075f;
+	}
+
+	AlphaSpeed = angleChangeStepLeft * alphaSpeedFromStickY + angleChangeStep * AlphaSpeed;
+	float maxAlphaSpeed = newAngleSpeedMaxBlendAmount;
+	if (alphaSpeedFromStickY > 0.0f)
+		maxAlphaSpeed = maxAlphaSpeed * 0.5;
+
+	if (AlphaSpeed <= maxAlphaSpeed) {
+		float minAlphaSpeed = -maxAlphaSpeed;
+		if (AlphaSpeed < minAlphaSpeed)
+			AlphaSpeed = minAlphaSpeed;
+	} else {
+		AlphaSpeed = maxAlphaSpeed;
+	}
+
+	if (Abs(AlphaSpeed) < 0.0001f)
+		AlphaSpeed = 0.0f;
+
+		float alphaWithSpeedAccounted;
+		if (mouseChangesBeta) {
+			alphaWithSpeedAccounted = alphaSpeedFromStickY + targetAlpha;
+				Alpha += alphaSpeedFromStickY;
+		} else {
+			alphaWithSpeedAccounted = CTimer::GetTimeStep() * AlphaSpeed + targetAlpha;
+			Alpha += targetAlphaBlendAmount;
+		}
+
+	if (Alpha <= maxAlphaAllowed) {
+		float minAlphaAllowed = -CARCAM_SET[camSetArrPos][14];
+		if (minAlphaAllowed > Alpha) {
+			Alpha = minAlphaAllowed;
+			AlphaSpeed = 0.0f;
+		}
+	} else {
+		Alpha = maxAlphaAllowed;
+		AlphaSpeed = 0.0f;
+	}
+
+	// Prevent unsignificant angle changes
+	if (Abs(lastAlpha - Alpha) < 0.0001f)
+		Alpha = lastAlpha;
+
+	lastAlpha = Alpha;
+
+	if (Abs(lastBeta - Beta) < 0.0001f)
+		Beta = lastBeta;
+
+	lastBeta = Beta;
+
+	Front.x = -(cos(Beta) * cos(Alpha));
+	Front.y = -(sin(Beta) * cos(Alpha));
+	Front.z = sin(Alpha);
+	GetVectorsReadyForRW();
+	TheCamera.m_bCamDirectlyBehind = false;
+	TheCamera.m_bCamDirectlyInFront = false;
+
+	Source = TargetCoors - newDistance * Front;
+
+	m_cvecTargetCoorsForFudgeInter = TargetCoors;
+	m_aTargetHistoryPosThree = m_aTargetHistoryPosOne;
+	float nextAlpha = alphaWithSpeedAccounted + zoomModeAlphaOffset;
+	float nextFrontX = -(cos(Beta) * cos(nextAlpha));
+	float nextFrontY = -(sin(Beta) * cos(nextAlpha));
+	float nextFrontZ = sin(nextAlpha);
+
+	m_aTargetHistoryPosOne.x = TargetCoors.x - nextFrontX * nextDistance;
+	m_aTargetHistoryPosOne.y = TargetCoors.y - nextFrontY * nextDistance;
+	m_aTargetHistoryPosOne.z = TargetCoors.z - nextFrontZ * nextDistance;
+
+	m_aTargetHistoryPosTwo.x = TargetCoors.x - nextFrontX * newDistance;
+	m_aTargetHistoryPosTwo.y = TargetCoors.y - nextFrontY * newDistance;
+	m_aTargetHistoryPosTwo.z = TargetCoors.z - nextFrontZ * newDistance;
+
+	// SA calls SetColVarsVehicle in here
+	if (nextDirectionIsForward) {
+
+		// This is new in LCS!
+		float timestepFactor = Pow(0.99f, CTimer::GetTimeStep());
+		dontCollideWithCars = (timestepFactor * dontCollideWithCars) + ((1.0f - timestepFactor) * car->m_vecMoveSpeed.Magnitude());
+
+		// Move cam if on collision
+		CColPoint foundCol;
+		CEntity* foundEnt;
+		CWorld::pIgnoreEntity = CamTargetEntity;
+		if (CWorld::ProcessLineOfSight(TargetCoors, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, true, false, true, false)) {
+			float obstacleTargetDist = (TargetCoors - foundCol.point).Magnitude();
+			float obstacleCamDist = newDistance - obstacleTargetDist;
+			if (!foundEnt->IsPed() || obstacleCamDist <= 1.0f) {
+				Source = foundCol.point;
+				if (obstacleTargetDist < 1.2f) {
+					RwCameraSetNearClipPlane(Scene.camera, max(0.05f, obstacleTargetDist - 0.3f));
+				}
+			} else {
+				if (!CWorld::ProcessLineOfSight(foundCol.point, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, true, false, true, false)) {
+					float lessClip = obstacleCamDist - 0.35f;
+					if (lessClip <= 0.9f)
+						RwCameraSetNearClipPlane(Scene.camera, lessClip);
+					else
+						RwCameraSetNearClipPlane(Scene.camera, 0.9f);
+				} else {
+					obstacleTargetDist = (TargetCoors - foundCol.point).Magnitude();
+					Source = foundCol.point;
+					if (obstacleTargetDist < 1.2f) {
+						float lessClip = obstacleTargetDist - 0.3f;
+						if (lessClip >= 0.05f)
+							RwCameraSetNearClipPlane(Scene.camera, lessClip);
+						else
+							RwCameraSetNearClipPlane(Scene.camera, 0.05f);
+					}
+				}
+			}
+		}
+		CWorld::pIgnoreEntity = nil;
+		float nearClip = RwCameraGetNearClipPlane(Scene.camera);
+		float radius = Tan(DEGTORAD(FOV * 0.5f)) * CDraw::GetAspectRatio() * 1.1f;
+
+		// If we're seeing blue hell due to camera intersects some surface, fix it.
+		// SA and LCS have this unrolled.
+		for (int i = 0;
+			i <= 5 && CWorld::TestSphereAgainstWorld((nearClip * Front) + Source, radius * nearClip, nil, true, true, false, true, false, false);
+			i++) {
+
+			CVector surfaceCamDist = gaTempSphereColPoints->point - Source;
+			CVector frontButInvertedIfTouchesSurface = DotProduct(surfaceCamDist, Front) * Front;
+			float newNearClip = (surfaceCamDist - frontButInvertedIfTouchesSurface).Magnitude() / radius;
+
+			if (newNearClip > nearClip)
+				newNearClip = nearClip;
+			if (newNearClip < 0.1f)
+				newNearClip = 0.1f;
+			if (nearClip > newNearClip)
+				RwCameraSetNearClipPlane(Scene.camera, newNearClip);
+
+			if (newNearClip == 0.1f)
+				Source += (TargetCoors - Source) * 0.3f;
+
+			nearClip = RwCameraGetNearClipPlane(Scene.camera);
+			radius = Tan(DEGTORAD(FOV * 0.5f)) * CDraw::GetAspectRatio() * 1.1f;
+		}
+	}
+	TheCamera.m_bCamDirectlyBehind = false;
+	TheCamera.m_bCamDirectlyInFront = false;
+
+	// ------- LCS specific part starts
+
+	if (camSetArrPos == 5 && Source.z < 1.0f) // RC Bandit and Baron
+		Source.z = 1.0f;
+
+	// Obviously some specific place in LC
+	if (Source.x > 11.0f && Source.x < 91.0f) {
+		if (Source.y > -680.0f && Source.y < -600.0f && Source.z < 24.4f)
+			Source.z = 24.4f;
+	}
+
+	// CCam::FixSourceAboveWaterLevel
+	if (CameraTarget.z >= -2.0f) {
+		float level = -6000.0;
+		// +0.5f is needed for III
+		if (CWaterLevel::GetWaterLevelNoWaves(Source.x, Source.y, Source.z, &level)) {
+			if (Source.z < level + 0.5f)
+				Source.z = level + 0.5f;
+		}
+	}
+	Front = TargetCoors - Source;
+
+	// -------- LCS specific part ends
+
+	GetVectorsReadyForRW();
+	// SA
+	// gTargetCoordsForLookingBehind = TargetCoors;
+
+	// SA code from CAutomobile::TankControl/FireTruckControl.
+	if (car->m_modelIndex == MI_RHINO || car->m_modelIndex == MI_FIRETRUCK) {
+
+		float &carGunLR = ((CAutomobile*)car)->m_fCarGunLR;
+		CVector hi = Multiply3x3(Front, car->GetMatrix());
+
+		// III/VC's firetruck turret angle is reversed
+		float angleToFace = (car->m_modelIndex == MI_FIRETRUCK ? -hi.Heading() : hi.Heading());
+
+		if (angleToFace <= carGunLR + PI) {
+			if (angleToFace < carGunLR - PI)
+				angleToFace = angleToFace + TWOPI;
+		} else {
+			angleToFace = angleToFace - TWOPI;
+		}
+
+		float neededTurn = angleToFace - carGunLR;
+		float turnPerFrame = CTimer::GetTimeStep() * (car->m_modelIndex == MI_FIRETRUCK ? 0.05f : 0.015f);
+		if (neededTurn <= turnPerFrame) {
+			if (neededTurn < -turnPerFrame)
+				angleToFace = carGunLR - turnPerFrame;
+		} else {
+			angleToFace = turnPerFrame + carGunLR;
+		}
+
+		if (car->m_modelIndex == MI_RHINO && carGunLR != angleToFace) {
+			DMAudio.PlayOneShot(car->m_audioEntityId, SOUND_CAR_TANK_TURRET_ROTATE, Abs(angleToFace - carGunLR));
+		}
+		carGunLR = angleToFace;
+
+		if (carGunLR < -PI) {
+			carGunLR += TWOPI;
+		} else if (carGunLR > PI) {
+			carGunLR -= TWOPI;
+		}
+
+		// Because firetruk turret also has Y movement
+		if (car->m_modelIndex == MI_FIRETRUCK) {
+			float &carGunUD = ((CAutomobile*)car)->m_fCarGunUD;
+
+			float alphaToFace = Atan2(hi.z, hi.Magnitude2D()) + DEGTORAD(15.0f);
+			float neededAlphaTurn = alphaToFace - carGunUD;
+			float alphaTurnPerFrame = CTimer::GetTimeStep() * 0.02f;
+
+			if (neededAlphaTurn > alphaTurnPerFrame) {
+				neededTurn = alphaTurnPerFrame;
+				carGunUD = neededTurn + carGunUD;
+			} else {
+				if (neededAlphaTurn >= -alphaTurnPerFrame) {
+					carGunUD = alphaToFace;
+				} else {
+					carGunUD = carGunUD - alphaTurnPerFrame;
+				}
+			}
+
+			float turretMinY = -DEGTORAD(20.0f);
+			float turretMaxY = DEGTORAD(20.0f);
+			if (turretMinY <= carGunUD) {
+				if (carGunUD > turretMaxY)
+					carGunUD = turretMaxY;
+			} else {
+				carGunUD = turretMinY;
+			}
+		}
+	}
 }
 #endif
 

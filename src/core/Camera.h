@@ -224,6 +224,7 @@ struct CCam
 
 	// custom stuff
 	void Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrientation, float, float);
+	void Process_FollowCar_SA(const CVector &CameraTarget, float TargetOrientation, float, float);
 };
 static_assert(sizeof(CCam) == 0x1A4, "CCam: wrong size");
 static_assert(offsetof(CCam, Alpha) == 0xA8, "CCam: error");

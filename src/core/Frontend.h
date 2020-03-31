@@ -473,7 +473,6 @@ public:
 	static int32 &m_ControlMethod;
 	static int8 &m_PrefsDMA;
 	static int32 &m_PrefsLanguage;
-	static int8 &m_bDisableMouseSteering;
 	static int32 &m_PrefsBrightness;
 	static float &m_PrefsLOD;
 	static int8 &m_bFrontEnd_ReloadObrTxtGxt;

@@ -64,7 +64,6 @@ bool &CMenuManager::m_bShutDownFrontEndRequested = *(bool*)0x95CD6A;
 
 int8 &CMenuManager::m_PrefsUseWideScreen = *(int8*)0x95CD23;
 int8 &CMenuManager::m_PrefsRadioStation = *(int8*)0x95CDA4;
-int8 &CMenuManager::m_bDisableMouseSteering = *(int8*)0x60252C;	// 1
 int32 &CMenuManager::m_PrefsBrightness = *(int32*)0x5F2E50;	// 256
 float &CMenuManager::m_PrefsLOD = *(float*)0x8F42C4;
 int8 &CMenuManager::m_bFrontEnd_ReloadObrTxtGxt = *(int8*)0x628CFC;
@@ -968,7 +967,7 @@ void CMenuManager::Draw()
 				rightText = TheText.Get(m_PrefsDMA ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_MOUSESTEER:
-				rightText = TheText.Get(m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
+				rightText = TheText.Get(CVehicle::m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
 				break;
 			}
 
@@ -3141,7 +3140,7 @@ CMenuManager::ProcessButtonPresses(void)
 						CMenuManager::m_ControlMethod = CONTROL_STANDART;
 						MousePointerStateHelper.bInvertVertically = false;
 						TheCamera.m_fMouseAccelHorzntl = 0.0025f;
-						m_bDisableMouseSteering = true;
+						CVehicle::m_bDisableMouseSteering = true;
 						TheCamera.m_bHeadBob = false;
 						SaveSettings();
 					}
@@ -3460,7 +3459,7 @@ void CMenuManager::ProcessOnOffMenuOptions()
 		SaveSettings();
 		break;
 	case MENUACTION_MOUSESTEER:
-		m_bDisableMouseSteering = !m_bDisableMouseSteering;
+		CVehicle::m_bDisableMouseSteering = !CVehicle::m_bDisableMouseSteering;
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		SaveSettings();
 		break;
