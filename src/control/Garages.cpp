@@ -119,7 +119,7 @@ int32(&CGarages::CarTypesCollected)[TOTAL_COLLECTCARS_GARAGES] = *(int32(*)[TOTA
 int32& CGarages::CrushedCarId = *(int32*)0x943060;
 uint32& CGarages::LastTimeHelpMessage = *(uint32*)0x8F1B58;
 int32& CGarages::MessageNumberInString = *(int32*)0x885BA8;
-char(&CGarages::MessageIDString)[8] = *(char(*)[8]) * (uintptr*)0x878358;
+char(&CGarages::MessageIDString)[MESSAGE_LENGTH] = *(char(*)[MESSAGE_LENGTH]) * (uintptr*)0x878358;
 int32& CGarages::MessageNumberInString2 = *(int32*)0x8E2C14;
 uint32& CGarages::MessageStartTime = *(uint32*)0x8F2530;
 uint32& CGarages::MessageEndTime = *(uint32*)0x8F597C;
@@ -467,8 +467,8 @@ void CGarage::Update()
 			if (IsPlayerOutsideGarage())
 				m_eGarageState = GS_OPENED;
 			break;
-			//case GS_CLOSEDCONTAINSCAR:
-			//case GS_AFTERDROPOFF:
+		//case GS_CLOSEDCONTAINSCAR:
+		//case GS_AFTERDROPOFF:
 		default:
 			break;
 		}
@@ -571,8 +571,8 @@ void CGarage::Update()
 			if (IsPlayerOutsideGarage())
 				m_eGarageState = GS_OPENED;
 			break;
-			//case GS_CLOSEDCONTAINSCAR:
-			//case GS_AFTERDROPOFF:
+		//case GS_CLOSEDCONTAINSCAR:
+		//case GS_AFTERDROPOFF:
 		default:
 			break;
 			}
@@ -631,9 +631,9 @@ void CGarage::Update()
 			}
 			UpdateDoorsHeight();
 			break;
-			//case GS_OPENEDCONTAINSCAR:
-			//case GS_CLOSEDCONTAINSCAR:
-			//case GS_AFTERDROPOFF:
+		//case GS_OPENEDCONTAINSCAR:
+		//case GS_CLOSEDCONTAINSCAR:
+		//case GS_AFTERDROPOFF:
 		default:
 			break;
 		}
@@ -715,9 +715,9 @@ void CGarage::Update()
 			}
 			UpdateDoorsHeight();
 			break;
-			//case GS_OPENEDCONTAINSCAR:
-			//case GS_CLOSEDCONTAINSCAR:
-			//case GS_AFTERDROPOFF:
+		//case GS_OPENEDCONTAINSCAR:
+		//case GS_CLOSEDCONTAINSCAR:
+		//case GS_AFTERDROPOFF:
 		default:
 			break;
 		}
@@ -754,7 +754,7 @@ void CGarage::Update()
 						TheCamera.SetCameraDirectlyBehindForFollowPed_CamOnAString();
 					}
 				}
-				}
+			}
 			break;
 		case GS_CLOSING:
 			m_fDoorPos = max(0.0f, m_fDoorPos - (m_bRotatedDoor ? ROTATED_DOOR_CLOSE_SPEED : DEFAULT_DOOR_CLOSE_SPEED) * CTimer::GetTimeStep());
@@ -804,12 +804,12 @@ void CGarage::Update()
 			}
 			UpdateDoorsHeight();
 			break;
-			//case GS_OPENEDCONTAINSCAR:
-			//case GS_CLOSEDCONTAINSCAR:
-			//case GS_AFTERDROPOFF:
+		//case GS_OPENEDCONTAINSCAR:
+		//case GS_CLOSEDCONTAINSCAR:
+		//case GS_AFTERDROPOFF:
 		default:
 			break;
-			}
+		}
 		break;
 	case GARAGE_FORCARTOCOMEOUTOF:
 		switch (m_eGarageState) {
@@ -836,9 +836,9 @@ void CGarage::Update()
 			}
 			UpdateDoorsHeight();
 			break;
-			//case GS_OPENEDCONTAINSCAR:
-			//case GS_CLOSEDCONTAINSCAR:
-			//case GS_AFTERDROPOFF:
+		//case GS_OPENEDCONTAINSCAR:
+		//case GS_CLOSEDCONTAINSCAR:
+		//case GS_AFTERDROPOFF:
 		default:
 			break;
 		}
@@ -905,10 +905,9 @@ void CGarage::Update()
 			}
 			UpdateCrusherAngle();
 			break;
-			//case GS_FULLYCLOSED:
-			//case GS_CLOSEDCONTAINSCAR:
-			//case GS_OPENEDCONTAINSCAR:
-
+		//case GS_FULLYCLOSED:
+		//case GS_CLOSEDCONTAINSCAR:
+		//case GS_OPENEDCONTAINSCAR:
 		default:
 			break;
 		}
@@ -971,8 +970,8 @@ void CGarage::Update()
 			if (m_eGarageType == GARAGE_MISSION_KEEPCAR && CTimer::GetTimeInMilliseconds() > m_nTimeToStartAction)
 				m_eGarageState = GS_OPENING;
 			break;
-			//case GS_OPENEDCONTAINSCAR:
-			//case GS_AFTERDROPOFF:
+		//case GS_OPENEDCONTAINSCAR:
+		//case GS_AFTERDROPOFF:
 		default:
 			break;
 		}
@@ -987,12 +986,12 @@ void CGarage::Update()
 			}
 			UpdateDoorsHeight();
 			break;
-			//case GS_OPENED:
-			//case GS_CLOSING:
-			//case GS_FULLYCLOSED:
-			//case GS_OPENEDCONTAINSCAR:
-			//case GS_CLOSEDCONTAINSCAR:
-			//case GS_AFTERDROPOFF:
+		//case GS_OPENED:
+		//case GS_CLOSING:
+		//case GS_FULLYCLOSED:
+		//case GS_OPENEDCONTAINSCAR:
+		//case GS_CLOSEDCONTAINSCAR:
+		//case GS_AFTERDROPOFF:
 		default:
 			break;
 		}
@@ -1015,16 +1014,15 @@ void CGarage::Update()
 			}
 			UpdateDoorsHeight();
 			break;
-			//case GS_OPENED:
-			//case GS_FULLYCLOSED:
-			//case GS_OPENEDCONTAINSCAR:
-			//case GS_CLOSEDCONTAINSCAR:
-			//case GS_AFTERDROPOFF:
+		//case GS_OPENED:
+		//case GS_FULLYCLOSED:
+		//case GS_OPENEDCONTAINSCAR:
+		//case GS_CLOSEDCONTAINSCAR:
+		//case GS_AFTERDROPOFF:
 		default:
 			break;
 		}
 		break;
-
 	case GARAGE_HIDEOUT_ONE:
 	case GARAGE_HIDEOUT_TWO:
 	case GARAGE_HIDEOUT_THREE:
@@ -1103,9 +1101,9 @@ void CGarage::Update()
 			}
 			UpdateDoorsHeight();
 			break;
-			//case GS_OPENEDCONTAINSCAR:
-			//case GS_CLOSEDCONTAINSCAR:
-			//case GS_AFTERDROPOFF:
+		//case GS_OPENEDCONTAINSCAR:
+		//case GS_CLOSEDCONTAINSCAR:
+		//case GS_AFTERDROPOFF:
 		default:
 			break;
 		}
@@ -1144,9 +1142,9 @@ void CGarage::Update()
 			}
 			UpdateDoorsHeight();
 			break;
-			//case GS_OPENEDCONTAINSCAR:
-			//case GS_CLOSEDCONTAINSCAR:
-			//case GS_AFTERDROPOFF:
+		//case GS_OPENEDCONTAINSCAR:
+		//case GS_CLOSEDCONTAINSCAR:
+		//case GS_AFTERDROPOFF:
 		default:
 			break;
 		}
@@ -1155,9 +1153,8 @@ void CGarage::Update()
 		//case GARAGE_60SECONDS:
 	default:
 		break;
-		}
-
-		}
+	}
+}
 
 bool CGarage::IsStaticPlayerCarEntirelyInside()
 {
@@ -1170,19 +1167,12 @@ bool CGarage::IsStaticPlayerCarEntirelyInside()
 	if (FindPlayerPed()->m_objective == OBJECTIVE_LEAVE_VEHICLE)
 		return false;
 	CVehicle* pVehicle = FindPlayerVehicle();
-	if (pVehicle->GetPosition().x < m_fX1)
+	if (pVehicle->GetPosition().x < m_fX1 || pVehicle->GetPosition().x > m_fX2 ||
+		pVehicle->GetPosition().y < m_fY1 || pVehicle->GetPosition().y > m_fY2)
 		return false;
-	if (pVehicle->GetPosition().x > m_fX2)
-		return false;
-	if (pVehicle->GetPosition().y < m_fY1)
-		return false;
-	if (pVehicle->GetPosition().y > m_fY2)
-		return false;
-	if (Abs(pVehicle->GetSpeed().x) > 0.01f)
-		return false;
-	if (Abs(pVehicle->GetSpeed().y) > 0.01f)
-		return false;
-	if (Abs(pVehicle->GetSpeed().z) > 0.01f)
+	if (Abs(pVehicle->GetSpeed().x) > 0.01f ||
+		Abs(pVehicle->GetSpeed().y) > 0.01f ||
+		Abs(pVehicle->GetSpeed().z) > 0.01f)
 		return false;
 	if (pVehicle->GetSpeed().MagnitudeSqr() > SQR(0.01f))
 		return false;
@@ -1191,25 +1181,15 @@ bool CGarage::IsStaticPlayerCarEntirelyInside()
 
 bool CGarage::IsEntityEntirelyInside(CEntity * pEntity)
 {
-	if (pEntity->GetPosition().x < m_fX1)
-		return false;
-	if (pEntity->GetPosition().x > m_fX2)
-		return false;
-	if (pEntity->GetPosition().y < m_fY1)
-		return false;
-	if (pEntity->GetPosition().y > m_fY2)
+	if (pEntity->GetPosition().x < m_fX1 || pEntity->GetPosition().x > m_fX2 ||
+		pEntity->GetPosition().y < m_fY1 || pEntity->GetPosition().y > m_fY2)
 		return false;
 	CColModel* pColModel = CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel();
 	for (int i = 0; i < pColModel->numSpheres; i++) {
 		CVector pos = pEntity->GetMatrix() * pColModel->spheres[i].center;
 		float radius = pColModel->spheres[i].radius;
-		if (pos.x - radius < m_fX1)
-			return false;
-		if (pos.x + radius > m_fX2)
-			return false;
-		if (pos.y - radius < m_fY1)
-			return false;
-		if (pos.y + radius > m_fY2)
+		if (pos.x - radius < m_fX1 || pos.x + radius > m_fX2 ||
+			pos.y - radius < m_fY1 || pos.y + radius > m_fY2)
 			return false;
 	}
 	return true;
@@ -1217,33 +1197,17 @@ bool CGarage::IsEntityEntirelyInside(CEntity * pEntity)
 
 bool CGarage::IsEntityEntirelyInside3D(CEntity * pEntity, float fMargin)
 {
-	if (pEntity->GetPosition().x < m_fX1 - fMargin)
-		return false;
-	if (pEntity->GetPosition().x > m_fX2 + fMargin)
-		return false;
-	if (pEntity->GetPosition().y < m_fY1 - fMargin)
-		return false;
-	if (pEntity->GetPosition().y > m_fY2 + fMargin)
-		return false;
-	if (pEntity->GetPosition().z < m_fZ1 - fMargin)
-		return false;
-	if (pEntity->GetPosition().z > m_fZ2 + fMargin)
+	if (pEntity->GetPosition().x < m_fX1 - fMargin || pEntity->GetPosition().x > m_fX2 + fMargin ||
+		pEntity->GetPosition().y < m_fY1 - fMargin || pEntity->GetPosition().y > m_fY2 + fMargin ||
+		pEntity->GetPosition().z < m_fZ1 - fMargin || pEntity->GetPosition().z > m_fZ2 + fMargin)
 		return false;
 	CColModel* pColModel = CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel();
 	for (int i = 0; i < pColModel->numSpheres; i++) {
 		CVector pos = pEntity->GetMatrix() * pColModel->spheres[i].center;
 		float radius = pColModel->spheres[i].radius;
-		if (pos.x + radius < m_fX1 - fMargin)
-			return false;
-		if (pos.x - radius > m_fX2 + fMargin)
-			return false;
-		if (pos.y + radius < m_fY1 - fMargin)
-			return false;
-		if (pos.y - radius > m_fY2 + fMargin)
-			return false;
-		if (pos.z + radius < m_fZ1 - fMargin)
-			return false;
-		if (pos.z - radius > m_fZ2 + fMargin)
+		if (pos.x + radius < m_fX1 - fMargin || pos.x - radius > m_fX2 + fMargin ||
+			pos.y + radius < m_fY1 - fMargin || pos.y - radius > m_fY2 + fMargin ||
+			pos.z + radius < m_fZ1 - fMargin || pos.z - radius > m_fZ2 + fMargin)
 			return false;
 	}
 	return true;
@@ -1282,17 +1246,9 @@ bool CGarage::IsPlayerOutsideGarage()
 bool CGarage::IsEntityTouching3D(CEntity * pEntity)
 {
 	float radius = pEntity->GetBoundRadius();
-	if (pEntity->GetPosition().x - radius < m_fX1)
-		return false;
-	if (pEntity->GetPosition().x + radius > m_fX2)
-		return false;
-	if (pEntity->GetPosition().y - radius < m_fY1)
-		return false;
-	if (pEntity->GetPosition().y + radius > m_fY2)
-		return false;
-	if (pEntity->GetPosition().z - radius < m_fZ1)
-		return false;
-	if (pEntity->GetPosition().z + radius > m_fZ2)
+	if (pEntity->GetPosition().x - radius < m_fX1 || pEntity->GetPosition().x + radius > m_fX2 ||
+		pEntity->GetPosition().y - radius < m_fY1 || pEntity->GetPosition().y + radius > m_fY2 ||
+		pEntity->GetPosition().z - radius < m_fZ1 || pEntity->GetPosition().z + radius > m_fZ2)
 		return false;
 	CColModel* pColModel = CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel();
 	for (int i = 0; i < pColModel->numSpheres; i++) {
@@ -1312,17 +1268,9 @@ bool CGarage::EntityHasASphereWayOutsideGarage(CEntity * pEntity, float fMargin)
 	for (int i = 0; i < pColModel->numSpheres; i++) {
 		CVector pos = pEntity->GetMatrix() * pColModel->spheres[i].center;
 		float radius = pColModel->spheres[i].radius;
-		if (pos.x + radius + fMargin < m_fX1)
-			return true;
-		if (pos.x - radius - fMargin > m_fX2)
-			return true;
-		if (pos.y + radius + fMargin < m_fY1)
-			return true;
-		if (pos.y - radius - fMargin > m_fY2)
-			return true;
-		if (pos.z + radius + fMargin < m_fZ1)
-			return true;
-		if (pos.z - radius - fMargin > m_fZ2)
+		if (pos.x + radius + fMargin < m_fX1 || pos.x - radius - fMargin > m_fX2 ||
+			pos.y + radius + fMargin < m_fY1 || pos.y - radius - fMargin > m_fY2 ||
+			pos.z + radius + fMargin < m_fZ1 || pos.z - radius - fMargin > m_fZ2)
 			return true;
 	}
 	return false;

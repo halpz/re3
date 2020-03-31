@@ -174,6 +174,9 @@ static_assert(sizeof(CGarage) == 140, "CGarage");
 
 class CGarages
 {
+	enum {
+		MESSAGE_LENGTH = 8
+	};
 	static int32 &BankVansCollected;
 	static bool &BombsAreFree;
 	static bool &RespraysAreFree;
@@ -182,7 +185,7 @@ class CGarages
 	static int32 &CrushedCarId;
 	static uint32 &LastTimeHelpMessage;
 	static int32 &MessageNumberInString;
-	static char(&MessageIDString)[8];
+	static char(&MessageIDString)[MESSAGE_LENGTH];
 	static int32 &MessageNumberInString2;
 	static uint32 &MessageStartTime;
 	static uint32 &MessageEndTime;
