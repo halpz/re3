@@ -39,9 +39,23 @@ enum {
 	ALIGN_RIGHT,
 };
 
+#ifdef MORE_LANGUAGES
+enum
+{
+	FONT_LANGSET_EFIGS,
+	FONT_LANGSET_RUSSIAN
+};
+#endif
+
 class CFont
 {
+#ifdef MORE_LANGUAGES
+	static int16 Size[2][3][193];
+	static uint8 LanguageSet;
+	static int32 Slot;
+#else
 	static int16 Size[3][193];
+#endif
 	static int16 &NewLine;
 	static CSprite2d *Sprite;	//[3]
 public:
@@ -136,4 +150,6 @@ public:
 		if(Details.alphaFade < 255.0f)
 			Details.dropColor.a *= Details.alphaFade/255.0f;
 	}
+
+	static void ReloadFonts(uint8 set);
 };

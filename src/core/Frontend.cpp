@@ -1727,6 +1727,17 @@ void CMenuManager::InitialiseChangedLanguageSettings()
 		CTimer::Update();
 		CGame::frenchGame = false;
 		CGame::germanGame = false;
+#ifdef MORE_LANGUAGES
+		switch (CMenuManager::m_PrefsLanguage) {
+		case LANGUAGE_RUSSIAN:
+			CFont::ReloadFonts(FONT_LANGSET_RUSSIAN);
+			break;
+		default:
+			CFont::ReloadFonts(FONT_LANGSET_EFIGS);
+			break;
+		}
+#endif
+
 		switch (CMenuManager::m_PrefsLanguage) {
 		case LANGUAGE_FRENCH:
 			CGame::frenchGame = true;
@@ -1734,6 +1745,11 @@ void CMenuManager::InitialiseChangedLanguageSettings()
 		case LANGUAGE_GERMAN:
 			CGame::germanGame = true;
 			break;
+#ifdef MORE_LANGUAGES
+		case LANGUAGE_RUSSIAN:
+			CGame::russianGame = true;
+			break;
+#endif
 		default:
 			break;
 		}
@@ -2935,6 +2951,14 @@ CMenuManager::ProcessButtonPresses(void)
 					CMenuManager::InitialiseChangedLanguageSettings();
 					SaveSettings();
 					break;
+#ifdef MORE_LANGUAGES
+				case MENUACTION_LANG_RUS:
+					m_PrefsLanguage = LANGUAGE_RUSSIAN;
+					m_bFrontEnd_ReloadObrTxtGxt = true;
+					CMenuManager::InitialiseChangedLanguageSettings();
+					SaveSettings();
+					break;
+#endif
 				case MENUACTION_POPULATESLOTS_CHANGEMENU:
 					PcSaveHelper.PopulateSlotInfo();
 

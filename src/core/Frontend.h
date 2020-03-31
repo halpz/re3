@@ -51,6 +51,9 @@ enum eLanguages
 	LANGUAGE_GERMAN,
 	LANGUAGE_ITALIAN,
 	LANGUAGE_SPANISH,
+#ifdef MORE_LANGUAGES
+	LANGUAGE_RUSSIAN,
+#endif
 };
 
 enum eFrontendSprites
@@ -301,6 +304,9 @@ enum eMenuAction
 	MENUACTION_UNK108,
 	MENUACTION_UNK109,
 	MENUACTION_UNK110,
+#ifdef MORE_LANGUAGES
+	MENUACTION_LANG_RUS,
+#endif
 };
 
 enum eCheckHover
