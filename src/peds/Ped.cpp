@@ -59,10 +59,6 @@
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
-#ifdef FREE_CAM
-extern bool bFreeMouseCam;
-#endif
-
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
 
@@ -812,7 +808,7 @@ bool
 CPed::CanStrafeOrMouseControl(void)
 {
 #ifdef FREE_CAM
-	if (bFreeMouseCam)
+	if (CCamera::bFreeCam)
 		return false;
 #endif
 	return m_nPedState == PED_NONE || m_nPedState == PED_IDLE || m_nPedState == PED_FLEE_POS || m_nPedState == PED_FLEE_ENTITY ||
@@ -6993,7 +6989,7 @@ CPed::FinishLaunchCB(CAnimBlendAssociation *animAssoc, void *arg)
 		) {
 
 #ifdef FREE_CAM
-		if (TheCamera.Cams[0].Using3rdPersonMouseCam() && !bFreeMouseCam) {
+		if (TheCamera.Cams[0].Using3rdPersonMouseCam() && !CCamera::bFreeCam) {
 #else
 		if (TheCamera.Cams[0].Using3rdPersonMouseCam()) {
 #endif

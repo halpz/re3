@@ -213,4 +213,4 @@ enum Config {
 
 // Camera
 #define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future
-//#define FREE_CAM		// Rotating cam
+#define FREE_CAM		// Rotating cam
