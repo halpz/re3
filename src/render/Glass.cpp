@@ -21,7 +21,7 @@ CFallingGlassPane CGlass::aGlassPanes[NUM_GLASSPANES];
 
 
 CVector2D CentersWithTriangle[NUM_GLASSTRIANGLES];
-CVector2D CoorsWithTriangle[NUM_GLASSTRIANGLES][3] =
+const CVector2D CoorsWithTriangle[NUM_GLASSTRIANGLES][3] =
 {
 	{
 		CVector2D(0.0f, 0.0f),
@@ -116,7 +116,7 @@ CFallingGlassPane::Update(void)
 				CParticle::AddParticle(PARTICLE_CAR_DEBRIS,
 					pos,
 					dir,
-					NULL,
+					nil,
 					CGeneral::GetRandomNumberInRange(0.02f, 0.2f),
 					color,
 					CGeneral::GetRandomNumberInRange(-40, 40),
@@ -287,7 +287,7 @@ CGlass::FindFreePane(void)
 			return &aGlassPanes[i];
 	}
 
-	return NULL;
+	return nil;
 }
 
 void
@@ -539,7 +539,7 @@ CGlass::RenderHiLightPolys(void)
 
 		LittleTest();
 
-		if ( RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStoredHiLight, NULL, rwIM3D_VERTEXUV) )
+		if ( RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStoredHiLight, nil, rwIM3D_VERTEXUV) )
 		{
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStoredHiLight);
 			RwIm3DEnd();
@@ -561,7 +561,7 @@ CGlass::RenderShatteredPolys(void)
 
 		LittleTest();
 
-		if ( RwIm3DTransform(&TempBufferRenderVertices[TEMPBUFFERVERTSHATTEREDOFFSET], TempBufferVerticesStoredShattered - TEMPBUFFERVERTSHATTEREDOFFSET, NULL, rwIM3D_VERTEXUV) )
+		if ( RwIm3DTransform(&TempBufferRenderVertices[TEMPBUFFERVERTSHATTEREDOFFSET], TempBufferVerticesStoredShattered - TEMPBUFFERVERTSHATTEREDOFFSET, nil, rwIM3D_VERTEXUV) )
 		{
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, &TempBufferRenderIndexList[TEMPBUFFERINDEXSHATTEREDOFFSET], TempBufferIndicesStoredShattered - TEMPBUFFERINDEXSHATTEREDOFFSET);
 			RwIm3DEnd();
@@ -583,7 +583,7 @@ CGlass::RenderReflectionPolys(void)
 
 		LittleTest();
 
-		if ( RwIm3DTransform(&TempBufferRenderVertices[TEMPBUFFERVERTREFLECTIONOFFSET], TempBufferVerticesStoredReflection - TEMPBUFFERVERTREFLECTIONOFFSET, NULL, rwIM3D_VERTEXUV) )
+		if ( RwIm3DTransform(&TempBufferRenderVertices[TEMPBUFFERVERTREFLECTIONOFFSET], TempBufferVerticesStoredReflection - TEMPBUFFERVERTREFLECTIONOFFSET, nil, rwIM3D_VERTEXUV) )
 		{
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, &TempBufferRenderIndexList[TEMPBUFFERINDEXREFLECTIONOFFSET], TempBufferIndicesStoredReflection - TEMPBUFFERINDEXREFLECTIONOFFSET);
 			RwIm3DEnd();
