@@ -116,7 +116,7 @@ int16 CFont::Size[3][193] = {
 #endif
 };
 
-uint16 foreign_table[128] = {
+wchar foreign_table[128] = {
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 	  0, 176,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -228,7 +228,7 @@ CFont::InitPerFrame(void)
 }
 
 void
-CFont::PrintChar(float x, float y, uint16 c)
+CFont::PrintChar(float x, float y, wchar c)
 {
 	if(x <= 0.0f || x > SCREEN_WIDTH ||
 	   y <= 0.0f || y > SCREEN_HEIGHT)	// BUG: game uses SCREENW again
@@ -274,14 +274,14 @@ CFont::PrintChar(float x, float y, uint16 c)
 }
 
 void
-CFont::PrintString(float xstart, float ystart, uint16 *s)
+CFont::PrintString(float xstart, float ystart, wchar *s)
 {
 	CRect rect;
 	int numSpaces;
 	float lineLength;
 	float x, y;
 	bool first;
-	uint16 *start, *t;
+	wchar *start, *t;
 
 	if(*s == '*')
 		return;
@@ -357,11 +357,11 @@ CFont::PrintString(float xstart, float ystart, uint16 *s)
 }
 
 int
-CFont::GetNumberLines(float xstart, float ystart, uint16 *s)
+CFont::GetNumberLines(float xstart, float ystart, wchar *s)
 {
 	int n;
 	float x, y;
-	uint16 *t;
+	wchar *t;
 
 	n = 0;
 	if(Details.centre || Details.rightJustify)
@@ -400,12 +400,12 @@ CFont::GetNumberLines(float xstart, float ystart, uint16 *s)
 }
 
 void
-CFont::GetTextRect(CRect *rect, float xstart, float ystart, uint16 *s)
+CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 {
 	int numLines;
 	float x, y;
 	int16 maxlength;
-	uint16 *t;
+	wchar *t;
 
 	maxlength = 0;
 	numLines = 0;
@@ -469,9 +469,9 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, uint16 *s)
 }
 
 void
-CFont::PrintString(float x, float y, uint16 *start, uint16 *end, float spwidth)
+CFont::PrintString(float x, float y, wchar *start, wchar *end, float spwidth)
 {
-	uint16 *s, c, unused;
+	wchar *s, c, unused;
 
 	for(s = start; s < end; s++){
 		if(*s == '~')
@@ -487,7 +487,7 @@ CFont::PrintString(float x, float y, uint16 *start, uint16 *end, float spwidth)
 }
 
 float
-CFont::GetCharacterWidth(uint16 c)
+CFont::GetCharacterWidth(wchar c)
 {
 #ifdef MORE_LANGUAGES
 	if (Details.proportional)
@@ -503,7 +503,7 @@ CFont::GetCharacterWidth(uint16 c)
 }
 
 float
-CFont::GetCharacterSize(uint16 c)
+CFont::GetCharacterSize(wchar c)
 {
 #ifdef MORE_LANGUAGES
 	if(Details.proportional)
@@ -519,7 +519,7 @@ CFont::GetCharacterSize(uint16 c)
 }
 
 float
-CFont::GetStringWidth(uint16 *s, bool spaces)
+CFont::GetStringWidth(wchar *s, bool spaces)
 {
 	float w;
 
@@ -537,8 +537,8 @@ CFont::GetStringWidth(uint16 *s, bool spaces)
 	return w;
 }
 
-uint16*
-CFont::GetNextSpace(uint16 *s)
+wchar*
+CFont::GetNextSpace(wchar *s)
 {
 	for(; *s != ' ' && *s != '\0'; s++)
 		if(*s == '~'){
@@ -551,8 +551,8 @@ CFont::GetNextSpace(uint16 *s)
 	return s;
 }
 
-uint16*
-CFont::ParseToken(uint16 *s, uint16*)
+wchar*
+CFont::ParseToken(wchar *s, wchar*)
 {
 	s++;
 	if(Details.color.r || Details.color.g || Details.color.b)
@@ -582,7 +582,7 @@ CFont::DrawFonts(void)
 	CSprite2d::DrawBank(Details.bank+2);
 }
 
-uint16
+wchar
 CFont::character_code(uint8 c)
 {
 	if(c < 128)
@@ -596,10 +596,10 @@ STARTPATCHES
 	InjectHook(0x500BA0, CFont::Shutdown, PATCH_JUMP);
 	InjectHook(0x500BE0, CFont::InitPerFrame, PATCH_JUMP);
 	InjectHook(0x500C30, CFont::PrintChar, PATCH_JUMP);
-	InjectHook(0x500F50, (void (*)(float, float, uint16*))CFont::PrintString, PATCH_JUMP);
+	InjectHook(0x500F50, (void (*)(float, float, wchar*))CFont::PrintString, PATCH_JUMP);
 	InjectHook(0x501260, CFont::GetNumberLines, PATCH_JUMP);
 	InjectHook(0x5013B0, CFont::GetTextRect, PATCH_JUMP);
-	InjectHook(0x501730, (void (*)(float, float, uint16*, uint16*, float))CFont::PrintString, PATCH_JUMP);
+	InjectHook(0x501730, (void (*)(float, float, wchar*, wchar*, float))CFont::PrintString, PATCH_JUMP);
 	InjectHook(0x5017E0, CFont::GetCharacterWidth, PATCH_JUMP);
 	InjectHook(0x501840, CFont::GetCharacterSize, PATCH_JUMP);
 	InjectHook(0x5018A0, CFont::GetStringWidth, PATCH_JUMP);
