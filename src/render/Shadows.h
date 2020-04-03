@@ -182,3 +182,4 @@ extern RwTexture *&gpGoalTex;
 extern RwTexture *&gpOutline1Tex;
 extern RwTexture *&gpOutline2Tex;
 extern RwTexture *&gpOutline3Tex;
+extern RwTexture *&gpCrackedGlassTex;

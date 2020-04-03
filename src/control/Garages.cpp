@@ -2078,14 +2078,12 @@ void CGarage::CenterCarInGarage(CVehicle* pVehicle)
 		return;
 	if (IsAnyOtherPedTouchingGarage(FindPlayerPed()))
 		return;
-	float posX = pVehicle->GetPosition().x;
-	float posY = pVehicle->GetPosition().y;
-	float posZ = pVehicle->GetPosition().z;
+	CVector pos = pVehicle->GetPosition();
 	float garageX = GetGarageCenterX();
 	float garageY = GetGarageCenterY();
-	float offsetX = garageX - posX;
-	float offsetY = garageY - posY;
-	float offsetZ = posZ - posZ;
+	float offsetX = garageX - pos.x;
+	float offsetY = garageY - pos.y;
+	float offsetZ = pos.z - pos.z;
 	float distance = CVector(offsetX, offsetY, offsetZ).Magnitude();
 	if (distance < RESPRAY_CENTERING_COEFFICIENT) {
 		pVehicle->GetPosition().x = GetGarageCenterX();
@@ -2096,7 +2094,7 @@ void CGarage::CenterCarInGarage(CVehicle* pVehicle)
 		pVehicle->GetPosition().y += offsetY * RESPRAY_CENTERING_COEFFICIENT / distance;
 	}
 	if (!IsEntityEntirelyInside3D(pVehicle, 0.1f))
-		pVehicle->GetPosition() = CVector(posX, posY, posZ);
+		pVehicle->GetPosition() = pos;
 }
 
 void CGarages::CloseHideOutGaragesBeforeSave()

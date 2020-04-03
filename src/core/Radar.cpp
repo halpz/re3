@@ -1106,8 +1106,11 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D
 // Radar space goes from -1.0 to 1.0 in x and y, top right is (1.0, 1.0)
 void CRadar::TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &in)
 {
-	// FIX? scale RADAR_LEFT here somehow
+#ifdef FIX_BUGS
+	out.x = (in.x + 1.0f)*0.5f*SCREEN_SCALE_X(RADAR_WIDTH) + SCREEN_SCALE_X(RADAR_LEFT);
+#else
 	out.x = (in.x + 1.0f)*0.5f*SCREEN_SCALE_X(RADAR_WIDTH) + RADAR_LEFT;
+#endif
 	out.y = (1.0f - in.y)*0.5f*SCREEN_SCALE_Y(RADAR_HEIGHT) + SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT);
 }
 
