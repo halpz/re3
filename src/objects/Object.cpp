@@ -38,8 +38,8 @@ CObject::CObject(void)
 	bIsPickup = false;
 	m_obj_flag2 = false;
 	bOutOfStock = false;
-	m_obj_flag8 = false;
-	m_obj_flag10 = false;
+	bGlassCracked = false;
+	bGlassBroken = false;
 	bHasBeenDamaged = false;
 	m_nRefModelIndex = -1;
 	bUseVehicleColours = false;
