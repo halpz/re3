@@ -9,8 +9,8 @@
 
 #define MENUACTION_X_MARGIN 40.0f
 #define MENUACTION_POS_Y 60.0f
-#define MENUACTION_WIDTH 0.405f
-#define MENUACTION_HEIGHT 0.63f
+#define MENUACTION_WIDTH 0.38f
+#define MENUACTION_SCALE_MULT 0.9f
 
 #define MENUCOLUMN_POS_X MENUHEADER_POS_X + 16.0f
 #define MENUCOLUMN_MAX_Y 149.0f
@@ -43,6 +43,29 @@
 
 #define MENUSLIDER_X 256.0f
 #define MENUSLIDER_UNK 256.0f
+
+#define SMALLTEXT_X_SCALE 0.45f
+#define SMALLTEXT_Y_SCALE 0.7f
+#define SMALLESTTEXT_X_SCALE 0.4f
+#define SMALLESTTEXT_Y_SCALE 0.6f
+
+#define PLAYERSETUP_LIST_TOP 28.0f
+#define PLAYERSETUP_LIST_BOTTOM 125.0f
+#define PLAYERSETUP_LIST_LEFT 200.0f
+#define PLAYERSETUP_LIST_RIGHT 36.0f
+#ifdef FIX_BUGS // See the scrollbar button drawing code
+#define PLAYERSETUP_SCROLLBAR_WIDTH 19.0f
+#else
+#define PLAYERSETUP_SCROLLBAR_WIDTH 16.0f
+#endif
+#define PLAYERSETUP_SCROLLBUTTON_HEIGHT 17.0f
+#define PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION 64
+#define PLAYERSETUP_ROW_TEXT_X_SCALE 0.4f
+#define PLAYERSETUP_ROW_TEXT_Y_SCALE 0.6f
+#define PLAYERSETUP_SKIN_COLUMN_LEFT 220.0f
+#define PLAYERSETUP_DATE_COLUMN_RIGHT 56.0f
+#define PLAYERSETUP_LIST_BODY_TOP 47
+#define PLAYERSETUP_ROW_HEIGHT 9
 
 enum eLanguages
 {
@@ -320,7 +343,7 @@ enum eCheckHover
 	HOVEROPTION_6,
 	HOVEROPTION_7,
 	HOVEROPTION_8,
-	HOVEROPTION_BACK,	// used in controller setup
+	HOVEROPTION_BACK,	// also layer in controller setup and skin menu
 	HOVEROPTION_10,
 	HOVEROPTION_11,
 	HOVEROPTION_OVER_SCROLL_UP,
@@ -330,9 +353,9 @@ enum eCheckHover
 	HOVEROPTION_HOLDING_SCROLLBAR,
 	HOVEROPTION_PAGEUP,
 	HOVEROPTION_PAGEDOWN,
-	HOVEROPTION_19,
-	HOVEROPTION_20,
-	HOVEROPTION_CHANGESKIN,
+	HOVEROPTION_LIST, // also layer in controller setup and skin menu
+	HOVEROPTION_SKIN,
+	HOVEROPTION_USESKIN, // also layer in controller setup and skin menu
 	HOVEROPTION_RADIO_0,
 	HOVEROPTION_RADIO_1,
 	HOVEROPTION_RADIO_2,
@@ -367,13 +390,20 @@ enum eControlMethod
 	CONTROL_CLASSIC,
 };
 
+// Why??
+enum ControllerSetupColumn
+{
+	CONTSETUP_PED_COLUMN = 0,
+	CONTSETUP_VEHICLE_COLUMN = 14,
+};
+
 struct tSkinInfo
 {
-	int32 field_0;
-	char skinName[256];
-	char currSkinName[256];
+	int32 skinId;
+	char skinNameDisplayed[256];
+	char skinNameOriginal[256];
 	char date[256];
-	tSkinInfo *field_304;
+	tSkinInfo *nextSkin;
 };
 
 struct BottomBarOption
@@ -419,15 +449,15 @@ public:
 	int32 m_nMouseTempPosX;
 	int32 m_nMouseTempPosY;
 	bool m_bShowMouse;
-	tSkinInfo m_sSkin;
+	tSkinInfo m_pSkinListHead;
 	tSkinInfo *m_pSelectedSkin;
 	int32 m_nFirstVisibleRowOnList;
-	float m_nCurListItemY;
+	float m_nScrollbarTopMargin;
 	int32 m_nTotalListRow;
 	int32 m_nSkinsTotal;
  char _unk0[4];
 	int32 m_nSelectedListRow;
-	bool m_bSkinsFound;
+	bool m_bSkinsEnumerated;
 	bool m_bQuitGameNoCD;
  bool m_bRenderGameInMenu;
 	bool m_bSaveMenuActive;
@@ -446,10 +476,10 @@ public:
 	bool m_bPressedScrollButton;
 	int32 m_CurrCntrlAction;
  char _unk1[4];
- int32 field_530;
+ int32 m_nSelectedContSetupColumn;
 	 bool m_bKeyIsOK;
  bool field_535;
-	int8 m_nCurrExLayer;	// TODO: What's that?
+	int8 m_nCurrExLayer;
 	int32 m_nHelperTextAlpha;
 	int32 m_nMouseOldPosX;
 	int32 m_nMouseOldPosY;
@@ -514,7 +544,7 @@ public:
 	int DisplaySlider(float, float, float, float, float, float);
 	void DoSettingsBeforeStartingAGame();
 	void Draw();
-	void DrawControllerBound(int, int, int, uint8);
+	void DrawControllerBound(int32, int32, int32, int8);
 	void DrawControllerScreenExtraText(int, int, int);
 	void DrawControllerSetupScreen();
 	void DrawFrontEnd();
@@ -550,6 +580,7 @@ public:
 	void UnloadTextures();
 	void WaitForUserCD();
 	void PrintController();
+	int GetNumOptionsCntrlConfigScreens();
 
 	// New (not in function or inlined in the game)
 	void ThingsToDoBeforeLeavingPage();

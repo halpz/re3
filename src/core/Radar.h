@@ -21,6 +21,10 @@ enum eBlipDisplay
 
 enum eRadarSprite
 {
+#ifdef MENU_MAP
+	RADAR_SPRITE_ENTITY_BLIP = -2,
+	RADAR_SPRITE_COORD_BLIP = -1,
+#endif
 	RADAR_SPRITE_NONE = 0,
 	RADAR_SPRITE_ASUKA = 1,
 	RADAR_SPRITE_BOMB = 2,
@@ -101,8 +105,16 @@ public:
 	static CSprite2d TonySprite;
 	static CSprite2d WeaponSprite;
 	static CSprite2d *RadarSprites[21];
+	static float cachedCos;
+	static float cachedSin;
+#ifdef MENU_MAP
+	static CRGBA ArrowBlipColour1;
+	static CRGBA ArrowBlipColour2;
+	static uint16 MapLegendList[75];
+	static bool bMenuMapActive;
 
-public:
+	static void InitFrontEndMap();
+#endif
 	static uint8 CalculateBlipAlpha(float dist);
 	static void ChangeBlipBrightness(int32 i, int32 bright);
 	static void ChangeBlipColour(int32 i, int32);
@@ -150,4 +162,5 @@ public:
 	static void ClipRadarTileCoords(int32 &x, int32 &y);
 	static bool IsPointInsideRadar(const CVector2D &);
 	static int LineRadarBoxCollision(CVector2D &, const CVector2D &, const CVector2D &);
+	static void CalculateCachedSinCos();
 };
