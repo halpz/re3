@@ -2340,8 +2340,7 @@ CAutomobile::FireTruckControl(void)
 		if(!CPad::GetPad(0)->GetWeapon())
 			return;
 #ifdef FREE_CAM
-		extern bool bFreeMouseCam;
-		if (!bFreeMouseCam)
+		if (!CCamera::bFreeCam)
 #endif 
 		{
 			m_fCarGunLR += CPad::GetPad(0)->GetCarGunLeftRight() * 0.00025f * CTimer::GetTimeStep();
@@ -2416,8 +2415,7 @@ CAutomobile::TankControl(void)
 	// Rotate turret
 	float prevAngle = m_fCarGunLR;
 #ifdef FREE_CAM
-	extern bool bFreeMouseCam;
-	if(!bFreeMouseCam)
+	if(!CCamera::bFreeCam)
 #endif
 		m_fCarGunLR -= CPad::GetPad(0)->GetCarGunLeftRight() * 0.00015f * CTimer::GetTimeStep();
 
