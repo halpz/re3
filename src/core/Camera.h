@@ -4,13 +4,28 @@
 class CEntity;
 class CPed;
 class CAutomobile;
+class CGarage;
 
 extern int16 &DebugCamMode;
 
-#define NUMBER_OF_VECTORS_FOR_AVERAGE 2
-
-struct CCam
+enum
 {
+	NUMBER_OF_VECTORS_FOR_AVERAGE = 2,
+	MAX_NUM_OF_SPLINETYPES = 4,
+	MAX_NUM_OF_NODES = 800	// for trains
+};
+
+#define DEFAULT_NEAR (0.9f)
+#define CAM_ZOOM_1STPRS (0.0f)
+#define CAM_ZOOM_1 (1.0f)
+#define CAM_ZOOM_2 (2.0f)
+#define CAM_ZOOM_3 (3.0f)
+#define CAM_ZOOM_TOPDOWN (4.0f)
+#define CAM_ZOOM_CINEMATIC (5.0f)
+
+class CCam
+{
+public:
 	enum
 	{
 		MODE_NONE = 0,
@@ -230,9 +245,12 @@ static_assert(sizeof(CCam) == 0x1A4, "CCam: wrong size");
 static_assert(offsetof(CCam, Alpha) == 0xA8, "CCam: error");
 static_assert(offsetof(CCam, Front) == 0x140, "CCam: error");
 
-struct CCamPathSplines
+class CCamPathSplines
 {
-	float m_arr_PathData[800];
+public:
+	enum {MAXPATHLENGTH=800};
+	float m_arr_PathData[MAXPATHLENGTH];
+	CCamPathSplines(void);
 };
 
 struct CTrainCamNode
@@ -296,13 +314,14 @@ enum
 
 enum
 {
-	CAM_CONTROLLER_0,
-	CAM_CONTROLLER_1,
-	CAM_CONTROLLER_2
+	CAMCONTROL_GAME,
+	CAMCONTROL_SCRIPT,
+	CAMCONTROL_OBBE
 };
 
-struct CCamera : public CPlaceable
+class CCamera : public CPlaceable
 {
+public:
 	bool m_bAboveGroundTrainNodesLoaded;
 	bool m_bBelowGroundTrainNodesLoaded;
 	bool m_bCamDirectlyBehind;
@@ -344,16 +363,12 @@ struct CCamera : public CPlaceable
 	bool m_bHeadBob;
 	bool m_bFailedCullZoneTestPreviously;
 
-bool m_FadeTargetIsSplashScreen;
+	bool m_FadeTargetIsSplashScreen;
 
 	bool WorldViewerBeingUsed;
 	uint8 ActiveCam;
 	uint32 m_uiCamShakeStart;
 	uint32 m_uiFirstPersonCamLastInputTime;
-// where are those?
-//bool m_bVehicleSuspenHigh;
-//bool m_bEnable1rstPersonCamCntrlsScript;
-//bool m_bAllow1rstPersonWeaponsCamera;
 
 	uint32 m_uiLongestTimeInMill;
 	uint32 m_uiNumberOfTrainCamNodes;
@@ -369,7 +384,7 @@ bool m_FadeTargetIsSplashScreen;
 	int m_BlurRed;
 	int m_BlurType;
 
-uint32    unknown;
+uint32    unknown;	// some counter having to do with music
 	int m_iWorkOutSpeedThisNumFrames;
 	int m_iNumFramesSoFar;
 
@@ -412,20 +427,20 @@ uint32    unknown;
 	float m_fOldBetaDiff;
 	float m_fPedZoomValue;
 
-  float m_fPedZoomValueScript;
-  float m_fPedZoomValueSmooth;
-  float m_fPositionAlongSpline;
-  float m_ScreenReductionPercentage;
-  float m_ScreenReductionSpeed;
-  float m_AlphaForPlayerAnim1rstPerson;
-  float Orientation;
-  float PedZoomIndicator;
-  float PlayerExhaustion;
-  float SoundDistUp, SoundDistLeft, SoundDistRight;
-  float SoundDistUpAsRead, SoundDistLeftAsRead, SoundDistRightAsRead;
-  float SoundDistUpAsReadOld, SoundDistLeftAsReadOld, SoundDistRightAsReadOld;
-  float m_fWideScreenReductionAmount;
-  float m_fStartingFOVForInterPol;
+	float m_fPedZoomValueScript;
+	float m_fPedZoomValueSmooth;
+	float m_fPositionAlongSpline;
+	float m_ScreenReductionPercentage;
+	float m_ScreenReductionSpeed;
+	float m_AlphaForPlayerAnim1rstPerson;
+	float Orientation;
+	float PedZoomIndicator;
+	float PlayerExhaustion;
+	float SoundDistUp, SoundDistLeft, SoundDistRight;
+	float SoundDistUpAsRead, SoundDistLeftAsRead, SoundDistRightAsRead;
+	float SoundDistUpAsReadOld, SoundDistLeftAsReadOld, SoundDistRightAsReadOld;
+	float m_fWideScreenReductionAmount;
+	float m_fStartingFOVForInterPol;
 
 	// not static yet
 	float m_fMouseAccelHorzntl;// acceleration multiplier for 1st person controls
@@ -435,8 +450,8 @@ uint32    unknown;
 
 
 	CCam Cams[3];
-	void *pToGarageWeAreIn;
-	void *pToGarageWeAreInForHackAvoidFirstPerson;
+	CGarage *pToGarageWeAreIn;
+	CGarage *pToGarageWeAreInForHackAvoidFirstPerson;
 	CQueuedMode m_PlayerMode;
 	CQueuedMode PlayerWeaponMode;
 	CVector m_PreviousCameraPosition;
@@ -447,17 +462,15 @@ uint32    unknown;
 	CVector m_vecFixedModeUpOffSet;
 	CVector m_vecCutSceneOffset;
 
-  // one of those has to go
-  CVector m_cvecStartingSourceForInterPol;
-  CVector m_cvecStartingTargetForInterPol;
-  CVector m_cvecStartingUpForInterPol;
-  CVector m_cvecSourceSpeedAtStartInter;
-  CVector m_cvecTargetSpeedAtStartInter;
-  CVector m_cvecUpSpeedAtStartInter;
-  CVector m_vecSourceWhenInterPol;
-  CVector m_vecTargetWhenInterPol;
-  CVector m_vecUpWhenInterPol;
-  //CVector m_vecClearGeometryVec;
+	CVector m_cvecStartingSourceForInterPol;
+	CVector m_cvecStartingTargetForInterPol;
+	CVector m_cvecStartingUpForInterPol;
+	CVector m_cvecSourceSpeedAtStartInter;
+	CVector m_cvecTargetSpeedAtStartInter;
+	CVector m_cvecUpSpeedAtStartInter;
+	CVector m_vecSourceWhenInterPol;
+	CVector m_vecTargetWhenInterPol;
+	CVector m_vecUpWhenInterPol;
 
 	CVector m_vecGameCamPos;
 	CVector SourceDuringInter;
@@ -465,8 +478,8 @@ uint32    unknown;
 	CVector UpDuringInter;
 	RwCamera *m_pRwCamera;
 	CEntity *pTargetEntity;
-	CCamPathSplines m_arrPathArray[4];
-	CTrainCamNode m_arrTrainCamNode[800];
+	CCamPathSplines m_arrPathArray[MAX_NUM_OF_SPLINETYPES];
+	CTrainCamNode m_arrTrainCamNode[MAX_NUM_OF_NODES];
 	CMatrix m_cameraMatrix;
 	bool m_bGarageFixedCamPositionSet;
 	bool m_vecDoingSpecialInterPolation;
@@ -490,7 +503,7 @@ uint32    unknown;
 	float m_fScriptPercentageInterToStopMoving;
 	float m_fScriptPercentageInterToCatchUp;
 
-uint32  m_fScriptTimeForInterPolation;
+	uint32  m_fScriptTimeForInterPolation;
 
 
 	int16   m_iFadingDirection;
@@ -503,68 +516,97 @@ uint32  m_fScriptTimeForInterPolation;
 	uint32 m_uiFadeTimeStartedMusic;
 
 	static bool &m_bUseMouse3rdPerson;
+#ifdef FREE_CAM
+	static bool bFreeCam;
+#endif
 
+	// High level and misc
+	void Init(void);
+	void Process(void);
+	void CamControl(void);
+	void UpdateTargetEntity(void);
+	void UpdateSoundDistances(void);
+	void InitialiseCameraForDebugMode(void);
+	void CamShake(float strength, float x, float y, float z);
 	bool Get_Just_Switched_Status() { return m_bJust_Switched; }
-	inline const CMatrix& GetCameraMatrix(void) { return m_cameraMatrix; }
-	CVector &GetGameCamPosition(void) { return m_vecGameCamPos; }
+
+	// Who's in control
+	void TakeControl(CEntity *target, int16 mode, int16 typeOfSwitch, int32 controller);
+	void TakeControlNoEntity(const CVector &position, int16 typeOfSwitch, int32 controller);
+	void TakeControlWithSpline(int16 typeOfSwitch);
+	void Restore(void);
+	void RestoreWithJumpCut(void);
+	void SetCamPositionForFixedMode(const CVector &Source, const CVector &UppOffSet);
+
+	// Transition
+	void StartTransition(int16 mode);
+	void StartTransitionWhenNotFinishedInter(int16 mode);
+	void StoreValuesDuringInterPol(CVector &source, CVector &target, CVector &up, float &FOV);
+
+	// Widescreen borders
+	void SetWideScreenOn(void);
+	void SetWideScreenOff(void);
+	void ProcessWideScreenOn(void);
+	void DrawBordersForWideScreen(void);
+
+	// Obbe's cam
+	bool IsItTimeForNewcam(int32 obbeMode, int32 time);
+	bool TryToStartNewCamMode(int32 obbeMode);
+	void DontProcessObbeCinemaCamera(void);
+	void ProcessObbeCinemaCameraCar(void);
+	void ProcessObbeCinemaCameraPed(void);
+
+	// Train
+	void LoadTrainCamNodes(char const *name);
+	void Process_Train_Camera_Control(void);
+
+	// Script
+	void LoadPathSplines(int file);
+	void FinishCutscene(void);
 	float GetPositionAlongSpline(void) { return m_fPositionAlongSpline; }
+	uint32 GetCutSceneFinishTime(void);
+	void SetCamCutSceneOffSet(const CVector &pos);
+	void SetPercentAlongCutScene(float percent);
+	void SetParametersForScriptInterpolation(float stopMoving, float catchUp, int32 time);
+	void SetZoomValueFollowPedScript(int16 dist);
+	void SetZoomValueCamStringScript(int16 dist);
+	void SetNearClipScript(float);
+
+	// Fading
+	void ProcessFade(void);
+	void ProcessMusicFade(void);
+	void Fade(float timeout, int16 direction);
+	void SetFadeColour(uint8 r, uint8 g, uint8 b);
+	bool GetFading(void);
+	int GetFadingDirection(void);
+	int GetScreenFadeStatus(void);
+
+	// Motion blur
+	void RenderMotionBlur(void);
+	void SetMotionBlur(int r, int g, int b, int a, int type);
+	void SetMotionBlurAlpha(int a);
+
+	// Player looking and aiming
+	int GetLookDirection(void);
+	bool GetLookingForwardFirstPerson(void);
+	bool GetLookingLRBFirstPerson(void);
+	void SetCameraDirectlyInFrontForFollowPed_CamOnAString(void);
+	void SetCameraDirectlyBehindForFollowPed_CamOnAString(void);
+	void SetNewPlayerWeaponMode(int16 mode, int16 minZoom, int16 maxZoom);
+	void ClearPlayerWeaponMode(void);
+	void UpdateAimingCoors(CVector const &coors);
+	void Find3rdPersonCamTargetVector(float dist, CVector pos, CVector &source, CVector &target);
+	float Find3rdPersonQuickAimPitch(void);
+
+	// Physical camera
+	void SetRwCamera(RwCamera *cam);
+	const CMatrix& GetCameraMatrix(void) { return m_cameraMatrix; }
+	CVector &GetGameCamPosition(void) { return m_vecGameCamPos; }
+	void CalculateDerivedValues(void);
 	bool IsPointVisible(const CVector &center, const CMatrix *mat);
 	bool IsSphereVisible(const CVector &center, float radius, const CMatrix *mat);
 	bool IsSphereVisible(const CVector &center, float radius);
 	bool IsBoxVisible(RwV3d *box, const CMatrix *mat);
-	int GetLookDirection(void);
-	bool GetLookingForwardFirstPerson(void);
-
-	void Fade(float timeout, int16 direction);
-	int GetScreenFadeStatus(void);
-	void ProcessFade(void);
-	void ProcessMusicFade(void);
-	void SetFadeColour(uint8 r, uint8 g, uint8 b);
-
-	void CamShake(float strength, float x, float y, float z);
-
-	void SetMotionBlur(int r, int g, int b, int a, int type);
-	void SetMotionBlurAlpha(int a);
-	void RenderMotionBlur(void);
-	void ClearPlayerWeaponMode();
-	void CalculateDerivedValues(void);
-
-	void DrawBordersForWideScreen(void);
-	void Restore(void);
-	void SetWideScreenOn(void);
-	void SetWideScreenOff(void);
-	void SetNearClipScript(float);
-
-	float Find3rdPersonQuickAimPitch(void);
-
-	void TakeControl(CEntity*, int16, int16, int32);
-	void TakeControlNoEntity(const CVector&, int16, int32);
-	void SetCamPositionForFixedMode(const CVector&, const CVector&);
-	bool GetFading();
-	int GetFadingDirection();
-
-	void Init();
-	void SetRwCamera(RwCamera*);
-	void Process();
-
-	void LoadPathSplines(int file);
-	uint32 GetCutSceneFinishTime(void);
-	void FinishCutscene(void);
-
-	void SetCamCutSceneOffSet(const CVector&);
-	void TakeControlWithSpline(short);
-	void RestoreWithJumpCut(void);
-	void SetCameraDirectlyInFrontForFollowPed_CamOnAString(void);
-	void SetCameraDirectlyBehindForFollowPed_CamOnAString(void);
-	void SetZoomValueFollowPedScript(int16);
-	void SetZoomValueCamStringScript(int16);
-	void SetNewPlayerWeaponMode(int16, int16, int16);
-	void UpdateAimingCoors(CVector const &);
-
-	void SetPercentAlongCutScene(float);
-	void SetParametersForScriptInterpolation(float, float, int32);
-
-	void dtor(void) { this->CCamera::~CCamera(); }
 };
 static_assert(offsetof(CCamera, DistanceToWater) == 0xe4, "CCamera: error");
 static_assert(offsetof(CCamera, m_WideScreenOn) == 0x70, "CCamera: error");
@@ -583,3 +625,5 @@ static_assert(sizeof(CCamera) == 0xE9D8, "CCamera: wrong size");
 extern CCamera &TheCamera;
 
 void CamShakeNoPos(CCamera*, float);
+void MakeAngleLessThan180(float &Angle);
+void WellBufferMe(float Target, float *CurrentValue, float *CurrentSpeed, float MaxSpeed, float Acceleration, bool IsAngle);

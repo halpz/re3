@@ -529,7 +529,7 @@ WRAPPER void CMenuManager::DoSettingsBeforeStartingAGame() { EAXJMP(0x48AB40); }
 #else
 void CMenuManager::DoSettingsBeforeStartingAGame()
 {
-	CCamera::m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDART;
+	CCamera::m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
 	if (m_PrefsVsyncDisp != m_PrefsVsync)
 		m_PrefsVsync = m_PrefsVsyncDisp;
 
@@ -2069,7 +2069,7 @@ void CMenuManager::Process(void)
 		}
 		if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
 			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
-				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDART;
+				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
 				if (m_PrefsVsyncDisp != m_PrefsVsync)
 					m_PrefsVsync = m_PrefsVsyncDisp;
 				DMAudio.Service();
@@ -3166,7 +3166,7 @@ CMenuManager::ProcessButtonPresses(void)
 							PSGLOBAL(joy1)->GetCapabilities(&devCaps);
 							ControlsManager.InitDefaultControlConfigJoyPad(devCaps.dwButtons);
 						}
-						CMenuManager::m_ControlMethod = CONTROL_STANDART;
+						CMenuManager::m_ControlMethod = CONTROL_STANDARD;
 						MousePointerStateHelper.bInvertVertically = false;
 						TheCamera.m_fMouseAccelHorzntl = 0.0025f;
 						CVehicle::m_bDisableMouseSteering = true;
@@ -3179,7 +3179,7 @@ CMenuManager::ProcessButtonPresses(void)
 #ifndef TIDY_UP_PBP
 					if (CMenuManager::m_ControlMethod == CONTROL_CLASSIC) {
 						CCamera::m_bUseMouse3rdPerson = true;
-						CMenuManager::m_ControlMethod = CONTROL_STANDART;
+						CMenuManager::m_ControlMethod = CONTROL_STANDARD;
 					} else {
 						CCamera::m_bUseMouse3rdPerson = false;
 						CMenuManager::m_ControlMethod = CONTROL_CLASSIC;

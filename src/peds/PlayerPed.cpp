@@ -18,10 +18,6 @@
 
 #define PAD_MOVE_TO_GAME_WORLD_MOVE 60.0f
 
-#ifdef FREE_CAM
-extern bool bFreeMouseCam;
-#endif
-
 CPlayerPed::~CPlayerPed()
 {
 	delete m_pWanted;
@@ -693,7 +689,7 @@ CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 	float padMoveInGameUnit = padMove / PAD_MOVE_TO_GAME_WORLD_MOVE;
 	if (padMoveInGameUnit > 0.0f) {
 #ifdef FREE_CAM
-		if (!bFreeMouseCam)
+		if (!CCamera::bFreeCam)
 			m_fRotationDest = CGeneral::LimitRadianAngle(TheCamera.Orientation);
 		else
 			m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown) - TheCamera.Orientation;
@@ -993,7 +989,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 				SetStoredState();
 				m_nPedState = PED_SNIPER_MODE;
 #ifdef FREE_CAM
-				if (bFreeMouseCam && TheCamera.Cams[0].Using3rdPersonMouseCam()) {
+				if (CCamera::bFreeCam && TheCamera.Cams[0].Using3rdPersonMouseCam()) {
 					m_fRotationCur = CGeneral::LimitRadianAngle(-TheCamera.Orientation);
 					SetHeading(m_fRotationCur);
 				}
@@ -1018,7 +1014,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 		if (m_nSelectedWepSlot == m_currentWeapon) {
 			if (m_pPointGunAt) {
 #ifdef FREE_CAM
-				if (bFreeMouseCam && weaponInfo->m_eWeaponFire == WEAPON_FIRE_MELEE && m_fMoveSpeed < 1.0f)
+				if (CCamera::bFreeCam && weaponInfo->m_eWeaponFire == WEAPON_FIRE_MELEE && m_fMoveSpeed < 1.0f)
 					StartFightAttack(padUsed->GetWeapon());
 				else
 #endif
@@ -1052,7 +1048,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 
 #ifdef FREE_CAM
 	// Rotate player/arm when shooting. We don't have auto-rotation anymore
-	if (CCamera::m_bUseMouse3rdPerson && bFreeMouseCam &&
+	if (CCamera::m_bUseMouse3rdPerson && CCamera::bFreeCam &&
 		m_nSelectedWepSlot == m_currentWeapon && m_nMoveState != PEDMOVE_SPRINT) {
 
 		// Weapons except throwable and melee ones
@@ -1103,7 +1099,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 			// what??
 			if (!m_pPointGunAt
 #ifdef FREE_CAM
-				|| (!bFreeMouseCam && CCamera::m_bUseMouse3rdPerson)
+				|| (!CCamera::bFreeCam && CCamera::m_bUseMouse3rdPerson)
 #else
 				|| CCamera::m_bUseMouse3rdPerson
 #endif
@@ -1125,7 +1121,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 			TheCamera.UpdateAimingCoors(m_pPointGunAt->GetPosition());
 		}
 #ifdef FREE_CAM
-		else if ((bFreeMouseCam && weaponInfo->m_eWeaponFire == WEAPON_FIRE_MELEE) || (weaponInfo->m_bCanAim && !CCamera::m_bUseMouse3rdPerson)) {
+		else if ((CCamera::bFreeCam && weaponInfo->m_eWeaponFire == WEAPON_FIRE_MELEE) || (weaponInfo->m_bCanAim && !CCamera::m_bUseMouse3rdPerson)) {
 #else
 		else if (weaponInfo->m_bCanAim && !CCamera::m_bUseMouse3rdPerson) {
 #endif

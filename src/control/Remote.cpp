@@ -35,7 +35,7 @@ CRemote::GivePlayerRemoteControlledCar(float x, float y, float z, float rot, uin
 
 	CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle = car;
 	CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->RegisterReference((CEntity**)&CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle);
-	TheCamera.TakeControl(car, CCam::MODE_BEHINDCAR, INTERPOLATION, CAM_CONTROLLER_1);
+	TheCamera.TakeControl(car, CCam::MODE_BEHINDCAR, INTERPOLATION, CAMCONTROL_SCRIPT);
 }
 
 void

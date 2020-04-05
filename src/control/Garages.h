@@ -5,6 +5,7 @@
 #include "config.h"
 
 class CVehicle;
+class CCamera;
 
 enum eGarageState : int8
 {
@@ -168,6 +169,7 @@ class CGarage
 
 	friend class CGarages;
 	friend class cAudioManager;
+	friend class CCamera;
 };
 
 static_assert(sizeof(CGarage) == 140, "CGarage");
