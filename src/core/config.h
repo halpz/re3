@@ -118,7 +118,9 @@ enum Config {
 	NUM_AUDIO_REFLECTIONS = 5,
 	NUM_SCRIPT_MAX_ENTITIES = 40,
 
-	NUM_GARAGE_STORED_CARS = 6
+	NUM_GARAGE_STORED_CARS = 6,
+
+	NUM_CRANES = 8
 };
 
 // We'll use this once we're ready to become independent of the game
