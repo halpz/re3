@@ -17,8 +17,6 @@
 
 cMusicManager &MusicManager = *(cMusicManager *)0x8F3964;
 int32 &gNumRetunePresses = *(int32 *)0x650B80;
-wchar *pCurrentStation = (wchar *)0x650B9C;
-uint8 &cDisplay = *(uint8 *)0x650BA1;
 int32 &gRetuneCounter = *(int32*)0x650B84;
 bool& bHasStarted = *(bool*)0x650B7C;
 
@@ -72,6 +70,8 @@ cMusicManager::DisplayRadioStationName()
 	int8 pRetune;
 	int8 gStreamedSound;
 	int8 gRetuneCounter;
+	static wchar *pCurrentStation = nil;
+	static uint8 cDisplay = 0;
 
 	if(!CTimer::GetIsPaused() && !TheCamera.m_WideScreenOn && PlayerInCar() &&
 	   !CReplay::IsPlayingBack()) {
