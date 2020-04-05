@@ -61,7 +61,7 @@ cAudioScriptObject::SaveAllAudioScriptObjects(uint8 *buf, uint32 *size)
 	INITSAVEBUF
 
 	int32 pool_size = CPools::GetAudioScriptObjectPool()->GetNoOfUsedSpaces();
-	*size = SAVE_HEADER_SIZE + pool_size * (sizeof(cAudioScriptObject) + sizeof(int32));
+	*size = SAVE_HEADER_SIZE + sizeof(int32) + pool_size * (sizeof(cAudioScriptObject) + sizeof(int32));
 	WriteSaveHeader(buf, 'A', 'U', 'D', '\0', *size - SAVE_HEADER_SIZE);
 	WriteSaveBuf(buf, pool_size);
 

@@ -2229,6 +2229,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		if (pos.z <= -100)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		UpdateCompareFlag(TheCamera.IsSphereVisible(pos, *(float*)&ScriptParams[3]));
+		return 0;
 	}
 	case COMMAND_DEBUG_ON:
 		CTheScripts::DbgFlag = true;
@@ -7657,13 +7658,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		assert(pObject);
 		if (ScriptParams[1]) {
 			if (pObject->bIsStatic) {
-				pObject->bIsStatic = true;
+				pObject->bIsStatic = false;
 				pObject->AddToMovingList();
 			}
 		}
 		else {
 			if (!pObject->bIsStatic) {
-				pObject->bIsStatic = false;
+				pObject->bIsStatic = true;
 				pObject->RemoveFromMovingList();
 			}
 		}
@@ -11037,6 +11038,7 @@ void CRunningScript::DoDeatharrestCheck()
 		int contactFlagOffset = CTheScripts::OnAMissionForContactFlag[contact];
 		if (contactFlagOffset && CTheScripts::ScriptSpace[contactFlagOffset] == 1) {
 			messageId += CTheScripts::BaseBriefIdForContact[contact];
+			found = true;
 		}
 	}
 	if (!found)
@@ -11331,6 +11333,7 @@ INITSAVEBUF
 			break;
 		case 4:
 			InvisibilitySettingArray[i] = CPools::GetDummyPool()->GetSlot(handle - 1);
+			break;
 		default:
 			assert(false);
 		}

@@ -17,7 +17,7 @@ class CRunningScript;
 
 struct CScriptRectangle 
 {
-	int8 m_bIsUsed;
+	bool m_bIsUsed;
 	bool m_bBeforeFade;
 	int16 m_nTextureId;
 	CRect m_sRect;

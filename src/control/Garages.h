@@ -192,7 +192,6 @@ class CGarages
 	static uint32 &NumGarages;
 	static bool &PlayerInGarage;
 	static int32 &PoliceCarsCollected;
-	static uint32 &GarageToBeTidied;
 	static CGarage(&aGarages)[NUM_GARAGES];
 	static CStoredCar(&aCarsInSafeHouse1)[NUM_GARAGE_STORED_CARS];
 	static CStoredCar(&aCarsInSafeHouse2)[NUM_GARAGE_STORED_CARS];
