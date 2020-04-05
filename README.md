@@ -42,7 +42,6 @@ cAudioManager - WIP
 CBoat
 CBrightLights
 CBulletInfo
-CCamera
 CCrane
 CCranes
 CCullZone

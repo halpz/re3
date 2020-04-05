@@ -372,11 +372,9 @@ DebugMenuPopulate(void)
 
 		extern bool PrintDebugCode;
 		extern int16 &DebugCamMode;
+		DebugMenuAddVarBool8("Cam", "Use mouse Cam", (int8*)&CCamera::m_bUseMouse3rdPerson, nil);
 #ifdef FREE_CAM
-		extern bool bFreePadCam;
-		extern bool bFreeMouseCam;
-		DebugMenuAddVarBool8("Cam", "Free Gamepad Cam", (int8*)&bFreePadCam, nil);
-		DebugMenuAddVarBool8("Cam", "Free Mouse Cam", (int8*)&bFreeMouseCam, nil);
+		DebugMenuAddVarBool8("Cam", "Free Cam", (int8*)&CCamera::bFreeCam, nil);
 #endif
 		DebugMenuAddVarBool8("Cam", "Print Debug Code", (int8*)&PrintDebugCode, nil);
 		DebugMenuAddVar("Cam", "Cam Mode", &DebugCamMode, nil, 1, 0, CCam::MODE_EDITOR, nil);

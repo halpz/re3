@@ -363,7 +363,7 @@ enum
 
 enum eControlMethod
 {
-	CONTROL_STANDART = 0,
+	CONTROL_STANDARD = 0,
 	CONTROL_CLASSIC,
 };
 
