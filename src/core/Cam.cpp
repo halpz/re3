@@ -627,7 +627,7 @@ CCam::LookBehind(void)
 		DeltaBeta = TargetOrientation - Beta;
 		while(DeltaBeta >= PI) DeltaBeta -= 2*PI;
 		while(DeltaBeta < -PI) DeltaBeta += 2*PI;
-		if(DirectionWasLooking == LOOKING_BEHIND)
+		if(DirectionWasLooking != LOOKING_BEHIND)
 			LookBehindCamWasInFront = DeltaBeta <= -HALFPI || DeltaBeta >= HALFPI;
 		if(LookBehindCamWasInFront)
 			TargetOrientation += PI;
