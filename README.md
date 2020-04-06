@@ -46,7 +46,7 @@ CCollision - almost done
 CCullZone - only mobile stuff
 CCullZones - only mobile stuff
 CExplosion
-CFireLoader - almost done
+CFileLoader - almost done
 CMenuManager - WIP
 CMotionBlurStreaks
 CObject
