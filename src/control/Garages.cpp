@@ -526,7 +526,7 @@ void CGarage::Update()
 					((CAutomobile*)(FindPlayerVehicle()))->m_pBombRigger = FindPlayerPed();
 					if (m_eGarageType == GARAGE_BOMBSHOP3)
 						CGarages::GivePlayerDetonator();
-					CStats::KgOfExplosivesUsed += KGS_OF_EXPLOSIVES_IN_BOMB;
+					CStats::KgsOfExplosivesUsed += KGS_OF_EXPLOSIVES_IN_BOMB;
 				}
 				switch (m_eGarageType) {
 				case GARAGE_BOMBSHOP1:
