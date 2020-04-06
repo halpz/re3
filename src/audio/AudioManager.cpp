@@ -3515,9 +3515,9 @@ cAudioManager::ProcessCrane()
 	static const int intensity = 80;
 
 	if(crane) {
-		if(crane->m_bCraneActive == 1) {
-			if(crane->m_bCraneStatus) {
-				m_sQueueSample.m_vecPos = crane->m_pObject->GetPosition();
+		if(crane->m_nCraneStatus == CCrane::ACTIVATED) {
+			if(crane->m_nCraneState != CCrane::IDLE) {
+				m_sQueueSample.m_vecPos = crane->m_pCraneEntity->GetPosition();
 				distSquared = GetDistanceSquared(&this->m_sQueueSample.m_vecPos);
 				if(distSquared < SQR(intensity)) {
 					CalculateDistance(distCalculated, distSquared);

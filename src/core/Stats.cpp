@@ -63,62 +63,56 @@ void CStats::Init()
 	PeopleKilledByOthers = 0;
 	PeopleKilledByPlayer = 0;
 	ShotsMade = 0;
-    CarsExploded = 0;
-    HelisDestroyed = 0;
-    ProgressMade = 0;
-    KgsOfExplosivesUsed = 0;
-    InstantHitsFiredByPlayer = 0;
-    InstantHitsHitByPlayer = 0;
-    CarsCrushed = 0;
-    HeadsPopped = 0;
-    TimesArrested = 0;
-    TimesDied = 0;
-    DaysPassed = 0;
-    NumberOfUniqueJumpsFound = 0;
-    mmRain = 0;
-    MaximumJumpFlips = 0;
-    MaximumJumpSpins = 0;
-    MaximumJumpDistance = 0;
-    MaximumJumpHeight = 0;
-    BestStuntJump = 0;
-    TotalNumberOfUniqueJumps = 0;
-    Record4x4One = 0;
-    LongestFlightInDodo = 0;
-    Record4x4Two = 0;
-    PassengersDroppedOffWithTaxi = 0;
-    Record4x4Three = 0;
-    MoneyMadeWithTaxi = 0;
-    Record4x4Mayhem = 0;
-    LivesSavedWithAmbulance = 0;
-    ElBurroTime = 0;
-    CriminalsCaught = 0;
-    MissionsGiven = 0;
-    HighestLevelAmbulanceMission = 0;
-    MissionsPassed = 0;
-    FiresExtinguished = 0;
-    DistanceTravelledOnFoot = 0;
-    TimeTakenDefuseMission = 0;
-    NumberKillFrenziesPassed = 0;
-    DistanceTravelledInVehicle = 0;
-    TotalNumberKillFrenzies = 0;
-    TotalNumberMissions = 0;
-    KillsSinceLastCheckpoint = 0;
-    TotalLegitimateKills = 0;
-    for (int i = 0; i < TOTAL_FASTEST_TIMES; i++)
-    {
-        FastestTimes[i] = 0;
-    }
-    for (int i = 0; i < TOTAL_HIGHEST_SCORES; i++)
-    {
-        HighestScores[i] = 0;
-    }
-    for (int i = 0; i < NUM_PEDTYPES; i++)
-    {
-        PedsKilledOfThisType[i] = 0;
-    }
-    IndustrialPassed = 0;
-    CommercialPassed = 0;
-    SuburbanPassed = 0;
+	CarsExploded = 0;
+	HelisDestroyed = 0;
+	ProgressMade = 0;
+	KgsOfExplosivesUsed = 0;
+	InstantHitsFiredByPlayer = 0;
+	InstantHitsHitByPlayer = 0;
+	CarsCrushed = 0;
+	HeadsPopped = 0;
+	TimesArrested = 0;
+	TimesDied = 0;
+	DaysPassed = 0;
+	NumberOfUniqueJumpsFound = 0;
+	mmRain = 0;
+	MaximumJumpFlips = 0;
+	MaximumJumpSpins = 0;
+	MaximumJumpDistance = 0;
+	MaximumJumpHeight = 0;
+	BestStuntJump = 0;
+	TotalNumberOfUniqueJumps = 0;
+	Record4x4One = 0;
+	LongestFlightInDodo = 0;
+	Record4x4Two = 0;
+	PassengersDroppedOffWithTaxi = 0;
+	Record4x4Three = 0;
+	MoneyMadeWithTaxi = 0;
+	Record4x4Mayhem = 0;
+	LivesSavedWithAmbulance = 0;
+	ElBurroTime = 0;
+	CriminalsCaught = 0;
+	MissionsGiven = 0;
+	HighestLevelAmbulanceMission = 0;
+	MissionsPassed = 0;
+	FiresExtinguished = 0;
+	DistanceTravelledOnFoot = 0;
+	TimeTakenDefuseMission = 0;
+	NumberKillFrenziesPassed = 0;
+	DistanceTravelledInVehicle = 0;
+	TotalNumberKillFrenzies = 0;
+	TotalNumberMissions = 0;
+	KillsSinceLastCheckpoint = 0;
+	TotalLegitimateKills = 0;
+	for (int i = 0; i < TOTAL_FASTEST_TIMES; i++)
+		FastestTimes[i] = 0;
+	for (int i = 0; i < TOTAL_HIGHEST_SCORES; i++)
+		HighestScores[i] = 0;
+	for (int i = 0; i < NUM_PEDTYPES; i++)
+		PedsKilledOfThisType[i] = 0;
+	IndustrialPassed = 0;
+	CommercialPassed = 0;
+	SuburbanPassed = 0;
 }
 
 void CStats::RegisterFastestTime(int32 index, int32 time)
@@ -205,8 +199,6 @@ void CStats::SetTotalNumberMissions(int32 total)
 {
 	TotalNumberMissions = total;
 }
-
-//WRAPPER void CStats::Init() { EAXJMP(0x4AAC60); }
 
 STARTPATCHES
 	InjectHook(0x48C5A3, CStats::Init, PATCH_JUMP); // CGame::ReInitGameObjectVariables
