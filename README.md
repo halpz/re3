@@ -66,7 +66,7 @@ CTrafficLights
 CWeapon
 CWeather
 CWorld
-GeneralLoad
+GenericLoad
 ```
 
 ### Coding style
