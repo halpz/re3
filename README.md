@@ -42,7 +42,6 @@ cAudioManager - WIP
 CBoat
 CBrightLights
 CBulletInfo
-CCollision - almost done
 CCullZone - only mobile stuff
 CCullZones - only mobile stuff
 CExplosion

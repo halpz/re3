@@ -34,8 +34,6 @@ enum Direction
 eLevelName &CCollision::ms_collisionInMemory = *(eLevelName*)0x8F6250;
 CLinkList<CColModel*> &CCollision::ms_colModelCache = *(CLinkList<CColModel*>*)0x95CB58;
 
-WRAPPER bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector &pos, float z, CColPoint &point, CStoredCollPoly *poly) { EAXJMP(0x4105A0); }
-
 void
 CCollision::Init(void)
 {
@@ -924,6 +922,87 @@ CCollision::ProcessVerticalLineTriangle(const CColLine &line,
 	}
 	mindist = t;
 	return true;
+}
+
+bool
+CCollision::IsStoredPolyStillValidVerticalLine(const CVector &pos, float z, CColPoint &point, CStoredCollPoly *poly)
+{
+	float t;
+
+	if(!poly->valid)
+		return false;
+
+	// maybe inlined?
+	CColTriangle tri;
+	tri.a = 0;
+	tri.b = 1;
+	tri.c = 2;
+	CColTrianglePlane plane;
+	plane.Set(poly->verts, tri);
+
+	const CVector &va = poly->verts[tri.a];
+	const CVector &vb = poly->verts[tri.b];
+	const CVector &vc = poly->verts[tri.c];
+	CVector p0 = pos;
+	CVector p1(pos.x, pos.y, z);
+
+	// The rest is pretty much CCollision::ProcessLineTriangle
+
+	// if points are on the same side, no collision
+	if(plane.CalcPoint(p0) * plane.CalcPoint(p1) > 0.0f)
+		return poly->valid = false;
+
+	// intersection parameter on line
+	t = -plane.CalcPoint(p0) / DotProduct(p1 - p0, plane.normal);
+	// find point of intersection
+	CVector p = p0 + (p1-p0)*t;
+
+	CVector2D vec1, vec2, vec3, vect;
+	switch(plane.dir){
+	case DIR_X_POS:
+		vec1.x = va.y; vec1.y = va.z;
+		vec2.x = vc.y; vec2.y = vc.z;
+		vec3.x = vb.y; vec3.y = vb.z;
+		vect.x = p.y; vect.y = p.z;
+		break;
+	case DIR_X_NEG:
+		vec1.x = va.y; vec1.y = va.z;
+		vec2.x = vb.y; vec2.y = vb.z;
+		vec3.x = vc.y; vec3.y = vc.z;
+		vect.x = p.y; vect.y = p.z;
+		break;
+	case DIR_Y_POS:
+		vec1.x = va.z; vec1.y = va.x;
+		vec2.x = vc.z; vec2.y = vc.x;
+		vec3.x = vb.z; vec3.y = vb.x;
+		vect.x = p.z; vect.y = p.x;
+		break;
+	case DIR_Y_NEG:
+		vec1.x = va.z; vec1.y = va.x;
+		vec2.x = vb.z; vec2.y = vb.x;
+		vec3.x = vc.z; vec3.y = vc.x;
+		vect.x = p.z; vect.y = p.x;
+		break;
+	case DIR_Z_POS:
+		vec1.x = va.x; vec1.y = va.y;
+		vec2.x = vc.x; vec2.y = vc.y;
+		vec3.x = vb.x; vec3.y = vb.y;
+		vect.x = p.x; vect.y = p.y;
+		break;
+	case DIR_Z_NEG:
+		vec1.x = va.x; vec1.y = va.y;
+		vec2.x = vb.x; vec2.y = vb.y;
+		vec3.x = vc.x; vec3.y = vc.y;
+		vect.x = p.x; vect.y = p.y;
+		break;
+	default:
+		assert(0);
+	}
+	if(CrossProduct2D(vec2-vec1, vect-vec1) < 0.0f) return poly->valid = false;
+	if(CrossProduct2D(vec3-vec1, vect-vec1) > 0.0f) return poly->valid = false;
+	if(CrossProduct2D(vec3-vec2, vect-vec2) < 0.0f) return poly->valid = false;
+	point.point = p;
+	return poly->valid = true;
 }
 
 bool
