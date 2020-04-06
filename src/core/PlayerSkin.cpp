@@ -142,10 +142,6 @@ CPlayerSkin::RenderFrontendSkinEdit(void)
 	const RwV3d axis2 = { 0.0f, 0.0f, 1.0f };
 	static uint32 LastFlash = 0;
 
-#ifdef ASPECT_RATIO_SCALE
-	pos.x = 1.35f * (SCREEN_ASPECT_RATIO / DEFAULT_ASPECT_RATIO);
-#endif
-
 	RwFrame *frame = RpClumpGetFrame(gpPlayerClump);
 
 	if (CTimer::GetTimeInMillisecondsPauseMode() - LastFlash > 7) {

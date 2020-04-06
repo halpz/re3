@@ -192,6 +192,7 @@ enum Config {
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
 #define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
 // #define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
+// #define MENU_MAP			// Very WIP
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER	// makes game load main_freeroam.scm by default
