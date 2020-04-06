@@ -42,19 +42,20 @@ cAudioManager - WIP
 CBoat
 CBrightLights
 CBulletInfo
-CCrane
-CCranes
-CCullZone
-CCullZones
+CCollision - almost done
+CCullZone - only mobile stuff
+CCullZones - only mobile stuff
 CExplosion
-CFallingGlassPane
-CGlass
+CFireLoader - almost done
 CMenuManager - WIP
 CMotionBlurStreaks
 CObject
 CPacManPickups
+CPad - only cheats
 CPedPath
+CPools - save/loading
 CRecordDataForChase
+CRecordDataForGame
 CRoadBlocks
 CRubbish
 CSceneEdit
@@ -65,6 +66,7 @@ CTrafficLights
 CWeapon
 CWeather
 CWorld
+GeneralLoad
 ```
 
 ### Coding style
