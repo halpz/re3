@@ -30,6 +30,12 @@
 #define HOOK_OFFSET_MOVEMENT_SPEED (0.1f)
 #define HOOK_HEIGHT_MOVEMENT_SPEED (0.06f)
 
+#define MESSAGE_SHOW_DURATION (4000)
+
+#define MAX_DISTANCE (99999.9f)
+#define MIN_VALID_POSITION (-10000.0f)
+#define DEFAULT_OFFSET (20.0f)
+
 uint32 TimerForCamInterpolation;
 
 uint32& CCranes::CarsCollectedMilitaryCrane = *(uint32*)0x8F6248;
@@ -72,8 +78,8 @@ void CCranes::AddThisOneCrane(CEntity* pEntity)
 	pCrane->m_fHookAngle = NumCranes; // lol wtf
 	while (pCrane->m_fHookAngle > TWOPI)
 		pCrane->m_fHookAngle -= TWOPI;
-	pCrane->m_fHookOffset = 20.0f;
-	pCrane->m_fHookHeight = 20.0f;
+	pCrane->m_fHookOffset = DEFAULT_OFFSET;
+	pCrane->m_fHookHeight = DEFAULT_OFFSET;
 	pCrane->m_nTimeForNextCheck = 0;
 	pCrane->m_nCraneState = CCrane::IDLE;
 	pCrane->m_bWasMilitaryCrane = false;
@@ -99,9 +105,9 @@ void CCranes::AddThisOneCrane(CEntity* pEntity)
 
 void CCranes::ActivateCrane(float fInfX, float fSupX, float fInfY, float fSupY, float fDropOffX, float fDropOffY, float fDropOffZ, float fHeading, bool bIsCrusher, bool bIsMilitary, float fPosX, float fPosY)
 {
-	float fMinDistance = 99999.9f;
+	float fMinDistance = MAX_DISTANCE;
 	float X = fPosX, Y = fPosY;
-	if (X <= -10000.0f || Y <= -10000.0f) {
+	if (X <= MIN_VALID_POSITION || Y <= MIN_VALID_POSITION) {
 		X = fDropOffX;
 		Y = fDropOffY;
 	}
@@ -114,7 +120,7 @@ void CCranes::ActivateCrane(float fInfX, float fSupX, float fInfY, float fSupY, 
 		}
 	}
 #ifdef FIX_BUGS // classic
-	if (fMinDistance == 99999.9f)
+	if (fMinDistance == MAX_DISTANCE)
 		return;
 #endif
 	CCrane* pCrane = &aCranes[index];
@@ -150,7 +156,7 @@ void CCranes::ActivateCrane(float fInfX, float fSupX, float fInfY, float fSupY, 
 
 void CCranes::DeActivateCrane(float X, float Y)
 {
-	float fMinDistance = 99999.9f;
+	float fMinDistance = MAX_DISTANCE;
 	int index = 0;
 	for (int i = 0; i < NumCranes; i++) {
 		float distance = (CVector2D(X, Y) - aCranes[i].m_pCraneEntity->GetPosition()).Magnitude();
@@ -160,7 +166,7 @@ void CCranes::DeActivateCrane(float X, float Y)
 		}
 	}
 #ifdef FIX_BUGS // classic
-	if (fMinDistance == 99999.9f)
+	if (fMinDistance == MAX_DISTANCE)
 		return;
 #endif
 	aCranes[index].m_nCraneStatus = CCrane::DEACTIVATED;
@@ -269,7 +275,7 @@ void CCrane::Update(void)
 			break;
 		case LIFTING_TARGET:
 			RotateCarriedCarProperly();
-			if (GoTowardsTarget(m_fDropoffAngle, m_fDropoffDistance, GetHeightToDropoff(), 0.3f))
+			if (GoTowardsTarget(m_fDropoffAngle, m_fDropoffDistance, GetHeightToDropoff(), CRANE_SLOWDOWN_MULTIPLIER))
 				m_nCraneState = ROTATING_TARGET;
 			if (!m_pVehiclePickedUp || m_pVehiclePickedUp->pDriver) {
 				m_pVehiclePickedUp = nil;
@@ -302,7 +308,7 @@ void CCrane::Update(void)
 							CCranes::RegisterCarForMilitaryCrane(m_pVehiclePickedUp->GetModelIndex());
 							if (!CCranes::HaveAllCarsBeenCollectedByMilitaryCrane()) {
 								CWorld::Players[CWorld::PlayerInFocus].m_nMoney += CAR_REWARD_MILITARY_CRANE;
-								CGarages::TriggerMessage("GA_10", CAR_REWARD_MILITARY_CRANE, 4000, -1);
+								CGarages::TriggerMessage("GA_10", CAR_REWARD_MILITARY_CRANE, MESSAGE_SHOW_DURATION, -1);
 							}
 							CWorld::Remove(m_pVehiclePickedUp);
 							delete m_pVehiclePickedUp;
@@ -415,11 +421,11 @@ void CCrane::FindCarInSectorList(CPtrList* pList)
 			if (!pVehicle->bCraneMessageDone) {
 				pVehicle->bCraneMessageDone = true;
 				if (!m_bIsMilitaryCrane)
-					CGarages::TriggerMessage("CR_1", -1, 4000, -1); // Crane cannot lift this vehicle.
+					CGarages::TriggerMessage("CR_1", -1, MESSAGE_SHOW_DURATION, -1); // Crane cannot lift this vehicle.
 				else if (DoesCranePickUpThisCarType(pVehicle->GetModelIndex()))
-					CGarages::TriggerMessage("GA_20", -1, 4000, -1); // We got more of these than we can shift. Sorry man, no deal.
+					CGarages::TriggerMessage("GA_20", -1, MESSAGE_SHOW_DURATION, -1); // We got more of these than we can shift. Sorry man, no deal.
 				else
-					CGarages::TriggerMessage("GA_19", -1, 4000, -1); // We're not interested in that model.
+					CGarages::TriggerMessage("GA_19", -1, MESSAGE_SHOW_DURATION, -1); // We're not interested in that model.
 			}
 		}
 		else {
