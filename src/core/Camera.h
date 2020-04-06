@@ -23,6 +23,20 @@ enum
 #define CAM_ZOOM_TOPDOWN (4.0f)
 #define CAM_ZOOM_CINEMATIC (5.0f)
 
+#ifdef FREE_CAM // LCS values
+#define FREE_CAR_ZOOM_VALUE_1 (-1.0f)
+#define FREE_CAR_ZOOM_VALUE_2 (2.0f)
+#define FREE_CAR_ZOOM_VALUE_3 (6.0f)
+
+#define FREE_BOAT_ZOOM_VALUE_1 (-2.41f)
+#define FREE_BOAT_ZOOM_VALUE_2 (6.49f)
+#define FREE_BOAT_ZOOM_VALUE_3 (15.0f)
+#endif
+
+#define DEFAULT_CAR_ZOOM_VALUE_1 (0.05f)
+#define DEFAULT_CAR_ZOOM_VALUE_2 (1.9f)
+#define DEFAULT_CAR_ZOOM_VALUE_3 (3.9f)
+
 class CCam
 {
 public:

@@ -27,11 +27,19 @@
 #include "World.h"
 #include "Renderer.h"
 #include "CdStream.h"
+#include "Radar.h"
 
 #define DONT_USE_SUSPICIOUS_FUNCS 1
 #define TIDY_UP_PBP // ProcessButtonPresses
 #define MAX_VISIBLE_LIST_ROW 30
 #define SCROLLBAR_MAX_HEIGHT 263.0f // actually it's 273. but calculating it from scrollbar drawing code gives 287. i don't know
+
+#ifdef MENU_MAP
+bool CMenuManager::bMenuMapActive = false;
+float CMenuManager::fMapSize;
+float CMenuManager::fMapCenterY;
+float CMenuManager::fMapCenterX;
+#endif
 
 #ifdef PS2_LIKE_MENU
 BottomBarOption bbNames[8];
@@ -129,7 +137,22 @@ const char* FrontendFilenames[][2] = {
 	{"fe_radio7", "" }, // MSX_FM
 	{"fe_radio8", "" }, // FLASHBACK
 	{"fe_radio9", "" }, // CHATTERBOX
-};					
+};
+
+#ifdef MENU_MAP
+const char* MapFilenames[][2] = {
+	{"mapMid01", "mapMid01A"},
+	{"mapMid02", "mapMid02A"},
+	{"mapMid03", "mapMid03A"},
+	{"mapBot01", "mapBot01A"},
+	{"mapBot02", "mapBot02A"},
+	{"mapBot03", "mapBot03A"},
+	{"mapTop01", "mapTop01A"},
+	{"mapTop02", "mapTop02A"},
+	{"mapTop03", "mapTop03A"},
+};
+CSprite2d CMenuManager::m_aMapSprites[NUM_MAP_SPRITES];
+#endif
 
 // 0x5F3344
 const char* MenuFilenames[][2] = {
@@ -362,7 +385,7 @@ void CMenuManager::CentreMousePointer()
 {
 	tagPOINT Point;
 
-	if (SCREEN_WIDTH * 0.5f == 0.0f && 0.0f == SCREEN_HEIGHT * 0.5f) {
+	if (SCREEN_WIDTH * 0.5f != 0.0f && 0.0f != SCREEN_HEIGHT * 0.5f) {
 		Point.x = SCREEN_WIDTH / 2;
 		Point.y = SCREEN_HEIGHT / 2;
 		ClientToScreen(PSGLOBAL(window), &Point);
@@ -562,6 +585,11 @@ void CMenuManager::Draw()
 		case MENUPAGE_BRIEFS:
 			PrintBriefs();
 			break;
+#ifdef MENU_MAP
+		case MENUPAGE_MAP:
+			PrintMap();
+			break;
+#endif
 	}
 
 	// Header height isn't accounted, we will add that later.
@@ -1156,7 +1184,7 @@ void CMenuManager::Draw()
 
 	if (m_nCurrScreen == MENUPAGE_CONTROLLER_SETTINGS)
 		PrintController();
-	
+
 /*	else if (m_nCurrScreen == MENUPAGE_SKIN_SELECT_OLD) {
 		CSprite2d::DrawRect(CRect(StretchX(180), MENU_Y(98), StretchX(230), MENU_Y(123)), CRGBA(255, 255, 255, FadeIn(255)));
 		CSprite2d::DrawRect(CRect(StretchX(181), MENU_Y(99), StretchX(229), MENU_Y(233)), CRGBA(Player color from PickNewPlayerColour, FadeIn(255)));
@@ -2570,7 +2598,12 @@ void CMenuManager::LoadAllTextures()
 		m_aMenuSprites[i].SetTexture(MenuFilenames[i][0], MenuFilenames[i][1]);
 		m_aMenuSprites[i].SetAddressing(rwTEXTUREADDRESSBORDER);
 	}
-
+#ifdef MENU_MAP
+	for (int i = 0; i < ARRAY_SIZE(MapFilenames); i++) {
+		m_aMapSprites[i].SetTexture(MapFilenames[i][0], MapFilenames[i][1]);
+		m_aMapSprites[i].SetAddressing(rwTEXTUREADDRESSBORDER);
+	}
+#endif
 	m_bSpritesLoaded = true;
 	CTxdStore::PopCurrentTxd();
 }
@@ -3756,6 +3789,14 @@ CMenuManager::ProcessButtonPresses(void)
 							break;
 #endif
 						} else {
+#ifdef MENU_MAP
+							if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu == MENUPAGE_MAP) {
+								fMapCenterX = SCREEN_WIDTH / 2;
+								fMapCenterY = SCREEN_HEIGHT / 3;
+								fMapSize = SCREEN_HEIGHT / CDraw::GetAspectRatio();
+							}
+
+#endif
 							ChangeScreen(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, 0, true, true);
 						}
 					}
@@ -4428,7 +4469,10 @@ void CMenuManager::UnloadTextures()
 	printf("REMOVE menu textures\n");
 	for (int i = 0; i < ARRAY_SIZE(MenuFilenames); ++i)
 		m_aMenuSprites[i].Delete();
-
+#ifdef MENU_MAP
+	for (int i = 0; i < ARRAY_SIZE(MapFilenames); ++i)
+		m_aMapSprites[i].Delete();
+#endif
 	int menu = CTxdStore::FindTxdSlot("menu");
 	CTxdStore::RemoveTxd(menu);
 
@@ -4673,6 +4717,171 @@ CMenuManager::PrintController(void)
 		}
 	}
 }
+
+#ifdef MENU_MAP
+
+#define ZOOM(x, y, in) \
+	do { \
+		if ((fMapSize < SCREEN_WIDTH / 3 && !in) || (fMapSize > SCREEN_WIDTH * 2 && in)) \
+			break; \
+		float z2 = in? 1.1f : 1.f/1.1f; \
+		fMapCenterX += (x - fMapCenterX) * (1.0f - z2); \
+		fMapCenterY += (y - fMapCenterY) * (1.0f - z2); \
+		fMapSize *= z2; \
+	} while(0) \
+
+void
+CMenuManager::PrintMap(void)
+{
+	bMenuMapActive = true;
+	CRadar::InitFrontEndMap();
+
+	// Because fMapSize is half of the map length, and map consists of 3x3 tiles.
+	float halfTile = fMapSize / 3.0f;
+
+	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
+
+	if (SCREEN_WIDTH >= fMapCenterX - fMapSize || SCREEN_HEIGHT >= fMapCenterY - fMapSize) {
+		m_aMapSprites[MAPTOP1].Draw(CRect(fMapCenterX - fMapSize, fMapCenterY - fMapSize,
+			fMapCenterX - halfTile, fMapCenterY - halfTile), CRGBA(255, 255, 255, FadeIn(255)));
+	}
+
+	if (SCREEN_WIDTH >= fMapCenterX - halfTile || SCREEN_HEIGHT >= fMapCenterY - fMapSize) {
+		m_aMapSprites[MAPTOP2].Draw(CRect(fMapCenterX - halfTile, fMapCenterY - fMapSize,
+			fMapCenterX + halfTile, fMapCenterY - halfTile), CRGBA(255, 255, 255, FadeIn(255)));
+	}
+
+	if (SCREEN_WIDTH >= fMapCenterX - halfTile || SCREEN_HEIGHT >= fMapCenterY - fMapSize) {
+		m_aMapSprites[MAPTOP3].Draw(CRect(fMapCenterX + halfTile, fMapCenterY - fMapSize,
+			fMapCenterX + fMapSize, fMapCenterY - halfTile), CRGBA(255, 255, 255, FadeIn(255)));
+	}
+
+	if (SCREEN_WIDTH >= fMapCenterX - fMapSize || SCREEN_HEIGHT >= fMapCenterY - halfTile) {
+		m_aMapSprites[MAPMID1].Draw(CRect(fMapCenterX - fMapSize, fMapCenterY - halfTile,
+			fMapCenterX - halfTile, fMapCenterY + halfTile), CRGBA(255, 255, 255, FadeIn(255)));
+	}
+
+	if (SCREEN_WIDTH >= fMapCenterX - halfTile || SCREEN_HEIGHT >= fMapCenterY - halfTile) {
+		m_aMapSprites[MAPMID2].Draw(CRect(fMapCenterX - halfTile, fMapCenterY - halfTile,
+			fMapCenterX + halfTile, fMapCenterY + halfTile), CRGBA(255, 255, 255, FadeIn(255)));
+	}
+
+	if (SCREEN_WIDTH >= fMapCenterX - halfTile || SCREEN_HEIGHT >= fMapCenterY - halfTile) {
+		m_aMapSprites[MAPMID3].Draw(CRect(fMapCenterX + halfTile, fMapCenterY - halfTile,
+			fMapCenterX + fMapSize, fMapCenterY + halfTile), CRGBA(255, 255, 255, FadeIn(255)));
+	}
+
+	if (SCREEN_WIDTH >= fMapCenterX - fMapSize || SCREEN_HEIGHT >= fMapCenterY - halfTile) {
+		m_aMapSprites[MAPBOT1].Draw(CRect(fMapCenterX - fMapSize, fMapCenterY + halfTile,
+			fMapCenterX - halfTile, fMapCenterY + fMapSize), CRGBA(255, 255, 255, FadeIn(255)));
+	}
+
+	if (SCREEN_WIDTH >= fMapCenterX - halfTile || SCREEN_HEIGHT >= fMapCenterY - halfTile) {
+		m_aMapSprites[MAPBOT2].Draw(CRect(fMapCenterX - halfTile, fMapCenterY + halfTile,
+			fMapCenterX + halfTile, fMapCenterY + fMapSize), CRGBA(255, 255, 255, FadeIn(255)));
+	}
+
+	if (SCREEN_WIDTH >= fMapCenterX - halfTile || SCREEN_HEIGHT >= fMapCenterY - halfTile) {
+		m_aMapSprites[MAPBOT3].Draw(CRect(fMapCenterX + halfTile, fMapCenterY + halfTile,
+			fMapCenterX + fMapSize, fMapCenterY + fMapSize), CRGBA(255, 255, 255, FadeIn(255)));
+	}
+
+	CRadar::DrawBlips();
+
+	if (CPad::GetPad(0)->GetRightMouseJustDown()) {
+		if (m_nMousePosY > fMapCenterY - fMapSize && m_nMousePosY < fMapCenterY + fMapSize &&
+			m_nMousePosX > fMapCenterX - fMapSize && m_nMousePosX < fMapCenterX + fMapSize) {
+
+			float diffX = fMapCenterX - fMapSize, diffY = fMapCenterY - fMapSize;
+			float x = ((m_nMousePosX - diffX) / (fMapSize * 2)) * 4000.0f - 2000.0f;
+			float y = 2000.0f - ((m_nMousePosY - diffY) / (fMapSize * 2)) * 4000.0f;
+			CRadar::ToggleTargetMarker(x, y);
+		}
+	}
+
+	if (CPad::GetPad(0)->GetLeftMouse()) {
+		fMapCenterX += m_nMousePosX - m_nMouseOldPosX;
+		fMapCenterY += m_nMousePosY - m_nMouseOldPosY;
+	} else if (CPad::GetPad(0)->GetLeft() || CPad::GetPad(0)->GetDPadLeft()) {
+		fMapCenterX += 15.0f;
+	} else if (CPad::GetPad(0)->GetRight() || CPad::GetPad(0)->GetDPadRight()) {
+		fMapCenterX -= 15.0f;
+	} else if (CPad::GetPad(0)->GetLeftStickX()) {
+		fMapCenterX -= CPad::GetPad(0)->GetLeftStickX() / 128.0f * 20.0f;
+	}
+
+	if (CPad::GetPad(0)->GetUp() || CPad::GetPad(0)->GetDPadUp()) {
+		fMapCenterY += 15.0f;
+	} else if (CPad::GetPad(0)->GetDown() || CPad::GetPad(0)->GetDPadDown()) {
+		fMapCenterY -= 15.0f;
+	} else if (CPad::GetPad(0)->GetLeftStickY()) {
+		fMapCenterY += CPad::GetPad(0)->GetLeftStickY() / 128.0f * 20.0f;
+	}
+
+	if (CPad::GetPad(0)->GetMouseWheelUp() || CPad::GetPad(0)->GetPageUp() || CPad::GetPad(0)->GetRightShoulder2()) {
+		if (CPad::GetPad(0)->GetMouseWheelUp())
+			ZOOM(m_nMousePosX, m_nMousePosY, false);
+		else
+			ZOOM(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, false);
+	} else if (CPad::GetPad(0)->GetMouseWheelDown() || CPad::GetPad(0)->GetPageDown() || CPad::GetPad(0)->GetRightShoulder1()) {
+		if (CPad::GetPad(0)->GetMouseWheelDown())
+			ZOOM(m_nMousePosX, m_nMousePosY, true);
+		else
+			ZOOM(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, true);
+	}
+	
+	if (fMapCenterX - fMapSize > SCREEN_WIDTH / 2)
+		fMapCenterX = fMapSize + SCREEN_WIDTH / 2;
+
+	if (fMapCenterX + fMapSize < SCREEN_WIDTH / 2)
+		fMapCenterX = SCREEN_WIDTH / 2 - fMapSize;
+
+	if (fMapCenterY + fMapSize < SCREEN_HEIGHT - MENU_Y(60.0f))
+		fMapCenterY = SCREEN_HEIGHT - MENU_Y(60.0f) - fMapSize;
+	
+	fMapCenterY = min(fMapCenterY, fMapSize); // To not show beyond north border
+
+	bMenuMapActive = false;
+
+	// CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(5.0f)); // From VC
+	// CFont::SetRightJustifyWrap(10.0f);
+
+	CSprite2d::DrawRect(CRect(MENU_X(14.0f), SCREEN_STRETCH_FROM_BOTTOM(95.0f),
+		SCREEN_STRETCH_FROM_RIGHT(11.0f), SCREEN_STRETCH_FROM_BOTTOM(58.0f)),
+		CRGBA(235, 170, 50, 255));
+
+	CFont::SetScale(MENU_X(0.4f), MENU_Y(0.7f));
+	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
+
+	float nextX = MENU_X(30.0f), nextY = 95.0f;
+	wchar *text;
+#define TEXT_PIECE(key,extraSpace) \
+	text = TheText.Get(key); CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), text); nextX += CFont::GetStringWidth(text, true) + MENU_X(extraSpace);
+
+	TEXT_PIECE("FEC_MWB", 3.0f);
+	TEXT_PIECE("FEC_PGD", 1.0f);
+	TEXT_PIECE("FEC_IBT", 1.0f);
+	TEXT_PIECE("FEC_ZIN", 20.0f);
+	TEXT_PIECE("FEC_MWF", 3.0f);
+	TEXT_PIECE("FEC_PGU", 1.0f);
+	TEXT_PIECE("FEC_IBT", 1.0f);
+	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), TheText.Get("FEC_ZOT")); nextX = MENU_X(30.0f); nextY -= 11.0f;
+	TEXT_PIECE("FEC_UPA", 2.0f);
+	TEXT_PIECE("FEC_DWA", 2.0f);
+	TEXT_PIECE("FEC_LFA", 2.0f);
+	TEXT_PIECE("FEC_RFA", 2.0f);
+	TEXT_PIECE("FEC_MSL", 1.0f);
+	TEXT_PIECE("FEC_IBT", 1.0f);
+	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), TheText.Get("FEC_MOV")); nextX = MENU_X(30.0f); nextY -= 11.0f;
+	TEXT_PIECE("FEC_MSR", 2.0f);
+	TEXT_PIECE("FEC_IBT", 1.0f);
+	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), TheText.Get("FEC_TAR"));
+#undef TEXT_PIECE
+}
+
+#undef ZOOM
+#endif
 
 #if 0
 uint8 CMenuManager::GetNumberOfMenuOptions()
