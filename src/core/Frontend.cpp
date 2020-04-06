@@ -1179,7 +1179,7 @@ CMenuManager::GetNumOptionsCntrlConfigScreens(void)
 			break;
 		case MENUPAGE_KEYBOARD_CONTROLS:
 			switch (m_ControlMethod) {
-				case CONTROL_STANDART:
+				case CONTROL_STANDARD:
 					number = 25;
 					break;
 				case CONTROL_CLASSIC:
@@ -1200,7 +1200,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 	int bindingMargin = MENU_X(3.0f);
 	float rowHeight;
 	switch (CMenuManager::m_ControlMethod) {
-		case CONTROL_STANDART:
+		case CONTROL_STANDARD:
 			rowHeight = 10.7f;
 			break;
 		case CONTROL_CLASSIC:
@@ -1274,13 +1274,13 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 					controllerAction = PED_LOOKBEHIND;
 					break;
 				case 23:
-					if (CMenuManager::m_ControlMethod == CONTROL_STANDART)
+					if (CMenuManager::m_ControlMethod == CONTROL_STANDARD)
 						controllerAction = -1;
 					else
 						controllerAction = PED_1RST_PERSON_LOOK_LEFT;
 					break;
 				case 24:
-					if (CMenuManager::m_ControlMethod == CONTROL_STANDART)
+					if (CMenuManager::m_ControlMethod == CONTROL_STANDARD)
 						controllerAction = -1;
 					else
 						controllerAction = PED_1RST_PERSON_LOOK_RIGHT;
