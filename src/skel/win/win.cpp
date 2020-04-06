@@ -2056,7 +2056,7 @@ _WinMain(HINSTANCE instance,
 					{
 						GetWindowPlacement(PSGLOBAL(window), &wp);
 						
-						if ( wp.showCmd != SW_SHOWMINIMIZED )
+						if (wp.showCmd != SW_SHOWMINIMIZED)
 							RsEventHandler(rsFRONTENDIDLE, nil);
 
 						if ( !FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bLoadingSavedGame )

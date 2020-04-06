@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Physical.h"
-#include "DummyObject.h"
 
 enum {
 	GAME_OBJECT = 1,
@@ -26,6 +25,7 @@ enum {
 };
 
 class CVehicle;
+class CDummyObject;
 
 class CObject : public CPhysical
 {
@@ -36,8 +36,8 @@ public:
 	int8 bIsPickup : 1;
 	int8 m_obj_flag2 : 1;
 	int8 bOutOfStock : 1;
-	int8 m_obj_flag8 : 1;
-	int8 m_obj_flag10 : 1;
+	int8 bGlassCracked : 1;
+	int8 bGlassBroken : 1;
 	int8 bHasBeenDamaged : 1;
 	int8 bUseVehicleColours : 1;
 	int8 m_obj_flag80 : 1;

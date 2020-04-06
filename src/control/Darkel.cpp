@@ -3,6 +3,7 @@
 #include "main.h"
 #include "Darkel.h"
 #include "PlayerPed.h"
+#include "Wanted.h"
 #include "Timer.h"
 #include "DMAudio.h"
 #include "Population.h"
@@ -161,9 +162,6 @@ CDarkel::ReadStatus()
 	return Status;
 }
 
-#if 0
-WRAPPER void CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle) { EAXJMP(0x421070); }
-#else
 void
 CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle)
 {
@@ -177,11 +175,7 @@ CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle)
 	RegisteredKills[vehicle->GetModelIndex()]++;
 	CStats::CarsExploded++;
 }
-#endif
 
-#if 0
-WRAPPER void CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapontype, bool headshot) { EAXJMP(0x420F60); }
-#else
 void
 CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapon, bool headshot)
 {
@@ -206,7 +200,6 @@ CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapon, bool headshot)
 		CStats::HeadsPopped++;
 	CStats::KillsSinceLastCheckpoint++;
 }
-#endif
 
 void
 CDarkel::RegisterKillNotByPlayer(CPed* victim, eWeaponType weapontype)
@@ -221,9 +214,6 @@ CDarkel::ResetModelsKilledByPlayer()
 		RegisteredKills[i] = 0;
 }
 
-#if 0
-WRAPPER void CDarkel::ResetOnPlayerDeath() { EAXJMP(0x420E70); }
-#else
 void
 CDarkel::ResetOnPlayerDeath()
 {
@@ -252,11 +242,7 @@ CDarkel::ResetOnPlayerDeath()
 		player->MakeChangesForNewWeapon(player->m_currentWeapon);
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, uint16 kill, int32 modelId0, wchar *text, int32 modelId2, int32 modelId3, int32 modelId4, bool standardSound, bool needHeadShot) { EAXJMP(0x4210E0); }
-#else
 void
 CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, uint16 kill, int32 modelId0, wchar *text, int32 modelId2, int32 modelId3, int32 modelId4, bool standardSound, bool needHeadShot)
 {
@@ -305,7 +291,6 @@ CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, uint16 kill, int32 mode
 	if (CDarkel::bStandardSoundAndMessages)
 		DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_START, 0);
 }
-#endif
 
 void
 CDarkel::Update()

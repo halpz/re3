@@ -10,6 +10,7 @@
 #include "Coronas.h"
 #include "World.h"
 #include "Ped.h"
+#include "DMAudio.h"
 #include "HandlingMgr.h"
 #include "Train.h"
 
@@ -690,6 +691,8 @@ CTrain::UpdateTrains(void)
 		time += 0x40000/4;
 	}
 }
+
+#include <new>
 
 class CTrain_ : public CTrain
 {

@@ -43,6 +43,11 @@ CText::Load(void)
 	case LANGUAGE_SPANISH:
 		sprintf(filename, "SPANISH.GXT");
 		break;
+#ifdef MORE_LANGUAGES
+	case LANGUAGE_RUSSIAN:
+		sprintf(filename, "RUSSIAN.GXT");
+		break;
+#endif
 	}
 
 	length = CFileMgr::LoadFile(filename, filedata, 0x40000, "rb");

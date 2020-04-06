@@ -33,6 +33,7 @@
 #include "Clock.h"
 #include "Timecycle.h"
 #include "RpAnimBlend.h"
+#include "AnimBlendAssociation.h"
 #include "Shadows.h"
 #include "Radar.h"
 #include "Hud.h"
@@ -207,6 +208,7 @@ PlayAnimation(RpClump *clump, AssocGroupId animGroup, AnimationId anim)
 	animAssoc->SetRun();
 }
 
+extern void (*DebugMenuProcess)(void);
 void
 CAnimViewer::Update(void)
 {
@@ -246,6 +248,9 @@ CAnimViewer::Update(void)
 	}
 	CPad::UpdatePads();
 	CPad* pad = CPad::GetPad(0);
+
+	DebugMenuProcess();
+
 	CStreaming::UpdateForAnimViewer();
 	CStreaming::RequestModel(modelId, 0);
 	if (CStreaming::HasModelLoaded(modelId)) {
@@ -289,7 +294,7 @@ CAnimViewer::Update(void)
 			}
 			newEntity->GetPosition() = CVector(0.0f, 0.0f, 0.0f);
 			CWorld::Add(newEntity);
-			TheCamera.TakeControl(pTarget, CCam::MODE_MODELVIEW, JUMP_CUT, CAM_CONTROLLER_1);
+			TheCamera.TakeControl(pTarget, CCam::MODE_MODELVIEW, JUMP_CUT, CAMCONTROL_SCRIPT);
 		}
 		if (pTarget->m_type == ENTITY_TYPE_VEHICLE || pTarget->m_type == ENTITY_TYPE_PED || pTarget->m_type == ENTITY_TYPE_OBJECT) {
 			((CPhysical*)pTarget)->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);

@@ -5,10 +5,13 @@
 #include "World.h"
 #include "Wanted.h"
 #include "EventList.h"
+#include "Messages.h"
+#include "Text.h"
+#include "main.h"
 
 int32 CEventList::ms_nFirstFreeSlotIndex;
-//CEvent gaEvent[NUMEVENTS];
-CEvent *gaEvent = (CEvent*)0x6EF830;
+CEvent gaEvent[NUMEVENTS];
+//CEvent *gaEvent = (CEvent*)0x6EF830;
 
 enum
 {
@@ -206,7 +209,7 @@ CEventList::ReportCrimeForEvent(eEventType type, int32 crimeId, bool copsDontCar
 	case EVENT_CAR_SET_ON_FIRE: crime = CRIME_VEHICLE_BURNED; break;
 	default: crime = CRIME_NONE; break;
 	}
-
+	
 	if(crime == CRIME_NONE)
 		return;
 

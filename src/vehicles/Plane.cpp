@@ -7,6 +7,8 @@
 #include "Streaming.h"
 #include "Replay.h"
 #include "Camera.h"
+#include "DMAudio.h"
+#include "Wanted.h"
 #include "Coronas.h"
 #include "Particle.h"
 #include "Explosion.h"
@@ -964,6 +966,7 @@ bool CPlane::HasCesnaLanded(void) { return CesnaMissionStatus == CESNA_STATUS_LA
 bool CPlane::HasCesnaBeenDestroyed(void) { return CesnaMissionStatus == CESNA_STATUS_DESTROYED; }
 bool CPlane::HasDropOffCesnaBeenShotDown(void) { return DropOffCesnaMissionStatus == CESNA_STATUS_DESTROYED; }
 
+#include <new>
 
 class CPlane_ : public CPlane
 {

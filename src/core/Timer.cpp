@@ -75,9 +75,6 @@ void CTimer::Shutdown(void)
 	;
 }
 
-#if 0
-WRAPPER void CTimer::Update(void) { EAXJMP(0x4ACF70); }
-#else
 void CTimer::Update(void)
 {
 	m_snPreviousTimeInMilliseconds = m_snTimeInMilliseconds;
@@ -149,7 +146,6 @@ void CTimer::Update(void)
   
 	m_FrameCounter++;
 }
-#endif
 
 void CTimer::Suspend(void)
 {
@@ -216,6 +212,11 @@ void CTimer::StartUserPause(void)
 void CTimer::EndUserPause(void)
 {
 	m_UserPause = false;
+}
+
+uint32 CTimer::GetCyclesPerFrame()
+{
+	return 20;
 }
 
 #if 1

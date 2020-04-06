@@ -865,6 +865,8 @@ CEntity::ModifyMatrixForBannerInWind(void)
 	UpdateRwFrame();
 }
 
+#include <new>
+
 class CEntity_ : public CEntity
 {
 public:

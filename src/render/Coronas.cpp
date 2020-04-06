@@ -59,9 +59,6 @@ int &CCoronas::bChangeBrightnessImmediately = *(int*)0x8E2C30;
 
 CRegisteredCorona *CCoronas::aCoronas = (CRegisteredCorona*)0x72E518;
 
-//WRAPPER void CCoronas::Render(void) { EAXJMP(0x4F8FB0); }
-//WRAPPER void CCoronas::RenderReflections(void) { EAXJMP(0x4F9B40); }
-
 const char aCoronaSpriteNames[][32] = {
 	"coronastar",
 	"corona",

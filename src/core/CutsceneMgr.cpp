@@ -1,3 +1,4 @@
+#define WITHWINDOWS	// just for VK_SPACE
 #include "common.h"
 #include "patcher.h"
 #include "General.h"
@@ -8,12 +9,14 @@
 #include "FileMgr.h"
 #include "main.h"
 #include "AnimManager.h"
+#include "AnimBlendAssociation.h"
 #include "AnimBlendAssocGroup.h"
 #include "AnimBlendClumpData.h"
 #include "Pad.h"
 #include "DMAudio.h"
 #include "World.h"
 #include "PlayerPed.h"
+#include "Wanted.h"
 #include "CutsceneHead.h"
 #include "RpAnimBlend.h"
 #include "ModelIndices.h"
@@ -180,7 +183,7 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	ms_pCutsceneDir->ReadDirFile("ANIM\\CUTS.DIR");
 
 	CStreaming::RemoveUnusedModelsInLoadedList();
-	CGame::DrasticTidyUpMemory();
+	CGame::DrasticTidyUpMemory(true);
 
 	strcpy(ms_cutsceneName, szCutsceneName);
 	file = CFileMgr::OpenFile("ANIM\\CUTS.IMG", "rb");
@@ -371,8 +374,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	}
 	CTimer::Stop();
-	//TheCamera.GetScreenFadeStatus() == 2; // what for??
-	CGame::DrasticTidyUpMemory();
+	CGame::DrasticTidyUpMemory(TheCamera.GetScreenFadeStatus() == 2);
 	CTimer::Update();
 }
 

@@ -21,6 +21,8 @@ CBuilding::ReplaceWithNewModel(int32 id)
 			CStreaming::RequestModel(id, STREAMFLAGS_DONT_REMOVE);
 }
 
+#include <new>
+
 class CBuilding_ : public CBuilding
 {
 public:

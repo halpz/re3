@@ -39,6 +39,7 @@
 #include "PathFind.h"
 #include "AnimManager.h"
 #include "RpAnimBlend.h"
+#include "AnimBlendAssociation.h"
 #include "Ped.h"
 #include "PlayerPed.h"
 #include "Object.h"
@@ -2338,9 +2339,15 @@ CAutomobile::FireTruckControl(void)
 	if(this == FindPlayerVehicle()){
 		if(!CPad::GetPad(0)->GetWeapon())
 			return;
-		m_fCarGunLR += CPad::GetPad(0)->GetCarGunLeftRight()*0.00025f*CTimer::GetTimeStep();
-		m_fCarGunUD += CPad::GetPad(0)->GetCarGunUpDown()*0.0001f*CTimer::GetTimeStep();
+#ifdef FREE_CAM
+		if (!CCamera::bFreeCam)
+#endif 
+		{
+			m_fCarGunLR += CPad::GetPad(0)->GetCarGunLeftRight() * 0.00025f * CTimer::GetTimeStep();
+			m_fCarGunUD += CPad::GetPad(0)->GetCarGunUpDown() * 0.0001f * CTimer::GetTimeStep();
+		}
 		m_fCarGunUD = clamp(m_fCarGunUD, 0.05f, 0.3f);
+
 
 		CVector cannonPos(0.0f, 1.5f, 1.9f);
 		cannonPos = GetMatrix() * cannonPos;
@@ -2407,7 +2414,11 @@ CAutomobile::TankControl(void)
 
 	// Rotate turret
 	float prevAngle = m_fCarGunLR;
-	m_fCarGunLR -= CPad::GetPad(0)->GetCarGunLeftRight() * 0.00015f * CTimer::GetTimeStep();
+#ifdef FREE_CAM
+	if(!CCamera::bFreeCam)
+#endif
+		m_fCarGunLR -= CPad::GetPad(0)->GetCarGunLeftRight() * 0.00015f * CTimer::GetTimeStep();
+
 	if(m_fCarGunLR < 0.0f)
 		m_fCarGunLR += TWOPI;
 	if(m_fCarGunLR > TWOPI)
@@ -2822,13 +2833,13 @@ CAutomobile::ProcessBuoyancy(void)
 			if(pDriver){
 				pDriver->bIsInWater = true;
 				if(pDriver->IsPlayer() || !bWaterTight)
-					pDriver->InflictDamage(nil, WEAPONTYPE_WATER, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+					pDriver->InflictDamage(nil, WEAPONTYPE_DROWNING, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 			}
 			for(i = 0; i < m_nNumMaxPassengers; i++)
 				if(pPassengers[i]){
 					pPassengers[i]->bIsInWater = true;
 					if(pPassengers[i]->IsPlayer() || !bWaterTight)
-						pPassengers[i]->InflictDamage(nil, WEAPONTYPE_WATER, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+						pPassengers[i]->InflictDamage(nil, WEAPONTYPE_DROWNING, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 				}
 		}else
 			bIsInWater = false;
@@ -4482,6 +4493,8 @@ CAutomobile::SetAllTaxiLights(bool set)
 {
 	m_sAllTaxiLights = set;
 }
+
+#include <new>
 
 class CAutomobile_ : public CAutomobile
 {

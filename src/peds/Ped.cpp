@@ -7,13 +7,21 @@
 #include "World.h"
 #include "RpAnimBlend.h"
 #include "Ped.h"
+#include "Wanted.h"
 #include "PlayerPed.h"
+#include "PedType.h"
+#include "AnimBlendClumpData.h"
+#include "AnimBlendAssociation.h"
+#include "Fire.h"
+#include "DMAudio.h"
 #include "General.h"
 #include "SurfaceTable.h"
 #include "VisibilityPlugins.h"
 #include "AudioManager.h"
 #include "HandlingMgr.h"
 #include "Replay.h"
+#include "Camera.h"
+#include "Radar.h"
 #include "PedPlacement.h"
 #include "Shadows.h"
 #include "Weather.h"
@@ -552,7 +560,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bScriptObjectiveCompleted = false;
 
 	bKindaStayInSamePlace = false;
-	m_ped_flagE2 = false;
+	bBeingChasedByPolice = false;
 	bNotAllowedToDuck = false;
 	bCrouchWhenShooting = false;
 	bIsDucking = false;
@@ -799,6 +807,10 @@ CPed::IsPedInControl(void)
 bool
 CPed::CanStrafeOrMouseControl(void)
 {
+#ifdef FREE_CAM
+	if (CCamera::bFreeCam)
+		return false;
+#endif
 	return m_nPedState == PED_NONE || m_nPedState == PED_IDLE || m_nPedState == PED_FLEE_POS || m_nPedState == PED_FLEE_ENTITY ||
 		m_nPedState == PED_ATTACK || m_nPedState == PED_FIGHT || m_nPedState == PED_AIM_GUN || m_nPedState == PED_JUMP;
 }
@@ -2720,6 +2732,10 @@ CPed::SetObjective(eObjective newObj, void *entity)
 			return;
 	}
 
+#ifdef VC_PED_PORTS
+	SetObjectiveTimer(0);
+	ClearPointGunAt();
+#endif
 	bObjectiveCompleted = false;
 	if (!IsTemporaryObjective(m_objective) || IsTemporaryObjective(newObj)) {
 		if (m_objective != newObj) {
@@ -3444,8 +3460,12 @@ CPed::ClearAll(void)
 	m_fleeFrom = nil;
 	m_fleeTimer = 0;
 	bUsesCollision = true;
+#ifdef VC_PED_PORTS
+	ClearPointGunAt();
+#else
 	ClearAimFlag();
 	ClearLookFlag();
+#endif
 	bIsPointingGunAt = false;
 	bRenderPedInCar = true;
 	bKnockedUpIntoAir = false;
@@ -3603,11 +3623,11 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	if (DyingOrDead())
 		return false;
 
-	if (!bUsesCollision && method != WEAPONTYPE_WATER)
+	if (!bUsesCollision && method != WEAPONTYPE_DROWNING)
 		return false;
 
 	if (bOnlyDamagedByPlayer && damagedBy != player && damagedBy != FindPlayerVehicle() &&
-		method != WEAPONTYPE_WATER && method != WEAPONTYPE_EXPLOSION)
+		method != WEAPONTYPE_DROWNING && method != WEAPONTYPE_EXPLOSION)
 		return false;
 
 	float healthImpact;
@@ -3953,10 +3973,10 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					}
 				}
 				break;
-			case WEAPONTYPE_WATER:
+			case WEAPONTYPE_DROWNING:
 				dieAnim = ANIM_DROWN;
 				break;
-			case WEAPONTYPE_FALL_DAMAGE:
+			case WEAPONTYPE_FALL:
 				if (bCollisionProof)
 					return false;
 
@@ -3982,7 +4002,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		}
 	}
 
-	if (m_fArmour != 0.0f && method != WEAPONTYPE_WATER) {
+	if (m_fArmour != 0.0f && method != WEAPONTYPE_DROWNING) {
 		if (player == this)
 			CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastArmourLoss = CTimer::GetTimeInMilliseconds();
 
@@ -4008,7 +4028,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	}
 
 	if (bInVehicle) {
-		if (method != WEAPONTYPE_WATER) {
+		if (method != WEAPONTYPE_DROWNING) {
 #ifdef VC_PED_PORTS
 			if (m_pMyVehicle) {
 				if (m_pMyVehicle->IsCar() && m_pMyVehicle->pDriver == this) {
@@ -4075,7 +4095,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		} else {
 			CDarkel::RegisterKillNotByPlayer(this, method);
 		}
-		if (method == WEAPONTYPE_WATER)
+		if (method == WEAPONTYPE_DROWNING)
 			bIsInTheAir = false;
 
 		return true;
@@ -6968,7 +6988,11 @@ CPed::FinishLaunchCB(CAnimBlendAssociation *animAssoc, void *arg)
 #endif
 		) {
 
+#ifdef FREE_CAM
+		if (TheCamera.Cams[0].Using3rdPersonMouseCam() && !CCamera::bFreeCam) {
+#else
 		if (TheCamera.Cams[0].Using3rdPersonMouseCam()) {
+#endif
 			float fpsAngle = ped->WorkOutHeadingForMovingFirstPerson(ped->m_fRotationCur);
 			ped->m_vecMoveSpeed.x = -velocityFromAnim * Sin(fpsAngle);
 			ped->m_vecMoveSpeed.y = velocityFromAnim * Cos(fpsAngle);
@@ -9589,7 +9613,7 @@ CPed::ProcessControl(void)
 												float neededTurnToCriminal = angleToLookCriminal - angleToFace;
 
 												if (neededTurnToCriminal > DEGTORAD(150.0f) && neededTurnToCriminal < DEGTORAD(210.0f)) {
-													((CCopPed*)this)->m_bZoneDisabledButClose = true;
+													((CCopPed*)this)->m_bStopAndShootDisabledZone = true;
 												}
 											}
 										}
@@ -12169,11 +12193,11 @@ CPed::PlacePedOnDryLand(void)
 	if (!CWorld::TestSphereAgainstWorld(potentialGround, 5.0f, nil, true, false, false, false, false, false))
 		return false;
 
-	CVector potentialGroundDist = CWorld::ms_testSpherePoint.point - GetPosition();
+	CVector potentialGroundDist = gaTempSphereColPoints[0].point - GetPosition();
 	potentialGroundDist.z = 0.0f;
 	potentialGroundDist.Normalise();
 
-	CVector posToCheck = 0.5f * potentialGroundDist + CWorld::ms_testSpherePoint.point;
+	CVector posToCheck = 0.5f * potentialGroundDist + gaTempSphereColPoints[0].point;
 	posToCheck.z = 3.0f + waterLevel;
 
 	if (CWorld::ProcessVerticalLine(posToCheck, waterLevel - 1.0f, foundCol, foundEnt, true, true, false, true, false, false, false)) {
@@ -14559,7 +14583,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 								|| m_pCollidingEntity == collidingEnt) {
 
 								if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL) && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
-									InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 15.0f, PEDPIECE_TORSO, 2);
+									InflictDamage(collidingEnt, WEAPONTYPE_FALL, 15.0f, PEDPIECE_TORSO, 2);
 								}
 							} else {
 								float damage = 100.0f * max(speed - 0.25f, 0.0f);
@@ -14572,7 +14596,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 									CVector2D offset = -m_vecMoveSpeed;
 									dir = GetLocalDirection(offset);
 								}
-								InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, damage, PEDPIECE_TORSO, dir);
+								InflictDamage(collidingEnt, WEAPONTYPE_FALL, damage, PEDPIECE_TORSO, dir);
 								if (IsPlayer() && damage2 > 5.0f)
 									Say(SOUND_PED_LAND);
 							}
@@ -14583,7 +14607,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							if (m_vecMoveSpeed.z >= -0.25f && (speedSqr = m_vecMoveSpeed.MagnitudeSqr()) <= sq(0.5f)) {
 
 								if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL) && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
-									InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 15.0f, PEDPIECE_TORSO, 2);
+									InflictDamage(collidingEnt, WEAPONTYPE_FALL, 15.0f, PEDPIECE_TORSO, 2);
 								}
 							} else {
 								if (speedSqr == 0.0f)
@@ -14594,7 +14618,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 									CVector2D offset = -m_vecMoveSpeed;
 									dir = GetLocalDirection(offset);
 								}
-								InflictDamage(collidingEnt, WEAPONTYPE_FALL_DAMAGE, 350.0f * sq(speedSqr), PEDPIECE_TORSO, dir);
+								InflictDamage(collidingEnt, WEAPONTYPE_FALL, 350.0f * sq(speedSqr), PEDPIECE_TORSO, dir);
 							}
 						}
 #endif
@@ -15020,7 +15044,7 @@ CPed::ProcessBuoyancy(void)
 					CVector pos = GetPosition();
 					if (PlacePedOnDryLand()) {
 						if (m_fHealth > 20.0f)
-							InflictDamage(nil, WEAPONTYPE_WATER, 15.0f, PEDPIECE_TORSO, false);
+							InflictDamage(nil, WEAPONTYPE_DROWNING, 15.0f, PEDPIECE_TORSO, false);
 
 						if (bIsInTheAir) {
 							RpAnimBlendClumpSetBlendDeltas(GetClump(), ASSOC_PARTIAL, -1000.0f);
@@ -15042,7 +15066,7 @@ CPed::ProcessBuoyancy(void)
 				m_vecMoveSpeed.y *= speedMult;
 				m_vecMoveSpeed.z *= speedMult;
 				bIsStanding = false;
-				InflictDamage(nil, WEAPONTYPE_WATER, 3.0f * CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+				InflictDamage(nil, WEAPONTYPE_DROWNING, 3.0f * CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 			}
 			if (buoyancyImpulse.z / m_fMass > 0.002f * CTimer::GetTimeStep()) {
 				if (speedMult == 0.0f) {
@@ -17446,6 +17470,8 @@ CPed::SetExitBoat(CVehicle *boat)
 	// Not there in VC.
 	CWaterLevel::FreeBoatWakeArray();
 }
+
+#include <new>
 
 class CPed_ : public CPed
 {

@@ -6,8 +6,6 @@
 CExplosion(&gaExplosion)[48] = *(CExplosion(*)[48])*(uintptr*)0x64E208;
 
 WRAPPER void CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32) { EAXJMP(0x5591C0); }
-//WRAPPER void CExplosion::RemoveAllExplosionsInArea(CVector, float) { EAXJMP(0x55AD40); }
-//WRAPPER bool CExplosion::TestForExplosionInArea(eExplosionType, float, float, float, float, float, float) { EAXJMP(0x55AC80); }
 
 int AudioHandle = AEHANDLE_NONE;
 

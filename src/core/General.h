@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ctype.h>
+
 class CGeneral
 {
 public:

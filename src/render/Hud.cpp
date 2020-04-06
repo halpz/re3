@@ -11,6 +11,7 @@
 #include "Pad.h"
 #include "Radar.h"
 #include "Replay.h"
+#include "Wanted.h"
 #include "Sprite.h"
 #include "Sprite2d.h"
 #include "Text.h"
@@ -102,9 +103,6 @@ struct
 RwTexture *&gpSniperSightTex = *(RwTexture**)0x8F5834;
 RwTexture *&gpRocketSightTex = *(RwTexture**)0x8E2C20;
 
-#if 0
-WRAPPER void CHud::Draw(void) { EAXJMP(0x5052A0); }
-#else
 void CHud::Draw()
 {
 	// disable hud via second controller
@@ -115,47 +113,43 @@ void CHud::Draw()
 		return;
 
 	if (m_Wants_To_Draw_Hud && !TheCamera.m_WideScreenOn) {
-		bool Mode_RunAround = 0;
-		bool Mode_FirstPerson = 0;
+		bool DrawCrossHair = 0;
+		bool DrawCrossHairPC = 0;
 
 		int32 WeaponType = FindPlayerPed()->m_weapons[FindPlayerPed()->m_currentWeapon].m_eWeaponType;
 		int32 Mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 
-		if (Mode == CCam::MODE_SNIPER || Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_M16_1STPERSON || Mode == CCam::MODE_EDITOR)
-			Mode_FirstPerson = 1;
-		if (Mode == CCam::MODE_M16_1STPERSON_RUNABOUT || Mode == CCam::MODE_SNIPER_RUNABOUT)
-			Mode_RunAround = 1;
+		if (Mode == CCam::MODE_SNIPER || Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_M16_1STPERSON || Mode == CCam::MODE_HELICANNON_1STPERSON)
+			DrawCrossHair = 1;
+		if (Mode == CCam::MODE_M16_1STPERSON_RUNABOUT || Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT || Mode == CCam::MODE_SNIPER_RUNABOUT)
+			DrawCrossHairPC = 1;
 
 		/*
 			Draw Crosshairs
 		*/
-		if (TheCamera.Cams->Using3rdPersonMouseCam() && (!CPad::GetPad(0)->GetLookBehindForPed() || TheCamera.m_bPlayerIsInGarage) || Mode == CCam::MODE_1STPERSON_RUNABOUT) {
+		if (TheCamera.Cams[TheCamera.ActiveCam].Using3rdPersonMouseCam() &&
+		    (!CPad::GetPad(0)->GetLookBehindForPed() || TheCamera.m_bPlayerIsInGarage) || Mode == CCam::MODE_1STPERSON_RUNABOUT) {
 			if (FindPlayerPed() && !FindPlayerPed()->EnteringCar()) {
 				if ((WeaponType >= WEAPONTYPE_COLT45 && WeaponType <= WEAPONTYPE_M16) || WeaponType == WEAPONTYPE_FLAMETHROWER)
-					Mode_RunAround = 1;
+					DrawCrossHairPC = 1;
 			}
 		}
 
-		if (Mode_FirstPerson || Mode_RunAround) {
+		if (DrawCrossHair || DrawCrossHairPC) {
 			RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void *)rwFILTERLINEAR);
 
-			int32 SpriteBrightLikeADiamond = SpriteBrightness + 1;
-			if (SpriteBrightLikeADiamond > 30)
-				SpriteBrightLikeADiamond = 30;
-
-			SpriteBrightness = SpriteBrightLikeADiamond;
+			SpriteBrightness = min(SpriteBrightness+1, 30);
 
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 
-			float fStep = Sin((CTimer::GetTimeInMilliseconds() & 1023) * 0.0061328127);
+			float fStep = Sin((CTimer::GetTimeInMilliseconds() & 1023)/1024.0f * 6.28f);
 			float fMultBright = SpriteBrightness * 0.03f * (0.25f * fStep + 0.75f);
 			CRect rect;
+			if (DrawCrossHairPC && TheCamera.Cams[TheCamera.ActiveCam].Using3rdPersonMouseCam()) {
 #ifndef ASPECT_RATIO_SCALE
-			if (Mode_RunAround && TheCamera.Cams->Using3rdPersonMouseCam()) {
 				float f3rdX = SCREEN_WIDTH * TheCamera.m_f3rdPersonCHairMultX;
 				float f3rdY = SCREEN_HEIGHT * TheCamera.m_f3rdPersonCHairMultY;
 #else
-			if (Mode_RunAround && TheCamera.Cams->Using3rdPersonMouseCam()) {
 				float f3rdX = (((TheCamera.m_f3rdPersonCHairMultX - 0.5f) / ((CDraw::GetAspectRatio()) / (DEFAULT_ASPECT_RATIO))) + 0.5f) * SCREEN_WIDTH;
 				float f3rdY = SCREEN_HEIGHT * TheCamera.m_f3rdPersonCHairMultY + SCREEN_SCALE_Y(-2.0f);
 #endif
@@ -179,14 +173,14 @@ void CHud::Draw()
 			else {
 				if (Mode == CCam::MODE_M16_1STPERSON ||
 				    Mode == CCam::MODE_M16_1STPERSON_RUNABOUT ||
-				    Mode == CCam::MODE_EDITOR) {
+				    Mode == CCam::MODE_HELICANNON_1STPERSON) {
 					rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(32.0f);
 					rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(32.0f);
 					rect.right = (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(32.0f);
 					rect.bottom = (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(32.0f);
 					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
 				}
-				else if (Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT) {
+				else if (Mode == CCam::MODE_1STPERSON_RUNABOUT) {
 					rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(32.0f * 0.7f);
 					rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(32.0f * 0.7f);
 					rect.right = (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(32.0f * 0.7f);
@@ -194,17 +188,18 @@ void CHud::Draw()
 
 					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
 				}
-				else if (Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_SNIPER_RUNABOUT) {
+				else if (Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT) {
 					RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
 					RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDONE);
 					RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDONE);
 					RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 					RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
-					RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpRocketSightTex->raster);
+					RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpRocketSightTex));
 
 					CSprite::RenderOneXLUSprite(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 1.0f, SCREEN_SCALE_X(40.0f), SCREEN_SCALE_Y(40.0f), (100.0f * fMultBright), (200.0f * fMultBright), (100.0f * fMultBright), 255, 1.0f, 255);
 				}
 				else {
+					// Sniper
 					rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(210.0f);
 					rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(210.0f);
 					rect.right = SCREEN_WIDTH / 2;
@@ -798,8 +793,11 @@ void CHud::Draw()
 		if (m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_RADAR) {
 			CRadar::DrawMap();
 			CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
-			// FIX? scale RADAR_LEFT here somehow
+#ifdef FIX_BUGS
+			rect.Translate(SCREEN_SCALE_X(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
+#else
 			rect.Translate(RADAR_LEFT, SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
+#endif
 			rect.Grow(4.0f);
 			Sprites[HUD_RADARDISC].Draw(rect, CRGBA(0, 0, 0, 255));
 			CRadar::DrawBlips();
@@ -1006,12 +1004,7 @@ void CHud::Draw()
 		}
 	}
 }
-#endif
 
-
-#if 0
-WRAPPER void CHud::DrawAfterFade(void) { EAXJMP(0x509030); }
-#else
 void CHud::DrawAfterFade()
 {
 	if (CTimer::GetIsUserPaused() || CReplay::IsPlayingBack())
@@ -1104,7 +1097,6 @@ void CHud::DrawAfterFade()
 			CFont::SetColor(CRGBA(175, 175, 175, 255));
 			CFont::PrintString(SCREEN_SCALE_X(26.0f), SCREEN_SCALE_Y(28.0f + (150.0f - PagerXOffset) * 0.6f), CHud::m_HelpMessageToPrint);
 			CFont::SetAlphaFade(255.0f);
-			CFont::DrawFonts();
 		}
 	}
 	else
@@ -1263,11 +1255,7 @@ void CHud::DrawAfterFade()
 		BigMessageInUse[1] = 0.0f;
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CHud::GetRidOfAllHudMessages(void) { EAXJMP(0x504F90); }
-#else
 void CHud::GetRidOfAllHudMessages()
 {
 	m_ZoneState = 0;
@@ -1303,7 +1291,6 @@ void CHud::GetRidOfAllHudMessages()
 			m_BigMessage[i][j] = 0;
 	}
 }
-#endif
 
 void CHud::Initialise()
 {
@@ -1345,9 +1332,6 @@ void CHud::Initialise()
 	CTxdStore::PopCurrentTxd();
 }
 
-#if 0
-WRAPPER void CHud::ReInitialise(void) { EAXJMP(0x504CC0); }
-#else
 void CHud::ReInitialise() {
 	m_Wants_To_Draw_Hud = true;
 	m_Wants_To_Draw_3dMarkers = true;
@@ -1369,12 +1353,9 @@ void CHud::ReInitialise() {
 	PagerSoundPlayed = 0;
 	PagerXOffset = 150.0f;
 }
-#endif
 
 wchar LastBigMessage[6][128];
-#if 0
-WRAPPER void CHud::SetBigMessage(wchar *message, int16 style) { EAXJMP(0x50A250); }
-#else
+
 void CHud::SetBigMessage(wchar *message, int16 style)
 {
 	int i = 0;
@@ -1402,11 +1383,7 @@ void CHud::SetBigMessage(wchar *message, int16 style)
 	LastBigMessage[style][i] = 0;
 	m_BigMessage[style][i] = 0;
 }
-#endif
 
-#if 0
-WRAPPER void CHud::SetHelpMessage(wchar *message, bool quick) { EAXJMP(0x5051E0); }
-#else
 void CHud::SetHelpMessage(wchar *message, bool quick)
 {
 	if (!CReplay::IsPlayingBack()) {
@@ -1421,11 +1398,7 @@ void CHud::SetHelpMessage(wchar *message, bool quick)
 		m_HelpMessageQuick = quick;
 	}
 }
-#endif
 
-#if 0
-WRAPPER void CHud::SetMessage(wchar *message) { EAXJMP(0x50A210); }
-#else
 void CHud::SetMessage(wchar *message)
 {
 	int i = 0;
@@ -1437,11 +1410,7 @@ void CHud::SetMessage(wchar *message)
 	}
 	m_Message[i] = 0;
 }
-#endif
 
-#if 0
-WRAPPER void CHud::SetPagerMessage(wchar *message) { EAXJMP(0x50A320); }
-#else
 void CHud::SetPagerMessage(wchar *message)
 {
 	int i = 0;
@@ -1453,25 +1422,16 @@ void CHud::SetPagerMessage(wchar *message)
 	}
 	m_PagerMessage[i] = 0;
 }
-#endif
 
-#if 0
-WRAPPER void CHud::SetVehicleName(wchar *name) { EAXJMP(0x505290); }
-#else
 void CHud::SetVehicleName(wchar *name)
 {
 	m_VehicleName = name;
 }
-#endif
 
-#if 0
-WRAPPER void CHud::SetZoneName(wchar *name) { EAXJMP(0x5051D0); }
-#else
 void CHud::SetZoneName(wchar *name)
 {
 	m_pZoneName = name;
 }
-#endif
 
 void CHud::Shutdown()
 {

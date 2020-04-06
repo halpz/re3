@@ -2,9 +2,9 @@
 
 enum {
 	PLAYERCONTROL_ENABLED = 0,
-	PLAYERCONTROL_DISABLED_1 = 1,
+	PLAYERCONTROL_DISABLED_1 = 1,	// used by first person camera
 	PLAYERCONTROL_DISABLED_2 = 2,
-	PLAYERCONTROL_DISABLED_4 = 4,
+	PLAYERCONTROL_GARAGE = 4,
 	PLAYERCONTROL_DISABLED_8 = 8,
 	PLAYERCONTROL_DISABLED_10 = 16,
 	PLAYERCONTROL_DISABLED_20 = 32, // used on CPlayerInfo::MakePlayerSafe
@@ -247,6 +247,10 @@ public:
 	static char *EditString(char *pStr, int32 nSize);
 	static int32 *EditCodesForControls(int32 *pRsKeys, int32 nSize);
 
+#ifdef XINPUT
+	void AffectFromXinput(uint32 pad);
+#endif
+
 	// mouse
 	bool GetLeftMouseJustDown()           { return !!(NewMouseControllerState.LMB && !OldMouseControllerState.LMB); }
 	bool GetRightMouseJustDown()          { return !!(NewMouseControllerState.RMB && !OldMouseControllerState.RMB); }
@@ -399,6 +403,8 @@ public:
 	bool GetLeftShoulder2JustDown()  { return !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2); }
 	bool GetRightShoulder1JustDown() { return !!(NewState.RightShoulder1 && !OldState.RightShoulder1); }
 	bool GetRightShoulder2JustDown() { return !!(NewState.RightShoulder2 && !OldState.RightShoulder2); }
+	bool GetLeftShockJustDown()      { return !!(NewState.LeftShock && !OldState.LeftShock); }
+	bool GetRightShockJustDown()     { return !!(NewState.RightShock && !OldState.RightShock); }
 	bool GetStartJustDown()          { return !!(NewState.Start && !OldState.Start); }
 	bool GetLeftStickXJustDown() { return !!(NewState.LeftStickX && !OldState.LeftStickX); }
 	bool GetLeftStickYJustDown() { return !!(NewState.LeftStickY && !OldState.LeftStickY); }
@@ -422,8 +428,15 @@ public:
 	bool GetLeftShoulder2(void)  { return !!NewState.LeftShoulder2; }
 	bool GetRightShoulder1(void) { return !!NewState.RightShoulder1; }
 	bool GetRightShoulder2(void) { return !!NewState.RightShoulder2; }
+	int16 GetLeftStickX(void)    { return NewState.LeftStickX; }
+	int16 GetLeftStickY(void)    { return NewState.LeftStickY; }
+	int16 GetRightStickX(void)    { return NewState.RightStickX; }
+	int16 GetRightStickY(void)    { return NewState.RightStickY; }
 
-  bool ArePlayerControlsDisabled(void) { return DisablePlayerControls != PLAYERCONTROL_ENABLED; }
+	bool ArePlayerControlsDisabled(void) { return DisablePlayerControls != PLAYERCONTROL_ENABLED; }
+	void SetDisablePlayerControls(uint8 who) { DisablePlayerControls |= who; }
+	void SetEnablePlayerControls(uint8 who) { DisablePlayerControls &= ~who; }
+	bool IsPlayerControlsDisabledBy(uint8 who) { return DisablePlayerControls & who; }
 };
 
 VALIDATE_SIZE(CPad, 0xFC);

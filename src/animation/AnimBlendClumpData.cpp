@@ -36,9 +36,19 @@ CAnimBlendClumpData::ForAllFrames(void (*cb)(AnimBlendFrameData*, void*), void *
 		cb(&frames[i], arg);
 }
 
+#include <new>
+
+class CAnimBlendClumpData_ : public CAnimBlendClumpData
+{
+public:
+	CAnimBlendClumpData *ctor(void) { return ::new (this) CAnimBlendClumpData(); }
+	void dtor(void) { this->CAnimBlendClumpData::~CAnimBlendClumpData(); }
+};
+
+
 STARTPATCHES
-	InjectHook(0x401880, &CAnimBlendClumpData::ctor, PATCH_JUMP);
-	InjectHook(0x4018B0, &CAnimBlendClumpData::dtor, PATCH_JUMP);
+	InjectHook(0x401880, &CAnimBlendClumpData_::ctor, PATCH_JUMP);
+	InjectHook(0x4018B0, &CAnimBlendClumpData_::dtor, PATCH_JUMP);
 	InjectHook(0x4018F0, &CAnimBlendClumpData::SetNumberOfFrames, PATCH_JUMP);
 	InjectHook(0x401930, &CAnimBlendClumpData::ForAllFrames, PATCH_JUMP);
 ENDPATCHES

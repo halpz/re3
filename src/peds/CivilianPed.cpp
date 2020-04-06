@@ -4,6 +4,8 @@
 #include "Phones.h"
 #include "General.h"
 #include "PlayerPed.h"
+#include "Wanted.h"
+#include "DMAudio.h"
 #include "World.h"
 #include "Vehicle.h"
 #include "SurfaceTable.h"
@@ -376,6 +378,8 @@ CCivilianPed::ProcessControl(void)
 	if (m_moved.Magnitude() > 0.0f)
 		Avoid();
 }
+
+#include <new>
 
 class CCivilianPed_ : public CCivilianPed
 {

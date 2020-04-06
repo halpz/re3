@@ -2,9 +2,6 @@
 #include "patcher.h"
 #include "Curves.h"
 
-#if 0
-WRAPPER float CCurves::CalcSpeedScaleFactor(CVector*, CVector*, float, float, float, float) { EAXJMP(0x420410); }
-#else
 float CCurves::CalcSpeedScaleFactor(CVector* pPoint1, CVector* pPoint2, float dir1X, float dir1Y, float dir2X, float dir2Y)
 {
 	CVector2D dir1(dir1X, dir1Y);
@@ -16,11 +13,7 @@ float CCurves::CalcSpeedScaleFactor(CVector* pPoint1, CVector* pPoint2, float di
 	else
 		return ((1.0f - dp) * 0.2f + 1.0f) * distance;
 }
-#endif
 
-#if 0
-WRAPPER void CCurves::CalcCurvePoint(CVector*, CVector*, CVector*, CVector*, float, int32, CVector*, CVector*) { EAXJMP(0x4204D0); }
-#else
 void CCurves::CalcCurvePoint(CVector* pPos1, CVector* pPos2, CVector* pDir1, CVector* pDir2, float between, int32 timeOnCurve, CVector* pOutPos, CVector* pOutDir)
 {
 	float actualFactor = CalcSpeedScaleFactor(pPos1, pPos2, pDir1->x, pDir1->y, pDir2->x, pDir2->y);
@@ -36,4 +29,3 @@ void CCurves::CalcCurvePoint(CVector* pPos1, CVector* pPos2, CVector* pDir1, CVe
 		(dir1.y * (1.0f - curveCoef) + dir2.y * curveCoef) / (timeOnCurve * 0.001f),
 		0.0f);
 }
-#endif

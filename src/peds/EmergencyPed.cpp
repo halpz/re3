@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "EmergencyPed.h"
+#include "DMAudio.h"
 #include "ModelIndices.h"
 #include "Vehicle.h"
 #include "Fire.h"
@@ -412,6 +413,8 @@ CEmergencyPed::MedicAI(void)
 		}
 	}
 }
+
+#include <new>
 
 class CEmergencyPed_ : public CEmergencyPed
 {

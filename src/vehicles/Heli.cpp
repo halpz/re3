@@ -19,6 +19,8 @@
 #include "World.h"
 #include "WaterLevel.h"
 #include "PlayerPed.h"
+#include "Wanted.h"
+#include "DMAudio.h"
 #include "Object.h"
 #include "HandlingMgr.h"
 #include "Heli.h"
@@ -1034,6 +1036,7 @@ bool CHeli::HasCatalinaBeenShotDown(void) { return CatalinaHasBeenShotDown; }
 
 void CHeli::ActivateHeli(bool activate) { ScriptHeliOn = activate; }
 
+#include <new>
 
 class CHeli_ : public CHeli
 {

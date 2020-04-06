@@ -8,57 +8,115 @@ CFontDetails &CFont::Details = *(CFontDetails*)0x8F317C;
 int16 &CFont::NewLine = *(int16*)0x95CC94;
 CSprite2d *CFont::Sprite = (CSprite2d*)0x95CC04;
 
+#ifdef MORE_LANGUAGES
+uint8 CFont::LanguageSet = FONT_LANGSET_EFIGS;
+int32 CFont::Slot = -1;
+
+int16 CFont::Size[2][3][193] = {
+	{
+#else
 int16 CFont::Size[3][193] = {
-	{
-	13, 12, 31, 35, 23, 35, 31,  9, 14, 15, 25, 30, 11, 17, 13, 31,
-	23, 16, 22, 21, 24, 23, 23, 20, 23, 22, 10, 35, 26, 26, 26, 26,
-	30, 26, 24, 23, 24, 22, 21, 24, 26, 10, 20, 26, 22, 29, 26, 25,
-	23, 25, 24, 24, 22, 25, 24, 29, 29, 23, 25, 37, 22, 37, 35, 37,
-	35, 21, 22, 21, 21, 22, 13, 22, 21, 10, 16, 22, 11, 32, 21, 21,
-	23, 22, 16, 20, 14, 21, 20, 30, 25, 21, 21, 33, 33, 33, 33, 35,
-	27, 27, 27, 27, 32, 24, 23, 23, 23, 23, 11, 11, 11, 11, 26, 26,
-	26, 26, 26, 26, 26, 25, 26, 21, 21, 21, 21, 32, 23, 22, 22, 22,
-	22, 11, 11, 11, 11, 22, 22, 22, 22, 22, 22, 22, 22, 26, 21, 24,
-	12, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
-	26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 18, 26, 26,
-	26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
-	20
-	},
+#endif
+		{
+		13, 12, 31, 35, 23, 35, 31,  9, 14, 15, 25, 30, 11, 17, 13, 31,
+		23, 16, 22, 21, 24, 23, 23, 20, 23, 22, 10, 35, 26, 26, 26, 26,
+		30, 26, 24, 23, 24, 22, 21, 24, 26, 10, 20, 26, 22, 29, 26, 25,
+		23, 25, 24, 24, 22, 25, 24, 29, 29, 23, 25, 37, 22, 37, 35, 37,
+		35, 21, 22, 21, 21, 22, 13, 22, 21, 10, 16, 22, 11, 32, 21, 21,
+		23, 22, 16, 20, 14, 21, 20, 30, 25, 21, 21, 33, 33, 33, 33, 35,
+		27, 27, 27, 27, 32, 24, 23, 23, 23, 23, 11, 11, 11, 11, 26, 26,
+		26, 26, 26, 26, 26, 25, 26, 21, 21, 21, 21, 32, 23, 22, 22, 22,
+		22, 11, 11, 11, 11, 22, 22, 22, 22, 22, 22, 22, 22, 26, 21, 24,
+		12, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+		26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 18, 26, 26,
+		26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+		20
+		},
 
-	{
-	13,  9, 21, 35, 23, 35, 35, 11, 35, 35, 25, 35, 11, 17, 13, 33,
-	28, 14, 22, 21, 24, 23, 23, 21, 23, 22, 10, 35, 13, 35, 13, 33,
-	 5, 25, 22, 23, 24, 21, 21, 24, 24,  9, 20, 24, 21, 27, 25, 25,
-	22, 25, 23, 20, 23, 23, 23, 31, 23, 23, 23, 37, 33, 37, 35, 37,
-	35, 21, 19, 19, 21, 19, 17, 21, 21,  8, 17, 18, 14, 24, 21, 21,
-	20, 22, 19, 20, 20, 19, 20, 26, 21, 20, 21, 33, 33, 33, 33, 35,
-	19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-	19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-	19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-	19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-	19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-	19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-	16
-	},
+		{
+		13,  9, 21, 35, 23, 35, 35, 11, 35, 35, 25, 35, 11, 17, 13, 33,
+		28, 14, 22, 21, 24, 23, 23, 21, 23, 22, 10, 35, 13, 35, 13, 33,
+		 5, 25, 22, 23, 24, 21, 21, 24, 24,  9, 20, 24, 21, 27, 25, 25,
+		22, 25, 23, 20, 23, 23, 23, 31, 23, 23, 23, 37, 33, 37, 35, 37,
+		35, 21, 19, 19, 21, 19, 17, 21, 21,  8, 17, 18, 14, 24, 21, 21,
+		20, 22, 19, 20, 20, 19, 20, 26, 21, 20, 21, 33, 33, 33, 33, 35,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		16
+		},
 
+		{
+		15, 14, 16, 25, 19, 26, 22, 11, 18, 18, 27, 26, 13, 19,  9, 27,
+		19, 18, 19, 19, 22, 19, 20, 18, 19, 20, 12, 32, 15, 32, 15, 35,
+		15, 19, 19, 19, 19, 19, 16, 19, 20,  9, 19, 20, 14, 29, 19, 20,
+		19, 19, 19, 19, 21, 19, 20, 32, 20, 19, 19, 33, 31, 39, 37, 39,
+		37, 21, 21, 21, 23, 21, 19, 23, 23, 10, 19, 20, 16, 26, 23, 23,
+		20, 20, 20, 22, 21, 22, 22, 26, 22, 22, 23, 35, 35, 35, 35, 37,
+		19, 19, 19, 19, 29, 19, 19, 19, 19, 19,  9,  9,  9,  9, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 30, 19, 19, 19, 19,
+		19, 10, 10, 10, 10, 19, 19, 19, 19, 19, 19, 19, 19, 19, 23, 35,
+		12, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 11, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19
+		}
+#ifdef MORE_LANGUAGES
+	},
 	{
-	15, 14, 16, 25, 19, 26, 22, 11, 18, 18, 27, 26, 13, 19,  9, 27,
-	19, 18, 19, 19, 22, 19, 20, 18, 19, 20, 12, 32, 15, 32, 15, 35,
-	15, 19, 19, 19, 19, 19, 16, 19, 20,  9, 19, 20, 14, 29, 19, 20,
-	19, 19, 19, 19, 21, 19, 20, 32, 20, 19, 19, 33, 31, 39, 37, 39,
-	37, 21, 21, 21, 23, 21, 19, 23, 23, 10, 19, 20, 16, 26, 23, 23,
-	20, 20, 20, 22, 21, 22, 22, 26, 22, 22, 23, 35, 35, 35, 35, 37,
-	19, 19, 19, 19, 29, 19, 19, 19, 19, 19,  9,  9,  9,  9, 19, 19,
-	19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 30, 19, 19, 19, 19,
-	19, 10, 10, 10, 10, 19, 19, 19, 19, 19, 19, 19, 19, 19, 23, 35,
-	12, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-	19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 11, 19, 19,
-	19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-	19
+		{ 13, 12, 31, 35, 23, 35, 31, 9, 14, 15, 25, 30, 11, 17,
+			13, 31, 23, 16, 22, 21, 24, 23, 23, 20, 23, 22, 10,
+			35, 26, 26, 26, 26, 30, 26, 24, 23, 24, 22, 21, 24,
+			26, 10, 20, 26, 22, 29, 26, 25, 23, 25, 24, 24, 22,
+			25, 24, 29, 29, 23, 25, 37, 22, 37, 35, 37, 35, 21,
+			22, 21, 21, 22, 13, 22, 21, 10, 16, 22, 11, 32, 21,
+			21, 23, 22, 16, 20, 14, 21, 20, 30, 25, 21, 21, 13,
+			33, 13, 13, 13, 24, 22, 22, 19, 26, 21, 30, 20, 23,
+			23, 21, 24, 26, 23, 22, 23, 21, 22, 20, 20, 26, 25,
+			24, 22, 31, 32, 23, 30, 22, 22, 32, 23, 19, 18, 18,
+			15, 22, 19, 27, 19, 20, 20, 18, 22, 24, 20, 19, 19,
+			20, 19, 16, 19, 28, 20, 20, 18, 26, 27, 19, 26, 18,
+			19, 27, 19, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+			26, 26, 26, 18, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+			26, 26, 26, 26, 26, 26, 26, 26, 26, 20 },
+		{ 13, 9, 21, 35, 23, 35, 35, 11, 35, 35, 25, 35, 11,
+			17, 13, 33, 28, 14, 22, 21, 24, 23, 23, 21, 23, 22,
+			10, 35, 13, 35, 13, 33, 5, 25, 22, 23, 24, 21, 21, 24,
+			24, 9, 20, 24, 21, 27, 25, 25, 22, 25, 23, 20, 23, 23,
+			23, 31, 23, 23, 23, 37, 33, 37, 35, 37, 35, 21, 19,
+			19, 21, 19, 17, 21, 21, 8, 17, 18, 14, 24, 21, 21, 20,
+			22, 19, 20, 20, 19, 20, 26, 21, 20, 21, 33, 33, 33,
+			33, 35, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 16, },
+		{ 15, 14, 16, 25, 19,
+			26, 22, 11, 18, 18, 27, 26, 13, 19, 9, 27, 19, 18, 19,
+			19, 22, 19, 20, 18, 19, 20, 12, 32, 15, 32, 15, 35,
+			15, 19, 19, 19, 19, 19, 16, 19, 20, 9, 19, 20, 14, 29,
+			19, 20, 19, 19, 19, 19, 21, 19, 20, 32, 20, 19, 19,
+			33, 31, 39, 37, 39, 37, 21, 21, 21, 23, 21, 19, 23, 23, 10, 19, 20, 16, 26, 23,
+			21, 21, 20, 20, 22, 21, 22, 22, 26, 22, 22, 23, 35,
+			35, 35, 35, 37, 19, 19, 19, 19, 19, 19, 29, 19, 19,
+			19, 20, 22, 31, 19, 19, 19, 19, 19, 29, 19, 29, 19,
+			21, 19, 30, 31, 21, 29, 19, 19, 29, 19, 21, 23, 32,
+			21, 21, 30, 31, 22, 21, 32, 33, 23, 32, 21, 21, 32,
+			21, 19, 19, 30, 31, 22, 22, 21, 32, 33, 23, 32, 21,
+			21, 32, 21, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 11, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19 },
 	}
+#endif
 };
 
-uint16 foreign_table[128] = {
+wchar foreign_table[128] = {
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 	  0, 176,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -75,7 +133,21 @@ CFont::Initialise(void)
 	int slot;
 
 	slot = CTxdStore::AddTxdSlot("fonts");
+#ifdef MORE_LANGUAGES
+	Slot = slot;
+	switch (LanguageSet)
+	{
+	case FONT_LANGSET_EFIGS:
+	default:
+		CTxdStore::LoadTxd(slot, "MODELS/FONTS.TXD");
+		break;
+	case FONT_LANGSET_RUSSIAN:
+		CTxdStore::LoadTxd(slot, "MODELS/FONTS_R.TXD");
+		break;
+	}
+#else
 	CTxdStore::LoadTxd(slot, "MODELS/FONTS.TXD");
+#endif
 	CTxdStore::AddRef(slot);
 	CTxdStore::PushCurrentTxd();
 	CTxdStore::SetCurrentTxd(slot);
@@ -94,12 +166,42 @@ CFont::Initialise(void)
 	SetBackgroundColor(CRGBA(0x80, 0x80, 0x80, 0x80));
 	SetBackGroundOnlyTextOff();
 	SetPropOn();
-	SetFontStyle(0);
+	SetFontStyle(FONT_BANK);
 	SetRightJustifyWrap(0.0f);
 	SetAlphaFade(255.0f);
 	SetDropShadowPosition(0);
 	CTxdStore::PopCurrentTxd();
 }
+
+#ifdef MORE_LANGUAGES
+void
+CFont::ReloadFonts(uint8 set)
+{
+	if (Slot != -1 && LanguageSet != set) {
+		Sprite[0].Delete();
+		Sprite[1].Delete();
+		Sprite[2].Delete();
+		CTxdStore::PushCurrentTxd();
+		CTxdStore::RemoveTxd(Slot);
+		switch (set)
+		{
+		case FONT_LANGSET_EFIGS:
+		default:
+			CTxdStore::LoadTxd(Slot, "MODELS/FONTS.TXD");
+			break;
+		case FONT_LANGSET_RUSSIAN:
+			CTxdStore::LoadTxd(Slot, "MODELS/FONTS_R.TXD");
+			break;
+		}
+		CTxdStore::SetCurrentTxd(Slot);
+		Sprite[0].SetTexture("font2", "font2_mask");
+		Sprite[1].SetTexture("pager", "pager_mask");
+		Sprite[2].SetTexture("font1", "font1_mask");
+		CTxdStore::PopCurrentTxd();
+	}
+	LanguageSet = set;
+}
+#endif
 
 void
 CFont::Shutdown(void)
@@ -107,7 +209,12 @@ CFont::Shutdown(void)
 	Sprite[0].Delete();
 	Sprite[1].Delete();
 	Sprite[2].Delete();
+#ifdef MORE_LANGUAGES
+	CTxdStore::RemoveTxdSlot(Slot);
+	Slot = -1;
+#else
 	CTxdStore::RemoveTxdSlot(CTxdStore::FindTxdSlot("fonts"));
+#endif
 }
 
 void
@@ -121,7 +228,7 @@ CFont::InitPerFrame(void)
 }
 
 void
-CFont::PrintChar(float x, float y, uint16 c)
+CFont::PrintChar(float x, float y, wchar c)
 {
 	if(x <= 0.0f || x > SCREEN_WIDTH ||
 	   y <= 0.0f || y > SCREEN_HEIGHT)	// BUG: game uses SCREENW again
@@ -167,14 +274,14 @@ CFont::PrintChar(float x, float y, uint16 c)
 }
 
 void
-CFont::PrintString(float xstart, float ystart, uint16 *s)
+CFont::PrintString(float xstart, float ystart, wchar *s)
 {
 	CRect rect;
 	int numSpaces;
 	float lineLength;
 	float x, y;
 	bool first;
-	uint16 *start, *t;
+	wchar *start, *t;
 
 	if(*s == '*')
 		return;
@@ -250,11 +357,11 @@ CFont::PrintString(float xstart, float ystart, uint16 *s)
 }
 
 int
-CFont::GetNumberLines(float xstart, float ystart, uint16 *s)
+CFont::GetNumberLines(float xstart, float ystart, wchar *s)
 {
 	int n;
 	float x, y;
-	uint16 *t;
+	wchar *t;
 
 	n = 0;
 	if(Details.centre || Details.rightJustify)
@@ -293,12 +400,12 @@ CFont::GetNumberLines(float xstart, float ystart, uint16 *s)
 }
 
 void
-CFont::GetTextRect(CRect *rect, float xstart, float ystart, uint16 *s)
+CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 {
 	int numLines;
 	float x, y;
 	int16 maxlength;
-	uint16 *t;
+	wchar *t;
 
 	maxlength = 0;
 	numLines = 0;
@@ -362,9 +469,9 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, uint16 *s)
 }
 
 void
-CFont::PrintString(float x, float y, uint16 *start, uint16 *end, float spwidth)
+CFont::PrintString(float x, float y, wchar *start, wchar *end, float spwidth)
 {
-	uint16 *s, c, unused;
+	wchar *s, c, unused;
 
 	for(s = start; s < end; s++){
 		if(*s == '~')
@@ -380,25 +487,39 @@ CFont::PrintString(float x, float y, uint16 *start, uint16 *end, float spwidth)
 }
 
 float
-CFont::GetCharacterWidth(uint16 c)
+CFont::GetCharacterWidth(wchar c)
 {
-	if(Details.proportional)
+#ifdef MORE_LANGUAGES
+	if (Details.proportional)
+		return Size[LanguageSet][Details.style][c];
+	else
+		return Size[LanguageSet][Details.style][192];
+#else
+	if (Details.proportional)
 		return Size[Details.style][c];
 	else
 		return Size[Details.style][192];
+#endif // MORE_LANGUAGES
 }
 
 float
-CFont::GetCharacterSize(uint16 c)
+CFont::GetCharacterSize(wchar c)
 {
+#ifdef MORE_LANGUAGES
 	if(Details.proportional)
+		return Size[LanguageSet][Details.style][c] * Details.scaleX;
+	else
+		return Size[LanguageSet][Details.style][192] * Details.scaleX;
+#else
+	if (Details.proportional)
 		return Size[Details.style][c] * Details.scaleX;
 	else
 		return Size[Details.style][192] * Details.scaleX;
+#endif // MORE_LANGUAGES
 }
 
 float
-CFont::GetStringWidth(uint16 *s, bool spaces)
+CFont::GetStringWidth(wchar *s, bool spaces)
 {
 	float w;
 
@@ -416,8 +537,8 @@ CFont::GetStringWidth(uint16 *s, bool spaces)
 	return w;
 }
 
-uint16*
-CFont::GetNextSpace(uint16 *s)
+wchar*
+CFont::GetNextSpace(wchar *s)
 {
 	for(; *s != ' ' && *s != '\0'; s++)
 		if(*s == '~'){
@@ -430,8 +551,8 @@ CFont::GetNextSpace(uint16 *s)
 	return s;
 }
 
-uint16*
-CFont::ParseToken(uint16 *s, uint16*)
+wchar*
+CFont::ParseToken(wchar *s, wchar*)
 {
 	s++;
 	if(Details.color.r || Details.color.g || Details.color.b)
@@ -461,7 +582,7 @@ CFont::DrawFonts(void)
 	CSprite2d::DrawBank(Details.bank+2);
 }
 
-uint16
+wchar
 CFont::character_code(uint8 c)
 {
 	if(c < 128)
@@ -475,10 +596,10 @@ STARTPATCHES
 	InjectHook(0x500BA0, CFont::Shutdown, PATCH_JUMP);
 	InjectHook(0x500BE0, CFont::InitPerFrame, PATCH_JUMP);
 	InjectHook(0x500C30, CFont::PrintChar, PATCH_JUMP);
-	InjectHook(0x500F50, (void (*)(float, float, uint16*))CFont::PrintString, PATCH_JUMP);
+	InjectHook(0x500F50, (void (*)(float, float, wchar*))CFont::PrintString, PATCH_JUMP);
 	InjectHook(0x501260, CFont::GetNumberLines, PATCH_JUMP);
 	InjectHook(0x5013B0, CFont::GetTextRect, PATCH_JUMP);
-	InjectHook(0x501730, (void (*)(float, float, uint16*, uint16*, float))CFont::PrintString, PATCH_JUMP);
+	InjectHook(0x501730, (void (*)(float, float, wchar*, wchar*, float))CFont::PrintString, PATCH_JUMP);
 	InjectHook(0x5017E0, CFont::GetCharacterWidth, PATCH_JUMP);
 	InjectHook(0x501840, CFont::GetCharacterSize, PATCH_JUMP);
 	InjectHook(0x5018A0, CFont::GetStringWidth, PATCH_JUMP);

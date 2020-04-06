@@ -6,13 +6,7 @@
 #define VARJMP(a) { _asm jmp a }
 #define WRAPARG(a) UNREFERENCED_PARAMETER(a)
 
-#define NOVMT __declspec(novtable)
-#define SETVMT(a) *((DWORD_PTR*)this) = (DWORD_PTR)a
-
-#include <algorithm>
-#include <vector>
-
-#include "common.h"
+#include <string.h>	//memset
 
 enum
 {
@@ -103,72 +97,30 @@ isVC(void)
 	InjectHook(a, func); \
 }
 
+void InjectHook_internal(uint32 address, uint32 hook, int type);
+void Protect_internal(uint32 address, uint32 size);
+void Unprotect_internal(void);
+
 template<typename T, typename AT> inline void
 Patch(AT address, T value)
 {
-	DWORD		dwProtect[2];
-	VirtualProtect((void*)address, sizeof(T), PAGE_EXECUTE_READWRITE, &dwProtect[0]);
+	Protect_internal((uint32)address, sizeof(T));
 	*(T*)address = value;
-	VirtualProtect((void*)address, sizeof(T), dwProtect[0], &dwProtect[1]);
+	Unprotect_internal();
 }
 
 template<typename AT> inline void
 Nop(AT address, unsigned int nCount)
 {
-	DWORD		dwProtect[2];
-	VirtualProtect((void*)address, nCount, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
+	Protect_internal((uint32)address, nCount);
 	memset((void*)address, 0x90, nCount);
-	VirtualProtect((void*)address, nCount, dwProtect[0], &dwProtect[1]);
+	Unprotect_internal();
 }
 
-template<typename AT> inline void
-ClearCC(AT address, unsigned int nCount)
+template <typename T> inline void
+InjectHook(uintptr_t address, T hook, unsigned int nType = PATCH_NOTHING)
 {
-	DWORD		dwProtect[2];
-	VirtualProtect((void*)address, nCount, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-	memset((void*)address, 0xCC, nCount);
-	VirtualProtect((void*)address, nCount, dwProtect[0], &dwProtect[1]);
-}
-
-extern std::vector<int32> usedAddresses;
-
-template<typename AT, typename HT> inline void
-InjectHook(AT address, HT hook, unsigned int nType=PATCH_NOTHING)
-{
-	if(std::any_of(usedAddresses.begin(), usedAddresses.end(),
-	               [address](AT value) { return (int32)value == address; })) {
-		debug("Used address %#06x twice when injecting hook\n", address);
-	}
-
-	usedAddresses.push_back((int32)address);
-
-	DWORD		dwProtect[2];
-	switch ( nType )
-	{
-	case PATCH_JUMP:
-		VirtualProtect((void*)address, 5, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-		*(BYTE*)address = 0xE9;
-		break;
-	case PATCH_CALL:
-		VirtualProtect((void*)address, 5, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-		*(BYTE*)address = 0xE8;
-		break;
-	default:
-		VirtualProtect((void*)((DWORD)address + 1), 4, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-		break;
-	}
-	DWORD		dwHook;
-	_asm
-	{
-		mov		eax, hook
-		mov		dwHook, eax
-	}
-
-	*(ptrdiff_t*)((DWORD)address + 1) = (DWORD)dwHook - (DWORD)address - 5;
-	if ( nType == PATCH_NOTHING )
-		VirtualProtect((void*)((DWORD)address + 1), 4, dwProtect[0], &dwProtect[1]);
-	else
-		VirtualProtect((void*)address, 5, dwProtect[0], &dwProtect[1]);
+	InjectHook_internal(address, reinterpret_cast<uintptr_t>((void *&)hook), nType);
 }
 
 inline void ExtractCall(void *dst, uint32_t a)

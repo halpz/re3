@@ -4,6 +4,7 @@
 #include "AutoPilot.h"
 #include "ModelIndices.h"
 #include "AnimManager.h"
+#include "Weapon.h"
 
 class CPed;
 class CFire;
@@ -266,6 +267,7 @@ public:
 	void ProcessCarAlarm(void);
 	bool IsSphereTouchingVehicle(float sx, float sy, float sz, float radius);
 	bool ShufflePassengersToMakeSpace(void);
+	void InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage);
 
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
@@ -300,3 +302,5 @@ public:
 };
 
 static_assert(sizeof(cVehicleParams) == 0x18, "cVehicleParams: error");
+
+void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);

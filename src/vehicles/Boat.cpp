@@ -299,6 +299,8 @@ CBoat::FillBoatList()
 	}
 }
 
+#include <new>
+
 class CBoat_ : public CBoat
 {
 public:

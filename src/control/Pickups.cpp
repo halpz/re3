@@ -15,8 +15,14 @@
 #include "Pad.h"
 #include "Pickups.h"
 #include "PlayerPed.h"
+#include "Wanted.h"
+#include "DMAudio.h"
+#include "Fire.h"
 #include "PointLights.h"
 #include "Pools.h"
+#ifdef FIX_BUGS
+#include "Replay.h"
+#endif
 #include "Script.h"
 #include "Shadows.h"
 #include "SpecialFX.h"
@@ -639,32 +645,26 @@ CPickups::AddToCollectedPickupsArray(int32 index)
 void
 CPickups::Update()
 {
-#ifndef FIX_BUGS
-	// BUG: this code can only reach 318 out of 320 pickups
+#ifdef FIX_BUGS // RIP speedrunning (solution from SA)
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 #define PICKUPS_FRAME_SPAN (6)
-#define PICKUPS_PER_FRAME (NUMGENERALPICKUPS/PICKUPS_FRAME_SPAN)
-
-	for (uint32 i = PICKUPS_PER_FRAME * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN); i < PICKUPS_PER_FRAME * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN + 1); i++) {
+#ifdef FIX_BUGS
+	for (uint32 i = NUMGENERALPICKUPS * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN) / PICKUPS_FRAME_SPAN; i < NUMGENERALPICKUPS * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN + 1) / PICKUPS_FRAME_SPAN; i++) {
+#else // BUG: this code can only reach 318 out of 320 pickups
+	for (uint32 i = NUMGENERALPICKUPS / PICKUPS_FRAME_SPAN * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN); i < NUMGENERALPICKUPS / PICKUPS_FRAME_SPAN * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN + 1); i++) {
+#endif
 		if (aPickUps[i].m_eType != PICKUP_NONE && aPickUps[i].Update(FindPlayerPed(), FindPlayerVehicle(), CWorld::PlayerInFocus)) {
 			AddToCollectedPickupsArray(i);
 		}
 	}
-
+#undef PICKUPS_FRAME_SPAN
 	for (uint32 i = NUMGENERALPICKUPS; i < NUMPICKUPS; i++) {
 		if (aPickUps[i].m_eType != PICKUP_NONE && aPickUps[i].Update(FindPlayerPed(), FindPlayerVehicle(), CWorld::PlayerInFocus)) {
 			AddToCollectedPickupsArray(i);
 		}
 	}
-
-#undef PICKUPS_FRAME_SPAN
-#undef PICKUPS_PER_FRAME
-#else
-	for (uint32 i = 0; i < NUMPICKUPS; i++) {
-		if (aPickUps[i].m_eType != PICKUP_NONE && aPickUps[i].Update(FindPlayerPed(), FindPlayerVehicle(), CWorld::PlayerInFocus)) {
-			AddToCollectedPickupsArray(i);
-		}
-	}
-#endif
 }
 
 void

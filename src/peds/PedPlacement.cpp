@@ -1,5 +1,6 @@
 #include "common.h"
 #include "patcher.h"
+#include "Ped.h"
 #include "PedPlacement.h"
 #include "World.h"
 

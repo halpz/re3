@@ -39,9 +39,23 @@ enum {
 	ALIGN_RIGHT,
 };
 
+#ifdef MORE_LANGUAGES
+enum
+{
+	FONT_LANGSET_EFIGS,
+	FONT_LANGSET_RUSSIAN
+};
+#endif
+
 class CFont
 {
+#ifdef MORE_LANGUAGES
+	static int16 Size[2][3][193];
+	static uint8 LanguageSet;
+	static int32 Slot;
+#else
 	static int16 Size[3][193];
+#endif
 	static int16 &NewLine;
 	static CSprite2d *Sprite;	//[3]
 public:
@@ -50,18 +64,18 @@ public:
 	static void Initialise(void);
 	static void Shutdown(void);
 	static void InitPerFrame(void);
-	static void PrintChar(float x, float y, uint16 c);
-	static void PrintString(float x, float y, uint16 *s);
-	static int GetNumberLines(float xstart, float ystart, uint16 *s);
-	static void GetTextRect(CRect *rect, float xstart, float ystart, uint16 *s);
-	static void PrintString(float x, float y, uint16 *start, uint16 *end, float spwidth);
-	static float GetCharacterWidth(uint16 c);
-	static float GetCharacterSize(uint16 c);
-	static float GetStringWidth(uint16 *s, bool spaces = false);
-	static uint16 *GetNextSpace(uint16 *s);
-	static uint16 *ParseToken(uint16 *s, uint16*);
+	static void PrintChar(float x, float y, wchar c);
+	static void PrintString(float x, float y, wchar *s);
+	static int GetNumberLines(float xstart, float ystart, wchar *s);
+	static void GetTextRect(CRect *rect, float xstart, float ystart, wchar *s);
+	static void PrintString(float x, float y, wchar *start, wchar *end, float spwidth);
+	static float GetCharacterWidth(wchar c);
+	static float GetCharacterSize(wchar c);
+	static float GetStringWidth(wchar *s, bool spaces = false);
+	static wchar *GetNextSpace(wchar *s);
+	static wchar *ParseToken(wchar *s, wchar*);
 	static void DrawFonts(void);
-	static uint16 character_code(uint8 c);
+	static wchar character_code(uint8 c);
 
 	static CFontDetails GetDetails() { return Details; }
 	static void SetScale(float x, float y) { Details.scaleX = x; Details.scaleY = y; }
@@ -136,4 +150,6 @@ public:
 		if(Details.alphaFade < 255.0f)
 			Details.dropColor.a *= Details.alphaFade/255.0f;
 	}
+
+	static void ReloadFonts(uint8 set);
 };

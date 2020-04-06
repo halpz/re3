@@ -94,12 +94,17 @@ enum Config {
 	NUM_GARAGES = 32,
 	NUM_PROJECTILES = 32,
 
+	NUM_GLASSPANES = 45,
+	NUM_GLASSENTITIES = 32,
 	NUM_WATERCANNONS = 3,
 
 	NUMPEDROUTES = 200,
 	NUMPHONES = 50,
 	NUMPEDGROUPS = 31,
 	NUMMODELSPERPEDGROUP = 8,
+	NUMSHOTINFOS = 100,
+
+	NUMROADBLOCKS = 600,
 
 	NUMVISIBLEENTITIES = 2000,
 	NUMINVISIBLEENTITIES = 150,
@@ -114,6 +119,8 @@ enum Config {
 
 	NUM_AUDIO_REFLECTIONS = 5,
 	NUM_SCRIPT_MAX_ENTITIES = 40,
+
+	NUM_GARAGE_STORED_CARS = 6
 };
 
 // We'll use this once we're ready to become independent of the game
@@ -164,15 +171,19 @@ enum Config {
 	// not in any game
 #	define NASTY_GAME	// nasty game for all languages
 #	define NO_MOVIES	// disable intro videos
-#   define NO_CDCHECK
+#	define NO_CDCHECK
 #	define CHATTYSPLASH	// print what the game is loading
+//#	define TIMEBARS		// print debug timers
 #endif
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
-#define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. doesn't have too many things
+#define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
+#define MORE_LANGUAGES		// Add more translations to the game
 
 // Pad
+#define XINPUT
 #define KANGAROO_CHEAT
+#define REGISTER_START_BUTTON // currently only in menu sadly. resumes the game
 
 // Hud, frontend and radar
 #define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
@@ -199,5 +210,9 @@ enum Config {
 // Peds
 #define ANIMATE_PED_COL_MODEL
 #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
-#define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
+// #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER
+
+// Camera
+#define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future
+#define FREE_CAM		// Rotating cam

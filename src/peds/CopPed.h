@@ -19,8 +19,8 @@ public:
 	int8 m_bIsInPursuit;
 	int8 m_bIsDisabledCop;
 	int8 field_1350;
-	int8 field_1351;
-	int8 m_bZoneDisabledButClose;
+	bool m_bBeatingSuspect;
+	int8 m_bStopAndShootDisabledZone;
 	int8 m_bZoneDisabled;
 	int8 field_1354;
 	int8 field_1355;
@@ -40,6 +40,7 @@ public:
 	void SetPursuit(bool);
 	void ArrestPlayer(void);
 	void ScanForCrimes(void);
+	void CopAI(void);
 };
 
 static_assert(sizeof(CCopPed) == 0x558, "CCopPed: error");

@@ -5,6 +5,7 @@
 #include "Pools.h"
 #include "Radar.h"
 #include "Object.h"
+#include "DummyObject.h"
 
 WRAPPER void CObject::ObjectDamage(float amount) { EAXJMP(0x4BB240); }
 WRAPPER void CObject::DeleteAllTempObjectInArea(CVector, float) { EAXJMP(0x4BBED0); }
@@ -37,8 +38,8 @@ CObject::CObject(void)
 	bIsPickup = false;
 	m_obj_flag2 = false;
 	bOutOfStock = false;
-	m_obj_flag8 = false;
-	m_obj_flag10 = false;
+	bGlassCracked = false;
+	bGlassBroken = false;
 	bHasBeenDamaged = false;
 	m_nRefModelIndex = -1;
 	bUseVehicleColours = false;
@@ -140,6 +141,8 @@ CObject::CanBeDeleted(void)
 			return true;
 	}
 }
+
+#include <new>
 
 class CObject_ : public CObject
 {

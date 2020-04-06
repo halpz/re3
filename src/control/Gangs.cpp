@@ -2,6 +2,7 @@
 #include "patcher.h"
 #include "ModelIndices.h"
 #include "Gangs.h"
+#include "Weapon.h"
 
 //CGangInfo(&CGangs::Gang)[NUM_GANGS] = *(CGangInfo(*)[NUM_GANGS])*(uintptr*)0x6EDF78;
 CGangInfo CGangs::Gang[NUM_GANGS];
@@ -13,7 +14,7 @@ CGangInfo::CGangInfo() :
 	m_Weapon2(WEAPONTYPE_UNARMED)
 {}
 
-void CGangs::Initialize(void)
+void CGangs::Initialise(void)
 {
 	Gang[GANG_MAFIA].m_nVehicleMI = MI_MAFIA;
 	Gang[GANG_TRIAD].m_nVehicleMI = MI_BELLYUP;
@@ -38,8 +39,8 @@ void CGangs::SetGangVehicleModel(int16 gang, int32 model)
 void CGangs::SetGangWeapons(int16 gang, int32 weapon1, int32 weapon2)
 {
 	CGangInfo *gi = GetGangInfo(gang);
-	gi->m_Weapon1 = (eWeaponType)weapon1;
-	gi->m_Weapon2 = (eWeaponType)weapon2;
+	gi->m_Weapon1 = weapon1;
+	gi->m_Weapon2 = weapon2;
 }
 
 void CGangs::SetGangPedModelOverride(int16 gang, int8 ovrd)
@@ -66,7 +67,7 @@ VALIDATESAVEBUF(*size);
 
 void CGangs::LoadAllGangData(uint8 *buf, uint32 size)
 {
-	Initialize();
+	Initialise();
 
 INITSAVEBUF
 	// original: SkipSaveBuf(buf, SAVE_HEADER_SIZE);
@@ -78,7 +79,7 @@ VALIDATESAVEBUF(size);
 }
 
 STARTPATCHES
-	InjectHook(0x4C3FB0, CGangs::Initialize, PATCH_JUMP);
+	InjectHook(0x4C3FB0, CGangs::Initialise, PATCH_JUMP);
 	InjectHook(0x4C4010, CGangs::SetGangVehicleModel, PATCH_JUMP);
 	InjectHook(0x4C4030, CGangs::SetGangWeapons, PATCH_JUMP);
 	InjectHook(0x4C4050, CGangs::SetGangPedModelOverride, PATCH_JUMP);

@@ -60,8 +60,6 @@ class CWorld
 	static uint16 &ms_nCurrentScanCode;
 
 public:
-	static CColPoint& ms_testSpherePoint;
-
 	static uint8 &PlayerInFocus;
 	static CPlayerInfo (&Players)[NUMPLAYERS];
 	static CEntity *&pIgnoreEntity;
@@ -101,7 +99,7 @@ public:
 	static bool GetIsLineOfSightSectorClear(CSector &sector, const CColLine &line, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
 	static bool GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bool ignoreSeeThrough, bool ignoreSomeObjects = false);
 	
-	static CEntity *TestSphereAgainstWorld(CVector centre, float distance, CEntity *entityToIgnore, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSomeObjects);
+	static CEntity *TestSphereAgainstWorld(CVector centre, float radius, CEntity *entityToIgnore, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSomeObjects);
 	static CEntity *TestSphereAgainstSectorList(CPtrList&, CVector, float, CEntity*, bool);
 	static void FindObjectsInRangeSectorList(CPtrList&, CVector&, float, bool, short*, short, CEntity**);
 	static void FindObjectsInRange(CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool);
@@ -117,6 +115,7 @@ public:
 	static void FindMissionEntitiesIntersectingCube(const CVector&, const CVector&, int16*, int16, CEntity**, bool, bool, bool);
 	static void ClearCarsFromArea(float, float, float, float, float, float);
 	static void ClearPedsFromArea(float, float, float, float, float, float);
+	static void CallOffChaseForArea(float, float, float, float);
 
 	static float GetSectorX(float f) { return ((f - WORLD_MIN_X)/SECTOR_SIZE_X); }
 	static float GetSectorY(float f) { return ((f - WORLD_MIN_Y)/SECTOR_SIZE_Y); }
@@ -132,14 +131,18 @@ public:
 	static void StopAllLawEnforcersInTheirTracks();
 	static void SetAllCarsCanBeDamaged(bool);
 	static void ExtinguishAllCarFiresInArea(CVector, float);
+	static void SetCarsOnFire(float, float, float, float, CEntity*);
 
 	static void Initialise();
 	static void AddParticles();
 	static void ShutDown();
+	static void ClearForRestart(void);
 	static void RepositionCertainDynamicObjects();
 	static void RemoveStaticObjects();
 	static void Process();
 };
+
+extern CColPoint *gaTempSphereColPoints;
 
 class CPlayerPed;
 class CVehicle;
