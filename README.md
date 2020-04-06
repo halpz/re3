@@ -56,7 +56,6 @@ CPools - save/loading
 CRecordDataForChase
 CRecordDataForGame
 CRoadBlocks
-CRubbish
 CSceneEdit
 CSkidmarks
 CSpecialFX
