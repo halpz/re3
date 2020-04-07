@@ -4722,11 +4722,15 @@ CMenuManager::PrintController(void)
 
 #define ZOOM(x, y, in) \
 	do { \
-		if ((fMapSize < SCREEN_WIDTH / 3 && !in) || (fMapSize > SCREEN_WIDTH * 2 && in)) \
+		if(fMapSize > SCREEN_WIDTH * 2 && in) \
 			break; \
 		float z2 = in? 1.1f : 1.f/1.1f; \
 		fMapCenterX += (x - fMapCenterX) * (1.0f - z2); \
 		fMapCenterY += (y - fMapCenterY) * (1.0f - z2); \
+		\
+		if (fMapSize < SCREEN_WIDTH / 3 && !in) \
+			break; \
+		\
 		fMapSize *= z2; \
 	} while(0) \
 
@@ -4738,6 +4742,11 @@ CMenuManager::PrintMap(void)
 
 	// Because fMapSize is half of the map length, and map consists of 3x3 tiles.
 	float halfTile = fMapSize / 3.0f;
+
+	// Darken background a bit
+	CSprite2d::DrawRect(CRect(0, 0,
+		SCREEN_WIDTH, SCREEN_HEIGHT),
+		CRGBA(0, 0, 0, FadeIn(128)));
 
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 
@@ -4799,6 +4808,17 @@ CMenuManager::PrintMap(void)
 		}
 	}
 
+	if (CPad::GetPad(0)->GetCrossJustDown()) {
+		if (SCREEN_HEIGHT / 2 > fMapCenterY - fMapSize && SCREEN_HEIGHT / 2 < fMapCenterY + fMapSize &&
+			SCREEN_WIDTH / 2 > fMapCenterX - fMapSize && SCREEN_WIDTH / 2 < fMapCenterX + fMapSize) {
+
+			float diffX = fMapCenterX - fMapSize, diffY = fMapCenterY - fMapSize;
+			float x = ((SCREEN_WIDTH / 2 - diffX) / (fMapSize * 2)) * 4000.0f - 2000.0f;
+			float y = 2000.0f - ((SCREEN_HEIGHT / 2 - diffY) / (fMapSize * 2)) * 4000.0f;
+			CRadar::ToggleTargetMarker(x, y);
+		}
+	}
+
 	if (CPad::GetPad(0)->GetLeftMouse()) {
 		fMapCenterX += m_nMousePosX - m_nMouseOldPosX;
 		fMapCenterY += m_nMousePosY - m_nMouseOldPosY;
@@ -4815,16 +4835,16 @@ CMenuManager::PrintMap(void)
 	} else if (CPad::GetPad(0)->GetDown() || CPad::GetPad(0)->GetDPadDown()) {
 		fMapCenterY -= 15.0f;
 	} else if (CPad::GetPad(0)->GetLeftStickY()) {
-		fMapCenterY += CPad::GetPad(0)->GetLeftStickY() / 128.0f * 20.0f;
+		fMapCenterY -= CPad::GetPad(0)->GetLeftStickY() / 128.0f * 20.0f;
 	}
 
-	if (CPad::GetPad(0)->GetMouseWheelUp() || CPad::GetPad(0)->GetPageUp() || CPad::GetPad(0)->GetRightShoulder2()) {
-		if (CPad::GetPad(0)->GetMouseWheelUp())
+	if (CPad::GetPad(0)->GetMouseWheelDown() || CPad::GetPad(0)->GetPageUp() || CPad::GetPad(0)->GetRightShoulder2()) {
+		if (CPad::GetPad(0)->GetMouseWheelDown())
 			ZOOM(m_nMousePosX, m_nMousePosY, false);
 		else
 			ZOOM(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, false);
-	} else if (CPad::GetPad(0)->GetMouseWheelDown() || CPad::GetPad(0)->GetPageDown() || CPad::GetPad(0)->GetRightShoulder1()) {
-		if (CPad::GetPad(0)->GetMouseWheelDown())
+	} else if (CPad::GetPad(0)->GetMouseWheelUp() || CPad::GetPad(0)->GetPageDown() || CPad::GetPad(0)->GetRightShoulder1()) {
+		if (CPad::GetPad(0)->GetMouseWheelUp())
 			ZOOM(m_nMousePosX, m_nMousePosY, true);
 		else
 			ZOOM(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, true);
@@ -4847,7 +4867,7 @@ CMenuManager::PrintMap(void)
 	// CFont::SetRightJustifyWrap(10.0f);
 
 	CSprite2d::DrawRect(CRect(MENU_X(14.0f), SCREEN_STRETCH_FROM_BOTTOM(95.0f),
-		SCREEN_STRETCH_FROM_RIGHT(11.0f), SCREEN_STRETCH_FROM_BOTTOM(58.0f)),
+		SCREEN_STRETCH_FROM_RIGHT(11.0f), SCREEN_STRETCH_FROM_BOTTOM(59.0f)),
 		CRGBA(235, 170, 50, 255));
 
 	CFont::SetScale(MENU_X(0.4f), MENU_Y(0.7f));
@@ -4859,11 +4879,11 @@ CMenuManager::PrintMap(void)
 #define TEXT_PIECE(key,extraSpace) \
 	text = TheText.Get(key); CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), text); nextX += CFont::GetStringWidth(text, true) + MENU_X(extraSpace);
 
-	TEXT_PIECE("FEC_MWB", 3.0f);
+	TEXT_PIECE("FEC_MWF", 3.0f);
 	TEXT_PIECE("FEC_PGD", 1.0f);
 	TEXT_PIECE("FEC_IBT", 1.0f);
 	TEXT_PIECE("FEC_ZIN", 20.0f);
-	TEXT_PIECE("FEC_MWF", 3.0f);
+	TEXT_PIECE("FEC_MWB", 3.0f);
 	TEXT_PIECE("FEC_PGU", 1.0f);
 	TEXT_PIECE("FEC_IBT", 1.0f);
 	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), TheText.Get("FEC_ZOT")); nextX = MENU_X(30.0f); nextY -= 11.0f;
