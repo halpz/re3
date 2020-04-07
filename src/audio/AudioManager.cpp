@@ -4117,15 +4117,15 @@ cAudioManager::ProcessGarages()
 						m_sQueueSample.m_nFrequency = 18000;                                   \
 					}                                                                              \
 					m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;                                 \
-					m_sQueueSample.field_16 = 4;                                                   \
+					m_sQueueSample.m_nReleasingVolumeModificator = 4;                              \
 					m_sQueueSample.m_bEmittingVolume = 60;                                         \
-					m_sQueueSample.field_48 = 0.0f;                                                \
+					m_sQueueSample.m_fSpeedMultiplier = 0.0f;                                                \
 					m_sQueueSample.m_fSoundIntensity = 80.0f;                                      \
-					/*m_sQueueSample.field_16 = 4;*/                                               \
+					/*m_sQueueSample.m_nReleasingVolumeModificator = 4;*/                          \
 					m_sQueueSample.m_bReverbFlag = true;                                           \
 					/*m_sQueueSample.m_bReverbFlag = true;*/                                       \
-					m_sQueueSample.m_bIsDistant = false;                                           \
-					m_sQueueSample.field_56 = 1;                                                   \
+					m_sQueueSample.m_bIs2D = false;                                           \
+					m_sQueueSample.m_bReleasingSoundFlag = 1;                                                   \
 					m_sQueueSample.m_nLoopCount = 1;                                               \
 					m_sQueueSample.m_nLoopStart = 0;                                               \
 					m_sQueueSample.m_nLoopEnd = -1;                                                \
