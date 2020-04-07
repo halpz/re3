@@ -211,9 +211,9 @@ void CWeather::Update(void)
 		fNewRain = 0.0f;
 	if (Rain != fNewRain) { // ok to use comparasion
 		if (Rain > fNewRain)
-			Rain = min(fNewRain, Rain + RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
+			Rain = max(fNewRain, Rain + RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
 		else
-			Rain = max(fNewRain, Rain - RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
+			Rain = min(fNewRain, Rain - RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
 	}
 
 	// Clouds
@@ -356,18 +356,16 @@ void CWeather::AddRain()
 	for (int i = 0; i < num_splash_attempts; i++) {
 		CColPoint point;
 		CEntity* entity;
-		if (CWorld::ProcessVerticalLine(fp + CVector(CGeneral::GetRandomNumberInRange(-7.0f, 7.0f), CGeneral::GetRandomNumberInRange(-7.0f, 7.0f), 0.0f) + CVector(0.0f, 0.0f, 40.0f), -40.0f,
-			point, entity, true, false, false, false, true, false, nil)) {
+		CVector np = fp + CVector(CGeneral::GetRandomNumberInRange(-7.0f, 7.0f), CGeneral::GetRandomNumberInRange(-7.0f, 7.0f), 0.0f);
+		if (CWorld::ProcessVerticalLine(np + CVector(0.0f, 0.0f, 40.0f), -40.0f, point, entity, true, false, false, false, true, false, nil)) {
 			for (int j = 0; j < num_splashes; j++)
 				CParticle::AddParticle((CGeneral::GetRandomTrueFalse() ? PARTICLE_RAIN_SPLASH : PARTICLE_RAIN_SPLASHUP),
-					CVector(fp.x + CGeneral::GetRandomNumberInRange(-2.0f, 2.0f), fp.y + CGeneral::GetRandomNumberInRange(-2.0f, 2.0f), point.point.z + 1.0f),
+					CVector(np.x + CGeneral::GetRandomNumberInRange(-2.0f, 2.0f), np.y + CGeneral::GetRandomNumberInRange(-2.0f, 2.0f), point.point.z + 0.1f),
 					CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, colour);
 		}
 	}
 }
 
-WRAPPER void RenderOneRainStreak(CVector pos, CVector unused, int intensity, bool scale, float distance) { EAXJMP(0x5240E0); }
-/*
 void RenderOneRainStreak(CVector pos, CVector unused, int intensity, bool scale, float distance)
 {
 	static float RandomTex;
@@ -386,15 +384,15 @@ void RenderOneRainStreak(CVector pos, CVector unused, int intensity, bool scale,
 	TempBufferRenderIndexList[TempBufferIndicesStored + 10] = TempBufferVerticesStored + 3;
 	TempBufferRenderIndexList[TempBufferIndicesStored + 11] = TempBufferVerticesStored + 4;
 	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 0], 0, 0, 0, 0);
-	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 0], pos.x + TheCamera.GetUp().x, pos.y + TheCamera.GetUp().y, pos.z + TheCamera.GetUp().z);
+	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 0], pos.x + 11.0f * TheCamera.GetUp().x, pos.y + 11.0f * TheCamera.GetUp().y, pos.z + 11.0f * TheCamera.GetUp().z);
 	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 1], 0, 0, 0, 0);
-	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 1], pos.x - TheCamera.GetUp().x, pos.y - TheCamera.GetUp().y, pos.z - TheCamera.GetUp().z);
+	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 1], pos.x - 9.0f * TheCamera.GetRight().x, pos.y - 9.0f * TheCamera.GetRight().y, pos.z - 9.0f * TheCamera.GetUp().z);
 	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 2], 200 * intensity / 256, 200 * intensity / 256, intensity, 255);
 	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 2], pos.x, pos.y, pos.z);
 	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 3], 0, 0, 0, 0);
 	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 3], pos.x + 9.0f * TheCamera.GetRight().x, pos.y + 9.0f * TheCamera.GetRight().y, pos.z + 9.0f * TheCamera.GetUp().z);
-	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 4], 0, 0, 0, 0);
-	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 4], pos.x - 11.0f * TheCamera.GetRight().x, pos.y - 11.0f * TheCamera.GetRight().y, pos.z - 11.0f * TheCamera.GetUp().z);
+	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 4], 0, 0, 0, 0); 
+	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 4], pos.x - 11.0f * TheCamera.GetUp().x, pos.y - 11.0f * TheCamera.GetUp().y, pos.z - 11.0f * TheCamera.GetUp().z);
 	float u = STREAK_U;
 	float v = STREAK_V;
 	if (scale) {
@@ -424,21 +422,17 @@ void RenderOneRainStreak(CVector pos, CVector unused, int intensity, bool scale,
 	RwIm3DVertexSetU(&TempBufferRenderVertices[TempBufferVerticesStored + 3], u + RandomTexX);
 	RwIm3DVertexSetV(&TempBufferRenderVertices[TempBufferVerticesStored + 3], RandomTexY);
 	RwIm3DVertexSetU(&TempBufferRenderVertices[TempBufferVerticesStored + 4], 0.5f * u + RandomTex + RandomTexX);
-	RwIm3DVertexSetV(&TempBufferRenderVertices[TempBufferVerticesStored + 5], 0.5f * v - RandomTexY);
+	RwIm3DVertexSetV(&TempBufferRenderVertices[TempBufferVerticesStored + 5], 0.5f * v + RandomTexY);
 	TempBufferIndicesStored += 12;
 	TempBufferVerticesStored += 5;
 }
-*/
 
-
-WRAPPER void CWeather::RenderRainStreaks(void) { EAXJMP(0x524550); }
-/*
 void CWeather::RenderRainStreaks(void)
 {
 	if (CTimer::GetIsCodePaused())
 		return;
 	int default_visibility = (64.0f - CTimeCycle::GetFogReduction()) / 64.0f * int(255 * Rain);
-	if (!default_visibility)
+	if (default_visibility == 0)
 		return;
 	TempBufferIndicesStored = 0;
 	TempBufferVerticesStored = 0;
@@ -452,15 +446,16 @@ void CWeather::RenderRainStreaks(void)
 				if (secondsElapsed < STREAK_INTEROLATION_TIME) {
 					intensity = default_visibility * 0.5f * secondsElapsed / STREAK_INTEROLATION_TIME;
 				}
-				else if (secondsElapsed > STREAK_LIFETIME - STREAK_INTEROLATION_TIME) {
+				else if (secondsElapsed > (STREAK_LIFETIME - STREAK_INTEROLATION_TIME)) {
 					intensity = (STREAK_LIFETIME - secondsElapsed) * default_visibility / STREAK_INTEROLATION_TIME;
 				}
 				else {
 					intensity = default_visibility;
 				}
+				debug("intensity: %d\n", intensity);
 				CVector dir = Streaks[i].direction;
 				dir.Normalise();
-				CVector pos = Streaks[i].direction + secondsElapsed * Streaks[i].direction;
+				CVector pos = Streaks[i].position + secondsElapsed * Streaks[i].direction;
 				RenderOneRainStreak(pos, dir, intensity, false, (pos - TheCamera.GetPosition()).Magnitude());
 #ifndef FIX_BUGS // remove useless code
 				if (secondsElapsed > 1.0f && secondsElapsed < STREAK_LIFETIME - 1.0f) {
@@ -472,8 +467,7 @@ void CWeather::RenderRainStreaks(void)
 		else if ((CGeneral::GetRandomNumber() & 0xF00) == 0){
 			// 1/16 probability
 			Streaks[i].direction = CVector(4.0f, 4.0f, -4.0f);
-			Streaks[i].position = 6.0f * TheCamera.GetForward() + TheCamera.GetPosition();
-			Streaks[i].position += CVector(-1.8f * Streaks[i].direction.x, -1.8f * Streaks[i].direction.y, 8.0f);
+			Streaks[i].position = 6.0f * TheCamera.GetForward() + TheCamera.GetPosition() + CVector(-1.8f * Streaks[i].direction.x, -1.8f * Streaks[i].direction.y, 8.0f);
 			if (!CCutsceneMgr::IsCutsceneProcessing()) {
 				Streaks[i].position.x += 2.0f * FindPlayerSpeed().x * 60.0f;
 				Streaks[i].position.y += 2.0f * FindPlayerSpeed().y * 60.0f;
@@ -485,8 +479,7 @@ void CWeather::RenderRainStreaks(void)
 			Streaks[i].timer = CTimer::GetTimeInMilliseconds();
 		}
 	}
-	if (TempBufferIndicesStored)
-	{
+	if (TempBufferIndicesStored){
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, 0);
 		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)1);
 		RwRenderStateSet(rwRENDERSTATEFOGENABLE, 0);
@@ -495,7 +488,7 @@ void CWeather::RenderRainStreaks(void)
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)2);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)1);
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpRainDropTex[3]->raster);
-		if (RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, 0, 1))
+		if (RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, 1))
 		{
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStored);
 			RwIm3DEnd();
@@ -510,7 +503,6 @@ void CWeather::RenderRainStreaks(void)
 	TempBufferVerticesStored = 0;
 	TempBufferIndicesStored = 0;
 }
-*/
 
 void CWeather::StoreWeatherState()
 {
