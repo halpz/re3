@@ -1,6 +1,7 @@
 #include "common.h"
 #include "patcher.h"
 #include "SpecialFX.h"
+#include "RenderBuffer.h"
 #include "Timer.h"
 #include "Sprite.h"
 #include "Font.h"
@@ -12,6 +13,7 @@
 #include "VisibilityPlugins.h"
 #include "World.h"
 #include "Particle.h"
+#include "Shadows.h"
 #include "General.h"
 #include "Camera.h"
 #include "Shadows.h"
@@ -402,6 +404,151 @@ C3dMarkers::Update()
 {
 }
 
+
+int CShinyTexts::NumShinyTexts;
+CShinyText CShinyTexts::aShinyTexts[NUMSHINYTEXTS];
+
+void
+CShinyTexts::Init(void)
+{
+	NumShinyTexts = 0;
+}
+
+void
+CShinyTexts::RegisterOne(CVector p0, CVector p1, CVector p2, CVector p3,
+	float u0, float v0, float u1, float v1, float u2, float v2, float u3, float v3,
+	uint8 type, uint8 red, uint8 green, uint8 blue, float maxDist)
+{
+	if(NumShinyTexts >= NUMSHINYTEXTS)
+		return;
+
+	aShinyTexts[NumShinyTexts].m_camDist = (p0 - TheCamera.GetPosition()).Magnitude();
+	if(aShinyTexts[NumShinyTexts].m_camDist > maxDist)
+		return;
+	aShinyTexts[NumShinyTexts].m_verts[0] = p0;
+	aShinyTexts[NumShinyTexts].m_verts[1] = p1;
+	aShinyTexts[NumShinyTexts].m_verts[2] = p2;
+	aShinyTexts[NumShinyTexts].m_verts[3] = p3;
+	aShinyTexts[NumShinyTexts].m_texCoords[0].x = u0;
+	aShinyTexts[NumShinyTexts].m_texCoords[0].y = v0;
+	aShinyTexts[NumShinyTexts].m_texCoords[1].x = u1;
+	aShinyTexts[NumShinyTexts].m_texCoords[1].y = v1;
+	aShinyTexts[NumShinyTexts].m_texCoords[2].x = u2;
+	aShinyTexts[NumShinyTexts].m_texCoords[2].y = v2;
+	aShinyTexts[NumShinyTexts].m_texCoords[3].x = u3;
+	aShinyTexts[NumShinyTexts].m_texCoords[3].y = v3;
+	aShinyTexts[NumShinyTexts].m_type = type;
+	aShinyTexts[NumShinyTexts].m_red = red;
+	aShinyTexts[NumShinyTexts].m_green = green;
+	aShinyTexts[NumShinyTexts].m_blue = blue;
+	// Fade out at half the max dist
+	float halfDist = maxDist*0.5f;
+	if(aShinyTexts[NumShinyTexts].m_camDist > halfDist){
+		float f = 1.0f - (aShinyTexts[NumShinyTexts].m_camDist - halfDist)/halfDist;
+		aShinyTexts[NumShinyTexts].m_red *= f;
+		aShinyTexts[NumShinyTexts].m_green *= f;
+		aShinyTexts[NumShinyTexts].m_blue *= f;
+	}
+
+	NumShinyTexts++;
+}
+
+void
+CShinyTexts::Render(void)
+{
+	int i, ix, v;
+	RwTexture *lastTex = nil;
+
+	if(NumShinyTexts == 0)
+		return;
+
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+
+	TempBufferVerticesStored = 0;
+	TempBufferIndicesStored = 0;
+
+	for(i = 0; i < NumShinyTexts; i++){
+		if(TempBufferIndicesStored > TEMPBUFFERINDEXSIZE-64 || TempBufferVerticesStored > TEMPBUFFERVERTSIZE-62)
+			RenderOutGeometryBuffer();
+
+		uint8 r = aShinyTexts[i].m_red;
+		uint8 g = aShinyTexts[i].m_green;
+		uint8 b = aShinyTexts[i].m_blue;
+
+		switch(aShinyTexts[i].m_type){
+		case SHINYTEXT_WALK:
+			if(lastTex != gpWalkDontTex){
+				RenderOutGeometryBuffer();
+				RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpWalkDontTex));
+				lastTex = gpWalkDontTex;
+			}
+	quad:
+			v = TempBufferVerticesStored;
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[v+0], r, g, b, 255);
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[v+0], aShinyTexts[i].m_verts[0].x, aShinyTexts[i].m_verts[0].y, aShinyTexts[i].m_verts[0].z);
+			RwIm3DVertexSetU(&TempBufferRenderVertices[v+0], aShinyTexts[i].m_texCoords[0].x);
+			RwIm3DVertexSetV(&TempBufferRenderVertices[v+0], aShinyTexts[i].m_texCoords[0].y);
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[v+1], r, g, b, 255);
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[v+1], aShinyTexts[i].m_verts[1].x, aShinyTexts[i].m_verts[1].y, aShinyTexts[i].m_verts[1].z);
+			RwIm3DVertexSetU(&TempBufferRenderVertices[v+1], aShinyTexts[i].m_texCoords[1].x);
+			RwIm3DVertexSetV(&TempBufferRenderVertices[v+1], aShinyTexts[i].m_texCoords[1].y);
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[v+2], r, g, b, 255);
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[v+2], aShinyTexts[i].m_verts[2].x, aShinyTexts[i].m_verts[2].y, aShinyTexts[i].m_verts[2].z);
+			RwIm3DVertexSetU(&TempBufferRenderVertices[v+2], aShinyTexts[i].m_texCoords[2].x);
+			RwIm3DVertexSetV(&TempBufferRenderVertices[v+2], aShinyTexts[i].m_texCoords[2].y);
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[v+3], r, g, b, 255);
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[v+3], aShinyTexts[i].m_verts[3].x, aShinyTexts[i].m_verts[3].y, aShinyTexts[i].m_verts[3].z);
+			RwIm3DVertexSetU(&TempBufferRenderVertices[v+3], aShinyTexts[i].m_texCoords[3].x);
+			RwIm3DVertexSetV(&TempBufferRenderVertices[v+3], aShinyTexts[i].m_texCoords[3].y);
+			ix = TempBufferIndicesStored;
+			TempBufferRenderIndexList[ix+0] = 0 + TempBufferVerticesStored;
+			TempBufferRenderIndexList[ix+1] = 1 + TempBufferVerticesStored;
+			TempBufferRenderIndexList[ix+2] = 2 + TempBufferVerticesStored;
+			TempBufferRenderIndexList[ix+3] = 2 + TempBufferVerticesStored;
+			TempBufferRenderIndexList[ix+4] = 1 + TempBufferVerticesStored;
+			TempBufferRenderIndexList[ix+5] = 3 + TempBufferVerticesStored;
+			TempBufferVerticesStored += 4;
+			TempBufferIndicesStored += 6;
+			break;
+
+		case SHINYTEXT_FLAT:
+			if(lastTex != nil){
+				RenderOutGeometryBuffer();
+				RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
+				lastTex = nil;
+			}
+			goto quad;
+		}
+	}
+
+	RenderOutGeometryBuffer();
+	NumShinyTexts = 0;
+
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+}
+
+void
+CShinyTexts::RenderOutGeometryBuffer(void)
+{
+	if(TempBufferIndicesStored != 0){
+		LittleTest();
+		if(RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, rwIM3D_VERTEXUV)){
+			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStored);
+			RwIm3DEnd();
+		}
+		TempBufferVerticesStored = 0;
+		TempBufferIndicesStored = 0;
+	}
+}
+
+
+
 #define MONEY_MESSAGE_LIFETIME_MS 2000
 
 CMoneyMessage CMoneyMessages::aMoneyMessages[NUMMONEYMESSAGES];
@@ -564,6 +711,11 @@ STARTPATCHES
 	InjectHook(0x51B400, C3dMarkers::Render, PATCH_JUMP);
 	InjectHook(0x51B3B0, C3dMarkers::Shutdown, PATCH_JUMP);
 	
+	InjectHook(0x51A5A0, CShinyTexts::Init, PATCH_JUMP);
+	InjectHook(0x51AAB0, CShinyTexts::RegisterOne, PATCH_JUMP);
+	InjectHook(0x51A5B0, CShinyTexts::Render, PATCH_JUMP);
+	InjectHook(0x51AA50, CShinyTexts::RenderOutGeometryBuffer, PATCH_JUMP);
+
 	InjectHook(0x51AF70, CMoneyMessages::Init, PATCH_JUMP);
 	InjectHook(0x51B030, CMoneyMessages::Render, PATCH_JUMP);
 ENDPATCHES

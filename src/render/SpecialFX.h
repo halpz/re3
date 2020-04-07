@@ -95,6 +95,37 @@ public:
 	static RpClump* (&m_pRpClumpArray)[NUMMARKERTYPES];
 };
 
+enum
+{
+	SHINYTEXT_WALK = 1,
+	SHINYTEXT_FLAT
+};
+
+class CShinyText
+{
+public:
+	CVector m_verts[4];
+	CVector2D m_texCoords[4];
+	float m_camDist;
+	uint8 m_type;
+	uint8 m_red;
+	uint8 m_green;
+	uint8 m_blue;
+};
+
+class CShinyTexts
+{
+	static int NumShinyTexts;
+	static CShinyText aShinyTexts[NUMSHINYTEXTS];
+public:
+	static void Init(void);
+	static void RegisterOne(CVector p0, CVector p1, CVector p2, CVector p3,
+		float u0, float v0, float u1, float v1, float u2, float v2, float u3, float v3,
+		uint8 type, uint8 red, uint8 green, uint8 blue, float maxDist);
+	static void Render(void);
+	static void RenderOutGeometryBuffer(void);
+};
+
 class CMoneyMessage
 {
 	friend class CMoneyMessages;
