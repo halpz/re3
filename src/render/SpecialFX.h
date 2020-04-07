@@ -37,12 +37,6 @@ public:
 	static void Update(void);
 };
 
-class CBrightLights
-{
-public:
-	static void RegisterOne(CVector pos, CVector up, CVector right, CVector fwd, uint8 type, uint8 unk1 = 0, uint8 unk2 = 0, uint8 unk3 = 0);
-};
-
 enum
 {
 	MARKERTYPE_0 = 0,
@@ -94,6 +88,58 @@ public:
 	static int32 &NumActiveMarkers;
 	static RpClump* (&m_pRpClumpArray)[NUMMARKERTYPES];
 };
+
+enum
+{
+	BRIGHTLIGHT_INVALID,
+	BRIGHTLIGHT_TRAFFIC_GREEN,
+	BRIGHTLIGHT_TRAFFIC_YELLOW,
+	BRIGHTLIGHT_TRAFFIC_RED,
+
+	// white
+	BRIGHTLIGHT_FRONT_LONG,
+	BRIGHTLIGHT_FRONT_SMALL,
+	BRIGHTLIGHT_FRONT_BIG,
+	BRIGHTLIGHT_FRONT_TALL,
+
+	// red
+	BRIGHTLIGHT_REAR_LONG,
+	BRIGHTLIGHT_REAR_SMALL,
+	BRIGHTLIGHT_REAR_BIG,
+	BRIGHTLIGHT_REAR_TALL,
+
+	BRIGHTLIGHT_SIREN,	// unused
+
+	BRIGHTLIGHT_FRONT = BRIGHTLIGHT_FRONT_LONG,
+	BRIGHTLIGHT_REAR = BRIGHTLIGHT_REAR_LONG,
+};
+
+class CBrightLight
+{
+public:
+	CVector m_pos;
+	CVector m_up;
+	CVector m_side;
+	CVector m_front;
+	float m_camDist;
+	uint8 m_type;
+	uint8 m_red;
+	uint8 m_green;
+	uint8 m_blue;
+};
+
+class CBrightLights
+{
+	static int NumBrightLights;
+	static CBrightLight aBrightLights[NUMBRIGHTLIGHTS];
+public:
+	static void Init(void);
+	static void RegisterOne(CVector pos, CVector up, CVector side, CVector front,
+		uint8 type, uint8 red = 0, uint8 green = 0, uint8 blue = 0);
+	static void Render(void);
+	static void RenderOutGeometryBuffer(void);
+};
+
 
 enum
 {

@@ -117,8 +117,6 @@ void CBulletTrace::Update(void)
 	m_framesInUse++;
 }
 
-WRAPPER void CBrightLights::RegisterOne(CVector pos, CVector up, CVector right, CVector fwd, uint8 type, uint8 unk1, uint8 unk2, uint8 unk3) { EAXJMP(0x51A410); }
-
 RpAtomic *
 MarkerAtomicCB(RpAtomic *atomic, void *data)
 {
@@ -403,6 +401,234 @@ void
 C3dMarkers::Update()
 {
 }
+
+
+#define BRIGHTLIGHTS_MAX_DIST (60.0f)	// invisible beyond this
+#define BRIGHTLIGHTS_FADE_DIST (45.0f)	// strongest between these two
+#define CARLIGHTS_MAX_DIST (30.0f)
+#define CARLIGHTS_FADE_DIST (15.0f)	// 31 for close lights
+
+int CBrightLights::NumBrightLights;
+CBrightLight CBrightLights::aBrightLights[NUMBRIGHTLIGHTS];
+
+void
+CBrightLights::Init(void)
+{
+	NumBrightLights = 0;
+}
+
+void
+CBrightLights::RegisterOne(CVector pos, CVector up, CVector side, CVector front,
+	uint8 type, uint8 red, uint8 green, uint8 blue)
+{
+	if(NumBrightLights >= NUMBRIGHTLIGHTS)
+		return;
+
+	aBrightLights[NumBrightLights].m_camDist = (pos - TheCamera.GetPosition()).Magnitude();
+	if(aBrightLights[NumBrightLights].m_camDist > BRIGHTLIGHTS_MAX_DIST)
+		return;
+
+	aBrightLights[NumBrightLights].m_pos = pos;
+	aBrightLights[NumBrightLights].m_up = up;
+	aBrightLights[NumBrightLights].m_side = side;
+	aBrightLights[NumBrightLights].m_front = front;
+	aBrightLights[NumBrightLights].m_type = type;
+	aBrightLights[NumBrightLights].m_red = red;
+	aBrightLights[NumBrightLights].m_green = green;
+	aBrightLights[NumBrightLights].m_blue = blue;
+
+	NumBrightLights++;
+}
+
+static float TrafficLightsSide[6] = { -0.09f, 0.09f, 0.162f, 0.09f, -0.09f, -0.162f };
+static float TrafficLightsUp[6] = { 0.162f, 0.162f, 0.0f, -0.162f, -0.162f, 0.0f };
+static float LongCarHeadLightsSide[8] = { -0.2f, 0.2f, -0.2f, 0.2f, -0.2f, 0.2f, -0.2f, 0.2f };
+static float LongCarHeadLightsFront[8] = { 0.1f, 0.1f, -0.1f, -0.1f, 0.1f, 0.1f, -0.1f, -0.1f };
+static float LongCarHeadLightsUp[8] = { 0.1f, 0.1f, 0.1f, 0.1f, -0.1f, -0.1f, -0.1f, -0.1f };
+static float SmallCarHeadLightsSide[8] = { -0.08f, 0.08f, -0.08f, 0.08f, -0.08f, 0.08f, -0.08f, 0.08f };
+static float SmallCarHeadLightsFront[8] = { 0.08f, 0.08f, -0.08f, -0.08f, 0.08f, 0.08f, -0.08f, -0.08f };
+static float SmallCarHeadLightsUp[8] = { 0.08f, 0.08f, 0.08f, 0.08f, -0.08f, -0.08f, -0.08f, -0.08f };
+static float BigCarHeadLightsSide[8] = { -0.15f, 0.15f, -0.15f, 0.15f, -0.15f, 0.15f, -0.15f, 0.15f };
+static float BigCarHeadLightsFront[8] = { 0.15f, 0.15f, -0.15f, -0.15f, 0.15f, 0.15f, -0.15f, -0.15f };
+static float BigCarHeadLightsUp[8] = { 0.15f, 0.15f, 0.15f, 0.15f, -0.15f, -0.15f, -0.15f, -0.15f };
+static float TallCarHeadLightsSide[8] = { -0.08f, 0.08f, -0.08f, 0.08f, -0.08f, 0.08f, -0.08f, 0.08f };
+static float TallCarHeadLightsFront[8] = { 0.08f, 0.08f, -0.08f, -0.08f, 0.08f, 0.08f, -0.08f, -0.08f };
+static float TallCarHeadLightsUp[8] = { 0.2f, 0.2f, 0.2f, 0.2f, -0.2f, -0.2f, -0.2f, -0.2f };
+static float SirenLightsSide[6] = { -0.04f, 0.04f, 0.06f, 0.04f, -0.04f, -0.06f };
+static float SirenLightsUp[6] = { 0.06f, 0.06f, 0.0f, -0.06f, -0.06f, 0.0f };
+static RwImVertexIndex TrafficLightIndices[4*3] = { 0, 1, 5,  1, 2, 3,  1, 3, 4,  1, 4, 5 };
+static RwImVertexIndex CubeIndices[12*3] = {
+	0, 2, 1,  1, 2, 3,  3, 5, 1,  3, 7, 5,
+	2, 7, 3,  2, 6, 7,  4, 0, 1,  4, 1, 5,
+	6, 0, 4,  6, 2, 0,  6, 5, 7,  6, 4, 5
+};
+
+void
+CBrightLights::Render(void)
+{
+	int i, j;
+	CVector pos;
+
+	if(NumBrightLights == 0)
+		return;
+
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
+
+	for(i = 0; i < NumBrightLights; i++){
+		if(TempBufferIndicesStored > TEMPBUFFERINDEXSIZE-40 || TempBufferVerticesStored > TEMPBUFFERVERTSIZE-40)
+			RenderOutGeometryBuffer();
+
+		int r, g, b, a;
+		float flicker = (CGeneral::GetRandomNumber()&0xFF) * 0.2f;
+		switch(aBrightLights[i].m_type){
+		case BRIGHTLIGHT_TRAFFIC_GREEN:
+			r = flicker; g = 255; b = flicker;
+			break;
+		case BRIGHTLIGHT_TRAFFIC_YELLOW:
+			r = 255; g = 128; b = flicker;
+			break;
+		case BRIGHTLIGHT_TRAFFIC_RED:
+			r = 255; g = flicker; b = flicker;
+			break;
+
+		case BRIGHTLIGHT_FRONT_LONG:
+		case BRIGHTLIGHT_FRONT_SMALL:
+		case BRIGHTLIGHT_FRONT_BIG:
+		case BRIGHTLIGHT_FRONT_TALL:
+			r = 255; g = 255; b = 255;
+			break;
+
+		case BRIGHTLIGHT_REAR_LONG:
+		case BRIGHTLIGHT_REAR_SMALL:
+		case BRIGHTLIGHT_REAR_BIG:
+		case BRIGHTLIGHT_REAR_TALL:
+			r = 255; g = flicker; b = flicker;
+			break;
+
+		case BRIGHTLIGHT_SIREN:
+			r = aBrightLights[i].m_red;
+			g = aBrightLights[i].m_green;
+			b = aBrightLights[i].m_blue;
+			break;
+		}
+
+		if(aBrightLights[i].m_camDist < BRIGHTLIGHTS_FADE_DIST)
+			a = 255;
+		else
+			a = 255*(1.0f - (aBrightLights[i].m_camDist-BRIGHTLIGHTS_FADE_DIST)/(BRIGHTLIGHTS_MAX_DIST-BRIGHTLIGHTS_FADE_DIST));
+		// fade car lights down to 31 as they come near
+		if(aBrightLights[i].m_type >= BRIGHTLIGHT_FRONT_LONG && aBrightLights[i].m_type <= BRIGHTLIGHT_REAR_TALL){
+			if(aBrightLights[i].m_camDist < CARLIGHTS_FADE_DIST)
+				a = 31;
+			else if(aBrightLights[i].m_camDist < CARLIGHTS_MAX_DIST)
+				a = 31 + (255-31)*((aBrightLights[i].m_camDist-CARLIGHTS_FADE_DIST)/(CARLIGHTS_MAX_DIST-CARLIGHTS_FADE_DIST));
+		}
+
+		switch(aBrightLights[i].m_type){
+		case BRIGHTLIGHT_TRAFFIC_GREEN:
+		case BRIGHTLIGHT_TRAFFIC_YELLOW:
+		case BRIGHTLIGHT_TRAFFIC_RED:
+			for(j = 0; j < 6; j++){
+				pos = TrafficLightsSide[j]*aBrightLights[i].m_side +
+					TrafficLightsUp[j]*aBrightLights[i].m_up +
+					aBrightLights[i].m_pos;
+				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+j], r, g, b, a);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+j], pos.x, pos.y, pos.z);
+			}
+			for(j = 0; j < 4*3; j++)
+				TempBufferRenderIndexList[TempBufferIndicesStored+j] = TrafficLightIndices[j] + TempBufferVerticesStored;
+			TempBufferVerticesStored += 6;
+			TempBufferIndicesStored += 4*3;
+			break;
+
+		case BRIGHTLIGHT_FRONT_LONG:
+		case BRIGHTLIGHT_REAR_LONG:
+			for(j = 0; j < 8; j++){
+				pos = LongCarHeadLightsSide[j]*aBrightLights[i].m_side +
+					LongCarHeadLightsUp[j]*aBrightLights[i].m_up +
+					LongCarHeadLightsFront[j]*aBrightLights[i].m_front +
+					aBrightLights[i].m_pos;
+				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+j], r, g, b, a);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+j], pos.x, pos.y, pos.z);
+			}
+			for(j = 0; j < 12*3; j++)
+				TempBufferRenderIndexList[TempBufferIndicesStored+j] = CubeIndices[j] + TempBufferVerticesStored;
+			TempBufferVerticesStored += 8;
+			TempBufferIndicesStored += 12*3;
+			break;
+
+		case BRIGHTLIGHT_FRONT_SMALL:
+		case BRIGHTLIGHT_REAR_SMALL:
+			for(j = 0; j < 8; j++){
+				pos = SmallCarHeadLightsSide[j]*aBrightLights[i].m_side +
+					SmallCarHeadLightsUp[j]*aBrightLights[i].m_up +
+					SmallCarHeadLightsFront[j]*aBrightLights[i].m_front +
+					aBrightLights[i].m_pos;
+				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+j], r, g, b, a);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+j], pos.x, pos.y, pos.z);
+			}
+			for(j = 0; j < 12*3; j++)
+				TempBufferRenderIndexList[TempBufferIndicesStored+j] = CubeIndices[j] + TempBufferVerticesStored;
+			TempBufferVerticesStored += 8;
+			TempBufferIndicesStored += 12*3;
+			break;
+
+		case BRIGHTLIGHT_FRONT_TALL:
+		case BRIGHTLIGHT_REAR_TALL:
+			for(j = 0; j < 8; j++){
+				pos = TallCarHeadLightsSide[j]*aBrightLights[i].m_side +
+					TallCarHeadLightsUp[j]*aBrightLights[i].m_up +
+					TallCarHeadLightsFront[j]*aBrightLights[i].m_front +
+					aBrightLights[i].m_pos;
+				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+j], r, g, b, a);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+j], pos.x, pos.y, pos.z);
+			}
+			for(j = 0; j < 12*3; j++)
+				TempBufferRenderIndexList[TempBufferIndicesStored+j] = CubeIndices[j] + TempBufferVerticesStored;
+			TempBufferVerticesStored += 8;
+			TempBufferIndicesStored += 12*3;
+			break;
+
+		case BRIGHTLIGHT_SIREN:
+			for(j = 0; j < 6; j++){
+				pos = SirenLightsSide[j]*aBrightLights[i].m_side +
+					SirenLightsUp[j]*aBrightLights[i].m_up +
+					aBrightLights[i].m_pos;
+				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+j], r, g, b, a);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+j], pos.x, pos.y, pos.z);
+			}
+			for(j = 0; j < 4*3; j++)
+				TempBufferRenderIndexList[TempBufferIndicesStored+j] = TrafficLightIndices[j] + TempBufferVerticesStored;
+			TempBufferVerticesStored += 6;
+			TempBufferIndicesStored += 4*3;
+			break;
+
+		}
+	}
+
+	RenderOutGeometryBuffer();
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+	NumBrightLights = 0;
+}
+
+void
+CBrightLights::RenderOutGeometryBuffer(void)
+{
+	if(TempBufferIndicesStored != 0){
+		LittleTest();
+		if(RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, rwIM3D_VERTEXUV)){
+			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStored);
+			RwIm3DEnd();
+		}
+		TempBufferVerticesStored = 0;
+		TempBufferIndicesStored = 0;
+	}
+}
+
 
 
 int CShinyTexts::NumShinyTexts;
@@ -711,6 +937,11 @@ STARTPATCHES
 	InjectHook(0x51B400, C3dMarkers::Render, PATCH_JUMP);
 	InjectHook(0x51B3B0, C3dMarkers::Shutdown, PATCH_JUMP);
 	
+	InjectHook(0x5197A0, CBrightLights::Init, PATCH_JUMP);
+	InjectHook(0x51A410, CBrightLights::RegisterOne, PATCH_JUMP);
+	InjectHook(0x5197B0, CBrightLights::Render, PATCH_JUMP);
+	InjectHook(0x51A3B0, CBrightLights::RenderOutGeometryBuffer, PATCH_JUMP);
+
 	InjectHook(0x51A5A0, CShinyTexts::Init, PATCH_JUMP);
 	InjectHook(0x51AAB0, CShinyTexts::RegisterOne, PATCH_JUMP);
 	InjectHook(0x51A5B0, CShinyTexts::Render, PATCH_JUMP);
