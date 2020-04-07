@@ -9,9 +9,12 @@
 #include "TxdStore.h"
 #include "FileMgr.h"
 #include "FileLoader.h"
+#include "Timecycle.h"
 #include "Lights.h"
+#include "ModelIndices.h"
 #include "VisibilityPlugins.h"
 #include "World.h"
+#include "PlayerPed.h"
 #include "Particle.h"
 #include "Shadows.h"
 #include "General.h"
@@ -19,17 +22,247 @@
 #include "Shadows.h"
 #include "main.h"
 
-WRAPPER void CSpecialFX::Render(void) { EAXJMP(0x518DC0); }
-WRAPPER void CSpecialFX::Update(void) { EAXJMP(0x518D40); }
-WRAPPER void CSpecialFX::Init(void) { EAXJMP(0x5189E0); }
-WRAPPER void CSpecialFX::Shutdown(void) { EAXJMP(0x518BE0); }
+RxObjSpace3DVertex StreakVertices[4];
+RwImVertexIndex StreakIndexList[12];
 
-WRAPPER void CMotionBlurStreaks::RegisterStreak(int32 id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2) { EAXJMP(0x519460); }
+RxObjSpace3DVertex TraceVertices[6];
+RwImVertexIndex TraceIndexList[12];
 
 
-CBulletTrace (&CBulletTraces::aTraces)[NUMBULLETTRACES] = *(CBulletTrace(*)[NUMBULLETTRACES])*(uintptr*)0x72B1B8;
-RxObjSpace3DVertex (&TraceVertices)[6] = *(RxObjSpace3DVertex(*)[6])*(uintptr*)0x649884;
-RwImVertexIndex (&TraceIndexList)[12] = *(RwImVertexIndex(*)[12])*(uintptr*)0x64986C;
+void
+CSpecialFX::Init(void)
+{
+	CBulletTraces::Init();
+
+	RwIm3DVertexSetU(&StreakVertices[0], 0.0f);
+	RwIm3DVertexSetV(&StreakVertices[0], 0.0f);
+	RwIm3DVertexSetU(&StreakVertices[1], 1.0f);
+	RwIm3DVertexSetV(&StreakVertices[1], 0.0f);
+	RwIm3DVertexSetU(&StreakVertices[2], 0.0f);
+	RwIm3DVertexSetV(&StreakVertices[2], 0.0f);
+	RwIm3DVertexSetU(&StreakVertices[3], 1.0f);
+	RwIm3DVertexSetV(&StreakVertices[3], 0.0f);
+
+	StreakIndexList[0] = 0;
+	StreakIndexList[1] = 1;
+	StreakIndexList[2] = 2;
+	StreakIndexList[3] = 1;
+	StreakIndexList[4] = 3;
+	StreakIndexList[5] = 2;
+	StreakIndexList[6] = 0;
+	StreakIndexList[7] = 2;
+	StreakIndexList[8] = 1;
+	StreakIndexList[9] = 1;
+	StreakIndexList[10] = 2;
+	StreakIndexList[11] = 3;
+
+	RwIm3DVertexSetRGBA(&TraceVertices[0], 20, 20, 20, 255);
+	RwIm3DVertexSetRGBA(&TraceVertices[1], 20, 20, 20, 255);
+	RwIm3DVertexSetRGBA(&TraceVertices[2], 70, 70, 70, 255);
+	RwIm3DVertexSetRGBA(&TraceVertices[3], 70, 70, 70, 255);
+	RwIm3DVertexSetRGBA(&TraceVertices[4], 10, 10, 10, 255);
+	RwIm3DVertexSetRGBA(&TraceVertices[5], 10, 10, 10, 255);
+	RwIm3DVertexSetU(&TraceVertices[0], 0.0);
+	RwIm3DVertexSetV(&TraceVertices[0], 0.0);
+	RwIm3DVertexSetU(&TraceVertices[1], 1.0);
+	RwIm3DVertexSetV(&TraceVertices[1], 0.0);
+	RwIm3DVertexSetU(&TraceVertices[2], 0.0);
+	RwIm3DVertexSetV(&TraceVertices[2], 0.5);
+	RwIm3DVertexSetU(&TraceVertices[3], 1.0);
+	RwIm3DVertexSetV(&TraceVertices[3], 0.5);
+	RwIm3DVertexSetU(&TraceVertices[4], 0.0);
+	RwIm3DVertexSetV(&TraceVertices[4], 1.0);
+	RwIm3DVertexSetU(&TraceVertices[5], 1.0);
+	RwIm3DVertexSetV(&TraceVertices[5], 1.0);
+
+	TraceIndexList[0] = 0;
+	TraceIndexList[1] = 2;
+	TraceIndexList[2] = 1;
+	TraceIndexList[3] = 1;
+	TraceIndexList[4] = 2;
+	TraceIndexList[5] = 3;
+	TraceIndexList[6] = 2;
+	TraceIndexList[7] = 4;
+	TraceIndexList[8] = 3;
+	TraceIndexList[9] = 3;
+	TraceIndexList[10] = 4;
+	TraceIndexList[11] = 5;
+
+	CMotionBlurStreaks::Init();
+	CBrightLights::Init();
+	CShinyTexts::Init();
+	CMoneyMessages::Init();
+	C3dMarkers::Init();
+}
+
+RwObject*
+LookForBatCB(RwObject *object, void *data)
+{
+	static CMatrix MatLTM;
+
+	if(CVisibilityPlugins::GetAtomicModelInfo((RpAtomic*)object) == (CSimpleModelInfo*)data){
+		MatLTM = CMatrix(RwFrameGetLTM(RpAtomicGetFrame((RpAtomic*)object)));
+		CVector p1 = MatLTM * CVector(0.02f, 0.05f, 0.07f);
+		CVector p2 = MatLTM * CVector(0.246f, 0.0325f, 0.796f);
+		CMotionBlurStreaks::RegisterStreak((uintptr)object, 100, 100, 100, p1, p2);
+	}
+	return nil;
+}
+
+void
+CSpecialFX::Update(void)
+{
+	CMotionBlurStreaks::Update();
+	CBulletTraces::Update();
+
+	if(FindPlayerPed() &&
+	   FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT &&
+	   FindPlayerPed()->GetWeapon()->m_eWeaponState == WEAPONSTATE_FIRING)
+		RwFrameForAllObjects(FindPlayerPed()->GetNodeFrame(PED_HANDR), LookForBatCB, CModelInfo::GetModelInfo(MI_BASEBALL_BAT));
+}
+
+void
+CSpecialFX::Shutdown(void)
+{
+	C3dMarkers::Shutdown();
+}
+
+void
+CSpecialFX::Render(void)
+{
+	CMotionBlurStreaks::Render();
+	CBulletTraces::Render();
+	CBrightLights::Render();
+	CShinyTexts::Render();
+	CMoneyMessages::Render();
+	C3dMarkers::Render();
+}
+
+CRegisteredMotionBlurStreak CMotionBlurStreaks::aStreaks[NUMMBLURSTREAKS];
+
+void
+CRegisteredMotionBlurStreak::Update(void)
+{
+	int i;
+	bool wasUpdated;
+	bool lastWasUpdated = false;
+	for(i = 2; i > 0; i--){
+		m_pos1[i] = m_pos1[i-1];
+		m_pos2[i] = m_pos2[i-1];
+		m_isValid[i] = m_isValid[i-1];
+		wasUpdated = true;
+		if(!lastWasUpdated && !m_isValid[i])
+			wasUpdated = false;
+		lastWasUpdated = wasUpdated;
+	}
+	m_isValid[0] = false;
+	if(!wasUpdated)
+		m_id = 0;
+}
+
+void
+CRegisteredMotionBlurStreak::Render(void)
+{
+	int i;
+	int a1, a2;
+	for(i = 0; i < 2; i++)
+		if(m_isValid[i] && m_isValid[i+1]){
+			a1 = (255/3)*(3-i)/3;
+			RwIm3DVertexSetRGBA(&StreakVertices[0], m_red, m_green, m_blue, a1);
+			RwIm3DVertexSetRGBA(&StreakVertices[1], m_red, m_green, m_blue, a1);
+			a2 = (255/3)*(3-(i+1))/3;
+			RwIm3DVertexSetRGBA(&StreakVertices[2], m_red, m_green, m_blue, a2);
+			RwIm3DVertexSetRGBA(&StreakVertices[3], m_red, m_green, m_blue, a2);
+			RwIm3DVertexSetPos(&StreakVertices[0], m_pos1[i].x, m_pos1[i].y, m_pos1[i].z);
+			RwIm3DVertexSetPos(&StreakVertices[1], m_pos2[i].x, m_pos2[i].y, m_pos2[i].z);
+			RwIm3DVertexSetPos(&StreakVertices[2], m_pos1[i+1].x, m_pos1[i+1].y, m_pos1[i+1].z);
+			RwIm3DVertexSetPos(&StreakVertices[3], m_pos2[i+1].x, m_pos2[i+1].y, m_pos2[i+1].z);
+			LittleTest();
+			if(RwIm3DTransform(StreakVertices, 4, nil, rwIM3D_VERTEXUV)){
+				RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, StreakIndexList, 12);
+				RwIm3DEnd();
+			}
+		}
+}
+
+void
+CMotionBlurStreaks::Init(void)
+{
+	int i;
+	for(i = 0; i < NUMMBLURSTREAKS; i++)
+		aStreaks[i].m_id = 0;
+}
+
+void
+CMotionBlurStreaks::Update(void)
+{
+	int i;
+	for(i = 0; i < NUMMBLURSTREAKS; i++)
+		if(aStreaks[i].m_id)
+			aStreaks[i].Update();
+}
+
+void
+CMotionBlurStreaks::RegisterStreak(uintptr id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2)
+{
+	int i;
+	for(i = 0; i < NUMMBLURSTREAKS; i++){
+		if(aStreaks[i].m_id == id){
+			// Found a streak from last frame, update
+			aStreaks[i].m_red = r;
+			aStreaks[i].m_green = g;
+			aStreaks[i].m_blue = b;
+			aStreaks[i].m_pos1[0] = p1;
+			aStreaks[i].m_pos2[0] = p2;
+			aStreaks[i].m_isValid[0] = true;
+			return;
+		}
+	}
+	// Find free slot
+	for(i = 0; aStreaks[i].m_id; i++)
+		if(i == NUMMBLURSTREAKS-1)
+			return;
+	// Create a new streak
+	aStreaks[i].m_id = id;
+	aStreaks[i].m_red = r;
+	aStreaks[i].m_green = g;
+	aStreaks[i].m_blue = b;
+	aStreaks[i].m_pos1[0] = p1;
+	aStreaks[i].m_pos2[0] = p2;
+	aStreaks[i].m_isValid[0] = true;
+	aStreaks[i].m_isValid[1] = false;
+	aStreaks[i].m_isValid[2] = false;
+}
+
+void
+CMotionBlurStreaks::Render(void)
+{
+	bool setRenderStates = false;
+	int i;
+	for(i = 0; i < NUMMBLURSTREAKS; i++)
+		if(aStreaks[i].m_id){
+			if(!setRenderStates){
+				RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+				RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+				RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void *)TRUE);
+				RwRenderStateSet(rwRENDERSTATEFOGCOLOR,
+					(void*)RWRGBALONG(CTimeCycle::GetFogRed(), CTimeCycle::GetFogGreen(), CTimeCycle::GetFogBlue(), 255));
+				RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+				RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+				RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)FALSE);
+ 				setRenderStates = true;
+			}
+			aStreaks[i].Render();
+		}
+	if(setRenderStates){
+		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+		RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void *)FALSE);
+	}
+}
+
+
+CBulletTrace CBulletTraces::aTraces[NUMBULLETTRACES];
 
 void CBulletTraces::Init(void)
 {
@@ -201,9 +434,9 @@ C3dMarker::Render()
 	ReSetAmbientAndDirectionalColours();
 }
 
-C3dMarker(&C3dMarkers::m_aMarkerArray)[NUM3DMARKERS] = *(C3dMarker(*)[NUM3DMARKERS])*(uintptr*)0x72D408;
-int32 &C3dMarkers::NumActiveMarkers = *(int32*)0x8F2A08;
-RpClump* (&C3dMarkers::m_pRpClumpArray)[NUMMARKERTYPES] = *(RpClump*(*)[NUMMARKERTYPES])*(uintptr*)0x8E2888;
+C3dMarker C3dMarkers::m_aMarkerArray[NUM3DMARKERS];
+int32 C3dMarkers::NumActiveMarkers;
+RpClump* C3dMarkers::m_pRpClumpArray[NUMMARKERTYPES];
 
 void
 C3dMarkers::Init()
@@ -628,8 +861,6 @@ CBrightLights::RenderOutGeometryBuffer(void)
 		TempBufferIndicesStored = 0;
 	}
 }
-
-
 
 int CShinyTexts::NumShinyTexts;
 CShinyText CShinyTexts::aShinyTexts[NUMSHINYTEXTS];

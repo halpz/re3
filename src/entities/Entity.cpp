@@ -394,13 +394,13 @@ CEntity::PreRender(void)
 			}else if(GetModelIndex() == MI_GRENADE){
 				CMotionBlurStreaks::RegisterStreak((uintptr)this,
 					100, 100, 100,
-					TheCamera.GetPosition() - 0.07f*TheCamera.GetRight(),
-					TheCamera.GetPosition() + 0.07f*TheCamera.GetRight());
+					GetPosition() - 0.07f*TheCamera.GetRight(),
+					GetPosition() + 0.07f*TheCamera.GetRight());
 			}else if(GetModelIndex() == MI_MOLOTOV){
 				CMotionBlurStreaks::RegisterStreak((uintptr)this,
 					0, 100, 0,
-					TheCamera.GetPosition() - 0.07f*TheCamera.GetRight(),
-					TheCamera.GetPosition() + 0.07f*TheCamera.GetRight());
+					GetPosition() - 0.07f*TheCamera.GetRight(),
+					GetPosition() + 0.07f*TheCamera.GetRight());
 			}
 		}else if(GetModelIndex() == MI_MISSILE){
 			CVector pos = GetPosition();

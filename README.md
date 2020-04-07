@@ -43,7 +43,6 @@ CBoat
 CBulletInfo
 CExplosion
 CMenuManager - WIP
-CMotionBlurStreaks
 CObject
 CPacManPickups
 CPad - only cheats
@@ -53,7 +52,6 @@ CRecordDataForChase
 CRecordDataForGame
 CRoadBlocks
 CSkidmarks
-CSpecialFX
 CStats
 CTrafficLights
 CWeapon

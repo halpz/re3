@@ -9,10 +9,29 @@ public:
 	static void Shutdown(void);
 };
 
-class CMotionBlurStreaks
+class CRegisteredMotionBlurStreak
 {
 public:
-	static void RegisterStreak(int32 id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2);
+	uintptr m_id;
+	uint8 m_red;
+	uint8 m_green;
+	uint8 m_blue;
+	CVector m_pos1[3];
+	CVector m_pos2[3];
+	bool m_isValid[3];
+
+	void Update(void);
+	void Render(void);
+};
+
+class CMotionBlurStreaks
+{
+	static CRegisteredMotionBlurStreak aStreaks[NUMMBLURSTREAKS];
+public:
+	static void Init(void);
+	static void Update(void);
+	static void RegisterStreak(uintptr id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2);
+	static void Render(void);
 };
 
 struct CBulletTrace
@@ -29,7 +48,7 @@ struct CBulletTrace
 class CBulletTraces
 {
 public:
-	static CBulletTrace (&aTraces)[NUMBULLETTRACES];
+	static CBulletTrace aTraces[NUMBULLETTRACES];
 
 	static void Init(void);
 	static void AddTrace(CVector*, CVector*);
@@ -84,9 +103,9 @@ public:
 	static void Render();
 	static void Update();
 
-	static C3dMarker(&m_aMarkerArray)[NUM3DMARKERS];
-	static int32 &NumActiveMarkers;
-	static RpClump* (&m_pRpClumpArray)[NUMMARKERTYPES];
+	static C3dMarker m_aMarkerArray[NUM3DMARKERS];
+	static int32 NumActiveMarkers;
+	static RpClump* m_pRpClumpArray[NUMMARKERTYPES];
 };
 
 enum
