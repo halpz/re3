@@ -109,6 +109,8 @@ enum eFrontendSprites
 	FE_RADIO7,
 	FE_RADIO8,
 	FE_RADIO9,
+
+	NUM_FE_SPRITES
 };
 
 enum eMenuSprites
@@ -132,6 +134,8 @@ enum eMenuSprites
 	MENUSPRITE_UPOFF,
 	MENUSPRITE_UPON,
 	MENUSPRITE_GTA3LOGO,
+	MENUSPRITE_UNUSED,
+	NUM_MENU_SPRITES
 };
 
 enum eSaveSlot
@@ -148,6 +152,22 @@ enum eSaveSlot
 	SAVESLOT_8,
 	SAVESLOT_LABEL = 36
 };
+
+#ifdef MENU_MAP
+enum MapSprites
+{
+	MAPMID1,
+	MAPMID2,
+	MAPMID3,
+	MAPBOT1,
+	MAPBOT2,
+	MAPBOT3,
+	MAPTOP1,
+	MAPTOP2,
+	MAPTOP3,
+	NUM_MAP_SPRITES
+};
+#endif
 
 enum eMenuScreen
 {
@@ -211,6 +231,9 @@ enum eMenuScreen
 	MENUPAGE_MOUSE_CONTROLS = 56,
 	MENUPAGE_57 = 57,
 	MENUPAGE_58 = 58,
+#ifdef MENU_MAP
+	MENUPAGE_MAP = 59,
+#endif
 	MENUPAGES
 };
 
@@ -465,8 +488,8 @@ public:
  char field_455;
 	bool m_bStartWaitingForKeyBind;
 	bool m_bSpritesLoaded;
-	CSprite2d m_aFrontEndSprites[28];
-	CSprite2d m_aMenuSprites[20];
+	CSprite2d m_aFrontEndSprites[NUM_FE_SPRITES];
+	CSprite2d m_aMenuSprites[NUM_MENU_SPRITES];
  int32 field_518;
 	int32 m_nMenuFadeAlpha;
 	bool m_bPressedPgUpOnList;
@@ -532,6 +555,14 @@ public:
 	static bool m_PrefsDisableTutorials;
 #endif // !MASTER
 
+#ifdef MENU_MAP
+	static bool bMenuMapActive;
+	static float fMapSize;
+	static float fMapCenterY;
+	static float fMapCenterX;
+	static CSprite2d m_aMapSprites[NUM_MAP_SPRITES];
+	void PrintMap();
+#endif
 
 public:
 	static void BuildStatLine(char *text, void *stat, uint8 aFloat, void *stat2);
