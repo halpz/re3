@@ -136,6 +136,7 @@ public:
 	static int GetFogRed(void) { return m_nCurrentFogColourRed; }
 	static int GetFogGreen(void) { return m_nCurrentFogColourGreen; }
 	static int GetFogBlue(void) { return m_nCurrentFogColourBlue; }
+	static int GetFogReduction(void) { return m_FogReduction; }
 
 	static void Initialise(void);
 	static void Update(void);

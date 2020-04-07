@@ -8,6 +8,14 @@ enum {
 class CWeather
 {
 public:
+	enum {
+		WEATHER_RANDOM = -1,
+		WEATHER_SUNNY = 0,
+		WEATHER_CLOUDY = 1,
+		WEATHER_RAINY = 2,
+		WEATHER_FOGGY = 3,
+		WEATHER_TOTAL = 4
+	};
 	static int32 &SoundHandle;
 
 	static int32 &WeatherTypeInList;
@@ -46,4 +54,18 @@ public:
 	static void ForceWeatherNow(int16);
 	static void StoreWeatherState();
 	static void RestoreWeatherState();
+	static void AddRain();
 };
+
+enum {
+	NUM_RAIN_STREAKS = 35
+};
+
+struct tRainStreak
+{
+	CVector position;
+	CVector direction;
+	uint32 timer;
+};
+
+extern RwTexture* (&gpRainDropTex)[4];
