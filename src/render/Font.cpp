@@ -1049,13 +1049,13 @@ CFont::SetScale(float x, float y)
 }
 
 void
-CFont::SetBackgroundColor(CRGBA col)
+CFont::SetBackgroundColor(const CRGBA &col)
 {
 	Details.backgroundColor = col;
 }
 
 void
-CFont::SetColor(CRGBA col)
+CFont::SetColor(const CRGBA &col)
 {
 	Details.color = col;
 	if (Details.alphaFade < 255.0f)
@@ -1063,7 +1063,7 @@ CFont::SetColor(CRGBA col)
 }
 
 void
-CFont::SetDropColor(CRGBA col)
+CFont::SetDropColor(const CRGBA &col)
 {
 	Details.dropColor = col;
 	if (Details.alphaFade < 255.0f)

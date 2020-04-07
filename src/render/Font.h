@@ -154,9 +154,9 @@ public:
 	static void SetRightJustifyWrap(float wrap) { Details.rightJustifyWrap = wrap; }
 	static void SetAlphaFade(float fade) { Details.alphaFade = fade; }
 	static void SetDropShadowPosition(int16 pos) { Details.dropShadowPosition = pos; }
-	static void SetBackgroundColor(CRGBA col);
-	static void SetColor(CRGBA col);
-	static void SetDropColor(CRGBA col);
+	static void SetBackgroundColor(const CRGBA &col);
+	static void SetColor(const CRGBA &col);
+	static void SetDropColor(const CRGBA &col);
 
 #ifdef MORE_LANGUAGES
 	static void ReloadFonts(uint8 set);
