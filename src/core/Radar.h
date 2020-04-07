@@ -69,7 +69,7 @@ struct CBlip
 	float m_Radius;
 	int16 m_wScale;
 	uint16 m_eBlipDisplay; // eBlipDisplay
-	uint16 m_IconID; // eRadarSprite
+	uint16 m_eRadarSprite; // eRadarSprite
 };
 static_assert(sizeof(CBlip) == 0x30, "CBlip: error");
 
@@ -108,12 +108,16 @@ public:
 	static float cachedCos;
 	static float cachedSin;
 #ifdef MENU_MAP
+#define NUM_MAP_LEGENDS 75
 	static CRGBA ArrowBlipColour1;
 	static CRGBA ArrowBlipColour2;
-	static uint16 MapLegendList[75];
-	static bool bMenuMapActive;
+	static uint16 MapLegendList[NUM_MAP_LEGENDS];
+	static uint16 MapLegendCounter;
+	static int TargetMarkerId;
 
 	static void InitFrontEndMap();
+	static void DrawYouAreHereSprite(float, float);
+	static void ToggleTargetMarker(float, float);
 #endif
 	static uint8 CalculateBlipAlpha(float dist);
 	static void ChangeBlipBrightness(int32 i, int32 bright);

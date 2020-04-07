@@ -727,12 +727,24 @@ CCamera::CamControl(void)
 				if(CarZoomIndicator == CAM_ZOOM_1STPRS && !m_bPlayerIsInGarage){
 					CarZoomValue = 0.0f;
 					ReqMode = CCam::MODE_1STPERSON;
-				}else if(CarZoomIndicator == CAM_ZOOM_1)
-					CarZoomValue = 0.05f;
+				}
+#ifdef FREE_CAM
+				else if (bFreeCam) {
+					if (CarZoomIndicator == CAM_ZOOM_1)
+						CarZoomValue = ((CVehicle*)pTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_1 : FREE_CAR_ZOOM_VALUE_1;
+					else if (CarZoomIndicator == CAM_ZOOM_2)
+						CarZoomValue = ((CVehicle*)pTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_2 : FREE_CAR_ZOOM_VALUE_2;
+					else if (CarZoomIndicator == CAM_ZOOM_3)
+						CarZoomValue = ((CVehicle*)pTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_3 : FREE_CAR_ZOOM_VALUE_3;
+				}
+#endif
+				else if(CarZoomIndicator == CAM_ZOOM_1)
+					CarZoomValue = DEFAULT_CAR_ZOOM_VALUE_1;
 				else if(CarZoomIndicator == CAM_ZOOM_2)
-					CarZoomValue = 1.9f;
+					CarZoomValue = DEFAULT_CAR_ZOOM_VALUE_2;
 				else if(CarZoomIndicator == CAM_ZOOM_3)
-					CarZoomValue = 3.9f;
+					CarZoomValue = DEFAULT_CAR_ZOOM_VALUE_3;
+
 				if(CarZoomIndicator == CAM_ZOOM_TOPDOWN && !m_bPlayerIsInGarage){
 					CarZoomValue = 1.0f;
 					ReqMode = CCam::MODE_TOPDOWN;
@@ -2956,11 +2968,23 @@ CCamera::SetZoomValueFollowPedScript(int16 dist)
 void
 CCamera::SetZoomValueCamStringScript(int16 dist)
 {
-	switch (dist) {
-	case 0: m_fCarZoomValueScript = 0.05f; break;
-	case 1: m_fCarZoomValueScript = 1.9f; break;
-	case 2: m_fCarZoomValueScript = 3.9f; break;
-	default: m_fCarZoomValueScript = m_fCarZoomValueScript; break;
+#ifdef FREE_CAM
+	if (bFreeCam) {
+		switch (dist) {
+		case 0: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_1 : FREE_CAR_ZOOM_VALUE_1; break;
+		case 1: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_2 : FREE_CAR_ZOOM_VALUE_2; break;
+		case 2: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_3 : FREE_CAR_ZOOM_VALUE_3; break;
+		default: m_fCarZoomValueScript = m_fCarZoomValueScript; break;
+		}
+	} else
+#endif
+	{
+		switch (dist) {
+		case 0: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_1; break;
+		case 1: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_2; break;
+		case 2: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_3; break;
+		default: m_fCarZoomValueScript = m_fCarZoomValueScript; break;
+		}
 	}
 
 	m_bUseScriptZoomValueCar = true;

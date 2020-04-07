@@ -141,10 +141,10 @@ public:
 	int32 m_counter;
 	int32 m_nSampleIndex;
 	uint8 m_bBankIndex;
-	bool m_bIsDistant;
+	bool m_bIs2D;
 	uint8 field_14;
 	uint8 field_15;
-	int32 field_16;
+	int32 m_nReleasingVolumeModificator;
 	int32 m_nFrequency;
 	uint8 m_bVolume;
 	uint8 field_25;
@@ -158,24 +158,24 @@ public:
 	uint8 field_45;
 	uint8 field_46;
 	uint8 field_47;
-	float field_48;
+	float m_fSpeedMultiplier;
 	float m_fSoundIntensity;
-	uint8 field_56;
+	bool m_bReleasingSoundFlag;
 	uint8 field_57;
 	uint8 field_58;
 	uint8 field_59;
 	CVector m_vecPos;
 	bool m_bReverbFlag;
 	uint8 m_bLoopsRemaining;
-	bool m_bRequireReflection;
+	bool m_bRequireReflection; // Used for oneshots
 	uint8 m_bOffset;
-	int32 field_76;
+	int32 m_nReleasingVolumeDivider;
 	uint8 m_bIsProcessed;
 	uint8 m_bLoopEnded;
 	uint8 field_82;
 	uint8 field_83;
 	int32 calculatedVolume;
-	int8 field_88;
+	int8 m_nVolumeChange;
 	uint8 field_89;
 	uint8 field_90;
 	uint8 field_91;
@@ -210,7 +210,7 @@ class tPedComment
 {
 public:
 	int32 m_nSampleIndex;
-	int32 m_entityIndex;
+	int32 m_nEntityIndex;
 	CVector m_vecPos;
 	float m_fDistance;
 	uint8 m_bVolume;
@@ -226,9 +226,9 @@ class cPedComments
 {
 public:
 	tPedComment m_asPedComments[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
-	uint8 indexMap[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
-	uint8 nrOfCommentsInBank[NUM_PED_COMMENTS_BANKS];
-	uint8 activeBank;
+	uint8 m_nIndexMap[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
+	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
+	uint8 m_nActiveBank;
 	uint8 gap_1163[1];
 
 	// reversed all methods
@@ -289,22 +289,22 @@ class cAudioManager
 {
 public:
 	bool m_bIsInitialised;
-	uint8 field_1;
-	uint8 field_2;
+	uint8 field_1; // unused
+	bool m_bFifthFrameFlag;
 	uint8 m_bActiveSamples;
-	uint8 field_4;
+	uint8 field_4; // unused
 	bool m_bDynamicAcousticModelingStatus;
-	uint8 field_6;
-	uint8 field_7;
-	float speedOfSound;
+	uint8 field_6; // unused
+	uint8 field_7; // unused
+	float m_fSpeedOfSound;
 	bool m_bTimerJustReset;
-	uint8 field_13;
-	uint8 field_14;
-	uint8 field_15;
+	uint8 field_13; // unused
+	uint8 field_14; // unused
+	uint8 field_15; // unused
 	int32 m_nTimer;
 	tSound m_sQueueSample;
 	bool m_bActiveSampleQueue;
-	uint8 gap_109[3];
+	uint8 gap_109[3]; // unused
 	tSound m_asSamples[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
 	uint8 m_abSampleQueueIndexTable[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
 	uint8 m_bSampleRequestQueuesStatus[NUM_SOUNDS_SAMPLES_BANKS];
@@ -328,10 +328,10 @@ public:
 	int32 m_nBridgeEntity;
 	cMissionAudio m_sMissionAudio;
 	int32 m_anRandomTable[5];
-	uint8 field_19192;
+	uint8 field_19192; // time?
 	uint8 m_bUserPause;
 	uint8 m_bPreviousUserPause;
-	uint8 field_19195; // time?
+	uint8 field_19195; // unused
 	uint32 m_FrameCounter;
 
 	// getters

@@ -128,18 +128,18 @@ cAudioManager::DoPoliceRadioCrackle()
 	m_sQueueSample.m_counter = 0;
 	m_sQueueSample.m_nSampleIndex = SFX_POLICE_RADIO_CRACKLE;
 	m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
-	m_sQueueSample.m_bIsDistant = true;
-	m_sQueueSample.field_16 = 10;
+	m_sQueueSample.m_bIs2D = true;
+	m_sQueueSample.m_nReleasingVolumeModificator = 10;
 	m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_POLICE_RADIO_CRACKLE);
 	m_sQueueSample.m_bVolume = m_anRandomTable[2] % 20 + 15;
 	m_sQueueSample.m_nLoopCount = 0;
 	m_sQueueSample.m_bEmittingVolume = m_sQueueSample.m_bVolume;
 	m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_POLICE_RADIO_CRACKLE);
 	m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_POLICE_RADIO_CRACKLE);
-	m_sQueueSample.field_56 = 0;
+	m_sQueueSample.m_bReleasingSoundFlag = 0;
 	m_sQueueSample.m_bReverbFlag = false;
 	m_sQueueSample.m_bOffset = 63;
-	m_sQueueSample.field_76 = 3;
+	m_sQueueSample.m_nReleasingVolumeDivider = 3;
 	m_sQueueSample.m_bRequireReflection = false;
 	AddSampleToRequestedQueue();
 }
