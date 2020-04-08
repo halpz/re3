@@ -314,7 +314,7 @@ void CWeather::AddRain()
 		dir.y = (CGeneral::GetRandomNumberInRange(-0.5f, 0.5f) + base_y) * CGeneral::GetRandomNumberInRange(10.0f, 25.0f);
 		dir.z = 0;
 		CParticle::AddParticle(PARTICLE_RAINDROP_2D, xpos, dir, nil, CGeneral::GetRandomNumberInRange(0.5f, 0.9f),
-			colour, 0, rain_angle + CGeneral::GetRandomNumberInRange(0, 20) - 10, cur_frame);
+			colour, 0, rain_angle + CGeneral::GetRandomNumberInRange(-10, 10), cur_frame);
 		xpos.x += screen_width / (2 * num_drops);
 		xpos.x += CGeneral::GetRandomNumberInRange(-25.0f, 25.0f);
 	}
@@ -325,7 +325,7 @@ void CWeather::AddRain()
 		dir.y = (CGeneral::GetRandomNumberInRange(-0.5f, 0.5f) + base_y) * CGeneral::GetRandomNumberInRange(10.0f, 25.0f);
 		dir.z = 0;
 		CParticle::AddParticle(PARTICLE_RAINDROP_2D, ypos, dir, nil, CGeneral::GetRandomNumberInRange(0.5f, 0.9f),
-			colour, 0, rain_angle + CGeneral::GetRandomNumberInRange(0, 20) - 10, cur_frame);
+			colour, 0, rain_angle + CGeneral::GetRandomNumberInRange(-10, 10), cur_frame);
 		ypos.y += screen_width / num_drops;
 		ypos.y += CGeneral::GetRandomNumberInRange(-25.0f, 25.0f);
 	}
@@ -336,7 +336,7 @@ void CWeather::AddRain()
 		dir.y = (CGeneral::GetRandomNumberInRange(-0.5f, 0.5f) + base_y) * CGeneral::GetRandomNumberInRange(10.0f, 25.0f);
 		dir.z = 0;
 		CParticle::AddParticle(PARTICLE_RAINDROP_2D, ypos2, dir, nil, CGeneral::GetRandomNumberInRange(0.5f, 0.9f),
-			colour, 0, rain_angle + CGeneral::GetRandomNumberInRange(0, 20) - 10, cur_frame);
+			colour, 0, rain_angle + CGeneral::GetRandomNumberInRange(-10, 10), cur_frame);
 		ypos2.y += screen_width / num_drops;
 		ypos2.y += CGeneral::GetRandomNumberInRange(-25.0f, 25.0f);
 	}
@@ -346,7 +346,7 @@ void CWeather::AddRain()
 		pos.y = CGeneral::GetRandomNumberInRange(DROPLETS_TOP_OFFSET, screen_height - DROPLETS_TOP_OFFSET);
 		pos.z = 0.0f;
 		CParticle::AddParticle(PARTICLE_RAINDROP_2D, pos, CVector(0.0f, 0.0f, 0.0f), nil, CGeneral::GetRandomNumberInRange(0.5f, 0.9f),
-			colour, CGeneral::GetRandomNumberInRange(0.0f, 20.0f) - 10, 360 - rain_angle + CGeneral::GetRandomNumberInRange(0.0f, 60.0f) - 30, cur_frame, 0);
+			colour, CGeneral::GetRandomNumberInRange(-10, 10), 360 - rain_angle + CGeneral::GetRandomNumberInRange(-30, 30), cur_frame, 0);
 	}
 	int num_splash_attempts = (int)(3 * Rain) + 1;
 	int num_splashes = (int)(3 * Rain) + 4;
