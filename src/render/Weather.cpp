@@ -494,7 +494,7 @@ void CWeather::RenderRainStreaks(void)
 		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpRainDropTex[3]->raster);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpRainDropTex[3]));
 		if (RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, 1))
 		{
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStored);
