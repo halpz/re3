@@ -210,10 +210,10 @@ void CWeather::Update(void)
 	else
 		fNewRain = 0.0f;
 	if (Rain != fNewRain) { // ok to use comparasion
-		if (Rain > fNewRain)
-			Rain = max(fNewRain, Rain + RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
+		if (Rain < fNewRain)
+			Rain = min(fNewRain, Rain + RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
 		else
-			Rain = min(fNewRain, Rain - RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
+			Rain = max(fNewRain, Rain - RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
 	}
 
 	// Clouds
@@ -431,8 +431,8 @@ void CWeather::RenderRainStreaks(void)
 {
 	if (CTimer::GetIsCodePaused())
 		return;
-	int default_visibility = (64.0f - CTimeCycle::GetFogReduction()) / 64.0f * int(255 * Rain);
-	if (default_visibility == 0)
+	int base_intensity = (64.0f - CTimeCycle::GetFogReduction()) / 64.0f * int(255 * Rain);
+	if (base_intensity == 0)
 		return;
 	TempBufferIndicesStored = 0;
 	TempBufferVerticesStored = 0;
@@ -444,13 +444,13 @@ void CWeather::RenderRainStreaks(void)
 			else{
 				int intensity;
 				if (secondsElapsed < STREAK_INTEROLATION_TIME) {
-					intensity = default_visibility * 0.5f * secondsElapsed / STREAK_INTEROLATION_TIME;
+					intensity = base_intensity * 0.5f * secondsElapsed / STREAK_INTEROLATION_TIME;
 				}
 				else if (secondsElapsed > (STREAK_LIFETIME - STREAK_INTEROLATION_TIME)) {
-					intensity = (STREAK_LIFETIME - secondsElapsed) * default_visibility / STREAK_INTEROLATION_TIME;
+					intensity = (STREAK_LIFETIME - secondsElapsed) * 0.5f * base_intensity / STREAK_INTEROLATION_TIME;
 				}
 				else {
-					intensity = default_visibility;
+					intensity = base_intensity * 0.5f;
 				}
 				debug("intensity: %d\n", intensity);
 				CVector dir = Streaks[i].direction;
