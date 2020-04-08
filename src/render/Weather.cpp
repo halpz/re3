@@ -305,8 +305,8 @@ void CWeather::AddRain()
 	float rain_angle = DEGTORAD(STATIC_RAIN_ANGLE + ((STATIC_RAIN_ANGLE < 0) ? 360 : 0));
 	float sin_angle = Sin(rain_angle);
 	float cos_angle = Cos(rain_angle);
-	float base_x = 0.0f * sin_angle - 1.0f * cos_angle;
-	float base_y = 1.0f * sin_angle + 0.0f * cos_angle;
+	float base_x = 0.0f * cos_angle - 1.0f * sin_angle;
+	float base_y = 1.0f * cos_angle + 0.0f * sin_angle;
 	CVector xpos(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < 2 * num_drops; i++) {
 		CVector dir;
@@ -487,25 +487,25 @@ void CWeather::RenderRainStreaks(void)
 		}
 	}
 	if (TempBufferIndicesStored){
-		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, 0);
-		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)1);
-		RwRenderStateSet(rwRENDERSTATEFOGENABLE, 0);
-		RwRenderStateSet(rwRENDERSTATEFOGTYPE, (void*)1);
-		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)2);
-		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)2);
-		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)1);
+		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+		RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+		RwRenderStateSet(rwRENDERSTATEFOGTYPE, (void*)rwFOGTYPELINEAR);
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpRainDropTex[3]->raster);
 		if (RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, 1))
 		{
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStored);
 			RwIm3DEnd();
 		}
-		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)1);
-		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)1);
-		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)5);
-		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)6);
-		RwRenderStateSet(rwRENDERSTATEFOGENABLE, 0);
-		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, 0);
+		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 	}
 	TempBufferVerticesStored = 0;
 	TempBufferIndicesStored = 0;
