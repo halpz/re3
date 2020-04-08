@@ -84,12 +84,14 @@ extern void **rwengine;
 #define DEFAULT_SCREEN_WIDTH (640)
 #define DEFAULT_SCREEN_HEIGHT (448)
 #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
+#define DEFAULT_VIEWWINDOW (0.7f)
 
 // game uses maximumWidth/Height, but this probably won't work
 // with RW windowed mode
 #define SCREEN_WIDTH ((float)RsGlobal.width)
 #define SCREEN_HEIGHT ((float)RsGlobal.height)
 #define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
+#define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
 
 // This scales from PS2 pixel coordinates to the real resolution
 #define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH / DEFAULT_SCREEN_WIDTH)

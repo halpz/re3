@@ -464,7 +464,7 @@ public:
 	bool m_bMenuActive;
 	bool m_bMenuStateChanged;
 	bool m_bWaitingForNewKeyBind;
-	bool m_bStartGameLoading;
+	bool m_bWantToRestart;
 	bool m_bFirstTime;
 	bool m_bGameNotLoaded;
 	int32 m_nMousePosX;
@@ -484,7 +484,7 @@ public:
 	bool m_bQuitGameNoCD;
  bool m_bRenderGameInMenu;
 	bool m_bSaveMenuActive;
-	bool m_bLoadingSavedGame;
+	bool m_bWantToLoad;
  char field_455;
 	bool m_bStartWaitingForKeyBind;
 	bool m_bSpritesLoaded;

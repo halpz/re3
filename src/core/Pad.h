@@ -161,6 +161,7 @@ public:
 
 	static bool &bDisplayNoControllerMessage;
 	static bool &bObsoleteControllerMessage;
+	static bool bOldDisplayNoControllerMessage;
 	static bool &m_bMapPadOneToPadTwo;
 	
 	static CKeyboardState &OldKeyState;
@@ -173,7 +174,7 @@ public:
 	
 	
 	
-	
+	static void Initialise(void);
 	void Clear(bool bResetPlayerControls);
 	void ClearMouseHistory();
 	void UpdateMouse();

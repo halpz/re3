@@ -555,7 +555,7 @@ void CMenuManager::DoSettingsBeforeStartingAGame()
 		m_PrefsVsync = m_PrefsVsyncDisp;
 
 	DMAudio.Service();
-	m_bStartGameLoading = true;
+	m_bWantToRestart = true;
 
 	ShutdownJustMenu();
 	UnloadTextures();
@@ -2819,7 +2819,7 @@ void CMenuManager::Process(void)
 	if (!m_bSaveMenuActive && TheCamera.GetScreenFadeStatus() != FADE_0)
 		return;
 
-	m_bStartGameLoading = false;
+	m_bWantToRestart = false;
 	InitialiseChangedLanguageSettings();
 
 	if (CPad::GetPad(0)->GetEscapeJustDown())
@@ -2861,9 +2861,9 @@ void CMenuManager::Process(void)
 				if (m_PrefsVsyncDisp != m_PrefsVsync)
 					m_PrefsVsync = m_PrefsVsyncDisp;
 				DMAudio.Service();
-				m_bStartGameLoading = true;
+				m_bWantToRestart = true;
 				RequestFrontEndShutDown();
-				m_bLoadingSavedGame = true;
+				m_bWantToLoad = true;
 				b_FoundRecentSavedGameWantToLoad = true;
 				DMAudio.SetEffectsFadeVol(0);
 				DMAudio.SetMusicFadeVol(0);
@@ -2960,7 +2960,7 @@ void CMenuManager::Process(void)
 		m_bWaitingForNewKeyBind = false;
 	}
 
-	if (!m_bStartGameLoading) {
+	if (!m_bWantToRestart) {
 		if (m_bGameNotLoaded)
 			DMAudio.Service();
 	}

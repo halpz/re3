@@ -48,6 +48,13 @@ char SaveFileNameJustSaved[260];
 int (&Slots)[SLOT_COUNT+1] = *(int(*)[SLOT_COUNT+1])*(uintptr*)0x72803C;
 CDate &CompileDateAndTime = *(CDate*)0x72BCB8;
 
+
+bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
+bool &JustLoadedDontFadeInYet = *(bool*)0x95CDB4;
+bool &StillToFadeOut = *(bool*)0x95CD99;
+uint32 &TimeStartedCountingForFade = *(uint32*)0x9430EC;
+uint32 &TimeToStayFadedBeforeFadeOut = *(uint32*)0x611564;
+
 #define ReadDataFromBufferPointer(buf, to) memcpy(&to, buf, sizeof(to)); buf += align4bytes(sizeof(to));
 #define WriteDataToBufferPointer(buf, from) memcpy(buf, &from, sizeof(from)); buf += align4bytes(sizeof(from));
 

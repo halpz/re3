@@ -89,8 +89,6 @@
 
 
 
-#define DEFAULT_VIEWWINDOW (0.7f)
-
 eLevelName &CGame::currLevel = *(eLevelName*)0x941514;
 bool &CGame::bDemoMode = *(bool*)0x5F4DD0;
 bool &CGame::nastyGame = *(bool*)0x5F4DD4;
@@ -492,7 +490,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CParticle::ReloadConfig();
 	CCullZones::ResolveVisibilities();
 
-	if ( !FrontEndMenuManager.m_bLoadingSavedGame )
+	if ( !FrontEndMenuManager.m_bWantToLoad )
 	{
 		CCranes::InitCranes();
 		CTheScripts::StartTestScript();
@@ -566,7 +564,7 @@ void CGame::InitialiseWhenRestarting(void)
 	
 	TheCamera.Init();
 	
-	if ( FrontEndMenuManager.m_bLoadingSavedGame == true )
+	if ( FrontEndMenuManager.m_bWantToLoad == true )
 	{
 		RestoreForStartLoad();
 		CStreaming::LoadScene(TheCamera.GetPosition());
@@ -574,7 +572,7 @@ void CGame::InitialiseWhenRestarting(void)
 	
 	ReInitGameObjectVariables();
 	
-	if ( FrontEndMenuManager.m_bLoadingSavedGame == true )
+	if ( FrontEndMenuManager.m_bWantToLoad == true )
 	{
 		if ( GenericLoad() == true )
 		{
@@ -593,7 +591,7 @@ void CGame::InitialiseWhenRestarting(void)
 			ShutDownForRestart();
 			CTimer::Stop();
 			CTimer::Initialise();
-			FrontEndMenuManager.m_bLoadingSavedGame = false;
+			FrontEndMenuManager.m_bWantToLoad = false;
 			ReInitGameObjectVariables();
 			currLevel = LEVEL_INDUSTRIAL;
 			CCollision::SortOutCollisionAfterLoad();
@@ -609,6 +607,9 @@ extern void (*DebugMenuProcess)(void);
 void CGame::Process(void) 
 {
 	CPad::UpdatePads();
+#ifdef PS2
+	ProcessTidyUpMemory();
+#endif
 	TheCamera.SetMotionBlurAlpha(0);
 	if (TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_SNIPER || TheCamera.m_BlurType == MBLUR_NORMAL)
 		TheCamera.SetMotionBlur(0, 0, 0, 0, MBLUR_NONE);
@@ -689,6 +690,13 @@ void CGame::DrasticTidyUpMemory(bool)
 }
 
 void CGame::TidyUpMemory(bool, bool)
+{
+#ifdef PS2
+	// meow
+#endif
+}
+
+void CGame::ProcessTidyUpMemory(void)
 {
 #ifdef PS2
 	// meow

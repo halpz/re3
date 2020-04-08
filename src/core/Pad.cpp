@@ -34,6 +34,7 @@ CMousePointerStateHelper &MousePointerStateHelper = *(CMousePointerStateHelper*)
 
 bool &CPad::bDisplayNoControllerMessage = *(bool *)0x95CD52;
 bool &CPad::bObsoleteControllerMessage = *(bool *)0x95CDB8;
+bool CPad::bOldDisplayNoControllerMessage;
 bool &CPad::m_bMapPadOneToPadTwo = *(bool *)0x95CD48;
 
 CKeyboardState &CPad::OldKeyState = *(CKeyboardState*)0x6F1E70;
@@ -135,6 +136,19 @@ void CKeyboardState::Clear()
 	LSHIFT = SHIFT = RSHIFT = LCTRL = RCTRL = LALT = RALT = 0;
 
 	LWIN = RWIN = APPS = 0;
+}
+
+void CPad::Initialise(void)
+{
+	for (int i = 0; i < MAX_PADS; i++)
+	{
+		CPad::GetPad(i)->Clear(true);
+		CPad::GetPad(i)->Mode = 0;
+	}
+	
+	bObsoleteControllerMessage     = false;
+	bOldDisplayNoControllerMessage = false;
+	bDisplayNoControllerMessage    = false;
 }
 
 void CPad::Clear(bool bResetPlayerControls)
