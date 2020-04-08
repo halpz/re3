@@ -124,8 +124,8 @@ CCamera::Init(void)
 	m_WideScreenOn = false;
 	m_fFOV_Wide_Screen = 0.0f;
 	m_bRestoreByJumpCut = false;
-	CarZoomIndicator = 2.0f;
-	PedZoomIndicator = 2.0f;
+	CarZoomIndicator = CAM_ZOOM_2;
+	PedZoomIndicator = CAM_ZOOM_2;
 	CarZoomValueSmooth = 0.0f;
 	m_fPedZoomValueSmooth = 0.0f;
 	pTargetEntity = nil;
@@ -623,11 +623,11 @@ CCamera::CamControl(void)
 				if(CPad::GetPad(0)->CycleCameraModeUpJustDown() && !CReplay::IsPlayingBack() &&
 				   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
 				   !m_WideScreenOn)
-					CarZoomIndicator -= 1.0f;
+					CarZoomIndicator--;
 				if(CPad::GetPad(0)->CycleCameraModeDownJustDown() && !CReplay::IsPlayingBack() &&
 				   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
 				   !m_WideScreenOn)
-					CarZoomIndicator += 1.0f;
+					CarZoomIndicator++;
 				if(!m_bFailedCullZoneTestPreviously){
 					if(CarZoomIndicator < CAM_ZOOM_1STPRS) CarZoomIndicator = CAM_ZOOM_CINEMATIC;
 					else if(CarZoomIndicator > CAM_ZOOM_CINEMATIC) CarZoomIndicator = CAM_ZOOM_1STPRS;
@@ -812,7 +812,7 @@ CCamera::CamControl(void)
 					else
 						PedZoomIndicator = CAM_ZOOM_TOPDOWN;
 				}else
-					PedZoomIndicator -= 1.0f;
+					PedZoomIndicator--;
 			}
 			if(CPad::GetPad(0)->CycleCameraModeDownJustDown() && !CReplay::IsPlayingBack() &&
 			   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
@@ -823,7 +823,7 @@ CCamera::CamControl(void)
 					else
 						PedZoomIndicator = CAM_ZOOM_TOPDOWN;
 				}else
-					PedZoomIndicator += 1.0f;
+					PedZoomIndicator++;
 			}
 			// disabled obbe's cam here
 			if(PedZoomIndicator < CAM_ZOOM_1) PedZoomIndicator = CAM_ZOOM_TOPDOWN;
@@ -1223,7 +1223,7 @@ CCamera::CamControl(void)
 	   ReqMode == CCam::MODE_1STPERSON_RUNABOUT || ReqMode == CCam::MODE_M16_1STPERSON_RUNABOUT ||
 	   ReqMode == CCam::MODE_FIGHT_CAM_RUNABOUT || ReqMode == CCam::MODE_HELICANNON_1STPERSON ||
 	   WhoIsInControlOfTheCamera == CAMCONTROL_SCRIPT ||
-           m_bJustCameOutOfGarage || m_bPlayerIsInGarage)
+	   m_bJustCameOutOfGarage || m_bPlayerIsInGarage)
 		canUseObbeCam = false;
 
 	if(m_bObbeCinematicPedCamOn && canUseObbeCam)
@@ -1524,7 +1524,7 @@ CCamera::UpdateTargetEntity(void)
 			cantOpen = false;
 
 		if(PLAYER->GetPedState() == PED_ENTER_CAR && !cantOpen){
-			if(!enteringCar && CarZoomIndicator != 0.0f){
+			if(!enteringCar && CarZoomIndicator != CAM_ZOOM_1STPRS){
 				pTargetEntity = PLAYER->m_pMyVehicle;
 				if(PLAYER->m_pMyVehicle == nil)
 					pTargetEntity = PLAYER;
@@ -1532,7 +1532,7 @@ CCamera::UpdateTargetEntity(void)
 		}
 
 		if((PLAYER->GetPedState() == PED_CARJACK || PLAYER->GetPedState() == PED_OPEN_DOOR) && !cantOpen){
-			if(!enteringCar && CarZoomIndicator != 0.0f)
+			if(!enteringCar && CarZoomIndicator != CAM_ZOOM_1STPRS)
 #ifdef GTA_PS2_STUFF
 // dunno if this has any amazing effects
 			{
@@ -1549,7 +1549,7 @@ CCamera::UpdateTargetEntity(void)
 			pTargetEntity = FindPlayerPed();
 		if(PLAYER->GetPedState() == PED_DRAG_FROM_CAR)
 			pTargetEntity = FindPlayerPed();
-		if(pTargetEntity->IsVehicle() && CarZoomIndicator != 0.0f && FindPlayerPed()->GetPedState() == PED_ARRESTED)
+		if(pTargetEntity->IsVehicle() && CarZoomIndicator != CAM_ZOOM_1STPRS && FindPlayerPed()->GetPedState() == PED_ARRESTED)
 			pTargetEntity = FindPlayerPed();
 	}
 }

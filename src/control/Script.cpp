@@ -7117,7 +7117,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_CLOSE_GARAGE:
 	{
 		CollectParameters(&m_nIp, 1);
-		CGarages::CloseGarage(ScriptParams[1]);
+		CGarages::CloseGarage(ScriptParams[0]);
 		return 0;
 	}
 	case COMMAND_WARP_CHAR_FROM_CAR_TO_COORD:

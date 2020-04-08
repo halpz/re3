@@ -40,14 +40,9 @@ to reverse at the time, calling the original functions is acceptable.
 ```
 cAudioManager - WIP
 CBoat
-CBrightLights
 CBulletInfo
-CCullZone - only mobile stuff
-CCullZones - only mobile stuff
 CExplosion
-CFileLoader - almost done
 CMenuManager - WIP
-CMotionBlurStreaks
 CObject
 CPacManPickups
 CPad - only cheats
@@ -56,16 +51,21 @@ CPools - save/loading
 CRecordDataForChase
 CRecordDataForGame
 CRoadBlocks
-CRubbish
-CSceneEdit
 CSkidmarks
-CSpecialFX
 CStats
 CTrafficLights
 CWeapon
 CWeather
 CWorld
 GenericLoad
+```
+
+The following classes have only unused or practically unused code left:
+```
+CCullZone - only mobile stuff
+CCullZones - only mobile stuff
+CFileLoader - almost done
+CSceneEdit
 ```
 
 ### Coding style

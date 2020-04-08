@@ -1107,7 +1107,7 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 		CStreaming::LoadScene(ff_coord);
 	}
 	if (cam_mode == REPLAYCAMMODE_ASSTORED)
-		TheCamera.CarZoomIndicator = 5.0f;
+		TheCamera.CarZoomIndicator = CAM_ZOOM_CINEMATIC;
 }
 
 void CReplay::StoreStuffInMem(void)
