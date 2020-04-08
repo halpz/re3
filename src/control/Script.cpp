@@ -9153,6 +9153,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		return 0;
 	}
 	case COMMAND_LOAD_END_OF_GAME_TUNE:
+		DMAudio.ChangeMusicMode(MUSICMODE_CUTSCENE);
 		printf("Start preload end of game audio\n");
 		DMAudio.PreloadCutSceneMusic(STREAMED_SOUND_GAME_COMPLETED);
 		printf("End preload end of game audio\n");
