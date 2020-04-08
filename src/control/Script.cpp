@@ -9141,7 +9141,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		assert(pVehicle);
 		assert(pVehicle->m_vehType == VEHICLE_TYPE_CAR);
 		CAutomobile* pCar = (CAutomobile*)pVehicle;
-		pCar->bTakeLessDamage = ScriptParams[1];
+		pCar->bMoreResistantToDamage = ScriptParams[1];
 		return 0;
 	}
 	case COMMAND_SET_JAMES_CAR_ON_PATH_TO_PLAYER:

@@ -83,7 +83,7 @@ CWeaponEffects::Render(void)
 		{
 			float recipz = 1.0f / pos.z;
 			CSprite::RenderOneXLUSprite(pos.x, pos.y, pos.z,
-				gCrossHair.m_fSize * w, gCrossHair.m_fSize * h,
+				gCrossHair.m_fSize * w, gCrossHair.m_fSize * SCREEN_SCALE_AR2(h),
 				gCrossHair.m_nRed, gCrossHair.m_nGreen, gCrossHair.m_nBlue, 255,
 				recipz, 255);
 		}
