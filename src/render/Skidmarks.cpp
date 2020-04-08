@@ -8,8 +8,8 @@
 
 CSkidmark CSkidmarks::aSkidmarks[NUMSKIDMARKS];
 
-RwImVertexIndex SkidmarkIndexList[16 * 6];
-RwIm3DVertex SkidmarkVertices[16 * 2];
+RwImVertexIndex SkidmarkIndexList[SKIDMARK_LENGTH * 6];
+RwIm3DVertex SkidmarkVertices[SKIDMARK_LENGTH * 2];
 RwTexture *gpSkidTex;
 RwTexture *gpSkidBloodTex;
 RwTexture *gpSkidMudTex;
@@ -32,7 +32,7 @@ CSkidmarks::Init(void)
 	}
 
 	ix = 0;
-	for(i = 0; i < 16; i++){
+	for(i = 0; i < SKIDMARK_LENGTH; i++){
 		SkidmarkIndexList[i*6+0] = ix+0;
 		SkidmarkIndexList[i*6+1] = ix+2;
 		SkidmarkIndexList[i*6+2] = ix+1;
@@ -42,7 +42,7 @@ CSkidmarks::Init(void)
 		ix += 2;
 	}
 
-	for(i = 0; i < 16; i++){
+	for(i = 0; i < SKIDMARK_LENGTH; i++){
 		RwIm3DVertexSetU(&SkidmarkVertices[i*2 + 0], 0.0f);
 		RwIm3DVertexSetV(&SkidmarkVertices[i*2 + 0], i*5.01f);
 		RwIm3DVertexSetU(&SkidmarkVertices[i*2 + 1], 1.0f);
@@ -201,7 +201,7 @@ CSkidmarks::RegisterOne(uintptr id, CVector pos, float fwdX, float fwdY, bool *i
 		}
 		aSkidmarks[i].m_lastUpdate = CTimer::GetTimeInMilliseconds();
 
-		if(aSkidmarks[i].m_last >= 15){
+		if(aSkidmarks[i].m_last >= SKIDMARK_LENGTH-1){
 			// No space to continue, end it
 			aSkidmarks[i].m_state = 2;
 			aSkidmarks[i].m_fadeStart = CTimer::GetTimeInMilliseconds() + 10000;

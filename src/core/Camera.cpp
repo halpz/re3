@@ -1223,7 +1223,7 @@ CCamera::CamControl(void)
 	   ReqMode == CCam::MODE_1STPERSON_RUNABOUT || ReqMode == CCam::MODE_M16_1STPERSON_RUNABOUT ||
 	   ReqMode == CCam::MODE_FIGHT_CAM_RUNABOUT || ReqMode == CCam::MODE_HELICANNON_1STPERSON ||
 	   WhoIsInControlOfTheCamera == CAMCONTROL_SCRIPT ||
-           m_bJustCameOutOfGarage || m_bPlayerIsInGarage)
+	   m_bJustCameOutOfGarage || m_bPlayerIsInGarage)
 		canUseObbeCam = false;
 
 	if(m_bObbeCinematicPedCamOn && canUseObbeCam)

@@ -1679,7 +1679,7 @@ float CGarage::CalcDistToGarageRectangleSquared(float X, float Y)
 	else
 		distX = 0.0f;
 	if (Y < m_fY1)
-		distY = m_fY1 - X;
+		distY = m_fY1 - Y;
 	else if (Y > m_fY2)
 		distY = Y - m_fY2;
 	else

@@ -1,5 +1,7 @@
 #pragma once
 
+enum { SKIDMARK_LENGTH = 16 };
+
 class CSkidmark
 {
 public:
@@ -12,8 +14,8 @@ public:
 	uint32 m_lastUpdate;;
 	uint32 m_fadeStart;
 	uint32 m_fadeEnd;
-	CVector m_pos[16];
-	CVector m_side[16];
+	CVector m_pos[SKIDMARK_LENGTH];
+	CVector m_side[SKIDMARK_LENGTH];
 };
 
 class CSkidmarks

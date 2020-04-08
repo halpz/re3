@@ -7117,7 +7117,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_CLOSE_GARAGE:
 	{
 		CollectParameters(&m_nIp, 1);
-		CGarages::CloseGarage(ScriptParams[1]);
+		CGarages::CloseGarage(ScriptParams[0]);
 		return 0;
 	}
 	case COMMAND_WARP_CHAR_FROM_CAR_TO_COORD:
@@ -9141,7 +9141,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		assert(pVehicle);
 		assert(pVehicle->m_vehType == VEHICLE_TYPE_CAR);
 		CAutomobile* pCar = (CAutomobile*)pVehicle;
-		pCar->bTakeLessDamage = ScriptParams[1];
+		pCar->bMoreResistantToDamage = ScriptParams[1];
 		return 0;
 	}
 	case COMMAND_SET_JAMES_CAR_ON_PATH_TO_PLAYER:
