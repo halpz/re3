@@ -91,8 +91,16 @@ const float Windiness[] = {
 #define STREAK_MIN_DISTANCE (8.0f)
 #define STREAK_MAX_DISTANCE (16.0f)
 
+#define SPLASH_CHECK_RADIUS (7.0f)
+#define SPLASH_OFFSET_RADIUS (2.0f)
+
 #define STREAK_LIFETIME (4.0f)
 #define STREAK_INTEROLATION_TIME (0.3f)
+
+#define RAIN_COLOUR_R (200)
+#define RAIN_COLOUR_G (200)
+#define RAIN_COLOUR_B (256)
+#define RAIN_ALPHA (255)
 
 void CWeather::Init(void)
 {
@@ -356,11 +364,14 @@ void CWeather::AddRain()
 	for (int i = 0; i < num_splash_attempts; i++) {
 		CColPoint point;
 		CEntity* entity;
-		CVector np = fp + CVector(CGeneral::GetRandomNumberInRange(-7.0f, 7.0f), CGeneral::GetRandomNumberInRange(-7.0f, 7.0f), 0.0f);
+		CVector np = fp + CVector(CGeneral::GetRandomNumberInRange(-SPLASH_CHECK_RADIUS, SPLASH_CHECK_RADIUS), CGeneral::GetRandomNumberInRange(-SPLASH_CHECK_RADIUS, SPLASH_CHECK_RADIUS), 0.0f);
 		if (CWorld::ProcessVerticalLine(np + CVector(0.0f, 0.0f, 40.0f), -40.0f, point, entity, true, false, false, false, true, false, nil)) {
 			for (int j = 0; j < num_splashes; j++)
 				CParticle::AddParticle((CGeneral::GetRandomTrueFalse() ? PARTICLE_RAIN_SPLASH : PARTICLE_RAIN_SPLASHUP),
-					CVector(np.x + CGeneral::GetRandomNumberInRange(-2.0f, 2.0f), np.y + CGeneral::GetRandomNumberInRange(-2.0f, 2.0f), point.point.z + 0.1f),
+					CVector(
+						np.x + CGeneral::GetRandomNumberInRange(-SPLASH_OFFSET_RADIUS, SPLASH_OFFSET_RADIUS),
+						np.y + CGeneral::GetRandomNumberInRange(-SPLASH_OFFSET_RADIUS, SPLASH_OFFSET_RADIUS),
+						point.point.z + 0.1f),
 					CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, colour);
 		}
 	}
@@ -387,7 +398,7 @@ void RenderOneRainStreak(CVector pos, CVector unused, int intensity, bool scale,
 	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 0], pos.x + 11.0f * TheCamera.GetUp().x, pos.y + 11.0f * TheCamera.GetUp().y, pos.z + 11.0f * TheCamera.GetUp().z);
 	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 1], 0, 0, 0, 0);
 	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 1], pos.x - 9.0f * TheCamera.GetRight().x, pos.y - 9.0f * TheCamera.GetRight().y, pos.z - 9.0f * TheCamera.GetUp().z);
-	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 2], 200 * intensity / 256, 200 * intensity / 256, intensity, 255);
+	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 2], RAIN_COLOUR_R * intensity / 256, RAIN_COLOUR_G * intensity / 256, RAIN_COLOUR_B * intensity / 256, RAIN_ALPHA);
 	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 2], pos.x, pos.y, pos.z);
 	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 3], 0, 0, 0, 0);
 	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 3], pos.x + 9.0f * TheCamera.GetRight().x, pos.y + 9.0f * TheCamera.GetRight().y, pos.z + 9.0f * TheCamera.GetUp().z);
@@ -443,16 +454,12 @@ void CWeather::RenderRainStreaks(void)
 				Streaks[i].timer = 0;
 			else{
 				int intensity;
-				if (secondsElapsed < STREAK_INTEROLATION_TIME) {
+				if (secondsElapsed < STREAK_INTEROLATION_TIME)
 					intensity = base_intensity * 0.5f * secondsElapsed / STREAK_INTEROLATION_TIME;
-				}
-				else if (secondsElapsed > (STREAK_LIFETIME - STREAK_INTEROLATION_TIME)) {
+				else if (secondsElapsed > (STREAK_LIFETIME - STREAK_INTEROLATION_TIME))
 					intensity = (STREAK_LIFETIME - secondsElapsed) * 0.5f * base_intensity / STREAK_INTEROLATION_TIME;
-				}
-				else {
+				else
 					intensity = base_intensity * 0.5f;
-				}
-				debug("intensity: %d\n", intensity);
 				CVector dir = Streaks[i].direction;
 				dir.Normalise();
 				CVector pos = Streaks[i].position + secondsElapsed * Streaks[i].direction;
