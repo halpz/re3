@@ -65,8 +65,8 @@ bool &bDidWeProcessAnyCinemaCam = *(bool*)0x95CD46;
 #define KEYJUSTDOWN(k) ControlsManager.GetIsKeyboardKeyJustDown((RsKeyCodes)k)
 #define KEYDOWN(k) ControlsManager.GetIsKeyboardKeyDown((RsKeyCodes)k)
 #define CTRLJUSTDOWN(key) \
-	       ((KEYDOWN(rsLCTRL) || KEYDOWN(rsRCTRL)) && KEYJUSTDOWN((RsKeyCodes)key) || \
-	        (KEYJUSTDOWN(rsLCTRL) || KEYJUSTDOWN(rsRCTRL)) && KEYDOWN((RsKeyCodes)key))
+		   ((KEYDOWN(rsLCTRL) || KEYDOWN(rsRCTRL)) && KEYJUSTDOWN((RsKeyCodes)key) || \
+			(KEYJUSTDOWN(rsLCTRL) || KEYJUSTDOWN(rsRCTRL)) && KEYDOWN((RsKeyCodes)key))
 #define CTRLDOWN(key) ((KEYDOWN(rsLCTRL) || KEYDOWN(rsRCTRL)) && KEYDOWN((RsKeyCodes)key))
 #endif
 
@@ -124,8 +124,8 @@ CCamera::Init(void)
 	m_WideScreenOn = false;
 	m_fFOV_Wide_Screen = 0.0f;
 	m_bRestoreByJumpCut = false;
-	CarZoomIndicator = 2.0f;
-	PedZoomIndicator = 2.0f;
+	CarZoomIndicator = CAM_ZOOM_2;
+	PedZoomIndicator = CAM_ZOOM_2;
 	CarZoomValueSmooth = 0.0f;
 	m_fPedZoomValueSmooth = 0.0f;
 	pTargetEntity = nil;
@@ -623,11 +623,11 @@ CCamera::CamControl(void)
 				if(CPad::GetPad(0)->CycleCameraModeUpJustDown() && !CReplay::IsPlayingBack() &&
 				   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
 				   !m_WideScreenOn)
-					CarZoomIndicator -= 1.0f;
+					CarZoomIndicator--;
 				if(CPad::GetPad(0)->CycleCameraModeDownJustDown() && !CReplay::IsPlayingBack() &&
 				   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
 				   !m_WideScreenOn)
-					CarZoomIndicator += 1.0f;
+					CarZoomIndicator++;
 				if(!m_bFailedCullZoneTestPreviously){
 					if(CarZoomIndicator < CAM_ZOOM_1STPRS) CarZoomIndicator = CAM_ZOOM_CINEMATIC;
 					else if(CarZoomIndicator > CAM_ZOOM_CINEMATIC) CarZoomIndicator = CAM_ZOOM_1STPRS;
@@ -812,7 +812,7 @@ CCamera::CamControl(void)
 					else
 						PedZoomIndicator = CAM_ZOOM_TOPDOWN;
 				}else
-					PedZoomIndicator -= 1.0f;
+					PedZoomIndicator--;
 			}
 			if(CPad::GetPad(0)->CycleCameraModeDownJustDown() && !CReplay::IsPlayingBack() &&
 			   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
@@ -823,7 +823,7 @@ CCamera::CamControl(void)
 					else
 						PedZoomIndicator = CAM_ZOOM_TOPDOWN;
 				}else
-					PedZoomIndicator += 1.0f;
+					PedZoomIndicator++;
 			}
 			// disabled obbe's cam here
 			if(PedZoomIndicator < CAM_ZOOM_1) PedZoomIndicator = CAM_ZOOM_TOPDOWN;
@@ -1223,7 +1223,7 @@ CCamera::CamControl(void)
 	   ReqMode == CCam::MODE_1STPERSON_RUNABOUT || ReqMode == CCam::MODE_M16_1STPERSON_RUNABOUT ||
 	   ReqMode == CCam::MODE_FIGHT_CAM_RUNABOUT || ReqMode == CCam::MODE_HELICANNON_1STPERSON ||
 	   WhoIsInControlOfTheCamera == CAMCONTROL_SCRIPT ||
-           m_bJustCameOutOfGarage || m_bPlayerIsInGarage)
+		   m_bJustCameOutOfGarage || m_bPlayerIsInGarage)
 		canUseObbeCam = false;
 
 	if(m_bObbeCinematicPedCamOn && canUseObbeCam)
@@ -1468,9 +1468,9 @@ CCamera::CamControl(void)
 
 	// Ped visibility
 	if((Cams[ActiveCam].Mode == CCam::MODE_1STPERSON ||
-	    Cams[ActiveCam].Mode == CCam::MODE_SNIPER ||
-	    Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON ||
-	    Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER) && pTargetEntity->IsPed() ||
+		Cams[ActiveCam].Mode == CCam::MODE_SNIPER ||
+		Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON ||
+		Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER) && pTargetEntity->IsPed() ||
 	   Cams[ActiveCam].Mode == CCam::MODE_FLYBY)
 		FindPlayerPed()->bIsVisible = false;
 	else
@@ -1524,7 +1524,7 @@ CCamera::UpdateTargetEntity(void)
 			cantOpen = false;
 
 		if(PLAYER->GetPedState() == PED_ENTER_CAR && !cantOpen){
-			if(!enteringCar && CarZoomIndicator != 0.0f){
+			if(!enteringCar && CarZoomIndicator != CAM_ZOOM_1STPRS){
 				pTargetEntity = PLAYER->m_pMyVehicle;
 				if(PLAYER->m_pMyVehicle == nil)
 					pTargetEntity = PLAYER;
@@ -1532,7 +1532,7 @@ CCamera::UpdateTargetEntity(void)
 		}
 
 		if((PLAYER->GetPedState() == PED_CARJACK || PLAYER->GetPedState() == PED_OPEN_DOOR) && !cantOpen){
-			if(!enteringCar && CarZoomIndicator != 0.0f)
+			if(!enteringCar && CarZoomIndicator != CAM_ZOOM_1STPRS)
 #ifdef GTA_PS2_STUFF
 // dunno if this has any amazing effects
 			{
@@ -1549,7 +1549,7 @@ CCamera::UpdateTargetEntity(void)
 			pTargetEntity = FindPlayerPed();
 		if(PLAYER->GetPedState() == PED_DRAG_FROM_CAR)
 			pTargetEntity = FindPlayerPed();
-		if(pTargetEntity->IsVehicle() && CarZoomIndicator != 0.0f && FindPlayerPed()->GetPedState() == PED_ARRESTED)
+		if(pTargetEntity->IsVehicle() && CarZoomIndicator != CAM_ZOOM_1STPRS && FindPlayerPed()->GetPedState() == PED_ARRESTED)
 			pTargetEntity = FindPlayerPed();
 	}
 }
@@ -1566,15 +1566,15 @@ CCamera::UpdateSoundDistances(void)
 	int n;
 
 	if((Cams[ActiveCam].Mode == CCam::MODE_1STPERSON ||
-	    Cams[ActiveCam].Mode == CCam::MODE_SNIPER ||
-	    Cams[ActiveCam].Mode == CCam::MODE_SNIPER_RUNABOUT ||
-	    Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT ||
-	    Cams[ActiveCam].Mode == CCam::MODE_1STPERSON_RUNABOUT ||
-	    Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON_RUNABOUT ||
-	    Cams[ActiveCam].Mode == CCam::MODE_FIGHT_CAM_RUNABOUT ||
-	    Cams[ActiveCam].Mode == CCam::MODE_HELICANNON_1STPERSON ||
-	    Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON ||
-	    Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER) &&
+		Cams[ActiveCam].Mode == CCam::MODE_SNIPER ||
+		Cams[ActiveCam].Mode == CCam::MODE_SNIPER_RUNABOUT ||
+		Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT ||
+		Cams[ActiveCam].Mode == CCam::MODE_1STPERSON_RUNABOUT ||
+		Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON_RUNABOUT ||
+		Cams[ActiveCam].Mode == CCam::MODE_FIGHT_CAM_RUNABOUT ||
+		Cams[ActiveCam].Mode == CCam::MODE_HELICANNON_1STPERSON ||
+		Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON ||
+		Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER) &&
 	   pTargetEntity->IsPed())
 		center = GetPosition() + 0.5f*GetForward();
 	else
@@ -1856,14 +1856,14 @@ CCamera::StartTransition(int16 newMode)
 	m_bUseTransitionBeta = false;
 
 	if((Cams[ActiveCam].Mode == CCam::MODE_SNIPER ||
-	    Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER ||
-	    Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON ||
-	    Cams[ActiveCam].Mode == CCam::MODE_SNIPER_RUNABOUT ||
-	    Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT ||
-	    Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON_RUNABOUT ||
-	    Cams[ActiveCam].Mode == CCam::MODE_FIGHT_CAM_RUNABOUT ||
-	    Cams[ActiveCam].Mode == CCam::MODE_HELICANNON_1STPERSON ||
-	    Cams[ActiveCam].Mode == CCam::MODE_1STPERSON_RUNABOUT) &&
+		Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER ||
+		Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON ||
+		Cams[ActiveCam].Mode == CCam::MODE_SNIPER_RUNABOUT ||
+		Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT ||
+		Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON_RUNABOUT ||
+		Cams[ActiveCam].Mode == CCam::MODE_FIGHT_CAM_RUNABOUT ||
+		Cams[ActiveCam].Mode == CCam::MODE_HELICANNON_1STPERSON ||
+		Cams[ActiveCam].Mode == CCam::MODE_1STPERSON_RUNABOUT) &&
 	   pTargetEntity->IsPed()){
 		float angle = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y) - HALFPI;
 		((CPed*)pTargetEntity)->m_fRotationCur = angle;
@@ -2184,12 +2184,12 @@ CCamera::DrawBordersForWideScreen(void)
 
 	CSprite2d::DrawRect(
 		CRect(0.0f, (SCREEN_HEIGHT/2) * m_ScreenReductionPercentage/100.0f - 8.0f,
-		      SCREEN_WIDTH, 0.0f),
+			  SCREEN_WIDTH, 0.0f),
 		CRGBA(0, 0, 0, 255));
 
 	CSprite2d::DrawRect(
 		CRect(0.0f, SCREEN_HEIGHT,
-		      SCREEN_WIDTH, SCREEN_HEIGHT - (SCREEN_HEIGHT/2) * m_ScreenReductionPercentage/100.0f - 8.0f),
+			  SCREEN_WIDTH, SCREEN_HEIGHT - (SCREEN_HEIGHT/2) * m_ScreenReductionPercentage/100.0f - 8.0f),
 		CRGBA(0, 0, 0, 255));
 }
 
@@ -2631,8 +2631,8 @@ CCamera::ProcessObbeCinemaCameraCar(void)
 	if(!bDidWeProcessAnyCinemaCam || IsItTimeForNewcam(SequenceOfCams[OldMode], TimeForNext)){
 		// This is very strange code...
 		for(OldMode = (OldMode+1) % 14;
-		    !TryToStartNewCamMode(SequenceOfCams[OldMode]) && i <= 14;
-		    OldMode = (OldMode+1) % 14)
+			!TryToStartNewCamMode(SequenceOfCams[OldMode]) && i <= 14;
+			OldMode = (OldMode+1) % 14)
 			i++;
 		TimeForNext = CTimer::GetTimeInMilliseconds();
 		if(i >= 14){
@@ -2659,8 +2659,8 @@ CCamera::ProcessObbeCinemaCameraPed(void)
 
 	if(!bDidWeProcessAnyCinemaCam || IsItTimeForNewcam(SequenceOfPedCams[PedOldMode], PedTimeForNext)){
 		for(PedOldMode = (PedOldMode+1) % 5;
-		    !TryToStartNewCamMode(SequenceOfPedCams[PedOldMode]);
-		    PedOldMode = (PedOldMode+1) % 5);
+			!TryToStartNewCamMode(SequenceOfPedCams[PedOldMode]);
+			PedOldMode = (PedOldMode+1) % 5);
 		PedTimeForNext = CTimer::GetTimeInMilliseconds();
 	}
 	bDidWeProcessAnyCinemaCam = true;
@@ -2813,11 +2813,11 @@ CCamera::Process_Train_Camera_Control(void)
 	uint32 node = m_iCurrentTrainCamNode;
 	for(i = 0; i < m_uiNumberOfTrainCamNodes && !found; i++){
 		if(target->IsWithinArea(m_arrTrainCamNode[node].m_cvecMinPointInRange.x,
-		                        m_arrTrainCamNode[node].m_cvecMinPointInRange.y,
-		                        m_arrTrainCamNode[node].m_cvecMinPointInRange.z,
-		                        m_arrTrainCamNode[node].m_cvecMaxPointInRange.x,
-		                        m_arrTrainCamNode[node].m_cvecMaxPointInRange.y,
-		                        m_arrTrainCamNode[node].m_cvecMaxPointInRange.z)){
+								m_arrTrainCamNode[node].m_cvecMinPointInRange.y,
+								m_arrTrainCamNode[node].m_cvecMinPointInRange.z,
+								m_arrTrainCamNode[node].m_cvecMaxPointInRange.x,
+								m_arrTrainCamNode[node].m_cvecMaxPointInRange.y,
+								m_arrTrainCamNode[node].m_cvecMaxPointInRange.z)){
 			m_iCurrentTrainCamNode = node;
 			found = true;
 		}

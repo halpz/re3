@@ -16,12 +16,15 @@ enum
 };
 
 #define DEFAULT_NEAR (0.9f)
-#define CAM_ZOOM_1STPRS (0.0f)
-#define CAM_ZOOM_1 (1.0f)
-#define CAM_ZOOM_2 (2.0f)
-#define CAM_ZOOM_3 (3.0f)
-#define CAM_ZOOM_TOPDOWN (4.0f)
-#define CAM_ZOOM_CINEMATIC (5.0f)
+enum
+{
+	CAM_ZOOM_1STPRS,
+	CAM_ZOOM_1,
+	CAM_ZOOM_2,
+	CAM_ZOOM_3,
+	CAM_ZOOM_TOPDOWN,
+	CAM_ZOOM_CINEMATIC,
+};
 
 #ifdef FREE_CAM // LCS values
 #define FREE_CAR_ZOOM_VALUE_1 (-1.0f)
@@ -412,7 +415,11 @@ uint32    unknown;	// some counter having to do with music
 
 	float CamFrontXNorm;
 	float CamFrontYNorm;
+#if 0  // TODO: FIX_BUGS once GenericLoad is done
+	int32 CarZoomIndicator;
+#else
 	float CarZoomIndicator;
+#endif
 	float CarZoomValue;
 	float CarZoomValueSmooth;
 
@@ -448,7 +455,11 @@ uint32    unknown;	// some counter having to do with music
 	float m_ScreenReductionSpeed;
 	float m_AlphaForPlayerAnim1rstPerson;
 	float Orientation;
+#if 0  // TODO: FIX_BUGS once GenericLoad is done
+	int32 PedZoomIndicator;
+#else
 	float PedZoomIndicator;
+#endif
 	float PlayerExhaustion;
 	float SoundDistUp, SoundDistLeft, SoundDistRight;
 	float SoundDistUpAsRead, SoundDistLeftAsRead, SoundDistRightAsRead;
