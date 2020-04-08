@@ -45,7 +45,6 @@ CExplosion
 CMenuManager - WIP
 CObject
 CPacManPickups
-CPad - only cheats
 CPedPath
 CPools - save/loading
 CRecordDataForChase
