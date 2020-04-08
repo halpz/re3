@@ -111,7 +111,7 @@ void CWeather::Init(void)
 
 void CWeather::Update(void)
 {
-	float fNewInterpolation = CClock::GetMinutes() / 60.0f;
+	float fNewInterpolation = CClock::GetMinutes() * 1.0f / 60;
 	if (fNewInterpolation < InterpolationValue) {
 		// new hour
 		OldWeatherType = NewWeatherType;
