@@ -132,6 +132,7 @@ public:
 	static void SetAllCarsCanBeDamaged(bool);
 	static void ExtinguishAllCarFiresInArea(CVector, float);
 	static void SetCarsOnFire(float, float, float, float, CEntity*);
+	static void SetPedsOnFire(float, float, float, float, CEntity*);
 
 	static void Initialise();
 	static void AddParticles();
@@ -140,6 +141,7 @@ public:
 	static void RepositionCertainDynamicObjects();
 	static void RemoveStaticObjects();
 	static void Process();
+	static void TriggerExplosion(const CVector &, float, float, CEntity*, bool);
 };
 
 extern CColPoint *gaTempSphereColPoints;
