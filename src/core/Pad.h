@@ -136,6 +136,10 @@ enum
 class CPad
 {
 public:
+	enum
+	{
+		HORNHISTORY_SIZE = 5,
+	};
 	CControllerState NewState;
 	CControllerState OldState;
 	CControllerState PCTempKeyState;
@@ -146,11 +150,11 @@ public:
 	int16 Mode;
 	int16 ShakeDur;
 	uint8 ShakeFreq;
-	bool bHornHistory[5];
+	bool bHornHistory[HORNHISTORY_SIZE];
 	uint8 iCurrHornHistory;
 	uint8 DisablePlayerControls;
 	int8 bApplyBrakes;
-	char _unk[12]; //int32 unk[3];
+	char CheatString[12];
 	char _pad0[3];
 	int32 LastTimeTouched;
 	int32 AverageWeapon;
@@ -173,8 +177,9 @@ public:
 	static CMouseControllerState &PCTempMouseControllerState;
 	
 	
-	
+#ifdef GTA_PS2_STUFF
 	static void Initialise(void);
+#endif
 	void Clear(bool bResetPlayerControls);
 	void ClearMouseHistory();
 	void UpdateMouse();
@@ -182,6 +187,9 @@ public:
 	void StartShake(int16 nDur, uint8 nFreq);
 	void StartShake_Distance(int16 nDur, uint8 nFreq, float fX, float fY, float fz);
 	void StartShake_Train(float fX, float fY);
+#ifdef GTA_PS2_STUFF
+	void AddToCheatString(char c);
+#endif
 	void AddToPCCheatString(char c);
 
 	static void UpdatePads(void);

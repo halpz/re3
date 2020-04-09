@@ -607,7 +607,7 @@ extern void (*DebugMenuProcess)(void);
 void CGame::Process(void) 
 {
 	CPad::UpdatePads();
-#ifdef PS2
+#ifdef GTA_PS2
 	ProcessTidyUpMemory();
 #endif
 	TheCamera.SetMotionBlurAlpha(0);

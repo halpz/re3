@@ -106,7 +106,9 @@ CPlayerSkin::GetSkinTexture(const char *texName)
 
 		tex = RwTextureCreate(raster);
 		RwTextureSetName(tex, texName);
+#ifdef FIX_BUGS
 		RwTextureSetFilterMode(tex, rwFILTERLINEAR); // filtering bugfix from VC
+#endif
 		RwTexDictionaryAddTexture(CTxdStore::GetSlot(m_txdSlot)->texDict, tex);
 
 		RwImageDestroy(image);

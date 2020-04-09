@@ -455,8 +455,10 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 
 	splash = LoadSplash(splashscreen);
 
+#ifndef GTA_PS2
 	if(RsGlobal.quit)
 		return;
+#endif
 
 	if(DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255)){
 		CSprite2d::SetRecipNearClip();
@@ -1226,7 +1228,7 @@ AppEventHandler(RsEvent event, void *param)
 void
 TheModelViewer(void)
 {
-#if (defined(PS2) || defined(XBOX))
+#if (defined(GTA_PS2) || defined(GTA_XBOX))
 	//TODO
 #else
 #ifdef ASPECT_RATIO_SCALE
@@ -1255,13 +1257,13 @@ void TheGame(void)
 {
 	printf("Into TheGame!!!\n");
 
-#ifdef PS2
+#ifdef GTA_PS2
 	gMainHeap.PushMemId(_TODOCONST(1));
 #endif
 
 	CTimer::Initialise();
 
-#ifdef PS2
+#ifdef GTA_PS2
 	CGame::Initialise();
 #else
 	CGame::Initialise("DATA\\GTA3.DAT");
@@ -1271,10 +1273,8 @@ void TheGame(void)
 
 	LoadingScreen("Starting Game", NULL, splash);
 
-#ifdef PS2
-	int32 state = TheMemoryCard.CheckCardInserted(_TODOCONST(0));
-
-	if (state == _TODOCONST(26)
+#ifdef GTA_PS2
+	if (   TheMemoryCard.CheckCardInserted(_TODOCONST(0)) == _TODOCONST(26)
 		&& TheMemoryCard.ChangeDirectory(_TODOCONST(0), TheMemoryCard.field154)
 		&& TheMemoryCard.FindMostRecentFileName(_TODOCONST(0), TheMemoryCard.field37) == 1
 		&& TheMemoryCard.CheckDataNotCorrupt(TheMemoryCard.field37))
@@ -1324,12 +1324,12 @@ void TheGame(void)
 			CSprite2d::InitPerFrame();
 			CFont::InitPerFrame();
 
-#ifdef PS2
+#ifdef GTA_PS2
 			gMainHeap.PushMemId(_TODOCONST(12));
 #endif
 			CPointLights::NumLights = 0;
 			CGame::Process();
-#ifdef PS2
+#ifdef GTA_PS2
 			gMainHeap.PopMemId();
 #endif
 
@@ -1354,18 +1354,18 @@ void TheGame(void)
 				break;
 
 			SetLightsWithTimeOfDayColour(Scene.world);
-#ifdef PS2
+#ifdef GTA_PS2
 			gMainHeap.PushMemId(_TODOCONST(15));
 #endif
 
 			if (!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu == true && TheCamera.GetScreenFadeStatus() != FADE_2 )
 			{
-#ifdef PS2
+#ifdef GTA_PS2
 				gMainHeap.PushMemId(_TODOCONST(11));
 #endif
 				CRenderer::ConstructRenderList();
 				CRenderer::PreRender();
-#ifdef PS2
+#ifdef GTA_PS2
 				gMainHeap.PopMemId();
 #endif
 
@@ -1405,7 +1405,7 @@ void TheGame(void)
 			if (FrontEndMenuManager.m_bWantToLoad)
 #endif
 			{
-#ifdef PS2
+#ifdef GTA_PS2
 				gMainHeap.PopMemId();
 #endif
 				break;
@@ -1424,7 +1424,7 @@ void TheGame(void)
 
 			CTimer::Update();
 
-#ifdef PS2
+#ifdef GTA_PS2
 			gMainHeap.PopMemId();
 #endif
 
@@ -1478,11 +1478,11 @@ void SystemInit()
 	mwInit();
 #endif
 	
-#ifdef PS2
+#ifdef GTA_PS2
 	InitMemoryMgr();
 #endif
 	
-#ifdef PS2
+#ifdef GTA_PS2
 	CFileMgr::InitCdSystem();
 	
 	char path[256];
@@ -1505,9 +1505,8 @@ void SystemInit()
 
 	CFileMgr::Initialise();
 	
-#ifdef PS2
+#ifdef GTA_PS2
 	CFileMgr::InitCd();
-	
 	
 	Char modulepath[256];
 	
@@ -1543,7 +1542,7 @@ void SystemInit()
 #endif
 	
 
-#ifdef PS2
+#ifdef GTA_PS2
 	ThreadParam param;
 	
 	param.entry = &IdleThread;
@@ -1567,7 +1566,7 @@ void SystemInit()
 	CGame::nastyGame = true;
 	CMenuManager::m_PrefsAllowNastyGame = true;
 	
-#ifdef PS2
+#ifdef GTA_PS2
 	int32 lang = sceScfGetLanguage();
 	if ( lang  == SCE_ITALIAN_LANGUAGE )
 		CMenuManager::m_PrefsLanguage = LANGUAGE_ITALIAN;
@@ -1604,7 +1603,7 @@ void GameInit()
 {
 	if ( !gameAlreadyInitialised )
 	{
-#ifdef PS2
+#ifdef GTA_PS2
 		char path[256];
 		
 		strcpy(path, "cdrom0:\\");
@@ -1630,7 +1629,7 @@ void GameInit()
 		//TODO
 #endif
 		
-#ifdef PS2
+#ifdef GTA_PS2
 		char *files[] =
 		{
 			"\\ANIM\\CUTS.IMG;1",
@@ -1730,7 +1729,7 @@ void GameInit()
 		
 		CreateDebugFont();
 		
-#ifdef PS2
+#ifdef GTA_PS2
 		AddIntcHandler(_TODOCONST(2), VBlankCounter, 0);
 #endif
 		
@@ -1738,18 +1737,18 @@ void GameInit()
 		
 		CSprite2d::SetRecipNearClip();
 		CTxdStore::Initialise();
-#ifdef PS2
+#ifdef GTA_PS2
 		gMainHeap.PushMemId(_TODOCONST(9));
 #endif
 		CFont::Initialise();
 		CHud::Initialise();
-#ifdef PS2
+#ifdef GTA_PS2
 		gMainHeap.PopMemId();
 #endif
 
 		ValidateVersion();
 		
-#ifdef PS2
+#ifdef GTA_PS2
 		sceCdCLOCK rtc;
 		sceCdReadClock(&rtc);
 		uint32 seed = rtc.minute + rtc.day;
@@ -1789,7 +1788,7 @@ main(int argc, char *argv[])
 	}
 #endif
 	
-#ifdef PS2
+#ifdef GTA_PS2
 	{
 		if (gameAlreadyInitialised)
 			RpSkySuspend();

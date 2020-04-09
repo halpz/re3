@@ -17,7 +17,7 @@
 #include "SpecialFX.h"
 
 float &CRadar::m_radarRange = *(float*)0x8E281C;
-CBlip (&CRadar::ms_RadarTrace)[NUMRADARBLIPS] = *(CBlip(*)[NUMRADARBLIPS]) * (uintptr*)0x6ED5E0;
+sRadarTrace (&CRadar::ms_RadarTrace)[NUMRADARBLIPS] = *(sRadarTrace(*)[NUMRADARBLIPS]) * (uintptr*)0x6ED5E0;
 CVector2D &vec2DRadarOrigin = *(CVector2D*)0x6299B8;
 int32 gRadarTxdIds[64];// = (int*)0x6299C0;
 
@@ -86,6 +86,134 @@ int CRadar::TargetMarkerId = -1;
 // taken from VC
 float CRadar::cachedCos;
 float CRadar::cachedSin;
+
+void ClipRadarTileCoords(int32 &x, int32 &y)
+{
+	if (x < 0)
+		x = 0;
+	if (x > RADAR_NUM_TILES-1)
+		x = RADAR_NUM_TILES-1;
+	if (y < 0)
+		y = 0;
+	if (y > RADAR_NUM_TILES-1)
+		y = RADAR_NUM_TILES-1;
+}
+
+void RequestMapSection(int32 x, int32 y)
+{
+	ClipRadarTileCoords(x, y);
+	CStreaming::RequestTxd(gRadarTxdIds[x + RADAR_NUM_TILES * y], STREAMFLAGS_DONT_REMOVE | STREAMFLAGS_DEPENDENCY);
+}
+
+void RemoveMapSection(int32 x, int32 y)
+{
+	if (x >= 0 && x <= 7 && y >= 0 && y <= 7)
+		CStreaming::RemoveTxd(gRadarTxdIds[x + RADAR_NUM_TILES * y]);
+}
+
+// Transform from section indices to world coordinates
+void GetTextureCorners(int32 x, int32 y, CVector2D *out)
+{
+	x =   x - RADAR_NUM_TILES/2;
+	y = -(y - RADAR_NUM_TILES/2);
+
+	// bottom left
+	out[0].x = RADAR_TILE_SIZE * (x);
+	out[0].y = RADAR_TILE_SIZE * (y - 1);
+
+	// bottom right
+	out[1].x = RADAR_TILE_SIZE * (x + 1);
+	out[1].y = RADAR_TILE_SIZE * (y - 1);
+
+	// top right
+	out[2].x = RADAR_TILE_SIZE * (x + 1);
+	out[2].y = RADAR_TILE_SIZE * (y);
+
+	// top left
+	out[3].x = RADAR_TILE_SIZE * (x);
+	out[3].y = RADAR_TILE_SIZE * (y);
+}
+
+
+bool IsPointInsideRadar(const CVector2D &point)
+{
+	if (point.x < -1.0f || point.x > 1.0f) return false;
+	if (point.y < -1.0f || point.y > 1.0f) return false;
+	return true;
+}
+
+// clip line p1,p2 against (-1.0, 1.0) in x and y, set out to clipped point closest to p1
+int LineRadarBoxCollision(CVector2D &out, const CVector2D &p1, const CVector2D &p2)
+{
+	float d1, d2;
+	float t;
+	float x, y;
+	float shortest = 1.0f;
+	int edge = -1;
+
+	// clip against left edge, x = -1.0
+	d1 = -1.0f - p1.x;
+	d2 = -1.0f - p2.x;
+	if (d1 * d2 < 0.0f) {
+		// they are on opposite sides, get point of intersection
+		t = d1 / (d1 - d2);
+		y = (p2.y - p1.y)*t + p1.y;
+		if (y >= -1.0f && y <= 1.0f && t <= shortest) {
+			out.x = -1.0f;
+			out.y = y;
+			edge = 3;
+			shortest = t;
+		}
+	}
+
+	// clip against right edge, x = 1.0
+	d1 = p1.x - 1.0f;
+	d2 = p2.x - 1.0f;
+	if (d1 * d2 < 0.0f) {
+		// they are on opposite sides, get point of intersection
+		t = d1 / (d1 - d2);
+		y = (p2.y - p1.y)*t + p1.y;
+		if (y >= -1.0f && y <= 1.0f && t <= shortest) {
+			out.x = 1.0f;
+			out.y = y;
+			edge = 1;
+			shortest = t;
+		}
+	}
+
+	// clip against top edge, y = -1.0
+	d1 = -1.0f - p1.y;
+	d2 = -1.0f - p2.y;
+	if (d1 * d2 < 0.0f) {
+		// they are on opposite sides, get point of intersection
+		t = d1 / (d1 - d2);
+		x = (p2.x - p1.x)*t + p1.x;
+		if (x >= -1.0f && x <= 1.0f && t <= shortest) {
+			out.y = -1.0f;
+			out.x = x;
+			edge = 0;
+			shortest = t;
+		}
+	}
+
+	// clip against bottom edge, y = 1.0
+	d1 = p1.y - 1.0f;
+	d2 = p2.y - 1.0f;
+	if (d1 * d2 < 0.0f) {
+		// they are on opposite sides, get point of intersection
+		t = d1 / (d1 - d2);
+		x = (p2.x - p1.x)*t + p1.x;
+		if (x >= -1.0f && x <= 1.0f && t <= shortest) {
+			out.y = 1.0f;
+			out.x = x;
+			edge = 2;
+			shortest = t;
+		}
+	}
+
+	return edge;
+}
+
 
 uint8 CRadar::CalculateBlipAlpha(float dist)
 {
@@ -892,7 +1020,7 @@ INITSAVEBUF
 	CheckSaveHeader(buf, 'R', 'D', 'R', '\0', size - SAVE_HEADER_SIZE);
 
 	for (int i = 0; i < NUMRADARBLIPS; i++)
-		ms_RadarTrace[i] = ReadSaveBuf<CBlip>(buf);
+		ms_RadarTrace[i] = ReadSaveBuf<sRadarTrace>(buf);
 
 VALIDATESAVEBUF(size);
 }
@@ -925,23 +1053,11 @@ CRadar::LoadTextures()
 	CTxdStore::PopCurrentTxd();
 }
 
-void RemoveMapSection(int32 x, int32 y)
-{
-	if (x >= 0 && x <= 7 && y >= 0 && y <= 7)
-		CStreaming::RemoveTxd(gRadarTxdIds[x + RADAR_NUM_TILES * y]);
-}
-
 void CRadar::RemoveRadarSections()
 {
 	for (int i = 0; i < 8; i++)
 		for (int j = 0; j < 8; j++)
 			RemoveMapSection(i, j);
-}
-
-void CRadar::RequestMapSection(int32 x, int32 y)
-{
-	ClipRadarTileCoords(x, y);
-	CStreaming::RequestTxd(gRadarTxdIds[x + RADAR_NUM_TILES * y], STREAMFLAGS_DONT_REMOVE | STREAMFLAGS_DEPENDENCY);
 }
 
 void CRadar::SaveAllRadarBlips(uint8 *buf, uint32 *size)
@@ -1242,121 +1358,6 @@ void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D
 	out.y = c * y - s * x;
 }
 
-// Transform from section indices to world coordinates
-void CRadar::GetTextureCorners(int32 x, int32 y, CVector2D *out)
-{
-	x =   x - RADAR_NUM_TILES/2;
-	y = -(y - RADAR_NUM_TILES/2);
-
-	// bottom left
-	out[0].x = RADAR_TILE_SIZE * (x);
-	out[0].y = RADAR_TILE_SIZE * (y - 1);
-
-	// bottom right
-	out[1].x = RADAR_TILE_SIZE * (x + 1);
-	out[1].y = RADAR_TILE_SIZE * (y - 1);
-
-	// top right
-	out[2].x = RADAR_TILE_SIZE * (x + 1);
-	out[2].y = RADAR_TILE_SIZE * (y);
-
-	// top left
-	out[3].x = RADAR_TILE_SIZE * (x);
-	out[3].y = RADAR_TILE_SIZE * (y);
-}
-
-void CRadar::ClipRadarTileCoords(int32 &x, int32 &y)
-{
-	if (x < 0)
-		x = 0;
-	if (x > RADAR_NUM_TILES-1)
-		x = RADAR_NUM_TILES-1;
-	if (y < 0)
-		y = 0;
-	if (y > RADAR_NUM_TILES-1)
-		y = RADAR_NUM_TILES-1;
-}
-
-
-bool CRadar::IsPointInsideRadar(const CVector2D &point)
-{
-	if (point.x < -1.0f || point.x > 1.0f) return false;
-	if (point.y < -1.0f || point.y > 1.0f) return false;
-	return true;
-}
-
-// clip line p1,p2 against (-1.0, 1.0) in x and y, set out to clipped point closest to p1
-int CRadar::LineRadarBoxCollision(CVector2D &out, const CVector2D &p1, const CVector2D &p2)
-{
-	float d1, d2;
-	float t;
-	float x, y;
-	float shortest = 1.0f;
-	int edge = -1;
-
-	// clip against left edge, x = -1.0
-	d1 = -1.0f - p1.x;
-	d2 = -1.0f - p2.x;
-	if (d1 * d2 < 0.0f) {
-		// they are on opposite sides, get point of intersection
-		t = d1 / (d1 - d2);
-		y = (p2.y - p1.y)*t + p1.y;
-		if (y >= -1.0f && y <= 1.0f && t <= shortest) {
-			out.x = -1.0f;
-			out.y = y;
-			edge = 3;
-			shortest = t;
-		}
-	}
-
-	// clip against right edge, x = 1.0
-	d1 = p1.x - 1.0f;
-	d2 = p2.x - 1.0f;
-	if (d1 * d2 < 0.0f) {
-		// they are on opposite sides, get point of intersection
-		t = d1 / (d1 - d2);
-		y = (p2.y - p1.y)*t + p1.y;
-		if (y >= -1.0f && y <= 1.0f && t <= shortest) {
-			out.x = 1.0f;
-			out.y = y;
-			edge = 1;
-			shortest = t;
-		}
-	}
-
-	// clip against top edge, y = -1.0
-	d1 = -1.0f - p1.y;
-	d2 = -1.0f - p2.y;
-	if (d1 * d2 < 0.0f) {
-		// they are on opposite sides, get point of intersection
-		t = d1 / (d1 - d2);
-		x = (p2.x - p1.x)*t + p1.x;
-		if (x >= -1.0f && x <= 1.0f && t <= shortest) {
-			out.y = -1.0f;
-			out.x = x;
-			edge = 0;
-			shortest = t;
-		}
-	}
-
-	// clip against bottom edge, y = 1.0
-	d1 = p1.y - 1.0f;
-	d2 = p2.y - 1.0f;
-	if (d1 * d2 < 0.0f) {
-		// they are on opposite sides, get point of intersection
-		t = d1 / (d1 - d2);
-		x = (p2.x - p1.x)*t + p1.x;
-		if (x >= -1.0f && x <= 1.0f && t <= shortest) {
-			out.y = 1.0f;
-			out.x = x;
-			edge = 2;
-			shortest = t;
-		}
-	}
-
-	return edge;
-}
-
 void
 CRadar::CalculateCachedSinCos()
 {
@@ -1488,8 +1489,14 @@ STARTPATCHES
 	InjectHook(0x4A5C60, CRadar::SetRadarMarkerState, PATCH_JUMP);
 	InjectHook(0x4A5D10, CRadar::DrawRotatingRadarSprite, PATCH_JUMP);
 	InjectHook(0x4A5EF0, CRadar::DrawRadarSprite, PATCH_JUMP);
+	InjectHook(0x4A6020, ClipRadarTileCoords, PATCH_JUMP);
+	InjectHook(0x4A6060, RequestMapSection, PATCH_JUMP);
+	InjectHook(0x4A60A0, RemoveMapSection, PATCH_JUMP);
 	InjectHook(0x4A60E0, CRadar::RemoveRadarSections, PATCH_JUMP);
 	InjectHook(0x4A6100, (void (*)(int32, int32))&CRadar::StreamRadarSections, PATCH_JUMP);
+	InjectHook(0x4A6160, IsPointInsideRadar, PATCH_JUMP);
+	InjectHook(0x4A61C0, GetTextureCorners, PATCH_JUMP);
+	InjectHook(0x4A6250, LineRadarBoxCollision, PATCH_JUMP);
 	InjectHook(0x4A64A0, CRadar::ClipRadarPoly, PATCH_JUMP);
 	InjectHook(0x4A67E0, CRadar::DrawRadarSection, PATCH_JUMP);
 	InjectHook(0x4A69C0, CRadar::DrawRadarMask, PATCH_JUMP);
@@ -1497,8 +1504,6 @@ STARTPATCHES
 	InjectHook(0x4A6C20, CRadar::DrawRadarMap, PATCH_JUMP);
 	InjectHook(0x4A6E30, CRadar::SaveAllRadarBlips, PATCH_JUMP);
 	InjectHook(0x4A6F30, CRadar::LoadAllRadarBlips, PATCH_JUMP);
-
-	InjectHook(0x4A61C0, CRadar::GetTextureCorners, PATCH_JUMP);
-	InjectHook(0x4A6160, CRadar::IsPointInsideRadar, PATCH_JUMP);
-	InjectHook(0x4A6250, CRadar::LineRadarBoxCollision, PATCH_JUMP);
+	//InjectHook(0x4A7000, `global constructor keyed to'Radar.cpp, PATCH_JUMP);
+	//InjectHook(0x4A7260, sRadarTrace::sRadarTrace, PATCH_JUMP);
 ENDPATCHES

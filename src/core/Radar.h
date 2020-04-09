@@ -56,7 +56,7 @@ enum
 	BLIP_MODE_SQUARE,
 };
 
-struct CBlip
+struct sRadarTrace
 {
 	uint32 m_nColor;
 	uint32 m_eBlipType; // eBlipType
@@ -71,7 +71,7 @@ struct CBlip
 	uint16 m_eBlipDisplay; // eBlipDisplay
 	uint16 m_eRadarSprite; // eRadarSprite
 };
-static_assert(sizeof(CBlip) == 0x30, "CBlip: error");
+static_assert(sizeof(sRadarTrace) == 0x30, "sRadarTrace: error");
 
 // Values for screen space
 #define RADAR_LEFT (40.0f)
@@ -83,7 +83,7 @@ class CRadar
 {
 public:
 	static float &m_radarRange;
-	static CBlip (&ms_RadarTrace)[NUMRADARBLIPS];
+	static sRadarTrace (&ms_RadarTrace)[NUMRADARBLIPS];
 	static CSprite2d AsukaSprite;
 	static CSprite2d BombSprite;
 	static CSprite2d CatSprite;
@@ -144,7 +144,6 @@ public:
 	static void LoadAllRadarBlips(uint8 *buf, uint32 size);
 	static void LoadTextures();
 	static void RemoveRadarSections();
-	static void RequestMapSection(int32 x, int32 y);
 	static void SaveAllRadarBlips(uint8*, uint32*);
 	static void SetBlipSprite(int32 i, int32 icon);
 	static int32 SetCoordBlip(eBlipType type, CVector pos, int32, eBlipDisplay);
@@ -161,10 +160,6 @@ public:
 	static void TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &in);
 	static void TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D &in);
 
-	// no in CRadar in the game:
-	static void GetTextureCorners(int32 x, int32 y, CVector2D *out);
-	static void ClipRadarTileCoords(int32 &x, int32 &y);
-	static bool IsPointInsideRadar(const CVector2D &);
-	static int LineRadarBoxCollision(CVector2D &, const CVector2D &, const CVector2D &);
+	// no in CRadar in the game:	
 	static void CalculateCachedSinCos();
 };
