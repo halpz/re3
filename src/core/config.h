@@ -126,7 +126,9 @@ enum Config {
 
 	NUM_GARAGE_STORED_CARS = 6,
 
-	NUM_CRANES = 8
+	NUM_CRANES = 8,
+
+	NUM_EXPLOSIONS = 48,
 };
 
 // We'll use this once we're ready to become independent of the game

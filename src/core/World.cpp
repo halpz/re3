@@ -56,6 +56,8 @@ WRAPPER void CWorld::FindMissionEntitiesIntersectingCube(const CVector&, const C
 WRAPPER void CWorld::ClearCarsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B50E0); }
 WRAPPER void CWorld::ClearPedsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B52B0); }
 WRAPPER void CWorld::CallOffChaseForArea(float, float, float, float) { EAXJMP(0x4B5530); }
+WRAPPER void CWorld::TriggerExplosion(const CVector& a1, float a2, float a3, CEntity *a4, bool a5) { EAXJMP(0x4B1140); }
+WRAPPER void CWorld::SetPedsOnFire(float, float, float, float, CEntity*) { EAXJMP(0x4B3D30); }
 
 void
 CWorld::Initialise()
