@@ -32,6 +32,12 @@ extern int &CheckSum;
 extern enum eLevelName &m_LevelToLoad;
 extern int (&Slots)[SLOT_COUNT+1];
 
+extern bool &b_FoundRecentSavedGameWantToLoad;
+extern bool &JustLoadedDontFadeInYet;
+extern bool &StillToFadeOut;
+extern uint32 &TimeStartedCountingForFade;
+extern uint32 &TimeToStayFadedBeforeFadeOut;
+
 extern char SaveFileNameJustSaved[260]; // 8F2570
 
 const char TopLineEmptyFile[] = "THIS FILE IS NOT VALID YET";

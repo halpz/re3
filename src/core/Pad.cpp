@@ -38,6 +38,7 @@ CMousePointerStateHelper &MousePointerStateHelper = *(CMousePointerStateHelper*)
 
 bool &CPad::bDisplayNoControllerMessage = *(bool *)0x95CD52;
 bool &CPad::bObsoleteControllerMessage = *(bool *)0x95CDB8;
+bool CPad::bOldDisplayNoControllerMessage;
 bool &CPad::m_bMapPadOneToPadTwo = *(bool *)0x95CD48;
 
 CKeyboardState &CPad::OldKeyState = *(CKeyboardState*)0x6F1E70;
@@ -329,6 +330,21 @@ void CKeyboardState::Clear()
 	LWIN = RWIN = APPS = 0;
 }
 
+#ifdef GTA_PS2_STUFF
+void CPad::Initialise(void)
+{
+	for (int i = 0; i < MAX_PADS; i++)
+	{
+		CPad::GetPad(i)->Clear(true);
+		CPad::GetPad(i)->Mode = 0;
+	}
+	
+	bObsoleteControllerMessage     = false;
+	bOldDisplayNoControllerMessage = false;
+	bDisplayNoControllerMessage    = false;
+}
+#endif
+
 void CPad::Clear(bool bResetPlayerControls)
 {
 	NewState.Clear();
@@ -356,13 +372,13 @@ void CPad::Clear(bool bResetPlayerControls)
 	bApplyBrakes = false;
 	
 	
-	for ( int32 i = 0; i < _TODOCONST(5); i++ )
+	for ( int32 i = 0; i < HORNHISTORY_SIZE; i++ )
 		bHornHistory[i] = false;
 	
 	iCurrHornHistory = 0;
 	
-	for ( int32 i = 0; i < _TODOCONST(12); i++ )
-		_unk[i] = ' ';
+	for ( int32 i = 0; i < ARRAY_SIZE(CheatString); i++ )
+		CheatString[i] = ' ';
 	
 	LastTimeTouched = CTimer::GetTimeInMilliseconds();
 	AverageWeapon = 0;
@@ -621,6 +637,108 @@ void CPad::StartShake_Train(float fX, float fY)
 	}
 }
 
+#ifdef GTA_PS2_STUFF
+void CPad::AddToCheatString(char c)
+{
+	for ( int32 i = ARRAY_SIZE(CheatString) - 2; i >= 0; i-- )
+		CheatString[i + 1] = CheatString[i];
+
+#define _CHEATCMP(str)  strncmp(str, CheatString, sizeof(str)-1)
+	// "4414LDRULDRU"	-	R2 R2 L1 R2 LEFT DOWN RIGHT UP LEFT DOWN RIGHT UP
+	if ( !_CHEATCMP("URDLURDL4144") )
+		WeaponCheat();
+
+	// "4411LDRULDRU"	-	R2 R2 L1 L1 LEFT DOWN RIGHT UP LEFT DOWN RIGHT UP
+	else if ( !_CHEATCMP("URDLURDL1144") )
+		MoneyCheat();
+	
+	// "4412LDRULDRU"	-	R2 R2 L1 L2 LEFT DOWN RIGHT UP LEFT DOWN RIGHT UP
+	else if ( !_CHEATCMP("URDLURDL2144") )
+		ArmourCheat();
+	
+	// "4413LDRULDRU"	-	R2 R2 L1 R1 LEFT DOWN RIGHT UP LEFT DOWN RIGHT UP
+	else if ( !_CHEATCMP("URDLURDL3144") )
+		HealthCheat();
+
+	// "4414LRLRLR"		-	R2 R2 L1 R2 LEFT RIGHT LEFT RIGHT LEFT RIGHT
+	else if ( !_CHEATCMP("RLRLRL4144") )
+		WantedLevelUpCheat();
+	
+	// "4414UDUDUD"		-	R2 R2 L1 R2 UP DOWN UP DOWN UP DOWN
+	else if ( !_CHEATCMP("DUDUDU4144") )
+		WantedLevelDownCheat();
+	
+	// "1234432T"		-	L1 L2 R1 R2 R2 R1 L2 TRIANGLE
+	else if ( !_CHEATCMP("T2344321") )
+		SunnyWeatherCheat();
+	
+	// "1234432S"		-	L1 L2 R1 R2 R2 R1 L2 SQUARE
+	else if ( !_CHEATCMP("S2344321") )
+		CloudyWeatherCheat();
+	
+	// "1234432C"		-	L1 L2 R1 R2 R2 R1 L2 CIRCLE
+	else if ( !_CHEATCMP("C2344321") )
+		RainyWeatherCheat();
+	
+	// "1234432X"		-	L1 L2 R1 R2 R2 R1 L2 CROSS
+	else if ( !_CHEATCMP("X2344321") )
+		FoggyWeatherCheat();
+	
+	// "CCCCCC321TCT"	-	CIRCLE CIRCLE CIRCLE CIRCLE CIRCLE CIRCLE R1 L2 L1 TRIANGLE CIRCLE TRIANGLE
+	else if ( !_CHEATCMP("TCT123CCCCCC") )
+		TankCheat();
+	
+	// "CCCSSSSS1TCT"	-	CIRCLE CIRCLE CIRCLE SQUARE SQUARE SQUARE SQUARE SQUARE L1 TRIANGLE CIRCLE TRIANGLE
+	else if ( !_CHEATCMP("TCT1SSSSSCCC") )
+		FastWeatherCheat();
+	
+	// "241324TSCT21"	-	L2 R2 L1 R1 L2 R2 TRIANGLE SQUARE CIRCLE TRIANGLE L2 L1
+	else if ( !_CHEATCMP("12TCST423142") )
+		BlowUpCarsCheat();
+	
+	// "RDLU12ULDR"		-	RIGHT DOWN LEFT UP L1 L2 UP LEFT DOWN RIGHT
+	else if ( !_CHEATCMP("RDLU21ULDR") )
+		ChangePlayerCheat();
+	
+	// "DULUX3421"		-	DOWN UP LEFT UP CROSS R1 R2 L2 L1
+	else if ( !_CHEATCMP("1243XULUD") )
+		MayhemCheat();
+	
+	// "DULUX3412"		-	DOWN UP LEFT UP CROSS R1 R2 L1 L2
+	else if ( !_CHEATCMP("2143XULUD") )
+		EverybodyAttacksPlayerCheat();
+	
+	// "43TX21UD"		-	R2 R1 TRIANGLE CROSS L2 L1 UP DOWN
+	else if ( !_CHEATCMP("DU12XT34") )
+		WeaponsForAllCheat();
+	
+	// "TURDS12"		-	TRIANGLE UP RIGHT DOWN SQUARE L1 L2
+	else if ( !_CHEATCMP("21SDRUT") )
+		FastTimeCheat();
+	
+	// "TURDS34"		-	TRIANGLE UP RIGHT DOWN SQUARE R1 R2
+	else if ( !_CHEATCMP("43SDRUT") )
+		SlowTimeCheat();
+
+	// "11S4T1T"		-	L1 L1 SQUARE R2 TRIANGLE L1 TRIANGLE
+	else if ( !_CHEATCMP("T1T4S11") )
+		OnlyRenderWheelsCheat();
+	
+	// "R4C32D13"		-	RIGHT R2 CIRCLE R1 L2 DOWN L1 R1
+	else if ( !_CHEATCMP("31D23C4R") )
+		ChittyChittyBangBangCheat();
+	
+	// "3141L33T"		-	R1 L1 R2 L1 LEFT R1 R1 TRIANGLE
+	else if ( !_CHEATCMP("T33L1413") )
+		StrongGripCheat();
+	
+	// "S1CD13TR1X"		-	SQUARE L1 CIRCLE DOWN L1 R1 TRIANGLE RIGHT L1 CROSS
+	else if ( !_CHEATCMP("X1RT31DC1S") )
+		NastyLimbsCheat();
+#undef _CHEATCMP
+}
+#endif
+
 void CPad::AddToPCCheatString(char c)
 {
 	for ( int32 i = ARRAY_SIZE(KeyBoardCheatString) - 2; i >= 0; i-- )
@@ -858,7 +976,7 @@ void CPad::Update(int16 unk)
 	
 	ProcessPCSpecificStuff();
 	
-	if ( ++iCurrHornHistory >= _TODOCONST(5) )
+	if ( ++iCurrHornHistory >= HORNHISTORY_SIZE )
 		iCurrHornHistory = 0;
 
 	bHornHistory[iCurrHornHistory] = GetHorn();
@@ -875,7 +993,7 @@ void CPad::DoCheats(void)
 
 void CPad::DoCheats(int16 unk)
 {
-#ifdef PS2
+#ifdef GTA_PS2_STUFF
 	if ( GetTriangleJustDown() )
 		AddToCheatString('T');
 	

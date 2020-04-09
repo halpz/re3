@@ -91,10 +91,10 @@ uint8 (&CTheScripts::ScriptSpace)[SIZE_SCRIPT_SPACE] = *(uint8(*)[SIZE_SCRIPT_SP
 CRunningScript(&CTheScripts::ScriptsArray)[MAX_NUM_SCRIPTS] = *(CRunningScript(*)[MAX_NUM_SCRIPTS])*(uintptr*)0x6F5C08;
 int32(&CTheScripts::BaseBriefIdForContact)[MAX_NUM_CONTACTS] = *(int32(*)[MAX_NUM_CONTACTS])*(uintptr*)0x880200;
 int32(&CTheScripts::OnAMissionForContactFlag)[MAX_NUM_CONTACTS] = *(int32(*)[MAX_NUM_CONTACTS])*(uintptr*)0x8622F0;
-CTextLine (&CTheScripts::IntroTextLines)[MAX_NUM_INTRO_TEXT_LINES] = *(CTextLine (*)[MAX_NUM_INTRO_TEXT_LINES])*(uintptr*)0x70EA68;
-CScriptRectangle (&CTheScripts::IntroRectangles)[MAX_NUM_INTRO_RECTANGLES] = *(CScriptRectangle (*)[MAX_NUM_INTRO_RECTANGLES])*(uintptr*)0x72D108;
+intro_text_line (&CTheScripts::IntroTextLines)[MAX_NUM_INTRO_TEXT_LINES] = *(intro_text_line (*)[MAX_NUM_INTRO_TEXT_LINES])*(uintptr*)0x70EA68;
+intro_script_rectangle (&CTheScripts::IntroRectangles)[MAX_NUM_INTRO_RECTANGLES] = *(intro_script_rectangle (*)[MAX_NUM_INTRO_RECTANGLES])*(uintptr*)0x72D108;
 CSprite2d (&CTheScripts::ScriptSprites)[MAX_NUM_SCRIPT_SRPITES] = *(CSprite2d(*)[MAX_NUM_SCRIPT_SRPITES])*(uintptr*)0x72B090;
-CScriptSphere(&CTheScripts::ScriptSphereArray)[MAX_NUM_SCRIPT_SPHERES] = *(CScriptSphere(*)[MAX_NUM_SCRIPT_SPHERES])*(uintptr*)0x727D60;
+script_sphere_struct(&CTheScripts::ScriptSphereArray)[MAX_NUM_SCRIPT_SPHERES] = *(script_sphere_struct(*)[MAX_NUM_SCRIPT_SPHERES])*(uintptr*)0x727D60;
 tCollectiveData(&CTheScripts::CollectiveArray)[MAX_NUM_COLLECTIVES] = *(tCollectiveData(*)[MAX_NUM_COLLECTIVES])*(uintptr*)0x6FA008;
 tUsedObject(&CTheScripts::UsedObjectArray)[MAX_NUM_USED_OBJECTS] = *(tUsedObject(*)[MAX_NUM_USED_OBJECTS])*(uintptr*)0x6E69C8;
 int32(&CTheScripts::MultiScriptArray)[MAX_NUM_MISSION_SCRIPTS] = *(int32(*)[MAX_NUM_MISSION_SCRIPTS])*(uintptr*)0x6F0558;
@@ -313,7 +313,7 @@ bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 id)
 	return false;
 }
 
-void CStuckCarCheckEntry::Reset()
+void stuck_car_data::Reset()
 {
 	m_nVehicleIndex = -1;
 	m_vecPos = CVector(-5000.0f, -5000.0f, -5000.0f);

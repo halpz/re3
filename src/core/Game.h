@@ -39,4 +39,5 @@ public:
 	// NB: these do something on PS2
 	static void TidyUpMemory(bool, bool);
 	static void DrasticTidyUpMemory(bool);
+	static void ProcessTidyUpMemory(void);
 };

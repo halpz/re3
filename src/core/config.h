@@ -153,6 +153,7 @@ enum Config {
 //#define MASTER
 
 #if defined GTA_PS2
+#	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
 #elif defined GTA_PC
 #	define GTA3_1_1_PATCH

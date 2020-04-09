@@ -815,7 +815,7 @@ void CHud::Draw()
 		DrawScriptText
 	*/
 	if (!CTimer::GetIsUserPaused()) {
-		CTextLine* IntroText = CTheScripts::IntroTextLines;
+		intro_text_line* IntroText = CTheScripts::IntroTextLines;
 
 		for (int i = 0; i < MAX_NUM_INTRO_TEXT_LINES; i++) {
 			if (CTheScripts::IntroTextLines[i].m_Text[0] && CTheScripts::IntroTextLines[i].m_bTextBeforeFade) {
@@ -862,7 +862,7 @@ void CHud::Draw()
 			}
 		}
 
-		CScriptRectangle* IntroRect = CTheScripts::IntroRectangles;
+		intro_script_rectangle* IntroRect = CTheScripts::IntroRectangles;
 
 		for (int i = 0; i < 16; i++) {
 			if (CTheScripts::IntroRectangles[i].m_bIsUsed && CTheScripts::IntroRectangles[i].m_bBeforeFade) {
