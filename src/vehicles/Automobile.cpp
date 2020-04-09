@@ -182,17 +182,17 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	m_weaponDoorTimerRight = m_weaponDoorTimerLeft;
 
 	if(GetModelIndex() == MI_DODO){
-		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
+		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
 		CMatrix mat1;
 		mat1.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]));
 		CMatrix mat2(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]));
 		mat1.GetPosition() += CVector(mat2.GetPosition().x + 0.1f, 0.0f, mat2.GetPosition().z);
 		mat1.UpdateRW();
 	}else if(GetModelIndex() == MI_MIAMI_SPARROW || GetModelIndex() == MI_MIAMI_RCRAIDER){
-		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
-		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_RF]), 0);
-		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_LB]), 0);
-		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_RB]), 0);
+		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
+		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_RF]), 0);
+		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LB]), 0);
+		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_RB]), 0);
 	}else if(GetModelIndex() == MI_RHINO){
 		bExplosionProof = true;
 		bBulletProof = true;

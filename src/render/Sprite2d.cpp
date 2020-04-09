@@ -267,6 +267,7 @@ CSprite2d::SetVertices(float x1, float y1, float x2, float y2, float x3, float y
 		const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
 {
 	float screenz, recipz;
+	float z = RwCameraGetNearClipPlane(Scene.camera);	// not done by game
 
 	screenz = RwIm2DGetNearScreenZ();
 	recipz = RecipNearClip;
@@ -312,10 +313,11 @@ void
 CSprite2d::SetVertices(int n, float *positions, float *uvs, const CRGBA &col)
 {
 	int i;
-	float screenz, recipz;
+	float screenz, recipz, z;
 
 	screenz = RwIm2DGetNearScreenZ();
 	recipz = RecipNearClip;
+	z = RwCameraGetNearClipPlane(Scene.camera);	// not done by game
 
 
 	for(i = 0; i < n; i++){
@@ -334,10 +336,11 @@ void
 CSprite2d::SetMaskVertices(int n, float *positions)
 {
 	int i;
-	float screenz, recipz;
+	float screenz, recipz, z;
 
 	screenz = RwIm2DGetNearScreenZ();
 	recipz = RecipNearClip;
+	z = RwCameraGetNearClipPlane(Scene.camera);	// not done by game
 
 	for(i = 0; i < n; i++){
 		RwIm2DVertexSetScreenX(&maVertices[i], positions[i*2 + 0]);
@@ -345,7 +348,7 @@ CSprite2d::SetMaskVertices(int n, float *positions)
 		RwIm2DVertexSetScreenZ(&maVertices[i], screenz);
 		RwIm2DVertexSetCameraZ(&maVertices[i], z);
 		RwIm2DVertexSetRecipCameraZ(&maVertices[i], recipz);
-		RwIm2DVertexSetIntRGBA(&maVertices[i], 0, 0, 0, 0);
+		RwIm2DVertexSetIntRGBA(&maVertices[i], 255, 255, 255, 255);	// 0, 0, 0, 0 on PC
 	}
 }
 
@@ -353,10 +356,11 @@ void
 CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3,
 		float u0, float v0, float u1, float v1, float u3, float v3, float u2, float v2)
 {
-	float screenz, recipz;
+	float screenz, recipz, z;
 
 	screenz = RwIm2DGetNearScreenZ();
 	recipz = RecipNearClip;
+	z = RwCameraGetNearClipPlane(Scene.camera);	// not done by game
 
 	RwIm2DVertexSetScreenX(&verts[0], r.left);
 	RwIm2DVertexSetScreenY(&verts[0], r.top);

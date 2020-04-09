@@ -94,7 +94,7 @@ CBoat::GetComponentWorldPosition(int32 component, CVector &pos)
 	pos = *RwMatrixGetPos(RwFrameGetLTM(m_aBoatNodes[component]));
 }
 
-RxObjSpace3DVertex KeepWaterOutVertices[4];
+RwIm3DVertex KeepWaterOutVertices[4];
 RwImVertexIndex KeepWaterOutIndices[6];
 
 void
@@ -103,7 +103,7 @@ CBoat::Render()
 	CMatrix matrix;
 
 	if (m_aBoatNodes[1] != nil) {
-		matrix.Attach(&m_aBoatNodes[1]->modelling);
+		matrix.Attach(RwFrameGetMatrix(m_aBoatNodes[1]));
 
 		CVector pos = matrix.GetPosition();
 		matrix.SetRotateZ(m_fMovingHiRotation);
@@ -111,7 +111,7 @@ CBoat::Render()
 
 		matrix.UpdateRW();
 		if (CVehicle::bWheelsOnlyCheat) {
-			RpAtomicRenderMacro((RpAtomic*)GetFirstObject(m_aBoatNodes[1]));
+			RpAtomicRender((RpAtomic*)GetFirstObject(m_aBoatNodes[1]));
 		}
 	}
 	m_fMovingHiRotation += 0.05f;
@@ -130,47 +130,23 @@ CBoat::Render()
 	KeepWaterOutIndices[5] = 3;
 	switch (GetModelIndex()) {
 	case MI_SPEEDER:
-		KeepWaterOutVertices[0].objVertex.x = -1.15f;
-		KeepWaterOutVertices[0].objVertex.y = 3.61f;
-		KeepWaterOutVertices[0].objVertex.z = 1.03f;
-		KeepWaterOutVertices[1].objVertex.x = 1.15f;
-		KeepWaterOutVertices[1].objVertex.y = 3.61f;
-		KeepWaterOutVertices[1].objVertex.z = 1.03f;
-		KeepWaterOutVertices[2].objVertex.x = -1.15f;
-		KeepWaterOutVertices[2].objVertex.y = 0.06f;
-		KeepWaterOutVertices[2].objVertex.z = 1.03f;
-		KeepWaterOutVertices[3].objVertex.x = 1.15f;
-		KeepWaterOutVertices[3].objVertex.y = 0.06f;
-		KeepWaterOutVertices[3].objVertex.z = 1.03f;
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[0], -1.15f, 3.61f, 1.03f);
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[1],  1.15f, 3.61f, 1.03f);
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[2], -1.15f, 0.06f, 1.03f);
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[3],  1.15f, 0.06f, 1.03f);
 		break;
 	case MI_REEFER:
-		KeepWaterOutVertices[2].objVertex.x = -1.9f;
-		KeepWaterOutVertices[2].objVertex.y = 2.83f;
-		KeepWaterOutVertices[2].objVertex.z = 1.0f;
-		KeepWaterOutVertices[3].objVertex.x = 1.9f;
-		KeepWaterOutVertices[3].objVertex.y = 2.83f;
-		KeepWaterOutVertices[3].objVertex.z = 1.0f;
-		KeepWaterOutVertices[0].objVertex.x = -1.66f;
-		KeepWaterOutVertices[0].objVertex.y = -4.48f;
-		KeepWaterOutVertices[0].objVertex.z = 0.83f;
-		KeepWaterOutVertices[1].objVertex.x = 1.66f;
-		KeepWaterOutVertices[1].objVertex.y = -4.48f;
-		KeepWaterOutVertices[1].objVertex.z = 0.83f;
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[0], -1.9f,   2.83f, 1.0f);
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[1],  1.9f,   2.83f, 1.0f);
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[2], -1.66f, -4.48f, 0.83f);
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[3],  1.66f, -4.48f, 0.83f);
 		break;
 	case MI_PREDATOR:
 	default:
-		KeepWaterOutVertices[0].objVertex.x = -1.45f;
-		KeepWaterOutVertices[0].objVertex.y = 1.9f;
-		KeepWaterOutVertices[0].objVertex.z = 0.96f;
-		KeepWaterOutVertices[1].objVertex.x = 1.45f;
-		KeepWaterOutVertices[1].objVertex.y = 1.9f;
-		KeepWaterOutVertices[1].objVertex.z = 0.96f;
-		KeepWaterOutVertices[2].objVertex.x = -1.45f;
-		KeepWaterOutVertices[2].objVertex.y = -3.75f;
-		KeepWaterOutVertices[2].objVertex.z = 0.96f;
-		KeepWaterOutVertices[3].objVertex.x = 1.45f;
-		KeepWaterOutVertices[3].objVertex.y = -3.75f;
-		KeepWaterOutVertices[3].objVertex.z = 0.96f;
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[0], -1.45f,   1.9f, 0.96f);
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[1],  1.45f,   1.9f, 0.96f);
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[2], -1.45f, -3.75f, 0.96f);
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[3],  1.45f, -3.75f, 0.96f);
 		break;
 	}
 	KeepWaterOutVertices[0].u = 0.0f;

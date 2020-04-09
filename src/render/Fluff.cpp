@@ -755,14 +755,14 @@ void CTowerClock::Render()
 			&TempV[1],
 			m_Position.x + Sin(angleMinute) * m_fScale * m_Size.x,
 			m_Position.y + Sin(angleMinute) * m_fScale * m_Size.y,
-			m_Position.z + Cos(angleMinute) * m_fScale;
+			m_Position.z + Cos(angleMinute) * m_fScale
 		);
 		RwIm3DVertexSetPos(&TempV[2], m_Position.x, m_Position.y, m_Position.z);
 		RwIm3DVertexSetPos(
 			&TempV[3],
 			m_Position.x + Sin(angleHour) * 0.75f * m_fScale * m_Size.x,
 			m_Position.y + Sin(angleHour) * 0.75f * m_fScale * m_Size.y,
-			m_Position.z + Cos(angleHour) * 0.75f * m_fScale;
+			m_Position.z + Cos(angleHour) * 0.75f * m_fScale
 		);
 
 		LittleTest();

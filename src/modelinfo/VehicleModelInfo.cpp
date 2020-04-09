@@ -707,7 +707,7 @@ RpMaterial*
 CVehicleModelInfo::GetEditableMaterialListCB(RpMaterial *material, void *data)
 {
 	static RwRGBA white = { 255, 255, 255, 255 };
-	RwRGBA *col;
+	const RwRGBA *col;
 	editableMatCBData *cbdata;
 
 	cbdata = (editableMatCBData*)data;
@@ -758,8 +758,8 @@ CVehicleModelInfo::SetVehicleColour(uint8 c1, uint8 c2)
 		col = ms_vehicleColourTable[c1];
 		coltex = ms_colourTextureTable[c1];
 		for(matp = m_materials1; *matp; matp++){
-			if(RpMaterialGetTexture(*matp) && RpMaterialGetTexture(*matp)->name[0] != '@'){
-				colp = RpMaterialGetColor(*matp);
+			if(RpMaterialGetTexture(*matp) && RwTextureGetName(RpMaterialGetTexture(*matp))[0] != '@'){
+				colp = (RwRGBA*)RpMaterialGetColor(*matp);	// get rid of const
 				colp->red = col.red;
 				colp->green = col.green;
 				colp->blue = col.blue;
@@ -773,8 +773,8 @@ CVehicleModelInfo::SetVehicleColour(uint8 c1, uint8 c2)
 		col = ms_vehicleColourTable[c2];
 		coltex = ms_colourTextureTable[c2];
 		for(matp = m_materials2; *matp; matp++){
-			if(RpMaterialGetTexture(*matp) && RpMaterialGetTexture(*matp)->name[0] != '@'){
-				colp = RpMaterialGetColor(*matp);
+			if(RpMaterialGetTexture(*matp) && RwTextureGetName(RpMaterialGetTexture(*matp))[0] != '@'){
+				colp = (RwRGBA*)RpMaterialGetColor(*matp);	// get rid of const
 				colp->red = col.red;
 				colp->green = col.green;
 				colp->blue = col.blue;
@@ -861,7 +861,7 @@ CreateCarColourTexture(uint8 r, uint8 g, uint8 b)
 	RwImageDestroy(img);
 	RwFree(pixels);
 	tex = RwTextureCreate(ras);
-	tex->name[0] = '@';
+	RwTextureGetName(tex)[0] = '@';
 	return tex;
 }
 
@@ -1058,7 +1058,7 @@ CVehicleModelInfo::LoadEnvironmentMaps(void)
 	}
 	if(gpWhiteTexture == nil){
 		gpWhiteTexture = RwTextureRead("white", nil);
-		gpWhiteTexture->name[0] = '@';
+		RwTextureGetName(gpWhiteTexture)[0] = '@';
 		RwTextureSetFilterMode(gpWhiteTexture, rwFILTERLINEAR);
 	}
 	CTxdStore::PopCurrentTxd();

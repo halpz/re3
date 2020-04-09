@@ -311,7 +311,7 @@ CFileLoader::FindRelatedModelInfoCB(RpAtomic *atomic, void *data)
 	int n;
 	RpClump *clump = (RpClump*)data;
 
-	nodename = GetFrameNodeName(RpClumpGetFrame(atomic));
+	nodename = GetFrameNodeName(RpAtomicGetFrame(atomic));
 	GetNameAndLOD(nodename, name, &n);
 	mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(name, nil);
 	if(mi){

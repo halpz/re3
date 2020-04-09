@@ -432,6 +432,7 @@ void
 CSprite::Set6Vertices2D(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
 {
 	float screenz, recipz;
+	float z = RwCameraGetNearClipPlane(Scene.camera);	// not done by game
 
 	screenz = m_f2DNearScreenZ;
 	recipz = m_fRecipNearClipPlane;
@@ -496,6 +497,7 @@ CSprite::Set6Vertices2D(RwIm2DVertex *verts, float x1, float y1, float x2, float
 		const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
 {
 	float screenz, recipz;
+	float z = RwCameraGetNearClipPlane(Scene.camera);	// not done by game
 
 	screenz = m_f2DNearScreenZ;
 	recipz = m_fRecipNearClipPlane;
