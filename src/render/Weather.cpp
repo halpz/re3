@@ -71,8 +71,8 @@ const int16 WeatherTypesList[] = {
 
 const float Windiness[] = {
 	0.0f, // WEATHER_SUNNY
-	0.7f, // WEATHER_RAINY
-	1.0f, // WEATHER_CLOUDY
+	0.7f, // WEATHER_CLOUDY
+	1.0f, // WEATHER_RAINY
 	0.5f  // WEATHER_FOGGY
 };
 
@@ -106,7 +106,7 @@ void CWeather::Init(void)
 {
 	NewWeatherType = WEATHER_SUNNY;
 	bScriptsForceRain = false;
-	OldWeatherType = WEATHER_RAINY;
+	OldWeatherType = WEATHER_CLOUDY;
 	Stored_StateStored = false;
 	InterpolationValue = 0.0f;
 	WhenToPlayLightningSound = 0;
