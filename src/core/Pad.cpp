@@ -28,6 +28,10 @@
 #include "Replay.h"
 #include "Weather.h"
 #include "win.h"
+#include "Streaming.h"
+#include "PathFind.h"
+#include "Wanted.h"
+#include "General.h"
 
 CPad *Pads = (CPad*)0x6F0360; // [2]
 CMousePointerStateHelper &MousePointerStateHelper = *(CMousePointerStateHelper*)0x95CC8C;
@@ -49,29 +53,217 @@ CMouseControllerState &CPad::PCTempMouseControllerState = *(CMouseControllerStat
 _TODO("gbFastTime");
 extern bool &gbFastTime;
 
-WRAPPER void WeaponCheat() { EAXJMP(0x490D90); }
-WRAPPER void HealthCheat() { EAXJMP(0x490E70); }
-WRAPPER void TankCheat() { EAXJMP(0x490EE0); }
-WRAPPER void BlowUpCarsCheat() { EAXJMP(0x491040); }
-WRAPPER void ChangePlayerCheat() { EAXJMP(0x4910B0); }
-WRAPPER void MayhemCheat() { EAXJMP(0x4911C0); }
-WRAPPER void EverybodyAttacksPlayerCheat() { EAXJMP(0x491270); }
-WRAPPER void WeaponsForAllCheat() { EAXJMP(0x491370); }
-WRAPPER void FastTimeCheat() { EAXJMP(0x4913A0); }
-WRAPPER void SlowTimeCheat() { EAXJMP(0x4913F0); }
-WRAPPER void MoneyCheat() { EAXJMP(0x491430); }
-WRAPPER void ArmourCheat() { EAXJMP(0x491460); }
-WRAPPER void WantedLevelUpCheat() { EAXJMP(0x491490); }
-WRAPPER void WantedLevelDownCheat() { EAXJMP(0x4914F0); }
-WRAPPER void SunnyWeatherCheat() { EAXJMP(0x491520); }
-WRAPPER void CloudyWeatherCheat() { EAXJMP(0x491550); }
-WRAPPER void RainyWeatherCheat() { EAXJMP(0x491580); }
-WRAPPER void FoggyWeatherCheat() { EAXJMP(0x4915B0); }
-WRAPPER void FastWeatherCheat() { EAXJMP(0x4915E0); }
-WRAPPER void OnlyRenderWheelsCheat() { EAXJMP(0x491610); }
-WRAPPER void ChittyChittyBangBangCheat() { EAXJMP(0x491640); }
-WRAPPER void StrongGripCheat() { EAXJMP(0x491670); }
-WRAPPER void NastyLimbsCheat() { EAXJMP(0x4916A0); }
+void WeaponCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT2"), true);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_BASEBALLBAT, 0);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_COLT45, 100);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_UZI, 100);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SHOTGUN, 20);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_AK47, 200);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_M16, 200);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SNIPERRIFLE, 5);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_ROCKETLAUNCHER, 5);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_MOLOTOV, 5);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_GRENADE, 5);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_FLAMETHROWER, 200);
+}
+
+void HealthCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT3"), true);
+	FindPlayerPed()->m_fHealth = 100.0f;
+	if (FindPlayerVehicle()) {
+		FindPlayerVehicle()->m_fHealth = 1000.0f;
+		if (FindPlayerVehicle()->m_vehType == VEHICLE_TYPE_CAR)
+			((CAutomobile*)FindPlayerVehicle())->Damage.SetEngineStatus(0);
+	}
+}
+
+void TankCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CStreaming::RequestModel(MI_RHINO, 0);
+	CStreaming::LoadAllRequestedModels(false);
+	if (CStreaming::ms_aInfoForModel[MI_RHINO].m_loadState == STREAMSTATE_LOADED) {
+		CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+		int32 node = ThePaths.FindNodeClosestToCoors(FindPlayerCoors(), PATH_CAR, 100.0f);
+
+		if (node < 0) return;
+		
+#ifdef FIX_BUGS
+		CAutomobile* tank = new CAutomobile(MI_RHINO, RANDOM_VEHICLE);
+#else
+		CAutomobile *tank = new CAutomobile(MI_RHINO, MISSION_VEHICLE);
+#endif
+		if (tank != nil) {
+			CVector pos = ThePaths.m_pathNodes[node].pos;
+			pos.z += 4.0f;
+			tank->GetPosition() = pos;
+			tank->SetOrientation(0.0f, 0.0f, DEGTORAD(200.0f));
+
+			tank->m_status = STATUS_ABANDONED;
+			tank->m_nDoorLock = CARLOCK_UNLOCKED;
+			CWorld::Add(tank);
+		}
+	}
+}
+
+void BlowUpCarsCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+
+	int i = CPools::GetVehiclePool()->GetSize();
+	while (i-- > 0) {
+		if (CVehicle *veh = CPools::GetVehiclePool()->GetSlot(i))
+			veh->BlowUpCar(nil);
+	}
+}
+
+void ChangePlayerCheat()
+{
+	int modelId;
+
+	if (FindPlayerPed()->IsPedInControl() && CModelInfo::GetModelInfo("player", nil)) {
+		CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+		CPlayerPed *ped = FindPlayerPed();
+		AssocGroupId AnimGrp = ped->m_animGroup;
+		do
+		{
+			do
+				modelId = CGeneral::GetRandomNumberInRange(0, MI_CAS_WOM+1);
+			while (!CModelInfo::GetModelInfo(modelId));
+		} while (modelId >= MI_SPECIAL01 && modelId <= MI_SPECIAL04 || modelId == MI_TAXI_D);
+
+		uint8 flags = CStreaming::ms_aInfoForModel[modelId].m_flags;
+		ped->DeleteRwObject();
+		CStreaming::RequestModel(modelId, STREAMFLAGS_DEPENDENCY| STREAMFLAGS_DONT_REMOVE);
+		CStreaming::LoadAllRequestedModels(false);
+		ped->m_modelIndex = -1;
+		ped->SetModelIndex(modelId);
+		ped->m_animGroup = AnimGrp;
+		if (modelId != MI_PLAYER) {
+			if (!(flags & STREAMFLAGS_DONT_REMOVE))
+				CStreaming::SetModelIsDeletable(modelId);
+		}
+	}
+}
+
+void MayhemCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	for (int i = PEDTYPE_CIVMALE; i < PEDTYPE_SPECIAL; i++)
+		CPedType::SetThreats(i, PED_FLAG_PLAYER1 | PED_FLAG_PLAYER2 | PED_FLAG_PLAYER3 | PED_FLAG_PLAYER4 |
+			PED_FLAG_CIVMALE | PED_FLAG_CIVFEMALE | PED_FLAG_COP | PED_FLAG_GANG1 |
+			PED_FLAG_GANG2 | PED_FLAG_GANG3 | PED_FLAG_GANG4 | PED_FLAG_GANG5 |
+			PED_FLAG_GANG6 | PED_FLAG_GANG7 | PED_FLAG_GANG8 | PED_FLAG_GANG9 |
+			PED_FLAG_EMERGENCY | PED_FLAG_PROSTITUTE | PED_FLAG_CRIMINAL | PED_FLAG_SPECIAL );
+}
+
+void EverybodyAttacksPlayerCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	for (int i = PEDTYPE_CIVMALE; i < PEDTYPE_SPECIAL; i++)
+		CPedType::AddThreat(i, PED_FLAG_PLAYER1);
+}
+
+void WeaponsForAllCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CPopulation::ms_bGivePedsWeapons = !CPopulation::ms_bGivePedsWeapons;
+}
+
+void FastTimeCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	if (CTimer::GetTimeScale() < 4.0f)
+		CTimer::SetTimeScale(CTimer::GetTimeScale() * 2.0f);
+}
+
+void SlowTimeCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	if (CTimer::GetTimeScale() > 0.25f)
+		CTimer::SetTimeScale(CTimer::GetTimeScale() * 0.5f);
+}
+
+void MoneyCheat()
+{
+	CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 250000;
+	CHud::SetHelpMessage(TheText.Get("CHEAT6"), true);
+}
+
+void ArmourCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT4"), true);
+	FindPlayerPed()->m_fArmour = 100.0f;
+}
+
+void WantedLevelUpCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT5"), true);
+	FindPlayerPed()->SetWantedLevel(min(FindPlayerPed()->m_pWanted->m_nWantedLevel + 2, 6));
+}
+
+void WantedLevelDownCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT5"), true);
+	FindPlayerPed()->SetWantedLevel(0);
+}
+
+void SunnyWeatherCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT7"), true);
+	CWeather::ForceWeatherNow(WEATHER_SUNNY);
+}
+
+void CloudyWeatherCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT7"), true);
+	CWeather::ForceWeatherNow(WEATHER_CLOUDY);
+}
+
+void RainyWeatherCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT7"), true);
+	CWeather::ForceWeatherNow(WEATHER_RAINY);
+}
+
+void FoggyWeatherCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT7"), true);
+	CWeather::ForceWeatherNow(WEATHER_FOGGY);
+}
+
+void FastWeatherCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	gbFastTime = !gbFastTime;
+}
+
+void OnlyRenderWheelsCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CVehicle::bWheelsOnlyCheat = !CVehicle::bWheelsOnlyCheat;
+}
+
+
+void ChittyChittyBangBangCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CVehicle::bAllDodosCheat = !CVehicle::bAllDodosCheat;
+}
+
+void StrongGripCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CVehicle::bCheat3 = !CVehicle::bCheat3;
+}
+
+void NastyLimbsCheat()
+{
+	CPed::bNastyLimbsCheat = !CPed::bNastyLimbsCheat;
+}
 //////////////////////////////////////////////////////////////////////////
 
 #ifdef KANGAROO_CHEAT
@@ -88,7 +280,7 @@ void KangarooCheat()
 		string = TheText.Get("CHEAT1");
 		m_fMass = 15.0f;
 	}
-	CHud::SetHelpMessage(string, 1);
+	CHud::SetHelpMessage(string, true);
 	playerPed->m_ped_flagI80 = !playerPed->m_ped_flagI80;
 
 	playerPed->m_fMass = m_fMass;
@@ -2086,7 +2278,31 @@ int32 *CPad::EditCodesForControls(int32 *pRsKeys, int32 nSize)
 	return pRsKeys;
 }
 
-STARTPATCHES	
+STARTPATCHES
+	InjectHook(0x490D90, &WeaponCheat, PATCH_JUMP);
+	InjectHook(0x490E70, &HealthCheat, PATCH_JUMP);
+	InjectHook(0x490EE0, &TankCheat, PATCH_JUMP);
+	InjectHook(0x491040, &BlowUpCarsCheat, PATCH_JUMP);
+	InjectHook(0x4910B0, &ChangePlayerCheat, PATCH_JUMP);
+	InjectHook(0x4911C0, &MayhemCheat, PATCH_JUMP);
+	InjectHook(0x491270, &EverybodyAttacksPlayerCheat, PATCH_JUMP);
+	InjectHook(0x491370, &WeaponsForAllCheat, PATCH_JUMP);
+	InjectHook(0x4913A0, &FastTimeCheat, PATCH_JUMP);
+	InjectHook(0x4913F0, &SlowTimeCheat, PATCH_JUMP);
+	InjectHook(0x491430, &MoneyCheat, PATCH_JUMP);
+	InjectHook(0x491460, &ArmourCheat, PATCH_JUMP);
+	InjectHook(0x491490, &WantedLevelUpCheat, PATCH_JUMP);
+	InjectHook(0x4914F0, &WantedLevelDownCheat, PATCH_JUMP);
+	InjectHook(0x491520, &SunnyWeatherCheat, PATCH_JUMP);
+	InjectHook(0x491550, &CloudyWeatherCheat, PATCH_JUMP);
+	InjectHook(0x491580, &RainyWeatherCheat, PATCH_JUMP);
+	InjectHook(0x4915B0, &FoggyWeatherCheat, PATCH_JUMP);
+	InjectHook(0x4915E0, &FastWeatherCheat, PATCH_JUMP);
+	InjectHook(0x491610, &OnlyRenderWheelsCheat, PATCH_JUMP);
+	InjectHook(0x491640, &ChittyChittyBangBangCheat, PATCH_JUMP);
+	InjectHook(0x491670, &StrongGripCheat, PATCH_JUMP);
+	InjectHook(0x4916A0, &NastyLimbsCheat, PATCH_JUMP);
+
 	InjectHook(0x4916C0, &CControllerState::Clear, PATCH_JUMP);
 	InjectHook(0x491760, &CKeyboardState::Clear, PATCH_JUMP);
 	InjectHook(0x491A10, &CPad::Clear, PATCH_JUMP);

@@ -85,6 +85,7 @@ public:
 	static uint32 GetFlag(int type) { return ms_apPedType[type]->m_flag; }
 	static uint32 GetAvoid(int type) { return ms_apPedType[type]->m_avoid; }
 	static uint32 GetThreats(int type) { return ms_apPedType[type]->m_threats; }
+	static void SetThreats(int type, uint32 threat) { ms_apPedType[type]->m_threats = threat; }
 	static void AddThreat(int type, int threat) { ms_apPedType[type]->m_threats |= threat; }
 	static void RemoveThreat(int type, int threat) { ms_apPedType[type]->m_threats &= ~threat; }
 	static bool IsThreat(int type, int threat) { return ms_apPedType[type]->m_threats & threat; }
