@@ -3269,7 +3269,7 @@ void
 CCamera::SetRwCamera(RwCamera *cam)
 {
 	m_pRwCamera = cam;
-	m_viewMatrix.Attach(&m_pRwCamera->viewMatrix, false);
+	m_viewMatrix.Attach(RwCameraGetViewMatrix(m_pRwCamera), false);
 	CMBlur::MotionBlurOpen(m_pRwCamera);
 }
 

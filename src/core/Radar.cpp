@@ -645,15 +645,14 @@ void CRadar::DrawRadarMask()
 	};
 
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)FALSE);
-	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDZERO);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-	RwD3D8SetRenderState(rwRENDERSTATESTENCILFUNCTION, rwSTENCILFUNCTIONALWAYS);
 
 	CVector2D out[8];
 	CVector2D in;
@@ -675,8 +674,6 @@ void CRadar::DrawRadarMask()
 		CSprite2d::SetMaskVertices(8, (float *)out);
 		RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::GetVertices(), 8);
 	};
-
-	RwD3D8SetRenderState(rwRENDERSTATESTENCILFUNCTION, rwSTENCILFUNCTIONGREATER);
 }
 
 void CRadar::DrawRadarSection(int32 x, int32 y)

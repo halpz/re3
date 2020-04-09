@@ -117,7 +117,7 @@ CVisibilityPlugins::SetRenderWareCamera(RwCamera *camera)
 RpMaterial*
 SetAlphaCB(RpMaterial *material, void *data)
 {
-	material->color.alpha = (uint8)(uint32)data;
+	((RwRGBA*)RpMaterialGetColor(material))->alpha = (uint8)(uint32)data;
 	return material;
 }
 
