@@ -46,7 +46,6 @@ CRoadBlocks
 CStats
 CTrafficLights
 CWeapon
-CWeather
 CWorld
 GenericLoad
 ```
