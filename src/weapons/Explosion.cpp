@@ -96,7 +96,12 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 	const RwRGBA color = { 160, 160, 160, 255 };
 	pPosn = pos;
 	pPosn.z += 5.0f;
+#ifdef FIX_BUGS
+	CShadows::AddPermanentShadow(SHADOWTEX_CAR, gpShadowHeliTex, &pPosn, 8.0f, 0.0f, 0.0f, -8.0f, 200, 0, 0, 0, 10.0f, 30000, 1.0f);
+#else
+	// last two arguments are swapped resulting in no shadow
 	CShadows::AddPermanentShadow(SHADOWTEX_CAR, gpShadowHeliTex, &pPosn, 8.0f, 0.0f, 0.0f, -8.0f, 200, 0, 0, 0, 10.0f, 1, 30000.0f);
+#endif
 
 	int n = 0;
 	while (gaExplosion[n].m_nIteration != 0 && n < ARRAY_SIZE(gaExplosion))
