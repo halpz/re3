@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "DMAudio.h"
 #include "common.h"
