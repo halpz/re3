@@ -458,7 +458,7 @@ void re3_debug(const char *format, ...)
 	vsprintf_s(re3_buff, re3_buffsize, format, va);
 	va_end(va);
 
-//	printf("%s", re3_buff);
+	printf("%s", re3_buff);
 	CDebug::DebugAddText(re3_buff);
 }
 
