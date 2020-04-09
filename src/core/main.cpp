@@ -59,17 +59,6 @@
 #include "timebars.h"
 #include "GenericGameStorage.h"
 
-#ifdef PS2
-#define GETWANTTOLOADSAVEGAME() (TheMemoryCard.m_bWantToLoad)
-#define SETWANTTOLOADSAVEGAME(b) {TheMemoryCard.m_bWantToLoad = (b);}
-#define GETFOUNDRECENTSAVEDGAMEWANTTOLOAD() (TheMemoryCard.b_FoundRecentSavedGameWantToLoad)
-#else //TODO
-#define GETWANTTOLOADSAVEGAME() (true)
-#define SETWANTTOLOADSAVEGAME(b) {}
-#define GETFOUNDRECENTSAVEDGAMEWANTTOLOAD() (true)
-#endif
-
-
 GlobalScene &Scene = *(GlobalScene*)0x726768;
 
 uint8 work_buff[55000];
@@ -1308,17 +1297,29 @@ void TheGame(void)
 
 	while (true)
 	{
-		if (GETWANTTOLOADSAVEGAME())
+#ifdef PS2
+		if (TheMemoryCard.m_bWantToLoad)
+#else
+		if (FrontEndMenuManager.m_bWantToLoad)
+#endif
 		{
 			char *splash1 = GetLevelSplashScreen(CGame::currLevel);
 			LoadSplash(splash1);
 		}
 
-		SETWANTTOLOADSAVEGAME(false);
+#ifdef PS2
+		TheMemoryCard.m_bWantToLoad = false;
+#else
+		FrontEndMenuManager.m_bWantToLoad = false;
+#endif
 
 		CTimer::Update();
 
-		while (!(FrontEndMenuManager.m_bWantToRestart || GETFOUNDRECENTSAVEDGAMEWANTTOLOAD()))
+#ifdef PS2
+		while (!(FrontEndMenuManager.m_bWantToRestart || TheMemoryCard.b_FoundRecentSavedGameWantToLoad))
+#else
+		while (!(FrontEndMenuManager.m_bWantToRestart || b_FoundRecentSavedGameWantToLoad))
+#endif
 		{
 			CSprite2d::InitPerFrame();
 			CFont::InitPerFrame();
@@ -1336,12 +1337,20 @@ void TheGame(void)
 
 			if (CGame::bDemoMode && CTimer::GetTimeInMilliseconds() > (3*60 + 30)*1000 && !CCutsceneMgr::IsCutsceneProcessing())
 			{
-				SETWANTTOLOADSAVEGAME(false);
+#ifdef PS2
+				TheMemoryCard.m_bWantToLoad = false;
+#else
+				FrontEndMenuManager.m_bWantToLoad = false;
+#endif
 				FrontEndMenuManager.m_bWantToRestart = true;
 				break;
 			}
 
-			if (FrontEndMenuManager.m_bWantToRestart || GETFOUNDRECENTSAVEDGAMEWANTTOLOAD())
+#ifdef PS2
+			if (FrontEndMenuManager.m_bWantToRestart || TheMemoryCard.b_FoundRecentSavedGameWantToLoad)
+#else
+			if (FrontEndMenuManager.m_bWantToRestart || b_FoundRecentSavedGameWantToLoad)
+#endif
 				break;
 
 			SetLightsWithTimeOfDayColour(Scene.world);
@@ -1390,7 +1399,11 @@ void TheGame(void)
 
 			RenderMenus();
 
-			if (GETWANTTOLOADSAVEGAME())
+#ifdef PS2
+			if (TheMemoryCard.m_bWantToLoad)
+#else
+			if (FrontEndMenuManager.m_bWantToLoad)
+#endif
 			{
 #ifdef PS2
 				gMainHeap.PopMemId();
@@ -1425,13 +1438,24 @@ void TheGame(void)
 		CGame::ShutDownForRestart();
 		CTimer::Stop();
 
-
-		if (FrontEndMenuManager.m_bWantToRestart || GETFOUNDRECENTSAVEDGAMEWANTTOLOAD())
+#ifdef PS2
+		if (FrontEndMenuManager.m_bWantToRestart || TheMemoryCard.b_FoundRecentSavedGameWantToLoad)
+#else
+		if (FrontEndMenuManager.m_bWantToRestart || b_FoundRecentSavedGameWantToLoad)
+#endif
 		{
-			if (GETFOUNDRECENTSAVEDGAMEWANTTOLOAD())
+#ifdef PS2
+			if (TheMemoryCard.b_FoundRecentSavedGameWantToLoad)
+#else
+			if (b_FoundRecentSavedGameWantToLoad)
+#endif
 			{
 				FrontEndMenuManager.m_bWantToRestart = true;
-				SETWANTTOLOADSAVEGAME(true);
+#ifdef PS2
+				TheMemoryCard.m_bWantToLoad = true;
+#else
+				FrontEndMenuManager.m_bWantToLoad = true;
+#endif
 			}
 
 			CGame::InitialiseWhenRestarting();
