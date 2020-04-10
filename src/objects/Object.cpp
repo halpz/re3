@@ -161,7 +161,7 @@ CObject::ObjectDamage(float amount)
 	bool bBodyCastDamageEffect = false;
 	if (m_modelIndex == MI_BODYCAST){
 		if (amount > 50.0f)
-			nBodyCastHealth = int16(nBodyCastHealth - 0.5f * amount);
+			nBodyCastHealth = (int16)(nBodyCastHealth - 0.5f * amount);
 		if (nBodyCastHealth < 0)
 			nBodyCastHealth = 0;
 		if (nBodyCastHealth < 200)
