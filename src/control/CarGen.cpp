@@ -242,7 +242,7 @@ void CCarGenerator::Load(uint8 *&buffer)
 
 void CTheCarGenerators::Process()
 {
-	if (FindPlayerTrain() || CCutsceneMgr::IsRunning())
+	if (FindPlayerTrain() || CCutsceneMgr::IsCutsceneProcessing())
 		return;
 	if (++CTheCarGenerators::ProcessCounter == 4)
 		CTheCarGenerators::ProcessCounter = 0;

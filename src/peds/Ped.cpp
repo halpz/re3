@@ -676,7 +676,7 @@ RemoveAllModelCB(RwObject *object, void *data)
 {
 	RpAtomic *atomic = (RpAtomic*)object;
 	if (CVisibilityPlugins::GetAtomicModelInfo(atomic)) {
-		RpClumpRemoveAtomic(atomic->clump, atomic);
+		RpClumpRemoveAtomic(RpAtomicGetClump(atomic), atomic);
 		RpAtomicDestroy(atomic);
 	}
 	return object;
@@ -902,7 +902,7 @@ static RwObject*
 SetPedAtomicVisibilityCB(RwObject* object, void* data)
 {
 	if (data == nil)
-		RpAtomicSetFlags(object, 0);
+		RpAtomicSetFlags((RpAtomic*)object, 0);
 	return object;
 }
 

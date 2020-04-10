@@ -71,8 +71,8 @@ const int16 WeatherTypesList[] = {
 
 const float Windiness[] = {
 	0.0f, // WEATHER_SUNNY
-	0.7f, // WEATHER_RAINY
-	1.0f, // WEATHER_CLOUDY
+	0.7f, // WEATHER_CLOUDY
+	1.0f, // WEATHER_RAINY
 	0.5f  // WEATHER_FOGGY
 };
 
@@ -106,7 +106,7 @@ void CWeather::Init(void)
 {
 	NewWeatherType = WEATHER_SUNNY;
 	bScriptsForceRain = false;
-	OldWeatherType = WEATHER_RAINY;
+	OldWeatherType = WEATHER_CLOUDY;
 	Stored_StateStored = false;
 	InterpolationValue = 0.0f;
 	WhenToPlayLightningSound = 0;
@@ -475,7 +475,7 @@ void CWeather::RenderRainStreaks(void)
 			// 1/16 probability
 			Streaks[i].direction = CVector(4.0f, 4.0f, -4.0f);
 			Streaks[i].position = 6.0f * TheCamera.GetForward() + TheCamera.GetPosition() + CVector(-1.8f * Streaks[i].direction.x, -1.8f * Streaks[i].direction.y, 8.0f);
-			if (!CCutsceneMgr::IsCutsceneProcessing()) {
+			if (!CCutsceneMgr::IsRunning()) {
 				Streaks[i].position.x += 2.0f * FindPlayerSpeed().x * 60.0f;
 				Streaks[i].position.y += 2.0f * FindPlayerSpeed().y * 60.0f;
 			}

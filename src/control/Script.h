@@ -15,22 +15,25 @@ class CRunningScript;
 
 #define KEY_LENGTH_IN_SCRIPT 8
 
-struct CScriptRectangle 
+struct intro_script_rectangle 
 {
 	bool m_bIsUsed;
 	bool m_bBeforeFade;
 	int16 m_nTextureId;
 	CRect m_sRect;
 	CRGBA m_sColor;
+	
+	intro_script_rectangle() { }
+	~intro_script_rectangle() { }
 };
 
-static_assert(sizeof(CScriptRectangle) == 0x18, "Script.h: error");
+static_assert(sizeof(intro_script_rectangle) == 0x18, "Script.h: error");
 
 enum {
 	SCRIPT_TEXT_MAX_LENGTH = 500
 };
 
-struct CTextLine 
+struct intro_text_line 
 {
 	float m_fScaleX;
 	float m_fScaleY;
@@ -50,6 +53,9 @@ struct CTextLine
 	float m_fAtY;
 	wchar m_Text[SCRIPT_TEXT_MAX_LENGTH];
 
+	intro_text_line() { }
+	~intro_text_line() { }
+	
 	void Reset()
 	{
 		m_fScaleX = 0.48f;
@@ -72,15 +78,17 @@ struct CTextLine
 	}
 };
 
-static_assert(sizeof(CTextLine) == 0x414, "Script.h: error");
+static_assert(sizeof(intro_text_line) == 0x414, "Script.h: error");
 
-struct CScriptSphere
+struct script_sphere_struct
 {
 	bool m_bInUse;
 	uint16 m_Index;
 	uint32 m_Id;
 	CVector m_vecCenter;
 	float m_fRadius;
+	
+	script_sphere_struct() { }
 };
 
 struct CStoredLine
@@ -145,7 +153,7 @@ public:
 	bool HasCarBeenUpsideDownForAWhile(int32);
 };
 
-struct CStuckCarCheckEntry
+struct stuck_car_data
 {
 	int32 m_nVehicleIndex;
 	CVector m_vecPos;
@@ -154,12 +162,13 @@ struct CStuckCarCheckEntry
 	uint32 m_nStuckTime;
 	bool m_bStuck;
 
+	stuck_car_data() { }
 	inline void Reset();
 };
 
 class CStuckCarCheck
 {
-	CStuckCarCheckEntry m_sCars[MAX_STUCK_CAR_CHECKS];
+	stuck_car_data m_sCars[MAX_STUCK_CAR_CHECKS];
 
 public:
 	void Init();
@@ -235,10 +244,10 @@ class CTheScripts
 	static CRunningScript(&ScriptsArray)[MAX_NUM_SCRIPTS];
 	static int32(&BaseBriefIdForContact)[MAX_NUM_CONTACTS];
 	static int32(&OnAMissionForContactFlag)[MAX_NUM_CONTACTS];
-	static CTextLine(&IntroTextLines)[MAX_NUM_INTRO_TEXT_LINES];
-	static CScriptRectangle(&IntroRectangles)[MAX_NUM_INTRO_RECTANGLES];
+	static intro_text_line(&IntroTextLines)[MAX_NUM_INTRO_TEXT_LINES];
+	static intro_script_rectangle(&IntroRectangles)[MAX_NUM_INTRO_RECTANGLES];
 	static CSprite2d(&ScriptSprites)[MAX_NUM_SCRIPT_SRPITES];
-	static CScriptSphere(&ScriptSphereArray)[MAX_NUM_SCRIPT_SPHERES];
+	static script_sphere_struct(&ScriptSphereArray)[MAX_NUM_SCRIPT_SPHERES];
 	static tCollectiveData(&CollectiveArray)[MAX_NUM_COLLECTIVES];
 	static tUsedObject(&UsedObjectArray)[MAX_NUM_USED_OBJECTS];
 	static int32(&MultiScriptArray)[MAX_NUM_MISSION_SCRIPTS];

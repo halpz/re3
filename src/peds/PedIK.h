@@ -54,8 +54,8 @@ public:
 	void GetComponentPosition(RwV3d *pos, uint32 node);
 	static RwMatrix *GetWorldMatrix(RwFrame *source, RwMatrix *destination);
 	void RotateTorso(AnimBlendFrameData* animBlend, LimbOrientation* limb, bool changeRoll);
-	void ExtractYawAndPitchLocal(RwMatrixTag *mat, float *yaw, float *pitch);
-	void ExtractYawAndPitchWorld(RwMatrixTag *mat, float *yaw, float *pitch);
+	void ExtractYawAndPitchLocal(RwMatrix *mat, float *yaw, float *pitch);
+	void ExtractYawAndPitchWorld(RwMatrix *mat, float *yaw, float *pitch);
 	LimbMoveStatus MoveLimb(LimbOrientation &limb, float approxPhi, float approxTheta, LimbMovementInfo &moveInfo);
 	bool RestoreGunPosn(void);
 	bool LookInDirection(float phi, float theta);

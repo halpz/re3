@@ -238,6 +238,7 @@ public:
 	bool IsTrain(void) { return m_vehType == VEHICLE_TYPE_TRAIN; }
 	bool IsHeli(void) { return m_vehType == VEHICLE_TYPE_HELI; }
 	bool IsPlane(void) { return m_vehType == VEHICLE_TYPE_PLANE; }
+	bool IsBike(void) { return m_vehType == VEHICLE_TYPE_BIKE; }
 
 	void FlyingControl(eFlightModel flightModel);
 	void ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,

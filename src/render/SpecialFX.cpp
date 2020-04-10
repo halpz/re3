@@ -22,10 +22,10 @@
 #include "Shadows.h"
 #include "main.h"
 
-RxObjSpace3DVertex StreakVertices[4];
+RwIm3DVertex StreakVertices[4];
 RwImVertexIndex StreakIndexList[12];
 
-RxObjSpace3DVertex TraceVertices[6];
+RwIm3DVertex TraceVertices[6];
 RwImVertexIndex TraceIndexList[12];
 
 
@@ -291,10 +291,10 @@ void CBulletTraces::Render(void)
 	for (int i = 0; i < NUMBULLETTRACES; i++) {
 		if (!aTraces[i].m_bInUse)
 			continue;
-		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)0);
-		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)2);
-		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)2);
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpShadowExplosionTex->raster);
+		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpShadowExplosionTex));
 		CVector inf = aTraces[i].m_vecCurrentPos;
 		CVector sup = aTraces[i].m_vecTargetPos;
 		CVector center = (inf + sup) / 2;
@@ -316,9 +316,9 @@ void CBulletTraces::Render(void)
 			RwIm3DEnd();
 		}
 	}
-	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)1);
-	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)5);
-	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)6);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 }
 
 void CBulletTraces::Update(void)
@@ -414,8 +414,7 @@ C3dMarker::Render()
 {
 	if (m_pAtomic == nil) return;
 
-	RwRGBA *color = RpMaterialGetColor(m_pMaterial);
-	*color = m_Color;
+	RpMaterialSetColor(m_pMaterial, &m_Color);
 
 	m_Matrix.UpdateRW();
 

@@ -134,8 +134,8 @@ uint32 &CCutsceneMgr::ms_cutsceneLoadStatus = *(uint32*)0x95CB40;
 RpAtomic *
 CalculateBoundingSphereRadiusCB(RpAtomic *atomic, void *data)
 {
-	float radius = RpAtomicGetBoundingSphereMacro(atomic)->radius;
-	RwV3d center = RpAtomicGetBoundingSphereMacro(atomic)->center;
+	float radius = RpAtomicGetBoundingSphere(atomic)->radius;
+	RwV3d center = RpAtomicGetBoundingSphere(atomic)->center;
 
 	for (RwFrame *frame = RpAtomicGetFrame(atomic); RwFrameGetParent(frame); frame = RwFrameGetParent(frame))
 		RwV3dTransformPoints(&center, &center, 1, RwFrameGetMatrix(frame));
@@ -326,7 +326,7 @@ CCutsceneMgr::CreateCutsceneObject(int modelId)
 
 		pModelInfo->SetColModel(pColModel);
 		clump = (RpClump*)pModelInfo->GetRwObject();
-		assert(RwObjectGetType(clump) == rpCLUMP);
+		assert(RwObjectGetType((RwObject*)clump) == rpCLUMP);
 		RpClumpForAllAtomics(clump, CalculateBoundingSphereRadiusCB, &radius);
 
 		pColModel->boundingSphere.radius = radius;
@@ -352,6 +352,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 		CWorld::Remove(ms_pCutsceneObjects[ms_numCutsceneObjs]);
 		ms_pCutsceneObjects[ms_numCutsceneObjs]->DeleteRwObject();
 		delete ms_pCutsceneObjects[ms_numCutsceneObjs];
+		ms_pCutsceneObjects[ms_numCutsceneObjs] = nil;
 	}
 	ms_numCutsceneObjs = 0;
 

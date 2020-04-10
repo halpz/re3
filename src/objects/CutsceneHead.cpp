@@ -20,7 +20,7 @@ CCutsceneHead::CCutsceneHead(CObject *obj)
 	m_pHeadNode = RpAnimBlendClumpFindFrame((RpClump*)obj->m_rwObject, "Shead")->frame;
 	atm = (RpAtomic*)GetFirstObject(m_pHeadNode);
 	if(atm){
-		assert(RwObjectGetType(atm) == rpATOMIC);
+		assert(RwObjectGetType((RwObject*)atm) == rpATOMIC);
 		RpAtomicSetFlags(atm, RpAtomicGetFlags(atm) & ~rpATOMICRENDER);
 	}
 }

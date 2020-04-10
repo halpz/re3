@@ -87,7 +87,7 @@ CClouds::Render(void)
 		RwV3d pos = { 0.0f, -100.0f, 15.0f };
 		RwV3dAdd(&worldpos, &campos, &pos);
 		if(CSprite::CalcScreenCoors(worldpos, &screenpos, &szx, &szy, false)){
-			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpCoronaTexture[2]->raster);
+			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[2]));
 			if(CCoronas::bSmallMoon){
 				szx *= 4.0f;
 				szy *= 4.0f;
@@ -116,7 +116,7 @@ CClouds::Render(void)
 		static float StarCoorsY[9] = { 0.0f, 0.45f, 0.9f, 1.0f, 0.85f, 0.52f, 0.48f, 0.35f, 0.2f };
 		static float StarSizes[9] = { 1.0f, 1.4f, 0.9f, 1.0f, 0.6f, 1.5f, 1.3f, 1.0f, 0.8f };
 		int brightness = (1.0f - coverage) * starintens;
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpCoronaTexture[0]->raster);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[0]));
 		for(i = 0; i < 11; i++){
 			RwV3d pos = { 100.0f, 0.0f, 10.0f };
 			if(i >= 9) pos.x = -pos.x;
@@ -132,7 +132,7 @@ CClouds::Render(void)
 		CSprite::FlushSpriteBuffer();
 
 		// *
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpCoronaTexture[0]->raster);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[0]));
 		RwV3d pos = { 100.0f, 0.0f, 10.0f };
 		RwV3dAdd(&worldpos, &campos, &pos);
 		worldpos.y -= 90.0f;
@@ -156,7 +156,7 @@ CClouds::Render(void)
 	int b = CTimeCycle::GetLowCloudsBlue() * lowcloudintensity;
 	for(int cloudtype = 0; cloudtype < 3; cloudtype++){
 		for(i = cloudtype; i < 12; i += 3){
-			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpCloudTex[cloudtype]->raster);
+			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCloudTex[cloudtype]));
 			RwV3d pos = { 800.0f*LowCloudsX[i], 800.0f*LowCloudsY[i], 60.0f*LowCloudsZ[i] };
 			worldpos.x = campos.x + pos.x;
 			worldpos.y = campos.y + pos.y;
@@ -202,7 +202,7 @@ CClouds::Render(void)
 
 		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpCloudTex[4]->raster);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCloudTex[4]));
 		for(i = 0; i < 37; i++){
 			RwV3d pos = { 2.0f*CoorsOffsetX[i], 2.0f*CoorsOffsetY[i], 40.0f*CoorsOffsetZ[i] + 40.0f };
 			worldpos.x = pos.x*rot_cos + pos.y*rot_sin + campos.x;
@@ -244,7 +244,7 @@ CClouds::Render(void)
 		// Highlights
 		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpCloudTex[3]->raster);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCloudTex[3]));
 
 		for(i = 0; i < 37; i++){
 			RwV3d pos = { 2.0f*CoorsOffsetX[i], 2.0f*CoorsOffsetY[i], 40.0f*CoorsOffsetZ[i] + 40.0f };
@@ -269,7 +269,7 @@ CClouds::Render(void)
 		static uint8 BowRed[6] = { 30, 30, 30, 10, 0, 15 };
 		static uint8 BowGreen[6] = { 0, 15, 30, 30, 0, 0 };
 		static uint8 BowBlue[6] = { 0, 0, 0, 10, 30, 30 };
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpCoronaTexture[0]->raster);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[0]));
 		for(i = 0; i < 6; i++){
 			RwV3d pos = { i*1.5f, 100.0f, 5.0f };
 			RwV3dAdd(&worldpos, &campos, &pos);

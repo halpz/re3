@@ -26,25 +26,24 @@ class CExplosion
 	CEntity *m_pCreatorEntity;
 	CEntity *m_pVictimEntity;
 	float m_fStopTime;
-	bool m_bActive;
-	int8 m_bActiveCounter;
-	int32 m_nStartTime;
+	uint8 m_nIteration;
+	uint8 m_nActiveCounter;
+	float m_fStartTime;
 	uint32 m_nParticlesExpireTime;
 	float m_fPower;
-	int32 field_34;
-	int32 field_38;
+	bool m_bIsBoat;
+	float m_fZshift;
 public:
 	static void Initialise();
 	static void Shutdown();
-	static void AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type,
-	                         const CVector &pos, uint32);
-
 	static int8 GetExplosionActiveCounter(uint8 id);
-	static CVector *GetExplosionPosition(uint8 id);
-	static uint8 GetExplosionType(uint8 id);
 	static void ResetExplosionActiveCounter(uint8 id);
-	static void RemoveAllExplosionsInArea(CVector, float);
-	static bool TestForExplosionInArea(eExplosionType, float, float, float, float, float, float);
+	static uint8 GetExplosionType(uint8 id);
+	static CVector *GetExplosionPosition(uint8 id);
+	static bool AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime);
+	static void Update();
+	static bool TestForExplosionInArea(eExplosionType type, float x1, float x2, float y1, float y2, float z1, float z2);
+	static void RemoveAllExplosionsInArea(CVector pos, float radius);
 };
 
-extern CExplosion (&gaExplosion)[48];
+extern CExplosion (&gaExplosion)[NUM_EXPLOSIONS];

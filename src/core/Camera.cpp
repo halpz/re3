@@ -142,7 +142,7 @@ CCamera::Init(void)
 	PlayerExhaustion = 1.0f;
 	DebugCamMode = CCam::MODE_NONE;
 	m_PedOrientForBehindOrInFront = 0.0f;
-	if(!FrontEndMenuManager.m_bStartGameLoading){
+	if(!FrontEndMenuManager.m_bWantToRestart){
 		m_bFading = false;
 		CDraw::FadeValue = 0;
 		m_fFLOATingFade = 0.0f;
@@ -151,7 +151,7 @@ CCamera::Init(void)
 		m_fFLOATingFadeMusic = 0.0f;
 	}
 	m_bMoveCamToAvoidGeom = false;
-	if(FrontEndMenuManager.m_bStartGameLoading)
+	if(FrontEndMenuManager.m_bWantToRestart)
 		m_bMoveCamToAvoidGeom = true;
 	m_bStartingSpline = false;
 	m_iTypeOfSwitch = INTERPOLATION;
@@ -3269,7 +3269,7 @@ void
 CCamera::SetRwCamera(RwCamera *cam)
 {
 	m_pRwCamera = cam;
-	m_viewMatrix.Attach(&m_pRwCamera->viewMatrix, false);
+	m_viewMatrix.Attach(RwCameraGetViewMatrix(m_pRwCamera), false);
 	CMBlur::MotionBlurOpen(m_pRwCamera);
 }
 

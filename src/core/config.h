@@ -79,6 +79,7 @@ enum Config {
 	NUMPICKUPMESSAGES = 16,
 	NUMBULLETTRACES = 16,
 	NUMMBLURSTREAKS = 4,
+	NUMSKIDMARKS = 32,
 
 	NUMONSCREENTIMERENTRIES = 1,
 	NUMRADARBLIPS = 32,
@@ -125,7 +126,9 @@ enum Config {
 
 	NUM_GARAGE_STORED_CARS = 6,
 
-	NUM_CRANES = 8
+	NUM_CRANES = 8,
+
+	NUM_EXPLOSIONS = 48,
 };
 
 // We'll use this once we're ready to become independent of the game
@@ -150,6 +153,7 @@ enum Config {
 //#define MASTER
 
 #if defined GTA_PS2
+#	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
 #elif defined GTA_PC
 #	define GTA3_1_1_PATCH

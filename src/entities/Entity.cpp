@@ -275,9 +275,9 @@ CEntity::CreateRwObject(void)
 		if(IsBuilding())
 			gBuildings++;
 		if(RwObjectGetType(m_rwObject) == rpATOMIC)
-			m_matrix.AttachRW(RwFrameGetMatrix(RpAtomicGetFrame(m_rwObject)), false);
+			m_matrix.AttachRW(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)), false);
 		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
-			m_matrix.AttachRW(RwFrameGetMatrix(RpClumpGetFrame(m_rwObject)), false);
+			m_matrix.AttachRW(RwFrameGetMatrix(RpClumpGetFrame((RpClump*)m_rwObject)), false);
 		mi->AddRef();
 	}
 }
@@ -290,7 +290,7 @@ CEntity::DeleteRwObject(void)
 	m_matrix.Detach();
 	if(m_rwObject){
 		if(RwObjectGetType(m_rwObject) == rpATOMIC){
-			f = RpAtomicGetFrame(m_rwObject);
+			f = RpAtomicGetFrame((RpAtomic*)m_rwObject);
 			RpAtomicDestroy((RpAtomic*)m_rwObject);
 			RwFrameDestroy(f);
 		}else if(RwObjectGetType(m_rwObject) == rpCLUMP)
@@ -307,9 +307,9 @@ CEntity::UpdateRwFrame(void)
 {
 	if(m_rwObject){
 		if(RwObjectGetType(m_rwObject) == rpATOMIC)
-			RwFrameUpdateObjects(RpAtomicGetFrame(m_rwObject));
+			RwFrameUpdateObjects(RpAtomicGetFrame((RpAtomic*)m_rwObject));
 		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
-			RwFrameUpdateObjects(RpClumpGetFrame(m_rwObject));
+			RwFrameUpdateObjects(RpClumpGetFrame((RpClump*)m_rwObject));
 	}
 }
 
@@ -482,9 +482,9 @@ CEntity::AttachToRwObject(RwObject *obj)
 	m_rwObject = obj;
 	if(m_rwObject){
 		if(RwObjectGetType(m_rwObject) == rpATOMIC)
-			m_matrix.Attach(RwFrameGetMatrix(RpAtomicGetFrame(m_rwObject)), false);
+			m_matrix.Attach(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)), false);
 		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
-			m_matrix.Attach(RwFrameGetMatrix(RpClumpGetFrame(m_rwObject)), false);
+			m_matrix.Attach(RwFrameGetMatrix(RpClumpGetFrame((RpClump*)m_rwObject)), false);
 		CModelInfo::GetModelInfo(m_modelIndex)->AddRef();
 	}
 }

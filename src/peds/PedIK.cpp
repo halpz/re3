@@ -340,7 +340,7 @@ CPedIK::RestoreLookAt(void)
 }
 
 void
-CPedIK::ExtractYawAndPitchWorld(RwMatrixTag *mat, float *yaw, float *pitch)
+CPedIK::ExtractYawAndPitchWorld(RwMatrix *mat, float *yaw, float *pitch)
 {
 	float f = clamp(DotProduct(mat->up, CVector(0.0f, 1.0f, 0.0f)), -1.0f, 1.0f);
 	*yaw = Acos(f);
@@ -352,7 +352,7 @@ CPedIK::ExtractYawAndPitchWorld(RwMatrixTag *mat, float *yaw, float *pitch)
 }
 
 void
-CPedIK::ExtractYawAndPitchLocal(RwMatrixTag *mat, float *yaw, float *pitch)
+CPedIK::ExtractYawAndPitchLocal(RwMatrix *mat, float *yaw, float *pitch)
 {
 	float f = clamp(DotProduct(mat->at, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
 	*yaw = Acos(f);

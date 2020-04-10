@@ -216,7 +216,7 @@ CPedModelInfo::AnimatePedColModel(CColModel* colmodel, RwFrame* frame)
 			RwMatrixCopy(mat, RwFrameGetMatrix(f));
 
 			for (f = RwFrameGetParent(f); f; f = RwFrameGetParent(f)) {
-				RwMatrixTransform(mat, &f->modelling, rwCOMBINEPOSTCONCAT);
+				RwMatrixTransform(mat, RwFrameGetMatrix(f), rwCOMBINEPOSTCONCAT);
 				if (RwFrameGetParent(f) == frame)
 					break;
 			}

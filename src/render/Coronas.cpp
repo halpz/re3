@@ -320,7 +320,7 @@ CCoronas::Render(void)
 
 						CSprite::RenderOneXLUSprite(spriteCoors.x, spriteCoors.y, spriteCoors.z,
 							spritew * aCoronas[i].size * wscale,
-							spriteh * SCREEN_SCALE_AR2(aCoronas[i].size * fogscale * hscale),
+							spriteh * aCoronas[i].size * fogscale * hscale,
 							CCoronas::aCoronas[i].red / fogscale,
 							CCoronas::aCoronas[i].green / fogscale,
 							CCoronas::aCoronas[i].blue / fogscale,
@@ -331,7 +331,7 @@ CCoronas::Render(void)
 						CSprite::RenderOneXLUSprite_Rotate_Aspect(
 							spriteCoors.x, spriteCoors.y, spriteCoors.z,
 							spritew * aCoronas[i].size * fogscale,
-							spriteh * SCREEN_SCALE_AR2(aCoronas[i].size * fogscale),
+							spriteh * aCoronas[i].size * fogscale,
 							CCoronas::aCoronas[i].red / fogscale,
 							CCoronas::aCoronas[i].green / fogscale,
 							CCoronas::aCoronas[i].blue / fogscale,

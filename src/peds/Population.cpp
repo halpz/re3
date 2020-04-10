@@ -704,12 +704,15 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 			if (i != 0) {
 				// Gang member
 				newPed->SetLeader(gangLeader);
+#ifndef FIX_BUGS
+				// seems to be a miami leftover (this code is not on PS2) but gang peds end up just being frozen
 				newPed->m_nPedState = PED_UNKNOWN;
 				gangLeader->m_nPedState = PED_UNKNOWN;
 				newPed->m_fRotationCur = CGeneral::GetRadianAngleBetweenPoints(
 					gangLeader->GetPosition().x, gangLeader->GetPosition().y,
 					newPed->GetPosition().x, newPed->GetPosition().y);
 				newPed->m_fRotationDest = newPed->m_fRotationCur;
+#endif
 			} else {
 				gangLeader = newPed;
 			}

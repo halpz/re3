@@ -90,7 +90,7 @@ uint32 (&aCarsToKeepTime)[MAX_CARS_TO_KEEP] = *(uint32(*)[MAX_CARS_TO_KEEP])*(ui
 void
 CCarCtrl::GenerateRandomCars()
 {
-	if (CCutsceneMgr::IsCutsceneProcessing())
+	if (CCutsceneMgr::IsRunning())
 		return;
 	if (NumRandomCars < 30){
 		if (CountDownToCarsAtStart == 0){
