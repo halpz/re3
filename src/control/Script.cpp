@@ -11373,15 +11373,15 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntit
 			continue;
 		CEntity* pFound = aEntities[i];
 		int cols;
-		if (CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel()->numLines <= 0)
-			cols = CCollision::ProcessColModels(pEntity->GetMatrix(), *CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel(),
-				pFound->GetMatrix(), *CModelInfo::GetModelInfo(pFound->GetModelIndex())->GetColModel(), aTempColPoints, nil, nil);
+		if (pEntity->GetColModel()->numLines <= 0)
+			cols = CCollision::ProcessColModels(pEntity->GetMatrix(), *pEntity->GetColModel(),
+				pFound->GetMatrix(), *pFound->GetColModel(), aTempColPoints, nil, nil);
 		else {
 			float lines[4];
 			lines[0] = lines[1] = lines[2] = lines[3] = 1.0f;
-			CColPoint tmp;
-			cols = CCollision::ProcessColModels(pEntity->GetMatrix(), *CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel(),
-				pFound->GetMatrix(), *CModelInfo::GetModelInfo(pFound->GetModelIndex())->GetColModel(), aTempColPoints, &tmp, lines);
+			CColPoint tmp[4];
+			cols = CCollision::ProcessColModels(pEntity->GetMatrix(), *pEntity->GetColModel(),
+				pFound->GetMatrix(), *pFound->GetColModel(), aTempColPoints,tmp, lines);
 		}
 		if (cols <= 0)
 			continue;
