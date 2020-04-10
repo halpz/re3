@@ -10,6 +10,18 @@ enum {
 };
 
 enum {
+	COLDAMAGE_EFFECT_NONE = 0,
+	COLDAMAGE_EFFECT_CHANGE_MODEL = 1,
+	COLDAMAGE_EFFECT_SPLIT_MODEL = 2,
+	COLDAMAGE_EFFECT_SMASH_COMPLETELY = 3,
+	COLDAMAGE_EFFECT_CHANGE_THEN_SMASH = 4,
+	COLDAMAGE_EFFECT_SMASH_CARDBOX_COMPLETELY = 50,
+	COLDAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY = 60,
+	COLDAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY = 70,
+	COLDAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY = 80,
+};
+
+enum {
 	COLLRESPONSE_NONE,
 	COLLRESPONSE_CHANGE_MODEL,
 	COLLRESPONSE_SPLIT_MODEL,
@@ -41,8 +53,8 @@ public:
 	int8 bHasBeenDamaged : 1;
 	int8 bUseVehicleColours : 1;
 	int8 m_obj_flag80 : 1;
-  int8 field_172; // car for a bonus pickup?
-  int8 field_173;
+	int8 m_nBonusValue; 
+	int8 field_173;
 	float m_fCollisionDamageMultiplier;
 	uint8 m_nCollisionDamageEffect;
 	uint8 m_nSpecialCollisionResponseCases;
@@ -74,7 +86,7 @@ public:
 	~CObject(void);
 
 	void ProcessControl(void);
-	void Teleport(CVector);
+	void Teleport(CVector vecPos);
 	void Render(void);
 	bool SetupLighting(void);
 	void RemoveLighting(bool reset);
@@ -84,6 +96,8 @@ public:
 	void Init(void);
 	bool CanBeDeleted(void);
 
-	static void DeleteAllTempObjectInArea(CVector, float);
+	static void DeleteAllMissionObjects();
+	static void DeleteAllTempObjects();
+	static void DeleteAllTempObjectInArea(CVector point, float fRadius);
 };
 static_assert(sizeof(CObject) == 0x198, "CObject: error");

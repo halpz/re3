@@ -6,12 +6,11 @@
 #include "Radar.h"
 #include "Object.h"
 #include "DummyObject.h"
-
-WRAPPER void CObject::ObjectDamage(float amount) { EAXJMP(0x4BB240); }
-WRAPPER void CObject::DeleteAllTempObjectInArea(CVector, float) { EAXJMP(0x4BBED0); }
-WRAPPER void CObject::Init(void) { EAXJMP(0x4BAEC0); }
-WRAPPER void CObject::ProcessControl(void) { EAXJMP(0x4BB040); }
-WRAPPER void CObject::Teleport(CVector) { EAXJMP(0x4BBDA0); }
+#include "Particle.h"
+#include "General.h"
+#include "ObjectData.h"
+#include "World.h"
+#include "Floater.h"
 
 int16 &CObject::nNoTempObjects = *(int16*)0x95CCA2;
 int16 &CObject::nBodyCastHealth = *(int16*)0x5F7D4C;	// 1000
@@ -28,13 +27,13 @@ CObject::CObject(void)
 	m_nCollisionDamageEffect = 0;
 	m_nSpecialCollisionResponseCases = COLLRESPONSE_NONE;
 	m_bCameraToAvoidThisObject = false;
-	ObjectCreatedBy = 0;
+	ObjectCreatedBy = 0; 
 	m_nEndOfLifeTime = 0;
 //	m_nRefModelIndex = -1;	// duplicate
 //	bUseVehicleColours = false;	// duplicate
 	m_colour2 = 0;
 	m_colour1 = m_colour2;
-	field_172 = 0;
+	m_nBonusValue = 0;
 	bIsPickup = false;
 	m_obj_flag2 = false;
 	bOutOfStock = false;
@@ -82,10 +81,46 @@ CObject::~CObject(void)
 		nNoTempObjects--;
 }
 
+void 
+CObject::ProcessControl(void) 
+{ 
+    CVector point, impulse;
+    if (m_nCollisionDamageEffect)
+        ObjectDamage(m_fDamageImpulse);
+    CPhysical::ProcessControl();
+    if (mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancy, &point, &impulse)) {
+        bIsInWater = true;
+        bIsStatic = false;
+        ApplyMoveForce(impulse);
+        ApplyTurnForce(impulse, point);
+        float fTimeStep = Pow(0.97f, CTimer::GetTimeStep());
+        m_vecMoveSpeed *= fTimeStep;
+        m_vecTurnSpeed *= fTimeStep;
+    }
+    if ((MI_EXPLODINGBARREL == m_modelIndex || MI_PETROLPUMP == m_modelIndex) && bHasBeenDamaged && bIsVisible 
+        && CGeneral::GetRandomNumberInRange(0, 31) == 10) {
+        bExplosionProof = true;
+        bIsVisible = false;
+        bUsesCollision = false;
+        bAffectedByGravity = false;
+        m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+    }
+}
+
+void 
+CObject::Teleport(CVector vecPos)
+{ 
+    CWorld::Remove(this);
+    m_matrix.GetPosition() = vecPos;
+    m_matrix.UpdateRW();
+    UpdateRwFrame();
+    CWorld::Add(this);
+}
+
 void
 CObject::Render(void)
 {
-	if(m_flagD80)
+	if(bDoNotRender)
 		return;
 
 	if(m_nRefModelIndex != -1 && ObjectCreatedBy == TEMP_OBJECT && bUseVehicleColours){
@@ -117,12 +152,197 @@ CObject::RemoveLighting(bool reset)
 		WorldReplaceScorchedLightsWithNormal(Scene.world);
 }
 
+void 
+CObject::ObjectDamage(float amount) 
+{
+	if (m_nCollisionDamageEffect && bUsesCollision) {
+		static int8_t nFrameGen = 0;
+		bool bBodyCastDamageEffect = false;
+		if (m_modelIndex == MI_BODYCAST){
+			if (amount > 50.0f)
+				nBodyCastHealth = static_cast<int16>(nBodyCastHealth - 0.5f * amount);
+			if (nBodyCastHealth < 0)
+				nBodyCastHealth = 0;
+			if (nBodyCastHealth < 200)
+				bBodyCastDamageEffect = true;
+			amount = 0.0f;
+		}
+        if ((amount * m_fCollisionDamageMultiplier > 150.0f || bBodyCastDamageEffect) && m_nCollisionDamageEffect) {
+            if (m_nCollisionDamageEffect == COLDAMAGE_EFFECT_CHANGE_MODEL) {
+                bRenderDamaged = true;
+                return;
+            }
+            if (m_nCollisionDamageEffect != COLDAMAGE_EFFECT_SPLIT_MODEL) {
+                if (m_nCollisionDamageEffect == COLDAMAGE_EFFECT_SMASH_COMPLETELY) {
+                    bIsVisible = false;
+                    bUsesCollision = false;
+                    bIsStatic = true;
+                    bExplosionProof = true;
+                    m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+                    m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+                    return;
+                }
+                if (m_nCollisionDamageEffect != COLDAMAGE_EFFECT_CHANGE_THEN_SMASH) {
+                    uint8 audioId = 0;
+                    const CVector& vecPos = m_matrix.GetPosition();
+                    const float fDirectionZ = 0.0002f * amount;
+                    switch (m_nCollisionDamageEffect)
+                    {
+                    case COLDAMAGE_EFFECT_SMASH_CARDBOX_COMPLETELY: {
+                        bIsVisible = false;
+                        bUsesCollision = false;
+                        bIsStatic = true;
+                        bExplosionProof = true;
+                        m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+                        m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+                        const RwRGBA color = {96, 48, 0, 255};
+                        for (int32_t i = 0; i < 25; i++) {
+                            CVector vecDir(CGeneral::GetRandomNumberInRange(-0.35f, 0.7f),
+                                        CGeneral::GetRandomNumberInRange(-0.35f, 0.7f),
+                                        CGeneral::GetRandomNumberInRange(0.1f, 0.15f) + fDirectionZ);
+                            ++nFrameGen;
+                            int32 currentFrame = nFrameGen & 3;
+                            float fRandom = CGeneral::GetRandomNumberInRange(0.01f, 1.0f);
+                            RwRGBA randomColor = {color.red * fRandom, color.green * fRandom , color.blue, color.alpha};
+                            float fSize = CGeneral::GetRandomNumberInRange(0.02f, 0.18f);
+                            int32 nRotationSpeed = CGeneral::GetRandomNumberInRange(-40, 80);
+                            CParticle::AddParticle(PARTICLE_CAR_DEBRIS, vecPos, vecDir, nil, fSize, randomColor, nRotationSpeed, 0, currentFrame, 0);
+                        }
+                        audioId = _SCRSOUND_CARDBOARD_BOX_SMASH;
+                        break;
+                    }
+                    case COLDAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY: {
+                        bIsVisible = false;
+                        bUsesCollision = false;
+                        bIsStatic = true;
+                        bExplosionProof = true;
+                        m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+                        m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+                        const RwRGBA color = {128, 128, 128, 255};
+                        for (int32_t i = 0; i < 45; i++) {
+                            CVector vecDir(CGeneral::GetRandomNumberInRange(-0.35f, 0.7f),
+                                CGeneral::GetRandomNumberInRange(-0.35f, 0.7f),
+                                CGeneral::GetRandomNumberInRange(0.1f, 0.15f) + fDirectionZ);
+                            ++nFrameGen;
+                            int32 currentFrame = nFrameGen & 3;
+                            float fRandom = CGeneral::GetRandomNumberInRange(0.5f, 0.5f);
+                            RwRGBA randomColor = {color.red * fRandom, color.green * fRandom , color.blue * fRandom, color.alpha};
+                            float fSize = CGeneral::GetRandomNumberInRange(0.02f, 0.18f);
+                            int32 nRotationSpeed = CGeneral::GetRandomNumberInRange(-40, 80);
+                            CParticle::AddParticle(PARTICLE_CAR_DEBRIS, vecPos, vecDir, nil, fSize, randomColor, nRotationSpeed, 0, currentFrame, 0);
+                        } 
+                        audioId = _SCRSOUND_WOODEN_BOX_SMASH;
+                        break;
+                    }
+                    case COLDAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY: {
+                        bIsVisible = false;
+                        bUsesCollision = false;
+                        bIsStatic = true;
+                        bExplosionProof = true;
+                        m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+                        m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+                        const RwRGBA color1 = {200, 0, 0, 255};
+                        const RwRGBA color2 = {200, 200, 200, 255};
+                        for (int32_t i = 0; i < 10; i++) {
+                            CVector vecDir(CGeneral::GetRandomNumberInRange(-0.35f, 0.7f),
+                                CGeneral::GetRandomNumberInRange(-0.35f, 0.7f),
+                                CGeneral::GetRandomNumberInRange(0.1f, 0.15f) + fDirectionZ);
+                            ++nFrameGen;
+                            int32 currentFrame = nFrameGen & 3;
+                            RwRGBA color = color2;
+                            if (nFrameGen & 1)
+                                color = color1;
+                            float fSize = CGeneral::GetRandomNumberInRange(0.02f, 0.18f);
+                            int32 nRotationSpeed = CGeneral::GetRandomNumberInRange(-40, 80);
+                            CParticle::AddParticle(PARTICLE_CAR_DEBRIS, vecPos, vecDir, nil, fSize, color, nRotationSpeed, 0, currentFrame, 0);
+                        }
+                        audioId = _SCRSOUND_TYRE_BUMP;
+                        break;
+                    }
+                    case COLDAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY: {
+                        bIsVisible = false;
+                        bUsesCollision = false;
+                        bIsStatic = true;
+                        bExplosionProof = true;
+                        m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+                        m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+                        const RwRGBA color1 = {200, 0, 0, 255};
+                        const RwRGBA color2 = {200, 200, 200, 255};
+                        for (int32_t i = 0; i < 32; i++) {
+                            CVector vecDir(CGeneral::GetRandomNumberInRange(-0.35f, 0.7f),
+                                CGeneral::GetRandomNumberInRange(-0.35f, 0.7f),
+                                CGeneral::GetRandomNumberInRange(0.1f, 0.15f) + fDirectionZ);
+                            ++nFrameGen;
+                            int32 currentFrame = nFrameGen & 3;
+                            RwRGBA color = color2;
+                            if (nFrameGen & 1)
+                                color = color1;
+                            float fSize = CGeneral::GetRandomNumberInRange(0.02f, 0.18f);
+                            int32 nRotationSpeed = CGeneral::GetRandomNumberInRange(-40, 80);
+                            CParticle::AddParticle(PARTICLE_CAR_DEBRIS, vecPos, vecDir, nil, fSize, color, nRotationSpeed, 0, currentFrame, 0);
+                        }
+                        audioId = _SCRSOUND_COL_CAR;
+                        break;
+                    }
+                    default:
+                        return;
+                    }
+                    PlayOneShotScriptObject(audioId, vecPos);
+                    return;
+                }
+                if (!bRenderDamaged) {
+                    bRenderDamaged = true;
+                } else {
+                    bIsVisible = false;
+                    bUsesCollision = false;
+                    bIsStatic = true;
+                    bExplosionProof = true;
+                    m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+                    m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+                }
+            }
+        }
+	}
+}
 
 void
 CObject::RefModelInfo(int32 modelId)
 {
 	m_nRefModelIndex = modelId;
 	CModelInfo::GetModelInfo(modelId)->AddRef();
+}
+
+void 
+CObject::Init(void) 
+{ 
+    m_type = ENTITY_TYPE_OBJECT;;
+    CObjectData::SetObjectData(m_modelIndex, *this);
+    m_nEndOfLifeTime = 0;
+    ObjectCreatedBy = GAME_OBJECT;
+    bIsStatic = true;
+    bIsPickup = false;
+    m_obj_flag2 = false;
+    bOutOfStock = false;
+    bGlassCracked = false;
+    bGlassBroken = false;
+    bHasBeenDamaged = false;
+    bUseVehicleColours = false;
+    m_nRefModelIndex = -1;
+    m_colour1 = 0;
+    m_colour2 = 0;
+    m_nBonusValue = 0;
+    m_pCollidingEntity = nil;
+    CColPoint point;
+    CEntity* outEntity = nil;
+    const CVector& vecPos = m_matrix.GetPosition();
+    if (CWorld::ProcessVerticalLine(vecPos, vecPos.z - 10.0f, point, outEntity, true, false, false, false, false, false, nil))
+        m_pCurSurface = outEntity;
+    else
+        m_pCurSurface = nil;
+    if (m_modelIndex == MI_BODYCAST)
+        nBodyCastHealth = 1000;
+    else if (m_modelIndex == MI_BUOY)
+        bTouchingWater = true;
 }
 
 bool
@@ -142,6 +362,45 @@ CObject::CanBeDeleted(void)
 	}
 }
 
+void
+CObject::DeleteAllMissionObjects()
+{
+    CObjectPool* objectPool = CPools::GetObjectPool();
+    for (int32_t i = 0; i < objectPool->GetSize(); i++) {
+        CObject* pObject = objectPool->GetSlot(i);
+        if (pObject && pObject->ObjectCreatedBy == MISSION_OBJECT) {
+            CWorld::Remove(pObject);
+            delete pObject;
+        }
+    }
+}
+
+void 
+CObject::DeleteAllTempObjects() 
+{
+    CObjectPool* objectPool = CPools::GetObjectPool();
+    for (int32_t i = 0; i < objectPool->GetSize(); i++) {
+        CObject* pObject = objectPool->GetSlot(i);
+        if (pObject && pObject->ObjectCreatedBy == TEMP_OBJECT) {
+            CWorld::Remove(pObject);
+            delete pObject;
+        }
+    }
+}
+
+void 
+CObject::DeleteAllTempObjectInArea(CVector point, float fRadius) 
+{
+    CObjectPool *objectPool = CPools::GetObjectPool();
+    for (int32_t i = 0; i < objectPool->GetSize(); i++) {
+        CObject *pObject = objectPool->GetSlot(i);
+        if (pObject && pObject->ObjectCreatedBy == TEMP_OBJECT && fRadius * fRadius > pObject->GetPosition().MagnitudeSqr()) {
+            CWorld::Remove(pObject);
+            delete pObject;
+        }
+    }
+}
+
 #include <new>
 
 class CObject_ : public CObject
@@ -152,6 +411,9 @@ public:
 	CObject *ctor(CDummyObject *dummy) { return ::new (this) CObject(dummy); }
 	void dtor(void) { CObject::~CObject(); }
 	void Render_(void) { CObject::Render(); }
+    void ProcessControl_(void) { CObject::ProcessControl(); }
+    bool SetupLighting_(void) { return CObject::SetupLighting(); }
+    void RemoveLighting_(bool reset) { CObject::RemoveLighting(reset); }
 };
 
 STARTPATCHES
@@ -159,5 +421,16 @@ STARTPATCHES
 	InjectHook(0x4BACE0, (CObject* (CObject::*)(int32, bool)) &CObject_::ctor, PATCH_JUMP);
 	InjectHook(0x4BAD50, (CObject* (CObject::*)(CDummyObject*)) &CObject_::ctor, PATCH_JUMP);
 	InjectHook(0x4BAE00, &CObject_::dtor, PATCH_JUMP);
+    InjectHook(0x4BB040, &CObject_::ProcessControl_, PATCH_JUMP);
+    InjectHook(0x4BBDA0, &CObject::Teleport, PATCH_JUMP);
 	InjectHook(0x4BB1E0, &CObject_::Render_, PATCH_JUMP);
+    InjectHook(0x4A7C90, &CObject_::SetupLighting_, PATCH_JUMP);
+    InjectHook(0x4A7CD0, &CObject_::RemoveLighting_, PATCH_JUMP);
+    InjectHook(0x4BB240, &CObject::ObjectDamage, PATCH_JUMP);
+    InjectHook(0x4BBD80, &CObject::RefModelInfo, PATCH_JUMP);
+    InjectHook(0x4BAEC0, &CObject::Init, PATCH_JUMP);
+    InjectHook(0x4BB010, &CObject::CanBeDeleted, PATCH_JUMP);
+    InjectHook(0x4BBE60, &CObject::DeleteAllMissionObjects, PATCH_JUMP);
+    InjectHook(0x4BBDF0, &CObject::DeleteAllTempObjects, PATCH_JUMP);
+    InjectHook(0x4BBED0, &CObject::DeleteAllTempObjectInArea, PATCH_JUMP);
 ENDPATCHES

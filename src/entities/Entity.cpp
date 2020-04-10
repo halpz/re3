@@ -62,11 +62,11 @@ CEntity::CEntity(void)
 	bRemoveFromWorld = false;
 	bHasHitWall = false;
 	bImBeingRendered = false;
-	m_flagD8 = false;
+	bTouchingWater = false;
 	bIsSubway = false;
 	bDrawLast = false;
 	bNoBrightHeadLights = false;
-	m_flagD80 = false;
+	bDoNotRender = false;
 
 	bDistanceFade = false;
 	m_flagE2 = false;
