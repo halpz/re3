@@ -154,7 +154,7 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 		pobj->m_nRemoveTimer = 0;
 	
 	if ( color.alpha != 0 )
-		pobj->m_Color, color;
+		pobj->m_Color = color;
 	else
 		pobj->m_Color.alpha  = 0;
 	
