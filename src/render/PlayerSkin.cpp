@@ -15,6 +15,9 @@
 #include "Timer.h"
 #include "Lights.h"
 
+RpClump *gpPlayerClump;
+float gOldFov;
+
 int CPlayerSkin::m_txdSlot;
 
 void
@@ -92,7 +95,7 @@ CPlayerSkin::GetSkinTexture(const char *texName)
 	CTxdStore::SetCurrentTxd(m_txdSlot);
 	tex = RwTextureRead(texName, NULL);
 	CTxdStore::PopCurrentTxd();
-	if (tex) return tex;
+	if (tex != nil) return tex;
 
 	if (strcmp(DEFAULT_SKIN_NAME, texName) == 0)
 		sprintf(gString, "models\\generic\\player.bmp");
@@ -139,7 +142,7 @@ CPlayerSkin::RenderFrontendSkinEdit(void)
 {
 	static float rotation = 0.0f;
 	RwRGBAReal AmbientColor = { 0.65f, 0.65f, 0.65f, 1.0f };
-	RwV3d pos = { 1.35f, 0.35f, 7.725f };
+	const RwV3d pos = { 1.35f, 0.35f, 7.725f };
 	const RwV3d axis1 = { 1.0f, 0.0f, 0.0f };
 	const RwV3d axis2 = { 0.0f, 0.0f, 1.0f };
 	static uint32 LastFlash = 0;
