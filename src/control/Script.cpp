@@ -8442,7 +8442,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
 		CPad::GetPad(ScriptParams[0])->DisablePlayerControls |= PLAYERCONTROL_DISABLED_80;
 		pPlayerInfo->MakePlayerSafe(true);
-		CCutsceneMgr::SetRunning(true);
+		CCutsceneMgr::StartCutsceneProcessing();
 		return 0;
 	}
 	case COMMAND_USE_TEXT_COMMANDS:

@@ -475,7 +475,7 @@ void CWeather::RenderRainStreaks(void)
 			// 1/16 probability
 			Streaks[i].direction = CVector(4.0f, 4.0f, -4.0f);
 			Streaks[i].position = 6.0f * TheCamera.GetForward() + TheCamera.GetPosition() + CVector(-1.8f * Streaks[i].direction.x, -1.8f * Streaks[i].direction.y, 8.0f);
-			if (!CCutsceneMgr::IsCutsceneProcessing()) {
+			if (!CCutsceneMgr::IsRunning()) {
 				Streaks[i].position.x += 2.0f * FindPlayerSpeed().x * 60.0f;
 				Streaks[i].position.y += 2.0f * FindPlayerSpeed().y * 60.0f;
 			}
