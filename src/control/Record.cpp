@@ -230,8 +230,8 @@ void CRecordDataForChase::SaveOrRetrieveDataForThisFrame(void)
 #else
 			CCarStateEachFrame* pState = (CCarStateEachFrame*)pChaseCars[CurrentCar];
 #endif
-			CVector right = CVector(pState->rightX, pState->rightY, pState->rightZ) / (UINT8_MAX / 2);
-			CVector forward = CVector(pState->forwardX, pState->forwardY, pState->forwardZ) / (UINT8_MAX / 2);
+			CVector right = CVector(pState->rightX, pState->rightY, pState->rightZ) / INT8_MAX;
+			CVector forward = CVector(pState->forwardX, pState->forwardY, pState->forwardZ) / INT8_MAX;
 			CVector up = CrossProduct(right, forward);
 			sprintf(gString, "%f %f %f\n", pState->pos.x, pState->pos.y, pState->pos.z);
 			CFileMgr::Write(fid2, gString, strlen(gString) - 1);
@@ -330,16 +330,16 @@ void CRecordDataForChase::SaveOrRetrieveCarPositions(void)
 
 void CRecordDataForChase::StoreInfoForCar(CAutomobile* pCar, CCarStateEachFrame* pState)
 {
-	pState->rightX = UINT8_MAX / 2 * pCar->GetRight().x;
-	pState->rightY = UINT8_MAX / 2 * pCar->GetRight().y;
-	pState->rightZ = UINT8_MAX / 2 * pCar->GetRight().z;
-	pState->forwardX = UINT8_MAX / 2 * pCar->GetForward().x;
-	pState->forwardY = UINT8_MAX / 2 * pCar->GetForward().y;
-	pState->forwardZ = UINT8_MAX / 2 * pCar->GetForward().z;
+	pState->rightX = INT8_MAX * pCar->GetRight().x;
+	pState->rightY = INT8_MAX * pCar->GetRight().y;
+	pState->rightZ = INT8_MAX * pCar->GetRight().z;
+	pState->forwardX = INT8_MAX * pCar->GetForward().x;
+	pState->forwardY = INT8_MAX * pCar->GetForward().y;
+	pState->forwardZ = INT8_MAX * pCar->GetForward().z;
 	pState->pos = pCar->GetPosition();
-	pState->velX = 1.0f * (UINT16_MAX / 2) * pCar->GetMoveSpeed().x;
-	pState->velY = 1.0f * (UINT16_MAX / 2) * pCar->GetMoveSpeed().y;
-	pState->velZ = 1.0f * (UINT16_MAX / 2) * pCar->GetMoveSpeed().z;
+	pState->velX = 0.5f * INT16_MAX * pCar->GetMoveSpeed().x;
+	pState->velY = 0.5f * INT16_MAX * pCar->GetMoveSpeed().y;
+	pState->velZ = 0.5f * INT16_MAX * pCar->GetMoveSpeed().z;
 	pState->wheel = 20 * pCar->m_fSteerAngle;
 	pState->gas = 100 * pCar->m_fGasPedal;
 	pState->brake = 100 * pCar->m_fBrakePedal;
@@ -348,8 +348,8 @@ void CRecordDataForChase::StoreInfoForCar(CAutomobile* pCar, CCarStateEachFrame*
 
 void CRecordDataForChase::RestoreInfoForMatrix(CMatrix& matrix, CCarStateEachFrame* pState)
 {
-	matrix.GetRight() = CVector(pState->rightX, pState->rightY, pState->rightZ) / (UINT8_MAX / 2);
-	matrix.GetForward() = CVector(pState->forwardX, pState->forwardY, pState->forwardZ) / (UINT8_MAX / 2);
+	matrix.GetRight() = CVector(pState->rightX, pState->rightY, pState->rightZ) / INT8_MAX;
+	matrix.GetForward() = CVector(pState->forwardX, pState->forwardY, pState->forwardZ) / INT8_MAX;
 	matrix.GetUp() = CrossProduct(matrix.GetRight(), matrix.GetForward());
 	matrix.GetPosition() = pState->pos;
 }
@@ -358,7 +358,7 @@ void CRecordDataForChase::RestoreInfoForCar(CAutomobile* pCar, CCarStateEachFram
 {
 	CVector oldPos = pCar->GetPosition();
 	RestoreInfoForMatrix(pCar->GetMatrix(), pState);
-	pCar->SetMoveSpeed(CVector(pState->velX, pState->velY, pState->velZ) * 1.0f / (UINT16_MAX / 2));
+	pCar->SetMoveSpeed(CVector(pState->velX, pState->velY, pState->velZ) / INT16_MAX / 0.5f);
 	pCar->SetTurnSpeed(0.0f, 0.0f, 0.0f);
 	pCar->m_fSteerAngle = pState->wheel / 20.0f;
 	pCar->m_fGasPedal = pState->gas / 100.0f;
