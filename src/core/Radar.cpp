@@ -1412,8 +1412,8 @@ CRadar::DrawYouAreHereSprite(float x, float y)
 		}
 	} else {
 		if (CTimer::GetTimeInMillisecondsPauseMode() - lastChange > 200) {
-				lastChange = CTimer::GetTimeInMillisecondsPauseMode();
-				show = !show;
+			lastChange = CTimer::GetTimeInMillisecondsPauseMode();
+			show = !show;
 		}
 	}
 
@@ -1422,7 +1422,7 @@ CRadar::DrawYouAreHereSprite(float x, float y)
 		float top = y - SCREEN_SCALE_Y(2.0f);
 		float right = SCREEN_SCALE_X(12.0) + x;
 		float bottom = y - SCREEN_SCALE_Y(26.0f);
-		CentreSprite.Draw(CRect(left, top, right, bottom), CRGBA(255, 217, 106, 255));
+		CentreSprite.Draw(CRect(left, top, right, bottom), CRGBA(255, 255, 255, 255));
 	}
 	MapLegendList[MapLegendCounter++] = RADAR_SPRITE_CENTRE;
 }

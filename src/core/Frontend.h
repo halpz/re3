@@ -7,27 +7,10 @@
 #define MENUHEADER_WIDTH 0.84f
 #define MENUHEADER_HEIGHT 1.6f
 
-#define MENUACTION_X_MARGIN 40.0f
+#define MENU_X_MARGIN 40.0f
 #define MENUACTION_POS_Y 60.0f
-#define MENUACTION_WIDTH 0.38f
+#define MENUACTION_WIDTH 38.0f
 #define MENUACTION_SCALE_MULT 0.9f
-
-#define MENUCOLUMN_POS_X MENUHEADER_POS_X + 16.0f
-#define MENUCOLUMN_MAX_Y 149.0f
-#define MENUCOLUMN_MID_Y 100.0f
-#define MENUCOLUMN_MIN_Y 110.0f
-#define MENUCOLUMN_PAUSE_Y 25.0f
-#define MENUCOLUMN_START_Y 9.0f
-#define MENUCOLUMN_FEDS 139.0f
-
-#define MENUCOLUMN_SAVE_X 121.0f
-#define MENUCOLUMN_SAVE_Y 111.0f
-
-#define MENUCOLUMN_SPACING_MAX 24.0f
-#define MENUCOLUMN_SPACING_MIN 20.0f
-
-#define MENUSELECT_BOX_MAX 20.5f
-#define MENUSELECT_BOX_MIN 17.0f
 
 #ifndef ASPECT_RATIO_SCALE
 #define MENURADIO_ICON_X 31.5f
@@ -38,12 +21,13 @@
 #define MENURADIO_ICON_W 60.0f
 #define MENURADIO_ICON_H 60.0f
 
-#define MENUDROP_COLOR_A 150
-#define MENUDROP_COLOR_SIZE -1
-
 #define MENUSLIDER_X 256.0f
 #define MENUSLIDER_UNK 256.0f
 
+#define BIGTEXT_X_SCALE 0.75f
+#define BIGTEXT_Y_SCALE 0.9f
+#define MEDIUMTEXT_X_SCALE 0.55f
+#define MEDIUMTEXT_Y_SCALE 0.8f
 #define SMALLTEXT_X_SCALE 0.45f
 #define SMALLTEXT_Y_SCALE 0.7f
 #define SMALLESTTEXT_X_SCALE 0.4f
@@ -66,6 +50,33 @@
 #define PLAYERSETUP_DATE_COLUMN_RIGHT 56.0f
 #define PLAYERSETUP_LIST_BODY_TOP 47
 #define PLAYERSETUP_ROW_HEIGHT 9
+
+#define STATS_SLIDE_Y_PER_SECOND 30.0f
+#define STATS_ROW_HEIGHT 20.0f
+#define STATS_ROW_X_MARGIN 50.0f
+#define STATS_BOTTOM_MARGIN 135.0f
+#define STATS_TOP_MARGIN 40.0f
+#define STATS_TOP_DIMMING_AREA_LENGTH (93.0f - STATS_TOP_MARGIN)
+#define STATS_BOTTOM_DIMMING_AREA_LENGTH 55.0f
+#define STATS_PUT_BACK_TO_BOTTOM_Y 50.0f
+#define STATS_RATING_X 24.0f
+#define STATS_RATING_Y 20.0f
+
+#define CONTSETUP_STANDARD_ROW_HEIGHT 10.7f
+#define CONTSETUP_CLASSIC_ROW_HEIGHT 9.0f
+#define CONTSETUP_BOUND_HIGHLIGHT_HEIGHT 10
+#define CONTSETUP_BOUND_COLUMN_WIDTH 190.0f
+#define CONTSETUP_LIST_HEADER_HEIGHT 20.0f
+#define CONTSETUP_LIST_TOP 28.0f
+#define CONTSETUP_LIST_RIGHT 18.0f
+#define CONTSETUP_LIST_BOTTOM 120.0f
+#define CONTSETUP_LIST_LEFT 18.0f
+#define CONTSETUP_COLUMN_1_X 40.0f
+#define CONTSETUP_COLUMN_2_X 210.0f
+#define CONTSETUP_COLUMN_3_X (CONTSETUP_COLUMN_2_X + CONTSETUP_BOUND_COLUMN_WIDTH + 10.0f)
+#define CONTSETUP_BACK_RIGHT 35.0f
+#define CONTSETUP_BACK_BOTTOM 122.0f
+#define CONTSETUP_BACK_HEIGHT 25.0f
 
 enum eLanguages
 {
@@ -185,19 +196,19 @@ enum eMenuScreen
 	MENUPAGE_NEW_GAME_RELOAD = 10,
 	MENUPAGE_LOAD_SLOT_CONFIRM = 11,
 	MENUPAGE_DELETE_SLOT_CONFIRM = 12,
-	MENUPAGE_13 = 13,
+	MENUPAGE_NO_MEMORY_CARD = 13,
 	MENUPAGE_LOADING_IN_PROGRESS = 14,
 	MENUPAGE_DELETING_IN_PROGRESS = 15,
-	MENUPAGE_16 = 16,
+	MENUPAGE_PS2_LOAD_FAILED = 16,
 	MENUPAGE_DELETE_FAILED = 17,
 	MENUPAGE_DEBUG_MENU = 18,
-	MENUPAGE_MEMORY_CARD_1 = 19,
-	MENUPAGE_MEMORY_CARD_2 = 20,
+	MENUPAGE_MEMORY_CARD_DEBUG = 19,
+	MENUPAGE_MEMORY_CARD_TEST = 20,
 	MENUPAGE_MULTIPLAYER_MAIN = 21,
-	MENUPAGE_SAVE_FAILED_1 = 22,
-	MENUPAGE_SAVE_FAILED_2 = 23,
+	MENUPAGE_PS2_SAVE_FAILED = 22,
+	MENUPAGE_PS2_SAVE_FAILED_2 = 23,
 	MENUPAGE_SAVE = 24,
-	MENUPAGE_NO_MEMORY_CARD = 25,
+	MENUPAGE_NO_MEMORY_CARD_2 = 25,
 	MENUPAGE_CHOOSE_SAVE_SLOT = 26,
 	MENUPAGE_SAVE_OVERWRITE_CONFIRM = 27,
 	MENUPAGE_MULTIPLAYER_MAP = 28,
@@ -438,7 +449,7 @@ struct BottomBarOption
 struct CMenuScreen
 {
 	char m_ScreenName[8];
-	int32 unk;
+	int32 unk; // 2 on MENUPAGE_MULTIPLAYER_START, 1 on everywhere else
 	int32 m_PreviousPage[2]; // eMenuScreen
 	int32 m_ParentEntry[2]; // row
 
@@ -544,11 +555,12 @@ public:
 	static bool &m_bShutDownFrontEndRequested;
 	static bool &m_PrefsAllowNastyGame;
 	
-	static float &menuXYpadding;
-	static float &actionTextScaleX;
-	static float &actionTextScaleY;
-	static int32 &sthWithButtons;
-	static int32 &sthWithButtons2;
+	static uint8 m_PrefsStereoMono;
+	static int32 m_SelectedMap;
+	static int32 m_SelectedGameType;
+	static uint8 m_PrefsPlayerRed;
+	static uint8 m_PrefsPlayerGreen;
+	static uint8 m_PrefsPlayerBlue;
 
 #ifndef MASTER
 	static bool m_PrefsMarketing;
@@ -557,6 +569,7 @@ public:
 
 #ifdef MENU_MAP
 	static bool bMenuMapActive;
+	static bool bMapMouseShownOnce;
 	static float fMapSize;
 	static float fMapCenterY;
 	static float fMapCenterX;
@@ -565,9 +578,9 @@ public:
 #endif
 
 public:
-	static void BuildStatLine(char *text, void *stat, uint8 aFloat, void *stat2);
+	static void BuildStatLine(char *text, void *stat, bool itsFloat, void *stat2);
 	static void CentreMousePointer();
-	int CheckCodesForControls(int32);
+	void CheckCodesForControls(int);
 	bool CheckHover(int x1, int x2, int y1, int y2);
 	void CheckSliderMovement(int);
 	int CostructStatLine(int);
@@ -585,13 +598,13 @@ public:
 #endif
 	void DrawPlayerSetupScreen();
 	int FadeIn(int alpha);
-	void FilterOutColorMarkersFromString(uint16, CRGBA &);
+	void FilterOutColorMarkersFromString(wchar*, CRGBA &);
 	int GetStartOptionsCntrlConfigScreens();
 	static void InitialiseChangedLanguageSettings();
 	void LoadAllTextures();
 	void LoadSettings();
-	static void MessageScreen(char *);
-	static void PickNewPlayerColour();
+	void MessageScreen(const char *);
+	void PickNewPlayerColour();
 	void PrintBriefs();
 	static void PrintErrorMessage();
 	void PrintStats();
@@ -612,6 +625,7 @@ public:
 	void WaitForUserCD();
 	void PrintController();
 	int GetNumOptionsCntrlConfigScreens();
+	int ConstructStatLine(int);
 
 	// New (not in function or inlined in the game)
 	void ThingsToDoBeforeLeavingPage();
