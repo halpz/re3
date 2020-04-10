@@ -130,7 +130,7 @@ void CTimer::Update(void)
 
 	ms_fTimeStepNonClipped = ms_fTimeStep;
 	
-	if ( CRecordDataForGame::RecordingState != RECORDSTATE_2 )
+	if ( !CRecordDataForGame::IsPlayingBack() )
 	{
 		ms_fTimeStep = min(3.0f, ms_fTimeStep);
 
