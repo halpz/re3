@@ -138,7 +138,7 @@ void CTimer::Update(void)
 			m_snTimeInMilliseconds = m_snPreviousTimeInMilliseconds + 60;
 	}
   
-	if ( CRecordDataForChase::Status == RECORDSTATE_1 )
+	if ( CRecordDataForChase::IsRecording() )
 	{
 		ms_fTimeStep = 1.0f;
 		m_snTimeInMilliseconds = m_snPreviousTimeInMilliseconds + 16;

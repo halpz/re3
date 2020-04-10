@@ -356,7 +356,7 @@ CAutomobile::ProcessControl(void)
 
 			PruneReferences();
 
-			if(m_status == STATUS_PLAYER && CRecordDataForChase::Status != RECORDSTATE_1)
+			if(m_status == STATUS_PLAYER && CRecordDataForChase::IsRecording())
 				DoDriveByShootings();
 		}
 		break;

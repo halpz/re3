@@ -26,6 +26,7 @@
 #include "Vehicle.h"
 #include "Ped.h"
 #include "Population.h"
+#include "Record.h"
 #include "Replay.h"
 #include "Weather.h"
 #include "win.h"
@@ -969,7 +970,7 @@ void CPad::Update(int16 unk)
 	OldState = NewState;
 	
 #if (defined GTA_PS2 || defined FIX_BUGS)
-	if (!CRecordDataForGame::IsPlayingBack() /* && !CRecordDataForChase::ShouldThisPadBeLeftAlone(unk) */)
+	if (!CRecordDataForGame::IsPlayingBack() && !CRecordDataForChase::ShouldThisPadBeLeftAlone(unk))
 #endif
 	{
 		NewState = ReconcileTwoControllersInput(PCTempKeyState, PCTempJoyState);
