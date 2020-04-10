@@ -352,6 +352,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 		CWorld::Remove(ms_pCutsceneObjects[ms_numCutsceneObjs]);
 		ms_pCutsceneObjects[ms_numCutsceneObjs]->DeleteRwObject();
 		delete ms_pCutsceneObjects[ms_numCutsceneObjs];
+		ms_pCutsceneObjects[ms_numCutsceneObjs] = nil;
 	}
 	ms_numCutsceneObjs = 0;
 
