@@ -3,6 +3,7 @@
 #include "Physical.h"
 
 enum {
+	UNKNOWN_OBJECT = 0,
 	GAME_OBJECT = 1,
 	MISSION_OBJECT = 2,
 	TEMP_OBJECT = 3,
