@@ -40,8 +40,6 @@ CObject
 CPacManPickups
 CPedPath
 CPools - save/loading
-CRecordDataForChase
-CRecordDataForGame
 CRoadBlocks
 CWeapon
 CWorld
