@@ -185,6 +185,7 @@ CObject::ObjectDamage(float amount)
 			bExplosionProof = true;
 			m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 			m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+			break;
 		case COLDAMAGE_EFFECT_CHANGE_THEN_SMASH:
 			if (!bRenderDamaged) {
 				bRenderDamaged = true;
@@ -294,8 +295,6 @@ CObject::ObjectDamage(float amount)
 			PlayOneShotScriptObject(_SCRSOUND_COL_CAR, vecPos);
 			break;
 		}
-		default:
-			return;
 		}
 	}
 }
