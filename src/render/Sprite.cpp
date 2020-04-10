@@ -30,10 +30,12 @@ CSprite::CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, 
 	out->x *= SCREEN_WIDTH * recip;
 	out->y *= SCREEN_HEIGHT * recip;
 	// What is this? size?
-	*outw = 70.0f/CDraw::GetFOV();
-	*outh = 70.0f/CDraw::GetFOV();
-	*outw *= SCREEN_WIDTH * recip;
-	*outh *= SCREEN_HEIGHT * recip;
+	*outw = 70.0f/CDraw::GetFOV() * SCREEN_WIDTH * recip;
+#ifdef ASPECT_RATIO_SCALE
+	*outh = 70.0f/CDraw::GetFOV() / (DEFAULT_ASPECT_RATIO / SCREEN_ASPECT_RATIO) * SCREEN_HEIGHT * recip;
+#else
+	*outh = 70.0f/CDraw::GetFOV() * SCREEN_HEIGHT * recip;
+#endif
 	return true;
 }
 
