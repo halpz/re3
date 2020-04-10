@@ -350,6 +350,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Catalina Fly Away", CHeli::MakeCatalinaHeliFlyAway);
 		DebugMenuAddVarBool8("Debug", "Script Heli On", (int8*)0x95CD43, nil);
 
+		DebugMenuAddVarBool8("Debug", "Show Ped Paths", (int8*)&gbShowPedPaths, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Paths", (int8*)&gbShowCarPaths, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Path Links", (int8*)&gbShowCarPathsLinks, nil);
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Collision Lines", (int8*)&gbShowCollisionLines, nil);

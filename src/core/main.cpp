@@ -1,8 +1,7 @@
 #include "common.h"
 #include "rpmatfx.h"
-#include "rpskin.h"
 #include "rphanim.h"
-#include "rtbmp.h"
+#include "rpskin.h"
 #include "patcher.h"
 #include "main.h"
 #include "CdStream.h"
@@ -54,6 +53,7 @@
 #include "Frontend.h"
 #include "AnimViewer.h"
 #include "Script.h"
+#include "PathFind.h"
 #include "Debug.h"
 #include "Console.h"
 #include "timebars.h"
@@ -788,8 +788,11 @@ void
 RenderDebugShit(void)
 {
 	CTheScripts::RenderTheScriptDebugLines();
+#ifndef FINAL
 	if(gbShowCollisionLines)
 		CRenderer::RenderCollisionLines();
+	ThePaths.DisplayPathData();
+#endif
 }
 
 void

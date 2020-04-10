@@ -84,10 +84,8 @@ union CConnectionFlags
 
 struct CCarPathLink
 {
-	float posX;
-	float posY;
-	float dirX;
-	float dirY;
+	CVector2D pos;
+	CVector2D dir;
 	int16 pathNodeIndex;
 	int8 numLeftLanes;
 	int8 numRightLanes;
@@ -208,7 +206,13 @@ public:
 	bool TestCoorsCloseness(CVector target, uint8 type, CVector start);
 	void Save(uint8 *buf, uint32 *size);
 	void Load(uint8 *buf, uint32 size);
+
+	void DisplayPathData(void);
 };
 static_assert(sizeof(CPathFind) == 0x49bf4, "CPathFind: error");
 
 extern CPathFind &ThePaths;
+
+extern bool gbShowPedPaths;
+extern bool gbShowCarPaths;
+extern bool gbShowCarPathsLinks;
