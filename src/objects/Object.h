@@ -85,5 +85,6 @@ public:
 	bool CanBeDeleted(void);
 
 	static void DeleteAllTempObjectInArea(CVector, float);
+	static void DeleteAllTempObjects();
 };
 static_assert(sizeof(CObject) == 0x198, "CObject: error");
