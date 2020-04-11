@@ -40,7 +40,7 @@ void CRecordDataForGame::Init(void)
 		RecordingState = STATE_PLAYBACK;
 	}
 	if (RecordingState == STATE_PLAYBACK) {
-		pDataBufferPointer = (uint8*)malloc(MEMORY_FOR_GAME_RECORD);
+		pDataBufferPointer = new uint8[MEMORY_FOR_GAME_RECORD];
 		pDataBuffer = pDataBufferPointer;
 		pDataBuffer[CFileMgr::Read(FId, (char*)pDataBufferPointer, MEMORY_FOR_GAME_RECORD) + 8] = -1;
 		CFileMgr::CloseFile(FId);
