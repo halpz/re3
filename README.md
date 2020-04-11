@@ -39,7 +39,6 @@ CMenuManager - WIP
 CObject
 CPacManPickups
 CPedPath
-CPools - save/loading
 CRoadBlocks
 CWeapon
 CWorld
