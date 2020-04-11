@@ -24,7 +24,11 @@
 
 #include <list>
 
+#ifndef RWLIBS
 void **rwengine = *(void***)0x5A10E1;
+#else
+extern "C" int vsprintf(char* const _Buffer, char const* const _Format, va_list  _ArgList);
+#endif
 
 DebugMenuAPI gDebugMenuAPI;
 
