@@ -98,7 +98,7 @@ CObject::ProcessControl(void)
 		m_vecTurnSpeed *= fTimeStep;
 	}
 	if ((m_modelIndex == MI_EXPLODINGBARREL || m_modelIndex == MI_PETROLPUMP) && bHasBeenDamaged && bIsVisible
-		&& CGeneral::GetRandomNumberInRange(0, 31) == 10) {
+		&& (CGeneral::GetRandomNumber() & 0x1F) == 10) {
 		bExplosionProof = true;
 		bIsVisible = false;
 		bUsesCollision = false;
@@ -183,8 +183,8 @@ CObject::ObjectDamage(float amount)
 			bUsesCollision = false;
 			bIsStatic = true;
 			bExplosionProof = true;
-			m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-			m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+			SetMoveSpeed(0.0f, 0.0f, 0.0f);
+			SetTurnSpeed(0.0f, 0.0f, 0.0f);
 			break;
 		case COLDAMAGE_EFFECT_CHANGE_THEN_SMASH:
 			if (!bRenderDamaged) {
@@ -195,8 +195,8 @@ CObject::ObjectDamage(float amount)
 				bUsesCollision = false;
 				bIsStatic = true;
 				bExplosionProof = true;
-				m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-				m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+				SetMoveSpeed(0.0f, 0.0f, 0.0f);
+				SetTurnSpeed(0.0f, 0.0f, 0.0f);
 			}
 			break;
 		case COLDAMAGE_EFFECT_SMASH_CARDBOX_COMPLETELY: {
@@ -204,8 +204,8 @@ CObject::ObjectDamage(float amount)
 			bUsesCollision = false;
 			bIsStatic = true;
 			bExplosionProof = true;
-			m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-			m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+			SetMoveSpeed(0.0f, 0.0f, 0.0f);
+			SetTurnSpeed(0.0f, 0.0f, 0.0f);
 			const RwRGBA color = { 96, 48, 0, 255 };
 			for (int32 i = 0; i < 25; i++) {
 				CVector vecDir(CGeneral::GetRandomNumberInRange(-0.35f, 0.7f),
@@ -227,8 +227,8 @@ CObject::ObjectDamage(float amount)
 			bUsesCollision = false;
 			bIsStatic = true;
 			bExplosionProof = true;
-			m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-			m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+			SetMoveSpeed(0.0f, 0.0f, 0.0f);
+			SetTurnSpeed(0.0f, 0.0f, 0.0f);
 			const RwRGBA color = { 128, 128, 128, 255 };
 			for (int32 i = 0; i < 45; i++) {
 				CVector vecDir(CGeneral::GetRandomNumberInRange(-0.35f, 0.7f),
@@ -250,8 +250,8 @@ CObject::ObjectDamage(float amount)
 			bUsesCollision = false;
 			bIsStatic = true;
 			bExplosionProof = true;
-			m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-			m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+			SetMoveSpeed(0.0f, 0.0f, 0.0f);
+			SetTurnSpeed(0.0f, 0.0f, 0.0f);
 			const RwRGBA color1 = { 200, 0, 0, 255 };
 			const RwRGBA color2 = { 200, 200, 200, 255 };
 			for (int32 i = 0; i < 10; i++) {
@@ -275,8 +275,8 @@ CObject::ObjectDamage(float amount)
 			bUsesCollision = false;
 			bIsStatic = true;
 			bExplosionProof = true;
-			m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-			m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+			SetMoveSpeed(0.0f, 0.0f, 0.0f);
+			SetTurnSpeed(0.0f, 0.0f, 0.0f);
 			const RwRGBA color1 = { 200, 0, 0, 255 };
 			const RwRGBA color2 = { 200, 200, 200, 255 };
 			for (int32 i = 0; i < 32; i++) {
