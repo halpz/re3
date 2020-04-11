@@ -28,10 +28,8 @@ CCivilianPed::CivilianAI(void)
 			return;
 
 		if (m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT || m_objective == OBJECTIVE_KILL_CHAR_ANY_MEANS) {
-			if (m_pedInObjective) {
-				if (m_pedInObjective->IsPlayer())
-					return;
-			}
+			if (m_pedInObjective && m_pedInObjective->IsPlayer())
+				return;
 		}
 		if (CTimer::GetTimeInMilliseconds() <= m_lookTimer)
 			return;
@@ -75,7 +73,7 @@ CCivilianPed::CivilianAI(void)
 				} else {
 					SetMoveState(PEDMOVE_WALK);
 				}
-			} else if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops)  {
+			} else if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops != 0)  {
 				SetFindPathAndFlee(m_threatEntity, 5000);
 				if (threatDistSqr < sq(10.0f)) {
 					SetMoveState(PEDMOVE_RUN);
@@ -170,8 +168,8 @@ CCivilianPed::CivilianAI(void)
 		if (m_threatEntity && m_threatEntity->IsPed()) {
 			CPed *threatPed = (CPed*)m_threatEntity;
 			if (m_pedStats->m_fear <= 100 - threatPed->m_pedStats->m_temper && threatPed->m_nPedType != PEDTYPE_COP) {
-				if (threatPed->GetWeapon()->IsTypeMelee() || !GetWeapon()->IsTypeMelee()) {
-					if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops) {
+				if (threatPed->GetWeapon(m_currentWeapon).IsTypeMelee() || !GetWeapon()->IsTypeMelee()) {
+					if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops != 0) {
 						if (m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT || m_objective == OBJECTIVE_KILL_CHAR_ANY_MEANS) {
 							SetFindPathAndFlee(m_threatEntity, 10000);
 						}

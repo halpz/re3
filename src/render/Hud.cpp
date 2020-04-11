@@ -21,54 +21,52 @@
 #include "User.h"
 #include "World.h"
 
-wchar *CHud::m_HelpMessage = (wchar*)0x86B888;
-wchar *CHud::m_LastHelpMessage = (wchar*)0x6E8F28;
-int32 &CHud::m_HelpMessageState = *(int32*)0x880E1C;
-int32 &CHud::m_HelpMessageTimer = *(int32*)0x880FA4;
-int32 &CHud::m_HelpMessageFadeTimer = *(int32*)0x8F6258;
-wchar *CHud::m_HelpMessageToPrint = (wchar*)0x664480;
-float &CHud::m_HelpMessageDisplayTime = *(float*)0x8E2C28;
-float &CHud::m_fTextBoxNumLines = *(float*)0x8E2C28;
-float &CHud::m_fHelpMessageTime = *(float *)0x8E2C28;
-bool &CHud::m_HelpMessageQuick = *(bool *)0x95CCF7;
-int32 CHud::m_ZoneState = *(int32*)0x8F29AC;
+wchar CHud::m_HelpMessage[256]; // = (wchar*)0x86B888;
+wchar CHud::m_LastHelpMessage[256]; // = (wchar*)0x6E8F28;
+uint32 CHud::m_HelpMessageState; // = *(int32*)0x880E1C;
+uint32 CHud::m_HelpMessageTimer; // = *(int32*)0x880FA4;
+int32 CHud::m_HelpMessageFadeTimer; // = *(int32*)0x8F6258;
+wchar CHud::m_HelpMessageToPrint[256]; // = (wchar*)0x664480;
+float CHud::m_fHelpMessageTime; // *(float *)0x8E2C28;
+bool CHud::m_HelpMessageQuick; // = *(bool*)0x95CCF7;
+uint32 CHud::m_ZoneState; // = *(int32*)0x8F29AC;
 int32 CHud::m_ZoneFadeTimer;
-int32 CHud::m_ZoneNameTimer = *(int32*)0x8F1A50;
-wchar *&CHud::m_pZoneName = *(wchar **)0x8E2C2C;
-wchar *CHud::m_pLastZoneName = (wchar*)0x8F432C;
+uint32 CHud::m_ZoneNameTimer; // = *(int32*)0x8F1A50;
+wchar *CHud::m_pZoneName; // = *(wchar**)0x8E2C2C;
+wchar *CHud::m_pLastZoneName; // = (wchar*)0x8F432C;
 wchar *CHud::m_ZoneToPrint;
-int32 CHud::m_VehicleState = *(int32*)0x940560;
+uint32 CHud::m_VehicleState; // = *(int32*)0x940560;
 int32 CHud::m_VehicleFadeTimer;
-int32 CHud::m_VehicleNameTimer = *(int32*)0x8F2A14;
-wchar *&CHud::m_VehicleName = *(wchar **)0x942FB4;
-wchar *CHud::m_pLastVehicleName = *(wchar **)0x8E2DD8;
+uint32 CHud::m_VehicleNameTimer; // = *(int32*)0x8F2A14;
+wchar *CHud::m_VehicleName; // = *(wchar**)0x942FB4;
+wchar *CHud::m_pLastVehicleName; // = *(wchar**)0x8E2DD8;
 wchar *CHud::m_pVehicleNameToPrint;
-wchar *CHud::m_Message = (wchar*)0x72E318;
-wchar *CHud::m_PagerMessage = (wchar*)0x878840;
-bool &CHud::m_Wants_To_Draw_Hud = *(bool*)0x95CD89;
-bool &CHud::m_Wants_To_Draw_3dMarkers = *(bool*)0x95CD62;
-wchar(&CHud::m_BigMessage)[6][128] = *(wchar(*)[6][128])*(uintptr*)0x664CE0;
-int16 &CHud::m_ItemToFlash = *(int16*)0x95CC82;
+wchar CHud::m_Message[256];// = (wchar*)0x72E318;
+wchar CHud::m_PagerMessage[256]; // = (wchar*)0x878840;
+bool CHud::m_Wants_To_Draw_Hud; // (bool*)0x95CD89;
+bool CHud::m_Wants_To_Draw_3dMarkers; // = *(bool*)0x95CD62;
+wchar CHud::m_BigMessage[6][128]; // = *(wchar(*)[6][128]) * (uintptr*)0x664CE0;
+int16 CHud::m_ItemToFlash; // = *(int16*)0x95CC82;
 
 // These aren't really in CHud
 float CHud::BigMessageInUse[6];
 float CHud::BigMessageAlpha[6];
 float CHud::BigMessageX[6];
-float &CHud::OddJob2OffTimer = *(float*)0x942FA0;
-int8 &CHud::CounterOnLastFrame = *(int8*)0x95CD67;
-float &CHud::OddJob2XOffset = *(float*)0x8F1B5C;
-int16 &CHud::CounterFlashTimer = *(int16*)0x95CC20;
-int16 &CHud::OddJob2Timer = *(int16*)0x95CC52;
-int8 &CHud::TimerOnLastFrame = *(int8*)0x95CDA7;
-int16 &CHud::OddJob2On = *(int16*)0x95CC78;
-int16 &CHud::TimerFlashTimer = *(int16*)0x95CC6C;
-int16 &CHud::PagerSoundPlayed = *(int16*)0x95CC4A;
-int32 &CHud::SpriteBrightness = *(int32*)0x95CC54;
-float &CHud::PagerXOffset = *(float*)0x941590;
-int16 &CHud::PagerTimer = *(int16*)0x95CC3A;
-int16 &CHud::PagerOn = *(int16*)0x95CCA0;
+float CHud::OddJob2OffTimer; // = *(float*)0x942FA0;
+bool CHud::CounterOnLastFrame; // = *(int8*)0x95CD67;
+float CHud::OddJob2XOffset; // = *(float*)0x8F1B5C;
+uint16 CHud::CounterFlashTimer; // = *(int16*)0x95CC20;
+uint16 CHud::OddJob2Timer; // = *(int16*)0x95CC52;
+bool CHud::TimerOnLastFrame; //= *(int8*)0x95CDA7;
+int16 CHud::OddJob2On; //= *(int16*)0x95CC78;
+uint16 CHud::TimerFlashTimer; //= *(int16*)0x95CC6C;
+int16 CHud::PagerSoundPlayed; //= *(int16*)0x95CC4A;
+int32 CHud::SpriteBrightness; //= *(int32*)0x95CC54;
+float CHud::PagerXOffset; //= *(float*)0x941590;
+int16 CHud::PagerTimer; //= *(int16*)0x95CC3A;
+int16 CHud::PagerOn; //= *(int16*)0x95CCA0;
 
-CSprite2d *CHud::Sprites = (CSprite2d*)0x95CB9C;
+CSprite2d CHud::Sprites[NUM_HUD_SPRITES]; //  = (CSprite2d*)0x95CB9C;
 
 struct
 {
@@ -90,14 +88,14 @@ struct
 	{"detonator", "detonator_mask"},
 	{"", ""},
 	{"", ""},
-	{"radardisc", "radardiscm"},
+	{"radardisc", "radardisc"},
 	{"pager", "pagerm"},
 	{"", ""},
 	{"", ""},
 	{"bleeder", ""},
 	{"sitesniper", "sitesniperm"},
 	{"siteM16", "siteM16m"},
-	{"siterocket", "siterocketm"}
+	{"siterocket", "siterocket"}
 };
 
 RwTexture *&gpSniperSightTex = *(RwTexture**)0x8F5834;
@@ -415,7 +413,7 @@ void CHud::Draw()
 			DrawZoneName
 		*/
 		if (m_pZoneName) {
-			float fZoneAlpha = 0.0f;
+			float fZoneAlpha = 255.0f;
 
 			if (m_pZoneName != m_pLastZoneName) {
 				switch (m_ZoneState) {
@@ -429,7 +427,7 @@ void CHud::Draw()
 				case 2:
 				case 3:
 				case 4:
-					m_ZoneNameTimer = 0;
+					m_ZoneNameTimer = 5;
 					m_ZoneState = 4;
 					break;
 				default:
@@ -441,6 +439,7 @@ void CHud::Draw()
 			if (m_ZoneState) {
 				switch (m_ZoneState) {
 				case 1:
+					m_ZoneFadeTimer = 1000;
 					if (m_ZoneNameTimer > 10000) {
 						m_ZoneFadeTimer = 1000;
 						m_ZoneState = 3;
@@ -468,7 +467,6 @@ void CHud::Draw()
 					if (m_ZoneFadeTimer < 0) {
 						m_ZoneFadeTimer = 0;
 						m_ZoneToPrint = m_pLastZoneName;
-						m_ZoneNameTimer = 0;
 						m_ZoneState = 2;
 					}
 					fZoneAlpha = m_ZoneFadeTimer * 0.001f * 255.0f;
@@ -500,12 +498,6 @@ void CHud::Draw()
 				}
 			}
 		}
-		/*else {
-			m_pLastZoneName = nil;
-			m_ZoneState = 0;
-			m_ZoneFadeTimer = 0;
-			m_ZoneNameTimer = 0;
-		}*/
 
 		/*
 			DrawVehicleName
@@ -633,9 +625,9 @@ void CHud::Draw()
 		wchar sTimer[16];
 
 		if (!CUserDisplay::OnscnTimer.m_sEntries[0].m_bTimerProcessed)
-			TimerOnLastFrame = 0;
+			TimerOnLastFrame = false;
 		if (!CUserDisplay::OnscnTimer.m_sEntries[0].m_bCounterProcessed)
-			CounterOnLastFrame = 0;
+			CounterOnLastFrame = false;
 
 #ifdef FIX_BUGS
 #define TIMER_RIGHT_OFFSET 34.0f // Taken from VC frenzy timer
@@ -647,7 +639,7 @@ void CHud::Draw()
 				if (!TimerOnLastFrame)
 					TimerFlashTimer = 1;
 
-				TimerOnLastFrame = 1;
+				TimerOnLastFrame = true;
 
 				if (TimerFlashTimer) {
 					if (++TimerFlashTimer > 50)
@@ -685,7 +677,7 @@ void CHud::Draw()
 				if (!CounterOnLastFrame)
 					CounterFlashTimer = 1;
 
-				CounterOnLastFrame = 1;
+				CounterOnLastFrame = true;
 
 				if (CounterFlashTimer) {
 					if (++CounterFlashTimer > 50)
@@ -739,11 +731,9 @@ void CHud::Draw()
 		/*
 			DrawPager
 		*/
-		if (!m_PagerMessage[0]) {
-			if (PagerOn == 1) {
-				PagerSoundPlayed = false;
-				PagerOn = 2;
-			}
+		if (!m_PagerMessage[0] && PagerOn == 1) {
+			PagerSoundPlayed = false;
+			PagerOn = 2;
 		}
 		if (m_PagerMessage[0] || PagerOn == 2) {
 			if (!PagerOn) {
@@ -752,7 +742,7 @@ void CHud::Draw()
 			}
 			if (PagerOn == 1) {
 				if (PagerXOffset > 0.0f) {
-					float fStep = PagerXOffset * 0.05f;
+					float fStep = PagerXOffset * 0.1f;
 					if (fStep > 10.0f)
 						fStep = 10.0f;
 					PagerXOffset -= fStep * CTimer::GetTimeStep();
@@ -763,10 +753,10 @@ void CHud::Draw()
 				}
 			}
 			else if (PagerOn == 2) {
-				float fStep = PagerXOffset * 0.05f;
+				float fStep = PagerXOffset * 0.1f;
 				if (fStep < 2.0f)
 					fStep = 2.0f;
-				PagerXOffset += fStep * CTimer::GetTimeStep();
+				PagerXOffset += fStep;
 				if (PagerXOffset > 150.0f) {
 					PagerXOffset = 150.0f;
 					PagerOn = 0;
@@ -815,9 +805,7 @@ void CHud::Draw()
 		DrawScriptText
 	*/
 	if (!CTimer::GetIsUserPaused()) {
-		intro_text_line* IntroText = CTheScripts::IntroTextLines;
-
-		for (int i = 0; i < MAX_NUM_INTRO_TEXT_LINES; i++) {
+		for (int i = 0; i < ARRAY_SIZE(CTheScripts::IntroTextLines); i++) {
 			if (CTheScripts::IntroTextLines[i].m_Text[0] && CTheScripts::IntroTextLines[i].m_bTextBeforeFade) {
 				CFont::SetScale(SCREEN_SCALE_X(CTheScripts::IntroTextLines[i].m_fScaleX), SCREEN_SCALE_Y(CTheScripts::IntroTextLines[i].m_fScaleY * 0.5f));
 				CFont::SetColor(CTheScripts::IntroTextLines[i].m_sColor);
@@ -858,31 +846,31 @@ void CHud::Draw()
 					CFont::SetPropOff();
 
 				CFont::SetFontStyle(CTheScripts::IntroTextLines[i].m_nFont);
-				CFont::PrintString(SCREEN_SCALE_X(640.0f - CTheScripts::IntroTextLines[i].m_fAtX), SCREEN_SCALE_Y(448.0f - CTheScripts::IntroTextLines[i].m_fAtY), IntroText->m_Text);
+				CFont::PrintString(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - CTheScripts::IntroTextLines[i].m_fAtX), SCREEN_SCALE_Y(DEFAULT_SCREEN_HEIGHT - CTheScripts::IntroTextLines[i].m_fAtY), CTheScripts::IntroTextLines[i].m_Text);
 			}
 		}
+		for (int i = 0; i < ARRAY_SIZE(CTheScripts::IntroRectangles); i++) {
+			intro_script_rectangle &IntroRect = CTheScripts::IntroRectangles[i];
 
-		intro_script_rectangle* IntroRect = CTheScripts::IntroRectangles;
-
-		for (int i = 0; i < 16; i++) {
-			if (CTheScripts::IntroRectangles[i].m_bIsUsed && CTheScripts::IntroRectangles[i].m_bBeforeFade) {
-				if (CTheScripts::IntroRectangles[i].m_nTextureId >= 0) {
+			// Yeah, top and bottom changed place. R* vision
+			if (IntroRect.m_bIsUsed && IntroRect.m_bBeforeFade) {
+				if (IntroRect.m_nTextureId >= 0) {
 					CRect rect = {
-						CTheScripts::IntroRectangles[i].m_sRect.left,
-						CTheScripts::IntroRectangles[i].m_sRect.bottom,
-						CTheScripts::IntroRectangles[i].m_sRect.right,
-						CTheScripts::IntroRectangles[i].m_sRect.bottom };
+						IntroRect.m_sRect.left,
+						IntroRect.m_sRect.top,
+						IntroRect.m_sRect.right,
+						IntroRect.m_sRect.bottom };
 
-					CTheScripts::ScriptSprites[CTheScripts::IntroRectangles[i].m_nTextureId].Draw(rect, IntroRect->m_sColor);
+					CTheScripts::ScriptSprites[IntroRect.m_nTextureId].Draw(rect, IntroRect.m_sColor);
 				}
 				else {
 					CRect rect = {
-						CTheScripts::IntroRectangles[i].m_sRect.left,
-						CTheScripts::IntroRectangles[i].m_sRect.bottom,
-						CTheScripts::IntroRectangles[i].m_sRect.right,
-						CTheScripts::IntroRectangles[i].m_sRect.bottom };
+						IntroRect.m_sRect.left,
+						IntroRect.m_sRect.top,
+						IntroRect.m_sRect.right,
+						IntroRect.m_sRect.bottom };
 
-					CSprite2d::DrawRect(rect, IntroRect->m_sColor);
+					CSprite2d::DrawRect(rect, IntroRect.m_sColor);
 				}
 			}
 		}
@@ -928,7 +916,7 @@ void CHud::Draw()
 				CFont::SetCentreSize(SCREEN_SCALE_X(615.0f));
 				CFont::SetFontStyle(FONT_HEADING);
 
-				if (BigMessageX[0] >= (SCREEN_WIDTH - 20)) {
+				if (BigMessageX[0] >= SCREEN_SCALE_FROM_RIGHT(20.0f)) {
 					BigMessageInUse[0] += CTimer::GetTimeStep();
 
 					if (BigMessageInUse[0] >= 120.0f) {
@@ -945,7 +933,7 @@ void CHud::Draw()
 					BigMessageX[0] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 					BigMessageAlpha[0] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 
-					if (BigMessageAlpha[0] >= 255.0f)
+					if (BigMessageAlpha[0] > 255.0f)
 						BigMessageAlpha[0] = 255.0f;
 				}
 
@@ -989,7 +977,7 @@ void CHud::Draw()
 				CFont::SetFontStyle(FONT_HEADING);
 
 				CFont::SetColor(CRGBA(0, 0, 0, BigMessageAlpha[2]));
-				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f + 4.0f), SCREEN_SCALE_FROM_BOTTOM(78.0f), m_BigMessage[2]);
+				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f - 4.0f), SCREEN_SCALE_FROM_BOTTOM(78.0f), m_BigMessage[2]);
 
 				CFont::SetColor(CRGBA(170, 123, 87, BigMessageAlpha[2]));
 				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(82.0f), m_BigMessage[2]);
@@ -1018,7 +1006,7 @@ void CHud::DrawAfterFade()
 				m_HelpMessageState = 2;
 				m_HelpMessageTimer = 0;
 				CMessages::WideStringCopy(m_HelpMessageToPrint, m_HelpMessage, 256);
-				m_HelpMessageDisplayTime = CMessages::GetWideStringLength(m_HelpMessage) * 0.05f + 3.0f;
+				m_fHelpMessageTime = CMessages::GetWideStringLength(m_HelpMessage) * 0.05f + 3.0f;
 
 				if (TheCamera.m_ScreenReductionPercentage == 0.0f)
 					DMAudio.PlayFrontEndSound(SOUND_A0, 0);
@@ -1036,14 +1024,14 @@ void CHud::DrawAfterFade()
 			CMessages::WideStringCopy(m_LastHelpMessage, m_HelpMessage, 256);
 		}
 
-		float fAlpha = 255.0f;
+		float fAlpha = 225.0f;
 
-		if (m_HelpMessageState) {
+		if (m_HelpMessageState != 0) {
 			switch (m_HelpMessageState) {
 			case 1:
-				fAlpha = 255.0f;
+				fAlpha = 225.0f;
 				m_HelpMessageFadeTimer = 600;
-				if (m_HelpMessageTimer > m_fHelpMessageTime * 1000 || m_HelpMessageQuick && m_HelpMessageTimer > 1500) {
+				if (m_HelpMessageTimer > m_fHelpMessageTime * 1000.0f || m_HelpMessageQuick && m_HelpMessageTimer > 1500.0f) {
 					m_HelpMessageFadeTimer = 600;
 					m_HelpMessageState = 3;
 				}
@@ -1054,24 +1042,24 @@ void CHud::DrawAfterFade()
 					m_HelpMessageState = 1;
 					m_HelpMessageFadeTimer = 0;
 				}
-				fAlpha = m_HelpMessageFadeTimer * 0.001f * 255.0f;
+				fAlpha = m_HelpMessageFadeTimer * 0.001f * 225.0f;
 				break;
 			case 3:
 				m_HelpMessageFadeTimer -= 2 * CTimer::GetTimeStepInMilliseconds();
-				if (m_HelpMessageFadeTimer >= 0) {
+				if (m_HelpMessageFadeTimer < 0) {
 					m_HelpMessageState = 0;
 					m_HelpMessageFadeTimer = 0;
 				}
-				fAlpha = m_HelpMessageFadeTimer * 0.001f * 255.0f;
+				fAlpha = m_HelpMessageFadeTimer * 0.001f * 225.0f;
 				break;
 			case 4:
 				m_HelpMessageFadeTimer -= 2 * CTimer::GetTimeStepInMilliseconds();
-				if (m_HelpMessageFadeTimer >= 0) {
+				if (m_HelpMessageFadeTimer < 0) {
 					m_HelpMessageState = 2;
 					m_HelpMessageFadeTimer = 0;
-					CMessages::WideStringCopy(m_HelpMessageToPrint, m_LastHelpMessage, 400);
+					CMessages::WideStringCopy(m_HelpMessageToPrint, m_LastHelpMessage, 256);
 				}
-				fAlpha = m_HelpMessageFadeTimer * 0.001f * 255.0f;
+				fAlpha = m_HelpMessageFadeTimer * 0.001f * 225.0f;
 				break;
 			default:
 				break;
@@ -1088,19 +1076,75 @@ void CHud::DrawAfterFade()
 			else
 				CFont::SetScale(SCREEN_SCALE_X(0.52f), SCREEN_SCALE_Y(1.1f));
 
+			CFont::SetColor(CRGBA(175, 175, 175, 255));
 			CFont::SetJustifyOff();
 			CFont::SetWrapx(SCREEN_SCALE_X(200.0f + 26.0f - 4.0f));
 			CFont::SetFontStyle(FONT_BANK);
 			CFont::SetBackgroundOn();
 			CFont::SetBackGroundOnlyTextOff();
-			CFont::SetBackgroundColor(CRGBA(0, 0, 0, fAlpha * 0.8f));
-			CFont::SetColor(CRGBA(175, 175, 175, 255));
+			CFont::SetBackgroundColor(CRGBA(0, 0, 0, fAlpha * 0.9f));
 			CFont::PrintString(SCREEN_SCALE_X(26.0f), SCREEN_SCALE_Y(28.0f + (150.0f - PagerXOffset) * 0.6f), CHud::m_HelpMessageToPrint);
 			CFont::SetAlphaFade(255.0f);
 		}
 	}
-	else
-		m_HelpMessageState = 0;
+
+	for (int i = 0; i < ARRAY_SIZE(CTheScripts::IntroTextLines); i++) {
+		intro_text_line &line = CTheScripts::IntroTextLines[i];
+		if (line.m_Text[0] != '\0' && !line.m_bTextBeforeFade) {
+			CFont::SetScale(SCREEN_SCALE_X(line.m_fScaleX), SCREEN_SCALE_Y(line.m_fScaleY) / 2);
+
+			CFont::SetColor(line.m_sColor);
+			if (line.m_bJustify)
+				CFont::SetJustifyOn();
+			else
+				CFont::SetJustifyOff();
+
+			if (line.m_bRightJustify)
+				CFont::SetRightJustifyOn();
+			else
+				CFont::SetRightJustifyOff();
+
+			if (line.m_bCentered)
+				CFont::SetCentreOn();
+			else
+				CFont::SetCentreOff();
+
+			CFont::SetWrapx(SCREEN_SCALE_X(line.m_fWrapX));
+			CFont::SetCentreSize(SCREEN_SCALE_X(line.m_fCenterSize));
+			if (line.m_bBackground)
+				CFont::SetBackgroundOn();
+			else
+				CFont::SetBackgroundOff();
+
+			CFont::SetBackgroundColor(line.m_sBackgroundColor);
+			if (line.m_bBackgroundOnly)
+				CFont::SetBackGroundOnlyTextOn();
+			else
+				CFont::SetBackGroundOnlyTextOff();
+
+			if (line.m_bTextProportional)
+				CFont::SetPropOn();
+			else
+				CFont::SetPropOff();
+
+			CFont::SetFontStyle(line.m_nFont);
+			CFont::PrintString(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - line.m_fAtX), SCREEN_SCALE_Y(DEFAULT_SCREEN_HEIGHT - line.m_fAtY), line.m_Text);
+		}
+	}
+	for (int i = 0; i < ARRAY_SIZE(CTheScripts::IntroRectangles); i++) {
+		intro_script_rectangle &rectangle = CTheScripts::IntroRectangles[i];
+		if (rectangle.m_bIsUsed && !rectangle.m_bBeforeFade) {
+
+			// Yeah, top and bottom changed place. R* vision
+			if (rectangle.m_nTextureId >= 0) {
+				CTheScripts::ScriptSprites[rectangle.m_nTextureId].Draw(CRect(rectangle.m_sRect.left, rectangle.m_sRect.bottom,
+					rectangle.m_sRect.right, rectangle.m_sRect.top), rectangle.m_sColor);
+			} else {
+				CSprite2d::DrawRect(CRect(rectangle.m_sRect.left, rectangle.m_sRect.bottom,
+					rectangle.m_sRect.right, rectangle.m_sRect.top), rectangle.m_sColor);
+			}
+		}
+	}
 
 	/*
 		DrawBigMessage2
@@ -1142,10 +1186,9 @@ void CHud::DrawAfterFade()
 	if (OddJob2OffTimer > 0)
 		OddJob2OffTimer -= CTimer::GetTimeStepInMilliseconds();
 
-	static float fStep;
+	float fStep;
 	if (m_BigMessage[5][0] && OddJob2OffTimer <= 0.0f) {
-		if (OddJob2On <= 3) {
-			switch (OddJob2On) {
+		switch (OddJob2On) {
 			case 0:
 				OddJob2On = 1;
 				OddJob2XOffset = 380.0f;
@@ -1156,9 +1199,7 @@ void CHud::DrawAfterFade()
 					OddJob2On = 2;
 				}
 				else {
-					fStep = 40.0f;
-					if ((OddJob2XOffset / 6.0f) <= 40.0f)
-						fStep = OddJob2XOffset / 6.0f;
+					fStep = min(40.0f, OddJob2XOffset / 6.0f);
 					OddJob2XOffset = OddJob2XOffset - fStep;
 				}
 				break;
@@ -1169,9 +1210,7 @@ void CHud::DrawAfterFade()
 				}
 				break;
 			case 3:
-				fStep = 30.0f;
-				if ((OddJob2XOffset / 5.0f) >= 30.0f)
-					fStep = OddJob2XOffset / 5.0f;
+				fStep = max(30.0f, OddJob2XOffset / 5.0f);
 
 				OddJob2XOffset = OddJob2XOffset - fStep;
 
@@ -1182,7 +1221,6 @@ void CHud::DrawAfterFade()
 				break;
 			default:
 				break;
-			}
 		}
 
 		if (!m_BigMessage[1][0]) {
@@ -1216,10 +1254,10 @@ void CHud::DrawAfterFade()
 				CFont::SetScale(SCREEN_SCALE_X(1.04f), SCREEN_SCALE_Y(1.6f));
 
 			CFont::SetPropOn();
-			CFont::SetRightJustifyWrap(-500.0f);
+			CFont::SetRightJustifyWrap(SCREEN_SCALE_X(-500.0f));
 			CFont::SetRightJustifyOn();
 			CFont::SetFontStyle(FONT_HEADING);
-			if (BigMessageX[1] >= (SCREEN_WIDTH - 20)) {
+			if (BigMessageX[1] >= SCREEN_SCALE_FROM_RIGHT(20.0f)) {
 				BigMessageInUse[1] += CTimer::GetTimeStep();
 
 				if (BigMessageInUse[1] >= 120.0f) {
@@ -1230,12 +1268,11 @@ void CHud::DrawAfterFade()
 					m_BigMessage[1][0] = 0;
 					BigMessageAlpha[1] = 0.0f;
 				}
-			}
-			else {
+			} else {
 				BigMessageX[1] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 				BigMessageAlpha[1] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 
-				if (BigMessageAlpha[1] >= 255.0f)
+				if (BigMessageAlpha[1] > 255.0f)
 					BigMessageAlpha[1] = 255.0f;
 			}
 
@@ -1273,7 +1310,7 @@ void CHud::GetRidOfAllHudMessages()
 	m_HelpMessageFadeTimer = 0;
 	m_HelpMessageState = 0;
 	m_HelpMessageQuick = 0;
-	m_HelpMessageDisplayTime = 1.0f;
+	m_fHelpMessageTime = 1.0f;
 	m_VehicleName = nil;
 	m_pLastVehicleName = nil;
 	m_pVehicleNameToPrint = nil;
@@ -1303,7 +1340,7 @@ void CHud::Initialise()
 	CTxdStore::PopCurrentTxd();
 	CTxdStore::SetCurrentTxd(HudTXD);
 
-	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames); i++) {
+	for (int i = 0; i < NUM_HUD_SPRITES; i++) {
 		Sprites[i].SetTexture(WeaponFilenames[i].name, WeaponFilenames[i].mask);
 	}
 
@@ -1314,14 +1351,14 @@ void CHud::Initialise()
 	if (gpRocketSightTex == nil)
 		gpRocketSightTex = RwTextureRead("siterocket", nil);
 
-	CounterOnLastFrame = 0;
+	CounterOnLastFrame = false;
 	m_ItemToFlash = ITEM_NONE;
 	OddJob2Timer = 0;
 	OddJob2OffTimer = 0.0f;
 	OddJob2On = 0;
 	OddJob2XOffset = 0.0f;
 	CounterFlashTimer = 0;
-	TimerOnLastFrame = 0;
+	TimerOnLastFrame = false;
 	TimerFlashTimer = 0;
 	SpriteBrightness = 0;
 	PagerOn = 0;
@@ -1338,14 +1375,14 @@ void CHud::ReInitialise() {
 
 	GetRidOfAllHudMessages();
 
-	CounterOnLastFrame = 0;
+	CounterOnLastFrame = false;
 	m_ItemToFlash = ITEM_NONE;
 	OddJob2Timer = 0;
 	OddJob2OffTimer = 0.0f;
 	OddJob2On = 0;
 	OddJob2XOffset = 0.0f;
 	CounterFlashTimer = 0;
-	TimerOnLastFrame = 0;
+	TimerOnLastFrame = false;
 	TimerFlashTimer = 0;
 	SpriteBrightness = 0;
 	PagerOn = 0;
@@ -1435,7 +1472,7 @@ void CHud::SetZoneName(wchar *name)
 
 void CHud::Shutdown()
 {
-	for (int i = 0; i < ARRAY_SIZE(WeaponFilenames); ++i) {
+	for (int i = 0; i < NUM_HUD_SPRITES; ++i) {
 		Sprites[i].Delete();
 	}
 

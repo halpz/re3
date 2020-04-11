@@ -54,3 +54,7 @@ public:
 	static void StartUserPause(void);
 	static void EndUserPause(void);
 };
+
+#ifdef FIX_BUGS
+extern double frameTime;
+#endif

@@ -34,6 +34,10 @@ LARGE_INTEGER &perfSuspendCounter = *(LARGE_INTEGER*)0x62A318;
 //UInt32 suspendDepth;
 uint32 &suspendDepth = *(uint32*)0x62A320;
 
+#ifdef FIX_BUGS
+double frameTime;
+#endif
+
 void CTimer::Initialise(void)
 {
 	debug("Initialising CTimer...\n");
@@ -90,17 +94,21 @@ void CTimer::Update(void)
 		
 		float updInCyclesScaled = updInCycles * ms_fTimeScale;
 		
-		double upd = updInCyclesScaled / (double)_nCyclesPerMS;
+		// We need that real frame time to fix transparent menu bug.
+#ifndef FIX_BUGS
+		double
+#endif
+		frameTime = updInCyclesScaled / (double)_nCyclesPerMS;
 
-		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + upd;
+		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + frameTime;
 		
 		if ( GetIsPaused() )
 			ms_fTimeStep = 0.0f;
 		else
 		{
-			m_snTimeInMilliseconds = m_snTimeInMilliseconds + upd;
-			m_snTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped + upd;
-			ms_fTimeStep = updInCyclesScaled / (double)_nCyclesPerMS / 20.0f;
+			m_snTimeInMilliseconds = m_snTimeInMilliseconds + frameTime;
+			m_snTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped + frameTime;
+			ms_fTimeStep = frameTime / 1000.0f * 50.0f;
 		}
 	}
 	else
@@ -109,19 +117,23 @@ void CTimer::Update(void)
 		
 		uint32 updInMs = timer - oldPcTimer;
 		
-		double upd = (double)updInMs * ms_fTimeScale;
+		// We need that real frame time to fix transparent menu bug.
+#ifndef FIX_BUGS
+		double
+#endif
+		frameTime = (double)updInMs * ms_fTimeScale;
 		
 		oldPcTimer = timer;
 		
-		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + upd;
+		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + frameTime;
 															 
 		if ( GetIsPaused() )
 			ms_fTimeStep = 0.0f;
 		else
 		{
-			m_snTimeInMilliseconds = m_snTimeInMilliseconds + upd;
-			m_snTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped + upd;
-			ms_fTimeStep = upd / 1000.0f * 50.0f;
+			m_snTimeInMilliseconds = m_snTimeInMilliseconds + frameTime;
+			m_snTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped + frameTime;
+			ms_fTimeStep = frameTime / 1000.0f * 50.0f;
 		}
 	}
 	
