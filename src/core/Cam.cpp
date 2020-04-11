@@ -3511,7 +3511,7 @@ CCam::Process_FlyBy(const CVector&, float, float, float)
 
 	Up = CVector(0.0f, 0.0f, 1.0f);
 	if(TheCamera.m_bStartingSpline)
-		m_fTimeElapsedFloat += CTimer::GetTimeStepInMilliseconds();
+		m_fTimeElapsedFloat += CTimer::GetTimeStepNonClippedInMilliseconds();
 	else{
 		m_fTimeElapsedFloat = 0.0f;
 		m_uiFinishTime = MS(TheCamera.m_arrPathArray[2].m_arr_PathData[10*((int)TheCamera.m_arrPathArray[2].m_arr_PathData[0]-1) + 1]);
