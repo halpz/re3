@@ -410,7 +410,7 @@ CCutsceneMgr::Update(void)
 
 	if (!ms_running) return;
 
-	ms_cutsceneTimer += CTimer::GetTimeStepNonClipped() * 0.02f;
+	ms_cutsceneTimer += CTimer::GetTimeStepNonClippedInSeconds();
 	if (CGeneral::faststricmp(ms_cutsceneName, "end") && TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FLYBY && ms_cutsceneLoadStatus == CUTSCENE_LOADING_0) {
 		if (CPad::GetPad(0)->GetCrossJustDown()
 			|| (CGame::playingIntro && CPad::GetPad(0)->GetStartJustDown())

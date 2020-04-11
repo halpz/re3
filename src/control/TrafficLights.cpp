@@ -40,9 +40,9 @@ CTrafficLights::DisplayActualLight(CEntity *ent)
 	for(i = 1; i < 6; i++){
 		assert(mi->Get2dEffect(i));
 		yMin = min(yMin, mi->Get2dEffect(i)->pos.y);
-		yMax = min(yMax, mi->Get2dEffect(i)->pos.y);
+		yMax = max(yMax, mi->Get2dEffect(i)->pos.y);
 		zMin = min(zMin, mi->Get2dEffect(i)->pos.z);
-		zMax = min(zMax, mi->Get2dEffect(i)->pos.z);
+		zMax = max(zMax, mi->Get2dEffect(i)->pos.z);
 	}
 
 	CVector pos1, pos2;
