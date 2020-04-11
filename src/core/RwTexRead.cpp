@@ -260,11 +260,13 @@ CreateTxdImageForVideoCard()
 
 	RwStream *img = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMWRITE, "models\\txd.img");
 	if (img == nil) {
-		if (_dwOperatingSystemVersion == OS_WINNT || _dwOperatingSystemVersion == OS_WIN2000 || _dwOperatingSystemVersion == OS_WINXP) {
+		// original code does otherwise and it leaks
+		delete []buf;
+		delete pDir;
+
+		if (_dwOperatingSystemVersion == OS_WINNT || _dwOperatingSystemVersion == OS_WIN2000 || _dwOperatingSystemVersion == OS_WINXP)
 			DealWithTxdWriteError(0, TXDSTORESIZE, "CVT_CRT");
-			delete []buf;
-			delete pDir;
-		}
+
 		return false;
 	}
 
