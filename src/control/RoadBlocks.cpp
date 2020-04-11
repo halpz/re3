@@ -44,7 +44,7 @@ CRoadBlocks::Init(void)
 void
 CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType, int16 roadBlockNode)
 {
-	CVector vecRoadBlockOffets[6] = { {-1.5, 1.8f, 0.0f}, {-1.5f, -1.8f, 0.0f}, {1.5f, 1.8f, 0.0f},
+	static const CVector vecRoadBlockOffets[6] = { {-1.5, 1.8f, 0.0f}, {-1.5f, -1.8f, 0.0f}, {1.5f, 1.8f, 0.0f},
 	{1.5f, -1.8f, 0.0f}, {-1.5f, 0.0f, 0.0f}, {1.5, 0.0, 0.0} };
 	CEntity* pEntityToAttack = (CEntity*)FindPlayerVehicle();
 	if (!pEntityToAttack)
@@ -54,30 +54,13 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 	for (int32 i = 0; i < 2; i++) {
 		const int32 roadBlockIndex = i + 2 * roadBlockType;
 		CVector posForZ = pVehicle->m_matrix * (fRadius * vecRoadBlockOffets[roadBlockIndex]);
-		int32 modelInfoId = 0;
+		int32 modelInfoId = MI_COP;
 		eCopType copType = COP_STREET;
 		switch (pVehicle->GetModelIndex())
 		{
 		case MI_FBICAR:
 			modelInfoId = MI_FBI;
 			copType = COP_FBI;
-			break;
-		case MI_MOONBEAM:
-		case MI_ESPERANT:
-		case MI_TAXI:
-		case MI_KURUMA:
-		case MI_BOBCAT:
-		case MI_MRWHOOP:
-		case MI_BFINJECT:
-		case MI_CORPSE:
-		case MI_POLICE:
-		case MI_SECURICA:
-		case MI_BANSHEE:
-		case MI_PREDATOR:
-		case MI_BUS:
-		case MI_RHINO:
-			copType = COP_STREET;
-			modelInfoId = MI_COP;
 			break;
 		case MI_ENFORCER:
 			modelInfoId = MI_SWAT;
@@ -121,7 +104,7 @@ void
 CRoadBlocks::GenerateRoadBlocks(void) 
 { 
 	CMatrix offsetMatrix;
-	unsigned int frame = CTimer::GetFrameCounter() & 0xF;
+	uint32 frame = CTimer::GetFrameCounter() & 0xF;
 	int16 nRoadblockNode = (int16)(600 * frame) / 16;
 	const int16 maxRoadBlocks = (int16)(600 * (frame + 1)) / 16;
 	int16 numRoadBlocks = CRoadBlocks::NumRoadBlocks;
@@ -137,11 +120,9 @@ CRoadBlocks::GenerateRoadBlocks(void)
 		if (direction.Magnitude() < 80.0f) {
 			CRoadBlocks::InOrOut[nRoadblockNode] = false;
 			continue;
-		}
-		else if (!CRoadBlocks::InOrOut[nRoadblockNode]) {
+		} else if (!CRoadBlocks::InOrOut[nRoadblockNode]) {
 			CRoadBlocks::InOrOut[nRoadblockNode] = true;
-		}
-		else {
+		} else {
 			continue;
 		}
 		if (!FindPlayerVehicle())
@@ -173,8 +154,7 @@ CRoadBlocks::GenerateRoadBlocks(void)
 			uint8 nRoadblockType = fDotProduct >= 0.0f;
 			if (CGeneral::GetRandomNumber() & 1) {
 				offsetMatrix.SetRotateZ(((CGeneral::GetRandomNumber() & 0xFF) - 128.0f) * 0.003f + HALFPI);
-			}
-			else {
+			} else {
 				nRoadblockType = fDotProduct < 0.0f;
 				offsetMatrix.SetRotateZ(((CGeneral::GetRandomNumber() & 0xFF) - 128.0f) * 0.003f - HALFPI);
 			}
@@ -208,15 +188,14 @@ CRoadBlocks::GenerateRoadBlocks(void)
 			pVehicle->bExtendedRange = true;
 			if (pVehicle->UsesSiren(pVehicle->GetModelIndex()) && CGeneral::GetRandomNumber() & 1)
 				pVehicle->m_bSirenOrAlarm = true;
-			if (pVehicle->m_matrix.GetForward().z <= 0.94f) {
-				delete pVehicle;
-			}
-			else {
+			if (pVehicle->m_matrix.GetForward().z > 0.94f) {
 				CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);
 				CWorld::Add(pVehicle);
 				pVehicle->bCreateRoadBlockPeds = true;
 				pVehicle->m_nRoadblockType = nRoadblockType;
 				pVehicle->m_nRoadblockNode = nRoadblockNode;
+			} else {
+				delete pVehicle;
 			}
 		}
 	}
