@@ -9,11 +9,13 @@
 #include "Clock.h"
 #include "Date.h"
 #include "FileMgr.h"
+#include "Frontend.h"
 #include "GameLogic.h"
 #include "Gangs.h"
 #include "Garages.h"
 #include "GenericGameStorage.h"
 #include "Pad.h"
+#include "Particle.h"
 #include "ParticleObject.h"
 #include "PathFind.h"
 #include "PCSave.h"
@@ -48,7 +50,6 @@ char SaveFileNameJustSaved[260];
 int (&Slots)[SLOT_COUNT+1] = *(int(*)[SLOT_COUNT+1])*(uintptr*)0x72803C;
 CDate &CompileDateAndTime = *(CDate*)0x72BCB8;
 
-
 bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
 bool &JustLoadedDontFadeInYet = *(bool*)0x95CDB4;
 bool &StillToFadeOut = *(bool*)0x95CD99;
@@ -58,10 +59,22 @@ uint32 &TimeToStayFadedBeforeFadeOut = *(uint32*)0x611564;
 #define ReadDataFromBufferPointer(buf, to) memcpy(&to, buf, sizeof(to)); buf += align4bytes(sizeof(to));
 #define WriteDataToBufferPointer(buf, from) memcpy(buf, &from, sizeof(from)); buf += align4bytes(sizeof(from));
 
-WRAPPER bool GenericLoad() { EAXJMP(0x590A00); }
+#define LoadSaveDataBlock(msg,load_func)\
+do {\
+	if (!ReadDataFromFile(file, (uint8 *) &size, 4))\
+		return false;\
+	size = align4bytes(size);\
+	if (!ReadDataFromFile(file, work_buff, size))\
+		return false;\
+	buf = work_buff;\
+	printf(msg);\
+	ReadDataFromBufferPointer(buf, size);\
+	load_func(buf, size);\
+	size = align4bytes(size);\
+	buf += size;\
+} while (0)
 
-
-#define WRITE_BLOCK(save_func)\
+#define WriteSaveDataBlock(save_func)\
 do {\
 	buf = work_buff;\
 	reserved = 0;\
@@ -138,7 +151,6 @@ GenericSave(int file)
 	WriteDataToBufferPointer(buf, CWeather::WeatherTypeInList);
 	WriteDataToBufferPointer(buf, TheCamera.CarZoomIndicator);
 	WriteDataToBufferPointer(buf, TheCamera.PedZoomIndicator);
-
 	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 
 	// Save scripts, block is nested within the same block as simple vars for some reason
@@ -153,25 +165,25 @@ GenericSave(int file)
 	totalSize = buf - work_buff;
 
 	// Save the rest
-	WRITE_BLOCK(CPools::SavePedPool);
-	WRITE_BLOCK(CGarages::Save);
-	WRITE_BLOCK(CPools::SaveVehiclePool);
-	WRITE_BLOCK(CPools::SaveObjectPool);
-	WRITE_BLOCK(ThePaths.Save);
-	WRITE_BLOCK(CCranes::Save);
-	WRITE_BLOCK(CPickups::Save);
-	WRITE_BLOCK(gPhoneInfo.Save);
-	WRITE_BLOCK(CRestart::SaveAllRestartPoints);
-	WRITE_BLOCK(CRadar::SaveAllRadarBlips);
-	WRITE_BLOCK(CTheZones::SaveAllZones);
-	WRITE_BLOCK(CGangs::SaveAllGangData);
-	WRITE_BLOCK(CTheCarGenerators::SaveAllCarGenerators);
-	WRITE_BLOCK(CParticleObject::SaveParticle);
-	WRITE_BLOCK(cAudioScriptObject::SaveAllAudioScriptObjects);
-	WRITE_BLOCK(CWorld::Players[CWorld::PlayerInFocus].SavePlayerInfo);
-	WRITE_BLOCK(CStats::SaveStats);
-	WRITE_BLOCK(CStreaming::MemoryCardSave);
-	WRITE_BLOCK(CPedType::Save);
+	WriteSaveDataBlock(CPools::SavePedPool);
+	WriteSaveDataBlock(CGarages::Save);
+	WriteSaveDataBlock(CPools::SaveVehiclePool);
+	WriteSaveDataBlock(CPools::SaveObjectPool);
+	WriteSaveDataBlock(ThePaths.Save);
+	WriteSaveDataBlock(CCranes::Save);
+	WriteSaveDataBlock(CPickups::Save);
+	WriteSaveDataBlock(gPhoneInfo.Save);
+	WriteSaveDataBlock(CRestart::SaveAllRestartPoints);
+	WriteSaveDataBlock(CRadar::SaveAllRadarBlips);
+	WriteSaveDataBlock(CTheZones::SaveAllZones);
+	WriteSaveDataBlock(CGangs::SaveAllGangData);
+	WriteSaveDataBlock(CTheCarGenerators::SaveAllCarGenerators);
+	WriteSaveDataBlock(CParticleObject::SaveParticle);
+	WriteSaveDataBlock(cAudioScriptObject::SaveAllAudioScriptObjects);
+	WriteSaveDataBlock(CWorld::Players[CWorld::PlayerInFocus].SavePlayerInfo);
+	WriteSaveDataBlock(CStats::SaveStats);
+	WriteSaveDataBlock(CStreaming::MemoryCardSave);
+	WriteSaveDataBlock(CPedType::Save);
 
 	// Write padding
 	for (int i = 0; i < 4; i++) {
@@ -195,6 +207,104 @@ GenericSave(int file)
 		return false;
 	}
 	
+	return true;
+}
+
+bool
+GenericLoad()
+{
+	uint8 *buf;
+	int32 file;
+	uint32 size;
+
+	int32 saveSize;
+	CPad *currPad;
+
+	uint32 timeInMilliseconds;
+	float timeScale;
+	float timeStep;
+	float timeStepNonClipped;
+	uint32 frameCounter;
+
+	// Load SimpleVars and Scripts
+	CheckSum = 0;
+	CDate(CompileDateAndTime);
+	CPad::ResetCheats();
+	if (!ReadInSizeofSaveFileBuffer(file, size))
+		return false;
+	size = align4bytes(size);
+	ReadDataFromFile(file, work_buff, size);
+	buf = (work_buff + 0x40);
+	ReadDataFromBufferPointer(buf, saveSize);
+	ReadDataFromBufferPointer(buf, CGame::currLevel);
+	ReadDataFromBufferPointer(buf, TheCamera.GetPosition().x);
+	ReadDataFromBufferPointer(buf, TheCamera.GetPosition().y);
+	ReadDataFromBufferPointer(buf, TheCamera.GetPosition().z);
+	ReadDataFromBufferPointer(buf, CClock::ms_nMillisecondsPerGameMinute);
+	ReadDataFromBufferPointer(buf, CClock::ms_nLastClockTick);
+	ReadDataFromBufferPointer(buf, CClock::ms_nGameClockHours);
+	ReadDataFromBufferPointer(buf, CClock::ms_nGameClockMinutes);
+	currPad = CPad::GetPad(0);
+	ReadDataFromBufferPointer(buf, currPad->Mode);
+	ReadDataFromBufferPointer(buf, timeInMilliseconds); CTimer::SetTimeInMilliseconds(timeInMilliseconds);
+	ReadDataFromBufferPointer(buf, timeScale); CTimer::SetTimeScale(timeScale);
+	ReadDataFromBufferPointer(buf, timeStep); CTimer::SetTimeStep(timeStep);
+	ReadDataFromBufferPointer(buf, timeStepNonClipped); CTimer::SetTimeInMillisecondsNonClipped(timeStepNonClipped);
+	ReadDataFromBufferPointer(buf, frameCounter); CTimer::SetFrameCounter(frameCounter);
+	ReadDataFromBufferPointer(buf, CTimeStep::ms_fTimeStep);
+	ReadDataFromBufferPointer(buf, CTimeStep::ms_fFramesPerUpdate);
+	ReadDataFromBufferPointer(buf, CTimeStep::ms_fTimeScale);
+	ReadDataFromBufferPointer(buf, CWeather::OldWeatherType);
+	ReadDataFromBufferPointer(buf, CWeather::NewWeatherType);
+	ReadDataFromBufferPointer(buf, CWeather::ForcedWeatherType);
+	ReadDataFromBufferPointer(buf, CWeather::InterpolationValue);
+	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nSecond);
+	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nMinute);
+	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nHour);
+	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nDay);
+	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nMonth);
+	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nYear);
+	ReadDataFromBufferPointer(buf, CWeather::WeatherTypeInList);
+	ReadDataFromBufferPointer(buf, TheCamera.CarZoomIndicator);
+	ReadDataFromBufferPointer(buf, TheCamera.PedZoomIndicator);
+	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
+	printf("Loading Scripts \n");
+	ReadDataFromBufferPointer(buf, size);
+	CTheScripts::LoadAllScripts(buf, size);
+	size = align4bytes(size);
+	buf += size;
+
+	// Load the rest
+	LoadSaveDataBlock("Loading PedPool \n", CPools::LoadPedPool);
+	LoadSaveDataBlock("Loading Garages \n", CGarages::Load);
+	LoadSaveDataBlock("Loading Vehicles \n", CPools::LoadVehiclePool);
+	LoadSaveDataBlock("Loading Objects \n", CPools::LoadObjectPool);
+	LoadSaveDataBlock("Loading Paths \n", ThePaths.Load);
+	LoadSaveDataBlock("Loading Cranes \n", CranesLoad);
+	LoadSaveDataBlock("Loading Pickups \n", CPickups::Load);
+	LoadSaveDataBlock("Loading Phoneinfo \n", gPhoneInfo.Load);
+	LoadSaveDataBlock("Loading Restart \n", CRestart::LoadAllRestartPoints);
+	LoadSaveDataBlock("Loading Radar Blips \n", CRadar::LoadAllRadarBlips);
+	LoadSaveDataBlock("Loading Zones \n", CTheZones::LoadAllZones);
+	LoadSaveDataBlock("Loading Gang Data \n", CGangs::LoadAllGangData);
+	LoadSaveDataBlock("Loading Car Generators \n", CTheCarGenerators::LoadAllCarGenerators);
+	CParticle::ReloadConfig();
+	LoadSaveDataBlock("Loading Particles \n", CParticleObject::LoadParticle);
+	LoadSaveDataBlock("Loading AudioScript Objects \n", cAudioScriptObject::LoadAllAudioScriptObjects);
+	LoadSaveDataBlock("Loading Player Info \n", CWorld::Players[CWorld::PlayerInFocus].LoadPlayerInfo);
+	LoadSaveDataBlock("Loading Stats \n", CStats::LoadStats);
+	LoadSaveDataBlock("Loading Streaming Stuff \n", CStreaming::MemoryCardLoad);
+	LoadSaveDataBlock("Loading PedType Stuff \n", CPedType::Load);
+
+	DMAudio.SetMusicMasterVolume(CMenuManager::m_PrefsMusicVolume);
+	DMAudio.SetEffectsMasterVolume(CMenuManager::m_PrefsSfxVolume);
+	if (!CloseFile(file)) {
+		PcSaveHelper.nErrorCode = SAVESTATUS_ERR_LOAD_CLOSE;
+		return false;
+	}
+	DoGameSpecificStuffAfterSucessLoad();
+	printf("Game successfully loaded \n");
+
 	return true;
 }
 
@@ -411,7 +521,7 @@ align4bytes(int32 size)
 
 STARTPATCHES
 	InjectHook(0x58F8D0, GenericSave, PATCH_JUMP);
-	//InjectHook(0x590A00, GenericLoad, PATCH_JUMP);
+	InjectHook(0x590A00, GenericLoad, PATCH_JUMP);
 	InjectHook(0x591910, ReadInSizeofSaveFileBuffer, PATCH_JUMP);
 	InjectHook(0x591990, ReadDataFromFile, PATCH_JUMP);
 	InjectHook(0x591A00, CloseFile, PATCH_JUMP);
