@@ -94,7 +94,7 @@ void TankCheat()
 
 		if (node < 0) return;
 		
-#ifndef FIX_BUGS // TEMP!!!
+#ifdef FIX_BUGS
 		CAutomobile* tank = new CAutomobile(MI_RHINO, RANDOM_VEHICLE);
 #else
 		CAutomobile *tank = new CAutomobile(MI_RHINO, MISSION_VEHICLE);
