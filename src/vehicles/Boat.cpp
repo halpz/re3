@@ -70,7 +70,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 	unk1 = 0.0f;
 	m_bIsAnchored = true;
 	field_2C4 = -9999.99f;
-	m_flagD8 = true;
+	bTouchingWater = true;
 	field_2CC = 0.0f;
 	field_2D0 = 0;
 	m_nNumWakePoints = 0;

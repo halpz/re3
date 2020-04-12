@@ -967,7 +967,7 @@ CPopulation::ConvertToRealObject(CDummyObject *dummy)
 	} else if (obj->m_modelIndex == MI_BUOY) {
 		obj->bIsStatic = false;
 		obj->m_vecMoveSpeed = CVector(0.0f, 0.0f, -0.001f);
-		obj->m_flagD8 = true;
+		obj->bTouchingWater = true;
 		obj->AddToMovingList();
 	}
 }

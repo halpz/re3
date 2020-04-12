@@ -26,7 +26,7 @@ cBuoyancy::ProcessBuoyancy(CPhysical *phys, float buoyancy, CVector *point, CVec
 {
 	m_numSteps = 2.0f;
 
-	if(!CWaterLevel::GetWaterLevel(phys->GetPosition(), &m_waterlevel, phys->m_flagD8))
+	if(!CWaterLevel::GetWaterLevel(phys->GetPosition(), &m_waterlevel, phys->bTouchingWater))
 		return false;
 	m_matrix = phys->GetMatrix();
 

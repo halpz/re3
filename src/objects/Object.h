@@ -3,10 +3,23 @@
 #include "Physical.h"
 
 enum {
+	UNKNOWN_OBJECT = 0,
 	GAME_OBJECT = 1,
 	MISSION_OBJECT = 2,
 	TEMP_OBJECT = 3,
 	CUTSCENE_OBJECT = 4,
+};
+
+enum {
+	COLDAMAGE_EFFECT_NONE = 0,
+	COLDAMAGE_EFFECT_CHANGE_MODEL = 1,
+	COLDAMAGE_EFFECT_SPLIT_MODEL = 2,
+	COLDAMAGE_EFFECT_SMASH_COMPLETELY = 3,
+	COLDAMAGE_EFFECT_CHANGE_THEN_SMASH = 4,
+	COLDAMAGE_EFFECT_SMASH_CARDBOX_COMPLETELY = 50,
+	COLDAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY = 60,
+	COLDAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY = 70,
+	COLDAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY = 80,
 };
 
 enum {
@@ -41,21 +54,21 @@ public:
 	int8 bHasBeenDamaged : 1;
 	int8 bUseVehicleColours : 1;
 	int8 m_obj_flag80 : 1;
-  int8 field_172; // car for a bonus pickup?
-  int8 field_173;
+	int8 m_nBonusValue; 
+	int8 field_173;
 	float m_fCollisionDamageMultiplier;
 	uint8 m_nCollisionDamageEffect;
 	uint8 m_nSpecialCollisionResponseCases;
 	bool m_bCameraToAvoidThisObject;
-  int8 field_17B;
-  int8 field_17C;
-  int8 field_17D;
-  int8 field_17E;
-  int8 field_17F;
+	int8 field_17B;
+	int8 field_17C;
+	int8 field_17D;
+	int8 field_17E;
+	int8 field_17F;
 	uint32 m_nEndOfLifeTime;
 	int16 m_nRefModelIndex;
-  int8 field_186;
-  int8 field_187;
+	int8 field_186;
+	int8 field_187;
 	CEntity *m_pCurSurface;
 	CEntity *m_pCollidingEntity;
 	int8 m_colour1, m_colour2;
@@ -74,7 +87,7 @@ public:
 	~CObject(void);
 
 	void ProcessControl(void);
-	void Teleport(CVector);
+	void Teleport(CVector vecPos);
 	void Render(void);
 	bool SetupLighting(void);
 	void RemoveLighting(bool reset);
@@ -84,6 +97,8 @@ public:
 	void Init(void);
 	bool CanBeDeleted(void);
 
-	static void DeleteAllTempObjectInArea(CVector, float);
+	static void DeleteAllMissionObjects();
+	static void DeleteAllTempObjects();
+	static void DeleteAllTempObjectInArea(CVector point, float fRadius);
 };
 static_assert(sizeof(CObject) == 0x198, "CObject: error");

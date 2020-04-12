@@ -2814,7 +2814,7 @@ CAutomobile::ProcessBuoyancy(void)
 	CVector impulse, point;
 
 	if(mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancy, &point, &impulse)){
-		m_flagD8 = true;
+		bTouchingWater = true;
 		ApplyMoveForce(impulse);
 		ApplyTurnForce(impulse, point);
 
@@ -2899,7 +2899,7 @@ CAutomobile::ProcessBuoyancy(void)
 		}
 	}else{
 		bIsInWater = false;
-		m_flagD8 = false;
+		bTouchingWater = false;
 
 		static RwRGBA splashCol = {155, 155, 185, 196};
 		static RwRGBA smokeCol = {255, 255, 255, 255};
