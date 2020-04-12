@@ -2724,7 +2724,10 @@ CPed::SetObjective(eObjective newObj, void *entity)
 				break;
 		}
 	} else {
-		if ((newObj == OBJECTIVE_LEAVE_VEHICLE
+		if ((newObj == OBJECTIVE_WAIT_IN_CAR_THEN_GETOUT || newObj == OBJECTIVE_KILL_CHAR_ON_FOOT ||
+			newObj == OBJECTIVE_KILL_CHAR_ANY_MEANS || newObj == OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE ||
+			newObj == OBJECTIVE_FLEE_CHAR_ON_FOOT_ALWAYS || newObj == OBJECTIVE_GOTO_CHAR_ON_FOOT ||
+			newObj == OBJECTIVE_FOLLOW_PED_IN_FORMATION || newObj == OBJECTIVE_LEAVE_VEHICLE
 #ifdef VC_PED_PORTS
 			|| newObj == OBJECTIVE_LEAVE_CAR_AND_DIE
 #endif
@@ -2733,7 +2736,6 @@ CPed::SetObjective(eObjective newObj, void *entity)
 	}
 
 #ifdef VC_PED_PORTS
-	SetObjectiveTimer(0);
 	ClearPointGunAt();
 #endif
 	bObjectiveCompleted = false;
