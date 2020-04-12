@@ -1247,8 +1247,8 @@ CStreaming::StreamVehiclesAndPeds(void)
 	static int timeBeforeNextLoad = 0;
 	static int modelQualityClass = 0;
 
-	if(CRecordDataForGame::RecordingState == RECORDSTATE_1 ||
-	   CRecordDataForGame::RecordingState == RECORDSTATE_2)
+	if(CRecordDataForGame::IsRecording() ||
+	   CRecordDataForGame::IsPlayingBack())
 		return;
 
 	if(FindPlayerPed()->m_pWanted->AreSwatRequired()){
