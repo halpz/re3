@@ -125,7 +125,7 @@ void
 cAudioManager::DoPoliceRadioCrackle()
 {
 	m_sQueueSample.m_nEntityIndex = m_nPoliceChannelEntity;
-	m_sQueueSample.m_counter = 0;
+	m_sQueueSample.m_nCounter = 0;
 	m_sQueueSample.m_nSampleIndex = SFX_POLICE_RADIO_CRACKLE;
 	m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
 	m_sQueueSample.m_bIs2D = true;
@@ -136,7 +136,7 @@ cAudioManager::DoPoliceRadioCrackle()
 	m_sQueueSample.m_bEmittingVolume = m_sQueueSample.m_bVolume;
 	m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_POLICE_RADIO_CRACKLE);
 	m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_POLICE_RADIO_CRACKLE);
-	m_sQueueSample.m_bReleasingSoundFlag = 0;
+	m_sQueueSample.m_bReleasingSoundFlag = false;
 	m_sQueueSample.m_bReverbFlag = false;
 	m_sQueueSample.m_bOffset = 63;
 	m_sQueueSample.m_nReleasingVolumeDivider = 3;
@@ -147,17 +147,20 @@ cAudioManager::DoPoliceRadioCrackle()
 void
 cAudioManager::ServicePoliceRadio()
 {
-	int32 wantedLevel = 0; // bug?;
+	int32 wantedLevel = 0; // uninitialized variable
 	static uint32 nLastSeen = 300;
 
-	if (!m_bIsInitialised) return;
+	if(!m_bIsInitialised) return;
 
-	if (!m_bUserPause) {
+	if(!m_bUserPause) {
 		bool crimeReport = SetupCrimeReport();
+#ifdef FIX_BUGS // Crash at 0x5fe6ef
+		if(!FindPlayerPed() || !FindPlayerPed()->m_pWanted) return;
+#endif
 		wantedLevel = FindPlayerPed()->m_pWanted->m_nWantedLevel;
-		if (!crimeReport) {
-			if (wantedLevel) {
-				if (nLastSeen) {
+		if(!crimeReport) {
+			if(wantedLevel) {
+				if(nLastSeen) {
 					--nLastSeen;
 				} else {
 					nLastSeen = m_anRandomTable[1] % 1000 + 2000;
