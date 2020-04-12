@@ -35,7 +35,6 @@ to reverse at the time, calling the original functions is acceptable.
 cAudioManager - WIP
 CBoat
 CBulletInfo
-CPacManPickups
 CPedPath
 CRoadBlocks
 CWeapon
