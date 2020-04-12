@@ -15027,7 +15027,7 @@ CPed::ProcessBuoyancy(void)
 #endif
 
 	if (mod_Buoyancy.ProcessBuoyancy(this, GRAVITY * m_fMass * buoyancyLevel, &buoyancyPoint, &buoyancyImpulse)) {
-		m_flagD8 = true;
+		bTouchingWater = true;
 		CEntity *entity;
 		CColPoint point;
 		if (CWorld::ProcessVerticalLine(GetPosition(), GetPosition().z - 3.0f, point, entity, false, true, false, false, false, false, false)
@@ -15093,7 +15093,7 @@ CPed::ProcessBuoyancy(void)
 		} else
 			return;
 	} else
-		m_flagD8 = false;
+		bTouchingWater = false;
 
 	if (nGenerateWaterCircles && CTimer::GetTimeInMilliseconds() >= nGenerateWaterCircles) {
 		CVector pos = GetPosition();
