@@ -350,7 +350,7 @@ bool CGame::Initialise(const char* datFile)
 	CAntennas::Init();
 	CGlass::Init();
 	gPhoneInfo.Initialise();
-	CSceneEdit::Init();
+	CSceneEdit::Initialise();
 	LoadingScreen("Loading the Game", "Load scripts", nil);
 	CTheScripts::Init();
 	CGangs::Initialise();
