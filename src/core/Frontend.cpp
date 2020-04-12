@@ -44,16 +44,27 @@
 #define FEET_IN_METER 3.33f
 #endif
 
-#define SCROLLABLE_STATS_PAGE
 #ifdef SCROLLABLE_STATS_PAGE
 #define isPlainTextScreen(screen) (screen == MENUPAGE_BRIEFS)
 #else
 #define isPlainTextScreen(screen) (screen == MENUPAGE_BRIEFS || screen == MENUPAGE_STATS)
 #endif
 
+#ifdef TRIANGLE_BACK_BUTTON
+#define GetBackJustUp GetTriangleJustUp
+#define GetBackJustDown GetTriangleJustDown
+#elif defined(CIRCLE_BACK_BUTTON)
+#define GetBackJustUp GetCircleJustUp
+#define GetBackJustDown GetCircleJustDown
+#else
+#define GetBackJustUp GetSquareJustUp
+#define GetBackJustDown GetSquareJustDown
+#endif
+
 #ifdef MENU_MAP
 bool CMenuManager::bMenuMapActive = false;
 bool CMenuManager::bMapMouseShownOnce = false;
+bool CMenuManager::bMapLoaded = false;
 float CMenuManager::fMapSize;
 float CMenuManager::fMapCenterY;
 float CMenuManager::fMapCenterX;
@@ -359,11 +370,6 @@ CMenuManager::PageDownList(bool playSoundOnSuccess)
 inline void
 CMenuManager::ThingsToDoBeforeLeavingPage()
 {
-#ifndef MASTER
-	if (m_nCurrScreen == MENUPAGE_NO_MEMORY_CARD || m_nCurrScreen == MENUPAGE_MEMORY_CARD_DEBUG) {
-		SaveSettings();
-	}
-#endif
 	if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) && strcmp(m_aSkinName, m_PrefsSkinFile) != 0) {
 		CWorld::Players[0].SetPlayerSkin(m_PrefsSkinFile);
 	} else if (m_nCurrScreen == MENUPAGE_SOUND_SETTINGS) {
@@ -719,13 +725,6 @@ CMenuManager::Draw()
 			else
 				str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
 			break;
-#ifndef MASTER
-		case MENUPAGE_NO_MEMORY_CARD:
-		case MENUPAGE_MEMORY_CARD_DEBUG:
-			CFont::SetColor(CRGBA(235, 170, 50, FadeIn(127))); // white in mobile, because all texts are white there
-			str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
-			break;
-#endif
 		case MENUPAGE_SAVE_OVERWRITE_CONFIRM:
 			if (Slots[m_nCurrSaveSlot + 1] == SLOT_EMPTY)
 				str = TheText.Get("FESZ_QZ");
@@ -743,20 +742,12 @@ CMenuManager::Draw()
 			break;
 		}
 
-#ifndef MASTER
-		if (m_nCurrScreen == MENUPAGE_NO_MEMORY_CARD || m_nCurrScreen == MENUPAGE_MEMORY_CARD_DEBUG) {
-			// CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN)); // it's always like that on PC
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(210.0), str);
-		} else
-#endif
-		{
 #ifdef FIX_BUGS
-			// Label is wrapped from right by StretchX(40)px, but wrapped from left by 40px. And this is only place R* didn't use StretchX in here.
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(menuXYpadding), str);
+		// Label is wrapped from right by StretchX(40)px, but wrapped from left by 40px. And this is only place R* didn't use StretchX in here.
+		CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(menuXYpadding), str);
 #else
-			CFont::PrintString(MENU_X_MARGIN, menuXYpadding, str);
+		CFont::PrintString(MENU_X_MARGIN, menuXYpadding, str);
 #endif
-		}
 	}
 
 	CFont::SetCentreSize(SCREEN_WIDTH);
@@ -3337,6 +3328,7 @@ CMenuManager::Process(void)
 	m_bWantToRestart = false;
 	InitialiseChangedLanguageSettings();
 
+	// Just a hack by R* to not make game continuously resume/pause. But we it seems we can live with it.
 	if (CPad::GetPad(0)->GetEscapeJustDown())
 		RequestFrontEndStartUp();
 
@@ -3662,7 +3654,7 @@ CMenuManager::ProcessButtonPresses(void)
 		}
 
 #ifndef TIDY_UP_PBP
-		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetSquareJustDown()) {
+		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustDown()) {
 			m_bShowMouse = false;
 			goBack = true;
 		}
@@ -3741,7 +3733,7 @@ CMenuManager::ProcessButtonPresses(void)
 		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown() || CPad::GetPad(0)->GetLeftMouseJustDown()) {
 			optionSelected = true;
 		}
-		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetSquareJustUp()) {
+		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustUp()) {
 			if (m_nCurrScreen != MENUPAGE_START_MENU) {
 				goBack = true;
 			}
@@ -4009,7 +4001,7 @@ CMenuManager::ProcessButtonPresses(void)
 
 		}
 #ifndef TIDY_UP_PBP
-		if (CPad::GetPad(0)->GetSquareJustDown()) {
+		if (CPad::GetPad(0)->GetBackJustDown()) {
 			if (m_nCurrScreen != MENUPAGE_START_MENU && m_nCurrScreen != MENUPAGE_PAUSE_MENU) {
 				m_bShowMouse = false;
 				goBack = true;
@@ -4050,11 +4042,11 @@ CMenuManager::ProcessButtonPresses(void)
 	if (!goDown && !goUp && !optionSelected) {
 		if (m_nCurrScreen != MENUPAGE_START_MENU) {
 			if (isPlainTextScreen(m_nCurrScreen)) {
-				if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetSquareJustUp()) {
+				if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustUp()) {
 					goBack = true;
 				}
 			} else {
-				if (CPad::GetPad(0)->GetEscapeJustDown() || (m_nCurrScreen != MENUPAGE_PAUSE_MENU && CPad::GetPad(0)->GetSquareJustDown())) {
+				if (CPad::GetPad(0)->GetEscapeJustDown() || (m_nCurrScreen != MENUPAGE_PAUSE_MENU && CPad::GetPad(0)->GetBackJustDown())) {
 					m_bShowMouse = false;
 					goBack = true;
 				}
@@ -4300,12 +4292,7 @@ CMenuManager::ProcessButtonPresses(void)
 						} else {
 #ifdef MENU_MAP
 							if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu == MENUPAGE_MAP) {
-								fMapCenterX = SCREEN_WIDTH / 2;
-								fMapCenterY = SCREEN_HEIGHT / 3;
-								fMapSize = SCREEN_HEIGHT / CDraw::GetAspectRatio();
-								bMapMouseShownOnce = false;
-								CPad::GetPad(0)->Clear(false);
-								CPad::GetPad(1)->Clear(false);
+								bMapLoaded = false;
 							}
 
 #endif
@@ -4913,8 +4900,19 @@ CMenuManager::SwitchMenuOnAndOff()
 			pControlEdit = nil;
 			m_bShutDownFrontEndRequested = false;
 			DisplayComboButtonErrMsg = false;
-			CPad::GetPad(0)->Clear(0);
-			CPad::GetPad(1)->Clear(0);
+
+#ifdef REGISTER_START_BUTTON
+			int16 start1 = CPad::GetPad(0)->PCTempJoyState.Start, start2 = CPad::GetPad(0)->PCTempKeyState.Start,
+				start3 = CPad::GetPad(0)->OldState.Start, start4 = CPad::GetPad(0)->NewState.Start;
+#endif
+			CPad::GetPad(0)->Clear(false);
+			CPad::GetPad(1)->Clear(false);
+#ifdef REGISTER_START_BUTTON
+			CPad::GetPad(0)->PCTempJoyState.Start = start1;
+			CPad::GetPad(0)->PCTempKeyState.Start = start2;
+			CPad::GetPad(0)->OldState.Start = start3;
+			CPad::GetPad(0)->NewState.Start = start4;
+#endif
 			m_nCurrScreen = MENUPAGE_NONE;
 		}
 	}
@@ -5242,6 +5240,20 @@ CMenuManager::PrintMap(void)
 {
 	bMenuMapActive = true;
 	CRadar::InitFrontEndMap();
+
+	if (!bMapLoaded) {
+		fMapCenterX = SCREEN_WIDTH / 2;
+		fMapCenterY = SCREEN_HEIGHT / 3;
+		fMapSize = SCREEN_HEIGHT / CDraw::GetAspectRatio();
+		bMapMouseShownOnce = false;
+		bMapLoaded = true;
+
+		// Let's wait for a frame to not toggle the waypoint
+		if (CPad::GetPad(0)->NewState.Cross) {
+			bMenuMapActive = false;
+			return;
+		}
+	}
 
 	// Because fMapSize is half of the map length, and map consists of 3x3 tiles.
 	float halfTile = fMapSize / 3.0f;
@@ -5600,6 +5612,9 @@ uint8 CMenuManager::GetNumberOfMenuOptions()
 	return Rows;
 }
 #endif
+
+#undef GetBackJustUp
+#undef GetBackJustDown
 
 STARTPATCHES
 	for (int i = 1; i < ARRAY_SIZE(aScreens); i++)

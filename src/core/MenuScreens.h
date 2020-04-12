@@ -128,7 +128,7 @@ const CMenuScreen aScreens[] = {
 
 	// MENUPAGE_NO_MEMORY_CARD = 13
 	{ "FES_NOC", 1, MENUPAGE_DISABLED, MENUPAGE_DISABLED, 0, 0,
-		MENUACTION_LABEL,		"FEC_OFI",	SAVESLOT_NONE,  MENUPAGE_NONE, // only in mobile. FEC_OFI is missing
+		// hud adjustment page in mobile
 	},
 
 	// MENUPAGE_LOADING_IN_PROGRESS = 14
@@ -444,7 +444,7 @@ const CMenuScreen aScreens[] = {
 
    // MENUPAGE_57 = 57
    { "", 0, MENUPAGE_NONE, MENUPAGE_NONE, 0, 0,
-
+	   // mission failed, wanna restart page in mobile
    },
 
    // MENUPAGE_58 = 58
