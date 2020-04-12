@@ -138,7 +138,7 @@ class tSound
 {
 public:
 	int32 m_nEntityIndex;
-	int32 m_counter;
+	int32 m_nCounter;
 	int32 m_nSampleIndex;
 	uint8 m_bBankIndex;
 	bool m_bIs2D;
@@ -170,8 +170,8 @@ public:
 	bool m_bRequireReflection; // Used for oneshots
 	uint8 m_bOffset;
 	int32 m_nReleasingVolumeDivider;
-	uint8 m_bIsProcessed;
-	uint8 m_bLoopEnded;
+	bool m_bIsProcessed;
+	bool m_bLoopEnded;
 	uint8 field_82;
 	uint8 field_83;
 	int32 calculatedVolume;
@@ -244,14 +244,14 @@ class cMissionAudio
 {
 public:
 	CVector m_vecPos;
-	uint8 field_12;
+	bool m_bPredefinedProperties;
 	uint8 gap_13[3];
 	int m_nSampleIndex;
 	uint8 m_bLoadingStatus;
 	uint8 m_bPlayStatus;
 	uint8 field_22;
 	uint8 field_23;
-	int field_24;
+	int32 m_nMissionAudioCounter;
 	bool m_bIsPlayed;
 	uint8 field_29;
 	uint8 field_30;
@@ -328,7 +328,7 @@ public:
 	int32 m_nBridgeEntity;
 	cMissionAudio m_sMissionAudio;
 	int32 m_anRandomTable[5];
-	uint8 field_19192; // time?
+	uint8 m_bTimeSpent;
 	uint8 m_bUserPause;
 	uint8 m_bPreviousUserPause;
 	uint8 field_19195; // unused

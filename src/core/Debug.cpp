@@ -24,7 +24,7 @@ CDebug::DebugAddText(const char *str)
 {
 	int32 i = 0;
 	if (*str != '\0') {
-		while (i < MAX_STR_LEN) {
+		while (i < MAX_STR_LEN - 1) {
 			ms_aTextBuffer[ms_nCurrentTextLine][i++] = *(str++);
 			if (*str == '\0')
 				break;

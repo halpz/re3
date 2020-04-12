@@ -21,10 +21,15 @@
 #include "Particle.h"
 #include "Console.h"
 #include "Debug.h"
+#include "Hud.h"
 
 #include <list>
 
+#ifndef RWLIBS
 void **rwengine = *(void***)0x5A10E1;
+#else
+extern "C" int vsprintf(char* const _Buffer, char const* const _Format, va_list  _ArgList);
+#endif
 
 DebugMenuAPI gDebugMenuAPI;
 
@@ -338,6 +343,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Rhino", [](){ SpawnCar(MI_RHINO); });
 		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
 
+		DebugMenuAddVarBool8("Debug", "Draw hud", (int8*)&CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
 		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);

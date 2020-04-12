@@ -111,7 +111,7 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 	object->bUsesCollision = false;
 	object->bIsPickup = true;
 
-	object->field_172 = m_eModelIndex == MI_PICKUP_BONUS ? m_nQuantity : 0;
+	object->m_nBonusValue = m_eModelIndex == MI_PICKUP_BONUS ? m_nQuantity : 0;
 
 	switch (m_eType)
 	{
@@ -671,9 +671,9 @@ void
 CPickups::DoPickUpEffects(CEntity *entity)
 {
 	if (entity->GetModelIndex() == MI_PICKUP_KILLFRENZY)
-		entity->m_flagD80 = CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame;
+		entity->bDoNotRender = CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame;
 
-	if (!entity->m_flagD80) {
+	if (!entity->bDoNotRender) {
 		float s = Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x7FF) * DEGTORAD(360.0f / 0x800));
 		float modifiedSin = 0.3f * (s + 1.0f);
 
@@ -716,7 +716,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 			size, 65.0f, CCoronas::TYPE_RING, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 
 		CObject *object = (CObject*)entity;
-		if (object->m_obj_flag2 || object->bOutOfStock || object->field_172) {
+		if (object->m_obj_flag2 || object->bOutOfStock || object->m_nBonusValue) {
 			float dist = (TheCamera.GetPosition() - pos).Magnitude();
 			const float MAXDIST = 12.0f;
 
@@ -734,7 +734,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 					aMessages[NumMessages].m_color.blue = aWeaponBlues[colorId];
 					aMessages[NumMessages].m_color.alpha = (1.0f - dist / MAXDIST) * 128.0f;
 					aMessages[NumMessages].m_bOutOfStock = object->bOutOfStock;
-					aMessages[NumMessages].m_quantity = object->field_172;
+					aMessages[NumMessages].m_quantity = object->m_nBonusValue;
 					NumMessages++;
 				}
 			}
