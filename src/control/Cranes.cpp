@@ -410,6 +410,8 @@ void CCrane::FindCarInSectorList(CPtrList* pList)
 		if (pVehicle->GetPosition().x < m_fPickupX1 || pVehicle->GetPosition().x > m_fPickupX2 ||
 			pVehicle->GetPosition().y < m_fPickupY1 || pVehicle->GetPosition().y > m_fPickupY2)
 			continue;
+		if (pVehicle->pDriver)
+			continue;
 		if (Abs(pVehicle->GetMoveSpeed().x) >= CAR_MOVING_SPEED_THRESHOLD ||
 			Abs(pVehicle->GetMoveSpeed().y) >= CAR_MOVING_SPEED_THRESHOLD ||
 			Abs(pVehicle->GetMoveSpeed().z) >= CAR_MOVING_SPEED_THRESHOLD)
