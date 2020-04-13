@@ -62,12 +62,17 @@ public:
 	static int16 m_nCurrentMovieCommand;
 	static int16 m_nCurrentCommand;
 	static int16 m_nCurrentVehicle;
+	static int16 m_nCurrentActor;
 	static bool m_bEditOn;
 	static bool m_bRecording;
 	static bool m_bCommandActive;
+	static bool m_bActorSelected;
+	static bool m_bActor2Selected;
+	static bool m_bVehicleSelected;
 	static int16 m_nNumActors;
 	static int16 m_nNumVehicles;
 	static int16 m_nNumMovieCommands;
+	static int16 m_nWeaponType;
 	static CPed* pActors[NUM_ACTORS_IN_MOVIE];
 	static CVehicle* pVehicles[NUM_VEHICLES_IN_MOVIE];
 	static bool m_bDrawGotoArrow;
@@ -86,5 +91,5 @@ public:
 	static void SelectActor(void);
 	static void SelectActor2(void);
 	static void SelectVehicle(void);
-	static void SelectWeapon(void);
+	static bool SelectWeapon(void);
 };
