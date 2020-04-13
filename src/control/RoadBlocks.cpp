@@ -25,7 +25,7 @@ CRoadBlocks::Init(void)
 	NumRoadBlocks = 0;
 	for (int objId = 0; objId < ThePaths.m_numMapObjects; objId++) {
 		if (ThePaths.m_objectFlags[objId] & UseInRoadBlock) {
-			if (NumRoadBlocks < 600) {
+			if (NumRoadBlocks < NUMROADBLOCKS) {
 				InOrOut[NumRoadBlocks] = true;
 				RoadBlockObjects[NumRoadBlocks] = objId;
 				NumRoadBlocks++;
@@ -105,8 +105,8 @@ CRoadBlocks::GenerateRoadBlocks(void)
 { 
 	CMatrix offsetMatrix;
 	uint32 frame = CTimer::GetFrameCounter() & 0xF;
-	int16 nRoadblockNode = (int16)(600 * frame) / 16;
-	const int16 maxRoadBlocks = (int16)(600 * (frame + 1)) / 16;
+	int16 nRoadblockNode = (int16)(NUMROADBLOCKS * frame) / 16;
+	const int16 maxRoadBlocks = (int16)(NUMROADBLOCKS * (frame + 1)) / 16;
 	int16 numRoadBlocks = CRoadBlocks::NumRoadBlocks;
 	if (CRoadBlocks::NumRoadBlocks >= maxRoadBlocks)
 		numRoadBlocks = maxRoadBlocks;
