@@ -2733,7 +2733,6 @@ CPed::SetObjective(eObjective newObj, void *entity)
 	}
 
 #ifdef VC_PED_PORTS
-	SetObjectiveTimer(0);
 	ClearPointGunAt();
 #endif
 	bObjectiveCompleted = false;

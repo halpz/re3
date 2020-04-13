@@ -33,22 +33,16 @@ to reverse at the time, calling the original functions is acceptable.
 ### Unreversed / incomplete classes (at least the ones we know)
 ```
 cAudioManager - WIP
-CBoat
 CBulletInfo
-CObject
-CPacManPickups
 CPedPath
-CRoadBlocks
 CWeapon
 CWorld
-GenericLoad
 ```
 
 The following classes have only unused or practically unused code left:
 ```
 CCullZone - only mobile stuff
 CCullZones - only mobile stuff
-CFileLoader - almost done
 CSceneEdit
 ```
 

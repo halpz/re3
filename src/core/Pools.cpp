@@ -183,7 +183,7 @@ INITSAVEBUF
 		if (!pVehicle)
 			continue;
 		bool bHasPassenger = false;
-		for (int j = 0; j < 8; j++) {
+		for (int j = 0; j < ARRAY_SIZE(pVehicle->pPassengers); j++) {
 			if (pVehicle->pPassengers[i])
 				bHasPassenger = true;
 		}
@@ -203,7 +203,7 @@ INITSAVEBUF
 		if (!pVehicle)
 			continue;
 		bool bHasPassenger = false;
-		for (int j = 0; j < 8; j++) {
+		for (int j = 0; j < ARRAY_SIZE(pVehicle->pPassengers); j++) {
 			if (pVehicle->pPassengers[j])
 				bHasPassenger = true;
 		}
