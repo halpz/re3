@@ -1012,7 +1012,7 @@ CPacManPickup::Update()
 			float massMult = (veh->m_fMass + 250.0f) / veh->m_fMass;
 			veh->m_fMass *= massMult;
 			veh->m_fTurnMass *= massMult;
-			veh->fForceMultiplier *= massMult;
+			veh->m_fForceMultiplier *= massMult;
 			FindPlayerPed()->m_pWanted->m_nChaos += 10;
 			FindPlayerPed()->m_pWanted->UpdateWantedLevel();
 			DMAudio.PlayFrontEndSound(SOUND_PICKUP_PACMAN_PACKAGE, 0);
@@ -1059,9 +1059,9 @@ CPacManPickups::Update()
 			if (dist < 10.0f) {
 				ThingsToCollect -= FindPlayerVehicle()->m_nPacManPickupsCarried;
 				FindPlayerVehicle()->m_nPacManPickupsCarried = 0;
-				FindPlayerVehicle()->m_fMass /= FindPlayerVehicle()->fForceMultiplier;
-				FindPlayerVehicle()->m_fTurnMass /= FindPlayerVehicle()->fForceMultiplier;
-				FindPlayerVehicle()->fForceMultiplier = 1.0f;
+				FindPlayerVehicle()->m_fMass /= FindPlayerVehicle()->m_fForceMultiplier;
+				FindPlayerVehicle()->m_fTurnMass /= FindPlayerVehicle()->m_fForceMultiplier;
+				FindPlayerVehicle()->m_fForceMultiplier = 1.0f;
 			}
 			if (ThingsToCollect <= 0) {
 				CollectGameState = 2;
@@ -1400,9 +1400,9 @@ CPacManPickups::ResetPowerPillsCarriedByPlayer()
 {
 	if (FindPlayerVehicle() != nil) {
 		FindPlayerVehicle()->m_nPacManPickupsCarried = 0;
-		FindPlayerVehicle()->m_fMass /= FindPlayerVehicle()->fForceMultiplier;
-		FindPlayerVehicle()->m_fTurnMass /= FindPlayerVehicle()->fForceMultiplier;
-		FindPlayerVehicle()->fForceMultiplier = 1.0f;
+		FindPlayerVehicle()->m_fMass /= FindPlayerVehicle()->m_fForceMultiplier;
+		FindPlayerVehicle()->m_fTurnMass /= FindPlayerVehicle()->m_fForceMultiplier;
+		FindPlayerVehicle()->m_fForceMultiplier = 1.0f;
 	}
 }
 
