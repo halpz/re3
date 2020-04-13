@@ -31,6 +31,7 @@
 #include "Radar.h"
 #include "Stats.h"
 #include "Messages.h"
+#include "FileLoader.h"
 
 #define TIDY_UP_PBP // ProcessButtonPresses
 #define MAX_VISIBLE_LIST_ROW 30
@@ -110,14 +111,14 @@ char *CMenuManager::m_PrefsSkinFile = (char*)0x5F2E74;	//[256] "$$\"\""
 
 int32 &CMenuManager::m_KeyPressedCode = *(int32*)0x5F2E70;	// -1
 
-// This is PS2 option color, they forget it here and used in PrintBriefs once(but didn't use the output anyway)
-#ifdef FIX_BUGS
-CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
+// Originally that was PS2 option color, they forget it here and used in PrintBriefs once(but didn't use the output anyway)
+#ifdef PS2_LIKE_MENU
+const CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255);
 #else
-CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255);
+const CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
 #endif
 
-float menuXYpadding = MENUACTION_POS_Y; // *(float*)0x5F355C;	// never changes. not original name
+const float menuXYpadding = MENUACTION_POS_Y; // *(float*)0x5F355C;	// not original name
 float MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE; //*(float*)0x5F2E40;
 float MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE; //*(float*)0x5F2E44;
 
@@ -130,17 +131,17 @@ uint8 CMenuManager::m_PrefsPlayerRed = 255;
 uint8 CMenuManager::m_PrefsPlayerGreen = 128;
 uint8 CMenuManager::m_PrefsPlayerBlue; // why??
 
-CMenuManager &FrontEndMenuManager = *(CMenuManager*)0x8F59D8;
+CMenuManager FrontEndMenuManager; // = *(CMenuManager*)0x8F59D8;
 
 // Move this somewhere else.
-float &CRenderer::ms_lodDistScale = *(float*)0x5F726C;	// 1.2
+float CRenderer::ms_lodDistScale = 1.2f; // *(float*)0x5F726C;
 
-uint32 &TimeToStopPadShaking = *(uint32*)0x628CF8;
-char *&pEditString = *(char**)0x628D00;
-int32 *&pControlEdit = *(int32**)0x628D08;
-bool &DisplayComboButtonErrMsg = *(bool*)0x628D14;
-int32 &MouseButtonJustClicked = *(int32*)0x628D0C;
-int32 &JoyButtonJustClicked = *(int32*)0x628D10;
+uint32 TimeToStopPadShaking; // = *(uint32*)0x628CF8;
+char *pEditString; // = *(char**)0x628D00;
+int32 *pControlEdit; // = *(int32**)0x628D08;
+bool DisplayComboButtonErrMsg; // = *(bool*)0x628D14;
+int32 MouseButtonJustClicked; // = *(int32*)0x628D0C;
+int32 JoyButtonJustClicked; // = *(int32*)0x628D10;
 //int32 *pControlTemp = 0;
 
 #ifndef MASTER
@@ -843,6 +844,10 @@ CMenuManager::Draw()
 			CFont::SetCentreOn();
 			break;
 	}
+
+#ifdef PS2_LIKE_MENU
+	CFont::SetFontStyle(FONT_BANK);
+#endif
 
 	switch (m_nCurrScreen) {
 		case MENUPAGE_CONTROLLER_PC_OLD1:
@@ -2140,7 +2145,7 @@ CMenuManager::DrawFrontEndNormal()
 	}
 
 	#define optionWidth		MENU_X(66.0f)
-	#define rawOptionHeight	20.0f
+	#define rawOptionHeight	22.0f
 	#define optionBottom	SCREEN_SCALE_FROM_BOTTOM(20.0f)
 	#define optionTop		SCREEN_SCALE_FROM_BOTTOM(20.0f + rawOptionHeight)
 	#define leftPadding		MENU_X_LEFT_ALIGNED(90.0f)
@@ -3187,31 +3192,33 @@ CMenuManager::PrintBriefs()
 			newColor = TEXT_COLOR;
 			FilterOutColorMarkersFromString(gUString, newColor);
 
-			// newColor wasn't used at all! let's fix this
+#ifdef PS2_LIKE_MENU
+			// This PS2 code was always here, but unused
 			bool rgSame = newColor.r == TEXT_COLOR.r && newColor.g == TEXT_COLOR.g;
 			bool bSame = rgSame && newColor.b == TEXT_COLOR.b;
-			bool colorNotChanged = bSame
-#ifndef FIX_BUGS
-				&& newColor.a == TEXT_COLOR.a
-#endif
-				;
+			bool colorNotChanged = bSame; /* && newColor.a == TEXT_COLOR.a; */
 
 			if (!colorNotChanged) {
 				newColor.r /= 2;
 				newColor.g /= 2;
 				newColor.b /= 2;
 			}
-#ifdef FIX_BUGS
-			newColor.a = FadeIn(255);
-			// because some colors aren't visible, due to they were made for PS2
-			CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(255)));
+			CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(255))); // But this is from PS2
 			CFont::SetDropShadowPosition(1);
+#endif
+
+#if defined(FIX_BUGS) || defined(PS2_LIKE_MENU)
+			newColor.a = FadeIn(255);
 			CFont::SetColor(newColor);
 #endif
 			CFont::PrintString(MENU_X_LEFT_ALIGNED(50.0f), nextY, gUString);
 			nextY += MENU_Y(menuXYpadding);
 		}
 	}
+
+#ifdef PS2_LIKE_MENU
+	CFont::SetDropShadowPosition(0);
+#endif
 }
 
 // Not sure about name. Not to be confused with CPad::PrintErrorMessage
@@ -4317,8 +4324,7 @@ CMenuManager::ProcessButtonPresses(void)
 					DoSettingsBeforeStartingAGame();
 					break;
 				case MENUACTION_RELOADIDE:
-					// TODO
-					// CFileLoader::ReloadObjectTypes("GTA3.IDE");
+					CFileLoader::ReloadObjectTypes("GTA3.IDE");
 					break;
 				case MENUACTION_RELOADIPL:
 					CGame::ReloadIPLs();
@@ -5023,7 +5029,7 @@ CMenuManager::PrintController(void)
 	CFont::SetFontStyle(FONT_BANK);  // X
 
 	// CFont::SetScale(0.4f, 0.4f);
-	CFont::SetScale(MENU_X(SMALLTEXT_X_SCALE), MENU_Y(SMALLTEXT_Y_SCALE)); // X
+	CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE)); // X
 
 	// CFont::SetColor(CRGBA(128, 128, 128, FadeIn(255)));
 	CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(255))); // X
@@ -5217,6 +5223,8 @@ CMenuManager::PrintController(void)
 				return;
 		}
 	}
+
+	CFont::SetDropShadowPosition(0); // X
 }
 
 #ifdef MENU_MAP

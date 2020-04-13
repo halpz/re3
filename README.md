@@ -45,7 +45,6 @@ The following classes have only unused or practically unused code left:
 ```
 CCullZone - only mobile stuff
 CCullZones - only mobile stuff
-CFileLoader - almost done
 CSceneEdit
 ```
 

@@ -640,4 +640,4 @@ public:
 
 static_assert(sizeof(CMenuManager) == 0x564, "CMenuManager: error");
 
-extern CMenuManager &FrontEndMenuManager;
+extern CMenuManager FrontEndMenuManager;
