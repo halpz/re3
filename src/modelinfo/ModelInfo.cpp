@@ -234,17 +234,22 @@ CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
 	}
 }
 
-CStore<CInstance, MLOINSTANCESIZE>&
-CModelInfo::GetMloInstanceStore()
-{
-	return CModelInfo::ms_mloInstanceStore;
-}
-
 void
 CModelInfo::ConstructMloClumps()
 {
 	for (int i = 0; i < ms_mloModelStore.allocPtr; i++)
 		ms_mloModelStore.store[i].ConstructClump();
+}
+
+void
+CModelInfo::ReInit2dEffects()
+{
+	ms_2dEffectStore.clear();
+
+	for (int i = 0; i < MODELINFOSIZE; i++) {
+		if (ms_modelInfoPtrs[i])
+			ms_modelInfoPtrs[i]->Init2dEffects();
+	}
 }
 
 STARTPATCHES
