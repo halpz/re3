@@ -31,6 +31,7 @@
 #include "Radar.h"
 #include "Stats.h"
 #include "Messages.h"
+#include "FileLoader.h"
 
 #define TIDY_UP_PBP // ProcessButtonPresses
 #define MAX_VISIBLE_LIST_ROW 30
@@ -44,16 +45,27 @@
 #define FEET_IN_METER 3.33f
 #endif
 
-#define SCROLLABLE_STATS_PAGE
 #ifdef SCROLLABLE_STATS_PAGE
 #define isPlainTextScreen(screen) (screen == MENUPAGE_BRIEFS)
 #else
 #define isPlainTextScreen(screen) (screen == MENUPAGE_BRIEFS || screen == MENUPAGE_STATS)
 #endif
 
+#ifdef TRIANGLE_BACK_BUTTON
+#define GetBackJustUp GetTriangleJustUp
+#define GetBackJustDown GetTriangleJustDown
+#elif defined(CIRCLE_BACK_BUTTON)
+#define GetBackJustUp GetCircleJustUp
+#define GetBackJustDown GetCircleJustDown
+#else
+#define GetBackJustUp GetSquareJustUp
+#define GetBackJustDown GetSquareJustDown
+#endif
+
 #ifdef MENU_MAP
 bool CMenuManager::bMenuMapActive = false;
 bool CMenuManager::bMapMouseShownOnce = false;
+bool CMenuManager::bMapLoaded = false;
 float CMenuManager::fMapSize;
 float CMenuManager::fMapCenterY;
 float CMenuManager::fMapCenterX;
@@ -99,14 +111,14 @@ char *CMenuManager::m_PrefsSkinFile = (char*)0x5F2E74;	//[256] "$$\"\""
 
 int32 &CMenuManager::m_KeyPressedCode = *(int32*)0x5F2E70;	// -1
 
-// This is PS2 option color, they forget it here and used in PrintBriefs once(but didn't use the output anyway)
-#ifdef FIX_BUGS
-CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
+// Originally that was PS2 option color, they forget it here and used in PrintBriefs once(but didn't use the output anyway)
+#ifdef PS2_LIKE_MENU
+const CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255);
 #else
-CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255);
+const CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
 #endif
 
-float menuXYpadding = MENUACTION_POS_Y; // *(float*)0x5F355C;	// never changes. not original name
+const float menuXYpadding = MENUACTION_POS_Y; // *(float*)0x5F355C;	// not original name
 float MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE; //*(float*)0x5F2E40;
 float MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE; //*(float*)0x5F2E44;
 
@@ -119,17 +131,17 @@ uint8 CMenuManager::m_PrefsPlayerRed = 255;
 uint8 CMenuManager::m_PrefsPlayerGreen = 128;
 uint8 CMenuManager::m_PrefsPlayerBlue; // why??
 
-CMenuManager &FrontEndMenuManager = *(CMenuManager*)0x8F59D8;
+CMenuManager FrontEndMenuManager; // = *(CMenuManager*)0x8F59D8;
 
 // Move this somewhere else.
-float &CRenderer::ms_lodDistScale = *(float*)0x5F726C;	// 1.2
+float CRenderer::ms_lodDistScale = 1.2f; // *(float*)0x5F726C;
 
-uint32 &TimeToStopPadShaking = *(uint32*)0x628CF8;
-char *&pEditString = *(char**)0x628D00;
-int32 *&pControlEdit = *(int32**)0x628D08;
-bool &DisplayComboButtonErrMsg = *(bool*)0x628D14;
-int32 &MouseButtonJustClicked = *(int32*)0x628D0C;
-int32 &JoyButtonJustClicked = *(int32*)0x628D10;
+uint32 TimeToStopPadShaking; // = *(uint32*)0x628CF8;
+char *pEditString; // = *(char**)0x628D00;
+int32 *pControlEdit; // = *(int32**)0x628D08;
+bool DisplayComboButtonErrMsg; // = *(bool*)0x628D14;
+int32 MouseButtonJustClicked; // = *(int32*)0x628D0C;
+int32 JoyButtonJustClicked; // = *(int32*)0x628D10;
 //int32 *pControlTemp = 0;
 
 #ifndef MASTER
@@ -359,11 +371,6 @@ CMenuManager::PageDownList(bool playSoundOnSuccess)
 inline void
 CMenuManager::ThingsToDoBeforeLeavingPage()
 {
-#ifndef MASTER
-	if (m_nCurrScreen == MENUPAGE_NO_MEMORY_CARD || m_nCurrScreen == MENUPAGE_MEMORY_CARD_DEBUG) {
-		SaveSettings();
-	}
-#endif
 	if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) && strcmp(m_aSkinName, m_PrefsSkinFile) != 0) {
 		CWorld::Players[0].SetPlayerSkin(m_PrefsSkinFile);
 	} else if (m_nCurrScreen == MENUPAGE_SOUND_SETTINGS) {
@@ -719,13 +726,6 @@ CMenuManager::Draw()
 			else
 				str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
 			break;
-#ifndef MASTER
-		case MENUPAGE_NO_MEMORY_CARD:
-		case MENUPAGE_MEMORY_CARD_DEBUG:
-			CFont::SetColor(CRGBA(235, 170, 50, FadeIn(127))); // white in mobile, because all texts are white there
-			str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
-			break;
-#endif
 		case MENUPAGE_SAVE_OVERWRITE_CONFIRM:
 			if (Slots[m_nCurrSaveSlot + 1] == SLOT_EMPTY)
 				str = TheText.Get("FESZ_QZ");
@@ -743,20 +743,12 @@ CMenuManager::Draw()
 			break;
 		}
 
-#ifndef MASTER
-		if (m_nCurrScreen == MENUPAGE_NO_MEMORY_CARD || m_nCurrScreen == MENUPAGE_MEMORY_CARD_DEBUG) {
-			// CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN)); // it's always like that on PC
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(210.0), str);
-		} else
-#endif
-		{
 #ifdef FIX_BUGS
-			// Label is wrapped from right by StretchX(40)px, but wrapped from left by 40px. And this is only place R* didn't use StretchX in here.
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(menuXYpadding), str);
+		// Label is wrapped from right by StretchX(40)px, but wrapped from left by 40px. And this is only place R* didn't use StretchX in here.
+		CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(menuXYpadding), str);
 #else
-			CFont::PrintString(MENU_X_MARGIN, menuXYpadding, str);
+		CFont::PrintString(MENU_X_MARGIN, menuXYpadding, str);
 #endif
-		}
 	}
 
 	CFont::SetCentreSize(SCREEN_WIDTH);
@@ -852,6 +844,10 @@ CMenuManager::Draw()
 			CFont::SetCentreOn();
 			break;
 	}
+
+#ifdef PS2_LIKE_MENU
+	CFont::SetFontStyle(FONT_BANK);
+#endif
 
 	switch (m_nCurrScreen) {
 		case MENUPAGE_CONTROLLER_PC_OLD1:
@@ -2149,7 +2145,7 @@ CMenuManager::DrawFrontEndNormal()
 	}
 
 	#define optionWidth		MENU_X(66.0f)
-	#define rawOptionHeight	20.0f
+	#define rawOptionHeight	22.0f
 	#define optionBottom	SCREEN_SCALE_FROM_BOTTOM(20.0f)
 	#define optionTop		SCREEN_SCALE_FROM_BOTTOM(20.0f + rawOptionHeight)
 	#define leftPadding		MENU_X_LEFT_ALIGNED(90.0f)
@@ -3196,31 +3192,33 @@ CMenuManager::PrintBriefs()
 			newColor = TEXT_COLOR;
 			FilterOutColorMarkersFromString(gUString, newColor);
 
-			// newColor wasn't used at all! let's fix this
+#ifdef PS2_LIKE_MENU
+			// This PS2 code was always here, but unused
 			bool rgSame = newColor.r == TEXT_COLOR.r && newColor.g == TEXT_COLOR.g;
 			bool bSame = rgSame && newColor.b == TEXT_COLOR.b;
-			bool colorNotChanged = bSame
-#ifndef FIX_BUGS
-				&& newColor.a == TEXT_COLOR.a
-#endif
-				;
+			bool colorNotChanged = bSame; /* && newColor.a == TEXT_COLOR.a; */
 
 			if (!colorNotChanged) {
 				newColor.r /= 2;
 				newColor.g /= 2;
 				newColor.b /= 2;
 			}
-#ifdef FIX_BUGS
-			newColor.a = FadeIn(255);
-			// because some colors aren't visible, due to they were made for PS2
-			CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(255)));
+			CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(255))); // But this is from PS2
 			CFont::SetDropShadowPosition(1);
+#endif
+
+#if defined(FIX_BUGS) || defined(PS2_LIKE_MENU)
+			newColor.a = FadeIn(255);
 			CFont::SetColor(newColor);
 #endif
 			CFont::PrintString(MENU_X_LEFT_ALIGNED(50.0f), nextY, gUString);
 			nextY += MENU_Y(menuXYpadding);
 		}
 	}
+
+#ifdef PS2_LIKE_MENU
+	CFont::SetDropShadowPosition(0);
+#endif
 }
 
 // Not sure about name. Not to be confused with CPad::PrintErrorMessage
@@ -3337,6 +3335,7 @@ CMenuManager::Process(void)
 	m_bWantToRestart = false;
 	InitialiseChangedLanguageSettings();
 
+	// Just a hack by R* to not make game continuously resume/pause. But we it seems we can live with it.
 	if (CPad::GetPad(0)->GetEscapeJustDown())
 		RequestFrontEndStartUp();
 
@@ -3662,7 +3661,7 @@ CMenuManager::ProcessButtonPresses(void)
 		}
 
 #ifndef TIDY_UP_PBP
-		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetSquareJustDown()) {
+		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustDown()) {
 			m_bShowMouse = false;
 			goBack = true;
 		}
@@ -3741,7 +3740,7 @@ CMenuManager::ProcessButtonPresses(void)
 		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown() || CPad::GetPad(0)->GetLeftMouseJustDown()) {
 			optionSelected = true;
 		}
-		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetSquareJustUp()) {
+		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustUp()) {
 			if (m_nCurrScreen != MENUPAGE_START_MENU) {
 				goBack = true;
 			}
@@ -4009,7 +4008,7 @@ CMenuManager::ProcessButtonPresses(void)
 
 		}
 #ifndef TIDY_UP_PBP
-		if (CPad::GetPad(0)->GetSquareJustDown()) {
+		if (CPad::GetPad(0)->GetBackJustDown()) {
 			if (m_nCurrScreen != MENUPAGE_START_MENU && m_nCurrScreen != MENUPAGE_PAUSE_MENU) {
 				m_bShowMouse = false;
 				goBack = true;
@@ -4050,11 +4049,11 @@ CMenuManager::ProcessButtonPresses(void)
 	if (!goDown && !goUp && !optionSelected) {
 		if (m_nCurrScreen != MENUPAGE_START_MENU) {
 			if (isPlainTextScreen(m_nCurrScreen)) {
-				if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetSquareJustUp()) {
+				if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustUp()) {
 					goBack = true;
 				}
 			} else {
-				if (CPad::GetPad(0)->GetEscapeJustDown() || (m_nCurrScreen != MENUPAGE_PAUSE_MENU && CPad::GetPad(0)->GetSquareJustDown())) {
+				if (CPad::GetPad(0)->GetEscapeJustDown() || (m_nCurrScreen != MENUPAGE_PAUSE_MENU && CPad::GetPad(0)->GetBackJustDown())) {
 					m_bShowMouse = false;
 					goBack = true;
 				}
@@ -4300,12 +4299,7 @@ CMenuManager::ProcessButtonPresses(void)
 						} else {
 #ifdef MENU_MAP
 							if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu == MENUPAGE_MAP) {
-								fMapCenterX = SCREEN_WIDTH / 2;
-								fMapCenterY = SCREEN_HEIGHT / 3;
-								fMapSize = SCREEN_HEIGHT / CDraw::GetAspectRatio();
-								bMapMouseShownOnce = false;
-								CPad::GetPad(0)->Clear(false);
-								CPad::GetPad(1)->Clear(false);
+								bMapLoaded = false;
 							}
 
 #endif
@@ -4330,8 +4324,7 @@ CMenuManager::ProcessButtonPresses(void)
 					DoSettingsBeforeStartingAGame();
 					break;
 				case MENUACTION_RELOADIDE:
-					// TODO
-					// CFileLoader::ReloadObjectTypes("GTA3.IDE");
+					CFileLoader::ReloadObjectTypes("GTA3.IDE");
 					break;
 				case MENUACTION_RELOADIPL:
 					CGame::ReloadIPLs();
@@ -4913,8 +4906,19 @@ CMenuManager::SwitchMenuOnAndOff()
 			pControlEdit = nil;
 			m_bShutDownFrontEndRequested = false;
 			DisplayComboButtonErrMsg = false;
-			CPad::GetPad(0)->Clear(0);
-			CPad::GetPad(1)->Clear(0);
+
+#ifdef REGISTER_START_BUTTON
+			int16 start1 = CPad::GetPad(0)->PCTempJoyState.Start, start2 = CPad::GetPad(0)->PCTempKeyState.Start,
+				start3 = CPad::GetPad(0)->OldState.Start, start4 = CPad::GetPad(0)->NewState.Start;
+#endif
+			CPad::GetPad(0)->Clear(false);
+			CPad::GetPad(1)->Clear(false);
+#ifdef REGISTER_START_BUTTON
+			CPad::GetPad(0)->PCTempJoyState.Start = start1;
+			CPad::GetPad(0)->PCTempKeyState.Start = start2;
+			CPad::GetPad(0)->OldState.Start = start3;
+			CPad::GetPad(0)->NewState.Start = start4;
+#endif
 			m_nCurrScreen = MENUPAGE_NONE;
 		}
 	}
@@ -5025,7 +5029,7 @@ CMenuManager::PrintController(void)
 	CFont::SetFontStyle(FONT_BANK);  // X
 
 	// CFont::SetScale(0.4f, 0.4f);
-	CFont::SetScale(MENU_X(SMALLTEXT_X_SCALE), MENU_Y(SMALLTEXT_Y_SCALE)); // X
+	CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE)); // X
 
 	// CFont::SetColor(CRGBA(128, 128, 128, FadeIn(255)));
 	CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(255))); // X
@@ -5219,6 +5223,8 @@ CMenuManager::PrintController(void)
 				return;
 		}
 	}
+
+	CFont::SetDropShadowPosition(0); // X
 }
 
 #ifdef MENU_MAP
@@ -5242,6 +5248,20 @@ CMenuManager::PrintMap(void)
 {
 	bMenuMapActive = true;
 	CRadar::InitFrontEndMap();
+
+	if (!bMapLoaded) {
+		fMapCenterX = SCREEN_WIDTH / 2;
+		fMapCenterY = SCREEN_HEIGHT / 3;
+		fMapSize = SCREEN_HEIGHT / CDraw::GetAspectRatio();
+		bMapMouseShownOnce = false;
+		bMapLoaded = true;
+
+		// Let's wait for a frame to not toggle the waypoint
+		if (CPad::GetPad(0)->NewState.Cross) {
+			bMenuMapActive = false;
+			return;
+		}
+	}
 
 	// Because fMapSize is half of the map length, and map consists of 3x3 tiles.
 	float halfTile = fMapSize / 3.0f;
@@ -5600,6 +5620,9 @@ uint8 CMenuManager::GetNumberOfMenuOptions()
 	return Rows;
 }
 #endif
+
+#undef GetBackJustUp
+#undef GetBackJustDown
 
 STARTPATCHES
 	for (int i = 1; i < ARRAY_SIZE(aScreens); i++)

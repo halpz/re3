@@ -43,4 +43,7 @@ public:
 	static void LoadMapZones(const char *filename);
 
 	static void ReloadPaths(const char *filename);
+	static void ReloadObjectTypes(const char *filename);
+	static void ReloadObject(const char *line);
+	static void ReLoadScene(const char *filename); // unused mobile function
 };

@@ -196,7 +196,7 @@ enum eMenuScreen
 	MENUPAGE_NEW_GAME_RELOAD = 10,
 	MENUPAGE_LOAD_SLOT_CONFIRM = 11,
 	MENUPAGE_DELETE_SLOT_CONFIRM = 12,
-	MENUPAGE_NO_MEMORY_CARD = 13,
+	MENUPAGE_NO_MEMORY_CARD = 13, // hud adjustment page in mobile
 	MENUPAGE_LOADING_IN_PROGRESS = 14,
 	MENUPAGE_DELETING_IN_PROGRESS = 15,
 	MENUPAGE_PS2_LOAD_FAILED = 16,
@@ -240,7 +240,7 @@ enum eMenuScreen
 	MENUPAGE_SKIN_SELECT = 54,
 	MENUPAGE_KEYBOARD_CONTROLS = 55,
 	MENUPAGE_MOUSE_CONTROLS = 56,
-	MENUPAGE_57 = 57,
+	MENUPAGE_57 = 57, // mission failed, wanna restart page in mobile
 	MENUPAGE_58 = 58,
 #ifdef MENU_MAP
 	MENUPAGE_MAP = 59,
@@ -570,6 +570,7 @@ public:
 #ifdef MENU_MAP
 	static bool bMenuMapActive;
 	static bool bMapMouseShownOnce;
+	static bool bMapLoaded;
 	static float fMapSize;
 	static float fMapCenterY;
 	static float fMapCenterX;
@@ -639,4 +640,4 @@ public:
 
 static_assert(sizeof(CMenuManager) == 0x564, "CMenuManager: error");
 
-extern CMenuManager &FrontEndMenuManager;
+extern CMenuManager FrontEndMenuManager;
