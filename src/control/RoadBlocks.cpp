@@ -113,89 +113,82 @@ CRoadBlocks::GenerateRoadBlocks(void)
 	for (; nRoadblockNode < numRoadBlocks; nRoadblockNode++) {
 		CTreadable *mapObject = ThePaths.m_mapObjects[CRoadBlocks::RoadBlockObjects[nRoadblockNode]];
 		CVector2D direction = FindPlayerCoors() - mapObject->GetPosition();
-		if ((direction.x <= -80.0f || direction.x < 80.0f) || (direction.y <= -80.0f || direction.y < 80.0f)) {
+		if (!((direction.x > -80.0f && direction.x < 80.0f) && (direction.y > -80.0f && direction.y < 80.0f))) {
 			CRoadBlocks::InOrOut[nRoadblockNode] = false;
-			continue;
 		}
-		if (direction.Magnitude() < 80.0f) {
+		else if (direction.Magnitude() >= 80.0f) {
 			CRoadBlocks::InOrOut[nRoadblockNode] = false;
-			continue;
-		} else if (!CRoadBlocks::InOrOut[nRoadblockNode]) {
+		}
+		else if (!CRoadBlocks::InOrOut[nRoadblockNode]) {
 			CRoadBlocks::InOrOut[nRoadblockNode] = true;
-		} else {
-			continue;
-		}
-		if (!FindPlayerVehicle())
-			continue;
-		CWanted *pPlayerWanted = FindPlayerPed()->m_pWanted;
-		if ((CGeneral::GetRandomNumber() & 0x7F) >= pPlayerWanted->m_RoadblockDensity)
-			continue;
-		float fMapObjectRadius = 2.0f * mapObject->GetColModel()->boundingBox.max.x;
-		int32 vehicleId = MI_POLICE;
-		if (pPlayerWanted->AreArmyRequired())
-			vehicleId = MI_BARRACKS;
-		else if (pPlayerWanted->AreFbiRequired())
-			vehicleId = MI_FBICAR;
-		else if (pPlayerWanted->AreSwatRequired())
-			vehicleId = MI_ENFORCER;
-		if (!CStreaming::HasModelLoaded(vehicleId))
-			vehicleId = MI_POLICE;
-		CColModel *pVehicleColModel = CModelInfo::GetModelInfo(vehicleId)->GetColModel();
-		float fModelRadius = 2.0f * pVehicleColModel->boundingSphere.radius + 0.25f;
-		int16 radius = (int16)(fMapObjectRadius / fModelRadius);
-		if (radius >= 6)
-			continue;
-		CVector2D directionToCamera = TheCamera.m_matrix.GetPosition() - mapObject->m_matrix.GetPosition();
-		float fDotProduct = DotProduct2D(directionToCamera, mapObject->m_matrix.GetUp());
-		if (radius <= 0)
-			continue;
-		float fOffset = 0.5f * fModelRadius * (float)(radius - 1);
-		for (int16 modelId = vehicleId; modelId < nRoadblockNode ; modelId++) {
-			uint8 nRoadblockType = fDotProduct >= 0.0f;
-			if (CGeneral::GetRandomNumber() & 1) {
-				offsetMatrix.SetRotateZ(((CGeneral::GetRandomNumber() & 0xFF) - 128.0f) * 0.003f + HALFPI);
-			} else {
-				nRoadblockType = fDotProduct < 0.0f;
-				offsetMatrix.SetRotateZ(((CGeneral::GetRandomNumber() & 0xFF) - 128.0f) * 0.003f - HALFPI);
-			}
-			if (ThePaths.m_objectFlags[CRoadBlocks::RoadBlockObjects[nRoadblockNode]] & ObjectEastWest)
-				offsetMatrix.GetPosition() = CVector(0.0f, -fOffset, 0.6f);
-			else
-				offsetMatrix.GetPosition() = CVector(-fOffset, 0.0f, 0.6f);                   
-			CMatrix vehicleMatrix = mapObject->m_matrix * offsetMatrix;
-			float fModelRadius = CModelInfo::GetModelInfo(modelId)->GetColModel()->boundingSphere.radius - 0.25f;
-			int16 colliding = 0;
-			CWorld::FindObjectsKindaColliding(vehicleMatrix.GetPosition(), fModelRadius, 0, &colliding, 2, nil, false, true, true, false, false);
-			if (colliding)
-				continue;
-			CAutomobile *pVehicle = new CAutomobile(vehicleId, RANDOM_VEHICLE);
-			pVehicle->m_status = STATUS_ABANDONED;
-			// pVehicle->GetHeightAboveRoad(); // called but return value is ignored?
-			vehicleMatrix.GetPosition().z += fModelRadius - 0.6f;
-			pVehicle->m_matrix = vehicleMatrix;
-			pVehicle->PlaceOnRoadProperly();
-			pVehicle->bIsStatic = false;
-			pVehicle->m_matrix.UpdateRW();
-			pVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
-			CCarCtrl::JoinCarWithRoadSystem(pVehicle);
-			pVehicle->bIsLocked = false;
-			pVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
-			pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
-			pVehicle->AutoPilot.m_nCurrentLane = 0;
-			pVehicle->AutoPilot.m_nNextLane = 0;
-			pVehicle->AutoPilot.m_fMaxTrafficSpeed = 0.0f;
-			pVehicle->AutoPilot.m_nCruiseSpeed = 0.0f;
-			pVehicle->bExtendedRange = true;
-			if (pVehicle->UsesSiren(pVehicle->GetModelIndex()) && CGeneral::GetRandomNumber() & 1)
-				pVehicle->m_bSirenOrAlarm = true;
-			if (pVehicle->m_matrix.GetForward().z > 0.94f) {
-				CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);
-				CWorld::Add(pVehicle);
-				pVehicle->bCreateRoadBlockPeds = true;
-				pVehicle->m_nRoadblockType = nRoadblockType;
-				pVehicle->m_nRoadblockNode = nRoadblockNode;
-			} else {
-				delete pVehicle;
+			if (FindPlayerVehicle() && (CGeneral::GetRandomNumber() & 0x7F) < FindPlayerPed()->m_pWanted->m_RoadblockDensity) {
+				CWanted *pPlayerWanted = FindPlayerPed()->m_pWanted;
+				float fMapObjectRadius = 2.0f * mapObject->GetColModel()->boundingBox.max.x;
+				int32 vehicleId = MI_POLICE;
+				if (pPlayerWanted->AreArmyRequired())
+					vehicleId = MI_BARRACKS;
+				else if (pPlayerWanted->AreFbiRequired())
+					vehicleId = MI_FBICAR;
+				else if (pPlayerWanted->AreSwatRequired())
+					vehicleId = MI_ENFORCER;
+				if (!CStreaming::HasModelLoaded(vehicleId))
+					vehicleId = MI_POLICE;
+				CColModel* pVehicleColModel = CModelInfo::GetModelInfo(vehicleId)->GetColModel();
+				float fModelRadius = 2.0f * pVehicleColModel->boundingSphere.radius + 0.25f;
+				int16 radius = (int16)(fMapObjectRadius / fModelRadius);
+				if (radius > 0 && radius < 6) {
+					CVector2D directionToCamera = TheCamera.m_matrix.GetPosition() - mapObject->m_matrix.GetPosition();
+					float fDotProduct = DotProduct2D(directionToCamera, mapObject->m_matrix.GetUp());
+					float fOffset = 0.5f * fModelRadius * (float)(radius - 1);
+					for (int16 i = 0; i < radius; i++) {
+						uint8 nRoadblockType = fDotProduct < 0.0f;
+						if (CGeneral::GetRandomNumber() & 1) {
+							offsetMatrix.SetRotateZ(((CGeneral::GetRandomNumber() & 0xFF) - 128.0f) * 0.003f + HALFPI);
+						} else {
+							nRoadblockType = !nRoadblockType;
+							offsetMatrix.SetRotateZ(((CGeneral::GetRandomNumber() & 0xFF) - 128.0f) * 0.003f - HALFPI);
+						}
+						if (ThePaths.m_objectFlags[CRoadBlocks::RoadBlockObjects[nRoadblockNode]] & ObjectEastWest)
+							offsetMatrix.GetPosition() = CVector(0.0f, -fOffset, 0.6f);
+						else
+							offsetMatrix.GetPosition() = CVector(-fOffset, 0.0f, 0.6f);
+						CMatrix vehicleMatrix = mapObject->m_matrix * offsetMatrix;
+						float fModelRadius = CModelInfo::GetModelInfo(vehicleId)->GetColModel()->boundingSphere.radius - 0.25f;
+						int16 colliding = 0;
+						CWorld::FindObjectsKindaColliding(vehicleMatrix.GetPosition(), fModelRadius, 0, &colliding, 2, nil, false, true, true, false, false);
+						if (!colliding) {
+							CAutomobile* pVehicle = new CAutomobile(vehicleId, RANDOM_VEHICLE);
+							pVehicle->m_status = STATUS_ABANDONED;
+							// pVehicle->GetHeightAboveRoad(); // called but return value is ignored?
+							vehicleMatrix.GetPosition().z += fModelRadius - 0.6f;
+							pVehicle->m_matrix = vehicleMatrix;
+							pVehicle->PlaceOnRoadProperly();
+							pVehicle->bIsStatic = false;
+							pVehicle->m_matrix.UpdateRW();
+							pVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
+							CCarCtrl::JoinCarWithRoadSystem(pVehicle);
+							pVehicle->bIsLocked = false;
+							pVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
+							pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
+							pVehicle->AutoPilot.m_nCurrentLane = 0;
+							pVehicle->AutoPilot.m_nNextLane = 0;
+							pVehicle->AutoPilot.m_fMaxTrafficSpeed = 0.0f;
+							pVehicle->AutoPilot.m_nCruiseSpeed = 0.0f;
+							pVehicle->bExtendedRange = true;
+							if (pVehicle->UsesSiren(pVehicle->GetModelIndex()) && CGeneral::GetRandomNumber() & 1)
+								pVehicle->m_bSirenOrAlarm = true;
+							if (pVehicle->m_matrix.GetForward().z > 0.94f) {
+								CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);
+								CWorld::Add(pVehicle);
+								pVehicle->bCreateRoadBlockPeds = true;
+								pVehicle->m_nRoadblockType = nRoadblockType;
+								pVehicle->m_nRoadblockNode = nRoadblockNode;
+							} else {
+								delete pVehicle;
+							}
+						}
+					}
+				}
 			}
 		}
 	}
