@@ -7708,22 +7708,18 @@ cAudioManager::ProcessProjectiles()
 void
 cAudioManager::ProcessRainOnVehicle(cVehicleParams *params)
 {
-	float emittingVol;
-	CVehicle *veh;
-
 	if(params->m_fDistance < SQR(rainOnVehicleIntensity) && CWeather::Rain > 0.01f &&
 	   (!CCullZones::CamNoRain() || !CCullZones::PlayerNoRain())) {
-		++params->m_pVehicle->m_bRainAudioCounter;
-		veh = params->m_pVehicle;
+		CVehicle *veh = params->m_pVehicle;
+		++veh->m_bRainAudioCounter;
 		if(veh->m_bRainAudioCounter >= 2) {
 			veh->m_bRainAudioCounter = 0;
 			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-			emittingVol = 30.f * CWeather::Rain;
+			float emittingVol = 30.f * CWeather::Rain;
 			m_sQueueSample.m_bVolume = ComputeVolume(
 			    emittingVol, rainOnVehicleIntensity, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
 				m_sQueueSample.m_nCounter = veh->m_bRainSamplesCounter++;
-				veh = params->m_pVehicle;
 				if(veh->m_bRainSamplesCounter > 4) veh->m_bRainSamplesCounter = 68;
 				m_sQueueSample.m_nSampleIndex =
 				    (m_anRandomTable[1] & 3) + SFX_CAR_RAIN_1;
