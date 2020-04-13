@@ -22,6 +22,7 @@
 #include "Phones.h"
 #include "Pickups.h"
 #include "PlayerPed.h"
+#include "ProjectileInfo.h"
 #include "Pools.h"
 #include "Radar.h"
 #include "Restart.h"
@@ -59,7 +60,7 @@ uint32 &TimeToStayFadedBeforeFadeOut = *(uint32*)0x611564;
 #define ReadDataFromBufferPointer(buf, to) memcpy(&to, buf, sizeof(to)); buf += align4bytes(sizeof(to));
 #define WriteDataToBufferPointer(buf, from) memcpy(buf, &from, sizeof(from)); buf += align4bytes(sizeof(from));
 
-#define LoadSaveDataBlock(msg,load_func)\
+#define LoadSaveDataBlock()\
 do {\
 	if (!ReadDataFromFile(file, (uint8 *) &size, 4))\
 		return false;\
@@ -67,7 +68,11 @@ do {\
 	if (!ReadDataFromFile(file, work_buff, size))\
 		return false;\
 	buf = work_buff;\
-	printf(msg);\
+} while (0)
+
+#define ReadDataFromBlock(msg,load_func)\
+do {\
+	debug(msg);\
 	ReadDataFromBufferPointer(buf, size);\
 	load_func(buf, size);\
 	size = align4bytes(size);\
@@ -130,11 +135,11 @@ GenericSave(int file)
 	WriteDataToBufferPointer(buf, CClock::ms_nGameClockMinutes);
 	currPad = CPad::GetPad(0);
 	WriteDataToBufferPointer(buf, currPad->Mode);
-	WriteDataToBufferPointer(buf, CTimer::GetTimeInMilliseconds());
-	WriteDataToBufferPointer(buf, CTimer::GetTimeScale());
-	WriteDataToBufferPointer(buf, CTimer::GetTimeStep());
-	WriteDataToBufferPointer(buf, CTimer::GetTimeStepNonClipped());
-	WriteDataToBufferPointer(buf, CTimer::GetFrameCounter());
+	WriteDataToBufferPointer(buf, CTimer::m_snTimeInMilliseconds);
+	WriteDataToBufferPointer(buf, CTimer::ms_fTimeScale);
+	WriteDataToBufferPointer(buf, CTimer::ms_fTimeStep);
+	WriteDataToBufferPointer(buf, CTimer::ms_fTimeStepNonClipped);
+	WriteDataToBufferPointer(buf, CTimer::m_FrameCounter);
 	WriteDataToBufferPointer(buf, CTimeStep::ms_fTimeStep);
 	WriteDataToBufferPointer(buf, CTimeStep::ms_fFramesPerUpdate);
 	WriteDataToBufferPointer(buf, CTimeStep::ms_fTimeScale);
@@ -220,12 +225,6 @@ GenericLoad()
 	int32 saveSize;
 	CPad *currPad;
 
-	uint32 timeInMilliseconds;
-	float timeScale;
-	float timeStep;
-	float timeStepNonClipped;
-	uint32 frameCounter;
-
 	// Load SimpleVars and Scripts
 	CheckSum = 0;
 	CDate(CompileDateAndTime);
@@ -246,11 +245,11 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, CClock::ms_nGameClockMinutes);
 	currPad = CPad::GetPad(0);
 	ReadDataFromBufferPointer(buf, currPad->Mode);
-	ReadDataFromBufferPointer(buf, timeInMilliseconds); CTimer::SetTimeInMilliseconds(timeInMilliseconds);
-	ReadDataFromBufferPointer(buf, timeScale); CTimer::SetTimeScale(timeScale);
-	ReadDataFromBufferPointer(buf, timeStep); CTimer::SetTimeStep(timeStep);
-	ReadDataFromBufferPointer(buf, timeStepNonClipped); CTimer::SetTimeInMillisecondsNonClipped(timeStepNonClipped);
-	ReadDataFromBufferPointer(buf, frameCounter); CTimer::SetFrameCounter(frameCounter);
+	ReadDataFromBufferPointer(buf, CTimer::m_snTimeInMilliseconds);
+	ReadDataFromBufferPointer(buf, CTimer::ms_fTimeScale);
+	ReadDataFromBufferPointer(buf, CTimer::ms_fTimeStep);
+	ReadDataFromBufferPointer(buf, CTimer::ms_fTimeStepNonClipped);
+	ReadDataFromBufferPointer(buf, CTimer::m_FrameCounter);
 	ReadDataFromBufferPointer(buf, CTimeStep::ms_fTimeStep);
 	ReadDataFromBufferPointer(buf, CTimeStep::ms_fFramesPerUpdate);
 	ReadDataFromBufferPointer(buf, CTimeStep::ms_fTimeScale);
@@ -268,33 +267,50 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, TheCamera.CarZoomIndicator);
 	ReadDataFromBufferPointer(buf, TheCamera.PedZoomIndicator);
 	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
-	printf("Loading Scripts \n");
-	ReadDataFromBufferPointer(buf, size);
-	CTheScripts::LoadAllScripts(buf, size);
-	size = align4bytes(size);
-	buf += size;
+	ReadDataFromBlock("Loading Scripts \n", CTheScripts::LoadAllScripts);
 
 	// Load the rest
-	LoadSaveDataBlock("Loading PedPool \n", CPools::LoadPedPool);
-	LoadSaveDataBlock("Loading Garages \n", CGarages::Load);
-	LoadSaveDataBlock("Loading Vehicles \n", CPools::LoadVehiclePool);
-	LoadSaveDataBlock("Loading Objects \n", CPools::LoadObjectPool);
-	LoadSaveDataBlock("Loading Paths \n", ThePaths.Load);
-	LoadSaveDataBlock("Loading Cranes \n", CranesLoad);
-	LoadSaveDataBlock("Loading Pickups \n", CPickups::Load);
-	LoadSaveDataBlock("Loading Phoneinfo \n", gPhoneInfo.Load);
-	LoadSaveDataBlock("Loading Restart \n", CRestart::LoadAllRestartPoints);
-	LoadSaveDataBlock("Loading Radar Blips \n", CRadar::LoadAllRadarBlips);
-	LoadSaveDataBlock("Loading Zones \n", CTheZones::LoadAllZones);
-	LoadSaveDataBlock("Loading Gang Data \n", CGangs::LoadAllGangData);
-	LoadSaveDataBlock("Loading Car Generators \n", CTheCarGenerators::LoadAllCarGenerators);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading PedPool \n", CPools::LoadPedPool);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Garages \n", CGarages::Load);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Vehicles \n", CPools::LoadVehiclePool);
+	LoadSaveDataBlock();
+	CProjectileInfo::RemoveAllProjectiles();
+	CObject::DeleteAllTempObjects();
+	ReadDataFromBlock("Loading Objects \n", CPools::LoadObjectPool);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Paths \n", ThePaths.Load);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Cranes \n", CranesLoad);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Pickups \n", CPickups::Load);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Phoneinfo \n", gPhoneInfo.Load);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Restart \n", CRestart::LoadAllRestartPoints);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Radar Blips \n", CRadar::LoadAllRadarBlips);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Zones \n", CTheZones::LoadAllZones);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Gang Data \n", CGangs::LoadAllGangData);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Car Generators \n", CTheCarGenerators::LoadAllCarGenerators);
 	CParticle::ReloadConfig();
-	LoadSaveDataBlock("Loading Particles \n", CParticleObject::LoadParticle);
-	LoadSaveDataBlock("Loading AudioScript Objects \n", cAudioScriptObject::LoadAllAudioScriptObjects);
-	LoadSaveDataBlock("Loading Player Info \n", CWorld::Players[CWorld::PlayerInFocus].LoadPlayerInfo);
-	LoadSaveDataBlock("Loading Stats \n", CStats::LoadStats);
-	LoadSaveDataBlock("Loading Streaming Stuff \n", CStreaming::MemoryCardLoad);
-	LoadSaveDataBlock("Loading PedType Stuff \n", CPedType::Load);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Particles \n", CParticleObject::LoadParticle);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading AudioScript Objects \n", cAudioScriptObject::LoadAllAudioScriptObjects);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Player Info \n", CWorld::Players[CWorld::PlayerInFocus].LoadPlayerInfo);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Stats \n", CStats::LoadStats);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Streaming Stuff \n", CStreaming::MemoryCardLoad);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading PedType Stuff \n", CPedType::Load);
 
 	DMAudio.SetMusicMasterVolume(CMenuManager::m_PrefsMusicVolume);
 	DMAudio.SetEffectsMasterVolume(CMenuManager::m_PrefsSfxVolume);
@@ -302,9 +318,9 @@ GenericLoad()
 		PcSaveHelper.nErrorCode = SAVESTATUS_ERR_LOAD_CLOSE;
 		return false;
 	}
-	DoGameSpecificStuffAfterSucessLoad();
-	printf("Game successfully loaded \n");
 
+	DoGameSpecificStuffAfterSucessLoad();
+	debug("Game successfully loaded \n");
 	return true;
 }
 
