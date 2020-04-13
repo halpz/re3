@@ -38,7 +38,6 @@ CPedPath
 CRoadBlocks
 CWeapon
 CWorld
-GenericLoad
 ```
 
 The following classes have only unused or practically unused code left:
