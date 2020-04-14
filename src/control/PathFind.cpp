@@ -14,8 +14,6 @@ bool gbShowCarPathsLinks;
 
 CPathFind &ThePaths = *(CPathFind*)0x8F6754;
 
-WRAPPER bool CPedPath::CalcPedRoute(uint8, CVector, CVector, CVector*, int16*, int16) { EAXJMP(0x42E680); }
-
 #define MAX_DIST INT16_MAX-1
 
 // object flags:
@@ -27,6 +25,215 @@ CPathInfoForObject *&InfoForTilePeds  = *(CPathInfoForObject**)0x8F1AE4;
 // unused
 CTempDetachedNode *&DetachedNodesCars = *(CTempDetachedNode**)0x8E2824;
 CTempDetachedNode *&DetachedNodesPeds = *(CTempDetachedNode**)0x8E28A0;
+
+bool 
+CPedPath::CalcPedRoute(int8 pathType, CVector position, CVector destination, CVector *pointPoses, int16 *pointsFound, int16 maxPoints)
+{
+	*pointsFound = 0;
+	CVector vecDistance = destination - position;
+	if (Abs(vecDistance.x) > 23.8f || Abs(vecDistance.y) > 23.8f || Abs(vecDistance.z) > 23.8f)
+		return false;
+	CVector vecPos = (position + destination) * 0.5f;
+	CVector vecSectorStartPos (vecPos.x - 14.0f, vecPos.y - 14.0f, vecPos.z);
+	CVector2D vecSectorEndPos (vecPos.x + 28.0f, vecPos.x + 28.0f);
+	const int16 nodeStartX = (position.x - vecSectorStartPos.x) * 1.4286f;
+	const int16 nodeStartY = (position.y - vecSectorStartPos.y) * 1.4286f;
+	const int16 nodeEndX = (destination.x - vecSectorStartPos.x) * 1.4286f;
+	const int16 nodeEndY = (destination.y - vecSectorStartPos.y) * 1.4286f;
+	if (nodeStartX == nodeEndX && nodeStartY == nodeEndY)
+		return false;
+	CPedPathNode pathNodes[40][40]; 
+	CPedPathNode pathNodesList[416];
+	for (int32 x = 0; x < 40; x++) {
+		for (int32 y = 0; y < 40; y++) {
+			pathNodes[x][y].bBlockade = false;
+			pathNodes[x][y].id = 0x7FFF;
+			pathNodes[x][y].nodeIdX = x;
+			pathNodes[x][y].nodeIdY = y;
+		}
+	}
+	CWorld::AdvanceCurrentScanCode();
+	if (pathType != ROUTE_NO_BLOCKADE) {
+		const int32 nStartX = max(CWorld::GetSectorIndexX(vecSectorStartPos.x), 0);
+		const int32 nStartY = max(CWorld::GetSectorIndexY(vecSectorStartPos.y), 0);
+		const int32 nEndX = min(CWorld::GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
+		const int32 nEndY = min(CWorld::GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
+		for (int32 y = nStartY; y <= nEndY; y++) {
+			for (int32 x = nStartX; x <= nEndX; x++) {
+				CSector *pSector = CWorld::GetSector(x, y);
+				AddBlockadeSectorList(pSector->m_lists[ENTITYLIST_VEHICLES], pathNodes, &vecSectorStartPos);
+				AddBlockadeSectorList(pSector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], pathNodes, &vecSectorStartPos);
+				AddBlockadeSectorList(pSector->m_lists[ENTITYLIST_OBJECTS], pathNodes, &vecSectorStartPos);
+				AddBlockadeSectorList(pSector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], pathNodes, &vecSectorStartPos);
+			}
+		}
+	}
+	for (int32 i = 0; i < 416; i++) {
+		pathNodesList[i].prev = nil;
+		pathNodesList[i].next = nil;
+	}
+	CPedPathNode *pStartPathNode = &pathNodes[nodeStartX][nodeStartY];
+	CPedPathNode *pEndPathNode = &pathNodes[nodeEndX][nodeEndY];
+	pEndPathNode->bBlockade = false;
+	pEndPathNode->id = 0;
+	pEndPathNode->prev = nil;
+	pEndPathNode->next = pathNodesList;
+	pathNodesList[0].prev = pEndPathNode;
+	int32 pathNodeIndex = 0;
+	CPedPathNode *pPreviousNode = nil;
+	for (; pathNodeIndex < 414; pathNodeIndex++)
+	{
+		pPreviousNode = pathNodesList[pathNodeIndex].prev;
+		while (pPreviousNode && pPreviousNode != pStartPathNode) {
+			const uint8 nodeIdX = pPreviousNode->nodeIdX;
+			const uint8 nodeIdY = pPreviousNode->nodeIdY;
+			if (nodeIdX > 0) {
+				AddNodeToPathList(&pathNodes[nodeIdX - 1][nodeIdY], pathNodeIndex + 5, pathNodesList);
+				if (nodeIdY > 0)
+					AddNodeToPathList(&pathNodes[nodeIdX - 1][nodeIdY - 1], pathNodeIndex + 7, pathNodesList);
+				if (nodeIdY < 39)
+					AddNodeToPathList(&pathNodes[nodeIdX - 1][nodeIdY + 1], pathNodeIndex + 7, pathNodesList);
+			}
+			if (nodeIdX < 39) {
+				AddNodeToPathList(&pathNodes[nodeIdX + 1][nodeIdY], pathNodeIndex + 5, pathNodesList);
+				if (nodeIdY > 0)
+					AddNodeToPathList(&pathNodes[nodeIdX + 1][nodeIdY - 1], pathNodeIndex + 7, pathNodesList);
+				if (nodeIdY < 39)
+					AddNodeToPathList(&pathNodes[nodeIdX + 1][nodeIdY + 1], pathNodeIndex + 7, pathNodesList);
+			}
+			if (nodeIdY > 0)
+				AddNodeToPathList(&pathNodes[nodeIdX][nodeIdY - 1], pathNodeIndex + 5, pathNodesList);
+			if (nodeIdY < 39)
+				AddNodeToPathList(&pathNodes[nodeIdX][nodeIdY + 1], pathNodeIndex + 5, pathNodesList);
+			pPreviousNode = pPreviousNode->prev;
+			if (!pPreviousNode)
+				break;
+		}
+
+		if (pPreviousNode && pPreviousNode == pStartPathNode)
+			break;
+	}
+	if (pathNodeIndex == 414)
+		return false;
+	CPedPathNode *pPathNode = pStartPathNode;
+	for (*pointsFound = 0; pPathNode != pEndPathNode && *pointsFound < maxPoints; ++ *pointsFound) {
+		const uint8 nodeIdX = pPathNode->nodeIdX;
+		const uint8 nodeIdY = pPathNode->nodeIdY;
+		if (nodeIdX <= 0 || pathNodes[nodeIdX - 1][nodeIdY].id + 5 != pPathNode->id) {
+			if (nodeIdX >= 39 || pathNodes[nodeIdX + 1][nodeIdY].id + 5 != pPathNode->id) {
+				if (nodeIdY <= 0 || pathNodes[nodeIdX][nodeIdY - 1].id + 5 != pPathNode->id) {
+					if (nodeIdY >= 39 || pathNodes[nodeIdX][nodeIdY + 1].id + 5 != pPathNode->id) {
+						if (nodeIdX <= 0 || nodeIdY <= 0 || pathNodes[nodeIdX - 1][nodeIdY - 1].id + 7 != pPathNode->id) {
+							if (nodeIdX <= 0 || nodeIdY >= 39 || pathNodes[nodeIdX - 1][nodeIdY + 1].id + 7 != pPathNode->id) {
+								if (nodeIdX >= 39 || nodeIdY <= 0 || pathNodes[nodeIdX + 1][nodeIdY - 1].id + 7 != pPathNode->id) {
+									if (nodeIdX < 39 && nodeIdY < 39 && pathNodes[nodeIdX + 1][nodeIdY + 1].id + 7 == pPathNode->id)
+										pPathNode = &pathNodes[nodeIdX + 1][nodeIdY + 1];
+								} else {
+									pPathNode = &pathNodes[nodeIdX + 1][nodeIdY - 1];
+								}
+							} else {
+								pPathNode = &pathNodes[nodeIdX - 1][nodeIdY + 1];
+							}
+						} else {
+							pPathNode = &pathNodes[nodeIdX - 1][nodeIdY - 1];
+						}
+					} else {
+						pPathNode = &pathNodes[nodeIdX][nodeIdY + 1]; 
+					}
+				} else {
+					pPathNode = &pathNodes[nodeIdX][nodeIdY - 1]; 
+				}
+			}
+			else {
+				pPathNode = &pathNodes[nodeIdX + 1][nodeIdY];
+			}
+		}
+		else {
+			pPathNode = &pathNodes[nodeIdX - 1][nodeIdY]; 
+		}
+		pointPoses[*pointsFound] = vecSectorStartPos;
+		pointPoses[*pointsFound].x += (float)pPathNode->nodeIdX * 0.7f;
+		pointPoses[*pointsFound].y += (float)pPathNode->nodeIdY * 0.7f;
+	}
+	return true;
+}
+
+
+void 
+CPedPath::AddNodeToPathList(CPedPathNode *pNodeToAdd, int16 id, CPedPathNode *pNodeList) 
+{
+	if (!pNodeToAdd->bBlockade && id < pNodeToAdd->id) {
+		if (pNodeToAdd->id != 0x7FFF)
+			RemoveNodeFromList(pNodeToAdd);
+		AddNodeToList(pNodeToAdd, id, pNodeList);
+	}
+}
+
+void 
+CPedPath::RemoveNodeFromList(CPedPathNode *pNode)
+{
+	pNode->next->prev = pNode->prev;
+	if (pNode->prev)
+		pNode->prev->next = pNode->next;
+}
+
+void 
+CPedPath::AddNodeToList(CPedPathNode *pNode, int16 index, CPedPathNode *pList)
+{
+	pNode->prev = pList[index].prev;
+	pNode->next = &pList[index];
+	if (pList[index].prev)
+		pList[index].prev->next = pNode;
+	pList[index].prev = pNode;
+	pNode->id = index;
+}
+
+void
+CPedPath::AddBlockadeSectorList(CPtrList& list, CPedPathNode(*pathNodes)[40], CVector *pPosition)
+{
+	CPtrNode* listNode = list.first;
+	while (listNode) {
+		CEntity* pEntity = (CEntity*)listNode->item;
+		if (pEntity->m_scanCode != CWorld::GetCurrentScanCode() && pEntity->bUsesCollision) {
+			pEntity->m_scanCode = CWorld::GetCurrentScanCode();
+			AddBlockade(pEntity, pathNodes, pPosition);
+		}
+		listNode = listNode->next;
+	}
+}
+
+void 
+CPedPath::AddBlockade(CEntity *pEntity, CPedPathNode(*pathNodes)[40], CVector *pPosition)
+{
+	const CColBox& boundingBox = pEntity->GetColModel()->boundingBox;
+	const float fBoundMaxY = boundingBox.max.y + 0.3f;
+	const float fBoundMinY = boundingBox.min.y - 0.3f;
+	const float fBoundMaxX = boundingBox.max.x + 0.3f;
+	const float fDistanceX = pPosition->x - pEntity->m_matrix.GetPosition().x;
+	const float fDistanceY = pPosition->y - pEntity->m_matrix.GetPosition().y;
+	const float fBoundRadius = pEntity->GetBoundRadius();
+	CVector vecBoundCentre;
+	pEntity->GetBoundCentre(vecBoundCentre);
+	if (vecBoundCentre.x + fBoundRadius >= pPosition->x && 
+		vecBoundCentre.y + fBoundRadius >= pPosition->y &&
+		vecBoundCentre.x - fBoundRadius <= pPosition->x + 28.0f &&
+		vecBoundCentre.y - fBoundRadius <= pPosition->y + 28.0f) {
+		for (int16 x = 0; x < 40; x++) {
+			const float pointX = (float)x * 0.7f + fDistanceX;
+			for (int16 y = 0; y < 40; y++) {
+				if (!pathNodes[x][y].bBlockade) {
+					const float pointY = (float)y * 0.7f + fDistanceY;
+					CVector2D point(pointX, pointY);
+					if (fBoundMaxX > Abs(DotProduct2D(point, pEntity->m_matrix.GetRight()))) {
+						float fDotProduct = DotProduct2D(point, pEntity->m_matrix.GetForward());
+						if (fBoundMaxY > fDotProduct && fBoundMinY < fDotProduct)
+							pathNodes[x][y].bBlockade = true;
+					}
+				}
+			}
+		}
+	}
+}
 
 void
 CPathFind::Init(void)
@@ -1576,6 +1783,13 @@ CPathFind::DisplayPathData(void)
 }
 
 STARTPATCHES
+	InjectHook(0x42E680, &CPedPath::CalcPedRoute, PATCH_JUMP);
+	InjectHook(0x42F100, &CPedPath::AddNodeToPathList, PATCH_JUMP);
+	InjectHook(0x42F140, &CPedPath::RemoveNodeFromList, PATCH_JUMP);
+	InjectHook(0x42F160, &CPedPath::AddNodeToList, PATCH_JUMP);
+	InjectHook(0x42F1A0, &CPedPath::AddBlockade, PATCH_JUMP);
+	InjectHook(0x42F420, &CPedPath::AddBlockadeSectorList, PATCH_JUMP);
+
 	InjectHook(0x4294A0, &CPathFind::Init, PATCH_JUMP);
 	InjectHook(0x42D580, &CPathFind::AllocatePathFindInfoMem, PATCH_JUMP);
 	InjectHook(0x429540, &CPathFind::RegisterMapObject, PATCH_JUMP);
