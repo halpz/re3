@@ -335,7 +335,6 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddVarBool8("Debug", "Draw hud", (int8*)&CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVarBool8("Debug", "Edit on", (int8*)&CSceneEdit::m_bEditOn, nil);
-		DebugMenuAddVarBool8("Debug", "MapPadOneToPadTwo", (int8*)&CPad::m_bMapPadOneToPadTwo, nil);
 		DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
 		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);

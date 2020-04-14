@@ -931,8 +931,8 @@ void CPad::UpdatePads(void)
 	
 	GetPad(0)->UpdateMouse();
 #ifdef XINPUT
-	GetPad(0)->AffectFromXinput(1);
-	GetPad(1)->AffectFromXinput(0);
+	GetPad(0)->AffectFromXinput(0);
+	GetPad(1)->AffectFromXinput(1);
 #else
 	CapturePad(0);
 #endif
