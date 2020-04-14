@@ -15,6 +15,7 @@ WRAPPER void CWeapon::Update(int32 audioEntity) { EAXJMP(0x563A10); }
 WRAPPER void CWeapon::DoTankDoomAiming(CEntity *playerVehicle, CEntity *playerPed, CVector *start, CVector *end) { EAXJMP(0x563200); }
 WRAPPER void CWeapon::InitialiseWeapons(void) { EAXJMP(0x55C2D0); }
 WRAPPER void FireOneInstantHitRound(CVector* shotSource, CVector* shotTarget, int32 damage) { EAXJMP(0x563B00); }
+WRAPPER void CWeapon::BlowUpExplosiveThings(CEntity* pEntity) { EAXJMP(0x564A60); }
 
 void
 CWeapon::Initialise(eWeaponType type, int ammo)

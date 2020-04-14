@@ -79,6 +79,7 @@ public:
 	bool HasWeaponAmmoToBeUsed(void);
 	static void InitialiseWeapons(void);
 	static void UpdateWeapons(void);
+	static void BlowUpExplosiveThings(CEntity*);
 };
 static_assert(sizeof(CWeapon) == 0x18, "CWeapon: error");
 
