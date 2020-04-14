@@ -10,6 +10,22 @@
 
 const int CollisionSoundIntensity = 60;
 
+cAudioCollisionManager::cAudioCollisionManager()
+{
+	m_sQueue.m_pEntity1 = nil;
+	m_sQueue.m_pEntity2 = nil;
+	m_sQueue.m_bSurface1 = SURFACE_DEFAULT;
+	m_sQueue.m_bSurface2 = SURFACE_DEFAULT;
+	m_sQueue.m_fIntensity2 = 0.0f;
+	m_sQueue.m_fIntensity1 = 0.0f;
+	m_sQueue.m_vecPosition = CVector(0.0f, 0.0f, 0.0f);
+
+	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++)
+		m_bIndicesTable[i] = NUMAUDIOCOLLISIONS;
+
+	m_bCollisionsInQueue = 0;
+}
+
 void
 cAudioCollisionManager::AddCollisionToRequestedQueue()
 {
@@ -151,21 +167,21 @@ cAudioManager::SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter)
 			m_sQueueSample.m_bVolume =
 			    ComputeVolume(emittingVol, CollisionSoundIntensity, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_bVolume) {
-				m_sQueueSample.m_counter = counter;
+				m_sQueueSample.m_nCounter = counter;
 				m_sQueueSample.m_vecPos = col->m_vecPosition;
 				m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
-				m_sQueueSample.m_bIsDistant = false;
-				m_sQueueSample.field_16 = 7;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_nReleasingVolumeModificator = 7;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_bEmittingVolume = emittingVol;
 				m_sQueueSample.m_nLoopStart =
 				    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nLoopEnd =
 				    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.field_48 = 4.0f;
+				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;
-				m_sQueueSample.field_56 = 0;
-				m_sQueueSample.field_76 = 5;
+				m_sQueueSample.m_bReleasingSoundFlag = false;
+				m_sQueueSample.m_nReleasingVolumeDivider = 5;
 				m_sQueueSample.m_bReverbFlag = true;
 				m_sQueueSample.m_bRequireReflection = false;
 				AddSampleToRequestedQueue();
@@ -270,19 +286,19 @@ cAudioManager::SetUpOneShotCollisionSound(cAudioCollision *col)
 					break;
 				}
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
-				m_sQueueSample.m_counter = counter++;
+				m_sQueueSample.m_nCounter = counter++;
 				if(counter >= 255) counter = 28;
 				m_sQueueSample.m_vecPos = col->m_vecPosition;
 				m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
-				m_sQueueSample.m_bIsDistant = false;
-				m_sQueueSample.field_16 = 11;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_nReleasingVolumeModificator = 11;
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.m_bEmittingVolume = emittingVol;
 				m_sQueueSample.m_nLoopStart = 0;
 				m_sQueueSample.m_nLoopEnd = -1;
-				m_sQueueSample.field_48 = 4.0f;
+				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;
-				m_sQueueSample.field_56 = 1;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
 				m_sQueueSample.m_bReverbFlag = true;
 				m_sQueueSample.m_bRequireReflection = false;
 				AddSampleToRequestedQueue();

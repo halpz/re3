@@ -1,5 +1,5 @@
 workspace "re3"
-	configurations { "Debug", "Release", "ReleaseFH" }
+	configurations { "Debug", "Release", "ReleaseFH", "DebugRW", "ReleaseRW"  }
 	location "build"
 
 	files { "src/*.*" }
@@ -13,6 +13,7 @@ workspace "re3"
 	files { "src/objects/*.*" }
 	files { "src/peds/*.*" }
 	files { "src/render/*.*" }
+	files { "src/rw/*.*" }
 	files { "src/save/*.*" }
 	files { "src/skel/*.*" }
 	files { "src/skel/win/*.*" }
@@ -32,6 +33,7 @@ workspace "re3"
 	includedirs { "src/objects" }
 	includedirs { "src/peds" }
 	includedirs { "src/render" }
+	includedirs { "src/rw" }
 	includedirs { "src/save/" }
 	includedirs { "src/skel/" }
 	includedirs { "src/skel/win" }
@@ -47,6 +49,12 @@ workspace "re3"
 
 	libdirs { "dxsdk/lib" }
 	libdirs { "milessdk/lib" }
+
+	filter "configurations:DebugRW or configurations:ReleaseRW"
+	defines { "RWLIBS" }
+	libdirs { "rwsdk/lib/d3d8/release" }
+	links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp" }
+	filter  {}
 	
     pbcommands = { 
        "setlocal EnableDelayedExpansion",
@@ -102,3 +110,15 @@ project "re3"
 		staticruntime "on"
 		targetextension ".asi"
 		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "scripts/")
+
+	filter "configurations:DebugRW"
+		defines { "DEBUG" }
+		staticruntime "on"
+		symbols "On"
+		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
+
+	filter "configurations:ReleaseRW"
+		defines { "NDEBUG" }
+		optimize "On"
+		staticruntime "on"
+		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")

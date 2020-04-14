@@ -73,9 +73,13 @@ enum Config {
 	NUMCORONAS = 56,
 	NUMPOINTLIGHTS = 32,
 	NUM3DMARKERS = 32,
+	NUMBRIGHTLIGHTS = 32,
+	NUMSHINYTEXTS = 32,
 	NUMMONEYMESSAGES = 16,
 	NUMPICKUPMESSAGES = 16,
 	NUMBULLETTRACES = 16,
+	NUMMBLURSTREAKS = 4,
+	NUMSKIDMARKS = 32,
 
 	NUMONSCREENTIMERENTRIES = 1,
 	NUMRADARBLIPS = 32,
@@ -83,6 +87,7 @@ enum Config {
 	NUMSCRIPTEDPICKUPS = 16,
 	NUMPICKUPS = NUMGENERALPICKUPS + NUMSCRIPTEDPICKUPS,
 	NUMCOLLECTEDPICKUPS = 20,
+	NUMPACMANPICKUPS = 256,
 	NUMEVENTS = 64,
 
 	NUM_CARGENS = 160,
@@ -120,7 +125,11 @@ enum Config {
 	NUM_AUDIO_REFLECTIONS = 5,
 	NUM_SCRIPT_MAX_ENTITIES = 40,
 
-	NUM_GARAGE_STORED_CARS = 6
+	NUM_GARAGE_STORED_CARS = 6,
+
+	NUM_CRANES = 8,
+
+	NUM_EXPLOSIONS = 48,
 };
 
 // We'll use this once we're ready to become independent of the game
@@ -145,6 +154,7 @@ enum Config {
 //#define MASTER
 
 #if defined GTA_PS2
+#	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
 #elif defined GTA_PC
 #	define GTA3_1_1_PATCH
@@ -183,13 +193,17 @@ enum Config {
 // Pad
 #define XINPUT
 #define KANGAROO_CHEAT
-#define REGISTER_START_BUTTON // currently only in menu sadly. resumes the game
+#define REGISTER_START_BUTTON
 
 // Hud, frontend and radar
 #define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
 #define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
 // #define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
+#define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
+#define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
+#define TRIANGLE_BACK_BUTTON
+// #define CIRCLE_BACK_BUTTON
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER	// makes game load main_freeroam.scm by default

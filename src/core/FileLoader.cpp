@@ -25,8 +25,6 @@
 #include "CdStream.h"
 #include "FileLoader.h"
 
-WRAPPER void CFileLoader::ReloadPaths(const char *filename) { EAXJMP(0x476DB0); }
-
 char CFileLoader::ms_line[256];
 
 const char*
@@ -311,7 +309,7 @@ CFileLoader::FindRelatedModelInfoCB(RpAtomic *atomic, void *data)
 	int n;
 	RpClump *clump = (RpClump*)data;
 
-	nodename = GetFrameNodeName(RpClumpGetFrame(atomic));
+	nodename = GetFrameNodeName(RpAtomicGetFrame(atomic));
 	GetNameAndLOD(nodename, name, &n);
 	mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(name, nil);
 	if(mi){
@@ -1198,6 +1196,165 @@ CFileLoader::LoadMapZones(const char *filename)
 	debug("Finished loading IPL\n");
 }
 
+void
+CFileLoader::ReloadPaths(const char *filename)
+{
+	enum {
+		NONE,
+		PATH,
+	};
+	char *line;
+	int section = NONE;
+	int id, pathType, pathIndex = -1;
+	char pathTypeStr[20];
+	debug("Reloading paths from %s...\n", filename);
+
+	int fd = CFileMgr::OpenFile(filename, "r");
+	for (line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)) {
+		if (*line == '\0' || *line == '#')
+			continue;
+
+		if (section == NONE) {
+			if (strncmp(line, "path", 4) == 0) {
+				section = PATH;
+				ThePaths.AllocatePathFindInfoMem(4500);
+			}
+		} else if (strncmp(line, "end", 3) == 0) {
+			section = NONE;
+		} else {
+			switch (section) {
+				case PATH:
+					if (pathIndex == -1) {
+						id = LoadPathHeader(line, pathTypeStr);
+						if (strncmp(pathTypeStr, "ped", 4) == 0)
+							pathType = 1;
+						else if (strncmp(pathTypeStr, "car", 4) == 0)
+							pathType = 0;
+						pathIndex = 0;
+					} else {
+						if (pathType == 1)
+							LoadPedPathNode(line, id, pathIndex);
+						else if (pathType == 0)
+							LoadCarPathNode(line, id, pathIndex);
+						pathIndex++;
+						if (pathIndex == 12)
+							pathIndex = -1;
+					}
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	CFileMgr::CloseFile(fd);
+}
+
+void
+CFileLoader::ReloadObjectTypes(const char *filename)
+{
+	enum {
+		NONE,
+		OBJS,
+		TOBJ,
+		TWODFX
+	};
+	char *line;
+	int section = NONE;
+	CModelInfo::ReInit2dEffects();
+	debug("Reloading object types from %s...\n", filename);
+
+	CFileMgr::ChangeDir("\\DATA\\MAPS\\");
+	int fd = CFileMgr::OpenFile(filename, "r");
+	CFileMgr::ChangeDir("\\");
+	for (line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)) {
+		if (*line == '\0' || *line == '#')
+			continue;
+
+		if (section == NONE) {
+			if (strncmp(line, "objs", 4) == 0) section = OBJS;
+			else if (strncmp(line, "tobj", 4) == 0) section = TOBJ;
+			else if (strncmp(line, "2dfx", 4) == 0) section = TWODFX;
+		} else if (strncmp(line, "end", 3) == 0) {
+			section = NONE;
+		} else {
+			switch (section) {
+				case OBJS:
+				case TOBJ:
+					ReloadObject(line);
+					break;
+				case TWODFX:
+					Load2dEffect(line);
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	CFileMgr::CloseFile(fd);
+}
+
+void
+CFileLoader::ReloadObject(const char *line)
+{
+	int id, numObjs;
+	char model[24], txd[24];
+	float dist[3];
+	uint32 flags;
+	CSimpleModelInfo *mi;
+
+	if(sscanf(line, "%d %s %s %d", &id, model, txd, &numObjs) != 4)
+		return;
+
+	switch(numObjs){
+	case 1:
+		sscanf(line, "%d %s %s %d %f %d",
+			&id, model, txd, &numObjs, &dist[0], &flags);
+		break;
+	case 2:
+		sscanf(line, "%d %s %s %d %f %f %d",
+			&id, model, txd, &numObjs, &dist[0], &dist[1], &flags);
+		break;
+	case 3:
+		sscanf(line, "%d %s %s %d %f %f %f %d",
+			&id, model, txd, &numObjs, &dist[0], &dist[1], &dist[2], &flags);
+		break;
+	}
+
+	mi = (CSimpleModelInfo*) CModelInfo::GetModelInfo(id);
+	if (
+#ifdef FIX_BUGS
+		mi &&
+#endif
+		mi->m_type == MITYPE_SIMPLE && !strcmp(mi->GetName(), model) && mi->m_numAtomics == numObjs) {
+		mi->SetLodDistances(dist);
+		SetModelInfoFlags(mi, flags);
+	} else {
+		printf("Can't reload %s\n", model);
+	}
+}
+
+// unused mobile function - crashes
+void
+CFileLoader::ReLoadScene(const char *filename)
+{
+	char *line;
+	CFileMgr::ChangeDir("\\DATA\\");
+	int fd = CFileMgr::OpenFile(filename, "r");
+	CFileMgr::ChangeDir("\\");
+
+	for (line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)) {
+		if (*line == '#')
+			continue;
+
+		if (strncmp(line, "EXIT", 9) == 0)	// BUG: 9?
+			break;
+
+		if (strncmp(line, "IDE", 3) == 0) {
+			LoadObjectTypes(line + 4);
+		}
+	}
+	CFileMgr::CloseFile(fd);
+}
 
 STARTPATCHES
 	InjectHook(0x476290, CFileLoader::LoadLevel, PATCH_JUMP);
@@ -1233,4 +1390,8 @@ STARTPATCHES
 	InjectHook(0x478A90, CFileLoader::LoadCullZone, PATCH_JUMP);
 
 	InjectHook(0x478550, CFileLoader::LoadMapZones, PATCH_JUMP);
+
+	InjectHook(0x476DB0, CFileLoader::ReloadPaths, PATCH_JUMP);
+	InjectHook(0x476F30, CFileLoader::ReloadObjectTypes, PATCH_JUMP);
+	InjectHook(0x4772B0, CFileLoader::ReloadObject, PATCH_JUMP);
 ENDPATCHES

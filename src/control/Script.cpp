@@ -91,10 +91,10 @@ uint8 (&CTheScripts::ScriptSpace)[SIZE_SCRIPT_SPACE] = *(uint8(*)[SIZE_SCRIPT_SP
 CRunningScript(&CTheScripts::ScriptsArray)[MAX_NUM_SCRIPTS] = *(CRunningScript(*)[MAX_NUM_SCRIPTS])*(uintptr*)0x6F5C08;
 int32(&CTheScripts::BaseBriefIdForContact)[MAX_NUM_CONTACTS] = *(int32(*)[MAX_NUM_CONTACTS])*(uintptr*)0x880200;
 int32(&CTheScripts::OnAMissionForContactFlag)[MAX_NUM_CONTACTS] = *(int32(*)[MAX_NUM_CONTACTS])*(uintptr*)0x8622F0;
-CTextLine (&CTheScripts::IntroTextLines)[MAX_NUM_INTRO_TEXT_LINES] = *(CTextLine (*)[MAX_NUM_INTRO_TEXT_LINES])*(uintptr*)0x70EA68;
-CScriptRectangle (&CTheScripts::IntroRectangles)[MAX_NUM_INTRO_RECTANGLES] = *(CScriptRectangle (*)[MAX_NUM_INTRO_RECTANGLES])*(uintptr*)0x72D108;
+intro_text_line (&CTheScripts::IntroTextLines)[MAX_NUM_INTRO_TEXT_LINES] = *(intro_text_line (*)[MAX_NUM_INTRO_TEXT_LINES])*(uintptr*)0x70EA68;
+intro_script_rectangle (&CTheScripts::IntroRectangles)[MAX_NUM_INTRO_RECTANGLES] = *(intro_script_rectangle (*)[MAX_NUM_INTRO_RECTANGLES])*(uintptr*)0x72D108;
 CSprite2d (&CTheScripts::ScriptSprites)[MAX_NUM_SCRIPT_SRPITES] = *(CSprite2d(*)[MAX_NUM_SCRIPT_SRPITES])*(uintptr*)0x72B090;
-CScriptSphere(&CTheScripts::ScriptSphereArray)[MAX_NUM_SCRIPT_SPHERES] = *(CScriptSphere(*)[MAX_NUM_SCRIPT_SPHERES])*(uintptr*)0x727D60;
+script_sphere_struct(&CTheScripts::ScriptSphereArray)[MAX_NUM_SCRIPT_SPHERES] = *(script_sphere_struct(*)[MAX_NUM_SCRIPT_SPHERES])*(uintptr*)0x727D60;
 tCollectiveData(&CTheScripts::CollectiveArray)[MAX_NUM_COLLECTIVES] = *(tCollectiveData(*)[MAX_NUM_COLLECTIVES])*(uintptr*)0x6FA008;
 tUsedObject(&CTheScripts::UsedObjectArray)[MAX_NUM_USED_OBJECTS] = *(tUsedObject(*)[MAX_NUM_USED_OBJECTS])*(uintptr*)0x6E69C8;
 int32(&CTheScripts::MultiScriptArray)[MAX_NUM_MISSION_SCRIPTS] = *(int32(*)[MAX_NUM_MISSION_SCRIPTS])*(uintptr*)0x6F0558;
@@ -313,7 +313,7 @@ bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 id)
 	return false;
 }
 
-void CStuckCarCheckEntry::Reset()
+void stuck_car_data::Reset()
 {
 	m_nVehicleIndex = -1;
 	m_vecPos = CVector(-5000.0f, -5000.0f, -5000.0f);
@@ -2229,6 +2229,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		if (pos.z <= -100)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		UpdateCompareFlag(TheCamera.IsSphereVisible(pos, *(float*)&ScriptParams[3]));
+		return 0;
 	}
 	case COMMAND_DEBUG_ON:
 		CTheScripts::DbgFlag = true;
@@ -7116,7 +7117,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_CLOSE_GARAGE:
 	{
 		CollectParameters(&m_nIp, 1);
-		CGarages::CloseGarage(ScriptParams[1]);
+		CGarages::CloseGarage(ScriptParams[0]);
 		return 0;
 	}
 	case COMMAND_WARP_CHAR_FROM_CAR_TO_COORD:
@@ -7657,13 +7658,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		assert(pObject);
 		if (ScriptParams[1]) {
 			if (pObject->bIsStatic) {
-				pObject->bIsStatic = true;
+				pObject->bIsStatic = false;
 				pObject->AddToMovingList();
 			}
 		}
 		else {
 			if (!pObject->bIsStatic) {
-				pObject->bIsStatic = false;
+				pObject->bIsStatic = true;
 				pObject->RemoveFromMovingList();
 			}
 		}
@@ -8441,7 +8442,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
 		CPad::GetPad(ScriptParams[0])->DisablePlayerControls |= PLAYERCONTROL_DISABLED_80;
 		pPlayerInfo->MakePlayerSafe(true);
-		CCutsceneMgr::SetRunning(true);
+		CCutsceneMgr::StartCutsceneProcessing();
 		return 0;
 	}
 	case COMMAND_USE_TEXT_COMMANDS:
@@ -9140,7 +9141,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		assert(pVehicle);
 		assert(pVehicle->m_vehType == VEHICLE_TYPE_CAR);
 		CAutomobile* pCar = (CAutomobile*)pVehicle;
-		pCar->bTakeLessDamage = ScriptParams[1];
+		pCar->bMoreResistantToDamage = ScriptParams[1];
 		return 0;
 	}
 	case COMMAND_SET_JAMES_CAR_ON_PATH_TO_PLAYER:
@@ -9152,6 +9153,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		return 0;
 	}
 	case COMMAND_LOAD_END_OF_GAME_TUNE:
+		DMAudio.ChangeMusicMode(MUSICMODE_CUTSCENE);
 		printf("Start preload end of game audio\n");
 		DMAudio.PreloadCutSceneMusic(STREAMED_SOUND_GAME_COMPLETED);
 		printf("End preload end of game audio\n");
@@ -11037,6 +11039,7 @@ void CRunningScript::DoDeatharrestCheck()
 		int contactFlagOffset = CTheScripts::OnAMissionForContactFlag[contact];
 		if (contactFlagOffset && CTheScripts::ScriptSpace[contactFlagOffset] == 1) {
 			messageId += CTheScripts::BaseBriefIdForContact[contact];
+			found = true;
 		}
 	}
 	if (!found)
@@ -11331,6 +11334,7 @@ INITSAVEBUF
 			break;
 		case 4:
 			InvisibilitySettingArray[i] = CPools::GetDummyPool()->GetSlot(handle - 1);
+			break;
 		default:
 			assert(false);
 		}
@@ -11369,15 +11373,15 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntit
 			continue;
 		CEntity* pFound = aEntities[i];
 		int cols;
-		if (CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel()->numLines <= 0)
-			cols = CCollision::ProcessColModels(pEntity->GetMatrix(), *CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel(),
-				pFound->GetMatrix(), *CModelInfo::GetModelInfo(pFound->GetModelIndex())->GetColModel(), aTempColPoints, nil, nil);
+		if (pEntity->GetColModel()->numLines <= 0)
+			cols = CCollision::ProcessColModels(pEntity->GetMatrix(), *pEntity->GetColModel(),
+				pFound->GetMatrix(), *pFound->GetColModel(), aTempColPoints, nil, nil);
 		else {
 			float lines[4];
 			lines[0] = lines[1] = lines[2] = lines[3] = 1.0f;
-			CColPoint tmp;
-			cols = CCollision::ProcessColModels(pEntity->GetMatrix(), *CModelInfo::GetModelInfo(pEntity->GetModelIndex())->GetColModel(),
-				pFound->GetMatrix(), *CModelInfo::GetModelInfo(pFound->GetModelIndex())->GetColModel(), aTempColPoints, &tmp, lines);
+			CColPoint tmp[4];
+			cols = CCollision::ProcessColModels(pEntity->GetMatrix(), *pEntity->GetColModel(),
+				pFound->GetMatrix(), *pFound->GetColModel(), aTempColPoints,tmp, lines);
 		}
 		if (cols <= 0)
 			continue;

@@ -676,7 +676,7 @@ RemoveAllModelCB(RwObject *object, void *data)
 {
 	RpAtomic *atomic = (RpAtomic*)object;
 	if (CVisibilityPlugins::GetAtomicModelInfo(atomic)) {
-		RpClumpRemoveAtomic(atomic->clump, atomic);
+		RpClumpRemoveAtomic(RpAtomicGetClump(atomic), atomic);
 		RpAtomicDestroy(atomic);
 	}
 	return object;
@@ -902,7 +902,7 @@ static RwObject*
 SetPedAtomicVisibilityCB(RwObject* object, void* data)
 {
 	if (data == nil)
-		RpAtomicSetFlags(object, 0);
+		RpAtomicSetFlags((RpAtomic*)object, 0);
 	return object;
 }
 
@@ -2733,7 +2733,6 @@ CPed::SetObjective(eObjective newObj, void *entity)
 	}
 
 #ifdef VC_PED_PORTS
-	SetObjectiveTimer(0);
 	ClearPointGunAt();
 #endif
 	bObjectiveCompleted = false;
@@ -15027,7 +15026,7 @@ CPed::ProcessBuoyancy(void)
 #endif
 
 	if (mod_Buoyancy.ProcessBuoyancy(this, GRAVITY * m_fMass * buoyancyLevel, &buoyancyPoint, &buoyancyImpulse)) {
-		m_flagD8 = true;
+		bTouchingWater = true;
 		CEntity *entity;
 		CColPoint point;
 		if (CWorld::ProcessVerticalLine(GetPosition(), GetPosition().z - 3.0f, point, entity, false, true, false, false, false, false, false)
@@ -15093,7 +15092,7 @@ CPed::ProcessBuoyancy(void)
 		} else
 			return;
 	} else
-		m_flagD8 = false;
+		bTouchingWater = false;
 
 	if (nGenerateWaterCircles && CTimer::GetTimeInMilliseconds() >= nGenerateWaterCircles) {
 		CVector pos = GetPosition();

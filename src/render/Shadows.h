@@ -175,11 +175,18 @@ public:
 	static void RenderIndicatorShadow        (uint32 nID, uint8 ShadowType, RwTexture *pTexture,  CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity);
 };
 
-extern RwTexture *&gpBloodPoolTex;
+extern RwTexture *&gpShadowCarTex;
+extern RwTexture *&gpShadowPedTex;
+extern RwTexture *&gpShadowHeliTex;
 extern RwTexture *&gpShadowExplosionTex;
 extern RwTexture *&gpShadowHeadLightsTex;
-extern RwTexture *&gpGoalTex;
 extern RwTexture *&gpOutline1Tex;
 extern RwTexture *&gpOutline2Tex;
 extern RwTexture *&gpOutline3Tex;
+extern RwTexture *&gpBloodPoolTex;
+extern RwTexture *&gpReflectionTex;
+extern RwTexture *&gpGoalMarkerTex;
+extern RwTexture *&gpWalkDontTex;
 extern RwTexture *&gpCrackedGlassTex;
+extern RwTexture *&gpPostShadowTex;
+extern RwTexture *&gpGoalTex;

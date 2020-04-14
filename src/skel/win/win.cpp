@@ -1927,7 +1927,7 @@ _WinMain(HINSTANCE instance,
 		* Enter the message processing loop...
 		*/
 
-		while( !RsGlobal.quit && !FrontEndMenuManager.m_bStartGameLoading )
+		while( !RsGlobal.quit && !FrontEndMenuManager.m_bWantToRestart )
 		{
 			if( PeekMessage(&message, nil, 0U, 0U, PM_REMOVE|PM_NOYIELD) )
 			{
@@ -2059,13 +2059,13 @@ _WinMain(HINSTANCE instance,
 						if (wp.showCmd != SW_SHOWMINIMIZED)
 							RsEventHandler(rsFRONTENDIDLE, nil);
 
-						if ( !FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bLoadingSavedGame )
+						if ( !FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bWantToLoad )
 						{
 							gGameState = GS_INIT_PLAYING_GAME;
 							TRACE("gGameState = GS_INIT_PLAYING_GAME;");
 						}
 
-						if ( FrontEndMenuManager.m_bLoadingSavedGame )
+						if ( FrontEndMenuManager.m_bWantToLoad )
 						{
 							InitialiseGame();
 							FrontEndMenuManager.m_bGameNotLoaded = false;
@@ -2128,7 +2128,7 @@ _WinMain(HINSTANCE instance,
 		RwInitialised = FALSE;
 		
 		FrontEndMenuManager.UnloadTextures();
-		if ( !FrontEndMenuManager.m_bStartGameLoading )
+		if ( !FrontEndMenuManager.m_bWantToRestart )
 			break;
 		
 		CPad::ResetCheats();
@@ -2138,13 +2138,13 @@ _WinMain(HINSTANCE instance,
 		
 		CTimer::Stop();
 		
-		if ( FrontEndMenuManager.m_bLoadingSavedGame )
+		if ( FrontEndMenuManager.m_bWantToLoad )
 		{
 			CGame::ShutDownForRestart();
 			CGame::InitialiseWhenRestarting();
 			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
-			FrontEndMenuManager.m_bLoadingSavedGame = false;
+			FrontEndMenuManager.m_bWantToLoad = false;
 		}
 		else
 		{
@@ -2168,7 +2168,7 @@ _WinMain(HINSTANCE instance,
 		}
 		
 		FrontEndMenuManager.m_bFirstTime = false;
-		FrontEndMenuManager.m_bStartGameLoading = false;
+		FrontEndMenuManager.m_bWantToRestart = false;
 	}
 	
 

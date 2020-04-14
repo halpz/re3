@@ -130,7 +130,8 @@ public:
 	int8 m_nGettingInFlags;
 	int8 m_nGettingOutFlags;
 	uint8 m_nNumMaxPassengers;
-	char field_1CD[19];
+	char field_1CD[3];
+	float field_1D0[4];
 	CEntity *m_pCurGroundEntity;
 	CFire *m_pCarFire;
 	float m_fSteerAngle;
@@ -238,6 +239,7 @@ public:
 	bool IsTrain(void) { return m_vehType == VEHICLE_TYPE_TRAIN; }
 	bool IsHeli(void) { return m_vehType == VEHICLE_TYPE_HELI; }
 	bool IsPlane(void) { return m_vehType == VEHICLE_TYPE_PLANE; }
+	bool IsBike(void) { return m_vehType == VEHICLE_TYPE_BIKE; }
 
 	void FlyingControl(eFlightModel flightModel);
 	void ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
@@ -268,6 +270,7 @@ public:
 	bool IsSphereTouchingVehicle(float sx, float sy, float sz, float radius);
 	bool ShufflePassengersToMakeSpace(void);
 	void InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage);
+	void DoFixedMachineGuns(void);
 
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }

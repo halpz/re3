@@ -5,7 +5,12 @@
 #include "Camera.h"
 #include "Vehicle.h"
 #include "World.h"
+#include "Lines.h"	// for debug
 #include "PathFind.h"
+
+bool gbShowPedPaths;
+bool gbShowCarPaths;
+bool gbShowCarPathsLinks;
 
 CPathFind &ThePaths = *(CPathFind*)0x8F6754;
 
@@ -466,20 +471,20 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				// IMPROVE: use a goto here
 				// Find existing car path link
 				for(k = 0; k < m_numCarPathLinks; k++){
-					if(m_carPathLinks[k].dirX == tempnodes[j].dirX &&
-					   m_carPathLinks[k].dirY == tempnodes[j].dirY &&
-					   m_carPathLinks[k].posX == tempnodes[j].pos.x &&
-					   m_carPathLinks[k].posY == tempnodes[j].pos.y){
+					if(m_carPathLinks[k].dir.x == tempnodes[j].dirX &&
+					   m_carPathLinks[k].dir.y == tempnodes[j].dirY &&
+					   m_carPathLinks[k].pos.x == tempnodes[j].pos.x &&
+					   m_carPathLinks[k].pos.y == tempnodes[j].pos.y){
 						m_carPathConnections[m_numConnections] = k;
 						k = m_numCarPathLinks;
 					}
 				}
 				// k is m_numCarPathLinks+1 if we found one
 				if(k == m_numCarPathLinks){
-					m_carPathLinks[m_numCarPathLinks].dirX = tempnodes[j].dirX;
-					m_carPathLinks[m_numCarPathLinks].dirY = tempnodes[j].dirY;
-					m_carPathLinks[m_numCarPathLinks].posX = tempnodes[j].pos.x;
-					m_carPathLinks[m_numCarPathLinks].posY = tempnodes[j].pos.y;
+					m_carPathLinks[m_numCarPathLinks].dir.x = tempnodes[j].dirX;
+					m_carPathLinks[m_numCarPathLinks].dir.y = tempnodes[j].dirY;
+					m_carPathLinks[m_numCarPathLinks].pos.x = tempnodes[j].pos.x;
+					m_carPathLinks[m_numCarPathLinks].pos.y = tempnodes[j].pos.y;
 					m_carPathLinks[m_numCarPathLinks].pathNodeIndex = i;
 					m_carPathLinks[m_numCarPathLinks].numLeftLanes = tempnodes[j].numLeftLanes;
 					m_carPathLinks[m_numCarPathLinks].numRightLanes = tempnodes[j].numRightLanes;
@@ -529,20 +534,20 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 					// IMPROVE: use a goto here
 					// Find existing car path link
 					for(k = 0; k < m_numCarPathLinks; k++){
-						if(m_carPathLinks[k].dirX == dx &&
-						   m_carPathLinks[k].dirY == dy &&
-						   m_carPathLinks[k].posX == posx &&
-						   m_carPathLinks[k].posY == posy){
+						if(m_carPathLinks[k].dir.x == dx &&
+						   m_carPathLinks[k].dir.y == dy &&
+						   m_carPathLinks[k].pos.x == posx &&
+						   m_carPathLinks[k].pos.y == posy){
 							m_carPathConnections[m_numConnections] = k;
 							k = m_numCarPathLinks;
 						}
 					}
 					// k is m_numCarPathLinks+1 if we found one
 					if(k == m_numCarPathLinks){
-						m_carPathLinks[m_numCarPathLinks].dirX = dx;
-						m_carPathLinks[m_numCarPathLinks].dirY = dy;
-						m_carPathLinks[m_numCarPathLinks].posX = posx;
-						m_carPathLinks[m_numCarPathLinks].posY = posy;
+						m_carPathLinks[m_numCarPathLinks].dir.x = dx;
+						m_carPathLinks[m_numCarPathLinks].dir.y = dy;
+						m_carPathLinks[m_numCarPathLinks].pos.x = posx;
+						m_carPathLinks[m_numCarPathLinks].pos.y = posy;
 						m_carPathLinks[m_numCarPathLinks].pathNodeIndex = i;
 						m_carPathLinks[m_numCarPathLinks].numLeftLanes = -1;
 						m_carPathLinks[m_numCarPathLinks].numRightLanes = -1;
@@ -760,8 +765,8 @@ CPathFind::SetLinksBridgeLights(float x1, float x2, float y1, float y2, bool ena
 {
 	int i;
 	for(i = 0; i < m_numCarPathLinks; i++)
-		if(x1 < m_carPathLinks[i].posX && m_carPathLinks[i].posX < x2 &&
-		   y1 < m_carPathLinks[i].posY && m_carPathLinks[i].posY < y2)
+		if(x1 < m_carPathLinks[i].pos.x && m_carPathLinks[i].pos.x < x2 &&
+		   y1 < m_carPathLinks[i].pos.y && m_carPathLinks[i].pos.y < y2)
 			m_carPathLinks[i].bBridgeLights = enable;
 }
 
@@ -1442,6 +1447,132 @@ CPathFind::Load(uint8 *buf, uint32 size)
 			m_pathNodes[i].bBetweenLevels = true;
 		else
 			m_pathNodes[i].bBetweenLevels = false;
+}
+
+void
+CPathFind::DisplayPathData(void)
+{
+	// Not the function from mobm_carPathLinksile but my own!
+
+	int i, j, k;
+	// Draw 50 units around camera
+	CVector pos = TheCamera.GetPosition();
+	const float maxDist = 50.0f;
+
+	// Render car path nodes
+	if(gbShowCarPaths)
+	for(i = 0; i < m_numCarPathNodes; i++){
+		if((m_pathNodes[i].pos - pos).MagnitudeSqr() > SQR(maxDist))
+			continue;
+
+		CVector n1 = m_pathNodes[i].pos;
+		n1.z += 0.3f;
+
+		// Draw node itself
+		CLines::RenderLineWithClipping(n1.x, n1.y, n1.z,
+			n1.x, n1.y, n1.z + 1.0f,
+			0xFFFFFFFF, 0xFFFFFFFF);
+
+		for(j = 0; j < m_pathNodes[i].numLinks; j++){
+			k = m_connections[m_pathNodes[i].firstLink + j];
+			CVector n2 = m_pathNodes[k].pos;
+			n2.z += 0.3f;
+			// Draw links to neighbours
+			CLines::RenderLineWithClipping(n1.x, n1.y, n1.z,
+				n2.x, n2.y, n2.z,
+				0xFFFFFFFF, 0xFFFFFFFF);
+		}
+	}
+
+	// Render car path nodes
+	if(gbShowCarPathsLinks)
+	for(i = 0; i < m_numCarPathLinks; i++){
+		CVector2D n1_2d = m_carPathLinks[i].pos;
+		if((n1_2d - pos).MagnitudeSqr() > SQR(maxDist))
+			continue;
+
+		int ni = m_carPathLinks[i].pathNodeIndex;
+		CVector pn1 = m_pathNodes[ni].pos;
+		pn1.z += 0.3f;
+		CVector n1(n1_2d.x, n1_2d.y, pn1.z);
+		n1.z += 0.3f;
+
+		// Draw car node itself
+		CLines::RenderLineWithClipping(n1.x, n1.y, n1.z,
+			n1.x, n1.y, n1.z + 1.0f,
+			0xFFFFFFFF, 0xFFFFFFFF);
+		CLines::RenderLineWithClipping(n1.x, n1.y, n1.z + 0.5f,
+			n1.x+m_carPathLinks[i].dir.x, n1.y+m_carPathLinks[i].dir.y, n1.z + 0.5f,
+			0xFFFFFFFF, 0xFFFFFFFF);
+
+		// Draw connection to car path node
+		CLines::RenderLineWithClipping(n1.x, n1.y, n1.z,
+			pn1.x, pn1.y, pn1.z,
+			0xFF0000FF, 0xFFFFFFFF);
+
+		// traffic light type
+		uint32 col = 0xFF;
+		if((m_carPathLinks[i].trafficLightType&0x7F) == 1)
+			col += 0xFF000000;
+		if((m_carPathLinks[i].trafficLightType&0x7F) == 2)
+			col += 0x00FF0000;
+		if(m_carPathLinks[i].trafficLightType & 0x80)
+			col += 0x0000FF00;
+		CLines::RenderLineWithClipping(n1.x+0.2f, n1.y, n1.z,
+			n1.x+0.2f, n1.y, n1.z + 1.0f,
+			col, col);
+
+		for(j = 0; j < m_pathNodes[ni].numLinks; j++){
+			k = m_carPathConnections[m_pathNodes[ni].firstLink + j];
+			CVector2D n2_2d = m_carPathLinks[k].pos;
+			int nk = m_carPathLinks[k].pathNodeIndex;
+			CVector pn2 = m_pathNodes[nk].pos;
+			pn2.z += 0.3f;
+			CVector n2(n2_2d.x, n2_2d.y, pn2.z);
+			n2.z += 0.3f;
+
+			// Draw links to neighbours
+			CLines::RenderLineWithClipping(n1.x, n1.y, n1.z,
+				n2.x, n2.y, n2.z,
+				0xFF00FFFF, 0xFF00FFFF);
+		}
+	}
+
+	// Render ped path nodes
+	if(gbShowPedPaths)
+	for(i = m_numCarPathNodes; i < m_numPathNodes; i++){
+		if((m_pathNodes[i].pos - pos).MagnitudeSqr() > SQR(maxDist))
+			continue;
+
+		CVector n1 = m_pathNodes[i].pos;
+		n1.z += 0.3f;
+
+		// Draw node itself
+		CLines::RenderLineWithClipping(n1.x, n1.y, n1.z,
+			n1.x, n1.y, n1.z + 1.0f,
+			0xFFFFFFFF, 0xFFFFFFFF);
+
+		for(j = 0; j < m_pathNodes[i].numLinks; j++){
+			k = m_connections[m_pathNodes[i].firstLink + j];
+			CVector n2 = m_pathNodes[k].pos;
+			n2.z += 0.3f;
+			// Draw links to neighbours
+			CLines::RenderLineWithClipping(n1.x, n1.y, n1.z,
+				n2.x, n2.y, n2.z,
+				0xFFFFFFFF, 0xFFFFFFFF);
+
+			// Draw connection flags
+			CVector mid = (n1+n2)/2.0f;
+			uint32 col = 0xFF;
+			if(m_connectionFlags[m_pathNodes[i].firstLink + j].bCrossesRoad)
+				col += 0x00FF0000;
+			if(m_connectionFlags[m_pathNodes[i].firstLink + j].bTrafficLight)
+				col += 0xFF000000;
+			CLines::RenderLineWithClipping(mid.x, mid.y, mid.z,
+				mid.x, mid.y, mid.z + 1.0f,
+				col, col);
+		}
+	}
 }
 
 STARTPATCHES

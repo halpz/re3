@@ -12,17 +12,17 @@ void CAutoPilot::ModifySpeed(float speed)
 	float positionBetweenNodes = (float)(CTimer::GetTimeInMilliseconds() - m_nTimeEnteredCurve) / m_nTimeToSpendOnCurrentCurve;
 	CCarPathLink* pCurrentLink = &ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo];
 	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[m_nNextPathNodeInfo];
-	float currentPathLinkForwardX = m_nCurrentDirection * ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo].dirX;
-	float currentPathLinkForwardY = m_nCurrentDirection * ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo].dirY;
-	float nextPathLinkForwardX = m_nNextDirection * ThePaths.m_carPathLinks[m_nNextPathNodeInfo].dirX;
-	float nextPathLinkForwardY = m_nNextDirection * ThePaths.m_carPathLinks[m_nNextPathNodeInfo].dirY;
+	float currentPathLinkForwardX = m_nCurrentDirection * ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo].dir.x;
+	float currentPathLinkForwardY = m_nCurrentDirection * ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo].dir.y;
+	float nextPathLinkForwardX = m_nNextDirection * ThePaths.m_carPathLinks[m_nNextPathNodeInfo].dir.x;
+	float nextPathLinkForwardY = m_nNextDirection * ThePaths.m_carPathLinks[m_nNextPathNodeInfo].dir.y;
 	CVector positionOnCurrentLinkIncludingLane(
-		pCurrentLink->posX + ((m_nCurrentLane + 0.5f) * LANE_WIDTH) * currentPathLinkForwardY,
-		pCurrentLink->posY - ((m_nCurrentLane + 0.5f) * LANE_WIDTH) * currentPathLinkForwardX,
+		pCurrentLink->pos.x + ((m_nCurrentLane + 0.5f) * LANE_WIDTH) * currentPathLinkForwardY,
+		pCurrentLink->pos.y - ((m_nCurrentLane + 0.5f) * LANE_WIDTH) * currentPathLinkForwardX,
 		0.0f);
 	CVector positionOnNextLinkIncludingLane(
-		pNextLink->posX + ((m_nNextLane + 0.5f) * LANE_WIDTH) * nextPathLinkForwardY,
-		pNextLink->posY - ((m_nNextLane + 0.5f) * LANE_WIDTH) * nextPathLinkForwardX,
+		pNextLink->pos.x + ((m_nNextLane + 0.5f) * LANE_WIDTH) * nextPathLinkForwardY,
+		pNextLink->pos.y - ((m_nNextLane + 0.5f) * LANE_WIDTH) * nextPathLinkForwardX,
 		0.0f);
 	m_nTimeToSpendOnCurrentCurve = CCurves::CalcSpeedScaleFactor(
 		&positionOnCurrentLinkIncludingLane,

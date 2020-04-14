@@ -9,10 +9,29 @@ public:
 	static void Shutdown(void);
 };
 
-class CMotionBlurStreaks
+class CRegisteredMotionBlurStreak
 {
 public:
-	static void RegisterStreak(int32 id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2);
+	uintptr m_id;
+	uint8 m_red;
+	uint8 m_green;
+	uint8 m_blue;
+	CVector m_pos1[3];
+	CVector m_pos2[3];
+	bool m_isValid[3];
+
+	void Update(void);
+	void Render(void);
+};
+
+class CMotionBlurStreaks
+{
+	static CRegisteredMotionBlurStreak aStreaks[NUMMBLURSTREAKS];
+public:
+	static void Init(void);
+	static void Update(void);
+	static void RegisterStreak(uintptr id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2);
+	static void Render(void);
 };
 
 struct CBulletTrace
@@ -29,18 +48,12 @@ struct CBulletTrace
 class CBulletTraces
 {
 public:
-	static CBulletTrace (&aTraces)[NUMBULLETTRACES];
+	static CBulletTrace aTraces[NUMBULLETTRACES];
 
 	static void Init(void);
 	static void AddTrace(CVector*, CVector*);
 	static void Render(void);
 	static void Update(void);
-};
-
-class CBrightLights
-{
-public:
-	static void RegisterOne(CVector pos, CVector up, CVector right, CVector fwd, uint8 type, uint8 unk1 = 0, uint8 unk2 = 0, uint8 unk3 = 0);
 };
 
 enum
@@ -90,9 +103,92 @@ public:
 	static void Render();
 	static void Update();
 
-	static C3dMarker(&m_aMarkerArray)[NUM3DMARKERS];
-	static int32 &NumActiveMarkers;
-	static RpClump* (&m_pRpClumpArray)[NUMMARKERTYPES];
+	static C3dMarker m_aMarkerArray[NUM3DMARKERS];
+	static int32 NumActiveMarkers;
+	static RpClump* m_pRpClumpArray[NUMMARKERTYPES];
+};
+
+enum
+{
+	BRIGHTLIGHT_INVALID,
+	BRIGHTLIGHT_TRAFFIC_GREEN,
+	BRIGHTLIGHT_TRAFFIC_YELLOW,
+	BRIGHTLIGHT_TRAFFIC_RED,
+
+	// white
+	BRIGHTLIGHT_FRONT_LONG,
+	BRIGHTLIGHT_FRONT_SMALL,
+	BRIGHTLIGHT_FRONT_BIG,
+	BRIGHTLIGHT_FRONT_TALL,
+
+	// red
+	BRIGHTLIGHT_REAR_LONG,
+	BRIGHTLIGHT_REAR_SMALL,
+	BRIGHTLIGHT_REAR_BIG,
+	BRIGHTLIGHT_REAR_TALL,
+
+	BRIGHTLIGHT_SIREN,	// unused
+
+	BRIGHTLIGHT_FRONT = BRIGHTLIGHT_FRONT_LONG,
+	BRIGHTLIGHT_REAR = BRIGHTLIGHT_REAR_LONG,
+};
+
+class CBrightLight
+{
+public:
+	CVector m_pos;
+	CVector m_up;
+	CVector m_side;
+	CVector m_front;
+	float m_camDist;
+	uint8 m_type;
+	uint8 m_red;
+	uint8 m_green;
+	uint8 m_blue;
+};
+
+class CBrightLights
+{
+	static int NumBrightLights;
+	static CBrightLight aBrightLights[NUMBRIGHTLIGHTS];
+public:
+	static void Init(void);
+	static void RegisterOne(CVector pos, CVector up, CVector side, CVector front,
+		uint8 type, uint8 red = 0, uint8 green = 0, uint8 blue = 0);
+	static void Render(void);
+	static void RenderOutGeometryBuffer(void);
+};
+
+
+enum
+{
+	SHINYTEXT_WALK = 1,
+	SHINYTEXT_FLAT
+};
+
+class CShinyText
+{
+public:
+	CVector m_verts[4];
+	CVector2D m_texCoords[4];
+	float m_camDist;
+	uint8 m_type;
+	uint8 m_red;
+	uint8 m_green;
+	uint8 m_blue;
+};
+
+class CShinyTexts
+{
+	static int NumShinyTexts;
+	static CShinyText aShinyTexts[NUMSHINYTEXTS];
+public:
+	static void Init(void);
+	static void RegisterOne(CVector p0, CVector p1, CVector p2, CVector p3,
+		float u0, float v0, float u1, float v1, float u2, float v2, float u3, float v3,
+		uint8 type, uint8 red, uint8 green, uint8 blue, float maxDist);
+	static void Render(void);
+	static void RenderOutGeometryBuffer(void);
 };
 
 class CMoneyMessage

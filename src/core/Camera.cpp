@@ -124,8 +124,8 @@ CCamera::Init(void)
 	m_WideScreenOn = false;
 	m_fFOV_Wide_Screen = 0.0f;
 	m_bRestoreByJumpCut = false;
-	CarZoomIndicator = 2.0f;
-	PedZoomIndicator = 2.0f;
+	CarZoomIndicator = CAM_ZOOM_2;
+	PedZoomIndicator = CAM_ZOOM_2;
 	CarZoomValueSmooth = 0.0f;
 	m_fPedZoomValueSmooth = 0.0f;
 	pTargetEntity = nil;
@@ -142,7 +142,7 @@ CCamera::Init(void)
 	PlayerExhaustion = 1.0f;
 	DebugCamMode = CCam::MODE_NONE;
 	m_PedOrientForBehindOrInFront = 0.0f;
-	if(!FrontEndMenuManager.m_bStartGameLoading){
+	if(!FrontEndMenuManager.m_bWantToRestart){
 		m_bFading = false;
 		CDraw::FadeValue = 0;
 		m_fFLOATingFade = 0.0f;
@@ -151,7 +151,7 @@ CCamera::Init(void)
 		m_fFLOATingFadeMusic = 0.0f;
 	}
 	m_bMoveCamToAvoidGeom = false;
-	if(FrontEndMenuManager.m_bStartGameLoading)
+	if(FrontEndMenuManager.m_bWantToRestart)
 		m_bMoveCamToAvoidGeom = true;
 	m_bStartingSpline = false;
 	m_iTypeOfSwitch = INTERPOLATION;
@@ -623,11 +623,11 @@ CCamera::CamControl(void)
 				if(CPad::GetPad(0)->CycleCameraModeUpJustDown() && !CReplay::IsPlayingBack() &&
 				   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
 				   !m_WideScreenOn)
-					CarZoomIndicator -= 1.0f;
+					CarZoomIndicator--;
 				if(CPad::GetPad(0)->CycleCameraModeDownJustDown() && !CReplay::IsPlayingBack() &&
 				   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
 				   !m_WideScreenOn)
-					CarZoomIndicator += 1.0f;
+					CarZoomIndicator++;
 				if(!m_bFailedCullZoneTestPreviously){
 					if(CarZoomIndicator < CAM_ZOOM_1STPRS) CarZoomIndicator = CAM_ZOOM_CINEMATIC;
 					else if(CarZoomIndicator > CAM_ZOOM_CINEMATIC) CarZoomIndicator = CAM_ZOOM_1STPRS;
@@ -727,12 +727,24 @@ CCamera::CamControl(void)
 				if(CarZoomIndicator == CAM_ZOOM_1STPRS && !m_bPlayerIsInGarage){
 					CarZoomValue = 0.0f;
 					ReqMode = CCam::MODE_1STPERSON;
-				}else if(CarZoomIndicator == CAM_ZOOM_1)
-					CarZoomValue = 0.05f;
+				}
+#ifdef FREE_CAM
+				else if (bFreeCam) {
+					if (CarZoomIndicator == CAM_ZOOM_1)
+						CarZoomValue = ((CVehicle*)pTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_1 : FREE_CAR_ZOOM_VALUE_1;
+					else if (CarZoomIndicator == CAM_ZOOM_2)
+						CarZoomValue = ((CVehicle*)pTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_2 : FREE_CAR_ZOOM_VALUE_2;
+					else if (CarZoomIndicator == CAM_ZOOM_3)
+						CarZoomValue = ((CVehicle*)pTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_3 : FREE_CAR_ZOOM_VALUE_3;
+				}
+#endif
+				else if(CarZoomIndicator == CAM_ZOOM_1)
+					CarZoomValue = DEFAULT_CAR_ZOOM_VALUE_1;
 				else if(CarZoomIndicator == CAM_ZOOM_2)
-					CarZoomValue = 1.9f;
+					CarZoomValue = DEFAULT_CAR_ZOOM_VALUE_2;
 				else if(CarZoomIndicator == CAM_ZOOM_3)
-					CarZoomValue = 3.9f;
+					CarZoomValue = DEFAULT_CAR_ZOOM_VALUE_3;
+
 				if(CarZoomIndicator == CAM_ZOOM_TOPDOWN && !m_bPlayerIsInGarage){
 					CarZoomValue = 1.0f;
 					ReqMode = CCam::MODE_TOPDOWN;
@@ -800,7 +812,7 @@ CCamera::CamControl(void)
 					else
 						PedZoomIndicator = CAM_ZOOM_TOPDOWN;
 				}else
-					PedZoomIndicator -= 1.0f;
+					PedZoomIndicator--;
 			}
 			if(CPad::GetPad(0)->CycleCameraModeDownJustDown() && !CReplay::IsPlayingBack() &&
 			   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
@@ -811,7 +823,7 @@ CCamera::CamControl(void)
 					else
 						PedZoomIndicator = CAM_ZOOM_TOPDOWN;
 				}else
-					PedZoomIndicator += 1.0f;
+					PedZoomIndicator++;
 			}
 			// disabled obbe's cam here
 			if(PedZoomIndicator < CAM_ZOOM_1) PedZoomIndicator = CAM_ZOOM_TOPDOWN;
@@ -1211,7 +1223,7 @@ CCamera::CamControl(void)
 	   ReqMode == CCam::MODE_1STPERSON_RUNABOUT || ReqMode == CCam::MODE_M16_1STPERSON_RUNABOUT ||
 	   ReqMode == CCam::MODE_FIGHT_CAM_RUNABOUT || ReqMode == CCam::MODE_HELICANNON_1STPERSON ||
 	   WhoIsInControlOfTheCamera == CAMCONTROL_SCRIPT ||
-           m_bJustCameOutOfGarage || m_bPlayerIsInGarage)
+	   m_bJustCameOutOfGarage || m_bPlayerIsInGarage)
 		canUseObbeCam = false;
 
 	if(m_bObbeCinematicPedCamOn && canUseObbeCam)
@@ -1512,7 +1524,7 @@ CCamera::UpdateTargetEntity(void)
 			cantOpen = false;
 
 		if(PLAYER->GetPedState() == PED_ENTER_CAR && !cantOpen){
-			if(!enteringCar && CarZoomIndicator != 0.0f){
+			if(!enteringCar && CarZoomIndicator != CAM_ZOOM_1STPRS){
 				pTargetEntity = PLAYER->m_pMyVehicle;
 				if(PLAYER->m_pMyVehicle == nil)
 					pTargetEntity = PLAYER;
@@ -1520,7 +1532,7 @@ CCamera::UpdateTargetEntity(void)
 		}
 
 		if((PLAYER->GetPedState() == PED_CARJACK || PLAYER->GetPedState() == PED_OPEN_DOOR) && !cantOpen){
-			if(!enteringCar && CarZoomIndicator != 0.0f)
+			if(!enteringCar && CarZoomIndicator != CAM_ZOOM_1STPRS)
 #ifdef GTA_PS2_STUFF
 // dunno if this has any amazing effects
 			{
@@ -1537,7 +1549,7 @@ CCamera::UpdateTargetEntity(void)
 			pTargetEntity = FindPlayerPed();
 		if(PLAYER->GetPedState() == PED_DRAG_FROM_CAR)
 			pTargetEntity = FindPlayerPed();
-		if(pTargetEntity->IsVehicle() && CarZoomIndicator != 0.0f && FindPlayerPed()->GetPedState() == PED_ARRESTED)
+		if(pTargetEntity->IsVehicle() && CarZoomIndicator != CAM_ZOOM_1STPRS && FindPlayerPed()->GetPedState() == PED_ARRESTED)
 			pTargetEntity = FindPlayerPed();
 	}
 }
@@ -2956,11 +2968,23 @@ CCamera::SetZoomValueFollowPedScript(int16 dist)
 void
 CCamera::SetZoomValueCamStringScript(int16 dist)
 {
-	switch (dist) {
-	case 0: m_fCarZoomValueScript = 0.05f; break;
-	case 1: m_fCarZoomValueScript = 1.9f; break;
-	case 2: m_fCarZoomValueScript = 3.9f; break;
-	default: m_fCarZoomValueScript = m_fCarZoomValueScript; break;
+#ifdef FREE_CAM
+	if (bFreeCam) {
+		switch (dist) {
+		case 0: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_1 : FREE_CAR_ZOOM_VALUE_1; break;
+		case 1: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_2 : FREE_CAR_ZOOM_VALUE_2; break;
+		case 2: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_3 : FREE_CAR_ZOOM_VALUE_3; break;
+		default: m_fCarZoomValueScript = m_fCarZoomValueScript; break;
+		}
+	} else
+#endif
+	{
+		switch (dist) {
+		case 0: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_1; break;
+		case 1: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_2; break;
+		case 2: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_3; break;
+		default: m_fCarZoomValueScript = m_fCarZoomValueScript; break;
+		}
 	}
 
 	m_bUseScriptZoomValueCar = true;
@@ -3245,7 +3269,7 @@ void
 CCamera::SetRwCamera(RwCamera *cam)
 {
 	m_pRwCamera = cam;
-	m_viewMatrix.Attach(&m_pRwCamera->viewMatrix, false);
+	m_viewMatrix.Attach(RwCameraGetViewMatrix(m_pRwCamera), false);
 	CMBlur::MotionBlurOpen(m_pRwCamera);
 }
 

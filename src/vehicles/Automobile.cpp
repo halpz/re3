@@ -182,17 +182,17 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	m_weaponDoorTimerRight = m_weaponDoorTimerLeft;
 
 	if(GetModelIndex() == MI_DODO){
-		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
+		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
 		CMatrix mat1;
 		mat1.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]));
 		CMatrix mat2(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]));
 		mat1.GetPosition() += CVector(mat2.GetPosition().x + 0.1f, 0.0f, mat2.GetPosition().z);
 		mat1.UpdateRW();
 	}else if(GetModelIndex() == MI_MIAMI_SPARROW || GetModelIndex() == MI_MIAMI_RCRAIDER){
-		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
-		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_RF]), 0);
-		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_LB]), 0);
-		RpAtomicSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_RB]), 0);
+		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
+		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_RF]), 0);
+		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LB]), 0);
+		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_RB]), 0);
 	}else if(GetModelIndex() == MI_RHINO){
 		bExplosionProof = true;
 		bBulletProof = true;
@@ -253,7 +253,7 @@ CAutomobile::ProcessControl(void)
 
 	ProcessCarAlarm();
 
-	// Scan if this car is committing a crime that the police can see
+	// Scan if this car sees the player committing any crimes
 	if(m_status != STATUS_ABANDONED && m_status != STATUS_WRECKED &&
 	   m_status != STATUS_PLAYER && m_status != STATUS_PLAYER_REMOTE && m_status != STATUS_PLAYER_DISABLED){
 		switch(GetModelIndex())
@@ -356,7 +356,7 @@ CAutomobile::ProcessControl(void)
 
 			PruneReferences();
 
-			if(m_status == STATUS_PLAYER && CRecordDataForChase::Status != RECORDSTATE_1)
+			if(m_status == STATUS_PLAYER && CRecordDataForChase::IsRecording())
 				DoDriveByShootings();
 		}
 		break;
@@ -667,7 +667,7 @@ CAutomobile::ProcessControl(void)
 		if(!strongGrip1 && !CVehicle::bCheat3)
 			gripCheat = false;
 		float acceleration = pHandling->Transmission.CalculateDriveAcceleration(m_fGasPedal, m_nCurrentGear, m_fChangeGearTime, fwdSpeed, gripCheat);
-		acceleration /= fForceMultiplier;
+		acceleration /= m_fForceMultiplier;
 
 		// unused
 		if(GetModelIndex() == MI_MIAMI_RCBARON ||
@@ -718,7 +718,7 @@ CAutomobile::ProcessControl(void)
 		else
 			traction = 0.004f;
 		traction *= pHandling->fTractionMultiplier / 4.0f;
-		traction /= fForceMultiplier;
+		traction /= m_fForceMultiplier;
 		if(CVehicle::bCheat3)
 			traction *= 4.0f;
 
@@ -1727,9 +1727,9 @@ CAutomobile::PreRender(void)
 
 		// bright lights
 		if(Damage.GetLightStatus(VEHLIGHT_FRONT_LEFT) == LIGHT_STATUS_OK && !bNoBrightHeadLights)
-			CBrightLights::RegisterOne(lightL, GetUp(), GetRight(), GetForward(), pHandling->FrontLights + 4);
+			CBrightLights::RegisterOne(lightL, GetUp(), GetRight(), GetForward(), pHandling->FrontLights + BRIGHTLIGHT_FRONT);
 		if(Damage.GetLightStatus(VEHLIGHT_FRONT_RIGHT) == LIGHT_STATUS_OK && !bNoBrightHeadLights)
-			CBrightLights::RegisterOne(lightR, GetUp(), GetRight(), GetForward(), pHandling->FrontLights + 4);
+			CBrightLights::RegisterOne(lightR, GetUp(), GetRight(), GetForward(), pHandling->FrontLights + BRIGHTLIGHT_FRONT);
 
 		// Taillights
 
@@ -1798,9 +1798,9 @@ CAutomobile::PreRender(void)
 
 		// bright lights
 		if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
-			CBrightLights::RegisterOne(lightL, GetUp(), GetRight(), GetForward(), pHandling->RearLights + 8);
+			CBrightLights::RegisterOne(lightL, GetUp(), GetRight(), GetForward(), pHandling->RearLights + BRIGHTLIGHT_REAR);
 		if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
-			CBrightLights::RegisterOne(lightR, GetUp(), GetRight(), GetForward(), pHandling->RearLights + 8);
+			CBrightLights::RegisterOne(lightR, GetUp(), GetRight(), GetForward(), pHandling->RearLights + BRIGHTLIGHT_REAR);
 
 		// Light shadows
 		if(!alarmOff){
@@ -1873,9 +1873,9 @@ CAutomobile::PreRender(void)
 							CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f);
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
-						CBrightLights::RegisterOne(lightL, GetUp(), GetRight(), GetForward(), pHandling->RearLights + 4);
+						CBrightLights::RegisterOne(lightL, GetUp(), GetRight(), GetForward(), pHandling->RearLights + BRIGHTLIGHT_FRONT);
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
-						CBrightLights::RegisterOne(lightR, GetUp(), GetRight(), GetForward(), pHandling->RearLights + 4);
+						CBrightLights::RegisterOne(lightR, GetUp(), GetRight(), GetForward(), pHandling->RearLights + BRIGHTLIGHT_FRONT);
 				}else{
 					// braking
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
@@ -1889,9 +1889,9 @@ CAutomobile::PreRender(void)
 							CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f);
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
-						CBrightLights::RegisterOne(lightL, GetUp(), GetRight(), GetForward(), pHandling->RearLights + 8);
+						CBrightLights::RegisterOne(lightL, GetUp(), GetRight(), GetForward(), pHandling->RearLights + BRIGHTLIGHT_REAR);
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
-						CBrightLights::RegisterOne(lightR, GetUp(), GetRight(), GetForward(), pHandling->RearLights + 8);
+						CBrightLights::RegisterOne(lightR, GetUp(), GetRight(), GetForward(), pHandling->RearLights + BRIGHTLIGHT_REAR);
 				}
 			}else{
 				if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
@@ -2814,7 +2814,7 @@ CAutomobile::ProcessBuoyancy(void)
 	CVector impulse, point;
 
 	if(mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancy, &point, &impulse)){
-		m_flagD8 = true;
+		bTouchingWater = true;
 		ApplyMoveForce(impulse);
 		ApplyTurnForce(impulse, point);
 
@@ -2899,7 +2899,7 @@ CAutomobile::ProcessBuoyancy(void)
 		}
 	}else{
 		bIsInWater = false;
-		m_flagD8 = false;
+		bTouchingWater = false;
 
 		static RwRGBA splashCol = {155, 155, 185, 196};
 		static RwRGBA smokeCol = {255, 255, 255, 255};
@@ -3791,7 +3791,7 @@ CAutomobile::BlowUpCar(CEntity *culprit)
 	}
 	ChangeLawEnforcerState(false);
 
-	gFireManager.StartFire(this, culprit, 0.8f, 1);	// TODO
+	gFireManager.StartFire(this, culprit, 0.8f, true);
 	CDarkel::RegisterCarBlownUpByPlayer(this);
 	if(GetModelIndex() == MI_RCBANDIT)
 		CExplosion::AddExplosion(this, culprit, EXPLOSION_CAR_QUICK, GetPosition(), 0);
@@ -4054,7 +4054,7 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 			if(ThePaths.m_connections[curnode->firstLink + i] == AutoPilot.m_nNextRouteNode)
 				break;
 		if(i < curnode->numLinks &&
-		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)	// TODO
+		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)
 			return true;
 	}
 
@@ -4064,7 +4064,7 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 			if(ThePaths.m_connections[curnode->firstLink + i] == AutoPilot.m_nPrevRouteNode)
 				break;
 		if(i < curnode->numLinks &&
-		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)	// TODO
+		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)
 			return true;
 	}
 

@@ -119,8 +119,10 @@ public:
 	static int GetSunCoronaBlue(void) { return m_nCurrentSunCoronaBlue; }
 	static float GetSunSize(void) { return m_fCurrentSunSize; }
 	static float GetSpriteBrightness(void) { return m_fCurrentSpriteBrightness; }
+	static float GetSpriteSize(void) { return m_fCurrentSpriteSize; }
 	static int GetShadowStrength(void) { return m_nCurrentShadowStrength; }
 	static int GetLightShadowStrength(void) { return m_nCurrentLightShadowStrength; }
+	static int GetLightOnGroundBrightness(void) { return m_fCurrentLightsOnGroundBrightness; }
 	static float GetFarClip(void) { return m_fCurrentFarClip; }
 	static float GetFogStart(void) { return m_fCurrentFogStart; }
 
@@ -136,6 +138,7 @@ public:
 	static int GetFogRed(void) { return m_nCurrentFogColourRed; }
 	static int GetFogGreen(void) { return m_nCurrentFogColourGreen; }
 	static int GetFogBlue(void) { return m_nCurrentFogColourBlue; }
+	static int GetFogReduction(void) { return m_FogReduction; }
 
 	static void Initialise(void);
 	static void Update(void);

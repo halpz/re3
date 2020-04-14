@@ -3511,7 +3511,7 @@ CCam::Process_FlyBy(const CVector&, float, float, float)
 
 	Up = CVector(0.0f, 0.0f, 1.0f);
 	if(TheCamera.m_bStartingSpline)
-		m_fTimeElapsedFloat += CTimer::GetTimeStepInMilliseconds();
+		m_fTimeElapsedFloat += CTimer::GetTimeStepNonClippedInMilliseconds();
 	else{
 		m_fTimeElapsedFloat = 0.0f;
 		m_uiFinishTime = MS(TheCamera.m_arrPathArray[2].m_arr_PathData[10*((int)TheCamera.m_arrPathArray[2].m_arr_PathData[0]-1) + 1]);
@@ -4672,15 +4672,15 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	else {
 		switch ((int)TheCamera.CarZoomIndicator) {
 			// near
-		case 1:
+		case CAM_ZOOM_1:
 			zoomModeAlphaOffset = ZmOneAlphaOffsetLCS[alphaArrPos];
 			break;
 			// mid
-		case 2:
+		case CAM_ZOOM_2:
 			zoomModeAlphaOffset = ZmTwoAlphaOffsetLCS[alphaArrPos];
 			break;
 			// far
-		case 3:
+		case CAM_ZOOM_3:
 			zoomModeAlphaOffset = ZmThreeAlphaOffsetLCS[alphaArrPos];
 			break;
 		default:
@@ -4705,14 +4705,12 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		}
 	} else {
 		// 0.6f = fTestShiftHeliCamTarget
-		TargetCoors.x += 0.6f * car->GetUp().x * colMaxZ;
-		TargetCoors.y += 0.6f * car->GetUp().y * colMaxZ;
-		TargetCoors.z += 0.6f * car->GetUp().z * colMaxZ;
+		TargetCoors += 0.6f * car->GetUp() * colMaxZ;
 	}
 
 	float minDistForVehType = CARCAM_SET[camSetArrPos][4];
 
-	if ((int)TheCamera.CarZoomIndicator == 1 && (camSetArrPos < 2 || camSetArrPos == 7)) {
+	if (TheCamera.CarZoomIndicator == CAM_ZOOM_1 && (camSetArrPos < 2 || camSetArrPos == 7)) {
 		minDistForVehType = minDistForVehType * 0.65f;
 	}
 
@@ -4904,8 +4902,8 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	//		yMovement = 0.0;
 
 	if (!nextDirectionIsForward) {
-		yMovement = 0.0;
-		xMovement = 0.0;
+		yMovement = 0.0f;
+		xMovement = 0.0f;
 	}
 
 	if (camSetArrPos == 0 || camSetArrPos == 7) {

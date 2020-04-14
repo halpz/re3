@@ -29,7 +29,7 @@ class CRenderer
 	static CVehicle *&m_pFirstPersonVehicle;
 
 public:
-	static float &ms_lodDistScale;	// defined in Frontend.cpp
+	static float ms_lodDistScale;	// defined in Frontend.cpp
 	static bool &m_loadingPriority;
 
 	static void Init(void);

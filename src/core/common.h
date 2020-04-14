@@ -74,9 +74,11 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 }
 
 
+#ifndef RWLIBS
 // little hack
 extern void **rwengine;
 #define RwEngineInstance (*rwengine)
+#endif
 
 #include "skeleton.h"
 #include "Draw.h"
@@ -84,12 +86,14 @@ extern void **rwengine;
 #define DEFAULT_SCREEN_WIDTH (640)
 #define DEFAULT_SCREEN_HEIGHT (448)
 #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
+#define DEFAULT_VIEWWINDOW (0.7f)
 
 // game uses maximumWidth/Height, but this probably won't work
 // with RW windowed mode
 #define SCREEN_WIDTH ((float)RsGlobal.width)
 #define SCREEN_HEIGHT ((float)RsGlobal.height)
 #define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
+#define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
 
 // This scales from PS2 pixel coordinates to the real resolution
 #define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH / DEFAULT_SCREEN_WIDTH)
@@ -105,10 +109,8 @@ extern void **rwengine;
 
 #ifdef ASPECT_RATIO_SCALE
 #define SCREEN_SCALE_AR(a) ((a) * DEFAULT_ASPECT_RATIO / SCREEN_ASPECT_RATIO)
-#define SCREEN_SCALE_AR2(a) ((a) / (DEFAULT_ASPECT_RATIO / SCREEN_ASPECT_RATIO))
 #else
 #define SCREEN_SCALE_AR(a) (a)
-#define SCREEN_SCALE_AR2(a) (a)
 #endif
 
 #include "maths.h"

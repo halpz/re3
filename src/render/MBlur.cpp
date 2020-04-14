@@ -4,12 +4,13 @@
 #include "Camera.h"
 #include "MBlur.h"
 
+// Originally taken from RW example 'mblur'
+
 RwRaster *&CMBlur::pFrontBuffer = *(RwRaster**)0x8E2C48;
 bool &CMBlur::ms_bJustInitialised = *(bool*)0x95CDAB;
 bool &CMBlur::BlurOn = *(bool*)0x95CDAD;
 
 static RwIm2DVertex Vertex[4];
-//static RwIm2DVertex *Vertex = (RwIm2DVertex*)0x62F780;
 static RwImVertexIndex Index[6] = { 0, 1, 2, 0, 2, 3 };
 
 void

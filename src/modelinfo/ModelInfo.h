@@ -36,7 +36,7 @@ public:
 	static CVehicleModelInfo *AddVehicleModel(int id);
 
 	static CStore<C2dEffect, TWODFXSIZE> &Get2dEffectStore(void) { return ms_2dEffectStore; }
-	static CStore<CInstance, MLOINSTANCESIZE> &GetMloInstanceStore();
+	static CStore<CInstance, MLOINSTANCESIZE> &GetMloInstanceStore(void) { return ms_mloInstanceStore; }
 
 	static CBaseModelInfo *GetModelInfo(const char *name, int *id);
 	static CBaseModelInfo *GetModelInfo(int id){
@@ -47,4 +47,5 @@ public:
 	static bool IsBikeModel(int32 id);
 	static void RemoveColModelsFromOtherLevels(eLevelName level);
 	static void ConstructMloClumps();
+	static void ReInit2dEffects();
 };

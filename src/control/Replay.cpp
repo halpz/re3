@@ -1107,7 +1107,7 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 		CStreaming::LoadScene(ff_coord);
 	}
 	if (cam_mode == REPLAYCAMMODE_ASSTORED)
-		TheCamera.CarZoomIndicator = 5.0f;
+		TheCamera.CarZoomIndicator = CAM_ZOOM_CINEMATIC;
 }
 
 void CReplay::StoreStuffInMem(void)
@@ -1129,8 +1129,8 @@ void CReplay::StoreStuffInMem(void)
 	pEmptyReferences = CReferences::pEmptyList;
 	pStoredCam = new uint8[sizeof(CCamera)];
 	memcpy(pStoredCam, &TheCamera, sizeof(CCamera));
-	pRadarBlips = new uint8[sizeof(CBlip) * NUMRADARBLIPS];
-	memcpy(pRadarBlips, CRadar::ms_RadarTrace, NUMRADARBLIPS * sizeof(CBlip));
+	pRadarBlips = new uint8[sizeof(sRadarTrace) * NUMRADARBLIPS];
+	memcpy(pRadarBlips, CRadar::ms_RadarTrace, NUMRADARBLIPS * sizeof(sRadarTrace));
 	PlayerWanted = *FindPlayerPed()->m_pWanted;
 	PlayerInfo = CWorld::Players[0];
 	Time1 = CTimer::GetTimeInMilliseconds();
@@ -1179,7 +1179,7 @@ void CReplay::RestoreStuffFromMem(void)
 	memcpy(&TheCamera, pStoredCam, sizeof(CCamera));
 	delete[] pStoredCam;
 	pStoredCam = nil;
-	memcpy(CRadar::ms_RadarTrace, pRadarBlips, sizeof(CBlip) * NUMRADARBLIPS);
+	memcpy(CRadar::ms_RadarTrace, pRadarBlips, sizeof(sRadarTrace) * NUMRADARBLIPS);
 	delete[] pRadarBlips;
 	pRadarBlips = nil;
 	FindPlayerPed()->m_pWanted = new CWanted(PlayerWanted);

@@ -21,10 +21,15 @@
 #include "Particle.h"
 #include "Console.h"
 #include "Debug.h"
+#include "Hud.h"
 
 #include <list>
 
+#ifndef RWLIBS
 void **rwengine = *(void***)0x5A10E1;
+#else
+extern "C" int vsprintf(char* const _Buffer, char const* const _Format, va_list  _ArgList);
+#endif
 
 DebugMenuAPI gDebugMenuAPI;
 
@@ -141,19 +146,6 @@ SpawnCar(int id)
 		v->m_status = STATUS_ABANDONED;
 		v->m_nDoorLock = CARLOCK_UNLOCKED;
 		CWorld::Add(v);
-	}
-}
-
-static void
-LetThemFollowYou(void) {
-	CPed *player = (CPed*) FindPlayerPed();
-	for (int i = 0; i < player->m_numNearPeds; i++) {
-		CPed *nearPed = player->m_nearPeds[i];
-		if (nearPed && !nearPed->IsPlayer()) {
-			nearPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, (void*)player);
-			nearPed->m_pedFormation = (eFormation)(1 + (rand() & 7));
-			nearPed->bScriptObjectiveCompleted = false;
-		}
 	}
 }
 
@@ -337,7 +329,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Dodo", [](){ SpawnCar(MI_DODO); });
 		DebugMenuAddCmd("Spawn", "Spawn Rhino", [](){ SpawnCar(MI_RHINO); });
 		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
+		DebugMenuAddCmd("Spawn", "Spawn Predator", [](){ SpawnCar(MI_PREDATOR); });
 
+		DebugMenuAddVarBool8("Debug", "Draw hud", (int8*)&CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
 		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
@@ -350,6 +344,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Catalina Fly Away", CHeli::MakeCatalinaHeliFlyAway);
 		DebugMenuAddVarBool8("Debug", "Script Heli On", (int8*)0x95CD43, nil);
 
+		DebugMenuAddVarBool8("Debug", "Show Ped Paths", (int8*)&gbShowPedPaths, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Paths", (int8*)&gbShowCarPaths, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Path Links", (int8*)&gbShowCarPathsLinks, nil);
 		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Show Collision Lines", (int8*)&gbShowCollisionLines, nil);
@@ -359,8 +356,6 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", (int8*)&gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
-
-		DebugMenuAddCmd("Debug", "Make peds follow you in formation", LetThemFollowYou);
 #ifdef TOGGLEABLE_BETA_FEATURES
 		DebugMenuAddVarBool8("Debug", "Toggle banned particles", (int8*)&CParticle::bEnableBannedParticles, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", (int8*)&CPed::bPopHeadsOnHeadshot, nil);
@@ -458,7 +453,7 @@ void re3_debug(const char *format, ...)
 	vsprintf_s(re3_buff, re3_buffsize, format, va);
 	va_end(va);
 
-//	printf("%s", re3_buff);
+	printf("%s", re3_buff);
 	CDebug::DebugAddText(re3_buff);
 }
 
