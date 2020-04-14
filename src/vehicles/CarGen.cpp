@@ -216,7 +216,7 @@ void CTheCarGenerators::Init()
 void CTheCarGenerators::SaveAllCarGenerators(uint8 *buffer, uint32 *size)
 {
 	const uint32 nGeneralDataSize = sizeof(NumOfCarGenerators) + sizeof(CurrentActiveCount) + sizeof(ProcessCounter) + sizeof(GenerateEvenIfPlayerIsCloseCounter) + sizeof(int16);
-	*size = sizeof(int) + nGeneralDataSize + sizeof(CarGeneratorArray) + SAVE_HEADER_SIZE;
+	*size = sizeof(int) + nGeneralDataSize + sizeof(uint32) + sizeof(CarGeneratorArray) + SAVE_HEADER_SIZE;
 INITSAVEBUF
 	WriteSaveHeader(buffer, 'C','G','N','\0', *size - SAVE_HEADER_SIZE);
 
