@@ -8921,6 +8921,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		UpdateCompareFlag(CCredits::AreCreditsDone());
 		return 0;
 	case COMMAND_CREATE_SINGLE_PARTICLE:
+		CollectParameters(&m_nIp, 8);
 		CParticle::AddParticle((tParticleType)ScriptParams[0], *(CVector*)&ScriptParams[1],
 			*(CVector*)&ScriptParams[4], nil, *(float*)&ScriptParams[7], 0, 0, 0, 0);
 		return 0;
