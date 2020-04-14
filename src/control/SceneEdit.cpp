@@ -197,6 +197,10 @@ void CSceneEdit::ReInitialise(void)
 	m_bEditOn = true;
 	m_bRecording = true;
 	m_bCommandActive = false;
+#ifdef FIX_BUGS
+	m_bCameraFollowActor = false;
+	TheCamera.Cams[TheCamera.ActiveCam].ResetStatics = true; // not enough...
+#endif
 	m_nActor = -1;
 	m_nActor2 = -1;
 	m_nVehicle = -1;
@@ -691,8 +695,8 @@ void CSceneEdit::ProcessCommand(void)
 		SelectActor();
 		if (m_bActorSelected) {
 			pActors[m_nActor]->SetObjective(OBJECTIVE_IDLE);
-			Movie[m_nCurrentMovieCommand].m_nCommandId = MOVIE_WAIT;
-			Movie[m_nCurrentMovieCommand++].m_nActorId = m_nActor;
+			Movie[m_nNumMovieCommands].m_nCommandId = MOVIE_WAIT;
+			Movie[m_nNumMovieCommands++].m_nActorId = m_nActor;
 		}
 		if (CPad::GetPad(1)->GetCircleJustDown()) {
 			pActors[m_nActor] = nil;
