@@ -29,8 +29,8 @@ public:
 	uint8 m_bCollisionsInQueue;
 	cAudioCollision m_sQueue;
 
-	// reversed all methods
-	void AddCollisionToRequestedQueue(); /// ok
+	cAudioCollisionManager();
+	void AddCollisionToRequestedQueue();
 };
 
 static_assert(sizeof(cAudioCollisionManager) == 852, "cAudioCollisionManager: error");

@@ -5,6 +5,7 @@ void RwFreeAlign(void *mem);
 
 void CreateDebugFont();
 void DestroyDebugFont();
+void ObrsPrintfString(const char *str, short x, short y);
 void FlushObrsPrintfs();
 void DefinedState(void);
 RwFrame *GetFirstChild(RwFrame *frame);

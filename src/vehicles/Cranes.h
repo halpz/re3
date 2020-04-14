@@ -89,10 +89,9 @@ public:
 	static bool IsThisCarBeingCarriedByAnyCrane(CVehicle* pVehicle);
 	static bool IsThisCarBeingTargettedByAnyCrane(CVehicle* pVehicle);
 	static void Save(uint8* buf, uint32* size);
+	static void Load(uint8* buf, uint32 size); // on mobile it's CranesLoad outside of the class
 
-	static uint32& CarsCollectedMilitaryCrane;
-	static int32& NumCranes;
-	static CCrane(&aCranes)[NUM_CRANES];
+	static uint32 CarsCollectedMilitaryCrane;
+	static int32 NumCranes;
+	static CCrane aCranes[NUM_CRANES];
 };
-
-void CranesLoad(uint8*, uint32);	// is this really outside CCranes?

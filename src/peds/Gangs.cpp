@@ -4,7 +4,6 @@
 #include "Gangs.h"
 #include "Weapon.h"
 
-//CGangInfo(&CGangs::Gang)[NUM_GANGS] = *(CGangInfo(*)[NUM_GANGS])*(uintptr*)0x6EDF78;
 CGangInfo CGangs::Gang[NUM_GANGS];
 
 CGangInfo::CGangInfo() :
@@ -70,7 +69,6 @@ void CGangs::LoadAllGangData(uint8 *buf, uint32 size)
 	Initialise();
 
 INITSAVEBUF
-	// original: SkipSaveBuf(buf, SAVE_HEADER_SIZE);
 	CheckSaveHeader(buf, 'G','N','G','\0', size - SAVE_HEADER_SIZE);
 
 	for (int i = 0; i < NUM_GANGS; i++)
