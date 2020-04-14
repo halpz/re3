@@ -197,7 +197,7 @@ public:
 	bool m_bIsUsed;
 	uint8 m_bStatus;
 	int16 m_awAudioEvent[NUM_AUDIOENTITY_EVENTS];
-	uint8 gap_18[2];
+	//uint8 gap_18[2];
 	float m_afVolume[NUM_AUDIOENTITY_EVENTS];
 	uint8 m_AudioEvents;
 	uint8 field_25[3];
@@ -216,7 +216,6 @@ public:
 	float m_fDistance;
 	uint8 m_bVolume;
 	int8 m_nProcess;
-	uint8 gap_26[2]; // unused
 
 	// no methods
 };
@@ -230,9 +229,8 @@ public:
 	uint8 m_nIndexMap[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
 	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 m_nActiveBank;
-	uint8 gap_1163[1]; // unused
 
-	// reversed all methods
+	cPedComments();
 	void Add(tPedComment *com);
 	void Process();
 };
@@ -246,7 +244,7 @@ class cMissionAudio
 public:
 	CVector m_vecPos;
 	bool m_bPredefinedProperties;
-	uint8 gap_13[3]; // unused
+	//uint8 gap_13[3];
 	int m_nSampleIndex;
 	uint8 m_bLoadingStatus;
 	uint8 m_bPlayStatus;
@@ -261,6 +259,18 @@ public:
 };
 
 static_assert(sizeof(cMissionAudio) == 32, "cMissionAudio: error");
+
+// name made up
+class cAudioScriptObjectManager
+{
+public:
+	int32 m_anScriptObjectEntityIndices[NUM_SCRIPT_MAX_ENTITIES];
+	int32 m_nScriptObjectEntityTotal;
+
+	cAudioScriptObjectManager() { m_nScriptObjectEntityTotal = 0; }
+	~cAudioScriptObjectManager() { m_nScriptObjectEntityTotal = 0; }
+};
+
 
 class cVehicleParams;
 class CPlane;
@@ -315,8 +325,7 @@ public:
 	int32 m_nAudioEntitiesTotal;
 	CVector m_avecReflectionsPos[NUM_AUDIO_REFLECTIONS];
 	float m_afReflectionsDistances[NUM_AUDIO_REFLECTIONS];
-	int32 m_anScriptObjectEntityIndices[NUM_SCRIPT_MAX_ENTITIES];
-	int32 m_nScriptObjectEntityTotal;
+	cAudioScriptObjectManager m_sAudioScriptObjectManager;
 	cPedComments m_sPedComments;
 	int32 m_nFireAudioEntity;
 	int32 m_nWaterCannonEntity;
@@ -611,4 +620,4 @@ public:
 
 static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
 
-extern cAudioManager &AudioManager;
+extern cAudioManager AudioManager;

@@ -10,6 +10,22 @@
 
 const int CollisionSoundIntensity = 60;
 
+cAudioCollisionManager::cAudioCollisionManager()
+{
+	m_sQueue.m_pEntity1 = nil;
+	m_sQueue.m_pEntity2 = nil;
+	m_sQueue.m_bSurface1 = SURFACE_DEFAULT;
+	m_sQueue.m_bSurface2 = SURFACE_DEFAULT;
+	m_sQueue.m_fIntensity2 = 0.0f;
+	m_sQueue.m_fIntensity1 = 0.0f;
+	m_sQueue.m_vecPosition = CVector(0.0f, 0.0f, 0.0f);
+
+	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++)
+		m_bIndicesTable[i] = NUMAUDIOCOLLISIONS;
+
+	m_bCollisionsInQueue = 0;
+}
+
 void
 cAudioCollisionManager::AddCollisionToRequestedQueue()
 {

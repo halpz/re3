@@ -39,7 +39,7 @@
 #include "ZoneCull.h"
 #include "sampman.h"
 
-cAudioManager &AudioManager = *(cAudioManager *)0x880FC0;
+cAudioManager AudioManager;
 uint32 gPornNextTime;            // = *(uint32*)0x6508A0;
 uint32 gSawMillNextTime;         // = *(uint32*)0x6508A4;
 uint32 gShopNextTime;            // = *(uint32*)0x6508A8;
@@ -192,6 +192,19 @@ enum PLAY_STATUS : uint8 {
 
 enum LOADING_STATUS : uint8 { LOADING_STATUS_NOT_LOADED = 0, LOADING_STATUS_LOADED = 1 };
 
+cPedComments::cPedComments()
+{
+	for (int i = 0; i < NUM_PED_COMMENTS_SLOTS; i++)
+		for (int j = 0; j < NUM_PED_COMMENTS_BANKS; j++) {
+			m_asPedComments[j][i].m_nProcess = -1;
+			m_nIndexMap[j][i] = NUM_PED_COMMENTS_SLOTS;
+		}
+
+	for (int i = 0; i < NUM_PED_COMMENTS_BANKS; i++)
+		m_nCommentsInBank[i] = 0;
+	m_nActiveBank = 0;
+}
+
 void
 cPedComments::Add(tPedComment *com)
 {
@@ -322,9 +335,9 @@ cPedComments::Process()
 
 cAudioManager::cAudioManager()
 {
-	m_bIsInitialised = 0;
+	m_bIsInitialised = false;
 	field_1 = 1;
-	m_fSpeedOfSound = 6.8600001f;
+	m_fSpeedOfSound = 6.86f;
 	m_bTimeSpent = 50;
 	m_bActiveSamples = NUM_SOUNDS_SAMPLES_SLOTS;
 	m_bActiveSampleQueue = 1;
@@ -350,7 +363,6 @@ cAudioManager::cAudioManager()
 cAudioManager::~cAudioManager()
 {
 	if(m_bIsInitialised) Terminate();
-	m_nScriptObjectEntityTotal = 0;
 }
 
 void
@@ -711,7 +723,7 @@ cAudioManager::DestroyAllGameCreatedEntities()
 				}
 			}
 		}
-		m_nScriptObjectEntityTotal = 0;
+		m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal = 0;
 	}
 }
 
@@ -2714,8 +2726,8 @@ cAudioManager::GenerateIntegerRandomNumberTable()
 char *
 cAudioManager::Get3DProviderName(uint8 id) const
 {
-	if(!m_bIsInitialised) return 0;
-	if(id >= SampleManager.GetNum3DProvidersAvailable()) return 0;
+	if(!m_bIsInitialised) return nil;
+	if(id >= SampleManager.GetNum3DProvidersAvailable()) return nil;
 	return SampleManager.Get3DProviderName(id);
 }
 
@@ -3028,12 +3040,12 @@ cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 			if(entity.m_bIsUsed) {
 				if(sound < SOUND_TOTAL_SOUNDS) {
 					if(entity.m_nType == AUDIOTYPE_SCRIPTOBJECT) {
-						if(m_nScriptObjectEntityTotal <
-						   ARRAY_SIZE(m_anScriptObjectEntityIndices)) {
+						if(m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal <
+						   ARRAY_SIZE(m_sAudioScriptObjectManager.m_anScriptObjectEntityIndices)) {
 							entity.m_awAudioEvent[0] = sound;
 							entity.m_AudioEvents = 1;
-							m_anScriptObjectEntityIndices
-							    [m_nScriptObjectEntityTotal++] = index;
+							m_sAudioScriptObjectManager.m_anScriptObjectEntityIndices
+							    [m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal++] = index;
 						}
 					} else {
 						int32 i = 0;
@@ -9588,15 +9600,15 @@ cAudioManager::ServiceSoundEffects()
 	ProcessMissionAudio();
 	AdjustSamplesVolume();
 	ProcessActiveQueues();
-	for(int32 i = 0; i < m_nScriptObjectEntityTotal; ++i) {
+	for(int32 i = 0; i < m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal; ++i) {
 		cAudioScriptObject *object =
-		    (cAudioScriptObject *)m_asAudioEntities[m_anScriptObjectEntityIndices[i]]
+		    (cAudioScriptObject *)m_asAudioEntities[m_sAudioScriptObjectManager.m_anScriptObjectEntityIndices[i]]
 		        .m_pEntity;
 		delete object;
-		m_asAudioEntities[m_anScriptObjectEntityIndices[i]].m_pEntity = nil;
-		DestroyEntity(m_anScriptObjectEntityIndices[i]);
+		m_asAudioEntities[m_sAudioScriptObjectManager.m_anScriptObjectEntityIndices[i]].m_pEntity = nil;
+		DestroyEntity(m_sAudioScriptObjectManager.m_anScriptObjectEntityIndices[i]);
 	}
-	m_nScriptObjectEntityTotal = 0;
+	m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal = 0;
 }
 
 int8
@@ -9965,7 +9977,7 @@ cAudioManager::Terminate()
 		}
 
 		m_nAudioEntitiesTotal = 0;
-		m_nScriptObjectEntityTotal = 0;
+		m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal = 0;
 		PreTerminateGameSpecificShutdown();
 
 		for(uint32 i = 0; i < DIGITALCHANNELS; i++) {
@@ -9974,7 +9986,7 @@ cAudioManager::Terminate()
 
 		SampleManager.Terminate();
 
-		m_bIsInitialised = 0;
+		m_bIsInitialised = false;
 		PostTerminateGameSpecificShutdown();
 	}
 }
