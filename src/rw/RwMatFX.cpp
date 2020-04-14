@@ -43,8 +43,16 @@ struct MatFX
 	int effects;
 };
 
+#ifdef RWLIBS
+extern "C" {
+	extern int MatFXMaterialDataOffset;
+	extern int MatFXAtomicDataOffset;
+	void _rpMatFXD3D8AtomicMatFXEnvRender(RxD3D8InstanceData* inst, int flags, int sel, RwTexture* texture, RwTexture* envMap);
+}
+#else
 int &MatFXMaterialDataOffset = *(int*)0x66188C;
 int &MatFXAtomicDataOffset = *(int*)0x66189C;
+#endif
 
 #ifdef PS2_MATFX
 
@@ -206,8 +214,13 @@ _rpMatFXD3D8AtomicMatFXEnvRender_ps2(RxD3D8InstanceData *inst, int flags, int se
 	RwD3D8SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, 0);
 }
 
+
 STARTPATCHES
+#ifdef RWLIBS
+	InjectHook((uintptr)&_rpMatFXD3D8AtomicMatFXEnvRender, _rpMatFXD3D8AtomicMatFXEnvRender_ps2, PATCH_JUMP);
+#else
 	InjectHook(0x5CF6C0, _rpMatFXD3D8AtomicMatFXEnvRender_ps2, PATCH_JUMP);
+#endif
 ENDPATCHES
 
 #endif
