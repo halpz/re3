@@ -136,8 +136,8 @@ CPedPath::CalcPedRoute(int8 pathType, CVector position, CVector destination, CVe
 		else if (nodeIdX < 39 && nodeIdY < 39 && pathNodes[nodeIdX + 1][nodeIdY + 1].id + 7 == pPathNode->id)
 			pPathNode = &pathNodes[nodeIdX + 1][nodeIdY + 1];
 		pointPoses[*pointsFound] = vecSectorStartPos;
-		pointPoses[*pointsFound].x += (float)pPathNode->nodeIdX * 0.7f;
-		pointPoses[*pointsFound].y += (float)pPathNode->nodeIdY * 0.7f;
+		pointPoses[*pointsFound].x += pPathNode->nodeIdX * 0.7f;
+		pointPoses[*pointsFound].y += pPathNode->nodeIdY * 0.7f;
 	}
 	return true;
 }
@@ -203,10 +203,10 @@ CPedPath::AddBlockade(CEntity *pEntity, CPedPathNode(*pathNodes)[40], CVector *p
 		vecBoundCentre.x - fBoundRadius <= pPosition->x + 28.0f &&
 		vecBoundCentre.y - fBoundRadius <= pPosition->y + 28.0f) {
 		for (int16 x = 0; x < 40; x++) {
-			const float pointX = (float)x * 0.7f + fDistanceX;
+			const float pointX = x * 0.7f + fDistanceX;
 			for (int16 y = 0; y < 40; y++) {
 				if (!pathNodes[x][y].bBlockade) {
-					const float pointY = (float)y * 0.7f + fDistanceY;
+					const float pointY = y * 0.7f + fDistanceY;
 					CVector2D point(pointX, pointY);
 					if (fBoundMaxX > Abs(DotProduct2D(point, pEntity->m_matrix.GetRight()))) {
 						float fDotProduct = DotProduct2D(point, pEntity->m_matrix.GetForward());
