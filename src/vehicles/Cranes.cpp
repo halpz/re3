@@ -38,9 +38,9 @@
 
 uint32 TimerForCamInterpolation;
 
-uint32& CCranes::CarsCollectedMilitaryCrane = *(uint32*)0x8F6248;
-int32& CCranes::NumCranes = *(int32*)0x8E28AC;
-CCrane(&CCranes::aCranes)[NUM_CRANES] = *(CCrane(*)[NUM_CRANES])*(uintptr*)0x6FA4E0;
+uint32 CCranes::CarsCollectedMilitaryCrane;
+int32 CCranes::NumCranes;
+CCrane CCranes::aCranes[NUM_CRANES];
 
 void CCranes::InitCranes(void) 
 {
@@ -466,13 +466,13 @@ bool CCrane::DoesCranePickUpThisCarType(uint32 mi)
 bool CCranes::DoesMilitaryCraneHaveThisOneAlready(uint32 mi)
 {
 	switch (mi) {
-	case MI_FIRETRUCK: return (CCranes::CarsCollectedMilitaryCrane & 1);
-	case MI_AMBULAN: return (CCranes::CarsCollectedMilitaryCrane & 2);
-	case MI_ENFORCER: return (CCranes::CarsCollectedMilitaryCrane & 4);
-	case MI_FBICAR: return (CCranes::CarsCollectedMilitaryCrane & 8);
-	case MI_RHINO: return (CCranes::CarsCollectedMilitaryCrane & 0x10);
-	case MI_BARRACKS: return (CCranes::CarsCollectedMilitaryCrane & 0x20);
-	case MI_POLICE: return (CCranes::CarsCollectedMilitaryCrane & 0x40);
+	case MI_FIRETRUCK: return (CarsCollectedMilitaryCrane & 1);
+	case MI_AMBULAN: return (CarsCollectedMilitaryCrane & 2);
+	case MI_ENFORCER: return (CarsCollectedMilitaryCrane & 4);
+	case MI_FBICAR: return (CarsCollectedMilitaryCrane & 8);
+	case MI_RHINO: return (CarsCollectedMilitaryCrane & 0x10);
+	case MI_BARRACKS: return (CarsCollectedMilitaryCrane & 0x20);
+	case MI_POLICE: return (CarsCollectedMilitaryCrane & 0x40);
 	default: break;
 	}
 	return false;
@@ -481,20 +481,20 @@ bool CCranes::DoesMilitaryCraneHaveThisOneAlready(uint32 mi)
 void CCranes::RegisterCarForMilitaryCrane(uint32 mi)
 {
 	switch (mi) {
-	case MI_FIRETRUCK: CCranes::CarsCollectedMilitaryCrane |= 1; break;
-	case MI_AMBULAN: CCranes::CarsCollectedMilitaryCrane |= 2; break;
-	case MI_ENFORCER: CCranes::CarsCollectedMilitaryCrane |= 4; break;
-	case MI_FBICAR: CCranes::CarsCollectedMilitaryCrane |= 8; break;
-	case MI_RHINO: CCranes::CarsCollectedMilitaryCrane |= 0x10; break;
-	case MI_BARRACKS: CCranes::CarsCollectedMilitaryCrane |= 0x20; break;
-	case MI_POLICE: CCranes::CarsCollectedMilitaryCrane |= 0x40; break;
+	case MI_FIRETRUCK: CarsCollectedMilitaryCrane |= 1; break;
+	case MI_AMBULAN: CarsCollectedMilitaryCrane |= 2; break;
+	case MI_ENFORCER: CarsCollectedMilitaryCrane |= 4; break;
+	case MI_FBICAR: CarsCollectedMilitaryCrane |= 8; break;
+	case MI_RHINO: CarsCollectedMilitaryCrane |= 0x10; break;
+	case MI_BARRACKS: CarsCollectedMilitaryCrane |= 0x20; break;
+	case MI_POLICE: CarsCollectedMilitaryCrane |= 0x40; break;
 	default: break;
 	}
 }
 
 bool CCranes::HaveAllCarsBeenCollectedByMilitaryCrane()
 {
-	return (CCranes::CarsCollectedMilitaryCrane & 0x7F) == 0x7F;
+	return (CarsCollectedMilitaryCrane & 0x7F) == 0x7F;
 }
 
 bool CCrane::GoTowardsTarget(float fAngleToTarget, float fDistanceToTarget, float fTargetHeight, float fSpeedMultiplier)
@@ -509,8 +509,7 @@ bool CCrane::GoTowardsTarget(float fAngleToTarget, float fDistanceToTarget, floa
 	if (Abs(fHookAngleDelta) < fHookAngleChangeThisFrame) {
 		m_fHookAngle = fAngleToTarget;
 		bAngleMovementFinished = true;
-	}
-	else {
+	} else {
 		if (fHookAngleDelta < 0.0f) {
 			m_fHookAngle -= fHookAngleChangeThisFrame;
 			if (m_fHookAngle < 0.0f)
@@ -528,8 +527,7 @@ bool CCrane::GoTowardsTarget(float fAngleToTarget, float fDistanceToTarget, floa
 	if (Abs(fHookOffsetDelta) < fHookOffsetChangeThisFrame) {
 		m_fHookOffset = fDistanceToTarget;
 		bOffsetMovementFinished = true;
-	}
-	else {
+	} else {
 		if (fHookOffsetDelta < 0.0f)
 			m_fHookOffset -= fHookOffsetChangeThisFrame;
 		else
@@ -541,8 +539,7 @@ bool CCrane::GoTowardsTarget(float fAngleToTarget, float fDistanceToTarget, floa
 	if (Abs(fHookHeightDelta) < fHookHeightChangeThisFrame) {
 		m_fHookHeight = fTargetHeight;
 		bHeightMovementFinished = true;
-	}
-	else {
+	} else {
 		if (fHookHeightDelta < 0.0f)
 			m_fHookHeight -= fHookHeightChangeThisFrame;
 		else
@@ -560,8 +557,7 @@ bool CCrane::GoTowardsHeightTarget(float fTargetHeight, float fSpeedMultiplier)
 	if (Abs(fHookHeightDelta) < fHookHeightChangeThisFrame) {
 		m_fHookHeight = fTargetHeight;
 		bHeightMovementFinished = true;
-	}
-	else {
+	} else {
 		if (fHookHeightDelta < 0.0f)
 			m_fHookHeight -= fHookHeightChangeThisFrame;
 		else
@@ -587,7 +583,7 @@ void CCrane::CalcHookCoordinates(float* pX, float* pY, float* pZ)
 
 void CCrane::SetHookMatrix()
 {
-	if (!m_pHook)
+	if (m_pHook == nil)
 		return;
 	m_pHook->GetPosition() = m_vecHookCurPos;
 	CVector up(m_vecHookInitPos.x - m_vecHookCurPos.x, m_vecHookInitPos.y - m_vecHookCurPos.y, 20.0f);
@@ -632,48 +628,44 @@ void CCranes::Save(uint8* buf, uint32* size)
 {
 	INITSAVEBUF
 
-	*size = 2 * sizeof(uint32) + NUM_CRANES * sizeof(CCrane);
+	*size = 2 * sizeof(uint32) + sizeof(aCranes);
 	WriteSaveBuf(buf, NumCranes);
 	WriteSaveBuf(buf, CarsCollectedMilitaryCrane);
 	for (int i = 0; i < NUM_CRANES; i++) {
-		CCrane* pCrane = WriteSaveBuf(buf, aCranes[i]);
-		if (pCrane->m_pCraneEntity)
-			pCrane->m_pCraneEntity = (CBuilding*)(CPools::GetBuildingPool()->GetJustIndex((CBuilding*)pCrane->m_pCraneEntity) + 1);
-		if (pCrane->m_pHook)
-			pCrane->m_pHook = (CObject*)(CPools::GetObjectPool()->GetJustIndex((CObject*)pCrane->m_pHook) + 1);
-		if (pCrane->m_pVehiclePickedUp)
-			pCrane->m_pVehiclePickedUp = (CVehicle*)(CPools::GetVehiclePool()->GetJustIndex((CVehicle*)pCrane->m_pVehiclePickedUp) + 1);
+		CCrane *pCrane = WriteSaveBuf(buf, aCranes[i]);
+		if (pCrane->m_pCraneEntity != nil)
+			pCrane->m_pCraneEntity = (CBuilding*)(CPools::GetBuildingPool()->GetJustIndex(pCrane->m_pCraneEntity) + 1);
+		if (pCrane->m_pHook != nil)
+			pCrane->m_pHook = (CObject*)(CPools::GetObjectPool()->GetJustIndex(pCrane->m_pHook) + 1);
+		if (pCrane->m_pVehiclePickedUp != nil)
+			pCrane->m_pVehiclePickedUp = (CVehicle*)(CPools::GetVehiclePool()->GetJustIndex(pCrane->m_pVehiclePickedUp) + 1);
 	}
 
 	VALIDATESAVEBUF(*size);
 }
 
-void CranesLoad(uint8* buf, uint32 size)
+void CCranes::Load(uint8* buf, uint32 size)
 {
 	INITSAVEBUF
 
-	CCranes::NumCranes = ReadSaveBuf<int32>(buf);
-	CCranes::CarsCollectedMilitaryCrane = ReadSaveBuf<uint32>(buf);
+	NumCranes = ReadSaveBuf<int32>(buf);
+	CarsCollectedMilitaryCrane = ReadSaveBuf<uint32>(buf);
 	for (int i = 0; i < NUM_CRANES; i++)
-		CCranes::aCranes[i] = ReadSaveBuf<CCrane>(buf);
+		aCranes[i] = ReadSaveBuf<CCrane>(buf);
 	for (int i = 0; i < NUM_CRANES; i++) {
-		CCrane* pCrane = &CCranes::aCranes[i];
-		if (pCrane->m_pCraneEntity)
+		CCrane *pCrane = &aCranes[i];
+		if (pCrane->m_pCraneEntity != nil)
 			pCrane->m_pCraneEntity = CPools::GetBuildingPool()->GetSlot((uint32)pCrane->m_pCraneEntity - 1);
-		if (pCrane->m_pHook)
+		if (pCrane->m_pHook != nil)
 			pCrane->m_pHook = CPools::GetObjectPool()->GetSlot((uint32)pCrane->m_pHook - 1);
-		if (pCrane->m_pVehiclePickedUp)
-			pCrane->m_pVehiclePickedUp = CPools::GetVehiclePool()->GetSlot((uint32)pCrane->m_pVehiclePickedUp + 1);
+		if (pCrane->m_pVehiclePickedUp != nil)
+			pCrane->m_pVehiclePickedUp = CPools::GetVehiclePool()->GetSlot((uint32)pCrane->m_pVehiclePickedUp - 1);
 	}
 	for (int i = 0; i < NUM_CRANES; i++) {
-		CCranes::aCranes[i].m_nAudioEntity = DMAudio.CreateEntity(AUDIOTYPE_CRANE, &CCranes::aCranes[i]);
-		if (CCranes::aCranes[i].m_nAudioEntity)
-			DMAudio.SetEntityStatus(CCranes::aCranes[i].m_nAudioEntity, 1);
+		aCranes[i].m_nAudioEntity = DMAudio.CreateEntity(AUDIOTYPE_CRANE, &aCranes[i]);
+		if (aCranes[i].m_nAudioEntity != 0)
+			DMAudio.SetEntityStatus(aCranes[i].m_nAudioEntity, 1);
 	}
 
 	VALIDATESAVEBUF(size);
 }
-
-STARTPATCHES
-	InjectHook(0x5454D0, CranesLoad, PATCH_JUMP); // GenericLoad
-ENDPATCHES

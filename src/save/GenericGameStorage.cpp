@@ -283,7 +283,7 @@ GenericLoad()
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Paths \n", ThePaths.Load);
 	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Cranes \n", CranesLoad);
+	ReadDataFromBlock("Loading Cranes \n", CCranes::Load);
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Pickups \n", CPickups::Load);
 	LoadSaveDataBlock();
