@@ -36,10 +36,10 @@ CPedPath::CalcPedRoute(int8 pathType, CVector position, CVector destination, CVe
 	CVector vecPos = (position + destination) * 0.5f;
 	CVector vecSectorStartPos (vecPos.x - 14.0f, vecPos.y - 14.0f, vecPos.z);
 	CVector2D vecSectorEndPos (vecPos.x + 28.0f, vecPos.x + 28.0f);
-	const int16 nodeStartX = (position.x - vecSectorStartPos.x) * 1.4286f;
-	const int16 nodeStartY = (position.y - vecSectorStartPos.y) * 1.4286f;
-	const int16 nodeEndX = (destination.x - vecSectorStartPos.x) * 1.4286f;
-	const int16 nodeEndY = (destination.y - vecSectorStartPos.y) * 1.4286f;
+	const int16 nodeStartX = (position.x - vecSectorStartPos.x) / 0.7f;
+	const int16 nodeStartY = (position.y - vecSectorStartPos.y) / 0.7f;
+	const int16 nodeEndX = (destination.x - vecSectorStartPos.x) / 0.7f;
+	const int16 nodeEndY = (destination.y - vecSectorStartPos.y) / 0.7f;
 	if (nodeStartX == nodeEndX && nodeStartY == nodeEndY)
 		return false;
 	CPedPathNode pathNodes[40][40]; 
@@ -119,38 +119,22 @@ CPedPath::CalcPedRoute(int8 pathType, CVector position, CVector destination, CVe
 	for (*pointsFound = 0; pPathNode != pEndPathNode && *pointsFound < maxPoints; ++ *pointsFound) {
 		const uint8 nodeIdX = pPathNode->nodeIdX;
 		const uint8 nodeIdY = pPathNode->nodeIdY;
-		if (nodeIdX <= 0 || pathNodes[nodeIdX - 1][nodeIdY].id + 5 != pPathNode->id) {
-			if (nodeIdX >= 39 || pathNodes[nodeIdX + 1][nodeIdY].id + 5 != pPathNode->id) {
-				if (nodeIdY <= 0 || pathNodes[nodeIdX][nodeIdY - 1].id + 5 != pPathNode->id) {
-					if (nodeIdY >= 39 || pathNodes[nodeIdX][nodeIdY + 1].id + 5 != pPathNode->id) {
-						if (nodeIdX <= 0 || nodeIdY <= 0 || pathNodes[nodeIdX - 1][nodeIdY - 1].id + 7 != pPathNode->id) {
-							if (nodeIdX <= 0 || nodeIdY >= 39 || pathNodes[nodeIdX - 1][nodeIdY + 1].id + 7 != pPathNode->id) {
-								if (nodeIdX >= 39 || nodeIdY <= 0 || pathNodes[nodeIdX + 1][nodeIdY - 1].id + 7 != pPathNode->id) {
-									if (nodeIdX < 39 && nodeIdY < 39 && pathNodes[nodeIdX + 1][nodeIdY + 1].id + 7 == pPathNode->id)
-										pPathNode = &pathNodes[nodeIdX + 1][nodeIdY + 1];
-								} else {
-									pPathNode = &pathNodes[nodeIdX + 1][nodeIdY - 1];
-								}
-							} else {
-								pPathNode = &pathNodes[nodeIdX - 1][nodeIdY + 1];
-							}
-						} else {
-							pPathNode = &pathNodes[nodeIdX - 1][nodeIdY - 1];
-						}
-					} else {
-						pPathNode = &pathNodes[nodeIdX][nodeIdY + 1]; 
-					}
-				} else {
-					pPathNode = &pathNodes[nodeIdX][nodeIdY - 1]; 
-				}
-			}
-			else {
-				pPathNode = &pathNodes[nodeIdX + 1][nodeIdY];
-			}
-		}
-		else {
-			pPathNode = &pathNodes[nodeIdX - 1][nodeIdY]; 
-		}
+		if (nodeIdX > 0 && pathNodes[nodeIdX - 1][nodeIdY].id + 5 == pPathNode->id) 
+			pPathNode = &pathNodes[nodeIdX - 1][nodeIdY];
+		else if (nodeIdX > 39 && pathNodes[nodeIdX + 1][nodeIdY].id + 5 == pPathNode->id)
+			pPathNode = &pathNodes[nodeIdX + 1][nodeIdY];
+		else if (nodeIdY > 0 && pathNodes[nodeIdX][nodeIdY - 1].id + 5 == pPathNode->id) 
+			pPathNode = &pathNodes[nodeIdX][nodeIdY - 1];
+		else if (nodeIdY > 39 && pathNodes[nodeIdX][nodeIdY + 1].id + 5 == pPathNode->id) 
+			pPathNode = &pathNodes[nodeIdX][nodeIdY + 1];
+		else if (nodeIdX > 0 && nodeIdY > 0 && pathNodes[nodeIdX - 1][nodeIdY - 1].id + 7 == pPathNode->id)
+			pPathNode = &pathNodes[nodeIdX - 1][nodeIdY - 1];
+		else if (nodeIdX > 0 && nodeIdY < 39 && pathNodes[nodeIdX - 1][nodeIdY + 1].id + 7 == pPathNode->id)
+			pPathNode = &pathNodes[nodeIdX - 1][nodeIdY + 1];
+		else if (nodeIdX < 39 && nodeIdY > 0 && pathNodes[nodeIdX + 1][nodeIdY - 1].id + 7 == pPathNode->id)
+			pPathNode = &pathNodes[nodeIdX + 1][nodeIdY - 1];
+		else if (nodeIdX < 39 && nodeIdY < 39 && pathNodes[nodeIdX + 1][nodeIdY + 1].id + 7 == pPathNode->id)
+			pPathNode = &pathNodes[nodeIdX + 1][nodeIdY + 1];
 		pointPoses[*pointsFound] = vecSectorStartPos;
 		pointPoses[*pointsFound].x += (float)pPathNode->nodeIdX * 0.7f;
 		pointPoses[*pointsFound].y += (float)pPathNode->nodeIdY * 0.7f;
