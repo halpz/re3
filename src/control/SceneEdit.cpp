@@ -106,7 +106,7 @@ void CSceneEdit::LoadMovie(void)
 	CFileMgr::SetDir("DATA");
 	int fid = CFileMgr::OpenFile("movie.dat", "r");
 #ifdef FIX_BUGS
-	if (fid > 0)
+	if (fid >= 0)
 #endif
 	{
 		CFileMgr::Read(fid, (char*)&Movie, sizeof(Movie));
