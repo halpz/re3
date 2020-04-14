@@ -15,6 +15,7 @@ bool gbShowCarPathsLinks;
 CPathFind &ThePaths = *(CPathFind*)0x8F6754;
 
 #define MAX_DIST INT16_MAX-1
+#define MIN_PED_ROUTE_DISTANCE 23.8f
 
 // object flags:
 //	1	UseInRoadBlock
@@ -31,7 +32,7 @@ CPedPath::CalcPedRoute(int8 pathType, CVector position, CVector destination, CVe
 {
 	*pointsFound = 0;
 	CVector vecDistance = destination - position;
-	if (Abs(vecDistance.x) > 23.8f || Abs(vecDistance.y) > 23.8f || Abs(vecDistance.z) > 23.8f)
+	if (Abs(vecDistance.x) > MIN_PED_ROUTE_DISTANCE || Abs(vecDistance.y) > MIN_PED_ROUTE_DISTANCE || Abs(vecDistance.z) > MIN_PED_ROUTE_DISTANCE)
 		return false;
 	CVector vecPos = (position + destination) * 0.5f;
 	CVector vecSectorStartPos (vecPos.x - 14.0f, vecPos.y - 14.0f, vecPos.z);
@@ -47,7 +48,7 @@ CPedPath::CalcPedRoute(int8 pathType, CVector position, CVector destination, CVe
 	for (int32 x = 0; x < 40; x++) {
 		for (int32 y = 0; y < 40; y++) {
 			pathNodes[x][y].bBlockade = false;
-			pathNodes[x][y].id = 0x7FFF;
+			pathNodes[x][y].id = INT16_MAX;
 			pathNodes[x][y].nodeIdX = x;
 			pathNodes[x][y].nodeIdY = y;
 		}
@@ -147,7 +148,7 @@ void
 CPedPath::AddNodeToPathList(CPedPathNode *pNodeToAdd, int16 id, CPedPathNode *pNodeList) 
 {
 	if (!pNodeToAdd->bBlockade && id < pNodeToAdd->id) {
-		if (pNodeToAdd->id != 0x7FFF)
+		if (pNodeToAdd->id != INT16_MAX)
 			RemoveNodeFromList(pNodeToAdd);
 		AddNodeToList(pNodeToAdd, id, pNodeList);
 	}
