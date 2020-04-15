@@ -11359,7 +11359,7 @@ VALIDATESAVEBUF(size)
 
 void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntity)
 {
-	static CColPoint aTempColPoints[32];
+	static CColPoint aTempColPoints[MAX_COLLISION_POINTS];
 	int16 entities = 0;
 	CEntity* aEntities[16];
 	CWorld::FindObjectsKindaColliding(pos, pEntity->GetBoundRadius(), false, &entities, 16, aEntities, false, true, true, false, false);

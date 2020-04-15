@@ -47,36 +47,36 @@ const RegenerationPoint aSafeZones[] = {
 		CVector(-321.0f, -1043.0f, -13.2f), CVector(-328.0f, -1045.0f, -13.2f), CVector(-398.0f, -1044.0f, -13.5f), CVector(-390.0f, -1040.5f, -13.5f) },
 	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, 425.0f, 280.0f, 471.0f, 447.0f, 20.0f, 5.0f,
 		CVector(-292.0f, -457.0f, -11.6f), CVector(-310.0f, -461.0f, -11.6f), CVector(-413.0f, -461.0f, -11.5f), CVector(-399.0f, -457.0f, -11.3f) }
-}; // *(RegenerationPoint(*)[8]) * (uintptr*)0x5FA578;
+};
 
-PedGroup CPopulation::ms_pPedGroups[NUMPEDGROUPS]; // = *(PedGroup(*)[NUMPEDGROUPS]) * (uintptr*)0x6E9248;
-bool CPopulation::ms_bGivePedsWeapons; // = *(bool*)0x95CCF6;
-int32 CPopulation::m_AllRandomPedsThisType = -1; // = *(int32*)0x5FA570;
-float CPopulation::PedDensityMultiplier = 1.0f; // = *(float*)0x5FA56C;
-uint32 CPopulation::ms_nTotalMissionPeds; // = *(uint32*)0x8F5F70;
-int32 CPopulation::MaxNumberOfPedsInUse = 25; // *(int32*)0x5FA574;
-uint32 CPopulation::ms_nNumCivMale; // = *(uint32*)0x8F2548;
-uint32 CPopulation::ms_nNumCivFemale; // = *(uint32*)0x8F5F44;
-uint32 CPopulation::ms_nNumCop; // = *(uint32*)0x885AFC;
-bool CPopulation::bZoneChangeHasHappened; // = *(bool*)0x95CD79;
-uint32 CPopulation::ms_nNumEmergency; // = *(uint32*)0x94071C;
-int8 CPopulation::m_CountDownToPedsAtStart; // = *(int8*)0x95CD4F;
-uint32 CPopulation::ms_nNumGang1; // = *(uint32*)0x8F1B1C;
-uint32 CPopulation::ms_nNumGang2; // = *(uint32*)0x8F1B14;
-uint32 CPopulation::ms_nTotalPeds; // = *(uint32*)0x95CB50;
-uint32 CPopulation::ms_nNumGang3; // = *(uint32*)0x8F2548;
-uint32 CPopulation::ms_nTotalGangPeds; // = *(uint32*)0x885AF0;
-uint32 CPopulation::ms_nNumGang4; // = *(uint32*)0x8F1B2C;
-uint32 CPopulation::ms_nTotalCivPeds; // = *(uint32*)0x8F2C3C;
-uint32 CPopulation::ms_nNumGang5; // = *(uint32*)0x8F1B30;
-uint32 CPopulation::ms_nNumDummy; // = *(uint32*)0x8F1A98;
-uint32 CPopulation::ms_nNumGang6; // = *(uint32*)0x8F1B20;
-uint32 CPopulation::ms_nNumGang9; // = *(uint32*)0x8F1B10;
-uint32 CPopulation::ms_nNumGang7; // = *(uint32*)0x8F1B28;
-uint32 CPopulation::ms_nNumGang8; // = *(uint32*)0x8F1B0C;
-CVector CPopulation::RegenerationPoint_a; // = *(CVector*)0x8E2AA4;
-CVector CPopulation::RegenerationPoint_b; // = *(CVector*)0x8E2A98;
-CVector CPopulation::RegenerationForward; // = *(CVector*)0x8F1AD4;
+PedGroup CPopulation::ms_pPedGroups[NUMPEDGROUPS];
+bool CPopulation::ms_bGivePedsWeapons;
+int32 CPopulation::m_AllRandomPedsThisType = -1;
+float CPopulation::PedDensityMultiplier = 1.0f;
+uint32 CPopulation::ms_nTotalMissionPeds;
+int32 CPopulation::MaxNumberOfPedsInUse = 25;
+uint32 CPopulation::ms_nNumCivMale;
+uint32 CPopulation::ms_nNumCivFemale;
+uint32 CPopulation::ms_nNumCop;
+bool CPopulation::bZoneChangeHasHappened;
+uint32 CPopulation::ms_nNumEmergency;
+int8 CPopulation::m_CountDownToPedsAtStart;
+uint32 CPopulation::ms_nNumGang1;
+uint32 CPopulation::ms_nNumGang2;
+uint32 CPopulation::ms_nTotalPeds;
+uint32 CPopulation::ms_nNumGang3;
+uint32 CPopulation::ms_nTotalGangPeds;
+uint32 CPopulation::ms_nNumGang4;
+uint32 CPopulation::ms_nTotalCivPeds;
+uint32 CPopulation::ms_nNumGang5;
+uint32 CPopulation::ms_nNumDummy;
+uint32 CPopulation::ms_nNumGang6;
+uint32 CPopulation::ms_nNumGang9;
+uint32 CPopulation::ms_nNumGang7;
+uint32 CPopulation::ms_nNumGang8;
+CVector CPopulation::RegenerationPoint_a;
+CVector CPopulation::RegenerationPoint_b;
+CVector CPopulation::RegenerationForward;
 
 void
 CPopulation::Initialise()

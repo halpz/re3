@@ -307,13 +307,13 @@ void CGarage::Update()
 					CGarages::bCamShouldBeOutisde = true;
 				}
 				if (pVehicle) {
-					if (IsEntityEntirelyOutside(pVehicle, 0.0f))
+					if (!IsEntityEntirelyOutside(pVehicle, 0.0f))
 						TheCamera.pToGarageWeAreInForHackAvoidFirstPerson = this;
 					if (pVehicle->GetModelIndex() == MI_MRWHOOP) {
 						if (pVehicle->IsWithinArea(
 							m_fX1 - DISTANCE_FOR_MRWHOOP_HACK,
-							m_fX2 + DISTANCE_FOR_MRWHOOP_HACK,
-							m_fY1 - DISTANCE_FOR_MRWHOOP_HACK,
+							m_fY1 + DISTANCE_FOR_MRWHOOP_HACK,
+							m_fX2 - DISTANCE_FOR_MRWHOOP_HACK,
 							m_fY2 + DISTANCE_FOR_MRWHOOP_HACK)) {
 							TheCamera.pToGarageWeAreIn = this;
 							CGarages::bCamShouldBeOutisde = true;
@@ -2313,6 +2313,10 @@ void CGarages::Load(uint8* buf, uint32 size)
 #ifdef FIX_GARAGE_SIZE
 	VALIDATESAVEBUF(size);
 #endif
+
+	MessageEndTime = 0;
+	bCamShouldBeOutisde = false;
+	MessageStartTime = 0;
 }
 
 bool

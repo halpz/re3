@@ -20,17 +20,17 @@ class CPtrList;
 
 class CRenderer
 {
-	static int32 &ms_nNoOfVisibleEntities;
-	static CEntity *(&ms_aVisibleEntityPtrs)[NUMVISIBLEENTITIES];
-	static int32 &ms_nNoOfInVisibleEntities;
-	static CEntity *(&ms_aInVisibleEntityPtrs)[NUMINVISIBLEENTITIES];
+	static int32 ms_nNoOfVisibleEntities;
+	static CEntity *ms_aVisibleEntityPtrs[NUMVISIBLEENTITIES];
+	static int32 ms_nNoOfInVisibleEntities;
+	static CEntity *ms_aInVisibleEntityPtrs[NUMINVISIBLEENTITIES];
 
-	static CVector &ms_vecCameraPosition;
-	static CVehicle *&m_pFirstPersonVehicle;
+	static CVector ms_vecCameraPosition;
+	static CVehicle *m_pFirstPersonVehicle;
 
 public:
-	static float ms_lodDistScale;	// defined in Frontend.cpp
-	static bool &m_loadingPriority;
+	static float ms_lodDistScale;
+	static bool m_loadingPriority;
 
 	static void Init(void);
 	static void Shutdown(void);
