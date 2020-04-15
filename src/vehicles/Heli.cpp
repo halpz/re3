@@ -78,6 +78,9 @@ CHeli::CHeli(int32 id, uint8 CreatedBy)
 	m_bTestRight = true;
 	m_fTargetOffset = 0.0f;
 	m_fSearchLightX = m_fSearchLightY = 0.0f;
+
+	// BUG: not in game but gets initialized to CDCDCDCD in debug
+	m_nLastShotTime = 0;
 }
 
 void
@@ -590,7 +593,12 @@ CHeli::PreRender(void)
 			break;
 		}
 		RwRGBA col = { r, g, b, 32 };
+#ifdef FIX_BUGS
+		pos.z = m_fHeliDustZ[frm];
+#else
+		// What the hell is the point of this?
 		pos.z = m_fHeliDustZ[(i - (i&3))/4];	// advance every 4 iterations, why not just /4?
+#endif
 		if(pos.z > -200.0f && GetPosition().z - pos.z < 20.0f)
 			CParticle::AddParticle(PARTICLE_HELI_DUST, pos, dir, nil, 0.0f, col);
 		i++;

@@ -612,7 +612,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 						if(model == MI_FIRE_HYDRANT && !Bobj->bHasBeenDamaged){
 							CParticleObject::AddObject(POBJECT_FIRE_HYDRANT, B->GetPosition() - CVector(0.0f, 0.0f, 0.5f), true);
 							Bobj->bHasBeenDamaged = true;
-						}else if(B->IsObject() && model != MI_EXPLODINGBARREL && model != MI_PETROLPUMP)
+						}else if(B->IsObject() && !IsExplosiveThingModel(model))
 							Bobj->bHasBeenDamaged = true;
 					}else{
 						if(IsGlass(B->GetModelIndex()))
@@ -1037,7 +1037,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 
 	int numCollisions;
 	int mostColliding;
-	CColPoint colpoints[32];
+	CColPoint colpoints[MAX_COLLISION_POINTS];
 	CVector shift = { 0.0f, 0.0f, 0.0f };
 	bool doShift = false;
 	CEntity *boat = nil;
@@ -1187,7 +1187,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 bool
 CPhysical::ProcessCollisionSectorList_SimpleCar(CPtrList *lists)
 {
-	static CColPoint aColPoints[32];
+	static CColPoint aColPoints[MAX_COLLISION_POINTS];
 	float radius;
 	CVector center;
 	int listtype;
@@ -1349,7 +1349,7 @@ collision:
 bool
 CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 {
-	static CColPoint aColPoints[32];
+	static CColPoint aColPoints[MAX_COLLISION_POINTS];
 	float radius;
 	CVector center;
 	CPtrList *list;

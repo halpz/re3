@@ -20,8 +20,8 @@ public:
 	uint8 m_nEvadeAmount;
 	int8 field_1367;
 	uint32 m_nSpeedTimer;
-	int32 m_nShotDelay;
-	float field_1376;	// m_fAttackButtonCounter?
+	uint32 m_nHitAnimDelayTimer;
+	float m_fAttackButtonCounter;
 	bool m_bHaveTargetSelected;	// may have better name
 	int8 field_1381;
 	int8 field_1382;

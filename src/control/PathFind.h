@@ -3,11 +3,7 @@
 #include "Treadable.h"
 
 class CVehicle;
-
-class CPedPath {
-public:
-	static bool CalcPedRoute(uint8, CVector, CVector, CVector*, int16*, int16);
-};
+class CPtrList;
 
 enum
 {
@@ -28,6 +24,33 @@ enum
 {
 	SWITCH_OFF = 0,
 	SWITCH_ON = 1,
+};
+
+enum 
+{
+	ROUTE_ADD_BLOCKADE = 0,
+	ROUTE_NO_BLOCKADE = 1
+};
+
+struct CPedPathNode
+{
+	bool bBlockade;
+	uint8 nodeIdX;
+	uint8 nodeIdY;
+	int16 id;
+	CPedPathNode* prev;
+	CPedPathNode* next;
+};
+static_assert(sizeof(CPedPathNode) == 0x10, "CPedPathNode: error");
+
+class CPedPath {
+public:
+	static bool CalcPedRoute(int8 pathType, CVector position, CVector destination, CVector *pointPoses, int16 *pointsFound, int16 maxPoints);
+	static void AddNodeToPathList(CPedPathNode *pNodeToAdd, int16 id, CPedPathNode *pNodeList);
+	static void RemoveNodeFromList(CPedPathNode *pNode);
+	static void AddNodeToList(CPedPathNode *pNode, int16 index, CPedPathNode *pList);
+	static void AddBlockade(CEntity *pEntity, CPedPathNode(*pathNodes)[40], CVector *pPosition);
+	static void AddBlockadeSectorList(CPtrList& list, CPedPathNode(*pathNodes)[40], CVector *pPosition);
 };
 
 struct CPathNode

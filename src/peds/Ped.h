@@ -796,7 +796,12 @@ public:
 
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
+	bool Dead(void) { return m_nPedState == PED_DEAD; }
+	bool Dying(void) { return m_nPedState == PED_DIE; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	bool OnGround(void) { return m_nPedState == PED_FALL || m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	
+	bool Driving(void) { return m_nPedState == PED_DRIVING; }
 	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
 	bool EnteringCar(void) { return m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK; }
 
@@ -823,14 +828,14 @@ public:
 	}
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
-	static uint16 &nThreatReactionRangeMultiplier;
+	static uint16 nThreatReactionRangeMultiplier;
 
 	// set by 0481:set_enter_car_range_multiplier opcode
-	static uint16 &nEnterCarRangeMultiplier;
+	static uint16 nEnterCarRangeMultiplier;
 
-	static bool &bNastyLimbsCheat;
-	static bool &bPedCheat2;
-	static bool &bPedCheat3;
+	static bool bNastyLimbsCheat;
+	static bool bPedCheat2;
+	static bool bPedCheat3;
 	static CVector2D ms_vec2DFleePosition;
 
 #ifdef TOGGLEABLE_BETA_FEATURES

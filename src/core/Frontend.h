@@ -2,10 +2,16 @@
 
 #include "Sprite2d.h"
 
+#ifdef PS2_LIKE_MENU
+#define MENUHEADER_POS_X 50.0f
+#define MENUHEADER_POS_Y 75.0f
+#define MENUHEADER_HEIGHT 1.3f
+#else
 #define MENUHEADER_POS_X 35.0f
 #define MENUHEADER_POS_Y 93.0f
-#define MENUHEADER_WIDTH 0.84f
 #define MENUHEADER_HEIGHT 1.6f
+#endif
+#define MENUHEADER_WIDTH 0.84f
 
 #define MENU_X_MARGIN 40.0f
 #define MENUACTION_POS_Y 60.0f

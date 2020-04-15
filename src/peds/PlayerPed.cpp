@@ -43,8 +43,8 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_fStaminaProgress = 0.0f;
 	m_nEvadeAmount = 0;
 	field_1367 = 0;
-	m_nShotDelay = 0;
-	field_1376 = 0.0f;
+	m_nHitAnimDelayTimer = 0;
+	m_fAttackButtonCounter = 0.0f;
 	m_bHaveTargetSelected = false;
 	m_bHasLockOnTarget = false;
 	m_bCanBeDamaged = true;
@@ -1024,10 +1024,10 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 					if (padUsed->WeaponJustDown()) {
 						m_bHaveTargetSelected = true;
 					} else if (!m_bHaveTargetSelected) {
-						field_1376 += CTimer::GetTimeStepNonClipped();
+						m_fAttackButtonCounter += CTimer::GetTimeStepNonClipped();
 					}
 				} else {
-					field_1376 = 0.0f;
+					m_fAttackButtonCounter = 0.0f;
 					m_bHaveTargetSelected = false;
 				}
 				SetAttack(nil);

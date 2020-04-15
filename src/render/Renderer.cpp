@@ -39,16 +39,17 @@ struct EntityInfo
 	float sort;
 };
 
-CLinkList<EntityInfo> &gSortedVehiclesAndPeds = *(CLinkList<EntityInfo>*)0x629AC0;
+CLinkList<EntityInfo> gSortedVehiclesAndPeds;
 
-int32 &CRenderer::ms_nNoOfVisibleEntities = *(int32*)0x940730;
-CEntity *(&CRenderer::ms_aVisibleEntityPtrs)[NUMVISIBLEENTITIES] = *(CEntity * (*)[NUMVISIBLEENTITIES]) * (uintptr*)0x6E9920;
-CEntity *(&CRenderer::ms_aInVisibleEntityPtrs)[NUMINVISIBLEENTITIES] = *(CEntity * (*)[NUMINVISIBLEENTITIES]) * (uintptr*)0x880B50;
-int32 &CRenderer::ms_nNoOfInVisibleEntities = *(int32*)0x8F1B78;
+int32 CRenderer::ms_nNoOfVisibleEntities;
+CEntity *CRenderer::ms_aVisibleEntityPtrs[NUMVISIBLEENTITIES];
+CEntity *CRenderer::ms_aInVisibleEntityPtrs[NUMINVISIBLEENTITIES];
+int32 CRenderer::ms_nNoOfInVisibleEntities;
 
-CVector &CRenderer::ms_vecCameraPosition = *(CVector*)0x8E2C3C;
-CVehicle *&CRenderer::m_pFirstPersonVehicle = *(CVehicle**)0x885B80;
-bool &CRenderer::m_loadingPriority = *(bool*)0x95CD86;
+CVector CRenderer::ms_vecCameraPosition;
+CVehicle *CRenderer::m_pFirstPersonVehicle;
+bool CRenderer::m_loadingPriority;
+float CRenderer::ms_lodDistScale = 1.2f;
 
 void
 CRenderer::Init(void)

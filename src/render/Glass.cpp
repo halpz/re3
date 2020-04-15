@@ -404,6 +404,7 @@ CGlass::AskForObjectToBeRenderedInGlass(CEntity *entity)
 void
 CGlass::RenderEntityInGlass(CEntity *entity)
 {
+	ASSERT(entity!=nil);
 	CObject *object = (CObject *)entity;
 
 	if ( object->bGlassBroken )
@@ -419,7 +420,7 @@ CGlass::RenderEntityInGlass(CEntity *entity)
 	uint8 alpha = CalcAlphaWithNormal(&fwdNorm);
 
 	CColModel *col = object->GetColModel();
-
+	ASSERT(col!=nil);
 	if ( col->numTriangles >= 2 )
 	{
 		CVector a = object->GetMatrix() * col->vertices[0];
@@ -523,6 +524,8 @@ CGlass::RenderEntityInGlass(CEntity *entity)
 int32
 CGlass::CalcAlphaWithNormal(CVector *normal)
 {
+	ASSERT(normal!=nil);
+	
 	float fwdDir = 2.0f * DotProduct(*normal, TheCamera.GetForward());
 	float fwdDot = DotProduct(TheCamera.GetForward()-fwdDir*(*normal), CVector(0.57f, 0.57f, -0.57f));
 	return int32(lerp(fwdDot*fwdDot*fwdDot*fwdDot*fwdDot*fwdDot, 20.0f, 255.0f));
@@ -597,6 +600,8 @@ CGlass::RenderReflectionPolys(void)
 void
 CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, CVector point, bool explosion)
 {
+	ASSERT(entity!=nil);
+	
 	CObject *object = (CObject *)entity;
 
 	if ( object->bGlassBroken )
@@ -605,7 +610,8 @@ CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, 
 	object->bGlassCracked = true;
 
 	CColModel *col = object->GetColModel();
-
+	ASSERT(col!=nil);
+	
 	CVector a = object->GetMatrix() * col->vertices[0];
 	CVector b = object->GetMatrix() * col->vertices[1];
 	CVector c = object->GetMatrix() * col->vertices[2];
@@ -647,6 +653,8 @@ CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, 
 void
 CGlass::WindowRespondsToSoftCollision(CEntity *entity, float amount)
 {
+	ASSERT(entity!=nil);
+	
 	CObject *object = (CObject *)entity;
 
 	if ( amount > 50.0f && !object->bGlassCracked )
@@ -659,6 +667,8 @@ CGlass::WindowRespondsToSoftCollision(CEntity *entity, float amount)
 void
 CGlass::WasGlassHitByBullet(CEntity *entity, CVector point)
 {
+	ASSERT(entity!=nil);
+	
 	CObject *object = (CObject *)entity;
 
 	if ( IsGlass(object->GetModelIndex()) )
@@ -679,6 +689,8 @@ CGlass::WasGlassHitByBullet(CEntity *entity, CVector point)
 void
 CGlass::WindowRespondsToExplosion(CEntity *entity, CVector point)
 {
+	ASSERT(entity!=nil);
+	
 	CObject *object = (CObject *)entity;
 
 	CVector distToGlass = object->GetPosition() - point;
