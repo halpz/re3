@@ -856,7 +856,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 	{
 		CGlass::WasGlassHitByBullet(victim, point->point);
 
-		CVector traceTarget = *target;
+		CVector traceTarget = point->point;
 		CBulletTraces::AddTrace(source, &traceTarget);
 
 		if ( shooter != nil )
