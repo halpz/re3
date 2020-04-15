@@ -43,3 +43,5 @@ after_build:
 artifacts:
 - path: bin/%CONFIGURATION%/re3.dll
   name: re3.dll
+- path: bin/%CONFIGURATION%/re3.pdb
+  name: re3.pdb
