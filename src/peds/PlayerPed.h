@@ -21,7 +21,7 @@ public:
 	int8 field_1367;
 	uint32 m_nSpeedTimer;
 	uint32 m_nHitAnimDelayTimer;
-	float m_fAttackButtonCounter;	// m_fAttackButtonCounter?
+	float m_fAttackButtonCounter;
 	bool m_bHaveTargetSelected;	// may have better name
 	int8 field_1381;
 	int8 field_1382;
