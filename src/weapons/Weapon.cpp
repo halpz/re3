@@ -2038,7 +2038,7 @@ FireOneInstantHitRound(CVector *source, CVector *target, int32 damage)
 	CEntity *victim;
 	CWorld::ProcessLineOfSight(*source, *target, point, victim, true, true, true, true, true, true, false);
 
-	CParticle::AddParticle(PARTICLE_HELI_ATTACK, *source, (*target) - (*source) * 0.15f);
+	CParticle::AddParticle(PARTICLE_HELI_ATTACK, *source, ((*target) - (*source)) * 0.15f);
 
 	if ( victim )
 	{
