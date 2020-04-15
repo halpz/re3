@@ -70,6 +70,7 @@ bool CBulletInfo::AddBullet(CEntity* pSource, eWeaponType type, CVector vecPosit
 	gaBulletInfo[i].m_vecSpeed = vecSpeed;
 	gaBulletInfo[i].m_fTimer = CTimer::GetTimeInMilliseconds() + BULLET_LIFETIME;
 	gaBulletInfo[i].m_bInUse = true;
+	return true;
 }
 
 void CBulletInfo::Update(void)
@@ -138,7 +139,7 @@ void CBulletInfo::Update(void)
 			else if (pHitEntity->IsVehicle()) {
 				CVehicle* pVehicle = (CVehicle*)pHitEntity;
 				pVehicle->InflictDamage(pBullet->m_pSource, pBullet->m_eWeaponType, pBullet->m_nDamage);
-				if (pBullet->m_eWeaponType == WEAPONTYPE_FLAMETHROWER) // how?
+				if (pBullet->m_eWeaponType == WEAPONTYPE_FLAMETHROWER) // huh?
 					gFireManager.StartFire(pVehicle, pBullet->m_pSource, 0.8f, true);
 				else {
 					for (int j = 0; j < NUM_VEHICLE_SPARKS; j++)
@@ -266,3 +267,10 @@ bool CBulletInfo::TestForSniperBullet(float x1, float x2, float y1, float y2, fl
 	return minP <= maxP;
 #endif
 }
+
+STARTPATCHES
+	InjectHook(0x558220, &CBulletInfo::Initialise, PATCH_JUMP);
+	InjectHook(0x558450, &CBulletInfo::Shutdown, PATCH_JUMP);
+	InjectHook(0x558470, &CBulletInfo::AddBullet, PATCH_JUMP);
+	InjectHook(0x558550, &CBulletInfo::Update, PATCH_JUMP);
+ENDPATCHES
