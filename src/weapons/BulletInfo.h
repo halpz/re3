@@ -18,7 +18,7 @@ public:
     };
 	static void Initialise(void);
 	static void Shutdown(void);
-	static bool AddBullet(CEntity*, eWeaponType, CVector, CVector);
+    static bool AddBullet(CEntity* pSource, eWeaponType type, CVector vecPosition, CVector vecSpeed);
 	static void Update(void);
 	static bool TestForSniperBullet(float x1, float x2, float y1, float y2, float z1, float z2);
 };
