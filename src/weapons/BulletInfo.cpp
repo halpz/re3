@@ -114,7 +114,7 @@ void CBulletInfo::Update(void)
 					}
 				}
 				if (CGame::nastyGame) {
-					CVector vecParticleDirection = (point.point - pPed->GetPosition()) / 100;
+					CVector vecParticleDirection = (point.point - pPed->GetPosition()) * 0.01f;
 					vecParticleDirection.z = 0.01f;
 					if (pPed->GetIsOnScreen()) {
 						for (int j = 0; j < NUM_PED_BLOOD_PARTICLES; j++)
@@ -129,7 +129,7 @@ void CBulletInfo::Update(void)
 						if (pAnim) {
 							pAnim->SetCurrentTime(0.0f);
 							pAnim->flags |= ASSOC_RUNNING;
-							pAnim->flags &= ASSOC_FADEOUTWHENDONE;
+							pAnim->flags &= ~ASSOC_FADEOUTWHENDONE;
 						}
 					}
 					pBullet->m_bInUse = false;
