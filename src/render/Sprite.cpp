@@ -137,8 +137,8 @@ CSprite::RenderOneXLUSprite(float x, float y, float z, float w, float h, uint8 r
 void
 CSprite::RenderOneXLUSprite_Rotate_Aspect(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intens, float recipz, float rotation, uint8 a)
 {
-	float c = Cos(DEGTORAD(rotation));
-	float s = Sin(DEGTORAD(rotation));
+	float c = Cos(rotation);
+	float s = Sin(rotation);
 
 	float xs[4];
 	float ys[4];
@@ -315,8 +315,8 @@ void
 CSprite::RenderBufferedOneXLUSprite_Rotate_Aspect(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intens, float recipz, float rotation, uint8 a)
 {
 	m_bFlushSpriteBufferSwitchZTest = 0;
-	float c = Cos(DEGTORAD(rotation));
-	float s = Sin(DEGTORAD(rotation));
+	float c = Cos(rotation);
+	float s = Sin(rotation);
 
 	float xs[4];
 	float ys[4];
@@ -367,8 +367,8 @@ void
 CSprite::RenderBufferedOneXLUSprite_Rotate_2Colours(float x, float y, float z, float w, float h, uint8 r1, uint8 g1, uint8 b1, uint8 r2, uint8 g2, uint8 b2, float cx, float cy, float recipz, float rotation, uint8 a)
 {
 	m_bFlushSpriteBufferSwitchZTest = 0;
-	float c = Cos(DEGTORAD(rotation));
-	float s = Sin(DEGTORAD(rotation));
+	float c = Cos(rotation);
+	float s = Sin(rotation);
 
 	float xs[4];
 	float ys[4];
@@ -398,11 +398,11 @@ CSprite::RenderBufferedOneXLUSprite_Rotate_2Colours(float x, float y, float z, f
 	// Colour factors, cx/y is the direction in which colours change from rgb1 to rgb2
 	cf[0] = (cx*(-c-s) + cy*(-c+s))*0.5f + 0.5f;
 	cf[0] = clamp(cf[0], 0.0f, 1.0f);
-	cf[1] = (cx*(-c-s) + cy*(-c+s))*0.5f + 0.5f;
+	cf[1] = (cx*(-c+s) + cy*( c+s))*0.5f + 0.5f;
 	cf[1] = clamp(cf[1], 0.0f, 1.0f);
-	cf[2] = (cx*(-c-s) + cy*(-c+s))*0.5f + 0.5f;
+	cf[2] = (cx*( c+s) + cy*( c-s))*0.5f + 0.5f;
 	cf[2] = clamp(cf[2], 0.0f, 1.0f);
-	cf[3] = (cx*(-c-s) + cy*(-c+s))*0.5f + 0.5f;
+	cf[3] = (cx*( c-s) + cy*(-c-s))*0.5f + 0.5f;
 	cf[3] = clamp(cf[3], 0.0f, 1.0f);
 
 	float screenz = m_f2DNearScreenZ +

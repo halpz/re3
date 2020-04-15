@@ -31,8 +31,8 @@ enum Direction
 	DIR_Z_NEG,
 };
 
-eLevelName &CCollision::ms_collisionInMemory = *(eLevelName*)0x8F6250;
-CLinkList<CColModel*> &CCollision::ms_colModelCache = *(CLinkList<CColModel*>*)0x95CB58;
+eLevelName CCollision::ms_collisionInMemory;
+CLinkList<CColModel*> CCollision::ms_colModelCache;
 
 void
 CCollision::Init(void)
@@ -1355,6 +1355,7 @@ CCollision::ProcessColModels(const CMatrix &matrixA, CColModel &modelA,
 				modelB.triangles[aTriangleIndicesB[j]],
 				modelB.trianglePlanes[aTriangleIndicesB[j]],
 				spherepoints[numCollisions], coldist);
+
 		if(hasCollided)
 			numCollisions++;
 	}

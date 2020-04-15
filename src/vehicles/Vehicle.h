@@ -277,12 +277,12 @@ public:
 	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE; }
 	AnimationId GetDriverAnim(void) { return IsCar() && bLowVehicle ? ANIM_CAR_LSIT : (IsBoat() && GetModelIndex() != MI_SPEEDER ? ANIM_DRIVE_BOAT : ANIM_CAR_SIT); }
 
-	static bool &bWheelsOnlyCheat;
-	static bool &bAllDodosCheat;
-	static bool &bCheat3;
-	static bool &bCheat4;
-	static bool &bCheat5;
-	static bool &m_bDisableMouseSteering;
+	static bool bWheelsOnlyCheat;
+	static bool bAllDodosCheat;
+	static bool bCheat3;
+	static bool bCheat4;
+	static bool bCheat5;
+	static bool m_bDisableMouseSteering;
 };
 
 static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");

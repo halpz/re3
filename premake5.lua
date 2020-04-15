@@ -94,13 +94,14 @@ project "re3"
 	filter "configurations:Debug"
 		defines { "DEBUG" }
 		staticruntime "on"
-		symbols "On"
+		symbols "Full"
 		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
 
 	filter "configurations:Release"
 		defines { "NDEBUG" }
 		optimize "On"
 		staticruntime "on"
+		symbols "Full"
 		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
 		
 	filter "configurations:ReleaseFH"

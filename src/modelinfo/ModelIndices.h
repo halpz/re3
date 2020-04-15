@@ -490,3 +490,10 @@ IsPoliceVehicleModel(int16 id)
 		id == MI_POLICE ||
 		id == MI_ENFORCER;
 }
+
+inline bool
+IsExplosiveThingModel(int16 id)
+{
+	return id == MI_EXPLODINGBARREL ||
+		id == MI_PETROLPUMP;
+}

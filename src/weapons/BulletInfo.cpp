@@ -267,10 +267,3 @@ bool CBulletInfo::TestForSniperBullet(float x1, float x2, float y1, float y2, fl
 	return minP <= maxP;
 #endif
 }
-
-STARTPATCHES
-	InjectHook(0x558220, &CBulletInfo::Initialise, PATCH_JUMP);
-	InjectHook(0x558450, &CBulletInfo::Shutdown, PATCH_JUMP);
-	InjectHook(0x558470, &CBulletInfo::AddBullet, PATCH_JUMP);
-	InjectHook(0x558550, &CBulletInfo::Update, PATCH_JUMP);
-ENDPATCHES

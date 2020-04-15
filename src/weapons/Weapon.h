@@ -1,5 +1,8 @@
 #pragma once
 
+#define DRIVEBYAUTOAIMING_MAXDIST (2.5f)
+#define DOOMAUTOAIMING_MAXDIST    (9000.0f)
+
 enum eWeaponType
 {
 	WEAPONTYPE_UNARMED,
@@ -49,7 +52,10 @@ enum eWeaponState
 };
 
 class CEntity;
+class CPhysical;
 class CAutomobile;
+struct CColPoint;
+class CWeaponInfo;
 
 class CWeapon
 {
@@ -64,23 +70,50 @@ public:
 	CWeapon() {
 		m_bAddRotOffset = false;
 	}
+	
+	CWeaponInfo *GetInfo();
 
-	static void ShutdownWeapons(void);
-	void Initialise(eWeaponType type, int ammo);
-	void Update(int32 audioEntity);
-	void Reload(void);
-	bool Fire(CEntity*, CVector*);
-	void FireFromCar(CAutomobile *car, bool left);
-	void AddGunshell(CEntity*, CVector const&, CVector2D const&, float);
-	bool IsTypeMelee(void);
-	bool IsType2Handed(void);
-	static void DoTankDoomAiming(CEntity *playerVehicle, CEntity *playerPed, CVector *start, CVector *end);
-	bool HitsGround(CEntity* holder, CVector* firePos, CEntity* aimingTo);
-	bool HasWeaponAmmoToBeUsed(void);
 	static void InitialiseWeapons(void);
-	static void UpdateWeapons(void);
-	static void BlowUpExplosiveThings(CEntity*);
+	static void ShutdownWeapons  (void);
+	static void UpdateWeapons    (void);
+	
+	void Initialise(eWeaponType type, int32 ammo);
+	
+	bool Fire          (CEntity *shooter, CVector *fireSource);
+	bool FireFromCar   (CAutomobile *shooter, bool left);
+	bool FireMelee     (CEntity *shooter, CVector &fireSource);
+	bool FireInstantHit(CEntity *shooter, CVector *fireSource);
+	
+	void AddGunshell   (CEntity *shooter, CVector const &source, CVector2D const &direction, float size);
+	void DoBulletImpact(CEntity *shooter, CEntity *victim, CVector *source, CVector *target, CColPoint *point, CVector2D ahead);
+	
+	bool FireShotgun   (CEntity *shooter, CVector *fireSource);
+	bool FireProjectile(CEntity *shooter, CVector *fireSource, float power);
+	
+	static void GenerateFlameThrowerParticles(CVector pos, CVector dir);
+	
+	bool FireAreaEffect       (CEntity *shooter, CVector *fireSource);
+	bool FireSniper           (CEntity *shooter);
+	bool FireM16_1stPerson    (CEntity *shooter);
+	bool FireInstantHitFromCar(CAutomobile *shooter, bool left);
+	
+	static void DoDoomAiming       (CEntity *shooter, CVector *source, CVector *target);
+	static void DoTankDoomAiming   (CEntity *shooter, CEntity *driver, CVector *source, CVector *target);
+	static void DoDriveByAutoAiming(CEntity *shooter, CVector *source, CVector *target);
+	
+	void Reload(void);
+	void Update(int32 audioEntity);
+	bool IsTypeMelee  (void);
+	bool IsType2Handed(void);
+	
+	static void MakePedsJumpAtShot(CPhysical *shooter, CVector *source, CVector *target);
+	
+	bool HitsGround(CEntity *holder, CVector *fireSource, CEntity *aimingTo);
+	static void BlowUpExplosiveThings(CEntity *thing);
+	bool HasWeaponAmmoToBeUsed(void);
+	
+	static bool ProcessLineOfSight(CVector const &point1, CVector const &point2, CColPoint &point, CEntity *&entity, eWeaponType type, CEntity *shooter, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects);
 };
-static_assert(sizeof(CWeapon) == 0x18, "CWeapon: error");
+VALIDATE_SIZE(CWeapon, 0x18);
 
-void FireOneInstantHitRound(CVector* shotSource, CVector* shotTarget, int32 damage);
+void FireOneInstantHitRound(CVector *source, CVector *target, int32 damage);

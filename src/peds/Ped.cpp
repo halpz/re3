@@ -62,7 +62,7 @@
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
 
-CColPoint &aTempPedColPts = *(CColPoint*)0x62DB14;
+CColPoint aTempPedColPts[MAX_COLLISION_POINTS];
 
 // Corresponds to ped sounds (from SOUND_PED_DEATH to SOUND_PED_TAXI_CALL)
 PedAudioData CommentWaitTime[39] = {
@@ -106,8 +106,6 @@ PedAudioData CommentWaitTime[39] = {
 	{1000, 1000, 1000, 1000},
 	{1000, 1000, 5000, 5000},
 };
-// *(CPedAudioData(*)[39]) * (uintptr*)0x5F94C4;
-
 uint16 nPlayerInComboMove;
 
 RpClump *flyingClumpTemp;
@@ -139,10 +137,9 @@ FightMove tFightMoves[NUM_FIGHTMOVES] = {
 	{ANIM_HIT_BEHIND, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
 	{ANIM_FIGHT2_IDLE, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
 };
-// *(FightMove(*)[NUM_FIGHTMOVES])* (uintptr*)0x5F9844;
 
-uint16 &CPed::nThreatReactionRangeMultiplier = *(uint16*)0x5F8C98;
-uint16 &CPed::nEnterCarRangeMultiplier = *(uint16*)0x5F8C94;
+uint16 CPed::nThreatReactionRangeMultiplier = 1;
+uint16 CPed::nEnterCarRangeMultiplier = 1;
 
 CVector vecPedCarDoorAnimOffset;
 CVector vecPedCarDoorLoAnimOffset;
@@ -151,9 +148,9 @@ CVector vecPedQuickDraggedOutCarAnimOffset;
 CVector vecPedDraggedOutCarAnimOffset;
 CVector vecPedTrainDoorAnimOffset;
 
-bool &CPed::bNastyLimbsCheat = *(bool*)0x95CD44;
-bool &CPed::bPedCheat2 = *(bool*)0x95CD5A;
-bool &CPed::bPedCheat3 = *(bool*)0x95CD59;
+bool CPed::bNastyLimbsCheat;
+bool CPed::bPedCheat2;
+bool CPed::bPedCheat3;
 CVector2D CPed::ms_vec2DFleePosition;
 
 void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
@@ -1231,7 +1228,7 @@ CPed::Attack(void)
 						weaponAnimAssoc->SetCurrentTime(0.0f);
 
 					if (IsPlayer()) {
-						((CPlayerPed*)this)->field_1376 = 0.0f;
+						((CPlayerPed*)this)->m_fAttackButtonCounter = 0.0f;
 						((CPlayerPed*)this)->m_bHaveTargetSelected = false;
 					}
 				}
@@ -4143,7 +4140,7 @@ CPed::SetGetUp(void)
 			&& ((CTimer::GetFrameCounter() + m_randomSeed % 256 + 5) % 8
 				|| CCollision::ProcessColModels(GetMatrix(), *CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(),
 					collidingVeh->GetMatrix(), *CModelInfo::GetModelInfo(collidingVeh->m_modelIndex)->GetColModel(),
-					&aTempPedColPts, nil, nil) > 0)) {
+					aTempPedColPts, nil, nil) > 0)) {
 
 			bGetUpAnimStarted = false;
 			if (IsPlayer())

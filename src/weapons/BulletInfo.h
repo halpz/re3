@@ -1,7 +1,7 @@
 #pragma once
-#include "Weapon.h"
 
 class CEntity;
+enum eWeaponType;
 
 class CBulletInfo
 {

@@ -46,6 +46,13 @@ public:
 		y *= invsqrt;
 		z *= invsqrt;
 	}
+	
+	void Normalise2D(void) {
+		float sq = MagnitudeSqr2D();
+		float invsqrt = RecipSqrt(sq);
+		x *= invsqrt;
+		y *= invsqrt;
+	}
 
 	const CVector &operator+=(CVector const &right) {
 		x += right.x;

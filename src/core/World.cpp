@@ -21,7 +21,7 @@
 #include "Population.h"
 #include "Fire.h"
 
-CColPoint *gaTempSphereColPoints = (CColPoint*)0x6E64C0;	// [32]
+CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
 CPtrList *CWorld::ms_bigBuildingsList = (CPtrList*)0x6FAB60;
 CPtrList &CWorld::ms_listMovingEntityPtrs = *(CPtrList*)0x8F433C;
@@ -29,7 +29,7 @@ CSector (*CWorld::ms_aSectors)[NUMSECTORS_X] = (CSector (*)[NUMSECTORS_Y])0x6656
 uint16 &CWorld::ms_nCurrentScanCode = *(uint16*)0x95CC64;
 
 uint8 &CWorld::PlayerInFocus = *(uint8 *)0x95CD61;
-CPlayerInfo (&CWorld::Players)[NUMPLAYERS] = *(CPlayerInfo (*)[NUMPLAYERS])*(uintptr*)0x9412F0;
+CPlayerInfo CWorld::Players[NUMPLAYERS];
 bool &CWorld::bNoMoreCollisionTorque = *(bool*)0x95CDCC;
 CEntity *&CWorld::pIgnoreEntity	= *(CEntity**)0x8F6494;
 bool &CWorld::bIncludeDeadPeds = *(bool*)0x95CD8F;
@@ -58,6 +58,7 @@ WRAPPER void CWorld::ClearPedsFromArea(float, float, float, float, float, float)
 WRAPPER void CWorld::CallOffChaseForArea(float, float, float, float) { EAXJMP(0x4B5530); }
 WRAPPER void CWorld::TriggerExplosion(const CVector& a1, float a2, float a3, CEntity *a4, bool a5) { EAXJMP(0x4B1140); }
 WRAPPER void CWorld::SetPedsOnFire(float, float, float, float, CEntity*) { EAXJMP(0x4B3D30); }
+WRAPPER void CWorld::UseDetonator(CEntity *) { EAXJMP(0x4B4650); }
 
 void
 CWorld::Initialise()
