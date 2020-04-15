@@ -144,12 +144,10 @@ void CHud::Draw()
 			float fMultBright = SpriteBrightness * 0.03f * (0.25f * fStep + 0.75f);
 			CRect rect;
 			if (DrawCrossHairPC && TheCamera.Cams[TheCamera.ActiveCam].Using3rdPersonMouseCam()) {
-#ifndef ASPECT_RATIO_SCALE
 				float f3rdX = SCREEN_WIDTH * TheCamera.m_f3rdPersonCHairMultX;
 				float f3rdY = SCREEN_HEIGHT * TheCamera.m_f3rdPersonCHairMultY;
-#else
-				float f3rdX = (((TheCamera.m_f3rdPersonCHairMultX - 0.5f) / ((CDraw::GetAspectRatio()) / (DEFAULT_ASPECT_RATIO))) + 0.5f) * SCREEN_WIDTH;
-				float f3rdY = SCREEN_HEIGHT * TheCamera.m_f3rdPersonCHairMultY + SCREEN_SCALE_Y(-2.0f);
+#ifdef ASPECT_RATIO_SCALE
+				f3rdY -= SCREEN_SCALE_Y(2.0f);
 #endif
 				if (FindPlayerPed() && WeaponType == WEAPONTYPE_M16) {
 					rect.left = f3rdX - SCREEN_SCALE_X(32.0f * 0.6f);

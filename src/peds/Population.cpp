@@ -35,17 +35,17 @@ const RegenerationPoint aSafeZones[] = {
 		CVector(790.0f, -917.0f, 39.0f), CVector(775.0f, -921.0f, 39.0f), CVector(424.0f, -942.0f, 38.0f), CVector(439.0f, -938.0f, 38.0f) },
 	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 555.0f, 711.0f, 118.0f, 186.0f, -30.0f, -10.0f,
 		CVector(698.0f,  182.0f, -20.0f), CVector(681.0f,  178.0f, -20.0f), CVector(586.0f,  144.0f, -20.0f), CVector(577.0f,  135.0f, -20.0f) },
-	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 26.0f, 44.0f, 124.0f, 87.0f, 20.0f, 6.0f,
+	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 626.0f, 744.0f, -124.0f, -87.0f, -20.0f, -6.0f,
 		CVector(736.0f, -117.0f, -13.0f), CVector(730.0f, -115.0f, -13.0f), CVector(635.0f, -93.0f, -12.5f), CVector(650.0f, -89.0f, -12.5f) },
-	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 45.0f, 34.0f, 780.0f, 750.0f, 25.0f, 6.0f,
+	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 645.0f, 734.0f, -780.0f, -750.0f, -25.0f, -6.0f,
 		CVector(729.0f, -764.0f, -18.0f), CVector(720.0f, -769.0f, -17.0f), CVector(652.0f, -774.0f, -10.5f), CVector(659.0f, -770.0f, -10.5f) },
-	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, 532.0f, 136.0f, 668.0f, 599.0f, 4.0f, 0.0f,
+	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -532.0f, -136.0f, -668.0f, -599.0f, 34.0f, 60.0f,
 		CVector(-172.0f, -619.0f,  44.0f), CVector(-183.0f, -623.0f,  44.0f), CVector(-511.0f, -645.0f,  41.0f), CVector(-493.0f, -639.0f,  41.5f) },
-	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, 325.0f, 175.0f, 7.0f, 5.0f, 30.0f, 10.0f,
+	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -325.0f, -175.0f, 27.0f, 75.0f, -30.0f, -10.0f,
 		CVector(-185.0f,  40.8f, -20.5f), CVector(-202.0f,  37.0f, -20.5f), CVector(-315.0f,  65.5f, -20.5f), CVector(-306.0f,  62.4f, -20.5f) },
-	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, 410.0f, 310.0f, 1055.0f, 1030.0f, 20.0f, 6.0f,
+	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -410.0f, -310.0f, -1055.0f, -1030.0f, -20.0f, -6.0f,
 		CVector(-321.0f, -1043.0f, -13.2f), CVector(-328.0f, -1045.0f, -13.2f), CVector(-398.0f, -1044.0f, -13.5f), CVector(-390.0f, -1040.5f, -13.5f) },
-	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, 425.0f, 280.0f, 471.0f, 447.0f, 20.0f, 5.0f,
+	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -425.0f, -280.0f, -471.0f, -447.0f, -20.0f, -5.0f,
 		CVector(-292.0f, -457.0f, -11.6f), CVector(-310.0f, -461.0f, -11.6f), CVector(-413.0f, -461.0f, -11.5f), CVector(-399.0f, -457.0f, -11.3f) }
 };
 
