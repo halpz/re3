@@ -2244,7 +2244,7 @@ CPed::BuildPedLists(void)
 						if (nThreatReactionRangeMultiplier * 30.0f > dist) {
 							gapTempPedList[gnNumTempPedList] = ped;
 							gnNumTempPedList++;
-							assert(gnNumTempPedList < ARRAYSIZE(gapTempPedList));
+							assert(gnNumTempPedList < ARRAY_SIZE(gapTempPedList));
 						}
 					}
 				}

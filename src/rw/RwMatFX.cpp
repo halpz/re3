@@ -1,3 +1,5 @@
+#ifndef LIBRW
+
 #define WITHD3D
 #include "common.h"
 #include "patcher.h"
@@ -222,5 +224,7 @@ STARTPATCHES
 	InjectHook(0x5CF6C0, _rpMatFXD3D8AtomicMatFXEnvRender_ps2, PATCH_JUMP);
 #endif
 ENDPATCHES
+
+#endif
 
 #endif

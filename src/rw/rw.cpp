@@ -1,3 +1,4 @@
+#ifndef LIBRW
 #include "common.h"
 #include "patcher.h"
 #include "rwcore.h"
@@ -836,4 +837,5 @@ InjectHook(0x5DF040, &RxNodeDefinitionGetLight, PATCH_JUMP);
 InjectHook(0x5DF560, &RxNodeDefinitionGetPostLight, PATCH_JUMP);
 InjectHook(0x5DFC60, &RxD3D8AllInOneSetRenderCallBack, PATCH_JUMP);
 ENDPATCHES
+#endif
 #endif

@@ -1,4 +1,4 @@
-﻿#include "common.h"
+#include "common.h"
 #include "patcher.h"
 
 #include "audio_enums.h"
@@ -6269,7 +6269,7 @@ cAudioManager::ProcessPedHeadphones(cPedParams *params)
 				emittingVol = 10;
 				veh = (CAutomobile *)ped->m_pMyVehicle;
 				if(veh && veh->IsCar()) {
-					for(int32 i = 2; i < ARRAYSIZE(veh->Doors); i++) {
+					for(int32 i = 2; i < ARRAY_SIZE(veh->Doors); i++) {
 						if(!veh->IsDoorClosed((eDoors)i) ||
 						   veh->IsDoorMissing((eDoors)i)) {
 							emittingVol = 42;

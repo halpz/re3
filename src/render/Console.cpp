@@ -1,4 +1,5 @@
 #include "common.h"
+#include <stdarg.h>
 #include "patcher.h"
 #include "Console.h"
 #include "Font.h"

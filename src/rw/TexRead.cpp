@@ -25,6 +25,12 @@
 float &texLoadTime = *(float*)0x8F1B50;
 int32 &texNumLoaded = *(int32*)0x8F252C;
 
+#ifdef LIBRW
+#define READNATIVE(stream, tex, size) rwNativeTextureHackRead(stream, tex, size)
+#else
+#define READNATIVE(stream, tex, size) RWSRCGLOBAL(stdFunc[rwSTANDARDNATIVETEXTUREREAD](stream, tex, size))
+#endif
+
 RwTexture*
 RwTextureGtaStreamRead(RwStream *stream)
 {
@@ -36,7 +42,7 @@ RwTextureGtaStreamRead(RwStream *stream)
 
 	float preloadTime = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
 
-	if(!RWSRCGLOBAL(stdFunc[rwSTANDARDNATIVETEXTUREREAD](stream, &tex, size)))
+	if(!READNATIVE(stream, &tex, size))
 		return nil;
 
 	if (gGameState == GS_INIT_PLAYING_GAME) {
@@ -121,7 +127,7 @@ RwTexDictionaryGtaStreamRead1(RwStream *stream)
 	}
 
 	numberTextures = numTextures;
-	streamPosition = stream->Type.memory.position;
+	streamPosition = STREAMPOS(stream);
 
 	return texDict;
 }
@@ -131,7 +137,7 @@ RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary *texDict)
 {
 	RwTexture *tex;
 
-	RwStreamSkip(stream, streamPosition - stream->Type.memory.position);
+	RwStreamSkip(stream, streamPosition - STREAMPOS(stream));
 
 	while(numberTextures--){
 		tex = RwTextureGtaStreamRead(stream);
@@ -251,6 +257,12 @@ DealWithTxdWriteError(uint32 num, uint32 count, const char *text)
 	RsGlobal.quit = true;
 }
 
+#ifdef LIBRW
+#define STREAMTELL(str)	str->tell()
+#else
+#define STREAMTELL(str) filesys->rwftell((str)->Type.file.fpFile)
+#endif
+
 bool
 CreateTxdImageForVideoCard()
 {
@@ -260,7 +272,9 @@ CreateTxdImageForVideoCard()
 
 	CStreaming::FlushRequestList();
 
+#ifndef LIBRW
 	RwFileFunctions *filesys = RwOsGetFileInterface();
+#endif
 
 	RwStream *img = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMWRITE, "models\\txd.img");
 	if (img == nil) {
@@ -287,7 +301,8 @@ CreateTxdImageForVideoCard()
 			sprintf(filename, "%s.txd", CTxdStore::GetTxdName(i));
 
 			if (CTxdStore::GetSlot(i)->texDict) {
-				int32 pos = filesys->rwftell(img->Type.file.fpFile);
+
+				int32 pos = STREAMTELL(img);
 
 				if (RwTexDictionaryStreamWrite(CTxdStore::GetSlot(i)->texDict, img) == nil) {
 					DealWithTxdWriteError(i, TXDSTORESIZE, "CVT_ERR");
@@ -298,7 +313,7 @@ CreateTxdImageForVideoCard()
 					return false;
 				}
 
-				int32 size = filesys->rwftell(img->Type.file.fpFile) - pos;
+				int32 size = STREAMTELL(img) - pos;
 				int32 num = size % CDSTREAM_SECTOR_SIZE;
 
 				size /= CDSTREAM_SECTOR_SIZE;

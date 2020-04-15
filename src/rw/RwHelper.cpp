@@ -90,9 +90,13 @@ DefinedState(void)
 	RwRenderStateSet(rwRENDERSTATEFOGTYPE, (void*)rwFOGTYPELINEAR);
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 
+#ifdef LIBRW
+	#pragma message ("	TODO: alphatest func")
+#else
 	// D3D stuff
 	RwD3D8SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 	RwD3D8SetRenderState(D3DRS_ALPHAREF, 2);
+#endif
 }
 
 RwFrame*
