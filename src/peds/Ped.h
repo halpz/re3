@@ -823,14 +823,14 @@ public:
 	}
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
-	static uint16 &nThreatReactionRangeMultiplier;
+	static uint16 nThreatReactionRangeMultiplier;
 
 	// set by 0481:set_enter_car_range_multiplier opcode
-	static uint16 &nEnterCarRangeMultiplier;
+	static uint16 nEnterCarRangeMultiplier;
 
-	static bool &bNastyLimbsCheat;
-	static bool &bPedCheat2;
-	static bool &bPedCheat3;
+	static bool bNastyLimbsCheat;
+	static bool bPedCheat2;
+	static bool bPedCheat3;
 	static CVector2D ms_vec2DFleePosition;
 
 #ifdef TOGGLEABLE_BETA_FEATURES

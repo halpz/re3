@@ -1037,7 +1037,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 
 	int numCollisions;
 	int mostColliding;
-	CColPoint colpoints[32];
+	CColPoint colpoints[MAX_COLLISION_POINTS];
 	CVector shift = { 0.0f, 0.0f, 0.0f };
 	bool doShift = false;
 	CEntity *boat = nil;
@@ -1187,7 +1187,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 bool
 CPhysical::ProcessCollisionSectorList_SimpleCar(CPtrList *lists)
 {
-	static CColPoint aColPoints[32];
+	static CColPoint aColPoints[MAX_COLLISION_POINTS];
 	float radius;
 	CVector center;
 	int listtype;
@@ -1349,7 +1349,7 @@ collision:
 bool
 CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 {
-	static CColPoint aColPoints[32];
+	static CColPoint aColPoints[MAX_COLLISION_POINTS];
 	float radius;
 	CVector center;
 	CPtrList *list;

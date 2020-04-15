@@ -3,6 +3,13 @@
 #include "templates.h"
 #include "Game.h"	// for eLevelName
 
+// If you spawn many tanks at once, you will see that collisions of two entity exceeds 32.
+#ifdef FIX_BUGS
+#define MAX_COLLISION_POINTS 64
+#else
+#define MAX_COLLISION_POINTS 32
+#endif
+
 struct CColSphere
 {
 	CVector center;
@@ -110,8 +117,8 @@ struct CColModel
 class CCollision
 {
 public:
-	static eLevelName &ms_collisionInMemory;
-	static CLinkList<CColModel*> &ms_colModelCache;
+	static eLevelName ms_collisionInMemory;
+	static CLinkList<CColModel*> ms_colModelCache;
 
 	static void Init(void);
 	static void Shutdown(void);
