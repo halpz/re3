@@ -1518,7 +1518,7 @@ CWeapon::FireSniper(CEntity *shooter)
 	CBulletInfo::AddBullet(shooter, m_eWeaponType, source, dir);
 	
 	if ( shooter == FindPlayerPed() )
-		++CStats::InstantHitsFiredByPlayer;
+		CStats::InstantHitsFiredByPlayer++;
 	
 	if ( shooter == FindPlayerPed() )
 	{
