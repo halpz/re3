@@ -9147,7 +9147,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	}
 	case COMMAND_SET_JAMES_CAR_ON_PATH_TO_PLAYER:
 	{
-		CollectParameters(&m_nIp, 2);
+		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		CCarCtrl::JoinCarWithRoadSystemGotoCoors(pVehicle, FindPlayerCoors(), false);

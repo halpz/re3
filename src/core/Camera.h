@@ -415,7 +415,7 @@ uint32    unknown;	// some counter having to do with music
 
 	float CamFrontXNorm;
 	float CamFrontYNorm;
-#if 0  // TODO: FIX_BUGS once GenericLoad is done
+#ifdef FIX_BUGS
 	int32 CarZoomIndicator;
 #else
 	float CarZoomIndicator;
@@ -455,7 +455,7 @@ uint32    unknown;	// some counter having to do with music
 	float m_ScreenReductionSpeed;
 	float m_AlphaForPlayerAnim1rstPerson;
 	float Orientation;
-#if 0  // TODO: FIX_BUGS once GenericLoad is done
+#ifdef FIX_BUGS
 	int32 PedZoomIndicator;
 #else
 	float PedZoomIndicator;
