@@ -21,8 +21,11 @@
 #include "User.h"
 #include "World.h"
 
-//wchar *CHud::m_HelpMessage = (wchar*)0x86B888;
-//wchar *CHud::m_LastHelpMessage = (wchar*)0x6E8F28;
+wchar CHud::m_HelpMessage[256]; // = (wchar*)0x86B888;
+wchar CHud::m_LastHelpMessage[256]; // = (wchar*)0x6E8F28;
+uint32 CHud::m_HelpMessageState; // = *(int32*)0x880E1C;
+uint32 CHud::m_HelpMessageTimer; // = *(int32*)0x880FA4;
+int32 CHud::m_HelpMessageFadeTimer; // = *(int32*)0x8F6258;
 wchar CHud::m_HelpMessageToPrint[256]; // = (wchar*)0x664480;
 float CHud::m_fHelpMessageTime; // *(float *)0x8E2C28;
 bool CHud::m_HelpMessageQuick; // = *(bool*)0x95CCF7;

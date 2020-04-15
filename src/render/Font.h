@@ -160,5 +160,11 @@ public:
 
 #ifdef MORE_LANGUAGES
 	static void ReloadFonts(uint8 set);
+
+	// japanese stuff
+	static bool IsAnsiCharacter(wchar* s);
+	static bool IsJapanesePunctuation(wchar* a1);
+	static bool IsJapanese() { return LanguageSet == FONT_LANGSET_JAPANESE; }
+	static bool IsJapaneseFont() { return IsJapanese() && (Details.style == FONT_JAPANESE || Details.style == FONT_PAGER);  }
 #endif
 };
