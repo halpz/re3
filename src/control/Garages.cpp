@@ -1082,7 +1082,7 @@ void CGarage::Update()
 #ifdef FIX_BUGS
 					bool bCreatedAllCars = false;
 #else
-					bool bCraetedAllCars;
+					bool bCreatedAllCars;
 #endif
 					switch (m_eGarageType) {
 					case GARAGE_HIDEOUT_ONE:   bCreatedAllCars = RestoreCarsForThisHideout(CGarages::aCarsInSafeHouse1); break;

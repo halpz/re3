@@ -142,6 +142,8 @@ public:
 	static void RemoveStaticObjects();
 	static void Process();
 	static void TriggerExplosion(const CVector &, float, float, CEntity*, bool);
+	
+	static void UseDetonator(CEntity *);
 };
 
 extern CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];

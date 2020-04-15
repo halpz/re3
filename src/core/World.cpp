@@ -58,6 +58,7 @@ WRAPPER void CWorld::ClearPedsFromArea(float, float, float, float, float, float)
 WRAPPER void CWorld::CallOffChaseForArea(float, float, float, float) { EAXJMP(0x4B5530); }
 WRAPPER void CWorld::TriggerExplosion(const CVector& a1, float a2, float a3, CEntity *a4, bool a5) { EAXJMP(0x4B1140); }
 WRAPPER void CWorld::SetPedsOnFire(float, float, float, float, CEntity*) { EAXJMP(0x4B3D30); }
+WRAPPER void CWorld::UseDetonator(CEntity *) { EAXJMP(0x4B4650); }
 
 void
 CWorld::Initialise()

@@ -1228,7 +1228,7 @@ CPed::Attack(void)
 						weaponAnimAssoc->SetCurrentTime(0.0f);
 
 					if (IsPlayer()) {
-						((CPlayerPed*)this)->field_1376 = 0.0f;
+						((CPlayerPed*)this)->m_fAttackButtonCounter = 0.0f;
 						((CPlayerPed*)this)->m_bHaveTargetSelected = false;
 					}
 				}
