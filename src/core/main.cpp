@@ -58,6 +58,7 @@
 #include "Console.h"
 #include "timebars.h"
 #include "GenericGameStorage.h"
+#include "SceneEdit.h"
 
 GlobalScene &Scene = *(GlobalScene*)0x726768;
 
@@ -864,11 +865,9 @@ Render2dStuff(void)
 
 	MusicManager.DisplayRadioStationName();
 	TheConsole.Display();
-/*
 	if(CSceneEdit::m_bEditOn)
 		CSceneEdit::Draw();
 	else
-*/
 		CHud::Draw();
 	CUserDisplay::OnscnTimer.ProcessForDisplay();
 	CMessages::Display();
