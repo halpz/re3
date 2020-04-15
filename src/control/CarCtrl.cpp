@@ -426,7 +426,7 @@ CCarCtrl::GenerateOneRandomCar()
 		(uint32)((0.5f + positionBetweenNodes) * pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve);
 #else
 	pCar->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
-		(0.5f + positionBetweenNodes) * pCar->AutoPilot.m_nSpeedScaleFactor;
+		(0.5f + positionBetweenNodes) * pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve;
 #endif
 	CVector directionCurrentLink(directionCurrentLinkX, directionCurrentLinkY, 0.0f);
 	CVector directionNextLink(directionNextLinkX, directionNextLinkY, 0.0f);

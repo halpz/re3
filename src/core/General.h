@@ -90,6 +90,11 @@ public:
 				return -Atan2(x / y, 1.0f);
 		}
 	}
+	
+	static float GetAngleBetweenPoints(float x1, float y1, float x2, float y2)
+	{
+		return RADTODEG(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
+	}
 
 	// should return direction in 0-8 range. fits perfectly to peds' path directions.
 	static int GetNodeHeadingFromVector(float x, float y)

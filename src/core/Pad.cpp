@@ -642,6 +642,8 @@ void CPad::AddToCheatString(char c)
 {
 	for ( int32 i = ARRAY_SIZE(CheatString) - 2; i >= 0; i-- )
 		CheatString[i + 1] = CheatString[i];
+	
+	CheatString[0] = c;
 
 #define _CHEATCMP(str)  strncmp(str, CheatString, sizeof(str)-1)
 	// "4414LDRULDRU"	-	R2 R2 L1 R2 LEFT DOWN RIGHT UP LEFT DOWN RIGHT UP

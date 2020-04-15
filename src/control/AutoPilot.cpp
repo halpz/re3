@@ -35,7 +35,7 @@ void CAutoPilot::ModifySpeed(float speed)
 	m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
 		(uint32)(positionBetweenNodes * m_nTimeToSpendOnCurrentCurve);
 #else
-	m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() - positionBetweenNodes * m_nSpeedScaleFactor;
+	m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() - positionBetweenNodes * m_nTimeToSpendOnCurrentCurve;
 #endif
 }
 

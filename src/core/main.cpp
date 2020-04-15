@@ -1557,8 +1557,9 @@ void SystemInit()
 	//
 #endif
 	
-	
+#ifdef GTA_PS2_STUFF
 	CPad::Initialise();
+#endif
 	CPad::GetPad(0)->Mode = 0;
 	
 	CGame::frenchGame = false;
