@@ -30,23 +30,22 @@
 #include "WeaponInfo.h"
 #include "World.h"
 
-uint16 gReloadSampleTime[WEAPONTYPE_TOTAL_INVENTORY_WEAPONS] =
+uint16 gReloadSampleTime[WEAPONTYPE_LAST_WEAPONTYPE] =
 {
-	0,		// UNARMED
-	0,		// BASEBALLBAT
-	250,	// COLT45
-	400,	// UZI
-	650,	// SHOTGUN
-	300,	// AK47
-	300,	// M16
-	423,	// SNIPERRIFLE
-	400,	// ROCKETLAUNCHER
-	0,		// FLAMETHROWER
-	0,		// MOLOTOV
-	0,		// GRENADE
-	0,		// DETONATOR
-
-	0		// WEAPONTYPE_HELICANNON
+	0,			// UNARMED
+	0,			// BASEBALLBAT
+	250,		// COLT45
+	400,		// UZI
+	650,		// SHOTGUN
+	300,		// AK47
+	300,		// M16
+	423,		// SNIPERRIFLE
+	400,		// ROCKETLAUNCHER
+	0,			// FLAMETHROWER
+	0,			// MOLOTOV
+	0,			// GRENADE
+	0,			// DETONATOR
+	0			// HELICANNON
 };
 
 CWeaponInfo *
