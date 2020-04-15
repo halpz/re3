@@ -13,8 +13,8 @@
 #include "Weapon.h"
 #include "World.h"
 
-CProjectileInfo (&gaProjectileInfo)[NUM_PROJECTILES] = *(CProjectileInfo(*)[NUM_PROJECTILES])*(uintptr*)0x64ED50;
-CProjectile* (&CProjectileInfo::ms_apProjectile)[NUM_PROJECTILES] = *(CProjectile*(*)[NUM_PROJECTILES])*(uintptr*)0x87C748;
+CProjectileInfo gaProjectileInfo[NUM_PROJECTILES];
+CProjectile *CProjectileInfo::ms_apProjectile[NUM_PROJECTILES];
 
 void
 CProjectileInfo::Initialise()
