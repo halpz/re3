@@ -178,8 +178,8 @@ RwImage     *RwImageWrite(RwImage * image, const RwChar * imageName);
 RwChar      *RwImageGetPath(void);
 const RwChar *RwImageSetPath(const RwChar * path) { Image::setSearchPath(path); return path; }
 RwImage     *RwImageSetStride(RwImage * image, RwInt32 stride) { image->stride = stride; return image; }
-RwImage     *RwImageSetPixels(RwImage * image, RwUInt8 * pixels) { image->setPixels(pixels); return image; }
-RwImage     *RwImageSetPalette(RwImage * image, RwRGBA * palette) { image->setPalette((uint8*)palette); return image; }
+RwImage     *RwImageSetPixels(RwImage * image, RwUInt8 * pixels) { image->pixels = pixels; return image; }
+RwImage     *RwImageSetPalette(RwImage * image, RwRGBA * palette) { image->palette = (uint8*)palette; return image; }
 RwInt32      RwImageGetWidth(const RwImage * image);
 RwInt32      RwImageGetHeight(const RwImage * image);
 RwInt32      RwImageGetDepth(const RwImage * image);
@@ -252,12 +252,12 @@ RwRaster    *RwRasterGetParent(const RwRaster *raster) { return raster->parent; 
 RwRaster    *RwRasterGetOffset(RwRaster *raster,  RwInt16 *xOffset, RwInt16 *yOffset);
 RwInt32      RwRasterGetNumLevels(RwRaster * raster);
 RwRaster    *RwRasterSubRaster(RwRaster * subRaster, RwRaster * raster, RwRect * rect);
-RwRaster    *RwRasterRenderFast(RwRaster * raster, RwInt32 x, RwInt32 y);
+RwRaster    *RwRasterRenderFast(RwRaster * raster, RwInt32 x, RwInt32 y) { return raster->renderFast(x, y) ? raster : nil; }
 RwRaster    *RwRasterRender(RwRaster * raster, RwInt32 x, RwInt32 y);
 RwRaster    *RwRasterRenderScaled(RwRaster * raster, RwRect * rect);
-RwRaster    *RwRasterPushContext(RwRaster * raster);
-RwRaster    *RwRasterPopContext(void);
-RwRaster    *RwRasterGetCurrentContext(void);
+RwRaster    *RwRasterPushContext(RwRaster * raster) { return Raster::pushContext(raster); }
+RwRaster    *RwRasterPopContext(void) { return Raster::popContext(); }
+RwRaster    *RwRasterGetCurrentContext(void) { return Raster::getCurrentContext(); }
 RwBool       RwRasterClear(RwInt32 pixelValue);
 RwBool       RwRasterClearRect(RwRect * rpRect, RwInt32 pixelValue);
 RwRaster    *RwRasterShowRaster(RwRaster * raster, void *dev, RwUInt32 flags);
@@ -378,20 +378,27 @@ RwStream *RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const v
 	default: return nil;
 	}
 
+	// oh god this is horrible. librw streams really need fixing
 	switch(type){
-	case rwSTREAMFILENAME:
+	case rwSTREAMFILENAME:{
+		StreamFile fakefile;
 		file = rwNewT(StreamFile, 1, 0);
+		memcpy(file, &fakefile, sizeof(StreamFile));
 		if(file->open((char*)pData, mode))
 			return file;
 		rwFree(file);
 		return nil;
-	case rwSTREAMMEMORY:
+	}
+	case rwSTREAMMEMORY:{
+		StreamMemory fakemem;
 		memargs = (RwMemory*)pData;
 		mem = rwNewT(StreamMemory, 1, 0);
+		memcpy(mem, &fakemem, sizeof(StreamMemory));
 		if(mem->open(memargs->start, memargs->length))
 			return mem;
 		rwFree(mem);
 		return nil;
+	}
 	default:
 		assert(0 && "unknown type");
 		return nil;
@@ -501,7 +508,10 @@ RwBool RwEngineOpen(RwEngineOpenParams *initParams) {
 	openParams.window = (HWND)initParams->displayID;
 	return Engine::open(&openParams);
 }
-RwBool RwEngineStart(void) { return Engine::start(); }
+RwBool RwEngineStart(void) {
+	rw::d3d::isP8supported = false;
+	return Engine::start();
+}
 RwBool RwEngineStop(void) { Engine::stop(); return true; }
 RwBool RwEngineClose(void) { Engine::close(); return true; }
 RwBool RwEngineTerm(void) { Engine::term(); return true; }
@@ -582,9 +592,8 @@ RpLight *RpLightSetColor(RpLight *light, const RwRGBAReal *color) { light->setCo
 RpGeometry  *RpGeometryCreate(RwInt32 numVert, RwInt32 numTriangles, RwUInt32 format) { return Geometry::create(numVert, numTriangles, format); }
 RwBool RpGeometryDestroy(RpGeometry *geometry) { geometry->destroy(); return true; }
 RpGeometry *_rpGeometryAddRef(RpGeometry *geometry);
-// TODO: implement this
-RpGeometry  *RpGeometryLock(RpGeometry *geometry, RwInt32 lockMode) { return geometry; }
-RpGeometry  *RpGeometryUnlock(RpGeometry *geometry) { return geometry; }
+RpGeometry  *RpGeometryLock(RpGeometry *geometry, RwInt32 lockMode) { geometry->lock(lockMode); return geometry; }
+RpGeometry  *RpGeometryUnlock(RpGeometry *geometry) { geometry->unlock(); return geometry; }
 RpGeometry  *RpGeometryTransform(RpGeometry *geometry, const RwMatrix *matrix);
 RpGeometry  *RpGeometryCreateSpace(RwReal radius);
 RpMorphTarget  *RpMorphTargetSetBoundingSphere(RpMorphTarget *morphTarget, const RwSphere *boundingSphere) { morphTarget->boundingSphere = *boundingSphere; return morphTarget; }
@@ -596,7 +605,11 @@ RpGeometry  *RpGeometryRemoveMorphTarget(RpGeometry *geometry, RwInt32 morphTarg
 RwInt32 RpGeometryGetNumMorphTargets(const RpGeometry *geometry);
 RpMorphTarget  *RpGeometryGetMorphTarget(const RpGeometry *geometry, RwInt32 morphTarget) { return &geometry->morphTargets[morphTarget]; }
 RwRGBA  *RpGeometryGetPreLightColors(const RpGeometry *geometry) { return geometry->colors; }
-RwTexCoords  *RpGeometryGetVertexTexCoords(const RpGeometry *geometry, RwTextureCoordinateIndex uvIndex) { return geometry->texCoords[uvIndex]; }
+RwTexCoords  *RpGeometryGetVertexTexCoords(const RpGeometry *geometry, RwTextureCoordinateIndex uvIndex) {
+	if(uvIndex == rwNARWTEXTURECOORDINATEINDEX)
+		return nil;
+	return geometry->texCoords[uvIndex-rwTEXTURECOORDINATEINDEX0];
+}
 RwInt32 RpGeometryGetNumTexCoordSets(const RpGeometry *geometry) { return geometry->numTexCoordSets; }
 RwInt32 RpGeometryGetNumVertices (const RpGeometry *geometry) { return geometry->numVertices; }
 RwV3d  *RpMorphTargetGetVertices(const RpMorphTarget *morphTarget) { return morphTarget->vertices; }
@@ -793,3 +806,9 @@ RpHAnimHierarchy *RpSkinAtomicGetHAnimHierarchy( const RpAtomic *atomic ) { retu
 
 RwImage *RtBMPImageWrite(RwImage * image, const RwChar * imageName) { rw::writeBMP(image, imageName); return image; }
 RwImage *RtBMPImageRead(const RwChar * imageName) { return rw::readBMP(imageName); }
+
+
+
+
+// fake shit
+RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags) { return 1; }

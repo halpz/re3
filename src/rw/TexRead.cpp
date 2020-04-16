@@ -70,7 +70,9 @@ RwTexDictionaryGtaStreamRead(RwStream *stream)
 	if(!RwStreamFindChunk(stream, rwID_STRUCT, &size, &version))
 		return nil;
 	assert(size == 4);
-	if(RwStreamRead(stream, &numTextures, size) != size)
+int foo = RwStreamRead(stream, &numTextures, size);
+if(foo != size)
+//	if(RwStreamRead(stream, &numTextures, size) != size)
 		return nil;
 
 	texDict = RwTexDictionaryCreate();
@@ -153,11 +155,6 @@ RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary *texDict)
 }
 
 #ifdef GTA_PC
-#ifdef RWLIBS
-extern "C" RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
-#else
-WRAPPER RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags) { EAXJMP(0x59A350); }
-#endif
 
 void
 ReadVideoCardCapsFile(uint32 &cap32, uint32 &cap24, uint32 &cap16, uint32 &cap8)
@@ -176,6 +173,8 @@ ReadVideoCardCapsFile(uint32 &cap32, uint32 &cap24, uint32 &cap16, uint32 &cap8)
 		CFileMgr::CloseFile(file);
 	}
 }
+
+RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
 
 bool
 CheckVideoCardCaps(void)

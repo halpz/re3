@@ -307,6 +307,7 @@ bool CGame::Initialise(const char* datFile)
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
 	LoadingScreen("Loading the Game", "Setup streaming", nil);
+#ifdef USE_TXD_CDIMAGE
 	int txdHandle = CFileMgr::OpenFile("MODELS\\TXD.IMG", "r");
 	if (txdHandle)
 		CFileMgr::CloseFile(txdHandle);
@@ -321,6 +322,9 @@ bool CGame::Initialise(const char* datFile)
 			CStreaming::Init();
 		}
 	}
+#else
+	CStreaming::Init();
+#endif
 	CStreaming::LoadInitialVehicles();
 	CStreaming::LoadInitialPeds();
 	CStreaming::RequestBigBuildings(LEVEL_NONE);
