@@ -29,7 +29,7 @@
 
 #define OBJECT_REPOSITION_OFFSET_Z 0.2f
 
-CColPoint *gaTempSphereColPoints = (CColPoint*)0x6E64C0;	// [32]
+CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
 CPtrList *CWorld::ms_bigBuildingsList = (CPtrList*)0x6FAB60;
 CPtrList &CWorld::ms_listMovingEntityPtrs = *(CPtrList*)0x8F433C;
@@ -37,7 +37,7 @@ CSector (*CWorld::ms_aSectors)[NUMSECTORS_X] = (CSector (*)[NUMSECTORS_Y])0x6656
 uint16 &CWorld::ms_nCurrentScanCode = *(uint16*)0x95CC64;
 
 uint8 &CWorld::PlayerInFocus = *(uint8 *)0x95CD61;
-CPlayerInfo (&CWorld::Players)[NUMPLAYERS] = *(CPlayerInfo (*)[NUMPLAYERS])*(uintptr*)0x9412F0;
+CPlayerInfo CWorld::Players[NUMPLAYERS];
 bool &CWorld::bNoMoreCollisionTorque = *(bool*)0x95CDCC;
 CEntity *&CWorld::pIgnoreEntity	= *(CEntity**)0x8F6494;
 bool &CWorld::bIncludeDeadPeds = *(bool*)0x95CD8F;
@@ -66,6 +66,7 @@ bool &CWorld::bIncludeCarTyres = *(bool*)0x95CDAA;
 //WRAPPER void CWorld::CallOffChaseForArea(float, float, float, float) { EAXJMP(0x4B5530); }
 WRAPPER void CWorld::TriggerExplosion(const CVector& position, float fRadius, float fPower, CEntity *pCreator, bool bProcessVehicleBombTimer) { EAXJMP(0x4B1140); }
 //WRAPPER void CWorld::SetPedsOnFire(float, float, float, float, CEntity*) { EAXJMP(0x4B3D30); }
+WRAPPER void CWorld::UseDetonator(CEntity *) { EAXJMP(0x4B4650); }
 
 void
 CWorld::Initialise()
@@ -2035,6 +2036,7 @@ CWorld::Process(void)
 		}
 	}
 }
+
 /*
 void 
 CWorld::TriggerExplosion(const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer)
@@ -2048,15 +2050,14 @@ CWorld::TriggerExplosion(const CVector& position, float fRadius, float fPower, C
 	for (int32 y = nStartY; y <= nEndY; y++) {
 		for (int32 x = nStartX; x <= nEndX; x++) {
 			CSector* pSector = CWorld::GetSector(x, y);
-			CWorld::TriggerExplosionSectorList(pSector->m_lists[ENTITYLIST_VEHICLES], position, fRadius, fPower, pCreator, bDrecementBombTimer);
-			CWorld::TriggerExplosionSectorList(pSector->m_lists[ENTITYLIST_PEDS], position, fRadius, fPower, pCreator, bDrecementBombTimer);
-			CWorld::TriggerExplosionSectorList(pSector->m_lists[ENTITYLIST_OBJECTS], position, fRadius, fPower, pCreator, bDrecementBombTimer);
+			CWorld::TriggerExplosionSectorList(pSector->m_lists[ENTITYLIST_VEHICLES], position, fRadius, fPower, pCreator, bProcessVehicleBombTimer);
+			CWorld::TriggerExplosionSectorList(pSector->m_lists[ENTITYLIST_PEDS], position, fRadius, fPower, pCreator, bProcessVehicleBombTimer);
+			CWorld::TriggerExplosionSectorList(pSector->m_lists[ENTITYLIST_OBJECTS], position, fRadius, fPower, pCreator, bProcessVehicleBombTimer);
 		}
 	}
 
 }
 */
-
 STARTPATCHES
 	InjectHook(0x4AE930, CWorld::Add, PATCH_JUMP);
 	InjectHook(0x4AE9D0, CWorld::Remove, PATCH_JUMP);

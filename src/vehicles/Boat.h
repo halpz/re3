@@ -58,7 +58,7 @@ public:
 	void PruneWakeTrail(void);
 	void AddWakePoint(CVector point);
 
-	static CBoat *(&apFrameWakeGeneratingBoats)[4];
+	static CBoat *apFrameWakeGeneratingBoats[4];
 	
 	static bool IsSectorAffectedByWake(CVector2D sector, float fSize, CBoat **apBoats);
 	static float IsVertexAffectedByWake(CVector vecVertex, CBoat *pBoat);

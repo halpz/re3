@@ -120,7 +120,7 @@ public:
 	float m_fGasPedalAudio;
 	tWheelState m_aWheelState[4];
 
-	static bool &m_sAllTaxiLights;
+	static bool m_sAllTaxiLights;
 
 	CAutomobile(int32 id, uint8 CreatedBy);
 

@@ -17,9 +17,8 @@
 
 #pragma comment( lib, "mss32.lib" )
 
-cSampleManager &SampleManager = *(cSampleManager *)0x7341E0;
-extern int32 (&BankStartOffset)[MAX_SAMPLEBANKS] = *(int32 (*)[MAX_SAMPLEBANKS])*(int *)0x6FAB70;
-
+cSampleManager SampleManager;
+int32 BankStartOffset[MAX_SAMPLEBANKS];
 ///////////////////////////////////////////////////////////////
 
 char SampleBankDescFilename[] = "AUDIO\\SFX.SDT";
@@ -116,7 +115,7 @@ typedef struct provider_stuff
 
 static int __cdecl comp(const provider_stuff*s1,const provider_stuff*s2)
 {
-  return(strcasecmp(s1->name, s2->name));
+  return( _stricmp(s1->name,s2->name) );
 }
 
 static void
@@ -435,21 +434,17 @@ _FindMP3s(void)
 				OutputDebugString("Resolving Link");
 				OutputDebugString(filepath);
 				
-				if ( f )
-					fprintf(f, " - shortcut to \"%s\"", filepath);
+				if ( f ) fprintf(f, " - shortcut to \"%s\"", filepath);
 			}
 			else
 			{
-				if ( f )
-					fprintf(f, " - couldn't resolve shortcut");
+				if ( f ) fprintf(f, " - couldn't resolve shortcut");
 			}
 			
 			bShortcut = true;
 		}
 		else
-		{
 			bShortcut = false;
-		}
 	}
 	
 	mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
@@ -494,8 +489,7 @@ _FindMP3s(void)
 			_pMP3List->pLinkPath = NULL;
 		}
 		
-		if ( f )
-			fprintf(f, " - OK\n");
+		if ( f ) fprintf(f, " - OK\n");
 		
 		bInitFirstEntry = false;
 	}
@@ -505,8 +499,7 @@ _FindMP3s(void)
 		
 		OutputDebugString(filepath);
 
-		if ( f )
-			fprintf(f, " - not an MP3 or supported MP3 type\n");
+		if ( f ) fprintf(f, " - not an MP3 or supported MP3 type\n");
 		
 		bInitFirstEntry = true;
 	}
@@ -514,17 +507,7 @@ _FindMP3s(void)
 	while ( true )
 	{
 		if ( !FindNextFile(hFind, &fd) )
-		{
-			if ( f )
-			{
-				fprintf(f, "\nTOTAL SUPPORTED MP3s: %d\n", nNumMP3s);
-				fclose(f);
-			}
-			
-            FindClose(hFind);
-            
-			return;
-		}
+			break;
 		
 		if ( bInitFirstEntry )
 		{
@@ -533,8 +516,7 @@ _FindMP3s(void)
 			
 			int32 filepathlen = strlen(filepath);
 			
-			if ( f )
-				fprintf(f, "\"%s\"", fd.cFileName);
+			if ( f ) fprintf(f, "\"%s\"", fd.cFileName);
 			
 			if ( filepathlen > 0 )
 			{
@@ -547,13 +529,11 @@ _FindMP3s(void)
 							OutputDebugString("Resolving Link");
 							OutputDebugString(filepath);
 							
-							if ( f )
-								fprintf(f, " - shortcut to \"%s\"", filepath);
+							if ( f ) fprintf(f, " - shortcut to \"%s\"", filepath);
 						}
 						else
 						{
-							if ( f )
-								fprintf(f, " - couldn't resolve shortcut");
+							if ( f ) fprintf(f, " - couldn't resolve shortcut");
 						}
 						
 						bShortcut = true;
@@ -564,8 +544,7 @@ _FindMP3s(void)
 						
 						if ( filepathlen > MAX_PATH )
 						{
-							if ( f )
-								fprintf(f, " - Filename and path too long - %s - IGNORED)\n", filepath);
+							if ( f ) fprintf(f, " - Filename and path too long - %s - IGNORED)\n", filepath);
 							
 							continue;
 						}
@@ -585,15 +564,7 @@ _FindMP3s(void)
 					_pMP3List = new tMP3Entry;
 					
 					if ( _pMP3List  == NULL)
-					{
-						if ( f )
-						{
-							fprintf(f, "\nTOTAL SUPPORTED MP3s: %d\n", nNumMP3s);
-							fclose(f);
-						}
-						FindClose(hFind);
-						return;
-					}
+						break;
 					
 					nNumMP3s = 1;
 					
@@ -614,8 +585,7 @@ _FindMP3s(void)
 					
 					pList = _pMP3List;
 					
-					if ( f )
-						fprintf(f, " - OK\n");
+					if ( f ) fprintf(f, " - OK\n");
 					
 					bInitFirstEntry = false;
 				}
@@ -624,8 +594,7 @@ _FindMP3s(void)
 					strcat(filepath, " - NOT A VALID MP3");
 					OutputDebugString(filepath);
 					
-					if ( f )
-						fprintf(f, " - not an MP3 or supported MP3 type\n");
+					if ( f ) fprintf(f, " - not an MP3 or supported MP3 type\n");
 				}
 			}
 		}
@@ -638,8 +607,7 @@ _FindMP3s(void)
 			
 			if ( filepathlen > 0 )
 			{
-				if ( f )
-					fprintf(f, "\"%s\"", fd.cFileName);
+				if ( f ) fprintf(f, "\"%s\"", fd.cFileName);
 			
 				if ( filepathlen > 4 )
 				{
@@ -650,13 +618,11 @@ _FindMP3s(void)
 							OutputDebugString("Resolving Link");
 							OutputDebugString(filepath);
 							
-							if ( f )
-								fprintf(f, " - shortcut to \"%s\"", filepath);
+							if ( f ) fprintf(f, " - shortcut to \"%s\"", filepath);
 						}
 						else
 						{
-							if ( f )
-								fprintf(f, " - couldn't resolve shortcut");
+							if ( f ) fprintf(f, " - couldn't resolve shortcut");
 						}
 						
 						bShortcut = true;
@@ -679,16 +645,8 @@ _FindMP3s(void)
 					
 					tMP3Entry *e = pList->pNext;
 					
-					if ( e == NULL)
-					{
-						if ( f )
-						{
-							fprintf(f, "\nTOTAL SUPPORTED MP3s: %d\n", nNumMP3s);
-							fclose(f);
-						}
-						FindClose(hFind);
-						return;
-					}
+					if ( e == NULL )
+						break;
 					
 					pList = pList->pNext;
 					
@@ -710,20 +668,26 @@ _FindMP3s(void)
 					
 					OutputDebugString(fd.cFileName);
 					
-					if ( f )
-						fprintf(f, " - OK\n");
+					if ( f ) fprintf(f, " - OK\n");
 				}
 				else
 				{
 					strcat(filepath, " - NOT A VALID MP3");
 					OutputDebugString(filepath);
 					
-					if ( f )
-						fprintf(f, " - not an MP3 or supported MP3 type\n");
+					if ( f ) fprintf(f, " - not an MP3 or supported MP3 type\n");
 				}
 			}
 		}
 	}
+	
+	if ( f )
+	{
+		fprintf(f, "\nTOTAL SUPPORTED MP3s: %d\n", nNumMP3s);
+		fclose(f);
+	}
+	
+	FindClose(hFind);
 }
 
 static void
@@ -2257,7 +2221,7 @@ cSampleManager::InitialiseSampleBanks(void)
 	
 	for ( int32 i = 0; i < TOTAL_AUDIO_SAMPLES; i++ )
 	{
-		if ( BankStartOffset[nBank] == BankStartOffset[0] + i )
+		if ( BankStartOffset[nBank] == BankStartOffset[SAMPLEBANK_MAIN] + i )
 		{
 			nSampleBankDiscStartOffset[nBank] = m_aSamples[i].nOffset;
 			nBank++;

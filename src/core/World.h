@@ -61,7 +61,7 @@ class CWorld
 
 public:
 	static uint8 &PlayerInFocus;
-	static CPlayerInfo (&Players)[NUMPLAYERS];
+	static CPlayerInfo Players[NUMPLAYERS];
 	static CEntity *&pIgnoreEntity;
 	static bool &bIncludeDeadPeds;
 	static bool &bNoMoreCollisionTorque;
@@ -151,9 +151,10 @@ public:
 	static void Process();
 	static void TriggerExplosion(const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer);
 	static void TriggerExplosionSectorList(CPtrList& list, const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer);
+	static void UseDetonator(CEntity *);
 };
 
-extern CColPoint *gaTempSphereColPoints;
+extern CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
 class CPlayerPed;
 class CVehicle;

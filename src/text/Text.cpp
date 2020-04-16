@@ -7,7 +7,7 @@
 
 static wchar WideErrorString[25];
 
-CText &TheText = *(CText*)0x941520;
+CText TheText;// = *(CText*)0x941520;
 
 CText::CText(void)
 {

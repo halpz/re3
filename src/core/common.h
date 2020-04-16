@@ -23,6 +23,15 @@
 #include <rwcore.h>
 #include <rpworld.h>
 
+// gotta put this somewhere
+#ifdef LIBRW
+#define STREAMPOS(str) ((str)->tell())
+#define STREAMFILE(str) (((rw::StreamFile*)(str))->file)
+#else
+#define STREAMPOS(str) ((str)->Type.memory.position)
+#define STREAMFILE(str) ((str)->Type.file.fpFile)
+#endif
+
 #define rwVENDORID_ROCKSTAR 0x0253F2
 
 // Get rid of bullshit windows definitions, we're not running on an 8086
@@ -39,9 +48,6 @@
 #ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(a) (sizeof(a) / sizeof(*(a)))
-#endif
 
 typedef uint8_t uint8;
 typedef int8_t int8;
@@ -55,7 +61,9 @@ typedef int64_t int64;
 // hardcode ucs-2
 typedef uint16_t wchar;
 
+#ifndef nil
 #define nil nullptr
+#endif
 
 #include "config.h"
 

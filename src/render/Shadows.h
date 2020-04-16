@@ -6,7 +6,6 @@
 #define MAX_PERMAMENTSHADOWS 48
 
 
-struct RwTexture;
 class CEntity;
 
 enum eShadowType

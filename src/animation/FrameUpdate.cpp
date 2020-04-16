@@ -6,7 +6,7 @@
 #include "AnimBlendAssociation.h"
 #include "RpAnimBlend.h"
 
-CAnimBlendClumpData *&gpAnimBlendClump = *(CAnimBlendClumpData**)0x621000;
+CAnimBlendClumpData *gpAnimBlendClump;
 
 void FrameUpdateCallBack(AnimBlendFrameData *frame, void *arg);
 void FrameUpdateCallBackWithVelocityExtraction(AnimBlendFrameData *frame, void *arg);

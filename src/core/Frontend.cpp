@@ -82,34 +82,34 @@ int curBottomBarOption = -1;
 int hoveredBottomBarOption = -1;
 #endif
 
-int32 CMenuManager::OS_Language = LANG_ENGLISH; // *(int32*)0x5F2F78;
-int8 CMenuManager::m_PrefsUseVibration; // = *(int8*)0x95CD92;
-int8 CMenuManager::m_DisplayControllerOnFoot; // = *(int8*)0x95CD8D;
-int8 CMenuManager::m_PrefsVsync = 1; // *(int8*)0x5F2E58;
-int8 CMenuManager::m_PrefsVsyncDisp = 1; // *(int8*)0x5F2E5C;
-int8 CMenuManager::m_PrefsFrameLimiter = 1; // *(int8*)0x5F2E60;
-int8 CMenuManager::m_PrefsShowSubtitles = 1; // *(int8*)0x5F2E54;
-int8 CMenuManager::m_PrefsSpeakers; // = *(int8*)0x95CD7E;
-int32 CMenuManager::m_ControlMethod; // = *(int32*)0x8F5F7C;
-int8 CMenuManager::m_PrefsDMA = 1; // *(int8*)0x5F2F74;
-int32 CMenuManager::m_PrefsLanguage; // = *(int32*)0x941238;
+int32 CMenuManager::OS_Language = LANG_ENGLISH;
+int8 CMenuManager::m_PrefsUseVibration;
+int8 CMenuManager::m_DisplayControllerOnFoot;
+int8 CMenuManager::m_PrefsVsync = 1;
+int8 CMenuManager::m_PrefsVsyncDisp = 1;
+int8 CMenuManager::m_PrefsFrameLimiter = 1;
+int8 CMenuManager::m_PrefsShowSubtitles = 1;
+int8 CMenuManager::m_PrefsSpeakers;
+int32 CMenuManager::m_ControlMethod;
+int8 CMenuManager::m_PrefsDMA = 1;
+int32 CMenuManager::m_PrefsLanguage;
 uint8 CMenuManager::m_PrefsStereoMono; // *(bool*)0x95CDB5; // unused except restore settings
 
-bool CMenuManager::m_PrefsAllowNastyGame = true; // *(bool*)0x5F2E64;
-bool CMenuManager::m_bStartUpFrontEndRequested; // = *(bool*)0x95CCF4;
-bool CMenuManager::m_bShutDownFrontEndRequested; // = *(bool*)0x95CD6A;
+bool CMenuManager::m_PrefsAllowNastyGame = true;
+bool CMenuManager::m_bStartUpFrontEndRequested;
+bool CMenuManager::m_bShutDownFrontEndRequested;
 
-int8 CMenuManager::m_PrefsUseWideScreen; // = *(int8*)0x95CD23;
-int8 CMenuManager::m_PrefsRadioStation; // = *(int8*)0x95CDA4;
-int32 CMenuManager::m_PrefsBrightness = 256; // = *(int32*)0x5F2E50;
-float CMenuManager::m_PrefsLOD; // = *(float*)0x8F42C4;
-int8 CMenuManager::m_bFrontEnd_ReloadObrTxtGxt; // = *(int8*)0x628CFC;
-int32 CMenuManager::m_PrefsMusicVolume = 102; // = *(int32*)0x5F2E4C;
-int32 CMenuManager::m_PrefsSfxVolume = 102; // = *(int32*)0x5F2E48;
+int8 CMenuManager::m_PrefsUseWideScreen;
+int8 CMenuManager::m_PrefsRadioStation;
+int32 CMenuManager::m_PrefsBrightness = 256;
+float CMenuManager::m_PrefsLOD = CRenderer::ms_lodDistScale;
+int8 CMenuManager::m_bFrontEnd_ReloadObrTxtGxt;
+int32 CMenuManager::m_PrefsMusicVolume = 102;
+int32 CMenuManager::m_PrefsSfxVolume = 102;
 
-char CMenuManager::m_PrefsSkinFile[256] = "$$\"\""; // = (char*)0x5F2E74;
+char CMenuManager::m_PrefsSkinFile[256] = "$$\"\"";
 
-int32 CMenuManager::m_KeyPressedCode = -1; // = *(int32*)0x5F2E70;
+int32 CMenuManager::m_KeyPressedCode = -1;
 
 // Originally that was PS2 option color, they forget it here and used in PrintBriefs once(but didn't use the output anyway)
 #ifdef PS2_LIKE_MENU
@@ -119,29 +119,26 @@ const CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
 #endif
 
 const float menuXYpadding = MENUACTION_POS_Y; // *(float*)0x5F355C;	// not original name
-float MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE; //*(float*)0x5F2E40;
-float MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE; //*(float*)0x5F2E44;
+float MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE;
+float MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE;
 
 bool holdingScrollBar; // *(bool*)0x628D59; // not original name
-int32 CMenuManager::m_SelectedMap; // *(int32*)0x8E2880;
-int32 CMenuManager::m_SelectedGameType; // *(int32*)0x942F88;
+int32 CMenuManager::m_SelectedMap;
+int32 CMenuManager::m_SelectedGameType;
 
 // Used in a hidden menu
 uint8 CMenuManager::m_PrefsPlayerRed = 255;
 uint8 CMenuManager::m_PrefsPlayerGreen = 128;
 uint8 CMenuManager::m_PrefsPlayerBlue; // why??
 
-CMenuManager FrontEndMenuManager; // = *(CMenuManager*)0x8F59D8;
+CMenuManager FrontEndMenuManager;
 
-// Move this somewhere else.
-float CRenderer::ms_lodDistScale = 1.2f; // *(float*)0x5F726C;
-
-uint32 TimeToStopPadShaking; // = *(uint32*)0x628CF8;
-char *pEditString; // = *(char**)0x628D00;
-int32 *pControlEdit; // = *(int32**)0x628D08;
-bool DisplayComboButtonErrMsg; // = *(bool*)0x628D14;
-int32 MouseButtonJustClicked; // = *(int32*)0x628D0C;
-int32 JoyButtonJustClicked; // = *(int32*)0x628D10;
+uint32 TimeToStopPadShaking;
+char *pEditString;
+int32 *pControlEdit;
+bool DisplayComboButtonErrMsg;
+int32 MouseButtonJustClicked;
+int32 JoyButtonJustClicked;
 //int32 *pControlTemp = 0;
 
 #ifndef MASTER
@@ -282,6 +279,12 @@ ScaleAndCenterX(float x)
 			m_nMenuFadeAlpha = 0; \
 	} while(0)
 #endif
+
+#define PREPARE_MENU_HEADER \
+	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255))); \
+	CFont::SetRightJustifyOn(); \
+	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT)); \
+	CFont::SetFontStyle(FONT_HEADING);
 
 #define ProcessSlider(value, increaseAction, decreaseAction, hoverStartX, hoverEndX) \
 	do { \
@@ -447,8 +450,8 @@ CMenuManager::CheckCodesForControls(int typeOfControl)
 	if (typeOfControl == KEYBOARD) {
 		if (*pControlEdit == rsESC) {
 			escPressed = true;
-		} else if (*pControlEdit > rsF3 && *pControlEdit != rsF9 && *pControlEdit != rsLWIN &&
-			*pControlEdit != rsRWIN && *pControlEdit != rsRALT) {
+		} else if (*pControlEdit != rsF1 && *pControlEdit != rsF2 && *pControlEdit != rsF3 && *pControlEdit != rsF9 &&
+			*pControlEdit != rsLWIN && *pControlEdit != rsRWIN && *pControlEdit != rsRALT) {
 			typeToSave = KEYBOARD;
 			if (ControlsManager.GetControllerKeyAssociatedWithAction(action, KEYBOARD) != rsNULL &&
 				*pControlEdit != ControlsManager.GetControllerKeyAssociatedWithAction(action, KEYBOARD)) {
@@ -465,7 +468,10 @@ CMenuManager::CheckCodesForControls(int typeOfControl)
 			DisplayComboButtonErrMsg = true;
 	}
 
-	ControlsManager.ClearSettingsAssociatedWithAction(action, typeToSave);
+#ifdef FIX_BUGS
+	if(!escPressed && !invalidKey)
+#endif
+		ControlsManager.ClearSettingsAssociatedWithAction(action, typeToSave);
 	if (!DisplayComboButtonErrMsg && !escPressed && !invalidKey) {
 		if (typeOfControl == KEYBOARD) {
 			ControlsManager.DeleteMatchingActionInitiators(action, *pControlEdit, KEYBOARD);
@@ -670,6 +676,17 @@ CMenuManager::Draw()
 	CFont::SetCentreOff();
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
+#ifdef GTA3_1_1_PATCH
+	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
+	CFont::SetRightJustifyOn();
+	CFont::SetFontStyle(FONT_HEADING);
+	CFont::SetScale(MENU_X(0.7f), MENU_Y(0.5f));
+	CFont::SetWrapx(SCREEN_WIDTH);
+	CFont::SetRightJustifyWrap(0.0f);
+	strcpy(gString, "V1.1");
+	AsciiToUnicode(gString, gUString);
+	CFont::PrintString(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 45, gUString);
+#endif
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
 
@@ -696,17 +713,9 @@ CMenuManager::Draw()
 #endif
 	if (aScreens[m_nCurrScreen].m_ScreenName[0] != '\0') {
 		
-		CFont::SetRightJustifyOn();
-		CFont::SetFontStyle(FONT_HEADING);
-#ifdef PS2_LIKE_MENU
-		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(1.3f));
-		CFont::PrintString(MENU_X_RIGHT_ALIGNED(50.0f), SCREEN_SCALE_FROM_BOTTOM(75.0f), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
-#else
-		CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
-		CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT));
+		PREPARE_MENU_HEADER
 		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
-#endif
+
 		// Weird place to put that.
 		nextYToUse += 24.0f + 10.0f;
 	}
@@ -1735,11 +1744,8 @@ CMenuManager::DrawControllerSetupScreen()
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
 
-	// Page header
-	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
-	CFont::SetRightJustifyOn();
-	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT));
-	CFont::SetFontStyle(FONT_HEADING);
+	PREPARE_MENU_HEADER
+
 	switch (m_ControlMethod) {
 		case CONTROL_STANDARD:
 			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y),
@@ -2417,10 +2423,8 @@ CMenuManager::DrawPlayerSetupScreen()
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
 
-	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
-	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT));
-	CFont::SetRightJustifyOn();
-	CFont::SetFontStyle(FONT_HEADING);
+	PREPARE_MENU_HEADER
+
 	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get("FET_PS"));
 
 	// lstrcpy's changed with strcpy
@@ -3314,10 +3318,7 @@ CMenuManager::PrintStats()
 
 	// ::Draw already does that.
 	/*
-	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
-	CFont::SetRightJustifyOn();
-	CFont::SetFontStyle(FONT_HEADING);
-	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT));
+	PREPARE_MENU_HEADER
 	CFont::PrintString(MENU_X_RIGHT_ALIGNED(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 	*/
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X), MENU_Y(MENU_TEXT_SIZE_Y));
@@ -5245,6 +5246,7 @@ CMenuManager::PrintController(void)
 void
 CMenuManager::PrintMap(void)
 {
+	CFont::SetJustifyOn();
 	bMenuMapActive = true;
 	CRadar::InitFrontEndMap();
 

@@ -1215,7 +1215,7 @@ void CReplay::RestoreStuffFromMem(void)
 		vehicle->SetModelIndex(mi);
 		if (mi == MI_DODO){
 			CAutomobile* dodo = (CAutomobile*)vehicle;
-			RpAtomicSetFlags(GetFirstObject(dodo->m_aCarNodes[CAR_WHEEL_LF]), 0);
+			RpAtomicSetFlags((RpAtomic*)GetFirstObject(dodo->m_aCarNodes[CAR_WHEEL_LF]), 0);
 			CMatrix tmp1;
 			tmp1.Attach(RwFrameGetMatrix(dodo->m_aCarNodes[CAR_WHEEL_RF]), false);
 			CMatrix tmp2(RwFrameGetMatrix(dodo->m_aCarNodes[CAR_WHEEL_LF]), false);
@@ -1243,7 +1243,7 @@ void CReplay::RestoreStuffFromMem(void)
 				vehicle->GetMatrix().Detach();
 				if (vehicle->m_rwObject){
 					if (RwObjectGetType(vehicle->m_rwObject) == rpATOMIC){
-						RwFrame* frame = RpAtomicGetFrame(vehicle->m_rwObject);
+						RwFrame* frame = RpAtomicGetFrame((RpAtomic*)vehicle->m_rwObject);
 						RpAtomicDestroy((RpAtomic*)vehicle->m_rwObject);
 						RwFrameDestroy(frame);
 					}
@@ -1254,7 +1254,7 @@ void CReplay::RestoreStuffFromMem(void)
 				int model_id = info->m_wheelId;
 				if (model_id != -1){
 					if ((vehicle->m_rwObject = CModelInfo::GetModelInfo(model_id)->CreateInstance())){
-						vehicle->GetMatrix().AttachRW(&((RwFrame*)vehicle->m_rwObject->parent)->modelling, false);
+						vehicle->GetMatrix().AttachRW(RwFrameGetMatrix(RpClumpGetFrame((RpClump*)vehicle->m_rwObject)), false);
 					}
 				}
 			}
@@ -1274,7 +1274,7 @@ void CReplay::RestoreStuffFromMem(void)
 		object->SetModelIndex(mi);
 		object->GetMatrix().m_attachment = nil;
 		if (RwObjectGetType(object->m_rwObject) == rpATOMIC)
-			object->GetMatrix().AttachRW(RwFrameGetMatrix(RpAtomicGetFrame(object->m_rwObject)), false);
+			object->GetMatrix().AttachRW(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)object->m_rwObject)), false);
 	}
 	i = CPools::GetDummyPool()->GetSize();
 	while (--i >= 0) {
@@ -1289,7 +1289,7 @@ void CReplay::RestoreStuffFromMem(void)
 		dummy->SetModelIndex(mi);
 		dummy->GetMatrix().m_attachment = nil;
 		if (RwObjectGetType(dummy->m_rwObject) == rpATOMIC)
-			dummy->GetMatrix().AttachRW(RwFrameGetMatrix(RpAtomicGetFrame(dummy->m_rwObject)), false);
+			dummy->GetMatrix().AttachRW(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)dummy->m_rwObject)), false);
 	}
 	CTimer::SetTimeInMilliseconds(Time1);
 	CTimer::SetTimeInMillisecondsNonClipped(Time2);

@@ -58,6 +58,7 @@
 #include "Console.h"
 #include "timebars.h"
 #include "GenericGameStorage.h"
+#include "SceneEdit.h"
 
 GlobalScene &Scene = *(GlobalScene*)0x726768;
 
@@ -239,8 +240,13 @@ DoFade(void)
 			float y = SCREEN_HEIGHT/2 * TheCamera.m_ScreenReductionPercentage/100.0f;
 			rect.left = 0.0f;
 			rect.right = SCREEN_WIDTH;
+#ifdef FIX_BUGS
+			rect.top = y - SCREEN_SCALE_Y(8.0f);
+			rect.bottom = SCREEN_HEIGHT - y - SCREEN_SCALE_Y(8.0f);
+#else
 			rect.top = y - 8.0f;
 			rect.bottom = SCREEN_HEIGHT - y - 8.0f;
+#endif // FIX_BUGS
 		}else{
 			rect.left = 0.0f;
 			rect.right = SCREEN_WIDTH;
@@ -690,14 +696,14 @@ DisplayGameDebugText()
 	CFont::SetPropOn();
 	CFont::SetBackgroundOff();
 	CFont::SetFontStyle(FONT_BANK);
-	CFont::SetScale(SCREEN_STRETCH_X(0.5f), SCREEN_STRETCH_Y(0.5f));
+	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.5f));
 	CFont::SetCentreOff();
 	CFont::SetRightJustifyOff();
 	CFont::SetWrapx(SCREEN_WIDTH);
 	CFont::SetJustifyOff();
 	CFont::SetBackGroundOnlyTextOff();
 	CFont::SetColor(CRGBA(255, 108, 0, 255));
-	CFont::PrintString(10.0f, 10.0f, ver);
+	CFont::PrintString(SCREEN_SCALE_X(10.0f), SCREEN_SCALE_Y(10.0f), ver);
 
 	FrameSamples++;
 	FramesPerSecondCounter += 1000.0f / (CTimer::GetTimeStepNonClippedInSeconds() * 1000.0f);	
@@ -748,6 +754,7 @@ DisplayGameDebugText()
 		
 		AsciiToUnicode(str, ustr);
 		
+		// Let's not scale those numbers, they look better that way :eyes:
 		CFont::SetPropOff();
 		CFont::SetBackgroundOff();
 		CFont::SetScale(0.7f, 1.5f);
@@ -863,11 +870,9 @@ Render2dStuff(void)
 
 	MusicManager.DisplayRadioStationName();
 	TheConsole.Display();
-/*
 	if(CSceneEdit::m_bEditOn)
 		CSceneEdit::Draw();
 	else
-*/
 		CHud::Draw();
 	CUserDisplay::OnscnTimer.ProcessForDisplay();
 	CMessages::Display();
@@ -1560,8 +1565,9 @@ void SystemInit()
 	//
 #endif
 	
-	
+#ifdef GTA_PS2_STUFF
 	CPad::Initialise();
+#endif
 	CPad::GetPad(0)->Mode = 0;
 	
 	CGame::frenchGame = false;

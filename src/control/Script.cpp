@@ -9147,7 +9147,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	}
 	case COMMAND_SET_JAMES_CAR_ON_PATH_TO_PLAYER:
 	{
-		CollectParameters(&m_nIp, 2);
+		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		CCarCtrl::JoinCarWithRoadSystemGotoCoors(pVehicle, FindPlayerCoors(), false);
@@ -10076,8 +10076,8 @@ void CRunningScript::LocatePlayerCarCommand(int32 command, uint32* pIp)
 		case COMMAND_LOCATE_PLAYER_ON_FOOT_CAR_3D:
 			result = !pPlayerInfo->m_pPed->bInVehicle;
 			break;
-		case COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_2D:
-		case COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_3D:
+		case COMMAND_LOCATE_PLAYER_IN_CAR_CAR_2D:
+		case COMMAND_LOCATE_PLAYER_IN_CAR_CAR_3D:
 			result = pPlayerInfo->m_pPed->bInVehicle;
 			break;
 		default:
@@ -11359,7 +11359,7 @@ VALIDATESAVEBUF(size)
 
 void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntity)
 {
-	static CColPoint aTempColPoints[32];
+	static CColPoint aTempColPoints[MAX_COLLISION_POINTS];
 	int16 entities = 0;
 	CEntity* aEntities[16];
 	CWorld::FindObjectsKindaColliding(pos, pEntity->GetBoundRadius(), false, &entities, 16, aEntities, false, true, true, false, false);

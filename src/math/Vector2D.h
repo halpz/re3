@@ -13,13 +13,14 @@ public:
 
 	void Normalise(void){
 		float sq = MagnitudeSqr();
-		if(sq > 0.0f){
+		//if(sq > 0.0f){
 			float invsqrt = RecipSqrt(sq);
 			x *= invsqrt;
 			y *= invsqrt;
-		}else
-			x = 1.0f;
+		//}else
+		//	x = 1.0f;
 	}
+	
 	const CVector2D &operator+=(CVector2D const &right) {
 		x += right.x;
 		y += right.y;

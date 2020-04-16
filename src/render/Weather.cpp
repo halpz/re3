@@ -126,7 +126,7 @@ void CWeather::Update(void)
 		if (ForcedWeatherType >= 0)
 			NewWeatherType = ForcedWeatherType;
 		else {
-			WeatherTypeInList = (WeatherTypeInList + 1) % ARRAYSIZE(WeatherTypesList);
+			WeatherTypeInList = (WeatherTypeInList + 1) % ARRAY_SIZE(WeatherTypesList);
 			NewWeatherType = WeatherTypesList[WeatherTypeInList];
 #ifdef FIX_BUGS
 		}

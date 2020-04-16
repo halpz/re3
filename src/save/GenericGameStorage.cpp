@@ -40,22 +40,22 @@
 
 const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 
-char (&DefaultPCSaveFileName)[260] = *(char(*)[260])*(uintptr*)0x8E28C0;
-char (&ValidSaveName)[260] = *(char(*)[260])*(uintptr*)0x8E2CBC;
-char (&LoadFileName)[256] = *(char(*)[256])*(uintptr*)0x9403C4;
-wchar (&SlotFileName)[SLOT_COUNT][260] = *(wchar(*)[SLOT_COUNT][260])*(uintptr*)0x6F07C8;
-wchar (&SlotSaveDate)[SLOT_COUNT][70] = *(wchar(*)[SLOT_COUNT][70])*(uintptr*)0x72B858;
-int &CheckSum = *(int*)0x8E2BE0;
-eLevelName &m_LevelToLoad = *(eLevelName*)0x8E29CC;
+char DefaultPCSaveFileName[260];// = *(char(*)[260]) * (uintptr*)0x8E28C0;
+char ValidSaveName[260];// = *(char(*)[260])*(uintptr*)0x8E2CBC;
+char LoadFileName[256];// = *(char(*)[256])*(uintptr*)0x9403C4;
+wchar SlotFileName[SLOT_COUNT][260];// = *(wchar(*)[SLOT_COUNT][260])*(uintptr*)0x6F07C8;
+wchar SlotSaveDate[SLOT_COUNT][70];// = *(wchar(*)[SLOT_COUNT][70])*(uintptr*)0x72B858;
+int CheckSum;// = *(int*)0x8E2BE0;
+eLevelName m_LevelToLoad;// = *(eLevelName*)0x8E29CC;
 char SaveFileNameJustSaved[260];
-int (&Slots)[SLOT_COUNT+1] = *(int(*)[SLOT_COUNT+1])*(uintptr*)0x72803C;
-CDate &CompileDateAndTime = *(CDate*)0x72BCB8;
+int Slots[SLOT_COUNT+1];// = *(int(*)[SLOT_COUNT+1])*(uintptr*)0x72803C;
+CDate CompileDateAndTime;// = *(CDate*)0x72BCB8;
 
-bool &b_FoundRecentSavedGameWantToLoad = *(bool*)0x95CDA8;
-bool &JustLoadedDontFadeInYet = *(bool*)0x95CDB4;
-bool &StillToFadeOut = *(bool*)0x95CD99;
-uint32 &TimeStartedCountingForFade = *(uint32*)0x9430EC;
-uint32 &TimeToStayFadedBeforeFadeOut = *(uint32*)0x611564;
+bool b_FoundRecentSavedGameWantToLoad;// = *(bool*)0x95CDA8;
+bool JustLoadedDontFadeInYet;// = *(bool*)0x95CDB4;
+bool StillToFadeOut;// = *(bool*)0x95CD99;
+uint32 TimeStartedCountingForFade;// = *(uint32*)0x9430EC;
+uint32 TimeToStayFadedBeforeFadeOut = 1750;// = *(uint32*)0x611564;
 
 #define ReadDataFromBufferPointer(buf, to) memcpy(&to, buf, sizeof(to)); buf += align4bytes(sizeof(to));
 #define WriteDataToBufferPointer(buf, from) memcpy(buf, &from, sizeof(from)); buf += align4bytes(sizeof(from));
@@ -154,8 +154,17 @@ GenericSave(int file)
 	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nMonth);
 	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nYear);
 	WriteDataToBufferPointer(buf, CWeather::WeatherTypeInList);
+#ifdef FIX_BUGS
+	// converted to float for compatibility with original format
+	// TODO: maybe remove this? not really gonna break anything vital
+	float f = TheCamera.CarZoomIndicator;
+	WriteDataToBufferPointer(buf, f);
+	f = TheCamera.PedZoomIndicator;
+	WriteDataToBufferPointer(buf, f);
+#else
 	WriteDataToBufferPointer(buf, TheCamera.CarZoomIndicator);
 	WriteDataToBufferPointer(buf, TheCamera.PedZoomIndicator);
+#endif
 	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 
 	// Save scripts, block is nested within the same block as simple vars for some reason
@@ -264,8 +273,18 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nMonth);
 	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nYear);
 	ReadDataFromBufferPointer(buf, CWeather::WeatherTypeInList);
+#ifdef FIX_BUGS
+	// converted to float for compatibility with original format
+	// TODO: maybe remove this? not really gonna break anything vital
+	float f;
+	ReadDataFromBufferPointer(buf, f);
+	TheCamera.CarZoomIndicator = f;
+	ReadDataFromBufferPointer(buf, f);
+	TheCamera.PedZoomIndicator = f;
+#else
 	ReadDataFromBufferPointer(buf, TheCamera.CarZoomIndicator);
 	ReadDataFromBufferPointer(buf, TheCamera.PedZoomIndicator);
+#endif
 	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 	ReadDataFromBlock("Loading Scripts \n", CTheScripts::LoadAllScripts);
 

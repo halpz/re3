@@ -16,35 +16,35 @@
 #include "HandlingMgr.h"
 #include "Plane.h"
 
-CPlaneNode *&pPathNodes = *(CPlaneNode**)0x8F1B68;
-CPlaneNode *&pPath2Nodes = *(CPlaneNode**)0x885B8C;
-CPlaneNode *&pPath3Nodes = *(CPlaneNode**)0x885B78;
-CPlaneNode *&pPath4Nodes = *(CPlaneNode**)0x885AD8;
-int32 &NumPathNodes = *(int32*)0x8F2BE4;
-int32 &NumPath2Nodes = *(int32*)0x941498;
-int32 &NumPath3Nodes = *(int32*)0x9414D8;
-int32 &NumPath4Nodes = *(int32*)0x9412C8;
-float &TotalLengthOfFlightPath = *(float*)0x8F2C6C;
-float &TotalLengthOfFlightPath2 = *(float*)0x64CFBC;
-float &TotalLengthOfFlightPath3 = *(float*)0x64CFD0;
-float &TotalLengthOfFlightPath4 = *(float*)0x64CFDC;
-float &TotalDurationOfFlightPath = *(float*)0x64CFB8;
-float &TotalDurationOfFlightPath2 = *(float*)0x64CFC0;
-float &TotalDurationOfFlightPath3 = *(float*)0x64CFD4;
-float &TotalDurationOfFlightPath4 = *(float*)0x64CFE0;
-float &LandingPoint = *(float*)0x8F2C7C;
-float &TakeOffPoint = *(float*)0x8E28A4;
-CPlaneInterpolationLine *aPlaneLineBits = (CPlaneInterpolationLine*)0x734168;	//[6]
+CPlaneNode *pPathNodes;// = *(CPlaneNode**)0x8F1B68;
+CPlaneNode *pPath2Nodes;// = *(CPlaneNode**)0x885B8C;
+CPlaneNode *pPath3Nodes;// = *(CPlaneNode**)0x885B78;
+CPlaneNode *pPath4Nodes;// = *(CPlaneNode**)0x885AD8;
+int32 NumPathNodes;// = *(int32*)0x8F2BE4;
+int32 NumPath2Nodes;// = *(int32*)0x941498;
+int32 NumPath3Nodes;// = *(int32*)0x9414D8;
+int32 NumPath4Nodes;// = *(int32*)0x9412C8;
+float TotalLengthOfFlightPath;// = *(float*)0x8F2C6C;
+float TotalLengthOfFlightPath2;// = *(float*)0x64CFBC;
+float TotalLengthOfFlightPath3;// = *(float*)0x64CFD0;
+float TotalLengthOfFlightPath4;// = *(float*)0x64CFDC;
+float TotalDurationOfFlightPath;// = *(float*)0x64CFB8;
+float TotalDurationOfFlightPath2;// = *(float*)0x64CFC0;
+float TotalDurationOfFlightPath3;// = *(float*)0x64CFD4;
+float TotalDurationOfFlightPath4;// = *(float*)0x64CFE0;
+float LandingPoint;// = *(float*)0x8F2C7C;
+float TakeOffPoint;// = *(float*)0x8E28A4;
+CPlaneInterpolationLine aPlaneLineBits[6]; // = (CPlaneInterpolationLine*)0x734168;
 
-float *PlanePathPosition = (float*)0x8F5FC8;	//[3]
-float *OldPlanePathPosition = (float*)0x8F5FBC;	//[3]
-float *PlanePathSpeed = (float*)0x941538;	//[3]
-float *PlanePath2Position = (float*)0x64CFC4;	//[3]
-float &PlanePath3Position = *(float*)0x64CFD8;
-float &PlanePath4Position = *(float*)0x64CFE4;
-float *PlanePath2Speed = (float*)0x8F1A54;	//[3]
-float &PlanePath3Speed = *(float*)0x8F1A94;
-float &PlanePath4Speed = *(float*)0x8F1AFC;
+float PlanePathPosition[3];// = (float*)0x8F5FC8;	//[3]
+float OldPlanePathPosition[3];// = (float*)0x8F5FBC;	//[3]
+float PlanePathSpeed[3];// = (float*)0x941538;	//[3]
+float PlanePath2Position[3];// = (float*)0x64CFC4;	//[3]
+float PlanePath3Position;// = *(float*)0x64CFD8;
+float PlanePath4Position;// = *(float*)0x64CFE4;
+float PlanePath2Speed[3];// = (float*)0x8F1A54;	//[3]
+float PlanePath3Speed;// = *(float*)0x8F1A94;
+float PlanePath4Speed;// = *(float*)0x8F1AFC;
 
 
 enum

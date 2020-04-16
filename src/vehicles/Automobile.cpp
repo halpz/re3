@@ -49,7 +49,7 @@ bool bAllCarCheat;	// unused
 
 RwObject *GetCurrentAtomicObjectCB(RwObject *object, void *data);
 
-bool &CAutomobile::m_sAllTaxiLights = *(bool*)0x95CD21;
+bool CAutomobile::m_sAllTaxiLights;// = *(bool*)0x95CD21;
 
 CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
  : CVehicle(CreatedBy)
@@ -356,7 +356,7 @@ CAutomobile::ProcessControl(void)
 
 			PruneReferences();
 
-			if(m_status == STATUS_PLAYER && CRecordDataForChase::IsRecording())
+			if(m_status == STATUS_PLAYER && !CRecordDataForChase::IsRecording())
 				DoDriveByShootings();
 		}
 		break;
@@ -4206,8 +4206,7 @@ GetCurrentAtomicObjectCB(RwObject *object, void *data)
 	return object;
 }
 
-CColPoint aTempPedColPts[32];	// this name doesn't make any sense
-								// they probably copied it from Ped (both serves same purpose) and didn't change the name
+CColPoint spherepoints[MAX_COLLISION_POINTS];
 
 CObject*
 CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
@@ -4327,7 +4326,7 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 
 	if(CCollision::ProcessColModels(obj->GetMatrix(), *obj->GetColModel(),
 			this->GetMatrix(), *this->GetColModel(),
-			aTempPedColPts, nil, nil) > 0)
+			spherepoints, nil, nil) > 0)
 		obj->m_pCollidingEntity = this;
 
 	if(bRenderScorched)

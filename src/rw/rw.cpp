@@ -1,3 +1,4 @@
+#ifndef LIBRW
 #include "common.h"
 #include "patcher.h"
 #include "rwcore.h"
@@ -414,6 +415,9 @@ WRAPPER RxNodeDefinition* RxNodeDefinitionGetMaterialScatter() { EAXJMP(0x5DDAA0
 WRAPPER RxNodeDefinition* RxNodeDefinitionGetLight() { EAXJMP(0x5DF040); }
 WRAPPER RxNodeDefinition* RxNodeDefinitionGetPostLight() { EAXJMP(0x5DF560); }
 WRAPPER void RxD3D8AllInOneSetRenderCallBack(RxPipelineNode* node, RxD3D8AllInOneRenderCallBack callback) { EAXJMP(0x5DFC60); }
+
+WRAPPER RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags) { EAXJMP(0x59A350); }
+
 #else
 
 extern "C"
@@ -432,6 +436,8 @@ extern "C"
     void* _rwVectorOpen(void* instance, RwInt32 offset, RwInt32 size);
     RwBool _rwPluginRegistryOpen();
     RwBool _rwPluginRegistryClose();
+
+    RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
 }
 
 STARTPATCHES
@@ -836,4 +842,5 @@ InjectHook(0x5DF040, &RxNodeDefinitionGetLight, PATCH_JUMP);
 InjectHook(0x5DF560, &RxNodeDefinitionGetPostLight, PATCH_JUMP);
 InjectHook(0x5DFC60, &RxD3D8AllInOneSetRenderCallBack, PATCH_JUMP);
 ENDPATCHES
+#endif
 #endif

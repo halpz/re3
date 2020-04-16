@@ -32,9 +32,6 @@ to reverse at the time, calling the original functions is acceptable.
 
 ### Unreversed / incomplete classes (at least the ones we know)
 ```
-CBulletInfo
-CPedPath
-CWeapon
 CWorld
 ```
 
@@ -42,7 +39,6 @@ The following classes have only unused or practically unused code left:
 ```
 CCullZone - only mobile stuff
 CCullZones - only mobile stuff
-CSceneEdit
 ```
 
 ### Coding style

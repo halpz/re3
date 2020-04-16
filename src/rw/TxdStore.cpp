@@ -6,8 +6,8 @@
 #include "RwHelper.h"
 #include "TxdStore.h"
 
-CPool<TxdDef,TxdDef> *&CTxdStore::ms_pTxdPool = *(CPool<TxdDef,TxdDef>**)0x8F5FB8;
-RwTexDictionary *&CTxdStore::ms_pStoredTxd = *(RwTexDictionary**)0x9405BC;
+CPool<TxdDef,TxdDef> *CTxdStore::ms_pTxdPool;// = *(CPool<TxdDef,TxdDef>**)0x8F5FB8;
+RwTexDictionary *CTxdStore::ms_pStoredTxd;// = *(RwTexDictionary**)0x9405BC;
 
 void
 CTxdStore::Initialise(void)

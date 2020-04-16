@@ -29,9 +29,9 @@ struct tPreviousBrief
 class CMessages 
 {
 public:
-	static tMessage(&BriefMessages)[NUMBRIEFMESSAGES];
-	static tBigMessage(&BIGMessages)[NUMBIGMESSAGES];
-	static tPreviousBrief(&PreviousBriefs)[NUMPREVIOUSBRIEFS];
+	static tMessage BriefMessages[NUMBRIEFMESSAGES];
+	static tBigMessage BIGMessages[NUMBIGMESSAGES];
+	static tPreviousBrief PreviousBriefs[NUMPREVIOUSBRIEFS];
 	static char PreviousMissionTitle[16]; // unused
 public:
 	static void Init(void);

@@ -1,5 +1,7 @@
+Librw = os.getenv("LIBRW")
+
 workspace "re3"
-	configurations { "Debug", "Release", "ReleaseFH", "DebugRW", "ReleaseRW"  }
+	configurations { "Debug", "Release", "ReleaseFH", "DebugRW", "ReleaseRW", "DebugLIBRW"  }
 	location "build"
 
 	files { "src/*.*" }
@@ -43,18 +45,28 @@ workspace "re3"
 	includedirs { "eax" }
 
 	includedirs { "dxsdk/include" }
-	includedirs { "rwsdk/include/d3d8" }
 	includedirs { "milessdk/include" }
 	includedirs { "eax" }
 
 	libdirs { "dxsdk/lib" }
 	libdirs { "milessdk/lib" }
 
+	filter "configurations:*LIBRW"
+	files { "src/fakerw/*.*" }
+	includedirs { "src/fakerw" }
+	includedirs { Librw }
+	libdirs { path.join(Librw, "lib/win-x86-d3d9/Debug") }
+	links { "rw", "d3d9" }
+
+	filter "configurations:not *LIBRW"
+	includedirs { "rwsdk/include/d3d8" }
+
 	filter "configurations:DebugRW or configurations:ReleaseRW"
 	defines { "RWLIBS" }
 	libdirs { "rwsdk/lib/d3d8/release" }
 	links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp" }
 	filter  {}
+
 	
     pbcommands = { 
        "setlocal EnableDelayedExpansion",
@@ -123,3 +135,9 @@ project "re3"
 		optimize "On"
 		staticruntime "on"
 		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
+
+	filter "configurations:DebugLIBRW"
+		defines { "DEBUG", "LIBRW", "RW_D3D9" }
+		symbols "On"
+		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
+

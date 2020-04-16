@@ -34,13 +34,13 @@ enum
 	HELI_STATUS_HOVER2,
 };
 
-CHeli **CHeli::pHelis = (CHeli**)0x72CF50;
-int16 &CHeli::NumRandomHelis = *(int16*)0x95CCAA;
-uint32 &CHeli::TestForNewRandomHelisTimer = *(uint32*)0x8F1A7C;
+CHeli *CHeli::pHelis[NUM_HELIS];// = (CHeli**)0x72CF50;
+int16 CHeli::NumRandomHelis;// = *(int16*)0x95CCAA;
+uint32 CHeli::TestForNewRandomHelisTimer;// = *(uint32*)0x8F1A7C;
 int16 CHeli::NumScriptHelis;	// unused
-bool &CHeli::CatalinaHeliOn = *(bool*)0x95CD85;
-bool &CHeli::CatalinaHasBeenShotDown = *(bool*)0x95CD56;
-bool &CHeli::ScriptHeliOn = *(bool*)0x95CD43;
+bool CHeli::CatalinaHeliOn;// = *(bool*)0x95CD85;
+bool CHeli::CatalinaHasBeenShotDown;// = *(bool*)0x95CD56;
+bool CHeli::ScriptHeliOn;// = *(bool*)0x95CD43;
 
 CHeli::CHeli(int32 id, uint8 CreatedBy)
  : CVehicle(CreatedBy)
@@ -78,6 +78,9 @@ CHeli::CHeli(int32 id, uint8 CreatedBy)
 	m_bTestRight = true;
 	m_fTargetOffset = 0.0f;
 	m_fSearchLightX = m_fSearchLightY = 0.0f;
+
+	// BUG: not in game but gets initialized to CDCDCDCD in debug
+	m_nLastShotTime = 0;
 }
 
 void
@@ -590,7 +593,12 @@ CHeli::PreRender(void)
 			break;
 		}
 		RwRGBA col = { r, g, b, 32 };
+#ifdef FIX_BUGS
+		pos.z = m_fHeliDustZ[frm];
+#else
+		// What the hell is the point of this?
 		pos.z = m_fHeliDustZ[(i - (i&3))/4];	// advance every 4 iterations, why not just /4?
+#endif
 		if(pos.z > -200.0f && GetPosition().z - pos.z < 20.0f)
 			CParticle::AddParticle(PARTICLE_HELI_DUST, pos, dir, nil, 0.0f, col);
 		i++;

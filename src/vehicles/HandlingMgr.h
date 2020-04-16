@@ -140,4 +140,4 @@ public:
 	bool HasFrontWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
 };
 VALIDATE_SIZE(cHandlingDataMgr, 0x3030);
-extern cHandlingDataMgr &mod_HandlingManager;
+extern cHandlingDataMgr mod_HandlingManager;

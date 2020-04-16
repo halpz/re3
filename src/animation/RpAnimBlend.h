@@ -37,5 +37,5 @@ CAnimBlendAssociation *RpAnimBlendClumpGetFirstAssociation(RpClump *clump);
 void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float timeDelta);
 
 
-extern CAnimBlendClumpData *&gpAnimBlendClump;
+extern CAnimBlendClumpData *gpAnimBlendClump;
 void FrameUpdateCallBack(AnimBlendFrameData *frame, void *arg);
