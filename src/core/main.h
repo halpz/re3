@@ -16,11 +16,8 @@ extern char *gString;
 extern char *gString2;
 extern wchar *gUString;
 extern wchar *gUString2;
-extern bool &b_FoundRecentSavedGameWantToLoad;
 extern bool gbPrintShite;
 extern bool &gbModelViewer;
-extern bool &StillToFadeOut;
-extern bool &JustLoadedDontFadeInYet;
 
 class CSprite2d;
 

@@ -22,8 +22,8 @@
 #include "RwHelper.h"
 #endif //GTA_PC
 
-float &texLoadTime = *(float*)0x8F1B50;
-int32 &texNumLoaded = *(int32*)0x8F252C;
+float texLoadTime;// = *(float*)0x8F1B50;
+int32 texNumLoaded;// = *(int32*)0x8F252C;
 
 #ifdef LIBRW
 #define READNATIVE(stream, tex, size) rwNativeTextureHackRead(stream, tex, size)
@@ -155,7 +155,11 @@ RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary *texDict)
 }
 
 #ifdef GTA_PC
-
+#ifdef RWLIBS
+extern "C" RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
+#else
+RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
+#endif
 void
 ReadVideoCardCapsFile(uint32 &cap32, uint32 &cap24, uint32 &cap16, uint32 &cap8)
 {
@@ -173,8 +177,6 @@ ReadVideoCardCapsFile(uint32 &cap32, uint32 &cap24, uint32 &cap16, uint32 &cap8)
 		CFileMgr::CloseFile(file);
 	}
 }
-
-RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
 
 bool
 CheckVideoCardCaps(void)

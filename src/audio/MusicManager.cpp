@@ -15,10 +15,10 @@
 #include "sampman.h"
 #include "patcher.h"
 
-cMusicManager &MusicManager = *(cMusicManager *)0x8F3964;
-int32 &gNumRetunePresses = *(int32 *)0x650B80;
-int32 &gRetuneCounter = *(int32*)0x650B84;
-bool& bHasStarted = *(bool*)0x650B7C;
+cMusicManager MusicManager;
+int32 gNumRetunePresses;
+int32 gRetuneCounter;
+bool bHasStarted;
 
 const int maxVolume = 127;
 
