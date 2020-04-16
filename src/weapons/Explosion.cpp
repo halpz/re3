@@ -19,7 +19,7 @@
 #include "WaterLevel.h"
 #include "World.h"
 
-CExplosion(&gaExplosion)[NUM_EXPLOSIONS] = *(CExplosion(*)[NUM_EXPLOSIONS])*(uintptr*)0x64E208;
+CExplosion gaExplosion[NUM_EXPLOSIONS];
 
 // these two were not initialised in original code, I'm really not sure what were they meant to be
 RwRGBA colMedExpl = { 0, 0, 0, 0 };

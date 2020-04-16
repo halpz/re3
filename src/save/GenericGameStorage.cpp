@@ -154,8 +154,17 @@ GenericSave(int file)
 	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nMonth);
 	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nYear);
 	WriteDataToBufferPointer(buf, CWeather::WeatherTypeInList);
+#ifdef FIX_BUGS
+	// converted to float for compatibility with original format
+	// TODO: maybe remove this? not really gonna break anything vital
+	float f = TheCamera.CarZoomIndicator;
+	WriteDataToBufferPointer(buf, f);
+	f = TheCamera.PedZoomIndicator;
+	WriteDataToBufferPointer(buf, f);
+#else
 	WriteDataToBufferPointer(buf, TheCamera.CarZoomIndicator);
 	WriteDataToBufferPointer(buf, TheCamera.PedZoomIndicator);
+#endif
 	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 
 	// Save scripts, block is nested within the same block as simple vars for some reason
@@ -264,8 +273,18 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nMonth);
 	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nYear);
 	ReadDataFromBufferPointer(buf, CWeather::WeatherTypeInList);
+#ifdef FIX_BUGS
+	// converted to float for compatibility with original format
+	// TODO: maybe remove this? not really gonna break anything vital
+	float f;
+	ReadDataFromBufferPointer(buf, f);
+	TheCamera.CarZoomIndicator = f;
+	ReadDataFromBufferPointer(buf, f);
+	TheCamera.PedZoomIndicator = f;
+#else
 	ReadDataFromBufferPointer(buf, TheCamera.CarZoomIndicator);
 	ReadDataFromBufferPointer(buf, TheCamera.PedZoomIndicator);
+#endif
 	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 	ReadDataFromBlock("Loading Scripts \n", CTheScripts::LoadAllScripts);
 

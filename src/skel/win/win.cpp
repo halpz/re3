@@ -679,11 +679,17 @@ psInitialise(void)
 	_dwMemAvailVirtual = memstats.dwAvailVirtual;
 	
 	_GetVideoMemInfo(&_dwMemTotalVideo, &_dwMemAvailVideo);
-	
+#ifdef FIX_BUGS
+	debug("Physical memory size %u\n", _dwMemTotalPhys);
+	debug("Available physical memory %u\n", _dwMemAvailPhys);
+	debug("Video memory size %u\n", _dwMemTotalVideo);
+	debug("Available video memory %u\n", _dwMemAvailVideo);
+#else
 	debug("Physical memory size %d\n", _dwMemTotalPhys);
 	debug("Available physical memory %d\n", _dwMemAvailPhys);
 	debug("Video memory size %d\n", _dwMemTotalVideo);
 	debug("Available video memory %d\n", _dwMemAvailVideo);
+#endif
 	
 	if ( _dwMemAvailVideo < (12 * 1024 * 1024) /*12 MB*/ )
 	{
@@ -1321,12 +1327,23 @@ psSelectDevice()
 		}
 		else
 		{
+#ifdef DEFAULT_NATIVE_RESOLUTION
+			// get the native video mode
+			HDC hDevice = GetDC(NULL);
+			int w = GetDeviceCaps(hDevice, HORZRES);
+			int h = GetDeviceCaps(hDevice, VERTRES);
+			int d = GetDeviceCaps(hDevice, BITSPIXEL);
+#else
+			const int w = 640;
+			const int h = 480;
+			const int d = 16;
+#endif
 			while ( !modeFound && GcurSelVM < RwEngineGetNumVideoModes() )
 			{
 				RwEngineGetVideoModeInfo(&vm, GcurSelVM);
-				if ( defaultFullscreenRes	&& vm.width	 != 640 
-											|| vm.height != 480
-											|| vm.depth	 != 16
+				if ( defaultFullscreenRes	&& vm.width	 != w 
+											|| vm.height != h
+											|| vm.depth	 != d
 											|| !(vm.flags & rwVIDEOMODEEXCLUSIVE) )
 					++GcurSelVM;
 				else
@@ -1335,8 +1352,12 @@ psSelectDevice()
 			
 			if ( !modeFound )
 			{
+#ifdef DEFAULT_NATIVE_RESOLUTION
+				GcurSelVM = 1;
+#else
 				MessageBox(nil, "Cannot find 640x480 video mode", "GTA3", MB_OK);
 				return FALSE;
+#endif
 			}
 		}
 	}
