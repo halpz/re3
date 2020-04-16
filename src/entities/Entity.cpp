@@ -865,6 +865,16 @@ CEntity::ModifyMatrixForBannerInWind(void)
 	UpdateRwFrame();
 }
 
+void 
+CEntity::AddSteamsFromGround1(CPtrList& list) 
+{
+	CPtrNode *pNode = list.first;
+	while (pNode) {
+		((CEntity*)pNode->item)->AddSteamsFromGround(nil);
+		pNode = pNode->next;
+	}
+}
+
 #include <new>
 
 class CEntity_ : public CEntity

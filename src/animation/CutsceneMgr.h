@@ -28,6 +28,7 @@ public:
 
 	static void StartCutsceneProcessing() { ms_cutsceneProcessing = true; }
 	static bool IsRunning(void) { return ms_running; }
+	static bool HasLoaded(void) { return ms_loaded; }
 	static bool IsCutsceneProcessing(void) { return ms_cutsceneProcessing; }
 	static bool UseLodMultiplier(void) { return ms_useLodMultiplier; }
 	static CCutsceneObject* GetCutsceneObject(int id) { return ms_pCutsceneObjects[id]; }

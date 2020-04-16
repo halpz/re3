@@ -20,6 +20,14 @@
 #include "Replay.h"
 #include "Population.h"
 #include "Fire.h"
+#include "ProjectileInfo.h"
+#include "WaterLevel.h"
+#include "CopPed.h"
+#include "Object.h"
+#include "Shadows.h"
+#include "Explosion.h"
+
+#define OBJECT_REPOSITION_OFFSET_Z 0.2f
 
 CColPoint *gaTempSphereColPoints = (CColPoint*)0x6E64C0;	// [32]
 
@@ -40,24 +48,24 @@ bool &CWorld::bProcessCutsceneOnly = *(bool*)0x95CD8B;
 bool &CWorld::bDoingCarCollisions = *(bool*)0x95CD8C;
 bool &CWorld::bIncludeCarTyres = *(bool*)0x95CDAA;
 
-WRAPPER void CWorld::ClearForRestart(void) { EAXJMP(0x4AE850); }
-WRAPPER void CWorld::AddParticles(void) { EAXJMP(0x4B4010); }
-WRAPPER void CWorld::ShutDown(void) { EAXJMP(0x4AE450); }
-WRAPPER void CWorld::RepositionCertainDynamicObjects() { EAXJMP(0x4B42B0); }
-WRAPPER void CWorld::RemoveStaticObjects() { EAXJMP(0x4B4D50); }
-WRAPPER void CWorld::RemoveReferencesToDeletedObject(CEntity*) { EAXJMP(0x4B3BF0); }
-WRAPPER void CWorld::FindObjectsKindaColliding(const CVector &, float, bool, int16*, int16, CEntity **, bool, bool, bool, bool, bool){ EAXJMP(0x4B2A30); }
-WRAPPER void CWorld::ClearExcitingStuffFromArea(const CVector &pos, float radius, uint8) { EAXJMP(0x4B4E70) };
-WRAPPER void CWorld::FindObjectsIntersectingCube(const CVector &, const CVector &, int16*, int16, CEntity **, bool, bool, bool, bool, bool) { EAXJMP(0x4B2E70); }
-WRAPPER void CWorld::FindObjectsIntersectingAngledCollisionBox(const CColBox &, const CMatrix &, const CVector &, float, float, float, float, int16*, int16, CEntity **, bool, bool, bool, bool, bool) { EAXJMP(0x4B3280); }
-WRAPPER void CWorld::FindObjectsOfTypeInRange(uint32, CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool) { EAXJMP(0x4B2600); }
-WRAPPER void CWorld::FindObjectsOfTypeInRangeSectorList(uint32, CPtrList&, CVector&, float, bool, short*, short, CEntity**) { EAXJMP(0x4B2960); }
-WRAPPER void CWorld::FindMissionEntitiesIntersectingCube(const CVector&, const CVector&, int16*, int16, CEntity**, bool, bool, bool) { EAXJMP(0x4B3680); }
-WRAPPER void CWorld::ClearCarsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B50E0); }
-WRAPPER void CWorld::ClearPedsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B52B0); }
-WRAPPER void CWorld::CallOffChaseForArea(float, float, float, float) { EAXJMP(0x4B5530); }
-WRAPPER void CWorld::TriggerExplosion(const CVector& a1, float a2, float a3, CEntity *a4, bool a5) { EAXJMP(0x4B1140); }
-WRAPPER void CWorld::SetPedsOnFire(float, float, float, float, CEntity*) { EAXJMP(0x4B3D30); }
+//WRAPPER void CWorld::ClearForRestart(void) { EAXJMP(0x4AE850); }
+//WRAPPER void CWorld::AddParticles(void) { EAXJMP(0x4B4010); }
+//WRAPPER void CWorld::ShutDown(void) { EAXJMP(0x4AE450); }
+//WRAPPER void CWorld::RepositionCertainDynamicObjects() { EAXJMP(0x4B42B0); }
+//WRAPPER void CWorld::RemoveStaticObjects() { EAXJMP(0x4B4D50); }
+//WRAPPER void CWorld::RemoveReferencesToDeletedObject(CEntity*) { EAXJMP(0x4B3BF0); }
+//WRAPPER void CWorld::FindObjectsKindaColliding(const CVector &, float, bool, int16*, int16, CEntity **, bool, bool, bool, bool, bool){ EAXJMP(0x4B2A30); }
+//WRAPPER void CWorld::ClearExcitingStuffFromArea(const CVector &pos, float radius, uint8 unused) { EAXJMP(0x4B4E70) };
+//WRAPPER void CWorld::FindObjectsIntersectingCube(const CVector &, const CVector &, int16*, int16, CEntity **, bool, bool, bool, bool, bool) { EAXJMP(0x4B2E70); }
+//WRAPPER void CWorld::FindObjectsIntersectingAngledCollisionBox(const CColBox &, const CMatrix &, const CVector &, float, float, float, float, int16*, int16, CEntity **, bool, bool, bool, bool, bool) { EAXJMP(0x4B3280); }
+//WRAPPER void CWorld::FindObjectsOfTypeInRange(uint32, CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool) { EAXJMP(0x4B2600); }
+//WRAPPER void CWorld::FindObjectsOfTypeInRangeSectorList(uint32, CPtrList&, CVector&, float, bool, short*, short, CEntity**) { EAXJMP(0x4B2960); }
+//WRAPPER void CWorld::FindMissionEntitiesIntersectingCube(const CVector&, const CVector&, int16*, int16, CEntity**, bool, bool, bool) { EAXJMP(0x4B3680); }
+//WRAPPER void CWorld::ClearCarsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B50E0); }
+//WRAPPER void CWorld::ClearPedsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B52B0); }
+//WRAPPER void CWorld::CallOffChaseForArea(float, float, float, float) { EAXJMP(0x4B5530); }
+WRAPPER void CWorld::TriggerExplosion(const CVector& position, float fRadius, float fPower, CEntity *pCreator, bool bProcessVehicleBombTimer) { EAXJMP(0x4B1140); }
+//WRAPPER void CWorld::SetPedsOnFire(float, float, float, float, CEntity*) { EAXJMP(0x4B3D30); }
 
 void
 CWorld::Initialise()
@@ -125,6 +133,48 @@ CWorld::ClearScanCodes(void)
 			((CEntity*)node->item)->m_scanCode = 0;
 		for(node = s->m_lists[ENTITYLIST_DUMMIES].first; node; node = node->next)
 			((CEntity*)node->item)->m_scanCode = 0;
+	}
+}
+
+void
+CWorld::ClearExcitingStuffFromArea(const CVector& pos, float radius, bool bRemoveProjectilesAndTidyUpShadows)
+{
+	CPedPool* pedPool = CPools::GetPedPool();
+	for (int32 i = 0; i < pedPool->GetSize(); i++) {
+		CPed* pPed = pedPool->GetSlot(i);
+		if (pPed && !pPed->IsPlayer() && pPed->CanBeDeleted() && 
+			CVector2D(pPed->GetPosition() - pos).MagnitudeSqr() < radius) {
+			CPopulation::RemovePed(pPed);
+		}
+	}
+	CVehiclePool* VehiclePool = CPools::GetVehiclePool();
+	for (int32 i = 0; i < VehiclePool->GetSize(); i++) {
+		CVehicle* pVehicle = VehiclePool->GetSlot(i);
+		if (pVehicle && CVector2D(pVehicle->GetPosition() - pos).MagnitudeSqr() < radius && 
+			!pVehicle->bIsLocked && pVehicle->CanBeDeleted()) {
+			if (pVehicle->pDriver) {
+				CPopulation::RemovePed(pVehicle->pDriver);
+				pVehicle->pDriver = nil;
+			}
+			for (int32 j = 0; j < pVehicle->m_nNumMaxPassengers; ++j) {
+				if (pVehicle->pPassengers[j]) {
+					CPopulation::RemovePed(pVehicle->pPassengers[j]);
+					pVehicle->pPassengers[j] = nil;
+					--pVehicle->m_nNumPassengers;
+				}
+			}
+			CCarCtrl::RemoveFromInterestingVehicleList(pVehicle);
+			CWorld::Remove(pVehicle);
+			delete pVehicle;
+		}
+	}
+	CObject::DeleteAllTempObjectsInArea(pos, radius);
+	gFireManager.ExtinguishPoint(pos, radius);
+	CWorld::ExtinguishAllCarFiresInArea(pos, radius);
+	CExplosion::RemoveAllExplosionsInArea(pos, radius);
+	if (bRemoveProjectilesAndTidyUpShadows) {
+		CProjectileInfo::RemoveAllProjectiles();
+		CShadows::TidyUpShadows();
 	}
 }
 
@@ -694,6 +744,67 @@ CWorld::FindObjectsInRange(CVector &centre, float radius, bool ignoreZ, short *n
 	}
 }
 
+void 
+CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& list, const CVector& position, float radius, bool bCheck2DOnly, int16* nEntitiesFound, int16 maxEntitiesToFind, CEntity** aEntities)
+{
+	CPtrNode* pNode = list.first;
+	while (pNode) {
+		CEntity* pEntity = (CEntity*)pNode->item;
+		if (pEntity->m_scanCode != ms_nCurrentScanCode) {
+			pEntity->m_scanCode = ms_nCurrentScanCode;
+			float fMagnitude = 0.0f;
+			if (bCheck2DOnly)
+				fMagnitude = CVector2D(position - pEntity->GetPosition()).Magnitude();
+			else
+				fMagnitude = CVector(position - pEntity->GetPosition()).Magnitude();
+			if (fMagnitude < radius * radius && *nEntitiesFound < maxEntitiesToFind) {
+				if (aEntities)
+					aEntities[*nEntitiesFound] = pEntity;
+				++*nEntitiesFound;
+			}
+		}
+		pNode = pNode->next;
+	}
+}
+
+void 
+CWorld::FindObjectsOfTypeInRange(uint32 modelId, const CVector& position, float radius, bool bCheck2DOnly, int16* nEntitiesFound, int16 maxEntitiesToFind, CEntity** aEntities, bool bBuildings, bool bVehicles, bool bPeds, bool bObjects, bool bDummies)
+{
+	CWorld::AdvanceCurrentScanCode();
+	*nEntitiesFound = 0;
+	const CVector2D vecSectorStartPos(position.x - radius, position.y - radius);
+	const CVector2D vecSectorEndPos(position.x + radius, position.y + radius);
+	const int32 nStartX = max(CWorld::GetSectorIndexX(vecSectorStartPos.x), 0);
+	const int32 nStartY = max(CWorld::GetSectorIndexY(vecSectorStartPos.y), 0);
+	const int32 nEndX = min(CWorld::GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = min(CWorld::GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
+	for (int32 y = nStartY; y <= nEndY; y++) {
+		for (int32 x = nStartX; x <= nEndX; x++) {
+			CSector* pSector = CWorld::GetSector(x, y);
+			if (bBuildings) {
+				CWorld::FindObjectsOfTypeInRangeSectorList(modelId, pSector->m_lists[ENTITYLIST_BUILDINGS], position, radius, bCheck2DOnly, nEntitiesFound, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsOfTypeInRangeSectorList(modelId, pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], position, radius, bCheck2DOnly, nEntitiesFound, maxEntitiesToFind, aEntities);
+			}
+			if (bVehicles) {
+				CWorld::FindObjectsOfTypeInRangeSectorList(modelId, pSector->m_lists[ENTITYLIST_VEHICLES], position, radius, bCheck2DOnly, nEntitiesFound, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsOfTypeInRangeSectorList(modelId, pSector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], position, radius, bCheck2DOnly, nEntitiesFound, maxEntitiesToFind, aEntities);
+			}
+			if (bPeds) {
+				CWorld::FindObjectsOfTypeInRangeSectorList(modelId, pSector->m_lists[ENTITYLIST_PEDS], position, radius, bCheck2DOnly, nEntitiesFound, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsOfTypeInRangeSectorList(modelId, pSector->m_lists[ENTITYLIST_PEDS_OVERLAP], position, radius, bCheck2DOnly, nEntitiesFound, maxEntitiesToFind, aEntities);
+			}
+			if (bObjects) {
+				CWorld::FindObjectsOfTypeInRangeSectorList(modelId, pSector->m_lists[ENTITYLIST_OBJECTS], position, radius, bCheck2DOnly, nEntitiesFound, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsOfTypeInRangeSectorList(modelId, pSector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], position, radius, bCheck2DOnly, nEntitiesFound, maxEntitiesToFind, aEntities);
+			}
+			if (bDummies) {
+				CWorld::FindObjectsOfTypeInRangeSectorList(modelId, pSector->m_lists[ENTITYLIST_DUMMIES], position, radius, bCheck2DOnly, nEntitiesFound, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsOfTypeInRangeSectorList(modelId, pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP], position, radius, bCheck2DOnly, nEntitiesFound, maxEntitiesToFind, aEntities);
+			}
+		}
+	}
+}
+
 CEntity*
 CWorld::TestSphereAgainstWorld(CVector centre, float radius, CEntity *entityToIgnore, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSomeObjects)
 {
@@ -872,6 +983,273 @@ CWorld::FindRoofZFor3DCoord(float x, float y, float z, bool *found)
 	}
 }
 
+void 
+CWorld::RemoveReferencesToDeletedObject(CEntity* pDeletedObject)
+{ 
+	int32 i = CPools::GetPedPool()->GetSize();
+	while (--i >= 0) {
+		CPed* pPed = CPools::GetPedPool()->GetSlot(i);
+		if (pPed && pPed != pDeletedObject) {
+			pPed->RemoveRefsToEntity(pDeletedObject);
+			if (pPed->m_pCurrentPhysSurface == pDeletedObject)
+				pPed->m_pCurrentPhysSurface = nil;
+		}
+	}
+	i = CPools::GetVehiclePool()->GetSize();
+	while (--i >= 0) {
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+		if (pVehicle && pVehicle != pDeletedObject) {
+			pVehicle->RemoveRefsToEntity(pDeletedObject);
+			pVehicle->RemoveRefsToVehicle(pDeletedObject);
+		}
+	}
+	i = CPools::GetObjectPool()->GetSize();
+	while (--i >= 0) {
+		CObject* pObject = CPools::GetObjectPool()->GetSlot(i);
+		if (pObject && pObject != pDeletedObject) {
+			pObject->RemoveRefsToEntity(pDeletedObject);
+		}
+	}
+}
+
+void 
+CWorld::FindObjectsKindaColliding(const CVector& position, float radius, bool bCheck2DOnly, int16* nCollidingEntities, int16 maxEntitiesToFind, CEntity** aEntities, bool bBuildings, bool bVehicles, bool bPeds, bool bObjects, bool bDummies)
+{ 
+	CWorld::AdvanceCurrentScanCode();
+	*nCollidingEntities = 0;
+	const CVector2D vecSectorStartPos(position.x - radius, position.y - radius);
+	const CVector2D vecSectorEndPos(position.x + radius, position.y + radius);
+	const int32 nStartX = max(CWorld::GetSectorIndexX(vecSectorStartPos.x), 0);
+	const int32 nStartY = max(CWorld::GetSectorIndexY(vecSectorStartPos.y), 0);
+	const int32 nEndX = min(CWorld::GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = min(CWorld::GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
+	for (int32 y = nStartY; y <= nEndY; y++) {
+		for (int32 x = nStartX; x <= nEndX; x++) {
+			CSector* pSector = CWorld::GetSector(x, y);
+			if (bBuildings) {
+				CWorld::FindObjectsKindaCollidingSectorList(pSector->m_lists[ENTITYLIST_BUILDINGS], position, radius, bCheck2DOnly, nCollidingEntities, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsKindaCollidingSectorList(pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], position, radius, bCheck2DOnly, nCollidingEntities, maxEntitiesToFind, aEntities);
+			}
+			if (bVehicles) {
+				CWorld::FindObjectsKindaCollidingSectorList(pSector->m_lists[ENTITYLIST_VEHICLES], position, radius, bCheck2DOnly, nCollidingEntities, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsKindaCollidingSectorList(pSector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], position, radius, bCheck2DOnly, nCollidingEntities, maxEntitiesToFind, aEntities);
+			}
+			if (bPeds) {
+			CWorld::FindObjectsKindaCollidingSectorList(pSector->m_lists[ENTITYLIST_PEDS], position, radius, bCheck2DOnly, nCollidingEntities, maxEntitiesToFind, aEntities);
+			CWorld::FindObjectsKindaCollidingSectorList(pSector->m_lists[ENTITYLIST_PEDS_OVERLAP], position, radius, bCheck2DOnly, nCollidingEntities, maxEntitiesToFind, aEntities);
+			}
+			if (bObjects) {
+				CWorld::FindObjectsKindaCollidingSectorList(pSector->m_lists[ENTITYLIST_OBJECTS], position, radius, bCheck2DOnly, nCollidingEntities, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsKindaCollidingSectorList(pSector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], position, radius, bCheck2DOnly, nCollidingEntities, maxEntitiesToFind, aEntities);
+			}
+			if (bDummies) {
+				CWorld::FindObjectsKindaCollidingSectorList(pSector->m_lists[ENTITYLIST_DUMMIES], position, radius, bCheck2DOnly, nCollidingEntities, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsKindaCollidingSectorList(pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP], position, radius, bCheck2DOnly, nCollidingEntities, maxEntitiesToFind, aEntities);
+			}
+		}
+	}
+}
+
+void 
+CWorld::FindObjectsKindaCollidingSectorList(CPtrList& list, const CVector& position, float radius, bool bCheck2DOnly, int16* nCollidingEntities, int16 maxEntitiesToFind, CEntity** aEntities)
+{
+	CPtrNode* pNode = list.first;
+	while (pNode) {
+		CEntity* pEntity = (CEntity*)pNode->item;
+		if (pEntity->m_scanCode != ms_nCurrentScanCode) {
+			pEntity->m_scanCode = ms_nCurrentScanCode;
+			float fMagnitude = 0.0f;
+			if (bCheck2DOnly)
+				fMagnitude = CVector2D(position - pEntity->GetPosition()).Magnitude();
+			else
+				fMagnitude = CVector(position - pEntity->GetPosition()).Magnitude();
+			if (pEntity->GetBoundRadius() + radius > fMagnitude && *nCollidingEntities < maxEntitiesToFind) {
+				if (aEntities)
+					aEntities[*nCollidingEntities] = pEntity;
+				++*nCollidingEntities;
+			}
+		}
+		pNode = pNode->next;
+	}
+}
+
+void
+CWorld::FindObjectsIntersectingCube(const CVector& vecStartPos, const CVector& vecEndPos, int16* nIntersecting, int16 maxEntitiesToFind, CEntity** aEntities, bool bBuildings, bool bVehicles, bool bPeds, bool bObjects, bool bDummies)
+{ 
+	CWorld::AdvanceCurrentScanCode();
+	*nIntersecting = 0;
+	const int32 nStartX = max(CWorld::GetSectorIndexX(vecStartPos.x), 0);
+	const int32 nStartY = max(CWorld::GetSectorIndexY(vecStartPos.y), 0);
+	const int32 nEndX = min(CWorld::GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = min(CWorld::GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
+	for (int32 y = nStartY; y <= nEndY; y++) {
+		for (int32 x = nStartX; x <= nEndX; x++) {
+			CSector* pSector = CWorld::GetSector(x, y);
+			if (bBuildings) {
+				CWorld::FindObjectsIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_BUILDINGS], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities);
+			}
+			if (bVehicles) {
+				CWorld::FindObjectsIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_VEHICLES], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities);
+			}
+			if (bPeds) {
+				CWorld::FindObjectsIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_PEDS], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_PEDS_OVERLAP], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities);
+			}
+			if (bObjects) {
+				CWorld::FindObjectsIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_OBJECTS], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities);
+			}
+			if (bDummies) {
+				CWorld::FindObjectsIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_DUMMIES], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities);
+			}
+		}
+	}
+
+}
+
+void 
+CWorld::FindObjectsIntersectingCubeSectorList(CPtrList& list, const CVector& vecStartPos, const CVector& vecEndPos, int16* nIntersecting, int16 maxEntitiesToFind, CEntity** aEntities)
+{
+	CPtrNode* pNode = list.first;
+	while (pNode) {
+			CEntity* pEntity = (CEntity*)pNode->item;
+			if (pEntity->m_scanCode != CWorld::ms_nCurrentScanCode) {
+				pEntity->m_scanCode = CWorld::ms_nCurrentScanCode;
+				float fRadius = pEntity->GetBoundRadius();
+				const CVector& entityPos = pEntity->GetPosition();
+				if (fRadius + entityPos.x >= vecStartPos.x && entityPos.x - fRadius <= vecEndPos.x &&
+					fRadius + entityPos.y >= vecStartPos.y && entityPos.y - fRadius <= vecEndPos.y && 
+					fRadius + entityPos.z >= vecStartPos.z && entityPos.z - fRadius <= vecEndPos.z && 
+					*nIntersecting < maxEntitiesToFind) {
+					if (aEntities)
+						aEntities[*nIntersecting] = pEntity;
+					++*nIntersecting;
+				}
+			}
+		pNode = pNode->next;
+	}
+}
+
+void 
+CWorld::FindObjectsIntersectingAngledCollisionBox(const CColBox& boundingBox, const CMatrix& matrix, const CVector& position, float fStartX, float fStartY, float fEndX, float fEndY, int16* nEntitiesFound, int16 maxEntitiesToFind, CEntity** aEntities, bool bBuildings, bool bVehicles, bool bPeds, bool bObjects, bool bDummies)
+{
+	CWorld::AdvanceCurrentScanCode();
+	*nEntitiesFound = 0;
+	const int32 nStartX = max(CWorld::GetSectorIndexX(fStartX), 0);
+	const int32 nStartY = max(CWorld::GetSectorIndexY(fStartY), 0);
+	const int32 nEndX = min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X - 1);
+	const int32 nEndY = min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y - 1);
+	for (int32 y = nStartY; y <= nEndY; y++) {
+		for (int32 x = nStartX; x <= nEndX; x++) {
+			CSector* pSector = CWorld::GetSector(x, y);
+			if (bBuildings) {
+				CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(pSector->m_lists[ENTITYLIST_BUILDINGS], boundingBox, matrix, position, nEntitiesFound, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], boundingBox, matrix, position, nEntitiesFound, maxEntitiesToFind, aEntities);
+			}
+			if (bVehicles) {
+				CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(pSector->m_lists[ENTITYLIST_VEHICLES], boundingBox, matrix, position, nEntitiesFound, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(pSector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], boundingBox, matrix, position, nEntitiesFound, maxEntitiesToFind, aEntities);
+			}
+			if (bPeds) {
+				CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(pSector->m_lists[ENTITYLIST_PEDS], boundingBox, matrix, position, nEntitiesFound, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(pSector->m_lists[ENTITYLIST_PEDS_OVERLAP], boundingBox, matrix, position, nEntitiesFound, maxEntitiesToFind, aEntities);
+			}
+			if (bObjects) {
+				CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(pSector->m_lists[ENTITYLIST_OBJECTS], boundingBox, matrix, position, nEntitiesFound, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(pSector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], boundingBox, matrix, position, nEntitiesFound, maxEntitiesToFind, aEntities);
+			}
+			if (bDummies) {
+				CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(pSector->m_lists[ENTITYLIST_DUMMIES], boundingBox, matrix, position, nEntitiesFound, maxEntitiesToFind, aEntities);
+				CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP], boundingBox, matrix, position, nEntitiesFound, maxEntitiesToFind, aEntities);
+			}
+		}
+	}
+}
+
+void 
+CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& list, const CColBox& boundingBox, const CMatrix& matrix, const CVector& position, int16* nEntitiesFound, int16 maxEntitiesToFind, CEntity** aEntities)
+{
+	CPtrNode* pNode = list.first;
+	while (pNode) {
+		CEntity* pEntity = (CEntity*)pNode->item;
+		if (pEntity->m_scanCode != CWorld::ms_nCurrentScanCode) {
+			pEntity->m_scanCode = CWorld::ms_nCurrentScanCode;
+			CColSphere sphere;
+			CVector vecDistance = pEntity->m_matrix.GetPosition() - position;
+			sphere.radius = pEntity->GetBoundRadius();
+			sphere.center = Multiply3x3(vecDistance, matrix);
+			if (CCollision::TestSphereBox(sphere, boundingBox) && *nEntitiesFound < maxEntitiesToFind) {
+				if (aEntities)
+					aEntities[*nEntitiesFound] = pEntity;
+				++*nEntitiesFound;
+			}
+		}
+		pNode = pNode->next;
+	}
+}
+
+void
+CWorld::FindMissionEntitiesIntersectingCube(const CVector& vecStartPos, const CVector& vecEndPos, int16* nIntersecting, int16 maxEntitiesToFind, CEntity** aEntities, bool bVehicles, bool bPeds, bool bObjects)
+{
+	CWorld::AdvanceCurrentScanCode();
+	*nIntersecting = 0;
+	const int32 nStartX = max(CWorld::GetSectorIndexX(vecStartPos.x), 0);
+	const int32 nStartY = max(CWorld::GetSectorIndexY(vecStartPos.y), 0);
+	const int32 nEndX = min(CWorld::GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = min(CWorld::GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
+	for (int32 y = nStartY; y <= nEndY; y++) {
+		for (int32 x = nStartX; x <= nEndX; x++) {
+			CSector* pSector = CWorld::GetSector(x, y);
+			if (bVehicles) {
+				CWorld::FindMissionEntitiesIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_VEHICLES], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities, true, false);
+				CWorld::FindMissionEntitiesIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities, true, false);
+			}
+			if (bPeds) {
+				CWorld::FindMissionEntitiesIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_PEDS], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities, false, true);
+				CWorld::FindMissionEntitiesIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_PEDS_OVERLAP], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities, false, true);
+			}
+			if (bObjects) {
+				CWorld::FindMissionEntitiesIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_OBJECTS], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities, false, false);
+				CWorld::FindMissionEntitiesIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], vecStartPos, vecEndPos, nIntersecting, maxEntitiesToFind, aEntities, false, false);
+			}
+		}
+	}
+}
+
+void
+CWorld::FindMissionEntitiesIntersectingCubeSectorList(CPtrList& list, const CVector& vecStartPos, const CVector& vecEndPos, int16* nIntersecting, int16 maxEntitiesToFind, CEntity** aEntities, bool bIsVehicleList, bool bIsPedList)
+{
+	CPtrNode* pNode = list.first;
+	while (pNode) {
+		CEntity* pEntity = (CEntity*)pNode->item;
+		if (pEntity->m_scanCode != CWorld::ms_nCurrentScanCode) {
+			pEntity->m_scanCode = CWorld::ms_nCurrentScanCode;
+			bool bIsMissionEntity = false;
+			if (bIsVehicleList)
+				bIsMissionEntity = ((CVehicle*)pEntity)->VehicleCreatedBy == MISSION_VEHICLE;
+			else if (bIsPedList)
+				bIsMissionEntity = ((CPed*)pEntity)->CharCreatedBy == MISSION_CHAR;
+			else
+				bIsMissionEntity = ((CObject*)pEntity)->ObjectCreatedBy == MISSION_OBJECT;
+			float fRadius = pEntity->GetBoundRadius();
+			const CVector& entityPos = pEntity->GetPosition();
+			if (bIsMissionEntity && 
+				fRadius + entityPos.x >= vecStartPos.x && entityPos.x - fRadius <= vecEndPos.x &&
+				fRadius + entityPos.y >= vecStartPos.y && entityPos.y - fRadius <= vecEndPos.y && 
+				fRadius + entityPos.z >= vecStartPos.z && entityPos.z - fRadius <= vecEndPos.z &&
+				*nIntersecting < maxEntitiesToFind) {
+				if (aEntities)
+					aEntities[*nIntersecting] = (CEntity*)pEntity;
+				++*nIntersecting;
+			}
+		}
+		pNode = pNode->next;
+	}
+}
+
 CPlayerPed*
 FindPlayerPed(void)
 {
@@ -958,6 +1336,155 @@ FindPlayerHeading(void)
 	if(FindPlayerVehicle())
 		return FindPlayerVehicle()->GetForward().Heading();
 	return FindPlayerPed()->GetForward().Heading();
+}
+
+
+void CWorld::ClearCarsFromArea(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+	CVehiclePool *pVehiclePool = CPools::GetVehiclePool();
+	for (int32 i = 0; i < pVehiclePool->GetSize(); i++) {
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+		if (pVehicle) {
+			const CVector& position = pVehicle->GetPosition();
+			if (position.x >= x1 && position.x <= x2 && 
+				position.y >= y1 && position.y <= y2 && 
+				position.z >= z1 && position.z <= z2 && 
+				!pVehicle->bIsLocked && pVehicle->CanBeDeleted()) {
+				if (pVehicle->pDriver) {
+					CPopulation::RemovePed(pVehicle->pDriver);
+					pVehicle->pDriver = nil;
+				}
+				for (int32 j = 0; j < pVehicle->m_nNumMaxPassengers; ++j) {
+					if (pVehicle->pPassengers[j]) {
+						CPopulation::RemovePed(pVehicle->pPassengers[j]);
+						pVehicle->pPassengers[j] = nil;
+						--pVehicle->m_nNumPassengers;
+					}
+				}
+				CCarCtrl::RemoveFromInterestingVehicleList(pVehicle);
+				CWorld::Remove(pVehicle);
+				delete pVehicle;
+			}
+		}
+	}
+}
+
+void 
+CWorld::ClearPedsFromArea(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+	CPedPool* pPedPool = CPools::GetPedPool();
+	for (int32 i = 0; i < pPedPool->GetSize(); i++) {
+		CPed* pPed = CPools::GetPedPool()->GetSlot(i);
+		if (pPed) {
+			const CVector& position = pPed->GetPosition();
+			if (!pPed->IsPlayer() && pPed->CanBeDeleted() &&
+				position.x >= x1 && position.x <= x2 &&
+				position.y >= y1 && position.y <= y2 &&
+				position.z >= z1 && position.z <= z2) {
+				CPopulation::RemovePed(pPed);
+			}
+		}
+	}
+}
+
+void 
+CWorld::CallOffChaseForArea(float x1, float y1, float x2, float y2)
+{
+	CWorld::AdvanceCurrentScanCode();
+	float fStartX = x1 - 10.0f;
+	float fStartY = y1 - 10.0f;
+	float fEndX = x2 + 10.0f;
+	float fEndY = y2 + 10.0f;
+	const int32 nStartX = max(CWorld::GetSectorIndexX(fStartX), 0);
+	const int32 nStartY = max(CWorld::GetSectorIndexY(fStartY), 0);
+	const int32 nEndX = min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X - 1);
+	const int32 nEndY = min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y - 1);
+	for (int32 y = nStartY; y <= nEndY; y++) {
+		for (int32 x = nStartX; x <= nEndX; x++) {
+			CSector* pSector = CWorld::GetSector(x, y);
+			CWorld::CallOffChaseForAreaSectorListVehicles(pSector->m_lists[ENTITYLIST_VEHICLES], x1, y1, x2, y2, fStartX, fStartY, fEndX, fEndY);
+			CWorld::CallOffChaseForAreaSectorListVehicles(pSector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], x1, y1, x2, y2, fStartX, fStartY, fEndX, fEndY);
+			CWorld::CallOffChaseForAreaSectorListPeds(pSector->m_lists[ENTITYLIST_PEDS], x1, y1, x2, y2);
+			CWorld::CallOffChaseForAreaSectorListPeds(pSector->m_lists[ENTITYLIST_PEDS_OVERLAP], x1, y1, x2, y2);
+		}
+	}
+}
+
+void 
+CWorld::CallOffChaseForAreaSectorListVehicles(CPtrList& list, float x1, float y1, float x2, float y2, float fStartX, float fStartY, float fEndX, float fEndY)
+{
+	CPtrNode* pNode = list.first;
+	while (pNode) {
+		CVehicle *pVehicle = (CVehicle*)pNode->item;
+		if (pVehicle->m_scanCode != CWorld::ms_nCurrentScanCode) {
+			pVehicle->m_scanCode = CWorld::ms_nCurrentScanCode;
+			const CVector& vehiclePos = pVehicle->m_matrix.GetPosition();
+			eCarMission carMission = pVehicle->AutoPilot.m_nCarMission;
+			if (pVehicle != FindPlayerVehicle() &&
+				vehiclePos.x > fStartX && vehiclePos.x < fEndX && 
+				vehiclePos.y > fStartY && vehiclePos.y < fEndY && 
+				pVehicle->bIsLawEnforcer && 
+				(carMission == MISSION_RAMPLAYER_FARAWAY || carMission == MISSION_RAMPLAYER_CLOSE ||
+				carMission == MISSION_BLOCKPLAYER_FARAWAY || carMission == MISSION_BLOCKPLAYER_CLOSE)
+				) {
+					pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 2000;
+					CColModel* pColModel = pVehicle->GetColModel();
+					bool bInsideSphere = false;
+					for (int32 i = 0; i < pColModel->numSpheres; i++) {
+						CVector pos = pVehicle->m_matrix * pColModel->spheres[i].center;
+						float fRadius = pColModel->spheres[i].radius;
+						if (pos.x + fRadius > x1 && pos.x - fRadius < x2 && pos.y + fRadius > y1 && pos.y - fRadius < y2)
+							bInsideSphere = true;
+						// Maybe break the loop when bInsideSphere is set to true?
+					}
+					if (bInsideSphere) {
+						if (pVehicle->m_matrix.GetPosition().x <= (x1 + x2) * 0.5f)
+							pVehicle->m_vecMoveSpeed.x = min(pVehicle->m_vecMoveSpeed.x, 0.0f);
+						else
+							pVehicle->m_vecMoveSpeed.x = max(pVehicle->m_vecMoveSpeed.x, 0.0f);
+						if (pVehicle->m_matrix.GetPosition().y <= (y1 + y2) * 0.5f)
+							pVehicle->m_vecMoveSpeed.y = min(pVehicle->m_vecMoveSpeed.y, 0.0f);
+						else
+							pVehicle->m_vecMoveSpeed.y = max(pVehicle->m_vecMoveSpeed.y, 0.0f);
+					}
+				}
+			}
+		pNode = pNode->next;
+	}
+}
+
+void 
+CWorld::CallOffChaseForAreaSectorListPeds(CPtrList& list, float x1, float y1, float x2, float y2)
+{
+	CPtrNode* pNode = list.first;
+	while (pNode) {
+		CPed* pPed = (CPed*)pNode->item;
+		const CVector& pedPos = pPed->GetPosition();
+		if (pPed->m_scanCode != CWorld::ms_nCurrentScanCode)
+		{
+			pPed->m_scanCode = CWorld::ms_nCurrentScanCode;
+			if (pPed != FindPlayerPed() && pPed->m_leader != FindPlayerPed() && 
+				pedPos.x > x1 && pedPos.x < x2 && 
+				pedPos.y > y1 && pedPos.y < y2 &&
+				(pPed->m_pedInObjective == FindPlayerPed() || pPed->m_carInObjective && pPed->m_carInObjective == FindPlayerVehicle()) &&
+				pPed->m_nPedState != PED_DEAD && pPed->m_nPedState != PED_DIE &&
+				(pPed->m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT || 
+					pPed->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER ||
+					pPed->m_objective == OBJECTIVE_KILL_CHAR_ANY_MEANS)) {
+				if (pPed->IsPedInControl()) {
+					if (pPed->m_nPedType == PEDTYPE_COP)
+						((CCopPed*)pPed)->ClearPursuit();
+					else
+						pPed->SetIdle();
+					pPed->SetObjective(OBJECTIVE_NONE);
+				}
+				else {
+					pPed->m_prevObjective = OBJECTIVE_NONE;
+					pPed->m_nLastPedState = PED_IDLE;
+				}
+			}
+		}
+	}
 }
 
 void
@@ -1056,6 +1583,214 @@ CWorld::ExtinguishAllCarFiresInArea(CVector point, float range)
 	}
 }
 
+void 
+CWorld::AddParticles(void) 
+{
+	for (int32 y = 0; y < NUMSECTORS_Y; y++) {
+		for (int32 x = 0; x < NUMSECTORS_X; x++) {
+			CSector* pSector = GetSector(x, y);
+			CEntity::AddSteamsFromGround1(pSector->m_lists[ENTITYLIST_BUILDINGS]);
+			CEntity::AddSteamsFromGround1(pSector->m_lists[ENTITYLIST_DUMMIES]);
+		}
+	}
+}
+
+void 
+CWorld::ShutDown(void)
+{
+	for (int32 y = 0; y < NUMSECTORS_Y; y++) {
+		for (int32 x = 0; x < NUMSECTORS_X; x++) {
+			CSector *pSector = GetSector(x, y);
+			CPtrNode *pNode = pSector->m_lists[ENTITYLIST_BUILDINGS].first;
+			while (pNode) {
+				CEntity* pEntity = (CEntity*)pNode->item;
+				if (pEntity) {
+					CWorld::Remove(pEntity);
+					delete pEntity;
+				}
+				pNode = pNode->next;
+			}
+			pNode = pSector->m_lists[ENTITYLIST_VEHICLES].first;
+			while (pNode) {
+				CEntity* pEntity = (CEntity*)pNode->item;
+				if (pEntity) {
+					CWorld::Remove(pEntity);
+					delete pEntity;
+				}
+				pNode = pNode->next;
+			}
+			pNode = pSector->m_lists[ENTITYLIST_PEDS].first;
+			while (pNode) {
+				CEntity* pEntity = (CEntity*)pNode->item;
+				if (pEntity) {
+					CWorld::Remove(pEntity);
+					delete pEntity;
+				}
+				pNode = pNode->next;
+			}
+			pNode = pSector->m_lists[ENTITYLIST_OBJECTS].first;
+			while (pNode) {
+				CEntity* pEntity = (CEntity*)pNode->item;
+				if (pEntity) {
+					CWorld::Remove(pEntity);
+					delete pEntity;
+				}
+				pNode = pNode->next;
+			}
+			pNode = pSector->m_lists[ENTITYLIST_DUMMIES].first;
+			while (pNode) {
+				CEntity* pEntity = (CEntity*)pNode->item;
+				if (pEntity) {
+					CWorld::Remove(pEntity);
+					delete pEntity;
+				}
+				pNode = pNode->next;
+			}
+			pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();
+			pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP].Flush();
+			pSector->m_lists[ENTITYLIST_DUMMIES].Flush();
+			pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].Flush();
+		}
+	}
+	for (int32 i = 0; i < 4; i ++) {
+		CPtrNode* pNode = GetBigBuildingList((eLevelName)i).first;
+		while (pNode) {
+			CEntity* pEntity = (CEntity*)pNode->item;
+			if (pEntity) {
+				// Maybe remove from world here?
+				delete pEntity;
+			}
+			pNode = pNode->next;
+		}
+		GetBigBuildingList((eLevelName)i).Flush();
+	}
+	for (int32 y = 0; y < NUMSECTORS_Y; y++) {
+		for (int32 x = 0; x < NUMSECTORS_X; x++) {
+			CSector* pSector = GetSector(x, y);
+			if (pSector->m_lists[ENTITYLIST_BUILDINGS].first) {
+				sprintf(gString, "Building list %d,%d not empty\n", x, y);
+				pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();
+			}
+			if (pSector->m_lists[ENTITYLIST_DUMMIES].first) {
+				sprintf(gString, "Dummy list %d,%d not empty\n", x, y);
+				pSector->m_lists[ENTITYLIST_DUMMIES].Flush();
+			}
+			if (pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP].first) {
+				sprintf(gString, "Building overlap list %d,%d not empty\n", x, y);
+				pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP].Flush();
+			}
+			if (pSector->m_lists[ENTITYLIST_VEHICLES_OVERLAP].first) {
+				sprintf(gString, "Vehicle overlap list %d,%d not empty\n", x, y);
+				pSector->m_lists[ENTITYLIST_VEHICLES_OVERLAP].Flush();
+			}
+			if (pSector->m_lists[ENTITYLIST_PEDS_OVERLAP].first) {
+				sprintf(gString, "Ped overlap list %d,%d not empty\n", x, y);
+				pSector->m_lists[ENTITYLIST_PEDS_OVERLAP].Flush();
+			}
+			if (pSector->m_lists[ENTITYLIST_OBJECTS_OVERLAP].first) {
+				sprintf(gString, "Object overlap list %d,%d not empty\n", x, y);
+				pSector->m_lists[ENTITYLIST_OBJECTS_OVERLAP].Flush();
+			}
+			if (pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].first) {
+				sprintf(gString, "Dummy overlap list %d,%d not empty\n", x, y);
+				pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].Flush();
+			}
+		}
+	}
+	ms_listMovingEntityPtrs.Flush();
+}
+
+void 
+CWorld::ClearForRestart(void) 
+{
+	if (CCutsceneMgr::HasLoaded())
+		CCutsceneMgr::DeleteCutsceneData();
+	CProjectileInfo::RemoveAllProjectiles();
+	CObject::DeleteAllTempObjects();
+	CObject::DeleteAllMissionObjects();
+	CPopulation::ConvertAllObjectsToDummyObjects();
+	for (int32 y = 0; y < NUMSECTORS_Y; y++) {
+		for (int32 x = 0; x < NUMSECTORS_X; x++) {
+			CSector *pSector = GetSector(x, y);
+			CPtrNode *pNode = pSector->m_lists[ENTITYLIST_PEDS].first;
+			while (pNode) {
+				CEntity *pEntity = (CEntity*)pNode->item;
+				if (pEntity) {
+					CWorld::Remove(pEntity);
+					delete pEntity;
+				}
+				pNode = pNode->next;
+			}
+			pNode = GetBigBuildingList(LEVEL_NONE).first;
+			while (pNode) {
+				CVehicle *pVehicle = (CVehicle*)pNode->item;
+				if (pVehicle && pVehicle->IsVehicle() && pVehicle->IsPlane()) {
+					CWorld::Remove(pVehicle);
+					delete pVehicle;
+				}
+				pNode = pNode->next;
+			}
+			pNode = pSector->m_lists[ENTITYLIST_VEHICLES].first;
+			while (pNode) {
+				CEntity* pEntity = (CEntity*)pNode->item;
+				if (pEntity) {
+					CWorld::Remove(pEntity);
+					delete pEntity;
+				}
+				pNode = pNode->next;
+			}
+		}
+	}
+	CPools::CheckPoolsEmpty();
+}
+
+void 
+CWorld::RepositionCertainDynamicObjects() 
+{ 
+	int32 i = CPools::GetDummyPool()->GetSize();
+	while (--i >= 0) {
+		CDummy* dummy = CPools::GetDummyPool()->GetSlot(i);
+		if (dummy) {
+			RepositionOneObject(dummy);
+		}
+	}
+}
+
+void
+CWorld::RepositionOneObject(CEntity* pEntity)
+{
+	int16 modeId = pEntity->m_modelIndex;
+	if (MI_SINGLESTREETLIGHTS1 == modeId || MI_SINGLESTREETLIGHTS2 == modeId || MI_SINGLESTREETLIGHTS3 == modeId
+		|| MI_DOUBLESTREETLIGHTS == modeId || MI_TREE1 == modeId || MI_TREE2 == modeId || MI_TREE3 == modeId
+		|| MI_TREE4 == modeId || MI_TREE5 == modeId || MI_TREE6 == modeId || MI_TREE7 == modeId
+		|| MI_TREE8 == modeId || MI_TREE9 == modeId || MI_TREE10 == modeId || MI_TREE11 == modeId
+		|| MI_TREE12 == modeId || MI_TREE13 == modeId || MI_TREE14 == modeId || MI_TRAFFICLIGHTS == modeId
+		|| MI_PARKINGMETER == modeId || MI_PHONEBOOTH1 == modeId || MI_WASTEBIN == modeId || MI_BIN == modeId
+		|| MI_POSTBOX1 == modeId || MI_NEWSSTAND == modeId || MI_TRAFFICCONE == modeId || MI_DUMP1 == modeId
+		|| MI_ROADWORKBARRIER1 == modeId || MI_BUSSIGN1 == modeId || MI_NOPARKINGSIGN1 == modeId
+		|| MI_PHONESIGN == modeId || MI_TAXISIGN == modeId || MI_FISHSTALL01 == modeId || MI_FISHSTALL02 == modeId
+		|| MI_FISHSTALL03 == modeId || MI_FISHSTALL04 == modeId || MI_BAGELSTAND2 == modeId || MI_FIRE_HYDRANT == modeId
+		|| MI_BOLLARDLIGHT == modeId || MI_PARKTABLE == modeId) {
+		CVector& position = pEntity->m_matrix.GetPosition();
+		float fBoundingBoxMinZ = pEntity->GetColModel()->boundingBox.min.z;
+		position.z = CWorld::FindGroundZFor3DCoord(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z, nil) - fBoundingBoxMinZ;
+		pEntity->m_matrix.UpdateRW();
+		pEntity->UpdateRwFrame();
+	} else if (MI_BUOY == modeId) {
+		float fWaterLevel = 0.0f;
+		bool found = true;
+		const CVector& position = pEntity->m_matrix.GetPosition();
+		float fGroundZ = CWorld::FindGroundZFor3DCoord(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z, &found);
+		if (CWaterLevel::GetWaterLevelNoWaves(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z, &fWaterLevel)) {
+			if (!found || fWaterLevel > fGroundZ) {
+				CColModel* pColModel = pEntity->GetColModel();
+				float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
+				pEntity->m_matrix.GetPosition().z = 0.2f * fHeight + fWaterLevel - 0.5f * fHeight;
+			}
+		}
+	}
+}
+
 void
 CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity *reason)
 {
@@ -1065,6 +1800,60 @@ CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity *reason)
 		if (veh && veh->m_status != STATUS_WRECKED && !veh->m_pCarFire && !veh->bFireProof) {
 			if (Abs(veh->GetPosition().z - z) < 5.0f && Abs(veh->GetPosition().x - x) < radius && Abs(veh->GetPosition().y - y) < radius)
 					gFireManager.StartFire(veh, reason, 0.8f, true);
+		}
+	}
+}
+
+void 
+CWorld::SetPedsOnFire(float x, float y, float z, float radius, CEntity* reason)
+{
+	int32 poolSize = CPools::GetPedPool()->GetSize();
+	for (int32 i = poolSize - 1; i >= 0; i--) {
+		CPed* pPed = CPools::GetPedPool()->GetSlot(i);
+		if (pPed && pPed->m_nPedState != PED_DEAD && !pPed->bInVehicle && !pPed->m_pFire && !pPed->bFireProof) {
+			if (Abs(pPed->GetPosition().z - z) < 5.0f && Abs(pPed->GetPosition().x - x) < radius && Abs(pPed->GetPosition().y - y) < radius)
+				gFireManager.StartFire(pPed, reason, 0.8f, true);
+		}
+	}
+}
+
+void 
+CWorld::RemoveStaticObjects() 
+{
+	for (int32 y = 0; y < NUMSECTORS_Y; y++) {
+		for (int32 x = 0; x < NUMSECTORS_X; x++) {
+			CSector* pSector = GetSector(x, y);
+			CPtrNode* pNode = pSector->m_lists[ENTITYLIST_BUILDINGS].first;
+			while (pNode) {
+				CEntity* pEntity = (CEntity*)pNode->item;
+				if (pEntity) {
+					CWorld::Remove(pEntity);
+					delete pEntity;
+				}
+				pNode = pNode->next;
+			}
+			pNode = pSector->m_lists[ENTITYLIST_OBJECTS].first;
+			while (pNode) {
+				CEntity* pEntity = (CEntity*)pNode->item;
+				if (pEntity) {
+					CWorld::Remove(pEntity);
+					delete pEntity;
+				}
+				pNode = pNode->next;
+			}
+			pNode = pSector->m_lists[ENTITYLIST_DUMMIES].first;
+			while (pNode) {
+				CEntity* pEntity = (CEntity*)pNode->item;
+				if (pEntity) {
+					CWorld::Remove(pEntity);
+					delete pEntity;
+				}
+				pNode = pNode->next;
+			}
+			pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();
+			pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP].Flush();
+			pSector->m_lists[ENTITYLIST_DUMMIES].Flush();
+			pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].Flush();
 		}
 	}
 }
@@ -1246,6 +2035,27 @@ CWorld::Process(void)
 		}
 	}
 }
+/*
+void 
+CWorld::TriggerExplosion(const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer)
+{
+	CVector2D vecStartPos(position.x - fRadius, position.y - fRadius);
+	CVector2D vecEndPos(position.x + fRadius, position.y + fRadius);
+	const int32 nStartX = max(CWorld::GetSectorIndexX(vecStartPos.x), 0);
+	const int32 nStartY = max(CWorld::GetSectorIndexY(vecStartPos.y), 0);
+	const int32 nEndX = min(CWorld::GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = min(CWorld::GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
+	for (int32 y = nStartY; y <= nEndY; y++) {
+		for (int32 x = nStartX; x <= nEndX; x++) {
+			CSector* pSector = CWorld::GetSector(x, y);
+			CWorld::TriggerExplosionSectorList(pSector->m_lists[ENTITYLIST_VEHICLES], position, fRadius, fPower, pCreator, bDrecementBombTimer);
+			CWorld::TriggerExplosionSectorList(pSector->m_lists[ENTITYLIST_PEDS], position, fRadius, fPower, pCreator, bDrecementBombTimer);
+			CWorld::TriggerExplosionSectorList(pSector->m_lists[ENTITYLIST_OBJECTS], position, fRadius, fPower, pCreator, bDrecementBombTimer);
+		}
+	}
+
+}
+*/
 
 STARTPATCHES
 	InjectHook(0x4AE930, CWorld::Add, PATCH_JUMP);

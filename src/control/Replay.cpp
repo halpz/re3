@@ -1087,7 +1087,7 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 	Playback.m_bSlot = first;
 	Playback.m_nOffset = 0;
 	Playback.m_pBase = Buffers[first];
-	CObject::DeleteAllTempObjectInArea(CVector(0.0f, 0.0f, 0.0f), 1000000.0f);
+	CObject::DeleteAllTempObjectsInArea(CVector(0.0f, 0.0f, 0.0f), 1000000.0f);
 	StoreStuffInMem();
 	EmptyPedsAndVehiclePools();
 	SlowMotion = 1;

@@ -4,6 +4,7 @@
 #include "Placeable.h"
 
 struct CReference;
+class CPtrList;
 
 enum eEntityType
 {
@@ -152,5 +153,7 @@ public:
 	void ModifyMatrixForTreeInWind(void);
 	void ModifyMatrixForBannerInWind(void);
 	void ProcessLightsForEntity(void);
+
+	static void AddSteamsFromGround1(CPtrList& list);
 };
 static_assert(sizeof(CEntity) == 0x64, "CEntity: error");

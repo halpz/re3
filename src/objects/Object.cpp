@@ -383,7 +383,7 @@ CObject::DeleteAllTempObjects()
 }
 
 void 
-CObject::DeleteAllTempObjectInArea(CVector point, float fRadius) 
+CObject::DeleteAllTempObjectsInArea(CVector point, float fRadius) 
 {
 	CObjectPool *objectPool = CPools::GetObjectPool();
 	for (int32 i = 0; i < objectPool->GetSize(); i++) {
@@ -426,5 +426,5 @@ STARTPATCHES
 	InjectHook(0x4BB010, &CObject::CanBeDeleted, PATCH_JUMP);
 	InjectHook(0x4BBE60, &CObject::DeleteAllMissionObjects, PATCH_JUMP);
 	InjectHook(0x4BBDF0, &CObject::DeleteAllTempObjects, PATCH_JUMP);
-	InjectHook(0x4BBED0, &CObject::DeleteAllTempObjectInArea, PATCH_JUMP);
+	InjectHook(0x4BBED0, &CObject::DeleteAllTempObjectsInArea, PATCH_JUMP);
 ENDPATCHES
