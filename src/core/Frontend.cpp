@@ -5246,6 +5246,7 @@ CMenuManager::PrintController(void)
 void
 CMenuManager::PrintMap(void)
 {
+	CFont::SetJustifyOn();
 	bMenuMapActive = true;
 	CRadar::InitFrontEndMap();
 
