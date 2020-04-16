@@ -17,29 +17,29 @@
 #define FRENZY_ANY_PED -1
 #define FRENZY_ANY_CAR -2
 
-int32 &CDarkel::TimeLimit = *(int32*)0x885BAC;
-int32 &CDarkel::PreviousTime = *(int32*)0x885B00;
-int32 &CDarkel::TimeOfFrenzyStart = *(int32*)0x9430D8;
-int32 &CDarkel::WeaponType = *(int32*)0x9430F0;
-int32 &CDarkel::AmmoInterruptedWeapon = *(int32*)0x8E29C8;
-int32 &CDarkel::KillsNeeded = *(int32*)0x8F1AB8;
-int8 &CDarkel::InterruptedWeapon = *(int8*)0x95CD60;
+int32 CDarkel::TimeLimit;
+int32 CDarkel::PreviousTime;
+int32 CDarkel::TimeOfFrenzyStart;
+int32 CDarkel::WeaponType;
+int32 CDarkel::AmmoInterruptedWeapon;
+int32 CDarkel::KillsNeeded;
+int8 CDarkel::InterruptedWeapon;
 
 /*
  * bStandardSoundAndMessages is a completely beta thing,
  * makes game handle sounds & messages instead of SCM (just like in GTA2)
  * but it's never been used in the game. Has unused sliding text when frenzy completed etc.
  */
-int8 &CDarkel::bStandardSoundAndMessages = *(int8*)0x95CDB6;
-int8 &CDarkel::bNeedHeadShot = *(int8*)0x95CDCA;
-int8 &CDarkel::bProperKillFrenzy = *(int8*)0x95CD98;
-uint16 &CDarkel::Status = *(uint16*)0x95CCB4;
-uint16 (&CDarkel::RegisteredKills)[NUM_DEFAULT_MODELS] = *(uint16(*)[NUM_DEFAULT_MODELS]) * (uintptr*)0x6EDBE0;
-int32 &CDarkel::ModelToKill = *(int32*)0x8F2C78;
-int32 &CDarkel::ModelToKill2 = *(int32*)0x885B40;
-int32 &CDarkel::ModelToKill3 = *(int32*)0x885B3C;
-int32 &CDarkel::ModelToKill4 = *(int32*)0x885B34;
-wchar *CDarkel::pStartMessage = (wchar*)0x8F2C08;
+int8 CDarkel::bStandardSoundAndMessages;
+int8 CDarkel::bNeedHeadShot;
+int8 CDarkel::bProperKillFrenzy;
+uint16 CDarkel::Status;
+uint16 CDarkel::RegisteredKills[NUM_DEFAULT_MODELS];
+int32 CDarkel::ModelToKill;
+int32 CDarkel::ModelToKill2;
+int32 CDarkel::ModelToKill3;
+int32 CDarkel::ModelToKill4;
+wchar *CDarkel::pStartMessage;
 
 uint8
 CDarkel::CalcFade(uint32 time, uint32 start, uint32 end)
@@ -262,10 +262,10 @@ CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, uint16 kill, int32 mode
 	pStartMessage = text;
 
 	if (text == TheText.Get("PAGE_00")) {
-		CDarkel::bProperKillFrenzy = 1;
-		CDarkel::pStartMessage = 0;
+		CDarkel::bProperKillFrenzy = true;
+		CDarkel::pStartMessage = nil;
 	} else
-		bProperKillFrenzy = 0;
+		bProperKillFrenzy = false;
 	
 	bStandardSoundAndMessages = standardSound;
 	bNeedHeadShot = needHeadShot;

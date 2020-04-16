@@ -108,7 +108,7 @@ LightsCreate(RpWorld *world)
 	pDirect = RpLightCreate(rpLIGHTDIRECTIONAL);
 	RpLightSetFlags(pDirect, rpLIGHTLIGHTATOMICS);
 	color.red = 1.0f;
-	color.green = 0.84f;
+	color.green = 0.85f;
 	color.blue = 0.45f;
 	RpLightSetColor(pDirect, &color);
 	RpLightSetRadius(pDirect, 2.0f);

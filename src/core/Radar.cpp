@@ -16,9 +16,9 @@
 #include "Streaming.h"
 #include "SpecialFX.h"
 
-float &CRadar::m_radarRange = *(float*)0x8E281C;
-sRadarTrace (&CRadar::ms_RadarTrace)[NUMRADARBLIPS] = *(sRadarTrace(*)[NUMRADARBLIPS]) * (uintptr*)0x6ED5E0;
-CVector2D &vec2DRadarOrigin = *(CVector2D*)0x6299B8;
+float CRadar::m_radarRange;
+sRadarTrace CRadar::ms_RadarTrace[NUMRADARBLIPS];
+CVector2D vec2DRadarOrigin;
 int32 gRadarTxdIds[64];// = (int*)0x6299C0;
 
 CSprite2d CRadar::AsukaSprite;// = *(CSprite2d*)0x8F1A40;
@@ -81,6 +81,7 @@ CRGBA CRadar::ArrowBlipColour2;
 uint16 CRadar::MapLegendCounter;
 uint16 CRadar::MapLegendList[NUM_MAP_LEGENDS];
 int CRadar::TargetMarkerId = -1;
+CVector CRadar::TargetMarkerPos;
 #endif
 
 // taken from VC
@@ -1442,6 +1443,7 @@ CRadar::ToggleTargetMarker(float x, float y)
 		ms_RadarTrace[nextBlip].m_bInUse = 1;
 		ms_RadarTrace[nextBlip].m_Radius = 1.0f;
 		CVector pos(x, y, CWorld::FindGroundZForCoord(x,y));
+		TargetMarkerPos = pos;
 		ms_RadarTrace[nextBlip].m_vec2DPos = pos;
 		ms_RadarTrace[nextBlip].m_vecPos = pos;
 		ms_RadarTrace[nextBlip].m_nEntityHandle = 0;

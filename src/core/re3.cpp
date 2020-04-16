@@ -24,6 +24,8 @@
 #include "Hud.h"
 #include "SceneEdit.h"
 #include "Pad.h"
+#include "PlayerPed.h"
+#include "Radar.h"
 
 #include <list>
 
@@ -163,6 +165,19 @@ FixCar(void)
 	((CAutomobile*)veh)->Damage.SetEngineStatus(0);
 	((CAutomobile*)veh)->Fix();
 }
+
+#ifdef MENU_MAP
+static void
+TeleportToWaypoint(void)
+{
+	if (FindPlayerVehicle()) {
+		if (CRadar::TargetMarkerId != -1)
+			FindPlayerVehicle()->Teleport(CRadar::TargetMarkerPos + CVector(0.0f, 0.0f, FindPlayerVehicle()->GetColModel()->boundingSphere.center.z));
+	} else
+		if(CRadar::TargetMarkerId != -1)
+			FindPlayerPed()->Teleport(CRadar::TargetMarkerPos + CVector(0.0f, 0.0f, FEET_OFFSET));
+}
+#endif
 
 static int engineStatus;
 static void
@@ -359,6 +374,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", (int8*)&gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
+#ifdef MENU_MAP
+		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
+#endif
 #ifdef TOGGLEABLE_BETA_FEATURES
 		DebugMenuAddVarBool8("Debug", "Toggle banned particles", (int8*)&CParticle::bEnableBannedParticles, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", (int8*)&CPed::bPopHeadsOnHeadshot, nil);

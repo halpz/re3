@@ -70,7 +70,7 @@ public:
 	void Init() { m_nModelIndex = 0; }
 	void Clear() { m_nModelIndex = 0; }
 	bool HasCar() { return m_nModelIndex != 0; }
-	CStoredCar(const CStoredCar& other);
+	const CStoredCar &operator=(const CStoredCar& other);
 	void StoreCar(CVehicle*);
 	CVehicle* RestoreCar();
 };
@@ -179,27 +179,27 @@ class CGarages
 	enum {
 		MESSAGE_LENGTH = 8
 	};
-	static int32 &BankVansCollected;
-	static bool &BombsAreFree;
-	static bool &RespraysAreFree;
-	static int32 &CarsCollected;
-	static int32 (&CarTypesCollected)[TOTAL_COLLECTCARS_GARAGES];
-	static int32 &CrushedCarId;
-	static uint32 &LastTimeHelpMessage;
-	static int32 &MessageNumberInString;
-	static char(&MessageIDString)[MESSAGE_LENGTH];
-	static int32 &MessageNumberInString2;
-	static uint32 &MessageStartTime;
-	static uint32 &MessageEndTime;
-	static uint32 &NumGarages;
-	static bool &PlayerInGarage;
-	static int32 &PoliceCarsCollected;
-	static CGarage(&aGarages)[NUM_GARAGES];
-	static CStoredCar(&aCarsInSafeHouse1)[NUM_GARAGE_STORED_CARS];
-	static CStoredCar(&aCarsInSafeHouse2)[NUM_GARAGE_STORED_CARS];
-	static CStoredCar(&aCarsInSafeHouse3)[NUM_GARAGE_STORED_CARS];
-	static int32 &AudioEntity;
-	static bool &bCamShouldBeOutisde;
+	static int32 BankVansCollected;
+	static bool BombsAreFree;
+	static bool RespraysAreFree;
+	static int32 CarsCollected;
+	static int32 CarTypesCollected[TOTAL_COLLECTCARS_GARAGES];
+	static int32 CrushedCarId;
+	static uint32 LastTimeHelpMessage;
+	static int32 MessageNumberInString;
+	static char MessageIDString[MESSAGE_LENGTH];
+	static int32 MessageNumberInString2;
+	static uint32 MessageStartTime;
+	static uint32 MessageEndTime;
+	static uint32 NumGarages;
+	static bool PlayerInGarage;
+	static int32 PoliceCarsCollected;
+	static CGarage aGarages[NUM_GARAGES];
+	static CStoredCar aCarsInSafeHouse1[NUM_GARAGE_STORED_CARS];
+	static CStoredCar aCarsInSafeHouse2[NUM_GARAGE_STORED_CARS];
+	static CStoredCar aCarsInSafeHouse3[NUM_GARAGE_STORED_CARS];
+	static int32 AudioEntity;
+	static bool bCamShouldBeOutisde;
 
 public:
 	static void Init(void);

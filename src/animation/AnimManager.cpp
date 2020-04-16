@@ -10,12 +10,12 @@
 #include "AnimBlendAssocGroup.h"
 #include "AnimManager.h"
 
-CAnimBlock *CAnimManager::ms_aAnimBlocks = (CAnimBlock*)0x6F01A0;
-CAnimBlendHierarchy *CAnimManager::ms_aAnimations = (CAnimBlendHierarchy*)0x70F430;
-int32 &CAnimManager::ms_numAnimBlocks = *(int32*)0x885AF8;
-int32 &CAnimManager::ms_numAnimations = *(int32*)0x8E2DD4;
-CAnimBlendAssocGroup *&CAnimManager::ms_aAnimAssocGroups = *(CAnimBlendAssocGroup**)0x8F583C;
-CLinkList<CAnimBlendHierarchy*> &CAnimManager::ms_animCache = *(CLinkList<CAnimBlendHierarchy*>*)0x9414DC;
+CAnimBlock CAnimManager::ms_aAnimBlocks[2];
+CAnimBlendHierarchy CAnimManager::ms_aAnimations[250];
+int32 CAnimManager::ms_numAnimBlocks;
+int32 CAnimManager::ms_numAnimations;
+CAnimBlendAssocGroup *CAnimManager::ms_aAnimAssocGroups;
+CLinkList<CAnimBlendHierarchy*> CAnimManager::ms_animCache;
 
 AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_WALK, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_FLAG80 },

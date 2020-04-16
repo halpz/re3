@@ -111,27 +111,27 @@ const int32 gaCarsToCollectInCraigsGarages[TOTAL_COLLECTCARS_GARAGES][TOTAL_COLL
 	{ MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_CHEETAH,  MI_TAXI,     MI_ESPERANT, MI_SENTINEL, MI_IDAHO    }
 };
 
-int32& CGarages::BankVansCollected = *(int32*)0x8F1B34;
-bool& CGarages::BombsAreFree = *(bool*)0x95CD7A;
-bool& CGarages::RespraysAreFree = *(bool*)0x95CD1D;
-int32& CGarages::CarsCollected = *(int32*)0x880E18;
-int32(&CGarages::CarTypesCollected)[TOTAL_COLLECTCARS_GARAGES] = *(int32(*)[TOTAL_COLLECTCARS_GARAGES]) * (uintptr*)0x8E286C;
-int32& CGarages::CrushedCarId = *(int32*)0x943060;
-uint32& CGarages::LastTimeHelpMessage = *(uint32*)0x8F1B58;
-int32& CGarages::MessageNumberInString = *(int32*)0x885BA8;
-char(&CGarages::MessageIDString)[MESSAGE_LENGTH] = *(char(*)[MESSAGE_LENGTH]) * (uintptr*)0x878358;
-int32& CGarages::MessageNumberInString2 = *(int32*)0x8E2C14;
-uint32& CGarages::MessageStartTime = *(uint32*)0x8F2530;
-uint32& CGarages::MessageEndTime = *(uint32*)0x8F597C;
-uint32& CGarages::NumGarages = *(uint32*)0x8F29F4;
-bool& CGarages::PlayerInGarage = *(bool*)0x95CD83;
-int32& CGarages::PoliceCarsCollected = *(int32*)0x941444;
-CStoredCar(&CGarages::aCarsInSafeHouse1)[NUM_GARAGE_STORED_CARS] = *(CStoredCar(*)[NUM_GARAGE_STORED_CARS]) * (uintptr*)0x6FA210;
-CStoredCar(&CGarages::aCarsInSafeHouse2)[NUM_GARAGE_STORED_CARS] = *(CStoredCar(*)[NUM_GARAGE_STORED_CARS]) * (uintptr*)0x6FA300;
-CStoredCar(&CGarages::aCarsInSafeHouse3)[NUM_GARAGE_STORED_CARS] = *(CStoredCar(*)[NUM_GARAGE_STORED_CARS]) * (uintptr*)0x6FA3F0;
-int32& CGarages::AudioEntity = *(int32*)0x5ECEA8;
-CGarage(&CGarages::aGarages)[NUM_GARAGES] = *(CGarage(*)[NUM_GARAGES]) * (uintptr*)0x72BCD0;
-bool& CGarages::bCamShouldBeOutisde = *(bool*)0x95CDB2;
+int32 CGarages::BankVansCollected;
+bool CGarages::BombsAreFree;
+bool CGarages::RespraysAreFree;
+int32 CGarages::CarsCollected;
+int32 CGarages::CarTypesCollected[TOTAL_COLLECTCARS_GARAGES];
+int32 CGarages::CrushedCarId;
+uint32 CGarages::LastTimeHelpMessage;
+int32 CGarages::MessageNumberInString;
+char CGarages::MessageIDString[MESSAGE_LENGTH];
+int32 CGarages::MessageNumberInString2;
+uint32 CGarages::MessageStartTime;
+uint32 CGarages::MessageEndTime;
+uint32 CGarages::NumGarages;
+bool CGarages::PlayerInGarage;
+int32 CGarages::PoliceCarsCollected;
+CStoredCar CGarages::aCarsInSafeHouse1[NUM_GARAGE_STORED_CARS];
+CStoredCar CGarages::aCarsInSafeHouse2[NUM_GARAGE_STORED_CARS];
+CStoredCar CGarages::aCarsInSafeHouse3[NUM_GARAGE_STORED_CARS];
+int32 CGarages::AudioEntity = AEHANDLE_NONE;
+CGarage CGarages::aGarages[NUM_GARAGES];
+bool CGarages::bCamShouldBeOutisde;
 
 void CGarages::Init(void)
 {
@@ -2256,7 +2256,7 @@ void CGarages::Save(uint8 * buf, uint32 * size)
 #endif
 }
 
-CStoredCar::CStoredCar(const CStoredCar & other)
+const CStoredCar &CStoredCar::operator=(const CStoredCar & other)
 {
 	m_nModelIndex = other.m_nModelIndex;
 	m_vecPos = other.m_vecPos;
@@ -2272,6 +2272,7 @@ CStoredCar::CStoredCar(const CStoredCar & other)
 	m_nVariationA = other.m_nVariationA;
 	m_nVariationB = other.m_nVariationB;
 	m_nCarBombType = other.m_nCarBombType;
+	return *this;
 }
 
 void CGarages::Load(uint8* buf, uint32 size)

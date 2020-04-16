@@ -2221,6 +2221,9 @@ cSampleManager::InitialiseSampleBanks(void)
 	
 	for ( int32 i = 0; i < TOTAL_AUDIO_SAMPLES; i++ )
 	{
+#ifdef FIX_BUGS
+		if (nBank >= MAX_SAMPLEBANKS) break;
+#endif
 		if ( BankStartOffset[nBank] == BankStartOffset[SAMPLEBANK_MAIN] + i )
 		{
 			nSampleBankDiscStartOffset[nBank] = m_aSamples[i].nOffset;

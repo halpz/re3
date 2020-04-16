@@ -117,19 +117,19 @@ FindCutsceneAudioTrackId(const char *szCutsceneName)
 	return -1;
 }
 
-bool &CCutsceneMgr::ms_running = *(bool*)0x95CCF5;
-bool &CCutsceneMgr::ms_cutsceneProcessing = *(bool*)0x95CD9F;
-CDirectory *&CCutsceneMgr::ms_pCutsceneDir = *(CDirectory**)0x8F5F88;
-CCutsceneObject *(&CCutsceneMgr::ms_pCutsceneObjects)[NUMCUTSCENEOBJECTS] = *(CCutsceneObject*(*)[NUMCUTSCENEOBJECTS]) *(uintptr*) 0x862170;
-int32 &CCutsceneMgr::ms_numCutsceneObjs = *(int32*)0x942FA4;
-bool &CCutsceneMgr::ms_loaded = *(bool*)0x95CD95;
-bool &CCutsceneMgr::ms_animLoaded = *(bool*)0x95CDA0;
-bool &CCutsceneMgr::ms_useLodMultiplier = *(bool*)0x95CD74;
-char(&CCutsceneMgr::ms_cutsceneName)[CUTSCENENAMESIZE] = *(char(*)[CUTSCENENAMESIZE]) *(uintptr*)0x70D9D0;
-CAnimBlendAssocGroup &CCutsceneMgr::ms_cutsceneAssociations = *(CAnimBlendAssocGroup*)0x709C58;
-CVector &CCutsceneMgr::ms_cutsceneOffset = *(CVector*)0x8F2C0C;
-float &CCutsceneMgr::ms_cutsceneTimer = *(float*)0x941548;
-uint32 &CCutsceneMgr::ms_cutsceneLoadStatus = *(uint32*)0x95CB40;
+bool CCutsceneMgr::ms_running;
+bool CCutsceneMgr::ms_cutsceneProcessing;
+CDirectory *CCutsceneMgr::ms_pCutsceneDir;
+CCutsceneObject *CCutsceneMgr::ms_pCutsceneObjects[NUMCUTSCENEOBJECTS];
+int32 CCutsceneMgr::ms_numCutsceneObjs;
+bool CCutsceneMgr::ms_loaded;
+bool CCutsceneMgr::ms_animLoaded;
+bool CCutsceneMgr::ms_useLodMultiplier;
+char CCutsceneMgr::ms_cutsceneName[CUTSCENENAMESIZE];
+CAnimBlendAssocGroup CCutsceneMgr::ms_cutsceneAssociations;
+CVector CCutsceneMgr::ms_cutsceneOffset;
+float CCutsceneMgr::ms_cutsceneTimer;
+uint32 CCutsceneMgr::ms_cutsceneLoadStatus;
 
 RpAtomic *
 CalculateBoundingSphereRadiusCB(RpAtomic *atomic, void *data)

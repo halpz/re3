@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "Sprite2d.h"
 
-RwIm2DVertex CSprite2d::maVertices[4];
+RwIm2DVertex CSprite2d::maVertices[8];
 float CSprite2d::RecipNearClip;
 int32 CSprite2d::mCurrentBank;
 RwTexture *CSprite2d::mpBankTextures[10];

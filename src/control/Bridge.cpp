@@ -6,20 +6,20 @@
 #include "PathFind.h"
 #include "Stats.h"
 
-CEntity*& CBridge::pLiftRoad = *(CEntity**)0x8E2C8C;
-CEntity*& CBridge::pLiftPart = *(CEntity**)0x8E2C94;
-CEntity*& CBridge::pWeight   = *(CEntity**)0x8E28BC;
+CEntity *CBridge::pLiftRoad;
+CEntity *CBridge::pLiftPart;
+CEntity *CBridge::pWeight;
 
-int& CBridge::State    = *(int*)0x8F2A1C;
-int& CBridge::OldState = *(int*)0x8F2A20;
+int CBridge::State;
+int CBridge::OldState;
 
-float& CBridge::DefaultZLiftPart   = *(float*)0x941430;
-float& CBridge::DefaultZLiftRoad   = *(float*)0x941438;
-float& CBridge::DefaultZLiftWeight = *(float*)0x8F1A44;
+float CBridge::DefaultZLiftPart;
+float CBridge::DefaultZLiftRoad;
+float CBridge::DefaultZLiftWeight;
 
-float& CBridge::OldLift = *(float*)0x8F6254;
+float CBridge::OldLift;
 
-uint32& CBridge::TimeOfBridgeBecomingOperational = *(uint32*)0x8F2BC0;
+uint32 CBridge::TimeOfBridgeBecomingOperational;
 
 void CBridge::Init()
 {
