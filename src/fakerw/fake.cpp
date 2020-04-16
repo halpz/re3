@@ -339,7 +339,7 @@ RwBool rwNativeTextureHackRead(RwStream *stream, RwTexture **tex, RwInt32 size)
 
 RwTexDictionary *RwTexDictionaryCreate(void) { return TexDictionary::create(); }
 RwBool RwTexDictionaryDestroy(RwTexDictionary * dict) { dict->destroy(); return true; }
-RwTexture *RwTexDictionaryAddTexture(RwTexDictionary * dict, RwTexture * texture) { dict->add(texture); return texture; }
+RwTexture *RwTexDictionaryAddTexture(RwTexDictionary * dict, RwTexture * texture) { dict->addFront(texture); return texture; }
 //RwTexture *RwTexDictionaryRemoveTexture(RwTexture * texture);
 RwTexture *RwTexDictionaryFindNamedTexture(RwTexDictionary * dict, const RwChar * name) { return dict->find(name); }
 RwTexDictionary *RwTexDictionaryGetCurrent(void) { return TexDictionary::getCurrent(); }
