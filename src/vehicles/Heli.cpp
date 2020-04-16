@@ -34,13 +34,13 @@ enum
 	HELI_STATUS_HOVER2,
 };
 
-CHeli **CHeli::pHelis = (CHeli**)0x72CF50;
-int16 &CHeli::NumRandomHelis = *(int16*)0x95CCAA;
-uint32 &CHeli::TestForNewRandomHelisTimer = *(uint32*)0x8F1A7C;
+CHeli *CHeli::pHelis[NUM_HELIS];// = (CHeli**)0x72CF50;
+int16 CHeli::NumRandomHelis;// = *(int16*)0x95CCAA;
+uint32 CHeli::TestForNewRandomHelisTimer;// = *(uint32*)0x8F1A7C;
 int16 CHeli::NumScriptHelis;	// unused
-bool &CHeli::CatalinaHeliOn = *(bool*)0x95CD85;
-bool &CHeli::CatalinaHasBeenShotDown = *(bool*)0x95CD56;
-bool &CHeli::ScriptHeliOn = *(bool*)0x95CD43;
+bool CHeli::CatalinaHeliOn;// = *(bool*)0x95CD85;
+bool CHeli::CatalinaHasBeenShotDown;// = *(bool*)0x95CD56;
+bool CHeli::ScriptHeliOn;// = *(bool*)0x95CD43;
 
 CHeli::CHeli(int32 id, uint8 CreatedBy)
  : CVehicle(CreatedBy)

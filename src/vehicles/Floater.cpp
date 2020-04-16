@@ -7,10 +7,9 @@
 #include "Vehicle.h"
 #include "Floater.h"
 
-cBuoyancy &mod_Buoyancy = *(cBuoyancy*)0x8F2674;
+cBuoyancy mod_Buoyancy;// = *(cBuoyancy*)0x8F2674;
 
-//static float fVolMultiplier = 1.0f;
-static float &fVolMultiplier = *(float*)0x601394;
+static float fVolMultiplier = 1.0f; // 0x601394;
 // amount of boat volume in bounding box
 // 1.0-volume is the empty space in the bbox
 static float fBoatVolumeDistribution[9] = {

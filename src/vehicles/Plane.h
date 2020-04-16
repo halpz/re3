@@ -67,6 +67,6 @@ public:
 };
 static_assert(sizeof(CPlane) == 0x29C, "CPlane: error");
 
-extern float &LandingPoint;
-extern float &TakeOffPoint;
-extern float *PlanePathPosition;	//[3]
+extern float LandingPoint;
+extern float TakeOffPoint;
+extern float PlanePathPosition[3];

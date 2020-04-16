@@ -14,23 +14,23 @@
 #include "HandlingMgr.h"
 #include "Train.h"
 
-static CTrainNode *&pTrackNodes = *(CTrainNode**)0x8F4338;
-static int16 &NumTrackNodes = *(int16*)0x95CC5C;
+static CTrainNode* pTrackNodes;
+static int16 NumTrackNodes;
 static float StationDist[3] = { 873.0f, 1522.0f, 2481.0f };
-static float &TotalLengthOfTrack = *(float*)0x64D000;
-static float &TotalDurationOfTrack = *(float*)0x64D004;
-static CTrainInterpolationLine *aLineBits = (CTrainInterpolationLine*)0x70D838;	// [17]
-static float *EngineTrackPosition = (float*)0x64D008;	//[2]
-static float *EngineTrackSpeed = (float*)0x880848;	//[2]
+static float TotalLengthOfTrack;
+static float TotalDurationOfTrack;
+static CTrainInterpolationLine aLineBits[17];
+static float EngineTrackPosition[2];
+static float EngineTrackSpeed[2];
 
-static CTrainNode *&pTrackNodes_S = *(CTrainNode**)0x8F2560;
-static int16 &NumTrackNodes_S = *(int16*)0x95CC6A;
+static CTrainNode* pTrackNodes_S;
+static int16 NumTrackNodes_S;
 static float StationDist_S[4] = { 55.0f, 1388.0f, 2337.0f, 3989.0f };
-static float &TotalLengthOfTrack_S = *(float*)0x64D010;
-static float &TotalDurationOfTrack_S = *(float*)0x64D014;
-static CTrainInterpolationLine *aLineBits_S = (CTrainInterpolationLine*)0x726600;	// [18]
-static float *EngineTrackPosition_S = (float*)0x64D018;	//[4]
-static float *EngineTrackSpeed_S = (float*)0x87C7C8;	//[4]
+static float TotalLengthOfTrack_S;
+static float TotalDurationOfTrack_S;
+static CTrainInterpolationLine aLineBits_S[18];
+static float EngineTrackPosition_S[4];
+static float EngineTrackSpeed_S[4];
 
 CVector CTrain::aStationCoors[3];
 CVector CTrain::aStationCoors_S[4];
