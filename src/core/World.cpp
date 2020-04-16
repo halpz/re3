@@ -26,6 +26,9 @@
 #include "Object.h"
 #include "Shadows.h"
 #include "Explosion.h"
+#include "Glass.h"
+#include "ParticleObject.h"
+#include "EventList.h"
 
 #define OBJECT_REPOSITION_OFFSET_Z 0.2f
 
@@ -47,26 +50,6 @@ bool &CWorld::bProcessCutsceneOnly = *(bool*)0x95CD8B;
 
 bool &CWorld::bDoingCarCollisions = *(bool*)0x95CD8C;
 bool &CWorld::bIncludeCarTyres = *(bool*)0x95CDAA;
-
-//WRAPPER void CWorld::ClearForRestart(void) { EAXJMP(0x4AE850); }
-//WRAPPER void CWorld::AddParticles(void) { EAXJMP(0x4B4010); }
-//WRAPPER void CWorld::ShutDown(void) { EAXJMP(0x4AE450); }
-//WRAPPER void CWorld::RepositionCertainDynamicObjects() { EAXJMP(0x4B42B0); }
-//WRAPPER void CWorld::RemoveStaticObjects() { EAXJMP(0x4B4D50); }
-//WRAPPER void CWorld::RemoveReferencesToDeletedObject(CEntity*) { EAXJMP(0x4B3BF0); }
-//WRAPPER void CWorld::FindObjectsKindaColliding(const CVector &, float, bool, int16*, int16, CEntity **, bool, bool, bool, bool, bool){ EAXJMP(0x4B2A30); }
-//WRAPPER void CWorld::ClearExcitingStuffFromArea(const CVector &pos, float radius, uint8 unused) { EAXJMP(0x4B4E70) };
-//WRAPPER void CWorld::FindObjectsIntersectingCube(const CVector &, const CVector &, int16*, int16, CEntity **, bool, bool, bool, bool, bool) { EAXJMP(0x4B2E70); }
-//WRAPPER void CWorld::FindObjectsIntersectingAngledCollisionBox(const CColBox &, const CMatrix &, const CVector &, float, float, float, float, int16*, int16, CEntity **, bool, bool, bool, bool, bool) { EAXJMP(0x4B3280); }
-//WRAPPER void CWorld::FindObjectsOfTypeInRange(uint32, CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool) { EAXJMP(0x4B2600); }
-//WRAPPER void CWorld::FindObjectsOfTypeInRangeSectorList(uint32, CPtrList&, CVector&, float, bool, short*, short, CEntity**) { EAXJMP(0x4B2960); }
-//WRAPPER void CWorld::FindMissionEntitiesIntersectingCube(const CVector&, const CVector&, int16*, int16, CEntity**, bool, bool, bool) { EAXJMP(0x4B3680); }
-//WRAPPER void CWorld::ClearCarsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B50E0); }
-//WRAPPER void CWorld::ClearPedsFromArea(float, float, float, float, float, float) { EAXJMP(0x4B52B0); }
-//WRAPPER void CWorld::CallOffChaseForArea(float, float, float, float) { EAXJMP(0x4B5530); }
-WRAPPER void CWorld::TriggerExplosion(const CVector& position, float fRadius, float fPower, CEntity *pCreator, bool bProcessVehicleBombTimer) { EAXJMP(0x4B1140); }
-//WRAPPER void CWorld::SetPedsOnFire(float, float, float, float, CEntity*) { EAXJMP(0x4B3D30); }
-WRAPPER void CWorld::UseDetonator(CEntity *) { EAXJMP(0x4B4650); }
 
 void
 CWorld::Initialise()
@@ -2037,7 +2020,6 @@ CWorld::Process(void)
 	}
 }
 
-/*
 void 
 CWorld::TriggerExplosion(const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer)
 {
@@ -2057,7 +2039,128 @@ CWorld::TriggerExplosion(const CVector& position, float fRadius, float fPower, C
 	}
 
 }
-*/
+
+void
+CWorld::TriggerExplosionSectorList(CPtrList& list, const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer)
+{
+	CPtrNode* pNode = list.first;
+	while (pNode) {
+		CPhysical* pEntity = (CPhysical*)pNode->item;
+		CVector vecDistance = pEntity->m_matrix.GetPosition() - position;
+		float fMagnitude = vecDistance.Magnitude();
+		if (fRadius > fMagnitude) {
+			CWeapon::BlowUpExplosiveThings(pEntity);
+			CPed* pPed = (CPed*)pEntity;
+			CObject* pObject = (CObject*)pEntity;
+			CVehicle* pVehicle = (CVehicle*)pEntity;
+			if (!pEntity->bExplosionProof && (!pEntity->IsPed() || !pPed->bInVehicle)) {
+				if (pEntity->bIsStatic) {
+					if (pEntity->IsObject()) {
+						if (fPower > pObject->m_fUprootLimit || IsFence(pObject->m_modelIndex)) {
+							if (IsGlass(pObject->m_modelIndex)) {
+								CGlass::WindowRespondsToExplosion(pObject, position);
+							} else {
+								pObject->bIsStatic = false;
+								pObject->AddToMovingList();
+								int16 modelId = pEntity->m_modelIndex;
+								if (modelId != MI_FIRE_HYDRANT || pObject->bHasBeenDamaged) {
+									if (pEntity->IsObject() && modelId != MI_EXPLODINGBARREL && modelId != MI_PETROLPUMP)
+										pObject->bHasBeenDamaged = true;
+								} else {
+									CVector pos = pEntity->m_matrix.GetPosition();
+									pos.z -= 0.5f;
+									CParticleObject::AddObject(POBJECT_FIRE_HYDRANT, pos, true);
+									pObject->bHasBeenDamaged = true;
+								}
+							}
+						}
+						if (pEntity->bIsStatic) {
+							float fDamageMultiplier = (fRadius - fMagnitude) * 2.0f / fRadius;
+							float fDamage = 300.0f * min(fDamageMultiplier, 1.0f);
+							pObject->ObjectDamage(fDamage);
+						}
+					} else {
+						pEntity->bIsStatic = false;
+						pEntity->AddToMovingList();
+					}
+				}
+				if (!pEntity->bIsStatic) {
+					float fDamageMultiplier = min((fRadius - fMagnitude) * 2.0f / fRadius, 1.0f);
+					CVector vecForceDir = vecDistance * (fPower * pEntity->m_fMass * 0.00071429f * fDamageMultiplier / max(fMagnitude, 0.01f));
+					vecForceDir.z = max(vecForceDir.z, 0.0f);
+					if (pEntity == FindPlayerPed())
+						vecForceDir.z = min(vecForceDir.z, 1.0f);
+					pEntity->ApplyMoveForce(vecForceDir);
+					if (!pEntity->bPedPhysics) {
+						float fBoundRadius = pEntity->GetBoundRadius();
+						float fDistanceZ = position.z - pEntity->m_matrix.GetPosition().z;
+						float fPointZ = fBoundRadius;
+						if (max(fDistanceZ, -fBoundRadius) < fBoundRadius)
+						{
+							if (fDistanceZ <= -fBoundRadius)
+								fPointZ = -fBoundRadius;
+							else
+								fPointZ = fDistanceZ;
+						}
+						pEntity->ApplyTurnForce(vecForceDir.x, vecForceDir.y, vecForceDir.z, 0.0f, 0.0f, fPointZ);
+					}
+					switch (pEntity->m_type)
+					{
+					case ENTITY_TYPE_VEHICLE:
+						if (pEntity->m_status == STATUS_SIMPLE)  {
+							pEntity->m_status = STATUS_PHYSICS;
+							CCarCtrl::SwitchVehicleToRealPhysics(pVehicle);
+						}
+						pVehicle->InflictDamage(pCreator, WEAPONTYPE_EXPLOSION, 1100.0f * fDamageMultiplier);
+						if (bProcessVehicleBombTimer) {
+							if (pVehicle->m_nBombTimer)
+								pVehicle->m_nBombTimer /= 10;
+						}
+						break;
+					case ENTITY_TYPE_PED: {
+						int8 direction = pPed->GetLocalDirection(-vecForceDir);
+						pPed->bIsStanding = false;
+						pPed->ApplyMoveForce(0.0, 0.0, 2.0f);
+						float fDamage = 250.0f * fDamageMultiplier;
+						pPed->InflictDamage(pCreator, WEAPONTYPE_EXPLOSION, fDamage, PEDPIECE_TORSO, direction);
+						if (pPed->m_nPedState!= PED_DIE)
+							pPed->SetFall(2000, (AnimationId)(direction + ANIM_KO_SKID_FRONT), 0);
+						if (pCreator && pCreator->IsPed()) {
+							eEventType eventType = EVENT_SHOOT_PED;
+							if (pPed->m_nPedType == PEDTYPE_COP)
+								eventType = EVENT_SHOOT_COP;
+							CEventList::RegisterEvent(eventType, EVENT_ENTITY_PED, pEntity, (CPed*)pCreator, 10000);
+							pPed->RegisterThreatWithGangPeds(pCreator);
+						}
+						break;
+					}
+					case ENTITY_TYPE_OBJECT:
+						pObject->ObjectDamage(300.0f * fDamageMultiplier);
+						break;
+					}
+				}
+			}
+		}
+		pNode = pNode->next;
+	}
+}
+
+void 
+CWorld::UseDetonator(CEntity* pEntity)
+{
+	int32 i = CPools::GetVehiclePool()->GetSize();
+	while (--i >= 0) {
+		CAutomobile* pVehicle = (CAutomobile*)CPools::GetVehiclePool()->GetSlot(i);
+		if (pVehicle && !pVehicle->m_vehType && pVehicle->m_bombType == CARBOMB_REMOTE && pVehicle->m_pBombRigger == pEntity) {
+			pVehicle->m_bombType = CARBOMB_NONE;
+			pVehicle->m_nBombTimer = 500;
+			pVehicle->m_pBlowUpEntity = pVehicle->m_pBombRigger;
+			if (pVehicle->m_pBlowUpEntity)
+				pVehicle->m_pBlowUpEntity->RegisterReference(&pVehicle->m_pBlowUpEntity);
+		}
+	}
+}
+
 STARTPATCHES
 	InjectHook(0x4AE930, CWorld::Add, PATCH_JUMP);
 	InjectHook(0x4AE9D0, CWorld::Remove, PATCH_JUMP);

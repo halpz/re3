@@ -151,7 +151,7 @@ public:
 	static void Process();
 	static void TriggerExplosion(const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer);
 	static void TriggerExplosionSectorList(CPtrList& list, const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer);
-	static void UseDetonator(CEntity *);
+	static void UseDetonator(CEntity *pEntity);
 };
 
 extern CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
