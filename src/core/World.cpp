@@ -1743,30 +1743,59 @@ CWorld::RepositionCertainDynamicObjects()
 void
 CWorld::RepositionOneObject(CEntity* pEntity)
 {
-	int16 modeId = pEntity->m_modelIndex;
-	if (MI_SINGLESTREETLIGHTS1 == modeId || MI_SINGLESTREETLIGHTS2 == modeId || MI_SINGLESTREETLIGHTS3 == modeId
-		|| MI_DOUBLESTREETLIGHTS == modeId || MI_TREE1 == modeId || MI_TREE2 == modeId || MI_TREE3 == modeId
-		|| MI_TREE4 == modeId || MI_TREE5 == modeId || MI_TREE6 == modeId || MI_TREE7 == modeId
-		|| MI_TREE8 == modeId || MI_TREE9 == modeId || MI_TREE10 == modeId || MI_TREE11 == modeId
-		|| MI_TREE12 == modeId || MI_TREE13 == modeId || MI_TREE14 == modeId || MI_TRAFFICLIGHTS == modeId
-		|| MI_PARKINGMETER == modeId || MI_PHONEBOOTH1 == modeId || MI_WASTEBIN == modeId || MI_BIN == modeId
-		|| MI_POSTBOX1 == modeId || MI_NEWSSTAND == modeId || MI_TRAFFICCONE == modeId || MI_DUMP1 == modeId
-		|| MI_ROADWORKBARRIER1 == modeId || MI_BUSSIGN1 == modeId || MI_NOPARKINGSIGN1 == modeId
-		|| MI_PHONESIGN == modeId || MI_TAXISIGN == modeId || MI_FISHSTALL01 == modeId || MI_FISHSTALL02 == modeId
-		|| MI_FISHSTALL03 == modeId || MI_FISHSTALL04 == modeId || MI_BAGELSTAND2 == modeId || MI_FIRE_HYDRANT == modeId
-		|| MI_BOLLARDLIGHT == modeId || MI_PARKTABLE == modeId) {
+	int16 modelId = pEntity->m_modelIndex;
+	if (modelId == MI_SINGLESTREETLIGHTS1
+		|| modelId == MI_SINGLESTREETLIGHTS2
+		|| modelId == MI_SINGLESTREETLIGHTS3
+		|| modelId == MI_DOUBLESTREETLIGHTS
+		|| modelId == MI_TREE1
+		|| modelId == MI_TREE2
+		|| modelId == MI_TREE3
+		|| modelId == MI_TREE4
+		|| modelId == MI_TREE5
+		|| modelId == MI_TREE6
+		|| modelId == MI_TREE7
+		|| modelId == MI_TREE8
+		|| modelId == MI_TREE9
+		|| modelId == MI_TREE10
+		|| modelId == MI_TREE11
+		|| modelId == MI_TREE12
+		|| modelId == MI_TREE13
+		|| modelId == MI_TREE14
+		|| modelId == MI_TRAFFICLIGHTS
+		|| modelId == MI_PARKINGMETER
+		|| modelId == MI_PHONEBOOTH1
+		|| modelId == MI_WASTEBIN
+		|| modelId == MI_BIN
+		|| modelId == MI_POSTBOX1
+		|| modelId == MI_NEWSSTAND
+		|| modelId == MI_TRAFFICCONE
+		|| modelId == MI_DUMP1
+		|| modelId == MI_ROADWORKBARRIER1
+		|| modelId == MI_BUSSIGN1
+		|| modelId == MI_NOPARKINGSIGN1
+		|| modelId == MI_PHONESIGN
+		|| modelId == MI_TAXISIGN
+		|| modelId == MI_FISHSTALL01
+		|| modelId == MI_FISHSTALL02
+		|| modelId == MI_FISHSTALL03
+		|| modelId == MI_FISHSTALL04
+		|| modelId == MI_BAGELSTAND2
+		|| modelId == MI_FIRE_HYDRANT
+		|| modelId == MI_BOLLARDLIGHT
+		|| modelId == MI_PARKTABLE) {
 		CVector& position = pEntity->m_matrix.GetPosition();
 		float fBoundingBoxMinZ = pEntity->GetColModel()->boundingBox.min.z;
 		position.z = CWorld::FindGroundZFor3DCoord(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z, nil) - fBoundingBoxMinZ;
 		pEntity->m_matrix.UpdateRW();
 		pEntity->UpdateRwFrame();
-	} else if (MI_BUOY == modeId) {
+	} else if (modelId == MI_BUOY) {
 		float fWaterLevel = 0.0f;
-		bool found = true;
+		bool bFound = true;
 		const CVector& position = pEntity->m_matrix.GetPosition();
-		float fGroundZ = CWorld::FindGroundZFor3DCoord(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z, &found);
+		float fGroundZ = CWorld::FindGroundZFor3DCoord(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z, &bFound);
 		if (CWaterLevel::GetWaterLevelNoWaves(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z, &fWaterLevel)) {
-			if (!found || fWaterLevel > fGroundZ) {
+			if (!bFound || fWaterLevel > fGroundZ) {
 				CColModel* pColModel = pEntity->GetColModel();
 				float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
 				pEntity->m_matrix.GetPosition().z = 0.2f * fHeight + fWaterLevel - 0.5f * fHeight;
