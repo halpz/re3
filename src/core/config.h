@@ -47,7 +47,8 @@ enum Config {
 	NUM_PATHCONNECTIONS = 10260,
 
 	// Link list lengths
-	// TODO: alpha list
+	NUMALPHALIST = 20,
+	NUMALPHAENTITYLIST = 150,
 	NUMCOLCACHELINKS = 200,
 	NUMREFERENCES = 800,
 
