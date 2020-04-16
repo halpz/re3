@@ -9132,6 +9132,9 @@ cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 		CVehicle *veh = params->m_pVehicle;
 		if(veh->m_bSirenOrAlarm == 0 && veh->m_nAlarmState <= 0) return;
 
+#ifdef FIX_BUGS
+		if (params->m_pVehicle->m_status == STATUS_WRECKED) return;
+#endif
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		m_sQueueSample.m_bVolume = ComputeVolume(80, 110.f, m_sQueueSample.m_fDistance);
 		if(m_sQueueSample.m_bVolume) {

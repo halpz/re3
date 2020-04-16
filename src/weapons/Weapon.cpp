@@ -2162,7 +2162,7 @@ CWeapon::MakePedsJumpAtShot(CPhysical *shooter, CVector *source, CVector *target
 				&& ped->GetPosition().y > miny && ped->GetPosition().y < maxy
 				&& ped->GetPosition().z > minz && ped->GetPosition().z < maxz )
 			{
-				if ( ped != FindPlayerPed() && (uint8)(ped->m_randomSeed ^ CGeneral::GetRandomNumber()) & 31 )
+				if ( ped != FindPlayerPed() && !((uint8)(ped->m_randomSeed ^ CGeneral::GetRandomNumber()) & 31) )
 					ped->SetEvasiveDive(shooter, 1);
 			}
 		}
