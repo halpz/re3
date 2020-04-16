@@ -14,11 +14,11 @@ enum bridgeStates {
 class CBridge
 {
 public:
-	static CEntity *&pLiftRoad, *&pLiftPart, *&pWeight;
-	static int &State, &OldState;
-	static float &DefaultZLiftPart, &DefaultZLiftRoad, &DefaultZLiftWeight;
-	static float &OldLift;
-	static uint32 &TimeOfBridgeBecomingOperational;
+	static CEntity *pLiftRoad, *pLiftPart, *pWeight;
+	static int State, OldState;
+	static float DefaultZLiftPart, DefaultZLiftRoad, DefaultZLiftWeight;
+	static float OldLift;
+	static uint32 TimeOfBridgeBecomingOperational;
 
 	static void Init();
 	static void Update();

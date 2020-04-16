@@ -8,7 +8,7 @@ class CSprite2d
 	static int32 mCurrentSprite[10];
 	static int32 mBankStart[10];
 	static RwIm2DVertex maBankVertices[500];
-	static RwIm2DVertex maVertices[4];
+	static RwIm2DVertex maVertices[8];
 public:
 	RwTexture *m_pTexture;
 
