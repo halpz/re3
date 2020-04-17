@@ -497,3 +497,10 @@ IsExplosiveThingModel(int16 id)
 	return id == MI_EXPLODINGBARREL ||
 		id == MI_PETROLPUMP;
 }
+
+inline bool 
+IsFence(int16 id)
+{
+	return id == MI_FENCE ||
+		id == MI_FENCE2;
+}

@@ -99,6 +99,6 @@ public:
 
 	static void DeleteAllMissionObjects();
 	static void DeleteAllTempObjects();
-	static void DeleteAllTempObjectInArea(CVector point, float fRadius);
+	static void DeleteAllTempObjectsInArea(CVector point, float fRadius);
 };
 static_assert(sizeof(CObject) == 0x198, "CObject: error");
