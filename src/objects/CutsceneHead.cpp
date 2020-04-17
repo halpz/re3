@@ -1,6 +1,6 @@
 #include "common.h"
 #include <rpskin.h>
-#include "patcher.h"
+
 #include "main.h"
 #include "RwHelper.h"
 #include "RpAnimBlend.h"
@@ -109,20 +109,3 @@ CCutsceneHead::PlayAnimation(const char *animName)
 		RwStreamClose(stream, nil);
 	}
 }
-
-class CCutsceneHead_ : public CCutsceneHead
-{
-public:
-	void CreateRwObject_(void) { CCutsceneHead::CreateRwObject(); }
-	void DeleteRwObject_(void) { CCutsceneHead::DeleteRwObject(); }
-	void ProcessControl_(void) { CCutsceneHead::ProcessControl(); }
-	void Render_(void) { CCutsceneHead::Render(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4BA650, &CCutsceneHead_::CreateRwObject_, PATCH_JUMP);
-	InjectHook(0x4BA690, &CCutsceneHead_::DeleteRwObject_, PATCH_JUMP);
-	InjectHook(0x4BA760, &CCutsceneHead_::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x4BA800, &CCutsceneHead_::Render_, PATCH_JUMP);
-	InjectHook(0x4BA6A0, &CCutsceneHead::PlayAnimation, PATCH_JUMP);
-ENDPATCHES

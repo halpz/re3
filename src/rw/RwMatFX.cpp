@@ -2,7 +2,9 @@
 
 #define WITHD3D
 #include "common.h"
+#ifdef RWLIBS
 #include "patcher.h"
+#endif
 
 struct MatFXNothing { int pad[5]; int effect; };
 
@@ -216,14 +218,11 @@ _rpMatFXD3D8AtomicMatFXEnvRender_ps2(RxD3D8InstanceData *inst, int flags, int se
 	RwD3D8SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, 0);
 }
 
-
-STARTPATCHES
 #ifdef RWLIBS
+STARTPATCHES
 	InjectHook((uintptr)&_rpMatFXD3D8AtomicMatFXEnvRender, _rpMatFXD3D8AtomicMatFXEnvRender_ps2, PATCH_JUMP);
-#else
-	InjectHook(0x5CF6C0, _rpMatFXD3D8AtomicMatFXEnvRender_ps2, PATCH_JUMP);
-#endif
 ENDPATCHES
+#endif
 
 #endif
 

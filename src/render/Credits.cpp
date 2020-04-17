@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Timer.h"
 #include "Font.h"
 #include "Frontend.h"
@@ -497,13 +497,3 @@ bool CCredits::AreCreditsDone(void)
 {
 	return !bCreditsGoing;
 }
-
-STARTPATCHES
-	InjectHook(0x4FE7A0, CCredits::Init, PATCH_JUMP);
-	InjectHook(0x4FE760, CCredits::Start, PATCH_JUMP);
-	InjectHook(0x4FE780, CCredits::Stop, PATCH_JUMP);
-	InjectHook(0x4FE790, CCredits::AreCreditsDone, PATCH_JUMP);
-	InjectHook(0x4FADF0, CCredits::Render, PATCH_JUMP);
-	InjectHook(0x4FE710, CCredits::PrintCreditSpace, PATCH_JUMP);
-	InjectHook(0x4FE620, CCredits::PrintCreditText, PATCH_JUMP);
-ENDPATCHES

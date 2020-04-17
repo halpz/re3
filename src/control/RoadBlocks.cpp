@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "RoadBlocks.h"
 #include "PathFind.h"
 #include "ModelIndices.h"
@@ -195,9 +195,3 @@ CRoadBlocks::GenerateRoadBlocks(void)
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x436F50, &CRoadBlocks::Init, PATCH_JUMP);
-	InjectHook(0x4376A0, &CRoadBlocks::GenerateRoadBlockCopsForCar, PATCH_JUMP);
-	InjectHook(0x436FA0, &CRoadBlocks::GenerateRoadBlocks, PATCH_JUMP);
-ENDPATCHES

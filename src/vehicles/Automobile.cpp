@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "RwHelper.h"
 #include "Pad.h"
@@ -4492,88 +4492,3 @@ CAutomobile::SetAllTaxiLights(bool set)
 {
 	m_sAllTaxiLights = set;
 }
-
-#include <new>
-
-class CAutomobile_ : public CAutomobile
-{
-public:
-	void ctor(int32 id, uint8 CreatedBy) { ::new (this) CAutomobile(id, CreatedBy); }
-	void dtor() { CAutomobile::~CAutomobile(); }
-	void SetModelIndex_(uint32 id) { CAutomobile::SetModelIndex(id); }
-	void ProcessControl_(void) { CAutomobile::ProcessControl(); }
-	void Teleport_(CVector v) { CAutomobile::Teleport(v); }
-	void PreRender_(void) { CAutomobile::PreRender(); }
-	void Render_(void) { CAutomobile::Render(); }
-
-	int32 ProcessEntityCollision_(CEntity *ent, CColPoint *colpoints){ return CAutomobile::ProcessEntityCollision(ent, colpoints); }
-
-	void ProcessControlInputs_(uint8 pad) { CAutomobile::ProcessControlInputs(pad); }
-	void GetComponentWorldPosition_(int32 component, CVector &pos) { CAutomobile::GetComponentWorldPosition(component, pos); }
-	bool IsComponentPresent_(int32 component) { return CAutomobile::IsComponentPresent(component); }
-	void SetComponentRotation_(int32 component, CVector rotation) { CAutomobile::SetComponentRotation(component, rotation); }
-	void OpenDoor_(int32 component, eDoors door, float ratio) { CAutomobile::OpenDoor(component, door, ratio); }
-	void ProcessOpenDoor_(uint32 component, uint32 anim, float time) { CAutomobile::ProcessOpenDoor(component, anim, time); }
-	bool IsDoorReady_(eDoors door) { return CAutomobile::IsDoorReady(door); }
-	bool IsDoorFullyOpen_(eDoors door) { return CAutomobile::IsDoorFullyOpen(door); }
-	bool IsDoorClosed_(eDoors door) { return CAutomobile::IsDoorClosed(door); }
-	bool IsDoorMissing_(eDoors door) { return CAutomobile::IsDoorMissing(door); }
-	void RemoveRefsToVehicle_(CEntity *ent) { CAutomobile::RemoveRefsToVehicle(ent); }
-	void BlowUpCar_(CEntity *ent) { CAutomobile::BlowUpCar(ent); }
-	bool SetUpWheelColModel_(CColModel *colModel) { return CAutomobile::SetUpWheelColModel(colModel); }
-	void BurstTyre_(uint8 tyre) { CAutomobile::BurstTyre(tyre); }
-	bool IsRoomForPedToLeaveCar_(uint32 door, CVector *pos) { return CAutomobile::IsRoomForPedToLeaveCar(door, pos); }
-	float GetHeightAboveRoad_(void) { return CAutomobile::GetHeightAboveRoad(); }
-	void PlayCarHorn_(void) { CAutomobile::PlayCarHorn(); }
-};
-
-STARTPATCHES
-	InjectHook(0x52C6B0, &CAutomobile_::ctor, PATCH_JUMP);
-	InjectHook(0x52D170, &CAutomobile_::dtor, PATCH_JUMP);
-	InjectHook(0x52D190, &CAutomobile_::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x531470, &CAutomobile_::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x535180, &CAutomobile_::Teleport_, PATCH_JUMP);
-	InjectHook(0x539EA0, &CAutomobile_::Render_, PATCH_JUMP);
-	InjectHook(0x535B40, &CAutomobile_::PreRender_, PATCH_JUMP);
-	InjectHook(0x53B270, &CAutomobile_::ProcessEntityCollision_, PATCH_JUMP);
-	InjectHook(0x53B660, &CAutomobile_::ProcessControlInputs_, PATCH_JUMP);
-	InjectHook(0x52E5F0, &CAutomobile_::GetComponentWorldPosition_, PATCH_JUMP);
-	InjectHook(0x52E660, &CAutomobile_::IsComponentPresent_, PATCH_JUMP);
-	InjectHook(0x52E680, &CAutomobile_::SetComponentRotation_, PATCH_JUMP);
-	InjectHook(0x52E750, &CAutomobile_::OpenDoor_, PATCH_JUMP);
-	InjectHook(0x52EF10, &CAutomobile_::IsDoorReady_, PATCH_JUMP);
-	InjectHook(0x52EF90, &CAutomobile_::IsDoorFullyOpen_, PATCH_JUMP);
-	InjectHook(0x52EFD0, &CAutomobile_::IsDoorClosed_, PATCH_JUMP);
-	InjectHook(0x52F000, &CAutomobile_::IsDoorMissing_, PATCH_JUMP);
-	InjectHook(0x53BF40, &CAutomobile_::RemoveRefsToVehicle_, PATCH_JUMP);
-	InjectHook(0x53BC60, &CAutomobile_::BlowUpCar_, PATCH_JUMP);
-	InjectHook(0x53BF70, &CAutomobile_::SetUpWheelColModel_, PATCH_JUMP);
-	InjectHook(0x53C0E0, &CAutomobile_::BurstTyre_, PATCH_JUMP);
-	InjectHook(0x53C5B0, &CAutomobile_::IsRoomForPedToLeaveCar_, PATCH_JUMP);
-	InjectHook(0x437690, &CAutomobile_::GetHeightAboveRoad_, PATCH_JUMP);
-	InjectHook(0x53C450, &CAutomobile_::PlayCarHorn_, PATCH_JUMP);
-	InjectHook(0x53E090, &CAutomobile::PlaceOnRoadProperly, PATCH_JUMP);
-	InjectHook(0x52F030, &CAutomobile::dmgDrawCarCollidingParticles, PATCH_JUMP);
-	InjectHook(0x535450, &CAutomobile::AddDamagedVehicleParticles, PATCH_JUMP);
-	InjectHook(0x5357D0, &CAutomobile::AddWheelDirtAndWater, PATCH_JUMP);
-	InjectHook(0x5353A0, &CAutomobile::ResetSuspension, PATCH_JUMP);
-	InjectHook(0x52D210, &CAutomobile::SetupSuspensionLines, PATCH_JUMP);
-	InjectHook(0x53E000, &CAutomobile::BlowUpCarsInPath, PATCH_JUMP);
-	InjectHook(0x42E220, &CAutomobile::HasCarStoppedBecauseOfLight, PATCH_JUMP);
-	InjectHook(0x53D320, &CAutomobile::SetBusDoorTimer, PATCH_JUMP);
-	InjectHook(0x53D370, &CAutomobile::ProcessAutoBusDoors, PATCH_JUMP);
-	InjectHook(0x535250, &CAutomobile::ProcessSwingingDoor, PATCH_JUMP);
-	InjectHook(0x53C240, &CAutomobile::Fix, PATCH_JUMP);
-	InjectHook(0x53C310, &CAutomobile::SetupDamageAfterLoad, PATCH_JUMP);
-	InjectHook(0x530300, &CAutomobile::SpawnFlyingComponent, PATCH_JUMP);
-	InjectHook(0x535320, &CAutomobile::RemoveBonnetInPedCollision, PATCH_JUMP);
-	InjectHook(0x5301A0, &CAutomobile::SetPanelDamage, PATCH_JUMP);
-	InjectHook(0x530120, &CAutomobile::SetBumperDamage, PATCH_JUMP);
-	InjectHook(0x530200, &CAutomobile::SetDoorDamage, PATCH_JUMP);
-	InjectHook(0x5300E0, &CAutomobile::SetComponentVisibility, PATCH_JUMP);
-	InjectHook(0x52D1B0, &CAutomobile::SetupModelNodes, PATCH_JUMP);
-	InjectHook(0x53C420, &CAutomobile::SetTaxiLight, PATCH_JUMP);
-	InjectHook(0x53BC40, &CAutomobile::GetAllWheelsOffGround, PATCH_JUMP);
-	InjectHook(0x5308C0, &CAutomobile::ReduceHornCounter, PATCH_JUMP);
-	InjectHook(0x53C440, &CAutomobile::SetAllTaxiLights, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "TempColModels.h"
 #include "ModelIndices.h"
@@ -248,15 +248,3 @@ CModelInfo::ReInit2dEffects()
 			ms_modelInfoPtrs[i]->Init2dEffects();
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x50B310, CModelInfo::Initialise, PATCH_JUMP);
-	InjectHook(0x50B5B0, CModelInfo::ShutDown, PATCH_JUMP);
-	InjectHook(0x50B920, CModelInfo::AddSimpleModel, PATCH_JUMP);
-	InjectHook(0x50B9C0, CModelInfo::AddTimeModel, PATCH_JUMP);
-	InjectHook(0x50BA10, CModelInfo::AddClumpModel, PATCH_JUMP);
-	InjectHook(0x50BAD0, CModelInfo::AddPedModel, PATCH_JUMP);
-	InjectHook(0x50BA60, CModelInfo::AddVehicleModel, PATCH_JUMP);
-	InjectHook(0x50B860, (CBaseModelInfo *(*)(const char*, int*))CModelInfo::GetModelInfo, PATCH_JUMP);
-	InjectHook(0x50BBC0, CModelInfo::RemoveColModelsFromOtherLevels, PATCH_JUMP);
-ENDPATCHES

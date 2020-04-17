@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "AnimBlendHierarchy.h"
 #include "AnimBlendClumpData.h"
 #include "RpAnimBlend.h"
@@ -202,33 +202,3 @@ CAnimBlendAssociation::UpdateBlend(float timeDelta)
 
 	return true;
 }
-
-#include <new>
-
-class CAnimBlendAssociation_ : public CAnimBlendAssociation
-{
-public:
-	CAnimBlendAssociation *ctor1(void) { return ::new (this) CAnimBlendAssociation(); }
-	CAnimBlendAssociation *ctor2(CAnimBlendAssociation &other) { return ::new (this) CAnimBlendAssociation(other); }
-	void dtor(void) { this->CAnimBlendAssociation::~CAnimBlendAssociation(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4016A0, &CAnimBlendAssociation::AllocateAnimBlendNodeArray, PATCH_JUMP);
-	InjectHook(0x4016F0, &CAnimBlendAssociation::FreeAnimBlendNodeArray, PATCH_JUMP);
-	InjectHook(0x4017B0, &CAnimBlendAssociation::GetNode, PATCH_JUMP);
-	InjectHook(0x401560, (void (CAnimBlendAssociation::*)(RpClump*, CAnimBlendHierarchy*))&CAnimBlendAssociation::Init, PATCH_JUMP);
-	InjectHook(0x401620, (void (CAnimBlendAssociation::*)(CAnimBlendAssociation&))&CAnimBlendAssociation::Init, PATCH_JUMP);
-	InjectHook(0x4017E0, &CAnimBlendAssociation::SetBlend, PATCH_JUMP);
-	InjectHook(0x401820, &CAnimBlendAssociation::SetFinishCallback, PATCH_JUMP);
-	InjectHook(0x401800, &CAnimBlendAssociation::SetDeleteCallback, PATCH_JUMP);
-	InjectHook(0x401700, &CAnimBlendAssociation::SetCurrentTime, PATCH_JUMP);
-	InjectHook(0x401780, &CAnimBlendAssociation::SyncAnimation, PATCH_JUMP);
-	InjectHook(0x4017D0, &CAnimBlendAssociation::Start, PATCH_JUMP);
-	InjectHook(0x4031F0, &CAnimBlendAssociation::UpdateTime, PATCH_JUMP);
-	InjectHook(0x4032B0, &CAnimBlendAssociation::UpdateBlend, PATCH_JUMP);
-
-	InjectHook(0x401460, &CAnimBlendAssociation_::ctor1, PATCH_JUMP);
-	InjectHook(0x4014C0, &CAnimBlendAssociation_::ctor2, PATCH_JUMP);
-	InjectHook(0x401520, &CAnimBlendAssociation_::dtor, PATCH_JUMP);
-ENDPATCHES

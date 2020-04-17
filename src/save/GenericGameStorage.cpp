@@ -1,7 +1,7 @@
 #define WITHWINDOWS
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "AudioScriptObject.h"
 #include "Camera.h"
 #include "CarGen.h"
@@ -553,22 +553,3 @@ align4bytes(int32 size)
 {
 	return (size + 3) & 0xFFFFFFFC;
 }
-
-STARTPATCHES
-	InjectHook(0x58F8D0, GenericSave, PATCH_JUMP);
-	InjectHook(0x590A00, GenericLoad, PATCH_JUMP);
-	InjectHook(0x591910, ReadInSizeofSaveFileBuffer, PATCH_JUMP);
-	InjectHook(0x591990, ReadDataFromFile, PATCH_JUMP);
-	InjectHook(0x591A00, CloseFile, PATCH_JUMP);
-	InjectHook(0x591A20, DoGameSpecificStuffAfterSucessLoad, PATCH_JUMP);
-	InjectHook(0x591A40, CheckSlotDataValid, PATCH_JUMP);
-	InjectHook(0x591A80, MakeSpaceForSizeInBufferPointer, PATCH_JUMP);
-	InjectHook(0x591AA0, CopySizeAndPreparePointer, PATCH_JUMP);
-	InjectHook(0x591AE0, DoGameSpecificStuffBeforeSave, PATCH_JUMP);
-	InjectHook(0x591B10, MakeValidSaveName, PATCH_JUMP);
-	InjectHook(0x591B50, GetSavedGameDateAndTime, PATCH_JUMP);
-	InjectHook(0x591B60, GetNameOfSavedGame, PATCH_JUMP);
-	InjectHook(0x591B70, CheckDataNotCorrupt, PATCH_JUMP);
-	InjectHook(0x591D60, RestoreForStartLoad, PATCH_JUMP);
-	InjectHook(0x591E80, align4bytes, PATCH_JUMP);
-ENDPATCHES

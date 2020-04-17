@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "DMAudio.h"
 #include "MusicManager.h"
 #include "AudioManager.h"
@@ -318,57 +318,3 @@ cDMAudio::SetRadioChannel(int8 radio, int32 pos)
 {
 	MusicManager.SetRadioChannelByScript(radio, pos);
 }
-
-STARTPATCHES
-	InjectHook(0x57C760, &cDMAudio::Initialise, PATCH_JUMP);
-	InjectHook(0x57C780, &cDMAudio::Terminate, PATCH_JUMP);
-	InjectHook(0x57C7A0, &cDMAudio::Service, PATCH_JUMP);
-	InjectHook(0x57C7C0, &cDMAudio::CreateEntity, PATCH_JUMP);
-	InjectHook(0x57C7F0, &cDMAudio::DestroyEntity, PATCH_JUMP);
-	InjectHook(0x57C810, &cDMAudio::SetEntityStatus, PATCH_JUMP);
-	InjectHook(0x57C840, &cDMAudio::PlayOneShot, PATCH_JUMP);
-	InjectHook(0x57C870, &cDMAudio::DestroyAllGameCreatedEntities, PATCH_JUMP);
-	InjectHook(0x57C890, &cDMAudio::SetEffectsMasterVolume, PATCH_JUMP);
-	InjectHook(0x57C8C0, &cDMAudio::SetMusicMasterVolume, PATCH_JUMP);
-	InjectHook(0x57C8F0, &cDMAudio::SetEffectsFadeVol, PATCH_JUMP);
-	InjectHook(0x57C920, &cDMAudio::SetMusicFadeVol, PATCH_JUMP);
-	InjectHook(0x57C950, &cDMAudio::GetNum3DProvidersAvailable, PATCH_JUMP);
-	InjectHook(0x57C970, &cDMAudio::Get3DProviderName, PATCH_JUMP);
-	InjectHook(0x57C990, &cDMAudio::GetCurrent3DProviderIndex, PATCH_JUMP);
-	InjectHook(0x57C9B0, &cDMAudio::SetCurrent3DProvider, PATCH_JUMP);
-	InjectHook(0x57C9D0, &cDMAudio::SetSpeakerConfig, PATCH_JUMP);
-	InjectHook(0x57C9F0, &cDMAudio::IsMP3RadioChannelAvailable, PATCH_JUMP);
-	InjectHook(0x57CA10, &cDMAudio::ReleaseDigitalHandle, PATCH_JUMP);
-	InjectHook(0x57CA30, &cDMAudio::ReacquireDigitalHandle, PATCH_JUMP);
-	InjectHook(0x57CA50, &cDMAudio::SetDynamicAcousticModelingStatus, PATCH_JUMP);
-	InjectHook(0x57CA70, &cDMAudio::CheckForAnAudioFileOnCD, PATCH_JUMP);
-	InjectHook(0x57CA90, &cDMAudio::GetCDAudioDriveLetter, PATCH_JUMP);
-	InjectHook(0x57CAB0, &cDMAudio::IsAudioInitialised, PATCH_JUMP);
-	InjectHook(0x57CAD0, &cDMAudio::ReportCrime, PATCH_JUMP);
-	InjectHook(0x57CB00, &cDMAudio::CreateLoopingScriptObject, PATCH_JUMP);
-	InjectHook(0x57CB40, &cDMAudio::DestroyLoopingScriptObject, PATCH_JUMP);
-	InjectHook(0x57CB60, &cDMAudio::CreateOneShotScriptObject, PATCH_JUMP);
-	InjectHook(0x57CBB0, &cDMAudio::PlaySuspectLastSeen, PATCH_JUMP);
-	InjectHook(0x57CBE0, &cDMAudio::ReportCollision, PATCH_JUMP);
-	InjectHook(0x57CC20, &cDMAudio::PlayFrontEndSound, PATCH_JUMP);
-	InjectHook(0x57CC60, &cDMAudio::PlayRadioAnnouncement, PATCH_JUMP);
-	InjectHook(0x57CC80, &cDMAudio::PlayFrontEndTrack, PATCH_JUMP);
-	InjectHook(0x57CCB0, &cDMAudio::StopFrontEndTrack, PATCH_JUMP);
-	InjectHook(0x57CCD0, &cDMAudio::ResetTimers, PATCH_JUMP);
-	InjectHook(0x57CCF0, &cDMAudio::ChangeMusicMode, PATCH_JUMP);
-	InjectHook(0x57CD10, &cDMAudio::PreloadCutSceneMusic, PATCH_JUMP);
-	InjectHook(0x57CD30, &cDMAudio::PlayPreloadedCutSceneMusic, PATCH_JUMP);
-	InjectHook(0x57CD50, &cDMAudio::StopCutSceneMusic, PATCH_JUMP);
-	InjectHook(0x57CD70, &cDMAudio::PreloadMissionAudio, PATCH_JUMP);
-	InjectHook(0x57CD90, &cDMAudio::GetMissionAudioLoadingStatus, PATCH_JUMP);
-	InjectHook(0x57CDB0, &cDMAudio::SetMissionAudioLocation, PATCH_JUMP);
-	InjectHook(0x57CDE0, &cDMAudio::PlayLoadedMissionAudio, PATCH_JUMP);
-	InjectHook(0x57CE00, &cDMAudio::IsMissionAudioSampleFinished, PATCH_JUMP);
-	InjectHook(0x57CE20, &cDMAudio::ClearMissionAudio, PATCH_JUMP);
-	InjectHook(0x57CE40, &cDMAudio::GetRadioInCar, PATCH_JUMP);
-	InjectHook(0x57CE60, &cDMAudio::SetRadioInCar, PATCH_JUMP);
-	InjectHook(0x57CE80, &cDMAudio::SetRadioChannel, PATCH_JUMP);
-	
-	//InjectHook(0x57CEB0, `global constructor keyed to'dmaudio.cpp, PATCH_JUMP);
-	//InjectHook(0x57CED0, cDMAudio::~cDMAudio, PATCH_JUMP);
-ENDPATCHES

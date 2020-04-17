@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Vehicle.h"
 #include "Door.h"
 
@@ -168,19 +168,3 @@ CTrainDoor::IsClosed(void)
 {
 	return m_fPosn == RetTranslationWhenClosed();
 }
-
-STARTPATCHES
-	InjectHook(0x545EF0, &CDoor::Open, PATCH_JUMP);
-	InjectHook(0x545BD0, &CDoor::Process, PATCH_JUMP);
-	InjectHook(0x545FE0, &CDoor::RetAngleWhenClosed, PATCH_JUMP);
-	InjectHook(0x546020, &CDoor::RetAngleWhenOpen, PATCH_JUMP);
-	InjectHook(0x545F80, &CDoor::GetAngleOpenRatio, PATCH_JUMP);
-	InjectHook(0x546090, &CDoor::IsFullyOpen, PATCH_JUMP);
-	InjectHook(0x546060, &CDoor::IsClosed, PATCH_JUMP);
-
-	InjectHook(0x546200, &CTrainDoor::Open, PATCH_JUMP);
-	InjectHook(0x546180, &CTrainDoor::RetTranslationWhenClosed, PATCH_JUMP);
-	InjectHook(0x5461C0, &CTrainDoor::RetTranslationWhenOpen, PATCH_JUMP);
-	InjectHook(0x546120, &CTrainDoor::IsFullyOpen, PATCH_JUMP);
-	InjectHook(0x5460F0, &CTrainDoor::IsClosed, PATCH_JUMP);
-ENDPATCHES

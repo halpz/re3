@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "TxdStore.h"
 #include "Timer.h"
@@ -1760,36 +1760,3 @@ CShadows::RenderIndicatorShadow(uint32 nID, uint8 ShadowType, RwTexture *pTextur
 			0, 128, 255, 128,
 			2048, 0.2f, 0);
 }
-
-
-STARTPATCHES
-	InjectHook(0x512AB0, CShadows::Init, PATCH_JUMP);
-	InjectHook(0x512F20, CShadows::Shutdown, PATCH_JUMP);
-	InjectHook(0x512FD0, CShadows::AddPermanentShadow, PATCH_JUMP);
-	InjectHook(0x5130A0, CShadows::StoreStaticShadow, PATCH_JUMP);
-	InjectHook(0x513550, (void(*)(uint8, CVector *, float, float, float, float, int16, uint8, uint8, uint8))CShadows::StoreShadowToBeRendered, PATCH_JUMP);
-	InjectHook(0x513750, (void(*)(uint8, RwTexture *, CVector *, float, float, float, float, int16, uint8, uint8, uint8, float, bool, float))CShadows::StoreShadowToBeRendered, PATCH_JUMP);
-	InjectHook(0x513830, CShadows::StoreShadowForCar, PATCH_JUMP);
-	InjectHook(0x513A70, CShadows::StoreCarLightShadow, PATCH_JUMP);
-	InjectHook(0x513C50, CShadows::StoreShadowForPed, PATCH_JUMP);
-	InjectHook(0x513CB0, CShadows::StoreShadowForPedObject, PATCH_JUMP);
-	InjectHook(0x513E00, CShadows::StoreShadowForTree, PATCH_JUMP);
-	InjectHook(0x513E10, CShadows::StoreShadowForPole, PATCH_JUMP);
-	InjectHook(0x513FC0, CShadows::SetRenderModeForShadowType, PATCH_JUMP);
-	InjectHook(0x514010, CShadows::RenderStoredShadows, PATCH_JUMP);
-	InjectHook(0x5145F0, CShadows::RenderStaticShadows, PATCH_JUMP);
-	InjectHook(0x514910, CShadows::GeneratePolysForStaticShadow, PATCH_JUMP);
-	InjectHook(0x514C90, CShadows::CastShadowSectorList, PATCH_JUMP);
-	InjectHook(0x514E30, CShadows::CastShadowEntity, PATCH_JUMP);
-	InjectHook(0x516BE0, CShadows::UpdateStaticShadows, PATCH_JUMP);
-	InjectHook(0x516C40, CShadows::UpdatePermanentShadows, PATCH_JUMP);
-	InjectHook(0x516E70, &CStaticShadow::Free, PATCH_JUMP);
-	InjectHook(0x516EB0, CShadows::CalcPedShadowValues, PATCH_JUMP);
-	InjectHook(0x516F90, CShadows::RenderExtraPlayerShadows, PATCH_JUMP);
-	InjectHook(0x517570, CShadows::TidyUpShadows, PATCH_JUMP);
-	InjectHook(0x517810, CShadows::RenderIndicatorShadow, PATCH_JUMP);
-	//InjectHook(0x517900, &CPermanentShadow::CPermanentShadow, PATCH_JUMP);
-	//InjectHook(0x517910, &CStaticShadow::CStaticShadow, PATCH_JUMP);
-	//InjectHook(0x517920, &CPolyBunch::CPolyBunch, PATCH_JUMP);
-	//InjectHook(0x517940, &CStoredShadow::CStoredShadow, PATCH_JUMP);
-ENDPATCHES

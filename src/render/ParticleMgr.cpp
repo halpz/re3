@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "FileMgr.h"
 #include "ParticleMgr.h"
@@ -242,9 +242,3 @@ void cParticleSystemMgr::LoadParticleData()
 		lineEnd++;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x50FCB0, &cParticleSystemMgr::ctor, PATCH_JUMP);
-	InjectHook(0x50FCD0, &cParticleSystemMgr::Initialise, PATCH_JUMP);
-	InjectHook(0x50FDF0, &cParticleSystemMgr::LoadParticleData, PATCH_JUMP);
-ENDPATCHES

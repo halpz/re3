@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Camera.h"
 #include "ModelInfo.h"
 
@@ -30,7 +30,3 @@ CTimeModelInfo::FindOtherTimeModel(void)
 	}
 	return nil;
 }
-
-STARTPATCHES
-	InjectHook(0x517C80, &CTimeModelInfo::FindOtherTimeModel, PATCH_JUMP);
-ENDPATCHES

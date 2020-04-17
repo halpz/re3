@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
@@ -138,30 +138,3 @@ CClumpModelInfo::GetFrameFromId(RpClump *clump, int32 id)
 	RwFrameForAllChildren(RpClumpGetFrame(clump), FindFrameFromIdCB, &assoc);
 	return assoc.frame;
 }
-
-
-class CClumpModelInfo_ : public CClumpModelInfo
-{
-public:
-	void DeleteRwObject_(void) { this->CClumpModelInfo::DeleteRwObject(); }
-	RwObject *CreateInstance_1(void) { return CClumpModelInfo::CreateInstance(); }
-	RwObject *CreateInstance_2(RwMatrix *m) { return CClumpModelInfo::CreateInstance(m); }
-	RwObject *GetRwObject_(void) { return CClumpModelInfo::GetRwObject(); }
-	void SetClump_(RpClump *clump) { CClumpModelInfo::SetClump(clump); }
-};
-
-STARTPATCHES
-	InjectHook(0x4F8800, &CClumpModelInfo_::DeleteRwObject_, PATCH_JUMP);
-	InjectHook(0x4F8920, &CClumpModelInfo_::CreateInstance_1, PATCH_JUMP);
-	InjectHook(0x4F88A0, &CClumpModelInfo_::CreateInstance_2, PATCH_JUMP);
-	InjectHook(0x50C1C0, &CClumpModelInfo_::GetRwObject_, PATCH_JUMP);
-	InjectHook(0x4F8830, &CClumpModelInfo_::SetClump_, PATCH_JUMP);
-	InjectHook(0x4F8940, &CClumpModelInfo::SetAtomicRendererCB, PATCH_JUMP);
-	InjectHook(0x4F8960, &CClumpModelInfo::FindFrameFromNameCB, PATCH_JUMP);
-	InjectHook(0x4F8A10, &CClumpModelInfo::FindFrameFromNameWithoutIdCB, PATCH_JUMP);
-	InjectHook(0x4F8AD0, &CClumpModelInfo::FindFrameFromIdCB, PATCH_JUMP);
-	InjectHook(0x4F8BB0, &CClumpModelInfo::SetFrameIds, PATCH_JUMP);
-	InjectHook(0x4F8B20, &CClumpModelInfo::FillFrameArrayCB, PATCH_JUMP);
-	InjectHook(0x4F8B90, &CClumpModelInfo::FillFrameArray, PATCH_JUMP);
-	InjectHook(0x4F8B50, &CClumpModelInfo::GetFrameFromId, PATCH_JUMP);
-ENDPATCHES

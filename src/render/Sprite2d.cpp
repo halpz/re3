@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Draw.h"
 #include "Camera.h"
@@ -474,37 +474,3 @@ void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, 
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEGOURAUD);
 }
-
-STARTPATCHES
-#define C4 const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&
-#define F8 float, float, float, float, float, float, float, float
-
-	InjectHook(0x51EA20, CSprite2d::SetRecipNearClip, PATCH_JUMP);
-	InjectHook(0x51EAE0, CSprite2d::InitPerFrame, PATCH_JUMP);
-	InjectHook(0x51EB70, CSprite2d::GetBank, PATCH_JUMP);
-	InjectHook(0x51EBC0, CSprite2d::AddSpriteToBank, PATCH_JUMP);
-	InjectHook(0x51EC50, CSprite2d::DrawBank, PATCH_JUMP);
-
-	InjectHook(0x51EA00, &CSprite2d::Delete, PATCH_JUMP);
-	InjectHook(0x51F950, &CSprite2d::SetRenderState, PATCH_JUMP);
-	InjectHook(0x51EA40, (void (CSprite2d::*)(const char*))&CSprite2d::SetTexture, PATCH_JUMP);
-	InjectHook(0x51EA70, (void (CSprite2d::*)(const char*,const char*))&CSprite2d::SetTexture, PATCH_JUMP);
-	InjectHook(0x51EAA0, &CSprite2d::SetAddressing, PATCH_JUMP);
-
-	InjectHook(0x51EE90, (void (*)(const CRect&, C4, uint32))CSprite2d::SetVertices, PATCH_JUMP);
-	InjectHook(0x51F220, (void (*)(const CRect&, C4, F8))CSprite2d::SetVertices, PATCH_JUMP);
-	InjectHook(0x51F070, (void (*)(F8, C4))CSprite2d::SetVertices, PATCH_JUMP);
-	InjectHook(0x51F3E0, (void (*)(int, float*, float*, const CRGBA&))CSprite2d::SetVertices, PATCH_JUMP);
-	InjectHook(0x51F490, CSprite2d::SetMaskVertices, PATCH_JUMP);
-	InjectHook(0x51F720, (void (*)(RwIm2DVertex*, const CRect&, C4, F8))CSprite2d::SetVertices, PATCH_JUMP);
-
-	InjectHook(0x51ECE0, (void (CSprite2d::*)(float, float, float, float, const CRGBA &))&CSprite2d::Draw, PATCH_JUMP);
-	InjectHook(0x51ED50, (void (CSprite2d::*)(const CRect &, const CRGBA &))&CSprite2d::Draw, PATCH_JUMP);
-	InjectHook(0x51ED90, (void (CSprite2d::*)(const CRect &, const CRGBA &, F8))&CSprite2d::Draw, PATCH_JUMP);
-	InjectHook(0x51EDF0, (void (CSprite2d::*)(const CRect &, C4))&CSprite2d::Draw, PATCH_JUMP);
-	InjectHook(0x51EE40, (void (CSprite2d::*)(F8, const CRGBA &))&CSprite2d::Draw, PATCH_JUMP);
-
-	InjectHook(0x51F970, (void (*)(const CRect&, const CRGBA&))CSprite2d::DrawRect, PATCH_JUMP);
-	InjectHook(0x51FA00, (void (*)(const CRect&, C4))CSprite2d::DrawRect, PATCH_JUMP);
-	InjectHook(0x51FA80, CSprite2d::DrawRectXLU, PATCH_JUMP);
-ENDPATCHES

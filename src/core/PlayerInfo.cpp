@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "PlayerPed.h"
 #include "Wanted.h"
@@ -558,20 +558,3 @@ CPlayerInfo::Process(void)
 		CStats::DistanceTravelledOnFoot += FindPlayerPed()->m_fDistanceTravelled;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x4B5DC0, &CPlayerInfo::dtor, PATCH_JUMP);
-	InjectHook(0x4A1700, &CPlayerInfo::LoadPlayerSkin, PATCH_JUMP);
-	InjectHook(0x4A1750, &CPlayerInfo::DeletePlayerSkin, PATCH_JUMP);
-	InjectHook(0x4A12E0, &CPlayerInfo::KillPlayer, PATCH_JUMP);
-	InjectHook(0x4A1330, &CPlayerInfo::ArrestPlayer, PATCH_JUMP);
-	InjectHook(0x49FC10, &CPlayerInfo::Clear, PATCH_JUMP);
-	InjectHook(0x4A15C0, &CPlayerInfo::BlowUpRCBuggy, PATCH_JUMP);
-	InjectHook(0x4A13B0, &CPlayerInfo::CancelPlayerEnteringCars, PATCH_JUMP);
-	InjectHook(0x4A1400, &CPlayerInfo::MakePlayerSafe, PATCH_JUMP);
-	InjectHook(0x4A0EC0, &CPlayerInfo::EvaluateCarPosition, PATCH_JUMP);
-	InjectHook(0x4A15F0, &CPlayerInfo::AwardMoneyForExplosion, PATCH_JUMP);
-	InjectHook(0x4A0B20, &CPlayerInfo::LoadPlayerInfo, PATCH_JUMP);
-	InjectHook(0x4A0960, &CPlayerInfo::SavePlayerInfo, PATCH_JUMP);
-	InjectHook(0x49FD30, &CPlayerInfo::Process, PATCH_JUMP);
-ENDPATCHES

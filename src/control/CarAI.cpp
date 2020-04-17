@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "CarAI.h"
 
 #include "Accident.h"
@@ -636,6 +636,3 @@ void CCarAI::MakeWayForCarWithSiren(CVehicle *pVehicle)
 		}
 	}
 }
-
-STARTPATCHES
-ENDPATCHES

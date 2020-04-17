@@ -13,7 +13,7 @@
 #include "MusicManager.h"
 #include "Frontend.h"
 #include "Timer.h"
-#include "patcher.h"
+
 
 #pragma comment( lib, "mss32.lib" )
 
@@ -2236,66 +2236,3 @@ cSampleManager::InitialiseSampleBanks(void)
 	
 	return true;
 }
-
-STARTPATCHES
-	//InjectHook(0x565500, cSampleManager::cSampleManager, PATCH_JUMP);
-	//InjectHook(0x565510, cSampleManager::~cSampleManager, PATCH_JUMP);
-	InjectHook(0x565520, comp, PATCH_JUMP);
-	InjectHook(0x565540, add_providers, PATCH_JUMP);
-	InjectHook(0x565680, release_existing, PATCH_JUMP);
-	InjectHook(0x5656F0, set_new_provider, PATCH_JUMP);
-	InjectHook(0x565900, &cSampleManager::SetSpeakerConfig, PATCH_JUMP);
-	InjectHook(0x565970, &cSampleManager::GetMaximumSupportedChannels, PATCH_JUMP);
-	InjectHook(0x565990, &cSampleManager::GetCurrent3DProviderIndex, PATCH_JUMP);
-	InjectHook(0x5659A0, &cSampleManager::SetCurrent3DProvider, PATCH_JUMP);
-	InjectHook(0x565A10, _ResolveLink, PATCH_JUMP);
-	InjectHook(0x565B40, _FindMP3s, PATCH_JUMP);
-	InjectHook(0x566380, _DeleteMP3Entries, PATCH_JUMP);
-	InjectHook(0x566400, _GetMP3EntryByIndex, PATCH_JUMP);
-	InjectHook(0x566490, &cSampleManager::IsMP3RadioChannelAvailable, PATCH_JUMP);
-	InjectHook(0x5664B0, &cSampleManager::ReleaseDigitalHandle, PATCH_JUMP);
-	InjectHook(0x5664F0, &cSampleManager::ReacquireDigitalHandle, PATCH_JUMP);
-	InjectHook(0x566530, &cSampleManager::Initialise, PATCH_JUMP);
-	InjectHook(0x566DC0, &cSampleManager::Terminate, PATCH_JUMP);
-	InjectHook(0x566EA0, &cSampleManager::CheckForAnAudioFileOnCD, PATCH_JUMP);
-	InjectHook(0x566F20, &cSampleManager::GetCDAudioDriveLetter, PATCH_JUMP);
-	InjectHook(0x566F50, &cSampleManager::UpdateEffectsVolume, PATCH_JUMP);
-	InjectHook(0x567010, &cSampleManager::SetEffectsMasterVolume, PATCH_JUMP);
-	InjectHook(0x567020, &cSampleManager::SetMusicMasterVolume, PATCH_JUMP);
-	InjectHook(0x567030, &cSampleManager::SetEffectsFadeVolume, PATCH_JUMP);
-	InjectHook(0x567040, &cSampleManager::SetMusicFadeVolume, PATCH_JUMP);
-	InjectHook(0x567050, &cSampleManager::LoadSampleBank, PATCH_JUMP);
-	InjectHook(0x567110, &cSampleManager::UnloadSampleBank, PATCH_JUMP);
-	InjectHook(0x567130, &cSampleManager::IsSampleBankLoaded, PATCH_JUMP);
-	InjectHook(0x567150, &cSampleManager::IsPedCommentLoaded, PATCH_JUMP);
-	InjectHook(0x5671A0, &cSampleManager::LoadPedComment, PATCH_JUMP);
-	InjectHook(0x5672A0, &cSampleManager::GetSampleBaseFrequency, PATCH_JUMP);
-	InjectHook(0x5672C0, &cSampleManager::GetSampleLoopStartOffset, PATCH_JUMP);
-	InjectHook(0x5672E0, &cSampleManager::GetSampleLoopEndOffset, PATCH_JUMP);
-	InjectHook(0x567300, &cSampleManager::GetSampleLength, PATCH_JUMP);
-	InjectHook(0x567320, &cSampleManager::UpdateReverb, PATCH_JUMP);
-	InjectHook(0x567630, &cSampleManager::SetChannelReverbFlag, PATCH_JUMP);
-	InjectHook(0x5676A0, &cSampleManager::InitialiseChannel, PATCH_JUMP);
-	InjectHook(0x567820, &cSampleManager::SetChannelEmittingVolume, PATCH_JUMP);
-	InjectHook(0x567890, &cSampleManager::SetChannel3DPosition, PATCH_JUMP);
-	InjectHook(0x5678D0, &cSampleManager::SetChannel3DDistances, PATCH_JUMP);
-	InjectHook(0x567900, &cSampleManager::SetChannelVolume, PATCH_JUMP);
-	InjectHook(0x567980, &cSampleManager::SetChannelPan, PATCH_JUMP);
-	InjectHook(0x5679D0, &cSampleManager::SetChannelFrequency, PATCH_JUMP);
-	InjectHook(0x567A30, &cSampleManager::SetChannelLoopPoints, PATCH_JUMP);
-	InjectHook(0x567AA0, &cSampleManager::SetChannelLoopCount, PATCH_JUMP);
-	InjectHook(0x567B00, &cSampleManager::GetChannelUsedFlag, PATCH_JUMP);
-	InjectHook(0x567B80, &cSampleManager::StartChannel, PATCH_JUMP);
-	InjectHook(0x567BE0, &cSampleManager::StopChannel, PATCH_JUMP);
-	InjectHook(0x567C50, &cSampleManager::PreloadStreamedFile, PATCH_JUMP);
-	InjectHook(0x567D30, &cSampleManager::PauseStream, PATCH_JUMP);
-	InjectHook(0x567D60, &cSampleManager::StartPreloadedStreamedFile, PATCH_JUMP);
-	InjectHook(0x567D80, &cSampleManager::StartStreamedFile, PATCH_JUMP);
-	InjectHook(0x5680E0, &cSampleManager::StopStreamedFile, PATCH_JUMP);
-	InjectHook(0x568130, &cSampleManager::GetStreamedFilePosition, PATCH_JUMP);
-	InjectHook(0x5681D0, &cSampleManager::SetStreamedVolumeAndPan, PATCH_JUMP);
-	InjectHook(0x568270, &cSampleManager::GetStreamedFileLength, PATCH_JUMP);
-	InjectHook(0x568290, &cSampleManager::IsStreamPlaying, PATCH_JUMP);
-	InjectHook(0x5682D0, &cSampleManager::InitialiseSampleBanks, PATCH_JUMP);
-	//InjectHook(0x5683F0, `global constructor keyed to'sampman.cpp, PATCH_JUMP);
-ENDPATCHES

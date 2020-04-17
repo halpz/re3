@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Timer.h"
 #include "Pad.h"
@@ -1016,48 +1016,3 @@ DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle)
 	CWorld::Remove(pVehicle);
 	delete pVehicle;
 }
-
-
-class CVehicle_ : public CVehicle
-{
-public:
-	void dtor(void) { CVehicle::~CVehicle(); }
-	void SetModelIndex_(uint32 id) { CVehicle::SetModelIndex(id); }
-	bool SetupLighting_(void) { return CVehicle::SetupLighting(); }
-	void RemoveLighting_(bool reset) { CVehicle::RemoveLighting(reset); }
-	float GetHeightAboveRoad_(void) { return CVehicle::GetHeightAboveRoad(); }
-};
-
-STARTPATCHES
-	InjectHook(0x551170, &CVehicle_::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x4A7DD0, &CVehicle_::SetupLighting_, PATCH_JUMP);
-	InjectHook(0x4A7E60, &CVehicle_::RemoveLighting_, PATCH_JUMP);
-	InjectHook(0x417E60, &CVehicle_::GetHeightAboveRoad_, PATCH_JUMP);
-
-	InjectHook(0x552BB0, &CVehicle::FlyingControl, PATCH_JUMP);
-	InjectHook(0x5512E0, &CVehicle::ProcessWheel, PATCH_JUMP);
-	InjectHook(0x551280, &CVehicle::ProcessWheelRotation, PATCH_JUMP);
-	InjectHook(0x552AF0, &CVehicle::ExtinguishCarFire, PATCH_JUMP);
-	InjectHook(0x551C90, &CVehicle::ProcessDelayedExplosion, PATCH_JUMP);
-	InjectHook(0x552880, &CVehicle::IsLawEnforcementVehicle, PATCH_JUMP);
-	InjectHook(0x552820, &CVehicle::ChangeLawEnforcerState, PATCH_JUMP);
-	InjectHook(0x552200, &CVehicle::UsesSiren, PATCH_JUMP);
-	InjectHook(0x5527E0, &CVehicle::IsVehicleNormal, PATCH_JUMP);
-	InjectHook(0x552B70, &CVehicle::CarHasRoof, PATCH_JUMP);
-	InjectHook(0x552230, &CVehicle::IsUpsideDown, PATCH_JUMP);
-	InjectHook(0x552260, &CVehicle::IsOnItsSide, PATCH_JUMP);
-	InjectHook(0x5511B0, &CVehicle::CanBeDeleted, PATCH_JUMP);
-	InjectHook(0x5522A0, &CVehicle::CanPedOpenLocks, PATCH_JUMP);
-	InjectHook(0x5522F0, &CVehicle::CanPedEnterCar, PATCH_JUMP);
-	InjectHook(0x5523C0, &CVehicle::CanPedExitCar, PATCH_JUMP);
-	InjectHook(0x5520C0, &CVehicle::SetUpDriver, PATCH_JUMP);
-	InjectHook(0x552160, &CVehicle::SetupPassenger, PATCH_JUMP);
-	InjectHook(0x551F20, &CVehicle::SetDriver, PATCH_JUMP);
-	InjectHook(0x551D90, (bool (CVehicle::*)(CPed*))&CVehicle::AddPassenger, PATCH_JUMP);
-	InjectHook(0x551E10, (bool (CVehicle::*)(CPed*,uint8))&CVehicle::AddPassenger, PATCH_JUMP);
-	InjectHook(0x5520A0, &CVehicle::RemoveDriver, PATCH_JUMP);
-	InjectHook(0x551EB0, &CVehicle::RemovePassenger, PATCH_JUMP);
-	InjectHook(0x5525A0, &CVehicle::ProcessCarAlarm, PATCH_JUMP);
-	InjectHook(0x552620, &CVehicle::IsSphereTouchingVehicle, PATCH_JUMP);
-	InjectHook(0x551950, &CVehicle::InflictDamage, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "CarCtrl.h"
 
 #include "Accident.h"
@@ -2736,20 +2736,3 @@ bool CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 	return x > -342.0f && x < -219.0f &&
 		y > -677.0f && y < -580.0f;
 }
-
-STARTPATCHES
-InjectHook(0x416580, &CCarCtrl::GenerateRandomCars, PATCH_JUMP);
-InjectHook(0x417EC0, &CCarCtrl::ChooseModel, PATCH_JUMP);
-InjectHook(0x418320, &CCarCtrl::RemoveDistantCars, PATCH_JUMP);
-InjectHook(0x418430, &CCarCtrl::PossiblyRemoveVehicle, PATCH_JUMP);
-InjectHook(0x41D280, &CCarCtrl::Init, PATCH_JUMP);
-InjectHook(0x41D3B0, &CCarCtrl::ReInit, PATCH_JUMP);
-InjectHook(0x41E250, &CCarCtrl::SteerAIBoatWithPhysics, PATCH_JUMP);
-InjectHook(0x41F6E0, &CCarCtrl::RegisterVehicleOfInterest, PATCH_JUMP);
-InjectHook(0x41F780, &CCarCtrl::IsThisVehicleInteresting, PATCH_JUMP);
-InjectHook(0x41F7A0, &CCarCtrl::RemoveFromInterestingVehicleList, PATCH_JUMP);
-InjectHook(0x41F7D0, &CCarCtrl::ClearInterestingVehicleList, PATCH_JUMP);
-InjectHook(0x41F7F0, &CCarCtrl::SwitchVehicleToRealPhysics, PATCH_JUMP);
-InjectHook(0x41F820, &CCarCtrl::JoinCarWithRoadSystem, PATCH_JUMP);
-InjectHook(0x41FA00, &CCarCtrl::JoinCarWithRoadSystemGotoCoors, PATCH_JUMP);
-ENDPATCHES

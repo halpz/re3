@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Weapon.h"
 #include "AnimBlendAssociation.h"
 #include "AudioManager.h"
@@ -2256,37 +2256,3 @@ CWeapon::ProcessLineOfSight(CVector const &point1, CVector const &point2, CColPo
 {
 	return CWorld::ProcessLineOfSight(point1, point2, point, entity, checkBuildings, checkVehicles, checkPeds, checkObjects, checkDummies, ignoreSeeThrough, ignoreSomeObjects);
 }
-
-STARTPATCHES
-
-	InjectHook(0x55C2D0, CWeapon::InitialiseWeapons, PATCH_JUMP);
-	InjectHook(0x55C2F0, CWeapon::ShutdownWeapons, PATCH_JUMP);
-	InjectHook(0x55C310, CWeapon::UpdateWeapons, PATCH_JUMP);
-	InjectHook(0x55C330, &CWeapon::Initialise, PATCH_JUMP);
-	InjectHook(0x55C380, &CWeapon::Fire, PATCH_JUMP);
-	InjectHook(0x55C940, &CWeapon::FireFromCar, PATCH_JUMP);
-	InjectHook(0x55CA20, &CWeapon::FireMelee, PATCH_JUMP);
-	InjectHook(0x55D2E0, &CWeapon::FireInstantHit, PATCH_JUMP);
-	InjectHook(0x55F770, &CWeapon::AddGunshell, PATCH_JUMP);
-	InjectHook(0x55F950, &CWeapon::DoBulletImpact, PATCH_JUMP);
-	InjectHook(0x560620, &CWeapon::FireShotgun, PATCH_JUMP);
-	InjectHook(0x561900, &CWeapon::FireProjectile, PATCH_JUMP);
-	InjectHook(0x561C70, CWeapon::GenerateFlameThrowerParticles, PATCH_JUMP);
-	InjectHook(0x561E00, &CWeapon::FireAreaEffect, PATCH_JUMP);
-	InjectHook(0x561FE0, &CWeapon::FireSniper, PATCH_JUMP);
-	InjectHook(0x562180, &CWeapon::FireM16_1stPerson, PATCH_JUMP);
-	InjectHook(0x5624D0, &CWeapon::FireInstantHitFromCar, PATCH_JUMP);
-	InjectHook(0x562EB0, CWeapon::DoDoomAiming, PATCH_JUMP);
-	InjectHook(0x563200, CWeapon::DoTankDoomAiming, PATCH_JUMP);
-	InjectHook(0x563660, CWeapon::DoDriveByAutoAiming, PATCH_JUMP);
-	InjectHook(0x5639D0, &CWeapon::Reload, PATCH_JUMP);
-	InjectHook(0x563A10, &CWeapon::Update, PATCH_JUMP);
-	InjectHook(0x563FB0, &CWeapon::IsTypeMelee, PATCH_JUMP);
-	InjectHook(0x563FD0, &CWeapon::IsType2Handed, PATCH_JUMP);
-	InjectHook(0x564680, CWeapon::MakePedsJumpAtShot, PATCH_JUMP);
-	InjectHook(0x564890, &CWeapon::HitsGround, PATCH_JUMP);
-	InjectHook(0x564A60, CWeapon::BlowUpExplosiveThings, PATCH_JUMP);
-	InjectHook(0x564B80, &CWeapon::HasWeaponAmmoToBeUsed, PATCH_JUMP);
-	InjectHook(0x564C00, CWeapon::ProcessLineOfSight, PATCH_JUMP);
-
-ENDPATCHES

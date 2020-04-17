@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Camera.h"
 #include "DMAudio.h"
 #include "Clock.h"
@@ -1483,18 +1483,3 @@ void CHud::Shutdown()
 	int HudTXD = CTxdStore::FindTxdSlot("hud");
 	CTxdStore::RemoveTxdSlot(HudTXD);
 }
-
-STARTPATCHES
-	InjectHook(0x5052A0, &CHud::Draw, PATCH_JUMP);
-	InjectHook(0x509030, &CHud::DrawAfterFade, PATCH_JUMP);
-	InjectHook(0x504F90, &CHud::GetRidOfAllHudMessages, PATCH_JUMP);
-	InjectHook(0x5048F0, &CHud::Initialise, PATCH_JUMP);
-	InjectHook(0x504CC0, &CHud::ReInitialise, PATCH_JUMP);
-	InjectHook(0x50A250, &CHud::SetBigMessage, PATCH_JUMP);
-	InjectHook(0x5051E0, &CHud::SetHelpMessage, PATCH_JUMP);
-	InjectHook(0x50A210, &CHud::SetMessage, PATCH_JUMP);
-	InjectHook(0x50A320, &CHud::SetPagerMessage, PATCH_JUMP);
-	InjectHook(0x505290, &CHud::SetVehicleName, PATCH_JUMP);
-	InjectHook(0x5051D0, &CHud::SetZoneName, PATCH_JUMP);
-	InjectHook(0x504C50, &CHud::Shutdown, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "RenderBuffer.h"
 
 int32 TempBufferVerticesStored;
@@ -50,10 +50,3 @@ RenderBuffer::RenderStuffInBuffer(void)
 	}
 	ClearRenderBuffer();
 }
-
-STARTPATCHES
-	InjectHook(0x517620, RenderBuffer::ClearRenderBuffer, PATCH_JUMP);
-	InjectHook(0x517640, RenderBuffer::StartStoring, PATCH_JUMP);
-	InjectHook(0x5176B0, RenderBuffer::StopStoring, PATCH_JUMP);
-	InjectHook(0x5177C0, RenderBuffer::RenderStuffInBuffer, PATCH_JUMP);
-ENDPATCHES

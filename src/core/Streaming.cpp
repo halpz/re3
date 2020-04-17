@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Pad.h"
 #include "Hud.h"
@@ -2439,82 +2439,3 @@ CStreaming::UpdateForAnimViewer(void)
 		CStreaming::RetryLoadFile(CStreaming::ms_channelError);
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x406430, CStreaming::Init, PATCH_JUMP);
-	InjectHook(0x406C80, CStreaming::Shutdown, PATCH_JUMP);
-	InjectHook(0x4076C0, CStreaming::Update, PATCH_JUMP);
-	InjectHook(0x406CC0, (void (*)(void))CStreaming::LoadCdDirectory, PATCH_JUMP);
-	InjectHook(0x406DA0, (void (*)(const char*, int))CStreaming::LoadCdDirectory, PATCH_JUMP);
-	InjectHook(0x409740, CStreaming::ConvertBufferToObject, PATCH_JUMP);
-	InjectHook(0x409580, CStreaming::FinishLoadingLargeFile, PATCH_JUMP);
-	InjectHook(0x407EA0, CStreaming::RequestModel, PATCH_JUMP);
-	InjectHook(0x407FD0, CStreaming::RequestSubway, PATCH_JUMP);
-	InjectHook(0x408190, CStreaming::RequestBigBuildings, PATCH_JUMP);
-	InjectHook(0x408210, CStreaming::RequestIslands, PATCH_JUMP);
-	InjectHook(0x40A890, CStreaming::RequestSpecialModel, PATCH_JUMP);
-	InjectHook(0x40ADA0, CStreaming::RequestSpecialChar, PATCH_JUMP);
-	InjectHook(0x54A5F0, CStreaming::HasModelLoaded, PATCH_JUMP);
-	InjectHook(0x40ADC0, CStreaming::HasSpecialCharLoaded, PATCH_JUMP);
-	InjectHook(0x40ADE0, CStreaming::SetMissionDoesntRequireSpecialChar, PATCH_JUMP);
-
-	InjectHook(0x408830, CStreaming::RemoveModel, PATCH_JUMP);
-	InjectHook(0x4083A0, CStreaming::RemoveUnusedBuildings, PATCH_JUMP);
-	InjectHook(0x4083D0, CStreaming::RemoveBuildings, PATCH_JUMP);
-	InjectHook(0x408640, CStreaming::RemoveUnusedBigBuildings, PATCH_JUMP);
-	InjectHook(0x408680, CStreaming::RemoveBigBuildings, PATCH_JUMP);
-	InjectHook(0x408780, CStreaming::RemoveIslandsNotUsed, PATCH_JUMP);
-	InjectHook(0x40B180, CStreaming::RemoveLoadedVehicle, PATCH_JUMP);
-	InjectHook(0x4089B0, CStreaming::RemoveLeastUsedModel, PATCH_JUMP);
-	InjectHook(0x408940, CStreaming::RemoveAllUnusedModels, PATCH_JUMP);
-	InjectHook(0x409450, CStreaming::RemoveReferencedTxds, PATCH_JUMP);
-
-	InjectHook(0x40B160, CStreaming::GetAvailableVehicleSlot, PATCH_JUMP);
-	InjectHook(0x40B060, CStreaming::AddToLoadedVehiclesList, PATCH_JUMP);
-	InjectHook(0x4094C0, CStreaming::IsTxdUsedByRequestedModels, PATCH_JUMP);
-	InjectHook(0x407E70, CStreaming::IsObjectInCdImage, PATCH_JUMP);
-	InjectHook(0x408280, CStreaming::HaveAllBigBuildingsLoaded, PATCH_JUMP);
-	InjectHook(0x40A790, CStreaming::SetModelIsDeletable, PATCH_JUMP);
-	InjectHook(0x40A800, CStreaming::SetModelTxdIsDeletable, PATCH_JUMP);
-	InjectHook(0x40A820, CStreaming::SetMissionDoesntRequireModel, PATCH_JUMP);
-
-	InjectHook(0x40AA00, CStreaming::LoadInitialPeds, PATCH_JUMP);
-	InjectHook(0x40ADF0, CStreaming::LoadInitialVehicles, PATCH_JUMP);
-	InjectHook(0x40AE60, CStreaming::StreamVehiclesAndPeds, PATCH_JUMP);
-	InjectHook(0x40AA30, CStreaming::StreamZoneModels, PATCH_JUMP);
-	InjectHook(0x40AD00, CStreaming::RemoveCurrentZonesModels, PATCH_JUMP);
-
-	InjectHook(0x409BE0, CStreaming::ProcessLoadingChannel, PATCH_JUMP);
-	InjectHook(0x40A610, CStreaming::FlushChannels, PATCH_JUMP);
-	InjectHook(0x40A680, CStreaming::FlushRequestList, PATCH_JUMP);
-	InjectHook(0x409FF0, CStreaming::GetCdImageOffset, PATCH_JUMP);
-	InjectHook(0x409E50, CStreaming::GetNextFileOnCd, PATCH_JUMP);
-	InjectHook(0x40A060, CStreaming::RequestModelStream, PATCH_JUMP);
-	InjectHook(0x4077F0, CStreaming::RetryLoadFile, PATCH_JUMP);
-	InjectHook(0x40A390, CStreaming::LoadRequestedModels, PATCH_JUMP);
-	InjectHook(0x40A440, CStreaming::LoadAllRequestedModels, PATCH_JUMP);
-
-	InjectHook(0x4078F0, CStreaming::AddModelsToRequestList, PATCH_JUMP);
-	InjectHook(0x407C50, (void (*)(CPtrList&,float,float,float,float,float,float))CStreaming::ProcessEntitiesInSectorList, PATCH_JUMP);
-	InjectHook(0x407DD0, (void (*)(CPtrList&))CStreaming::ProcessEntitiesInSectorList, PATCH_JUMP);
-
-	InjectHook(0x407070, CStreaming::DeleteFarAwayRwObjects, PATCH_JUMP);
-	InjectHook(0x407390, CStreaming::DeleteAllRwObjects, PATCH_JUMP);
-	InjectHook(0x407400, CStreaming::DeleteRwObjectsAfterDeath, PATCH_JUMP);
-	InjectHook(0x408A60, CStreaming::DeleteRwObjectsBehindCamera, PATCH_JUMP);
-	InjectHook(0x407560, CStreaming::DeleteRwObjectsInSectorList, PATCH_JUMP);
-	InjectHook(0x4075A0, CStreaming::DeleteRwObjectsInOverlapSectorList, PATCH_JUMP);
-	InjectHook(0x409340, CStreaming::DeleteRwObjectsBehindCameraInSectorList, PATCH_JUMP);
-	InjectHook(0x4093C0, CStreaming::DeleteRwObjectsNotInFrustumInSectorList, PATCH_JUMP);
-	InjectHook(0x409B70, CStreaming::MakeSpaceFor, PATCH_JUMP);
-	InjectHook(0x40A6D0, CStreaming::LoadScene, PATCH_JUMP);
-
-	InjectHook(0x40B210, CStreaming::MemoryCardSave, PATCH_JUMP);
-	InjectHook(0x40B250, CStreaming::MemoryCardLoad, PATCH_JUMP);
-
-	InjectHook(0x4063E0, &CStreamingInfo::GetCdPosnAndSize, PATCH_JUMP);
-	InjectHook(0x406410, &CStreamingInfo::SetCdPosnAndSize, PATCH_JUMP);
-	InjectHook(0x4063D0, &CStreamingInfo::GetCdSize, PATCH_JUMP);
-	InjectHook(0x406380, &CStreamingInfo::AddToList, PATCH_JUMP);
-	InjectHook(0x4063A0, &CStreamingInfo::RemoveFromList, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "ModelIndices.h"
 #include "Gangs.h"
 #include "Weapon.h"
@@ -75,13 +75,3 @@ INITSAVEBUF
 		Gang[i] = ReadSaveBuf<CGangInfo>(buf);
 VALIDATESAVEBUF(size);
 }
-
-STARTPATCHES
-	InjectHook(0x4C3FB0, CGangs::Initialise, PATCH_JUMP);
-	InjectHook(0x4C4010, CGangs::SetGangVehicleModel, PATCH_JUMP);
-	InjectHook(0x4C4030, CGangs::SetGangWeapons, PATCH_JUMP);
-	InjectHook(0x4C4050, CGangs::SetGangPedModelOverride, PATCH_JUMP);
-	InjectHook(0x4C4070, CGangs::GetGangPedModelOverride, PATCH_JUMP);
-	InjectHook(0x4C4080, CGangs::SaveAllGangData, PATCH_JUMP);
-	InjectHook(0x4C4100, CGangs::LoadAllGangData, PATCH_JUMP);
-ENDPATCHES

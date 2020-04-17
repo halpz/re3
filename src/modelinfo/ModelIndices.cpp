@@ -1,9 +1,9 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "ModelIndices.h"
 
-#define X(name, var, addr) int16 &var = *(int16*)addr;
+#define X(name, var, addr) int16 var;
 	MODELINDICES
 #undef X
 
@@ -32,8 +32,3 @@ TestModelIndices(void)
 {
 	;
 }
-
-STARTPATCHES
-	InjectHook(0x48EB60, InitModelIndices, PATCH_JUMP);
-	InjectHook(0x48F030, MatchModelString, PATCH_JUMP);
-ENDPATCHES

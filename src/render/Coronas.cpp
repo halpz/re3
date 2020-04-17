@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "General.h"
 #include "TxdStore.h"
@@ -572,17 +572,3 @@ CRegisteredCorona::Update(void)
 	firstUpdate = false;
 	registeredThisFrame = false;
 }
-
-STARTPATCHES
-	InjectHook(0x4F9F90, CCoronas::Init, PATCH_JUMP);
-	InjectHook(0x4FA050, CCoronas::Shutdown, PATCH_JUMP);
-	InjectHook(0x4F8EC0, CCoronas::Update, PATCH_JUMP);
-	InjectHook(0x4FA0E0, (void (*)(uint32, uint8, uint8, uint8, uint8, const CVector&, float, float, RwTexture*, int8, uint8, uint8, uint8, float))CCoronas::RegisterCorona, PATCH_JUMP);
-	InjectHook(0x4FA080, (void (*)(uint32, uint8, uint8, uint8, uint8, const CVector&, float, float, uint8, int8, uint8, uint8, uint8, float))CCoronas::RegisterCorona, PATCH_JUMP);
-	InjectHook(0x4FA2D0, CCoronas::UpdateCoronaCoors, PATCH_JUMP);
-	InjectHook(0x4F8FB0, CCoronas::Render, PATCH_JUMP);
-	InjectHook(0x4F9B40, CCoronas::RenderReflections, PATCH_JUMP);
-	InjectHook(0x4FA380, CCoronas::DoSunAndMoon, PATCH_JUMP);
-
-	InjectHook(0x4F8C40, &CRegisteredCorona::Update, PATCH_JUMP);
-ENDPATCHES

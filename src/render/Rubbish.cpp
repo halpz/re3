@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Timer.h"
 #include "Weather.h"

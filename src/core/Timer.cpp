@@ -1,6 +1,6 @@
 #include <windows.h>
 #include "common.h"
-#include "patcher.h"
+
 #include "DMAudio.h"
 #include "Record.h"
 #include "Timer.h"
@@ -225,18 +225,3 @@ uint32 CTimer::GetCyclesPerFrame()
 	return 20;
 }
 
-#if 1
-STARTPATCHES	
-	InjectHook(0x4ACE60, CTimer::Initialise, PATCH_JUMP);
-	InjectHook(0x4ACF60, CTimer::Shutdown, PATCH_JUMP);
-	InjectHook(0x4ACF70, CTimer::Update, PATCH_JUMP);
-	InjectHook(0x4AD310, CTimer::Suspend, PATCH_JUMP);
-	InjectHook(0x4AD370, CTimer::Resume, PATCH_JUMP);
-	InjectHook(0x4AD3F0, CTimer::GetCyclesPerMillisecond, PATCH_JUMP);
-	InjectHook(0x4AD410, CTimer::GetCurrentTimeInCycles, PATCH_JUMP);
-	InjectHook(0x4AD450, CTimer::GetIsSlowMotionActive, PATCH_JUMP);
-	InjectHook(0x4AD480, CTimer::Stop, PATCH_JUMP);
-	InjectHook(0x4AD490, CTimer::StartUserPause, PATCH_JUMP);
-	InjectHook(0x4AD4A0, CTimer::EndUserPause, PATCH_JUMP);
-ENDPATCHES
-#endif

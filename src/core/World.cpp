@@ -27,28 +27,28 @@
 #include "Vehicle.h"
 #include "WaterLevel.h"
 #include "common.h"
-#include "patcher.h"
+
 
 #define OBJECT_REPOSITION_OFFSET_Z 2.0f
 
 CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
-CPtrList *CWorld::ms_bigBuildingsList = (CPtrList *)0x6FAB60;
-CPtrList &CWorld::ms_listMovingEntityPtrs = *(CPtrList *)0x8F433C;
-CSector (*CWorld::ms_aSectors)[NUMSECTORS_X] = (CSector(*)[NUMSECTORS_Y])0x665608;
-uint16 &CWorld::ms_nCurrentScanCode = *(uint16 *)0x95CC64;
+CPtrList CWorld::ms_bigBuildingsList[4];// = (CPtrList*)0x6FAB60;
+CPtrList CWorld::ms_listMovingEntityPtrs;// = *(CPtrList*)0x8F433C;
+CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];// = (CSector (*)[NUMSECTORS_Y])0x665608;
+uint16 CWorld::ms_nCurrentScanCode;// = *(uint16*)0x95CC64;
 
-uint8 &CWorld::PlayerInFocus = *(uint8 *)0x95CD61;
+uint8 CWorld::PlayerInFocus;// = *(uint8 *)0x95CD61;
 CPlayerInfo CWorld::Players[NUMPLAYERS];
-bool &CWorld::bNoMoreCollisionTorque = *(bool *)0x95CDCC;
-CEntity *&CWorld::pIgnoreEntity = *(CEntity **)0x8F6494;
-bool &CWorld::bIncludeDeadPeds = *(bool *)0x95CD8F;
-bool &CWorld::bSecondShift = *(bool *)0x95CD54;
-bool &CWorld::bForceProcessControl = *(bool *)0x95CD6C;
-bool &CWorld::bProcessCutsceneOnly = *(bool *)0x95CD8B;
+bool CWorld::bNoMoreCollisionTorque;// = *(bool*)0x95CDCC;
+CEntity *CWorld::pIgnoreEntity;//	= *(CEntity**)0x8F6494;
+bool CWorld::bIncludeDeadPeds;// = *(bool*)0x95CD8F;
+bool CWorld::bSecondShift;// = *(bool*)0x95CD54;
+bool CWorld::bForceProcessControl;// = *(bool*)0x95CD6C;
+bool CWorld::bProcessCutsceneOnly;// = *(bool*)0x95CD8B;
 
-bool &CWorld::bDoingCarCollisions = *(bool *)0x95CD8C;
-bool &CWorld::bIncludeCarTyres = *(bool *)0x95CDAA;
+bool CWorld::bDoingCarCollisions;// = *(bool*)0x95CD8C;
+bool CWorld::bIncludeCarTyres;// = *(bool*)0x95CDAA;
 
 void
 CWorld::Initialise()
@@ -2215,32 +2215,3 @@ CWorld::UseDetonator(CEntity *pEntity)
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x4AE930, CWorld::Add, PATCH_JUMP);
-	InjectHook(0x4AE9D0, CWorld::Remove, PATCH_JUMP);
-	InjectHook(0x4B1F60, CWorld::ClearScanCodes, PATCH_JUMP);
-	InjectHook(0x4AF970, CWorld::ProcessLineOfSight, PATCH_JUMP);
-	InjectHook(0x4B0A80, CWorld::ProcessLineOfSightSector, PATCH_JUMP);
-	InjectHook(0x4B0C70, CWorld::ProcessLineOfSightSectorList, PATCH_JUMP);
-	InjectHook(0x4B0DE0, CWorld::ProcessVerticalLine, PATCH_JUMP);
-	InjectHook(0x4B0EF0, CWorld::ProcessVerticalLineSector, PATCH_JUMP);
-	InjectHook(0x4B1090, CWorld::ProcessVerticalLineSectorList, PATCH_JUMP);
-	InjectHook(0x4AEAA0, CWorld::GetIsLineOfSightClear, PATCH_JUMP);
-	InjectHook(0x4B2000, CWorld::GetIsLineOfSightSectorClear, PATCH_JUMP);
-	InjectHook(0x4B2160, CWorld::GetIsLineOfSightSectorListClear, PATCH_JUMP);
-
-	InjectHook(0x4B2200, CWorld::FindObjectsInRange, PATCH_JUMP);
-	InjectHook(0x4B2540, CWorld::FindObjectsInRangeSectorList, PATCH_JUMP);
-	InjectHook(0x4B4AC0, CWorld::TestSphereAgainstSectorList, PATCH_JUMP);
-	InjectHook(0x4B4710, CWorld::TestSphereAgainstWorld, PATCH_JUMP);
-	InjectHook(0x4B3A80, CWorld::FindGroundZForCoord, PATCH_JUMP);
-	InjectHook(0x4B3AE0, CWorld::FindGroundZFor3DCoord, PATCH_JUMP);
-	InjectHook(0x4B3B50, CWorld::FindRoofZFor3DCoord, PATCH_JUMP);
-
-	InjectHook(0x4B5BC0, CWorld::StopAllLawEnforcersInTheirTracks, PATCH_JUMP);
-	InjectHook(0x4B53F0, CWorld::SetAllCarsCanBeDamaged, PATCH_JUMP);
-	InjectHook(0x4B5460, CWorld::ExtinguishAllCarFiresInArea, PATCH_JUMP);
-
-	InjectHook(0x4B1A60, CWorld::Process, PATCH_JUMP);
-ENDPATCHES

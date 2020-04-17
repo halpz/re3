@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
 #include "AnimBlendClumpData.h"
@@ -220,9 +220,3 @@ FrameUpdateCallBackWith3dVelocityExtraction(AnimBlendFrameData *frame, void *arg
 	}
 	RwMatrixUpdate(mat);
 }
-
-STARTPATCHES
-	InjectHook(0x4025F0, FrameUpdateCallBack, PATCH_JUMP);
-	InjectHook(0x4028B0, FrameUpdateCallBackWithVelocityExtraction, PATCH_JUMP);
-	InjectHook(0x402D40, FrameUpdateCallBackWith3dVelocityExtraction, PATCH_JUMP);
-ENDPATCHES

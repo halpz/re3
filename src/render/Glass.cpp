@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Glass.h"
 #include "Timer.h"
 #include "Object.h"
@@ -708,26 +708,3 @@ CGlass::WindowRespondsToExplosion(CEntity *entity, CVector point)
 			object->bGlassCracked = true;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x501F20, CGlass::Init, PATCH_JUMP);
-	InjectHook(0x502050, CGlass::Update, PATCH_JUMP);
-	InjectHook(0x502080, &CFallingGlassPane::Update, PATCH_JUMP);
-	InjectHook(0x502350, CGlass::Render, PATCH_JUMP);
-	InjectHook(0x502490, CGlass::FindFreePane, PATCH_JUMP);
-	InjectHook(0x5024C0, &CFallingGlassPane::Render, PATCH_JUMP);
-	InjectHook(0x502AC0, CGlass::GeneratePanesForWindow, PATCH_JUMP);
-	InjectHook(0x5033F0, CGlass::AskForObjectToBeRenderedInGlass, PATCH_JUMP);
-	InjectHook(0x503420, CGlass::RenderEntityInGlass, PATCH_JUMP);
-	InjectHook(0x503C90, CGlass::CalcAlphaWithNormal, PATCH_JUMP);
-	InjectHook(0x503D60, CGlass::RenderHiLightPolys, PATCH_JUMP);
-	InjectHook(0x503DE0, CGlass::RenderShatteredPolys, PATCH_JUMP);
-	InjectHook(0x503E70, CGlass::RenderReflectionPolys, PATCH_JUMP);
-	InjectHook(0x503F10, CGlass::WindowRespondsToCollision, PATCH_JUMP);
-	InjectHook(0x504630, CGlass::WindowRespondsToSoftCollision, PATCH_JUMP);
-	InjectHook(0x504670, CGlass::WasGlassHitByBullet, PATCH_JUMP);
-	InjectHook(0x504790, CGlass::WindowRespondsToExplosion, PATCH_JUMP);
-	//InjectHook(0x504880, `global constructor keyed to'glass.cpp, PATCH_JUMP);
-	//InjectHook(0x5048D0, CFallingGlassPane::~CFallingGlassPane, PATCH_JUMP);
-	//InjectHook(0x5048E0, CFallingGlassPane::CFallingGlassPane, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Bridge.h"
 #include "Pools.h"
 #include "ModelIndices.h"
@@ -144,11 +144,3 @@ bool CBridge::ThisIsABridgeObjectMovingUp(int index)
 
 	return State == STATE_LIFT_PART_ABOUT_TO_MOVE_UP || State == STATE_LIFT_PART_MOVING_UP;
 }
-
-STARTPATCHES
-	InjectHook(0x413A30, &CBridge::Init, PATCH_JUMP);
-	InjectHook(0x413AC0, &CBridge::Update, PATCH_JUMP);
-	InjectHook(0x413D10, &CBridge::ShouldLightsBeFlashing, PATCH_JUMP);
-	InjectHook(0x413D20, &CBridge::FindBridgeEntities, PATCH_JUMP);
-	InjectHook(0x413DE0, &CBridge::ThisIsABridgeObjectMovingUp, PATCH_JUMP);
-ENDPATCHES

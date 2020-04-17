@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "FileMgr.h"
 #include "Directory.h"
@@ -57,10 +57,3 @@ CDirectory::FindItem(const char *name, uint32 &offset, uint32 &size)
 		}
 	return false;
 }
-
-STARTPATCHES
-	InjectHook(0x473630, &CDirectory::ReadDirFile, PATCH_JUMP);
-	InjectHook(0x473690, &CDirectory::WriteDirFile, PATCH_JUMP);
-	InjectHook(0x473600, &CDirectory::AddItem, PATCH_JUMP);
-	InjectHook(0x4736E0, &CDirectory::FindItem, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "WaterCannon.h"
 #include "Vector.h"
 #include "General.h"
@@ -304,17 +304,3 @@ void CWaterCannons::Render(void)
 			aCannons[i].Render();
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x521A30, &CWaterCannon::Init, PATCH_JUMP);
-	InjectHook(0x521B80, &CWaterCannon::Update_OncePerFrame, PATCH_JUMP);
-	InjectHook(0x521CC0, &CWaterCannon::Update_NewInput, PATCH_JUMP);
-	InjectHook(0x521D30, &CWaterCannon::Render, PATCH_JUMP);
-	InjectHook(0x5220B0, &CWaterCannon::PushPeds, PATCH_JUMP);
-	InjectHook(0x522440, CWaterCannons::Init, PATCH_JUMP);
-	InjectHook(0x522470, CWaterCannons::UpdateOne, PATCH_JUMP);
-	InjectHook(0x522510, CWaterCannons::Update, PATCH_JUMP);
-	InjectHook(0x522550, CWaterCannons::Render, PATCH_JUMP);
-	//InjectHook(0x522B40, `global constructor keyed to'watercannon.cpp, PATCH_JUMP);
-	//InjectHook(0x522B60, CWaterCannon::CWaterCannon, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "FileMgr.h"
 #include "PedType.h"
 
@@ -202,12 +202,3 @@ INITSAVEBUF
 		*ms_apPedType[i] = ReadSaveBuf<CPedType>(buf);
 VALIDATESAVEBUF(size)
 }
-
-STARTPATCHES
-	InjectHook(0x4EE7E0, &CPedType::Initialise, PATCH_JUMP);
-	InjectHook(0x4EE890, &CPedType::Shutdown, PATCH_JUMP);
-	InjectHook(0x4EEC10, &CPedType::FindPedType, PATCH_JUMP);
-	InjectHook(0x4EEF40, &CPedType::FindPedFlag, PATCH_JUMP);
-	InjectHook(0x4EF320, &CPedType::Save, PATCH_JUMP);
-	InjectHook(0x4EF3D0, &CPedType::Load, PATCH_JUMP);
-ENDPATCHES

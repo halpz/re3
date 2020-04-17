@@ -2,7 +2,7 @@
 #include <fcntl.h>
 #include <direct.h>
 #include "common.h"
-#include "patcher.h"
+
 #include "FileMgr.h"
 
 const char *_psGetUserFilesFolder();
@@ -282,19 +282,3 @@ CFileMgr::GetErrorReadWrite(int fd)
 {
 	return myfeof(fd);
 }
-
-STARTPATCHES
-	InjectHook(0x478F80, CFileMgr::Initialise, PATCH_JUMP);
-	InjectHook(0x478FB0, CFileMgr::ChangeDir, PATCH_JUMP);
-	InjectHook(0x479020, CFileMgr::SetDir, PATCH_JUMP);
-	InjectHook(0x479080, CFileMgr::SetDirMyDocuments, PATCH_JUMP);
-	InjectHook(0x479090, CFileMgr::LoadFile, PATCH_JUMP);
-	InjectHook(0x479100, CFileMgr::OpenFile, PATCH_JUMP);
-	InjectHook(0x479120, CFileMgr::OpenFileForWriting, PATCH_JUMP);
-	InjectHook(0x479140, CFileMgr::Read, PATCH_JUMP);
-	InjectHook(0x479160, CFileMgr::Write, PATCH_JUMP);
-	InjectHook(0x479180, CFileMgr::Seek, PATCH_JUMP);
-	InjectHook(0x4791D0, CFileMgr::ReadLine, PATCH_JUMP);
-	InjectHook(0x479200, CFileMgr::CloseFile, PATCH_JUMP);
-	InjectHook(0x479210, CFileMgr::GetErrorReadWrite, PATCH_JUMP);
-ENDPATCHES

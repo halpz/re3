@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Timer.h"
 #include "TxdStore.h"
@@ -1849,19 +1849,3 @@ void CParticle::AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatr
 					0.3f, color, 0, 0, 0, 0);
 	}
 }
-
-STARTPATCHES
-	//InjectHook(0x50C410, &CParticle::ctor, PATCH_JUMP);
-	//InjectHook(0x50C420, &CParticle::dtor, PATCH_JUMP);
-	InjectHook(0x50C430, CParticle::ReloadConfig, PATCH_JUMP);
-	InjectHook(0x50C570, CParticle::Initialise, PATCH_JUMP);
-	InjectHook(0x50CF40, CParticle::Shutdown, PATCH_JUMP);
-	//InjectHook(0x50D140, CParticle::AddParticle, PATCH_JUMP);
-	InjectHook(0x50D190, (CParticle *(*)(tParticleType, CVector const&, CVector const&, CEntity*, float, RwRGBA const&, int, int, int, int))CParticle::AddParticle, PATCH_JUMP);
-	InjectHook(0x50DCF0, CParticle::Update, PATCH_JUMP);
-	InjectHook(0x50EE20, CParticle::Render, PATCH_JUMP);
-	InjectHook(0x50F6E0, CParticle::RemovePSystem, PATCH_JUMP);
-	InjectHook(0x50F720, CParticle::RemoveParticle, PATCH_JUMP);
-	InjectHook(0x50F760, CParticle::AddJetExplosion, PATCH_JUMP);
-	InjectHook(0x50FAA0, CParticle::AddYardieDoorSmoke, PATCH_JUMP);
-ENDPATCHES

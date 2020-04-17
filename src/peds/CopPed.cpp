@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "World.h"
 #include "PlayerPed.h"
 #include "CopPed.h"
@@ -736,25 +736,3 @@ CCopPed::ProcessControl(void)
 		SetAttack(m_pedInObjective);
 	}
 }
-
-#include <new>
-
-class CCopPed_ : public CCopPed
-{
-public:
-	CCopPed *ctor(eCopType type) { return ::new (this) CCopPed(type); };
-	void dtor(void) { CCopPed::~CCopPed(); }
-	void ProcessControl_(void) { CCopPed::ProcessControl(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4C11B0, &CCopPed_::ctor, PATCH_JUMP);
-	InjectHook(0x4C13E0, &CCopPed_::dtor, PATCH_JUMP);
-	InjectHook(0x4C1400, &CCopPed_::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x4C28C0, &CCopPed::ClearPursuit, PATCH_JUMP);
-	InjectHook(0x4C2B00, &CCopPed::SetArrestPlayer, PATCH_JUMP);
-	InjectHook(0x4C27D0, &CCopPed::SetPursuit, PATCH_JUMP);
-	InjectHook(0x4C2C90, &CCopPed::ArrestPlayer, PATCH_JUMP);
-	InjectHook(0x4C26A0, &CCopPed::ScanForCrimes, PATCH_JUMP);
-	InjectHook(0x4C1B50, &CCopPed::CopAI, PATCH_JUMP);
-ENDPATCHES

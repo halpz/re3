@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "ModelIndices.h"
 #include "Timer.h"
@@ -874,56 +874,3 @@ CEntity::AddSteamsFromGround(CPtrList& list)
 		pNode = pNode->next;
 	}
 }
-
-#include <new>
-
-class CEntity_ : public CEntity
-{
-public:
-	CEntity *ctor(void) { return ::new (this) CEntity(); }
-	void dtor(void) { this->CEntity::~CEntity(); }
-	void Add_(void) { CEntity::Add(); }
-	void Remove_(void) { CEntity::Remove(); }
-	void SetModelIndex_(uint32 i) { CEntity::SetModelIndex(i); }
-	void CreateRwObject_(void) { CEntity::CreateRwObject(); }
-	void DeleteRwObject_(void) { CEntity::DeleteRwObject(); }
-	CRect GetBoundRect_(void) { return CEntity::GetBoundRect(); }
-	void PreRender_(void) { CEntity::PreRender(); }
-	void Render_(void) { CEntity::Render(); }
-	bool SetupLighting_(void) { return CEntity::SetupLighting(); }
-};
-
-STARTPATCHES
-	InjectHook(0x473C30, &CEntity_::ctor, PATCH_JUMP);
-	InjectHook(0x473E40, &CEntity_::dtor, PATCH_JUMP);
-	InjectHook(0x473E70, &CEntity_::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x475080, &CEntity_::Add_, PATCH_JUMP);
-	InjectHook(0x475310, &CEntity_::Remove_, PATCH_JUMP);
-	InjectHook(0x473EA0, &CEntity_::CreateRwObject_, PATCH_JUMP);
-	InjectHook(0x473F90, &CEntity_::DeleteRwObject_, PATCH_JUMP);
-	InjectHook(0x474000, &CEntity_::GetBoundRect_, PATCH_JUMP);
-	InjectHook(0x474350, &CEntity_::PreRender_, PATCH_JUMP);
-	InjectHook(0x474BD0, &CEntity_::Render_, PATCH_JUMP);
-	InjectHook(0x4A7C60, &CEntity_::SetupLighting_, PATCH_JUMP);
-
-	InjectHook(0x4742C0, (void (CEntity::*)(CVector&))&CEntity::GetBoundCentre, PATCH_JUMP);
-	InjectHook(0x474310, &CEntity::GetBoundRadius, PATCH_JUMP);
-	InjectHook(0x474C10, &CEntity::GetIsTouching, PATCH_JUMP);
-	InjectHook(0x474CC0, &CEntity::GetIsOnScreen, PATCH_JUMP);
-	InjectHook(0x474D20, &CEntity::GetIsOnScreenComplex, PATCH_JUMP);
-	InjectHook(0x474CA0, &CEntity::IsVisible, PATCH_JUMP);
-	InjectHook(0x474330, &CEntity::UpdateRwFrame, PATCH_JUMP);
-	InjectHook(0x4755E0, &CEntity::SetupBigBuilding, PATCH_JUMP);
-	InjectHook(0x4A7480, &CEntity::RegisterReference, PATCH_JUMP);
-	InjectHook(0x4A74E0, &CEntity::ResolveReferences, PATCH_JUMP);
-	InjectHook(0x4A7530, &CEntity::PruneReferences, PATCH_JUMP);
-
-	InjectHook(0x473F10, &CEntity::AttachToRwObject, PATCH_JUMP);
-	InjectHook(0x473F60, &CEntity::DetachFromRwObject, PATCH_JUMP);
-
-	InjectHook(0x475A20, &CEntity::PreRenderForGlassWindow, PATCH_JUMP);
-	InjectHook(0x50CE40, (void (CEntity::*)(CVector*))& CEntity::AddSteamsFromGround, PATCH_JUMP);
-	InjectHook(0x475670, &CEntity::ModifyMatrixForTreeInWind, PATCH_JUMP);
-	InjectHook(0x475830, &CEntity::ModifyMatrixForBannerInWind, PATCH_JUMP);
-	InjectHook(0x4FA530, &CEntity::ProcessLightsForEntity, PATCH_JUMP);
-ENDPATCHES

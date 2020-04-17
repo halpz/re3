@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Draw.h"
 #include "Camera.h"
@@ -593,19 +593,3 @@ CSprite::RenderBufferedOneXLUSprite2D_Rotate_Dimension(float x, float y, float w
 	if(nSpriteBufferIndex >= SPRITEBUFFERSIZE)
 		FlushSpriteBuffer();
 }
-
-STARTPATCHES
-	InjectHook(0x51C4A0, CSprite::CalcHorizonCoors, PATCH_JUMP);
-	InjectHook(0x51C3A0, CSprite::CalcScreenCoors, PATCH_JUMP);
-	InjectHook(0x51C590, CSprite::InitSpriteBuffer, PATCH_JUMP);
-	InjectHook(0x51C5B0, CSprite::InitSpriteBuffer2D, PATCH_JUMP);
-	InjectHook(0x51C520, CSprite::FlushSpriteBuffer, PATCH_JUMP);
-	InjectHook(0x51C960, CSprite::RenderOneXLUSprite, PATCH_JUMP);
-	InjectHook(0x51D110, CSprite::RenderOneXLUSprite_Rotate_Aspect, PATCH_JUMP);
-	InjectHook(0x51C5D0, CSprite::RenderBufferedOneXLUSprite, PATCH_JUMP);
-	InjectHook(0x51D5B0, CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension, PATCH_JUMP);
-	InjectHook(0x51CCD0, CSprite::RenderBufferedOneXLUSprite_Rotate_Aspect, PATCH_JUMP);
-	InjectHook(0x51D9E0, CSprite::RenderBufferedOneXLUSprite_Rotate_2Colours, PATCH_JUMP);
-	InjectHook(0x51E3C0, CSprite::RenderBufferedOneXLUSprite2D, PATCH_JUMP);
-	InjectHook(0x51E490, CSprite::RenderBufferedOneXLUSprite2D_Rotate_Dimension, PATCH_JUMP);
-ENDPATCHES

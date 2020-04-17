@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Building.h"
 #include "Treadable.h"
 #include "Train.h"
@@ -562,17 +562,3 @@ CCullZones::DoWeHaveMoreThanXOccurencesOfSet(int32 count, uint16 *set)
 	}
 	return false;
 }
-
-STARTPATCHES
-	InjectHook(0x524BC0, &CCullZones::Init, PATCH_JUMP);
-	InjectHook(0x524EC0, &CCullZones::ResolveVisibilities, PATCH_JUMP);
-	InjectHook(0x524F80, &CCullZones::Update, PATCH_JUMP);
-	InjectHook(0x525370, &CCullZones::AddCullZone, PATCH_JUMP);
-	InjectHook(0x5250D0, &CCullZones::ForceCullZoneCoors, PATCH_JUMP);
-	InjectHook(0x525130, &CCullZones::FindCullZoneForCoors, PATCH_JUMP);
-	InjectHook(0x5251C0, &CCullZones::FindAttributesForCoors, PATCH_JUMP);
-	InjectHook(0x525290, &CCullZones::FindZoneWithStairsAttributeForPlayer, PATCH_JUMP);
-
-	InjectHook(0x525610, &CCullZone::DoStuffLeavingZone, PATCH_JUMP);
-	InjectHook(0x525810, &CCullZone::DoStuffEnteringZone, PATCH_JUMP);
-ENDPATCHES

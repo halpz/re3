@@ -5,7 +5,7 @@
 #pragma warning( pop )
 #include "common.h"
 #include "win.h"
-#include "patcher.h"
+
 #include "Game.h"
 #include "main.h"
 #include "RwHelper.h"
@@ -710,20 +710,3 @@ void CGame::ProcessTidyUpMemory(void)
 	// meow
 #endif
 }
-
-STARTPATCHES
-	InjectHook(0x48BB80, CGame::InitialiseOnceBeforeRW, PATCH_JUMP);
-	InjectHook(0x48BBA0, CGame::InitialiseRenderWare, PATCH_JUMP);
-	InjectHook(0x48BCB0, CGame::ShutdownRenderWare, PATCH_JUMP);
-	InjectHook(0x48BD50, CGame::InitialiseOnceAfterRW, PATCH_JUMP);
-	InjectHook(0x48BEC0, CGame::FinalShutdown, PATCH_JUMP);
-	InjectHook(0x48BED0, CGame::Initialise, PATCH_JUMP);
-	InjectHook(0x48C3A0, CGame::ShutDown, PATCH_JUMP);
-	InjectHook(0x48C4B0, CGame::ReInitGameObjectVariables, PATCH_JUMP);
-	InjectHook(0x48C620, CGame::ReloadIPLs, PATCH_JUMP);
-	InjectHook(0x48C6B0, CGame::ShutDownForRestart, PATCH_JUMP);
-	InjectHook(0x48C740, CGame::InitialiseWhenRestarting, PATCH_JUMP);
-	InjectHook(0x48C850, CGame::Process, PATCH_JUMP);
-	InjectHook(0x48CA10, CGame::DrasticTidyUpMemory, PATCH_JUMP);
-	InjectHook(0x48CA20, CGame::TidyUpMemory, PATCH_JUMP);
-ENDPATCHES

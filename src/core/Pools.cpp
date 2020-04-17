@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Pools.h"
 
 #include "Boat.h"
@@ -425,19 +425,3 @@ INITSAVEBUF
 	}
 VALIDATESAVEBUF(size)
 }
-
-STARTPATCHES
-	InjectHook(0x4A1770, CPools::Initialise, PATCH_JUMP);
-	InjectHook(0x4A1880, CPools::ShutDown, PATCH_JUMP);
-	InjectHook(0x4A1A50, CPools::CheckPoolsEmpty, PATCH_JUMP);
-	InjectHook(0x4A1A80, CPools::GetPedRef, PATCH_JUMP);
-	InjectHook(0x4A1AA0, CPools::GetPed, PATCH_JUMP);
-	InjectHook(0x4A1AC0, CPools::GetVehicleRef, PATCH_JUMP);
-	InjectHook(0x4A1AE0, CPools::GetVehicle, PATCH_JUMP);
-	InjectHook(0x4A1B00, CPools::GetObjectRef, PATCH_JUMP);
-	InjectHook(0x4A1B20, CPools::GetObject, PATCH_JUMP);
-	InjectHook(0x4A2DB0, CPools::MakeSureSlotInObjectPoolIsEmpty, PATCH_JUMP);
-	InjectHook(0x4A1B40, CPools::LoadVehiclePool, PATCH_JUMP);
-	InjectHook(0x4A2550, CPools::LoadObjectPool, PATCH_JUMP);
-	InjectHook(0x4A2B50, CPools::LoadPedPool, PATCH_JUMP);
-ENDPATCHES

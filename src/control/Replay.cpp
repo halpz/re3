@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "AnimBlendAssociation.h"
 #include "Boat.h"
 #include "SpecialFX.h"
@@ -1570,16 +1570,3 @@ void CReplay::Display()
 	if (Mode == MODE_PLAYBACK)
 		CFont::PrintString(SCREEN_SCALE_X(63.5f), SCREEN_SCALE_Y(30.0f), TheText.Get("REPLAY"));
 }
-
-STARTPATCHES
-InjectHook(0x592FE0, &CReplay::Init, PATCH_JUMP);
-InjectHook(0x593150, &CReplay::DisableReplays, PATCH_JUMP);
-InjectHook(0x593160, &CReplay::EnableReplays, PATCH_JUMP);
-InjectHook(0x593170, &CReplay::Update, PATCH_JUMP);
-InjectHook(0x595B20, &CReplay::FinishPlayback, PATCH_JUMP);
-InjectHook(0x595BD0, &CReplay::EmptyReplayBuffer, PATCH_JUMP);
-InjectHook(0x595EE0, &CReplay::Display, PATCH_JUMP);
-InjectHook(0x596030, &CReplay::TriggerPlayback, PATCH_JUMP);
-InjectHook(0x597560, &CReplay::StreamAllNecessaryCarsAndPeds, PATCH_JUMP);
-InjectHook(0x597680, &CReplay::ShouldStandardCameraBeProcessed, PATCH_JUMP);
-ENDPATCHES

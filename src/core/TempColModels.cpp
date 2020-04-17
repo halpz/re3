@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "TempColModels.h"
 #include "SurfaceTable.h"
 
@@ -287,7 +287,3 @@ CTempColModels::Initialise(void)
 
 #undef SET_COLMODEL_SPHERES
 }
-
-STARTPATCHES
-	InjectHook(0x412160, CTempColModels::Initialise, PATCH_JUMP);
-ENDPATCHES

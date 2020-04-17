@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Camera.h"
 #include "General.h"
 #include "Heli.h"
@@ -287,16 +287,3 @@ CProjectileInfo::RemoveIfThisIsAProjectile(CObject *object)
 	ms_apProjectile[i] = nil;
 	return true;
 }
-
-STARTPATCHES
-	InjectHook(0x55ADF0, CProjectileInfo::Initialise, PATCH_JUMP);
-	InjectHook(0x55AFF0, CProjectileInfo::Shutdown, PATCH_JUMP);
-	InjectHook(0x55B010, CProjectileInfo::GetProjectileInfo, PATCH_JUMP);
-	InjectHook(0x55B030, CProjectileInfo::AddProjectile, PATCH_JUMP);
-	InjectHook(0x55B700, CProjectileInfo::RemoveProjectile, PATCH_JUMP);
-	InjectHook(0x55B770, CProjectileInfo::RemoveNotAdd, PATCH_JUMP);
-	InjectHook(0x55B7C0, CProjectileInfo::Update, PATCH_JUMP);
-	InjectHook(0x55BA50, CProjectileInfo::IsProjectileInRange, PATCH_JUMP);
-	InjectHook(0x55BB80, CProjectileInfo::RemoveAllProjectiles, PATCH_JUMP);
-	InjectHook(0x55BBD0, CProjectileInfo::RemoveIfThisIsAProjectile, PATCH_JUMP);
-ENDPATCHES

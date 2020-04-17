@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "World.h"
 #include "Vehicle.h"
 #include "PlayerPed.h"
@@ -57,9 +57,3 @@ CReferences::PruneAllReferencesInWorld(void)
 			e->PruneReferences();
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x4A7350, CReferences::Init, PATCH_JUMP);
-	InjectHook(0x4A7570, CReferences::RemoveReferencesToPlayer, PATCH_JUMP);
-	InjectHook(0x4A75A0, CReferences::PruneAllReferencesInWorld, PATCH_JUMP);
-ENDPATCHES

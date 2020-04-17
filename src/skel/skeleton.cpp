@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 
 #include <stdio.h>
 #include <math.h>
@@ -415,26 +415,3 @@ RsInitialise(void)
 
 	return result;
 }
-
-
-
-
-STARTPATCHES
-	InjectHook(0x584890, RsTimer, PATCH_JUMP);
-	InjectHook(0x5848A0, RsCameraShowRaster, PATCH_JUMP);
-	InjectHook(0x5848B0, RsCameraBeginUpdate, PATCH_JUMP);
-	InjectHook(0x5848C0, RsRegisterImageLoader, PATCH_JUMP);
-	InjectHook(0x5848D0, RsSetDebug, PATCH_JUMP);
-	InjectHook(0x5848E0, RsMouseSetPos, PATCH_JUMP);
-	InjectHook(0x5848F0, RsSelectDevice, PATCH_JUMP);
-	InjectHook(0x584900, RsInputDeviceAttach, PATCH_JUMP);
-	InjectHook(0x584960, rsCommandLine, PATCH_JUMP);
-	InjectHook(0x584980, rsPreInitCommandLine, PATCH_JUMP);
-	InjectHook(0x5849C0, RsKeyboardEventHandler, PATCH_JUMP);
-	InjectHook(0x5849F0, RsPadEventHandler, PATCH_JUMP);
-	InjectHook(0x584A20, RsEventHandler, PATCH_JUMP);
-	InjectHook(0x584B30, RsRwTerminate, PATCH_JUMP);
-	InjectHook(0x584B40, RsRwInitialise, PATCH_JUMP);
-	InjectHook(0x584C30, RsTerminate, PATCH_JUMP);
-	InjectHook(0x584C40, RsInitialise, PATCH_JUMP);
-ENDPATCHES

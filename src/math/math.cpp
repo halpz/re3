@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Quaternion.h"
 
 // TODO: move more stuff into here
@@ -191,8 +191,3 @@ CQuaternion::Get(RwMatrix *matrix)
 	matrix->up.z = y_2z + w_2x;
 	matrix->at.z = 1.0f - (x_2x + y_2y);
 }
-
-STARTPATCHES
-	InjectHook(0x4BA1C0, &CQuaternion::Slerp, PATCH_JUMP);
-	InjectHook(0x4BA0D0, &CQuaternion::Get, PATCH_JUMP);
-ENDPATCHES

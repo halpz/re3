@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Stats.h"
 #include "Text.h"
 #include "World.h"
@@ -418,11 +418,3 @@ void CStats::LoadStats(uint8 *buf, uint32 size)
 	assert(buf - buf_start == size);
 #undef CopyFromBuf
 }
-
-STARTPATCHES
-	InjectHook(0x48C5A3, CStats::Init, PATCH_JUMP); // CGame::ReInitGameObjectVariables
-	InjectHook(0x4AB3E0, CStats::SaveStats, PATCH_JUMP);
-	InjectHook(0x4AB670, CStats::LoadStats, PATCH_JUMP);
-	InjectHook(0x4AB090, CStats::FindCriminalRatingString, PATCH_JUMP);
-	InjectHook(0x4AB2A0, CStats::FindCriminalRatingNumber, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Vehicle.h"
 #include "DamageManager.h"
@@ -228,24 +228,3 @@ CDamageManager::ProgressEngineDamage(void)
 	SetEngineStatus(newstatus);
 	return true;
 }
-
-STARTPATCHES
-	InjectHook(0x545850, &CDamageManager::ResetDamageStatus, PATCH_JUMP);
-	InjectHook(0x545B70, &CDamageManager::FuckCarCompletely, PATCH_JUMP);
-	InjectHook(0x545790, &CDamageManager::GetComponentGroup, PATCH_JUMP);
-	InjectHook(0x545A80, &CDamageManager::ApplyDamage, PATCH_JUMP);
-	InjectHook(0x545920, &CDamageManager::SetDoorStatus, PATCH_JUMP);
-	InjectHook(0x545930, &CDamageManager::GetDoorStatus, PATCH_JUMP);
-	InjectHook(0x545970, &CDamageManager::ProgressDoorDamage, PATCH_JUMP);
-	InjectHook(0x5458B0, &CDamageManager::SetPanelStatus, PATCH_JUMP);
-	InjectHook(0x5458E0, (int32 (CDamageManager::*)(int32))&CDamageManager::GetPanelStatus, PATCH_JUMP);
-	InjectHook(0x545A00, &CDamageManager::ProgressPanelDamage, PATCH_JUMP);
-	InjectHook(0x545860, &CDamageManager::SetLightStatus, PATCH_JUMP);
-	InjectHook(0x545890, &CDamageManager::GetLightStatus, PATCH_JUMP);
-	InjectHook(0x545900, &CDamageManager::SetWheelStatus, PATCH_JUMP);
-	InjectHook(0x545910, &CDamageManager::GetWheelStatus, PATCH_JUMP);
-	InjectHook(0x545A40, &CDamageManager::ProgressWheelDamage, PATCH_JUMP);
-	InjectHook(0x545940, &CDamageManager::SetEngineStatus, PATCH_JUMP);
-	InjectHook(0x545960, &CDamageManager::GetEngineStatus, PATCH_JUMP);
-	InjectHook(0x5459B0, &CDamageManager::ProgressEngineDamage, PATCH_JUMP);
-ENDPATCHES

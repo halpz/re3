@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "Timer.h"
 #include "ModelIndices.h"
 #include "FileMgr.h"
@@ -691,32 +691,3 @@ CTrain::UpdateTrains(void)
 		time += 0x40000/4;
 	}
 }
-
-#include <new>
-
-class CTrain_ : public CTrain
-{
-public:
-	void ctor(int32 id, uint8 CreatedBy) { ::new (this) CTrain(id, CreatedBy); }
-	void SetModelIndex_(uint32 id) { CTrain::SetModelIndex(id); }
-	void ProcessControl_(void) { CTrain::ProcessControl(); }
-	void PreRender_(void) { CTrain::PreRender(); }
-	void Render_(void) { CTrain::Render(); }
-	void dtor(void) { CTrain::~CTrain(); }
-};
-
-STARTPATCHES
-	InjectHook(0x54E470, &CTrain_::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x54E4C0, &CTrain_::PreRender_, PATCH_JUMP);
-	InjectHook(0x54EAA0, &CTrain_::Render_, PATCH_JUMP);
-	InjectHook(0x54E450, &CTrain_::dtor, PATCH_JUMP);
-	InjectHook(0x54E2A0, &CTrain_::ctor, PATCH_JUMP);
-	InjectHook(0x550300, &CTrain::TrainHitStuff, PATCH_JUMP);
-	InjectHook(0x5504A0, &CTrain::AddPassenger, PATCH_JUMP);
-	InjectHook(0x550360, &CTrain::OpenTrainDoor, PATCH_JUMP);
-
-	InjectHook(0x54F000, CTrain::InitTrains, PATCH_JUMP);
-	InjectHook(0x54F360, CTrain::Shutdown, PATCH_JUMP);
-	InjectHook(0x54EAB0, CTrain::ReadAndInterpretTrackFile, PATCH_JUMP);
-	InjectHook(0x54F3A0, CTrain::UpdateTrains, PATCH_JUMP);
-ENDPATCHES

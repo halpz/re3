@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Draw.h"
 #include "World.h"
@@ -3386,58 +3386,3 @@ CCamPathSplines::CCamPathSplines(void)
 	for(i = 0; i < MAXPATHLENGTH; i++)
 		m_arr_PathData[i] = 0.0f;
 }
-
-
-STARTPATCHES
-	InjectHook(0x42C760, (bool (CCamera::*)(const CVector &center, float radius, const CMatrix *mat))&CCamera::IsSphereVisible, PATCH_JUMP);
-	InjectHook(0x46FD00, &CCamera::SetFadeColour, PATCH_JUMP);
-
-	InjectHook(0x46FD40, &CCamera::SetMotionBlur, PATCH_JUMP);
-	InjectHook(0x46FD80, &CCamera::SetMotionBlurAlpha, PATCH_JUMP);
-	InjectHook(0x46F940, &CCamera::RenderMotionBlur, PATCH_JUMP);
-
-	InjectHook(0x46FC90, &CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString, PATCH_JUMP);
-
-	InjectHook(0x46FF00, &CCamera::SetWideScreenOn, PATCH_JUMP);
-	InjectHook(0x46FF10, &CCamera::SetWideScreenOff, PATCH_JUMP);
-
-	InjectHook(0x46FCC0, &CCamera::SetCamPositionForFixedMode, PATCH_JUMP);
-	InjectHook(0x46FEC0, &CCamera::SetRwCamera, PATCH_JUMP);
-	InjectHook(0x46B920, &CCamera::GetCutSceneFinishTime, PATCH_JUMP);
-	InjectHook(0x46B560, &CCamera::FinishCutscene, PATCH_JUMP);
-	InjectHook(0x46FF30, &CCamera::SetZoomValueFollowPedScript, PATCH_JUMP);
-	InjectHook(0x46FF90, &CCamera::SetZoomValueCamStringScript, PATCH_JUMP);
-
-
-	InjectHook(0x46F8E0, &CCamera::ProcessWideScreenOn, PATCH_JUMP);
-	InjectHook(0x46FDE0, &CCamera::SetParametersForScriptInterpolation, PATCH_JUMP);
-	InjectHook(0x46BA20, &CCamera::GetLookingLRBFirstPerson, PATCH_JUMP);
-	InjectHook(0x470D80, &CCamera::StartTransitionWhenNotFinishedInter, PATCH_JUMP);
-	InjectHook(0x46FFF0, &CCamera::StartTransition, PATCH_JUMP);
-	InjectHook(0x46BEB0, &CCamera::InitialiseCameraForDebugMode, PATCH_JUMP);
-	InjectHook(0x471500, &CCamera::TakeControl, PATCH_JUMP);
-	InjectHook(0x4715B0, &CCamera::TakeControlNoEntity, PATCH_JUMP);
-	InjectHook(0x46B3A0, &CCamera::Fade, PATCH_JUMP);
-	InjectHook(0x46FE20, &CCamera::SetPercentAlongCutScene, PATCH_JUMP);
-	InjectHook(0x46B100, &CamShakeNoPos, PATCH_JUMP);
-	InjectHook(0x46B200, &CCamera::CamShake, PATCH_JUMP);
-	InjectHook(0x46F520, &CCamera::ProcessObbeCinemaCameraPed, PATCH_JUMP);
-	InjectHook(0x46F3E0, &CCamera::ProcessObbeCinemaCameraCar, PATCH_JUMP);
-	InjectHook(0x470DA0, &CCamera::StoreValuesDuringInterPol, PATCH_JUMP);
-	InjectHook(0x46B430, &CCamera::DrawBordersForWideScreen, PATCH_JUMP);
-	InjectHook(0x46F990, &CCamera::Restore, PATCH_JUMP);
-	InjectHook(0x46FAE0, &CCamera::RestoreWithJumpCut, PATCH_JUMP);
-	InjectHook(0x46F080, &CCamera::ProcessFade, PATCH_JUMP);
-	InjectHook(0x46EEA0, &CCamera::CalculateDerivedValues, PATCH_JUMP);
-	InjectHook(0x46F1E0, &CCamera::ProcessMusicFade, PATCH_JUMP);
-	InjectHook(0x46D1D0, &CCamera::LoadPathSplines, PATCH_JUMP);
-	InjectHook(0x4712A0, &CCamera::UpdateTargetEntity, PATCH_JUMP);
-	InjectHook(0x46B580, &CCamera::Find3rdPersonCamTargetVector, PATCH_JUMP);
-	InjectHook(0x46BAD0, &CCamera::Init, PATCH_JUMP);
-	InjectHook(0x46C9E0, &CCamera::LoadTrainCamNodes, PATCH_JUMP);
-	InjectHook(0x46F600, &CCamera::Process_Train_Camera_Control, PATCH_JUMP);
-	InjectHook(0x470EA0, &CCamera::UpdateSoundDistances, PATCH_JUMP);
-	InjectHook(0x46BF10, &CCamera::IsItTimeForNewcam, PATCH_JUMP);
-	InjectHook(0x471650, &CCamera::TryToStartNewCamMode, PATCH_JUMP);
-//	InjectHook(0x46D3F0, &CCamera::Process, PATCH_JUMP);
-ENDPATCHES

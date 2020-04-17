@@ -54,22 +54,22 @@ struct CStoredCollPoly;
 
 class CWorld
 {
-	static CPtrList *ms_bigBuildingsList;	// [4];
-	static CPtrList &ms_listMovingEntityPtrs;
-	static CSector (*ms_aSectors)[NUMSECTORS_X];	// [NUMSECTORS_Y][NUMSECTORS_X];
-	static uint16 &ms_nCurrentScanCode;
+	static CPtrList ms_bigBuildingsList[4];
+	static CPtrList ms_listMovingEntityPtrs;
+	static CSector ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];
+	static uint16 ms_nCurrentScanCode;
 
 public:
-	static uint8 &PlayerInFocus;
+	static uint8 PlayerInFocus;
 	static CPlayerInfo Players[NUMPLAYERS];
-	static CEntity *&pIgnoreEntity;
-	static bool &bIncludeDeadPeds;
-	static bool &bNoMoreCollisionTorque;
-	static bool &bSecondShift;
-	static bool &bForceProcessControl;
-	static bool &bProcessCutsceneOnly;
-	static bool &bDoingCarCollisions;
-	static bool &bIncludeCarTyres;
+	static CEntity *pIgnoreEntity;
+	static bool bIncludeDeadPeds;
+	static bool bNoMoreCollisionTorque;
+	static bool bSecondShift;
+	static bool bForceProcessControl;
+	static bool bProcessCutsceneOnly;
+	static bool bDoingCarCollisions;
+	static bool bIncludeCarTyres;
 
 	static void Remove(CEntity *entity);
 	static void Add(CEntity *entity);

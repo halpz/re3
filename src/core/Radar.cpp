@@ -1,6 +1,6 @@
 #include "config.h"
 #include "common.h"
-#include "patcher.h"
+
 #include "RwHelper.h"
 #include "Radar.h"
 #include "Camera.h"
@@ -1458,51 +1458,3 @@ CRadar::ToggleTargetMarker(float x, float y)
 }
 #endif
 
-STARTPATCHES
-	InjectHook(0x4A3EF0, CRadar::Initialise, PATCH_JUMP);
-	InjectHook(0x4A3F60, CRadar::Shutdown, PATCH_JUMP);
-	InjectHook(0x4A4030, CRadar::LoadTextures, PATCH_JUMP);
-	InjectHook(0x4A4180, CRadar::GetNewUniqueBlipIndex, PATCH_JUMP);
-	InjectHook(0x4A41C0, CRadar::GetActualBlipArrayIndex, PATCH_JUMP);
-	InjectHook(0x4A4200, CRadar::DrawMap, PATCH_JUMP);
-	InjectHook(0x4A42F0, CRadar::DrawBlips, PATCH_JUMP);
-	InjectHook(0x4A4C70, CRadar::Draw3dMarkers, PATCH_JUMP);
-	InjectHook(0x4A4F30, CRadar::LimitRadarPoint, PATCH_JUMP);
-	InjectHook(0x4A4F90, CRadar::CalculateBlipAlpha, PATCH_JUMP);
-	InjectHook(0x4A5040, CRadar::TransformRadarPointToScreenSpace, PATCH_JUMP);
-	InjectHook(0x4A50D0, CRadar::TransformRealWorldPointToRadarSpace, PATCH_JUMP);
-	InjectHook(0x4A5300, CRadar::TransformRadarPointToRealWorldSpace, PATCH_JUMP);
-	InjectHook(0x4A5530, CRadar::TransformRealWorldToTexCoordSpace, PATCH_JUMP);
-	InjectHook(0x4A5590, CRadar::SetCoordBlip, PATCH_JUMP);
-	InjectHook(0x4A5640, CRadar::SetEntityBlip, PATCH_JUMP);
-	InjectHook(0x4A56C0, CRadar::ClearBlipForEntity, PATCH_JUMP);
-	InjectHook(0x4A5720, CRadar::ClearBlip, PATCH_JUMP);
-	InjectHook(0x4A5770, CRadar::ChangeBlipColour, PATCH_JUMP);
-	InjectHook(0x4A57A0, CRadar::ChangeBlipBrightness, PATCH_JUMP);
-	InjectHook(0x4A57E0, CRadar::ChangeBlipScale, PATCH_JUMP);
-	InjectHook(0x4A5810, CRadar::ChangeBlipDisplay, PATCH_JUMP);
-	InjectHook(0x4A5840, CRadar::SetBlipSprite, PATCH_JUMP);
-	InjectHook(0x4A5870, CRadar::ShowRadarTrace, PATCH_JUMP);
-	InjectHook(0x4A59C0, CRadar::ShowRadarMarker, PATCH_JUMP);
-	InjectHook(0x4A5BB0, CRadar::GetRadarTraceColour, PATCH_JUMP);
-	InjectHook(0x4A5C60, CRadar::SetRadarMarkerState, PATCH_JUMP);
-	InjectHook(0x4A5D10, CRadar::DrawRotatingRadarSprite, PATCH_JUMP);
-	InjectHook(0x4A5EF0, CRadar::DrawRadarSprite, PATCH_JUMP);
-	InjectHook(0x4A6020, ClipRadarTileCoords, PATCH_JUMP);
-	InjectHook(0x4A6060, RequestMapSection, PATCH_JUMP);
-	InjectHook(0x4A60A0, RemoveMapSection, PATCH_JUMP);
-	InjectHook(0x4A60E0, CRadar::RemoveRadarSections, PATCH_JUMP);
-	InjectHook(0x4A6100, (void (*)(int32, int32))&CRadar::StreamRadarSections, PATCH_JUMP);
-	InjectHook(0x4A6160, IsPointInsideRadar, PATCH_JUMP);
-	InjectHook(0x4A61C0, GetTextureCorners, PATCH_JUMP);
-	InjectHook(0x4A6250, LineRadarBoxCollision, PATCH_JUMP);
-	InjectHook(0x4A64A0, CRadar::ClipRadarPoly, PATCH_JUMP);
-	InjectHook(0x4A67E0, CRadar::DrawRadarSection, PATCH_JUMP);
-	InjectHook(0x4A69C0, CRadar::DrawRadarMask, PATCH_JUMP);
-	InjectHook(0x4A6B60, (void (*)(const CVector&))&CRadar::StreamRadarSections, PATCH_JUMP);
-	InjectHook(0x4A6C20, CRadar::DrawRadarMap, PATCH_JUMP);
-	InjectHook(0x4A6E30, CRadar::SaveAllRadarBlips, PATCH_JUMP);
-	InjectHook(0x4A6F30, CRadar::LoadAllRadarBlips, PATCH_JUMP);
-	//InjectHook(0x4A7000, `global constructor keyed to'Radar.cpp, PATCH_JUMP);
-	//InjectHook(0x4A7260, sRadarTrace::sRadarTrace, PATCH_JUMP);
-ENDPATCHES

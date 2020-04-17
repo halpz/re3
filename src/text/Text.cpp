@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "FileMgr.h"
 #include "Frontend.h"
 #include "Messages.h"
@@ -304,21 +304,3 @@ TextCopy(wchar *dst, const wchar *src)
 {
 	while((*dst++ = *src++) != '\0');
 }
-
-
-STARTPATCHES
-	InjectHook(0x52C3C0, &CText::Load, PATCH_JUMP);
-	InjectHook(0x52C580, &CText::Unload, PATCH_JUMP);
-	InjectHook(0x52C5A0, &CText::Get, PATCH_JUMP);
-	InjectHook(0x52C220, &CText::GetUpperCase, PATCH_JUMP);
-	InjectHook(0x52C2C0, &CText::UpperCase, PATCH_JUMP);
-
-	InjectHook(0x52BE70, &CKeyArray::Load, PATCH_JUMP);
-	InjectHook(0x52BF60, &CKeyArray::Unload, PATCH_JUMP);
-	InjectHook(0x52BF80, &CKeyArray::Update, PATCH_JUMP);
-	InjectHook(0x52C060, &CKeyArray::BinarySearch, PATCH_JUMP);
-	InjectHook(0x52BFB0, &CKeyArray::Search, PATCH_JUMP);
-
-	InjectHook(0x52C120, &CData::Load, PATCH_JUMP);
-	InjectHook(0x52C200, &CData::Unload, PATCH_JUMP);
-ENDPATCHES

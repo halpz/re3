@@ -1,6 +1,6 @@
 #define WITHWINDOWS	// for our script loading hack
 #include "common.h"
-#include "patcher.h"
+
 
 #include "Script.h"
 #include "ScriptCommands.h"
@@ -11626,17 +11626,3 @@ void CTheScripts::ReadMultiScriptFileOffsetsFromScript()
 		MultiScriptArray[i] = Read4BytesFromScript(&ip);
 	}
 }
-
-STARTPATCHES
-InjectHook(0x438790, &CTheScripts::Init, PATCH_JUMP);
-InjectHook(0x439040, &CTheScripts::Process, PATCH_JUMP);
-InjectHook(0x439400, &CTheScripts::StartTestScript, PATCH_JUMP);
-InjectHook(0x439410, &CTheScripts::IsPlayerOnAMission, PATCH_JUMP);
-InjectHook(0x44FD10, &CTheScripts::UndoBuildingSwaps, PATCH_JUMP);
-InjectHook(0x44FD60, &CTheScripts::UndoEntityInvisibilitySettings, PATCH_JUMP);
-InjectHook(0x4534E0, &CTheScripts::ScriptDebugLine3D, PATCH_JUMP);
-InjectHook(0x453550, &CTheScripts::RenderTheScriptDebugLines, PATCH_JUMP);
-InjectHook(0x4535E0, &CTheScripts::SaveAllScripts, PATCH_JUMP);
-InjectHook(0x453B30, &CTheScripts::LoadAllScripts, PATCH_JUMP);
-InjectHook(0x454060, &CTheScripts::ClearSpaceForMissionEntity, PATCH_JUMP);
-ENDPATCHES

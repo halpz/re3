@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "GameLogic.h"
 #include "Clock.h"
 #include "Stats.h"
@@ -284,11 +284,3 @@ CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed *pPlayerPed, CVector
 	CWorld::Remove(pPlayerPed);
 	CWorld::Add(pPlayerPed);
 }
-
-STARTPATCHES
-	InjectHook(0x4213F0, &CGameLogic::InitAtStartOfGame, PATCH_JUMP);
-	InjectHook(0x421C00, &CGameLogic::PassTime, PATCH_JUMP);
-	InjectHook(0x421A20, &CGameLogic::SortOutStreamingAndMemory, PATCH_JUMP);
-	InjectHook(0x421400, &CGameLogic::Update, PATCH_JUMP);
-	InjectHook(0x421A60, &CGameLogic::RestorePlayerStuffDuringResurrection, PATCH_JUMP);
-ENDPATCHES

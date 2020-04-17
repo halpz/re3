@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Garages.h"
 #include "main.h"
 
@@ -2357,10 +2357,3 @@ CGarages::IsModelIndexADoor(uint32 id)
 		id == MI_CRUSHERBODY ||
 		id == MI_CRUSHERLID;
 }
-
-
-STARTPATCHES
-	InjectHook(0x427AB0, CGarages::IsPointInAGarageCameraZone, PATCH_JUMP); // CCamera::CamControl
-	InjectHook(0x427BC0, CGarages::CameraShouldBeOutside, PATCH_JUMP); // CCamera::CamControl
-	InjectHook(0x428940, CGarages::Load, PATCH_JUMP); // GenericLoad
-ENDPATCHES

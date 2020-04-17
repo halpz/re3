@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "FileMgr.h"
 #include "HandlingMgr.h"
@@ -237,11 +237,3 @@ cHandlingDataMgr::GetHandlingId(const char *name)
 			break;
 	return i;
 }
-
-STARTPATCHES
-	InjectHook(0x546D80, &cHandlingDataMgr::Initialise, PATCH_JUMP);
-	InjectHook(0x546DB0, &cHandlingDataMgr::LoadHandlingData, PATCH_JUMP);
-	InjectHook(0x546BB0, &cHandlingDataMgr::ConvertDataToGameUnits, PATCH_JUMP);
-	InjectHook(0x546AA0, &cHandlingDataMgr::FindExactWord, PATCH_JUMP);
-	InjectHook(0x546B70, &cHandlingDataMgr::GetHandlingId, PATCH_JUMP);
-ENDPATCHES

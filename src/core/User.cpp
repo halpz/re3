@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 
 #include "Hud.h"
 #include "PlayerPed.h"
@@ -120,16 +120,3 @@ CUserDisplay::Process()
 	Pager.Process();
 	CurrentVehicle.Process();
 }
-
-STARTPATCHES
-	InjectHook(0x4AD4C0, &CPlaceName::Init, PATCH_JUMP);
-	InjectHook(0x4AD4E0, &CPlaceName::Process, PATCH_JUMP);
-	InjectHook(0x4AD5B0, &CPlaceName::Display, PATCH_JUMP);
-
-	InjectHook(0x4AD5F0, &CCurrentVehicle::Init, PATCH_JUMP);
-	InjectHook(0x4AD600, &CCurrentVehicle::Process, PATCH_JUMP);
-	InjectHook(0x4AD630, &CCurrentVehicle::Display, PATCH_JUMP);
-
-	InjectHook(0x4AD660, &CUserDisplay::Init, PATCH_JUMP);
-	InjectHook(0x4AD690, &CUserDisplay::Process, PATCH_JUMP);
-ENDPATCHES

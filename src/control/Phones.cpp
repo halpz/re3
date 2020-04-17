@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Phones.h"
 #include "Pools.h"
 #include "ModelIndices.h"
@@ -377,20 +377,3 @@ PhonePickUpCB(CAnimBlendAssociation *assoc, void *arg)
 
 	CPhoneInfo::pCallBackPed = nil;
 }
-
-STARTPATCHES
-	InjectHook(0x42F720, &CPhoneInfo::FindNearestFreePhone, PATCH_JUMP);
-	InjectHook(0x42FD50, &CPhoneInfo::PhoneAtThisPosition, PATCH_JUMP);
-	InjectHook(0x42FFF0, &CPhoneInfo::HasMessageBeenDisplayed, PATCH_JUMP);
-	InjectHook(0x430030, &CPhoneInfo::IsMessageBeingDisplayed, PATCH_JUMP);
-	InjectHook(0x430120, &CPhoneInfo::Load, PATCH_JUMP);
-	InjectHook(0x42FF90, &CPhoneInfo::SetPhoneMessage_JustOnce, PATCH_JUMP);
-	InjectHook(0x42FF30, &CPhoneInfo::SetPhoneMessage_Repeatedly, PATCH_JUMP);
-	InjectHook(0x430060, &CPhoneInfo::Save, PATCH_JUMP);
-	InjectHook(0x42F710, &CPhoneInfo::Shutdown, PATCH_JUMP);
-	InjectHook(0x42F640, &CPhoneInfo::Initialise, PATCH_JUMP);
-	InjectHook(0x42FDB0, &CPhoneInfo::GrabPhone, PATCH_JUMP);
-	InjectHook(0x42F7A0, &CPhoneInfo::Update, PATCH_JUMP);
-	InjectHook(0x42F570, &PhonePutDownCB, PATCH_JUMP);
-	InjectHook(0x42F470, &PhonePickUpCB, PATCH_JUMP);
-ENDPATCHES

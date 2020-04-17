@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Restart.h"
 #include "Zones.h"
 #include "PathFind.h"
@@ -247,16 +247,3 @@ INITSAVEBUF
 	WriteSaveBuf(buf, OverridePoliceStationLevel);
 VALIDATESAVEBUF(*size);
 }
-
-
-STARTPATCHES
-	InjectHook(0x435E20, &CRestart::Initialise, PATCH_JUMP);
-	InjectHook(0x436100, &CRestart::AddHospitalRestartPoint, PATCH_JUMP);
-	InjectHook(0x436150, &CRestart::AddPoliceRestartPoint, PATCH_JUMP);
-	InjectHook(0x4366C0, &CRestart::OverrideNextRestart, PATCH_JUMP);
-	InjectHook(0x4366F0, &CRestart::CancelOverrideRestart, PATCH_JUMP);
-	InjectHook(0x4361A0, &CRestart::FindClosestHospitalRestartPoint, PATCH_JUMP);
-	InjectHook(0x436450, &CRestart::FindClosestPoliceRestartPoint, PATCH_JUMP);
-	InjectHook(0x436B20, &CRestart::LoadAllRestartPoints, PATCH_JUMP);
-	InjectHook(0x436700, &CRestart::SaveAllRestartPoints, PATCH_JUMP);
-ENDPATCHES

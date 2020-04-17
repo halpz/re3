@@ -12,7 +12,7 @@
 #include "Camera.h"
 
 
-#include "patcher.h"
+
 
 /*
  *****************************************************************************
@@ -832,14 +832,3 @@ AttachInputDevices(void)
 
 	return TRUE;
 }
-
-
-STARTPATCHES
-	InjectHook(0x583F10, HandleKeyDown, PATCH_JUMP);
-	InjectHook(0x5842F0, HandleKeyUp, PATCH_JUMP);
-	InjectHook(0x5846C0, KeyboardHandler, PATCH_JUMP);
-	InjectHook(0x5846F0, HandlePadButtonDown, PATCH_JUMP);
-	InjectHook(0x584770, HandlePadButtonUp, PATCH_JUMP);
-	InjectHook(0x584830, PadHandler, PATCH_JUMP);
-	InjectHook(0x584860, AttachInputDevices, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Clock.h"
 #include "Weather.h"
@@ -315,8 +315,3 @@ CTimeCycle::Update(void)
 	else
 		m_FogReduction = max(m_FogReduction-1, 0);
 }
-
-STARTPATCHES
-	InjectHook(0x4ABAE0, CTimeCycle::Initialise, PATCH_JUMP);
-	InjectHook(0x4ABF40, CTimeCycle::Update, PATCH_JUMP);
-ENDPATCHES

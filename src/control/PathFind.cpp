@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "FileMgr.h"	// only needed for empty function
 #include "Camera.h"
@@ -1766,48 +1766,3 @@ CPathFind::DisplayPathData(void)
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x42E680, &CPedPath::CalcPedRoute, PATCH_JUMP);
-	InjectHook(0x42F100, &CPedPath::AddNodeToPathList, PATCH_JUMP);
-	InjectHook(0x42F140, &CPedPath::RemoveNodeFromList, PATCH_JUMP);
-	InjectHook(0x42F160, &CPedPath::AddNodeToList, PATCH_JUMP);
-	InjectHook(0x42F1A0, &CPedPath::AddBlockade, PATCH_JUMP);
-	InjectHook(0x42F420, &CPedPath::AddBlockadeSectorList, PATCH_JUMP);
-
-	InjectHook(0x4294A0, &CPathFind::Init, PATCH_JUMP);
-	InjectHook(0x42D580, &CPathFind::AllocatePathFindInfoMem, PATCH_JUMP);
-	InjectHook(0x429540, &CPathFind::RegisterMapObject, PATCH_JUMP);
-	InjectHook(0x42D7E0, &CPathFind::StoreNodeInfoPed, PATCH_JUMP);
-	InjectHook(0x42D690, &CPathFind::StoreNodeInfoCar, PATCH_JUMP);
-	InjectHook(0x429610, &CPathFind::PreparePathData, PATCH_JUMP);
-	InjectHook(0x42B810, &CPathFind::CountFloodFillGroups, PATCH_JUMP);
-	InjectHook(0x429C20, &CPathFind::PreparePathDataForType, PATCH_JUMP);
-
-	InjectHook(0x42C990, &CPathFind::CalcRoadDensity, PATCH_JUMP);
-	InjectHook(0x42E1B0, &CPathFind::TestForPedTrafficLight, PATCH_JUMP);
-	InjectHook(0x42E340, &CPathFind::TestCrossesRoad, PATCH_JUMP);
-	InjectHook(0x42CBE0, &CPathFind::AddNodeToList, PATCH_JUMP);
-	InjectHook(0x42CBB0, &CPathFind::RemoveNodeFromList, PATCH_JUMP);
-	InjectHook(0x42B790, &CPathFind::RemoveBadStartNode, PATCH_JUMP);
-	InjectHook(0x42E3B0, &CPathFind::SetLinksBridgeLights, PATCH_JUMP);
-	InjectHook(0x42DED0, &CPathFind::SwitchOffNodeAndNeighbours, PATCH_JUMP);
-	InjectHook(0x42D960, &CPathFind::SwitchRoadsOffInArea, PATCH_JUMP);
-	InjectHook(0x42DA50, &CPathFind::SwitchPedRoadsOffInArea, PATCH_JUMP);
-	InjectHook(0x42DB50, &CPathFind::SwitchRoadsInAngledArea, PATCH_JUMP);
-	InjectHook(0x42E140, &CPathFind::MarkRoadsBetweenLevelsNodeAndNeighbours, PATCH_JUMP);
-	InjectHook(0x42DF50, &CPathFind::MarkRoadsBetweenLevelsInArea, PATCH_JUMP);
-	InjectHook(0x42E040, &CPathFind::PedMarkRoadsBetweenLevelsInArea, PATCH_JUMP);
-	InjectHook(0x42CC30, &CPathFind::FindNodeClosestToCoors, PATCH_JUMP);
-	InjectHook(0x42CDC0, &CPathFind::FindNodeClosestToCoorsFavourDirection, PATCH_JUMP);
-	InjectHook(0x42CFC0, &CPathFind::FindNodeOrientationForCarPlacement, PATCH_JUMP);
-	InjectHook(0x42D060, &CPathFind::FindNodeOrientationForCarPlacementFacingDestination, PATCH_JUMP);
-	InjectHook(0x42BF10, &CPathFind::NewGenerateCarCreationCoors, PATCH_JUMP);
-	InjectHook(0x42C1E0, &CPathFind::GeneratePedCreationCoors, PATCH_JUMP);
-	InjectHook(0x42D2A0, &CPathFind::FindRoadObjectClosestToCoors, PATCH_JUMP);
-	InjectHook(0x42B9F0, &CPathFind::FindNextNodeWandering, PATCH_JUMP);
-	InjectHook(0x42B040, &CPathFind::DoPathSearch, PATCH_JUMP);
-	InjectHook(0x42C8C0, &CPathFind::TestCoorsCloseness, PATCH_JUMP);
-	InjectHook(0x42E450, &CPathFind::Save, PATCH_JUMP);
-	InjectHook(0x42E550, &CPathFind::Load, PATCH_JUMP);
-ENDPATCHES

@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "ModelIndices.h"
 #include "FileMgr.h"
@@ -965,24 +965,3 @@ const CVector CPlane::FindDropOffCesnaCoordinates(void) { return pDropOffCesna->
 bool CPlane::HasCesnaLanded(void) { return CesnaMissionStatus == CESNA_STATUS_LANDED; }
 bool CPlane::HasCesnaBeenDestroyed(void) { return CesnaMissionStatus == CESNA_STATUS_DESTROYED; }
 bool CPlane::HasDropOffCesnaBeenShotDown(void) { return DropOffCesnaMissionStatus == CESNA_STATUS_DESTROYED; }
-
-#include <new>
-
-class CPlane_ : public CPlane
-{
-public:
-	void ctor(int32 id, uint8 CreatedBy) { ::new (this) CPlane(id, CreatedBy); }
-	void dtor(void) { CPlane::~CPlane(); }
-};
-
-STARTPATCHES
-	InjectHook(0x54B170, &CPlane_::ctor, PATCH_JUMP);
-	InjectHook(0x54B270, &CPlane_::dtor, PATCH_JUMP);
-	InjectHook(0x54B820, CPlane::InitPlanes, PATCH_JUMP);
-	InjectHook(0x54BCD0, CPlane::Shutdown, PATCH_JUMP);
-	InjectHook(0x54BD50, CPlane::LoadPath, PATCH_JUMP);
-	InjectHook(0x54BEC0, CPlane::UpdatePlanes, PATCH_JUMP);
-	InjectHook(0x54DE90, CPlane::TestRocketCollision, PATCH_JUMP);
-	InjectHook(0x54E000, CPlane::CreateIncomingCesna, PATCH_JUMP);
-	InjectHook(0x54E160, CPlane::CreateDropOffCesna, PATCH_JUMP);
-ENDPATCHES

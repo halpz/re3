@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "FileMgr.h"
 #include "WeaponInfo.h"
@@ -202,12 +202,3 @@ CWeaponInfo::Shutdown(void)
 	debug("Shutting down CWeaponInfo...\n");
 	debug("CWeaponInfo shut down\n");
 }
-
-STARTPATCHES
-	InjectHook(0x564EA0, &CWeaponInfo::Initialise, PATCH_JUMP);
-	InjectHook(0x564FD0, &CWeaponInfo::GetWeaponInfo, PATCH_JUMP);
-	InjectHook(0x5653E0, &CWeaponInfo::FindWeaponType, PATCH_JUMP);
-	InjectHook(0x5653B0, &CWeaponInfo::FindWeaponFireType, PATCH_JUMP);
-	InjectHook(0x564FE0, &CWeaponInfo::LoadWeaponData, PATCH_JUMP);
-	InjectHook(0x564FB0, &CWeaponInfo::Shutdown, PATCH_JUMP);
-ENDPATCHES

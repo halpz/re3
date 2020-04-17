@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Game.h"
 #include "General.h"
 #include "World.h"
@@ -1180,16 +1180,3 @@ CPopulation::ManagePopulation(void)
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x4F3770, &CPopulation::Initialise, PATCH_JUMP);
-	InjectHook(0x4F5780, &CPopulation::ChooseGangOccupation, PATCH_JUMP);
-	InjectHook(0x4F6200, &CPopulation::DealWithZoneChange, PATCH_JUMP);
-	InjectHook(0x4F6010, &CPopulation::FindCollisionZoneForCoors, PATCH_JUMP);
-	InjectHook(0x4F6410, &CPopulation::PedCreationDistMultiplier, PATCH_JUMP);
-	InjectHook(0x4F5280, &CPopulation::AddPed, PATCH_JUMP);
-	InjectHook(0x4F4470, &CPopulation::ConvertToRealObject, PATCH_JUMP);
-	InjectHook(0x4F4690, &CPopulation::TestRoomForDummyObject, PATCH_JUMP);
-	InjectHook(0x4F45A0, &CPopulation::ConvertToDummyObject, PATCH_JUMP);
-	InjectHook(0x4F4410, &CPopulation::ConvertAllObjectsToDummyObjects, PATCH_JUMP);
-ENDPATCHES

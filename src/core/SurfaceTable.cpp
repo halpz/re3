@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "FileMgr.h"
 #include "Weather.h"
@@ -141,10 +141,3 @@ CSurfaceTable::GetAdhesiveLimit(CColPoint &colpoint)
 {
 	return ms_aAdhesiveLimitTable[GetAdhesionGroup(colpoint.surfaceB)][GetAdhesionGroup(colpoint.surfaceA)];
 }
-
-STARTPATCHES
-	InjectHook(0x4AB8F0, CSurfaceTable::Initialise, PATCH_JUMP);
-	InjectHook(0x4ABA60, CSurfaceTable::GetAdhesionGroup, PATCH_JUMP);
-	InjectHook(0x4ABAA0, CSurfaceTable::GetWetMultiplier, PATCH_JUMP);
-	InjectHook(0x4ABA30, CSurfaceTable::GetAdhesiveLimit, PATCH_JUMP);
-ENDPATCHES

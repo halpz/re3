@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Darkel.h"
 #include "Stats.h"
@@ -1043,24 +1043,3 @@ void CHeli::MakeCatalinaHeliFlyAway(void) { pHelis[HELI_CATALINA]->m_pathState =
 bool CHeli::HasCatalinaBeenShotDown(void) { return CatalinaHasBeenShotDown; }
 
 void CHeli::ActivateHeli(bool activate) { ScriptHeliOn = activate; }
-
-#include <new>
-
-class CHeli_ : public CHeli
-{
-public:
-	void ctor(int32 id, uint8 CreatedBy) { ::new (this) CHeli(id, CreatedBy); }
-	void dtor(void) { CHeli::~CHeli(); }
-};
-
-STARTPATCHES
-	InjectHook(0x547220, &CHeli_::ctor, PATCH_JUMP);
-	InjectHook(0x5474A0, &CHeli_::dtor, PATCH_JUMP);
-	InjectHook(0x54AE50, &CHeli::SpawnFlyingComponent, PATCH_JUMP);
-	InjectHook(0x549970, CHeli::InitHelis, PATCH_JUMP);
-	InjectHook(0x5499F0, CHeli::UpdateHelis, PATCH_JUMP);
-	InjectHook(0x54AE10, CHeli::SpecialHeliPreRender, PATCH_JUMP);
-	InjectHook(0x54AA30, CHeli::TestRocketCollision, PATCH_JUMP);
-	InjectHook(0x54AB30, CHeli::TestBulletCollision, PATCH_JUMP);
-	InjectHook(0x54A640, GenerateHeli, PATCH_JUMP);
-ENDPATCHES

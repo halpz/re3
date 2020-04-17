@@ -9,7 +9,7 @@
 #include <Xinput.h>
 #pragma comment( lib, "Xinput9_1_0.lib" )
 #endif
-#include "patcher.h"
+
 #include "Pad.h"
 #include "ControllerConfig.h"
 #include "Timer.h"
@@ -1285,7 +1285,7 @@ bool CPad::GetLookRight(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
+
 	return !!(NewState.RightShoulder2 && !NewState.LeftShoulder2);
 }
 
@@ -1294,7 +1294,7 @@ bool CPad::GetLookBehindForCar(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
+
 	return !!(NewState.RightShoulder2 && NewState.LeftShoulder2);
 }
 
@@ -1768,7 +1768,7 @@ bool CPad::CycleWeaponRightJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
+
 	return !!(NewState.RightShoulder2 && !OldState.RightShoulder2);
 }
 
@@ -1865,7 +1865,7 @@ bool CPad::ShiftTargetLeftJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
+
 	return !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2);
 }
 
@@ -1873,7 +1873,7 @@ bool CPad::ShiftTargetRightJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
+
 	return !!(NewState.RightShoulder2 && !OldState.RightShoulder2);
 }
 
@@ -2404,111 +2404,3 @@ int32 *CPad::EditCodesForControls(int32 *pRsKeys, int32 nSize)
 	
 	return pRsKeys;
 }
-
-STARTPATCHES
-	InjectHook(0x490D90, &WeaponCheat, PATCH_JUMP);
-	InjectHook(0x490E70, &HealthCheat, PATCH_JUMP);
-	InjectHook(0x490EE0, &TankCheat, PATCH_JUMP);
-	InjectHook(0x491040, &BlowUpCarsCheat, PATCH_JUMP);
-	InjectHook(0x4910B0, &ChangePlayerCheat, PATCH_JUMP);
-	InjectHook(0x4911C0, &MayhemCheat, PATCH_JUMP);
-	InjectHook(0x491270, &EverybodyAttacksPlayerCheat, PATCH_JUMP);
-	InjectHook(0x491370, &WeaponsForAllCheat, PATCH_JUMP);
-	InjectHook(0x4913A0, &FastTimeCheat, PATCH_JUMP);
-	InjectHook(0x4913F0, &SlowTimeCheat, PATCH_JUMP);
-	InjectHook(0x491430, &MoneyCheat, PATCH_JUMP);
-	InjectHook(0x491460, &ArmourCheat, PATCH_JUMP);
-	InjectHook(0x491490, &WantedLevelUpCheat, PATCH_JUMP);
-	InjectHook(0x4914F0, &WantedLevelDownCheat, PATCH_JUMP);
-	InjectHook(0x491520, &SunnyWeatherCheat, PATCH_JUMP);
-	InjectHook(0x491550, &CloudyWeatherCheat, PATCH_JUMP);
-	InjectHook(0x491580, &RainyWeatherCheat, PATCH_JUMP);
-	InjectHook(0x4915B0, &FoggyWeatherCheat, PATCH_JUMP);
-	InjectHook(0x4915E0, &FastWeatherCheat, PATCH_JUMP);
-	InjectHook(0x491610, &OnlyRenderWheelsCheat, PATCH_JUMP);
-	InjectHook(0x491640, &ChittyChittyBangBangCheat, PATCH_JUMP);
-	InjectHook(0x491670, &StrongGripCheat, PATCH_JUMP);
-	InjectHook(0x4916A0, &NastyLimbsCheat, PATCH_JUMP);
-
-	InjectHook(0x4916C0, &CControllerState::Clear, PATCH_JUMP);
-	InjectHook(0x491760, &CKeyboardState::Clear, PATCH_JUMP);
-	InjectHook(0x491A10, &CPad::Clear, PATCH_JUMP);
-	InjectHook(0x491B50, &CPad::ClearMouseHistory, PATCH_JUMP);
-	//InjectHook(0x491B80, &CMouseControllerState::CMouseControllerState, PATCH_JUMP);
-	InjectHook(0x491BB0, &CMouseControllerState::Clear, PATCH_JUMP);
-	InjectHook(0x491BD0, &CMousePointerStateHelper::GetMouseSetUp, PATCH_JUMP);
-	InjectHook(0x491CA0, &CPad::UpdateMouse, PATCH_JUMP);
-	InjectHook(0x491E60, &CPad::ReconcileTwoControllersInput, PATCH_JUMP);
-	InjectHook(0x492230, &CPad::StartShake, PATCH_JUMP);
-	InjectHook(0x492290, &CPad::StartShake_Distance, PATCH_JUMP);
-	InjectHook(0x492360, &CPad::StartShake_Train, PATCH_JUMP);
-	InjectHook(0x492450, &CPad::AddToPCCheatString, PATCH_JUMP);
-	InjectHook(0x492720, CPad::UpdatePads, PATCH_JUMP);
-	InjectHook(0x492C60, &CPad::ProcessPCSpecificStuff, PATCH_JUMP);
-	InjectHook(0x492C70, &CPad::Update, PATCH_JUMP);
-#pragma warning( push )
-#pragma warning( disable : 4573)
-	InjectHook(0x492F00, (void (*)())CPad::DoCheats, PATCH_JUMP);
-#pragma warning( pop )
-	InjectHook(0x492F20, (void (CPad::*)(int16))&CPad::DoCheats, PATCH_JUMP);
-	InjectHook(0x492F30, CPad::StopPadsShaking, PATCH_JUMP);
-	InjectHook(0x492F50, &CPad::StopShaking, PATCH_JUMP);
-	InjectHook(0x492F60, CPad::GetPad, PATCH_JUMP);
-	InjectHook(0x492F70, &CPad::GetSteeringLeftRight, PATCH_JUMP);
-	InjectHook(0x492FF0, &CPad::GetSteeringUpDown, PATCH_JUMP);
-	InjectHook(0x493070, &CPad::GetCarGunUpDown, PATCH_JUMP);
-	InjectHook(0x4930C0, &CPad::GetCarGunLeftRight, PATCH_JUMP);
-	InjectHook(0x493110, &CPad::GetPedWalkLeftRight, PATCH_JUMP);
-	InjectHook(0x493190, &CPad::GetPedWalkUpDown, PATCH_JUMP);
-	InjectHook(0x493210, &CPad::GetAnalogueUpDown, PATCH_JUMP);
-	InjectHook(0x493290, &CPad::GetLookLeft, PATCH_JUMP);
-	InjectHook(0x4932C0, &CPad::GetLookRight, PATCH_JUMP);
-	InjectHook(0x4932F0, &CPad::GetLookBehindForCar, PATCH_JUMP);
-	InjectHook(0x493320, &CPad::GetLookBehindForPed, PATCH_JUMP);
-	InjectHook(0x493350, &CPad::GetHorn, PATCH_JUMP);
-	InjectHook(0x4933F0, &CPad::HornJustDown, PATCH_JUMP);
-	InjectHook(0x493490, &CPad::GetCarGunFired, PATCH_JUMP);
-	InjectHook(0x4934F0, &CPad::CarGunJustDown, PATCH_JUMP);
-	InjectHook(0x493560, &CPad::GetHandBrake, PATCH_JUMP);
-	InjectHook(0x4935A0, &CPad::GetBrake, PATCH_JUMP);
-	InjectHook(0x4935F0, &CPad::GetExitVehicle, PATCH_JUMP);
-	InjectHook(0x493650, &CPad::ExitVehicleJustDown, PATCH_JUMP);
-	InjectHook(0x4936C0, &CPad::GetWeapon, PATCH_JUMP);
-	InjectHook(0x493700, &CPad::WeaponJustDown, PATCH_JUMP);
-	InjectHook(0x493780, &CPad::GetAccelerate, PATCH_JUMP);
-	InjectHook(0x4937D0, &CPad::CycleCameraModeUpJustDown, PATCH_JUMP);
-	InjectHook(0x493830, &CPad::CycleCameraModeDownJustDown, PATCH_JUMP);
-	InjectHook(0x493870, &CPad::ChangeStationJustDown, PATCH_JUMP);
-	InjectHook(0x493910, &CPad::CycleWeaponLeftJustDown, PATCH_JUMP);
-	InjectHook(0x493940, &CPad::CycleWeaponRightJustDown, PATCH_JUMP);
-	InjectHook(0x493970, &CPad::GetTarget, PATCH_JUMP);
-	InjectHook(0x4939D0, &CPad::TargetJustDown, PATCH_JUMP);
-	InjectHook(0x493A40, &CPad::JumpJustDown, PATCH_JUMP);
-	InjectHook(0x493A70, &CPad::GetSprint, PATCH_JUMP);
-	InjectHook(0x493AE0, &CPad::ShiftTargetLeftJustDown, PATCH_JUMP);
-	InjectHook(0x493B10, &CPad::ShiftTargetRightJustDown, PATCH_JUMP);
-	InjectHook(0x493B40, &CPad::GetAnaloguePadUp, PATCH_JUMP);
-	InjectHook(0x493BA0, &CPad::GetAnaloguePadDown, PATCH_JUMP);
-	InjectHook(0x493C00, &CPad::GetAnaloguePadLeft, PATCH_JUMP);
-	InjectHook(0x493C60, &CPad::GetAnaloguePadRight, PATCH_JUMP);
-	InjectHook(0x493CC0, &CPad::GetAnaloguePadLeftJustUp, PATCH_JUMP);
-	InjectHook(0x493D20, &CPad::GetAnaloguePadRightJustUp, PATCH_JUMP);
-	InjectHook(0x493D80, &CPad::ForceCameraBehindPlayer, PATCH_JUMP);
-	InjectHook(0x493E00, &CPad::SniperZoomIn, PATCH_JUMP);
-	InjectHook(0x493E70, &CPad::SniperZoomOut, PATCH_JUMP);
-	InjectHook(0x493EE0, &CPad::SniperModeLookLeftRight, PATCH_JUMP);
-	InjectHook(0x493F30, &CPad::SniperModeLookUpDown, PATCH_JUMP);
-	InjectHook(0x493F80, &CPad::LookAroundLeftRight, PATCH_JUMP);
-	InjectHook(0x494130, &CPad::LookAroundUpDown, PATCH_JUMP);
-	InjectHook(0x494290, &CPad::ResetAverageWeapon, PATCH_JUMP);
-	InjectHook(0x4942B0, CPad::PrintErrorMessage, PATCH_JUMP);
-	InjectHook(0x494420, LittleTest, PATCH_JUMP);
-	InjectHook(0x494450, CPad::ResetCheats, PATCH_JUMP);
-	InjectHook(0x4944B0, CPad::EditString, PATCH_JUMP);
-	InjectHook(0x494690, CPad::EditCodesForControls, PATCH_JUMP);
-
-	//InjectHook(0x494E50, `global constructor keyed to'Pad.cpp, PATCH_JUMP);
-	//InjectHook(0x494EB0, sub_494EB0, PATCH_JUMP);
-	//InjectHook(0x494ED0, &CPad::~CPad, PATCH_JUMP);
-	//InjectHook(0x494EE0, &CPad::CPad, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Lights.h"
 #include "Camera.h"
@@ -284,10 +284,3 @@ CPointLights::RenderFogEffect(void)
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x510790, CPointLights::AddLight, PATCH_JUMP);
-	InjectHook(0x510960, CPointLights::GenerateLightsAffectingObject, PATCH_JUMP);
-	InjectHook(0x510C20, CPointLights::RemoveLightsAffectingObject, PATCH_JUMP);
-	InjectHook(0x510C30, CPointLights::RenderFogEffect, PATCH_JUMP);
-ENDPATCHES

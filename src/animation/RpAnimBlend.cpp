@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
@@ -378,26 +378,3 @@ RpAnimBlendClumpUpdateAnimations(RpClump *clump, float timeDelta)
 	}
 	RwFrameUpdateObjects(RpClumpGetFrame(clump));
 }
-
-
-STARTPATCHES
-	InjectHook(0x4052D0, RpAnimBlendPluginAttach, PATCH_JUMP);
-	InjectHook(0x4052A0, RpAnimBlendAllocateData, PATCH_JUMP);
-	InjectHook(0x405780, (CAnimBlendAssociation *(*)(CAnimBlendAssociation*))RpAnimBlendGetNextAssociation, PATCH_JUMP);
-	InjectHook(0x4057A0, (CAnimBlendAssociation *(*)(CAnimBlendAssociation*,uint32))RpAnimBlendGetNextAssociation, PATCH_JUMP);
-
-	InjectHook(0x405520, RpAnimBlendClumpSetBlendDeltas, PATCH_JUMP);
-	InjectHook(0x405560, RpAnimBlendClumpRemoveAllAssociations, PATCH_JUMP);
-	InjectHook(0x405570, RpAnimBlendClumpRemoveAssociations, PATCH_JUMP);
-	InjectHook(0x405480, RpAnimBlendClumpInit, PATCH_JUMP);
-	InjectHook(0x405500, RpAnimBlendClumpIsInitialized, PATCH_JUMP);
-	InjectHook(0x4055C0, RpAnimBlendClumpGetAssociation, PATCH_JUMP);
-	InjectHook(0x4055F0, RpAnimBlendClumpGetMainAssociation, PATCH_JUMP);
-	InjectHook(0x405680, RpAnimBlendClumpGetMainPartialAssociation, PATCH_JUMP);
-	InjectHook(0x4056D0, RpAnimBlendClumpGetMainAssociation_N, PATCH_JUMP);
-	InjectHook(0x405710, RpAnimBlendClumpGetMainPartialAssociation_N, PATCH_JUMP);
-	InjectHook(0x405750, (CAnimBlendAssociation *(*)(RpClump*, uint32))RpAnimBlendClumpGetFirstAssociation, PATCH_JUMP);
-	InjectHook(0x4031B0, (CAnimBlendAssociation *(*)(RpClump*))RpAnimBlendClumpGetFirstAssociation, PATCH_JUMP);
-	InjectHook(0x405460, RpAnimBlendClumpFillFrameArray, PATCH_JUMP);
-	InjectHook(0x4024B0, RpAnimBlendClumpUpdateAnimations, PATCH_JUMP);
-ENDPATCHES

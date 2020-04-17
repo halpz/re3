@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Camera.h"
 #include "World.h"
@@ -327,9 +327,3 @@ CTrafficLights::LightForCars2(void)
 	else
 		return CAR_LIGHTS_RED;
 }
-
-STARTPATCHES
-	InjectHook(0x455760, &CTrafficLights::LightForCars1, PATCH_JUMP);
-	InjectHook(0x455790, &CTrafficLights::LightForCars2, PATCH_JUMP);
-	InjectHook(0x4557D0, &CTrafficLights::LightForPeds, PATCH_JUMP);
-ENDPATCHES

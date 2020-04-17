@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Lights.h"
 #include "Pools.h"
@@ -394,37 +394,3 @@ CObject::DeleteAllTempObjectsInArea(CVector point, float fRadius)
 		}
 	}
 }
-
-#include <new>
-
-class CObject_ : public CObject
-{
-public:
-	CObject *ctor(void) { return ::new (this) CObject(); }
-	CObject *ctor(int32 mi, bool createRW) { return ::new (this) CObject(mi, createRW); }
-	CObject *ctor(CDummyObject *dummy) { return ::new (this) CObject(dummy); }
-	void dtor(void) { CObject::~CObject(); }
-	void Render_(void) { CObject::Render(); }
-	void ProcessControl_(void) { CObject::ProcessControl(); }
-	bool SetupLighting_(void) { return CObject::SetupLighting(); }
-	void RemoveLighting_(bool reset) { CObject::RemoveLighting(reset); }
-};
-
-STARTPATCHES
-	InjectHook(0x4BABD0, (CObject* (CObject::*)(void)) &CObject_::ctor, PATCH_JUMP);
-	InjectHook(0x4BACE0, (CObject* (CObject::*)(int32, bool)) &CObject_::ctor, PATCH_JUMP);
-	InjectHook(0x4BAD50, (CObject* (CObject::*)(CDummyObject*)) &CObject_::ctor, PATCH_JUMP);
-	InjectHook(0x4BAE00, &CObject_::dtor, PATCH_JUMP);
-	InjectHook(0x4BB040, &CObject_::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x4BBDA0, &CObject::Teleport, PATCH_JUMP);
-	InjectHook(0x4BB1E0, &CObject_::Render_, PATCH_JUMP);
-	InjectHook(0x4A7C90, &CObject_::SetupLighting_, PATCH_JUMP);
-	InjectHook(0x4A7CD0, &CObject_::RemoveLighting_, PATCH_JUMP);
-	InjectHook(0x4BB240, &CObject::ObjectDamage, PATCH_JUMP);
-	InjectHook(0x4BBD80, &CObject::RefModelInfo, PATCH_JUMP);
-	InjectHook(0x4BAEC0, &CObject::Init, PATCH_JUMP);
-	InjectHook(0x4BB010, &CObject::CanBeDeleted, PATCH_JUMP);
-	InjectHook(0x4BBE60, &CObject::DeleteAllMissionObjects, PATCH_JUMP);
-	InjectHook(0x4BBDF0, &CObject::DeleteAllTempObjects, PATCH_JUMP);
-	InjectHook(0x4BBED0, &CObject::DeleteAllTempObjectsInArea, PATCH_JUMP);
-ENDPATCHES

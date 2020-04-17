@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "CivilianPed.h"
 #include "Phones.h"
 #include "General.h"
@@ -376,21 +376,3 @@ CCivilianPed::ProcessControl(void)
 	if (m_moved.Magnitude() > 0.0f)
 		Avoid();
 }
-
-#include <new>
-
-class CCivilianPed_ : public CCivilianPed
-{
-public:
-	CCivilianPed *ctor(ePedType pedtype, uint32 mi) { return ::new (this) CCivilianPed(pedtype, mi); };
-	void dtor(void) { CCivilianPed::~CCivilianPed(); }
-	void ProcessControl_(void) { CCivilianPed::ProcessControl(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4BFF30, &CCivilianPed_::ctor, PATCH_JUMP);
-	InjectHook(0x4BFFC0, &CCivilianPed_::dtor, PATCH_JUMP);
-	InjectHook(0x4BFFE0, &CCivilianPed_::ProcessControl_, PATCH_JUMP);
-
-	InjectHook(0x4C07A0, &CCivilianPed::CivilianAI, PATCH_JUMP);
-ENDPATCHES

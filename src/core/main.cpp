@@ -2,7 +2,7 @@
 #include "rpmatfx.h"
 #include "rphanim.h"
 #include "rpskin.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "CdStream.h"
 #include "General.h"
@@ -1838,28 +1838,3 @@ main(int argc, char *argv[])
 	
 	return 0;
 }
-
-STARTPATCHES
-	InjectHook(0x48E480, Idle, PATCH_JUMP);
-	InjectHook(0x48E700, FrontendIdle, PATCH_JUMP);
-
-	InjectHook(0x48CF10, DoRWStuffStartOfFrame, PATCH_JUMP);
-	InjectHook(0x48D040, DoRWStuffStartOfFrame_Horizon, PATCH_JUMP);
-	InjectHook(0x48E030, RenderScene, PATCH_JUMP);
-	InjectHook(0x48E080, RenderDebugShit, PATCH_JUMP);
-	InjectHook(0x48E090, RenderEffects, PATCH_JUMP);
-	InjectHook(0x48E0E0, Render2dStuff, PATCH_JUMP);
-	InjectHook(0x48E450, RenderMenus, PATCH_JUMP);
-	InjectHook(0x48D120, DoFade, PATCH_JUMP);
-	InjectHook(0x48E470, Render2dStuffAfterFade, PATCH_JUMP);
-
-	InjectHook(0x48D550, LoadSplash, PATCH_JUMP);
-	InjectHook(0x48D670, DestroySplashScreen, PATCH_JUMP);
-	InjectHook(0x48D770, LoadingScreen, PATCH_JUMP);
-	InjectHook(0x48D760, ResetLoadingScreenBar, PATCH_JUMP);
-	
-	InjectHook(0x48D470, PluginAttach, PATCH_JUMP);
-	InjectHook(0x48D520, Initialise3D, PATCH_JUMP);
-	InjectHook(0x48D540, Terminate3D, PATCH_JUMP);
-	InjectHook(0x48E800, AppEventHandler, PATCH_JUMP);
-ENDPATCHES

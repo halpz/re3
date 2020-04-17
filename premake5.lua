@@ -1,7 +1,7 @@
 Librw = os.getenv("LIBRW")
 
 workspace "re3"
-	configurations { "Debug", "Release", "ReleaseFH", "DebugRW", "ReleaseRW", "DebugLIBRW"  }
+	configurations { "Debug", "Release", "ReleaseFH", "DebugRW", "ReleaseRW"  }
 	location "build"
 
 	files { "src/*.*" }
@@ -51,20 +51,20 @@ workspace "re3"
 	libdirs { "dxsdk/lib" }
 	libdirs { "milessdk/lib" }
 
-	filter "configurations:*LIBRW"
-	files { "src/fakerw/*.*" }
-	includedirs { "src/fakerw" }
-	includedirs { Librw }
-	libdirs { path.join(Librw, "lib/win-x86-d3d9/Debug") }
-	links { "rw", "d3d9" }
-
-	filter "configurations:not *LIBRW"
-	includedirs { "rwsdk/include/d3d8" }
-
-	filter "configurations:DebugRW or configurations:ReleaseRW"
-	defines { "RWLIBS" }
-	libdirs { "rwsdk/lib/d3d8/release" }
-	links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp" }
+	filter "configurations:Debug or Release"
+		files { "src/fakerw/*.*" }
+		includedirs { "src/fakerw" }
+		includedirs { "librw" }
+		includedirs { "librw/src" }
+		libdirs { path.join("librw", "lib/win-x86-d3d9/%{cfg.buildcfg}") }
+		links { "rw", "d3d9" }
+	filter  {}
+	
+	filter "configurations:DebugRW or ReleaseRW"
+		defines { "RWLIBS" }
+		includedirs { "rwsdk/include/d3d8" }
+		libdirs { "rwsdk/lib/d3d8/release" }
+		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp" }
 	filter  {}
 
 	
@@ -95,49 +95,43 @@ workspace "re3"
     end
 
 project "re3"
-	kind "SharedLib"
+	kind "WindowedApp"
 	language "C++"
 	targetname "re3"
 	targetdir "bin/%{cfg.buildcfg}"
-	targetextension ".dll"
+	targetextension ".exe"
 	characterset ("MBCS")
 	linkoptions "/SAFESEH:NO"
 
 	filter "configurations:Debug"
-		defines { "DEBUG" }
-		staticruntime "on"
+		defines { "DEBUG", "LIBRW", "RW_D3D9" }
+		staticruntime "off"
 		symbols "Full"
-		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
+		setpaths("$(GTA_III_RE_DIR)/", "re3.exe", "")
 
 	filter "configurations:Release"
-		defines { "NDEBUG" }
+		defines { "NDEBUG", "LIBRW", "RW_D3D9" }
 		optimize "On"
-		staticruntime "on"
+		staticruntime "off"
 		symbols "Full"
-		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
+		setpaths("$(GTA_III_RE_DIR)/", "re3.exe", "")
 		
 	filter "configurations:ReleaseFH"
 		defines { "NDEBUG" }
 		symbols "Full"
 		optimize "off"
 		staticruntime "on"
-		targetextension ".asi"
-		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "scripts/")
+		setpaths("$(GTA_III_RE_DIR)/", "re3.exe", "")
 
 	filter "configurations:DebugRW"
 		defines { "DEBUG" }
 		staticruntime "on"
 		symbols "On"
-		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
+		setpaths("$(GTA_III_RE_DIR)/", "re3.exe", "")
 
 	filter "configurations:ReleaseRW"
 		defines { "NDEBUG" }
 		optimize "On"
 		staticruntime "on"
-		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
-
-	filter "configurations:DebugLIBRW"
-		defines { "DEBUG", "LIBRW", "RW_D3D9" }
-		symbols "On"
-		setpaths("$(GTA_III_RE_DIR)/", "gta3.exe", "plugins/")
+		setpaths("$(GTA_III_RE_DIR)/", "re3.exe", "")
 

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Timecycle.h"
 #include "HandlingMgr.h"
@@ -850,24 +850,3 @@ CBoat::AddWakePoint(CVector point)
 		m_nNumWakePoints = 1;
 	}
 }
-
-#include <new>
-
-class CBoat_ : public CBoat
-{
-public:
-	CBoat* ctor(int32 id, uint8 CreatedBy) { return ::new (this) CBoat(id, CreatedBy); }
-	void dtor() { CBoat::~CBoat(); };
-};
-
-STARTPATCHES
-	InjectHook(0x53E3E0, &CBoat_::ctor, PATCH_JUMP);
-	InjectHook(0x53E790, &CBoat_::dtor, PATCH_JUMP);
-	InjectHook(0x53E7D0, &CBoat::SetupModelNodes, PATCH_JUMP);
-	InjectHook(0x542370, CBoat::IsSectorAffectedByWake, PATCH_JUMP);
-	InjectHook(0x5424A0, CBoat::IsVertexAffectedByWake, PATCH_JUMP);
-	InjectHook(0x542250, CBoat::FillBoatList, PATCH_JUMP);
-	InjectHook(0x542140, &CBoat::AddWakePoint, PATCH_JUMP);
-	InjectHook(0x5420D0, &CBoat::PruneWakeTrail, PATCH_JUMP);
-	InjectHook(0x541A30, &CBoat::ApplyWaterResistance, PATCH_JUMP);
-ENDPATCHES

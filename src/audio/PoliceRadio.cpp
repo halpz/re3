@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "DMAudio.h"
 #include "AudioManager.h"
 #include "AudioSamples.h"
@@ -774,19 +774,3 @@ cAudioManager::AgeCrimes()
 		}
 	}
 }
-
-STARTPATCHES
-InjectHook(0x580AF0, &cAudioManager::AgeCrimes, PATCH_JUMP);
-InjectHook(0x57F060, &cAudioManager::DoPoliceRadioCrackle, PATCH_JUMP);
-InjectHook(0x57F050, &cAudioManager::GetMissionScriptPoliceAudioPlayingStatus, PATCH_JUMP);
-InjectHook(0x57EEC0, &cAudioManager::InitialisePoliceRadio, PATCH_JUMP);
-InjectHook(0x57EAC0, &cAudioManager::InitialisePoliceRadioZones, PATCH_JUMP);
-InjectHook(0x580500, &cAudioManager::PlaySuspectLastSeen, PATCH_JUMP);
-InjectHook(0x5803D0, &cAudioManager::ReportCrime, PATCH_JUMP);
-InjectHook(0x57EFF0, &cAudioManager::ResetPoliceRadio, PATCH_JUMP);
-InjectHook(0x57F110, &cAudioManager::ServicePoliceRadio, PATCH_JUMP);
-InjectHook(0x57F1B0, &cAudioManager::ServicePoliceRadioChannel, PATCH_JUMP);
-InjectHook(0x57F020, &cAudioManager::SetMissionScriptPoliceAudio, PATCH_JUMP);
-InjectHook(0x57F5B0, &cAudioManager::SetupCrimeReport, PATCH_JUMP);
-InjectHook(0x57FCC0, &cAudioManager::SetupSuspectLastSeenReport, PATCH_JUMP);
-ENDPATCHES

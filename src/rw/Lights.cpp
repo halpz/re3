@@ -1,7 +1,7 @@
 #include "common.h"
 #include <rwcore.h>
 #include <rpworld.h>
-#include "patcher.h"
+
 #include "Lights.h"
 #include "Timecycle.h"
 #include "Coronas.h"
@@ -11,7 +11,7 @@
 
 RpLight *pAmbient;
 RpLight *pDirect;
-RpLight *pExtraDirectionals[] = { nil };
+RpLight *pExtraDirectionals[4] = { nil };
 int LightStrengths[4];
 int NumExtraDirLightsInWorld;
 
@@ -312,22 +312,3 @@ SetAmbientColours(RwRGBAReal *color)
 {
 	RpLightSetColor(pAmbient, color);
 }
-
-
-STARTPATCHES
-	InjectHook(0x526510, SetLightsWithTimeOfDayColour, PATCH_JUMP);
-	InjectHook(0x5269A0, LightsCreate, PATCH_JUMP);
-	InjectHook(0x526B40, LightsDestroy, PATCH_JUMP);
-	InjectHook(0x526C10, WorldReplaceNormalLightsWithScorched, PATCH_JUMP);
-	InjectHook(0x526C50, WorldReplaceScorchedLightsWithNormal, PATCH_JUMP);
-	InjectHook(0x526C70, AddAnExtraDirectionalLight, PATCH_JUMP);
-	InjectHook(0x526DB0, RemoveExtraDirectionalLights, PATCH_JUMP);
-	InjectHook(0x526DE0, SetAmbientAndDirectionalColours, PATCH_JUMP);
-	InjectHook(0x526E60, SetBrightMarkerColours, PATCH_JUMP);
-	InjectHook(0x526F10, ReSetAmbientAndDirectionalColours, PATCH_JUMP);
-	InjectHook(0x526F40, DeActivateDirectional, PATCH_JUMP);
-	InjectHook(0x526F50, ActivateDirectional, PATCH_JUMP);
-	InjectHook(0x526F60, (void (*)(void))SetAmbientColours, PATCH_JUMP);
-	InjectHook(0x526F80, SetAmbientColoursForPedsCarsAndObjects, PATCH_JUMP);
-	InjectHook(0x526FA0, (void (*)(RwRGBAReal*))SetAmbientColours, PATCH_JUMP);
-ENDPATCHES

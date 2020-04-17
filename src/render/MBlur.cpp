@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "RwHelper.h"
 #include "Camera.h"
 #include "MBlur.h"
@@ -213,11 +213,3 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type,
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 }
-
-STARTPATCHES
-	InjectHook(0x50AE40, CMBlur::MotionBlurOpen, PATCH_JUMP);
-	InjectHook(0x50B170, CMBlur::MotionBlurClose, PATCH_JUMP);
-	InjectHook(0x50A800, CMBlur::CreateImmediateModeData, PATCH_JUMP);
-	InjectHook(0x50AD70, CMBlur::MotionBlurRender, PATCH_JUMP);
-	InjectHook(0x50A9C0, CMBlur::OverlayRender, PATCH_JUMP);
-ENDPATCHES

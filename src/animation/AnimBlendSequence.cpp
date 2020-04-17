@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "AnimBlendSequence.h"
 
 CAnimBlendSequence::CAnimBlendSequence(void)
@@ -60,9 +60,3 @@ CAnimBlendSequence::RemoveQuaternionFlips(void)
 		last = frame->rotation;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x402330, &CAnimBlendSequence::SetName, PATCH_JUMP);
-	InjectHook(0x402350, &CAnimBlendSequence::SetNumFrames, PATCH_JUMP);
-	InjectHook(0x4023A0, &CAnimBlendSequence::RemoveQuaternionFlips, PATCH_JUMP);
-ENDPATCHES
