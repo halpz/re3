@@ -36,11 +36,11 @@ static_assert(sizeof(CPhone) == 0x34, "CPhone: error");
 
 class CPhoneInfo {
 public:
-	static bool &bDisplayingPhoneMessage;
-	static uint32 &PhoneEnableControlsTimer;
-	static CPhone *&pPhoneDisplayingMessages;
-	static bool &bPickingUpPhone;
-	static CPed *&pCallBackPed;
+	static bool bDisplayingPhoneMessage;
+	static uint32 PhoneEnableControlsTimer;
+	static CPhone *pPhoneDisplayingMessages;
+	static bool bPickingUpPhone;
+	static CPed *pCallBackPed;
 
 	int32 m_nMax;
 	int32 m_nScriptPhonesMax;
@@ -63,7 +63,7 @@ public:
 	void Update(void);
 };
 
-extern CPhoneInfo &gPhoneInfo;
+extern CPhoneInfo gPhoneInfo;
 
 void PhonePutDownCB(CAnimBlendAssociation *assoc, void *arg);
 void PhonePickUpCB(CAnimBlendAssociation *assoc, void *arg);

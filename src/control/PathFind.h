@@ -138,8 +138,8 @@ struct CPathInfoForObject
 	int8 numRightLanes;
 	uint8 crossing : 1;
 };
-extern CPathInfoForObject *&InfoForTileCars;
-extern CPathInfoForObject *&InfoForTilePeds;
+extern CPathInfoForObject *InfoForTileCars;
+extern CPathInfoForObject *InfoForTilePeds;
 
 struct CTempNode
 {
@@ -234,7 +234,7 @@ public:
 };
 static_assert(sizeof(CPathFind) == 0x49bf4, "CPathFind: error");
 
-extern CPathFind &ThePaths;
+extern CPathFind ThePaths;
 
 extern bool gbShowPedPaths;
 extern bool gbShowCarPaths;

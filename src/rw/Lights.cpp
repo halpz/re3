@@ -9,18 +9,18 @@
 #include "ZoneCull.h"
 #include "Frontend.h"
 
-RpLight *pAmbient;// = *(RpLight**)0x885B6C;
-RpLight *pDirect;// = *(RpLight**)0x880F7C;
-RpLight *pExtraDirectionals[] = { nil, nil, nil, nil };// = (RpLight**)0x60009C;
-int LightStrengths[4];// = (int*)0x87BEF0;
-int NumExtraDirLightsInWorld;// = *(int*)0x64C608;
+RpLight *pAmbient;
+RpLight *pDirect;
+RpLight *pExtraDirectionals[] = { nil };
+int LightStrengths[4];
+int NumExtraDirLightsInWorld;
 
-RwRGBAReal AmbientLightColourForFrame;// = *(RwRGBAReal*)0x6F46F8;
-RwRGBAReal AmbientLightColourForFrame_PedsCarsAndObjects;// = *(RwRGBAReal*)0x6F1D10;
-RwRGBAReal DirectionalLightColourForFrame;// = *(RwRGBAReal*)0x87C6B8;
+RwRGBAReal AmbientLightColourForFrame;
+RwRGBAReal AmbientLightColourForFrame_PedsCarsAndObjects;
+RwRGBAReal DirectionalLightColourForFrame;
 
-RwRGBAReal AmbientLightColour;// = *(RwRGBAReal*)0x86B0F8;
-RwRGBAReal DirectionalLightColour;// = *(RwRGBAReal*)0x72E308;
+RwRGBAReal AmbientLightColour;
+RwRGBAReal DirectionalLightColour;
 
 void
 SetLightsWithTimeOfDayColour(RpWorld *)

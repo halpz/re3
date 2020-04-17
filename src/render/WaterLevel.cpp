@@ -39,8 +39,8 @@ int16 CWaterLevel::nGeomUsed;
 //RwTexture *gpWaterTex;
 //RwRaster *gpWaterRaster;
 
-RwTexture *&gpWaterTex = *(RwTexture **)0x64D070;
-RwRaster *&gpWaterRaster = *(RwRaster **)0x8F5FD4;
+RwTexture *gpWaterTex;
+RwRaster *gpWaterRaster;
 
 
 const float fAdd1 = 180.0f;

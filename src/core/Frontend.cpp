@@ -93,7 +93,7 @@ int8 CMenuManager::m_PrefsSpeakers;
 int32 CMenuManager::m_ControlMethod;
 int8 CMenuManager::m_PrefsDMA = 1;
 int32 CMenuManager::m_PrefsLanguage;
-uint8 CMenuManager::m_PrefsStereoMono; // *(bool*)0x95CDB5; // unused except restore settings
+uint8 CMenuManager::m_PrefsStereoMono; // unused except restore settings
 
 bool CMenuManager::m_PrefsAllowNastyGame = true;
 bool CMenuManager::m_bStartUpFrontEndRequested;

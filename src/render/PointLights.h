@@ -18,8 +18,8 @@ static_assert(sizeof(CRegisteredPointLight) == 0x2C, "CRegisteredPointLight: err
 class CPointLights
 {
 public:
-	static int16 &NumLights;
-	static CRegisteredPointLight *aLights;	//[NUMPOINTLIGHTS]
+	static int16 NumLights;
+	static CRegisteredPointLight aLights[NUMPOINTLIGHTS];
 
 	enum {
 		LIGHT_POINT,

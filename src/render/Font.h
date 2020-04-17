@@ -31,6 +31,7 @@ enum {
 	FONT_BANK,
 	FONT_PAGER,
 	FONT_HEADING,
+	MAX_FONTS
 };
 
 enum {
@@ -50,16 +51,16 @@ enum
 class CFont
 {
 #ifdef MORE_LANGUAGES
-	static int16 Size[2][3][193];
+	static int16 Size[2][MAX_FONTS][193];
 	static uint8 LanguageSet;
 	static int32 Slot;
 #else
-	static int16 Size[3][193];
+	static int16 Size[MAX_FONTS][193];
 #endif
-	static int16 &NewLine;
-	static CSprite2d *Sprite;	//[3]
+	static int16 NewLine;
+	static CSprite2d Sprite[MAX_FONTS];
 public:
-	static CFontDetails& Details;
+	static CFontDetails Details;
 
 	static void Initialise(void);
 	static void Shutdown(void);

@@ -3,17 +3,17 @@
 class CTimer
 {
 
-	static uint32 &m_snTimeInMilliseconds;
-	static uint32 &m_snTimeInMillisecondsPauseMode;
-	static uint32 &m_snTimeInMillisecondsNonClipped;
-	static uint32 &m_snPreviousTimeInMilliseconds;
-	static uint32 &m_FrameCounter;
-	static float &ms_fTimeScale;
-	static float &ms_fTimeStep;
-	static float &ms_fTimeStepNonClipped;
+	static uint32 m_snTimeInMilliseconds;
+	static uint32 m_snTimeInMillisecondsPauseMode;
+	static uint32 m_snTimeInMillisecondsNonClipped;
+	static uint32 m_snPreviousTimeInMilliseconds;
+	static uint32 m_FrameCounter;
+	static float ms_fTimeScale;
+	static float ms_fTimeStep;
+	static float ms_fTimeStepNonClipped;
 public:
-	static bool  &m_UserPause;
-	static bool  &m_CodePause;
+	static bool  m_UserPause;
+	static bool  m_CodePause;
 
 	static const float &GetTimeStep(void) { return ms_fTimeStep; }
 	static void SetTimeStep(float ts) { ms_fTimeStep = ts; }

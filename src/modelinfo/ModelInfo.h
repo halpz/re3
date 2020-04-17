@@ -13,7 +13,7 @@
 
 class CModelInfo
 {
-	static CBaseModelInfo **ms_modelInfoPtrs; //[MODELINFOSIZE];
+	static CBaseModelInfo *ms_modelInfoPtrs[MODELINFOSIZE];
 	static CStore<CSimpleModelInfo, SIMPLEMODELSIZE> ms_simpleModelStore;
 	static CStore<CMloModelInfo, MLOMODELSIZE> ms_mloModelStore;
 	static CStore<CInstance, MLOINSTANCESIZE> ms_mloInstanceStore;

@@ -31,16 +31,16 @@
 #include "WaterLevel.h"
 #include "World.h"
 
-CPickup(&CPickups::aPickUps)[NUMPICKUPS] = *(CPickup(*)[NUMPICKUPS])*(uintptr*)0x878C98;
-int16 CPickups::NumMessages;// = *(int16*)0x95CC98;
-int32 CPickups::aPickUpsCollected[NUMCOLLECTEDPICKUPS];// = *(int32(*)[NUMCOLLECTEDPICKUPS])*(uintptr*)0x87C538;
-int16 CPickups::CollectedPickUpIndex;// = *(int16*)0x95CC8A;
+CPickup CPickups::aPickUps[NUMPICKUPS];
+int16 CPickups::NumMessages;
+int32 CPickups::aPickUpsCollected[NUMCOLLECTEDPICKUPS];
+int16 CPickups::CollectedPickUpIndex;
 
 // unused
-bool &CPickups::bPickUpcamActivated = *(bool*)0x95CD71;
-CVehicle *&CPickups::pPlayerVehicle = *(CVehicle**)0x8F29E8;
-CVector &CPickups::StaticCamCoors = *(CVector*)0x9404C8;
-uint32 &CPickups::StaticCamStartTime = *(uint32*)0x8E289C;
+bool CPickups::bPickUpcamActivated;
+CVehicle *CPickups::pPlayerVehicle;
+CVector CPickups::StaticCamCoors;
+uint32 CPickups::StaticCamStartTime;
 
 tPickupMessage CPickups::aMessages[NUMPICKUPMESSAGES];
 

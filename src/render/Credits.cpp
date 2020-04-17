@@ -8,8 +8,8 @@
 #include "Text.h"
 #include "Credits.h"
 
-bool &CCredits::bCreditsGoing = *(bool*)0x95CDD3;
-uint32 &CCredits::CreditsStartTime = *(uint32*)0x8F2528;
+bool CCredits::bCreditsGoing;
+uint32 CCredits::CreditsStartTime;
 
 void
 CCredits::Init(void)

@@ -17,8 +17,7 @@ static RwBool               DefaultVideoMode = TRUE;
 
 bool TurnOnAnimViewer = false;
 
-//RsGlobalType                RsGlobal;
-RsGlobalType &RsGlobal = *(RsGlobalType*)0x8F4360;
+RsGlobalType                RsGlobal;
 
 RwUInt32
 RsTimer(void)

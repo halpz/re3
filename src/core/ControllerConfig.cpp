@@ -18,7 +18,7 @@
 #include "win.h"
 #include "GenericGameStorage.h"
 
-CControllerConfigManager &ControlsManager = *(CControllerConfigManager*)0x8F43A4;
+CControllerConfigManager ControlsManager;
 
 CControllerConfigManager::CControllerConfigManager()
 {

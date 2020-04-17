@@ -8,15 +8,15 @@
 float CDraw::ms_fAspectRatio = DEFAULT_ASPECT_RATIO;
 #endif
 
-float &CDraw::ms_fNearClipZ = *(float*)0x8E2DC4;
-float &CDraw::ms_fFarClipZ = *(float*)0x9434F0;
-float &CDraw::ms_fFOV = *(float*)0x5FBC6C;
-float &CDraw::ms_fLODDistance = *(float*)0x8F2C30;
+float CDraw::ms_fNearClipZ;
+float CDraw::ms_fFarClipZ;
+float CDraw::ms_fFOV = 45.0f;
+float CDraw::ms_fLODDistance;
 
-uint8 &CDraw::FadeValue = *(uint8*)0x95CD68;
-uint8 &CDraw::FadeRed = *(uint8*)0x95CD90;
-uint8 &CDraw::FadeGreen = *(uint8*)0x95CD71;
-uint8 &CDraw::FadeBlue = *(uint8*)0x95CD53;
+uint8 CDraw::FadeValue;
+uint8 CDraw::FadeRed;
+uint8 CDraw::FadeGreen;
+uint8 CDraw::FadeBlue;
 
 float
 CDraw::FindAspectRatio(void)

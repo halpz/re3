@@ -5,34 +5,28 @@
 #include "Record.h"
 #include "Timer.h"
 
-uint32 &CTimer::m_snTimeInMilliseconds = *(uint32*)0x885B48;
-uint32 &CTimer::m_snTimeInMillisecondsPauseMode = *(uint32*)0x5F7614;
-uint32 &CTimer::m_snTimeInMillisecondsNonClipped = *(uint32*)0x9412E8;
-uint32 &CTimer::m_snPreviousTimeInMilliseconds = *(uint32*)0x8F29E4;
-uint32 &CTimer::m_FrameCounter = *(uint32*)0x9412EC;
-float &CTimer::ms_fTimeScale = *(float*)0x8F2C20;
-float &CTimer::ms_fTimeStep = *(float*)0x8E2CB4;
-float &CTimer::ms_fTimeStepNonClipped = *(float*)0x8E2C4C;
-bool  &CTimer::m_UserPause = *(bool*)0x95CD7C;
-bool  &CTimer::m_CodePause = *(bool*)0x95CDB1;
+uint32 CTimer::m_snTimeInMilliseconds;
+uint32 CTimer::m_snTimeInMillisecondsPauseMode = 1;
+uint32 CTimer::m_snTimeInMillisecondsNonClipped;
+uint32 CTimer::m_snPreviousTimeInMilliseconds;
+uint32 CTimer::m_FrameCounter;
+float CTimer::ms_fTimeScale;
+float CTimer::ms_fTimeStep;
+float CTimer::ms_fTimeStepNonClipped;
+bool  CTimer::m_UserPause;
+bool  CTimer::m_CodePause;
 
-//UInt32 oldPcTimer;
-uint32 &oldPcTimer = *(uint32*)0x9434F4;
+uint32 oldPcTimer;
 
-//UInt32 suspendPcTimer;
-uint32 &suspendPcTimer = *(uint32*)0x62A308;
+uint32 suspendPcTimer;
 
-//UInt32 _nCyclesPerMS = 1;
-uint32 &_nCyclesPerMS = *(uint32*)0x5F7610;
+uint32 _nCyclesPerMS = 1;
 
-//LARGE_INTEGER _oldPerfCounter;
-LARGE_INTEGER &_oldPerfCounter = *(LARGE_INTEGER*)0x62A310;
+LARGE_INTEGER _oldPerfCounter;
 
-//LARGE_INTEGER perfSuspendCounter;
-LARGE_INTEGER &perfSuspendCounter = *(LARGE_INTEGER*)0x62A318;
+LARGE_INTEGER perfSuspendCounter;
 
-//UInt32 suspendDepth;
-uint32 &suspendDepth = *(uint32*)0x62A320;
+uint32 suspendDepth;
 
 #ifdef FIX_BUGS
 double frameTime;

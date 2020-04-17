@@ -30,49 +30,49 @@
 #include "Streaming.h"
 #include "main.h"
 
-bool &CStreaming::ms_disableStreaming = *(bool*)0x95CD6E;
-bool &CStreaming::ms_bLoadingBigModel = *(bool*)0x95CDB0;
-int32 &CStreaming::ms_numModelsRequested = *(int32*)0x8E2C10;
-CStreamingInfo *CStreaming::ms_aInfoForModel = (CStreamingInfo*)0x6C7088;
-CStreamingInfo &CStreaming::ms_startLoadedList = *(CStreamingInfo*)0x942F60;
-CStreamingInfo &CStreaming::ms_endLoadedList = *(CStreamingInfo*)0x8F1AC0;
-CStreamingInfo &CStreaming::ms_startRequestedList = *(CStreamingInfo*)0x8F1B3C;
-CStreamingInfo &CStreaming::ms_endRequestedList = *(CStreamingInfo*)0x940738;
-int32 &CStreaming::ms_oldSectorX = *(int32*)0x8F2C84;
-int32 &CStreaming::ms_oldSectorY = *(int32*)0x8F2C88;
-int32 &CStreaming::ms_streamingBufferSize = *(int32*)0x942FB0;
-int8 **CStreaming::ms_pStreamingBuffer = (int8**)0x87F818;
-int32 &CStreaming::ms_memoryUsed = *(int32*)0x940568;
-CStreamingChannel *CStreaming::ms_channel = (CStreamingChannel*)0x727EE0;
-int32 &CStreaming::ms_channelError = *(int32*)0x880DB8;
-int32 &CStreaming::ms_numVehiclesLoaded = *(int32*)0x8F2C80;
-int32 *CStreaming::ms_vehiclesLoaded = (int32*)0x773560;
-int32 &CStreaming::ms_lastVehicleDeleted = *(int32*)0x95CBF8;
-CDirectory *&CStreaming::ms_pExtraObjectsDir = *(CDirectory**)0x95CB90;
-int32 &CStreaming::ms_numPriorityRequests = *(int32*)0x8F31C4;
-bool &CStreaming::ms_hasLoadedLODs = *(bool*)0x95CD47;
-int32 &CStreaming::ms_currentPedGrp = *(int32*)0x8F2BBC;
+bool CStreaming::ms_disableStreaming;
+bool CStreaming::ms_bLoadingBigModel;
+int32 CStreaming::ms_numModelsRequested;
+CStreamingInfo CStreaming::ms_aInfoForModel[NUMSTREAMINFO];
+CStreamingInfo CStreaming::ms_startLoadedList;
+CStreamingInfo CStreaming::ms_endLoadedList;
+CStreamingInfo CStreaming::ms_startRequestedList;
+CStreamingInfo CStreaming::ms_endRequestedList;
+int32 CStreaming::ms_oldSectorX;
+int32 CStreaming::ms_oldSectorY;
+int32 CStreaming::ms_streamingBufferSize;
+int8 *CStreaming::ms_pStreamingBuffer[2];
+int32 CStreaming::ms_memoryUsed;
+CStreamingChannel CStreaming::ms_channel[2];
+int32 CStreaming::ms_channelError;
+int32 CStreaming::ms_numVehiclesLoaded;
+int32 CStreaming::ms_vehiclesLoaded[MAXVEHICLESLOADED];
+int32 CStreaming::ms_lastVehicleDeleted;
+CDirectory *CStreaming::ms_pExtraObjectsDir;
+int32 CStreaming::ms_numPriorityRequests;
+bool CStreaming::ms_hasLoadedLODs;
+int32 CStreaming::ms_currentPedGrp;
 int32 CStreaming::ms_currentPedLoading;
 int32 CStreaming::ms_lastCullZone;
-uint16 &CStreaming::ms_loadedGangs = *(uint16*)0x95CC60;
-uint16 &CStreaming::ms_loadedGangCars = *(uint16*)0x95CC2E;
-int32 *CStreaming::ms_imageOffsets = (int32*)0x6E60A0;
-int32 &CStreaming::ms_lastImageRead = *(int32*)0x880E2C;
-int32 &CStreaming::ms_imageSize = *(int32*)0x8F1A34;
-uint32 &CStreaming::ms_memoryAvailable = *(uint32*)0x880F8C;
+uint16 CStreaming::ms_loadedGangs;
+uint16 CStreaming::ms_loadedGangCars;
+int32 CStreaming::ms_imageOffsets[NUMCDIMAGES];
+int32 CStreaming::ms_lastImageRead;
+int32 CStreaming::ms_imageSize;
+uint32 CStreaming::ms_memoryAvailable;
 
-int32 &desiredNumVehiclesLoaded = *(int32*)0x5EC194;
+int32 desiredNumVehiclesLoaded = 12;
 
-CEntity *&pIslandLODindustEntity = *(CEntity**)0x6212DC;
-CEntity *&pIslandLODcomIndEntity = *(CEntity**)0x6212E0;
-CEntity *&pIslandLODcomSubEntity = *(CEntity**)0x6212E4;
-CEntity *&pIslandLODsubIndEntity = *(CEntity**)0x6212E8;
-CEntity *&pIslandLODsubComEntity = *(CEntity**)0x6212EC;
-int32 &islandLODindust = *(int32*)0x6212C8;
-int32 &islandLODcomInd = *(int32*)0x6212CC;
-int32 &islandLODcomSub = *(int32*)0x6212D0;
-int32 &islandLODsubInd = *(int32*)0x6212D4;
-int32 &islandLODsubCom = *(int32*)0x6212D8;
+CEntity *pIslandLODindustEntity;
+CEntity *pIslandLODcomIndEntity;
+CEntity *pIslandLODcomSubEntity;
+CEntity *pIslandLODsubIndEntity;
+CEntity *pIslandLODsubComEntity;
+int32 islandLODindust;
+int32 islandLODcomInd;
+int32 islandLODcomSub;
+int32 islandLODsubInd;
+int32 islandLODsubCom;
 
 bool
 CStreamingInfo::GetCdPosnAndSize(uint32 &posn, uint32 &size)
@@ -199,7 +199,7 @@ CStreaming::Init(void)
 	// PC only, figure out how much memory we got
 #ifdef GTA_PC
 #define MB (1024*1024)
-	extern unsigned long &_dwMemAvailPhys;
+	extern unsigned long _dwMemAvailPhys;
 	ms_memoryAvailable = (_dwMemAvailPhys - 10*MB)/2;
 	if(ms_memoryAvailable < 50*MB)
 		ms_memoryAvailable = 50*MB;

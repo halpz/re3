@@ -6,7 +6,7 @@
 #include "AudioScriptObject.h"
 #include "sampman.h"
 
-cDMAudio &DMAudio = *(cDMAudio*)0x95CDBE;
+cDMAudio DMAudio;
 
 void
 cDMAudio::Initialise(void)

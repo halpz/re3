@@ -5,10 +5,10 @@
 #include "Camera.h"
 #include "Sprite.h"
 
-float &CSprite::m_f2DNearScreenZ = *(float*)0x8F1ABC;
-float &CSprite::m_f2DFarScreenZ = *(float*)0x8F2C94;
-float &CSprite::m_fRecipNearClipPlane = *(float*)0x8F5FFC;
-int32 &CSprite::m_bFlushSpriteBufferSwitchZTest = *(int32*)0x8F5FB0;
+float CSprite::m_f2DNearScreenZ;
+float CSprite::m_f2DFarScreenZ;
+float CSprite::m_fRecipNearClipPlane;
+int32 CSprite::m_bFlushSpriteBufferSwitchZTest;
 
 float 
 CSprite::CalcHorizonCoors(void)
@@ -40,9 +40,9 @@ CSprite::CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, 
 }
 
 #define SPRITEBUFFERSIZE 64
-static int32 &nSpriteBufferIndex = *(int32*)0x649A80;
-static RwIm2DVertex *SpriteBufferVerts = (RwIm2DVertex*)0x649A84;	//[SPRITEBUFFERSIZE*6];
-static RwIm2DVertex *verts = (RwIm2DVertex*)0x64C484;	//[4];
+static int32 nSpriteBufferIndex;
+static RwIm2DVertex SpriteBufferVerts[SPRITEBUFFERSIZE*6];
+static RwIm2DVertex verts[4];
 
 void
 CSprite::InitSpriteBuffer(void)

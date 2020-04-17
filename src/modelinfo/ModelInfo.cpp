@@ -5,11 +5,8 @@
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 
-CBaseModelInfo **CModelInfo::ms_modelInfoPtrs = (CBaseModelInfo**)0x83D408;
+CBaseModelInfo *CModelInfo::ms_modelInfoPtrs[MODELINFOSIZE];
 
-//CStore<CSimpleModelInfo, SIMPLEMODELSIZE> &CModelInfo::ms_simpleModelStore = *(CStore<CSimpleModelInfo, SIMPLEMODELSIZE>*)0x885BB4;
-//CStore<CTimeModelInfo, TIMEMODELSIZE> &CModelInfo::ms_timeModelStore = *(CStore<CTimeModelInfo, TIMEMODELSIZE>*)0x94076C;
-//CStore<C2dEffect, TWODFXSIZE> &CModelInfo::ms_2dEffectStore = *(CStore<C2dEffect, TWODFXSIZE>*)0x9434F8;
 CStore<CSimpleModelInfo, SIMPLEMODELSIZE> CModelInfo::ms_simpleModelStore;
 CStore<CMloModelInfo, MLOMODELSIZE> CModelInfo::ms_mloModelStore;
 CStore<CInstance, MLOINSTANCESIZE> CModelInfo::ms_mloInstanceStore;

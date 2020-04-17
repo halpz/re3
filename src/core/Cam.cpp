@@ -28,7 +28,7 @@
 const float DefaultFOV = 70.0f;	// beta: 80.0f
 
 bool PrintDebugCode = false;
-int16 &DebugCamMode = *(int16*)0x95CCF2;
+int16 DebugCamMode;
 
 #ifdef FREE_CAM
 bool CCamera::bFreeCam = false;

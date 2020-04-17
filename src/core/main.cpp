@@ -60,23 +60,18 @@
 #include "GenericGameStorage.h"
 #include "SceneEdit.h"
 
-GlobalScene &Scene = *(GlobalScene*)0x726768;
+GlobalScene Scene;
 
 uint8 work_buff[55000];
-//char gString[256];
-//char gString2[512];
-//wchar gUString[256];
-//wchar gUString2[256];
-char *gString = (char*)0x711B40;
-char *gString2 = (char*)0x878A40;
-wchar *gUString = (wchar*)0x74B018;
-wchar *gUString2 = (wchar*)0x6EDD70;
-
+char gString[256];
+char gString2[512];
+wchar gUString[256];
+wchar gUString2[256];
 
 float FramesPerSecond = 30.0f;
 
 bool gbPrintShite = false;
-bool &gbModelViewer = *(bool*)0x95CD93;
+bool gbModelViewer;
 
 int32 frameCount;
 

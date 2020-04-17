@@ -35,26 +35,26 @@
 #include "Wanted.h"
 #include "General.h"
 
-CPad *Pads = (CPad*)0x6F0360; // [2]
-CMousePointerStateHelper &MousePointerStateHelper = *(CMousePointerStateHelper*)0x95CC8C;
+CPad Pads[MAX_PADS];
+CMousePointerStateHelper MousePointerStateHelper;
 
-bool &CPad::bDisplayNoControllerMessage = *(bool *)0x95CD52;
-bool &CPad::bObsoleteControllerMessage = *(bool *)0x95CDB8;
+bool CPad::bDisplayNoControllerMessage;
+bool CPad::bObsoleteControllerMessage;
 bool CPad::bOldDisplayNoControllerMessage;
-bool &CPad::m_bMapPadOneToPadTwo = *(bool *)0x95CD48;
+bool CPad::m_bMapPadOneToPadTwo;
 
-CKeyboardState &CPad::OldKeyState = *(CKeyboardState*)0x6F1E70;
-CKeyboardState &CPad::NewKeyState = *(CKeyboardState*)0x6E60D0;
-CKeyboardState &CPad::TempKeyState = *(CKeyboardState*)0x774DE8;
+CKeyboardState CPad::OldKeyState;
+CKeyboardState CPad::NewKeyState;
+CKeyboardState CPad::TempKeyState;
 
 char CPad::KeyBoardCheatString[20];
 
-CMouseControllerState &CPad::OldMouseControllerState = *(CMouseControllerState*)0x8472A0;
-CMouseControllerState &CPad::NewMouseControllerState = *(CMouseControllerState*)0x8809F0;
-CMouseControllerState &CPad::PCTempMouseControllerState = *(CMouseControllerState*)0x6F1E60;
+CMouseControllerState CPad::OldMouseControllerState;
+CMouseControllerState CPad::NewMouseControllerState;
+CMouseControllerState CPad::PCTempMouseControllerState;
 
 _TODO("gbFastTime");
-extern bool &gbFastTime;
+extern bool gbFastTime;
 
 void WeaponCheat()
 {

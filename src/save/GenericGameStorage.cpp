@@ -40,22 +40,22 @@
 
 const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 
-char DefaultPCSaveFileName[260];// = *(char(*)[260]) * (uintptr*)0x8E28C0;
-char ValidSaveName[260];// = *(char(*)[260])*(uintptr*)0x8E2CBC;
-char LoadFileName[256];// = *(char(*)[256])*(uintptr*)0x9403C4;
-wchar SlotFileName[SLOT_COUNT][260];// = *(wchar(*)[SLOT_COUNT][260])*(uintptr*)0x6F07C8;
-wchar SlotSaveDate[SLOT_COUNT][70];// = *(wchar(*)[SLOT_COUNT][70])*(uintptr*)0x72B858;
-int CheckSum;// = *(int*)0x8E2BE0;
-eLevelName m_LevelToLoad;// = *(eLevelName*)0x8E29CC;
+char DefaultPCSaveFileName[260];
+char ValidSaveName[260];
+char LoadFileName[256];
+wchar SlotFileName[SLOT_COUNT][260];
+wchar SlotSaveDate[SLOT_COUNT][70];
+int CheckSum;
+eLevelName m_LevelToLoad;
 char SaveFileNameJustSaved[260];
-int Slots[SLOT_COUNT+1];// = *(int(*)[SLOT_COUNT+1])*(uintptr*)0x72803C;
-CDate CompileDateAndTime;// = *(CDate*)0x72BCB8;
+int Slots[SLOT_COUNT+1];
+CDate CompileDateAndTime;
 
-bool b_FoundRecentSavedGameWantToLoad;// = *(bool*)0x95CDA8;
-bool JustLoadedDontFadeInYet;// = *(bool*)0x95CDB4;
-bool StillToFadeOut;// = *(bool*)0x95CD99;
-uint32 TimeStartedCountingForFade;// = *(uint32*)0x9430EC;
-uint32 TimeToStayFadedBeforeFadeOut = 1750;// = *(uint32*)0x611564;
+bool b_FoundRecentSavedGameWantToLoad;
+bool JustLoadedDontFadeInYet;
+bool StillToFadeOut;
+uint32 TimeStartedCountingForFade;
+uint32 TimeToStayFadedBeforeFadeOut = 1750;
 
 #define ReadDataFromBufferPointer(buf, to) memcpy(&to, buf, sizeof(to)); buf += align4bytes(sizeof(to));
 #define WriteDataToBufferPointer(buf, from) memcpy(buf, &from, sizeof(from)); buf += align4bytes(sizeof(from));

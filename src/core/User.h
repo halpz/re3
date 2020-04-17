@@ -31,10 +31,10 @@ public:
 class CUserDisplay
 {
 public:
-	static CPlaceName &PlaceName;
-	static COnscreenTimer &OnscnTimer;
-	static CPager &Pager;
-	static CCurrentVehicle &CurrentVehicle;
+	static CPlaceName PlaceName;
+	static COnscreenTimer OnscnTimer;
+	static CPager Pager;
+	static CCurrentVehicle CurrentVehicle;
 
 	static void Init();
 	static void Process();

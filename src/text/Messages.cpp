@@ -12,9 +12,9 @@
 
 #include "ControllerConfig.h"
 
-tMessage CMessages::BriefMessages[NUMBRIEFMESSAGES];// = *(tMessage(*)[NUMBRIEFMESSAGES]) * (uintptr*)0x8786E0;
-tPreviousBrief CMessages::PreviousBriefs[NUMPREVIOUSBRIEFS];// = *(tPreviousBrief(*)[NUMPREVIOUSBRIEFS]) * (uintptr*)0x713C08;
-tBigMessage CMessages::BIGMessages[NUMBIGMESSAGES];// = *(tBigMessage(*)[NUMBIGMESSAGES]) * (uintptr*)0x773628;
+tMessage CMessages::BriefMessages[NUMBRIEFMESSAGES];
+tPreviousBrief CMessages::PreviousBriefs[NUMPREVIOUSBRIEFS];
+tBigMessage CMessages::BIGMessages[NUMBIGMESSAGES];
 char CMessages::PreviousMissionTitle[16]; // unused
 
 void

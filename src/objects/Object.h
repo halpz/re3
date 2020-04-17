@@ -73,8 +73,8 @@ public:
 	CEntity *m_pCollidingEntity;
 	int8 m_colour1, m_colour2;
 
-	static int16 &nNoTempObjects;
-	static int16 &nBodyCastHealth;
+	static int16 nNoTempObjects;
+	static int16 nBodyCastHealth;
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);

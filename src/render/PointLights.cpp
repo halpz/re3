@@ -10,8 +10,8 @@
 #include "Timer.h"
 #include "PointLights.h"
 
-int16 &CPointLights::NumLights = *(int16*)0x95CC3E;
-CRegisteredPointLight *CPointLights::aLights = (CRegisteredPointLight*)0x7096D0;
+int16 CPointLights::NumLights;
+CRegisteredPointLight CPointLights::aLights[NUMPOINTLIGHTS];
 
 void
 CPointLights::InitPerFrame(void)
@@ -114,7 +114,7 @@ CPointLights::GenerateLightsAffectingObject(CVector *objCoors)
 	return ret;
 }
 
-extern RwRaster *&gpPointlightRaster;
+extern RwRaster *gpPointlightRaster;
 
 void
 CPointLights::RemoveLightsAffectingObject(void)

@@ -4,7 +4,7 @@
 #include "FileMgr.h"
 #include "HandlingMgr.h"
 
-cHandlingDataMgr mod_HandlingManager;// = *(cHandlingDataMgr*)0x728060;
+cHandlingDataMgr mod_HandlingManager;
 
 const char *HandlingFilename = "HANDLING.CFG";
 

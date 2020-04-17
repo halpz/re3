@@ -77,36 +77,36 @@ class CPtrList;
 class CStreaming
 {
 public:
-	static bool &ms_disableStreaming;
-	static bool &ms_bLoadingBigModel;
-	static int32 &ms_numModelsRequested;
-	static CStreamingInfo *ms_aInfoForModel;	//[NUMSTREAMINFO]
-	static CStreamingInfo &ms_startLoadedList;
-	static CStreamingInfo &ms_endLoadedList;
-	static CStreamingInfo &ms_startRequestedList;
-	static CStreamingInfo &ms_endRequestedList;
-	static int32 &ms_oldSectorX;
-	static int32 &ms_oldSectorY;
-	static int32 &ms_streamingBufferSize;
-	static int8 **ms_pStreamingBuffer;	//[2]
-	static int32 &ms_memoryUsed;
-	static CStreamingChannel *ms_channel;	//[2]
-	static int32 &ms_channelError;
-	static int32 &ms_numVehiclesLoaded;
-	static int32 *ms_vehiclesLoaded;	//[MAXVEHICLESLOADED]
-	static int32 &ms_lastVehicleDeleted;
-	static CDirectory *&ms_pExtraObjectsDir;
-	static int32 &ms_numPriorityRequests;
-	static bool &ms_hasLoadedLODs;
-	static int32 &ms_currentPedGrp;
+	static bool ms_disableStreaming;
+	static bool ms_bLoadingBigModel;
+	static int32 ms_numModelsRequested;
+	static CStreamingInfo ms_aInfoForModel[NUMSTREAMINFO];
+	static CStreamingInfo ms_startLoadedList;
+	static CStreamingInfo ms_endLoadedList;
+	static CStreamingInfo ms_startRequestedList;
+	static CStreamingInfo ms_endRequestedList;
+	static int32 ms_oldSectorX;
+	static int32 ms_oldSectorY;
+	static int32 ms_streamingBufferSize;
+	static int8 *ms_pStreamingBuffer[2];
+	static int32 ms_memoryUsed;
+	static CStreamingChannel ms_channel[2];
+	static int32 ms_channelError;
+	static int32 ms_numVehiclesLoaded;
+	static int32 ms_vehiclesLoaded[MAXVEHICLESLOADED];
+	static int32 ms_lastVehicleDeleted;
+	static CDirectory *ms_pExtraObjectsDir;
+	static int32 ms_numPriorityRequests;
+	static bool ms_hasLoadedLODs;
+	static int32 ms_currentPedGrp;
 	static int32 ms_lastCullZone;
-	static uint16 &ms_loadedGangs;
-	static uint16 &ms_loadedGangCars;
+	static uint16 ms_loadedGangs;
+	static uint16 ms_loadedGangCars;
 	static int32 ms_currentPedLoading;
-	static int32 *ms_imageOffsets;	//[NUMCDIMAGES]
-	static int32 &ms_lastImageRead;
-	static int32 &ms_imageSize;
-	static uint32 &ms_memoryAvailable;
+	static int32 ms_imageOffsets[NUMCDIMAGES];
+	static int32 ms_lastImageRead;
+	static int32 ms_imageSize;
+	static uint32 ms_memoryAvailable;
 
 	static void Init(void);
 	static void Shutdown(void);

@@ -13,13 +13,13 @@
 #include "RpAnimBlend.h"
 #include "AnimBlendAssociation.h"
 
-CPhoneInfo &gPhoneInfo = *(CPhoneInfo*)0x732A20;
+CPhoneInfo gPhoneInfo;
 
-bool &CPhoneInfo::bDisplayingPhoneMessage = *(bool*)0x6283AC;  // is phone picked up
-uint32 &CPhoneInfo::PhoneEnableControlsTimer = *(uint32*)0x6283A8;
-CPhone *&CPhoneInfo::pPhoneDisplayingMessages = *(CPhone**)0x6283B0;
-bool &CPhoneInfo::bPickingUpPhone = *(bool*)0x6283B4;
-CPed *&CPhoneInfo::pCallBackPed = *(CPed**)0x6283B8; // ped who picking up the phone (reset after pickup cb)
+bool CPhoneInfo::bDisplayingPhoneMessage;  // is phone picked up
+uint32 CPhoneInfo::PhoneEnableControlsTimer;
+CPhone *CPhoneInfo::pPhoneDisplayingMessages;
+bool CPhoneInfo::bPickingUpPhone;
+CPed *CPhoneInfo::pCallBackPed; // ped who picking up the phone (reset after pickup cb)
 
 /*
 	Entering phonebooth cutscene, showing messages and triggering these things

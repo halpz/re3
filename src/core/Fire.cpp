@@ -16,7 +16,7 @@
 #include "Ped.h"
 #include "Fire.h"
 
-CFireManager &gFireManager = *(CFireManager*)0x8F31D0;
+CFireManager gFireManager;
 
 CFire::CFire()
 {

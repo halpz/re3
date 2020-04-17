@@ -19,14 +19,14 @@
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 
-int8 *CVehicleModelInfo::ms_compsToUse = (int8*)0x5FF2EC;	// -2, -2
-int8 *CVehicleModelInfo::ms_compsUsed = (int8*)0x95CCB2;
-RwTexture **CVehicleModelInfo::ms_pEnvironmentMaps = (RwTexture **)0x8F1A30;
-RwRGBA *CVehicleModelInfo::ms_vehicleColourTable = (RwRGBA*)0x86BA88;
-RwTexture **CVehicleModelInfo::ms_colourTextureTable = (RwTexture**)0x711C40;
+int8 CVehicleModelInfo::ms_compsToUse[2] = { -2, -2 };
+int8 CVehicleModelInfo::ms_compsUsed[2];
+RwTexture *CVehicleModelInfo::ms_pEnvironmentMaps[NUM_VEHICLE_ENVMAPS];
+RwRGBA CVehicleModelInfo::ms_vehicleColourTable[256];
+RwTexture *CVehicleModelInfo::ms_colourTextureTable[256];
 
-RwTexture *&gpWhiteTexture = *(RwTexture**)0x64C4F8;
-RwFrame *&pMatFxIdentityFrame = *(RwFrame**)0x64C510;
+RwTexture *gpWhiteTexture;
+RwFrame *pMatFxIdentityFrame;
 
 enum {
 	VEHICLE_FLAG_COLLAPSE	= 0x2,

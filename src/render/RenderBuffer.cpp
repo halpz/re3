@@ -2,14 +2,14 @@
 #include "patcher.h"
 #include "RenderBuffer.h"
 
-int32 &TempBufferVerticesStored = *(int32*)0x8F5F78;
-int32 &TempBufferIndicesStored = *(int32*)0x8F1A4C;
+int32 TempBufferVerticesStored;
+int32 TempBufferIndicesStored;
 
-RwIm3DVertex *TempBufferRenderVertices = (RwIm3DVertex*)0x862330;
-RwImVertexIndex *TempBufferRenderIndexList = (RwImVertexIndex*)0x846288;
+RwIm3DVertex TempBufferRenderVertices[TEMPBUFFERVERTSIZE];
+RwImVertexIndex TempBufferRenderIndexList[TEMPBUFFERINDEXSIZE];
 
-int &RenderBuffer::VerticesToBeStored = *(int*)0x8F59C4;
-int &RenderBuffer::IndicesToBeStored = *(int*)0x8E28B0;
+int RenderBuffer::VerticesToBeStored;
+int RenderBuffer::IndicesToBeStored;
 
 void
 RenderBuffer::ClearRenderBuffer(void)

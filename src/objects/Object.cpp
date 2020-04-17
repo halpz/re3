@@ -12,8 +12,8 @@
 #include "World.h"
 #include "Floater.h"
 
-int16 &CObject::nNoTempObjects = *(int16*)0x95CCA2;
-int16 &CObject::nBodyCastHealth = *(int16*)0x5F7D4C;	// 1000
+int16 CObject::nNoTempObjects;
+int16 CObject::nBodyCastHealth = 1000;
 
 void *CObject::operator new(size_t sz) { return CPools::GetObjectPool()->New();  }
 void *CObject::operator new(size_t sz, int handle) { return CPools::GetObjectPool()->New(handle);};
