@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Building.h"
 #include "Treadable.h"
 #include "Train.h"
@@ -11,21 +11,21 @@
 #include "ZoneCull.h"
 #include "Zones.h"
 
-int32     &CCullZones::NumCullZones = *(int*)0x8F2564;
-CCullZone(&CCullZones::aZones)[NUMCULLZONES] = *(CCullZone(*)[NUMCULLZONES])*(uintptr*)0x864750;
-int32     &CCullZones::NumAttributeZones = *(int*)0x8E29D0;
-CAttributeZone (&CCullZones::aAttributeZones)[NUMATTRIBZONES] = *(CAttributeZone(*)[NUMATTRIBZONES])*(uintptr*)0x709C60;
-uint16    (&CCullZones::aIndices)[NUMZONEINDICES] = *(uint16(*)[NUMZONEINDICES])*(uintptr*)0x847330;
-int16     (&CCullZones::aPointersToBigBuildingsForBuildings)[NUMBUILDINGS] = *(int16(*)[NUMBUILDINGS])*(uintptr*)0x86C9D0;
-int16     (&CCullZones::aPointersToBigBuildingsForTreadables)[NUMTREADABLES] = *(int16(*)[NUMTREADABLES])*(uintptr*)0x8F1B8C;
+int32     CCullZones::NumCullZones;
+CCullZone CCullZones::aZones[NUMCULLZONES];
+int32     CCullZones::NumAttributeZones;
+CAttributeZone CCullZones::aAttributeZones[NUMATTRIBZONES];
+uint16    CCullZones::aIndices[NUMZONEINDICES];
+int16     CCullZones::aPointersToBigBuildingsForBuildings[NUMBUILDINGS];
+int16     CCullZones::aPointersToBigBuildingsForTreadables[NUMTREADABLES];
 
-int32 &CCullZones::CurrentWantedLevelDrop_Player = *(int32*)0x880DA8;
-int32 &CCullZones::CurrentFlags_Camera = *(int32*)0x940718;
-int32 &CCullZones::CurrentFlags_Player = *(int32*)0x9415F0;
-int32 &CCullZones::OldCullZone = *(int32*)0x8E2C90;
-int32 &CCullZones::EntityIndicesUsed = *(int32*)0x8F2508;
-bool &CCullZones::bCurrentSubwayIsInvisible = *(bool*)0x95CDA5;
-bool &CCullZones::bCullZonesDisabled = *(bool*)0x95CD4A;
+int32 CCullZones::CurrentWantedLevelDrop_Player;
+int32 CCullZones::CurrentFlags_Camera;
+int32 CCullZones::CurrentFlags_Player;
+int32 CCullZones::OldCullZone;
+int32 CCullZones::EntityIndicesUsed;
+bool CCullZones::bCurrentSubwayIsInvisible;
+bool CCullZones::bCullZonesDisabled;
 
 
 void
@@ -562,17 +562,3 @@ CCullZones::DoWeHaveMoreThanXOccurencesOfSet(int32 count, uint16 *set)
 	}
 	return false;
 }
-
-STARTPATCHES
-	InjectHook(0x524BC0, &CCullZones::Init, PATCH_JUMP);
-	InjectHook(0x524EC0, &CCullZones::ResolveVisibilities, PATCH_JUMP);
-	InjectHook(0x524F80, &CCullZones::Update, PATCH_JUMP);
-	InjectHook(0x525370, &CCullZones::AddCullZone, PATCH_JUMP);
-	InjectHook(0x5250D0, &CCullZones::ForceCullZoneCoors, PATCH_JUMP);
-	InjectHook(0x525130, &CCullZones::FindCullZoneForCoors, PATCH_JUMP);
-	InjectHook(0x5251C0, &CCullZones::FindAttributesForCoors, PATCH_JUMP);
-	InjectHook(0x525290, &CCullZones::FindZoneWithStairsAttributeForPlayer, PATCH_JUMP);
-
-	InjectHook(0x525610, &CCullZone::DoStuffLeavingZone, PATCH_JUMP);
-	InjectHook(0x525810, &CCullZone::DoStuffEnteringZone, PATCH_JUMP);
-ENDPATCHES

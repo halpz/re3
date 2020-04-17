@@ -73,8 +73,8 @@ public:
 	CEntity *m_pCollidingEntity;
 	int8 m_colour1, m_colour2;
 
-	static int16 &nNoTempObjects;
-	static int16 &nBodyCastHealth;
+	static int16 nNoTempObjects;
+	static int16 nBodyCastHealth;
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
@@ -99,6 +99,6 @@ public:
 
 	static void DeleteAllMissionObjects();
 	static void DeleteAllTempObjects();
-	static void DeleteAllTempObjectInArea(CVector point, float fRadius);
+	static void DeleteAllTempObjectsInArea(CVector point, float fRadius);
 };
 static_assert(sizeof(CObject) == 0x198, "CObject: error");

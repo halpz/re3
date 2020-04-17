@@ -89,13 +89,13 @@ public:
 	static void Load(uint8 *buf, uint32 size);
 	static void Save(uint8 *buf, uint32 *size);
 
-	static CPickup(&aPickUps)[NUMPICKUPS];
+	static CPickup aPickUps[NUMPICKUPS];
 
 	// unused
-	static bool &bPickUpcamActivated;
-	static CVehicle *&pPlayerVehicle;
-	static CVector &StaticCamCoors;
-	static uint32 &StaticCamStartTime;
+	static bool bPickUpcamActivated;
+	static CVehicle *pPlayerVehicle;
+	static CVector StaticCamCoors;
+	static uint32 StaticCamStartTime;
 };
 
 extern uint16 AmmoForWeapon[20];

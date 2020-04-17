@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "CarGen.h"
 
 #include "Automobile.h"
@@ -249,10 +249,3 @@ INITSAVEBUF
 		CarGeneratorArray[i] = ReadSaveBuf<CCarGenerator>(buffer);
 VALIDATESAVEBUF(size)
 }
-
-STARTPATCHES
-InjectHook(0x543020, CTheCarGenerators::Init, PATCH_JUMP);
-InjectHook(0x542F40, CTheCarGenerators::Process, PATCH_JUMP);
-InjectHook(0x543050, CTheCarGenerators::SaveAllCarGenerators, PATCH_JUMP);
-InjectHook(0x5431E0, CTheCarGenerators::LoadAllCarGenerators, PATCH_JUMP);
-ENDPATCHES

@@ -1,7 +1,7 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include "common.h"
-#include "patcher.h"
+
 #include "win.h"
 #include "Frontend.h"
 #include "Font.h"
@@ -93,7 +93,7 @@ int8 CMenuManager::m_PrefsSpeakers;
 int32 CMenuManager::m_ControlMethod;
 int8 CMenuManager::m_PrefsDMA = 1;
 int32 CMenuManager::m_PrefsLanguage;
-uint8 CMenuManager::m_PrefsStereoMono; // *(bool*)0x95CDB5; // unused except restore settings
+uint8 CMenuManager::m_PrefsStereoMono; // unused except restore settings
 
 bool CMenuManager::m_PrefsAllowNastyGame = true;
 bool CMenuManager::m_bStartUpFrontEndRequested;
@@ -5624,21 +5624,3 @@ uint8 CMenuManager::GetNumberOfMenuOptions()
 
 #undef GetBackJustUp
 #undef GetBackJustDown
-
-STARTPATCHES
-	for (int i = 1; i < ARRAY_SIZE(aScreens); i++)
-		Patch(0x611930 + sizeof(CMenuScreen) * i, aScreens[i]);
-	InjectHook(0x4856F0, &CMenuManager::ProcessButtonPresses, PATCH_JUMP);
-	InjectHook(0x485100, &CMenuManager::Process, PATCH_JUMP);
-	InjectHook(0x47A230, &CMenuManager::LoadAllTextures, PATCH_JUMP);
-	InjectHook(0x47A540, &CMenuManager::DrawFrontEnd, PATCH_JUMP);
-
-	InjectHook(0x48ABE0, &CMenuManager::StretchX, PATCH_JUMP);
-	InjectHook(0x48AC20, &CMenuManager::StretchY, PATCH_JUMP);
-	InjectHook(0x488EE0, &CMenuManager::LoadSettings, PATCH_JUMP);
-	InjectHook(0x488CC0, &CMenuManager::SaveSettings, PATCH_JUMP);
-	InjectHook(0x47A440, &CMenuManager::UnloadTextures, PATCH_JUMP);
-	InjectHook(0x48AB40, &CMenuManager::DoSettingsBeforeStartingAGame, PATCH_JUMP);
-	InjectHook(0x48AE60, &CMenuManager::ProcessOnOffMenuOptions, PATCH_JUMP);
-	InjectHook(0x489710, &CMenuManager::DrawControllerBound, PATCH_JUMP);
-ENDPATCHES

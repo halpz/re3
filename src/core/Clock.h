@@ -3,15 +3,15 @@
 class CClock
 {
 public:
-	static uint8  &ms_nGameClockHours;
-	static uint8  &ms_nGameClockMinutes;
-	static uint16 &ms_nGameClockSeconds;
-	static uint8  &ms_Stored_nGameClockHours;
-	static uint8  &ms_Stored_nGameClockMinutes;
-	static uint16 &ms_Stored_nGameClockSeconds;
-	static uint32 &ms_nMillisecondsPerGameMinute;
-	static uint32 &ms_nLastClockTick;
-	static bool   &ms_bClockHasBeenStored;
+	static uint8  ms_nGameClockHours;
+	static uint8  ms_nGameClockMinutes;
+	static uint16 ms_nGameClockSeconds;
+	static uint8  ms_Stored_nGameClockHours;
+	static uint8  ms_Stored_nGameClockMinutes;
+	static uint16 ms_Stored_nGameClockSeconds;
+	static uint32 ms_nMillisecondsPerGameMinute;
+	static uint32 ms_nLastClockTick;
+	static bool   ms_bClockHasBeenStored;
 
 	static void Initialise(uint32 scale);
 	static void Update(void);

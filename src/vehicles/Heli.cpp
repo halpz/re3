@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Darkel.h"
 #include "Stats.h"
@@ -34,13 +34,13 @@ enum
 	HELI_STATUS_HOVER2,
 };
 
-CHeli *CHeli::pHelis[NUM_HELIS];// = (CHeli**)0x72CF50;
-int16 CHeli::NumRandomHelis;// = *(int16*)0x95CCAA;
-uint32 CHeli::TestForNewRandomHelisTimer;// = *(uint32*)0x8F1A7C;
+CHeli *CHeli::pHelis[NUM_HELIS];
+int16 CHeli::NumRandomHelis;
+uint32 CHeli::TestForNewRandomHelisTimer;
 int16 CHeli::NumScriptHelis;	// unused
-bool CHeli::CatalinaHeliOn;// = *(bool*)0x95CD85;
-bool CHeli::CatalinaHasBeenShotDown;// = *(bool*)0x95CD56;
-bool CHeli::ScriptHeliOn;// = *(bool*)0x95CD43;
+bool CHeli::CatalinaHeliOn;
+bool CHeli::CatalinaHasBeenShotDown;
+bool CHeli::ScriptHeliOn;
 
 CHeli::CHeli(int32 id, uint8 CreatedBy)
  : CVehicle(CreatedBy)
@@ -1043,24 +1043,3 @@ void CHeli::MakeCatalinaHeliFlyAway(void) { pHelis[HELI_CATALINA]->m_pathState =
 bool CHeli::HasCatalinaBeenShotDown(void) { return CatalinaHasBeenShotDown; }
 
 void CHeli::ActivateHeli(bool activate) { ScriptHeliOn = activate; }
-
-#include <new>
-
-class CHeli_ : public CHeli
-{
-public:
-	void ctor(int32 id, uint8 CreatedBy) { ::new (this) CHeli(id, CreatedBy); }
-	void dtor(void) { CHeli::~CHeli(); }
-};
-
-STARTPATCHES
-	InjectHook(0x547220, &CHeli_::ctor, PATCH_JUMP);
-	InjectHook(0x5474A0, &CHeli_::dtor, PATCH_JUMP);
-	InjectHook(0x54AE50, &CHeli::SpawnFlyingComponent, PATCH_JUMP);
-	InjectHook(0x549970, CHeli::InitHelis, PATCH_JUMP);
-	InjectHook(0x5499F0, CHeli::UpdateHelis, PATCH_JUMP);
-	InjectHook(0x54AE10, CHeli::SpecialHeliPreRender, PATCH_JUMP);
-	InjectHook(0x54AA30, CHeli::TestRocketCollision, PATCH_JUMP);
-	InjectHook(0x54AB30, CHeli::TestBulletCollision, PATCH_JUMP);
-	InjectHook(0x54A640, GenerateHeli, PATCH_JUMP);
-ENDPATCHES

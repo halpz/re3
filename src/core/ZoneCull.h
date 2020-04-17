@@ -79,21 +79,21 @@ struct CAttributeZone
 class CCullZones
 {
 public:
-	static int32     &NumCullZones;
-	static CCullZone (&aZones)[NUMCULLZONES];
-	static int32     &NumAttributeZones;
-	static CAttributeZone(&aAttributeZones)[NUMATTRIBZONES];
-	static uint16        (&aIndices)[NUMZONEINDICES];
-	static int16         (&aPointersToBigBuildingsForBuildings)[NUMBUILDINGS];
-	static int16         (&aPointersToBigBuildingsForTreadables)[NUMTREADABLES];
+	static int32     NumCullZones;
+	static CCullZone aZones[NUMCULLZONES];
+	static int32     NumAttributeZones;
+	static CAttributeZone aAttributeZones[NUMATTRIBZONES];
+	static uint16        aIndices[NUMZONEINDICES];
+	static int16         aPointersToBigBuildingsForBuildings[NUMBUILDINGS];
+	static int16         aPointersToBigBuildingsForTreadables[NUMTREADABLES];
 
-	static int32 &CurrentWantedLevelDrop_Player;
-	static int32 &CurrentFlags_Camera;
-	static int32 &CurrentFlags_Player;
-	static int32 &OldCullZone;
-	static int32 &EntityIndicesUsed;
-	static bool &bCurrentSubwayIsInvisible;
-	static bool &bCullZonesDisabled;
+	static int32 CurrentWantedLevelDrop_Player;
+	static int32 CurrentFlags_Camera;
+	static int32 CurrentFlags_Player;
+	static int32 OldCullZone;
+	static int32 EntityIndicesUsed;
+	static bool bCurrentSubwayIsInvisible;
+	static bool bCullZonesDisabled;
 
 	static void Init(void);
 	static void ResolveVisibilities(void);

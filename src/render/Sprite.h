@@ -2,10 +2,10 @@
 
 class CSprite
 {
-	static float &m_f2DNearScreenZ;
-	static float &m_f2DFarScreenZ;
-	static float &m_fRecipNearClipPlane;
-	static int32 &m_bFlushSpriteBufferSwitchZTest;
+	static float m_f2DNearScreenZ;
+	static float m_f2DFarScreenZ;
+	static float m_fRecipNearClipPlane;
+	static int32 m_bFlushSpriteBufferSwitchZTest;
 public:
 	static float CalcHorizonCoors(void);
 	static bool CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, bool farclip);

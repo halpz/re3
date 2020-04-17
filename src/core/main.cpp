@@ -2,7 +2,7 @@
 #include "rpmatfx.h"
 #include "rphanim.h"
 #include "rpskin.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "CdStream.h"
 #include "General.h"
@@ -60,23 +60,18 @@
 #include "GenericGameStorage.h"
 #include "SceneEdit.h"
 
-GlobalScene &Scene = *(GlobalScene*)0x726768;
+GlobalScene Scene;
 
 uint8 work_buff[55000];
-//char gString[256];
-//char gString2[512];
-//wchar gUString[256];
-//wchar gUString2[256];
-char *gString = (char*)0x711B40;
-char *gString2 = (char*)0x878A40;
-wchar *gUString = (wchar*)0x74B018;
-wchar *gUString2 = (wchar*)0x6EDD70;
-
+char gString[256];
+char gString2[512];
+wchar gUString[256];
+wchar gUString2[256];
 
 float FramesPerSecond = 30.0f;
 
 bool gbPrintShite = false;
-bool &gbModelViewer = *(bool*)0x95CD93;
+bool gbModelViewer;
 
 int32 frameCount;
 
@@ -1843,28 +1838,3 @@ main(int argc, char *argv[])
 	
 	return 0;
 }
-
-STARTPATCHES
-	InjectHook(0x48E480, Idle, PATCH_JUMP);
-	InjectHook(0x48E700, FrontendIdle, PATCH_JUMP);
-
-	InjectHook(0x48CF10, DoRWStuffStartOfFrame, PATCH_JUMP);
-	InjectHook(0x48D040, DoRWStuffStartOfFrame_Horizon, PATCH_JUMP);
-	InjectHook(0x48E030, RenderScene, PATCH_JUMP);
-	InjectHook(0x48E080, RenderDebugShit, PATCH_JUMP);
-	InjectHook(0x48E090, RenderEffects, PATCH_JUMP);
-	InjectHook(0x48E0E0, Render2dStuff, PATCH_JUMP);
-	InjectHook(0x48E450, RenderMenus, PATCH_JUMP);
-	InjectHook(0x48D120, DoFade, PATCH_JUMP);
-	InjectHook(0x48E470, Render2dStuffAfterFade, PATCH_JUMP);
-
-	InjectHook(0x48D550, LoadSplash, PATCH_JUMP);
-	InjectHook(0x48D670, DestroySplashScreen, PATCH_JUMP);
-	InjectHook(0x48D770, LoadingScreen, PATCH_JUMP);
-	InjectHook(0x48D760, ResetLoadingScreenBar, PATCH_JUMP);
-	
-	InjectHook(0x48D470, PluginAttach, PATCH_JUMP);
-	InjectHook(0x48D520, Initialise3D, PATCH_JUMP);
-	InjectHook(0x48D540, Terminate3D, PATCH_JUMP);
-	InjectHook(0x48E800, AppEventHandler, PATCH_JUMP);
-ENDPATCHES

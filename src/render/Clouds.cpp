@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Sprite.h"
 #include "Sprite2d.h"
 #include "General.h"
@@ -430,12 +430,3 @@ CClouds::RenderHorizon(void)
 	CSprite2d::DrawRect(CRect(0, z1, SCREEN_WIDTH, z2),
 		ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
 }
-
-STARTPATCHES
-	InjectHook(0x4F6C10, CClouds::Init, PATCH_JUMP);
-	InjectHook(0x4F6CA0, CClouds::Shutdown, PATCH_JUMP);
-	InjectHook(0x4F6CE0, CClouds::Update, PATCH_JUMP);
-	InjectHook(0x4F6D90, CClouds::Render, PATCH_JUMP);
-	InjectHook(0x4F7F00, CClouds::RenderBackground, PATCH_JUMP);
-	InjectHook(0x4F85F0, CClouds::RenderHorizon, PATCH_JUMP);
-ENDPATCHES

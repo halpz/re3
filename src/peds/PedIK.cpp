@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Camera.h"
 #include "PedIK.h"
 #include "Ped.h"
@@ -362,19 +362,3 @@ CPedIK::ExtractYawAndPitchLocal(RwMatrix *mat, float *yaw, float *pitch)
 	*pitch = Acos(f);
 	if (mat->up.x > 0.0f) *pitch = -*pitch;
 }
-
-STARTPATCHES
-	InjectHook(0x4ED0F0, &CPedIK::GetComponentPosition, PATCH_JUMP);
-	InjectHook(0x4ED060, &CPedIK::GetWorldMatrix, PATCH_JUMP);
-	InjectHook(0x4EDDB0, &CPedIK::RotateTorso, PATCH_JUMP);
-	InjectHook(0x4ED440, &CPedIK::MoveLimb, PATCH_JUMP);
-	InjectHook(0x4EDD70, &CPedIK::RestoreGunPosn, PATCH_JUMP);
-	InjectHook(0x4ED620, &CPedIK::LookInDirection, PATCH_JUMP);
-	InjectHook(0x4ED590, &CPedIK::LookAtPosition, PATCH_JUMP);
-	InjectHook(0x4ED9B0, &CPedIK::PointGunInDirection, PATCH_JUMP);
-	InjectHook(0x4EDB20, &CPedIK::PointGunInDirectionUsingArm, PATCH_JUMP);
-	InjectHook(0x4ED920, &CPedIK::PointGunAtPosition, PATCH_JUMP);
-	InjectHook(0x4ED810, &CPedIK::RestoreLookAt, PATCH_JUMP);
-	InjectHook(0x4ED140, &CPedIK::ExtractYawAndPitchWorld, PATCH_JUMP);
-	InjectHook(0x4ED2C0, &CPedIK::ExtractYawAndPitchLocal, PATCH_JUMP);
-ENDPATCHES

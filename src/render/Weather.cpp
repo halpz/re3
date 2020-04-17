@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Weather.h"
 
 #include "Camera.h"
@@ -18,35 +18,35 @@
 #include "World.h"
 #include "ZoneCull.h"
 
-int32 &CWeather::SoundHandle = *(int32*)0x5FFBC4;
+int32 CWeather::SoundHandle = -1;
 
-int32 &CWeather::WeatherTypeInList = *(int32*)0x8F626C;
-int16 &CWeather::OldWeatherType = *(int16*)0x95CCEC;
-int16 &CWeather::NewWeatherType = *(int16*)0x95CC70;
-int16 &CWeather::ForcedWeatherType = *(int16*)0x95CC80;
+int32 CWeather::WeatherTypeInList;
+int16 CWeather::OldWeatherType;
+int16 CWeather::NewWeatherType;
+int16 CWeather::ForcedWeatherType;
 
-bool &CWeather::LightningFlash = *(bool*)0x95CDA3;
-bool &CWeather::LightningBurst = *(bool*)0x95CDAC;
-uint32 &CWeather::LightningStart = *(uint32*)0x8F5F84;
-uint32 &CWeather::LightningFlashLastChange = *(uint32*)0x8E2C0C;
-uint32 &CWeather::WhenToPlayLightningSound = *(uint32*)0x8F57E4;
-uint32 &CWeather::LightningDuration = *(uint32*)0x940578;
+bool CWeather::LightningFlash;
+bool CWeather::LightningBurst;
+uint32 CWeather::LightningStart;
+uint32 CWeather::LightningFlashLastChange;
+uint32 CWeather::WhenToPlayLightningSound;
+uint32 CWeather::LightningDuration;
 
-float &CWeather::Foggyness = *(float*)0x885AF4;
-float &CWeather::CloudCoverage = *(float*)0x8E2818;
-float &CWeather::Wind = *(float*)0x8E2BF8;
-float &CWeather::Rain = *(float*)0x8E2BFC;
-float &CWeather::InterpolationValue = *(float*)0x8F2520;
-float &CWeather::WetRoads = *(float*)0x8F5FF8;
-float &CWeather::Rainbow = *(float*)0x940598;
+float CWeather::Foggyness;
+float CWeather::CloudCoverage;
+float CWeather::Wind;
+float CWeather::Rain;
+float CWeather::InterpolationValue;
+float CWeather::WetRoads;
+float CWeather::Rainbow;
 
-bool &CWeather::bScriptsForceRain = *(bool*)0x95CD7D;
-bool &CWeather::Stored_StateStored = *(bool*)0x95CDC1;
+bool CWeather::bScriptsForceRain;
+bool CWeather::Stored_StateStored;
 
-float &CWeather::Stored_InterpolationValue = *(float*)0x942F54;
-int16 &CWeather::Stored_OldWeatherType = *(int16*)0x95CC68;
-int16 &CWeather::Stored_NewWeatherType = *(int16*)0x95CCAE;
-float &CWeather::Stored_Rain = *(float*)0x885B4C;
+float CWeather::Stored_InterpolationValue;
+int16 CWeather::Stored_OldWeatherType;
+int16 CWeather::Stored_NewWeatherType;
+float CWeather::Stored_Rain;
 
 tRainStreak Streaks[NUM_RAIN_STREAKS];
 

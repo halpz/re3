@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Pools.h"
 #include "ModelIndices.h"
 #include "Timer.h"
@@ -11,8 +11,8 @@
 #include "Wanted.h"
 #include "General.h"
 
-int32 &CWanted::MaximumWantedLevel = *(int32*)0x5F7714;	// 6
-int32 &CWanted::nMaximumWantedLevel = *(int32*)0x5F7718;	// 6400
+int32 CWanted::MaximumWantedLevel = 6;
+int32 CWanted::nMaximumWantedLevel = 6400;
 
 void
 CWanted::Initialise()
@@ -456,25 +456,3 @@ CWanted::UpdateCrimesQ(void)
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x4AD6E0, &CWanted::Initialise, PATCH_JUMP);
-	InjectHook(0x4AD790, &CWanted::Reset, PATCH_JUMP);
-	InjectHook(0x4AD7B0, &CWanted::Update, PATCH_JUMP);
-	InjectHook(0x4AD900, &CWanted::UpdateWantedLevel, PATCH_JUMP);
-	InjectHook(0x4AD9F0, &CWanted::RegisterCrime, PATCH_JUMP);
-	InjectHook(0x4ADA10, &CWanted::RegisterCrime_Immediately, PATCH_JUMP);
-	InjectHook(0x4ADA50, &CWanted::SetWantedLevel, PATCH_JUMP);
-	InjectHook(0x4ADAC0, &CWanted::SetWantedLevelNoDrop, PATCH_JUMP);
-	InjectHook(0x4ADAE0, &CWanted::SetMaximumWantedLevel, PATCH_JUMP);
-	InjectHook(0x4ADBA0, &CWanted::AreSwatRequired, PATCH_JUMP);
-	InjectHook(0x4ADBC0, &CWanted::AreFbiRequired, PATCH_JUMP);
-	InjectHook(0x4ADBE0, &CWanted::AreArmyRequired, PATCH_JUMP);
-	InjectHook(0x4ADC00, &CWanted::NumOfHelisRequired, PATCH_JUMP);
-	InjectHook(0x4ADC40, &CWanted::ResetPolicePursuit, PATCH_JUMP);
-	InjectHook(0x4ADD00, &CWanted::WorkOutPolicePresence, PATCH_JUMP);
-	InjectHook(0x4ADF20, &CWanted::ClearQdCrimes, PATCH_JUMP);
-	InjectHook(0x4ADFD0, &CWanted::AddCrimeToQ, PATCH_JUMP);
-	InjectHook(0x4AE090, &CWanted::UpdateCrimesQ, PATCH_JUMP);
-	InjectHook(0x4AE110, &CWanted::ReportCrimeNow, PATCH_JUMP);
-ENDPATCHES

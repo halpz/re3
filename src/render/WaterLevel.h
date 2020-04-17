@@ -64,7 +64,7 @@
 
 #define MAX_BOAT_WAKES 8
 
-extern RwRaster*& gpWaterRaster;
+extern RwRaster* gpWaterRaster;
 
 class CWaterLevel
 {

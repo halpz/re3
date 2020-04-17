@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Lights.h"
 #include "ModelInfo.h"
@@ -1207,40 +1207,3 @@ CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)
 	if(reset)
 		ReSetAmbientAndDirectionalColours();
 }
-
-STARTPATCHES
-	InjectHook(0x4A7680, CRenderer::Init, PATCH_JUMP);
-	InjectHook(0x4A76A0, CRenderer::Shutdown, PATCH_JUMP);
-
-	InjectHook(0x4A7B90, CRenderer::RenderOneRoad, PATCH_JUMP);
-	InjectHook(0x4A7BA0, CRenderer::RenderOneNonRoad, PATCH_JUMP);
-	InjectHook(0x4A7B20, CRenderer::RenderFirstPersonVehicle, PATCH_JUMP);
-	InjectHook(0x4A78B0, CRenderer::RenderRoads, PATCH_JUMP);
-	InjectHook(0x4A7930, CRenderer::RenderEverythingBarRoads, PATCH_JUMP);
-	InjectHook(0x4A7AA0, CRenderer::RenderVehiclesButNotBoats, PATCH_JUMP);
-	InjectHook(0x4A7AE0, CRenderer::RenderBoats, PATCH_JUMP);
-	InjectHook(0x4A7910, CRenderer::RenderFadingInEntities, PATCH_JUMP);
-
-	InjectHook(0x4A9350, CRenderer::SetupEntityVisibility, PATCH_JUMP);
-	InjectHook(0x4A9920, CRenderer::SetupBigBuildingVisibility, PATCH_JUMP);
-
-	InjectHook(0x4A76B0, CRenderer::ConstructRenderList, PATCH_JUMP);
-	InjectHook(0x4A7840, CRenderer::PreRender, PATCH_JUMP);
-	InjectHook(0x4A8970, CRenderer::ScanWorld, PATCH_JUMP);
-	InjectHook(0x4AA240, CRenderer::RequestObjectsInFrustum, PATCH_JUMP);
-	InjectHook(0x4A7F30, CRenderer::ScanSectorPoly, PATCH_JUMP);
-	InjectHook(0x4A9300, CRenderer::ScanBigBuildingList, PATCH_JUMP);
-	InjectHook(0x4A9BB0, CRenderer::ScanSectorList, PATCH_JUMP);
-	InjectHook(0x4A9E30, CRenderer::ScanSectorList_Priority, PATCH_JUMP);
-	InjectHook(0x4AA0A0, CRenderer::ScanSectorList_Subway, PATCH_JUMP);
-	InjectHook(0x4AA1D0, CRenderer::ScanSectorList_RequestModels, PATCH_JUMP);
-
-	InjectHook(0x4AA940, CRenderer::SortBIGBuildings, PATCH_JUMP);
-	InjectHook(0x4AA990, CRenderer::SortBIGBuildingsForSectorList, PATCH_JUMP);
-
-	InjectHook(0x4A9840, CRenderer::ShouldModelBeStreamed, PATCH_JUMP);
-	InjectHook(0x4AAA00, CRenderer::IsEntityCullZoneVisible, PATCH_JUMP);
-	InjectHook(0x4AAAA0, CRenderer::IsVehicleCullZoneVisible, PATCH_JUMP);
-
-	InjectHook(0x4A7CF0, CRenderer::RemoveVehiclePedLights, PATCH_JUMP);
-ENDPATCHES

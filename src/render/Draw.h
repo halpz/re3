@@ -13,11 +13,11 @@ enum eAspectRatio
 class CDraw
 {
 private:
-	static float &ms_fNearClipZ;
-	static float &ms_fFarClipZ;
-	static float &ms_fFOV;
+	static float ms_fNearClipZ;
+	static float ms_fFarClipZ;
+	static float ms_fFOV;
 public:
-	static float &ms_fLODDistance;	// set but unused?
+	static float ms_fLODDistance;	// set but unused?
 
 #ifdef ASPECT_RATIO_SCALE
 	// we use this variable to scale a lot of 2D elements
@@ -25,10 +25,10 @@ public:
 	static float ms_fAspectRatio;
 #endif
 
-	static uint8 &FadeValue;
-	static uint8 &FadeRed;
-	static uint8 &FadeGreen;
-	static uint8 &FadeBlue;
+	static uint8 FadeValue;
+	static uint8 FadeRed;
+	static uint8 FadeGreen;
+	static uint8 FadeBlue;
 
 	static void SetNearClipZ(float nearclip) { ms_fNearClipZ = nearclip; }
 	static float GetNearClipZ(void) { return ms_fNearClipZ; }

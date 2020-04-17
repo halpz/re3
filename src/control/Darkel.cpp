@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Darkel.h"
 #include "PlayerPed.h"
@@ -371,19 +371,3 @@ CDarkel::Update()
 			DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_PASSED, 0);
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x421380, CDarkel::CalcFade, PATCH_JUMP);
-	InjectHook(0x420650, CDarkel::Init, PATCH_JUMP);
-	InjectHook(0x420660, CDarkel::Update, PATCH_JUMP);
-	InjectHook(0x420E60, CDarkel::FrenzyOnGoing, PATCH_JUMP);
-	InjectHook(0x420E50, CDarkel::ReadStatus, PATCH_JUMP);
-	InjectHook(0x420E70, CDarkel::ResetOnPlayerDeath, PATCH_JUMP);
-	InjectHook(0x4210E0, CDarkel::StartFrenzy, PATCH_JUMP);
-	InjectHook(0x421370, CDarkel::QueryModelsKilledByPlayer, PATCH_JUMP);
-	InjectHook(0x421060, CDarkel::RegisterKillNotByPlayer, PATCH_JUMP);
-	InjectHook(0x421310, CDarkel::ResetModelsKilledByPlayer, PATCH_JUMP);
-	InjectHook(0x420920, CDarkel::DrawMessages, PATCH_JUMP);
-	InjectHook(0x421070, CDarkel::RegisterCarBlownUpByPlayer, PATCH_JUMP);
-	InjectHook(0x420F60, CDarkel::RegisterKillByPlayer, PATCH_JUMP);
-ENDPATCHES

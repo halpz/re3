@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Camera.h"
 #include "DMAudio.h"
 #include "Clock.h"
@@ -21,52 +21,52 @@
 #include "User.h"
 #include "World.h"
 
-wchar CHud::m_HelpMessage[256]; // = (wchar*)0x86B888;
-wchar CHud::m_LastHelpMessage[256]; // = (wchar*)0x6E8F28;
-uint32 CHud::m_HelpMessageState; // = *(int32*)0x880E1C;
-uint32 CHud::m_HelpMessageTimer; // = *(int32*)0x880FA4;
-int32 CHud::m_HelpMessageFadeTimer; // = *(int32*)0x8F6258;
-wchar CHud::m_HelpMessageToPrint[256]; // = (wchar*)0x664480;
-float CHud::m_fHelpMessageTime; // *(float *)0x8E2C28;
-bool CHud::m_HelpMessageQuick; // = *(bool*)0x95CCF7;
-uint32 CHud::m_ZoneState; // = *(int32*)0x8F29AC;
+wchar CHud::m_HelpMessage[256];
+wchar CHud::m_LastHelpMessage[256];
+uint32 CHud::m_HelpMessageState;
+uint32 CHud::m_HelpMessageTimer;
+int32 CHud::m_HelpMessageFadeTimer;
+wchar CHud::m_HelpMessageToPrint[256];
+float CHud::m_fHelpMessageTime;
+bool CHud::m_HelpMessageQuick;
+uint32 CHud::m_ZoneState;
 int32 CHud::m_ZoneFadeTimer;
-uint32 CHud::m_ZoneNameTimer; // = *(int32*)0x8F1A50;
-wchar *CHud::m_pZoneName; // = *(wchar**)0x8E2C2C;
-wchar *CHud::m_pLastZoneName; // = (wchar*)0x8F432C;
+uint32 CHud::m_ZoneNameTimer;
+wchar *CHud::m_pZoneName;
+wchar *CHud::m_pLastZoneName;
 wchar *CHud::m_ZoneToPrint;
-uint32 CHud::m_VehicleState; // = *(int32*)0x940560;
+uint32 CHud::m_VehicleState;
 int32 CHud::m_VehicleFadeTimer;
-uint32 CHud::m_VehicleNameTimer; // = *(int32*)0x8F2A14;
-wchar *CHud::m_VehicleName; // = *(wchar**)0x942FB4;
-wchar *CHud::m_pLastVehicleName; // = *(wchar**)0x8E2DD8;
+uint32 CHud::m_VehicleNameTimer;
+wchar *CHud::m_VehicleName;
+wchar *CHud::m_pLastVehicleName;
 wchar *CHud::m_pVehicleNameToPrint;
-wchar CHud::m_Message[256];// = (wchar*)0x72E318;
-wchar CHud::m_PagerMessage[256]; // = (wchar*)0x878840;
-bool CHud::m_Wants_To_Draw_Hud; // (bool*)0x95CD89;
-bool CHud::m_Wants_To_Draw_3dMarkers; // = *(bool*)0x95CD62;
-wchar CHud::m_BigMessage[6][128]; // = *(wchar(*)[6][128]) * (uintptr*)0x664CE0;
-int16 CHud::m_ItemToFlash; // = *(int16*)0x95CC82;
+wchar CHud::m_Message[256];
+wchar CHud::m_PagerMessage[256];
+bool CHud::m_Wants_To_Draw_Hud;
+bool CHud::m_Wants_To_Draw_3dMarkers;
+wchar CHud::m_BigMessage[6][128];
+int16 CHud::m_ItemToFlash;
 
 // These aren't really in CHud
 float CHud::BigMessageInUse[6];
 float CHud::BigMessageAlpha[6];
 float CHud::BigMessageX[6];
-float CHud::OddJob2OffTimer; // = *(float*)0x942FA0;
-bool CHud::CounterOnLastFrame; // = *(int8*)0x95CD67;
-float CHud::OddJob2XOffset; // = *(float*)0x8F1B5C;
-uint16 CHud::CounterFlashTimer; // = *(int16*)0x95CC20;
-uint16 CHud::OddJob2Timer; // = *(int16*)0x95CC52;
-bool CHud::TimerOnLastFrame; //= *(int8*)0x95CDA7;
-int16 CHud::OddJob2On; //= *(int16*)0x95CC78;
-uint16 CHud::TimerFlashTimer; //= *(int16*)0x95CC6C;
-int16 CHud::PagerSoundPlayed; //= *(int16*)0x95CC4A;
-int32 CHud::SpriteBrightness; //= *(int32*)0x95CC54;
-float CHud::PagerXOffset; //= *(float*)0x941590;
-int16 CHud::PagerTimer; //= *(int16*)0x95CC3A;
-int16 CHud::PagerOn; //= *(int16*)0x95CCA0;
+float CHud::OddJob2OffTimer;
+bool CHud::CounterOnLastFrame;
+float CHud::OddJob2XOffset;
+uint16 CHud::CounterFlashTimer;
+uint16 CHud::OddJob2Timer;
+bool CHud::TimerOnLastFrame;
+int16 CHud::OddJob2On;
+uint16 CHud::TimerFlashTimer;
+int16 CHud::PagerSoundPlayed;
+int32 CHud::SpriteBrightness;
+float CHud::PagerXOffset;
+int16 CHud::PagerTimer;
+int16 CHud::PagerOn;
 
-CSprite2d CHud::Sprites[NUM_HUD_SPRITES]; //  = (CSprite2d*)0x95CB9C;
+CSprite2d CHud::Sprites[NUM_HUD_SPRITES];
 
 struct
 {
@@ -98,8 +98,8 @@ struct
 	{"siterocket", "siterocket"}
 };
 
-RwTexture *&gpSniperSightTex = *(RwTexture**)0x8F5834;
-RwTexture *&gpRocketSightTex = *(RwTexture**)0x8E2C20;
+RwTexture *gpSniperSightTex;
+RwTexture *gpRocketSightTex;
 
 void CHud::Draw()
 {
@@ -1483,18 +1483,3 @@ void CHud::Shutdown()
 	int HudTXD = CTxdStore::FindTxdSlot("hud");
 	CTxdStore::RemoveTxdSlot(HudTXD);
 }
-
-STARTPATCHES
-	InjectHook(0x5052A0, &CHud::Draw, PATCH_JUMP);
-	InjectHook(0x509030, &CHud::DrawAfterFade, PATCH_JUMP);
-	InjectHook(0x504F90, &CHud::GetRidOfAllHudMessages, PATCH_JUMP);
-	InjectHook(0x5048F0, &CHud::Initialise, PATCH_JUMP);
-	InjectHook(0x504CC0, &CHud::ReInitialise, PATCH_JUMP);
-	InjectHook(0x50A250, &CHud::SetBigMessage, PATCH_JUMP);
-	InjectHook(0x5051E0, &CHud::SetHelpMessage, PATCH_JUMP);
-	InjectHook(0x50A210, &CHud::SetMessage, PATCH_JUMP);
-	InjectHook(0x50A320, &CHud::SetPagerMessage, PATCH_JUMP);
-	InjectHook(0x505290, &CHud::SetVehicleName, PATCH_JUMP);
-	InjectHook(0x5051D0, &CHud::SetZoneName, PATCH_JUMP);
-	InjectHook(0x504C50, &CHud::Shutdown, PATCH_JUMP);
-ENDPATCHES

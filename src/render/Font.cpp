@@ -1,21 +1,21 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Sprite2d.h"
 #include "TxdStore.h"
 #include "Font.h"
 
-CFontDetails &CFont::Details = *(CFontDetails*)0x8F317C;
-int16 &CFont::NewLine = *(int16*)0x95CC94;
-CSprite2d *CFont::Sprite = (CSprite2d*)0x95CC04;
+CFontDetails CFont::Details;
+int16 CFont::NewLine;
+CSprite2d CFont::Sprite[MAX_FONTS];
 
 #ifdef MORE_LANGUAGES
 uint8 CFont::LanguageSet = FONT_LANGSET_EFIGS;
 int32 CFont::Slot = -1;
 
-int16 CFont::Size[2][3][193] = {
+int16 CFont::Size[2][MAX_FONTS][193] = {
 	{
 #else
-int16 CFont::Size[3][193] = {
+int16 CFont::Size[MAX_FONTS][193] = {
 #endif
 		{
 		13, 12, 31, 35, 23, 35, 31,  9, 14, 15, 25, 30, 11, 17, 13, 31,
@@ -589,48 +589,3 @@ CFont::character_code(uint8 c)
 		return c;
 	return foreign_table[c-128];
 }
-
-STARTPATCHES
-
-	InjectHook(0x500A40, CFont::Initialise, PATCH_JUMP);
-	InjectHook(0x500BA0, CFont::Shutdown, PATCH_JUMP);
-	InjectHook(0x500BE0, CFont::InitPerFrame, PATCH_JUMP);
-	InjectHook(0x500C30, CFont::PrintChar, PATCH_JUMP);
-	InjectHook(0x500F50, (void (*)(float, float, wchar*))CFont::PrintString, PATCH_JUMP);
-	InjectHook(0x501260, CFont::GetNumberLines, PATCH_JUMP);
-	InjectHook(0x5013B0, CFont::GetTextRect, PATCH_JUMP);
-	InjectHook(0x501730, (void (*)(float, float, wchar*, wchar*, float))CFont::PrintString, PATCH_JUMP);
-	InjectHook(0x5017E0, CFont::GetCharacterWidth, PATCH_JUMP);
-	InjectHook(0x501840, CFont::GetCharacterSize, PATCH_JUMP);
-	InjectHook(0x5018A0, CFont::GetStringWidth, PATCH_JUMP);
-	InjectHook(0x501960, CFont::GetNextSpace, PATCH_JUMP);
-	InjectHook(0x5019A0, CFont::ParseToken, PATCH_JUMP);
-	InjectHook(0x501B50, CFont::DrawFonts, PATCH_JUMP);
-	InjectHook(0x501E80, CFont::character_code, PATCH_JUMP);
-
-	InjectHook(0x501B80, CFont::SetScale, PATCH_JUMP);
-	InjectHook(0x501BA0, CFont::SetSlantRefPoint, PATCH_JUMP);
-	InjectHook(0x501BC0, CFont::SetSlant, PATCH_JUMP);
-	InjectHook(0x501BD0, CFont::SetColor, PATCH_JUMP);
-	InjectHook(0x501C60, CFont::SetJustifyOn, PATCH_JUMP);
-	InjectHook(0x501C80, CFont::SetJustifyOff, PATCH_JUMP);
-	InjectHook(0x501C90, CFont::SetCentreOn, PATCH_JUMP);
-	InjectHook(0x501CB0, CFont::SetCentreOff, PATCH_JUMP);
-	InjectHook(0x501CC0, CFont::SetWrapx, PATCH_JUMP);
-	InjectHook(0x501CD0, CFont::SetCentreSize, PATCH_JUMP);
-	InjectHook(0x501CE0, CFont::SetBackgroundOn, PATCH_JUMP);
-	InjectHook(0x501CF0, CFont::SetBackgroundOff, PATCH_JUMP);
-	InjectHook(0x501D00, CFont::SetBackgroundColor, PATCH_JUMP);
-	InjectHook(0x501D30, CFont::SetBackGroundOnlyTextOn, PATCH_JUMP);
-	InjectHook(0x501D40, CFont::SetBackGroundOnlyTextOff, PATCH_JUMP);
-	InjectHook(0x501D50, CFont::SetRightJustifyOn, PATCH_JUMP);
-	InjectHook(0x501D70, CFont::SetRightJustifyOff, PATCH_JUMP);
-	InjectHook(0x501D90, CFont::SetPropOff, PATCH_JUMP);
-	InjectHook(0x501DA0, CFont::SetPropOn, PATCH_JUMP);
-	InjectHook(0x501DB0, CFont::SetFontStyle, PATCH_JUMP);
-	InjectHook(0x501DC0, CFont::SetRightJustifyWrap, PATCH_JUMP);
-	InjectHook(0x501DD0, CFont::SetAlphaFade, PATCH_JUMP);
-	InjectHook(0x501DE0, CFont::SetDropColor, PATCH_JUMP);
-	InjectHook(0x501E70, CFont::SetDropShadowPosition, PATCH_JUMP);
-
-ENDPATCHES

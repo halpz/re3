@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "RoadBlocks.h"
 #include "PathFind.h"
 #include "ModelIndices.h"
@@ -15,9 +15,9 @@
 #include "CarCtrl.h"
 #include "General.h"
 
-int16 &CRoadBlocks::NumRoadBlocks = *(int16*)0x95CC34;
-int16 (&CRoadBlocks::RoadBlockObjects)[NUMROADBLOCKS] = *(int16(*)[NUMROADBLOCKS]) * (uintptr*)0x72B3A8;
-bool (&CRoadBlocks::InOrOut)[NUMROADBLOCKS] = *(bool(*)[NUMROADBLOCKS]) * (uintptr*)0x733810;
+int16 CRoadBlocks::NumRoadBlocks;
+int16 CRoadBlocks::RoadBlockObjects[NUMROADBLOCKS];
+bool CRoadBlocks::InOrOut[NUMROADBLOCKS];
 
 void
 CRoadBlocks::Init(void)
@@ -195,9 +195,3 @@ CRoadBlocks::GenerateRoadBlocks(void)
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x436F50, &CRoadBlocks::Init, PATCH_JUMP);
-	InjectHook(0x4376A0, &CRoadBlocks::GenerateRoadBlockCopsForCar, PATCH_JUMP);
-	InjectHook(0x436FA0, &CRoadBlocks::GenerateRoadBlocks, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Ped.h"
 #include "NodeName.h"
@@ -229,17 +229,3 @@ CPedModelInfo::AnimatePedColModel(CColModel* colmodel, RwFrame* frame)
 
 	return colmodel;
 }
-
-class CPedModelInfo_ : public CPedModelInfo
-{
-public:
-	void DeleteRwObject_(void) { CPedModelInfo::DeleteRwObject(); }
-	void SetClump_(RpClump *clump) { CPedModelInfo::SetClump(clump); }
-};
-
-STARTPATCHES
-	InjectHook(0x510210, &CPedModelInfo_::SetClump_, PATCH_JUMP);
-	InjectHook(0x510280, &CPedModelInfo_::DeleteRwObject_, PATCH_JUMP);
-	InjectHook(0x510390, &CPedModelInfo::SetLowDetailClump, PATCH_JUMP);
-	InjectHook(0x5104D0, &CPedModelInfo::CreateHitColModel, PATCH_JUMP);
-ENDPATCHES

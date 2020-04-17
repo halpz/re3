@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "ShotInfo.h"
 #include "Entity.h"
 #include "Weapon.h"
@@ -13,8 +13,6 @@
 CShotInfo gaShotInfo[NUMSHOTINFOS];
 float CShotInfo::ms_afRandTable[20];
 
-// CShotInfo (&gaShotInfo)[100] = *(CShotInfo(*)[100])*(uintptr*)0x64F0D0;
-// float (&CShotInfo::ms_afRandTable)[20] = *(float(*)[20])*(uintptr*)0x6E9878;
 
 /*
 	Used for flamethrower. I don't know why it's name is CShotInfo.
@@ -131,10 +129,3 @@ CShotInfo::Update()
 			CWorld::SetCarsOnFire(shot.m_startPos.x, shot.m_startPos.y, shot.m_startPos.z, 4.0f, shot.m_sourceEntity);
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x55BFF0, &CShotInfo::Update, PATCH_JUMP);
-	InjectHook(0x55BD70, &CShotInfo::AddShot, PATCH_JUMP);
-	InjectHook(0x55BC60, &CShotInfo::Initialise, PATCH_JUMP);
-	InjectHook(0x55BD50, &CShotInfo::Shutdown, PATCH_JUMP);
-ENDPATCHES

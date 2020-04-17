@@ -1,6 +1,6 @@
 #define WITHD3D
 #include "common.h"
-#include "patcher.h"
+
 #include "Timecycle.h"
 #include "skeleton.h"
 #if defined(RWLIBS) && !defined(FINAL)
@@ -389,13 +389,7 @@ CameraCreate(RwInt32 width, RwInt32 height, RwBool zBuffer)
 	return (nil);
 }
 
+#ifdef USE_TEXTURE_POOL
 WRAPPER void _TexturePoolsInitialise() { EAXJMP(0x598B10); }
 WRAPPER void _TexturePoolsShutdown() { EAXJMP(0x598B30); }
-
-STARTPATCHES
-	//InjectHook(0x526450, GetFirstObjectCallback, PATCH_JUMP);
-	InjectHook(0x526460, GetFirstObject, PATCH_JUMP);
-	InjectHook(0x527170, CameraSize, PATCH_JUMP);
-	InjectHook(0x527340, CameraDestroy, PATCH_JUMP);
-	InjectHook(0x5273B0, CameraCreate, PATCH_JUMP);
-ENDPATCHES
+#endif

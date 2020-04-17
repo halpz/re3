@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 
 struct rpGeometryList
 {
@@ -222,9 +222,3 @@ RpClumpGtaCancelStream(void)
 	rwFrameListDeinitialize(&gFrameList);
 	gFrameList.numFrames = 0;
 }
-
-STARTPATCHES
-	InjectHook(0x526060, RpClumpGtaStreamRead1, PATCH_JUMP);
-	InjectHook(0x526180, RpClumpGtaStreamRead2, PATCH_JUMP);
-	InjectHook(0x5262D0, RpClumpGtaCancelStream, PATCH_JUMP);
-ENDPATCHES

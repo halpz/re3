@@ -29,18 +29,12 @@
 
 #include <list>
 
-#ifndef RWLIBS
-void **rwengine = *(void***)0x5A10E1;
-#else
+#ifdef RWLIBS
 extern "C" int vsprintf(char* const _Buffer, char const* const _Format, va_list  _ArgList);
 #endif
 
 DebugMenuAPI gDebugMenuAPI;
 
-STARTPATCHES
-	InjectHook(0x5A07E0, (void (*)(void*)) &operator delete, PATCH_JUMP);
-	InjectHook(0x5A0690, (void* (*)(size_t)) &operator new, PATCH_JUMP);
-ENDPATCHES
 
 #ifdef USE_PS2_RAND
 unsigned __int64 myrand_seed = 1;
@@ -387,7 +381,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 
 		extern bool PrintDebugCode;
-		extern int16 &DebugCamMode;
+		extern int16 DebugCamMode;
 		DebugMenuAddVarBool8("Cam", "Use mouse Cam", (int8*)&CCamera::m_bUseMouse3rdPerson, nil);
 #ifdef FREE_CAM
 		DebugMenuAddVarBool8("Cam", "Free Cam", (int8*)&CCamera::bFreeCam, nil);
@@ -494,37 +488,3 @@ void re3_trace(const char *filename, unsigned int lineno, const char *func, cons
 #ifdef VALIDATE_SAVE_SIZE
 int32 _saveBufCount;
 #endif
-
-void
-patch()
-{
-	StaticPatcher::Apply();
-
-//	Patch<float>(0x46BC61+6, 1.0f);	// car distance
-	InjectHook(0x59E460, printf, PATCH_JUMP);
-	InjectHook(0x475E00, printf, PATCH_JUMP);	// _Error
-
-
-//	InterceptCall(&open_script_orig, open_script, 0x438869);
-
-//	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x58275E);
-}
-
-BOOL WINAPI
-DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
-{
-	if(reason == DLL_PROCESS_ATTACH){
-
-		AllocConsole();
-		freopen("CONIN$", "r", stdin);
-		freopen("CONOUT$", "w", stdout);
-		freopen("CONOUT$", "w", stderr);
-
-		if (*(DWORD*)0x5C1E75 == 0xB85548EC)	// 1.0
-			patch();
-		else
-			return FALSE;
-	}
-
-	return TRUE;
-}

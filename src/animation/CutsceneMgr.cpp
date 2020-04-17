@@ -1,6 +1,6 @@
 #define WITHWINDOWS	// just for VK_SPACE
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "CutsceneMgr.h"
 #include "Directory.h"
@@ -423,19 +423,3 @@ CCutsceneMgr::Update(void)
 
 bool CCutsceneMgr::HasCutsceneFinished(void) { return TheCamera.GetPositionAlongSpline() == 1.0f; }
 
-STARTPATCHES
-	InjectHook(0x4045D0, &CCutsceneMgr::Initialise, PATCH_JUMP);
-	InjectHook(0x404630, &CCutsceneMgr::Shutdown, PATCH_JUMP);
-	InjectHook(0x404650, &CCutsceneMgr::LoadCutsceneData, PATCH_JUMP);
-	InjectHook(0x405140, &CCutsceneMgr::FinishCutscene, PATCH_JUMP);
-	InjectHook(0x404D80, &CCutsceneMgr::SetHeadAnim, PATCH_JUMP);
-	InjectHook(0x404DC0, &CCutsceneMgr::SetupCutsceneToStart, PATCH_JUMP);
-	InjectHook(0x404D20, &CCutsceneMgr::SetCutsceneAnim, PATCH_JUMP);
-	InjectHook(0x404CD0, &CCutsceneMgr::AddCutsceneHead, PATCH_JUMP);
-	InjectHook(0x404BE0, &CCutsceneMgr::CreateCutsceneObject, PATCH_JUMP);
-	InjectHook(0x4048E0, &CCutsceneMgr::DeleteCutsceneData, PATCH_JUMP);
-	InjectHook(0x404EE0, &CCutsceneMgr::Update, PATCH_JUMP);
-	InjectHook(0x4051B0, &CCutsceneMgr::GetCutsceneTimeInMilleseconds, PATCH_JUMP);
-	InjectHook(0x4051F0, &CCutsceneMgr::HasCutsceneFinished, PATCH_JUMP);
-	InjectHook(0x404B40, &CalculateBoundingSphereRadiusCB, PATCH_JUMP);
-ENDPATCHES

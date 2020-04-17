@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Timer.h"
 #include "HandlingMgr.h"
 #include "Transmission.h"
@@ -136,8 +136,3 @@ cTransmission::CalculateDriveAcceleration(const float &gasPedal, uint8 &gear, fl
 	}
 	return fAcceleration;
 }
-
-STARTPATCHES
-	InjectHook(0x550A00, &cTransmission::CalculateGearForSimpleCar, PATCH_JUMP);
-	InjectHook(0x5506B0, &cTransmission::CalculateDriveAcceleration, PATCH_JUMP);
-ENDPATCHES

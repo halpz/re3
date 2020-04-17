@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "World.h"
 #include "Timer.h"
 #include "ModelIndices.h"
@@ -1933,58 +1933,3 @@ CPhysical::ProcessCollision(void)
 	bIsInSafePosition = true;
 	RemoveAndAdd();
 }
-
-class CPhysical_ : public CPhysical
-{
-public:
-	void dtor(void) { CPhysical::~CPhysical(); }
-	void Add_(void) { CPhysical::Add(); }
-	void Remove_(void) { CPhysical::Remove(); }
-	CRect GetBoundRect_(void) { return CPhysical::GetBoundRect(); }
-	void ProcessControl_(void) { CPhysical::ProcessControl(); }
-	void ProcessShift_(void) { CPhysical::ProcessShift(); }
-	void ProcessCollision_(void) { CPhysical::ProcessCollision(); }
-	int32 ProcessEntityCollision_(CEntity *ent, CColPoint *point) { return CPhysical::ProcessEntityCollision(ent, point); }
-};
-
-STARTPATCHES
-	InjectHook(0x495130, &CPhysical_::dtor, PATCH_JUMP);
-	InjectHook(0x4951F0, &CPhysical_::Add_, PATCH_JUMP);
-	InjectHook(0x4954B0, &CPhysical_::Remove_, PATCH_JUMP);
-	InjectHook(0x495540, &CPhysical_::RemoveAndAdd, PATCH_JUMP);
-	InjectHook(0x495F10, &CPhysical_::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x496F10, &CPhysical_::ProcessShift_, PATCH_JUMP);
-	InjectHook(0x4961A0, &CPhysical_::ProcessCollision_, PATCH_JUMP);
-	InjectHook(0x49F790, &CPhysical_::ProcessEntityCollision_, PATCH_JUMP);
-	InjectHook(0x4958F0, &CPhysical::AddToMovingList, PATCH_JUMP);
-	InjectHook(0x495940, &CPhysical::RemoveFromMovingList, PATCH_JUMP);
-	InjectHook(0x497180, &CPhysical::AddCollisionRecord, PATCH_JUMP);
-	InjectHook(0x4970C0, &CPhysical::AddCollisionRecord_Treadable, PATCH_JUMP);
-	InjectHook(0x497240, &CPhysical::GetHasCollidedWith, PATCH_JUMP);
-	InjectHook(0x49F820, &CPhysical::RemoveRefsToEntity, PATCH_JUMP);
-	InjectHook(0x49F890, &CPhysical::PlacePhysicalRelativeToOtherPhysical, PATCH_JUMP);
-
-#define F3 float, float, float
-	InjectHook(0x495B10, &CPhysical::ApplyMoveSpeed, PATCH_JUMP);
-	InjectHook(0x497280, &CPhysical::ApplyTurnSpeed, PATCH_JUMP);
-	InjectHook(0x4959A0, (void (CPhysical::*)(F3))&CPhysical::ApplyMoveForce, PATCH_JUMP);
-	InjectHook(0x495A10, (void (CPhysical::*)(F3, F3))&CPhysical::ApplyTurnForce, PATCH_JUMP);
-	InjectHook(0x495D90, (void (CPhysical::*)(F3))&CPhysical::ApplyFrictionMoveForce, PATCH_JUMP);
-	InjectHook(0x495E10, (void (CPhysical::*)(F3, F3))&CPhysical::ApplyFrictionTurnForce, PATCH_JUMP);
-	InjectHook(0x499890, &CPhysical::ApplySpringCollision, PATCH_JUMP);
-	InjectHook(0x499990, &CPhysical::ApplySpringDampening, PATCH_JUMP);
-	InjectHook(0x495B50, &CPhysical::ApplyGravity, PATCH_JUMP);
-	InjectHook(0x495B80, (void (CPhysical::*)(void))&CPhysical::ApplyFriction, PATCH_JUMP);
-	InjectHook(0x495C20, &CPhysical::ApplyAirResistance, PATCH_JUMP);
-
-	InjectHook(0x4973A0, &CPhysical::ApplyCollision, PATCH_JUMP);
-	InjectHook(0x4992A0, &CPhysical::ApplyCollisionAlt, PATCH_JUMP);
-	InjectHook(0x499BE0, (bool (CPhysical::*)(float, CColPoint&))&CPhysical::ApplyFriction, PATCH_JUMP);
-	InjectHook(0x49A180, (bool (CPhysical::*)(CPhysical*, float, CColPoint&))&CPhysical::ApplyFriction, PATCH_JUMP);
-
-	InjectHook(0x49DA10, &CPhysical::ProcessShiftSectorList, PATCH_JUMP);
-	InjectHook(0x49E790, &CPhysical::ProcessCollisionSectorList_SimpleCar, PATCH_JUMP);
-	InjectHook(0x49B620, &CPhysical::ProcessCollisionSectorList, PATCH_JUMP);
-	InjectHook(0x496E50, &CPhysical::CheckCollision, PATCH_JUMP);
-	InjectHook(0x496EB0, &CPhysical::CheckCollision_SimpleCar, PATCH_JUMP);
-ENDPATCHES

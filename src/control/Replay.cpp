@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "AnimBlendAssociation.h"
 #include "Boat.h"
 #include "SpecialFX.h"
@@ -39,71 +39,70 @@
 #include "Camera.h"
 #include "Radar.h"
 
-uint8 &CReplay::Mode = *(uint8*)0x95CD5B;
-CAddressInReplayBuffer &CReplay::Record = *(CAddressInReplayBuffer*)0x942F7C;
-CAddressInReplayBuffer &CReplay::Playback = *(CAddressInReplayBuffer*)0x8F5F48;
-uint8 *&CReplay::pBuf0 = *(uint8**)0x8E2C64;
-CAutomobile *&CReplay::pBuf1 = *(CAutomobile**)0x8E2C68;
-uint8 *&CReplay::pBuf2 = *(uint8**)0x8E2C6C;
-CPlayerPed *&CReplay::pBuf3 = *(CPlayerPed**)0x8E2C70;
-uint8 *&CReplay::pBuf4 = *(uint8**)0x8E2C74;
-CCutsceneHead *&CReplay::pBuf5 = *(CCutsceneHead**)0x8E2C78;
-uint8 *&CReplay::pBuf6 = *(uint8**)0x8E2C80;
-CPtrNode *&CReplay::pBuf7 = *(CPtrNode**)0x8E2C84;
-uint8 *&CReplay::pBuf8 = *(uint8**)0x8E2C54;
-CEntryInfoNode *&CReplay::pBuf9 = *(CEntryInfoNode**)0x8E2C58;
-uint8 *&CReplay::pBuf10 = *(uint8**)0x8F2C28;
-CDummyPed *&CReplay::pBuf11 = *(CDummyPed**)0x8F2C2C;
-uint8 *&CReplay::pRadarBlips = *(uint8**)0x8F29F8;
-uint8 *&CReplay::pStoredCam = *(uint8**)0x8F2C34;
-uint8 *&CReplay::pWorld1 = *(uint8**)0x8E29C4;
-CReference *&CReplay::pEmptyReferences = *(CReference**)0x8F256C;
-CStoredDetailedAnimationState *&CReplay::pPedAnims = *(CStoredDetailedAnimationState**)0x8F6260;
-uint8 *&CReplay::pPickups = *(uint8**)0x8F1A48;
-uint8 *&CReplay::pReferences = *(uint8**)0x880FAC;
-uint8(&CReplay::BufferStatus)[NUM_REPLAYBUFFERS] = *(uint8(*)[NUM_REPLAYBUFFERS])*(uintptr*)0x8804D8;
-uint8(&CReplay::Buffers)[NUM_REPLAYBUFFERS][REPLAYBUFFERSIZE] = *(uint8(*)[NUM_REPLAYBUFFERS][REPLAYBUFFERSIZE])*(uintptr*)0x779958;
-bool &CReplay::bPlayingBackFromFile = *(bool*)0x95CD58;
-bool &CReplay::bReplayEnabled = *(bool*)0x617CAC;
-uint32 &CReplay::SlowMotion = *(uint32*)0x9414D4;
-uint32 &CReplay::FramesActiveLookAroundCam = *(uint32*)0x880F84;
-bool &CReplay::bDoLoadSceneWhenDone = *(bool*)0x95CD76;
-CPtrList &CReplay::WorldPtrList = *(CPtrList*)0x880F90;
-CPtrList &CReplay::BigBuildingPtrList = *(CPtrList*)0x941284;
-CWanted &CReplay::PlayerWanted = *(CWanted*)0x8F6278;
-CPlayerInfo &CReplay::PlayerInfo = *(CPlayerInfo*)0x8F5840;
-uint32 &CReplay::Time1 = *(uint32*)0x8F29DC;
-uint32 &CReplay::Time2 = *(uint32*)0x8F29D0;
-uint32 &CReplay::Time3 = *(uint32*)0x8F29D4;
-uint32 &CReplay::Time4 = *(uint32*)0x8F29C8;
-uint32 &CReplay::Frame = *(uint32*)0x8F2554;
-uint8 &CReplay::ClockHours = *(uint8*)0x95CDC5;
-uint8 &CReplay::ClockMinutes = *(uint8*)0x95CDA2;
-uint16 &CReplay::OldWeatherType = *(uint16*)0x95CCEA;
-uint16 &CReplay::NewWeatherType = *(uint16*)0x95CC6E;
-float &CReplay::WeatherInterpolationValue = *(float*)0x8F1A28;
-float &CReplay::TimeStepNonClipped = *(float*)0x8F5FF4;
-float &CReplay::TimeStep = *(float*)0x8F2C24;
-float &CReplay::TimeScale = *(float*)0x880E20;
-float &CReplay::CameraFixedX = *(float*)0x943054;
-float &CReplay::CameraFixedY = *(float*)0x943058;
-float &CReplay::CameraFixedZ = *(float*)0x94305C;
-int32 &CReplay::OldRadioStation = *(int32*)0x94151C;
-int8 &CReplay::CameraMode = *(int8*)0x95CD5F;
-bool &CReplay::bAllowLookAroundCam = *(bool*)0x95CDCD;
-float &CReplay::LoadSceneX = *(float*)0x880F9C;
-float &CReplay::LoadSceneY = *(float*)0x880F98;
-float &CReplay::LoadSceneZ = *(float*)0x880F94;
-float &CReplay::CameraFocusX = *(float*)0x942F5C;
-float &CReplay::CameraFocusY = *(float*)0x942F74;
-float &CReplay::CameraFocusZ = *(float*)0x942F58;
-bool &CReplay::bPlayerInRCBuggy = *(bool*)0x95CDC3;
-float &CReplay::fDistanceLookAroundCam = *(float*)0x885B44;
-float &CReplay::fBetaAngleLookAroundCam = *(float*)0x94072C;
-float &CReplay::fAlphaAngleLookAroundCam = *(float*)0x8F2A0C;
+uint8 CReplay::Mode;
+CAddressInReplayBuffer CReplay::Record;
+CAddressInReplayBuffer CReplay::Playback;
+uint8 *CReplay::pBuf0;
+CAutomobile *CReplay::pBuf1;
+uint8 *CReplay::pBuf2;
+CPlayerPed *CReplay::pBuf3;
+uint8 *CReplay::pBuf4;
+CCutsceneHead *CReplay::pBuf5;
+uint8 *CReplay::pBuf6;
+CPtrNode *CReplay::pBuf7;
+uint8 *CReplay::pBuf8;
+CEntryInfoNode *CReplay::pBuf9;
+uint8 *CReplay::pBuf10;
+CDummyPed *CReplay::pBuf11;
+uint8 *CReplay::pRadarBlips;
+uint8 *CReplay::pStoredCam;
+uint8 *CReplay::pWorld1;
+CReference *CReplay::pEmptyReferences;
+CStoredDetailedAnimationState *CReplay::pPedAnims;
+uint8 *CReplay::pPickups;
+uint8 *CReplay::pReferences;
+uint8 CReplay::BufferStatus[NUM_REPLAYBUFFERS];
+uint8 CReplay::Buffers[NUM_REPLAYBUFFERS][REPLAYBUFFERSIZE];
+bool CReplay::bPlayingBackFromFile;
+bool CReplay::bReplayEnabled = true;
+uint32 CReplay::SlowMotion;
+uint32 CReplay::FramesActiveLookAroundCam;
+bool CReplay::bDoLoadSceneWhenDone;
+CPtrList CReplay::WorldPtrList;
+CPtrList CReplay::BigBuildingPtrList;
+CWanted CReplay::PlayerWanted;
+CPlayerInfo CReplay::PlayerInfo;
+uint32 CReplay::Time1;
+uint32 CReplay::Time2;
+uint32 CReplay::Time3;
+uint32 CReplay::Time4;
+uint32 CReplay::Frame;
+uint8 CReplay::ClockHours;
+uint8 CReplay::ClockMinutes;
+uint16 CReplay::OldWeatherType;
+uint16 CReplay::NewWeatherType;
+float CReplay::WeatherInterpolationValue;
+float CReplay::TimeStepNonClipped;
+float CReplay::TimeStep;
+float CReplay::TimeScale;
+float CReplay::CameraFixedX;
+float CReplay::CameraFixedY;
+float CReplay::CameraFixedZ;
+int32 CReplay::OldRadioStation;
+int8 CReplay::CameraMode;
+bool CReplay::bAllowLookAroundCam;
+float CReplay::LoadSceneX;
+float CReplay::LoadSceneY;
+float CReplay::LoadSceneZ;
+float CReplay::CameraFocusX;
+float CReplay::CameraFocusY;
+float CReplay::CameraFocusZ;
+bool CReplay::bPlayerInRCBuggy;
+float CReplay::fDistanceLookAroundCam;
+float CReplay::fBetaAngleLookAroundCam;
+float CReplay::fAlphaAngleLookAroundCam;
 
-static void(*(&CBArray)[30])(CAnimBlendAssociation*, void*) = *(void(*(*)[30])(CAnimBlendAssociation*, void*))*(uintptr*)0x61052C;
-static void(*CBArray_RE3[])(CAnimBlendAssociation*, void*) =
+static void(*CBArray[])(CAnimBlendAssociation*, void*) =
 {
 	nil, &CPed::PedGetupCB, &CPed::PedStaggerCB, &CPed::PedEvadeCB, &CPed::FinishDieAnimCB,
 	&CPed::FinishedWaitCB, &CPed::FinishLaunchCB, &CPed::FinishHitHeadCB, &CPed::PedAnimGetInCB, &CPed::PedAnimDoorOpenCB,
@@ -119,16 +118,13 @@ static uint8 FindCBFunctionID(void(*f)(CAnimBlendAssociation*, void*))
 		if (CBArray[i] == f)
 			return i;
 	}
-	for (int i = 0; i < sizeof(CBArray_RE3) / sizeof(*CBArray_RE3); i++) {
-		if (CBArray_RE3[i] == f)
-			return i;
-	}
+
 	return 0;
 }
 
 static void(*FindCBFunction(uint8 id))(CAnimBlendAssociation*, void*)
 {
-	return CBArray_RE3[id];
+	return CBArray[id];
 }
 
 static void ApplyPanelDamageToCar(uint32 panels, CAutomobile* vehicle, bool flying)
@@ -1087,7 +1083,7 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 	Playback.m_bSlot = first;
 	Playback.m_nOffset = 0;
 	Playback.m_pBase = Buffers[first];
-	CObject::DeleteAllTempObjectInArea(CVector(0.0f, 0.0f, 0.0f), 1000000.0f);
+	CObject::DeleteAllTempObjectsInArea(CVector(0.0f, 0.0f, 0.0f), 1000000.0f);
 	StoreStuffInMem();
 	EmptyPedsAndVehiclePools();
 	SlowMotion = 1;
@@ -1574,16 +1570,3 @@ void CReplay::Display()
 	if (Mode == MODE_PLAYBACK)
 		CFont::PrintString(SCREEN_SCALE_X(63.5f), SCREEN_SCALE_Y(30.0f), TheText.Get("REPLAY"));
 }
-
-STARTPATCHES
-InjectHook(0x592FE0, &CReplay::Init, PATCH_JUMP);
-InjectHook(0x593150, &CReplay::DisableReplays, PATCH_JUMP);
-InjectHook(0x593160, &CReplay::EnableReplays, PATCH_JUMP);
-InjectHook(0x593170, &CReplay::Update, PATCH_JUMP);
-InjectHook(0x595B20, &CReplay::FinishPlayback, PATCH_JUMP);
-InjectHook(0x595BD0, &CReplay::EmptyReplayBuffer, PATCH_JUMP);
-InjectHook(0x595EE0, &CReplay::Display, PATCH_JUMP);
-InjectHook(0x596030, &CReplay::TriggerPlayback, PATCH_JUMP);
-InjectHook(0x597560, &CReplay::StreamAllNecessaryCarsAndPeds, PATCH_JUMP);
-InjectHook(0x597680, &CReplay::ShouldStandardCameraBeProcessed, PATCH_JUMP);
-ENDPATCHES

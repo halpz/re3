@@ -1,13 +1,13 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "World.h"
 #include "Vehicle.h"
 #include "PlayerPed.h"
 #include "Pools.h"
 #include "References.h"
 
-CReference *CReferences::aRefs = (CReference*)0x70BBE0; //[NUMREFERENCES];
-CReference *&CReferences::pEmptyList = *(CReference**)0x8F1AF8;
+CReference CReferences::aRefs[NUMREFERENCES];
+CReference *CReferences::pEmptyList;
 
 void
 CReferences::Init(void)
@@ -57,9 +57,3 @@ CReferences::PruneAllReferencesInWorld(void)
 			e->PruneReferences();
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x4A7350, CReferences::Init, PATCH_JUMP);
-	InjectHook(0x4A7570, CReferences::RemoveReferencesToPlayer, PATCH_JUMP);
-	InjectHook(0x4A75A0, CReferences::PruneAllReferencesInWorld, PATCH_JUMP);
-ENDPATCHES

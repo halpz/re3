@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Timer.h"
 #include "TxdStore.h"
@@ -204,26 +204,21 @@ RwRaster  *gpGunShellRaster;
 RwRaster  *gpWakeOldRaster;
 
 
-//RwRaster  *gpPointlightRaster;	// CPointLights::RenderFogEffect
-RwRaster *&gpPointlightRaster = *(RwRaster **)0x8F5FE0;
+RwRaster  *gpPointlightRaster;	// CPointLights::RenderFogEffect
 
-//RwTexture *gpRainDropTex[MAX_RAINDROP_FILES]; // CWeather::RenderRainStreaks
-RwTexture *      (&gpRainDropTex)[MAX_RAINDROP_FILES] = *(RwTexture * (*)[MAX_RAINDROP_FILES])*(int *)0x880660;
+RwTexture *gpRainDropTex[MAX_RAINDROP_FILES]; // CWeather::RenderRainStreaks
 
 
 RwRaster  *gpRainDropRaster[MAX_RAINDROP_FILES];
 
-//Float      CParticle::ms_afRandTable[CParticle::RAND_TABLE_SIZE]; //
-float      (&CParticle::ms_afRandTable)[CParticle::RAND_TABLE_SIZE] = *(float (*)[CParticle::RAND_TABLE_SIZE])*(int *)0x6E98C8;
+float      CParticle::ms_afRandTable[CParticle::RAND_TABLE_SIZE];
 
 
 CParticle *CParticle::m_pUnusedListHead;
 
 
-//Float      CParticle::m_SinTable[CParticle::SIN_COS_TABLE_SIZE]; //
-//Float      CParticle::m_CosTable[CParticle::SIN_COS_TABLE_SIZE]; /
-float      (&CParticle::m_SinTable)[CParticle::SIN_COS_TABLE_SIZE] = *(float (*)[CParticle::SIN_COS_TABLE_SIZE])*(int *)0x877358;
-float      (&CParticle::m_CosTable)[CParticle::SIN_COS_TABLE_SIZE] = *(float (*)[CParticle::SIN_COS_TABLE_SIZE])*(int *)0x70DA18;
+float      CParticle::m_SinTable[CParticle::SIN_COS_TABLE_SIZE];
+float      CParticle::m_CosTable[CParticle::SIN_COS_TABLE_SIZE]; 
 
 int32 Randomizer;
 
@@ -1854,19 +1849,3 @@ void CParticle::AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatr
 					0.3f, color, 0, 0, 0, 0);
 	}
 }
-
-STARTPATCHES
-	//InjectHook(0x50C410, &CParticle::ctor, PATCH_JUMP);
-	//InjectHook(0x50C420, &CParticle::dtor, PATCH_JUMP);
-	InjectHook(0x50C430, CParticle::ReloadConfig, PATCH_JUMP);
-	InjectHook(0x50C570, CParticle::Initialise, PATCH_JUMP);
-	InjectHook(0x50CF40, CParticle::Shutdown, PATCH_JUMP);
-	//InjectHook(0x50D140, CParticle::AddParticle, PATCH_JUMP);
-	InjectHook(0x50D190, (CParticle *(*)(tParticleType, CVector const&, CVector const&, CEntity*, float, RwRGBA const&, int, int, int, int))CParticle::AddParticle, PATCH_JUMP);
-	InjectHook(0x50DCF0, CParticle::Update, PATCH_JUMP);
-	InjectHook(0x50EE20, CParticle::Render, PATCH_JUMP);
-	InjectHook(0x50F6E0, CParticle::RemovePSystem, PATCH_JUMP);
-	InjectHook(0x50F720, CParticle::RemoveParticle, PATCH_JUMP);
-	InjectHook(0x50F760, CParticle::AddJetExplosion, PATCH_JUMP);
-	InjectHook(0x50FAA0, CParticle::AddYardieDoorSmoke, PATCH_JUMP);
-ENDPATCHES

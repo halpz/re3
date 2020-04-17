@@ -6,7 +6,7 @@ class CPed;
 class CAutomobile;
 class CGarage;
 
-extern int16 &DebugCamMode;
+extern int16 DebugCamMode;
 
 enum
 {
@@ -540,7 +540,7 @@ uint32    unknown;	// some counter having to do with music
 	uint32 m_uiFadeTimeStarted;
 	uint32 m_uiFadeTimeStartedMusic;
 
-	static bool &m_bUseMouse3rdPerson;
+	static bool m_bUseMouse3rdPerson;
 #ifdef FREE_CAM
 	static bool bFreeCam;
 #endif
@@ -647,7 +647,7 @@ static_assert(offsetof(CCamera, m_vecCutSceneOffset) == 0x6F8, "CCamera: error")
 static_assert(offsetof(CCamera, m_arrPathArray) == 0x7a8, "CCamera: error");
 static_assert(sizeof(CCamera) == 0xE9D8, "CCamera: wrong size");
 
-extern CCamera &TheCamera;
+extern CCamera TheCamera;
 
 void CamShakeNoPos(CCamera*, float);
 void MakeAngleLessThan180(float &Angle);

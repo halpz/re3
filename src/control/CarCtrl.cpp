@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "CarCtrl.h"
 
 #include "Accident.h"
@@ -67,25 +67,25 @@
 #define MIN_ANGLE_TO_APPLY_HANDBRAKE 0.7f
 #define MIN_SPEED_TO_APPLY_HANDBRAKE 0.3f
 
-int &CCarCtrl::NumLawEnforcerCars = *(int*)0x8F1B38;
-int &CCarCtrl::NumAmbulancesOnDuty = *(int*)0x885BB0;
-int &CCarCtrl::NumFiretrucksOnDuty = *(int*)0x9411F0;
-bool &CCarCtrl::bCarsGeneratedAroundCamera = *(bool*)0x95CD8A;
-float& CCarCtrl::CarDensityMultiplier = *(float*)0x5EC8B4;
-int32 &CCarCtrl::NumMissionCars = *(int32*)0x8F1B54;
-int32 &CCarCtrl::NumRandomCars = *(int32*)0x943118;
-int32 &CCarCtrl::NumParkedCars = *(int32*)0x8F29E0;
-int32 &CCarCtrl::NumPermanentCars = *(int32*)0x8F29F0;
-int8 &CCarCtrl::CountDownToCarsAtStart = *(int8*)0x95CD63;
-int32 &CCarCtrl::MaxNumberOfCarsInUse = *(int32*)0x5EC8B8;
-uint32 &CCarCtrl::LastTimeLawEnforcerCreated = *(uint32*)0x8F5FF0;
-uint32 &CCarCtrl::LastTimeFireTruckCreated = *(uint32*)0x880F5C;
-uint32 &CCarCtrl::LastTimeAmbulanceCreated = *(uint32*)0x941450;
-int32 (&CCarCtrl::TotalNumOfCarsOfRating)[TOTAL_CUSTOM_CLASSES] = *(int32(*)[TOTAL_CUSTOM_CLASSES])*(uintptr*)0x8F1A60;
-int32 (&CCarCtrl::NextCarOfRating)[TOTAL_CUSTOM_CLASSES] = *(int32(*)[TOTAL_CUSTOM_CLASSES])*(uintptr*)0x9412AC;
-int32 (&CCarCtrl::CarArrays)[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY] = *(int32(*)[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY])*(uintptr*)0x6EB860;
-CVehicle* (&apCarsToKeep)[MAX_CARS_TO_KEEP] = *(CVehicle*(*)[MAX_CARS_TO_KEEP])*(uintptr*)0x70D830;
-uint32 (&aCarsToKeepTime)[MAX_CARS_TO_KEEP] = *(uint32(*)[MAX_CARS_TO_KEEP])*(uintptr*)0x87F9A8;
+int CCarCtrl::NumLawEnforcerCars;
+int CCarCtrl::NumAmbulancesOnDuty;
+int CCarCtrl::NumFiretrucksOnDuty;
+bool CCarCtrl::bCarsGeneratedAroundCamera;
+float CCarCtrl::CarDensityMultiplier = 1.0f;
+int32 CCarCtrl::NumMissionCars;
+int32 CCarCtrl::NumRandomCars;
+int32 CCarCtrl::NumParkedCars;
+int32 CCarCtrl::NumPermanentCars;
+int8 CCarCtrl::CountDownToCarsAtStart;
+int32 CCarCtrl::MaxNumberOfCarsInUse = 12;
+uint32 CCarCtrl::LastTimeLawEnforcerCreated;
+uint32 CCarCtrl::LastTimeFireTruckCreated;
+uint32 CCarCtrl::LastTimeAmbulanceCreated;
+int32 CCarCtrl::TotalNumOfCarsOfRating[TOTAL_CUSTOM_CLASSES];
+int32 CCarCtrl::NextCarOfRating[TOTAL_CUSTOM_CLASSES];
+int32 CCarCtrl::CarArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
+CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];
+uint32 aCarsToKeepTime[MAX_CARS_TO_KEEP];
 
 void
 CCarCtrl::GenerateRandomCars()
@@ -2736,20 +2736,3 @@ bool CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 	return x > -342.0f && x < -219.0f &&
 		y > -677.0f && y < -580.0f;
 }
-
-STARTPATCHES
-InjectHook(0x416580, &CCarCtrl::GenerateRandomCars, PATCH_JUMP);
-InjectHook(0x417EC0, &CCarCtrl::ChooseModel, PATCH_JUMP);
-InjectHook(0x418320, &CCarCtrl::RemoveDistantCars, PATCH_JUMP);
-InjectHook(0x418430, &CCarCtrl::PossiblyRemoveVehicle, PATCH_JUMP);
-InjectHook(0x41D280, &CCarCtrl::Init, PATCH_JUMP);
-InjectHook(0x41D3B0, &CCarCtrl::ReInit, PATCH_JUMP);
-InjectHook(0x41E250, &CCarCtrl::SteerAIBoatWithPhysics, PATCH_JUMP);
-InjectHook(0x41F6E0, &CCarCtrl::RegisterVehicleOfInterest, PATCH_JUMP);
-InjectHook(0x41F780, &CCarCtrl::IsThisVehicleInteresting, PATCH_JUMP);
-InjectHook(0x41F7A0, &CCarCtrl::RemoveFromInterestingVehicleList, PATCH_JUMP);
-InjectHook(0x41F7D0, &CCarCtrl::ClearInterestingVehicleList, PATCH_JUMP);
-InjectHook(0x41F7F0, &CCarCtrl::SwitchVehicleToRealPhysics, PATCH_JUMP);
-InjectHook(0x41F820, &CCarCtrl::JoinCarWithRoadSystem, PATCH_JUMP);
-InjectHook(0x41FA00, &CCarCtrl::JoinCarWithRoadSystemGotoCoors, PATCH_JUMP);
-ENDPATCHES

@@ -52,18 +52,18 @@ public:
 class CTheZones
 {
 public:
-	static eLevelName &m_CurrLevel;
-	static CZone *&m_pPlayersZone;
-	static int16 &FindIndex;
+	static eLevelName m_CurrLevel;
+	static CZone *m_pPlayersZone;
+	static int16 FindIndex;
 
-	static uint16 &NumberOfAudioZones;
-	static int16 *AudioZoneArray;	//[NUMAUDIOZONES];
-	static uint16 &TotalNumberOfMapZones;
-	static uint16 &TotalNumberOfZones;
-	static CZone *ZoneArray;	//[NUMZONES];
-	static CZone *MapZoneArray;	//[NUMMAPZONES];
-	static uint16 &TotalNumberOfZoneInfos;
-	static CZoneInfo *ZoneInfoArray;	//[2*NUMZONES];
+	static uint16 NumberOfAudioZones;
+	static int16 AudioZoneArray[NUMAUDIOZONES];
+	static uint16 TotalNumberOfMapZones;
+	static uint16 TotalNumberOfZones;
+	static CZone ZoneArray[NUMZONES];
+	static CZone MapZoneArray[NUMMAPZONES];
+	static uint16 TotalNumberOfZoneInfos;
+	static CZoneInfo ZoneInfoArray[2*NUMZONES];
 
 	static void Init(void);
 	static void Update(void);

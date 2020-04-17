@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Projectile.h"
 
 CProjectile::CProjectile(int32 model) : CObject()
@@ -13,17 +13,3 @@ CProjectile::CProjectile(int32 model) : CObject()
 	SetModelIndex(model);
 	ObjectCreatedBy = MISSION_OBJECT;
 }
-
-#include <new>
-
-class CProjectile_ : public CProjectile
-{
-public:
-	CProjectile* ctor(int32 model) { return ::new (this) CProjectile(model); }
-	void dtor(void) { CProjectile::~CProjectile(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4BFE30, &CProjectile_::ctor, PATCH_JUMP);
-	InjectHook(0x4BFED0, &CProjectile_::dtor, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Automobile.h"
 #include "CarCtrl.h"
 #include "Camera.h"
@@ -49,8 +49,3 @@ CRemote::TakeRemoteControlledCarFromPlayer(void)
 	CWorld::Players[CWorld::PlayerInFocus].m_bInRemoteMode = true;
 	CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->bRemoveFromWorld = true;
 }
-
-STARTPATCHES
-	InjectHook(0x435C30, &CRemote::GivePlayerRemoteControlledCar, PATCH_JUMP);
-	InjectHook(0x435DA0, &CRemote::TakeRemoteControlledCarFromPlayer, PATCH_JUMP);
-ENDPATCHES

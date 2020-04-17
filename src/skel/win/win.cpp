@@ -45,31 +45,25 @@
 #define MAX_SUBSYSTEMS		(16)
 
 
-//static RwBool		  ForegroundApp = TRUE;
-static RwBool		&ForegroundApp = *(RwBool*)0x060F000;
+static RwBool		  ForegroundApp = TRUE;
 
-//static RwBool		  RwInitialised = FALSE;
-static RwBool		&RwInitialised = *(RwBool*)0x885B88;
+static RwBool		  RwInitialised = FALSE;
 
 static RwSubSystemInfo GsubSysInfo[MAX_SUBSYSTEMS];
 static RwInt32		GnumSubSystems = 0;
 static RwInt32		GcurSel = 0, GcurSelVM = 0;
 
-//static RwBool startupDeactivate;
-static RwBool &startupDeactivate = *(RwBool*)0x8E2878;
+static RwBool startupDeactivate;
 
-//static RwBool useDefault;
-static RwBool &useDefault = *(RwBool*)0x6510D4;
+static RwBool useDefault;
 
-//static RwBool defaultFullscreenRes = TRUE;
-static RwBool &defaultFullscreenRes = *(RwBool*)0x60EFFC;
+static RwBool defaultFullscreenRes = TRUE;
 
 /* Class name for the MS Window's window class. */
 
 static const RwChar *AppClassName = RWSTRING("Grand theft auto 3");
 
-//static psGlobalType PsGlobal;
-static psGlobalType &PsGlobal = *(psGlobalType*)0x72CF60;
+static psGlobalType PsGlobal;
 
 
 #define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
@@ -107,14 +101,14 @@ IMediaSeeking *pMS = nil;
 
 DWORD dwDXVersion;
 DWORD _dwMemTotalPhys;
-DWORD &_dwMemAvailPhys = *(DWORD*)0x70F29C;
+DWORD _dwMemAvailPhys;
 DWORD _dwMemTotalVirtual;
 DWORD _dwMemAvailVirtual;
-DWORD &_dwMemTotalVideo = *(DWORD*)0x70F2A8;
+DWORD _dwMemTotalVideo;
 DWORD _dwMemAvailVideo;
-DWORD &_dwOperatingSystemVersion = *(DWORD*)0x70F290;
+DWORD _dwOperatingSystemVersion;
 
-RwUInt32 &gGameState = *(RwUInt32*)0x8F5838;
+RwUInt32 gGameState;
 CJoySticks AllValidWinJoys;
 
 CJoySticks::CJoySticks()
@@ -1372,7 +1366,7 @@ psSelectDevice()
 	{
 		return FALSE;
 	}
-	
+
 	if (vm.flags & rwVIDEOMODEEXCLUSIVE)
 	{
 		debug("%dx%dx%d", vm.width, vm.height, vm.depth);
@@ -1760,7 +1754,7 @@ void HandleExit()
  *****************************************************************************
  */
 int PASCAL
-_WinMain(HINSTANCE instance, 
+WinMain(HINSTANCE instance, 
 		HINSTANCE prevInstance	__RWUNUSED__, 
 		CMDSTR cmdLine, 
 		int cmdShow)
@@ -1769,7 +1763,7 @@ _WinMain(HINSTANCE instance,
 	RwV2d pos;
 	RwInt32 argc, i;
 	RwChar **argv;
-
+	StaticPatcher::Apply();
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
 
 	/* 
@@ -3031,60 +3025,3 @@ int strcasecmp(const char *str1, const char *str2)
 	return _strcmpi(str1, str2);
 }
 #endif
-
-
-STARTPATCHES	
-	//InjectHook(0x580B30, &CJoySticks::CJoySticks, PATCH_JUMP);
-	//InjectHook(0x580B50, &CJoySticks::ClearJoyInfo, PATCH_JUMP);
-	InjectHook(0x580B70, _psCreateFolder, PATCH_JUMP);
-	InjectHook(0x580BB0, _psGetUserFilesFolder, PATCH_JUMP);
-	InjectHook(0x580C70, psCameraBeginUpdate, PATCH_JUMP);
-	InjectHook(0x580CA0, psCameraShowRaster, PATCH_JUMP);
-	InjectHook(0x580CE0, psTimer, PATCH_JUMP);
-	InjectHook(0x580D20, psMouseSetPos, PATCH_JUMP);
-	InjectHook(0x580E10, psGetMemoryFunctions, PATCH_JUMP);
-	InjectHook(0x580E20, psInstallFileSystem, PATCH_JUMP);
-	InjectHook(0x580E30, psNativeTextureSupport, PATCH_JUMP);
-	InjectHook(0x580E40, InitApplication, PATCH_JUMP);
-	InjectHook(0x580EB0, InitInstance, PATCH_JUMP);
-	InjectHook(0x580F30, _GetVideoMemInfo, PATCH_JUMP);
-	InjectHook(0x580FA0, GetDXVersion, PATCH_JUMP);
-	InjectHook(0x5810C0, _psGetCpuVendr, PATCH_JUMP);
-	InjectHook(0x5810E0, _psGetCpuFeatures, PATCH_JUMP);
-	InjectHook(0x5810F0, _psGetCpuFeaturesEx, PATCH_JUMP);
-	InjectHook(0x581120, _psPrintCpuInfo, PATCH_JUMP);
-	InjectHook(0x581180, psInitialise, PATCH_JUMP);
-	InjectHook(0x581460, psTerminate, PATCH_JUMP);
-	InjectHook(0x581470, _psGetNumVideModes, PATCH_JUMP);
-	InjectHook(0x581480, _psFreeVideoModeList, PATCH_JUMP);
-	InjectHook(0x5814F0, _psGetVideoModeList, PATCH_JUMP);
-	InjectHook(0x581630, _psSelectScreenVM, PATCH_JUMP);
-	InjectHook(0x5816B0, WaitForState, PATCH_JUMP);
-	InjectHook(0x5816E0, HandleGraphEvent, PATCH_JUMP);
-	InjectHook(0x581790, MainWndProc, PATCH_JUMP);
-	InjectHook(0x581C90, IsForegroundApp, PATCH_JUMP);
-	InjectHook(0x581CB0, GetBestRefreshRate, PATCH_JUMP);
-	InjectHook(0x581D80, psSelectDevice, PATCH_JUMP);
-	InjectHook(0x581F90, _psSetVideoMode, PATCH_JUMP);
-	InjectHook(0x582030, CommandLineToArgv, PATCH_JUMP);
-	InjectHook(0x582160, InitialiseLanguage, PATCH_JUMP);
-	InjectHook(0x5822F0, CenterVideo, PATCH_JUMP);
-	InjectHook(0x582380, PlayMovieInWindow, PATCH_JUMP);
-	InjectHook(0x5825E0, CloseInterfaces, PATCH_JUMP);
-	InjectHook(0x582680, CloseClip, PATCH_JUMP);
-	InjectHook(0x5826A0, HandleExit, PATCH_JUMP);
-	InjectHook(0x582710, _WinMain, PATCH_JUMP);
-	InjectHook(0x5830D0, _InputInitialise, PATCH_JUMP);
-	InjectHook(0x583110, _InputInitialiseMouse, PATCH_JUMP);
-	InjectHook(0x583190, CapturePad, PATCH_JUMP);
-	InjectHook(0x583580, _InputInitialiseJoys, PATCH_JUMP);
-	InjectHook(0x583670, _InputAddJoyStick, PATCH_JUMP);
-	InjectHook(0x583810, _InputAddJoys, PATCH_JUMP);
-	InjectHook(0x583870, _InputGetMouseState, PATCH_JUMP);
-	InjectHook(0x583910, _InputShutdown, PATCH_JUMP);
-	InjectHook(0x583940, _InputEnumDevicesCallback, PATCH_JUMP);
-	InjectHook(0x583A20, _InputTranslateKey, PATCH_JUMP);
-	InjectHook(0x583DC0, _InputTranslateShiftKeyUpDown, PATCH_JUMP);
-	InjectHook(0x583E50, _InputTranslateShiftKey, PATCH_JUMP);
-	InjectHook(0x583EE0, _InputIsExtended, PATCH_JUMP);
-ENDPATCHES

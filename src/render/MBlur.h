@@ -3,9 +3,9 @@
 class CMBlur
 {
 public:
-	static RwRaster *&pFrontBuffer;
-	static bool &ms_bJustInitialised;
-	static bool &BlurOn;
+	static RwRaster *pFrontBuffer;
+	static bool ms_bJustInitialised;
+	static bool BlurOn;
 
 public:
 	static void MotionBlurOpen(RwCamera *cam);

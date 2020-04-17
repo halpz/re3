@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Pager.h"
 #include "Timer.h"
 #include "Messages.h"
@@ -182,13 +182,3 @@ CPager::RestartCurrentMessage()
 		m_messages[0].m_nTimeToChangePosition = CTimer::GetTimeInMilliseconds() + m_messages[0].m_nSpeedMs;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x52B6F0, &CPager::Init, PATCH_JUMP);
-	InjectHook(0x52B740, &CPager::Process, PATCH_JUMP);
-	InjectHook(0x52B890, &CPager::Display, PATCH_JUMP);
-	InjectHook(0x52B940, &CPager::AddMessage, PATCH_JUMP);
-	InjectHook(0x52BB50, &CPager::AddMessageWithNumber, PATCH_JUMP);
-	InjectHook(0x52BE50, &CPager::RestartCurrentMessage, PATCH_JUMP);
-	InjectHook(0x52BE00, &CPager::ClearMessages, PATCH_JUMP);
-ENDPATCHES

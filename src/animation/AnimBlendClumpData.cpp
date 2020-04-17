@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "AnimBlendClumpData.h"
 #include "RwHelper.h"
 
@@ -35,20 +35,3 @@ CAnimBlendClumpData::ForAllFrames(void (*cb)(AnimBlendFrameData*, void*), void *
 	for(i = 0; i < numFrames; i++)
 		cb(&frames[i], arg);
 }
-
-#include <new>
-
-class CAnimBlendClumpData_ : public CAnimBlendClumpData
-{
-public:
-	CAnimBlendClumpData *ctor(void) { return ::new (this) CAnimBlendClumpData(); }
-	void dtor(void) { this->CAnimBlendClumpData::~CAnimBlendClumpData(); }
-};
-
-
-STARTPATCHES
-	InjectHook(0x401880, &CAnimBlendClumpData_::ctor, PATCH_JUMP);
-	InjectHook(0x4018B0, &CAnimBlendClumpData_::dtor, PATCH_JUMP);
-	InjectHook(0x4018F0, &CAnimBlendClumpData::SetNumberOfFrames, PATCH_JUMP);
-	InjectHook(0x401930, &CAnimBlendClumpData::ForAllFrames, PATCH_JUMP);
-ENDPATCHES

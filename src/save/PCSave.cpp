@@ -1,6 +1,6 @@
 #define WITHWINDOWS
 #include "common.h"
-#include "patcher.h"
+
 #include "FileMgr.h"
 #include "GenericGameStorage.h"
 #include "Messages.h"
@@ -9,7 +9,7 @@
 
 const char* _psGetUserFilesFolder();
 
-C_PcSave PcSaveHelper;// = *(C_PcSave*)0x8E2C60;
+C_PcSave PcSaveHelper;
 
 void
 C_PcSave::SetSaveDirectory(const char *path)
@@ -136,11 +136,3 @@ C_PcSave::PopulateSlotInfo()
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x591EA0, C_PcSave::SetSaveDirectory, PATCH_JUMP);
-	InjectHook(0x5922F0, &C_PcSave::DeleteSlot, PATCH_JUMP);
-	InjectHook(0x591EC0, &C_PcSave::SaveSlot, PATCH_JUMP);
-	InjectHook(0x591F80, &C_PcSave::PcClassSaveRoutine, PATCH_JUMP);
-	InjectHook(0x592090, &C_PcSave::PopulateSlotInfo, PATCH_JUMP);
-ENDPATCHES

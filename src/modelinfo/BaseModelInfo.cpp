@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "templates.h"
 #include "TxdStore.h"
 #include "2dEffect.h"
@@ -99,25 +99,3 @@ CBaseModelInfo::Get2dEffect(int n)
 	else
 		return nil;
 }
-
-
-class CBaseModelInfo_ : public CBaseModelInfo
-{
-public:
-	void Shutdown_(void) { CBaseModelInfo::Shutdown(); }
-};
-STARTPATCHES
-	// can't easily replace ctor at 4F6A50
-	InjectHook(0x4F6A90, &CBaseModelInfo_::Shutdown_, PATCH_JUMP);
-
-	InjectHook(0x4F6AC0, &CBaseModelInfo::DeleteCollisionModel, PATCH_JUMP);
-	InjectHook(0x4F6B70, &CBaseModelInfo::ClearTexDictionary, PATCH_JUMP);
-	InjectHook(0x4F6BA0, &CBaseModelInfo::AddRef, PATCH_JUMP);
-	InjectHook(0x4F6BB0, &CBaseModelInfo::RemoveRef, PATCH_JUMP);
-	InjectHook(0x4F6B40, &CBaseModelInfo::SetTexDictionary, PATCH_JUMP);
-	InjectHook(0x4F6B80, &CBaseModelInfo::AddTexDictionaryRef, PATCH_JUMP);
-	InjectHook(0x4F6B90, &CBaseModelInfo::RemoveTexDictionaryRef, PATCH_JUMP);
-	InjectHook(0x4F6B20, &CBaseModelInfo::Add2dEffect, PATCH_JUMP);
-	InjectHook(0x4F6AF0, &CBaseModelInfo::Init2dEffects, PATCH_JUMP);
-	InjectHook(0x4F6B00, &CBaseModelInfo::Get2dEffect, PATCH_JUMP);
-ENDPATCHES

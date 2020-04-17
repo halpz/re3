@@ -6,7 +6,7 @@
 #define WITHWINDOWS
 #include "common.h"
 #include "win.h"
-#include "patcher.h"
+
 #include "Timer.h"
 #ifdef GTA_PC
 #include "FileMgr.h"
@@ -22,8 +22,8 @@
 #include "RwHelper.h"
 #endif //GTA_PC
 
-float texLoadTime;// = *(float*)0x8F1B50;
-int32 texNumLoaded;// = *(int32*)0x8F252C;
+float texLoadTime;
+int32 texNumLoaded;
 
 #ifdef LIBRW
 #define READNATIVE(stream, tex, size) rwNativeTextureHackRead(stream, tex, size)
@@ -349,17 +349,3 @@ CreateTxdImageForVideoCard()
 	return true;
 }
 #endif // GTA_PC
-
-STARTPATCHES
-	InjectHook(0x592380, RwTextureGtaStreamRead, PATCH_JUMP);
-	InjectHook(0x5924A0, RwTexDictionaryGtaStreamRead, PATCH_JUMP);
-	InjectHook(0x592550, RwTexDictionaryGtaStreamRead1, PATCH_JUMP);
-	InjectHook(0x592650, RwTexDictionaryGtaStreamRead2, PATCH_JUMP);
-
-	InjectHook(0x5926C0, ReadVideoCardCapsFile, PATCH_JUMP);
-	InjectHook(0x592740, CheckVideoCardCaps, PATCH_JUMP);
-	InjectHook(0x5927D0, WriteVideoCardCapsFile, PATCH_JUMP);
-	InjectHook(0x592880, ConvertingTexturesScreen, PATCH_JUMP);
-	InjectHook(0x592BF0, DealWithTxdWriteError, PATCH_JUMP);
-	InjectHook(0x592C70, CreateTxdImageForVideoCard, PATCH_JUMP);
-ENDPATCHES

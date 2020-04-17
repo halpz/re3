@@ -1,12 +1,12 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "FileMgr.h"
 #include "Weather.h"
 #include "Collision.h"
 #include "SurfaceTable.h"
 
-float (*CSurfaceTable::ms_aAdhesiveLimitTable)[NUMADHESIVEGROUPS] = (float (*)[NUMADHESIVEGROUPS])0x8E29D4;
+float CSurfaceTable::ms_aAdhesiveLimitTable[NUMADHESIVEGROUPS][NUMADHESIVEGROUPS];
 
 void
 CSurfaceTable::Initialise(char *filename)
@@ -141,10 +141,3 @@ CSurfaceTable::GetAdhesiveLimit(CColPoint &colpoint)
 {
 	return ms_aAdhesiveLimitTable[GetAdhesionGroup(colpoint.surfaceB)][GetAdhesionGroup(colpoint.surfaceA)];
 }
-
-STARTPATCHES
-	InjectHook(0x4AB8F0, CSurfaceTable::Initialise, PATCH_JUMP);
-	InjectHook(0x4ABA60, CSurfaceTable::GetAdhesionGroup, PATCH_JUMP);
-	InjectHook(0x4ABAA0, CSurfaceTable::GetWetMultiplier, PATCH_JUMP);
-	InjectHook(0x4ABA30, CSurfaceTable::GetAdhesiveLimit, PATCH_JUMP);
-ENDPATCHES

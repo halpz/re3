@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Draw.h"
 #include "World.h"
@@ -28,7 +28,7 @@
 const float DefaultFOV = 70.0f;	// beta: 80.0f
 
 bool PrintDebugCode = false;
-int16 &DebugCamMode = *(int16*)0x95CCF2;
+int16 DebugCamMode;
 
 #ifdef FREE_CAM
 bool CCamera::bFreeCam = false;
@@ -5236,55 +5236,3 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	}
 }
 #endif
-
-STARTPATCHES
-	InjectHook(0x456F40, WellBufferMe, PATCH_JUMP);
-	InjectHook(0x458410, &CCam::Init, PATCH_JUMP);
-	InjectHook(0x4582F0, &CCam::GetVectorsReadyForRW, PATCH_JUMP);
-	InjectHook(0x457710, &CCam::DoAverageOnVector, PATCH_JUMP);
-	InjectHook(0x458060, &CCam::GetPedBetaAngleForClearView, PATCH_JUMP);
-	InjectHook(0x457210, &CCam::Cam_On_A_String_Unobscured, PATCH_JUMP);
-	InjectHook(0x457A80, &CCam::FixCamWhenObscuredByVehicle, PATCH_JUMP);
-	InjectHook(0x457B90, &CCam::FixCamIfObscured, PATCH_JUMP);
-	InjectHook(0x465DA0, &CCam::RotCamIfInFrontCar, PATCH_JUMP);
-	InjectHook(0x4662D0, &CCam::WorkOutCamHeightWeeCar, PATCH_JUMP);
-	InjectHook(0x466650, &CCam::WorkOutCamHeight, PATCH_JUMP);
-	InjectHook(0x458600, &CCam::LookBehind, PATCH_JUMP);
-	InjectHook(0x458C40, &CCam::LookLeft, PATCH_JUMP);
-	InjectHook(0x458FB0, &CCam::LookRight, PATCH_JUMP);
-	InjectHook(0x4574C0, &CCam::ClipIfPedInFrontOfPlayer, PATCH_JUMP);
-	InjectHook(0x459300, &CCam::KeepTrackOfTheSpeed, PATCH_JUMP);
-	InjectHook(0x458580, &CCam::IsTargetInWater, PATCH_JUMP);
-	InjectHook(0x4570C0, &CCam::AvoidWallsTopDownPed, PATCH_JUMP);
-	InjectHook(0x4595B0, &CCam::PrintMode, PATCH_JUMP);
-
-	InjectHook(0x467400, &CCam::ProcessSpecialHeightRoutines, PATCH_JUMP);
-	InjectHook(0x4596A0, &CCam::Process, PATCH_JUMP);
-	InjectHook(0x45E3A0, &CCam::Process_FollowPed, PATCH_JUMP);
-	InjectHook(0x45FF70, &CCam::Process_FollowPedWithMouse, PATCH_JUMP);
-	InjectHook(0x45BE60, &CCam::Process_BehindCar, PATCH_JUMP);
-	InjectHook(0x45C090, &CCam::Process_Cam_On_A_String, PATCH_JUMP);
-	InjectHook(0x463EB0, &CCam::Process_TopDown, PATCH_JUMP);
-	InjectHook(0x464390, &CCam::Process_TopDownPed, PATCH_JUMP);
-	InjectHook(0x461AF0, &CCam::Process_Rocket, PATCH_JUMP);
-	InjectHook(0x460E00, &CCam::Process_M16_1stPerson, PATCH_JUMP);
-	InjectHook(0x459FA0, &CCam::Process_1stPerson, PATCH_JUMP);
-	InjectHook(0x462420, &CCam::Process_Sniper, PATCH_JUMP);
-	InjectHook(0x463130, &CCam::Process_Syphon, PATCH_JUMP);
-	InjectHook(0x463A70, &CCam::Process_Syphon_Crim_In_Front, PATCH_JUMP);
-	InjectHook(0x45B470, &CCam::Process_BehindBoat, PATCH_JUMP);
-	InjectHook(0x45D2F0, &CCam::Process_Fight_Cam, PATCH_JUMP);
-	InjectHook(0x45DC20, &CCam::Process_FlyBy, PATCH_JUMP);
-	InjectHook(0x464D10, &CCam::Process_WheelCam, PATCH_JUMP);
-	InjectHook(0x45DA20, &CCam::Process_Fixed, PATCH_JUMP);
-	InjectHook(0x461940, &CCam::Process_Player_Fallen_Water, PATCH_JUMP);
-	InjectHook(0x45C400, &CCam::Process_Circle, PATCH_JUMP);
-	InjectHook(0x462FC0, &CCam::Process_SpecialFixedForSyphon, PATCH_JUMP);
-	InjectHook(0x45CCC0, &CCam::Process_Debug, PATCH_JUMP);
-	InjectHook(0x4656C0, &CCam::ProcessPedsDeadBaby, PATCH_JUMP);
-	InjectHook(0x465000, &CCam::ProcessArrestCamOne, PATCH_JUMP);
-	InjectHook(0x4653C0, &CCam::ProcessArrestCamTwo, PATCH_JUMP);
-
-	InjectHook(0x456CE0, &FindSplinePathPositionFloat, PATCH_JUMP);
-	InjectHook(0x4569A0, &FindSplinePathPositionVector, PATCH_JUMP);
-ENDPATCHES

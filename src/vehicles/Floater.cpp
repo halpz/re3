@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Timer.h"
 #include "WaterLevel.h"
 #include "ModelIndices.h"
@@ -7,9 +7,9 @@
 #include "Vehicle.h"
 #include "Floater.h"
 
-cBuoyancy mod_Buoyancy;// = *(cBuoyancy*)0x8F2674;
+cBuoyancy mod_Buoyancy;
 
-static float fVolMultiplier = 1.0f; // 0x601394;
+static float fVolMultiplier = 1.0f;
 // amount of boat volume in bounding box
 // 1.0-volume is the empty space in the bbox
 static float fBoatVolumeDistribution[9] = {
@@ -183,12 +183,3 @@ cBuoyancy::CalcBuoyancyForce(CPhysical *phys, CVector *point, CVector *impulse)
 	*impulse = CVector(0.0f, 0.0f, m_volumeUnderWater*m_buoyancy*CTimer::GetTimeStep());
 	return true;
 }
-
-STARTPATCHES
-	InjectHook(0x546270, &cBuoyancy::ProcessBuoyancy, PATCH_JUMP);
-	InjectHook(0x546360, &cBuoyancy::PreCalcSetup, PATCH_JUMP);
-	InjectHook(0x5466F0, &cBuoyancy::SimpleCalcBuoyancy, PATCH_JUMP);
-	InjectHook(0x546820, &cBuoyancy::SimpleSumBuoyancyData, PATCH_JUMP);
-	InjectHook(0x546620, &cBuoyancy::FindWaterLevel, PATCH_JUMP);
-	InjectHook(0x5465A0, &cBuoyancy::CalcBuoyancyForce, PATCH_JUMP);
-ENDPATCHES

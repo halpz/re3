@@ -29,9 +29,9 @@ enum eWinVersion
 	OS_WINXP,
 };
 
-extern DWORD &_dwOperatingSystemVersion;
+extern DWORD _dwOperatingSystemVersion;
 
-extern RwUInt32 &gGameState;
+extern RwUInt32 gGameState;
 
 /* platform specfic global data */
 typedef struct
@@ -127,5 +127,5 @@ void HandleExit();
 #endif                          /* __cplusplus */
 
 
-extern DWORD &_dwOperatingSystemVersion;
+extern DWORD _dwOperatingSystemVersion;
 #endif /* (!defined(_PLATFORM_WIN_H)) */

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "WeaponEffects.h"
 #include "TxdStore.h"
 #include "Sprite.h"
@@ -94,13 +94,3 @@ CWeaponEffects::Render(void)
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void *)rwBLENDINVSRCALPHA);
 	}
 }
-
-STARTPATCHES
-	//InjectHook(0x564C40, CWeaponEffects::CWeaponEffects, PATCH_JUMP);
-	//InjectHook(0x564C50, CWeaponEffects::~CWeaponEffects, PATCH_JUMP);
-	InjectHook(0x564C60, CWeaponEffects::Init, PATCH_JUMP);
-	InjectHook(0x564CF0, CWeaponEffects::Shutdown, PATCH_JUMP);
-	InjectHook(0x564D00, CWeaponEffects::MarkTarget, PATCH_JUMP);
-	InjectHook(0x564D60, CWeaponEffects::ClearCrossHair, PATCH_JUMP);
-	InjectHook(0x564D70, CWeaponEffects::Render, PATCH_JUMP);
-ENDPATCHES

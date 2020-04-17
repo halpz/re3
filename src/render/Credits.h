@@ -2,8 +2,8 @@
 
 class CCredits
 {
-	static bool &bCreditsGoing;
-	static uint32 &CreditsStartTime;
+	static bool bCreditsGoing;
+	static uint32 CreditsStartTime;
 public:
 	static void Init(void);
 	static void Start(void);

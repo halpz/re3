@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Antennas.h"
 
 CAntenna CAntennas::aAntennas[NUMANTENNAS];
@@ -123,17 +123,3 @@ CAntenna::Update(CVector dir, CVector basepos)
 		pos[i] = newpos;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x4F64D0, &CAntennas::Init, PATCH_JUMP);
-	InjectHook(0x4F6550, &CAntennas::Update, PATCH_JUMP);
-	InjectHook(0x4F66C0, &CAntennas::RegisterOne, PATCH_JUMP);
-	InjectHook(0x4F6590, &CAntennas::Render, PATCH_JUMP);
-	InjectHook(0x4F6830, &CAntenna::Update, PATCH_JUMP);
-
-	// give to cheetah for testing
-//	Patch<int>(0x535B50+1, 105);
-//	Patch<float>(0x535B57+7, -0.84);
-//	Patch<float>(0x535B74+7, 0.78);
-//	Patch<float>(0x535B69+7, 0.24);
-ENDPATCHES

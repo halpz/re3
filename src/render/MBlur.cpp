@@ -1,14 +1,14 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "RwHelper.h"
 #include "Camera.h"
 #include "MBlur.h"
 
 // Originally taken from RW example 'mblur'
 
-RwRaster *&CMBlur::pFrontBuffer = *(RwRaster**)0x8E2C48;
-bool &CMBlur::ms_bJustInitialised = *(bool*)0x95CDAB;
-bool &CMBlur::BlurOn = *(bool*)0x95CDAD;
+RwRaster *CMBlur::pFrontBuffer;
+bool CMBlur::ms_bJustInitialised;
+bool CMBlur::BlurOn;
 
 static RwIm2DVertex Vertex[4];
 static RwImVertexIndex Index[6] = { 0, 1, 2, 0, 2, 3 };
@@ -213,11 +213,3 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type,
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 }
-
-STARTPATCHES
-	InjectHook(0x50AE40, CMBlur::MotionBlurOpen, PATCH_JUMP);
-	InjectHook(0x50B170, CMBlur::MotionBlurClose, PATCH_JUMP);
-	InjectHook(0x50A800, CMBlur::CreateImmediateModeData, PATCH_JUMP);
-	InjectHook(0x50AD70, CMBlur::MotionBlurRender, PATCH_JUMP);
-	InjectHook(0x50A9C0, CMBlur::OverlayRender, PATCH_JUMP);
-ENDPATCHES

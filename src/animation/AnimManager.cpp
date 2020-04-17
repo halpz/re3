@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "ModelInfo.h"
 #include "ModelIndices.h"
@@ -909,23 +909,3 @@ CAnimManager::RemoveLastAnimFile(void)
 	for(i = 0; i < ms_aAnimBlocks[ms_numAnimBlocks].numAnims; i++)
 		ms_aAnimations[ms_aAnimBlocks[ms_numAnimBlocks].firstIndex + i].RemoveAnimSequences();
 }
-
-
-STARTPATCHES
-	InjectHook(0x403380, CAnimManager::Initialise, PATCH_JUMP);
-	InjectHook(0x4033B0, CAnimManager::Shutdown, PATCH_JUMP);
-	InjectHook(0x403410, CAnimManager::UncompressAnimation, PATCH_JUMP);
-	InjectHook(0x4034A0, CAnimManager::GetAnimationBlock, PATCH_JUMP);
-	InjectHook(0x4034F0, (CAnimBlendHierarchy *(*)(const char*, CAnimBlock*))CAnimManager::GetAnimation, PATCH_JUMP);
-	InjectHook(0x4035B0, CAnimManager::GetAnimGroupName, PATCH_JUMP);
-	InjectHook(0x4035C0, CAnimManager::CreateAnimAssociation, PATCH_JUMP);
-	InjectHook(0x4035E0, (CAnimBlendAssociation *(*)(AssocGroupId, AnimationId))CAnimManager::GetAnimAssociation, PATCH_JUMP);
-	InjectHook(0x403600, (CAnimBlendAssociation *(*)(AssocGroupId, const char*))CAnimManager::GetAnimAssociation, PATCH_JUMP);
-	InjectHook(0x403620, CAnimManager::AddAnimation, PATCH_JUMP);
-	InjectHook(0x4036A0, CAnimManager::AddAnimationAndSync, PATCH_JUMP);
-	InjectHook(0x403710, CAnimManager::BlendAnimation, PATCH_JUMP);
-	InjectHook(0x4038F0, CAnimManager::LoadAnimFiles, PATCH_JUMP);
-	InjectHook(0x403A10, (void (*)(const char *))CAnimManager::LoadAnimFile, PATCH_JUMP);
-	InjectHook(0x403A40, (void (*)(int, bool))CAnimManager::LoadAnimFile, PATCH_JUMP);
-	InjectHook(0x404320, CAnimManager::RemoveLastAnimFile, PATCH_JUMP);
-ENDPATCHES

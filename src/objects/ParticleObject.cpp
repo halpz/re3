@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "ParticleObject.h"
 #include "Timer.h"
 #include "General.h"
@@ -9,11 +9,11 @@
 #include "Game.h"
 
 
-CParticleObject (&gPObjectArray)[MAX_PARTICLEOBJECTS] = *(CParticleObject(*)[MAX_PARTICLEOBJECTS])*(uintptr*)0x62A58C;
+CParticleObject gPObjectArray[MAX_PARTICLEOBJECTS];
 
-CParticleObject *&CParticleObject::pCloseListHead = *(CParticleObject **)int(0x8F4340);
-CParticleObject *&CParticleObject::pFarListHead = *(CParticleObject **)int(0x942F78);
-CParticleObject *&CParticleObject::pUnusedListHead = *(CParticleObject **)int(0x94128C);
+CParticleObject *CParticleObject::pCloseListHead;
+CParticleObject *CParticleObject::pFarListHead;
+CParticleObject *CParticleObject::pUnusedListHead;
 
 CAudioHydrant List[MAX_AUDIOHYDRANTS];
 
@@ -1099,39 +1099,3 @@ CParticleObject::MoveToList(CParticleObject **from, CParticleObject **to, CParti
 	if ( obj->m_pNext )
 		obj->m_pNext->m_pPrev = obj;
 }
-
-class CParticleObject_ : public CParticleObject
-{
-public:
-	void ctor() { CParticleObject::CParticleObject(); }
-	void dtor() { CParticleObject::~CParticleObject(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4BC330, CAudioHydrant::Add, PATCH_JUMP);
-	InjectHook(0x4BC390, CAudioHydrant::Remove, PATCH_JUMP);
-	
-	InjectHook(0x4BC3E0, &CParticleObject_::ctor, PATCH_JUMP);
-	InjectHook(0x4BC420, &CParticleObject_::dtor, PATCH_JUMP);
-	InjectHook(0x4BC440, CParticleObject::Initialise, PATCH_JUMP);
-	
-	InjectHook(0x4BC4D0, (CParticleObject *(*)(uint16, CVector const &, uint8))CParticleObject::AddObject, PATCH_JUMP);
-	InjectHook(0x4BC520, (CParticleObject *(*)(uint16, CVector const &, float, uint8))CParticleObject::AddObject, PATCH_JUMP);
-	InjectHook(0x4BC570, (CParticleObject *(*)(uint16, CVector const &, CVector const &, float, uint8))CParticleObject::AddObject, PATCH_JUMP);
-	InjectHook(0x4BC5B0, (CParticleObject *(*)(uint16, CVector const &, CVector const &, float, uint32, RwRGBA const &, uint8))CParticleObject::AddObject, PATCH_JUMP);
-
-	InjectHook(0x4BC9F0, &CParticleObject::RemoveObject, PATCH_JUMP);
-	InjectHook(0x4BCA30, CParticleObject::UpdateAll, PATCH_JUMP);
-	InjectHook(0x4BCA80, &CParticleObject::UpdateClose, PATCH_JUMP);
-	InjectHook(0x4BF9F0, &CParticleObject::UpdateFar, PATCH_JUMP);
-	InjectHook(0x4BFA80, CParticleObject::SaveParticle, PATCH_JUMP);
-	InjectHook(0x4BFB30, CParticleObject::LoadParticle, PATCH_JUMP);
-	InjectHook(0x4BFC80, CParticleObject::RemoveAllParticleObjects, PATCH_JUMP);
-	InjectHook(0x4BFD10, CParticleObject::MoveToList, PATCH_JUMP);
-	//InjectHook(0x4BFD70, CParticleObject::~CParticleObject, PATCH_JUMP); // virtual
-	//InjectHook(0x4BFDB0, `global constructor keyed to'ParticleObject.cpp, PATCH_JUMP);
-	//InjectHook(0x4BFE00, CAudioHydrant::CAudioHydrant, PATCH_JUMP);
-	//InjectHook(0x4BFE10, sub_4BFE10, PATCH_JUMP); // destroy gPObjectArray array
-	
-	
-ENDPATCHES

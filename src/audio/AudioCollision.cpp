@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "DMAudio.h"
 #include "Entity.h"
 #include "AudioCollision.h"
@@ -406,14 +406,3 @@ cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface
 		m_sCollisionManager.AddCollisionToRequestedQueue();
 	}
 }
-
-STARTPATCHES
-InjectHook(0x5685E0, &cAudioCollisionManager::AddCollisionToRequestedQueue, PATCH_JUMP);
-InjectHook(0x569060, &cAudioManager::GetCollisionOneShotRatio, PATCH_JUMP);
-InjectHook(0x5693B0, &cAudioManager::GetCollisionRatio, PATCH_JUMP);
-InjectHook(0x568410, &cAudioManager::ReportCollision, PATCH_JUMP);
-InjectHook(0x5686D0, &cAudioManager::ServiceCollisions, PATCH_JUMP);
-InjectHook(0x568E20, &cAudioManager::SetLoopingCollisionRequestedSfxFreqAndGetVol, PATCH_JUMP);
-InjectHook(0x568D30, &cAudioManager::SetUpLoopingCollisionSound, PATCH_JUMP);
-InjectHook(0x5689D0, &cAudioManager::SetUpOneShotCollisionSound, PATCH_JUMP);
-ENDPATCHES

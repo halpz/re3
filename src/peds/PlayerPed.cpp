@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "PlayerPed.h"
 #include "Wanted.h"
 #include "Fire.h"
@@ -1495,41 +1495,3 @@ CPlayerPed::ProcessControl(void)
 		m_bSpeedTimerFlag = false;
 	}
 }
-
-#include <new>
-
-class CPlayerPed_ : public CPlayerPed
-{
-public:
-	CPlayerPed* ctor(void) { return ::new (this) CPlayerPed(); }
-	void dtor(void) { CPlayerPed::~CPlayerPed(); }
-	void SetMoveAnim_(void) { CPlayerPed::SetMoveAnim(); }
-	void ProcessControl_(void) { CPlayerPed::ProcessControl(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4EF7E0, &CPlayerPed_::ctor, PATCH_JUMP);
-	InjectHook(0x4EFB30, &CPlayerPed_::dtor, PATCH_JUMP);
-	InjectHook(0x4F3760, &CPlayerPed_::SetMoveAnim_, PATCH_JUMP);
-	InjectHook(0x4EFD90, &CPlayerPed_::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x4F28A0, &CPlayerPed::ClearWeaponTarget, PATCH_JUMP);
-	InjectHook(0x4F3700, &CPlayerPed::AnnoyPlayerPed, PATCH_JUMP);
-	InjectHook(0x4F36C0, &CPlayerPed::GetPlayerInfoForThisPlayerPed, PATCH_JUMP);
-	InjectHook(0x4F2560, &CPlayerPed::MakeChangesForNewWeapon, PATCH_JUMP);
-	InjectHook(0x4F07C0, &CPlayerPed::ReApplyMoveAnims, PATCH_JUMP);
-	InjectHook(0x4F0880, &CPlayerPed::SetRealMoveAnim, PATCH_JUMP);
-	InjectHook(0x4F1810, &CPlayerPed::PlayerControlFighter, PATCH_JUMP);
-	InjectHook(0x4F1340, &CPlayerPed::RestoreSprintEnergy, PATCH_JUMP);
-	InjectHook(0x4F1380, &CPlayerPed::DoWeaponSmoothSpray, PATCH_JUMP);
-	InjectHook(0x4F36E0, &CPlayerPed::DoStuffToGoOnFire, PATCH_JUMP);
-	InjectHook(0x4F3350, &CPlayerPed::DoesTargetHaveToBeBroken, PATCH_JUMP);
-	InjectHook(0x4F31D0, &CPlayerPed::RunningLand, PATCH_JUMP);
-	InjectHook(0x4F2D00, &CPlayerPed::IsThisPedAttackingPlayer, PATCH_JUMP);
-	InjectHook(0x4F1CF0, &CPlayerPed::PlayerControlSniper, PATCH_JUMP);
-	InjectHook(0x4F2310, &CPlayerPed::ProcessWeaponSwitch, PATCH_JUMP);
-	InjectHook(0x4F1DF0, &CPlayerPed::PlayerControlM16, PATCH_JUMP);
-	InjectHook(0x4F3460, &CPlayerPed::KeepAreaAroundPlayerClear, PATCH_JUMP);
-	InjectHook(0x4F1970, &CPlayerPed::PlayerControl1stPersonRunAround, PATCH_JUMP);
-	InjectHook(0x4F1EF0, &CPlayerPed::ProcessPlayerWeapon, PATCH_JUMP);
-	InjectHook(0x4F2640, &CPlayerPed::ProcessAnimGroups, PATCH_JUMP);
-ENDPATCHES

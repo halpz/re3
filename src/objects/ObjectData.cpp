@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "ModelInfo.h"
 #include "Object.h"
@@ -96,8 +96,3 @@ CObjectData::SetObjectData(int32 modelId, CObject &object)
 		object.bExplosionProof = true;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x4BC0E0, CObjectData::Initialise, PATCH_JUMP);
-	InjectHook(0x4BC270, CObjectData::SetObjectData, PATCH_JUMP);
-ENDPATCHES

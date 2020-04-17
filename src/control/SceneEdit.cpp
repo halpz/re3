@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "SceneEdit.h"
 
 #include "Automobile.h"

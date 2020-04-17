@@ -62,9 +62,9 @@ public:
 	int8                m_nCreationChance;
 	char _pad1[2];
 	
-	static CParticleObject *&pCloseListHead;
-	static CParticleObject *&pFarListHead;
-	static CParticleObject *&pUnusedListHead;
+	static CParticleObject *pCloseListHead;
+	static CParticleObject *pFarListHead;
+	static CParticleObject *pUnusedListHead;
 	
 	CParticleObject();
 	~CParticleObject();
@@ -89,7 +89,7 @@ public:
 	static void MoveToList(CParticleObject **from, CParticleObject **to, CParticleObject *obj);
 };
 
-extern CParticleObject (&gPObjectArray)[MAX_PARTICLEOBJECTS];
+extern CParticleObject gPObjectArray[MAX_PARTICLEOBJECTS];
 
 class CAudioHydrant
 {

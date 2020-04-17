@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Ped.h"
 #include "PedPlacement.h"
 #include "World.h"
@@ -49,8 +49,3 @@ CPedPlacement::IsPositionClearForPed(CVector* pos)
 	CWorld::FindObjectsKindaColliding(*pos, 0.75f, true, &count, 2, nil, false, true, true, false, false);
 	return count == 0;
 }
-
-STARTPATCHES
-	InjectHook(0x4EE340, &CPedPlacement::FindZCoorForPed, PATCH_JUMP);
-	InjectHook(0x4EE310, &CPedPlacement::IsPositionClearOfCars, PATCH_JUMP);
-ENDPATCHES

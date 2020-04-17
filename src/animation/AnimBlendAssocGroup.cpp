@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "ModelInfo.h"
 #include "AnimManager.h"
@@ -148,15 +148,3 @@ CAnimBlendAssocGroup::CreateAssociations(const char *blockName, RpClump *clump, 
 	}
 	numAssociations = numAssocs;
 }
-
-
-
-STARTPATCHES
-	InjectHook(0x4012D0, &CAnimBlendAssocGroup::DestroyAssociations, PATCH_JUMP);
-	InjectHook(0x4013D0, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(uint32))&CAnimBlendAssocGroup::GetAnimation, PATCH_JUMP);
-	InjectHook(0x401300, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(const char*))&CAnimBlendAssocGroup::GetAnimation, PATCH_JUMP);
-	InjectHook(0x401420, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(uint32))&CAnimBlendAssocGroup::CopyAnimation, PATCH_JUMP);
-	InjectHook(0x4013E0, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(const char*))&CAnimBlendAssocGroup::CopyAnimation, PATCH_JUMP);
-	InjectHook(0x401130, (void (CAnimBlendAssocGroup::*)(const char*))&CAnimBlendAssocGroup::CreateAssociations, PATCH_JUMP);
-	InjectHook(0x401220, (void (CAnimBlendAssocGroup::*)(const char*, RpClump*, const char**, int))&CAnimBlendAssocGroup::CreateAssociations, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include <ctype.h>
 
 #include "Zones.h"
@@ -8,18 +8,18 @@
 #include "Text.h"
 #include "World.h"
 
-eLevelName &CTheZones::m_CurrLevel = *(eLevelName*)0x8F2BC8;
-CZone *&CTheZones::m_pPlayersZone = *(CZone**)0x8F254C;
-int16 &CTheZones::FindIndex = *(int16*)0x95CC40;
+eLevelName CTheZones::m_CurrLevel;
+CZone *CTheZones::m_pPlayersZone;
+int16 CTheZones::FindIndex;
 
-uint16 &CTheZones::NumberOfAudioZones = *(uint16*)0x95CC84;
-int16 *CTheZones::AudioZoneArray = (int16*)0x713BC0;
-uint16 &CTheZones::TotalNumberOfMapZones = *(uint16*)0x95CC74;
-uint16 &CTheZones::TotalNumberOfZones = *(uint16*)0x95CC36;
-CZone *CTheZones::ZoneArray = (CZone*)0x86BEE0;
-CZone *CTheZones::MapZoneArray = (CZone*)0x663EC0;
-uint16 &CTheZones::TotalNumberOfZoneInfos = *(uint16*)0x95CC3C;
-CZoneInfo *CTheZones::ZoneInfoArray = (CZoneInfo*)0x714400;
+uint16 CTheZones::NumberOfAudioZones;
+int16 CTheZones::AudioZoneArray[NUMAUDIOZONES];
+uint16 CTheZones::TotalNumberOfMapZones;
+uint16 CTheZones::TotalNumberOfZones;
+CZone CTheZones::ZoneArray[NUMZONES];
+CZone CTheZones::MapZoneArray[NUMMAPZONES];
+uint16 CTheZones::TotalNumberOfZoneInfos;
+CZoneInfo CTheZones::ZoneInfoArray[2*NUMZONES];
 
 #define SWAPF(a, b) { float t; t = a; a = b; b = t; }
 
@@ -840,36 +840,3 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 length)
 	TotalNumberOfMapZones = *(uint16*)(buffer);
 	NumberOfAudioZones = *(uint16*)(buffer+2);
 }
-
-
-STARTPATCHES
-	InjectHook(0x4B5DD0, &CZone::GetTranslatedName, PATCH_JUMP);
-	InjectHook(0x4B5DE0, CTheZones::Init, PATCH_JUMP);
-	InjectHook(0x4B61D0, CTheZones::Update, PATCH_JUMP);
-	InjectHook(0x4B6210, CTheZones::CreateZone, PATCH_JUMP);
-	InjectHook(0x4B6380, CTheZones::CreateMapZone, PATCH_JUMP);
-	InjectHook(0x4B64C0, CTheZones::PostZoneCreation, PATCH_JUMP);
-	InjectHook(0x4B6500, CTheZones::InsertZoneIntoZoneHierarchy, PATCH_JUMP);
-	InjectHook(0x4B6530, CTheZones::InsertZoneIntoZoneHierRecursive, PATCH_JUMP);
-	InjectHook(0x4B65F0, CTheZones::ZoneIsEntirelyContainedWithinOtherZone, PATCH_JUMP);
-	InjectHook(0x4B6710, CTheZones::PointLiesWithinZone, PATCH_JUMP);
-	InjectHook(0x4B6910, CTheZones::GetLevelFromPosition, PATCH_JUMP);
-	InjectHook(0x4B69B0, CTheZones::FindSmallestZonePosition, PATCH_JUMP);
-	InjectHook(0x4B6790, CTheZones::FindSmallestZonePositionType, PATCH_JUMP);
-	InjectHook(0x4B6890, CTheZones::FindSmallestZonePositionILN, PATCH_JUMP);
-	InjectHook(0x4B6800, CTheZones::FindZoneByLabelAndReturnIndex, PATCH_JUMP);
-	InjectHook(0x4B6FA0, CTheZones::GetZone, PATCH_JUMP);
-	InjectHook(0x4B84F0, CTheZones::GetPointerForZoneIndex, PATCH_JUMP);
-	InjectHook(0x4B6A10, CTheZones::GetZoneInfo, PATCH_JUMP);
-	InjectHook(0x4B6FB0, CTheZones::GetZoneInfoForTimeOfDay, PATCH_JUMP);
-	InjectHook(0x4B6A50, CTheZones::SetZoneCarInfo, PATCH_JUMP);
-	InjectHook(0x4B6DC0, CTheZones::SetZonePedInfo, PATCH_JUMP);
-	InjectHook(0x4B6EB0, CTheZones::SetCarDensity, PATCH_JUMP);
-	InjectHook(0x4B6F00, CTheZones::SetPedDensity, PATCH_JUMP);
-	InjectHook(0x4B6F50, CTheZones::SetPedGroup, PATCH_JUMP);
-	InjectHook(0x4B83E0, CTheZones::FindAudioZone, PATCH_JUMP);
-	InjectHook(0x4B8430, CTheZones::FindZoneForPoint, PATCH_JUMP);
-	InjectHook(0x4B8340, CTheZones::AddZoneToAudioZoneArray, PATCH_JUMP);
-	InjectHook(0x4B8510, CTheZones::SaveAllZones, PATCH_JUMP);
-	InjectHook(0x4B8950, CTheZones::LoadAllZones, PATCH_JUMP);
-ENDPATCHES

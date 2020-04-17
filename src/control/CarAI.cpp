@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "CarAI.h"
 
 #include "Accident.h"
@@ -33,7 +33,6 @@ float CCarAI::FindSwitchDistanceFar(CVehicle* pVehicle)
 
 void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 {
-	//((void(*)(CVehicle*))(0x413E50))(pVehicle);
 	//return;
 	if (pVehicle->bIsLawEnforcer){
 		if (pVehicle->AutoPilot.m_nCarMission == MISSION_BLOCKCAR_FARAWAY ||
@@ -637,6 +636,3 @@ void CCarAI::MakeWayForCarWithSiren(CVehicle *pVehicle)
 		}
 	}
 }
-
-STARTPATCHES
-ENDPATCHES

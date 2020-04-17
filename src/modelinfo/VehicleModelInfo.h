@@ -81,11 +81,11 @@ public:
 	RpAtomic *m_comps[6];
 	int32 m_numComps;
 
-	static int8 *ms_compsToUse;	// [2];
-	static int8 *ms_compsUsed;	// [2];
-	static RwTexture **ms_pEnvironmentMaps;		// [NUM_VEHICLE_ENVMAPS]
-	static RwRGBA *ms_vehicleColourTable;		// [256]
-	static RwTexture **ms_colourTextureTable;	// [256]
+	static int8 ms_compsToUse[2];
+	static int8 ms_compsUsed[2];
+	static RwTexture *ms_pEnvironmentMaps[NUM_VEHICLE_ENVMAPS];
+	static RwRGBA ms_vehicleColourTable[256];
+	static RwTexture *ms_colourTextureTable[256];
 	static RwObjectNameIdAssocation *ms_vehicleDescs[NUM_VEHICLE_TYPES];
 
 	CVehicleModelInfo(void);
