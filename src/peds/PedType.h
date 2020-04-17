@@ -71,7 +71,7 @@ class CPedType
 	uint32 m_threats;
 	uint32 m_avoid;
 
-	static CPedType *(&ms_apPedType)[NUM_PEDTYPES];
+	static CPedType *ms_apPedType[NUM_PEDTYPES];
 public:
 
 	static void Initialise(void);

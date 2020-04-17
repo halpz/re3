@@ -350,6 +350,9 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddVarBool8("Debug", "Draw hud", (int8*)&CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVarBool8("Debug", "Edit on", (int8*)&CSceneEdit::m_bEditOn, nil);
+#ifdef MENU_MAP
+		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
+#endif
 		DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
 		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
@@ -374,9 +377,6 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", (int8*)&gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
-#ifdef MENU_MAP
-		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
-#endif
 #ifdef TOGGLEABLE_BETA_FEATURES
 		DebugMenuAddVarBool8("Debug", "Toggle banned particles", (int8*)&CParticle::bEnableBannedParticles, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", (int8*)&CPed::bPopHeadsOnHeadshot, nil);

@@ -22,4 +22,4 @@ public:
 	void Init() { m_nCurrentLine = 0; m_nLineCount = 0; }
 };
 
-extern CConsole &TheConsole;
+extern CConsole TheConsole;

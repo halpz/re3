@@ -1623,6 +1623,15 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 	if (ped->IsPlayer())
 		AudioManager.PlayerJustLeftCar();
 
+#ifdef VC_PED_PORTS
+	if (ped->m_objective == OBJECTIVE_LEAVE_CAR_AND_DIE) {
+		dragAssoc->SetDeleteCallback(PedSetDraggedOutCarPositionCB, ped);
+		ped->m_fHealth = 0.0f;
+		ped->SetDie(ANIM_FLOOR_HIT, 1000.0f, 0.5f);
+		return;
+	}
+#endif
+
 	if (quickJackedAssoc) {
 		dragAssoc->SetDeleteCallback(PedSetQuickDraggedOutCarPositionCB, ped);
 	} else {
@@ -5186,7 +5195,7 @@ CPed::SetFall(int extraTime, AnimationId animId, uint8 evenIfNotInControl)
 	}
 
 	if (extraTime == -1) {
-		m_getUpTimer = -1;
+		m_getUpTimer = UINT32_MAX;
 	} else if (fallAssoc) {
 		if (IsPlayer()) {
 			m_getUpTimer = 1000.0f * fallAssoc->hierarchy->totalLength
@@ -6448,7 +6457,7 @@ CPed::ExitCar(void)
 void
 CPed::Fall(void)
 {
-	if (m_getUpTimer != -1 && CTimer::GetTimeInMilliseconds() > m_getUpTimer
+	if (m_getUpTimer != UINT32_MAX && CTimer::GetTimeInMilliseconds() > m_getUpTimer
 #ifdef VC_PED_PORTS
 		&& bIsStanding
 #endif
@@ -10663,7 +10672,7 @@ CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 		return;
 
 	if (ped->EnteringCar()) {
-		bool isLow = veh->bLowVehicle;
+		bool isLow = !!veh->bLowVehicle;
 
 		if (!veh->bIsBus)
 			veh->ProcessOpenDoor(ped->m_vehEnterType, ANIM_CAR_CLOSEDOOR_LHS, 1.0f);
@@ -10691,7 +10700,11 @@ CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 #endif
 							|| !veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, nil))))) {
 
-			if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER)
+			if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER
+#ifdef VC_PED_PORTS
+				|| ped->m_nPedState == PED_CARJACK
+#endif
+				)
 				veh->bIsBeingCarJacked = false;
 
 			ped->m_objective = OBJECTIVE_ENTER_CAR_AS_PASSENGER;
@@ -11027,9 +11040,9 @@ CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 		PedSetInCarCB(nil, ped);
 		return;
 	}
-	bool isVan = veh->bIsVan;
-	bool isBus = veh->bIsBus;
-	bool isLow = veh->bLowVehicle;
+	bool isVan = !!veh->bIsVan;
+	bool isBus = !!veh->bIsBus;
+	bool isLow = !!veh->bLowVehicle;
 	eDoors enterDoor;
 	switch (ped->m_vehEnterType) {
 		case CAR_DOOR_RF:
@@ -11144,7 +11157,7 @@ CPed::PedAnimPullPedOutCB(CAnimBlendAssociation* animAssoc, void* arg)
 		if (!ped->IsNotInWreckedVehicle())
 			return;
 
-		bool isLow = veh->bLowVehicle;
+		bool isLow = !!veh->bLowVehicle;
 
 		int padNo;
 		if (ped->IsPlayer()) {
@@ -11426,7 +11439,9 @@ CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation* animAssoc, void* arg)
 	CMatrix pedMat(ped->GetMatrix());
 	CVector posAfterBeingDragged = Multiply3x3(pedMat, (itsRearDoor ? -vecPedDraggedOutCarAnimOffset : vecPedDraggedOutCarAnimOffset));
 	posAfterBeingDragged += ped->GetPosition();
+#ifndef VC_PED_PORTS
 	posAfterBeingDragged.z += 1.0f;
+#endif
 	CPedPlacement::FindZCoorForPed(&posAfterBeingDragged);
 	ped->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 	ped->GetPosition() = posAfterBeingDragged;
@@ -11476,17 +11491,26 @@ CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation* animAssoc, void* arg)
 		&& ped->m_pMyVehicle->VehicleCreatedBy != MISSION_VEHICLE && driver
 		&& driver->IsPlayer() && !CTheScripts::IsPlayerOnAMission()) {
 
+#ifndef VC_PED_PORTS
 		if (CGeneral::GetRandomNumber() & 1)
 			ped->SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, driver);
 		else
+#endif
 			ped->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, ped->m_pMyVehicle);
 
 	} else {
-		ped->m_nPedState = PED_NONE;
-		ped->m_nLastPedState = PED_NONE;
-		ped->SetFlee(ped->m_pMyVehicle->GetPosition(), 10000);
-		ped->bUsePedNodeSeek = true;
-		ped->m_pNextPathNode = nil;
+#ifdef VC_PED_PORTS
+		if (ped->m_pedStats->m_temper > ped->m_pedStats->m_fear && ped->CharCreatedBy != MISSION_CHAR
+			&& ped->m_pMyVehicle->VehicleCreatedBy != MISSION_VEHICLE && !driver
+			&& FindPlayerPed()->m_carInObjective == ped->m_pMyVehicle && !CTheScripts::IsPlayerOnAMission())
+			ped->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, ped->m_pMyVehicle);
+		else
+#endif
+		{
+			ped->m_nPedState = PED_NONE;
+			ped->m_nLastPedState = PED_NONE;
+			ped->SetFindPathAndFlee(ped->m_pMyVehicle->GetPosition(), 10000);
+		}
 	}
 	ped->SetGetUp();
 }
@@ -12289,24 +12313,36 @@ CPed::PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *animAssoc, void 
 				ped->Say(SOUND_PED_FLEE_RUN);
 			}
 		} else {
-			if (ped->m_pedStats->m_temper <= ped->m_pedStats->m_fear
-				|| ped->CharCreatedBy == MISSION_CHAR || veh->VehicleCreatedBy == MISSION_VEHICLE
-				|| !veh->pDriver || !veh->pDriver->IsPlayer()
-				|| CTheScripts::IsPlayerOnAMission()) {
+			if (ped->m_pedStats->m_temper > ped->m_pedStats->m_fear
+				&& ped->CharCreatedBy != MISSION_CHAR && veh->VehicleCreatedBy != MISSION_VEHICLE
+				&& veh->pDriver && veh->pDriver->IsPlayer()
+				&& !CTheScripts::IsPlayerOnAMission()) {
 
-				ped->SetFlee(veh->GetPosition(), 10000);
-				ped->bUsePedNodeSeek = true;
-				ped->m_pNextPathNode = nil;
-				if (CGeneral::GetRandomNumber() & 1 || ped->m_pedStats->m_fear > 70) {
-					ped->SetMoveState(PEDMOVE_SPRINT);
-					ped->Say(SOUND_PED_FLEE_SPRINT);
-				} else {
-					ped->Say(SOUND_PED_FLEE_RUN);
+#ifndef VC_PED_PORTS
+				if (CGeneral::GetRandomNumber() < MYRAND_MAX / 2) {
+					ped->SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, veh->pDriver);
+				} else
+#endif
+					ped->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, veh);
+
+			} else {
+#ifdef VC_PED_PORTS
+				if (ped->m_pedStats->m_temper > ped->m_pedStats->m_fear && ped->CharCreatedBy != MISSION_CHAR
+					&& ped->m_pMyVehicle->VehicleCreatedBy != MISSION_VEHICLE && !veh->pDriver
+					&& FindPlayerPed()->m_carInObjective == ped->m_pMyVehicle && !CTheScripts::IsPlayerOnAMission())
+					ped->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, veh);
+				else
+#endif
+				{
+					ped->SetFindPathAndFlee(veh->GetPosition(), 10000);
+					if (CGeneral::GetRandomNumber() & 1 || ped->m_pedStats->m_fear > 70) {
+						ped->SetMoveState(PEDMOVE_SPRINT);
+						ped->Say(SOUND_PED_FLEE_SPRINT);
+					} else {
+						ped->Say(SOUND_PED_FLEE_RUN);
+					}
 				}
-			} else if (CGeneral::GetRandomNumber() < 0x3FFF) {
-				ped->SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, veh->pDriver);
-			} else
-				ped->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, veh);
+			}
 		}
 	}
 	if (ped->m_nLastPedState == PED_IDLE)
