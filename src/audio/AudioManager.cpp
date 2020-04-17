@@ -10035,7 +10035,7 @@ cAudioManager::UpdateReflections()
 						if(CWorld::ProcessVerticalLine(
 						       camPos, m_avecReflectionsPos[4].z, colpoint,
 						       ent, true, false, false, false, true, false,
-						       false)) {
+						       nil)) {
 							m_afReflectionsDistances[4] =
 							    colpoint.point.z - camPos.z;
 						} else {

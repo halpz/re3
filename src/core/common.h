@@ -12,7 +12,7 @@
 #include <math.h>
 
 #ifdef WITHWINDOWS
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 #ifdef WITHD3D
@@ -62,7 +62,7 @@ typedef int64_t int64;
 typedef uint16_t wchar;
 
 #ifndef nil
-#define nil nullptr
+#define nil NULL
 #endif
 
 #include "config.h"

@@ -1,6 +1,7 @@
 #pragma once
 #include "Placeable.h"
 #include "AudioManager.h"
+#include "ParticleType.h"
 
 #define MAX_PARTICLEOBJECTS 100
 #define MAX_AUDIOHYDRANTS   8
@@ -37,7 +38,6 @@ enum eParticleObjectState
 	POBJECTSTATE_FREE,
 };
 
-enum tParticleType;
 class CParticle;
 
 class CParticleObject : public CPlaceable

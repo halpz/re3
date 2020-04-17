@@ -59,8 +59,7 @@ CAnimBlendAssociation*
 CAnimBlendAssocGroup::CopyAnimation(const char *name)
 {
 	CAnimBlendAssociation *anim = GetAnimation(name);
-	if(anim == nil)
-		return nil;
+	if(anim == nil) return nil;
 	CAnimManager::UncompressAnimation(anim->hierarchy);
 	return new CAnimBlendAssociation(*anim);
 }
@@ -70,19 +69,26 @@ strcmpIgnoringDigits(const char *s1, const char *s2)
 {
 	char c1, c2;
 
-	for(;;){
+	for(;;) {
 		c1 = *s1;
 		c2 = *s2;
 		if(c1) s1++;
 		if(c2) s2++;
-		if(c1 == '\0' && c2 == '\0')
-			return true;
+		if(c1 == '\0' && c2 == '\0') return true;
+#if 1
+		if(iswdigit(c1) && iswdigit(c2))
+#else
 		if(__ascii_iswdigit(c1) && __ascii_iswdigit(c2))
+#endif
 			continue;
+#if 1
+		c1 = toupper(c1);
+		c2 = toupper(c2);
+#else
 		c1 = __ascii_toupper(c1);
 		c2 = __ascii_toupper(c2);
-		if(c1 != c2)
-			return false;
+#endif
+		if(c1 != c2) return false;
 	}
 }
 

@@ -124,7 +124,7 @@ public:
 	static bool faststricmp(const char *str1, const char *str2)
 	{
 		for (; *str1; str1++, str2++) {
-#if MUCH_SLOWER
+#if 1
 			if (toupper(*str1) != toupper(*str2))
 #else
 			if (__ascii_toupper(*str1) != __ascii_toupper(*str2))

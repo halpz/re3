@@ -1,12 +1,13 @@
 #pragma once
 
+#include "AnimManager.h"
+#include "CrimeType.h"
+#include "EventList.h"
+#include "PedIK.h"
+#include "PedStats.h"
 #include "Physical.h"
 #include "Weapon.h"
-#include "PedStats.h"
-#include "PedIK.h"
-#include "AnimManager.h"
 #include "WeaponInfo.h"
-#include "EventList.h"
 
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
@@ -17,7 +18,6 @@ class CObject;
 class CFire;
 struct AnimBlendFrameData;
 class CAnimBlendAssociation;
-enum eCrimeType;
 
 struct PedAudioData
 {

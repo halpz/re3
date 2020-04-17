@@ -1,6 +1,7 @@
 #pragma once
 
 #include "audio_enums.h"
+#include "CrimeType.h"
 
 enum eSound : int16
 {
