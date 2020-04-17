@@ -106,31 +106,33 @@ project "re3"
 		defines { "DEBUG", "LIBRW", "RW_D3D9" }
 		staticruntime "off"
 		symbols "Full"
-		setpaths("$(GTA_III_RE_DIR)/", "re3.exe", "")
+		setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
 
 	filter "configurations:Release"
 		defines { "NDEBUG", "LIBRW", "RW_D3D9" }
 		optimize "On"
 		staticruntime "off"
 		symbols "Full"
-		setpaths("$(GTA_III_RE_DIR)/", "re3.exe", "")
+		setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
 		
 	filter "configurations:ReleaseFH"
 		defines { "NDEBUG" }
 		symbols "Full"
 		optimize "off"
 		staticruntime "on"
-		setpaths("$(GTA_III_RE_DIR)/", "re3.exe", "")
+		setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
 
 	filter "configurations:DebugRW"
 		defines { "DEBUG" }
 		staticruntime "on"
 		symbols "On"
-		setpaths("$(GTA_III_RE_DIR)/", "re3.exe", "")
+		setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
+		linkoptions "/SECTION:_rwcseg,ER!W /MERGE:_rwcseg=.text"
 
 	filter "configurations:ReleaseRW"
 		defines { "NDEBUG" }
 		optimize "On"
 		staticruntime "on"
-		setpaths("$(GTA_III_RE_DIR)/", "re3.exe", "")
+		setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
+		linkoptions "/SECTION:_rwcseg,ER!W /MERGE:_rwcseg=.text"
 
