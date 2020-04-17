@@ -1,6 +1,6 @@
 #pragma once
 
-extern RwTexture **gpCoronaTexture;	//[9]
+extern RwTexture *gpCoronaTexture[9];
 
 struct CRegisteredCorona
 {
@@ -42,7 +42,7 @@ static_assert(sizeof(CRegisteredCorona) == 0x80, "CRegisteredCorona: error");
 
 class CCoronas
 {
-	static CRegisteredCorona *aCoronas;	//[NUMCORONAS];
+	static CRegisteredCorona aCoronas[NUMCORONAS];
 public:
 	enum {
 		SUN_CORE = 1,
@@ -77,12 +77,12 @@ public:
 		STREAK_ON,
 	};
 
-	static float &LightsMult;
-	static float &SunScreenY;
-	static float &SunScreenX;
-	static bool &bSmallMoon;
-	static bool &SunBlockedByClouds;
-	static int &bChangeBrightnessImmediately;
+	static float LightsMult;
+	static float SunScreenY;
+	static float SunScreenX;
+	static bool bSmallMoon;
+	static bool SunBlockedByClouds;
+	static int bChangeBrightnessImmediately;
 
 	static void Init(void);
 	static void Shutdown(void);
