@@ -4,7 +4,6 @@
 #include "FileMgr.h"
 #include "PedStats.h"
 
-//CPedStats *(&CPedStats::ms_apPedStats)[NUM_PEDSTATS] = *(CPedStats *(*)[NUM_PEDSTATS]) *(uintptr*)0x9404D4;
 CPedStats *CPedStats::ms_apPedStats[NUM_PEDSTATS];
 
 void

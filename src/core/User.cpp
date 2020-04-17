@@ -9,10 +9,10 @@
 #include "World.h"
 #include "Zones.h"
 
-CPlaceName& CUserDisplay::PlaceName = *(CPlaceName*)0x8F29BC;
-COnscreenTimer& CUserDisplay::OnscnTimer = *(COnscreenTimer*)0x862238;
-CPager& CUserDisplay::Pager = *(CPager*)0x8F2744;
-CCurrentVehicle& CUserDisplay::CurrentVehicle = *(CCurrentVehicle*)0x8F5FE8;
+CPlaceName CUserDisplay::PlaceName;
+COnscreenTimer CUserDisplay::OnscnTimer;
+CPager CUserDisplay::Pager;
+CCurrentVehicle CUserDisplay::CurrentVehicle;
 
 CPlaceName::CPlaceName()
 {

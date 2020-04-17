@@ -232,7 +232,7 @@ enum RsPadButtons
 typedef enum RsPadButtons RsPadButtons;
 
 
-extern RsGlobalType &RsGlobal;
+extern RsGlobalType RsGlobal;
 
 extern RsEventStatus AppEventHandler(RsEvent event, void *param);
 extern RwBool        AttachInputDevices(void);

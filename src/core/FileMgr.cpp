@@ -168,8 +168,8 @@ myfeof(int fd)
 }
 
 
-char *CFileMgr::ms_rootDirName = (char*)0x5F18F8;
-char *CFileMgr::ms_dirName = (char*)0x713CA8;
+char CFileMgr::ms_rootDirName[128] = {'\0'};
+char CFileMgr::ms_dirName[128];
 
 void
 CFileMgr::Initialise(void)

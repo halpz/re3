@@ -198,4 +198,4 @@ public:
 
 VALIDATE_SIZE(CControllerConfigManager, 0x143C);
 
-extern CControllerConfigManager &ControlsManager;
+extern CControllerConfigManager ControlsManager;

@@ -13,8 +13,6 @@
 CShotInfo gaShotInfo[NUMSHOTINFOS];
 float CShotInfo::ms_afRandTable[20];
 
-// CShotInfo (&gaShotInfo)[100] = *(CShotInfo(*)[100])*(uintptr*)0x64F0D0;
-// float (&CShotInfo::ms_afRandTable)[20] = *(float(*)[20])*(uintptr*)0x6E9878;
 
 /*
 	Used for flamethrower. I don't know why it's name is CShotInfo.

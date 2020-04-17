@@ -7,7 +7,6 @@
 #include "AnimBlendAssociation.h"
 #include "Weapon.h"
 
-//CWeaponInfo (&CWeaponInfo::ms_apWeaponInfos)[14] = * (CWeaponInfo(*)[14]) * (uintptr*)0x6503EC;
 CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
 
 static char ms_aWeaponNames[][32] = {

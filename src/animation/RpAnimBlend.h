@@ -11,7 +11,7 @@ struct AnimBlendFrameUpdateData
 	CAnimBlendNode *nodes[16];
 };
 
-extern RwInt32 &ClumpOffset;
+extern RwInt32 ClumpOffset;
 #define RPANIMBLENDCLUMPDATA(o) (RWPLUGINOFFSET(CAnimBlendClumpData*, o, ClumpOffset))
 
 bool RpAnimBlendPluginAttach(void);

@@ -9,7 +9,7 @@
 #define CONSOLE_Y_POS (10.0f)
 #define CONSOLE_LINE_HEIGHT (12.0f)
 
-CConsole &TheConsole = *(CConsole*)0x8F6498;
+CConsole TheConsole;
 
 void
 CConsole::AddLine(char *s, uint8 r, uint8 g, uint8 b)

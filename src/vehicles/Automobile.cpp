@@ -49,7 +49,7 @@ bool bAllCarCheat;	// unused
 
 RwObject *GetCurrentAtomicObjectCB(RwObject *object, void *data);
 
-bool CAutomobile::m_sAllTaxiLights;// = *(bool*)0x95CD21;
+bool CAutomobile::m_sAllTaxiLights;
 
 CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
  : CVehicle(CreatedBy)

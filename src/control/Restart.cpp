@@ -4,22 +4,22 @@
 #include "Zones.h"
 #include "PathFind.h"
 
-uint8 &CRestart::OverrideHospitalLevel = *(uint8*)0x95CD4C;
-uint8 &CRestart::OverridePoliceStationLevel = *(uint8*)0x95CD50;
-bool &CRestart::bFadeInAfterNextArrest = *(bool*)0x95CD69;
-bool &CRestart::bFadeInAfterNextDeath = *(bool*)0x95CD9D;
+uint8 CRestart::OverrideHospitalLevel;
+uint8 CRestart::OverridePoliceStationLevel;
+bool CRestart::bFadeInAfterNextArrest;
+bool CRestart::bFadeInAfterNextDeath;
 
-bool &CRestart::bOverrideRestart = *(bool*)0x95CD5D;
-CVector &CRestart::OverridePosition = *(CVector*)0x8E2C00;
-float &CRestart::OverrideHeading = *(float*)0x8F2A18;
+bool CRestart::bOverrideRestart;
+CVector CRestart::OverridePosition;
+float CRestart::OverrideHeading;
 
-CVector(&CRestart::HospitalRestartPoints)[NUM_RESTART_POINTS] = *(CVector(*)[NUM_RESTART_POINTS])*(uintptr*)0x87F9B0;
-float(&CRestart::HospitalRestartHeadings)[NUM_RESTART_POINTS] = *(float(*)[NUM_RESTART_POINTS])*(uintptr*)0x6F1D40;
-uint16 &CRestart::NumberOfHospitalRestarts = *(uint16*)0x95CC46;
+CVector CRestart::HospitalRestartPoints[NUM_RESTART_POINTS];
+float CRestart::HospitalRestartHeadings[NUM_RESTART_POINTS];
+uint16 CRestart::NumberOfHospitalRestarts;
 
-CVector(&CRestart::PoliceRestartPoints)[NUM_RESTART_POINTS] = *(CVector(*)[NUM_RESTART_POINTS])*(uintptr*)0x846228;
-float(&CRestart::PoliceRestartHeadings)[NUM_RESTART_POINTS] = *(float(*)[NUM_RESTART_POINTS])*(uintptr*)0x6F1D20;
-uint16 &CRestart::NumberOfPoliceRestarts = *(uint16*)0x95CC44;
+CVector CRestart::PoliceRestartPoints[NUM_RESTART_POINTS];
+float CRestart::PoliceRestartHeadings[NUM_RESTART_POINTS];
+uint16 CRestart::NumberOfPoliceRestarts;
 
 void
 CRestart::Initialise()

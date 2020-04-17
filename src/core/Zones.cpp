@@ -8,18 +8,18 @@
 #include "Text.h"
 #include "World.h"
 
-eLevelName &CTheZones::m_CurrLevel = *(eLevelName*)0x8F2BC8;
-CZone *&CTheZones::m_pPlayersZone = *(CZone**)0x8F254C;
-int16 &CTheZones::FindIndex = *(int16*)0x95CC40;
+eLevelName CTheZones::m_CurrLevel;
+CZone *CTheZones::m_pPlayersZone;
+int16 CTheZones::FindIndex;
 
-uint16 &CTheZones::NumberOfAudioZones = *(uint16*)0x95CC84;
-int16 *CTheZones::AudioZoneArray = (int16*)0x713BC0;
-uint16 &CTheZones::TotalNumberOfMapZones = *(uint16*)0x95CC74;
-uint16 &CTheZones::TotalNumberOfZones = *(uint16*)0x95CC36;
-CZone *CTheZones::ZoneArray = (CZone*)0x86BEE0;
-CZone *CTheZones::MapZoneArray = (CZone*)0x663EC0;
-uint16 &CTheZones::TotalNumberOfZoneInfos = *(uint16*)0x95CC3C;
-CZoneInfo *CTheZones::ZoneInfoArray = (CZoneInfo*)0x714400;
+uint16 CTheZones::NumberOfAudioZones;
+int16 CTheZones::AudioZoneArray[NUMAUDIOZONES];
+uint16 CTheZones::TotalNumberOfMapZones;
+uint16 CTheZones::TotalNumberOfZones;
+CZone CTheZones::ZoneArray[NUMZONES];
+CZone CTheZones::MapZoneArray[NUMMAPZONES];
+uint16 CTheZones::TotalNumberOfZoneInfos;
+CZoneInfo CTheZones::ZoneInfoArray[2*NUMZONES];
 
 #define SWAPF(a, b) { float t; t = a; a = b; b = t; }
 

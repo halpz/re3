@@ -6,9 +6,9 @@
 
 // Originally taken from RW example 'mblur'
 
-RwRaster *&CMBlur::pFrontBuffer = *(RwRaster**)0x8E2C48;
-bool &CMBlur::ms_bJustInitialised = *(bool*)0x95CDAB;
-bool &CMBlur::BlurOn = *(bool*)0x95CDAD;
+RwRaster *CMBlur::pFrontBuffer;
+bool CMBlur::ms_bJustInitialised;
+bool CMBlur::BlurOn;
 
 static RwIm2DVertex Vertex[4];
 static RwImVertexIndex Index[6] = { 0, 1, 2, 0, 2, 3 };

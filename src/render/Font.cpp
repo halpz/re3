@@ -4,18 +4,18 @@
 #include "TxdStore.h"
 #include "Font.h"
 
-CFontDetails &CFont::Details = *(CFontDetails*)0x8F317C;
-int16 &CFont::NewLine = *(int16*)0x95CC94;
-CSprite2d *CFont::Sprite = (CSprite2d*)0x95CC04;
+CFontDetails CFont::Details;
+int16 CFont::NewLine;
+CSprite2d CFont::Sprite[MAX_FONTS];
 
 #ifdef MORE_LANGUAGES
 uint8 CFont::LanguageSet = FONT_LANGSET_EFIGS;
 int32 CFont::Slot = -1;
 
-int16 CFont::Size[2][3][193] = {
+int16 CFont::Size[2][MAX_FONTS][193] = {
 	{
 #else
-int16 CFont::Size[3][193] = {
+int16 CFont::Size[MAX_FONTS][193] = {
 #endif
 		{
 		13, 12, 31, 35, 23, 35, 31,  9, 14, 15, 25, 30, 11, 17, 13, 31,

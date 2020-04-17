@@ -10,15 +10,15 @@
 #include "Wanted.h"
 #include "World.h"
 
-CCPtrNodePool *&CPools::ms_pPtrNodePool = *(CCPtrNodePool**)0x943044;
-CEntryInfoNodePool *&CPools::ms_pEntryInfoNodePool = *(CEntryInfoNodePool**)0x941448;
-CPedPool *&CPools::ms_pPedPool = *(CPedPool**)0x8F2C60;
-CVehiclePool *&CPools::ms_pVehiclePool = *(CVehiclePool**)0x9430DC;
-CBuildingPool *&CPools::ms_pBuildingPool = *(CBuildingPool**)0x8F2C04;
-CTreadablePool *&CPools::ms_pTreadablePool = *(CTreadablePool**)0x8F2568;
-CObjectPool *&CPools::ms_pObjectPool = *(CObjectPool**)0x880E28;
-CDummyPool *&CPools::ms_pDummyPool = *(CDummyPool**)0x8F2C18;
-CAudioScriptObjectPool *&CPools::ms_pAudioScriptObjectPool = *(CAudioScriptObjectPool**)0x8F1B6C;
+CCPtrNodePool *CPools::ms_pPtrNodePool;
+CEntryInfoNodePool *CPools::ms_pEntryInfoNodePool;
+CPedPool *CPools::ms_pPedPool;
+CVehiclePool *CPools::ms_pVehiclePool;
+CBuildingPool *CPools::ms_pBuildingPool;
+CTreadablePool *CPools::ms_pTreadablePool;
+CObjectPool *CPools::ms_pObjectPool;
+CDummyPool *CPools::ms_pDummyPool;
+CAudioScriptObjectPool *CPools::ms_pAudioScriptObjectPool;
 
 void
 CPools::Initialise(void)

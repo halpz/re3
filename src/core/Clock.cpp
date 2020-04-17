@@ -6,17 +6,17 @@
 #include "Stats.h"
 
 _TODO("gbFastTime");
-bool &gbFastTime = *(bool*)0x95CDBB;
+bool gbFastTime;
 
-uint8  &CClock::ms_nGameClockHours = *(uint8*)0x95CDA6;
-uint8  &CClock::ms_nGameClockMinutes = *(uint8*)0x95CDC8;
-uint16 &CClock::ms_nGameClockSeconds = *(uint16*)0x95CC7C;
-uint8  &CClock::ms_Stored_nGameClockHours = *(uint8*)0x95CD7B;
-uint8  &CClock::ms_Stored_nGameClockMinutes = *(uint8*)0x95CD9B;
-uint16 &CClock::ms_Stored_nGameClockSeconds = *(uint16*)0x95CC9C;
-uint32 &CClock::ms_nMillisecondsPerGameMinute = *(uint32*)0x8F2C64;
-uint32  &CClock::ms_nLastClockTick = *(uint32*)0x9430E4;
-bool   &CClock::ms_bClockHasBeenStored = *(bool*)0x95CD82;
+uint8  CClock::ms_nGameClockHours;
+uint8  CClock::ms_nGameClockMinutes;
+uint16 CClock::ms_nGameClockSeconds;
+uint8  CClock::ms_Stored_nGameClockHours;
+uint8  CClock::ms_Stored_nGameClockMinutes;
+uint16 CClock::ms_Stored_nGameClockSeconds;
+uint32 CClock::ms_nMillisecondsPerGameMinute;
+uint32  CClock::ms_nLastClockTick;
+bool   CClock::ms_bClockHasBeenStored;
 
 void
 CClock::Initialise(uint32 scale)

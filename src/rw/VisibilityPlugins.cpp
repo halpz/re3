@@ -11,24 +11,24 @@
 
 #define FADE_DISTANCE 20.0f
 
-CLinkList<CVisibilityPlugins::AlphaObjectInfo> CVisibilityPlugins::m_alphaList;// = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0x8F42E4;
-CLinkList<CVisibilityPlugins::AlphaObjectInfo> CVisibilityPlugins::m_alphaEntityList;// = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0x943084;
+CLinkList<CVisibilityPlugins::AlphaObjectInfo> CVisibilityPlugins::m_alphaList;
+CLinkList<CVisibilityPlugins::AlphaObjectInfo> CVisibilityPlugins::m_alphaEntityList;
 
-int32 CVisibilityPlugins::ms_atomicPluginOffset = -1;// = *(int32*)0x600124;
-int32 CVisibilityPlugins::ms_framePluginOffset = -1;// = *(int32*)0x600128;
-int32 CVisibilityPlugins::ms_clumpPluginOffset = -1;// = *(int32*)0x60012C;
+int32 CVisibilityPlugins::ms_atomicPluginOffset = -1;
+int32 CVisibilityPlugins::ms_framePluginOffset = -1;
+int32 CVisibilityPlugins::ms_clumpPluginOffset = -1;
 
-RwCamera *CVisibilityPlugins::ms_pCamera;// = *(RwCamera**)0x8F2514;
-RwV3d *CVisibilityPlugins::ms_pCameraPosn;// = *(RwV3d**)0x8F6270;
-float CVisibilityPlugins::ms_cullCompsDist;// = *(float*)0x8F2BC4;
-float CVisibilityPlugins::ms_vehicleLod0Dist;// = *(float*)0x885B28;
-float CVisibilityPlugins::ms_vehicleLod1Dist;// = *(float*)0x885B30;
-float CVisibilityPlugins::ms_vehicleFadeDist;// = *(float*)0x8E28B4;
-float CVisibilityPlugins::ms_bigVehicleLod0Dist;// = *(float*)0x8E2A84;
-float CVisibilityPlugins::ms_bigVehicleLod1Dist;// = *(float*)0x8E2A8C;
-float CVisibilityPlugins::ms_pedLod0Dist;// = *(float*)0x8F2BD4;
-float CVisibilityPlugins::ms_pedLod1Dist;// = *(float*)0x8F2BD8;
-float CVisibilityPlugins::ms_pedFadeDist;// = *(float*)0x8E2C34;
+RwCamera *CVisibilityPlugins::ms_pCamera;
+RwV3d *CVisibilityPlugins::ms_pCameraPosn;
+float CVisibilityPlugins::ms_cullCompsDist;
+float CVisibilityPlugins::ms_vehicleLod0Dist;
+float CVisibilityPlugins::ms_vehicleLod1Dist;
+float CVisibilityPlugins::ms_vehicleFadeDist;
+float CVisibilityPlugins::ms_bigVehicleLod0Dist;
+float CVisibilityPlugins::ms_bigVehicleLod1Dist;
+float CVisibilityPlugins::ms_pedLod0Dist;
+float CVisibilityPlugins::ms_pedLod1Dist;
+float CVisibilityPlugins::ms_pedFadeDist;
 
 void
 CVisibilityPlugins::Initialise(void)

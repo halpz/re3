@@ -21,14 +21,14 @@ struct tPoliceRadioZone {
 	int32 field_12;
 };
 
-tPoliceRadioZone (&ZoneSfx)[NUMAUDIOZONES] = *(tPoliceRadioZone(*)[NUMAUDIOZONES])*(uintptr*)0x880240;
-char *SubZo2Label = (char*)0x6E9918;
-char *SubZo3Label = (char*)0x6E9870;
+tPoliceRadioZone ZoneSfx[NUMAUDIOZONES];
+char SubZo2Label[8];
+char SubZo3Label[8];
 
-int32 &g_nMissionAudioSfx = *(int32*)0x60ED84;
-int8 &g_nMissionAudioPlayingStatus = *(int8*)0x60ED88;
-uint8 &gSpecialSuspectLastSeenReport = *(uint8*)0x95CD4D;
-uint32 (&gMinTimeToNextReport)[NUM_CRIME_TYPES] = *(uint32(*)[NUM_CRIME_TYPES])*(uintptr*)0x8E2828;
+int32 g_nMissionAudioSfx = TOTAL_AUDIO_SAMPLES;
+int8 g_nMissionAudioPlayingStatus = 2;
+uint8 gSpecialSuspectLastSeenReport;
+uint32 gMinTimeToNextReport[NUM_CRIME_TYPES];
 
 void
 cAudioManager::InitialisePoliceRadioZones()

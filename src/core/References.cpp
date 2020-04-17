@@ -6,8 +6,8 @@
 #include "Pools.h"
 #include "References.h"
 
-CReference *CReferences::aRefs = (CReference*)0x70BBE0; //[NUMREFERENCES];
-CReference *&CReferences::pEmptyList = *(CReference**)0x8F1AF8;
+CReference CReferences::aRefs[NUMREFERENCES];
+CReference *CReferences::pEmptyList;
 
 void
 CReferences::Init(void)

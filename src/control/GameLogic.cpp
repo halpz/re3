@@ -20,7 +20,7 @@
 #include "Script.h"
 #include "Garages.h"
 
-uint8 CGameLogic::ActivePlayers; // 0x95CD5E
+uint8 CGameLogic::ActivePlayers;
 
 void
 CGameLogic::InitAtStartOfGame()

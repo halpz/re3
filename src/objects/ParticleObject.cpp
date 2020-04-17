@@ -9,11 +9,11 @@
 #include "Game.h"
 
 
-CParticleObject (&gPObjectArray)[MAX_PARTICLEOBJECTS] = *(CParticleObject(*)[MAX_PARTICLEOBJECTS])*(uintptr*)0x62A58C;
+CParticleObject gPObjectArray[MAX_PARTICLEOBJECTS];
 
-CParticleObject *&CParticleObject::pCloseListHead = *(CParticleObject **)int(0x8F4340);
-CParticleObject *&CParticleObject::pFarListHead = *(CParticleObject **)int(0x942F78);
-CParticleObject *&CParticleObject::pUnusedListHead = *(CParticleObject **)int(0x94128C);
+CParticleObject *CParticleObject::pCloseListHead;
+CParticleObject *CParticleObject::pFarListHead;
+CParticleObject *CParticleObject::pUnusedListHead;
 
 CAudioHydrant List[MAX_AUDIOHYDRANTS];
 

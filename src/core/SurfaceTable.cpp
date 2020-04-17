@@ -6,7 +6,7 @@
 #include "Collision.h"
 #include "SurfaceTable.h"
 
-float (*CSurfaceTable::ms_aAdhesiveLimitTable)[NUMADHESIVEGROUPS] = (float (*)[NUMADHESIVEGROUPS])0x8E29D4;
+float CSurfaceTable::ms_aAdhesiveLimitTable[NUMADHESIVEGROUPS][NUMADHESIVEGROUPS];
 
 void
 CSurfaceTable::Initialise(char *filename)

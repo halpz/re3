@@ -120,23 +120,23 @@ public:
 		return angle;
 	}
 
-	static int32 &NumLawEnforcerCars;
-	static int32 &NumAmbulancesOnDuty;
-	static int32 &NumFiretrucksOnDuty;
-	static int32 &NumRandomCars;
-	static int32 &NumMissionCars;
-	static int32 &NumParkedCars;
-	static int32 &NumPermanentCars;
-	static bool &bCarsGeneratedAroundCamera;
-	static float &CarDensityMultiplier;
-	static int8 &CountDownToCarsAtStart;
-	static int32 &MaxNumberOfCarsInUse;
-	static uint32 &LastTimeLawEnforcerCreated;
-	static uint32 &LastTimeFireTruckCreated;
-	static uint32 &LastTimeAmbulanceCreated;
-	static int32 (&TotalNumOfCarsOfRating)[TOTAL_CUSTOM_CLASSES];
-	static int32 (&NextCarOfRating)[TOTAL_CUSTOM_CLASSES];
-	static int32 (&CarArrays)[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
+	static int32 NumLawEnforcerCars;
+	static int32 NumAmbulancesOnDuty;
+	static int32 NumFiretrucksOnDuty;
+	static int32 NumRandomCars;
+	static int32 NumMissionCars;
+	static int32 NumParkedCars;
+	static int32 NumPermanentCars;
+	static bool bCarsGeneratedAroundCamera;
+	static float CarDensityMultiplier;
+	static int8 CountDownToCarsAtStart;
+	static int32 MaxNumberOfCarsInUse;
+	static uint32 LastTimeLawEnforcerCreated;
+	static uint32 LastTimeFireTruckCreated;
+	static uint32 LastTimeAmbulanceCreated;
+	static int32 TotalNumOfCarsOfRating[TOTAL_CUSTOM_CLASSES];
+	static int32 NextCarOfRating[TOTAL_CUSTOM_CLASSES];
+	static int32 CarArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 };
 
-extern CVehicle* (&apCarsToKeep)[MAX_CARS_TO_KEEP];
+extern CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];

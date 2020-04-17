@@ -19,28 +19,28 @@
 float CRadar::m_radarRange;
 sRadarTrace CRadar::ms_RadarTrace[NUMRADARBLIPS];
 CVector2D vec2DRadarOrigin;
-int32 gRadarTxdIds[64];// = (int*)0x6299C0;
+int32 gRadarTxdIds[64];
 
-CSprite2d CRadar::AsukaSprite;// = *(CSprite2d*)0x8F1A40;
-CSprite2d CRadar::BombSprite;// = (CSprite2d*)0x8F5FB4;
-CSprite2d CRadar::CatSprite;// = (CSprite2d*)0x885B24;
-CSprite2d CRadar::CentreSprite;// = (CSprite2d*)0x8F6268;
-CSprite2d CRadar::CopcarSprite;// = (CSprite2d*)0x8F1A2C;
-CSprite2d CRadar::DonSprite;// = (CSprite2d*)0x8F2BE0;
-CSprite2d CRadar::EightSprite;// = (CSprite2d*)0x8F2BCC;
-CSprite2d CRadar::ElSprite;// = (CSprite2d*)0x8F1B80;
-CSprite2d CRadar::IceSprite;// = (CSprite2d*)0x9415FC;
-CSprite2d CRadar::JoeySprite;// = (CSprite2d*)0x8F2C00;
-CSprite2d CRadar::KenjiSprite;// = (CSprite2d*)0x8F2C68;
-CSprite2d CRadar::LizSprite;// = (CSprite2d*)0x8F5830;
-CSprite2d CRadar::LuigiSprite;// = (CSprite2d*)0x8F1A3C;
-CSprite2d CRadar::NorthSprite;// = (CSprite2d*)0x8F6274;
-CSprite2d CRadar::RaySprite;// = (CSprite2d*)0x8E2A7C;
-CSprite2d CRadar::SalSprite;// = (CSprite2d*)0x8F29EC;
-CSprite2d CRadar::SaveSprite;// = (CSprite2d*)0x8F5F74;
-CSprite2d CRadar::SpraySprite;// = (CSprite2d*)0x94307C;
-CSprite2d CRadar::TonySprite;// = (CSprite2d*)0x885B58;
-CSprite2d CRadar::WeaponSprite;// = (CSprite2d*)0x941534;
+CSprite2d CRadar::AsukaSprite;
+CSprite2d CRadar::BombSprite;
+CSprite2d CRadar::CatSprite;
+CSprite2d CRadar::CentreSprite;
+CSprite2d CRadar::CopcarSprite;
+CSprite2d CRadar::DonSprite;
+CSprite2d CRadar::EightSprite;
+CSprite2d CRadar::ElSprite;
+CSprite2d CRadar::IceSprite;
+CSprite2d CRadar::JoeySprite;
+CSprite2d CRadar::KenjiSprite;
+CSprite2d CRadar::LizSprite;
+CSprite2d CRadar::LuigiSprite;
+CSprite2d CRadar::NorthSprite;
+CSprite2d CRadar::RaySprite;
+CSprite2d CRadar::SalSprite;
+CSprite2d CRadar::SaveSprite;
+CSprite2d CRadar::SpraySprite;
+CSprite2d CRadar::TonySprite;
+CSprite2d CRadar::WeaponSprite;
 
 CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = { 
 	nil,

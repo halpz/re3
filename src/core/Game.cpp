@@ -89,19 +89,19 @@
 
 
 
-eLevelName &CGame::currLevel = *(eLevelName*)0x941514;
-bool &CGame::bDemoMode = *(bool*)0x5F4DD0;
-bool &CGame::nastyGame = *(bool*)0x5F4DD4;
-bool &CGame::frenchGame = *(bool*)0x95CDCB;
-bool &CGame::germanGame = *(bool*)0x95CD1E;
-bool &CGame::noProstitutes = *(bool*)0x95CDCF;
-bool &CGame::playingIntro = *(bool*)0x95CDC2;
-char *CGame::aDatFile = (char*)0x773A48;
+eLevelName CGame::currLevel;
+bool CGame::bDemoMode = true;
+bool CGame::nastyGame = true;
+bool CGame::frenchGame;
+bool CGame::germanGame;
+bool CGame::noProstitutes;
+bool CGame::playingIntro;
+char CGame::aDatFile[32];
 #ifdef MORE_LANGUAGES
 bool CGame::russianGame = false;
 #endif
 
-int &gameTxdSlot = *(int*)0x628D88;
+int gameTxdSlot;
 
 bool
 CGame::InitialiseOnceBeforeRW(void)
@@ -115,7 +115,9 @@ CGame::InitialiseOnceBeforeRW(void)
 bool
 CGame::InitialiseRenderWare(void)
 {
+#ifdef USE_TEXTURE_POOL
 	_TexturePoolsInitialise();
+#endif
 	
 	CTxdStore::Initialise();
 	CVisibilityPlugins::Initialise();
@@ -188,7 +190,9 @@ void CGame::ShutdownRenderWare(void)
 	
 	CVisibilityPlugins::Shutdown();
 	
+#ifdef USE_TEXTURE_POOL
 	_TexturePoolsShutdown();
+#endif
 }
 
 bool CGame::InitialiseOnceAfterRW(void)

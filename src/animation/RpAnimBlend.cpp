@@ -8,7 +8,7 @@
 #include "AnimBlendAssociation.h"
 #include "RpAnimBlend.h"
 
-RwInt32 &ClumpOffset = *(RwInt32*)0x8F1B84;
+RwInt32 ClumpOffset;
 
 enum
 {

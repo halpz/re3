@@ -256,4 +256,4 @@ public:
 	void SetRadioInCar(uint32 radio);
 	void SetRadioChannel(int8 radio, int32 pos);
 };
-extern cDMAudio &DMAudio;
+extern cDMAudio DMAudio;

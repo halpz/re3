@@ -16,15 +16,15 @@
 #define SMALLSTRIPHEIGHT 4.0f
 #define HORIZSTRIPHEIGHT 48.0f
 
-RwTexture **gpCloudTex = (RwTexture**)0x9411C0;	//[5];
+RwTexture *gpCloudTex[5];
 
-float &CClouds::CloudRotation = *(float*)0x8F5F40;
-uint32 &CClouds::IndividualRotation = *(uint32*)0x943078;
+float CClouds::CloudRotation;
+uint32 CClouds::IndividualRotation;
 
-float &CClouds::ms_cameraRoll = *(float*)0x8F29CC;
-float &CClouds::ms_horizonZ = *(float*)0x8F31C0;
-CRGBA &CClouds::ms_colourTop = *(CRGBA*)0x94143C;
-CRGBA &CClouds::ms_colourBottom = *(CRGBA*)0x8F2C38;
+float CClouds::ms_cameraRoll;
+float CClouds::ms_horizonZ;
+CRGBA CClouds::ms_colourTop;
+CRGBA CClouds::ms_colourBottom;
 
 void
 CClouds::Init(void)

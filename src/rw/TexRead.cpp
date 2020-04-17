@@ -22,8 +22,8 @@
 #include "RwHelper.h"
 #endif //GTA_PC
 
-float texLoadTime;// = *(float*)0x8F1B50;
-int32 texNumLoaded;// = *(int32*)0x8F252C;
+float texLoadTime;
+int32 texNumLoaded;
 
 #ifdef LIBRW
 #define READNATIVE(stream, tex, size) rwNativeTextureHackRead(stream, tex, size)

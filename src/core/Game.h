@@ -11,17 +11,17 @@ enum eLevelName
 class CGame
 {
 public:
-	static eLevelName &currLevel;
-	static bool &bDemoMode;
-	static bool &nastyGame;
-	static bool &frenchGame;
-	static bool &germanGame;
+	static eLevelName currLevel;
+	static bool bDemoMode;
+	static bool nastyGame;
+	static bool frenchGame;
+	static bool germanGame;
 #ifdef MORE_LANGUAGES
 	static bool russianGame;
 #endif
-	static bool &noProstitutes;
-	static bool &playingIntro;
-	static char *aDatFile;	//[32];
+	static bool noProstitutes;
+	static bool playingIntro;
+	static char aDatFile[32];
 
 	static bool InitialiseOnceBeforeRW(void);
 	static bool InitialiseRenderWare(void);

@@ -3,7 +3,7 @@
 #include "FileMgr.h"
 #include "PedType.h"
 
-CPedType *(&CPedType::ms_apPedType)[NUM_PEDTYPES] = *(CPedType *(*)[NUM_PEDTYPES]) *(uintptr*)0x941594;
+CPedType *CPedType::ms_apPedType[NUM_PEDTYPES];
 
 void
 CPedType::Initialise(void)

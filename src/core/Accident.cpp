@@ -6,7 +6,7 @@
 #include "Pools.h"
 #include "World.h"
 
-CAccidentManager& gAccidentManager = *(CAccidentManager*)0x87FD10;
+CAccidentManager gAccidentManager;
 
 CAccident*
 CAccidentManager::GetNextFreeAccident()

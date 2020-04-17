@@ -15,9 +15,9 @@
 #include "CarCtrl.h"
 #include "General.h"
 
-int16 &CRoadBlocks::NumRoadBlocks = *(int16*)0x95CC34;
-int16 (&CRoadBlocks::RoadBlockObjects)[NUMROADBLOCKS] = *(int16(*)[NUMROADBLOCKS]) * (uintptr*)0x72B3A8;
-bool (&CRoadBlocks::InOrOut)[NUMROADBLOCKS] = *(bool(*)[NUMROADBLOCKS]) * (uintptr*)0x733810;
+int16 CRoadBlocks::NumRoadBlocks;
+int16 CRoadBlocks::RoadBlockObjects[NUMROADBLOCKS];
+bool CRoadBlocks::InOrOut[NUMROADBLOCKS];
 
 void
 CRoadBlocks::Init(void)

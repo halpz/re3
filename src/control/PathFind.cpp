@@ -12,7 +12,7 @@ bool gbShowPedPaths;
 bool gbShowCarPaths;
 bool gbShowCarPathsLinks;
 
-CPathFind &ThePaths = *(CPathFind*)0x8F6754;
+CPathFind ThePaths;
 
 #define MAX_DIST INT16_MAX-1
 #define MIN_PED_ROUTE_DISTANCE 23.8f
@@ -21,11 +21,11 @@ CPathFind &ThePaths = *(CPathFind*)0x8F6754;
 //	1	UseInRoadBlock
 //	2	east/west road(?)
 
-CPathInfoForObject *&InfoForTileCars = *(CPathInfoForObject**)0x8F1A8C;
-CPathInfoForObject *&InfoForTilePeds  = *(CPathInfoForObject**)0x8F1AE4;
+CPathInfoForObject *InfoForTileCars;
+CPathInfoForObject *InfoForTilePeds;
 // unused
-CTempDetachedNode *&DetachedNodesCars = *(CTempDetachedNode**)0x8E2824;
-CTempDetachedNode *&DetachedNodesPeds = *(CTempDetachedNode**)0x8E28A0;
+CTempDetachedNode *DetachedNodesCars;
+CTempDetachedNode *DetachedNodesPeds;
 
 bool 
 CPedPath::CalcPedRoute(int8 pathType, CVector position, CVector destination, CVector *pointPoses, int16 *pointsFound, int16 maxPoints)

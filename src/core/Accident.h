@@ -29,4 +29,4 @@ public:
 	bool WorkToDoForMedics();
 };
 
-extern CAccidentManager& gAccidentManager;
+extern CAccidentManager gAccidentManager;

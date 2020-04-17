@@ -21,16 +21,16 @@
 
 #define INVALID_ORIENTATION (-9999.99f)
 
-float fShapeLength = 0.4f;// *(float*)0x600E78;
-float fShapeTime = 0.05f;// *(float*)0x600E7C;
-float fRangeMult = 0.75f; // = *(float*)0x600E80; //0.6f; // 0.75f gta 3
-float fTimeMult;// = *(float*)0x943008;
+float fShapeLength = 0.4f;
+float fShapeTime = 0.05f;
+float fRangeMult = 0.75f; //0.6f; // 0.75f gta 3
+float fTimeMult;
 
 float MAX_WAKE_LENGTH = 50.0f;
 float MIN_WAKE_INTERVAL = 1.0f;
 float WAKE_LIFETIME = 400.0f;
 
-CBoat *CBoat::apFrameWakeGeneratingBoats[4];// = *(CBoat * (*)[4]) * (uintptr*)0x8620E0;
+CBoat *CBoat::apFrameWakeGeneratingBoats[4];
 
 CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 {

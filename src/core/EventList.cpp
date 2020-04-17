@@ -11,7 +11,6 @@
 
 int32 CEventList::ms_nFirstFreeSlotIndex;
 CEvent gaEvent[NUMEVENTS];
-//CEvent *gaEvent = (CEvent*)0x6EF830;
 
 enum
 {

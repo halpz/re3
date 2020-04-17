@@ -60,8 +60,8 @@ public:
 	CCrimeBeingQd m_aCrimes[16];
 	CCopPed *m_pCops[10];
 
-	static int32 &MaximumWantedLevel;
-	static int32 &nMaximumWantedLevel;
+	static int32 MaximumWantedLevel;
+	static int32 nMaximumWantedLevel;
 
 public:
 	void Initialise();

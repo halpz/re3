@@ -58,9 +58,9 @@ enum
 #define PLAYER (CWorld::Players[CWorld::PlayerInFocus].m_pPed)
 // NB: removed explicit TheCamera from all functions
 
-CCamera &TheCamera = *(CCamera*)0x6FACF8;
-bool &CCamera::m_bUseMouse3rdPerson = *(bool *)0x5F03D8;
-bool &bDidWeProcessAnyCinemaCam = *(bool*)0x95CD46;
+CCamera TheCamera;
+bool CCamera::m_bUseMouse3rdPerson = true;
+bool bDidWeProcessAnyCinemaCam;
 
 #ifdef IMPROVED_CAMERA
 #define KEYJUSTDOWN(k) ControlsManager.GetIsKeyboardKeyJustDown((RsKeyCodes)k)

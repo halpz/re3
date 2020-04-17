@@ -11,8 +11,8 @@
 #include "Wanted.h"
 #include "General.h"
 
-int32 &CWanted::MaximumWantedLevel = *(int32*)0x5F7714;	// 6
-int32 &CWanted::nMaximumWantedLevel = *(int32*)0x5F7718;	// 6400
+int32 CWanted::MaximumWantedLevel = 6;
+int32 CWanted::nMaximumWantedLevel = 6400;
 
 void
 CWanted::Initialise()

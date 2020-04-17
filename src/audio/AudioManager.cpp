@@ -40,18 +40,18 @@
 #include "sampman.h"
 
 cAudioManager AudioManager;
-uint32 gPornNextTime;            // = *(uint32*)0x6508A0;
-uint32 gSawMillNextTime;         // = *(uint32*)0x6508A4;
-uint32 gShopNextTime;            // = *(uint32*)0x6508A8;
-uint32 gAirportNextTime;         // = *(uint32*)0x6508AC;
-uint32 gCinemaNextTime;          //= *(uint32*)0x6508B0;
-uint32 gDocksNextTime;           // = *(uint32*)0x6508B4;
-uint32 gHomeNextTime;            // = *(uint32*)0x6508B8;
-uint32 gCellNextTime;            // = *(uint32*)0x6508BC;
-uint32 gNextCryTime;             // = *(uint32*)0x6508C0;
-uint8 gJumboVolOffsetPercentage; // = *(uint8 *)0x6508ED;
-bool bPlayerJustEnteredCar;      // = *(bool *)0x6508C4;
-bool g_bMissionAudioLoadFailed;  // = *(bool *)0x95CD8E;
+uint32 gPornNextTime;
+uint32 gSawMillNextTime;
+uint32 gShopNextTime;
+uint32 gAirportNextTime;
+uint32 gCinemaNextTime;
+uint32 gDocksNextTime;
+uint32 gHomeNextTime;
+uint32 gCellNextTime;
+uint32 gNextCryTime;
+uint8 gJumboVolOffsetPercentage;
+bool bPlayerJustEnteredCar;
+bool g_bMissionAudioLoadFailed;
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;

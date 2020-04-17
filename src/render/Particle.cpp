@@ -204,26 +204,21 @@ RwRaster  *gpGunShellRaster;
 RwRaster  *gpWakeOldRaster;
 
 
-//RwRaster  *gpPointlightRaster;	// CPointLights::RenderFogEffect
-RwRaster *&gpPointlightRaster = *(RwRaster **)0x8F5FE0;
+RwRaster  *gpPointlightRaster;	// CPointLights::RenderFogEffect
 
-//RwTexture *gpRainDropTex[MAX_RAINDROP_FILES]; // CWeather::RenderRainStreaks
-RwTexture *      (&gpRainDropTex)[MAX_RAINDROP_FILES] = *(RwTexture * (*)[MAX_RAINDROP_FILES])*(int *)0x880660;
+RwTexture *gpRainDropTex[MAX_RAINDROP_FILES]; // CWeather::RenderRainStreaks
 
 
 RwRaster  *gpRainDropRaster[MAX_RAINDROP_FILES];
 
-//Float      CParticle::ms_afRandTable[CParticle::RAND_TABLE_SIZE]; //
-float      (&CParticle::ms_afRandTable)[CParticle::RAND_TABLE_SIZE] = *(float (*)[CParticle::RAND_TABLE_SIZE])*(int *)0x6E98C8;
+float      CParticle::ms_afRandTable[CParticle::RAND_TABLE_SIZE];
 
 
 CParticle *CParticle::m_pUnusedListHead;
 
 
-//Float      CParticle::m_SinTable[CParticle::SIN_COS_TABLE_SIZE]; //
-//Float      CParticle::m_CosTable[CParticle::SIN_COS_TABLE_SIZE]; /
-float      (&CParticle::m_SinTable)[CParticle::SIN_COS_TABLE_SIZE] = *(float (*)[CParticle::SIN_COS_TABLE_SIZE])*(int *)0x877358;
-float      (&CParticle::m_CosTable)[CParticle::SIN_COS_TABLE_SIZE] = *(float (*)[CParticle::SIN_COS_TABLE_SIZE])*(int *)0x70DA18;
+float      CParticle::m_SinTable[CParticle::SIN_COS_TABLE_SIZE];
+float      CParticle::m_CosTable[CParticle::SIN_COS_TABLE_SIZE]; 
 
 int32 Randomizer;
 

@@ -20,43 +20,31 @@
 SETTWEAKPATH("Shadows");
 TWEAKBOOL(gbPrintShite);
 
-#if 1
 RwImVertexIndex ShadowIndexList[24];
-#else
-RwImVertexIndex (&ShadowIndexList)[24] = *(RwImVertexIndex (*)[24])*(int *)0x649188;
-#endif
 
-RwTexture *&gpShadowCarTex = *(RwTexture **)0x8F2C90;
-RwTexture *&gpShadowPedTex = *(RwTexture **)0x8F59D0;
-RwTexture *&gpShadowHeliTex = *(RwTexture **)0x8E2A90;
-RwTexture *&gpShadowExplosionTex = *(RwTexture **)0x8F2A00;
-RwTexture *&gpShadowHeadLightsTex = *(RwTexture **)0x95CB98;
-RwTexture *&gpOutline1Tex = *(RwTexture **)0x8F1B24;
-RwTexture *&gpOutline2Tex = *(RwTexture **)0x8F1B04;
-RwTexture *&gpOutline3Tex = *(RwTexture **)0x8F1B08;
-RwTexture *&gpBloodPoolTex = *(RwTexture **)0x9415F8;
-RwTexture *&gpReflectionTex = *(RwTexture **)0x8F582C;
-RwTexture *&gpGoalMarkerTex = *(RwTexture **)0x94142C;
-RwTexture *&gpWalkDontTex = *(RwTexture **)0x95CB4C;
-RwTexture *&gpCrackedGlassTex = *(RwTexture **)0x95CB94;
-RwTexture *&gpPostShadowTex = *(RwTexture **)0x8F59D4;
-RwTexture *&gpGoalTex = *(RwTexture**)0x94142C;
+RwTexture *gpShadowCarTex;
+RwTexture *gpShadowPedTex;
+RwTexture *gpShadowHeliTex;
+RwTexture *gpShadowExplosionTex;
+RwTexture *gpShadowHeadLightsTex;
+RwTexture *gpOutline1Tex;
+RwTexture *gpOutline2Tex;
+RwTexture *gpOutline3Tex;
+RwTexture *gpBloodPoolTex;
+RwTexture *gpReflectionTex;
+RwTexture *gpGoalMarkerTex;
+RwTexture *gpWalkDontTex;
+RwTexture *gpCrackedGlassTex;
+RwTexture *gpPostShadowTex;
+RwTexture *gpGoalTex;
 
-#if 1
 int16            CShadows::ShadowsStoredToBeRendered;
 CStoredShadow    CShadows::asShadowsStored  [MAX_STOREDSHADOWS];
 CPolyBunch       CShadows::aPolyBunches     [MAX_POLYBUNCHES];
 CStaticShadow    CShadows::aStaticShadows   [MAX_STATICSHADOWS];
 CPolyBunch      *CShadows::pEmptyBunchList;
 CPermanentShadow CShadows::aPermanentShadows[MAX_PERMAMENTSHADOWS];
-#else
-int16              &CShadows::ShadowsStoredToBeRendered = *(int16*)0x95CCEE;
-CStoredShadow      (&CShadows::asShadowsStored)[MAX_STOREDSHADOWS] = *(CStoredShadow (*)[MAX_STOREDSHADOWS])*(int *)0x779058;
-CPolyBunch         (&CShadows::aPolyBunches)[MAX_POLYBUNCHES] = *(CPolyBunch (*)[MAX_POLYBUNCHES])*(int *)0x86F4C8;
-CStaticShadow      (&CShadows::aStaticShadows)[MAX_STATICSHADOWS] = *(CStaticShadow (*)[MAX_STATICSHADOWS])*(int *)0x773BE8;
-CPolyBunch         *&CShadows::pEmptyBunchList = *(CPolyBunch**)0x8F435C;
-CPermanentShadow   (&CShadows::aPermanentShadows)[MAX_PERMAMENTSHADOWS] = *(CPermanentShadow (*)[MAX_PERMAMENTSHADOWS])*(int *)0x712040;
-#endif
+
 
 void
 CShadows::Init(void)

@@ -45,31 +45,25 @@
 #define MAX_SUBSYSTEMS		(16)
 
 
-//static RwBool		  ForegroundApp = TRUE;
-static RwBool		&ForegroundApp = *(RwBool*)0x060F000;
+static RwBool		  ForegroundApp = TRUE;
 
-//static RwBool		  RwInitialised = FALSE;
-static RwBool		&RwInitialised = *(RwBool*)0x885B88;
+static RwBool		  RwInitialised = FALSE;
 
 static RwSubSystemInfo GsubSysInfo[MAX_SUBSYSTEMS];
 static RwInt32		GnumSubSystems = 0;
 static RwInt32		GcurSel = 0, GcurSelVM = 0;
 
-//static RwBool startupDeactivate;
-static RwBool &startupDeactivate = *(RwBool*)0x8E2878;
+static RwBool startupDeactivate;
 
-//static RwBool useDefault;
-static RwBool &useDefault = *(RwBool*)0x6510D4;
+static RwBool useDefault;
 
-//static RwBool defaultFullscreenRes = TRUE;
-static RwBool &defaultFullscreenRes = *(RwBool*)0x60EFFC;
+static RwBool defaultFullscreenRes = TRUE;
 
 /* Class name for the MS Window's window class. */
 
 static const RwChar *AppClassName = RWSTRING("Grand theft auto 3");
 
-//static psGlobalType PsGlobal;
-static psGlobalType &PsGlobal = *(psGlobalType*)0x72CF60;
+static psGlobalType PsGlobal;
 
 
 #define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
@@ -107,14 +101,14 @@ IMediaSeeking *pMS = nil;
 
 DWORD dwDXVersion;
 DWORD _dwMemTotalPhys;
-DWORD &_dwMemAvailPhys = *(DWORD*)0x70F29C;
+DWORD _dwMemAvailPhys;
 DWORD _dwMemTotalVirtual;
 DWORD _dwMemAvailVirtual;
-DWORD &_dwMemTotalVideo = *(DWORD*)0x70F2A8;
+DWORD _dwMemTotalVideo;
 DWORD _dwMemAvailVideo;
-DWORD &_dwOperatingSystemVersion = *(DWORD*)0x70F290;
+DWORD _dwOperatingSystemVersion;
 
-RwUInt32 &gGameState = *(RwUInt32*)0x8F5838;
+RwUInt32 gGameState;
 CJoySticks AllValidWinJoys;
 
 CJoySticks::CJoySticks()

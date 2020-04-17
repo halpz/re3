@@ -49,16 +49,11 @@ public:
 		;
 	}
 
-	//static float      ms_afRandTable[RAND_TABLE_SIZE];
-	static float      (&ms_afRandTable)[RAND_TABLE_SIZE];
+	static float      ms_afRandTable[RAND_TABLE_SIZE];
 	static CParticle *m_pUnusedListHead;
 	
-	/*
 	static float      m_SinTable[SIN_COS_TABLE_SIZE];
 	static float      m_CosTable[SIN_COS_TABLE_SIZE];
-	*/
-	static float      (&m_SinTable)[SIN_COS_TABLE_SIZE];
-	static float      (&m_CosTable)[SIN_COS_TABLE_SIZE];
 	
 	static float Sin(int32 value) { return m_SinTable[value]; }
 	static float Cos(int32 value) { return m_CosTable[value]; }
