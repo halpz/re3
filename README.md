@@ -12,23 +12,18 @@ such that we have a working game at all times.
 
 ## How can I try it?
 
-- re3 requires game assets to work, so you need to own a copy of GTA III.
-- Since re3 is a DLL that works with original GTA III for now, you need Simple DLL Loader. You can get it [here](https://github.com/aap/simpledllloader).
+- re3 requires game assets to work, so you **must** own a copy of GTA III.
 - Build re3 or download it from one of the above links (Debug or Release).
-- Make sure you included the re3 in `plugins.cfg` or `dlls.cfg`.
+- (Optional) If you want to use optional features like Russian language or menu map, copy the files in /gamefiles folder to your game root folder.
+- Move re3.exe to GTA 3 directory and run it.
 
-![#ffa500](https://placehold.it/15/ffa500/000000?text=+) **Notice if you will build it**
+> :information_source: **Rendering engine** re3 uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of re3, but you also can use LIBRW enviorenment variable to specify path to your own librw.
 
-There are various settings at the very bottom of `config.h`, you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
+> :warning: **Notice for builders** There are various settings at the very bottom of `config.h`, you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
 
 https://github.com/GTAmodding/re3/tree/master/src/core/config.h
 
-## I want to contribute, where should I start?
-
-A good approach is to start at the fringes of the code base,
-i.e. classes that don't depend on code that we don't have reversed yet.
-If a function uses only few unreversed functions that would be inconvenient
-to reverse at the time, calling the original functions is acceptable.
+## Contributing
 
 ### Unreversed / incomplete classes (at least the ones we know)
 The following classes have only unused or practically unused code left:
@@ -150,4 +145,5 @@ Here you can find a list of variables that you might need to set in windows:
 ```
 "GTA_III_RE_DIR" * path to "gta3_re" game folder usually where this plugin run.
 "GTA_III_DIR" * path to "GTAIII" game folder.
+"LIBRW" * path to LIBRW.
 ```
