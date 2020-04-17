@@ -753,14 +753,16 @@ CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList &list, const
 		CEntity *pEntity = (CEntity *)pNode->item;
 		if(pEntity->m_scanCode != GetCurrentScanCode()) {
 			pEntity->m_scanCode = GetCurrentScanCode();
-			float fMagnitude = 0.0f;
-			if(bCheck2DOnly)
-				fMagnitude = (position - pEntity->GetPosition()).MagnitudeSqr2D();
-			else
-				fMagnitude = (position - pEntity->GetPosition()).MagnitudeSqr();
-			if(fMagnitude < radius * radius && *nEntitiesFound < maxEntitiesToFind) {
-				if(aEntities) aEntities[*nEntitiesFound] = pEntity;
-				++*nEntitiesFound;
+			if(modelId == pEntity->m_modelIndex) {
+				float fMagnitude = 0.0f;
+				if(bCheck2DOnly)
+					fMagnitude = (position - pEntity->GetPosition()).MagnitudeSqr2D();
+				else
+					fMagnitude = (position - pEntity->GetPosition()).MagnitudeSqr();
+				if(fMagnitude < radius * radius && *nEntitiesFound < maxEntitiesToFind) {
+					if(aEntities) aEntities[*nEntitiesFound] = pEntity;
+					++*nEntitiesFound;
+				}
 			}
 		}
 	}
