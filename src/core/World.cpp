@@ -30,7 +30,7 @@
 #include "ParticleObject.h"
 #include "EventList.h"
 
-#define OBJECT_REPOSITION_OFFSET_Z 0.2f
+#define OBJECT_REPOSITION_OFFSET_Z 2.0f
 
 CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
@@ -738,9 +738,9 @@ CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& list, const
 			pEntity->m_scanCode = ms_nCurrentScanCode;
 			float fMagnitude = 0.0f;
 			if (bCheck2DOnly)
-				fMagnitude = CVector2D(position - pEntity->GetPosition()).Magnitude();
+				fMagnitude = (position - pEntity->GetPosition()).MagnitudeSqr2D();
 			else
-				fMagnitude = CVector(position - pEntity->GetPosition()).Magnitude();
+				fMagnitude = (position - pEntity->GetPosition()).MagnitudeSqr();
 			if (fMagnitude < radius * radius && *nEntitiesFound < maxEntitiesToFind) {
 				if (aEntities)
 					aEntities[*nEntitiesFound] = pEntity;
@@ -1044,9 +1044,9 @@ CWorld::FindObjectsKindaCollidingSectorList(CPtrList& list, const CVector& posit
 			pEntity->m_scanCode = ms_nCurrentScanCode;
 			float fMagnitude = 0.0f;
 			if (bCheck2DOnly)
-				fMagnitude = CVector2D(position - pEntity->GetPosition()).Magnitude();
+				fMagnitude = (position - pEntity->GetPosition()).Magnitude2D();
 			else
-				fMagnitude = CVector(position - pEntity->GetPosition()).Magnitude();
+				fMagnitude = (position - pEntity->GetPosition()).Magnitude();
 			if (pEntity->GetBoundRadius() + radius > fMagnitude && *nCollidingEntities < maxEntitiesToFind) {
 				if (aEntities)
 					aEntities[*nCollidingEntities] = pEntity;
@@ -1162,7 +1162,7 @@ CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& list, cons
 		if (pEntity->m_scanCode != CWorld::ms_nCurrentScanCode) {
 			pEntity->m_scanCode = CWorld::ms_nCurrentScanCode;
 			CColSphere sphere;
-			CVector vecDistance = pEntity->m_matrix.GetPosition() - position;
+			CVector vecDistance = pEntity->GetPosition() - position;
 			sphere.radius = pEntity->GetBoundRadius();
 			sphere.center = Multiply3x3(vecDistance, matrix);
 			if (CCollision::TestSphereBox(sphere, boundingBox) && *nEntitiesFound < maxEntitiesToFind) {
@@ -1226,7 +1226,7 @@ CWorld::FindMissionEntitiesIntersectingCubeSectorList(CPtrList& list, const CVec
 				fRadius + entityPos.z >= vecStartPos.z && entityPos.z - fRadius <= vecEndPos.z &&
 				*nIntersecting < maxEntitiesToFind) {
 				if (aEntities)
-					aEntities[*nIntersecting] = (CEntity*)pEntity;
+					aEntities[*nIntersecting] = pEntity;
 				++*nIntersecting;
 			}
 		}
@@ -1402,7 +1402,7 @@ CWorld::CallOffChaseForAreaSectorListVehicles(CPtrList& list, float x1, float y1
 		CVehicle *pVehicle = (CVehicle*)pNode->item;
 		if (pVehicle->m_scanCode != CWorld::ms_nCurrentScanCode) {
 			pVehicle->m_scanCode = CWorld::ms_nCurrentScanCode;
-			const CVector& vehiclePos = pVehicle->m_matrix.GetPosition();
+			const CVector& vehiclePos = pVehicle->GetPosition();
 			eCarMission carMission = pVehicle->AutoPilot.m_nCarMission;
 			if (pVehicle != FindPlayerVehicle() &&
 				vehiclePos.x > fStartX && vehiclePos.x < fEndX && 
@@ -1422,11 +1422,11 @@ CWorld::CallOffChaseForAreaSectorListVehicles(CPtrList& list, float x1, float y1
 						// Maybe break the loop when bInsideSphere is set to true?
 					}
 					if (bInsideSphere) {
-						if (pVehicle->m_matrix.GetPosition().x <= (x1 + x2) * 0.5f)
+						if (pVehicle->GetPosition().x <= (x1 + x2) * 0.5f)
 							pVehicle->m_vecMoveSpeed.x = min(pVehicle->m_vecMoveSpeed.x, 0.0f);
 						else
 							pVehicle->m_vecMoveSpeed.x = max(pVehicle->m_vecMoveSpeed.x, 0.0f);
-						if (pVehicle->m_matrix.GetPosition().y <= (y1 + y2) * 0.5f)
+						if (pVehicle->GetPosition().y <= (y1 + y2) * 0.5f)
 							pVehicle->m_vecMoveSpeed.y = min(pVehicle->m_vecMoveSpeed.y, 0.0f);
 						else
 							pVehicle->m_vecMoveSpeed.y = max(pVehicle->m_vecMoveSpeed.y, 0.0f);
@@ -1573,8 +1573,8 @@ CWorld::AddParticles(void)
 	for (int32 y = 0; y < NUMSECTORS_Y; y++) {
 		for (int32 x = 0; x < NUMSECTORS_X; x++) {
 			CSector* pSector = GetSector(x, y);
-			CEntity::AddSteamsFromGround1(pSector->m_lists[ENTITYLIST_BUILDINGS]);
-			CEntity::AddSteamsFromGround1(pSector->m_lists[ENTITYLIST_DUMMIES]);
+			CEntity::AddSteamsFromGround(pSector->m_lists[ENTITYLIST_BUILDINGS]);
+			CEntity::AddSteamsFromGround(pSector->m_lists[ENTITYLIST_DUMMIES]);
 		}
 	}
 }
@@ -1605,7 +1605,7 @@ CWorld::ShutDown(void)
 			}
 			pNode = pSector->m_lists[ENTITYLIST_PEDS].first;
 			while (pNode) {
-				CEntity* pEntity = (CEntity*)pNode->item;
+				CEntity *pEntity = (CEntity*)pNode->item;
 				if (pEntity) {
 					CWorld::Remove(pEntity);
 					delete pEntity;
@@ -1614,7 +1614,7 @@ CWorld::ShutDown(void)
 			}
 			pNode = pSector->m_lists[ENTITYLIST_OBJECTS].first;
 			while (pNode) {
-				CEntity* pEntity = (CEntity*)pNode->item;
+				CEntity *pEntity = (CEntity*)pNode->item;
 				if (pEntity) {
 					CWorld::Remove(pEntity);
 					delete pEntity;
@@ -1623,7 +1623,7 @@ CWorld::ShutDown(void)
 			}
 			pNode = pSector->m_lists[ENTITYLIST_DUMMIES].first;
 			while (pNode) {
-				CEntity* pEntity = (CEntity*)pNode->item;
+				CEntity *pEntity = (CEntity*)pNode->item;
 				if (pEntity) {
 					CWorld::Remove(pEntity);
 					delete pEntity;
@@ -1637,9 +1637,9 @@ CWorld::ShutDown(void)
 		}
 	}
 	for (int32 i = 0; i < 4; i ++) {
-		CPtrNode* pNode = GetBigBuildingList((eLevelName)i).first;
+		CPtrNode *pNode = GetBigBuildingList((eLevelName)i).first;
 		while (pNode) {
-			CEntity* pEntity = (CEntity*)pNode->item;
+			CEntity *pEntity = (CEntity*)pNode->item;
 			if (pEntity) {
 				// Maybe remove from world here?
 				delete pEntity;
@@ -1650,7 +1650,7 @@ CWorld::ShutDown(void)
 	}
 	for (int32 y = 0; y < NUMSECTORS_Y; y++) {
 		for (int32 x = 0; x < NUMSECTORS_X; x++) {
-			CSector* pSector = GetSector(x, y);
+			CSector *pSector = GetSector(x, y);
 			if (pSector->m_lists[ENTITYLIST_BUILDINGS].first) {
 				sprintf(gString, "Building list %d,%d not empty\n", x, y);
 				pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();
@@ -1784,7 +1784,7 @@ CWorld::RepositionOneObject(CEntity* pEntity)
 		|| modelId == MI_FIRE_HYDRANT
 		|| modelId == MI_BOLLARDLIGHT
 		|| modelId == MI_PARKTABLE) {
-		CVector& position = pEntity->m_matrix.GetPosition();
+		CVector& position = pEntity->GetPosition();
 		float fBoundingBoxMinZ = pEntity->GetColModel()->boundingBox.min.z;
 		position.z = CWorld::FindGroundZFor3DCoord(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z, nil) - fBoundingBoxMinZ;
 		pEntity->m_matrix.UpdateRW();
@@ -1792,13 +1792,13 @@ CWorld::RepositionOneObject(CEntity* pEntity)
 	} else if (modelId == MI_BUOY) {
 		float fWaterLevel = 0.0f;
 		bool bFound = true;
-		const CVector& position = pEntity->m_matrix.GetPosition();
+		const CVector& position = pEntity->GetPosition();
 		float fGroundZ = CWorld::FindGroundZFor3DCoord(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z, &bFound);
 		if (CWaterLevel::GetWaterLevelNoWaves(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z, &fWaterLevel)) {
 			if (!bFound || fWaterLevel > fGroundZ) {
 				CColModel* pColModel = pEntity->GetColModel();
 				float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
-				pEntity->m_matrix.GetPosition().z = 0.2f * fHeight + fWaterLevel - 0.5f * fHeight;
+				pEntity->GetPosition().z = 0.2f * fHeight + fWaterLevel - 0.5f * fHeight;
 			}
 		}
 	}
@@ -2075,7 +2075,7 @@ CWorld::TriggerExplosionSectorList(CPtrList& list, const CVector& position, floa
 	CPtrNode* pNode = list.first;
 	while (pNode) {
 		CPhysical* pEntity = (CPhysical*)pNode->item;
-		CVector vecDistance = pEntity->m_matrix.GetPosition() - position;
+		CVector vecDistance = pEntity->GetPosition() - position;
 		float fMagnitude = vecDistance.Magnitude();
 		if (fRadius > fMagnitude) {
 			CWeapon::BlowUpExplosiveThings(pEntity);
@@ -2096,7 +2096,7 @@ CWorld::TriggerExplosionSectorList(CPtrList& list, const CVector& position, floa
 									if (pEntity->IsObject() && modelId != MI_EXPLODINGBARREL && modelId != MI_PETROLPUMP)
 										pObject->bHasBeenDamaged = true;
 								} else {
-									CVector pos = pEntity->m_matrix.GetPosition();
+									CVector pos = pEntity->GetPosition();
 									pos.z -= 0.5f;
 									CParticleObject::AddObject(POBJECT_FIRE_HYDRANT, pos, true);
 									pObject->bHasBeenDamaged = true;
@@ -2122,7 +2122,7 @@ CWorld::TriggerExplosionSectorList(CPtrList& list, const CVector& position, floa
 					pEntity->ApplyMoveForce(vecForceDir);
 					if (!pEntity->bPedPhysics) {
 						float fBoundRadius = pEntity->GetBoundRadius();
-						float fDistanceZ = position.z - pEntity->m_matrix.GetPosition().z;
+						float fDistanceZ = position.z - pEntity->GetPosition().z;
 						float fPointZ = fBoundRadius;
 						if (max(fDistanceZ, -fBoundRadius) < fBoundRadius)
 						{

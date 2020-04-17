@@ -866,7 +866,7 @@ CEntity::ModifyMatrixForBannerInWind(void)
 }
 
 void 
-CEntity::AddSteamsFromGround1(CPtrList& list) 
+CEntity::AddSteamsFromGround(CPtrList& list) 
 {
 	CPtrNode *pNode = list.first;
 	while (pNode) {
@@ -922,7 +922,7 @@ STARTPATCHES
 	InjectHook(0x473F60, &CEntity::DetachFromRwObject, PATCH_JUMP);
 
 	InjectHook(0x475A20, &CEntity::PreRenderForGlassWindow, PATCH_JUMP);
-	InjectHook(0x50CE40, &CEntity::AddSteamsFromGround, PATCH_JUMP);
+	InjectHook(0x50CE40, (void (CEntity::*)(CVector*))& CEntity::AddSteamsFromGround, PATCH_JUMP);
 	InjectHook(0x475670, &CEntity::ModifyMatrixForTreeInWind, PATCH_JUMP);
 	InjectHook(0x475830, &CEntity::ModifyMatrixForBannerInWind, PATCH_JUMP);
 	InjectHook(0x4FA530, &CEntity::ProcessLightsForEntity, PATCH_JUMP);
