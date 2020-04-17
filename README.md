@@ -31,10 +31,6 @@ If a function uses only few unreversed functions that would be inconvenient
 to reverse at the time, calling the original functions is acceptable.
 
 ### Unreversed / incomplete classes (at least the ones we know)
-```
-CWorld
-```
-
 The following classes have only unused or practically unused code left:
 ```
 CCullZone - only mobile stuff
