@@ -1,4 +1,4 @@
-Librw = os.getenv("LIBRW")
+Librw = os.getenv("LIBRW") or "librw"
 
 workspace "re3"
 	configurations { "Debug", "Release", "ReleaseFH", "DebugRW", "ReleaseRW"  }
@@ -54,8 +54,8 @@ workspace "re3"
 	filter "configurations:Debug or Release"
 		files { "src/fakerw/*.*" }
 		includedirs { "src/fakerw" }
-		includedirs { "librw" }
-		libdirs { path.join("librw", "lib/win-x86-d3d9/%{cfg.buildcfg}") }
+		includedirs { Librw }
+		libdirs { path.join(Librw, "lib/win-x86-d3d9/%{cfg.buildcfg}") }
 		links { "rw", "d3d9" }
 	filter  {}
 	
