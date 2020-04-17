@@ -55,7 +55,6 @@ workspace "re3"
 		files { "src/fakerw/*.*" }
 		includedirs { "src/fakerw" }
 		includedirs { "librw" }
-		includedirs { "librw/src" }
 		libdirs { path.join("librw", "lib/win-x86-d3d9/%{cfg.buildcfg}") }
 		links { "rw", "d3d9" }
 	filter  {}
