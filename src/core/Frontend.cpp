@@ -305,9 +305,11 @@ ScaleAndCenterX(float x)
 	} while(0)
 
 #define ProcessRadioIcon(sprite, x, y, radioId, hoverOpt) \
-	sprite.Draw(x, y, MENU_X(MENURADIO_ICON_SCALE), MENU_Y(MENURADIO_ICON_SCALE), radioId == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170)); \
-		if (CheckHover(x, x + MENU_X(MENURADIO_ICON_SCALE), y, y + MENU_Y(MENURADIO_ICON_SCALE))) \
-			m_nHoverOption = hoverOpt;
+	do { \
+		sprite.Draw(x, y, MENU_X(MENURADIO_ICON_SCALE), MENU_Y(MENURADIO_ICON_SCALE), radioId == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170)); \
+			if (CheckHover(x, x + MENU_X(MENURADIO_ICON_SCALE), y, y + MENU_Y(MENURADIO_ICON_SCALE))) \
+				m_nHoverOption = hoverOpt; \
+	} while (0)
 
 // --- Functions not in the game/inlined starts
 

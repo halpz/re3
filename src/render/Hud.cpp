@@ -473,7 +473,12 @@ void CHud::Draw()
 					break;
 
 				}
+
+#ifndef HUD_ENHANCEMENTS
 				if (!m_Message[0]) {
+#else
+				if (!m_Message[0] && !m_BigMessage[2][0]) { // Hide zone name if wasted/busted text is displaying
+#endif
 					m_ZoneNameTimer += CTimer::GetTimeStepInMilliseconds();
 					CFont::SetJustifyOff();
 					CFont::SetPropOn();
@@ -563,7 +568,11 @@ void CHud::Draw()
 					break;
 				}
 
+#ifndef HUD_ENHANCEMENTS
 				if (!m_Message[0]) {
+#else
+				if (!m_Message[0] && !m_BigMessage[2][0]) { // Hide vehicle name if wasted/busted text is displaying
+#endif
 					m_VehicleNameTimer += CTimer::GetTimeStepInMilliseconds();
 					CFont::SetJustifyOff();
 					CFont::SetPropOn();
