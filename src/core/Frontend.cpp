@@ -287,7 +287,7 @@ ScaleAndCenterX(float x)
 
 #define ProcessSlider(value, increaseAction, decreaseAction, hoverStartX, hoverEndX) \
 	do { \
-		lastActiveBarX = DisplaySlider(SCREEN_STRETCH_FROM_RIGHT(MENUSLIDER_X + columnWidth), MENU_Y(bitAboveNextItemY), MENU_Y(smallestSliderBar), MENU_Y(usableLineHeight), MENU_X(MENUSLIDER_UNK), value); \
+		lastActiveBarX = DisplaySlider(MENU_X_RIGHT_ALIGNED(MENUSLIDER_X + columnWidth), MENU_Y(bitAboveNextItemY), MENU_Y(smallestSliderBar), MENU_Y(usableLineHeight), MENU_X(MENUSLIDER_UNK), value); \
 		if (i != m_nCurrOption || !itemsAreSelectable) \
 			break; \
 		 \
@@ -298,7 +298,7 @@ ScaleAndCenterX(float x)
 			break; \
 		 \
 		m_nHoverOption = increaseAction; \
-		if (m_nMousePosX < SCREEN_STRETCH_FROM_RIGHT(MENUSLIDER_X + columnWidth)) \
+		if (m_nMousePosX < MENU_X_RIGHT_ALIGNED(MENUSLIDER_X + columnWidth)) \
 			m_nHoverOption = HOVEROPTION_NOT_HOVERING; \
 	} while(0)
 
@@ -1237,7 +1237,6 @@ CMenuManager::Draw()
 			}
 
 			// Sliders
-			// We stretch slider start X here(like original code), because it will always be center of screen
 			int lastActiveBarX;
 			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
 				case MENUACTION_BRIGHTNESS:
