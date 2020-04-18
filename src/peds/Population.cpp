@@ -1050,7 +1050,7 @@ CPopulation::TestSafeForRealObject(CDummyObject *dummy)
 	if (maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y;
 #endif
 
-	static CColPoint aTempColPoints;
+	static CColPoint aTempColPoints[MAX_COLLISION_POINTS];
 
 	for (int curY = minY; curY <= maxY; curY++) {
 		for (int curX = minX; curX <= maxX; curX++) {
@@ -1061,7 +1061,7 @@ CPopulation::TestSafeForRealObject(CDummyObject *dummy)
 				if (veh->m_scanCode != CWorld::GetCurrentScanCode()) {
 					if (veh->GetIsTouching(colCentre, colRadius)) {
 						veh->m_scanCode = CWorld::GetCurrentScanCode();
-						if (CCollision::ProcessColModels(dummy->GetMatrix(), *dummyCol, veh->GetMatrix(), *veh->GetColModel(), &aTempColPoints, nil, nil) > 0)
+						if (CCollision::ProcessColModels(dummy->GetMatrix(), *dummyCol, veh->GetMatrix(), *veh->GetColModel(), aTempColPoints, nil, nil) > 0)
 							return false;
 					}
 				}
@@ -1072,7 +1072,7 @@ CPopulation::TestSafeForRealObject(CDummyObject *dummy)
 				if (veh->m_scanCode != CWorld::GetCurrentScanCode()) {
 					if (veh->GetIsTouching(colCentre, colRadius)) {
 						veh->m_scanCode = CWorld::GetCurrentScanCode();
-						if (CCollision::ProcessColModels(dummy->GetMatrix(), *dummyCol, veh->GetMatrix(), *veh->GetColModel(), &aTempColPoints, nil, nil) > 0)
+						if (CCollision::ProcessColModels(dummy->GetMatrix(), *dummyCol, veh->GetMatrix(), *veh->GetColModel(), aTempColPoints, nil, nil) > 0)
 							return false;
 					}
 				}

@@ -118,7 +118,7 @@ const CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255);
 const CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
 #endif
 
-const float menuXYpadding = MENUACTION_POS_Y; // *(float*)0x5F355C;	// not original name
+const float menuXYpadding = MENUACTION_POS_Y; // TODO this is non-existant, remove it
 float MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE;
 float MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE;
 
@@ -754,9 +754,9 @@ CMenuManager::Draw()
 
 #ifdef FIX_BUGS
 		// Label is wrapped from right by StretchX(40)px, but wrapped from left by 40px. And this is only place R* didn't use StretchX in here.
-		CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(menuXYpadding), str);
+		CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(MENUACTION_POS_Y), str);
 #else
-		CFont::PrintString(MENU_X_MARGIN, menuXYpadding, str);
+		CFont::PrintString(MENU_X_MARGIN, MENUACTION_POS_Y, str);
 #endif
 	}
 
@@ -3181,7 +3181,7 @@ CMenuManager::PrintBriefs()
 	CFont::SetRightJustifyOff();
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X * 0.7), MENU_Y(MENU_TEXT_SIZE_Y * 0.9)); // second mulipliers are double, idk why
 
-	float nextY = 40.0f;
+	float nextY = BRIEFS_TOP_MARGIN;
 	CRGBA newColor;
 	for (int i = 4; i >= 0; i--) {
 		tPreviousBrief &brief = CMessages::PreviousBriefs[i];
@@ -3214,8 +3214,8 @@ CMenuManager::PrintBriefs()
 			newColor.a = FadeIn(255);
 			CFont::SetColor(newColor);
 #endif
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(50.0f), nextY, gUString);
-			nextY += MENU_Y(menuXYpadding);
+			CFont::PrintString(MENU_X_LEFT_ALIGNED(BRIEFS_LINE_X), nextY, gUString);
+			nextY += MENU_Y(BRIEFS_LINE_HEIGHT);
 		}
 	}
 
@@ -3252,6 +3252,9 @@ void
 CMenuManager::PrintStats()
 {
 	int rowNum = ConstructStatLine(99999);
+#ifdef GTA3_1_1_PATCH
+	CFont::SetFontStyle(FONT_BANK);
+#endif
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X * 0.7), MENU_Y(MENU_TEXT_SIZE_Y * 0.9)); // second mulipliers are double, idk why
 	float nextYChange, y, alphaMult;
 
