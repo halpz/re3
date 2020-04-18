@@ -51,6 +51,12 @@ cMusicManager::PlayerInCar()
 	if(State == PED_DRAG_FROM_CAR || State == PED_EXIT_CAR || State == PED_ARRESTED)
 		return false;
 
+	if (!FindPlayerVehicle())
+		return true;
+
+	if (FindPlayerVehicle()->m_status == STATUS_WRECKED)
+		return false;
+
 	switch(FindPlayerVehicle()->m_modelIndex) {
 	case MI_FIRETRUCK:
 	case MI_AMBULAN:

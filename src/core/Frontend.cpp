@@ -5470,7 +5470,8 @@ CMenuManager::ConstructStatLine(int rowIdx)
 	if (player.m_nTotalPackages != 0)
 		packagesPercent = player.m_nCollectedPackages * 100.0f / player.m_nTotalPackages;
 
-	STAT_LINE("PERPIC", &packagesPercent, 0, &(nTemp = 100));
+	int nPackagesPercent = packagesPercent;
+	STAT_LINE("PERPIC", &nPackagesPercent, 0, &(nTemp = 100));
 	STAT_LINE("NOUNIF", &CStats::TotalNumberOfUniqueJumps, 0, &CStats::NumberOfUniqueJumpsFound);
 	STAT_LINE("DAYSPS", &CStats::DaysPassed, false, nil);
 	if (CGame::nastyGame) {
