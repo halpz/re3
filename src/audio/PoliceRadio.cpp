@@ -1,15 +1,18 @@
 #include "common.h"
 
 #include "DMAudio.h"
+
 #include "AudioManager.h"
+
 #include "AudioSamples.h"
 #include "MusicManager.h"
-#include "PoliceRadio.h"
 #include "PlayerPed.h"
-#include "sampman.h"
-#include "Zones.h"
+#include "PoliceRadio.h"
+#include "Replay.h"
 #include "Vehicle.h"
 #include "World.h"
+#include "Zones.h"
+#include "sampman.h"
 
 const int maxVolume = 127;
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
@@ -155,7 +158,8 @@ cAudioManager::ServicePoliceRadio()
 	if(!m_bUserPause) {
 		bool crimeReport = SetupCrimeReport();
 #ifdef FIX_BUGS // Crash at 0x5fe6ef
-		if(!FindPlayerPed() || !FindPlayerPed()->m_pWanted) return;
+		if(CReplay::IsPlayingBack() || !FindPlayerPed() || !FindPlayerPed()->m_pWanted)
+			return;
 #endif
 		wantedLevel = FindPlayerPed()->m_pWanted->m_nWantedLevel;
 		if(!crimeReport) {
