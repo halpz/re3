@@ -625,218 +625,113 @@ CTheZones::InitialiseAudioZoneArray(void)
 }
 
 void
-CTheZones::SaveAllZones(uint8 *buffer, uint32 *length)
+CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 {
+	INITSAVEBUF
 	int i;
 
-	*length = 8 + 12 +
-		NUMZONES*56 + 2*NUMZONES*58 + 4 +
-		NUMMAPZONES*56 + NUMAUDIOZONES*2 + 4;
+	*size = SAVE_HEADER_SIZE
+		+ sizeof(int32) // GetIndexForZonePointer
+		+ sizeof(m_CurrLevel) + sizeof(FindIndex)
+		+ sizeof(int16) // padding
+		+ sizeof(ZoneArray) + sizeof(ZoneInfoArray)
+		+ sizeof(TotalNumberOfZones) + sizeof(TotalNumberOfZoneInfos)
+		+ sizeof(MapZoneArray) + sizeof(AudioZoneArray)
+		+ sizeof(TotalNumberOfMapZones) + sizeof(NumberOfAudioZones);
 
-	buffer[0] = 'Z';
-	buffer[1] = 'N';
-	buffer[2] = 'S';
-	buffer[3] = '\0';
-	*(uint32*)(buffer+4) = *length - 8;
-	buffer += 8;
+	WriteSaveHeader(buffer, 'Z', 'N', 'S', '\0', *size - SAVE_HEADER_SIZE);
 
-	*(int32*)(buffer) = GetIndexForZonePointer(m_pPlayersZone);
-	*(int32*)(buffer+4) = m_CurrLevel;
-	*(int16*)(buffer+8) = FindIndex;
-	*(int16*)(buffer+10) = 0;
-	buffer += 12;
+	WriteSaveBuf(buffer, GetIndexForZonePointer(m_pPlayersZone));
+	WriteSaveBuf(buffer, m_CurrLevel);
+	WriteSaveBuf(buffer, FindIndex);
+	WriteSaveBuf(buffer, (int16)0); // padding
 
-	for(i = 0; i < NUMZONES; i++){
-		memcpy(buffer, ZoneArray[i].name, 8);
-		*(float*)(buffer+8) = ZoneArray[i].minx;
-		*(float*)(buffer+12) = ZoneArray[i].miny;
-		*(float*)(buffer+16) = ZoneArray[i].minz;
-		*(float*)(buffer+20) = ZoneArray[i].maxx;
-		*(float*)(buffer+24) = ZoneArray[i].maxy;
-		*(float*)(buffer+28) = ZoneArray[i].maxz;
-		*(int32*)(buffer+32) = ZoneArray[i].type;
-		*(int32*)(buffer+36) = ZoneArray[i].level;
-		*(int16*)(buffer+40) = ZoneArray[i].zoneinfoDay;
-		*(int16*)(buffer+42) = ZoneArray[i].zoneinfoNight;
-		*(int32*)(buffer+44) = GetIndexForZonePointer(ZoneArray[i].child);
-		*(int32*)(buffer+48) = GetIndexForZonePointer(ZoneArray[i].parent);
-		*(int32*)(buffer+52) = GetIndexForZonePointer(ZoneArray[i].next);
-		buffer += 56;
+	for(i = 0; i < ARRAY_SIZE(ZoneArray); i++){
+		CZone *zone = WriteSaveBuf(buffer, ZoneArray[i]);
+		zone->child = (CZone*)GetIndexForZonePointer(ZoneArray[i].child);
+		zone->parent = (CZone*)GetIndexForZonePointer(ZoneArray[i].parent);
+		zone->next = (CZone*)GetIndexForZonePointer(ZoneArray[i].next);
 	}
 
-	for(i = 0; i < 2*NUMZONES; i++){
-		*(int16*)(buffer) = ZoneInfoArray[i].carDensity;
-		*(int16*)(buffer+2) = ZoneInfoArray[i].carThreshold[0];
-		*(int16*)(buffer+4) = ZoneInfoArray[i].carThreshold[1];
-		*(int16*)(buffer+6) = ZoneInfoArray[i].carThreshold[2];
-		*(int16*)(buffer+8) = ZoneInfoArray[i].carThreshold[3];
-		*(int16*)(buffer+10) = ZoneInfoArray[i].carThreshold[4];
-		*(int16*)(buffer+12) = ZoneInfoArray[i].carThreshold[5];
-		*(int16*)(buffer+14) = ZoneInfoArray[i].copThreshold;
-		*(int16*)(buffer+16) = ZoneInfoArray[i].gangThreshold[0];
-		*(int16*)(buffer+18) = ZoneInfoArray[i].gangThreshold[1];
-		*(int16*)(buffer+20) = ZoneInfoArray[i].gangThreshold[2];
-		*(int16*)(buffer+22) = ZoneInfoArray[i].gangThreshold[3];
-		*(int16*)(buffer+24) = ZoneInfoArray[i].gangThreshold[4];
-		*(int16*)(buffer+26) = ZoneInfoArray[i].gangThreshold[5];
-		*(int16*)(buffer+28) = ZoneInfoArray[i].gangThreshold[6];
-		*(int16*)(buffer+30) = ZoneInfoArray[i].gangThreshold[7];
-		*(int16*)(buffer+32) = ZoneInfoArray[i].gangThreshold[8];
-		*(uint16*)(buffer+34) = ZoneInfoArray[i].pedDensity;
-		*(uint16*)(buffer+36) = ZoneInfoArray[i].copDensity;
-		*(uint16*)(buffer+38) = ZoneInfoArray[i].gangDensity[0];
-		*(uint16*)(buffer+40) = ZoneInfoArray[i].gangDensity[1];
-		*(uint16*)(buffer+42) = ZoneInfoArray[i].gangDensity[2];
-		*(uint16*)(buffer+44) = ZoneInfoArray[i].gangDensity[3];
-		*(uint16*)(buffer+46) = ZoneInfoArray[i].gangDensity[4];
-		*(uint16*)(buffer+48) = ZoneInfoArray[i].gangDensity[5];
-		*(uint16*)(buffer+50) = ZoneInfoArray[i].gangDensity[6];
-		*(uint16*)(buffer+52) = ZoneInfoArray[i].gangDensity[7];
-		*(uint16*)(buffer+54) = ZoneInfoArray[i].gangDensity[8];
-		*(uint16*)(buffer+56) = ZoneInfoArray[i].pedGroup;
-		buffer += 58;
+	for(i = 0; i < ARRAY_SIZE(ZoneInfoArray); i++)
+		WriteSaveBuf(buffer, ZoneInfoArray[i]);
+
+	WriteSaveBuf(buffer, TotalNumberOfZones);
+	WriteSaveBuf(buffer, TotalNumberOfZoneInfos);
+
+	for(i = 0; i < ARRAY_SIZE(MapZoneArray); i++) {
+		CZone* zone = WriteSaveBuf(buffer, MapZoneArray[i]);
+
+		/*
+		The call of GetIndexForZonePointer is wrong, as it is
+		meant for a different array, but the game doesn't brake
+		if those fields are nil. Let's make sure they are.
+		*/
+		assert(MapZoneArray[i].child == nil);
+		assert(MapZoneArray[i].parent == nil);
+		assert(MapZoneArray[i].next == nil);
+		zone->child = (CZone*)GetIndexForZonePointer(MapZoneArray[i].child);
+		zone->parent = (CZone*)GetIndexForZonePointer(MapZoneArray[i].parent);
+		zone->next = (CZone*)GetIndexForZonePointer(MapZoneArray[i].next);
 	}
 
-	*(uint16*)(buffer) = TotalNumberOfZones;
-	*(uint16*)(buffer+2) = TotalNumberOfZoneInfos;
-	buffer += 4;
+	for(i = 0; i < ARRAY_SIZE(AudioZoneArray); i++)
+		WriteSaveBuf(buffer, AudioZoneArray[i]);
 
-	for(i = 0; i < NUMMAPZONES; i++){
-		memcpy(buffer, MapZoneArray[i].name, 8);
-		*(float*)(buffer+8) = MapZoneArray[i].minx;
-		*(float*)(buffer+12) = MapZoneArray[i].miny;
-		*(float*)(buffer+16) = MapZoneArray[i].minz;
-		*(float*)(buffer+20) = MapZoneArray[i].maxx;
-		*(float*)(buffer+24) = MapZoneArray[i].maxy;
-		*(float*)(buffer+28) = MapZoneArray[i].maxz;
-		*(int32*)(buffer+32) = MapZoneArray[i].type;
-		*(int32*)(buffer+36) = MapZoneArray[i].level;
-		*(int16*)(buffer+40) = MapZoneArray[i].zoneinfoDay;
-		*(int16*)(buffer+42) = MapZoneArray[i].zoneinfoNight;
-#ifdef STANDALONE
-		// BUG: GetIndexForZonePointer uses ZoneArray
-		// so indices will be unpredictable with different memory layout
-		assert(0);
-#endif
-		*(int32*)(buffer+44) = GetIndexForZonePointer(MapZoneArray[i].child);
-		*(int32*)(buffer+48) = GetIndexForZonePointer(MapZoneArray[i].parent);
-		*(int32*)(buffer+52) = GetIndexForZonePointer(MapZoneArray[i].next);
-		buffer += 56;
-	}
+	WriteSaveBuf(buffer, TotalNumberOfMapZones);
+	WriteSaveBuf(buffer, NumberOfAudioZones);
 
-	for(i = 0; i < NUMAUDIOZONES; i++){
-		*(int16*)buffer = AudioZoneArray[i];
-		buffer += 2;
-	}
-
-	*(uint16*)(buffer) = TotalNumberOfMapZones;
-	*(uint16*)(buffer+2) = NumberOfAudioZones;
+	VALIDATESAVEBUF(*size)
 }
 
 void
-CTheZones::LoadAllZones(uint8 *buffer, uint32 length)
+CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 {
+	INITSAVEBUF
 	int i;
 
-	assert(length == 8 + 12 +
-		NUMZONES*56 + 2*NUMZONES*58 + 4 +
-		NUMMAPZONES*56 + NUMAUDIOZONES*2 + 4);
-	assert(buffer[0] == 'Z');
-	assert(buffer[1] == 'N');
-	assert(buffer[2] == 'S');
-	assert(buffer[3] == '\0');
-	assert(*(uint32*)(buffer+4) == length - 8);
-	buffer += 8;
+	CheckSaveHeader(buffer, 'Z', 'N', 'S', '\0', size - SAVE_HEADER_SIZE);
 
-	m_pPlayersZone = GetPointerForZoneIndex(*(int32*)(buffer));
-	m_CurrLevel = (eLevelName)*(int32*)(buffer+4);
-	FindIndex = *(int16*)(buffer+8);
-	assert(*(int16*)(buffer+10) == 0);
-	buffer += 12;
+	m_pPlayersZone = GetPointerForZoneIndex(ReadSaveBuf<int32>(buffer));
+	m_CurrLevel = ReadSaveBuf<eLevelName>(buffer);
+	FindIndex = ReadSaveBuf<int16>(buffer);
+	ReadSaveBuf<int16>(buffer);
 
-	for(i = 0; i < NUMZONES; i++){
-		memcpy(ZoneArray[i].name, buffer, 8);
-		ZoneArray[i].minx = *(float*)(buffer+8);
-		ZoneArray[i].miny = *(float*)(buffer+12);
-		ZoneArray[i].minz = *(float*)(buffer+16);
-		ZoneArray[i].maxx = *(float*)(buffer+20);
-		ZoneArray[i].maxy = *(float*)(buffer+24);
-		ZoneArray[i].maxz = *(float*)(buffer+28);
-		ZoneArray[i].type = (eZoneType)*(int32*)(buffer+32);
-		ZoneArray[i].level = (eLevelName)*(int32*)(buffer+36);
-		ZoneArray[i].zoneinfoDay = *(int16*)(buffer+40);
-		ZoneArray[i].zoneinfoNight = *(int16*)(buffer+42);
-		ZoneArray[i].child = GetPointerForZoneIndex(*(int32*)(buffer+44));
-		ZoneArray[i].parent = GetPointerForZoneIndex(*(int32*)(buffer+48));
-		ZoneArray[i].next = GetPointerForZoneIndex(*(int32*)(buffer+52));
-		buffer += 56;
+	for(i = 0; i < ARRAY_SIZE(ZoneArray); i++){
+		ZoneArray[i] = ReadSaveBuf<CZone>(buffer);
+
+		ZoneArray[i].child = GetPointerForZoneIndex((int32)ZoneArray[i].child);
+		ZoneArray[i].parent = GetPointerForZoneIndex((int32)ZoneArray[i].parent);
+		ZoneArray[i].next = GetPointerForZoneIndex((int32)ZoneArray[i].next);
 	}
 
-	for(i = 0; i < 2*NUMZONES; i++){
-		ZoneInfoArray[i].carDensity = *(int16*)(buffer);
-		ZoneInfoArray[i].carThreshold[0] = *(int16*)(buffer+2);
-		ZoneInfoArray[i].carThreshold[1] = *(int16*)(buffer+4);
-		ZoneInfoArray[i].carThreshold[2] = *(int16*)(buffer+6);
-		ZoneInfoArray[i].carThreshold[3] = *(int16*)(buffer+8);
-		ZoneInfoArray[i].carThreshold[4] = *(int16*)(buffer+10);
-		ZoneInfoArray[i].carThreshold[5] = *(int16*)(buffer+12);
-		ZoneInfoArray[i].copThreshold = *(int16*)(buffer+14);
-		ZoneInfoArray[i].gangThreshold[0] = *(int16*)(buffer+16);
-		ZoneInfoArray[i].gangThreshold[1] = *(int16*)(buffer+18);
-		ZoneInfoArray[i].gangThreshold[2] = *(int16*)(buffer+20);
-		ZoneInfoArray[i].gangThreshold[3] = *(int16*)(buffer+22);
-		ZoneInfoArray[i].gangThreshold[4] = *(int16*)(buffer+24);
-		ZoneInfoArray[i].gangThreshold[5] = *(int16*)(buffer+26);
-		ZoneInfoArray[i].gangThreshold[6] = *(int16*)(buffer+28);
-		ZoneInfoArray[i].gangThreshold[7] = *(int16*)(buffer+30);
-		ZoneInfoArray[i].gangThreshold[8] = *(int16*)(buffer+32);
-		ZoneInfoArray[i].pedDensity = *(uint16*)(buffer+34);
-		ZoneInfoArray[i].copDensity = *(uint16*)(buffer+36);
-		ZoneInfoArray[i].gangDensity[0] = *(uint16*)(buffer+38);
-		ZoneInfoArray[i].gangDensity[1] = *(uint16*)(buffer+40);
-		ZoneInfoArray[i].gangDensity[2] = *(uint16*)(buffer+42);
-		ZoneInfoArray[i].gangDensity[3] = *(uint16*)(buffer+44);
-		ZoneInfoArray[i].gangDensity[4] = *(uint16*)(buffer+46);
-		ZoneInfoArray[i].gangDensity[5] = *(uint16*)(buffer+48);
-		ZoneInfoArray[i].gangDensity[6] = *(uint16*)(buffer+50);
-		ZoneInfoArray[i].gangDensity[7] = *(uint16*)(buffer+52);
-		ZoneInfoArray[i].gangDensity[8] = *(uint16*)(buffer+54);
-		ZoneInfoArray[i].pedGroup = *(uint16*)(buffer+56);
-		buffer += 58;
+	for(i = 0; i < ARRAY_SIZE(ZoneInfoArray); i++)
+		ZoneInfoArray[i] = ReadSaveBuf<CZoneInfo>(buffer);
+
+	TotalNumberOfZones = ReadSaveBuf<int16>(buffer);
+	TotalNumberOfZoneInfos = ReadSaveBuf<int16>(buffer);
+
+	for(i = 0; i < ARRAY_SIZE(MapZoneArray); i++){
+		MapZoneArray[i] = ReadSaveBuf<CZone>(buffer);
+
+		/*
+		The call of GetPointerForZoneIndex is wrong, as it is
+		meant for a different array, but the game doesn't brake
+		if save data stored is -1.
+		*/
+		MapZoneArray[i].child = GetPointerForZoneIndex((int32)MapZoneArray[i].child);
+		MapZoneArray[i].parent = GetPointerForZoneIndex((int32)MapZoneArray[i].parent);
+		MapZoneArray[i].next = GetPointerForZoneIndex((int32)MapZoneArray[i].next);
+		assert(MapZoneArray[i].child == nil);
+		assert(MapZoneArray[i].parent == nil);
+		assert(MapZoneArray[i].next == nil);
 	}
 
-	TotalNumberOfZones = *(uint16*)(buffer);
-	TotalNumberOfZoneInfos = *(uint16*)(buffer+2);
-	buffer += 4;
+	for(i = 0; i < ARRAY_SIZE(AudioZoneArray); i++)
+		AudioZoneArray[i] = ReadSaveBuf<int16>(buffer);
 
-	for(i = 0; i < NUMMAPZONES; i++){
-		memcpy(MapZoneArray[i].name, buffer, 8);
-		MapZoneArray[i].minx = *(float*)(buffer+8);
-		MapZoneArray[i].miny = *(float*)(buffer+12);
-		MapZoneArray[i].minz = *(float*)(buffer+16);
-		MapZoneArray[i].maxx = *(float*)(buffer+20);
-		MapZoneArray[i].maxy = *(float*)(buffer+24);
-		MapZoneArray[i].maxz = *(float*)(buffer+28);
-		MapZoneArray[i].type = (eZoneType)*(int32*)(buffer+32);
-		MapZoneArray[i].level = (eLevelName)*(int32*)(buffer+36);
-		MapZoneArray[i].zoneinfoDay = *(int16*)(buffer+40);
-		MapZoneArray[i].zoneinfoNight = *(int16*)(buffer+42);
-#ifdef STANDALONE
-		// BUG: GetPointerForZoneIndex uses ZoneArray
-		// so pointers will be unpredictable with different memory layout
-		assert(0);
-#endif
-		MapZoneArray[i].child = GetPointerForZoneIndex(*(int32*)(buffer+44));
-		MapZoneArray[i].parent = GetPointerForZoneIndex(*(int32*)(buffer+48));
-		MapZoneArray[i].next = GetPointerForZoneIndex(*(int32*)(buffer+52));
-		buffer += 56;
-	}
+	TotalNumberOfMapZones = ReadSaveBuf<uint16>(buffer);
+	NumberOfAudioZones = ReadSaveBuf<uint16>(buffer);
 
-	for(i = 0; i < NUMAUDIOZONES; i++){
-		AudioZoneArray[i] = *(int16*)buffer;
-		buffer += 2;
-	}
-
-	TotalNumberOfMapZones = *(uint16*)(buffer);
-	NumberOfAudioZones = *(uint16*)(buffer+2);
+	VALIDATESAVEBUF(size)
 }
