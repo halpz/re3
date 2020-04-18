@@ -787,6 +787,10 @@ CVehicle::CanPedExitCar(void)
 {
 	CVector up = GetUp();
 	if(up.z > 0.1f || up.z < -0.1f){
+#ifdef VC_PED_PORTS
+		if (IsBoat())
+			return true;
+#endif
 		// can't exit when car is moving too fast
 		if(m_vecMoveSpeed.MagnitudeSqr() > 0.005f)
 			return false;

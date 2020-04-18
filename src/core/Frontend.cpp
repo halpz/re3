@@ -118,7 +118,6 @@ const CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255);
 const CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
 #endif
 
-const float menuXYpadding = MENUACTION_POS_Y; // TODO this is non-existant, remove it
 float MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE;
 float MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE;
 
@@ -231,8 +230,7 @@ ScaleAndCenterX(float x)
 	else {
 		if (x > DEFAULT_SCREEN_WIDTH / 2) {
 			return SCREEN_WIDTH / 2 + SCREEN_SCALE_X(x - DEFAULT_SCREEN_WIDTH / 2);
-		}
-		else {
+		} else {
 			return SCREEN_WIDTH / 2 - SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH / 2 - x);
 		}
 	}
@@ -1257,7 +1255,8 @@ CMenuManager::Draw()
 					break;
 			}
 
-			nextYToUse += lineHeight * CFont::GetNumberLines(menuXYpadding, nextYToUse, leftText);
+			// 60.0 is silly
+			nextYToUse += lineHeight * CFont::GetNumberLines(MENU_X_LEFT_ALIGNED(60.0f), MENU_Y(nextYToUse), leftText);
 
 			// Radio icons
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_RADIO) {
@@ -3385,8 +3384,7 @@ CMenuManager::Process(void)
 				DMAudio.SetEffectsFadeVol(0);
 				DMAudio.SetMusicFadeVol(0);
 				DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
-			}
-			else
+			} else
 				SaveLoadFileError_SetUpErrorScreen();
 		}
 
