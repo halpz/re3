@@ -135,7 +135,9 @@ CPlayerPed::SetupPlayerPed(int32 index)
 {
 	CPlayerPed *player = new CPlayerPed();
 	CWorld::Players[index].m_pPed = player;
+#ifdef FIX_BUGS
 	player->RegisterReference((CEntity**)&CWorld::Players[index].m_pPed);
+#endif
 
 	player->SetOrientation(0.0f, 0.0f, 0.0f);
 
