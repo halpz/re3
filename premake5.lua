@@ -101,6 +101,8 @@ project "re3"
 	targetextension ".exe"
 	characterset ("MBCS")
 	linkoptions "/SAFESEH:NO"
+	
+	prebuildcommands { "cd \"../librw\" && premake5 " .. _ACTION .. " && msbuild \"build/librw.sln\" /property:Configuration=%{cfg.longname} /property:Platform=\"win-x86-d3d9\"" }
 
 	filter "configurations:Debug"
 		defines { "DEBUG", "LIBRW", "RW_D3D9" }
