@@ -130,7 +130,6 @@ public:
 	int8 m_nGettingInFlags;
 	int8 m_nGettingOutFlags;
 	uint8 m_nNumMaxPassengers;
-	char field_1CD[3];
 	float field_1D0[4];
 	CEntity *m_pCurGroundEntity;
 	CFire *m_pCarFire;
@@ -180,7 +179,6 @@ public:
 	int16 m_nRoadblockNode;
 	float m_fHealth;           // 1000.0f = full health. 250.0f = fire. 0 -> explode
 	uint8 m_nCurrentGear;
-	int8 field_205[3];
 	float m_fChangeGearTime;
 	uint32 m_nGunFiringTime;    // last time when gun on vehicle was fired (used on boats)
 	uint32 m_nTimeOfDeath;
@@ -296,7 +294,6 @@ class cVehicleParams
 {
 public:
 	bool m_bDistanceCalculated;
-	char gap_1[3];
 	float m_fDistance;
 	CVehicle *m_pVehicle;
 	cTransmission *m_pTransmission;

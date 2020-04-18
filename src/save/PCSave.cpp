@@ -86,7 +86,11 @@ C_PcSave::PopulateSlotInfo()
 		SlotSaveDate[i][0] = '\0';
 	}
 	for (int i = 0; i < SLOT_COUNT; i++) {
+#ifdef FIX_BUGS
+		char savename[MAX_PATH];
+#else
 		char savename[52];
+#endif
 		struct {
 			int size;
 			wchar FileName[24];

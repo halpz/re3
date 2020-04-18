@@ -46,7 +46,6 @@ public:
 		uint8 bRendered         : 1;
 		//uint8 bDrawOnBuildings  : 1;
 	} m_nFlags;
-	char _pad0;
 	RwTexture *m_pTexture;
 
     CStoredShadow()
@@ -58,11 +57,9 @@ class CPolyBunch
 {
 public:
 	int16 m_nNumVerts;
-	char _pad0[2];
 	CVector m_aVerts[7];
 	uint8 m_aU[7];
 	uint8 m_aV[7];
-	char _pad1[2];
 	CPolyBunch *m_pNext;
 
     CPolyBunch()
@@ -82,7 +79,6 @@ public:
 	float m_fZDistance;
 	float m_fScale;
 	uint8 m_nType;
-	char _pad0;
 	int16 m_nIntensity; // unsigned ?
 	uint8 m_nRed;
 	uint8 m_nGreen;
@@ -90,7 +86,6 @@ public:
 	bool m_bJustCreated;
 	bool m_bRendered;
 	bool m_bTemp;
-	char _pad1[2];
 	RwTexture *m_pTexture;
 	
 	CStaticShadow()
@@ -113,7 +108,6 @@ public:
 	uint8 m_nRed;
 	uint8 m_nGreen;
 	uint8 m_nBlue;
-	char _pad0[2];
 	uint32 m_nTimeCreated;
 	uint32 m_nLifeTime;
 	RwTexture *m_pTexture;

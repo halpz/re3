@@ -13,7 +13,6 @@ public:
 	uint8 m_nTriIndex;
 	bool m_bActive;
 	bool m_bShattered;
-	char _pad0[1];
 
 	CFallingGlassPane()  { }
 	~CFallingGlassPane() { }

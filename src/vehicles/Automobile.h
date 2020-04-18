@@ -92,7 +92,6 @@ public:
 	uint8 bWaterTight : 1;	// no damage for non-player peds
 	uint8 bNotDamagedUpsideDown : 1;
 	uint8 bMoreResistantToDamage : 1;
-	uint8 field_4DB;
 	CEntity *m_pBombRigger;
 	int16 field_4E0;
 	uint16 m_hydraulicState;

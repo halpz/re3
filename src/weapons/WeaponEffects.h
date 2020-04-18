@@ -4,7 +4,6 @@ class CWeaponEffects
 {
 public:
 	bool m_bActive;
-	char _pad[3];
 	CVector m_vecPos;
 	uint8 m_nRed;
 	uint8 m_nGreen;

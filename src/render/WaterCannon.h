@@ -13,7 +13,6 @@ public:
 	
 	int32 m_nId;
 	int16 m_nCur;
-	char _pad0[2];
 	uint32 m_nTimeCreated;
 	CVector m_avecPos[NUM_SEGMENTPOINTS];
 	CVector m_avecVelocity[NUM_SEGMENTPOINTS];

@@ -31,22 +31,13 @@ public:
 	uint32 m_nLastBumpPlayerCarTimer;
 	uint32 m_nUnusedTaxiTimer;
 	bool m_bUnusedTaxiThing;
-	int8 field_197;
-	int8 field_198;
-	int8 field_199;
 	uint32 m_nNextSexFrequencyUpdateTime;
 	uint32 m_nNextSexMoneyUpdateTime;
 	int32 m_nSexFrequency;
 	CCivilianPed *m_pHooker;
 	int8 m_WBState; // eWastedBustedState
-	int8 field_217;
-	int8 field_218;
-	int8 field_219;
 	uint32 m_nWBTime;
 	bool m_bInRemoteMode;
-	int8 field_225;
-	int8 field_226;
-	int8 field_227;
 	uint32 m_nTimeLostRemoteCar;
 	uint32 m_nTimeLastHealthLoss;
 	uint32 m_nTimeLastArmourLoss;
@@ -54,8 +45,6 @@ public:
 	int32 m_nUpsideDownCounter;
 	int32 field_248;
 	int16 m_nTrafficMultiplier;
-	int8 field_254;
-	int8 field_255;
 	float m_fRoadDensity;
 	uint32 m_nPreviousTimeRewardedForExplosion;
 	int32 m_nExplosionsSinceLastReward;
@@ -90,7 +79,6 @@ public:
 	void FindClosestCarSectorList(CPtrList&, CPed*, float, float, float, float, float*, CVehicle**);
 
 	~CPlayerInfo() { };
-	void dtor(void) { this->CPlayerInfo::~CPlayerInfo(); }
 };
 
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");

@@ -53,14 +53,12 @@ public:
 	uint8               m_nSkipFrames;
 	uint16              m_nFrameCounter;
 	uint16              m_nState;
-	char _pad0[2];
 	CVector             m_vecTarget;
 	float               m_fRandVal;
 	float               m_fSize;
 	CRGBA               m_Color;
 	uint8               m_bRemove;
 	int8                m_nCreationChance;
-	char _pad1[2];
 	
 	static CParticleObject *pCloseListHead;
 	static CParticleObject *pFarListHead;

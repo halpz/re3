@@ -70,7 +70,6 @@ public:
 	static bool ScriptHeliOn;
 
 	CHeli(int32 id, uint8 CreatedBy);
-	CHeli* ctor(int, uint8);
 
 	// from CEntity
 	void SetModelIndex(uint32 id);
