@@ -634,7 +634,7 @@ RpClump *RpClumpForAllLights(RpClump * clump, RpLightCallBack callback, void *pD
 RpClump *RpClumpForAllCameras(RpClump * clump, RwCameraCallBack callback, void *pData);
 //RpClump *RpClumpCreateSpace(const RwV3d * position, RwReal radius);
 RpClump *RpClumpRender(RpClump * clump) { clump->render(); return clump; }
-RpClump *RpClumpRemoveAtomic(RpClump * clump, RpAtomic * atomic) { atomic->removeFromClump(); return clump; }
+RpClump *RpClumpRemoveAtomic(RpClump * clump, RpAtomic * atomic) { clump->removeAtomic(atomic); return clump; }
 RpClump *RpClumpAddAtomic(RpClump * clump, RpAtomic * atomic) { clump->addAtomic(atomic); return clump; }
 //RpClump *RpClumpRemoveLight(RpClump * clump, RpLight * light);
 //RpClump *RpClumpAddLight(RpClump * clump, RpLight * light);
