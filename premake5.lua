@@ -60,7 +60,6 @@ workspace "re3"
 	filter  {}
 	
 	filter "configurations:DebugRW or ReleaseRW"
-		defines { "RWLIBS" }
 		includedirs { "rwsdk/include/d3d8" }
 		libdirs { "rwsdk/lib/d3d8/release" }
 		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp" }
@@ -102,39 +101,29 @@ project "re3"
 	characterset ("MBCS")
 	linkoptions "/SAFESEH:NO"
 	
-	prebuildcommands { "cd \"../librw\" && premake5 " .. _ACTION .. " && msbuild \"build/librw.sln\" /property:Configuration=%{cfg.longname} /property:Platform=\"win-x86-d3d9\"" }
-
-	filter "configurations:Debug"
-		defines { "DEBUG", "LIBRW", "RW_D3D9" }
-		staticruntime "off"
-		symbols "Full"
-		setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
-
-	filter "configurations:Release"
-		defines { "NDEBUG", "LIBRW", "RW_D3D9" }
+	setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
+	symbols "Full"
+	staticruntime "off"
+	
+	filter "configurations:not *RW"
+		prebuildcommands { "cd \"../librw\" && premake5 " .. _ACTION .. " && msbuild \"build/librw.sln\" /property:Configuration=%{cfg.longname} /property:Platform=\"win-x86-d3d9\"" }
+		defines { "LIBRW", "RW_D3D9" }
+	
+	filter "configurations:*RW"
+		defines { "RWLIBS" }
+		staticruntime "on"
+		linkoptions "/SECTION:_rwcseg,ER!W /MERGE:_rwcseg=.text"
+		
+	filter "configurations:Debug*"
+		defines { "DEBUG" }
+		
+	filter "configurations:Release*"
+		defines { "NDEBUG" }
 		optimize "On"
-		staticruntime "off"
-		symbols "Full"
-		setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
+
 		
 	filter "configurations:ReleaseFH"
-		defines { "NDEBUG" }
-		symbols "Full"
+		prebuildcommands {}
 		optimize "off"
 		staticruntime "on"
-		setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
-
-	filter "configurations:DebugRW"
-		defines { "DEBUG" }
-		staticruntime "on"
-		symbols "On"
-		setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
-		linkoptions "/SECTION:_rwcseg,ER!W /MERGE:_rwcseg=.text"
-
-	filter "configurations:ReleaseRW"
-		defines { "NDEBUG" }
-		optimize "On"
-		staticruntime "on"
-		setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
-		linkoptions "/SECTION:_rwcseg,ER!W /MERGE:_rwcseg=.text"
 
