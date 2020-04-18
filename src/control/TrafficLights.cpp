@@ -8,7 +8,7 @@
 #include "Clock.h"
 #include "Weather.h"
 #include "Timecycle.h"
-#include "PointLights.h"
+#include "Pointlights.h"
 #include "Shadows.h"
 #include "Coronas.h"
 #include "SpecialFX.h"

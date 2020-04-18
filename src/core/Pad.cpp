@@ -6,7 +6,7 @@
 
 #include "common.h"
 #ifdef XINPUT
-#include <xinput.h>
+#include <Xinput.h>
 #pragma comment( lib, "Xinput9_1_0.lib" )
 #endif
 

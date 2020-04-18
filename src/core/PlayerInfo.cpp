@@ -180,7 +180,7 @@ CPlayerInfo::MakePlayerSafe(bool toggle)
 		m_pPed->bExplosionProof = true;
 		m_pPed->m_bCanBeDamaged = false;
 		((CPlayerPed*)m_pPed)->ClearAdrenaline();
-		CancelPlayerEnteringCars(nil);
+		CancelPlayerEnteringCars(false);
 		gFireManager.ExtinguishPoint(GetPos(), 4000.0f);
 		CExplosion::RemoveAllExplosionsInArea(GetPos(), 4000.0f);
 		CProjectileInfo::RemoveAllProjectiles();

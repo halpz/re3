@@ -1986,59 +1986,50 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 		if ( nFile == STREAMED_SOUND_RADIO_MP3_PLAYER )
 		{
 			uint32 i = 0;
-			do {
-				if(i != 0 || _bIsMp3Active) {
-					if(++_CurMP3Index >= nNumMP3s) _CurMP3Index = 0;
-
-					_CurMP3Pos = 0;
-
-					tMP3Entry *mp3 = _GetMP3EntryByIndex(_CurMP3Index);
-
-					if(mp3) {
-						mp3 = _pMP3List;
-						if(mp3 == NULL) {
-							_bIsMp3Active = false;
-							nFile = 0;
-							strcpy(filename, m_szCDRomRootPath);
-							strcat(filename, StreamedNameTable[nFile]);
-
-							mp3Stream[nStream] =
-							    AIL_open_stream(DIG, filename, 0);
-							if(mp3Stream[nStream]) {
-								AIL_set_stream_loop_count(
-								    mp3Stream[nStream], 1);
-								AIL_set_stream_ms_position(
-								    mp3Stream[nStream], position);
-								AIL_pause_stream(mp3Stream[nStream],
-								                 0);
-								return true;
-							}
-
-							return false;
-						}
+			
+			if ( !_bIsMp3Active ) goto FIND_MP3TRACK;
+			
+			do
+			{
+				if ( ++_CurMP3Index >= nNumMP3s )
+					_CurMP3Index = 0;
+				
+				_CurMP3Pos = 0;
+				
+				tMP3Entry *mp3 = _GetMP3EntryByIndex(_CurMP3Index);
+			
+				if ( mp3 )
+				{
+					mp3 = _pMP3List;
+					if ( mp3 == NULL )
+					{
+						_bIsMp3Active = false;
+						nFile = 0;
+						goto PLAY_STREAMEDTRACK;
 					}
-
-					if(mp3->pLinkPath != NULL)
-						mp3Stream[nStream] =
-						    AIL_open_stream(DIG, mp3->pLinkPath, 0);
-					else {
-						strcpy(filename, _mp3DirectoryPath);
-						strcat(filename, mp3->aFilename);
-
-						mp3Stream[nStream] =
-						    AIL_open_stream(DIG, filename, 0);
-					}
-
-					if(mp3Stream[nStream]) {
-						AIL_set_stream_loop_count(mp3Stream[nStream], 1);
-						AIL_set_stream_ms_position(mp3Stream[nStream], 0);
-						AIL_pause_stream(mp3Stream[nStream], 0);
-						return true;
-					}
-
-					_bIsMp3Active = false;
-					continue;
 				}
+			
+				if ( mp3->pLinkPath != NULL )
+					mp3Stream[nStream] = AIL_open_stream(DIG, mp3->pLinkPath, 0);
+				else
+				{
+					strcpy(filename, _mp3DirectoryPath);
+					strcat(filename, mp3->aFilename);
+					
+					mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+				}
+				
+				if ( mp3Stream[nStream] )
+				{
+					AIL_set_stream_loop_count(mp3Stream[nStream], 1);
+					AIL_set_stream_ms_position(mp3Stream[nStream], 0);
+					AIL_pause_stream(mp3Stream[nStream], 0);
+					return true;
+				}
+				
+				goto NEXT_MP3TRACK;
+				
+FIND_MP3TRACK:
 				if ( nPos > nStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] )
 					position = 0;
 				
@@ -2048,23 +2039,10 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 					if ( e == NULL )
 					{
 						nFile = 0;
-						strcpy(filename, m_szCDRomRootPath);
-						strcat(filename, StreamedNameTable[nFile]);
-						mp3Stream[nStream] =
-						    AIL_open_stream(DIG, filename, 0);
-						if(mp3Stream[nStream]) {
-							AIL_set_stream_loop_count(
-							    mp3Stream[nStream], 1);
-							AIL_set_stream_ms_position(
-							    mp3Stream[nStream], position);
-							AIL_pause_stream(mp3Stream[nStream], 0);
-							return true;
-						}
-
-						return false;
+						goto PLAY_STREAMEDTRACK;
 					}
 				}
-
+				
 				if ( e->pLinkPath != NULL )
 					mp3Stream[nStream] = AIL_open_stream(DIG, e->pLinkPath, 0);
 				else
@@ -2086,14 +2064,17 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 					return true;
 				}
 				
+NEXT_MP3TRACK:			
 				_bIsMp3Active = false;
-
-			} while(++i < nNumMP3s);
-
+	
+			} while ( ++i < nNumMP3s );
+			
 			position = 0;
 			nFile = 0;
+			goto PLAY_STREAMEDTRACK;
 		}
 		
+PLAY_STREAMEDTRACK:
 		strcpy(filename, m_szCDRomRootPath);
 		strcat(filename, StreamedNameTable[nFile]);
 		
