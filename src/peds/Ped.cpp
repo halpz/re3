@@ -3038,7 +3038,6 @@ CPed::QuitEnteringCar(void)
 		if (animAssoc) {
 			animAssoc->blendDelta = -4.0f;
 			animAssoc->flags |= ASSOC_DELETEFADEDOUT;
-			animAssoc = m_pVehicleAnim;
 			animAssoc->flags &= ~ASSOC_RUNNING;
 		}
 	} else
@@ -3047,7 +3046,11 @@ CPed::QuitEnteringCar(void)
 	m_pVehicleAnim = nil;
 	
 	if (veh) {
+#ifdef VC_PED_PORTS
+		if (veh->AutoPilot.m_nCruiseSpeed == 0 && veh->VehicleCreatedBy == RANDOM_VEHICLE)
+#else
 		if (veh->AutoPilot.m_nCruiseSpeed == 0)
+#endif
 			veh->AutoPilot.m_nCruiseSpeed = 17;
 	}
 }
@@ -4146,7 +4149,7 @@ CPed::SetGetUp(void)
 		CVehicle *veh = (CVehicle*)CPedPlacement::IsPositionClearOfCars(&GetPosition());
 		if (veh && veh->m_vehType != VEHICLE_TYPE_BIKE ||
 			collidingVeh && collidingVeh->IsVehicle() && collidingVeh->m_vehType != VEHICLE_TYPE_BIKE
-			&& ((CTimer::GetFrameCounter() + m_randomSeed % 256 + 5) % 8
+			&& ((uint8)(CTimer::GetFrameCounter() + m_randomSeed + 5) % 8
 				|| CCollision::ProcessColModels(GetMatrix(), *CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(),
 					collidingVeh->GetMatrix(), *CModelInfo::GetModelInfo(collidingVeh->m_modelIndex)->GetColModel(),
 					aTempPedColPts, nil, nil) > 0)) {
@@ -10729,7 +10732,10 @@ CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 			ped->m_pVehicleAnim->SetFinishCallback(PedSetInCarCB, ped);
 		}
 	} else {
-		ped->QuitEnteringCar();
+#ifdef VC_PED_PORTS
+		if (ped->m_nPedState != PED_DRIVING)
+#endif
+			ped->QuitEnteringCar();
 	}
 }
 
@@ -11014,7 +11020,10 @@ CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 		return;
 
 	if (!ped->EnteringCar()) {
-		ped->QuitEnteringCar();
+#ifdef VC_PED_PORTS
+		if(ped->m_nPedState != PED_DRIVING)
+#endif
+			ped->QuitEnteringCar();
 		return;
 	}
 
@@ -13733,7 +13742,12 @@ CPed::ProcessObjective(void)
 				// fall through
 			case OBJECTIVE_LEAVE_VEHICLE:
 				if (CTimer::GetTimeInMilliseconds() > m_leaveCarTimer) {
-					if (InVehicle()) {
+					if (InVehicle()
+#ifdef VC_PED_PORTS
+						&& (FindPlayerPed() != this || !CPad::GetPad(0)->GetAccelerate()
+							|| bBusJacked)
+#endif
+						) {
 						if (m_nPedState != PED_EXIT_CAR && m_nPedState != PED_DRAG_FROM_CAR && m_nPedState != PED_EXIT_TRAIN
 							&& (m_nPedType != PEDTYPE_COP
 #ifdef VC_PED_PORTS
