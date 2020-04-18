@@ -6909,7 +6909,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			CVector cp3 = tmp_matrix * CVector(pColModel->boundingBox.min.x, pColModel->boundingBox.max.y, pColModel->boundingBox.min.z);
 			CVector cp4 = tmp_matrix * CVector(pColModel->boundingBox.min.x, pColModel->boundingBox.min.y, pColModel->boundingBox.max.z);
 			int16 collisions;
-			CWorld::FindObjectsIntersectingAngledCollisionBox(pColModel->boundingBox, tmp_matrix, pos,
+			CWorld::FindObjectsIntersectingAngledCollisionBox(pColModel->boundingBox, tmp_matrix, newPosition,
 				min(cp1.x, min(cp2.x, min(cp3.x, cp4.x))),
 				min(cp1.y, min(cp2.y, min(cp3.y, cp4.y))),
 				max(cp1.x, max(cp2.x, max(cp3.x, cp4.x))),
