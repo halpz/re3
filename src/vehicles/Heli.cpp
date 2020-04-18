@@ -24,6 +24,9 @@
 #include "Object.h"
 #include "HandlingMgr.h"
 #include "Heli.h"
+#ifdef FIX_BUGS
+#include "Replay.h"
+#endif
 
 enum
 {
@@ -428,89 +431,95 @@ CHeli::ProcessControl(void)
 	// Search light and shooting
 	if(m_heliStatus == HELI_STATUS_FLY_AWAY || m_heliType == HELI_TYPE_CATALINA || CCullZones::PlayerNoRain())
 		m_fSearchLightIntensity = 0.0f;
-	else{
+	else {
 		// Update search light history once every 1000ms
 		int timeDiff = CTimer::GetTimeInMilliseconds() - m_nSearchLightTimer;
-		while(timeDiff > 1000){
-			for(i = 5; i > 0; i--){
-				m_aSearchLightHistoryX[i] = m_aSearchLightHistoryX[i-1];
-				m_aSearchLightHistoryY[i] = m_aSearchLightHistoryY[i-1];
+		while (timeDiff > 1000) {
+			for (i = 5; i > 0; i--) {
+				m_aSearchLightHistoryX[i] = m_aSearchLightHistoryX[i - 1];
+				m_aSearchLightHistoryY[i] = m_aSearchLightHistoryY[i - 1];
 			}
-			m_aSearchLightHistoryX[0] = FindPlayerCoors().x + FindPlayerSpeed().x*50.0f*(m_nHeliId+2);
-			m_aSearchLightHistoryY[0] = FindPlayerCoors().y + FindPlayerSpeed().y*50.0f*(m_nHeliId+2);
+			m_aSearchLightHistoryX[0] = FindPlayerCoors().x + FindPlayerSpeed().x * 50.0f * (m_nHeliId + 2);
+			m_aSearchLightHistoryY[0] = FindPlayerCoors().y + FindPlayerSpeed().y * 50.0f * (m_nHeliId + 2);
 
 			timeDiff -= 1000;
 			m_nSearchLightTimer += 1000;
 		}
 		assert(timeDiff <= 1000);
-		float f1 = timeDiff/1000.0f;
+		float f1 = timeDiff / 1000.0f;
 		float f2 = 1.0f - f1;
-		m_fSearchLightX = m_aSearchLightHistoryX[m_nHeliId+2]*f2 + m_aSearchLightHistoryX[m_nHeliId+2-1]*f1;
-		m_fSearchLightY = m_aSearchLightHistoryY[m_nHeliId+2]*f2 + m_aSearchLightHistoryY[m_nHeliId+2-1]*f1;
+		m_fSearchLightX = m_aSearchLightHistoryX[m_nHeliId + 2] * f2 + m_aSearchLightHistoryX[m_nHeliId + 2 - 1] * f1;
+		m_fSearchLightY = m_aSearchLightHistoryY[m_nHeliId + 2] * f2 + m_aSearchLightHistoryY[m_nHeliId + 2 - 1] * f1;
 
 		float searchLightDist = (CVector2D(m_fSearchLightX, m_fSearchLightY) - GetPosition()).Magnitude();
-		if(searchLightDist > 60.0f)
+		if (searchLightDist > 60.0f)
 			m_fSearchLightIntensity = 0.0f;
-		else if(searchLightDist < 40.0f)
+		else if (searchLightDist < 40.0f)
 			m_fSearchLightIntensity = 1.0f;
 		else
-			m_fSearchLightIntensity = 1.0f - (40.0f-searchLightDist)/40.0f;
+			m_fSearchLightIntensity = 1.0f - (40.0f - searchLightDist) / 40.0f;
 
-		if(m_fSearchLightIntensity < 0.9f || sq(FindPlayerCoors().x-m_fSearchLightX) + sq(FindPlayerCoors().y-m_fSearchLightY) > sq(7.0f))
+		if (m_fSearchLightIntensity < 0.9f || sq(FindPlayerCoors().x - m_fSearchLightX) + sq(FindPlayerCoors().y - m_fSearchLightY) > sq(7.0f))
 			m_nShootTimer = CTimer::GetTimeInMilliseconds();
-		else if(CTimer::GetTimeInMilliseconds() > m_nPoliceShoutTimer){
+		else if (CTimer::GetTimeInMilliseconds() > m_nPoliceShoutTimer) {
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_PED_HELI_PLAYER_FOUND, 0.0f);
-			m_nPoliceShoutTimer = CTimer::GetTimeInMilliseconds() + 4500 + (CGeneral::GetRandomNumber()&0xFFF);
+			m_nPoliceShoutTimer = CTimer::GetTimeInMilliseconds() + 4500 + (CGeneral::GetRandomNumber() & 0xFFF);
 		}
-
-		// Shoot
-		int shootTimeout;
-		if(m_heliType == HELI_TYPE_RANDOM){
-			switch(FindPlayerPed()->m_pWanted->m_nWantedLevel){
-			case 0:
-			case 1:
-			case 2: shootTimeout = 999999; break;
-			case 3: shootTimeout = 10000; break;
-			case 4: shootTimeout = 5000; break;
-			case 5: shootTimeout = 3500; break;
-			case 6: shootTimeout = 2000; break;
-			}
-			if(CCullZones::NoPolice())
-				shootTimeout /= 2;
-		}else
-			shootTimeout = 1500;
-
-		if(FindPlayerPed()->m_pWanted->IsIgnored())
-			m_nShootTimer = CTimer::GetTimeInMilliseconds();
-		else{
-			// Check if line of sight is clear
-			if(CTimer::GetTimeInMilliseconds() > m_nShootTimer + shootTimeout &&
-			   CTimer::GetPreviousTimeInMilliseconds() <= m_nShootTimer + shootTimeout){
-				if(CWorld::GetIsLineOfSightClear(GetPosition(), FindPlayerCoors(), true, false, false, false, false, false)){
-					if(m_heliStatus == HELI_STATUS_HOVER2)
-						m_heliStatus = HELI_STATUS_HOVER;
-				}else{
-					m_nShootTimer = CTimer::GetTimeInMilliseconds();
-					if(m_heliStatus == HELI_STATUS_HOVER)
-						m_heliStatus = HELI_STATUS_HOVER2;
+#ifdef FIX_BUGS
+		if (!CReplay::IsPlayingBack())
+#endif
+		{
+			// Shoot
+			int shootTimeout;
+			if (m_heliType == HELI_TYPE_RANDOM) {
+				switch (FindPlayerPed()->m_pWanted->m_nWantedLevel) {
+				case 0:
+				case 1:
+				case 2: shootTimeout = 999999; break;
+				case 3: shootTimeout = 10000; break;
+				case 4: shootTimeout = 5000; break;
+				case 5: shootTimeout = 3500; break;
+				case 6: shootTimeout = 2000; break;
 				}
+				if (CCullZones::NoPolice())
+					shootTimeout /= 2;
 			}
+			else
+				shootTimeout = 1500;
 
-			// Shoot!
-			if(CTimer::GetTimeInMilliseconds() > m_nShootTimer + shootTimeout &&
-			   CTimer::GetTimeInMilliseconds() > m_nLastShotTime + 200){
-				CVector shotTarget = FindPlayerCoors();
-				// some inaccuracy
-				shotTarget.x += ((CGeneral::GetRandomNumber()&0xFF)-128)/50.0f;
-				shotTarget.y += ((CGeneral::GetRandomNumber()&0xFF)-128)/50.0f;
-				CVector direction = FindPlayerCoors() - GetPosition();
-				direction.Normalise();
-				shotTarget += 3.0f*direction;
-				CVector shotSource = GetPosition();
-				shotSource += 3.0f*direction;
-				FireOneInstantHitRound(&shotSource, &shotTarget, 20);
-				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
-				m_nLastShotTime = CTimer::GetTimeInMilliseconds();
+			if (FindPlayerPed()->m_pWanted->IsIgnored())
+				m_nShootTimer = CTimer::GetTimeInMilliseconds();
+			else {
+				// Check if line of sight is clear
+				if (CTimer::GetTimeInMilliseconds() > m_nShootTimer + shootTimeout &&
+					CTimer::GetPreviousTimeInMilliseconds() <= m_nShootTimer + shootTimeout) {
+					if (CWorld::GetIsLineOfSightClear(GetPosition(), FindPlayerCoors(), true, false, false, false, false, false)) {
+						if (m_heliStatus == HELI_STATUS_HOVER2)
+							m_heliStatus = HELI_STATUS_HOVER;
+					}
+					else {
+						m_nShootTimer = CTimer::GetTimeInMilliseconds();
+						if (m_heliStatus == HELI_STATUS_HOVER)
+							m_heliStatus = HELI_STATUS_HOVER2;
+					}
+				}
+
+				// Shoot!
+				if (CTimer::GetTimeInMilliseconds() > m_nShootTimer + shootTimeout &&
+					CTimer::GetTimeInMilliseconds() > m_nLastShotTime + 200) {
+					CVector shotTarget = FindPlayerCoors();
+					// some inaccuracy
+					shotTarget.x += ((CGeneral::GetRandomNumber() & 0xFF) - 128) / 50.0f;
+					shotTarget.y += ((CGeneral::GetRandomNumber() & 0xFF) - 128) / 50.0f;
+					CVector direction = FindPlayerCoors() - GetPosition();
+					direction.Normalise();
+					shotTarget += 3.0f * direction;
+					CVector shotSource = GetPosition();
+					shotSource += 3.0f * direction;
+					FireOneInstantHitRound(&shotSource, &shotTarget, 20);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
+					m_nLastShotTime = CTimer::GetTimeInMilliseconds();
+				}
 			}
 		}
 	}
@@ -825,7 +834,11 @@ CHeli::UpdateHelis(void)
 	int i, j;
 
 	// Spawn new police helis
-	int numHelisRequired = FindPlayerPed()->m_pWanted->NumOfHelisRequired();
+	int numHelisRequired = 
+#ifdef FIX_BUGS
+		CReplay::IsPlayingBack() ? 0 :
+#endif
+		FindPlayerPed()->m_pWanted->NumOfHelisRequired();
 	if(CStreaming::HasModelLoaded(MI_CHOPPER) && CTimer::GetTimeInMilliseconds() > TestForNewRandomHelisTimer){
 		// Spawn a police heli
 		TestForNewRandomHelisTimer = CTimer::GetTimeInMilliseconds() + 15000;

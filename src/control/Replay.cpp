@@ -68,8 +68,8 @@ bool CReplay::bReplayEnabled = true;
 uint32 CReplay::SlowMotion;
 uint32 CReplay::FramesActiveLookAroundCam;
 bool CReplay::bDoLoadSceneWhenDone;
-CPtrList CReplay::WorldPtrList;
-CPtrList CReplay::BigBuildingPtrList;
+CPtrNode* CReplay::WorldPtrList;
+CPtrNode* CReplay::BigBuildingPtrList;
 CWanted CReplay::PlayerWanted;
 CPlayerInfo CReplay::PlayerInfo;
 uint32 CReplay::Time1;
@@ -101,6 +101,9 @@ bool CReplay::bPlayerInRCBuggy;
 float CReplay::fDistanceLookAroundCam;
 float CReplay::fBetaAngleLookAroundCam;
 float CReplay::fAlphaAngleLookAroundCam;
+#ifdef FIX_BUGS
+int CReplay::nHandleOfPlayerPed[NUMPLAYERS];
+#endif
 
 static void(*CBArray[])(CAnimBlendAssociation*, void*) =
 {
@@ -275,7 +278,7 @@ void CReplay::RecordThisFrame(void)
 			continue;
 		memory_required += sizeof(tBulletTracePacket);
 	}
-	memory_required += sizeof(tEndOfFramePacket);
+	memory_required += sizeof(tEndOfFramePacket) + 1; // 1 for Record.m_pBase[Record.m_nOffset] = REPLAYPACKET_END;
 	if (Record.m_nOffset + memory_required > REPLAYBUFFERSIZE) {
 		Record.m_pBase[Record.m_nOffset] = REPLAYPACKET_END;
 		BufferStatus[Record.m_bSlot] = REPLAYBUFFER_PLAYBACK;
@@ -1108,6 +1111,10 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 
 void CReplay::StoreStuffInMem(void)
 {
+#ifdef FIX_BUGS
+	for (int i = 0; i < NUMPLAYERS; i++)
+		nHandleOfPlayerPed[i] = CPools::GetPedPool()->GetIndex(CWorld::Players[i].m_pPed);
+#endif
 	CPools::GetVehiclePool()->Store(pBuf0, pBuf1);
 	CPools::GetPedPool()->Store(pBuf2, pBuf3);
 	CPools::GetObjectPool()->Store(pBuf4, pBuf5);
@@ -1116,8 +1123,8 @@ void CReplay::StoreStuffInMem(void)
 	CPools::GetDummyPool()->Store(pBuf10, pBuf11);
 	pWorld1 = new uint8[sizeof(CSector) * NUMSECTORS_X * NUMSECTORS_Y];
 	memcpy(pWorld1, CWorld::GetSector(0, 0), NUMSECTORS_X * NUMSECTORS_Y * sizeof(CSector));
-	WorldPtrList = CWorld::GetMovingEntityList();
-	BigBuildingPtrList = CWorld::GetBigBuildingList(LEVEL_NONE);
+	WorldPtrList = CWorld::GetMovingEntityList().first; // why
+	BigBuildingPtrList = CWorld::GetBigBuildingList(LEVEL_NONE).first;
 	pPickups = new uint8[sizeof(CPickup) * NUMPICKUPS];
 	memcpy(pPickups, CPickups::aPickUps, NUMPICKUPS * sizeof(CPickup));
 	pReferences = new uint8[(sizeof(CReference) * NUMREFERENCES)];
@@ -1162,8 +1169,8 @@ void CReplay::RestoreStuffFromMem(void)
 	memcpy(CWorld::GetSector(0, 0), pWorld1, sizeof(CSector) * NUMSECTORS_X * NUMSECTORS_Y);
 	delete[] pWorld1;
 	pWorld1 = nil;
-	CWorld::GetMovingEntityList() = WorldPtrList;
-	CWorld::GetBigBuildingList(LEVEL_NONE) = BigBuildingPtrList;
+	CWorld::GetMovingEntityList().first = WorldPtrList;
+	CWorld::GetBigBuildingList(LEVEL_NONE).first = BigBuildingPtrList;
 	memcpy(CPickups::aPickUps, pPickups, sizeof(CPickup) * NUMPICKUPS);
 	delete[] pPickups;
 	pPickups = nil;
@@ -1178,6 +1185,14 @@ void CReplay::RestoreStuffFromMem(void)
 	memcpy(CRadar::ms_RadarTrace, pRadarBlips, sizeof(sRadarTrace) * NUMRADARBLIPS);
 	delete[] pRadarBlips;
 	pRadarBlips = nil;
+#ifdef FIX_BUGS
+	for (int i = 0; i < NUMPLAYERS; i++) {
+		CPlayerPed* pPlayerPed = (CPlayerPed*)CPools::GetPedPool()->GetAt(nHandleOfPlayerPed[i]);
+		assert(pPlayerPed);
+		CWorld::Players[i].m_pPed = pPlayerPed;
+		pPlayerPed->RegisterReference((CEntity**)&CWorld::Players[i].m_pPed);
+	}
+#endif
 	FindPlayerPed()->m_pWanted = new CWanted(PlayerWanted);
 	CWorld::Players[0] = PlayerInfo;
 	int i = CPools::GetPedPool()->GetSize();
@@ -1393,8 +1408,8 @@ void CReplay::SaveReplayToHD(void)
 	for (first = (current + 1) % NUM_REPLAYBUFFERS; ; first = (first + 1) % NUM_REPLAYBUFFERS)
 		if (BufferStatus[first] == REPLAYBUFFER_RECORD || BufferStatus[first] == REPLAYBUFFER_PLAYBACK)
 			break;
-	for(int i = first;; i = (i + 1) % NUM_REPLAYBUFFERS){
-		CFileMgr::Write(fw, (char*)Buffers[first], sizeof(Buffers[first]));
+	for(int i = first; ; i = (i + 1) % NUM_REPLAYBUFFERS){
+		CFileMgr::Write(fw, (char*)Buffers[i], sizeof(Buffers[i]));
 		if (BufferStatus[i] == REPLAYBUFFER_RECORD)
 			break;
 	}

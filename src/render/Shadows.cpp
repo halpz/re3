@@ -13,6 +13,9 @@
 #include "Weather.h"
 #include "ModelIndices.h"
 #include "RenderBuffer.h"
+#ifdef FIX_BUGS
+#include "Replay.h"
+#endif
 #include "PointLights.h"
 #include "SpecialFX.h"
 #include "Shadows.h"
@@ -1609,6 +1612,10 @@ CShadows::CalcPedShadowValues(CVector vecLightDir,
 void
 CShadows::RenderExtraPlayerShadows(void)
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	if ( CTimeCycle::GetLightShadowStrength() != 0 )
 	{
 		CVehicle *pCar = FindPlayerVehicle();

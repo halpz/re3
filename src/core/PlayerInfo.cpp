@@ -41,6 +41,10 @@ CPlayerInfo::SetPlayerSkin(char *skin)
 CVector&
 CPlayerInfo::GetPos()
 {
+#ifdef FIX_BUGS
+	if (!m_pPed)
+		return TheCamera.GetPosition();
+#endif
 	if (m_pPed->InVehicle())
 		return m_pPed->m_pMyVehicle->GetPosition();
 	return m_pPed->GetPosition();
@@ -342,6 +346,10 @@ CPlayerInfo::FindClosestCarSectorList(CPtrList& carList, CPed* ped, float unk1, 
 void
 CPlayerInfo::Process(void)
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	// Unused taxi feature. Gives you a dollar for every second with a passenger. Can be toggled via 0x29A opcode.
 	bool startTaxiTimer = true;
 	if (m_bUnusedTaxiThing && m_pPed->bInVehicle) {
