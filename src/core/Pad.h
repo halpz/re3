@@ -155,7 +155,6 @@ public:
 	uint8 DisablePlayerControls;
 	int8 bApplyBrakes;
 	char CheatString[12];
-	char _pad0[3];
 	int32 LastTimeTouched;
 	int32 AverageWeapon;
 	int32 AverageEntries;

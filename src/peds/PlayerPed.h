@@ -23,20 +23,13 @@ public:
 	uint32 m_nHitAnimDelayTimer;
 	float m_fAttackButtonCounter;
 	bool m_bHaveTargetSelected;	// may have better name
-	int8 field_1381;
-	int8 field_1382;
-	int8 field_1383;
 	CEntity *m_pEvadingFrom;	// is this CPhysical?
 	int32 m_nTargettableObjects[4];
 	bool m_bAdrenalineActive;
 	bool m_bHasLockOnTarget;
-	int8 field_1406;
-	int8 field_1407;
 	uint32 m_nAdrenalineTime;
 	bool m_bCanBeDamaged;
 	int8 field_1413;
-	int8 field_1414;
-	int8 field_1415;
 	CVector m_vecSafePos[6]; // safe places from the player, for example behind a tree
 	CPed *m_pPedAtSafePos[6];
 	float m_fWalkAngle;

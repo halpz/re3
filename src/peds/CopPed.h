@@ -13,17 +13,13 @@ class CCopPed : public CPed
 {
 public:
 	int16 m_wRoadblockNode;
-	int8 field_1342;
-	int8 field_1343;
 	float m_fDistanceToTarget;
-	int8 m_bIsInPursuit;
-	int8 m_bIsDisabledCop;
+	bool m_bIsInPursuit;
+	bool m_bIsDisabledCop;
 	int8 field_1350;
 	bool m_bBeatingSuspect;
-	int8 m_bStopAndShootDisabledZone;
-	int8 m_bZoneDisabled;
-	int8 field_1354;
-	int8 field_1355;
+	bool m_bStopAndShootDisabledZone;
+	bool m_bZoneDisabled;
 	int32 field_1356;
 	eCopType m_nCopType;
 	int8 field_1364;

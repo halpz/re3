@@ -112,20 +112,17 @@ public:
 	};
 
 	bool                  m_bFirstCapture;
-	char _pad0[3];
 #ifdef __DINPUT_INCLUDED__
 	DIJOYSTATE2           m_OldState;
 	DIJOYSTATE2           m_NewState;
 #else
-	uint8 ___padd[0x110 * 2];
+	uint32 ___padd[0x110 / 4 * 2];
 #endif
 	wchar                 m_aActionNames[MAX_CONTROLLERACTIONS][ACTIONNAME_LENGTH];
 	bool                  m_aButtonStates[MAX_BUTTONS];
-	char _pad1[3];
 	tControllerConfigBind m_aSettings[MAX_CONTROLLERACTIONS][MAX_CONTROLLERTYPES];
 	bool                  m_aSimCheckers[MAX_SIMS][MAX_CONTROLLERTYPES];
 	bool                  m_bMouseAssociated;
-	char _pad2[3];
 	
 	CControllerConfigManager();
 

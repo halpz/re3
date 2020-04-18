@@ -194,8 +194,6 @@ CRenderer::RenderRoads(void)
 	DeActivateDirectional();
 	SetAmbientColours();
 
-	ThePaths.m_pathNodes[-1].group = 6;
-
 	for(i = 0; i < ms_nNoOfVisibleEntities; i++){
 		t = (CTreadable*)ms_aVisibleEntityPtrs[i];
 		if(t->IsBuilding() && t->GetIsATreadable()){

@@ -201,40 +201,9 @@ RwInt32      RwImageStreamGetSize(const RwImage * image);
 RwImage     *RwImageStreamRead(RwStream * stream);
 const RwImage *RwImageStreamWrite(const RwImage * image, RwStream * stream);
 
-// TODO: this is kind hard...
 RwImage *RwImageFindRasterFormat(RwImage *ipImage,RwInt32 nRasterType, RwInt32 *npWidth,RwInt32 *npHeight, RwInt32 *npDepth,RwInt32 *npFormat)
 {
-	// very dumb implementation for now
-	// this is also platform specific
-	if((nRasterType&rwRASTERTYPEMASK) != rwRASTERTYPETEXTURE){
-		*npFormat = 0;
-		return nil;
-	}
-	*npWidth = ipImage->width;
-	*npHeight = ipImage->height;
-	switch(ipImage->depth){
-	case 4:
-	case 8:
-		*npDepth = 8;
-		*npFormat = Raster::C8888 | Raster::PAL8;
-		break;
-	case 16:
-		*npDepth = 16;
-		*npFormat = Raster::C1555;
-		break;
-	case 24:
-		*npDepth = 32;
-		*npFormat = Raster::C888;
-		break;
-	case 32:
-		*npDepth = 32;
-		*npFormat = Raster::C8888;
-		break;
-	default:
-		assert(0 && "invalid depth");
-		return nil;
-	}
-	return ipImage;
+	return Raster::imageFindRasterFormat(ipImage, nRasterType, npWidth, npHeight, npDepth, npFormat) ? ipImage : nil;
 }
 
 
@@ -269,11 +238,7 @@ RwInt32      RwRasterRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObj
 RwInt32      RwRasterGetPluginOffset(RwUInt32 pluginID);
 RwBool       RwRasterValidatePlugins(const RwRaster * raster);
 
-// TODO: let's hope this works
-RwRaster *RwRasterSetFromImage(RwRaster *raster, RwImage *image) {
-	engine->driver[raster->platform]->rasterFromImage(raster, image);
-	return raster;
-}
+RwRaster *RwRasterSetFromImage(RwRaster *raster, RwImage *image) { return raster->setFromImage(image); }
 
 
 

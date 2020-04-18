@@ -46,7 +46,6 @@ struct tParticleSystemData
 	uint16        m_nFinalAnimationFrame;
 	uint16        m_nAnimationSpeed;
 	uint16        m_nRotationSpeed;
-	char _pad1[2];
 	float         m_fGravitationalAcceleration;
 	int32         m_nFrictionDecceleration;
 	int32         m_nLifeSpan;
@@ -60,7 +59,6 @@ struct tParticleSystemData
 	RwRGBA        m_RenderColouring;
 	uint8         m_InitialColorVariation;
 	RwRGBA        m_FadeDestinationColor;
-	char _pad2[3];
 	uint32        m_ColorFadeTime;
 	
 	RwRaster      **m_ppRaster;

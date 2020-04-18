@@ -1,5 +1,5 @@
-#ifndef MASTER
 #include "common.h"
+#ifndef MASTER
 #include "Font.h"
 #include "Frontend.h"
 #include "Timer.h"

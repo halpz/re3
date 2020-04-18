@@ -55,20 +55,20 @@ public:
 	int8 bUseVehicleColours : 1;
 	int8 m_obj_flag80 : 1;
 	int8 m_nBonusValue; 
-	int8 field_173;
 	float m_fCollisionDamageMultiplier;
 	uint8 m_nCollisionDamageEffect;
 	uint8 m_nSpecialCollisionResponseCases;
 	bool m_bCameraToAvoidThisObject;
+
+	// this batch is unused
 	int8 field_17B;
 	int8 field_17C;
 	int8 field_17D;
 	int8 field_17E;
 	int8 field_17F;
+
 	uint32 m_nEndOfLifeTime;
 	int16 m_nRefModelIndex;
-	int8 field_186;
-	int8 field_187;
 	CEntity *m_pCurSurface;
 	CEntity *m_pCollidingEntity;
 	int8 m_colour1, m_colour2;

@@ -24,7 +24,6 @@ public:
 	uint16     m_nZRotationTimer;
 	float     m_fCurrentZRadius;
 	uint16     m_nZRadiusTimer;
-	char _pad0[2];
 	float     m_fSize;
 	float     m_fExpansionRate;
 	uint16     m_nFadeToBlackTimer;
@@ -36,7 +35,6 @@ public:
 	int16     m_nRotationStep;
 	int16     m_nRotation;
 	RwRGBA    m_Color;
-	char _pad1[2];
 	CParticle *m_pNext;
 	
 	CParticle()
