@@ -118,7 +118,6 @@ const CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255);
 const CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
 #endif
 
-const float menuXYpadding = MENUACTION_POS_Y; // TODO this is non-existant, remove it
 float MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE;
 float MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE;
 
@@ -231,8 +230,7 @@ ScaleAndCenterX(float x)
 	else {
 		if (x > DEFAULT_SCREEN_WIDTH / 2) {
 			return SCREEN_WIDTH / 2 + SCREEN_SCALE_X(x - DEFAULT_SCREEN_WIDTH / 2);
-		}
-		else {
+		} else {
 			return SCREEN_WIDTH / 2 - SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH / 2 - x);
 		}
 	}
@@ -289,7 +287,7 @@ ScaleAndCenterX(float x)
 
 #define ProcessSlider(value, increaseAction, decreaseAction, hoverStartX, hoverEndX) \
 	do { \
-		lastActiveBarX = DisplaySlider(SCREEN_STRETCH_FROM_RIGHT(MENUSLIDER_X + columnWidth), MENU_Y(bitAboveNextItemY), MENU_Y(smallestSliderBar), MENU_Y(usableLineHeight), MENU_X(MENUSLIDER_UNK), value); \
+		lastActiveBarX = DisplaySlider(MENU_X_RIGHT_ALIGNED(MENUSLIDER_X + columnWidth), MENU_Y(bitAboveNextItemY), MENU_Y(smallestSliderBar), MENU_Y(usableLineHeight), MENU_X(MENUSLIDER_UNK), value); \
 		if (i != m_nCurrOption || !itemsAreSelectable) \
 			break; \
 		 \
@@ -300,14 +298,16 @@ ScaleAndCenterX(float x)
 			break; \
 		 \
 		m_nHoverOption = increaseAction; \
-		if (m_nMousePosX < SCREEN_STRETCH_FROM_RIGHT(MENUSLIDER_X + columnWidth)) \
+		if (m_nMousePosX < MENU_X_RIGHT_ALIGNED(MENUSLIDER_X + columnWidth)) \
 			m_nHoverOption = HOVEROPTION_NOT_HOVERING; \
 	} while(0)
 
 #define ProcessRadioIcon(sprite, x, y, radioId, hoverOpt) \
-	sprite.Draw(x, y, MENU_X(MENURADIO_ICON_SCALE), MENU_Y(MENURADIO_ICON_SCALE), radioId == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170)); \
-		if (CheckHover(x, x + MENU_X(MENURADIO_ICON_SCALE), y, y + MENU_Y(MENURADIO_ICON_SCALE))) \
-			m_nHoverOption = hoverOpt;
+	do { \
+		sprite.Draw(x, y, MENU_X(MENURADIO_ICON_SCALE), MENU_Y(MENURADIO_ICON_SCALE), radioId == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170)); \
+			if (CheckHover(x, x + MENU_X(MENURADIO_ICON_SCALE), y, y + MENU_Y(MENURADIO_ICON_SCALE))) \
+				m_nHoverOption = hoverOpt; \
+	} while (0)
 
 // --- Functions not in the game/inlined starts
 
@@ -1237,7 +1237,6 @@ CMenuManager::Draw()
 			}
 
 			// Sliders
-			// We stretch slider start X here(like original code), because it will always be center of screen
 			int lastActiveBarX;
 			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
 				case MENUACTION_BRIGHTNESS:
@@ -1257,7 +1256,8 @@ CMenuManager::Draw()
 					break;
 			}
 
-			nextYToUse += lineHeight * CFont::GetNumberLines(menuXYpadding, nextYToUse, leftText);
+			// 60.0 is silly
+			nextYToUse += lineHeight * CFont::GetNumberLines(MENU_X_LEFT_ALIGNED(60.0f), MENU_Y(nextYToUse), leftText);
 
 			// Radio icons
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_RADIO) {
@@ -3385,8 +3385,7 @@ CMenuManager::Process(void)
 				DMAudio.SetEffectsFadeVol(0);
 				DMAudio.SetMusicFadeVol(0);
 				DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
-			}
-			else
+			} else
 				SaveLoadFileError_SetUpErrorScreen();
 		}
 
