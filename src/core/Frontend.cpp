@@ -167,15 +167,15 @@ const char* FrontendFilenames[][2] = {
 	{"fe_arrows2", "" },
 	{"fe_arrows3", "" },
 	{"fe_arrows4", "" },
-	{"fe_radio1", "" }, // HEAD_RADIO
-	{"fe_radio2", "" }, // DOUBLE_CLEF
-	{"fe_radio3", "" }, // JAH_RADIO
-	{"fe_radio4", "" }, // RISE_FM
-	{"fe_radio5", "" }, // LIPS_106
-	{"fe_radio6", "" }, // GAME_FM
-	{"fe_radio7", "" }, // MSX_FM
-	{"fe_radio8", "" }, // FLASHBACK
-	{"fe_radio9", "" }, // CHATTERBOX
+	{"fe_radio1", "" },
+	{"fe_radio2", "" },
+	{"fe_radio3", "" },
+	{"fe_radio4", "" },
+	{"fe_radio5", "" },
+	{"fe_radio6", "" },
+	{"fe_radio7", "" },
+	{"fe_radio8", "" },
+	{"fe_radio9", "" },
 };
 
 #ifdef MENU_MAP
@@ -231,7 +231,8 @@ ScaleAndCenterX(float x)
 	else {
 		if (x > DEFAULT_SCREEN_WIDTH / 2) {
 			return SCREEN_WIDTH / 2 + SCREEN_SCALE_X(x - DEFAULT_SCREEN_WIDTH / 2);
-		} else {
+		}
+		else {
 			return SCREEN_WIDTH / 2 - SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH / 2 - x);
 		}
 	}
@@ -302,6 +303,11 @@ ScaleAndCenterX(float x)
 		if (m_nMousePosX < SCREEN_STRETCH_FROM_RIGHT(MENUSLIDER_X + columnWidth)) \
 			m_nHoverOption = HOVEROPTION_NOT_HOVERING; \
 	} while(0)
+
+#define ProcessRadioIcon(sprite, x, y, radioId, hoverOpt) \
+	sprite.Draw(x, y, MENU_X(MENURADIO_ICON_SCALE), MENU_Y(MENURADIO_ICON_SCALE), radioId == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170)); \
+		if (CheckHover(x, x + MENU_X(MENURADIO_ICON_SCALE), y, y + MENU_Y(MENURADIO_ICON_SCALE))) \
+			m_nHoverOption = hoverOpt;
 
 // --- Functions not in the game/inlined starts
 
@@ -1253,27 +1259,21 @@ CMenuManager::Draw()
 
 			nextYToUse += lineHeight * CFont::GetNumberLines(menuXYpadding, nextYToUse, leftText);
 
-			// TODO: This should be rewritten as multiple macro calls instead of loop, radio order is wrong.
-			//		And hover detection is missing.
-			float fIconSpacing = 59.52f;
+			// Radio icons
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_RADIO) {
-				for (int i = 0; i < POLICE_RADIO; i++) {
-#ifndef ASPECT_RATIO_SCALE
-					if (i < USERTRACK)
-						m_aFrontEndSprites[i + FE_RADIO1].Draw(SCREEN_STRETCH_X(MENURADIO_ICON_X + fIconSpacing * i), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(MENURADIO_ICON_Y), SCREEN_SCALE_X(MENURADIO_ICON_W), SCREEN_SCALE_Y(MENURADIO_ICON_H), i == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170));
-					if (i > CHATTERBOX && DMAudio.IsMP3RadioChannelAvailable())
-						m_aMenuSprites[MENUSPRITE_MP3LOGO].Draw(SCREEN_STRETCH_X(MENURADIO_ICON_X + fIconSpacing * i), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(MENURADIO_ICON_Y), SCREEN_SCALE_X(MENURADIO_ICON_W), SCREEN_SCALE_Y(MENURADIO_ICON_H), i == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170));
-#else
-					float fMp3Pos = 0.0f;
-					if (DMAudio.IsMP3RadioChannelAvailable())
-						fMp3Pos = 34.0f;
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO1], MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(nextYToUse), 0, HOVEROPTION_RADIO_0);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO2], MENU_X_LEFT_ALIGNED(90.0f), MENU_Y(nextYToUse), 1, HOVEROPTION_RADIO_1);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO5], MENU_X_LEFT_ALIGNED(150.0f), MENU_Y(nextYToUse), 2, HOVEROPTION_RADIO_2);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO7], MENU_X_LEFT_ALIGNED(210.0f), MENU_Y(nextYToUse), 3, HOVEROPTION_RADIO_3);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO8], MENU_X_LEFT_ALIGNED(270.0f), MENU_Y(nextYToUse), 4, HOVEROPTION_RADIO_4);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO3], MENU_X_LEFT_ALIGNED(320.0f), MENU_Y(nextYToUse), 5, HOVEROPTION_RADIO_5);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO4], MENU_X_LEFT_ALIGNED(360.0f), MENU_Y(nextYToUse), 6, HOVEROPTION_RADIO_6);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO6], MENU_X_LEFT_ALIGNED(420.0f), MENU_Y(nextYToUse), 7, HOVEROPTION_RADIO_7);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO9], MENU_X_LEFT_ALIGNED(480.0f), MENU_Y(nextYToUse), 8, HOVEROPTION_RADIO_8);
 
-					if (i < USERTRACK)
-						m_aFrontEndSprites[i + FE_RADIO1].Draw((SCREEN_WIDTH * 0.5) + SCREEN_SCALE_X(-fMp3Pos + MENURADIO_ICON_X + (fIconSpacing * i)), MENU_Y(nextYToUse), MENU_X(menuXYpadding), MENU_Y(menuXYpadding), i == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170));
-					if (i > CHATTERBOX && DMAudio.IsMP3RadioChannelAvailable())
-						m_aMenuSprites[MENUSPRITE_MP3LOGO].Draw((SCREEN_WIDTH * 0.5) + SCREEN_SCALE_X(-fMp3Pos + MENURADIO_ICON_X + (fIconSpacing * i)), MENU_Y(nextYToUse), MENU_X(menuXYpadding), MENU_Y(menuXYpadding), i == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170));
-#endif
-				}
+				if (DMAudio.IsMP3RadioChannelAvailable())
+					ProcessRadioIcon(m_aMenuSprites[MENUSPRITE_MP3LOGO], MENU_X_LEFT_ALIGNED(540.0f), MENU_Y(nextYToUse), 9, HOVEROPTION_RADIO_9);
+
 				nextYToUse += 70.0f;
 			}
 		}
