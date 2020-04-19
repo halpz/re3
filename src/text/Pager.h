@@ -7,7 +7,7 @@ struct PagerMessage {
 	uint16 m_nStringLength;
 	uint16 m_nPriority;
 	uint32 m_nTimeToChangePosition;
-	int16 field_10;
+	int16 unused; // but still set in SCM. importance? ringtone?
 	int32 m_nNumber[6];
 };
 

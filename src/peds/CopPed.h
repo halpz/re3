@@ -20,12 +20,9 @@ public:
 	bool m_bBeatingSuspect;
 	bool m_bStopAndShootDisabledZone;
 	bool m_bZoneDisabled;
-	int32 field_1356;
+	float m_fAbseilPos; // VC leftover, unused
 	eCopType m_nCopType;
 	int8 field_1364;
-	int8 field_1365;
-	int8 field_1366;
-	int8 field_1367;
 
 	CCopPed(eCopType);
 	~CCopPed();

@@ -548,10 +548,10 @@ CPlayerInfo::Process(void)
 	}
 	if (FindPlayerVehicle()) {
 		CVehicle *veh = FindPlayerVehicle();
-		veh->m_nZoneLevel = -1;
+		veh->m_nZoneLevel = LEVEL_IGNORE;
 		for (int i = 0; i < ARRAY_SIZE(veh->pPassengers); i++) {
 			if (veh->pPassengers[i])
-				veh->pPassengers[i]->m_nZoneLevel = 0;
+				veh->pPassengers[i]->m_nZoneLevel = LEVEL_NONE;
 		}
 		CStats::DistanceTravelledInVehicle += veh->m_fDistanceTravelled;
 	} else {

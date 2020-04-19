@@ -99,7 +99,7 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 	switch (m_eType)
 	{
 	case PICKUP_IN_SHOP:
-		object->m_obj_flag2 = true;
+		object->bPickupObjWithMessage = true;
 		object->bOutOfStock = false;
 		break;
 	case PICKUP_ON_STREET:
@@ -113,11 +113,11 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 	case PICKUP_NAUTICAL_MINE_ARMED:
 	case PICKUP_FLOATINGPACKAGE:
 	case PICKUP_ON_STREET_SLOW:
-		object->m_obj_flag2 = false;
+		object->bPickupObjWithMessage = false;
 		object->bOutOfStock = false;
 		break;
 	case PICKUP_IN_SHOP_OUT_OF_STOCK:
-		object->m_obj_flag2 = false;
+		object->bPickupObjWithMessage = false;
 		object->bOutOfStock = true;
 		object->bRenderScorched = true;
 		break;
@@ -690,7 +690,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 			size, 65.0f, CCoronas::TYPE_RING, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 
 		CObject *object = (CObject*)entity;
-		if (object->m_obj_flag2 || object->bOutOfStock || object->m_nBonusValue) {
+		if (object->bPickupObjWithMessage || object->bOutOfStock || object->m_nBonusValue) {
 			float dist = (TheCamera.GetPosition() - pos).Magnitude();
 			const float MAXDIST = 12.0f;
 

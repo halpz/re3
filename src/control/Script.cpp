@@ -8931,7 +8931,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		if (ScriptParams[1])
-			pPed->m_nZoneLevel = -1;
+			pPed->m_nZoneLevel = LEVEL_IGNORE;
 		else
 			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
 		return 0;
@@ -9130,7 +9130,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		if (ScriptParams[1])
-			pVehicle->m_nZoneLevel = -1;
+			pVehicle->m_nZoneLevel = LEVEL_IGNORE;
 		else
 			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(pVehicle->GetPosition());
 		return 0;
