@@ -251,7 +251,7 @@ INITSAVEBUF
 			continue;
 		if (pObject->ObjectCreatedBy == MISSION_OBJECT) {
 			bool bIsPickup = pObject->bIsPickup;
-			bool bFlag2 = pObject->m_obj_flag2;
+			bool bPickupObjWithMessage = pObject->bPickupObjWithMessage;
 			bool bOutOfStock = pObject->bOutOfStock;
 			bool bGlassCracked = pObject->bGlassCracked;
 			bool bGlassBroken = pObject->bGlassBroken;
@@ -269,7 +269,7 @@ INITSAVEBUF
 			WriteSaveBuf(buf, (uint32)0); // same
 			WriteSaveBuf(buf, pObject->ObjectCreatedBy);
 			WriteSaveBuf(buf, bIsPickup);
-			WriteSaveBuf(buf, bFlag2);
+			WriteSaveBuf(buf, bPickupObjWithMessage);
 			WriteSaveBuf(buf, bOutOfStock);
 			WriteSaveBuf(buf, bGlassCracked);
 			WriteSaveBuf(buf, bGlassBroken);
@@ -305,7 +305,7 @@ INITSAVEBUF
 		ReadSaveBuf<uint32>(buf);
 		pBufferObject->ObjectCreatedBy = ReadSaveBuf<int8>(buf);
 		pBufferObject->bIsPickup = ReadSaveBuf<bool>(buf);
-		pBufferObject->m_flagE2 = ReadSaveBuf<bool>(buf);
+		pBufferObject->bPickupObjWithMessage = ReadSaveBuf<bool>(buf);
 		pBufferObject->bOutOfStock = ReadSaveBuf<bool>(buf);
 		pBufferObject->bGlassCracked = ReadSaveBuf<bool>(buf);
 		pBufferObject->bGlassBroken = ReadSaveBuf<bool>(buf);
@@ -325,7 +325,7 @@ INITSAVEBUF
 		pObject->m_objectMatrix = pBufferObject->m_objectMatrix;
 		pObject->ObjectCreatedBy = pBufferObject->ObjectCreatedBy;
 		pObject->bIsPickup = pBufferObject->bIsPickup;
-		pObject->m_flagE2 = pBufferObject->m_flagE2;
+		pObject->bPickupObjWithMessage = pBufferObject->bPickupObjWithMessage;
 		pObject->bOutOfStock = pBufferObject->bOutOfStock;
 		pObject->bGlassCracked = pBufferObject->bGlassCracked;
 		pObject->bGlassBroken = pBufferObject->bGlassBroken;

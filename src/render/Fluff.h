@@ -8,7 +8,7 @@ public:
 	CMovingThing *m_pNext;
 	CMovingThing *m_pPrev;
 	int16 m_nType;
-	int16 field_A;
+	int16 m_nHidden;
 	CVector m_vecPosn;
 	CEntity* m_pEntity;
 

@@ -63,7 +63,7 @@ CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 	m_bIsInPursuit = false;
 	field_1350 = 1;
 	m_bIsDisabledCop = false;
-	field_1356 = 0;
+	m_fAbseilPos = 0.0f;
 	m_attackTimer = 0;
 	m_bBeatingSuspect = false;
 	m_bStopAndShootDisabledZone = false;
@@ -668,7 +668,7 @@ CCopPed::ProcessControl(void)
 				}
 
 				if (bDuckAndCover) {
-#ifndef GTA3_1_1_PATCH
+#if !defined(GTA3_1_1_PATCH) && !defined(VC_PED_PORTS)
 					if (!bNotAllowedToDuck && Seek()) {
 						SetMoveState(PEDMOVE_STILL);
 						SetMoveAnim();

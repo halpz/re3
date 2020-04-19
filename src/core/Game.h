@@ -2,6 +2,7 @@
 
 enum eLevelName
 {
+	LEVEL_IGNORE = -1, // beware, this is only used in CPhysical's m_nZoneLevel
 	LEVEL_NONE = 0,
 	LEVEL_INDUSTRIAL,
 	LEVEL_COMMERCIAL,

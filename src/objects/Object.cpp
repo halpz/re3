@@ -35,7 +35,7 @@ CObject::CObject(void)
 	m_colour1 = m_colour2;
 	m_nBonusValue = 0;
 	bIsPickup = false;
-	m_obj_flag2 = false;
+	bPickupObjWithMessage = false;
 	bOutOfStock = false;
 	bGlassCracked = false;
 	bGlassBroken = false;
@@ -315,7 +315,7 @@ CObject::Init(void)
 	ObjectCreatedBy = GAME_OBJECT;
 	bIsStatic = true;
 	bIsPickup = false;
-	m_obj_flag2 = false;
+	bPickupObjWithMessage = false;
 	bOutOfStock = false;
 	bGlassCracked = false;
 	bGlassBroken = false;
