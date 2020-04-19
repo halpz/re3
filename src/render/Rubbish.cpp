@@ -414,7 +414,19 @@ void
 CRubbish::Shutdown(void)
 {
 	RwTextureDestroy(gpRubbishTexture[0]);
+#ifdef GTA3_1_1_PATCH
+	gpRubbishTexture[0] = nil;
+#endif
 	RwTextureDestroy(gpRubbishTexture[1]);
+#ifdef GTA3_1_1_PATCH
+	gpRubbishTexture[1] = nil;
+#endif
 	RwTextureDestroy(gpRubbishTexture[2]);
+#ifdef GTA3_1_1_PATCH
+	gpRubbishTexture[2] = nil;
+#endif
 	RwTextureDestroy(gpRubbishTexture[3]);
+#ifdef GTA3_1_1_PATCH
+	gpRubbishTexture[3] = nil;
+#endif
 }

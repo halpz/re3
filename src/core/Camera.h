@@ -546,6 +546,7 @@ uint32    unknown;	// some counter having to do with music
 #endif
 
 	// High level and misc
+	CCamera(void);
 	void Init(void);
 	void Process(void);
 	void CamControl(void);

@@ -668,11 +668,13 @@ CCopPed::ProcessControl(void)
 				}
 
 				if (bDuckAndCover) {
+#ifndef GTA3_1_1_PATCH
 					if (!bNotAllowedToDuck && Seek()) {
 						SetMoveState(PEDMOVE_STILL);
 						SetMoveAnim();
 						SetPointGunAt(m_pedInObjective);
 					}
+#endif
 				} else if (Seek()) {
 					CVehicle *playerVeh = FindPlayerVehicle();
 					if (!playerVeh && player && player->EnteringCar()) {

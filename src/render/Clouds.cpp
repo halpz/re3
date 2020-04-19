@@ -44,10 +44,25 @@ void
 CClouds::Shutdown(void)
 {
 	RwTextureDestroy(gpCloudTex[0]);
+#ifdef GTA3_1_1_PATCH
+	gpCloudTex[0] = nil;
+#endif
 	RwTextureDestroy(gpCloudTex[1]);
+#ifdef GTA3_1_1_PATCH
+	gpCloudTex[1] = nil;
+#endif
 	RwTextureDestroy(gpCloudTex[2]);
+#ifdef GTA3_1_1_PATCH
+	gpCloudTex[2] = nil;
+#endif
 	RwTextureDestroy(gpCloudTex[3]);
+#ifdef GTA3_1_1_PATCH
+	gpCloudTex[3] = nil;
+#endif
 	RwTextureDestroy(gpCloudTex[4]);
+#ifdef GTA3_1_1_PATCH
+	gpCloudTex[4] = nil;
+#endif
 }
 
 void

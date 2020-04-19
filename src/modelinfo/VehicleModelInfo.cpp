@@ -960,7 +960,9 @@ CVehicleModelInfo::DeleteVehicleColourTextures(void)
 	for(i = 0; i < 256; i++){
 		if(ms_colourTextureTable[i]){
 			RwTextureDestroy(ms_colourTextureTable[i]);
+#ifdef GTA3_1_1_PATCH
 			ms_colourTextureTable[i] = nil;
+#endif
 		}
 	}
 }
