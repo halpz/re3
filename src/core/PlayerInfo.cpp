@@ -1,35 +1,35 @@
 #include "common.h"
 
-#include "main.h"
-#include "PlayerPed.h"
-#include "Wanted.h"
-#include "PlayerInfo.h"
+#include "Automobile.h"
+#include "Bridge.h"
+#include "Camera.h"
+#include "Cranes.h"
+#include "Darkel.h"
+#include "Explosion.h"
 #include "Fire.h"
 #include "Frontend.h"
-#include "PlayerSkin.h"
-#include "Darkel.h"
-#include "Messages.h"
-#include "Text.h"
-#include "Stats.h"
-#include "Remote.h"
-#include "World.h"
-#include "Replay.h"
-#include "Camera.h"
-#include "Pad.h"
-#include "ProjectileInfo.h"
-#include "Explosion.h"
-#include "Script.h"
-#include "Automobile.h"
-#include "HandlingMgr.h"
 #include "General.h"
-#include "SpecialFX.h"
-#include "Cranes.h"
-#include "Bridge.h"
-#include "WaterLevel.h"
+#include "HandlingMgr.h"
+#include "Messages.h"
+#include "Pad.h"
 #include "PathFind.h"
-#include "ZoneCull.h"
+#include "PlayerInfo.h"
+#include "PlayerPed.h"
+#include "PlayerSkin.h"
+#include "ProjectileInfo.h"
+#include "Remote.h"
 #include "Renderer.h"
+#include "Replay.h"
+#include "Script.h"
+#include "SpecialFX.h"
+#include "Stats.h"
 #include "Streaming.h"
+#include "Text.h"
+#include "Wanted.h"
+#include "WaterLevel.h"
+#include "World.h"
+#include "ZoneCull.h"
+#include "main.h"
 
 void
 CPlayerInfo::SetPlayerSkin(char *skin)
@@ -184,7 +184,7 @@ CPlayerInfo::MakePlayerSafe(bool toggle)
 		m_pPed->bExplosionProof = true;
 		m_pPed->m_bCanBeDamaged = false;
 		((CPlayerPed*)m_pPed)->ClearAdrenaline();
-		CancelPlayerEnteringCars(false);
+		CancelPlayerEnteringCars(nil);
 		gFireManager.ExtinguishPoint(GetPos(), 4000.0f);
 		CExplosion::RemoveAllExplosionsInArea(GetPos(), 4000.0f);
 		CProjectileInfo::RemoveAllProjectiles();

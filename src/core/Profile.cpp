@@ -52,20 +52,20 @@ void CProfile::SuspendProfile(eProfile profile)
 
 void CProfile::ShowResults()
 {
-	ms_afMaxEndTime[PROFILE_FRAME_RATE] = max(ms_afMaxEndTime[PROFILE_FRAME_RATE], ms_afEndTime[PROFILE_FRAME_RATE]);
-	ms_afMaxEndTime[PROFILE_PHYSICS] = max(ms_afMaxEndTime[PROFILE_PHYSICS], ms_afEndTime[PROFILE_PHYSICS]);
-	ms_afMaxEndTime[PROFILE_COLLISION] = max(ms_afMaxEndTime[PROFILE_COLLISION], ms_afEndTime[PROFILE_COLLISION]);
-	ms_afMaxEndTime[PROFILE_PED_AI] = max(ms_afMaxEndTime[PROFILE_PED_AI], ms_afEndTime[PROFILE_PED_AI]);
-	ms_afMaxEndTime[PROFILE_PROCESSING_TIME] = max(ms_afMaxEndTime[PROFILE_PROCESSING_TIME], ms_afEndTime[PROFILE_PROCESSING_TIME]);
-	ms_afMaxEndTime[PROFILE_RENDERING_TIME] = max(ms_afMaxEndTime[PROFILE_RENDERING_TIME], ms_afEndTime[PROFILE_RENDERING_TIME]);
-	ms_afMaxEndTime[PROFILE_TOTAL] = max(ms_afMaxEndTime[PROFILE_TOTAL], ms_afEndTime[PROFILE_TOTAL]);
+	ms_afMaxEndTime[PROFILE_FRAME_RATE] = Max(ms_afMaxEndTime[PROFILE_FRAME_RATE], ms_afEndTime[PROFILE_FRAME_RATE]);
+	ms_afMaxEndTime[PROFILE_PHYSICS] = Max(ms_afMaxEndTime[PROFILE_PHYSICS], ms_afEndTime[PROFILE_PHYSICS]);
+	ms_afMaxEndTime[PROFILE_COLLISION] = Max(ms_afMaxEndTime[PROFILE_COLLISION], ms_afEndTime[PROFILE_COLLISION]);
+	ms_afMaxEndTime[PROFILE_PED_AI] = Max(ms_afMaxEndTime[PROFILE_PED_AI], ms_afEndTime[PROFILE_PED_AI]);
+	ms_afMaxEndTime[PROFILE_PROCESSING_TIME] = Max(ms_afMaxEndTime[PROFILE_PROCESSING_TIME], ms_afEndTime[PROFILE_PROCESSING_TIME]);
+	ms_afMaxEndTime[PROFILE_RENDERING_TIME] = Max(ms_afMaxEndTime[PROFILE_RENDERING_TIME], ms_afEndTime[PROFILE_RENDERING_TIME]);
+	ms_afMaxEndTime[PROFILE_TOTAL] = Max(ms_afMaxEndTime[PROFILE_TOTAL], ms_afEndTime[PROFILE_TOTAL]);
 
-	ms_afMaxCumulativeTime[PROFILE_FRAME_RATE] = max(ms_afMaxCumulativeTime[PROFILE_FRAME_RATE], ms_afCumulativeTime[PROFILE_FRAME_RATE]);
-	ms_afMaxCumulativeTime[PROFILE_PHYSICS] = max(ms_afMaxCumulativeTime[PROFILE_PHYSICS], ms_afCumulativeTime[PROFILE_PHYSICS]);
-	ms_afMaxCumulativeTime[PROFILE_COLLISION] = max(ms_afMaxCumulativeTime[PROFILE_COLLISION], ms_afCumulativeTime[PROFILE_COLLISION]);
-	ms_afMaxCumulativeTime[PROFILE_PED_AI] = max(ms_afMaxCumulativeTime[PROFILE_PED_AI], ms_afCumulativeTime[PROFILE_PED_AI]);
-	ms_afMaxCumulativeTime[PROFILE_PROCESSING_TIME] = max(ms_afMaxCumulativeTime[PROFILE_PROCESSING_TIME], ms_afCumulativeTime[PROFILE_PROCESSING_TIME]);
-	ms_afMaxCumulativeTime[PROFILE_RENDERING_TIME] = max(ms_afMaxCumulativeTime[PROFILE_RENDERING_TIME], ms_afCumulativeTime[PROFILE_RENDERING_TIME]);
-	ms_afMaxCumulativeTime[PROFILE_TOTAL] = max(ms_afMaxCumulativeTime[PROFILE_TOTAL], ms_afCumulativeTime[PROFILE_TOTAL]);
+	ms_afMaxCumulativeTime[PROFILE_FRAME_RATE] = Max(ms_afMaxCumulativeTime[PROFILE_FRAME_RATE], ms_afCumulativeTime[PROFILE_FRAME_RATE]);
+	ms_afMaxCumulativeTime[PROFILE_PHYSICS] = Max(ms_afMaxCumulativeTime[PROFILE_PHYSICS], ms_afCumulativeTime[PROFILE_PHYSICS]);
+	ms_afMaxCumulativeTime[PROFILE_COLLISION] = Max(ms_afMaxCumulativeTime[PROFILE_COLLISION], ms_afCumulativeTime[PROFILE_COLLISION]);
+	ms_afMaxCumulativeTime[PROFILE_PED_AI] = Max(ms_afMaxCumulativeTime[PROFILE_PED_AI], ms_afCumulativeTime[PROFILE_PED_AI]);
+	ms_afMaxCumulativeTime[PROFILE_PROCESSING_TIME] = Max(ms_afMaxCumulativeTime[PROFILE_PROCESSING_TIME], ms_afCumulativeTime[PROFILE_PROCESSING_TIME]);
+	ms_afMaxCumulativeTime[PROFILE_RENDERING_TIME] = Max(ms_afMaxCumulativeTime[PROFILE_RENDERING_TIME], ms_afCumulativeTime[PROFILE_RENDERING_TIME]);
+	ms_afMaxCumulativeTime[PROFILE_TOTAL] = Max(ms_afMaxCumulativeTime[PROFILE_TOTAL], ms_afCumulativeTime[PROFILE_TOTAL]);
 }
 #endif

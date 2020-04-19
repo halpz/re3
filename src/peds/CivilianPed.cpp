@@ -318,12 +318,12 @@ CCivilianPed::ProcessControl(void)
 							if (CWorld::Players[CWorld::PlayerInFocus].m_nMoney >= 10 && playerSexFrequency > 250) {
 									CWorld::Players[CWorld::PlayerInFocus].m_nNextSexFrequencyUpdateTime = CTimer::GetTimeInMilliseconds() + playerSexFrequency;
 									if (playerSexFrequency >= 350) {
-										CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = max(250, playerSexFrequency - 30);
+										CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = Max(250, playerSexFrequency - 30);
 									} else {
-										CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = max(250, playerSexFrequency - 10);
+										CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = Max(250, playerSexFrequency - 10);
 									}
 
-									m_pMyVehicle->pDriver->m_fHealth = min(125.0f, 1.0f + m_pMyVehicle->pDriver->m_fHealth);
+									m_pMyVehicle->pDriver->m_fHealth = Min(125.0f, 1.0f + m_pMyVehicle->pDriver->m_fHealth);
 									if (CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency == 250)
 										CWorld::Players[CWorld::PlayerInFocus].m_nNextSexFrequencyUpdateTime = CTimer::GetTimeInMilliseconds() + 3000;
 							} else {
@@ -357,7 +357,7 @@ CCivilianPed::ProcessControl(void)
 				if (playerMoney <= 1) {
 					CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = 250;
 				} else {
-					CWorld::Players[CWorld::PlayerInFocus].m_nMoney = max(0, playerMoney - 1);
+					CWorld::Players[CWorld::PlayerInFocus].m_nMoney = Max(0, playerMoney - 1);
 				}
 				CWorld::Players[CWorld::PlayerInFocus].m_nNextSexMoneyUpdateTime = CTimer::GetTimeInMilliseconds() + 1000;
 			}

@@ -374,7 +374,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 							pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 750;
 						pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 						if (pVehicle->VehicleCreatedBy == RANDOM_VEHICLE)
-							pVehicle->AutoPilot.m_nDrivingStyle = max(DRIVINGSTYLE_AVOID_CARS, pVehicle->AutoPilot.m_nDrivingStyle);
+							pVehicle->AutoPilot.m_nDrivingStyle = Max(DRIVINGSTYLE_AVOID_CARS, pVehicle->AutoPilot.m_nDrivingStyle);
 						pVehicle->PlayCarHorn();
 					}
 				}
@@ -510,7 +510,7 @@ void CCarAI::TellCarToRamOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
 	pTarget->RegisterReference((CEntity**)&pVehicle->AutoPilot.m_pTargetCar);
 	pVehicle->AutoPilot.m_nCarMission = MISSION_RAMCAR_FARAWAY;
 	pVehicle->bEngineOn = true;
-	pVehicle->AutoPilot.m_nCruiseSpeed = max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
+	pVehicle->AutoPilot.m_nCruiseSpeed = Max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
 }
 
 void CCarAI::TellCarToBlockOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
@@ -519,7 +519,7 @@ void CCarAI::TellCarToBlockOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
 	pTarget->RegisterReference((CEntity**)&pVehicle->AutoPilot.m_pTargetCar);
 	pVehicle->AutoPilot.m_nCarMission = MISSION_BLOCKCAR_FARAWAY;
 	pVehicle->bEngineOn = true;
-	pVehicle->AutoPilot.m_nCruiseSpeed = max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
+	pVehicle->AutoPilot.m_nCruiseSpeed = Max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
 }
 eCarMission CCarAI::FindPoliceCarMissionForWantedLevel()
 {

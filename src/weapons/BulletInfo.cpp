@@ -232,35 +232,35 @@ bool CBulletInfo::TestForSniperBullet(float x1, float x2, float y1, float y2, fl
 #else
 	float minP = 0.0f;
 	float maxP = 1.0f;
-	float minX = min(PlayerSniperBulletStart.x, PlayerSniperBulletEnd.x);
-	float maxX = max(PlayerSniperBulletStart.x, PlayerSniperBulletEnd.x);
+	float minX = Min(PlayerSniperBulletStart.x, PlayerSniperBulletEnd.x);
+	float maxX = Max(PlayerSniperBulletStart.x, PlayerSniperBulletEnd.x);
 	if (minX < x2 || maxX > x1) {
 		if (minX < x1)
-			minP = min(minP, (x1 - minX) / (maxX - minX));
+			minP = Min(minP, (x1 - minX) / (maxX - minX));
 		if (maxX > x2)
-			maxP = max(maxP, (maxX - x2) / (maxX - minX));
+			maxP = Max(maxP, (maxX - x2) / (maxX - minX));
 	}
 	else
 		return false;
-	float minY = min(PlayerSniperBulletStart.y, PlayerSniperBulletEnd.y);
-	float maxY = max(PlayerSniperBulletStart.y, PlayerSniperBulletEnd.y);
+	float minY = Min(PlayerSniperBulletStart.y, PlayerSniperBulletEnd.y);
+	float maxY = Max(PlayerSniperBulletStart.y, PlayerSniperBulletEnd.y);
 	if (minY < y2 || maxY > y1) {
 		if (minY < y1)
-			minP = min(minP, (y1 - minY) / (maxY - minY));
+			minP = Min(minP, (y1 - minY) / (maxY - minY));
 		if (maxY > y2)
-			maxP = max(maxP, (maxY - y2) / (maxY - minY));
+			maxP = Max(maxP, (maxY - y2) / (maxY - minY));
 	}
 #ifdef FIX_BUGS
 	else
 		return false;
 #endif
-	float minZ = min(PlayerSniperBulletStart.z, PlayerSniperBulletEnd.z);
-	float maxZ = max(PlayerSniperBulletStart.z, PlayerSniperBulletEnd.z);
+	float minZ = Min(PlayerSniperBulletStart.z, PlayerSniperBulletEnd.z);
+	float maxZ = Max(PlayerSniperBulletStart.z, PlayerSniperBulletEnd.z);
 	if (minZ < z2 || maxZ > z1) {
 		if (minZ < z1)
-			minP = min(minP, (z1 - minZ) / (maxZ - minZ));
+			minP = Min(minP, (z1 - minZ) / (maxZ - minZ));
 		if (maxZ > z2)
-			maxP = max(maxP, (maxZ - z2) / (maxZ - minZ));
+			maxP = Max(maxP, (maxZ - z2) / (maxZ - minZ));
 	}
 	else
 		return false;

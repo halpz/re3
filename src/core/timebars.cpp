@@ -102,14 +102,14 @@ void tbDisplay()
 #ifndef FINAL
 		// Timers output (my own implementation)
 		for (uint32 i = 0; i < TimerBar.count; i++) {
-			MaxTimes[i] = max(MaxTimes[i], TimerBar.Timers[i].endTime - TimerBar.Timers[i].startTime);
+			MaxTimes[i] = Max(MaxTimes[i], TimerBar.Timers[i].endTime - TimerBar.Timers[i].startTime);
 			sprintf(temp, "%s: %.2f", &TimerBar.Timers[i].name[0], MaxTimes[i]);
 			AsciiToUnicode(temp, wtemp);
 			CFont::PrintString(RsGlobal.maximumWidth * (4.0f / DEFAULT_SCREEN_WIDTH), RsGlobal.maximumHeight * ((8.0f * (i + 2)) / DEFAULT_SCREEN_HEIGHT), wtemp);
 		}
 
 #ifdef FRAMETIME
-		MaxFrameTime = max(MaxFrameTime, FrameEndTime - FrameInitTime);
+		MaxFrameTime = Max(MaxFrameTime, FrameEndTime - FrameInitTime);
 		sprintf(temp, "Frame Time: %.2f", MaxFrameTime);
 		AsciiToUnicode(temp, wtemp);
 

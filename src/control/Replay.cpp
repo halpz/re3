@@ -681,9 +681,9 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 	vp->health = vehicle->m_fHealth / 4.0f; /* Not anticipated that health can be > 1000. */
 	vp->acceleration = vehicle->m_fGasPedal * 100.0f;
 	vp->panels = vehicle->IsCar() ? ((CAutomobile*)vehicle)->Damage.m_panelStatus : 0;
-	vp->velocityX = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetMoveSpeed().x)); /* 8000!? */
-	vp->velocityY = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetMoveSpeed().y));
-	vp->velocityZ = 8000.0f * max(-4.0f, min(4.0f, vehicle->GetMoveSpeed().z));
+	vp->velocityX = 8000.0f * Max(-4.0f, Min(4.0f, vehicle->GetMoveSpeed().x)); /* 8000!? */
+	vp->velocityY = 8000.0f * Max(-4.0f, Min(4.0f, vehicle->GetMoveSpeed().y));
+	vp->velocityZ = 8000.0f * Max(-4.0f, Min(4.0f, vehicle->GetMoveSpeed().z));
 	vp->mi = vehicle->GetModelIndex();
 	vp->primary_color = vehicle->m_currentColour1;
 	vp->secondary_color = vehicle->m_currentColour2;
@@ -1512,9 +1512,9 @@ void CReplay::ProcessLookAroundCam(void)
 	--FramesActiveLookAroundCam;
 	fBetaAngleLookAroundCam += x_moved;
 	if (CPad::NewMouseControllerState.LMB && CPad::NewMouseControllerState.RMB)
-		fDistanceLookAroundCam = max(3.0f, min(15.0f, fDistanceLookAroundCam + 2.0f * y_moved));
+		fDistanceLookAroundCam = Max(3.0f, Min(15.0f, fDistanceLookAroundCam + 2.0f * y_moved));
 	else
-		fAlphaAngleLookAroundCam = max(0.1f, min(1.5f, fAlphaAngleLookAroundCam + y_moved));
+		fAlphaAngleLookAroundCam = Max(0.1f, Min(1.5f, fAlphaAngleLookAroundCam + y_moved));
 	CVector camera_pt(
 		fDistanceLookAroundCam * Sin(fBetaAngleLookAroundCam) * Cos(fAlphaAngleLookAroundCam),
 		fDistanceLookAroundCam * Cos(fBetaAngleLookAroundCam) * Cos(fAlphaAngleLookAroundCam),

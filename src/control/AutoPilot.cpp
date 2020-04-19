@@ -8,7 +8,7 @@
 
 void CAutoPilot::ModifySpeed(float speed)
 {
-	m_fMaxTrafficSpeed = max(0.01f, speed);
+	m_fMaxTrafficSpeed = Max(0.01f, speed);
 	float positionBetweenNodes = (float)(CTimer::GetTimeInMilliseconds() - m_nTimeEnteredCurve) / m_nTimeToSpendOnCurrentCurve;
 	CCarPathLink* pCurrentLink = &ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo];
 	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[m_nNextPathNodeInfo];

@@ -195,14 +195,14 @@ void CWaterCannon::PushPeds(void)
 	{
 		if ( m_abUsed[i] )
 		{
-			minx = min(minx, m_avecPos[i].x);
-			maxx = max(maxx, m_avecPos[i].x);
+			minx = Min(minx, m_avecPos[i].x);
+			maxx = Max(maxx, m_avecPos[i].x);
 			
-			miny = min(miny, m_avecPos[i].y);
-			maxy = max(maxy, m_avecPos[i].y);
+			miny = Min(miny, m_avecPos[i].y);
+			maxy = Max(maxy, m_avecPos[i].y);
 			
-			minz = min(minz, m_avecPos[i].z);
-			maxz = max(maxz, m_avecPos[i].z);
+			minz = Min(minz, m_avecPos[i].z);
+			maxz = Max(maxz, m_avecPos[i].z);
 		}
 	}
 	

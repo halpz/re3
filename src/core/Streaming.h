@@ -71,7 +71,6 @@ struct CStreamingChannel
 };
 
 class CDirectory;
-enum eLevelName;
 class CPtrList;
 
 class CStreaming

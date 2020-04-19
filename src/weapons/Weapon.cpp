@@ -107,9 +107,11 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 	CVector fireOffset(0.0f, 0.0f, 0.6f);
 	CVector *source = fireSource;
 
-	if ( !fireSource )
-		source = &(shooter->GetMatrix() * fireOffset);
-
+	if (!fireSource) {
+		static CVector tmp;
+		tmp = shooter->GetMatrix() * fireOffset;
+		source = &tmp;
+	}
 	if ( m_bAddRotOffset )
 	{
 		float heading = RADTODEG(shooter->GetForward().Heading());
@@ -997,7 +999,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 						CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal*0.05f);
 
 					CVector dist = point->point - (*source);
-					CVector offset = dist - max(0.2f*dist.Magnitude(), 2.0f) * CVector(ahead.x, ahead.y, 0.0f);
+					CVector offset = dist - Max(0.2f*dist.Magnitude(), 2.0f) * CVector(ahead.x, ahead.y, 0.0f);
 					CVector smokePos = *source + offset;
 
 					smokePos.x += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f);
@@ -1016,7 +1018,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 						CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal*0.05f);
 
 					CVector dist = point->point - (*source);
-					CVector offset = dist - max(0.2f*dist.Magnitude(), 0.5f) * CVector(ahead.x, ahead.y, 0.0f);
+					CVector offset = dist - Max(0.2f*dist.Magnitude(), 0.5f) * CVector(ahead.x, ahead.y, 0.0f);
 					CVector smokePos = *source + offset;
 
 					CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, smokePos, CVector(0.0f, 0.0f, 0.0f));
@@ -1265,7 +1267,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 							CParticle::AddParticle(PARTICLE_SPARK, point.point, point.normal*0.05f);
 
 						CVector dist = point.point - (*fireSource);
-						CVector offset = dist - max(0.2f*dist.Magnitude(), 2.0f) * CVector(shootRot.x, shootRot.y, 0.0f);
+						CVector offset = dist - Max(0.2f*dist.Magnitude(), 2.0f) * CVector(shootRot.x, shootRot.y, 0.0f);
 						CVector smokePos = *fireSource + offset;
 
 						CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, smokePos, CVector(0.0f, 0.0f, 0.0f));
@@ -1280,7 +1282,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 							CParticle::AddParticle(PARTICLE_SPARK, point.point, point.normal*0.05f);
 
 						CVector dist = point.point - (*fireSource);
-						CVector offset = dist - max(0.2f*dist.Magnitude(), 2.0f) * CVector(shootRot.x, shootRot.y, 0.0f);
+						CVector offset = dist - Max(0.2f*dist.Magnitude(), 2.0f) * CVector(shootRot.x, shootRot.y, 0.0f);
 						CVector smokePos = *fireSource + offset;
 
 						smokePos.x += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f);
@@ -1347,7 +1349,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 		else
 		{
 			CVector traceTarget = *fireSource;
-			traceTarget += (target - (*fireSource)) * min(info->m_fRange, 30.0f) / info->m_fRange;
+			traceTarget += (target - (*fireSource)) * Min(info->m_fRange, 30.0f) / info->m_fRange;
 			CBulletTraces::AddTrace(fireSource, &traceTarget);
 		}
 	}
@@ -1877,8 +1879,9 @@ CWeapon::DoTankDoomAiming(CEntity *shooter, CEntity *driver, CVector *source, CV
 
 					if ( 3.0f*distToVictimZ < distToVictim )
 					{
+						CVector tmp = CVector(victim->GetPosition().x, victim->GetPosition().y, 0.0f);
 						if ( CCollision::DistToLine(source, target,
-								&CVector(victim->GetPosition().x, victim->GetPosition().y, 0.0f)) < victim->GetBoundRadius()*3.0f )
+								&tmp) < victim->GetBoundRadius()*3.0f )
 						{
 							float vehicleDist = Sqrt(SQR(distToVictim) + SQR(distToVictimZ));
 							if ( vehicleDist < closestEntityDist )
@@ -2145,12 +2148,12 @@ CWeapon::MakePedsJumpAtShot(CPhysical *shooter, CVector *source, CVector *target
 	ASSERT(source!=nil);
 	ASSERT(target!=nil);
 
-	float minx = min(source->x, target->x) - 2.0f;
-	float maxx = max(source->x, target->x) + 2.0f;
-	float miny = min(source->y, target->y) - 2.0f;
-	float maxy = max(source->y, target->y) + 2.0f;
-	float minz = min(source->z, target->z) - 2.0f;
-	float maxz = max(source->z, target->z) + 2.0f;
+	float minx = Min(source->x, target->x) - 2.0f;
+	float maxx = Max(source->x, target->x) + 2.0f;
+	float miny = Min(source->y, target->y) - 2.0f;
+	float maxy = Max(source->y, target->y) + 2.0f;
+	float minz = Min(source->z, target->z) - 2.0f;
+	float maxz = Max(source->z, target->z) + 2.0f;
 
 	for ( int32 i = CPools::GetPedPool()->GetSize() - 1; i >= 0; i--)
 	{

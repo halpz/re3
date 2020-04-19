@@ -205,7 +205,7 @@ DoFade(void)
 		CRGBA fadeColor;
 		CRect rect;
 		int fadeValue = CDraw::FadeValue;
-		float brightness = min(CMenuManager::m_PrefsBrightness, 256);
+		float brightness = Min(CMenuManager::m_PrefsBrightness, 256);
 		if(brightness <= 50)
 			brightness = 50;
 		if(FrontEndMenuManager.m_bMenuActive)
