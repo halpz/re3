@@ -44,6 +44,9 @@ CText::Load(void)
 		sprintf(filename, "SPANISH.GXT");
 		break;
 #ifdef MORE_LANGUAGES
+	case LANGUAGE_POLISH:
+		sprintf(filename, "POLISH.GXT");
+		break;
 	case LANGUAGE_RUSSIAN:
 		sprintf(filename, "RUSSIAN.GXT");
 		break;
