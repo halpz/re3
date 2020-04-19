@@ -98,6 +98,7 @@ bool CGame::noProstitutes;
 bool CGame::playingIntro;
 char CGame::aDatFile[32];
 #ifdef MORE_LANGUAGES
+bool CGame::polishGame = false;
 bool CGame::russianGame = false;
 #endif
 
