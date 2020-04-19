@@ -192,7 +192,7 @@ class CReplay
 		int8 velocityX;
 		int8 velocityY;
 		int8 velocityZ;
-		union{
+		union {
 			int8 car_gun;
 			int8 wheel_state;
 		};
@@ -208,25 +208,25 @@ private:
 	static uint8 Mode;
 	static CAddressInReplayBuffer Record;
 	static CAddressInReplayBuffer Playback;
-	static uint8 *pBuf0;
-	static CAutomobile *pBuf1;
-	static uint8 *pBuf2;
-	static CPlayerPed *pBuf3;
-	static uint8 *pBuf4;
-	static CCutsceneHead *pBuf5;
-	static uint8 *pBuf6;
-	static CPtrNode *pBuf7;
-	static uint8 *pBuf8;
-	static CEntryInfoNode *pBuf9;
-	static uint8 *pBuf10;
-	static CDummyPed *pBuf11;
-	static uint8 *pRadarBlips;
-	static uint8 *pStoredCam;
-	static uint8 *pWorld1;
-	static CReference *pEmptyReferences;
-	static CStoredDetailedAnimationState *pPedAnims;
-	static uint8 *pPickups;
-	static uint8 *pReferences;
+	static uint8* pBuf0;
+	static CAutomobile* pBuf1;
+	static uint8* pBuf2;
+	static CPlayerPed* pBuf3;
+	static uint8* pBuf4;
+	static CCutsceneHead* pBuf5;
+	static uint8* pBuf6;
+	static CPtrNode* pBuf7;
+	static uint8* pBuf8;
+	static CEntryInfoNode* pBuf9;
+	static uint8* pBuf10;
+	static CDummyPed* pBuf11;
+	static uint8* pRadarBlips;
+	static uint8* pStoredCam;
+	static uint8* pWorld1;
+	static CReference* pEmptyReferences;
+	static CStoredDetailedAnimationState* pPedAnims;
+	static uint8* pPickups;
+	static uint8* pReferences;
 	static uint8 BufferStatus[NUM_REPLAYBUFFERS];
 	static uint8 Buffers[NUM_REPLAYBUFFERS][REPLAYBUFFERSIZE];
 	static bool bPlayingBackFromFile;
@@ -234,8 +234,8 @@ private:
 	static uint32 SlowMotion;
 	static uint32 FramesActiveLookAroundCam;
 	static bool bDoLoadSceneWhenDone;
-	static CPtrList WorldPtrList;
-	static CPtrList BigBuildingPtrList;
+	static CPtrNode* WorldPtrList;
+	static CPtrNode* BigBuildingPtrList;
 	static CWanted PlayerWanted;
 	static CPlayerInfo PlayerInfo;
 	static uint32 Time1;
@@ -267,6 +267,9 @@ private:
 	static float fDistanceLookAroundCam;
 	static float fAlphaAngleLookAroundCam;
 	static float fBetaAngleLookAroundCam;
+#ifdef FIX_BUGS
+	static int nHandleOfPlayerPed[NUMPLAYERS];
+#endif
 
 public:
 	static void Init(void);

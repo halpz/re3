@@ -12,6 +12,9 @@
 #include "AudioScriptObject.h"
 #include "RpAnimBlend.h"
 #include "AnimBlendAssociation.h"
+#ifdef FIX_BUGS
+#include "Replay.h"
+#endif
 
 CPhoneInfo gPhoneInfo;
 
@@ -45,6 +48,10 @@ isPhoneAvailable(int m_phoneId)
 void
 CPhoneInfo::Update(void)
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	CPlayerPed *player = FindPlayerPed();
 	CPlayerInfo *playerInfo = &CWorld::Players[CWorld::PlayerInFocus];
 	if (bDisplayingPhoneMessage && CTimer::GetTimeInMilliseconds() > PhoneEnableControlsTimer) {

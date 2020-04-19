@@ -26,8 +26,17 @@ CReferences::RemoveReferencesToPlayer(void)
 {
 	if(FindPlayerVehicle())
 		FindPlayerVehicle()->ResolveReferences();
+#ifdef FIX_BUGS
+	if (FindPlayerPed()) {
+		CPlayerPed* pPlayerPed = FindPlayerPed();
+		FindPlayerPed()->ResolveReferences();
+		CWorld::Players[CWorld::PlayerInFocus].m_pPed = pPlayerPed;
+		pPlayerPed->RegisterReference((CEntity**)&CWorld::Players[CWorld::PlayerInFocus].m_pPed);
+	}
+#else
 	if(FindPlayerPed())
 		FindPlayerPed()->ResolveReferences();
+#endif
 }
 
 void

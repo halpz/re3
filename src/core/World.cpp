@@ -1386,6 +1386,10 @@ FindPlayerEntity(void)
 CVector
 FindPlayerCoors(void)
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return TheCamera.GetPosition();
+#endif
 	CPlayerPed *ped = FindPlayerPed();
 	if(ped->InVehicle())
 		return ped->m_pMyVehicle->GetPosition();
@@ -1396,6 +1400,11 @@ FindPlayerCoors(void)
 CVector &
 FindPlayerSpeed(void)
 {
+#ifdef FIX_BUGS
+	static CVector vecTmpVector(0.0f, 0.0f, 0.0f);
+	if (CReplay::IsPlayingBack())
+		return vecTmpVector;
+#endif
 	CPlayerPed *ped = FindPlayerPed();
 	if(ped->InVehicle())
 		return ped->m_pMyVehicle->m_vecMoveSpeed;
@@ -1406,6 +1415,9 @@ FindPlayerSpeed(void)
 CVector &
 FindPlayerCentreOfWorld(int32 player)
 {
+#ifdef FIX_BUGS
+	if(CReplay::IsPlayingBack()) return TheCamera.GetPosition();
+#endif
 	if(CCarCtrl::bCarsGeneratedAroundCamera) return TheCamera.GetPosition();
 	if(CWorld::Players[player].m_pRemoteVehicle) return CWorld::Players[player].m_pRemoteVehicle->GetPosition();
 	if(FindPlayerVehicle()) return FindPlayerVehicle()->GetPosition();
@@ -1415,6 +1427,9 @@ FindPlayerCentreOfWorld(int32 player)
 CVector &
 FindPlayerCentreOfWorld_NoSniperShift(void)
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack()) return TheCamera.GetPosition();
+#endif
 	if(CCarCtrl::bCarsGeneratedAroundCamera) return TheCamera.GetPosition();
 	if(CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
 		return CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->GetPosition();

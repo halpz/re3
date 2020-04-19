@@ -2490,6 +2490,10 @@ CCamera::TryToStartNewCamMode(int obbeMode)
 		TakeControl(FindPlayerEntity(), CCam::MODE_CAM_ON_A_STRING, JUMP_CUT, CAMCONTROL_OBBE);
 		return true;
 	case OBBE_COPCAR:
+#ifdef FIX_BUGS
+		if (CReplay::IsPlayingBack())
+			return false;
+#endif
 		if(FindPlayerPed()->m_pWanted->m_nWantedLevel < 1)
 			return false;
 		if(FindPlayerVehicle() == nil)
@@ -2514,6 +2518,10 @@ CCamera::TryToStartNewCamMode(int obbeMode)
 		}
 		return false;
 	case OBBE_COPCAR_WHEEL:
+#ifdef FIX_BUGS
+		if (CReplay::IsPlayingBack())
+			return false;
+#endif
 		if(FindPlayerPed()->m_pWanted->m_nWantedLevel < 1)
 			return false;
 		if(FindPlayerVehicle() == nil)

@@ -28,6 +28,9 @@
 #include "CutsceneMgr.h"
 #include "CdStream.h"
 #include "Streaming.h"
+#ifdef FIX_BUGS
+#include "Replay.h"
+#endif
 #include "main.h"
 
 bool CStreaming::ms_disableStreaming;
@@ -280,7 +283,11 @@ CStreaming::Update(void)
 	   !requestedSubway &&
 	   !CGame::playingIntro &&
 	   ms_numModelsRequested < 5 &&
-	   !CRenderer::m_loadingPriority){
+	   !CRenderer::m_loadingPriority
+#ifdef FIX_BUGS
+		&& !CReplay::IsPlayingBack()
+#endif
+		){
 		StreamVehiclesAndPeds();
 		StreamZoneModels(FindPlayerCoors());
 	}
@@ -1248,7 +1255,11 @@ CStreaming::StreamVehiclesAndPeds(void)
 	static int modelQualityClass = 0;
 
 	if(CRecordDataForGame::IsRecording() ||
-	   CRecordDataForGame::IsPlayingBack())
+	   CRecordDataForGame::IsPlayingBack()
+#ifdef FIX_BUGS
+	   || CReplay::IsPlayingBack()
+#endif
+		)
 		return;
 
 	if(FindPlayerPed()->m_pWanted->AreSwatRequired()){

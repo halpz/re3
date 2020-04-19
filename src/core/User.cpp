@@ -3,6 +3,7 @@
 
 #include "Hud.h"
 #include "PlayerPed.h"
+#include "Replay.h"
 #include "Text.h"
 #include "User.h"
 #include "Vehicle.h"
@@ -115,6 +116,10 @@ CUserDisplay::Init()
 void
 CUserDisplay::Process()
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	PlaceName.Process();
 	OnscnTimer.Process();
 	Pager.Process();
