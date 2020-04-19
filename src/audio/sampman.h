@@ -45,7 +45,7 @@ class cSampleManager
 	uint8   m_nEffectsFadeVolume;
 	uint8   m_nMusicFadeVolume;
 	uint8   m_nMonoMode;
-	char _pad0[1];
+	char	unk;
 	char    m_szCDRomRootPath[80];
 	bool    m_bInitialised;
 	uint8   m_nNumberOfProviders;

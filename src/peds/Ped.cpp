@@ -9191,8 +9191,11 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 		ped->QuitEnteringCar();
 		return;
 	}
-	bool itsVan = veh->bIsVan;
-	bool itsBus = veh->bIsBus;
+	bool itsVan = !!veh->bIsVan;
+	bool itsBus = !!veh->bIsBus;
+#ifdef FIX_BUGS
+	bool itsLow = !!veh->bLowVehicle;
+#endif
 	eDoors enterDoor;
 	AnimationId enterAnim;
 
@@ -9227,6 +9230,10 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 				enterAnim = ANIM_VAN_GETIN;
 			} else if (itsBus) {
 				enterAnim = ANIM_COACH_IN_R;
+#ifdef FIX_BUGS
+			} else if (itsLow) {
+				enterAnim = ANIM_CAR_GETIN_LOW_RHS;
+#endif
 			} else {
 				enterAnim = ANIM_CAR_GETIN_RHS;
 			}
@@ -9234,6 +9241,10 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 			enterAnim = ANIM_VAN_GETIN_L;
 		} else if (itsBus) {
 			enterAnim = ANIM_COACH_IN_L;
+#ifdef FIX_BUGS
+		} else if (itsLow) {
+			enterAnim = ANIM_CAR_GETIN_LOW_LHS;
+#endif
 		} else {
 			enterAnim = ANIM_CAR_GETIN_LHS;
 		}
@@ -10806,6 +10817,11 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 				}
 			}
 		}
+#ifdef CANCELLABLE_CAR_ENTER
+		if (!veh->IsDoorMissing(door) && veh->CanPedOpenLocks(ped) && veh->IsCar()) {
+			((CAutomobile*)veh)->Damage.SetDoorStatus(door, DOOR_STATUS_SWINGING);
+		}
+#endif
 		ped->QuitEnteringCar();
 		ped->RestorePreviousObjective();
 		ped->bCancelEnteringCar = false;
@@ -14492,7 +14508,8 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 	if (collidingEnt->IsVehicle() && ((CVehicle*)collidingEnt)->IsBoat())
 		collidedWithBoat = true;
 
-	if (!field_EF && !m_phy_flagA80
+	// ofc we're not vehicle
+	if (!m_bIsVehicleBeingShifted && !m_phy_flagA80
 #ifdef VC_PED_PORTS
 		&& !collidingEnt->IsPed()
 #endif
@@ -15259,7 +15276,7 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 {
 	uint32 optedDoorNode = wantedDoorNode;
 	bool teleportNeeded = false;
-	bool isLow = veh->bLowVehicle;
+	bool isLow = !!veh->bLowVehicle;
 	if (!veh->CanPedExitCar()) {
 		if (veh->pDriver && !veh->pDriver->IsPlayer()) {
 			veh->AutoPilot.m_nCruiseSpeed = 0;

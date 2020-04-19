@@ -36,7 +36,7 @@ CPhysical::CPhysical(void)
 	for(i = 0; i < 6; i++)
 		m_aCollisionRecords[i] = nil;
 
-	field_EF = false;
+	m_bIsVehicleBeingShifted = false;
 
 	m_nDamagePieceType = 0;
 	m_fDamageImpulse = 0.0f;
@@ -63,7 +63,7 @@ CPhysical::CPhysical(void)
 	m_phy_flagA10 = false;
 	m_phy_flagA20 = false;
 
-	m_nZoneLevel = 0;
+	m_nZoneLevel = LEVEL_NONE;
 }
 
 CPhysical::~CPhysical(void)
@@ -1767,13 +1767,13 @@ CPhysical::ProcessShift(void)
 		CWorld::AdvanceCurrentScanCode();
 
 		if(IsVehicle())
-			field_EF = true;
+			m_bIsVehicleBeingShifted = true;
 
 		CEntryInfoNode *node;
 		bool hasshifted = false;	// whatever that means...
 		for(node = m_entryInfoList.first; node; node = node->next)
 			hasshifted |= ProcessShiftSectorList(node->sector->m_lists);
-		field_EF = false;
+		m_bIsVehicleBeingShifted = false;
 		if(hasshifted){
 			CWorld::AdvanceCurrentScanCode();
 			for(node = m_entryInfoList.first; node; node = node->next)
@@ -1799,7 +1799,7 @@ CPhysical::ProcessCollision(void)
 	CPed *ped = (CPed*)this;
 
 	m_fDistanceTravelled = 0.0f;
-	field_EF = 0;
+	m_bIsVehicleBeingShifted = false;
 	m_phy_flagA80 = false;
 
 	if(!bUsesCollision){
@@ -1912,7 +1912,7 @@ CPhysical::ProcessCollision(void)
 	ApplyMoveSpeed();
 	ApplyTurnSpeed();
 	GetMatrix().Reorthogonalise();
-	field_EF = 0;
+	m_bIsVehicleBeingShifted = false;
 	m_phy_flagA80 = false;
 	if(!m_vecMoveSpeed.IsZero() ||
 	   !m_vecTurnSpeed.IsZero() ||

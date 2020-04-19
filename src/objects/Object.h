@@ -47,13 +47,12 @@ public:
 	float m_fUprootLimit;
 	int8 ObjectCreatedBy;
 	int8 bIsPickup : 1;
-	int8 m_obj_flag2 : 1;
+	int8 bPickupObjWithMessage : 1;
 	int8 bOutOfStock : 1;
 	int8 bGlassCracked : 1;
 	int8 bGlassBroken : 1;
 	int8 bHasBeenDamaged : 1;
 	int8 bUseVehicleColours : 1;
-	int8 m_obj_flag80 : 1;
 	int8 m_nBonusValue; 
 	float m_fCollisionDamageMultiplier;
 	uint8 m_nCollisionDamageEffect;

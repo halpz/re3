@@ -65,7 +65,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nNumGettingIn = 0;
 	m_nGettingInFlags = 0;
 	m_nGettingOutFlags = 0;
-	m_nNumMaxPassengers = 8;
+	m_nNumMaxPassengers = ARRAY_SIZE(pPassengers);
 	for(i = 0; i < m_nNumMaxPassengers; i++)
 		pPassengers[i] = nil;
 	m_nBombTimer = 0;
@@ -101,7 +101,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nLastWeaponDamage = -1;
 	m_fMapObjectHeightAhead = m_fMapObjectHeightBehind = 0.0f;
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
-	if(m_audioEntityId)
+	if(m_audioEntityId >= 0)
 		DMAudio.SetEntityStatus(m_audioEntityId, true);
 	m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
 	m_pCurGroundEntity = nil;
@@ -728,7 +728,7 @@ CVehicle::CanBeDeleted(void)
 			return false;
 	}
 
-	for(i = 0; i < 8; i++){
+	for(i = 0; i < ARRAY_SIZE(pPassengers); i++){
 		// Same check as above
 		if(pPassengers[i]){
 			if(pPassengers[i]->CharCreatedBy == MISSION_CHAR)
@@ -941,7 +941,7 @@ void
 CVehicle::RemovePassenger(CPed *p)
 {
 	if (IsTrain()){
-		for (int i = 0; i < 8; i++){
+		for (int i = 0; i < ARRAY_SIZE(pPassengers); i++){
 			if (pPassengers[i] == p) {
 				pPassengers[i] = nil;
 				m_nNumPassengers--;

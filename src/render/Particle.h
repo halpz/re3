@@ -90,7 +90,7 @@ public:
 	static void AddJetExplosion(CVector const &vecPos, float fPower, float fSize);
 	static void AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatrix);
 
-#ifndef MASTER
+#ifdef TOGGLEABLE_BETA_FEATURES
 	static bool bEnableBannedParticles;
 #endif
 };

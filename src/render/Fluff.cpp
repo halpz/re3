@@ -159,12 +159,12 @@ void CMovingThings::Update()
 	int block = CTimer::GetFrameCounter() % TIME_SPAN;
 
 	for (i = (block * NUMMOVINGTHINGS) / TIME_SPAN; i < ((block + 1) * NUMMOVINGTHINGS) / TIME_SPAN; i++) {
-		if (aMovingThings[i].field_A == 1)
+		if (aMovingThings[i].m_nHidden == 1)
 			aMovingThings[i].Update();
 	}
 
 	for (i = 0; i < CMovingThings::Num; i++) {
-		if (aMovingThings[i].field_A == 0)
+		if (aMovingThings[i].m_nHidden == 0)
 			aMovingThings[i].Update();
 	}
 
@@ -212,14 +212,14 @@ void CMovingThing::Update()
 	m_pEntity->UpdateRwFrame();
 	
 	if (SQR(m_pEntity->GetPosition().x - TheCamera.GetPosition().x) + SQR(m_pEntity->GetPosition().y - TheCamera.GetPosition().y) < 40000.0f) {
-		if (field_A == 1) {
+		if (m_nHidden == 1) {
 			AddToList(&CMovingThings::StartCloseList);
-			field_A = 0;
+			m_nHidden = 0;
 		}
 	} else {
-		if (field_A == 0) {
+		if (m_nHidden == 0) {
 			RemoveFromList();
-			field_A = 1;
+			m_nHidden = 1;
 		}
 	}
 }

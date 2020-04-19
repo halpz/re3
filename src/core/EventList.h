@@ -26,8 +26,7 @@ enum eEventType
 	EVENT_ICECREAM,
 	EVENT_ATM,
 	EVENT_SHOPSTALL, // used on graffitis
-	EVENT_SHOPWINDOW,
-	EVENT_LAST_EVENT // may be above one
+	EVENT_LAST_EVENT
 };
 
 enum eEventEntity

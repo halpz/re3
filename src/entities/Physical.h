@@ -40,7 +40,7 @@ public:
   char field_EC;
 	uint8 m_nStaticFrames;
 	uint8 m_nCollisionRecords;
-	bool field_EF;
+	bool m_bIsVehicleBeingShifted;
 	CEntity *m_aCollisionRecords[PHYSICAL_MAX_COLLISIONRECORDS];
 
 	float m_fDistanceTravelled;
@@ -55,8 +55,8 @@ public:
 	uint8 bAffectedByGravity : 1;
 	uint8 bInfiniteMass : 1;
 	uint8 bIsInWater : 1;
-	uint8 m_phy_flagA10 : 1;
-	uint8 m_phy_flagA20 : 1;
+	uint8 m_phy_flagA10 : 1; // unused
+	uint8 m_phy_flagA20 : 1; // unused
 	uint8 bHitByTrain : 1;
 	uint8 m_phy_flagA80 : 1;
 

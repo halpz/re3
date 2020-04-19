@@ -161,7 +161,7 @@ enum Config {
 #	define GTA3_1_1_PATCH
 //#	define GTA3_STEAM_PATCH
 #	ifdef GTA_PS2_STUFF
-//#		define USE_PS2_RAND	// this is unsafe until we have the game reversed
+#		define USE_PS2_RAND
 #		define RANDOMSPLASH	// use random splash as on PS2
 #		define PS2_MATFX
 #	endif
