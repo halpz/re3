@@ -1675,13 +1675,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		return 0;
 	}
 	case COMMAND_GENERATE_RANDOM_INT:
-#ifdef FIX_BUGS
-		// Not a very good fix but before switching to PS2 rand, it sort of works
-		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = CGeneral::GetRandomNumberInRange(0, 65535);
-#else
-		/* On PC between 0 and 32767, even though script expects values between 0 and 65536 */
 		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = CGeneral::GetRandomNumber();
-#endif
 		return 0;
 	case COMMAND_CREATE_CHAR:
 	{

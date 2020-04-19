@@ -491,7 +491,7 @@ CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quan
 	int32 slot = 0;
 
 	if (type == PICKUP_FLOATINGPACKAGE || type == PICKUP_NAUTICAL_MINE_INACTIVE) {
-		for (slot = NUMPICKUPS; slot >= 0; slot--) {
+		for (slot = NUMPICKUPS-1; slot >= 0; slot--) {
 			if (aPickUps[slot].m_eType == PICKUP_NONE) {
 				bFreeFound = true;
 				break;
