@@ -2893,6 +2893,9 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		CGame::germanGame = false;
 #ifdef MORE_LANGUAGES
 		switch (m_PrefsLanguage) {
+		case LANGUAGE_POLISH:
+			CFont::ReloadFonts(FONT_LANGSET_POLISH);
+			break;
 		case LANGUAGE_RUSSIAN:
 			CFont::ReloadFonts(FONT_LANGSET_RUSSIAN);
 			break;
@@ -2910,6 +2913,9 @@ CMenuManager::InitialiseChangedLanguageSettings()
 			CGame::germanGame = true;
 			break;
 #ifdef MORE_LANGUAGES
+		case LANGUAGE_POLISH:
+			CGame::polishGame = true;
+			break;
 		case LANGUAGE_RUSSIAN:
 			CGame::russianGame = true;
 			break;
@@ -4264,6 +4270,12 @@ CMenuManager::ProcessButtonPresses(void)
 					SaveSettings();
 					break;
 #ifdef MORE_LANGUAGES
+				case MENUACTION_LANG_PL:
+					m_PrefsLanguage = LANGUAGE_POLISH;
+					m_bFrontEnd_ReloadObrTxtGxt = true;
+					InitialiseChangedLanguageSettings();
+					SaveSettings();
+					break;
 				case MENUACTION_LANG_RUS:
 					m_PrefsLanguage = LANGUAGE_RUSSIAN;
 					m_bFrontEnd_ReloadObrTxtGxt = true;
@@ -5571,6 +5583,7 @@ CMenuManager::ConstructStatLine(int rowIdx)
 		case LANGUAGE_ITALIAN:
 		case LANGUAGE_SPANISH:
 #ifdef MORE_LANGUAGES
+		case LANGUAGE_POLISH:
 		case LANGUAGE_RUSSIAN:
 #endif
 			STAT_LINE("FESTDFM", &CStats::DistanceTravelledOnFoot, true, nil);

@@ -44,14 +44,16 @@ enum {
 enum
 {
 	FONT_LANGSET_EFIGS,
-	FONT_LANGSET_RUSSIAN
+	FONT_LANGSET_RUSSIAN,
+	FONT_LANGSET_POLISH,
+	LANGSET_MAX
 };
 #endif
 
 class CFont
 {
 #ifdef MORE_LANGUAGES
-	static int16 Size[2][MAX_FONTS][193];
+	static int16 Size[LANGSET_MAX][MAX_FONTS][193];
 	static uint8 LanguageSet;
 	static int32 Slot;
 #else
