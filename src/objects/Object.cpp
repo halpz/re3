@@ -214,7 +214,7 @@ CObject::ObjectDamage(float amount)
 				++nFrameGen;
 				int32 currentFrame = nFrameGen & 3;
 				float fRandom = CGeneral::GetRandomNumberInRange(0.01f, 1.0f);
-				RwRGBA randomColor = { color.red * fRandom, color.green * fRandom , color.blue, color.alpha };
+				RwRGBA randomColor = { uint8(color.red * fRandom), uint8(color.green * fRandom) , color.blue, color.alpha };
 				float fSize = CGeneral::GetRandomNumberInRange(0.02f, 0.18f);
 				int32 nRotationSpeed = CGeneral::GetRandomNumberInRange(-40, 80);
 				CParticle::AddParticle(PARTICLE_CAR_DEBRIS, vecPos, vecDir, nil, fSize, randomColor, nRotationSpeed, 0, currentFrame, 0);
@@ -237,7 +237,7 @@ CObject::ObjectDamage(float amount)
 				++nFrameGen;
 				int32 currentFrame = nFrameGen & 3;
 				float fRandom = CGeneral::GetRandomNumberInRange(0.5f, 0.5f);
-				RwRGBA randomColor = { color.red * fRandom, color.green * fRandom , color.blue * fRandom, color.alpha };
+				RwRGBA randomColor = { uint8(color.red * fRandom), uint8(color.green * fRandom), uint8(color.blue * fRandom), color.alpha };
 				float fSize = CGeneral::GetRandomNumberInRange(0.02f, 0.18f);
 				int32 nRotationSpeed = CGeneral::GetRandomNumberInRange(-40, 80);
 				CParticle::AddParticle(PARTICLE_CAR_DEBRIS, vecPos, vecDir, nil, fSize, randomColor, nRotationSpeed, 0, currentFrame, 0);

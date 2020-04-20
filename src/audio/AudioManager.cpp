@@ -635,9 +635,9 @@ cAudioManager::ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, 
 			float speedOfSource = (dist / m_bTimeSpent) * speedMultiplier;
 			if(m_fSpeedOfSound > Abs(speedOfSource)) {
 				if(speedOfSource < 0.0f) {
-					speedOfSource = max(speedOfSource, -1.5f);
+					speedOfSource = Max(speedOfSource, -1.5f);
 				} else {
-					speedOfSource = min(speedOfSource, 1.5f);
+					speedOfSource = Min(speedOfSource, 1.5f);
 				}
 				newFreq =
 				    (oldFreq * m_fSpeedOfSound) / (speedOfSource + m_fSpeedOfSound);
@@ -650,10 +650,10 @@ cAudioManager::ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, 
 int32
 cAudioManager::ComputePan(float dist, CVector *vec)
 {
-	int32 index = min(63, Abs(vec->x / (dist / 64.f)));
+	int32 index = Min(63, Abs(vec->x / (dist / 64.f)));
 
-	if(vec->x > 0.f) return max(20, 63 - panTable[index]);
-	return min(107, panTable[index] + 63);
+	if(vec->x > 0.f) return Max(20, 63 - panTable[index]);
+	return Min(107, panTable[index] + 63);
 }
 
 uint8
@@ -2894,7 +2894,7 @@ cAudioManager::GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobil
 		relativeVelChange = (gasPedalAudio - 0.4f) * 1.25f;
 
 	} else if(wheelState == WHEEL_STATE_SKIDDING) {
-		relativeVelChange = min(1.0f, Abs(velocityChange) / transmission->fMaxVelocity);
+		relativeVelChange = Min(1.0f, Abs(velocityChange) / transmission->fMaxVelocity);
 	} else if(wheelState == WHEEL_STATE_FIXED) {
 		modificator = 0.4f;
 		relativeVelChange = gasPedalAudio;
@@ -2905,7 +2905,7 @@ cAudioManager::GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobil
 		velChange = Abs(velocityChange);
 		if(relativeVelChange > 0.4f) relativeVelChange = relativeVelChange * modificator;
 		if(velChange > 0.04f) {
-			relativeVel = min(1.0f, velChange / transmission->fMaxVelocity);
+			relativeVel = Min(1.0f, velChange / transmission->fMaxVelocity);
 		} else {
 			relativeVel = 0.0f;
 		}
@@ -2914,7 +2914,7 @@ cAudioManager::GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobil
 		relativeVelChange = 0.0f;
 	}
 
-	return max(relativeVelChange, min(1.0f, Abs(automobile->m_vecTurnSpeed.z) * 20.0f));
+	return Max(relativeVelChange, Min(1.0f, Abs(automobile->m_vecTurnSpeed.z) * 20.0f));
 }
 
 float
@@ -2924,12 +2924,12 @@ cAudioManager::GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automo
 	float relativeVelChange;
 
 	if(automobile->m_aWheelState[wheel] == 2) {
-		relativeVelChange = min(1.0f, Abs(velocityChange) / transmission->fMaxVelocity);
+		relativeVelChange = Min(1.0f, Abs(velocityChange) / transmission->fMaxVelocity);
 	} else {
 		relativeVelChange = 0.0f;
 	}
 
-	return max(relativeVelChange, min(1.0f, Abs(automobile->m_vecTurnSpeed.z) * 20.0f));
+	return Max(relativeVelChange, Min(1.0f, Abs(automobile->m_vecTurnSpeed.z) * 20.0f));
 }
 
 bool
@@ -3326,7 +3326,7 @@ cAudioManager::ProcessActiveQueues()
 							if(field_4) {
 								emittingVol =
 								    2 *
-								    min(63,
+								    Min(63,
 								        sample.m_bEmittingVolume);
 							} else {
 								emittingVol =
@@ -3353,13 +3353,13 @@ cAudioManager::ProcessActiveQueues()
 								if(sample.m_nFrequency <=
 								   m_asActiveSamples[j]
 								       .m_nFrequency) {
-									freq = max(
+									freq = Max(
 									    sample.m_nFrequency,
 									    m_asActiveSamples[j]
 									            .m_nFrequency -
 									        6000);
 								} else {
-									freq = min(
+									freq = Min(
 									    sample.m_nFrequency,
 									    m_asActiveSamples[j]
 									            .m_nFrequency +
@@ -3376,14 +3376,14 @@ cAudioManager::ProcessActiveQueues()
 								if(sample.m_bEmittingVolume <=
 								   m_asActiveSamples[j]
 								       .m_bEmittingVolume) {
-									vol = max(
+									vol = Max(
 									    m_asActiveSamples[j]
 									            .m_bEmittingVolume -
 									        10,
 									    sample
 									        .m_bEmittingVolume);
 								} else {
-									vol = min(
+									vol = Min(
 									    m_asActiveSamples[j]
 									            .m_bEmittingVolume +
 									        10,
@@ -3394,7 +3394,7 @@ cAudioManager::ProcessActiveQueues()
 								uint8 emittingVol;
 								if(field_4) {
 									emittingVol =
-									    2 * min(63, vol);
+									    2 * Min(63, vol);
 								} else {
 									emittingVol = vol;
 								}
@@ -3461,7 +3461,7 @@ cAudioManager::ProcessActiveQueues()
 							    &position);
 						if(field_4) {
 							emittingVol =
-							    2 * min(63, m_asActiveSamples[j]
+							    2 * Min(63, m_asActiveSamples[j]
 							                    .m_bEmittingVolume);
 						} else {
 							emittingVol =
@@ -3783,7 +3783,7 @@ cAudioManager::ProcessBoatMovingOverWater(cVehicleParams *params)
 	velocityChange = Abs(params->m_fVelocityChange);
 	if(velocityChange <= 0.0005f && params->m_pVehicle->GetPosition().y) return true;
 
-	velocityChange = min(0.75f, velocityChange);
+	velocityChange = Min(0.75f, velocityChange);
 	multiplier = (velocityChange - 0.0005f) * 1.3342f;
 	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 	vol = (30.f * multiplier);
@@ -5044,7 +5044,7 @@ void
 cAudioManager::ProcessJumboDecel(CPlane *plane)
 {
 	if(SetupJumboFlySound(20) && SetupJumboTaxiSound(75)) {
-		const float modificator = min(1.f, (plane->m_fSpeed - 0.10334f) * 1.676f);
+		const float modificator = Min(1.f, (plane->m_fSpeed - 0.10334f) * 1.676f);
 		SetupJumboEngineSound(maxVolume * modificator, 6050.f * modificator + 16000);
 		SetupJumboWhineSound(18, 29500);
 	}
@@ -7259,7 +7259,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 		CurrentPretendGear = 1;
 	}
 	if(CReplay::IsPlayingBack()) {
-		accelerateState = 255.f * max(0.0f, min(1.0f, automobile->m_fGasPedal));
+		accelerateState = 255.f * Max(0.0f, Min(1.0f, automobile->m_fGasPedal));
 	} else {
 		accelerateState = Pads->GetAccelerate();
 	}
@@ -7268,7 +7268,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 	velocityChange = params->m_fVelocityChange;
 	relativeVelocityChange = 2.0f * velocityChange / transmission->fMaxVelocity;
 
-	accelerationMultipler = min(min(1.f, relativeVelocityChange), 0.f);
+	accelerationMultipler = Min(Min(1.f, relativeVelocityChange), 0.f);
 	gasPedalAudio = accelerationMultipler;
 	currentGear = params->m_pVehicle->m_nCurrentGear;
 
@@ -7290,9 +7290,9 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 	if(0.0f != velocityChange) {
 		time = params->m_pVehicle->m_vecMoveSpeed.z / velocityChange;
 		if(time <= 0.0f) {
-			freqModifier = max(-0.2f, time) * -15000.f;
+			freqModifier = Max(-0.2f, time) * -15000.f;
 		} else {
-			freqModifier = -(min(0.2f, time) * 15000.f);
+			freqModifier = -(Min(0.2f, time) * 15000.f);
 		}
 		if(params->m_fVelocityChange < -0.001f) freqModifier = -freqModifier;
 	} else {
@@ -7311,10 +7311,10 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 				gasPedalAudio = automobile->m_fGasPedalAudio;
 			} else {
 				gasPedalAudio =
-				    min(1.0f, params->m_fVelocityChange /
+				    Min(1.0f, params->m_fVelocityChange /
 				                  params->m_pTransmission->fMaxReverseVelocity);
 			}
-			gasPedalAudio = max(0.0f, gasPedalAudio);
+			gasPedalAudio = Max(0.0f, gasPedalAudio);
 			automobile->m_fGasPedalAudio = gasPedalAudio;
 		} else if(LastAccel > 0) {
 			if(channelUsed) {
@@ -7343,7 +7343,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 		AddPlayerCarSample(110 - (40.f * gasPedalAudio), freq,
 		                   (engineSoundType + SFX_CAR_REV_10), 0, 52, 1);
 
-		CurrentPretendGear = max(1, currentGear);
+		CurrentPretendGear = Max(1, currentGear);
 		LastAccel = accelerateState;
 
 		bHandbrakeOnLastFrame = automobile->bIsHandbrakeOn;
@@ -8005,7 +8005,7 @@ cAudioManager::ProcessTrainNoise(cVehicleParams *params)
 	if(params->m_fVelocityChange > 0.0f) {
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		train = (CTrain *)params->m_pVehicle;
-		speedMultipler = min(1.0f, train->m_fSpeed * 250.f / 51.f);
+		speedMultipler = Min(1.0f, train->m_fSpeed * 250.f / 51.f);
 		emittingVol = (75.f * speedMultipler);
 		if(train->m_fWagonPosition == 0.0f) {
 			m_sQueueSample.m_bVolume =
@@ -8176,7 +8176,7 @@ cAudioManager::ProcessVehicleDoors(cVehicleParams *params)
 		if(automobile->Damage.GetDoorStatus(i) == 2) {
 			doorState = automobile->Doors[i].m_nDoorState;
 			if(doorState == 1 || doorState == 2) {
-				velocity = min(0.3f, Abs(automobile->Doors[i].m_fAngVel));
+				velocity = Min(0.3f, Abs(automobile->Doors[i].m_fAngVel));
 				if(velocity > 0.0035f) {
 					emittingVol = (100.f * velocity * 10.f / 3.f);
 					m_sQueueSample.m_bVolume = ComputeVolume(
@@ -8599,7 +8599,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			m_sQueueSample.m_fSoundIntensity = 30.0f;
 			break;
 		case SOUND_CAR_JUMP:
-			emittingVol = max(
+			emittingVol = Max(
 			    80.f,
 			    2 * (100.f *
 			         m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]));
@@ -9081,7 +9081,7 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams *params)
 				                  params->m_fDistance);
 				emittingVol =
 				    30.f *
-				    min(1.f,
+				    Min(1.f,
 				        velocity / (0.5f * params->m_pTransmission->fMaxVelocity));
 				m_sQueueSample.m_bVolume =
 				    ComputeVolume(emittingVol, 95.f, m_sQueueSample.m_fDistance);
@@ -9397,7 +9397,7 @@ cAudioManager::ProcessWetRoadNoise(cVehicleParams *params)
 				CalculateDistance(params->m_bDistanceCalculated,
 				                  params->m_fDistance);
 				relativeVelocity =
-				    min(1.0f,
+				    Min(1.0f,
 				        velChange / (0.5f * params->m_pTransmission->fMaxVelocity));
 				emittingVol = 23.0f * relativeVelocity * CWeather::WetRoads;
 				m_sQueueSample.m_bVolume =
@@ -10035,7 +10035,7 @@ cAudioManager::UpdateReflections()
 						if(CWorld::ProcessVerticalLine(
 						       camPos, m_avecReflectionsPos[4].z, colpoint,
 						       ent, true, false, false, false, true, false,
-						       false)) {
+						       nil)) {
 							m_afReflectionsDistances[4] =
 							    colpoint.point.z - camPos.z;
 						} else {

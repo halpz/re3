@@ -110,7 +110,7 @@ INITSAVEBUF
 		CStreaming::LoadAllRequestedModels(false);
 		int32 slot = ReadSaveBuf<int32>(buf);
 		CVehicle* pVehicle;
-		char* vbuf = new char[max(sizeof(CAutomobile), sizeof(CBoat))];
+		char* vbuf = new char[Max(sizeof(CAutomobile), sizeof(CBoat))];
 		if (type == VEHICLE_TYPE_BOAT) {
 			memcpy(vbuf, buf, sizeof(CBoat));
 			SkipSaveBuf(buf, sizeof(CBoat));

@@ -349,8 +349,8 @@ CMenuManager::PageUpList(bool playSoundOnSuccess)
 			if(playSoundOnSuccess)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 
-			m_nFirstVisibleRowOnList = max(0, m_nFirstVisibleRowOnList - MAX_VISIBLE_LIST_ROW);
-			m_nSelectedListRow = min(m_nSelectedListRow, m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW - 1);
+			m_nFirstVisibleRowOnList = Max(0, m_nFirstVisibleRowOnList - MAX_VISIBLE_LIST_ROW);
+			m_nSelectedListRow = Min(m_nSelectedListRow, m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW - 1);
 		} else {
 			m_nFirstVisibleRowOnList = 0;
 			m_nSelectedListRow = 0;
@@ -367,8 +367,8 @@ CMenuManager::PageDownList(bool playSoundOnSuccess)
 			if(playSoundOnSuccess)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 
-			m_nFirstVisibleRowOnList = min(m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW, m_nTotalListRow - MAX_VISIBLE_LIST_ROW);
-			m_nSelectedListRow = max(m_nSelectedListRow, m_nFirstVisibleRowOnList);
+			m_nFirstVisibleRowOnList = Min(m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW, m_nTotalListRow - MAX_VISIBLE_LIST_ROW);
+			m_nSelectedListRow = Max(m_nSelectedListRow, m_nFirstVisibleRowOnList);
 		} else {
 			m_nFirstVisibleRowOnList = m_nTotalListRow - MAX_VISIBLE_LIST_ROW;
 			m_nSelectedListRow = m_nTotalListRow - 1;
@@ -643,7 +643,7 @@ CMenuManager::DisplaySlider(float x, float y, float mostLeftBarSize, float mostR
 		} else
 			color = CRGBA(185, 120, 0, FadeIn(255));
 
-		maxBarHeight = max(mostLeftBarSize, mostRightBarSize);
+		maxBarHeight = Max(mostLeftBarSize, mostRightBarSize);
 
 		float curBarFreeSpace = ((16 - i) * mostLeftBarSize + i * mostRightBarSize) / 16.0f;
 		float left = curBarX;
@@ -2492,7 +2492,7 @@ CMenuManager::DrawPlayerSetupScreen()
 					strncpy(&m_pSelectedSkin->skinNameDisplayed[k], "(", 1);
 				if (!strncmp(&m_pSelectedSkin->skinNameDisplayed[k], "}", 1))
 					strncpy(&m_pSelectedSkin->skinNameDisplayed[k], ")", 1);
-				if (!strncmp(&m_pSelectedSkin->skinNameDisplayed[k], "£", 1))
+				if (!strncmp(&m_pSelectedSkin->skinNameDisplayed[k], "ï¿½", 1))
 					strncpy(&m_pSelectedSkin->skinNameDisplayed[k], "$", 1);
 			}
 
@@ -2829,7 +2829,7 @@ CMenuManager::FadeIn(int alpha)
 		m_nCurrScreen == MENUPAGE_DELETING)
 		return alpha;
 
-	return min(m_nMenuFadeAlpha, alpha);
+	return Min(m_nMenuFadeAlpha, alpha);
 }
 
 void
@@ -5405,7 +5405,7 @@ CMenuManager::PrintMap(void)
 	if (fMapCenterY + fMapSize < SCREEN_HEIGHT - MENU_Y(60.0f))
 		fMapCenterY = SCREEN_HEIGHT - MENU_Y(60.0f) - fMapSize;
 	
-	fMapCenterY = min(fMapCenterY, fMapSize); // To not show beyond north border
+	fMapCenterY = Min(fMapCenterY, fMapSize); // To not show beyond north border
 
 	bMenuMapActive = false;
 
@@ -5467,7 +5467,7 @@ CMenuManager::ConstructStatLine(int rowIdx)
 
 	int percentCompleted = (CStats::TotalProgressInGame == 0 ? 0 :
 		CStats::ProgressMade * 100.0f / (CGame::nastyGame ? CStats::TotalProgressInGame : CStats::TotalProgressInGame - 1));
-	percentCompleted = min(percentCompleted, 100);
+	percentCompleted = Min(percentCompleted, 100);
 
 	STAT_LINE("PER_COM", &percentCompleted, false, nil);
 	STAT_LINE("NMISON", &CStats::MissionsGiven, false, nil);

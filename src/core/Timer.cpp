@@ -138,7 +138,7 @@ void CTimer::Update(void)
 	
 	if ( !CRecordDataForGame::IsPlayingBack() )
 	{
-		ms_fTimeStep = min(3.0f, ms_fTimeStep);
+		ms_fTimeStep = Min(3.0f, ms_fTimeStep);
 
 		if ( (m_snTimeInMilliseconds - m_snPreviousTimeInMilliseconds) > 60 )
 			m_snTimeInMilliseconds = m_snPreviousTimeInMilliseconds + 60;

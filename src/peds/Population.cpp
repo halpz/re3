@@ -595,7 +595,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 	}
 	// Yeah, float
 	float maxPossiblePedsForArea = (zoneInfo.pedDensity + zoneInfo.carDensity) * playerInfo->m_fRoadDensity * PedDensityMultiplier * CIniFile::PedNumberMultiplier;
-	maxPossiblePedsForArea = min(maxPossiblePedsForArea, MaxNumberOfPedsInUse);
+	maxPossiblePedsForArea = Min(maxPossiblePedsForArea, MaxNumberOfPedsInUse);
 
 	if (ms_nTotalPeds < maxPossiblePedsForArea || addCop) {
 		int decisionThreshold = CGeneral::GetRandomNumberInRange(0, 1000);
@@ -703,7 +703,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 				if (!foundGround)
 					return;
 
-				generatedCoors.z = max(generatedCoors.z, groundZ);
+				generatedCoors.z = Max(generatedCoors.z, groundZ);
 			}
 			bool farEnoughToAdd = true;
 			CMatrix mat(TheCamera.GetCameraMatrix());

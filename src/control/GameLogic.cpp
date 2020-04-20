@@ -93,7 +93,7 @@ CGameLogic::Update()
 			if (pPlayerInfo.m_bGetOutOfHospitalFree) {
 				pPlayerInfo.m_bGetOutOfHospitalFree = false;
 			} else {
-				pPlayerInfo.m_nMoney = max(0, pPlayerInfo.m_nMoney - 1000);
+				pPlayerInfo.m_nMoney = Max(0, pPlayerInfo.m_nMoney - 1000);
 				pPlayerInfo.m_pPed->ClearWeapons();
 			}
 
@@ -163,7 +163,7 @@ CGameLogic::Update()
 			if (pPlayerInfo.m_bGetOutOfJailFree) {
 				pPlayerInfo.m_bGetOutOfJailFree = false;
 			} else {
-				pPlayerInfo.m_nMoney = max(0, pPlayerInfo.m_nMoney - takeMoney);
+				pPlayerInfo.m_nMoney = Max(0, pPlayerInfo.m_nMoney - takeMoney);
 				pPlayerInfo.m_pPed->ClearWeapons();
 			}
 

@@ -163,7 +163,7 @@ void CWeather::Update(void)
 			else {
 				// 0.125 probability
 				LightningBurst = false;
-				LightningDuration = min(CTimer::GetFrameCounter() - LightningStart, 20);
+				LightningDuration = Min(CTimer::GetFrameCounter() - LightningStart, 20);
 				LightningFlash = false;
 				WhenToPlayLightningSound = CTimer::GetTimeInMilliseconds() + 150 * (20 - LightningDuration);
 			}
@@ -219,9 +219,9 @@ void CWeather::Update(void)
 		fNewRain = 0.0f;
 	if (Rain != fNewRain) { // ok to use comparasion
 		if (Rain < fNewRain)
-			Rain = min(fNewRain, Rain + RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
+			Rain = Min(fNewRain, Rain + RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
 		else
-			Rain = max(fNewRain, Rain - RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
+			Rain = Max(fNewRain, Rain - RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
 	}
 
 	// Clouds

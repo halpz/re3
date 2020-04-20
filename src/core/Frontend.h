@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 
 #include "Sprite2d.h"
 

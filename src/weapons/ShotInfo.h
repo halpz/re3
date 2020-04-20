@@ -1,7 +1,8 @@
 #pragma once
 
+#include "WeaponType.h"
+
 class CEntity;
-enum eWeaponType;
 
 class CShotInfo
 {

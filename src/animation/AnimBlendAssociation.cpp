@@ -185,7 +185,7 @@ CAnimBlendAssociation::UpdateBlend(float timeDelta)
 	if(blendAmount <= 0.0f && blendDelta < 0.0f){
 		// We're faded out and are not fading in
 		blendAmount = 0.0f;
-		blendDelta = max(0.0f, blendDelta);
+		blendDelta = Max(0.0f, blendDelta);
 		if(flags & ASSOC_DELETEFADEDOUT){
 			if(callbackType == CB_FINISH || callbackType == CB_DELETE)
 				callback(this, callbackArg);
@@ -197,7 +197,7 @@ CAnimBlendAssociation::UpdateBlend(float timeDelta)
 	if(blendAmount > 1.0f){
 		// Maximally faded in, clamp values
 		blendAmount = 1.0f;
-		blendDelta = min(0.0f, blendDelta);
+		blendDelta = Min(0.0f, blendDelta);
 	}
 
 	return true;
