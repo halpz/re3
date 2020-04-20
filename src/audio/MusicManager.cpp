@@ -705,7 +705,7 @@ cMusicManager::GetTrackStartPos(uint8 track)
 		result = m_aTracks[track].m_nPosition;
 		m_aTracks[track].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
 	} else 
-		result = min(CTimer::GetTimeInMillisecondsPauseMode() - timer, 90000) + m_aTracks[track].m_nPosition;
+		result = Min(CTimer::GetTimeInMillisecondsPauseMode() - timer, 90000) + m_aTracks[track].m_nPosition;
 
 	if (result > m_aTracks[track].m_nLength) result %= m_aTracks[track].m_nLength;
 	return result;

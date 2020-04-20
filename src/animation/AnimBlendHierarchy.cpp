@@ -36,7 +36,7 @@ CAnimBlendHierarchy::CalcTotalTime(void)
 		float seqTime = 0.0f;
 		for(j = 0; j < sequences[i].numFrames; j++)
 			seqTime += sequences[i].GetKeyFrame(j)->deltaTime;
-		totalTime = max(totalTime, seqTime);
+		totalTime = Max(totalTime, seqTime);
 	}
 	totalLength = totalTime;
 }

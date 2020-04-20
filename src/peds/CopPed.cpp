@@ -153,7 +153,7 @@ CCopPed::ClearPursuit(void)
 		return;
 
 	m_bIsInPursuit = false;
-	for (int i = 0; i < max(wanted->m_MaxCops, wanted->m_CurrentCops); ++i)  {
+	for (int i = 0; i < Max(wanted->m_MaxCops, wanted->m_CurrentCops); ++i)  {
 		if (!foundMyself && wanted->m_pCops[i] == this) {
 			wanted->m_pCops[i] = nil;
 			--wanted->m_CurrentCops;
@@ -342,7 +342,7 @@ CCopPed::CopAI(void)
 				int oldCopNum = wanted->m_CurrentCops;
 				int maxCops = wanted->m_MaxCops;
 				
-				for (int i = 0; i < max(maxCops, oldCopNum); i++) {
+				for (int i = 0; i < Max(maxCops, oldCopNum); i++) {
 					CCopPed *cop = wanted->m_pCops[i];
 					if (cop && cop->m_fDistanceToTarget > copFarthestToTargetDist) {
 						copFarthestToTargetDist = cop->m_fDistanceToTarget;

@@ -30,7 +30,7 @@ CPedPlacement::FindZCoorForPed(CVector* pos)
 	if (CWorld::ProcessVerticalLine(vec, startZ, foundCol, foundEnt, true, false, false, false, true, false, nil))
 		foundColZ2 = foundCol.point.z;
 
-	zForPed = max(foundColZ, foundColZ2);
+	zForPed = Max(foundColZ, foundColZ2);
 
 	if (zForPed > -99.0f)
 		pos->z = FEET_OFFSET + zForPed;

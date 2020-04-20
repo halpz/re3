@@ -467,7 +467,7 @@ CCamera::Process(void)
 	GetPosition().z += shakeOffset*(((shakeRand&0xF00)>>8)-7);
 
 	if(shakeOffset > 0.0f && m_BlurType != MBLUR_SNIPER)
-		SetMotionBlurAlpha(min((int)(shakeStrength*255.0f) + 25, 150));
+		SetMotionBlurAlpha(Min((int)(shakeStrength*255.0f) + 25, 150));
 	if(Cams[ActiveCam].Mode == CCam::MODE_1STPERSON && FindPlayerVehicle() && FindPlayerVehicle()->GetUp().z < 0.2f)
 		SetMotionBlur(230, 230, 230, 215, MBLUR_NORMAL);
 
@@ -489,19 +489,19 @@ CCamera::Process(void)
 		CDraw::SetFOV(Cams[2].FOV);
 		m_vecGameCamPos = Cams[ActiveCam].Source;
 
-		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = (RwV3d)GetPosition();
-		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = (RwV3d)GetForward();
-		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = (RwV3d)GetUp();
-		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = (RwV3d)GetRight();
+		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = GetPosition().toRwV3d();
+		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = GetForward().toRwV3d();
+		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = GetUp().toRwV3d();
+		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = GetRight().toRwV3d();
 		RwMatrixUpdate(RwFrameGetMatrix(frame));
 		RwFrameUpdateObjects(frame);
 	}else{
 		RwFrame *frame = RwCameraGetFrame(m_pRwCamera);
 		m_vecGameCamPos = GetPosition();
-		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = (RwV3d)GetPosition();
-		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = (RwV3d)GetForward();
-		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = (RwV3d)GetUp();
-		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = (RwV3d)GetRight();
+		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = GetPosition().toRwV3d();
+		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = GetForward().toRwV3d();
+		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = GetUp().toRwV3d();
+		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = GetRight().toRwV3d();
 		RwMatrixUpdate(RwFrameGetMatrix(frame));
 		RwFrameUpdateObjects(frame);
 	}
@@ -768,27 +768,27 @@ CCamera::CamControl(void)
 				if(m_bUseScriptZoomValueCar){
 					if(CarZoomValueSmooth < m_fCarZoomValueScript){
 						CarZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = min(CarZoomValueSmooth, m_fCarZoomValueScript);
+						CarZoomValueSmooth = Min(CarZoomValueSmooth, m_fCarZoomValueScript);
 					}else{
 						CarZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = max(CarZoomValueSmooth, m_fCarZoomValueScript);
+						CarZoomValueSmooth = Max(CarZoomValueSmooth, m_fCarZoomValueScript);
 					}
 				}else if(m_bFailedCullZoneTestPreviously){
 					CloseInCarHeightTarget = 0.65f;
 					if(CarZoomValueSmooth < -0.65f){
 						CarZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = min(CarZoomValueSmooth, -0.65f);
+						CarZoomValueSmooth = Min(CarZoomValueSmooth, -0.65f);
 					}else{
 						CarZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = max(CarZoomValueSmooth, -0.65f);
+						CarZoomValueSmooth = Max(CarZoomValueSmooth, -0.65f);
 					}
 				}else{
 					if(CarZoomValueSmooth < CarZoomValue){
 						CarZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = min(CarZoomValueSmooth, CarZoomValue);
+						CarZoomValueSmooth = Min(CarZoomValueSmooth, CarZoomValue);
 					}else{
 						CarZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = max(CarZoomValueSmooth, CarZoomValue);
+						CarZoomValueSmooth = Max(CarZoomValueSmooth, CarZoomValue);
 					}
 				}
 
@@ -872,28 +872,28 @@ CCamera::CamControl(void)
 			if(m_bUseScriptZoomValuePed){
 				if(m_fPedZoomValueSmooth < m_fPedZoomValueScript){
 					m_fPedZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = min(m_fPedZoomValueSmooth, m_fPedZoomValueScript);
+					m_fPedZoomValueSmooth = Min(m_fPedZoomValueSmooth, m_fPedZoomValueScript);
 				}else{
 					m_fPedZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = max(m_fPedZoomValueSmooth, m_fPedZoomValueScript);
+					m_fPedZoomValueSmooth = Max(m_fPedZoomValueSmooth, m_fPedZoomValueScript);
 				}
 			}else if(m_bFailedCullZoneTestPreviously){
 				static float PedZoomedInVal = 0.5f;
 				CloseInPedHeightTarget = 0.7f;
 				if(m_fPedZoomValueSmooth < PedZoomedInVal){
 					m_fPedZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = min(m_fPedZoomValueSmooth, PedZoomedInVal);
+					m_fPedZoomValueSmooth = Min(m_fPedZoomValueSmooth, PedZoomedInVal);
 				}else{
 					m_fPedZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = max(m_fPedZoomValueSmooth, PedZoomedInVal);
+					m_fPedZoomValueSmooth = Max(m_fPedZoomValueSmooth, PedZoomedInVal);
 				}
 			}else{
 				if(m_fPedZoomValueSmooth < m_fPedZoomValue){
 					m_fPedZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = min(m_fPedZoomValueSmooth, m_fPedZoomValue);
+					m_fPedZoomValueSmooth = Min(m_fPedZoomValueSmooth, m_fPedZoomValue);
 				}else{
 					m_fPedZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = max(m_fPedZoomValueSmooth, m_fPedZoomValue);
+					m_fPedZoomValueSmooth = Max(m_fPedZoomValueSmooth, m_fPedZoomValue);
 				}
 			}
 
@@ -2256,7 +2256,7 @@ CCamera::IsItTimeForNewcam(int32 obbeMode, int32 time)
 
 			if(fwd.Magnitude() < 2.0f)
 				// very close, fix near clip
-				SetNearClipScript(max(fwd.Magnitude()*0.5f, 0.05f));
+				SetNearClipScript(Max(fwd.Magnitude()*0.5f, 0.05f));
 			// too far and driving away from cam
 			if(fwd.Magnitude() > 19.0f && DotProduct(FindPlayerSpeed(), fwd) > 0.0f)
 				return true;

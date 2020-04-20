@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <Windows.h>
+#include <windows.h>
 
 StaticPatcher *StaticPatcher::ms_head;
 

@@ -1,9 +1,10 @@
 #pragma once
 
+#include "WeaponType.h"
+
 class CEntity;
 class CObject;
 class CProjectile;
-enum eWeaponType;
 
 class CProjectileInfo
 {

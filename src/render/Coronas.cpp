@@ -106,7 +106,7 @@ CCoronas::Update(void)
 	int i;
 	static int LastCamLook = 0;
 
-	LightsMult = min(LightsMult + 0.03f * CTimer::GetTimeStep(), 1.0f);
+	LightsMult = Min(LightsMult + 0.03f * CTimer::GetTimeStep(), 1.0f);
 
 	int CamLook = 0;
 	if(TheCamera.Cams[TheCamera.ActiveCam].LookingLeft) CamLook |= 1;
@@ -118,7 +118,7 @@ CCoronas::Update(void)
 	if(LastCamLook != CamLook)
 		bChangeBrightnessImmediately = 3;
 	else
-		bChangeBrightnessImmediately = max(bChangeBrightnessImmediately-1, 0);
+		bChangeBrightnessImmediately = Max(bChangeBrightnessImmediately-1, 0);
 	LastCamLook = CamLook;
 
 	for(i = 0; i < NUMCORONAS; i++)
@@ -305,7 +305,7 @@ CCoronas::Render(void)
 
 				// render corona itself
 				if(aCoronas[i].texture){
-					float fogscale = CWeather::Foggyness*min(spriteCoors.z, 40.0f)/40.0f + 1.0f;
+					float fogscale = CWeather::Foggyness*Min(spriteCoors.z, 40.0f)/40.0f + 1.0f;
 					if(CCoronas::aCoronas[i].id == SUN_CORE)
 						spriteCoors.z = 0.95f * RwCameraGetFarClipPlane(Scene.camera);
 					RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(aCoronas[i].texture));
@@ -316,7 +316,7 @@ CCoronas::Render(void)
 						float f = 1.0f - aCoronas[i].someAngle*2.0f/PI;
 						float wscale = 6.0f*sq(sq(sq(f))) + 0.5f;
 						float hscale = 0.35f - (wscale - 0.5f) * 0.06f;
-						hscale = max(hscale, 0.15f);
+						hscale = Max(hscale, 0.15f);
 
 						CSprite::RenderOneXLUSprite(spriteCoors.x, spriteCoors.y, spriteCoors.z,
 							spritew * aCoronas[i].size * wscale,
@@ -466,7 +466,7 @@ CCoronas::RenderReflections(void)
 				float spritew, spriteh;
 				if(CSprite::CalcScreenCoors(coors, spriteCoors, &spritew, &spriteh, true)){
 					float drawDist = 0.75f * aCoronas[i].drawDist;
-					drawDist = min(drawDist, 50.0f);
+					drawDist = Min(drawDist, 50.0f);
 					if(spriteCoors.z < drawDist){
 						float fadeDistance = drawDist / 2.0f;
 						float distanceFade = spriteCoors.z < fadeDistance ? 1.0f : 1.0f - (spriteCoors.z - fadeDistance)/fadeDistance;
@@ -545,25 +545,25 @@ CRegisteredCorona::Update(void)
 	   (CCoronas::SunBlockedByClouds && id == CCoronas::SUN_CORONA ||
 	    !CWorld::GetIsLineOfSightClear(coors, TheCamera.GetPosition(), true, false, false, false, false, false))){
 		// Corona is blocked, fade out
-		fadeAlpha = max(fadeAlpha - 15.0f*CTimer::GetTimeStep(), 0.0f);
+		fadeAlpha = Max(fadeAlpha - 15.0f*CTimer::GetTimeStep(), 0.0f);
 	}else if(offScreen){
 		// Same when off screen
-		fadeAlpha = max(fadeAlpha - 15.0f*CTimer::GetTimeStep(), 0.0f);
+		fadeAlpha = Max(fadeAlpha - 15.0f*CTimer::GetTimeStep(), 0.0f);
 	}else{
 		// Visible
 		if(alpha > fadeAlpha){
 			// fade in
-			fadeAlpha = min(fadeAlpha + 15.0f*CTimer::GetTimeStep(), alpha);
+			fadeAlpha = Min(fadeAlpha + 15.0f*CTimer::GetTimeStep(), alpha);
 			if(CCoronas::bChangeBrightnessImmediately)
 				fadeAlpha = alpha;
 		}else if(alpha < fadeAlpha){
 			// too visible, decrease alpha but not below alpha
-			fadeAlpha = max(fadeAlpha - 15.0f*CTimer::GetTimeStep(), alpha);
+			fadeAlpha = Max(fadeAlpha - 15.0f*CTimer::GetTimeStep(), alpha);
 		}
 
 		// darken scene when the sun is visible
 		if(id == CCoronas::SUN_CORONA)
-			CCoronas::LightsMult = max(CCoronas::LightsMult - CTimer::GetTimeStep()*0.06f, 0.6f);
+			CCoronas::LightsMult = Max(CCoronas::LightsMult - CTimer::GetTimeStep()*0.06f, 0.6f);
 	}
 
 	// remove if invisible

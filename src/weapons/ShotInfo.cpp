@@ -109,7 +109,7 @@ CShotInfo::Update()
 		if (shot.m_sourceEntity) {
 			assert(shot.m_sourceEntity->IsPed());
 			CPed *ped = (CPed*) shot.m_sourceEntity;
-			float radius = max(1.0f, shot.m_radius);
+			float radius = Max(1.0f, shot.m_radius);
 
 			for (int i = 0; i < ped->m_numNearPeds; ++i) {
 				CPed *nearPed = ped->m_nearPeds[i];

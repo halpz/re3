@@ -6,7 +6,7 @@
 
 #include "common.h"
 #ifdef XINPUT
-#include <Xinput.h>
+#include <xinput.h>
 #pragma comment( lib, "Xinput9_1_0.lib" )
 #endif
 
@@ -205,7 +205,7 @@ void ArmourCheat()
 void WantedLevelUpCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT5"), true);
-	FindPlayerPed()->SetWantedLevel(min(FindPlayerPed()->m_pWanted->m_nWantedLevel + 2, 6));
+	FindPlayerPed()->SetWantedLevel(Min(FindPlayerPed()->m_pWanted->m_nWantedLevel + 2, 6));
 }
 
 void WantedLevelDownCheat()
@@ -513,10 +513,10 @@ CControllerState CPad::ReconcileTwoControllersInput(CControllerState const &Stat
 	{ if ( State1.button || State2.button ) ReconState.button = 255; }
 	
 #define _RECONCILE_AXIS_POSITIVE(axis) \
-	{ if ( State1.axis >= 0 && State2.axis >= 0 ) ReconState.axis = max(State1.axis, State2.axis); }
+	{ if ( State1.axis >= 0 && State2.axis >= 0 ) ReconState.axis = Max(State1.axis, State2.axis); }
 
 #define _RECONCILE_AXIS_NEGATIVE(axis) \
-	{ if ( State1.axis <= 0 && State2.axis <= 0 ) ReconState.axis = min(State1.axis, State2.axis); }
+	{ if ( State1.axis <= 0 && State2.axis <= 0 ) ReconState.axis = Min(State1.axis, State2.axis); }
 
 #define _RECONCILE_AXIS(axis) \
 	{ _RECONCILE_AXIS_POSITIVE(axis); _RECONCILE_AXIS_NEGATIVE(axis); }

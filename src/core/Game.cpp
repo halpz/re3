@@ -72,7 +72,7 @@
 #include "Streaming.h"
 #include "SurfaceTable.h"
 #include "TempColModels.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "TrafficLights.h"
 #include "Train.h"
 #include "TxdStore.h"

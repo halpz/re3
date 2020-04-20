@@ -6,7 +6,7 @@
 #include "General.h"
 #include "AudioScriptObject.h"
 #include "World.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "Particle.h"
 #include "Camera.h"
 #include "RenderBuffer.h"
@@ -617,12 +617,12 @@ CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, 
 	CVector c = object->GetMatrix() * col->vertices[2];
 	CVector d = object->GetMatrix() * col->vertices[3];
 
-	float minx = min(min(a.x, b.x), min(c.x, d.x));
-	float maxx = max(max(a.x, b.x), max(c.x, d.x));
-	float miny = min(min(a.y, b.y), min(c.y, d.y));
-	float maxy = max(max(a.y, b.y), max(c.y, d.y));
-	float minz = min(min(a.z, b.z), min(c.z, d.z));
-	float maxz = max(max(a.z, b.z), max(c.z, d.z));
+	float minx = Min(Min(a.x, b.x), Min(c.x, d.x));
+	float maxx = Max(Max(a.x, b.x), Max(c.x, d.x));
+	float miny = Min(Min(a.y, b.y), Min(c.y, d.y));
+	float maxy = Max(Max(a.y, b.y), Max(c.y, d.y));
+	float minz = Min(Min(a.z, b.z), Min(c.z, d.z));
+	float maxz = Max(Max(a.z, b.z), Max(c.z, d.z));
 
 
 	if ( amount > 300.0f )

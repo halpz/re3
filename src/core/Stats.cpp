@@ -121,13 +121,13 @@ void CStats::RegisterFastestTime(int32 index, int32 time)
 	if (FastestTimes[index] == 0)
 		FastestTimes[index] = time;
 	else
-		FastestTimes[index] = min(FastestTimes[index], time);
+		FastestTimes[index] = Min(FastestTimes[index], time);
 }
 
 void CStats::RegisterHighestScore(int32 index, int32 score)
 {
 	assert(index >= 0 && index < TOTAL_HIGHEST_SCORES);
-	HighestScores[index] = max(HighestScores[index], score);
+	HighestScores[index] = Max(HighestScores[index], score);
 }
 
 void CStats::RegisterElBurroTime(int32 time)
@@ -167,7 +167,7 @@ void CStats::AnotherCriminalCaught()
 
 void CStats::RegisterLevelAmbulanceMission(int32 level)
 {
-	HighestLevelAmbulanceMission = max(HighestLevelAmbulanceMission, level);
+	HighestLevelAmbulanceMission = Max(HighestLevelAmbulanceMission, level);
 }
 
 void CStats::AnotherFireExtinguished()
@@ -177,7 +177,7 @@ void CStats::AnotherFireExtinguished()
 
 void CStats::RegisterLongestFlightInDodo(int32 time)
 {
-	LongestFlightInDodo = max(LongestFlightInDodo, time);
+	LongestFlightInDodo = Max(LongestFlightInDodo, time);
 }
 
 void CStats::RegisterTimeTakenDefuseMission(int32 time)

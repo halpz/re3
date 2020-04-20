@@ -182,7 +182,7 @@ CPlayerPed::MakeChangesForNewWeapon(int8 weapon)
 	}
 	SetCurrentWeapon(weapon);
 
-	GetWeapon()->m_nAmmoInClip = min(GetWeapon()->m_nAmmoTotal, CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition);
+	GetWeapon()->m_nAmmoInClip = Min(GetWeapon()->m_nAmmoTotal, CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition);
 
 	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAim))
 		ClearWeaponTarget();
@@ -699,7 +699,7 @@ CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 #else
 		m_fRotationDest = CGeneral::LimitRadianAngle(TheCamera.Orientation);
 #endif
-		m_fMoveSpeed = min(padMoveInGameUnit, 0.07f * CTimer::GetTimeStep() + m_fMoveSpeed);
+		m_fMoveSpeed = Min(padMoveInGameUnit, 0.07f * CTimer::GetTimeStep() + m_fMoveSpeed);
 	} else {
 		m_fMoveSpeed = 0.0f;
 	}
@@ -1186,7 +1186,7 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 		}
 
 		float maxAcc = 0.07f * CTimer::GetTimeStep();
-		m_fMoveSpeed = min(padMoveInGameUnit, m_fMoveSpeed + maxAcc);
+		m_fMoveSpeed = Min(padMoveInGameUnit, m_fMoveSpeed + maxAcc);
 
 	} else {
 		m_fMoveSpeed = 0.0f;
@@ -1406,7 +1406,7 @@ CPlayerPed::ProcessControl(void)
 			if (bVehEnterDoorIsBlocked || bKindaStayInSamePlace) {
 				m_fMoveSpeed = 0.0f;
 			} else {
-				m_fMoveSpeed = min(2.0f, 2.0f * (m_vecSeekPos - GetPosition()).Magnitude2D());
+				m_fMoveSpeed = Min(2.0f, 2.0f * (m_vecSeekPos - GetPosition()).Magnitude2D());
 			}
 			if (padUsed && !padUsed->ArePlayerControlsDisabled()) {
 				if (padUsed->GetTarget() || padUsed->GetLeftStickXJustDown() || padUsed->GetLeftStickYJustDown() ||

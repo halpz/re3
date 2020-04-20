@@ -296,7 +296,7 @@ void CRecordDataForChase::SaveOrRetrieveCarPositions(void)
 	case STATE_PLAYBACK:
 	{
 		TimeMultiplier += CTimer::GetTimeStepNonClippedInSeconds();
-		float EndOfFrameTime = CHASE_SCENE_FRAMES_PER_SECOND * min(CHASE_SCENE_LENGTH_IN_SECONDS, TimeMultiplier);
+		float EndOfFrameTime = CHASE_SCENE_FRAMES_PER_SECOND * Min(CHASE_SCENE_LENGTH_IN_SECONDS, TimeMultiplier);
 		for (int i = 0; i < NUM_CHASE_CARS; i++) {
 			if (!pBaseMemForCar[i])
 				continue;
@@ -371,7 +371,7 @@ void CRecordDataForChase::RestoreInfoForCar(CAutomobile* pCar, CCarStateEachFram
 		else
 			pCar->GetModelInfo()->ChooseVehicleColour(pCar->m_currentColour1, pCar->m_currentColour2);
 	}
-	pCar->m_fHealth = min(pCar->m_fHealth, 500.0f);
+	pCar->m_fHealth = Min(pCar->m_fHealth, 500.0f);
 	if (stop) {
 		pCar->m_fGasPedal = 0.0f;
 		pCar->m_fBrakePedal = 0.0f;

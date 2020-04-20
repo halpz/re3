@@ -1950,7 +1950,7 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float 
 			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
 			if(mi->m_type != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff())){
 				lodDistSq = sq(mi->GetLargestLodDistance());
-				lodDistSq = min(lodDistSq, sq(STREAM_DIST));
+				lodDistSq = Min(lodDistSq, sq(STREAM_DIST));
 				pos = CVector2D(e->GetPosition());
 				if(xmin < pos.x && pos.x < xmax &&
 				   ymin < pos.y && pos.y < ymax &&
@@ -2170,20 +2170,20 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 	if(Abs(TheCamera.GetForward().x) > Abs(TheCamera.GetForward().y)){
 		// looking west/east
 
-		ymin = max(iy - 10, 0);
-		ymax = min(iy + 10, NUMSECTORS_Y - 1);
+		ymin = Max(iy - 10, 0);
+		ymax = Min(iy + 10, NUMSECTORS_Y - 1);
 		assert(ymin <= ymax);
 
 		// Delete a block of sectors that we know is behind the camera
 		if(TheCamera.GetForward().x > 0){
 			// looking east
-			xmax = max(ix - 2, 0);
-			xmin = max(ix - 10, 0);
+			xmax = Max(ix - 2, 0);
+			xmin = Max(ix - 10, 0);
 			inc = 1;
 		}else{
 			// looking west
-			xmax = min(ix + 2, NUMSECTORS_X - 1);
-			xmin = min(ix + 10, NUMSECTORS_X - 1);
+			xmax = Min(ix + 2, NUMSECTORS_X - 1);
+			xmin = Min(ix + 10, NUMSECTORS_X - 1);
 			inc = -1;
 		}
 		for(y = ymin; y <= ymax; y++){
@@ -2199,13 +2199,13 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 		// Now a block that intersects with the camera's frustum
 		if(TheCamera.GetForward().x > 0){
 			// looking east
-			xmax = max(ix + 10, 0);
-			xmin = max(ix - 2, 0);
+			xmax = Max(ix + 10, 0);
+			xmin = Max(ix - 2, 0);
 			inc = 1;
 		}else{
 			// looking west
-			xmax = min(ix - 10, NUMSECTORS_X - 1);
-			xmin = min(ix + 2, NUMSECTORS_X - 1);
+			xmax = Min(ix - 10, NUMSECTORS_X - 1);
+			xmin = Min(ix + 2, NUMSECTORS_X - 1);
 			inc = -1;
 		}
 		for(y = ymin; y <= ymax; y++){
@@ -2234,20 +2234,20 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 	}else{
 		// looking north/south
 
-		xmin = max(ix - 10, 0);
-		xmax = min(ix + 10, NUMSECTORS_X - 1);
+		xmin = Max(ix - 10, 0);
+		xmax = Min(ix + 10, NUMSECTORS_X - 1);
 		assert(xmin <= xmax);
 
 		// Delete a block of sectors that we know is behind the camera
 		if(TheCamera.GetForward().y > 0){
 			// looking north
-			ymax = max(iy - 2, 0);
-			ymin = max(iy - 10, 0);
+			ymax = Max(iy - 2, 0);
+			ymin = Max(iy - 10, 0);
 			inc = 1;
 		}else{
 			// looking south
-			ymax = min(iy + 2, NUMSECTORS_Y - 1);
-			ymin = min(iy + 10, NUMSECTORS_Y - 1);
+			ymax = Min(iy + 2, NUMSECTORS_Y - 1);
+			ymin = Min(iy + 10, NUMSECTORS_Y - 1);
 			inc = -1;
 		}
 		for(x = xmin; x <= xmax; x++){
@@ -2263,13 +2263,13 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 		// Now a block that intersects with the camera's frustum
 		if(TheCamera.GetForward().y > 0){
 			// looking north
-			ymax = max(iy + 10, 0);
-			ymin = max(iy - 2, 0);
+			ymax = Max(iy + 10, 0);
+			ymin = Max(iy - 2, 0);
 			inc = 1;
 		}else{
 			// looking south
-			ymax = min(iy - 10, NUMSECTORS_Y - 1);
-			ymin = min(iy + 2, NUMSECTORS_Y - 1);
+			ymax = Min(iy - 10, NUMSECTORS_Y - 1);
+			ymin = Min(iy + 2, NUMSECTORS_Y - 1);
 			inc = -1;
 		}
 		for(x = xmin; x <= xmax; x++){

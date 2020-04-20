@@ -217,9 +217,9 @@ CRubbish::Update(void)
 
 	// FRAMETIME
 	if(bRubbishInvisible)
-		RubbishVisibility = max(RubbishVisibility-5, 0);
+		RubbishVisibility = Max(RubbishVisibility-5, 0);
 	else
-		RubbishVisibility = min(RubbishVisibility+5, 255);
+		RubbishVisibility = Min(RubbishVisibility+5, 255);
 
 	// Spawn a new sheet
 	COneSheet *sheet = StartEmptyList.m_next;
