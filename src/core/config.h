@@ -226,6 +226,7 @@ enum Config {
 
 // Pickups
 //#define MONEY_MESSAGES
+#define CAMERA_PICKUP
 
 // Peds
 #define ANIMATE_PED_COL_MODEL
