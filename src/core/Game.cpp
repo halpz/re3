@@ -156,6 +156,14 @@ CGame::InitialiseRenderWare(void)
 	LightsCreate(Scene.world);
 	
 	CreateDebugFont();
+
+#ifdef LIBRW
+#ifdef PS2_MATFX
+	rw::MatFX::modulateEnvMap = true;
+#else
+	rw::MatFX::modulateEnvMap = false;
+#endif
+#endif
 	
 	CFont::Initialise();
 	CHud::Initialise();

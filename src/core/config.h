@@ -209,6 +209,7 @@ enum Config {
 #define TRIANGLE_BACK_BUTTON
 // #define CIRCLE_BACK_BUTTON
 #define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better. 
+#define BETA_SLIDING_TEXT
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER	// makes game load main_freeroam.scm by default
@@ -225,6 +226,7 @@ enum Config {
 
 // Pickups
 //#define MONEY_MESSAGES
+#define CAMERA_PICKUP
 
 // Peds
 #define ANIMATE_PED_COL_MODEL
