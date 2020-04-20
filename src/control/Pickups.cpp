@@ -623,6 +623,34 @@ CPickups::Update()
 	if (CReplay::IsPlayingBack())
 		return;
 #endif
+#ifdef CAMERA_PICKUP
+	if ( bPickUpcamActivated ) // taken from PS2
+	{
+		float dist = (FindPlayerCoors() - StaticCamCoors).Magnitude2D();
+		float mult;
+		if ( dist < 10.0f )
+			mult = 1.0f - (dist / 10.0f );
+		else 
+			mult = 0.0f;
+		
+		CVector pos = StaticCamCoors;
+		pos.z += (pPlayerVehicle->GetColModel()->boundingBox.GetSize().z + 2.0f) * mult;
+		
+		if ( (CTimer::GetTimeInMilliseconds() - StaticCamStartTime) > 750 )
+		{
+			TheCamera.SetCamPositionForFixedMode(pos, CVector(0.0f, 0.0f, 0.0f));	
+			TheCamera.TakeControl(FindPlayerVehicle(), CCam::MODE_FIXED, JUMP_CUT, CAMCONTROL_SCRIPT);
+		}
+
+		if ( FindPlayerVehicle() != pPlayerVehicle
+			|| (FindPlayerCoors() - StaticCamCoors).Magnitude() > 40.0f
+			|| ((CTimer::GetTimeInMilliseconds() - StaticCamStartTime) > 60000) )
+		{
+			TheCamera.RestoreWithJumpCut();
+			bPickUpcamActivated = false;
+		}
+	}
+#endif
 #define PICKUPS_FRAME_SPAN (6)
 #ifdef FIX_BUGS
 	for (uint32 i = NUMGENERALPICKUPS * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN) / PICKUPS_FRAME_SPAN; i < NUMGENERALPICKUPS * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN + 1) / PICKUPS_FRAME_SPAN; i++) {
