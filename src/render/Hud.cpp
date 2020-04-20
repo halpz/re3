@@ -1240,10 +1240,17 @@ void CHud::DrawAfterFade()
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
 			CFont::SetFontStyle(FONT_BANK);
 
+#ifdef BETA_SLIDING_TEXT
+			CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f) - SCREEN_SCALE_X(OddJob2XOffset), SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(20.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[5]);
+
+			CFont::SetColor(CRGBA(156, 91, 40, 255));
+			CFont::PrintString(SCREEN_WIDTH / 2 - SCREEN_SCALE_X(OddJob2XOffset), SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(20.0f), m_BigMessage[5]);
+#else
 			CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(20.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[5]);
 
 			CFont::SetColor(CRGBA(156, 91, 40, 255));
 			CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(20.0f), m_BigMessage[5]);
+#endif
 		}
 	}
 
