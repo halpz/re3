@@ -18,5 +18,6 @@ public:
 	void ReadDirFile(const char *filename);
 	bool WriteDirFile(const char *filename);
 	void AddItem(const DirectoryInfo &dirinfo);
+	void AddItem(const DirectoryInfo &dirinfo, int32 imgId);
 	bool FindItem(const char *name, uint32 &offset, uint32 &size);
 };
