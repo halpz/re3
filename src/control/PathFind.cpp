@@ -55,10 +55,10 @@ CPedPath::CalcPedRoute(int8 pathType, CVector position, CVector destination, CVe
 	}
 	CWorld::AdvanceCurrentScanCode();
 	if (pathType != ROUTE_NO_BLOCKADE) {
-		const int32 nStartX = max(CWorld::GetSectorIndexX(vecSectorStartPos.x), 0);
-		const int32 nStartY = max(CWorld::GetSectorIndexY(vecSectorStartPos.y), 0);
-		const int32 nEndX = min(CWorld::GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
-		const int32 nEndY = min(CWorld::GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
+		const int32 nStartX = Max(CWorld::GetSectorIndexX(vecSectorStartPos.x), 0);
+		const int32 nStartY = Max(CWorld::GetSectorIndexY(vecSectorStartPos.y), 0);
+		const int32 nEndX = Min(CWorld::GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
+		const int32 nEndY = Min(CWorld::GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
 		for (int32 y = nStartY; y <= nEndY; y++) {
 			for (int32 x = nStartX; x <= nEndX; x++) {
 				CSector *pSector = CWorld::GetSector(x, y);
@@ -397,8 +397,8 @@ CPathFind::PreparePathData(void)
 					numExtern++;
 					if(InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes > numLanes)
 						numLanes = InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes;
-					maxX = max(maxX, Abs(InfoForTileCars[k].x));
-					maxY = max(maxY, Abs(InfoForTileCars[k].y));
+					maxX = Max(maxX, Abs(InfoForTileCars[k].x));
+					maxY = Max(maxY, Abs(InfoForTileCars[k].y));
 				}else if(InfoForTileCars[k].type == NodeTypeIntern)
 					numIntern++;
 			}
@@ -582,7 +582,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				if(Abs(dx) < nearestDist){
 					dy = tempnodes[k].pos.y - CoorsXFormed.y;
 					if(Abs(dy) < nearestDist){
-						nearestDist = max(Abs(dx), Abs(dy));
+						nearestDist = Max(Abs(dx), Abs(dy));
 						nearestId = k;
 					}
 				}
@@ -691,13 +691,13 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 
 		// Find i inside path segment
 		iseg = 0;
-		for(j = max(oldNumPathNodes, i-12); j < i; j++)
+		for(j = Max(oldNumPathNodes, i-12); j < i; j++)
 			if(m_pathNodes[j].objectIndex == m_pathNodes[i].objectIndex)
 				iseg++;
 
 		istart = 12*m_mapObjects[m_pathNodes[i].objectIndex]->m_modelIndex;
 		// Add links to other internal nodes
-		for(j = max(oldNumPathNodes, i-12); j < min(m_numPathNodes, i+12); j++){
+		for(j = Max(oldNumPathNodes, i-12); j < Min(m_numPathNodes, i+12); j++){
 			if(m_pathNodes[i].objectIndex != m_pathNodes[j].objectIndex || i == j)
 				continue;
 			// N.B.: in every path segment, the externals have to be at the end
@@ -1466,8 +1466,11 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 		targetNode = FindNodeClosestToCoors(target, type, distLimit);
 	else
 		targetNode = forcedTargetNode;
-	if(targetNode < 0)
-		goto fail;
+	if(targetNode < 0) {
+		*pNumNodes = 0;
+		if(pDist) *pDist = 100000.0f;
+		return;
+	}
 
 	// Find start
 	int numPathsToTry;
@@ -1486,18 +1489,27 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 		numPathsToTry = 1;
 		startObj = m_mapObjects[m_pathNodes[startNodeId].objectIndex];
 	}
-	if(numPathsToTry == 0)
-		goto fail;
+	if(numPathsToTry == 0) {
+		*pNumNodes = 0;
+		if(pDist) *pDist = 100000.0f;
+		return;
+	}
 
 	if(startNodeId < 0){
 		// why only check node 0?
-		if(m_pathNodes[startObj->m_nodeIndices[type][0]].group != m_pathNodes[targetNode].group)
-			goto fail;
+		if(m_pathNodes[startObj->m_nodeIndices[type][0]].group !=
+		   m_pathNodes[targetNode].group) {
+			*pNumNodes = 0;
+			if(pDist) *pDist = 100000.0f;
+			return;
+		}
 	}else{
-		if(m_pathNodes[startNodeId].group != m_pathNodes[targetNode].group)
-			goto fail;
+		if(m_pathNodes[startNodeId].group != m_pathNodes[targetNode].group) {
+			*pNumNodes = 0;
+			if(pDist) *pDist = 100000.0f;
+			return;
+		}
 	}
-
 
 	for(i = 0; i < 512; i++)
 		m_searchNodes[i].next = nil;
@@ -1576,11 +1588,6 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 	for(i = 0; i < numNodesToBeCleared; i++)
 		apNodesToBeCleared[i]->distance = MAX_DIST;
 	return;
-
-fail:
-	*pNumNodes = 0;
-	if(pDist)
-		*pDist = 100000.0f;
 }
 
 static CPathNode *pNodeList[32];

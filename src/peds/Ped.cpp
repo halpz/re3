@@ -344,15 +344,15 @@ CPed::DebugRenderOnePedText(void)
 		bitAbove.z += 2.0f;
 		if (CSprite::CalcScreenCoors(bitAbove, &screenCoords, &width, &height, true)) {
 
-			float lineHeight = SCREEN_SCALE_Y(min(height/100.0f, 0.7f) * 22.0f);
+			float lineHeight = SCREEN_SCALE_Y(Min(height/100.0f, 0.7f) * 22.0f);
 
 			DefinedState();
 			CFont::SetPropOn();
 			CFont::SetBackgroundOn();
 
 			// Originally both of them were being divided by 60.0f.
-			float xScale = min(width / 240.0f, 0.7f);
-			float yScale = min(height / 80.0f, 0.7f);
+			float xScale = Min(width / 240.0f, 0.7f);
+			float yScale = Min(height / 80.0f, 0.7f);
 
 			CFont::SetScale(SCREEN_SCALE_X(xScale), SCREEN_SCALE_Y(yScale));
 			CFont::SetCentreOn();
@@ -1837,7 +1837,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 			case ANIM_VAN_GETIN:
 #ifdef VC_PED_PORTS
 				multExtractedFromAnim = true;
-				zBlend = max(m_pVehicleAnim->currentTime / m_pVehicleAnim->hierarchy->totalLength - 0.3f, 0.0f) / (1.0f - 0.3f);
+				zBlend = Max(m_pVehicleAnim->currentTime / m_pVehicleAnim->hierarchy->totalLength - 0.3f, 0.0f) / (1.0f - 0.3f);
 				// fall through
 #endif
 			case ANIM_CAR_QJACKED:
@@ -1848,7 +1848,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 #ifdef VC_PED_PORTS
 				if (!multExtractedFromAnim) {
 					multExtractedFromAnim = true;
-					zBlend = max(m_pVehicleAnim->currentTime / m_pVehicleAnim->hierarchy->totalLength - 0.5f, 0.0f) / (1.0f - 0.5f);
+					zBlend = Max(m_pVehicleAnim->currentTime / m_pVehicleAnim->hierarchy->totalLength - 0.5f, 0.0f) / (1.0f - 0.5f);
 				}
 				// fall through
 #endif
@@ -1863,7 +1863,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 #ifdef VC_PED_PORTS
 				if (veh && veh->IsCar() && veh->bIsBus) {
 					multExtractedFromAnimBus = true;
-					zBlend = min(m_pVehicleAnim->currentTime / m_pVehicleAnim->hierarchy->totalLength, 0.5f) / 0.5f;
+					zBlend = Min(m_pVehicleAnim->currentTime / m_pVehicleAnim->hierarchy->totalLength, 0.5f) / 0.5f;
 				}
 				// fall through
 #endif
@@ -1943,7 +1943,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 				neededPos.z = autoZPos.z;
 				m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 			} else if (neededPos.z <= currentZ && m_pVehicleAnim && vehAnim != ANIM_VAN_CLOSE_L && vehAnim != ANIM_VAN_CLOSE) {
-				adjustedTimeStep = min(m_pVehicleAnim->timeStep, 0.1f);
+				adjustedTimeStep = Min(m_pVehicleAnim->timeStep, 0.1f);
 
 				// Smoothly change ped position
 				neededPos.z = currentZ - (currentZ - neededPos.z) / (m_pVehicleAnim->GetTimeLeft() / adjustedTimeStep);
@@ -1965,12 +1965,12 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 					if (m_pVehicleAnim &&
 						(vehAnim == ANIM_CAR_GETIN_RHS || vehAnim == ANIM_CAR_GETIN_LOW_RHS || vehAnim == ANIM_CAR_GETIN_LHS || vehAnim == ANIM_CAR_GETIN_LOW_LHS
 							|| vehAnim == ANIM_CAR_QJACK || vehAnim == ANIM_VAN_GETIN_L || vehAnim == ANIM_VAN_GETIN)) {
-						adjustedTimeStep = min(m_pVehicleAnim->timeStep, 0.1f);
+						adjustedTimeStep = Min(m_pVehicleAnim->timeStep, 0.1f);
 
 						// Smoothly change ped position
 						neededPos.z = (neededPos.z - currentZ) / (m_pVehicleAnim->GetTimeLeft() / adjustedTimeStep) + currentZ;
 					} else if (EnteringCar()) {
-						neededPos.z = max(currentZ, autoZPos.z);
+						neededPos.z = Max(currentZ, autoZPos.z);
 					}
 #ifdef VC_PED_PORTS
 				}
@@ -2511,7 +2511,7 @@ CPed::CanPedJumpThis(CEntity *unused, CVector *damageNormal = nil)
 			CVector invDamageNormal(-damageNormal->x, -damageNormal->y, 0.0f);
 			invDamageNormal *= 1.0f / collPower;
 			CVector estimatedJumpDist = invDamageNormal + collPower * invDamageNormal * ourCol->spheres->radius;
-			forwardOffset = estimatedJumpDist * min(2.0f / collPower, 4.0f);
+			forwardOffset = estimatedJumpDist * Min(2.0f / collPower, 4.0f);
 		}
 	} else {
 		pos.z -= 0.15f;
@@ -5155,12 +5155,12 @@ CPed::FightStrike(CVector &touchedNodePos)
 
 			float moveMult;
 			if (m_lastFightMove == FIGHTMOVE_GROUNDKICK) {
-				moveMult = min(damageMult * 0.6f, 4.0f);
+				moveMult = Min(damageMult * 0.6f, 4.0f);
 			} else {
 				if (nearPed->m_nPedState != PED_DIE || damageMult >= 20) {
 					moveMult = damageMult;
 				} else {
-					moveMult = min(damageMult * 2.0f, 14.0f);
+					moveMult = Min(damageMult * 2.0f, 14.0f);
 				}
 			}
 
@@ -5884,7 +5884,7 @@ CPed::CreateDeadPedWeaponPickups(void)
 			pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
 		}
 		if (found)
-			CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, min(weaponAmmo, AmmoForWeapon_OnStreet[weapon]));
+			CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, Min(weaponAmmo, AmmoForWeapon_OnStreet[weapon]));
 	}
 	ClearWeapons();
 }
@@ -5893,7 +5893,7 @@ void
 CPed::SetAttackTimer(uint32 time)
 {
 	if (CTimer::GetTimeInMilliseconds() > m_attackTimer)
-		m_attackTimer = max(m_shootTimer, CTimer::GetTimeInMilliseconds()) + time;
+		m_attackTimer = Max(m_shootTimer, CTimer::GetTimeInMilliseconds()) + time;
 }
 
 void
@@ -8676,7 +8676,7 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 		distVec.Normalise();
 
 #ifdef VC_PED_PORTS
-		distVec *= min(car->m_fMass / 1400.0f, 1.0f);
+		distVec *= Min(car->m_fMass / 1400.0f, 1.0f);
 #endif
 		car->ApplyMoveForce(distVec * -100.0f);
 		Say(SOUND_PED_DEFEND);
@@ -8709,7 +8709,7 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 		m_vecMoveSpeed.z = 0.0f;
 		distVec.Normalise();
 #ifdef VC_PED_PORTS
-		distVec *= min(car->m_fMass / 1400.0f, 1.0f);
+		distVec *= Min(car->m_fMass / 1400.0f, 1.0f);
 #endif
 		car->ApplyMoveForce(distVec * -60.0f);
 		Say(SOUND_PED_DEFEND);
@@ -10027,7 +10027,7 @@ CPed::ProcessControl(void)
 				CVector offsetToCheck;
 				m_nPedStateTimer++;
 
-				float adjustedTs = max(CTimer::GetTimeStep(), 0.01f);
+				float adjustedTs = Max(CTimer::GetTimeStep(), 0.01f);
 
 				CPad *pad0 = CPad::GetPad(0);
 				if ((m_nPedStateTimer <= 50.0f / (4.0f * adjustedTs) || m_nPedStateTimer * 0.01f <= forceDir.MagnitudeSqr())
@@ -10051,7 +10051,7 @@ CPed::ProcessControl(void)
 						CColPoint obstacleForFlying, obstacleForFlyingOtherDir;
 
 						// Check is there any room for being knocked up in reverse direction of force
-						if (CWorld::ProcessVerticalLine(posToCheck, -20.0f, obstacleForFlying, foundEnt, true, false, false, false, false, false, false)) {
+						if (CWorld::ProcessVerticalLine(posToCheck, -20.0f, obstacleForFlying, foundEnt, true, false, false, false, false, false, nil)) {
 							obstacleForFlyingZ = obstacleForFlying.point.z;
 						} else {
 							obstacleForFlyingZ = 500.0f;
@@ -10060,7 +10060,7 @@ CPed::ProcessControl(void)
 						posToCheck = GetPosition() - offsetToCheck;
 
 						// Now check for direction of force this time
-						if (CWorld::ProcessVerticalLine(posToCheck, -20.0f, obstacleForFlyingOtherDir, foundEnt, true, false, false, false, false, false, false)) {
+						if (CWorld::ProcessVerticalLine(posToCheck, -20.0f, obstacleForFlyingOtherDir, foundEnt, true, false, false, false, false, false, nil)) {
 							obstacleForFlyingOtherDirZ = obstacleForFlyingOtherDir.point.z;
 						} else {
 							obstacleForFlyingOtherDirZ = 501.0f;
@@ -10180,7 +10180,7 @@ CPed::ProcessControl(void)
 					offsetToCheck = GetPosition();
 					offsetToCheck.z += 0.5f;
 
-					if (CWorld::ProcessVerticalLine(offsetToCheck, GetPosition().z - FEET_OFFSET, foundCol, foundEnt, true, true, false, true, false, false, false)) {
+					if (CWorld::ProcessVerticalLine(offsetToCheck, GetPosition().z - FEET_OFFSET, foundCol, foundEnt, true, true, false, true, false, false, nil)) {
 #ifdef VC_PED_PORTS
 						if (!bSomeVCflag1 || FEET_OFFSET + foundCol.point.z < GetPosition().z) {
 							GetPosition().z = FEET_OFFSET + foundCol.point.z;
@@ -12245,7 +12245,7 @@ CPed::PlacePedOnDryLand(void)
 	CVector posToCheck = 0.5f * potentialGroundDist + gaTempSphereColPoints[0].point;
 	posToCheck.z = 3.0f + waterLevel;
 
-	if (CWorld::ProcessVerticalLine(posToCheck, waterLevel - 1.0f, foundCol, foundEnt, true, true, false, true, false, false, false)) {
+	if (CWorld::ProcessVerticalLine(posToCheck, waterLevel - 1.0f, foundCol, foundEnt, true, true, false, true, false, false, nil)) {
 		foundColZ = foundCol.point.z;
 		if (foundColZ >= waterLevel) {
 			posToCheck.z = 0.8f + foundColZ;
@@ -12259,7 +12259,7 @@ CPed::PlacePedOnDryLand(void)
 	posToCheck = 5.0f * potentialGroundDist + GetPosition();
 	posToCheck.z = 3.0f + waterLevel;
 
-	if (!CWorld::ProcessVerticalLine(posToCheck, waterLevel - 1.0f, foundCol, foundEnt, true, true, false, true, false, false, false))
+	if (!CWorld::ProcessVerticalLine(posToCheck, waterLevel - 1.0f, foundCol, foundEnt, true, true, false, true, false, false, nil))
 		return false;
 
 	foundColZ = foundCol.point.z;
@@ -13975,9 +13975,9 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 	CVector2D adjustedColMin(objColMin.x - 0.35f, objColMin.y - 0.35f);
 	CVector2D adjustedColMax(objColMax.x + 0.35f, objColMax.y + 0.35f);
 
-	checkIntervalInDist = max(checkIntervalInDist, 0.5f);
-	checkIntervalInDist = min(checkIntervalInDist, (objColMax.z - objColMin.z) / 2.0f);
-	checkIntervalInDist = min(checkIntervalInDist, (adjustedColMax.x - adjustedColMin.x) / 2.0f);
+	checkIntervalInDist = Max(checkIntervalInDist, 0.5f);
+	checkIntervalInDist = Min(checkIntervalInDist, (objColMax.z - objColMin.z) / 2.0f);
+	checkIntervalInDist = Min(checkIntervalInDist, (adjustedColMax.x - adjustedColMin.x) / 2.0f);
 
 	if (objMat.GetUp().z < 0.0f)
 		objUpsideDown = true;
@@ -14649,7 +14649,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 									InflictDamage(collidingEnt, WEAPONTYPE_FALL, 15.0f, PEDPIECE_TORSO, 2);
 								}
 							} else {
-								float damage = 100.0f * max(speed - 0.25f, 0.0f);
+								float damage = 100.0f * Max(speed - 0.25f, 0.0f);
 								float damage2 = damage;
 								if (m_vecMoveSpeed.z < -0.25f)
 									damage += (-0.25f - m_vecMoveSpeed.z) * 150.0f;
@@ -14727,8 +14727,8 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 #ifdef VC_PED_PORTS
 				} else {
 					float speed = m_vecMoveSpeed.Magnitude2D();
-					sphereNormal.x = -m_vecMoveSpeed.x / max(0.001f, speed);
-					sphereNormal.y = -m_vecMoveSpeed.y / max(0.001f, speed);
+					sphereNormal.x = -m_vecMoveSpeed.x / Max(0.001f, speed);
+					sphereNormal.y = -m_vecMoveSpeed.y / Max(0.001f, speed);
 					GetPosition().z -= 0.05f;
 					bSomeVCflag1 = true;
 				}
@@ -15093,7 +15093,7 @@ CPed::ProcessBuoyancy(void)
 		bTouchingWater = true;
 		CEntity *entity;
 		CColPoint point;
-		if (CWorld::ProcessVerticalLine(GetPosition(), GetPosition().z - 3.0f, point, entity, false, true, false, false, false, false, false)
+		if (CWorld::ProcessVerticalLine(GetPosition(), GetPosition().z - 3.0f, point, entity, false, true, false, false, false, false, nil)
 			&& entity->IsVehicle() && ((CVehicle*)entity)->IsBoat()) {
 			bIsInWater = false;
 			return;
@@ -15470,7 +15470,7 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 			if (CWorld::ProcessVerticalLine(vec, startZ, foundCol, foundEnt, true, true, false, false, true, false, nil))
 				foundColZ2 = foundCol.point.z;
 
-			zForPed = max(foundColZ, foundColZ2);
+			zForPed = Max(foundColZ, foundColZ2);
 
 			if (zForPed > -99.0f)
 				GetPosition().z = FEET_OFFSET + zForPed;
@@ -17069,7 +17069,7 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 
 	// Because buses have stairs
 	if (!m_pMyVehicle->bIsBus)
-		zDiff = max(0.0f, doorOpenPos.z - GetPosition().z);
+		zDiff = Max(0.0f, doorOpenPos.z - GetPosition().z);
 
 	m_vecOffsetSeek = doorOpenPos - GetPosition();
 	m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 600;
@@ -17220,7 +17220,7 @@ CPed::WarpPedToNearEntityOffScreen(CEntity *warpTo)
 
 	CVector appropriatePos = GetPosition();
 	CVector zCorrectedPos = appropriatePos;
-	int tryCount = min(10, halfOfDist);
+	int tryCount = Min(10, halfOfDist);
 	for (int i = 0; i < tryCount; ++i) {
 		appropriatePos += halfNormalizedDist;
 		CPedPlacement::FindZCoorForPed(&zCorrectedPos);
@@ -17254,7 +17254,7 @@ CPed::WarpPedToNearLeaderOffScreen(void)
 
 	CVector appropriatePos = GetPosition();
 	CVector zCorrectedPos = appropriatePos;
-	int tryCount = min(10, halfOfDist);
+	int tryCount = Min(10, halfOfDist);
 	for (int i = 0; i < tryCount; ++i) {
 		appropriatePos += halfNormalizedDist;
 		CPedPlacement::FindZCoorForPed(&zCorrectedPos);
@@ -17296,7 +17296,7 @@ CPed::SetCarJack_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 	car->m_nGettingInFlags |= doorFlag;
 	m_vecOffsetSeek = carEnterPos - GetPosition();
 	m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 600;
-	float zDiff = max(0.0f, carEnterPos.z - GetPosition().z);
+	float zDiff = Max(0.0f, carEnterPos.z - GetPosition().z);
 	bUsesCollision = false;
 
 	if (zDiff > 4.4f) {

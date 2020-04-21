@@ -289,7 +289,7 @@ CCullZones::FindAttributesForCoors(CVector coors, int32 *wantedLevel)
 		   coors.z >= aAttributeZones[i].minz && coors.z <= aAttributeZones[i].maxz){
 			attribs |= aAttributeZones[i].attributes;
 			if(wantedLevel)
-				*wantedLevel = max(*wantedLevel, aAttributeZones[i].wantedLevel);
+				*wantedLevel = Max(*wantedLevel, aAttributeZones[i].wantedLevel);
 		}
 	return attribs;
 }

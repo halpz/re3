@@ -226,7 +226,7 @@ cAudioManager::SetUpOneShotCollisionSound(cAudioCollision *col)
 		if(s1 == SURFACE_METAL6 && s2 == SURFACE_FLESH) ratio = 0.25f * ratio;
 		if(s1 == SURFACE_METAL6 && ratio < 0.6f) {
 			s1 = SURFACE_BILLBOARD;
-			ratio = min(1.f, 2.f * ratio);
+			ratio = Min(1.f, 2.f * ratio);
 		}
 		emittingVol = 40.f * ratio;
 		if(emittingVol) {

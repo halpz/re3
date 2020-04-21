@@ -212,7 +212,7 @@ CWanted::ReportCrimeNow(eCrimeType type, const CVector &coors, bool policeDoesnt
 	else
 		sensitivity = m_fCrimeSensitivity;
 
-	wantedLevelDrop = min(CCullZones::GetWantedLevelDrop(), 100);
+	wantedLevelDrop = Min(CCullZones::GetWantedLevelDrop(), 100);
 
 	chaos = (1.0f - wantedLevelDrop/100.0f) * sensitivity;
 	if (policeDoesntCare)
@@ -371,7 +371,7 @@ CWanted::Update(void)
 			CVector playerPos = FindPlayerCoors();
 			if (WorkOutPolicePresence(playerPos, radius) == 0) {
 				m_nLastUpdateTime = CTimer::GetTimeInMilliseconds();
-				m_nChaos = max(0, m_nChaos - 1);
+				m_nChaos = Max(0, m_nChaos - 1);
 				UpdateWantedLevel();
 			}
 		}

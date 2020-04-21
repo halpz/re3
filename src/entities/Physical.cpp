@@ -457,7 +457,7 @@ CPhysical::ApplySpringCollision(float springConst, CVector &springDir, CVector &
 {
 	float compression = 1.0f - springRatio;
 	if(compression > 0.0f){
-		float step = min(CTimer::GetTimeStep(), 3.0f);
+		float step = Min(CTimer::GetTimeStep(), 3.0f);
 		float impulse = -GRAVITY*m_fMass*step * springConst * compression * bias*2.0f;
 		ApplyMoveForce(springDir*impulse);
 		ApplyTurnForce(springDir*impulse, point);
@@ -471,12 +471,12 @@ CPhysical::ApplySpringDampening(float damping, CVector &springDir, CVector &poin
 {
 	float speedA = DotProduct(speed, springDir);
 	float speedB = DotProduct(GetSpeed(point), springDir);
-	float step = min(CTimer::GetTimeStep(), 3.0f);
+	float step = Min(CTimer::GetTimeStep(), 3.0f);
 	float impulse = -damping * (speedA + speedB)/2.0f * m_fMass * step * 0.53f;
 
 	// what is this?
 	float a = m_fTurnMass / ((point.MagnitudeSqr() + 1.0f) * 2.0f * m_fMass);
-	a = min(a, 1.0f);
+	a = Min(a, 1.0f);
 	float b = Abs(impulse / (speedB * m_fMass));
 	if(a < b)
 		impulse *= a/b;
@@ -646,7 +646,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 		// positive if B is moving towards A
 		// not interested in how much B moves into A apparently?
 		// only interested in cases where A collided into B
-		speedB = max(0.0f, DotProduct(B->m_vecMoveSpeed, colpoint.normal));
+		speedB = Max(0.0f, DotProduct(B->m_vecMoveSpeed, colpoint.normal));
 		// A has moved into B
 		if(speedA < speedB){
 			if(!A->bHasHitWall)
@@ -1151,18 +1151,18 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 				CVector dir = A->GetPosition() - B->GetPosition();
 				dir.Normalise();
 				if(dir.z < 0.0f && dir.z < A->GetForward().z && dir.z < A->GetRight().z)
-					dir.z = min(0.0f, min(A->GetForward().z, A->GetRight().z));
+					dir.z = Min(0.0f, Min(A->GetForward().z, A->GetRight().z));
 				shift += dir * colpoints[mostColliding].depth * 0.5f;
 			}else if(A->IsPed() && B->IsVehicle() && ((CVehicle*)B)->IsBoat()){
 				CVector dir = colpoints[mostColliding].normal;
-				float f = min(Abs(dir.z), 0.9f);
+				float f = Min(Abs(dir.z), 0.9f);
 				dir.z = 0.0f;
 				dir.Normalise();
 				shift += dir * colpoints[mostColliding].depth / (1.0f - f);
 				boat = B;
 			}else if(B->IsPed() && A->IsVehicle() && ((CVehicle*)A)->IsBoat()){
 				CVector dir = colpoints[mostColliding].normal * -1.0f;
-				float f = min(Abs(dir.z), 0.9f);
+				float f = Min(Abs(dir.z), 0.9f);
 				dir.z = 0.0f;
 				dir.Normalise();
 				B->GetPosition() += dir * colpoints[mostColliding].depth / (1.0f - f);
@@ -1250,7 +1250,7 @@ collision:
 			float turnSpeedDiff = (B->m_vecTurnSpeed - A->m_vecTurnSpeed).MagnitudeSqr();
 			float moveSpeedDiff = (B->m_vecMoveSpeed - A->m_vecMoveSpeed).MagnitudeSqr();
 
-			DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, max(turnSpeedDiff, moveSpeedDiff));
+			DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, Max(turnSpeedDiff, moveSpeedDiff));
 		}
 	}else if(A->bHasContacted){
 		CVector savedMoveFriction = A->m_vecMoveFriction;
@@ -1272,7 +1272,7 @@ collision:
 			float turnSpeedDiff = (B->m_vecTurnSpeed - A->m_vecTurnSpeed).MagnitudeSqr();
 			float moveSpeedDiff = (B->m_vecMoveSpeed - A->m_vecMoveSpeed).MagnitudeSqr();
 
-			DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, max(turnSpeedDiff, moveSpeedDiff));
+			DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, Max(turnSpeedDiff, moveSpeedDiff));
 
 			if(A->ApplyFriction(B, CSurfaceTable::GetAdhesiveLimit(aColPoints[i])/numCollisions, aColPoints[i])){
 				A->bHasContacted = true;
@@ -1305,7 +1305,7 @@ collision:
 			float turnSpeedDiff = (B->m_vecTurnSpeed - A->m_vecTurnSpeed).MagnitudeSqr();
 			float moveSpeedDiff = (B->m_vecMoveSpeed - A->m_vecMoveSpeed).MagnitudeSqr();
 
-			DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, max(turnSpeedDiff, moveSpeedDiff));
+			DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, Max(turnSpeedDiff, moveSpeedDiff));
 
 			if(A->ApplyFriction(B, CSurfaceTable::GetAdhesiveLimit(aColPoints[i])/numCollisions, aColPoints[i])){
 				A->bHasContacted = true;
@@ -1332,7 +1332,7 @@ collision:
 			float turnSpeedDiff = (B->m_vecTurnSpeed - A->m_vecTurnSpeed).MagnitudeSqr();
 			float moveSpeedDiff = (B->m_vecMoveSpeed - A->m_vecMoveSpeed).MagnitudeSqr();
 
-			DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, max(turnSpeedDiff, moveSpeedDiff));
+			DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, Max(turnSpeedDiff, moveSpeedDiff));
 
 			if(A->ApplyFriction(B, CSurfaceTable::GetAdhesiveLimit(aColPoints[i])/numCollisions, aColPoints[i])){
 				A->bHasContacted = true;
@@ -1510,7 +1510,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						float turnSpeedDiff = A->m_vecTurnSpeed.MagnitudeSqr();
 						float moveSpeedDiff = A->m_vecMoveSpeed.MagnitudeSqr();
 
-						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, imp, max(turnSpeedDiff, moveSpeedDiff));
+						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, imp, Max(turnSpeedDiff, moveSpeedDiff));
 					}
 				}else{
 					for(i = 0; i < numCollisions; i++){
@@ -1531,7 +1531,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						float turnSpeedDiff = A->m_vecTurnSpeed.MagnitudeSqr();
 						float moveSpeedDiff = A->m_vecMoveSpeed.MagnitudeSqr();
 
-						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, imp, max(turnSpeedDiff, moveSpeedDiff));
+						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, imp, Max(turnSpeedDiff, moveSpeedDiff));
 
 						float adhesion = CSurfaceTable::GetAdhesiveLimit(aColPoints[i]) / numCollisions;
 
@@ -1549,7 +1549,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 							else if(A->GetUp().z > 0.3f)
 								adhesion = 0.0f;
 							else
-								adhesion *= min(5.0f, 0.03f*impulseA + 1.0f);
+								adhesion *= Min(5.0f, 0.03f*impulseA + 1.0f);
 						}
 
 						if(A->ApplyFriction(adhesion, aColPoints[i]))
@@ -1598,7 +1598,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						float turnSpeedDiff = (B->m_vecTurnSpeed - A->m_vecTurnSpeed).MagnitudeSqr();
 						float moveSpeedDiff = (B->m_vecMoveSpeed - A->m_vecMoveSpeed).MagnitudeSqr();
 
-						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, max(turnSpeedDiff, moveSpeedDiff));
+						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, Max(turnSpeedDiff, moveSpeedDiff));
 					}
 				}else if(A->bHasContacted){
 					CVector savedMoveFriction = A->m_vecMoveFriction;
@@ -1623,7 +1623,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						float turnSpeedDiff = (B->m_vecTurnSpeed - A->m_vecTurnSpeed).MagnitudeSqr();
 						float moveSpeedDiff = (B->m_vecMoveSpeed - A->m_vecMoveSpeed).MagnitudeSqr();
 
-						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, max(turnSpeedDiff, moveSpeedDiff));
+						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, Max(turnSpeedDiff, moveSpeedDiff));
 
 						if(A->ApplyFriction(B, CSurfaceTable::GetAdhesiveLimit(aColPoints[i])/numCollisions, aColPoints[i])){
 							A->bHasContacted = true;
@@ -1659,7 +1659,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						float turnSpeedDiff = (B->m_vecTurnSpeed - A->m_vecTurnSpeed).MagnitudeSqr();
 						float moveSpeedDiff = (B->m_vecMoveSpeed - A->m_vecMoveSpeed).MagnitudeSqr();
 
-						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, max(turnSpeedDiff, moveSpeedDiff));
+						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, Max(turnSpeedDiff, moveSpeedDiff));
 
 						if(A->ApplyFriction(B, CSurfaceTable::GetAdhesiveLimit(aColPoints[i])/numCollisions, aColPoints[i])){
 							A->bHasContacted = true;
@@ -1689,7 +1689,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						float turnSpeedDiff = (B->m_vecTurnSpeed - A->m_vecTurnSpeed).MagnitudeSqr();
 						float moveSpeedDiff = (B->m_vecMoveSpeed - A->m_vecMoveSpeed).MagnitudeSqr();
 
-						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, max(turnSpeedDiff, moveSpeedDiff));
+						DMAudio.ReportCollision(A, B, aColPoints[i].surfaceA, aColPoints[i].surfaceB, impulseA, Max(turnSpeedDiff, moveSpeedDiff));
 
 						if(A->ApplyFriction(B, CSurfaceTable::GetAdhesiveLimit(aColPoints[i])/numCollisions, aColPoints[i])){
 							A->bHasContacted = true;
@@ -1835,7 +1835,7 @@ CPhysical::ProcessCollision(void)
 
 	if(IsPed() && (distSq >= sq(0.2f) || ped->IsPlayer())){
 		if(ped->IsPlayer())
-			n = max(NUMSTEPS(0.2f), 2.0f);
+			n = Max(NUMSTEPS(0.2f), 2.0f);
 		else
 			n = NUMSTEPS(0.3f);
 		step = savedTimeStep / n;
@@ -1856,7 +1856,7 @@ CPhysical::ProcessCollision(void)
 			speedDown = Multiply3x3(GetMatrix(), speedDown);
 			speedUp = GetSpeed(speedUp);
 			speedDown = GetSpeed(speedDown);
-			distSq = max(speedUp.MagnitudeSqr(), speedDown.MagnitudeSqr()) * sq(CTimer::GetTimeStep());
+			distSq = Max(speedUp.MagnitudeSqr(), speedDown.MagnitudeSqr()) * sq(CTimer::GetTimeStep());
 			if(distSq >= sq(0.3f)){
 				n = NUMSTEPS(0.3f);
 				step = savedTimeStep / n;

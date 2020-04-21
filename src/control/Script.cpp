@@ -5,6 +5,7 @@
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "AnimBlendAssociation.h"
 #include "Boat.h"
 #include "BulletInfo.h"
 #include "Camera.h"
@@ -18,11 +19,12 @@
 #include "Cranes.h"
 #include "Credits.h"
 #include "CutsceneMgr.h"
-#include "Darkel.h"
 #include "DMAudio.h"
+#include "Darkel.h"
 #include "EmergencyPed.h"
 #include "Explosion.h"
 #include "FileMgr.h"
+#include "Fire.h"
 #include "Frontend.h"
 #include "Gangs.h"
 #include "Garages.h"
@@ -31,7 +33,6 @@
 #include "Heli.h"
 #include "Hud.h"
 #include "Lines.h"
-#include "main.h"
 #include "Messages.h"
 #include "ModelIndices.h"
 #include "Pad.h"
@@ -48,13 +49,12 @@
 #include "Population.h"
 #include "PowerPoints.h"
 #include "ProjectileInfo.h"
+#include "Radar.h"
 #include "Record.h"
 #include "Remote.h"
-#include "Restart.h"
 #include "Replay.h"
+#include "Restart.h"
 #include "RpAnimBlend.h"
-#include "AnimBlendAssociation.h"
-#include "Fire.h"
 #include "Rubbish.h"
 #include "Shadows.h"
 #include "SpecialFX.h"
@@ -67,7 +67,7 @@
 #include "Weather.h"
 #include "World.h"
 #include "Zones.h"
-#include "Radar.h"
+#include "main.h"
 
 #define PICKUP_PLACEMENT_OFFSET 0.5f
 #define PED_FIND_Z_OFFSET 5.0f
@@ -2004,7 +2004,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			car->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS;
 		car->m_status = STATUS_PHYSICS;
 		car->bEngineOn = true;
-		car->AutoPilot.m_nCruiseSpeed = max(car->AutoPilot.m_nCruiseSpeed, 6);
+		car->AutoPilot.m_nCruiseSpeed = Max(car->AutoPilot.m_nCruiseSpeed, 6);
 		car->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
@@ -2016,7 +2016,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CCarCtrl::JoinCarWithRoadSystem(car);
 		car->AutoPilot.m_nCarMission = MISSION_CRUISE;
 		car->bEngineOn = true;
-		car->AutoPilot.m_nCruiseSpeed = max(car->AutoPilot.m_nCruiseSpeed, 6);
+		car->AutoPilot.m_nCruiseSpeed = Max(car->AutoPilot.m_nCruiseSpeed, 6);
 		car->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
@@ -2100,7 +2100,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
-		car->AutoPilot.m_nCruiseSpeed = min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
+		car->AutoPilot.m_nCruiseSpeed = Min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
 		return 0;
 	}
 	case COMMAND_SET_CAR_DRIVING_STYLE:
@@ -3639,7 +3639,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		pos.x = (infX + supX) / 2;
 		pos.y = (infY + supY) / 2;
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		float radius = max(pos.x - infX, pos.y - infY);
+		float radius = Max(pos.x - infX, pos.y - infY);
 		pPed->bScriptObjectiveCompleted = false;
 		pPed->SetObjective(OBJECTIVE_GUARD_SPOT, pos, radius);
 		return 0;
@@ -4145,7 +4145,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		pos.x = (infX + supX) / 2;
 		pos.y = (infY + supY) / 2;
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		float radius = max(pos.x - infX, pos.y - infY);
+		float radius = Max(pos.x - infX, pos.y - infY);
 		pPed->bScriptObjectiveCompleted = false;
 		pPed->SetObjective(OBJECTIVE_GOTO_AREA_ON_FOOT, pos, radius);
 		return 0;
@@ -4941,7 +4941,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		pos.x = (infX + supX) / 2;
 		pos.y = (infY + supY) / 2;
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		float radius = max(pos.x - infX, pos.y - infY);
+		float radius = Max(pos.x - infX, pos.y - infY);
 		pPed->bScriptObjectiveCompleted = false;
 		pPed->SetObjective(OBJECTIVE_RUN_TO_AREA, pos, radius);
 		return 0;
@@ -5363,7 +5363,7 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		pos.x = (infX + supX) / 2;
 		pos.y = (infY + supY) / 2;
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		float radius = max(pos.x - infX, pos.y - infY);
+		float radius = Max(pos.x - infX, pos.y - infY);
 		pPed->bScriptObjectiveCompleted = false;
 		pPed->SetObjective(OBJECTIVE_GOTO_AREA_ANY_MEANS, pos, radius);
 		return 0;
@@ -5600,7 +5600,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			pVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_ACCURATE;
 		pVehicle->m_status = STATUS_PHYSICS;
 		pVehicle->bEngineOn = true;
-		pVehicle->AutoPilot.m_nCruiseSpeed = max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
+		pVehicle->AutoPilot.m_nCruiseSpeed = Max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
 		pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
@@ -5715,7 +5715,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		pBoat->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_ASTHECROWSWIMS;
 		pBoat->AutoPilot.m_vecDestinationCoors = pos;
 		pBoat->m_status = STATUS_PHYSICS;
-		pBoat->AutoPilot.m_nCruiseSpeed = max(6, pBoat->AutoPilot.m_nCruiseSpeed);
+		pBoat->AutoPilot.m_nCruiseSpeed = Max(6, pBoat->AutoPilot.m_nCruiseSpeed);
 		pBoat->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
@@ -6300,23 +6300,23 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		return 0;
 	case COMMAND_REGISTER_JUMP_DISTANCE:
 		CollectParameters(&m_nIp, 1);
-		CStats::MaximumJumpDistance = max(CStats::MaximumJumpDistance, *(float*)&ScriptParams[0]);
+		CStats::MaximumJumpDistance = Max(CStats::MaximumJumpDistance, *(float*)&ScriptParams[0]);
 		return 0;
 	case COMMAND_REGISTER_JUMP_HEIGHT:
 		CollectParameters(&m_nIp, 1);
-		CStats::MaximumJumpHeight = max(CStats::MaximumJumpHeight, *(float*)&ScriptParams[0]);
+		CStats::MaximumJumpHeight = Max(CStats::MaximumJumpHeight, *(float*)&ScriptParams[0]);
 		return 0;
 	case COMMAND_REGISTER_JUMP_FLIPS:
 		CollectParameters(&m_nIp, 1);
-		CStats::MaximumJumpFlips = max(CStats::MaximumJumpFlips, ScriptParams[0]);
+		CStats::MaximumJumpFlips = Max(CStats::MaximumJumpFlips, ScriptParams[0]);
 		return 0;
 	case COMMAND_REGISTER_JUMP_SPINS:
 		CollectParameters(&m_nIp, 1);
-		CStats::MaximumJumpSpins = max(CStats::MaximumJumpSpins, ScriptParams[0]);
+		CStats::MaximumJumpSpins = Max(CStats::MaximumJumpSpins, ScriptParams[0]);
 		return 0;
 	case COMMAND_REGISTER_JUMP_STUNT:
 		CollectParameters(&m_nIp, 1);
-		CStats::BestStuntJump = max(CStats::BestStuntJump, ScriptParams[0]);
+		CStats::BestStuntJump = Max(CStats::BestStuntJump, ScriptParams[0]);
 		return 0;
 	case COMMAND_REGISTER_UNIQUE_JUMP_FOUND:
 		++CStats::NumberOfUniqueJumpsFound;
@@ -6849,10 +6849,10 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			CVector cp4 = tmp_matrix * CVector(pColModel->boundingBox.min.x, pColModel->boundingBox.min.y, pColModel->boundingBox.max.z);
 			int16 collisions;
 			CWorld::FindObjectsIntersectingAngledCollisionBox(pColModel->boundingBox, tmp_matrix, pos,
-				min(cp1.x, min(cp2.x, min(cp3.x, cp4.x))),
-				min(cp1.y, min(cp2.y, min(cp3.y, cp4.y))),
-				max(cp1.x, max(cp2.x, max(cp3.x, cp4.x))),
-				max(cp1.y, max(cp2.y, max(cp3.y, cp4.y))),
+				Min(cp1.x, Min(cp2.x, Min(cp3.x, cp4.x))),
+				Min(cp1.y, Min(cp2.y, Min(cp3.y, cp4.y))),
+				Max(cp1.x, Max(cp2.x, Max(cp3.x, cp4.x))),
+				Max(cp1.y, Max(cp2.y, Max(cp3.y, cp4.y))),
 				&collisions, 2, nil, false, true, true, false, false);
 			if (collisions > 0)
 				obstacleInPath = true;
@@ -6904,10 +6904,10 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			CVector cp4 = tmp_matrix * CVector(pColModel->boundingBox.min.x, pColModel->boundingBox.min.y, pColModel->boundingBox.max.z);
 			int16 collisions;
 			CWorld::FindObjectsIntersectingAngledCollisionBox(pColModel->boundingBox, tmp_matrix, newPosition,
-				min(cp1.x, min(cp2.x, min(cp3.x, cp4.x))),
-				min(cp1.y, min(cp2.y, min(cp3.y, cp4.y))),
-				max(cp1.x, max(cp2.x, max(cp3.x, cp4.x))),
-				max(cp1.y, max(cp2.y, max(cp3.y, cp4.y))),
+				Min(cp1.x, Min(cp2.x, Min(cp3.x, cp4.x))),
+				Min(cp1.y, Min(cp2.y, Min(cp3.y, cp4.y))),
+				Max(cp1.x, Max(cp2.x, Max(cp3.x, cp4.x))),
+				Max(cp1.y, Max(cp2.y, Max(cp3.y, cp4.y))),
 				&collisions, 2, nil, false, true, true, false, false);
 			if (collisions > 0)
 				obstacleInPath = true;
@@ -7740,7 +7740,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[1];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		float size = max(0.0f, *(float*)&ScriptParams[7]);
+		float size = Max(0.0f, *(float*)&ScriptParams[7]);
 		eParticleObjectType type = (eParticleObjectType)ScriptParams[0];
 		RwRGBA color;
 		if (type == POBJECT_SMOKE_TRAIL){
@@ -11450,22 +11450,22 @@ void CTheScripts::HighlightImportantAngledArea(uint32 id, float x1, float y1, fl
 	supY = infY = Y;
 	X = (x2 + x3) / 2;
 	Y = (y2 + y3) / 2;
-	infX = min(infX, X);
-	supX = max(supX, X);
-	infY = min(infY, Y);
-	supY = max(supY, Y);
+	infX = Min(infX, X);
+	supX = Max(supX, X);
+	infY = Min(infY, Y);
+	supY = Max(supY, Y);
 	X = (x3 + x4) / 2;
 	Y = (y3 + y4) / 2;
-	infX = min(infX, X);
-	supX = max(supX, X);
-	infY = min(infY, Y);
-	supY = max(supY, Y);
+	infX = Min(infX, X);
+	supX = Max(supX, X);
+	infY = Min(infY, Y);
+	supY = Max(supY, Y);
 	X = (x4 + x1) / 2;
 	Y = (y4 + y1) / 2;
-	infX = min(infX, X);
-	supX = max(supX, X);
-	infY = min(infY, Y);
-	supY = max(supY, Y);
+	infX = Min(infX, X);
+	supX = Max(supX, X);
+	infY = Min(infY, Y);
+	supY = Max(supY, Y);
 	CVector center;
 	center.x = (infX + supX) / 2;
 	center.y = (infY + supY) / 2;

@@ -272,7 +272,7 @@ CBoat::ProcessControl(void)
 				impulse = m_vecMoveSpeed.MagnitudeSqr()*pHandling->fSuspensionForceLevel*buoyanceImpulse.z*CTimer::GetTimeStep()*0.5f*m_fGasPedal;
 			else
 				impulse = 0.0f;
-			impulse = min(impulse, GRAVITY*pHandling->fSuspensionDampingLevel*m_fMass*CTimer::GetTimeStep());
+			impulse = Min(impulse, GRAVITY*pHandling->fSuspensionDampingLevel*m_fMass*CTimer::GetTimeStep());
 			ApplyMoveForce(impulse*GetUp());
 			ApplyTurnForce(impulse*GetUp(), buoyancePoint - pHandling->fSuspensionBias*GetForward());
 		}
@@ -375,10 +375,10 @@ CBoat::ProcessControl(void)
 		}
 
 		// Slow down or push down boat as it approaches the world limits
-		m_vecMoveSpeed.x = min(m_vecMoveSpeed.x, -(GetPosition().x - 1900.0f)*0.01f);	// east
-		m_vecMoveSpeed.x = max(m_vecMoveSpeed.x, -(GetPosition().x - -1515.0f)*0.01f);	// west
-		m_vecMoveSpeed.y = min(m_vecMoveSpeed.y, -(GetPosition().y - 600.0f)*0.01f);	// north
-		m_vecMoveSpeed.y = max(m_vecMoveSpeed.y, -(GetPosition().y - -1900.0f)*0.01f);	// south
+		m_vecMoveSpeed.x = Min(m_vecMoveSpeed.x, -(GetPosition().x - 1900.0f)*0.01f);	// east
+		m_vecMoveSpeed.x = Max(m_vecMoveSpeed.x, -(GetPosition().x - -1515.0f)*0.01f);	// west
+		m_vecMoveSpeed.y = Min(m_vecMoveSpeed.y, -(GetPosition().y - 600.0f)*0.01f);	// north
+		m_vecMoveSpeed.y = Max(m_vecMoveSpeed.y, -(GetPosition().y - -1900.0f)*0.01f);	// south
 
 		if(!onLand && bBoatInWater)
 			ApplyWaterResistance();
@@ -765,7 +765,7 @@ CBoat::IsVertexAffectedByWake(CVector vecVertex, CBoat *pBoat)
 		float fDist = vecDist.MagnitudeSqr();
 		
 		if ( fDist < SQR(fMaxDist) )
-			return 1.0f - min(fRangeMult * Sqrt(fDist / SQR(fMaxDist)) + (WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[i]) * fTimeMult, 1.0f);
+			return 1.0f - Min(fRangeMult * Sqrt(fDist / SQR(fMaxDist)) + (WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[i]) * fTimeMult, 1.0f);
 	}
 
 	return 0.0f;
@@ -837,7 +837,7 @@ CBoat::AddWakePoint(CVector point)
 	int i;
 	if(m_afWakePointLifeTime[0] > 0.0f){
 		if((CVector2D(GetPosition()) - m_avec2dWakePoints[0]).MagnitudeSqr() < SQR(1.0f)){
-			for(i = min(m_nNumWakePoints, ARRAY_SIZE(m_afWakePointLifeTime)-1); i != 0; i--){
+			for(i = Min(m_nNumWakePoints, ARRAY_SIZE(m_afWakePointLifeTime)-1); i != 0; i--){
 				m_avec2dWakePoints[i] = m_avec2dWakePoints[i-1];
 				m_afWakePointLifeTime[i] = m_afWakePointLifeTime[i-1];
 			}
