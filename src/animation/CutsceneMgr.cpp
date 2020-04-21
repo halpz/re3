@@ -1,4 +1,3 @@
-#define WITHWINDOWS	// just for VK_SPACE
 #include "common.h"
 
 #include "General.h"
@@ -416,7 +415,7 @@ CCutsceneMgr::Update(void)
 			|| (CGame::playingIntro && CPad::GetPad(0)->GetStartJustDown())
 			|| CPad::GetPad(0)->GetLeftMouseJustDown()
 			|| CPad::GetPad(0)->GetEnterJustDown()
-			|| CPad::GetPad(0)->GetCharJustDown(VK_SPACE))
+			|| CPad::GetPad(0)->GetCharJustDown(' '))
 			FinishCutscene();
 	}
 }

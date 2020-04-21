@@ -1,5 +1,6 @@
-#define WITHWINDOWS
 #include "common.h"
+#define USEALTERNATIVEWINFUNCS
+#include "crossplatform.h"
 #include "main.h"
 
 #include "AudioScriptObject.h"

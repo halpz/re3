@@ -11,7 +11,6 @@
 #include "sampman.h"
 #include "AudioManager.h"
 #include "MusicManager.h"
-#include "Frontend.h"
 #include "Timer.h"
 
 

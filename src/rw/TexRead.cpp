@@ -1,9 +1,6 @@
 #pragma warning( push )
 #pragma warning( disable : 4005)
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
 #pragma warning( pop )
-#define WITHWINDOWS
 #include "common.h"
 #include "win.h"
 
