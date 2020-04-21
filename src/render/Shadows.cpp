@@ -1644,7 +1644,7 @@ CShadows::RenderExtraPlayerShadows(void)
 							if ( fLightDist < fRadius*0.5f )
 								nColorStrength = (5*CTimeCycle::GetLightShadowStrength()/8);
 							else
-								nColorStrength = int32(CTimeCycle::GetLightShadowStrength() * fMult);
+								nColorStrength = int32((5*CTimeCycle::GetLightShadowStrength()/8) * fMult);
 
 							float fInv = 1.0f / fLightDist;
 							vecLight.x *= fInv;
