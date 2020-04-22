@@ -2,17 +2,11 @@
 #include "skeleton.h"
 #include "events.h"
 
-//#include "main.h"
-	#define DIRECTINPUT_VERSION 0x0800
-	#include <dinput.h>
 #include "common.h"
 #include "Pad.h"
 #include "ControllerConfig.h"
 #include "Frontend.h"
 #include "Camera.h"
-
-
-
 
 /*
  *****************************************************************************

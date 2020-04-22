@@ -1,6 +1,6 @@
 #include <direct.h>
 #include <csignal>
-#include <windows.h>
+#define WITHWINDOWS
 #include "common.h"
 #include "patcher.h"
 #include "Renderer.h"

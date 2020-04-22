@@ -1,4 +1,4 @@
-#include <windows.h>
+#define WITHWINDOWS
 #include "common.h"
 
 #include "DMAudio.h"
