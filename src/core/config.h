@@ -193,6 +193,11 @@ enum Config {
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch) 
 //#define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 //#define USE_TEXTURE_POOL
+//#define OPENAL
+
+// Particle
+//#define PC_PARTICLE
+//#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
 
 // Pad
 #define XINPUT

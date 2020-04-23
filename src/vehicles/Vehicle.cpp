@@ -1002,18 +1002,12 @@ void
 DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle)
 {
 	if (pVehicle->pDriver) {
-#ifndef FIX_BUGS
-		// this just isn't fair
 		CDarkel::RegisterKillByPlayer(pVehicle->pDriver, WEAPONTYPE_UNIDENTIFIED);
-#endif
 		pVehicle->pDriver->FlagToDestroyWhenNextProcessed();
 	}
 	for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++) {
 		if (pVehicle->pPassengers[i]) {
-#ifndef FIX_BUGS
-			// this just isn't fair
 			CDarkel::RegisterKillByPlayer(pVehicle->pPassengers[i], WEAPONTYPE_UNIDENTIFIED);
-#endif
 			pVehicle->pPassengers[i]->FlagToDestroyWhenNextProcessed();
 		}
 	}
