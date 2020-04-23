@@ -5,6 +5,11 @@
 #define RSREGSETBREAKALLOC(_name) /* No op */
 #endif /* (!defined(RSREGSETBREAKALLOC)) */
 
+#ifndef _INC_WINDOWS
+#define _X86_
+#include <windef.h>
+#endif
+
 enum eGameState
 {
 	GS_START_UP = 0,
@@ -17,7 +22,9 @@ enum eGameState
 	GS_FRONTEND,
 	GS_INIT_PLAYING_GAME,
 	GS_PLAYING_GAME,
+#ifndef MASTER
 	GS_ANIMVIEWER,
+#endif
 };
 
 enum eWinVersion
@@ -33,6 +40,7 @@ extern DWORD _dwOperatingSystemVersion;
 
 extern RwUInt32 gGameState;
 
+#ifdef __DINPUT_INCLUDED__
 /* platform specfic global data */
 typedef struct
 {
@@ -86,6 +94,7 @@ public:
 };
 
 extern CJoySticks AllValidWinJoys;
+#endif
 
 #ifdef    __cplusplus
 extern "C"
@@ -97,6 +106,7 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
 
 RwBool IsForegroundApp();
 
+#ifdef __DINPUT_INCLUDED__
 HRESULT _InputInitialise();
 HRESULT _InputInitialiseMouse();
 HRESULT CapturePad(RwInt32 padID);
@@ -110,6 +120,7 @@ BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key);
 void _InputTranslateShiftKeyUpDown(RsKeyCodes *rs);;
 BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, BOOLEAN bDown);
 BOOL _InputIsExtended(INT flag);
+#endif
 
 void InitialiseLanguage();
 RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode);

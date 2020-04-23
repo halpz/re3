@@ -1,5 +1,6 @@
-#define WITHWINDOWS
 #include "common.h"
+#define USEALTERNATIVEWINFUNCS
+#include "crossplatform.h"
 
 #include "FileMgr.h"
 #include "GenericGameStorage.h"
@@ -94,7 +95,7 @@ C_PcSave::PopulateSlotInfo()
 		struct {
 			int size;
 			wchar FileName[24];
-			_SYSTEMTIME SaveDateTime;
+			SYSTEMTIME SaveDateTime;
 		} header;
 		sprintf(savename, "%s%i%s", DefaultPCSaveFileName, i + 1, ".b");
 		int file = CFileMgr::OpenFile(savename, "rb");
@@ -110,8 +111,8 @@ C_PcSave::PopulateSlotInfo()
 		}
 		if (Slots[i + 1] == SLOT_OK) {
 			if (CheckDataNotCorrupt(i, savename)) {
-				_SYSTEMTIME st;
-				memcpy(&st, &header.SaveDateTime, sizeof(_SYSTEMTIME));
+				SYSTEMTIME st;
+				memcpy(&st, &header.SaveDateTime, sizeof(SYSTEMTIME));
 				const char *month;
 				switch (st.wMonth)
 				{
