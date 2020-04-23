@@ -9606,7 +9606,7 @@ cAudioManager::ServiceSoundEffects()
 	ProcessMissionAudio();
 	AdjustSamplesVolume();
 	ProcessActiveQueues();
-#ifdef WITHMILES
+#ifdef OPENAL
 	SampleManager.Service();
 #endif
 	for(int32 i = 0; i < m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal; ++i) {
