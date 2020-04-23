@@ -2019,7 +2019,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 }
 
 static void
-particleProduceFootDust(CPed *ped, CVector *pos, float size, int times)
+particleProduceFootDust(CPed *ped, CVector const &pos, float size, int times)
 {
 	switch (ped->m_nSurfaceTouched)
 	{
@@ -2028,7 +2028,7 @@ particleProduceFootDust(CPed *ped, CVector *pos, float size, int times)
 		case SURFACE_PAVEMENT:
 		case SURFACE_SAND:
 			for (int i = 0; i < times; ++i) {
-				CVector adjustedPos = *pos;
+				CVector adjustedPos = pos;
 				adjustedPos.x += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
 				adjustedPos.y += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
 				CParticle::AddParticle(PARTICLE_PEDFOOT_DUST, adjustedPos, CVector(0.0f, 0.0f, 0.0f), nil, size, CRGBA(0, 0, 0, 0), 0, 0, 0, 0);
@@ -2040,16 +2040,27 @@ particleProduceFootDust(CPed *ped, CVector *pos, float size, int times)
 }
 
 static void
-particleProduceFootSplash(CPed *ped, CVector *pos, float size, int times)
+particleProduceFootSplash(CPed *ped, CVector const &pos, float size, int times)
 {
+#ifdef PC_PARTICLE
 	for (int i = 0; i < times; i++) {
-		CVector adjustedPos = *pos;
+		CVector adjustedPos = pos;
 		adjustedPos.x += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
 		adjustedPos.y += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
 
 		CVector direction = ped->GetForward() * -0.05f;
 		CParticle::AddParticle(PARTICLE_RAIN_SPLASHUP, adjustedPos, direction, nil, size, CRGBA(32, 32, 32, 32), 0, 0, CGeneral::GetRandomNumber() & 1, 200);
 	}
+#else
+	for ( int32 i = 0; i < times; i++ )
+	{
+		CVector adjustedPos = pos;
+		adjustedPos.x += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f);
+		adjustedPos.y += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f);
+	
+		CParticle::AddParticle(PARTICLE_RAIN_SPLASHUP, adjustedPos, CVector(0.0f, 0.0f, 0.0f), nil, size, CRGBA(0, 0, 0, 0), 0, 0, CGeneral::GetRandomNumber() & 1, 200);
+	}
+#endif
 }
 
 void
@@ -2079,6 +2090,50 @@ CPed::PlayFootSteps(void)
 			idleAssocBlend += assoc->blendAmount;
 		}
 	}
+
+#ifdef GTA_PS2_STUFF
+	CAnimBlendAssociation *runStopAsoc = NULL;
+	
+	if ( IsPlayer() )
+	{	
+		runStopAsoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_RUN_STOP);
+		
+		if ( runStopAsoc == NULL )
+			runStopAsoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_RUN_STOP_R);
+	}
+	
+	if ( runStopAsoc != NULL && runStopAsoc->blendAmount > 0.1f )
+	{
+		{
+			CVector pos(0.0f, 0.0f, 0.0f);
+			RwFrame *parent = m_pFrames[PED_FOOTL]->frame;
+			while( parent )
+			{
+				RwV3dTransformPoints(pos, pos, 1, RwFrameGetMatrix(parent));
+				parent = RwFrameGetParent(parent);
+			}
+				
+			pos.z -= 0.1f;
+			pos += GetForward()*0.2f;
+			particleProduceFootDust(this, pos, 0.02f, 1);
+		}
+
+		{
+			CVector pos(0.0f, 0.0f, 0.0f);
+			RwFrame *parent = m_pFrames[PED_FOOTR]->frame;
+			while( parent )
+			{
+				RwV3dTransformPoints(pos, pos, 1, RwFrameGetMatrix(parent));
+				parent = RwFrameGetParent(parent);
+			}
+				
+			pos.z -= 0.1f;
+			pos += GetForward()*0.2f;
+			particleProduceFootDust(this, pos, 0.02f, 1);
+		}
+	}
+#endif
+	
 
 	if (walkRunAssoc && walkRunAssocBlend > 0.5f && idleAssocBlend < 1.0f) {
 		float stepStart = 1 / 15.0f;
@@ -2121,9 +2176,15 @@ CPed::PlayFootSteps(void)
 			}
 			if (CWeather::Rain <= 0.1f || CCullZones::CamNoRain() || CCullZones::PlayerNoRain()) {
 				if(IsPlayer())
-					particleProduceFootDust(this, &footPos, 0.0f, 4);
-			} else if(stepPart == 2) {
-				particleProduceFootSplash(this, &footPos, 0.15f, 4);
+					particleProduceFootDust(this, footPos, 0.0f, 4);
+			}
+#ifdef PC_PARTICLE
+			else if(stepPart == 2)
+#else
+			else
+#endif
+			{
+				particleProduceFootSplash(this, footPos, 0.15f, 4);
 			}
 		}
 	}
@@ -2131,6 +2192,7 @@ CPed::PlayFootSteps(void)
 	if (m_nSurfaceTouched == SURFACE_PUDDLE) {
 		float pedSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
 		if (pedSpeed > 0.03f && CTimer::GetFrameCounter() % 2 == 0 && pedSpeed > 0.13f) {
+#ifdef PC_PARTICLE
 			float particleSize = pedSpeed * 2.0f;
 
 			if (particleSize < 0.25f)
@@ -2149,6 +2211,12 @@ CPed::PlayFootSteps(void)
 
 			particleDir.z = CGeneral::GetRandomNumberInRange(0.03f, 0.05f);
 			CParticle::AddParticle(PARTICLE_RUBBER_SMOKE, particlePos, particleDir, nil, particleSize, CRGBA(255,255,255,255), 0, 0, 0, 0);
+#else
+			CVector particlePos = (GetPosition() - 0.3f * GetUp()) + GetForward()*0.3f;
+			CVector particleDir = m_vecMoveSpeed * 0.45f;
+			particleDir.z = CGeneral::GetRandomNumberInRange(0.03f, 0.05f);
+			CParticle::AddParticle(PARTICLE_PED_SPLASH, particlePos-CVector(0.0f, 0.0f, 1.2f), particleDir, nil, 0.0f, CRGBA(155, 185, 155, 255));
+#endif
 		}
 	}
 }
@@ -15114,7 +15182,11 @@ CPed::ProcessBuoyancy(void)
 							bIsInTheAir = false;
 						}
 						pos.z = pos.z - 0.8f;
+#ifdef PC_PARTICLE
 						CParticleObject::AddObject(POBJECT_PED_WATER_SPLASH, pos, CVector(0.0f, 0.0f, 0.0f), 0.0f, 50, color, true);
+#else
+						CParticleObject::AddObject(POBJECT_PED_WATER_SPLASH, pos, CVector(0.0f, 0.0f, 0.0f), 0.0f, 50, CRGBA(0, 0, 0, 0), true);
+#endif
 						m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 						m_nPedState = PED_IDLE;
 						return;
@@ -15143,6 +15215,7 @@ CPed::ProcessBuoyancy(void)
 				} else {
 					m_vecMoveSpeed.z = -0.01f;
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLASH, 0.0f);
+#ifdef PC_PARTICLE
 					CVector aBitForward = 2.2f * m_vecMoveSpeed + GetPosition();
 					float level = 0.0f;
 					if (CWaterLevel::GetWaterLevel(aBitForward, &level, false))
@@ -15151,6 +15224,18 @@ CPed::ProcessBuoyancy(void)
 					CParticleObject::AddObject(POBJECT_PED_WATER_SPLASH, aBitForward, CVector(0.0f, 0.0f, 0.1f), 0.0f, 200, color, true);
 					nGenerateRaindrops = CTimer::GetTimeInMilliseconds() + 80;
 					nGenerateWaterCircles = CTimer::GetTimeInMilliseconds() + 100;
+#else
+					CVector aBitForward = 1.6f * m_vecMoveSpeed + GetPosition();
+					float level = 0.0f;
+					if (CWaterLevel::GetWaterLevel(aBitForward, &level, false))
+						aBitForward.z = level + 0.5f;
+					
+					CVector vel = m_vecMoveSpeed * 0.1f;
+					vel.z = 0.18f;
+					CParticleObject::AddObject(POBJECT_PED_WATER_SPLASH, aBitForward, vel, 0.0f, 350, CRGBA(0, 0, 0, 0), true);
+					nGenerateRaindrops = CTimer::GetTimeInMilliseconds() + 300;
+					nGenerateWaterCircles = CTimer::GetTimeInMilliseconds() + 60;
+#endif
 				}
 			}
 		} else
@@ -15167,9 +15252,15 @@ CPed::ProcessBuoyancy(void)
 		if (pos.z != 0.0f) {
 			nGenerateWaterCircles = 0;
 			for(int i = 0; i < 4; i++) {
+#ifdef PC_PARTICLE
 				pos.x += CGeneral::GetRandomNumberInRange(-0.75f, 0.75f);
 				pos.y += CGeneral::GetRandomNumberInRange(-0.75f, 0.75f);
 				CParticle::AddParticle(PARTICLE_RAIN_SPLASH_BIGGROW, pos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, color, 0, 0, 0, 0);
+#else
+				pos.x += CGeneral::GetRandomNumberInRange(-2.5f, 2.5f);
+				pos.y += CGeneral::GetRandomNumberInRange(-2.5f, 2.5f);
+				CParticle::AddParticle(PARTICLE_RAIN_SPLASH_BIGGROW, pos+CVector(0.0f, 0.0f, 1.0f), CVector(0.0f, 0.0f, 0.0f));
+#endif
 			}
 		}
 	}
@@ -15181,9 +15272,17 @@ CPed::ProcessBuoyancy(void)
 			pos.z = level;
 
 		if (pos.z >= 0.0f) {
+#ifdef PC_PARTICLE
 			pos.z += 0.25f;
+#else
+			pos.z += 0.5f;
+#endif
 			nGenerateRaindrops = 0;
+#ifdef PC_PARTICLE
 			CParticleObject::AddObject(POBJECT_SPLASHES_AROUND, pos, CVector(0.0f, 0.0f, 0.0f), 4.5f, 1500, CRGBA(0,0,0,0), true);
+#else
+			CParticleObject::AddObject(POBJECT_SPLASHES_AROUND, pos, CVector(0.0f, 0.0f, 0.0f), 4.5f, 2500, CRGBA(0,0,0,0), true);
+#endif
 		}
 	}
 }

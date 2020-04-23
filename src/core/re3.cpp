@@ -1,6 +1,6 @@
 #include <direct.h>
 #include <csignal>
-#include <windows.h>
+#define WITHWINDOWS
 #include "common.h"
 #include "patcher.h"
 #include "Renderer.h"
@@ -372,7 +372,6 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", (int8*)&gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
 #ifdef TOGGLEABLE_BETA_FEATURES
-		DebugMenuAddVarBool8("Debug", "Toggle banned particles", (int8*)&CParticle::bEnableBannedParticles, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", (int8*)&CPed::bPopHeadsOnHeadshot, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle peds running to phones to report crimes", (int8*)&CPed::bMakePedsRunToPhonesToReportCrimes, nil);
 #endif

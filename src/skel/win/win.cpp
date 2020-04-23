@@ -1986,7 +1986,7 @@ WinMain(HINSTANCE instance,
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetEnterJustDown() )
 							++gGameState;
-						else if ( CPad::GetPad(0)->GetCharJustDown(VK_SPACE) )
+						else if ( CPad::GetPad(0)->GetCharJustDown(' ') )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetAltJustDown() )
 							++gGameState;
@@ -2022,7 +2022,7 @@ WinMain(HINSTANCE instance,
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetEnterJustDown() )
 							++gGameState;
-						else if ( CPad::GetPad(0)->GetCharJustDown(VK_SPACE) )
+						else if ( CPad::GetPad(0)->GetCharJustDown(' ') )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetAltJustDown() )
 							++gGameState;

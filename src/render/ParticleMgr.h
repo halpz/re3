@@ -118,11 +118,11 @@ class cParticleSystemMgr
 public:
 	tParticleSystemData m_aParticles[MAX_PARTICLES];
 
-	cParticleSystemMgr() { ctor(); } void ctor();
+	cParticleSystemMgr();
 	
 	void Initialise();
 	void LoadParticleData();
-	//void RangeCheck(tParticleSystemData *pData);
+	void RangeCheck(tParticleSystemData *pData) { }
 };
 
 VALIDATE_SIZE(cParticleSystemMgr, 0x2420);
