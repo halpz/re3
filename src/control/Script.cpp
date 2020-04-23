@@ -6435,9 +6435,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 				pPed->FlagToDestroyWhenNextProcessed();
 		}
 		else if (CGame::nastyGame && pPed->IsPedInControl()) {
-			RwMatrix tmp_rw;
-			CPedIK::GetWorldMatrix(pPed->m_pFrames[PED_HEAD]->frame, &tmp_rw);
-			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, tmp_rw.pos, true);
+			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, pPed->GetNodePosition(PED_HEAD), true);
 		}
 		else {
 			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
@@ -6450,9 +6448,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pPed);
 		if (CGame::nastyGame) {
-			RwMatrix tmp_rw;
-			CPedIK::GetWorldMatrix(pPed->m_pFrames[PED_HEAD]->frame, &tmp_rw);
-			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, tmp_rw.pos, true);
+			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, pPed->GetNodePosition(PED_HEAD), true);
 		}
 		else {
 			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);

@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "RwHelper.h"
 #include "PlayerPed.h"
 #include "Wanted.h"
 #include "Fire.h"
@@ -1497,4 +1498,9 @@ CPlayerPed::ProcessControl(void)
 		m_nSpeedTimer = 0;
 		m_bSpeedTimerFlag = false;
 	}
+
+#ifdef PED_SKIN
+	if (!bIsVisible && IsClumpSkinned(GetClump()))
+		UpdateRpHAnim();
+#endif
 }

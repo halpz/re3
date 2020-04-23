@@ -4,13 +4,9 @@
 #include <rpworld.h>
 #include <rpmatfx.h>
 #include <rphanim.h>
+#include <rpskin.h>
 #include <assert.h>
 #include <string.h>
-
-// TODO: split image<->raster functions in two
-//       implement raster context
-//	BMP reader
-//	geometry locking
 
 using namespace rw;
 
@@ -55,7 +51,7 @@ RwMatrix *RwMatrixMultiply(RwMatrix * matrixOut, const RwMatrix * MatrixIn1, con
 RwMatrix *RwMatrixTransform(RwMatrix * matrix, const RwMatrix * transform, RwOpCombineType combineOp)
 	{ matrix->transform(transform, (rw::CombineOp)combineOp); return matrix; }
 //RwMatrix *RwMatrixOrthoNormalize(RwMatrix * matrixOut, const RwMatrix * matrixIn);
-//RwMatrix *RwMatrixInvert(RwMatrix * matrixOut, const RwMatrix * matrixIn);
+RwMatrix *RwMatrixInvert(RwMatrix * matrixOut, const RwMatrix * matrixIn) { Matrix::invert(matrixOut, matrixIn); return matrixOut; }
 RwMatrix *RwMatrixScale(RwMatrix * matrix, const RwV3d * scale, RwOpCombineType combineOp)
 	{ matrix->scale(scale, (rw::CombineOp)combineOp); return matrix; }
 RwMatrix *RwMatrixTranslate(RwMatrix * matrix, const RwV3d * translation, RwOpCombineType combineOp)
@@ -742,14 +738,24 @@ RwBool RpHAnimPluginAttach(void) {
 	return true;
 }
 
+RwInt32 RpHAnimFrameGetID(RwFrame *frame) { return HAnimData::get(frame)->id; }
+
+RwInt32 RpHAnimIDGetIndex(RpHAnimHierarchy *hierarchy, RwInt32 ID) { return hierarchy->getIndex(ID); }
+
 RwBool RpHAnimFrameSetHierarchy(RwFrame *frame, RpHAnimHierarchy *hierarchy) { HAnimData::get(frame)->hierarchy = hierarchy; return true; }
 RpHAnimHierarchy *RpHAnimFrameGetHierarchy(RwFrame *frame) { return HAnimHierarchy::get(frame); }
 
-RwBool RpHAnimHierarchySetCurrentAnim(RpHAnimHierarchy *hierarchy, RpHAnimAnimation *anim) { hierarchy->currentAnim->setCurrentAnim(anim); return true; }
-RwBool RpHAnimHierarchyAddAnimTime(RpHAnimHierarchy *hierarchy, RwReal time) { hierarchy->currentAnim->addTime(time); return true; }
+RpHAnimHierarchy *RpHAnimHierarchySetFlags(RpHAnimHierarchy *hierarchy, RpHAnimHierarchyFlag flags) { hierarchy->flags = flags; return hierarchy; }
 
+RwBool RpHAnimHierarchySetCurrentAnim(RpHAnimHierarchy *hierarchy, RpHAnimAnimation *anim) { hierarchy->interpolator->setCurrentAnim(anim); return true; }
+RwBool RpHAnimHierarchyAddAnimTime(RpHAnimHierarchy *hierarchy, RwReal time) { hierarchy->interpolator->addTime(time); return true; }
+
+RwMatrix *RpHAnimHierarchyGetMatrixArray(RpHAnimHierarchy *hierarchy) { return hierarchy->matrices; }
 RwBool RpHAnimHierarchyUpdateMatrices(RpHAnimHierarchy *hierarchy) { hierarchy->updateMatrices(); return true; }
 
+RpHAnimAnimation *RpHAnimAnimationCreate(RwInt32 typeID, RwInt32 numFrames, RwInt32 flags, RwReal duration)
+	{ return Animation::create(AnimInterpolatorInfo::find(typeID), numFrames, flags, duration); }
+RpHAnimAnimation  *RpHAnimAnimationDestroy(RpHAnimAnimation *animation) { animation->destroy(); return animation; }
 RpHAnimAnimation  *RpHAnimAnimationStreamRead(RwStream *stream) { return Animation::streamRead(stream); }
 
 
@@ -762,6 +768,13 @@ RwBool RpSkinPluginAttach(void) {
 	return true;
 }
 
+RwUInt32 RpSkinGetNumBones( RpSkin *skin ) { return skin->numBones; }
+const RwMatrixWeights *RpSkinGetVertexBoneWeights( RpSkin *skin ) { return (RwMatrixWeights*)skin->weights; }
+const RwUInt32 *RpSkinGetVertexBoneIndices( RpSkin *skin ) { return (RwUInt32*)skin->indices; }
+const RwMatrix *RpSkinGetSkinToBoneMatrices( RpSkin *skin ) { return (const RwMatrix*)skin->inverseMatrices; }
+
+RpSkin *RpSkinGeometryGetSkin( RpGeometry *geometry ) { return Skin::get(geometry); }
+
 RpAtomic *RpSkinAtomicSetHAnimHierarchy( RpAtomic *atomic, RpHAnimHierarchy *hierarchy ) { Skin::setHierarchy(atomic, hierarchy); return atomic; }
 RpHAnimHierarchy *RpSkinAtomicGetHAnimHierarchy( const RpAtomic *atomic ) { return Skin::getHierarchy(atomic); }
 
@@ -772,6 +785,23 @@ RpHAnimHierarchy *RpSkinAtomicGetHAnimHierarchy( const RpAtomic *atomic ) { retu
 RwImage *RtBMPImageWrite(RwImage * image, const RwChar * imageName) { rw::writeBMP(image, imageName); return image; }
 RwImage *RtBMPImageRead(const RwChar * imageName) { return rw::readBMP(imageName); }
 
+#include "rtquat.h"
+
+RtQuat *RtQuatRotate(RtQuat * quat, const RwV3d * axis, RwReal angle, RwOpCombineType combineOp) { return quat->rotate(axis, angle/180.0f*3.14159f, (CombineOp)combineOp); }
+void RtQuatConvertToMatrix(const RtQuat * const qpQuat, RwMatrix * const mpMatrix) { mpMatrix->rotate(*qpQuat, COMBINEREPLACE); }
+
+
+#include "rtcharse.h"
+
+RwBool       RtCharsetOpen(void) { return Charset::open(); }
+void         RtCharsetClose(void) { return Charset::close(); }
+RtCharset   *RtCharsetPrint(RtCharset * charSet, const RwChar * string, RwInt32 x, RwInt32 y) { charSet->print(string, x, y, true); return charSet; }
+RtCharset   *RtCharsetPrintBuffered(RtCharset * charSet, const RwChar * string, RwInt32 x, RwInt32 y, RwBool hideSpaces) { charSet->printBuffered(string, x, y, hideSpaces); return charSet; }
+RwBool       RtCharsetBufferFlush(void) { Charset::flushBuffer(); return true; }
+RtCharset   *RtCharsetSetColors(RtCharset * charSet, const RwRGBA * foreGround, const RwRGBA * backGround) { return charSet->setColors(foreGround, backGround); }
+RtCharset   *RtCharsetGetDesc(RtCharset * charset, RtCharsetDesc * desc) { *desc = charset->desc; return charset; }
+RtCharset   *RtCharsetCreate(const RwRGBA * foreGround, const RwRGBA * backGround) { return Charset::create(foreGround, backGround); }
+RwBool       RtCharsetDestroy(RtCharset * charSet) { charSet->destroy(); return true; }
 
 
 

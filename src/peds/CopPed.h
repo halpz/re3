@@ -36,4 +36,6 @@ public:
 	void CopAI(void);
 };
 
+#ifndef PED_SKIN
 static_assert(sizeof(CCopPed) == 0x558, "CCopPed: error");
+#endif

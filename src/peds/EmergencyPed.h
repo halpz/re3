@@ -36,4 +36,6 @@ public:
 	void FiremanAI(void);
 	void MedicAI(void);
 };
+#ifndef PED_SKIN
 static_assert(sizeof(CEmergencyPed) == 0x554, "CEmergencyPed: error");
+#endif

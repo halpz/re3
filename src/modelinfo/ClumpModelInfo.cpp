@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "RwHelper.h"
 #include "General.h"
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
@@ -15,12 +16,40 @@ CClumpModelInfo::DeleteRwObject(void)
 	}
 }
 
+#ifdef PED_SKIN
+static RpAtomic*
+SetHierarchyForSkinAtomic(RpAtomic *atomic, void *data)
+{
+	RpSkinAtomicSetHAnimHierarchy(atomic, (RpHAnimHierarchy*)data);
+	return nil;
+}
+#endif
+
 RwObject*
 CClumpModelInfo::CreateInstance(void)
 {
-	if(m_clump)
-		return (RwObject*)RpClumpClone(m_clump);
-	return nil;
+	if(m_clump == nil)
+		return nil;
+	RpClump *clone = RpClumpClone(m_clump);
+#ifdef PED_SKIN
+	if(IsClumpSkinned(clone)){
+		RpHAnimHierarchy *hier;
+		RpHAnimAnimation *anim;
+
+		hier = GetAnimHierarchyFromClump(clone);
+		assert(hier);
+		// This seems dangerous as only the first atomic will get a hierarchy
+		// can we guarantee this if hands and head are also in the clump?
+		RpClumpForAllAtomics(clone, SetHierarchyForSkinAtomic, hier);
+		anim = HAnimAnimationCreateForHierarchy(hier);
+		RpHAnimHierarchySetCurrentAnim(hier, anim);
+//		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
+		// the rest is xbox only:
+		// RpSkinGetNumBones(RpSkinGeometryGetSkin(RpAtomicGetGeometry(IsClumpSkinned(clone))));
+		RpHAnimHierarchyUpdateMatrices(hier);
+	}
+#endif
+	return (RwObject*)clone;
 }
 
 RwObject*
@@ -48,8 +77,45 @@ CClumpModelInfo::SetClump(RpClump *clump)
 	CVisibilityPlugins::SetClumpModelInfo(m_clump, this);
 	AddTexDictionaryRef();
 	RpClumpForAllAtomics(clump, SetAtomicRendererCB, nil);
+
+	// TODO: also set for player?
 	if(strncmp(GetName(), "playerh", 8) == 0)
 		RpClumpForAllAtomics(clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
+
+#ifdef PED_SKIN
+	if(IsClumpSkinned(clump)){
+		int i;
+		RpHAnimHierarchy *hier;
+		RpAtomic *skinAtomic;
+		RpSkin *skin;
+
+		// mobile:
+//		hier = nil;
+//		RwFrameForAllChildren(RpClumpGetFrame(clump), GetHierarchyFromChildNodesCB, &hier);
+//		assert(hier);
+//		RpClumpForAllAtomics(clump, SetHierarchyForSkinAtomic, hier);
+//		skinAtomic = GetFirstAtomic(clump);
+
+		// xbox:
+		hier = GetAnimHierarchyFromClump(clump);
+		assert(hier);
+		RpSkinAtomicSetHAnimHierarchy(IsClumpSkinned(clump), hier);
+		skinAtomic = IsClumpSkinned(clump);
+
+		assert(skinAtomic);
+		skin = RpSkinGeometryGetSkin(RpAtomicGetGeometry(skinAtomic));
+		// ignore const
+		for(i = 0; i < RpGeometryGetNumVertices(RpAtomicGetGeometry(skinAtomic)); i++){
+			RwMatrixWeights *weights = (RwMatrixWeights*)&RpSkinGetVertexBoneWeights(skin)[i];
+			float sum = weights->w0 + weights->w1 + weights->w2 + weights->w3;
+			weights->w0 /= sum;
+			weights->w1 /= sum;
+			weights->w2 /= sum;
+			weights->w3 /= sum;
+		}
+//		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
+	}
+#endif
 }
 
 void

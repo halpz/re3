@@ -367,7 +367,12 @@ CAnimViewer::Update(void)
 					} else {
 						// Originally it was GetPad(1)->LeftShoulder2
 						if (pad->NewState.Triangle) {
-							CPedModelInfo::AnimatePedColModel(((CPedModelInfo*)CModelInfo::GetModelInfo(pTarget->m_modelIndex))->GetHitColModel(), RpClumpGetFrame(pTarget->GetClump()));
+#ifdef PED_SKIN
+							if(IsClumpSkinned(pTarget->GetClump()))
+								((CPedModelInfo*)CModelInfo::GetModelInfo(pTarget->m_modelIndex))->AnimatePedColModelSkinned(pTarget->GetClump());
+							else
+#endif
+								CPedModelInfo::AnimatePedColModel(((CPedModelInfo*)CModelInfo::GetModelInfo(pTarget->m_modelIndex))->GetHitColModel(), RpClumpGetFrame(pTarget->GetClump()));
 							AsciiToUnicode("Ped Col model will be animated as long as you hold the button", gUString);
 							CMessages::AddMessage(gUString, 100, 0);
 						}

@@ -7,7 +7,7 @@ struct AnimBlendFrameData;
 
 struct AnimBlendFrameUpdateData
 {
-	int foobar;
+	int foobar;	// TODO: figure out what this actually means
 	CAnimBlendNode *nodes[16];
 };
 
@@ -38,4 +38,5 @@ void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float timeDelta);
 
 
 extern CAnimBlendClumpData *gpAnimBlendClump;
-void FrameUpdateCallBack(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackNonSkinned(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg);

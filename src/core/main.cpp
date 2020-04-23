@@ -794,6 +794,7 @@ RenderDebugShit(void)
 	if(gbShowCollisionLines)
 		CRenderer::RenderCollisionLines();
 	ThePaths.DisplayPathData();
+	CDebug::DrawLines();
 #endif
 }
 

@@ -1,12 +1,17 @@
 #include "common.h"
 
+#include "RwHelper.h"
 #include "General.h"
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
+#include "Bones.h"
 #include "AnimBlendClumpData.h"
 #include "AnimBlendHierarchy.h"
 #include "AnimBlendAssociation.h"
 #include "RpAnimBlend.h"
+#ifdef PED_SKIN
+#include "PedModelInfo.h"
+#endif
 
 RwInt32 ClumpOffset;
 
@@ -122,19 +127,59 @@ FrameForAllChildrenFillFrameArrayCallBack(RwFrame *frame, void *data)
 	return frame;
 }
 
+// FrameInitCallBack on PS2
 void
-FrameInitCallBack(AnimBlendFrameData *frameData, void*)
+FrameInitCBnonskin(AnimBlendFrameData *frameData, void*)
 {
 	frameData->flag = 0;
 	frameData->resetPos = *RwMatrixGetPos(RwFrameGetMatrix(frameData->frame));
 }
 
 void
-RpAnimBlendClumpInit(RpClump *clump)
+FrameInitCBskin(AnimBlendFrameData *frameData, void*)
 {
+	frameData->flag = 0;
+}
+
 #ifdef PED_SKIN
-	TODO
-#else
+void
+RpAnimBlendClumpInitSkinned(RpClump *clump)
+{
+	int i;
+	RwV3d boneTab[64];
+	CAnimBlendClumpData *clumpData;
+	RpAtomic *atomic;
+	RpSkin *skin;
+	RpHAnimHierarchy *hier;
+	int numBones;
+
+	RpAnimBlendAllocateData(clump);
+	clumpData = *RPANIMBLENDCLUMPDATA(clump);
+	atomic = IsClumpSkinned(clump);
+	assert(atomic);
+	skin = RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic));
+	assert(skin);
+	numBones = RpSkinGetNumBones(skin);
+	clumpData->SetNumberOfBones(numBones);
+	hier = GetAnimHierarchyFromSkinClump(clump);
+	assert(hier);
+	memset(boneTab, 0, sizeof(boneTab));
+	SkinGetBonePositionsToTable(clump, boneTab);
+
+	AnimBlendFrameData *frames = clumpData->frames;
+	for(i = 0; i < numBones; i++){
+		frames[i].nodeID = HIERNODEID(hier, i);
+		frames[i].resetPos = boneTab[i];
+		frames[i].hanimFrame = (RpHAnimStdKeyFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
+	}
+	clumpData->ForAllFrames(FrameInitCBskin, nil);
+	clumpData->frames[0].flag |= AnimBlendFrameData::VELOCITY_EXTRACTION;
+}
+#endif
+
+void
+RpAnimBlendClumpInitNotSkinned(RpClump *clump)
+{
 	int numFrames = 0;
 	CAnimBlendClumpData *clumpData;
 	RwFrame *root;
@@ -147,9 +192,19 @@ RpAnimBlendClumpInit(RpClump *clump)
 	clumpData->SetNumberOfFrames(numFrames);
 	frames = clumpData->frames;
 	RwFrameForAllChildren(root, FrameForAllChildrenFillFrameArrayCallBack, &frames);
-	clumpData->ForAllFrames(FrameInitCallBack, nil);
+	clumpData->ForAllFrames(FrameInitCBnonskin, nil);
 	clumpData->frames[0].flag |= AnimBlendFrameData::VELOCITY_EXTRACTION;
+}
+
+void
+RpAnimBlendClumpInit(RpClump *clump)
+{
+#ifdef PED_SKIN
+	if(IsClumpSkinned(clump))
+		RpAnimBlendClumpInitSkinned(clump);
+	else
 #endif
+		RpAnimBlendClumpInitNotSkinned(clump);
 }
 
 bool
@@ -298,42 +353,68 @@ RpAnimBlendClumpGetFirstAssociation(RpClump *clump)
 	return CAnimBlendAssociation::FromLink(clumpData->link.next); 
 }
 
+// FillFrameArrayCallBack on PS2
 void
-FillFrameArrayCallBack(AnimBlendFrameData *frame, void *arg)
+FillFrameArrayCBnonskin(AnimBlendFrameData *frame, void *arg)
 {
 	AnimBlendFrameData **frames = (AnimBlendFrameData**)arg;
 	frames[CVisibilityPlugins::GetFrameHierarchyId(frame->frame)] = frame;
 }
 
+#ifdef PED_SKIN
+void
+RpAnimBlendClumpFillFrameArraySkin(RpClump *clump, AnimBlendFrameData **frames)
+{
+	int i;
+	CAnimBlendClumpData *clumpData = *RPANIMBLENDCLUMPDATA(clump);
+	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(clump);
+	for(i = PED_MID; i < PED_NODE_MAX; i++)
+		frames[i] = &clumpData->frames[RpHAnimIDGetIndex(hier, ConvertPedNode2BoneTag(i))];
+}
+#endif
+
 void
 RpAnimBlendClumpFillFrameArray(RpClump *clump, AnimBlendFrameData **frames)
 {
 #ifdef PED_SKIN
-	TODO
-#else
-	(*RPANIMBLENDCLUMPDATA(clump))->ForAllFrames(FillFrameArrayCallBack, frames);
+	if(IsClumpSkinned(clump))
+		RpAnimBlendClumpFillFrameArraySkin(clump, frames);
+	else
 #endif
+		(*RPANIMBLENDCLUMPDATA(clump))->ForAllFrames(FillFrameArrayCBnonskin, frames);
 }
 
 AnimBlendFrameData *pFrameDataFound;
 
+// FrameFindCallBack on PS2
 void
-FrameFindCallBack(AnimBlendFrameData *frame, void *arg)
+FrameFindByNameCBnonskin(AnimBlendFrameData *frame, void *arg)
 {
 	char *nodename = GetFrameNodeName(frame->frame);
 	if(!CGeneral::faststricmp(nodename, (char*)arg))
 		pFrameDataFound = frame;
 }
 
+#ifdef PED_SKIN
+void
+FrameFindByNameCBskin(AnimBlendFrameData *frame, void *arg)
+{
+	const char *name = ConvertBoneTag2BoneName(frame->nodeID);
+	if(name && CGeneral::faststricmp(name, (char*)arg) == 0)
+		pFrameDataFound = frame;
+}
+#endif
+
 AnimBlendFrameData*
 RpAnimBlendClumpFindFrame(RpClump *clump, const char *name)
 {
 	pFrameDataFound = nil;
 #ifdef PED_SKIN
-	TODO
-#else
-	(*RPANIMBLENDCLUMPDATA(clump))->ForAllFrames(FrameFindCallBack, (void*)name);
+	if(IsClumpSkinned(clump))
+		(*RPANIMBLENDCLUMPDATA(clump))->ForAllFrames(FrameFindByNameCBskin, (void*)name);
+	else
 #endif
+		(*RPANIMBLENDCLUMPDATA(clump))->ForAllFrames(FrameFindByNameCBnonskin, (void*)name);
 	return pFrameDataFound;
 }
 
@@ -369,7 +450,12 @@ RpAnimBlendClumpUpdateAnimations(RpClump *clump, float timeDelta)
 	}
 	updateData.nodes[i] = nil;
 
-	clumpData->ForAllFrames(FrameUpdateCallBack, &updateData);
+#ifdef PED_SKIN
+	if(IsClumpSkinned(clump))
+		clumpData->ForAllFrames(FrameUpdateCallBackSkinned, &updateData);
+	else
+#endif
+		clumpData->ForAllFrames(FrameUpdateCallBackNonSkinned, &updateData);
 
 	for(link = clumpData->link.next; link; link = link->next){
 		CAnimBlendAssociation *assoc = CAnimBlendAssociation::FromLink(link);
