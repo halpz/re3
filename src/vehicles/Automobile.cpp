@@ -2848,6 +2848,7 @@ CAutomobile::ProcessBuoyancy(void)
 		static uint32 nGenerateWaterCircles = 0;
 
 		if(initialSpeed.z < -0.3f && impulse.z > 0.3f){
+#if defined(PC_PARTICLE) || defined (PS2_ALTERNATIVE_CARSPLASH)
 			RwRGBA color;
 			color.red = (0.5f * CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed())*0.45f*255;
 			color.green = (0.5f * CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen())*0.45f*255;
@@ -2856,6 +2857,30 @@ CAutomobile::ProcessBuoyancy(void)
 			CParticleObject::AddObject(POBJECT_CAR_WATER_SPLASH, GetPosition(),
 				CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.15f, 0.3f)),
 				0.0f, 75, color, true);
+#else
+			CVector pos = (initialSpeed * 2.0f) + (GetPosition() + point);
+	
+			for ( int32 i = 0; i < 360; i += 4 )
+			{
+				float fSin = Sin(float(i));
+				float fCos = Cos(float(i));
+				
+				CVector dir(fSin*0.01f, fCos*0.01f, CGeneral::GetRandomNumberInRange(0.25f, 0.45f));
+				
+				CParticle::AddParticle(PARTICLE_CAR_SPLASH,
+					pos + CVector(fSin*4.5f, fCos*4.5f, 0.0f),
+					dir, NULL, 0.0f, CRGBA(225, 225, 255, 180));
+	
+				for ( int32 j = 0; j < 3; j++ )
+				{
+					float fMul = 1.5f * float(j + 1);
+					
+					CParticle::AddParticle(PARTICLE_CAR_SPLASH,
+						pos + CVector(fSin * fMul, fCos * fMul, 0.0f),
+						dir, NULL, 0.0f, CRGBA(225, 225, 255, 180));                      
+				}
+			}
+#endif
 
 			nGenerateRaindrops = CTimer::GetTimeInMilliseconds() + 300;
 			nGenerateWaterCircles = CTimer::GetTimeInMilliseconds() + 60;
@@ -2909,9 +2934,16 @@ CAutomobile::ProcessBuoyancy(void)
 				CVector pos = m_aWheelColPoints[i].point + 0.3f*GetUp() - GetPosition();
 				CVector vSpeed = GetSpeed(pos);
 				vSpeed.z = 0.0f;
+#ifdef GTA_PS2_STUFF
+				// ps2 puddle physics
+				CVector moveForce = CTimer::GetTimeStep() * (m_fMass * (vSpeed * -0.003f));
+				ApplyMoveForce(moveForce.x, moveForce.y, moveForce.z);
+#endif
 				float fSpeed = vSpeed.MagnitudeSqr();
+#ifdef PC_PARTICLE
 				if(fSpeed > sq(0.05f)){
 					fSpeed = Sqrt(fSpeed);
+
 					float size = Min((fSpeed < 0.15f ? 0.25f : 0.75f)*fSpeed, 0.6f);
 					CVector right = 0.2f*fSpeed*GetRight() + 0.2f*vSpeed;
 
@@ -2924,10 +2956,39 @@ CAutomobile::ProcessBuoyancy(void)
 					CParticle::AddParticle(PARTICLE_RUBBER_SMOKE,
 						pos + GetPosition(), -0.6f*right,
 						nil, size, smokeCol, 0, 0, 0, 0);
-
+				
 					if((CTimer::GetFrameCounter() & 0xF) == 0)
 						DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_SPLASH, 2000.0f*fSpeed);
 				}
+#else
+				if ( ( (CTimer::GetFrameCounter() + i) & 3 ) == 0 )
+				{
+					if(fSpeed > sq(0.05f))
+					{
+						fSpeed = Sqrt(fSpeed);
+						CRGBA color(155, 185, 155, 255);
+						float boxY = GetColModel()->boundingBox.max.y;
+						CVector right = 0.5f * GetRight();
+						
+						if ( i == 2 )
+						{
+							CParticle::AddParticle(PARTICLE_PED_SPLASH,
+								GetPosition() + (boxY * GetForward()) + right,
+								0.75f*m_vecMoveSpeed, NULL, 0.0f, color);
+			
+						}
+						else if ( i == 0 )
+						{
+							CParticle::AddParticle(PARTICLE_PED_SPLASH,
+								GetPosition() + (boxY * GetForward()) - right,
+								0.75f*m_vecMoveSpeed, NULL, 0.0f, color);
+						}
+						
+						if((CTimer::GetFrameCounter() & 0xF) == 0)
+							DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_SPLASH, 2000.0f*fSpeed);
+					}
+				}
+#endif	
 			}
 		}
 	}
@@ -3486,14 +3547,29 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 		}
 		return 0;
 	default:
-		// Is this even visible?
-		if(CWeather::WetRoads > 0.01f && CTimer::GetFrameCounter() & 1){
-			CParticle::AddParticle(PARTICLE_WATERSPRAY,
+		if ( CWeather::WetRoads > 0.01f 
+#ifdef PC_PARTICLE	
+			&& CTimer::GetFrameCounter() & 1
+#endif	
+			)
+		{
+			CParticle::AddParticle(
+#ifdef FIX_BUGS
+				PARTICLE_WHEEL_WATER,
+#else
+				PARTICLE_WATERSPRAY,
+#endif
 				colpoint->point + CVector(0.0f, 0.0f, 0.25f+0.25f),
-				CVector(0.0f, 0.0f, 1.0f), nil,
+#ifdef PC_PARTICLE
+				CVector(0.0f, 0.0f, 1.0f),
+#else	
+				CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.005f, 0.04f)),
+#endif		
+				nil,
 				CGeneral::GetRandomNumberInRange(0.1f, 0.5f), waterCol);
 			return 0;
 		}
+		
 		return 1;
 	}
 }

@@ -9548,6 +9548,9 @@ cAudioManager::ResetTimers(uint32 time)
 		SampleManager.SetEffectsFadeVolume(0);
 		SampleManager.SetMusicFadeVolume(0);
 		MusicManager.ResetMusicAfterReload();
+#ifdef OPENAL
+		SampleManager.Service();
+#endif
 	}
 }
 
@@ -9603,6 +9606,9 @@ cAudioManager::ServiceSoundEffects()
 	ProcessMissionAudio();
 	AdjustSamplesVolume();
 	ProcessActiveQueues();
+#ifdef WITHMILES
+	SampleManager.Service();
+#endif
 	for(int32 i = 0; i < m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal; ++i) {
 		cAudioScriptObject *object =
 		    (cAudioScriptObject *)m_asAudioEntities[m_sAudioScriptObjectManager.m_anScriptObjectEntityIndices[i]]
@@ -9983,7 +9989,7 @@ cAudioManager::Terminate()
 		m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal = 0;
 		PreTerminateGameSpecificShutdown();
 
-		for(uint32 i = 0; i < DIGITALCHANNELS; i++) {
+		for(uint32 i = 0; i < MAX_SAMPLEBANKS; i++) {
 			if(SampleManager.IsSampleBankLoaded(i)) SampleManager.UnloadSampleBank(i);
 		}
 
