@@ -594,8 +594,9 @@ psInitialise(void)
 	C_PcSave::SetSaveDirectory(_psGetUserFilesFolder());
 	
 	InitialiseLanguage();
-
+#ifndef GTA3_1_1_PATCH
 	FrontEndMenuManager.LoadSettings();
+#endif
 	
 	gGameState = GS_START_UP;
 	TRACE("gGameState = GS_START_UP");
@@ -640,7 +641,11 @@ psInitialise(void)
 			_dwOperatingSystemVersion = OS_WIN95;
 		}
 	}
-	
+
+#ifdef GTA3_1_1_PATCH
+	FrontEndMenuManager.LoadSettings();
+#endif
+
 	dwDXVersion = GetDXVersion();
 	debug("DirectX version 0x%x\n", dwDXVersion);
 	
