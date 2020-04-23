@@ -8,8 +8,7 @@ cParticleSystemMgr mod_ParticleSystemManager;
 
 const char *ParticleFilename = "PARTICLE.CFG";
 
-//cParticleSystemMgr::cParticleSystemMgr()
-void cParticleSystemMgr::ctor()
+cParticleSystemMgr::cParticleSystemMgr()
 {
 	memset(this, 0, sizeof(*this));
 }

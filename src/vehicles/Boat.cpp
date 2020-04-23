@@ -340,27 +340,46 @@ CBoat::ProcessControl(void)
 							else
 								jetPos.z = 0.0f;
 
+#ifdef PC_PARTICLE
 							CVector wakePos = GetPosition() + sternPos;
 							wakePos.z -= 0.65f;
+#else
+							CVector wakePos = GetPosition() + sternPos;
+							wakePos.z = -0.3f;
+#endif
 
 							CVector wakeDir = 0.75f * jetDir;
 
 							CParticle::AddParticle(PARTICLE_BOAT_THRUSTJET, jetPos, jetDir, nil, 0.0f, jetColor);
+#ifdef PC_PARTICLE
 							CParticle::AddParticle(PARTICLE_CAR_SPLASH, jetPos, 0.25f * jetDir, nil, 1.0f, splashColor,
 								CGeneral::GetRandomNumberInRange(0, 30),
 								CGeneral::GetRandomNumberInRange(0, 90), 3);
+#endif
 							if(!cameraHack)
 								CParticle::AddParticle(PARTICLE_BOAT_WAKE, wakePos, wakeDir, nil, 0.0f, jetColor);
 						}else if((CTimer::GetFrameCounter() + m_randomSeed) & 1){
+#ifdef PC_PARTICLE
 							jetDir.z = 0.018f;
 							jetDir.x *= 0.01f;
 							jetDir.y *= 0.01f;
 							propellerWorld.z += 1.5f;
-
+							
 							CParticle::AddParticle(PARTICLE_BOAT_SPLASH, propellerWorld, jetDir, nil, 1.5f, jetColor);
+#else
+							jetDir.z = 0.018f;
+							jetDir.x *= 0.03f;
+							jetDir.y *= 0.03f;
+							propellerWorld.z += 1.0f;
+							
+							CParticle::AddParticle(PARTICLE_BOAT_SPLASH, propellerWorld, jetDir, nil, 0.0f, jetColor);
+#endif
+							
+#ifdef PC_PARTICLE
 							CParticle::AddParticle(PARTICLE_CAR_SPLASH, propellerWorld, 0.1f * jetDir, nil, 0.5f, splashColor,
 								CGeneral::GetRandomNumberInRange(0, 30),
 								CGeneral::GetRandomNumberInRange(0, 90), 3);
+#endif
 						}
 					}
 				}else if(!onLand){
@@ -416,36 +435,66 @@ CBoat::ProcessControl(void)
 		}
 
 		// Spray particles on sides of boat
-		if(m_nDeltaVolumeUnderWater > 75){
+#ifdef PC_PARTICLE
+		if(m_nDeltaVolumeUnderWater > 75)
+#else
+		if(m_nDeltaVolumeUnderWater > 120)
+#endif
+		{
 			float speed = m_vecMoveSpeed.Magnitude();
 			float splash1Size = speed;
-			float splash2Size = m_nDeltaVolumeUnderWater * 0.005f * 0.2f;
+			float splash2Size = float(m_nDeltaVolumeUnderWater) * 0.005f * 0.2f;
 			float front = 0.9f * GetColModel()->boundingBox.max.y;
 			if(splash1Size > 0.75f) splash1Size = 0.75f;
 
 			CVector dir, pos;
 
 			// right
+#ifdef PC_PARTICLE
 			dir = -0.5f*m_vecMoveSpeed;
 			dir.z += 0.1f*speed;
 			dir += 0.5f*GetRight()*speed;
 			pos = front*GetForward() + 0.5f*GetRight() + GetPosition() + m_vecBuoyancePoint;
 			CWaterLevel::GetWaterLevel(pos, &pos.z, true);
+#else
+			dir = 0.3f*m_vecMoveSpeed;
+			dir.z += 0.05f*speed;
+			dir += 0.5f*GetRight()*speed;
+			pos = (GetPosition() + m_vecBuoyancePoint) + (1.5f*GetRight());
+#endif
+			
+#ifdef PC_PARTICLE
 			CParticle::AddParticle(PARTICLE_CAR_SPLASH, pos, 0.75f * dir, nil, splash1Size, splashColor,
 				CGeneral::GetRandomNumberInRange(0, 30),
 				CGeneral::GetRandomNumberInRange(0, 90), 1);
 			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, splash2Size, jetColor);
+#else
+			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, splash2Size);
+#endif
+			
 
 			// left
+#ifdef PC_PARTICLE
 			dir = -0.5f*m_vecMoveSpeed;
 			dir.z += 0.1f*speed;
 			dir -= 0.5f*GetRight()*speed;
 			pos = front*GetForward() - 0.5f*GetRight() + GetPosition() + m_vecBuoyancePoint;
 			CWaterLevel::GetWaterLevel(pos, &pos.z, true);
+#else
+			dir = 0.3f*m_vecMoveSpeed;
+			dir.z += 0.05f*speed;
+			dir -= 0.5f*GetRight()*speed;
+			pos = (GetPosition() + m_vecBuoyancePoint) - (1.5f*GetRight());
+#endif
+			
+#ifdef PC_PARTICLE
 			CParticle::AddParticle(PARTICLE_CAR_SPLASH, pos, 0.75f * dir, nil, splash1Size, splashColor,
 				CGeneral::GetRandomNumberInRange(0, 30),
 				CGeneral::GetRandomNumberInRange(0, 90), 1);
 			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, splash2Size, jetColor);
+#else
+			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, splash2Size);
+#endif
 		}
 
 		m_fPrevVolumeUnderWater = m_fVolumeUnderWater;
