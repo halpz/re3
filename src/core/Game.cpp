@@ -84,6 +84,7 @@
 #include "World.h"
 #include "ZoneCull.h"
 #include "Zones.h"
+#include "debugmenu.h"
 
 
 
@@ -618,7 +619,6 @@ void CGame::InitialiseWhenRestarting(void)
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 }
 
-extern void (*DebugMenuProcess)(void);
 void CGame::Process(void) 
 {
 	CPad::UpdatePads();

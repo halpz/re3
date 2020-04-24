@@ -59,6 +59,7 @@
 #include "timebars.h"
 #include "GenericGameStorage.h"
 #include "SceneEdit.h"
+#include "debugmenu.h"
 
 GlobalScene Scene;
 
@@ -90,9 +91,7 @@ void GameInit(void);
 void SystemInit(void);
 void TheGame(void);
 
-extern void (*DebugMenuProcess)(void);
-extern void (*DebugMenuRender)(void);
-void DebugMenuInit(void);
+void DebugMenuInit(void) {}
 void DebugMenuPopulate(void);
 
 
