@@ -95,6 +95,18 @@ createMenuFont(void)
 	RtCharsetGetDesc(fontStyles[MENUFONT_NORMAL], &fontDesc);
 }
 
+void
+destroyMenuFont(void)
+{
+	RtCharsetDestroy(fontStyles[MENUFONT_NORMAL]);
+	fontStyles[MENUFONT_NORMAL] = nil;
+	RtCharsetDestroy(fontStyles[MENUFONT_SEL_ACTIVE]);
+	fontStyles[MENUFONT_SEL_ACTIVE] = nil;
+	RtCharsetDestroy(fontStyles[MENUFONT_SEL_INACTIVE]);
+	fontStyles[MENUFONT_SEL_INACTIVE] = nil;
+	RtCharsetDestroy(fontStyles[MENUFONT_MOUSE]);
+	fontStyles[MENUFONT_MOUSE] = nil;
+}
 
 
 
@@ -755,7 +767,7 @@ static uint8 arrowPx[] = {
 };
 
 void
-initDebug(void)
+DebugMenuInit(void)
 {
 	createMenuFont();
 
@@ -779,6 +791,22 @@ initDebug(void)
 	arrow = RwRasterSetFromImage(arrow, img);
 	assert(arrow);
 	RwImageDestroy(img);
+
+	menuInitialized = true;
+}
+
+void
+DebugMenuShutdown(void)
+{
+	if(menuInitialized){
+		destroyMenuFont();
+		RwRasterDestroy(cursor);
+		cursor = nil;
+		RwRasterDestroy(arrow);
+		arrow = nil;
+		// TODO: the menus ...
+	}
+	menuInitialized = false;
 }
 
 void
@@ -971,10 +999,8 @@ DebugMenuProcess(void)
 
 	pad->DisablePlayerControls = 1;
 	// TODO: this could happen earlier
-	if(!menuInitialized){
-		initDebug();
-		menuInitialized = 1;
-	}
+	if(!menuInitialized)
+		DebugMenuInit();
 	updateMouse();
 
 }

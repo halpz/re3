@@ -312,6 +312,26 @@ HAnimAnimationCreateForHierarchy(RpHAnimHierarchy *hier)
 	return anim;
 }
 
+RpAtomic*
+AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data)
+{
+	if(RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))){
+		RpHAnimHierarchy *hier = RpSkinAtomicGetHAnimHierarchy(atomic);
+#ifdef LIBRW
+		if(hier && hier->interpolator->currentAnim){
+			RpHAnimAnimationDestroy(hier->interpolator->currentAnim);
+			hier->interpolator->currentAnim = nil;
+		}
+#else
+		if(hier && hier->pCurrentAnim){
+			RpHAnimAnimationDestroy(hier->pCurrentAnim);
+			hier->pCurrentAnim = nil;
+		}
+#endif
+	}
+	return atomic;
+}
+
 void
 RenderSkeleton(RpHAnimHierarchy *hier)
 {

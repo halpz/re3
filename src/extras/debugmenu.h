@@ -31,6 +31,8 @@ MenuEntry *DebugMenuAddCmd(const char *path, const char *name, TriggerFunc trigg
 void DebugMenuEntrySetWrap(MenuEntry *e, bool wrap);
 void DebugMenuEntrySetStrings(MenuEntry *e, const char **strings);
 void DebugMenuEntrySetAddress(MenuEntry *e, void *addr);
+void DebugMenuInit(void);
+void DebugMenuShutdown(void);
 void DebugMenuProcess(void);
 void DebugMenuRender(void);
 

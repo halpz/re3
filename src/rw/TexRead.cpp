@@ -66,10 +66,7 @@ RwTexDictionaryGtaStreamRead(RwStream *stream)
 
 	if(!RwStreamFindChunk(stream, rwID_STRUCT, &size, &version))
 		return nil;
-	assert(size == 4);
-int foo = RwStreamRead(stream, &numTextures, size);
-if(foo != size)
-//	if(RwStreamRead(stream, &numTextures, size) != size)
+	if(RwStreamRead(stream, &numTextures, size) != size)
 		return nil;
 
 	texDict = RwTexDictionaryCreate();
