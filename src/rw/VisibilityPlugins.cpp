@@ -543,6 +543,21 @@ CVisibilityPlugins::RenderPedHiDetailCB(RpAtomic *atomic)
 	return atomic;
 }
 
+// This is needed for peds with only one clump, i.e. skinned models
+// strangely even the xbox version has no such thing
+RpAtomic*
+CVisibilityPlugins::RenderPedCB(RpAtomic *atomic)
+{
+	int32 alpha;
+
+	alpha = GetClumpAlpha(RpAtomicGetClump(atomic));
+	if(alpha == 255)
+		AtomicDefaultRenderCallBack(atomic);
+	else
+		RenderAlphaAtomic(atomic, alpha);
+	return atomic;
+}
+
 float
 CVisibilityPlugins::GetDistanceSquaredFromCamera(RwFrame *frame)
 {

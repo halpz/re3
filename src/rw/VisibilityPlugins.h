@@ -63,6 +63,7 @@ public:
 	static RpAtomic *RenderPlayerCB(RpAtomic *atomic);
 	static RpAtomic *RenderPedLowDetailCB(RpAtomic *atomic);
 	static RpAtomic *RenderPedHiDetailCB(RpAtomic *atomic);
+	static RpAtomic *RenderPedCB(RpAtomic *atomic);	// for skinned models with only one clump
 
 	static void RenderAlphaAtomics(void);
 	static void RenderFadingEntities(void);
@@ -131,3 +132,5 @@ public:
 
 	static bool PluginAttach(void);
 };
+
+RpMaterial *SetAlphaCB(RpMaterial *material, void *data);

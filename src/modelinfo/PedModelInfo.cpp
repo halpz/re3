@@ -1,6 +1,9 @@
 #include "common.h"
 
+#include "RwHelper.h"
 #include "General.h"
+#include "Bones.h"
+#include "SurfaceTable.h"
 #include "Ped.h"
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
@@ -9,13 +12,31 @@
 void
 CPedModelInfo::DeleteRwObject(void)
 {
-	CClumpModelInfo::DeleteRwObject();
 	if(m_hitColModel)
 		delete m_hitColModel;
 	m_hitColModel = nil;
+#ifdef PED_SKIN
+	RwFrame *frame;
+	if(m_head){
+		frame = RpAtomicGetFrame(m_head);
+		RpAtomicDestroy(m_head);
+		RwFrameDestroy(frame);
+	}
+	if(m_lhand){
+		frame = RpAtomicGetFrame(m_lhand);
+		RpAtomicDestroy(m_lhand);
+		RwFrameDestroy(frame);
+	}
+	if(m_rhand){
+		frame = RpAtomicGetFrame(m_rhand);
+		RpAtomicDestroy(m_rhand);
+		RwFrameDestroy(frame);
+	}
+#endif
+	CClumpModelInfo::DeleteRwObject();	// PC calls this first
 }
 
-RwObjectNameIdAssocation CPedModelInfo::m_pPedIds[12] = {
+RwObjectNameIdAssocation CPedModelInfo::m_pPedIds[PED_NODE_MAX] = {
 	{ "Smid",	PED_MID, 0, },	// that is strange...
 	{ "Shead",	PED_HEAD, 0, },
 	{ "Supperarml",	PED_UPPERARML, 0, },
@@ -30,15 +51,70 @@ RwObjectNameIdAssocation CPedModelInfo::m_pPedIds[12] = {
 	{ nil,	0, 0, },
 };
 
+#ifdef PED_SKIN
+struct LimbCBarg
+{
+	CPedModelInfo *mi;
+	RpClump *clump;
+	int32 frameIDs[3];
+};
+
+RpAtomic*
+CPedModelInfo::findLimbsCb(RpAtomic *atomic, void *data)
+{
+	LimbCBarg *limbs = (LimbCBarg*)data;
+	RwFrame *frame = RpAtomicGetFrame(atomic);
+	const char *name = GetFrameNodeName(frame);
+	if(CGeneral::faststricmp(name, "Shead01") == 0){
+		limbs->frameIDs[0] = RpHAnimFrameGetID(frame);
+		limbs->mi->m_head = atomic;
+		RpClumpRemoveAtomic(limbs->clump, atomic);
+		RwFrameRemoveChild(frame);
+	}else if(CGeneral::faststricmp(name, "SLhand01") == 0){
+		limbs->frameIDs[1] = RpHAnimFrameGetID(frame);
+		limbs->mi->m_lhand = atomic;
+		RpClumpRemoveAtomic(limbs->clump, atomic);
+		RwFrameRemoveChild(frame);
+	}else if(CGeneral::faststricmp(name, "SRhand01") == 0){
+		limbs->frameIDs[2] = RpHAnimFrameGetID(frame);
+		limbs->mi->m_rhand = atomic;
+		RpClumpRemoveAtomic(limbs->clump, atomic);
+		RwFrameRemoveChild(frame);
+	}
+	return atomic;
+}
+#endif
+
 void
 CPedModelInfo::SetClump(RpClump *clump)
 {
+#ifdef PED_SKIN
+
+	// CB has to be set here before atomics are detached from clump
+	if(strncmp(GetName(), "player", 7) == 0)
+		RpClumpForAllAtomics(clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
+	if(IsClumpSkinned(clump)){
+		LimbCBarg limbs = { this, clump, { 0, 0, 0 } };
+		RpClumpForAllAtomics(clump, findLimbsCb, &limbs);
+	}
+	CClumpModelInfo::SetClump(clump);
+	SetFrameIds(m_pPedIds);
+	if(m_hitColModel == nil && !IsClumpSkinned(clump))
+		CreateHitColModel();
+	// And again because CClumpModelInfo resets it
+	if(strncmp(GetName(), "player", 7) == 0)
+		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
+	else if(IsClumpSkinned(clump))
+		// skinned peds have no low detail version, so they don't have the right render Cb
+		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPedCB);
+#else
 	CClumpModelInfo::SetClump(clump);
 	SetFrameIds(m_pPedIds);
 	if(m_hitColModel == nil)
 		CreateHitColModel();
 	if(strncmp(GetName(), "player", 7) == 0)
 		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
+#endif
 }
 
 RpAtomic*
@@ -157,7 +233,7 @@ CPedModelInfo::CreateHitColModel(void)
 		}
 		if(nodeFrame){
 			float radius = m_pColNodeInfos[i].radius;
-			if(m_pColNodeInfos[i].pieceType == 6)
+			if(m_pColNodeInfos[i].pieceType == PEDPIECE_HEAD)
 				RwFrameForAllObjects(nodeFrame, FindHeadRadiusCB, &radius);
 			RwMatrixTransform(mat, RwFrameGetMatrix(nodeFrame), rwCOMBINEREPLACE);
 			const char *name = GetFrameNodeName(nodeFrame);
@@ -172,7 +248,7 @@ CPedModelInfo::CreateHitColModel(void)
 			center.x = mat->pos.x + m_pColNodeInfos[i].x;
 			center.y = mat->pos.y + 0.0f;
 			center.z = mat->pos.z + m_pColNodeInfos[i].z;
-			spheres[i].Set(radius, center, 17, m_pColNodeInfos[i].pieceType);
+			spheres[i].Set(radius, center, SURFACE_FLESH, m_pColNodeInfos[i].pieceType);
 		}
 	}
 	RwMatrixDestroy(mat);
@@ -186,7 +262,7 @@ CPedModelInfo::CreateHitColModel(void)
 	max.x = max.y = 0.5f;
 	max.z = 1.2f;
 	colmodel->boundingBox.Set(min, max, 0, 0);
-	colmodel->level = 0;
+	colmodel->level = LEVEL_NONE;
 	m_hitColModel = colmodel;
 }
 
@@ -229,3 +305,81 @@ CPedModelInfo::AnimatePedColModel(CColModel* colmodel, RwFrame* frame)
 
 	return colmodel;
 }
+
+#ifdef PED_SKIN
+void
+CPedModelInfo::CreateHitColModelSkinned(RpClump *clump)
+{
+	CVector center;
+	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(clump);
+	CColModel *colmodel = new CColModel;
+	CColSphere *spheres = (CColSphere*)RwMalloc(NUMPEDINFONODES*sizeof(CColSphere));
+	RwFrame *root = RpClumpGetFrame(m_clump);
+	RwMatrix *invmat = RwMatrixCreate();
+	RwMatrix *mat = RwMatrixCreate();
+	RwMatrixInvert(invmat, RwFrameGetMatrix(RpClumpGetFrame(clump)));
+
+	for(int i = 0; i < NUMPEDINFONODES; i++){
+		*mat = *invmat;
+		int id = ConvertPedNode2BoneTag(m_pColNodeInfos[i].pedNode);	// this is wrong, wtf R* ???
+		int idx = RpHAnimIDGetIndex(hier, id);
+
+		// This doesn't really work as the positions are not initialized yet
+		RwMatrixTransform(mat, &RpHAnimHierarchyGetMatrixArray(hier)[idx], rwCOMBINEPRECONCAT);
+		RwV3d pos = { 0.0f, 0.0f, 0.0f };
+		RwV3dTransformPoints(&pos, &pos, 1, mat);
+
+		center.x = pos.x + m_pColNodeInfos[i].x;
+		center.y = pos.y + 0.0f;
+		center.z = pos.z + m_pColNodeInfos[i].z;
+		spheres[i].Set(m_pColNodeInfos[i].radius, center, SURFACE_FLESH, m_pColNodeInfos[i].pieceType);
+	}
+	RwMatrixDestroy(invmat);
+	RwMatrixDestroy(mat);
+	colmodel->spheres = spheres;
+	colmodel->numSpheres = NUMPEDINFONODES;
+	center.x = center.y = center.z = 0.0f;
+	colmodel->boundingSphere.Set(2.0f, center, 0, 0);
+	CVector min, max;
+	min.x = min.y = -0.5f;
+	min.z = -1.2f;
+	max.x = max.y = 0.5f;
+	max.z = 1.2f;
+	colmodel->boundingBox.Set(min, max, 0, 0);
+	colmodel->level = LEVEL_NONE;
+	m_hitColModel = colmodel;
+}
+
+CColModel*
+CPedModelInfo::AnimatePedColModelSkinned(RpClump *clump)
+{
+	if(m_hitColModel == nil){
+		CreateHitColModelSkinned(clump);
+		return m_hitColModel;
+	}
+	RwMatrix *invmat, *mat;
+	CColSphere *spheres = m_hitColModel->spheres;
+	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(clump);
+	invmat = RwMatrixCreate();
+	mat = RwMatrixCreate();
+	RwMatrixInvert(invmat, RwFrameGetMatrix(RpClumpGetFrame(clump)));
+
+	for(int i = 0; i < NUMPEDINFONODES; i++){
+		*mat = *invmat;
+		int id = ConvertPedNode2BoneTag(m_pColNodeInfos[i].pedNode);
+		int idx = RpHAnimIDGetIndex(hier, id);
+
+		RwMatrixTransform(mat, &RpHAnimHierarchyGetMatrixArray(hier)[idx], rwCOMBINEPRECONCAT);
+		RwV3d pos = { 0.0f, 0.0f, 0.0f };
+		RwV3dTransformPoints(&pos, &pos, 1, mat);
+
+		spheres[i].center.x = pos.x + m_pColNodeInfos[i].x;
+		spheres[i].center.y = pos.y + 0.0f;
+		spheres[i].center.z = pos.z + m_pColNodeInfos[i].z;
+	}
+	RwMatrixDestroy(invmat);
+	RwMatrixDestroy(mat);
+	return m_hitColModel;
+}
+
+#endif

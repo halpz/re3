@@ -1,5 +1,6 @@
 #pragma once
 
+#include "RwHelper.h"
 #include "AnimManager.h"
 #include "Crime.h"
 #include "EventList.h"
@@ -380,9 +381,11 @@ public:
 	uint32 bFallenDown : 1;
 #ifdef VC_PED_PORTS
 	uint32 bSomeVCflag1 : 1;
-#else
-	uint32 m_ped_flagI20 : 1;
 #endif
+#ifdef PED_SKIN
+	uint32 bDontAcceptIKLookAts : 1;	// TODO: find uses of this
+#endif
+	// our own flags
 	uint32 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 
@@ -401,6 +404,10 @@ public:
 	CEntity* m_pEventEntity;
 	float m_fAngleToEvent;
 	AnimBlendFrameData *m_pFrames[PED_NODE_MAX];
+#ifdef PED_SKIN
+	// stored inside the clump with non-skin ped
+	RpAtomic *m_pWeaponModel;
+#endif
 	AssocGroupId m_animGroup;
 	CAnimBlendAssociation *m_pVehicleAnim;
 	CVector2D m_vecAnimMoveDelta;
@@ -730,7 +737,6 @@ public:
 	static void PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 
-	// functions that I see unnecessary to hook
 	bool IsPlayer(void);
 	bool UseGroundColModel(void);
 	bool CanSetPedState(void);
@@ -780,7 +786,6 @@ public:
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
-	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
 
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
@@ -815,6 +820,44 @@ public:
 			SetMoveState(PEDMOVE_WALK);
 	}
 
+	// Using this to abstract nodes of skinned and non-skinned meshes
+	CVector GetNodePosition(int32 node)
+	{
+#ifdef PED_SKIN
+		if(IsClumpSkinned(GetClump())){
+			RwV3d pos = { 0.0f, 0.0f, 0.0f };
+			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+			int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
+			RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
+			// this is just stupid
+			//RwV3dTransformPoints(&pos, &pos, 1, &mats[idx]);
+			pos = mats[idx].pos;
+			return pos;
+		}else
+#endif
+		{
+			RwMatrix mat;
+			CPedIK::GetWorldMatrix(m_pFrames[node]->frame, &mat);
+			return mat.pos;
+		}
+	}
+	void TransformToNode(CVector &pos, int32 node)
+	{
+#ifdef PED_SKIN
+		if(IsClumpSkinned(GetClump())){
+			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+			int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
+			RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
+			RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, &mats[idx]);
+		}else
+#endif
+		{
+			RwFrame *frame;
+			for (frame = m_pFrames[node]->frame; frame; frame = RwFrameGetParent(frame))
+				RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, RwFrameGetMatrix(frame));
+		}
+	}
+
 	// set by 0482:set_threat_reaction_range_multiplier opcode
 	static uint16 nThreatReactionRangeMultiplier;
 
@@ -836,6 +879,10 @@ public:
 	static void SwitchDebugDisplay(void);
 	void DebugRenderOnePedText(void);
 #endif
+
+#ifdef PED_SKIN
+	void renderLimb(int node);
+#endif
 };
 
 class cPedParams
@@ -849,6 +896,7 @@ public:
 
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 
+#ifndef PED_SKIN
 static_assert(offsetof(CPed, m_nPedState) == 0x224, "CPed: error");
 static_assert(offsetof(CPed, m_pCurSurface) == 0x2FC, "CPed: error");
 static_assert(offsetof(CPed, m_pMyVehicle) == 0x310, "CPed: error");
@@ -861,3 +909,4 @@ static_assert(offsetof(CPed, m_bodyPartBleeding) == 0x4F2, "CPed: error");
 static_assert(offsetof(CPed, m_pedInObjective) == 0x16C, "CPed: error");
 static_assert(offsetof(CPed, m_pEventEntity) == 0x19C, "CPed: error");
 static_assert(sizeof(CPed) == 0x53C, "CPed: error");
+#endif

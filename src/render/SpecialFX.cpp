@@ -117,8 +117,14 @@ CSpecialFX::Update(void)
 
 	if(FindPlayerPed() &&
 	   FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT &&
-	   FindPlayerPed()->GetWeapon()->m_eWeaponState == WEAPONSTATE_FIRING)
-		RwFrameForAllObjects(FindPlayerPed()->GetNodeFrame(PED_HANDR), LookForBatCB, CModelInfo::GetModelInfo(MI_BASEBALL_BAT));
+	   FindPlayerPed()->GetWeapon()->m_eWeaponState == WEAPONSTATE_FIRING){
+#ifdef PED_SKIN
+		if(IsClumpSkinned(FindPlayerPed()->GetClump())){
+			LookForBatCB((RwObject*)FindPlayerPed()->m_pWeaponModel, CModelInfo::GetModelInfo(MI_BASEBALL_BAT));
+		}else
+#endif
+			RwFrameForAllObjects(FindPlayerPed()->m_pFrames[PED_HANDR]->frame, LookForBatCB, CModelInfo::GetModelInfo(MI_BASEBALL_BAT));
+	}
 }
 
 void

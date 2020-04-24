@@ -27,9 +27,15 @@
 #ifdef LIBRW
 #define STREAMPOS(str) ((str)->tell())
 #define STREAMFILE(str) (((rw::StreamFile*)(str))->file)
+#define HIERNODEINFO(hier) ((hier)->nodeInfo)
+#define HIERNODEID(hier, i) ((hier)->nodeInfo[i].id)
+#define HANIMFRAMES(anim) ((anim)->keyframes)
 #else
 #define STREAMPOS(str) ((str)->Type.memory.position)
 #define STREAMFILE(str) ((str)->Type.file.fpFile)
+#define HIERNODEINFO(hier) ((hier)->pNodeInfo)
+#define HIERNODEID(hier, i) ((hier)->pNodeInfo[i].nodeID)
+#define HANIMFRAMES(anim) ((anim)->pFrames)
 #endif
 
 #define rwVENDORID_ROCKSTAR 0x0253F2
@@ -62,6 +68,11 @@ typedef uint16_t wchar;
 #endif
 
 #include "config.h"
+
+#ifdef PED_SKIN
+#include <rphanim.h>
+#include <rpskin.h>
+#endif
 
 #define ALIGNPTR(p) (void*)((((uintptr)(void*)p) + sizeof(void*)-1) & ~(sizeof(void*)-1))
 

@@ -1766,6 +1766,14 @@ WinMain(HINSTANCE instance,
 	StaticPatcher::Apply();
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
 
+/*
+	// TODO: make this an option somewhere
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+*/
+
 	/* 
 	 * Initialize the platform independent data.
 	 * This will in turn initialize the platform specific data...

@@ -10,6 +10,18 @@ public:
 
 	float Magnitude(void) const { return Sqrt(x*x + y*y + z*z + w*w); }
 	float MagnitudeSqr(void) const { return x*x + y*y + z*z + w*w; }
+	void Normalise(void) {
+		float sq = MagnitudeSqr();
+		if(sq == 0.0f)
+			w = 1.0f;
+		else{
+			float invsqrt = RecipSqrt(sq);
+			x *= invsqrt;
+			y *= invsqrt;
+			z *= invsqrt;
+			w *= invsqrt;
+		}
+	}
 
 	const CQuaternion &operator+=(CQuaternion const &right) {
 		x += right.x;

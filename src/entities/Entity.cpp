@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "General.h"
+#include "RwHelper.h"
 #include "ModelIndices.h"
 #include "Timer.h"
 #include "Placeable.h"
@@ -24,6 +25,8 @@
 #include "References.h"
 #include "TxdStore.h"
 #include "Zones.h"
+#include "Bones.h"
+#include "Debug.h"
 
 int gBuildings;
 
@@ -282,6 +285,28 @@ CEntity::CreateRwObject(void)
 	}
 }
 
+#ifdef PED_SKIN
+RpAtomic*
+AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data)
+{
+	if(RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))){
+		RpHAnimHierarchy *hier = RpSkinAtomicGetHAnimHierarchy(atomic);
+#ifdef LIBRW
+		if(hier && hier->interpolator->currentAnim){
+			RpHAnimAnimationDestroy(hier->interpolator->currentAnim);
+			hier->interpolator->currentAnim = nil;
+		}
+#else
+		if(hier && hier->pCurrentAnim){
+			RpHAnimAnimationDestroy(hier->pCurrentAnim);
+			hier->pCurrentAnim = nil;
+		}
+#endif
+	}
+	return atomic;
+}
+#endif
+
 void
 CEntity::DeleteRwObject(void)
 {
@@ -293,8 +318,13 @@ CEntity::DeleteRwObject(void)
 			f = RpAtomicGetFrame((RpAtomic*)m_rwObject);
 			RpAtomicDestroy((RpAtomic*)m_rwObject);
 			RwFrameDestroy(f);
-		}else if(RwObjectGetType(m_rwObject) == rpCLUMP)
+		}else if(RwObjectGetType(m_rwObject) == rpCLUMP){
+#ifdef PED_SKIN
+			if(IsClumpSkinned((RpClump*)m_rwObject))
+				RpClumpForAllAtomics((RpClump*)m_rwObject, AtomicRemoveAnimFromSkinCB, nil);
+#endif
 			RpClumpDestroy((RpClump*)m_rwObject);
+		}
 		m_rwObject = nil;
 		CModelInfo::GetModelInfo(m_modelIndex)->RemoveRef();
 		if(IsBuilding())
@@ -557,6 +587,44 @@ CEntity::PruneReferences(void)
 		}
 	}
 }
+
+#ifdef PED_SKIN
+void
+CEntity::UpdateRpHAnim(void)
+{
+	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+	RpHAnimHierarchyUpdateMatrices(hier);
+
+#if 0
+	int i;
+	char buf[256];
+	if(this == (CEntity*)FindPlayerPed())
+	for(i = 0; i < hier->numNodes; i++){
+		RpHAnimStdKeyFrame *kf = (RpHAnimStdKeyFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f  %6.3f %6.3f %6.3f  %d %s",
+			kf->q.imag.x, kf->q.imag.y, kf->q.imag.z, kf->q.real,
+			kf->t.x, kf->t.y, kf->t.z,
+			HIERNODEID(hier, i),
+			ConvertBoneTag2BoneName(HIERNODEID(hier, i)));
+		CDebug::PrintAt(buf, 10, 1+i*3);
+
+		RwMatrix *m = &RpHAnimHierarchyGetMatrixArray(hier)[i];
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
+			m->right.x, m->up.x, m->at.x, m->pos.x);
+		CDebug::PrintAt(buf, 80, 1+i*3+0);
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
+			m->right.y, m->up.y, m->at.y, m->pos.y);
+		CDebug::PrintAt(buf, 80, 1+i*3+1);
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
+			m->right.z, m->up.z, m->at.z, m->pos.z);
+		CDebug::PrintAt(buf, 80, 1+i*3+2);
+	}
+
+	void RenderSkeleton(RpHAnimHierarchy *hier);
+	RenderSkeleton(hier);
+#endif
+}
+#endif
 
 void
 CEntity::AddSteamsFromGround(CVector *unused)
