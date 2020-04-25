@@ -41,7 +41,21 @@ void
 CDirectory::AddItem(const DirectoryInfo &dirinfo)
 {
 	assert(numEntries < maxEntries);
+#ifdef FIX_BUGS
+	// don't add if already exists
+	uint32 offset, size;
+	if(FindItem(dirinfo.name, offset, size))
+		return;
+#endif
 	entries[numEntries++] = dirinfo;
+}
+
+void
+CDirectory::AddItem(const DirectoryInfo &dirinfo, int32 imgId)
+{
+	DirectoryInfo di = dirinfo;
+	di.offset |= imgId<<24;
+	AddItem(di);
 }
 
 bool

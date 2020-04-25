@@ -1,5 +1,7 @@
 #include "common.h"
+#include "RwHelper.h"
 #include "Debug.h"
+#include "Lines.h"
 #include "Font.h"
 #include "main.h"
 #include "Text.h"
@@ -114,11 +116,14 @@ CDebug::DisplayScreenStrings()
 	CFont::SetFontStyle(FONT_BANK);
 
 	for(i = 0; i < ms_nScreenStrs; i++){
+/*
 		AsciiToUnicode(ms_aScreenStrs[i].str, gUString);
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 		CFont::PrintString(ms_aScreenStrs[i].x, ms_aScreenStrs[i].y, gUString);
 		CFont::SetColor(CRGBA(255, 255, 255, 255));
 		CFont::PrintString(ms_aScreenStrs[i].x+1, ms_aScreenStrs[i].y+1, gUString);
+*/
+		ObrsPrintfString(ms_aScreenStrs[i].str, ms_aScreenStrs[i].x, ms_aScreenStrs[i].y);
 	}
 	CFont::DrawFonts();
 
@@ -131,7 +136,35 @@ CDebug::PrintAt(const char *str, int x, int y)
 	if(ms_nScreenStrs >= MAX_SCREEN_STRS)
 		return;
 	strncpy(ms_aScreenStrs[ms_nScreenStrs].str, str, 256);
-	ms_aScreenStrs[ms_nScreenStrs].x = x*12;
-	ms_aScreenStrs[ms_nScreenStrs].y = y*22;
+	ms_aScreenStrs[ms_nScreenStrs].x = x;//*12;
+	ms_aScreenStrs[ms_nScreenStrs].y = y;//*22;
 	ms_nScreenStrs++;
+}
+
+CDebug::Line CDebug::ms_aLines[MAX_DEBUG_LINES];
+int CDebug::ms_nLines;
+
+void
+CDebug::AddLine(CVector p1, CVector p2, uint32 c1, uint32 c2)
+{
+	if(ms_nLines >= MAX_DEBUG_LINES)
+		return;
+	ms_aLines[ms_nLines].p1 = p1;
+	ms_aLines[ms_nLines].p2 = p2;
+	ms_aLines[ms_nLines].c1 = c1;
+	ms_aLines[ms_nLines].c2 = c2;
+	ms_nLines++;
+}
+
+void
+CDebug::DrawLines(void)
+{
+	int i;
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
+	for(i = 0; i < ms_nLines; i++){
+		Line *l = &ms_aLines[i];
+		CLines::RenderLineWithClipping(l->p1.x, l->p1.y, l->p1.z, l->p2.x, l->p2.y, l->p2.z, l->c1, l->c2);
+	}
+	ms_nLines = 0;
 }

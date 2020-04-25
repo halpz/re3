@@ -2789,17 +2789,20 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 
 	if(CamTargetEntity->IsPed()){
 		// static bool FailedTestTwelveFramesAgo = false;	// unused
-		RwV3d HeadPos = vecHeadCamOffset;
+		CVector HeadPos = vecHeadCamOffset;
 		CVector TargetCoors;
 
-		// needs fix for SKINNING
-		RwFrame *frm = ((CPed*)CamTargetEntity)->GetNodeFrame(PED_HEAD);
+		((CPed*)CamTargetEntity)->TransformToNode(HeadPos, PED_HEAD);
+		// This is done on PC, but checking for the clump frame is not necessary apparently
+/*
+		RwFrame *frm = ((CPed*)CamTargetEntity)->m_pFrames[PED_HEAD]->frame;
 		while(frm){
 			RwV3dTransformPoints(&HeadPos, &HeadPos, 1, RwFrameGetMatrix(frm));
 			frm = RwFrameGetParent(frm);
 			if(frm == RpClumpGetFrame(CamTargetEntity->GetClump()))
 				frm = nil;
 		}
+*/
 
 		if(ResetStatics){
 			Beta = TargetOrientation;
@@ -2826,13 +2829,13 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 			m_vecBufferedPlayerBodyOffset.z =
 				TheCamera.m_fGaitSwayBuffer * m_vecBufferedPlayerBodyOffset.z +
 				(1.0f-TheCamera.m_fGaitSwayBuffer) * HeadPos.z;
-			HeadPos = (CamTargetEntity->GetMatrix() * m_vecBufferedPlayerBodyOffset).toRwV3d();
+			HeadPos = (CamTargetEntity->GetMatrix() * m_vecBufferedPlayerBodyOffset);
 		}else{
 			float HeadDelta = (HeadPos - InitialHeadPos).Magnitude2D();
 			CVector Fwd = CamTargetEntity->GetForward();
 			Fwd.z = 0.0f;
 			Fwd.Normalise();
-			HeadPos = (HeadDelta*1.23f*Fwd + CamTargetEntity->GetPosition()).toRwV3d();
+			HeadPos = (HeadDelta*1.23f*Fwd + CamTargetEntity->GetPosition());
 			HeadPos.z += 0.59f;
 		}
 		Source = HeadPos;

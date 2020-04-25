@@ -77,4 +77,6 @@ public:
 	static void ReactivatePlayerPed(int32);
 };
 
+#ifndef PED_SKIN
 static_assert(sizeof(CPlayerPed) == 0x5F0, "CPlayerPed: error");
+#endif

@@ -24,7 +24,7 @@ bool CVehicle::bAllDodosCheat;
 bool CVehicle::bCheat3;
 bool CVehicle::bCheat4;
 bool CVehicle::bCheat5;
-bool CVehicle::m_bDisableMouseSteering;
+bool CVehicle::m_bDisableMouseSteering = true;
 
 void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New();  }
 void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehiclePool()->New(handle); }

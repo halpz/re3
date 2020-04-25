@@ -566,8 +566,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			target.y = 0.0f;
 			target.z = 0.0f;
 
-			for (RwFrame *i = shooterPed->GetNodeFrame(PED_HANDR); i; i = RwFrameGetParent(i))
-				RwV3dTransformPoints(target, target, 1, RwFrameGetMatrix(i));
+			shooterPed->TransformToNode(target, PED_HANDR);
 
 			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
 		}

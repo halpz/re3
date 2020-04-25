@@ -62,7 +62,7 @@ workspace "re3"
 	filter "configurations:DebugRW or ReleaseRW"
 		includedirs { "rwsdk/include/d3d8" }
 		libdirs { "rwsdk/lib/d3d8/release" }
-		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp" }
+		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp", "rtquat", "rtcharse" }
 	filter  {}
 
 	

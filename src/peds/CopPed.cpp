@@ -465,8 +465,7 @@ CCopPed::CopAI(void)
 				if (m_fDistanceToTarget < weaponRange) {
 					CWeaponInfo *weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
 					CVector gunPos = weaponInfo->m_vecFireOffset;
-					for (RwFrame *i = GetNodeFrame(PED_HANDR); i; i = RwFrameGetParent(i))
-						RwV3dTransformPoints((RwV3d*)&gunPos, (RwV3d*)&gunPos, 1, RwFrameGetMatrix(i));
+					TransformToNode(gunPos, PED_HANDR);
 
 					CColPoint foundCol;
 					CEntity *foundEnt;

@@ -13,6 +13,15 @@ RwObject *GetFirstObject(RwFrame *frame);
 RpAtomic *GetFirstAtomic(RpClump *clump);
 RwTexture *GetFirstTexture(RwTexDictionary *txd);
 
+#ifdef PED_SKIN
+RpAtomic *IsClumpSkinned(RpClump *clump);
+RpHAnimHierarchy *GetAnimHierarchyFromSkinClump(RpClump *clump);	// get from atomic
+RpHAnimHierarchy *GetAnimHierarchyFromClump(RpClump *clump);	// get from frame
+RwFrame *GetHierarchyFromChildNodesCB(RwFrame *frame, void *data);
+void SkinGetBonePositionsToTable(RpClump *clump, RwV3d *boneTable);
+RpHAnimAnimation *HAnimAnimationCreateForHierarchy(RpHAnimHierarchy *hier);
+#endif
+
 RwTexDictionary *RwTexDictionaryGtaStreamRead(RwStream *stream);
 RwTexDictionary *RwTexDictionaryGtaStreamRead1(RwStream *stream);
 RwTexDictionary *RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary *texDict);

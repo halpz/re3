@@ -6,6 +6,7 @@
 #include "Stats.h"
 #include "World.h"
 #include "RpAnimBlend.h"
+#include "Bones.h"
 #include "Ped.h"
 #include "Wanted.h"
 #include "PlayerPed.h"
@@ -642,6 +643,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_collPoly.valid = false;
 	m_fCollisionSpeed = 0.0f;
 	m_wepModelID = -1;
+#ifdef PED_SKIN
+	m_pWeaponModel = nil;
+#endif
 	CPopulation::UpdatePedCount((ePedType)m_nPedType, false);
 }
 
@@ -818,10 +822,17 @@ CPed::AddWeaponModel(int id)
 	RpAtomic *atm;
 
 	if (id != -1) {
-		atm = (RpAtomic*)CModelInfo::GetModelInfo(id)->CreateInstance();
-		RwFrameDestroy(RpAtomicGetFrame(atm));
-		RpAtomicSetFrame(atm, GetNodeFrame(PED_HANDR));
-		RpClumpAddAtomic(GetClump(), atm);
+#ifdef PED_SKIN
+		if(IsClumpSkinned(GetClump()))
+			m_pWeaponModel = (RpAtomic*)CModelInfo::GetModelInfo(id)->CreateInstance();
+		else
+#endif
+		{
+			atm = (RpAtomic*)CModelInfo::GetModelInfo(id)->CreateInstance();
+			RwFrameDestroy(RpAtomicGetFrame(atm));
+			RpAtomicSetFrame(atm, m_pFrames[PED_HANDR]->frame);
+			RpClumpAddAtomic(GetClump(), atm);
+		}
 		m_wepModelID = id;
 	}
 }
@@ -915,25 +926,28 @@ void
 CPed::RemoveBodyPart(PedNode nodeId, int8 direction)
 {
 	RwFrame *frame;
-	RwV3d pos;
+	CVector pos;
 
-	frame = GetNodeFrame(nodeId);
+	frame = m_pFrames[nodeId]->frame;
 	if (frame) {
 		if (CGame::nastyGame) {
-#ifdef TOGGLEABLE_BETA_FEATURES
-			if (bPopHeadsOnHeadshot || nodeId != PED_HEAD)
-#else
-			if (nodeId != PED_HEAD)
+#ifdef PED_SKIN
+			if(!IsClumpSkinned(GetClump()))
 #endif
-				SpawnFlyingComponent(nodeId, direction);
+			{
+#ifdef TOGGLEABLE_BETA_FEATURES
+				if (bPopHeadsOnHeadshot || nodeId != PED_HEAD)
+#else
+				if (nodeId != PED_HEAD)
+#endif
+					SpawnFlyingComponent(nodeId, direction);
 
-			RecurseFrameChildrenVisibilityCB(frame, nil);
+				RecurseFrameChildrenVisibilityCB(frame, nil);
+			}
 			pos.x = 0.0f;
 			pos.y = 0.0f;
 			pos.z = 0.0f;
-
-			for (; frame; frame = RwFrameGetParent(frame))
-				RwV3dTransformPoints(&pos, &pos, 1, RwFrameGetMatrix(frame));
+			TransformToNode(pos, PED_HEAD);
 
 			if (CEntity::GetIsOnScreen()) {
 				CParticle::AddParticle(PARTICLE_TEST, pos,
@@ -1102,10 +1116,7 @@ CPed::ClearLookFlag(void) {
 bool
 CPed::IsPedHeadAbovePos(float zOffset)
 {
-	RwMatrix mat;
-	
-	CPedIK::GetWorldMatrix(GetNodeFrame(PED_HEAD), &mat);
-	return zOffset + GetPosition().z < RwMatrixGetPos(&mat)->z;
+	return zOffset + GetPosition().z < GetNodePosition(PED_HEAD).z;
 }
 
 void
@@ -1158,7 +1169,6 @@ CPed::Attack(void)
 	CAnimBlendAssociation *weaponAnimAssoc;
 	int32 weaponAnim;
 	float animStart;
-	RwFrame *frame;
 	eWeaponType ourWeaponType;
 	float weaponAnimTime;
 	eWeaponFire ourWeaponFire;
@@ -1260,13 +1270,7 @@ CPed::Attack(void)
 
 			firePos = GetMatrix() * firePos;
 		} else if (ourWeaponType != WEAPONTYPE_UNARMED) {
-			if (weaponAnimAssoc->animId == ANIM_KICK_FLOOR)
-				frame = GetNodeFrame(PED_FOOTR);
-			else
-				frame = GetNodeFrame(PED_HANDR);
-
-			for (; frame; frame = RwFrameGetParent(frame))
-				RwV3dTransformPoints((RwV3d*)firePos, (RwV3d*)firePos, 1, RwFrameGetMatrix(frame));
+			TransformToNode(firePos, weaponAnimAssoc->animId == ANIM_KICK_FLOOR ? PED_FOOTR : PED_HANDR);
 		} else {
 			firePos = GetMatrix() * firePos;
 		}
@@ -1314,8 +1318,7 @@ CPed::Attack(void)
 		firePos = ourWeapon->m_vecFireOffset;
 
 		if (weaponAnimTime > 1.0f && weaponAnimTime - weaponAnimAssoc->timeStep <= 1.0f && weaponAnimAssoc->IsRunning()) {
-			for (frame = GetNodeFrame(PED_HANDR); frame; frame = RwFrameGetParent(frame))
-				RwV3dTransformPoints((RwV3d*)firePos, (RwV3d*)firePos, 1, RwFrameGetMatrix(frame));
+			TransformToNode(firePos, PED_HANDR);
 
 			CVector gunshellPos(
 				firePos.x - 0.6f * GetForward().x,
@@ -1415,7 +1418,17 @@ void
 CPed::RemoveWeaponModel(int modelId)
 {
 	// modelId is not used!! This function just removes the current weapon.
-	RwFrameForAllObjects(GetNodeFrame(PED_HANDR),RemoveAllModelCB,nil);
+#ifdef PED_SKIN
+	if(IsClumpSkinned(GetClump())){
+		if(m_pWeaponModel){
+			RwFrame *frm = RpAtomicGetFrame(m_pWeaponModel);
+			RpAtomicDestroy(m_pWeaponModel);
+			RwFrameDestroy(frm);
+			m_pWeaponModel = nil;
+		}
+	}else
+#endif
+		RwFrameForAllObjects(m_pFrames[PED_HANDR]->frame,RemoveAllModelCB,nil);
 	m_wepModelID = -1;
 }
 
@@ -2106,12 +2119,7 @@ CPed::PlayFootSteps(void)
 	{
 		{
 			CVector pos(0.0f, 0.0f, 0.0f);
-			RwFrame *parent = m_pFrames[PED_FOOTL]->frame;
-			while( parent )
-			{
-				RwV3dTransformPoints(pos, pos, 1, RwFrameGetMatrix(parent));
-				parent = RwFrameGetParent(parent);
-			}
+			TransformToNode(pos, PED_FOOTL);
 				
 			pos.z -= 0.1f;
 			pos += GetForward()*0.2f;
@@ -2120,12 +2128,7 @@ CPed::PlayFootSteps(void)
 
 		{
 			CVector pos(0.0f, 0.0f, 0.0f);
-			RwFrame *parent = m_pFrames[PED_FOOTR]->frame;
-			while( parent )
-			{
-				RwV3dTransformPoints(pos, pos, 1, RwFrameGetMatrix(parent));
-				parent = RwFrameGetParent(parent);
-			}
+			TransformToNode(pos, PED_FOOTR);
 				
 			pos.z -= 0.1f;
 			pos += GetForward()*0.2f;
@@ -2149,9 +2152,7 @@ CPed::PlayFootSteps(void)
 		if (stepPart != 0) {
 			DMAudio.PlayOneShot(m_audioEntityId, stepPart == 1 ? SOUND_STEP_START : SOUND_STEP_END, 1.0f);
 			CVector footPos(0.0f, 0.0f, 0.0f);
-
-			for (RwFrame *frame = GetNodeFrame(stepPart == 1 ? PED_FOOTL : PED_FOOTR); frame; frame = RwFrameGetParent(frame))
-				RwV3dTransformPoints(footPos, footPos, 1, RwFrameGetMatrix(frame));
+			TransformToNode(footPos, stepPart == 1 ? PED_FOOTL : PED_FOOTR);
 
 			CVector forward = GetForward();
 
@@ -2358,6 +2359,11 @@ CPed::SetModelIndex(uint32 mi)
 
 	// This is a mistake by R*, velocity is CVector, whereas m_vecAnimMoveDelta is CVector2D. 
 	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity = (CVector*) &m_vecAnimMoveDelta;
+
+#ifdef PED_SKIN
+	if(modelInfo->GetHitColModel() == nil)
+		modelInfo->CreateHitColModelSkinned(GetClump());
+#endif
 }
 
 void
@@ -2517,9 +2523,31 @@ CPed::CalculateNewVelocity(void)
 		}
 
 		if (newUpperLegs.phi > -DEGTORAD(50.0f) && newUpperLegs.phi < DEGTORAD(50.0f)) {
-			newUpperLegs.theta = 0.0f;
-			m_pedIK.RotateTorso(m_pFrames[PED_UPPERLEGL], &newUpperLegs, false);
-			m_pedIK.RotateTorso(m_pFrames[PED_UPPERLEGR], &newUpperLegs, false);
+#ifdef PED_SKIN
+			if(IsClumpSkinned(GetClump())){
+/*
+				// this looks shit
+				newUpperLegs.theta = 0.0f;
+				RwV3d axis = { -1.0f, 0.0f, 0.0f };
+				RtQuatRotate(&m_pFrames[PED_UPPERLEGL]->hanimFrame->q, &axis, RADTODEG(newUpperLegs.phi), rwCOMBINEPRECONCAT);
+				RtQuatRotate(&m_pFrames[PED_UPPERLEGR]->hanimFrame->q, &axis, RADTODEG(newUpperLegs.phi), rwCOMBINEPRECONCAT);
+*/
+				newUpperLegs.theta = 0.1f;
+				RwV3d Xaxis = { 1.0f, 0.0f, 0.0f };
+				RwV3d Zaxis = { 0.0f, 0.0f, 1.0f };
+				RtQuatRotate(&m_pFrames[PED_UPPERLEGL]->hanimFrame->q, &Zaxis, RADTODEG(newUpperLegs.theta), rwCOMBINEPOSTCONCAT);
+				RtQuatRotate(&m_pFrames[PED_UPPERLEGL]->hanimFrame->q, &Xaxis, RADTODEG(newUpperLegs.phi), rwCOMBINEPOSTCONCAT);
+				RtQuatRotate(&m_pFrames[PED_UPPERLEGR]->hanimFrame->q, &Zaxis, RADTODEG(newUpperLegs.theta), rwCOMBINEPOSTCONCAT);
+				RtQuatRotate(&m_pFrames[PED_UPPERLEGR]->hanimFrame->q, &Xaxis, RADTODEG(newUpperLegs.phi), rwCOMBINEPOSTCONCAT);
+
+				bDontAcceptIKLookAts = true;
+			}else
+#endif
+			{
+				newUpperLegs.theta = 0.0f;
+				m_pedIK.RotateTorso(m_pFrames[PED_UPPERLEGL], &newUpperLegs, false);
+				m_pedIK.RotateTorso(m_pFrames[PED_UPPERLEGR], &newUpperLegs, false);
+			}
 		}
 	}
 }
@@ -5118,6 +5146,12 @@ CPed::FightStrike(CVector &touchedNodePos)
 			// He can beat us
 			if (sq(maxDistanceToBeBeaten) > potentialAttackDistance.MagnitudeSqr()) {
 
+#ifdef PED_SKIN
+				// Have to animate a skinned clump because the initial col model is useless
+				if(IsClumpSkinned(GetClump()))
+					ourCol = ((CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex))->AnimatePedColModelSkinned(GetClump());
+				else
+#endif
 				if (nearPed->m_nPedState == PED_FALL
 					|| nearPed->m_nPedState == PED_DEAD || nearPed->m_nPedState == PED_DIE
 					|| !nearPed->IsPedHeadAbovePos(-0.3f)) {
@@ -6153,11 +6187,9 @@ CPed::Die(void)
 uint8
 CPed::DoesLOSBulletHitPed(CColPoint &colPoint)
 {
-	RwMatrix mat;
 	uint8 retVal = 2;
 
-	CPedIK::GetWorldMatrix(GetNodeFrame(PED_HEAD), &mat);
-	float headZ = RwMatrixGetPos(&mat)->z;
+	float headZ = GetNodePosition(PED_HEAD).z;
 
 	if (m_nPedState == PED_FALL)
 		retVal = 1;
@@ -6579,36 +6611,31 @@ CPed::Fight(void)
 		if (curMove.hitLevel != HITLEVEL_NULL && animTime > curMove.startFireTime && animTime <= curMove.endFireTime && m_fightState >= FIGHTSTATE_NO_MOVE) {
 
 			CVector touchingNodePos(0.0f, 0.0f, 0.0f);
-			RwFrame *touchingFrame = nil;
 
 			switch (m_lastFightMove) {
 				case FIGHTMOVE_STDPUNCH:
 				case FIGHTMOVE_PUNCHHOOK:
 				case FIGHTMOVE_BODYBLOW:
-					touchingFrame = GetNodeFrame(PED_HANDR);
+					TransformToNode(touchingNodePos, PED_HANDR);
 					break;
 				case FIGHTMOVE_IDLE:
 				case FIGHTMOVE_SHUFFLE_F:
 					break;
 				case FIGHTMOVE_KNEE:
-					touchingFrame = GetNodeFrame(PED_LOWERLEGR);
+					TransformToNode(touchingNodePos, PED_LOWERLEGR);
 					break;
 				case FIGHTMOVE_HEADBUTT:
-					touchingFrame = GetNodeFrame(PED_HEAD);
+					TransformToNode(touchingNodePos, PED_HEAD);
 					break;
 				case FIGHTMOVE_PUNCHJAB:
-					touchingFrame = GetNodeFrame(PED_HANDL);
+					TransformToNode(touchingNodePos, PED_HANDL);
 					break;
 				case FIGHTMOVE_KICK:
 				case FIGHTMOVE_LONGKICK:
 				case FIGHTMOVE_ROUNDHOUSE:
 				case FIGHTMOVE_GROUNDKICK:
-					touchingFrame = GetNodeFrame(PED_FOOTR);
+					TransformToNode(touchingNodePos, PED_FOOTR);
 					break;
-			}
-			while (touchingFrame) {
-				RwV3dTransformPoints(touchingNodePos, touchingNodePos, 1, RwFrameGetMatrix(touchingFrame));
-				touchingFrame = RwFrameGetParent(touchingFrame);
 			}
 
 			if (m_lastFightMove == FIGHTMOVE_PUNCHJAB) {
@@ -7091,8 +7118,7 @@ CPed::FinishLaunchCB(CAnimBlendAssociation *animAssoc, void *arg)
 
 	if (ped->bDoBloodyFootprints) {
 		CVector bloodPos(0.0f, 0.0f, 0.0f);
-		for (RwFrame *i = ped->GetNodeFrame(PED_FOOTL); i; i = RwFrameGetParent(i))
-			RwV3dTransformPoints(bloodPos, bloodPos, 1, RwFrameGetMatrix(i));
+		ped->TransformToNode(bloodPos, PED_FOOTL);
 
 		bloodPos.z -= 0.1f;
 		bloodPos += 0.2f * ped->GetForward();
@@ -7105,8 +7131,7 @@ CPed::FinishLaunchCB(CAnimBlendAssociation *animAssoc, void *arg)
 			255, 255, 0, 0, 4.0f, 3000, 1.0f);
 
 		bloodPos = CVector(0.0f, 0.0f, 0.0f);
-		for (RwFrame *j = ped->GetNodeFrame(PED_FOOTR); j; j = RwFrameGetParent(j))
-			RwV3dTransformPoints(bloodPos, bloodPos, 1, RwFrameGetMatrix(j));
+		ped->TransformToNode(bloodPos, PED_FOOTR);
 
 		bloodPos.z -= 0.1f;
 		bloodPos += 0.2f * ped->GetForward();
@@ -12647,8 +12672,66 @@ CPed::Render(void)
 	if (!bInVehicle || m_nPedState == PED_EXIT_CAR || m_nPedState == PED_DRAG_FROM_CAR ||
 		bRenderPedInCar && sq(25.0f * TheCamera.LODDistMultiplier) >= (TheCamera.GetPosition() - GetPosition()).MagnitudeSqr()) {
 		CEntity::Render();
+
+#ifdef PED_SKIN
+		if(IsClumpSkinned(GetClump())){
+			renderLimb(PED_HEAD);
+			renderLimb(PED_HANDL);
+			renderLimb(PED_HANDR);
+		}
+		if(m_pWeaponModel && IsClumpSkinned(GetClump())){
+			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+			int idx = RpHAnimIDGetIndex(hier, m_pFrames[PED_HANDR]->nodeID);
+			RwMatrix *mat = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+			RwFrame *frame = RpAtomicGetFrame(m_pWeaponModel);
+			*RwFrameGetMatrix(frame) = *mat;
+			RwFrameUpdateObjects(frame);
+			RpAtomicRender(m_pWeaponModel);
+		}
+#endif
 	}
 }
+
+#ifdef PED_SKIN
+static RpMaterial*
+SetLimbAlphaCB(RpMaterial *material, void *data)
+{
+	((RwRGBA*)RpMaterialGetColor(material))->alpha = *(uint8*)data;
+	return material;
+}
+
+void
+CPed::renderLimb(int node)
+{
+	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+	int idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
+	RwMatrix *mat = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+	CPedModelInfo *mi = (CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex);
+	RpAtomic *atomic;
+	switch(node){
+	case PED_HEAD:
+		atomic = mi->getHead();
+		break;
+	case PED_HANDL:
+		atomic = mi->getLeftHand();
+		break;
+	case PED_HANDR:
+		atomic = mi->getRightHand();
+		break;
+	default:
+		return;
+	}
+	if(atomic == nil)
+		return;
+
+	RwFrame *frame = RpAtomicGetFrame(atomic);
+	*RwFrameGetMatrix(frame) = *mat;
+	RwFrameUpdateObjects(frame);
+	int alpha = CVisibilityPlugins::GetClumpAlpha(GetClump());
+	RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), SetLimbAlphaCB, &alpha);
+	RpAtomicRender(atomic);
+}
+#endif
 
 void
 CPed::ProcessObjective(void)
@@ -15065,12 +15148,26 @@ CPed::PreRender(void)
 		CTimeCycle::m_fShadowFrontX[CTimeCycle::m_CurrentStoredValue], CTimeCycle::m_fShadowFrontY[CTimeCycle::m_CurrentStoredValue],
 		CTimeCycle::m_fShadowSideX[CTimeCycle::m_CurrentStoredValue], CTimeCycle::m_fShadowSideY[CTimeCycle::m_CurrentStoredValue]);
 
+#ifdef PED_SKIN
+	if(IsClumpSkinned(GetClump())){
+		UpdateRpHAnim();
+
+		if(bBodyPartJustCameOff && m_bodyPartBleeding == PED_HEAD){
+			// scale head to 0 if shot off
+			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+			int32 idx = RpHAnimIDGetIndex(hier, ConvertPedNode2BoneTag(PED_HEAD));
+			RwMatrix *head = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+			RwV3d zero = { 0.0f, 0.0f, 0.0f };
+			RwMatrixScale(head, &zero, rwCOMBINEPRECONCAT);
+		}
+	}
+#endif
+
 	if (bBodyPartJustCameOff && bIsPedDieAnimPlaying && m_bodyPartBleeding != -1 && (CTimer::GetFrameCounter() & 7) > 3) {
 		CVector bloodDir(0.0f, 0.0f, 0.0f);
 		CVector bloodPos(0.0f, 0.0f, 0.0f);
 
-		for (RwFrame *frame = GetNodeFrame(m_bodyPartBleeding); frame; frame = RwFrameGetParent(frame))
-			RwV3dTransformPoints(bloodPos, bloodPos, 1, RwFrameGetMatrix(frame));
+		TransformToNode(bloodPos, m_bodyPartBleeding);
 
 		switch (m_bodyPartBleeding) {
 			case PED_HEAD:
@@ -16216,11 +16313,10 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 				}
 			}
 			if (CGame::nastyGame) {
-				RwMatrix headMat;
-				CPedIK::GetWorldMatrix(GetNodeFrame(PED_HEAD), &headMat);
+				CVector headPos = GetNodePosition(PED_HEAD);
 				for(int i = 0; i < 4; ++i) {
 					CVector bloodDir(0.0f, 0.0f, 0.1f);
-					CVector bloodPos = headMat.pos - 0.2f * GetForward();
+					CVector bloodPos = headPos - 0.2f * GetForward();
 					CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, bloodDir, nil, 0.0f, 0, 0, 0, 0);
 				}
 			}
@@ -16792,6 +16888,10 @@ CPed::SpawnFlyingComponent(int pedNode, int8 direction)
 	if (CObject::nNoTempObjects >= NUMTEMPOBJECTS)
 		return nil;
 
+#ifdef PED_SKIN
+	assert(!IsClumpSkinned(GetClump()));
+#endif
+
 	CObject *obj = new CObject();
 	if (!obj)
 		return nil;
@@ -16799,12 +16899,12 @@ CPed::SpawnFlyingComponent(int pedNode, int8 direction)
 	RwFrame *frame = RwFrameCreate();
 	RpClump *clump = RpClumpCreate();
 	RpClumpSetFrame(clump, frame);
-	RwMatrix *matrix = RwFrameGetLTM(GetNodeFrame(pedNode));
+	RwMatrix *matrix = RwFrameGetLTM(m_pFrames[pedNode]->frame);
 	*RwFrameGetMatrix(frame) = *matrix;
 
 	flyingClumpTemp = clump;
-	RwFrameForAllObjects(GetNodeFrame(pedNode), CloneAtomicToFrameCB, frame);
-	RwFrameForAllChildren(GetNodeFrame(pedNode), RecurseFrameChildrenToCloneCB, frame);
+	RwFrameForAllObjects(m_pFrames[pedNode]->frame, CloneAtomicToFrameCB, frame);
+	RwFrameForAllChildren(m_pFrames[pedNode]->frame, RecurseFrameChildrenToCloneCB, frame);
 	flyingClumpTemp = nil;
 	switch (pedNode) {
 		case PED_HEAD:

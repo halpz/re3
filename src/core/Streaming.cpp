@@ -369,8 +369,12 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 					lastID = modelId;
 				}
 			}else{
-				// BUG: doesn't remember which cdimage this was in
+#ifdef FIX_BUGS
+				// remember which cdimage this came from
+				ms_pExtraObjectsDir->AddItem(direntry, n);
+#else
 				ms_pExtraObjectsDir->AddItem(direntry);
+#endif
 				lastID = -1;
 			}
 		}else if(!CGeneral::faststrcmp(dot+1, "TXD") || !CGeneral::faststrcmp(dot+1, "txd")){

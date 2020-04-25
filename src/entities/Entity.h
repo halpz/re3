@@ -148,6 +148,10 @@ public:
 	void ResolveReferences(void);
 	void PruneReferences(void);
 
+#ifdef PED_SKIN
+	void UpdateRpHAnim(void);
+#endif
+
 	void PreRenderForGlassWindow(void);
 	void AddSteamsFromGround(CVector *unused);
 	void ModifyMatrixForTreeInWind(void);
