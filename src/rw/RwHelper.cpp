@@ -9,6 +9,8 @@
 RtCharset *debugCharset;
 #endif
 
+bool gPS2alphaTest = 1;
+
 static bool charsetOpen;
 void OpenCharsetSafe()
 {
@@ -101,6 +103,8 @@ DefinedState(void)
 #ifdef LIBRW
 	rw::SetRenderState(rw::ALPHATESTFUNC, rw::ALPHAGREATEREQUAL);
 	rw::SetRenderState(rw::ALPHATESTREF, 3);
+
+	rw::SetRenderState(rw::GSALPHATEST, gPS2alphaTest);
 #else
 	// D3D stuff
 	RwD3D8SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
