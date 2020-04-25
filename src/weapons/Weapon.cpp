@@ -600,8 +600,8 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 		rotOffset.Normalise();
 
 		target   = *fireSource;
-		target.x = rotOffset.x * info->m_fRange;
-		target.y = rotOffset.y * info->m_fRange;
+		target.x += rotOffset.x * info->m_fRange;
+		target.y += rotOffset.y * info->m_fRange;
 
 		if ( shooter->IsPed() )
 			DoDoomAiming(shooter, fireSource, &target);
