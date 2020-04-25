@@ -202,6 +202,8 @@ enum Config {
 // Pad
 #define XINPUT
 #define KANGAROO_CHEAT
+#define ALLCARSHELI_CHEAT
+#define ALT_DODO_CHEAT
 #define REGISTER_START_BUTTON
 
 // Hud, frontend and radar

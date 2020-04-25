@@ -280,6 +280,9 @@ public:
 	static bool bCheat3;
 	static bool bCheat4;
 	static bool bCheat5;
+#ifdef ALT_DODO_CHEAT
+	static bool bAltDodoCheat;
+#endif
 	static bool m_bDisableMouseSteering;
 };
 
