@@ -787,8 +787,8 @@ RwImage *RtBMPImageRead(const RwChar * imageName) { return rw::readBMP(imageName
 
 #include "rtquat.h"
 
-RtQuat *RtQuatRotate(RtQuat * quat, const RwV3d * axis, RwReal angle, RwOpCombineType combineOp) { return quat->rotate(axis, angle/180.0f*3.14159f, (CombineOp)combineOp); }
-void RtQuatConvertToMatrix(const RtQuat * const qpQuat, RwMatrix * const mpMatrix) { mpMatrix->rotate(*qpQuat, COMBINEREPLACE); }
+RtQuat *RtQuatRotate(RtQuat * quat, const RwV3d * axis, RwReal angle, RwOpCombineType combineOp) { return (RtQuat*)((rw::Quat*)quat)->rotate(axis, angle/180.0f*3.14159f, (CombineOp)combineOp); }
+void RtQuatConvertToMatrix(const RtQuat * const qpQuat, RwMatrix * const mpMatrix) { mpMatrix->rotate(*(rw::Quat*)qpQuat, COMBINEREPLACE); }
 
 
 #include "rtcharse.h"

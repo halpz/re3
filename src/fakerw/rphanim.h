@@ -9,7 +9,15 @@ typedef rw::Animation RpHAnimAnimation;
 
 #define rpHANIMSTDKEYFRAMETYPEID 0x1
 
-typedef rw::HAnimKeyFrame RpHAnimStdKeyFrame;
+// same as rw::HAnimKeyFrame, but we need RtQuat in this one
+struct RpHAnimStdKeyFrame
+{
+	RpHAnimStdKeyFrame *prevFrame;
+	RwReal        time;
+	RtQuat           q;
+	RwV3d            t;
+};
+
 
 enum RpHAnimHierarchyFlag
 {

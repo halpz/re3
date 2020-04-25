@@ -1,6 +1,11 @@
 #pragma once
 
-typedef rw::Quat RtQuat;
+// Same layout as rw::Quat but with ugly imag,real separation which i don't want in librw
+struct RtQuat
+{
+	rw::V3d imag;
+	rw::float32 real;
+};
 
 RwBool RtQuatConvertFromMatrix(RtQuat * const qpQuat, const RwMatrix * const mpMatrix);
 RtQuat *RtQuatRotate(RtQuat * quat, const RwV3d * axis, RwReal angle, RwOpCombineType combineOp);
