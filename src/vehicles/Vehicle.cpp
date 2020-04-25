@@ -202,7 +202,7 @@ const float fSeaPropFallOff = 2.3f;
 const float fSeaThrust = 0.002f;
 const float fSeaSideSlipMult = 0.1f;
 const float fSeaRudderMult = 0.01f;
-const float fSeaYawMult = 0.0003f;
+const float fSeaYawMult = -0.0003f;
 const float fSeaRollMult = 0.0015f;
 const float fSeaRollStabilise = -0.01f;
 const float fSeaPitchMult = 0.0002f;
@@ -316,7 +316,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 
 		CVector vecFRight = CrossProduct(GetForward(), CVector(0.0f, 0.0f, 1.0f));
 		CVector vecStabilise = (GetUp().z > 0.0f) ? vecFRight : -vecFRight;
-		float fStabiliseDirection = (GetUp().z > 0.0f) ? -1.0f : 1.0f;
+		float fStabiliseDirection = (GetRight().z > 0.0f) ? -1.0f : 1.0f;
 		float fStabiliseImpulse;
 		if (flightModel == FLIGHT_MODEL_RCPLANE)
 			fStabiliseImpulse = fRCRollStabilise * fStabiliseDirection * (1.0f - DotProduct(GetRight(), vecStabilise)) * (1.0f - Abs(GetForward().z));
@@ -332,14 +332,14 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 			fPitchImpulse = fRCTailMult * fTail * Abs(fTail) + fRCPitchMult * fSteerUD * fForwSpeed;
 		else
 			fPitchImpulse = fSeaTailMult * fTail * Abs(fTail) + fSeaPitchMult * fSteerUD * fForwSpeed;
-		ApplyTurnForce(fPitchImpulse* m_fTurnMass* GetRight()* CTimer::GetTimeStep(), vecWidthForward);
+		ApplyTurnForce(fPitchImpulse* m_fTurnMass* GetUp()* CTimer::GetTimeStep(), vecWidthForward);
 
 		float fLift = -DotProduct(GetMoveSpeed(), GetUp()) / Max(0.01f, GetMoveSpeed().Magnitude());
 		float fLiftImpluse;
 		if (flightModel == FLIGHT_MODEL_RCPLANE)
 			fLiftImpluse = (fRCAttackLiftMult * fLift + fRCFormLiftMult) * fForwSpeed * fForwSpeed;
 		else
-			fLiftImpluse = fSeaAttackLiftMult * fLift + fSeaFormLiftMult * fForwSpeed * fForwSpeed;
+			fLiftImpluse = (fSeaAttackLiftMult * fLift + fSeaFormLiftMult) * fForwSpeed * fForwSpeed;
 		float fLiftForce = fLiftImpluse * m_fMass * CTimer::GetTimeStep();
 		if (GRAVITY * CTimer::GetTimeStep() * m_fMass < fLiftImpluse) {
 			if (flightModel == FLIGHT_MODEL_RCPLANE && GetPosition().z > 50.0f)
