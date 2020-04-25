@@ -322,8 +322,12 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
 		DebugMenuAddCmd("Spawn", "Spawn Predator", [](){ SpawnCar(MI_PREDATOR); });
 
-		DebugMenuAddVarBool8("Debug", "Draw hud", (int8*)&CHud::m_Wants_To_Draw_Hud, nil);
-		DebugMenuAddVarBool8("Debug", "Edit on", (int8*)&CSceneEdit::m_bEditOn, nil);
+#ifdef LIBRW
+		DebugMenuAddVarBool8("Render", "PS2 Alpha test Emu", &gPS2alphaTest, nil);
+#endif
+
+		DebugMenuAddVarBool8("Debug", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
+		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
 #ifdef MENU_MAP
 		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
 #endif
@@ -333,27 +337,27 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
 		DebugMenuAddCmd("Debug", "Place Car on Road", PlaceOnRoad);
 
-		DebugMenuAddVarBool8("Debug", "Catalina Heli On", (int8*)&CHeli::CatalinaHeliOn, nil);
+		DebugMenuAddVarBool8("Debug", "Catalina Heli On", &CHeli::CatalinaHeliOn, nil);
 		DebugMenuAddCmd("Debug", "Catalina Fly By", CHeli::StartCatalinaFlyBy);
 		DebugMenuAddCmd("Debug", "Catalina Take Off", CHeli::CatalinaTakeOff);
 		DebugMenuAddCmd("Debug", "Catalina Fly Away", CHeli::MakeCatalinaHeliFlyAway);
-		DebugMenuAddVarBool8("Debug", "Script Heli On", (int8*)&CHeli::ScriptHeliOn, nil);
+		DebugMenuAddVarBool8("Debug", "Script Heli On", &CHeli::ScriptHeliOn, nil);
 
-		DebugMenuAddVarBool8("Debug", "Show Ped Paths", (int8*)&gbShowPedPaths, nil);
-		DebugMenuAddVarBool8("Debug", "Show Car Paths", (int8*)&gbShowCarPaths, nil);
-		DebugMenuAddVarBool8("Debug", "Show Car Path Links", (int8*)&gbShowCarPathsLinks, nil);
-		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
-		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
-		DebugMenuAddVarBool8("Debug", "Show Collision Lines", (int8*)&gbShowCollisionLines, nil);
-		DebugMenuAddVarBool8("Debug", "Show Collision Polys", (int8*)&gbShowCollisionPolys, nil);
-		DebugMenuAddVarBool8("Debug", "Don't render Buildings", (int8*)&gbDontRenderBuildings, nil);
-		DebugMenuAddVarBool8("Debug", "Don't render Big Buildings", (int8*)&gbDontRenderBigBuildings, nil);
-		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
-		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", (int8*)&gbDontRenderVehicles, nil);
-		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
+		DebugMenuAddVarBool8("Debug", "Show Ped Paths", &gbShowPedPaths, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Paths", &gbShowCarPaths, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Path Links", &gbShowCarPathsLinks, nil);
+		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", &gbShowPedRoadGroups, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", &gbShowCarRoadGroups, nil);
+		DebugMenuAddVarBool8("Debug", "Show Collision Lines", &gbShowCollisionLines, nil);
+		DebugMenuAddVarBool8("Debug", "Show Collision Polys", &gbShowCollisionPolys, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Buildings", &gbDontRenderBuildings, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Big Buildings", &gbDontRenderBigBuildings, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Peds", &gbDontRenderPeds, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", &gbDontRenderVehicles, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Objects", &gbDontRenderObjects, nil);
 #ifdef TOGGLEABLE_BETA_FEATURES
-		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", (int8*)&CPed::bPopHeadsOnHeadshot, nil);
-		DebugMenuAddVarBool8("Debug", "Toggle peds running to phones to report crimes", (int8*)&CPed::bMakePedsRunToPhonesToReportCrimes, nil);
+		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", &CPed::bPopHeadsOnHeadshot, nil);
+		DebugMenuAddVarBool8("Debug", "Toggle peds running to phones to report crimes", &CPed::bMakePedsRunToPhonesToReportCrimes, nil);
 #endif
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
@@ -361,11 +365,11 @@ DebugMenuPopulate(void)
 
 		extern bool PrintDebugCode;
 		extern int16 DebugCamMode;
-		DebugMenuAddVarBool8("Cam", "Use mouse Cam", (int8*)&CCamera::m_bUseMouse3rdPerson, nil);
+		DebugMenuAddVarBool8("Cam", "Use mouse Cam", &CCamera::m_bUseMouse3rdPerson, nil);
 #ifdef FREE_CAM
-		DebugMenuAddVarBool8("Cam", "Free Cam", (int8*)&CCamera::bFreeCam, nil);
+		DebugMenuAddVarBool8("Cam", "Free Cam", &CCamera::bFreeCam, nil);
 #endif
-		DebugMenuAddVarBool8("Cam", "Print Debug Code", (int8*)&PrintDebugCode, nil);
+		DebugMenuAddVarBool8("Cam", "Print Debug Code", &PrintDebugCode, nil);
 		DebugMenuAddVar("Cam", "Cam Mode", &DebugCamMode, nil, 1, 0, CCam::MODE_EDITOR, nil);
 		DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });
 		DebugMenuAddCmd("Cam", "Follow Ped With Bind", []() { DebugCamMode = CCam::MODE_FOLLOW_PED_WITH_BIND; });

@@ -80,3 +80,7 @@ inline DebugMenuEntry *DebugMenuAddVarBool8(const char *path, const char *name, 
 	DebugMenuEntrySetWrap(e, true);
 	return e;
 }
+inline DebugMenuEntry *DebugMenuAddVarBool8(const char *path, const char *name, bool *ptr, TriggerFunc triggerFunc)
+{
+	return DebugMenuAddVarBool8(path, name, (int8_t*)ptr, triggerFunc);
+}

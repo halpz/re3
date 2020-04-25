@@ -10,12 +10,12 @@ CAnimBlendClumpData *gpAnimBlendClump;
 
 // PS2 names without "NonSkinned"
 void FrameUpdateCallBackNonSkinned(AnimBlendFrameData *frame, void *arg);
-void FrameUpdateCallBackNonSkinnedWithVelocityExtraction(AnimBlendFrameData *frame, void *arg);
-void FrameUpdateCallBackNonSkinnedWith3dVelocityExtraction(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackWithVelocityExtractionNonSkinned(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackWith3dVelocityExtractionNonSkinned(AnimBlendFrameData *frame, void *arg);
 
 void FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg);
-void FrameUpdateCallBackSkinnedWithVelocityExtraction(AnimBlendFrameData *frame, void *arg);
-void FrameUpdateCallBackSkinnedWith3dVelocityExtraction(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackWithVelocityExtractionSkinned(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackWith3dVelocityExtractionSkinned(AnimBlendFrameData *frame, void *arg);
 
 
 void
@@ -31,9 +31,9 @@ FrameUpdateCallBackNonSkinned(AnimBlendFrameData *frame, void *arg)
 	if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION &&
 	   gpAnimBlendClump->velocity){
 		if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION_3D)
-			FrameUpdateCallBackNonSkinnedWith3dVelocityExtraction(frame, arg);
+			FrameUpdateCallBackWith3dVelocityExtractionNonSkinned(frame, arg);
 		else
-			FrameUpdateCallBackNonSkinnedWithVelocityExtraction(frame, arg);
+			FrameUpdateCallBackWithVelocityExtractionNonSkinned(frame, arg);
 		return;
 	}
 
@@ -70,7 +70,7 @@ FrameUpdateCallBackNonSkinned(AnimBlendFrameData *frame, void *arg)
 }
 
 void
-FrameUpdateCallBackNonSkinnedWithVelocityExtraction(AnimBlendFrameData *frame, void *arg)
+FrameUpdateCallBackWithVelocityExtractionNonSkinned(AnimBlendFrameData *frame, void *arg)
 {
 	CVector vec, pos(0.0f, 0.0f, 0.0f);
 	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
@@ -150,7 +150,7 @@ FrameUpdateCallBackNonSkinnedWithVelocityExtraction(AnimBlendFrameData *frame, v
 
 // original code uses do loops?
 void
-FrameUpdateCallBackNonSkinnedWith3dVelocityExtraction(AnimBlendFrameData *frame, void *arg)
+FrameUpdateCallBackWith3dVelocityExtractionNonSkinned(AnimBlendFrameData *frame, void *arg)
 {
 	CVector vec, pos(0.0f, 0.0f, 0.0f);
 	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
@@ -227,9 +227,9 @@ FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg)
 	if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION &&
 	   gpAnimBlendClump->velocity){
 		if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION_3D)
-			FrameUpdateCallBackSkinnedWith3dVelocityExtraction(frame, arg);
+			FrameUpdateCallBackWith3dVelocityExtractionSkinned(frame, arg);
 		else
-			FrameUpdateCallBackSkinnedWithVelocityExtraction(frame, arg);
+			FrameUpdateCallBackWithVelocityExtractionSkinned(frame, arg);
 		return;
 	}
 
@@ -267,7 +267,7 @@ FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg)
 }
 
 void
-FrameUpdateCallBackSkinnedWithVelocityExtraction(AnimBlendFrameData *frame, void *arg)
+FrameUpdateCallBackWithVelocityExtractionSkinned(AnimBlendFrameData *frame, void *arg)
 {
 	CVector vec, pos(0.0f, 0.0f, 0.0f);
 	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
@@ -347,7 +347,7 @@ FrameUpdateCallBackSkinnedWithVelocityExtraction(AnimBlendFrameData *frame, void
 }
 
 void
-FrameUpdateCallBackSkinnedWith3dVelocityExtraction(AnimBlendFrameData *frame, void *arg)
+FrameUpdateCallBackWith3dVelocityExtractionSkinned(AnimBlendFrameData *frame, void *arg)
 {
 	CVector vec, pos(0.0f, 0.0f, 0.0f);
 	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
