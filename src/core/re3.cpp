@@ -17,7 +17,6 @@
 #include "Heli.h"
 #include "Automobile.h"
 #include "Ped.h"
-#include "debugmenu_public.h"
 #include "Particle.h"
 #include "Console.h"
 #include "Debug.h"
@@ -26,14 +25,13 @@
 #include "Pad.h"
 #include "PlayerPed.h"
 #include "Radar.h"
+#include "debugmenu.h"
 
 #include <list>
 
 #ifdef RWLIBS
 extern "C" int vsprintf(char* const _Buffer, char const* const _Format, va_list  _ArgList);
 #endif
-
-DebugMenuAPI gDebugMenuAPI;
 
 
 #ifdef USE_PS2_RAND
@@ -60,24 +58,6 @@ void
 mysrand(unsigned int seed)
 {
 	myrand_seed = seed;
-}
-
-void (*DebugMenuProcess)(void);
-void (*DebugMenuRender)(void);
-static void stub(void) { }
-
-void
-DebugMenuInit(void)
-{
-	if(DebugMenuLoad()){
-		DebugMenuProcess = (void(*)(void))GetProcAddress(gDebugMenuAPI.module, "DebugMenuProcess");
-		DebugMenuRender = (void(*)(void))GetProcAddress(gDebugMenuAPI.module, "DebugMenuRender");
-	}
-	if(DebugMenuProcess == nil || DebugMenuRender == nil){
-		DebugMenuProcess = stub;
-		DebugMenuRender = stub;
-	}
-
 }
 
 void WeaponCheat();
@@ -269,7 +249,7 @@ TWEAKSWITCH(CWeather::NewWeatherType, 0, 3, wt, NULL);
 void
 DebugMenuPopulate(void)
 {
-	if(DebugMenuLoad()){
+	if(1){
 		static const char *weathers[] = {
 			"Sunny", "Cloudy", "Rainy", "Foggy"
 		};
@@ -284,7 +264,7 @@ DebugMenuPopulate(void)
 		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 3, weathers);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVar("Time & Weather", "Wind", (float*)&CWeather::Wind, nil, 0.1f, 0.0f, 1.0f);
-		DebugMenuAddVar("Time & Weather", "Time scale", (float*)0x8F2C20, nil, 0.1f, 0.0f, 10.0f);
+		DebugMenuAddVar("Time & Weather", "Time scale", (float*)&CTimer::GetTimeScale(), nil, 0.1f, 0.0f, 10.0f);
 
 		DebugMenuAddCmd("Cheats", "Weapons", WeaponCheat);
 		DebugMenuAddCmd("Cheats", "Money", MoneyCheat);
@@ -357,7 +337,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Catalina Fly By", CHeli::StartCatalinaFlyBy);
 		DebugMenuAddCmd("Debug", "Catalina Take Off", CHeli::CatalinaTakeOff);
 		DebugMenuAddCmd("Debug", "Catalina Fly Away", CHeli::MakeCatalinaHeliFlyAway);
-		DebugMenuAddVarBool8("Debug", "Script Heli On", (int8*)0x95CD43, nil);
+		DebugMenuAddVarBool8("Debug", "Script Heli On", (int8*)&CHeli::ScriptHeliOn, nil);
 
 		DebugMenuAddVarBool8("Debug", "Show Ped Paths", (int8*)&gbShowPedPaths, nil);
 		DebugMenuAddVarBool8("Debug", "Show Car Paths", (int8*)&gbShowCarPaths, nil);
@@ -396,18 +376,6 @@ DebugMenuPopulate(void)
 		CTweakVars::AddDBG("Debug");
 	}
 }
-
-/*
-int (*RsEventHandler_orig)(int a, int b);
-int
-delayedPatches10(int a, int b)
-{
-	DebugMenuInit();
-	DebugMenuPopulate();
-
-	return RsEventHandler_orig(a, b);
-}
-*/
 
 const int   re3_buffsize = 1024;
 static char re3_buff[re3_buffsize];

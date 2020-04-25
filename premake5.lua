@@ -22,6 +22,7 @@ workspace "re3"
 	files { "src/text/*.*" }
 	files { "src/vehicles/*.*" }
 	files { "src/weapons/*.*" }
+	files { "src/extras/*.*" }
 	files { "eax/*.*" }
 
 	includedirs { "src" }
@@ -42,6 +43,7 @@ workspace "re3"
 	includedirs { "src/text" }
 	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
+	includedirs { "src/extras" }
 	includedirs { "eax" }
 
 	includedirs { "dxsdk/include" }
@@ -73,7 +75,7 @@ workspace "re3"
        "set filename=%%~ni",
        "set fileextension=%%~xi",
        "set target=!path!!filename!!fileextension!",
-       "if exist \"!target!\" copy /y \"!file!\" \"!target!\"",
+       "copy /y \"!file!\" \"!target!\"",
        ")" }
     
     function setpaths (gamepath, exepath, scriptspath)
@@ -106,7 +108,7 @@ project "re3"
 	staticruntime "off"
 	
 	filter "configurations:not *RW"
-		prebuildcommands { "cd \"../librw\" && premake5 " .. _ACTION .. " && msbuild \"build/librw.sln\" /property:Configuration=%{cfg.longname} /property:Platform=\"win-x86-d3d9\"" }
+	--	prebuildcommands { "cd \"../librw\" && premake5 " .. _ACTION .. " && msbuild \"build/librw.sln\" /property:Configuration=%{cfg.longname} /property:Platform=\"win-x86-d3d9\"" }
 		defines { "LIBRW", "RW_D3D9" }
 	
 	filter "configurations:*RW"

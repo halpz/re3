@@ -176,8 +176,8 @@ const RwChar *RwImageSetPath(const RwChar * path) { Image::setSearchPath(path); 
 RwImage     *RwImageSetStride(RwImage * image, RwInt32 stride) { image->stride = stride; return image; }
 RwImage     *RwImageSetPixels(RwImage * image, RwUInt8 * pixels) { image->pixels = pixels; return image; }
 RwImage     *RwImageSetPalette(RwImage * image, RwRGBA * palette) { image->palette = (uint8*)palette; return image; }
-RwInt32      RwImageGetWidth(const RwImage * image);
-RwInt32      RwImageGetHeight(const RwImage * image);
+RwInt32      RwImageGetWidth(const RwImage * image) { return image->width; }
+RwInt32      RwImageGetHeight(const RwImage * image) { return image->height; }
 RwInt32      RwImageGetDepth(const RwImage * image);
 RwInt32      RwImageGetStride(const RwImage * image);
 RwUInt8     *RwImageGetPixels(const RwImage * image);
