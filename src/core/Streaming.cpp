@@ -754,7 +754,8 @@ CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flag
 	}else
 		RemoveModel(modelId);
 
-	ms_pExtraObjectsDir->FindItem(modelName, pos, size);
+	bool found = ms_pExtraObjectsDir->FindItem(modelName, pos, size);
+	assert(found);
 	mi->ClearTexDictionary();
 	if(CTxdStore::FindTxdSlot(modelName) == -1)
 		mi->SetTexDictionary("generic");

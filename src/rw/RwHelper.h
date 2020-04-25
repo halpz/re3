@@ -21,6 +21,8 @@ RpHAnimHierarchy *GetAnimHierarchyFromClump(RpClump *clump);	// get from frame
 RwFrame *GetHierarchyFromChildNodesCB(RwFrame *frame, void *data);
 void SkinGetBonePositionsToTable(RpClump *clump, RwV3d *boneTable);
 RpHAnimAnimation *HAnimAnimationCreateForHierarchy(RpHAnimHierarchy *hier);
+RpAtomic *AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data);
+void RenderSkeleton(RpHAnimHierarchy *hier);
 #endif
 
 RwTexDictionary *RwTexDictionaryGtaStreamRead(RwStream *stream);

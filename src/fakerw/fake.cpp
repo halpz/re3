@@ -241,7 +241,7 @@ RwRaster *RwRasterSetFromImage(RwRaster *raster, RwImage *image) { return raster
 
 RwTexture *RwTextureCreate(RwRaster * raster) { return Texture::create(raster); }
 RwBool RwTextureDestroy(RwTexture * texture) { texture->destroy(); return true; }
-RwTexture *RwTextureAddRef(RwTexture *texture) { texture->refCount++; return texture; }
+RwTexture *RwTextureAddRef(RwTexture *texture) { texture->addRef(); return texture; }
 // TODO
 RwBool RwTextureSetMipmapping(RwBool enable) { return true; }
 RwBool RwTextureGetMipmapping(void);
@@ -410,11 +410,11 @@ RwBool RwIm3DRenderLine(RwInt32 vert1, RwInt32 vert2) {
 	RwImVertexIndex indices[2];
 	indices[0] = vert1;
 	indices[1] = vert2;
-	im3d::RenderIndexed((PrimitiveType)PRIMTYPELINELIST, indices, 2);
+	im3d::RenderIndexedPrimitive((PrimitiveType)PRIMTYPELINELIST, indices, 2);
 	return true;
 }
 RwBool RwIm3DRenderTriangle(RwInt32 vert1, RwInt32 vert2, RwInt32 vert3);
-RwBool RwIm3DRenderIndexedPrimitive(RwPrimitiveType primType, RwImVertexIndex *indices, RwInt32 numIndices) { im3d::RenderIndexed((PrimitiveType)primType, indices, numIndices); return true; }
+RwBool RwIm3DRenderIndexedPrimitive(RwPrimitiveType primType, RwImVertexIndex *indices, RwInt32 numIndices) { im3d::RenderIndexedPrimitive((PrimitiveType)primType, indices, numIndices); return true; }
 RwBool RwIm3DRenderPrimitive(RwPrimitiveType primType);
 
 

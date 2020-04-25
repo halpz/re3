@@ -91,7 +91,6 @@ void GameInit(void);
 void SystemInit(void);
 void TheGame(void);
 
-void DebugMenuInit(void) {}
 void DebugMenuPopulate(void);
 
 
@@ -344,6 +343,8 @@ static void
 Terminate3D(void)
 {
 	CGame::ShutdownRenderWare();
+
+	DebugMenuShutdown();
 	
 	RsRwTerminate();
 
@@ -794,6 +795,7 @@ RenderDebugShit(void)
 		CRenderer::RenderCollisionLines();
 	ThePaths.DisplayPathData();
 	CDebug::DrawLines();
+	DefinedState();
 #endif
 }
 

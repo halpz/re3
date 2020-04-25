@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "General.h"
+#include "RwHelper.h"
 #include "ModelInfo.h"
 #include "ModelIndices.h"
 #include "FileMgr.h"
@@ -754,6 +755,11 @@ CAnimManager::LoadAnimFiles(void)
 		group->CreateAssociations(def->blockName, clump, def->animNames, def->numAnims);
 		for(j = 0; j < group->numAssociations; j++)
 			group->GetAnimation(j)->flags |= def->animDescs[j].flags;
+#ifdef PED_SKIN
+		// forgot on xbox/android
+		if(IsClumpSkinned(clump))
+			RpClumpForAllAtomics(clump, AtomicRemoveAnimFromSkinCB, nil);
+#endif
 		RpClumpDestroy(clump);
 	}
 }

@@ -285,28 +285,6 @@ CEntity::CreateRwObject(void)
 	}
 }
 
-#ifdef PED_SKIN
-RpAtomic*
-AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data)
-{
-	if(RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))){
-		RpHAnimHierarchy *hier = RpSkinAtomicGetHAnimHierarchy(atomic);
-#ifdef LIBRW
-		if(hier && hier->interpolator->currentAnim){
-			RpHAnimAnimationDestroy(hier->interpolator->currentAnim);
-			hier->interpolator->currentAnim = nil;
-		}
-#else
-		if(hier && hier->pCurrentAnim){
-			RpHAnimAnimationDestroy(hier->pCurrentAnim);
-			hier->pCurrentAnim = nil;
-		}
-#endif
-	}
-	return atomic;
-}
-#endif
-
 void
 CEntity::DeleteRwObject(void)
 {
