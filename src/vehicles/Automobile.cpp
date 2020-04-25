@@ -1013,7 +1013,7 @@ CAutomobile::ProcessControl(void)
 				m_aWheelSpeed[0] = Max(m_aWheelSpeed[0]-0.0005f, 0.0f);
 		}else if((GetModelIndex() == MI_DODO || CVehicle::bAllDodosCheat) &&
 		         m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
-			FlyingControl(FLIGHT_MODEL_DODO);
+			FlyingControl(FLIGHT_MODEL_RCPLANE);
 		}else if(GetModelIndex() == MI_MIAMI_RCBARON){
 			FlyingControl(FLIGHT_MODEL_RCPLANE);
 		}else if(GetModelIndex() == MI_MIAMI_RCRAIDER || GetModelIndex() == MI_MIAMI_SPARROW || bAllCarCheat){

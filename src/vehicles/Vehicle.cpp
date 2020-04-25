@@ -185,6 +185,35 @@ CVehicle::GetHeightAboveRoad(void)
 	return -1.0f * GetColModel()->boundingBox.min.z;
 }
 
+const float fRCPropFallOff = 3.0f;
+const float fRCAeroThrust = 0.003f;
+const float fRCSideSlipMult = 0.1f;
+const float fRCRudderMult = 0.2f;
+const float fRCYawMult = -0.01f;
+const float fRCRollMult = 0.02f;
+const float fRCRollStabilise = -0.08f;
+const float fRCPitchMult = 0.005f;
+const float fRCTailMult = 0.3f;
+const float fRCFormLiftMult = 0.02f;
+const float fRCAttackLiftMult = 0.25f;
+const CVector vecRCAeroResistance(0.998f, 0.998f, 0.9f);
+
+const float fSeaPropFallOff = 2.3f;
+const float fSeaThrust = 0.002f;
+const float fSeaSideSlipMult = 0.1f;
+const float fSeaRudderMult = 0.01f;
+const float fSeaYawMult = 0.0003f;
+const float fSeaRollMult = 0.0015f;
+const float fSeaRollStabilise = -0.01f;
+const float fSeaPitchMult = 0.0002f;
+const float fSeaTailMult = 0.01f;
+const float fSeaFormLiftMult = 0.012f;
+const float fSeaAttackLiftMult = 0.1f;
+const CVector vecSeaAeroResistance(0.995f, 0.995f, 0.85f);
+
+const float fSpeedResistanceY = 500.0f;
+const float fSpeedResistanceZ = 500.0f;
+
 void
 CVehicle::FlyingControl(eFlightModel flightModel)
 {
@@ -229,18 +258,112 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 
 		m_vecTurnSpeed.y *= Pow(0.9f, CTimer::GetTimeStep());
 		moveSpeed = m_vecMoveSpeed.MagnitudeSqr();
-		if(moveSpeed > 2.25f)
+		if(moveSpeed > SQR(1.5f))
 			m_vecMoveSpeed *= 1.5f/Sqrt(moveSpeed);
 
 		float turnSpeed = m_vecTurnSpeed.MagnitudeSqr();
-		if(turnSpeed > 0.04f)
+		if(turnSpeed > SQR(0.2f))
 			m_vecTurnSpeed *= 0.2f/Sqrt(turnSpeed);
 	}
 		break;
 
 	case FLIGHT_MODEL_RCPLANE:
 	case FLIGHT_MODEL_SEAPLANE:
-		assert(0 && "Plane flight model not implemented");
+	{
+		// thrust
+		float fForwSpeed = DotProduct(GetMoveSpeed(), GetForward());
+		CVector vecWidthForward = GetColModel()->boundingBox.min.y * GetForward();
+		float fThrust = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
+		if (fForwSpeed > 0.1f || (flightModel == FLIGHT_MODEL_RCPLANE && fForwSpeed > 0.02f))
+			fThrust += 1.0f;
+		else if (fForwSpeed > 0.0f && fThrust < 0.0f)
+			fThrust = 0.0f;
+		float fThrustImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fThrustImpulse = (fThrust - fRCPropFallOff * fForwSpeed) * fRCAeroThrust;
+		else
+			fThrustImpulse = (fThrust - fSeaPropFallOff * fForwSpeed) * fSeaThrust;
+		ApplyMoveForce(fThrustImpulse * GetForward() * m_fMass * CTimer::GetTimeStep());
+
+		// left/right
+		float fSideSpeed = -DotProduct(GetMoveSpeed(), GetRight());
+		float fSteerLR = CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
+		float fSideSlipImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fSideSlipImpulse = Abs(fSideSpeed) * fSideSpeed * fRCSideSlipMult;
+		else
+			fSideSlipImpulse = Abs(fSideSpeed) * fSideSpeed * fSeaSideSlipMult;
+		ApplyMoveForce(m_fMass * GetRight() * fSideSlipImpulse * CTimer::GetTimeStep());
+
+		float fYaw = -DotProduct(CrossProduct(m_vecTurnSpeed + m_vecTurnFriction, vecWidthForward) + m_vecMoveSpeed + m_vecMoveFriction, GetRight());
+		float fYawImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fYawImpulse = fRCRudderMult * fYaw * Abs(fYaw) + fRCYawMult * fSteerLR * fForwSpeed;
+		else
+			fYawImpulse = fSeaRudderMult * fYaw * Abs(fYaw) + fSeaYawMult * fSteerLR * fForwSpeed;
+		ApplyTurnForce(fYawImpulse * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), vecWidthForward);
+
+		float fRollImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE) {
+			float fDirectionMultiplier = CPad::GetPad(0)->GetLookRight();
+			if (CPad::GetPad(0)->GetLookLeft())
+				fDirectionMultiplier = -1;
+			fRollImpulse = (0.5f * fDirectionMultiplier + fSteerLR) * fRCRollMult;
+		}
+		else
+			fRollImpulse = fSteerLR * fSeaRollMult;
+		ApplyTurnForce(GetRight() * fRollImpulse * fForwSpeed * m_fTurnMass * CTimer::GetTimeStep(), GetUp());
+
+		CVector vecFRight = CrossProduct(GetForward(), CVector(0.0f, 0.0f, 1.0f));
+		CVector vecStabilise = (GetUp().z > 0.0f) ? vecFRight : -vecFRight;
+		float fStabiliseDirection = (GetUp().z > 0.0f) ? -1.0f : 1.0f;
+		float fStabiliseImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fStabiliseImpulse = fRCRollStabilise * fStabiliseDirection * (1.0f - DotProduct(GetRight(), vecStabilise)) * (1.0f - Abs(GetForward().z));
+		else
+			fStabiliseImpulse = fSeaRollStabilise * fStabiliseDirection * (1.0f - DotProduct(GetRight(), vecStabilise)) * (1.0f - Abs(GetForward().z));
+		ApplyTurnForce(fStabiliseImpulse * m_fTurnMass * GetRight(), GetUp()); // no CTimer::GetTimeStep(), is it right? VC doesn't have it too
+
+		// up/down
+		float fTail = -DotProduct(CrossProduct(m_vecTurnSpeed + m_vecTurnFriction, vecWidthForward) + m_vecMoveSpeed + m_vecMoveFriction, GetUp());
+		float fSteerUD = -CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
+		float fPitchImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fPitchImpulse = fRCTailMult * fTail * Abs(fTail) + fRCPitchMult * fSteerUD * fForwSpeed;
+		else
+			fPitchImpulse = fSeaTailMult * fTail * Abs(fTail) + fSeaPitchMult * fSteerUD * fForwSpeed;
+		ApplyTurnForce(fPitchImpulse* m_fTurnMass* GetRight()* CTimer::GetTimeStep(), vecWidthForward);
+
+		float fLift = -DotProduct(GetMoveSpeed(), GetUp()) / Max(0.01f, GetMoveSpeed().Magnitude());
+		float fLiftImpluse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fLiftImpluse = (fRCAttackLiftMult * fLift + fRCFormLiftMult) * fForwSpeed * fForwSpeed;
+		else
+			fLiftImpluse = fSeaAttackLiftMult * fLift + fSeaFormLiftMult * fForwSpeed * fForwSpeed;
+		float fLiftForce = fLiftImpluse * m_fMass * CTimer::GetTimeStep();
+		if (GRAVITY * CTimer::GetTimeStep() * m_fMass < fLiftImpluse) {
+			if (flightModel == FLIGHT_MODEL_RCPLANE && GetPosition().z > 50.0f)
+				fLiftForce = CTimer::GetTimeStep() * 0.0072 * m_fMass;
+			else if (flightModel == FLIGHT_MODEL_SEAPLANE && GetPosition().z > 80.0f)
+				fLiftForce = CTimer::GetTimeStep() * 0.0072 * m_fMass;
+		}
+		ApplyMoveForce(fLiftForce * GetUp());
+		CVector vecResistance;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			vecResistance = vecRCAeroResistance;
+		else
+			vecResistance = vecSeaAeroResistance;
+		float rX = Pow(vecResistance.x, CTimer::GetTimeStep());
+		float rY = Pow(vecResistance.y, CTimer::GetTimeStep());
+		float rZ = Pow(vecResistance.z, CTimer::GetTimeStep());
+		CVector vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());
+		vecTurnSpeed.x *= rX;
+		float fResistance = vecTurnSpeed.y * (1.0f / (fSpeedResistanceY * SQR(vecTurnSpeed.y) + 1.0f)) * rY - vecTurnSpeed.y;
+		vecTurnSpeed.z *= rZ;
+		m_vecTurnSpeed = Multiply3x3(GetMatrix(), vecTurnSpeed);
+		ApplyTurnForce(-GetUp() * fResistance * m_fTurnMass, GetRight() + Multiply3x3(GetMatrix(), m_vecCentreOfMass));
+		break;
+	}
 	case FLIGHT_MODEL_HELI:
 		assert(0 && "Heli flight model not implemented");
 	}
