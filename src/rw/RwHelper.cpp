@@ -9,12 +9,20 @@
 RtCharset *debugCharset;
 #endif
 
+static bool charsetOpen;
+void OpenCharsetSafe()
+{
+	if(!charsetOpen)
+		RtCharsetOpen();
+	charsetOpen = true;
+}
+
 void CreateDebugFont()
 {
 #ifndef FINAL
 	RwRGBA color = { 255, 255, 128, 255 };
 	RwRGBA colorbg = { 0, 0, 0, 0 };
-	RtCharsetOpen();
+	OpenCharsetSafe();
 	debugCharset = RtCharsetCreate(&color, &colorbg);
 #endif
 }
@@ -24,6 +32,7 @@ void DestroyDebugFont()
 #ifndef FINAL
 	RtCharsetDestroy(debugCharset);
 	RtCharsetClose();
+	charsetOpen = false;
 #endif
 }
 

@@ -3,6 +3,7 @@
 void *RwMallocAlign(RwUInt32 size, RwUInt32 align);
 void RwFreeAlign(void *mem);
 
+void OpenCharsetSafe();
 void CreateDebugFont();
 void DestroyDebugFont();
 void ObrsPrintfString(const char *str, short x, short y);
