@@ -63,7 +63,6 @@ struct tJoy
 	bool         m_bInitialised;
 	bool         m_bHasAxisZ;
 	bool         m_bHasAxisR;
-	char _pad0;
 	int          m_nVendorID;
 	int          m_nProductID;
 };
