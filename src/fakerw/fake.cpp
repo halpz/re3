@@ -290,9 +290,29 @@ RwTextureAddressMode RwTextureGetAddressingV(const RwTexture *texture);
 // TODO
 void _rwD3D8TexDictionaryEnableRasterFormatConversion(bool enable) { }
 
+static rw::Raster*
+ConvertTexRaster(rw::Raster *ras)
+{
+	using namespace rw;
+	Image *img = ras->toImage();
+	ras->destroy();
+	img->unindex();
+	ras = Raster::createFromImage(img);
+	img->destroy();
+	return ras;
+}
+
 // hack for reading native textures
 RwBool rwNativeTextureHackRead(RwStream *stream, RwTexture **tex, RwInt32 size)
-	{ *tex = Texture::streamReadNative(stream); return *tex != nil; }
+{
+	*tex = Texture::streamReadNative(stream);
+#ifdef RW_GL3
+	if(strcmp((*tex)->name, "copnu") == 0)
+		tex = tex;
+	(*tex)->raster = ConvertTexRaster((*tex)->raster);
+#endif
+	return *tex != nil;
+}
 
 
 

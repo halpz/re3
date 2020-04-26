@@ -19,11 +19,25 @@
 #include "platform.h"
 #include "crossplatform.h"
 
+#include "patcher.h"
+#include "main.h"
+#include "FileMgr.h"
+#include "Text.h"
+#include "Pad.h"
+#include "Timer.h"
+#include "DMAudio.h"
+#include "ControllerConfig.h"
+#include "Frontend.h"
+#include "Game.h"
+#include "PCSave.h"
+#include "Sprite2d.h"
+#include "AnimViewer.h"
+
+
 #define MAX_SUBSYSTEMS		(16)
 
 
-using namespace rw;
-EngineOpenParams openParams;
+rw::EngineOpenParams openParams;
 
 static RwBool		  ForegroundApp = TRUE;
 
@@ -49,19 +63,6 @@ static psGlobalType PsGlobal;
 #define JIF(x) if (FAILED(hr=(x))) \
 	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return;}
 
-#include "patcher.h"
-#include "main.h"
-#include "FileMgr.h"
-#include "Text.h"
-#include "Pad.h"
-#include "Timer.h"
-#include "DMAudio.h"
-#include "ControllerConfig.h"
-#include "Frontend.h"
-#include "Game.h"
-#include "PCSave.h"
-#include "Sprite2d.h"
-#include "AnimViewer.h"
 
 // TODO: This is used on selecting video mode, so either think something or remove it completely
 DWORD _dwMemTotalVideo = 1024 * (1024 * 1024); // 1024 MB as placeholder
