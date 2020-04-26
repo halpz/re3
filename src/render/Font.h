@@ -49,25 +49,23 @@ enum
 	FONT_LANGSET_EFIGS,
 	FONT_LANGSET_RUSSIAN,
 	FONT_LANGSET_POLISH,
-	FONT_LANGSET_JAPANESE
+	FONT_LANGSET_JAPANESE,
 	LANGSET_MAX
 };
-#endif
 
-#define FONTJAP(style) (CFont::LanguageSet == FONT_LANGSET_JAPANESE ? FONT_JAPANESE : style)
+#define FONT_LOCALE(style) (CFont::IsJapanese() ? FONT_JAPANESE : style)
+#else
+#define FONT_LOCALE(style) (style)
+#endif
 
 class CFont
 {
 #ifdef MORE_LANGUAGES
 	static int16 Size[LANGSET_MAX][MAX_FONTS][193];
-public:
 	static uint8 LanguageSet;
-private:
 	static int32 Slot;
-	static CSprite2d Sprite[4];
 #else
 	static int16 Size[MAX_FONTS][193];
-	static CSprite2d* Sprite;	//[3]
 #endif
 	static int16 NewLine;
 	static CSprite2d Sprite[MAX_FONTS];
@@ -89,6 +87,9 @@ public:
 	static float GetCharacterWidth(wchar c);
 	static float GetCharacterSize(wchar c);
 	static float GetStringWidth(wchar *s, bool spaces = false);
+#ifdef MORE_LANGUAGES
+	static float GetStringWidth_Jap(wchar* s);
+#endif
 	static uint16 *GetNextSpace(wchar *s);
 #ifdef MORE_LANGUAGES
 	static uint16 *ParseToken(wchar *s, wchar*, bool japShit = false);
@@ -158,16 +159,16 @@ public:
 	static void SetRightJustifyWrap(float wrap) { Details.rightJustifyWrap = wrap; }
 	static void SetAlphaFade(float fade) { Details.alphaFade = fade; }
 	static void SetDropShadowPosition(int16 pos) { Details.dropShadowPosition = pos; }
-	static void SetBackgroundColor(const CRGBA &col);
-	static void SetColor(const CRGBA &col);
-	static void SetDropColor(const CRGBA &col);
+	static void SetBackgroundColor(CRGBA col);
+	static void SetColor(CRGBA col);
+	static void SetDropColor(CRGBA col);
 
 #ifdef MORE_LANGUAGES
 	static void ReloadFonts(uint8 set);
 
 	// japanese stuff
 	static bool IsAnsiCharacter(wchar* s);
-	static bool IsJapanesePunctuation(wchar* a1);
+	static bool IsJapanesePunctuation(wchar* str);
 	static bool IsJapanese() { return LanguageSet == FONT_LANGSET_JAPANESE; }
 	static bool IsJapaneseFont() { return IsJapanese() && (Details.style == FONT_JAPANESE || Details.style == FONT_PAGER);  }
 #endif

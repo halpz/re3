@@ -1,6 +1,9 @@
 #include "common.h"
 
 #include "FileMgr.h"
+#ifdef MORE_LANGUAGES
+#include "Game.h"
+#endif
 #include "Frontend.h"
 #include "Messages.h"
 #include "Text.h"
@@ -260,10 +263,8 @@ CData::Unload(void)
 void
 AsciiToUnicode(const char *src, wchar *dst)
 {
-	while((*dst++ = *src++) != '\0');
+	while((*dst++ = (unsigned char)*src++) != '\0');
 }
-
-#include "Game.h"
 
 char*
 UnicodeToAscii(wchar *src)
@@ -271,7 +272,11 @@ UnicodeToAscii(wchar *src)
 	static char aStr[256];
 	int len;
 	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
-		if(*src < 128 || (CGame::russianGame && *src < 256))
+#ifdef MORE_LANGUAGES
+		if(*src < 128 || ((CGame::russianGame || CGame::japaneseGame) && *src < 256))
+#else
+		if(*src < 128)
+#endif
 			aStr[len] = *src;
 		else
 			aStr[len] = '#';
@@ -312,6 +317,3 @@ TextCopy(wchar *dst, const wchar *src)
 {
 	while((*dst++ = *src++) != '\0');
 }
-
-
-	InjectHook(0x52C2F0, &UnicodeToAscii, PATCH_JUMP);

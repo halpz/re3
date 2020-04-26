@@ -167,6 +167,7 @@ int16 CFont::Size[MAX_FONTS][193] = {
 #endif
 };
 
+#ifdef MORE_LANGUAGES
 int16 Size_jp[] = {
 	15, 14, 16, 20, 19, 26, 22, 11, 18, 18, 27, 26, 13, //; 0
 	19, 20, 27, 19, 15, 19, 19, 21, 19, 20, 18, 19, 15, //; 13
@@ -184,6 +185,7 @@ int16 Size_jp[] = {
 	19, 19, 19, 11, 19, 19, 19, 19, 19, 19, 19, 19, 19, //; 170
 	19, 19, 19, 19, 19, 19, 19, 19, 19, 21
 };
+#endif
 
 wchar foreign_table[128] = {
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -227,11 +229,13 @@ CFont::Initialise(void)
 	CTxdStore::PushCurrentTxd();
 	CTxdStore::SetCurrentTxd(slot);
 	Sprite[0].SetTexture("font2", "font2_mask");
-	if (LanguageSet == FONT_LANGSET_JAPANESE) {
+#ifdef MORE_LANGUAGES
+	if (IsJapanese()) {
 		Sprite[1].SetTexture("FONTJAP", "FONTJAP_mask");
 		Sprite[3].SetTexture("FONTJAP", "FONTJAP_mask");
 	}
 	else
+#endif // MORE_LANGUAGES
 		Sprite[1].SetTexture("pager", "pager_mask");
 	Sprite[2].SetTexture("font1", "font1_mask");
 	SetScale(1.0f, 1.0f);
@@ -261,7 +265,7 @@ CFont::ReloadFonts(uint8 set)
 		Sprite[0].Delete();
 		Sprite[1].Delete();
 		Sprite[2].Delete();
-		if (LanguageSet == FONT_LANGSET_JAPANESE)
+		if (IsJapanese())
 			Sprite[3].Delete();
 		CTxdStore::PushCurrentTxd();
 		CTxdStore::RemoveTxd(Slot);
@@ -302,9 +306,9 @@ CFont::Shutdown(void)
 	Sprite[0].Delete();
 	Sprite[1].Delete();
 	Sprite[2].Delete();
-	if (LanguageSet == FONT_LANGSET_JAPANESE)
-		Sprite[3].Delete();
 #ifdef MORE_LANGUAGES
+	if (IsJapanese())
+		Sprite[3].Delete();
 	CTxdStore::RemoveTxdSlot(Slot);
 	Slot = -1;
 #else
@@ -318,8 +322,10 @@ CFont::InitPerFrame(void)
 	Details.bank = CSprite2d::GetBank(30, Sprite[0].m_pTexture);
 	CSprite2d::GetBank(15, Sprite[1].m_pTexture);
 	CSprite2d::GetBank(15, Sprite[2].m_pTexture);
-	if (LanguageSet == FONT_LANGSET_JAPANESE)
+#ifdef MORE_LANGUAGES
+	if (IsJapanese())
 		CSprite2d::GetBank(15, Sprite[3].m_pTexture);
+#endif
 	SetDropShadowPosition(0);
 	NewLine = 0;
 }
@@ -334,11 +340,13 @@ CFont::PrintChar(float x, float y, wchar c)
 	float w = GetCharacterWidth(c) / 32.0f;
 	float xoff = c % 16;
 	float yoff = c / 16;
-	if (LanguageSet == FONT_LANGSET_JAPANESE && (Details.style == FONT_PAGER || Details.style == FONT_JAPANESE)) {
+#ifdef MORE_LANGUAGES
+	if (IsJapaneseFont()) {
 		w = 21.0f;
-		xoff = (float)(c % 48);// *w / 1024.0f;
+		xoff = (float)(c % 48);
 		yoff = c / 48;
 	}
+#endif
 
 	if(Details.style == FONT_BANK || Details.style == FONT_HEADING){
 		if(Details.dropShadowPosition != 0){
@@ -362,7 +370,8 @@ CFont::PrintChar(float x, float y, wchar c)
 			(xoff+1.0f)/16.0f - 0.001f, yoff/12.8f,
 			xoff/16.0f,                 (yoff+1.0f)/12.8f - 0.002f,
 			(xoff+1.0f)/16.0f - 0.001f, (yoff+1.0f)/12.8f - 0.002f);
-	}else if (LanguageSet == FONT_LANGSET_JAPANESE && (Details.style == FONT_PAGER || Details.style == FONT_JAPANESE)) {
+#ifdef MORE_LANGUAGES
+	}else if (IsJapaneseFont()) {
 		if (Details.dropShadowPosition != 0) {
 			CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
 				CRect(x + SCREEN_SCALE_X(Details.dropShadowPosition),
@@ -384,8 +393,8 @@ CFont::PrintChar(float x, float y, wchar c)
 			xoff * w / 1024.0f + (1.0f / 48.0f) - 0.001f, yoff / 25.6f,
 			xoff * w / 1024.0f, (yoff + 1.0f) / 25.6f - 0.002f,
 			xoff * w / 1024.0f + (1.0f / 48.0f) - 0.001f, (yoff + 1.0f) / 25.6f - 0.0001f);
-	}
-	else
+#endif
+	}else
 		CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
 			CRect(x, y,
 					x + 32.0f * Details.scaleX * w,
@@ -397,26 +406,10 @@ CFont::PrintChar(float x, float y, wchar c)
 			(xoff+w)/16.0f - 0.0001f, (yoff+1.0f)/16.0f - 0.0001f);
 }
 
-bool CFont::IsJapanesePunctuation(wchar *a1)
+#ifdef MORE_LANGUAGES
+bool CFont::IsJapanesePunctuation(wchar *str)
 {
-	wchar v2;
-
-	v2 = *a1;
-	if (v2 != 0xE7
-		&& v2 != 0x124
-		&& v2 != 0x126
-		&& v2 != 0x128
-		&& v2 != 0x104
-		&& v2 != ','
-		&& v2 != '>'
-		&& v2 != '!'
-		&& v2 != 0x99
-		&& v2 != '?'
-		&& v2 != ':')
-	{
-		return false;
-	}
-	return true;
+	return (*str == 0xE7 || *str == 0x124 || *str == 0x126 || *str == 0x128 || *str == 0x104 || *str == ',' || *str == '>' || *str == '!' || *str == 0x99 || *str == '?' || *str == ':');
 }
 
 bool CFont::IsAnsiCharacter(wchar *s)
@@ -433,200 +426,11 @@ bool CFont::IsAnsiCharacter(wchar *s)
 		return true;
 	return false;
 }
+#endif
 
 void
 CFont::PrintString(float xstart, float ystart, wchar *s)
 {
-	/*
-	if (1)
-	{
-		wchar* result; // eax
-		__int16 numSpaces; // bx
-		wchar* start; // ebp
-		double v6; // st7
-		float v7; // ST2C_4
-		float v8; // ST2C_4
-		double v9; // st5
-		double v10; // st7
-		double v11; // st5
-		float v12; // ST10_4
-		float v13; // ST00_4
-		float v14; // ST34_4
-		unsigned __int16* v15; // eax
-		wchar* t; // esi
-		unsigned __int16 v17; // ax
-		double v18; // st7
-		double v19; // st7
-		float v20; // ST34_4
-		double v21; // st7
-		double v22; // st7
-		double v23; // st7
-		double xleft_d; // st6
-		float xleft; // ST00_4
-		float v26; // ST34_4
-		float v27; // [esp+24h] [ebp-44h]
-		float lineLength; // [esp+28h] [ebp-40h]
-		float v29; // [esp+30h] [ebp-38h]
-		float x; // [esp+40h] [ebp-28h]
-		float y; // [esp+44h] [ebp-24h]
-		char first; // [esp+4Bh] [ebp-1Dh]
-		CRect v33; // [esp+4Ch] [ebp-1Ch]
-
-		result = s;
-		if (*s != '*')
-		{
-			if (CFont::Details.background == 1)
-			{
-				CFont::GetTextRect(&v33, xstart, ystart, s);
-				CSprite2d::DrawRect(v33, CFont::Details.backgroundColor);
-			}
-			numSpaces = 0;
-			lineLength = 0.0;
-			start = s;
-			first = 1;
-			if (CFont::Details.centre != 1 && CFont::Details.rightJustify != 1)
-				x = xstart;
-			else
-				x = 0.0;
-			y = ystart;
-			while (1)
-			{
-				while (1)
-				{
-					while (1)
-					{
-						result = s;
-						if (!*s)
-							return;// result;
-						v27 = CFont::GetStringWidth(s, false);
-						if (CFont::Details.centre == 1)
-							v6 = CFont::Details.centreSize;
-						else
-							v6 = CFont::Details.rightJustify == 1 ? xstart - CFont::Details.rightJustifyWrap : CFont::Details.wrapX;
-						v7 = v6;
-						v8 = v7 - SCREEN_WIDTH * 0.0015625f * 21.0 * 2.0;
-						if (x + v27 <= v8 || first)
-							break;
-						if (someJapCheck(s))
-							--s;
-						if (CFont::Details.justify != 1 || CFont::Details.centre)
-							v9 = 0.0;
-						else
-							v9 = (CFont::Details.wrapX - lineLength) / (double)numSpaces;
-						v10 = v9;
-						if (CFont::Details.centre)
-						{
-							v11 = xstart - x * 0.5;
-						}
-						else if (CFont::Details.rightJustify)
-						{
-							v11 = xstart - x;
-						}
-						else
-						{
-							v11 = xstart;
-						}
-						v12 = v10;
-						v13 = v11;
-						CFont::PrintString(v13, y, start, s, v12, xstart);
-						start = s;
-						if (CFont::Details.centre != 1 && CFont::Details.rightJustify != 1)
-							x = xstart;
-						else
-							x = 0.0;
-						v14 = 32.0 * CFont::Details.scaleY * 0.3636363636363636 + 2.0 * CFont::Details.scaleY;
-						numSpaces = 0;
-						first = 1;
-						y = v14 + y;
-						lineLength = 0.0;
-					}
-					v15 = CFont::GetNextSpace(s);
-					t = v15;
-					v17 = *v15;
-					if (!v17 || !t[1] && v17 == ' ')
-						break;
-					if (!first)
-						++numSpaces;
-					first = 0;
-					v21 = CFont::GetStringWidth(s, 0);
-					x = v21 + x;
-					if (sub_511630(s))
-						x = x + 21.0;
-					s = t;
-					v22 = CFont::GetCharacterSize(*t - 32);
-					++s;
-					x = v22 + x;
-					lineLength = x;
-					if (!*s)
-					{
-						v23 = CFont::GetStringWidth(s, 0);
-						x = v23 + x;
-						if (sub_511630(s))
-							x = x + 21.0;
-						if (CFont::Details.centre)
-						{
-							xleft_d = xstart - x * 0.5;
-						}
-						else if (CFont::Details.rightJustify)
-						{
-							xleft_d = xstart - x;
-						}
-						else
-						{
-							xleft_d = xstart;
-						}
-						xleft = xleft_d;
-						if (CFont::PrintString(xleft, y, start, s, 0.0, xstart))
-						{
-							start = s;
-							if (CFont::Details.centre != 1 && CFont::Details.rightJustify != 1)
-								x = xstart;
-							else
-								x = 0.0;
-							v26 = 32.0 * CFont::Details.scaleY * 0.3636363636363636 + 2.0 * CFont::Details.scaleY;
-							numSpaces = 0;
-							first = 1;
-							y = v26 + y;
-							lineLength = 0.0;
-						}
-					}
-				}
-				if (!t[1] && v17 == ' ')
-					*t = 0;
-				v18 = CFont::GetStringWidth(s, 0);
-				s = t;
-				x = v18 + x;
-				if (CFont::Details.centre)
-					break;
-				if (CFont::Details.rightJustify)
-				{
-					v19 = xstart - x;
-				LABEL_43:
-					v29 = v19;
-					goto LABEL_44;
-				}
-				v29 = xstart;
-			LABEL_44:
-				if (CFont::PrintString(v29, y, start, s, 0.0, xstart))
-				{
-					start = s;
-					if (CFont::Details.centre != 1 && CFont::Details.rightJustify != 1)
-						x = xstart;
-					else
-						x = 0.0;
-					v20 = 32.0 * CFont::Details.scaleY * 0.3636363636363636 + 2.0 * CFont::Details.scaleY;
-					numSpaces = 0;
-					first = 1;
-					y = v20 + y;
-					lineLength = 0.0;
-				}
-			}
-			v19 = xstart - x * 0.5;
-			goto LABEL_43;
-		}
-		return;
-	}*/
-
 	CRect rect;
 	int numSpaces;
 	float lineLength;
@@ -662,18 +466,24 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 				float xend = Details.centre ? Details.centreSize :
 				           Details.rightJustify ? xstart - Details.rightJustifyWrap :
 				           Details.wrapX;
-				if (LanguageSet == FONT_LANGSET_JAPANESE && (Details.style == FONT_JAPANESE || Details.style == FONT_PAGER))
+#ifdef MORE_LANGUAGES
+				if (IsJapaneseFont())
 					xend -= SCREEN_SCALE_X(21.0f * 2.0f);
+#endif
 				if(x + GetStringWidth(s) > xend && !first){
-					if (LanguageSet == FONT_LANGSET_JAPANESE && IsJapanesePunctuation(s))
+#ifdef MORE_LANGUAGES
+					if (IsJapanese() && IsJapanesePunctuation(s))
 						s--;
+#endif
 					// flush line
 					float spaceWidth = !Details.justify || Details.centre ? 0.0f :
 						(Details.wrapX - lineLength) / numSpaces;
 					float xleft = Details.centre ? xstart - x/2 :
 					              Details.rightJustify ? xstart - x :
 					              xstart;
+#ifdef MORE_LANGUAGES
 					PrintString(xleft, y, start, s, spaceWidth, xstart);
+#endif
 					// reset things
 					lineLength = 0.0f;
 					numSpaces = 0;
@@ -682,9 +492,11 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 						x = 0.0f;
 					else
 						x = xstart;
-					if (LanguageSet == FONT_LANGSET_JAPANESE && (Details.style == FONT_JAPANESE || Details.style == FONT_PAGER))
+#ifdef MORE_LANGUAGES
+					if (IsJapaneseFont())
 						y += 32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY;
 					else
+#endif
 						y += 32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY;
 					start = s;
 				}else
@@ -699,11 +511,14 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 				numSpaces++;
 			first = false;
 			x += GetStringWidth(s) + GetCharacterSize(*t - ' ');
-			if (LanguageSet == FONT_LANGSET_JAPANESE && (Details.style == FONT_JAPANESE || Details.style == FONT_PAGER) && IsAnsiCharacter(s))
+#ifdef MORE_LANGUAGES
+			if (IsJapaneseFont() && IsAnsiCharacter(s))
 				x += 21.0f;
+#endif
 			lineLength = x;
 			s = t+1;
-			if (LanguageSet == FONT_LANGSET_JAPANESE && (Details.style == FONT_JAPANESE || Details.style == FONT_PAGER) && !*s) {
+#ifdef MORE_LANGUAGES
+			if (IsJapaneseFont() && !*s) {
 				x += GetStringWidth(s);
 				if (IsAnsiCharacter(s))
 					x += 21.0f;
@@ -724,7 +539,7 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 					lineLength = 0.0f;
 				}
 			}
-
+#endif
 		}
 		// print rest
 		if(t[0] == ' ' && t[1] == '\0')
@@ -735,7 +550,7 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 		              Details.rightJustify ? xstart - x :
 		              xstart;
 #ifdef MORE_LANGUAGES
-		if (PrintString(xleft, y, start, s, 0.0f, xstart) && LanguageSet == FONT_LANGSET_JAPANESE && (Details.style == FONT_JAPANESE || Details.style == FONT_PAGER)) {
+		if (PrintString(xleft, y, start, s, 0.0f, xstart) && IsJapaneseFont()) {
 			start = s;
 			if (!Details.centre && !Details.rightJustify)
 				x = xstart;
@@ -747,7 +562,7 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 			lineLength = 0.0f;
 		}
 #else
-		PrintString(xleft, y, start, s, 0.0f)
+		PrintString(xleft, y, start, s, 0.0f);
 #endif
 	}
 }
@@ -759,9 +574,10 @@ CFont::GetNumberLines(float xstart, float ystart, wchar *s)
 	float x, y;
 	wchar *t;
 	n = 0;
-	bool v14 = false;
 
 #ifdef MORE_LANGUAGES
+	bool bSomeJapBool = false;
+
 	if (IsJapanese()) {
 		t = s;
 		wchar unused;
@@ -771,14 +587,14 @@ CFont::GetNumberLines(float xstart, float ystart, wchar *s)
 			if (NewLine) {
 				n++;
 				NewLine = false;
-				v14 = true;
+				bSomeJapBool = true;
 			}
 			t++;
 		}
 	}
-#endif
 
-	if (v14) n--;
+	if (bSomeJapBool) n--;
+#endif
 
 	if(Details.centre || Details.rightJustify)
 		x = 0.0f;
@@ -788,15 +604,19 @@ CFont::GetNumberLines(float xstart, float ystart, wchar *s)
 
 	while(*s){
 		float f = (Details.centre ? Details.centreSize : Details.wrapX);
+#ifdef MORE_LANGUAGES
 		if (IsJapaneseFont())
 			f -= SCREEN_SCALE_X(21.0f * 2.0f);
+#endif
 
 		if(x + GetStringWidth(s) > f){
-			if (LanguageSet == FONT_LANGSET_JAPANESE)
+#ifdef MORE_LANGUAGES
+			if (IsJapanese())
 			{
 				if (IsJapanesePunctuation(s))
 					s--;
 			}
+#endif
 			// reached end of line
 			if(Details.centre || Details.rightJustify)
 				x = 0.0f;
@@ -804,9 +624,11 @@ CFont::GetNumberLines(float xstart, float ystart, wchar *s)
 				x = xstart;
 			n++;
 			// Why even?
-			if (LanguageSet == FONT_LANGSET_JAPANESE)
+#ifdef MORE_LANGUAGES
+			if (IsJapanese())
 				y += 32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY;
 			else
+#endif
 				y += 32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY;
 		}else{
 			// still space in current line
@@ -814,18 +636,24 @@ CFont::GetNumberLines(float xstart, float ystart, wchar *s)
 			if(*t == '\0'){
 				// end of string
 				x += GetStringWidth(s);
-				if ((LanguageSet == FONT_LANGSET_JAPANESE) && IsAnsiCharacter(s))
+#ifdef MORE_LANGUAGES
+				if (IsJapanese() && IsAnsiCharacter(s))
 					x += 21.0f;
+#endif
 				n++;
 				s = t;
 			}else{
 				x += GetStringWidth(s);
-				if ((LanguageSet == FONT_LANGSET_JAPANESE) && IsAnsiCharacter(s))
+#ifdef MORE_LANGUAGES
+				if (IsJapanese() && IsAnsiCharacter(s))
 					x += 21.0f;
+#endif
 				s = t+1;
 				x += GetCharacterSize(*t - ' ');
-				if (LanguageSet == FONT_LANGSET_JAPANESE && !*s)
+#ifdef MORE_LANGUAGES
+				if (IsJapanese() && !*s)
 					n++;
+#endif
 			}
 		}
 	}
@@ -844,10 +672,11 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 	maxlength = 0;
 	numLines = 0;
 
+#ifdef MORE_LANGUAGES
 	if (IsJapanese()) {
 		numLines = GetNumberLines(xstart, ystart, s);
-		//maxlength = Details.centreSize;
 	}else{
+#endif
 		if(Details.centre || Details.rightJustify)
 			x = 0.0f;
 		else
@@ -882,38 +711,50 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 				}
 			}
 		}
+#ifdef MORE_LANGUAGES
 	}
+#endif
 
 	if(Details.centre){
 		if(Details.backgroundOnlyText){
 			rect->left = xstart - maxlength/2 - 4.0f;
 			rect->right = xstart + maxlength/2 + 4.0f;
+#ifdef MORE_LANGUAGES
 			if (IsJapaneseFont()) {
 				rect->bottom = (32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY) * numLines + ystart + (4.0f / 2.75f);
 				rect->top = ystart - (4.0f / 2.75f);
 			} else {
+#endif
 				rect->bottom = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines + ystart + 2.0f;
 				rect->top = ystart - 2.0f;
+#ifdef MORE_LANGUAGES
 			}
+#endif
 		}else{
 			rect->left = xstart - Details.centreSize*0.5f - 4.0f;
 			rect->right = xstart + Details.centreSize*0.5f + 4.0f;
+#ifdef MORE_LANGUAGES
 			if (IsJapaneseFont()) {
 				rect->bottom = (32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY) * numLines + ystart + (4.0f / 2.75f);
 				rect->top = ystart - (4.0f / 2.75f);
 			} else {
+#endif
 				rect->bottom = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines + ystart + 2.0f;
 				rect->top = ystart - 2.0f;
+#ifdef MORE_LANGUAGES
 			}
+#endif
 		}
 	}else{
 		rect->left = xstart - 4.0f;
 		rect->right = Details.wrapX;
 		// WTF?
 		rect->bottom = ystart - 4.0f + 4.0f;
+#ifdef MORE_LANGUAGES
 		if (IsJapaneseFont())
 			rect->top = (32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY) * numLines + ystart + 2.0f + (4.0f / 2.75f);
 		else
+#endif
 			rect->top = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines + ystart + 2.0f + 2.0f;
 	}
 }
@@ -924,8 +765,8 @@ CFont::PrintString(float x, float y, wchar *start, wchar *&end, float spwidth, f
 {
 	wchar *s, c, unused;
 
-	if (LanguageSet == FONT_LANGSET_JAPANESE) {
-		float v14 = 0.0f;
+	if (IsJapanese()) {
+		float jx = 0.0f;
 		for (s = start; s < end; s++) {
 			if (*s == JAP_TERMINATION || *s == '~')
 				s = ParseToken(s, &unused, true);
@@ -933,17 +774,13 @@ CFont::PrintString(float x, float y, wchar *start, wchar *&end, float spwidth, f
 				NewLine = false;
 				break;
 			}
-			v14 += GetCharacterSize(*s - ' ');
+			jx += GetCharacterSize(*s - ' ');
 		}
 		s = start;
 		if (Details.centre)
-		{
-			x = japX - v14 * 0.5;
-		}
+			x = japX - jx / 2.0f;
 		else if (Details.rightJustify)
-		{
-			x = japX - v14;
-		}
+			x = japX - jx;
 	}
 
 	for (s = start; s < end; s++) {
@@ -988,8 +825,7 @@ float
 CFont::GetCharacterWidth(wchar c)
 {
 #ifdef MORE_LANGUAGES
-	if (IsJapanese())
-	{
+	if (IsJapanese()) {
 		if (!Details.proportional)
 			return Size[0][Details.style][192];
 		if (c <= 94 || Details.style == FONT_HEADING || Details.style == FONT_BANK) {
@@ -1012,7 +848,7 @@ CFont::GetCharacterWidth(wchar c)
 			return 10.0f;
 		case FONT_PAGER:
 			return 31.5f;
-		case FONT_HEADING:
+		default:
 			return Size[0][Details.style][c];
 		}
 	}
@@ -1058,7 +894,7 @@ CFont::GetCharacterSize(wchar c)
 			return 10.0f * Details.scaleX;
 		case FONT_PAGER:
 			return 31.5f * Details.scaleX;
-		case FONT_HEADING:
+		default:
 			return Size[0][Details.style][c] * Details.scaleX;
 		}
 	}
@@ -1080,106 +916,9 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 	float w;
 
 	w = 0.0f;
-
-	if (LanguageSet == FONT_LANGSET_JAPANESE)
+#ifdef MORE_LANGUAGES
+	if (IsJapanese())
 	{
-		/*	unsigned __int16* v2; // ebx
-			double v3; // st4
-			int v4; // edx
-			double v5; // st7
-			unsigned __int16 v6; // ax
-			unsigned __int16 v7; // ax
-			double v8; // st3
-			float v10; // [esp+0h] [ebp-20h]
-			float v11; // [esp+4h] [ebp-1Ch]
-
-			v2 = (unsigned __int16*)s;
-			v10 = 0.0;
-			do
-			{
-				if ((*v2 != ' ' || spaces) && *v2)
-				{
-					v3 = CFont::Details.scaleX;
-					v4 = 193 * (signed __int16)CFont::Details.style;
-					v5 = 29.4 * CFont::Details.scaleX;
-					do
-					{
-						v6 = *v2;
-						if (*v2 == 0x807Eu || v6 == '~')
-						{
-							do
-								++v2;
-							while (*v2 != 0x807Eu && *v2 != '~');
-							++v2;
-							goto LABEL_27;
-						}
-						v7 = v6 - ' ';
-						if (CFont::Details.proportional == 1)
-						{
-							if (v7 > 94u && CFont::Details.style != FONT_HEADING && CFont::Details.style != FONT_BANK)
-							{
-								if (v7 >= 254u || CFont::Details.style != FONT_PAGER)
-								{
-									switch (CFont::Details.style)
-									{
-									case FONT_JAPANESE:
-										v8 = v5;
-										goto LABEL_25;
-									case FONT_BANK:
-										v8 = 10.0 * CFont::Details.scaleX;
-										goto LABEL_25;
-									case FONT_PAGER:
-										v8 = 31.5 * CFont::Details.scaleX;
-										goto LABEL_25;
-									case FONT_HEADING:
-										v11 = Size[0][Details.style][v7] * CFont::Details.scaleX;
-										break;
-									}
-								}
-								else
-								{
-									v11 = v5;
-								}
-								goto def_510DAD;
-							}
-							if (Details.style == FONT_JAPANESE)
-								v8 = Size_jp[v7] * Details.scaleX;
-							else
-								v8 = CFont::Size[0][Details.style][v7] * v3;
-						}
-						else
-						{
-							v8 = CFont::Size[0][CFont::Details.style][192] * v3;
-						}
-					LABEL_25:
-						v11 = v8;
-					def_510DAD:
-						v10 = v10 + v11;
-					LABEL_27:
-						if (*v2 != 0x807Eu && *v2 != '~')
-							++v2;
-					} while (*v2 == 0x807Eu || *v2 == '~');
-				}
-			} while (IsAnsiCharacter(v2));
-			return v10;*/
-
-		/*for (;; s++)
-		{
-			if (*s == '\0' && (!spaces || (*s == ' ' || !sub_511630(s) && *s != '~' && *s != JAP_TERMINATION)))
-				return w;
-			while (*s == '~' || *s == JAP_TERMINATION) {
-				s++;
-				while (*s != '~' && *s != JAP_TERMINATION) s++;
-				s++;
-				if (*s == ' ' && spaces)
-					return w;
-			}
-			w += GetCharacterSize(*s - ' ');
-			s++;
-			if ((*s != '~' && *s != JAP_TERMINATION) && ((*s == ' ' || !sub_511630(s)) && !spaces))
-				return w;
-		}*/
-
 		do
 		{
 			if ((*s != ' ' || spaces) && *s != '\0') {
@@ -1188,18 +927,14 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 						s++;
 						while (!(*s == '~' || *s == JAP_TERMINATION)) s++;
 						s++;
-						//if (*s != JAP_TERMINATION && *s != '~')
-						//	++s;
-						//continue;
 					}
 					w += GetCharacterSize(*s - ' ');
-					//if (*s != JAP_TERMINATION && *s != '~')
 					++s;
 				} while (*s == '~' || *s == JAP_TERMINATION);
 			}
-		} while (IsAnsiCharacter(s));//*/
-	}
-	else
+		} while (IsAnsiCharacter(s));
+	} else
+#endif
 	{
 		for (; (*s != ' ' || spaces) && *s != '\0'; s++) {
 			if (*s == '~') {
@@ -1215,151 +950,49 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 	return w;
 }
 
+
+#ifdef MORE_LANGUAGES
+float
+CFont::GetStringWidth_Jap(wchar* s)
+{
+	float w;
+
+	w = 0.0f;
+	for (; *s != '\0';) {
+		do {
+			while (*s == '~' || *s == JAP_TERMINATION) {
+				s++;
+				while (!(*s == '~' || *s == JAP_TERMINATION)) s++;
+				s++;
+			}
+			w += GetCharacterSize(*s - ' ');
+			++s;
+		} while (*s == '~' || *s == JAP_TERMINATION);
+	}
+	return w;
+}
+#endif
+
 wchar*
 CFont::GetNextSpace(wchar *s)
 {
+#ifdef MORE_LANGUAGES
 	if (IsJapanese()) {
-		unsigned __int16* v1; // ebx
-
-		v1 = s;
-		while (*v1 == ' ' || !*v1)
+		do
 		{
-		LABEL_11:
-			if (!IsAnsiCharacter(v1))
-				return v1;
-		}
-		while (1)
-		{
-			if (*v1 == 0x807Eu || *v1 == '~')
-			{
-				do
-					++v1;
-				while (*v1 != 0x807Eu && *v1 != '~');
-				++v1;
-				if (*v1 == ' ')
-					return v1;
-			}
-			++v1;
-			if (*v1 != 0x807Eu && *v1 != '~')
-				goto LABEL_11;
-		}
-
-		if (*v1 == ' ' || !*v1)
-		{
-			if (IsAnsiCharacter(v1))
-			{
-				do
-				{
-					if (*v1 == 0x807Eu || *v1 == '~')
-					{
-						do
-							++v1;
-						while (*v1 != 0x807Eu && *v1 != '~');
-						++v1;
-						if (*v1 == ' ')
-							return v1;
+			if (*s != ' ' && *s != '\0') {
+				do {
+					while (*s == '~' || *s == JAP_TERMINATION) {
+						s++;
+						while (!(*s == '~' || *s == JAP_TERMINATION)) s++;
+						s++;
 					}
-					++v1;
-					if (*v1 != 0x807Eu && *v1 != '~')
-						if (!IsAnsiCharacter(v1))
-							return v1;
-				} while (*v1 == ' ' || !*v1);
-			}
-		}
-
-		/*for (;; s++)
-		{
-			if (*s == '\0' || *s == ' ' || (!sub_511630(s) && *s != '~' && *s != JAP_TERMINATION))
-				return s;
-			if (*s == '~' || *s == JAP_TERMINATION) {
-				s++;
-				while (*s != '~' && *s != JAP_TERMINATION) s++;
-				s++;
-				if (*s == ' ' )
-					return s;
-			}
-			//s++;
-			//if (*s == ' ' || (!sub_511630(s) && *s != '~' && *s != JAP_TERMINATION))
-			//	return s;
-		}*/
-
-		/*for (;*s != ' ' && *s != '\0' && sub_511630(s); s++) {
-			while (*s == '~' || *s == JAP_TERMINATION) {
-				s++;
-				while (*s != '~' && *s != JAP_TERMINATION) s++;
-				s++;
-				if (*s == ' ' || ((*s != '~' && *s != JAP_TERMINATION) && !sub_511630(s)))
-					return s;
-			}
-		}
-		return s;*/
-		/*while (*s == ' ' || !*s) {
-		LABEL_11:
-			if (!sub_511630(s))
-				return s;
-		}*/
-
-		/*while (*s != ' ' && *s != '\0')
-		{
-			while (*s == JAP_TERMINATION || *s == '~')
-			{
-				do
 					++s;
-				while (*s != JAP_TERMINATION && *s != '~');
-				++s;
-				if (*s == ' ')
-					return s;
+				} while (*s == '~' || *s == JAP_TERMINATION);
 			}
-			++s;
-			if (!sub_511630(s))
-				return s;
-			//if (*s != JAP_TERMINATION && *s != '~')
-			//	goto LABEL_11;
-		}
-		return s;*/
-
-
-		//for (; *s != ' ' && *s != '\0';) {
-		//	if (!sub_511630(s))
-		//		break;
-		//	//for (; *s == '~' || *s == JAP_TERMINATION;s++) {
-		//	//	s++;
-		//	//	while (!(*s == '~' || *s == JAP_TERMINATION)) s++;
-		//	//	s++;
-		//	//	if (*s == ' ')
-		//	//		return s;
-		//	//	if (!sub_511630(s))
-		//	//		return s;
-		//	//}
-		//	while (true)
-		//	{
-		//		if (*s == '~' || *s == JAP_TERMINATION) {
-		//			s++;
-		//			while (*s != '~' || *s == JAP_TERMINATION) s++;
-		//			s++;
-		//			if (*s == ' ')
-		//				return s;
-		//		}
-		//		s++;
-		//		if (!(*s == '~' || *s == JAP_TERMINATION))
-		//			break;
-		//	}
-		//}
-		//return s;
-
-
-		for (;*s != ' ' && *s != '\0' && IsAnsiCharacter(s); s++ ) {
-			if (*s == '~' || *s == JAP_TERMINATION)
-			{
-				s++;
-				while (*s != '~' && *s != JAP_TERMINATION) s++;
-				s++;
-				if (*s == ' ' || ((*s != '~' && *s != JAP_TERMINATION) && !IsAnsiCharacter(s)))
-					break;
-			}
-		}
-	}
-	else
+		} while (IsAnsiCharacter(s));
+	} else
+#endif
 	{
 		for(; *s != ' ' && *s != '\0'; s++)
 			if(*s == '~'){
@@ -1434,8 +1067,10 @@ CFont::DrawFonts(void)
 	CSprite2d::DrawBank(Details.bank);
 	CSprite2d::DrawBank(Details.bank+1);
 	CSprite2d::DrawBank(Details.bank+2);
+#ifdef MORE_LANGUAGES
 	if (IsJapanese())
 		CSprite2d::DrawBank(Details.bank+3);
+#endif
 }
 
 wchar
@@ -1450,22 +1085,24 @@ CFont::character_code(uint8 c)
 void
 CFont::SetScale(float x, float y)
 {
-	/*if (LanguageSet == FONT_LANGSET_JAPANESE) {
+#ifdef MORE_LANGUAGES
+	/*if (IsJapanese()) {
 		x *= 1.35f;
 		y *= 1.25f;
 	}*/
+#endif
 	Details.scaleX = x;
 	Details.scaleY = y;
 }
 
 void
-CFont::SetBackgroundColor(const CRGBA &col)
+CFont::SetBackgroundColor(CRGBA col)
 {
 	Details.backgroundColor = col;
 }
 
 void
-CFont::SetColor(const CRGBA &col)
+CFont::SetColor(CRGBA col)
 {
 	Details.color = col;
 	if (Details.alphaFade < 255.0f)
@@ -1473,7 +1110,7 @@ CFont::SetColor(const CRGBA &col)
 }
 
 void
-CFont::SetDropColor(const CRGBA &col)
+CFont::SetDropColor(CRGBA col)
 {
 	Details.dropColor = col;
 	if (Details.alphaFade < 255.0f)

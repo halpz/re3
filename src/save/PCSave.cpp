@@ -3,6 +3,9 @@
 #include "crossplatform.h"
 
 #include "FileMgr.h"
+#ifdef MORE_LANGUAGES
+#include "Game.h"
+#endif
 #include "GenericGameStorage.h"
 #include "Messages.h"
 #include "PCSave.h"
@@ -131,7 +134,12 @@ C_PcSave::PopulateSlotInfo()
 				default: assert(0);
 				}
 				char date[70];
-				sprintf(date, "%02d %s %04d %02d:%02d:%02d", st.wDay, UnicodeToAsciiForSaveLoad(TheText.Get(month)), st.wYear, st.wHour, st.wMinute, st.wSecond);
+#ifdef MORE_LANGUAGES
+				if (CGame::japaneseGame)
+					sprintf(date, "%02d %02d %04d %02d:%02d:%02d", st.wDay, st.wMonth, st.wYear, st.wHour, st.wMinute, st.wSecond);
+				else
+#endif // MORE_LANGUAGES
+					sprintf(date, "%02d %s %04d %02d:%02d:%02d", st.wDay, UnicodeToAsciiForSaveLoad(TheText.Get(month)), st.wYear, st.wHour, st.wMinute, st.wSecond);
 				AsciiToUnicode(date, SlotSaveDate[i]);
 
 			} else {

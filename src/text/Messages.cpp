@@ -52,10 +52,12 @@ CMessages::WideStringCopy(wchar *dst, wchar *src, uint16 size)
 	dst[i] = '\0';
 }
 
-wchar jappy(wchar c)
+wchar FixupChar(wchar c)
 {
-	if (CFont::LanguageSet == FONT_LANGSET_JAPANESE)
+#ifdef MORE_LANGUAGES
+	if (CFont::IsJapanese())
 		return c & 0x7fff;
+#endif
 	return c;
 }
 
@@ -68,10 +70,10 @@ CMessages::WideStringCompare(wchar *str1, wchar *str2, uint16 size)
 		return false;
 
 	for (int32 i = 0; i < size; i++) {
-		if (!jappy(str1[i]))
+		if (FixupChar(str1[i]) == '\0')
 			break;
 
-		if (jappy(str1[i]) != jappy(str2[i]))
+		if (FixupChar(str1[i]) != FixupChar(str2[i]))
 			return false;
 	}
 	return true;
@@ -377,10 +379,12 @@ CMessages::InsertNumberInString(wchar *str, int32 n1, int32 n2, int32 n3, int32 
 	int32 i = 0;
 
 	for (int32 c = 0; c < size;) {
-		if ((CFont::LanguageSet == FONT_LANGSET_JAPANESE && str[c] == (0x8000 | '~') && str[c + 1] == (0x8000 | '1') && str[c + 2] == (0x8000 | '~')) ||
-			(CFont::LanguageSet != FONT_LANGSET_JAPANESE && str[c] == '~' && str[c + 1] == '1' && str[c + 2] == '~'))
-		{
-			//if (str[c] == '~' && str[c + 1] == '1' && str[c + 2] == '~') {
+#ifdef MORE_LANGUAGES
+		if ((CFont::IsJapanese() && str[c] == (0x8000 | '~') && str[c + 1] == (0x8000 | '1') && str[c + 2] == (0x8000 | '~')) ||
+			(!CFont::IsJapanese() && str[c] == '~' && str[c + 1] == '1' && str[c + 2] == '~')) {
+#else
+		if (str[c] == '~' && str[c + 1] == '1' && str[c + 2] == '~') {
+#endif
 			switch (i) {
 			case 0: sprintf(numStr, "%d", n1); break;
 			case 1: sprintf(numStr, "%d", n2); break;
@@ -418,10 +422,13 @@ CMessages::InsertStringInString(wchar *str1, wchar *str2)
 	wchar *_str1 = str1;
 	uint16 i;
 	for (i = 0; i < total_size; ) {
-		if ((CFont::LanguageSet == FONT_LANGSET_JAPANESE && *_str1 == (0x8000 | '~') && *(_str1 + 1) == (0x8000 | 'a') && *(_str1 + 2) == (0x8000 | '~'))
-			|| (CFont::LanguageSet != FONT_LANGSET_JAPANESE && *_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~'))
+#ifdef MORE_LANGUAGES
+		if ((CFont::IsJapanese() && *_str1 == (0x8000 | '~') && *(_str1 + 1) == (0x8000 | 'a') && *(_str1 + 2) == (0x8000 | '~'))
+			|| (CFont::IsJapanese() && *_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~'))
 		{
-			//if (*_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~') {
+#else
+			if (*_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~') {
+#endif
 			_str1 += 3;
 			for (int j = 0; j < str2_size; j++) {
 				tempstr[i++] = str2[j];
@@ -452,8 +459,12 @@ CMessages::InsertPlayerControlKeysInString(wchar *str)
 
 	wchar *_outstr = outstr;
 	for (i = 0; i < strSize;) {
-		if ((CFont::LanguageSet == FONT_LANGSET_JAPANESE && str[i] == (0x8000 | '~') && str[i + 1] == (0x8000 | 'k') && str[i + 2] == (0x8000 | '~')) ||
-			(CFont::LanguageSet != FONT_LANGSET_JAPANESE && str[i] == '~' && str[i + 1] == 'k' && str[i + 2] == '~')) {
+#ifdef MORE_LANGUAGES
+		if ((CFont::IsJapanese() && str[i] == (0x8000 | '~') && str[i + 1] == (0x8000 | 'k') && str[i + 2] == (0x8000 | '~')) ||
+			(!CFont::IsJapanese() && str[i] == '~' && str[i + 1] == 'k' && str[i + 2] == '~')) {
+#else
+		if (str[i] == '~' && str[i + 1] == 'k' && str[i + 2] == '~') {
+#endif
 			i += 4;
 			for (int32 cont = 0; cont < MAX_CONTROLLERACTIONS; cont++) {
 				uint16 contSize = GetWideStringLength(ControlsManager.m_aActionNames[cont]);

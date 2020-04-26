@@ -660,7 +660,7 @@ void CHud::Draw()
 					CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
 					CFont::SetRightJustifyOn();
 					CFont::SetRightJustifyWrap(0.0f);
-					CFont::SetFontStyle(FONTJAP(FONT_HEADING));
+					CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 					CFont::SetPropOff();
 					CFont::SetBackGroundOnlyTextOn();
 					CFont::SetColor(CRGBA(0, 0, 0, 255));
@@ -701,7 +701,7 @@ void CHud::Draw()
 						CFont::SetCentreOff();
 						CFont::SetRightJustifyOn();
 						CFont::SetRightJustifyWrap(0.0f);
-						CFont::SetFontStyle(FONTJAP(FONT_HEADING));
+						CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 						CFont::SetColor(CRGBA(244, 20, 20, 255));
 						CFont::SetWrapx(SCREEN_SCALE_X(640.0f));
 						CFont::SetPropOff();
@@ -852,7 +852,7 @@ void CHud::Draw()
 				else
 					CFont::SetPropOff();
 
-				CFont::SetFontStyle(FONTJAP(CTheScripts::IntroTextLines[i].m_nFont));
+				CFont::SetFontStyle(FONT_LOCALE(CTheScripts::IntroTextLines[i].m_nFont));
 				CFont::PrintString(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - CTheScripts::IntroTextLines[i].m_fAtX), SCREEN_SCALE_Y(DEFAULT_SCREEN_HEIGHT - CTheScripts::IntroTextLines[i].m_fAtY), CTheScripts::IntroTextLines[i].m_Text);
 			}
 		}
@@ -892,7 +892,7 @@ void CHud::Draw()
 			CFont::SetScale(SCREEN_SCALE_X(0.48f), SCREEN_SCALE_Y(1.120f));
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
-			CFont::SetFontStyle(FONTJAP(FONT_BANK));
+			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 
 			float offsetX = SCREEN_SCALE_X(40.0f) + SCREEN_SCALE_X(8.0f);
 			float center = SCREEN_SCALE_FROM_RIGHT(50.0f) - SCREEN_SCALE_X(8.0f) - offsetX;
@@ -1080,18 +1080,22 @@ void CHud::DrawAfterFade()
 
 			if (CGame::germanGame)
 				CFont::SetScale(SCREEN_SCALE_X(0.52f * 0.85f), SCREEN_SCALE_Y(1.1f * 0.85f));
-			else if (CFont::LanguageSet == FONT_LANGSET_JAPANESE)
+#ifdef MORE_LANGUAGES
+			else if (CFont::IsJapanese())
 				CFont::SetScale(SCREEN_SCALE_X(0.52f) * 1.35f, SCREEN_SCALE_Y(1.1f) * 1.25f);
+#endif
 			else
 				CFont::SetScale(SCREEN_SCALE_X(0.52f), SCREEN_SCALE_Y(1.1f));
 
 			CFont::SetColor(CRGBA(175, 175, 175, 255));
 			CFont::SetJustifyOff();
-			if (CFont::LanguageSet == FONT_LANGSET_JAPANESE) 
+#ifdef MORE_LANGUAGES
+			if (CFont::IsJapanese())
 				CFont::SetWrapx(SCREEN_SCALE_X(229.0f + 26.0f - 4.0f));
 			else
+#endif
 				CFont::SetWrapx(SCREEN_SCALE_X(200.0f + 26.0f - 4.0f));
-			CFont::SetFontStyle(FONTJAP(FONT_BANK));
+			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 			CFont::SetBackgroundOn();
 			CFont::SetBackGroundOnlyTextOff();
 			CFont::SetBackgroundColor(CRGBA(0, 0, 0, fAlpha * 0.9f));
@@ -1169,7 +1173,7 @@ void CHud::DrawAfterFade()
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetCentreSize(SCREEN_SCALE_X(600.0f));
-		CFont::SetFontStyle(FONTJAP(FONT_BANK));
+		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 		CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[3]);
@@ -1186,7 +1190,7 @@ void CHud::DrawAfterFade()
 		CFont::SetPropOn();
 		CFont::SetCentreSize(SCREEN_SCALE_X(620.0f));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::SetFontStyle(FONTJAP(FONT_BANK));
+		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 
 		CFont::PrintString((SCREEN_WIDTH / 2) - SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f) - SCREEN_SCALE_Y(2.0f), m_BigMessage[4]);
 
@@ -1243,7 +1247,7 @@ void CHud::DrawAfterFade()
 			CFont::SetPropOn();
 			CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
-			CFont::SetFontStyle(FONTJAP(FONT_BANK));
+			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 
 #ifdef BETA_SLIDING_TEXT
 			CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f) - SCREEN_SCALE_X(OddJob2XOffset), SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(20.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[5]);

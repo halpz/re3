@@ -1390,7 +1390,7 @@ void CGarages::PrintMessages()
 		CFont::SetBackgroundOff();
 		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(50.0f));
 		CFont::SetCentreOn();
-		CFont::SetFontStyle(FONTJAP(FONT_BANK));
+		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 
 #if defined(PS2) || defined (FIX_BUGS)
