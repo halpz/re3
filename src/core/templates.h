@@ -104,6 +104,10 @@ public:
 		return m_flags[i].free ? nil : (T*)&m_entries[i];
 	}
 	T *GetAt(int handle){
+#ifdef FIX_BUGS
+		if (handle == -1)
+			return nil;
+#endif
 		return m_flags[handle>>8].u == (handle & 0xFF) ?
 		       (T*)&m_entries[handle >> 8] : nil;
 	}

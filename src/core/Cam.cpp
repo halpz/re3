@@ -2545,11 +2545,13 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 		ResetStatics = false;
 	}
 
+#ifndef GTA3_1_1_PATCH
 	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
 	Source = HeadPos;
 	Source.z += 0.1f;
 	Source.x -= 0.19f*Cos(m_fInitialPlayerOrientation);
 	Source.y -= 0.19f*Sin(m_fInitialPlayerOrientation);
+#endif
 
 	// Look around
 	bool UseMouse = false;
@@ -2577,6 +2579,17 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 	while(Beta < -PI) Beta += 2*PI;
 	if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
 	if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+
+#ifdef GTA3_1_1_PATCH
+	HeadPos.x = 0.0f;
+	HeadPos.y = 0.0f;
+	HeadPos.z = 0.0f;
+	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
+	Source = HeadPos;
+	Source.z += 0.1f;
+	Source.x -= 0.19f * Cos(m_fInitialPlayerOrientation);
+	Source.y -= 0.19f * Sin(m_fInitialPlayerOrientation);
+#endif
 
 	TargetCoors.x = 3.0f * Cos(Alpha) * Cos(Beta) + Source.x;
 	TargetCoors.y = 3.0f * Cos(Alpha) * Sin(Beta) + Source.y;

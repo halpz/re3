@@ -293,6 +293,38 @@ void KangarooCheat()
 }
 #endif
 
+#ifdef ALLCARSHELI_CHEAT
+void AllCarsHeliCheat(void)
+{
+	wchar* string;
+	if (bAllCarCheat) {
+		string = TheText.Get("CHEATOF");
+		bAllCarCheat = false;
+	}
+	else {
+		string = TheText.Get("CHEAT1");
+		bAllCarCheat = true;
+	}
+	CHud::SetHelpMessage(string, true);
+}
+#endif
+
+#ifdef ALT_DODO_CHEAT
+void AltDodoCheat(void)
+{
+	wchar* string;
+	if (CVehicle::bAltDodoCheat) {
+		string = TheText.Get("CHEATOF");
+		CVehicle::bAltDodoCheat = false;
+	}
+	else {
+		string = TheText.Get("CHEAT1");
+		CVehicle::bAltDodoCheat = true;
+	}
+	CHud::SetHelpMessage(string, true);
+}
+#endif
+
 void
 CControllerState::Clear(void)
 {
@@ -914,6 +946,18 @@ void CPad::AddToPCCheatString(char c)
 	// "PEDDEBUG"
 	if (!_CHEATCMP("GUBEDDEP"))
 		CPed::SwitchDebugDisplay();
+#endif
+
+#ifdef ALLCARSHELI_CHEAT
+	// "CARSAREHELI"
+	if (!_CHEATCMP("ILEHERASRAC"))
+		AllCarsHeliCheat();
+#endif
+
+#ifdef ALT_DODO_CHEAT
+	// "IWANTTOMASTERDODO"
+	if (!_CHEATCMP("ODODRETSAMOTTNAWI"))
+		AltDodoCheat();
 #endif
 	
 	#undef _CHEATCMP

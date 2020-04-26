@@ -1868,6 +1868,9 @@ void CCarCtrl::Init(void)
 	NumFiretrucksOnDuty = 0;
 	LastTimeFireTruckCreated = 0;
 	LastTimeAmbulanceCreated = 0;
+#ifdef FIX_BUGS
+	LastTimeLawEnforcerCreated = 0;
+#endif
 	bCarsGeneratedAroundCamera = false;
 	CountDownToCarsAtStart = 2;
 	CarDensityMultiplier = 1.0f;
@@ -1890,6 +1893,11 @@ void CCarCtrl::ReInit(void)
 	NumPermanentCars = 0;
 	NumAmbulancesOnDuty = 0;
 	NumFiretrucksOnDuty = 0;
+#ifdef FIX_BUGS
+	LastTimeFireTruckCreated = 0;
+	LastTimeAmbulanceCreated = 0;
+	LastTimeLawEnforcerCreated = 0;
+#endif
 	CountDownToCarsAtStart = 2;
 	CarDensityMultiplier = 1.0f;
 	for (int i = 0; i < MAX_CARS_TO_KEEP; i++)

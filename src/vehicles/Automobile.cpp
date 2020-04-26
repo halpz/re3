@@ -1013,16 +1013,28 @@ CAutomobile::ProcessControl(void)
 				m_aWheelSpeed[0] = Max(m_aWheelSpeed[0]-0.0005f, 0.0f);
 		}else if((GetModelIndex() == MI_DODO || CVehicle::bAllDodosCheat) &&
 		         m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
-			FlyingControl(FLIGHT_MODEL_DODO);
+#ifdef ALT_DODO_CHEAT
+			if (bAltDodoCheat)
+				FlyingControl(FLIGHT_MODEL_SEAPLANE);
+			else
+#endif
+				FlyingControl(FLIGHT_MODEL_DODO);
 		}else if(GetModelIndex() == MI_MIAMI_RCBARON){
 			FlyingControl(FLIGHT_MODEL_RCPLANE);
 		}else if(GetModelIndex() == MI_MIAMI_RCRAIDER || GetModelIndex() == MI_MIAMI_SPARROW || bAllCarCheat){
-			if(CPad::GetPad(0)->GetCircleJustDown())
-				m_aWheelSpeed[0] = Max(m_aWheelSpeed[0]-0.03f, 0.0f);
-			if(m_aWheelSpeed[0] < 0.22f)
-				m_aWheelSpeed[0] += 0.0001f;
-			if(m_aWheelSpeed[0] > 0.15f)
+#ifdef ALLCARSHELI_CHEAT
+			if (bAllCarCheat)
 				FlyingControl(FLIGHT_MODEL_HELI);
+			else
+#endif
+			{
+				if (CPad::GetPad(0)->GetCircleJustDown())
+					m_aWheelSpeed[0] = Max(m_aWheelSpeed[0] - 0.03f, 0.0f);
+				if (m_aWheelSpeed[0] < 0.22f)
+					m_aWheelSpeed[0] += 0.0001f;
+				if (m_aWheelSpeed[0] > 0.15f)
+					FlyingControl(FLIGHT_MODEL_HELI);
+			}
 		}
 	}
 

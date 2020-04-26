@@ -2966,8 +2966,10 @@ CMenuManager::LoadAllTextures()
 	CTxdStore::LoadTxd(frontendTxdSlot, "MODELS/FRONTEND.TXD");
 	CTxdStore::AddRef(frontendTxdSlot);
 	CTxdStore::SetCurrentTxd(frontendTxdSlot);
+#ifndef GTA3_1_1_PATCH
 	CStreaming::IHaveUsedStreamingMemory();
 	CTimer::Update();
+#endif
 
 	for (int i = 0; i < ARRAY_SIZE(FrontendFilenames); i++) {
 		m_aFrontEndSprites[i].SetTexture(FrontendFilenames[i][0], FrontendFilenames[i][1]);
@@ -2994,6 +2996,10 @@ CMenuManager::LoadAllTextures()
 		m_aMapSprites[i].SetAddressing(rwTEXTUREADDRESSBORDER);
 	}
 #endif
+#ifdef GTA3_1_1_PATCH
+	CStreaming::IHaveUsedStreamingMemory();
+	CTimer::Update();
+#endif
 	m_bSpritesLoaded = true;
 	CTxdStore::PopCurrentTxd();
 }
@@ -3005,7 +3011,11 @@ CMenuManager::LoadSettings()
 	int fileHandle = CFileMgr::OpenFile("gta3.set", "r");
 
 	int32 prevLang = m_PrefsLanguage;
+#ifdef GTA3_1_1_PATCH
+	CMBlur::BlurOn = (_dwOperatingSystemVersion != OS_WIN98);
+#else
 	CMBlur::BlurOn = true;
+#endif
 	MousePointerStateHelper.bInvertVertically = true;
 
 	// 50 is silly
@@ -4474,7 +4484,18 @@ CMenuManager::ProcessButtonPresses(void)
 						m_PrefsUseWideScreen = false;
 						m_PrefsShowSubtitles = true;
 						m_nDisplayVideoMode = m_nPrefsVideoMode;
+#ifdef GTA3_1_1_PATCH
+						if (_dwOperatingSystemVersion == OS_WIN98) {
+							CMBlur::BlurOn = false;
+							CMBlur::MotionBlurClose();
+						}
+						else {
+							CMBlur::BlurOn = true;
+							CMBlur::MotionBlurOpen(Scene.camera);
+						}
+#else
 						CMBlur::BlurOn = true;
+#endif
 						SaveSettings();
 					} else if ((m_nCurrScreen != MENUPAGE_SKIN_SELECT_OLD) && (m_nCurrScreen == MENUPAGE_CONTROLLER_PC)) {
 						ControlsManager.MakeControllerActionsBlank();
@@ -5012,7 +5033,7 @@ CMenuManager::WaitForUserCD()
 	CSprite2d *splash;
 	char *splashscreen = nil;
 
-#ifndef RANDOMSPLASH
+#if (!(defined RANDOMSPLASH) && !(defined GTA3_1_1_PATCH))
 	if (CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
 		splashscreen = "mainsc2";
 	else

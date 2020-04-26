@@ -24,6 +24,9 @@ bool CVehicle::bAllDodosCheat;
 bool CVehicle::bCheat3;
 bool CVehicle::bCheat4;
 bool CVehicle::bCheat5;
+#ifdef ALT_DODO_CHEAT
+bool CVehicle::bAltDodoCheat;
+#endif
 bool CVehicle::m_bDisableMouseSteering = true;
 
 void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New();  }
@@ -185,6 +188,48 @@ CVehicle::GetHeightAboveRoad(void)
 	return -1.0f * GetColModel()->boundingBox.min.z;
 }
 
+const float fRCPropFallOff = 3.0f;
+const float fRCAeroThrust = 0.003f;
+const float fRCSideSlipMult = 0.1f;
+const float fRCRudderMult = 0.2f;
+const float fRCYawMult = -0.01f;
+const float fRCRollMult = 0.02f;
+const float fRCRollStabilise = -0.08f;
+const float fRCPitchMult = 0.005f;
+const float fRCTailMult = 0.3f;
+const float fRCFormLiftMult = 0.02f;
+const float fRCAttackLiftMult = 0.25f;
+const CVector vecRCAeroResistance(0.998f, 0.998f, 0.9f);
+
+const float fSeaPropFallOff = 2.3f;
+const float fSeaThrust = 0.002f;
+const float fSeaSideSlipMult = 0.1f;
+const float fSeaRudderMult = 0.01f;
+const float fSeaYawMult = -0.0003f;
+const float fSeaRollMult = 0.0015f;
+const float fSeaRollStabilise = -0.01f;
+const float fSeaPitchMult = 0.0002f;
+const float fSeaTailMult = 0.01f;
+const float fSeaFormLiftMult = 0.012f;
+const float fSeaAttackLiftMult = 0.1f;
+const CVector vecSeaAeroResistance(0.995f, 0.995f, 0.85f);
+
+const float fSpeedResistanceY = 500.0f;
+const float fSpeedResistanceZ = 500.0f;
+
+const CVector vecHeliMoveRes(0.995f, 0.995f, 0.99f);
+const CVector vecRCHeliMoveRes(0.99f, 0.99f, 0.99f);
+const float fThrustVar = 0.3f;
+const float fRotorFallOff = 0.75f;
+const float fStabiliseVar = 0.015f;
+const float fPitchBrake = 10.0f;
+const float fPitchVar = 0.006f;
+const float fRollVar = 0.006f;
+const float fYawVar = -0.001f;
+const CVector vecHeliResistance(0.81f, 0.85f, 0.99f);
+const CVector vecRCHeliResistance(0.92f, 0.92f, 0.998f);
+const float fSpinSpeedRes = 20.0f;
+
 void
 CVehicle::FlyingControl(eFlightModel flightModel)
 {
@@ -229,20 +274,183 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 
 		m_vecTurnSpeed.y *= Pow(0.9f, CTimer::GetTimeStep());
 		moveSpeed = m_vecMoveSpeed.MagnitudeSqr();
-		if(moveSpeed > 2.25f)
+		if(moveSpeed > SQR(1.5f))
 			m_vecMoveSpeed *= 1.5f/Sqrt(moveSpeed);
 
 		float turnSpeed = m_vecTurnSpeed.MagnitudeSqr();
-		if(turnSpeed > 0.04f)
+		if(turnSpeed > SQR(0.2f))
 			m_vecTurnSpeed *= 0.2f/Sqrt(turnSpeed);
 	}
 		break;
 
 	case FLIGHT_MODEL_RCPLANE:
 	case FLIGHT_MODEL_SEAPLANE:
-		assert(0 && "Plane flight model not implemented");
+	{
+		// thrust
+		float fForwSpeed = DotProduct(GetMoveSpeed(), GetForward());
+		CVector vecWidthForward = GetColModel()->boundingBox.min.y * GetForward();
+		float fThrust = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
+		if (fForwSpeed > 0.1f || (flightModel == FLIGHT_MODEL_RCPLANE && fForwSpeed > 0.02f))
+			fThrust += 1.0f;
+		else if (fForwSpeed > 0.0f && fThrust < 0.0f)
+			fThrust = 0.0f;
+		float fThrustImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fThrustImpulse = (fThrust - fRCPropFallOff * fForwSpeed) * fRCAeroThrust;
+		else
+			fThrustImpulse = (fThrust - fSeaPropFallOff * fForwSpeed) * fSeaThrust;
+		ApplyMoveForce(fThrustImpulse * GetForward() * m_fMass * CTimer::GetTimeStep());
+
+		// left/right
+		float fSideSpeed = -DotProduct(GetMoveSpeed(), GetRight());
+		float fSteerLR = CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
+		float fSideSlipImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fSideSlipImpulse = Abs(fSideSpeed) * fSideSpeed * fRCSideSlipMult;
+		else
+			fSideSlipImpulse = Abs(fSideSpeed) * fSideSpeed * fSeaSideSlipMult;
+		ApplyMoveForce(m_fMass * GetRight() * fSideSlipImpulse * CTimer::GetTimeStep());
+
+		float fYaw = -DotProduct(CrossProduct(m_vecTurnSpeed + m_vecTurnFriction, vecWidthForward) + m_vecMoveSpeed + m_vecMoveFriction, GetRight());
+		float fYawImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fYawImpulse = fRCRudderMult * fYaw * Abs(fYaw) + fRCYawMult * fSteerLR * fForwSpeed;
+		else
+			fYawImpulse = fSeaRudderMult * fYaw * Abs(fYaw) + fSeaYawMult * fSteerLR * fForwSpeed;
+		ApplyTurnForce(fYawImpulse * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), vecWidthForward);
+
+		float fRollImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE) {
+			float fDirectionMultiplier = CPad::GetPad(0)->GetLookRight();
+			if (CPad::GetPad(0)->GetLookLeft())
+				fDirectionMultiplier = -1;
+			fRollImpulse = (0.5f * fDirectionMultiplier + fSteerLR) * fRCRollMult;
+		}
+		else
+			fRollImpulse = fSteerLR * fSeaRollMult;
+		ApplyTurnForce(GetRight() * fRollImpulse * fForwSpeed * m_fTurnMass * CTimer::GetTimeStep(), GetUp());
+
+		CVector vecFRight = CrossProduct(GetForward(), CVector(0.0f, 0.0f, 1.0f));
+		CVector vecStabilise = (GetUp().z > 0.0f) ? vecFRight : -vecFRight;
+		float fStabiliseDirection = (GetRight().z > 0.0f) ? -1.0f : 1.0f;
+		float fStabiliseImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fStabiliseImpulse = fRCRollStabilise * fStabiliseDirection * (1.0f - DotProduct(GetRight(), vecStabilise)) * (1.0f - Abs(GetForward().z));
+		else
+			fStabiliseImpulse = fSeaRollStabilise * fStabiliseDirection * (1.0f - DotProduct(GetRight(), vecStabilise)) * (1.0f - Abs(GetForward().z));
+		ApplyTurnForce(fStabiliseImpulse * m_fTurnMass * GetRight(), GetUp()); // no CTimer::GetTimeStep(), is it right? VC doesn't have it too
+
+		// up/down
+		float fTail = -DotProduct(CrossProduct(m_vecTurnSpeed + m_vecTurnFriction, vecWidthForward) + m_vecMoveSpeed + m_vecMoveFriction, GetUp());
+		float fSteerUD = -CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
+		float fPitchImpulse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fPitchImpulse = fRCTailMult * fTail * Abs(fTail) + fRCPitchMult * fSteerUD * fForwSpeed;
+		else
+			fPitchImpulse = fSeaTailMult * fTail * Abs(fTail) + fSeaPitchMult * fSteerUD * fForwSpeed;
+		ApplyTurnForce(fPitchImpulse * m_fTurnMass * GetUp() * CTimer::GetTimeStep(), vecWidthForward);
+
+		float fLift = -DotProduct(GetMoveSpeed(), GetUp()) / Max(0.01f, GetMoveSpeed().Magnitude());
+		float fLiftImpluse;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			fLiftImpluse = (fRCAttackLiftMult * fLift + fRCFormLiftMult) * fForwSpeed * fForwSpeed;
+		else
+			fLiftImpluse = (fSeaAttackLiftMult * fLift + fSeaFormLiftMult) * fForwSpeed * fForwSpeed;
+		float fLiftForce = fLiftImpluse * m_fMass * CTimer::GetTimeStep();
+		if (GRAVITY * CTimer::GetTimeStep() * m_fMass < fLiftImpluse) {
+			if (flightModel == FLIGHT_MODEL_RCPLANE && GetPosition().z > 50.0f)
+				fLiftForce = CTimer::GetTimeStep() * 0.0072 * m_fMass;
+			else if (flightModel == FLIGHT_MODEL_SEAPLANE && GetPosition().z > 80.0f)
+				fLiftForce = CTimer::GetTimeStep() * 0.0072 * m_fMass;
+		}
+		ApplyMoveForce(fLiftForce * GetUp());
+		CVector vecResistance;
+		if (flightModel == FLIGHT_MODEL_RCPLANE)
+			vecResistance = vecRCAeroResistance;
+		else
+			vecResistance = vecSeaAeroResistance;
+		float rX = Pow(vecResistance.x, CTimer::GetTimeStep());
+		float rY = Pow(vecResistance.y, CTimer::GetTimeStep());
+		float rZ = Pow(vecResistance.z, CTimer::GetTimeStep());
+		CVector vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());
+		vecTurnSpeed.x *= rX;
+		float fResistance = vecTurnSpeed.y * (1.0f / (fSpeedResistanceY * SQR(vecTurnSpeed.y) + 1.0f)) * rY - vecTurnSpeed.y;
+		vecTurnSpeed.z *= rZ;
+		m_vecTurnSpeed = Multiply3x3(GetMatrix(), vecTurnSpeed);
+		ApplyTurnForce(-GetUp() * fResistance * m_fTurnMass, GetRight() + Multiply3x3(GetMatrix(), m_vecCentreOfMass));
+		break;
+	}
 	case FLIGHT_MODEL_HELI:
-		assert(0 && "Heli flight model not implemented");
+	{
+		CVector vecMoveResistance;
+		if (GetModelIndex() == MI_MIAMI_SPARROW)
+			vecMoveResistance = vecHeliMoveRes;
+		else
+			vecMoveResistance = vecRCHeliMoveRes;
+		float rmX = Pow(vecMoveResistance.x, CTimer::GetTimeStep());
+		float rmY = Pow(vecMoveResistance.y, CTimer::GetTimeStep());
+		float rmZ = Pow(vecMoveResistance.z, CTimer::GetTimeStep());
+		m_vecMoveSpeed.x *= rmX;
+		m_vecMoveSpeed.y *= rmY;
+		m_vecMoveSpeed.z *= rmZ;
+		if (m_status != STATUS_PLAYER && m_status != STATUS_PLAYER_REMOTE)
+			return;
+		float fThrust;
+		if (bCheat5)
+			fThrust = CPad::GetPad(0)->GetSteeringUpDown() * fThrustVar / 128.0f + 0.95f;
+		else
+			fThrust = fThrustVar * (CPad::GetPad(0)->GetAccelerate() - 2 * CPad::GetPad(0)->GetBrake()) / 255.0f + 0.95f;
+		fThrust -= fRotorFallOff * DotProduct(m_vecMoveSpeed, GetUp());
+#ifdef GTA3_1_1_PATCH
+		if (fThrust > 0.9f && GetPosition().z > 80.0f)
+			fThrust = 0.9f;
+#endif
+		ApplyMoveForce(GRAVITY * GetUp() * fThrust * m_fMass * CTimer::GetTimeStep());
+
+		if (GetUp().z > 0.0f)
+			ApplyTurnForce(-CVector(GetUp().x, GetUp().y, 0.0f) * fStabiliseVar * m_fTurnMass * CTimer::GetTimeStep(), GetUp());
+
+		float fRoll, fPitch, fYaw;
+		if (bCheat5) {
+			fPitch = CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
+			fRoll = -CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
+			fYaw = CPad::GetPad(0)->GetCarGunLeftRight() / 128.0f;
+		}
+		else {
+			fPitch = CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
+			fRoll = CPad::GetPad(0)->GetLookLeft();
+			if (CPad::GetPad(0)->GetLookRight())
+				fRoll = -1.0f;
+			fYaw = CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
+		}
+		if (CPad::GetPad(0)->GetHorn()) {
+			fYaw = 0.0f;
+			fPitch = clamp(10.0f * DotProduct(m_vecMoveSpeed, GetUp()), -200.0f, 1.3f);
+			fRoll = clamp(10.0f * DotProduct(m_vecMoveSpeed, GetRight()), -200.0f, 1.3f);
+		}
+		debug("fPitch: %f\n", fPitch);
+		ApplyTurnForce(fPitch * GetUp() * fPitchVar * m_fTurnMass * CTimer::GetTimeStep(), GetForward());
+		ApplyTurnForce(fRoll * GetUp() * fRollVar * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
+		ApplyTurnForce(fYaw * GetForward() * fYawVar * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
+
+		CVector vecResistance;
+		if (GetModelIndex() == MI_MIAMI_SPARROW)
+			vecResistance = vecHeliResistance;
+		else
+			vecResistance = vecRCHeliResistance;
+		float rX = Pow(vecResistance.x, CTimer::GetTimeStep());
+		float rY = Pow(vecResistance.y, CTimer::GetTimeStep());
+		float rZ = Pow(vecResistance.z, CTimer::GetTimeStep());
+		CVector vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());
+		float fResistanceMultiplier = Pow(1.0f / (fSpinSpeedRes * SQR(vecTurnSpeed.z) + 1.0f), CTimer::GetTimeStep());
+		float fResistance = vecTurnSpeed.z * fResistanceMultiplier - vecTurnSpeed.z;
+		vecTurnSpeed.x *= rX;
+		vecTurnSpeed.y *= rY;
+		vecTurnSpeed.z *= rZ;
+		m_vecTurnSpeed = Multiply3x3(GetMatrix(), vecTurnSpeed);
+		ApplyTurnForce(-GetRight() * fResistance * m_fTurnMass, GetForward() + Multiply3x3(GetMatrix(), m_vecCentreOfMass));
+		break;
+	}
 	}
 }
 

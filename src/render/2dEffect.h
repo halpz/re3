@@ -76,8 +76,14 @@ public:
 		if(type == EFFECT_LIGHT){
 			if(light.corona)
 				RwTextureDestroy(light.corona);
+#ifdef GTA3_1_1_PATCH
+			light.corona = nil;
+#endif
 			if(light.shadow)
 				RwTextureDestroy(light.shadow);
+#ifdef GTA3_1_1_PATCH
+			light.shadow = nil;
+#endif
 		}
 	}
 };
