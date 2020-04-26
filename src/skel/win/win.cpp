@@ -1,3 +1,5 @@
+#if defined RW_D3D9 || defined RWLIBS
+
 #define _WIN32_WINDOWS 0x0500
 #define WINVER 0x0500
 #define DIRECTINPUT_VERSION 0x0800
@@ -40,7 +42,7 @@
 #include "resource.h"
 #include "skeleton.h"
 #include "platform.h"
-#include "win.h"
+#include "crossplatform.h"
 
 #define MAX_SUBSYSTEMS		(16)
 
@@ -3037,4 +3039,5 @@ int strcasecmp(const char *str1, const char *str2)
 {
 	return _strcmpi(str1, str2);
 }
+#endif
 #endif

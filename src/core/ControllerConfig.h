@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined RW_D3D9 || defined RWLIBS
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
+#endif
 
 // based on x-gtasa
 
@@ -96,6 +100,16 @@ class CControllerState;
 
 #define ACTIONNAME_LENGTH 40
 
+#ifdef RW_GL3
+struct GlfwJoyState {
+	int8 id;
+	bool isGamepad;
+	uint8 numButtons;
+	uint8* buttons;
+	bool mappedButtons[17];
+};
+#endif
+
 class CControllerConfigManager
 {
 public:
@@ -112,11 +126,12 @@ public:
 	};
 
 	bool                  m_bFirstCapture;
-#ifdef __DINPUT_INCLUDED__
+#if defined RW_GL3
+	GlfwJoyState           m_OldState;
+	GlfwJoyState           m_NewState;
+#else
 	DIJOYSTATE2           m_OldState;
 	DIJOYSTATE2           m_NewState;
-#else
-	uint32 ___padd[0x110 / 4 * 2];
 #endif
 	wchar                 m_aActionNames[MAX_CONTROLLERACTIONS][ACTIONNAME_LENGTH];
 	bool                  m_aButtonStates[MAX_BUTTONS];
@@ -193,6 +208,8 @@ public:
 	void  ResetSettingOrder                   (e_ControllerAction action);
 };
 
+#ifndef RW_GL3
 VALIDATE_SIZE(CControllerConfigManager, 0x143C);
+#endif
 
 extern CControllerConfigManager ControlsManager;

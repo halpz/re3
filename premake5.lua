@@ -1,7 +1,7 @@
 Librw = os.getenv("LIBRW") or "librw"
 
 workspace "re3"
-	configurations { "Debug", "Release", "ReleaseFH", "DebugRW", "ReleaseRW"  }
+	configurations { "Debug", "Release", "ReleaseFH", "DebugRW", "ReleaseRW", "ReleaseGLFW"  }
 	location "build"
 
 	files { "src/*.*" }
@@ -19,6 +19,7 @@ workspace "re3"
 	files { "src/save/*.*" }
 	files { "src/skel/*.*" }
 	files { "src/skel/win/*.*" }
+	files { "src/skel/glfw/*.*" }
 	files { "src/text/*.*" }
 	files { "src/vehicles/*.*" }
 	files { "src/weapons/*.*" }
@@ -40,6 +41,7 @@ workspace "re3"
 	includedirs { "src/save/" }
 	includedirs { "src/skel/" }
 	includedirs { "src/skel/win" }
+	includedirs { "src/skel/glfw" }
 	includedirs { "src/text" }
 	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
@@ -67,6 +69,21 @@ workspace "re3"
 		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp", "rtquat", "rtcharse" }
 	filter  {}
 
+	filter "configurations:ReleaseGLFW"
+		defines { "GLEW_STATIC", "GLFW_DLL" }
+		files { "src/fakerw/*.*" }
+		includedirs { "src/fakerw" }
+		includedirs { Librw }
+		includedirs { "glfw-3.3.2.bin.WIN32/include" }
+		includedirs { "glew-2.1.0/include" }
+		libdirs { path.join(Librw, "lib/win-x86-gl3/Release") }
+		libdirs { "glew-2.1.0/lib/Release/Win32" }
+		libdirs { "glfw-3.3.2.bin.WIN32/lib-vc2015" }
+		links { "opengl32" }
+		links { "glew32s" }
+		links { "glfw3dll" }
+		links { "rw" }
+	filter  {}
 	
     pbcommands = { 
        "setlocal EnableDelayedExpansion",
@@ -107,14 +124,18 @@ project "re3"
 	symbols "Full"
 	staticruntime "off"
 	
-	filter "configurations:not *RW"
-	--	prebuildcommands { "cd \"../librw\" && premake5 " .. _ACTION .. " && msbuild \"build/librw.sln\" /property:Configuration=%{cfg.longname} /property:Platform=\"win-x86-d3d9\"" }
+	filter "configurations:Debug or Release or ReleaseFH"
+		prebuildcommands { "cd \"../librw\" && premake5 " .. _ACTION .. " && msbuild \"build/librw.sln\" /property:Configuration=%{cfg.longname} /property:Platform=\"win-x86-d3d9\"" }
 		defines { "LIBRW", "RW_D3D9" }
 	
 	filter "configurations:*RW"
 		defines { "RWLIBS" }
 		staticruntime "on"
 		linkoptions "/SECTION:_rwcseg,ER!W /MERGE:_rwcseg=.text"
+
+	filter "configurations:*GLFW"
+		prebuildcommands { "cd \"../librw\" && premake5 " .. _ACTION .. " && msbuild \"build/librw.sln\" /property:Configuration=Release /property:Platform=\"win-x86-gl3\"" }
+		defines { "LIBRW", "RW_GL3" }
 		
 	filter "configurations:Debug*"
 		defines { "DEBUG" }

@@ -1,4 +1,6 @@
+#if defined RW_D3D9 || defined RWLIBS
 #define WITHD3D
+#endif
 #include "common.h"
 
 #include "Timecycle.h"

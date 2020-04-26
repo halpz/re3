@@ -200,7 +200,9 @@ enum Config {
 //#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
 
 // Pad
+#ifndef RW_GL3
 #define XINPUT
+#endif
 #define KANGAROO_CHEAT
 #define ALLCARSHELI_CHEAT
 #define ALT_DODO_CHEAT

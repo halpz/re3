@@ -11,11 +11,11 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef WITHWINDOWS
+#if defined _WIN32 && defined WITHWINDOWS 
 #include <windows.h>
 #endif
 
-#ifdef WITHD3D
+#if defined _WIN32 && defined WITHD3D
 #include <windows.h>
 #include <d3d8types.h>
 #endif
@@ -31,11 +31,18 @@
 #define HIERNODEID(hier, i) ((hier)->nodeInfo[i].id)
 #define HANIMFRAMES(anim) ((anim)->keyframes)
 #else
+#define RWHALFPIXEL	// always d3d
 #define STREAMPOS(str) ((str)->Type.memory.position)
 #define STREAMFILE(str) ((str)->Type.file.fpFile)
 #define HIERNODEINFO(hier) ((hier)->pNodeInfo)
 #define HIERNODEID(hier, i) ((hier)->pNodeInfo[i].nodeID)
 #define HANIMFRAMES(anim) ((anim)->pFrames)
+#endif
+
+#ifdef RWHALFPIXEL
+#define HALFPX (0.5f)
+#else
+#define HALFPX (0.0f)
 #endif
 
 #define rwVENDORID_ROCKSTAR 0x0253F2
@@ -87,13 +94,6 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 {
 	return w>>p & (1<<s)-1;
 }
-
-
-#ifndef RWLIBS
-// little hack
-extern void **rwengine;
-#define RwEngineInstance (*rwengine)
-#endif
 
 #include "skeleton.h"
 #include "Draw.h"

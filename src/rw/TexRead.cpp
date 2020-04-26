@@ -2,7 +2,7 @@
 #pragma warning( disable : 4005)
 #pragma warning( pop )
 #include "common.h"
-#include "win.h"
+#include "crossplatform.h"
 
 #include "Timer.h"
 #ifdef GTA_PC
