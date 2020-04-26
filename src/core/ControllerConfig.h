@@ -96,6 +96,16 @@ class CControllerState;
 
 #define ACTIONNAME_LENGTH 40
 
+#ifdef RW_GL3
+struct GlfwJoyState {
+	int8 id;
+	bool isGamepad;
+	uint8 numButtons;
+	uint8* buttons;
+	bool mappedButtons[17];
+};
+#endif
+
 class CControllerConfigManager
 {
 public:
@@ -115,8 +125,9 @@ public:
 #ifdef __DINPUT_INCLUDED__
 	DIJOYSTATE2           m_OldState;
 	DIJOYSTATE2           m_NewState;
-#else
-	uint32 ___padd[0x110 / 4 * 2];
+#elif defined RW_GL3
+	GlfwJoyState           m_OldState;
+	GlfwJoyState           m_NewState;
 #endif
 	wchar                 m_aActionNames[MAX_CONTROLLERACTIONS][ACTIONNAME_LENGTH];
 	bool                  m_aButtonStates[MAX_BUTTONS];
@@ -193,6 +204,6 @@ public:
 	void  ResetSettingOrder                   (e_ControllerAction action);
 };
 
-VALIDATE_SIZE(CControllerConfigManager, 0x143C);
+//VALIDATE_SIZE(CControllerConfigManager, 0x143C);
 
 extern CControllerConfigManager ControlsManager;
