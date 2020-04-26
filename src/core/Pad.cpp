@@ -1,10 +1,13 @@
 #pragma warning( push )
 #pragma warning( disable : 4005)
+#if defined RW_D3D9 || defined RWLIBS
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+#endif
 #pragma warning( pop )
 
 #include "common.h"
+#include "crossplatform.h"
 #ifdef XINPUT
 #include <xinput.h>
 #pragma comment( lib, "Xinput9_1_0.lib" )
@@ -29,7 +32,6 @@
 #include "Record.h"
 #include "Replay.h"
 #include "Weather.h"
-#include "win.h"
 #include "Streaming.h"
 #include "PathFind.h"
 #include "Wanted.h"
@@ -423,6 +425,7 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 {
 	CMouseControllerState state;
 	
+#if defined RW_D3D9 || defined RWLIBS
 	if ( PSGLOBAL(mouse) == nil )
 		_InputInitialiseMouse();
 	
@@ -432,7 +435,6 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 		devCaps.dwSize = sizeof(DIDEVCAPS);
 		
 		PSGLOBAL(mouse)->GetCapabilities(&devCaps);
-		
 		switch ( devCaps.dwButtons )
 		{
 			case 3:
@@ -456,6 +458,19 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 			state.WHEELUP = true;
 		}
 	}
+#else
+	// It seems there is no way to get number of buttons on mouse, so assign all buttons if we have mouse.
+	double xpos = 1.0f, ypos;
+	glfwGetCursorPos(PSGLOBAL(window), &xpos, &ypos);
+
+	if (xpos != NULL) {
+		state.MMB = true;
+		state.RMB = true;
+		state.LMB = true;
+		state.WHEELDN = true;
+		state.WHEELUP = true;
+	}
+#endif
 
 	return state;
 }
@@ -464,6 +479,7 @@ void CPad::UpdateMouse()
 {
 	if ( IsForegroundApp() )
 	{
+#if defined RW_D3D9 || defined RWLIBS
 		if ( PSGLOBAL(mouse) == nil )
 			_InputInitialiseMouse();
 		
@@ -500,6 +516,44 @@ void CPad::UpdateMouse()
 			OldMouseControllerState = NewMouseControllerState;
 			NewMouseControllerState = PCTempMouseControllerState;
 		}
+#else
+		double xpos = 1.0f, ypos;
+		glfwGetCursorPos(PSGLOBAL(window), &xpos, &ypos);
+		if (xpos == NULL)
+			return;
+
+		int32 signX = 1;
+		int32 signy = 1;
+
+		if (!FrontEndMenuManager.m_bMenuActive)
+		{
+			if (MousePointerStateHelper.bInvertVertically)
+				signy = -1;
+			if (MousePointerStateHelper.bInvertHorizontally)
+				signX = -1;
+		}
+
+		PCTempMouseControllerState.Clear();
+
+		PCTempMouseControllerState.x = (float)(signX * (xpos - PSGLOBAL(lastMousePos.x)));
+		PCTempMouseControllerState.y = (float)(signy * (ypos - PSGLOBAL(lastMousePos.y)));
+		PCTempMouseControllerState.LMB = glfwGetMouseButton(PSGLOBAL(window), GLFW_MOUSE_BUTTON_LEFT);
+		PCTempMouseControllerState.RMB = glfwGetMouseButton(PSGLOBAL(window), GLFW_MOUSE_BUTTON_RIGHT);
+		PCTempMouseControllerState.MMB = glfwGetMouseButton(PSGLOBAL(window), GLFW_MOUSE_BUTTON_MIDDLE);
+		PCTempMouseControllerState.MXB1 = glfwGetMouseButton(PSGLOBAL(window), GLFW_MOUSE_BUTTON_4);
+		PCTempMouseControllerState.MXB2 = glfwGetMouseButton(PSGLOBAL(window), GLFW_MOUSE_BUTTON_5);
+
+		PSGLOBAL(lastMousePos.x) = xpos;
+		PSGLOBAL(lastMousePos.y) = ypos;
+
+		if (PSGLOBAL(mouseWheel) > 0)
+			PCTempMouseControllerState.WHEELUP = 1;
+		else if (PSGLOBAL(mouseWheel) < 0)
+			PCTempMouseControllerState.WHEELDN = 1;
+
+		OldMouseControllerState = NewMouseControllerState;
+		NewMouseControllerState = PCTempMouseControllerState;
+#endif
 	}
 }
 

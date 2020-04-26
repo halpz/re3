@@ -1,10 +1,9 @@
+#define WITHWINDOWS
 #include "common.h"
 #include "patcher.h"
 
 #include <algorithm>
 #include <vector>
-
-#include <windows.h>
 
 StaticPatcher *StaticPatcher::ms_head;
 

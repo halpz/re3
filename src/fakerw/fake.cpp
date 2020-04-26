@@ -460,13 +460,17 @@ RwBool RwRenderStateSet(RwRenderState state, void *value)
 	}
 }
 
-
-static EngineOpenParams openParams;
 // WARNING: unused parameters
 RwBool RwEngineInit(RwMemoryFunctions *memFuncs, RwUInt32 initFlags, RwUInt32 resArenaSize) { Engine::init(); return true; }
 // TODO: this is platform dependent
 RwBool RwEngineOpen(RwEngineOpenParams *initParams) {
+#if defined RW_D3D9 || defined RWLIBS
+	static EngineOpenParams openParams;
 	openParams.window = (HWND)initParams->displayID;
+#else
+	extern EngineOpenParams openParams;
+	openParams.window = (GLFWwindow**)initParams->displayID;
+#endif
 	return Engine::open(&openParams);
 }
 RwBool RwEngineStart(void) {

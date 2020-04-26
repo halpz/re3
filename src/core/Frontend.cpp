@@ -1,8 +1,11 @@
+#if defined RW_D3D9 || defined RWLIBS
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
-#include "common.h"
+#endif
 
-#include "win.h"
+#define WITHWINDOWS
+#include "common.h"
+#include "crossplatform.h"
 #include "Frontend.h"
 #include "Font.h"
 #include "Pad.h"
@@ -430,13 +433,16 @@ CMenuManager::BuildStatLine(char *text, void *stat, bool itsFloat, void *stat2)
 void
 CMenuManager::CentreMousePointer()
 {
-	tagPOINT Point;
-
 	if (SCREEN_WIDTH * 0.5f != 0.0f && 0.0f != SCREEN_HEIGHT * 0.5f) {
+#if defined RW_D3D9 || defined RWLIBS
+		tagPOINT Point;
 		Point.x = SCREEN_WIDTH / 2;
 		Point.y = SCREEN_HEIGHT / 2;
 		ClientToScreen(PSGLOBAL(window), &Point);
 		SetCursorPos(Point.x, Point.y);
+#elif defined RW_GL3
+		glfwSetCursorPos(PSGLOBAL(window), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+#endif
 
 		PSGLOBAL(lastMousePos.x) = SCREEN_WIDTH / 2;
 		PSGLOBAL(lastMousePos.y) = SCREEN_HEIGHT / 2;
@@ -4474,12 +4480,20 @@ CMenuManager::ProcessButtonPresses(void)
 						ControlsManager.MakeControllerActionsBlank();
 						ControlsManager.InitDefaultControlConfiguration();
 						ControlsManager.InitDefaultControlConfigMouse(MousePointerStateHelper.GetMouseSetUp());
-						if (AllValidWinJoys.m_aJoys[0].m_bInitialised) {
+#if !defined RW_GL3
+						if (AllValidWinJoys.m_aJoys[JOYSTICK1].m_bInitialised) {
 							DIDEVCAPS devCaps;
 							devCaps.dwSize = sizeof(DIDEVCAPS);
 							PSGLOBAL(joy1)->GetCapabilities(&devCaps);
 							ControlsManager.InitDefaultControlConfigJoyPad(devCaps.dwButtons);
 						}
+#else
+						if (PSGLOBAL(joy1id) != -1 && glfwJoystickPresent(PSGLOBAL(joy1id))) {
+							int count;
+							glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
+							ControlsManager.InitDefaultControlConfigJoyPad(count);
+						}
+#endif
 						m_ControlMethod = CONTROL_STANDARD;
 						MousePointerStateHelper.bInvertVertically = false;
 						TheCamera.m_fMouseAccelHorzntl = 0.0025f;

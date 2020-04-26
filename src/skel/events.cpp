@@ -1,12 +1,13 @@
-#include "rwcore.h"
-#include "skeleton.h"
-#include "events.h"
-
 #include "common.h"
 #include "Pad.h"
 #include "ControllerConfig.h"
 #include "Frontend.h"
 #include "Camera.h"
+
+#include "rwcore.h"
+#include "skeleton.h"
+#include "events.h"
+
 
 /*
  *****************************************************************************

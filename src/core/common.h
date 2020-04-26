@@ -11,11 +11,11 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef WITHWINDOWS
+#if defined _WIN32 && defined WITHWINDOWS 
 #include <windows.h>
 #endif
 
-#ifdef WITHD3D
+#if defined _WIN32 && defined WITHD3D
 #include <windows.h>
 #include <d3d8types.h>
 #endif

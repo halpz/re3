@@ -1,7 +1,10 @@
+#if defined RW_D3D9 || defined RWLIBS
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
-#include "common.h"
+#endif
 
+#include "common.h"
+#include "crossplatform.h"
 #include "ControllerConfig.h"
 #include "Pad.h"
 #include "FileMgr.h"
@@ -15,7 +18,6 @@
 #include "World.h"
 #include "ModelIndices.h"
 #include "Camera.h"
-#include "win.h"
 #include "GenericGameStorage.h"
 
 CControllerConfigManager ControlsManager;
@@ -41,13 +43,71 @@ void CControllerConfigManager::MakeControllerActionsBlank()
 	}
 }
 
+#ifdef RW_GL3
+int MapIdToButtonId(int mapId) {
+	switch (mapId) {
+		case GLFW_GAMEPAD_BUTTON_A: // Cross
+			return 2;
+		case GLFW_GAMEPAD_BUTTON_B: // Circle
+			return 1;
+		case GLFW_GAMEPAD_BUTTON_X: // Square
+			return 3;
+		case GLFW_GAMEPAD_BUTTON_Y: // Triangle
+			return 4;
+		case GLFW_GAMEPAD_BUTTON_LEFT_BUMPER:
+			return 7;
+		case GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER:
+			return 8;
+		case GLFW_GAMEPAD_BUTTON_BACK:
+			return 9;
+		case GLFW_GAMEPAD_BUTTON_START:
+			return 12;
+		case GLFW_GAMEPAD_BUTTON_LEFT_THUMB:
+			return 10;
+		case GLFW_GAMEPAD_BUTTON_RIGHT_THUMB:
+			return 11;
+		case GLFW_GAMEPAD_BUTTON_DPAD_UP:
+			return 13;
+		case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT:
+			return 14;
+		case GLFW_GAMEPAD_BUTTON_DPAD_DOWN:
+			return 15;
+		case GLFW_GAMEPAD_BUTTON_DPAD_LEFT:
+			return 16;
+		// GLFW sends those as axes, so I added them here manually.
+		case 15: // Left trigger
+			return 5;
+		case 16: // Right trigger
+			return 6;
+		default:
+			return 0;
+	}
+}
+#endif
+
 int32 CControllerConfigManager::GetJoyButtonJustDown()
 {
 #ifdef __DINPUT_INCLUDED__
+#ifdef FIX_BUGS
+	for (int32 i = 0; i < MAX_BUTTONS; i++)
+#else
 	for (int32 i = 0; i < JOY_BUTTONS; i++)
+#endif
 	{
 		if (m_NewState.rgbButtons[i] & 0x80 && !(m_OldState.rgbButtons[i] & 0x80))
 			return i + 1;
+	}
+#elif defined RW_GL3
+	if (m_NewState.isGamepad) {
+		for (int32 i = 0; i < MAX_BUTTONS; i++) {
+			if (m_NewState.mappedButtons[i] && !(m_OldState.mappedButtons[i]))
+				return MapIdToButtonId(i);
+		}
+	} else {
+		for (int32 i = 0; i < Min(m_NewState.numButtons, MAX_BUTTONS); i++) {
+			if (m_NewState.buttons[i] && !(m_OldState.buttons[i]))
+				return i + 1;
+		}
 	}
 #endif
 	return 0;
@@ -249,8 +309,13 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 	if (buttons > 16)
 		btn = 16;
 
+	// Now we use SDL Game Controller DB
+#if defined RW_D3D9 || defined RWLIBS
 	if (   AllValidWinJoys.m_aJoys[JOYSTICK1].m_nVendorID == 0x3427
 		&& AllValidWinJoys.m_aJoys[JOYSTICK1].m_nProductID == 0x1190)
+#else
+	if (0)
+#endif
 	{
 		//GIC USB Joystick, PS2 Gamepad ?
 
@@ -445,8 +510,13 @@ void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown(int32 button, i
 				break;
 			}
 
-			if (   AllValidWinJoys.m_aJoys[JOYSTICK1].m_nVendorID  == 0x3427
+			// Now we use SDL Game Controller DB
+#if defined RW_D3D9 || defined RWLIBS
+			if (AllValidWinJoys.m_aJoys[JOYSTICK1].m_nVendorID == 0x3427
 				&& AllValidWinJoys.m_aJoys[JOYSTICK1].m_nProductID == 0x1190)
+#else
+			if (0)
+#endif
 			{
 				//GIC USB Joystick, PS2 Gamepad ?
 
@@ -872,8 +942,13 @@ void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonUp(int32 button, int
 				break;
 			}
 
-			if (   AllValidWinJoys.m_aJoys[JOYSTICK1].m_nVendorID  == 0x3427
+			// Now we use SDL Game Controller DB
+#if defined RW_D3D9 || defined RWLIBS
+			if (AllValidWinJoys.m_aJoys[JOYSTICK1].m_nVendorID == 0x3427
 				&& AllValidWinJoys.m_aJoys[JOYSTICK1].m_nProductID == 0x1190)
+#else
+			if (0)
+#endif
 			{
 				//GIC USB Joystick, PS2 Gamepad ?
 
@@ -1809,7 +1884,7 @@ wchar *CControllerConfigManager::GetControllerSettingTextKeyBoard(e_ControllerAc
 	static wchar ActionText[50];
 	static wchar NewStringWithNumber[30];
 
-	for (int32 i = 0; i < ARRAYSIZE(ActionText); i++)
+	for (int32 i = 0; i < ARRAY_SIZE(ActionText); i++)
 		ActionText[i] = '\0';
 
 	if (GetControllerKeyAssociatedWithAction(action, type) != rsNULL)
@@ -2265,6 +2340,19 @@ void CControllerConfigManager::UpdateJoyButtonState(int32 padnumber)
 			m_aButtonStates[i] = true;
 		else
 			m_aButtonStates[i] = false;
+	}
+#elif defined RW_GL3
+	if (m_NewState.isGamepad) {
+		for (int32 i = 0; i < MAX_BUTTONS; i++) {
+			if (i == GLFW_GAMEPAD_BUTTON_GUIDE)
+				continue;
+
+			m_aButtonStates[MapIdToButtonId(i)-1] = m_NewState.mappedButtons[i];
+		}
+	} else {
+		for (int32 i = 0; i < Min(m_NewState.numButtons, MAX_BUTTONS); i++) {
+			m_aButtonStates[i] = m_NewState.buttons[i];
+		}
 	}
 #endif
 }

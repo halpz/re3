@@ -707,13 +707,13 @@ CBoat::Render()
 	((CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()))->SetVehicleColour(m_currentColour1, m_currentColour2);
 	if (!CVehicle::bWheelsOnlyCheat)
 		CEntity::Render();
-	KeepWaterOutVertices[0].color = -1;
+	KeepWaterOutVertices[0].setColor(255, 255, 255, 255);
 	KeepWaterOutIndices[0] = 0;
-	KeepWaterOutVertices[1].color = -1;
+	KeepWaterOutVertices[1].setColor(255, 255, 255, 255);
 	KeepWaterOutIndices[1] = 2;
-	KeepWaterOutVertices[2].color = -1;
+	KeepWaterOutVertices[2].setColor(255, 255, 255, 255);
 	KeepWaterOutIndices[2] = 1;
-	KeepWaterOutVertices[3].color = -1;
+	KeepWaterOutVertices[3].setColor(255, 255, 255, 255);
 	KeepWaterOutIndices[3] = 1;
 	KeepWaterOutIndices[4] = 2;
 	KeepWaterOutIndices[5] = 3;

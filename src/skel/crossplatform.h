@@ -1,5 +1,61 @@
 #include <time.h>
 
+// This is the common include for platform/renderer specific skeletons(glfw, win etc.) and cross platform things (like Windows directories wrapper, platform specific global arrays etc.) 
+
+// This only has <windef.h> as Win header.
+#ifdef _WIN32
+#include "win.h"
+#endif
+
+#ifdef RW_GL3
+typedef struct
+{
+    GLFWwindow* window;
+    RwBool		fullScreen;
+    RwV2d		lastMousePos;
+    double      mouseWheel; // glfw doesn't cache it
+    int8        joy1id;
+    int8        joy2id;
+}
+psGlobalType;
+
+#define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
+
+void CapturePad(RwInt32 padID);
+void joysChangeCB(int jid, int event);
+#endif
+
+enum eGameState
+{
+    GS_START_UP = 0,
+    GS_INIT_LOGO_MPEG,
+    GS_LOGO_MPEG,
+    GS_INIT_INTRO_MPEG,
+    GS_INTRO_MPEG,
+    GS_INIT_ONCE,
+    GS_INIT_FRONTEND,
+    GS_FRONTEND,
+    GS_INIT_PLAYING_GAME,
+    GS_PLAYING_GAME,
+#ifndef MASTER
+    GS_ANIMVIEWER,
+#endif
+};
+extern RwUInt32 gGameState;
+
+RwBool IsForegroundApp();
+void InitialiseLanguage();
+RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode);
+
+RwChar** _psGetVideoModeList();
+RwInt32 _psGetNumVideModes();
+
+void _psSelectScreenVM(RwInt32 videoMode);
+void HandleExit();
+void _InputTranslateShiftKeyUpDown(RsKeyCodes* rs);
+
+// Mostly wrappers around Windows functions
+
 #ifndef MAX_PATH
     #if !defined _WIN32 || defined __MINGW32__
     #define MAX_PATH PATH_MAX
@@ -7,8 +63,6 @@
     #define MAX_PATH 260
     #endif
 #endif
-
-// Mostly wrappers around Windows functions
 
 // TODO: Remove USEALTERNATIVEWINFUNCS and don't use it anywhere when re3 becomes fully cross-platform, this is for testing
 // Codes compatible with Windows and Linux
@@ -27,18 +81,13 @@ struct SYSTEMTIME {
     uint16 wMilliseconds;
 };
 
-#define GetLocalTime GetLocalTime_CP
-#else
-#include <Windows.h>
-#endif
-
 void GetLocalTime_CP(SYSTEMTIME* out);
-
+#define GetLocalTime GetLocalTime_CP
+#define OutputDebugString(s) re3_debug("[DBG-2]: " s "\n")
+#endif
 
 // Only runs on GNU/POSIX/etc.
 #if !defined _WIN32 || defined __MINGW32__
-#define OutputDebugString(s) re3_debug("[DBG-2]: " s "\n")
-
 #include <iostream>
 #include <dirent.h>
 #include <sys/types.h>

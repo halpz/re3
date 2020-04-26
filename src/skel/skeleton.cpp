@@ -293,7 +293,7 @@ RwBool
 RsRwInitialise(void *displayID)
 {
 	RwEngineOpenParams  openParams;
-   
+
 	/*
 	 * Start RenderWare...
 	 */

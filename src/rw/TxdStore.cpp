@@ -127,6 +127,38 @@ CTxdStore::RemoveRefWithoutDelete(int slot)
 	GetSlot(slot)->refCount--;
 }
 
+#ifdef RW_GL3
+rw::Raster*
+convertTexRaster(rw::Raster* ras)
+{
+	rw::Image* img = ras->toImage();
+//	ras->destroy();
+	img->unindex();
+	ras = rw::Raster::createFromImage(img);
+	img->destroy();
+	return ras;
+}
+
+void
+convertTxd(rw::TexDictionary* txd)
+{
+	rw::Texture* tex;
+	FORLIST(lnk, txd->textures) {
+		tex = rw::Texture::fromDict(lnk);
+		rw::Raster* ras = tex->raster;
+		if (ras && ras->platform != rw::platform) {
+			if (!(ras->platform == rw::PLATFORM_D3D8 && rw::platform == rw::PLATFORM_D3D9 ||
+				ras->platform == rw::PLATFORM_D3D9 && rw::platform == rw::PLATFORM_D3D8)) {
+				tex->raster = convertTexRaster(ras);
+				ras->destroy();
+			}
+		}
+		tex->setFilter(rw::Texture::LINEAR);
+	}
+
+}
+#endif
+
 bool
 CTxdStore::LoadTxd(int slot, RwStream *stream)
 {
@@ -134,6 +166,9 @@ CTxdStore::LoadTxd(int slot, RwStream *stream)
 
 	if(RwStreamFindChunk(stream, rwID_TEXDICTIONARY, nil, nil)){
 		def->texDict = RwTexDictionaryGtaStreamRead(stream);
+#ifdef RW_GL3
+		convertTxd(def->texDict);
+#endif
 		return def->texDict != nil;
 	}
 	printf("Failed to load TXD\n");
