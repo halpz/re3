@@ -7135,13 +7135,7 @@ struct tVehicleSampleData {
 	char gap_25[3];
 };
 
-// int32 *GearFreqAdj = (int32 *)0x606A50;
-int32 GearFreqAdj[] = {112, 23, 0, 0, 112, 23, 0, 0, 72, 13,  0,   0,
-                       176, 4,  0, 0, 0,   0,  0, 0, 24, 252, 255, 255};
-
-// tVehicleSampleData *CarSounds = (tVehicleSampleData *)0x606204;
-
-const tVehicleSampleData CarSounds[70] = {
+const tVehicleSampleData aVehicleSettings[70] = {
     {SFX_CAR_REV_2, 2, "", SFX_CAR_HORN_JEEP, 26513, SFX_CAR_ALARM_1, 9935, 1},
     {SFX_CAR_REV_1, 1, "", SFX_CAR_HORN_56CHEV, 11487, SFX_CAR_ALARM_1, 9935, 0},
     {SFX_CAR_REV_8, 8, "", SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_ALARM_1, 10928, 1},
@@ -7216,6 +7210,8 @@ const tVehicleSampleData CarSounds[70] = {
 void
 cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *automobile)
 {
+	static int32 GearFreqAdj[] = { 6000, 6000, 3400, 1200, 0, -1000 };
+
 	cTransmission *transmission;
 	float velocityChange;
 	float relativeVelocityChange;
@@ -7298,7 +7294,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 	} else {
 		freqModifier = 0;
 	}
-	engineSoundType = CarSounds[params->m_nIndex].m_bEngineSoundType;
+	engineSoundType = aVehicleSettings[params->m_nIndex].m_bEngineSoundType;
 	soundOffset = 3 * (engineSoundType - 1);
 	if(accelerateState <= 0) {
 		if(params->m_fVelocityChange < -0.001f) {
@@ -8218,7 +8214,6 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 	CAutomobile *automobile;
 	float relativeGearChange;
 	float relativeChange;
-	float reverseRelativechange;
 	uint8 volume;
 	eSfxSample accelerationSample;
 	int32 freq = 0; // uinitialized variable
@@ -8251,36 +8246,28 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 				currentGear = params->m_pVehicle->m_nCurrentGear;
 				if(automobile->m_nWheelsOnGround) {
 					if(automobile->bIsHandbrakeOn) {
-						if(0.f == params->m_fVelocityChange)
+						if(params->m_fVelocityChange == 0.0f)
 							traction = 0.9f;
 					} else if(params->m_pVehicle->m_status == STATUS_SIMPLE) {
-						traction = 0.f;
+						traction = 0.0f;
 					} else {
 						switch(transmission->nDriveType) {
 						case '4':
-							for(int32 i = 0;
-							    i <
-							    ARRAY_SIZE(automobile->m_aWheelState);
-							    i++) {
-								if(automobile->m_aWheelState[i] ==
-								   WHEEL_STATE_SPINNING)
+							for(int32 i = 0; i < ARRAY_SIZE(automobile->m_aWheelState); i++) {
+								if(automobile->m_aWheelState[i] == WHEEL_STATE_SPINNING)
 									traction += 0.05f;
 							}
 							break;
 						case 'F':
-							if(automobile->m_aWheelState[0] ==
-							   WHEEL_STATE_SPINNING)
+							if(automobile->m_aWheelState[0] == WHEEL_STATE_SPINNING)
 								traction += 0.1f;
-							if(automobile->m_aWheelState[2] ==
-							   WHEEL_STATE_SPINNING)
+							if(automobile->m_aWheelState[2] == WHEEL_STATE_SPINNING)
 								traction += 0.1f;
 							break;
 						case 'R':
-							if(automobile->m_aWheelState[1] ==
-							   WHEEL_STATE_SPINNING)
+							if(automobile->m_aWheelState[1] == WHEEL_STATE_SPINNING)
 								traction += 0.1f;
-							if(automobile->m_aWheelState[3] ==
-							   WHEEL_STATE_SPINNING)
+							if(automobile->m_aWheelState[3] == WHEEL_STATE_SPINNING)
 								traction += 0.1f;
 							break;
 						}
@@ -8288,44 +8275,16 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 					if(transmission->fMaxVelocity <= 0.f) {
 						relativeChange = 0.f;
 					} else if(currentGear) {
-						if((params->m_fVelocityChange -
-						    transmission->Gears[currentGear]
-						        .fShiftDownVelocity) /
-						       transmission->fMaxVelocity * 2.5f <=
-						   1.f)
-							relativeGearChange =
-							    (params->m_fVelocityChange -
-							     transmission->Gears[currentGear]
-							         .fShiftDownVelocity) /
-							    transmission->fMaxVelocity * 2.5f;
-						else
-							relativeGearChange = 1.f;
-						if(0.f == traction &&
-						   automobile->m_status != STATUS_SIMPLE &&
-						   params->m_fVelocityChange >=
-						       transmission->Gears[1].fShiftUpVelocity) {
+						relativeGearChange = Min(1.0f, (params->m_fVelocityChange - transmission->Gears[currentGear].fShiftDownVelocity) / transmission->fMaxVelocity * 2.5f);
+						if(traction == 0.0f && automobile->m_status != STATUS_SIMPLE && params->m_fVelocityChange >= transmission->Gears[1].fShiftUpVelocity) {
 							traction = 0.7f;
 						}
-						relativeChange =
-						    traction * automobile->m_fGasPedalAudio *
-						        0.95f +
-						    (1.f - traction) * relativeGearChange;
-					} else {
-						reverseRelativechange = Abs(
-						    (params->m_fVelocityChange -
-						     transmission->Gears[0].fShiftDownVelocity) /
-						    transmission->fMaxReverseVelocity);
-						if(1.f - reverseRelativechange <= 1.f) {
-							relativeChange =
-							    1.f - reverseRelativechange;
-						} else {
-							relativeChange = 1.f;
-						}
-					}
+						relativeChange = traction * automobile->m_fGasPedalAudio * 0.95f + (1.0f - traction) * relativeGearChange;
+					} else
+						relativeChange = Min(1.0f, 1.0f - Abs((params->m_fVelocityChange - transmission->Gears[0].fShiftDownVelocity) / transmission->fMaxReverseVelocity));
 				} else {
 					if(automobile->m_nDriveWheelsOnGround)
-						automobile->m_fGasPedalAudio =
-						    automobile->m_fGasPedalAudio * 0.4f;
+						automobile->m_fGasPedalAudio *= 0.4f;
 					relativeChange = automobile->m_fGasPedalAudio;
 				}
 				modificator = relativeChange;
@@ -8338,9 +8297,8 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 					volume =
 					    ComputeVolume(120, 50.f, m_sQueueSample.m_fDistance);
 				} else {
-					emittingVol = modificator * 4 / 3 * 40.f + 80.f;
-					volume = ComputeVolume(emittingVol, 50.f,
-					                       m_sQueueSample.m_fDistance);
+					emittingVol = modificator * 4.0f / 3.0f * 40.f + 80.f;
+					volume = ComputeVolume(emittingVol, 50.f, m_sQueueSample.m_fDistance);
 				}
 			} else {
 				modificator = 0.f;
@@ -8351,98 +8309,73 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 			if(m_sQueueSample.m_bVolume) {
 				if(automobile->m_status == STATUS_SIMPLE) {
 					if(modificator < 0.02f) {
-						m_sQueueSample.m_nSampleIndex =
-						    CarSounds[params->m_nIndex].m_bEngineSoundType +
-						    SFX_CAR_REV_10;
+						m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_bEngineSoundType + SFX_CAR_REV_10;
 						freq = 10000.f * modificator + 22050;
 						m_sQueueSample.m_nCounter = 52;
-						m_sQueueSample.m_bBankIndex = 0;
-						m_sQueueSample.m_bIs2D = 0;
+						m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
+						m_sQueueSample.m_bIs2D = false;
 						m_sQueueSample.m_nReleasingVolumeModificator = 3;
-						m_sQueueSample.m_nFrequency =
-						    freq +
-						    100 * m_sQueueSample.m_nEntityIndex % 1000;
-						if(m_sQueueSample.m_nSampleIndex ==
-						       SFX_CAR_IDLE_6 ||
-						   m_sQueueSample.m_nSampleIndex == SFX_CAR_REV_6)
-							m_sQueueSample.m_nFrequency =
-							    m_sQueueSample.m_nFrequency >> 1;
+						m_sQueueSample.m_nFrequency = freq + 100 * m_sQueueSample.m_nEntityIndex % 1000;
+						if(m_sQueueSample.m_nSampleIndex == SFX_CAR_IDLE_6 || m_sQueueSample.m_nSampleIndex == SFX_CAR_REV_6)
+							m_sQueueSample.m_nFrequency /= 2;
 						m_sQueueSample.m_nLoopCount = 0;
 						m_sQueueSample.m_bEmittingVolume = emittingVol;
-						m_sQueueSample.m_nLoopStart =
-						    SampleManager.GetSampleLoopStartOffset(
-						        m_sQueueSample.m_nSampleIndex);
-						m_sQueueSample.m_nLoopEnd =
-						    SampleManager.GetSampleLoopEndOffset(
-						        m_sQueueSample.m_nSampleIndex);
+						m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+						m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 						m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 						m_sQueueSample.m_fSoundIntensity = 50.0f;
 						m_sQueueSample.m_bReleasingSoundFlag = false;
 						m_sQueueSample.m_nReleasingVolumeDivider = 8;
-						m_sQueueSample.m_bReverbFlag = 1;
-						m_sQueueSample.m_bRequireReflection = 0;
+						m_sQueueSample.m_bReverbFlag = true;
+						m_sQueueSample.m_bRequireReflection = false;
 						AddSampleToRequestedQueue();
 						return;
 					}
 					accelerationSample =
-					    CarSounds[params->m_nIndex].m_nAccelerationSampleIndex;
+						aVehicleSettings[params->m_nIndex].m_nAccelerationSampleIndex;
 				} else {
 					if(automobile->m_fGasPedal < 0.05f) {
 						m_sQueueSample.m_nSampleIndex =
-						    CarSounds[params->m_nIndex].m_bEngineSoundType +
+							aVehicleSettings[params->m_nIndex].m_bEngineSoundType +
 						    SFX_CAR_REV_10; // to recheck idle sounds start
 						                    // 1 postion later
 						freq = 10000.f * modificator + 22050;
 						m_sQueueSample.m_nCounter = 52;
-						m_sQueueSample.m_bBankIndex = 0;
-						m_sQueueSample.m_bIs2D = 0;
+						m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
+						m_sQueueSample.m_bIs2D = false;
 						m_sQueueSample.m_nReleasingVolumeModificator = 3;
-						m_sQueueSample.m_nFrequency =
-						    freq +
-						    100 * m_sQueueSample.m_nEntityIndex % 1000;
-						if(m_sQueueSample.m_nSampleIndex ==
-						       SFX_CAR_IDLE_6 ||
+						m_sQueueSample.m_nFrequency = freq + 100 * m_sQueueSample.m_nEntityIndex % 1000;
+						if(m_sQueueSample.m_nSampleIndex == SFX_CAR_IDLE_6 ||
 						   m_sQueueSample.m_nSampleIndex == SFX_CAR_REV_6)
-							m_sQueueSample.m_nFrequency =
-							    m_sQueueSample.m_nFrequency >> 1;
+							m_sQueueSample.m_nFrequency = m_sQueueSample.m_nFrequency >> 1;
 						m_sQueueSample.m_nLoopCount = 0;
 						m_sQueueSample.m_bEmittingVolume = emittingVol;
-						m_sQueueSample.m_nLoopStart =
-						    SampleManager.GetSampleLoopStartOffset(
-						        m_sQueueSample.m_nSampleIndex);
-						m_sQueueSample.m_nLoopEnd =
-						    SampleManager.GetSampleLoopEndOffset(
-						        m_sQueueSample.m_nSampleIndex);
+						m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset( m_sQueueSample.m_nSampleIndex);
+						m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 						m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 						m_sQueueSample.m_fSoundIntensity = 50.0f;
 						m_sQueueSample.m_bReleasingSoundFlag = false;
 						m_sQueueSample.m_nReleasingVolumeDivider = 8;
-						m_sQueueSample.m_bReverbFlag = 1;
-						m_sQueueSample.m_bRequireReflection = 0;
+						m_sQueueSample.m_bReverbFlag = true;
+						m_sQueueSample.m_bRequireReflection = false;
 						AddSampleToRequestedQueue();
 						return;
 					}
-					accelerationSample =
-					    CarSounds[params->m_nIndex].m_nAccelerationSampleIndex;
+					accelerationSample = aVehicleSettings[params->m_nIndex].m_nAccelerationSampleIndex;
 				}
 				m_sQueueSample.m_nSampleIndex = accelerationSample;
 				m_sQueueSample.m_nCounter = 2;
-				m_sQueueSample.m_bBankIndex = 0;
-				m_sQueueSample.m_bIs2D = 0;
+				m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
-				m_sQueueSample.m_nFrequency =
-				    freq + 100 * m_sQueueSample.m_nEntityIndex % 1000;
+				m_sQueueSample.m_nFrequency = freq + 100 * m_sQueueSample.m_nEntityIndex % 1000;
 				if(m_sQueueSample.m_nSampleIndex == SFX_CAR_IDLE_6 ||
 				   m_sQueueSample.m_nSampleIndex == SFX_CAR_REV_6)
-					m_sQueueSample.m_nFrequency =
-					    m_sQueueSample.m_nFrequency >> 1;
+					m_sQueueSample.m_nFrequency /= 2;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_bEmittingVolume = emittingVol;
-				m_sQueueSample.m_nLoopStart =
-				    SampleManager.GetSampleLoopStartOffset(
-				        m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(
-				    m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 				m_sQueueSample.m_fSoundIntensity = 50.0f;
 				m_sQueueSample.m_bReleasingSoundFlag = false;
@@ -8486,12 +8419,12 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams *params)
 				if(m_sQueueSample.m_bVolume) {
 					m_sQueueSample.m_nCounter = 4;
 					m_sQueueSample.m_nSampleIndex =
-					    CarSounds[params->m_nIndex].m_nHornSample;
+						aVehicleSettings[params->m_nIndex].m_nHornSample;
 					m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
 					m_sQueueSample.m_bIs2D = false;
 					m_sQueueSample.m_nReleasingVolumeModificator = 2;
 					m_sQueueSample.m_nFrequency =
-					    CarSounds[params->m_nIndex].m_nHornFrequency;
+						aVehicleSettings[params->m_nIndex].m_nHornFrequency;
 					m_sQueueSample.m_nLoopCount = 0;
 					m_sQueueSample.m_bEmittingVolume = 80;
 					m_sQueueSample.m_nLoopStart =
@@ -8542,7 +8475,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 		case SOUND_CAR_DOOR_CLOSE_BACK_RIGHT:
 			maxDist = 2500.f;
 			emittingVol = m_anRandomTable[2] % 5 + 122;
-			switch(CarSounds[params->m_nIndex].m_bDoorType) {
+			switch(aVehicleSettings[params->m_nIndex].m_bDoorType) {
 			case 0: m_sQueueSample.m_nSampleIndex = SFX_OLD_CAR_DOOR_CLOSE; break;
 			case 2: m_sQueueSample.m_nSampleIndex = SFX_TRUCK_DOOR_CLOSE; break;
 			case 3: m_sQueueSample.m_nSampleIndex = SFX_AIR_BRAKES; break;
@@ -8568,7 +8501,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 		case SOUND_CAR_DOOR_OPEN_BACK_RIGHT:
 			maxDist = 2500.f;
 			emittingVol = m_anRandomTable[1] % 10 + 117;
-			switch(CarSounds[params->m_nIndex].m_bDoorType) {
+			switch(aVehicleSettings[params->m_nIndex].m_bDoorType) {
 			case 0: m_sQueueSample.m_nSampleIndex = SFX_OLD_CAR_DOOR_OPEN; break;
 			case 2: m_sQueueSample.m_nSampleIndex = SFX_TRUCK_DOOR_OPEN; break;
 			case 3: m_sQueueSample.m_nSampleIndex = SFX_AIR_BRAKES; break;
@@ -8620,114 +8553,6 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 			m_sQueueSample.m_fSoundIntensity = 35.0f;
 			break;
-		case SOUND_E:
-		case SOUND_F:
-		case SOUND_STEP_START:
-		case SOUND_STEP_END:
-		case SOUND_FALL_LAND:
-		case SOUND_FALL_COLLAPSE:
-		case SOUND_FIGHT_PUNCH_33:
-		case SOUND_FIGHT_KICK_34:
-		case SOUND_FIGHT_HEADBUTT_35:
-		case SOUND_FIGHT_PUNCH_36:
-		case SOUND_FIGHT_PUNCH_37:
-		case SOUND_FIGHT_CLOSE_PUNCH_38:
-		case SOUND_FIGHT_PUNCH_39:
-		case SOUND_FIGHT_PUNCH_OR_KICK_BELOW_40:
-		case SOUND_FIGHT_PUNCH_41:
-		case SOUND_FIGHT_PUNCH_FROM_BEHIND_42:
-		case SOUND_FIGHT_KNEE_OR_KICK_43:
-		case SOUND_FIGHT_KICK_44:
-		case SOUND_WEAPON_BAT_ATTACK:
-		case SOUND_WEAPON_RELOAD:
-		case SOUND_WEAPON_AK47_BULLET_ECHO:
-		case SOUND_WEAPON_UZI_BULLET_ECHO:
-		case SOUND_WEAPON_M16_BULLET_ECHO:
-		case SOUND_WEAPON_FLAMETHROWER_FIRE:
-		case SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM:
-		case SOUND_WEAPON_ROCKET_SHOT_NO_ZOOM:
-		case SOUND_WEAPON_HIT_PED:
-		case SOUND_GARAGE_NO_MONEY:
-		case SOUND_GARAGE_BAD_VEHICLE:
-		case SOUND_GARAGE_OPENING:
-		case SOUND_GARAGE_BOMB_ALREADY_SET:
-		case SOUND_GARAGE_BOMB1_SET:
-		case SOUND_GARAGE_BOMB2_SET:
-		case SOUND_GARAGE_BOMB3_SET:
-		case SOUND_40:
-		case SOUND_41:
-		case SOUND_GARAGE_VEHICLE_DECLINED:
-		case SOUND_GARAGE_VEHICLE_ACCEPTED:
-		case SOUND_GARAGE_DOOR_CLOSED:
-		case SOUND_GARAGE_DOOR_OPENED:
-		case SOUND_CRANE_PICKUP:
-		case SOUND_PICKUP_WEAPON_BOUGHT:
-		case SOUND_PICKUP_WEAPON:
-		case SOUND_PICKUP_HEALTH:
-		case SOUND_4A:
-		case SOUND_4B:
-		case SOUND_PICKUP_ADRENALINE:
-		case SOUND_PICKUP_ARMOUR:
-		case SOUND_PICKUP_BONUS:
-		case SOUND_PICKUP_MONEY:
-		case SOUND_PICKUP_HIDDEN_PACKAGE:
-		case SOUND_PICKUP_PACMAN_PILL:
-		case SOUND_PICKUP_PACMAN_PACKAGE:
-		case SOUND_PICKUP_FLOAT_PACKAGE:
-		case SOUND_RAMPAGE_START:
-		case SOUND_RAMPAGE_ONGOING:
-		case SOUND_RAMPAGE_PASSED:
-		case SOUND_RAMPAGE_FAILED:
-		case SOUND_RAMPAGE_KILL:
-		case SOUND_RAMPAGE_CAR_BLOWN:
-		case SOUND_EVIDENCE_PICKUP:
-		case SOUND_UNLOAD_GOLD:
-		case SOUND_PAGER:
-		case SOUND_PED_DEATH:
-		case SOUND_PED_DAMAGE:
-		case SOUND_PED_HIT:
-		case SOUND_PED_LAND:
-		case SOUND_PED_BULLET_HIT:
-		case SOUND_PED_BOMBER:
-		case SOUND_PED_BURNING:
-		case SOUND_PED_ARREST_FBI:
-		case SOUND_PED_ARREST_SWAT:
-		case SOUND_PED_ARREST_COP:
-		case SOUND_PED_HANDS_UP:
-		case SOUND_PED_HANDS_COWER:
-		case SOUND_PED_FLEE_SPRINT:
-		case SOUND_PED_CAR_JACKING:
-		case SOUND_PED_MUGGING:
-		case SOUND_PED_CAR_JACKED:
-		case SOUND_PED_ROBBED:
-		case SOUND_PED_TAXI_WAIT:
-		case SOUND_PED_ATTACK:
-		case SOUND_PED_DEFEND:
-		case SOUND_PED_PURSUIT_ARMY:
-		case SOUND_PED_PURSUIT_FBI:
-		case SOUND_PED_PURSUIT_SWAT:
-		case SOUND_PED_PURSUIT_COP:
-		case SOUND_PED_HEALING:
-		case SOUND_PED_7B:
-		case SOUND_PED_LEAVE_VEHICLE:
-		case SOUND_PED_EVADE:
-		case SOUND_PED_FLEE_RUN:
-		case SOUND_PED_CAR_COLLISION:
-		case SOUND_PED_SOLICIT:
-		case SOUND_PED_EXTINGUISHING_FIRE:
-		case SOUND_PED_WAIT_DOUBLEBACK:
-		case SOUND_PED_CHAT_SEXY:
-		case SOUND_PED_CHAT_EVENT:
-		case SOUND_PED_CHAT:
-		case SOUND_PED_TAXI_CALL:
-		case SOUND_INJURED_PED_MALE_OUCH:
-		case SOUND_INJURED_PED_FEMALE:
-		case SOUND_8A:
-		case SOUND_RACE_START_3:
-		case SOUND_RACE_START_2:
-		case SOUND_RACE_START_1:
-		case SOUND_RACE_START_GO:
-		case SOUND_SPLASH: continue;
 		case SOUND_CAR_ENGINE_START:
 			emittingVol = 60;
 			maxDist = 1600.f;
@@ -8998,6 +8823,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			m_sQueueSample.m_fSoundIntensity = 40.0f;
 			maxDist = 1600.f;
 			break;
+		default: continue;
 		}
 		if(params->m_fDistance < maxDist) {
 			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
@@ -9007,10 +8833,10 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			if(m_sQueueSample.m_bVolume) {
 				if(noReflections) {
 					m_sQueueSample.m_nLoopCount = 0;
-					m_sQueueSample.m_bReleasingSoundFlag = 0;
+					m_sQueueSample.m_bReleasingSoundFlag = false;
 				} else {
 					m_sQueueSample.m_nLoopCount = 1;
-					m_sQueueSample.m_bReleasingSoundFlag = 1;
+					m_sQueueSample.m_bReleasingSoundFlag = true;
 				}
 				m_sQueueSample.m_nLoopStart =
 				    SampleManager.GetSampleLoopStartOffset(
@@ -9018,7 +8844,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(
 				    m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_bEmittingVolume = emittingVol;
-				m_sQueueSample.m_bReverbFlag = 1;
+				m_sQueueSample.m_bReverbFlag = true;
 				m_sQueueSample.m_bIs2D = false;
 				AddSampleToRequestedQueue();
 			}
@@ -9152,15 +8978,15 @@ cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 					m_sQueueSample.m_nCounter = 60;
 				} else {
 					m_sQueueSample.m_nSampleIndex =
-					    CarSounds[params->m_nIndex].m_nSirenOrAlarmSample;
+						aVehicleSettings[params->m_nIndex].m_nSirenOrAlarmSample;
 					m_sQueueSample.m_nFrequency =
-					    CarSounds[params->m_nIndex].m_nSirenOrAlarmFrequency;
+						aVehicleSettings[params->m_nIndex].m_nSirenOrAlarmFrequency;
 				}
 			} else {
 				m_sQueueSample.m_nSampleIndex =
-				    CarSounds[params->m_nIndex].m_nSirenOrAlarmSample;
+					aVehicleSettings[params->m_nIndex].m_nSirenOrAlarmSample;
 				m_sQueueSample.m_nFrequency =
-				    CarSounds[params->m_nIndex].m_nSirenOrAlarmFrequency;
+					aVehicleSettings[params->m_nIndex].m_nSirenOrAlarmFrequency;
 			}
 			m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
 			m_sQueueSample.m_bIs2D = false;
