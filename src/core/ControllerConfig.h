@@ -122,12 +122,18 @@ public:
 	};
 
 	bool                  m_bFirstCapture;
-#ifdef __DINPUT_INCLUDED__
-	DIJOYSTATE2           m_OldState;
-	DIJOYSTATE2           m_NewState;
-#elif defined RW_GL3
+#if defined RW_GL3
 	GlfwJoyState           m_OldState;
 	GlfwJoyState           m_NewState;
+#else
+	#ifdef __DINPUT_INCLUDED__
+		DIJOYSTATE2           m_OldState;
+		DIJOYSTATE2           m_NewState;
+	#else
+		// this is here to fix the size of a struct
+		// TODO: find a better was a remove this
+		uint32 ___padd[0x110 / 4 * 2];
+	#endif
 #endif
 	wchar                 m_aActionNames[MAX_CONTROLLERACTIONS][ACTIONNAME_LENGTH];
 	bool                  m_aButtonStates[MAX_BUTTONS];
@@ -204,6 +210,8 @@ public:
 	void  ResetSettingOrder                   (e_ControllerAction action);
 };
 
-//VALIDATE_SIZE(CControllerConfigManager, 0x143C);
+#ifndef RW_GL3
+VALIDATE_SIZE(CControllerConfigManager, 0x143C);
+#endif
 
 extern CControllerConfigManager ControlsManager;
