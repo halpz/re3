@@ -1,12 +1,12 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Accident.h"
 
 #include "Ped.h"
 #include "Pools.h"
 #include "World.h"
 
-CAccidentManager& gAccidentManager = *(CAccidentManager*)0x87FD10;
+CAccidentManager gAccidentManager;
 
 CAccident*
 CAccidentManager::GetNextFreeAccident()
@@ -122,13 +122,3 @@ CAccidentManager::UnattendedAccidents()
 	}
 	return false;
 }
-
-STARTPATCHES
-	InjectHook(0x4565A0, &CAccidentManager::GetNextFreeAccident, PATCH_JUMP);
-	InjectHook(0x4565D0, &CAccidentManager::ReportAccident, PATCH_JUMP);
-	InjectHook(0x456710, &CAccidentManager::Update, PATCH_JUMP);
-	InjectHook(0x456760, &CAccidentManager::FindNearestAccident, PATCH_JUMP);
-	InjectHook(0x456880, &CAccidentManager::CountActiveAccidents, PATCH_JUMP);
-	InjectHook(0x4568A0, &CAccidentManager::WorkToDoForMedics, PATCH_JUMP);
-	InjectHook(0x4568D0, &CAccidentManager::UnattendedAccidents, PATCH_JUMP);
-ENDPATCHES

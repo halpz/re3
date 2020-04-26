@@ -1,6 +1,7 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
+#include "RwHelper.h"
 #include "ModelInfo.h"
 #include "ModelIndices.h"
 #include "FileMgr.h"
@@ -10,12 +11,12 @@
 #include "AnimBlendAssocGroup.h"
 #include "AnimManager.h"
 
-CAnimBlock *CAnimManager::ms_aAnimBlocks = (CAnimBlock*)0x6F01A0;
-CAnimBlendHierarchy *CAnimManager::ms_aAnimations = (CAnimBlendHierarchy*)0x70F430;
-int32 &CAnimManager::ms_numAnimBlocks = *(int32*)0x885AF8;
-int32 &CAnimManager::ms_numAnimations = *(int32*)0x8E2DD4;
-CAnimBlendAssocGroup *&CAnimManager::ms_aAnimAssocGroups = *(CAnimBlendAssocGroup**)0x8F583C;
-CLinkList<CAnimBlendHierarchy*> &CAnimManager::ms_animCache = *(CLinkList<CAnimBlendHierarchy*>*)0x9414DC;
+CAnimBlock CAnimManager::ms_aAnimBlocks[2];
+CAnimBlendHierarchy CAnimManager::ms_aAnimations[250];
+int32 CAnimManager::ms_numAnimBlocks;
+int32 CAnimManager::ms_numAnimations;
+CAnimBlendAssocGroup *CAnimManager::ms_aAnimAssocGroups;
+CLinkList<CAnimBlendHierarchy*> CAnimManager::ms_animCache;
 
 AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_WALK, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_FLAG80 },
@@ -754,6 +755,11 @@ CAnimManager::LoadAnimFiles(void)
 		group->CreateAssociations(def->blockName, clump, def->animNames, def->numAnims);
 		for(j = 0; j < group->numAssociations; j++)
 			group->GetAnimation(j)->flags |= def->animDescs[j].flags;
+#ifdef PED_SKIN
+		// forgot on xbox/android
+		if(IsClumpSkinned(clump))
+			RpClumpForAllAtomics(clump, AtomicRemoveAnimFromSkinCB, nil);
+#endif
 		RpClumpDestroy(clump);
 	}
 }
@@ -909,23 +915,3 @@ CAnimManager::RemoveLastAnimFile(void)
 	for(i = 0; i < ms_aAnimBlocks[ms_numAnimBlocks].numAnims; i++)
 		ms_aAnimations[ms_aAnimBlocks[ms_numAnimBlocks].firstIndex + i].RemoveAnimSequences();
 }
-
-
-STARTPATCHES
-	InjectHook(0x403380, CAnimManager::Initialise, PATCH_JUMP);
-	InjectHook(0x4033B0, CAnimManager::Shutdown, PATCH_JUMP);
-	InjectHook(0x403410, CAnimManager::UncompressAnimation, PATCH_JUMP);
-	InjectHook(0x4034A0, CAnimManager::GetAnimationBlock, PATCH_JUMP);
-	InjectHook(0x4034F0, (CAnimBlendHierarchy *(*)(const char*, CAnimBlock*))CAnimManager::GetAnimation, PATCH_JUMP);
-	InjectHook(0x4035B0, CAnimManager::GetAnimGroupName, PATCH_JUMP);
-	InjectHook(0x4035C0, CAnimManager::CreateAnimAssociation, PATCH_JUMP);
-	InjectHook(0x4035E0, (CAnimBlendAssociation *(*)(AssocGroupId, AnimationId))CAnimManager::GetAnimAssociation, PATCH_JUMP);
-	InjectHook(0x403600, (CAnimBlendAssociation *(*)(AssocGroupId, const char*))CAnimManager::GetAnimAssociation, PATCH_JUMP);
-	InjectHook(0x403620, CAnimManager::AddAnimation, PATCH_JUMP);
-	InjectHook(0x4036A0, CAnimManager::AddAnimationAndSync, PATCH_JUMP);
-	InjectHook(0x403710, CAnimManager::BlendAnimation, PATCH_JUMP);
-	InjectHook(0x4038F0, CAnimManager::LoadAnimFiles, PATCH_JUMP);
-	InjectHook(0x403A10, (void (*)(const char *))CAnimManager::LoadAnimFile, PATCH_JUMP);
-	InjectHook(0x403A40, (void (*)(int, bool))CAnimManager::LoadAnimFile, PATCH_JUMP);
-	InjectHook(0x404320, CAnimManager::RemoveLastAnimFile, PATCH_JUMP);
-ENDPATCHES

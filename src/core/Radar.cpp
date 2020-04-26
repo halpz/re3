@@ -1,6 +1,6 @@
 #include "config.h"
 #include "common.h"
-#include "patcher.h"
+
 #include "RwHelper.h"
 #include "Radar.h"
 #include "Camera.h"
@@ -16,31 +16,31 @@
 #include "Streaming.h"
 #include "SpecialFX.h"
 
-float &CRadar::m_radarRange = *(float*)0x8E281C;
-sRadarTrace (&CRadar::ms_RadarTrace)[NUMRADARBLIPS] = *(sRadarTrace(*)[NUMRADARBLIPS]) * (uintptr*)0x6ED5E0;
-CVector2D &vec2DRadarOrigin = *(CVector2D*)0x6299B8;
-int32 gRadarTxdIds[64];// = (int*)0x6299C0;
+float CRadar::m_radarRange;
+sRadarTrace CRadar::ms_RadarTrace[NUMRADARBLIPS];
+CVector2D vec2DRadarOrigin;
+int32 gRadarTxdIds[64];
 
-CSprite2d CRadar::AsukaSprite;// = *(CSprite2d*)0x8F1A40;
-CSprite2d CRadar::BombSprite;// = (CSprite2d*)0x8F5FB4;
-CSprite2d CRadar::CatSprite;// = (CSprite2d*)0x885B24;
-CSprite2d CRadar::CentreSprite;// = (CSprite2d*)0x8F6268;
-CSprite2d CRadar::CopcarSprite;// = (CSprite2d*)0x8F1A2C;
-CSprite2d CRadar::DonSprite;// = (CSprite2d*)0x8F2BE0;
-CSprite2d CRadar::EightSprite;// = (CSprite2d*)0x8F2BCC;
-CSprite2d CRadar::ElSprite;// = (CSprite2d*)0x8F1B80;
-CSprite2d CRadar::IceSprite;// = (CSprite2d*)0x9415FC;
-CSprite2d CRadar::JoeySprite;// = (CSprite2d*)0x8F2C00;
-CSprite2d CRadar::KenjiSprite;// = (CSprite2d*)0x8F2C68;
-CSprite2d CRadar::LizSprite;// = (CSprite2d*)0x8F5830;
-CSprite2d CRadar::LuigiSprite;// = (CSprite2d*)0x8F1A3C;
-CSprite2d CRadar::NorthSprite;// = (CSprite2d*)0x8F6274;
-CSprite2d CRadar::RaySprite;// = (CSprite2d*)0x8E2A7C;
-CSprite2d CRadar::SalSprite;// = (CSprite2d*)0x8F29EC;
-CSprite2d CRadar::SaveSprite;// = (CSprite2d*)0x8F5F74;
-CSprite2d CRadar::SpraySprite;// = (CSprite2d*)0x94307C;
-CSprite2d CRadar::TonySprite;// = (CSprite2d*)0x885B58;
-CSprite2d CRadar::WeaponSprite;// = (CSprite2d*)0x941534;
+CSprite2d CRadar::AsukaSprite;
+CSprite2d CRadar::BombSprite;
+CSprite2d CRadar::CatSprite;
+CSprite2d CRadar::CentreSprite;
+CSprite2d CRadar::CopcarSprite;
+CSprite2d CRadar::DonSprite;
+CSprite2d CRadar::EightSprite;
+CSprite2d CRadar::ElSprite;
+CSprite2d CRadar::IceSprite;
+CSprite2d CRadar::JoeySprite;
+CSprite2d CRadar::KenjiSprite;
+CSprite2d CRadar::LizSprite;
+CSprite2d CRadar::LuigiSprite;
+CSprite2d CRadar::NorthSprite;
+CSprite2d CRadar::RaySprite;
+CSprite2d CRadar::SalSprite;
+CSprite2d CRadar::SaveSprite;
+CSprite2d CRadar::SpraySprite;
+CSprite2d CRadar::TonySprite;
+CSprite2d CRadar::WeaponSprite;
 
 CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = { 
 	nil,
@@ -81,6 +81,7 @@ CRGBA CRadar::ArrowBlipColour2;
 uint16 CRadar::MapLegendCounter;
 uint16 CRadar::MapLegendList[NUM_MAP_LEGENDS];
 int CRadar::TargetMarkerId = -1;
+CVector CRadar::TargetMarkerPos;
 #endif
 
 // taken from VC
@@ -1442,6 +1443,7 @@ CRadar::ToggleTargetMarker(float x, float y)
 		ms_RadarTrace[nextBlip].m_bInUse = 1;
 		ms_RadarTrace[nextBlip].m_Radius = 1.0f;
 		CVector pos(x, y, CWorld::FindGroundZForCoord(x,y));
+		TargetMarkerPos = pos;
 		ms_RadarTrace[nextBlip].m_vec2DPos = pos;
 		ms_RadarTrace[nextBlip].m_vecPos = pos;
 		ms_RadarTrace[nextBlip].m_nEntityHandle = 0;
@@ -1456,51 +1458,3 @@ CRadar::ToggleTargetMarker(float x, float y)
 }
 #endif
 
-STARTPATCHES
-	InjectHook(0x4A3EF0, CRadar::Initialise, PATCH_JUMP);
-	InjectHook(0x4A3F60, CRadar::Shutdown, PATCH_JUMP);
-	InjectHook(0x4A4030, CRadar::LoadTextures, PATCH_JUMP);
-	InjectHook(0x4A4180, CRadar::GetNewUniqueBlipIndex, PATCH_JUMP);
-	InjectHook(0x4A41C0, CRadar::GetActualBlipArrayIndex, PATCH_JUMP);
-	InjectHook(0x4A4200, CRadar::DrawMap, PATCH_JUMP);
-	InjectHook(0x4A42F0, CRadar::DrawBlips, PATCH_JUMP);
-	InjectHook(0x4A4C70, CRadar::Draw3dMarkers, PATCH_JUMP);
-	InjectHook(0x4A4F30, CRadar::LimitRadarPoint, PATCH_JUMP);
-	InjectHook(0x4A4F90, CRadar::CalculateBlipAlpha, PATCH_JUMP);
-	InjectHook(0x4A5040, CRadar::TransformRadarPointToScreenSpace, PATCH_JUMP);
-	InjectHook(0x4A50D0, CRadar::TransformRealWorldPointToRadarSpace, PATCH_JUMP);
-	InjectHook(0x4A5300, CRadar::TransformRadarPointToRealWorldSpace, PATCH_JUMP);
-	InjectHook(0x4A5530, CRadar::TransformRealWorldToTexCoordSpace, PATCH_JUMP);
-	InjectHook(0x4A5590, CRadar::SetCoordBlip, PATCH_JUMP);
-	InjectHook(0x4A5640, CRadar::SetEntityBlip, PATCH_JUMP);
-	InjectHook(0x4A56C0, CRadar::ClearBlipForEntity, PATCH_JUMP);
-	InjectHook(0x4A5720, CRadar::ClearBlip, PATCH_JUMP);
-	InjectHook(0x4A5770, CRadar::ChangeBlipColour, PATCH_JUMP);
-	InjectHook(0x4A57A0, CRadar::ChangeBlipBrightness, PATCH_JUMP);
-	InjectHook(0x4A57E0, CRadar::ChangeBlipScale, PATCH_JUMP);
-	InjectHook(0x4A5810, CRadar::ChangeBlipDisplay, PATCH_JUMP);
-	InjectHook(0x4A5840, CRadar::SetBlipSprite, PATCH_JUMP);
-	InjectHook(0x4A5870, CRadar::ShowRadarTrace, PATCH_JUMP);
-	InjectHook(0x4A59C0, CRadar::ShowRadarMarker, PATCH_JUMP);
-	InjectHook(0x4A5BB0, CRadar::GetRadarTraceColour, PATCH_JUMP);
-	InjectHook(0x4A5C60, CRadar::SetRadarMarkerState, PATCH_JUMP);
-	InjectHook(0x4A5D10, CRadar::DrawRotatingRadarSprite, PATCH_JUMP);
-	InjectHook(0x4A5EF0, CRadar::DrawRadarSprite, PATCH_JUMP);
-	InjectHook(0x4A6020, ClipRadarTileCoords, PATCH_JUMP);
-	InjectHook(0x4A6060, RequestMapSection, PATCH_JUMP);
-	InjectHook(0x4A60A0, RemoveMapSection, PATCH_JUMP);
-	InjectHook(0x4A60E0, CRadar::RemoveRadarSections, PATCH_JUMP);
-	InjectHook(0x4A6100, (void (*)(int32, int32))&CRadar::StreamRadarSections, PATCH_JUMP);
-	InjectHook(0x4A6160, IsPointInsideRadar, PATCH_JUMP);
-	InjectHook(0x4A61C0, GetTextureCorners, PATCH_JUMP);
-	InjectHook(0x4A6250, LineRadarBoxCollision, PATCH_JUMP);
-	InjectHook(0x4A64A0, CRadar::ClipRadarPoly, PATCH_JUMP);
-	InjectHook(0x4A67E0, CRadar::DrawRadarSection, PATCH_JUMP);
-	InjectHook(0x4A69C0, CRadar::DrawRadarMask, PATCH_JUMP);
-	InjectHook(0x4A6B60, (void (*)(const CVector&))&CRadar::StreamRadarSections, PATCH_JUMP);
-	InjectHook(0x4A6C20, CRadar::DrawRadarMap, PATCH_JUMP);
-	InjectHook(0x4A6E30, CRadar::SaveAllRadarBlips, PATCH_JUMP);
-	InjectHook(0x4A6F30, CRadar::LoadAllRadarBlips, PATCH_JUMP);
-	//InjectHook(0x4A7000, `global constructor keyed to'Radar.cpp, PATCH_JUMP);
-	//InjectHook(0x4A7260, sRadarTrace::sRadarTrace, PATCH_JUMP);
-ENDPATCHES

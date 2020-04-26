@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "SpecialFX.h"
 #include "RenderBuffer.h"
 #include "Timer.h"
@@ -117,8 +117,14 @@ CSpecialFX::Update(void)
 
 	if(FindPlayerPed() &&
 	   FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT &&
-	   FindPlayerPed()->GetWeapon()->m_eWeaponState == WEAPONSTATE_FIRING)
-		RwFrameForAllObjects(FindPlayerPed()->GetNodeFrame(PED_HANDR), LookForBatCB, CModelInfo::GetModelInfo(MI_BASEBALL_BAT));
+	   FindPlayerPed()->GetWeapon()->m_eWeaponState == WEAPONSTATE_FIRING){
+#ifdef PED_SKIN
+		if(IsClumpSkinned(FindPlayerPed()->GetClump())){
+			LookForBatCB((RwObject*)FindPlayerPed()->m_pWeaponModel, CModelInfo::GetModelInfo(MI_BASEBALL_BAT));
+		}else
+#endif
+			RwFrameForAllObjects(FindPlayerPed()->m_pFrames[PED_HANDR]->frame, LookForBatCB, CModelInfo::GetModelInfo(MI_BASEBALL_BAT));
+	}
 }
 
 void
@@ -1151,32 +1157,3 @@ CSpecialParticleStuff::UpdateBoatFoamAnimation(CMatrix* pMatrix)
 		dZ = 2.0f;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x518DE0, &CBulletTraces::Init, PATCH_JUMP);
-	InjectHook(0x518E90, &CBulletTraces::AddTrace, PATCH_JUMP);
-	InjectHook(0x518F20, &CBulletTraces::Render, PATCH_JUMP);
-	InjectHook(0x519240, &CBulletTraces::Update, PATCH_JUMP);
-
-	InjectHook(0x51B070, &C3dMarker::AddMarker, PATCH_JUMP);
-	InjectHook(0x51B170, &C3dMarker::DeleteMarkerObject, PATCH_JUMP);
-	InjectHook(0x51B1B0, &C3dMarker::Render, PATCH_JUMP);
-	InjectHook(0x51B2B0, C3dMarkers::Init, PATCH_JUMP);
-	InjectHook(0x51B480, C3dMarkers::PlaceMarker, PATCH_JUMP);
-	InjectHook(0x51BB80, C3dMarkers::PlaceMarkerSet, PATCH_JUMP);
-	InjectHook(0x51B400, C3dMarkers::Render, PATCH_JUMP);
-	InjectHook(0x51B3B0, C3dMarkers::Shutdown, PATCH_JUMP);
-	
-	InjectHook(0x5197A0, CBrightLights::Init, PATCH_JUMP);
-	InjectHook(0x51A410, CBrightLights::RegisterOne, PATCH_JUMP);
-	InjectHook(0x5197B0, CBrightLights::Render, PATCH_JUMP);
-	InjectHook(0x51A3B0, CBrightLights::RenderOutGeometryBuffer, PATCH_JUMP);
-
-	InjectHook(0x51A5A0, CShinyTexts::Init, PATCH_JUMP);
-	InjectHook(0x51AAB0, CShinyTexts::RegisterOne, PATCH_JUMP);
-	InjectHook(0x51A5B0, CShinyTexts::Render, PATCH_JUMP);
-	InjectHook(0x51AA50, CShinyTexts::RenderOutGeometryBuffer, PATCH_JUMP);
-
-	InjectHook(0x51AF70, CMoneyMessages::Init, PATCH_JUMP);
-	InjectHook(0x51B030, CMoneyMessages::Render, PATCH_JUMP);
-ENDPATCHES

@@ -22,13 +22,12 @@ enum EmergencyPedState
 class CEmergencyPed : public CPed
 {
 public:
-	// 0x53C
 	CPed *m_pRevivedPed;
 	EmergencyPedState m_nEmergencyPedState;
 	CAccident *m_pAttendedAccident;
 	CFire *m_pAttendedFire;
-	bool m_bStartedToCPR; // set but unused(?)
-	int32 field_1360; // also something for medics, unused(?)
+	bool m_bStartedToCPR; // set but unused
+	int32 field_1360; // set to 0 but unused
 
 	CEmergencyPed(uint32);
 	~CEmergencyPed() { }
@@ -37,4 +36,6 @@ public:
 	void FiremanAI(void);
 	void MedicAI(void);
 };
+#ifndef PED_SKIN
 static_assert(sizeof(CEmergencyPed) == 0x554, "CEmergencyPed: error");
+#endif

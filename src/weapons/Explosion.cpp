@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Automobile.h"
 #include "Bike.h"
 #include "Camera.h"
@@ -19,7 +19,7 @@
 #include "WaterLevel.h"
 #include "World.h"
 
-CExplosion(&gaExplosion)[NUM_EXPLOSIONS] = *(CExplosion(*)[NUM_EXPLOSIONS])*(uintptr*)0x64E208;
+CExplosion gaExplosion[NUM_EXPLOSIONS];
 
 // these two were not initialised in original code, I'm really not sure what were they meant to be
 RwRGBA colMedExpl = { 0, 0, 0, 0 };
@@ -458,16 +458,3 @@ CExplosion::RemoveAllExplosionsInArea(CVector pos, float radius)
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x559030, &CExplosion::Initialise, PATCH_JUMP);
-	InjectHook(0x559100, &CExplosion::Shutdown, PATCH_JUMP);
-	InjectHook(0x559140, &CExplosion::GetExplosionActiveCounter, PATCH_JUMP);
-	InjectHook(0x559160, &CExplosion::ResetExplosionActiveCounter, PATCH_JUMP);
-	InjectHook(0x559180, &CExplosion::GetExplosionType, PATCH_JUMP);
-	InjectHook(0x5591A0, &CExplosion::GetExplosionPosition, PATCH_JUMP);
-	InjectHook(0x5591C0, &CExplosion::AddExplosion, PATCH_JUMP);
-	InjectHook(0x55A0C0, &CExplosion::Update, PATCH_JUMP);
-	InjectHook(0x55AC80, &CExplosion::TestForExplosionInArea, PATCH_JUMP);
-	InjectHook(0x55AD40, &CExplosion::RemoveAllExplosionsInArea, PATCH_JUMP);
-ENDPATCHES

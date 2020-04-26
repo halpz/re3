@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "PlayerSkin.h"
 #include "TxdStore.h"
@@ -163,12 +163,3 @@ CPlayerSkin::RenderFrontendSkinEdit(void)
 	SetAmbientColours(&AmbientColor);
 	RpClumpRender(gpPlayerClump);
 }
-
-STARTPATCHES
-InjectHook(0x59B9B0, &CPlayerSkin::Initialise, PATCH_JUMP);
-InjectHook(0x59B9E0, &CPlayerSkin::Shutdown, PATCH_JUMP);
-InjectHook(0x59B9F0, &CPlayerSkin::GetSkinTexture, PATCH_JUMP);
-InjectHook(0x59BC70, &CPlayerSkin::BeginFrontendSkinEdit, PATCH_JUMP);
-InjectHook(0x59BCB0, &CPlayerSkin::EndFrontendSkinEdit, PATCH_JUMP);
-InjectHook(0x59BCE0, &CPlayerSkin::RenderFrontendSkinEdit, PATCH_JUMP);
-ENDPATCHES

@@ -22,15 +22,15 @@ typedef CPool<cAudioScriptObject> CAudioScriptObjectPool;
 
 class CPools
 {
-	static CCPtrNodePool *&ms_pPtrNodePool;
-	static CEntryInfoNodePool *&ms_pEntryInfoNodePool;
-	static CPedPool *&ms_pPedPool;
-	static CVehiclePool *&ms_pVehiclePool;
-	static CBuildingPool *&ms_pBuildingPool;
-	static CTreadablePool *&ms_pTreadablePool;
-	static CObjectPool *&ms_pObjectPool;
-	static CDummyPool *&ms_pDummyPool;
-	static CAudioScriptObjectPool *&ms_pAudioScriptObjectPool;
+	static CCPtrNodePool *ms_pPtrNodePool;
+	static CEntryInfoNodePool *ms_pEntryInfoNodePool;
+	static CPedPool *ms_pPedPool;
+	static CVehiclePool *ms_pVehiclePool;
+	static CBuildingPool *ms_pBuildingPool;
+	static CTreadablePool *ms_pTreadablePool;
+	static CObjectPool *ms_pObjectPool;
+	static CDummyPool *ms_pDummyPool;
+	static CAudioScriptObjectPool *ms_pAudioScriptObjectPool;
 public:
 	static CCPtrNodePool *GetPtrNodePool(void) { return ms_pPtrNodePool; }
 	static CEntryInfoNodePool *GetEntryInfoNodePool(void) { return ms_pEntryInfoNodePool; }

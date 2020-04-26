@@ -1,5 +1,7 @@
 #include "common.h"
-#include "patcher.h"
+
+#include "ctype.h"
+
 #include "General.h"
 #include "ModelInfo.h"
 #include "AnimManager.h"
@@ -75,12 +77,21 @@ strcmpIgnoringDigits(const char *s1, const char *s2)
 		c2 = *s2;
 		if(c1) s1++;
 		if(c2) s2++;
-		if(c1 == '\0' && c2 == '\0')
-			return true;
+		if(c1 == '\0' && c2 == '\0') return true;
+#if defined _WIN32 && !defined __MINGW32__
 		if(__ascii_iswdigit(c1) && __ascii_iswdigit(c2))
+#else
+		if(iswdigit(c1) && iswdigit(c2))
+#endif
 			continue;
+#if defined _WIN32 && !defined __MINGW32__
 		c1 = __ascii_toupper(c1);
 		c2 = __ascii_toupper(c2);
+#else
+		c1 = toupper(c1);
+		c2 = toupper(c2);
+#endif
+
 		if(c1 != c2)
 			return false;
 	}
@@ -148,15 +159,3 @@ CAnimBlendAssocGroup::CreateAssociations(const char *blockName, RpClump *clump, 
 	}
 	numAssociations = numAssocs;
 }
-
-
-
-STARTPATCHES
-	InjectHook(0x4012D0, &CAnimBlendAssocGroup::DestroyAssociations, PATCH_JUMP);
-	InjectHook(0x4013D0, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(uint32))&CAnimBlendAssocGroup::GetAnimation, PATCH_JUMP);
-	InjectHook(0x401300, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(const char*))&CAnimBlendAssocGroup::GetAnimation, PATCH_JUMP);
-	InjectHook(0x401420, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(uint32))&CAnimBlendAssocGroup::CopyAnimation, PATCH_JUMP);
-	InjectHook(0x4013E0, (CAnimBlendAssociation *(CAnimBlendAssocGroup::*)(const char*))&CAnimBlendAssocGroup::CopyAnimation, PATCH_JUMP);
-	InjectHook(0x401130, (void (CAnimBlendAssocGroup::*)(const char*))&CAnimBlendAssocGroup::CreateAssociations, PATCH_JUMP);
-	InjectHook(0x401220, (void (CAnimBlendAssocGroup::*)(const char*, RpClump*, const char**, int))&CAnimBlendAssocGroup::CreateAssociations, PATCH_JUMP);
-ENDPATCHES

@@ -1,8 +1,7 @@
 #pragma once
 
-enum AnimationId;
-enum eWeaponFire;
-enum eWeaponType;
+#include "AnimationId.h"
+#include "WeaponType.h"
 
 class CWeaponInfo {
 //	static CWeaponInfo(&ms_apWeaponInfos)[14];
@@ -38,7 +37,6 @@ public:
 	uint8 m_b1stPerson : 1;
 	uint8 m_bHeavy : 1;
 	uint8 m_bThrow : 1;
-	uint8 stuff;
 
 	static void Initialise(void);
 	static void LoadWeaponData(void);

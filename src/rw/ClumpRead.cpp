@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 
 struct rpGeometryList
 {
@@ -153,7 +153,7 @@ RpClumpGtaStreamRead1(RwStream *stream)
 
 	if(!RwStreamFindChunk(stream, rwID_FRAMELIST, nil, &version))
 		return false;
-	if(_rwFrameListStreamRead(stream, &gFrameList) == nil)
+	if(rwFrameListStreamRead(stream, &gFrameList) == nil)
 		return false;
 
 	if(!RwStreamFindChunk(stream, rwID_GEOMETRYLIST, nil, &version)){
@@ -164,7 +164,7 @@ RpClumpGtaStreamRead1(RwStream *stream)
 		rwFrameListDeinitialize(&gFrameList);
 		return false;
 	}
-	streamPosition = stream->Type.memory.position;
+	streamPosition = STREAMPOS(stream);
 	return true;
 }
 
@@ -180,7 +180,7 @@ RpClumpGtaStreamRead2(RwStream *stream)
 	if(clump == nil)
 		return nil;
 
-	RwStreamSkip(stream, streamPosition - stream->Type.memory.position);
+	RwStreamSkip(stream, streamPosition - STREAMPOS(stream));
 
 	if(GeometryListStreamRead2(stream, &gGeomList) == nil){
 		GeometryListDeinitialize(&gGeomList);
@@ -222,9 +222,3 @@ RpClumpGtaCancelStream(void)
 	rwFrameListDeinitialize(&gFrameList);
 	gFrameList.numFrames = 0;
 }
-
-STARTPATCHES
-	InjectHook(0x526060, RpClumpGtaStreamRead1, PATCH_JUMP);
-	InjectHook(0x526180, RpClumpGtaStreamRead2, PATCH_JUMP);
-	InjectHook(0x5262D0, RpClumpGtaCancelStream, PATCH_JUMP);
-ENDPATCHES

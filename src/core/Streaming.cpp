@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Pad.h"
 #include "Hud.h"
@@ -28,51 +28,54 @@
 #include "CutsceneMgr.h"
 #include "CdStream.h"
 #include "Streaming.h"
+#ifdef FIX_BUGS
+#include "Replay.h"
+#endif
 #include "main.h"
 
-bool &CStreaming::ms_disableStreaming = *(bool*)0x95CD6E;
-bool &CStreaming::ms_bLoadingBigModel = *(bool*)0x95CDB0;
-int32 &CStreaming::ms_numModelsRequested = *(int32*)0x8E2C10;
-CStreamingInfo *CStreaming::ms_aInfoForModel = (CStreamingInfo*)0x6C7088;
-CStreamingInfo &CStreaming::ms_startLoadedList = *(CStreamingInfo*)0x942F60;
-CStreamingInfo &CStreaming::ms_endLoadedList = *(CStreamingInfo*)0x8F1AC0;
-CStreamingInfo &CStreaming::ms_startRequestedList = *(CStreamingInfo*)0x8F1B3C;
-CStreamingInfo &CStreaming::ms_endRequestedList = *(CStreamingInfo*)0x940738;
-int32 &CStreaming::ms_oldSectorX = *(int32*)0x8F2C84;
-int32 &CStreaming::ms_oldSectorY = *(int32*)0x8F2C88;
-int32 &CStreaming::ms_streamingBufferSize = *(int32*)0x942FB0;
-int8 **CStreaming::ms_pStreamingBuffer = (int8**)0x87F818;
-int32 &CStreaming::ms_memoryUsed = *(int32*)0x940568;
-CStreamingChannel *CStreaming::ms_channel = (CStreamingChannel*)0x727EE0;
-int32 &CStreaming::ms_channelError = *(int32*)0x880DB8;
-int32 &CStreaming::ms_numVehiclesLoaded = *(int32*)0x8F2C80;
-int32 *CStreaming::ms_vehiclesLoaded = (int32*)0x773560;
-int32 &CStreaming::ms_lastVehicleDeleted = *(int32*)0x95CBF8;
-CDirectory *&CStreaming::ms_pExtraObjectsDir = *(CDirectory**)0x95CB90;
-int32 &CStreaming::ms_numPriorityRequests = *(int32*)0x8F31C4;
-bool &CStreaming::ms_hasLoadedLODs = *(bool*)0x95CD47;
-int32 &CStreaming::ms_currentPedGrp = *(int32*)0x8F2BBC;
+bool CStreaming::ms_disableStreaming;
+bool CStreaming::ms_bLoadingBigModel;
+int32 CStreaming::ms_numModelsRequested;
+CStreamingInfo CStreaming::ms_aInfoForModel[NUMSTREAMINFO];
+CStreamingInfo CStreaming::ms_startLoadedList;
+CStreamingInfo CStreaming::ms_endLoadedList;
+CStreamingInfo CStreaming::ms_startRequestedList;
+CStreamingInfo CStreaming::ms_endRequestedList;
+int32 CStreaming::ms_oldSectorX;
+int32 CStreaming::ms_oldSectorY;
+int32 CStreaming::ms_streamingBufferSize;
+int8 *CStreaming::ms_pStreamingBuffer[2];
+int32 CStreaming::ms_memoryUsed;
+CStreamingChannel CStreaming::ms_channel[2];
+int32 CStreaming::ms_channelError;
+int32 CStreaming::ms_numVehiclesLoaded;
+int32 CStreaming::ms_vehiclesLoaded[MAXVEHICLESLOADED];
+int32 CStreaming::ms_lastVehicleDeleted;
+CDirectory *CStreaming::ms_pExtraObjectsDir;
+int32 CStreaming::ms_numPriorityRequests;
+bool CStreaming::ms_hasLoadedLODs;
+int32 CStreaming::ms_currentPedGrp;
 int32 CStreaming::ms_currentPedLoading;
 int32 CStreaming::ms_lastCullZone;
-uint16 &CStreaming::ms_loadedGangs = *(uint16*)0x95CC60;
-uint16 &CStreaming::ms_loadedGangCars = *(uint16*)0x95CC2E;
-int32 *CStreaming::ms_imageOffsets = (int32*)0x6E60A0;
-int32 &CStreaming::ms_lastImageRead = *(int32*)0x880E2C;
-int32 &CStreaming::ms_imageSize = *(int32*)0x8F1A34;
-uint32 &CStreaming::ms_memoryAvailable = *(uint32*)0x880F8C;
+uint16 CStreaming::ms_loadedGangs;
+uint16 CStreaming::ms_loadedGangCars;
+int32 CStreaming::ms_imageOffsets[NUMCDIMAGES];
+int32 CStreaming::ms_lastImageRead;
+int32 CStreaming::ms_imageSize;
+uint32 CStreaming::ms_memoryAvailable;
 
-int32 &desiredNumVehiclesLoaded = *(int32*)0x5EC194;
+int32 desiredNumVehiclesLoaded = 12;
 
-CEntity *&pIslandLODindustEntity = *(CEntity**)0x6212DC;
-CEntity *&pIslandLODcomIndEntity = *(CEntity**)0x6212E0;
-CEntity *&pIslandLODcomSubEntity = *(CEntity**)0x6212E4;
-CEntity *&pIslandLODsubIndEntity = *(CEntity**)0x6212E8;
-CEntity *&pIslandLODsubComEntity = *(CEntity**)0x6212EC;
-int32 &islandLODindust = *(int32*)0x6212C8;
-int32 &islandLODcomInd = *(int32*)0x6212CC;
-int32 &islandLODcomSub = *(int32*)0x6212D0;
-int32 &islandLODsubInd = *(int32*)0x6212D4;
-int32 &islandLODsubCom = *(int32*)0x6212D8;
+CEntity *pIslandLODindustEntity;
+CEntity *pIslandLODcomIndEntity;
+CEntity *pIslandLODcomSubEntity;
+CEntity *pIslandLODsubIndEntity;
+CEntity *pIslandLODsubComEntity;
+int32 islandLODindust;
+int32 islandLODcomInd;
+int32 islandLODcomSub;
+int32 islandLODsubInd;
+int32 islandLODsubCom;
 
 bool
 CStreamingInfo::GetCdPosnAndSize(uint32 &posn, uint32 &size)
@@ -199,7 +202,7 @@ CStreaming::Init(void)
 	// PC only, figure out how much memory we got
 #ifdef GTA_PC
 #define MB (1024*1024)
-	extern unsigned long &_dwMemAvailPhys;
+	extern unsigned long _dwMemAvailPhys;
 	ms_memoryAvailable = (_dwMemAvailPhys - 10*MB)/2;
 	if(ms_memoryAvailable < 50*MB)
 		ms_memoryAvailable = 50*MB;
@@ -280,7 +283,11 @@ CStreaming::Update(void)
 	   !requestedSubway &&
 	   !CGame::playingIntro &&
 	   ms_numModelsRequested < 5 &&
-	   !CRenderer::m_loadingPriority){
+	   !CRenderer::m_loadingPriority
+#ifdef FIX_BUGS
+		&& !CReplay::IsPlayingBack()
+#endif
+		){
 		StreamVehiclesAndPeds();
 		StreamZoneModels(FindPlayerCoors());
 	}
@@ -362,8 +369,12 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 					lastID = modelId;
 				}
 			}else{
-				// BUG: doesn't remember which cdimage this was in
+#ifdef FIX_BUGS
+				// remember which cdimage this came from
+				ms_pExtraObjectsDir->AddItem(direntry, n);
+#else
 				ms_pExtraObjectsDir->AddItem(direntry);
+#endif
 				lastID = -1;
 			}
 		}else if(!CGeneral::faststrcmp(dot+1, "TXD") || !CGeneral::faststrcmp(dot+1, "txd")){
@@ -743,7 +754,8 @@ CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flag
 	}else
 		RemoveModel(modelId);
 
-	ms_pExtraObjectsDir->FindItem(modelName, pos, size);
+	bool found = ms_pExtraObjectsDir->FindItem(modelName, pos, size);
+	assert(found);
 	mi->ClearTexDictionary();
 	if(CTxdStore::FindTxdSlot(modelName) == -1)
 		mi->SetTexDictionary("generic");
@@ -1248,7 +1260,11 @@ CStreaming::StreamVehiclesAndPeds(void)
 	static int modelQualityClass = 0;
 
 	if(CRecordDataForGame::IsRecording() ||
-	   CRecordDataForGame::IsPlayingBack())
+	   CRecordDataForGame::IsPlayingBack()
+#ifdef FIX_BUGS
+	   || CReplay::IsPlayingBack()
+#endif
+		)
 		return;
 
 	if(FindPlayerPed()->m_pWanted->AreSwatRequired()){
@@ -1939,7 +1955,7 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float 
 			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
 			if(mi->m_type != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff())){
 				lodDistSq = sq(mi->GetLargestLodDistance());
-				lodDistSq = min(lodDistSq, sq(STREAM_DIST));
+				lodDistSq = Min(lodDistSq, sq(STREAM_DIST));
 				pos = CVector2D(e->GetPosition());
 				if(xmin < pos.x && pos.x < xmax &&
 				   ymin < pos.y && pos.y < ymax &&
@@ -2159,20 +2175,20 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 	if(Abs(TheCamera.GetForward().x) > Abs(TheCamera.GetForward().y)){
 		// looking west/east
 
-		ymin = max(iy - 10, 0);
-		ymax = min(iy + 10, NUMSECTORS_Y - 1);
+		ymin = Max(iy - 10, 0);
+		ymax = Min(iy + 10, NUMSECTORS_Y - 1);
 		assert(ymin <= ymax);
 
 		// Delete a block of sectors that we know is behind the camera
 		if(TheCamera.GetForward().x > 0){
 			// looking east
-			xmax = max(ix - 2, 0);
-			xmin = max(ix - 10, 0);
+			xmax = Max(ix - 2, 0);
+			xmin = Max(ix - 10, 0);
 			inc = 1;
 		}else{
 			// looking west
-			xmax = min(ix + 2, NUMSECTORS_X - 1);
-			xmin = min(ix + 10, NUMSECTORS_X - 1);
+			xmax = Min(ix + 2, NUMSECTORS_X - 1);
+			xmin = Min(ix + 10, NUMSECTORS_X - 1);
 			inc = -1;
 		}
 		for(y = ymin; y <= ymax; y++){
@@ -2188,13 +2204,13 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 		// Now a block that intersects with the camera's frustum
 		if(TheCamera.GetForward().x > 0){
 			// looking east
-			xmax = max(ix + 10, 0);
-			xmin = max(ix - 2, 0);
+			xmax = Max(ix + 10, 0);
+			xmin = Max(ix - 2, 0);
 			inc = 1;
 		}else{
 			// looking west
-			xmax = min(ix - 10, NUMSECTORS_X - 1);
-			xmin = min(ix + 2, NUMSECTORS_X - 1);
+			xmax = Min(ix - 10, NUMSECTORS_X - 1);
+			xmin = Min(ix + 2, NUMSECTORS_X - 1);
 			inc = -1;
 		}
 		for(y = ymin; y <= ymax; y++){
@@ -2223,20 +2239,20 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 	}else{
 		// looking north/south
 
-		xmin = max(ix - 10, 0);
-		xmax = min(ix + 10, NUMSECTORS_X - 1);
+		xmin = Max(ix - 10, 0);
+		xmax = Min(ix + 10, NUMSECTORS_X - 1);
 		assert(xmin <= xmax);
 
 		// Delete a block of sectors that we know is behind the camera
 		if(TheCamera.GetForward().y > 0){
 			// looking north
-			ymax = max(iy - 2, 0);
-			ymin = max(iy - 10, 0);
+			ymax = Max(iy - 2, 0);
+			ymin = Max(iy - 10, 0);
 			inc = 1;
 		}else{
 			// looking south
-			ymax = min(iy + 2, NUMSECTORS_Y - 1);
-			ymin = min(iy + 10, NUMSECTORS_Y - 1);
+			ymax = Min(iy + 2, NUMSECTORS_Y - 1);
+			ymin = Min(iy + 10, NUMSECTORS_Y - 1);
 			inc = -1;
 		}
 		for(x = xmin; x <= xmax; x++){
@@ -2252,13 +2268,13 @@ CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
 		// Now a block that intersects with the camera's frustum
 		if(TheCamera.GetForward().y > 0){
 			// looking north
-			ymax = max(iy + 10, 0);
-			ymin = max(iy - 2, 0);
+			ymax = Max(iy + 10, 0);
+			ymin = Max(iy - 2, 0);
 			inc = 1;
 		}else{
 			// looking south
-			ymax = min(iy - 10, NUMSECTORS_Y - 1);
-			ymin = min(iy + 2, NUMSECTORS_Y - 1);
+			ymax = Min(iy - 10, NUMSECTORS_Y - 1);
+			ymin = Min(iy + 2, NUMSECTORS_Y - 1);
 			inc = -1;
 		}
 		for(x = xmin; x <= xmax; x++){
@@ -2439,82 +2455,3 @@ CStreaming::UpdateForAnimViewer(void)
 		CStreaming::RetryLoadFile(CStreaming::ms_channelError);
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x406430, CStreaming::Init, PATCH_JUMP);
-	InjectHook(0x406C80, CStreaming::Shutdown, PATCH_JUMP);
-	InjectHook(0x4076C0, CStreaming::Update, PATCH_JUMP);
-	InjectHook(0x406CC0, (void (*)(void))CStreaming::LoadCdDirectory, PATCH_JUMP);
-	InjectHook(0x406DA0, (void (*)(const char*, int))CStreaming::LoadCdDirectory, PATCH_JUMP);
-	InjectHook(0x409740, CStreaming::ConvertBufferToObject, PATCH_JUMP);
-	InjectHook(0x409580, CStreaming::FinishLoadingLargeFile, PATCH_JUMP);
-	InjectHook(0x407EA0, CStreaming::RequestModel, PATCH_JUMP);
-	InjectHook(0x407FD0, CStreaming::RequestSubway, PATCH_JUMP);
-	InjectHook(0x408190, CStreaming::RequestBigBuildings, PATCH_JUMP);
-	InjectHook(0x408210, CStreaming::RequestIslands, PATCH_JUMP);
-	InjectHook(0x40A890, CStreaming::RequestSpecialModel, PATCH_JUMP);
-	InjectHook(0x40ADA0, CStreaming::RequestSpecialChar, PATCH_JUMP);
-	InjectHook(0x54A5F0, CStreaming::HasModelLoaded, PATCH_JUMP);
-	InjectHook(0x40ADC0, CStreaming::HasSpecialCharLoaded, PATCH_JUMP);
-	InjectHook(0x40ADE0, CStreaming::SetMissionDoesntRequireSpecialChar, PATCH_JUMP);
-
-	InjectHook(0x408830, CStreaming::RemoveModel, PATCH_JUMP);
-	InjectHook(0x4083A0, CStreaming::RemoveUnusedBuildings, PATCH_JUMP);
-	InjectHook(0x4083D0, CStreaming::RemoveBuildings, PATCH_JUMP);
-	InjectHook(0x408640, CStreaming::RemoveUnusedBigBuildings, PATCH_JUMP);
-	InjectHook(0x408680, CStreaming::RemoveBigBuildings, PATCH_JUMP);
-	InjectHook(0x408780, CStreaming::RemoveIslandsNotUsed, PATCH_JUMP);
-	InjectHook(0x40B180, CStreaming::RemoveLoadedVehicle, PATCH_JUMP);
-	InjectHook(0x4089B0, CStreaming::RemoveLeastUsedModel, PATCH_JUMP);
-	InjectHook(0x408940, CStreaming::RemoveAllUnusedModels, PATCH_JUMP);
-	InjectHook(0x409450, CStreaming::RemoveReferencedTxds, PATCH_JUMP);
-
-	InjectHook(0x40B160, CStreaming::GetAvailableVehicleSlot, PATCH_JUMP);
-	InjectHook(0x40B060, CStreaming::AddToLoadedVehiclesList, PATCH_JUMP);
-	InjectHook(0x4094C0, CStreaming::IsTxdUsedByRequestedModels, PATCH_JUMP);
-	InjectHook(0x407E70, CStreaming::IsObjectInCdImage, PATCH_JUMP);
-	InjectHook(0x408280, CStreaming::HaveAllBigBuildingsLoaded, PATCH_JUMP);
-	InjectHook(0x40A790, CStreaming::SetModelIsDeletable, PATCH_JUMP);
-	InjectHook(0x40A800, CStreaming::SetModelTxdIsDeletable, PATCH_JUMP);
-	InjectHook(0x40A820, CStreaming::SetMissionDoesntRequireModel, PATCH_JUMP);
-
-	InjectHook(0x40AA00, CStreaming::LoadInitialPeds, PATCH_JUMP);
-	InjectHook(0x40ADF0, CStreaming::LoadInitialVehicles, PATCH_JUMP);
-	InjectHook(0x40AE60, CStreaming::StreamVehiclesAndPeds, PATCH_JUMP);
-	InjectHook(0x40AA30, CStreaming::StreamZoneModels, PATCH_JUMP);
-	InjectHook(0x40AD00, CStreaming::RemoveCurrentZonesModels, PATCH_JUMP);
-
-	InjectHook(0x409BE0, CStreaming::ProcessLoadingChannel, PATCH_JUMP);
-	InjectHook(0x40A610, CStreaming::FlushChannels, PATCH_JUMP);
-	InjectHook(0x40A680, CStreaming::FlushRequestList, PATCH_JUMP);
-	InjectHook(0x409FF0, CStreaming::GetCdImageOffset, PATCH_JUMP);
-	InjectHook(0x409E50, CStreaming::GetNextFileOnCd, PATCH_JUMP);
-	InjectHook(0x40A060, CStreaming::RequestModelStream, PATCH_JUMP);
-	InjectHook(0x4077F0, CStreaming::RetryLoadFile, PATCH_JUMP);
-	InjectHook(0x40A390, CStreaming::LoadRequestedModels, PATCH_JUMP);
-	InjectHook(0x40A440, CStreaming::LoadAllRequestedModels, PATCH_JUMP);
-
-	InjectHook(0x4078F0, CStreaming::AddModelsToRequestList, PATCH_JUMP);
-	InjectHook(0x407C50, (void (*)(CPtrList&,float,float,float,float,float,float))CStreaming::ProcessEntitiesInSectorList, PATCH_JUMP);
-	InjectHook(0x407DD0, (void (*)(CPtrList&))CStreaming::ProcessEntitiesInSectorList, PATCH_JUMP);
-
-	InjectHook(0x407070, CStreaming::DeleteFarAwayRwObjects, PATCH_JUMP);
-	InjectHook(0x407390, CStreaming::DeleteAllRwObjects, PATCH_JUMP);
-	InjectHook(0x407400, CStreaming::DeleteRwObjectsAfterDeath, PATCH_JUMP);
-	InjectHook(0x408A60, CStreaming::DeleteRwObjectsBehindCamera, PATCH_JUMP);
-	InjectHook(0x407560, CStreaming::DeleteRwObjectsInSectorList, PATCH_JUMP);
-	InjectHook(0x4075A0, CStreaming::DeleteRwObjectsInOverlapSectorList, PATCH_JUMP);
-	InjectHook(0x409340, CStreaming::DeleteRwObjectsBehindCameraInSectorList, PATCH_JUMP);
-	InjectHook(0x4093C0, CStreaming::DeleteRwObjectsNotInFrustumInSectorList, PATCH_JUMP);
-	InjectHook(0x409B70, CStreaming::MakeSpaceFor, PATCH_JUMP);
-	InjectHook(0x40A6D0, CStreaming::LoadScene, PATCH_JUMP);
-
-	InjectHook(0x40B210, CStreaming::MemoryCardSave, PATCH_JUMP);
-	InjectHook(0x40B250, CStreaming::MemoryCardLoad, PATCH_JUMP);
-
-	InjectHook(0x4063E0, &CStreamingInfo::GetCdPosnAndSize, PATCH_JUMP);
-	InjectHook(0x406410, &CStreamingInfo::SetCdPosnAndSize, PATCH_JUMP);
-	InjectHook(0x4063D0, &CStreamingInfo::GetCdSize, PATCH_JUMP);
-	InjectHook(0x406380, &CStreamingInfo::AddToList, PATCH_JUMP);
-	InjectHook(0x4063A0, &CStreamingInfo::RemoveFromList, PATCH_JUMP);
-ENDPATCHES

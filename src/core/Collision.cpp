@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Lists.h"
 #include "Game.h"
@@ -31,8 +31,8 @@ enum Direction
 	DIR_Z_NEG,
 };
 
-eLevelName &CCollision::ms_collisionInMemory = *(eLevelName*)0x8F6250;
-CLinkList<CColModel*> &CCollision::ms_colModelCache = *(CLinkList<CColModel*>*)0x95CB58;
+eLevelName CCollision::ms_collisionInMemory;
+CLinkList<CColModel*> CCollision::ms_colModelCache;
 
 void
 CCollision::Init(void)
@@ -153,10 +153,10 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 			// on water we expect to be between levels
 			multipleLevels = true;
 		}else{
-			xmin = max(sx - 1, 0);
-			xmax = min(sx + 1, NUMSECTORS_X-1);
-			ymin = max(sy - 1, 0);
-			ymax = min(sy + 1, NUMSECTORS_Y-1);
+			xmin = Max(sx - 1, 0);
+			xmax = Min(sx + 1, NUMSECTORS_X-1);
+			ymin = Max(sy - 1, 0);
+			ymax = Min(sy + 1, NUMSECTORS_Y-1);
 
 			for(x = xmin; x <= xmax; x++)
 				for(y = ymin; y <= ymax; y++){
@@ -1355,6 +1355,7 @@ CCollision::ProcessColModels(const CMatrix &matrixA, CColModel &modelA,
 				modelB.triangles[aTriangleIndicesB[j]],
 				modelB.trianglePlanes[aTriangleIndicesB[j]],
 				spherepoints[numCollisions], coldist);
+
 		if(hasCollided)
 			numCollisions++;
 	}
@@ -2139,70 +2140,3 @@ CColModel::operator=(const CColModel &other)
 	}
 	return *this;
 }
-
-#include <new>
-struct CColLine_ : public CColLine
-{
-	CColLine *ctor(CVector *p0, CVector *p1) { return ::new (this) CColLine(*p0, *p1); }
-};
-
-struct CColModel_ : public CColModel
-{
-	CColModel *ctor(void) { return ::new (this) CColModel(); }
-	void dtor(void) { this->CColModel::~CColModel(); }
-};
-
-
-STARTPATCHES
-	InjectHook(0x4B9C30, (CMatrix& (*)(const CMatrix &src, CMatrix &dst))Invert, PATCH_JUMP);
-
-	InjectHook(0x40B380, CCollision::Init, PATCH_JUMP);
-	InjectHook(0x40B3A0, CCollision::Shutdown, PATCH_JUMP);
-	InjectHook(0x40B3B0, CCollision::Update, PATCH_JUMP);
-	InjectHook(0x40B5B0, CCollision::LoadCollisionWhenINeedIt, PATCH_JUMP);
-	InjectHook(0x40B900, CCollision::SortOutCollisionAfterLoad, PATCH_JUMP);
-
-	InjectHook(0x40BB70, CCollision::TestSphereBox, PATCH_JUMP);
-	InjectHook(0x40E130, CCollision::TestLineBox, PATCH_JUMP);
-	InjectHook(0x40E5C0, CCollision::TestVerticalLineBox, PATCH_JUMP);
-	InjectHook(0x40EC10, CCollision::TestLineTriangle, PATCH_JUMP);
-	InjectHook(0x40DAA0, CCollision::TestLineSphere, PATCH_JUMP);
-	InjectHook(0x40C580, CCollision::TestSphereTriangle, PATCH_JUMP);
-	InjectHook(0x40F720, CCollision::TestLineOfSight, PATCH_JUMP);
-
-	InjectHook(0x40B9F0, CCollision::ProcessSphereSphere, PATCH_JUMP);
-	InjectHook(0x40BC00, CCollision::ProcessSphereBox, PATCH_JUMP);
-	InjectHook(0x40E670, CCollision::ProcessLineBox, PATCH_JUMP);
-	InjectHook(0x40DE80, CCollision::ProcessLineSphere, PATCH_JUMP);
-	InjectHook(0x40FB50, CCollision::ProcessVerticalLineTriangle, PATCH_JUMP);
-	InjectHook(0x40F140, CCollision::ProcessLineTriangle, PATCH_JUMP);
-	InjectHook(0x40CE30, CCollision::ProcessSphereTriangle, PATCH_JUMP);
-
-	InjectHook(0x40F910, CCollision::ProcessLineOfSight, PATCH_JUMP);
-	InjectHook(0x410120, CCollision::ProcessVerticalLine, PATCH_JUMP);
-	InjectHook(0x410BE0, CCollision::ProcessColModels, PATCH_JUMP);
-
-	InjectHook(0x40B960, CCollision::CalculateTrianglePlanes, PATCH_JUMP);
-	InjectHook(0x411640, &CLink<CColModel*>::Remove, PATCH_JUMP);
-	InjectHook(0x411620, &CLink<CColModel*>::Insert, PATCH_JUMP);
-	InjectHook(0x4115C0, &CLinkList<CColModel*>::Insert, PATCH_JUMP);
-	InjectHook(0x411600, &CLinkList<CColModel*>::Remove, PATCH_JUMP);
-//	InjectHook(0x411530, &CLinkList<CColModel*>::Init, PATCH_JUMP);
-
-	InjectHook(0x411E40, (void (CColSphere::*)(float, const CVector&, uint8, uint8))&CColSphere::Set, PATCH_JUMP);
-	InjectHook(0x40B2A0, &CColBox::Set, PATCH_JUMP);
-	InjectHook(0x40B320, &CColLine_::ctor, PATCH_JUMP);
-	InjectHook(0x40B350, &CColLine::Set, PATCH_JUMP);
-	InjectHook(0x411E70, &CColTriangle::Set, PATCH_JUMP);
-
-	InjectHook(0x411EA0, &CColTrianglePlane::Set, PATCH_JUMP);
-	InjectHook(0x412140, &CColTrianglePlane::GetNormal, PATCH_JUMP);
-
-	InjectHook(0x411680, &CColModel_::ctor, PATCH_JUMP);
-	InjectHook(0x4116E0, &CColModel_::dtor, PATCH_JUMP);
-	InjectHook(0x411D80, &CColModel::RemoveCollisionVolumes, PATCH_JUMP);
-	InjectHook(0x411CB0, &CColModel::CalculateTrianglePlanes, PATCH_JUMP);
-	InjectHook(0x411D10, &CColModel::RemoveTrianglePlanes, PATCH_JUMP);
-	InjectHook(0x411D40, &CColModel::SetLinkPtr, PATCH_JUMP);
-	InjectHook(0x411D60, &CColModel::GetLinkPtr, PATCH_JUMP);
-ENDPATCHES

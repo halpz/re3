@@ -2,7 +2,7 @@
 #include "rpmatfx.h"
 #include "rphanim.h"
 #include "rpskin.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "CdStream.h"
 #include "General.h"
@@ -58,24 +58,21 @@
 #include "Console.h"
 #include "timebars.h"
 #include "GenericGameStorage.h"
+#include "SceneEdit.h"
+#include "debugmenu.h"
 
-GlobalScene &Scene = *(GlobalScene*)0x726768;
+GlobalScene Scene;
 
 uint8 work_buff[55000];
-//char gString[256];
-//char gString2[512];
-//wchar gUString[256];
-//wchar gUString2[256];
-char *gString = (char*)0x711B40;
-char *gString2 = (char*)0x878A40;
-wchar *gUString = (wchar*)0x74B018;
-wchar *gUString2 = (wchar*)0x6EDD70;
-
+char gString[256];
+char gString2[512];
+wchar gUString[256];
+wchar gUString2[256];
 
 float FramesPerSecond = 30.0f;
 
 bool gbPrintShite = false;
-bool &gbModelViewer = *(bool*)0x95CD93;
+bool gbModelViewer;
 
 int32 frameCount;
 
@@ -94,9 +91,6 @@ void GameInit(void);
 void SystemInit(void);
 void TheGame(void);
 
-extern void (*DebugMenuProcess)(void);
-extern void (*DebugMenuRender)(void);
-void DebugMenuInit(void);
 void DebugMenuPopulate(void);
 
 
@@ -209,7 +203,7 @@ DoFade(void)
 		CRGBA fadeColor;
 		CRect rect;
 		int fadeValue = CDraw::FadeValue;
-		float brightness = min(CMenuManager::m_PrefsBrightness, 256);
+		float brightness = Min(CMenuManager::m_PrefsBrightness, 256);
 		if(brightness <= 50)
 			brightness = 50;
 		if(FrontEndMenuManager.m_bMenuActive)
@@ -239,8 +233,13 @@ DoFade(void)
 			float y = SCREEN_HEIGHT/2 * TheCamera.m_ScreenReductionPercentage/100.0f;
 			rect.left = 0.0f;
 			rect.right = SCREEN_WIDTH;
+#ifdef FIX_BUGS
+			rect.top = y - SCREEN_SCALE_Y(8.0f);
+			rect.bottom = SCREEN_HEIGHT - y - SCREEN_SCALE_Y(8.0f);
+#else
 			rect.top = y - 8.0f;
 			rect.bottom = SCREEN_HEIGHT - y - 8.0f;
+#endif // FIX_BUGS
 		}else{
 			rect.left = 0.0f;
 			rect.right = SCREEN_WIDTH;
@@ -344,6 +343,8 @@ static void
 Terminate3D(void)
 {
 	CGame::ShutdownRenderWare();
+
+	DebugMenuShutdown();
 	
 	RsRwTerminate();
 
@@ -690,14 +691,14 @@ DisplayGameDebugText()
 	CFont::SetPropOn();
 	CFont::SetBackgroundOff();
 	CFont::SetFontStyle(FONT_BANK);
-	CFont::SetScale(SCREEN_STRETCH_X(0.5f), SCREEN_STRETCH_Y(0.5f));
+	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.5f));
 	CFont::SetCentreOff();
 	CFont::SetRightJustifyOff();
 	CFont::SetWrapx(SCREEN_WIDTH);
 	CFont::SetJustifyOff();
 	CFont::SetBackGroundOnlyTextOff();
 	CFont::SetColor(CRGBA(255, 108, 0, 255));
-	CFont::PrintString(10.0f, 10.0f, ver);
+	CFont::PrintString(SCREEN_SCALE_X(10.0f), SCREEN_SCALE_Y(10.0f), ver);
 
 	FrameSamples++;
 	FramesPerSecondCounter += 1000.0f / (CTimer::GetTimeStepNonClippedInSeconds() * 1000.0f);	
@@ -748,6 +749,7 @@ DisplayGameDebugText()
 		
 		AsciiToUnicode(str, ustr);
 		
+		// Let's not scale those numbers, they look better that way :eyes:
 		CFont::SetPropOff();
 		CFont::SetBackgroundOff();
 		CFont::SetScale(0.7f, 1.5f);
@@ -792,6 +794,8 @@ RenderDebugShit(void)
 	if(gbShowCollisionLines)
 		CRenderer::RenderCollisionLines();
 	ThePaths.DisplayPathData();
+	CDebug::DrawLines();
+	DefinedState();
 #endif
 }
 
@@ -863,11 +867,9 @@ Render2dStuff(void)
 
 	MusicManager.DisplayRadioStationName();
 	TheConsole.Display();
-/*
 	if(CSceneEdit::m_bEditOn)
 		CSceneEdit::Draw();
 	else
-*/
 		CHud::Draw();
 	CUserDisplay::OnscnTimer.ProcessForDisplay();
 	CMessages::Display();
@@ -1560,8 +1562,9 @@ void SystemInit()
 	//
 #endif
 	
-	
+#ifdef GTA_PS2_STUFF
 	CPad::Initialise();
+#endif
 	CPad::GetPad(0)->Mode = 0;
 	
 	CGame::frenchGame = false;
@@ -1837,28 +1840,3 @@ main(int argc, char *argv[])
 	
 	return 0;
 }
-
-STARTPATCHES
-	InjectHook(0x48E480, Idle, PATCH_JUMP);
-	InjectHook(0x48E700, FrontendIdle, PATCH_JUMP);
-
-	InjectHook(0x48CF10, DoRWStuffStartOfFrame, PATCH_JUMP);
-	InjectHook(0x48D040, DoRWStuffStartOfFrame_Horizon, PATCH_JUMP);
-	InjectHook(0x48E030, RenderScene, PATCH_JUMP);
-	InjectHook(0x48E080, RenderDebugShit, PATCH_JUMP);
-	InjectHook(0x48E090, RenderEffects, PATCH_JUMP);
-	InjectHook(0x48E0E0, Render2dStuff, PATCH_JUMP);
-	InjectHook(0x48E450, RenderMenus, PATCH_JUMP);
-	InjectHook(0x48D120, DoFade, PATCH_JUMP);
-	InjectHook(0x48E470, Render2dStuffAfterFade, PATCH_JUMP);
-
-	InjectHook(0x48D550, LoadSplash, PATCH_JUMP);
-	InjectHook(0x48D670, DestroySplashScreen, PATCH_JUMP);
-	InjectHook(0x48D770, LoadingScreen, PATCH_JUMP);
-	InjectHook(0x48D760, ResetLoadingScreenBar, PATCH_JUMP);
-	
-	InjectHook(0x48D470, PluginAttach, PATCH_JUMP);
-	InjectHook(0x48D520, Initialise3D, PATCH_JUMP);
-	InjectHook(0x48D540, Terminate3D, PATCH_JUMP);
-	InjectHook(0x48E800, AppEventHandler, PATCH_JUMP);
-ENDPATCHES

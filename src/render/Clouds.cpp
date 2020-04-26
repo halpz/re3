@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Sprite.h"
 #include "Sprite2d.h"
 #include "General.h"
@@ -16,15 +16,15 @@
 #define SMALLSTRIPHEIGHT 4.0f
 #define HORIZSTRIPHEIGHT 48.0f
 
-RwTexture **gpCloudTex = (RwTexture**)0x9411C0;	//[5];
+RwTexture *gpCloudTex[5];
 
-float &CClouds::CloudRotation = *(float*)0x8F5F40;
-uint32 &CClouds::IndividualRotation = *(uint32*)0x943078;
+float CClouds::CloudRotation;
+uint32 CClouds::IndividualRotation;
 
-float &CClouds::ms_cameraRoll = *(float*)0x8F29CC;
-float &CClouds::ms_horizonZ = *(float*)0x8F31C0;
-CRGBA &CClouds::ms_colourTop = *(CRGBA*)0x94143C;
-CRGBA &CClouds::ms_colourBottom = *(CRGBA*)0x8F2C38;
+float CClouds::ms_cameraRoll;
+float CClouds::ms_horizonZ;
+CRGBA CClouds::ms_colourTop;
+CRGBA CClouds::ms_colourBottom;
 
 void
 CClouds::Init(void)
@@ -233,7 +233,7 @@ CClouds::Render(void)
 					szx*55.0f, szy*55.0f,
 					tr, tg, tb, br, bg, bb, 0.0f, -1.0f,
 					1.0f/screenpos.z,
-					IndividualRotation/65336.0f * 2*3.14f + ms_cameraRoll,
+					(uint16)IndividualRotation/65336.0f * 6.28f + ms_cameraRoll,
 					fluffyalpha);
 				bCloudOnScreen[i] = true;
 			}else
@@ -388,7 +388,7 @@ CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 			ms_colourBottom.b = topblue;
 			ms_colourBottom.a = alpha;
 
-			botpos = min(SCREEN_HEIGHT, topedge);
+			botpos = Min(SCREEN_HEIGHT, topedge);
 			CSprite2d::DrawRect(CRect(0, 0, SCREEN_WIDTH, botpos),
 				ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
 		}
@@ -415,27 +415,18 @@ CClouds::RenderHorizon(void)
 	if(ms_horizonZ > SCREEN_HEIGHT)
 		return;
 
-	float z1 = min(ms_horizonZ + SMALLSTRIPHEIGHT, SCREEN_HEIGHT);
+	float z1 = Min(ms_horizonZ + SMALLSTRIPHEIGHT, SCREEN_HEIGHT);
 	CSprite2d::DrawRectXLU(CRect(0, ms_horizonZ, SCREEN_WIDTH, z1),
 		ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
 
 	// This is just weird
 	float a = SCREEN_HEIGHT/400.0f * HORIZSTRIPHEIGHT +
-		SCREEN_HEIGHT/300.0f * max(TheCamera.GetPosition().z, 0.0f);
+		SCREEN_HEIGHT/300.0f * Max(TheCamera.GetPosition().z, 0.0f);
 	float b = TheCamera.GetUp().z < 0.0f ?
 		SCREEN_HEIGHT :
 		SCREEN_HEIGHT * Abs(TheCamera.GetRight().z);
 	float z2 = z1 + (a + b)*TheCamera.LODDistMultiplier;
-	z2 = min(z2, SCREEN_HEIGHT);
+	z2 = Min(z2, SCREEN_HEIGHT);
 	CSprite2d::DrawRect(CRect(0, z1, SCREEN_WIDTH, z2),
 		ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
 }
-
-STARTPATCHES
-	InjectHook(0x4F6C10, CClouds::Init, PATCH_JUMP);
-	InjectHook(0x4F6CA0, CClouds::Shutdown, PATCH_JUMP);
-	InjectHook(0x4F6CE0, CClouds::Update, PATCH_JUMP);
-	InjectHook(0x4F6D90, CClouds::Render, PATCH_JUMP);
-	InjectHook(0x4F7F00, CClouds::RenderBackground, PATCH_JUMP);
-	InjectHook(0x4F85F0, CClouds::RenderHorizon, PATCH_JUMP);
-ENDPATCHES

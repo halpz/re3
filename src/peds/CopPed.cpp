@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "World.h"
 #include "PlayerPed.h"
 #include "CopPed.h"
@@ -63,7 +63,7 @@ CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 	m_bIsInPursuit = false;
 	field_1350 = 1;
 	m_bIsDisabledCop = false;
-	field_1356 = 0;
+	m_fAbseilPos = 0.0f;
 	m_attackTimer = 0;
 	m_bBeatingSuspect = false;
 	m_bStopAndShootDisabledZone = false;
@@ -153,7 +153,7 @@ CCopPed::ClearPursuit(void)
 		return;
 
 	m_bIsInPursuit = false;
-	for (int i = 0; i < max(wanted->m_MaxCops, wanted->m_CurrentCops); ++i)  {
+	for (int i = 0; i < Max(wanted->m_MaxCops, wanted->m_CurrentCops); ++i)  {
 		if (!foundMyself && wanted->m_pCops[i] == this) {
 			wanted->m_pCops[i] = nil;
 			--wanted->m_CurrentCops;
@@ -342,7 +342,7 @@ CCopPed::CopAI(void)
 				int oldCopNum = wanted->m_CurrentCops;
 				int maxCops = wanted->m_MaxCops;
 				
-				for (int i = 0; i < max(maxCops, oldCopNum); i++) {
+				for (int i = 0; i < Max(maxCops, oldCopNum); i++) {
 					CCopPed *cop = wanted->m_pCops[i];
 					if (cop && cop->m_fDistanceToTarget > copFarthestToTargetDist) {
 						copFarthestToTargetDist = cop->m_fDistanceToTarget;
@@ -465,8 +465,7 @@ CCopPed::CopAI(void)
 				if (m_fDistanceToTarget < weaponRange) {
 					CWeaponInfo *weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
 					CVector gunPos = weaponInfo->m_vecFireOffset;
-					for (RwFrame *i = GetNodeFrame(PED_HANDR); i; i = RwFrameGetParent(i))
-						RwV3dTransformPoints((RwV3d*)&gunPos, (RwV3d*)&gunPos, 1, RwFrameGetMatrix(i));
+					TransformToNode(gunPos, PED_HANDR);
 
 					CColPoint foundCol;
 					CEntity *foundEnt;
@@ -668,11 +667,13 @@ CCopPed::ProcessControl(void)
 				}
 
 				if (bDuckAndCover) {
+#if !defined(GTA3_1_1_PATCH) && !defined(VC_PED_PORTS)
 					if (!bNotAllowedToDuck && Seek()) {
 						SetMoveState(PEDMOVE_STILL);
 						SetMoveAnim();
 						SetPointGunAt(m_pedInObjective);
 					}
+#endif
 				} else if (Seek()) {
 					CVehicle *playerVeh = FindPlayerVehicle();
 					if (!playerVeh && player && player->EnteringCar()) {
@@ -736,25 +737,3 @@ CCopPed::ProcessControl(void)
 		SetAttack(m_pedInObjective);
 	}
 }
-
-#include <new>
-
-class CCopPed_ : public CCopPed
-{
-public:
-	CCopPed *ctor(eCopType type) { return ::new (this) CCopPed(type); };
-	void dtor(void) { CCopPed::~CCopPed(); }
-	void ProcessControl_(void) { CCopPed::ProcessControl(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4C11B0, &CCopPed_::ctor, PATCH_JUMP);
-	InjectHook(0x4C13E0, &CCopPed_::dtor, PATCH_JUMP);
-	InjectHook(0x4C1400, &CCopPed_::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x4C28C0, &CCopPed::ClearPursuit, PATCH_JUMP);
-	InjectHook(0x4C2B00, &CCopPed::SetArrestPlayer, PATCH_JUMP);
-	InjectHook(0x4C27D0, &CCopPed::SetPursuit, PATCH_JUMP);
-	InjectHook(0x4C2C90, &CCopPed::ArrestPlayer, PATCH_JUMP);
-	InjectHook(0x4C26A0, &CCopPed::ScanForCrimes, PATCH_JUMP);
-	InjectHook(0x4C1B50, &CCopPed::CopAI, PATCH_JUMP);
-ENDPATCHES

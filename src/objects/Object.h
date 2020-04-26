@@ -47,34 +47,33 @@ public:
 	float m_fUprootLimit;
 	int8 ObjectCreatedBy;
 	int8 bIsPickup : 1;
-	int8 m_obj_flag2 : 1;
+	int8 bPickupObjWithMessage : 1;
 	int8 bOutOfStock : 1;
 	int8 bGlassCracked : 1;
 	int8 bGlassBroken : 1;
 	int8 bHasBeenDamaged : 1;
 	int8 bUseVehicleColours : 1;
-	int8 m_obj_flag80 : 1;
 	int8 m_nBonusValue; 
-	int8 field_173;
 	float m_fCollisionDamageMultiplier;
 	uint8 m_nCollisionDamageEffect;
 	uint8 m_nSpecialCollisionResponseCases;
 	bool m_bCameraToAvoidThisObject;
+
+	// this batch is unused
 	int8 field_17B;
 	int8 field_17C;
 	int8 field_17D;
 	int8 field_17E;
 	int8 field_17F;
+
 	uint32 m_nEndOfLifeTime;
 	int16 m_nRefModelIndex;
-	int8 field_186;
-	int8 field_187;
 	CEntity *m_pCurSurface;
 	CEntity *m_pCollidingEntity;
 	int8 m_colour1, m_colour2;
 
-	static int16 &nNoTempObjects;
-	static int16 &nBodyCastHealth;
+	static int16 nNoTempObjects;
+	static int16 nBodyCastHealth;
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
@@ -99,6 +98,6 @@ public:
 
 	static void DeleteAllMissionObjects();
 	static void DeleteAllTempObjects();
-	static void DeleteAllTempObjectInArea(CVector point, float fRadius);
+	static void DeleteAllTempObjectsInArea(CVector point, float fRadius);
 };
 static_assert(sizeof(CObject) == 0x198, "CObject: error");

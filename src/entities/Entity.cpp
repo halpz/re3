@@ -1,6 +1,7 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
+#include "RwHelper.h"
 #include "ModelIndices.h"
 #include "Timer.h"
 #include "Placeable.h"
@@ -24,6 +25,8 @@
 #include "References.h"
 #include "TxdStore.h"
 #include "Zones.h"
+#include "Bones.h"
+#include "Debug.h"
 
 int gBuildings;
 
@@ -293,8 +296,13 @@ CEntity::DeleteRwObject(void)
 			f = RpAtomicGetFrame((RpAtomic*)m_rwObject);
 			RpAtomicDestroy((RpAtomic*)m_rwObject);
 			RwFrameDestroy(f);
-		}else if(RwObjectGetType(m_rwObject) == rpCLUMP)
+		}else if(RwObjectGetType(m_rwObject) == rpCLUMP){
+#ifdef PED_SKIN
+			if(IsClumpSkinned((RpClump*)m_rwObject))
+				RpClumpForAllAtomics((RpClump*)m_rwObject, AtomicRemoveAnimFromSkinCB, nil);
+#endif
 			RpClumpDestroy((RpClump*)m_rwObject);
+		}
 		m_rwObject = nil;
 		CModelInfo::GetModelInfo(m_modelIndex)->RemoveRef();
 		if(IsBuilding())
@@ -557,6 +565,44 @@ CEntity::PruneReferences(void)
 		}
 	}
 }
+
+#ifdef PED_SKIN
+void
+CEntity::UpdateRpHAnim(void)
+{
+	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+	RpHAnimHierarchyUpdateMatrices(hier);
+
+#if 0
+	int i;
+	char buf[256];
+	if(this == (CEntity*)FindPlayerPed())
+	for(i = 0; i < hier->numNodes; i++){
+		RpHAnimStdKeyFrame *kf = (RpHAnimStdKeyFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f  %6.3f %6.3f %6.3f  %d %s",
+			kf->q.imag.x, kf->q.imag.y, kf->q.imag.z, kf->q.real,
+			kf->t.x, kf->t.y, kf->t.z,
+			HIERNODEID(hier, i),
+			ConvertBoneTag2BoneName(HIERNODEID(hier, i)));
+		CDebug::PrintAt(buf, 10, 1+i*3);
+
+		RwMatrix *m = &RpHAnimHierarchyGetMatrixArray(hier)[i];
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
+			m->right.x, m->up.x, m->at.x, m->pos.x);
+		CDebug::PrintAt(buf, 80, 1+i*3+0);
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
+			m->right.y, m->up.y, m->at.y, m->pos.y);
+		CDebug::PrintAt(buf, 80, 1+i*3+1);
+		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f",
+			m->right.z, m->up.z, m->at.z, m->pos.z);
+		CDebug::PrintAt(buf, 80, 1+i*3+2);
+	}
+
+	void RenderSkeleton(RpHAnimHierarchy *hier);
+	RenderSkeleton(hier);
+#endif
+}
+#endif
 
 void
 CEntity::AddSteamsFromGround(CVector *unused)
@@ -865,55 +911,12 @@ CEntity::ModifyMatrixForBannerInWind(void)
 	UpdateRwFrame();
 }
 
-#include <new>
-
-class CEntity_ : public CEntity
+void 
+CEntity::AddSteamsFromGround(CPtrList& list) 
 {
-public:
-	CEntity *ctor(void) { return ::new (this) CEntity(); }
-	void dtor(void) { this->CEntity::~CEntity(); }
-	void Add_(void) { CEntity::Add(); }
-	void Remove_(void) { CEntity::Remove(); }
-	void SetModelIndex_(uint32 i) { CEntity::SetModelIndex(i); }
-	void CreateRwObject_(void) { CEntity::CreateRwObject(); }
-	void DeleteRwObject_(void) { CEntity::DeleteRwObject(); }
-	CRect GetBoundRect_(void) { return CEntity::GetBoundRect(); }
-	void PreRender_(void) { CEntity::PreRender(); }
-	void Render_(void) { CEntity::Render(); }
-	bool SetupLighting_(void) { return CEntity::SetupLighting(); }
-};
-
-STARTPATCHES
-	InjectHook(0x473C30, &CEntity_::ctor, PATCH_JUMP);
-	InjectHook(0x473E40, &CEntity_::dtor, PATCH_JUMP);
-	InjectHook(0x473E70, &CEntity_::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x475080, &CEntity_::Add_, PATCH_JUMP);
-	InjectHook(0x475310, &CEntity_::Remove_, PATCH_JUMP);
-	InjectHook(0x473EA0, &CEntity_::CreateRwObject_, PATCH_JUMP);
-	InjectHook(0x473F90, &CEntity_::DeleteRwObject_, PATCH_JUMP);
-	InjectHook(0x474000, &CEntity_::GetBoundRect_, PATCH_JUMP);
-	InjectHook(0x474350, &CEntity_::PreRender_, PATCH_JUMP);
-	InjectHook(0x474BD0, &CEntity_::Render_, PATCH_JUMP);
-	InjectHook(0x4A7C60, &CEntity_::SetupLighting_, PATCH_JUMP);
-
-	InjectHook(0x4742C0, (void (CEntity::*)(CVector&))&CEntity::GetBoundCentre, PATCH_JUMP);
-	InjectHook(0x474310, &CEntity::GetBoundRadius, PATCH_JUMP);
-	InjectHook(0x474C10, &CEntity::GetIsTouching, PATCH_JUMP);
-	InjectHook(0x474CC0, &CEntity::GetIsOnScreen, PATCH_JUMP);
-	InjectHook(0x474D20, &CEntity::GetIsOnScreenComplex, PATCH_JUMP);
-	InjectHook(0x474CA0, &CEntity::IsVisible, PATCH_JUMP);
-	InjectHook(0x474330, &CEntity::UpdateRwFrame, PATCH_JUMP);
-	InjectHook(0x4755E0, &CEntity::SetupBigBuilding, PATCH_JUMP);
-	InjectHook(0x4A7480, &CEntity::RegisterReference, PATCH_JUMP);
-	InjectHook(0x4A74E0, &CEntity::ResolveReferences, PATCH_JUMP);
-	InjectHook(0x4A7530, &CEntity::PruneReferences, PATCH_JUMP);
-
-	InjectHook(0x473F10, &CEntity::AttachToRwObject, PATCH_JUMP);
-	InjectHook(0x473F60, &CEntity::DetachFromRwObject, PATCH_JUMP);
-
-	InjectHook(0x475A20, &CEntity::PreRenderForGlassWindow, PATCH_JUMP);
-	InjectHook(0x50CE40, &CEntity::AddSteamsFromGround, PATCH_JUMP);
-	InjectHook(0x475670, &CEntity::ModifyMatrixForTreeInWind, PATCH_JUMP);
-	InjectHook(0x475830, &CEntity::ModifyMatrixForBannerInWind, PATCH_JUMP);
-	InjectHook(0x4FA530, &CEntity::ProcessLightsForEntity, PATCH_JUMP);
-ENDPATCHES
+	CPtrNode *pNode = list.first;
+	while (pNode) {
+		((CEntity*)pNode->item)->AddSteamsFromGround(nil);
+		pNode = pNode->next;
+	}
+}

@@ -1,14 +1,14 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Draw.h"
 #include "Camera.h"
 #include "Sprite.h"
 
-float &CSprite::m_f2DNearScreenZ = *(float*)0x8F1ABC;
-float &CSprite::m_f2DFarScreenZ = *(float*)0x8F2C94;
-float &CSprite::m_fRecipNearClipPlane = *(float*)0x8F5FFC;
-int32 &CSprite::m_bFlushSpriteBufferSwitchZTest = *(int32*)0x8F5FB0;
+float CSprite::m_f2DNearScreenZ;
+float CSprite::m_f2DFarScreenZ;
+float CSprite::m_fRecipNearClipPlane;
+int32 CSprite::m_bFlushSpriteBufferSwitchZTest;
 
 float 
 CSprite::CalcHorizonCoors(void)
@@ -40,9 +40,9 @@ CSprite::CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, 
 }
 
 #define SPRITEBUFFERSIZE 64
-static int32 &nSpriteBufferIndex = *(int32*)0x649A80;
-static RwIm2DVertex *SpriteBufferVerts = (RwIm2DVertex*)0x649A84;	//[SPRITEBUFFERSIZE*6];
-static RwIm2DVertex *verts = (RwIm2DVertex*)0x64C484;	//[4];
+static int32 nSpriteBufferIndex;
+static RwIm2DVertex SpriteBufferVerts[SPRITEBUFFERSIZE*6];
+static RwIm2DVertex verts[4];
 
 void
 CSprite::InitSpriteBuffer(void)
@@ -137,8 +137,8 @@ CSprite::RenderOneXLUSprite(float x, float y, float z, float w, float h, uint8 r
 void
 CSprite::RenderOneXLUSprite_Rotate_Aspect(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intens, float recipz, float rotation, uint8 a)
 {
-	float c = Cos(DEGTORAD(rotation));
-	float s = Sin(DEGTORAD(rotation));
+	float c = Cos(rotation);
+	float s = Sin(rotation);
 
 	float xs[4];
 	float ys[4];
@@ -315,8 +315,8 @@ void
 CSprite::RenderBufferedOneXLUSprite_Rotate_Aspect(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intens, float recipz, float rotation, uint8 a)
 {
 	m_bFlushSpriteBufferSwitchZTest = 0;
-	float c = Cos(DEGTORAD(rotation));
-	float s = Sin(DEGTORAD(rotation));
+	float c = Cos(rotation);
+	float s = Sin(rotation);
 
 	float xs[4];
 	float ys[4];
@@ -367,8 +367,8 @@ void
 CSprite::RenderBufferedOneXLUSprite_Rotate_2Colours(float x, float y, float z, float w, float h, uint8 r1, uint8 g1, uint8 b1, uint8 r2, uint8 g2, uint8 b2, float cx, float cy, float recipz, float rotation, uint8 a)
 {
 	m_bFlushSpriteBufferSwitchZTest = 0;
-	float c = Cos(DEGTORAD(rotation));
-	float s = Sin(DEGTORAD(rotation));
+	float c = Cos(rotation);
+	float s = Sin(rotation);
 
 	float xs[4];
 	float ys[4];
@@ -398,11 +398,11 @@ CSprite::RenderBufferedOneXLUSprite_Rotate_2Colours(float x, float y, float z, f
 	// Colour factors, cx/y is the direction in which colours change from rgb1 to rgb2
 	cf[0] = (cx*(-c-s) + cy*(-c+s))*0.5f + 0.5f;
 	cf[0] = clamp(cf[0], 0.0f, 1.0f);
-	cf[1] = (cx*(-c-s) + cy*(-c+s))*0.5f + 0.5f;
+	cf[1] = (cx*(-c+s) + cy*( c+s))*0.5f + 0.5f;
 	cf[1] = clamp(cf[1], 0.0f, 1.0f);
-	cf[2] = (cx*(-c-s) + cy*(-c+s))*0.5f + 0.5f;
+	cf[2] = (cx*( c+s) + cy*( c-s))*0.5f + 0.5f;
 	cf[2] = clamp(cf[2], 0.0f, 1.0f);
-	cf[3] = (cx*(-c-s) + cy*(-c+s))*0.5f + 0.5f;
+	cf[3] = (cx*( c-s) + cy*(-c-s))*0.5f + 0.5f;
 	cf[3] = clamp(cf[3], 0.0f, 1.0f);
 
 	float screenz = m_f2DNearScreenZ +
@@ -593,19 +593,3 @@ CSprite::RenderBufferedOneXLUSprite2D_Rotate_Dimension(float x, float y, float w
 	if(nSpriteBufferIndex >= SPRITEBUFFERSIZE)
 		FlushSpriteBuffer();
 }
-
-STARTPATCHES
-	InjectHook(0x51C4A0, CSprite::CalcHorizonCoors, PATCH_JUMP);
-	InjectHook(0x51C3A0, CSprite::CalcScreenCoors, PATCH_JUMP);
-	InjectHook(0x51C590, CSprite::InitSpriteBuffer, PATCH_JUMP);
-	InjectHook(0x51C5B0, CSprite::InitSpriteBuffer2D, PATCH_JUMP);
-	InjectHook(0x51C520, CSprite::FlushSpriteBuffer, PATCH_JUMP);
-	InjectHook(0x51C960, CSprite::RenderOneXLUSprite, PATCH_JUMP);
-	InjectHook(0x51D110, CSprite::RenderOneXLUSprite_Rotate_Aspect, PATCH_JUMP);
-	InjectHook(0x51C5D0, CSprite::RenderBufferedOneXLUSprite, PATCH_JUMP);
-	InjectHook(0x51D5B0, CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension, PATCH_JUMP);
-	InjectHook(0x51CCD0, CSprite::RenderBufferedOneXLUSprite_Rotate_Aspect, PATCH_JUMP);
-	InjectHook(0x51D9E0, CSprite::RenderBufferedOneXLUSprite_Rotate_2Colours, PATCH_JUMP);
-	InjectHook(0x51E3C0, CSprite::RenderBufferedOneXLUSprite2D, PATCH_JUMP);
-	InjectHook(0x51E490, CSprite::RenderBufferedOneXLUSprite2D_Rotate_Dimension, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "ParticleObject.h"
 #include "Timer.h"
 #include "General.h"
@@ -9,11 +9,11 @@
 #include "Game.h"
 
 
-CParticleObject (&gPObjectArray)[MAX_PARTICLEOBJECTS] = *(CParticleObject(*)[MAX_PARTICLEOBJECTS])*(uintptr*)0x62A58C;
+CParticleObject gPObjectArray[MAX_PARTICLEOBJECTS];
 
-CParticleObject *&CParticleObject::pCloseListHead = *(CParticleObject **)int(0x8F4340);
-CParticleObject *&CParticleObject::pFarListHead = *(CParticleObject **)int(0x942F78);
-CParticleObject *&CParticleObject::pUnusedListHead = *(CParticleObject **)int(0x94128C);
+CParticleObject *CParticleObject::pCloseListHead;
+CParticleObject *CParticleObject::pFarListHead;
+CParticleObject *CParticleObject::pUnusedListHead;
 
 CAudioHydrant List[MAX_AUDIOHYDRANTS];
 
@@ -169,7 +169,11 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 			{
 				pobj->m_ParticleType     = PARTICLE_STEAM_NY;
 				pobj->m_nNumEffectCycles = 1;
+#ifdef PC_PARTICLE
 				pobj->m_nSkipFrames      = 3;
+#else
+				pobj->m_nSkipFrames      = 1;
+#endif
 				pobj->m_nCreationChance  = 8;
 				break;
 			}
@@ -187,7 +191,11 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 			{
 				pobj->m_ParticleType     = PARTICLE_STEAM_NY;
 				pobj->m_nNumEffectCycles = 1;
+#ifdef PC_PARTICLE
 				pobj->m_nSkipFrames      = 3;
+#else
+				pobj->m_nSkipFrames      = 1;
+#endif
 				pobj->m_nCreationChance  = 8;
 				break;
 			}
@@ -205,7 +213,11 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 			{
 				pobj->m_ParticleType     = PARTICLE_STEAM_NY;
 				pobj->m_nNumEffectCycles = 1;
+#ifdef PC_PARTICLE
 				pobj->m_nSkipFrames      = 3;
+#else
+				pobj->m_nSkipFrames      = 1;
+#endif
 				pobj->m_nCreationChance  = 8;
 				pobj->m_Color            = CRGBA(16, 16, 16, 255);
 				break;
@@ -228,7 +240,11 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 			{
 				pobj->m_ParticleType     = PARTICLE_CAR_SPLASH;
 				pobj->m_nNumEffectCycles = 0;
+#ifdef PC_PARTICLE
 				pobj->m_nSkipFrames      = 1;
+#else
+				pobj->m_nSkipFrames      = 3;
+#endif
 				pobj->m_nCreationChance  = 0;
 				break;
 			}
@@ -236,7 +252,11 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 			case POBJECT_SPLASHES_AROUND:
 			{
 				pobj->m_ParticleType     = PARTICLE_SPLASH;
+#ifdef PC_PARTICLE
 				pobj->m_nNumEffectCycles = 15;
+#else
+				pobj->m_nNumEffectCycles = 30;
+#endif
 				pobj->m_nSkipFrames      = 2;
 				pobj->m_nCreationChance  = 0;
 				break;
@@ -246,7 +266,11 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 			{
 				pobj->m_ParticleType     = PARTICLE_FLAME;
 				pobj->m_nNumEffectCycles = 1;
+#ifdef PC_PARTICLE
 				pobj->m_nSkipFrames      = 2;
+#else
+				pobj->m_nSkipFrames      = 1;
+#endif
 				pobj->m_nCreationChance  = 2;
 				pobj->m_vecTarget        = CVector(0.0f, 0.0f, 0.0f);
 				break;
@@ -256,7 +280,11 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 			{
 				pobj->m_ParticleType     = PARTICLE_FLAME;
 				pobj->m_nNumEffectCycles = 1;
+#ifdef PC_PARTICLE
 				pobj->m_nSkipFrames      = 2;
+#else
+				pobj->m_nSkipFrames      = 1;
+#endif
 				pobj->m_nCreationChance  = 4;
 				pobj->m_vecTarget        = CVector(0.0f, 0.0f, 0.0f);
 				break;
@@ -286,7 +314,11 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 			{
 				pobj->m_ParticleType     = PARTICLE_EXPLOSION_MEDIUM;
 				pobj->m_nNumEffectCycles = 1;
+#ifdef PC_PARTICLE
 				pobj->m_nSkipFrames      = 3;
+#else
+				pobj->m_nSkipFrames      = 1;
+#endif
 				pobj->m_nCreationChance  = 2;
 				pobj->m_fRandVal         = 0.01f;
 				break;
@@ -598,6 +630,7 @@ void CParticleObject::UpdateClose(void)
 				
 				case POBJECT_PED_WATER_SPLASH:
 				{
+#ifdef PC_PARTICLE
 					CRGBA colorsmoke(255, 255, 255, 196);
 					
 					CVector pos = this->GetPosition();
@@ -699,12 +732,69 @@ void CParticleObject::UpdateClose(void)
 						CParticle::AddParticle(PARTICLE_CAR_SPLASH, splashpos, splashvel, NULL,
 							CGeneral::GetRandomNumberInRange(0.4f, 1.0f), this->m_Color);
 					}
+#else
+					CVector pos;
+					CVector vel;
+						
+					for ( int32 i = -2; i < 2; i++ )
+					{
+						pos = this->GetPosition();
+						pos += CVector(-0.75f, 0.5f * float(i), 0.0f);
 					
+						vel = this->m_vecTarget;					
+						vel.x += -1.5     * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.y += float(i) * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.z += CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
+						CParticle::AddParticle(PARTICLE_PED_SPLASH, pos, vel, NULL, 0.8f, this->m_Color);
+					
+						pos = this->GetPosition();
+						pos += CVector(0.75f, 0.5f * float(i), 0.0f);
+					
+						vel = this->m_vecTarget;
+						vel.x += 1.5f     * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.y += float(i) * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.z += CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
+						CParticle::AddParticle(PARTICLE_PED_SPLASH, pos, vel, NULL, 0.8f, this->m_Color);
+					
+						pos = this->GetPosition();
+						pos += CVector(0.5f * float(i), -0.75, 0.0f);
+					
+						vel = this->m_vecTarget;
+						vel.x += float(i) * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.y += -1.5f    * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.z += CGeneral::GetRandomNumberInRange(0.03f, 0.06f);					
+						CParticle::AddParticle(PARTICLE_PED_SPLASH, pos, vel, NULL, 0.8f, this->m_Color);
+					
+						
+						pos = this->GetPosition();
+						pos += CVector(0.5f * float(i), 0.75, 0.0f);
+						
+						vel = this->m_vecTarget;
+						vel.x += float(i) * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.y += 1.5f     * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.z += CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
+						CParticle::AddParticle(PARTICLE_PED_SPLASH, pos, vel, NULL, 0.8f, this->m_Color);
+					}
+									
+					
+					for ( int32 i = 0; i < 4; i++ )	
+					{
+						pos = this->GetPosition();
+						
+						pos.x += CGeneral::GetRandomNumberInRange(-1.5f, 1.5f);
+						pos.y += CGeneral::GetRandomNumberInRange(-1.5f, 1.5f);
+						pos.z += CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
+
+						vel = this->m_vecTarget;
+						CParticle::AddParticle(PARTICLE_PED_SPLASH, pos, vel, NULL, 0.8f, this->m_Color);
+					}
+#endif
 					break;
 				}
 				
 				case POBJECT_CAR_WATER_SPLASH:
 				{
+#ifdef PC_PARTICLE
 					CRGBA colorsmoke(255, 255, 255, 196);
 					
 					CVector pos = this->GetPosition();
@@ -799,7 +889,65 @@ void CParticleObject::UpdateClose(void)
 						splashvel.z += CGeneral::GetRandomNumberInRange(0.26f, 0.53f);
 						CParticle::AddParticle(PARTICLE_CAR_SPLASH, splashpos, splashvel, NULL, 0.0f, this->m_Color);
 					}
+#else
+					CVector pos;
+					CVector vel;
+						
+					for ( int32 i = -3; i < 4; i++ )
+					{
+						pos = this->GetPosition();
+						pos += CVector(-1.5f, 0.5f * float(i), 0.0f);
+						
+			
+						vel = this->m_vecTarget;
+						vel.x += -3.0f * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.y += float(i) * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.z += CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
+						CParticle::AddParticle(PARTICLE_CAR_SPLASH, pos, vel, NULL, 0.0f, this->m_Color);
 					
+					
+						pos = this->GetPosition();
+						pos += CVector(1.5f, 0.5f * float(i), 0.0f);
+						
+						vel = this->m_vecTarget;
+						vel.x += 3.0f * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.y += float(i) * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.z += CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
+						CParticle::AddParticle(PARTICLE_CAR_SPLASH, pos, vel, NULL, 0.0f, this->m_Color);
+					
+					
+						pos = this->GetPosition();
+						pos += CVector(0.5f * float(i), -1.5f, 0.0f);
+			
+						vel = this->m_vecTarget;
+						vel.x += float(i) * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.y += -3.0f * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.z += CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
+						CParticle::AddParticle(PARTICLE_CAR_SPLASH, pos, vel, NULL, 0.0f, this->m_Color);
+					
+					
+						pos = this->GetPosition();
+						pos += CVector(0.5f * float(i), 1.5f, 0.0f);
+			
+			
+						vel = this->m_vecTarget;
+						vel.x += float(i) * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.y += 3.0f * CGeneral::GetRandomNumberInRange(0.001f, 0.006f);
+						vel.z += CGeneral::GetRandomNumberInRange(0.03f, 0.06f);						
+						CParticle::AddParticle(PARTICLE_CAR_SPLASH, pos, vel, NULL, 0.0f, this->m_Color);
+					}
+					
+					for ( int32 i = 0; i < 8; i++ )
+					{	
+						pos = this->GetPosition();
+						pos.x += CGeneral::GetRandomNumberInRange(-3.0f, 3.0f);
+						pos.y += CGeneral::GetRandomNumberInRange(-3.0f, 3.0f);
+			
+						vel = this->m_vecTarget;			
+						vel.z += CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
+						CParticle::AddParticle(PARTICLE_CAR_SPLASH, pos, vel, NULL, 0.0f, this->m_Color);
+					}
+#endif				
 					break;
 				}
 				
@@ -1099,39 +1247,3 @@ CParticleObject::MoveToList(CParticleObject **from, CParticleObject **to, CParti
 	if ( obj->m_pNext )
 		obj->m_pNext->m_pPrev = obj;
 }
-
-class CParticleObject_ : public CParticleObject
-{
-public:
-	void ctor() { CParticleObject::CParticleObject(); }
-	void dtor() { CParticleObject::~CParticleObject(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4BC330, CAudioHydrant::Add, PATCH_JUMP);
-	InjectHook(0x4BC390, CAudioHydrant::Remove, PATCH_JUMP);
-	
-	InjectHook(0x4BC3E0, &CParticleObject_::ctor, PATCH_JUMP);
-	InjectHook(0x4BC420, &CParticleObject_::dtor, PATCH_JUMP);
-	InjectHook(0x4BC440, CParticleObject::Initialise, PATCH_JUMP);
-	
-	InjectHook(0x4BC4D0, (CParticleObject *(*)(uint16, CVector const &, uint8))CParticleObject::AddObject, PATCH_JUMP);
-	InjectHook(0x4BC520, (CParticleObject *(*)(uint16, CVector const &, float, uint8))CParticleObject::AddObject, PATCH_JUMP);
-	InjectHook(0x4BC570, (CParticleObject *(*)(uint16, CVector const &, CVector const &, float, uint8))CParticleObject::AddObject, PATCH_JUMP);
-	InjectHook(0x4BC5B0, (CParticleObject *(*)(uint16, CVector const &, CVector const &, float, uint32, RwRGBA const &, uint8))CParticleObject::AddObject, PATCH_JUMP);
-
-	InjectHook(0x4BC9F0, &CParticleObject::RemoveObject, PATCH_JUMP);
-	InjectHook(0x4BCA30, CParticleObject::UpdateAll, PATCH_JUMP);
-	InjectHook(0x4BCA80, &CParticleObject::UpdateClose, PATCH_JUMP);
-	InjectHook(0x4BF9F0, &CParticleObject::UpdateFar, PATCH_JUMP);
-	InjectHook(0x4BFA80, CParticleObject::SaveParticle, PATCH_JUMP);
-	InjectHook(0x4BFB30, CParticleObject::LoadParticle, PATCH_JUMP);
-	InjectHook(0x4BFC80, CParticleObject::RemoveAllParticleObjects, PATCH_JUMP);
-	InjectHook(0x4BFD10, CParticleObject::MoveToList, PATCH_JUMP);
-	//InjectHook(0x4BFD70, CParticleObject::~CParticleObject, PATCH_JUMP); // virtual
-	//InjectHook(0x4BFDB0, `global constructor keyed to'ParticleObject.cpp, PATCH_JUMP);
-	//InjectHook(0x4BFE00, CAudioHydrant::CAudioHydrant, PATCH_JUMP);
-	//InjectHook(0x4BFE10, sub_4BFE10, PATCH_JUMP); // destroy gPObjectArray array
-	
-	
-ENDPATCHES

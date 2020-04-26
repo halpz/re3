@@ -90,6 +90,11 @@ public:
 				return -Atan2(x / y, 1.0f);
 		}
 	}
+	
+	static float GetAngleBetweenPoints(float x1, float y1, float x2, float y2)
+	{
+		return RADTODEG(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
+	}
 
 	// should return direction in 0-8 range. fits perfectly to peds' path directions.
 	static int GetNodeHeadingFromVector(float x, float y)
@@ -119,7 +124,7 @@ public:
 	static bool faststricmp(const char *str1, const char *str2)
 	{
 		for (; *str1; str1++, str2++) {
-#if MUCH_SLOWER
+#if MUCH_SLOWER || !defined _WIN32 || defined __MINGW32__
 			if (toupper(*str1) != toupper(*str2))
 #else
 			if (__ascii_toupper(*str1) != __ascii_toupper(*str2))

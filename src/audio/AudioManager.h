@@ -118,7 +118,7 @@ enum eScriptSounds : int16 {
 	SCRIPT_SOUND_BULLET_HIT_GROUND_1 = 106,
 	SCRIPT_SOUND_BULLET_HIT_GROUND_2 = 107,
 	SCRIPT_SOUND_BULLET_HIT_GROUND_3 = 108,
-	SCRIPT_SOUND_109 = 109,
+	SCRIPT_SOUND_BULLET_HIT_WATER = 109, //no sound
 	SCRIPT_SOUND_110 = 110,
 	SCRIPT_SOUND_111 = 111,
 	SCRIPT_SOUND_PAYPHONE_RINGING = 112,
@@ -143,28 +143,17 @@ public:
 	int32 m_nSampleIndex;
 	uint8 m_bBankIndex;
 	bool m_bIs2D;
-	uint8 field_14; // unused
-	uint8 field_15; // unused
 	int32 m_nReleasingVolumeModificator;
 	int32 m_nFrequency;
 	uint8 m_bVolume;
-	uint8 field_25; // unused
-	uint8 field_26; // unused
-	uint8 field_27; // unused
 	float m_fDistance;
 	int32 m_nLoopCount;
 	int32 m_nLoopStart;
 	int32 m_nLoopEnd;
 	uint8 m_bEmittingVolume;
-	uint8 field_45; // unused
-	uint8 field_46; // unused
-	uint8 field_47; // unused
 	float m_fSpeedMultiplier;
 	float m_fSoundIntensity;
 	bool m_bReleasingSoundFlag;
-	uint8 field_57; // unused
-	uint8 field_58; // unused
-	uint8 field_59; // unused
 	CVector m_vecPos;
 	bool m_bReverbFlag;
 	uint8 m_bLoopsRemaining;
@@ -173,15 +162,8 @@ public:
 	int32 m_nReleasingVolumeDivider;
 	bool m_bIsProcessed;
 	bool m_bLoopEnded;
-	uint8 field_82; // unused
-	uint8 field_83; // unused
 	int32 m_nCalculatedVolume;
 	int8 m_nVolumeChange;
-	uint8 field_89; // unused
-	uint8 field_90; // unused
-	uint8 field_91; // unused
-
-	// no methods
 };
 
 static_assert(sizeof(tSound) == 92, "tSound: error");
@@ -197,12 +179,8 @@ public:
 	bool m_bIsUsed;
 	uint8 m_bStatus;
 	int16 m_awAudioEvent[NUM_AUDIOENTITY_EVENTS];
-	//uint8 gap_18[2];
 	float m_afVolume[NUM_AUDIOENTITY_EVENTS];
 	uint8 m_AudioEvents;
-	uint8 field_25[3];
-
-	// no methods
 };
 
 static_assert(sizeof(tAudioEntity) == 40, "tAudioEntity: error");
@@ -216,8 +194,6 @@ public:
 	float m_fDistance;
 	uint8 m_bVolume;
 	int8 m_nProcess;
-
-	// no methods
 };
 
 static_assert(sizeof(tPedComment) == 28, "tPedComment: error");
@@ -244,18 +220,12 @@ class cMissionAudio
 public:
 	CVector m_vecPos;
 	bool m_bPredefinedProperties;
-	//uint8 gap_13[3];
 	int m_nSampleIndex;
 	uint8 m_bLoadingStatus;
 	uint8 m_bPlayStatus;
 	uint8 field_22; // todo find a name
-	uint8 field_23; // unused
 	int32 m_nMissionAudioCounter;
 	bool m_bIsPlayed;
-	uint8 field_29; // unused
-	uint8 field_30; // unused
-	uint8 field_31; // unused
-	                // no methods
 };
 
 static_assert(sizeof(cMissionAudio) == 32, "cMissionAudio: error");
@@ -305,17 +275,11 @@ public:
 	uint8 m_bActiveSamples;
 	uint8 field_4; // unused
 	bool m_bDynamicAcousticModelingStatus;
-	uint8 field_6; // unused
-	uint8 field_7; // unused
 	float m_fSpeedOfSound;
 	bool m_bTimerJustReset;
-	uint8 field_13; // unused
-	uint8 field_14; // unused
-	uint8 field_15; // unused
 	int32 m_nTimer;
 	tSound m_sQueueSample;
 	bool m_bActiveSampleQueue;
-	uint8 gap_109[3]; // unused
 	tSound m_asSamples[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
 	uint8 m_abSampleQueueIndexTable[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
 	uint8 m_bSampleRequestQueuesStatus[NUM_SOUNDS_SAMPLES_BANKS];
@@ -341,7 +305,6 @@ public:
 	uint8 m_bTimeSpent;
 	uint8 m_bUserPause;
 	uint8 m_bPreviousUserPause;
-	uint8 field_19195; // unused
 	uint32 m_FrameCounter;
 
 	cAudioManager();
@@ -618,6 +581,6 @@ public:
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity, float dist);
 };
 
-static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
+//dstatic_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
 
 extern cAudioManager AudioManager;

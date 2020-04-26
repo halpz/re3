@@ -1,7 +1,10 @@
+#if defined RW_D3D9 || defined RWLIBS
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+#endif
+
 #include "common.h"
-#include "patcher.h"
+#include "crossplatform.h"
 #include "ControllerConfig.h"
 #include "Pad.h"
 #include "FileMgr.h"
@@ -15,10 +18,9 @@
 #include "World.h"
 #include "ModelIndices.h"
 #include "Camera.h"
-#include "win.h"
 #include "GenericGameStorage.h"
 
-CControllerConfigManager &ControlsManager = *(CControllerConfigManager*)0x8F43A4;
+CControllerConfigManager ControlsManager;
 
 CControllerConfigManager::CControllerConfigManager()
 {
@@ -41,13 +43,71 @@ void CControllerConfigManager::MakeControllerActionsBlank()
 	}
 }
 
+#ifdef RW_GL3
+int MapIdToButtonId(int mapId) {
+	switch (mapId) {
+		case GLFW_GAMEPAD_BUTTON_A: // Cross
+			return 2;
+		case GLFW_GAMEPAD_BUTTON_B: // Circle
+			return 1;
+		case GLFW_GAMEPAD_BUTTON_X: // Square
+			return 3;
+		case GLFW_GAMEPAD_BUTTON_Y: // Triangle
+			return 4;
+		case GLFW_GAMEPAD_BUTTON_LEFT_BUMPER:
+			return 7;
+		case GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER:
+			return 8;
+		case GLFW_GAMEPAD_BUTTON_BACK:
+			return 9;
+		case GLFW_GAMEPAD_BUTTON_START:
+			return 12;
+		case GLFW_GAMEPAD_BUTTON_LEFT_THUMB:
+			return 10;
+		case GLFW_GAMEPAD_BUTTON_RIGHT_THUMB:
+			return 11;
+		case GLFW_GAMEPAD_BUTTON_DPAD_UP:
+			return 13;
+		case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT:
+			return 14;
+		case GLFW_GAMEPAD_BUTTON_DPAD_DOWN:
+			return 15;
+		case GLFW_GAMEPAD_BUTTON_DPAD_LEFT:
+			return 16;
+		// GLFW sends those as axes, so I added them here manually.
+		case 15: // Left trigger
+			return 5;
+		case 16: // Right trigger
+			return 6;
+		default:
+			return 0;
+	}
+}
+#endif
+
 int32 CControllerConfigManager::GetJoyButtonJustDown()
 {
 #ifdef __DINPUT_INCLUDED__
+#ifdef FIX_BUGS
+	for (int32 i = 0; i < MAX_BUTTONS; i++)
+#else
 	for (int32 i = 0; i < JOY_BUTTONS; i++)
+#endif
 	{
 		if (m_NewState.rgbButtons[i] & 0x80 && !(m_OldState.rgbButtons[i] & 0x80))
 			return i + 1;
+	}
+#elif defined RW_GL3
+	if (m_NewState.isGamepad) {
+		for (int32 i = 0; i < MAX_BUTTONS; i++) {
+			if (m_NewState.mappedButtons[i] && !(m_OldState.mappedButtons[i]))
+				return MapIdToButtonId(i);
+		}
+	} else {
+		for (int32 i = 0; i < Min(m_NewState.numButtons, MAX_BUTTONS); i++) {
+			if (m_NewState.buttons[i] && !(m_OldState.buttons[i]))
+				return i + 1;
+		}
 	}
 #endif
 	return 0;
@@ -249,8 +309,13 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 	if (buttons > 16)
 		btn = 16;
 
+	// Now we use SDL Game Controller DB
+#if defined RW_D3D9 || defined RWLIBS
 	if (   AllValidWinJoys.m_aJoys[JOYSTICK1].m_nVendorID == 0x3427
 		&& AllValidWinJoys.m_aJoys[JOYSTICK1].m_nProductID == 0x1190)
+#else
+	if (0)
+#endif
 	{
 		//GIC USB Joystick, PS2 Gamepad ?
 
@@ -445,8 +510,13 @@ void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown(int32 button, i
 				break;
 			}
 
-			if (   AllValidWinJoys.m_aJoys[JOYSTICK1].m_nVendorID  == 0x3427
+			// Now we use SDL Game Controller DB
+#if defined RW_D3D9 || defined RWLIBS
+			if (AllValidWinJoys.m_aJoys[JOYSTICK1].m_nVendorID == 0x3427
 				&& AllValidWinJoys.m_aJoys[JOYSTICK1].m_nProductID == 0x1190)
+#else
+			if (0)
+#endif
 			{
 				//GIC USB Joystick, PS2 Gamepad ?
 
@@ -872,8 +942,13 @@ void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonUp(int32 button, int
 				break;
 			}
 
-			if (   AllValidWinJoys.m_aJoys[JOYSTICK1].m_nVendorID  == 0x3427
+			// Now we use SDL Game Controller DB
+#if defined RW_D3D9 || defined RWLIBS
+			if (AllValidWinJoys.m_aJoys[JOYSTICK1].m_nVendorID == 0x3427
 				&& AllValidWinJoys.m_aJoys[JOYSTICK1].m_nProductID == 0x1190)
+#else
+			if (0)
+#endif
 			{
 				//GIC USB Joystick, PS2 Gamepad ?
 
@@ -1809,7 +1884,7 @@ wchar *CControllerConfigManager::GetControllerSettingTextKeyBoard(e_ControllerAc
 	static wchar ActionText[50];
 	static wchar NewStringWithNumber[30];
 
-	for (int32 i = 0; i < ARRAYSIZE(ActionText); i++)
+	for (int32 i = 0; i < ARRAY_SIZE(ActionText); i++)
 		ActionText[i] = '\0';
 
 	if (GetControllerKeyAssociatedWithAction(action, type) != rsNULL)
@@ -2266,6 +2341,19 @@ void CControllerConfigManager::UpdateJoyButtonState(int32 padnumber)
 		else
 			m_aButtonStates[i] = false;
 	}
+#elif defined RW_GL3
+	if (m_NewState.isGamepad) {
+		for (int32 i = 0; i < MAX_BUTTONS; i++) {
+			if (i == GLFW_GAMEPAD_BUTTON_GUIDE)
+				continue;
+
+			m_aButtonStates[MapIdToButtonId(i)-1] = m_NewState.mappedButtons[i];
+		}
+	} else {
+		for (int32 i = 0; i < Min(m_NewState.numButtons, MAX_BUTTONS); i++) {
+			m_aButtonStates[i] = m_NewState.buttons[i];
+		}
+	}
 #endif
 }
 
@@ -2362,57 +2450,3 @@ void CControllerConfigManager::ResetSettingOrder(e_ControllerAction action)
 		}
 	}
 }
-
-
-STARTPATCHES
-	InjectHook(0x58B7A0, &CControllerConfigManager::MakeControllerActionsBlank, PATCH_JUMP);
-	InjectHook(0x58B7D0, &CControllerConfigManager::GetJoyButtonJustDown, PATCH_JUMP);
-	InjectHook(0x58B800, &CControllerConfigManager::SaveSettings, PATCH_JUMP);
-	InjectHook(0x58B870, &CControllerConfigManager::LoadSettings, PATCH_JUMP);
-	InjectHook(0x58B930, &CControllerConfigManager::InitDefaultControlConfiguration, PATCH_JUMP);
-	InjectHook(0x58BD00, &CControllerConfigManager::InitDefaultControlConfigMouse, PATCH_JUMP);
-	InjectHook(0x58BD90, &CControllerConfigManager::InitDefaultControlConfigJoyPad, PATCH_JUMP);
-	InjectHook(0x58C060, &CControllerConfigManager::InitialiseControllerActionNameArray, PATCH_JUMP);
-	InjectHook(0x58C5E0, &CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown, PATCH_JUMP);
-	InjectHook(0x58C730, &CControllerConfigManager::AffectControllerStateOn_ButtonDown, PATCH_JUMP);
-	InjectHook(0x58C880, &CControllerConfigManager::AffectControllerStateOn_ButtonDown_Driving, PATCH_JUMP);
-	InjectHook(0x58CAD0, &CControllerConfigManager::AffectControllerStateOn_ButtonDown_FirstPersonOnly, PATCH_JUMP);
-	InjectHook(0x58CB10, &CControllerConfigManager::AffectControllerStateOn_ButtonDown_ThirdPersonOnly, PATCH_JUMP);
-	InjectHook(0x58CBD0, &CControllerConfigManager::AffectControllerStateOn_ButtonDown_FirstAndThirdPersonOnly, PATCH_JUMP);
-	InjectHook(0x58CD70, &CControllerConfigManager::AffectControllerStateOn_ButtonDown_AllStates, PATCH_JUMP);
-	InjectHook(0x58CE50, &CControllerConfigManager::AffectControllerStateOn_ButtonDown_VehicleAndThirdPersonOnly, PATCH_JUMP);
-	InjectHook(0x58CE80, &CControllerConfigManager::UpdateJoyInConfigMenus_ButtonUp, PATCH_JUMP);
-	InjectHook(0x58CFD0, &CControllerConfigManager::AffectControllerStateOn_ButtonUp, PATCH_JUMP);
-	InjectHook(0x58D090, &CControllerConfigManager::AffectControllerStateOn_ButtonUp_All_Player_States, PATCH_JUMP);
-	InjectHook(0x58D0C0, &CControllerConfigManager::AffectPadFromKeyBoard, PATCH_JUMP);
-	InjectHook(0x58D1A0, &CControllerConfigManager::AffectPadFromMouse, PATCH_JUMP);
-	InjectHook(0x58D220, &CControllerConfigManager::ClearSimButtonPressCheckers, PATCH_JUMP);
-	InjectHook(0x58D2A0, &CControllerConfigManager::GetIsKeyboardKeyDown, PATCH_JUMP);
-	InjectHook(0x58D8A0, &CControllerConfigManager::GetIsKeyboardKeyJustDown, PATCH_JUMP);
-	InjectHook(0x58E280, &CControllerConfigManager::GetIsMouseButtonDown, PATCH_JUMP);
-	InjectHook(0x58E360, &CControllerConfigManager::GetIsMouseButtonUp, PATCH_JUMP);
-	InjectHook(0x58E440, &CControllerConfigManager::DeleteMatchingCommonControls, PATCH_JUMP);
-	InjectHook(0x58E540, &CControllerConfigManager::DeleteMatching3rdPersonControls, PATCH_JUMP);
-	InjectHook(0x58E630, &CControllerConfigManager::DeleteMatching1rst3rdPersonControls, PATCH_JUMP);
-	InjectHook(0x58E710, &CControllerConfigManager::DeleteMatchingVehicleControls, PATCH_JUMP);
-	InjectHook(0x58E890, &CControllerConfigManager::DeleteMatchingVehicle_3rdPersonControls, PATCH_JUMP);
-	InjectHook(0x58E8D0, &CControllerConfigManager::DeleteMatching1rstPersonControls, PATCH_JUMP);
-	InjectHook(0x58E920, &CControllerConfigManager::DeleteMatchingActionInitiators, PATCH_JUMP);
-	InjectHook(0x58EA70, &CControllerConfigManager::GetIsKeyBlank, PATCH_JUMP);
-	InjectHook(0x58EAD0, &CControllerConfigManager::GetActionType, PATCH_JUMP);
-	InjectHook(0x58EB40, &CControllerConfigManager::ClearSettingsAssociatedWithAction, PATCH_JUMP);
-	InjectHook(0x58EBF0, &CControllerConfigManager::GetControllerSettingTextWithOrderNumber, PATCH_JUMP);
-	InjectHook(0x58EC50, &CControllerConfigManager::GetControllerSettingTextKeyBoard, PATCH_JUMP);
-	InjectHook(0x58F320, &CControllerConfigManager::GetControllerSettingTextMouse, PATCH_JUMP);
-	InjectHook(0x58F3D0, &CControllerConfigManager::GetControllerSettingTextJoystick, PATCH_JUMP);
-	InjectHook(0x58F420, &CControllerConfigManager::GetNumOfSettingsForAction, PATCH_JUMP);
-	InjectHook(0x58F460, &CControllerConfigManager::GetWideStringOfCommandKeys, PATCH_JUMP);
-	InjectHook(0x58F590, &CControllerConfigManager::GetControllerKeyAssociatedWithAction, PATCH_JUMP);
-	InjectHook(0x58F5B0, &CControllerConfigManager::UpdateJoyButtonState, PATCH_JUMP);
-	InjectHook(0x58F660, &CControllerConfigManager::GetIsActionAButtonCombo, PATCH_JUMP);
-	InjectHook(0x58F690, &CControllerConfigManager::GetButtonComboText, PATCH_JUMP);
-	InjectHook(0x58F700, &CControllerConfigManager::SetControllerKeyAssociatedWithAction, PATCH_JUMP);
-	InjectHook(0x58F740, &CControllerConfigManager::GetMouseButtonAssociatedWithAction, PATCH_JUMP);
-	InjectHook(0x58F760, &CControllerConfigManager::SetMouseButtonAssociatedWithAction, PATCH_JUMP);
-	InjectHook(0x58F790, &CControllerConfigManager::ResetSettingOrder, PATCH_JUMP);
-ENDPATCHES

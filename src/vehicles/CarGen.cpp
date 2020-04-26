@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "CarGen.h"
 
 #include "Automobile.h"
@@ -157,7 +157,7 @@ void CCarGenerator::Setup(float x, float y, float z, float angle, int32 mi, int1
 	m_bIsBlocking = false;
 	m_vecInf = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->boundingBox.min;
 	m_vecSup = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->boundingBox.max;
-	m_fSize = max(m_vecInf.Magnitude(), m_vecSup.Magnitude());
+	m_fSize = Max(m_vecInf.Magnitude(), m_vecSup.Magnitude());
 }
 
 bool CCarGenerator::CheckForBlockage()
@@ -249,10 +249,3 @@ INITSAVEBUF
 		CarGeneratorArray[i] = ReadSaveBuf<CCarGenerator>(buffer);
 VALIDATESAVEBUF(size)
 }
-
-STARTPATCHES
-InjectHook(0x543020, CTheCarGenerators::Init, PATCH_JUMP);
-InjectHook(0x542F40, CTheCarGenerators::Process, PATCH_JUMP);
-InjectHook(0x543050, CTheCarGenerators::SaveAllCarGenerators, PATCH_JUMP);
-InjectHook(0x5431E0, CTheCarGenerators::LoadAllCarGenerators, PATCH_JUMP);
-ENDPATCHES

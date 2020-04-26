@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Lights.h"
 #include "ModelInfo.h"
@@ -39,16 +39,17 @@ struct EntityInfo
 	float sort;
 };
 
-CLinkList<EntityInfo> &gSortedVehiclesAndPeds = *(CLinkList<EntityInfo>*)0x629AC0;
+CLinkList<EntityInfo> gSortedVehiclesAndPeds;
 
-int32 &CRenderer::ms_nNoOfVisibleEntities = *(int32*)0x940730;
-CEntity *(&CRenderer::ms_aVisibleEntityPtrs)[NUMVISIBLEENTITIES] = *(CEntity * (*)[NUMVISIBLEENTITIES]) * (uintptr*)0x6E9920;
-CEntity *(&CRenderer::ms_aInVisibleEntityPtrs)[NUMINVISIBLEENTITIES] = *(CEntity * (*)[NUMINVISIBLEENTITIES]) * (uintptr*)0x880B50;
-int32 &CRenderer::ms_nNoOfInVisibleEntities = *(int32*)0x8F1B78;
+int32 CRenderer::ms_nNoOfVisibleEntities;
+CEntity *CRenderer::ms_aVisibleEntityPtrs[NUMVISIBLEENTITIES];
+CEntity *CRenderer::ms_aInVisibleEntityPtrs[NUMINVISIBLEENTITIES];
+int32 CRenderer::ms_nNoOfInVisibleEntities;
 
-CVector &CRenderer::ms_vecCameraPosition = *(CVector*)0x8E2C3C;
-CVehicle *&CRenderer::m_pFirstPersonVehicle = *(CVehicle**)0x885B80;
-bool &CRenderer::m_loadingPriority = *(bool*)0x95CD86;
+CVector CRenderer::ms_vecCameraPosition;
+CVehicle *CRenderer::m_pFirstPersonVehicle;
+bool CRenderer::m_loadingPriority;
+float CRenderer::ms_lodDistScale = 1.2f;
 
 void
 CRenderer::Init(void)
@@ -192,8 +193,6 @@ CRenderer::RenderRoads(void)
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 	DeActivateDirectional();
 	SetAmbientColours();
-
-	ThePaths.m_pathNodes[-1].group = 6;
 
 	for(i = 0; i < ms_nNoOfVisibleEntities; i++){
 		t = (CTreadable*)ms_aVisibleEntityPtrs[i];
@@ -1206,40 +1205,3 @@ CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)
 	if(reset)
 		ReSetAmbientAndDirectionalColours();
 }
-
-STARTPATCHES
-	InjectHook(0x4A7680, CRenderer::Init, PATCH_JUMP);
-	InjectHook(0x4A76A0, CRenderer::Shutdown, PATCH_JUMP);
-
-	InjectHook(0x4A7B90, CRenderer::RenderOneRoad, PATCH_JUMP);
-	InjectHook(0x4A7BA0, CRenderer::RenderOneNonRoad, PATCH_JUMP);
-	InjectHook(0x4A7B20, CRenderer::RenderFirstPersonVehicle, PATCH_JUMP);
-	InjectHook(0x4A78B0, CRenderer::RenderRoads, PATCH_JUMP);
-	InjectHook(0x4A7930, CRenderer::RenderEverythingBarRoads, PATCH_JUMP);
-	InjectHook(0x4A7AA0, CRenderer::RenderVehiclesButNotBoats, PATCH_JUMP);
-	InjectHook(0x4A7AE0, CRenderer::RenderBoats, PATCH_JUMP);
-	InjectHook(0x4A7910, CRenderer::RenderFadingInEntities, PATCH_JUMP);
-
-	InjectHook(0x4A9350, CRenderer::SetupEntityVisibility, PATCH_JUMP);
-	InjectHook(0x4A9920, CRenderer::SetupBigBuildingVisibility, PATCH_JUMP);
-
-	InjectHook(0x4A76B0, CRenderer::ConstructRenderList, PATCH_JUMP);
-	InjectHook(0x4A7840, CRenderer::PreRender, PATCH_JUMP);
-	InjectHook(0x4A8970, CRenderer::ScanWorld, PATCH_JUMP);
-	InjectHook(0x4AA240, CRenderer::RequestObjectsInFrustum, PATCH_JUMP);
-	InjectHook(0x4A7F30, CRenderer::ScanSectorPoly, PATCH_JUMP);
-	InjectHook(0x4A9300, CRenderer::ScanBigBuildingList, PATCH_JUMP);
-	InjectHook(0x4A9BB0, CRenderer::ScanSectorList, PATCH_JUMP);
-	InjectHook(0x4A9E30, CRenderer::ScanSectorList_Priority, PATCH_JUMP);
-	InjectHook(0x4AA0A0, CRenderer::ScanSectorList_Subway, PATCH_JUMP);
-	InjectHook(0x4AA1D0, CRenderer::ScanSectorList_RequestModels, PATCH_JUMP);
-
-	InjectHook(0x4AA940, CRenderer::SortBIGBuildings, PATCH_JUMP);
-	InjectHook(0x4AA990, CRenderer::SortBIGBuildingsForSectorList, PATCH_JUMP);
-
-	InjectHook(0x4A9840, CRenderer::ShouldModelBeStreamed, PATCH_JUMP);
-	InjectHook(0x4AAA00, CRenderer::IsEntityCullZoneVisible, PATCH_JUMP);
-	InjectHook(0x4AAAA0, CRenderer::IsVehicleCullZoneVisible, PATCH_JUMP);
-
-	InjectHook(0x4A7CF0, CRenderer::RemoveVehiclePedLights, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "AudioScriptObject.h"
 #include "Pools.h"
 #include "DMAudio.h"
@@ -86,10 +86,3 @@ PlayOneShotScriptObject(uint8 id, CVector const &pos)
 	audioScriptObject->AudioEntity = AEHANDLE_NONE;
 	DMAudio.CreateOneShotScriptObject(audioScriptObject);
 }
-
-STARTPATCHES
-InjectHook(0x57C430, &cAudioScriptObject::Reset, PATCH_JUMP);
-InjectHook(0x57C5F0, &PlayOneShotScriptObject, PATCH_JUMP);
-InjectHook(0x57C560, &cAudioScriptObject::LoadAllAudioScriptObjects, PATCH_JUMP);
-InjectHook(0x57c460, &cAudioScriptObject::SaveAllAudioScriptObjects, PATCH_JUMP);
-ENDPATCHES

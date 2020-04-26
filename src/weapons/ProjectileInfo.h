@@ -1,22 +1,23 @@
 #pragma once
 
+#include "WeaponType.h"
+
 class CEntity;
 class CObject;
 class CProjectile;
-enum eWeaponType;
 
 class CProjectileInfo
 {
 public:
 	eWeaponType m_eWeaponType;
-	CEntity* m_pSource;
+	CEntity *m_pSource;
 	uint32 m_nExplosionTime;
 	bool m_bInUse;
 	CVector m_vecPos;
 
 public:
-	static CProjectileInfo* GetProjectileInfo(int32 id);
-	static CProjectile* (&ms_apProjectile)[NUM_PROJECTILES];
+	static CProjectileInfo *GetProjectileInfo(int32 id);
+	static CProjectile *ms_apProjectile[NUM_PROJECTILES];
 
 	static void Initialise();
 	static void Shutdown();
@@ -29,4 +30,4 @@ public:
 	static bool IsProjectileInRange(float x1, float x2, float y1, float y2, float z1, float z2, bool remove);
 };
 
-extern CProjectileInfo (&gaProjectileInfo)[NUM_PROJECTILES];
+extern CProjectileInfo gaProjectileInfo[NUM_PROJECTILES];

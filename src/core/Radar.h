@@ -82,8 +82,8 @@ static_assert(sizeof(sRadarTrace) == 0x30, "sRadarTrace: error");
 class CRadar
 {
 public:
-	static float &m_radarRange;
-	static sRadarTrace (&ms_RadarTrace)[NUMRADARBLIPS];
+	static float m_radarRange;
+	static sRadarTrace ms_RadarTrace[NUMRADARBLIPS];
 	static CSprite2d AsukaSprite;
 	static CSprite2d BombSprite;
 	static CSprite2d CatSprite;
@@ -114,6 +114,7 @@ public:
 	static uint16 MapLegendList[NUM_MAP_LEGENDS];
 	static uint16 MapLegendCounter;
 	static int TargetMarkerId;
+	static CVector TargetMarkerPos;
 
 	static void InitFrontEndMap();
 	static void DrawYouAreHereSprite(float, float);

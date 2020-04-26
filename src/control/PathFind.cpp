@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "FileMgr.h"	// only needed for empty function
 #include "Camera.h"
@@ -12,21 +12,213 @@ bool gbShowPedPaths;
 bool gbShowCarPaths;
 bool gbShowCarPathsLinks;
 
-CPathFind &ThePaths = *(CPathFind*)0x8F6754;
-
-WRAPPER bool CPedPath::CalcPedRoute(uint8, CVector, CVector, CVector*, int16*, int16) { EAXJMP(0x42E680); }
+CPathFind ThePaths;
 
 #define MAX_DIST INT16_MAX-1
+#define MIN_PED_ROUTE_DISTANCE 23.8f
 
 // object flags:
 //	1	UseInRoadBlock
 //	2	east/west road(?)
 
-CPathInfoForObject *&InfoForTileCars = *(CPathInfoForObject**)0x8F1A8C;
-CPathInfoForObject *&InfoForTilePeds  = *(CPathInfoForObject**)0x8F1AE4;
+CPathInfoForObject *InfoForTileCars;
+CPathInfoForObject *InfoForTilePeds;
 // unused
-CTempDetachedNode *&DetachedNodesCars = *(CTempDetachedNode**)0x8E2824;
-CTempDetachedNode *&DetachedNodesPeds = *(CTempDetachedNode**)0x8E28A0;
+CTempDetachedNode *DetachedNodesCars;
+CTempDetachedNode *DetachedNodesPeds;
+
+bool 
+CPedPath::CalcPedRoute(int8 pathType, CVector position, CVector destination, CVector *pointPoses, int16 *pointsFound, int16 maxPoints)
+{
+	*pointsFound = 0;
+	CVector vecDistance = destination - position;
+	if (Abs(vecDistance.x) > MIN_PED_ROUTE_DISTANCE || Abs(vecDistance.y) > MIN_PED_ROUTE_DISTANCE || Abs(vecDistance.z) > MIN_PED_ROUTE_DISTANCE)
+		return false;
+	CVector vecPos = (position + destination) * 0.5f;
+	CVector vecSectorStartPos (vecPos.x - 14.0f, vecPos.y - 14.0f, vecPos.z);
+	CVector2D vecSectorEndPos (vecPos.x + 28.0f, vecPos.x + 28.0f);
+	const int16 nodeStartX = (position.x - vecSectorStartPos.x) / 0.7f;
+	const int16 nodeStartY = (position.y - vecSectorStartPos.y) / 0.7f;
+	const int16 nodeEndX = (destination.x - vecSectorStartPos.x) / 0.7f;
+	const int16 nodeEndY = (destination.y - vecSectorStartPos.y) / 0.7f;
+	if (nodeStartX == nodeEndX && nodeStartY == nodeEndY)
+		return false;
+	CPedPathNode pathNodes[40][40]; 
+	CPedPathNode pathNodesList[416];
+	for (int32 x = 0; x < 40; x++) {
+		for (int32 y = 0; y < 40; y++) {
+			pathNodes[x][y].bBlockade = false;
+			pathNodes[x][y].id = INT16_MAX;
+			pathNodes[x][y].nodeIdX = x;
+			pathNodes[x][y].nodeIdY = y;
+		}
+	}
+	CWorld::AdvanceCurrentScanCode();
+	if (pathType != ROUTE_NO_BLOCKADE) {
+		const int32 nStartX = Max(CWorld::GetSectorIndexX(vecSectorStartPos.x), 0);
+		const int32 nStartY = Max(CWorld::GetSectorIndexY(vecSectorStartPos.y), 0);
+		const int32 nEndX = Min(CWorld::GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
+		const int32 nEndY = Min(CWorld::GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
+		for (int32 y = nStartY; y <= nEndY; y++) {
+			for (int32 x = nStartX; x <= nEndX; x++) {
+				CSector *pSector = CWorld::GetSector(x, y);
+				AddBlockadeSectorList(pSector->m_lists[ENTITYLIST_VEHICLES], pathNodes, &vecSectorStartPos);
+				AddBlockadeSectorList(pSector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], pathNodes, &vecSectorStartPos);
+				AddBlockadeSectorList(pSector->m_lists[ENTITYLIST_OBJECTS], pathNodes, &vecSectorStartPos);
+				AddBlockadeSectorList(pSector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], pathNodes, &vecSectorStartPos);
+			}
+		}
+	}
+	for (int32 i = 0; i < 416; i++) {
+		pathNodesList[i].prev = nil;
+		pathNodesList[i].next = nil;
+	}
+	CPedPathNode *pStartPathNode = &pathNodes[nodeStartX][nodeStartY];
+	CPedPathNode *pEndPathNode = &pathNodes[nodeEndX][nodeEndY];
+	pEndPathNode->bBlockade = false;
+	pEndPathNode->id = 0;
+	pEndPathNode->prev = nil;
+	pEndPathNode->next = pathNodesList;
+	pathNodesList[0].prev = pEndPathNode;
+	int32 pathNodeIndex = 0;
+	CPedPathNode *pPreviousNode = nil;
+	for (; pathNodeIndex < 414; pathNodeIndex++)
+	{
+		pPreviousNode = pathNodesList[pathNodeIndex].prev;
+		while (pPreviousNode && pPreviousNode != pStartPathNode) {
+			const uint8 nodeIdX = pPreviousNode->nodeIdX;
+			const uint8 nodeIdY = pPreviousNode->nodeIdY;
+			if (nodeIdX > 0) {
+				AddNodeToPathList(&pathNodes[nodeIdX - 1][nodeIdY], pathNodeIndex + 5, pathNodesList);
+				if (nodeIdY > 0)
+					AddNodeToPathList(&pathNodes[nodeIdX - 1][nodeIdY - 1], pathNodeIndex + 7, pathNodesList);
+				if (nodeIdY < 39)
+					AddNodeToPathList(&pathNodes[nodeIdX - 1][nodeIdY + 1], pathNodeIndex + 7, pathNodesList);
+			}
+			if (nodeIdX < 39) {
+				AddNodeToPathList(&pathNodes[nodeIdX + 1][nodeIdY], pathNodeIndex + 5, pathNodesList);
+				if (nodeIdY > 0)
+					AddNodeToPathList(&pathNodes[nodeIdX + 1][nodeIdY - 1], pathNodeIndex + 7, pathNodesList);
+				if (nodeIdY < 39)
+					AddNodeToPathList(&pathNodes[nodeIdX + 1][nodeIdY + 1], pathNodeIndex + 7, pathNodesList);
+			}
+			if (nodeIdY > 0)
+				AddNodeToPathList(&pathNodes[nodeIdX][nodeIdY - 1], pathNodeIndex + 5, pathNodesList);
+			if (nodeIdY < 39)
+				AddNodeToPathList(&pathNodes[nodeIdX][nodeIdY + 1], pathNodeIndex + 5, pathNodesList);
+			pPreviousNode = pPreviousNode->prev;
+			if (!pPreviousNode)
+				break;
+		}
+
+		if (pPreviousNode && pPreviousNode == pStartPathNode)
+			break;
+	}
+	if (pathNodeIndex == 414)
+		return false;
+	CPedPathNode *pPathNode = pStartPathNode;
+	for (*pointsFound = 0; pPathNode != pEndPathNode && *pointsFound < maxPoints; ++ *pointsFound) {
+		const uint8 nodeIdX = pPathNode->nodeIdX;
+		const uint8 nodeIdY = pPathNode->nodeIdY;
+		if (nodeIdX > 0 && pathNodes[nodeIdX - 1][nodeIdY].id + 5 == pPathNode->id) 
+			pPathNode = &pathNodes[nodeIdX - 1][nodeIdY];
+		else if (nodeIdX > 39 && pathNodes[nodeIdX + 1][nodeIdY].id + 5 == pPathNode->id)
+			pPathNode = &pathNodes[nodeIdX + 1][nodeIdY];
+		else if (nodeIdY > 0 && pathNodes[nodeIdX][nodeIdY - 1].id + 5 == pPathNode->id) 
+			pPathNode = &pathNodes[nodeIdX][nodeIdY - 1];
+		else if (nodeIdY > 39 && pathNodes[nodeIdX][nodeIdY + 1].id + 5 == pPathNode->id) 
+			pPathNode = &pathNodes[nodeIdX][nodeIdY + 1];
+		else if (nodeIdX > 0 && nodeIdY > 0 && pathNodes[nodeIdX - 1][nodeIdY - 1].id + 7 == pPathNode->id)
+			pPathNode = &pathNodes[nodeIdX - 1][nodeIdY - 1];
+		else if (nodeIdX > 0 && nodeIdY < 39 && pathNodes[nodeIdX - 1][nodeIdY + 1].id + 7 == pPathNode->id)
+			pPathNode = &pathNodes[nodeIdX - 1][nodeIdY + 1];
+		else if (nodeIdX < 39 && nodeIdY > 0 && pathNodes[nodeIdX + 1][nodeIdY - 1].id + 7 == pPathNode->id)
+			pPathNode = &pathNodes[nodeIdX + 1][nodeIdY - 1];
+		else if (nodeIdX < 39 && nodeIdY < 39 && pathNodes[nodeIdX + 1][nodeIdY + 1].id + 7 == pPathNode->id)
+			pPathNode = &pathNodes[nodeIdX + 1][nodeIdY + 1];
+		pointPoses[*pointsFound] = vecSectorStartPos;
+		pointPoses[*pointsFound].x += pPathNode->nodeIdX * 0.7f;
+		pointPoses[*pointsFound].y += pPathNode->nodeIdY * 0.7f;
+	}
+	return true;
+}
+
+
+void 
+CPedPath::AddNodeToPathList(CPedPathNode *pNodeToAdd, int16 id, CPedPathNode *pNodeList) 
+{
+	if (!pNodeToAdd->bBlockade && id < pNodeToAdd->id) {
+		if (pNodeToAdd->id != INT16_MAX)
+			RemoveNodeFromList(pNodeToAdd);
+		AddNodeToList(pNodeToAdd, id, pNodeList);
+	}
+}
+
+void 
+CPedPath::RemoveNodeFromList(CPedPathNode *pNode)
+{
+	pNode->next->prev = pNode->prev;
+	if (pNode->prev)
+		pNode->prev->next = pNode->next;
+}
+
+void 
+CPedPath::AddNodeToList(CPedPathNode *pNode, int16 index, CPedPathNode *pList)
+{
+	pNode->prev = pList[index].prev;
+	pNode->next = &pList[index];
+	if (pList[index].prev)
+		pList[index].prev->next = pNode;
+	pList[index].prev = pNode;
+	pNode->id = index;
+}
+
+void
+CPedPath::AddBlockadeSectorList(CPtrList& list, CPedPathNode(*pathNodes)[40], CVector *pPosition)
+{
+	CPtrNode* listNode = list.first;
+	while (listNode) {
+		CEntity* pEntity = (CEntity*)listNode->item;
+		if (pEntity->m_scanCode != CWorld::GetCurrentScanCode() && pEntity->bUsesCollision) {
+			pEntity->m_scanCode = CWorld::GetCurrentScanCode();
+			AddBlockade(pEntity, pathNodes, pPosition);
+		}
+		listNode = listNode->next;
+	}
+}
+
+void 
+CPedPath::AddBlockade(CEntity *pEntity, CPedPathNode(*pathNodes)[40], CVector *pPosition)
+{
+	const CColBox& boundingBox = pEntity->GetColModel()->boundingBox;
+	const float fBoundMaxY = boundingBox.max.y + 0.3f;
+	const float fBoundMinY = boundingBox.min.y - 0.3f;
+	const float fBoundMaxX = boundingBox.max.x + 0.3f;
+	const float fDistanceX = pPosition->x - pEntity->m_matrix.GetPosition().x;
+	const float fDistanceY = pPosition->y - pEntity->m_matrix.GetPosition().y;
+	const float fBoundRadius = pEntity->GetBoundRadius();
+	CVector vecBoundCentre;
+	pEntity->GetBoundCentre(vecBoundCentre);
+	if (vecBoundCentre.x + fBoundRadius >= pPosition->x && 
+		vecBoundCentre.y + fBoundRadius >= pPosition->y &&
+		vecBoundCentre.x - fBoundRadius <= pPosition->x + 28.0f &&
+		vecBoundCentre.y - fBoundRadius <= pPosition->y + 28.0f) {
+		for (int16 x = 0; x < 40; x++) {
+			const float pointX = x * 0.7f + fDistanceX;
+			for (int16 y = 0; y < 40; y++) {
+				if (!pathNodes[x][y].bBlockade) {
+					const float pointY = y * 0.7f + fDistanceY;
+					CVector2D point(pointX, pointY);
+					if (fBoundMaxX > Abs(DotProduct2D(point, pEntity->m_matrix.GetRight()))) {
+						float fDotProduct = DotProduct2D(point, pEntity->m_matrix.GetForward());
+						if (fBoundMaxY > fDotProduct && fBoundMinY < fDotProduct)
+							pathNodes[x][y].bBlockade = true;
+					}
+				}
+			}
+		}
+	}
+}
 
 void
 CPathFind::Init(void)
@@ -205,8 +397,8 @@ CPathFind::PreparePathData(void)
 					numExtern++;
 					if(InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes > numLanes)
 						numLanes = InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes;
-					maxX = max(maxX, Abs(InfoForTileCars[k].x));
-					maxY = max(maxY, Abs(InfoForTileCars[k].y));
+					maxX = Max(maxX, Abs(InfoForTileCars[k].x));
+					maxY = Max(maxY, Abs(InfoForTileCars[k].y));
 				}else if(InfoForTileCars[k].type == NodeTypeIntern)
 					numIntern++;
 			}
@@ -390,7 +582,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				if(Abs(dx) < nearestDist){
 					dy = tempnodes[k].pos.y - CoorsXFormed.y;
 					if(Abs(dy) < nearestDist){
-						nearestDist = max(Abs(dx), Abs(dy));
+						nearestDist = Max(Abs(dx), Abs(dy));
 						nearestId = k;
 					}
 				}
@@ -499,13 +691,13 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 
 		// Find i inside path segment
 		iseg = 0;
-		for(j = max(oldNumPathNodes, i-12); j < i; j++)
+		for(j = Max(oldNumPathNodes, i-12); j < i; j++)
 			if(m_pathNodes[j].objectIndex == m_pathNodes[i].objectIndex)
 				iseg++;
 
 		istart = 12*m_mapObjects[m_pathNodes[i].objectIndex]->m_modelIndex;
 		// Add links to other internal nodes
-		for(j = max(oldNumPathNodes, i-12); j < min(m_numPathNodes, i+12); j++){
+		for(j = Max(oldNumPathNodes, i-12); j < Min(m_numPathNodes, i+12); j++){
 			if(m_pathNodes[i].objectIndex != m_pathNodes[j].objectIndex || i == j)
 				continue;
 			// N.B.: in every path segment, the externals have to be at the end
@@ -1274,8 +1466,11 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 		targetNode = FindNodeClosestToCoors(target, type, distLimit);
 	else
 		targetNode = forcedTargetNode;
-	if(targetNode < 0)
-		goto fail;
+	if(targetNode < 0) {
+		*pNumNodes = 0;
+		if(pDist) *pDist = 100000.0f;
+		return;
+	}
 
 	// Find start
 	int numPathsToTry;
@@ -1294,18 +1489,27 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 		numPathsToTry = 1;
 		startObj = m_mapObjects[m_pathNodes[startNodeId].objectIndex];
 	}
-	if(numPathsToTry == 0)
-		goto fail;
+	if(numPathsToTry == 0) {
+		*pNumNodes = 0;
+		if(pDist) *pDist = 100000.0f;
+		return;
+	}
 
 	if(startNodeId < 0){
 		// why only check node 0?
-		if(m_pathNodes[startObj->m_nodeIndices[type][0]].group != m_pathNodes[targetNode].group)
-			goto fail;
+		if(m_pathNodes[startObj->m_nodeIndices[type][0]].group !=
+		   m_pathNodes[targetNode].group) {
+			*pNumNodes = 0;
+			if(pDist) *pDist = 100000.0f;
+			return;
+		}
 	}else{
-		if(m_pathNodes[startNodeId].group != m_pathNodes[targetNode].group)
-			goto fail;
+		if(m_pathNodes[startNodeId].group != m_pathNodes[targetNode].group) {
+			*pNumNodes = 0;
+			if(pDist) *pDist = 100000.0f;
+			return;
+		}
 	}
-
 
 	for(i = 0; i < 512; i++)
 		m_searchNodes[i].next = nil;
@@ -1384,11 +1588,6 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 	for(i = 0; i < numNodesToBeCleared; i++)
 		apNodesToBeCleared[i]->distance = MAX_DIST;
 	return;
-
-fail:
-	*pNumNodes = 0;
-	if(pDist)
-		*pDist = 100000.0f;
 }
 
 static CPathNode *pNodeList[32];
@@ -1574,41 +1773,3 @@ CPathFind::DisplayPathData(void)
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x4294A0, &CPathFind::Init, PATCH_JUMP);
-	InjectHook(0x42D580, &CPathFind::AllocatePathFindInfoMem, PATCH_JUMP);
-	InjectHook(0x429540, &CPathFind::RegisterMapObject, PATCH_JUMP);
-	InjectHook(0x42D7E0, &CPathFind::StoreNodeInfoPed, PATCH_JUMP);
-	InjectHook(0x42D690, &CPathFind::StoreNodeInfoCar, PATCH_JUMP);
-	InjectHook(0x429610, &CPathFind::PreparePathData, PATCH_JUMP);
-	InjectHook(0x42B810, &CPathFind::CountFloodFillGroups, PATCH_JUMP);
-	InjectHook(0x429C20, &CPathFind::PreparePathDataForType, PATCH_JUMP);
-
-	InjectHook(0x42C990, &CPathFind::CalcRoadDensity, PATCH_JUMP);
-	InjectHook(0x42E1B0, &CPathFind::TestForPedTrafficLight, PATCH_JUMP);
-	InjectHook(0x42E340, &CPathFind::TestCrossesRoad, PATCH_JUMP);
-	InjectHook(0x42CBE0, &CPathFind::AddNodeToList, PATCH_JUMP);
-	InjectHook(0x42CBB0, &CPathFind::RemoveNodeFromList, PATCH_JUMP);
-	InjectHook(0x42B790, &CPathFind::RemoveBadStartNode, PATCH_JUMP);
-	InjectHook(0x42E3B0, &CPathFind::SetLinksBridgeLights, PATCH_JUMP);
-	InjectHook(0x42DED0, &CPathFind::SwitchOffNodeAndNeighbours, PATCH_JUMP);
-	InjectHook(0x42D960, &CPathFind::SwitchRoadsOffInArea, PATCH_JUMP);
-	InjectHook(0x42DA50, &CPathFind::SwitchPedRoadsOffInArea, PATCH_JUMP);
-	InjectHook(0x42DB50, &CPathFind::SwitchRoadsInAngledArea, PATCH_JUMP);
-	InjectHook(0x42E140, &CPathFind::MarkRoadsBetweenLevelsNodeAndNeighbours, PATCH_JUMP);
-	InjectHook(0x42DF50, &CPathFind::MarkRoadsBetweenLevelsInArea, PATCH_JUMP);
-	InjectHook(0x42E040, &CPathFind::PedMarkRoadsBetweenLevelsInArea, PATCH_JUMP);
-	InjectHook(0x42CC30, &CPathFind::FindNodeClosestToCoors, PATCH_JUMP);
-	InjectHook(0x42CDC0, &CPathFind::FindNodeClosestToCoorsFavourDirection, PATCH_JUMP);
-	InjectHook(0x42CFC0, &CPathFind::FindNodeOrientationForCarPlacement, PATCH_JUMP);
-	InjectHook(0x42D060, &CPathFind::FindNodeOrientationForCarPlacementFacingDestination, PATCH_JUMP);
-	InjectHook(0x42BF10, &CPathFind::NewGenerateCarCreationCoors, PATCH_JUMP);
-	InjectHook(0x42C1E0, &CPathFind::GeneratePedCreationCoors, PATCH_JUMP);
-	InjectHook(0x42D2A0, &CPathFind::FindRoadObjectClosestToCoors, PATCH_JUMP);
-	InjectHook(0x42B9F0, &CPathFind::FindNextNodeWandering, PATCH_JUMP);
-	InjectHook(0x42B040, &CPathFind::DoPathSearch, PATCH_JUMP);
-	InjectHook(0x42C8C0, &CPathFind::TestCoorsCloseness, PATCH_JUMP);
-	InjectHook(0x42E450, &CPathFind::Save, PATCH_JUMP);
-	InjectHook(0x42E550, &CPathFind::Load, PATCH_JUMP);
-ENDPATCHES

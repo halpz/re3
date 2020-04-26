@@ -1,19 +1,25 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
 #include "AnimBlendClumpData.h"
 #include "AnimBlendAssociation.h"
 #include "RpAnimBlend.h"
 
-CAnimBlendClumpData *&gpAnimBlendClump = *(CAnimBlendClumpData**)0x621000;
+CAnimBlendClumpData *gpAnimBlendClump;
 
-void FrameUpdateCallBack(AnimBlendFrameData *frame, void *arg);
-void FrameUpdateCallBackWithVelocityExtraction(AnimBlendFrameData *frame, void *arg);
-void FrameUpdateCallBackWith3dVelocityExtraction(AnimBlendFrameData *frame, void *arg);
+// PS2 names without "NonSkinned"
+void FrameUpdateCallBackNonSkinned(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackWithVelocityExtractionNonSkinned(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackWith3dVelocityExtractionNonSkinned(AnimBlendFrameData *frame, void *arg);
+
+void FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackWithVelocityExtractionSkinned(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackWith3dVelocityExtractionSkinned(AnimBlendFrameData *frame, void *arg);
+
 
 void
-FrameUpdateCallBack(AnimBlendFrameData *frame, void *arg)
+FrameUpdateCallBackNonSkinned(AnimBlendFrameData *frame, void *arg)
 {
 	CVector vec, pos(0.0f, 0.0f, 0.0f);
 	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
@@ -25,9 +31,9 @@ FrameUpdateCallBack(AnimBlendFrameData *frame, void *arg)
 	if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION &&
 	   gpAnimBlendClump->velocity){
 		if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION_3D)
-			FrameUpdateCallBackWith3dVelocityExtraction(frame, arg);
+			FrameUpdateCallBackWith3dVelocityExtractionNonSkinned(frame, arg);
 		else
-			FrameUpdateCallBackWithVelocityExtraction(frame, arg);
+			FrameUpdateCallBackWithVelocityExtractionNonSkinned(frame, arg);
 		return;
 	}
 
@@ -48,12 +54,7 @@ FrameUpdateCallBack(AnimBlendFrameData *frame, void *arg)
 
 	if((frame->flag & AnimBlendFrameData::IGNORE_ROTATION) == 0){
 		RwMatrixSetIdentity(mat);
-
-		float norm = rot.MagnitudeSqr();
-		if(norm == 0.0f)
-			rot.w = 1.0f;
-		else
-			rot *= 1.0f/Sqrt(norm);
+		rot.Normalise();
 		rot.Get(mat);
 	}
 
@@ -69,7 +70,7 @@ FrameUpdateCallBack(AnimBlendFrameData *frame, void *arg)
 }
 
 void
-FrameUpdateCallBackWithVelocityExtraction(AnimBlendFrameData *frame, void *arg)
+FrameUpdateCallBackWithVelocityExtractionNonSkinned(AnimBlendFrameData *frame, void *arg)
 {
 	CVector vec, pos(0.0f, 0.0f, 0.0f);
 	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
@@ -122,12 +123,7 @@ FrameUpdateCallBackWithVelocityExtraction(AnimBlendFrameData *frame, void *arg)
 
 	if((frame->flag & AnimBlendFrameData::IGNORE_ROTATION) == 0){
 		RwMatrixSetIdentity(mat);
-
-		float norm = rot.MagnitudeSqr();
-		if(norm == 0.0f)
-			rot.w = 1.0f;
-		else
-			rot *= 1.0f/Sqrt(norm);
+		rot.Normalise();
 		rot.Get(mat);
 	}
 
@@ -154,7 +150,7 @@ FrameUpdateCallBackWithVelocityExtraction(AnimBlendFrameData *frame, void *arg)
 
 // original code uses do loops?
 void
-FrameUpdateCallBackWith3dVelocityExtraction(AnimBlendFrameData *frame, void *arg)
+FrameUpdateCallBackWith3dVelocityExtractionNonSkinned(AnimBlendFrameData *frame, void *arg)
 {
 	CVector vec, pos(0.0f, 0.0f, 0.0f);
 	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
@@ -201,12 +197,7 @@ FrameUpdateCallBackWith3dVelocityExtraction(AnimBlendFrameData *frame, void *arg
 
 	if((frame->flag & AnimBlendFrameData::IGNORE_ROTATION) == 0){
 		RwMatrixSetIdentity(mat);
-
-		float norm = rot.MagnitudeSqr();
-		if(norm == 0.0f)
-			rot.w = 1.0f;
-		else
-			rot *= 1.0f/Sqrt(norm);
+		rot.Normalise();
 		rot.Get(mat);
 	}
 
@@ -221,8 +212,202 @@ FrameUpdateCallBackWith3dVelocityExtraction(AnimBlendFrameData *frame, void *arg
 	RwMatrixUpdate(mat);
 }
 
-STARTPATCHES
-	InjectHook(0x4025F0, FrameUpdateCallBack, PATCH_JUMP);
-	InjectHook(0x4028B0, FrameUpdateCallBackWithVelocityExtraction, PATCH_JUMP);
-	InjectHook(0x402D40, FrameUpdateCallBackWith3dVelocityExtraction, PATCH_JUMP);
-ENDPATCHES
+#ifdef PED_SKIN
+
+void
+FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg)
+{
+	CVector vec, pos(0.0f, 0.0f, 0.0f);
+	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
+	float totalBlendAmount = 0.0f;
+	RpHAnimStdKeyFrame *xform = frame->hanimFrame;
+	CAnimBlendNode **node;
+	AnimBlendFrameUpdateData *updateData = (AnimBlendFrameUpdateData*)arg;
+
+	if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION &&
+	   gpAnimBlendClump->velocity){
+		if(frame->flag & AnimBlendFrameData::VELOCITY_EXTRACTION_3D)
+			FrameUpdateCallBackWith3dVelocityExtractionSkinned(frame, arg);
+		else
+			FrameUpdateCallBackWithVelocityExtractionSkinned(frame, arg);
+		return;
+	}
+
+	if(updateData->foobar)
+		for(node = updateData->nodes; *node; node++)
+			if((*node)->sequence && (*node)->association->IsPartial())
+				totalBlendAmount += (*node)->association->blendAmount;
+
+	for(node = updateData->nodes; *node; node++){
+		if((*node)->sequence){
+			(*node)->Update(vec, q, 1.0f-totalBlendAmount);
+			if((*node)->sequence->HasTranslation())
+				pos += vec;
+			rot += q;
+		}
+		++*node;
+	}
+
+	if((frame->flag & AnimBlendFrameData::IGNORE_ROTATION) == 0){
+		rot.Normalise();
+		xform->q.imag.x = rot.x;
+		xform->q.imag.y = rot.y;
+		xform->q.imag.z = rot.z;
+		xform->q.real = rot.w;
+	}
+
+	if((frame->flag & AnimBlendFrameData::IGNORE_TRANSLATION) == 0){
+		xform->t.x = pos.x;
+		xform->t.y = pos.y;
+		xform->t.z = pos.z;
+		xform->t.x += frame->resetPos.x;
+		xform->t.y += frame->resetPos.y;
+		xform->t.z += frame->resetPos.z;
+	}
+}
+
+void
+FrameUpdateCallBackWithVelocityExtractionSkinned(AnimBlendFrameData *frame, void *arg)
+{
+	CVector vec, pos(0.0f, 0.0f, 0.0f);
+	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
+	float totalBlendAmount = 0.0f;
+	float transx = 0.0f, transy = 0.0f;
+	float curx = 0.0f, cury = 0.0f;
+	float endx = 0.0f, endy = 0.0f;
+	bool looped = false;
+	RpHAnimStdKeyFrame *xform = frame->hanimFrame;
+	CAnimBlendNode **node;
+	AnimBlendFrameUpdateData *updateData = (AnimBlendFrameUpdateData*)arg;
+
+	if(updateData->foobar)
+		for(node = updateData->nodes; *node; node++)
+			if((*node)->sequence && (*node)->association->IsPartial())
+				totalBlendAmount += (*node)->association->blendAmount;
+
+	for(node = updateData->nodes; *node; node++)
+		if((*node)->sequence && (*node)->sequence->HasTranslation()){
+			if((*node)->association->HasTranslation()){
+				(*node)->GetCurrentTranslation(vec, 1.0f-totalBlendAmount);
+				cury += vec.y;
+				if((*node)->association->HasXTranslation())
+					curx += vec.x;
+			}
+		}
+
+	for(node = updateData->nodes; *node; node++){
+		if((*node)->sequence){
+			bool nodelooped = (*node)->Update(vec, q, 1.0f-totalBlendAmount);
+			rot += q;
+			if((*node)->sequence->HasTranslation()){
+				pos += vec;
+				if((*node)->association->HasTranslation()){
+					transy += vec.y;
+					if((*node)->association->HasXTranslation())
+						transx += vec.x;
+					looped |= nodelooped;
+					if(nodelooped){
+						(*node)->GetEndTranslation(vec, 1.0f-totalBlendAmount);
+						endy += vec.y;
+						if((*node)->association->HasXTranslation())
+							endx += vec.x;
+					}
+				}
+			}
+		}
+		++*node;
+	}
+
+	if((frame->flag & AnimBlendFrameData::IGNORE_ROTATION) == 0){
+		rot.Normalise();
+		xform->q.imag.x = rot.x;
+		xform->q.imag.y = rot.y;
+		xform->q.imag.z = rot.z;
+		xform->q.real = rot.w;
+	}
+
+	if((frame->flag & AnimBlendFrameData::IGNORE_TRANSLATION) == 0){
+		gpAnimBlendClump->velocity->x = transx - curx;
+		gpAnimBlendClump->velocity->y = transy - cury;
+		if(looped){
+			gpAnimBlendClump->velocity->x += endx;
+			gpAnimBlendClump->velocity->y += endy;
+		}
+		xform->t.x = pos.x - transx;
+		xform->t.y = pos.y - transy;
+		xform->t.z = pos.z;
+		if(xform->t.z >= -0.8f)
+			if(xform->t.z < -0.4f)
+				xform->t.z += (2.5f * xform->t.z + 2.0f) * frame->resetPos.z;
+			else
+				xform->t.z += frame->resetPos.z;
+		xform->t.x += frame->resetPos.x;
+		xform->t.y += frame->resetPos.y;
+	}
+}
+
+void
+FrameUpdateCallBackWith3dVelocityExtractionSkinned(AnimBlendFrameData *frame, void *arg)
+{
+	CVector vec, pos(0.0f, 0.0f, 0.0f);
+	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
+	float totalBlendAmount = 0.0f;
+	CVector trans(0.0f, 0.0f, 0.0f);
+	CVector cur(0.0f, 0.0f, 0.0f);
+	CVector end(0.0f, 0.0f, 0.0f);
+	bool looped = false;
+	RpHAnimStdKeyFrame *xform = frame->hanimFrame;
+	CAnimBlendNode **node;
+	AnimBlendFrameUpdateData *updateData = (AnimBlendFrameUpdateData*)arg;
+
+	if(updateData->foobar)
+		for(node = updateData->nodes; *node; node++)
+			if((*node)->sequence && (*node)->association->IsPartial())
+				totalBlendAmount += (*node)->association->blendAmount;
+
+	for(node = updateData->nodes; *node; node++)
+		if((*node)->sequence && (*node)->sequence->HasTranslation()){
+			if((*node)->association->HasTranslation()){
+				(*node)->GetCurrentTranslation(vec, 1.0f-totalBlendAmount);
+				cur += vec;
+			}
+		}
+
+	for(node = updateData->nodes; *node; node++){
+		if((*node)->sequence){
+			bool nodelooped = (*node)->Update(vec, q, 1.0f-totalBlendAmount);
+			rot += q;
+			if((*node)->sequence->HasTranslation()){
+				pos += vec;
+				if((*node)->association->HasTranslation()){
+					trans += vec;
+					looped |= nodelooped;
+					if(nodelooped){
+						(*node)->GetEndTranslation(vec, 1.0f-totalBlendAmount);
+						end += vec;
+					}
+				}
+			}
+		}
+		++*node;
+	}
+
+	if((frame->flag & AnimBlendFrameData::IGNORE_ROTATION) == 0){
+		rot.Normalise();
+		xform->q.imag.x = rot.x;
+		xform->q.imag.y = rot.y;
+		xform->q.imag.z = rot.z;
+		xform->q.real = rot.w;
+	}
+
+	if((frame->flag & AnimBlendFrameData::IGNORE_TRANSLATION) == 0){
+		*gpAnimBlendClump->velocity = trans - cur;
+		if(looped)
+			*gpAnimBlendClump->velocity += end;
+		xform->t.x = (pos - trans).x + frame->resetPos.x;
+		xform->t.y = (pos - trans).y + frame->resetPos.y;
+		xform->t.z = (pos - trans).z + frame->resetPos.z;
+	}
+}
+
+#endif

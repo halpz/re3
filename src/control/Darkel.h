@@ -1,9 +1,10 @@
 #pragma once
+
 #include "ModelIndices.h"
+#include "WeaponType.h"
 
 class CVehicle;
 class CPed;
-enum eWeaponType;
 
 enum
 {
@@ -16,22 +17,22 @@ enum
 class CDarkel
 {
 private:
-	static int32 &TimeLimit;
-	static int32 &PreviousTime;
-	static int32 &TimeOfFrenzyStart;
-	static int32 &WeaponType;
-	static int32 &AmmoInterruptedWeapon;
-	static int32 &KillsNeeded;
-	static int8 &InterruptedWeapon;
-	static int8 &bStandardSoundAndMessages;
-	static int8 &bNeedHeadShot;
-	static int8 &bProperKillFrenzy;
-	static uint16 &Status;
-	static uint16 (&RegisteredKills)[NUM_DEFAULT_MODELS];
-	static int32 &ModelToKill;
-	static int32 &ModelToKill2;
-	static int32 &ModelToKill3;
-	static int32 &ModelToKill4;
+	static int32 TimeLimit;
+	static int32 PreviousTime;
+	static int32 TimeOfFrenzyStart;
+	static int32 WeaponType;
+	static int32 AmmoInterruptedWeapon;
+	static int32 KillsNeeded;
+	static int8 InterruptedWeapon;
+	static int8 bStandardSoundAndMessages;
+	static int8 bNeedHeadShot;
+	static int8 bProperKillFrenzy;
+	static uint16 Status;
+	static uint16 RegisteredKills[NUM_DEFAULT_MODELS];
+	static int32 ModelToKill;
+	static int32 ModelToKill2;
+	static int32 ModelToKill3;
+	static int32 ModelToKill4;
 	static wchar *pStartMessage;
 
 public:

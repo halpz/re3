@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "FileMgr.h"
 #include "ParticleMgr.h"
@@ -8,8 +8,7 @@ cParticleSystemMgr mod_ParticleSystemManager;
 
 const char *ParticleFilename = "PARTICLE.CFG";
 
-//cParticleSystemMgr::cParticleSystemMgr()
-void cParticleSystemMgr::ctor()
+cParticleSystemMgr::cParticleSystemMgr()
 {
 	memset(this, 0, sizeof(*this));
 }
@@ -91,7 +90,7 @@ void cParticleSystemMgr::LoadParticleData()
 						break;
 
 					case CFG_PARAM_INITIAL_COLOR_VARIATION:
-						entry->m_InitialColorVariation = min(atoi(value), 100);
+						entry->m_InitialColorVariation = Min(atoi(value), 100);
 						break;
 
 					case CFG_PARAM_FADE_DESTINATION_COLOR_R:
@@ -242,9 +241,3 @@ void cParticleSystemMgr::LoadParticleData()
 		lineEnd++;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x50FCB0, &cParticleSystemMgr::ctor, PATCH_JUMP);
-	InjectHook(0x50FCD0, &cParticleSystemMgr::Initialise, PATCH_JUMP);
-	InjectHook(0x50FDF0, &cParticleSystemMgr::LoadParticleData, PATCH_JUMP);
-ENDPATCHES

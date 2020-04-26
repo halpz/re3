@@ -1,6 +1,6 @@
-#include <windows.h>
+#define WITHWINDOWS
 #include "common.h"
-#include "patcher.h"
+
 #include "CdStream.h"
 #include "rwcore.h"
 #include "RwHelper.h"
@@ -507,24 +507,3 @@ CdStreamGetNumImages(void)
 {	
 	return gNumImages;
 }
-
-
-STARTPATCHES
-	InjectHook(0x405B50, CdStreamInitThread, PATCH_JUMP);
-	InjectHook(0x405C80, CdStreamInit, PATCH_JUMP);
-	//InjectHook(0x405DB0, debug, PATCH_JUMP);
-	InjectHook(0x405DC0, GetGTA3ImgSize, PATCH_JUMP);
-	InjectHook(0x405DD0, CdStreamShutdown, PATCH_JUMP);
-	InjectHook(0x405E40, CdStreamRead, PATCH_JUMP);
-	InjectHook(0x405F90, CdStreamGetStatus, PATCH_JUMP);
-	InjectHook(0x406000, CdStreamGetLastPosn, PATCH_JUMP);
-	InjectHook(0x406010, CdStreamSync, PATCH_JUMP);
-	InjectHook(0x4060B0, AddToQueue, PATCH_JUMP);
-	InjectHook(0x4060F0, GetFirstInQueue, PATCH_JUMP);
-	InjectHook(0x406110, RemoveFirstInQueue, PATCH_JUMP);
-	InjectHook(0x406140, CdStreamThread, PATCH_JUMP);
-	InjectHook(0x406270, CdStreamAddImage, PATCH_JUMP);
-	InjectHook(0x4062E0, CdStreamGetImageName, PATCH_JUMP);
-	InjectHook(0x406300, CdStreamRemoveImages, PATCH_JUMP);
-	InjectHook(0x406370, CdStreamGetNumImages, PATCH_JUMP);
-ENDPATCHES

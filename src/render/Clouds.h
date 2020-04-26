@@ -3,13 +3,13 @@
 class CClouds
 {
 public:
-	static float &CloudRotation;
-	static uint32 &IndividualRotation;
+	static float CloudRotation;
+	static uint32 IndividualRotation;
 
-	static float &ms_cameraRoll;
-	static float &ms_horizonZ;
-	static CRGBA &ms_colourTop;
-	static CRGBA &ms_colourBottom;
+	static float ms_cameraRoll;
+	static float ms_horizonZ;
+	static CRGBA ms_colourTop;
+	static CRGBA ms_colourBottom;
 
 	static void Init(void);
 	static void Shutdown(void);

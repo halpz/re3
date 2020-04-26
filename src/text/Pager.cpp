@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Pager.h"
 #include "Timer.h"
 #include "Messages.h"
@@ -98,7 +98,7 @@ CPager::AddMessage(wchar *str, uint16 speed, uint16 priority, uint16 a5)
 		m_messages[i].m_pText = str;
 		m_messages[i].m_nSpeedMs = speed;
 		m_messages[i].m_nPriority = priority;
-		m_messages[i].field_10 = a5;
+		m_messages[i].unused = a5;
 		m_messages[i].m_nCurrentPosition = -(m_nNumDisplayLetters + 10);
 		m_messages[i].m_nTimeToChangePosition = CTimer::GetTimeInMilliseconds() + speed;
 		m_messages[i].m_nStringLength = size;
@@ -142,7 +142,7 @@ CPager::AddMessageWithNumber(wchar *str, int32 n1, int32 n2, int32 n3, int32 n4,
 		m_messages[i].m_pText = str;
 		m_messages[i].m_nSpeedMs = speed;
 		m_messages[i].m_nPriority = priority;
-		m_messages[i].field_10 = a11;
+		m_messages[i].unused = a11;
 		m_messages[i].m_nCurrentPosition = -(m_nNumDisplayLetters + 10);
 		m_messages[i].m_nTimeToChangePosition = CTimer::GetTimeInMilliseconds() + speed;
 		m_messages[i].m_nStringLength = size;
@@ -182,13 +182,3 @@ CPager::RestartCurrentMessage()
 		m_messages[0].m_nTimeToChangePosition = CTimer::GetTimeInMilliseconds() + m_messages[0].m_nSpeedMs;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x52B6F0, &CPager::Init, PATCH_JUMP);
-	InjectHook(0x52B740, &CPager::Process, PATCH_JUMP);
-	InjectHook(0x52B890, &CPager::Display, PATCH_JUMP);
-	InjectHook(0x52B940, &CPager::AddMessage, PATCH_JUMP);
-	InjectHook(0x52BB50, &CPager::AddMessageWithNumber, PATCH_JUMP);
-	InjectHook(0x52BE50, &CPager::RestartCurrentMessage, PATCH_JUMP);
-	InjectHook(0x52BE00, &CPager::ClearMessages, PATCH_JUMP);
-ENDPATCHES

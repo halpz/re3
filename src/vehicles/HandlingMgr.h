@@ -101,7 +101,7 @@ struct tHandlingData
 	float fSteeringLock;
 	float fTractionLoss;
 	float fTractionBias;
- uint32 field_AC;
+	float fABS; // should be VC leftover
 	float fSuspensionForceLevel;
 	float fSuspensionDampingLevel;
 	float fSuspensionUpperLimit;
@@ -126,7 +126,7 @@ private:
 	float field_C;	// unused it seems
 	float field_10;	//
 	tHandlingData HandlingData[NUMHANDLINGS];
-	uint32 field_302C;	// unused it seems, padding?
+	uint32 field_302C;	// unused it seems
 
 public:
 	cHandlingDataMgr(void);
@@ -140,4 +140,4 @@ public:
 	bool HasFrontWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
 };
 VALIDATE_SIZE(cHandlingDataMgr, 0x3030);
-extern cHandlingDataMgr &mod_HandlingManager;
+extern cHandlingDataMgr mod_HandlingManager;

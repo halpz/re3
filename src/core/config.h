@@ -47,7 +47,8 @@ enum Config {
 	NUM_PATHCONNECTIONS = 10260,
 
 	// Link list lengths
-	// TODO: alpha list
+	NUMALPHALIST = 20,
+	NUMALPHAENTITYLIST = 150,
 	NUMCOLCACHELINKS = 200,
 	NUMREFERENCES = 800,
 
@@ -160,7 +161,7 @@ enum Config {
 #	define GTA3_1_1_PATCH
 //#	define GTA3_STEAM_PATCH
 #	ifdef GTA_PS2_STUFF
-//#		define USE_PS2_RAND	// this is unsafe until we have the game reversed
+#		define USE_PS2_RAND
 #		define RANDOMSPLASH	// use random splash as on PS2
 #		define PS2_MATFX
 #	endif
@@ -189,9 +190,19 @@ enum Config {
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
 #define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
 #define MORE_LANGUAGES		// Add more translations to the game
+#define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch) 
+//#define USE_TXD_CDIMAGE		// generate and load textures from txd.img
+//#define USE_TEXTURE_POOL
+//#define OPENAL
+
+// Particle
+//#define PC_PARTICLE
+//#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
 
 // Pad
+#ifndef RW_GL3
 #define XINPUT
+#endif
 #define KANGAROO_CHEAT
 #define REGISTER_START_BUTTON
 
@@ -204,6 +215,8 @@ enum Config {
 #define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
 #define TRIANGLE_BACK_BUTTON
 // #define CIRCLE_BACK_BUTTON
+#define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better. 
+#define BETA_SLIDING_TEXT
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER	// makes game load main_freeroam.scm by default
@@ -220,8 +233,10 @@ enum Config {
 
 // Pickups
 //#define MONEY_MESSAGES
+#define CAMERA_PICKUP
 
 // Peds
+#define PED_SKIN		// support for skinned geometry on peds
 #define ANIMATE_PED_COL_MODEL
 #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
 // #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward

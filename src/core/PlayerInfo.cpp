@@ -1,35 +1,35 @@
 #include "common.h"
-#include "patcher.h"
-#include "main.h"
-#include "PlayerPed.h"
-#include "Wanted.h"
-#include "PlayerInfo.h"
+
+#include "Automobile.h"
+#include "Bridge.h"
+#include "Camera.h"
+#include "Cranes.h"
+#include "Darkel.h"
+#include "Explosion.h"
 #include "Fire.h"
 #include "Frontend.h"
-#include "PlayerSkin.h"
-#include "Darkel.h"
-#include "Messages.h"
-#include "Text.h"
-#include "Stats.h"
-#include "Remote.h"
-#include "World.h"
-#include "Replay.h"
-#include "Camera.h"
-#include "Pad.h"
-#include "ProjectileInfo.h"
-#include "Explosion.h"
-#include "Script.h"
-#include "Automobile.h"
-#include "HandlingMgr.h"
 #include "General.h"
-#include "SpecialFX.h"
-#include "Cranes.h"
-#include "Bridge.h"
-#include "WaterLevel.h"
+#include "HandlingMgr.h"
+#include "Messages.h"
+#include "Pad.h"
 #include "PathFind.h"
-#include "ZoneCull.h"
+#include "PlayerInfo.h"
+#include "PlayerPed.h"
+#include "PlayerSkin.h"
+#include "ProjectileInfo.h"
+#include "Remote.h"
 #include "Renderer.h"
+#include "Replay.h"
+#include "Script.h"
+#include "SpecialFX.h"
+#include "Stats.h"
 #include "Streaming.h"
+#include "Text.h"
+#include "Wanted.h"
+#include "WaterLevel.h"
+#include "World.h"
+#include "ZoneCull.h"
+#include "main.h"
 
 void
 CPlayerInfo::SetPlayerSkin(char *skin)
@@ -41,6 +41,10 @@ CPlayerInfo::SetPlayerSkin(char *skin)
 CVector&
 CPlayerInfo::GetPos()
 {
+#ifdef FIX_BUGS
+	if (!m_pPed)
+		return TheCamera.GetPosition();
+#endif
 	if (m_pPed->InVehicle())
 		return m_pPed->m_pMyVehicle->GetPosition();
 	return m_pPed->GetPosition();
@@ -180,7 +184,7 @@ CPlayerInfo::MakePlayerSafe(bool toggle)
 		m_pPed->bExplosionProof = true;
 		m_pPed->m_bCanBeDamaged = false;
 		((CPlayerPed*)m_pPed)->ClearAdrenaline();
-		CancelPlayerEnteringCars(false);
+		CancelPlayerEnteringCars(nil);
 		gFireManager.ExtinguishPoint(GetPos(), 4000.0f);
 		CExplosion::RemoveAllExplosionsInArea(GetPos(), 4000.0f);
 		CProjectileInfo::RemoveAllProjectiles();
@@ -342,6 +346,10 @@ CPlayerInfo::FindClosestCarSectorList(CPtrList& carList, CPed* ped, float unk1, 
 void
 CPlayerInfo::Process(void)
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	// Unused taxi feature. Gives you a dollar for every second with a passenger. Can be toggled via 0x29A opcode.
 	bool startTaxiTimer = true;
 	if (m_bUnusedTaxiThing && m_pPed->bInVehicle) {
@@ -548,30 +556,13 @@ CPlayerInfo::Process(void)
 	}
 	if (FindPlayerVehicle()) {
 		CVehicle *veh = FindPlayerVehicle();
-		veh->m_nZoneLevel = -1;
+		veh->m_nZoneLevel = LEVEL_IGNORE;
 		for (int i = 0; i < ARRAY_SIZE(veh->pPassengers); i++) {
 			if (veh->pPassengers[i])
-				veh->pPassengers[i]->m_nZoneLevel = 0;
+				veh->pPassengers[i]->m_nZoneLevel = LEVEL_NONE;
 		}
 		CStats::DistanceTravelledInVehicle += veh->m_fDistanceTravelled;
 	} else {
 		CStats::DistanceTravelledOnFoot += FindPlayerPed()->m_fDistanceTravelled;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x4B5DC0, &CPlayerInfo::dtor, PATCH_JUMP);
-	InjectHook(0x4A1700, &CPlayerInfo::LoadPlayerSkin, PATCH_JUMP);
-	InjectHook(0x4A1750, &CPlayerInfo::DeletePlayerSkin, PATCH_JUMP);
-	InjectHook(0x4A12E0, &CPlayerInfo::KillPlayer, PATCH_JUMP);
-	InjectHook(0x4A1330, &CPlayerInfo::ArrestPlayer, PATCH_JUMP);
-	InjectHook(0x49FC10, &CPlayerInfo::Clear, PATCH_JUMP);
-	InjectHook(0x4A15C0, &CPlayerInfo::BlowUpRCBuggy, PATCH_JUMP);
-	InjectHook(0x4A13B0, &CPlayerInfo::CancelPlayerEnteringCars, PATCH_JUMP);
-	InjectHook(0x4A1400, &CPlayerInfo::MakePlayerSafe, PATCH_JUMP);
-	InjectHook(0x4A0EC0, &CPlayerInfo::EvaluateCarPosition, PATCH_JUMP);
-	InjectHook(0x4A15F0, &CPlayerInfo::AwardMoneyForExplosion, PATCH_JUMP);
-	InjectHook(0x4A0B20, &CPlayerInfo::LoadPlayerInfo, PATCH_JUMP);
-	InjectHook(0x4A0960, &CPlayerInfo::SavePlayerInfo, PATCH_JUMP);
-	InjectHook(0x49FD30, &CPlayerInfo::Process, PATCH_JUMP);
-ENDPATCHES

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "FileMgr.h"
 #include "WeaponInfo.h"
@@ -7,7 +7,6 @@
 #include "AnimBlendAssociation.h"
 #include "Weapon.h"
 
-//CWeaponInfo (&CWeaponInfo::ms_apWeaponInfos)[14] = * (CWeaponInfo(*)[14]) * (uintptr*)0x6503EC;
 CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
 
 static char ms_aWeaponNames[][32] = {
@@ -203,12 +202,3 @@ CWeaponInfo::Shutdown(void)
 	debug("Shutting down CWeaponInfo...\n");
 	debug("CWeaponInfo shut down\n");
 }
-
-STARTPATCHES
-	InjectHook(0x564EA0, &CWeaponInfo::Initialise, PATCH_JUMP);
-	InjectHook(0x564FD0, &CWeaponInfo::GetWeaponInfo, PATCH_JUMP);
-	InjectHook(0x5653E0, &CWeaponInfo::FindWeaponType, PATCH_JUMP);
-	InjectHook(0x5653B0, &CWeaponInfo::FindWeaponFireType, PATCH_JUMP);
-	InjectHook(0x564FE0, &CWeaponInfo::LoadWeaponData, PATCH_JUMP);
-	InjectHook(0x564FB0, &CWeaponInfo::Shutdown, PATCH_JUMP);
-ENDPATCHES

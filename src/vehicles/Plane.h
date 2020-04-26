@@ -33,8 +33,6 @@ public:
 	int16 m_nPlaneId;
 	int16 m_isFarAway;
 	int16 m_nCurPathNode;
-	char field_654;
-	char field_655;
 	float m_fSpeed;
 	uint32 m_nFrameWhenHit;
 	bool m_bHasBeenHit;
@@ -67,6 +65,6 @@ public:
 };
 static_assert(sizeof(CPlane) == 0x29C, "CPlane: error");
 
-extern float &LandingPoint;
-extern float &TakeOffPoint;
-extern float *PlanePathPosition;	//[3]
+extern float LandingPoint;
+extern float TakeOffPoint;
+extern float PlanePathPosition[3];

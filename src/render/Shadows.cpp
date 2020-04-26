@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "TxdStore.h"
 #include "Timer.h"
@@ -13,6 +13,9 @@
 #include "Weather.h"
 #include "ModelIndices.h"
 #include "RenderBuffer.h"
+#ifdef FIX_BUGS
+#include "Replay.h"
+#endif
 #include "PointLights.h"
 #include "SpecialFX.h"
 #include "Shadows.h"
@@ -20,43 +23,31 @@
 SETTWEAKPATH("Shadows");
 TWEAKBOOL(gbPrintShite);
 
-#if 1
 RwImVertexIndex ShadowIndexList[24];
-#else
-RwImVertexIndex (&ShadowIndexList)[24] = *(RwImVertexIndex (*)[24])*(int *)0x649188;
-#endif
 
-RwTexture *&gpShadowCarTex = *(RwTexture **)0x8F2C90;
-RwTexture *&gpShadowPedTex = *(RwTexture **)0x8F59D0;
-RwTexture *&gpShadowHeliTex = *(RwTexture **)0x8E2A90;
-RwTexture *&gpShadowExplosionTex = *(RwTexture **)0x8F2A00;
-RwTexture *&gpShadowHeadLightsTex = *(RwTexture **)0x95CB98;
-RwTexture *&gpOutline1Tex = *(RwTexture **)0x8F1B24;
-RwTexture *&gpOutline2Tex = *(RwTexture **)0x8F1B04;
-RwTexture *&gpOutline3Tex = *(RwTexture **)0x8F1B08;
-RwTexture *&gpBloodPoolTex = *(RwTexture **)0x9415F8;
-RwTexture *&gpReflectionTex = *(RwTexture **)0x8F582C;
-RwTexture *&gpGoalMarkerTex = *(RwTexture **)0x94142C;
-RwTexture *&gpWalkDontTex = *(RwTexture **)0x95CB4C;
-RwTexture *&gpCrackedGlassTex = *(RwTexture **)0x95CB94;
-RwTexture *&gpPostShadowTex = *(RwTexture **)0x8F59D4;
-RwTexture *&gpGoalTex = *(RwTexture**)0x94142C;
+RwTexture *gpShadowCarTex;
+RwTexture *gpShadowPedTex;
+RwTexture *gpShadowHeliTex;
+RwTexture *gpShadowExplosionTex;
+RwTexture *gpShadowHeadLightsTex;
+RwTexture *gpOutline1Tex;
+RwTexture *gpOutline2Tex;
+RwTexture *gpOutline3Tex;
+RwTexture *gpBloodPoolTex;
+RwTexture *gpReflectionTex;
+RwTexture *gpGoalMarkerTex;
+RwTexture *gpWalkDontTex;
+RwTexture *gpCrackedGlassTex;
+RwTexture *gpPostShadowTex;
+RwTexture *gpGoalTex;
 
-#if 1
 int16            CShadows::ShadowsStoredToBeRendered;
 CStoredShadow    CShadows::asShadowsStored  [MAX_STOREDSHADOWS];
 CPolyBunch       CShadows::aPolyBunches     [MAX_POLYBUNCHES];
 CStaticShadow    CShadows::aStaticShadows   [MAX_STATICSHADOWS];
 CPolyBunch      *CShadows::pEmptyBunchList;
 CPermanentShadow CShadows::aPermanentShadows[MAX_PERMAMENTSHADOWS];
-#else
-int16              &CShadows::ShadowsStoredToBeRendered = *(int16*)0x95CCEE;
-CStoredShadow      (&CShadows::asShadowsStored)[MAX_STOREDSHADOWS] = *(CStoredShadow (*)[MAX_STOREDSHADOWS])*(int *)0x779058;
-CPolyBunch         (&CShadows::aPolyBunches)[MAX_POLYBUNCHES] = *(CPolyBunch (*)[MAX_POLYBUNCHES])*(int *)0x86F4C8;
-CStaticShadow      (&CShadows::aStaticShadows)[MAX_STATICSHADOWS] = *(CStaticShadow (*)[MAX_STATICSHADOWS])*(int *)0x773BE8;
-CPolyBunch         *&CShadows::pEmptyBunchList = *(CPolyBunch**)0x8F435C;
-CPermanentShadow   (&CShadows::aPermanentShadows)[MAX_PERMAMENTSHADOWS] = *(CPermanentShadow (*)[MAX_PERMAMENTSHADOWS])*(int *)0x712040;
-#endif
+
 
 void
 CShadows::Init(void)
@@ -728,10 +719,10 @@ CShadows::RenderStoredShadows(void)
 					float fStartY = shadowPos.y - fHeight;
 					float fEndY   = shadowPos.y + fHeight;
 
-					int32 nStartX = max(CWorld::GetSectorIndexX(fStartX), 0);
-					int32 nStartY = max(CWorld::GetSectorIndexY(fStartY), 0);
-					int32 nEndX   = min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X-1);
-					int32 nEndY   = min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y-1);
+					int32 nStartX = Max(CWorld::GetSectorIndexX(fStartX), 0);
+					int32 nStartY = Max(CWorld::GetSectorIndexY(fStartY), 0);
+					int32 nEndX   = Min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X-1);
+					int32 nEndY   = Min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y-1);
 
 					CWorld::AdvanceCurrentScanCode();
 
@@ -874,10 +865,10 @@ CShadows::GeneratePolysForStaticShadow(int16 nStaticShadowID)
 	float fStartY = shadowPos.y - fHeight;
 	float fEndY   = shadowPos.y + fHeight;
 
-	int32 nStartX = max(CWorld::GetSectorIndexX(fStartX), 0);
-	int32 nStartY = max(CWorld::GetSectorIndexY(fStartY), 0);
-	int32 nEndX   = min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X-1);
-	int32 nEndY   = min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y-1);
+	int32 nStartX = Max(CWorld::GetSectorIndexX(fStartX), 0);
+	int32 nStartY = Max(CWorld::GetSectorIndexY(fStartY), 0);
+	int32 nEndX   = Min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X-1);
+	int32 nEndY   = Min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y-1);
 
 	CWorld::AdvanceCurrentScanCode();
 
@@ -1017,11 +1008,11 @@ CShadows::CastShadowEntity(CEntity *pEntity,  float fStartX, float fStartY, floa
 	Points[3].x = (fLengthRight   - fFrontRight)    - fSideRight;
 	Points[3].y = (fLengthForward - fFrontForward)  - fSideForward;
 
-	float MinX = min(min(Points[0].x, Points[1].x), min(Points[2].x, Points[3].x));
-	float MaxX = max(max(Points[0].x, Points[1].x), max(Points[2].x, Points[3].x));
+	float MinX = Min(Min(Points[0].x, Points[1].x), Min(Points[2].x, Points[3].x));
+	float MaxX = Max(Max(Points[0].x, Points[1].x), Max(Points[2].x, Points[3].x));
 
-	float MinY = min(min(Points[0].y, Points[1].y), min(Points[2].y, Points[3].y));
-	float MaxY = max(max(Points[0].y, Points[1].y), max(Points[2].y, Points[3].y));
+	float MinY = Min(Min(Points[0].y, Points[1].y), Min(Points[2].y, Points[3].y));
+	float MaxY = Max(Max(Points[0].y, Points[1].y), Max(Points[2].y, Points[3].y));
 
 	float MaxZ = pPosn->z - pEntity->GetPosition().z;
 	float MinZ = MaxZ - fZDistance;
@@ -1621,6 +1612,10 @@ CShadows::CalcPedShadowValues(CVector vecLightDir,
 void
 CShadows::RenderExtraPlayerShadows(void)
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	if ( CTimeCycle::GetLightShadowStrength() != 0 )
 	{
 		CVehicle *pCar = FindPlayerVehicle();
@@ -1647,9 +1642,9 @@ CShadows::RenderExtraPlayerShadows(void)
 
 							int32 nColorStrength;
 							if ( fLightDist < fRadius*0.5f )
-								nColorStrength = CTimeCycle::GetLightShadowStrength();
+								nColorStrength = (5*CTimeCycle::GetLightShadowStrength()/8);
 							else
-								nColorStrength = int32(CTimeCycle::GetLightShadowStrength() * fMult);
+								nColorStrength = int32((5*CTimeCycle::GetLightShadowStrength()/8) * fMult);
 
 							float fInv = 1.0f / fLightDist;
 							vecLight.x *= fInv;
@@ -1768,40 +1763,7 @@ CShadows::RenderIndicatorShadow(uint32 nID, uint8 ShadowType, RwTexture *pTextur
 {
 	ASSERT(pPosn != NULL);
 
-	C3dMarkers::PlaceMarkerSet(nID, _TODOCONST(4), *pPosn, max(fFrontX, -fSideY),
+	C3dMarkers::PlaceMarkerSet(nID, _TODOCONST(4), *pPosn, Max(fFrontX, -fSideY),
 			0, 128, 255, 128,
 			2048, 0.2f, 0);
 }
-
-
-STARTPATCHES
-	InjectHook(0x512AB0, CShadows::Init, PATCH_JUMP);
-	InjectHook(0x512F20, CShadows::Shutdown, PATCH_JUMP);
-	InjectHook(0x512FD0, CShadows::AddPermanentShadow, PATCH_JUMP);
-	InjectHook(0x5130A0, CShadows::StoreStaticShadow, PATCH_JUMP);
-	InjectHook(0x513550, (void(*)(uint8, CVector *, float, float, float, float, int16, uint8, uint8, uint8))CShadows::StoreShadowToBeRendered, PATCH_JUMP);
-	InjectHook(0x513750, (void(*)(uint8, RwTexture *, CVector *, float, float, float, float, int16, uint8, uint8, uint8, float, bool, float))CShadows::StoreShadowToBeRendered, PATCH_JUMP);
-	InjectHook(0x513830, CShadows::StoreShadowForCar, PATCH_JUMP);
-	InjectHook(0x513A70, CShadows::StoreCarLightShadow, PATCH_JUMP);
-	InjectHook(0x513C50, CShadows::StoreShadowForPed, PATCH_JUMP);
-	InjectHook(0x513CB0, CShadows::StoreShadowForPedObject, PATCH_JUMP);
-	InjectHook(0x513E00, CShadows::StoreShadowForTree, PATCH_JUMP);
-	InjectHook(0x513E10, CShadows::StoreShadowForPole, PATCH_JUMP);
-	InjectHook(0x513FC0, CShadows::SetRenderModeForShadowType, PATCH_JUMP);
-	InjectHook(0x514010, CShadows::RenderStoredShadows, PATCH_JUMP);
-	InjectHook(0x5145F0, CShadows::RenderStaticShadows, PATCH_JUMP);
-	InjectHook(0x514910, CShadows::GeneratePolysForStaticShadow, PATCH_JUMP);
-	InjectHook(0x514C90, CShadows::CastShadowSectorList, PATCH_JUMP);
-	InjectHook(0x514E30, CShadows::CastShadowEntity, PATCH_JUMP);
-	InjectHook(0x516BE0, CShadows::UpdateStaticShadows, PATCH_JUMP);
-	InjectHook(0x516C40, CShadows::UpdatePermanentShadows, PATCH_JUMP);
-	InjectHook(0x516E70, &CStaticShadow::Free, PATCH_JUMP);
-	InjectHook(0x516EB0, CShadows::CalcPedShadowValues, PATCH_JUMP);
-	InjectHook(0x516F90, CShadows::RenderExtraPlayerShadows, PATCH_JUMP);
-	InjectHook(0x517570, CShadows::TidyUpShadows, PATCH_JUMP);
-	InjectHook(0x517810, CShadows::RenderIndicatorShadow, PATCH_JUMP);
-	//InjectHook(0x517900, &CPermanentShadow::CPermanentShadow, PATCH_JUMP);
-	//InjectHook(0x517910, &CStaticShadow::CStaticShadow, PATCH_JUMP);
-	//InjectHook(0x517920, &CPolyBunch::CPolyBunch, PATCH_JUMP);
-	//InjectHook(0x517940, &CStoredShadow::CStoredShadow, PATCH_JUMP);
-ENDPATCHES

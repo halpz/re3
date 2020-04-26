@@ -1,12 +1,12 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Glass.h"
 #include "Timer.h"
 #include "Object.h"
 #include "General.h"
 #include "AudioScriptObject.h"
 #include "World.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "Particle.h"
 #include "Camera.h"
 #include "RenderBuffer.h"
@@ -404,6 +404,7 @@ CGlass::AskForObjectToBeRenderedInGlass(CEntity *entity)
 void
 CGlass::RenderEntityInGlass(CEntity *entity)
 {
+	ASSERT(entity!=nil);
 	CObject *object = (CObject *)entity;
 
 	if ( object->bGlassBroken )
@@ -419,7 +420,7 @@ CGlass::RenderEntityInGlass(CEntity *entity)
 	uint8 alpha = CalcAlphaWithNormal(&fwdNorm);
 
 	CColModel *col = object->GetColModel();
-
+	ASSERT(col!=nil);
 	if ( col->numTriangles >= 2 )
 	{
 		CVector a = object->GetMatrix() * col->vertices[0];
@@ -523,6 +524,8 @@ CGlass::RenderEntityInGlass(CEntity *entity)
 int32
 CGlass::CalcAlphaWithNormal(CVector *normal)
 {
+	ASSERT(normal!=nil);
+	
 	float fwdDir = 2.0f * DotProduct(*normal, TheCamera.GetForward());
 	float fwdDot = DotProduct(TheCamera.GetForward()-fwdDir*(*normal), CVector(0.57f, 0.57f, -0.57f));
 	return int32(lerp(fwdDot*fwdDot*fwdDot*fwdDot*fwdDot*fwdDot, 20.0f, 255.0f));
@@ -597,6 +600,8 @@ CGlass::RenderReflectionPolys(void)
 void
 CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, CVector point, bool explosion)
 {
+	ASSERT(entity!=nil);
+	
 	CObject *object = (CObject *)entity;
 
 	if ( object->bGlassBroken )
@@ -605,18 +610,19 @@ CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, 
 	object->bGlassCracked = true;
 
 	CColModel *col = object->GetColModel();
-
+	ASSERT(col!=nil);
+	
 	CVector a = object->GetMatrix() * col->vertices[0];
 	CVector b = object->GetMatrix() * col->vertices[1];
 	CVector c = object->GetMatrix() * col->vertices[2];
 	CVector d = object->GetMatrix() * col->vertices[3];
 
-	float minx = min(min(a.x, b.x), min(c.x, d.x));
-	float maxx = max(max(a.x, b.x), max(c.x, d.x));
-	float miny = min(min(a.y, b.y), min(c.y, d.y));
-	float maxy = max(max(a.y, b.y), max(c.y, d.y));
-	float minz = min(min(a.z, b.z), min(c.z, d.z));
-	float maxz = max(max(a.z, b.z), max(c.z, d.z));
+	float minx = Min(Min(a.x, b.x), Min(c.x, d.x));
+	float maxx = Max(Max(a.x, b.x), Max(c.x, d.x));
+	float miny = Min(Min(a.y, b.y), Min(c.y, d.y));
+	float maxy = Max(Max(a.y, b.y), Max(c.y, d.y));
+	float minz = Min(Min(a.z, b.z), Min(c.z, d.z));
+	float maxz = Max(Max(a.z, b.z), Max(c.z, d.z));
 
 
 	if ( amount > 300.0f )
@@ -647,6 +653,8 @@ CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, 
 void
 CGlass::WindowRespondsToSoftCollision(CEntity *entity, float amount)
 {
+	ASSERT(entity!=nil);
+	
 	CObject *object = (CObject *)entity;
 
 	if ( amount > 50.0f && !object->bGlassCracked )
@@ -659,6 +667,8 @@ CGlass::WindowRespondsToSoftCollision(CEntity *entity, float amount)
 void
 CGlass::WasGlassHitByBullet(CEntity *entity, CVector point)
 {
+	ASSERT(entity!=nil);
+	
 	CObject *object = (CObject *)entity;
 
 	if ( IsGlass(object->GetModelIndex()) )
@@ -679,6 +689,8 @@ CGlass::WasGlassHitByBullet(CEntity *entity, CVector point)
 void
 CGlass::WindowRespondsToExplosion(CEntity *entity, CVector point)
 {
+	ASSERT(entity!=nil);
+	
 	CObject *object = (CObject *)entity;
 
 	CVector distToGlass = object->GetPosition() - point;
@@ -696,26 +708,3 @@ CGlass::WindowRespondsToExplosion(CEntity *entity, CVector point)
 			object->bGlassCracked = true;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x501F20, CGlass::Init, PATCH_JUMP);
-	InjectHook(0x502050, CGlass::Update, PATCH_JUMP);
-	InjectHook(0x502080, &CFallingGlassPane::Update, PATCH_JUMP);
-	InjectHook(0x502350, CGlass::Render, PATCH_JUMP);
-	InjectHook(0x502490, CGlass::FindFreePane, PATCH_JUMP);
-	InjectHook(0x5024C0, &CFallingGlassPane::Render, PATCH_JUMP);
-	InjectHook(0x502AC0, CGlass::GeneratePanesForWindow, PATCH_JUMP);
-	InjectHook(0x5033F0, CGlass::AskForObjectToBeRenderedInGlass, PATCH_JUMP);
-	InjectHook(0x503420, CGlass::RenderEntityInGlass, PATCH_JUMP);
-	InjectHook(0x503C90, CGlass::CalcAlphaWithNormal, PATCH_JUMP);
-	InjectHook(0x503D60, CGlass::RenderHiLightPolys, PATCH_JUMP);
-	InjectHook(0x503DE0, CGlass::RenderShatteredPolys, PATCH_JUMP);
-	InjectHook(0x503E70, CGlass::RenderReflectionPolys, PATCH_JUMP);
-	InjectHook(0x503F10, CGlass::WindowRespondsToCollision, PATCH_JUMP);
-	InjectHook(0x504630, CGlass::WindowRespondsToSoftCollision, PATCH_JUMP);
-	InjectHook(0x504670, CGlass::WasGlassHitByBullet, PATCH_JUMP);
-	InjectHook(0x504790, CGlass::WindowRespondsToExplosion, PATCH_JUMP);
-	//InjectHook(0x504880, `global constructor keyed to'glass.cpp, PATCH_JUMP);
-	//InjectHook(0x5048D0, CFallingGlassPane::~CFallingGlassPane, PATCH_JUMP);
-	//InjectHook(0x5048E0, CFallingGlassPane::CFallingGlassPane, PATCH_JUMP);
-ENDPATCHES

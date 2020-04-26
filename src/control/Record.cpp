@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Record.h"
 
 #include "FileMgr.h"
@@ -10,11 +10,11 @@
 #include "VehicleModelInfo.h"
 #include "World.h"
 
-uint16 &CRecordDataForGame::RecordingState = *(uint16*)0x95CC24;
-uint8*& CRecordDataForGame::pDataBuffer = *(uint8**)0x8F1B70;
-uint8*& CRecordDataForGame::pDataBufferPointer = *(uint8**)0x8F1AB0;
-int& CRecordDataForGame::FId = *(int*)0x885BA4;
-tGameBuffer& CRecordDataForGame::pDataBufferForFrame = *(tGameBuffer*)0x72CED0;
+uint16 CRecordDataForGame::RecordingState;
+uint8* CRecordDataForGame::pDataBuffer;
+uint8* CRecordDataForGame::pDataBufferPointer;
+int CRecordDataForGame::FId;
+tGameBuffer CRecordDataForGame::pDataBufferForFrame;
 
 #define MEMORY_FOR_GAME_RECORD (150000)
 
@@ -176,15 +176,15 @@ uint16 CRecordDataForGame::CalcGameChecksum(void)
 	return checksum ^ checksum >> 16;
 }
 
-uint8& CRecordDataForChase::Status = *(uint8*)0x95CDCE;
-int& CRecordDataForChase::PositionChanges = *(int*)0x8F59C8;
-uint8& CRecordDataForChase::CurrentCar = *(uint8*)0x95CDC9;
-CAutomobile* (&CRecordDataForChase::pChaseCars)[NUM_CHASE_CARS] = *(CAutomobile * (*)[NUM_CHASE_CARS])*(uintptr*)0x6F46A8;
-uint32& CRecordDataForChase::AnimStartTime = *(uint32*)0x8F1AEC;
-float& CRecordDataForChase::AnimTime = *(float*)0x880F88;
-CCarStateEachFrame* (&CRecordDataForChase::pBaseMemForCar)[NUM_CHASE_CARS] = *(CCarStateEachFrame * (*)[NUM_CHASE_CARS])*(uintptr*)0x70EA18;
-float& CRecordDataForChase::TimeMultiplier = *(float*)0x8E2A94;
-int& CRecordDataForChase::FId2 = *(int*)0x8E2C18;
+uint8 CRecordDataForChase::Status;
+int CRecordDataForChase::PositionChanges;
+uint8 CRecordDataForChase::CurrentCar;
+CAutomobile* CRecordDataForChase::pChaseCars[NUM_CHASE_CARS];
+uint32 CRecordDataForChase::AnimStartTime;
+float CRecordDataForChase::AnimTime;
+CCarStateEachFrame* CRecordDataForChase::pBaseMemForCar[NUM_CHASE_CARS];
+float CRecordDataForChase::TimeMultiplier;
+int CRecordDataForChase::FId2;
 
 #define CHASE_SCENE_LENGTH_IN_SECONDS (80)
 #define CHASE_SCENE_FRAMES_PER_SECOND (15) // skipping every second frame
@@ -296,7 +296,7 @@ void CRecordDataForChase::SaveOrRetrieveCarPositions(void)
 	case STATE_PLAYBACK:
 	{
 		TimeMultiplier += CTimer::GetTimeStepNonClippedInSeconds();
-		float EndOfFrameTime = CHASE_SCENE_FRAMES_PER_SECOND * min(CHASE_SCENE_LENGTH_IN_SECONDS, TimeMultiplier);
+		float EndOfFrameTime = CHASE_SCENE_FRAMES_PER_SECOND * Min(CHASE_SCENE_LENGTH_IN_SECONDS, TimeMultiplier);
 		for (int i = 0; i < NUM_CHASE_CARS; i++) {
 			if (!pBaseMemForCar[i])
 				continue;
@@ -371,7 +371,7 @@ void CRecordDataForChase::RestoreInfoForCar(CAutomobile* pCar, CCarStateEachFram
 		else
 			pCar->GetModelInfo()->ChooseVehicleColour(pCar->m_currentColour1, pCar->m_currentColour2);
 	}
-	pCar->m_fHealth = min(pCar->m_fHealth, 500.0f);
+	pCar->m_fHealth = Min(pCar->m_fHealth, 500.0f);
 	if (stop) {
 		pCar->m_fGasPedal = 0.0f;
 		pCar->m_fBrakePedal = 0.0f;

@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "Entity.h"
 #include "Fluff.h"
 #include "Camera.h"
@@ -159,12 +159,12 @@ void CMovingThings::Update()
 	int block = CTimer::GetFrameCounter() % TIME_SPAN;
 
 	for (i = (block * NUMMOVINGTHINGS) / TIME_SPAN; i < ((block + 1) * NUMMOVINGTHINGS) / TIME_SPAN; i++) {
-		if (aMovingThings[i].field_A == 1)
+		if (aMovingThings[i].m_nHidden == 1)
 			aMovingThings[i].Update();
 	}
 
 	for (i = 0; i < CMovingThings::Num; i++) {
-		if (aMovingThings[i].field_A == 0)
+		if (aMovingThings[i].m_nHidden == 0)
 			aMovingThings[i].Update();
 	}
 
@@ -212,14 +212,14 @@ void CMovingThing::Update()
 	m_pEntity->UpdateRwFrame();
 	
 	if (SQR(m_pEntity->GetPosition().x - TheCamera.GetPosition().x) + SQR(m_pEntity->GetPosition().y - TheCamera.GetPosition().y) < 40000.0f) {
-		if (field_A == 1) {
+		if (m_nHidden == 1) {
 			AddToList(&CMovingThings::StartCloseList);
-			field_A = 0;
+			m_nHidden = 0;
 		}
 	} else {
-		if (field_A == 0) {
+		if (m_nHidden == 0) {
 			RemoveFromList();
-			field_A = 1;
+			m_nHidden = 1;
 		}
 	}
 }
@@ -864,31 +864,3 @@ void CDigitalClock::Render()
 		CSprite::FlushSpriteBuffer();
 	}
 }
-
-STARTPATCHES
-InjectHook(0x4FF290, &CMovingThing::Update, PATCH_JUMP);
-InjectHook(0x4FF320, &CMovingThing::AddToList, PATCH_JUMP);
-InjectHook(0x4FF340, &CMovingThing::RemoveFromList, PATCH_JUMP);
-
-InjectHook(0x4FE7C0, &CMovingThings::Init,     PATCH_JUMP);
-InjectHook(0x4FF020, &CMovingThings::Shutdown, PATCH_JUMP);
-InjectHook(0x4FF0D0, &CMovingThings::Update,   PATCH_JUMP);
-InjectHook(0x4FF210, &CMovingThings::Render,   PATCH_JUMP);
-
-InjectHook(0x4FF360, &FindTunnelMessage,       PATCH_JUMP);
-InjectHook(0x4FF390, &FindBridgeMessage,       PATCH_JUMP);
-InjectHook(0x4FF3C0, &FindTimeMessage,         PATCH_JUMP);
-InjectHook(0x4FF450, &FindDigitalClockMessage, PATCH_JUMP);
-
-InjectHook(0x4FF610, &CScrollBar::Init,   PATCH_JUMP);
-InjectHook(0x4FF6E0, &CScrollBar::Update, PATCH_JUMP);
-InjectHook(0x4FFCE0, &CScrollBar::Render, PATCH_JUMP);
-
-InjectHook(0x5000D0, &CTowerClock::Init,   PATCH_JUMP);
-InjectHook(0x500130, &CTowerClock::Update, PATCH_JUMP);
-InjectHook(0x5001D0, &CTowerClock::Render, PATCH_JUMP);
-
-InjectHook(0x5004F0, &CDigitalClock::Init,   PATCH_JUMP);
-InjectHook(0x500550, &CDigitalClock::Update, PATCH_JUMP);
-InjectHook(0x5005F0, &CDigitalClock::Render, PATCH_JUMP);
-ENDPATCHES

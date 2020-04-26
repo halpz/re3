@@ -11,8 +11,8 @@ struct CReference
 class CReferences
 {
 public:
-	static CReference *aRefs; //[NUMREFERENCES];
-	static CReference *&pEmptyList;
+	static CReference aRefs[NUMREFERENCES];
+	static CReference *pEmptyList;
 
 	static void Init(void);
 	static void RemoveReferencesToPlayer(void);

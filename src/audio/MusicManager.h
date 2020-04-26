@@ -86,4 +86,4 @@ public:
 
 static_assert(sizeof(cMusicManager) == 0x95C, "cMusicManager: error");
 
-extern cMusicManager &MusicManager;
+extern cMusicManager MusicManager;

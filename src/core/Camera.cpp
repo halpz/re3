@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Draw.h"
 #include "World.h"
@@ -29,6 +29,7 @@
 #include "SceneEdit.h"
 #include "Pools.h"
 #include "Debug.h"
+#include "GenericGameStorage.h"
 #include "Camera.h"
 
 enum
@@ -57,9 +58,9 @@ enum
 #define PLAYER (CWorld::Players[CWorld::PlayerInFocus].m_pPed)
 // NB: removed explicit TheCamera from all functions
 
-CCamera &TheCamera = *(CCamera*)0x6FACF8;
-bool &CCamera::m_bUseMouse3rdPerson = *(bool *)0x5F03D8;
-bool &bDidWeProcessAnyCinemaCam = *(bool*)0x95CD46;
+CCamera TheCamera;
+bool CCamera::m_bUseMouse3rdPerson = true;
+bool bDidWeProcessAnyCinemaCam;
 
 #ifdef IMPROVED_CAMERA
 #define KEYJUSTDOWN(k) ControlsManager.GetIsKeyboardKeyJustDown((RsKeyCodes)k)
@@ -466,7 +467,7 @@ CCamera::Process(void)
 	GetPosition().z += shakeOffset*(((shakeRand&0xF00)>>8)-7);
 
 	if(shakeOffset > 0.0f && m_BlurType != MBLUR_SNIPER)
-		SetMotionBlurAlpha(min((int)(shakeStrength*255.0f) + 25, 150));
+		SetMotionBlurAlpha(Min((int)(shakeStrength*255.0f) + 25, 150));
 	if(Cams[ActiveCam].Mode == CCam::MODE_1STPERSON && FindPlayerVehicle() && FindPlayerVehicle()->GetUp().z < 0.2f)
 		SetMotionBlur(230, 230, 230, 215, MBLUR_NORMAL);
 
@@ -488,19 +489,19 @@ CCamera::Process(void)
 		CDraw::SetFOV(Cams[2].FOV);
 		m_vecGameCamPos = Cams[ActiveCam].Source;
 
-		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = (RwV3d)GetPosition();
-		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = (RwV3d)GetForward();
-		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = (RwV3d)GetUp();
-		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = (RwV3d)GetRight();
+		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = GetPosition().toRwV3d();
+		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = GetForward().toRwV3d();
+		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = GetUp().toRwV3d();
+		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = GetRight().toRwV3d();
 		RwMatrixUpdate(RwFrameGetMatrix(frame));
 		RwFrameUpdateObjects(frame);
 	}else{
 		RwFrame *frame = RwCameraGetFrame(m_pRwCamera);
 		m_vecGameCamPos = GetPosition();
-		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = (RwV3d)GetPosition();
-		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = (RwV3d)GetForward();
-		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = (RwV3d)GetUp();
-		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = (RwV3d)GetRight();
+		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = GetPosition().toRwV3d();
+		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = GetForward().toRwV3d();
+		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = GetUp().toRwV3d();
+		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = GetRight().toRwV3d();
 		RwMatrixUpdate(RwFrameGetMatrix(frame));
 		RwFrameUpdateObjects(frame);
 	}
@@ -767,27 +768,27 @@ CCamera::CamControl(void)
 				if(m_bUseScriptZoomValueCar){
 					if(CarZoomValueSmooth < m_fCarZoomValueScript){
 						CarZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = min(CarZoomValueSmooth, m_fCarZoomValueScript);
+						CarZoomValueSmooth = Min(CarZoomValueSmooth, m_fCarZoomValueScript);
 					}else{
 						CarZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = max(CarZoomValueSmooth, m_fCarZoomValueScript);
+						CarZoomValueSmooth = Max(CarZoomValueSmooth, m_fCarZoomValueScript);
 					}
 				}else if(m_bFailedCullZoneTestPreviously){
 					CloseInCarHeightTarget = 0.65f;
 					if(CarZoomValueSmooth < -0.65f){
 						CarZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = min(CarZoomValueSmooth, -0.65f);
+						CarZoomValueSmooth = Min(CarZoomValueSmooth, -0.65f);
 					}else{
 						CarZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = max(CarZoomValueSmooth, -0.65f);
+						CarZoomValueSmooth = Max(CarZoomValueSmooth, -0.65f);
 					}
 				}else{
 					if(CarZoomValueSmooth < CarZoomValue){
 						CarZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = min(CarZoomValueSmooth, CarZoomValue);
+						CarZoomValueSmooth = Min(CarZoomValueSmooth, CarZoomValue);
 					}else{
 						CarZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-						CarZoomValueSmooth = max(CarZoomValueSmooth, CarZoomValue);
+						CarZoomValueSmooth = Max(CarZoomValueSmooth, CarZoomValue);
 					}
 				}
 
@@ -871,28 +872,28 @@ CCamera::CamControl(void)
 			if(m_bUseScriptZoomValuePed){
 				if(m_fPedZoomValueSmooth < m_fPedZoomValueScript){
 					m_fPedZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = min(m_fPedZoomValueSmooth, m_fPedZoomValueScript);
+					m_fPedZoomValueSmooth = Min(m_fPedZoomValueSmooth, m_fPedZoomValueScript);
 				}else{
 					m_fPedZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = max(m_fPedZoomValueSmooth, m_fPedZoomValueScript);
+					m_fPedZoomValueSmooth = Max(m_fPedZoomValueSmooth, m_fPedZoomValueScript);
 				}
 			}else if(m_bFailedCullZoneTestPreviously){
 				static float PedZoomedInVal = 0.5f;
 				CloseInPedHeightTarget = 0.7f;
 				if(m_fPedZoomValueSmooth < PedZoomedInVal){
 					m_fPedZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = min(m_fPedZoomValueSmooth, PedZoomedInVal);
+					m_fPedZoomValueSmooth = Min(m_fPedZoomValueSmooth, PedZoomedInVal);
 				}else{
 					m_fPedZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = max(m_fPedZoomValueSmooth, PedZoomedInVal);
+					m_fPedZoomValueSmooth = Max(m_fPedZoomValueSmooth, PedZoomedInVal);
 				}
 			}else{
 				if(m_fPedZoomValueSmooth < m_fPedZoomValue){
 					m_fPedZoomValueSmooth += 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = min(m_fPedZoomValueSmooth, m_fPedZoomValue);
+					m_fPedZoomValueSmooth = Min(m_fPedZoomValueSmooth, m_fPedZoomValue);
 				}else{
 					m_fPedZoomValueSmooth -= 0.12f * CTimer::GetTimeStep();
-					m_fPedZoomValueSmooth = max(m_fPedZoomValueSmooth, m_fPedZoomValue);
+					m_fPedZoomValueSmooth = Max(m_fPedZoomValueSmooth, m_fPedZoomValue);
 				}
 			}
 
@@ -2183,13 +2184,21 @@ CCamera::DrawBordersForWideScreen(void)
 		SetMotionBlurAlpha(80);
 
 	CSprite2d::DrawRect(
+#ifdef FIX_BUGS
+		CRect(0.0f, (SCREEN_HEIGHT/2) * m_ScreenReductionPercentage/100.0f - SCREEN_SCALE_Y(8.0f),
+#else
 		CRect(0.0f, (SCREEN_HEIGHT/2) * m_ScreenReductionPercentage/100.0f - 8.0f,
+#endif
 		      SCREEN_WIDTH, 0.0f),
 		CRGBA(0, 0, 0, 255));
 
 	CSprite2d::DrawRect(
 		CRect(0.0f, SCREEN_HEIGHT,
+#ifdef FIX_BUGS
+		      SCREEN_WIDTH, SCREEN_HEIGHT - (SCREEN_HEIGHT/2) * m_ScreenReductionPercentage/100.0f - SCREEN_SCALE_Y(8.0f)),
+#else
 		      SCREEN_WIDTH, SCREEN_HEIGHT - (SCREEN_HEIGHT/2) * m_ScreenReductionPercentage/100.0f - 8.0f),
+#endif
 		CRGBA(0, 0, 0, 255));
 }
 
@@ -2247,7 +2256,7 @@ CCamera::IsItTimeForNewcam(int32 obbeMode, int32 time)
 
 			if(fwd.Magnitude() < 2.0f)
 				// very close, fix near clip
-				SetNearClipScript(max(fwd.Magnitude()*0.5f, 0.05f));
+				SetNearClipScript(Max(fwd.Magnitude()*0.5f, 0.05f));
 			// too far and driving away from cam
 			if(fwd.Magnitude() > 19.0f && DotProduct(FindPlayerSpeed(), fwd) > 0.0f)
 				return true;
@@ -2481,6 +2490,10 @@ CCamera::TryToStartNewCamMode(int obbeMode)
 		TakeControl(FindPlayerEntity(), CCam::MODE_CAM_ON_A_STRING, JUMP_CUT, CAMCONTROL_OBBE);
 		return true;
 	case OBBE_COPCAR:
+#ifdef FIX_BUGS
+		if (CReplay::IsPlayingBack())
+			return false;
+#endif
 		if(FindPlayerPed()->m_pWanted->m_nWantedLevel < 1)
 			return false;
 		if(FindPlayerVehicle() == nil)
@@ -2505,6 +2518,10 @@ CCamera::TryToStartNewCamMode(int obbeMode)
 		}
 		return false;
 	case OBBE_COPCAR_WHEEL:
+#ifdef FIX_BUGS
+		if (CReplay::IsPlayingBack())
+			return false;
+#endif
 		if(FindPlayerPed()->m_pWanted->m_nWantedLevel < 1)
 			return false;
 		if(FindPlayerVehicle() == nil)
@@ -3377,58 +3394,3 @@ CCamPathSplines::CCamPathSplines(void)
 	for(i = 0; i < MAXPATHLENGTH; i++)
 		m_arr_PathData[i] = 0.0f;
 }
-
-
-STARTPATCHES
-	InjectHook(0x42C760, (bool (CCamera::*)(const CVector &center, float radius, const CMatrix *mat))&CCamera::IsSphereVisible, PATCH_JUMP);
-	InjectHook(0x46FD00, &CCamera::SetFadeColour, PATCH_JUMP);
-
-	InjectHook(0x46FD40, &CCamera::SetMotionBlur, PATCH_JUMP);
-	InjectHook(0x46FD80, &CCamera::SetMotionBlurAlpha, PATCH_JUMP);
-	InjectHook(0x46F940, &CCamera::RenderMotionBlur, PATCH_JUMP);
-
-	InjectHook(0x46FC90, &CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString, PATCH_JUMP);
-
-	InjectHook(0x46FF00, &CCamera::SetWideScreenOn, PATCH_JUMP);
-	InjectHook(0x46FF10, &CCamera::SetWideScreenOff, PATCH_JUMP);
-
-	InjectHook(0x46FCC0, &CCamera::SetCamPositionForFixedMode, PATCH_JUMP);
-	InjectHook(0x46FEC0, &CCamera::SetRwCamera, PATCH_JUMP);
-	InjectHook(0x46B920, &CCamera::GetCutSceneFinishTime, PATCH_JUMP);
-	InjectHook(0x46B560, &CCamera::FinishCutscene, PATCH_JUMP);
-	InjectHook(0x46FF30, &CCamera::SetZoomValueFollowPedScript, PATCH_JUMP);
-	InjectHook(0x46FF90, &CCamera::SetZoomValueCamStringScript, PATCH_JUMP);
-
-
-	InjectHook(0x46F8E0, &CCamera::ProcessWideScreenOn, PATCH_JUMP);
-	InjectHook(0x46FDE0, &CCamera::SetParametersForScriptInterpolation, PATCH_JUMP);
-	InjectHook(0x46BA20, &CCamera::GetLookingLRBFirstPerson, PATCH_JUMP);
-	InjectHook(0x470D80, &CCamera::StartTransitionWhenNotFinishedInter, PATCH_JUMP);
-	InjectHook(0x46FFF0, &CCamera::StartTransition, PATCH_JUMP);
-	InjectHook(0x46BEB0, &CCamera::InitialiseCameraForDebugMode, PATCH_JUMP);
-	InjectHook(0x471500, &CCamera::TakeControl, PATCH_JUMP);
-	InjectHook(0x4715B0, &CCamera::TakeControlNoEntity, PATCH_JUMP);
-	InjectHook(0x46B3A0, &CCamera::Fade, PATCH_JUMP);
-	InjectHook(0x46FE20, &CCamera::SetPercentAlongCutScene, PATCH_JUMP);
-	InjectHook(0x46B100, &CamShakeNoPos, PATCH_JUMP);
-	InjectHook(0x46B200, &CCamera::CamShake, PATCH_JUMP);
-	InjectHook(0x46F520, &CCamera::ProcessObbeCinemaCameraPed, PATCH_JUMP);
-	InjectHook(0x46F3E0, &CCamera::ProcessObbeCinemaCameraCar, PATCH_JUMP);
-	InjectHook(0x470DA0, &CCamera::StoreValuesDuringInterPol, PATCH_JUMP);
-	InjectHook(0x46B430, &CCamera::DrawBordersForWideScreen, PATCH_JUMP);
-	InjectHook(0x46F990, &CCamera::Restore, PATCH_JUMP);
-	InjectHook(0x46FAE0, &CCamera::RestoreWithJumpCut, PATCH_JUMP);
-	InjectHook(0x46F080, &CCamera::ProcessFade, PATCH_JUMP);
-	InjectHook(0x46EEA0, &CCamera::CalculateDerivedValues, PATCH_JUMP);
-	InjectHook(0x46F1E0, &CCamera::ProcessMusicFade, PATCH_JUMP);
-	InjectHook(0x46D1D0, &CCamera::LoadPathSplines, PATCH_JUMP);
-	InjectHook(0x4712A0, &CCamera::UpdateTargetEntity, PATCH_JUMP);
-	InjectHook(0x46B580, &CCamera::Find3rdPersonCamTargetVector, PATCH_JUMP);
-	InjectHook(0x46BAD0, &CCamera::Init, PATCH_JUMP);
-	InjectHook(0x46C9E0, &CCamera::LoadTrainCamNodes, PATCH_JUMP);
-	InjectHook(0x46F600, &CCamera::Process_Train_Camera_Control, PATCH_JUMP);
-	InjectHook(0x470EA0, &CCamera::UpdateSoundDistances, PATCH_JUMP);
-	InjectHook(0x46BF10, &CCamera::IsItTimeForNewcam, PATCH_JUMP);
-	InjectHook(0x471650, &CCamera::TryToStartNewCamMode, PATCH_JUMP);
-//	InjectHook(0x46D3F0, &CCamera::Process, PATCH_JUMP);
-ENDPATCHES

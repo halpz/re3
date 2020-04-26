@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Timer.h"
 #include "TxdStore.h"
@@ -12,9 +12,6 @@
 #include "ParticleObject.h"
 #include "Particle.h"
 
-#ifdef TOGGLEABLE_BETA_FEATURES
-bool CParticle::bEnableBannedParticles = false;
-#endif
 
 #define MAX_PARTICLES_ON_SCREEN   (1000)
 
@@ -204,26 +201,21 @@ RwRaster  *gpGunShellRaster;
 RwRaster  *gpWakeOldRaster;
 
 
-//RwRaster  *gpPointlightRaster;	// CPointLights::RenderFogEffect
-RwRaster *&gpPointlightRaster = *(RwRaster **)0x8F5FE0;
+RwRaster  *gpPointlightRaster;	// CPointLights::RenderFogEffect
 
-//RwTexture *gpRainDropTex[MAX_RAINDROP_FILES]; // CWeather::RenderRainStreaks
-RwTexture *      (&gpRainDropTex)[MAX_RAINDROP_FILES] = *(RwTexture * (*)[MAX_RAINDROP_FILES])*(int *)0x880660;
+RwTexture *gpRainDropTex[MAX_RAINDROP_FILES]; // CWeather::RenderRainStreaks
 
 
 RwRaster  *gpRainDropRaster[MAX_RAINDROP_FILES];
 
-//Float      CParticle::ms_afRandTable[CParticle::RAND_TABLE_SIZE]; //
-float      (&CParticle::ms_afRandTable)[CParticle::RAND_TABLE_SIZE] = *(float (*)[CParticle::RAND_TABLE_SIZE])*(int *)0x6E98C8;
+float      CParticle::ms_afRandTable[CParticle::RAND_TABLE_SIZE];
 
 
 CParticle *CParticle::m_pUnusedListHead;
 
 
-//Float      CParticle::m_SinTable[CParticle::SIN_COS_TABLE_SIZE]; //
-//Float      CParticle::m_CosTable[CParticle::SIN_COS_TABLE_SIZE]; /
-float      (&CParticle::m_SinTable)[CParticle::SIN_COS_TABLE_SIZE] = *(float (*)[CParticle::SIN_COS_TABLE_SIZE])*(int *)0x877358;
-float      (&CParticle::m_CosTable)[CParticle::SIN_COS_TABLE_SIZE] = *(float (*)[CParticle::SIN_COS_TABLE_SIZE])*(int *)0x70DA18;
+float      CParticle::m_SinTable[CParticle::SIN_COS_TABLE_SIZE];
+float      CParticle::m_CosTable[CParticle::SIN_COS_TABLE_SIZE]; 
 
 int32 Randomizer;
 
@@ -393,8 +385,12 @@ void CParticle::Initialise()
 
 	gpFlame5Tex = RwTextureRead("flame5", nil);
 	
+#ifdef FIX_BUGS
+	gpFlame5Raster = RwTextureGetRaster(gpFlame5Tex);
+#else
 	gpFlame5Raster = RwTextureGetRaster(gpFlame1Tex);	// copy-paste bug ?
-	
+#endif
+
 	gpRainDropSmallTex = RwTextureRead("rainsmall", nil);
 	gpRainDropSmallRaster = RwTextureGetRaster(gpRainDropSmallTex);
 
@@ -772,9 +768,8 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 {
 	if ( CTimer::GetIsPaused() )
 		return NULL;
-#ifdef TOGGLEABLE_BETA_FEATURES
-	if(!bEnableBannedParticles)
-#endif
+
+#ifdef PC_PARTICLE
 	if ( ( type == PARTICLE_ENGINE_SMOKE
 		|| type == PARTICLE_ENGINE_SMOKE2
 		|| type == PARTICLE_ENGINE_STEAM
@@ -787,6 +782,7 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 	{
 		return nil;
 	}
+#endif
 
 	CParticle *pParticle = m_pUnusedListHead;
 	
@@ -858,6 +854,7 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 
 	pParticle->m_nRotation = nRotation;
 	
+// PC only
 	if ( pParticle->m_nRotation >= 360 )
 		pParticle->m_nRotation -= 360;
 	else if ( pParticle->m_nRotation < 0 )
@@ -1353,12 +1350,13 @@ void CParticle::Update()
 					
 					particle->m_nAlpha = clamp(particle->m_nAlpha - psystem->m_nFadeAlphaAmount,
 														0, 255);
-
+#ifdef PC_PARTICLE
 					if ( particle->m_nAlpha == 0 )
 					{
 						bRemoveParticle = true;
 						continue;
 					}
+#endif
 				}
 				else
 					++particle->m_nFadeAlphaTimer;
@@ -1453,18 +1451,15 @@ void CParticle::Render()
 	for ( int32 i = 0; i < MAX_PARTICLES; i++ )
 	{
 		tParticleSystemData *psystem = &mod_ParticleSystemManager.m_aParticles[i];
-		
+#ifdef PC_PARTICLE
 		bool particleBanned = false;
-
+#endif
 		CParticle *particle = psystem->m_pParticles;
 		
 		RwRaster **frames = psystem->m_ppRaster;
-		
+#ifdef PC_PARTICLE
 		tParticleType type = psystem->m_Type;
 
-#ifdef TOGGLEABLE_BETA_FEATURES
-		if (!bEnableBannedParticles)
-#endif
 		if ( type == PARTICLE_ENGINE_SMOKE
 			|| type == PARTICLE_ENGINE_SMOKE2
 			|| type == PARTICLE_ENGINE_STEAM
@@ -1476,7 +1471,8 @@ void CParticle::Render()
 		{
 			particleBanned = true;
 		}
-		
+#endif
+
 		if ( particle )
 		{
 			if ( (flags & DRAW_OPAQUE) != (psystem->Flags & DRAW_OPAQUE)
@@ -1517,10 +1513,11 @@ void CParticle::Render()
 		while ( particle != nil )
 		{
 			bool canDraw = true;
+#ifdef PC_PARTICLE
 
 			if ( particle->m_nAlpha == 0 )
 				canDraw = false;
-			
+#endif
 			if ( canDraw && psystem->m_nFinalAnimationFrame != 0 && frames != nil )
 			{
 				RwRaster *curFrame = frames[particle->m_nCurrentFrame];
@@ -1543,7 +1540,7 @@ void CParticle::Render()
 							particle->m_fSize * 63.0f,
 							particle->m_Color,
 							particle->m_nColorIntensity,
-							(float)particle->m_nRotation,
+							(float)particle->m_nRotation, //DEGTORAD((float)particle->m_nRotation) ps2
 							particle->m_nAlpha);
 				}
 				else
@@ -1569,8 +1566,10 @@ void CParticle::Render()
 
 				if ( CSprite::CalcScreenCoors(particle->m_vecPosition, coors, &w, &h, true) )
 				{
+#ifdef PC_PARTICLE
 					if ( (!particleBanned || SCREEN_WIDTH * fParticleScaleLimit >= w)
 											&& SCREEN_HEIGHT * fParticleScaleLimit >= h )
+#endif
 					{
 						if ( particle->m_nRotation != 0 )
 						{					
@@ -1581,7 +1580,7 @@ void CParticle::Render()
 									particle->m_Color.blue,
 									particle->m_nColorIntensity,
 									1.0f / coors.z,
-									float(particle->m_nRotation),
+									float(particle->m_nRotation), // DEGTORAD((float)particle->m_nRotation) ps2
 									particle->m_nAlpha);
 						}
 						else if ( psystem->Flags & SCREEN_TRAIL )
@@ -1606,7 +1605,6 @@ void CParticle::Render()
 
 								fTrailLength = fDist;
 								
-								//Float fRot = Atan2( vecDist.x / fDist, Sqrt(1.0f - vecDist.x / fDist * (vecDist.x / fDist)) );
 								float fRot = Asin(vecDist.x / fDist);
 
 								fRotation = fRot;
@@ -1658,7 +1656,6 @@ void CParticle::Render()
 								
 								fTrailLength = fDist;
 								
-								//Float fRot = Atan2(vecDist.x / fDist, Sqrt(1.0f - vecDist.x / fDist * (vecDist.x / fDist)));
 								float fRot = Asin(vecDist.x / fDist);
 								
 								fRotation = fRot;
@@ -1854,19 +1851,3 @@ void CParticle::AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatr
 					0.3f, color, 0, 0, 0, 0);
 	}
 }
-
-STARTPATCHES
-	//InjectHook(0x50C410, &CParticle::ctor, PATCH_JUMP);
-	//InjectHook(0x50C420, &CParticle::dtor, PATCH_JUMP);
-	InjectHook(0x50C430, CParticle::ReloadConfig, PATCH_JUMP);
-	InjectHook(0x50C570, CParticle::Initialise, PATCH_JUMP);
-	InjectHook(0x50CF40, CParticle::Shutdown, PATCH_JUMP);
-	//InjectHook(0x50D140, CParticle::AddParticle, PATCH_JUMP);
-	InjectHook(0x50D190, (CParticle *(*)(tParticleType, CVector const&, CVector const&, CEntity*, float, RwRGBA const&, int, int, int, int))CParticle::AddParticle, PATCH_JUMP);
-	InjectHook(0x50DCF0, CParticle::Update, PATCH_JUMP);
-	InjectHook(0x50EE20, CParticle::Render, PATCH_JUMP);
-	InjectHook(0x50F6E0, CParticle::RemovePSystem, PATCH_JUMP);
-	InjectHook(0x50F720, CParticle::RemoveParticle, PATCH_JUMP);
-	InjectHook(0x50F760, CParticle::AddJetExplosion, PATCH_JUMP);
-	InjectHook(0x50FAA0, CParticle::AddYardieDoorSmoke, PATCH_JUMP);
-ENDPATCHES

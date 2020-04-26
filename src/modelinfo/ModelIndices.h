@@ -158,7 +158,7 @@
 	X("subplatform_sub",	MI_SUBPLATFORM_SUB2, 0x5F5BC0) \
 	X("files",		MI_FILES, 0x5F5BC4)
 
-#define X(name, var, addr) extern int16 &var;
+#define X(name, var, addr) extern int16 var;
 	MODELINDICES
 #undef X
 
@@ -489,4 +489,18 @@ IsPoliceVehicleModel(int16 id)
 		id == MI_PREDATOR ||
 		id == MI_POLICE ||
 		id == MI_ENFORCER;
+}
+
+inline bool
+IsExplosiveThingModel(int16 id)
+{
+	return id == MI_EXPLODINGBARREL ||
+		id == MI_PETROLPUMP;
+}
+
+inline bool 
+IsFence(int16 id)
+{
+	return id == MI_FENCE ||
+		id == MI_FENCE2;
 }

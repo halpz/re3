@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "Lights.h"
 #include "Camera.h"
@@ -10,8 +10,8 @@
 #include "Timer.h"
 #include "PointLights.h"
 
-int16 &CPointLights::NumLights = *(int16*)0x95CC3E;
-CRegisteredPointLight *CPointLights::aLights = (CRegisteredPointLight*)0x7096D0;
+int16 CPointLights::NumLights;
+CRegisteredPointLight CPointLights::aLights[NUMPOINTLIGHTS];
 
 void
 CPointLights::InitPerFrame(void)
@@ -98,7 +98,7 @@ CPointLights::GenerateLightsAffectingObject(CVector *objCoors)
 
 						if(aLights[i].type == LIGHT_DIRECTIONAL){
 							float dot = -DotProduct(dir, aLights[i].dir);
-							intensity *= max((dot-0.5f)*2.0f, 0.0f);
+							intensity *= Max((dot-0.5f)*2.0f, 0.0f);
 						}
 
 						if(intensity > 0.0f)
@@ -114,7 +114,7 @@ CPointLights::GenerateLightsAffectingObject(CVector *objCoors)
 	return ret;
 }
 
-extern RwRaster *&gpPointlightRaster;
+extern RwRaster *gpPointlightRaster;
 
 void
 CPointLights::RemoveLightsAffectingObject(void)
@@ -284,10 +284,3 @@ CPointLights::RenderFogEffect(void)
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x510790, CPointLights::AddLight, PATCH_JUMP);
-	InjectHook(0x510960, CPointLights::GenerateLightsAffectingObject, PATCH_JUMP);
-	InjectHook(0x510C20, CPointLights::RemoveLightsAffectingObject, PATCH_JUMP);
-	InjectHook(0x510C30, CPointLights::RenderFogEffect, PATCH_JUMP);
-ENDPATCHES

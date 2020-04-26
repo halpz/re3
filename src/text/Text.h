@@ -56,4 +56,4 @@ public:
 	void UpperCase(wchar *s);
 };
 
-extern CText &TheText;
+extern CText TheText;

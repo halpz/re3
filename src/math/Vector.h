@@ -9,6 +9,11 @@ public:
 #ifdef RWCORE_H
 	CVector(const RwV3d &v) : x(v.x), y(v.y), z(v.z) {}
 
+	RwV3d toRwV3d(void) const {
+		RwV3d vecRw = { this->x, this->y, this->z };
+		return vecRw;
+	}
+
 	operator RwV3d (void) const {
 		RwV3d vecRw = { this->x, this->y, this->z };
 		return vecRw;
@@ -45,6 +50,13 @@ public:
 		x *= invsqrt;
 		y *= invsqrt;
 		z *= invsqrt;
+	}
+	
+	void Normalise2D(void) {
+		float sq = MagnitudeSqr2D();
+		float invsqrt = RecipSqrt(sq);
+		x *= invsqrt;
+		y *= invsqrt;
 	}
 
 	const CVector &operator+=(CVector const &right) {

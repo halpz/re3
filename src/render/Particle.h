@@ -24,7 +24,6 @@ public:
 	uint16     m_nZRotationTimer;
 	float     m_fCurrentZRadius;
 	uint16     m_nZRadiusTimer;
-	char _pad0[2];
 	float     m_fSize;
 	float     m_fExpansionRate;
 	uint16     m_nFadeToBlackTimer;
@@ -36,7 +35,6 @@ public:
 	int16     m_nRotationStep;
 	int16     m_nRotation;
 	RwRGBA    m_Color;
-	char _pad1[2];
 	CParticle *m_pNext;
 	
 	CParticle()
@@ -49,16 +47,11 @@ public:
 		;
 	}
 
-	//static float      ms_afRandTable[RAND_TABLE_SIZE];
-	static float      (&ms_afRandTable)[RAND_TABLE_SIZE];
+	static float      ms_afRandTable[RAND_TABLE_SIZE];
 	static CParticle *m_pUnusedListHead;
 	
-	/*
 	static float      m_SinTable[SIN_COS_TABLE_SIZE];
 	static float      m_CosTable[SIN_COS_TABLE_SIZE];
-	*/
-	static float      (&m_SinTable)[SIN_COS_TABLE_SIZE];
-	static float      (&m_CosTable)[SIN_COS_TABLE_SIZE];
 	
 	static float Sin(int32 value) { return m_SinTable[value]; }
 	static float Cos(int32 value) { return m_CosTable[value]; }
@@ -96,10 +89,6 @@ public:
 
 	static void AddJetExplosion(CVector const &vecPos, float fPower, float fSize);
 	static void AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatrix);
-
-#ifndef MASTER
-	static bool bEnableBannedParticles;
-#endif
 };
 
 VALIDATE_SIZE(CParticle, 0x68);

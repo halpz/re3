@@ -1,10 +1,11 @@
 #include "common.h"
 #include <rpskin.h>
-#include "patcher.h"
+
 #include "main.h"
 #include "RwHelper.h"
 #include "RpAnimBlend.h"
 #include "AnimBlendClumpData.h"
+#include "Bones.h"
 #include "Directory.h"
 #include "CutsceneMgr.h"
 #include "Streaming.h"
@@ -17,11 +18,23 @@ CCutsceneHead::CCutsceneHead(CObject *obj)
 	RpAtomic *atm;
 
 	assert(RwObjectGetType(obj->m_rwObject) == rpCLUMP);
-	m_pHeadNode = RpAnimBlendClumpFindFrame((RpClump*)obj->m_rwObject, "Shead")->frame;
-	atm = (RpAtomic*)GetFirstObject(m_pHeadNode);
-	if(atm){
-		assert(RwObjectGetType((RwObject*)atm) == rpATOMIC);
-		RpAtomicSetFlags(atm, RpAtomicGetFlags(atm) & ~rpATOMICRENDER);
+#ifdef PED_SKIN
+	unk1 = 0;
+	bIsSkinned = false;
+	m_parentObject = (CCutsceneObject*)obj;
+	// Hide original head
+	if(IsClumpSkinned(obj->GetClump())){
+		m_parentObject->SetRenderHead(false);
+		bIsSkinned = true;
+	}else
+#endif
+	{
+		m_pHeadNode = RpAnimBlendClumpFindFrame((RpClump*)obj->m_rwObject, "Shead")->frame;
+		atm = (RpAtomic*)GetFirstObject(m_pHeadNode);
+		if(atm){
+			assert(RwObjectGetType((RwObject*)atm) == rpATOMIC);
+			RpAtomicSetFlags(atm, RpAtomicGetFlags(atm) & ~rpATOMICRENDER);
+		}
 	}
 }
 
@@ -48,11 +61,28 @@ CCutsceneHead::ProcessControl(void)
 	RpAtomic *atm;
 	RpHAnimHierarchy *hier;
 
+	// android/xbox calls is at the end
 	CPhysical::ProcessControl();
 
-	m_matrix.SetRotateY(PI/2);
-	m_matrix = CMatrix(RwFrameGetLTM(m_pHeadNode)) * m_matrix;
-	UpdateRwFrame();
+#ifdef PED_SKIN
+	if(bIsSkinned){
+		UpdateRpHAnim();
+		UpdateRwFrame();
+
+		RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(m_parentObject->GetClump());
+		int idx = RpHAnimIDGetIndex(hier, BONE_head);
+		RwMatrix *mat = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+		if(RwV3dLength(&mat->pos) > 100.0f){
+			m_matrix.SetRotateY(PI/2);
+			m_matrix = CMatrix(mat) * m_matrix;
+		}
+	}else
+#endif
+	{
+		m_matrix.SetRotateY(PI/2);
+		m_matrix = CMatrix(RwFrameGetLTM(m_pHeadNode)) * m_matrix;
+		UpdateRwFrame();	// android/xbox don't call this
+	}
 
 	assert(RwObjectGetType(m_rwObject) == rpCLUMP);
 	atm = GetFirstAtomic((RpClump*)m_rwObject);
@@ -65,8 +95,25 @@ CCutsceneHead::Render(void)
 {
 	RpAtomic *atm;
 
-	m_matrix.SetRotateY(PI/2);
-	m_matrix = CMatrix(RwFrameGetLTM(m_pHeadNode)) * m_matrix;
+#ifdef PED_SKIN
+	if(bIsSkinned){
+		RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(m_parentObject->GetClump());
+		RpHAnimHierarchyUpdateMatrices(hier);
+		int idx = RpHAnimIDGetIndex(hier, BONE_head);
+		RwMatrix *mat = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+		if(RwV3dLength(&mat->pos) > 100.0f){
+			m_matrix.SetRotateY(PI/2);
+			m_matrix = CMatrix(mat) * m_matrix;
+		}
+		RenderLimb(BONE_Lhand);
+		RenderLimb(BONE_Rhand);
+	}else
+#endif
+	{
+		m_matrix.SetRotateY(PI/2);
+		m_matrix = CMatrix(RwFrameGetLTM(m_pHeadNode)) * m_matrix;
+	}
+
 	UpdateRwFrame();
 
 	assert(RwObjectGetType(m_rwObject) == rpCLUMP);
@@ -75,6 +122,34 @@ CCutsceneHead::Render(void)
 
 	CObject::Render();
 }
+
+#ifdef PED_SKIN
+void
+CCutsceneHead::RenderLimb(int32 bone)
+{
+	RpAtomic *atomic;
+	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(m_parentObject->GetClump());
+	int idx = RpHAnimIDGetIndex(hier, bone);
+	RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
+	CPedModelInfo *mi = (CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex);
+	switch(bone){
+	case BONE_Lhand:
+		atomic = mi->getLeftHand();
+		break;
+	case BONE_Rhand:
+		atomic = mi->getRightHand();
+		break;
+	default:
+		return;
+	}
+	if(atomic){
+		RwFrame *frame = RpAtomicGetFrame(atomic);
+		RwMatrixTransform(RwFrameGetMatrix(frame), &mats[idx], rwCOMBINEREPLACE);
+		RwFrameUpdateObjects(frame);
+		RpAtomicRender(atomic);
+	}
+}
+#endif
 
 void
 CCutsceneHead::PlayAnimation(const char *animName)
@@ -109,20 +184,3 @@ CCutsceneHead::PlayAnimation(const char *animName)
 		RwStreamClose(stream, nil);
 	}
 }
-
-class CCutsceneHead_ : public CCutsceneHead
-{
-public:
-	void CreateRwObject_(void) { CCutsceneHead::CreateRwObject(); }
-	void DeleteRwObject_(void) { CCutsceneHead::DeleteRwObject(); }
-	void ProcessControl_(void) { CCutsceneHead::ProcessControl(); }
-	void Render_(void) { CCutsceneHead::Render(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4BA650, &CCutsceneHead_::CreateRwObject_, PATCH_JUMP);
-	InjectHook(0x4BA690, &CCutsceneHead_::DeleteRwObject_, PATCH_JUMP);
-	InjectHook(0x4BA760, &CCutsceneHead_::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x4BA800, &CCutsceneHead_::Render_, PATCH_JUMP);
-	InjectHook(0x4BA6A0, &CCutsceneHead::PlayAnimation, PATCH_JUMP);
-ENDPATCHES

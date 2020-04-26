@@ -54,22 +54,22 @@ struct CStoredCollPoly;
 
 class CWorld
 {
-	static CPtrList *ms_bigBuildingsList;	// [4];
-	static CPtrList &ms_listMovingEntityPtrs;
-	static CSector (*ms_aSectors)[NUMSECTORS_X];	// [NUMSECTORS_Y][NUMSECTORS_X];
-	static uint16 &ms_nCurrentScanCode;
+	static CPtrList ms_bigBuildingsList[4];
+	static CPtrList ms_listMovingEntityPtrs;
+	static CSector ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];
+	static uint16 ms_nCurrentScanCode;
 
 public:
-	static uint8 &PlayerInFocus;
-	static CPlayerInfo (&Players)[NUMPLAYERS];
-	static CEntity *&pIgnoreEntity;
-	static bool &bIncludeDeadPeds;
-	static bool &bNoMoreCollisionTorque;
-	static bool &bSecondShift;
-	static bool &bForceProcessControl;
-	static bool &bProcessCutsceneOnly;
-	static bool &bDoingCarCollisions;
-	static bool &bIncludeCarTyres;
+	static uint8 PlayerInFocus;
+	static CPlayerInfo Players[NUMPLAYERS];
+	static CEntity *pIgnoreEntity;
+	static bool bIncludeDeadPeds;
+	static bool bNoMoreCollisionTorque;
+	static bool bSecondShift;
+	static bool bForceProcessControl;
+	static bool bProcessCutsceneOnly;
+	static bool bDoingCarCollisions;
+	static bool bIncludeCarTyres;
 
 	static void Remove(CEntity *entity);
 	static void Add(CEntity *entity);
@@ -85,7 +85,7 @@ public:
 		}
 	}
 	static void ClearScanCodes(void);
-	static void ClearExcitingStuffFromArea(const CVector &pos, float radius, uint8);
+	static void ClearExcitingStuffFromArea(const CVector &pos, float radius, bool bRemoveProjectilesAndTidyUpShadows);
 
 	static bool CameraToIgnoreThisObject(CEntity *ent);
 
@@ -103,19 +103,26 @@ public:
 	static CEntity *TestSphereAgainstSectorList(CPtrList&, CVector, float, CEntity*, bool);
 	static void FindObjectsInRangeSectorList(CPtrList&, CVector&, float, bool, short*, short, CEntity**);
 	static void FindObjectsInRange(CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool);
-	static void FindObjectsOfTypeInRangeSectorList(uint32, CPtrList&, CVector&, float, bool, short*, short, CEntity**);
-	static void FindObjectsOfTypeInRange(uint32, CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool);
+	static void FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& list, const CVector& position, float radius, bool bCheck2DOnly, int16* nEntitiesFound, int16 maxEntitiesToFind, CEntity** aEntities);
+	static void FindObjectsOfTypeInRange(uint32 modelId, const CVector& position, float radius, bool bCheck2DOnly, int16* nEntitiesFound, int16 maxEntitiesToFind, CEntity** aEntities, bool bBuildings, bool bVehicles, bool bPeds, bool bObjects, bool bDummies);
 	static float FindGroundZForCoord(float x, float y);
 	static float FindGroundZFor3DCoord(float x, float y, float z, bool *found);
 	static float FindRoofZFor3DCoord(float x, float y, float z, bool *found);
 	static void RemoveReferencesToDeletedObject(CEntity*);
-	static void FindObjectsKindaColliding(const CVector &, float, bool, int16*, int16, CEntity **, bool, bool, bool, bool, bool);
-	static void FindObjectsIntersectingCube(const CVector &, const CVector &, int16*, int16, CEntity **, bool, bool, bool, bool, bool);
+	static void FindObjectsKindaColliding(const CVector& position, float radius, bool bCheck2DOnly, int16* nCollidingEntities, int16 maxEntitiesToFind, CEntity** aEntities, bool bBuildings, bool bVehicles, bool bPeds, bool bObjects, bool bDummies);
+	static void FindObjectsKindaCollidingSectorList(CPtrList& list, const CVector& position, float radius, bool bCheck2DOnly, int16* nCollidingEntities, int16 maxEntitiesToFind, CEntity** aEntities);
+	static void FindObjectsIntersectingCube(const CVector& vecStartPos, const CVector& vecEndPos, int16* nIntersecting, int16 maxEntitiesToFind, CEntity** aEntities, bool bBuildings, bool bVehicles, bool bPeds, bool bObjects, bool bDummies);
+	static void FindObjectsIntersectingCubeSectorList(CPtrList& list, const CVector& vecStartPos, const CVector& vecEndPos, int16* nIntersecting, int16 maxEntitiesToFind, CEntity** aEntities);
 	static void FindObjectsIntersectingAngledCollisionBox(const CColBox &, const CMatrix &, const CVector &, float, float, float, float, int16*, int16, CEntity **, bool, bool, bool, bool, bool);
-	static void FindMissionEntitiesIntersectingCube(const CVector&, const CVector&, int16*, int16, CEntity**, bool, bool, bool);
-	static void ClearCarsFromArea(float, float, float, float, float, float);
-	static void ClearPedsFromArea(float, float, float, float, float, float);
-	static void CallOffChaseForArea(float, float, float, float);
+	static void FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& list, const CColBox& boundingBox, const CMatrix& matrix, const CVector& position, int16* nEntitiesFound, int16 maxEntitiesToFind, CEntity** aEntities);
+	static void FindMissionEntitiesIntersectingCube(const CVector& vecStartPos, const CVector& vecEndPos, int16* nIntersecting, int16 maxEntitiesToFind, CEntity** aEntities, bool bVehicles, bool bPeds, bool bObjects);
+	static void FindMissionEntitiesIntersectingCubeSectorList(CPtrList& list, const CVector& vecStartPos, const CVector& vecEndPos, int16* nIntersecting, int16 maxEntitiesToFind, CEntity** aEntities, bool bIsVehicleList, bool bIsPedList);
+
+	static void ClearCarsFromArea(float x1, float y1, float z1, float x2, float y2, float z2);
+	static void ClearPedsFromArea(float x1, float y1, float z1, float x2, float y2, float z2);
+	static void CallOffChaseForArea(float x1, float y1, float x2, float y2);
+	static void CallOffChaseForAreaSectorListVehicles(CPtrList& list, float x1, float y1, float x2, float y2, float fStartX, float fStartY, float fEndX, float fEndY);
+	static void CallOffChaseForAreaSectorListPeds(CPtrList& list, float x1, float y1, float x2, float y2);
 
 	static float GetSectorX(float f) { return ((f - WORLD_MIN_X)/SECTOR_SIZE_X); }
 	static float GetSectorY(float f) { return ((f - WORLD_MIN_Y)/SECTOR_SIZE_Y); }
@@ -131,20 +138,23 @@ public:
 	static void StopAllLawEnforcersInTheirTracks();
 	static void SetAllCarsCanBeDamaged(bool);
 	static void ExtinguishAllCarFiresInArea(CVector, float);
-	static void SetCarsOnFire(float, float, float, float, CEntity*);
-	static void SetPedsOnFire(float, float, float, float, CEntity*);
+	static void SetCarsOnFire(float x, float y, float z, float radius, CEntity* reason);
+	static void SetPedsOnFire(float x, float y, float z, float radius, CEntity* reason);
 
 	static void Initialise();
 	static void AddParticles();
 	static void ShutDown();
 	static void ClearForRestart(void);
 	static void RepositionCertainDynamicObjects();
+	static void RepositionOneObject(CEntity* pEntity);
 	static void RemoveStaticObjects();
 	static void Process();
-	static void TriggerExplosion(const CVector &, float, float, CEntity*, bool);
+	static void TriggerExplosion(const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer);
+	static void TriggerExplosionSectorList(CPtrList& list, const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer);
+	static void UseDetonator(CEntity *pEntity);
 };
 
-extern CColPoint *gaTempSphereColPoints;
+extern CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
 class CPlayerPed;
 class CVehicle;

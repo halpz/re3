@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 
 #include "DMAudio.h"
 #include "Hud.h"
@@ -153,18 +153,3 @@ void COnscreenTimerEntry::ProcessForDisplayCounter() {
 	uint32 counter = *CTheScripts::GetPointerToScriptVariable(m_nCounterOffset);
 	sprintf(m_bCounterBuffer, "%d", counter);
 }
-
-STARTPATCHES
-	InjectHook(0x429160, &COnscreenTimerEntry::Process, PATCH_JUMP);
-	InjectHook(0x429110, &COnscreenTimerEntry::ProcessForDisplay, PATCH_JUMP);
-	InjectHook(0x429080, &COnscreenTimerEntry::ProcessForDisplayClock, PATCH_JUMP);
-	InjectHook(0x4290F0, &COnscreenTimerEntry::ProcessForDisplayCounter, PATCH_JUMP);
-
-	InjectHook(0x429220, &COnscreenTimer::Init, PATCH_JUMP);
-	InjectHook(0x429320, &COnscreenTimer::Process, PATCH_JUMP);
-	InjectHook(0x4292E0, &COnscreenTimer::ProcessForDisplay, PATCH_JUMP);
-	InjectHook(0x429450, &COnscreenTimer::ClearCounter, PATCH_JUMP);
-	InjectHook(0x429410, &COnscreenTimer::ClearClock, PATCH_JUMP);
-	InjectHook(0x4293B0, &COnscreenTimer::AddCounter, PATCH_JUMP);
-	InjectHook(0x429350, &COnscreenTimer::AddClock, PATCH_JUMP);
-ENDPATCHES

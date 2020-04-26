@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "CivilianPed.h"
 #include "Phones.h"
 #include "General.h"
@@ -318,12 +318,12 @@ CCivilianPed::ProcessControl(void)
 							if (CWorld::Players[CWorld::PlayerInFocus].m_nMoney >= 10 && playerSexFrequency > 250) {
 									CWorld::Players[CWorld::PlayerInFocus].m_nNextSexFrequencyUpdateTime = CTimer::GetTimeInMilliseconds() + playerSexFrequency;
 									if (playerSexFrequency >= 350) {
-										CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = max(250, playerSexFrequency - 30);
+										CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = Max(250, playerSexFrequency - 30);
 									} else {
-										CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = max(250, playerSexFrequency - 10);
+										CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = Max(250, playerSexFrequency - 10);
 									}
 
-									m_pMyVehicle->pDriver->m_fHealth = min(125.0f, 1.0f + m_pMyVehicle->pDriver->m_fHealth);
+									m_pMyVehicle->pDriver->m_fHealth = Min(125.0f, 1.0f + m_pMyVehicle->pDriver->m_fHealth);
 									if (CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency == 250)
 										CWorld::Players[CWorld::PlayerInFocus].m_nNextSexFrequencyUpdateTime = CTimer::GetTimeInMilliseconds() + 3000;
 							} else {
@@ -357,7 +357,7 @@ CCivilianPed::ProcessControl(void)
 				if (playerMoney <= 1) {
 					CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = 250;
 				} else {
-					CWorld::Players[CWorld::PlayerInFocus].m_nMoney = max(0, playerMoney - 1);
+					CWorld::Players[CWorld::PlayerInFocus].m_nMoney = Max(0, playerMoney - 1);
 				}
 				CWorld::Players[CWorld::PlayerInFocus].m_nNextSexMoneyUpdateTime = CTimer::GetTimeInMilliseconds() + 1000;
 			}
@@ -376,21 +376,3 @@ CCivilianPed::ProcessControl(void)
 	if (m_moved.Magnitude() > 0.0f)
 		Avoid();
 }
-
-#include <new>
-
-class CCivilianPed_ : public CCivilianPed
-{
-public:
-	CCivilianPed *ctor(ePedType pedtype, uint32 mi) { return ::new (this) CCivilianPed(pedtype, mi); };
-	void dtor(void) { CCivilianPed::~CCivilianPed(); }
-	void ProcessControl_(void) { CCivilianPed::ProcessControl(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4BFF30, &CCivilianPed_::ctor, PATCH_JUMP);
-	InjectHook(0x4BFFC0, &CCivilianPed_::dtor, PATCH_JUMP);
-	InjectHook(0x4BFFE0, &CCivilianPed_::ProcessControl_, PATCH_JUMP);
-
-	InjectHook(0x4C07A0, &CCivilianPed::CivilianAI, PATCH_JUMP);
-ENDPATCHES

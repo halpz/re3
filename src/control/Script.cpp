@@ -1,10 +1,10 @@
 #define WITHWINDOWS	// for our script loading hack
 #include "common.h"
-#include "patcher.h"
 
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "AnimBlendAssociation.h"
 #include "Boat.h"
 #include "BulletInfo.h"
 #include "Camera.h"
@@ -18,11 +18,12 @@
 #include "Cranes.h"
 #include "Credits.h"
 #include "CutsceneMgr.h"
-#include "Darkel.h"
 #include "DMAudio.h"
+#include "Darkel.h"
 #include "EmergencyPed.h"
 #include "Explosion.h"
 #include "FileMgr.h"
+#include "Fire.h"
 #include "Frontend.h"
 #include "Gangs.h"
 #include "Garages.h"
@@ -31,7 +32,6 @@
 #include "Heli.h"
 #include "Hud.h"
 #include "Lines.h"
-#include "main.h"
 #include "Messages.h"
 #include "ModelIndices.h"
 #include "Pad.h"
@@ -48,13 +48,12 @@
 #include "Population.h"
 #include "PowerPoints.h"
 #include "ProjectileInfo.h"
+#include "Radar.h"
 #include "Record.h"
 #include "Remote.h"
-#include "Restart.h"
 #include "Replay.h"
+#include "Restart.h"
 #include "RpAnimBlend.h"
-#include "AnimBlendAssociation.h"
-#include "Fire.h"
 #include "Rubbish.h"
 #include "Shadows.h"
 #include "SpecialFX.h"
@@ -67,7 +66,7 @@
 #include "Weather.h"
 #include "World.h"
 #include "Zones.h"
-#include "Radar.h"
+#include "main.h"
 
 #define PICKUP_PLACEMENT_OFFSET 0.5f
 #define PED_FIND_Z_OFFSET 5.0f
@@ -87,47 +86,47 @@
 #define FEET_IN_METER 3.33f
 #endif
 
-uint8 (&CTheScripts::ScriptSpace)[SIZE_SCRIPT_SPACE] = *(uint8(*)[SIZE_SCRIPT_SPACE])*(uintptr*)0x74B248;
-CRunningScript(&CTheScripts::ScriptsArray)[MAX_NUM_SCRIPTS] = *(CRunningScript(*)[MAX_NUM_SCRIPTS])*(uintptr*)0x6F5C08;
-int32(&CTheScripts::BaseBriefIdForContact)[MAX_NUM_CONTACTS] = *(int32(*)[MAX_NUM_CONTACTS])*(uintptr*)0x880200;
-int32(&CTheScripts::OnAMissionForContactFlag)[MAX_NUM_CONTACTS] = *(int32(*)[MAX_NUM_CONTACTS])*(uintptr*)0x8622F0;
-intro_text_line (&CTheScripts::IntroTextLines)[MAX_NUM_INTRO_TEXT_LINES] = *(intro_text_line (*)[MAX_NUM_INTRO_TEXT_LINES])*(uintptr*)0x70EA68;
-intro_script_rectangle (&CTheScripts::IntroRectangles)[MAX_NUM_INTRO_RECTANGLES] = *(intro_script_rectangle (*)[MAX_NUM_INTRO_RECTANGLES])*(uintptr*)0x72D108;
-CSprite2d (&CTheScripts::ScriptSprites)[MAX_NUM_SCRIPT_SRPITES] = *(CSprite2d(*)[MAX_NUM_SCRIPT_SRPITES])*(uintptr*)0x72B090;
-script_sphere_struct(&CTheScripts::ScriptSphereArray)[MAX_NUM_SCRIPT_SPHERES] = *(script_sphere_struct(*)[MAX_NUM_SCRIPT_SPHERES])*(uintptr*)0x727D60;
-tCollectiveData(&CTheScripts::CollectiveArray)[MAX_NUM_COLLECTIVES] = *(tCollectiveData(*)[MAX_NUM_COLLECTIVES])*(uintptr*)0x6FA008;
-tUsedObject(&CTheScripts::UsedObjectArray)[MAX_NUM_USED_OBJECTS] = *(tUsedObject(*)[MAX_NUM_USED_OBJECTS])*(uintptr*)0x6E69C8;
-int32(&CTheScripts::MultiScriptArray)[MAX_NUM_MISSION_SCRIPTS] = *(int32(*)[MAX_NUM_MISSION_SCRIPTS])*(uintptr*)0x6F0558;
-tBuildingSwap(&CTheScripts::BuildingSwapArray)[MAX_NUM_BUILDING_SWAPS] = *(tBuildingSwap(*)[MAX_NUM_BUILDING_SWAPS])*(uintptr*)0x880E30;
-CEntity*(&CTheScripts::InvisibilitySettingArray)[MAX_NUM_INVISIBILITY_SETTINGS] = *(CEntity*(*)[MAX_NUM_INVISIBILITY_SETTINGS])*(uintptr*)0x8620F0;
-CStoredLine (&CTheScripts::aStoredLines)[MAX_NUM_STORED_LINES] = *(CStoredLine(*)[MAX_NUM_STORED_LINES])*(uintptr*)0x743018;
-bool &CTheScripts::DbgFlag = *(bool*)0x95CD87;
-uint32 &CTheScripts::OnAMissionFlag = *(uint32*)0x8F1B64;
-int32 &CTheScripts::StoreVehicleIndex = *(int32*)0x8F5F3C;
-bool &CTheScripts::StoreVehicleWasRandom = *(bool*)0x95CDBC;
-CRunningScript *&CTheScripts::pIdleScripts = *(CRunningScript**)0x9430D4;
-CRunningScript *&CTheScripts::pActiveScripts = *(CRunningScript**)0x8E2BF4;
-uint32 &CTheScripts::NextFreeCollectiveIndex = *(uint32*)0x942F98;
-int32 &CTheScripts::LastRandomPedId = *(int32*)0x8F251C;
-uint16 &CTheScripts::NumberOfUsedObjects = *(uint16*)0x95CC72;
-bool &CTheScripts::bAlreadyRunningAMissionScript = *(bool*)0x95CDB3;
-bool &CTheScripts::bUsingAMultiScriptFile = *(bool*)0x95CD55;
-uint16 &CTheScripts::NumberOfMissionScripts = *(uint16*)0x95CC9A;
-uint32 &CTheScripts::LargestMissionScriptSize = *(uint32*)0x9414C8;
-uint32 &CTheScripts::MainScriptSize = *(uint32*)0x9405A4;
-uint8 &CTheScripts::FailCurrentMission = *(uint8*)0x95CD41;
-uint8 &CTheScripts::CountdownToMakePlayerUnsafe = *(uint8*)0x95CD51;
-uint8 &CTheScripts::DelayMakingPlayerUnsafeThisTime = *(uint8*)0x95CD88;
-uint16 &CTheScripts::NumScriptDebugLines = *(uint16*)0x95CC42;
-uint16 &CTheScripts::NumberOfIntroRectanglesThisFrame = *(uint16*)0x95CC88;
-uint16 &CTheScripts::NumberOfIntroTextLinesThisFrame = *(uint16*)0x95CC32;
-uint8 &CTheScripts::UseTextCommands = *(uint8*)0x95CD57;
-CMissionCleanup (&CTheScripts::MissionCleanup) = *(CMissionCleanup*)0x8F2A24;
-CUpsideDownCarCheck (&CTheScripts::UpsideDownCars) = *(CUpsideDownCarCheck*)0x6EE450;
-CStuckCarCheck (&CTheScripts::StuckCars) = *(CStuckCarCheck*)0x87C588;
-uint16 &CTheScripts::CommandsExecuted = *(uint16*)0x95CCA6;
-uint16 &CTheScripts::ScriptsUpdated = *(uint16*)0x95CC5E;
-int32(&ScriptParams)[32] = *(int32(*)[32])*(uintptr*)0x6ED460;
+uint8 CTheScripts::ScriptSpace[SIZE_SCRIPT_SPACE];
+CRunningScript CTheScripts::ScriptsArray[MAX_NUM_SCRIPTS];
+int32 CTheScripts::BaseBriefIdForContact[MAX_NUM_CONTACTS];
+int32 CTheScripts::OnAMissionForContactFlag[MAX_NUM_CONTACTS];
+intro_text_line CTheScripts::IntroTextLines[MAX_NUM_INTRO_TEXT_LINES];
+intro_script_rectangle CTheScripts::IntroRectangles[MAX_NUM_INTRO_RECTANGLES];
+CSprite2d CTheScripts::ScriptSprites[MAX_NUM_SCRIPT_SRPITES];
+script_sphere_struct CTheScripts::ScriptSphereArray[MAX_NUM_SCRIPT_SPHERES];
+tCollectiveData CTheScripts::CollectiveArray[MAX_NUM_COLLECTIVES];
+tUsedObject CTheScripts::UsedObjectArray[MAX_NUM_USED_OBJECTS];
+int32 CTheScripts::MultiScriptArray[MAX_NUM_MISSION_SCRIPTS];
+tBuildingSwap CTheScripts::BuildingSwapArray[MAX_NUM_BUILDING_SWAPS];
+CEntity* CTheScripts::InvisibilitySettingArray[MAX_NUM_INVISIBILITY_SETTINGS];
+CStoredLine CTheScripts::aStoredLines[MAX_NUM_STORED_LINES];
+bool CTheScripts::DbgFlag;
+uint32 CTheScripts::OnAMissionFlag;
+int32 CTheScripts::StoreVehicleIndex;
+bool CTheScripts::StoreVehicleWasRandom;
+CRunningScript *CTheScripts::pIdleScripts;
+CRunningScript *CTheScripts::pActiveScripts;
+uint32 CTheScripts::NextFreeCollectiveIndex;
+int32 CTheScripts::LastRandomPedId;
+uint16 CTheScripts::NumberOfUsedObjects;
+bool CTheScripts::bAlreadyRunningAMissionScript;
+bool CTheScripts::bUsingAMultiScriptFile;
+uint16 CTheScripts::NumberOfMissionScripts;
+uint32 CTheScripts::LargestMissionScriptSize;
+uint32 CTheScripts::MainScriptSize;
+uint8 CTheScripts::FailCurrentMission;
+uint8 CTheScripts::CountdownToMakePlayerUnsafe;
+uint8 CTheScripts::DelayMakingPlayerUnsafeThisTime;
+uint16 CTheScripts::NumScriptDebugLines;
+uint16 CTheScripts::NumberOfIntroRectanglesThisFrame;
+uint16 CTheScripts::NumberOfIntroTextLinesThisFrame;
+uint8 CTheScripts::UseTextCommands;
+CMissionCleanup CTheScripts::MissionCleanup;
+CUpsideDownCarCheck CTheScripts::UpsideDownCars;
+CStuckCarCheck CTheScripts::StuckCars;
+uint16 CTheScripts::CommandsExecuted;
+uint16 CTheScripts::ScriptsUpdated;
+int32 ScriptParams[32];
 
 CMissionCleanup::CMissionCleanup()
 {
@@ -2010,7 +2009,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			car->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS;
 		car->m_status = STATUS_PHYSICS;
 		car->bEngineOn = true;
-		car->AutoPilot.m_nCruiseSpeed = max(car->AutoPilot.m_nCruiseSpeed, 6);
+		car->AutoPilot.m_nCruiseSpeed = Max(car->AutoPilot.m_nCruiseSpeed, 6);
 		car->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
@@ -2022,7 +2021,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CCarCtrl::JoinCarWithRoadSystem(car);
 		car->AutoPilot.m_nCarMission = MISSION_CRUISE;
 		car->bEngineOn = true;
-		car->AutoPilot.m_nCruiseSpeed = max(car->AutoPilot.m_nCruiseSpeed, 6);
+		car->AutoPilot.m_nCruiseSpeed = Max(car->AutoPilot.m_nCruiseSpeed, 6);
 		car->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
@@ -2106,7 +2105,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
-		car->AutoPilot.m_nCruiseSpeed = min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
+		car->AutoPilot.m_nCruiseSpeed = Min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
 		return 0;
 	}
 	case COMMAND_SET_CAR_DRIVING_STYLE:
@@ -3645,7 +3644,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		pos.x = (infX + supX) / 2;
 		pos.y = (infY + supY) / 2;
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		float radius = max(pos.x - infX, pos.y - infY);
+		float radius = Max(pos.x - infX, pos.y - infY);
 		pPed->bScriptObjectiveCompleted = false;
 		pPed->SetObjective(OBJECTIVE_GUARD_SPOT, pos, radius);
 		return 0;
@@ -4151,7 +4150,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		pos.x = (infX + supX) / 2;
 		pos.y = (infY + supY) / 2;
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		float radius = max(pos.x - infX, pos.y - infY);
+		float radius = Max(pos.x - infX, pos.y - infY);
 		pPed->bScriptObjectiveCompleted = false;
 		pPed->SetObjective(OBJECTIVE_GOTO_AREA_ON_FOOT, pos, radius);
 		return 0;
@@ -4947,7 +4946,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		pos.x = (infX + supX) / 2;
 		pos.y = (infY + supY) / 2;
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		float radius = max(pos.x - infX, pos.y - infY);
+		float radius = Max(pos.x - infX, pos.y - infY);
 		pPed->bScriptObjectiveCompleted = false;
 		pPed->SetObjective(OBJECTIVE_RUN_TO_AREA, pos, radius);
 		return 0;
@@ -5369,7 +5368,7 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		pos.x = (infX + supX) / 2;
 		pos.y = (infY + supY) / 2;
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		float radius = max(pos.x - infX, pos.y - infY);
+		float radius = Max(pos.x - infX, pos.y - infY);
 		pPed->bScriptObjectiveCompleted = false;
 		pPed->SetObjective(OBJECTIVE_GOTO_AREA_ANY_MEANS, pos, radius);
 		return 0;
@@ -5606,7 +5605,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			pVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_ACCURATE;
 		pVehicle->m_status = STATUS_PHYSICS;
 		pVehicle->bEngineOn = true;
-		pVehicle->AutoPilot.m_nCruiseSpeed = max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
+		pVehicle->AutoPilot.m_nCruiseSpeed = Max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
 		pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
@@ -5721,7 +5720,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		pBoat->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_ASTHECROWSWIMS;
 		pBoat->AutoPilot.m_vecDestinationCoors = pos;
 		pBoat->m_status = STATUS_PHYSICS;
-		pBoat->AutoPilot.m_nCruiseSpeed = max(6, pBoat->AutoPilot.m_nCruiseSpeed);
+		pBoat->AutoPilot.m_nCruiseSpeed = Max(6, pBoat->AutoPilot.m_nCruiseSpeed);
 		pBoat->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
 	}
@@ -6306,23 +6305,23 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		return 0;
 	case COMMAND_REGISTER_JUMP_DISTANCE:
 		CollectParameters(&m_nIp, 1);
-		CStats::MaximumJumpDistance = max(CStats::MaximumJumpDistance, *(float*)&ScriptParams[0]);
+		CStats::MaximumJumpDistance = Max(CStats::MaximumJumpDistance, *(float*)&ScriptParams[0]);
 		return 0;
 	case COMMAND_REGISTER_JUMP_HEIGHT:
 		CollectParameters(&m_nIp, 1);
-		CStats::MaximumJumpHeight = max(CStats::MaximumJumpHeight, *(float*)&ScriptParams[0]);
+		CStats::MaximumJumpHeight = Max(CStats::MaximumJumpHeight, *(float*)&ScriptParams[0]);
 		return 0;
 	case COMMAND_REGISTER_JUMP_FLIPS:
 		CollectParameters(&m_nIp, 1);
-		CStats::MaximumJumpFlips = max(CStats::MaximumJumpFlips, ScriptParams[0]);
+		CStats::MaximumJumpFlips = Max(CStats::MaximumJumpFlips, ScriptParams[0]);
 		return 0;
 	case COMMAND_REGISTER_JUMP_SPINS:
 		CollectParameters(&m_nIp, 1);
-		CStats::MaximumJumpSpins = max(CStats::MaximumJumpSpins, ScriptParams[0]);
+		CStats::MaximumJumpSpins = Max(CStats::MaximumJumpSpins, ScriptParams[0]);
 		return 0;
 	case COMMAND_REGISTER_JUMP_STUNT:
 		CollectParameters(&m_nIp, 1);
-		CStats::BestStuntJump = max(CStats::BestStuntJump, ScriptParams[0]);
+		CStats::BestStuntJump = Max(CStats::BestStuntJump, ScriptParams[0]);
 		return 0;
 	case COMMAND_REGISTER_UNIQUE_JUMP_FOUND:
 		++CStats::NumberOfUniqueJumpsFound;
@@ -6436,9 +6435,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 				pPed->FlagToDestroyWhenNextProcessed();
 		}
 		else if (CGame::nastyGame && pPed->IsPedInControl()) {
-			RwMatrix tmp_rw;
-			CPedIK::GetWorldMatrix(pPed->m_pFrames[PED_HEAD]->frame, &tmp_rw);
-			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, tmp_rw.pos, true);
+			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, pPed->GetNodePosition(PED_HEAD), true);
 		}
 		else {
 			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
@@ -6451,9 +6448,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pPed);
 		if (CGame::nastyGame) {
-			RwMatrix tmp_rw;
-			CPedIK::GetWorldMatrix(pPed->m_pFrames[PED_HEAD]->frame, &tmp_rw);
-			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, tmp_rw.pos, true);
+			pPed->ApplyHeadShot(WEAPONTYPE_SNIPERRIFLE, pPed->GetNodePosition(PED_HEAD), true);
 		}
 		else {
 			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
@@ -6855,10 +6850,10 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			CVector cp4 = tmp_matrix * CVector(pColModel->boundingBox.min.x, pColModel->boundingBox.min.y, pColModel->boundingBox.max.z);
 			int16 collisions;
 			CWorld::FindObjectsIntersectingAngledCollisionBox(pColModel->boundingBox, tmp_matrix, pos,
-				min(cp1.x, min(cp2.x, min(cp3.x, cp4.x))),
-				min(cp1.y, min(cp2.y, min(cp3.y, cp4.y))),
-				max(cp1.x, max(cp2.x, max(cp3.x, cp4.x))),
-				max(cp1.y, max(cp2.y, max(cp3.y, cp4.y))),
+				Min(cp1.x, Min(cp2.x, Min(cp3.x, cp4.x))),
+				Min(cp1.y, Min(cp2.y, Min(cp3.y, cp4.y))),
+				Max(cp1.x, Max(cp2.x, Max(cp3.x, cp4.x))),
+				Max(cp1.y, Max(cp2.y, Max(cp3.y, cp4.y))),
 				&collisions, 2, nil, false, true, true, false, false);
 			if (collisions > 0)
 				obstacleInPath = true;
@@ -6909,11 +6904,11 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			CVector cp3 = tmp_matrix * CVector(pColModel->boundingBox.min.x, pColModel->boundingBox.max.y, pColModel->boundingBox.min.z);
 			CVector cp4 = tmp_matrix * CVector(pColModel->boundingBox.min.x, pColModel->boundingBox.min.y, pColModel->boundingBox.max.z);
 			int16 collisions;
-			CWorld::FindObjectsIntersectingAngledCollisionBox(pColModel->boundingBox, tmp_matrix, pos,
-				min(cp1.x, min(cp2.x, min(cp3.x, cp4.x))),
-				min(cp1.y, min(cp2.y, min(cp3.y, cp4.y))),
-				max(cp1.x, max(cp2.x, max(cp3.x, cp4.x))),
-				max(cp1.y, max(cp2.y, max(cp3.y, cp4.y))),
+			CWorld::FindObjectsIntersectingAngledCollisionBox(pColModel->boundingBox, tmp_matrix, newPosition,
+				Min(cp1.x, Min(cp2.x, Min(cp3.x, cp4.x))),
+				Min(cp1.y, Min(cp2.y, Min(cp3.y, cp4.y))),
+				Max(cp1.x, Max(cp2.x, Max(cp3.x, cp4.x))),
+				Max(cp1.y, Max(cp2.y, Max(cp3.y, cp4.y))),
 				&collisions, 2, nil, false, true, true, false, false);
 			if (collisions > 0)
 				obstacleInPath = true;
@@ -7746,7 +7741,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[1];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		float size = max(0.0f, *(float*)&ScriptParams[7]);
+		float size = Max(0.0f, *(float*)&ScriptParams[7]);
 		eParticleObjectType type = (eParticleObjectType)ScriptParams[0];
 		RwRGBA color;
 		if (type == POBJECT_SMOKE_TRAIL){
@@ -8931,7 +8926,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		if (ScriptParams[1])
-			pPed->m_nZoneLevel = -1;
+			pPed->m_nZoneLevel = LEVEL_IGNORE;
 		else
 			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
 		return 0;
@@ -9130,7 +9125,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		if (ScriptParams[1])
-			pVehicle->m_nZoneLevel = -1;
+			pVehicle->m_nZoneLevel = LEVEL_IGNORE;
 		else
 			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(pVehicle->GetPosition());
 		return 0;
@@ -9147,7 +9142,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	}
 	case COMMAND_SET_JAMES_CAR_ON_PATH_TO_PLAYER:
 	{
-		CollectParameters(&m_nIp, 2);
+		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		CCarCtrl::JoinCarWithRoadSystemGotoCoors(pVehicle, FindPlayerCoors(), false);
@@ -10076,8 +10071,8 @@ void CRunningScript::LocatePlayerCarCommand(int32 command, uint32* pIp)
 		case COMMAND_LOCATE_PLAYER_ON_FOOT_CAR_3D:
 			result = !pPlayerInfo->m_pPed->bInVehicle;
 			break;
-		case COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_2D:
-		case COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_3D:
+		case COMMAND_LOCATE_PLAYER_IN_CAR_CAR_2D:
+		case COMMAND_LOCATE_PLAYER_IN_CAR_CAR_3D:
 			result = pPlayerInfo->m_pPed->bInVehicle;
 			break;
 		default:
@@ -11359,7 +11354,7 @@ VALIDATESAVEBUF(size)
 
 void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntity)
 {
-	static CColPoint aTempColPoints[32];
+	static CColPoint aTempColPoints[MAX_COLLISION_POINTS];
 	int16 entities = 0;
 	CEntity* aEntities[16];
 	CWorld::FindObjectsKindaColliding(pos, pEntity->GetBoundRadius(), false, &entities, 16, aEntities, false, true, true, false, false);
@@ -11456,22 +11451,22 @@ void CTheScripts::HighlightImportantAngledArea(uint32 id, float x1, float y1, fl
 	supY = infY = Y;
 	X = (x2 + x3) / 2;
 	Y = (y2 + y3) / 2;
-	infX = min(infX, X);
-	supX = max(supX, X);
-	infY = min(infY, Y);
-	supY = max(supY, Y);
+	infX = Min(infX, X);
+	supX = Max(supX, X);
+	infY = Min(infY, Y);
+	supY = Max(supY, Y);
 	X = (x3 + x4) / 2;
 	Y = (y3 + y4) / 2;
-	infX = min(infX, X);
-	supX = max(supX, X);
-	infY = min(infY, Y);
-	supY = max(supY, Y);
+	infX = Min(infX, X);
+	supX = Max(supX, X);
+	infY = Min(infY, Y);
+	supY = Max(supY, Y);
 	X = (x4 + x1) / 2;
 	Y = (y4 + y1) / 2;
-	infX = min(infX, X);
-	supX = max(supX, X);
-	infY = min(infY, Y);
-	supY = max(supY, Y);
+	infX = Min(infX, X);
+	supX = Max(supX, X);
+	infY = Min(infY, Y);
+	supY = Max(supY, Y);
 	CVector center;
 	center.x = (infX + supX) / 2;
 	center.y = (infY + supY) / 2;
@@ -11626,17 +11621,3 @@ void CTheScripts::ReadMultiScriptFileOffsetsFromScript()
 		MultiScriptArray[i] = Read4BytesFromScript(&ip);
 	}
 }
-
-STARTPATCHES
-InjectHook(0x438790, &CTheScripts::Init, PATCH_JUMP);
-InjectHook(0x439040, &CTheScripts::Process, PATCH_JUMP);
-InjectHook(0x439400, &CTheScripts::StartTestScript, PATCH_JUMP);
-InjectHook(0x439410, &CTheScripts::IsPlayerOnAMission, PATCH_JUMP);
-InjectHook(0x44FD10, &CTheScripts::UndoBuildingSwaps, PATCH_JUMP);
-InjectHook(0x44FD60, &CTheScripts::UndoEntityInvisibilitySettings, PATCH_JUMP);
-InjectHook(0x4534E0, &CTheScripts::ScriptDebugLine3D, PATCH_JUMP);
-InjectHook(0x453550, &CTheScripts::RenderTheScriptDebugLines, PATCH_JUMP);
-InjectHook(0x4535E0, &CTheScripts::SaveAllScripts, PATCH_JUMP);
-InjectHook(0x453B30, &CTheScripts::LoadAllScripts, PATCH_JUMP);
-InjectHook(0x454060, &CTheScripts::ClearSpaceForMissionEntity, PATCH_JUMP);
-ENDPATCHES

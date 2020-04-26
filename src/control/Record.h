@@ -23,7 +23,7 @@ public:
 	CVector pos;
 };
 
-extern char* gString;
+extern char gString[256];;
 
 class CRecordDataForChase
 {
@@ -37,15 +37,15 @@ class CRecordDataForChase
 		STATE_PLAYBACK = 3,
 		STATE_PLAYBACK_BEFORE_RECORDING = 4
 	};
-	static uint8 &Status;
-	static int &PositionChanges;
-	static uint8 &CurrentCar;
-	static CAutomobile*(&pChaseCars)[NUM_CHASE_CARS];
-	static float &AnimTime;
-	static uint32 &AnimStartTime;
-	static CCarStateEachFrame* (&pBaseMemForCar)[NUM_CHASE_CARS];
-	static float &TimeMultiplier;
-	static int &FId2;
+	static uint8 Status;
+	static int PositionChanges;
+	static uint8 CurrentCar;
+	static CAutomobile*pChaseCars[NUM_CHASE_CARS];
+	static float AnimTime;
+	static uint32 AnimStartTime;
+	static CCarStateEachFrame* pBaseMemForCar[NUM_CHASE_CARS];
+	static float TimeMultiplier;
+	static int FId2;
 public:
 
 	static bool IsRecording(void) { return Status == STATE_RECORD; }
@@ -86,11 +86,11 @@ class CRecordDataForGame
 		STATE_RECORD = 1,
 		STATE_PLAYBACK = 2,
 	};
-	static uint16& RecordingState;
-	static uint8* &pDataBuffer;
-	static uint8* &pDataBufferPointer;
-	static int &FId;
-	static tGameBuffer &pDataBufferForFrame;
+	static uint16 RecordingState;
+	static uint8* pDataBuffer;
+	static uint8* pDataBufferPointer;
+	static int FId;
+	static tGameBuffer pDataBufferForFrame;
 
 public:
 	static bool IsRecording() { return RecordingState == STATE_RECORD; }

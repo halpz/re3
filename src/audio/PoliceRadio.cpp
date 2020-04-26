@@ -1,15 +1,18 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "DMAudio.h"
+
 #include "AudioManager.h"
+
 #include "AudioSamples.h"
 #include "MusicManager.h"
-#include "PoliceRadio.h"
 #include "PlayerPed.h"
-#include "sampman.h"
-#include "Zones.h"
+#include "PoliceRadio.h"
+#include "Replay.h"
 #include "Vehicle.h"
 #include "World.h"
+#include "Zones.h"
+#include "sampman.h"
 
 const int maxVolume = 127;
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
@@ -21,14 +24,14 @@ struct tPoliceRadioZone {
 	int32 field_12;
 };
 
-tPoliceRadioZone (&ZoneSfx)[NUMAUDIOZONES] = *(tPoliceRadioZone(*)[NUMAUDIOZONES])*(uintptr*)0x880240;
-char *SubZo2Label = (char*)0x6E9918;
-char *SubZo3Label = (char*)0x6E9870;
+tPoliceRadioZone ZoneSfx[NUMAUDIOZONES];
+char SubZo2Label[8];
+char SubZo3Label[8];
 
-int32 &g_nMissionAudioSfx = *(int32*)0x60ED84;
-int8 &g_nMissionAudioPlayingStatus = *(int8*)0x60ED88;
-uint8 &gSpecialSuspectLastSeenReport = *(uint8*)0x95CD4D;
-uint32 (&gMinTimeToNextReport)[NUM_CRIME_TYPES] = *(uint32(*)[NUM_CRIME_TYPES])*(uintptr*)0x8E2828;
+int32 g_nMissionAudioSfx = TOTAL_AUDIO_SAMPLES;
+int8 g_nMissionAudioPlayingStatus = 2;
+uint8 gSpecialSuspectLastSeenReport;
+uint32 gMinTimeToNextReport[NUM_CRIME_TYPES];
 
 void
 cAudioManager::InitialisePoliceRadioZones()
@@ -155,7 +158,8 @@ cAudioManager::ServicePoliceRadio()
 	if(!m_bUserPause) {
 		bool crimeReport = SetupCrimeReport();
 #ifdef FIX_BUGS // Crash at 0x5fe6ef
-		if(!FindPlayerPed() || !FindPlayerPed()->m_pWanted) return;
+		if(CReplay::IsPlayingBack() || !FindPlayerPed() || !FindPlayerPed()->m_pWanted)
+			return;
 #endif
 		wantedLevel = FindPlayerPed()->m_pWanted->m_nWantedLevel;
 		if(!crimeReport) {
@@ -774,19 +778,3 @@ cAudioManager::AgeCrimes()
 		}
 	}
 }
-
-STARTPATCHES
-InjectHook(0x580AF0, &cAudioManager::AgeCrimes, PATCH_JUMP);
-InjectHook(0x57F060, &cAudioManager::DoPoliceRadioCrackle, PATCH_JUMP);
-InjectHook(0x57F050, &cAudioManager::GetMissionScriptPoliceAudioPlayingStatus, PATCH_JUMP);
-InjectHook(0x57EEC0, &cAudioManager::InitialisePoliceRadio, PATCH_JUMP);
-InjectHook(0x57EAC0, &cAudioManager::InitialisePoliceRadioZones, PATCH_JUMP);
-InjectHook(0x580500, &cAudioManager::PlaySuspectLastSeen, PATCH_JUMP);
-InjectHook(0x5803D0, &cAudioManager::ReportCrime, PATCH_JUMP);
-InjectHook(0x57EFF0, &cAudioManager::ResetPoliceRadio, PATCH_JUMP);
-InjectHook(0x57F110, &cAudioManager::ServicePoliceRadio, PATCH_JUMP);
-InjectHook(0x57F1B0, &cAudioManager::ServicePoliceRadioChannel, PATCH_JUMP);
-InjectHook(0x57F020, &cAudioManager::SetMissionScriptPoliceAudio, PATCH_JUMP);
-InjectHook(0x57F5B0, &cAudioManager::SetupCrimeReport, PATCH_JUMP);
-InjectHook(0x57FCC0, &cAudioManager::SetupSuspectLastSeenReport, PATCH_JUMP);
-ENDPATCHES

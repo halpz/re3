@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Font.h"
 #include "Pad.h"
 #include "Text.h"
@@ -37,6 +37,7 @@
 #include "Shadows.h"
 #include "Radar.h"
 #include "Hud.h"
+#include "debugmenu.h"
 
 int CAnimViewer::animTxdSlot = 0;
 CEntity *CAnimViewer::pTarget = nil;
@@ -208,7 +209,6 @@ PlayAnimation(RpClump *clump, AssocGroupId animGroup, AnimationId anim)
 	animAssoc->SetRun();
 }
 
-extern void (*DebugMenuProcess)(void);
 void
 CAnimViewer::Update(void)
 {
@@ -367,7 +367,12 @@ CAnimViewer::Update(void)
 					} else {
 						// Originally it was GetPad(1)->LeftShoulder2
 						if (pad->NewState.Triangle) {
-							CPedModelInfo::AnimatePedColModel(((CPedModelInfo*)CModelInfo::GetModelInfo(pTarget->m_modelIndex))->GetHitColModel(), RpClumpGetFrame(pTarget->GetClump()));
+#ifdef PED_SKIN
+							if(IsClumpSkinned(pTarget->GetClump()))
+								((CPedModelInfo*)CModelInfo::GetModelInfo(pTarget->m_modelIndex))->AnimatePedColModelSkinned(pTarget->GetClump());
+							else
+#endif
+								CPedModelInfo::AnimatePedColModel(((CPedModelInfo*)CModelInfo::GetModelInfo(pTarget->m_modelIndex))->GetHitColModel(), RpClumpGetFrame(pTarget->GetClump()));
 							AsciiToUnicode("Ped Col model will be animated as long as you hold the button", gUString);
 							CMessages::AddMessage(gUString, 100, 0);
 						}

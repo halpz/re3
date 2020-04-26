@@ -1,8 +1,11 @@
 #pragma once
 
+extern bool gPS2alphaTest;
+
 void *RwMallocAlign(RwUInt32 size, RwUInt32 align);
 void RwFreeAlign(void *mem);
 
+void OpenCharsetSafe();
 void CreateDebugFont();
 void DestroyDebugFont();
 void ObrsPrintfString(const char *str, short x, short y);
@@ -12,6 +15,17 @@ RwFrame *GetFirstChild(RwFrame *frame);
 RwObject *GetFirstObject(RwFrame *frame);
 RpAtomic *GetFirstAtomic(RpClump *clump);
 RwTexture *GetFirstTexture(RwTexDictionary *txd);
+
+#ifdef PED_SKIN
+RpAtomic *IsClumpSkinned(RpClump *clump);
+RpHAnimHierarchy *GetAnimHierarchyFromSkinClump(RpClump *clump);	// get from atomic
+RpHAnimHierarchy *GetAnimHierarchyFromClump(RpClump *clump);	// get from frame
+RwFrame *GetHierarchyFromChildNodesCB(RwFrame *frame, void *data);
+void SkinGetBonePositionsToTable(RpClump *clump, RwV3d *boneTable);
+RpHAnimAnimation *HAnimAnimationCreateForHierarchy(RpHAnimHierarchy *hier);
+RpAtomic *AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data);
+void RenderSkeleton(RpHAnimHierarchy *hier);
+#endif
 
 RwTexDictionary *RwTexDictionaryGtaStreamRead(RwStream *stream);
 RwTexDictionary *RwTexDictionaryGtaStreamRead1(RwStream *stream);

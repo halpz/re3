@@ -1,6 +1,6 @@
 #include "common.h"
 #include <rpmatfx.h>
-#include "patcher.h"
+
 #include "RwHelper.h"
 #include "General.h"
 #include "NodeName.h"
@@ -19,14 +19,14 @@
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 
-int8 *CVehicleModelInfo::ms_compsToUse = (int8*)0x5FF2EC;	// -2, -2
-int8 *CVehicleModelInfo::ms_compsUsed = (int8*)0x95CCB2;
-RwTexture **CVehicleModelInfo::ms_pEnvironmentMaps = (RwTexture **)0x8F1A30;
-RwRGBA *CVehicleModelInfo::ms_vehicleColourTable = (RwRGBA*)0x86BA88;
-RwTexture **CVehicleModelInfo::ms_colourTextureTable = (RwTexture**)0x711C40;
+int8 CVehicleModelInfo::ms_compsToUse[2] = { -2, -2 };
+int8 CVehicleModelInfo::ms_compsUsed[2];
+RwTexture *CVehicleModelInfo::ms_pEnvironmentMaps[NUM_VEHICLE_ENVMAPS];
+RwRGBA CVehicleModelInfo::ms_vehicleColourTable[256];
+RwTexture *CVehicleModelInfo::ms_colourTextureTable[256];
 
-RwTexture *&gpWhiteTexture = *(RwTexture**)0x64C4F8;
-RwFrame *&pMatFxIdentityFrame = *(RwFrame**)0x64C510;
+RwTexture *gpWhiteTexture;
+RwFrame *pMatFxIdentityFrame;
 
 enum {
 	VEHICLE_FLAG_COLLAPSE	= 0x2,
@@ -1104,65 +1104,3 @@ CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(int id)
 
 	return n - 1;
 }
-
-class CVehicleModelInfo_ : public CVehicleModelInfo
-{
-public:
-	void DeleteRwObject_(void) { CVehicleModelInfo::DeleteRwObject(); }
-	RwObject *CreateInstance_(void) { return CVehicleModelInfo::CreateInstance(); }
-	void SetClump_(RpClump *clump) { CVehicleModelInfo::SetClump(clump); }
-};
-
-STARTPATCHES
-	InjectHook(0x427820, &CVehicleModelInfo::SetComponentsToUse, PATCH_JUMP);
-
-	InjectHook(0x51FDC0, &CVehicleModelInfo_::DeleteRwObject_, PATCH_JUMP);
-	InjectHook(0x51FCB0, &CVehicleModelInfo_::CreateInstance_, PATCH_JUMP);
-	InjectHook(0x51FC60, &CVehicleModelInfo_::SetClump_, PATCH_JUMP);
-
-	InjectHook(0x51FE10, &CVehicleModelInfo::CollapseFramesCB, PATCH_JUMP);
-	InjectHook(0x51FE50, &CVehicleModelInfo::MoveObjectsCB, PATCH_JUMP);
-	InjectHook(0x51FE70, &CVehicleModelInfo::HideDamagedAtomicCB, PATCH_JUMP);
-	InjectHook(0x51FED0, &CVehicleModelInfo::HideAllComponentsAtomicCB, PATCH_JUMP);
-	InjectHook(0x51FEF0, &CVehicleModelInfo::HasAlphaMaterialCB, PATCH_JUMP);
-
-	InjectHook(0x51FF10, &CVehicleModelInfo::SetAtomicRendererCB, PATCH_JUMP);
-	InjectHook(0x520030, &CVehicleModelInfo::SetAtomicRendererCB_BigVehicle, PATCH_JUMP);
-	InjectHook(0x520230, &CVehicleModelInfo::SetAtomicRendererCB_Train, PATCH_JUMP);
-	InjectHook(0x520120, &CVehicleModelInfo::SetAtomicRendererCB_Boat, PATCH_JUMP);
-	InjectHook(0x520210, &CVehicleModelInfo::SetAtomicRendererCB_Heli, PATCH_JUMP);
-	InjectHook(0x5202C0, &CVehicleModelInfo::SetAtomicRenderCallbacks, PATCH_JUMP);
-
-	InjectHook(0x520340, &CVehicleModelInfo::SetAtomicFlagCB, PATCH_JUMP);
-	InjectHook(0x520360, &CVehicleModelInfo::ClearAtomicFlagCB, PATCH_JUMP);
-
-	InjectHook(0x5204D0, &CVehicleModelInfo::PreprocessHierarchy, PATCH_JUMP);
-	InjectHook(0x5203C0, &CVehicleModelInfo::SetVehicleComponentFlags, PATCH_JUMP);
-
-	InjectHook(0x520840, &CVehicleModelInfo::GetWheelPosn, PATCH_JUMP);
-
-	InjectHook(0x520880, IsValidCompRule, PATCH_JUMP);
-	InjectHook(0x520990, CountCompsInRule, PATCH_JUMP);
-	InjectHook(0x5209C0, ChooseComponent, PATCH_JUMP);
-	InjectHook(0x5208C0, GetListOfComponentsNotUsedByRules, PATCH_JUMP);
-	InjectHook(0x520AB0, &CVehicleModelInfo::ChooseComponent, PATCH_JUMP);
-	InjectHook(0x520BE0, &CVehicleModelInfo::ChooseSecondComponent, PATCH_JUMP);
-
-	InjectHook(0x520DC0, (RpAtomic *(*)(RpAtomic*, void*))CVehicleModelInfo::GetEditableMaterialListCB, PATCH_JUMP);
-	InjectHook(0x520D30, (RpMaterial *(*)(RpMaterial*, void*))CVehicleModelInfo::GetEditableMaterialListCB, PATCH_JUMP);
-	InjectHook(0x520DE0, &CVehicleModelInfo::FindEditableMaterialList, PATCH_JUMP);
-	InjectHook(0x520E70, &CVehicleModelInfo::SetVehicleColour, PATCH_JUMP);
-	InjectHook(0x520FD0, &CVehicleModelInfo::ChooseVehicleColour, PATCH_JUMP);
-	InjectHook(0x5210A0, &CVehicleModelInfo::AvoidSameVehicleColour, PATCH_JUMP);
-	InjectHook(0x521260, &CVehicleModelInfo::LoadVehicleColours, PATCH_JUMP);
-	InjectHook(0x521650, &CVehicleModelInfo::DeleteVehicleColourTextures, PATCH_JUMP);
-
-	InjectHook(0x5219D0, &CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors, PATCH_JUMP);
-
-	InjectHook(0x521820, (RpAtomic *(*)(RpAtomic*, void*))CVehicleModelInfo::SetEnvironmentMapCB, PATCH_JUMP);
-	InjectHook(0x5217A0, (RpMaterial *(*)(RpMaterial*, void*))CVehicleModelInfo::SetEnvironmentMapCB, PATCH_JUMP);
-	InjectHook(0x521770, CVehicleModelInfo::HasSpecularMaterialCB, PATCH_JUMP);
-	InjectHook(0x521890, &CVehicleModelInfo::SetEnvironmentMap, PATCH_JUMP);
-	InjectHook(0x521680, CVehicleModelInfo::LoadEnvironmentMaps, PATCH_JUMP);
-	InjectHook(0x521720, CVehicleModelInfo::ShutdownEnvironmentMaps, PATCH_JUMP);
-ENDPATCHES

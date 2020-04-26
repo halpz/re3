@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Timer.h"
 #include "Pad.h"
@@ -19,12 +19,12 @@
 #include "Fire.h"
 #include "Darkel.h"
 
-bool &CVehicle::bWheelsOnlyCheat = *(bool *)0x95CD78;
-bool &CVehicle::bAllDodosCheat = *(bool *)0x95CD75;
-bool &CVehicle::bCheat3 = *(bool *)0x95CD66;
-bool &CVehicle::bCheat4 = *(bool *)0x95CD65;
-bool &CVehicle::bCheat5 = *(bool *)0x95CD64;
-bool &CVehicle::m_bDisableMouseSteering = *(bool *)0x60252C;
+bool CVehicle::bWheelsOnlyCheat;
+bool CVehicle::bAllDodosCheat;
+bool CVehicle::bCheat3;
+bool CVehicle::bCheat4;
+bool CVehicle::bCheat5;
+bool CVehicle::m_bDisableMouseSteering = true;
 
 void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New();  }
 void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehiclePool()->New(handle); }
@@ -65,7 +65,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nNumGettingIn = 0;
 	m_nGettingInFlags = 0;
 	m_nGettingOutFlags = 0;
-	m_nNumMaxPassengers = 8;
+	m_nNumMaxPassengers = ARRAY_SIZE(pPassengers);
 	for(i = 0; i < m_nNumMaxPassengers; i++)
 		pPassengers[i] = nil;
 	m_nBombTimer = 0;
@@ -101,7 +101,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nLastWeaponDamage = -1;
 	m_fMapObjectHeightAhead = m_fMapObjectHeightBehind = 0.0f;
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
-	if(m_audioEntityId)
+	if(m_audioEntityId >= 0)
 		DMAudio.SetEntityStatus(m_audioEntityId, true);
 	m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
 	m_pCurGroundEntity = nil;
@@ -281,7 +281,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 		right = -contactSpeedRight/wheelsOnGround;
 
 		if(wheelStatus == WHEEL_STATUS_BURST){
-			float fwdspeed = min(contactSpeedFwd, 0.3f);
+			float fwdspeed = Min(contactSpeedFwd, 0.3f);
 			right += fwdspeed * CGeneral::GetRandomNumberInRange(-0.1f, 0.1f);
 		}
 	}
@@ -533,7 +533,7 @@ CVehicle::DoFixedMachineGuns(void)
 void
 CVehicle::ExtinguishCarFire(void)
 {
-	m_fHealth = max(m_fHealth, 300.0f);
+	m_fHealth = Max(m_fHealth, 300.0f);
 	if(m_pCarFire)
 		m_pCarFire->Extinguish();
 	if(IsCar()){
@@ -728,7 +728,7 @@ CVehicle::CanBeDeleted(void)
 			return false;
 	}
 
-	for(i = 0; i < 8; i++){
+	for(i = 0; i < ARRAY_SIZE(pPassengers); i++){
 		// Same check as above
 		if(pPassengers[i]){
 			if(pPassengers[i]->CharCreatedBy == MISSION_CHAR)
@@ -787,6 +787,10 @@ CVehicle::CanPedExitCar(void)
 {
 	CVector up = GetUp();
 	if(up.z > 0.1f || up.z < -0.1f){
+#ifdef VC_PED_PORTS
+		if (IsBoat())
+			return true;
+#endif
 		// can't exit when car is moving too fast
 		if(m_vecMoveSpeed.MagnitudeSqr() > 0.005f)
 			return false;
@@ -870,13 +874,13 @@ CVehicle::SetDriver(CPed *driver)
 
 	if(bFreebies && driver == FindPlayerPed()){
 		if(GetModelIndex() == MI_AMBULAN)
-			FindPlayerPed()->m_fHealth = min(FindPlayerPed()->m_fHealth + 20.0f, 100.0f);
+			FindPlayerPed()->m_fHealth = Min(FindPlayerPed()->m_fHealth + 20.0f, 100.0f);
 		else if(GetModelIndex() == MI_TAXI)
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
 		else if(GetModelIndex() == MI_POLICE)
 			driver->GiveWeapon(WEAPONTYPE_SHOTGUN, 5);
 		else if(GetModelIndex() == MI_ENFORCER)
-			driver->m_fArmour = max(driver->m_fArmour, 100.0f);
+			driver->m_fArmour = Max(driver->m_fArmour, 100.0f);
 		else if(GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE)
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
 		bFreebies = false;
@@ -937,7 +941,7 @@ void
 CVehicle::RemovePassenger(CPed *p)
 {
 	if (IsTrain()){
-		for (int i = 0; i < 8; i++){
+		for (int i = 0; i < ARRAY_SIZE(pPassengers); i++){
 			if (pPassengers[i] == p) {
 				pPassengers[i] = nil;
 				m_nNumPassengers--;
@@ -998,66 +1002,15 @@ void
 DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle)
 {
 	if (pVehicle->pDriver) {
-#ifndef FIX_BUGS
-		// this just isn't fair
 		CDarkel::RegisterKillByPlayer(pVehicle->pDriver, WEAPONTYPE_UNIDENTIFIED);
-#endif
 		pVehicle->pDriver->FlagToDestroyWhenNextProcessed();
 	}
 	for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++) {
 		if (pVehicle->pPassengers[i]) {
-#ifndef FIX_BUGS
-			// this just isn't fair
 			CDarkel::RegisterKillByPlayer(pVehicle->pPassengers[i], WEAPONTYPE_UNIDENTIFIED);
-#endif
 			pVehicle->pPassengers[i]->FlagToDestroyWhenNextProcessed();
 		}
 	}
 	CWorld::Remove(pVehicle);
 	delete pVehicle;
 }
-
-
-class CVehicle_ : public CVehicle
-{
-public:
-	void dtor(void) { CVehicle::~CVehicle(); }
-	void SetModelIndex_(uint32 id) { CVehicle::SetModelIndex(id); }
-	bool SetupLighting_(void) { return CVehicle::SetupLighting(); }
-	void RemoveLighting_(bool reset) { CVehicle::RemoveLighting(reset); }
-	float GetHeightAboveRoad_(void) { return CVehicle::GetHeightAboveRoad(); }
-};
-
-STARTPATCHES
-	InjectHook(0x551170, &CVehicle_::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x4A7DD0, &CVehicle_::SetupLighting_, PATCH_JUMP);
-	InjectHook(0x4A7E60, &CVehicle_::RemoveLighting_, PATCH_JUMP);
-	InjectHook(0x417E60, &CVehicle_::GetHeightAboveRoad_, PATCH_JUMP);
-
-	InjectHook(0x552BB0, &CVehicle::FlyingControl, PATCH_JUMP);
-	InjectHook(0x5512E0, &CVehicle::ProcessWheel, PATCH_JUMP);
-	InjectHook(0x551280, &CVehicle::ProcessWheelRotation, PATCH_JUMP);
-	InjectHook(0x552AF0, &CVehicle::ExtinguishCarFire, PATCH_JUMP);
-	InjectHook(0x551C90, &CVehicle::ProcessDelayedExplosion, PATCH_JUMP);
-	InjectHook(0x552880, &CVehicle::IsLawEnforcementVehicle, PATCH_JUMP);
-	InjectHook(0x552820, &CVehicle::ChangeLawEnforcerState, PATCH_JUMP);
-	InjectHook(0x552200, &CVehicle::UsesSiren, PATCH_JUMP);
-	InjectHook(0x5527E0, &CVehicle::IsVehicleNormal, PATCH_JUMP);
-	InjectHook(0x552B70, &CVehicle::CarHasRoof, PATCH_JUMP);
-	InjectHook(0x552230, &CVehicle::IsUpsideDown, PATCH_JUMP);
-	InjectHook(0x552260, &CVehicle::IsOnItsSide, PATCH_JUMP);
-	InjectHook(0x5511B0, &CVehicle::CanBeDeleted, PATCH_JUMP);
-	InjectHook(0x5522A0, &CVehicle::CanPedOpenLocks, PATCH_JUMP);
-	InjectHook(0x5522F0, &CVehicle::CanPedEnterCar, PATCH_JUMP);
-	InjectHook(0x5523C0, &CVehicle::CanPedExitCar, PATCH_JUMP);
-	InjectHook(0x5520C0, &CVehicle::SetUpDriver, PATCH_JUMP);
-	InjectHook(0x552160, &CVehicle::SetupPassenger, PATCH_JUMP);
-	InjectHook(0x551F20, &CVehicle::SetDriver, PATCH_JUMP);
-	InjectHook(0x551D90, (bool (CVehicle::*)(CPed*))&CVehicle::AddPassenger, PATCH_JUMP);
-	InjectHook(0x551E10, (bool (CVehicle::*)(CPed*,uint8))&CVehicle::AddPassenger, PATCH_JUMP);
-	InjectHook(0x5520A0, &CVehicle::RemoveDriver, PATCH_JUMP);
-	InjectHook(0x551EB0, &CVehicle::RemovePassenger, PATCH_JUMP);
-	InjectHook(0x5525A0, &CVehicle::ProcessCarAlarm, PATCH_JUMP);
-	InjectHook(0x552620, &CVehicle::IsSphereTouchingVehicle, PATCH_JUMP);
-	InjectHook(0x551950, &CVehicle::InflictDamage, PATCH_JUMP);
-ENDPATCHES

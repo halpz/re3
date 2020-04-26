@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Vector.h"
 #include "PlayerPed.h"
 #include "Entity.h"
@@ -16,7 +16,7 @@
 #include "Ped.h"
 #include "Fire.h"
 
-CFireManager &gFireManager = *(CFireManager*)0x8F31D0;
+CFireManager gFireManager;
 
 CFire::CFire()
 {
@@ -438,21 +438,3 @@ CFireManager::SetScriptFireAudio(int16 index, bool state)
 {
 	m_aFires[index].m_bAudioSet = state;
 }
-
-STARTPATCHES
-	InjectHook(0x4798D0, &CFire::ProcessFire, PATCH_JUMP);
-	InjectHook(0x4798B0, &CFire::ReportThisFire, PATCH_JUMP);
-	InjectHook(0x479D40, &CFire::Extinguish, PATCH_JUMP);
-	InjectHook(0x479500, (void(CFireManager::*)(CVector pos, float size, bool propagation))&CFireManager::StartFire, PATCH_JUMP);
-	InjectHook(0x479590, (CFire *(CFireManager::*)(CEntity *, CEntity *, float, bool))&CFireManager::StartFire, PATCH_JUMP);
-	InjectHook(0x479310, &CFireManager::Update, PATCH_JUMP);
-	InjectHook(0x479430, &CFireManager::FindFurthestFire_NeverMindFireMen, PATCH_JUMP);
-	InjectHook(0x479340, &CFireManager::FindNearestFire, PATCH_JUMP);
-	InjectHook(0x4792E0, &CFireManager::GetNextFreeFire, PATCH_JUMP);
-	InjectHook(0x479DB0, &CFireManager::ExtinguishPoint, PATCH_JUMP);
-	InjectHook(0x479E60, &CFireManager::StartScriptFire, PATCH_JUMP);
-	InjectHook(0x479FC0, &CFireManager::IsScriptFireExtinguish, PATCH_JUMP);
-	InjectHook(0x47A000, &CFireManager::RemoveAllScriptFires, PATCH_JUMP);
-	InjectHook(0x479FE0, &CFireManager::RemoveScriptFire, PATCH_JUMP);
-	InjectHook(0x47A040, &CFireManager::SetScriptFireAudio, PATCH_JUMP);
-ENDPATCHES

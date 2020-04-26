@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "Quaternion.h"
 #include "ModelInfo.h"
 #include "ModelIndices.h"
@@ -1355,43 +1355,3 @@ CFileLoader::ReLoadScene(const char *filename)
 	}
 	CFileMgr::CloseFile(fd);
 }
-
-STARTPATCHES
-	InjectHook(0x476290, CFileLoader::LoadLevel, PATCH_JUMP);
-
-	InjectHook(0x476520, CFileLoader::LoadCollisionFromDatFile, PATCH_JUMP);
-	InjectHook(0x4761D0, CFileLoader::LoadLine, PATCH_JUMP);
-	InjectHook(0x4765B0, CFileLoader::LoadTexDictionary, PATCH_JUMP);
-	InjectHook(0x478B20, CFileLoader::LoadCollisionFile, PATCH_JUMP);
-	InjectHook(0x478C20, CFileLoader::LoadCollisionModel, PATCH_JUMP);
-	InjectHook(0x476750, CFileLoader::LoadModelFile, PATCH_JUMP);
-	InjectHook(0x476810, (void (*)(const char*))CFileLoader::LoadClumpFile, PATCH_JUMP);
-	InjectHook(0x476990, (bool (*)(RwStream*,uint32))CFileLoader::LoadClumpFile, PATCH_JUMP);
-	InjectHook(0x476A20, CFileLoader::StartLoadClumpFile, PATCH_JUMP);
-	InjectHook(0x476A70, CFileLoader::FinishLoadClumpFile, PATCH_JUMP);
-	InjectHook(0x476930, CFileLoader::LoadAtomicFile, PATCH_JUMP);
-	InjectHook(0x4767C0, CFileLoader::LoadAtomicFile2Return, PATCH_JUMP);
-	InjectHook(0x476630, CFileLoader::AddTexDictionaries, PATCH_JUMP);
-
-	InjectHook(0x476AC0, CFileLoader::LoadObjectTypes, PATCH_JUMP);
-	InjectHook(0x477040, CFileLoader::LoadObject, PATCH_JUMP);
-	InjectHook(0x4774B0, CFileLoader::LoadTimeObject, PATCH_JUMP);
-	InjectHook(0x477920, CFileLoader::LoadClumpObject, PATCH_JUMP);
-	InjectHook(0x477990, CFileLoader::LoadVehicleObject, PATCH_JUMP);
-	InjectHook(0x477DE0, CFileLoader::LoadPedObject, PATCH_JUMP);
-	InjectHook(0x477ED0, CFileLoader::LoadPathHeader, PATCH_JUMP);
-	InjectHook(0x477FF0, CFileLoader::LoadCarPathNode, PATCH_JUMP);
-	InjectHook(0x477F00, CFileLoader::LoadPedPathNode, PATCH_JUMP);
-	InjectHook(0x4780E0, CFileLoader::Load2dEffect, PATCH_JUMP);
-
-	InjectHook(0x478370, CFileLoader::LoadScene, PATCH_JUMP);
-	InjectHook(0x4786B0, CFileLoader::LoadObjectInstance, PATCH_JUMP);
-	InjectHook(0x478A00, CFileLoader::LoadZone, PATCH_JUMP);
-	InjectHook(0x478A90, CFileLoader::LoadCullZone, PATCH_JUMP);
-
-	InjectHook(0x478550, CFileLoader::LoadMapZones, PATCH_JUMP);
-
-	InjectHook(0x476DB0, CFileLoader::ReloadPaths, PATCH_JUMP);
-	InjectHook(0x476F30, CFileLoader::ReloadObjectTypes, PATCH_JUMP);
-	InjectHook(0x4772B0, CFileLoader::ReloadObject, PATCH_JUMP);
-ENDPATCHES

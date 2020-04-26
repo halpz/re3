@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Timecycle.h"
 #include "HandlingMgr.h"
@@ -21,16 +21,16 @@
 
 #define INVALID_ORIENTATION (-9999.99f)
 
-float &fShapeLength = *(float*)0x600E78;
-float &fShapeTime   = *(float*)0x600E7C;
-float &fRangeMult   = *(float*)0x600E80; //0.6f; // 0.75f gta 3
-float &fTimeMult = *(float*)0x943008;
+float fShapeLength = 0.4f;
+float fShapeTime = 0.05f;
+float fRangeMult = 0.75f; //0.6f; // 0.75f gta 3
+float fTimeMult;
 
 float MAX_WAKE_LENGTH = 50.0f;
 float MIN_WAKE_INTERVAL = 1.0f;
 float WAKE_LIFETIME = 400.0f;
 
-CBoat * (&CBoat::apFrameWakeGeneratingBoats)[4] = *(CBoat * (*)[4])*(uintptr*)0x8620E0;
+CBoat *CBoat::apFrameWakeGeneratingBoats[4];
 
 CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 {
@@ -272,7 +272,7 @@ CBoat::ProcessControl(void)
 				impulse = m_vecMoveSpeed.MagnitudeSqr()*pHandling->fSuspensionForceLevel*buoyanceImpulse.z*CTimer::GetTimeStep()*0.5f*m_fGasPedal;
 			else
 				impulse = 0.0f;
-			impulse = min(impulse, GRAVITY*pHandling->fSuspensionDampingLevel*m_fMass*CTimer::GetTimeStep());
+			impulse = Min(impulse, GRAVITY*pHandling->fSuspensionDampingLevel*m_fMass*CTimer::GetTimeStep());
 			ApplyMoveForce(impulse*GetUp());
 			ApplyTurnForce(impulse*GetUp(), buoyancePoint - pHandling->fSuspensionBias*GetForward());
 		}
@@ -340,27 +340,46 @@ CBoat::ProcessControl(void)
 							else
 								jetPos.z = 0.0f;
 
+#ifdef PC_PARTICLE
 							CVector wakePos = GetPosition() + sternPos;
 							wakePos.z -= 0.65f;
+#else
+							CVector wakePos = GetPosition() + sternPos;
+							wakePos.z = -0.3f;
+#endif
 
 							CVector wakeDir = 0.75f * jetDir;
 
 							CParticle::AddParticle(PARTICLE_BOAT_THRUSTJET, jetPos, jetDir, nil, 0.0f, jetColor);
+#ifdef PC_PARTICLE
 							CParticle::AddParticle(PARTICLE_CAR_SPLASH, jetPos, 0.25f * jetDir, nil, 1.0f, splashColor,
 								CGeneral::GetRandomNumberInRange(0, 30),
 								CGeneral::GetRandomNumberInRange(0, 90), 3);
+#endif
 							if(!cameraHack)
 								CParticle::AddParticle(PARTICLE_BOAT_WAKE, wakePos, wakeDir, nil, 0.0f, jetColor);
 						}else if((CTimer::GetFrameCounter() + m_randomSeed) & 1){
+#ifdef PC_PARTICLE
 							jetDir.z = 0.018f;
 							jetDir.x *= 0.01f;
 							jetDir.y *= 0.01f;
 							propellerWorld.z += 1.5f;
-
+							
 							CParticle::AddParticle(PARTICLE_BOAT_SPLASH, propellerWorld, jetDir, nil, 1.5f, jetColor);
+#else
+							jetDir.z = 0.018f;
+							jetDir.x *= 0.03f;
+							jetDir.y *= 0.03f;
+							propellerWorld.z += 1.0f;
+							
+							CParticle::AddParticle(PARTICLE_BOAT_SPLASH, propellerWorld, jetDir, nil, 0.0f, jetColor);
+#endif
+							
+#ifdef PC_PARTICLE
 							CParticle::AddParticle(PARTICLE_CAR_SPLASH, propellerWorld, 0.1f * jetDir, nil, 0.5f, splashColor,
 								CGeneral::GetRandomNumberInRange(0, 30),
 								CGeneral::GetRandomNumberInRange(0, 90), 3);
+#endif
 						}
 					}
 				}else if(!onLand){
@@ -375,10 +394,10 @@ CBoat::ProcessControl(void)
 		}
 
 		// Slow down or push down boat as it approaches the world limits
-		m_vecMoveSpeed.x = min(m_vecMoveSpeed.x, -(GetPosition().x - 1900.0f)*0.01f);	// east
-		m_vecMoveSpeed.x = max(m_vecMoveSpeed.x, -(GetPosition().x - -1515.0f)*0.01f);	// west
-		m_vecMoveSpeed.y = min(m_vecMoveSpeed.y, -(GetPosition().y - 600.0f)*0.01f);	// north
-		m_vecMoveSpeed.y = max(m_vecMoveSpeed.y, -(GetPosition().y - -1900.0f)*0.01f);	// south
+		m_vecMoveSpeed.x = Min(m_vecMoveSpeed.x, -(GetPosition().x - 1900.0f)*0.01f);	// east
+		m_vecMoveSpeed.x = Max(m_vecMoveSpeed.x, -(GetPosition().x - -1515.0f)*0.01f);	// west
+		m_vecMoveSpeed.y = Min(m_vecMoveSpeed.y, -(GetPosition().y - 600.0f)*0.01f);	// north
+		m_vecMoveSpeed.y = Max(m_vecMoveSpeed.y, -(GetPosition().y - -1900.0f)*0.01f);	// south
 
 		if(!onLand && bBoatInWater)
 			ApplyWaterResistance();
@@ -416,36 +435,66 @@ CBoat::ProcessControl(void)
 		}
 
 		// Spray particles on sides of boat
-		if(m_nDeltaVolumeUnderWater > 75){
+#ifdef PC_PARTICLE
+		if(m_nDeltaVolumeUnderWater > 75)
+#else
+		if(m_nDeltaVolumeUnderWater > 120)
+#endif
+		{
 			float speed = m_vecMoveSpeed.Magnitude();
 			float splash1Size = speed;
-			float splash2Size = m_nDeltaVolumeUnderWater * 0.005f * 0.2f;
+			float splash2Size = float(m_nDeltaVolumeUnderWater) * 0.005f * 0.2f;
 			float front = 0.9f * GetColModel()->boundingBox.max.y;
 			if(splash1Size > 0.75f) splash1Size = 0.75f;
 
 			CVector dir, pos;
 
 			// right
+#ifdef PC_PARTICLE
 			dir = -0.5f*m_vecMoveSpeed;
 			dir.z += 0.1f*speed;
 			dir += 0.5f*GetRight()*speed;
 			pos = front*GetForward() + 0.5f*GetRight() + GetPosition() + m_vecBuoyancePoint;
 			CWaterLevel::GetWaterLevel(pos, &pos.z, true);
+#else
+			dir = 0.3f*m_vecMoveSpeed;
+			dir.z += 0.05f*speed;
+			dir += 0.5f*GetRight()*speed;
+			pos = (GetPosition() + m_vecBuoyancePoint) + (1.5f*GetRight());
+#endif
+			
+#ifdef PC_PARTICLE
 			CParticle::AddParticle(PARTICLE_CAR_SPLASH, pos, 0.75f * dir, nil, splash1Size, splashColor,
 				CGeneral::GetRandomNumberInRange(0, 30),
 				CGeneral::GetRandomNumberInRange(0, 90), 1);
 			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, splash2Size, jetColor);
+#else
+			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, splash2Size);
+#endif
+			
 
 			// left
+#ifdef PC_PARTICLE
 			dir = -0.5f*m_vecMoveSpeed;
 			dir.z += 0.1f*speed;
 			dir -= 0.5f*GetRight()*speed;
 			pos = front*GetForward() - 0.5f*GetRight() + GetPosition() + m_vecBuoyancePoint;
 			CWaterLevel::GetWaterLevel(pos, &pos.z, true);
+#else
+			dir = 0.3f*m_vecMoveSpeed;
+			dir.z += 0.05f*speed;
+			dir -= 0.5f*GetRight()*speed;
+			pos = (GetPosition() + m_vecBuoyancePoint) - (1.5f*GetRight());
+#endif
+			
+#ifdef PC_PARTICLE
 			CParticle::AddParticle(PARTICLE_CAR_SPLASH, pos, 0.75f * dir, nil, splash1Size, splashColor,
 				CGeneral::GetRandomNumberInRange(0, 30),
 				CGeneral::GetRandomNumberInRange(0, 90), 1);
 			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, splash2Size, jetColor);
+#else
+			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, splash2Size);
+#endif
 		}
 
 		m_fPrevVolumeUnderWater = m_fVolumeUnderWater;
@@ -658,13 +707,13 @@ CBoat::Render()
 	((CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()))->SetVehicleColour(m_currentColour1, m_currentColour2);
 	if (!CVehicle::bWheelsOnlyCheat)
 		CEntity::Render();
-	KeepWaterOutVertices[0].color = -1;
+	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[0], 255, 255, 255, 255);
 	KeepWaterOutIndices[0] = 0;
-	KeepWaterOutVertices[1].color = -1;
+	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[1], 255, 255, 255, 255);
 	KeepWaterOutIndices[1] = 2;
-	KeepWaterOutVertices[2].color = -1;
+	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[2], 255, 255, 255, 255);
 	KeepWaterOutIndices[2] = 1;
-	KeepWaterOutVertices[3].color = -1;
+	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[3], 255, 255, 255, 255);
 	KeepWaterOutIndices[3] = 1;
 	KeepWaterOutIndices[4] = 2;
 	KeepWaterOutIndices[5] = 3;
@@ -765,7 +814,7 @@ CBoat::IsVertexAffectedByWake(CVector vecVertex, CBoat *pBoat)
 		float fDist = vecDist.MagnitudeSqr();
 		
 		if ( fDist < SQR(fMaxDist) )
-			return 1.0f - min(fRangeMult * Sqrt(fDist / SQR(fMaxDist)) + (WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[i]) * fTimeMult, 1.0f);
+			return 1.0f - Min(fRangeMult * Sqrt(fDist / SQR(fMaxDist)) + (WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[i]) * fTimeMult, 1.0f);
 	}
 
 	return 0.0f;
@@ -837,7 +886,7 @@ CBoat::AddWakePoint(CVector point)
 	int i;
 	if(m_afWakePointLifeTime[0] > 0.0f){
 		if((CVector2D(GetPosition()) - m_avec2dWakePoints[0]).MagnitudeSqr() < SQR(1.0f)){
-			for(i = min(m_nNumWakePoints, ARRAY_SIZE(m_afWakePointLifeTime)-1); i != 0; i--){
+			for(i = Min(m_nNumWakePoints, ARRAY_SIZE(m_afWakePointLifeTime)-1); i != 0; i--){
 				m_avec2dWakePoints[i] = m_avec2dWakePoints[i-1];
 				m_afWakePointLifeTime[i] = m_afWakePointLifeTime[i-1];
 			}
@@ -850,24 +899,3 @@ CBoat::AddWakePoint(CVector point)
 		m_nNumWakePoints = 1;
 	}
 }
-
-#include <new>
-
-class CBoat_ : public CBoat
-{
-public:
-	CBoat* ctor(int32 id, uint8 CreatedBy) { return ::new (this) CBoat(id, CreatedBy); }
-	void dtor() { CBoat::~CBoat(); };
-};
-
-STARTPATCHES
-	InjectHook(0x53E3E0, &CBoat_::ctor, PATCH_JUMP);
-	InjectHook(0x53E790, &CBoat_::dtor, PATCH_JUMP);
-	InjectHook(0x53E7D0, &CBoat::SetupModelNodes, PATCH_JUMP);
-	InjectHook(0x542370, CBoat::IsSectorAffectedByWake, PATCH_JUMP);
-	InjectHook(0x5424A0, CBoat::IsVertexAffectedByWake, PATCH_JUMP);
-	InjectHook(0x542250, CBoat::FillBoatList, PATCH_JUMP);
-	InjectHook(0x542140, &CBoat::AddWakePoint, PATCH_JUMP);
-	InjectHook(0x5420D0, &CBoat::PruneWakeTrail, PATCH_JUMP);
-	InjectHook(0x541A30, &CBoat::ApplyWaterResistance, PATCH_JUMP);
-ENDPATCHES

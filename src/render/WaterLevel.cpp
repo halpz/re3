@@ -21,7 +21,7 @@
 #include "RenderBuffer.h"
 #include <rpworld.h>
 #include "WaterLevel.h"
-#include "patcher.h"
+
 
 float TEXTURE_ADDU;
 float TEXTURE_ADDV;
@@ -39,8 +39,8 @@ int16 CWaterLevel::nGeomUsed;
 //RwTexture *gpWaterTex;
 //RwRaster *gpWaterRaster;
 
-RwTexture *&gpWaterTex = *(RwTexture **)0x64D070;
-RwRaster *&gpWaterRaster = *(RwRaster **)0x8F5FD4;
+RwTexture *gpWaterTex;
+RwRaster *gpWaterRaster;
 
 
 const float fAdd1 = 180.0f;
@@ -979,7 +979,7 @@ CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &col
 			SMALL_SECTOR_SIZE / 2,
 			apBoatList) )
 	{
-		float fWakeColor = fAdd1 - max(255.0f - float(color.blue + color.red + color.green) / 3, fAdd2);
+		float fWakeColor = fAdd1 - Max(255.0f - float(color.blue + color.red + color.green) / 3, fAdd2);
 		
 		RpGeometry *wavyGeometry = RpAtomicGetGeometry(ms_pWavyAtomic);	
 		RpGeometry *geom  = apGeomArray[nGeomUsed++];
@@ -1035,9 +1035,9 @@ CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &col
 					
 					RwRGBAAssign(&wakeColor, &color);
 
-					wakeColor.red   = min(color.red   + int32(fWakeColor * fRedMult   * fDistMult), 255);
-					wakeColor.green = min(color.green + int32(fWakeColor * fGreenMult * fDistMult), 255);
-					wakeColor.blue  = min(color.blue  + int32(fWakeColor * fBlueMult  * fDistMult), 255);
+					wakeColor.red   = Min(color.red   + int32(fWakeColor * fRedMult   * fDistMult), 255);
+					wakeColor.green = Min(color.green + int32(fWakeColor * fGreenMult * fDistMult), 255);
+					wakeColor.blue  = Min(color.blue  + int32(fWakeColor * fBlueMult  * fDistMult), 255);
 					
 					RwRGBAAssign(&geomPreLights[9*i+j], &wakeColor);
 
@@ -1114,7 +1114,7 @@ CWaterLevel::CalcDistanceToWater(float fX, float fY)
 					fSectorY + SMALL_SECTOR_SIZE - fY
 				);
 				
-				fDistSqr = min(vecDist.MagnitudeSqr(), fDistSqr);
+				fDistSqr = Min(vecDist.MagnitudeSqr(), fDistSqr);
 			}
 		}
 	}
@@ -1234,22 +1234,3 @@ CWaterLevel::FreeBoatWakeArray()
 	
 	nGeomUsed = 0;  
 }
-
-STARTPATCHES
-	InjectHook(0x554EA0, &CWaterLevel::Initialise, PATCH_JUMP);
-	InjectHook(0x554FE0, &CWaterLevel::Shutdown, PATCH_JUMP);
-	InjectHook(0x555010, &CWaterLevel::CreateWavyAtomic, PATCH_JUMP);
-	InjectHook(0x5552A0, &CWaterLevel::DestroyWavyAtomic, PATCH_JUMP);
-	InjectHook(0x5552C0, (bool (*)(float,float,float,float*,bool))&CWaterLevel::GetWaterLevel, PATCH_JUMP);
-	InjectHook(0x555440, &CWaterLevel::GetWaterLevelNoWaves, PATCH_JUMP);
-	InjectHook(0x5554E0, &CWaterLevel::RenderWater, PATCH_JUMP);
-	InjectHook(0x556C30, &CWaterLevel::RenderOneFlatSmallWaterPoly, PATCH_JUMP);
-	InjectHook(0x556E80, &CWaterLevel::RenderOneFlatLargeWaterPoly, PATCH_JUMP);
-	InjectHook(0x5570D0, &CWaterLevel::RenderOneFlatHugeWaterPoly, PATCH_JUMP);
-	InjectHook(0x557320, &CWaterLevel::RenderOneFlatExtraHugeWaterPoly, PATCH_JUMP);
-	InjectHook(0x557570, &CWaterLevel::RenderOneWavySector, PATCH_JUMP);
-	InjectHook(0x557C30, &CWaterLevel::CalcDistanceToWater, PATCH_JUMP);
-	InjectHook(0x557EA0, &CWaterLevel::RenderAndEmptyRenderBuffer, PATCH_JUMP);
-	InjectHook(0x557F00, &CWaterLevel::AllocateBoatWakeArray, PATCH_JUMP);
-	InjectHook(0x5581C0, &CWaterLevel::FreeBoatWakeArray, PATCH_JUMP);
-ENDPATCHES

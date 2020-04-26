@@ -1,12 +1,9 @@
 #pragma warning( push )
 #pragma warning( disable : 4005)
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
 #pragma warning( pop )
-#define WITHWINDOWS
 #include "common.h"
-#include "win.h"
-#include "patcher.h"
+#include "crossplatform.h"
+
 #include "Timer.h"
 #ifdef GTA_PC
 #include "FileMgr.h"
@@ -22,8 +19,14 @@
 #include "RwHelper.h"
 #endif //GTA_PC
 
-float &texLoadTime = *(float*)0x8F1B50;
-int32 &texNumLoaded = *(int32*)0x8F252C;
+float texLoadTime;
+int32 texNumLoaded;
+
+#ifdef LIBRW
+#define READNATIVE(stream, tex, size) rwNativeTextureHackRead(stream, tex, size)
+#else
+#define READNATIVE(stream, tex, size) RWSRCGLOBAL(stdFunc[rwSTANDARDNATIVETEXTUREREAD](stream, tex, size))
+#endif
 
 RwTexture*
 RwTextureGtaStreamRead(RwStream *stream)
@@ -36,7 +39,7 @@ RwTextureGtaStreamRead(RwStream *stream)
 
 	float preloadTime = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
 
-	if(!RWSRCGLOBAL(stdFunc[rwSTANDARDNATIVETEXTUREREAD](stream, &tex, size)))
+	if(!READNATIVE(stream, &tex, size))
 		return nil;
 
 	if (gGameState == GS_INIT_PLAYING_GAME) {
@@ -63,7 +66,6 @@ RwTexDictionaryGtaStreamRead(RwStream *stream)
 
 	if(!RwStreamFindChunk(stream, rwID_STRUCT, &size, &version))
 		return nil;
-	assert(size == 4);
 	if(RwStreamRead(stream, &numTextures, size) != size)
 		return nil;
 
@@ -121,7 +123,7 @@ RwTexDictionaryGtaStreamRead1(RwStream *stream)
 	}
 
 	numberTextures = numTextures;
-	streamPosition = stream->Type.memory.position;
+	streamPosition = STREAMPOS(stream);
 
 	return texDict;
 }
@@ -131,7 +133,7 @@ RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary *texDict)
 {
 	RwTexture *tex;
 
-	RwStreamSkip(stream, streamPosition - stream->Type.memory.position);
+	RwStreamSkip(stream, streamPosition - STREAMPOS(stream));
 
 	while(numberTextures--){
 		tex = RwTextureGtaStreamRead(stream);
@@ -150,9 +152,8 @@ RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary *texDict)
 #ifdef RWLIBS
 extern "C" RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
 #else
-WRAPPER RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags) { EAXJMP(0x59A350); }
+RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
 #endif
-
 void
 ReadVideoCardCapsFile(uint32 &cap32, uint32 &cap24, uint32 &cap16, uint32 &cap8)
 {
@@ -251,6 +252,12 @@ DealWithTxdWriteError(uint32 num, uint32 count, const char *text)
 	RsGlobal.quit = true;
 }
 
+#ifdef LIBRW
+#define STREAMTELL(str)	str->tell()
+#else
+#define STREAMTELL(str) filesys->rwftell((str)->Type.file.fpFile)
+#endif
+
 bool
 CreateTxdImageForVideoCard()
 {
@@ -260,7 +267,9 @@ CreateTxdImageForVideoCard()
 
 	CStreaming::FlushRequestList();
 
+#ifndef LIBRW
 	RwFileFunctions *filesys = RwOsGetFileInterface();
+#endif
 
 	RwStream *img = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMWRITE, "models\\txd.img");
 	if (img == nil) {
@@ -287,7 +296,8 @@ CreateTxdImageForVideoCard()
 			sprintf(filename, "%s.txd", CTxdStore::GetTxdName(i));
 
 			if (CTxdStore::GetSlot(i)->texDict) {
-				int32 pos = filesys->rwftell(img->Type.file.fpFile);
+
+				int32 pos = STREAMTELL(img);
 
 				if (RwTexDictionaryStreamWrite(CTxdStore::GetSlot(i)->texDict, img) == nil) {
 					DealWithTxdWriteError(i, TXDSTORESIZE, "CVT_ERR");
@@ -298,7 +308,7 @@ CreateTxdImageForVideoCard()
 					return false;
 				}
 
-				int32 size = filesys->rwftell(img->Type.file.fpFile) - pos;
+				int32 size = STREAMTELL(img) - pos;
 				int32 num = size % CDSTREAM_SECTOR_SIZE;
 
 				size /= CDSTREAM_SECTOR_SIZE;
@@ -333,17 +343,3 @@ CreateTxdImageForVideoCard()
 	return true;
 }
 #endif // GTA_PC
-
-STARTPATCHES
-	InjectHook(0x592380, RwTextureGtaStreamRead, PATCH_JUMP);
-	InjectHook(0x5924A0, RwTexDictionaryGtaStreamRead, PATCH_JUMP);
-	InjectHook(0x592550, RwTexDictionaryGtaStreamRead1, PATCH_JUMP);
-	InjectHook(0x592650, RwTexDictionaryGtaStreamRead2, PATCH_JUMP);
-
-	InjectHook(0x5926C0, ReadVideoCardCapsFile, PATCH_JUMP);
-	InjectHook(0x592740, CheckVideoCardCaps, PATCH_JUMP);
-	InjectHook(0x5927D0, WriteVideoCardCapsFile, PATCH_JUMP);
-	InjectHook(0x592880, ConvertingTexturesScreen, PATCH_JUMP);
-	InjectHook(0x592BF0, DealWithTxdWriteError, PATCH_JUMP);
-	InjectHook(0x592C70, CreateTxdImageForVideoCard, PATCH_JUMP);
-ENDPATCHES

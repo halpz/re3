@@ -1,6 +1,7 @@
-#define WITHWINDOWS
 #include "common.h"
-#include "patcher.h"
+#define USEALTERNATIVEWINFUNCS
+#include "crossplatform.h"
+
 #include "FileMgr.h"
 #include "GenericGameStorage.h"
 #include "Messages.h"
@@ -9,7 +10,7 @@
 
 const char* _psGetUserFilesFolder();
 
-C_PcSave &PcSaveHelper = *(C_PcSave*)0x8E2C60;
+C_PcSave PcSaveHelper;
 
 void
 C_PcSave::SetSaveDirectory(const char *path)
@@ -86,11 +87,15 @@ C_PcSave::PopulateSlotInfo()
 		SlotSaveDate[i][0] = '\0';
 	}
 	for (int i = 0; i < SLOT_COUNT; i++) {
+#ifdef FIX_BUGS
+		char savename[MAX_PATH];
+#else
 		char savename[52];
+#endif
 		struct {
 			int size;
 			wchar FileName[24];
-			_SYSTEMTIME SaveDateTime;
+			SYSTEMTIME SaveDateTime;
 		} header;
 		sprintf(savename, "%s%i%s", DefaultPCSaveFileName, i + 1, ".b");
 		int file = CFileMgr::OpenFile(savename, "rb");
@@ -106,8 +111,8 @@ C_PcSave::PopulateSlotInfo()
 		}
 		if (Slots[i + 1] == SLOT_OK) {
 			if (CheckDataNotCorrupt(i, savename)) {
-				_SYSTEMTIME st;
-				memcpy(&st, &header.SaveDateTime, sizeof(_SYSTEMTIME));
+				SYSTEMTIME st;
+				memcpy(&st, &header.SaveDateTime, sizeof(SYSTEMTIME));
 				const char *month;
 				switch (st.wMonth)
 				{
@@ -136,11 +141,3 @@ C_PcSave::PopulateSlotInfo()
 		}
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x591EA0, C_PcSave::SetSaveDirectory, PATCH_JUMP);
-	InjectHook(0x5922F0, &C_PcSave::DeleteSlot, PATCH_JUMP);
-	InjectHook(0x591EC0, &C_PcSave::SaveSlot, PATCH_JUMP);
-	InjectHook(0x591F80, &C_PcSave::PcClassSaveRoutine, PATCH_JUMP);
-	InjectHook(0x592090, &C_PcSave::PopulateSlotInfo, PATCH_JUMP);
-ENDPATCHES

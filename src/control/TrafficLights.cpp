@@ -1,19 +1,19 @@
 #include "common.h"
-#include "patcher.h"
-#include "General.h"
+
 #include "Camera.h"
-#include "World.h"
-#include "PathFind.h"
-#include "Timer.h"
 #include "Clock.h"
-#include "Weather.h"
-#include "Timecycle.h"
-#include "Pointlights.h"
-#include "Shadows.h"
 #include "Coronas.h"
+#include "General.h"
+#include "PathFind.h"
+#include "PointLights.h"
+#include "Shadows.h"
 #include "SpecialFX.h"
-#include "Vehicle.h"
+#include "Timecycle.h"
+#include "Timer.h"
 #include "TrafficLights.h"
+#include "Vehicle.h"
+#include "Weather.h"
+#include "World.h"
 
 // TODO: figure out the meaning of this
 enum { SOME_FLAG = 0x80 };
@@ -39,10 +39,10 @@ CTrafficLights::DisplayActualLight(CEntity *ent)
 	float zMax = mi->Get2dEffect(0)->pos.z;
 	for(i = 1; i < 6; i++){
 		assert(mi->Get2dEffect(i));
-		yMin = min(yMin, mi->Get2dEffect(i)->pos.y);
-		yMax = max(yMax, mi->Get2dEffect(i)->pos.y);
-		zMin = min(zMin, mi->Get2dEffect(i)->pos.z);
-		zMax = max(zMax, mi->Get2dEffect(i)->pos.z);
+		yMin = Min(yMin, mi->Get2dEffect(i)->pos.y);
+		yMax = Max(yMax, mi->Get2dEffect(i)->pos.y);
+		zMin = Min(zMin, mi->Get2dEffect(i)->pos.z);
+		zMax = Max(zMax, mi->Get2dEffect(i)->pos.z);
 	}
 
 	CVector pos1, pos2;
@@ -327,9 +327,3 @@ CTrafficLights::LightForCars2(void)
 	else
 		return CAR_LIGHTS_RED;
 }
-
-STARTPATCHES
-	InjectHook(0x455760, &CTrafficLights::LightForCars1, PATCH_JUMP);
-	InjectHook(0x455790, &CTrafficLights::LightForCars2, PATCH_JUMP);
-	InjectHook(0x4557D0, &CTrafficLights::LightForPeds, PATCH_JUMP);
-ENDPATCHES

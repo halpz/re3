@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Camera.h"
 #include "General.h"
 #include "Heli.h"
@@ -13,8 +13,8 @@
 #include "Weapon.h"
 #include "World.h"
 
-CProjectileInfo (&gaProjectileInfo)[NUM_PROJECTILES] = *(CProjectileInfo(*)[NUM_PROJECTILES])*(uintptr*)0x64ED50;
-CProjectile* (&CProjectileInfo::ms_apProjectile)[NUM_PROJECTILES] = *(CProjectile*(*)[NUM_PROJECTILES])*(uintptr*)0x87C748;
+CProjectileInfo gaProjectileInfo[NUM_PROJECTILES];
+CProjectile *CProjectileInfo::ms_apProjectile[NUM_PROJECTILES];
 
 void
 CProjectileInfo::Initialise()
@@ -287,16 +287,3 @@ CProjectileInfo::RemoveIfThisIsAProjectile(CObject *object)
 	ms_apProjectile[i] = nil;
 	return true;
 }
-
-STARTPATCHES
-	InjectHook(0x55ADF0, CProjectileInfo::Initialise, PATCH_JUMP);
-	InjectHook(0x55AFF0, CProjectileInfo::Shutdown, PATCH_JUMP);
-	InjectHook(0x55B010, CProjectileInfo::GetProjectileInfo, PATCH_JUMP);
-	InjectHook(0x55B030, CProjectileInfo::AddProjectile, PATCH_JUMP);
-	InjectHook(0x55B700, CProjectileInfo::RemoveProjectile, PATCH_JUMP);
-	InjectHook(0x55B770, CProjectileInfo::RemoveNotAdd, PATCH_JUMP);
-	InjectHook(0x55B7C0, CProjectileInfo::Update, PATCH_JUMP);
-	InjectHook(0x55BA50, CProjectileInfo::IsProjectileInRange, PATCH_JUMP);
-	InjectHook(0x55BB80, CProjectileInfo::RemoveAllProjectiles, PATCH_JUMP);
-	InjectHook(0x55BBD0, CProjectileInfo::RemoveIfThisIsAProjectile, PATCH_JUMP);
-ENDPATCHES

@@ -66,7 +66,7 @@ public:
 
 VALIDATE_SIZE(CMousePointerStateHelper, 0x2);
 
-extern CMousePointerStateHelper &MousePointerStateHelper;
+extern CMousePointerStateHelper MousePointerStateHelper;
 
 
 class CKeyboardState
@@ -155,7 +155,6 @@ public:
 	uint8 DisablePlayerControls;
 	int8 bApplyBrakes;
 	char CheatString[12];
-	char _pad0[3];
 	int32 LastTimeTouched;
 	int32 AverageWeapon;
 	int32 AverageEntries;
@@ -163,18 +162,18 @@ public:
 	CPad() { }
 	~CPad() { }
 
-	static bool &bDisplayNoControllerMessage;
-	static bool &bObsoleteControllerMessage;
+	static bool bDisplayNoControllerMessage;
+	static bool bObsoleteControllerMessage;
 	static bool bOldDisplayNoControllerMessage;
-	static bool &m_bMapPadOneToPadTwo;
+	static bool m_bMapPadOneToPadTwo;
 	
-	static CKeyboardState &OldKeyState;
-	static CKeyboardState &NewKeyState;
-	static CKeyboardState &TempKeyState;
+	static CKeyboardState OldKeyState;
+	static CKeyboardState NewKeyState;
+	static CKeyboardState TempKeyState;
 	static char KeyBoardCheatString[20];
-	static CMouseControllerState &OldMouseControllerState;
-	static CMouseControllerState &NewMouseControllerState;
-	static CMouseControllerState &PCTempMouseControllerState;
+	static CMouseControllerState OldMouseControllerState;
+	static CMouseControllerState NewMouseControllerState;
+	static CMouseControllerState PCTempMouseControllerState;
 	
 	
 #ifdef GTA_PS2_STUFF
@@ -450,4 +449,4 @@ public:
 };
 
 VALIDATE_SIZE(CPad, 0xFC);
-extern CPad *Pads;	//[2]
+extern CPad Pads[MAX_PADS];

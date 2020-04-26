@@ -34,6 +34,7 @@ enum {
 #ifdef MORE_LANGUAGES
 	FONT_JAPANESE,
 #endif
+	MAX_FONTS
 };
 
 enum {
@@ -47,7 +48,9 @@ enum
 {
 	FONT_LANGSET_EFIGS,
 	FONT_LANGSET_RUSSIAN,
+	FONT_LANGSET_POLISH,
 	FONT_LANGSET_JAPANESE
+	LANGSET_MAX
 };
 #endif
 
@@ -56,19 +59,20 @@ enum
 class CFont
 {
 #ifdef MORE_LANGUAGES
-	static int16 Size[2][3][193];
+	static int16 Size[LANGSET_MAX][MAX_FONTS][193];
 public:
 	static uint8 LanguageSet;
 private:
 	static int32 Slot;
 	static CSprite2d Sprite[4];
 #else
-	static int16 Size[3][193];
+	static int16 Size[MAX_FONTS][193];
 	static CSprite2d* Sprite;	//[3]
 #endif
-	static int16 &NewLine;
+	static int16 NewLine;
+	static CSprite2d Sprite[MAX_FONTS];
 public:
-	static CFontDetails& Details;
+	static CFontDetails Details;
 
 	static void Initialise(void);
 	static void Shutdown(void);

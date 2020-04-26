@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 
 #include "Camera.h"
@@ -31,16 +31,16 @@
 #include "WaterLevel.h"
 #include "World.h"
 
-CPickup(&CPickups::aPickUps)[NUMPICKUPS] = *(CPickup(*)[NUMPICKUPS])*(uintptr*)0x878C98;
-int16 CPickups::NumMessages;// = *(int16*)0x95CC98;
-int32 CPickups::aPickUpsCollected[NUMCOLLECTEDPICKUPS];// = *(int32(*)[NUMCOLLECTEDPICKUPS])*(uintptr*)0x87C538;
-int16 CPickups::CollectedPickUpIndex;// = *(int16*)0x95CC8A;
+CPickup CPickups::aPickUps[NUMPICKUPS];
+int16 CPickups::NumMessages;
+int32 CPickups::aPickUpsCollected[NUMCOLLECTEDPICKUPS];
+int16 CPickups::CollectedPickUpIndex;
 
 // unused
-bool &CPickups::bPickUpcamActivated = *(bool*)0x95CD71;
-CVehicle *&CPickups::pPlayerVehicle = *(CVehicle**)0x8F29E8;
-CVector &CPickups::StaticCamCoors = *(CVector*)0x9404C8;
-uint32 &CPickups::StaticCamStartTime = *(uint32*)0x8E289C;
+bool CPickups::bPickUpcamActivated;
+CVehicle *CPickups::pPlayerVehicle;
+CVector CPickups::StaticCamCoors;
+uint32 CPickups::StaticCamStartTime;
 
 tPickupMessage CPickups::aMessages[NUMPICKUPMESSAGES];
 
@@ -99,7 +99,7 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 	switch (m_eType)
 	{
 	case PICKUP_IN_SHOP:
-		object->m_obj_flag2 = true;
+		object->bPickupObjWithMessage = true;
 		object->bOutOfStock = false;
 		break;
 	case PICKUP_ON_STREET:
@@ -113,11 +113,11 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 	case PICKUP_NAUTICAL_MINE_ARMED:
 	case PICKUP_FLOATINGPACKAGE:
 	case PICKUP_ON_STREET_SLOW:
-		object->m_obj_flag2 = false;
+		object->bPickupObjWithMessage = false;
 		object->bOutOfStock = false;
 		break;
 	case PICKUP_IN_SHOP_OUT_OF_STOCK:
-		object->m_obj_flag2 = false;
+		object->bPickupObjWithMessage = false;
 		object->bOutOfStock = true;
 		object->bRenderScorched = true;
 		break;
@@ -491,7 +491,7 @@ CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quan
 	int32 slot = 0;
 
 	if (type == PICKUP_FLOATINGPACKAGE || type == PICKUP_NAUTICAL_MINE_INACTIVE) {
-		for (slot = NUMPICKUPS; slot >= 0; slot--) {
+		for (slot = NUMPICKUPS-1; slot >= 0; slot--) {
 			if (aPickUps[slot].m_eType == PICKUP_NONE) {
 				bFreeFound = true;
 				break;
@@ -623,6 +623,34 @@ CPickups::Update()
 	if (CReplay::IsPlayingBack())
 		return;
 #endif
+#ifdef CAMERA_PICKUP
+	if ( bPickUpcamActivated ) // taken from PS2
+	{
+		float dist = (FindPlayerCoors() - StaticCamCoors).Magnitude2D();
+		float mult;
+		if ( dist < 10.0f )
+			mult = 1.0f - (dist / 10.0f );
+		else 
+			mult = 0.0f;
+		
+		CVector pos = StaticCamCoors;
+		pos.z += (pPlayerVehicle->GetColModel()->boundingBox.GetSize().z + 2.0f) * mult;
+		
+		if ( (CTimer::GetTimeInMilliseconds() - StaticCamStartTime) > 750 )
+		{
+			TheCamera.SetCamPositionForFixedMode(pos, CVector(0.0f, 0.0f, 0.0f));	
+			TheCamera.TakeControl(FindPlayerVehicle(), CCam::MODE_FIXED, JUMP_CUT, CAMCONTROL_SCRIPT);
+		}
+
+		if ( FindPlayerVehicle() != pPlayerVehicle
+			|| (FindPlayerCoors() - StaticCamCoors).Magnitude() > 40.0f
+			|| ((CTimer::GetTimeInMilliseconds() - StaticCamStartTime) > 60000) )
+		{
+			TheCamera.RestoreWithJumpCut();
+			bPickUpcamActivated = false;
+		}
+	}
+#endif
 #define PICKUPS_FRAME_SPAN (6)
 #ifdef FIX_BUGS
 	for (uint32 i = NUMGENERALPICKUPS * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN) / PICKUPS_FRAME_SPAN; i < NUMGENERALPICKUPS * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN + 1) / PICKUPS_FRAME_SPAN; i++) {
@@ -690,7 +718,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 			size, 65.0f, CCoronas::TYPE_RING, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 
 		CObject *object = (CObject*)entity;
-		if (object->m_obj_flag2 || object->bOutOfStock || object->m_nBonusValue) {
+		if (object->bPickupObjWithMessage || object->bOutOfStock || object->m_nBonusValue) {
 			float dist = (TheCamera.GetPosition() - pos).Magnitude();
 			const float MAXDIST = 12.0f;
 
@@ -1406,47 +1434,3 @@ CPacManPickups::ResetPowerPillsCarriedByPlayer()
 		FindPlayerVehicle()->m_fForceMultiplier = 1.0f;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x430220, CPickups::Init, PATCH_JUMP);
-	InjectHook(0x4303D0, CPickups::Update, PATCH_JUMP);
-	InjectHook(0x432440, CPickups::RenderPickUpText, PATCH_JUMP);
-	InjectHook(0x431C30, CPickups::DoCollectableEffects, PATCH_JUMP);
-	InjectHook(0x431F40, CPickups::DoMoneyEffects, PATCH_JUMP);
-	InjectHook(0x4321C0, CPickups::DoMineEffects, PATCH_JUMP);
-	InjectHook(0x431520, CPickups::DoPickUpEffects, PATCH_JUMP);
-	InjectHook(0x4304B0, CPickups::GenerateNewOne, PATCH_JUMP);
-	InjectHook(0x430660, CPickups::GenerateNewOne_WeaponType, PATCH_JUMP);
-	InjectHook(0x4307A0, CPickups::RemovePickUp, PATCH_JUMP);
-	InjectHook(0x430800, CPickups::RemoveAllFloatingPickups, PATCH_JUMP);
-	InjectHook(0x433D60, CPickups::AddToCollectedPickupsArray, PATCH_JUMP);
-	InjectHook(0x430770, CPickups::IsPickUpPickedUp, PATCH_JUMP);
-	InjectHook(0x430690, CPickups::ModelForWeapon, PATCH_JUMP);
-	InjectHook(0x4306F0, CPickups::WeaponForModel, PATCH_JUMP);
-	InjectHook(0x431510, CPickups::FindColourIndexForWeaponMI, PATCH_JUMP);/**/
-	InjectHook(0x433DF0, CPickups::GetActualPickupIndex, PATCH_JUMP);
-	InjectHook(0x433DB0, CPickups::GetNewUniquePickupIndex, PATCH_JUMP);
-	InjectHook(0x433B60, CPickups::PassTime, PATCH_JUMP);
-	InjectHook(0x4339F0, CPickups::GivePlayerGoodiesWithPickUpMI, PATCH_JUMP);
-	InjectHook(0x433F60, CPickups::Load, PATCH_JUMP);
-	InjectHook(0x433E40, CPickups::Save, PATCH_JUMP);
-	InjectHook(0x433BA0, &CPickup::GiveUsAPickUpObject, PATCH_JUMP);
-	InjectHook(0x430860, &CPickup::Update, PATCH_JUMP);
-	InjectHook(0x4331B0, &CPacManPickup::Update, PATCH_JUMP);
-	InjectHook(0x432760, CPacManPickups::Init, PATCH_JUMP);
-	InjectHook(0x432800, CPacManPickups::Update, PATCH_JUMP);
-	InjectHook(0x432AE0, CPacManPickups::GeneratePMPickUps, PATCH_JUMP);
-	InjectHook(0x432D50, CPacManPickups::GeneratePMPickUpsForRace, PATCH_JUMP);
-	InjectHook(0x432F20, CPacManPickups::GenerateOnePMPickUp, PATCH_JUMP);
-	InjectHook(0x432F60, CPacManPickups::Render, PATCH_JUMP);
-	InjectHook(0x433150, CPacManPickups::ClearPMPickUps, PATCH_JUMP);
-	InjectHook(0x433340, CPacManPickups::StartPacManRace, PATCH_JUMP);
-	InjectHook(0x433360, CPacManPickups::StartPacManRecord, PATCH_JUMP);
-	InjectHook(0x4333A0, CPacManPickups::QueryPowerPillsEatenInRace, PATCH_JUMP);
-	InjectHook(0x4333B0, CPacManPickups::ResetPowerPillsEatenInRace, PATCH_JUMP);
-	InjectHook(0x4333C0, CPacManPickups::CleanUpPacManStuff, PATCH_JUMP);
-	InjectHook(0x4333D0, CPacManPickups::StartPacManScramble, PATCH_JUMP);
-	InjectHook(0x4333F0, CPacManPickups::QueryPowerPillsCarriedByPlayer, PATCH_JUMP);
-	InjectHook(0x433410, CPacManPickups::ResetPowerPillsCarriedByPlayer, PATCH_JUMP);
-
-ENDPATCHES

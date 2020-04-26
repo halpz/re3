@@ -61,16 +61,15 @@ public:
 	float m_fTargetOffset;
 	bool m_bTestRight;
 
-	static CHeli **pHelis;	//[NUM_HELIS]
-	static int16 &NumRandomHelis;
-	static uint32 &TestForNewRandomHelisTimer;
+	static CHeli *pHelis[NUM_HELIS];
+	static int16 NumRandomHelis;
+	static uint32 TestForNewRandomHelisTimer;
 	static int16 NumScriptHelis;	// unused
-	static bool &CatalinaHeliOn;
-	static bool &CatalinaHasBeenShotDown;
-	static bool &ScriptHeliOn;
+	static bool CatalinaHeliOn;
+	static bool CatalinaHasBeenShotDown;
+	static bool ScriptHeliOn;
 
 	CHeli(int32 id, uint8 CreatedBy);
-	CHeli* ctor(int, uint8);
 
 	// from CEntity
 	void SetModelIndex(uint32 id);

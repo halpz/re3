@@ -37,4 +37,4 @@ public:
 	static void SetSaveDirectory(const char *path);
 };
 
-extern C_PcSave &PcSaveHelper;
+extern C_PcSave PcSaveHelper;

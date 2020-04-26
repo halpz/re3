@@ -1,10 +1,12 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
+#include "RwHelper.h"
 #include "Lights.h"
 #include "PointLights.h"
 #include "RpAnimBlend.h"
 #include "AnimBlendClumpData.h"
+#include "Bones.h"
 #include "Renderer.h"
 #include "ModelIndices.h"
 #include "Shadows.h"
@@ -19,6 +21,12 @@ CCutsceneObject::CCutsceneObject(void)
 	ObjectCreatedBy = CUTSCENE_OBJECT;
 	m_fMass = 1.0f;
 	m_fTurnMass = 1.0f;
+
+#ifdef PED_SKIN
+	bRenderHead = true;
+	bRenderRightHand = true;
+	bRenderLeftHand = true;
+#endif
 }
 
 void
@@ -42,12 +50,24 @@ CCutsceneObject::ProcessControl(void)
 		m_vecMoveSpeed *= 1.0f/CTimer::GetTimeStep();
 
 	ApplyMoveSpeed();
+
+#ifdef PED_SKIN
+	if(IsClumpSkinned(GetClump()))
+		UpdateRpHAnim();
+#endif
+}
+
+static RpMaterial*
+MaterialSetAlpha(RpMaterial *material, void *data)
+{
+	((RwRGBA*)RpMaterialGetColor(material))->alpha = (uint8)(uintptr)data;
+	return material;
 }
 
 void
 CCutsceneObject::PreRender(void)
 {
-	if(IsPedModel(GetModelIndex()))
+	if(IsPedModel(GetModelIndex())){
 		CShadows::StoreShadowForPedObject(this,
 			CTimeCycle::m_fShadowDisplacementX[CTimeCycle::m_CurrentStoredValue],
 			CTimeCycle::m_fShadowDisplacementY[CTimeCycle::m_CurrentStoredValue],
@@ -55,13 +75,56 @@ CCutsceneObject::PreRender(void)
 			CTimeCycle::m_fShadowFrontY[CTimeCycle::m_CurrentStoredValue],
 			CTimeCycle::m_fShadowSideX[CTimeCycle::m_CurrentStoredValue],
 			CTimeCycle::m_fShadowSideY[CTimeCycle::m_CurrentStoredValue]);
+		// For some reason xbox/android limbs are transparent here...
+		RpGeometry *geometry = RpAtomicGetGeometry(GetFirstAtomic(GetClump()));
+		RpGeometrySetFlags(geometry, RpGeometryGetFlags(geometry) | rpGEOMETRYMODULATEMATERIALCOLOR);
+		RpGeometryForAllMaterials(geometry, MaterialSetAlpha, (void*)255);
+	}
 }
 
 void
 CCutsceneObject::Render(void)
 {
+#ifdef PED_SKIN
+	if(IsClumpSkinned(GetClump())){
+		if(bRenderLeftHand) RenderLimb(BONE_Lhand);
+		if(bRenderRightHand) RenderLimb(BONE_Rhand);
+		if(bRenderHead) RenderLimb(BONE_head);
+	}
+#endif
 	CObject::Render();
 }
+
+#ifdef PED_SKIN
+void
+CCutsceneObject::RenderLimb(int32 bone)
+{
+	RpAtomic *atomic;
+	CPedModelInfo *mi = (CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex);
+	switch(bone){
+	case BONE_head:
+		atomic = mi->getHead();
+		break;
+	case BONE_Lhand:
+		atomic = mi->getLeftHand();
+		break;
+	case BONE_Rhand:
+		atomic = mi->getRightHand();
+		break;
+	default:
+		return;
+	}
+	if(atomic){
+		RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+		int idx = RpHAnimIDGetIndex(hier, bone);
+		RwMatrix *mat = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+		RwFrame *frame = RpAtomicGetFrame(atomic);
+		*RwFrameGetMatrix(frame) = *mat;
+		RwFrameUpdateObjects(frame);
+		RpAtomicRender(atomic);
+	}
+}
+#endif
 
 bool
 CCutsceneObject::SetupLighting(void)
@@ -88,25 +151,3 @@ CCutsceneObject::RemoveLighting(bool reset)
 {
 	CRenderer::RemoveVehiclePedLights(this, reset);
 }
-
-class CCutsceneObject_ : public CCutsceneObject
-{
-public:
-	void dtor(void) { this->CCutsceneObject::~CCutsceneObject(); }
-	void SetModelIndex_(uint32 id) { CCutsceneObject::SetModelIndex(id); }
-	void ProcessControl_(void) { CCutsceneObject::ProcessControl(); }
-	void PreRender_(void) { CCutsceneObject::PreRender(); }
-	void Render_(void) { CCutsceneObject::Render(); }
-	bool SetupLighting_(void) { return CCutsceneObject::SetupLighting(); }
-	void RemoveLighting_(bool reset) { CCutsceneObject::RemoveLighting(reset); }
-};
-
-STARTPATCHES
-	InjectHook(0x4BA960, &CCutsceneObject_::dtor, PATCH_JUMP);
-	InjectHook(0x4BA980, &CCutsceneObject_::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x4BA9C0, &CCutsceneObject_::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x4BAA40, &CCutsceneObject_::PreRender_, PATCH_JUMP);
-	InjectHook(0x4BAAA0, &CCutsceneObject_::Render_, PATCH_JUMP);
-	InjectHook(0x4A7E70, &CCutsceneObject_::SetupLighting_, PATCH_JUMP);
-	InjectHook(0x4A7F00, &CCutsceneObject_::RemoveLighting_, PATCH_JUMP);
-ENDPATCHES

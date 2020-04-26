@@ -20,19 +20,19 @@ public:
 		float sort;
 	};
 
-	static CLinkList<AlphaObjectInfo> &m_alphaList;
-	static CLinkList<AlphaObjectInfo> &m_alphaEntityList;
-	static RwCamera *&ms_pCamera;
-	static RwV3d *&ms_pCameraPosn;
-	static float &ms_cullCompsDist;
-	static float &ms_vehicleLod0Dist;
-	static float &ms_vehicleLod1Dist;
-	static float &ms_vehicleFadeDist;
-	static float &ms_bigVehicleLod0Dist;
-	static float &ms_bigVehicleLod1Dist;
-	static float &ms_pedLod0Dist;
-	static float &ms_pedLod1Dist;
-	static float &ms_pedFadeDist;
+	static CLinkList<AlphaObjectInfo> m_alphaList;
+	static CLinkList<AlphaObjectInfo> m_alphaEntityList;
+	static RwCamera *ms_pCamera;
+	static RwV3d *ms_pCameraPosn;
+	static float ms_cullCompsDist;
+	static float ms_vehicleLod0Dist;
+	static float ms_vehicleLod1Dist;
+	static float ms_vehicleFadeDist;
+	static float ms_bigVehicleLod0Dist;
+	static float ms_bigVehicleLod1Dist;
+	static float ms_pedLod0Dist;
+	static float ms_pedLod1Dist;
+	static float ms_pedFadeDist;
 
 	static void Initialise(void);
 	static void Shutdown(void);
@@ -63,6 +63,7 @@ public:
 	static RpAtomic *RenderPlayerCB(RpAtomic *atomic);
 	static RpAtomic *RenderPedLowDetailCB(RpAtomic *atomic);
 	static RpAtomic *RenderPedHiDetailCB(RpAtomic *atomic);
+	static RpAtomic *RenderPedCB(RpAtomic *atomic);	// for skinned models with only one clump
 
 	static void RenderAlphaAtomics(void);
 	static void RenderFadingEntities(void);
@@ -70,7 +71,7 @@ public:
 	// All actually unused
 	static bool DefaultVisibilityCB(RpClump *clump);
 	static bool FrustumSphereCB(RpClump *clump);
-//	static bool MloVisibilityCB(RpClump *clump);
+	static bool MloVisibilityCB(RpClump *clump);
 	static bool VehicleVisibilityCB(RpClump *clump);
 	static bool VehicleVisibilityCB_BigVehicle(RpClump *clump);
 
@@ -97,7 +98,7 @@ public:
 	static void *AtomicDestructor(void *object, int32 offset, int32 len);
 	static void *AtomicCopyConstructor(void *dst, const void *src,
 	                                   int32 offset, int32 len);
-	static int32 &ms_atomicPluginOffset;
+	static int32 ms_atomicPluginOffset;
 
 	struct FrameExt
 	{
@@ -111,7 +112,7 @@ public:
 	static void *FrameDestructor(void *object, int32 offset, int32 len);
 	static void *FrameCopyConstructor(void *dst, const void *src,
 	                                  int32 offset, int32 len);
-	static int32 &ms_framePluginOffset;
+	static int32 ms_framePluginOffset;
 
 	// Not actually used
 	struct ClumpExt
@@ -127,7 +128,9 @@ public:
 	static void *ClumpDestructor(void *object, int32 offset, int32 len);
 	static void *ClumpCopyConstructor(void *dst, const void *src,
 	                                  int32 offset, int32 len);
-	static int32 &ms_clumpPluginOffset;
+	static int32 ms_clumpPluginOffset;
 
 	static bool PluginAttach(void);
 };
+
+RpMaterial *SetAlphaCB(RpMaterial *material, void *data);

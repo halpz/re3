@@ -7,11 +7,11 @@ struct AnimBlendFrameData;
 
 struct AnimBlendFrameUpdateData
 {
-	int foobar;
+	int foobar;	// TODO: figure out what this actually means
 	CAnimBlendNode *nodes[16];
 };
 
-extern RwInt32 &ClumpOffset;
+extern RwInt32 ClumpOffset;
 #define RPANIMBLENDCLUMPDATA(o) (RWPLUGINOFFSET(CAnimBlendClumpData*, o, ClumpOffset))
 
 bool RpAnimBlendPluginAttach(void);
@@ -37,5 +37,6 @@ CAnimBlendAssociation *RpAnimBlendClumpGetFirstAssociation(RpClump *clump);
 void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float timeDelta);
 
 
-extern CAnimBlendClumpData *&gpAnimBlendClump;
-void FrameUpdateCallBack(AnimBlendFrameData *frame, void *arg);
+extern CAnimBlendClumpData *gpAnimBlendClump;
+void FrameUpdateCallBackNonSkinned(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg);

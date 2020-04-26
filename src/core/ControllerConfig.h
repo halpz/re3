@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined RW_D3D9 || defined RWLIBS
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
+#endif
 
 // based on x-gtasa
 
@@ -96,6 +100,16 @@ class CControllerState;
 
 #define ACTIONNAME_LENGTH 40
 
+#ifdef RW_GL3
+struct GlfwJoyState {
+	int8 id;
+	bool isGamepad;
+	uint8 numButtons;
+	uint8* buttons;
+	bool mappedButtons[17];
+};
+#endif
+
 class CControllerConfigManager
 {
 public:
@@ -112,20 +126,18 @@ public:
 	};
 
 	bool                  m_bFirstCapture;
-	char _pad0[3];
-#ifdef __DINPUT_INCLUDED__
+#if defined RW_GL3
+	GlfwJoyState           m_OldState;
+	GlfwJoyState           m_NewState;
+#else
 	DIJOYSTATE2           m_OldState;
 	DIJOYSTATE2           m_NewState;
-#else
-	uint8 ___padd[0x110 * 2];
 #endif
 	wchar                 m_aActionNames[MAX_CONTROLLERACTIONS][ACTIONNAME_LENGTH];
 	bool                  m_aButtonStates[MAX_BUTTONS];
-	char _pad1[3];
 	tControllerConfigBind m_aSettings[MAX_CONTROLLERACTIONS][MAX_CONTROLLERTYPES];
 	bool                  m_aSimCheckers[MAX_SIMS][MAX_CONTROLLERTYPES];
 	bool                  m_bMouseAssociated;
-	char _pad2[3];
 	
 	CControllerConfigManager();
 
@@ -196,6 +208,8 @@ public:
 	void  ResetSettingOrder                   (e_ControllerAction action);
 };
 
+#ifndef RW_GL3
 VALIDATE_SIZE(CControllerConfigManager, 0x143C);
+#endif
 
-extern CControllerConfigManager &ControlsManager;
+extern CControllerConfigManager ControlsManager;

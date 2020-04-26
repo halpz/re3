@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "AnimBlendAssociation.h"
 #include "AnimBlendNode.h"
 
@@ -158,13 +158,3 @@ CAnimBlendNode::GetEndTranslation(CVector &trans, float weight)
 			trans = kf->translation * blend;
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x401B10, &CAnimBlendNode::Init, PATCH_JUMP);
-	InjectHook(0x401B30, &CAnimBlendNode::Update, PATCH_JUMP);
-	InjectHook(0x401DC0, &CAnimBlendNode::NextKeyFrame, PATCH_JUMP);
-	InjectHook(0x4021B0, &CAnimBlendNode::FindKeyFrame, PATCH_JUMP);
-	InjectHook(0x401E70, &CAnimBlendNode::CalcDeltas, PATCH_JUMP);
-	InjectHook(0x401FE0, &CAnimBlendNode::GetCurrentTranslation, PATCH_JUMP);
-	InjectHook(0x402110, &CAnimBlendNode::GetEndTranslation, PATCH_JUMP);
-ENDPATCHES

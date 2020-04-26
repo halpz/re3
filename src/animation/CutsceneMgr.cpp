@@ -1,6 +1,5 @@
-#define WITHWINDOWS	// just for VK_SPACE
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "CutsceneMgr.h"
 #include "Directory.h"
@@ -117,19 +116,19 @@ FindCutsceneAudioTrackId(const char *szCutsceneName)
 	return -1;
 }
 
-bool &CCutsceneMgr::ms_running = *(bool*)0x95CCF5;
-bool &CCutsceneMgr::ms_cutsceneProcessing = *(bool*)0x95CD9F;
-CDirectory *&CCutsceneMgr::ms_pCutsceneDir = *(CDirectory**)0x8F5F88;
-CCutsceneObject *(&CCutsceneMgr::ms_pCutsceneObjects)[NUMCUTSCENEOBJECTS] = *(CCutsceneObject*(*)[NUMCUTSCENEOBJECTS]) *(uintptr*) 0x862170;
-int32 &CCutsceneMgr::ms_numCutsceneObjs = *(int32*)0x942FA4;
-bool &CCutsceneMgr::ms_loaded = *(bool*)0x95CD95;
-bool &CCutsceneMgr::ms_animLoaded = *(bool*)0x95CDA0;
-bool &CCutsceneMgr::ms_useLodMultiplier = *(bool*)0x95CD74;
-char(&CCutsceneMgr::ms_cutsceneName)[CUTSCENENAMESIZE] = *(char(*)[CUTSCENENAMESIZE]) *(uintptr*)0x70D9D0;
-CAnimBlendAssocGroup &CCutsceneMgr::ms_cutsceneAssociations = *(CAnimBlendAssocGroup*)0x709C58;
-CVector &CCutsceneMgr::ms_cutsceneOffset = *(CVector*)0x8F2C0C;
-float &CCutsceneMgr::ms_cutsceneTimer = *(float*)0x941548;
-uint32 &CCutsceneMgr::ms_cutsceneLoadStatus = *(uint32*)0x95CB40;
+bool CCutsceneMgr::ms_running;
+bool CCutsceneMgr::ms_cutsceneProcessing;
+CDirectory *CCutsceneMgr::ms_pCutsceneDir;
+CCutsceneObject *CCutsceneMgr::ms_pCutsceneObjects[NUMCUTSCENEOBJECTS];
+int32 CCutsceneMgr::ms_numCutsceneObjs;
+bool CCutsceneMgr::ms_loaded;
+bool CCutsceneMgr::ms_animLoaded;
+bool CCutsceneMgr::ms_useLodMultiplier;
+char CCutsceneMgr::ms_cutsceneName[CUTSCENENAMESIZE];
+CAnimBlendAssocGroup CCutsceneMgr::ms_cutsceneAssociations;
+CVector CCutsceneMgr::ms_cutsceneOffset;
+float CCutsceneMgr::ms_cutsceneTimer;
+uint32 CCutsceneMgr::ms_cutsceneLoadStatus;
 
 RpAtomic *
 CalculateBoundingSphereRadiusCB(RpAtomic *atomic, void *data)
@@ -416,26 +415,10 @@ CCutsceneMgr::Update(void)
 			|| (CGame::playingIntro && CPad::GetPad(0)->GetStartJustDown())
 			|| CPad::GetPad(0)->GetLeftMouseJustDown()
 			|| CPad::GetPad(0)->GetEnterJustDown()
-			|| CPad::GetPad(0)->GetCharJustDown(VK_SPACE))
+			|| CPad::GetPad(0)->GetCharJustDown(' '))
 			FinishCutscene();
 	}
 }
 
 bool CCutsceneMgr::HasCutsceneFinished(void) { return TheCamera.GetPositionAlongSpline() == 1.0f; }
 
-STARTPATCHES
-	InjectHook(0x4045D0, &CCutsceneMgr::Initialise, PATCH_JUMP);
-	InjectHook(0x404630, &CCutsceneMgr::Shutdown, PATCH_JUMP);
-	InjectHook(0x404650, &CCutsceneMgr::LoadCutsceneData, PATCH_JUMP);
-	InjectHook(0x405140, &CCutsceneMgr::FinishCutscene, PATCH_JUMP);
-	InjectHook(0x404D80, &CCutsceneMgr::SetHeadAnim, PATCH_JUMP);
-	InjectHook(0x404DC0, &CCutsceneMgr::SetupCutsceneToStart, PATCH_JUMP);
-	InjectHook(0x404D20, &CCutsceneMgr::SetCutsceneAnim, PATCH_JUMP);
-	InjectHook(0x404CD0, &CCutsceneMgr::AddCutsceneHead, PATCH_JUMP);
-	InjectHook(0x404BE0, &CCutsceneMgr::CreateCutsceneObject, PATCH_JUMP);
-	InjectHook(0x4048E0, &CCutsceneMgr::DeleteCutsceneData, PATCH_JUMP);
-	InjectHook(0x404EE0, &CCutsceneMgr::Update, PATCH_JUMP);
-	InjectHook(0x4051B0, &CCutsceneMgr::GetCutsceneTimeInMilleseconds, PATCH_JUMP);
-	InjectHook(0x4051F0, &CCutsceneMgr::HasCutsceneFinished, PATCH_JUMP);
-	InjectHook(0x404B40, &CalculateBoundingSphereRadiusCB, PATCH_JUMP);
-ENDPATCHES

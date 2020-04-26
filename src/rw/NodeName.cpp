@@ -1,8 +1,8 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "NodeName.h"
 
-static int32 &gPluginOffset = *(int32*)0x64C610;
+static int32 gPluginOffset;
 
 enum
 {

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Phones.h"
 #include "Pools.h"
 #include "ModelIndices.h"
@@ -12,14 +12,17 @@
 #include "AudioScriptObject.h"
 #include "RpAnimBlend.h"
 #include "AnimBlendAssociation.h"
+#ifdef FIX_BUGS
+#include "Replay.h"
+#endif
 
-CPhoneInfo &gPhoneInfo = *(CPhoneInfo*)0x732A20;
+CPhoneInfo gPhoneInfo;
 
-bool &CPhoneInfo::bDisplayingPhoneMessage = *(bool*)0x6283AC;  // is phone picked up
-uint32 &CPhoneInfo::PhoneEnableControlsTimer = *(uint32*)0x6283A8;
-CPhone *&CPhoneInfo::pPhoneDisplayingMessages = *(CPhone**)0x6283B0;
-bool &CPhoneInfo::bPickingUpPhone = *(bool*)0x6283B4;
-CPed *&CPhoneInfo::pCallBackPed = *(CPed**)0x6283B8; // ped who picking up the phone (reset after pickup cb)
+bool CPhoneInfo::bDisplayingPhoneMessage;  // is phone picked up
+uint32 CPhoneInfo::PhoneEnableControlsTimer;
+CPhone *CPhoneInfo::pPhoneDisplayingMessages;
+bool CPhoneInfo::bPickingUpPhone;
+CPed *CPhoneInfo::pCallBackPed; // ped who picking up the phone (reset after pickup cb)
 
 /*
 	Entering phonebooth cutscene, showing messages and triggering these things
@@ -45,6 +48,10 @@ isPhoneAvailable(int m_phoneId)
 void
 CPhoneInfo::Update(void)
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	CPlayerPed *player = FindPlayerPed();
 	CPlayerInfo *playerInfo = &CWorld::Players[CWorld::PlayerInFocus];
 	if (bDisplayingPhoneMessage && CTimer::GetTimeInMilliseconds() > PhoneEnableControlsTimer) {
@@ -377,20 +384,3 @@ PhonePickUpCB(CAnimBlendAssociation *assoc, void *arg)
 
 	CPhoneInfo::pCallBackPed = nil;
 }
-
-STARTPATCHES
-	InjectHook(0x42F720, &CPhoneInfo::FindNearestFreePhone, PATCH_JUMP);
-	InjectHook(0x42FD50, &CPhoneInfo::PhoneAtThisPosition, PATCH_JUMP);
-	InjectHook(0x42FFF0, &CPhoneInfo::HasMessageBeenDisplayed, PATCH_JUMP);
-	InjectHook(0x430030, &CPhoneInfo::IsMessageBeingDisplayed, PATCH_JUMP);
-	InjectHook(0x430120, &CPhoneInfo::Load, PATCH_JUMP);
-	InjectHook(0x42FF90, &CPhoneInfo::SetPhoneMessage_JustOnce, PATCH_JUMP);
-	InjectHook(0x42FF30, &CPhoneInfo::SetPhoneMessage_Repeatedly, PATCH_JUMP);
-	InjectHook(0x430060, &CPhoneInfo::Save, PATCH_JUMP);
-	InjectHook(0x42F710, &CPhoneInfo::Shutdown, PATCH_JUMP);
-	InjectHook(0x42F640, &CPhoneInfo::Initialise, PATCH_JUMP);
-	InjectHook(0x42FDB0, &CPhoneInfo::GrabPhone, PATCH_JUMP);
-	InjectHook(0x42F7A0, &CPhoneInfo::Update, PATCH_JUMP);
-	InjectHook(0x42F570, &PhonePutDownCB, PATCH_JUMP);
-	InjectHook(0x42F470, &PhonePickUpCB, PATCH_JUMP);
-ENDPATCHES

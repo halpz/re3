@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "AnimBlendSequence.h"
 #include "AnimBlendHierarchy.h"
 
@@ -36,7 +36,7 @@ CAnimBlendHierarchy::CalcTotalTime(void)
 		float seqTime = 0.0f;
 		for(j = 0; j < sequences[i].numFrames; j++)
 			seqTime += sequences[i].GetKeyFrame(j)->deltaTime;
-		totalTime = max(totalTime, seqTime);
+		totalTime = Max(totalTime, seqTime);
 	}
 	totalLength = totalTime;
 }
@@ -72,13 +72,3 @@ CAnimBlendHierarchy::RemoveUncompressedData(void)
 	// useless
 	compressed = 1;
 }
-
-STARTPATCHES
-	InjectHook(0x4019A0, &CAnimBlendHierarchy::Shutdown, PATCH_JUMP);
-	InjectHook(0x4019C0, &CAnimBlendHierarchy::SetName, PATCH_JUMP);
-	InjectHook(0x4019E0, &CAnimBlendHierarchy::CalcTotalTime, PATCH_JUMP);
-	InjectHook(0x401A80, &CAnimBlendHierarchy::RemoveQuaternionFlips, PATCH_JUMP);
-	InjectHook(0x401AB0, &CAnimBlendHierarchy::RemoveAnimSequences, PATCH_JUMP);
-	InjectHook(0x401AD0, &CAnimBlendHierarchy::Uncompress, PATCH_JUMP);
-	InjectHook(0x401B00, &CAnimBlendHierarchy::RemoveUncompressedData, PATCH_JUMP);
-ENDPATCHES

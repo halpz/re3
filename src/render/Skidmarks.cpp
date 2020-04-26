@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "TxdStore.h"
 #include "Timer.h"
@@ -214,7 +214,8 @@ CSkidmarks::RegisterOne(uintptr id, CVector pos, float fwdX, float fwdY, bool *i
 		aSkidmarks[i].m_pos[aSkidmarks[i].m_last] = pos;
 
 		CVector2D dist = aSkidmarks[i].m_pos[aSkidmarks[i].m_last] - aSkidmarks[i].m_pos[aSkidmarks[i].m_last-1];
-		dist.Normalise();
+		dist.NormaliseSafe();
+		fwd.NormaliseSafe();
 		CVector2D right(dist.y, -dist.x);
 		float turn = DotProduct2D(fwd, right);
 		turn = Abs(turn) + 1.0f;

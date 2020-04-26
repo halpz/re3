@@ -1,7 +1,7 @@
 #include "common.h"
 #include <rwcore.h>
 #include <rpworld.h>
-#include "patcher.h"
+
 #include "Lights.h"
 #include "Timecycle.h"
 #include "Coronas.h"
@@ -9,18 +9,18 @@
 #include "ZoneCull.h"
 #include "Frontend.h"
 
-RpLight *&pAmbient = *(RpLight**)0x885B6C;
-RpLight *&pDirect = *(RpLight**)0x880F7C;
-RpLight **pExtraDirectionals = (RpLight**)0x60009C;
-int *LightStrengths = (int*)0x87BEF0;
-int &NumExtraDirLightsInWorld = *(int*)0x64C608;
+RpLight *pAmbient;
+RpLight *pDirect;
+RpLight *pExtraDirectionals[4] = { nil };
+int LightStrengths[4];
+int NumExtraDirLightsInWorld;
 
-RwRGBAReal &AmbientLightColourForFrame = *(RwRGBAReal*)0x6F46F8;
-RwRGBAReal &AmbientLightColourForFrame_PedsCarsAndObjects = *(RwRGBAReal*)0x6F1D10;
-RwRGBAReal &DirectionalLightColourForFrame = *(RwRGBAReal*)0x87C6B8;
+RwRGBAReal AmbientLightColourForFrame;
+RwRGBAReal AmbientLightColourForFrame_PedsCarsAndObjects;
+RwRGBAReal DirectionalLightColourForFrame;
 
-RwRGBAReal &AmbientLightColour = *(RwRGBAReal*)0x86B0F8;
-RwRGBAReal &DirectionalLightColour = *(RwRGBAReal*)0x72E308;
+RwRGBAReal AmbientLightColour;
+RwRGBAReal DirectionalLightColour;
 
 void
 SetLightsWithTimeOfDayColour(RpWorld *)
@@ -37,9 +37,9 @@ SetLightsWithTimeOfDayColour(RpWorld *)
 			AmbientLightColourForFrame.green = 1.0f;
 			AmbientLightColourForFrame.blue = 1.0f;
 		}
-		AmbientLightColourForFrame_PedsCarsAndObjects.red = min(1.0f, AmbientLightColourForFrame.red*1.3f);
-		AmbientLightColourForFrame_PedsCarsAndObjects.green = min(1.0f, AmbientLightColourForFrame.green*1.3f);
-		AmbientLightColourForFrame_PedsCarsAndObjects.blue = min(1.0f, AmbientLightColourForFrame.blue*1.3f);
+		AmbientLightColourForFrame_PedsCarsAndObjects.red = Min(1.0f, AmbientLightColourForFrame.red*1.3f);
+		AmbientLightColourForFrame_PedsCarsAndObjects.green = Min(1.0f, AmbientLightColourForFrame.green*1.3f);
+		AmbientLightColourForFrame_PedsCarsAndObjects.blue = Min(1.0f, AmbientLightColourForFrame.blue*1.3f);
 		RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
 	}
 
@@ -70,20 +70,20 @@ SetLightsWithTimeOfDayColour(RpWorld *)
 		float f1 = 2.0f * (CMenuManager::m_PrefsBrightness/256.0f - 1.0f) * 0.6f + 1.0f;
 		float f2 = 3.0f * (CMenuManager::m_PrefsBrightness/256.0f - 1.0f) * 0.6f + 1.0f;
 
-		AmbientLightColourForFrame.red = min(1.0f, AmbientLightColourForFrame.red * f2);
-		AmbientLightColourForFrame.green = min(1.0f, AmbientLightColourForFrame.green * f2);
-		AmbientLightColourForFrame.blue = min(1.0f, AmbientLightColourForFrame.blue * f2);
-		AmbientLightColourForFrame_PedsCarsAndObjects.red = min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.red * f1);
-		AmbientLightColourForFrame_PedsCarsAndObjects.green = min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.green * f1);
-		AmbientLightColourForFrame_PedsCarsAndObjects.blue = min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.blue * f1);
+		AmbientLightColourForFrame.red = Min(1.0f, AmbientLightColourForFrame.red * f2);
+		AmbientLightColourForFrame.green = Min(1.0f, AmbientLightColourForFrame.green * f2);
+		AmbientLightColourForFrame.blue = Min(1.0f, AmbientLightColourForFrame.blue * f2);
+		AmbientLightColourForFrame_PedsCarsAndObjects.red = Min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.red * f1);
+		AmbientLightColourForFrame_PedsCarsAndObjects.green = Min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.green * f1);
+		AmbientLightColourForFrame_PedsCarsAndObjects.blue = Min(1.0f, AmbientLightColourForFrame_PedsCarsAndObjects.blue * f1);
 #ifdef FIX_BUGS
-		DirectionalLightColourForFrame.red = min(1.0f, DirectionalLightColourForFrame.red * f1);
-		DirectionalLightColourForFrame.green = min(1.0f, DirectionalLightColourForFrame.green * f1);
-		DirectionalLightColourForFrame.blue = min(1.0f, DirectionalLightColourForFrame.blue * f1);
+		DirectionalLightColourForFrame.red = Min(1.0f, DirectionalLightColourForFrame.red * f1);
+		DirectionalLightColourForFrame.green = Min(1.0f, DirectionalLightColourForFrame.green * f1);
+		DirectionalLightColourForFrame.blue = Min(1.0f, DirectionalLightColourForFrame.blue * f1);
 #else
-		DirectionalLightColourForFrame.red = min(1.0f, AmbientLightColourForFrame.red * f1);
-		DirectionalLightColourForFrame.green = min(1.0f, AmbientLightColourForFrame.green * f1);
-		DirectionalLightColourForFrame.blue = min(1.0f, AmbientLightColourForFrame.blue * f1);
+		DirectionalLightColourForFrame.red = Min(1.0f, AmbientLightColourForFrame.red * f1);
+		DirectionalLightColourForFrame.green = Min(1.0f, AmbientLightColourForFrame.green * f1);
+		DirectionalLightColourForFrame.blue = Min(1.0f, AmbientLightColourForFrame.blue * f1);
 #endif
 	}
 }
@@ -108,7 +108,7 @@ LightsCreate(RpWorld *world)
 	pDirect = RpLightCreate(rpLIGHTDIRECTIONAL);
 	RpLightSetFlags(pDirect, rpLIGHTLIGHTATOMICS);
 	color.red = 1.0f;
-	color.green = 0.84f;
+	color.green = 0.85f;
 	color.blue = 0.45f;
 	RpLightSetColor(pDirect, &color);
 	RpLightSetRadius(pDirect, 2.0f);
@@ -193,7 +193,7 @@ AddAnExtraDirectionalLight(RpWorld *world, float dirx, float diry, float dirz, f
 	RwRGBAReal color;
 	RwV3d *dir;
 
-	strength = max(max(red, green), blue);
+	strength = Max(Max(red, green), blue);
 	n = -1;
 	if(NumExtraDirLightsInWorld < NUMEXTRADIRECTIONALS)
 		n = NumExtraDirLightsInWorld;
@@ -221,7 +221,7 @@ AddAnExtraDirectionalLight(RpWorld *world, float dirx, float diry, float dirz, f
 	RwFrameUpdateObjects(RpLightGetFrame(pExtraDirectionals[n]));
 	RpLightSetFlags(pExtraDirectionals[n], rpLIGHTLIGHTATOMICS);
 	LightStrengths[n] = strength;
-	NumExtraDirLightsInWorld = min(NumExtraDirLightsInWorld+1, NUMEXTRADIRECTIONALS);
+	NumExtraDirLightsInWorld = Min(NumExtraDirLightsInWorld+1, NUMEXTRADIRECTIONALS);
 }
 
 void
@@ -312,22 +312,3 @@ SetAmbientColours(RwRGBAReal *color)
 {
 	RpLightSetColor(pAmbient, color);
 }
-
-
-STARTPATCHES
-	InjectHook(0x526510, SetLightsWithTimeOfDayColour, PATCH_JUMP);
-	InjectHook(0x5269A0, LightsCreate, PATCH_JUMP);
-	InjectHook(0x526B40, LightsDestroy, PATCH_JUMP);
-	InjectHook(0x526C10, WorldReplaceNormalLightsWithScorched, PATCH_JUMP);
-	InjectHook(0x526C50, WorldReplaceScorchedLightsWithNormal, PATCH_JUMP);
-	InjectHook(0x526C70, AddAnExtraDirectionalLight, PATCH_JUMP);
-	InjectHook(0x526DB0, RemoveExtraDirectionalLights, PATCH_JUMP);
-	InjectHook(0x526DE0, SetAmbientAndDirectionalColours, PATCH_JUMP);
-	InjectHook(0x526E60, SetBrightMarkerColours, PATCH_JUMP);
-	InjectHook(0x526F10, ReSetAmbientAndDirectionalColours, PATCH_JUMP);
-	InjectHook(0x526F40, DeActivateDirectional, PATCH_JUMP);
-	InjectHook(0x526F50, ActivateDirectional, PATCH_JUMP);
-	InjectHook(0x526F60, (void (*)(void))SetAmbientColours, PATCH_JUMP);
-	InjectHook(0x526F80, SetAmbientColoursForPedsCarsAndObjects, PATCH_JUMP);
-	InjectHook(0x526FA0, (void (*)(RwRGBAReal*))SetAmbientColours, PATCH_JUMP);
-ENDPATCHES

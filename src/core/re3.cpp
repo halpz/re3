@@ -1,6 +1,6 @@
 #include <direct.h>
 #include <csignal>
-#include <windows.h>
+#define WITHWINDOWS
 #include "common.h"
 #include "patcher.h"
 #include "Renderer.h"
@@ -17,26 +17,22 @@
 #include "Heli.h"
 #include "Automobile.h"
 #include "Ped.h"
-#include "debugmenu_public.h"
 #include "Particle.h"
 #include "Console.h"
 #include "Debug.h"
 #include "Hud.h"
+#include "SceneEdit.h"
+#include "Pad.h"
+#include "PlayerPed.h"
+#include "Radar.h"
+#include "debugmenu.h"
 
 #include <list>
 
-#ifndef RWLIBS
-void **rwengine = *(void***)0x5A10E1;
-#else
+#ifdef RWLIBS
 extern "C" int vsprintf(char* const _Buffer, char const* const _Format, va_list  _ArgList);
 #endif
 
-DebugMenuAPI gDebugMenuAPI;
-
-STARTPATCHES
-	InjectHook(0x5A07E0, (void (*)(void*)) &operator delete, PATCH_JUMP);
-	InjectHook(0x5A0690, (void* (*)(size_t)) &operator new, PATCH_JUMP);
-ENDPATCHES
 
 #ifdef USE_PS2_RAND
 unsigned __int64 myrand_seed = 1;
@@ -62,24 +58,6 @@ void
 mysrand(unsigned int seed)
 {
 	myrand_seed = seed;
-}
-
-void (*DebugMenuProcess)(void);
-void (*DebugMenuRender)(void);
-static void stub(void) { }
-
-void
-DebugMenuInit(void)
-{
-	if(DebugMenuLoad()){
-		DebugMenuProcess = (void(*)(void))GetProcAddress(gDebugMenuAPI.module, "DebugMenuProcess");
-		DebugMenuRender = (void(*)(void))GetProcAddress(gDebugMenuAPI.module, "DebugMenuRender");
-	}
-	if(DebugMenuProcess == nil || DebugMenuRender == nil){
-		DebugMenuProcess = stub;
-		DebugMenuRender = stub;
-	}
-
 }
 
 void WeaponCheat();
@@ -161,6 +139,19 @@ FixCar(void)
 	((CAutomobile*)veh)->Damage.SetEngineStatus(0);
 	((CAutomobile*)veh)->Fix();
 }
+
+#ifdef MENU_MAP
+static void
+TeleportToWaypoint(void)
+{
+	if (FindPlayerVehicle()) {
+		if (CRadar::TargetMarkerId != -1)
+			FindPlayerVehicle()->Teleport(CRadar::TargetMarkerPos + CVector(0.0f, 0.0f, FindPlayerVehicle()->GetColModel()->boundingSphere.center.z));
+	} else
+		if(CRadar::TargetMarkerId != -1)
+			FindPlayerPed()->Teleport(CRadar::TargetMarkerPos + CVector(0.0f, 0.0f, FEET_OFFSET));
+}
+#endif
 
 static int engineStatus;
 static void
@@ -258,7 +249,7 @@ TWEAKSWITCH(CWeather::NewWeatherType, 0, 3, wt, NULL);
 void
 DebugMenuPopulate(void)
 {
-	if(DebugMenuLoad()){
+	if(1){
 		static const char *weathers[] = {
 			"Sunny", "Cloudy", "Rainy", "Foggy"
 		};
@@ -273,7 +264,7 @@ DebugMenuPopulate(void)
 		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 3, weathers);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVar("Time & Weather", "Wind", (float*)&CWeather::Wind, nil, 0.1f, 0.0f, 1.0f);
-		DebugMenuAddVar("Time & Weather", "Time scale", (float*)0x8F2C20, nil, 0.1f, 0.0f, 10.0f);
+		DebugMenuAddVar("Time & Weather", "Time scale", (float*)&CTimer::GetTimeScale(), nil, 0.1f, 0.0f, 10.0f);
 
 		DebugMenuAddCmd("Cheats", "Weapons", WeaponCheat);
 		DebugMenuAddCmd("Cheats", "Money", MoneyCheat);
@@ -331,47 +322,54 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
 		DebugMenuAddCmd("Spawn", "Spawn Predator", [](){ SpawnCar(MI_PREDATOR); });
 
-		DebugMenuAddVarBool8("Debug", "Draw hud", (int8*)&CHud::m_Wants_To_Draw_Hud, nil);
+#ifdef LIBRW
+		DebugMenuAddVarBool8("Render", "PS2 Alpha test Emu", &gPS2alphaTest, nil);
+#endif
+
+		DebugMenuAddVarBool8("Debug", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
+		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
+#ifdef MENU_MAP
+		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
+#endif
 		DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
 		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
 		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
 		DebugMenuAddCmd("Debug", "Place Car on Road", PlaceOnRoad);
 
-		DebugMenuAddVarBool8("Debug", "Catalina Heli On", (int8*)&CHeli::CatalinaHeliOn, nil);
+		DebugMenuAddVarBool8("Debug", "Catalina Heli On", &CHeli::CatalinaHeliOn, nil);
 		DebugMenuAddCmd("Debug", "Catalina Fly By", CHeli::StartCatalinaFlyBy);
 		DebugMenuAddCmd("Debug", "Catalina Take Off", CHeli::CatalinaTakeOff);
 		DebugMenuAddCmd("Debug", "Catalina Fly Away", CHeli::MakeCatalinaHeliFlyAway);
-		DebugMenuAddVarBool8("Debug", "Script Heli On", (int8*)0x95CD43, nil);
+		DebugMenuAddVarBool8("Debug", "Script Heli On", &CHeli::ScriptHeliOn, nil);
 
-		DebugMenuAddVarBool8("Debug", "Show Ped Paths", (int8*)&gbShowPedPaths, nil);
-		DebugMenuAddVarBool8("Debug", "Show Car Paths", (int8*)&gbShowCarPaths, nil);
-		DebugMenuAddVarBool8("Debug", "Show Car Path Links", (int8*)&gbShowCarPathsLinks, nil);
-		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", (int8*)&gbShowPedRoadGroups, nil);
-		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", (int8*)&gbShowCarRoadGroups, nil);
-		DebugMenuAddVarBool8("Debug", "Show Collision Lines", (int8*)&gbShowCollisionLines, nil);
-		DebugMenuAddVarBool8("Debug", "Show Collision Polys", (int8*)&gbShowCollisionPolys, nil);
-		DebugMenuAddVarBool8("Debug", "Don't render Buildings", (int8*)&gbDontRenderBuildings, nil);
-		DebugMenuAddVarBool8("Debug", "Don't render Big Buildings", (int8*)&gbDontRenderBigBuildings, nil);
-		DebugMenuAddVarBool8("Debug", "Don't render Peds", (int8*)&gbDontRenderPeds, nil);
-		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", (int8*)&gbDontRenderVehicles, nil);
-		DebugMenuAddVarBool8("Debug", "Don't render Objects", (int8*)&gbDontRenderObjects, nil);
+		DebugMenuAddVarBool8("Debug", "Show Ped Paths", &gbShowPedPaths, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Paths", &gbShowCarPaths, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Path Links", &gbShowCarPathsLinks, nil);
+		DebugMenuAddVarBool8("Debug", "Show Ped Road Groups", &gbShowPedRoadGroups, nil);
+		DebugMenuAddVarBool8("Debug", "Show Car Road Groups", &gbShowCarRoadGroups, nil);
+		DebugMenuAddVarBool8("Debug", "Show Collision Lines", &gbShowCollisionLines, nil);
+		DebugMenuAddVarBool8("Debug", "Show Collision Polys", &gbShowCollisionPolys, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Buildings", &gbDontRenderBuildings, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Big Buildings", &gbDontRenderBigBuildings, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Peds", &gbDontRenderPeds, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Vehicles", &gbDontRenderVehicles, nil);
+		DebugMenuAddVarBool8("Debug", "Don't render Objects", &gbDontRenderObjects, nil);
 #ifdef TOGGLEABLE_BETA_FEATURES
-		DebugMenuAddVarBool8("Debug", "Toggle banned particles", (int8*)&CParticle::bEnableBannedParticles, nil);
-		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", (int8*)&CPed::bPopHeadsOnHeadshot, nil);
-		DebugMenuAddVarBool8("Debug", "Toggle peds running to phones to report crimes", (int8*)&CPed::bMakePedsRunToPhonesToReportCrimes, nil);
+		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", &CPed::bPopHeadsOnHeadshot, nil);
+		DebugMenuAddVarBool8("Debug", "Toggle peds running to phones to report crimes", &CPed::bMakePedsRunToPhonesToReportCrimes, nil);
 #endif
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 
 		extern bool PrintDebugCode;
-		extern int16 &DebugCamMode;
-		DebugMenuAddVarBool8("Cam", "Use mouse Cam", (int8*)&CCamera::m_bUseMouse3rdPerson, nil);
+		extern int16 DebugCamMode;
+		DebugMenuAddVarBool8("Cam", "Use mouse Cam", &CCamera::m_bUseMouse3rdPerson, nil);
 #ifdef FREE_CAM
-		DebugMenuAddVarBool8("Cam", "Free Cam", (int8*)&CCamera::bFreeCam, nil);
+		DebugMenuAddVarBool8("Cam", "Free Cam", &CCamera::bFreeCam, nil);
 #endif
-		DebugMenuAddVarBool8("Cam", "Print Debug Code", (int8*)&PrintDebugCode, nil);
+		DebugMenuAddVarBool8("Cam", "Print Debug Code", &PrintDebugCode, nil);
 		DebugMenuAddVar("Cam", "Cam Mode", &DebugCamMode, nil, 1, 0, CCam::MODE_EDITOR, nil);
 		DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });
 		DebugMenuAddCmd("Cam", "Follow Ped With Bind", []() { DebugCamMode = CCam::MODE_FOLLOW_PED_WITH_BIND; });
@@ -382,18 +380,6 @@ DebugMenuPopulate(void)
 		CTweakVars::AddDBG("Debug");
 	}
 }
-
-/*
-int (*RsEventHandler_orig)(int a, int b);
-int
-delayedPatches10(int a, int b)
-{
-	DebugMenuInit();
-	DebugMenuPopulate();
-
-	return RsEventHandler_orig(a, b);
-}
-*/
 
 const int   re3_buffsize = 1024;
 static char re3_buff[re3_buffsize];
@@ -473,37 +459,3 @@ void re3_trace(const char *filename, unsigned int lineno, const char *func, cons
 #ifdef VALIDATE_SAVE_SIZE
 int32 _saveBufCount;
 #endif
-
-void
-patch()
-{
-	StaticPatcher::Apply();
-
-//	Patch<float>(0x46BC61+6, 1.0f);	// car distance
-	InjectHook(0x59E460, printf, PATCH_JUMP);
-	InjectHook(0x475E00, printf, PATCH_JUMP);	// _Error
-
-
-//	InterceptCall(&open_script_orig, open_script, 0x438869);
-
-//	InterceptCall(&RsEventHandler_orig, delayedPatches10, 0x58275E);
-}
-
-BOOL WINAPI
-DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
-{
-	if(reason == DLL_PROCESS_ATTACH){
-
-		AllocConsole();
-		freopen("CONIN$", "r", stdin);
-		freopen("CONOUT$", "w", stdout);
-		freopen("CONOUT$", "w", stderr);
-
-		if (*(DWORD*)0x5C1E75 == 0xB85548EC)	// 1.0
-			patch();
-		else
-			return FALSE;
-	}
-
-	return TRUE;
-}

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "templates.h"
 #include "Entity.h"
 #include "ModelInfo.h"
@@ -11,40 +11,37 @@
 
 #define FADE_DISTANCE 20.0f
 
-/*
 CLinkList<CVisibilityPlugins::AlphaObjectInfo> CVisibilityPlugins::m_alphaList;
 CLinkList<CVisibilityPlugins::AlphaObjectInfo> CVisibilityPlugins::m_alphaEntityList;
 
 int32 CVisibilityPlugins::ms_atomicPluginOffset = -1;
 int32 CVisibilityPlugins::ms_framePluginOffset = -1;
 int32 CVisibilityPlugins::ms_clumpPluginOffset = -1;
-*/
-CLinkList<CVisibilityPlugins::AlphaObjectInfo> &CVisibilityPlugins::m_alphaList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0x8F42E4;
-CLinkList<CVisibilityPlugins::AlphaObjectInfo> &CVisibilityPlugins::m_alphaEntityList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0x943084;
 
-int32 &CVisibilityPlugins::ms_atomicPluginOffset = *(int32*)0x600124;
-int32 &CVisibilityPlugins::ms_framePluginOffset = *(int32*)0x600128;
-int32 &CVisibilityPlugins::ms_clumpPluginOffset = *(int32*)0x60012C;
-
-RwCamera *&CVisibilityPlugins::ms_pCamera = *(RwCamera**)0x8F2514;
-RwV3d *&CVisibilityPlugins::ms_pCameraPosn = *(RwV3d**)0x8F6270;
-float &CVisibilityPlugins::ms_cullCompsDist = *(float*)0x8F2BC4;
-float &CVisibilityPlugins::ms_vehicleLod0Dist = *(float*)0x885B28;
-float &CVisibilityPlugins::ms_vehicleLod1Dist = *(float*)0x885B30;
-float &CVisibilityPlugins::ms_vehicleFadeDist = *(float*)0x8E28B4;
-float &CVisibilityPlugins::ms_bigVehicleLod0Dist = *(float*)0x8E2A84;
-float &CVisibilityPlugins::ms_bigVehicleLod1Dist = *(float*)0x8E2A8C;
-float &CVisibilityPlugins::ms_pedLod0Dist = *(float*)0x8F2BD4;
-float &CVisibilityPlugins::ms_pedLod1Dist = *(float*)0x8F2BD8;
-float &CVisibilityPlugins::ms_pedFadeDist = *(float*)0x8E2C34;
+RwCamera *CVisibilityPlugins::ms_pCamera;
+RwV3d *CVisibilityPlugins::ms_pCameraPosn;
+float CVisibilityPlugins::ms_cullCompsDist;
+float CVisibilityPlugins::ms_vehicleLod0Dist;
+float CVisibilityPlugins::ms_vehicleLod1Dist;
+float CVisibilityPlugins::ms_vehicleFadeDist;
+float CVisibilityPlugins::ms_bigVehicleLod0Dist;
+float CVisibilityPlugins::ms_bigVehicleLod1Dist;
+float CVisibilityPlugins::ms_pedLod0Dist;
+float CVisibilityPlugins::ms_pedLod1Dist;
+float CVisibilityPlugins::ms_pedFadeDist;
 
 void
 CVisibilityPlugins::Initialise(void)
 {
-	m_alphaList.Init(20);
+	m_alphaList.Init(NUMALPHALIST);
 	m_alphaList.head.item.sort = 0.0f;
 	m_alphaList.tail.item.sort = 100000000.0f;
-	m_alphaEntityList.Init(150);
+#ifdef ASPECT_RATIO_SCALE
+	// default 150 if not enough for bigger FOVs
+	m_alphaEntityList.Init(NUMALPHAENTITYLIST * 3);
+#else
+	m_alphaEntityList.Init(NUMALPHAENTITYLIST);
+#endif // ASPECT_RATIO_SCALE
 	m_alphaEntityList.head.item.sort = 0.0f;
 	m_alphaEntityList.tail.item.sort = 100000000.0f;
 }
@@ -546,6 +543,21 @@ CVisibilityPlugins::RenderPedHiDetailCB(RpAtomic *atomic)
 	return atomic;
 }
 
+// This is needed for peds with only one clump, i.e. skinned models
+// strangely even the xbox version has no such thing
+RpAtomic*
+CVisibilityPlugins::RenderPedCB(RpAtomic *atomic)
+{
+	int32 alpha;
+
+	alpha = GetClumpAlpha(RpAtomicGetClump(atomic));
+	if(alpha == 255)
+		AtomicDefaultRenderCallBack(atomic);
+	else
+		RenderAlphaAtomic(atomic, alpha);
+	return atomic;
+}
+
 float
 CVisibilityPlugins::GetDistanceSquaredFromCamera(RwFrame *frame)
 {
@@ -600,6 +612,16 @@ bool
 CVisibilityPlugins::DefaultVisibilityCB(RpClump *clump)
 {
 	return true;
+}
+
+bool
+CVisibilityPlugins::MloVisibilityCB(RpClump *clump)
+{
+	RwFrame *frame = RpClumpGetFrame(clump);
+	CMloModelInfo *modelInfo = (CMloModelInfo*)GetFrameHierarchyId(frame);
+	if (sq(modelInfo->field_34) < GetDistanceSquaredFromCamera(frame))
+		return false;
+	return CVisibilityPlugins::FrustumSphereCB(clump);
 }
 
 bool
@@ -831,59 +853,3 @@ CVisibilityPlugins::GetClumpAlpha(RpClump *clump)
 {
 	return CLUMPEXT(clump)->alpha;
 }
-
-
-STARTPATCHES
-	InjectHook(0x527E50, CVisibilityPlugins::Initialise, PATCH_JUMP);
-	InjectHook(0x527EA0, CVisibilityPlugins::Shutdown, PATCH_JUMP);
-	InjectHook(0x528F90, CVisibilityPlugins::InitAlphaEntityList, PATCH_JUMP);
-	InjectHook(0x528FF0, CVisibilityPlugins::InsertEntityIntoSortedList, PATCH_JUMP);
-	InjectHook(0x528F80, CVisibilityPlugins::InitAlphaAtomicList, PATCH_JUMP);
-	InjectHook(0x528FA0, CVisibilityPlugins::InsertAtomicIntoSortedList, PATCH_JUMP);
-	InjectHook(0x528C50, CVisibilityPlugins::SetRenderWareCamera, PATCH_JUMP);
-
-	InjectHook(0x527F60, SetAlphaCB, PATCH_JUMP);
-	InjectHook(0x529040, CVisibilityPlugins::RenderAlphaAtomics, PATCH_JUMP);
-	InjectHook(0x529070, CVisibilityPlugins::RenderFadingEntities, PATCH_JUMP);
-
-	InjectHook(0x527F70, CVisibilityPlugins::RenderWheelAtomicCB, PATCH_JUMP);
-	InjectHook(0x528000, CVisibilityPlugins::RenderObjNormalAtomic, PATCH_JUMP);
-	InjectHook(0x5280B0, CVisibilityPlugins::RenderAlphaAtomic, PATCH_JUMP);
-	InjectHook(0x528100, CVisibilityPlugins::RenderFadingAtomic, PATCH_JUMP);
-
-	InjectHook(0x5283E0, CVisibilityPlugins::RenderVehicleHiDetailCB, PATCH_JUMP);
-	InjectHook(0x5284B0, CVisibilityPlugins::RenderVehicleHiDetailAlphaCB, PATCH_JUMP);
-	InjectHook(0x5288A0, CVisibilityPlugins::RenderVehicleHiDetailCB_BigVehicle, PATCH_JUMP);
-	InjectHook(0x528A10, CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_BigVehicle, PATCH_JUMP);
-	InjectHook(0x528AD0, CVisibilityPlugins::RenderVehicleHiDetailCB_Boat, PATCH_JUMP);
-	InjectHook(0x5287F0, CVisibilityPlugins::RenderVehicleLowDetailCB_BigVehicle, PATCH_JUMP);
-	InjectHook(0x528940, CVisibilityPlugins::RenderVehicleLowDetailAlphaCB_BigVehicle, PATCH_JUMP);
-	InjectHook(0x528240, CVisibilityPlugins::RenderVehicleReallyLowDetailCB, PATCH_JUMP);
-	InjectHook(0x5287B0, CVisibilityPlugins::RenderVehicleReallyLowDetailCB_BigVehicle, PATCH_JUMP);
-	InjectHook(0x5285D0, CVisibilityPlugins::RenderTrainHiDetailCB, PATCH_JUMP);
-	InjectHook(0x5286A0, CVisibilityPlugins::RenderTrainHiDetailAlphaCB, PATCH_JUMP);
-
-	InjectHook(0x528BC0, CVisibilityPlugins::RenderPedHiDetailCB, PATCH_JUMP);
-	InjectHook(0x528B60, CVisibilityPlugins::RenderPedLowDetailCB, PATCH_JUMP);
-
-
-	InjectHook(0x527DC0, CVisibilityPlugins::PluginAttach, PATCH_JUMP);
-
-	InjectHook(0x527EC0, CVisibilityPlugins::SetAtomicModelInfo, PATCH_JUMP);
-	InjectHook(0x527F00, CVisibilityPlugins::GetAtomicModelInfo, PATCH_JUMP);
-	InjectHook(0x527F10, CVisibilityPlugins::SetAtomicFlag, PATCH_JUMP);
-	InjectHook(0x527F30, CVisibilityPlugins::ClearAtomicFlag, PATCH_JUMP);
-	InjectHook(0x527F50, CVisibilityPlugins::GetAtomicId, PATCH_JUMP);
-	InjectHook(0x528C20, CVisibilityPlugins::SetAtomicRenderCallback, PATCH_JUMP);
-
-	InjectHook(0x528D60, CVisibilityPlugins::SetFrameHierarchyId, PATCH_JUMP);
-	InjectHook(0x528D80, CVisibilityPlugins::GetFrameHierarchyId, PATCH_JUMP);
-
-	InjectHook(0x528ED0, CVisibilityPlugins::SetClumpModelInfo, PATCH_JUMP);
-	InjectHook(0x528F50, CVisibilityPlugins::SetClumpAlpha, PATCH_JUMP);
-	InjectHook(0x528F70, CVisibilityPlugins::GetClumpAlpha, PATCH_JUMP);
-
-
-	InjectHook(0x529120, CVisibilityPlugins::GetDistanceSquaredFromCamera, PATCH_JUMP);
-	InjectHook(0x5282A0, CVisibilityPlugins::GetDotProductWithCameraVector, PATCH_JUMP);
-ENDPATCHES

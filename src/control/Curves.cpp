@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Curves.h"
 
 float CCurves::CalcSpeedScaleFactor(CVector* pPoint1, CVector* pPoint2, float dir1X, float dir1Y, float dir2X, float dir2Y)

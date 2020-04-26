@@ -42,4 +42,4 @@ public:
 	void FindWaterLevel(const CVector &zpos, CVector *waterLevel, tWaterLevel *waterPosition);
 	bool CalcBuoyancyForce(CPhysical *phys, CVector *impulse, CVector *point);
 };
-extern cBuoyancy &mod_Buoyancy;
+extern cBuoyancy mod_Buoyancy;

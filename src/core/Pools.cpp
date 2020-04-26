@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Pools.h"
 
 #include "Boat.h"
@@ -10,15 +10,15 @@
 #include "Wanted.h"
 #include "World.h"
 
-CCPtrNodePool *&CPools::ms_pPtrNodePool = *(CCPtrNodePool**)0x943044;
-CEntryInfoNodePool *&CPools::ms_pEntryInfoNodePool = *(CEntryInfoNodePool**)0x941448;
-CPedPool *&CPools::ms_pPedPool = *(CPedPool**)0x8F2C60;
-CVehiclePool *&CPools::ms_pVehiclePool = *(CVehiclePool**)0x9430DC;
-CBuildingPool *&CPools::ms_pBuildingPool = *(CBuildingPool**)0x8F2C04;
-CTreadablePool *&CPools::ms_pTreadablePool = *(CTreadablePool**)0x8F2568;
-CObjectPool *&CPools::ms_pObjectPool = *(CObjectPool**)0x880E28;
-CDummyPool *&CPools::ms_pDummyPool = *(CDummyPool**)0x8F2C18;
-CAudioScriptObjectPool *&CPools::ms_pAudioScriptObjectPool = *(CAudioScriptObjectPool**)0x8F1B6C;
+CCPtrNodePool *CPools::ms_pPtrNodePool;
+CEntryInfoNodePool *CPools::ms_pEntryInfoNodePool;
+CPedPool *CPools::ms_pPedPool;
+CVehiclePool *CPools::ms_pVehiclePool;
+CBuildingPool *CPools::ms_pBuildingPool;
+CTreadablePool *CPools::ms_pTreadablePool;
+CObjectPool *CPools::ms_pObjectPool;
+CDummyPool *CPools::ms_pDummyPool;
+CAudioScriptObjectPool *CPools::ms_pAudioScriptObjectPool;
 
 void
 CPools::Initialise(void)
@@ -110,7 +110,7 @@ INITSAVEBUF
 		CStreaming::LoadAllRequestedModels(false);
 		int32 slot = ReadSaveBuf<int32>(buf);
 		CVehicle* pVehicle;
-		char* vbuf = new char[max(sizeof(CAutomobile), sizeof(CBoat))];
+		char* vbuf = new char[Max(sizeof(CAutomobile), sizeof(CBoat))];
 		if (type == VEHICLE_TYPE_BOAT) {
 			memcpy(vbuf, buf, sizeof(CBoat));
 			SkipSaveBuf(buf, sizeof(CBoat));
@@ -251,7 +251,7 @@ INITSAVEBUF
 			continue;
 		if (pObject->ObjectCreatedBy == MISSION_OBJECT) {
 			bool bIsPickup = pObject->bIsPickup;
-			bool bFlag2 = pObject->m_obj_flag2;
+			bool bPickupObjWithMessage = pObject->bPickupObjWithMessage;
 			bool bOutOfStock = pObject->bOutOfStock;
 			bool bGlassCracked = pObject->bGlassCracked;
 			bool bGlassBroken = pObject->bGlassBroken;
@@ -269,7 +269,7 @@ INITSAVEBUF
 			WriteSaveBuf(buf, (uint32)0); // same
 			WriteSaveBuf(buf, pObject->ObjectCreatedBy);
 			WriteSaveBuf(buf, bIsPickup);
-			WriteSaveBuf(buf, bFlag2);
+			WriteSaveBuf(buf, bPickupObjWithMessage);
 			WriteSaveBuf(buf, bOutOfStock);
 			WriteSaveBuf(buf, bGlassCracked);
 			WriteSaveBuf(buf, bGlassBroken);
@@ -305,7 +305,7 @@ INITSAVEBUF
 		ReadSaveBuf<uint32>(buf);
 		pBufferObject->ObjectCreatedBy = ReadSaveBuf<int8>(buf);
 		pBufferObject->bIsPickup = ReadSaveBuf<bool>(buf);
-		pBufferObject->m_flagE2 = ReadSaveBuf<bool>(buf);
+		pBufferObject->bPickupObjWithMessage = ReadSaveBuf<bool>(buf);
 		pBufferObject->bOutOfStock = ReadSaveBuf<bool>(buf);
 		pBufferObject->bGlassCracked = ReadSaveBuf<bool>(buf);
 		pBufferObject->bGlassBroken = ReadSaveBuf<bool>(buf);
@@ -325,7 +325,7 @@ INITSAVEBUF
 		pObject->m_objectMatrix = pBufferObject->m_objectMatrix;
 		pObject->ObjectCreatedBy = pBufferObject->ObjectCreatedBy;
 		pObject->bIsPickup = pBufferObject->bIsPickup;
-		pObject->m_flagE2 = pBufferObject->m_flagE2;
+		pObject->bPickupObjWithMessage = pBufferObject->bPickupObjWithMessage;
 		pObject->bOutOfStock = pBufferObject->bOutOfStock;
 		pObject->bGlassCracked = pBufferObject->bGlassCracked;
 		pObject->bGlassBroken = pBufferObject->bGlassBroken;
@@ -425,19 +425,3 @@ INITSAVEBUF
 	}
 VALIDATESAVEBUF(size)
 }
-
-STARTPATCHES
-	InjectHook(0x4A1770, CPools::Initialise, PATCH_JUMP);
-	InjectHook(0x4A1880, CPools::ShutDown, PATCH_JUMP);
-	InjectHook(0x4A1A50, CPools::CheckPoolsEmpty, PATCH_JUMP);
-	InjectHook(0x4A1A80, CPools::GetPedRef, PATCH_JUMP);
-	InjectHook(0x4A1AA0, CPools::GetPed, PATCH_JUMP);
-	InjectHook(0x4A1AC0, CPools::GetVehicleRef, PATCH_JUMP);
-	InjectHook(0x4A1AE0, CPools::GetVehicle, PATCH_JUMP);
-	InjectHook(0x4A1B00, CPools::GetObjectRef, PATCH_JUMP);
-	InjectHook(0x4A1B20, CPools::GetObject, PATCH_JUMP);
-	InjectHook(0x4A2DB0, CPools::MakeSureSlotInObjectPoolIsEmpty, PATCH_JUMP);
-	InjectHook(0x4A1B40, CPools::LoadVehiclePool, PATCH_JUMP);
-	InjectHook(0x4A2550, CPools::LoadObjectPool, PATCH_JUMP);
-	InjectHook(0x4A2B50, CPools::LoadPedPool, PATCH_JUMP);
-ENDPATCHES

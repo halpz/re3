@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "EmergencyPed.h"
 #include "DMAudio.h"
 #include "ModelIndices.h"
@@ -413,20 +413,3 @@ CEmergencyPed::MedicAI(void)
 		}
 	}
 }
-
-#include <new>
-
-class CEmergencyPed_ : public CEmergencyPed
-{
-public:
-	CEmergencyPed* ctor(int pedtype) { return ::new (this) CEmergencyPed(pedtype); };
-	void dtor(void) { CEmergencyPed::~CEmergencyPed(); }
-	void ProcessControl_(void) { CEmergencyPed::ProcessControl(); }
-};
-
-STARTPATCHES
-	InjectHook(0x4C2E40, &CEmergencyPed_::ctor, PATCH_JUMP);
-	InjectHook(0x4C2EF0, &CEmergencyPed_::dtor, PATCH_JUMP);
-	InjectHook(0x4C2F10, &CEmergencyPed_::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x4C3EC0, &CEmergencyPed::InRange, PATCH_JUMP);
-ENDPATCHES

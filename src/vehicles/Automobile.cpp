@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "RwHelper.h"
 #include "Pad.h"
@@ -49,7 +49,7 @@ bool bAllCarCheat;	// unused
 
 RwObject *GetCurrentAtomicObjectCB(RwObject *object, void *data);
 
-bool &CAutomobile::m_sAllTaxiLights = *(bool*)0x95CD21;
+bool CAutomobile::m_sAllTaxiLights;
 
 CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
  : CVehicle(CreatedBy)
@@ -356,7 +356,7 @@ CAutomobile::ProcessControl(void)
 
 			PruneReferences();
 
-			if(m_status == STATUS_PLAYER && CRecordDataForChase::IsRecording())
+			if(m_status == STATUS_PLAYER && !CRecordDataForChase::IsRecording())
 				DoDriveByShootings();
 		}
 		break;
@@ -562,7 +562,7 @@ CAutomobile::ProcessControl(void)
 			bWasPostponed = false;
 			bHasHitWall = false;
 			m_fDistanceTravelled = 0.0f;
-			field_EF = false;
+			m_bIsVehicleBeingShifted = false;
 			m_phy_flagA80 = false;
 			ApplyMoveSpeed();
 			ApplyTurnSpeed();
@@ -692,7 +692,7 @@ CAutomobile::ProcessControl(void)
 			if(m_aSuspensionSpringRatio[i] < 1.0f)
 				m_aWheelTimer[i] = 4.0f;
 			else
-				m_aWheelTimer[i] = max(m_aWheelTimer[i]-CTimer::GetTimeStep(), 0.0f);
+				m_aWheelTimer[i] = Max(m_aWheelTimer[i]-CTimer::GetTimeStep(), 0.0f);
 
 			if(m_aWheelTimer[i] > 0.0f){
 				m_nWheelsOnGround++;
@@ -1010,7 +1010,7 @@ CAutomobile::ProcessControl(void)
 
 		if(m_status != STATUS_PLAYER && m_status != STATUS_PLAYER_REMOTE && m_status != STATUS_PHYSICS){
 			if(GetModelIndex() == MI_MIAMI_RCRAIDER || GetModelIndex() == MI_MIAMI_SPARROW)
-				m_aWheelSpeed[0] = max(m_aWheelSpeed[0]-0.0005f, 0.0f);
+				m_aWheelSpeed[0] = Max(m_aWheelSpeed[0]-0.0005f, 0.0f);
 		}else if((GetModelIndex() == MI_DODO || CVehicle::bAllDodosCheat) &&
 		         m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
 			FlyingControl(FLIGHT_MODEL_DODO);
@@ -1018,7 +1018,7 @@ CAutomobile::ProcessControl(void)
 			FlyingControl(FLIGHT_MODEL_RCPLANE);
 		}else if(GetModelIndex() == MI_MIAMI_RCRAIDER || GetModelIndex() == MI_MIAMI_SPARROW || bAllCarCheat){
 			if(CPad::GetPad(0)->GetCircleJustDown())
-				m_aWheelSpeed[0] = max(m_aWheelSpeed[0]-0.03f, 0.0f);
+				m_aWheelSpeed[0] = Max(m_aWheelSpeed[0]-0.03f, 0.0f);
 			if(m_aWheelSpeed[0] < 0.22f)
 				m_aWheelSpeed[0] += 0.0001f;
 			if(m_aWheelSpeed[0] > 0.15f)
@@ -1130,10 +1130,10 @@ CAutomobile::ProcessControl(void)
 		if(speed > sq(0.1f)){
 			speed = Sqrt(speed);
 			if(suspShake > 0.0f){
-				uint8 freq = min(200.0f*suspShake*speed*2000.0f/m_fMass + 100.0f, 250.0f);
+				uint8 freq = Min(200.0f*suspShake*speed*2000.0f/m_fMass + 100.0f, 250.0f);
 				CPad::GetPad(0)->StartShake(20000.0f*CTimer::GetTimeStep()/freq, freq);
 			}else{
-				uint8 freq = min(200.0f*surfShake*speed*2000.0f/m_fMass + 40.0f, 145.0f);
+				uint8 freq = Min(200.0f*surfShake*speed*2000.0f/m_fMass + 40.0f, 145.0f);
 				CPad::GetPad(0)->StartShake(5000.0f*CTimer::GetTimeStep()/freq, freq);
 			}
 		}
@@ -2148,7 +2148,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 	// m_aSuspensionSpringRatio are now set to the point where the tyre touches ground.
 	// In ProcessControl these will be re-normalized to ignore the tyre radius.
 
-	if(field_EF || m_phy_flagA80 ||
+	if(m_bIsVehicleBeingShifted || m_phy_flagA80 ||
 	   GetModelIndex() == MI_DODO && (ent->IsPed() || ent->IsVehicle())){
 		// don't do line collision
 		for(i = 0; i < 4; i++)
@@ -2601,7 +2601,7 @@ CAutomobile::HydraulicControl(void)
 		float minz = pos.z + extendedLowerLimit - wheelRadius;
 		if(minz < specialColModel->boundingBox.min.z)
 			specialColModel->boundingBox.min.z = minz;
-		float radius = max(specialColModel->boundingBox.min.Magnitude(), specialColModel->boundingBox.max.Magnitude());
+		float radius = Max(specialColModel->boundingBox.min.Magnitude(), specialColModel->boundingBox.max.Magnitude());
 		if(specialColModel->boundingSphere.radius < radius)
 			specialColModel->boundingSphere.radius = radius;
 
@@ -2700,10 +2700,10 @@ CAutomobile::HydraulicControl(void)
 		float front = -rear;
 		float right = CPad::GetPad(0)->GetCarGunLeftRight()/128.0f;
 		float left = -right;
-		suspChange[CARWHEEL_FRONT_LEFT] = max(front+left, 0.0f);
-		suspChange[CARWHEEL_REAR_LEFT] = max(rear+left, 0.0f);
-		suspChange[CARWHEEL_FRONT_RIGHT] = max(front+right, 0.0f);
-		suspChange[CARWHEEL_REAR_RIGHT] = max(rear+right, 0.0f);
+		suspChange[CARWHEEL_FRONT_LEFT] = Max(front+left, 0.0f);
+		suspChange[CARWHEEL_REAR_LEFT] = Max(rear+left, 0.0f);
+		suspChange[CARWHEEL_FRONT_RIGHT] = Max(front+right, 0.0f);
+		suspChange[CARWHEEL_REAR_RIGHT] = Max(rear+right, 0.0f);
 
 		if(m_hydraulicState < 100){
 			// Lowered, move wheels up
@@ -2819,7 +2819,7 @@ CAutomobile::ProcessBuoyancy(void)
 		ApplyTurnForce(impulse, point);
 
 		CVector initialSpeed = m_vecMoveSpeed;
-		float timeStep = max(CTimer::GetTimeStep(), 0.01f);
+		float timeStep = Max(CTimer::GetTimeStep(), 0.01f);
 		float impulseRatio = impulse.z / (GRAVITY * m_fMass * timeStep);
 		float waterResistance = Pow(1.0f - 0.05f*impulseRatio, CTimer::GetTimeStep());
 		m_vecMoveSpeed *= waterResistance;
@@ -2848,6 +2848,7 @@ CAutomobile::ProcessBuoyancy(void)
 		static uint32 nGenerateWaterCircles = 0;
 
 		if(initialSpeed.z < -0.3f && impulse.z > 0.3f){
+#if defined(PC_PARTICLE) || defined (PS2_ALTERNATIVE_CARSPLASH)
 			RwRGBA color;
 			color.red = (0.5f * CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed())*0.45f*255;
 			color.green = (0.5f * CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen())*0.45f*255;
@@ -2856,6 +2857,30 @@ CAutomobile::ProcessBuoyancy(void)
 			CParticleObject::AddObject(POBJECT_CAR_WATER_SPLASH, GetPosition(),
 				CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.15f, 0.3f)),
 				0.0f, 75, color, true);
+#else
+			CVector pos = (initialSpeed * 2.0f) + (GetPosition() + point);
+	
+			for ( int32 i = 0; i < 360; i += 4 )
+			{
+				float fSin = Sin(float(i));
+				float fCos = Cos(float(i));
+				
+				CVector dir(fSin*0.01f, fCos*0.01f, CGeneral::GetRandomNumberInRange(0.25f, 0.45f));
+				
+				CParticle::AddParticle(PARTICLE_CAR_SPLASH,
+					pos + CVector(fSin*4.5f, fCos*4.5f, 0.0f),
+					dir, NULL, 0.0f, CRGBA(225, 225, 255, 180));
+	
+				for ( int32 j = 0; j < 3; j++ )
+				{
+					float fMul = 1.5f * float(j + 1);
+					
+					CParticle::AddParticle(PARTICLE_CAR_SPLASH,
+						pos + CVector(fSin * fMul, fCos * fMul, 0.0f),
+						dir, NULL, 0.0f, CRGBA(225, 225, 255, 180));                      
+				}
+			}
+#endif
 
 			nGenerateRaindrops = CTimer::GetTimeInMilliseconds() + 300;
 			nGenerateWaterCircles = CTimer::GetTimeInMilliseconds() + 60;
@@ -2909,10 +2934,17 @@ CAutomobile::ProcessBuoyancy(void)
 				CVector pos = m_aWheelColPoints[i].point + 0.3f*GetUp() - GetPosition();
 				CVector vSpeed = GetSpeed(pos);
 				vSpeed.z = 0.0f;
+#ifdef GTA_PS2_STUFF
+				// ps2 puddle physics
+				CVector moveForce = CTimer::GetTimeStep() * (m_fMass * (vSpeed * -0.003f));
+				ApplyMoveForce(moveForce.x, moveForce.y, moveForce.z);
+#endif
 				float fSpeed = vSpeed.MagnitudeSqr();
+#ifdef PC_PARTICLE
 				if(fSpeed > sq(0.05f)){
 					fSpeed = Sqrt(fSpeed);
-					float size = min((fSpeed < 0.15f ? 0.25f : 0.75f)*fSpeed, 0.6f);
+
+					float size = Min((fSpeed < 0.15f ? 0.25f : 0.75f)*fSpeed, 0.6f);
 					CVector right = 0.2f*fSpeed*GetRight() + 0.2f*vSpeed;
 
 					CParticle::AddParticle(PARTICLE_PED_SPLASH,
@@ -2924,10 +2956,39 @@ CAutomobile::ProcessBuoyancy(void)
 					CParticle::AddParticle(PARTICLE_RUBBER_SMOKE,
 						pos + GetPosition(), -0.6f*right,
 						nil, size, smokeCol, 0, 0, 0, 0);
-
+				
 					if((CTimer::GetFrameCounter() & 0xF) == 0)
 						DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_SPLASH, 2000.0f*fSpeed);
 				}
+#else
+				if ( ( (CTimer::GetFrameCounter() + i) & 3 ) == 0 )
+				{
+					if(fSpeed > sq(0.05f))
+					{
+						fSpeed = Sqrt(fSpeed);
+						CRGBA color(155, 185, 155, 255);
+						float boxY = GetColModel()->boundingBox.max.y;
+						CVector right = 0.5f * GetRight();
+						
+						if ( i == 2 )
+						{
+							CParticle::AddParticle(PARTICLE_PED_SPLASH,
+								GetPosition() + (boxY * GetForward()) + right,
+								0.75f*m_vecMoveSpeed, NULL, 0.0f, color);
+			
+						}
+						else if ( i == 0 )
+						{
+							CParticle::AddParticle(PARTICLE_PED_SPLASH,
+								GetPosition() + (boxY * GetForward()) - right,
+								0.75f*m_vecMoveSpeed, NULL, 0.0f, color);
+						}
+						
+						if((CTimer::GetFrameCounter() & 0xF) == 0)
+							DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_SPLASH, 2000.0f*fSpeed);
+					}
+				}
+#endif	
 			}
 		}
 	}
@@ -2994,11 +3055,11 @@ CAutomobile::DoDriveByShootings(void)
 
 	// TODO: what is this?
 	if(!lookingLeft && m_weaponDoorTimerLeft > 0.0f){
-		m_weaponDoorTimerLeft = max(m_weaponDoorTimerLeft - CTimer::GetTimeStep()*0.1f, 0.0f);
+		m_weaponDoorTimerLeft = Max(m_weaponDoorTimerLeft - CTimer::GetTimeStep()*0.1f, 0.0f);
 		ProcessOpenDoor(CAR_DOOR_LF, NUM_ANIMS, m_weaponDoorTimerLeft);
 	}
 	if(!lookingRight && m_weaponDoorTimerRight > 0.0f){
-		m_weaponDoorTimerRight = max(m_weaponDoorTimerRight - CTimer::GetTimeStep()*0.1f, 0.0f);
+		m_weaponDoorTimerRight = Max(m_weaponDoorTimerRight - CTimer::GetTimeStep()*0.1f, 0.0f);
 		ProcessOpenDoor(CAR_DOOR_RF, NUM_ANIMS, m_weaponDoorTimerRight);
 	}
 }
@@ -3146,7 +3207,7 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 			FindPlayerPed()->SetWantedLevelNoDrop(1);
 
 		if(m_status == STATUS_PLAYER && impulse > 50.0f){
-			uint8 freq = min(0.4f*impulse*2000.0f/m_fMass + 100.0f, 250.0f);
+			uint8 freq = Min(0.4f*impulse*2000.0f/m_fMass + 100.0f, 250.0f);
 			CPad::GetPad(0)->StartShake(40000/freq, freq);
 		}
 
@@ -3299,7 +3360,7 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 
 			if(m_pDamageEntity && m_pDamageEntity == FindPlayerVehicle() && impulse > 10.0f){
 				int money = (doubleMoney ? 2 : 1) * impulse*pHandling->nMonetaryValue/1000000.0f;
-				money = min(money, 40);
+				money = Min(money, 40);
 				if(money > 2){
 					sprintf(gString, "$%d", money);
 					CWorld::Players[CWorld::PlayerInFocus].m_nMoney += money;
@@ -3486,14 +3547,29 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 		}
 		return 0;
 	default:
-		// Is this even visible?
-		if(CWeather::WetRoads > 0.01f && CTimer::GetFrameCounter() & 1){
-			CParticle::AddParticle(PARTICLE_WATERSPRAY,
+		if ( CWeather::WetRoads > 0.01f 
+#ifdef PC_PARTICLE	
+			&& CTimer::GetFrameCounter() & 1
+#endif	
+			)
+		{
+			CParticle::AddParticle(
+#ifdef FIX_BUGS
+				PARTICLE_WHEEL_WATER,
+#else
+				PARTICLE_WATERSPRAY,
+#endif
 				colpoint->point + CVector(0.0f, 0.0f, 0.25f+0.25f),
-				CVector(0.0f, 0.0f, 1.0f), nil,
+#ifdef PC_PARTICLE
+				CVector(0.0f, 0.0f, 1.0f),
+#else	
+				CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.005f, 0.04f)),
+#endif		
+				nil,
 				CGeneral::GetRandomNumberInRange(0.1f, 0.5f), waterCol);
 			return 0;
 		}
+		
 		return 1;
 	}
 }
@@ -4004,7 +4080,7 @@ CAutomobile::SetupSuspensionLines(void)
 	// adjust col model to include suspension lines
 	if(colModel->boundingBox.min.z > colModel->lines[0].p1.z)
 		colModel->boundingBox.min.z = colModel->lines[0].p1.z;
-	float radius = max(colModel->boundingBox.min.Magnitude(), colModel->boundingBox.max.Magnitude());
+	float radius = Max(colModel->boundingBox.min.Magnitude(), colModel->boundingBox.max.Magnitude());
 	if(colModel->boundingSphere.radius < radius)
 		colModel->boundingSphere.radius = radius;
 
@@ -4206,8 +4282,7 @@ GetCurrentAtomicObjectCB(RwObject *object, void *data)
 	return object;
 }
 
-CColPoint aTempPedColPts[32];	// this name doesn't make any sense
-								// they probably copied it from Ped (both serves same purpose) and didn't change the name
+CColPoint spherepoints[MAX_COLLISION_POINTS];
 
 CObject*
 CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
@@ -4327,7 +4402,7 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 
 	if(CCollision::ProcessColModels(obj->GetMatrix(), *obj->GetColModel(),
 			this->GetMatrix(), *this->GetColModel(),
-			aTempPedColPts, nil, nil) > 0)
+			spherepoints, nil, nil) > 0)
 		obj->m_pCollidingEntity = this;
 
 	if(bRenderScorched)
@@ -4493,88 +4568,3 @@ CAutomobile::SetAllTaxiLights(bool set)
 {
 	m_sAllTaxiLights = set;
 }
-
-#include <new>
-
-class CAutomobile_ : public CAutomobile
-{
-public:
-	void ctor(int32 id, uint8 CreatedBy) { ::new (this) CAutomobile(id, CreatedBy); }
-	void dtor() { CAutomobile::~CAutomobile(); }
-	void SetModelIndex_(uint32 id) { CAutomobile::SetModelIndex(id); }
-	void ProcessControl_(void) { CAutomobile::ProcessControl(); }
-	void Teleport_(CVector v) { CAutomobile::Teleport(v); }
-	void PreRender_(void) { CAutomobile::PreRender(); }
-	void Render_(void) { CAutomobile::Render(); }
-
-	int32 ProcessEntityCollision_(CEntity *ent, CColPoint *colpoints){ return CAutomobile::ProcessEntityCollision(ent, colpoints); }
-
-	void ProcessControlInputs_(uint8 pad) { CAutomobile::ProcessControlInputs(pad); }
-	void GetComponentWorldPosition_(int32 component, CVector &pos) { CAutomobile::GetComponentWorldPosition(component, pos); }
-	bool IsComponentPresent_(int32 component) { return CAutomobile::IsComponentPresent(component); }
-	void SetComponentRotation_(int32 component, CVector rotation) { CAutomobile::SetComponentRotation(component, rotation); }
-	void OpenDoor_(int32 component, eDoors door, float ratio) { CAutomobile::OpenDoor(component, door, ratio); }
-	void ProcessOpenDoor_(uint32 component, uint32 anim, float time) { CAutomobile::ProcessOpenDoor(component, anim, time); }
-	bool IsDoorReady_(eDoors door) { return CAutomobile::IsDoorReady(door); }
-	bool IsDoorFullyOpen_(eDoors door) { return CAutomobile::IsDoorFullyOpen(door); }
-	bool IsDoorClosed_(eDoors door) { return CAutomobile::IsDoorClosed(door); }
-	bool IsDoorMissing_(eDoors door) { return CAutomobile::IsDoorMissing(door); }
-	void RemoveRefsToVehicle_(CEntity *ent) { CAutomobile::RemoveRefsToVehicle(ent); }
-	void BlowUpCar_(CEntity *ent) { CAutomobile::BlowUpCar(ent); }
-	bool SetUpWheelColModel_(CColModel *colModel) { return CAutomobile::SetUpWheelColModel(colModel); }
-	void BurstTyre_(uint8 tyre) { CAutomobile::BurstTyre(tyre); }
-	bool IsRoomForPedToLeaveCar_(uint32 door, CVector *pos) { return CAutomobile::IsRoomForPedToLeaveCar(door, pos); }
-	float GetHeightAboveRoad_(void) { return CAutomobile::GetHeightAboveRoad(); }
-	void PlayCarHorn_(void) { CAutomobile::PlayCarHorn(); }
-};
-
-STARTPATCHES
-	InjectHook(0x52C6B0, &CAutomobile_::ctor, PATCH_JUMP);
-	InjectHook(0x52D170, &CAutomobile_::dtor, PATCH_JUMP);
-	InjectHook(0x52D190, &CAutomobile_::SetModelIndex_, PATCH_JUMP);
-	InjectHook(0x531470, &CAutomobile_::ProcessControl_, PATCH_JUMP);
-	InjectHook(0x535180, &CAutomobile_::Teleport_, PATCH_JUMP);
-	InjectHook(0x539EA0, &CAutomobile_::Render_, PATCH_JUMP);
-	InjectHook(0x535B40, &CAutomobile_::PreRender_, PATCH_JUMP);
-	InjectHook(0x53B270, &CAutomobile_::ProcessEntityCollision_, PATCH_JUMP);
-	InjectHook(0x53B660, &CAutomobile_::ProcessControlInputs_, PATCH_JUMP);
-	InjectHook(0x52E5F0, &CAutomobile_::GetComponentWorldPosition_, PATCH_JUMP);
-	InjectHook(0x52E660, &CAutomobile_::IsComponentPresent_, PATCH_JUMP);
-	InjectHook(0x52E680, &CAutomobile_::SetComponentRotation_, PATCH_JUMP);
-	InjectHook(0x52E750, &CAutomobile_::OpenDoor_, PATCH_JUMP);
-	InjectHook(0x52EF10, &CAutomobile_::IsDoorReady_, PATCH_JUMP);
-	InjectHook(0x52EF90, &CAutomobile_::IsDoorFullyOpen_, PATCH_JUMP);
-	InjectHook(0x52EFD0, &CAutomobile_::IsDoorClosed_, PATCH_JUMP);
-	InjectHook(0x52F000, &CAutomobile_::IsDoorMissing_, PATCH_JUMP);
-	InjectHook(0x53BF40, &CAutomobile_::RemoveRefsToVehicle_, PATCH_JUMP);
-	InjectHook(0x53BC60, &CAutomobile_::BlowUpCar_, PATCH_JUMP);
-	InjectHook(0x53BF70, &CAutomobile_::SetUpWheelColModel_, PATCH_JUMP);
-	InjectHook(0x53C0E0, &CAutomobile_::BurstTyre_, PATCH_JUMP);
-	InjectHook(0x53C5B0, &CAutomobile_::IsRoomForPedToLeaveCar_, PATCH_JUMP);
-	InjectHook(0x437690, &CAutomobile_::GetHeightAboveRoad_, PATCH_JUMP);
-	InjectHook(0x53C450, &CAutomobile_::PlayCarHorn_, PATCH_JUMP);
-	InjectHook(0x53E090, &CAutomobile::PlaceOnRoadProperly, PATCH_JUMP);
-	InjectHook(0x52F030, &CAutomobile::dmgDrawCarCollidingParticles, PATCH_JUMP);
-	InjectHook(0x535450, &CAutomobile::AddDamagedVehicleParticles, PATCH_JUMP);
-	InjectHook(0x5357D0, &CAutomobile::AddWheelDirtAndWater, PATCH_JUMP);
-	InjectHook(0x5353A0, &CAutomobile::ResetSuspension, PATCH_JUMP);
-	InjectHook(0x52D210, &CAutomobile::SetupSuspensionLines, PATCH_JUMP);
-	InjectHook(0x53E000, &CAutomobile::BlowUpCarsInPath, PATCH_JUMP);
-	InjectHook(0x42E220, &CAutomobile::HasCarStoppedBecauseOfLight, PATCH_JUMP);
-	InjectHook(0x53D320, &CAutomobile::SetBusDoorTimer, PATCH_JUMP);
-	InjectHook(0x53D370, &CAutomobile::ProcessAutoBusDoors, PATCH_JUMP);
-	InjectHook(0x535250, &CAutomobile::ProcessSwingingDoor, PATCH_JUMP);
-	InjectHook(0x53C240, &CAutomobile::Fix, PATCH_JUMP);
-	InjectHook(0x53C310, &CAutomobile::SetupDamageAfterLoad, PATCH_JUMP);
-	InjectHook(0x530300, &CAutomobile::SpawnFlyingComponent, PATCH_JUMP);
-	InjectHook(0x535320, &CAutomobile::RemoveBonnetInPedCollision, PATCH_JUMP);
-	InjectHook(0x5301A0, &CAutomobile::SetPanelDamage, PATCH_JUMP);
-	InjectHook(0x530120, &CAutomobile::SetBumperDamage, PATCH_JUMP);
-	InjectHook(0x530200, &CAutomobile::SetDoorDamage, PATCH_JUMP);
-	InjectHook(0x5300E0, &CAutomobile::SetComponentVisibility, PATCH_JUMP);
-	InjectHook(0x52D1B0, &CAutomobile::SetupModelNodes, PATCH_JUMP);
-	InjectHook(0x53C420, &CAutomobile::SetTaxiLight, PATCH_JUMP);
-	InjectHook(0x53BC40, &CAutomobile::GetAllWheelsOffGround, PATCH_JUMP);
-	InjectHook(0x5308C0, &CAutomobile::ReduceHornCounter, PATCH_JUMP);
-	InjectHook(0x53C440, &CAutomobile::SetAllTaxiLights, PATCH_JUMP);
-ENDPATCHES

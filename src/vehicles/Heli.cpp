@@ -1,6 +1,6 @@
 #include "common.h"
 #include "main.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "Darkel.h"
 #include "Stats.h"
@@ -24,6 +24,9 @@
 #include "Object.h"
 #include "HandlingMgr.h"
 #include "Heli.h"
+#ifdef FIX_BUGS
+#include "Replay.h"
+#endif
 
 enum
 {
@@ -34,13 +37,13 @@ enum
 	HELI_STATUS_HOVER2,
 };
 
-CHeli **CHeli::pHelis = (CHeli**)0x72CF50;
-int16 &CHeli::NumRandomHelis = *(int16*)0x95CCAA;
-uint32 &CHeli::TestForNewRandomHelisTimer = *(uint32*)0x8F1A7C;
+CHeli *CHeli::pHelis[NUM_HELIS];
+int16 CHeli::NumRandomHelis;
+uint32 CHeli::TestForNewRandomHelisTimer;
 int16 CHeli::NumScriptHelis;	// unused
-bool &CHeli::CatalinaHeliOn = *(bool*)0x95CD85;
-bool &CHeli::CatalinaHasBeenShotDown = *(bool*)0x95CD56;
-bool &CHeli::ScriptHeliOn = *(bool*)0x95CD43;
+bool CHeli::CatalinaHeliOn;
+bool CHeli::CatalinaHasBeenShotDown;
+bool CHeli::ScriptHeliOn;
 
 CHeli::CHeli(int32 id, uint8 CreatedBy)
  : CVehicle(CreatedBy)
@@ -78,6 +81,9 @@ CHeli::CHeli(int32 id, uint8 CreatedBy)
 	m_bTestRight = true;
 	m_fTargetOffset = 0.0f;
 	m_fSearchLightX = m_fSearchLightY = 0.0f;
+
+	// BUG: not in game but gets initialized to CDCDCDCD in debug
+	m_nLastShotTime = 0;
 }
 
 void
@@ -225,19 +231,19 @@ CHeli::ProcessControl(void)
 		switch(m_heliStatus){
 		case HELI_STATUS_HOVER:
 			groundZ = CWorld::FindGroundZFor3DCoord(GetPosition().x, GetPosition().y, 1000.0f, nil);
-			m_fTargetZ = max(groundZ, m_fTargetZ) + 8.0f;
+			m_fTargetZ = Max(groundZ, m_fTargetZ) + 8.0f;
 			break;
 		case HELI_STATUS_SHOT_DOWN:
 			groundZ = CWorld::FindGroundZFor3DCoord(GetPosition().x, GetPosition().y, 1000.0f, nil);
-			m_fTargetZ = max(groundZ, m_fTargetZ) + 8.0f + m_fTargetOffset;
+			m_fTargetZ = Max(groundZ, m_fTargetZ) + 8.0f + m_fTargetOffset;
 			break;
 		case HELI_STATUS_HOVER2:
 			groundZ = CWorld::FindGroundZFor3DCoord(GetPosition().x, GetPosition().y, 1000.0f, nil);
-			m_fTargetZ = max(groundZ, m_fTargetZ) + 8.0f + m_fTargetOffset;
+			m_fTargetZ = Max(groundZ, m_fTargetZ) + 8.0f + m_fTargetOffset;
 			break;
 		default:
 			groundZ = CWorld::FindGroundZFor3DCoord(GetPosition().x, GetPosition().y, 1000.0f, nil);
-			m_fTargetZ = max(groundZ, m_fTargetZ) + 12.0f;
+			m_fTargetZ = Max(groundZ, m_fTargetZ) + 12.0f;
 			break;
 		}
 
@@ -425,89 +431,95 @@ CHeli::ProcessControl(void)
 	// Search light and shooting
 	if(m_heliStatus == HELI_STATUS_FLY_AWAY || m_heliType == HELI_TYPE_CATALINA || CCullZones::PlayerNoRain())
 		m_fSearchLightIntensity = 0.0f;
-	else{
+	else {
 		// Update search light history once every 1000ms
 		int timeDiff = CTimer::GetTimeInMilliseconds() - m_nSearchLightTimer;
-		while(timeDiff > 1000){
-			for(i = 5; i > 0; i--){
-				m_aSearchLightHistoryX[i] = m_aSearchLightHistoryX[i-1];
-				m_aSearchLightHistoryY[i] = m_aSearchLightHistoryY[i-1];
+		while (timeDiff > 1000) {
+			for (i = 5; i > 0; i--) {
+				m_aSearchLightHistoryX[i] = m_aSearchLightHistoryX[i - 1];
+				m_aSearchLightHistoryY[i] = m_aSearchLightHistoryY[i - 1];
 			}
-			m_aSearchLightHistoryX[0] = FindPlayerCoors().x + FindPlayerSpeed().x*50.0f*(m_nHeliId+2);
-			m_aSearchLightHistoryY[0] = FindPlayerCoors().y + FindPlayerSpeed().y*50.0f*(m_nHeliId+2);
+			m_aSearchLightHistoryX[0] = FindPlayerCoors().x + FindPlayerSpeed().x * 50.0f * (m_nHeliId + 2);
+			m_aSearchLightHistoryY[0] = FindPlayerCoors().y + FindPlayerSpeed().y * 50.0f * (m_nHeliId + 2);
 
 			timeDiff -= 1000;
 			m_nSearchLightTimer += 1000;
 		}
 		assert(timeDiff <= 1000);
-		float f1 = timeDiff/1000.0f;
+		float f1 = timeDiff / 1000.0f;
 		float f2 = 1.0f - f1;
-		m_fSearchLightX = m_aSearchLightHistoryX[m_nHeliId+2]*f2 + m_aSearchLightHistoryX[m_nHeliId+2-1]*f1;
-		m_fSearchLightY = m_aSearchLightHistoryY[m_nHeliId+2]*f2 + m_aSearchLightHistoryY[m_nHeliId+2-1]*f1;
+		m_fSearchLightX = m_aSearchLightHistoryX[m_nHeliId + 2] * f2 + m_aSearchLightHistoryX[m_nHeliId + 2 - 1] * f1;
+		m_fSearchLightY = m_aSearchLightHistoryY[m_nHeliId + 2] * f2 + m_aSearchLightHistoryY[m_nHeliId + 2 - 1] * f1;
 
 		float searchLightDist = (CVector2D(m_fSearchLightX, m_fSearchLightY) - GetPosition()).Magnitude();
-		if(searchLightDist > 60.0f)
+		if (searchLightDist > 60.0f)
 			m_fSearchLightIntensity = 0.0f;
-		else if(searchLightDist < 40.0f)
+		else if (searchLightDist < 40.0f)
 			m_fSearchLightIntensity = 1.0f;
 		else
-			m_fSearchLightIntensity = 1.0f - (40.0f-searchLightDist)/40.0f;
+			m_fSearchLightIntensity = 1.0f - (40.0f - searchLightDist) / 40.0f;
 
-		if(m_fSearchLightIntensity < 0.9f || sq(FindPlayerCoors().x-m_fSearchLightX) + sq(FindPlayerCoors().y-m_fSearchLightY) > sq(7.0f))
+		if (m_fSearchLightIntensity < 0.9f || sq(FindPlayerCoors().x - m_fSearchLightX) + sq(FindPlayerCoors().y - m_fSearchLightY) > sq(7.0f))
 			m_nShootTimer = CTimer::GetTimeInMilliseconds();
-		else if(CTimer::GetTimeInMilliseconds() > m_nPoliceShoutTimer){
+		else if (CTimer::GetTimeInMilliseconds() > m_nPoliceShoutTimer) {
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_PED_HELI_PLAYER_FOUND, 0.0f);
-			m_nPoliceShoutTimer = CTimer::GetTimeInMilliseconds() + 4500 + (CGeneral::GetRandomNumber()&0xFFF);
+			m_nPoliceShoutTimer = CTimer::GetTimeInMilliseconds() + 4500 + (CGeneral::GetRandomNumber() & 0xFFF);
 		}
-
-		// Shoot
-		int shootTimeout;
-		if(m_heliType == HELI_TYPE_RANDOM){
-			switch(FindPlayerPed()->m_pWanted->m_nWantedLevel){
-			case 0:
-			case 1:
-			case 2: shootTimeout = 999999; break;
-			case 3: shootTimeout = 10000; break;
-			case 4: shootTimeout = 5000; break;
-			case 5: shootTimeout = 3500; break;
-			case 6: shootTimeout = 2000; break;
-			}
-			if(CCullZones::NoPolice())
-				shootTimeout /= 2;
-		}else
-			shootTimeout = 1500;
-
-		if(FindPlayerPed()->m_pWanted->IsIgnored())
-			m_nShootTimer = CTimer::GetTimeInMilliseconds();
-		else{
-			// Check if line of sight is clear
-			if(CTimer::GetTimeInMilliseconds() > m_nShootTimer + shootTimeout &&
-			   CTimer::GetPreviousTimeInMilliseconds() <= m_nShootTimer + shootTimeout){
-				if(CWorld::GetIsLineOfSightClear(GetPosition(), FindPlayerCoors(), true, false, false, false, false, false)){
-					if(m_heliStatus == HELI_STATUS_HOVER2)
-						m_heliStatus = HELI_STATUS_HOVER;
-				}else{
-					m_nShootTimer = CTimer::GetTimeInMilliseconds();
-					if(m_heliStatus == HELI_STATUS_HOVER)
-						m_heliStatus = HELI_STATUS_HOVER2;
+#ifdef FIX_BUGS
+		if (!CReplay::IsPlayingBack())
+#endif
+		{
+			// Shoot
+			int shootTimeout;
+			if (m_heliType == HELI_TYPE_RANDOM) {
+				switch (FindPlayerPed()->m_pWanted->m_nWantedLevel) {
+				case 0:
+				case 1:
+				case 2: shootTimeout = 999999; break;
+				case 3: shootTimeout = 10000; break;
+				case 4: shootTimeout = 5000; break;
+				case 5: shootTimeout = 3500; break;
+				case 6: shootTimeout = 2000; break;
 				}
+				if (CCullZones::NoPolice())
+					shootTimeout /= 2;
 			}
+			else
+				shootTimeout = 1500;
 
-			// Shoot!
-			if(CTimer::GetTimeInMilliseconds() > m_nShootTimer + shootTimeout &&
-			   CTimer::GetTimeInMilliseconds() > m_nLastShotTime + 200){
-				CVector shotTarget = FindPlayerCoors();
-				// some inaccuracy
-				shotTarget.x += ((CGeneral::GetRandomNumber()&0xFF)-128)/50.0f;
-				shotTarget.y += ((CGeneral::GetRandomNumber()&0xFF)-128)/50.0f;
-				CVector direction = FindPlayerCoors() - GetPosition();
-				direction.Normalise();
-				shotTarget += 3.0f*direction;
-				CVector shotSource = GetPosition();
-				shotSource += 3.0f*direction;
-				FireOneInstantHitRound(&shotSource, &shotTarget, 20);
-				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
-				m_nLastShotTime = CTimer::GetTimeInMilliseconds();
+			if (FindPlayerPed()->m_pWanted->IsIgnored())
+				m_nShootTimer = CTimer::GetTimeInMilliseconds();
+			else {
+				// Check if line of sight is clear
+				if (CTimer::GetTimeInMilliseconds() > m_nShootTimer + shootTimeout &&
+					CTimer::GetPreviousTimeInMilliseconds() <= m_nShootTimer + shootTimeout) {
+					if (CWorld::GetIsLineOfSightClear(GetPosition(), FindPlayerCoors(), true, false, false, false, false, false)) {
+						if (m_heliStatus == HELI_STATUS_HOVER2)
+							m_heliStatus = HELI_STATUS_HOVER;
+					}
+					else {
+						m_nShootTimer = CTimer::GetTimeInMilliseconds();
+						if (m_heliStatus == HELI_STATUS_HOVER)
+							m_heliStatus = HELI_STATUS_HOVER2;
+					}
+				}
+
+				// Shoot!
+				if (CTimer::GetTimeInMilliseconds() > m_nShootTimer + shootTimeout &&
+					CTimer::GetTimeInMilliseconds() > m_nLastShotTime + 200) {
+					CVector shotTarget = FindPlayerCoors();
+					// some inaccuracy
+					shotTarget.x += ((CGeneral::GetRandomNumber() & 0xFF) - 128) / 50.0f;
+					shotTarget.y += ((CGeneral::GetRandomNumber() & 0xFF) - 128) / 50.0f;
+					CVector direction = FindPlayerCoors() - GetPosition();
+					direction.Normalise();
+					shotTarget += 3.0f * direction;
+					CVector shotSource = GetPosition();
+					shotSource += 3.0f * direction;
+					FireOneInstantHitRound(&shotSource, &shotTarget, 20);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
+					m_nLastShotTime = CTimer::GetTimeInMilliseconds();
+				}
 			}
 		}
 	}
@@ -590,7 +602,12 @@ CHeli::PreRender(void)
 			break;
 		}
 		RwRGBA col = { r, g, b, 32 };
+#ifdef FIX_BUGS
+		pos.z = m_fHeliDustZ[frm];
+#else
+		// What the hell is the point of this?
 		pos.z = m_fHeliDustZ[(i - (i&3))/4];	// advance every 4 iterations, why not just /4?
+#endif
 		if(pos.z > -200.0f && GetPosition().z - pos.z < 20.0f)
 			CParticle::AddParticle(PARTICLE_HELI_DUST, pos, dir, nil, 0.0f, col);
 		i++;
@@ -817,7 +834,11 @@ CHeli::UpdateHelis(void)
 	int i, j;
 
 	// Spawn new police helis
-	int numHelisRequired = FindPlayerPed()->m_pWanted->NumOfHelisRequired();
+	int numHelisRequired = 
+#ifdef FIX_BUGS
+		CReplay::IsPlayingBack() ? 0 :
+#endif
+		FindPlayerPed()->m_pWanted->NumOfHelisRequired();
 	if(CStreaming::HasModelLoaded(MI_CHOPPER) && CTimer::GetTimeInMilliseconds() > TestForNewRandomHelisTimer){
 		// Spawn a police heli
 		TestForNewRandomHelisTimer = CTimer::GetTimeInMilliseconds() + 15000;
@@ -996,7 +1017,7 @@ CHeli::TestBulletCollision(CVector *line0, CVector *line1, CVector *bulletPos, i
 			float distToHeli = (pHelis[i]->GetPosition() - *line0).Magnitude();
 			CVector line = (*line1 - *line0);
 			float lineLength = line.Magnitude();
-			*bulletPos = *line0 + line*max(1.0f, distToHeli-5.0f);
+			*bulletPos = *line0 + line*Max(1.0f, distToHeli-5.0f);
 
 			pHelis[i]->m_nBulletDamage += damage;
 
@@ -1035,24 +1056,3 @@ void CHeli::MakeCatalinaHeliFlyAway(void) { pHelis[HELI_CATALINA]->m_pathState =
 bool CHeli::HasCatalinaBeenShotDown(void) { return CatalinaHasBeenShotDown; }
 
 void CHeli::ActivateHeli(bool activate) { ScriptHeliOn = activate; }
-
-#include <new>
-
-class CHeli_ : public CHeli
-{
-public:
-	void ctor(int32 id, uint8 CreatedBy) { ::new (this) CHeli(id, CreatedBy); }
-	void dtor(void) { CHeli::~CHeli(); }
-};
-
-STARTPATCHES
-	InjectHook(0x547220, &CHeli_::ctor, PATCH_JUMP);
-	InjectHook(0x5474A0, &CHeli_::dtor, PATCH_JUMP);
-	InjectHook(0x54AE50, &CHeli::SpawnFlyingComponent, PATCH_JUMP);
-	InjectHook(0x549970, CHeli::InitHelis, PATCH_JUMP);
-	InjectHook(0x5499F0, CHeli::UpdateHelis, PATCH_JUMP);
-	InjectHook(0x54AE10, CHeli::SpecialHeliPreRender, PATCH_JUMP);
-	InjectHook(0x54AA30, CHeli::TestRocketCollision, PATCH_JUMP);
-	InjectHook(0x54AB30, CHeli::TestBulletCollision, PATCH_JUMP);
-	InjectHook(0x54A640, GenerateHeli, PATCH_JUMP);
-ENDPATCHES

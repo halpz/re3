@@ -10,8 +10,8 @@ struct TxdDef {
 
 class CTxdStore
 {
-	static CPool<TxdDef,TxdDef> *&ms_pTxdPool;
-	static RwTexDictionary *&ms_pStoredTxd;
+	static CPool<TxdDef,TxdDef> *ms_pTxdPool;
+	static RwTexDictionary *ms_pStoredTxd;
 public:
 	static void Initialise(void);
 	static void Shutdown(void);

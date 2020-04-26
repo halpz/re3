@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Pools.h"
 #include "ModelIndices.h"
 #include "World.h"
@@ -11,7 +11,6 @@
 
 int32 CEventList::ms_nFirstFreeSlotIndex;
 CEvent gaEvent[NUMEVENTS];
-//CEvent *gaEvent = (CEvent*)0x6EF830;
 
 enum
 {
@@ -228,14 +227,3 @@ CEventList::ReportCrimeForEvent(eEventType type, int32 crimeId, bool copsDontCar
 		FindPlayerPed()->SetWantedLevelNoDrop(2);
 
 }
-
-STARTPATCHES
-	InjectHook(0x475B60, CEventList::Initialise, PATCH_JUMP);
-	InjectHook(0x475BE0, CEventList::Update, PATCH_JUMP);
-	InjectHook(0x475C50, (void (*)(eEventType,eEventEntity,CEntity *,CPed *,int32))CEventList::RegisterEvent, PATCH_JUMP);
-	InjectHook(0x475E10, (void (*)(eEventType,CVector,int32))CEventList::RegisterEvent, PATCH_JUMP);
-	InjectHook(0x475F40, CEventList::GetEvent, PATCH_JUMP);
-	InjectHook(0x475F70, CEventList::ClearEvent, PATCH_JUMP);
-	InjectHook(0x475F90, CEventList::FindClosestEvent, PATCH_JUMP);
-	InjectHook(0x476070, CEventList::ReportCrimeForEvent, PATCH_JUMP);
-ENDPATCHES

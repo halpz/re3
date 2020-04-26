@@ -1,9 +1,9 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "main.h"
 #include "PedRoutes.h"
 
-CRouteNode (&gaRoutes)[NUMPEDROUTES] = *(CRouteNode(*)[NUMPEDROUTES]) * (uintptr*)0x62E090;
+CRouteNode gaRoutes[NUMPEDROUTES];
 
 void
 CRouteNode::Initialise()

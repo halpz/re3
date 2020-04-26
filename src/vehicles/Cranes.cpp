@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Cranes.h"
 
 #include "Camera.h"
@@ -213,10 +213,10 @@ void CCrane::Update(void)
 				CTimer::GetTimeInMilliseconds() > m_nTimeForNextCheck) {
 				CWorld::AdvanceCurrentScanCode();
 #ifdef FIX_BUGS
-				int xstart = max(0, CWorld::GetSectorIndexX(m_fPickupX1));
-				int xend = min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(m_fPickupX2));
-				int ystart = max(0, CWorld::GetSectorIndexY(m_fPickupY1));
-				int yend = min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(m_fPickupY2));
+				int xstart = Max(0, CWorld::GetSectorIndexX(m_fPickupX1));
+				int xend = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(m_fPickupX2));
+				int ystart = Max(0, CWorld::GetSectorIndexY(m_fPickupY1));
+				int yend = Min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(m_fPickupY2));
 #else
 				int xstart = CWorld::GetSectorIndexX(m_fPickupX1);
 				int xend = CWorld::GetSectorIndexX(m_fPickupX2);

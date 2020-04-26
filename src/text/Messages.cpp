@@ -1,8 +1,5 @@
-#define DIRECTINPUT_VERSION 0x0800
-#include "dinput.h"
-
 #include "common.h"
-#include "patcher.h"
+
 #include "Messages.h"
 #include "RwHelper.h"
 #include "Hud.h"
@@ -14,9 +11,9 @@
 
 #include "Font.h"
 
-tMessage(&CMessages::BriefMessages)[NUMBRIEFMESSAGES] = *(tMessage(*)[NUMBRIEFMESSAGES])*(uintptr*)0x8786E0;
-tPreviousBrief(&CMessages::PreviousBriefs)[NUMPREVIOUSBRIEFS] = *(tPreviousBrief(*)[NUMPREVIOUSBRIEFS])*(uintptr*)0x713C08;
-tBigMessage(&CMessages::BIGMessages)[NUMBIGMESSAGES] = *(tBigMessage(*)[NUMBIGMESSAGES])*(uintptr*)0x773628;
+tMessage CMessages::BriefMessages[NUMBRIEFMESSAGES];
+tPreviousBrief CMessages::PreviousBriefs[NUMPREVIOUSBRIEFS];
+tBigMessage CMessages::BIGMessages[NUMBIGMESSAGES];
 char CMessages::PreviousMissionTitle[16]; // unused
 
 void
@@ -819,33 +816,3 @@ CMessages::ClearAllMessagesDisplayedByGame()
 	CHud::GetRidOfAllHudMessages();
 	CUserDisplay::Pager.ClearMessages();
 }
-
-STARTPATCHES
-	InjectHook(0x529310, CMessages::Init, PATCH_JUMP);
-	InjectHook(0x529490, CMessages::GetWideStringLength, PATCH_JUMP);
-	InjectHook(0x5294B0, CMessages::WideStringCopy, PATCH_JUMP);
-	InjectHook(0x529510, CMessages::WideStringCompare, PATCH_JUMP);
-	InjectHook(0x529580, CMessages::Process, PATCH_JUMP);
-	InjectHook(0x529800, CMessages::Display, PATCH_JUMP);
-	InjectHook(0x529900, CMessages::AddMessage, PATCH_JUMP);
-	InjectHook(0x529A10, CMessages::AddMessageJumpQ, PATCH_JUMP);
-	InjectHook(0x529AF0, CMessages::AddMessageSoon, PATCH_JUMP);
-	InjectHook(0x529CE0, CMessages::ClearMessages, PATCH_JUMP);
-	InjectHook(0x529E00, CMessages::ClearSmallMessagesOnly, PATCH_JUMP);
-	InjectHook(0x529EB0, CMessages::AddBigMessage, PATCH_JUMP);
-	InjectHook(0x529F60, CMessages::AddBigMessageQ, PATCH_JUMP);
-	InjectHook(0x52A040, CMessages::AddToPreviousBriefArray, PATCH_JUMP);
-	InjectHook(0x52A1A0, CMessages::InsertNumberInString, PATCH_JUMP);
-	InjectHook(0x52A300, CMessages::InsertStringInString, PATCH_JUMP);
-	InjectHook(0x52A490, CMessages::InsertPlayerControlKeysInString, PATCH_JUMP);
-	InjectHook(0x52A850, CMessages::AddMessageWithNumber, PATCH_JUMP);
-	InjectHook(0x52A9A0, CMessages::AddMessageJumpQWithNumber, PATCH_JUMP);
-	InjectHook(0x52AAC0, CMessages::AddMessageSoonWithNumber, PATCH_JUMP);
-	InjectHook(0x52AD10, CMessages::AddBigMessageWithNumber, PATCH_JUMP);
-	InjectHook(0x52AE00, CMessages::AddBigMessageWithNumberQ, PATCH_JUMP);
-	InjectHook(0x52AF30, CMessages::AddMessageWithString, PATCH_JUMP);
-	InjectHook(0x52B050, CMessages::AddMessageJumpQWithString, PATCH_JUMP);
-	InjectHook(0x52B140, CMessages::ClearThisPrint, PATCH_JUMP);
-	InjectHook(0x52B3C0, CMessages::ClearThisBigPrint, PATCH_JUMP);
-	InjectHook(0x52B670, CMessages::ClearAllMessagesDisplayedByGame, PATCH_JUMP);
-ENDPATCHES

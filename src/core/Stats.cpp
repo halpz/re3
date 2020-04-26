@@ -1,62 +1,62 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Stats.h"
 #include "Text.h"
 #include "World.h"
 
-int32 &CStats::DaysPassed = *(int32*)0x8F2BB8;
-int32 &CStats::HeadsPopped = *(int32*)0x8F647C;
-int32& CStats::CommercialPassed = *(int32*)0x8F4334;
-int32& CStats::IndustrialPassed = *(int32*)0x8E2A68;
-int32& CStats::SuburbanPassed = *(int32*)0x8F2740;
-int32 &CStats::NumberKillFrenziesPassed = *(int32*)0x8E287C;
-int32 &CStats::PeopleKilledByOthers = *(int32*)0x8E2C50;
-int32 &CStats::HelisDestroyed = *(int32*)0x8E2A64;
-int32(&CStats::PedsKilledOfThisType)[NUM_PEDTYPES] = *(int32(*)[NUM_PEDTYPES]) * (uintptr*)0x880DBC;
-int32 &CStats::TimesDied = *(int32*)0x8E2BDC;
-int32 &CStats::TimesArrested = *(int32*)0x8E2BEC;
-int32 &CStats::KillsSinceLastCheckpoint = *(int32*)0x8F2C8C;
-int32& CStats::DistanceTravelledInVehicle = *(int32*)0x940574;
-int32& CStats::DistanceTravelledOnFoot = *(int32*)0x941518;
-int32 &CStats::ProgressMade = *(int32*)0x8F6224;
-int32 &CStats::TotalProgressInGame = *(int32*)0x885B2C;
-int32& CStats::CarsExploded = *(int32*)0x941288;
-int32& CStats::PeopleKilledByPlayer = *(int32*)0x8F1B7C;
-float &CStats::MaximumJumpDistance = *(float*)0x8F2BDC;
-float &CStats::MaximumJumpHeight = *(float*)0x940564;
-int32 &CStats::MaximumJumpFlips = *(int32*)0x8F2524;
-int32 &CStats::MaximumJumpSpins = *(int32*)0x8F29B0;
-int32 &CStats::BestStuntJump = *(int32*)0x885B50;
-int32 &CStats::NumberOfUniqueJumpsFound = *(int32*)0x885B74;
-int32 &CStats::TotalNumberOfUniqueJumps = *(int32*)0x8E2DC0;
-int32 &CStats::PassengersDroppedOffWithTaxi = *(int32*)0x940724;
-int32 &CStats::MoneyMadeWithTaxi = *(int32*)0x941544;
-int32 &CStats::MissionsGiven = *(int32*)0x9430E8;
-int32 &CStats::MissionsPassed = *(int32*)0x940768;
-char(&CStats::LastMissionPassedName)[8] = *(char(*)[8])*(uintptr*)0x70D828;
-int32 &CStats::TotalLegitimateKills = *(int32*)0x8F6004;
-int32 &CStats::ElBurroTime = *(int32*)0x8E2A6C;
-int32& CStats::Record4x4One = *(int32*)0x940570;
-int32& CStats::Record4x4Two = *(int32*)0x94058C;
-int32& CStats::Record4x4Three = *(int32*)0x880FA8;
-int32& CStats::Record4x4Mayhem = *(int32*)0x885B70;
-int32& CStats::LivesSavedWithAmbulance = *(int32*)0x8F57E0;
-int32& CStats::CriminalsCaught = *(int32*)0x8F2518;
-int32& CStats::HighestLevelAmbulanceMission = *(int32*)0x8F2A04;
-int32& CStats::FiresExtinguished = *(int32*)0x8F5FEC;
-int32& CStats::LongestFlightInDodo = *(int32*)0x8F5FE4;
-int32& CStats::TimeTakenDefuseMission = *(int32*)0x880E24;
-int32& CStats::TotalNumberKillFrenzies = *(int32*)0x8E2884;
-int32& CStats::TotalNumberMissions = *(int32*)0x8E2820;
-int32& CStats::RoundsFiredByPlayer = *(int32*)0x8E2BE8;
-int32& CStats::KgsOfExplosivesUsed = *(int32*)0x8F2510;
-int32& CStats::InstantHitsFiredByPlayer = *(int32*)0x943070;
-int32& CStats::InstantHitsHitByPlayer = *(int32*)0x95CB8C;
-int32& CStats::BestTimeBombDefusal = *(int32*)0x880E24;
-int32& CStats::mmRain = *(int32*)0x8F2C98;
-int32& CStats::CarsCrushed = *(int32*)0x943050;
-int32(&CStats::FastestTimes)[CStats::TOTAL_FASTEST_TIMES] = *(int32(*)[CStats::TOTAL_FASTEST_TIMES])*(uintptr*)0x6E9128;
-int32(&CStats::HighestScores)[CStats::TOTAL_HIGHEST_SCORES] = *(int32(*)[CStats::TOTAL_HIGHEST_SCORES]) * (uintptr*)0x8622B0;
+int32 CStats::DaysPassed;
+int32 CStats::HeadsPopped;
+int32 CStats::CommercialPassed;
+int32 CStats::IndustrialPassed;
+int32 CStats::SuburbanPassed;
+int32 CStats::NumberKillFrenziesPassed;
+int32 CStats::PeopleKilledByOthers;
+int32 CStats::HelisDestroyed;
+int32 CStats::PedsKilledOfThisType[NUM_PEDTYPES];
+int32 CStats::TimesDied;
+int32 CStats::TimesArrested;
+int32 CStats::KillsSinceLastCheckpoint;
+int32 CStats::DistanceTravelledInVehicle;
+int32 CStats::DistanceTravelledOnFoot;
+int32 CStats::ProgressMade;
+int32 CStats::TotalProgressInGame;
+int32 CStats::CarsExploded;
+int32 CStats::PeopleKilledByPlayer;
+float CStats::MaximumJumpDistance;
+float CStats::MaximumJumpHeight;
+int32 CStats::MaximumJumpFlips;
+int32 CStats::MaximumJumpSpins;
+int32 CStats::BestStuntJump;
+int32 CStats::NumberOfUniqueJumpsFound;
+int32 CStats::TotalNumberOfUniqueJumps;
+int32 CStats::PassengersDroppedOffWithTaxi;
+int32 CStats::MoneyMadeWithTaxi;
+int32 CStats::MissionsGiven;
+int32 CStats::MissionsPassed;
+char CStats::LastMissionPassedName[8];
+int32 CStats::TotalLegitimateKills;
+int32 CStats::ElBurroTime;
+int32 CStats::Record4x4One;
+int32 CStats::Record4x4Two;
+int32 CStats::Record4x4Three;
+int32 CStats::Record4x4Mayhem;
+int32 CStats::LivesSavedWithAmbulance;
+int32 CStats::CriminalsCaught;
+int32 CStats::HighestLevelAmbulanceMission;
+int32 CStats::FiresExtinguished;
+int32 CStats::LongestFlightInDodo;
+int32 CStats::TimeTakenDefuseMission;
+int32 CStats::TotalNumberKillFrenzies;
+int32 CStats::TotalNumberMissions;
+int32 CStats::RoundsFiredByPlayer;
+int32 CStats::KgsOfExplosivesUsed;
+int32 CStats::InstantHitsFiredByPlayer;
+int32 CStats::InstantHitsHitByPlayer;
+int32 CStats::BestTimeBombDefusal;
+int32 CStats::mmRain;
+int32 CStats::CarsCrushed;
+int32 CStats::FastestTimes[CStats::TOTAL_FASTEST_TIMES];
+int32 CStats::HighestScores[CStats::TOTAL_HIGHEST_SCORES];
 
 void CStats::Init()
 {
@@ -121,13 +121,13 @@ void CStats::RegisterFastestTime(int32 index, int32 time)
 	if (FastestTimes[index] == 0)
 		FastestTimes[index] = time;
 	else
-		FastestTimes[index] = min(FastestTimes[index], time);
+		FastestTimes[index] = Min(FastestTimes[index], time);
 }
 
 void CStats::RegisterHighestScore(int32 index, int32 score)
 {
 	assert(index >= 0 && index < TOTAL_HIGHEST_SCORES);
-	HighestScores[index] = max(HighestScores[index], score);
+	HighestScores[index] = Max(HighestScores[index], score);
 }
 
 void CStats::RegisterElBurroTime(int32 time)
@@ -167,7 +167,7 @@ void CStats::AnotherCriminalCaught()
 
 void CStats::RegisterLevelAmbulanceMission(int32 level)
 {
-	HighestLevelAmbulanceMission = max(HighestLevelAmbulanceMission, level);
+	HighestLevelAmbulanceMission = Max(HighestLevelAmbulanceMission, level);
 }
 
 void CStats::AnotherFireExtinguished()
@@ -177,7 +177,7 @@ void CStats::AnotherFireExtinguished()
 
 void CStats::RegisterLongestFlightInDodo(int32 time)
 {
-	LongestFlightInDodo = max(LongestFlightInDodo, time);
+	LongestFlightInDodo = Max(LongestFlightInDodo, time);
 }
 
 void CStats::RegisterTimeTakenDefuseMission(int32 time)
@@ -418,11 +418,3 @@ void CStats::LoadStats(uint8 *buf, uint32 size)
 	assert(buf - buf_start == size);
 #undef CopyFromBuf
 }
-
-STARTPATCHES
-	InjectHook(0x48C5A3, CStats::Init, PATCH_JUMP); // CGame::ReInitGameObjectVariables
-	InjectHook(0x4AB3E0, CStats::SaveStats, PATCH_JUMP);
-	InjectHook(0x4AB670, CStats::LoadStats, PATCH_JUMP);
-	InjectHook(0x4AB090, CStats::FindCriminalRatingString, PATCH_JUMP);
-	InjectHook(0x4AB2A0, CStats::FindCriminalRatingNumber, PATCH_JUMP);
-ENDPATCHES

@@ -48,4 +48,4 @@ public:
 	void RemoveScriptFire(int16 index);
 	void SetScriptFireAudio(int16 index, bool state);
 };
-extern CFireManager &gFireManager;
+extern CFireManager gFireManager;

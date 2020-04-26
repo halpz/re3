@@ -9,25 +9,26 @@ class CCutsceneHead;
 
 class CCutsceneMgr
 {
-	static bool &ms_running;
-	static CCutsceneObject *(&ms_pCutsceneObjects)[NUMCUTSCENEOBJECTS];
+	static bool ms_running;
+	static CCutsceneObject *ms_pCutsceneObjects[NUMCUTSCENEOBJECTS];
 	
-	static int32 &ms_numCutsceneObjs;
-	static bool &ms_loaded;
-	static bool &ms_animLoaded;
-	static bool &ms_useLodMultiplier;
+	static int32 ms_numCutsceneObjs;
+	static bool ms_loaded;
+	static bool ms_animLoaded;
+	static bool ms_useLodMultiplier;
 
-	static char(&ms_cutsceneName)[CUTSCENENAMESIZE];
-	static CAnimBlendAssocGroup &ms_cutsceneAssociations;
-	static CVector &ms_cutsceneOffset;
-	static float &ms_cutsceneTimer;
-	static bool &ms_cutsceneProcessing;
+	static char ms_cutsceneName[CUTSCENENAMESIZE];
+	static CAnimBlendAssocGroup ms_cutsceneAssociations;
+	static CVector ms_cutsceneOffset;
+	static float ms_cutsceneTimer;
+	static bool ms_cutsceneProcessing;
 public:
-	static CDirectory *&ms_pCutsceneDir;
-	static uint32 &ms_cutsceneLoadStatus;
+	static CDirectory *ms_pCutsceneDir;
+	static uint32 ms_cutsceneLoadStatus;
 
 	static void StartCutsceneProcessing() { ms_cutsceneProcessing = true; }
 	static bool IsRunning(void) { return ms_running; }
+	static bool HasLoaded(void) { return ms_loaded; }
 	static bool IsCutsceneProcessing(void) { return ms_cutsceneProcessing; }
 	static bool UseLodMultiplier(void) { return ms_useLodMultiplier; }
 	static CCutsceneObject* GetCutsceneObject(int id) { return ms_pCutsceneObjects[id]; }

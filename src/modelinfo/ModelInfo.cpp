@@ -1,15 +1,12 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "TempColModels.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 
-CBaseModelInfo **CModelInfo::ms_modelInfoPtrs = (CBaseModelInfo**)0x83D408;
+CBaseModelInfo *CModelInfo::ms_modelInfoPtrs[MODELINFOSIZE];
 
-//CStore<CSimpleModelInfo, SIMPLEMODELSIZE> &CModelInfo::ms_simpleModelStore = *(CStore<CSimpleModelInfo, SIMPLEMODELSIZE>*)0x885BB4;
-//CStore<CTimeModelInfo, TIMEMODELSIZE> &CModelInfo::ms_timeModelStore = *(CStore<CTimeModelInfo, TIMEMODELSIZE>*)0x94076C;
-//CStore<C2dEffect, TWODFXSIZE> &CModelInfo::ms_2dEffectStore = *(CStore<C2dEffect, TWODFXSIZE>*)0x9434F8;
 CStore<CSimpleModelInfo, SIMPLEMODELSIZE> CModelInfo::ms_simpleModelStore;
 CStore<CMloModelInfo, MLOMODELSIZE> CModelInfo::ms_mloModelStore;
 CStore<CInstance, MLOINSTANCESIZE> CModelInfo::ms_mloInstanceStore;
@@ -251,15 +248,3 @@ CModelInfo::ReInit2dEffects()
 			ms_modelInfoPtrs[i]->Init2dEffects();
 	}
 }
-
-STARTPATCHES
-	InjectHook(0x50B310, CModelInfo::Initialise, PATCH_JUMP);
-	InjectHook(0x50B5B0, CModelInfo::ShutDown, PATCH_JUMP);
-	InjectHook(0x50B920, CModelInfo::AddSimpleModel, PATCH_JUMP);
-	InjectHook(0x50B9C0, CModelInfo::AddTimeModel, PATCH_JUMP);
-	InjectHook(0x50BA10, CModelInfo::AddClumpModel, PATCH_JUMP);
-	InjectHook(0x50BAD0, CModelInfo::AddPedModel, PATCH_JUMP);
-	InjectHook(0x50BA60, CModelInfo::AddVehicleModel, PATCH_JUMP);
-	InjectHook(0x50B860, (CBaseModelInfo *(*)(const char*, int*))CModelInfo::GetModelInfo, PATCH_JUMP);
-	InjectHook(0x50BBC0, CModelInfo::RemoveColModelsFromOtherLevels, PATCH_JUMP);
-ENDPATCHES

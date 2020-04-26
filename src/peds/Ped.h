@@ -1,12 +1,14 @@
 #pragma once
 
+#include "RwHelper.h"
+#include "AnimManager.h"
+#include "Crime.h"
+#include "EventList.h"
+#include "PedIK.h"
+#include "PedStats.h"
 #include "Physical.h"
 #include "Weapon.h"
-#include "PedStats.h"
-#include "PedIK.h"
-#include "AnimManager.h"
 #include "WeaponInfo.h"
-#include "EventList.h"
 
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
@@ -17,7 +19,6 @@ class CObject;
 class CFire;
 struct AnimBlendFrameData;
 class CAnimBlendAssociation;
-enum eCrimeType;
 
 struct PedAudioData
 {
@@ -301,95 +302,94 @@ public:
 	float m_fCollisionSpeed;
 
 	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
-	uint8 bIsStanding : 1;
-	uint8 m_ped_flagA2 : 1;	// bWasStanding?
-	uint8 bIsAttacking : 1;		// doesn't reset after fist fight
-	uint8 bIsPointingGunAt : 1;
-	uint8 bIsLooking : 1;
-	uint8 bKeepTryingToLook : 1; // if we can't look somewhere due to unreachable angles
-	uint8 bIsRestoringLook : 1;
-	uint8 bIsAimingGun : 1;
+	uint32 bIsStanding : 1;
+	uint32 m_ped_flagA2 : 1;	// bWasStanding?
+	uint32 bIsAttacking : 1;		// doesn't reset after fist fight
+	uint32 bIsPointingGunAt : 1;
+	uint32 bIsLooking : 1;
+	uint32 bKeepTryingToLook : 1; // if we can't look somewhere due to unreachable angles
+	uint32 bIsRestoringLook : 1;
+	uint32 bIsAimingGun : 1;
 
-	uint8 bIsRestoringGun : 1;
-	uint8 bCanPointGunAtTarget : 1;
-	uint8 bIsTalking : 1;
-	uint8 bIsInTheAir : 1;
-	uint8 bIsLanding : 1;
-	uint8 bIsRunning : 1; // on some conditions
-	uint8 bHitSomethingLastFrame : 1;
-	uint8 bVehEnterDoorIsBlocked : 1; // because someone else enters/exits from there
+	uint32 bIsRestoringGun : 1;
+	uint32 bCanPointGunAtTarget : 1;
+	uint32 bIsTalking : 1;
+	uint32 bIsInTheAir : 1;
+	uint32 bIsLanding : 1;
+	uint32 bIsRunning : 1; // on some conditions
+	uint32 bHitSomethingLastFrame : 1;
+	uint32 bVehEnterDoorIsBlocked : 1; // because someone else enters/exits from there
 
-	uint8 bCanPedEnterSeekedCar : 1;
-	uint8 bRespondsToThreats : 1;
-	uint8 bRenderPedInCar : 1;
-	uint8 bChangedSeat : 1;
-	uint8 bUpdateAnimHeading : 1;
-	uint8 bBodyPartJustCameOff : 1;
-	uint8 bIsShooting : 1;
-	uint8 bFindNewNodeAfterStateRestore : 1;
+	uint32 bCanPedEnterSeekedCar : 1;
+	uint32 bRespondsToThreats : 1;
+	uint32 bRenderPedInCar : 1;
+	uint32 bChangedSeat : 1;
+	uint32 bUpdateAnimHeading : 1;
+	uint32 bBodyPartJustCameOff : 1;
+	uint32 bIsShooting : 1;
+	uint32 bFindNewNodeAfterStateRestore : 1;
 
-	uint8 bHasACamera : 1; // does ped possess a camera to document accidents involves fire/explosion
-	uint8 bGonnaInvestigateEvent : 1;
-	uint8 bPedIsBleeding : 1;
-	uint8 bStopAndShoot : 1; // Ped cannot reach target to attack with fist, need to use gun
-	uint8 bIsPedDieAnimPlaying : 1;
-	uint8 bUsePedNodeSeek : 1;
-	uint8 bObjectiveCompleted : 1;
-	uint8 bScriptObjectiveCompleted : 1;
+	uint32 bHasACamera : 1; // does ped possess a camera to document accidents involves fire/explosion
+	uint32 bGonnaInvestigateEvent : 1;
+	uint32 bPedIsBleeding : 1;
+	uint32 bStopAndShoot : 1; // Ped cannot reach target to attack with fist, need to use gun
+	uint32 bIsPedDieAnimPlaying : 1;
+	uint32 bUsePedNodeSeek : 1;
+	uint32 bObjectiveCompleted : 1;
+	uint32 bScriptObjectiveCompleted : 1;
 
-	uint8 bKindaStayInSamePlace : 1;
-	uint8 bBeingChasedByPolice : 1; // Unused VC leftover. Should've been set for criminal/gang members
-	uint8 bNotAllowedToDuck : 1;
-	uint8 bCrouchWhenShooting : 1;
-	uint8 bIsDucking : 1;
-	uint8 bGetUpAnimStarted : 1;
-	uint8 bDoBloodyFootprints : 1;
-	uint8 bFleeAfterExitingCar : 1;
+	uint32 bKindaStayInSamePlace : 1;
+	uint32 bBeingChasedByPolice : 1; // Unused VC leftover. Should've been set for criminal/gang members
+	uint32 bNotAllowedToDuck : 1;
+	uint32 bCrouchWhenShooting : 1;
+	uint32 bIsDucking : 1;
+	uint32 bGetUpAnimStarted : 1;
+	uint32 bDoBloodyFootprints : 1;
+	uint32 bFleeAfterExitingCar : 1;
 
-	uint8 bWanderPathAfterExitingCar : 1;
-	uint8 bIsLeader : 1;
-	uint8 bDontDragMeOutCar : 1; // unfinished feature
-	uint8 m_ped_flagF8 : 1;
-	uint8 bWillBeQuickJacked : 1;
-	uint8 bCancelEnteringCar : 1; // after door is opened or couldn't be opened due to it's locked
-	uint8 bObstacleShowedUpDuringKillObjective : 1;
-	uint8 bDuckAndCover : 1;
+	uint32 bWanderPathAfterExitingCar : 1;
+	uint32 bIsLeader : 1;
+	uint32 bDontDragMeOutCar : 1; // unfinished feature
+	uint32 m_ped_flagF8 : 1;
+	uint32 bWillBeQuickJacked : 1;
+	uint32 bCancelEnteringCar : 1; // after door is opened or couldn't be opened due to it's locked
+	uint32 bObstacleShowedUpDuringKillObjective : 1;
+	uint32 bDuckAndCover : 1;
 
-	uint8 bStillOnValidPoly : 1; // set if the polygon the ped is on is still valid for collision
-	uint8 bAllowMedicsToReviveMe : 1;
-	uint8 bResetWalkAnims : 1;
-	uint8 bStartWanderPathOnFoot : 1; // exits the car if he's in it, reset after path found
-	uint8 bOnBoat : 1; // not just driver, may be just standing
-	uint8 bBusJacked : 1;
-	uint8 bGonnaKillTheCarJacker : 1; // only set when car is jacked from right door and when arrested by police
-	uint8 bFadeOut : 1;
+	uint32 bStillOnValidPoly : 1; // set if the polygon the ped is on is still valid for collision
+	uint32 bAllowMedicsToReviveMe : 1;
+	uint32 bResetWalkAnims : 1;
+	uint32 bStartWanderPathOnFoot : 1; // exits the car if he's in it, reset after path found
+	uint32 bOnBoat : 1; // not just driver, may be just standing
+	uint32 bBusJacked : 1;
+	uint32 bGonnaKillTheCarJacker : 1; // only set when car is jacked from right door and when arrested by police
+	uint32 bFadeOut : 1;
 
-	uint8 bKnockedUpIntoAir : 1; // has ped been knocked up into the air by a car collision
-	uint8 bHitSteepSlope : 1; // has ped collided/is standing on a steep slope (surface type)
-	uint8 bCullExtraFarAway : 1; // special ped only gets culled if it's extra far away (for roadblocks)
-	uint8 bClearObjective : 1;
-	uint8 bTryingToReachDryLand : 1; // has ped just exited boat and trying to get to dry land
-	uint8 bCollidedWithMyVehicle : 1;
-	uint8 bRichFromMugging : 1; // ped has lots of cash cause they've been mugging people
-	uint8 bChrisCriminal : 1; // Is a criminal as killed during Chris' police mission (should be counted as such)
+	uint32 bKnockedUpIntoAir : 1; // has ped been knocked up into the air by a car collision
+	uint32 bHitSteepSlope : 1; // has ped collided/is standing on a steep slope (surface type)
+	uint32 bCullExtraFarAway : 1; // special ped only gets culled if it's extra far away (for roadblocks)
+	uint32 bClearObjective : 1;
+	uint32 bTryingToReachDryLand : 1; // has ped just exited boat and trying to get to dry land
+	uint32 bCollidedWithMyVehicle : 1;
+	uint32 bRichFromMugging : 1; // ped has lots of cash cause they've been mugging people
+	uint32 bChrisCriminal : 1; // Is a criminal as killed during Chris' police mission (should be counted as such)
 
-	uint8 bShakeFist : 1;  // test shake hand at look entity
-	uint8 bNoCriticalHits : 1; // if set, limbs won't came off
-	uint8 bVehExitWillBeInstant : 1;
-	uint8 bHasAlreadyBeenRecorded : 1;
-	uint8 bFallenDown : 1;
+	uint32 bShakeFist : 1;  // test shake hand at look entity
+	uint32 bNoCriticalHits : 1; // if set, limbs won't came off
+	uint32 bVehExitWillBeInstant : 1;
+	uint32 bHasAlreadyBeenRecorded : 1;
+	uint32 bFallenDown : 1;
 #ifdef VC_PED_PORTS
-	uint8 bSomeVCflag1 : 1;
-#else
-	uint8 m_ped_flagI20 : 1;
+	uint32 bSomeVCflag1 : 1;
 #endif
-	uint8 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
-	uint8 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
+#ifdef PED_SKIN
+	uint32 bDontAcceptIKLookAts : 1;	// TODO: find uses of this
+#endif
+	// our own flags
+	uint32 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
+	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 
-	uint8 stuff10[3];
 	uint8 CharCreatedBy;
-	uint8 field_161;
-	uint8 pad_162[2];
 	eObjective m_objective;
 	eObjective m_prevObjective;
 	CPed *m_pedInObjective;
@@ -404,6 +404,10 @@ public:
 	CEntity* m_pEventEntity;
 	float m_fAngleToEvent;
 	AnimBlendFrameData *m_pFrames[PED_NODE_MAX];
+#ifdef PED_SKIN
+	// stored inside the clump with non-skin ped
+	RpAtomic *m_pWeaponModel;
+#endif
 	AssocGroupId m_animGroup;
 	CAnimBlendAssociation *m_pVehicleAnim;
 	CVector2D m_vecAnimMoveDelta;
@@ -424,8 +428,6 @@ public:
 	uint16 m_nPathNodes;
 	int16 m_nCurPathNode;
 	int8 m_nPathDir;
-private:
-	int8 _pad2B5[3];
 public:
 	CPathNode *m_pLastPathNode;
 	CPathNode *m_pNextPathNode;
@@ -436,12 +438,11 @@ public:
 	int16 m_routePointsPassed;
 	int16 m_routeType;	// See PedRouteType
 	int16 m_routePointsBeingPassed;
-	uint16 field_2D2;
 	CVector2D m_moved;
 	float m_fRotationCur;
 	float m_fRotationDest;
 	float m_headingRate;
-	uint16 m_vehEnterType;	// TODO: this is more like a door, not a type
+	uint16 m_vehEnterType;
 	int16 m_walkAroundType;
 	CPhysical *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;
@@ -450,10 +451,8 @@ public:
 	CEntity *m_pSeekTarget;
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
-	uint8 pad_315[3];
 	float m_distanceToCountSeekDone;
 	bool bRunningToPhone;
-	uint8 field_31D;
 	int16 m_phoneId;
 	eCrimeType m_crimeToReportOnPhone;
 	uint32 m_phoneTalkTimer;
@@ -468,7 +467,6 @@ public:
 	uint32 m_collidingThingTimer;
 	CEntity *m_pCollidingEntity;
 	uint8 m_stateUnused;
-	uint8 pad_351[3];
 	uint32 m_timerUnused;
 	CVector2D *m_wanderRangeBounds;	// array with 2 CVector2D (actually unused CRange2D class) - unused
 	CWeapon m_weapons[WEAPONTYPE_TOTAL_INVENTORY_WEAPONS];
@@ -483,7 +481,6 @@ public:
 	uint8 m_fightButtonPressure;
 	FightState m_fightState;
 	bool m_takeAStepAfterAttack;
-	uint8 pad_4B3;
 	CFire *m_pFire;
 	CEntity *m_pLookTarget;
 	float m_fLookDirection;
@@ -502,11 +499,9 @@ public:
 	uint8 m_panicCounter;
 	bool m_deadBleeding;
 	int8 m_bodyPartBleeding;		// PedNode, but -1 if there isn't
-	uint8 m_field_4F3;
 	CPed *m_nearPeds[10];
 	uint16 m_numNearPeds;
 	int8 m_lastWepDam;
-	uint8 pad_51F;
 	uint32 m_lastSoundStart;
 	uint32 m_soundStart;
 	uint16 m_lastQueuedSound;
@@ -742,7 +737,6 @@ public:
 	static void PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 
-	// functions that I see unnecessary to hook
 	bool IsPlayer(void);
 	bool UseGroundColModel(void);
 	bool CanSetPedState(void);
@@ -792,11 +786,15 @@ public:
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
-	RwFrame *GetNodeFrame(int nodeId) { return m_pFrames[nodeId]->frame; }
 
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) { m_nPedState = state; }
+	bool Dead(void) { return m_nPedState == PED_DEAD; }
+	bool Dying(void) { return m_nPedState == PED_DIE; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	bool OnGround(void) { return m_nPedState == PED_FALL || m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	
+	bool Driving(void) { return m_nPedState == PED_DRIVING; }
 	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
 	bool EnteringCar(void) { return m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK; }
 
@@ -822,15 +820,53 @@ public:
 			SetMoveState(PEDMOVE_WALK);
 	}
 
+	// Using this to abstract nodes of skinned and non-skinned meshes
+	CVector GetNodePosition(int32 node)
+	{
+#ifdef PED_SKIN
+		if(IsClumpSkinned(GetClump())){
+			RwV3d pos = { 0.0f, 0.0f, 0.0f };
+			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+			int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
+			RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
+			// this is just stupid
+			//RwV3dTransformPoints(&pos, &pos, 1, &mats[idx]);
+			pos = mats[idx].pos;
+			return pos;
+		}else
+#endif
+		{
+			RwMatrix mat;
+			CPedIK::GetWorldMatrix(m_pFrames[node]->frame, &mat);
+			return mat.pos;
+		}
+	}
+	void TransformToNode(CVector &pos, int32 node)
+	{
+#ifdef PED_SKIN
+		if(IsClumpSkinned(GetClump())){
+			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+			int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
+			RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
+			RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, &mats[idx]);
+		}else
+#endif
+		{
+			RwFrame *frame;
+			for (frame = m_pFrames[node]->frame; frame; frame = RwFrameGetParent(frame))
+				RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, RwFrameGetMatrix(frame));
+		}
+	}
+
 	// set by 0482:set_threat_reaction_range_multiplier opcode
-	static uint16 &nThreatReactionRangeMultiplier;
+	static uint16 nThreatReactionRangeMultiplier;
 
 	// set by 0481:set_enter_car_range_multiplier opcode
-	static uint16 &nEnterCarRangeMultiplier;
+	static uint16 nEnterCarRangeMultiplier;
 
-	static bool &bNastyLimbsCheat;
-	static bool &bPedCheat2;
-	static bool &bPedCheat3;
+	static bool bNastyLimbsCheat;
+	static bool bPedCheat2;
+	static bool bPedCheat3;
 	static CVector2D ms_vec2DFleePosition;
 
 #ifdef TOGGLEABLE_BETA_FEATURES
@@ -842,6 +878,10 @@ public:
 	// Mobile things
 	static void SwitchDebugDisplay(void);
 	void DebugRenderOnePedText(void);
+#endif
+
+#ifdef PED_SKIN
+	void renderLimb(int node);
 #endif
 };
 
@@ -856,6 +896,7 @@ public:
 
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 
+#ifndef PED_SKIN
 static_assert(offsetof(CPed, m_nPedState) == 0x224, "CPed: error");
 static_assert(offsetof(CPed, m_pCurSurface) == 0x2FC, "CPed: error");
 static_assert(offsetof(CPed, m_pMyVehicle) == 0x310, "CPed: error");
@@ -868,3 +909,4 @@ static_assert(offsetof(CPed, m_bodyPartBleeding) == 0x4F2, "CPed: error");
 static_assert(offsetof(CPed, m_pedInObjective) == 0x16C, "CPed: error");
 static_assert(offsetof(CPed, m_pEventEntity) == 0x19C, "CPed: error");
 static_assert(sizeof(CPed) == 0x53C, "CPed: error");
+#endif

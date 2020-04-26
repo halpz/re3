@@ -1,26 +1,22 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Sprite2d.h"
 #include "TxdStore.h"
 #include "Font.h"
 
-CFontDetails &CFont::Details = *(CFontDetails*)0x8F317C;
-int16 &CFont::NewLine = *(int16*)0x95CC94;
-#ifdef MORE_LANGUAGES
-CSprite2d CFont::Sprite[4];
-#else
-CSprite2d *CFont::Sprite = (CSprite2d*)0x95CC04;
-#endif
+CFontDetails CFont::Details;
+int16 CFont::NewLine;
+CSprite2d CFont::Sprite[MAX_FONTS];
 
 #ifdef MORE_LANGUAGES
 uint8 CFont::LanguageSet = FONT_LANGSET_EFIGS;
 int32 CFont::Slot = -1;
 #define JAP_TERMINATION (0x8000 | '~')
 
-int16 CFont::Size[2][3][193] = {
+int16 CFont::Size[LANGSET_MAX][MAX_FONTS][193] = {
 	{
 #else
-int16 CFont::Size[3][193] = {
+int16 CFont::Size[MAX_FONTS][193] = {
 #endif
 		{
 		13, 12, 31, 35, 23, 35, 31,  9, 14, 15, 25, 30, 11, 17, 13, 31,
@@ -117,6 +113,56 @@ int16 CFont::Size[3][193] = {
 			21, 32, 21, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
 			19, 19, 19, 11, 19, 19, 19, 19, 19, 19, 19, 19, 19,
 			19, 19, 19, 19, 19, 19, 19, 19, 19, 19 },
+	},
+
+	{
+		{
+			13, 12, 31, 35, 23, 35, 31, 9, 14, 15, 25, 30, 11, 17, 13, 31,
+				23, 16, 22, 21, 24, 23, 23, 20, 23, 22, 10, 35, 26, 26, 26, 26,
+				30, 26, 24, 23, 24, 22, 21, 24, 26, 10, 20, 26, 22, 29, 26, 25,
+				23, 25, 24, 24, 22, 25, 24, 29, 29, 23, 25, 37, 22, 37, 35, 37,
+				35, 21, 22, 21, 21, 22, 13, 22, 21, 10, 16, 22, 11, 32, 21, 21,
+				23, 22, 16, 20, 14, 21, 20, 30, 25, 21, 21, 33, 33, 33, 33, 35,
+				27, 27, 27, 27, 32, 24, 23, 23, 23, 23, 11, 11, 11, 11, 26, 26,
+				26, 26, 26, 26, 26, 25, 26, 21, 21, 21, 21, 32, 23, 22, 22, 22,
+				22, 11, 11, 11, 11, 22, 22, 22, 22, 22, 22, 22, 22, 26, 21, 24,
+				12, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+				26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 18, 26, 26,
+				26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+				20
+		},
+
+		{
+			13,  9, 21, 35, 23, 35, 35, 11, 35, 35, 25, 35, 11, 17, 13, 33,
+			28, 14, 22, 21, 24, 23, 23, 21, 23, 22, 10, 35, 13, 35, 13, 33,
+			5, 25, 22, 23, 24, 21, 21, 24, 24,  9, 20, 24, 21, 27, 25, 25,
+			22, 25, 23, 20, 23, 23, 23, 31, 23, 23, 23, 37, 33, 37, 35, 37,
+			35, 21, 19, 19, 21, 19, 17, 21, 21,  8, 17, 18, 14, 24, 21, 21,
+			20, 22, 19, 20, 20, 19, 20, 26, 21, 20, 21, 33, 33, 33, 33, 35,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			16
+		},
+
+		{
+			15, 14, 16, 25, 19, 26, 22, 11, 18, 18, 27, 26, 13, 19,  9, 27,
+			19, 18, 19, 19, 22, 19, 20, 18, 19, 20, 12, 32, 15, 32, 15, 35,
+			15, 19, 19, 19, 19, 19, 16, 19, 20,  9, 19, 20, 14, 29, 19, 20,
+			19, 19, 19, 19, 21, 19, 20, 32, 20, 19, 19, 33, 31, 39, 37, 39,
+			37, 21, 21, 21, 23, 21, 19, 23, 23, 10, 19, 20, 16, 26, 23, 23,
+			20, 20, 20, 22, 21, 22, 22, 26, 22, 22, 23, 35, 35, 35, 35, 37,
+			19, 19, 19, 19, 29, 19, 19, 19, 19, 19,  9,  9,  9,  9, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 30, 19, 19, 19, 19,
+			19, 10, 10, 10, 10, 19, 19, 19, 19, 19, 19, 19, 19, 19, 23, 35,
+			12, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 11, 19, 19,
+			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+			19
+		}
 	}
 #endif
 };
@@ -163,6 +209,9 @@ CFont::Initialise(void)
 	case FONT_LANGSET_EFIGS:
 	default:
 		CTxdStore::LoadTxd(slot, "MODELS/FONTS.TXD");
+		break;
+	case FONT_LANGSET_POLISH:
+		CTxdStore::LoadTxd(slot, "MODELS/FONTS_P.TXD");
 		break;
 	case FONT_LANGSET_RUSSIAN:
 		CTxdStore::LoadTxd(slot, "MODELS/FONTS_R.TXD");
@@ -221,6 +270,9 @@ CFont::ReloadFonts(uint8 set)
 		case FONT_LANGSET_EFIGS:
 		default:
 			CTxdStore::LoadTxd(Slot, "MODELS/FONTS.TXD");
+			break;
+		case FONT_LANGSET_POLISH:
+			CTxdStore::LoadTxd(Slot, "MODELS/FONTS_P.TXD");
 			break;
 		case FONT_LANGSET_RUSSIAN:
 			CTxdStore::LoadTxd(Slot, "MODELS/FONTS_R.TXD");
@@ -1427,48 +1479,3 @@ CFont::SetDropColor(const CRGBA &col)
 	if (Details.alphaFade < 255.0f)
 		Details.dropColor.a *= Details.alphaFade / 255.0f;
 }
-
-STARTPATCHES
-
-	InjectHook(0x500A40, CFont::Initialise, PATCH_JUMP);
-	InjectHook(0x500BA0, CFont::Shutdown, PATCH_JUMP);
-	InjectHook(0x500BE0, CFont::InitPerFrame, PATCH_JUMP);
-	InjectHook(0x500C30, CFont::PrintChar, PATCH_JUMP);
-	InjectHook(0x500F50, (void (*)(float, float, wchar*))CFont::PrintString, PATCH_JUMP);
-	InjectHook(0x501260, CFont::GetNumberLines, PATCH_JUMP);
-	InjectHook(0x5013B0, CFont::GetTextRect, PATCH_JUMP);
-	//InjectHook(0x501730, (void (*)(float, float, wchar*, wchar*, float))CFont::PrintString, PATCH_JUMP);
-	InjectHook(0x5017E0, CFont::GetCharacterWidth, PATCH_JUMP);
-	InjectHook(0x501840, CFont::GetCharacterSize, PATCH_JUMP);
-	InjectHook(0x5018A0, CFont::GetStringWidth, PATCH_JUMP);
-	InjectHook(0x501960, CFont::GetNextSpace, PATCH_JUMP);
-	InjectHook(0x5019A0, CFont::ParseToken, PATCH_JUMP);
-	InjectHook(0x501B50, CFont::DrawFonts, PATCH_JUMP);
-	InjectHook(0x501E80, CFont::character_code, PATCH_JUMP);
-
-	InjectHook(0x501B80, CFont::SetScale, PATCH_JUMP);
-	InjectHook(0x501BA0, CFont::SetSlantRefPoint, PATCH_JUMP);
-	InjectHook(0x501BC0, CFont::SetSlant, PATCH_JUMP);
-	InjectHook(0x501BD0, CFont::SetColor, PATCH_JUMP);
-	InjectHook(0x501C60, CFont::SetJustifyOn, PATCH_JUMP);
-	InjectHook(0x501C80, CFont::SetJustifyOff, PATCH_JUMP);
-	InjectHook(0x501C90, CFont::SetCentreOn, PATCH_JUMP);
-	InjectHook(0x501CB0, CFont::SetCentreOff, PATCH_JUMP);
-	InjectHook(0x501CC0, CFont::SetWrapx, PATCH_JUMP);
-	InjectHook(0x501CD0, CFont::SetCentreSize, PATCH_JUMP);
-	InjectHook(0x501CE0, CFont::SetBackgroundOn, PATCH_JUMP);
-	InjectHook(0x501CF0, CFont::SetBackgroundOff, PATCH_JUMP);
-	InjectHook(0x501D00, CFont::SetBackgroundColor, PATCH_JUMP);
-	InjectHook(0x501D30, CFont::SetBackGroundOnlyTextOn, PATCH_JUMP);
-	InjectHook(0x501D40, CFont::SetBackGroundOnlyTextOff, PATCH_JUMP);
-	InjectHook(0x501D50, CFont::SetRightJustifyOn, PATCH_JUMP);
-	InjectHook(0x501D70, CFont::SetRightJustifyOff, PATCH_JUMP);
-	InjectHook(0x501D90, CFont::SetPropOff, PATCH_JUMP);
-	InjectHook(0x501DA0, CFont::SetPropOn, PATCH_JUMP);
-	InjectHook(0x501DB0, CFont::SetFontStyle, PATCH_JUMP);
-	InjectHook(0x501DC0, CFont::SetRightJustifyWrap, PATCH_JUMP);
-	InjectHook(0x501DD0, CFont::SetAlphaFade, PATCH_JUMP);
-	InjectHook(0x501DE0, CFont::SetDropColor, PATCH_JUMP);
-	InjectHook(0x501E70, CFont::SetDropShadowPosition, PATCH_JUMP);
-
-ENDPATCHES

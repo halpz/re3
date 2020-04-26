@@ -11,17 +11,32 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef WITHWINDOWS
-#include <Windows.h>
+#if defined _WIN32 && defined WITHWINDOWS 
+#include <windows.h>
 #endif
 
-#ifdef WITHD3D
+#if defined _WIN32 && defined WITHD3D
 #include <windows.h>
 #include <d3d8types.h>
 #endif
 
 #include <rwcore.h>
 #include <rpworld.h>
+
+// gotta put this somewhere
+#ifdef LIBRW
+#define STREAMPOS(str) ((str)->tell())
+#define STREAMFILE(str) (((rw::StreamFile*)(str))->file)
+#define HIERNODEINFO(hier) ((hier)->nodeInfo)
+#define HIERNODEID(hier, i) ((hier)->nodeInfo[i].id)
+#define HANIMFRAMES(anim) ((anim)->keyframes)
+#else
+#define STREAMPOS(str) ((str)->Type.memory.position)
+#define STREAMFILE(str) ((str)->Type.file.fpFile)
+#define HIERNODEINFO(hier) ((hier)->pNodeInfo)
+#define HIERNODEID(hier, i) ((hier)->pNodeInfo[i].nodeID)
+#define HANIMFRAMES(anim) ((anim)->pFrames)
+#endif
 
 #define rwVENDORID_ROCKSTAR 0x0253F2
 
@@ -33,15 +48,8 @@
 #undef near
 #endif
 
-#ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(a) (sizeof(a) / sizeof(*(a)))
-#endif
+#define Max(a,b) ((a) > (b) ? (a) : (b))
+#define Min(a,b) ((a) < (b) ? (a) : (b))
 
 typedef uint8_t uint8;
 typedef int8_t int8;
@@ -55,9 +63,16 @@ typedef int64_t int64;
 // hardcode ucs-2
 typedef uint16_t wchar;
 
-#define nil nullptr
+#ifndef nil
+#define nil NULL
+#endif
 
 #include "config.h"
+
+#ifdef PED_SKIN
+#include <rphanim.h>
+#include <rpskin.h>
+#endif
 
 #define ALIGNPTR(p) (void*)((((uintptr)(void*)p) + sizeof(void*)-1) & ~(sizeof(void*)-1))
 
@@ -72,13 +87,6 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 {
 	return w>>p & (1<<s)-1;
 }
-
-
-#ifndef RWLIBS
-// little hack
-extern void **rwengine;
-#define RwEngineInstance (*rwengine)
-#endif
 
 #include "skeleton.h"
 #include "Draw.h"
@@ -268,7 +276,7 @@ class CTweakFunc : public CTweakVar
 	void (*m_pFunc)();
 public:
 	CTweakFunc(void (*pFunc)(), const char *strName, const char *strPath) :
-		m_pFunc(pFunc), m_pVarName(strName), m_pPath(strPath)
+		m_pPath(strPath), m_pVarName(strName), m_pFunc(pFunc)
 	{
 		CTweakVars::Add(this);
 	}
@@ -282,7 +290,7 @@ class CTweakBool : public CTweakVar
 	bool *m_pBoolVar;
 public:
 	CTweakBool(bool *pBool, const char *strName, const char *strPath) :
-		m_pBoolVar(pBool), m_pVarName(strName), m_pPath(strPath)
+		m_pPath(strPath), m_pVarName(strName), m_pBoolVar(pBool)
 	{
 		CTweakVars::Add(this);
 	}
@@ -298,9 +306,10 @@ class CTweakSwitch : public CTweakVar
 	const char **m_aStr;
 	void (*m_pFunc)();
 public:
-	CTweakSwitch(void *pInt, const char *strName, int32 nMin, int32 nMax, const char **aStr, void (*pFunc)(), const char *strPath) :
-		m_pVarName(strName), m_pPath(strPath),
-		m_aStr(aStr), m_pIntVar(pInt), m_nMin(nMin), m_nMax(nMax)
+	CTweakSwitch(void *pInt, const char *strName, int32 nMin, int32 nMax, const char **aStr,
+	             void (*pFunc)(), const char *strPath)
+	    : m_pPath(strPath), m_pVarName(strName), m_pIntVar(pInt), m_nMin(nMin), m_nMax(nMax),
+	      m_aStr(aStr)
 	{
 		CTweakVars::Add(this);
 	}
@@ -308,22 +317,24 @@ public:
 	void AddDBG(const char *path);
 };
 
-#define _TWEEKCLASS(name, type) \
-class name : public CTweakVar \
-{ \
-public: \
-	const char *m_pPath, *m_pVarName; \
-	type *m_pIntVar, m_nLoawerBound, m_nUpperBound, m_nStep; \
- \
-	name(type *pInt, const char *strName, type nLower, type nUpper, type nStep, const char *strPath) : \
-		m_pIntVar(pInt), m_nLoawerBound(nLower), m_nUpperBound(nUpper), m_nStep(nStep), \
-		m_pVarName(strName), m_pPath(strPath) \
-	{ \
-		CTweakVars::Add(this); \
-	} \
-	 \
-	void AddDBG(const char *path); \
-};
+#define _TWEEKCLASS(name, type)                                                                    \
+	class name : public CTweakVar                                                              \
+	{                                                                                          \
+	public:                                                                                    \
+		const char *m_pPath, *m_pVarName;                                                  \
+		type *m_pIntVar, m_nLoawerBound, m_nUpperBound, m_nStep;                           \
+                                                                                                   \
+		name(type *pInt, const char *strName, type nLower, type nUpper, type nStep,        \
+		     const char *strPath)                                                          \
+		    : m_pPath(strPath), m_pVarName(strName), m_pIntVar(pInt),                      \
+		      m_nLoawerBound(nLower), m_nUpperBound(nUpper), m_nStep(nStep)                \
+                                                                                                   \
+		{                                                                                  \
+			CTweakVars::Add(this);                                                     \
+		}                                                                                  \
+                                                                                                   \
+		void AddDBG(const char *path);                                                     \
+	};
 
 _TWEEKCLASS(CTweakInt8, int8);
 _TWEEKCLASS(CTweakUInt8, uint8);

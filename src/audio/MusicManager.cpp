@@ -13,12 +13,12 @@
 #include "Timer.h"
 #include "World.h"
 #include "sampman.h"
-#include "patcher.h"
 
-cMusicManager &MusicManager = *(cMusicManager *)0x8F3964;
-int32 &gNumRetunePresses = *(int32 *)0x650B80;
-int32 &gRetuneCounter = *(int32*)0x650B84;
-bool& bHasStarted = *(bool*)0x650B7C;
+
+cMusicManager MusicManager;
+int32 gNumRetunePresses;
+int32 gRetuneCounter;
+bool bHasStarted;
 
 const int maxVolume = 127;
 
@@ -49,6 +49,12 @@ cMusicManager::PlayerInCar()
 	int32 State = FindPlayerPed()->m_nPedState;
 
 	if(State == PED_DRAG_FROM_CAR || State == PED_EXIT_CAR || State == PED_ARRESTED)
+		return false;
+
+	if (!FindPlayerVehicle())
+		return true;
+
+	if (FindPlayerVehicle()->m_status == STATUS_WRECKED)
 		return false;
 
 	switch(FindPlayerVehicle()->m_modelIndex) {
@@ -699,7 +705,7 @@ cMusicManager::GetTrackStartPos(uint8 track)
 		result = m_aTracks[track].m_nPosition;
 		m_aTracks[track].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
 	} else 
-		result = min(CTimer::GetTimeInMillisecondsPauseMode() - timer, 90000) + m_aTracks[track].m_nPosition;
+		result = Min(CTimer::GetTimeInMillisecondsPauseMode() - timer, 90000) + m_aTracks[track].m_nPosition;
 
 	if (result > m_aTracks[track].m_nLength) result %= m_aTracks[track].m_nLength;
 	return result;
@@ -904,34 +910,3 @@ cMusicManager::ChangeRadioChannel()
 	}
 	return true;
 }
-
-STARTPATCHES
-InjectHook(0x57E4B0, &cMusicManager::PlayerInCar, PATCH_JUMP);
-InjectHook(0x57E6D0, &cMusicManager::DisplayRadioStationName, PATCH_JUMP);
-InjectHook(0x57CF70, &cMusicManager::Initialise, PATCH_JUMP);
-InjectHook(0x57D140, &cMusicManager::Terminate, PATCH_JUMP);
-InjectHook(0x57D1D0, &cMusicManager::GetRadioInCar, PATCH_JUMP);
-InjectHook(0x57D2C0, &cMusicManager::SetRadioInCar, PATCH_JUMP);
-InjectHook(0x57D180, &cMusicManager::SetRadioChannelByScript, PATCH_JUMP);
-InjectHook(0x57CF30, &cMusicManager::ResetMusicAfterReload, PATCH_JUMP);
-InjectHook(0x57E6A0, &cMusicManager::UsesPoliceRadio, PATCH_JUMP);
-InjectHook(0x57D310, &cMusicManager::ChangeMusicMode, PATCH_JUMP);
-InjectHook(0x57D420, &cMusicManager::ResetTimers, PATCH_JUMP);
-InjectHook(0x57D440, &cMusicManager::Service, PATCH_JUMP);
-InjectHook(0x57D530, &cMusicManager::ServiceFrontEndMode, PATCH_JUMP);
-InjectHook(0x57E3D0, &cMusicManager::StopFrontEndTrack, PATCH_JUMP);
-InjectHook(0x57E430, &cMusicManager::PlayAnnouncement, PATCH_JUMP);
-InjectHook(0x57E2E0, &cMusicManager::PlayFrontEndTrack, PATCH_JUMP);
-InjectHook(0x57E210, &cMusicManager::PreloadCutSceneMusic, PATCH_JUMP);
-InjectHook(0x57E290, &cMusicManager::PlayPreloadedCutSceneMusic, PATCH_JUMP);
-InjectHook(0x57E2B0, &cMusicManager::StopCutSceneMusic, PATCH_JUMP);
-InjectHook(0x57E450, &cMusicManager::GetTrackStartPos, PATCH_JUMP);
-InjectHook(0x57D690, &cMusicManager::ServiceGameMode, PATCH_JUMP);
-InjectHook(0x57DCB0, &cMusicManager::ServiceAmbience, PATCH_JUMP);
-InjectHook(0x57DEA0, &cMusicManager::ComputeAmbienceVol, PATCH_JUMP);
-InjectHook(0x57E100, &cMusicManager::ServiceTrack, PATCH_JUMP);
-InjectHook(0x57DFC0, &cMusicManager::ServiceAnnouncement, PATCH_JUMP);
-InjectHook(0x57E530, &cMusicManager::GetCarTuning, PATCH_JUMP);
-InjectHook(0x57E5A0, &cMusicManager::GetNextCarTuning, PATCH_JUMP);
-InjectHook(0x57E130, &cMusicManager::ChangeRadioChannel, PATCH_JUMP);
-ENDPATCHES

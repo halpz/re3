@@ -1,6 +1,8 @@
 #pragma once
-#include "Placeable.h"
+
 #include "AudioManager.h"
+#include "ParticleType.h"
+#include "Placeable.h"
 
 #define MAX_PARTICLEOBJECTS 100
 #define MAX_AUDIOHYDRANTS   8
@@ -37,7 +39,6 @@ enum eParticleObjectState
 	POBJECTSTATE_FREE,
 };
 
-enum tParticleType;
 class CParticle;
 
 class CParticleObject : public CPlaceable
@@ -53,18 +54,16 @@ public:
 	uint8               m_nSkipFrames;
 	uint16              m_nFrameCounter;
 	uint16              m_nState;
-	char _pad0[2];
 	CVector             m_vecTarget;
 	float               m_fRandVal;
 	float               m_fSize;
 	CRGBA               m_Color;
 	uint8               m_bRemove;
 	int8                m_nCreationChance;
-	char _pad1[2];
 	
-	static CParticleObject *&pCloseListHead;
-	static CParticleObject *&pFarListHead;
-	static CParticleObject *&pUnusedListHead;
+	static CParticleObject *pCloseListHead;
+	static CParticleObject *pFarListHead;
+	static CParticleObject *pUnusedListHead;
 	
 	CParticleObject();
 	~CParticleObject();
@@ -89,7 +88,7 @@ public:
 	static void MoveToList(CParticleObject **from, CParticleObject **to, CParticleObject *obj);
 };
 
-extern CParticleObject (&gPObjectArray)[MAX_PARTICLEOBJECTS];
+extern CParticleObject gPObjectArray[MAX_PARTICLEOBJECTS];
 
 class CAudioHydrant
 {

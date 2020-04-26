@@ -1,10 +1,9 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "FileMgr.h"
 #include "PedStats.h"
 
-//CPedStats *(&CPedStats::ms_apPedStats)[NUM_PEDSTATS] = *(CPedStats *(*)[NUM_PEDSTATS]) *(uintptr*)0x9404D4;
 CPedStats *CPedStats::ms_apPedStats[NUM_PEDSTATS];
 
 void
@@ -117,10 +116,3 @@ CPedStats::GetPedStatType(char *name)
 
 	return NUM_PEDSTATS;
 }
-
-STARTPATCHES
-	InjectHook(0x4EF460, &CPedStats::Initialise, PATCH_JUMP);
-	InjectHook(0x4EF540, &CPedStats::Shutdown, PATCH_JUMP);
-	InjectHook(0x4EF580, &CPedStats::LoadPedStats, PATCH_JUMP);
-	InjectHook(0x4EF780, &CPedStats::GetPedStatType, PATCH_JUMP);
-ENDPATCHES

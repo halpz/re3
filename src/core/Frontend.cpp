@@ -1,8 +1,11 @@
+#if defined RW_D3D9 || defined RWLIBS
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+#endif
+
+#define WITHWINDOWS
 #include "common.h"
-#include "patcher.h"
-#include "win.h"
+#include "crossplatform.h"
 #include "Frontend.h"
 #include "Font.h"
 #include "Pad.h"
@@ -82,34 +85,34 @@ int curBottomBarOption = -1;
 int hoveredBottomBarOption = -1;
 #endif
 
-int32 CMenuManager::OS_Language = LANG_ENGLISH; // *(int32*)0x5F2F78;
-int8 CMenuManager::m_PrefsUseVibration; // = *(int8*)0x95CD92;
-int8 CMenuManager::m_DisplayControllerOnFoot; // = *(int8*)0x95CD8D;
-int8 CMenuManager::m_PrefsVsync = 1; // *(int8*)0x5F2E58;
-int8 CMenuManager::m_PrefsVsyncDisp = 1; // *(int8*)0x5F2E5C;
-int8 CMenuManager::m_PrefsFrameLimiter = 1; // *(int8*)0x5F2E60;
-int8 CMenuManager::m_PrefsShowSubtitles = 1; // *(int8*)0x5F2E54;
-int8 CMenuManager::m_PrefsSpeakers; // = *(int8*)0x95CD7E;
-int32 CMenuManager::m_ControlMethod; // = *(int32*)0x8F5F7C;
-int8 CMenuManager::m_PrefsDMA = 1; // *(int8*)0x5F2F74;
-int32 CMenuManager::m_PrefsLanguage; // = *(int32*)0x941238;
-uint8 CMenuManager::m_PrefsStereoMono; // *(bool*)0x95CDB5; // unused except restore settings
+int32 CMenuManager::OS_Language = LANG_ENGLISH;
+int8 CMenuManager::m_PrefsUseVibration;
+int8 CMenuManager::m_DisplayControllerOnFoot;
+int8 CMenuManager::m_PrefsVsync = 1;
+int8 CMenuManager::m_PrefsVsyncDisp = 1;
+int8 CMenuManager::m_PrefsFrameLimiter = 1;
+int8 CMenuManager::m_PrefsShowSubtitles = 1;
+int8 CMenuManager::m_PrefsSpeakers;
+int32 CMenuManager::m_ControlMethod;
+int8 CMenuManager::m_PrefsDMA = 1;
+int32 CMenuManager::m_PrefsLanguage;
+uint8 CMenuManager::m_PrefsStereoMono; // unused except restore settings
 
-bool CMenuManager::m_PrefsAllowNastyGame = true; // *(bool*)0x5F2E64;
-bool CMenuManager::m_bStartUpFrontEndRequested; // = *(bool*)0x95CCF4;
-bool CMenuManager::m_bShutDownFrontEndRequested; // = *(bool*)0x95CD6A;
+bool CMenuManager::m_PrefsAllowNastyGame = true;
+bool CMenuManager::m_bStartUpFrontEndRequested;
+bool CMenuManager::m_bShutDownFrontEndRequested;
 
-int8 CMenuManager::m_PrefsUseWideScreen; // = *(int8*)0x95CD23;
-int8 CMenuManager::m_PrefsRadioStation; // = *(int8*)0x95CDA4;
-int32 CMenuManager::m_PrefsBrightness = 256; // = *(int32*)0x5F2E50;
-float CMenuManager::m_PrefsLOD; // = *(float*)0x8F42C4;
-int8 CMenuManager::m_bFrontEnd_ReloadObrTxtGxt; // = *(int8*)0x628CFC;
-int32 CMenuManager::m_PrefsMusicVolume = 102; // = *(int32*)0x5F2E4C;
-int32 CMenuManager::m_PrefsSfxVolume = 102; // = *(int32*)0x5F2E48;
+int8 CMenuManager::m_PrefsUseWideScreen;
+int8 CMenuManager::m_PrefsRadioStation;
+int32 CMenuManager::m_PrefsBrightness = 256;
+float CMenuManager::m_PrefsLOD = CRenderer::ms_lodDistScale;
+int8 CMenuManager::m_bFrontEnd_ReloadObrTxtGxt;
+int32 CMenuManager::m_PrefsMusicVolume = 102;
+int32 CMenuManager::m_PrefsSfxVolume = 102;
 
-char CMenuManager::m_PrefsSkinFile[256] = "$$\"\""; // = (char*)0x5F2E74;
+char CMenuManager::m_PrefsSkinFile[256] = "$$\"\"";
 
-int32 CMenuManager::m_KeyPressedCode = -1; // = *(int32*)0x5F2E70;
+int32 CMenuManager::m_KeyPressedCode = -1;
 
 // Originally that was PS2 option color, they forget it here and used in PrintBriefs once(but didn't use the output anyway)
 #ifdef PS2_LIKE_MENU
@@ -118,30 +121,26 @@ const CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255);
 const CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
 #endif
 
-const float menuXYpadding = MENUACTION_POS_Y; // *(float*)0x5F355C;	// not original name
-float MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE; //*(float*)0x5F2E40;
-float MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE; //*(float*)0x5F2E44;
+float MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE;
+float MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE;
 
 bool holdingScrollBar; // *(bool*)0x628D59; // not original name
-int32 CMenuManager::m_SelectedMap; // *(int32*)0x8E2880;
-int32 CMenuManager::m_SelectedGameType; // *(int32*)0x942F88;
+int32 CMenuManager::m_SelectedMap;
+int32 CMenuManager::m_SelectedGameType;
 
 // Used in a hidden menu
 uint8 CMenuManager::m_PrefsPlayerRed = 255;
 uint8 CMenuManager::m_PrefsPlayerGreen = 128;
 uint8 CMenuManager::m_PrefsPlayerBlue; // why??
 
-CMenuManager FrontEndMenuManager; // = *(CMenuManager*)0x8F59D8;
+CMenuManager FrontEndMenuManager;
 
-// Move this somewhere else.
-float CRenderer::ms_lodDistScale = 1.2f; // *(float*)0x5F726C;
-
-uint32 TimeToStopPadShaking; // = *(uint32*)0x628CF8;
-char *pEditString; // = *(char**)0x628D00;
-int32 *pControlEdit; // = *(int32**)0x628D08;
-bool DisplayComboButtonErrMsg; // = *(bool*)0x628D14;
-int32 MouseButtonJustClicked; // = *(int32*)0x628D0C;
-int32 JoyButtonJustClicked; // = *(int32*)0x628D10;
+uint32 TimeToStopPadShaking;
+char *pEditString;
+int32 *pControlEdit;
+bool DisplayComboButtonErrMsg;
+int32 MouseButtonJustClicked;
+int32 JoyButtonJustClicked;
 //int32 *pControlTemp = 0;
 
 #ifndef MASTER
@@ -170,15 +169,15 @@ const char* FrontendFilenames[][2] = {
 	{"fe_arrows2", "" },
 	{"fe_arrows3", "" },
 	{"fe_arrows4", "" },
-	{"fe_radio1", "" }, // HEAD_RADIO
-	{"fe_radio2", "" }, // DOUBLE_CLEF
-	{"fe_radio3", "" }, // JAH_RADIO
-	{"fe_radio4", "" }, // RISE_FM
-	{"fe_radio5", "" }, // LIPS_106
-	{"fe_radio6", "" }, // GAME_FM
-	{"fe_radio7", "" }, // MSX_FM
-	{"fe_radio8", "" }, // FLASHBACK
-	{"fe_radio9", "" }, // CHATTERBOX
+	{"fe_radio1", "" },
+	{"fe_radio2", "" },
+	{"fe_radio3", "" },
+	{"fe_radio4", "" },
+	{"fe_radio5", "" },
+	{"fe_radio6", "" },
+	{"fe_radio7", "" },
+	{"fe_radio8", "" },
+	{"fe_radio9", "" },
 };
 
 #ifdef MENU_MAP
@@ -283,9 +282,15 @@ ScaleAndCenterX(float x)
 	} while(0)
 #endif
 
+#define PREPARE_MENU_HEADER \
+	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255))); \
+	CFont::SetRightJustifyOn(); \
+	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT)); \
+	CFont::SetFontStyle(FONT_HEADING);
+
 #define ProcessSlider(value, increaseAction, decreaseAction, hoverStartX, hoverEndX) \
 	do { \
-		lastActiveBarX = DisplaySlider(SCREEN_STRETCH_FROM_RIGHT(MENUSLIDER_X + columnWidth), MENU_Y(bitAboveNextItemY), MENU_Y(smallestSliderBar), MENU_Y(usableLineHeight), MENU_X(MENUSLIDER_UNK), value); \
+		lastActiveBarX = DisplaySlider(MENU_X_RIGHT_ALIGNED(MENUSLIDER_X + columnWidth), MENU_Y(bitAboveNextItemY), MENU_Y(smallestSliderBar), MENU_Y(usableLineHeight), MENU_X(MENUSLIDER_UNK), value); \
 		if (i != m_nCurrOption || !itemsAreSelectable) \
 			break; \
 		 \
@@ -296,9 +301,16 @@ ScaleAndCenterX(float x)
 			break; \
 		 \
 		m_nHoverOption = increaseAction; \
-		if (m_nMousePosX < SCREEN_STRETCH_FROM_RIGHT(MENUSLIDER_X + columnWidth)) \
+		if (m_nMousePosX < MENU_X_RIGHT_ALIGNED(MENUSLIDER_X + columnWidth)) \
 			m_nHoverOption = HOVEROPTION_NOT_HOVERING; \
 	} while(0)
+
+#define ProcessRadioIcon(sprite, x, y, radioId, hoverOpt) \
+	do { \
+		sprite.Draw(x, y, MENU_X(MENURADIO_ICON_SCALE), MENU_Y(MENURADIO_ICON_SCALE), radioId == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170)); \
+			if (CheckHover(x, x + MENU_X(MENURADIO_ICON_SCALE), y, y + MENU_Y(MENURADIO_ICON_SCALE))) \
+				m_nHoverOption = hoverOpt; \
+	} while (0)
 
 // --- Functions not in the game/inlined starts
 
@@ -340,8 +352,8 @@ CMenuManager::PageUpList(bool playSoundOnSuccess)
 			if(playSoundOnSuccess)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 
-			m_nFirstVisibleRowOnList = max(0, m_nFirstVisibleRowOnList - MAX_VISIBLE_LIST_ROW);
-			m_nSelectedListRow = min(m_nSelectedListRow, m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW - 1);
+			m_nFirstVisibleRowOnList = Max(0, m_nFirstVisibleRowOnList - MAX_VISIBLE_LIST_ROW);
+			m_nSelectedListRow = Min(m_nSelectedListRow, m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW - 1);
 		} else {
 			m_nFirstVisibleRowOnList = 0;
 			m_nSelectedListRow = 0;
@@ -358,8 +370,8 @@ CMenuManager::PageDownList(bool playSoundOnSuccess)
 			if(playSoundOnSuccess)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 
-			m_nFirstVisibleRowOnList = min(m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW, m_nTotalListRow - MAX_VISIBLE_LIST_ROW);
-			m_nSelectedListRow = max(m_nSelectedListRow, m_nFirstVisibleRowOnList);
+			m_nFirstVisibleRowOnList = Min(m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW, m_nTotalListRow - MAX_VISIBLE_LIST_ROW);
+			m_nSelectedListRow = Max(m_nSelectedListRow, m_nFirstVisibleRowOnList);
 		} else {
 			m_nFirstVisibleRowOnList = m_nTotalListRow - MAX_VISIBLE_LIST_ROW;
 			m_nSelectedListRow = m_nTotalListRow - 1;
@@ -421,13 +433,16 @@ CMenuManager::BuildStatLine(char *text, void *stat, bool itsFloat, void *stat2)
 void
 CMenuManager::CentreMousePointer()
 {
-	tagPOINT Point;
-
 	if (SCREEN_WIDTH * 0.5f != 0.0f && 0.0f != SCREEN_HEIGHT * 0.5f) {
+#if defined RW_D3D9 || defined RWLIBS
+		tagPOINT Point;
 		Point.x = SCREEN_WIDTH / 2;
 		Point.y = SCREEN_HEIGHT / 2;
 		ClientToScreen(PSGLOBAL(window), &Point);
 		SetCursorPos(Point.x, Point.y);
+#elif defined RW_GL3
+		glfwSetCursorPos(PSGLOBAL(window), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+#endif
 
 		PSGLOBAL(lastMousePos.x) = SCREEN_WIDTH / 2;
 		PSGLOBAL(lastMousePos.y) = SCREEN_HEIGHT / 2;
@@ -447,8 +462,8 @@ CMenuManager::CheckCodesForControls(int typeOfControl)
 	if (typeOfControl == KEYBOARD) {
 		if (*pControlEdit == rsESC) {
 			escPressed = true;
-		} else if (*pControlEdit > rsF3 && *pControlEdit != rsF9 && *pControlEdit != rsLWIN &&
-			*pControlEdit != rsRWIN && *pControlEdit != rsRALT) {
+		} else if (*pControlEdit != rsF1 && *pControlEdit != rsF2 && *pControlEdit != rsF3 && *pControlEdit != rsF9 &&
+			*pControlEdit != rsLWIN && *pControlEdit != rsRWIN && *pControlEdit != rsRALT) {
 			typeToSave = KEYBOARD;
 			if (ControlsManager.GetControllerKeyAssociatedWithAction(action, KEYBOARD) != rsNULL &&
 				*pControlEdit != ControlsManager.GetControllerKeyAssociatedWithAction(action, KEYBOARD)) {
@@ -465,7 +480,10 @@ CMenuManager::CheckCodesForControls(int typeOfControl)
 			DisplayComboButtonErrMsg = true;
 	}
 
-	ControlsManager.ClearSettingsAssociatedWithAction(action, typeToSave);
+#ifdef FIX_BUGS
+	if(!escPressed && !invalidKey)
+#endif
+		ControlsManager.ClearSettingsAssociatedWithAction(action, typeToSave);
 	if (!DisplayComboButtonErrMsg && !escPressed && !invalidKey) {
 		if (typeOfControl == KEYBOARD) {
 			ControlsManager.DeleteMatchingActionInitiators(action, *pControlEdit, KEYBOARD);
@@ -631,7 +649,7 @@ CMenuManager::DisplaySlider(float x, float y, float mostLeftBarSize, float mostR
 		} else
 			color = CRGBA(185, 120, 0, FadeIn(255));
 
-		maxBarHeight = max(mostLeftBarSize, mostRightBarSize);
+		maxBarHeight = Max(mostLeftBarSize, mostRightBarSize);
 
 		float curBarFreeSpace = ((16 - i) * mostLeftBarSize + i * mostRightBarSize) / 16.0f;
 		float left = curBarX;
@@ -670,6 +688,17 @@ CMenuManager::Draw()
 	CFont::SetCentreOff();
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
+#ifdef GTA3_1_1_PATCH
+	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
+	CFont::SetRightJustifyOn();
+	CFont::SetFontStyle(FONT_HEADING);
+	CFont::SetScale(MENU_X(0.7f), MENU_Y(0.5f));
+	CFont::SetWrapx(SCREEN_WIDTH);
+	CFont::SetRightJustifyWrap(0.0f);
+	strcpy(gString, "V1.1");
+	AsciiToUnicode(gString, gUString);
+	CFont::PrintString(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 45, gUString);
+#endif
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
 
@@ -696,17 +725,9 @@ CMenuManager::Draw()
 #endif
 	if (aScreens[m_nCurrScreen].m_ScreenName[0] != '\0') {
 		
-		CFont::SetRightJustifyOn();
-		CFont::SetFontStyle(FONTJAP(FONT_HEADING));
-#ifdef PS2_LIKE_MENU
-		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(1.3f));
-		CFont::PrintString(MENU_X_RIGHT_ALIGNED(50.0f), SCREEN_SCALE_FROM_BOTTOM(75.0f), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
-#else
-		CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
-		CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT));
+		PREPARE_MENU_HEADER
 		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
-#endif
+
 		// Weird place to put that.
 		nextYToUse += 24.0f + 10.0f;
 	}
@@ -745,9 +766,9 @@ CMenuManager::Draw()
 
 #ifdef FIX_BUGS
 		// Label is wrapped from right by StretchX(40)px, but wrapped from left by 40px. And this is only place R* didn't use StretchX in here.
-		CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(menuXYpadding), str);
+		CFont::PrintString(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN), MENU_Y(MENUACTION_POS_Y), str);
 #else
-		CFont::PrintString(MENU_X_MARGIN, menuXYpadding, str);
+		CFont::PrintString(MENU_X_MARGIN, MENUACTION_POS_Y, str);
 #endif
 	}
 
@@ -1112,7 +1133,7 @@ CMenuManager::Draw()
 
 					int extraOffset = 0;
 					if (aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_RADIO)
-						extraOffset = (int) 60.0f;
+						extraOffset = MENURADIO_ICON_SCALE;
 
 					// There were many unused codes in here to calculate how much space will texts gonna take.
 
@@ -1222,7 +1243,6 @@ CMenuManager::Draw()
 			}
 
 			// Sliders
-			// We stretch slider start X here(like original code), because it will always be center of screen
 			int lastActiveBarX;
 			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
 				case MENUACTION_BRIGHTNESS:
@@ -1242,29 +1262,24 @@ CMenuManager::Draw()
 					break;
 			}
 
-			nextYToUse += lineHeight * CFont::GetNumberLines(menuXYpadding, nextYToUse, leftText);
+			// 60.0 is silly
+			nextYToUse += lineHeight * CFont::GetNumberLines(MENU_X_LEFT_ALIGNED(60.0f), MENU_Y(nextYToUse), leftText);
 
-			// TODO: This should be rewritten as multiple macro calls instead of loop, radio order is wrong.
-			//		And hover detection is missing.
-			float fIconSpacing = 59.52f;
+			// Radio icons
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_RADIO) {
-				for (int i = 0; i < POLICE_RADIO; i++) {
-#ifndef ASPECT_RATIO_SCALE
-					if (i < USERTRACK)
-						m_aFrontEndSprites[i + FE_RADIO1].Draw(SCREEN_STRETCH_X(MENURADIO_ICON_X + fIconSpacing * i), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(MENURADIO_ICON_Y), SCREEN_SCALE_X(MENURADIO_ICON_W), SCREEN_SCALE_Y(MENURADIO_ICON_H), i == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170));
-					if (i > CHATTERBOX && DMAudio.IsMP3RadioChannelAvailable())
-						m_aMenuSprites[MENUSPRITE_MP3LOGO].Draw(SCREEN_STRETCH_X(MENURADIO_ICON_X + fIconSpacing * i), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(MENURADIO_ICON_Y), SCREEN_SCALE_X(MENURADIO_ICON_W), SCREEN_SCALE_Y(MENURADIO_ICON_H), i == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170));
-#else
-					float fMp3Pos = 0.0f;
-					if (DMAudio.IsMP3RadioChannelAvailable())
-						fMp3Pos = 34.0f;
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO1], MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(nextYToUse), 0, HOVEROPTION_RADIO_0);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO2], MENU_X_LEFT_ALIGNED(90.0f), MENU_Y(nextYToUse), 1, HOVEROPTION_RADIO_1);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO5], MENU_X_LEFT_ALIGNED(150.0f), MENU_Y(nextYToUse), 2, HOVEROPTION_RADIO_2);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO7], MENU_X_LEFT_ALIGNED(210.0f), MENU_Y(nextYToUse), 3, HOVEROPTION_RADIO_3);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO8], MENU_X_LEFT_ALIGNED(270.0f), MENU_Y(nextYToUse), 4, HOVEROPTION_RADIO_4);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO3], MENU_X_LEFT_ALIGNED(320.0f), MENU_Y(nextYToUse), 5, HOVEROPTION_RADIO_5);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO4], MENU_X_LEFT_ALIGNED(360.0f), MENU_Y(nextYToUse), 6, HOVEROPTION_RADIO_6);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO6], MENU_X_LEFT_ALIGNED(420.0f), MENU_Y(nextYToUse), 7, HOVEROPTION_RADIO_7);
+				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO9], MENU_X_LEFT_ALIGNED(480.0f), MENU_Y(nextYToUse), 8, HOVEROPTION_RADIO_8);
 
-					if (i < USERTRACK)
-						m_aFrontEndSprites[i + FE_RADIO1].Draw((SCREEN_WIDTH * 0.5) + SCREEN_SCALE_X(-fMp3Pos + MENURADIO_ICON_X + (fIconSpacing * i)), MENU_Y(nextYToUse), MENU_X(menuXYpadding), MENU_Y(menuXYpadding), i == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170));
-					if (i > CHATTERBOX && DMAudio.IsMP3RadioChannelAvailable())
-						m_aMenuSprites[MENUSPRITE_MP3LOGO].Draw((SCREEN_WIDTH * 0.5) + SCREEN_SCALE_X(-fMp3Pos + MENURADIO_ICON_X + (fIconSpacing * i)), MENU_Y(nextYToUse), MENU_X(menuXYpadding), MENU_Y(menuXYpadding), i == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170));
-#endif
-				}
+				if (DMAudio.IsMP3RadioChannelAvailable())
+					ProcessRadioIcon(m_aMenuSprites[MENUSPRITE_MP3LOGO], MENU_X_LEFT_ALIGNED(540.0f), MENU_Y(nextYToUse), 9, HOVEROPTION_RADIO_9);
+
 				nextYToUse += 70.0f;
 			}
 		}
@@ -1735,11 +1750,8 @@ CMenuManager::DrawControllerSetupScreen()
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
 
-	// Page header
-	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
-	CFont::SetRightJustifyOn();
-	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT));
-	CFont::SetFontStyle(FONTJAP(FONT_HEADING));
+	PREPARE_MENU_HEADER
+
 	switch (m_ControlMethod) {
 		case CONTROL_STANDARD:
 			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y),
@@ -2417,10 +2429,8 @@ CMenuManager::DrawPlayerSetupScreen()
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
 
-	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
-	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT));
-	CFont::SetRightJustifyOn();
-	CFont::SetFontStyle(FONTJAP(FONT_HEADING));
+	PREPARE_MENU_HEADER
+
 	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get("FET_PS"));
 
 	// lstrcpy's changed with strcpy
@@ -2488,7 +2498,7 @@ CMenuManager::DrawPlayerSetupScreen()
 					strncpy(&m_pSelectedSkin->skinNameDisplayed[k], "(", 1);
 				if (!strncmp(&m_pSelectedSkin->skinNameDisplayed[k], "}", 1))
 					strncpy(&m_pSelectedSkin->skinNameDisplayed[k], ")", 1);
-				if (!strncmp(&m_pSelectedSkin->skinNameDisplayed[k], "£", 1))
+				if (!strncmp(&m_pSelectedSkin->skinNameDisplayed[k], "ï¿½", 1))
 					strncpy(&m_pSelectedSkin->skinNameDisplayed[k], "$", 1);
 			}
 
@@ -2825,7 +2835,7 @@ CMenuManager::FadeIn(int alpha)
 		m_nCurrScreen == MENUPAGE_DELETING)
 		return alpha;
 
-	return min(m_nMenuFadeAlpha, alpha);
+	return Min(m_nMenuFadeAlpha, alpha);
 }
 
 void
@@ -2889,6 +2899,9 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		CGame::germanGame = false;
 #ifdef MORE_LANGUAGES
 		switch (m_PrefsLanguage) {
+		case LANGUAGE_POLISH:
+			CFont::ReloadFonts(FONT_LANGSET_POLISH);
+			break;
 		case LANGUAGE_RUSSIAN:
 			CFont::ReloadFonts(FONT_LANGSET_RUSSIAN);
 			break;
@@ -2909,6 +2922,9 @@ CMenuManager::InitialiseChangedLanguageSettings()
 			CGame::germanGame = true;
 			break;
 #ifdef MORE_LANGUAGES
+		case LANGUAGE_POLISH:
+			CGame::polishGame = true;
+			break;
 		case LANGUAGE_RUSSIAN:
 			CGame::russianGame = true;
 			break;
@@ -3180,7 +3196,7 @@ CMenuManager::PrintBriefs()
 	CFont::SetRightJustifyOff();
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X * 0.7), MENU_Y(MENU_TEXT_SIZE_Y * 0.9)); // second mulipliers are double, idk why
 
-	float nextY = 40.0f;
+	float nextY = BRIEFS_TOP_MARGIN;
 	CRGBA newColor;
 	for (int i = 4; i >= 0; i--) {
 		tPreviousBrief &brief = CMessages::PreviousBriefs[i];
@@ -3213,8 +3229,8 @@ CMenuManager::PrintBriefs()
 			newColor.a = FadeIn(255);
 			CFont::SetColor(newColor);
 #endif
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(50.0f), nextY, gUString);
-			nextY += MENU_Y(menuXYpadding);
+			CFont::PrintString(MENU_X_LEFT_ALIGNED(BRIEFS_LINE_X), nextY, gUString);
+			nextY += MENU_Y(BRIEFS_LINE_HEIGHT);
 		}
 	}
 
@@ -3251,6 +3267,9 @@ void
 CMenuManager::PrintStats()
 {
 	int rowNum = ConstructStatLine(99999);
+#ifdef GTA3_1_1_PATCH
+	CFont::SetFontStyle(FONT_BANK);
+#endif
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X * 0.7), MENU_Y(MENU_TEXT_SIZE_Y * 0.9)); // second mulipliers are double, idk why
 	float nextYChange, y, alphaMult;
 
@@ -3317,10 +3336,7 @@ CMenuManager::PrintStats()
 
 	// ::Draw already does that.
 	/*
-	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
-	CFont::SetRightJustifyOn();
-	CFont::SetFontStyle(FONTJAP(FONT_HEADING));
-	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT));
+	PREPARE_MENU_HEADER
 	CFont::PrintString(MENU_X_RIGHT_ALIGNED(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 	*/
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X), MENU_Y(MENU_TEXT_SIZE_Y));
@@ -3384,8 +3400,7 @@ CMenuManager::Process(void)
 				DMAudio.SetEffectsFadeVol(0);
 				DMAudio.SetMusicFadeVol(0);
 				DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
-			}
-			else
+			} else
 				SaveLoadFileError_SetUpErrorScreen();
 		}
 
@@ -4254,6 +4269,12 @@ CMenuManager::ProcessButtonPresses(void)
 					SaveSettings();
 					break;
 #ifdef MORE_LANGUAGES
+				case MENUACTION_LANG_PL:
+					m_PrefsLanguage = LANGUAGE_POLISH;
+					m_bFrontEnd_ReloadObrTxtGxt = true;
+					InitialiseChangedLanguageSettings();
+					SaveSettings();
+					break;
 				case MENUACTION_LANG_RUS:
 					m_PrefsLanguage = LANGUAGE_RUSSIAN;
 					m_bFrontEnd_ReloadObrTxtGxt = true;
@@ -4468,12 +4489,20 @@ CMenuManager::ProcessButtonPresses(void)
 						ControlsManager.MakeControllerActionsBlank();
 						ControlsManager.InitDefaultControlConfiguration();
 						ControlsManager.InitDefaultControlConfigMouse(MousePointerStateHelper.GetMouseSetUp());
-						if (AllValidWinJoys.m_aJoys[0].m_bInitialised) {
+#if !defined RW_GL3
+						if (AllValidWinJoys.m_aJoys[JOYSTICK1].m_bInitialised) {
 							DIDEVCAPS devCaps;
 							devCaps.dwSize = sizeof(DIDEVCAPS);
 							PSGLOBAL(joy1)->GetCapabilities(&devCaps);
 							ControlsManager.InitDefaultControlConfigJoyPad(devCaps.dwButtons);
 						}
+#else
+						if (PSGLOBAL(joy1id) != -1 && glfwJoystickPresent(PSGLOBAL(joy1id))) {
+							int count;
+							glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
+							ControlsManager.InitDefaultControlConfigJoyPad(count);
+						}
+#endif
 						m_ControlMethod = CONTROL_STANDARD;
 						MousePointerStateHelper.bInvertVertically = false;
 						TheCamera.m_fMouseAccelHorzntl = 0.0025f;
@@ -5254,6 +5283,7 @@ CMenuManager::PrintController(void)
 void
 CMenuManager::PrintMap(void)
 {
+	CFont::SetJustifyOn();
 	bMenuMapActive = true;
 	CRadar::InitFrontEndMap();
 
@@ -5398,7 +5428,7 @@ CMenuManager::PrintMap(void)
 	if (fMapCenterY + fMapSize < SCREEN_HEIGHT - MENU_Y(60.0f))
 		fMapCenterY = SCREEN_HEIGHT - MENU_Y(60.0f) - fMapSize;
 	
-	fMapCenterY = min(fMapCenterY, fMapSize); // To not show beyond north border
+	fMapCenterY = Min(fMapCenterY, fMapSize); // To not show beyond north border
 
 	bMenuMapActive = false;
 
@@ -5460,7 +5490,7 @@ CMenuManager::ConstructStatLine(int rowIdx)
 
 	int percentCompleted = (CStats::TotalProgressInGame == 0 ? 0 :
 		CStats::ProgressMade * 100.0f / (CGame::nastyGame ? CStats::TotalProgressInGame : CStats::TotalProgressInGame - 1));
-	percentCompleted = min(percentCompleted, 100);
+	percentCompleted = Min(percentCompleted, 100);
 
 	STAT_LINE("PER_COM", &percentCompleted, false, nil);
 	STAT_LINE("NMISON", &CStats::MissionsGiven, false, nil);
@@ -5474,7 +5504,8 @@ CMenuManager::ConstructStatLine(int rowIdx)
 	if (player.m_nTotalPackages != 0)
 		packagesPercent = player.m_nCollectedPackages * 100.0f / player.m_nTotalPackages;
 
-	STAT_LINE("PERPIC", &packagesPercent, 0, &(nTemp = 100));
+	int nPackagesPercent = packagesPercent;
+	STAT_LINE("PERPIC", &nPackagesPercent, 0, &(nTemp = 100));
 	STAT_LINE("NOUNIF", &CStats::TotalNumberOfUniqueJumps, 0, &CStats::NumberOfUniqueJumpsFound);
 	STAT_LINE("DAYSPS", &CStats::DaysPassed, false, nil);
 	if (CGame::nastyGame) {
@@ -5554,6 +5585,7 @@ CMenuManager::ConstructStatLine(int rowIdx)
 		case LANGUAGE_ITALIAN:
 		case LANGUAGE_SPANISH:
 #ifdef MORE_LANGUAGES
+		case LANGUAGE_POLISH:
 		case LANGUAGE_RUSSIAN:
 #endif
 			STAT_LINE("FESTDFM", &CStats::DistanceTravelledOnFoot, true, nil);
@@ -5631,21 +5663,3 @@ uint8 CMenuManager::GetNumberOfMenuOptions()
 
 #undef GetBackJustUp
 #undef GetBackJustDown
-
-STARTPATCHES
-	for (int i = 1; i < ARRAY_SIZE(aScreens); i++)
-		Patch(0x611930 + sizeof(CMenuScreen) * i, aScreens[i]);
-	InjectHook(0x4856F0, &CMenuManager::ProcessButtonPresses, PATCH_JUMP);
-	InjectHook(0x485100, &CMenuManager::Process, PATCH_JUMP);
-	InjectHook(0x47A230, &CMenuManager::LoadAllTextures, PATCH_JUMP);
-	InjectHook(0x47A540, &CMenuManager::DrawFrontEnd, PATCH_JUMP);
-
-	InjectHook(0x48ABE0, &CMenuManager::StretchX, PATCH_JUMP);
-	InjectHook(0x48AC20, &CMenuManager::StretchY, PATCH_JUMP);
-	InjectHook(0x488EE0, &CMenuManager::LoadSettings, PATCH_JUMP);
-	InjectHook(0x488CC0, &CMenuManager::SaveSettings, PATCH_JUMP);
-	InjectHook(0x47A440, &CMenuManager::UnloadTextures, PATCH_JUMP);
-	InjectHook(0x48AB40, &CMenuManager::DoSettingsBeforeStartingAGame, PATCH_JUMP);
-	InjectHook(0x48AE60, &CMenuManager::ProcessOnOffMenuOptions, PATCH_JUMP);
-	InjectHook(0x489710, &CMenuManager::DrawControllerBound, PATCH_JUMP);
-ENDPATCHES

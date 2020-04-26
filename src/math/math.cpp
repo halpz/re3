@@ -1,8 +1,21 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "Quaternion.h"
 
 // TODO: move more stuff into here
+
+void
+CVector2D::Normalise(void)
+{
+	float sq = MagnitudeSqr();
+	assert(sq != 0.0f);	// just be safe here
+	//if(sq > 0.0f){
+		float invsqrt = RecipSqrt(sq);
+		x *= invsqrt;
+		y *= invsqrt;
+	//}else
+	//	x = 1.0f;
+}
 
 void
 CMatrix::SetRotate(float xAngle, float yAngle, float zAngle)
@@ -191,8 +204,3 @@ CQuaternion::Get(RwMatrix *matrix)
 	matrix->up.z = y_2z + w_2x;
 	matrix->at.z = 1.0f - (x_2x + y_2y);
 }
-
-STARTPATCHES
-	InjectHook(0x4BA1C0, &CQuaternion::Slerp, PATCH_JUMP);
-	InjectHook(0x4BA0D0, &CQuaternion::Get, PATCH_JUMP);
-ENDPATCHES

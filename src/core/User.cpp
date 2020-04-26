@@ -1,18 +1,19 @@
 #include "common.h"
-#include "patcher.h"
+
 
 #include "Hud.h"
 #include "PlayerPed.h"
+#include "Replay.h"
 #include "Text.h"
 #include "User.h"
 #include "Vehicle.h"
 #include "World.h"
 #include "Zones.h"
 
-CPlaceName& CUserDisplay::PlaceName = *(CPlaceName*)0x8F29BC;
-COnscreenTimer& CUserDisplay::OnscnTimer = *(COnscreenTimer*)0x862238;
-CPager& CUserDisplay::Pager = *(CPager*)0x8F2744;
-CCurrentVehicle& CUserDisplay::CurrentVehicle = *(CCurrentVehicle*)0x8F5FE8;
+CPlaceName CUserDisplay::PlaceName;
+COnscreenTimer CUserDisplay::OnscnTimer;
+CPager CUserDisplay::Pager;
+CCurrentVehicle CUserDisplay::CurrentVehicle;
 
 CPlaceName::CPlaceName()
 {
@@ -115,21 +116,12 @@ CUserDisplay::Init()
 void
 CUserDisplay::Process()
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	PlaceName.Process();
 	OnscnTimer.Process();
 	Pager.Process();
 	CurrentVehicle.Process();
 }
-
-STARTPATCHES
-	InjectHook(0x4AD4C0, &CPlaceName::Init, PATCH_JUMP);
-	InjectHook(0x4AD4E0, &CPlaceName::Process, PATCH_JUMP);
-	InjectHook(0x4AD5B0, &CPlaceName::Display, PATCH_JUMP);
-
-	InjectHook(0x4AD5F0, &CCurrentVehicle::Init, PATCH_JUMP);
-	InjectHook(0x4AD600, &CCurrentVehicle::Process, PATCH_JUMP);
-	InjectHook(0x4AD630, &CCurrentVehicle::Display, PATCH_JUMP);
-
-	InjectHook(0x4AD660, &CUserDisplay::Init, PATCH_JUMP);
-	InjectHook(0x4AD690, &CUserDisplay::Process, PATCH_JUMP);
-ENDPATCHES

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "audio_enums.h"
+#include "Crime.h"
 
 enum eSound : int16
 {
@@ -179,7 +180,6 @@ enum eSound : int16
 
 class cAudioScriptObject;
 class CEntity;
-enum eCrimeType;
 
 class cDMAudio
 {
@@ -256,4 +256,4 @@ public:
 	void SetRadioInCar(uint32 radio);
 	void SetRadioChannel(int8 radio, int32 pos);
 };
-extern cDMAudio &DMAudio;
+extern cDMAudio DMAudio;

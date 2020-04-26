@@ -1,13 +1,13 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "templates.h"
 #include "General.h"
 #include "Streaming.h"
 #include "RwHelper.h"
 #include "TxdStore.h"
 
-CPool<TxdDef,TxdDef> *&CTxdStore::ms_pTxdPool = *(CPool<TxdDef,TxdDef>**)0x8F5FB8;
-RwTexDictionary *&CTxdStore::ms_pStoredTxd = *(RwTexDictionary**)0x9405BC;
+CPool<TxdDef,TxdDef> *CTxdStore::ms_pTxdPool;
+RwTexDictionary *CTxdStore::ms_pStoredTxd;
 
 void
 CTxdStore::Initialise(void)
@@ -185,25 +185,3 @@ CTxdStore::RemoveTxd(int slot)
 		RwTexDictionaryDestroy(def->texDict);
 	def->texDict = nil;
 }
-
-STARTPATCHES
-	InjectHook(0x527440, CTxdStore::Initialise, PATCH_JUMP);
-	InjectHook(0x527470, CTxdStore::Shutdown, PATCH_JUMP);
-	InjectHook(0x527490, CTxdStore::GameShutdown, PATCH_JUMP);
-	InjectHook(0x5274E0, CTxdStore::AddTxdSlot, PATCH_JUMP);
-	InjectHook(0x5275D0, CTxdStore::FindTxdSlot, PATCH_JUMP);
-	InjectHook(0x527590, CTxdStore::GetTxdName, PATCH_JUMP);
-	InjectHook(0x527900, CTxdStore::PushCurrentTxd, PATCH_JUMP);
-	InjectHook(0x527910, CTxdStore::PopCurrentTxd, PATCH_JUMP);
-	InjectHook(0x5278C0, CTxdStore::SetCurrentTxd, PATCH_JUMP);
-	InjectHook(0x527830, CTxdStore::Create, PATCH_JUMP);
-	InjectHook(0x527A00, CTxdStore::GetNumRefs, PATCH_JUMP);
-	InjectHook(0x527930, CTxdStore::AddRef, PATCH_JUMP);
-	InjectHook(0x527970, CTxdStore::RemoveRef, PATCH_JUMP);
-	InjectHook(0x5279C0, CTxdStore::RemoveRefWithoutDelete, PATCH_JUMP);
-	InjectHook(0x527700, (bool (*)(int, RwStream*))CTxdStore::LoadTxd, PATCH_JUMP);
-	InjectHook(0x5276B0, (bool (*)(int, const char*))CTxdStore::LoadTxd, PATCH_JUMP);
-	InjectHook(0x527770, CTxdStore::StartLoadTxd, PATCH_JUMP);
-	InjectHook(0x5277E0, CTxdStore::FinishLoadTxd, PATCH_JUMP);
-	InjectHook(0x527870, CTxdStore::RemoveTxd, PATCH_JUMP);
-ENDPATCHES

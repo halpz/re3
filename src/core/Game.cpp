@@ -1,11 +1,9 @@
 #pragma warning( push )
 #pragma warning( disable : 4005)
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
 #pragma warning( pop )
 #include "common.h"
-#include "win.h"
-#include "patcher.h"
+#include "crossplatform.h"
+
 #include "Game.h"
 #include "main.h"
 #include "RwHelper.h"
@@ -72,7 +70,7 @@
 #include "Streaming.h"
 #include "SurfaceTable.h"
 #include "TempColModels.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "TrafficLights.h"
 #include "Train.h"
 #include "TxdStore.h"
@@ -86,22 +84,24 @@
 #include "World.h"
 #include "ZoneCull.h"
 #include "Zones.h"
+#include "debugmenu.h"
 
 
 
-eLevelName &CGame::currLevel = *(eLevelName*)0x941514;
-bool &CGame::bDemoMode = *(bool*)0x5F4DD0;
-bool &CGame::nastyGame = *(bool*)0x5F4DD4;
-bool &CGame::frenchGame = *(bool*)0x95CDCB;
-bool &CGame::germanGame = *(bool*)0x95CD1E;
-bool &CGame::noProstitutes = *(bool*)0x95CDCF;
-bool &CGame::playingIntro = *(bool*)0x95CDC2;
-char *CGame::aDatFile = (char*)0x773A48;
+eLevelName CGame::currLevel;
+bool CGame::bDemoMode = true;
+bool CGame::nastyGame = true;
+bool CGame::frenchGame;
+bool CGame::germanGame;
+bool CGame::noProstitutes;
+bool CGame::playingIntro;
+char CGame::aDatFile[32];
 #ifdef MORE_LANGUAGES
+bool CGame::polishGame = false;
 bool CGame::russianGame = false;
 #endif
 
-int &gameTxdSlot = *(int*)0x628D88;
+int gameTxdSlot;
 
 bool
 CGame::InitialiseOnceBeforeRW(void)
@@ -115,7 +115,9 @@ CGame::InitialiseOnceBeforeRW(void)
 bool
 CGame::InitialiseRenderWare(void)
 {
+#ifdef USE_TEXTURE_POOL
 	_TexturePoolsInitialise();
+#endif
 	
 	CTxdStore::Initialise();
 	CVisibilityPlugins::Initialise();
@@ -153,6 +155,14 @@ CGame::InitialiseRenderWare(void)
 	LightsCreate(Scene.world);
 	
 	CreateDebugFont();
+
+#ifdef LIBRW
+#ifdef PS2_MATFX
+	rw::MatFX::modulateEnvMap = true;
+#else
+	rw::MatFX::modulateEnvMap = false;
+#endif
+#endif
 	
 	CFont::Initialise();
 	CHud::Initialise();
@@ -188,7 +198,9 @@ void CGame::ShutdownRenderWare(void)
 	
 	CVisibilityPlugins::Shutdown();
 	
+#ifdef USE_TEXTURE_POOL
 	_TexturePoolsShutdown();
+#endif
 }
 
 bool CGame::InitialiseOnceAfterRW(void)
@@ -307,6 +319,7 @@ bool CGame::Initialise(const char* datFile)
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
 	LoadingScreen("Loading the Game", "Setup streaming", nil);
+#ifdef USE_TXD_CDIMAGE
 	int txdHandle = CFileMgr::OpenFile("MODELS\\TXD.IMG", "r");
 	if (txdHandle)
 		CFileMgr::CloseFile(txdHandle);
@@ -321,6 +334,9 @@ bool CGame::Initialise(const char* datFile)
 			CStreaming::Init();
 		}
 	}
+#else
+	CStreaming::Init();
+#endif
 	CStreaming::LoadInitialVehicles();
 	CStreaming::LoadInitialPeds();
 	CStreaming::RequestBigBuildings(LEVEL_NONE);
@@ -350,7 +366,7 @@ bool CGame::Initialise(const char* datFile)
 	CAntennas::Init();
 	CGlass::Init();
 	gPhoneInfo.Initialise();
-	CSceneEdit::Init();
+	CSceneEdit::Initialise();
 	LoadingScreen("Loading the Game", "Load scripts", nil);
 	CTheScripts::Init();
 	CGangs::Initialise();
@@ -603,7 +619,6 @@ void CGame::InitialiseWhenRestarting(void)
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 }
 
-extern void (*DebugMenuProcess)(void);
 void CGame::Process(void) 
 {
 	CPad::UpdatePads();
@@ -702,20 +717,3 @@ void CGame::ProcessTidyUpMemory(void)
 	// meow
 #endif
 }
-
-STARTPATCHES
-	InjectHook(0x48BB80, CGame::InitialiseOnceBeforeRW, PATCH_JUMP);
-	InjectHook(0x48BBA0, CGame::InitialiseRenderWare, PATCH_JUMP);
-	InjectHook(0x48BCB0, CGame::ShutdownRenderWare, PATCH_JUMP);
-	InjectHook(0x48BD50, CGame::InitialiseOnceAfterRW, PATCH_JUMP);
-	InjectHook(0x48BEC0, CGame::FinalShutdown, PATCH_JUMP);
-	InjectHook(0x48BED0, CGame::Initialise, PATCH_JUMP);
-	InjectHook(0x48C3A0, CGame::ShutDown, PATCH_JUMP);
-	InjectHook(0x48C4B0, CGame::ReInitGameObjectVariables, PATCH_JUMP);
-	InjectHook(0x48C620, CGame::ReloadIPLs, PATCH_JUMP);
-	InjectHook(0x48C6B0, CGame::ShutDownForRestart, PATCH_JUMP);
-	InjectHook(0x48C740, CGame::InitialiseWhenRestarting, PATCH_JUMP);
-	InjectHook(0x48C850, CGame::Process, PATCH_JUMP);
-	InjectHook(0x48CA10, CGame::DrasticTidyUpMemory, PATCH_JUMP);
-	InjectHook(0x48CA20, CGame::TidyUpMemory, PATCH_JUMP);
-ENDPATCHES

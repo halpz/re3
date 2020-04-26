@@ -1,15 +1,18 @@
 #pragma warning( push )
 #pragma warning( disable : 4005)
+#if defined RW_D3D9 || defined RWLIBS
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+#endif
 #pragma warning( pop )
 
 #include "common.h"
+#include "crossplatform.h"
 #ifdef XINPUT
-#include <Xinput.h>
+#include <xinput.h>
 #pragma comment( lib, "Xinput9_1_0.lib" )
 #endif
-#include "patcher.h"
+
 #include "Pad.h"
 #include "ControllerConfig.h"
 #include "Timer.h"
@@ -29,32 +32,31 @@
 #include "Record.h"
 #include "Replay.h"
 #include "Weather.h"
-#include "win.h"
 #include "Streaming.h"
 #include "PathFind.h"
 #include "Wanted.h"
 #include "General.h"
 
-CPad *Pads = (CPad*)0x6F0360; // [2]
-CMousePointerStateHelper &MousePointerStateHelper = *(CMousePointerStateHelper*)0x95CC8C;
+CPad Pads[MAX_PADS];
+CMousePointerStateHelper MousePointerStateHelper;
 
-bool &CPad::bDisplayNoControllerMessage = *(bool *)0x95CD52;
-bool &CPad::bObsoleteControllerMessage = *(bool *)0x95CDB8;
+bool CPad::bDisplayNoControllerMessage;
+bool CPad::bObsoleteControllerMessage;
 bool CPad::bOldDisplayNoControllerMessage;
-bool &CPad::m_bMapPadOneToPadTwo = *(bool *)0x95CD48;
+bool CPad::m_bMapPadOneToPadTwo;
 
-CKeyboardState &CPad::OldKeyState = *(CKeyboardState*)0x6F1E70;
-CKeyboardState &CPad::NewKeyState = *(CKeyboardState*)0x6E60D0;
-CKeyboardState &CPad::TempKeyState = *(CKeyboardState*)0x774DE8;
+CKeyboardState CPad::OldKeyState;
+CKeyboardState CPad::NewKeyState;
+CKeyboardState CPad::TempKeyState;
 
 char CPad::KeyBoardCheatString[20];
 
-CMouseControllerState &CPad::OldMouseControllerState = *(CMouseControllerState*)0x8472A0;
-CMouseControllerState &CPad::NewMouseControllerState = *(CMouseControllerState*)0x8809F0;
-CMouseControllerState &CPad::PCTempMouseControllerState = *(CMouseControllerState*)0x6F1E60;
+CMouseControllerState CPad::OldMouseControllerState;
+CMouseControllerState CPad::NewMouseControllerState;
+CMouseControllerState CPad::PCTempMouseControllerState;
 
 _TODO("gbFastTime");
-extern bool &gbFastTime;
+extern bool gbFastTime;
 
 void WeaponCheat()
 {
@@ -205,7 +207,7 @@ void ArmourCheat()
 void WantedLevelUpCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT5"), true);
-	FindPlayerPed()->SetWantedLevel(min(FindPlayerPed()->m_pWanted->m_nWantedLevel + 2, 6));
+	FindPlayerPed()->SetWantedLevel(Min(FindPlayerPed()->m_pWanted->m_nWantedLevel + 2, 6));
 }
 
 void WantedLevelDownCheat()
@@ -423,6 +425,7 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 {
 	CMouseControllerState state;
 	
+#if defined RW_D3D9 || defined RWLIBS
 	if ( PSGLOBAL(mouse) == nil )
 		_InputInitialiseMouse();
 	
@@ -432,7 +435,6 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 		devCaps.dwSize = sizeof(DIDEVCAPS);
 		
 		PSGLOBAL(mouse)->GetCapabilities(&devCaps);
-		
 		switch ( devCaps.dwButtons )
 		{
 			case 3:
@@ -456,6 +458,19 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 			state.WHEELUP = true;
 		}
 	}
+#else
+	// It seems there is no way to get number of buttons on mouse, so assign all buttons if we have mouse.
+	double xpos = 1.0f, ypos;
+	glfwGetCursorPos(PSGLOBAL(window), &xpos, &ypos);
+
+	if (xpos != NULL) {
+		state.MMB = true;
+		state.RMB = true;
+		state.LMB = true;
+		state.WHEELDN = true;
+		state.WHEELUP = true;
+	}
+#endif
 
 	return state;
 }
@@ -464,6 +479,7 @@ void CPad::UpdateMouse()
 {
 	if ( IsForegroundApp() )
 	{
+#if defined RW_D3D9 || defined RWLIBS
 		if ( PSGLOBAL(mouse) == nil )
 			_InputInitialiseMouse();
 		
@@ -500,6 +516,44 @@ void CPad::UpdateMouse()
 			OldMouseControllerState = NewMouseControllerState;
 			NewMouseControllerState = PCTempMouseControllerState;
 		}
+#else
+		double xpos = 1.0f, ypos;
+		glfwGetCursorPos(PSGLOBAL(window), &xpos, &ypos);
+		if (xpos == NULL)
+			return;
+
+		int32 signX = 1;
+		int32 signy = 1;
+
+		if (!FrontEndMenuManager.m_bMenuActive)
+		{
+			if (MousePointerStateHelper.bInvertVertically)
+				signy = -1;
+			if (MousePointerStateHelper.bInvertHorizontally)
+				signX = -1;
+		}
+
+		PCTempMouseControllerState.Clear();
+
+		PCTempMouseControllerState.x = (float)(signX * (xpos - PSGLOBAL(lastMousePos.x)));
+		PCTempMouseControllerState.y = (float)(signy * (ypos - PSGLOBAL(lastMousePos.y)));
+		PCTempMouseControllerState.LMB = glfwGetMouseButton(PSGLOBAL(window), GLFW_MOUSE_BUTTON_LEFT);
+		PCTempMouseControllerState.RMB = glfwGetMouseButton(PSGLOBAL(window), GLFW_MOUSE_BUTTON_RIGHT);
+		PCTempMouseControllerState.MMB = glfwGetMouseButton(PSGLOBAL(window), GLFW_MOUSE_BUTTON_MIDDLE);
+		PCTempMouseControllerState.MXB1 = glfwGetMouseButton(PSGLOBAL(window), GLFW_MOUSE_BUTTON_4);
+		PCTempMouseControllerState.MXB2 = glfwGetMouseButton(PSGLOBAL(window), GLFW_MOUSE_BUTTON_5);
+
+		PSGLOBAL(lastMousePos.x) = xpos;
+		PSGLOBAL(lastMousePos.y) = ypos;
+
+		if (PSGLOBAL(mouseWheel) > 0)
+			PCTempMouseControllerState.WHEELUP = 1;
+		else if (PSGLOBAL(mouseWheel) < 0)
+			PCTempMouseControllerState.WHEELDN = 1;
+
+		OldMouseControllerState = NewMouseControllerState;
+		NewMouseControllerState = PCTempMouseControllerState;
+#endif
 	}
 }
 
@@ -513,10 +567,10 @@ CControllerState CPad::ReconcileTwoControllersInput(CControllerState const &Stat
 	{ if ( State1.button || State2.button ) ReconState.button = 255; }
 	
 #define _RECONCILE_AXIS_POSITIVE(axis) \
-	{ if ( State1.axis >= 0 && State2.axis >= 0 ) ReconState.axis = max(State1.axis, State2.axis); }
+	{ if ( State1.axis >= 0 && State2.axis >= 0 ) ReconState.axis = Max(State1.axis, State2.axis); }
 
 #define _RECONCILE_AXIS_NEGATIVE(axis) \
-	{ if ( State1.axis <= 0 && State2.axis <= 0 ) ReconState.axis = min(State1.axis, State2.axis); }
+	{ if ( State1.axis <= 0 && State2.axis <= 0 ) ReconState.axis = Min(State1.axis, State2.axis); }
 
 #define _RECONCILE_AXIS(axis) \
 	{ _RECONCILE_AXIS_POSITIVE(axis); _RECONCILE_AXIS_NEGATIVE(axis); }
@@ -644,6 +698,8 @@ void CPad::AddToCheatString(char c)
 {
 	for ( int32 i = ARRAY_SIZE(CheatString) - 2; i >= 0; i-- )
 		CheatString[i + 1] = CheatString[i];
+	
+	CheatString[0] = c;
 
 #define _CHEATCMP(str)  strncmp(str, CheatString, sizeof(str)-1)
 	// "4414LDRULDRU"	-	R2 R2 L1 R2 LEFT DOWN RIGHT UP LEFT DOWN RIGHT UP
@@ -1283,7 +1339,7 @@ bool CPad::GetLookRight(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
+
 	return !!(NewState.RightShoulder2 && !NewState.LeftShoulder2);
 }
 
@@ -1292,7 +1348,7 @@ bool CPad::GetLookBehindForCar(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
+
 	return !!(NewState.RightShoulder2 && NewState.LeftShoulder2);
 }
 
@@ -1766,7 +1822,7 @@ bool CPad::CycleWeaponRightJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
+
 	return !!(NewState.RightShoulder2 && !OldState.RightShoulder2);
 }
 
@@ -1863,7 +1919,7 @@ bool CPad::ShiftTargetLeftJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
+
 	return !!(NewState.LeftShoulder2 && !OldState.LeftShoulder2);
 }
 
@@ -1871,7 +1927,7 @@ bool CPad::ShiftTargetRightJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
+
 	return !!(NewState.RightShoulder2 && !OldState.RightShoulder2);
 }
 
@@ -2402,111 +2458,3 @@ int32 *CPad::EditCodesForControls(int32 *pRsKeys, int32 nSize)
 	
 	return pRsKeys;
 }
-
-STARTPATCHES
-	InjectHook(0x490D90, &WeaponCheat, PATCH_JUMP);
-	InjectHook(0x490E70, &HealthCheat, PATCH_JUMP);
-	InjectHook(0x490EE0, &TankCheat, PATCH_JUMP);
-	InjectHook(0x491040, &BlowUpCarsCheat, PATCH_JUMP);
-	InjectHook(0x4910B0, &ChangePlayerCheat, PATCH_JUMP);
-	InjectHook(0x4911C0, &MayhemCheat, PATCH_JUMP);
-	InjectHook(0x491270, &EverybodyAttacksPlayerCheat, PATCH_JUMP);
-	InjectHook(0x491370, &WeaponsForAllCheat, PATCH_JUMP);
-	InjectHook(0x4913A0, &FastTimeCheat, PATCH_JUMP);
-	InjectHook(0x4913F0, &SlowTimeCheat, PATCH_JUMP);
-	InjectHook(0x491430, &MoneyCheat, PATCH_JUMP);
-	InjectHook(0x491460, &ArmourCheat, PATCH_JUMP);
-	InjectHook(0x491490, &WantedLevelUpCheat, PATCH_JUMP);
-	InjectHook(0x4914F0, &WantedLevelDownCheat, PATCH_JUMP);
-	InjectHook(0x491520, &SunnyWeatherCheat, PATCH_JUMP);
-	InjectHook(0x491550, &CloudyWeatherCheat, PATCH_JUMP);
-	InjectHook(0x491580, &RainyWeatherCheat, PATCH_JUMP);
-	InjectHook(0x4915B0, &FoggyWeatherCheat, PATCH_JUMP);
-	InjectHook(0x4915E0, &FastWeatherCheat, PATCH_JUMP);
-	InjectHook(0x491610, &OnlyRenderWheelsCheat, PATCH_JUMP);
-	InjectHook(0x491640, &ChittyChittyBangBangCheat, PATCH_JUMP);
-	InjectHook(0x491670, &StrongGripCheat, PATCH_JUMP);
-	InjectHook(0x4916A0, &NastyLimbsCheat, PATCH_JUMP);
-
-	InjectHook(0x4916C0, &CControllerState::Clear, PATCH_JUMP);
-	InjectHook(0x491760, &CKeyboardState::Clear, PATCH_JUMP);
-	InjectHook(0x491A10, &CPad::Clear, PATCH_JUMP);
-	InjectHook(0x491B50, &CPad::ClearMouseHistory, PATCH_JUMP);
-	//InjectHook(0x491B80, &CMouseControllerState::CMouseControllerState, PATCH_JUMP);
-	InjectHook(0x491BB0, &CMouseControllerState::Clear, PATCH_JUMP);
-	InjectHook(0x491BD0, &CMousePointerStateHelper::GetMouseSetUp, PATCH_JUMP);
-	InjectHook(0x491CA0, &CPad::UpdateMouse, PATCH_JUMP);
-	InjectHook(0x491E60, &CPad::ReconcileTwoControllersInput, PATCH_JUMP);
-	InjectHook(0x492230, &CPad::StartShake, PATCH_JUMP);
-	InjectHook(0x492290, &CPad::StartShake_Distance, PATCH_JUMP);
-	InjectHook(0x492360, &CPad::StartShake_Train, PATCH_JUMP);
-	InjectHook(0x492450, &CPad::AddToPCCheatString, PATCH_JUMP);
-	InjectHook(0x492720, CPad::UpdatePads, PATCH_JUMP);
-	InjectHook(0x492C60, &CPad::ProcessPCSpecificStuff, PATCH_JUMP);
-	InjectHook(0x492C70, &CPad::Update, PATCH_JUMP);
-#pragma warning( push )
-#pragma warning( disable : 4573)
-	InjectHook(0x492F00, (void (*)())CPad::DoCheats, PATCH_JUMP);
-#pragma warning( pop )
-	InjectHook(0x492F20, (void (CPad::*)(int16))&CPad::DoCheats, PATCH_JUMP);
-	InjectHook(0x492F30, CPad::StopPadsShaking, PATCH_JUMP);
-	InjectHook(0x492F50, &CPad::StopShaking, PATCH_JUMP);
-	InjectHook(0x492F60, CPad::GetPad, PATCH_JUMP);
-	InjectHook(0x492F70, &CPad::GetSteeringLeftRight, PATCH_JUMP);
-	InjectHook(0x492FF0, &CPad::GetSteeringUpDown, PATCH_JUMP);
-	InjectHook(0x493070, &CPad::GetCarGunUpDown, PATCH_JUMP);
-	InjectHook(0x4930C0, &CPad::GetCarGunLeftRight, PATCH_JUMP);
-	InjectHook(0x493110, &CPad::GetPedWalkLeftRight, PATCH_JUMP);
-	InjectHook(0x493190, &CPad::GetPedWalkUpDown, PATCH_JUMP);
-	InjectHook(0x493210, &CPad::GetAnalogueUpDown, PATCH_JUMP);
-	InjectHook(0x493290, &CPad::GetLookLeft, PATCH_JUMP);
-	InjectHook(0x4932C0, &CPad::GetLookRight, PATCH_JUMP);
-	InjectHook(0x4932F0, &CPad::GetLookBehindForCar, PATCH_JUMP);
-	InjectHook(0x493320, &CPad::GetLookBehindForPed, PATCH_JUMP);
-	InjectHook(0x493350, &CPad::GetHorn, PATCH_JUMP);
-	InjectHook(0x4933F0, &CPad::HornJustDown, PATCH_JUMP);
-	InjectHook(0x493490, &CPad::GetCarGunFired, PATCH_JUMP);
-	InjectHook(0x4934F0, &CPad::CarGunJustDown, PATCH_JUMP);
-	InjectHook(0x493560, &CPad::GetHandBrake, PATCH_JUMP);
-	InjectHook(0x4935A0, &CPad::GetBrake, PATCH_JUMP);
-	InjectHook(0x4935F0, &CPad::GetExitVehicle, PATCH_JUMP);
-	InjectHook(0x493650, &CPad::ExitVehicleJustDown, PATCH_JUMP);
-	InjectHook(0x4936C0, &CPad::GetWeapon, PATCH_JUMP);
-	InjectHook(0x493700, &CPad::WeaponJustDown, PATCH_JUMP);
-	InjectHook(0x493780, &CPad::GetAccelerate, PATCH_JUMP);
-	InjectHook(0x4937D0, &CPad::CycleCameraModeUpJustDown, PATCH_JUMP);
-	InjectHook(0x493830, &CPad::CycleCameraModeDownJustDown, PATCH_JUMP);
-	InjectHook(0x493870, &CPad::ChangeStationJustDown, PATCH_JUMP);
-	InjectHook(0x493910, &CPad::CycleWeaponLeftJustDown, PATCH_JUMP);
-	InjectHook(0x493940, &CPad::CycleWeaponRightJustDown, PATCH_JUMP);
-	InjectHook(0x493970, &CPad::GetTarget, PATCH_JUMP);
-	InjectHook(0x4939D0, &CPad::TargetJustDown, PATCH_JUMP);
-	InjectHook(0x493A40, &CPad::JumpJustDown, PATCH_JUMP);
-	InjectHook(0x493A70, &CPad::GetSprint, PATCH_JUMP);
-	InjectHook(0x493AE0, &CPad::ShiftTargetLeftJustDown, PATCH_JUMP);
-	InjectHook(0x493B10, &CPad::ShiftTargetRightJustDown, PATCH_JUMP);
-	InjectHook(0x493B40, &CPad::GetAnaloguePadUp, PATCH_JUMP);
-	InjectHook(0x493BA0, &CPad::GetAnaloguePadDown, PATCH_JUMP);
-	InjectHook(0x493C00, &CPad::GetAnaloguePadLeft, PATCH_JUMP);
-	InjectHook(0x493C60, &CPad::GetAnaloguePadRight, PATCH_JUMP);
-	InjectHook(0x493CC0, &CPad::GetAnaloguePadLeftJustUp, PATCH_JUMP);
-	InjectHook(0x493D20, &CPad::GetAnaloguePadRightJustUp, PATCH_JUMP);
-	InjectHook(0x493D80, &CPad::ForceCameraBehindPlayer, PATCH_JUMP);
-	InjectHook(0x493E00, &CPad::SniperZoomIn, PATCH_JUMP);
-	InjectHook(0x493E70, &CPad::SniperZoomOut, PATCH_JUMP);
-	InjectHook(0x493EE0, &CPad::SniperModeLookLeftRight, PATCH_JUMP);
-	InjectHook(0x493F30, &CPad::SniperModeLookUpDown, PATCH_JUMP);
-	InjectHook(0x493F80, &CPad::LookAroundLeftRight, PATCH_JUMP);
-	InjectHook(0x494130, &CPad::LookAroundUpDown, PATCH_JUMP);
-	InjectHook(0x494290, &CPad::ResetAverageWeapon, PATCH_JUMP);
-	InjectHook(0x4942B0, CPad::PrintErrorMessage, PATCH_JUMP);
-	InjectHook(0x494420, LittleTest, PATCH_JUMP);
-	InjectHook(0x494450, CPad::ResetCheats, PATCH_JUMP);
-	InjectHook(0x4944B0, CPad::EditString, PATCH_JUMP);
-	InjectHook(0x494690, CPad::EditCodesForControls, PATCH_JUMP);
-
-	//InjectHook(0x494E50, `global constructor keyed to'Pad.cpp, PATCH_JUMP);
-	//InjectHook(0x494EB0, sub_494EB0, PATCH_JUMP);
-	//InjectHook(0x494ED0, &CPad::~CPad, PATCH_JUMP);
-	//InjectHook(0x494EE0, &CPad::CPad, PATCH_JUMP);
-ENDPATCHES

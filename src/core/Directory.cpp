@@ -1,5 +1,5 @@
 #include "common.h"
-#include "patcher.h"
+
 #include "General.h"
 #include "FileMgr.h"
 #include "Directory.h"
@@ -41,7 +41,21 @@ void
 CDirectory::AddItem(const DirectoryInfo &dirinfo)
 {
 	assert(numEntries < maxEntries);
+#ifdef FIX_BUGS
+	// don't add if already exists
+	uint32 offset, size;
+	if(FindItem(dirinfo.name, offset, size))
+		return;
+#endif
 	entries[numEntries++] = dirinfo;
+}
+
+void
+CDirectory::AddItem(const DirectoryInfo &dirinfo, int32 imgId)
+{
+	DirectoryInfo di = dirinfo;
+	di.offset |= imgId<<24;
+	AddItem(di);
 }
 
 bool
@@ -57,10 +71,3 @@ CDirectory::FindItem(const char *name, uint32 &offset, uint32 &size)
 		}
 	return false;
 }
-
-STARTPATCHES
-	InjectHook(0x473630, &CDirectory::ReadDirFile, PATCH_JUMP);
-	InjectHook(0x473690, &CDirectory::WriteDirFile, PATCH_JUMP);
-	InjectHook(0x473600, &CDirectory::AddItem, PATCH_JUMP);
-	InjectHook(0x4736E0, &CDirectory::FindItem, PATCH_JUMP);
-ENDPATCHES

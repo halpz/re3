@@ -18,7 +18,7 @@ struct AnimBlendFrameData
 #ifdef PED_SKIN
 	union {
 		RwFrame *frame;
-		RpHAnimStdKeyFrame *hanimframe;
+		RpHAnimStdKeyFrame *hanimFrame;
 	};
 	int32 nodeID;
 #else
@@ -50,4 +50,6 @@ public:
 #endif
 	void ForAllFrames(void (*cb)(AnimBlendFrameData*, void*), void *arg);
 };
+#ifndef PED_SKIN
 static_assert(sizeof(CAnimBlendClumpData) == 0x14, "CAnimBlendClumpData: error");
+#endif

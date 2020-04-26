@@ -1,3 +1,6 @@
+
+// DON'T include directly. crossplatform.h includes this if you're on Windows.
+
 #if (!defined(_PLATFORM_WIN_H))
 #define _PLATFORM_WIN_H
 
@@ -5,20 +8,10 @@
 #define RSREGSETBREAKALLOC(_name) /* No op */
 #endif /* (!defined(RSREGSETBREAKALLOC)) */
 
-enum eGameState
-{
-	GS_START_UP = 0,
-	GS_INIT_LOGO_MPEG,
-	GS_LOGO_MPEG,
-	GS_INIT_INTRO_MPEG,
-	GS_INTRO_MPEG,
-	GS_INIT_ONCE,
-	GS_INIT_FRONTEND,
-	GS_FRONTEND,
-	GS_INIT_PLAYING_GAME,
-	GS_PLAYING_GAME,
-	GS_ANIMVIEWER,
-};
+#ifndef _INC_WINDOWS
+#define _X86_
+#include <windef.h>
+#endif
 
 enum eWinVersion
 {
@@ -29,10 +22,9 @@ enum eWinVersion
 	OS_WINXP,
 };
 
-extern DWORD &_dwOperatingSystemVersion;
+extern DWORD _dwOperatingSystemVersion;
 
-extern RwUInt32 &gGameState;
-
+#ifdef __DINPUT_INCLUDED__
 /* platform specfic global data */
 typedef struct
 {
@@ -71,7 +63,6 @@ struct tJoy
 	bool         m_bInitialised;
 	bool         m_bHasAxisZ;
 	bool         m_bHasAxisR;
-	char _pad0;
 	int          m_nVendorID;
 	int          m_nProductID;
 };
@@ -86,16 +77,16 @@ public:
 };
 
 extern CJoySticks AllValidWinJoys;
+#endif
 
 #ifdef    __cplusplus
 extern "C"
 {
 #endif                          /* __cplusplus */
 
+#ifdef __DINPUT_INCLUDED__
 extern LRESULT      CALLBACK
 MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
-
-RwBool IsForegroundApp();
 
 HRESULT _InputInitialise();
 HRESULT _InputInitialiseMouse();
@@ -107,25 +98,15 @@ HRESULT _InputGetMouseState(DIMOUSESTATE2 *state);
 void _InputShutdown();
 BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext );
 BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key);
-void _InputTranslateShiftKeyUpDown(RsKeyCodes *rs);;
 BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, BOOLEAN bDown);
 BOOL _InputIsExtended(INT flag);
+#endif
 
-void InitialiseLanguage();
-RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode);
 void CenterVideo(void);
 void CloseClip(void);
-
-RwChar **_psGetVideoModeList();
-RwInt32 _psGetNumVideModes();
-
-void _psSelectScreenVM(RwInt32 videoMode);
-void HandleExit();
 
 #ifdef    __cplusplus
 }
 #endif                          /* __cplusplus */
 
-
-extern DWORD &_dwOperatingSystemVersion;
 #endif /* (!defined(_PLATFORM_WIN_H)) */

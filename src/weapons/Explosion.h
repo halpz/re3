@@ -46,4 +46,4 @@ public:
 	static void RemoveAllExplosionsInArea(CVector pos, float radius);
 };
 
-extern CExplosion (&gaExplosion)[NUM_EXPLOSIONS];
+extern CExplosion gaExplosion[NUM_EXPLOSIONS];

@@ -1,7 +1,7 @@
 #pragma once
 
-enum eLevelName
-{
+enum eLevelName {
+	LEVEL_IGNORE = -1, // beware, this is only used in CPhysical's m_nZoneLevel
 	LEVEL_NONE = 0,
 	LEVEL_INDUSTRIAL,
 	LEVEL_COMMERCIAL,
@@ -11,17 +11,18 @@ enum eLevelName
 class CGame
 {
 public:
-	static eLevelName &currLevel;
-	static bool &bDemoMode;
-	static bool &nastyGame;
-	static bool &frenchGame;
-	static bool &germanGame;
+	static eLevelName currLevel;
+	static bool bDemoMode;
+	static bool nastyGame;
+	static bool frenchGame;
+	static bool germanGame;
 #ifdef MORE_LANGUAGES
+	static bool polishGame;
 	static bool russianGame;
 #endif
-	static bool &noProstitutes;
-	static bool &playingIntro;
-	static char *aDatFile;	//[32];
+	static bool noProstitutes;
+	static bool playingIntro;
+	static char aDatFile[32];
 
 	static bool InitialiseOnceBeforeRW(void);
 	static bool InitialiseRenderWare(void);

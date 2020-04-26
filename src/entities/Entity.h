@@ -4,6 +4,7 @@
 #include "Placeable.h"
 
 struct CReference;
+class CPtrList;
 
 enum eEntityType
 {
@@ -39,25 +40,25 @@ public:
 	uint32 m_status : 5;
 
 	// flagsA
-	uint32 bUsesCollision : 1;
-	uint32 bCollisionProcessed : 1;
-	uint32 bIsStatic : 1;
-	uint32 bHasContacted : 1;
+	uint32 bUsesCollision : 1;			// does entity use collision
+	uint32 bCollisionProcessed : 1;		// has object been processed by a ProcessEntityCollision function
+	uint32 bIsStatic : 1;				// is entity static
+	uint32 bHasContacted : 1;			// has entity processed some contact forces
 	uint32 bPedPhysics : 1;
-	uint32 bIsStuck : 1;
-	uint32 bIsInSafePosition : 1;
+	uint32 bIsStuck : 1;				// is entity stuck
+	uint32 bIsInSafePosition : 1;		// is entity in a collision free safe position
 	uint32 bUseCollisionRecords : 1;
 
 	// flagsB
-	uint32 bWasPostponed : 1;
+	uint32 bWasPostponed : 1;			// was entity control processing postponed
 	uint32 bExplosionProof : 1;
-	uint32 bIsVisible : 1;
-	uint32 bHasCollided : 1;	//
+	uint32 bIsVisible : 1;				//is the entity visible
+	uint32 bHasCollided : 1;
 	uint32 bRenderScorched : 1;
 	uint32 bHasBlip : 1;
-	uint32 bIsBIGBuilding : 1;
+	uint32 bIsBIGBuilding : 1;			// Set if this entity is a big building
 	// VC inserts one more flag here: if drawdist <= 2000
-	uint32 bRenderDamaged : 1;
+	uint32 bRenderDamaged : 1;			// use damaged LOD models for objects with applicable damage
 
 	// flagsC
 	uint32 bBulletProof : 1;
@@ -65,22 +66,22 @@ public:
 	uint32 bCollisionProof : 1;
 	uint32 bMeleeProof : 1;
 	uint32 bOnlyDamagedByPlayer : 1;
-	uint32 bStreamingDontDelete : 1;
+	uint32 bStreamingDontDelete : 1;	// Dont let the streaming remove this 
 	uint32 bZoneCulled : 1;
-	uint32 bZoneCulled2 : 1;	// only treadables+10m
+	uint32 bZoneCulled2 : 1;    // only treadables+10m
 
 	// flagsD
-	uint32 bRemoveFromWorld : 1;
-	uint32 bHasHitWall : 1;
-	uint32 bImBeingRendered : 1;
+	uint32 bRemoveFromWorld : 1;		// remove this entity next time it should be processed
+	uint32 bHasHitWall : 1;				// has collided with a building (changes subsequent collisions)
+	uint32 bImBeingRendered : 1;		// don't delete me because I'm being rendered
 	uint32 bTouchingWater : 1;	// used by cBuoyancy::ProcessBuoyancy
 	uint32 bIsSubway : 1;	// set when subway, but maybe different meaning?
-	uint32 bDrawLast : 1;
+	uint32 bDrawLast : 1;				// draw object last
 	uint32 bNoBrightHeadLights : 1;
 	uint32 bDoNotRender : 1;
 
 	// flagsE
-	uint32 bDistanceFade : 1;
+	uint32 bDistanceFade : 1;			// Fade entity because it is far away
 	uint32 m_flagE2 : 1;
 
 	uint16 m_scanCode;
@@ -147,10 +148,16 @@ public:
 	void ResolveReferences(void);
 	void PruneReferences(void);
 
+#ifdef PED_SKIN
+	void UpdateRpHAnim(void);
+#endif
+
 	void PreRenderForGlassWindow(void);
 	void AddSteamsFromGround(CVector *unused);
 	void ModifyMatrixForTreeInWind(void);
 	void ModifyMatrixForBannerInWind(void);
 	void ProcessLightsForEntity(void);
+
+	static void AddSteamsFromGround(CPtrList& list);
 };
 static_assert(sizeof(CEntity) == 0x64, "CEntity: error");
