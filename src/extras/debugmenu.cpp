@@ -1068,13 +1068,13 @@ drawArrow(RwRect r, int direction, int style)
 	int top = r.y;
 	int bottom = r.y+r.h;
 
-	float umin = 0.5f / width;
-	float vmin = 0.5f / height;
-	float umax = (width + 0.5f) / width;
-	float vmax = (height + 0.5f) / height;
+	float umin = HALFPX / width;
+	float vmin = HALFPX / height;
+	float umax = (width + HALFPX) / width;
+	float vmax = (height + HALFPX) / height;
 	if(direction < 0){
-		vmin = (height - 0.5f) / height;
-		vmax = -0.5f / height;
+		vmin = (height - HALFPX) / height;
+		vmax = -HALFPX / height;
 	}
 
 	if(style){
@@ -1167,10 +1167,10 @@ drawMouse(void)
 	float h = RwRasterGetHeight(cursor);
 	float recipz = 1.0f/RwCameraGetNearClipPlane(cam);
 
-	float umin = 0.5f / w;
-	float vmin = 0.5f / h;
-	float umax = (w + 0.5f) / w;
-	float vmax = (h + 0.5f) / h;
+	float umin = HALFPX / w;
+	float vmin = HALFPX / h;
+	float umax = (w + HALFPX) / w;
+	float vmax = (h + HALFPX) / h;
 
 	vert = vertices;
 	RwIm2DVertexSetScreenX(vert, x);

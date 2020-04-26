@@ -58,13 +58,13 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
 	float zero, xmax, ymax;
 
 	if(RwRasterGetDepth(RwCameraGetRaster(cam)) == 16){
-		zero = 0.5f;
-		xmax = rect->w + 0.5f;
-		ymax = rect->h + 0.5f;
+		zero = HALFPX;
+		xmax = rect->w + HALFPX;
+		ymax = rect->h + HALFPX;
 	}else{
-		zero = -0.5f;
-		xmax = rect->w - 0.5f;
-		ymax = rect->h - 0.5f;
+		zero = -HALFPX;
+		xmax = rect->w - HALFPX;
+		ymax = rect->h - HALFPX;
 	}
 
 	RwIm2DVertexSetScreenX(&Vertex[0], zero);

@@ -31,11 +31,18 @@
 #define HIERNODEID(hier, i) ((hier)->nodeInfo[i].id)
 #define HANIMFRAMES(anim) ((anim)->keyframes)
 #else
+#define RWHALFPIXEL	// always d3d
 #define STREAMPOS(str) ((str)->Type.memory.position)
 #define STREAMFILE(str) ((str)->Type.file.fpFile)
 #define HIERNODEINFO(hier) ((hier)->pNodeInfo)
 #define HIERNODEID(hier, i) ((hier)->pNodeInfo[i].nodeID)
 #define HANIMFRAMES(anim) ((anim)->pFrames)
+#endif
+
+#ifdef RWHALFPIXEL
+#define HALFPX (0.5f)
+#else
+#define HALFPX (0.0f)
 #endif
 
 #define rwVENDORID_ROCKSTAR 0x0253F2
