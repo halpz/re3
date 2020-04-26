@@ -95,13 +95,6 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 	return w>>p & (1<<s)-1;
 }
 
-
-#ifndef RWLIBS
-// little hack
-extern void **rwengine;
-#define RwEngineInstance (*rwengine)
-#endif
-
 #include "skeleton.h"
 #include "Draw.h"
 
