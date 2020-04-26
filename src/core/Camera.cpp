@@ -71,11 +71,27 @@ bool bDidWeProcessAnyCinemaCam;
 #define CTRLDOWN(key) ((KEYDOWN(rsLCTRL) || KEYDOWN(rsRCTRL)) && KEYDOWN((RsKeyCodes)key))
 #endif
 
+CCamera::CCamera(void)
+{
+#ifdef GTA3_1_1_PATCH
+	m_fMouseAccelHorzntl = 0.0025f;
+	m_fMouseAccelVertical = 0.003f;
+#endif
+	Init();
+}
+
 void
 CCamera::Init(void)
 {
+#ifdef GTA3_1_1_PATCH
+	float fMouseAccelHorzntl = m_fMouseAccelHorzntl;
+	float fMouseAccelVertical = m_fMouseAccelVertical;
+#endif
 	memset(this, 0, sizeof(CCamera));	// getting rid of vtable, eh?
-
+#ifdef GTA3_1_1_PATCH
+	m_fMouseAccelHorzntl = fMouseAccelHorzntl;
+	m_fMouseAccelVertical = fMouseAccelVertical;
+#endif
 	m_pRwCamera = nil;
 	m_1rstPersonRunCloseToAWall = false;
 	m_fPositionAlongSpline = 0.0f;
@@ -191,8 +207,10 @@ CCamera::Init(void)
 	m_uiTransitionState = 0;
 	m_uiTimeTransitionStart = 0;
 	m_bLookingAtPlayer = true;
+#ifndef GTA3_1_1_PATCH
 	m_fMouseAccelHorzntl = 0.0025f;
 	m_fMouseAccelVertical = 0.003f;
+#endif
 	m_f3rdPersonCHairMultX = 0.53f;
 	m_f3rdPersonCHairMultY = 0.4f;
 }

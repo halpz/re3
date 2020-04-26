@@ -256,10 +256,6 @@ void CUpsideDownCarCheck::UpdateTimers()
 {
 	uint32 timeStep = CTimer::GetTimeStepInMilliseconds();
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
-#ifdef FIX_BUGS
-		if (m_sCars[i].m_nVehicleIndex == -1)
-			continue;
-#endif
 		CVehicle* v = CPools::GetVehiclePool()->GetAt(m_sCars[i].m_nVehicleIndex);
 		if (v){
 			if (IsCarUpsideDown(m_sCars[i].m_nVehicleIndex))
@@ -1674,13 +1670,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		return 0;
 	}
 	case COMMAND_GENERATE_RANDOM_INT:
-#ifdef FIX_BUGS
-		// Not a very good fix but before switching to PS2 rand, it sort of works
-		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = CGeneral::GetRandomNumberInRange(0, 65535);
-#else
-		/* On PC between 0 and 32767, even though script expects values between 0 and 65536 */
 		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) = CGeneral::GetRandomNumber();
-#endif
 		return 0;
 	case COMMAND_CREATE_CHAR:
 	{
@@ -2314,20 +2304,15 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		assert(pCurrent); // GetIndex(0) doesn't look good
 		int handle = CPools::GetVehiclePool()->GetIndex(pCurrent);
 		if (handle != CTheScripts::StoreVehicleIndex && m_bIsMissionScript){
-#ifdef FIX_BUGS
-			if (CTheScripts::StoreVehicleIndex != -1)
-#endif
-			{
-				CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
-				if (pOld){
-					CCarCtrl::RemoveFromInterestingVehicleList(pOld);
-					if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom){
-						pOld->VehicleCreatedBy = RANDOM_VEHICLE;
-						pOld->bIsLocked = false;
-						CCarCtrl::NumRandomCars++;
-						CCarCtrl::NumMissionCars--;
-						CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
-					}
+			CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
+			if (pOld){
+				CCarCtrl::RemoveFromInterestingVehicleList(pOld);
+				if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom){
+					pOld->VehicleCreatedBy = RANDOM_VEHICLE;
+					pOld->bIsLocked = false;
+					CCarCtrl::NumRandomCars++;
+					CCarCtrl::NumMissionCars--;
+					CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				}
 			}
 
@@ -2370,20 +2355,15 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		assert(pCurrent); // Here pCurrent shouldn't be NULL anyway
 		int handle = CPools::GetVehiclePool()->GetIndex(pCurrent);
 		if (handle != CTheScripts::StoreVehicleIndex && m_bIsMissionScript) {
-#ifdef FIX_BUGS
-			if (CTheScripts::StoreVehicleIndex != -1)
-#endif
-			{
-				CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
-				if (pOld){
-					CCarCtrl::RemoveFromInterestingVehicleList(pOld);
-					if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom){
-						pOld->VehicleCreatedBy = RANDOM_VEHICLE;
-						pOld->bIsLocked = false;
-						CCarCtrl::NumRandomCars++;
-						CCarCtrl::NumMissionCars--;
-						CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
-					}
+			CVehicle* pOld = CPools::GetVehiclePool()->GetAt(CTheScripts::StoreVehicleIndex);
+			if (pOld){
+				CCarCtrl::RemoveFromInterestingVehicleList(pOld);
+				if (pOld->VehicleCreatedBy == MISSION_VEHICLE && CTheScripts::StoreVehicleWasRandom){
+					pOld->VehicleCreatedBy = RANDOM_VEHICLE;
+					pOld->bIsLocked = false;
+					CCarCtrl::NumRandomCars++;
+					CCarCtrl::NumMissionCars--;
+					CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				}
 			}
 
@@ -9649,6 +9629,16 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CPed::nEnterCarRangeMultiplier = *(float*)&ScriptParams[0];
 #else
 		CPed::nEnterCarRangeMultiplier = (float)ScriptParams[0];
+#endif
+		return 0;
+#endif
+#ifndef GTA3_1_1_PATCH
+	case COMMAND_SET_THREAT_REACTION_RANGE_MULTIPLIER:
+		CollectParameters(&m_nIp, 1);
+#ifdef FIX_BUGS
+		CPed::nThreatReactionRangeMultiplier = *(float*)&ScriptParams[0];
+#else
+		CPed::nThreatReactionRangeMultiplier = (float)ScriptParams[0];
 #endif
 		return 0;
 #endif

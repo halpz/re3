@@ -450,3 +450,7 @@ public:
 
 VALIDATE_SIZE(CPad, 0xFC);
 extern CPad Pads[MAX_PADS];
+
+#ifdef ALLCARSHELI_CHEAT
+extern bool bAllCarCheat;
+#endif
