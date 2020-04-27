@@ -298,6 +298,12 @@ void CBulletTraces::Render(void)
 		if (!aTraces[i].m_bInUse)
 			continue;
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+#ifdef FIX_BUGS
+		// Raster has no transparent pixels so it relies on the raster format having alpha
+		// to turn on blending. librw image conversion might get rid of it right now so let's
+		// just force it on.
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+#endif
 		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpShadowExplosionTex));
