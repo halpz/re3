@@ -294,6 +294,14 @@ static rw::Raster*
 ConvertTexRaster(rw::Raster *ras)
 {
 	using namespace rw;
+
+	if(ras->platform == rw::platform)
+		return ras;
+	// compatible platforms
+	if(ras->platform == PLATFORM_D3D8 && rw::platform == PLATFORM_D3D9 ||
+	   ras->platform == PLATFORM_D3D9 && rw::platform == PLATFORM_D3D8)
+		return ras;
+
 	Image *img = ras->toImage();
 	ras->destroy();
 	img->unindex();
@@ -306,9 +314,7 @@ ConvertTexRaster(rw::Raster *ras)
 RwBool rwNativeTextureHackRead(RwStream *stream, RwTexture **tex, RwInt32 size)
 {
 	*tex = Texture::streamReadNative(stream);
-#ifdef RW_GL3
-	if(strcmp((*tex)->name, "copnu") == 0)
-		tex = tex;
+#ifdef LIBRW
 	(*tex)->raster = ConvertTexRaster((*tex)->raster);
 #endif
 	return *tex != nil;
@@ -830,4 +836,10 @@ RwBool       RtCharsetDestroy(RtCharset * charSet) { charSet->destroy(); return 
 
 
 // fake shit
-RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags) { return 1; }
+RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags)
+{
+#ifdef RW_GL3
+	return '3LGO';
+#endif
+	return flags & 0xF00;
+}
