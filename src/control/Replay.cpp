@@ -701,7 +701,7 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 		vp->door_angles[1] = 127.0f / PI * car->Doors[3].m_fAngle;
 		vp->door_status = 0;
 		for (int i = 0; i < 6; i++){
-			if (car->Damage.GetDoorStatus(i) == 3)
+			if (car->Damage.GetDoorStatus(i) == DOOR_STATUS_MISSING)
 				vp->door_status |= BIT(i);
 		}
 	}
@@ -744,27 +744,27 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 			car->Damage.SetDoorStatus(DOOR_FRONT_LEFT, DOOR_STATUS_SWINGING);
 		if (vp->door_angles[1])
 			car->Damage.SetDoorStatus(DOOR_FRONT_RIGHT, DOOR_STATUS_SWINGING);
-		if (vp->door_status & 1 && car->Damage.GetDoorStatus(DOOR_BONNET) != 3){
+		if (vp->door_status & 1 && car->Damage.GetDoorStatus(DOOR_BONNET) != DOOR_STATUS_MISSING){
 			car->Damage.SetDoorStatus(DOOR_BONNET, DOOR_STATUS_MISSING);
 			car->SetDoorDamage(CAR_BONNET, DOOR_BONNET, true);
 		}
-		if (vp->door_status & 2 && car->Damage.GetDoorStatus(DOOR_BOOT) != 3) {
+		if (vp->door_status & 2 && car->Damage.GetDoorStatus(DOOR_BOOT) != DOOR_STATUS_MISSING) {
 			car->Damage.SetDoorStatus(DOOR_BOOT, DOOR_STATUS_MISSING);
 			car->SetDoorDamage(CAR_BOOT, DOOR_BOOT, true);
 		}
-		if (vp->door_status & 4 && car->Damage.GetDoorStatus(DOOR_FRONT_LEFT) != 3) {
+		if (vp->door_status & 4 && car->Damage.GetDoorStatus(DOOR_FRONT_LEFT) != DOOR_STATUS_MISSING) {
 			car->Damage.SetDoorStatus(DOOR_FRONT_LEFT, DOOR_STATUS_MISSING);
 			car->SetDoorDamage(CAR_DOOR_LF, DOOR_FRONT_LEFT, true);
 		}
-		if (vp->door_status & 8 && car->Damage.GetDoorStatus(DOOR_FRONT_RIGHT) != 3) {
+		if (vp->door_status & 8 && car->Damage.GetDoorStatus(DOOR_FRONT_RIGHT) != DOOR_STATUS_MISSING) {
 			car->Damage.SetDoorStatus(DOOR_FRONT_RIGHT, DOOR_STATUS_MISSING);
 			car->SetDoorDamage(CAR_DOOR_RF, DOOR_FRONT_RIGHT, true);
 		}
-		if (vp->door_status & 0x10 && car->Damage.GetDoorStatus(DOOR_REAR_LEFT) != 3) {
+		if (vp->door_status & 0x10 && car->Damage.GetDoorStatus(DOOR_REAR_LEFT) != DOOR_STATUS_MISSING) {
 			car->Damage.SetDoorStatus(DOOR_REAR_LEFT, DOOR_STATUS_MISSING);
 			car->SetDoorDamage(CAR_DOOR_LR, DOOR_REAR_LEFT, true);
 		}
-		if (vp->door_status & 0x20 && car->Damage.GetDoorStatus(DOOR_REAR_RIGHT) != 3) {
+		if (vp->door_status & 0x20 && car->Damage.GetDoorStatus(DOOR_REAR_RIGHT) != DOOR_STATUS_MISSING) {
 			car->Damage.SetDoorStatus(DOOR_REAR_RIGHT, DOOR_STATUS_MISSING);
 			car->SetDoorDamage(CAR_DOOR_RR, DOOR_REAR_RIGHT, true);
 		}

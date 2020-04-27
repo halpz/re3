@@ -242,12 +242,31 @@ public:
 };
 
 
-class cVehicleParams;
+class cTransmission;
 class CPlane;
 class CVehicle;
 class CPed;
-class cPedParams;
-class cTransmission;
+
+class cPedParams
+{
+public:
+	bool m_bDistanceCalculated;
+	float m_fDistance;
+	CPed *m_pPed;
+};
+
+class cVehicleParams
+{
+public:
+	bool m_bDistanceCalculated;
+	float m_fDistance;
+	CVehicle *m_pVehicle;
+	cTransmission *m_pTransmission;
+	int m_nIndex;
+	float m_fVelocityChange;
+};
+
+static_assert(sizeof(cVehicleParams) == 0x18, "cVehicleParams: error");
 
 enum {
 	/*

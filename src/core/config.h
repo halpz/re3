@@ -191,7 +191,7 @@ enum Config {
 #define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
 #define MORE_LANGUAGES		// Add more translations to the game
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch) 
-//#define USE_TXD_CDIMAGE		// generate and load textures from txd.img
+#define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 //#define USE_TEXTURE_POOL
 //#define OPENAL
 

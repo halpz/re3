@@ -291,19 +291,4 @@ static_assert(offsetof(CVehicle, m_pCurGroundEntity) == 0x1E0, "CVehicle: error"
 static_assert(offsetof(CVehicle, m_nAlarmState) == 0x1A0, "CVehicle: error");
 static_assert(offsetof(CVehicle, m_nLastWeaponDamage) == 0x228, "CVehicle: error");
 
-class cTransmission;
-
-class cVehicleParams
-{
-public:
-	bool m_bDistanceCalculated;
-	float m_fDistance;
-	CVehicle *m_pVehicle;
-	cTransmission *m_pTransmission;
-	int m_nIndex;
-	float m_fVelocityChange;
-};
-
-static_assert(sizeof(cVehicleParams) == 0x18, "cVehicleParams: error");
-
 void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);
