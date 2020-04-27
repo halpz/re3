@@ -567,6 +567,9 @@ public:
 	bool CanSeeEntity(CEntity*, float);
 	void RestorePreviousObjective(void);
 	void SetIdle(void);
+#ifdef _MSC_VER
+	__declspec(noinline) // workaround for a compiler bug, hooray MS :P
+#endif
 	void SetObjective(eObjective, void*);
 	void SetObjective(eObjective);
 	void SetObjective(eObjective, int16, int16);
