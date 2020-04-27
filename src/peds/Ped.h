@@ -888,15 +888,6 @@ public:
 #endif
 };
 
-class cPedParams
-{
-public:
-	bool m_bDistanceCalculated;
-	char gap_1[3];
-	float m_fDistance;
-	CPed *m_pPed;
-};
-
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 
 #ifndef PED_SKIN
