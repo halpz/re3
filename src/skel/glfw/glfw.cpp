@@ -248,83 +248,6 @@ psNativeTextureSupport(void)
 /*
  *****************************************************************************
  */
-static char cpuvendor[16] = "UnknownVendr";
-__declspec(naked)  const char * _psGetCpuVendr()
-{
-	__asm
-	{
-		push	ebx
-		xor		eax, eax
-		cpuid
-		mov		dword ptr [cpuvendor+0], ebx
-		mov		dword ptr [cpuvendor+4], edx
-		mov		dword ptr [cpuvendor+8], ecx
-		mov		eax, offset cpuvendor
-		pop		ebx
-		retn
-	}
-}
-
-/*
- *****************************************************************************
- */
-__declspec(naked) RwUInt32 _psGetCpuFeatures()
-{
-	__asm
-	{
-		mov		eax, 1
-		cpuid
-		mov		eax, edx
-		retn
-	}
-}
-
-/*
- *****************************************************************************
- */
-__declspec(naked) RwUInt32 _psGetCpuFeaturesEx()
-{
-	__asm
-	{
-		mov		eax, 80000000h
-		cpuid
-
-		cmp		eax, 80000000h
-		jbe		short _NOEX
-
-		mov		eax, 80000001h
-		cpuid
-
-		mov		eax, edx
-		jmp		short _RETEX
-
-_NOEX:
-		xor		eax, eax
-		mov		eax, eax
-		
-_RETEX:
-		retn   
-	}
-}
-
-void _psPrintCpuInfo()
-{
-	RwUInt32 features	= _psGetCpuFeatures();
-	RwUInt32 FeaturesEx = _psGetCpuFeaturesEx();
-
-	debug("Running on a %s", _psGetCpuVendr());
-
-	if ( features & 0x800000 )
-		debug("with MMX");
-	if ( features & 0x2000000 )
-		debug("with SSE");
-	if ( FeaturesEx & 0x80000000 )
-		debug("with 3DNow");
-}
-
-/*
- *****************************************************************************
- */
 #ifdef UNDER_CE
 #define CMDSTR	LPWSTR
 #else
@@ -356,8 +279,6 @@ psInitialise(void)
 	
 	gGameState = GS_START_UP;
 	TRACE("gGameState = GS_START_UP");
-	
-	_psPrintCpuInfo();
 	
 	OSVERSIONINFO verInfo;
 	verInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
