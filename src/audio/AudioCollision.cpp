@@ -164,16 +164,16 @@ cAudioManager::SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter)
 		uint8 emittingVol = SetLoopingCollisionRequestedSfxFreqAndGetVol(col);
 		if(emittingVol) {
 			m_sQueueSample.m_fDistance = Sqrt(col->m_fDistance);
-			m_sQueueSample.m_bVolume =
+			m_sQueueSample.m_nVolume =
 			    ComputeVolume(emittingVol, CollisionSoundIntensity, m_sQueueSample.m_fDistance);
-			if(m_sQueueSample.m_bVolume) {
+			if(m_sQueueSample.m_nVolume) {
 				m_sQueueSample.m_nCounter = counter;
 				m_sQueueSample.m_vecPos = col->m_vecPosition;
-				m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nReleasingVolumeModificator = 7;
 				m_sQueueSample.m_nLoopCount = 0;
-				m_sQueueSample.m_bEmittingVolume = emittingVol;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_nLoopStart =
 				    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nLoopEnd =
@@ -231,9 +231,9 @@ cAudioManager::SetUpOneShotCollisionSound(cAudioCollision *col)
 		emittingVol = 40.f * ratio;
 		if(emittingVol) {
 			m_sQueueSample.m_fDistance = Sqrt(col->m_fDistance);
-			m_sQueueSample.m_bVolume =
+			m_sQueueSample.m_nVolume =
 			    ComputeVolume(emittingVol, CollisionSoundIntensity, m_sQueueSample.m_fDistance);
-			if(m_sQueueSample.m_bVolume) {
+			if(m_sQueueSample.m_nVolume) {
 				m_sQueueSample.m_nSampleIndex = gOneShotCol[s1];
 				switch(m_sQueueSample.m_nSampleIndex) {
 				case SFX_COL_TARMAC_1:
@@ -289,11 +289,11 @@ cAudioManager::SetUpOneShotCollisionSound(cAudioCollision *col)
 				m_sQueueSample.m_nCounter = counter++;
 				if(counter >= 255) counter = 28;
 				m_sQueueSample.m_vecPos = col->m_vecPosition;
-				m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nReleasingVolumeModificator = 11;
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_bEmittingVolume = emittingVol;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_nLoopStart = 0;
 				m_sQueueSample.m_nLoopEnd = -1;
 				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
@@ -380,7 +380,7 @@ cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface
 	CVector v1;
 	CVector v2;
 
-	if(!m_bIsInitialised || m_nCollisionEntity < 0 || m_bUserPause ||
+	if(!m_bIsInitialised || m_nCollisionEntity < 0 || m_nUserPause ||
 	   (velocity < 0.0016f && collisionPower < 0.01f))
 		return;
 

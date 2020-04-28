@@ -2,6 +2,8 @@
 
 #define NUMAUDIOCOLLISIONS 10
 
+class CEntity;
+
 class cAudioCollision
 {
 public:

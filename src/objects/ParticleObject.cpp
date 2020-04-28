@@ -7,6 +7,7 @@
 #include "Particle.h"
 #include "Camera.h"
 #include "Game.h"
+#include "DMAudio.h"
 
 
 CParticleObject gPObjectArray[MAX_PARTICLEOBJECTS];

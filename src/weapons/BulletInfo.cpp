@@ -3,7 +3,7 @@
 #include "BulletInfo.h"
 
 #include "AnimBlendAssociation.h"
-#include "AudioManager.h"
+#include "DMAudio.h"
 #include "AudioScriptObject.h"
 #ifdef FIX_BUGS
 #include "Collision.h"
