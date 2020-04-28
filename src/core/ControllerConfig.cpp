@@ -685,7 +685,15 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown_Driving(int32 
 	}
 	
 	bool isDodo = false;
-	if (FindPlayerVehicle() && (FindPlayerVehicle()->IsVehicle() && FindPlayerVehicle()->GetModelIndex() == MI_DODO))
+	if (FindPlayerVehicle() && (FindPlayerVehicle()->IsVehicle() && (
+		FindPlayerVehicle()->GetModelIndex() == MI_DODO
+#ifdef FIX_BUGS
+		|| CVehicle::bAllDodosCheat
+#ifdef ALLCARSHELI_CHEAT
+		|| bAllCarCheat
+#endif
+#endif
+		)))
 	{
 		isDodo = true;
 	}
