@@ -130,18 +130,18 @@ cAudioManager::DoPoliceRadioCrackle()
 	m_sQueueSample.m_nEntityIndex = m_nPoliceChannelEntity;
 	m_sQueueSample.m_nCounter = 0;
 	m_sQueueSample.m_nSampleIndex = SFX_POLICE_RADIO_CRACKLE;
-	m_sQueueSample.m_bBankIndex = SAMPLEBANK_MAIN;
+	m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 	m_sQueueSample.m_bIs2D = true;
 	m_sQueueSample.m_nReleasingVolumeModificator = 10;
 	m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_POLICE_RADIO_CRACKLE);
-	m_sQueueSample.m_bVolume = m_anRandomTable[2] % 20 + 15;
+	m_sQueueSample.m_nVolume = m_anRandomTable[2] % 20 + 15;
 	m_sQueueSample.m_nLoopCount = 0;
-	m_sQueueSample.m_bEmittingVolume = m_sQueueSample.m_bVolume;
+	m_sQueueSample.m_nEmittingVolume = m_sQueueSample.m_nVolume;
 	m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_POLICE_RADIO_CRACKLE);
 	m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_POLICE_RADIO_CRACKLE);
 	m_sQueueSample.m_bReleasingSoundFlag = false;
 	m_sQueueSample.m_bReverbFlag = false;
-	m_sQueueSample.m_bOffset = 63;
+	m_sQueueSample.m_nOffset = 63;
 	m_sQueueSample.m_nReleasingVolumeDivider = 3;
 	m_sQueueSample.m_bRequireReflection = false;
 	AddSampleToRequestedQueue();
@@ -155,7 +155,7 @@ cAudioManager::ServicePoliceRadio()
 
 	if(!m_bIsInitialised) return;
 
-	if(!m_bUserPause) {
+	if(!m_nUserPause) {
 		bool crimeReport = SetupCrimeReport();
 #ifdef FIX_BUGS // Crash at 0x5fe6ef
 		if(CReplay::IsPlayingBack() || !FindPlayerPed() || !FindPlayerPed()->m_pWanted)
@@ -190,14 +190,14 @@ cAudioManager::ServicePoliceRadioChannel(int32 wantedLevel)
 
 	if (!m_bIsInitialised) return;
 
-	if (m_bUserPause) {
+	if (m_nUserPause) {
 		if (SampleManager.GetChannelUsedFlag(policeChannel)) SampleManager.StopChannel(policeChannel);
 		if (g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES && bMissionAudioPhysicalPlayingStatus == 1 &&
 			SampleManager.IsStreamPlaying(1)) {
 			SampleManager.PauseStream(1, 1);
 		}
 	} else {
-		if (m_bPreviousUserPause && g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES &&
+		if (m_nPreviousUserPause && g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES &&
 			bMissionAudioPhysicalPlayingStatus == 1) {
 			SampleManager.PauseStream(0, 1);
 		}

@@ -3,6 +3,7 @@
 #include "crossplatform.h"
 #include "main.h"
 
+#include "DMAudio.h"
 #include "AudioScriptObject.h"
 #include "Camera.h"
 #include "CarGen.h"

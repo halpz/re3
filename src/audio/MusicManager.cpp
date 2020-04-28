@@ -1,5 +1,6 @@
 #include "common.h"
 #include <time.h>
+#include "soundlist.h"
 #include "MusicManager.h"
 #include "AudioManager.h"
 #include "ControllerConfig.h"
@@ -302,14 +303,14 @@ cMusicManager::GetRadioInCar(void)
 		CVehicle *veh = FindPlayerVehicle();
 		if (veh != nil){
 			if (UsesPoliceRadio(veh)) {
-				if (m_nRadioInCar == NO_STREAMED_SOUND || CReplay::IsPlayingBack() && AudioManager.m_bUserPause)
+				if (m_nRadioInCar == NO_STREAMED_SOUND || CReplay::IsPlayingBack() && AudioManager.m_nUserPause)
 					return POLICE_RADIO;
 				return m_nRadioInCar;
 			} else return veh->m_nRadioStation;
 		}
 	}
 
-	if (m_nRadioInCar == NO_STREAMED_SOUND || CReplay::IsPlayingBack() && AudioManager.m_bUserPause)
+	if (m_nRadioInCar == NO_STREAMED_SOUND || CReplay::IsPlayingBack() && AudioManager.m_nUserPause)
 		return RADIO_OFF;
 	return m_nRadioInCar;
 }
@@ -402,7 +403,7 @@ cMusicManager::ServiceFrontEndMode()
 				switch (m_nCurrentStreamedSound)
 				{
 				case STREAMED_SOUND_MISSION_COMPLETED:
-					if (!AudioManager.m_bUserPause)
+					if (!AudioManager.m_nUserPause)
 						ChangeMusicMode(MUSICMODE_GAME);
 					break;
 				case STREAMED_SOUND_GAME_COMPLETED:
@@ -458,7 +459,7 @@ cMusicManager::ServiceGameMode()
 		nFramesSinceCutsceneEnded = -1;
 	}
 
-	if (AudioManager.m_bPreviousUserPause)
+	if (AudioManager.m_nPreviousUserPause)
 		m_bPreviousPlayerInCar = false;
 	if (!m_bPlayerInCar) {
 		if (m_bPreviousPlayerInCar) {
