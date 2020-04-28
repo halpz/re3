@@ -3,24 +3,21 @@ image: Visual Studio 2019
 configuration:
 - Debug
 - Release
-platform: Win32
+platform:
+- win-x86-librw_d3d9-mss
 environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
 install:
 - cmd: >-
     git submodule update --init --recursive
 
-    copy premake5.exe "librw/premake5.exe"     
-
-    cd "librw" && premake5 vs2019 && msbuild "build/librw.sln" /property:Configuration=%CONFIGURATION% /property:Platform="win-x86-d3d9"
-
-    cd "%APPVEYOR_BUILD_FOLDER%" && premake5 vs2019
+    premake5 vs2019
 
 build:
   project: build/re3.sln
   verbosity: minimal
 artifacts:
-- path: bin/%CONFIGURATION%/re3.exe
+- path: bin/%PLATFORM%/%CONFIGURATION%/re3.exe
   name: re3.exe
-- path: bin/%CONFIGURATION%/re3.pdb
+- path: bin/%PLATFORM%/%CONFIGURATION%/re3.pdb
   name: re3.pdb
