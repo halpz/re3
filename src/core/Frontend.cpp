@@ -3038,7 +3038,24 @@ CMenuManager::LoadSettings()
 		if (strncmp(Ver, TopLineEmptyFile, sizeof(TopLineEmptyFile) - 1)) {
 			CFileMgr::Seek(fileHandle, 0, 0);
 			ControlsManager.LoadSettings(fileHandle);
+#ifdef IMPROVED_VIDEOMODE
+			CFileMgr::Read(fileHandle, (char*)&m_nPrefsWidth, sizeof(m_nPrefsWidth));
+			CFileMgr::Read(fileHandle, (char*)&m_nPrefsHeight, sizeof(m_nPrefsHeight));
+			CFileMgr::Read(fileHandle, (char*)&m_nPrefsDepth, sizeof(m_nPrefsDepth));
+			CFileMgr::Read(fileHandle, (char*)&m_nPrefsWindowed, sizeof(m_nPrefsWindowed));
+			CFileMgr::Read(fileHandle, (char*)&m_nPrefsSubsystem, sizeof(m_nPrefsSubsystem));
+			if(m_nPrefsWindowed != 0 && m_nPrefsWindowed != 1){
+				// garbage data from vanilla settings file
+				// let skeleton find something
+				m_nPrefsWidth = 0;
+				m_nPrefsHeight = 0;
+				m_nPrefsDepth = 0;
+				m_nPrefsWindowed = 0;
+				m_nPrefsSubsystem = 0;
+			}
+#else
 			CFileMgr::Read(fileHandle, gString, 20);
+#endif
 			CFileMgr::Read(fileHandle, gString, 20);
 			CFileMgr::Read(fileHandle, gString, 4);
 			CFileMgr::Read(fileHandle, gString, 4);
@@ -3120,7 +3137,15 @@ CMenuManager::SaveSettings()
 	int fileHandle = CFileMgr::OpenFile("gta3.set", "w+");
 	if (fileHandle) {
 		ControlsManager.SaveSettings(fileHandle);
+#ifdef IMPROVED_VIDEOMODE
+		CFileMgr::Write(fileHandle, (char*)&m_nPrefsWidth, sizeof(m_nPrefsWidth));
+		CFileMgr::Write(fileHandle, (char*)&m_nPrefsHeight, sizeof(m_nPrefsHeight));
+		CFileMgr::Write(fileHandle, (char*)&m_nPrefsDepth, sizeof(m_nPrefsDepth));
+		CFileMgr::Write(fileHandle, (char*)&m_nPrefsWindowed, sizeof(m_nPrefsWindowed));
+		CFileMgr::Write(fileHandle, (char*)&m_nPrefsSubsystem, sizeof(m_nPrefsSubsystem));
+#else
 		CFileMgr::Write(fileHandle, RubbishString, 20);
+#endif
 		CFileMgr::Write(fileHandle, RubbishString, 20);
 		CFileMgr::Write(fileHandle, RubbishString, 4);
 		CFileMgr::Write(fileHandle, RubbishString, 4);
