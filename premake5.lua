@@ -1,4 +1,27 @@
-Librw = os.getenv("LIBRW") or "librw"
+newoption {
+	trigger     = "glewdir",
+	value       = "PATH",
+	description = "Directory of GLEW",
+	default     = "glew-2.1.0"
+}
+
+newoption {
+	trigger     = "glfwdir",
+	value       = "PATH",
+	description = "Directory of glfw",
+	default     = "glfw-3.3.2.bin.WIN32"
+}
+
+newoption {
+	trigger     = "with-librw",
+	description = "Build and use librw from this solution"
+}
+
+if(_OPTIONS["with-librw"]) then
+	Librw = "librw"
+else
+	Librw = os.getenv("LIBRW") or "librw"
+end
 
 workspace "re3"
 	language "C++"
@@ -12,7 +35,7 @@ workspace "re3"
 			"win-x86-librw_d3d9-mss",
 			"win-x86-librw_gl3_glfw-mss",
 		}
-	
+
 	filter "configurations:Debug"
 		defines { "DEBUG" }
 		
@@ -28,12 +51,18 @@ workspace "re3"
 		
 	filter { "platforms:*librw_d3d9*" }
 		defines { "RW_D3D9" }
+		if(not _OPTIONS["with-librw"]) then
+			libdirs { path.join(Librw, "lib/win-x86-d3d9/%{cfg.buildcfg}") }
+		end
 		
 	filter "platforms:*librw_gl3_glfw*"
 		defines { "RW_GL3" }
+		if(not _OPTIONS["with-librw"]) then
+			libdirs { path.join(Librw, "lib/win-x86-gl3/%{cfg.buildcfg}") }
+		end
 		defines { "GLEW_STATIC" }
-		includedirs { "glfw-3.3.2.bin.WIN32/include" }
-		includedirs { "glew-2.1.0/include" }
+		includedirs { path.join(_OPTIONS["glfwdir"], "include") }
+		includedirs { path.join(_OPTIONS["glewdir"], "include") }
 	filter  {}
 	
     pbcommands = { 
@@ -62,6 +91,7 @@ workspace "re3"
        --targetdir ("bin/%{prj.name}/" .. scriptspath)
     end
 
+if(_OPTIONS["with-librw"]) then
 project "librw"
 	kind "StaticLib"
 	targetname "rw"
@@ -71,6 +101,7 @@ project "librw"
 	filter "platforms:*RW33*"
 		flags { "ExcludeFromBuild" }
 	filter  {}
+end
 
 project "re3"
 	kind "WindowedApp"
@@ -145,7 +176,9 @@ project "re3"
 		files { "src/fakerw/*.*" }
 		includedirs { "src/fakerw" }
 		includedirs { Librw }
-		libdirs { "lib/%{cfg.platform}/%{cfg.buildcfg}" }
+		if(_OPTIONS["with-librw"]) then
+			libdirs { "lib/%{cfg.platform}/%{cfg.buildcfg}" }
+		end
 		links { "rw" }
 
 	filter "platforms:*d3d*"
@@ -156,7 +189,6 @@ project "re3"
 		links { "d3d9" }
 		
 	filter "platforms:*gl3_glfw*"
-		libdirs { "glew-2.1.0/lib/Release/Win32" }
-		libdirs { "glfw-3.3.2.bin.WIN32/lib-" .. string.gsub(_ACTION, "vs", "vc")  }
+		libdirs { path.join(_OPTIONS["glewdir"], "lib/Release/Win32") }
+		libdirs { path.join(_OPTIONS["glfwdir"], "lib-" .. string.gsub(_ACTION, "vs", "vc")) }
 		links { "opengl32", "glew32s", "glfw3" }
-

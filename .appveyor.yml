@@ -11,7 +11,7 @@ install:
 - cmd: >-
     git submodule update --init --recursive
 
-    premake5 vs2019
+    premake5 vs2019 --with-librw
 
 build:
   project: build/re3.sln
