@@ -110,7 +110,7 @@ int8 CMenuManager::m_bFrontEnd_ReloadObrTxtGxt;
 int32 CMenuManager::m_PrefsMusicVolume = 102;
 int32 CMenuManager::m_PrefsSfxVolume = 102;
 
-char CMenuManager::m_PrefsSkinFile[256] = "$$\"\"";
+char CMenuManager::m_PrefsSkinFile[256] = DEFAULT_SKIN_NAME;
 
 int32 CMenuManager::m_KeyPressedCode = -1;
 
@@ -286,7 +286,7 @@ ScaleAndCenterX(float x)
 	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255))); \
 	CFont::SetRightJustifyOn(); \
 	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT)); \
-	CFont::SetFontStyle(FONT_HEADING);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 
 #define ProcessSlider(value, increaseAction, decreaseAction, hoverStartX, hoverEndX) \
 	do { \
@@ -596,7 +596,7 @@ CMenuManager::DisplayHelperText()
 
 	CFont::SetCentreOn();
 	CFont::SetScale(SCREEN_SCALE_X(SMALLESTTEXT_X_SCALE), SCREEN_SCALE_Y(SMALLESTTEXT_Y_SCALE));
-	CFont::SetFontStyle(FONT_HEADING);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 
 	// TODO: name this cases?
 	switch (m_nHelperTextMsgId) {
@@ -732,7 +732,7 @@ CMenuManager::Draw()
 		nextYToUse += 24.0f + 10.0f;
 	}
 
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 	CFont::SetScale(MENU_X(MENUACTION_SCALE_MULT * MENU_TEXT_SIZE_X), MENU_Y(MENUACTION_SCALE_MULT * MENU_TEXT_SIZE_Y));
 	CFont::SetRightJustifyOff();
 	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
@@ -788,7 +788,7 @@ CMenuManager::Draw()
 			columnWidth = 320;
 			headerHeight = 240;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
 			CFont::SetCentreOn();
 			break;
@@ -805,7 +805,7 @@ CMenuManager::Draw()
 			columnWidth = 50;
 			headerHeight = 0;
 			lineHeight = 20;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = MEDIUMTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = MEDIUMTEXT_Y_SCALE));
 			CFont::SetRightJustifyOff();
 			break;
@@ -815,7 +815,7 @@ CMenuManager::Draw()
 			columnWidth = 120;
 			headerHeight = 38;
 			lineHeight = 20;
-			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE));
 			CFont::SetRightJustifyOff();
 			break;
@@ -827,7 +827,7 @@ CMenuManager::Draw()
 			columnWidth = 320;
 			headerHeight = 60;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
 			CFont::SetCentreOn();
 			break;
@@ -835,7 +835,7 @@ CMenuManager::Draw()
 			columnWidth = 320;
 			headerHeight = 140;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
 			CFont::SetCentreOn();
 			break;
@@ -843,7 +843,7 @@ CMenuManager::Draw()
 			columnWidth = 320;
 			headerHeight = 117;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
 			CFont::SetCentreOn();
 			break;
@@ -852,7 +852,7 @@ CMenuManager::Draw()
 			columnWidth = 180;
 			headerHeight = 60;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
 			break;
 #endif
@@ -860,14 +860,14 @@ CMenuManager::Draw()
 			columnWidth = 320;
 			headerHeight = 40;
 			lineHeight = 24;
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
 			CFont::SetCentreOn();
 			break;
 	}
 
 #ifdef PS2_LIKE_MENU
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 #endif
 
 	switch (m_nCurrScreen) {
@@ -1580,7 +1580,12 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 					nextX += CFont::GetStringWidth(seperator, true) + bindingMargin;
 				}
 				CFont::PrintString(nextX, nextY, settingText);
-				nextX += CFont::GetStringWidth(settingText, true) + bindingMargin;
+#ifdef MORE_LANGUAGES
+				if (CFont::IsJapanese())
+					nextX += CFont::GetStringWidth_Jap(settingText) + bindingMargin;
+				else
+#endif
+					nextX += CFont::GetStringWidth(settingText, true) + bindingMargin;
 			}
 		}
 		if (controllerAction == -1) {
@@ -1629,7 +1634,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 					}
 					CFont::SetCentreOn();
 					CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-					CFont::SetFontStyle(FONT_HEADING);
+					CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 					CFont::SetColor(CRGBA(255, 255, 255, FadeIn(255)));
 					if (m_bKeyChangeNotProcessed) {
 						CFont::PrintString(MENU_X_LEFT_ALIGNED(275.0f), SCREEN_SCALE_FROM_BOTTOM(114.0f), TheText.Get("FET_CIG")); // BACKSPACE TO CLEAR - LMB,RETURN TO CHANGE
@@ -1639,7 +1644,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 					
 					CFont::SetRightJustifyOff();
 					CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-					CFont::SetFontStyle(0);
+					CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 					if (!m_bKeyIsOK)
 						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 
@@ -1647,24 +1652,24 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 				} else {
 					CFont::SetCentreOn();
 					CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-					CFont::SetFontStyle(FONT_HEADING);
+					CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 					CFont::SetColor(CRGBA(255, 255, 255, FadeIn(255)));
 					CFont::PrintString(MENU_X_LEFT_ALIGNED(275.0f), SCREEN_SCALE_FROM_BOTTOM(114.0f), TheText.Get("FET_CIG")); // BACKSPACE TO CLEAR - LMB,RETURN TO CHANGE
 					CFont::SetRightJustifyOff();
 					CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-					CFont::SetFontStyle(FONT_BANK);
+					CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 					m_bKeyIsOK = false;
 					m_bKeyChangeNotProcessed = false;
 				}
 			} else if (optionIdx == m_nSelectedListRow) {
 				CFont::SetCentreOn();
 				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-				CFont::SetFontStyle(FONT_HEADING);
+				CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 				CFont::SetColor(CRGBA(55, 55, 55, FadeIn(255)));
 				CFont::PrintString(MENU_X_LEFT_ALIGNED(275.0f), SCREEN_SCALE_FROM_BOTTOM(114.0f), TheText.Get("FET_EIG")); // CANNOT SET A CONTROL FOR THIS ACTION
 				CFont::SetRightJustifyOff();
 				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-				CFont::SetFontStyle(FONT_BANK);
+				CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 			}
 		}
 	}
@@ -1819,7 +1824,7 @@ CMenuManager::DrawControllerSetupScreen()
 		CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
 
 	// List header
-	CFont::SetFontStyle(FONT_HEADING);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 	CFont::SetScale(MENU_X(MENUACTION_SCALE_MULT), MENU_Y(MENUACTION_SCALE_MULT));
 	CFont::SetRightJustifyOff();
 	CFont::PrintString(MENU_X_LEFT_ALIGNED(CONTSETUP_COLUMN_1_X), MENU_Y(CONTSETUP_LIST_TOP), TheText.Get("FET_CAC"));
@@ -1827,7 +1832,7 @@ CMenuManager::DrawControllerSetupScreen()
 	CFont::PrintString(MENU_X_LEFT_ALIGNED(CONTSETUP_COLUMN_3_X), MENU_Y(CONTSETUP_LIST_TOP), TheText.Get("FET_CCR"));
 	CFont::SetRightJustifyOff();
 	CFont::SetScale(MENU_X_LEFT_ALIGNED(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 	int yStart;
 	if (m_ControlMethod == CONTROL_CLASSIC)
 		yStart = CONTSETUP_LIST_HEADER_HEIGHT + 29;
@@ -1916,7 +1921,7 @@ CMenuManager::DrawControllerSetupScreen()
 	}
 
 	// Back button and it's shadow
-	CFont::SetFontStyle(FONT_HEADING);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X), MENU_Y(MENU_TEXT_SIZE_Y));
 	CFont::SetRightJustifyOn();
 	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(90)));
@@ -2174,7 +2179,7 @@ CMenuManager::DrawFrontEndNormal()
 			if (CheckHover(xStart, xStart + optionWidth, optionTop, optionBottom))
 				hoveredBottomBarOption = i;
 
-			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 			CFont::SetScale(MENU_X(0.35f), MENU_Y(0.7f));
 			CFont::SetRightJustifyOff();
 			if (hoveredBottomBarOption == i && hoveredBottomBarOption != curBottomBarOption)
@@ -2442,7 +2447,7 @@ CMenuManager::DrawPlayerSetupScreen()
 		m_pSelectedSkin->nextSkin = new tSkinInfo;
 		m_pSelectedSkin = m_pSelectedSkin->nextSkin;
 		m_pSelectedSkin->skinId = 0;
-		strcpy(m_pSelectedSkin->skinNameOriginal, "$$\"\"");
+		strcpy(m_pSelectedSkin->skinNameOriginal, DEFAULT_SKIN_NAME);
 		strcpy(m_pSelectedSkin->skinNameDisplayed, UnicodeToAscii(TheText.Get("FET_DSN")));
 		int nextSkinId = 1;
 		m_pSelectedSkin->nextSkin = nil;
@@ -2451,7 +2456,7 @@ CMenuManager::DrawPlayerSetupScreen()
 		SYSTEMTIME SystemTime;
 		HANDLE handle = FindFirstFile("skins\\*.bmp", &FindFileData);
 		for (int i = 1; handle != INVALID_HANDLE_VALUE && i; i = FindNextFile(handle, &FindFileData)) {
-			if (strncmp(FindFileData.cFileName, "$$\"\"", 5) != 0) {
+			if (strncmp(FindFileData.cFileName, DEFAULT_SKIN_NAME, 5) != 0) {
 				m_pSelectedSkin->nextSkin = new tSkinInfo;
 				m_pSelectedSkin = m_pSelectedSkin->nextSkin;
 				m_pSelectedSkin->skinId = nextSkinId;
@@ -2525,7 +2530,7 @@ CMenuManager::DrawPlayerSetupScreen()
 	} else {
 		CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
 	}
-	CFont::SetFontStyle(FONT_HEADING);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 	CFont::SetScale(MENU_X(MENUACTION_SCALE_MULT), MENU_Y(MENUACTION_SCALE_MULT));
 	CFont::SetRightJustifyOn();
 	CFont::PrintString(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_DATE_COLUMN_RIGHT), MENU_Y(PLAYERSETUP_LIST_TOP), TheText.Get("FES_DAT"));
@@ -2544,7 +2549,7 @@ CMenuManager::DrawPlayerSetupScreen()
 	// Skin list
 	CFont::SetRightJustifyOff();
 	CFont::SetScale(MENU_X(PLAYERSETUP_ROW_TEXT_X_SCALE), MENU_Y(PLAYERSETUP_ROW_TEXT_Y_SCALE));
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 	if (m_nSkinsTotal > 0) {
 		for (m_pSelectedSkin = m_pSkinListHead.nextSkin; m_pSelectedSkin->skinId != m_nFirstVisibleRowOnList;
 			m_pSelectedSkin = m_pSelectedSkin->nextSkin);
@@ -2698,7 +2703,7 @@ CMenuManager::DrawPlayerSetupScreen()
 
 		// Big apply button
 		if (strcmp(m_aSkinName, m_PrefsSkinFile) != 0) {
-			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 			switch (m_PrefsLanguage) {
 				case LANGUAGE_FRENCH:
 					CFont::SetScale(MENU_X(1.1f), MENU_Y(1.9f));
@@ -2718,7 +2723,7 @@ CMenuManager::DrawPlayerSetupScreen()
 			CFont::SetRightJustifyOff();
 			CFont::PrintString(MENU_X_LEFT_ALIGNED(20.0f), MENU_Y(220.0f), TheText.Get("FET_APL"));
 		}
-		CFont::SetFontStyle(FONT_HEADING);
+		CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 
 		CFont::SetScale(MENU_X(SMALLTEXT_X_SCALE), MENU_Y(SMALLTEXT_Y_SCALE));
 
@@ -2796,7 +2801,7 @@ CMenuManager::DrawPlayerSetupScreen()
 			m_nHoverOption = HOVEROPTION_NOT_HOVERING;
 		}
 	}
-	CFont::SetFontStyle(FONT_HEADING);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 	CFont::SetScale(MENU_X(SMALLTEXT_X_SCALE), MENU_Y(SMALLTEXT_Y_SCALE));
 	CFont::SetRightJustifyOn();
 	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(90)));
@@ -2898,12 +2903,17 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		CGame::frenchGame = false;
 		CGame::germanGame = false;
 #ifdef MORE_LANGUAGES
+		CGame::russianGame = false;
+		CGame::japaneseGame = false;
 		switch (m_PrefsLanguage) {
 		case LANGUAGE_POLISH:
 			CFont::ReloadFonts(FONT_LANGSET_POLISH);
 			break;
 		case LANGUAGE_RUSSIAN:
 			CFont::ReloadFonts(FONT_LANGSET_RUSSIAN);
+			break;
+		case LANGUAGE_JAPANESE:
+			CFont::ReloadFonts(FONT_LANGSET_JAPANESE);
 			break;
 		default:
 			CFont::ReloadFonts(FONT_LANGSET_EFIGS);
@@ -2919,16 +2929,17 @@ CMenuManager::InitialiseChangedLanguageSettings()
 			CGame::germanGame = true;
 			break;
 #ifdef MORE_LANGUAGES
-		case LANGUAGE_POLISH:
-			CGame::polishGame = true;
-			break;
 		case LANGUAGE_RUSSIAN:
 			CGame::russianGame = true;
+			break;
+		case LANGUAGE_JAPANESE:
+			CGame::japaneseGame = true;
 			break;
 #endif
 		default:
 			break;
 		}
+		PcSaveHelper.PopulateSlotInfo();
 	}
 }
 
@@ -3094,8 +3105,8 @@ CMenuManager::LoadSettings()
 
 	if (!SkinFound) {
 		OutputDebugString("Default skin set as no other skins are available OR saved skin not found!");
-		strcpy(m_PrefsSkinFile, "$$\"\"");
-		strcpy(m_aSkinName, "$$\"\"");
+		strcpy(m_PrefsSkinFile, DEFAULT_SKIN_NAME);
+		strcpy(m_aSkinName, DEFAULT_SKIN_NAME);
 	}
 }
 
@@ -3169,7 +3180,7 @@ CMenuManager::MessageScreen(const char *text)
 	CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(170.0f));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_FROM_RIGHT(170.0f));
 	CSprite2d::DrawRect(CRect(SCREEN_SCALE_X(120.0f), SCREEN_SCALE_Y(150.0f), SCREEN_SCALE_FROM_RIGHT(120.0f), SCREEN_SCALE_FROM_BOTTOM(220.0f)), CRGBA(50, 50, 50, 210));
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 	CFont::SetCentreSize(SCREEN_SCALE_X(380.0f));
 	CFont::SetCentreOn();
 	CFont::SetColor(CRGBA(255, 217, 106, 255));
@@ -3199,7 +3210,7 @@ void
 CMenuManager::PrintBriefs()
 {
 	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 	CFont::SetRightJustifyOff();
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X * 0.7), MENU_Y(MENU_TEXT_SIZE_Y * 0.9)); // second mulipliers are double, idk why
 
@@ -3254,7 +3265,7 @@ CMenuManager::PrintErrorMessage()
 		return;
 
 	CSprite2d::DrawRect(CRect(SCREEN_SCALE_X(20.0f), SCREEN_SCALE_Y(140.0f), SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f)), CRGBA(64, 16, 16, 224));
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 	CFont::SetBackgroundOff();
 	CFont::SetPropOn();
 	CFont::SetCentreOff();
@@ -4285,6 +4296,12 @@ CMenuManager::ProcessButtonPresses(void)
 				case MENUACTION_LANG_RUS:
 					m_PrefsLanguage = LANGUAGE_RUSSIAN;
 					m_bFrontEnd_ReloadObrTxtGxt = true;
+					CMenuManager::InitialiseChangedLanguageSettings();
+					SaveSettings();
+					break;
+				case MENUACTION_LANG_JAP:
+					m_PrefsLanguage = LANGUAGE_JAPANESE;
+					m_bFrontEnd_ReloadObrTxtGxt = true;
 					InitialiseChangedLanguageSettings();
 					SaveSettings();
 					break;
@@ -5075,7 +5092,7 @@ CMenuManager::PrintController(void)
 			m_aFrontEndSprites[FE_ARROWS4].Draw(MENU_X_LEFT_ALIGNED(160.0f), MENU_Y(160.0f), MENU_X(235.2f), MENU_Y(175.2f), CRGBA(255, 255, 255, 255));
 	}
 
-	CFont::SetFontStyle(FONT_BANK);  // X
+	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));  // X
 
 	// CFont::SetScale(0.4f, 0.4f);
 	CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE)); // X
@@ -5452,7 +5469,7 @@ CMenuManager::PrintMap(void)
 		CRGBA(235, 170, 50, 255));
 
 	CFont::SetScale(MENU_X(0.4f), MENU_Y(0.7f));
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
 
 	float nextX = MENU_X(30.0f), nextY = 95.0f;

@@ -17,8 +17,8 @@ public:
 	static bool frenchGame;
 	static bool germanGame;
 #ifdef MORE_LANGUAGES
-	static bool polishGame;
 	static bool russianGame;
+	static bool japaneseGame;
 #endif
 	static bool noProstitutes;
 	static bool playingIntro;

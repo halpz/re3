@@ -31,6 +31,9 @@ enum {
 	FONT_BANK,
 	FONT_PAGER,
 	FONT_HEADING,
+#ifdef MORE_LANGUAGES
+	FONT_JAPANESE,
+#endif
 	MAX_FONTS
 };
 
@@ -46,8 +49,13 @@ enum
 	FONT_LANGSET_EFIGS,
 	FONT_LANGSET_RUSSIAN,
 	FONT_LANGSET_POLISH,
+	FONT_LANGSET_JAPANESE,
 	LANGSET_MAX
 };
+
+#define FONT_LOCALE(style) (CFont::IsJapanese() ? FONT_JAPANESE : style)
+#else
+#define FONT_LOCALE(style) (style)
 #endif
 
 class CFont
@@ -71,17 +79,28 @@ public:
 	static void PrintString(float x, float y, wchar *s);
 	static int GetNumberLines(float xstart, float ystart, wchar *s);
 	static void GetTextRect(CRect *rect, float xstart, float ystart, wchar *s);
+#ifdef MORE_LANGUAGES
+	static bool PrintString(float x, float y, wchar *start, wchar* &end, float spwidth, float japX);
+#else
 	static void PrintString(float x, float y, wchar *start, wchar *end, float spwidth);
+#endif
 	static float GetCharacterWidth(wchar c);
 	static float GetCharacterSize(wchar c);
 	static float GetStringWidth(wchar *s, bool spaces = false);
-	static wchar *GetNextSpace(wchar *s);
-	static wchar *ParseToken(wchar *s, wchar*);
+#ifdef MORE_LANGUAGES
+	static float GetStringWidth_Jap(wchar* s);
+#endif
+	static uint16 *GetNextSpace(wchar *s);
+#ifdef MORE_LANGUAGES
+	static uint16 *ParseToken(wchar *s, wchar*, bool japShit = false);
+#else
+	static uint16 *ParseToken(wchar *s, wchar*);
+#endif
 	static void DrawFonts(void);
-	static wchar character_code(uint8 c);
+	static uint16 character_code(uint8 c);
 
 	static CFontDetails GetDetails() { return Details; }
-	static void SetScale(float x, float y) { Details.scaleX = x; Details.scaleY = y; }
+	static void SetScale(float x, float y);
 	static void SetSlantRefPoint(float x, float y) { Details.slantRefX = x; Details.slantRefY = y; }
 	static void SetSlant(float s) { Details.slant = s; }
 	static void SetJustifyOn(void) {
@@ -140,19 +159,17 @@ public:
 	static void SetRightJustifyWrap(float wrap) { Details.rightJustifyWrap = wrap; }
 	static void SetAlphaFade(float fade) { Details.alphaFade = fade; }
 	static void SetDropShadowPosition(int16 pos) { Details.dropShadowPosition = pos; }
+	static void SetBackgroundColor(CRGBA col);
+	static void SetColor(CRGBA col);
+	static void SetDropColor(CRGBA col);
 
-	// TODO: really just CRGBA but that isn't passed correctly
-	static void SetBackgroundColor(const CRGBA &col) { Details.backgroundColor = col; }
-	static void SetColor(const CRGBA &col) {
-		Details.color = col;
-		if(Details.alphaFade < 255.0f)
-			Details.color.a *= Details.alphaFade/255.0f;
-	}
-	static void SetDropColor(const CRGBA &col) {
-		Details.dropColor = col;
-		if(Details.alphaFade < 255.0f)
-			Details.dropColor.a *= Details.alphaFade/255.0f;
-	}
-
+#ifdef MORE_LANGUAGES
 	static void ReloadFonts(uint8 set);
+
+	// japanese stuff
+	static bool IsAnsiCharacter(wchar* s);
+	static bool IsJapanesePunctuation(wchar* str);
+	static bool IsJapanese() { return LanguageSet == FONT_LANGSET_JAPANESE; }
+	static bool IsJapaneseFont() { return IsJapanese() && (Details.style == FONT_JAPANESE || Details.style == FONT_PAGER);  }
+#endif
 };

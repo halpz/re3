@@ -1,6 +1,9 @@
 #include "common.h"
 
 #include "FileMgr.h"
+#ifdef MORE_LANGUAGES
+#include "Game.h"
+#endif
 #include "Frontend.h"
 #include "Messages.h"
 #include "Text.h"
@@ -49,6 +52,9 @@ CText::Load(void)
 		break;
 	case LANGUAGE_RUSSIAN:
 		sprintf(filename, "RUSSIAN.GXT");
+		break;
+	case LANGUAGE_JAPANESE:
+		sprintf(filename, "JAPANESE.GXT");
 		break;
 #endif
 	}
@@ -257,7 +263,7 @@ CData::Unload(void)
 void
 AsciiToUnicode(const char *src, wchar *dst)
 {
-	while((*dst++ = *src++) != '\0');
+	while((*dst++ = (unsigned char)*src++) != '\0');
 }
 
 char*
@@ -266,7 +272,11 @@ UnicodeToAscii(wchar *src)
 	static char aStr[256];
 	int len;
 	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
+#ifdef MORE_LANGUAGES
+		if(*src < 128 || ((CGame::russianGame || CGame::japaneseGame) && *src < 256))
+#else
 		if(*src < 128)
+#endif
 			aStr[len] = *src;
 		else
 			aStr[len] = '#';
