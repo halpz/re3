@@ -421,7 +421,11 @@ RwChar **_psGetVideoModeList()
 				_VMList[i] = nil;
 		}
 		else
+#ifdef IMPROVED_VIDEOMODE
+			_VMList[i] = strdup("WINDOW");
+#else
 			_VMList[i] = nil;
+#endif
 	}
 	
 	return _VMList;
@@ -529,6 +533,10 @@ psSelectDevice()
 		
 		/* Get the default selection */
 		GcurSel = RwEngineGetCurrentSubSystem();
+#ifdef IMPROVED_VIDEOMODE
+		if(FrontEndMenuManager.m_nPrefsSubsystem < GnumSubSystems)
+			GcurSel = FrontEndMenuManager.m_nPrefsSubsystem;
+#endif
 	}
 	
 	/* Set the driver to use the correct sub system */
@@ -536,8 +544,12 @@ psSelectDevice()
 	{
 		return FALSE;
 	}
-	
-	
+
+#ifdef IMPROVED_VIDEOMODE
+	FrontEndMenuManager.m_nPrefsSubsystem = GcurSel;
+#endif
+
+#ifndef IMPROVED_VIDEOMODE
 	if ( !useDefault )
 	{
 		if ( _psGetVideoModeList()[FrontEndMenuManager.m_nDisplayVideoMode] && FrontEndMenuManager.m_nDisplayVideoMode )
@@ -581,9 +593,67 @@ psSelectDevice()
 			}
 		}
 	}
+#else
+	if ( !useDefault )
+	{
+		if(FrontEndMenuManager.m_nPrefsWidth == 0 ||
+		   FrontEndMenuManager.m_nPrefsHeight == 0 ||
+		   FrontEndMenuManager.m_nPrefsDepth == 0){
+			// Defaults if nothing specified
+			FrontEndMenuManager.m_nPrefsWidth = GetSystemMetrics(SM_CXSCREEN);
+			FrontEndMenuManager.m_nPrefsHeight = GetSystemMetrics(SM_CYSCREEN);
+			FrontEndMenuManager.m_nPrefsDepth = 32;
+			FrontEndMenuManager.m_nPrefsWindowed = 0;
+		}
+
+		// Find the videomode that best fits what we got from the settings file
+		RwInt32 bestMode = -1;
+		RwInt32 bestWidth = -1;
+		RwInt32 bestHeight = -1;
+		RwInt32 bestDepth = -1;
+		for(GcurSelVM = 0; GcurSelVM < RwEngineGetNumVideoModes(); GcurSelVM++){
+			RwEngineGetVideoModeInfo(&vm, GcurSelVM);
+			if(!(vm.flags & rwVIDEOMODEEXCLUSIVE) != FrontEndMenuManager.m_nPrefsWindowed)
+				continue;
+
+			if(FrontEndMenuManager.m_nPrefsWindowed){
+				bestMode = GcurSelVM;
+			}else{
+				// try the largest one that isn't larger than what we wanted
+				if(vm.width >= bestWidth && vm.width <= FrontEndMenuManager.m_nPrefsWidth &&
+				   vm.height >= bestHeight && vm.height <= FrontEndMenuManager.m_nPrefsHeight &&
+				   vm.depth >= bestDepth && vm.depth <= FrontEndMenuManager.m_nPrefsDepth){
+					bestWidth = vm.width;
+					bestHeight = vm.height;
+					bestDepth = vm.depth;
+					bestMode = GcurSelVM;
+				}
+			}
+		}
+
+		if(bestMode < 0){
+			MessageBox(nil, "Cannot find desired video mode", "GTA3", MB_OK);
+			return FALSE;
+		}
+		GcurSelVM = bestMode;
+
+		FrontEndMenuManager.m_nDisplayVideoMode = GcurSelVM;
+		FrontEndMenuManager.m_nPrefsVideoMode = FrontEndMenuManager.m_nDisplayVideoMode;
+		GcurSelVM = FrontEndMenuManager.m_nDisplayVideoMode;
+	}
+#endif
 	
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
-	
+
+#ifdef IMPROVED_VIDEOMODE
+	if(vm.flags & rwVIDEOMODEEXCLUSIVE){
+		FrontEndMenuManager.m_nPrefsWidth = vm.width;
+		FrontEndMenuManager.m_nPrefsHeight = vm.height;
+		FrontEndMenuManager.m_nPrefsDepth = vm.depth;
+	}
+	FrontEndMenuManager.m_nPrefsWindowed = !(vm.flags & rwVIDEOMODEEXCLUSIVE);
+#endif
+
 	FrontEndMenuManager.m_nCurrOption = 0;
 	
 	/* Set up the video mode and set the apps window
@@ -616,8 +686,71 @@ psSelectDevice()
 		
 		PSGLOBAL(fullScreen) = TRUE;
 	}
+#ifdef IMPROVED_VIDEOMODE
+	else{
+		RsGlobal.maximumWidth = FrontEndMenuManager.m_nPrefsWidth;
+		RsGlobal.maximumHeight = FrontEndMenuManager.m_nPrefsHeight;
+		RsGlobal.width = FrontEndMenuManager.m_nPrefsWidth;
+		RsGlobal.height = FrontEndMenuManager.m_nPrefsHeight;
+		
+		PSGLOBAL(fullScreen) = FALSE;
+	}
+#endif
 	
 	return TRUE;
+}
+
+void keypressCB(GLFWwindow* window, int key, int scancode, int action, int mods);
+void resizeCB(GLFWwindow* window, int width, int height);
+void scrollCB(GLFWwindow* window, double xoffset, double yoffset);
+void cursorCB(GLFWwindow* window, double xpos, double ypos);
+void joysChangeCB(int jid, int event);
+
+void _InputInitialiseJoys()
+{
+	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
+		if (glfwJoystickPresent(i)) {
+			if (PSGLOBAL(joy1id) == -1)
+				PSGLOBAL(joy1id) = i;
+			else if (PSGLOBAL(joy2id) == -1)
+				PSGLOBAL(joy2id) = i;
+			else
+				break;
+		}
+	}
+
+	if (PSGLOBAL(joy1id) != -1) {
+		int count;
+		glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
+		ControlsManager.InitDefaultControlConfigJoyPad(count);
+	}
+}
+
+void _InputInitialiseMouse()
+{
+	glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+}
+
+void psPostRWinit(void)
+{
+	RwVideoMode vm;
+	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
+
+	glfwSetKeyCallback(PSGLOBAL(window), keypressCB);
+	glfwSetWindowSizeCallback(PSGLOBAL(window), resizeCB);
+	glfwSetScrollCallback(PSGLOBAL(window), scrollCB);
+	glfwSetCursorPosCallback(PSGLOBAL(window), cursorCB);
+	glfwSetJoystickCallback(joysChangeCB);
+
+	_InputInitialiseJoys();
+	_InputInitialiseMouse();
+
+	if(!(vm.flags & rwVIDEOMODEEXCLUSIVE))
+		glfwSetWindowSize(PSGLOBAL(window), RsGlobal.maximumWidth, RsGlobal.maximumHeight);
+
+	// Make sure all keys are released
+	CPad::GetPad(0)->Clear(true);
+	CPad::GetPad(1)->Clear(true);
 }
 
 /*
@@ -634,9 +767,9 @@ RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode)
 	
 	useDefault = TRUE;
 	
-	if ( RsEventHandler(rsRWINITIALISE, &PSGLOBAL(window)) == rsEVENTERROR )
+	if ( RsEventHandler(rsRWINITIALISE, &openParams) == rsEVENTERROR )
 		return FALSE;
-	
+
 	RwInitialised = TRUE;
 	useDefault = FALSE;
 	
@@ -648,6 +781,8 @@ RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode)
 	r.h = RsGlobal.maximumHeight;
 
 	RsEventHandler(rsCAMERASIZE, &r);
+	
+	psPostRWinit();
 	
 	return TRUE;
 }
@@ -895,7 +1030,7 @@ void resizeCB(GLFWwindow* window, int width, int height) {
 
 		RsEventHandler(rsCAMERASIZE, &r);
 	}
-	glfwSetWindowPos(window, 0, 0);
+//	glfwSetWindowPos(window, 0, 0);
 }
 
 void scrollCB(GLFWwindow* window, double xoffset, double yoffset) {
@@ -1067,31 +1202,6 @@ cursorCB(GLFWwindow* window, double xpos, double ypos) {
 	FrontEndMenuManager.m_nMouseTempPosY = ypos;
 }
 
-void _InputInitialiseJoys()
-{
-	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
-		if (glfwJoystickPresent(i)) {
-			if (PSGLOBAL(joy1id) == -1)
-				PSGLOBAL(joy1id) = i;
-			else if (PSGLOBAL(joy2id) == -1)
-				PSGLOBAL(joy2id) = i;
-			else
-				break;
-		}
-	}
-
-	if (PSGLOBAL(joy1id) != -1) {
-		int count;
-		glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
-		ControlsManager.InitDefaultControlConfigJoyPad(count);
-	}
-}
-
-void _InputInitialiseMouse()
-{
-	glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-}
-
 /*
  *****************************************************************************
  */
@@ -1145,6 +1255,7 @@ WinMain(HINSTANCE instance,
 	openParams.width = RsGlobal.maximumWidth;
 	openParams.height = RsGlobal.maximumHeight;
 	openParams.windowtitle = RsGlobal.appName;
+	openParams.window = &PSGLOBAL(window);
 	
 	ControlsManager.MakeControllerActionsBlank();
 	ControlsManager.InitDefaultControlConfiguration();
@@ -1152,18 +1263,18 @@ WinMain(HINSTANCE instance,
 	/* 
 	 * Initialize the 3D (RenderWare) components of the app...
 	 */
-	if( rsEVENTERROR == RsEventHandler(rsRWINITIALISE, &PSGLOBAL(window)) )
+	if( rsEVENTERROR == RsEventHandler(rsRWINITIALISE, &openParams) )
 	{
 		RsEventHandler(rsTERMINATE, nil);
 
 		return 0;
 	}
 
-	_InputInitialiseJoys();
-	_InputInitialiseMouse();
+	psPostRWinit();
+
 	ControlsManager.InitDefaultControlConfigMouse(MousePointerStateHelper.GetMouseSetUp());
 
-	glfwSetWindowPos(PSGLOBAL(window), 0, 0);
+//	glfwSetWindowPos(PSGLOBAL(window), 0, 0);
 
 	/* 
 	 * Parse command line parameters (except program name) one at 
@@ -1231,11 +1342,6 @@ WinMain(HINSTANCE instance,
 #endif
 	
 	initkeymap();
-	glfwSetKeyCallback(PSGLOBAL(window), keypressCB);
-	glfwSetWindowSizeCallback(PSGLOBAL(window), resizeCB);
-	glfwSetScrollCallback(PSGLOBAL(window), scrollCB);
-	glfwSetCursorPosCallback(PSGLOBAL(window), cursorCB);
-	glfwSetJoystickCallback(joysChangeCB);
 
 	while ( TRUE )
 	{

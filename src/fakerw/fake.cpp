@@ -490,12 +490,11 @@ RwBool RwRenderStateSet(RwRenderState state, void *value)
 RwBool RwEngineInit(RwMemoryFunctions *memFuncs, RwUInt32 initFlags, RwUInt32 resArenaSize) { Engine::init(); return true; }
 // TODO: this is platform dependent
 RwBool RwEngineOpen(RwEngineOpenParams *initParams) {
-#if defined RW_D3D9 || defined RWLIBS
 	static EngineOpenParams openParams;
+#ifdef RW_D3D9
 	openParams.window = (HWND)initParams->displayID;
 #else
-	extern EngineOpenParams openParams;
-	openParams.window = (GLFWwindow**)initParams->displayID;
+	openParams = *(EngineOpenParams*)initParams->displayID;
 #endif
 	return Engine::open(&openParams);
 }
