@@ -81,7 +81,7 @@ CPlane::CPlane(int32 id, uint8 CreatedBy)
 	m_bIsDrugRunCesna = false;
 	m_bIsDropOffCesna = false;
 
-	m_status = STATUS_PLANE;
+	SetStatus(STATUS_PLANE);
 	bIsBIGBuilding = true;
 	m_level = LEVEL_NONE;
 }
@@ -754,7 +754,7 @@ CPlane::InitPlanes(void)
 	for(i = 0; i < 3; i++){
 		CPlane *plane = new CPlane(MI_AIRTRAIN, PERMANENT_VEHICLE);
 		plane->GetMatrix().SetTranslate(0.0f, 0.0f, 0.0f);
-		plane->m_status = STATUS_ABANDONED;
+		plane->SetStatus(STATUS_ABANDONED);
 		plane->bIsLocked = true;
 		plane->m_nPlaneId = i;
 		plane->m_nCurPathNode = 0;
@@ -768,7 +768,7 @@ CPlane::InitPlanes(void)
 	for(i = 0; i < 3; i++){
 		CPlane *plane = new CPlane(MI_DEADDODO, PERMANENT_VEHICLE);
 		plane->GetMatrix().SetTranslate(0.0f, 0.0f, 0.0f);
-		plane->m_status = STATUS_ABANDONED;
+		plane->SetStatus(STATUS_ABANDONED);
 		plane->bIsLocked = true;
 		plane->m_nPlaneId = i;
 		plane->m_nCurPathNode = 0;
@@ -926,7 +926,7 @@ CPlane::CreateIncomingCesna(void)
 	}
 	pDrugRunCesna = new CPlane(MI_DEADDODO, PERMANENT_VEHICLE);
 	pDrugRunCesna->GetMatrix().SetTranslate(0.0f, 0.0f, 0.0f);
-	pDrugRunCesna->m_status = STATUS_ABANDONED;
+	pDrugRunCesna->SetStatus(STATUS_ABANDONED);
 	pDrugRunCesna->bIsLocked = true;
 	pDrugRunCesna->m_nPlaneId = 0;
 	pDrugRunCesna->m_nCurPathNode = 0;
@@ -948,7 +948,7 @@ CPlane::CreateDropOffCesna(void)
 	}
 	pDropOffCesna = new CPlane(MI_DEADDODO, PERMANENT_VEHICLE);
 	pDropOffCesna->GetMatrix().SetTranslate(0.0f, 0.0f, 0.0f);
-	pDropOffCesna->m_status = STATUS_ABANDONED;
+	pDropOffCesna->SetStatus(STATUS_ABANDONED);
 	pDropOffCesna->bIsLocked = true;
 	pDropOffCesna->m_nPlaneId = 0;
 	pDropOffCesna->m_nCurPathNode = 0;

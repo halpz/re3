@@ -309,7 +309,7 @@ CObject::RefModelInfo(int32 modelId)
 void 
 CObject::Init(void) 
 { 
-	m_type = ENTITY_TYPE_OBJECT;;
+	m_type = ENTITY_TYPE_OBJECT;
 	CObjectData::SetObjectData(m_modelIndex, *this);
 	m_nEndOfLifeTime = 0;
 	ObjectCreatedBy = GAME_OBJECT;

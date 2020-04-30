@@ -850,7 +850,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 					else{
 						new_v = new(vp->index << 8) CAutomobile(mi, 2);
 					}
-					new_v->m_status = STATUS_PLAYER_PLAYBACKFROMBUFFER;
+					new_v->SetStatus(STATUS_PLAYER_PLAYBACKFROMBUFFER);
 					vp->matrix.DecompressIntoFullMatrix(new_v->GetMatrix());
 					new_v->m_currentColour1 = vp->primary_color;
 					new_v->m_currentColour2 = vp->secondary_color;
@@ -870,7 +870,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 				}
 				else {
 					CPed* new_p = new(ph->index << 8) CCivilianPed((ePedType)ph->pedtype, ph->mi);
-					new_p->m_status = STATUS_PLAYER_PLAYBACKFROMBUFFER;
+					new_p->SetStatus(STATUS_PLAYER_PLAYBACKFROMBUFFER);
 					new_p->GetMatrix().SetUnity();
 					CWorld::Add(new_p);
 				}

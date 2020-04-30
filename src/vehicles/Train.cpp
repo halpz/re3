@@ -59,7 +59,7 @@ CTrain::CTrain(int32 id, uint8 CreatedBy)
 	m_nDoorState = TRAIN_DOOR_CLOSED;
 
 	bUsesCollision = true;
-	m_status = STATUS_TRAIN_MOVING;
+	SetStatus(STATUS_TRAIN_MOVING);
 }
 
 void
@@ -177,11 +177,11 @@ CTrain::ProcessControl(void)
 	m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
 
 	if(engineTrackSpeed[m_nWagonGroup] > 0.001f){
-		m_status = STATUS_TRAIN_MOVING;
+		SetStatus(STATUS_TRAIN_MOVING);
 		m_bTrainStopping = false;
 		m_bProcessDoor = true;
 	}else{
-		m_status = STATUS_TRAIN_NOT_MOVING;
+		SetStatus(STATUS_TRAIN_NOT_MOVING);
 		m_bTrainStopping = true;
 	}
 
@@ -252,7 +252,7 @@ CTrain::ProcessControl(void)
 	}
 
 	// Hit stuff
-	if(m_bIsFirstWagon && m_status == STATUS_TRAIN_MOVING){
+	if(m_bIsFirstWagon && GetStatus()== STATUS_TRAIN_MOVING){
 		CVector front = GetPosition() + GetForward()*GetColModel()->boundingBox.max.y + m_vecMoveSpeed*CTimer::GetTimeStep();
 
 		int x, xmin, xmax;
@@ -440,7 +440,7 @@ CTrain::InitTrains(void)
 	for(i = 0; i < 5; i++){
 		train = new CTrain(MI_TRAIN, PERMANENT_VEHICLE);
 		train->GetMatrix().SetTranslate(0.0f, 0.0f, 0.0f);
-		train->m_status = STATUS_ABANDONED;
+		train->SetStatus(STATUS_ABANDONED);
 		train->bIsLocked = true;
 		train->m_fWagonPosition = wagonPositions[i];
 		train->m_bIsFirstWagon = firstWagon[i];
@@ -459,7 +459,7 @@ CTrain::InitTrains(void)
 	for(i = 0; i < 8; i++){
 		train = new CTrain(MI_TRAIN, PERMANENT_VEHICLE);
 		train->GetMatrix().SetTranslate(0.0f, 0.0f, 0.0f);
-		train->m_status = STATUS_ABANDONED;
+		train->SetStatus(STATUS_ABANDONED);
 		train->bIsLocked = true;
 		train->m_fWagonPosition = wagonPositions_S[i];
 		train->m_bIsFirstWagon = firstWagon_S[i];

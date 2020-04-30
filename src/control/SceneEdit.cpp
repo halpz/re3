@@ -450,7 +450,7 @@ void CSceneEdit::ProcessCommand(void)
 				break;
 			}
 			CVehicle* pVehicle = new CAutomobile(m_nVehiclemodelId, MISSION_VEHICLE);
-			pVehicle->m_status = STATUS_PHYSICS;
+			pVehicle->SetStatus(STATUS_PHYSICS);
 			pVehicle->GetPosition() = m_vecCurrentPosition;
 			pVehicle->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(pVehicle);
@@ -567,7 +567,7 @@ void CSceneEdit::ProcessCommand(void)
 						pActors[m_nActor]->m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_STRAIGHT;
 					else
 						pActors[m_nActor]->m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS;
-					pActors[m_nActor]->m_pMyVehicle->m_status = STATUS_PHYSICS;
+					pActors[m_nActor]->m_pMyVehicle->SetStatus(STATUS_PHYSICS);
 					pActors[m_nActor]->m_pMyVehicle->bEngineOn = true;
 					pActors[m_nActor]->m_pMyVehicle->AutoPilot.m_nCruiseSpeed = Max(16, pActors[m_nActor]->m_pMyVehicle->AutoPilot.m_nCruiseSpeed);
 					pActors[m_nActor]->m_pMyVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
@@ -810,7 +810,7 @@ void CSceneEdit::PlayBack(void)
 			break;
 		}
 		CVehicle* pVehicle = new CAutomobile(m_nVehiclemodelId, MISSION_VEHICLE);
-		pVehicle->m_status = STATUS_PHYSICS;
+		pVehicle->SetStatus(STATUS_PHYSICS);
 		pVehicle->GetPosition() = m_vecCurrentPosition;
 		pVehicle->SetOrientation(0.0f, 0.0f, 0.0f);
 		CWorld::Add(pVehicle);
@@ -845,7 +845,7 @@ void CSceneEdit::PlayBack(void)
 						pActors[m_nActor]->m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_STRAIGHT;
 					else
 						pActors[m_nActor]->m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS;
-					pActors[m_nActor]->m_pMyVehicle->m_status = STATUS_PHYSICS;
+					pActors[m_nActor]->m_pMyVehicle->SetStatus(STATUS_PHYSICS);
 					pActors[m_nActor]->m_pMyVehicle->bEngineOn = true;
 					pActors[m_nActor]->m_pMyVehicle->AutoPilot.m_nCruiseSpeed = Max(16, pActors[m_nActor]->m_pMyVehicle->AutoPilot.m_nCruiseSpeed);
 					pActors[m_nActor]->m_pMyVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();

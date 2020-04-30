@@ -121,7 +121,7 @@ SpawnCar(int id)
 
 		v->GetPosition().z += 4.0f;
 		v->SetOrientation(0.0f, 0.0f, 3.49f);
-		v->m_status = STATUS_ABANDONED;
+		v->SetStatus(STATUS_ABANDONED);
 		v->m_nDoorLock = CARLOCK_UNLOCKED;
 		CWorld::Add(v);
 	}

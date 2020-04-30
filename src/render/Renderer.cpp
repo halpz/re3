@@ -382,7 +382,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 			}
 			return VIS_INVISIBLE;
 		}
-		if(ent->m_type == ENTITY_TYPE_OBJECT &&
+		if(ent->IsObject() &&
 		   ((CObject*)ent)->ObjectCreatedBy == TEMP_OBJECT){
 			if(ent->m_rwObject == nil || !ent->bIsVisible)
 				return VIS_INVISIBLE;
@@ -399,7 +399,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 	if(LOD_DISTANCE + STREAM_DISTANCE < dist && dist < mi->GetLargestLodDistance())
 		dist = mi->GetLargestLodDistance();
 
-	if(ent->m_type == ENTITY_TYPE_OBJECT && ent->bRenderDamaged)
+	if(ent->IsObject() && ent->bRenderDamaged)
 		mi->m_isDamaged = true;
 
 	RpAtomic *a = mi->GetAtomicFromDistance(dist);
@@ -1162,7 +1162,7 @@ CRenderer::IsEntityCullZoneVisible(CEntity *ent)
 	if(ent->bZoneCulled)
 		return false;
 
-	switch(ent->m_type){
+	switch(ent->GetType()){
 	case ENTITY_TYPE_VEHICLE:
 		return IsVehicleCullZoneVisible(ent);
 	case ENTITY_TYPE_PED:
@@ -1187,7 +1187,7 @@ bool
 CRenderer::IsVehicleCullZoneVisible(CEntity *ent)
 {
 	CVehicle *v = (CVehicle*)ent;
-	switch(v->m_status)
+	switch(v->GetStatus())
 	case STATUS_SIMPLE:
 	case STATUS_PHYSICS:
 	case STATUS_ABANDONED:

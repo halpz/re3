@@ -245,7 +245,7 @@ CTrafficLights::ShouldCarStopForLight(CVehicle *vehicle, bool alwaysStop)
 			}
 	}
 
-	if(vehicle->m_status == STATUS_PHYSICS){
+	if(vehicle->GetStatus() == STATUS_PHYSICS){
 		node = vehicle->AutoPilot.m_nPreviousPathNodeInfo;
 		type = ThePaths.m_carPathLinks[node].trafficLightType;
 		if(type){

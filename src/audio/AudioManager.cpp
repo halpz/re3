@@ -4461,7 +4461,7 @@ void cAudioManager::ProcessFires(int32)
 		if(gFireManager.m_aFires[i].m_bIsOngoing && gFireManager.m_aFires[i].m_bAudioSet) {
 			entity = gFireManager.m_aFires[i].m_pEntity;
 			if(entity) {
-				switch(entity->m_type & 7) {
+				switch(entity->GetType()) {
 				case ENTITY_TYPE_BUILDING:
 					m_sQueueSample.m_fSoundIntensity = 50.0f;
 					m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
@@ -7097,7 +7097,7 @@ cAudioManager::ProcessPhysical(int32 id)
 {
 	CPhysical *entity = (CPhysical *)m_asAudioEntities[id].m_pEntity;
 	if(entity) {
-		switch(entity->m_type) {
+		switch(entity->GetType()) {
 		case ENTITY_TYPE_VEHICLE:
 			ProcessVehicle((CVehicle *)m_asAudioEntities[id].m_pEntity);
 			break;
@@ -8069,7 +8069,7 @@ cAudioManager::ProcessVehicle(CVehicle *veh)
 	if(handling) params.m_pTransmission = &handling->Transmission;
 
 	params.m_nIndex = veh->m_modelIndex - 90;
-	if(params.m_pVehicle->m_status == STATUS_SIMPLE)
+	if(params.m_pVehicle->GetStatus() == STATUS_SIMPLE)
 		velChange = params.m_pVehicle->AutoPilot.m_fMaxTrafficSpeed * 0.02f;
 	else
 		velChange =
@@ -8215,7 +8215,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 	if(params->m_fDistance < SQR(50.f)) {
 		playerVeh = FindPlayerVehicle();
 		veh = params->m_pVehicle;
-		if(playerVeh == veh && veh->m_status == STATUS_WRECKED) {
+		if(playerVeh == veh && veh->GetStatus() == STATUS_WRECKED) {
 			SampleManager.StopChannel(m_nActiveSamples);
 			return;
 		}
@@ -8237,7 +8237,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 					if(automobile->bIsHandbrakeOn) {
 						if(params->m_fVelocityChange == 0.0f)
 							traction = 0.9f;
-					} else if(params->m_pVehicle->m_status == STATUS_SIMPLE) {
+					} else if(params->m_pVehicle->GetStatus() == STATUS_SIMPLE) {
 						traction = 0.0f;
 					} else {
 						switch(transmission->nDriveType) {
@@ -8265,7 +8265,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 						relativeChange = 0.f;
 					} else if(currentGear) {
 						relativeGearChange = Min(1.0f, (params->m_fVelocityChange - transmission->Gears[currentGear].fShiftDownVelocity) / transmission->fMaxVelocity * 2.5f);
-						if(traction == 0.0f && automobile->m_status != STATUS_SIMPLE && params->m_fVelocityChange >= transmission->Gears[1].fShiftUpVelocity) {
+						if(traction == 0.0f && automobile->GetStatus() != STATUS_SIMPLE && params->m_fVelocityChange >= transmission->Gears[1].fShiftUpVelocity) {
 							traction = 0.7f;
 						}
 						relativeChange = traction * automobile->m_fGasPedalAudio * 0.95f + (1.0f - traction) * relativeGearChange;
@@ -8296,7 +8296,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 			}
 			m_sQueueSample.m_nVolume = volume;
 			if(m_sQueueSample.m_nVolume) {
-				if(automobile->m_status == STATUS_SIMPLE) {
+				if(automobile->GetStatus() == STATUS_SIMPLE) {
 					if(modificator < 0.02f) {
 						m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_bEngineSoundType + SFX_CAR_REV_10;
 						freq = 10000.f * modificator + 22050;
@@ -8388,7 +8388,7 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams *params)
 		if((!automobile->m_bSirenOrAlarm || !UsesSirenSwitching(params->m_nIndex)) &&
 		   automobile->m_modelIndex != MI_MRWHOOP) {
 			if(automobile->m_nCarHornTimer) {
-				if(params->m_pVehicle->m_status) {
+				if(params->m_pVehicle->GetStatus() != STATUS_PLAYER) {
 					if(automobile->m_nCarHornTimer > 44)
 						automobile->m_nCarHornTimer = 44;
 					if(automobile->m_nCarHornTimer == 44)
@@ -8946,14 +8946,14 @@ cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 		if(veh->m_bSirenOrAlarm == 0 && veh->m_nAlarmState <= 0) return;
 
 #ifdef FIX_BUGS
-		if (params->m_pVehicle->m_status == STATUS_WRECKED) return;
+		if (params->m_pVehicle->GetStatus() == STATUS_WRECKED) return;
 #endif
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		m_sQueueSample.m_nVolume = ComputeVolume(80, 110.f, m_sQueueSample.m_fDistance);
 		if(m_sQueueSample.m_nVolume) {
 			m_sQueueSample.m_nCounter = 5;
 			if(UsesSiren(params->m_nIndex)) {
-				if(params->m_pVehicle->m_status == STATUS_ABANDONED) return;
+				if(params->m_pVehicle->GetStatus() == STATUS_ABANDONED) return;
 				if(veh->m_nCarHornTimer && params->m_nIndex != FIRETRUK) {
 					m_sQueueSample.m_nSampleIndex = SFX_SIREN_FAST;
 					if(params->m_nIndex == FBICAR)

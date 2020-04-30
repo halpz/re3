@@ -482,10 +482,10 @@ CCarCtrl::GenerateOneRandomCar()
 	case NINES:
 	case GANG8:
 	case GANG9:
-		pCar->m_status = STATUS_SIMPLE;
+		pCar->SetStatus(STATUS_SIMPLE);
 		break;
 	case COPS:
-		pCar->m_status = (pCar->AutoPilot.m_nCarMission == MISSION_CRUISE) ? STATUS_SIMPLE : STATUS_PHYSICS;
+		pCar->SetStatus((pCar->AutoPilot.m_nCarMission == MISSION_CRUISE) ? STATUS_SIMPLE : STATUS_PHYSICS);
 		pCar->ChangeLawEnforcerState(1);
 		break;
 	default:
@@ -532,7 +532,7 @@ CCarCtrl::GenerateOneRandomCar()
 	else
 		pCar->SetUpDriver();
 	if ((CGeneral::GetRandomNumber() & 0x3F) == 0){ /* 1/64 probability */
-		pCar->m_status = STATUS_PHYSICS;
+		pCar->SetStatus(STATUS_PHYSICS);
 		pCar->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
 		pCar->AutoPilot.m_nCruiseSpeed += 10;
 	}
@@ -702,7 +702,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 			return;
 		}
 	}
-	if ((pVehicle->m_status == STATUS_SIMPLE || pVehicle->m_status == STATUS_PHYSICS && pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS) &&
+	if ((pVehicle->GetStatus() == STATUS_SIMPLE || pVehicle->GetStatus() == STATUS_PHYSICS && pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS) &&
 		CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeToStartMission > 5000 &&
 		!pVehicle->GetIsOnScreen() &&
 		(pVehicle->GetPosition() - vecPlayerPos).Magnitude2D() > 25.0f &&
@@ -716,7 +716,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 		delete pVehicle;
 		return;
 	}
-	if (pVehicle->m_status != STATUS_WRECKED || pVehicle->m_nTimeOfDeath == 0)
+	if (pVehicle->GetStatus() != STATUS_WRECKED || pVehicle->m_nTimeOfDeath == 0)
 		return;
 	if (CTimer::GetTimeInMilliseconds() > pVehicle->m_nTimeOfDeath + 60000 &&
 		(!pVehicle->GetIsOnScreen() || !CRenderer::IsEntityCullZoneVisible(pVehicle))){
@@ -759,7 +759,7 @@ CCarCtrl::UpdateCarOnRails(CVehicle* pVehicle)
 	SlowCarOnRailsDownForTrafficAndLights(pVehicle);
 	if (pVehicle->AutoPilot.m_nTimeEnteredCurve + pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve <= CTimer::GetTimeInMilliseconds())
 		PickNextNodeAccordingStrategy(pVehicle);
-	if (pVehicle->m_status == STATUS_PHYSICS)
+	if (pVehicle->GetStatus() == STATUS_PHYSICS)
 		return;
 	CCarPathLink* pCurrentLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];
 	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
@@ -917,7 +917,7 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 		if (sideLength + 0.5f < sidewaysDistance)
 			/* If car is far enough taking side into account, don't care */
 			continue;
-		if (pPed->m_type == ENTITY_TYPE_PED){ /* ...how can it not be? */
+		if (pPed->IsPed()){ /* ...how can it not be? */
 			if (pPed->GetPedState() != PED_STEP_AWAY && pPed->GetPedState() != PED_DIVE_AWAY){
 				if (distanceUntilHit < movementTowardsPedPerSecond){
 					/* Very close. Time to evade. */
@@ -937,7 +937,7 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 					}
 				}else{
 					/* Relatively safe but annoying. */
-					if (pVehicle->m_status == STATUS_PLAYER &&
+					if (pVehicle->GetStatus() == STATUS_PLAYER &&
 					  pPed->GetPedState() != PED_FLEE_ENTITY &&
 					  pPed->CharCreatedBy == RANDOM_CHAR){
 						float angleCarToPed = CGeneral::GetRadianAngleBetweenPoints(
@@ -1042,8 +1042,8 @@ void CCarCtrl::SlowCarDownForOtherCar(CEntity* pOtherEntity, CVehicle* pVehicle,
 		  DotProduct2D(pVehicle->GetForward(), pOtherVehicle->GetForward()) < 0.5f &&
 		  pVehicle < pOtherVehicle){ /* that comparasion though... */
 			*pSpeed = Max(curSpeed / 5, *pSpeed);
-			if (pVehicle->m_status == STATUS_SIMPLE){
-				pVehicle->m_status = STATUS_PHYSICS;
+			if (pVehicle->GetStatus() == STATUS_SIMPLE){
+				pVehicle->SetStatus(STATUS_PHYSICS);
 				SwitchVehicleToRealPhysics(pVehicle);
 			}
 			pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
@@ -1535,7 +1535,7 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 	pNextLink = &ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[nextLink + pCurPathNode->firstLink]];
 	if (prevNode == pVehicle->AutoPilot.m_nNextRouteNode){
 		/* We can no longer shift vehicle without physics if we have to turn it around. */
-		pVehicle->m_status = STATUS_PHYSICS;
+		pVehicle->SetStatus(STATUS_PHYSICS);
 		SwitchVehicleToRealPhysics(pVehicle);
 	}
 	pVehicle->AutoPilot.m_nTimeEnteredCurve += pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve;
@@ -1640,7 +1640,7 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 	float distanceToTargetNode;
 #ifndef REMOVE_TREADABLE_PATHFIND
 	if (pTarget && pTarget->m_pCurGroundEntity &&
-	  pTarget->m_pCurGroundEntity->m_type == ENTITY_TYPE_BUILDING &&
+	  pTarget->m_pCurGroundEntity->IsBuilding() &&
 	  ((CBuilding*)pTarget->m_pCurGroundEntity)->GetIsATreadable() &&
 	  ((CTreadable*)pTarget->m_pCurGroundEntity)->m_nodeIndices[0][0] >= 0){
 		CTreadable* pCurrentMapObject = (CTreadable*)pTarget->m_pCurGroundEntity;
@@ -2674,7 +2674,7 @@ bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 mi, CVector vecPos)
 	spawnPos.z = groundZ + pVehicle->GetDistanceFromCentreOfMassToBaseOfModel();
 	pVehicle->GetPosition() = spawnPos;
 	pVehicle->SetMoveSpeed(CVector(0.0f, 0.0f, 0.0f));
-	pVehicle->m_status = STATUS_PHYSICS;
+	pVehicle->SetStatus(STATUS_PHYSICS);
 	switch (mi){
 	case MI_FIRETRUCK:
 		pVehicle->bIsFireTruckOnDuty = true;

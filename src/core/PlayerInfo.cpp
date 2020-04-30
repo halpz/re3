@@ -328,7 +328,7 @@ CPlayerInfo::FindClosestCarSectorList(CPtrList& carList, CPed* ped, float unk1, 
 				continue;
 
 			car->m_scanCode = CWorld::GetCurrentScanCode();
-			if (car->m_status != STATUS_WRECKED && car->m_status != STATUS_TRAIN_MOVING
+			if (car->GetStatus() != STATUS_WRECKED && car->GetStatus() != STATUS_TRAIN_MOVING
 				&& (car->GetUp().z > 0.3f || (car->IsVehicle() && ((CVehicle*)car)->m_vehType == VEHICLE_TYPE_BIKE))) {
 				CVector carCentre = car->GetBoundCentre();
 
@@ -413,7 +413,7 @@ CPlayerInfo::Process(void)
 
 						// This condition will always return true, else block was probably WIP Miami code.
 						if (veh->m_vehType != VEHICLE_TYPE_BIKE || veh->m_nDoorLock == CARLOCK_LOCKED_PLAYER_INSIDE) {
-							if (veh->m_status != STATUS_WRECKED && veh->m_status != STATUS_TRAIN_MOVING && veh->m_nDoorLock != CARLOCK_LOCKED_PLAYER_INSIDE) {
+							if (veh->GetStatus() != STATUS_WRECKED && veh->GetStatus() != STATUS_TRAIN_MOVING && veh->m_nDoorLock != CARLOCK_LOCKED_PLAYER_INSIDE) {
 								if (veh->m_vecMoveSpeed.Magnitude() < 0.17f && CTimer::GetTimeScale() >= 0.5f && !veh->bIsInWater) {
 									m_pPed->SetObjective(OBJECTIVE_LEAVE_VEHICLE, veh);
 								}
@@ -454,7 +454,7 @@ CPlayerInfo::Process(void)
 						weAreOnBoat = true;
 						m_pPed->bOnBoat = true;
 #ifdef VC_PED_PORTS
-						if (carBelow->m_status != STATUS_WRECKED && carBelow->GetUp().z > 0.3f)
+						if (carBelow->GetStatus() != STATUS_WRECKED && carBelow->GetUp().z > 0.3f)
 #else
 						if (carBelow->m_status != STATUS_WRECKED)
 #endif
@@ -491,7 +491,7 @@ CPlayerInfo::Process(void)
 				}
 				// carBelow is now closest vehicle
 				if (carBelow && !weAreOnBoat) {
-					if (carBelow->m_status == STATUS_TRAIN_NOT_MOVING) {
+					if (carBelow->GetStatus() == STATUS_TRAIN_NOT_MOVING) {
 						m_pPed->SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, carBelow);
 					} else if (carBelow->IsBoat()) {
 						if (!carBelow->pDriver) {
@@ -526,7 +526,7 @@ CPlayerInfo::Process(void)
 			m_bInRemoteMode = false;
 			CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle = nil;
 			if (FindPlayerVehicle()) {
-				FindPlayerVehicle()->m_status = STATUS_PLAYER;
+				FindPlayerVehicle()->SetStatus(STATUS_PLAYER);
 			}
 		}
 	}

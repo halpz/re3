@@ -393,7 +393,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		m_vecMoveSpeed.x *= rmX;
 		m_vecMoveSpeed.y *= rmY;
 		m_vecMoveSpeed.z *= rmZ;
-		if (m_status != STATUS_PLAYER && m_status != STATUS_PLAYER_REMOTE)
+		if (GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE)
 			return;
 		float fThrust;
 		if (bCheat5)
@@ -623,13 +623,13 @@ CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage
 	}
 	if (m_fHealth > 0.0f) {
 		if (VehicleCreatedBy == RANDOM_VEHICLE && pDriver &&
-			(m_status == STATUS_SIMPLE || m_status == STATUS_PHYSICS) &&
+			(GetStatus() == STATUS_SIMPLE || GetStatus() == STATUS_PHYSICS) &&
 			AutoPilot.m_nCarMission == MISSION_CRUISE) {
 			if (m_randomSeed < DAMAGE_FLEE_IN_CAR_PROBABILITY_VALUE) {
 				CCarCtrl::SwitchVehicleToRealPhysics(this);
 				AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
 				AutoPilot.m_nCruiseSpeed = GAME_SPEED_TO_CARAI_SPEED * pHandling->Transmission.fUnkMaxVelocity;
-				m_status = STATUS_PHYSICS;
+				SetStatus(STATUS_PHYSICS);
 			}
 		}
 		m_nLastWeaponDamage = weaponType;
@@ -639,11 +639,11 @@ CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage
 			if (VehicleCreatedBy == RANDOM_VEHICLE &&
 				(m_fHealth < DAMAGE_HEALTH_TO_FLEE_ALWAYS ||
 					bFrightensDriver && m_randomSeed > DAMAGE_FLEE_ON_FOOT_PROBABILITY_VALUE)) {
-				switch (m_status) {
+				switch (GetStatus()) {
 				case STATUS_SIMPLE:
 				case STATUS_PHYSICS:
 					if (pDriver) {
-						m_status = STATUS_ABANDONED;
+						SetStatus(STATUS_ABANDONED);
 						pDriver->bFleeAfterExitingCar = true;
 						pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
 					}
@@ -871,7 +871,7 @@ CVehicle::UsesSiren(uint32 id)
 bool
 CVehicle::IsVehicleNormal(void)
 {
-	if (!pDriver || m_nNumPassengers != 0 || m_status == STATUS_WRECKED)
+	if (!pDriver || m_nNumPassengers != 0 || GetStatus() == STATUS_WRECKED)
 		return false;
 	switch (GetModelIndex()){
 	case MI_FIRETRUCK:
@@ -1141,7 +1141,7 @@ CVehicle::AddPassenger(CPed *passenger, uint8 n)
 void
 CVehicle::RemoveDriver(void)
 {
-	m_status = STATUS_ABANDONED;
+	SetStatus(STATUS_ABANDONED);
 	pDriver = nil;
 }
 

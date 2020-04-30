@@ -4683,7 +4683,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	static float ZmTwoAlphaOffsetLCS[] = { 0.1f, 0.08f, 0.3f, 0.08f, 0.08f };
 	static float ZmThreeAlphaOffsetLCS[] = { 0.065f, 0.05f, 0.15f, 0.06f, 0.08f };
 
-	if (isHeli && car->m_status == STATUS_PLAYER_REMOTE)
+	if (isHeli && car->GetStatus() == STATUS_PLAYER_REMOTE)
 		zoomModeAlphaOffset = ZmTwoAlphaOffsetLCS[alphaArrPos];
 	else {
 		switch ((int)TheCamera.CarZoomIndicator) {
@@ -4712,7 +4712,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 
 	float minDistForThisCar = approxCarLength * CARCAM_SET[camSetArrPos][3];
 
-	if (!isHeli || car->m_status == STATUS_PLAYER_REMOTE) {
+	if (!isHeli || car->GetStatus() == STATUS_PLAYER_REMOTE) {
 		float radiusToStayOutside = colMaxZ * CARCAM_SET[camSetArrPos][0] - CARCAM_SET[camSetArrPos][2];
 		if (radiusToStayOutside > 0.0f) {
 			TargetCoors.z += radiusToStayOutside;

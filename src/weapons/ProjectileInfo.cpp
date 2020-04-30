@@ -193,7 +193,7 @@ CProjectileInfo::Update()
 		if (!gaProjectileInfo[i].m_bInUse) continue;
 
 		CPed *ped = (CPed*)gaProjectileInfo[i].m_pSource;
-		if (ped != nil && ped->m_type == ENTITY_TYPE_PED && !ped->IsPointerValid())
+		if (ped != nil && ped->IsPed() && !ped->IsPointerValid())
 			gaProjectileInfo[i].m_pSource = nil;
 
 		if (ms_apProjectile[i] == nil) {

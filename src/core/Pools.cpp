@@ -161,8 +161,8 @@ INITSAVEBUF
 		pVehicle->m_nTimeOfDeath = pBufferVehicle->m_nTimeOfDeath;
 #endif
 		pVehicle->m_nDoorLock = pBufferVehicle->m_nDoorLock;
-		pVehicle->m_status = pBufferVehicle->m_status;
-		pVehicle->m_type = pBufferVehicle->m_type;
+		pVehicle->SetStatus(pBufferVehicle->GetStatus());
+		pVehicle->SetType(pBufferVehicle->GetType());
 		(pVehicle->GetAddressOfEntityProperties())[0] = (pBufferVehicle->GetAddressOfEntityProperties())[0];
 		(pVehicle->GetAddressOfEntityProperties())[1] = (pBufferVehicle->GetAddressOfEntityProperties())[1];
 		pVehicle->AutoPilot = pBufferVehicle->AutoPilot;

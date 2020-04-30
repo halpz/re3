@@ -771,7 +771,7 @@ CPlayerPed::KeepAreaAroundPlayerClear(void)
 	for (int i = 0; i < lastVehicle; i++) {
 		CVehicle *veh = (CVehicle*)vehicles[i];
 		if (veh->VehicleCreatedBy != MISSION_VEHICLE) {
-			if (veh->m_status != STATUS_PLAYER && veh->m_status != STATUS_PLAYER_DISABLED) {
+			if (veh->GetStatus() != STATUS_PLAYER && veh->GetStatus() != STATUS_PLAYER_DISABLED) {
 				if ((veh->GetPosition() - playerPos).MagnitudeSqr() > 25.0f) {
 					veh->AutoPilot.m_nTempAction = TEMPACT_WAIT;
 					veh->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 5000;

@@ -171,7 +171,7 @@ void CBulletInfo::Update(void)
 			}
 			if (pBullet->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE && bAddSound) {
 				cAudioScriptObject* pAudio;
-				switch (pHitEntity->m_type) {
+				switch (pHitEntity->GetType()) {
 				case ENTITY_TYPE_BUILDING:
 					pAudio = new cAudioScriptObject();
 					pAudio->Posn = pHitEntity->GetPosition();

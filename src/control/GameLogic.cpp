@@ -102,8 +102,8 @@ CGameLogic::Update()
 				if (pVehicle != nil) {
 					if (pVehicle->pDriver == pPlayerInfo.m_pPed) {
 						pVehicle->pDriver = nil;
-						if (pVehicle->m_status != STATUS_WRECKED)
-							pVehicle->m_status = STATUS_ABANDONED;
+						if (pVehicle->GetStatus() != STATUS_WRECKED)
+							pVehicle->SetStatus(STATUS_ABANDONED);
 					} else
 						pVehicle->RemovePassenger(pPlayerInfo.m_pPed);
 				}
@@ -172,8 +172,8 @@ CGameLogic::Update()
 				if (pVehicle != nil) {
 					if (pVehicle->pDriver == pPlayerInfo.m_pPed) {
 						pVehicle->pDriver = nil;
-						if (pVehicle->m_status != STATUS_WRECKED)
-							pVehicle->m_status = STATUS_ABANDONED;
+						if (pVehicle->GetStatus() != STATUS_WRECKED)
+							pVehicle->SetStatus(STATUS_ABANDONED);
 					}
 					else
 						pVehicle->RemovePassenger(pPlayerInfo.m_pPed);
@@ -214,8 +214,8 @@ CGameLogic::Update()
 				if (pVehicle != nil) {
 					if (pVehicle->pDriver == pPlayerInfo.m_pPed) {
 						pVehicle->pDriver = nil;
-						if (pVehicle->m_status != STATUS_WRECKED)
-							pVehicle->m_status = STATUS_ABANDONED;
+						if (pVehicle->GetStatus() != STATUS_WRECKED)
+							pVehicle->SetStatus(STATUS_ABANDONED);
 					} else
 						pVehicle->RemovePassenger(pPlayerInfo.m_pPed);
 				}

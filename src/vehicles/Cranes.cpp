@@ -416,7 +416,7 @@ void CCrane::FindCarInSectorList(CPtrList* pList)
 			Abs(pVehicle->GetMoveSpeed().y) >= CAR_MOVING_SPEED_THRESHOLD ||
 			Abs(pVehicle->GetMoveSpeed().z) >= CAR_MOVING_SPEED_THRESHOLD)
 			continue;
-		if (!pVehicle->IsCar() || pVehicle->m_status == STATUS_WRECKED || pVehicle->m_fHealth < 250.0f)
+		if (!pVehicle->IsCar() || pVehicle->GetStatus() == STATUS_WRECKED || pVehicle->m_fHealth < 250.0f)
 			continue;
 		if (!DoesCranePickUpThisCarType(pVehicle->GetModelIndex()) ||
 			m_bIsMilitaryCrane && CCranes::DoesMilitaryCraneHaveThisOneAlready(pVehicle->GetModelIndex())) {
