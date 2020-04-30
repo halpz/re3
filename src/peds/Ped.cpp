@@ -522,7 +522,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fElasticity = 0.05f;
 
 	bIsStanding = false;
-	m_ped_flagA2 = false;
+	bWasStanding = false;
 	bIsAttacking = false;
 	bIsPointingGunAt = false;
 	bIsLooking = false;
@@ -9487,14 +9487,14 @@ CPed::ProcessControl(void)
 #ifdef VC_PED_PORTS
 			if (bIsInWater) {
 				bIsStanding = false;
-				m_ped_flagA2 = false;
+				bWasStanding = false;
 				CPhysical::ProcessControl();
 			}
 #endif
 			return;
 		}
 
-		m_ped_flagA2 = false;
+		bWasStanding = false;
 		if (bIsStanding) {
 			if (!CWorld::bForceProcessControl) {
 				if (m_pCurrentPhysSurface && m_pCurrentPhysSurface->bIsInSafePosition) {
@@ -10106,7 +10106,7 @@ CPed::ProcessControl(void)
 			}
 			if ((bIsInTheAir && !DyingOrDead())
 #ifdef VC_PED_PORTS
-				|| (!bIsStanding && !m_ped_flagA2 && m_nPedState == PED_FALL)
+				|| (!bIsStanding && !bWasStanding && m_nPedState == PED_FALL)
 #endif		
 			) {
 				if (m_nPedStateTimer <= 1000 && m_nPedStateTimer) {
@@ -12344,7 +12344,7 @@ CPed::PlacePedOnDryLand(void)
 			posToCheck.z = 0.8f + foundColZ;
 			GetPosition() = posToCheck;
 			bIsStanding = true;
-			m_ped_flagA2 = true;
+			bWasStanding = true;
 			return true;
 		}
 	}
@@ -12362,7 +12362,7 @@ CPed::PlacePedOnDryLand(void)
 	posToCheck.z = 0.8f + foundColZ;
 	GetPosition() = posToCheck;
 	bIsStanding = true;
-	m_ped_flagA2 = true;
+	bWasStanding = true;
 	return true;
 }
 
@@ -14671,7 +14671,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 #endif
 			if (bIsStanding) {
 				bIsStanding = false;
-				m_ped_flagA2 = true;
+				bWasStanding = true;
 			}
 			bCollisionProcessed = true;
 			m_fCollisionSpeed += m_vecMoveSpeed.Magnitude2D() * CTimer::GetTimeStep();
@@ -14684,7 +14684,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 			} else {
 				CVector pos = GetPosition();
 				float potentialGroundZ = GetPosition().z - FEET_OFFSET;
-				if (m_ped_flagA2) {
+				if (bWasStanding) {
 					pos.z += -0.25f;
 					potentialGroundZ += gravityEffect;
 				}
@@ -14716,7 +14716,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 
 			// 0.52f should be a ped's approx. radius
 			float totalRadiusWhenCollided = collidingEnt->GetBoundRadius() + 0.52f - gravityEffect;
-			if (m_ped_flagA2) {
+			if (bWasStanding) {
 				if (collidedWithBoat) {
 					potentialCenter.z += 2.0f * gravityEffect;
 					totalRadiusWhenCollided += Abs(gravityEffect);
@@ -14728,7 +14728,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 				ourLine.p0 = GetPosition();
 				ourLine.p1 = GetPosition();
 				ourLine.p1.z = GetPosition().z - FEET_OFFSET;
-				if (m_ped_flagA2) {
+				if (bWasStanding) {
 					ourLine.p1.z = ourLine.p1.z + gravityEffect;
 					ourLine.p0.z = ourLine.p0.z + -0.25f;
 				}
@@ -14736,7 +14736,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 				belowTorsoCollided = CCollision::ProcessVerticalLine(ourLine, collidingEnt->GetMatrix(), *hisCol,
 					intersectionPoint, minDist, false, &m_collPoly);
 
-				if (collidedWithBoat && m_ped_flagA2 && !belowTorsoCollided) {
+				if (collidedWithBoat && bWasStanding && !belowTorsoCollided) {
 					ourLine.p0.z = ourLine.p1.z;
 					ourLine.p1.z = ourLine.p1.z + gravityEffect;
 					belowTorsoCollided = CCollision::ProcessVerticalLine(ourLine, collidingEnt->GetMatrix(), *hisCol,
@@ -14817,7 +14817,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 						}
 #else
 						float speedSqr = 0.0f;
-						if (!m_ped_flagA2) {
+						if (!bWasStanding) {
 							if (m_vecMoveSpeed.z >= -0.25f && (speedSqr = m_vecMoveSpeed.MagnitudeSqr()) <= sq(0.5f)) {
 
 								if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL) && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
@@ -14862,7 +14862,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 	}
 	if (collidingEnt->IsBuilding() || collidingEnt->bIsStatic) 	{
 
-		if (m_ped_flagA2) {
+		if (bWasStanding) {
 			CVector sphereNormal;
 			float normalLength;
 			for(int sphere = 0; sphere < ourCollidedSpheres; sphere++) {

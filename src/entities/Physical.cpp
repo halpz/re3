@@ -1886,7 +1886,7 @@ CPhysical::ProcessCollision(void)
 		// TODO: get rid of copy paste?
 		if(CheckCollision()){
 			if(IsPed() && m_vecMoveSpeed.z == 0.0f &&
-			   !ped->m_ped_flagA2 &&
+			   !ped->bWasStanding &&
 			   ped->bIsStanding)
 				savedMatrix.GetPosition().z = GetPosition().z;
 			GetMatrix() = savedMatrix;
@@ -1894,7 +1894,7 @@ CPhysical::ProcessCollision(void)
 			return;
 		}
 		if(IsPed() && m_vecMoveSpeed.z == 0.0f &&
-		   !ped->m_ped_flagA2 &&
+		   !ped->bWasStanding &&
 		   ped->bIsStanding)
 			savedMatrix.GetPosition().z = GetPosition().z;
 		GetMatrix() = savedMatrix;
