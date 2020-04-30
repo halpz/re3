@@ -301,7 +301,7 @@ CPhoneInfo::Initialise(void)
 			if (building->m_modelIndex == MI_PHONEBOOTH1) {
 				CPhone *maxPhone = &m_aPhones[m_nMax];
 				maxPhone->m_nState = PHONE_STATE_FREE;
-				maxPhone->m_vecPos = *(building->GetPosition());
+				maxPhone->m_vecPos = building->GetPosition();
 				maxPhone->m_pEntity = building;
 				m_nMax++;
 			}

@@ -214,7 +214,7 @@ CShadows::AddPermanentShadow(uint8 ShadowType, RwTexture *pTexture, CVector *pPo
 }
 
 void
-CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, CVector *pPosn,
+CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, Const CVector *pPosn,
 							float fFrontX, float fFrontY, float fSideX, float fSideY,
 							int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
 							float fZDistance, float fScale, float fDrawDistance, bool bTempShadow, float fUpDistance)

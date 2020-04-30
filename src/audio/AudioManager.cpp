@@ -9814,7 +9814,7 @@ cAudioManager::Terminate()
 }
 
 void
-cAudioManager::TranslateEntity(CVector *in, CVector *out) const
+cAudioManager::TranslateEntity(Const CVector *in, CVector *out) const
 {
 	*out = MultiplyInverse(TheCamera.GetMatrix(), *in);
 }

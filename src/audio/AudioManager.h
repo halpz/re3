@@ -456,7 +456,7 @@ public:
 	void SetupSuspectLastSeenReport();
 
 	void Terminate();
-	void TranslateEntity(CVector *v1, CVector *v2) const;
+	void TranslateEntity(Const CVector *v1, CVector *v2) const;
 
 	void UpdateGasPedalAudio(CAutomobile *automobile);
 	void UpdateReflections();

@@ -84,7 +84,7 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 
 	if (object == nil) return nil;
 	object->ObjectCreatedBy = MISSION_OBJECT;
-	object->GetPosition() = m_vecPos;
+	object->SetPosition(m_vecPos);
 	object->SetOrientation(0.0f, 0.0f, -HALFPI);
 	object->GetMatrix().UpdateRW();
 	object->UpdateRwFrame();
@@ -695,7 +695,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 
 		assert(colorId >= 0);
 
-		CVector &pos = entity->GetPosition();
+		const CVector &pos = entity->GetPosition();
 
 		float colorModifier = ((CGeneral::GetRandomNumber() & 0x1F) * 0.015f + 1.0f) * modifiedSin * 0.15f;
 		CShadows::StoreStaticShadow(
@@ -749,7 +749,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 void
 CPickups::DoMineEffects(CEntity *entity)
 {
-	CVector &pos = entity->GetPosition();
+	const CVector &pos = entity->GetPosition();
 	float dist = (TheCamera.GetPosition() - pos).Magnitude();
 	const float MAXDIST = 20.0f;
 
@@ -771,7 +771,7 @@ CPickups::DoMineEffects(CEntity *entity)
 void
 CPickups::DoMoneyEffects(CEntity *entity)
 {
-	CVector &pos = entity->GetPosition();
+	const CVector &pos = entity->GetPosition();
 	float dist = (TheCamera.GetPosition() - pos).Magnitude();
 	const float MAXDIST = 20.0f;
 
@@ -793,7 +793,7 @@ CPickups::DoMoneyEffects(CEntity *entity)
 void
 CPickups::DoCollectableEffects(CEntity *entity)
 {
-	CVector &pos = entity->GetPosition();
+	const CVector &pos = entity->GetPosition();
 	float dist = (TheCamera.GetPosition() - pos).Magnitude();
 	const float MAXDIST = 14.0f;
 
@@ -1145,7 +1145,7 @@ CPacManPickups::GeneratePMPickUps(CVector pos, float scrambleMult, int16 count, 
 				CObject *obj = new CObject(MI_BULLION, true);
 				if (obj != nil) {
 					obj->ObjectCreatedBy = MISSION_OBJECT;
-					obj->GetPosition() = aPMPickUps[i].m_vecPosn;
+					obj->SetPosition(aPMPickUps[i].m_vecPosn);
 					obj->SetOrientation(0.0f, 0.0f, -HALFPI);
 					obj->GetMatrix().UpdateRW();
 					obj->UpdateRwFrame();
@@ -1296,7 +1296,7 @@ CPacManPickups::GeneratePMPickUpsForRace(int32 race)
 			if (obj != nil) {
 				obj->ObjectCreatedBy = MISSION_OBJECT;
 
-				obj->GetPosition() = aPMPickUps[i].m_vecPosn;
+				obj->SetPosition(aPMPickUps[i].m_vecPosn);
 				obj->SetOrientation(0.0f, 0.0f, -HALFPI);
 				obj->GetMatrix().UpdateRW();
 				obj->UpdateRwFrame();

@@ -349,7 +349,7 @@ void CSceneEdit::ProcessCommand(void)
 			}
 			CPed* pPed = new CCivilianPed(PEDTYPE_SPECIAL, m_nPedmodelId);
 			pPed->CharCreatedBy = MISSION_CHAR;
-			pPed->GetPosition() = m_vecCurrentPosition;
+			pPed->SetPosition(m_vecCurrentPosition);
 			pPed->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(pPed);
 			pPed->bUsesCollision = false;
@@ -363,7 +363,7 @@ void CSceneEdit::ProcessCommand(void)
 			}
 		}
 		else {
-			pActors[m_nActor]->GetPosition() = m_vecCurrentPosition;
+			pActors[m_nActor]->SetPosition(m_vecCurrentPosition);
 			pActors[m_nActor]->SetOrientation(0.0f, 0.0f, 0.0f);
 			int32 mi = m_nPedmodelId;
 			if (CPad::GetPad(1)->GetLeftShoulder1JustDown())
@@ -405,7 +405,7 @@ void CSceneEdit::ProcessCommand(void)
 		SelectActor();
 		if (m_bCommandActive)
 			break;
-		pActors[m_nActor]->GetPosition() = m_vecCurrentPosition;
+		pActors[m_nActor]->SetPosition(m_vecCurrentPosition);
 		if (CPad::GetPad(1)->GetTriangleJustDown()) {
 			m_bCommandActive = false;
 #ifndef FIX_BUGS // why? it crashes, also makes no sense
@@ -451,7 +451,7 @@ void CSceneEdit::ProcessCommand(void)
 			}
 			CVehicle* pVehicle = new CAutomobile(m_nVehiclemodelId, MISSION_VEHICLE);
 			pVehicle->SetStatus(STATUS_PHYSICS);
-			pVehicle->GetPosition() = m_vecCurrentPosition;
+			pVehicle->SetPosition(m_vecCurrentPosition);
 			pVehicle->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(pVehicle);
 			pVehicle->bUsesCollision = false;
@@ -465,7 +465,7 @@ void CSceneEdit::ProcessCommand(void)
 			}
 		}
 		else {
-			pVehicles[m_nVehicle]->GetPosition() = m_vecCurrentPosition;
+			pVehicles[m_nVehicle]->SetPosition(m_vecCurrentPosition);
 			pVehicles[m_nVehicle]->SetOrientation(0.0f, 0.0f, 0.0f);
 			int32 mi = m_nVehiclemodelId;
 			if (CPad::GetPad(1)->GetLeftShoulder1JustDown())
@@ -507,7 +507,7 @@ void CSceneEdit::ProcessCommand(void)
 		SelectVehicle();
 		if (m_bCommandActive)
 			break;
-		pVehicles[m_nVehicle]->GetPosition() = m_vecCurrentPosition;
+		pVehicles[m_nVehicle]->SetPosition(m_vecCurrentPosition);
 		if (CPad::GetPad(1)->GetTriangleJustDown()) {
 			m_bCommandActive = false;
 #ifndef FIX_BUGS // again, why? works wrong
@@ -785,7 +785,7 @@ void CSceneEdit::PlayBack(void)
 		CPed* pPed = new CCivilianPed(PEDTYPE_SPECIAL, m_nPedmodelId);
 		pPed->CharCreatedBy = MISSION_CHAR;
 		CWorld::Add(pPed);
-		pPed->GetPosition() = m_vecCurrentPosition;
+		pPed->SetPosition(m_vecCurrentPosition);
 		pPed->SetOrientation(0.0f, 0.0f, 0.0f);
 		for (int i = 0; i < NUM_ACTORS_IN_MOVIE; i++) {
 			if (pActors[i] == nil) {
@@ -811,7 +811,7 @@ void CSceneEdit::PlayBack(void)
 		}
 		CVehicle* pVehicle = new CAutomobile(m_nVehiclemodelId, MISSION_VEHICLE);
 		pVehicle->SetStatus(STATUS_PHYSICS);
-		pVehicle->GetPosition() = m_vecCurrentPosition;
+		pVehicle->SetPosition(m_vecCurrentPosition);
 		pVehicle->SetOrientation(0.0f, 0.0f, 0.0f);
 		CWorld::Add(pVehicle);
 		for (int i = 0; i < NUM_VEHICLES_IN_MOVIE; i++) {

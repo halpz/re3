@@ -2164,7 +2164,7 @@ int32 CGarages::FindMaxNumStoredCarsForGarage(eGarageType type)
 	return 0;
 }
 
-bool CGarages::IsPointWithinHideOutGarage(CVector& point)
+bool CGarages::IsPointWithinHideOutGarage(Const CVector& point)
 {
 	for (int i = 0; i < NUM_GARAGES; i++) {
 		switch (aGarages[i].m_eGarageType) {
@@ -2180,7 +2180,7 @@ bool CGarages::IsPointWithinHideOutGarage(CVector& point)
 	return false;
 }
 
-bool CGarages::IsPointWithinAnyGarage(CVector& point)
+bool CGarages::IsPointWithinAnyGarage(Const CVector& point)
 {
 	for (int i = 0; i < NUM_GARAGES; i++) {
 		switch (aGarages[i].m_eGarageType) {

@@ -58,7 +58,7 @@ CPointLights::AddLight(uint8 type, CVector coors, CVector dir, float radius, flo
 }
 
 float
-CPointLights::GenerateLightsAffectingObject(CVector *objCoors)
+CPointLights::GenerateLightsAffectingObject(Const CVector *objCoors)
 {
 	int i;
 	float ret;

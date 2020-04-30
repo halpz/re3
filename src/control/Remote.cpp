@@ -18,7 +18,7 @@ CRemote::GivePlayerRemoteControlledCar(float x, float y, float z, float rot, uin
 	z = car->GetDistanceFromCentreOfMassToBaseOfModel() + CWorld::FindGroundZFor3DCoord(x, y, z + 2.0f, &found);
 
 	car->GetMatrix().SetRotateZOnly(rot);
-	car->GetPosition() = CVector(x, y, z);
+	car->SetPosition(x, y, z);
 	car->SetStatus(STATUS_PLAYER_REMOTE);
 	car->bIsLocked = true;
 

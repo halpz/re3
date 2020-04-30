@@ -58,6 +58,9 @@
 #define Max(a,b) ((a) > (b) ? (a) : (b))
 #define Min(a,b) ((a) < (b) ? (a) : (b))
 
+// Use this to add const that wasn't there in the original code
+#define Const const
+
 typedef uint8_t uint8;
 typedef int8_t int8;
 typedef uint16_t uint16;

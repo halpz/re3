@@ -101,8 +101,8 @@ public:
 	
 	static CEntity *TestSphereAgainstWorld(CVector centre, float radius, CEntity *entityToIgnore, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSomeObjects);
 	static CEntity *TestSphereAgainstSectorList(CPtrList&, CVector, float, CEntity*, bool);
-	static void FindObjectsInRangeSectorList(CPtrList&, CVector&, float, bool, short*, short, CEntity**);
-	static void FindObjectsInRange(CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool);
+	static void FindObjectsInRangeSectorList(CPtrList&, Const CVector&, float, bool, short*, short, CEntity**);
+	static void FindObjectsInRange(Const CVector&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool);
 	static void FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& list, const CVector& position, float radius, bool bCheck2DOnly, int16* nEntitiesFound, int16 maxEntitiesToFind, CEntity** aEntities);
 	static void FindObjectsOfTypeInRange(uint32 modelId, const CVector& position, float radius, bool bCheck2DOnly, int16* nEntitiesFound, int16 maxEntitiesToFind, CEntity** aEntities, bool bBuildings, bool bVehicles, bool bPeds, bool bObjects, bool bDummies);
 	static float FindGroundZForCoord(float x, float y);
