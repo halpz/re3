@@ -14660,7 +14660,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 		collidedWithBoat = true;
 
 	// ofc we're not vehicle
-	if (!m_bIsVehicleBeingShifted && !m_phy_flagA80
+	if (!m_bIsVehicleBeingShifted && !bSkipLineCol
 #ifdef VC_PED_PORTS
 		&& !collidingEnt->IsPed()
 #endif

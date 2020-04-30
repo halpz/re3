@@ -54,7 +54,7 @@ CPhysical::CPhysical(void)
 	bInfiniteMass = false;
 	bIsInWater = false;
 	bHitByTrain = false;
-	m_phy_flagA80 = false;
+	bSkipLineCol = false;
 
 	m_fDistanceTravelled = 0.0f;
 	m_treadable[PATH_CAR] = nil;
@@ -1401,7 +1401,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 				continue;
 			}
 
-			A->m_phy_flagA80 = false;
+			A->bSkipLineCol = false;
 			skipCollision = false;
 			altcollision = false;
 
@@ -1411,13 +1411,13 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 			  (B->IsVehicle() || B->IsPed()) &&
 			  A->GetUp().z < 0.66f){
 				skipCollision = true;
-				A->m_phy_flagA80 = true;
+				A->bSkipLineCol = true;
 				Aobj->m_pCollidingEntity = B;
 			}else if((A->IsVehicle() || A->IsPed()) &&
 			  B->GetUp().z < 0.66f &&
 			  IsTrafficLight(B->GetModelIndex())){
 				skipCollision = true;
-				A->m_phy_flagA80 = true;
+				A->bSkipLineCol = true;
 				Bobj->m_pCollidingEntity = A;
 			}else if(A->IsObject() && B->IsVehicle()){
 				if(A->GetModelIndex() == MI_CAR_BUMPER || A->GetModelIndex() == MI_FILES)
@@ -1460,18 +1460,18 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 				skipCollision = true;
 			}else if(A->IsPed() && IsBodyPart(B->GetModelIndex())){
 				skipCollision = true;
-				A->m_phy_flagA80 = true;
+				A->bSkipLineCol = true;
 			}else if(A->IsPed() && Aped->m_pCollidingEntity == B){
 				skipCollision = true;
 				if(!Aped->bKnockedUpIntoAir)
-					A->m_phy_flagA80 = true;
+					A->bSkipLineCol = true;
 			}else if(B->IsPed() && Bped->m_pCollidingEntity == A){
 				skipCollision = true;
-				A->m_phy_flagA80 = true;
+				A->bSkipLineCol = true;
 			}else if(A->GetModelIndex() == MI_RCBANDIT && (B->IsPed() || B->IsVehicle()) ||
 			         B->GetModelIndex() == MI_RCBANDIT && (A->IsPed() || A->IsVehicle())){
 				skipCollision = true;
-				A->m_phy_flagA80 = true;
+				A->bSkipLineCol = true;
 			}else if(A->IsPed() && B->IsObject() && Bobj->m_fUprootLimit > 0.0f)
 				altcollision = true;
 
@@ -1804,7 +1804,7 @@ CPhysical::ProcessCollision(void)
 
 	m_fDistanceTravelled = 0.0f;
 	m_bIsVehicleBeingShifted = false;
-	m_phy_flagA80 = false;
+	bSkipLineCol = false;
 
 	if(!bUsesCollision){
 		bIsStuck = false;
@@ -1917,7 +1917,7 @@ CPhysical::ProcessCollision(void)
 	ApplyTurnSpeed();
 	GetMatrix().Reorthogonalise();
 	m_bIsVehicleBeingShifted = false;
-	m_phy_flagA80 = false;
+	bSkipLineCol = false;
 	if(!m_vecMoveSpeed.IsZero() ||
 	   !m_vecTurnSpeed.IsZero() ||
 	   bHitByTrain ||
@@ -1931,7 +1931,7 @@ CPhysical::ProcessCollision(void)
 	}
 	bHitByTrain = false;
 	m_fDistanceTravelled = (GetPosition() - savedMatrix.GetPosition()).Magnitude();
-	m_phy_flagA80 = false;
+	bSkipLineCol = false;
 
 	bIsStuck = false;
 	bIsInSafePosition = true;

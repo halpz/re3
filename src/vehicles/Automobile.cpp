@@ -563,7 +563,7 @@ CAutomobile::ProcessControl(void)
 			bHasHitWall = false;
 			m_fDistanceTravelled = 0.0f;
 			m_bIsVehicleBeingShifted = false;
-			m_phy_flagA80 = false;
+			bSkipLineCol = false;
 			ApplyMoveSpeed();
 			ApplyTurnSpeed();
 			for(i = 0; CheckCollision() && i < 5; i++){
@@ -2160,7 +2160,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 	// m_aSuspensionSpringRatio are now set to the point where the tyre touches ground.
 	// In ProcessControl these will be re-normalized to ignore the tyre radius.
 
-	if(m_bIsVehicleBeingShifted || m_phy_flagA80 ||
+	if(m_bIsVehicleBeingShifted || bSkipLineCol ||
 	   GetModelIndex() == MI_DODO && (ent->IsPed() || ent->IsVehicle())){
 		// don't do line collision
 		for(i = 0; i < 4; i++)
