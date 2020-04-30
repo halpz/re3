@@ -121,8 +121,8 @@ struct CEntityProperties
 
 	void Store(CEntity* pEntity)
 	{
-		m_type = pEntity->m_type;
-		m_status = pEntity->m_status;
+		m_type = pEntity->GetType();
+		m_status = pEntity->GetStatus();
 		bUsesCollision = pEntity->bUsesCollision;
 		bCollisionProcessed = pEntity->bCollisionProcessed;
 		bIsStatic = pEntity->bIsStatic;
@@ -161,8 +161,8 @@ struct CEntityProperties
 
 	void Restore(CEntity* pEntity)
 	{
-		pEntity->m_type = m_type;
-		pEntity->m_status = m_status;
+		pEntity->SetType((eEntityType)m_type);
+		pEntity->SetStatus((eEntityStatus)m_status);
 		pEntity->bUsesCollision = bUsesCollision;
 		pEntity->bCollisionProcessed = bCollisionProcessed;
 		pEntity->bIsStatic = bIsStatic;
