@@ -88,7 +88,7 @@ CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot)
 		delete object;
 	} else if (!CProjectileInfo::RemoveIfThisIsAProjectile(object)) {
 		// relocate to another slot??
-		CObject *newObject = new CObject();
+		CObject *newObject = new CObject(object->GetModelIndex(), false);
 		CWorld::Remove(object);
 		memcpy(newObject, object, ms_pObjectPool->GetMaxEntrySize());
 		CWorld::Add(newObject);
