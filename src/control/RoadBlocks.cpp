@@ -156,7 +156,7 @@ CRoadBlocks::GenerateRoadBlocks(void)
 							CWorld::FindObjectsKindaColliding(vehicleMatrix.GetPosition(), fModelRadius, 0, &colliding, 2, nil, false, true, true, false, false);
 							if (!colliding) {
 								CAutomobile *pVehicle = new CAutomobile(vehicleId, RANDOM_VEHICLE);
-								pVehicle->m_status = STATUS_ABANDONED;
+								pVehicle->SetStatus(STATUS_ABANDONED);
 								// pVehicle->GetHeightAboveRoad(); // called but return value is ignored?
 								vehicleMatrix.GetPosition().z += fModelRadius - 0.6f;
 								pVehicle->m_matrix = vehicleMatrix;

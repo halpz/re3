@@ -41,7 +41,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			pVehicle->AutoPilot.m_nCarMission == MISSION_RAMPLAYER_CLOSE)
 			pVehicle->AutoPilot.m_nCruiseSpeed = FindPoliceCarSpeedForWantedLevel(pVehicle);
 	}
-	switch (pVehicle->m_status){
+	switch (pVehicle->GetStatus()){
 	case STATUS_PLAYER:
 	case STATUS_PLAYER_PLAYBACKFROMBUFFER:
 	case STATUS_TRAIN_MOVING:
@@ -330,12 +330,12 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 				if (ABS(FindPlayerCoors().x - pVehicle->GetPosition().x) > 10.0f ||
 				  ABS(FindPlayerCoors().y - pVehicle->GetPosition().y) > 10.0f){
 					pVehicle->AutoPilot.m_nCruiseSpeed = FindPoliceCarSpeedForWantedLevel(pVehicle);
-					pVehicle->m_status = STATUS_PHYSICS;
+					pVehicle->SetStatus(STATUS_PHYSICS);
 					pVehicle->AutoPilot.m_nCarMission = FindPoliceCarMissionForWantedLevel();
 					pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 					pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
 				}else if (pVehicle->AutoPilot.m_nCarMission == MISSION_CRUISE){
-					pVehicle->m_status = STATUS_PHYSICS;
+					pVehicle->SetStatus(STATUS_PHYSICS);
 					TellOccupantsToLeaveCar(pVehicle);
 					pVehicle->AutoPilot.m_nCruiseSpeed = 0;
 					pVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
@@ -357,7 +357,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 		pVehicle->AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 		pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 	}
-	if (pVehicle->m_status == STATUS_PHYSICS && pVehicle->AutoPilot.m_nTempAction == TEMPACT_NONE){
+	if (pVehicle->GetStatus() == STATUS_PHYSICS && pVehicle->AutoPilot.m_nTempAction == TEMPACT_NONE){
 		if (pVehicle->AutoPilot.m_nCarMission != MISSION_NONE){
 			if (pVehicle->AutoPilot.m_nCarMission != MISSION_STOP_FOREVER &&
 			  pVehicle->AutoPilot.m_nCruiseSpeed != 0 &&
@@ -386,7 +386,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 		  CTimer::GetPreviousTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeToStartMission <= 30000 &&
 		  pVehicle->AutoPilot.m_nCarMission == MISSION_CRUISE &&
 		  !CTrafficLights::ShouldCarStopForBridge(pVehicle)){
-			pVehicle->m_status = STATUS_PHYSICS;
+			pVehicle->SetStatus(STATUS_PHYSICS);
 			CCarCtrl::SwitchVehicleToRealPhysics(pVehicle);
 			pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
 			pVehicle->AutoPilot.m_nTempAction = TEMPACT_REVERSE;
@@ -446,7 +446,7 @@ float CCarAI::GetCarToGoToCoors(CVehicle* pVehicle, CVector* pTarget)
 		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 		pVehicle->AutoPilot.m_nCruiseSpeed = 20;
 		pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
-		pVehicle->m_status = STATUS_PHYSICS;
+		pVehicle->SetStatus(STATUS_PHYSICS);
 		pVehicle->AutoPilot.m_nCarMission = (CCarCtrl::JoinCarWithRoadSystemGotoCoors(pVehicle, *pTarget, false)) ?
 			MISSION_GOTOCOORDS_STRAIGHT : MISSION_GOTOCOORDS;
 	}else if (Abs(pTarget->x - pVehicle->AutoPilot.m_vecDestinationCoors.x) > 2.0f ||
@@ -603,7 +603,7 @@ void CCarAI::MakeWayForCarWithSiren(CVehicle *pVehicle)
 			continue;
 		if (vehicle->m_vehType != VEHICLE_TYPE_CAR && vehicle->m_vehType != VEHICLE_TYPE_BIKE)
 			continue;
-		if (vehicle->m_status != STATUS_SIMPLE && vehicle->m_status != STATUS_PHYSICS)
+		if (vehicle->GetStatus() != STATUS_SIMPLE && vehicle->GetStatus() != STATUS_PHYSICS)
 			continue;
 		if (vehicle->VehicleCreatedBy != RANDOM_VEHICLE)
 			continue;
@@ -627,7 +627,7 @@ void CCarAI::MakeWayForCarWithSiren(CVehicle *pVehicle)
 					TEMPACT_SWERVELEFT : TEMPACT_SWERVERIGHT;
 				vehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 2000;
 			}
-			vehicle->m_status = STATUS_PHYSICS;
+			vehicle->SetStatus(STATUS_PHYSICS);
 		}else{
 			if (DotProduct2D(vehicle->GetMoveSpeed(), distance) < 0.0f && vehicle->AutoPilot.m_nTempAction != TEMPACT_WAIT){
 				vehicle->AutoPilot.m_nTempAction = TEMPACT_WAIT;

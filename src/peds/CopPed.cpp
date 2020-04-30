@@ -132,7 +132,7 @@ CCopPed::SetArrestPlayer(CPed *player)
 		player->m_pMyVehicle->m_nNumGettingIn = 0;
 		player->m_pMyVehicle->m_nGettingInFlags = 0;
 		player->m_pMyVehicle->bIsHandbrakeOn = true;
-		player->m_pMyVehicle->m_status = STATUS_PLAYER_DISABLED;
+		player->m_pMyVehicle->SetStatus(STATUS_PLAYER_DISABLED);
 	}
 	if (GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED)
 		SetCurrentWeapon(WEAPONTYPE_COLT45);

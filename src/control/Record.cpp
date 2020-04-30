@@ -286,7 +286,7 @@ void CRecordDataForChase::SaveOrRetrieveCarPositions(void)
 			}
 			if (Status == STATE_PLAYBACK_BEFORE_RECORDING) {
 				Status = STATE_RECORD;
-				pChaseCars[CurrentCar]->m_status = STATUS_PLAYER;
+				pChaseCars[CurrentCar]->SetStatus(STATUS_PLAYER);
 			}
 		}
 		break;
@@ -408,7 +408,7 @@ void CRecordDataForChase::GiveUsACar(int32 mi, CVector pos, float angle, CAutomo
 		return;
 	CAutomobile* pCar = new CAutomobile(mi, MISSION_VEHICLE);
 	pCar->GetPosition() = pos;
-	pCar->m_status = STATUS_PLAYER_PLAYBACKFROMBUFFER;
+	pCar->SetStatus(STATUS_PLAYER_PLAYBACKFROMBUFFER);
 	pCar->GetMatrix().SetRotateZOnly(DEGTORAD(angle));
 	pCar->pDriver = nil;
 	pCar->m_currentColour1 = colour1;
@@ -517,7 +517,7 @@ CVehicle* CRecordDataForChase::TurnChaseCarIntoScriptCar(int32 i)
 {
 	CVehicle* pVehicle = pChaseCars[i];
 	pChaseCars[i] = nil;
-	pVehicle->m_status = STATUS_PHYSICS;
+	pVehicle->SetStatus(STATUS_PHYSICS);
 	return pVehicle;
 }
 

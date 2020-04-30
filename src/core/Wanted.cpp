@@ -352,7 +352,7 @@ CWanted::WorkOutPolicePresence(CVector posn, float radius)
 		   vehicle->bIsLawEnforcer &&
 		   IsPoliceVehicleModel(vehicle->GetModelIndex()) &&
 		   vehicle != FindPlayerVehicle() &&
-		   vehicle->m_status != STATUS_ABANDONED && vehicle->m_status != STATUS_WRECKED &&
+		   vehicle->GetStatus() != STATUS_ABANDONED && vehicle->GetStatus() != STATUS_WRECKED &&
 		   (posn - vehicle->GetPosition()).Magnitude() < radius)
 			numPolice++;
 	}

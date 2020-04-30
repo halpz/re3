@@ -54,7 +54,7 @@ CPhysical::CPhysical(void)
 	bInfiniteMass = false;
 	bIsInWater = false;
 	bHitByTrain = false;
-	m_phy_flagA80 = false;
+	bSkipLineCol = false;
 
 	m_fDistanceTravelled = 0.0f;
 	m_treadable[PATH_CAR] = nil;
@@ -350,7 +350,7 @@ CPhysical::ProcessControl(void)
 	bWasPostponed = false;
 	bHasHitWall = false;
 
-	if(m_status == STATUS_SIMPLE)
+	if(GetStatus() == STATUS_SIMPLE)
 		return;
 
 	m_nCollisionRecords = 0;
@@ -538,7 +538,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 	float timestepB;
 	if(A->bPedPhysics){
 		if(A->IsPed() && ((CPed*)A)->IsPlayer() && B->IsVehicle() &&
-		   (B->m_status == STATUS_ABANDONED || B->m_status == STATUS_WRECKED || A->bHasHitWall))
+		   (B->GetStatus() == STATUS_ABANDONED || B->GetStatus() == STATUS_WRECKED || A->bHasHitWall))
 			timestepB = 2200.0f / B->m_fMass;
 		else
 			timestepB = 10.0f;
@@ -757,7 +757,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 				fA.y *= 1.4f;
 				if(colpoint.normal.z < 0.7f)
 					fA.z *= 0.3f;
-				if(A->m_status == STATUS_PLAYER)
+				if(A->GetStatus() == STATUS_PLAYER)
 					pointposA *= 0.8f;
 				if(CWorld::bNoMoreCollisionTorque){
 					A->ApplyFrictionMoveForce(fA*-0.3f);
@@ -769,7 +769,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 				fB.y *= 1.4f;
 				if(colpoint.normal.z < 0.7f)
 					fB.z *= 0.3f;
-				if(B->m_status == STATUS_PLAYER)
+				if(B->GetStatus() == STATUS_PLAYER)
 					pointposB *= 0.8f;
 				if(CWorld::bNoMoreCollisionTorque){
 					// BUG: the game actually uses A here, but this can't be right
@@ -815,7 +815,7 @@ CPhysical::ApplyCollisionAlt(CEntity *B, CColPoint &colpoint, float &impulse, CV
 		if(normalSpeed < 0.0f){
 			float minspeed = 0.0104f * CTimer::GetTimeStep();
 #ifdef GTA3_1_1_PATCH
-			if ((IsObject() || IsVehicle() && (GetUp().z < -0.3f || ((CVehicle*)this)->IsBike() && (m_status == STATUS_ABANDONED || m_status == STATUS_WRECKED))) &&
+			if ((IsObject() || IsVehicle() && (GetUp().z < -0.3f || ((CVehicle*)this)->IsBike() && (GetStatus() == STATUS_ABANDONED || GetStatus() == STATUS_WRECKED))) &&
 #else
 			if((IsObject() || IsVehicle() && GetUp().z < -0.3f) &&
 #endif
@@ -1341,8 +1341,8 @@ collision:
 		}
 	}
 
-	if(B->m_status == STATUS_SIMPLE){
-		B->m_status = STATUS_PHYSICS;
+	if(B->GetStatus() == STATUS_SIMPLE){
+		B->SetStatus(STATUS_PHYSICS);
 		if(B->IsVehicle())
 			CCarCtrl::SwitchVehicleToRealPhysics((CVehicle*)B);
 	}
@@ -1401,7 +1401,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 				continue;
 			}
 
-			A->m_phy_flagA80 = false;
+			A->bSkipLineCol = false;
 			skipCollision = false;
 			altcollision = false;
 
@@ -1411,13 +1411,13 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 			  (B->IsVehicle() || B->IsPed()) &&
 			  A->GetUp().z < 0.66f){
 				skipCollision = true;
-				A->m_phy_flagA80 = true;
+				A->bSkipLineCol = true;
 				Aobj->m_pCollidingEntity = B;
 			}else if((A->IsVehicle() || A->IsPed()) &&
 			  B->GetUp().z < 0.66f &&
 			  IsTrafficLight(B->GetModelIndex())){
 				skipCollision = true;
-				A->m_phy_flagA80 = true;
+				A->bSkipLineCol = true;
 				Bobj->m_pCollidingEntity = A;
 			}else if(A->IsObject() && B->IsVehicle()){
 				if(A->GetModelIndex() == MI_CAR_BUMPER || A->GetModelIndex() == MI_FILES)
@@ -1460,18 +1460,18 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 				skipCollision = true;
 			}else if(A->IsPed() && IsBodyPart(B->GetModelIndex())){
 				skipCollision = true;
-				A->m_phy_flagA80 = true;
+				A->bSkipLineCol = true;
 			}else if(A->IsPed() && Aped->m_pCollidingEntity == B){
 				skipCollision = true;
 				if(!Aped->bKnockedUpIntoAir)
-					A->m_phy_flagA80 = true;
+					A->bSkipLineCol = true;
 			}else if(B->IsPed() && Bped->m_pCollidingEntity == A){
 				skipCollision = true;
-				A->m_phy_flagA80 = true;
+				A->bSkipLineCol = true;
 			}else if(A->GetModelIndex() == MI_RCBANDIT && (B->IsPed() || B->IsVehicle()) ||
 			         B->GetModelIndex() == MI_RCBANDIT && (A->IsPed() || A->IsVehicle())){
 				skipCollision = true;
-				A->m_phy_flagA80 = true;
+				A->bSkipLineCol = true;
 			}else if(A->IsPed() && B->IsObject() && Bobj->m_fUprootLimit > 0.0f)
 				altcollision = true;
 
@@ -1544,7 +1544,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 							}else
 								adhesion = 0.0f;
 						}else if(A->IsVehicle()){
-							if(A->m_status == STATUS_WRECKED)
+							if(A->GetStatus() == STATUS_WRECKED)
 								adhesion *= 3.0f;
 							else if(A->GetUp().z > 0.3f)
 								adhesion = 0.0f;
@@ -1561,7 +1561,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 					m_vecMoveSpeed += moveSpeed / numResponses;
 					m_vecTurnSpeed += turnSpeed / numResponses;
 					if(!CWorld::bNoMoreCollisionTorque &&
-					   A->m_status == STATUS_PLAYER && A->IsVehicle() &&
+					   A->GetStatus() == STATUS_PLAYER && A->IsVehicle() &&
 					   Abs(A->m_vecMoveSpeed.x) > 0.2f &&
 					   Abs(A->m_vecMoveSpeed.y) > 0.2f){
 						A->m_vecMoveFriction.x += moveSpeed.x * -0.3f / numCollisions;
@@ -1713,8 +1713,8 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						Aobj->ObjectDamage(maxImpulseB);
 				}
 
-				if(B->m_status == STATUS_SIMPLE){
-					B->m_status = STATUS_PHYSICS;
+				if(B->GetStatus() == STATUS_SIMPLE){
+					B->SetStatus(STATUS_PHYSICS);
 					if(B->IsVehicle())
 						CCarCtrl::SwitchVehicleToRealPhysics((CVehicle*)B);
 				}
@@ -1758,7 +1758,7 @@ void
 CPhysical::ProcessShift(void)
 {
 	m_fDistanceTravelled = 0.0f;
-	if(m_status == STATUS_SIMPLE){
+	if(GetStatus() == STATUS_SIMPLE){
 		bIsStuck = false;
 		bIsInSafePosition = true;
 		RemoveAndAdd();
@@ -1804,7 +1804,7 @@ CPhysical::ProcessCollision(void)
 
 	m_fDistanceTravelled = 0.0f;
 	m_bIsVehicleBeingShifted = false;
-	m_phy_flagA80 = false;
+	bSkipLineCol = false;
 
 	if(!bUsesCollision){
 		bIsStuck = false;
@@ -1813,9 +1813,9 @@ CPhysical::ProcessCollision(void)
 		return;
 	}
 
-	if(m_status == STATUS_SIMPLE){
-		if(CheckCollision_SimpleCar() && m_status == STATUS_SIMPLE){
-			m_status = STATUS_PHYSICS;
+	if(GetStatus() == STATUS_SIMPLE){
+		if(CheckCollision_SimpleCar() && GetStatus() == STATUS_SIMPLE){
+			SetStatus(STATUS_PHYSICS);
 			if(IsVehicle())
 				CCarCtrl::SwitchVehicleToRealPhysics((CVehicle*)this);
 		}
@@ -1840,7 +1840,7 @@ CPhysical::ProcessCollision(void)
 			n = NUMSTEPS(0.3f);
 		step = savedTimeStep / n;
 	}else if(IsVehicle() && distSq >= sq(0.4f)){
-		if(m_status == STATUS_PLAYER)
+		if(GetStatus() == STATUS_PLAYER)
 			n = NUMSTEPS(0.2f);
 		else
 			n = distSq > 0.32f ? NUMSTEPS(0.3f) : NUMSTEPS(0.4f);
@@ -1886,7 +1886,7 @@ CPhysical::ProcessCollision(void)
 		// TODO: get rid of copy paste?
 		if(CheckCollision()){
 			if(IsPed() && m_vecMoveSpeed.z == 0.0f &&
-			   !ped->m_ped_flagA2 &&
+			   !ped->bWasStanding &&
 			   ped->bIsStanding)
 				savedMatrix.GetPosition().z = GetPosition().z;
 			GetMatrix() = savedMatrix;
@@ -1894,7 +1894,7 @@ CPhysical::ProcessCollision(void)
 			return;
 		}
 		if(IsPed() && m_vecMoveSpeed.z == 0.0f &&
-		   !ped->m_ped_flagA2 &&
+		   !ped->bWasStanding &&
 		   ped->bIsStanding)
 			savedMatrix.GetPosition().z = GetPosition().z;
 		GetMatrix() = savedMatrix;
@@ -1917,11 +1917,11 @@ CPhysical::ProcessCollision(void)
 	ApplyTurnSpeed();
 	GetMatrix().Reorthogonalise();
 	m_bIsVehicleBeingShifted = false;
-	m_phy_flagA80 = false;
+	bSkipLineCol = false;
 	if(!m_vecMoveSpeed.IsZero() ||
 	   !m_vecTurnSpeed.IsZero() ||
 	   bHitByTrain ||
-	   m_status == STATUS_PLAYER || IsPed() && ped->IsPlayer()){
+		GetStatus() == STATUS_PLAYER || IsPed() && ped->IsPlayer()){
 		if(IsVehicle())
 			((CVehicle*)this)->bVehicleColProcessed = true;
 		if(CheckCollision()){
@@ -1931,7 +1931,7 @@ CPhysical::ProcessCollision(void)
 	}
 	bHitByTrain = false;
 	m_fDistanceTravelled = (GetPosition() - savedMatrix.GetPosition()).Magnitude();
-	m_phy_flagA80 = false;
+	bSkipLineCol = false;
 
 	bIsStuck = false;
 	bIsInSafePosition = true;

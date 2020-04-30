@@ -61,7 +61,7 @@ void CCarGenerator::DoInternalProcessing()
 		pos.z += pBoat->GetDistanceFromCentreOfMassToBaseOfModel();
 		pBoat->GetPosition() = pos;
 		pBoat->SetOrientation(0.0f, 0.0f, DEGTORAD(m_fAngle));
-		pBoat->m_status = STATUS_ABANDONED;
+		pBoat->SetStatus(STATUS_ABANDONED);
 		pBoat->m_nDoorLock = CARLOCK_UNLOCKED;
 		CWorld::Add(pBoat);
 		if (CGeneral::GetRandomNumberInRange(0, 100) < m_nAlarm)
@@ -95,7 +95,7 @@ void CCarGenerator::DoInternalProcessing()
 			pos.z += pCar->GetDistanceFromCentreOfMassToBaseOfModel();
 			pCar->GetPosition() = pos;
 			pCar->SetOrientation(0.0f, 0.0f, DEGTORAD(m_fAngle));
-			pCar->m_status = STATUS_ABANDONED;
+			pCar->SetStatus(STATUS_ABANDONED);
 			pCar->bLightsOn = false;
 			pCar->m_nDoorLock = CARLOCK_UNLOCKED;
 			CWorld::Add(pCar);
@@ -130,7 +130,7 @@ void CCarGenerator::Process()
 		m_nVehicleHandle = -1;
 		return;
 	}
-	if (pVehicle->m_status != STATUS_PLAYER)
+	if (pVehicle->GetStatus() != STATUS_PLAYER)
 		return;
 	m_nTimer += 60000;
 	m_nVehicleHandle = -1;

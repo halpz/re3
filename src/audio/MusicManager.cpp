@@ -55,7 +55,7 @@ cMusicManager::PlayerInCar()
 	if (!FindPlayerVehicle())
 		return true;
 
-	if (FindPlayerVehicle()->m_status == STATUS_WRECKED)
+	if (FindPlayerVehicle()->GetStatus() == STATUS_WRECKED)
 		return false;
 
 	switch(FindPlayerVehicle()->m_modelIndex) {

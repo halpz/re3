@@ -869,8 +869,8 @@ CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 			CVehicle* veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
 			if (veh && veh->m_nZoneLevel == LEVEL_NONE && veh->IsCar()) {
 
-				if(veh->m_status != STATUS_ABANDONED && veh->m_status != STATUS_WRECKED && veh->m_status != STATUS_PLAYER &&
-					veh->m_status != STATUS_PLAYER_REMOTE) {
+				if(veh->GetStatus() != STATUS_ABANDONED && veh->GetStatus() != STATUS_WRECKED && veh->GetStatus() != STATUS_PLAYER &&
+					veh->GetStatus() != STATUS_PLAYER_REMOTE) {
 
 					CVector vehPos(veh->GetPosition());
 					CPopulation::FindCollisionZoneForCoors(&vehPos, &zone, &level);

@@ -137,7 +137,7 @@ CBoat::ProcessControl(void)
 
 	ProcessCarAlarm();
 
-	switch(m_status){
+	switch(GetStatus()){
 	case STATUS_PLAYER:
 		m_bIsAnchored = false;
 		m_fOrientation = INVALID_ORIENTATION;
@@ -176,7 +176,7 @@ CBoat::ProcessControl(void)
 	}
 
 	float collisionDamage = pHandling->fCollisionDamageMultiplier * m_fDamageImpulse;
-	if(collisionDamage > 25.0f && m_status != STATUS_WRECKED && m_fHealth >= 150.0f){
+	if(collisionDamage > 25.0f && GetStatus() != STATUS_WRECKED && m_fHealth >= 150.0f){
 		float prevHealth = m_fHealth;
 		if(this == FindPlayerVehicle()){
 			if(bTakeLessDamage)
@@ -199,7 +199,7 @@ CBoat::ProcessControl(void)
 	}
 
 	// Damage particles
-	if(m_fHealth <= 600.0f && m_status != STATUS_WRECKED &&
+	if(m_fHealth <= 600.0f && GetStatus() != STATUS_WRECKED &&
 	   Abs(GetPosition().x - TheCamera.GetPosition().x) < 200.0f &&
 	   Abs(GetPosition().y - TheCamera.GetPosition().y) < 200.0f){
 		float speedSq = m_vecMoveSpeed.MagnitudeSqr();
@@ -326,7 +326,7 @@ CBoat::ProcessControl(void)
 					// Spray some particles
 					CVector jetDir = -0.04f * force;
 					if(m_fGasPedal > 0.0f){
-						if(m_status == STATUS_PLAYER){
+						if(GetStatus() == STATUS_PLAYER){
 							bool cameraHack = TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
 								TheCamera.WhoIsInControlOfTheCamera == CAMCONTROL_OBBE;
 							CVector sternPos = GetColModel()->boundingBox.min;
@@ -597,7 +597,7 @@ CBoat::BlowUpCar(CEntity *culprit)
 
 	// explosion pushes vehicle up
 	m_vecMoveSpeed.z += 0.13f;
-	m_status = STATUS_WRECKED;
+	SetStatus(STATUS_WRECKED);
 	bRenderScorched = true;
 
 	m_fHealth = 0.0;

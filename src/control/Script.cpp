@@ -1737,7 +1737,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			if (ped->InVehicle()) {
 				if (ped->m_pMyVehicle->pDriver == ped) {
 					ped->m_pMyVehicle->RemoveDriver();
-					ped->m_pMyVehicle->m_status = STATUS_ABANDONED;
+					ped->m_pMyVehicle->SetStatus(STATUS_ABANDONED);
 					if (ped->m_pMyVehicle->m_nDoorLock == CARLOCK_LOCKED_INITIALLY)
 						ped->m_pMyVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
 					if (ped->m_nPedType == PEDTYPE_COP && ped->m_pMyVehicle->IsLawEnforcementVehicle())
@@ -1933,7 +1933,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			pos.z += boat->GetDistanceFromCentreOfMassToBaseOfModel();
 			boat->GetPosition() = pos;
 			CTheScripts::ClearSpaceForMissionEntity(pos, boat);
-			boat->m_status = STATUS_ABANDONED;
+			boat->SetStatus(STATUS_ABANDONED);
 			boat->bIsLocked = true;
 			boat->AutoPilot.m_nCarMission = MISSION_NONE;
 			boat->AutoPilot.m_nTempAction = TEMPACT_NONE; /* Animation ID? */
@@ -1951,7 +1951,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
 			car->GetPosition() = pos;
 			CTheScripts::ClearSpaceForMissionEntity(pos, car);
-			car->m_status = STATUS_ABANDONED;
+			car->SetStatus(STATUS_ABANDONED);
 			car->bIsLocked = true;
 			CCarCtrl::JoinCarWithRoadSystem(car);
 			car->AutoPilot.m_nCarMission = MISSION_NONE;
@@ -1997,7 +1997,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			car->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_STRAIGHT;
 		else
 			car->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS;
-		car->m_status = STATUS_PHYSICS;
+		car->SetStatus(STATUS_PHYSICS);
 		car->bEngineOn = true;
 		car->AutoPilot.m_nCruiseSpeed = Max(car->AutoPilot.m_nCruiseSpeed, 6);
 		car->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
@@ -2087,7 +2087,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
-		UpdateCompareFlag(car && car->m_status != STATUS_WRECKED && (car->IsBoat() || !car->bIsInWater));
+		UpdateCompareFlag(car && car->GetStatus() != STATUS_WRECKED && (car->IsBoat() || !car->bIsInWater));
 		return 0;
 	}
 	case COMMAND_SET_CAR_CRUISE_SPEED:
@@ -2626,7 +2626,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
-		UpdateCompareFlag(!pVehicle || pVehicle->m_status == STATUS_WRECKED || !pVehicle->IsBoat() && pVehicle->bIsInWater);
+		UpdateCompareFlag(!pVehicle || pVehicle->GetStatus() == STATUS_WRECKED || !pVehicle->IsBoat() && pVehicle->bIsInWater);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_THREAT_SEARCH:
@@ -2753,7 +2753,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		pPed->m_pMyVehicle = pVehicle;
 		pPed->m_pMyVehicle->RegisterReference((CEntity**)&pPed->m_pMyVehicle);
 		pPed->bInVehicle = true;
-		pVehicle->m_status = STATUS_PHYSICS;
+		pVehicle->SetStatus(STATUS_PHYSICS);
 		if (!pVehicle->IsBoat())
 			pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
 		pVehicle->bEngineOn = true;
@@ -2786,7 +2786,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 				pPlayer->m_pPed->bRenderPedInCar = true;
 			if (pPlayer->m_pPed->m_pMyVehicle->pDriver == pPlayer->m_pPed){
 				pPlayer->m_pPed->m_pMyVehicle->RemoveDriver();
-				pPlayer->m_pPed->m_pMyVehicle->m_status = STATUS_ABANDONED;
+				pPlayer->m_pPed->m_pMyVehicle->SetStatus(STATUS_ABANDONED);
 				pPlayer->m_pPed->m_pMyVehicle->bEngineOn = false;
 				pPlayer->m_pPed->m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 0;
 			}else{
@@ -2878,7 +2878,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		float y1 = *(float*)&ScriptParams[2];
 		float x2 = *(float*)&ScriptParams[3];
 		float y2 = *(float*)&ScriptParams[4];
-		UpdateCompareFlag(pVehicle->m_status == STATUS_WRECKED &&
+		UpdateCompareFlag(pVehicle->GetStatus() == STATUS_WRECKED &&
 			pVehicle->IsWithinArea(x1, y1, x2, y2));
 		if (!ScriptParams[5])
 			return 0;
@@ -2898,7 +2898,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		float x2 = *(float*)&ScriptParams[4];
 		float y2 = *(float*)&ScriptParams[5];
 		float z2 = *(float*)&ScriptParams[6];
-		UpdateCompareFlag(pVehicle->m_status == STATUS_WRECKED &&
+		UpdateCompareFlag(pVehicle->GetStatus() == STATUS_WRECKED &&
 			pVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		if (!ScriptParams[7])
 			return 0;
@@ -3947,7 +3947,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		pPed->m_pMyVehicle->RegisterReference((CEntity**)&pPed->m_pMyVehicle);
 		pPed->bInVehicle = true;
 		pPed->SetPedState(PED_DRIVING);
-		pVehicle->m_status = STATUS_PHYSICS;
+		pVehicle->SetStatus(STATUS_PHYSICS);
 		pPed->bUsesCollision = false;
 #ifdef FIX_BUGS
 		AnimationId anim = pVehicle->GetDriverAnim();
@@ -5583,7 +5583,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			pVehicle->AutoPilot.m_nCarMission = MISSION_GOTO_COORDS_STRAIGHT_ACCURATE;
 		else
 			pVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_ACCURATE;
-		pVehicle->m_status = STATUS_PHYSICS;
+		pVehicle->SetStatus(STATUS_PHYSICS);
 		pVehicle->bEngineOn = true;
 		pVehicle->AutoPilot.m_nCruiseSpeed = Max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
 		pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
@@ -5699,7 +5699,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &pos.z, false);
 		pBoat->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_ASTHECROWSWIMS;
 		pBoat->AutoPilot.m_vecDestinationCoors = pos;
-		pBoat->m_status = STATUS_PHYSICS;
+		pBoat->SetStatus(STATUS_PHYSICS);
 		pBoat->AutoPilot.m_nCruiseSpeed = Max(6, pBoat->AutoPilot.m_nCruiseSpeed);
 		pBoat->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		return 0;
@@ -5712,7 +5712,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		assert(pVehicle->m_vehType == VEHICLE_TYPE_BOAT);
 		CBoat* pBoat = (CBoat*)pVehicle;
 		pBoat->AutoPilot.m_nCarMission = MISSION_NONE;
-		pBoat->m_status = STATUS_PHYSICS;
+		pBoat->SetStatus(STATUS_PHYSICS);
 		pBoat->bEngineOn = false;
 		pBoat->AutoPilot.m_nCruiseSpeed = 0;
 		return 0;
@@ -6911,7 +6911,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 				if (pPed->m_pMyVehicle){
 					if (pPed == pPed->m_pMyVehicle->pDriver){
 						pPed->m_pMyVehicle->RemoveDriver();
-						pPed->m_pMyVehicle->m_status = STATUS_ABANDONED;
+						pPed->m_pMyVehicle->SetStatus(STATUS_ABANDONED);
 						if (pPed->m_pMyVehicle->m_nDoorLock == CARLOCK_LOCKED_INITIALLY)
 							pPed->m_pMyVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
 						if (pPed->m_nPedType == PEDTYPE_COP && pPed->m_pMyVehicle->IsLawEnforcementVehicle())
@@ -7108,7 +7108,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 				pPed->bRenderPedInCar = true;
 			if (pPed->m_pMyVehicle->pDriver == pPed){
 				pPed->m_pMyVehicle->RemoveDriver();
-				pPed->m_pMyVehicle->m_status = STATUS_ABANDONED;
+				pPed->m_pMyVehicle->SetStatus(STATUS_ABANDONED);
 				pPed->m_pMyVehicle->bEngineOn = false;
 				pPed->m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 0;
 			}else{
@@ -7779,7 +7779,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
-		pVehicle->m_status = ScriptParams[1];
+		pVehicle->SetStatus((eEntityStatus)ScriptParams[1]);
 		return 0;
 	}
 	case COMMAND_IS_CHAR_MALE:
@@ -8156,7 +8156,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		car->GetPosition() = pos;
 		car->SetHeading(DEGTORAD(*(float*)&ScriptParams[3]));
 		CTheScripts::ClearSpaceForMissionEntity(pos, car);
-		car->m_status = STATUS_ABANDONED;
+		car->SetStatus(STATUS_ABANDONED);
 		car->bIsLocked = true;
 		car->bIsCarParkVehicle = true;
 		CCarCtrl::JoinCarWithRoadSystem(car);
@@ -11229,7 +11229,7 @@ INITSAVEBUF
 			type = 0;
 			handle = 0;
 		} else {
-			switch (pEntity->m_type) {
+			switch (pEntity->GetType()) {
 			case ENTITY_TYPE_BUILDING:
 				if (((CBuilding*)pEntity)->GetIsATreadable()) {
 					type = 1;
@@ -11371,7 +11371,7 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntit
 		}
 		if (cols <= 0)
 			continue;
-		switch (pFound->m_type) {
+		switch (pFound->GetType()) {
 		case ENTITY_TYPE_VEHICLE:
 		{
 			printf("Will try to delete a vehicle where a mission entity should be\n");

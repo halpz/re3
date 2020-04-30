@@ -749,7 +749,7 @@ void CGarage::Update()
 				if (((CAutomobile*)(m_pTarget))->Damage.GetEngineStatus() <= ENGINE_STATUS_ON_FIRE &&
 					((CAutomobile*)(m_pTarget))->m_fFireBlowUpTimer == 0.0f) {
 #endif
-					if (m_pTarget->m_status != STATUS_WRECKED) {
+					if (m_pTarget->GetStatus() != STATUS_WRECKED) {
 						CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_GARAGE);
 						FindPlayerPed()->m_pWanted->m_bIgnoredByCops = true;
 						m_eGarageState = GS_CLOSING;
@@ -1855,7 +1855,7 @@ CVehicle* CStoredCar::RestoreCar()
 	CVehicle* pVehicle = new CAutomobile(m_nModelIndex, RANDOM_VEHICLE);
 #endif
 	pVehicle->GetPosition() = m_vecPos;
-	pVehicle->m_status = STATUS_ABANDONED;
+	pVehicle->SetStatus(STATUS_ABANDONED);
 	pVehicle->GetForward() = m_vecAngle;
 	pVehicle->GetRight() = CVector(m_vecAngle.y, -m_vecAngle.x, 0.0f);
 	pVehicle->GetUp() = CVector(0.0f, 0.0f, 1.0f);
@@ -1975,7 +1975,7 @@ void CGarage::TidyUpGarage()
 		if (pVehicle->GetPosition().x > m_fX1 && pVehicle->GetPosition().x < m_fX2 &&
 			pVehicle->GetPosition().y > m_fY1 && pVehicle->GetPosition().y < m_fY2 &&
 			pVehicle->GetPosition().z > m_fZ1 && pVehicle->GetPosition().z < m_fZ2) {
-			if (pVehicle->m_status == STATUS_WRECKED || pVehicle->GetUp().z < 0.5f) {
+			if (pVehicle->GetStatus() == STATUS_WRECKED || pVehicle->GetUp().z < 0.5f) {
 				CWorld::Remove(pVehicle);
 				delete pVehicle;
 			}
@@ -1990,7 +1990,7 @@ void CGarage::TidyUpGarageClose()
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!pVehicle || !pVehicle->IsCar())
 			continue;
-		if (!pVehicle->IsCar() || pVehicle->m_status != STATUS_WRECKED || !IsEntityTouching3D(pVehicle))
+		if (!pVehicle->IsCar() || pVehicle->GetStatus() != STATUS_WRECKED || !IsEntityTouching3D(pVehicle))
 			continue;
 		bool bRemove = false;
 		if (m_eGarageState != GS_FULLYCLOSED) {

@@ -6,7 +6,7 @@
 struct CReference;
 class CPtrList;
 
-enum eEntityType
+enum eEntityType : uint8
 {
 	ENTITY_TYPE_NOTHING = 0,
 	ENTITY_TYPE_BUILDING,
@@ -16,7 +16,7 @@ enum eEntityType
 	ENTITY_TYPE_DUMMY,
 };
 
-enum eEntityStatus
+enum eEntityStatus : uint8
 {
 	STATUS_PLAYER,
 	STATUS_PLAYER_PLAYBACKFROMBUFFER,
@@ -36,9 +36,11 @@ class CEntity : public CPlaceable
 {
 public:
 	RwObject *m_rwObject;
+protected:
 	uint32 m_type : 3;
+private:
 	uint32 m_status : 5;
-
+public:
 	// flagsA
 	uint32 bUsesCollision : 1;			// does entity use collision
 	uint32 bCollisionProcessed : 1;		// has object been processed by a ProcessEntityCollision function
@@ -90,6 +92,11 @@ public:
 	uint16 m_level;	// int16
 	CReference *m_pFirstReference;
 
+public:
+	eEntityType GetType() const { return (eEntityType)m_type; }
+	void SetType(eEntityType type) { m_type = type; }
+	eEntityStatus GetStatus() const { return (eEntityStatus)m_status; }
+	void SetStatus(eEntityStatus status) { m_status = status; }
 	CColModel *GetColModel(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(); }
 #ifndef COMPATIBLE_SAVES
 	uint32* GetAddressOfEntityProperties() { /* AWFUL */ return (uint32*)((char*)&m_rwObject + sizeof(m_rwObject)); }

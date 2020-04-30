@@ -77,7 +77,7 @@ CHeli::CHeli(int32 id, uint8 CreatedBy)
 		m_fHeliDustZ[i] = -50.0f;
 
 	m_nPoliceShoutTimer = CTimer::GetTimeInMilliseconds();
-	m_status = STATUS_HELI;
+	SetStatus(STATUS_HELI);
 	m_bTestRight = true;
 	m_fTargetOffset = 0.0f;
 	m_fSearchLightX = m_fSearchLightY = 0.0f;
@@ -810,7 +810,7 @@ GenerateHeli(bool catalina)
 	if(catalina)
 		heli->GetMatrix().SetRotateZOnly(DEGTORAD(270.0f));	// game actually uses 3.14 here
 
-	heli->m_status = STATUS_ABANDONED;
+	heli->SetStatus(STATUS_ABANDONED);
 
 	int id = -1;
 	bool found = false;

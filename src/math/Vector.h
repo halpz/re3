@@ -95,6 +95,10 @@ public:
 		return x == right.x && y == right.y && z == right.z;
 	}
 
+	const bool operator!=(CVector const &right) {
+		return x != right.x || y != right.y || z != right.z;
+	}
+
 	bool IsZero(void) const { return x == 0.0f && y == 0.0f && z == 0.0f; }
 };
 

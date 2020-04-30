@@ -990,7 +990,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 		}
 		else
 		{
-			switch ( victim->m_type )
+			switch ( victim->GetType() )
 			{
 				case ENTITY_TYPE_BUILDING:
 				{
@@ -1065,7 +1065,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 			}
 		}
 
-		switch ( victim->m_type )
+		switch ( victim->GetType() )
 		{
 			case ENTITY_TYPE_BUILDING:
 			{
@@ -1256,7 +1256,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 			}
 			else
 			{
-				switch ( victim->m_type )
+				switch ( victim->GetType() )
 				{
 					case ENTITY_TYPE_VEHICLE:
 					{
@@ -1315,7 +1315,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				}
 			}
 
-			switch ( victim->m_type )
+			switch ( victim->GetType() )
 			{
 				case ENTITY_TYPE_BUILDING:
 				{
@@ -1724,7 +1724,7 @@ CWeapon::FireInstantHitFromCar(CAutomobile *shooter, bool left)
 		else
 			CGlass::WasGlassHitByBullet(victim, point.point);
 
-		switch ( victim->m_type )
+		switch ( victim->GetType() )
 		{
 			case ENTITY_TYPE_BUILDING:
 			{
@@ -1796,10 +1796,10 @@ CWeapon::DoDoomAiming(CEntity *shooter, CVector *source, CVector *target)
 
 		if ( (CEntity*)shooterPed != victim && shooterPed->CanSeeEntity(victim, DEGTORAD(22.5f)) )
 		{
-			if ( !(victim->m_status == STATUS_TRAIN_MOVING
-				|| victim->m_status == STATUS_TRAIN_NOT_MOVING
-				|| victim->m_status == STATUS_HELI
-				|| victim->m_status == STATUS_PLANE) )
+			if ( !(victim->GetStatus() == STATUS_TRAIN_MOVING
+				|| victim->GetStatus() == STATUS_TRAIN_NOT_MOVING
+				|| victim->GetStatus() == STATUS_HELI
+				|| victim->GetStatus() == STATUS_PLANE) )
 			{
 				float distToVictim   = (shooterPed->GetPosition()-victim->GetPosition()).Magnitude2D();
 				float distToVictimZ  = Abs(shooterPed->GetPosition().z-victim->GetPosition().z);
@@ -1866,10 +1866,10 @@ CWeapon::DoTankDoomAiming(CEntity *shooter, CEntity *driver, CVector *source, CV
 
 		if ( shooter != victim && driver != victim )
 		{
-			if ( !(victim->m_status == STATUS_TRAIN_MOVING
-				|| victim->m_status == STATUS_TRAIN_NOT_MOVING
-				|| victim->m_status == STATUS_HELI
-				|| victim->m_status == STATUS_PLANE) )
+			if ( !(victim->GetStatus() == STATUS_TRAIN_MOVING
+				|| victim->GetStatus() == STATUS_TRAIN_NOT_MOVING
+				|| victim->GetStatus() == STATUS_HELI
+				|| victim->GetStatus() == STATUS_PLANE) )
 			{
 				if ( !(victim->IsVehicle() && victim->bRenderScorched) )
 				{
@@ -2086,7 +2086,7 @@ FireOneInstantHitRound(CVector *source, CVector *target, int32 damage)
 			((CVehicle *)victim)->InflictDamage(nil, WEAPONTYPE_UZI, damage);
 		//BUG ? no CGlass::WasGlassHitByBullet
 
-		switch ( victim->m_type )
+		switch ( victim->GetType() )
 		{
 			case ENTITY_TYPE_BUILDING:
 			{

@@ -107,7 +107,7 @@ void TankCheat()
 			tank->GetPosition() = pos;
 			tank->SetOrientation(0.0f, 0.0f, DEGTORAD(200.0f));
 
-			tank->m_status = STATUS_ABANDONED;
+			tank->SetStatus(STATUS_ABANDONED);
 			tank->m_nDoorLock = CARLOCK_UNLOCKED;
 			CWorld::Add(tank);
 		}

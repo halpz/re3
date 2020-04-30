@@ -413,6 +413,14 @@ CMenuManager::BuildStatLine(char *text, void *stat, bool itsFloat, void *stat2)
 	if (!text)
 		return;
 
+#ifdef MORE_LANGUAGES
+	if (CFont::IsJapanese() && stat2)
+		if (itsFloat)
+			sprintf(gString2, "  %.2f/%.2f", *(float*)stat, *(float*)stat2);
+		else
+			sprintf(gString2, "  %d/%d", *(int*)stat, *(int*)stat2);
+	else
+#endif
 	if (stat2) {
 		if (itsFloat) 
 			sprintf(gString2, "  %.2f %s %.2f", *(float*)stat, UnicodeToAscii(TheText.Get("FEST_OO")), *(float*)stat2);
@@ -2939,7 +2947,6 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		default:
 			break;
 		}
-		PcSaveHelper.PopulateSlotInfo();
 	}
 }
 
@@ -3286,7 +3293,7 @@ CMenuManager::PrintStats()
 {
 	int rowNum = ConstructStatLine(99999);
 #ifdef GTA3_1_1_PATCH
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 #endif
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X * 0.7), MENU_Y(MENU_TEXT_SIZE_Y * 0.9)); // second mulipliers are double, idk why
 	float nextYChange, y, alphaMult;
@@ -3345,9 +3352,21 @@ CMenuManager::PrintStats()
 
 	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
 	CFont::SetRightJustifyOff();
-	CFont::PrintString(nextX, MENU_Y(STATS_RATING_Y), TheText.Get("CRIMRA")); nextX += MENU_X(10.0f) + CFont::GetStringWidth(TheText.Get("CRIMRA"), true);
+	CFont::PrintString(nextX, MENU_Y(STATS_RATING_Y), TheText.Get("CRIMRA"));
+#ifdef MORE_LANGUAGES
+	if (CFont::IsJapanese())
+		nextX += MENU_X(10.0f) + CFont::GetStringWidth_Jap(TheText.Get("CRIMRA"));
+	else
+#endif
+		nextX += MENU_X(10.0f) + CFont::GetStringWidth(TheText.Get("CRIMRA"), true);
 	UnicodeStrcpy(gUString, CStats::FindCriminalRatingString());
-	CFont::PrintString(nextX, MENU_Y(STATS_RATING_Y), gUString); nextX += MENU_X(6.0f) + CFont::GetStringWidth(gUString, true);
+	CFont::PrintString(nextX, MENU_Y(STATS_RATING_Y), gUString);
+#ifdef MORE_LANGUAGES
+	if (CFont::IsJapanese())
+		nextX += MENU_X(6.0f) + CFont::GetStringWidth_Jap(gUString);
+	else
+#endif
+		nextX += MENU_X(6.0f) + CFont::GetStringWidth(gUString, true);
 	sprintf(gString, "%d", CStats::FindCriminalRatingNumber());
 	AsciiToUnicode(gString, gUString);
 	CFont::PrintString(nextX, MENU_Y(STATS_RATING_Y), gUString);
@@ -5474,8 +5493,18 @@ CMenuManager::PrintMap(void)
 
 	float nextX = MENU_X(30.0f), nextY = 95.0f;
 	wchar *text;
+#ifdef MORE_LANGUAGES
+#define TEXT_PIECE(key,extraSpace) \
+	text = TheText.Get(key);\
+	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), text);\
+	if (CFont::IsJapanese())\
+		nextX += CFont::GetStringWidth_Jap(text) + MENU_X(extraSpace);\
+	else\
+		nextX += CFont::GetStringWidth(text, true) + MENU_X(extraSpace);
+#else
 #define TEXT_PIECE(key,extraSpace) \
 	text = TheText.Get(key); CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), text); nextX += CFont::GetStringWidth(text, true) + MENU_X(extraSpace);
+#endif
 
 	TEXT_PIECE("FEC_MWF", 3.0f);
 	TEXT_PIECE("FEC_PGU", 1.0f);
@@ -5616,6 +5645,7 @@ CMenuManager::ConstructStatLine(int rowIdx)
 #ifdef MORE_LANGUAGES
 		case LANGUAGE_POLISH:
 		case LANGUAGE_RUSSIAN:
+		case LANGUAGE_JAPANESE:
 #endif
 			STAT_LINE("FESTDFM", &CStats::DistanceTravelledOnFoot, true, nil);
 			STAT_LINE("FESTDCM", &CStats::DistanceTravelledInVehicle, true, nil);

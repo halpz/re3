@@ -19,7 +19,7 @@ CRemote::GivePlayerRemoteControlledCar(float x, float y, float z, float rot, uin
 
 	car->GetMatrix().SetRotateZOnly(rot);
 	car->GetPosition() = CVector(x, y, z);
-	car->m_status = STATUS_PLAYER_REMOTE;
+	car->SetStatus(STATUS_PLAYER_REMOTE);
 	car->bIsLocked = true;
 
 	CCarCtrl::JoinCarWithRoadSystem(car);
@@ -31,7 +31,7 @@ CRemote::GivePlayerRemoteControlledCar(float x, float y, float z, float rot, uin
 	car->bEngineOn = true;
 	CWorld::Add(car);
 	if (FindPlayerVehicle() != nil) 
-		FindPlayerVehicle()->m_status = STATUS_PLAYER_DISABLED;
+		FindPlayerVehicle()->SetStatus(STATUS_PLAYER_DISABLED);
 
 	CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle = car;
 	CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->RegisterReference((CEntity**)&CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle);

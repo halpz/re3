@@ -303,7 +303,7 @@ public:
 
 	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
 	uint32 bIsStanding : 1;
-	uint32 m_ped_flagA2 : 1;	// bWasStanding?
+	uint32 bWasStanding : 1;
 	uint32 bIsAttacking : 1;		// doesn't reset after fist fight
 	uint32 bIsPointingGunAt : 1;
 	uint32 bIsLooking : 1;

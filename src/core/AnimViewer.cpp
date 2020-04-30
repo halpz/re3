@@ -278,7 +278,7 @@ CAnimViewer::Update(void)
 //					}
 				} else {
 					newEntity = pTarget = new CAutomobile(modelId, RANDOM_VEHICLE);
-					newEntity->m_status = STATUS_ABANDONED;
+					newEntity->SetStatus(STATUS_ABANDONED);
 				}
 				newEntity->bIsStuck = true;
 			} else if (modelInfo->m_type == MITYPE_PED) {
@@ -296,7 +296,7 @@ CAnimViewer::Update(void)
 			CWorld::Add(newEntity);
 			TheCamera.TakeControl(pTarget, CCam::MODE_MODELVIEW, JUMP_CUT, CAMCONTROL_SCRIPT);
 		}
-		if (pTarget->m_type == ENTITY_TYPE_VEHICLE || pTarget->m_type == ENTITY_TYPE_PED || pTarget->m_type == ENTITY_TYPE_OBJECT) {
+		if (pTarget->IsVehicle() || pTarget->IsPed() || pTarget->IsObject()) {
 			((CPhysical*)pTarget)->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 		}
 		pTarget->GetPosition().z = 0.0f;

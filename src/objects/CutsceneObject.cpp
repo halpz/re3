@@ -15,7 +15,7 @@
 
 CCutsceneObject::CCutsceneObject(void)
 {
-	m_status = STATUS_SIMPLE;
+	SetStatus(STATUS_SIMPLE);
 	bUsesCollision = false;
 	bStreamingDontDelete = true;
 	ObjectCreatedBy = CUTSCENE_OBJECT;

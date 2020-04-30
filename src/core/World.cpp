@@ -1867,7 +1867,7 @@ CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity *reason)
 	int poolSize = CPools::GetVehiclePool()->GetSize();
 	for(int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
 		CVehicle *veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
-		if(veh && veh->m_status != STATUS_WRECKED && !veh->m_pCarFire && !veh->bFireProof) {
+		if(veh && veh->GetStatus() != STATUS_WRECKED && !veh->m_pCarFire && !veh->bFireProof) {
 			if(Abs(veh->GetPosition().z - z) < 5.0f && Abs(veh->GetPosition().x - x) < radius &&
 			   Abs(veh->GetPosition().y - y) < radius)
 				gFireManager.StartFire(veh, reason, 0.8f, true);
@@ -1928,7 +1928,7 @@ CWorld::Process(void)
 				if(csObj->m_rwObject && RwObjectGetType(csObj->m_rwObject) == rpCLUMP &&
 				   RpAnimBlendClumpGetFirstAssociation(csObj->GetClump())) {
 					RpAnimBlendClumpUpdateAnimations(csObj->GetClump(),
-					                                 0.02f * (csObj->m_type == ENTITY_TYPE_OBJECT
+					                                 0.02f * (csObj->IsObject()
 					                                              ? CTimer::GetTimeStepNonClipped()
 					                                              : CTimer::GetTimeStep()));
 				}
@@ -1946,7 +1946,7 @@ CWorld::Process(void)
 			if(movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
 			   RpAnimBlendClumpGetFirstAssociation(movingEnt->GetClump())) {
 				RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(),
-				                                 0.02f * (movingEnt->m_type == ENTITY_TYPE_OBJECT
+				                                 0.02f * (movingEnt->IsObject()
 				                                              ? CTimer::GetTimeStepNonClipped()
 				                                              : CTimer::GetTimeStep()));
 			}
@@ -2030,7 +2030,7 @@ CWorld::Process(void)
 					movingEnt->UpdateRwFrame();
 					if(!movingEnt->bIsInSafePosition) {
 						movingEnt->bIsStuck = true;
-						if(movingEnt->m_status == STATUS_PLAYER) {
+						if(movingEnt->GetStatus() == STATUS_PLAYER) {
 							printf("STUCK: Final Step: Player Entity %d Is Stuck\n",
 							       movingEnt->m_modelIndex);
 							movingEnt->m_vecMoveSpeed *= 0.3f;
@@ -2178,10 +2178,10 @@ CWorld::TriggerExplosionSectorList(CPtrList &list, const CVector &position, floa
 						pEntity->ApplyTurnForce(vecForceDir.x, vecForceDir.y, vecForceDir.z,
 						                        0.0f, 0.0f, fPointZ);
 					}
-					switch(pEntity->m_type) {
+					switch(pEntity->GetType()) {
 					case ENTITY_TYPE_VEHICLE:
-						if(pEntity->m_status == STATUS_SIMPLE) {
-							pEntity->m_status = STATUS_PHYSICS;
+						if(pEntity->GetStatus() == STATUS_SIMPLE) {
+							pEntity->SetStatus(STATUS_PHYSICS);
 							CCarCtrl::SwitchVehicleToRealPhysics(pVehicle);
 						}
 						pVehicle->InflictDamage(pCreator, WEAPONTYPE_EXPLOSION,
