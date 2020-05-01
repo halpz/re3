@@ -1,10 +1,10 @@
 # re3
 [![Build status](https://ci.appveyor.com/api/projects/status/hyiwgegks122h8jg?svg=true)](https://ci.appveyor.com/project/aap/re3/branch/master)
 <a href="https://discord.gg/jYpXxTm"><img src="https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat" /></a>
-<a href="https://bintray.com/gtamodding/re3/Debug_win-x86-librw_d3d9-mss/_latestVersion"><img src="https://img.shields.io/badge/download-DebugDirectX3D-9cf.svg" /></a>
-<a href="https://bintray.com/gtamodding/re3/Debug_win-x86-librw_gl3_glfw-mss/_latestVersion"><img src="https://img.shields.io/badge/download-DebugOpenGL-blue.svg" /></a>
-<a href="https://bintray.com/gtamodding/re3/Release_win-x86-librw_d3d9-mss/_latestVersion"><img src="https://img.shields.io/badge/download-ReleaseDirectX3D-orange.svg" /></a>
-<a href="https://bintray.com/gtamodding/re3/Release_win-x86-librw_gl3_glfw-mss/_latestVersion"><img src="https://img.shields.io/badge/download-ReleaseOpenGL-red.svg" /></a>
+| Platform | Debug | Release |
+|------------------|-------------|-------------|
+| Windows Direct3D9 | [![Download](https://api.bintray.com/packages/gtamodding/re3/Debug_win-x86-librw_d3d9-mss/images/download.svg)](https://bintray.com/gtamodding/re3/Debug_win-x86-librw_d3d9-mss/_latestVersion) | [![Download](https://api.bintray.com/packages/gtamodding/re3/Release_win-x86-librw_d3d9-mss/images/download.svg)](https://bintray.com/gtamodding/re3/Release_win-x86-librw_d3d9-mss/_latestVersion) |
+| Windows OpenGL3.3 | [![Download](https://api.bintray.com/packages/gtamodding/re3/Debug_win-x86-librw_gl3_glfw-mss/images/download.svg)](https://bintray.com/gtamodding/re3/Debug_win-x86-librw_gl3_glfw-mss/_latestVersion) | [![Download](https://api.bintray.com/packages/gtamodding/re3/Release_win-x86-librw_gl3_glfw-mss/images/download.svg)](https://bintray.com/gtamodding/re3/Release_win-x86-librw_gl3_glfw-mss/_latestVersion) |
 
 ## Intro
 
