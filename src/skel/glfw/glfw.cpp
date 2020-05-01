@@ -49,7 +49,13 @@ static RwInt32		GcurSel = 0, GcurSelVM = 0;
 
 static RwBool useDefault;
 
+// What is that for anyway?
+#ifndef IMPROVED_VIDEOMODE
 static RwBool defaultFullscreenRes = TRUE;
+#else
+static RwBool defaultFullscreenRes = FALSE;
+static RwInt32 bestWndMode = -1;
+#endif
 
 static psGlobalType PsGlobal;
 
@@ -421,11 +427,7 @@ RwChar **_psGetVideoModeList()
 				_VMList[i] = nil;
 		}
 		else
-#ifdef IMPROVED_VIDEOMODE
-			_VMList[i] = strdup("WINDOW");
-#else
 			_VMList[i] = nil;
-#endif
 	}
 	
 	return _VMList;
@@ -440,7 +442,7 @@ void _psSelectScreenVM(RwInt32 videoMode)
 	
 	FrontEndMenuManager.UnloadTextures();
 	
-	if ( !_psSetVideoMode(RwEngineGetCurrentSubSystem(), videoMode) )
+	if (!_psSetVideoMode(RwEngineGetCurrentSubSystem(), videoMode))
 	{
 		RsGlobal.quit = TRUE;
 	}
@@ -607,18 +609,16 @@ psSelectDevice()
 		}
 
 		// Find the videomode that best fits what we got from the settings file
-		RwInt32 bestMode = -1;
+		RwInt32 bestFsMode = -1;
 		RwInt32 bestWidth = -1;
 		RwInt32 bestHeight = -1;
 		RwInt32 bestDepth = -1;
 		for(GcurSelVM = 0; GcurSelVM < RwEngineGetNumVideoModes(); GcurSelVM++){
 			RwEngineGetVideoModeInfo(&vm, GcurSelVM);
-			if(!(vm.flags & rwVIDEOMODEEXCLUSIVE) != FrontEndMenuManager.m_nPrefsWindowed)
-				continue;
 
-			if(FrontEndMenuManager.m_nPrefsWindowed){
-				bestMode = GcurSelVM;
-			}else{
+			if (!(vm.flags & rwVIDEOMODEEXCLUSIVE)){
+				bestWndMode = GcurSelVM;
+			} else {
 				// try the largest one that isn't larger than what we wanted
 				if(vm.width >= bestWidth && vm.width <= FrontEndMenuManager.m_nPrefsWidth &&
 				   vm.height >= bestHeight && vm.height <= FrontEndMenuManager.m_nPrefsHeight &&
@@ -626,32 +626,34 @@ psSelectDevice()
 					bestWidth = vm.width;
 					bestHeight = vm.height;
 					bestDepth = vm.depth;
-					bestMode = GcurSelVM;
+					bestFsMode = GcurSelVM;
 				}
 			}
 		}
 
-		if(bestMode < 0){
+		if(bestFsMode < 0){
 			MessageBox(nil, "Cannot find desired video mode", "GTA3", MB_OK);
 			return FALSE;
 		}
-		GcurSelVM = bestMode;
+		GcurSelVM = bestFsMode;
 
 		FrontEndMenuManager.m_nDisplayVideoMode = GcurSelVM;
 		FrontEndMenuManager.m_nPrefsVideoMode = FrontEndMenuManager.m_nDisplayVideoMode;
-		GcurSelVM = FrontEndMenuManager.m_nDisplayVideoMode;
+
+		FrontEndMenuManager.m_nSelectedScreenMode = FrontEndMenuManager.m_nPrefsWindowed;
 	}
 #endif
-	
+
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
 
 #ifdef IMPROVED_VIDEOMODE
-	if(vm.flags & rwVIDEOMODEEXCLUSIVE){
-		FrontEndMenuManager.m_nPrefsWidth = vm.width;
-		FrontEndMenuManager.m_nPrefsHeight = vm.height;
-		FrontEndMenuManager.m_nPrefsDepth = vm.depth;
-	}
-	FrontEndMenuManager.m_nPrefsWindowed = !(vm.flags & rwVIDEOMODEEXCLUSIVE);
+	if (FrontEndMenuManager.m_nPrefsWindowed)
+		GcurSelVM = bestWndMode;
+
+	// Now GcurSelVM is 0 but vm has sizes(and fullscreen flag) of the video mode we want, that's why we changed the rwVIDEOMODEEXCLUSIVE conditions below
+	FrontEndMenuManager.m_nPrefsWidth = vm.width;
+	FrontEndMenuManager.m_nPrefsHeight = vm.height;
+	FrontEndMenuManager.m_nPrefsDepth = vm.depth;
 #endif
 
 	FrontEndMenuManager.m_nCurrOption = 0;
@@ -677,6 +679,7 @@ psSelectDevice()
 		}
 	}
 	*/
+#ifndef IMPROVED_VIDEOMODE
 	if (vm.flags & rwVIDEOMODEEXCLUSIVE)
 	{
 		RsGlobal.maximumWidth = vm.width;
@@ -686,15 +689,13 @@ psSelectDevice()
 		
 		PSGLOBAL(fullScreen) = TRUE;
 	}
-#ifdef IMPROVED_VIDEOMODE
-	else{
+#else
 		RsGlobal.maximumWidth = FrontEndMenuManager.m_nPrefsWidth;
 		RsGlobal.maximumHeight = FrontEndMenuManager.m_nPrefsHeight;
 		RsGlobal.width = FrontEndMenuManager.m_nPrefsWidth;
 		RsGlobal.height = FrontEndMenuManager.m_nPrefsHeight;
 		
-		PSGLOBAL(fullScreen) = FALSE;
-	}
+		PSGLOBAL(fullScreen) = !FrontEndMenuManager.m_nPrefsWindowed;
 #endif
 	
 	return TRUE;
@@ -1022,6 +1023,8 @@ void resizeCB(GLFWwindow* window, int width, int height) {
 
 	if (RwInitialised && height > 0 && width > 0) {
 		RwRect r;
+
+		// TODO support resizing with mouse. Now enabling this makes weird things to trails and CameraSize messing with sizes
 
 		r.x = 0;
 		r.y = 0;
