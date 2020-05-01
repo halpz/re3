@@ -371,6 +371,9 @@ enum eMenuAction
 	MENUACTION_LANG_RUS,
 	MENUACTION_LANG_JAP,
 #endif
+#ifdef IMPROVED_VIDEOMODE
+	MENUACTION_SCREENMODE
+#endif
 };
 
 enum eCheckHover
@@ -539,6 +542,7 @@ public:
 	int32 m_nPrefsDepth;
 	int32 m_nPrefsWindowed;
 	int32 m_nPrefsSubsystem;
+	int32 m_nSelectedScreenMode;
 #endif
 
 public:
