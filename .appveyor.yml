@@ -38,7 +38,7 @@ deploy:
 - provider: BinTray
   username: shfil119
   api_key:
-    secure: gDoU7c1rRjVVQsYNjsXrQX2PBM3GgF7Ky9Qn1RFN+HL4yZ1XE1RBYZoRNxr/PWJc
+    secure: xWnYDfNWM87iPoBFbz6L1XAduxijJRWSpQLhMDOjznmzbMCsORtdx2tmWmFLTwf6
   subject: gtamodding
   repo: re3
   package: "%configuration%_%platform%"
