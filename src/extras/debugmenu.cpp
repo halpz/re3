@@ -6,6 +6,7 @@
 #include "rtcharse.h"
 #include "inttypes.h"
 #include "debugmenu.h"
+#include <new>
 
 #define snprintf _snprintf
 
@@ -152,6 +153,7 @@ struct Menu
 	void update(void);
 	void draw(void);
 	Menu(void){ memset(this, 0, sizeof(Menu)); }
+	~Menu(void);
 };
 extern Menu toplevel;
 
@@ -160,6 +162,7 @@ struct MenuEntry_Sub : MenuEntry
 	Menu *submenu;
 
 	MenuEntry_Sub(const char *name, Menu *menu);
+	~MenuEntry_Sub(void) { delete submenu; }
 };
 
 struct MenuEntry_Var : MenuEntry
@@ -705,6 +708,16 @@ Menu::draw(void)
 		((MenuEntry_Sub*)this->selectedEntry)->submenu->draw();
 }
 
+Menu::~Menu(void)
+{
+	MenuEntry *e, *next;
+	for(e = entries; e; e = next){
+		next = e->next;
+		delete e;
+	}
+	memset(this, 0, sizeof(Menu));
+}
+
 Menu*
 findMenu(const char *name)
 {
@@ -792,6 +805,7 @@ DebugMenuInit(void)
 	assert(arrow);
 	RwImageDestroy(img);
 
+
 	menuInitialized = true;
 }
 
@@ -804,7 +818,14 @@ DebugMenuShutdown(void)
 		cursor = nil;
 		RwRasterDestroy(arrow);
 		arrow = nil;
-		// TODO: the menus ...
+
+		toplevel.~Menu();
+		new (&toplevel) Menu();
+
+		activeMenu = &toplevel;
+		deepestMenu = &toplevel;
+		mouseOverMenu = nil;
+		mouseOverEntry = nil;
 	}
 	menuInitialized = false;
 }
