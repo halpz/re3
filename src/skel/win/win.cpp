@@ -791,7 +791,11 @@ RwChar **_psGetVideoModeList()
 				_VMList[i] = nil;
 		}
 		else
+#ifdef IMPROVED_VIDEOMODE
+			_VMList[i] = strdup("WINDOW");
+#else
 			_VMList[i] = nil;
+#endif
 	}
 	
 	return _VMList;
@@ -1310,6 +1314,10 @@ psSelectDevice()
 		
 		/* Get the default selection */
 		GcurSel = RwEngineGetCurrentSubSystem();
+#ifdef IMPROVED_VIDEOMODE
+		if(FrontEndMenuManager.m_nPrefsSubsystem < GnumSubSystems)
+			GcurSel = FrontEndMenuManager.m_nPrefsSubsystem;
+#endif
 	}
 	
 	/* Set the driver to use the correct sub system */
@@ -1317,8 +1325,12 @@ psSelectDevice()
 	{
 		return FALSE;
 	}
-	
-	
+
+#ifdef IMPROVED_VIDEOMODE
+	FrontEndMenuManager.m_nPrefsSubsystem = GcurSel;
+#endif
+
+#ifndef IMPROVED_VIDEOMODE
 	if ( !useDefault )
 	{
 		if ( _psGetVideoModeList()[FrontEndMenuManager.m_nDisplayVideoMode] && FrontEndMenuManager.m_nDisplayVideoMode )
@@ -1362,9 +1374,67 @@ psSelectDevice()
 			}
 		}
 	}
+#else
+	if ( !useDefault )
+	{
+		if(FrontEndMenuManager.m_nPrefsWidth == 0 ||
+		   FrontEndMenuManager.m_nPrefsHeight == 0 ||
+		   FrontEndMenuManager.m_nPrefsDepth == 0){
+			// Defaults if nothing specified
+			FrontEndMenuManager.m_nPrefsWidth = GetSystemMetrics(SM_CXSCREEN);
+			FrontEndMenuManager.m_nPrefsHeight = GetSystemMetrics(SM_CYSCREEN);
+			FrontEndMenuManager.m_nPrefsDepth = 32;
+			FrontEndMenuManager.m_nPrefsWindowed = 0;
+		}
+
+		// Find the videomode that best fits what we got from the settings file
+		RwInt32 bestMode = -1;
+		RwInt32 bestWidth = -1;
+		RwInt32 bestHeight = -1;
+		RwInt32 bestDepth = -1;
+		for(GcurSelVM = 0; GcurSelVM < RwEngineGetNumVideoModes(); GcurSelVM++){
+			RwEngineGetVideoModeInfo(&vm, GcurSelVM);
+			if(!(vm.flags & rwVIDEOMODEEXCLUSIVE) != FrontEndMenuManager.m_nPrefsWindowed)
+				continue;
+
+			if(FrontEndMenuManager.m_nPrefsWindowed){
+				bestMode = GcurSelVM;
+			}else{
+				// try the largest one that isn't larger than what we wanted
+				if(vm.width >= bestWidth && vm.width <= FrontEndMenuManager.m_nPrefsWidth &&
+				   vm.height >= bestHeight && vm.height <= FrontEndMenuManager.m_nPrefsHeight &&
+				   vm.depth >= bestDepth && vm.depth <= FrontEndMenuManager.m_nPrefsDepth){
+					bestWidth = vm.width;
+					bestHeight = vm.height;
+					bestDepth = vm.depth;
+					bestMode = GcurSelVM;
+				}
+			}
+		}
+
+		if(bestMode < 0){
+			MessageBox(nil, "Cannot find desired video mode", "GTA3", MB_OK);
+			return FALSE;
+		}
+		GcurSelVM = bestMode;
+
+		FrontEndMenuManager.m_nDisplayVideoMode = GcurSelVM;
+		FrontEndMenuManager.m_nPrefsVideoMode = FrontEndMenuManager.m_nDisplayVideoMode;
+		GcurSelVM = FrontEndMenuManager.m_nDisplayVideoMode;
+	}
+#endif
 	
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
-	
+
+#ifdef IMPROVED_VIDEOMODE
+	if(vm.flags & rwVIDEOMODEEXCLUSIVE){
+		FrontEndMenuManager.m_nPrefsWidth = vm.width;
+		FrontEndMenuManager.m_nPrefsHeight = vm.height;
+		FrontEndMenuManager.m_nPrefsDepth = vm.depth;
+	}
+	FrontEndMenuManager.m_nPrefsWindowed = !(vm.flags & rwVIDEOMODEEXCLUSIVE);
+#endif
+
 	FrontEndMenuManager.m_nCurrOption = 0;
 	
 	/* Set up the video mode and set the apps window
@@ -1395,8 +1465,39 @@ psSelectDevice()
 		RsGlobal.height = vm.height;
 		
 		PSGLOBAL(fullScreen) = TRUE;
+
+#ifdef IMPROVED_VIDEOMODE
+		SetWindowLong(PSGLOBAL(window), GWL_STYLE, WS_POPUP);
+		SetWindowPos(PSGLOBAL(window), nil, 0, 0, 0, 0,
+					SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER|
+					SWP_FRAMECHANGED);
+	}else{
+		RECT rect;
+		rect.left = rect.top = 0;
+		rect.right = FrontEndMenuManager.m_nPrefsWidth;
+		rect.bottom = FrontEndMenuManager.m_nPrefsHeight;
+		AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+
+		// center it
+		int spaceX = GetSystemMetrics(SM_CXSCREEN) - (rect.right-rect.left);
+		int spaceY = GetSystemMetrics(SM_CYSCREEN) - (rect.bottom-rect.top);
+
+		SetWindowLong(PSGLOBAL(window), GWL_STYLE, WS_VISIBLE | WS_OVERLAPPEDWINDOW);
+		SetWindowPos(PSGLOBAL(window), HWND_NOTOPMOST, spaceX/2, spaceY/2,
+			(rect.right - rect.left),
+			(rect.bottom - rect.top), 0);
+
+		// Have to get actual size because the window perhaps didn't fit
+		GetClientRect(PSGLOBAL(window), &rect);
+		RsGlobal.maximumWidth = rect.right;
+		RsGlobal.maximumHeight = rect.bottom;
+		RsGlobal.width = rect.right;
+		RsGlobal.height = rect.bottom;
+		
+		PSGLOBAL(fullScreen) = FALSE;
+#endif
 	}
-	
+
 	return TRUE;
 }
 
@@ -1840,11 +1941,13 @@ WinMain(HINSTANCE instance,
 	}
 	
 	ControlsManager.InitDefaultControlConfigMouse(MousePointerStateHelper.GetMouseSetUp());
-	
+
+#ifndef IMPROVED_VIDEOMODE
 	SetWindowLong(PSGLOBAL(window), GWL_STYLE, WS_POPUP);
 	SetWindowPos(PSGLOBAL(window), nil, 0, 0, 0, 0,
 				SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER|
 				SWP_FRAMECHANGED);
+#endif
 
 	/* 
 	 * Initialize the 3D (RenderWare) components of the app...

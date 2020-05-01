@@ -192,6 +192,7 @@ enum Config {
 #define MORE_LANGUAGES		// Add more translations to the game
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch) 
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
+#define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 //#define USE_TEXTURE_POOL
 //#define OPENAL
 

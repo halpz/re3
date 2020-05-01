@@ -533,6 +533,14 @@ public:
 	int32 m_nCurrSaveSlot;
 	int32 m_nScreenChangeDelayTimer;
 
+#ifdef IMPROVED_VIDEOMODE
+	int32 m_nPrefsWidth;
+	int32 m_nPrefsHeight;
+	int32 m_nPrefsDepth;
+	int32 m_nPrefsWindowed;
+	int32 m_nPrefsSubsystem;
+#endif
+
 public:
 	bool GetIsMenuActive() {return !!m_bMenuActive;}
 
@@ -645,7 +653,9 @@ public:
 	// uint8 GetNumberOfMenuOptions();
 };
 
+#ifndef IMPROVED_VIDEOMODE
 static_assert(sizeof(CMenuManager) == 0x564, "CMenuManager: error");
+#endif
 
 extern CMenuManager FrontEndMenuManager;
 extern unsigned long _dwOperatingSystemVersion;
