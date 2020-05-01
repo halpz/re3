@@ -39,7 +39,7 @@ deploy:
   username: shfil119
   api_key:
     secure: gDoU7c1rRjVVQsYNjsXrQX2PBM3GgF7Ky9Qn1RFN+HL4yZ1XE1RBYZoRNxr/PWJc
-  subject: shfil119
+  subject: gtamodding
   repo: re3
   package: "%configuration%_%platform%"
   version: "%APPVEYOR_BUILD_VERSION%"
