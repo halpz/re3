@@ -30,9 +30,9 @@ build:
   project: build/re3.sln
   verbosity: minimal
 after_build:
-- 7z a "re3_%APPVEYOR_BUILD_VERSION%.zip" bin/%PLATFORM%/%CONFIGURATION%/re3.exe bin/%PLATFORM%/%CONFIGURATION%/re3.pdb
+- 7z a "re3_%configuration%_%platform%_%APPVEYOR_BUILD_VERSION%.zip" bin/%PLATFORM%/%CONFIGURATION%/re3.exe bin/%PLATFORM%/%CONFIGURATION%/re3.pdb
 artifacts:
-- path: "re3_%APPVEYOR_BUILD_VERSION%.zip"
+- path: "re3_%configuration%_%platform%_%APPVEYOR_BUILD_VERSION%.zip"
   name: re3
 deploy:
 - provider: BinTray
