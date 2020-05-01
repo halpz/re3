@@ -394,6 +394,9 @@ CMenuManager::ThingsToDoBeforeLeavingPage()
 #endif
 	} else if (m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
 		m_nDisplayVideoMode = m_nPrefsVideoMode;
+#ifdef IMPROVED_VIDEOMODE
+		m_nSelectedScreenMode = m_nPrefsWindowed;
+#endif
 	}
 
 	if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
@@ -1078,6 +1081,18 @@ CMenuManager::Draw()
 				AsciiToUnicode(_psGetVideoModeList()[m_nDisplayVideoMode], unicodeTemp);
 				rightText = unicodeTemp;
 				break;
+#ifdef IMPROVED_VIDEOMODE
+			case MENUACTION_SCREENMODE:
+				char mode[32];
+				if (m_nSelectedScreenMode == 0)
+					sprintf(mode, "FULLSCREEN");
+				else
+					sprintf(mode, "WINDOWED");
+
+				AsciiToUnicode(mode, unicodeTemp);
+				rightText = unicodeTemp;
+				break;
+#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex == -1)
 					rightText = TheText.Get("FEA_NAH");
@@ -1249,6 +1264,14 @@ CMenuManager::Draw()
 					SetHelperText(3);
 				}
 			}
+#ifdef IMPROVED_VIDEOMODE
+			if (m_nSelectedScreenMode != m_nPrefsWindowed) {
+				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "SCRFOR") != 0
+					&& m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+					m_nSelectedScreenMode = m_nPrefsWindowed;
+				}
+			}
+#endif
 
 			// Sliders
 			int lastActiveBarX;
@@ -3060,6 +3083,7 @@ CMenuManager::LoadSettings()
 				m_nPrefsWindowed = 0;
 				m_nPrefsSubsystem = 0;
 			}
+			m_nSelectedScreenMode = m_nPrefsWindowed;
 #else
 			CFileMgr::Read(fileHandle, gString, 20);
 #endif
@@ -4489,6 +4513,16 @@ CMenuManager::ProcessButtonPresses(void)
 						SaveSettings();
 					}
 					break;
+#ifdef IMPROVED_VIDEOMODE
+				case MENUACTION_SCREENMODE:
+					if (m_nSelectedScreenMode != m_nPrefsWindowed) {
+						m_nPrefsWindowed = m_nSelectedScreenMode;
+						_psSelectScreenVM(m_nPrefsVideoMode); // apply same resolution
+						SetHelperText(0);
+						SaveSettings();
+					}
+					break;
+#endif
 				case MENUACTION_AUDIOHW:
 				{
 					int selectedProvider = m_nPrefsAudio3DProviderIndex;
@@ -4762,6 +4796,12 @@ CMenuManager::ProcessButtonPresses(void)
 					}
 				}
 				break;
+#ifdef IMPROVED_VIDEOMODE
+			case MENUACTION_SCREENMODE:
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				m_nSelectedScreenMode = !m_nSelectedScreenMode;
+				break;
+#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex != -1) {
 					m_nPrefsAudio3DProviderIndex += changeValueBy;

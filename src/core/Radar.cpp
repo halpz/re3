@@ -1064,6 +1064,13 @@ void CRadar::SaveAllRadarBlips(uint8 *buf, uint32 *size)
 INITSAVEBUF
 	WriteSaveHeader(buf, 'R', 'D', 'R', '\0', *size - SAVE_HEADER_SIZE);
 
+#ifdef MENU_MAP
+	if (TargetMarkerId != -1) {
+		ClearBlip(TargetMarkerId);
+		TargetMarkerId = -1;
+	}
+#endif
+
 	for (int i = 0; i < NUMRADARBLIPS; i++)
 		WriteSaveBuf(buf, ms_RadarTrace[i]);
 

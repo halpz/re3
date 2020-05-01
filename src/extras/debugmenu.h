@@ -13,6 +13,7 @@ struct MenuEntry
 	Menu *menu;
 
 	MenuEntry(const char *name);
+	virtual ~MenuEntry(void) {}
 };
 
 typedef MenuEntry DebugMenuEntry;
