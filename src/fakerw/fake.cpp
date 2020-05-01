@@ -392,8 +392,8 @@ RwStream *RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const v
 	}
 }
 RwBool RwStreamClose(RwStream * stream, void *pData) { stream->close(); rwFree(stream); return true; }
-RwUInt32 RwStreamRead(RwStream * stream, void *buffer, RwUInt32 length) { return stream->read(buffer, length); }
-RwStream *RwStreamWrite(RwStream * stream, const void *buffer, RwUInt32 length) { stream->write(buffer, length); return stream; }
+RwUInt32 RwStreamRead(RwStream * stream, void *buffer, RwUInt32 length) { return stream->read8(buffer, length); }
+RwStream *RwStreamWrite(RwStream * stream, const void *buffer, RwUInt32 length) { stream->write8(buffer, length); return stream; }
 RwStream *RwStreamSkip(RwStream * stream, RwUInt32 offset) { stream->seek(offset); return stream; }
 
 RwBool RwStreamFindChunk(RwStream *stream, RwUInt32 type, RwUInt32 *lengthOut, RwUInt32 *versionOut)
