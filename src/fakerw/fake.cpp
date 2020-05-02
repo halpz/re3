@@ -126,8 +126,8 @@ rwFrameList *rwFrameListStreamRead(RwStream *stream, rwFrameList *fl) { return f
 RwCamera    *RwCameraBeginUpdate(RwCamera * camera) { camera->beginUpdate(); return camera; }
 RwCamera    *RwCameraEndUpdate(RwCamera * camera) { camera->endUpdate(); return camera; }
 RwCamera    *RwCameraClear(RwCamera * camera, RwRGBA * colour, RwInt32 clearMode) { camera->clear(colour, clearMode); return camera; }
-// WARNING: ignored arguments
-RwCamera    *RwCameraShowRaster(RwCamera * camera, void *pDev, RwUInt32 flags) { camera->showRaster(); return camera; }
+// WARNING: ignored argument
+RwCamera    *RwCameraShowRaster(RwCamera * camera, void *pDev, RwUInt32 flags) { camera->showRaster(flags); return camera; }
 RwBool       RwCameraDestroy(RwCamera * camera) { camera->destroy(); return true; }
 RwCamera    *RwCameraCreate(void) { return rw::Camera::create(); }
 RwCamera    *RwCameraClone(RwCamera * camera) { return camera->clone(); }
