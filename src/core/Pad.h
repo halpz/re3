@@ -418,6 +418,7 @@ public:
 	bool GetLeftStickYJustDown() { return !!(NewState.LeftStickY && !OldState.LeftStickY); }
   
 	bool GetTriangleJustUp() { return !!(!NewState.Triangle && OldState.Triangle); }
+	bool GetCircleJustUp() { return !!(!NewState.Circle && OldState.Circle); }
 	bool GetCrossJustUp() { return !!(!NewState.Cross && OldState.Cross); }
 	bool GetSquareJustUp() { return !!(!NewState.Square && OldState.Square); }
 	bool GetDPadUpJustUp() { return !!(!NewState.DPadUp && OldState.DPadUp); }
