@@ -8865,8 +8865,8 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams *params)
 	CAutomobile *automobile;
 	cTransmission *transmission;
 	int32 emittingVol;
-	float newSkidVal = 0.f;
-	float skidVal = 0.f;
+	float newSkidVal = 0.0f;
+	float skidVal = 0.0f;
 
 	if (params->m_fDistance >= 1600.f)
 		return;
@@ -8875,47 +8875,36 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams *params)
 		return;
 	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 	for (int32 i = 0; i < ARRAY_SIZE(automobile->m_aWheelState); i++) {
-		if (!automobile->m_aWheelState[i] || automobile->Damage.GetWheelStatus(i) == WHEEL_STATUS_MISSING)
+		if (automobile->m_aWheelState[i] == WHEEL_STATE_NORMAL || automobile->Damage.GetWheelStatus(i) == WHEEL_STATUS_MISSING)
 			continue;
 		transmission = params->m_pTransmission;
-		if (transmission->nDriveType == '4') {
+		switch (transmission->nDriveType)
+		{
+		case '4':
 			newSkidVal = GetVehicleDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
-			if (newSkidVal > skidVal)
-				skidVal = newSkidVal;
-			continue;
-		}
-		if (transmission->nDriveType != 'F') {
-			if (transmission->nDriveType != 'R') {
-				if (newSkidVal > skidVal)
-					skidVal = newSkidVal;
-				continue;
-			}
-			if (i != 1 && i != 3) {
+			break;
+		case 'F':
+			if (i == CARWHEEL_FRONT_LEFT || i == CARWHEEL_FRONT_RIGHT)
+				newSkidVal = GetVehicleDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
+			else
 				newSkidVal = GetVehicleNonDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
-				if (newSkidVal > skidVal)
-					skidVal = newSkidVal;
-				continue;
-			}
-			newSkidVal = GetVehicleDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
-			if (newSkidVal > skidVal)
-				skidVal = newSkidVal;
-			continue;
+			break;
+		case 'R':
+			if (i == CARWHEEL_REAR_LEFT || i == CARWHEEL_REAR_RIGHT)
+				newSkidVal = GetVehicleDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
+			else
+				newSkidVal = GetVehicleNonDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
+			break;
+		default:
+			break;
 		}
-		if (i == 0 || i == 2) {
-			newSkidVal = GetVehicleDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
-			if (newSkidVal > skidVal)
-				skidVal = newSkidVal;
-			continue;
-		}
-		newSkidVal = GetVehicleNonDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
-		if (newSkidVal > skidVal)
-			skidVal = newSkidVal;
+		skidVal = Max(skidVal, newSkidVal);
 	}
 
 	if (skidVal > 0.0f) {
 		emittingVol = 50.f * skidVal;
 		m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 40.f, m_sQueueSample.m_fDistance);
-		if (m_sQueueSample.m_nVolume) {
+		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 3;
 			switch (params->m_pVehicle->m_nSurfaceTouched) {
 			case SURFACE_GRASS:
@@ -9242,10 +9231,7 @@ cAudioManager::Service()
 void
 cAudioManager::ServiceSoundEffects()
 {
-	if (m_FrameCounter++ % 5)
-		m_bFifthFrameFlag = false;
-	else
-		m_bFifthFrameFlag = true;
+	m_bFifthFrameFlag = (m_FrameCounter++ % 5) == 0;
 	if (m_nUserPause && !m_nPreviousUserPause) {
 		for (int32 i = 0; i < allChannels; i++)
 			SampleManager.StopChannel(i);

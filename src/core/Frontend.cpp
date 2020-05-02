@@ -5617,9 +5617,9 @@ CMenuManager::ConstructStatLine(int rowIdx)
 
 	STAT_LINE("PER_COM", &percentCompleted, false, nil);
 	STAT_LINE("NMISON", &CStats::MissionsGiven, false, nil);
-	STAT_LINE("FEST_MP", &CStats::MissionsPassed, 0, &CStats::TotalNumberMissions);
+	STAT_LINE("FEST_MP", &CStats::MissionsPassed, false, &CStats::TotalNumberMissions);
 	if (CGame::nastyGame) {
-		STAT_LINE("FEST_RP", &CStats::NumberKillFrenziesPassed, 0, &CStats::TotalNumberKillFrenzies);
+		STAT_LINE("FEST_RP", &CStats::NumberKillFrenziesPassed, false, &CStats::TotalNumberKillFrenzies);
 	}
 	
 	CPlayerInfo &player = CWorld::Players[CWorld::PlayerInFocus];
@@ -5628,8 +5628,8 @@ CMenuManager::ConstructStatLine(int rowIdx)
 		packagesPercent = player.m_nCollectedPackages * 100.0f / player.m_nTotalPackages;
 
 	int nPackagesPercent = packagesPercent;
-	STAT_LINE("PERPIC", &nPackagesPercent, 0, &(nTemp = 100));
-	STAT_LINE("NOUNIF", &CStats::TotalNumberOfUniqueJumps, 0, &CStats::NumberOfUniqueJumpsFound);
+	STAT_LINE("PERPIC", &nPackagesPercent, false, &(nTemp = 100));
+	STAT_LINE("NOUNIF", &CStats::NumberOfUniqueJumpsFound, false, &CStats::TotalNumberOfUniqueJumps);
 	STAT_LINE("DAYSPS", &CStats::DaysPassed, false, nil);
 	if (CGame::nastyGame) {
 		STAT_LINE("PE_WAST", &CStats::PeopleKilledByPlayer, false, nil);
