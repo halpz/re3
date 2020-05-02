@@ -920,3 +920,108 @@ CEntity::AddSteamsFromGround(CPtrList& list)
 		pNode = pNode->next;
 	}
 }
+
+#ifdef COMPATIBLE_SAVES
+void
+CEntity::SaveEntityFlags(uint8*& buf)
+{
+	uint32 tmp = 0;
+	tmp |= (m_type & (BIT(3) - 1));
+	tmp |= (m_status & (BIT(5) - 1)) << 3;
+
+	if (bUsesCollision) tmp |= BIT(8);
+	if (bCollisionProcessed) tmp |= BIT(9);
+	if (bIsStatic)  tmp |= BIT(10);
+	if (bHasContacted) tmp |= BIT(11);
+	if (bPedPhysics) tmp |= BIT(12);
+	if (bIsStuck) tmp |= BIT(13);
+	if (bIsInSafePosition) tmp |= BIT(14);
+	if (bUseCollisionRecords) tmp |= BIT(15);
+
+	if (bWasPostponed) tmp |= BIT(16);
+	if (bExplosionProof) tmp |= BIT(17);
+	if (bIsVisible)  tmp |= BIT(18);
+	if (bHasCollided) tmp |= BIT(19);
+	if (bRenderScorched) tmp |= BIT(20);
+	if (bHasBlip) tmp |= BIT(21);
+	if (bIsBIGBuilding) tmp |= BIT(22);
+	if (bRenderDamaged) tmp |= BIT(23);
+
+	if (bBulletProof) tmp |= BIT(24);
+	if (bFireProof) tmp |= BIT(25);
+	if (bCollisionProof)  tmp |= BIT(26);
+	if (bMeleeProof) tmp |= BIT(27);
+	if (bOnlyDamagedByPlayer) tmp |= BIT(28);
+	if (bStreamingDontDelete) tmp |= BIT(29);
+	if (bZoneCulled) tmp |= BIT(30);
+	if (bZoneCulled2) tmp |= BIT(31);
+
+	WriteSaveBuf<uint32>(buf, tmp);
+
+	tmp = 0;
+
+	if (bRemoveFromWorld) tmp |= BIT(0);
+	if (bHasHitWall) tmp |= BIT(1);
+	if (bImBeingRendered)  tmp |= BIT(2);
+	if (bTouchingWater) tmp |= BIT(3);
+	if (bIsSubway) tmp |= BIT(4);
+	if (bDrawLast) tmp |= BIT(5);
+	if (bNoBrightHeadLights) tmp |= BIT(6);
+	if (bDoNotRender) tmp |= BIT(7);
+
+	if (bDistanceFade) tmp |= BIT(8);
+	if (m_flagE2) tmp |= BIT(9);
+
+	WriteSaveBuf<uint32>(buf, tmp);
+}
+
+void
+CEntity::LoadEntityFlags(uint8*& buf)
+{
+	uint32 tmp = ReadSaveBuf<uint32>(buf);
+	m_type = (tmp & ((BIT(3) - 1)));
+	m_status = ((tmp >> 3) & (BIT(5) - 1));
+
+	bUsesCollision = !!(tmp & BIT(8));
+	bCollisionProcessed = !!(tmp & BIT(9));
+	bIsStatic = !!(tmp & BIT(10));
+	bHasContacted = !!(tmp & BIT(11));
+	bPedPhysics = !!(tmp & BIT(12));
+	bIsStuck = !!(tmp & BIT(13));
+	bIsInSafePosition = !!(tmp & BIT(14));
+	bUseCollisionRecords = !!(tmp & BIT(15));
+
+	bWasPostponed = !!(tmp & BIT(16));
+	bExplosionProof = !!(tmp & BIT(17));
+	bIsVisible = !!(tmp & BIT(18));
+	bHasCollided = !!(tmp & BIT(19));
+	bRenderScorched = !!(tmp & BIT(20));
+	bHasBlip = !!(tmp & BIT(21));
+	bIsBIGBuilding = !!(tmp & BIT(22));
+	bRenderDamaged = !!(tmp & BIT(23));
+
+	bBulletProof = !!(tmp & BIT(24));
+	bFireProof = !!(tmp & BIT(25));
+	bCollisionProof = !!(tmp & BIT(26));
+	bMeleeProof = !!(tmp & BIT(27));
+	bOnlyDamagedByPlayer = !!(tmp & BIT(28));
+	bStreamingDontDelete = !!(tmp & BIT(29));
+	bZoneCulled = !!(tmp & BIT(30));
+	bZoneCulled2 = !!(tmp & BIT(31));
+
+	tmp = ReadSaveBuf<uint32>(buf);
+
+	bRemoveFromWorld = !!(tmp & BIT(0));
+	bHasHitWall = !!(tmp & BIT(1));
+	bImBeingRendered = !!(tmp & BIT(2));
+	bTouchingWater = !!(tmp & BIT(3));
+	bIsSubway = !!(tmp & BIT(4));
+	bDrawLast = !!(tmp & BIT(5));
+	bNoBrightHeadLights = !!(tmp & BIT(6));
+	bDoNotRender = !!(tmp & BIT(7));
+
+	bDistanceFade = !!(tmp & BIT(8));
+	m_flagE2 = !!(tmp & BIT(9));
+}
+
+#endif

@@ -19,6 +19,13 @@
 
 #define PAD_MOVE_TO_GAME_WORLD_MOVE 60.0f
 
+const uint32 CPlayerPed::nSaveStructSize =
+#ifdef COMPATIBLE_SAVES
+	1520;
+#else
+	sizeof(CPlayerPed);
+#endif
+
 CPlayerPed::~CPlayerPed()
 {
 	delete m_pWanted;
@@ -1504,3 +1511,33 @@ CPlayerPed::ProcessControl(void)
 		UpdateRpHAnim();
 #endif
 }
+
+#ifdef COMPATIBLE_SAVES
+void
+CPlayerPed::Save(uint8*& buf)
+{
+	CPed::Save(buf);
+	SkipSaveBuf(buf, 16);
+	WriteSaveBuf<float>(buf, m_fMaxStamina);
+	SkipSaveBuf(buf, 28);
+	WriteSaveBuf<int32>(buf, m_nTargettableObjects[0]);
+	WriteSaveBuf<int32>(buf, m_nTargettableObjects[1]);
+	WriteSaveBuf<int32>(buf, m_nTargettableObjects[2]);
+	WriteSaveBuf<int32>(buf, m_nTargettableObjects[3]);
+	SkipSaveBuf(buf, 116);
+}
+
+void
+CPlayerPed::Load(uint8*& buf)
+{
+	CPed::Load(buf);
+	SkipSaveBuf(buf, 16);
+	m_fMaxStamina = ReadSaveBuf<float>(buf);
+	SkipSaveBuf(buf, 28);
+	m_nTargettableObjects[0] = ReadSaveBuf<int32>(buf);
+	m_nTargettableObjects[1] = ReadSaveBuf<int32>(buf);
+	m_nTargettableObjects[2] = ReadSaveBuf<int32>(buf);
+	m_nTargettableObjects[3] = ReadSaveBuf<int32>(buf);
+	SkipSaveBuf(buf, 116);
+}
+#endif

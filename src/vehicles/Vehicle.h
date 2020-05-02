@@ -231,6 +231,10 @@ public:
 	virtual bool IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos) { return false;}
 	virtual float GetHeightAboveRoad(void);
 	virtual void PlayCarHorn(void) {}
+#ifdef COMPATIBLE_SAVES
+	virtual void Save(uint8*& buf);
+	virtual void Load(uint8*& buf);
+#endif
 
 	bool IsCar(void) { return m_vehType == VEHICLE_TYPE_CAR; }
 	bool IsBoat(void) { return m_vehType == VEHICLE_TYPE_BOAT; }

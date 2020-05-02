@@ -64,7 +64,14 @@ public:
 	static float IsVertexAffectedByWake(CVector vecVertex, CBoat *pBoat);
 	static void FillBoatList(void);
 
+#ifdef COMPATIBLE_SAVES
+	virtual void Save(uint8*& buf);
+	virtual void Load(uint8*& buf);
+#endif
+	static const uint32 nSaveStructSize;
+
 };
+
 static_assert(sizeof(CBoat) == 0x484, "CBoat: error");
 
 extern float MAX_WAKE_LENGTH;

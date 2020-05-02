@@ -2258,3 +2258,29 @@ CWeapon::ProcessLineOfSight(CVector const &point1, CVector const &point2, CColPo
 {
 	return CWorld::ProcessLineOfSight(point1, point2, point, entity, checkBuildings, checkVehicles, checkPeds, checkObjects, checkDummies, ignoreSeeThrough, ignoreSomeObjects);
 }
+
+#ifdef COMPATIBLE_SAVES
+void
+CWeapon::Save(uint8*& buf)
+{
+	WriteSaveBuf<uint32>(buf, m_eWeaponType);
+	WriteSaveBuf<uint32>(buf, m_eWeaponState);
+	WriteSaveBuf<uint32>(buf, m_nAmmoInClip);
+	WriteSaveBuf<uint32>(buf, m_nAmmoTotal);
+	WriteSaveBuf<uint32>(buf, m_nTimer);
+	WriteSaveBuf<bool>(buf, m_bAddRotOffset);
+	SkipSaveBuf(buf, 3);
+}
+
+void
+CWeapon::Load(uint8*& buf)
+{
+	m_eWeaponType = (eWeaponType)ReadSaveBuf<uint32>(buf);
+	m_eWeaponState = (eWeaponState)ReadSaveBuf<uint32>(buf);
+	m_nAmmoInClip = ReadSaveBuf<uint32>(buf);
+	m_nAmmoTotal = ReadSaveBuf<uint32>(buf);
+	m_nTimer = ReadSaveBuf<uint32>(buf);
+	m_bAddRotOffset = ReadSaveBuf<bool>(buf);
+	SkipSaveBuf(buf, 3);
+}
+#endif

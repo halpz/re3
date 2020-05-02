@@ -110,13 +110,24 @@ INITSAVEBUF
 		CStreaming::LoadAllRequestedModels(false);
 		int32 slot = ReadSaveBuf<int32>(buf);
 		CVehicle* pVehicle;
-		char* vbuf = new char[Max(sizeof(CAutomobile), sizeof(CBoat))];
+#ifdef COMPATIBLE_SAVES
+		if (type == VEHICLE_TYPE_BOAT)
+			pVehicle = new(slot) CBoat(model, RANDOM_VEHICLE);
+		else if (type == VEHICLE_TYPE_CAR)
+			pVehicle = new(slot) CAutomobile(model, RANDOM_VEHICLE);
+		else
+			assert(0);
+		--CCarCtrl::NumRandomCars;
+		pVehicle->Load(buf);
+		CWorld::Add(pVehicle);
+#else
+		char* vbuf = new char[Max(CAutomobile::nSaveStructSize, CBoat::nSaveStructSize)];
 		if (type == VEHICLE_TYPE_BOAT) {
 			memcpy(vbuf, buf, sizeof(CBoat));
 			SkipSaveBuf(buf, sizeof(CBoat));
 			CBoat* pBoat = new(slot) CBoat(model, RANDOM_VEHICLE);
 			pVehicle = pBoat;
-			--CCarCtrl::NumRandomCars; // why?
+			--CCarCtrl::NumRandomCars;
 		}
 		else if (type == VEHICLE_TYPE_CAR) {
 			memcpy(vbuf, buf, sizeof(CAutomobile));
@@ -168,6 +179,7 @@ INITSAVEBUF
 		pVehicle->AutoPilot = pBufferVehicle->AutoPilot;
 		CWorld::Add(pVehicle);
 		delete[] vbuf;
+#endif
 	}
 VALIDATESAVEBUF(size)
 }
@@ -184,7 +196,7 @@ INITSAVEBUF
 			continue;
 		bool bHasPassenger = false;
 		for (int j = 0; j < ARRAY_SIZE(pVehicle->pPassengers); j++) {
-			if (pVehicle->pPassengers[i])
+			if (pVehicle->pPassengers[j])
 				bHasPassenger = true;
 		}
 		if (!pVehicle->pDriver && !bHasPassenger) {
@@ -194,8 +206,8 @@ INITSAVEBUF
 				++nNumBoats;
 		}
 	}
-	*size = nNumCars * (sizeof(uint32) + sizeof(int16) + sizeof(int32) + sizeof(CAutomobile)) + sizeof(int) +
-		nNumBoats * (sizeof(uint32) + sizeof(int16) + sizeof(int32) + sizeof(CBoat)) + sizeof(int);
+	*size = nNumCars * (sizeof(uint32) + sizeof(int16) + sizeof(int32) + CAutomobile::nSaveStructSize) + sizeof(int) +
+		nNumBoats * (sizeof(uint32) + sizeof(int16) + sizeof(int32) + CBoat::nSaveStructSize) + sizeof(int);
 	WriteSaveBuf(buf, nNumCars);
 	WriteSaveBuf(buf, nNumBoats);
 	for (int i = 0; i < nPoolSize; i++) {
@@ -208,6 +220,14 @@ INITSAVEBUF
 				bHasPassenger = true;
 		}
 		if (!pVehicle->pDriver && !bHasPassenger) {
+#ifdef COMPATIBLE_SAVES
+			if ((pVehicle->IsCar() || pVehicle->IsBoat()) && pVehicle->VehicleCreatedBy == MISSION_VEHICLE) {
+				WriteSaveBuf<uint32>(buf, pVehicle->m_vehType);
+				WriteSaveBuf<int16>(buf, pVehicle->m_modelIndex);
+				WriteSaveBuf<int32>(buf, GetVehicleRef(pVehicle));
+				pVehicle->Save(buf);
+			}
+#else
 			if (pVehicle->IsCar() && pVehicle->VehicleCreatedBy == MISSION_VEHICLE) {
 				WriteSaveBuf(buf, (uint32)pVehicle->m_vehType);
 				WriteSaveBuf(buf, pVehicle->m_modelIndex);
@@ -222,6 +242,7 @@ INITSAVEBUF
 				memcpy(buf, pVehicle, sizeof(CBoat));
 				SkipSaveBuf(buf, sizeof(CBoat));
 			}
+#endif
 		}
 	}
 VALIDATESAVEBUF(*size)
@@ -279,8 +300,12 @@ INITSAVEBUF
 			WriteSaveBuf(buf, pObject->m_nCollisionDamageEffect);
 			WriteSaveBuf(buf, pObject->m_nSpecialCollisionResponseCases);
 			WriteSaveBuf(buf, pObject->m_nEndOfLifeTime);
+#ifdef COMPATIBLE_SAVES
+			pObject->SaveEntityFlags(buf);
+#else
 			WriteSaveBuf(buf, (pObject->GetAddressOfEntityProperties())[0]);
 			WriteSaveBuf(buf, (pObject->GetAddressOfEntityProperties())[1]);
+#endif
 		}
 	}
 VALIDATESAVEBUF(*size)
@@ -315,12 +340,17 @@ INITSAVEBUF
 		pBufferObject->m_nCollisionDamageEffect = ReadSaveBuf<uint8>(buf);
 		pBufferObject->m_nSpecialCollisionResponseCases = ReadSaveBuf<uint8>(buf);
 		pBufferObject->m_nEndOfLifeTime = ReadSaveBuf<uint32>(buf);
+#ifndef COMPATIBLE_SAVES
 		(pBufferObject->GetAddressOfEntityProperties())[0] = ReadSaveBuf<uint32>(buf);
 		(pBufferObject->GetAddressOfEntityProperties())[1] = ReadSaveBuf<uint32>(buf);
+#endif
 		if (GetObjectPool()->GetSlot(ref >> 8))
 			CPopulation::ConvertToDummyObject(GetObjectPool()->GetSlot(ref >> 8));
 		CObject* pObject = new(ref) CObject(mi, false);
 		pObject->GetMatrix() = pBufferObject->GetMatrix();
+#ifdef COMPATIBLE_SAVES
+		pObject->LoadEntityFlags(buf);
+#endif
 		pObject->m_fUprootLimit = pBufferObject->m_fUprootLimit;
 		pObject->m_objectMatrix = pBufferObject->m_objectMatrix;
 		pObject->ObjectCreatedBy = pBufferObject->ObjectCreatedBy;
@@ -335,8 +365,10 @@ INITSAVEBUF
 		pObject->m_nCollisionDamageEffect = pBufferObject->m_nCollisionDamageEffect;
 		pObject->m_nSpecialCollisionResponseCases = pBufferObject->m_nSpecialCollisionResponseCases;
 		pObject->m_nEndOfLifeTime = pBufferObject->m_nEndOfLifeTime;
+#ifndef COMPATIBLE_SAVES
 		(pObject->GetAddressOfEntityProperties())[0] = (pBufferObject->GetAddressOfEntityProperties())[0];
 		(pObject->GetAddressOfEntityProperties())[1] = (pBufferObject->GetAddressOfEntityProperties())[1];
+#endif
 		pObject->bHasCollided = false;
 		CWorld::Add(pObject);
 		delete[] obuf;
@@ -356,7 +388,7 @@ INITSAVEBUF
 		if (!pPed->bInVehicle && pPed->m_nPedType == PEDTYPE_PLAYER1)
 			nNumPeds++;
 	}
-	*size = sizeof(int) + nNumPeds * (sizeof(uint32) + sizeof(int16) + sizeof(int) + sizeof(CPlayerPed) +
+	*size = sizeof(int) + nNumPeds * (sizeof(uint32) + sizeof(int16) + sizeof(int) + CPlayerPed::nSaveStructSize +
 		sizeof(CWanted::MaximumWantedLevel) + sizeof(CWanted::nMaximumWantedLevel) + MAX_MODEL_NAME);
 	WriteSaveBuf(buf, nNumPeds);
 	for (int i = 0; i < nPoolSize; i++) {
@@ -367,8 +399,12 @@ INITSAVEBUF
 			WriteSaveBuf(buf, pPed->m_nPedType);
 			WriteSaveBuf(buf, pPed->m_modelIndex);
 			WriteSaveBuf(buf, GetPedRef(pPed));
+#ifdef COMPATIBLE_SAVES
+			pPed->Save(buf);
+#else
 			memcpy(buf, pPed, sizeof(CPlayerPed));
 			SkipSaveBuf(buf, sizeof(CPlayerPed));
+#endif
 			WriteSaveBuf(buf, CWanted::MaximumWantedLevel);
 			WriteSaveBuf(buf, CWanted::nMaximumWantedLevel);
 			memcpy(buf, CModelInfo::GetModelInfo(pPed->GetModelIndex())->GetName(), MAX_MODEL_NAME);
@@ -386,6 +422,34 @@ INITSAVEBUF
 		uint32 pedtype = ReadSaveBuf<uint32>(buf);
 		int16 model = ReadSaveBuf<int16>(buf);
 		int ref = ReadSaveBuf<int>(buf);
+#ifdef COMPATIBLE_SAVES
+		CPed* pPed;
+
+		char name[MAX_MODEL_NAME];
+		// Unfortunate hack: player model is stored after ped structure.
+		// It could be avoided by just using "player" because in practice it is always true.
+		memcpy(name, buf + CPlayerPed::nSaveStructSize + 2 * sizeof(int32), MAX_MODEL_NAME);
+		CStreaming::RequestSpecialModel(model, name, STREAMFLAGS_DONT_REMOVE);
+		CStreaming::LoadAllRequestedModels(false);
+
+		if (pedtype == PEDTYPE_PLAYER1)
+			pPed = new(ref) CPlayerPed();
+		else
+			assert(0);
+
+		pPed->Load(buf);
+		if (pedtype == PEDTYPE_PLAYER1) {
+			CWanted::MaximumWantedLevel = ReadSaveBuf<int32>(buf);
+			CWanted::nMaximumWantedLevel = ReadSaveBuf<int32>(buf);
+			SkipSaveBuf(buf, MAX_MODEL_NAME);
+		}
+
+		if (pedtype == PEDTYPE_PLAYER1) {
+			pPed->m_wepAccuracy = 100;
+			CWorld::Players[0].m_pPed = (CPlayerPed*)pPed;
+		}
+		CWorld::Add(pPed);
+#else
 		char* pbuf = new char[sizeof(CPlayerPed)];
 		CPlayerPed* pBufferPlayer = (CPlayerPed*)pbuf;
 		CPed* pPed;
@@ -416,12 +480,14 @@ INITSAVEBUF
 		pPed->m_maxWeaponTypeAllowed = pBufferPlayer->m_maxWeaponTypeAllowed;
 		for (int i = 0; i < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; i++)
 			pPed->m_weapons[i] = pBufferPlayer->m_weapons[i];
+
 		if (pedtype == PEDTYPE_PLAYER1) {
 			pPed->m_wepAccuracy = 100;
 			CWorld::Players[0].m_pPed = (CPlayerPed*)pPed;
 		}
 		CWorld::Add(pPed);
 		delete[] pbuf;
+#endif
 	}
 VALIDATESAVEBUF(size)
 }

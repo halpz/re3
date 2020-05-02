@@ -51,6 +51,13 @@ RwObject *GetCurrentAtomicObjectCB(RwObject *object, void *data);
 
 bool CAutomobile::m_sAllTaxiLights;
 
+const uint32 CAutomobile::nSaveStructSize =
+#ifdef COMPATIBLE_SAVES
+	1448;
+#else
+	sizeof(CAutomobile);
+#endif
+
 CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
  : CVehicle(CreatedBy)
 {
@@ -4580,3 +4587,22 @@ CAutomobile::SetAllTaxiLights(bool set)
 {
 	m_sAllTaxiLights = set;
 }
+
+#ifdef COMPATIBLE_SAVES
+void
+CAutomobile::Save(uint8*& buf)
+{
+	CVehicle::Save(buf);
+	WriteSaveBuf<CDamageManager>(buf, Damage);
+	SkipSaveBuf(buf, 800 - sizeof(CDamageManager));
+}
+
+void
+CAutomobile::Load(uint8*& buf)
+{
+	CVehicle::Load(buf);
+	Damage = ReadSaveBuf<CDamageManager>(buf);
+	SkipSaveBuf(buf, 800 - sizeof(CDamageManager));
+	SetupDamageAfterLoad();
+}
+#endif
