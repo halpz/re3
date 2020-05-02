@@ -336,7 +336,11 @@ void CHud::Draw()
 				|| FindPlayerPed()->m_fHealth < 10 && CTimer::GetFrameCounter() & 8) {
 
 				AsciiToUnicode("{", sPrintIcon);
+#ifdef FIX_BUGS
+				sprintf(sTemp, "%03d", int32(FindPlayerPed()->m_fHealth + 0.5f));
+#else
 				sprintf(sTemp, "%03d", (int32)FindPlayerPed()->m_fHealth);
+#endif
 				AsciiToUnicode(sTemp, sPrint);
 
 				CFont::SetColor(CRGBA(0, 0, 0, 255));
@@ -362,7 +366,11 @@ void CHud::Draw()
 			CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
 			if (FindPlayerPed()->m_fArmour > 1.0f) {
 				AsciiToUnicode("[", sPrintIcon);
+#ifdef FIX_BUGS
+				sprintf(sTemp, "%03d", int32(FindPlayerPed()->m_fArmour + 0.5f));
+#else
 				sprintf(sTemp, "%03d", (int32)FindPlayerPed()->m_fArmour);
+#endif
 				AsciiToUnicode(sTemp, sPrint);
 
 				CFont::SetColor(CRGBA(0, 0, 0, 255));
