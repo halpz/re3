@@ -26,6 +26,7 @@
 #include "PlayerPed.h"
 #include "Radar.h"
 #include "debugmenu.h"
+#include "Frontend.h"
 
 #include <list>
 
@@ -325,6 +326,9 @@ DebugMenuPopulate(void)
 #ifdef LIBRW
 		DebugMenuAddVarBool8("Render", "PS2 Alpha test Emu", &gPS2alphaTest, nil);
 #endif
+		DebugMenuAddVarBool8("Render", "Frame limiter", &FrontEndMenuManager.m_PrefsFrameLimiter, nil);
+		DebugMenuAddVarBool8("Render", "VSynch", &FrontEndMenuManager.m_PrefsVsync, nil);
+		DebugMenuAddVar("Render", "Max FPS", &RsGlobal.maxFPS, nil, 1, 1, 1000, nil);
 
 		DebugMenuAddVarBool8("Debug", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
