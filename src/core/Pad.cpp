@@ -55,6 +55,10 @@ CMouseControllerState CPad::OldMouseControllerState;
 CMouseControllerState CPad::NewMouseControllerState;
 CMouseControllerState CPad::PCTempMouseControllerState;
 
+#ifdef DETECT_PAD_INPUT_SWITCH
+bool CPad::IsAffectedByController = false;
+#endif
+
 _TODO("gbFastTime");
 extern bool gbFastTime;
 
@@ -322,6 +326,16 @@ void AltDodoCheat(void)
 		CVehicle::bAltDodoCheat = true;
 	}
 	CHud::SetHelpMessage(string, true);
+}
+#endif
+
+#ifdef DETECT_PAD_INPUT_SWITCH
+bool
+CControllerState::IsAnyButtonPressed(void)
+{
+	return !!LeftStickX || !!LeftStickY || !!RightStickX || !!RightStickY || !!LeftShoulder1 || !!LeftShoulder2 || !!RightShoulder1 || !!RightShoulder2 ||
+	       !!DPadUp || !!DPadDown || !!DPadLeft || !!DPadRight || !!Start || !!Select || !!Square || !!Triangle || !!Cross || !!Circle || !!LeftShock ||
+	       !!RightShock || !!NetworkTalk;
 }
 #endif
 
@@ -1037,11 +1051,20 @@ void CPad::UpdatePads(void)
 #else
 	CapturePad(0);
 #endif
-	
+#ifdef DETECT_PAD_INPUT_SWITCH
+	if (GetPad(0)->PCTempJoyState.IsAnyButtonPressed())
+		IsAffectedByController = true;
+	else {
+#endif
+		ControlsManager.ClearSimButtonPressCheckers();
+		ControlsManager.AffectPadFromKeyBoard();
+		ControlsManager.AffectPadFromMouse();
 
-	ControlsManager.ClearSimButtonPressCheckers();
-	ControlsManager.AffectPadFromKeyBoard();
-	ControlsManager.AffectPadFromMouse();
+#ifdef DETECT_PAD_INPUT_SWITCH
+	}
+	if (IsAffectedByController && (GetPad(0)->PCTempKeyState.IsAnyButtonPressed() || GetPad(0)->PCTempMouseState.IsAnyButtonPressed()))
+		IsAffectedByController = false;
+#endif
 	
 	if ( CReplay::IsPlayingBackFromFile() )
 		bUpdate = false;
@@ -1096,7 +1119,10 @@ void CPad::Update(int16 unk)
 
 void CPad::DoCheats(void)
 {
-	GetPad(0)->DoCheats(0);
+#ifdef DETECT_PAD_INPUT_SWITCH
+	if (IsAffectedByController)
+#endif
+		GetPad(0)->DoCheats(0);
 }
 
 void CPad::DoCheats(int16 unk)
@@ -1154,13 +1180,19 @@ CPad *CPad::GetPad(int32 pad)
 {
 	return &Pads[pad];
 }
+#ifdef DETECT_PAD_INPUT_SWITCH
+#define CURMODE (IsAffectedByController ? Mode : 0)
+#else
+#define CURMODE (Mode)
+#endif
+
 
 int16 CPad::GetSteeringLeftRight(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1192,8 +1224,8 @@ int16 CPad::GetSteeringUpDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1225,8 +1257,8 @@ int16 CPad::GetCarGunUpDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1252,8 +1284,8 @@ int16 CPad::GetCarGunLeftRight(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1279,8 +1311,8 @@ int16 CPad::GetPedWalkLeftRight(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1313,8 +1345,8 @@ int16 CPad::GetPedWalkUpDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1344,7 +1376,7 @@ int16 CPad::GetPedWalkUpDown(void)
 
 int16 CPad::GetAnalogueUpDown(void)
 {
-	switch ( Mode )
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1409,8 +1441,8 @@ bool CPad::GetHorn(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		{
@@ -1448,8 +1480,8 @@ bool CPad::HornJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		{
@@ -1488,8 +1520,8 @@ bool CPad::GetCarGunFired(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1515,8 +1547,8 @@ bool CPad::CarGunJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1542,8 +1574,8 @@ int16 CPad::GetHandBrake(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1575,8 +1607,8 @@ int16 CPad::GetBrake(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1613,8 +1645,8 @@ bool CPad::GetExitVehicle(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1640,8 +1672,8 @@ bool CPad::ExitVehicleJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1667,8 +1699,8 @@ int32 CPad::GetWeapon(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1700,8 +1732,8 @@ bool CPad::WeaponJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1733,8 +1765,8 @@ int16 CPad::GetAccelerate(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1769,7 +1801,7 @@ int16 CPad::GetAccelerate(void)
 
 bool CPad::CycleCameraModeUpJustDown(void)
 {
-	switch ( Mode )
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1793,7 +1825,7 @@ bool CPad::CycleCameraModeUpJustDown(void)
 
 bool CPad::CycleCameraModeDownJustDown(void)
 {
-	switch ( Mode )
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1819,8 +1851,8 @@ bool CPad::ChangeStationJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		{
@@ -1875,8 +1907,8 @@ bool CPad::GetTarget(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1902,8 +1934,8 @@ bool CPad::TargetJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1937,8 +1969,8 @@ bool CPad::GetSprint(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -2092,8 +2124,8 @@ bool CPad::ForceCameraBehindPlayer(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -2125,8 +2157,8 @@ bool CPad::SniperZoomIn(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -2152,8 +2184,8 @@ bool CPad::SniperZoomOut(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-	
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -2175,6 +2207,7 @@ bool CPad::SniperZoomOut(void)
 	return false;
 }
 
+#undef CURMODE
 
 int16 CPad::SniperModeLookLeftRight(void)
 {

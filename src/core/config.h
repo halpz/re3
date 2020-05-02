@@ -204,6 +204,7 @@ enum Config {
 #ifndef RW_GL3
 #define XINPUT
 #endif
+#define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
 #define KANGAROO_CHEAT
 #define ALLCARSHELI_CHEAT
 #define ALT_DODO_CHEAT
