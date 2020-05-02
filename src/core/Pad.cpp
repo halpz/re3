@@ -1016,7 +1016,7 @@ void CPad::AffectFromXinput(uint32 pad)
 
 		if (Abs(rx) > 0.3f || Abs(ry) > 0.3f) {
 			PCTempJoyState.RightStickX = (int32)(rx * 128.0f);
-			PCTempJoyState.RightStickY = (int32)(ry * 128.0f);
+			PCTempJoyState.RightStickY = (int32)(-ry * 128.0f);
 		}
 
 		XINPUT_VIBRATION VibrationState;
@@ -2223,6 +2223,9 @@ int16 CPad::SniperModeLookLeftRight(void)
 int16 CPad::SniperModeLookUpDown(void)
 {
 	int16 axis = NewState.LeftStickY;
+#ifdef FIX_BUGS
+	axis = -axis;
+#endif
 	int16 dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
 	
 	if ( Abs(axis) > Abs(dpad) )
@@ -2249,7 +2252,11 @@ int16 CPad::LookAroundLeftRight(void)
 int16 CPad::LookAroundUpDown(void)
 {
 	int16 axis = GetPad(0)->NewState.RightStickY;
-	
+
+#ifdef FIX_BUGS
+	axis = -axis;
+#endif
+
 	if ( Abs(axis) > 85 && !GetLookBehindForPed() )
 		return (int16) ( (axis + ( ( axis > 0 ) ? -85 : 85) )
 							* (127.0f / 32.0f) ); // 3.96875f
