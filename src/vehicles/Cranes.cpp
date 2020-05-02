@@ -340,7 +340,7 @@ void CCrane::Update(void)
 		case GOING_TOWARDS_TARGET_ONLY_HEIGHT:
 		case ROTATING_TARGET:
 			if (m_pVehiclePickedUp) {
-				m_pVehiclePickedUp->GetPosition() = CVector(m_vecHookCurPos.x, m_vecHookCurPos.y, m_vecHookCurPos.z - m_pVehiclePickedUp->GetColModel()->boundingBox.max.z);
+				m_pVehiclePickedUp->SetPosition(m_vecHookCurPos.x, m_vecHookCurPos.y, m_vecHookCurPos.z - m_pVehiclePickedUp->GetColModel()->boundingBox.max.z);
 				m_pVehiclePickedUp->SetMoveSpeed(0.0f, 0.0f, 0.0f);
 				CVector up(vecHook.x - m_vecHookCurPos.x, vecHook.y - m_vecHookCurPos.y, 20.0f);
 				up.Normalise();
@@ -585,7 +585,7 @@ void CCrane::SetHookMatrix()
 {
 	if (m_pHook == nil)
 		return;
-	m_pHook->GetPosition() = m_vecHookCurPos;
+	m_pHook->SetPosition(m_vecHookCurPos);
 	CVector up(m_vecHookInitPos.x - m_vecHookCurPos.x, m_vecHookInitPos.y - m_vecHookCurPos.y, 20.0f);
 	up.Normalise();
 	m_pHook->GetRight() = CrossProduct(CVector(0.0f, 1.0f, 0.0f), up);

@@ -116,11 +116,11 @@ SpawnCar(int id)
 			DebugMenuEntrySetAddress(carCol2, &v->m_currentColour2);
 
 		if(CModelInfo::IsBoatModel(id))
-			v->GetPosition() = TheCamera.GetPosition() + TheCamera.GetForward()*15.0f;
+			v->SetPosition(TheCamera.GetPosition() + TheCamera.GetForward()*15.0f);
 		else
-			v->GetPosition() = ThePaths.m_pathNodes[node].pos;
+			v->SetPosition(ThePaths.m_pathNodes[node].pos);
 
-		v->GetPosition().z += 4.0f;
+		v->GetMatrix().GetPosition().z += 4.0f;
 		v->SetOrientation(0.0f, 0.0f, 3.49f);
 		v->SetStatus(STATUS_ABANDONED);
 		v->m_nDoorLock = CARLOCK_UNLOCKED;

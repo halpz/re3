@@ -647,7 +647,7 @@ CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, 
 	}
 
 	object->bGlassBroken = true;
-	object->GetPosition().z = -100.0f;
+	object->GetMatrix().GetPosition().z = -100.0f;
 }
 
 void

@@ -288,7 +288,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 		case PICKUP_NAUTICAL_MINE_INACTIVE:
 		{
 			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, false))
-				m_pObject->GetPosition().z = waterLevel + 0.6f;
+				m_pObject->GetMatrix().GetPosition().z = waterLevel + 0.6f;
 
 			m_pObject->GetMatrix().UpdateRW();
 			m_pObject->UpdateRwFrame();
@@ -310,7 +310,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 		}
 		case PICKUP_NAUTICAL_MINE_ARMED:
 			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, false))
-				m_pObject->GetPosition().z = waterLevel + 0.6f;
+				m_pObject->GetMatrix().GetPosition().z = waterLevel + 0.6f;
 
 			m_pObject->GetMatrix().UpdateRW();
 			m_pObject->UpdateRwFrame();
@@ -337,7 +337,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 		}
 		case PICKUP_FLOATINGPACKAGE:
 			m_pObject->m_vecMoveSpeed.z -= 0.01f * CTimer::GetTimeStep();
-			m_pObject->GetPosition() += m_pObject->GetMoveSpeed() * CTimer::GetTimeStep();
+			m_pObject->GetMatrix().GetPosition() += m_pObject->GetMoveSpeed() * CTimer::GetTimeStep();
 
 			m_pObject->GetMatrix().UpdateRW();
 			m_pObject->UpdateRwFrame();
@@ -346,7 +346,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 			break;
 		case PICKUP_FLOATINGPACKAGE_FLOATING:
 			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, 0))
-				m_pObject->GetPosition().z = waterLevel;
+				m_pObject->GetMatrix().GetPosition().z = waterLevel;
 
 			m_pObject->GetMatrix().UpdateRW();
 			m_pObject->UpdateRwFrame();

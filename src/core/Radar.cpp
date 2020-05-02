@@ -524,7 +524,7 @@ void CRadar::DrawBlips()
 								} else {
 #ifdef TRIANGULAR_BLIPS
 									CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
-									CVector &blipPos = blipEntity->GetPosition();
+									const CVector &blipPos = blipEntity->GetPosition();
 									uint8 mode = BLIP_MODE_TRIANGULAR_UP;
 									if (blipPos.z - pos.z <= 2.0f) {
 										if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;
@@ -630,7 +630,7 @@ void CRadar::DrawBlips()
 #ifdef TRIANGULAR_BLIPS
 								{
 									CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
-									CVector &blipPos = blipEntity->GetPosition();
+									const CVector &blipPos = blipEntity->GetPosition();
 									uint8 mode = BLIP_MODE_TRIANGULAR_UP;
 									if (blipPos.z - pos.z <= 2.0f) {
 										if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;
