@@ -128,6 +128,14 @@ uint16 CTheScripts::CommandsExecuted;
 uint16 CTheScripts::ScriptsUpdated;
 int32 ScriptParams[32];
 
+
+const uint32 CRunningScript::nSaveStructSize =
+#ifdef COMPATIBLE_SAVES
+	136;	
+#else
+	sizeof(CRunningScript);
+#endif
+
 CMissionCleanup::CMissionCleanup()
 {
 	Init();
@@ -11188,7 +11196,7 @@ INITSAVEBUF
 	uint32 runningScripts = 0;
 	for (CRunningScript* pScript = pActiveScripts; pScript; pScript = pScript->GetNext())
 		runningScripts++;
-	*size = sizeof(CRunningScript) * runningScripts + varSpace + SCRIPT_DATA_SIZE + SAVE_HEADER_SIZE + 3 * sizeof(uint32);
+	*size = CRunningScript::nSaveStructSize * runningScripts + varSpace + SCRIPT_DATA_SIZE + SAVE_HEADER_SIZE + 3 * sizeof(uint32);
 	WriteSaveHeader(buf, 'S', 'C', 'R', '\0', *size - SAVE_HEADER_SIZE);
 	WriteSaveBuf(buf, varSpace);
 	for (uint32 i = 0; i < varSpace; i++)
@@ -11260,7 +11268,7 @@ INITSAVEBUF
 	WriteSaveBuf(buf, (uint16)0);
 	WriteSaveBuf(buf, runningScripts);
 	for (CRunningScript* pScript = pActiveScripts; pScript; pScript = pScript->GetNext())
-		WriteSaveBuf(buf, *pScript);
+		pScript->Save(buf);
 VALIDATESAVEBUF(*size)
 }
 
@@ -11336,7 +11344,7 @@ INITSAVEBUF
 	ReadSaveBuf<uint16>(buf);
 	uint32 runningScripts = ReadSaveBuf<uint32>(buf);
 	for (uint32 i = 0; i < runningScripts; i++)
-		StartNewScript(0)->BuildFromSaved(ReadSaveBuf<CRunningScript>(buf));
+		StartNewScript(0)->Load(buf);
 VALIDATESAVEBUF(size)
 }
 
@@ -11610,4 +11618,70 @@ void CTheScripts::ReadMultiScriptFileOffsetsFromScript()
 	for (int i = 0; i < NumberOfMissionScripts; i++) {
 		MultiScriptArray[i] = Read4BytesFromScript(&ip);
 	}
+}
+
+void CRunningScript::Save(uint8*& buf)
+{
+#ifdef COMPATIBLE_SAVES
+	SkipSaveBuf(buf, 8);
+	for (int i = 0; i < 8; i++)
+		WriteSaveBuf<char>(buf, m_abScriptName[i]);
+	WriteSaveBuf<uint32>(buf, m_nIp);
+	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
+	for (int i = 0; i < MAX_STACK_DEPTH; i++)
+		WriteSaveBuf<uint32>(buf, m_anStack[i]);
+	WriteSaveBuf<uint16>(buf, m_nStackPointer);
+	SkipSaveBuf(buf, 2);
+	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
+		WriteSaveBuf<int32>(buf, m_anLocalVariables[i]);
+	WriteSaveBuf<bool>(buf, m_bCondResult);
+	WriteSaveBuf<bool>(buf, m_bIsMissionScript);
+	WriteSaveBuf<bool>(buf, m_bSkipWakeTime);
+	SkipSaveBuf(buf, 1);
+	WriteSaveBuf<uint32>(buf, m_nWakeTime);
+	WriteSaveBuf<uint16>(buf, m_nAndOrState);
+	WriteSaveBuf<bool>(buf, m_bNotFlag);
+	WriteSaveBuf<bool>(buf, m_bDeatharrestEnabled);
+	WriteSaveBuf<bool>(buf, m_bDeatharrestExecuted);
+	WriteSaveBuf<bool>(buf, m_bMissionFlag);
+	SkipSaveBuf(buf, 2);
+#else
+	WriteSaveBuf(buf, *this);
+#endif
+}
+
+void CRunningScript::Load(uint8*& buf)
+{
+#ifdef COMPATIBLE_SAVES
+	SkipSaveBuf(buf, 8);
+	for (int i = 0; i < 8; i++)
+		m_abScriptName[i] = ReadSaveBuf<char>(buf);
+	m_nIp = ReadSaveBuf<uint32>(buf);
+	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
+	for (int i = 0; i < MAX_STACK_DEPTH; i++)
+		m_anStack[i] = ReadSaveBuf<uint32>(buf);
+	m_nStackPointer = ReadSaveBuf<uint16>(buf);
+	SkipSaveBuf(buf, 2);
+	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
+		m_anLocalVariables[i] = ReadSaveBuf<int32>(buf);
+	m_bCondResult = ReadSaveBuf<bool>(buf);
+	m_bIsMissionScript = ReadSaveBuf<bool>(buf);
+	m_bSkipWakeTime = ReadSaveBuf<bool>(buf);
+	SkipSaveBuf(buf, 1);
+	m_nWakeTime = ReadSaveBuf<uint32>(buf);
+	m_nAndOrState = ReadSaveBuf<uint16>(buf);
+	m_bNotFlag = ReadSaveBuf<bool>(buf);
+	m_bDeatharrestEnabled = ReadSaveBuf<bool>(buf);
+	m_bDeatharrestExecuted = ReadSaveBuf<bool>(buf);
+	m_bMissionFlag = ReadSaveBuf<bool>(buf);
+	SkipSaveBuf(buf, 2);
+#else
+	CRunningScript* n = next;
+	CRunningScript* p = prev;
+	*this = ReadSaveBuf<CRunningScript>(buf);
+	next = n;
+	prev = p;
+#endif
 }
