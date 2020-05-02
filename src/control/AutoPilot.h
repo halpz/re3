@@ -120,5 +120,10 @@ public:
 
 	void ModifySpeed(float);
 	void RemoveOnePathNode();
+#ifdef COMPATIBLE_SAVES
+	void Save(uint8*& buf);
+	void Load(uint8*& buf);
+#endif
+
 };
 static_assert(sizeof(CAutoPilot) == 0x70, "CAutoPilot: error");

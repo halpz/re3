@@ -32,6 +32,13 @@ float WAKE_LIFETIME = 400.0f;
 
 CBoat *CBoat::apFrameWakeGeneratingBoats[4];
 
+const uint32 CBoat::nSaveStructSize =
+#ifdef COMPATIBLE_SAVES
+	1156;
+#else
+	sizeof(CBoat);
+#endif
+
 CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 {
 	CVehicleModelInfo *minfo = (CVehicleModelInfo*)CModelInfo::GetModelInfo(mi);
@@ -899,3 +906,19 @@ CBoat::AddWakePoint(CVector point)
 		m_nNumWakePoints = 1;
 	}
 }
+
+#ifdef COMPATIBLE_SAVES
+void
+CBoat::Save(uint8*& buf)
+{
+	CVehicle::Save(buf);
+	SkipSaveBuf(buf, 1156 - 648);
+}
+
+void
+CBoat::Load(uint8*& buf)
+{
+	CVehicle::Load(buf);
+	SkipSaveBuf(buf, 1156 - 648);
+}
+#endif

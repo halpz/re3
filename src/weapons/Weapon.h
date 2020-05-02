@@ -67,6 +67,11 @@ public:
 	bool HasWeaponAmmoToBeUsed(void);
 	
 	static bool ProcessLineOfSight(CVector const &point1, CVector const &point2, CColPoint &point, CEntity *&entity, eWeaponType type, CEntity *shooter, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects);
+
+#ifdef COMPATIBLE_SAVES
+	void Save(uint8*& buf);
+	void Load(uint8*& buf);
+#endif
 };
 VALIDATE_SIZE(CWeapon, 0x18);
 

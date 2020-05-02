@@ -98,7 +98,10 @@ public:
 	eEntityStatus GetStatus() const { return (eEntityStatus)m_status; }
 	void SetStatus(eEntityStatus status) { m_status = status; }
 	CColModel *GetColModel(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(); }
-#ifndef COMPATIBLE_SAVES
+#ifdef COMPATIBLE_SAVES
+	void SaveEntityFlags(uint8*& buf);
+	void LoadEntityFlags(uint8*& buf);
+#else
 	uint32* GetAddressOfEntityProperties() { /* AWFUL */ return (uint32*)((char*)&m_rwObject + sizeof(m_rwObject)); }
 #endif
 

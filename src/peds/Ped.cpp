@@ -17732,3 +17732,45 @@ CPed::SetExitBoat(CVehicle *boat)
 	// Not there in VC.
 	CWaterLevel::FreeBoatWakeArray();
 }
+
+#ifdef COMPATIBLE_SAVES
+void
+CPed::Save(uint8*& buf)
+{
+	SkipSaveBuf(buf, 52);
+	WriteSaveBuf<float>(buf, GetPosition().x);
+	WriteSaveBuf<float>(buf, GetPosition().y);
+	WriteSaveBuf<float>(buf, GetPosition().z);
+	SkipSaveBuf(buf, 288);
+	WriteSaveBuf<uint8>(buf, CharCreatedBy);
+	SkipSaveBuf(buf, 351);
+	WriteSaveBuf<float>(buf, m_fHealth);
+	WriteSaveBuf<float>(buf, m_fArmour);
+	SkipSaveBuf(buf, 148);
+	for (int i = 0; i < 13; i++) // has to be hardcoded
+		m_weapons[i].Save(buf);
+	SkipSaveBuf(buf, 5);
+	WriteSaveBuf<uint8>(buf, m_maxWeaponTypeAllowed);
+	SkipSaveBuf(buf, 162);
+}
+
+void
+CPed::Load(uint8*& buf)
+{
+	SkipSaveBuf(buf, 52);
+	GetPosition().x = ReadSaveBuf<float>(buf);
+	GetPosition().y = ReadSaveBuf<float>(buf);
+	GetPosition().z = ReadSaveBuf<float>(buf);
+	SkipSaveBuf(buf, 288);
+	CharCreatedBy = ReadSaveBuf<uint8>(buf);
+	SkipSaveBuf(buf, 351);
+	m_fHealth = ReadSaveBuf<float>(buf);
+	m_fArmour = ReadSaveBuf<float>(buf);
+	SkipSaveBuf(buf, 148);
+	for (int i = 0; i < 13; i++) // has to be hardcoded
+		m_weapons[i].Load(buf);
+	SkipSaveBuf(buf, 5);
+	m_maxWeaponTypeAllowed = ReadSaveBuf<uint8>(buf);
+	SkipSaveBuf(buf, 162);
+}
+#endif

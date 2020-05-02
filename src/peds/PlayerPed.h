@@ -75,6 +75,13 @@ public:
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);
 	static void ReactivatePlayerPed(int32);
+
+#ifdef COMPATIBLE_SAVES
+	virtual void Save(uint8*& buf);
+	virtual void Load(uint8*& buf);
+#endif
+
+	static const uint32 nSaveStructSize;
 };
 
 #ifndef PED_SKIN

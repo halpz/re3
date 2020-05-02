@@ -886,6 +886,11 @@ public:
 #ifdef PED_SKIN
 	void renderLimb(int node);
 #endif
+
+#ifdef COMPATIBLE_SAVES
+	virtual void Save(uint8*& buf);
+	virtual void Load(uint8*& buf);
+#endif
 };
 
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);

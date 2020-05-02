@@ -1222,3 +1222,128 @@ DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle)
 	CWorld::Remove(pVehicle);
 	delete pVehicle;
 }
+
+#ifdef COMPATIBLE_SAVES
+void
+CVehicle::Save(uint8*& buf)
+{
+	SkipSaveBuf(buf, 4);
+	WriteSaveBuf<float>(buf, GetRight().x);
+	WriteSaveBuf<float>(buf, GetRight().y);
+	WriteSaveBuf<float>(buf, GetRight().z);
+	SkipSaveBuf(buf, 4);
+	WriteSaveBuf<float>(buf, GetForward().x);
+	WriteSaveBuf<float>(buf, GetForward().y);
+	WriteSaveBuf<float>(buf, GetForward().z);
+	SkipSaveBuf(buf, 4);
+	WriteSaveBuf<float>(buf, GetUp().x);
+	WriteSaveBuf<float>(buf, GetUp().y);
+	WriteSaveBuf<float>(buf, GetUp().z);
+	SkipSaveBuf(buf, 4);
+	WriteSaveBuf<float>(buf, GetPosition().x);
+	WriteSaveBuf<float>(buf, GetPosition().y);
+	WriteSaveBuf<float>(buf, GetPosition().z);
+	SkipSaveBuf(buf, 16);
+	SaveEntityFlags(buf);
+	SkipSaveBuf(buf, 212);
+	AutoPilot.Save(buf);
+	WriteSaveBuf<int8>(buf, m_currentColour1);
+	WriteSaveBuf<int8>(buf, m_currentColour2);
+	SkipSaveBuf(buf, 2);
+	WriteSaveBuf<int16>(buf, m_nAlarmState);
+	SkipSaveBuf(buf, 43);
+	WriteSaveBuf<uint8>(buf, m_nNumMaxPassengers);
+	SkipSaveBuf(buf, 2);
+	WriteSaveBuf<float>(buf, field_1D0[0]);
+	WriteSaveBuf<float>(buf, field_1D0[1]);
+	WriteSaveBuf<float>(buf, field_1D0[2]);
+	WriteSaveBuf<float>(buf, field_1D0[3]);
+	SkipSaveBuf(buf, 8);
+	WriteSaveBuf<float>(buf, m_fSteerAngle);
+	WriteSaveBuf<float>(buf, m_fGasPedal);
+	WriteSaveBuf<float>(buf, m_fBrakePedal);
+	WriteSaveBuf<uint8>(buf, VehicleCreatedBy);
+	uint8 flags = 0;
+	if (bIsLawEnforcer) flags |= BIT(0);
+	if (bIsLocked) flags |= BIT(3);
+	if (bEngineOn) flags |= BIT(4);
+	if (bIsHandbrakeOn) flags |= BIT(5);
+	if (bLightsOn) flags |= BIT(6);
+	if (bFreebies) flags |= BIT(7);
+	WriteSaveBuf<uint8>(buf, flags);
+	SkipSaveBuf(buf, 10);
+	WriteSaveBuf<float>(buf, m_fHealth);
+	WriteSaveBuf<uint8>(buf, m_nCurrentGear);
+	SkipSaveBuf(buf, 3);
+	WriteSaveBuf<float>(buf, m_fChangeGearTime);
+	SkipSaveBuf(buf, 4);
+	WriteSaveBuf<uint32>(buf, m_nTimeOfDeath);
+	SkipSaveBuf(buf, 2);
+	WriteSaveBuf<int16>(buf, m_nBombTimer);
+	SkipSaveBuf(buf, 12);
+	WriteSaveBuf<int8>(buf, m_nDoorLock);
+	SkipSaveBuf(buf, 99);
+}
+
+void
+CVehicle::Load(uint8*& buf)
+{
+	CMatrix tmp;
+	SkipSaveBuf(buf, 4);
+	tmp.GetRight().x = ReadSaveBuf<float>(buf);
+	tmp.GetRight().y = ReadSaveBuf<float>(buf);
+	tmp.GetRight().z = ReadSaveBuf<float>(buf);
+	SkipSaveBuf(buf, 4);
+	tmp.GetForward().x = ReadSaveBuf<float>(buf);
+	tmp.GetForward().y = ReadSaveBuf<float>(buf);
+	tmp.GetForward().z = ReadSaveBuf<float>(buf);
+	SkipSaveBuf(buf, 4);
+	tmp.GetUp().x = ReadSaveBuf<float>(buf);
+	tmp.GetUp().y = ReadSaveBuf<float>(buf);
+	tmp.GetUp().z = ReadSaveBuf<float>(buf);
+	SkipSaveBuf(buf, 4);
+	tmp.GetPosition().x = ReadSaveBuf<float>(buf);
+	tmp.GetPosition().y = ReadSaveBuf<float>(buf);
+	tmp.GetPosition().z = ReadSaveBuf<float>(buf);
+	m_matrix = tmp;
+	SkipSaveBuf(buf, 16);
+	LoadEntityFlags(buf);
+	SkipSaveBuf(buf, 212);
+	AutoPilot.Load(buf);
+	m_currentColour1 = ReadSaveBuf<int8>(buf);
+	m_currentColour2 = ReadSaveBuf<int8>(buf);
+	SkipSaveBuf(buf, 2);
+	m_nAlarmState = ReadSaveBuf<int16>(buf);
+	SkipSaveBuf(buf, 43);
+	m_nNumMaxPassengers = ReadSaveBuf<int8>(buf);
+	SkipSaveBuf(buf, 2);
+	field_1D0[0] = ReadSaveBuf<float>(buf);
+	field_1D0[1] = ReadSaveBuf<float>(buf);
+	field_1D0[2] = ReadSaveBuf<float>(buf);
+	field_1D0[3] = ReadSaveBuf<float>(buf);
+	SkipSaveBuf(buf, 8);
+	m_fSteerAngle = ReadSaveBuf<float>(buf);
+	m_fGasPedal = ReadSaveBuf<float>(buf);
+	m_fBrakePedal = ReadSaveBuf<float>(buf);
+	VehicleCreatedBy = ReadSaveBuf<uint8>(buf);
+	uint8 flags = ReadSaveBuf<uint8>(buf);
+	bIsLawEnforcer = !!(flags & BIT(0));
+	bIsLocked = !!(flags & BIT(3));
+	bEngineOn = !!(flags & BIT(4));
+	bIsHandbrakeOn = !!(flags & BIT(5));
+	bLightsOn = !!(flags & BIT(6));
+	bFreebies = !!(flags & BIT(7));
+	SkipSaveBuf(buf, 10);
+	m_fHealth = ReadSaveBuf<float>(buf);
+	m_nCurrentGear = ReadSaveBuf<uint8>(buf);
+	SkipSaveBuf(buf, 3);
+	m_fChangeGearTime = ReadSaveBuf<float>(buf);
+	SkipSaveBuf(buf, 4);
+	m_nTimeOfDeath = ReadSaveBuf<uint32>(buf);
+	SkipSaveBuf(buf, 2);
+	m_nBombTimer = ReadSaveBuf<int16>(buf);
+	SkipSaveBuf(buf, 12);
+	m_nDoorLock = (eCarLock)ReadSaveBuf<int8>(buf);
+	SkipSaveBuf(buf, 99);
+}
+#endif

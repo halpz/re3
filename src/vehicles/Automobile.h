@@ -188,9 +188,15 @@ public:
 	void HideAllComps(void);
 	void ShowAllComps(void);
 	void ReduceHornCounter(void);
+#ifdef COMPATIBLE_SAVES
+	virtual void Save(uint8*& buf);
+	virtual void Load(uint8*& buf);
+#endif
+	static const uint32 nSaveStructSize;
 
 	static void SetAllTaxiLights(bool set);
 };
+
 static_assert(sizeof(CAutomobile) == 0x5A8, "CAutomobile: error");
 
 inline uint8 GetCarDoorFlag(int32 carnode) {
