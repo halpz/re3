@@ -29,6 +29,9 @@ public:
 	float GetRightStickX(void) { return RightStickX/32767.0f; };
 	float GetRightStickY(void) { return RightStickY/32767.0f; };
 
+#ifdef DETECT_PAD_INPUT_SWITCH
+	bool IsAnyButtonPressed();
+#endif
 	void Clear(void);
 };
 VALIDATE_SIZE(CControllerState, 0x2A);
@@ -158,7 +161,10 @@ public:
 	int32 LastTimeTouched;
 	int32 AverageWeapon;
 	int32 AverageEntries;
-	
+
+#ifdef DETECT_PAD_INPUT_SWITCH
+	static bool IsAffectedByController;
+#endif
 	CPad() { }
 	~CPad() { }
 

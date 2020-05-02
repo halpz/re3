@@ -5258,7 +5258,11 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		return 0;
 	}
 	case COMMAND_GET_CONTROLLER_MODE:
+#if defined(GTA_PC) && !defined(DETECT_PAD_INPUT_SWITCH)
 		ScriptParams[0] = 0;
+#else
+		ScriptParams[0] = CPad::IsAffectedByController ? CPad::GetPad(0)->Mode : 0;
+#endif
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	case COMMAND_SET_CAN_RESPRAY_CAR:

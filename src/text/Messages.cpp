@@ -424,7 +424,7 @@ CMessages::InsertStringInString(wchar *str1, wchar *str2)
 	for (i = 0; i < total_size; ) {
 #ifdef MORE_LANGUAGES
 		if ((CFont::IsJapanese() && *_str1 == (0x8000 | '~') && *(_str1 + 1) == (0x8000 | 'a') && *(_str1 + 2) == (0x8000 | '~'))
-			|| (CFont::IsJapanese() && *_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~'))
+			|| (*_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~'))
 		{
 #else
 			if (*_str1 == '~' && *(_str1 + 1) == 'a' && *(_str1 + 2) == '~') {

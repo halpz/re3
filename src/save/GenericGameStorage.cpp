@@ -164,7 +164,7 @@ GenericSave(int file)
 	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nMonth);
 	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nYear);
 	WriteDataToBufferPointer(buf, CWeather::WeatherTypeInList);
-#ifdef FIX_BUGS
+#ifdef COMPATIBLE_SAVES
 	// converted to float for compatibility with original format
 	// TODO: maybe remove this? not really gonna break anything vital
 	float f = TheCamera.CarZoomIndicator;
@@ -283,7 +283,7 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nMonth);
 	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nYear);
 	ReadDataFromBufferPointer(buf, CWeather::WeatherTypeInList);
-#ifdef FIX_BUGS
+#ifdef COMPATIBLE_SAVES
 	// converted to float for compatibility with original format
 	// TODO: maybe remove this? not really gonna break anything vital
 	float f;

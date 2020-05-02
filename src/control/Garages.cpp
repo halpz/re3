@@ -528,9 +528,14 @@ void CGarage::Update()
 						CGarages::GivePlayerDetonator();
 					CStats::KgsOfExplosivesUsed += KGS_OF_EXPLOSIVES_IN_BOMB;
 				}
+#ifdef DETECT_PAD_INPUT_SWITCH
+				int16 Mode = CPad::IsAffectedByController ? CPad::GetPad(0)->Mode : 0;
+#else
+				int16 Mode = CPad::GetPad(0)->Mode;
+#endif
 				switch (m_eGarageType) {
 				case GARAGE_BOMBSHOP1:
-					switch (CPad::GetPad(0)->Mode) {
+					switch (Mode) {
 					case 0:
 					case 1:
 					case 2:
@@ -542,7 +547,7 @@ void CGarage::Update()
 					}
 					break;
 				case GARAGE_BOMBSHOP2:
-					switch (CPad::GetPad(0)->Mode) {
+					switch (Mode) {
 					case 0:
 					case 1:
 					case 2:
