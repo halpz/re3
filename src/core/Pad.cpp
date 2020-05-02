@@ -1180,15 +1180,19 @@ CPad *CPad::GetPad(int32 pad)
 {
 	return &Pads[pad];
 }
+#ifdef DETECT_PAD_INPUT_SWITCH
+#define CURMODE (IsAffectedByController ? Mode : 0)
+#else
+#define CURMODE (Mode)
+#endif
+
 
 int16 CPad::GetSteeringLeftRight(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1220,10 +1224,8 @@ int16 CPad::GetSteeringUpDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1255,10 +1257,8 @@ int16 CPad::GetCarGunUpDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1284,10 +1284,8 @@ int16 CPad::GetCarGunLeftRight(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1313,10 +1311,8 @@ int16 CPad::GetPedWalkLeftRight(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1349,10 +1345,8 @@ int16 CPad::GetPedWalkUpDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1382,10 +1376,7 @@ int16 CPad::GetPedWalkUpDown(void)
 
 int16 CPad::GetAnalogueUpDown(void)
 {
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1450,10 +1441,8 @@ bool CPad::GetHorn(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		{
@@ -1491,10 +1480,8 @@ bool CPad::HornJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		{
@@ -1533,10 +1520,8 @@ bool CPad::GetCarGunFired(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1562,10 +1547,8 @@ bool CPad::CarGunJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1591,10 +1574,8 @@ int16 CPad::GetHandBrake(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1626,10 +1607,8 @@ int16 CPad::GetBrake(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1666,10 +1645,8 @@ bool CPad::GetExitVehicle(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1695,10 +1672,8 @@ bool CPad::ExitVehicleJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1724,10 +1699,8 @@ int32 CPad::GetWeapon(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1759,10 +1732,8 @@ bool CPad::WeaponJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1794,10 +1765,8 @@ int16 CPad::GetAccelerate(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return 0;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1832,10 +1801,7 @@ int16 CPad::GetAccelerate(void)
 
 bool CPad::CycleCameraModeUpJustDown(void)
 {
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1859,10 +1825,7 @@ bool CPad::CycleCameraModeUpJustDown(void)
 
 bool CPad::CycleCameraModeDownJustDown(void)
 {
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+	switch (CURMODE)
 	{
 		case 0:
 		case 2:
@@ -1888,10 +1851,8 @@ bool CPad::ChangeStationJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		{
@@ -1946,10 +1907,8 @@ bool CPad::GetTarget(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -1975,10 +1934,8 @@ bool CPad::TargetJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -2012,10 +1969,8 @@ bool CPad::GetSprint(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -2169,10 +2124,8 @@ bool CPad::ForceCameraBehindPlayer(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -2204,10 +2157,8 @@ bool CPad::SniperZoomIn(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -2233,10 +2184,8 @@ bool CPad::SniperZoomOut(void)
 {
 	if ( ArePlayerControlsDisabled() )
 		return false;
-#ifdef DETECT_PAD_INPUT_SWITCH
-	int16 Mode = IsAffectedByController ? this->Mode : 0;
-#endif
-	switch ( Mode )
+
+	switch (CURMODE)
 	{
 		case 0:
 		case 1:
@@ -2258,6 +2207,7 @@ bool CPad::SniperZoomOut(void)
 	return false;
 }
 
+#undef CURMODE
 
 int16 CPad::SniperModeLookLeftRight(void)
 {
