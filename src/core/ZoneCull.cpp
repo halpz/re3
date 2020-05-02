@@ -522,7 +522,7 @@ CCullZone::CalcDistToCullZoneSquared(float x, float y)
 bool
 CCullZone::IsEntityCloseEnoughToZone(CEntity *entity, bool checkLevel)
 {
-	CVector &pos = entity->GetPosition();
+	const CVector &pos = entity->GetPosition();
 
 	CSimpleModelInfo *minfo = (CSimpleModelInfo*)CModelInfo::GetModelInfo(entity->GetModelIndex());
 	float distToZone = CalcDistToCullZone(pos.x, pos.y);

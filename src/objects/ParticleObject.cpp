@@ -137,7 +137,7 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 	pobj->m_nState           = POBJECTSTATE_UPDATE_CLOSE;
 	pobj->m_Type             = (eParticleObjectType)type;
 	
-	pobj->GetPosition()      = pos;
+	pobj->SetPosition(pos);
 	pobj->m_vecTarget        = target;
 	
 	pobj->m_nNumEffectCycles = 1;
@@ -1174,7 +1174,7 @@ CParticleObject::LoadParticle(uint8 *buffer, uint32  length)
 		dst->m_nState           = POBJECTSTATE_UPDATE_CLOSE;
 		dst->m_Type             = src->m_Type;
 		dst->m_ParticleType     = src->m_ParticleType;
-		dst->GetPosition()      = src->GetPosition();
+		dst->SetPosition(src->GetPosition());
 		dst->m_vecTarget        = src->m_vecTarget;
 		dst->m_nFrameCounter    = src->m_nFrameCounter;
 		dst->m_bRemove          = src->m_bRemove;

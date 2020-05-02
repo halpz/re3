@@ -59,7 +59,7 @@ void CCarGenerator::DoInternalProcessing()
 		if (pos.z <= -100.0f)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += pBoat->GetDistanceFromCentreOfMassToBaseOfModel();
-		pBoat->GetPosition() = pos;
+		pBoat->SetPosition(pos);
 		pBoat->SetOrientation(0.0f, 0.0f, DEGTORAD(m_fAngle));
 		pBoat->SetStatus(STATUS_ABANDONED);
 		pBoat->m_nDoorLock = CARLOCK_UNLOCKED;
@@ -93,7 +93,7 @@ void CCarGenerator::DoInternalProcessing()
 			pCar->bIsStatic = false;
 			pCar->bEngineOn = false;
 			pos.z += pCar->GetDistanceFromCentreOfMassToBaseOfModel();
-			pCar->GetPosition() = pos;
+			pCar->SetPosition(pos);
 			pCar->SetOrientation(0.0f, 0.0f, DEGTORAD(m_fAngle));
 			pCar->SetStatus(STATUS_ABANDONED);
 			pCar->bLightsOn = false;

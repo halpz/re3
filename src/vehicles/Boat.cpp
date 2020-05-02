@@ -520,7 +520,7 @@ CBoat::ProcessControl(void)
 			// is this some inlined CPlaceable method?
 			CVector pos = GetPosition();
 			GetMatrix().RotateZ(m_fOrientation - GetForward().Heading());
-			GetPosition() = pos;
+			GetMatrix().GetPosition() = pos;
 		}
 	}
 
@@ -680,7 +680,7 @@ CBoat::BlowUpCar(CEntity *culprit)
 	dist.Normalise();
 	if(GetUp().z > 0.0f)
 		dist += GetUp();
-	obj->GetPosition() += GetUp();
+	obj->GetMatrix().GetPosition() += GetUp();
 
 	CWorld::Add(obj);
 
@@ -771,7 +771,7 @@ void
 CBoat::Teleport(CVector v)
 {
 	CWorld::Remove(this);
-	GetPosition() = v;
+	SetPosition(v);
 	SetOrientation(0.0f, 0.0f, 0.0f);
 	SetMoveSpeed(0.0f, 0.0f, 0.0f);
 	SetTurnSpeed(0.0f, 0.0f, 0.0f);

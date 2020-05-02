@@ -2401,7 +2401,7 @@ void
 CPed::Teleport(CVector pos)
 {
 	CWorld::Remove(this);
-	GetPosition() = pos;
+	SetPosition(pos);
 	bIsStanding = false;
 	m_nPedStateTimer = 0;
 	m_actionX = 0.0f;
@@ -3222,7 +3222,7 @@ CPed::TurnBody(void)
 	bool turnDone = true;
 
 	if (m_pLookTarget) {
-		CVector &lookPos = m_pLookTarget->GetPosition();
+		const CVector &lookPos = m_pLookTarget->GetPosition();
 
 		lookDir = CGeneral::GetRadianAngleBetweenPoints(
 					lookPos.x,

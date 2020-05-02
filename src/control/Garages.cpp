@@ -1448,14 +1448,14 @@ void CGarage::UpdateDoorsHeight()
 {
 	RefreshDoorPointers(false);
 	if (m_pDoor1) {
-		m_pDoor1->GetPosition().z = m_fDoorPos + m_fDoor1Z;
+		m_pDoor1->GetMatrix().GetPosition().z = m_fDoorPos + m_fDoor1Z;
 		if (m_bRotatedDoor)
 			BuildRotatedDoorMatrix(m_pDoor1, m_fDoorPos / m_fDoorHeight);
 		m_pDoor1->GetMatrix().UpdateRW();
 		m_pDoor1->UpdateRwFrame();
 	}
 	if (m_pDoor2) {
-		m_pDoor2->GetPosition().z = m_fDoorPos + m_fDoor2Z;
+		m_pDoor2->GetMatrix().GetPosition().z = m_fDoorPos + m_fDoor2Z;
 		if (m_bRotatedDoor)
 			BuildRotatedDoorMatrix(m_pDoor2, m_fDoorPos / m_fDoorHeight);
 		m_pDoor2->GetMatrix().UpdateRW();
@@ -1482,18 +1482,18 @@ void CGarage::UpdateCrusherAngle()
 void CGarage::UpdateCrusherShake(float X, float Y)
 {
 	RefreshDoorPointers(false);
-	m_pDoor1->GetPosition().x += X;
-	m_pDoor1->GetPosition().y += Y;
+	m_pDoor1->GetMatrix().GetPosition().x += X;
+	m_pDoor1->GetMatrix().GetPosition().y += Y;
 	m_pDoor1->GetMatrix().UpdateRW();
 	m_pDoor1->UpdateRwFrame();
-	m_pDoor1->GetPosition().x -= X;
-	m_pDoor1->GetPosition().y -= Y;
-	m_pDoor2->GetPosition().x += X;
-	m_pDoor2->GetPosition().y += Y;
+	m_pDoor1->GetMatrix().GetPosition().x -= X;
+	m_pDoor1->GetMatrix().GetPosition().y -= Y;
+	m_pDoor2->GetMatrix().GetPosition().x += X;
+	m_pDoor2->GetMatrix().GetPosition().y += Y;
 	m_pDoor2->GetMatrix().UpdateRW();
 	m_pDoor2->UpdateRwFrame();
-	m_pDoor2->GetPosition().x -= X;
-	m_pDoor2->GetPosition().y -= Y;
+	m_pDoor2->GetMatrix().GetPosition().x -= X;
+	m_pDoor2->GetMatrix().GetPosition().y -= Y;
 }
 
 // This is dumb but there is no way to avoid goto. What was there originally even?
@@ -1854,7 +1854,7 @@ CVehicle* CStoredCar::RestoreCar()
 #else
 	CVehicle* pVehicle = new CAutomobile(m_nModelIndex, RANDOM_VEHICLE);
 #endif
-	pVehicle->GetPosition() = m_vecPos;
+	pVehicle->SetPosition(m_vecPos);
 	pVehicle->SetStatus(STATUS_ABANDONED);
 	pVehicle->GetForward() = m_vecAngle;
 	pVehicle->GetRight() = CVector(m_vecAngle.y, -m_vecAngle.x, 0.0f);
@@ -2089,15 +2089,15 @@ void CGarage::CenterCarInGarage(CVehicle* pVehicle)
 	float offsetZ = pos.z - pos.z;
 	float distance = CVector(offsetX, offsetY, offsetZ).Magnitude();
 	if (distance < RESPRAY_CENTERING_COEFFICIENT) {
-		pVehicle->GetPosition().x = GetGarageCenterX();
-		pVehicle->GetPosition().y = GetGarageCenterY();
+		pVehicle->GetMatrix().GetPosition().x = GetGarageCenterX();
+		pVehicle->GetMatrix().GetPosition().y = GetGarageCenterY();
 	}
 	else {
-		pVehicle->GetPosition().x += offsetX * RESPRAY_CENTERING_COEFFICIENT / distance;
-		pVehicle->GetPosition().y += offsetY * RESPRAY_CENTERING_COEFFICIENT / distance;
+		pVehicle->GetMatrix().GetPosition().x += offsetX * RESPRAY_CENTERING_COEFFICIENT / distance;
+		pVehicle->GetMatrix().GetPosition().y += offsetY * RESPRAY_CENTERING_COEFFICIENT / distance;
 	}
 	if (!IsEntityEntirelyInside3D(pVehicle, 0.1f))
-		pVehicle->GetPosition() = pos;
+		pVehicle->SetPosition(pos);
 }
 
 void CGarages::CloseHideOutGaragesBeforeSave()
@@ -2164,7 +2164,7 @@ int32 CGarages::FindMaxNumStoredCarsForGarage(eGarageType type)
 	return 0;
 }
 
-bool CGarages::IsPointWithinHideOutGarage(CVector& point)
+bool CGarages::IsPointWithinHideOutGarage(Const CVector& point)
 {
 	for (int i = 0; i < NUM_GARAGES; i++) {
 		switch (aGarages[i].m_eGarageType) {
@@ -2180,7 +2180,7 @@ bool CGarages::IsPointWithinHideOutGarage(CVector& point)
 	return false;
 }
 
-bool CGarages::IsPointWithinAnyGarage(CVector& point)
+bool CGarages::IsPointWithinAnyGarage(Const CVector& point)
 {
 	for (int i = 0; i < NUM_GARAGES; i++) {
 		switch (aGarages[i].m_eGarageType) {
@@ -2205,7 +2205,7 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 		default:
 			aGarages[i].RefreshDoorPointers(true);
 			if (aGarages[i].m_pDoor1) {
-				aGarages[i].m_pDoor1->GetPosition().z = aGarages[i].m_fDoor1Z;
+				aGarages[i].m_pDoor1->GetMatrix().GetPosition().z = aGarages[i].m_fDoor1Z;
 				if (aGarages[i].m_pDoor1->IsObject())
 					((CObject*)aGarages[i].m_pDoor1)->m_objectMatrix.GetPosition().z = aGarages[i].m_fDoor1Z;
 				if (aGarages[i].m_bRotatedDoor)
@@ -2214,7 +2214,7 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 				aGarages[i].m_pDoor1->UpdateRwFrame();
 			}
 			if (aGarages[i].m_pDoor2) {
-				aGarages[i].m_pDoor2->GetPosition().z = aGarages[i].m_fDoor2Z;
+				aGarages[i].m_pDoor2->GetMatrix().GetPosition().z = aGarages[i].m_fDoor2Z;
 				if (aGarages[i].m_pDoor2->IsObject())
 					((CObject*)aGarages[i].m_pDoor2)->m_objectMatrix.GetPosition().z = aGarages[i].m_fDoor2Z;
 				if (aGarages[i].m_bRotatedDoor)

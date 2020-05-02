@@ -1293,7 +1293,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += CWorld::Players[index].m_pPed->GetDistanceFromCentreOfMassToBaseOfModel();
-		CWorld::Players[index].m_pPed->GetPosition() = pos;
+		CWorld::Players[index].m_pPed->SetPosition(pos);
 		CTheScripts::ClearSpaceForMissionEntity(pos, CWorld::Players[index].m_pPed);
 		CPlayerPed::ReactivatePlayerPed(index);
 		ScriptParams[0] = index;
@@ -5153,7 +5153,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CRestart::OverrideNextRestart(pos, *(float*)&ScriptParams[3]);
-		if (CWorld::Players[CWorld::PlayerInFocus].m_WBState != WBSTATE_PLAYING) //TODO: enum
+		if (CWorld::Players[CWorld::PlayerInFocus].m_WBState != WBSTATE_PLAYING)
 			printf("RESTART_CRITICAL_MISSION - Player state is not PLAYING\n");
 		CWorld::Players[CWorld::PlayerInFocus].PlayerFailedCriticalMission();
 		return 0;

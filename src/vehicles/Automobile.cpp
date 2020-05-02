@@ -1220,7 +1220,7 @@ CAutomobile::Teleport(CVector pos)
 {
 	CWorld::Remove(this);
 
-	GetPosition() = pos;
+	SetPosition(pos);
 	SetOrientation(0.0f, 0.0f, 0.0f);
 	SetMoveSpeed(0.0f, 0.0f, 0.0f);
 	SetTurnSpeed(0.0f, 0.0f, 0.0f);

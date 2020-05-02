@@ -104,7 +104,7 @@ void TankCheat()
 		if (tank != nil) {
 			CVector pos = ThePaths.m_pathNodes[node].pos;
 			pos.z += 4.0f;
-			tank->GetPosition() = pos;
+			tank->SetPosition(pos);
 			tank->SetOrientation(0.0f, 0.0f, DEGTORAD(200.0f));
 
 			tank->SetStatus(STATUS_ABANDONED);

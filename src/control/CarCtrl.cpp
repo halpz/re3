@@ -461,7 +461,7 @@ CCarCtrl::GenerateOneRandomCar()
 		return;
 	}
 	finalPosition.z = groundZ + pCar->GetHeightAboveRoad();
-	pCar->GetPosition() = finalPosition;
+	pCar->SetPosition(finalPosition);
 	pCar->SetMoveSpeed(directionIncludingCurve / GAME_SPEED_TO_CARAI_SPEED);
 	CVector2D speedDifferenceWithTarget = (CVector2D)pCar->GetMoveSpeed() - vecPlayerSpeed;
 	CVector2D distanceToTarget = positionIncludingCurve - vecTargetPos;
@@ -1964,9 +1964,8 @@ void CCarCtrl::DragCarToPoint(CVehicle* pVehicle, CVector* pPoint)
 	pVehicle->GetRight() = CVector(posTarget.y - midPos.y, -(posTarget.x - midPos.x), 0.0f) / 3;
 	pVehicle->GetForward() = CVector(-cosZ * pVehicle->GetRight().y, cosZ * pVehicle->GetRight().x, sinZ);
 	pVehicle->GetUp() = CrossProduct(pVehicle->GetRight(), pVehicle->GetForward());
-	pVehicle->GetPosition() = (CVector(midPos.x, midPos.y, actualBehindZ)
-		+ CVector(posTarget.x, posTarget.y, actualAheadZ)) / 2;
-	pVehicle->GetPosition().z += pVehicle->GetHeightAboveRoad();
+	pVehicle->SetPosition((CVector(midPos.x, midPos.y, actualBehindZ) + CVector(posTarget.x, posTarget.y, actualAheadZ)) / 2);
+	pVehicle->GetMatrix().GetPosition().z += pVehicle->GetHeightAboveRoad();
 }
 
 float CCarCtrl::FindSpeedMultiplier(float angleChange, float minAngle, float maxAngle, float coef)
@@ -2647,7 +2646,7 @@ bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 mi, CVector vecPos)
 		return nil;
 	CAutomobile* pVehicle = new CAutomobile(mi, RANDOM_VEHICLE);
 	pVehicle->AutoPilot.m_vecDestinationCoors = vecPos;
-	pVehicle->GetPosition() = spawnPos;
+	pVehicle->SetPosition(spawnPos);
 	pVehicle->AutoPilot.m_nCarMission = (JoinCarWithRoadSystemGotoCoors(pVehicle, vecPos, false)) ? MISSION_GOTOCOORDS_STRAIGHT : MISSION_GOTOCOORDS;
 	pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed = 25;
 	pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
@@ -2672,7 +2671,7 @@ bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 mi, CVector vecPos)
 		return false;
 	}
 	spawnPos.z = groundZ + pVehicle->GetDistanceFromCentreOfMassToBaseOfModel();
-	pVehicle->GetPosition() = spawnPos;
+	pVehicle->SetPosition(spawnPos);
 	pVehicle->SetMoveSpeed(CVector(0.0f, 0.0f, 0.0f));
 	pVehicle->SetStatus(STATUS_PHYSICS);
 	switch (mi){

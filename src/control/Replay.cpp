@@ -1020,7 +1020,7 @@ void CReplay::ProcessReplayCamera(void)
 	switch (CameraMode) {
 	case REPLAYCAMMODE_TOPDOWN:
 	{
-		TheCamera.GetPosition() = CVector(CameraFocusX, CameraFocusY, CameraFocusZ + 15.0f);
+		TheCamera.SetPosition(CameraFocusX, CameraFocusY, CameraFocusZ + 15.0f);
 		TheCamera.GetForward() = CVector(0.0f, 0.0f, -1.0f);
 		TheCamera.GetUp() = CVector(0.0f, 1.0f, 0.0f);
 		TheCamera.GetRight() = CVector(1.0f, 0.0f, 0.0f);
@@ -1539,7 +1539,7 @@ void CReplay::ProcessLookAroundCam(void)
 	TheCamera.GetForward() = forward;
 	TheCamera.GetUp() = up;
 	TheCamera.GetRight() = right;
-	TheCamera.GetPosition() = camera_pt;
+	TheCamera.SetPosition(camera_pt);
 	RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
 	pm->pos = *(RwV3d*)&TheCamera.GetPosition();
 	pm->at = *(RwV3d*)&TheCamera.GetForward();

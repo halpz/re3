@@ -279,7 +279,7 @@ void CRecordDataForChase::SaveOrRetrieveCarPositions(void)
 		}
 		if (CPad::GetPad(0)->GetLeftShockJustDown() && CPad::GetPad(0)->GetRightShockJustDown()) {
 			if (!CPad::GetPad(0)->GetRightShockJustDown()) {
-				pChaseCars[CurrentCar]->GetPosition() = NewCoorsForRecordedCars[PositionChanges].pos;
+				pChaseCars[CurrentCar]->SetPosition(NewCoorsForRecordedCars[PositionChanges].pos);
 				pChaseCars[CurrentCar]->SetMoveSpeed(0.0f, 0.0f, 0.0f);
 				pChaseCars[CurrentCar]->GetMatrix().SetRotateZOnly(DEGTORAD(NewCoorsForRecordedCars[PositionChanges].angle));
 				++PositionChanges;
@@ -311,12 +311,12 @@ void CRecordDataForChase::SaveOrRetrieveCarPositions(void)
 				pChaseCars[i]->GetRight() += (tmp.GetRight() - pChaseCars[i]->GetRight()) * dp;
 				pChaseCars[i]->GetForward() += (tmp.GetForward() - pChaseCars[i]->GetForward()) * dp;
 				pChaseCars[i]->GetUp() += (tmp.GetUp() - pChaseCars[i]->GetUp()) * dp;
-				pChaseCars[i]->GetPosition() += (tmp.GetPosition() - pChaseCars[i]->GetPosition()) * dp;
+				pChaseCars[i]->GetMatrix().GetPosition() += (tmp.GetPosition() - pChaseCars[i]->GetPosition()) * dp;
 			}
 			else{
 				RestoreInfoForCar(pChaseCars[i], &pBaseMemForCar[i][CHASE_SCENE_FRAMES_IN_RECORDING - 1], true);
 				if (i == 0)
-					pChaseCars[i]->GetPosition().z += 0.2f;
+					pChaseCars[i]->GetMatrix().GetPosition().z += 0.2f;
 			}
 			pChaseCars[i]->GetMatrix().UpdateRW();
 			pChaseCars[i]->UpdateRwFrame();
@@ -407,7 +407,7 @@ void CRecordDataForChase::GiveUsACar(int32 mi, CVector pos, float angle, CAutomo
 	if (!CStreaming::HasModelLoaded(mi))
 		return;
 	CAutomobile* pCar = new CAutomobile(mi, MISSION_VEHICLE);
-	pCar->GetPosition() = pos;
+	pCar->SetPosition(pos);
 	pCar->SetStatus(STATUS_PLAYER_PLAYBACKFROMBUFFER);
 	pCar->GetMatrix().SetRotateZOnly(DEGTORAD(angle));
 	pCar->pDriver = nil;

@@ -39,7 +39,7 @@ public:
 
 	static void InitPerFrame(void);
 	static void AddLight(uint8 type, CVector coors, CVector dir, float radius, float red, float green, float blue, uint8 fogType, bool castExtraShadows);
-	static float GenerateLightsAffectingObject(CVector *objCoors);
+	static float GenerateLightsAffectingObject(Const CVector *objCoors);
 	static void RemoveLightsAffectingObject(void);
 	static void RenderFogEffect(void);
 };

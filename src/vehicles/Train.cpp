@@ -161,7 +161,7 @@ CTrain::ProcessControl(void)
 	CVector posFront = (1.0f - f)*trackNodes[curTrackNodeFront].p + f*trackNodes[nextTrackNodeFront].p;
 
 	// Now set matrix
-	GetPosition() = (posRear + posFront)/2.0f;
+	SetPosition((posRear + posFront)/2.0f);
 	CVector fwd = posFront - posRear;
 	fwd.Normalise();
 	CVector right = CrossProduct(fwd, CVector(0.0f, 0.0f, 1.0f));

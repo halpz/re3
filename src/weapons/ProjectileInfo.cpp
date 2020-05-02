@@ -245,7 +245,7 @@ CProjectileInfo::IsProjectileInRange(float x1, float x2, float y1, float y2, flo
 	for (int i = 0; i < ARRAY_SIZE(ms_apProjectile); i++) {
 		if (gaProjectileInfo[i].m_bInUse) {
 			if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER || gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_MOLOTOV || gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_GRENADE) {
-				CVector &pos = ms_apProjectile[i]->GetPosition();
+				const CVector &pos = ms_apProjectile[i]->GetPosition();
 				if (pos.x >= x1 && pos.x <= x2 && pos.y >= y1 && pos.y <= y2 && pos.z >= z1 && pos.z <= z2) {
 					result = true;
 					if (remove) {

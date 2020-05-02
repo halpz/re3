@@ -659,7 +659,7 @@ CWorld::GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bo
 }
 
 void
-CWorld::FindObjectsInRangeSectorList(CPtrList &list, CVector &centre, float radius, bool ignoreZ, short *nextObject,
+CWorld::FindObjectsInRangeSectorList(CPtrList &list, Const CVector &centre, float radius, bool ignoreZ, short *nextObject,
                                      short lastObject, CEntity **objects)
 {
 	float radiusSqr = radius * radius;
@@ -685,7 +685,7 @@ CWorld::FindObjectsInRangeSectorList(CPtrList &list, CVector &centre, float radi
 }
 
 void
-CWorld::FindObjectsInRange(CVector &centre, float radius, bool ignoreZ, short *nextObject, short lastObject,
+CWorld::FindObjectsInRange(Const CVector &centre, float radius, bool ignoreZ, short *nextObject, short lastObject,
                            CEntity **objects, bool checkBuildings, bool checkVehicles, bool checkPeds,
                            bool checkObjects, bool checkDummies)
 {

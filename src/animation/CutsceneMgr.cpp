@@ -267,11 +267,11 @@ CCutsceneMgr::SetupCutsceneToStart(void)
 		assert(RwObjectGetType(ms_pCutsceneObjects[i]->m_rwObject) == rpCLUMP);
 		if (CAnimBlendAssociation *pAnimBlendAssoc = RpAnimBlendClumpGetFirstAssociation((RpClump*)ms_pCutsceneObjects[i]->m_rwObject)) {
 			assert(pAnimBlendAssoc->hierarchy->sequences[0].HasTranslation());
-			ms_pCutsceneObjects[i]->GetPosition() = ms_cutsceneOffset + ((KeyFrameTrans*)pAnimBlendAssoc->hierarchy->sequences[0].GetKeyFrame(0))->translation;
+			ms_pCutsceneObjects[i]->SetPosition(ms_cutsceneOffset + ((KeyFrameTrans*)pAnimBlendAssoc->hierarchy->sequences[0].GetKeyFrame(0))->translation);
 			CWorld::Add(ms_pCutsceneObjects[i]);
 			pAnimBlendAssoc->SetRun();
 		} else {
-			ms_pCutsceneObjects[i]->GetPosition() = ms_cutsceneOffset;
+			ms_pCutsceneObjects[i]->SetPosition(ms_cutsceneOffset);
 		}
 	}
 

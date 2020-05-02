@@ -232,8 +232,8 @@ public:
 	static bool CameraShouldBeOutside(void);
 	static void GivePlayerDetonator(void);
 	static void PlayerArrestedOrDied(void);
-	static bool IsPointWithinHideOutGarage(CVector&);
-	static bool IsPointWithinAnyGarage(CVector&);
+	static bool IsPointWithinHideOutGarage(Const CVector&);
+	static bool IsPointWithinAnyGarage(Const CVector&);
 	static void SetAllDoorsBackToOriginalHeight(void);
 	static void Save(uint8* buf, uint32* size);
 	static void Load(uint8* buf, uint32 size);
