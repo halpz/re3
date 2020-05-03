@@ -273,8 +273,12 @@ CTrafficLights::ShouldCarStopForLight(CVehicle *vehicle, bool alwaysStop)
 bool
 CTrafficLights::ShouldCarStopForBridge(CVehicle *vehicle)
 {
+#ifdef GTA_BRIDGE
 	return ThePaths.m_carPathLinks[vehicle->AutoPilot.m_nNextPathNodeInfo].bBridgeLights &&
 		!ThePaths.m_carPathLinks[vehicle->AutoPilot.m_nCurrentPathNodeInfo].bBridgeLights;
+#else
+	return false;
+#endif
 }
 
 int
