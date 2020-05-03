@@ -12,7 +12,7 @@ enum eCopType
 class CCopPed : public CPed
 {
 public:
-	int16 m_wRoadblockNode;
+	int16 m_nRoadblockNode;
 	float m_fDistanceToTarget;
 	bool m_bIsInPursuit;
 	bool m_bIsDisabledCop;

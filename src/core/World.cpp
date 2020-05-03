@@ -1618,7 +1618,7 @@ CWorld::RemoveFallenPeds(void)
 				if(ped->CharCreatedBy != RANDOM_CHAR || ped->IsPlayer()) {
 					int closestNode = ThePaths.FindNodeClosestToCoors(ped->GetPosition(), PATH_PED,
 					                                                  999999.9f, false, false);
-					CVector newPos = ThePaths.m_pathNodes[closestNode].pos;
+					CVector newPos = ThePaths.m_pathNodes[closestNode].GetPosition();
 					newPos.z += 2.0f;
 					ped->Teleport(newPos);
 					ped->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
@@ -1642,7 +1642,7 @@ CWorld::RemoveFallenCars(void)
 				   (veh->pDriver && veh->pDriver->IsPlayer())) {
 					int closestNode = ThePaths.FindNodeClosestToCoors(veh->GetPosition(), PATH_CAR,
 					                                                  999999.9f, false, false);
-					CVector newPos = ThePaths.m_pathNodes[closestNode].pos;
+					CVector newPos = ThePaths.m_pathNodes[closestNode].GetPosition();
 					newPos.z += 3.0f;
 					veh->Teleport(newPos);
 					veh->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);

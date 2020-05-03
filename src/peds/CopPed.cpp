@@ -73,7 +73,7 @@ CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 
 	// VC also initializes in here, but as nil
 #ifdef FIX_BUGS
-	m_wRoadblockNode = -1;
+	m_nRoadblockNode = -1;
 #endif
 }
 
@@ -305,9 +305,9 @@ CCopPed::CopAI(void)
 			m_bZoneDisabled = true;
 			m_bIsDisabledCop = true;
 #ifdef FIX_BUGS
-			m_wRoadblockNode = -1;
+			m_nRoadblockNode = -1;
 #else
-			m_wRoadblockNode = 0;
+			m_nRoadblockNode = 0;
 #endif
 			bKindaStayInSamePlace = true;
 			bIsRunning = false;
@@ -424,9 +424,15 @@ CCopPed::CopAI(void)
 						// VC checks for != nil compared to buggy behaviour of III. I check for != -1 here.
 #ifdef VC_PED_PORTS
 						float dotProd;
-						if (m_wRoadblockNode != -1) {
-							CTreadable *roadBlockRoad = ThePaths.m_mapObjects[CRoadBlocks::RoadBlockObjects[m_wRoadblockNode]];
+						if (m_nRoadblockNode != -1) {
+#ifndef MIAMI
+							CTreadable *roadBlockRoad = ThePaths.m_mapObjects[CRoadBlocks::RoadBlockObjects[m_nRoadblockNode]];
 							dotProd = DotProduct2D(playerOrHisVeh->GetPosition() - roadBlockRoad->GetPosition(), GetPosition() - roadBlockRoad->GetPosition());
+#else
+							// TODO: check this, i'm only getting this compile here....
+							CPathNode *roadBlockNode = &ThePaths.m_pathNodes[CRoadBlocks::RoadBlockNodes[m_nRoadblockNode]];
+							dotProd = DotProduct2D(playerOrHisVeh->GetPosition() - roadBlockNode->GetPosition(), GetPosition() - roadBlockNode->GetPosition());
+#endif
 						} else
 							dotProd = -1.0f;
 
@@ -437,10 +443,10 @@ CCopPed::CopAI(void)
 						float copRoadDotProd, targetRoadDotProd;
 #else
 						float copRoadDotProd = 1.0f, targetRoadDotProd = 1.0f;
-						if (m_wRoadblockNode != -1)
+						if (m_nRoadblockNode != -1)
 #endif
 						{
-							CTreadable* roadBlockRoad = ThePaths.m_mapObjects[CRoadBlocks::RoadBlockObjects[m_wRoadblockNode]];
+							CTreadable* roadBlockRoad = ThePaths.m_mapObjects[CRoadBlocks::RoadBlockObjects[m_nRoadblockNode]];
 							CVector2D roadFwd = roadBlockRoad->GetForward();
 							copRoadDotProd = DotProduct2D(GetPosition() - roadBlockRoad->GetPosition(), roadFwd);
 							targetRoadDotProd = DotProduct2D(playerOrHisVeh->GetPosition() - roadBlockRoad->GetPosition(), roadFwd);

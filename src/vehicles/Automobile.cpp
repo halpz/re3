@@ -4146,7 +4146,7 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 	if(AutoPilot.m_nCurrentRouteNode && AutoPilot.m_nNextRouteNode){
 		CPathNode *curnode = &ThePaths.m_pathNodes[AutoPilot.m_nCurrentRouteNode];
 		for(i = 0; i < curnode->numLinks; i++)
-			if(ThePaths.m_connections[curnode->firstLink + i] == AutoPilot.m_nNextRouteNode)
+			if(ThePaths.ConnectedNode(curnode->firstLink + i) == AutoPilot.m_nNextRouteNode)
 				break;
 		if(i < curnode->numLinks &&
 		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)
@@ -4156,7 +4156,7 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 	if(AutoPilot.m_nCurrentRouteNode && AutoPilot.m_nPrevRouteNode){
 		CPathNode *curnode = &ThePaths.m_pathNodes[AutoPilot.m_nCurrentRouteNode];
 		for(i = 0; i < curnode->numLinks; i++)
-			if(ThePaths.m_connections[curnode->firstLink + i] == AutoPilot.m_nPrevRouteNode)
+			if(ThePaths.ConnectedNode(curnode->firstLink + i) == AutoPilot.m_nPrevRouteNode)
 				break;
 		if(i < curnode->numLinks &&
 		   ThePaths.m_carPathLinks[ThePaths.m_carPathConnections[curnode->firstLink + i]].trafficLightType & 3)

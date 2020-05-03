@@ -15,19 +15,40 @@
 #include "CarCtrl.h"
 #include "General.h"
 
+#ifndef MIAMI
+#define ROADBLOCKDIST (80.0f)
+#else
+#define ROADBLOCKDIST (90.0f)
+#endif
+
 int16 CRoadBlocks::NumRoadBlocks;
+#ifndef MIAMI
 int16 CRoadBlocks::RoadBlockObjects[NUMROADBLOCKS];
+#else
+int16 CRoadBlocks::RoadBlockNodes[NUMROADBLOCKS];
+#endif
 bool CRoadBlocks::InOrOut[NUMROADBLOCKS];
 
+//--MIAMI: TODO: script roadblocks
 void
 CRoadBlocks::Init(void)
 {
+	int i;
 	NumRoadBlocks = 0;
-	for (int objId = 0; objId < ThePaths.m_numMapObjects; objId++) {
-		if (ThePaths.m_objectFlags[objId] & UseInRoadBlock) {
+#ifndef MIAMI
+	for (i = 0; i < ThePaths.m_numMapObjects; i++) {
+		if (ThePaths.m_objectFlags[i] & UseInRoadBlock) {
+#else
+	for(i = 0; i < ThePaths.m_numCarPathNodes; i++){
+		if(ThePaths.m_pathNodes[i].bUseInRoadBlock && ThePaths.m_pathNodes[i].numLinks == 2){
+#endif
 			if (NumRoadBlocks < NUMROADBLOCKS) {
 				InOrOut[NumRoadBlocks] = true;
-				RoadBlockObjects[NumRoadBlocks] = objId;
+#ifndef MIAMI
+				RoadBlockObjects[NumRoadBlocks] = i;
+#else
+				RoadBlockNodes[NumRoadBlocks] = i;
+#endif
 				NumRoadBlocks++;
 			} else {
 #ifndef MASTER
@@ -38,7 +59,6 @@ CRoadBlocks::Init(void)
 			}
 		}
 	}
-
 }
 
 void
@@ -85,7 +105,7 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 		pCopPed->SetIdle();
 		pCopPed->bKindaStayInSamePlace = true;
 		pCopPed->bNotAllowedToDuck = false;
-		pCopPed->m_wRoadblockNode = roadBlockNode;
+		pCopPed->m_nRoadblockNode = roadBlockNode;
 		pCopPed->bCrouchWhenShooting = roadBlockType != 2;
 		if (pEntityToAttack) {
 			pCopPed->m_pPointGunAt = pEntityToAttack;
@@ -107,18 +127,20 @@ CRoadBlocks::GenerateRoadBlocks(void)
 	uint32 frame = CTimer::GetFrameCounter() & 0xF;
 	int16 nRoadblockNode = (int16)(NUMROADBLOCKS * frame) / 16;
 	const int16 maxRoadBlocks = (int16)(NUMROADBLOCKS * (frame + 1)) / 16;
-	int16 numRoadBlocks = CRoadBlocks::NumRoadBlocks;
-	if (CRoadBlocks::NumRoadBlocks >= maxRoadBlocks)
-		numRoadBlocks = maxRoadBlocks;
-	for (; nRoadblockNode < numRoadBlocks; nRoadblockNode++) {
-		CTreadable *mapObject = ThePaths.m_mapObjects[CRoadBlocks::RoadBlockObjects[nRoadblockNode]];
+	for (; nRoadblockNode < Min(NumRoadBlocks, maxRoadBlocks); nRoadblockNode++) {
+#ifndef MIAMI
+		CTreadable *mapObject = ThePaths.m_mapObjects[RoadBlockObjects[nRoadblockNode]];
 		CVector2D vecDistance = FindPlayerCoors() - mapObject->GetPosition();
-		if (vecDistance.x > -80.0f && vecDistance.x < 80.0f &&
-			vecDistance.y > -80.0f && vecDistance.y < 80.0f &&
-			vecDistance.Magnitude() < 80.0f) {
-			if (!CRoadBlocks::InOrOut[nRoadblockNode]) {
-				CRoadBlocks::InOrOut[nRoadblockNode] = true;
+#else
+		CVector2D vecDistance = FindPlayerCoors() - ThePaths.m_pathNodes[nRoadblockNode].GetPosition();
+#endif
+		if (vecDistance.x > -ROADBLOCKDIST && vecDistance.x < ROADBLOCKDIST &&
+			vecDistance.y > -ROADBLOCKDIST && vecDistance.y < ROADBLOCKDIST &&
+			vecDistance.Magnitude() < ROADBLOCKDIST) {
+			if (!InOrOut[nRoadblockNode]) {
+				InOrOut[nRoadblockNode] = true;
 				if (FindPlayerVehicle() && (CGeneral::GetRandomNumber() & 0x7F) < FindPlayerPed()->m_pWanted->m_RoadblockDensity) {
+#ifndef MIAMI
 					CWanted *pPlayerWanted = FindPlayerPed()->m_pWanted;
 					float fMapObjectRadius = 2.0f * mapObject->GetColModel()->boundingBox.max.x;
 					int32 vehicleId = MI_POLICE;
@@ -146,7 +168,7 @@ CRoadBlocks::GenerateRoadBlocks(void)
 								nRoadblockType = !nRoadblockType;
 								offsetMatrix.SetRotateZ(((CGeneral::GetRandomNumber() & 0xFF) - 128.0f) * 0.003f - HALFPI);
 							}
-							if (ThePaths.m_objectFlags[CRoadBlocks::RoadBlockObjects[nRoadblockNode]] & ObjectEastWest)
+							if (ThePaths.m_objectFlags[RoadBlockObjects[nRoadblockNode]] & ObjectEastWest)
 								offsetMatrix.GetPosition() = CVector(0.0f, -fOffset, 0.6f);
 							else
 								offsetMatrix.GetPosition() = CVector(-fOffset, 0.0f, 0.6f);
@@ -188,10 +210,13 @@ CRoadBlocks::GenerateRoadBlocks(void)
 							}
 						}
 					}
+#endif
 				}
 			}
 		} else {
-			CRoadBlocks::InOrOut[nRoadblockNode] = false;
+			InOrOut[nRoadblockNode] = false;
 		}
 	}
+
+//--MIAMI: TODO script roadblocks
 }

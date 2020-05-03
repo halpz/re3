@@ -106,7 +106,7 @@ void TankCheat()
 		CAutomobile *tank = new CAutomobile(MI_RHINO, MISSION_VEHICLE);
 #endif
 		if (tank != nil) {
-			CVector pos = ThePaths.m_pathNodes[node].pos;
+			CVector pos = ThePaths.m_pathNodes[node].GetPosition();
 			pos.z += 4.0f;
 			tank->SetPosition(pos);
 			tank->SetOrientation(0.0f, 0.0f, DEGTORAD(200.0f));

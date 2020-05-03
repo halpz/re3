@@ -5559,7 +5559,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CPathNode* pNode = &ThePaths.m_pathNodes[ThePaths.FindNodeClosestToCoors(pos, 1, 999999.9f)];
-		*(CVector*)&ScriptParams[0] = pNode->pos;
+		*(CVector*)&ScriptParams[0] = pNode->GetPosition();
 		StoreParameters(&m_nIp, 3);
 		return 0;
 	}
@@ -5570,7 +5570,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CPathNode* pNode = &ThePaths.m_pathNodes[ThePaths.FindNodeClosestToCoors(pos, 0, 999999.9f)];
-		*(CVector*)&ScriptParams[0] = pNode->pos;
+		*(CVector*)&ScriptParams[0] = pNode->GetPosition();
 		StoreParameters(&m_nIp, 3);
 		return 0;
 	}
@@ -8247,7 +8247,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		int node = ThePaths.FindNodeClosestToCoors(pos, 0, 999999.9f, true, true);
-		*(CVector*)&ScriptParams[0] = ThePaths.m_pathNodes[node].pos;
+		*(CVector*)&ScriptParams[0] = ThePaths.m_pathNodes[node].GetPosition();
 		*(float*)&ScriptParams[3] = ThePaths.FindNodeOrientationForCarPlacement(node);
 		StoreParameters(&m_nIp, 4);
 		return 0;
@@ -9329,7 +9329,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		float destY = *(float*)&ScriptParams[4];
 		int32 nid = ThePaths.FindNodeClosestToCoors(pos, 0, 999999.9f, true, true);
 		CPathNode* pNode = &ThePaths.m_pathNodes[nid];
-		*(CVector*)&ScriptParams[0] = pNode->pos;
+		*(CVector*)&ScriptParams[0] = pNode->GetPosition();
 		*(float*)&ScriptParams[3] = ThePaths.FindNodeOrientationForCarPlacementFacingDestination(nid, destX, destY, true);
 		StoreParameters(&m_nIp, 4);
 		return 0;
@@ -9344,7 +9344,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		float destY = *(float*)&ScriptParams[4];
 		int32 nid = ThePaths.FindNodeClosestToCoors(pos, 0, 999999.9f, true, true);
 		CPathNode* pNode = &ThePaths.m_pathNodes[nid];
-		*(CVector*)&ScriptParams[0] = pNode->pos;
+		*(CVector*)&ScriptParams[0] = pNode->GetPosition();
 		*(float*)&ScriptParams[3] = ThePaths.FindNodeOrientationForCarPlacementFacingDestination(nid, destX, destY, false);
 		StoreParameters(&m_nIp, 4);
 		return 0;
