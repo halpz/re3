@@ -157,6 +157,7 @@ enum Config {
 #ifndef MIAMI
 #define GTA_TRAIN	// This game has trains
 #define GTA_BRIDGE	// This game has the bridge
+#define GTA_ZONECULL	// This game culls by zones
 #endif
 
 // This enables things from the PS2 version on PC
