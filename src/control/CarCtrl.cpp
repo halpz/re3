@@ -422,8 +422,11 @@ CCarCtrl::GenerateOneRandomCar()
 #ifdef FIX_BUGS
 	/* Casting timer to float is very unwanted. In this case it's not awful */
 	/* but in CAutoPilot::ModifySpeed it can even cause crashes (see SilentPatch). */
+
+	/* Second fix: adding 0.5f is a mistake. It should be between 0 and 1. It was fixed in SA.*/
+	/* It is also correct in CAutoPilot::ModifySpeed. */
 	pCar->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
-		(uint32)((0.5f + positionBetweenNodes) * pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve);
+		(uint32)(positionBetweenNodes * pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve);
 #else
 	pCar->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
 		(0.5f + positionBetweenNodes) * pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve;
