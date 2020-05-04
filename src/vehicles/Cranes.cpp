@@ -443,7 +443,9 @@ bool CCrane::DoesCranePickUpThisCarType(uint32 mi)
 	if (m_bIsCrusher) {
 		return mi != MI_FIRETRUCK &&
 			mi != MI_TRASH &&
-#ifndef FIX_BUGS // why
+#ifdef FIX_BUGS
+			mi != MI_COACH &&
+#else
 			mi != MI_BLISTA &&
 #endif
 			mi != MI_SECURICA &&
