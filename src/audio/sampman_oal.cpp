@@ -54,7 +54,7 @@ ALuint       ALEffect = AL_EFFECT_NULL;
 ALuint       ALEffectSlot = AL_EFFECTSLOT_NULL;
 struct
 {
-	std::string id;
+	char id[256];
 	char name[256];
 	int sources;
 }providers[MAXPROVIDERS];
@@ -137,7 +137,7 @@ add_providers()
 		{
 			if ( n < MAXPROVIDERS )
 			{
-				providers[n].id=std::string(pDeviceList->GetDeviceName(i), strlen(pDeviceList->GetDeviceName(i)));
+				strcpy(providers[n].id, pDeviceList->GetDeviceName(i));
 				strncpy(providers[n].name, pDeviceList->GetDeviceName(i), sizeof(providers[n].name));
 				providers[n].sources = pDeviceList->GetMaxNumSources(i);
 				SampleManager.Set3DProviderName(n, providers[n].name);
@@ -152,7 +152,7 @@ add_providers()
 			{
 				if ( n < MAXPROVIDERS )
 				{
-					providers[n].id=std::string(pDeviceList->GetDeviceName(i), strlen(pDeviceList->GetDeviceName(i)));
+					strcpy(providers[n].id, pDeviceList->GetDeviceName(i));
 					strncpy(providers[n].name, pDeviceList->GetDeviceName(i), sizeof(providers[n].name));
 					strcat(providers[n].name, " EAX");
 					providers[n].sources = pDeviceList->GetMaxNumSources(i);
@@ -162,7 +162,7 @@ add_providers()
 				
 				if ( n < MAXPROVIDERS )
 				{
-					providers[n].id=std::string(pDeviceList->GetDeviceName(i), strlen(pDeviceList->GetDeviceName(i)));
+					strcpy(providers[n].id, pDeviceList->GetDeviceName(i));
 					strncpy(providers[n].name, pDeviceList->GetDeviceName(i), sizeof(providers[n].name));
 					strcat(providers[n].name, " EAX3");
 					providers[n].sources = pDeviceList->GetMaxNumSources(i);
@@ -263,7 +263,7 @@ set_new_provider(int index)
 		
 		ALCint attr[] = {ALC_FREQUENCY,MAX_FREQ,0};
 		
-		ALDevice  = alcOpenDevice(providers[index].id.c_str());
+		ALDevice  = alcOpenDevice(providers[index].id);
 		ASSERT(ALDevice != NULL);
 		
 		ALContext = alcCreateContext(ALDevice, attr);
