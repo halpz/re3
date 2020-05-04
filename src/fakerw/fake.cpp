@@ -450,6 +450,7 @@ RwBool RwIm3DRenderPrimitive(RwPrimitiveType primType);
 RwBool RwRenderStateSet(RwRenderState state, void *value)
 {
 	uint32 uival = (uintptr)value;
+	uint32 fog;
 	switch(state){
 	case rwRENDERSTATETEXTURERASTER: SetRenderState(TEXTURERASTER, uival); return true;
 	case rwRENDERSTATETEXTUREADDRESS: SetRenderState(TEXTUREADDRESS, uival); return true;
@@ -465,7 +466,14 @@ RwBool RwRenderStateSet(RwRenderState state, void *value)
 	case rwRENDERSTATEVERTEXALPHAENABLE: SetRenderState(VERTEXALPHA, uival); return true;
 	case rwRENDERSTATEBORDERCOLOR: return true;
 	case rwRENDERSTATEFOGENABLE: SetRenderState(FOGENABLE, uival); return true;
-	case rwRENDERSTATEFOGCOLOR: SetRenderState(FOGCOLOR, uival); return true;
+	case rwRENDERSTATEFOGCOLOR:
+		// have to swap R and B here
+		fog = (uival>>16)&0xFF;
+		fog |= (uival&0xFF)<<16;
+		fog |= uival&0xFF00;
+		fog |= uival&0xFF000000;
+		SetRenderState(FOGCOLOR, fog);
+		return true;
 	case rwRENDERSTATEFOGTYPE: return true;
 	case rwRENDERSTATEFOGDENSITY: return true;
 	case rwRENDERSTATEFOGTABLE: return true;
