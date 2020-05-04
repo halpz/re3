@@ -26,11 +26,11 @@
 #include "Frontend.h"
 #include "Timer.h"
 
-//todo max channals
-//todo queue
-//todo loop count
-//todo mp3/wav stream
-//todo mp3 player
+//TODO: fix eax3 reverb
+//TODO: max channals
+//TODO: loop count
+//TODO: mp3/wav stream
+//TODO: mp3 player
 
 #pragma comment( lib, "OpenAL32.lib" )
 
