@@ -267,6 +267,7 @@ void
 CPhysical::AddCollisionRecord_Treadable(CEntity *ent)
 {
 	if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable()){
+#ifndef MIAMI
 		CTreadable *t = (CTreadable*)ent;
 		if(t->m_nodeIndices[PATH_PED][0] >= 0 ||
 		   t->m_nodeIndices[PATH_PED][1] >= 0 ||
@@ -278,6 +279,7 @@ CPhysical::AddCollisionRecord_Treadable(CEntity *ent)
 		   t->m_nodeIndices[PATH_CAR][2] >= 0 ||
 		   t->m_nodeIndices[PATH_CAR][3] >= 0)
 			m_treadable[PATH_CAR] = t;
+#endif
 	}
 }
 

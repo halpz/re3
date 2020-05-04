@@ -4504,7 +4504,7 @@ CPed::RestorePreviousState(void)
 				bIsRunning = false;
 				if (!bFindNewNodeAfterStateRestore) {
 					if (m_pNextPathNode) {
-						CVector diff = m_pNextPathNode->pos - GetPosition();
+						CVector diff = m_pNextPathNode->GetPosition() - GetPosition();
 						if (diff.MagnitudeSqr() < sq(7.0f)) {
 							SetMoveState(PEDMOVE_WALK);
 							break;
@@ -6925,10 +6925,10 @@ SelectClosestNodeForSeek(CPed *ped, CPathNode *node, CVector2D closeDist, CVecto
 {
 	for (int i = 0; i < node->numLinks; i++) {
 
-		CPathNode *testNode = &ThePaths.m_pathNodes[ThePaths.m_connections[i + node->firstLink]];
+		CPathNode *testNode = &ThePaths.m_pathNodes[ThePaths.ConnectedNode(i + node->firstLink)];
 
 		if (testNode && testNode != closeNode && testNode != closeNode2) {
-			CVector2D posDiff(ped->m_vecSeekPos - testNode->pos);
+			CVector2D posDiff(ped->m_vecSeekPos - testNode->GetPosition());
 			float dist = posDiff.MagnitudeSqr();
 
 			if (farDist.MagnitudeSqr() > dist) {
@@ -6969,16 +6969,16 @@ CPed::FindBestCoordsFromNodes(CVector unused, CVector *bestCoords)
 	CVector2D seekPosDist (m_vecSeekPos - ourPos);
 
 	CPathNode *closestNode = &ThePaths.m_pathNodes[closestNodeId];
-	CVector2D closeDist(m_vecSeekPos - closestNode->pos);
+	CVector2D closeDist(m_vecSeekPos - closestNode->GetPosition());
 
 	SelectClosestNodeForSeek(this, closestNode, closeDist, seekPosDist, closestNode, nil);
 
 	// Above function decided that going to the next node is more logical than seeking the object.
 	if (m_pNextPathNode) {
 
-		CVector pathToNextNode = m_pNextPathNode->pos - ourPos;
+		CVector pathToNextNode = m_pNextPathNode->GetPosition() - ourPos;
 		if (pathToNextNode.MagnitudeSqr2D() < seekPosDist.MagnitudeSqr()) {
-			*bestCoords = m_pNextPathNode->pos;
+			*bestCoords = m_pNextPathNode->GetPosition();
 			return true;
 		}
 		m_pNextPathNode = nil;
@@ -7671,7 +7671,7 @@ CPed::Flee(void)
 			}
 
 			if (m_pNextPathNode) {
-				m_vecSeekPos = m_pNextPathNode->pos;
+				m_vecSeekPos = m_pNextPathNode->GetPosition();
 				if (m_nMoveState == PEDMOVE_RUN)
 					bIsRunning = true;
 
@@ -9653,17 +9653,17 @@ CPed::ProcessControl(void)
 											if (m_nPedState == PED_WANDER_PATH) {
 												m_pNextPathNode = &ThePaths.m_pathNodes[closestNodeId];
 												angleToFace = CGeneral::GetRadianAngleBetweenPoints(
-													m_pNextPathNode->pos.x, m_pNextPathNode->pos.y,
+													m_pNextPathNode->GetX(), m_pNextPathNode->GetY(),
 													GetPosition().x, GetPosition().y);
 											} else {
-												if (ThePaths.m_pathNodes[closestNodeId].pos.x == 0.0f
-													|| ThePaths.m_pathNodes[closestNodeId].pos.y == 0.0f) {
+												if (ThePaths.m_pathNodes[closestNodeId].GetX() == 0.0f
+													|| ThePaths.m_pathNodes[closestNodeId].GetY() == 0.0f) {
 													posToHead = (3.0f * m_vecDamageNormal) + GetPosition();
 													posToHead.x += (CGeneral::GetRandomNumber() % 512) / 250.0f - 1.0f;
 													posToHead.y += (CGeneral::GetRandomNumber() % 512) / 250.0f - 1.0f;
 												} else {
-													posToHead.x = ThePaths.m_pathNodes[closestNodeId].pos.x;
-													posToHead.y = ThePaths.m_pathNodes[closestNodeId].pos.y;
+													posToHead.x = ThePaths.m_pathNodes[closestNodeId].GetX();
+													posToHead.y = ThePaths.m_pathNodes[closestNodeId].GetY();
 												}
 												angleToFace = CGeneral::GetRadianAngleBetweenPoints(
 													posToHead.x, posToHead.y,
@@ -9674,12 +9674,12 @@ CPed::ProcessControl(void)
 											}
 										} else {
 											angleToFace = CGeneral::GetRadianAngleBetweenPoints(
-												ThePaths.m_pathNodes[closestNodeId].pos.x,
-												ThePaths.m_pathNodes[closestNodeId].pos.y,
+												ThePaths.m_pathNodes[closestNodeId].GetX(),
+												ThePaths.m_pathNodes[closestNodeId].GetY(),
 												GetPosition().x,
 												GetPosition().y);
 
-											CVector2D distToNode = ThePaths.m_pathNodes[closestNodeId].pos - GetPosition();
+											CVector2D distToNode = ThePaths.m_pathNodes[closestNodeId].GetPosition() - GetPosition();
 											CVector2D distToSeekPos = m_vecSeekPos - GetPosition();
 
 											if (DotProduct2D(distToNode, distToSeekPos) < 0.0f) {
@@ -12904,7 +12904,7 @@ CPed::ProcessObjective(void)
 								if (closestNode >= 0) {
 									int16 colliding;
 									CWorld::FindObjectsKindaColliding(
-										ThePaths.m_pathNodes[closestNode].pos, 10.0f, true, &colliding, 2, nil, false, true, true, false, false);
+										ThePaths.m_pathNodes[closestNode].GetPosition(), 10.0f, true, &colliding, 2, nil, false, true, true, false, false);
 									if (!colliding) {
 										CZoneInfo zoneInfo;
 										int chosenCarClass;
@@ -12912,7 +12912,7 @@ CPed::ProcessObjective(void)
 										int chosenModel = CCarCtrl::ChooseModel(&zoneInfo, &ourPos, &chosenCarClass);
 										CAutomobile *newVeh = new CAutomobile(chosenModel, RANDOM_VEHICLE);
 										if (newVeh) {
-											newVeh->GetPosition() = ThePaths.m_pathNodes[closestNode].pos;
+											newVeh->GetPosition() = ThePaths.m_pathNodes[closestNode].GetPosition();
 											newVeh->GetPosition().z += 4.0f;
 											newVeh->SetHeading(DEGTORAD(200.0f));
 											newVeh->SetStatus(STATUS_ABANDONED);
@@ -13112,7 +13112,7 @@ CPed::ProcessObjective(void)
 								FindBestCoordsFromNodes(m_vecSeekPos, &bestCoords);
 
 							if (m_pNextPathNode)
-								m_vecSeekPos = m_pNextPathNode->pos;
+								m_vecSeekPos = m_pNextPathNode->GetPosition();
 
 							SetSeek(m_vecSeekPos, m_distanceToCountSeekDone);
 						} else {
@@ -13666,7 +13666,7 @@ CPed::ProcessObjective(void)
 								FindBestCoordsFromNodes(m_vecSeekPos, &bestCoords);
 
 							if (m_pNextPathNode)
-								m_vecSeekPos = m_pNextPathNode->pos;
+								m_vecSeekPos = m_pNextPathNode->GetPosition();
 						}
 						SetSeek(m_vecSeekPos, m_distanceToCountSeekDone);
 					}
@@ -17324,7 +17324,7 @@ CPed::WanderPath(void)
 		if (m_nMoveState == PEDMOVE_STILL || m_nMoveState == PEDMOVE_NONE)
 			SetMoveState(PEDMOVE_WALK);
 	}
-	m_vecSeekPos = m_pNextPathNode->pos;
+	m_vecSeekPos = m_pNextPathNode->GetPosition();
 	m_vecSeekPos.z += 1.0f;
 
 	// Only returns true when ped is stuck(not stopped) I think, then we should assign new direction or wait state to him.

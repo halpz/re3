@@ -118,7 +118,7 @@ SpawnCar(int id)
 		if(CModelInfo::IsBoatModel(id))
 			v->SetPosition(TheCamera.GetPosition() + TheCamera.GetForward()*15.0f);
 		else
-			v->SetPosition(ThePaths.m_pathNodes[node].pos);
+			v->SetPosition(ThePaths.m_pathNodes[node].GetPosition());
 
 		v->GetMatrix().GetPosition().z += 4.0f;
 		v->SetOrientation(0.0f, 0.0f, 3.49f);

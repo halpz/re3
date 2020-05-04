@@ -150,12 +150,12 @@ CTrafficLights::ScanForLightsOnMap(void)
 
 			// Check cars
 			for(i = 0; i < ThePaths.m_numCarPathLinks; i++){
-				CVector2D dist = ThePaths.m_carPathLinks[i].pos - light->GetPosition();
+				CVector2D dist = ThePaths.m_carPathLinks[i].GetPosition() - light->GetPosition();
 				float dotY = Abs(DotProduct2D(dist, light->GetForward()));	// forward is direction of car light
 				float dotX = DotProduct2D(dist, light->GetRight());	// towards base of light
 				// it has to be on the correct side of the node and also not very far away
 				if(dotX < 0.0f && dotX > -15.0f && dotY < 3.0f){
-					float dz = ThePaths.m_pathNodes[ThePaths.m_carPathLinks[i].pathNodeIndex].pos.z -
+					float dz = ThePaths.m_pathNodes[ThePaths.m_carPathLinks[i].pathNodeIndex].GetZ() -
 						light->GetPosition().z;
 					if(dz < 15.0f){
 						ThePaths.m_carPathLinks[i].trafficLightType = FindTrafficLightType(light);
@@ -182,16 +182,16 @@ CTrafficLights::ScanForLightsOnMap(void)
 			// Check peds
 			for(i = ThePaths.m_numCarPathNodes; i < ThePaths.m_numPathNodes; i++){
 				float dist1, dist2;
-				dist1 = Abs(ThePaths.m_pathNodes[i].pos.x - light->GetPosition().x) +
-					Abs(ThePaths.m_pathNodes[i].pos.y - light->GetPosition().y);
+				dist1 = Abs(ThePaths.m_pathNodes[i].GetX() - light->GetPosition().x) +
+					Abs(ThePaths.m_pathNodes[i].GetY() - light->GetPosition().y);
 				if(dist1 < 50.0f){
 					for(l = 0; l < ThePaths.m_pathNodes[i].numLinks; l++){
 						j = ThePaths.m_pathNodes[i].firstLink + l;
-						if(ThePaths.m_connectionFlags[j].bCrossesRoad){
-							dist2 = Abs(ThePaths.m_pathNodes[j].pos.x - light->GetPosition().x) +
-								Abs(ThePaths.m_pathNodes[j].pos.y - light->GetPosition().y);
+						if(ThePaths.ConnectionCrossesRoad(j)){
+							dist2 = Abs(ThePaths.m_pathNodes[j].GetX() - light->GetPosition().x) +
+								Abs(ThePaths.m_pathNodes[j].GetY() - light->GetPosition().y);
 							if(dist1 < 15.0f || dist2 < 15.0f)
-								ThePaths.m_connectionFlags[j].bTrafficLight = true;
+								ThePaths.ConnectionSetTrafficLight(j);
 						}
 					}
 				}
@@ -213,8 +213,8 @@ CTrafficLights::ShouldCarStopForLight(CVehicle *vehicle, bool alwaysStop)
 			if(alwaysStop ||
 			   (type&~SOME_FLAG) == 1 && LightForCars1() != CAR_LIGHTS_GREEN ||
 			   (type&~SOME_FLAG) == 2 && LightForCars2() != CAR_LIGHTS_GREEN){
-				float dist = DotProduct2D(CVector2D(vehicle->GetPosition()) - ThePaths.m_carPathLinks[node].pos,
-						ThePaths.m_carPathLinks[node].dir);
+				float dist = DotProduct2D(CVector2D(vehicle->GetPosition()) - ThePaths.m_carPathLinks[node].GetPosition(),
+						ThePaths.m_carPathLinks[node].GetDirection());
 				if(vehicle->AutoPilot.m_nNextDirection == -1){
 					if(dist > 0.0f && dist < 8.0f)
 						return true;
@@ -233,8 +233,8 @@ CTrafficLights::ShouldCarStopForLight(CVehicle *vehicle, bool alwaysStop)
 			if(alwaysStop ||
 			   (type&~SOME_FLAG) == 1 && LightForCars1() != CAR_LIGHTS_GREEN ||
 			   (type&~SOME_FLAG) == 2 && LightForCars2() != CAR_LIGHTS_GREEN){
-				float dist = DotProduct2D(CVector2D(vehicle->GetPosition()) - ThePaths.m_carPathLinks[node].pos,
-						ThePaths.m_carPathLinks[node].dir);
+				float dist = DotProduct2D(CVector2D(vehicle->GetPosition()) - ThePaths.m_carPathLinks[node].GetPosition(),
+						ThePaths.m_carPathLinks[node].GetDirection());
 				if(vehicle->AutoPilot.m_nCurrentDirection == -1){
 					if(dist > 0.0f && dist < 8.0f)
 						return true;
@@ -254,8 +254,8 @@ CTrafficLights::ShouldCarStopForLight(CVehicle *vehicle, bool alwaysStop)
 				if(alwaysStop ||
 				   (type&~SOME_FLAG) == 1 && LightForCars1() != CAR_LIGHTS_GREEN ||
 				   (type&~SOME_FLAG) == 2 && LightForCars2() != CAR_LIGHTS_GREEN){
-					float dist = DotProduct2D(CVector2D(vehicle->GetPosition()) - ThePaths.m_carPathLinks[node].pos,
-							ThePaths.m_carPathLinks[node].dir);
+					float dist = DotProduct2D(CVector2D(vehicle->GetPosition()) - ThePaths.m_carPathLinks[node].GetPosition(),
+							ThePaths.m_carPathLinks[node].GetDirection());
 					if(vehicle->AutoPilot.m_nPreviousDirection == -1){
 						if(dist > 0.0f && dist < 6.0f)
 							return true;
@@ -273,8 +273,12 @@ CTrafficLights::ShouldCarStopForLight(CVehicle *vehicle, bool alwaysStop)
 bool
 CTrafficLights::ShouldCarStopForBridge(CVehicle *vehicle)
 {
+#ifdef GTA_BRIDGE
 	return ThePaths.m_carPathLinks[vehicle->AutoPilot.m_nNextPathNodeInfo].bBridgeLights &&
 		!ThePaths.m_carPathLinks[vehicle->AutoPilot.m_nCurrentPathNodeInfo].bBridgeLights;
+#else
+	return false;
+#endif
 }
 
 int

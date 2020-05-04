@@ -198,6 +198,7 @@ CRenderer::RenderRoads(void)
 		t = (CTreadable*)ms_aVisibleEntityPtrs[i];
 		if(t->IsBuilding() && t->GetIsATreadable()){
 #ifndef MASTER
+#ifndef MIAMI
 			if(gbShowCarRoadGroups || gbShowPedRoadGroups){
 				int ind = 0;
 				if(gbShowCarRoadGroups)
@@ -206,6 +207,7 @@ CRenderer::RenderRoads(void)
 					ind += ThePaths.m_pathNodes[t->m_nodeIndices[PATH_PED][0]].group;
 				SetAmbientColoursToIndicateRoadGroup(ind);
 			}
+#endif
 #endif
 			RenderOneRoad(t);
 #ifndef MASTER

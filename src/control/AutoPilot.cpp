@@ -12,17 +12,17 @@ void CAutoPilot::ModifySpeed(float speed)
 	float positionBetweenNodes = (float)(CTimer::GetTimeInMilliseconds() - m_nTimeEnteredCurve) / m_nTimeToSpendOnCurrentCurve;
 	CCarPathLink* pCurrentLink = &ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo];
 	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[m_nNextPathNodeInfo];
-	float currentPathLinkForwardX = m_nCurrentDirection * ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo].dir.x;
-	float currentPathLinkForwardY = m_nCurrentDirection * ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo].dir.y;
-	float nextPathLinkForwardX = m_nNextDirection * ThePaths.m_carPathLinks[m_nNextPathNodeInfo].dir.x;
-	float nextPathLinkForwardY = m_nNextDirection * ThePaths.m_carPathLinks[m_nNextPathNodeInfo].dir.y;
+	float currentPathLinkForwardX = m_nCurrentDirection * ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo].GetDirX();
+	float currentPathLinkForwardY = m_nCurrentDirection * ThePaths.m_carPathLinks[m_nCurrentPathNodeInfo].GetDirY();
+	float nextPathLinkForwardX = m_nNextDirection * ThePaths.m_carPathLinks[m_nNextPathNodeInfo].GetDirX();
+	float nextPathLinkForwardY = m_nNextDirection * ThePaths.m_carPathLinks[m_nNextPathNodeInfo].GetDirY();
 	CVector positionOnCurrentLinkIncludingLane(
-		pCurrentLink->pos.x + ((m_nCurrentLane + 0.5f) * LANE_WIDTH) * currentPathLinkForwardY,
-		pCurrentLink->pos.y - ((m_nCurrentLane + 0.5f) * LANE_WIDTH) * currentPathLinkForwardX,
+		pCurrentLink->GetX() + ((m_nCurrentLane + 0.5f) * LANE_WIDTH) * currentPathLinkForwardY,
+		pCurrentLink->GetY() - ((m_nCurrentLane + 0.5f) * LANE_WIDTH) * currentPathLinkForwardX,
 		0.0f);
 	CVector positionOnNextLinkIncludingLane(
-		pNextLink->pos.x + ((m_nNextLane + 0.5f) * LANE_WIDTH) * nextPathLinkForwardY,
-		pNextLink->pos.y - ((m_nNextLane + 0.5f) * LANE_WIDTH) * nextPathLinkForwardX,
+		pNextLink->GetX() + ((m_nNextLane + 0.5f) * LANE_WIDTH) * nextPathLinkForwardY,
+		pNextLink->GetY() - ((m_nNextLane + 0.5f) * LANE_WIDTH) * nextPathLinkForwardX,
 		0.0f);
 	m_nTimeToSpendOnCurrentCurve = CCurves::CalcSpeedScaleFactor(
 		&positionOnCurrentLinkIncludingLane,

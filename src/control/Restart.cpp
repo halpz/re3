@@ -108,7 +108,7 @@ CRestart::FindClosestHospitalRestartPoint(const CVector &pos, CVector *outPos, f
 
 	// if we still didn't find anything, find closest path node
 	if (closestPoint == NUM_RESTART_POINTS) {
-		*outPos = ThePaths.m_pathNodes[ThePaths.FindNodeClosestToCoors(pos, PATH_PED, 999999.9f)].pos;
+		*outPos = ThePaths.m_pathNodes[ThePaths.FindNodeClosestToCoors(pos, PATH_PED, 999999.9f)].GetPosition();
 		*outHeading = 0.0f;
 		printf("Couldn't find a hospital restart zone near the player %f %f %f->%f %f %f\n", pos.x, pos.y, pos.z, outPos->x, outPos->y, outPos->z);
 	} else {
@@ -156,7 +156,7 @@ CRestart::FindClosestPoliceRestartPoint(const CVector &pos, CVector *outPos, flo
 	// if we still didn't find anything, find closest path node
 	if (closestPoint == NUM_RESTART_POINTS) {
 		printf("Couldn't find a police restart zone near the player\n");
-		*outPos = ThePaths.m_pathNodes[ThePaths.FindNodeClosestToCoors(pos, PATH_PED, 999999.9f)].pos;
+		*outPos = ThePaths.m_pathNodes[ThePaths.FindNodeClosestToCoors(pos, PATH_PED, 999999.9f)].GetPosition();
 		*outHeading = 0.0f;
 	} else {
 		*outPos = PoliceRestartPoints[closestPoint];
