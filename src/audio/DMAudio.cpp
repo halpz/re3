@@ -119,7 +119,7 @@ int8 cDMAudio::AutoDetect3DProviders(void)
 		if ( !strcmp(providername, "MILES FAST 2D POSITIONAL AUDIO") )
 			return i;
 #elif defined(AUDIO_OAL)
-		if ( !strcmp(providername, "OPEANAL SOFT") )
+		if ( !strcmp(providername, "OPENAL SOFT") )
 			return i;
 #endif
 	}
