@@ -600,6 +600,8 @@ public:
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity, float dist);
 };
 
-//dstatic_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
+#ifdef AUDIO_MSS
+static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
+#endif
 
 extern cAudioManager AudioManager;

@@ -220,22 +220,9 @@ bool CGame::InitialiseOnceAfterRW(void)
 	if ( FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -99 || FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -2 )
 	{
 		CMenuManager::m_PrefsSpeakers = 0;
-		
-		for ( int32 i = 0; i < DMAudio.GetNum3DProvidersAvailable(); i++ )
-		{
-			wchar buff[64];
-			
-			char *name = DMAudio.Get3DProviderName(i);
-			AsciiToUnicode(name, buff);
-			char *providername = UnicodeToAscii(buff);
-			strupr(providername);
-			
-			if ( !strcmp(providername, "MILES FAST 2D POSITIONAL AUDIO") )
-			{
-				FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = i;
-				break;
-			}
-		}
+		int8 provider = DMAudio.AutoDetect3DProviders();
+		if ( provider != -1 )
+			FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = provider;
 	}
 
 	DMAudio.SetCurrent3DProvider(FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);
