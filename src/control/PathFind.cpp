@@ -18,37 +18,21 @@ CPathFind ThePaths;
 #define MIN_PED_ROUTE_DISTANCE 23.8f
 
 
-#ifdef MIAMI
 #define NUMTEMPNODES 5000
 #define NUMDETACHED_CARS 1024
 #define NUMDETACHED_PEDS 1214
 #define NUMTEMPEXTERNALNODES 4600
-#else
-#define NUMTEMPNODES 4000
-#define NUMDETACHED_CARS 100
-#define NUMDETACHED_PEDS 50
-#endif
 
-
-// object flags:
-//	1	UseInRoadBlock
-//	2	east/west road(?)
 
 CPathInfoForObject *InfoForTileCars;
 CPathInfoForObject *InfoForTilePeds;
 
-#ifndef MIAMI
-// unused
-CTempDetachedNode *DetachedNodesCars;
-CTempDetachedNode *DetachedNodesPeds;
-#else
 CPathInfoForObject *DetachedInfoForTileCars;
 CPathInfoForObject *DetachedInfoForTilePeds;
 CTempNodeExternal *TempExternalNodes;
 int32 NumTempExternalNodes;
 int32 NumDetachedPedNodeGroups;
 int32 NumDetachedCarNodeGroups;
-#endif
 
 bool 
 CPedPath::CalcPedRoute(int8 pathType, CVector position, CVector destination, CVector *pointPoses, int16 *pointsFound, int16 maxPoints)
@@ -243,7 +227,7 @@ CPedPath::AddBlockade(CEntity *pEntity, CPedPathNode(*pathNodes)[40], CVector *p
 	}
 }
 
-#ifdef MIAMI
+//--MIAMI: done
 // Make sure all externals link TO an internal
 void
 CPathInfoForObject::SwapConnectionsToBeRightWayRound(void)
@@ -262,7 +246,6 @@ CPathInfoForObject::SwapConnectionsToBeRightWayRound(void)
 			tile[i].crossing = tmp;
 		}
 }
-#endif
 
 //--MIAMI: done
 void
@@ -275,9 +258,7 @@ CPathFind::Init(void)
 	m_numConnections = 0;
 	m_numCarPathLinks = 0;
 	unk = 0;
-#ifdef MIAMI
 	NumTempExternalNodes = 0;
-#endif
 
 	for(i = 0; i < NUM_PATHNODES; i++)
 		m_pathNodes[i].distance = MAX_DIST;
@@ -292,23 +273,12 @@ CPathFind::AllocatePathFindInfoMem(int16 numPathGroups)
 	delete[] InfoForTilePeds;
 	InfoForTilePeds = nil;
 
-	// NB: MIAMI doesn't use numPathGroups here but hardcodes 4500
-	InfoForTileCars = new CPathInfoForObject[12*numPathGroups];
-	memset(InfoForTileCars, 0, 12*numPathGroups*sizeof(CPathInfoForObject));
-	InfoForTilePeds = new CPathInfoForObject[12*numPathGroups];
-	memset(InfoForTilePeds, 0, 12*numPathGroups*sizeof(CPathInfoForObject));
+	// NB: MIAMI doesn't use numPathGroups here but hardcodes PATHNODESIZE
+	InfoForTileCars = new CPathInfoForObject[12*PATHNODESIZE];
+	memset(InfoForTileCars, 0, 12*PATHNODESIZE*sizeof(CPathInfoForObject));
+	InfoForTilePeds = new CPathInfoForObject[12*PATHNODESIZE];
+	memset(InfoForTilePeds, 0, 12*PATHNODESIZE*sizeof(CPathInfoForObject));
 
-#ifndef MIAMI
-	// unused
-	delete[] DetachedNodesCars;
-	DetachedNodesCars = nil;
-	delete[] DetachedNodesPeds;
-	DetachedNodesPeds = nil;
-	DetachedNodesCars = new CTempDetachedNode[NUMDETACHED_CARS];
-	memset(DetachedNodesCars, 0, NUMDETACHED_CARS*sizeof(CTempDetachedNode));
-	DetachedNodesPeds = new CTempDetachedNode[NUMDETACHED_PEDS];
-	memset(DetachedNodesPeds, 0, NUMDETACHED_PEDS*sizeof(CTempDetachedNode));
-#else
 	delete[] DetachedInfoForTileCars;
 	DetachedInfoForTileCars = nil;
 	delete[] DetachedInfoForTilePeds;
@@ -323,7 +293,6 @@ CPathFind::AllocatePathFindInfoMem(int16 numPathGroups)
 	NumTempExternalNodes = 0;
 	NumDetachedPedNodeGroups = 0;
 	NumDetachedCarNodeGroups = 0;
-#endif
 }
 
 //--MIAMI: done
@@ -337,106 +306,53 @@ CPathFind::RegisterMapObject(CTreadable *mapObject)
 void
 CPathFind::StoreNodeInfoPed(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, int16 width, bool crossing)
 {
-	int i, j;
+	int i;
 
 	i = id*12 + node;
 	InfoForTilePeds[i].type = type;
 	InfoForTilePeds[i].next = next;
-#ifndef MIAMI
-	InfoForTilePeds[i].x = x;
-	InfoForTilePeds[i].y = y;
-	InfoForTilePeds[i].z = z;
-#else
 	InfoForTilePeds[i].x = x/16.0f;
 	InfoForTilePeds[i].y = y/16.0f;
 	InfoForTilePeds[i].z = z/16.0f;
-#endif
 	InfoForTilePeds[i].numLeftLanes = 0;
 	InfoForTilePeds[i].numRightLanes = 0;
 	InfoForTilePeds[i].crossing = crossing;
-#ifdef MIAMI
 	InfoForTilePeds[i].flag02 = false;
 	InfoForTilePeds[i].roadBlock = false;
 	InfoForTilePeds[i].disabled = false;
 	InfoForTilePeds[i].waterPath = false;
 	InfoForTilePeds[i].betweenLevels = false;
-#endif
 
-#ifndef MIAMI
-	if(type)
-		for(i = 0; i < node; i++){
-			j = id*12 + i;
-			if(x == InfoForTilePeds[j].x && y == InfoForTilePeds[j].y){
-				printf("^^^^^^^^^^^^^ AARON IS TOO CHICKEN TO EAT MEAT!\n");
-				printf("Several ped nodes on one road segment have identical coordinates (%d==%d && %d==%d)\n",
-					x, InfoForTilePeds[j].x, y, InfoForTilePeds[j].y);
-				printf("Modelindex of cullprit: %d\n\n", id);
-			}
-		}
-#else
 	if(node == 11)
 		InfoForTilePeds[id*12].SwapConnectionsToBeRightWayRound();
-#endif
 }
 
 //--MIAMI: TODO: implement all the arguments once we can load the VC map
 void
 CPathFind::StoreNodeInfoCar(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, int16 width, int8 numLeft, int8 numRight)
 {
-	int i, j;
+	int i;
 
 	i = id*12 + node;
 	InfoForTileCars[i].type = type;
 	InfoForTileCars[i].next = next;
-#ifndef MIAMI
-	InfoForTileCars[i].x = x;
-	InfoForTileCars[i].y = y;
-	InfoForTileCars[i].z = z;
-#else
 	InfoForTileCars[i].x = x/16.0f;
 	InfoForTileCars[i].y = y/16.0f;
 	InfoForTileCars[i].z = z/16.0f;
-#endif
 	InfoForTileCars[i].numLeftLanes = numLeft;
 	InfoForTileCars[i].numRightLanes = numRight;
-#ifdef MIAMI
 	InfoForTileCars[i].crossing = false;
 	InfoForTileCars[i].flag02 = false;
 	InfoForTileCars[i].roadBlock = false;
 	InfoForTileCars[i].disabled = false;
 	InfoForTileCars[i].waterPath = false;
 	InfoForTileCars[i].betweenLevels = false;
-#endif
 
-
-#ifndef MIAMI
-	if(type)
-		for(i = 0; i < node; i++){
-			j = id*12 + i;
-			if(x == InfoForTileCars[j].x && y == InfoForTileCars[j].y){
-				printf("^^^^^^^^^^^^^ AARON IS TOO CHICKEN TO EAT MEAT!\n");
-				printf("Several car nodes on one road segment have identical coordinates (%d==%d && %d==%d)\n",
-					x, InfoForTileCars[j].x, y, InfoForTileCars[j].y);
-				printf("Modelindex of cullprit: %d\n\n", id);
-			}
-		}
-#else
 	if(node == 11)
 		InfoForTileCars[id*12].SwapConnectionsToBeRightWayRound();
-#endif
 }
 
-#ifndef MIAMI
-void
-CPathFind::CalcNodeCoors(int16 x, int16 y, int16 z, int id, CVector *out)
-{
-	CVector pos;
-	pos.x = x / 16.0f;
-	pos.y = y / 16.0f;
-	pos.z = z / 16.0f;
-	*out = m_mapObjects[id]->GetMatrix() * pos;
-}
-#else
+//--MIAMI: done
 void
 CPathFind::CalcNodeCoors(float x, float y, float z, int id, CVector *out)
 {
@@ -446,7 +362,6 @@ CPathFind::CalcNodeCoors(float x, float y, float z, int id, CVector *out)
 	pos.z = z;
 	*out = m_mapObjects[id]->GetMatrix() * pos;
 }
-#endif
 
 //--MIAMI: done
 bool
@@ -460,28 +375,17 @@ CPathFind::LoadPathFindData(void)
 void
 CPathFind::PreparePathData(void)
 {
-	int i, j, k;
-	int numExtern, numIntern, numLanes;
-	float maxX, maxY;
+	int i, j;
+	int numExtern, numIntern;
 	CTempNode *tempNodes;
 
 	printf("PreparePathData\n");
 	if(!CPathFind::LoadPathFindData() &&	// empty
 	   InfoForTileCars && InfoForTilePeds &&
-#ifndef MIAMI
-	   DetachedNodesCars && DetachedNodesPeds
-#else
-	   DetachedInfoForTileCars && DetachedInfoForTilePeds && TempExternalNodes
-#endif
-		){
+	   DetachedInfoForTileCars && DetachedInfoForTilePeds && TempExternalNodes){
 		tempNodes = new CTempNode[NUMTEMPNODES];
 
 		m_numConnections = 0;
-
-#ifndef MIAMI
-		for(i = 0; i < PATHNODESIZE; i++)
-			m_pathNodes[i].unkBits = 0;
-#endif
 
 		for(i = 0; i < PATHNODESIZE; i++){
 			numExtern = 0;
@@ -496,7 +400,6 @@ CPathFind::PreparePathData(void)
 				printf("ILLEGAL BLOCK. MORE THAN 1 INTERNALS AND NOT 2 EXTERNALS (Modelindex:%d)\n", i);
 		}
 
-#ifdef MIAMI
 		int numExternDetached, numInternDetached;
 		for(i = 0; i < NUMDETACHED_CARS; i++){
 			numExternDetached = 0;
@@ -509,7 +412,6 @@ CPathFind::PreparePathData(void)
 			}
 			// no diagnostic here
 		}
-#endif
 
 		for(i = 0; i < PATHNODESIZE; i++)
 			for(j = 0; j < 12; j++)
@@ -522,7 +424,6 @@ CPathFind::PreparePathData(void)
 					if(InfoForTileCars[i*12 + j].numLeftLanes + InfoForTileCars[i*12 + j].numRightLanes <= 0)
 						printf("ILLEGAL BLOCK. NO LANES IN NODE (Obj:%d)\n", i);
 				}
-#ifdef MIAMI
 		for(i = 0; i < NUMDETACHED_CARS; i++)
 			for(j = 0; j < 12; j++)
 				if(DetachedInfoForTilePeds[i*12 + j].type == NodeTypeExtern){
@@ -534,60 +435,12 @@ CPathFind::PreparePathData(void)
 					if(DetachedInfoForTilePeds[i*12 + j].numLeftLanes + DetachedInfoForTilePeds[i*12 + j].numRightLanes <= 0)
 						printf("ILLEGAL BLOCK. NO LANES IN NODE (Obj:%d)\n", i);
 				}
-#endif
 
 		m_numPathNodes = 0;
-#ifndef MIAMI
-		PreparePathDataForType(PATH_CAR, tempNodes, InfoForTileCars, 1.0f, DetachedNodesCars, NUMDETACHED_CARS);
-		m_numCarPathNodes = m_numPathNodes;
-		PreparePathDataForType(PATH_PED, tempNodes, InfoForTilePeds, 1.0f, DetachedNodesPeds, NUMDETACHED_PEDS);
-#else
 		PreparePathDataForType(PATH_CAR, tempNodes, InfoForTileCars, 1.0f, DetachedInfoForTileCars, NumDetachedCarNodeGroups);
 		m_numCarPathNodes = m_numPathNodes;
 		PreparePathDataForType(PATH_PED, tempNodes, InfoForTilePeds, 1.0f, DetachedInfoForTilePeds, NumDetachedPedNodeGroups);
-#endif
 		m_numPedPathNodes = m_numPathNodes - m_numCarPathNodes;
-
-#ifndef MIAMI
-		// TODO: figure out what exactly is going on here
-		// Some roads seem to get a west/east flag
-		for(i = 0; i < m_numMapObjects; i++){
-			numExtern = 0;
-			numIntern = 0;
-			numLanes = 0;
-			maxX = 0.0f;
-			maxY = 0.0f;
-			for(j = 0; j < 12; j++){
-				k = i*12 + j;
-				if(InfoForTileCars[k].type == NodeTypeExtern){
-					numExtern++;
-					if(InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes > numLanes)
-						numLanes = InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes;
-					maxX = Max(maxX, Abs(InfoForTileCars[k].x));
-					maxY = Max(maxY, Abs(InfoForTileCars[k].y));
-				}else if(InfoForTileCars[k].type == NodeTypeIntern)
-					numIntern++;
-			}
-
-			if(numIntern == 1 && numExtern == 2){
-				if(numLanes < 4){
-					if((i & 7) == 4){		// WHAT?
-						m_objectFlags[i] |= UseInRoadBlock;
-						if(maxX > maxY)
-							m_objectFlags[i] |= ObjectEastWest;
-						else
-							m_objectFlags[i] &= ~ObjectEastWest;
-					}
-				}else{
-					m_objectFlags[i] |= UseInRoadBlock;
-					if(maxX > maxY)
-						m_objectFlags[i] |= ObjectEastWest;
-					else
-						m_objectFlags[i] &= ~ObjectEastWest;
-				}
-			}
-		}
-#endif
 
 		delete[] tempNodes;
 
@@ -599,19 +452,12 @@ CPathFind::PreparePathData(void)
 		delete[] InfoForTilePeds;
 		InfoForTilePeds = nil;
 
-#ifndef MIAMI
-		delete[] DetachedNodesCars;
-		DetachedNodesCars = nil;
-		delete[] DetachedNodesPeds;
-		DetachedNodesPeds = nil;
-#else
 		delete[] DetachedInfoForTileCars;
 		DetachedInfoForTileCars = nil;
 		delete[] DetachedInfoForTilePeds;
 		DetachedInfoForTilePeds = nil;
 		delete[] TempExternalNodes;
 		TempExternalNodes = nil;
-#endif
 	}
 	printf("Done with PreparePathData\n");
 }
@@ -659,13 +505,8 @@ CPathFind::CountFloodFillGroups(uint8 type)
 
 		if(node->numLinks == 0){
 			if(type == PATH_CAR)
-#ifndef MIAMI
-				printf("Single car node: %f %f %f (%d)\n",
-					node->GetX(), node->GetY(), node->GetZ(), m_mapObjects[node->objectIndex]->GetModelIndex());
-#else
 				printf("Single car node: %f %f %f\n",
 					node->GetX(), node->GetY(), node->GetZ());
-#endif
 			else
 				printf("Single ped node: %f %f %f\n",
 					node->GetX(), node->GetY(), node->GetZ());
@@ -696,42 +537,28 @@ int32 TempListLength;
 //--MIAMI: done
 void
 CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoForObject *objectpathinfo,
-#ifndef MIAMI
-	float maxdist, CTempDetachedNode *detachednodes, int numDetached)
-#else
 	float maxdist, CPathInfoForObject *detachednodes, int numDetached)
-#endif
 {
 	static CVector CoorsXFormed;
-	int i, j, k, l;
+	int i, j, k;
 	int l1, l2;
 	int start;
 	float posx, posy;
 	float dx, dy, mag;
 	float nearestDist;
 	int nearestId;
-	int next;
 	int oldNumPathNodes, oldNumLinks;
 	float dist;
 	int iseg, jseg;
-	int istart, jstart;
 	int done, cont;
 	int tileStart;
 
 	oldNumPathNodes = m_numPathNodes;
 	oldNumLinks = m_numConnections;
 
-#ifndef MIAMI
-#define OBJECTINDEX(n) (m_pathNodes[(n)].objectIndex)
-	// Initialize map objects
-	for(i = 0; i < m_numMapObjects; i++)
-		for(j = 0; j < 12; j++)
-			m_mapObjects[i]->m_nodeIndices[type][j] = -1;
-#else
 #define OBJECTINDEX(n) (mapObjIndices[(n)])
 	int16 *mapObjIndices = new int16[NUM_PATHNODES];
 	NumTempExternalNodes = 0;
-#endif
 
 	// Calculate internal nodes, store them and connect them to defining object
 	for(i = 0; i < m_numMapObjects; i++){
@@ -747,10 +574,6 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 					&CoorsXFormed);
 				m_pathNodes[m_numPathNodes].SetPosition(CoorsXFormed);
 				OBJECTINDEX(m_numPathNodes) = i;
-#ifndef MIAMI
-				m_pathNodes[m_numPathNodes].unkBits = 1;
-				m_mapObjects[i]->m_nodeIndices[type][j] = m_numPathNodes;
-#else
 				m_pathNodes[m_numPathNodes].width = objectpathinfo[start + j].width;
 				m_pathNodes[m_numPathNodes].speedLimit = objectpathinfo[start + j].speedLimit;
 				m_pathNodes[m_numPathNodes].spawnRate = objectpathinfo[start + j].spawnRate;
@@ -759,10 +582,8 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				m_pathNodes[m_numPathNodes].bWaterPath = objectpathinfo[start + j].waterPath;
 				m_pathNodes[m_numPathNodes].flagB2 = objectpathinfo[start + j].flag02;
 				m_pathNodes[m_numPathNodes].bBetweenLevels = objectpathinfo[start + j].betweenLevels;
-#endif
 				m_numPathNodes++;
 			}
-#ifdef MIAMI
 			else if(objectpathinfo[start + j].type == NodeTypeExtern){
 				CalcNodeCoors(
 					objectpathinfo[start + j].x,
@@ -779,11 +600,9 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				TempExternalNodes[NumTempExternalNodes].isCross = !!objectpathinfo[start + j].crossing;
 				NumTempExternalNodes++;
 			}
-#endif
 		}
 	}
 
-#ifdef MIAMI
 	// Same thing for detached nodes
 	for(i = 0; i < numDetached; i++){
 		tileStart = m_numPathNodes;
@@ -819,87 +638,9 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 			}
 		}
 	}
-#endif
 
 	// Insert external nodes into TempList
 	TempListLength = 0;
-#ifndef MIAMI
-	for(i = 0; i < m_numMapObjects; i++){
-		start = 12 * m_mapObjects[i]->GetModelIndex();
-		for(j = 0; j < 12; j++){
-			if(objectpathinfo[start + j].type != NodeTypeExtern)
-				continue;
-			CalcNodeCoors(
-				objectpathinfo[start + j].x,
-				objectpathinfo[start + j].y,
-				objectpathinfo[start + j].z,
-				i,
-				&CoorsXFormed);
-
-			// find closest unconnected node
-			nearestId = -1;
-			nearestDist = maxdist;
-			for(k = 0; k < TempListLength; k++){
-				if(tempnodes[k].linkState != 1)
-					continue;
-				dx = tempnodes[k].pos.x - CoorsXFormed.x;
-				if(Abs(dx) < nearestDist){
-					dy = tempnodes[k].pos.y - CoorsXFormed.y;
-					if(Abs(dy) < nearestDist){
-						nearestDist = Max(Abs(dx), Abs(dy));
-						nearestId = k;
-					}
-				}
-			}
-
-			if(nearestId < 0){
-				// None found, add this one to temp list
-				tempnodes[TempListLength].pos = CoorsXFormed;
-				next = objectpathinfo[start + j].next;
-				if(next < 0){
-					// no link from this node, find link to this node
-					next = 0;
-					for(k = start; j != objectpathinfo[k].next; k++)
-						next++;
-				}
-				// link to connecting internal node
-				tempnodes[TempListLength].link1 = m_mapObjects[i]->m_nodeIndices[type][next];
-				if(type == PATH_CAR){
-					tempnodes[TempListLength].numLeftLanes = objectpathinfo[start + j].numLeftLanes;
-					tempnodes[TempListLength].numRightLanes = objectpathinfo[start + j].numRightLanes;
-				}
-				tempnodes[TempListLength++].linkState = 1;
-			}else{
-				// Found nearest, connect it to our neighbour
-				next = objectpathinfo[start + j].next;
-				if(next < 0){
-					// no link from this node, find link to this node
-					next = 0;
-					for(k = start; j != objectpathinfo[k].next; k++)
-						next++;
-				}
-				tempnodes[nearestId].link2 = m_mapObjects[i]->m_nodeIndices[type][next];
-				tempnodes[nearestId].linkState = 2;
-
-				// collapse this node with nearest we found
-				dx = m_pathNodes[tempnodes[nearestId].link1].GetX() - m_pathNodes[tempnodes[nearestId].link2].GetX();
-				dy = m_pathNodes[tempnodes[nearestId].link1].GetY() - m_pathNodes[tempnodes[nearestId].link2].GetY();
-				tempnodes[nearestId].pos = (tempnodes[nearestId].pos + CoorsXFormed)*0.5f;
-				mag = Sqrt(dx*dx + dy*dy);
-				tempnodes[nearestId].dirX = dx/mag;
-				tempnodes[nearestId].dirY = dy/mag;
-				// do something when number of lanes doesn't agree
-				if(type == PATH_CAR)
-					if(tempnodes[nearestId].numLeftLanes != 0 && tempnodes[nearestId].numRightLanes != 0 &&
-					   (objectpathinfo[start + j].numLeftLanes == 0 || objectpathinfo[start + j].numRightLanes == 0)){
-						// why switch left and right here?
-						tempnodes[nearestId].numLeftLanes = objectpathinfo[start + j].numRightLanes;
-						tempnodes[nearestId].numRightLanes = objectpathinfo[start + j].numLeftLanes;
-					}
-			}
-		}
-	}
-#else
 	for(i = 0; i < NumTempExternalNodes; i++){
 		// find closest unconnected node
 		nearestId = -1;
@@ -954,7 +695,6 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				}
 		}
 	}
-#endif
 
 	// Loop through previously added internal nodes and link them
 	for(i = oldNumPathNodes; i < m_numPathNodes; i++){
@@ -977,49 +717,30 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				continue;
 
 			dist = (m_pathNodes[i].GetPosition() - m_pathNodes[ConnectedNode(m_numConnections)].GetPosition()).Magnitude();
-#ifndef MIAMI
-			m_distances[m_numConnections] = dist;
-			m_connectionFlags[m_numConnections].flags = 0;
-#else
 			m_distances[m_numConnections] = Min(dist, 255);
 			if(tempnodes[j].isCross)
 				m_connections[j] |= 0x8000;	// crosses road flag
-#endif
 
 			if(type == PATH_CAR){
 				// IMPROVE: use a goto here
 				// Find existing car path link
 				for(k = 0; k < m_numCarPathLinks; k++){
-#ifndef MIAMI
-					if(m_carPathLinks[k].dir.x == tempnodes[j].dirX &&
-					   m_carPathLinks[k].dir.y == tempnodes[j].dirY &&
-					   m_carPathLinks[k].pos.x == tempnodes[j].pos.x &&
-					   m_carPathLinks[k].pos.y == tempnodes[j].pos.y){
-#else
 					if(m_carPathLinks[k].dirX == tempnodes[j].dirX &&
 					   m_carPathLinks[k].dirY == tempnodes[j].dirY &&
 					   m_carPathLinks[k].x == (int)(tempnodes[j].pos.x*8.0f) &&
 					   m_carPathLinks[k].y == (int)(tempnodes[j].pos.y*8.0f)){
-#endif
 						m_carPathConnections[m_numConnections] = k;
 						k = m_numCarPathLinks;
 					}
 				}
 				// k is m_numCarPathLinks+1 if we found one
 				if(k == m_numCarPathLinks){
-#ifndef MIAMI
-					m_carPathLinks[m_numCarPathLinks].dir.x = tempnodes[j].dirX;
-					m_carPathLinks[m_numCarPathLinks].dir.y = tempnodes[j].dirY;
-					m_carPathLinks[m_numCarPathLinks].pos.x = tempnodes[j].pos.x;
-					m_carPathLinks[m_numCarPathLinks].pos.y = tempnodes[j].pos.y;
-#else
 					m_carPathLinks[m_numCarPathLinks].dirX = tempnodes[j].dirX;
 					m_carPathLinks[m_numCarPathLinks].dirY = tempnodes[j].dirY;
 					m_carPathLinks[m_numCarPathLinks].x = tempnodes[j].pos.x*8.0f;
 					m_carPathLinks[m_numCarPathLinks].y = tempnodes[j].pos.y*8.0f;
 					m_carPathLinks[m_numCarPathLinks].flag1 = false;
 					m_carPathLinks[m_numCarPathLinks].width = tempnodes[j].width;
-#endif
 					m_carPathLinks[m_numCarPathLinks].pathNodeIndex = i;
 					m_carPathLinks[m_numCarPathLinks].numLeftLanes = tempnodes[j].numLeftLanes;
 					m_carPathLinks[m_numCarPathLinks].numRightLanes = tempnodes[j].numRightLanes;
@@ -1033,7 +754,6 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 			m_numConnections++;
 		}
 
-#ifdef MIAMI
 		CPathInfoForObject *tile;
 		if(mapObjIndices[i] < 0){
 			if(type == PATH_CAR)
@@ -1046,7 +766,6 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 			else
 				tile = &InfoForTilePeds[12 * m_mapObjects[mapObjIndices[i]]->GetModelIndex()];
 		}
-#endif
 
 		// Find i inside path segment
 		iseg = 0;
@@ -1054,9 +773,6 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 			if(OBJECTINDEX(j) == OBJECTINDEX(i))
 				iseg++;
 
-#ifndef MIAMI
-		istart = 12 * m_mapObjects[m_pathNodes[i].objectIndex]->GetModelIndex();
-#endif
 		// Add links to other internal nodes
 		for(j = Max(oldNumPathNodes, i-12); j < Min(m_numPathNodes, i+12); j++){
 			if(OBJECTINDEX(i) != OBJECTINDEX(j) || i == j)
@@ -1064,23 +780,13 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 			// N.B.: in every path segment, the externals have to be at the end
 			jseg = j-i + iseg;
 
-#ifndef MIAMI
-			jstart = 12 * m_mapObjects[m_pathNodes[j].objectIndex]->GetModelIndex();
-			if(objectpathinfo[istart + iseg].next == jseg ||
-			   objectpathinfo[jstart + jseg].next == iseg){
-#else
 			if(tile[iseg].next == jseg ||
 			   tile[jseg].next == iseg){
-#endif
 				// Found a link between i and jConnectionSetCrossesRoad
 				// NB this clears the flags in MIAMI
 				m_connections[m_numConnections] = j;
 				dist = (m_pathNodes[i].GetPosition() - m_pathNodes[j].GetPosition()).Magnitude();
-#ifndef MIAMI
-				m_distances[m_numConnections] = dist;
-#else
 				m_distances[m_numConnections] = Min(dist, 255);
-#endif
 
 				if(type == PATH_CAR){
 					posx = (m_pathNodes[i].GetX() + m_pathNodes[j].GetX())*0.5f;
@@ -1090,9 +796,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 					mag = Sqrt(dx*dx + dy*dy);
 					dx /= mag;
 					dy /= mag;
-#ifdef MIAMI
 					int width = Max(m_pathNodes[i].width, m_pathNodes[j].width);
-#endif
 					if(i < j){
 						dx = -dx;
 						dy = -dy;
@@ -1100,36 +804,22 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 					// IMPROVE: use a goto here
 					// Find existing car path link
 					for(k = 0; k < m_numCarPathLinks; k++){
-#ifndef MIAMI
-						if(m_carPathLinks[k].dir.x == dx &&
-						   m_carPathLinks[k].dir.y == dy &&
-						   m_carPathLinks[k].pos.x == posx &&
-						   m_carPathLinks[k].pos.y == posy){
-#else
 						if(m_carPathLinks[k].dirX == (int)(dx*100.0f) &&
 						   m_carPathLinks[k].dirY == (int)(dy*100.0f) &&
 						   m_carPathLinks[k].x == (int)(posx*8.0f) &&
 						   m_carPathLinks[k].y == (int)(posy*8.0f)){
-#endif
 							m_carPathConnections[m_numConnections] = k;
 							k = m_numCarPathLinks;
 						}
 					}
 					// k is m_numCarPathLinks+1 if we found one
 					if(k == m_numCarPathLinks){
-#ifndef MIAMI
-						m_carPathLinks[m_numCarPathLinks].dir.x = dx;
-						m_carPathLinks[m_numCarPathLinks].dir.y = dy;
-						m_carPathLinks[m_numCarPathLinks].pos.x = posx;
-						m_carPathLinks[m_numCarPathLinks].pos.y = posy;
-#else
 						m_carPathLinks[m_numCarPathLinks].dirX = dx*100.0f;
 						m_carPathLinks[m_numCarPathLinks].dirY = dy*100.0f;
 						m_carPathLinks[m_numCarPathLinks].x = posx*8.0f;
 						m_carPathLinks[m_numCarPathLinks].y = posy*8.0f;
 						m_carPathLinks[m_numCarPathLinks].flag1 = false;
 						m_carPathLinks[m_numCarPathLinks].width = width;
-#endif
 						m_carPathLinks[m_numCarPathLinks].pathNodeIndex = i;
 						m_carPathLinks[m_numCarPathLinks].numLeftLanes = -1;
 						m_carPathLinks[m_numCarPathLinks].numRightLanes = -1;
@@ -1139,17 +829,9 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 					}
 				}else{
 					// Crosses road
-#ifndef MIAMI
-					if(objectpathinfo[istart + iseg].next == jseg && objectpathinfo[istart + iseg].crossing ||
-					   objectpathinfo[jstart + jseg].next == iseg && objectpathinfo[jstart + jseg].crossing)
-						m_connectionFlags[m_numConnections].bCrossesRoad = true;
-					else
-						m_connectionFlags[m_numConnections].bCrossesRoad = false;
-#else
 					if(tile[iseg].next == jseg && tile[iseg].crossing ||
 					   tile[jseg].next == iseg && tile[jseg].crossing)
 						m_connections[m_numConnections] |= 0x8000;	// crosses road flag
-#endif
 				}
 
 				m_pathNodes[i].numLinks++;
@@ -1162,11 +844,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 		done = 0;
 		// Set number of lanes for all nodes somehow
 		// very strange code
-#ifndef MIAMI
-		for(k = 0; !done && k < 10; k++){
-#else
 		for(k = 0; !done && k < 12; k++){
-#endif
 			done = 1;
 			for(i = 0; i < m_numPathNodes; i++){
 				if(m_pathNodes[i].numLinks != 2)
@@ -1174,35 +852,6 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				l1 = m_carPathConnections[m_pathNodes[i].firstLink];
 				l2 = m_carPathConnections[m_pathNodes[i].firstLink+1];
 
-#ifndef MIAMI
-				if(m_carPathLinks[l1].numLeftLanes == -1 &&
-				   m_carPathLinks[l2].numLeftLanes != -1){
-					done = 0;
-					if(m_carPathLinks[l2].pathNodeIndex == i){
-						// why switch left and right here?
-						m_carPathLinks[l1].numLeftLanes = m_carPathLinks[l2].numRightLanes;
-						m_carPathLinks[l1].numRightLanes = m_carPathLinks[l2].numLeftLanes;
-					}else{
-						m_carPathLinks[l1].numLeftLanes = m_carPathLinks[l2].numLeftLanes;
-						m_carPathLinks[l1].numRightLanes = m_carPathLinks[l2].numRightLanes;
-					}
-					m_carPathLinks[l1].pathNodeIndex = i;
-				}else if(m_carPathLinks[l1].numLeftLanes != -1 &&
-				         m_carPathLinks[l2].numLeftLanes == -1){
-					done = 0;
-					if(m_carPathLinks[l1].pathNodeIndex == i){
-						// why switch left and right here?
-						m_carPathLinks[l2].numLeftLanes = m_carPathLinks[l1].numRightLanes;
-						m_carPathLinks[l2].numRightLanes = m_carPathLinks[l1].numLeftLanes;
-					}else{
-						m_carPathLinks[l2].numLeftLanes = m_carPathLinks[l1].numLeftLanes;
-						m_carPathLinks[l2].numRightLanes = m_carPathLinks[l1].numRightLanes;
-					}
-					m_carPathLinks[l2].pathNodeIndex = i;
-				}else if(m_carPathLinks[l1].numLeftLanes == -1 &&
-				         m_carPathLinks[l2].numLeftLanes == -1)
-					done = 0;
-#else
 				int8 l1Left = m_carPathLinks[l1].numLeftLanes;
 				int8 l1Right = m_carPathLinks[l1].numRightLanes;
 				int8 l2Left = m_carPathLinks[l2].numLeftLanes;
@@ -1247,7 +896,6 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				m_carPathLinks[l1].numRightLanes = l1Right;
 				m_carPathLinks[l2].numLeftLanes = l2Left;
 				m_carPathLinks[l2].numRightLanes = l2Right;
-#endif
 			}
 		}
 
@@ -1255,17 +903,10 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 		for(i = 0; i < m_numPathNodes; i++)
 			for(j = 0; j < m_pathNodes[i].numLinks; j++){
 				k = m_carPathConnections[m_pathNodes[i].firstLink + j];
-#ifndef MIAMI
-				if(m_carPathLinks[k].numLeftLanes < 0)
-					m_carPathLinks[k].numLeftLanes = 1;
-				if(m_carPathLinks[k].numRightLanes < 0)
-					m_carPathLinks[k].numRightLanes = 1;
-#else
 				if(m_carPathLinks[k].numLeftLanes == -1)
 					m_carPathLinks[k].numLeftLanes = 0;
 				if(m_carPathLinks[k].numRightLanes == -1)
 					m_carPathLinks[k].numRightLanes = 0;
-#endif
 			}
 	}
 
@@ -1274,10 +915,6 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 		do{
 			cont = 0;
 			for(i = 0; i < m_numPathNodes; i++){
-#ifndef MIAMI
-				m_pathNodes[i].bDisabled = false;
-				m_pathNodes[i].bBetweenLevels = false;
-#endif
 				// See if node is a dead end, if so, we're not done yet
 				if(!m_pathNodes[i].bDeadEnd){
 					k = 0;
@@ -1310,26 +947,11 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 					m_connections[j] = node-1;
 			}
 
-#ifndef MIAMI
-			// Also in treadables
-			for(j = 0; j < m_numMapObjects; j++)
-				for(k = 0; k < 12; k++){
-					if(m_mapObjects[j]->m_nodeIndices[PATH_PED][k] == i){
-						// remove this one
-						for(l = k; l < 12-1; l++)
-							m_mapObjects[j]->m_nodeIndices[PATH_PED][l] = m_mapObjects[j]->m_nodeIndices[PATH_PED][l+1];
-						m_mapObjects[j]->m_nodeIndices[PATH_PED][11] = -1;
-					}else if(m_mapObjects[j]->m_nodeIndices[PATH_PED][k] > i)
-						m_mapObjects[j]->m_nodeIndices[PATH_PED][k]--;
-				}
-#endif
-
 			i--;
 			m_numPathNodes--;
 		}
-#ifdef MIAMI
+
 	delete[] mapObjIndices;
-#endif
 }
 
 //--MIAMI: done
@@ -1349,17 +971,6 @@ CPathFind::CalcRoadDensity(float x, float y)
 				next = m_carPathConnections[m_pathNodes[i].firstLink + j];
 				density += m_carPathLinks[next].numLeftLanes * dist;
 				density += m_carPathLinks[next].numRightLanes * dist;
-
-#ifndef MIAMI
-				if(m_carPathLinks[next].numLeftLanes < 0)
-					printf("Link from object %d to %d (MIs)\n",
-						m_mapObjects[m_pathNodes[i].objectIndex]->GetModelIndex(),
-						m_mapObjects[m_pathNodes[ConnectedNode(m_pathNodes[i].firstLink + j)].objectIndex]->GetModelIndex());
-				if(m_carPathLinks[next].numRightLanes < 0)
-					printf("Link from object %d to %d (MIs)\n",
-						m_mapObjects[m_pathNodes[i].objectIndex]->GetModelIndex(),
-						m_mapObjects[m_pathNodes[ConnectedNode(m_pathNodes[i].firstLink + j)].objectIndex]->GetModelIndex());
-#endif
 			}
 		}
 	}
@@ -1585,13 +1196,8 @@ CPathFind::PedMarkRoadsBetweenLevelsInArea(float x1, float x2, float y1, float y
 }
 
 //--MIAMI: done
-#ifndef MIAMI
-int32
-CPathFind::FindNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bool ignoreDisabled, bool ignoreBetweenLevels)
-#else
 int32
 CPathFind::FindNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bool ignoreDisabled, bool ignoreBetweenLevels, bool ignoreFlagB4, bool bWaterPath)
-#endif
 {
 	int i;
 	int firstNode, lastNode;
@@ -1613,25 +1219,15 @@ CPathFind::FindNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bo
 	for(i = firstNode; i < lastNode; i++){
 		if(ignoreDisabled && m_pathNodes[i].bDisabled) continue;
 		if(ignoreBetweenLevels && m_pathNodes[i].bBetweenLevels) continue;
-#ifndef MIAMI
-		switch(m_pathNodes[i].unkBits){
-		case 1:
-		case 2:
-#else
 		if(ignoreFlagB4 && m_pathNodes[i].flagB4) continue;
 		if(bWaterPath != m_pathNodes[i].bWaterPath) continue;
-#endif
-			dist = Abs(m_pathNodes[i].GetX() - coors.x) +
-			       Abs(m_pathNodes[i].GetY() - coors.y) +
-			       3.0f*Abs(m_pathNodes[i].GetZ() - coors.z);
-			if(dist < closestDist){
-				closestDist = dist;
-				closestNode = i;
-			}
-#ifndef MIAMI
-			break;
+		dist = Abs(m_pathNodes[i].GetX() - coors.x) +
+		       Abs(m_pathNodes[i].GetY() - coors.y) +
+		       3.0f*Abs(m_pathNodes[i].GetZ() - coors.z);
+		if(dist < closestDist){
+			closestDist = dist;
+			closestNode = i;
 		}
-#endif
 	}
 	return closestDist < distLimit ? closestNode : -1;
 }
@@ -1659,27 +1255,18 @@ CPathFind::FindNodeClosestToCoorsFavourDirection(CVector coors, uint8 type, floa
 	}
 
 	for(i = firstNode; i < lastNode; i++){
-#ifndef MIAMI
-		switch(m_pathNodes[i].unkBits){
-		case 1:
-		case 2:
-#endif
-			dX = m_pathNodes[i].GetX() - coors.x;
-			dY = m_pathNodes[i].GetY() - coors.y;
-			dist = Abs(dX) + Abs(dY) +
-			       3.0f*Abs(m_pathNodes[i].GetZ() - coors.z);
+		dX = m_pathNodes[i].GetX() - coors.x;
+		dY = m_pathNodes[i].GetY() - coors.y;
+		dist = Abs(dX) + Abs(dY) +
+		       3.0f*Abs(m_pathNodes[i].GetZ() - coors.z);
+		if(dist < closestDist){
+			NormalizeXY(dX, dY);
+			dist -= (dX*dirX + dY*dirY - 1.0f)*20.0f;
 			if(dist < closestDist){
-				NormalizeXY(dX, dY);
-				dist -= (dX*dirX + dY*dirY - 1.0f)*20.0f;
-				if(dist < closestDist){
-					closestDist = dist;
-					closestNode = i;
-				}
+				closestDist = dist;
+				closestNode = i;
 			}
-#ifndef MIAMI
-			break;
 		}
-#endif
 	}
 	return closestNode;
 }
@@ -1856,44 +1443,6 @@ CPathFind::GeneratePedCreationCoors(float x, float y, float minDist, float maxDi
 	return false;
 }
 
-#ifndef MIAMI
-CTreadable*
-CPathFind::FindRoadObjectClosestToCoors(CVector coors, uint8 type)
-{
-	int i, j, k;
-	int node1, node2;
-	CTreadable *closestMapObj = nil;
-	float closestDist = 10000.0f;
-
-	for(i = 0; i < m_numMapObjects; i++){
-		CTreadable *mapObj = m_mapObjects[i];
-		if(mapObj->m_nodeIndices[type][0] < 0)
-			continue;
-		CVector vDist = mapObj->GetPosition() - coors;
-		float fDist = Abs(vDist.x) + Abs(vDist.y) + Abs(vDist.z);
-		if(fDist < 200.0f || fDist < closestDist)
-			for(j = 0; j < 12; j++){
-				node1 = mapObj->m_nodeIndices[type][j];
-				if(node1 < 0)
-					break;
-				// FIX: game uses ThePaths here explicitly
-				for(k = 0; k < m_pathNodes[node1].numLinks; k++){
-					node2 = ConnectedNode(m_pathNodes[node1].firstLink + k);
-					float lineDist = CCollision::DistToLine(&m_pathNodes[node1].GetPosition(), &m_pathNodes[node2].GetPosition(), &coors);
-					if(lineDist < closestDist){
-						closestDist = lineDist;
-						if((coors - m_pathNodes[node1].GetPosition()).MagnitudeSqr() < (coors - m_pathNodes[node2].GetPosition()).MagnitudeSqr())
-							closestMapObj = m_mapObjects[m_pathNodes[node1].objectIndex];
-						else
-							closestMapObj = m_mapObjects[m_pathNodes[node2].objectIndex];
-					}
-				}
-			}
-	}
-	return closestMapObj;
-}
-#endif
-
 //--MIAMI: done
 void
 CPathFind::FindNextNodeWandering(uint8 type, CVector coors, CPathNode **lastNode, CPathNode **nextNode, uint8 curDir, uint8 *nextDir)
@@ -1902,24 +1451,8 @@ CPathFind::FindNextNodeWandering(uint8 type, CVector coors, CPathNode **lastNode
 	CPathNode *node;
 
 	if(lastNode == nil || (node = *lastNode) == nil || (coors - (*lastNode)->GetPosition()).MagnitudeSqr() > 7.0f){
-#ifndef MIAMI
-		// need to find the node we're coming from
-		node = nil;
-		CTreadable *obj = FindRoadObjectClosestToCoors(coors, type);
-		float nodeDist = 1000000000.0f;
-		for(i = 0; i < 12; i++){
-			if(obj->m_nodeIndices[type][i] < 0)
-				break;
-			float dist = (coors - m_pathNodes[obj->m_nodeIndices[type][i]].GetPosition()).MagnitudeSqr();
-			if(dist < nodeDist){
-				nodeDist = dist;
-				node = &m_pathNodes[obj->m_nodeIndices[type][i]];
-			}
-		}
-#else
 		int32 nodeIdx = FindNodeClosestToCoors(coors, type, 999999.88f);
 		node = &m_pathNodes[nodeIdx];
-#endif
 	}
 
 	CVector2D vCurDir(Sin(curDir*PI/4.0f), Cos(curDir * PI / 4.0f));
@@ -1975,11 +1508,7 @@ CPathFind::FindNextNodeWandering(uint8 type, CVector coors, CPathNode **lastNode
 	}
 }
 
-#ifndef MIAMI
-static CPathNode *apNodesToBeCleared[4995];
-#else
 static CPathNode *apNodesToBeCleared[6525];
-#endif
 
 //--MIAMI: done
 void
@@ -1997,45 +1526,6 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 	}
 
 	// Find start
-#ifndef MIAMI
-	int numPathsToTry;
-	CTreadable *startObj;
-	if(startNodeId < 0){
-		if(vehicle == nil || (startObj = vehicle->m_treadable[type]) == nil)
-			startObj = FindRoadObjectClosestToCoors(start, type);
-		numPathsToTry = 0;
-		for(i = 0; i < 12; i++){
-			if(startObj->m_nodeIndices[type][i] < 0)
-				break;
-			if(m_pathNodes[startObj->m_nodeIndices[type][i]].group == m_pathNodes[targetNodeId].group)
-				numPathsToTry++;
-		}
-	}else{
-		numPathsToTry = 1;
-		startObj = m_mapObjects[m_pathNodes[startNodeId].objectIndex];
-	}
-	if(numPathsToTry == 0) {
-		*pNumNodes = 0;
-		if(pDist) *pDist = 100000.0f;
-		return;
-	}
-
-	if(startNodeId < 0){
-		// why only check node 0?
-		if(m_pathNodes[startObj->m_nodeIndices[type][0]].group !=
-		   m_pathNodes[targetNodeId].group) {
-			*pNumNodes = 0;
-			if(pDist) *pDist = 100000.0f;
-			return;
-		}
-	}else{
-		if(m_pathNodes[startNodeId].group != m_pathNodes[targetNodeId].group) {
-			*pNumNodes = 0;
-			if(pDist) *pDist = 100000.0f;
-			return;
-		}
-	}
-#else
 	if(startNodeId < 0)
 		startNodeId = FindNodeClosestToCoors(start, type, 999999.88f);
 	if(startNodeId < 0) {
@@ -2053,7 +1543,6 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 		if(pDist) *pDist = 100000.0f;
 		return;
 	}
-#endif
 
 	for(i = 0; i < ARRAY_SIZE(m_searchNodes); i++)
 		m_searchNodes[i].SetNext(nil);
@@ -2064,23 +1553,11 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 	// Dijkstra's algorithm
 	// Find distances
 	int numPathsFound = 0;
-#ifndef MIAMI
-	if(startNodeId < 0 && m_mapObjects[m_pathNodes[targetNodeId].objectIndex] == startObj)
-		numPathsFound++;
-	for(i = 0; numPathsFound < numPathsToTry; i = (i+1) & 0x1FF){
-#else
 	for(i = 0; numPathsFound == 0; i = (i+1) & 0x1FF){
-#endif
 		CPathNode *node;
 		for(node = m_searchNodes[i].GetNext(); node; node = node->GetNext()){
-#ifndef MIAMI
-			if(m_mapObjects[node->objectIndex] == startObj &&
-			   (startNodeId < 0 || node == &m_pathNodes[startNodeId]))
-				numPathsFound++;
-#else
 			if(node == &m_pathNodes[startNodeId])
 				numPathsFound = 1;
-#endif
 
 			for(j = 0; j < node->numLinks; j++){
 				int next = ConnectedNode(node->firstLink + j);
@@ -2100,39 +1577,12 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 
 	// Find out whence to start tracing back
 	CPathNode *curNode;
-#ifndef MIAMI
-	if(startNodeId < 0){
-		int minDist = MAX_DIST;
-		*pNumNodes = 1;
-		for(i = 0; i < 12; i++){
-			if(startObj->m_nodeIndices[type][i] < 0)
-				break;
-			int dist = (m_pathNodes[startObj->m_nodeIndices[type][i]].GetPosition() - start).Magnitude();
-			if(m_pathNodes[startObj->m_nodeIndices[type][i]].distance + dist < minDist){
-				minDist = m_pathNodes[startObj->m_nodeIndices[type][i]].distance + dist;
-				curNode = &m_pathNodes[startObj->m_nodeIndices[type][i]];
-			}
-		}
-		if(maxNumNodes == 0){
-			*pNumNodes = 0;
-		}else{
-			nodes[0] = curNode;
-			*pNumNodes = 1;
-		}
-		if(pDist)
-			*pDist = minDist;
-	}else
-#endif
-	{
-		curNode = &m_pathNodes[startNodeId];
-		*pNumNodes = 0;
-		if(pDist)
-			*pDist = m_pathNodes[startNodeId].distance;
-	}
+	curNode = &m_pathNodes[startNodeId];
+	*pNumNodes = 0;
+	if(pDist)
+		*pDist = m_pathNodes[startNodeId].distance;
 
-#ifdef MIAMI
 	nodes[(*pNumNodes)++] = curNode;
-#endif
 	// Trace back to target and update list of nodes
 	while(*pNumNodes < maxNumNodes && curNode != &m_pathNodes[targetNodeId])
 		for(i = 0; i < curNode->numLinks; i++){
@@ -2146,7 +1596,6 @@ CPathFind::DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector ta
 
 	for(i = 0; i < numNodesToBeCleared; i++)
 		apNodesToBeCleared[i]->distance = MAX_DIST;
-	return;
 }
 
 static CPathNode *pNodeList[32];
@@ -2164,11 +1613,7 @@ CPathFind::TestCoorsCloseness(CVector target, uint8 type, CVector start)
 	else
 		DoPathSearch(type, start, -1, target, nil, &DummyResult2, 0, nil, &dist, 50.0f, -1);
 	if(type == PATH_CAR)
-#ifndef MIAMI
-		return dist < 160.0f;
-#else
 		return dist < 150.0f;
-#endif
 	else
 		return dist < 100.0f;
 }
@@ -2341,7 +1786,6 @@ CPathFind::DisplayPathData(void)
 	}
 }
 
-#ifdef MIAMI
 CPathNode*
 CPathFind::GetNode(int16 index)
 {
@@ -2361,4 +1805,3 @@ CPathFind::GetIndex(CPathNode *node)
 	else
 		return (node - ThePaths.m_pathNodes) + ARRAY_SIZE(ThePaths.m_searchNodes);
 }
-#endif

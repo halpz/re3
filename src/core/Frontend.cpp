@@ -1060,10 +1060,10 @@ CMenuManager::Draw()
 				rightText = TheText.Get(gbBigWhiteDebugLightSwitchedOn ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_PEDROADGROUPS:
-				rightText = TheText.Get(gbShowPedRoadGroups ? "FEM_ON" : "FEM_OFF");
+				// REMOVED(MIAMI)
 				break;
 			case MENUACTION_CARROADGROUPS:
-				rightText = TheText.Get(gbShowCarRoadGroups ? "FEM_ON" : "FEM_OFF");
+				// REMOVED(MIAMI)
 				break;
 			case MENUACTION_COLLISIONPOLYS:
 				rightText = TheText.Get(gbShowCollisionPolys ? "FEM_ON" : "FEM_OFF");
@@ -4904,11 +4904,11 @@ CMenuManager::ProcessOnOffMenuOptions()
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		break;
 	case MENUACTION_PEDROADGROUPS:
-		gbShowPedRoadGroups = !gbShowPedRoadGroups;
+		// REMOVED(MIAMI)
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		break;
 	case MENUACTION_CARROADGROUPS:
-		gbShowCarRoadGroups = !gbShowCarRoadGroups;
+		// REMOVED(MIAMI)
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		break;
 	case MENUACTION_COLLISIONPOLYS:

@@ -8,13 +8,10 @@
 CBaseModelInfo *CModelInfo::ms_modelInfoPtrs[MODELINFOSIZE];
 
 CStore<CSimpleModelInfo, SIMPLEMODELSIZE> CModelInfo::ms_simpleModelStore;
-CStore<CMloModelInfo, MLOMODELSIZE> CModelInfo::ms_mloModelStore;
-CStore<CInstance, MLOINSTANCESIZE> CModelInfo::ms_mloInstanceStore;
 CStore<CTimeModelInfo, TIMEMODELSIZE> CModelInfo::ms_timeModelStore;
 CStore<CClumpModelInfo, CLUMPMODELSIZE> CModelInfo::ms_clumpModelStore;
 CStore<CPedModelInfo, PEDMODELSIZE> CModelInfo::ms_pedModelStore;
 CStore<CVehicleModelInfo, VEHICLEMODELSIZE> CModelInfo::ms_vehicleModelStore;
-CStore<CXtraCompsModelInfo, XTRACOMPSMODELSIZE> CModelInfo::ms_xtraCompsModelStore;
 CStore<C2dEffect, TWODFXSIZE> CModelInfo::ms_2dEffectStore;
 
 void
@@ -26,11 +23,8 @@ CModelInfo::Initialise(void)
 	for(i = 0; i < MODELINFOSIZE; i++)
 		ms_modelInfoPtrs[i] = nil;
 	ms_2dEffectStore.clear();
-	ms_mloInstanceStore.clear();
-	ms_xtraCompsModelStore.clear();
 	ms_simpleModelStore.clear();
 	ms_timeModelStore.clear();
-	ms_mloModelStore.clear();
 	ms_clumpModelStore.clear();
 	ms_pedModelStore.clear();
 	ms_vehicleModelStore.clear();
@@ -90,8 +84,6 @@ CModelInfo::ShutDown(void)
 	int i;
 	for(i = 0; i < ms_simpleModelStore.allocPtr; i++)
 		ms_simpleModelStore.store[i].Shutdown();
-	for(i = 0; i < ms_mloInstanceStore.allocPtr; i++)
-		ms_mloInstanceStore.store[i].Shutdown();
 	for(i = 0; i < ms_timeModelStore.allocPtr; i++)
 		ms_timeModelStore.store[i].Shutdown();
 	for(i = 0; i < ms_clumpModelStore.allocPtr; i++)
@@ -100,18 +92,11 @@ CModelInfo::ShutDown(void)
 		ms_vehicleModelStore.store[i].Shutdown();
 	for(i = 0; i < ms_pedModelStore.allocPtr; i++)
 		ms_pedModelStore.store[i].Shutdown();
-	for(i = 0; i < ms_xtraCompsModelStore.allocPtr; i++)
-		ms_xtraCompsModelStore.store[i].Shutdown();
-	for(i = 0; i < ms_mloInstanceStore.allocPtr; i++)
-		ms_mloInstanceStore.store[i].Shutdown();
 	for(i = 0; i < ms_2dEffectStore.allocPtr; i++)
 		ms_2dEffectStore.store[i].Shutdown();
 
 	ms_2dEffectStore.clear();
 	ms_simpleModelStore.clear();
-	ms_mloInstanceStore.clear();
-	ms_mloModelStore.clear();
-	ms_xtraCompsModelStore.clear();
 	ms_timeModelStore.clear();
 	ms_pedModelStore.clear();
 	ms_clumpModelStore.clear();
@@ -125,18 +110,6 @@ CModelInfo::AddSimpleModel(int id)
 	modelinfo = CModelInfo::ms_simpleModelStore.alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->Init();
-	return modelinfo;
-}
-
-CMloModelInfo *
-CModelInfo::AddMloModel(int id)
-{
-	CMloModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_mloModelStore.alloc();
-	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
-	modelinfo->m_clump = nil;
-	modelinfo->firstInstance = 0;
-	modelinfo->lastInstance = 0;
 	return modelinfo;
 }
 
@@ -200,7 +173,6 @@ CModelInfo::GetModelInfo(const char *name, int *id)
 	return nil;
 }
 
-#ifdef MIAMI
 CBaseModelInfo*
 CModelInfo::GetModelInfo(const char *name, int minIndex, int maxIndex)
 {
@@ -212,7 +184,6 @@ CModelInfo::GetModelInfo(const char *name, int minIndex, int maxIndex)
 	}
 	return nil;
 }
-#endif
 
 bool
 CModelInfo::IsBoatModel(int32 id)
@@ -226,32 +197,6 @@ CModelInfo::IsBikeModel(int32 id)
 {
 	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
 		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_BIKE;
-}
-
-#ifndef MIAMI
-void
-CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
-{
-	int i;
-	CBaseModelInfo *mi;
-	CColModel *colmodel;
-
-	for(i = 0; i < MODELINFOSIZE; i++){
-		mi = GetModelInfo(i);
-		if(mi){
-			colmodel = mi->GetColModel();
-			if(colmodel && colmodel->level != LEVEL_NONE && colmodel->level != level)
-				colmodel->RemoveCollisionVolumes();
-		}
-	}
-}
-#endif
-
-void
-CModelInfo::ConstructMloClumps()
-{
-	for (int i = 0; i < ms_mloModelStore.allocPtr; i++)
-		ms_mloModelStore.store[i].ConstructClump();
 }
 
 void

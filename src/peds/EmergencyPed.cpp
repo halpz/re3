@@ -44,11 +44,6 @@ CEmergencyPed::InRange(CPed *victim)
 void
 CEmergencyPed::ProcessControl(void)
 {
-#ifndef MIAMI
-	if (m_nZoneLevel > LEVEL_NONE && m_nZoneLevel != CCollision::ms_collisionInMemory)
-		return;
-#endif
-
 	CPed::ProcessControl();
 	if (bWasPostponed)
 		return;

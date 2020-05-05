@@ -24,10 +24,8 @@
 #include "ZoneCull.h"
 #include "CdStream.h"
 #include "FileLoader.h"
-#ifdef MIAMI
 #include "Streaming.h"
 #include "ColStore.h"
-#endif
 
 char CFileLoader::ms_line[256];
 
@@ -50,16 +48,12 @@ CFileLoader::LoadLevel(const char *filename)
 {
 	int fd;
 	RwTexDictionary *savedTxd;
-	eLevelName savedLevel;
 	bool objectsLoaded;
 	char *line;
 	char txdname[64];
 
 	savedTxd = RwTexDictionaryGetCurrent();
 	objectsLoaded = false;
-#ifndef MIAMI
-	savedLevel = CGame::currLevel;
-#endif
 	if(savedTxd == nil){
 		savedTxd = RwTexDictionaryCreate();
 		RwTexDictionarySetCurrent(savedTxd);
@@ -83,17 +77,8 @@ CFileLoader::LoadLevel(const char *filename)
 			AddTexDictionaries(savedTxd, txd);
 			RwTexDictionaryDestroy(txd);
 		}else if(strncmp(line, "COLFILE", 7) == 0){
-#ifndef MIAMI
-			int level;
-			sscanf(line+8, "%d", &level);
-			CGame::currLevel = (eLevelName)level;
-			LoadingScreenLoadingFile(line+10);
-			LoadCollisionFile(line+10);
-			CGame::currLevel = savedLevel;
-#else
 			LoadingScreenLoadingFile(line+10);
 			LoadCollisionFile(line+10, 0);
-#endif
 		}else if(strncmp(line, "MODELFILE", 9) == 0){
 			LoadingScreenLoadingFile(line + 10);
 			LoadModelFile(line + 10);
@@ -105,16 +90,11 @@ CFileLoader::LoadLevel(const char *filename)
 			LoadObjectTypes(line + 4);
 		}else if(strncmp(line, "IPL", 3) == 0){
 			if(!objectsLoaded){
-#ifndef MIAMI
-				CModelInfo::ConstructMloClumps();
-				CObjectData::Initialise("DATA\\OBJECT.DAT");
-#else
 				LoadingScreenLoadingFile("Collision");
 				CObjectData::Initialise("DATA\\OBJECT.DAT");
 				CStreaming::Init();
 				CColStore::LoadAllCollision();
-				// TODO: anim indices
-#endif
+				// TODO(MIAMI): anim indices
 				objectsLoaded = true;
 			}
 			LoadingScreenLoadingFile(line + 4);
@@ -132,41 +112,13 @@ CFileLoader::LoadLevel(const char *filename)
 	CFileMgr::CloseFile(fd);
 	RwTexDictionarySetCurrent(savedTxd);
 
-#ifdef MIAMI
 	int i;
 	for(i = 1; i < COLSTORESIZE; i++)
 		if(CColStore::GetSlot(i))
 			CColStore::GetBoundingBox(i).Grow(120.0f);
 	CWorld::RepositionCertainDynamicObjects();
 	CColStore::RemoveAllCollision();
-#endif
 }
-
-#ifndef MIAMI
-void
-CFileLoader::LoadCollisionFromDatFile(int currlevel)
-{
-	int fd;
-	char *line;
-
-	fd = CFileMgr::OpenFile(CGame::aDatFile, "r");
-	assert(fd > 0);
-
-	for(line = LoadLine(fd); line; line = LoadLine(fd)){
-		if(*line == '#')
-			continue;
-
-		if(strncmp(line, "COLFILE", 7) == 0){
-			int level;
-			sscanf(line+8, "%d", &level);
-			if(currlevel == level)
-				LoadCollisionFile(line+10);
-		}
-	}
-
-	CFileMgr::CloseFile(fd);
-}
-#endif
 
 char*
 CFileLoader::LoadLine(int fd)
@@ -209,13 +161,8 @@ struct ColHeader
 };
 
 //--MIAMI: done
-#ifndef MIAMI
-void
-CFileLoader::LoadCollisionFile(const char *filename)
-#else
 void
 CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
-#endif
 {
 	int fd;
 	char modelname[24];
@@ -232,17 +179,11 @@ CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
 
 		mi = CModelInfo::GetModelInfo(modelname, nil);
 		if(mi){
-#ifndef MIAMI
-			if(mi->GetColModel()){
-#else
 			if(mi->GetColModel() && mi->DoesOwnColModel()){
-#endif
 				LoadCollisionModel(work_buff+24, *mi->GetColModel(), modelname);
 			}else{
 				CColModel *model = new CColModel;
-#ifdef MIAMI
 				model->level = colSlot;
-#endif
 				LoadCollisionModel(work_buff+24, *model, modelname);
 				mi->SetColModel(model, true);
 			}
@@ -254,7 +195,6 @@ CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
 	CFileMgr::CloseFile(fd);
 }
 
-#ifdef MIAMI
 bool
 CFileLoader::LoadCollisionFileFirstTime(uint8 *buffer, uint32 size, uint8 colSlot)
 {
@@ -278,8 +218,6 @@ CFileLoader::LoadCollisionFileFirstTime(uint8 *buffer, uint32 size, uint8 colSlo
 
 		mi = CModelInfo::GetModelInfo(modelname, &modelIndex);
 		if(mi){
-if(modelIndex == 855)
-modelIndex = modelIndex;
 			CColStore::IncludeModelIndex(colSlot, modelIndex);
 			CColModel *model = new CColModel;
 			model->level = colSlot;
@@ -328,7 +266,6 @@ CFileLoader::LoadCollisionFile(uint8 *buffer, uint32 size, uint8 colSlot)
 	}
 	return true;
 }
-#endif
 
 void
 CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
@@ -617,7 +554,6 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	enum {
 		NONE,
 		OBJS,
-		MLO,
 		TOBJ,
 		HIER,
 		CARS,
@@ -652,16 +588,10 @@ CFileLoader::LoadObjectTypes(const char *filename)
 			else if(strncmp(line, "path", 4) == 0) section = PATH;
 			else if(strncmp(line, "2dfx", 4) == 0) section = TWODFX;
 		}else if(strncmp(line, "end", 3) == 0){
-			section = section == MLO ? OBJS : NONE;
+			section = NONE;
 		}else switch(section){
 		case OBJS:
-			if(strncmp(line, "sta", 3) == 0)
-				mlo = LoadMLO(line);
-			else
-				LoadObject(line);
-			break;
-		case MLO:
-			LoadMLOInstance(mlo, line);
+			LoadObject(line);
 			break;
 		case TOBJ:
 			LoadTimeObject(line);
@@ -762,57 +692,6 @@ CFileLoader::LoadObject(const char *line)
 	mi->m_firstDamaged = damaged;
 	mi->SetTexDictionary(txd);
 	MatchModelString(model, id);
-}
-
-int
-CFileLoader::LoadMLO(const char *line)
-{
-	char smth[8];
-	char name[24];
-	int modelIndex;
-	float someFloat;
-
-	sscanf(line, "%s %s %d %f", smth, name, &modelIndex, &someFloat);
-	CMloModelInfo *minfo = CModelInfo::AddMloModel(modelIndex);
-	minfo->SetName(name);
-	minfo->field_34 = someFloat;
-	int instId = CModelInfo::GetMloInstanceStore().allocPtr;
-	minfo->firstInstance = instId;
-	minfo->lastInstance = instId;
-	minfo->SetTexDictionary("generic");
-	return modelIndex;
-}
-
-void
-CFileLoader::LoadMLOInstance(int id, const char *line)
-{
-	char name[24];
-	RwV3d pos, scale, rot;
-	float angle;
-	int modelIndex;
-
-	CMloModelInfo *minfo = (CMloModelInfo*)CModelInfo::GetModelInfo(id);
-	sscanf(line, "%d %s %f %f %f %f %f %f %f %f %f %f",
-		&modelIndex,
-		name,
-		&pos.x, &pos.y, &pos.z,
-		&scale.x, &scale.y, &scale.z,
-		&rot.x, &rot.y, &rot.z,
-		&angle);
-	float rad = Acos(angle) * 2.0f;
-	CInstance *inst = CModelInfo::GetMloInstanceStore().alloc();
-	minfo->lastInstance++;
-
-	RwMatrix *matrix = RwMatrixCreate();
-	RwMatrixScale(matrix, &scale, rwCOMBINEREPLACE);
-	RwMatrixRotate(matrix, &rot, -RADTODEG(rad), rwCOMBINEPOSTCONCAT);
-	RwMatrixTranslate(matrix, &pos, rwCOMBINEPOSTCONCAT);
-
-	inst->GetMatrix() = CMatrix(matrix);
-	inst->GetMatrix().UpdateRW();
-
-	inst->m_modelIndex = modelIndex;
-	RwMatrixDestroy(matrix);
 }
 
 void
@@ -1182,7 +1061,6 @@ CFileLoader::LoadObjectInstance(const char *line)
 	CSimpleModelInfo *mi;
 	RwMatrix *xform;
 	CEntity *entity;
-#ifdef MIAMI
 	float area;
 
 	if(sscanf(line, "%d %s %f %f %f %f %f %f %f %f %f %f %f",
@@ -1190,27 +1068,22 @@ CFileLoader::LoadObjectInstance(const char *line)
 	          &trans.x, &trans.y, &trans.z,
 	          &scale.x, &scale.y, &scale.z,
 	          &axis.x, &axis.y, &axis.z, &angle) != 13){
-#endif
-	if(sscanf(line, "%d %s %f %f %f %f %f %f %f %f %f %f",
-	          &id, name,
-	          &trans.x, &trans.y, &trans.z,
-	          &scale.x, &scale.y, &scale.z,
-	          &axis.x, &axis.y, &axis.z, &angle) != 12)
-		return;
-#ifdef MIAMI
+		if(sscanf(line, "%d %s %f %f %f %f %f %f %f %f %f %f",
+		          &id, name,
+		          &trans.x, &trans.y, &trans.z,
+		          &scale.x, &scale.y, &scale.z,
+		          &axis.x, &axis.y, &axis.z, &angle) != 12)
+			return;
 		area = 0;
 	}
-#endif
 
 	mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
 	if(mi == nil)
 		return;
 	assert(mi->IsSimple());
 
-#ifdef MIAMI
 	if(!CStreaming::IsObjectInCdImage(id))
 		debug("Not in cdimage %s\n", mi->GetName());
-#endif
 
 	angle = -RADTODEG(2.0f * acosf(angle));
 	xform = RwMatrixCreate();
@@ -1226,9 +1099,7 @@ CFileLoader::LoadObjectInstance(const char *line)
 		entity->SetModelIndexNoCreate(id);
 		entity->GetMatrix() = CMatrix(xform);
 		entity->m_level = CTheZones::GetLevelFromPosition(entity->GetPosition());
-#ifdef MIAMI
 		entity->m_area = area;
-#endif
 		if(mi->IsSimple()){
 			if(mi->m_isBigBuilding)
 				entity->SetupBigBuilding();
@@ -1239,27 +1110,24 @@ CFileLoader::LoadObjectInstance(const char *line)
 			entity->bIsVisible = false;
 		CWorld::Add(entity);
 
-#ifdef MIAMI
 		CColModel *col = entity->GetColModel();
 		if(col->numSpheres || col->numBoxes || col->numTriangles){
 			if(col->level != 0)
 				CColStore::GetBoundingBox(col->level).ContainRect(entity->GetBoundRect());
 		}else
 			entity->bUsesCollision = false;
-		// TODO: set some flag here if col min is below 6
-#endif
+		// TODO(MIAMI): set some flag here if col min is below 6
 	}else{
 		entity = new CDummyObject;
 		entity->SetModelIndexNoCreate(id);
 		entity->GetMatrix() = CMatrix(xform);
 		CWorld::Add(entity);
+		// TODO(MIAMI)
 //--MIAMI: TODO
 		if(IsGlass(entity->GetModelIndex()))
 			entity->bIsVisible = false;
 		entity->m_level = CTheZones::GetLevelFromPosition(entity->GetPosition());
-#ifdef MIAMI
 		entity->m_area = area;
-#endif
 	}
 
 	RwMatrixDestroy(xform);

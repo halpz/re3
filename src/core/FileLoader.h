@@ -5,16 +5,11 @@ class CFileLoader
 	static char ms_line[256];
 public:
 	static void LoadLevel(const char *filename);
-	static void LoadCollisionFromDatFile(int currlevel);
 	static char *LoadLine(int fd);
 	static RwTexDictionary *LoadTexDictionary(const char *filename);
-#ifndef MIAMI
-	static void LoadCollisionFile(const char *filename);
-#else
-	static void LoadCollisionFile(const char *filename, uint8 colSlot = 0);
+	static void LoadCollisionFile(const char *filename, uint8 colSlot);
 	static bool LoadCollisionFileFirstTime(uint8 *buffer, uint32 size, uint8 colSlot);
 	static bool LoadCollisionFile(uint8 *buffer, uint32 size, uint8 colSlot);
-#endif
 	static void LoadCollisionModel(uint8 *buf, struct CColModel &model, char *name);
 	static void LoadModelFile(const char *filename);
 	static RpAtomic *FindRelatedModelInfoCB(RpAtomic *atomic, void *data);
@@ -29,8 +24,6 @@ public:
 
 	static void LoadObjectTypes(const char *filename);
 	static void LoadObject(const char *line);
-	static int LoadMLO(const char *line);
-	static void LoadMLOInstance(int id, const char *line);
 	static void LoadTimeObject(const char *line);
 	static void LoadClumpObject(const char *line);
 	static void LoadVehicleObject(const char *line);

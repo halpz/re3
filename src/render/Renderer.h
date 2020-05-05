@@ -2,8 +2,6 @@
 
 class CEntity;
 
-extern bool gbShowPedRoadGroups;
-extern bool gbShowCarRoadGroups;
 extern bool gbShowCollisionPolys;
 extern bool gbShowCollisionLines;
 extern bool gbShowCullZoneDebugStuff;
