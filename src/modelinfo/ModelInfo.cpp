@@ -8,7 +8,6 @@
 CBaseModelInfo *CModelInfo::ms_modelInfoPtrs[MODELINFOSIZE];
 
 CStore<CSimpleModelInfo, SIMPLEMODELSIZE> CModelInfo::ms_simpleModelStore;
-CStore<CInstance, MLOINSTANCESIZE> CModelInfo::ms_mloInstanceStore;
 CStore<CTimeModelInfo, TIMEMODELSIZE> CModelInfo::ms_timeModelStore;
 CStore<CClumpModelInfo, CLUMPMODELSIZE> CModelInfo::ms_clumpModelStore;
 CStore<CPedModelInfo, PEDMODELSIZE> CModelInfo::ms_pedModelStore;
@@ -24,7 +23,6 @@ CModelInfo::Initialise(void)
 	for(i = 0; i < MODELINFOSIZE; i++)
 		ms_modelInfoPtrs[i] = nil;
 	ms_2dEffectStore.clear();
-	ms_mloInstanceStore.clear();
 	ms_simpleModelStore.clear();
 	ms_timeModelStore.clear();
 	ms_clumpModelStore.clear();
@@ -86,8 +84,6 @@ CModelInfo::ShutDown(void)
 	int i;
 	for(i = 0; i < ms_simpleModelStore.allocPtr; i++)
 		ms_simpleModelStore.store[i].Shutdown();
-	for(i = 0; i < ms_mloInstanceStore.allocPtr; i++)
-		ms_mloInstanceStore.store[i].Shutdown();
 	for(i = 0; i < ms_timeModelStore.allocPtr; i++)
 		ms_timeModelStore.store[i].Shutdown();
 	for(i = 0; i < ms_clumpModelStore.allocPtr; i++)
@@ -96,14 +92,11 @@ CModelInfo::ShutDown(void)
 		ms_vehicleModelStore.store[i].Shutdown();
 	for(i = 0; i < ms_pedModelStore.allocPtr; i++)
 		ms_pedModelStore.store[i].Shutdown();
-	for(i = 0; i < ms_mloInstanceStore.allocPtr; i++)
-		ms_mloInstanceStore.store[i].Shutdown();
 	for(i = 0; i < ms_2dEffectStore.allocPtr; i++)
 		ms_2dEffectStore.store[i].Shutdown();
 
 	ms_2dEffectStore.clear();
 	ms_simpleModelStore.clear();
-	ms_mloInstanceStore.clear();
 	ms_timeModelStore.clear();
 	ms_pedModelStore.clear();
 	ms_clumpModelStore.clear();
