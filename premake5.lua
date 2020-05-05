@@ -103,6 +103,10 @@ project "librw"
 	filter  {}
 end
 
+local function addSrcFiles( prefix )
+	return prefix .. "/*cpp", prefix .. "/*.h", prefix .. "/*.c", prefix .. "/*.ico", prefix .. "/*.aps", prefix .. "/*.rc"
+end
+
 project "reVC"
 	kind "WindowedApp"
 	targetname "re3"
@@ -113,27 +117,29 @@ project "reVC"
 	
 	defines { "MIAMI" }
 
-	files { "src/*.*" }
-	files { "src/animation/*.*" }
-	files { "src/audio/*.*" }
-	files { "src/control/*.*" }
-	files { "src/core/*.*" }
-	files { "src/entities/*.*" }
-	files { "src/math/*.*" }
-	files { "src/modelinfo/*.*" }
-	files { "src/objects/*.*" }
-	files { "src/peds/*.*" }
-	files { "src/render/*.*" }
-	files { "src/rw/*.*" }
-	files { "src/save/*.*" }
-	files { "src/skel/*.*" }
-	files { "src/skel/win/*.*" }
-	files { "src/skel/glfw/*.*" }
-	files { "src/text/*.*" }
-	files { "src/vehicles/*.*" }
-	files { "src/weapons/*.*" }
-	files { "src/extras/*.*" }
-	files { "eax/*.*" }
+	files { addSrcFiles("src") }
+	files { addSrcFiles("src/animation") }
+	files { addSrcFiles("src/audio") }
+	files { addSrcFiles("src/audio/miles") }
+	files { addSrcFiles("src/audio/openal") }
+	files { addSrcFiles("src/control") }
+	files { addSrcFiles("src/core") }
+	files { addSrcFiles("src/entities") }
+	files { addSrcFiles("src/math") }
+	files { addSrcFiles("src/modelinfo") }
+	files { addSrcFiles("src/objects") }
+	files { addSrcFiles("src/peds") }
+	files { addSrcFiles("src/render") }
+	files { addSrcFiles("src/rw") }
+	files { addSrcFiles("src/save") }
+	files { addSrcFiles("src/skel") }
+	files { addSrcFiles("src/skel/win") }
+	files { addSrcFiles("src/skel/glfw") }
+	files { addSrcFiles("src/text") }
+	files { addSrcFiles("src/vehicles") }
+	files { addSrcFiles("src/weapons") }
+	files { addSrcFiles("src/extras") }
+	files { addSrcFiles("eax") }
 
 	includedirs { "src" }
 	includedirs { "src/animation" }
@@ -174,7 +180,7 @@ project "reVC"
 	
 	filter "platforms:*librw*"
 		defines { "LIBRW" }
-		files { "src/fakerw/*.*" }
+		files { addSrcFiles("src/fakerw") }
 		includedirs { "src/fakerw" }
 		includedirs { Librw }
 		if(_OPTIONS["with-librw"]) then
