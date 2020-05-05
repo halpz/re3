@@ -120,8 +120,8 @@ project "reVC"
 	files { addSrcFiles("src") }
 	files { addSrcFiles("src/animation") }
 	files { addSrcFiles("src/audio") }
-	files { addSrcFiles("src/audio/miles") }
-	files { addSrcFiles("src/audio/openal") }
+	--files { addSrcFiles("src/audio/miles") }
+	--files { addSrcFiles("src/audio/openal") }
 	files { addSrcFiles("src/control") }
 	files { addSrcFiles("src/core") }
 	files { addSrcFiles("src/entities") }
