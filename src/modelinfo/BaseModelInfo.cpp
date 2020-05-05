@@ -6,7 +6,7 @@
 #include "BaseModelInfo.h"
 
 
-CBaseModelInfo::CBaseModelInfo(ModeInfoType type)
+CBaseModelInfo::CBaseModelInfo(ModelInfoType type)
 {
 	m_colModel = nil;
 	m_twodEffects = nil;

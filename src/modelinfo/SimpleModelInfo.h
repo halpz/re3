@@ -25,7 +25,7 @@ public:
 	uint16  m_noZwrite      : 1;
 
 	CSimpleModelInfo(void) : CBaseModelInfo(MITYPE_SIMPLE) {}
-	CSimpleModelInfo(ModeInfoType id) : CBaseModelInfo(id) {}
+	CSimpleModelInfo(ModelInfoType id) : CBaseModelInfo(id) {}
 	~CSimpleModelInfo() {}
 	void DeleteRwObject(void);
 	RwObject *CreateInstance(void);

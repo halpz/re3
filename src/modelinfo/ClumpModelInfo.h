@@ -32,7 +32,7 @@ public:
 	RpClump *m_clump;
 
 	CClumpModelInfo(void) : CBaseModelInfo(MITYPE_CLUMP) {}
-	CClumpModelInfo(ModeInfoType id) : CBaseModelInfo(id) {}
+	CClumpModelInfo(ModelInfoType id) : CBaseModelInfo(id) {}
 	~CClumpModelInfo() {}
 	void DeleteRwObject(void);
 	RwObject *CreateInstance(void);

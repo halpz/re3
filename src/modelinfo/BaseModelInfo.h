@@ -4,7 +4,7 @@
 
 #define MAX_MODEL_NAME (24)
 
-enum ModeInfoType : uint8
+enum ModelInfoType : uint8
 {
 	MITYPE_NA        = 0,
 	MITYPE_SIMPLE    = 1,
@@ -15,7 +15,7 @@ enum ModeInfoType : uint8
 	MITYPE_PED       = 6,
 	MITYPE_XTRACOMPS = 7,
 };
-static_assert(sizeof(ModeInfoType) == 1, "ModeInfoType: error");
+static_assert(sizeof(ModelInfoType) == 1, "ModeInfoType: error");
 
 class C2dEffect;
 
@@ -28,12 +28,12 @@ protected:
 	int16        m_objectId;
 	uint16       m_refCount;
 	int16        m_txdSlot;
-	ModeInfoType m_type;
+	ModelInfoType m_type;
 	uint8        m_num2dEffects;
 	bool         m_freeCol;
 
 public:
-	CBaseModelInfo(ModeInfoType type);
+	CBaseModelInfo(ModelInfoType type);
 	virtual ~CBaseModelInfo() {}
 	virtual void Shutdown(void);
 	virtual void DeleteRwObject(void) = 0;
@@ -42,7 +42,7 @@ public:
 	virtual RwObject *GetRwObject(void) = 0;
 
 	// one day it becomes virtual
-	ModeInfoType GetModelType() const { return m_type; }
+	ModelInfoType GetModelType() const { return m_type; }
 	bool IsSimple(void) { return m_type == MITYPE_SIMPLE || m_type == MITYPE_TIME; }
 	bool IsClump(void) { return m_type == MITYPE_CLUMP || m_type == MITYPE_PED || m_type == MITYPE_VEHICLE ||
 		m_type == MITYPE_MLO || m_type == MITYPE_XTRACOMPS;	// unused but what the heck
