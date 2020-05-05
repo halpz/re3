@@ -696,7 +696,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 		if (pVehicle->bExtendedRange)
 			threshold *= 1.5f;
 		if (distanceToPlayer > threshold && !CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
-			if (pVehicle->GetIsOnScreenAndNotCulled()){
+			if (pVehicle->GetIsOnScreen() && CRenderer::IsEntityCullZoneVisible(pVehicle)) {
 				pVehicle->bFadeOut = true;
 			}else{
 				CWorld::Remove(pVehicle);
@@ -722,7 +722,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 	if (pVehicle->GetStatus() != STATUS_WRECKED || pVehicle->m_nTimeOfDeath == 0)
 		return;
 	if (CTimer::GetTimeInMilliseconds() > pVehicle->m_nTimeOfDeath + 60000 &&
-		!pVehicle->GetIsOnScreenAndNotCulled()){
+		!(pVehicle->GetIsOnScreen() && CRenderer::IsEntityCullZoneVisible(pVehicle)) ){
 		if ((pVehicle->GetPosition() - vecPlayerPos).MagnitudeSqr() > SQR(7.5f)){
 			if (!CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
 				CWorld::Remove(pVehicle);
@@ -2743,13 +2743,9 @@ bool CCarCtrl::ThisRoadObjectCouldMove(int16 mi)
 
 bool CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 {
-#ifdef GTA_BRIDGE	// actually they forgot that in VC...
 	// bridge moves up and down
 	return x > -342.0f && x < -219.0f &&
 		y > -677.0f && y < -580.0f;
-#else
-	return false;
-#endif
 }
 
 float CCarCtrl::FindSpeedMultiplierWithSpeedFromNodes(int8 type)

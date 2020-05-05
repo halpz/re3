@@ -633,11 +633,7 @@ CCamera::CamControl(void)
 					m_bInitialNodeFound = false;
 					m_bInitialNoNodeStaticsSet = false;
 				}
-#ifdef GTA_TRAIN
 				Process_Train_Camera_Control();
-#else
-				assert(0 && "this can't happen");
-#endif
 			}else{
 				if(((CVehicle*)pTargetEntity)->IsBoat())
 					boatTarget = true;
@@ -2713,7 +2709,6 @@ CCamera::DontProcessObbeCinemaCamera(void)
 	bDidWeProcessAnyCinemaCam = false;
 }
 
-#ifdef GTA_TRAIN
 void
 CCamera::LoadTrainCamNodes(char const *name)
 {
@@ -2891,7 +2886,6 @@ CCamera::Process_Train_Camera_Control(void)
 		}
 	}
 }
-#endif
 
 
 void
