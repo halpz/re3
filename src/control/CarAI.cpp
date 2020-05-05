@@ -189,7 +189,6 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			}
 			if (pVehicle->bIsLawEnforcer)
 				MellowOutChaseSpeed(pVehicle);
-#endif
 			break;
 		case MISSION_GOTOCOORDS:
 			if ((pVehicle->AutoPilot.m_vecDestinationCoors - pVehicle->GetPosition()).Magnitude2D() < DISTANCE_TO_SWITCH_DISTANCE_GOTO ||
