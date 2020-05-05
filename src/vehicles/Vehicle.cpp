@@ -1354,7 +1354,6 @@ CVehicle::Load(uint8*& buf)
 }
 #endif
 
-#ifdef MIAMI
 eVehicleAppearance
 //--MIAMI: TODO, implement VC version, appearance != type
 // This would work for cars, boats and bikes but not for planes and helis
@@ -1372,4 +1371,3 @@ CVehicle::GetVehicleAppearance(void)
 		return VEHICLE_HELI;
 	return VEHICLE_NONE;
 }
-#endif

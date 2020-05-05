@@ -26,7 +26,6 @@ enum eCarMission : uint8
 	MISSION_BLOCKCAR_FARAWAY,
 	MISSION_BLOCKCAR_CLOSE,
 	MISSION_BLOCKCAR_HANDBRAKESTOP,
-#ifdef MIAMI
 	MISSION_HELI_FLYTOCOORS,
 	MISSION_ATTACKPLAYER,
 	MISSION_PLANE_FLYTOCOORS,
@@ -34,7 +33,6 @@ enum eCarMission : uint8
 	MISSION_SLOWLY_DRIVE_TOWARDS_PLAYER_1,
 	MISSION_SLOWLY_DRIVE_TOWARDS_PLAYER_2,
 	MISSION_BLOCKPLAYER_FORWARDANDBACK
-#endif
 };
 
 enum eCarTempAction : uint8
@@ -84,18 +82,14 @@ public:
 	uint32 m_nTimeTempAction;
 	float m_fMaxTrafficSpeed;
 	uint8 m_nCruiseSpeed;
-#ifdef MIAMI
 	uint8 m_nCruiseSpeedMultiplierType;
 	float m_fCruiseSpeedMultiplier;
-#endif
 	uint8 m_bSlowedDownBecauseOfCars : 1;
 	uint8 m_bSlowedDownBecauseOfPeds : 1;
 	uint8 m_bStayInCurrentLevel : 1;
 	uint8 m_bStayInFastLane : 1;
 	uint8 m_bIgnorePathfinding : 1;
-#ifdef MIAMI
 	uint8 m_nSwitchDistance;
-#endif
 	CVector m_vecDestinationCoors;
 	CPathNode *m_aPathFindNodesInfo[NUM_PATH_NODES_IN_AUTOPILOT];
 	int16 m_nPathFindNodesCount;
@@ -125,10 +119,8 @@ public:
 		m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 		m_nAntiReverseTimer = m_nTimeToStartMission;
 		m_bStayInFastLane = false;
-#ifdef MIAMI
 		m_nCruiseSpeedMultiplierType = 0;
 		m_fCruiseSpeedMultiplier = 1.0f;
-#endif
 	}
 
 	void ModifySpeed(float);

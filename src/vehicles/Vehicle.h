@@ -109,7 +109,6 @@ enum eFlightModel
 	FLIGHT_MODEL_SEAPLANE
 };
 
-#ifdef MIAMI
 enum eVehicleAppearance
 {
 	VEHICLE_NONE,
@@ -119,7 +118,6 @@ enum eVehicleAppearance
 	VEHICLE_BOAT,
 	VEHICLE_PLANE,
 };
-#endif
 
 // Or Weapon.h?
 void FireOneInstantHitRound(CVector *shotSource, CVector *shotTarget, int32 damage);
@@ -184,9 +182,7 @@ public:
 	uint8 bIsCarParkVehicle : 1; // Car has been created using the special CAR_PARK script command
 	uint8 bHasAlreadyBeenRecorded : 1; // Used for replays
 
-#ifdef MIAMI
 	uint8 bParking : 1;
-#endif;
 
 	int8 m_numPedsUseItAsCover;
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
@@ -252,9 +248,7 @@ public:
 	virtual void Load(uint8*& buf);
 #endif
 
-#ifdef MIAMI
 	eVehicleAppearance GetVehicleAppearance(void);
-#endif
 	bool IsCar(void) { return m_vehType == VEHICLE_TYPE_CAR; }
 	bool IsBoat(void) { return m_vehType == VEHICLE_TYPE_BOAT; }
 	bool IsTrain(void) { return m_vehType == VEHICLE_TYPE_TRAIN; }

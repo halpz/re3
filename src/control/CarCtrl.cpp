@@ -2752,7 +2752,6 @@ bool CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 #endif
 }
 
-#ifdef MIAMI
 float CCarCtrl::FindSpeedMultiplierWithSpeedFromNodes(int8 type)
 {
 	switch (type)
@@ -2762,4 +2761,3 @@ float CCarCtrl::FindSpeedMultiplierWithSpeedFromNodes(int8 type)
 	}
 	return 1.0f;
 }
-#endif
