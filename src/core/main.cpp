@@ -1134,7 +1134,7 @@ void
 InitialiseGame(void)
 {
 	LoadingScreen(nil, nil, "loadsc0");
-	CGame::Initialise("DATA\\GTA3.DAT");
+	CGame::Initialise("DATA\\GTA_VC.DAT");
 }
 
 RsEventStatus

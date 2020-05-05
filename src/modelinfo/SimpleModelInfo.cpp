@@ -55,7 +55,7 @@ CSimpleModelInfo::Init(void)
 	m_atomics[2] = nil;
 	m_numAtomics = 0;
 	m_firstDamaged  = 0;
-	m_normalCull    = 0;
+	m_wetRoadReflection    = 0;
 	m_isDamaged     = 0;
 	m_isBigBuilding = 0;
 	m_noFade        = 0;
@@ -64,6 +64,10 @@ CSimpleModelInfo::Init(void)
 	m_isSubway      = 0;
 	m_ignoreLight   = 0;
 	m_noZwrite      = 0;
+	m_noShadows     = 0;
+	m_ignoreDrawDist  = 0;
+	m_isCodeGlass     = 0;
+	m_isArtistGlass   = 0;
 }
 
 void
@@ -154,6 +158,8 @@ CSimpleModelInfo::FindRelatedModel(void)
 	}
 }
 
+#define NEAR_DRAW_DIST 0.0f	// 100.0f in liberty city
+
 void
 CSimpleModelInfo::SetupBigBuilding(void)
 {
@@ -162,9 +168,13 @@ CSimpleModelInfo::SetupBigBuilding(void)
 		m_isBigBuilding = 1;
 		FindRelatedModel();
 		related = GetRelatedModel();
-		if(related)
+		if(related){
 			m_lodDistances[2] = related->GetLargestLodDistance()/TheCamera.LODDistMultiplier;
-		else
-			m_lodDistances[2] = 100.0f;
+			if(m_drawLast){
+				m_drawLast = false;
+				debug("%s was draw last\n", GetName());
+			}
+		}else
+			m_lodDistances[2] = NEAR_DRAW_DIST;
 	}
 }

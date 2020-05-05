@@ -3182,12 +3182,14 @@ CCamera::GetScreenFadeStatus(void)
 void
 CCamera::RenderMotionBlur(void)
 {
+#ifndef MIAMI	// temporary
 	if(m_BlurType == 0)
 		return;
 
 	CMBlur::MotionBlurRender(m_pRwCamera,
 		m_BlurRed, m_BlurGreen, m_BlurBlue,
 		m_motionBlur, m_BlurType, m_imotionBlurAddAlpha);
+#endif
 }
 
 void

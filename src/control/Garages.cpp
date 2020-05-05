@@ -156,10 +156,7 @@ void CGarages::Init(void)
 	AudioEntity = DMAudio.CreateEntity(AUDIOTYPE_GARAGE, (void*)1);
 	if (AudioEntity >= 0)
 		DMAudio.SetEntityStatus(AudioEntity, 1);
-	AddOne(
-		CRUSHER_GARAGE_X1, CRUSHER_GARAGE_Y1, CRUSHER_GARAGE_Z1,
-		CRUSHER_GARAGE_X2, CRUSHER_GARAGE_Y2, CRUSHER_GARAGE_Z2,
-		GARAGE_CRUSHER, 0);
+	// MIAMI: removed crusher
 }
 
 #ifndef PS2

@@ -109,7 +109,7 @@ end
 
 project "reVC"
 	kind "WindowedApp"
-	targetname "re3"
+	targetname "reVC"
 	targetdir "bin/%{cfg.platform}/%{cfg.buildcfg}"
 	targetextension ".exe"
 	characterset ("MBCS")

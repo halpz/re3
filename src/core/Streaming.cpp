@@ -64,16 +64,10 @@ uint32 CStreaming::ms_memoryAvailable;
 
 int32 desiredNumVehiclesLoaded = 12;
 
-CEntity *pIslandLODindustEntity;
-CEntity *pIslandLODcomIndEntity;
-CEntity *pIslandLODcomSubEntity;
-CEntity *pIslandLODsubIndEntity;
-CEntity *pIslandLODsubComEntity;
-int32 islandLODindust;
-int32 islandLODcomInd;
-int32 islandLODcomSub;
-int32 islandLODsubInd;
-int32 islandLODsubCom;
+CEntity *pIslandLODmainlandEntity;
+CEntity *pIslandLODbeachEntity;
+int32 islandLODmainland;
+int32 islandLODbeach;
 
 bool
 CStreamingInfo::GetCdPosnAndSize(uint32 &posn, uint32 &size)
@@ -212,21 +206,12 @@ CStreaming::Init2(void)
 
 	// find island LODs
 
-	pIslandLODindustEntity = nil;
-	pIslandLODcomIndEntity = nil;
-	pIslandLODcomSubEntity = nil;
-	pIslandLODsubIndEntity = nil;
-	pIslandLODsubComEntity = nil;
-	islandLODindust = -1;
-	islandLODcomInd = -1;
-	islandLODcomSub = -1;
-	islandLODsubInd = -1;
-	islandLODsubCom = -1;
-        CModelInfo::GetModelInfo("IslandLODInd", &islandLODindust);
-        CModelInfo::GetModelInfo("IslandLODcomIND", &islandLODcomInd);
-        CModelInfo::GetModelInfo("IslandLODcomSUB", &islandLODcomSub);
-        CModelInfo::GetModelInfo("IslandLODsubIND", &islandLODsubInd);
-        CModelInfo::GetModelInfo("IslandLODsubCOM", &islandLODsubCom);
+	pIslandLODmainlandEntity = nil;
+	pIslandLODbeachEntity = nil;
+	islandLODmainland = -1;
+	islandLODbeach = -1;
+        CModelInfo::GetModelInfo("IslandLODmainland", &islandLODmainland);
+        CModelInfo::GetModelInfo("IslandLODbeach", &islandLODbeach);
 }
 
 void
@@ -678,47 +663,6 @@ CStreaming::RequestModel(int32 id, int32 flags)
 	}
 }
 
-void
-CStreaming::RequestSubway(void)
-{
-	RequestModel(MI_SUBWAY1, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY2, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY3, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY4, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY5, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY6, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY7, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY8, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY9, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY10, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY11, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY12, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY13, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY14, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY15, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY16, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY17, STREAMFLAGS_NOFADE);
-	RequestModel(MI_SUBWAY18, STREAMFLAGS_NOFADE);
-
-	switch(CGame::currLevel){
-	case LEVEL_INDUSTRIAL:
-		RequestModel(MI_SUBPLATFORM_IND, STREAMFLAGS_NOFADE);
-		break;
-	case LEVEL_COMMERCIAL:
-		if(FindPlayerTrain()->GetPosition().y < -700.0f){
-			RequestModel(MI_SUBPLATFORM_COMS, STREAMFLAGS_NOFADE);
-			RequestModel(MI_SUBPLATFORM_COMS2, STREAMFLAGS_NOFADE);
-		}else{
-			RequestModel(MI_SUBPLATFORM_COMN, STREAMFLAGS_NOFADE);
-		}
-		break;
-	case LEVEL_SUBURBAN:
-		RequestModel(MI_SUBPLATFORM_SUB, STREAMFLAGS_NOFADE);
-		RequestModel(MI_SUBPLATFORM_SUB2, STREAMFLAGS_NOFADE);
-		break;
-	}
-}
-
 #define BIGBUILDINGFLAGS STREAMFLAGS_DONT_REMOVE
 
 void
@@ -772,21 +716,18 @@ CStreaming::InstanceBigBuildings(eLevelName level, const CVector &pos)
 	}
 }
 
+//--MIAMI: done
 void
 CStreaming::RequestIslands(eLevelName level)
 {
 	switch(level){
-	case LEVEL_INDUSTRIAL:
-		RequestModel(islandLODcomInd, BIGBUILDINGFLAGS);
-		RequestModel(islandLODsubInd, BIGBUILDINGFLAGS);
+	case LEVEL_MAINLAND:
+		if(islandLODbeach != -1)
+			RequestModel(islandLODbeach, BIGBUILDINGFLAGS);
 		break;
-	case LEVEL_COMMERCIAL:
-		RequestModel(islandLODindust, BIGBUILDINGFLAGS);
-		RequestModel(islandLODsubCom, BIGBUILDINGFLAGS);
-		break;
-	case LEVEL_SUBURBAN:
-		RequestModel(islandLODindust, BIGBUILDINGFLAGS);
-		RequestModel(islandLODcomSub, BIGBUILDINGFLAGS);
+	case LEVEL_BEACH:
+		if(islandLODmainland != -1)
+			RequestModel(islandLODmainland, BIGBUILDINGFLAGS);
 		break;
 	}
 }
@@ -906,16 +847,14 @@ CStreaming::RemoveModel(int32 id)
 	ms_aInfoForModel[id].m_loadState = STREAMSTATE_NOTLOADED;
 }
 
-//--MIAMI: change islands
+//--MIAMI: done
 void
 CStreaming::RemoveUnusedBuildings(eLevelName level)
 {
-	if(level != LEVEL_INDUSTRIAL)
-		RemoveBuildings(LEVEL_INDUSTRIAL);
-	if(level != LEVEL_COMMERCIAL)
-		RemoveBuildings(LEVEL_COMMERCIAL);
-	if(level != LEVEL_SUBURBAN)
-		RemoveBuildings(LEVEL_SUBURBAN);
+	if(level != LEVEL_BEACH)
+		RemoveBuildings(LEVEL_BEACH);
+	if(level != LEVEL_MAINLAND)
+		RemoveBuildings(LEVEL_MAINLAND);
 }
 
 //--MIAMI: done
@@ -979,16 +918,14 @@ CStreaming::RemoveBuildings(eLevelName level)
 	}
 }
 
-//--MIAMI: change islands
+//--MIAMI: done
 void
 CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
-	if(level != LEVEL_INDUSTRIAL)
-		RemoveBigBuildings(LEVEL_INDUSTRIAL);
-	if(level != LEVEL_COMMERCIAL)
-		RemoveBigBuildings(LEVEL_COMMERCIAL);
-	if(level != LEVEL_SUBURBAN)
-		RemoveBigBuildings(LEVEL_SUBURBAN);
+	if(level != LEVEL_BEACH)
+		RemoveBigBuildings(LEVEL_BEACH);
+	if(level != LEVEL_MAINLAND)
+		RemoveBigBuildings(LEVEL_MAINLAND);
 	RemoveIslandsNotUsed(level);
 }
 
@@ -1009,40 +946,23 @@ void
 CStreaming::RemoveIslandsNotUsed(eLevelName level)
 {
 	int i;
-	if(pIslandLODindustEntity == nil)
+	if(pIslandLODmainlandEntity == nil)
 	for(i = CPools::GetBuildingPool()->GetSize()-1; i >= 0; i--){
 		CBuilding *building = CPools::GetBuildingPool()->GetSlot(i);
 		if(building == nil)
 			continue;
-		if(building->GetModelIndex() == islandLODindust) pIslandLODindustEntity = building;
-		if(building->GetModelIndex() == islandLODcomInd) pIslandLODcomIndEntity = building;
-		if(building->GetModelIndex() == islandLODcomSub) pIslandLODcomSubEntity = building;
-		if(building->GetModelIndex() == islandLODsubInd) pIslandLODsubIndEntity = building;
-		if(building->GetModelIndex() == islandLODsubCom) pIslandLODsubComEntity = building;
+		if(building->GetModelIndex() == islandLODmainland)
+			pIslandLODmainlandEntity = building;
+		if(building->GetModelIndex() == islandLODbeach)
+			pIslandLODbeachEntity = building;
 	}
 
 	switch(level){
-	case LEVEL_INDUSTRIAL:
-		DeleteIsland(pIslandLODindustEntity);
-		DeleteIsland(pIslandLODcomSubEntity);
-		DeleteIsland(pIslandLODsubComEntity);
+	case LEVEL_MAINLAND:
+		DeleteIsland(pIslandLODmainlandEntity);
 		break;
-	case LEVEL_COMMERCIAL:
-		DeleteIsland(pIslandLODcomIndEntity);
-		DeleteIsland(pIslandLODcomSubEntity);
-		DeleteIsland(pIslandLODsubIndEntity);
-		break;
-	case LEVEL_SUBURBAN:
-		DeleteIsland(pIslandLODsubIndEntity);
-		DeleteIsland(pIslandLODsubComEntity);
-		DeleteIsland(pIslandLODcomIndEntity);
-		break;
-	default:
-		DeleteIsland(pIslandLODindustEntity);
-		DeleteIsland(pIslandLODcomIndEntity);
-		DeleteIsland(pIslandLODcomSubEntity);
-		DeleteIsland(pIslandLODsubIndEntity);
-		DeleteIsland(pIslandLODsubComEntity);
+	case LEVEL_BEACH:
+		DeleteIsland(pIslandLODbeachEntity);
 		break;
 	}
 }
