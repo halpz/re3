@@ -1,4 +1,4 @@
-#include "World.h"
+#include "common.h"
 #include "Camera.h"
 #include "CarCtrl.h"
 #include "CopPed.h"
@@ -26,7 +26,7 @@
 #include "TempColModels.h"
 #include "Vehicle.h"
 #include "WaterLevel.h"
-#include "common.h"
+#include "World.h"
 
 
 #define OBJECT_REPOSITION_OFFSET_Z 2.0f

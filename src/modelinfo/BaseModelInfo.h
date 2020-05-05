@@ -30,7 +30,7 @@ protected:
 	int16        m_txdSlot;
 	ModelInfoType m_type;
 	uint8        m_num2dEffects;
-	bool         m_freeCol;
+	bool         m_bOwnsColModel;
 
 public:
 	CBaseModelInfo(ModelInfoType type);
@@ -49,9 +49,10 @@ public:
 	}
 	char *GetName(void) { return m_name; }
 	void SetName(const char *name) { strncpy(m_name, name, 24); }
-	void SetColModel(CColModel *col, bool free = false){
-		m_colModel = col; m_freeCol = free; }
+	void SetColModel(CColModel *col, bool owns = false){
+		m_colModel = col; m_bOwnsColModel = owns; }
 	CColModel *GetColModel(void) { return m_colModel; }
+	bool DoesOwnColModel(void) { return m_bOwnsColModel; }
 	void DeleteCollisionModel(void);
 	void ClearTexDictionary(void) { m_txdSlot = -1; }
 	short GetObjectID(void) { return m_objectId; }

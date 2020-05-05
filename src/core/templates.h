@@ -35,15 +35,24 @@ class CPool
 
 public:
 	CPool(int size){
+		// TODO: use new here
 		m_entries = (U*)malloc(sizeof(U)*size);
 		m_flags = (Flags*)malloc(sizeof(Flags)*size);
 		m_size = size;
+#ifndef MIAMI
 		m_allocPtr = 0;
+#else
+		m_allocPtr = -1;
+#endif
 		for(int i = 0; i < size; i++){
 			m_flags[i].id   = 0;
 			m_flags[i].free = 1;
 		}
 	}
+#ifdef MIAMI
+	CPool(int size, const char *name)
+	 : CPool(size) {}
+#endif
 	~CPool() {
 		Flush();
 	}

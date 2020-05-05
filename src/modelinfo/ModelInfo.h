@@ -42,6 +42,9 @@ public:
 	static CBaseModelInfo *GetModelInfo(int id){
 		return ms_modelInfoPtrs[id];
 	}
+#ifdef MIAMI
+	static CBaseModelInfo *GetModelInfo(const char *name, int minIndex, int maxIndex);
+#endif
 
 	static bool IsBoatModel(int32 id);
 	static bool IsBikeModel(int32 id);

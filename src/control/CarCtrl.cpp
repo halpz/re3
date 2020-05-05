@@ -696,7 +696,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 		if (pVehicle->bExtendedRange)
 			threshold *= 1.5f;
 		if (distanceToPlayer > threshold && !CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
-			if (pVehicle->GetIsOnScreen() && CRenderer::IsEntityCullZoneVisible(pVehicle)){
+			if (pVehicle->GetIsOnScreenAndNotCulled()){
 				pVehicle->bFadeOut = true;
 			}else{
 				CWorld::Remove(pVehicle);
@@ -722,7 +722,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 	if (pVehicle->GetStatus() != STATUS_WRECKED || pVehicle->m_nTimeOfDeath == 0)
 		return;
 	if (CTimer::GetTimeInMilliseconds() > pVehicle->m_nTimeOfDeath + 60000 &&
-		(!pVehicle->GetIsOnScreen() || !CRenderer::IsEntityCullZoneVisible(pVehicle))){
+		!pVehicle->GetIsOnScreenAndNotCulled()){
 		if ((pVehicle->GetPosition() - vecPlayerPos).MagnitudeSqr() > SQR(7.5f)){
 			if (!CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
 				CWorld::Remove(pVehicle);

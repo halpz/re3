@@ -95,6 +95,12 @@ CSimpleModelInfo::IncreaseAlpha(void)
 }
 
 float
+CSimpleModelInfo::GetLodDistance(int i)
+{
+	return m_lodDistances[i] * TheCamera.LODDistMultiplier;
+}
+
+float
 CSimpleModelInfo::GetNearDistance(void)
 {
 	return m_lodDistances[2] * TheCamera.LODDistMultiplier;
@@ -119,10 +125,20 @@ CSimpleModelInfo::GetAtomicFromDistance(float dist)
 	if(m_isDamaged)
 		i = m_firstDamaged;
 	for(; i < m_numAtomics; i++)
-		if(dist < m_lodDistances[i] *TheCamera.LODDistMultiplier)
+		if(dist < m_lodDistances[i] * TheCamera.LODDistMultiplier)
 			return m_atomics[i];
 	return nil;
 }
+
+#ifdef MIAMI
+RpAtomic*
+CSimpleModelInfo::GetFirstAtomicFromDistance(float dist)
+{
+	if(dist < m_lodDistances[0] * TheCamera.LODDistMultiplier)
+		return m_atomics[0];
+	return nil;
+}
+#endif
 
 void
 CSimpleModelInfo::FindRelatedModel(void)

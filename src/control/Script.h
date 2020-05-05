@@ -372,6 +372,9 @@ private:
 	friend class CRunningScript;
 	friend class CHud;
 	friend void CMissionCleanup::Process();
+#ifdef MIAMI
+	friend class CColStore;
+#endif
 };
 
 

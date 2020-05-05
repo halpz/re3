@@ -298,11 +298,12 @@ enum
 
 enum
 {
-	// TODO: figure out
-	FADE_0,
+	// TODO: find better names
+	FADE_0,	// faded in
 	FADE_1,	// mid fade
-	FADE_2,
+	FADE_2,	// faded out
 
+	// Direction
 	FADE_OUT = 0,
 	FADE_IN,
 	FADE_NONE
