@@ -74,7 +74,7 @@ CEntity::CEntity(void)
 	bDistanceFade = false;
 	m_flagE2 = false;
 
-	m_bIsStaticWaitingForCollision = false;
+	bIsStaticWaitingForCollision = false;
 
 	m_scanCode = 0;
 	m_modelIndex = -1;

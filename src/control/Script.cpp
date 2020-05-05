@@ -171,6 +171,17 @@ void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 	m_nCount++;
 }
 
+static void PossiblyWakeThisEntity(CPhysical* pEntity)
+{
+	if (!pEntity->bIsStaticWaitingForCollision)
+		return;
+	if (CColStore::HasCollisionLoaded(pEntity->GetPosition())) {
+		pEntity->bIsStaticWaitingForCollision = false;
+		if (!pEntity->IsStatic())
+			pEntity->AddToMovingList();
+	}
+}
+
 void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
 {
 	for (int i = 0; i < MAX_CLEANUP; i++){
@@ -204,17 +215,6 @@ void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
 			m_sEntities[i].type = CLEANUP_UNUSED;
 			m_nCount--;
 		}
-	}
-}
-
-static void PossiblyWakeThisEntity(CPhysical* pEntity)
-{
-	if (!pEntity->m_bIsStaticWaitingForCollision)
-		return;
-	if (CColStore::HasCollisionLoaded(pEntity->GetPosition())) {
-		pEntity->m_bIsStaticWaitingForCollision = false;
-		if (!pEntity->IsStatic())
-			pEntity->AddToMovingList();
 	}
 }
 
@@ -1798,7 +1798,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		ped->SetOrientation(0.0f, 0.0f, 0.0f);
 		CTheScripts::ClearSpaceForMissionEntity(pos, ped);
 		if (m_bIsMissionScript)
-			ped->m_bIsStaticWaitingForCollision = true;
+			ped->bIsStaticWaitingForCollision = true;
 		CWorld::Add(ped);
 		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
 		CPopulation::ms_nTotalMissionPeds++;
@@ -2018,7 +2018,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			boat->AutoPilot.m_nTempAction = TEMPACT_NONE; /* Animation ID? */
 			boat->AutoPilot.m_nCruiseSpeed = boat->AutoPilot.m_fMaxTrafficSpeed = 20.0f;
 			if (m_bIsMissionScript)
-				boat->m_bIsStaticWaitingForCollision = true;
+				boat->bIsStaticWaitingForCollision = true;
 			CWorld::Add(boat);
 			handle = CPools::GetVehiclePool()->GetIndex(boat);
 		}
@@ -2044,7 +2044,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			car->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
 			car->bHasBeenOwnedByPlayer = true;
 			if (m_bIsMissionScript)
-				car->m_bIsStaticWaitingForCollision = true;
+				car->bIsStaticWaitingForCollision = true;
 			CWorld::Add(car);
 			handle = CPools::GetVehiclePool()->GetIndex(car);
 		}
@@ -7422,7 +7422,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		ped->SetOrientation(0.0f, 0.0f, 0.0f);
 		CTheScripts::ClearSpaceForMissionEntity(pos, ped);
 		if (m_bIsMissionScript)
-			ped->m_bIsStaticWaitingForCollision = true;
+			ped->bIsStaticWaitingForCollision = true;
 		CWorld::Add(ped);
 		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
 		CPopulation::ms_nTotalMissionPeds++;

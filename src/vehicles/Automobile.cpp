@@ -2190,7 +2190,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 						}
 
 						// move body cast
-						if(phys->bIsStatic){
+						if(phys->IsStatic()){
 							phys->bIsStatic = false;
 							phys->m_nStaticFrames = 0;
 							phys->ApplyMoveForce(m_vecMoveSpeed / Sqrt(speed));

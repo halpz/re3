@@ -156,11 +156,11 @@ void CBulletInfo::Update(void)
 				if (pHitEntity->IsObject()) {
 					CObject* pObject = (CObject*)pHitEntity;
 					if (!pObject->bInfiniteMass) {
-						if (pObject->bIsStatic && pObject->m_fUprootLimit <= 0.0f) {
+						if (pObject->IsStatic() && pObject->m_fUprootLimit <= 0.0f) {
 							pObject->bIsStatic = false;
 							pObject->AddToMovingList();
 						}
-						if (!pObject->bIsStatic)
+						if (!pObject->IsStatic())
 							pObject->ApplyMoveForce(-BULLET_HIT_FORCE * point.normal);
 					}
 				}
