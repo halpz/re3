@@ -87,10 +87,8 @@ struct CStoredCollPoly
 
 struct CColModel
 {
-#ifndef MIAMI
 	CColSphere boundingSphere;
 	CColBox boundingBox;
-#endif
 	int16 numSpheres;
 	int16 numLines;
 	int16 numBoxes;
