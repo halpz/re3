@@ -138,7 +138,7 @@ struct CCarPathLink
 	int16 pathNodeIndex;
 	int8 numLeftLanes;
 	int8 numRightLanes;
-	int8 trafficLightType;
+	uint8 trafficLightType;
 
 	uint8 bBridgeLights : 1;
 	// more?
