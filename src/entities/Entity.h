@@ -84,6 +84,7 @@ public:
 	// flagsE
 	uint32 m_flagE2 : 1;
 	// TODO(MIAMI)
+	uint32 m_bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
 
 	uint16 m_scanCode;
 	uint16 m_randomSeed;
@@ -98,6 +99,7 @@ public:
 	eEntityStatus GetStatus() const { return (eEntityStatus)m_status; }
 	void SetStatus(eEntityStatus status) { m_status = status; }
 	CColModel *GetColModel(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(); }
+	bool IsStatic(void) { return bIsStatic && m_bIsStaticWaitingForCollision; }
 #ifdef COMPATIBLE_SAVES
 	void SaveEntityFlags(uint8*& buf);
 	void LoadEntityFlags(uint8*& buf);

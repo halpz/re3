@@ -131,6 +131,7 @@ public:
 	void AddEntityToList(int32, uint8);
 	void RemoveEntityFromList(int32, uint8);
 	void Process();
+	void CheckIfCollisionHasLoadedForMissionObject();
 };
 
 struct CUpsideDownCarCheckEntry
