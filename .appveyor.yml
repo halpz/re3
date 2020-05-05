@@ -27,13 +27,13 @@ install:
     premake5 vs2019 --with-librw --glewdir=%APPVEYOR_BUILD_FOLDER%/%GLEW_BASE% --glfwdir=%APPVEYOR_BUILD_FOLDER%/%GLFW_BASE%
 
 build:
-  project: build/re3.sln
+  project: build/reVC.sln
   verbosity: minimal
 after_build:
-- 7z a "re3_%configuration%_%platform%_%APPVEYOR_BUILD_VERSION%.zip" bin/%PLATFORM%/%CONFIGURATION%/re3.exe bin/%PLATFORM%/%CONFIGURATION%/re3.pdb
+- 7z a "reVC_%configuration%_%platform%_%APPVEYOR_BUILD_VERSION%.zip" bin/%PLATFORM%/%CONFIGURATION%/re3.exe bin/%PLATFORM%/%CONFIGURATION%/re3.pdb
 artifacts:
-- path: "re3_%configuration%_%platform%_%APPVEYOR_BUILD_VERSION%.zip"
-  name: re3
+- path: "reVC_%configuration%_%platform%_%APPVEYOR_BUILD_VERSION%.zip"
+  name: reVC
 deploy:
 - provider: BinTray
   username: shfil119
@@ -43,7 +43,7 @@ deploy:
   repo: re3
   package: "%configuration%_%platform%"
   version: "%APPVEYOR_BUILD_VERSION%"
-  artifact: re3
+  artifact: reVC
   publish: true
   on:
     branch: master
