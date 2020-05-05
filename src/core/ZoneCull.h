@@ -122,4 +122,9 @@ public:
 	static bool DoWeHaveMoreThanXOccurencesOfSet(int32 count, uint16 *set);
 
 	static void CompressIndicesArray() {};// todo
+
+#ifdef MIAMI
+	//--MIAMI: TODO
+	static bool PoliceAbandonCars(void) { return false; }
+#endif
 };

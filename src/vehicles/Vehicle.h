@@ -109,6 +109,18 @@ enum eFlightModel
 	FLIGHT_MODEL_SEAPLANE
 };
 
+#ifdef MIAMI
+enum eVehicleAppearance
+{
+	VEHICLE_NONE,
+	VEHICLE_CAR,
+	VEHICLE_BIKE,
+	VEHICLE_HELI,
+	VEHICLE_BOAT,
+	VEHICLE_PLANE,
+};
+#endif
+
 // Or Weapon.h?
 void FireOneInstantHitRound(CVector *shotSource, CVector *shotTarget, int32 damage);
 
@@ -172,6 +184,10 @@ public:
 	uint8 bIsCarParkVehicle : 1; // Car has been created using the special CAR_PARK script command
 	uint8 bHasAlreadyBeenRecorded : 1; // Used for replays
 
+#ifdef MIAMI
+	uint8 bParking : 1;
+#endif;
+
 	int8 m_numPedsUseItAsCover;
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
 	int8 m_nPacManPickupsCarried;
@@ -193,7 +209,7 @@ public:
 	uint8 m_bRainAudioCounter;
 	uint8 m_bRainSamplesCounter;
 	uint8 m_nCarHornTimer;
-	uint8 field_22D; // last horn?
+	uint8 m_nCarHornPattern; // last horn?
 	bool m_bSirenOrAlarm;
 	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
@@ -236,6 +252,9 @@ public:
 	virtual void Load(uint8*& buf);
 #endif
 
+#ifdef MIAMI
+	eVehicleAppearance GetVehicleAppearance(void);
+#endif
 	bool IsCar(void) { return m_vehType == VEHICLE_TYPE_CAR; }
 	bool IsBoat(void) { return m_vehType == VEHICLE_TYPE_BOAT; }
 	bool IsTrain(void) { return m_vehType == VEHICLE_TYPE_TRAIN; }
@@ -274,6 +293,7 @@ public:
 	void InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage);
 	void DoFixedMachineGuns(void);
 
+
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
 	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE; }
@@ -289,10 +309,5 @@ public:
 #endif
 	static bool m_bDisableMouseSteering;
 };
-
-static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");
-static_assert(offsetof(CVehicle, m_pCurGroundEntity) == 0x1E0, "CVehicle: error");
-static_assert(offsetof(CVehicle, m_nAlarmState) == 0x1A0, "CVehicle: error");
-static_assert(offsetof(CVehicle, m_nLastWeaponDamage) == 0x228, "CVehicle: error");
 
 void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);
