@@ -3186,10 +3186,10 @@ CAutomobile::PlaceOnRoadProperly(void)
 	float c = Cos(angle);
 	float s = Sin(angle);
 
-	GetRight() = CVector((front.y - rear.y)/len, -(front.x - rear.x)/len, 0.0f);
-	GetForward() = CVector(-c*GetRight().y, c*GetRight().x, s);
-	GetUp() = CrossProduct(GetRight(), GetForward());
-	GetPosition() = CVector((front.x + rear.x)/2.0f, (front.y + rear.y)/2.0f, (frontZ + rearZ)/2.0f + GetHeightAboveRoad());
+	GetMatrix().GetRight() = CVector((front.y - rear.y) / len, -(front.x - rear.x) / len, 0.0f);
+	GetMatrix().GetForward() = CVector(-c * GetRight().y, c * GetRight().x, s);
+	GetMatrix().GetUp() = CrossProduct(GetRight(), GetForward());
+	GetMatrix().GetPosition() = CVector((front.x + rear.x) / 2.0f, (front.y + rear.y) / 2.0f, (frontZ + rearZ) / 2.0f + GetHeightAboveRoad());
 }
 
 void
@@ -4408,7 +4408,7 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 		if(GetUp().z > 0.0f){
 			// simulate fast upward movement if going fast
 			float speed = CVector2D(m_vecMoveSpeed).MagnitudeSqr();
-			obj->GetPosition() += GetUp()*speed;
+			obj->GetMatrix().Translate(GetUp()*speed);
 		}
 	}
 	obj->ApplyMoveForce(dist);

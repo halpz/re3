@@ -1725,7 +1725,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += 1.0f;
-		ped->GetPosition() = pos;
+		ped->SetPosition(pos);
 		ped->SetOrientation(0.0f, 0.0f, 0.0f);
 		CTheScripts::ClearSpaceForMissionEntity(pos, ped);
 		CWorld::Add(ped);
@@ -1939,7 +1939,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			if (pos.z <= MAP_Z_LOW_LIMIT)
 				pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 			pos.z += boat->GetDistanceFromCentreOfMassToBaseOfModel();
-			boat->GetPosition() = pos;
+			boat->SetPosition(pos);
 			CTheScripts::ClearSpaceForMissionEntity(pos, boat);
 			boat->SetStatus(STATUS_ABANDONED);
 			boat->bIsLocked = true;
@@ -1957,7 +1957,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			if (pos.z <= MAP_Z_LOW_LIMIT)
 				pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 			pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
-			car->GetPosition() = pos;
+			car->SetPosition(pos);
 			CTheScripts::ClearSpaceForMissionEntity(pos, car);
 			car->SetStatus(STATUS_ABANDONED);
 			car->bIsLocked = true;
@@ -2531,7 +2531,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += pObj->GetDistanceFromCentreOfMassToBaseOfModel();
-		pObj->GetPosition() = pos;
+		pObj->SetPosition(pos);
 		pObj->SetOrientation(0.0f, 0.0f, 0.0f);
 		pObj->GetMatrix().UpdateRW();
 		pObj->UpdateRwFrame();
@@ -2751,7 +2751,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		pPed->CharCreatedBy = MISSION_CHAR;
 		pPed->bRespondsToThreats = false;
 		pPed->bAllowMedicsToReviveMe = false;
-		pPed->GetPosition() = pVehicle->GetPosition();
+		pPed->SetPosition(pVehicle->GetPosition());
 		pPed->SetOrientation(0.0f, 0.0f, 0.0f);
 		pPed->SetPedState(PED_DRIVING);
 		CPopulation::ms_nTotalMissionPeds++;
@@ -3943,7 +3943,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		pPed->CharCreatedBy = MISSION_CHAR;
 		pPed->bRespondsToThreats = false;
 		pPed->bAllowMedicsToReviveMe = false;
-		pPed->GetPosition() = pVehicle->GetPosition();
+		pPed->SetPosition(pVehicle->GetPosition());
 		pPed->SetOrientation(0.0f, 0.0f, 0.0f);
 		pPed->SetPedState(PED_DRIVING);
 		CPopulation::ms_nTotalMissionPeds++;
@@ -5319,7 +5319,7 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[1];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		pObj->GetPosition() = pos;
+		pObj->SetPosition(pos);
 		pObj->SetOrientation(0.0f, 0.0f, 0.0f);
 		pObj->GetMatrix().UpdateRW();
 		pObj->UpdateRwFrame();
@@ -7343,7 +7343,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += 1.0f;
-		ped->GetPosition() = pos;
+		ped->SetPosition(pos);
 		ped->SetOrientation(0.0f, 0.0f, 0.0f);
 		CTheScripts::ClearSpaceForMissionEntity(pos, ped);
 		CWorld::Add(ped);
@@ -8165,7 +8165,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 			car = new CAutomobile(model, MISSION_VEHICLE);
 		CVector pos = *(CVector*)&ScriptParams[0];
 		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
-		car->GetPosition() = pos;
+		car->SetPosition(pos);
 		car->SetHeading(DEGTORAD(*(float*)&ScriptParams[3]));
 		CTheScripts::ClearSpaceForMissionEntity(pos, car);
 		car->SetStatus(STATUS_ABANDONED);

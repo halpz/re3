@@ -2019,7 +2019,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	}
 
 	if (seatPosMult > 0.2f || vehIsUpsideDown) {
-		GetPosition() = neededPos;
+		SetPosition(neededPos);
 
 		SetHeading(m_fRotationCur);
 	} else {
@@ -6504,7 +6504,7 @@ CPed::LineUpPedWithTrain(void)
 		lineUpPos += (GetPosition() - lineUpPos) * percentageLeft;
 	}
 
-	GetPosition() = lineUpPos;
+	SetPosition(lineUpPos);
 	SetHeading(m_fRotationCur);
 }
 
@@ -8684,7 +8684,7 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 						carHighestZ = (car->GetMatrix() * CVector(0.0f, vehColMaxY, vehColMaxZ)).z;
 						float highestZDist = carHighestZ - GetPosition().z;
 						if (highestZDist > 0.0f) {
-							GetPosition().z += 0.5f * highestZDist;
+							GetMatrix().GetPosition().z += 0.5f * highestZDist;
 							carHighestZ += highestZDist * 0.25f;
 						}
 						carLength = vehColMaxY;
@@ -9959,7 +9959,7 @@ CPed::ProcessControl(void)
 							}
 
 						} else if (!bVehEnterDoorIsBlocked) {
-							if (collidingVeh->m_status != STATUS_PLAYER || CharCreatedBy == MISSION_CHAR) {
+							if (collidingVeh->GetStatus() != STATUS_PLAYER || CharCreatedBy == MISSION_CHAR) {
 
 								SetDirectionToWalkAroundObject(collidingVeh);
 
@@ -10169,8 +10169,8 @@ CPed::ProcessControl(void)
 						}
 
 						if (flyDir != 0 && !bSomeVCflag1) {
-							GetPosition() = (flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point);
-							GetPosition().z += FEET_OFFSET;
+							SetPosition((flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point));
+							GetMatrix().GetPosition().z += FEET_OFFSET;
 							GetMatrix().UpdateRW();
 							SetLanding();
 							bIsStanding = true;
@@ -10184,7 +10184,7 @@ CPed::ProcessControl(void)
 						forceDir.z = 4.0f;
 						ApplyMoveForce(forceDir);
 
-						GetPosition() += 0.25f * offsetToCheck;
+						GetMatrix().GetPosition() += 0.25f * offsetToCheck;
 
 						m_fRotationCur = CGeneral::GetRadianAngleBetweenPoints(offsetToCheck.x, offsetToCheck.y, 0.0f, 0.0f);
 						m_fRotationCur = CGeneral::LimitRadianAngle(m_fRotationCur);
@@ -10276,13 +10276,13 @@ CPed::ProcessControl(void)
 					if (CWorld::ProcessVerticalLine(offsetToCheck, GetPosition().z - FEET_OFFSET, foundCol, foundEnt, true, true, false, true, false, false, nil)) {
 #ifdef VC_PED_PORTS
 						if (!bSomeVCflag1 || FEET_OFFSET + foundCol.point.z < GetPosition().z) {
-							GetPosition().z = FEET_OFFSET + foundCol.point.z;
+							GetMatrix().GetPosition().z = FEET_OFFSET + foundCol.point.z;
 							GetMatrix().UpdateRW();
 							if (bSomeVCflag1)
 								bSomeVCflag1 = false;
 						}
 #else
-						GetPosition().z = FEET_OFFSET + foundCol.point.z;
+						GetMatrix().GetPosition().z = FEET_OFFSET + foundCol.point.z;
 						GetMatrix().UpdateRW();
 #endif
 						SetLanding();
@@ -11562,7 +11562,7 @@ CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation* animAssoc, void* arg)
 #endif
 	CPedPlacement::FindZCoorForPed(&posAfterBeingDragged);
 	ped->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-	ped->GetPosition() = posAfterBeingDragged;
+	ped->SetPosition(posAfterBeingDragged);
 
 	if (ped->m_pMyVehicle && !ped->m_pMyVehicle->IsRoomForPedToLeaveCar(ped->m_vehEnterType, &vecPedDraggedOutCarAnimOffset)) {
 		ped->PositionPedOutOfCollision();
@@ -12187,7 +12187,7 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 	CVector posFromZ = ped->GetPosition();
 	CPedPlacement::FindZCoorForPed(&posFromZ);
 	ped->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-	ped->GetPosition() = posFromZ;
+	ped->SetPosition(posFromZ);
 	veh = ped->m_pMyVehicle;
 	if (veh) {
 		if (ped->m_nPedType == PEDTYPE_PROSTITUTE) {
@@ -12310,7 +12310,7 @@ CPed::PedSetOutTrainCB(CAnimBlendAssociation *animAssoc, void *arg)
 	posAfterExit += ped->GetPosition();
 	CPedPlacement::FindZCoorForPed(&posAfterExit);
 	ped->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-	ped->GetPosition() = posAfterExit;
+	ped->SetPosition(posAfterExit);
 	ped->SetHeading(ped->m_fRotationCur);
 	veh->RemovePassenger(ped);
 }
@@ -12342,7 +12342,7 @@ CPed::PlacePedOnDryLand(void)
 		foundColZ = foundCol.point.z;
 		if (foundColZ >= waterLevel) {
 			posToCheck.z = 0.8f + foundColZ;
-			GetPosition() = posToCheck;
+			SetPosition(posToCheck);
 			bIsStanding = true;
 			bWasStanding = true;
 			return true;
@@ -12360,7 +12360,7 @@ CPed::PlacePedOnDryLand(void)
 		return false;
 
 	posToCheck.z = 0.8f + foundColZ;
-	GetPosition() = posToCheck;
+	SetPosition(posToCheck);
 	bIsStanding = true;
 	bWasStanding = true;
 	return true;
@@ -12388,7 +12388,7 @@ CPed::PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *animAssoc, void 
 	finalPos = finalLocalPos + ped->GetPosition();
 	CPedPlacement::FindZCoorForPed(&finalPos);
 	ped->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-	ped->GetPosition() = finalPos;
+	ped->SetPosition(finalPos);
 
 	if (veh) {
 		ped->m_fRotationDest = veh->GetForward().Heading() - HALFPI;
@@ -12524,11 +12524,11 @@ CPed::PositionPedOutOfCollision(void)
 
 	// We refrain from using posNearVeh, probably because of it may be top of the vehicle.
 	if (putSomewhereClose) {
-		GetPosition() = posSomewhereClose;
+		SetPosition(posSomewhereClose);
 	} else {
 		CVector vehSize = veh->GetModelInfo()->GetColModel()->boundingBox.max;
-		GetPosition() = posNearVeh;
-		GetPosition().z += vehSize.z;
+		posNearVeh.z += vehSize.z;
+		SetPosition(posNearVeh);
 	}
 	return true;
 }
@@ -12912,8 +12912,8 @@ CPed::ProcessObjective(void)
 										int chosenModel = CCarCtrl::ChooseModel(&zoneInfo, &ourPos, &chosenCarClass);
 										CAutomobile *newVeh = new CAutomobile(chosenModel, RANDOM_VEHICLE);
 										if (newVeh) {
-											newVeh->GetPosition() = ThePaths.m_pathNodes[closestNode].GetPosition();
-											newVeh->GetPosition().z += 4.0f;
+										    newVeh->GetMatrix().GetPosition() = ThePaths.m_pathNodes[closestNode].GetPosition();
+										    newVeh->GetMatrix().GetPosition().z += 4.0f;
 											newVeh->SetHeading(DEGTORAD(200.0f));
 											newVeh->SetStatus(STATUS_ABANDONED);
 											newVeh->m_nDoorLock = CARLOCK_UNLOCKED;
@@ -13424,7 +13424,7 @@ CPed::ProcessObjective(void)
 								}
 							}
 							if (foundSeat) {
-								GetPosition() = GetPositionToOpenCarDoor(m_carInObjective, m_vehEnterType);
+								SetPosition(GetPositionToOpenCarDoor(m_carInObjective, m_vehEnterType));
 								SetEnterCar(m_carInObjective, m_vehEnterType);
 							}
 						}
@@ -14692,12 +14692,12 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 					bStillOnValidPoly = true;
 #ifdef VC_PED_PORTS
 					if(!bSomeVCflag1 || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
-						GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
+						GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
 						if (bSomeVCflag1)
 							bSomeVCflag1 = false;
 					}
 #else
-					GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
+					GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
 #endif
 
 					m_vecMoveSpeed.z = 0.0f;
@@ -14770,12 +14770,12 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							}
 #ifdef VC_PED_PORTS
 							if (!bSomeVCflag1 || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
-								GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
+								GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
 								if (bSomeVCflag1)
 									bSomeVCflag1 = false;
 							}
 #else
-							GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
+						    GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
 #endif
 							m_nSurfaceTouched = intersectionPoint.surfaceB;
 							if (m_nSurfaceTouched == SURFACE_STONE) {
@@ -14880,7 +14880,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 					float speed = m_vecMoveSpeed.Magnitude2D();
 					sphereNormal.x = -m_vecMoveSpeed.x / Max(0.001f, speed);
 					sphereNormal.y = -m_vecMoveSpeed.y / Max(0.001f, speed);
-					GetPosition().z -= 0.05f;
+					GetMatrix().GetPosition().z -= 0.05f;
 					bSomeVCflag1 = true;
 				}
 #endif
@@ -15669,7 +15669,7 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 			zForPed = Max(foundColZ, foundColZ2);
 
 			if (zForPed > -99.0f)
-				GetPosition().z = FEET_OFFSET + zForPed;
+				GetMatrix().GetPosition().z = FEET_OFFSET + zForPed;
 		} else {
 			if (veh->GetUp().z > -0.8f) {
 				bool addDoorSmoke = false;
@@ -17002,7 +17002,7 @@ CPed::WarpPedIntoCar(CVehicle *car)
 	}
 
 	CWorld::Remove(this);
-	GetPosition() = car->GetPosition();
+	SetPosition(car->GetPosition());
 	CWorld::Add(this);
 
 	if (car->bIsAmbulanceOnDuty) {
@@ -17670,7 +17670,7 @@ CPed::SetExitBoat(CVehicle *boat)
 		m_pCurSurface = boat;
 		m_pCurSurface->RegisterReference((CEntity**)&m_pCurSurface);
 	}
-	GetPosition() = firstPos;
+	SetPosition(firstPos);
 	SetMoveState(PEDMOVE_STILL);
 	m_vecMoveSpeed = boat->m_vecMoveSpeed;
 	bTryingToReachDryLand = true;
@@ -17725,7 +17725,7 @@ CPed::SetExitBoat(CVehicle *boat)
 			return;
 		}
 */	}
-	GetPosition() = newPos;
+	SetPosition(newPos);
 	SetMoveState(PEDMOVE_STILL);
 	m_vecMoveSpeed = boat->m_vecMoveSpeed;
 #endif
@@ -17758,9 +17758,9 @@ void
 CPed::Load(uint8*& buf)
 {
 	SkipSaveBuf(buf, 52);
-	GetPosition().x = ReadSaveBuf<float>(buf);
-	GetPosition().y = ReadSaveBuf<float>(buf);
-	GetPosition().z = ReadSaveBuf<float>(buf);
+	GetMatrix().GetPosition().x = ReadSaveBuf<float>(buf);
+	GetMatrix().GetPosition().y = ReadSaveBuf<float>(buf);
+	GetMatrix().GetPosition().z = ReadSaveBuf<float>(buf);
 	SkipSaveBuf(buf, 288);
 	CharCreatedBy = ReadSaveBuf<uint8>(buf);
 	SkipSaveBuf(buf, 351);

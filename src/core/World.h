@@ -164,6 +164,6 @@ CVehicle *FindPlayerTrain(void);
 CEntity *FindPlayerEntity(void);
 CVector FindPlayerCoors(void);
 CVector &FindPlayerSpeed(void);
-CVector &FindPlayerCentreOfWorld(int32 player);
-CVector &FindPlayerCentreOfWorld_NoSniperShift(void);
+const CVector &FindPlayerCentreOfWorld(int32 player);
+const CVector &FindPlayerCentreOfWorld_NoSniperShift(void);
 float FindPlayerHeading(void);

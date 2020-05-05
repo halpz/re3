@@ -9,11 +9,6 @@ public:
 #ifdef RWCORE_H
 	CVector(const RwV3d &v) : x(v.x), y(v.y), z(v.z) {}
 
-	RwV3d toRwV3d(void) const {
-		RwV3d vecRw = { this->x, this->y, this->z };
-		return vecRw;
-	}
-
 	operator RwV3d (void) const {
 		RwV3d vecRw = { this->x, this->y, this->z };
 		return vecRw;
@@ -21,10 +16,6 @@ public:
 	
 	operator RwV3d *(void) {
 		return (RwV3d*)this;
-	}
-	
-	operator RwV3d &(void) {
-		return *((RwV3d*)this);
 	}
 #endif
 	// (0,1,0) means no rotation. So get right vector and its atan

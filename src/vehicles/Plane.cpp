@@ -359,8 +359,8 @@ CPlane::ProcessControl(void)
 			CVector posFront2 = (1.0f - f)*pPathNodes[curPathNodeFront2].p + f*pPathNodes[nextPathNodeFront2].p;
 
 			// Now set matrix
-			GetPosition() = (posRear + posFront)/2.0f;
-			GetPosition().z += 4.3f;
+			GetMatrix().GetPosition() = (posRear + posFront) / 2.0f;
+			GetMatrix().GetPosition().z += 4.3f;
 			CVector fwd = posFront - posRear;
 			fwd.Normalise();
 			if(pitch != 0.0f){
@@ -375,9 +375,9 @@ CPlane::ProcessControl(void)
 				right.z += 3.0f*roll.z;
 			right.Normalise();
 			CVector up = CrossProduct(right, fwd);
-			GetRight() = right;
-			GetUp() = up;
-			GetForward() = fwd;
+			GetMatrix().GetRight() = right;
+			GetMatrix().GetUp() = up;
+			GetMatrix().GetForward() = fwd;
 
 			// Set speed
 			m_vecMoveSpeed = fwd*PlanePathSpeed[m_nPlaneId]/60.0f;
@@ -511,8 +511,8 @@ CPlane::ProcessControl(void)
 			CVector posFront2 = (1.0f - f)*pathNodes[curPathNodeFront2].p + f*pathNodes[nextPathNodeFront2].p;
 
 			// Now set matrix
-			GetPosition() = (posRear + posFront)/2.0f;
-			GetPosition().z += 1.0f;
+			GetMatrix().GetPosition() = (posRear + posFront) / 2.0f;
+			GetMatrix().GetPosition().z += 1.0f;
 			CVector fwd = posFront - posRear;
 			fwd.Normalise();
 			CVector fwd2 = posFront2 - posRear;
@@ -522,9 +522,9 @@ CPlane::ProcessControl(void)
 			right.z += 3.0f*roll.z;
 			right.Normalise();
 			CVector up = CrossProduct(right, fwd);
-			GetRight() = right;
-			GetUp() = up;
-			GetForward() = fwd;
+			GetMatrix().GetRight() = right;
+			GetMatrix().GetUp() = up;
+			GetMatrix().GetForward() = fwd;
 
 			// Set speed
 			m_vecMoveSpeed = fwd*planePathSpeed/60.0f;

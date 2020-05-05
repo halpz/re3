@@ -900,10 +900,10 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 			TheCamera.GetMatrix().GetPosition() *= split;
 			TheCamera.GetMatrix() += CMatrix(interpolation) * pg->camera_pos;
 			RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-			pm->pos = *(RwV3d*)TheCamera.GetPosition();
-			pm->at = *(RwV3d*)TheCamera.GetForward();
-			pm->up = *(RwV3d*)TheCamera.GetUp();
-			pm->right = *(RwV3d*)TheCamera.GetRight();
+			pm->pos = TheCamera.GetPosition();
+			pm->at = TheCamera.GetForward();
+			pm->up = TheCamera.GetUp();
+			pm->right = TheCamera.GetRight();
 			CameraFocusX = split * CameraFocusX + interpolation * pg->player_pos.x;
 			CameraFocusY = split * CameraFocusY + interpolation * pg->player_pos.y;
 			CameraFocusZ = split * CameraFocusZ + interpolation * pg->player_pos.z;

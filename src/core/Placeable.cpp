@@ -12,9 +12,9 @@ CPlaceable::~CPlaceable(void) = default;
 void
 CPlaceable::SetHeading(float angle)
 {
-	CVector pos = GetPosition();
+	CVector pos = GetMatrix().GetPosition();
 	m_matrix.SetRotateZ(angle);
-	GetPosition() += pos;
+	GetMatrix().Translate(pos);
 }
 
 bool
