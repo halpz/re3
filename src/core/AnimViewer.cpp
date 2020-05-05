@@ -148,7 +148,7 @@ LastPedModelId(int modelId)
 	CBaseModelInfo *model;
 	for (int i = modelId; i >= 0; i--) {
 		model = CModelInfo::GetModelInfo(i);
-		if (model->m_type == MITYPE_PED)
+		if (model->GetModelType() == MITYPE_PED)
 			return i;
 	}
 	return modelId;
@@ -160,7 +160,7 @@ LastVehicleModelId(int modelId)
 	CBaseModelInfo* model;
 	for (int i = modelId; i >= 0; i--) {
 		model = CModelInfo::GetModelInfo(i);
-		if (model->m_type == MITYPE_VEHICLE)
+		if (model->GetModelType() == MITYPE_VEHICLE)
 			return i;
 	}
 	return modelId;
@@ -222,7 +222,7 @@ CAnimViewer::Update(void)
 	CBaseModelInfo *modelInfo = CModelInfo::GetModelInfo(modelId);
 	CEntity *newEntity = nil;
 
-	if (modelInfo->m_type == MITYPE_PED) {
+	if (modelInfo->GetModelType() == MITYPE_PED) {
 		int animGroup = ((CPedModelInfo*)modelInfo)->m_animGroup;
 
 		if (animId > ANIM_IDLE_STANCE)
@@ -257,7 +257,7 @@ CAnimViewer::Update(void)
 
 		if (!pTarget) {
 
-			if (modelInfo->m_type == MITYPE_VEHICLE) {
+			if (modelInfo->GetModelType() == MITYPE_VEHICLE) {
 
 				CVehicleModelInfo* veh = (CVehicleModelInfo*)modelInfo;
 				if (veh->m_vehicleType != VEHICLE_TYPE_CAR) {
@@ -281,7 +281,7 @@ CAnimViewer::Update(void)
 					newEntity->SetStatus(STATUS_ABANDONED);
 				}
 				newEntity->bIsStuck = true;
-			} else if (modelInfo->m_type == MITYPE_PED) {
+			} else if (modelInfo->GetModelType() == MITYPE_PED) {
 				pTarget = newEntity = new CPed(PEDTYPE_CIVMALE);
 				newEntity->SetModelIndex(modelId);
 			} else {
@@ -301,9 +301,9 @@ CAnimViewer::Update(void)
 		}
 		pTarget->GetMatrix().GetPosition().z = 0.0f;
 
-		if (modelInfo->m_type != MITYPE_PED) {
+		if (modelInfo->GetModelType() != MITYPE_PED) {
 
-			if (modelInfo->m_type == MITYPE_VEHICLE) {
+			if (modelInfo->GetModelType() == MITYPE_VEHICLE) {
 
 				if (pad->NewState.LeftShoulder1 && !pad->OldState.LeftShoulder1) {
 					nextModelId = LastPedModelId(modelId);

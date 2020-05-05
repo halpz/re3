@@ -435,7 +435,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 
 		if(mi->IsSimple()){
 			success = CFileLoader::LoadAtomicFile(stream, streamId);
-		}else if(mi->m_type == MITYPE_VEHICLE){
+		} else if (mi->GetModelType() == MITYPE_VEHICLE) {
 			// load vehicles in two parts
 			CModelInfo::GetModelInfo(streamId)->AddRef();
 			success = CFileLoader::StartLoadClumpFile(stream, streamId);
@@ -499,7 +499,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 	if(streamId < STREAM_OFFSET_TXD){
 		// Model
 		// Vehicles and Peds not in loaded list
-		if(mi->m_type != MITYPE_VEHICLE && mi->m_type != MITYPE_PED){
+		if (mi->GetModelType() != MITYPE_VEHICLE && mi->GetModelType() != MITYPE_PED) {
 			CSimpleModelInfo *smi = (CSimpleModelInfo*)mi;
 
 			// Set fading for some objects
@@ -858,7 +858,7 @@ CStreaming::RemoveBuildings(eLevelName level)
 			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
 			if(!e->bImBeingRendered){
 				e->DeleteRwObject();
-				if(mi->m_refCount == 0)
+				if (mi->GetNumRefs() == 0)
 					RemoveModel(e->GetModelIndex());
 			}
 		}
@@ -871,7 +871,7 @@ CStreaming::RemoveBuildings(eLevelName level)
 			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
 			if(!e->bImBeingRendered){
 				e->DeleteRwObject();
-				if(mi->m_refCount == 0)
+				if (mi->GetNumRefs() == 0)
 					RemoveModel(e->GetModelIndex());
 			}
 		}
@@ -884,7 +884,7 @@ CStreaming::RemoveBuildings(eLevelName level)
 			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
 			if(!e->bImBeingRendered && ((CObject*)e)->ObjectCreatedBy == GAME_OBJECT){
 				e->DeleteRwObject();
-				if(mi->m_refCount == 0)
+				if (mi->GetNumRefs() == 0)
 					RemoveModel(e->GetModelIndex());
 			}
 		}
@@ -897,7 +897,7 @@ CStreaming::RemoveBuildings(eLevelName level)
 			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
 			if(!e->bImBeingRendered){
 				e->DeleteRwObject();
-				if(mi->m_refCount == 0)
+				if (mi->GetNumRefs() == 0)
 					RemoveModel(e->GetModelIndex());
 			}
 		}
@@ -972,7 +972,7 @@ CStreaming::RemoveBigBuildings(eLevelName level)
 			mi = CModelInfo::GetModelInfo(e->GetModelIndex());
 			if(!e->bImBeingRendered){
 				e->DeleteRwObject();
-				if(mi->m_refCount == 0)
+				if (mi->GetNumRefs() == 0)
 					RemoveModel(e->GetModelIndex());
 			}
 		}
@@ -990,8 +990,7 @@ CStreaming::RemoveLoadedVehicle(void)
 			ms_lastVehicleDeleted = 0;
 		id = ms_vehiclesLoaded[ms_lastVehicleDeleted];
 		if(id != -1 &&
-		   (ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0 &&
-		   CModelInfo::GetModelInfo(id)->m_refCount == 0 &&
+		   (ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0 && CModelInfo::GetModelInfo(id)->GetNumRefs() == 0 &&
 		   ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED)
 			goto found;
 	}
@@ -1012,7 +1011,7 @@ CStreaming::RemoveLeastUsedModel(void)
 	for(si = ms_endLoadedList.m_prev; si != &ms_startLoadedList; si = si->m_prev){
 		streamId = si - ms_aInfoForModel;
 		if(streamId < STREAM_OFFSET_TXD){
-			if(CModelInfo::GetModelInfo(streamId)->m_refCount == 0){
+			if (CModelInfo::GetModelInfo(streamId)->GetNumRefs() == 0) {
 				RemoveModel(streamId);
 				return true;
 			}
@@ -1038,7 +1037,7 @@ CStreaming::RemoveAllUnusedModels(void)
 	for(i = NUM_DEFAULT_MODELS; i < MODELINFOSIZE; i++){
 		if(ms_aInfoForModel[i].m_loadState == STREAMSTATE_LOADED &&
 		   ms_aInfoForModel[i].m_flags & STREAMFLAGS_DONT_REMOVE &&
-		   CModelInfo::GetModelInfo(i)->m_refCount == 0){
+		    CModelInfo::GetModelInfo(i)->GetNumRefs() == 0) {
 			RemoveModel(i);
 			ms_aInfoForModel[i].m_loadState = STREAMSTATE_NOTLOADED;
 		}
@@ -1129,8 +1128,7 @@ CStreaming::AddToLoadedVehiclesList(int32 modelId)
 		for(i = 0; i < MAXVEHICLESLOADED; i++){
 			id = ms_vehiclesLoaded[ms_lastVehicleDeleted];
 			if(id != -1 &&
-			   (ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0 &&
-			    CModelInfo::GetModelInfo(id)->m_refCount == 0)
+			   (ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0 && CModelInfo::GetModelInfo(id)->GetNumRefs() == 0)
 				goto found;
 			ms_lastVehicleDeleted++;
 			if(ms_lastVehicleDeleted == MAXVEHICLESLOADED)
@@ -1202,7 +1200,7 @@ void
 CStreaming::SetModelIsDeletable(int32 id)
 {
 	ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_DONT_REMOVE;
-	if((id >= STREAM_OFFSET_TXD || CModelInfo::GetModelInfo(id)->m_type != MITYPE_VEHICLE) &&
+	if ((id >= STREAM_OFFSET_TXD || CModelInfo::GetModelInfo(id)->GetModelType() != MITYPE_VEHICLE) &&
 	   (ms_aInfoForModel[id].m_flags & STREAMFLAGS_SCRIPTOWNED) == 0){
 		if(ms_aInfoForModel[id].m_loadState != STREAMSTATE_LOADED)
 			RemoveModel(id);
@@ -1221,7 +1219,7 @@ void
 CStreaming::SetMissionDoesntRequireModel(int32 id)
 {
 	ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_SCRIPTOWNED;
-	if((id >= STREAM_OFFSET_TXD || CModelInfo::GetModelInfo(id)->m_type != MITYPE_VEHICLE) &&
+	if ((id >= STREAM_OFFSET_TXD || CModelInfo::GetModelInfo(id)->GetModelType() != MITYPE_VEHICLE) &&
 	   (ms_aInfoForModel[id].m_flags & STREAMFLAGS_DONT_REMOVE) == 0){
 		if(ms_aInfoForModel[id].m_loadState != STREAMSTATE_LOADED)
 			RemoveModel(id);
@@ -1599,8 +1597,8 @@ CStreaming::RequestModelStream(int32 ch)
 
 		// Can't load certain combinations of files together
 		if(streamId < STREAM_OFFSET_TXD){
-			if(havePed && CModelInfo::GetModelInfo(streamId)->m_type == MITYPE_PED ||
-			   haveBigFile && CModelInfo::GetModelInfo(streamId)->m_type == MITYPE_VEHICLE ||
+			if (havePed && CModelInfo::GetModelInfo(streamId)->GetModelType() == MITYPE_PED ||
+			    haveBigFile && CModelInfo::GetModelInfo(streamId)->GetModelType() == MITYPE_VEHICLE ||
 			   !TxdAvailable(CModelInfo::GetModelInfo(streamId)->GetTxdSlot()))
 				break;
 		}else{
@@ -1619,9 +1617,9 @@ CStreaming::RequestModelStream(int32 ch)
 			break;
 		}
 		if(streamId < STREAM_OFFSET_TXD){
-			if(CModelInfo::GetModelInfo(streamId)->m_type == MITYPE_PED)
+			if (CModelInfo::GetModelInfo(streamId)->GetModelType() == MITYPE_PED)
 				havePed = 1;
-			if(CModelInfo::GetModelInfo(streamId)->m_type == MITYPE_VEHICLE)
+			if (CModelInfo::GetModelInfo(streamId)->GetModelType() == MITYPE_VEHICLE)
 				haveBigFile = 1;
 		}else{
 			if(size > 200)
@@ -1679,8 +1677,7 @@ CStreaming::ProcessLoadingChannel(int32 ch)
 				continue;
 
 			cdsize = ms_aInfoForModel[id].GetCdSize();
-			if(id < STREAM_OFFSET_TXD &&
-			   CModelInfo::GetModelInfo(id)->m_type == MITYPE_VEHICLE &&
+			if(id < STREAM_OFFSET_TXD && CModelInfo::GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
 			   ms_numVehiclesLoaded >= desiredNumVehiclesLoaded &&
 			   !RemoveLoadedVehicle() &&
 			   ((ms_aInfoForModel[id].m_flags & STREAMFLAGS_NOT_IN_LIST) == 0 || GetAvailableVehicleSlot() == -1)){
@@ -1953,7 +1950,7 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float 
 		if(!e->bStreamingDontDelete && !e->bIsSubway &&
 		   (!e->IsObject() || ((CObject*)e)->ObjectCreatedBy != TEMP_OBJECT)){
 			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
-			if(mi->m_type != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff())){
+			if (mi->GetModelType() != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff())) {
 				lodDistSq = sq(mi->GetLargestLodDistance());
 				lodDistSq = Min(lodDistSq, sq(STREAM_DIST));
 				pos = CVector2D(e->GetPosition());
@@ -1983,7 +1980,7 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list)
 		if(!e->bStreamingDontDelete && !e->bIsSubway &&
 		   (!e->IsObject() || ((CObject*)e)->ObjectCreatedBy != TEMP_OBJECT)){
 			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
-			if(mi->m_type != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff()))
+			if (mi->GetModelType() != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff()))
 				if(CRenderer::IsEntityCullZoneVisible(e))
 					RequestModel(e->GetModelIndex(), 0);
 		}
@@ -2349,7 +2346,7 @@ CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, int32 mem)
 		if(!e->bStreamingDontDelete && !e->bImBeingRendered &&
 		   e->m_rwObject && ms_aInfoForModel[e->GetModelIndex()].m_next){
 			e->DeleteRwObject();
-			if(CModelInfo::GetModelInfo(e->GetModelIndex())->m_refCount == 0){
+			if (CModelInfo::GetModelInfo(e->GetModelIndex())->GetNumRefs() == 0) {
 				RemoveModel(e->GetModelIndex());
 				if(ms_memoryUsed < mem)
 					return true;
@@ -2370,7 +2367,7 @@ CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, int32 mem)
 		if(!e->bStreamingDontDelete && !e->bImBeingRendered &&
 		   e->m_rwObject && !e->IsVisible() && ms_aInfoForModel[e->GetModelIndex()].m_next){
 			e->DeleteRwObject();
-			if(CModelInfo::GetModelInfo(e->GetModelIndex())->m_refCount == 0){
+			if (CModelInfo::GetModelInfo(e->GetModelIndex())->GetNumRefs() == 0) {
 				RemoveModel(e->GetModelIndex());
 				if(ms_memoryUsed < mem)
 					return true;

@@ -203,14 +203,14 @@ CModelInfo::GetModelInfo(const char *name, int *id)
 bool
 CModelInfo::IsBoatModel(int32 id)
 {
-	return GetModelInfo(id)->m_type == MITYPE_VEHICLE &&
+	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
 		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_BOAT;
 }
 
 bool
 CModelInfo::IsBikeModel(int32 id)
 {
-	return GetModelInfo(id)->m_type == MITYPE_VEHICLE &&
+	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
 		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_BIKE;
 }
 

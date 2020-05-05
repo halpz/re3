@@ -22,7 +22,7 @@ CTimeModelInfo::FindOtherTimeModel(void)
 
 	for(i = 0; i < MODELINFOSIZE; i++){
 		CBaseModelInfo *mi = CModelInfo::GetModelInfo(i);
-		if(mi && mi->m_type == MITYPE_TIME &&
+		if (mi && mi->GetModelType() == MITYPE_TIME &&
 		   strncmp(name, mi->GetName(), 24) == 0){
 			m_otherTimeModelID = i;
 			return (CTimeModelInfo*)mi;

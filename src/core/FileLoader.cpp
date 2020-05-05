@@ -384,7 +384,7 @@ CFileLoader::LoadClumpFile(RwStream *stream, uint32 id)
 		return false;
 	mi = (CClumpModelInfo*)CModelInfo::GetModelInfo(id);
 	mi->SetClump(clump);
-	if(mi->m_type == MITYPE_PED && id != 0 && RwStreamFindChunk(stream, rwID_CLUMP, nil, nil)){
+	if (mi->GetModelType() == MITYPE_PED && id != 0 && RwStreamFindChunk(stream, rwID_CLUMP, nil, nil)) {
 		// Read LOD ped
 		clump = RpClumpStreamRead(stream);
 		if(clump){
@@ -1325,7 +1325,7 @@ CFileLoader::ReloadObject(const char *line)
 #ifdef FIX_BUGS
 		mi &&
 #endif
-		mi->m_type == MITYPE_SIMPLE && !strcmp(mi->GetName(), model) && mi->m_numAtomics == numObjs) {
+	    mi->GetModelType() == MITYPE_SIMPLE && !strcmp(mi->GetName(), model) && mi->m_numAtomics == numObjs) {
 		mi->SetLodDistances(dist);
 		SetModelInfoFlags(mi, flags);
 	} else {

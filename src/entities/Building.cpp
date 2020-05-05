@@ -12,7 +12,7 @@ CBuilding::ReplaceWithNewModel(int32 id)
 {
 	DeleteRwObject();
 
-	if(CModelInfo::GetModelInfo(m_modelIndex)->m_refCount == 0)
+	if (CModelInfo::GetModelInfo(m_modelIndex)->GetNumRefs() == 0)
 		CStreaming::RemoveModel(m_modelIndex);
 	m_modelIndex = id;
 

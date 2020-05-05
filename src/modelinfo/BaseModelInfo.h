@@ -22,18 +22,17 @@ class C2dEffect;
 class CBaseModelInfo
 {
 protected:
-	// TODO?: make more things protected
 	char         m_name[MAX_MODEL_NAME];
 	CColModel   *m_colModel;
 	C2dEffect   *m_twodEffects;
 	int16        m_objectId;
-public:
 	uint16       m_refCount;
 	int16        m_txdSlot;
 	ModeInfoType m_type;
 	uint8        m_num2dEffects;
 	bool         m_freeCol;
 
+public:
 	CBaseModelInfo(ModeInfoType type);
 	virtual ~CBaseModelInfo() {}
 	virtual void Shutdown(void);
@@ -42,6 +41,8 @@ public:
 	virtual RwObject *CreateInstance(void) = 0;
 	virtual RwObject *GetRwObject(void) = 0;
 
+	// one day it becomes virtual
+	ModeInfoType GetModelType() const { return m_type; }
 	bool IsSimple(void) { return m_type == MITYPE_SIMPLE || m_type == MITYPE_TIME; }
 	bool IsClump(void) { return m_type == MITYPE_CLUMP || m_type == MITYPE_PED || m_type == MITYPE_VEHICLE ||
 		m_type == MITYPE_MLO || m_type == MITYPE_XTRACOMPS;	// unused but what the heck
@@ -64,6 +65,8 @@ public:
 	void Init2dEffects(void);
 	void Add2dEffect(C2dEffect *fx);
 	C2dEffect *Get2dEffect(int n);
+	uint8 GetNum2dEffects() const { return m_num2dEffects; }
+	uint16 GetNumRefs() const { return m_refCount; }
 };
 
 static_assert(sizeof(CBaseModelInfo) == 0x30, "CBaseModelInfo: error");

@@ -8870,8 +8870,8 @@ CPed::LookForInterestingNodes(void)
 			for (ptrNode = sector->m_lists[ENTITYLIST_VEHICLES].first; ptrNode && !found; ptrNode = ptrNode->next) {
 				CVehicle *veh = (CVehicle*)ptrNode->item;
 				model = veh->GetModelInfo();
-				if (model->m_num2dEffects != 0) {
-					for (int e = 0; e < model->m_num2dEffects; e++) {
+				if (model->GetNum2dEffects() != 0) {
+					for (int e = 0; e < model->GetNum2dEffects(); e++) {
 						effect = model->Get2dEffect(e);
 						if (effect->type == EFFECT_ATTRACTOR && effect->attractor.probability >= randVal) {
 							objMat = &veh->GetMatrix();
@@ -8888,8 +8888,8 @@ CPed::LookForInterestingNodes(void)
 			for (ptrNode = sector->m_lists[ENTITYLIST_OBJECTS].first; ptrNode && !found; ptrNode = ptrNode->next) {
 				CObject *obj = (CObject*)ptrNode->item;
 				model = CModelInfo::GetModelInfo(obj->GetModelIndex());
-				if (model->m_num2dEffects != 0) {
-					for (int e = 0; e < model->m_num2dEffects; e++) {
+				if (model->GetNum2dEffects() != 0) {
+					for (int e = 0; e < model->GetNum2dEffects(); e++) {
 						effect = model->Get2dEffect(e);
 						if (effect->type == EFFECT_ATTRACTOR && effect->attractor.probability >= randVal) {
 							objMat = &obj->GetMatrix();
@@ -8906,8 +8906,8 @@ CPed::LookForInterestingNodes(void)
 			for (ptrNode = sector->m_lists[ENTITYLIST_BUILDINGS].first; ptrNode && !found; ptrNode = ptrNode->next) {
 				CBuilding *building = (CBuilding*)ptrNode->item;
 				model = CModelInfo::GetModelInfo(building->GetModelIndex());
-				if (model->m_num2dEffects != 0) {
-					for (int e = 0; e < model->m_num2dEffects; e++) {
+				if (model->GetNum2dEffects() != 0) {
+					for (int e = 0; e < model->GetNum2dEffects(); e++) {
 						effect = model->Get2dEffect(e);
 						if (effect->type == EFFECT_ATTRACTOR && effect->attractor.probability >= randVal) {
 							objMat = &building->GetMatrix();
@@ -8924,8 +8924,8 @@ CPed::LookForInterestingNodes(void)
 			for (ptrNode = sector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP].first; ptrNode && !found; ptrNode = ptrNode->next) {
 				CBuilding *building = (CBuilding*)ptrNode->item;
 				model = CModelInfo::GetModelInfo(building->GetModelIndex());
-				if (model->m_num2dEffects != 0) {
-					for (int e = 0; e < model->m_num2dEffects; e++) {
+				if (model->GetNum2dEffects() != 0) {
+					for (int e = 0; e < model->GetNum2dEffects(); e++) {
 						effect = model->Get2dEffect(e);
 						if (effect->type == EFFECT_ATTRACTOR && effect->attractor.probability >= randVal) {
 							objMat = &building->GetMatrix();

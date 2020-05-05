@@ -125,7 +125,7 @@ CObject::Render(void)
 
 	if(m_nRefModelIndex != -1 && ObjectCreatedBy == TEMP_OBJECT && bUseVehicleColours){
 		CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(m_nRefModelIndex);
-		assert(mi->m_type == MITYPE_VEHICLE);
+		assert(mi->GetModelType() == MITYPE_VEHICLE);
 		mi->SetVehicleColour(m_colour1, m_colour2);
 	}
 

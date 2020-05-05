@@ -334,7 +334,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 	float dist;
 
 	bool request = true;
-	if(mi->m_type == MITYPE_TIME){
+	if (mi->GetModelType() == MITYPE_TIME) {
  		ti = (CTimeModelInfo*)mi;
 		other = ti->GetOtherTimeModel();
 		if(CClock::GetIsTimeInRange(ti->GetTimeOn(), ti->GetTimeOff())){
@@ -350,7 +350,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 			request = false;
 		}
 	}else{
-		if(mi->m_type != MITYPE_SIMPLE){
+		if (mi->GetModelType() != MITYPE_SIMPLE) {
 			if(FindPlayerVehicle() == ent &&
 			   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON){
 				// Player's vehicle in first person mode
@@ -482,7 +482,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 	CTimeModelInfo *ti;
 	int32 other;
 
-	if(mi->m_type == MITYPE_TIME){
+	if (mi->GetModelType() == MITYPE_TIME) {
  		ti = (CTimeModelInfo*)mi;
 		other = ti->GetOtherTimeModel();
 		// Hide objects not in time range if possible
@@ -490,7 +490,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 			if(!CClock::GetIsTimeInRange(ti->GetTimeOn(), ti->GetTimeOff()))
 				return 0;
 		// Draw like normal
-	}else if(mi->m_type == MITYPE_VEHICLE)
+	} else if (mi->GetModelType() == MITYPE_VEHICLE)
 		return ent->IsVisible();
 
 	float dist = (ms_vecCameraPosition-ent->GetPosition()).Magnitude();
@@ -507,7 +507,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 
 		// But if it is a time object, we'd rather draw the wrong
 		// non-LOD than the right LOD.
-		if(nonLOD->m_type == MITYPE_TIME){
+		if (nonLOD->GetModelType() == MITYPE_TIME) {
 			ti = (CTimeModelInfo*)nonLOD;
 			other = ti->GetOtherTimeModel();
 			if(other != -1 && CModelInfo::GetModelInfo(other)->GetRwObject())

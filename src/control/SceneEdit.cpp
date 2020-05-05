@@ -84,12 +84,11 @@ static int32 NextValidModelId(int32 mi, int32 step)
 		CVehicleModelInfo* pVehicleInfo = (CVehicleModelInfo*)pInfo;
 		if (!pInfo)
 			continue;
-		if (pInfo->m_type == MITYPE_PED
+		if (pInfo->GetModelType() == MITYPE_PED
 #ifdef FIX_BUGS
 			&& !(i >= MI_SPECIAL01 && i <= MI_SPECIAL04)
 #endif
-			||
-			pInfo->m_type == MITYPE_VEHICLE &&
+			|| pInfo->GetModelType() == MITYPE_VEHICLE &&
 #ifdef FIX_BUGS
 			(pVehicleInfo->m_vehicleType == VEHICLE_TYPE_CAR || pVehicleInfo->m_vehicleType == VEHICLE_TYPE_BOAT))
 #else // && and || priority failure it seems, also crashes on special models
