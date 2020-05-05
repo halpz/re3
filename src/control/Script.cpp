@@ -249,6 +249,21 @@ void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObject()
 	}
 }
 
+CPhysical* CMissionCleanup::DoesThisEntityWaitForCollision(int i)
+{
+	if (m_sEntities[i].type == CLEANUP_CAR) {
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(m_sEntities[i].id);
+		if (pVehicle && pVehicle->GetStatus() != STATUS_WRECKED)
+			return pVehicle;
+	}
+	else if (m_sEntities[i].type == CLEANUP_CHAR) {
+		CPed* pPed = CPools::GetPedPool()->GetAt(m_sEntities[i].id);
+		if (pPed && !pPed->DyingOrDead())
+			return pPed;
+	}
+	return nil;
+}
+
 void CMissionCleanup::Process()
 {
 	CPopulation::m_AllRandomPedsThisType = -1;
