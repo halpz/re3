@@ -6,6 +6,7 @@
 #include "Curves.h"
 #include "PathFind.h"
 
+//--MIAMI: done
 void CAutoPilot::ModifySpeed(float speed)
 {
 	m_fMaxTrafficSpeed = Max(0.01f, speed);
@@ -39,6 +40,7 @@ void CAutoPilot::ModifySpeed(float speed)
 #endif
 }
 
+//--MIAMI: done
 void CAutoPilot::RemoveOnePathNode()
 {
 	--m_nPathFindNodesCount;
@@ -47,6 +49,7 @@ void CAutoPilot::RemoveOnePathNode()
 }
 
 #ifdef COMPATIBLE_SAVES
+//--MIAMI: TODO
 void CAutoPilot::Save(uint8*& buf)
 {
 	WriteSaveBuf<int32>(buf, m_nCurrentRouteNode);
@@ -86,6 +89,7 @@ void CAutoPilot::Save(uint8*& buf)
 	SkipSaveBuf(buf, 6);
 }
 
+//--MIAMI: TODO
 void CAutoPilot::Load(uint8*& buf)
 {
 	m_nCurrentRouteNode = ReadSaveBuf<int32>(buf);

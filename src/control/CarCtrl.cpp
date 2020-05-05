@@ -531,7 +531,7 @@ CCarCtrl::GenerateOneRandomCar()
 	pVehicleModel->AvoidSameVehicleColour(&pCar->m_currentColour1, &pCar->m_currentColour2);
 	CWorld::Add(pCar);
 	if (carClass == COPS)
-		CCarAI::AddPoliceOccupants(pCar);
+		CCarAI::AddPoliceCarOccupants(pCar);
 	else
 		pCar->SetUpDriver();
 	if ((CGeneral::GetRandomNumber() & 0x3F) == 0){ /* 1/64 probability */
@@ -2751,3 +2751,15 @@ bool CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 	return false;
 #endif
 }
+
+#ifdef MIAMI
+float CCarCtrl::FindSpeedMultiplierWithSpeedFromNodes(int8 type)
+{
+	switch (type)
+	{
+	case 1: return 1.5f;
+	case 2: return 2.0f;
+	}
+	return 1.0f;
+}
+#endif

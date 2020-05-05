@@ -8277,8 +8277,8 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams *params)
 				if (params->m_pVehicle->GetStatus() != STATUS_PLAYER) {
 					automobile->m_nCarHornTimer = Min(44, automobile->m_nCarHornTimer);
 					if (automobile->m_nCarHornTimer == 44)
-						automobile->field_22D = (m_FrameCounter + m_sQueueSample.m_nEntityIndex) & 7;
-					if (!hornPatternsArray[automobile->field_22D][44 - automobile->m_nCarHornTimer])
+						automobile->m_nCarHornPattern = (m_FrameCounter + m_sQueueSample.m_nEntityIndex) & 7;
+					if (!hornPatternsArray[automobile->m_nCarHornPattern][44 - automobile->m_nCarHornTimer])
 						return;
 				}
 

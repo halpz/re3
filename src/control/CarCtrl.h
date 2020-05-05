@@ -104,6 +104,9 @@ public:
 	static void ClearInterestingVehicleList();
 	static void FindLinksToGoWithTheseNodes(CVehicle*);
 	static bool GenerateOneEmergencyServicesCar(uint32, CVector);
+#ifdef MIAMI
+	static float FindSpeedMultiplierWithSpeedFromNodes(int8);
+#endif
 
 	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle)
 	{
