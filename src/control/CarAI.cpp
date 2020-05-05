@@ -85,19 +85,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 				if (pVehicle->UsesSiren(pVehicle->GetModelIndex()))
 					pVehicle->m_bSirenOrAlarm = true;
 			}
-#ifndef MIAMI
-			if (FindPlayerPed()->m_pWanted->m_bIgnoredByEveryone || pVehicle->bIsLawEnforcer &&
-				(FindPlayerPed()->m_pWanted->m_nWantedLevel == 0 || FindPlayerPed()->m_pWanted->m_bIgnoredByCops || CCullZones::NoPolice())) {
-				CCarCtrl::JoinCarWithRoadSystem(pVehicle);
-				pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
-				pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
-				pVehicle->m_bSirenOrAlarm = false;
-				if (CCullZones::NoPolice())
-					pVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
-			}
-#else
 			BackToCruisingIfNoWantedLevel(pVehicle);
-#endif
 			break;
 		case MISSION_RAMPLAYER_CLOSE:
 			if (FindSwitchDistanceFar(pVehicle) >= (FindPlayerCoors() - pVehicle->GetPosition()).Magnitude2D() ||
