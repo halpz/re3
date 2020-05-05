@@ -232,7 +232,6 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			}
 			if (pVehicle->bIsLawEnforcer)
 				MellowOutChaseSpeed(pVehicle);
-#endif
 			break;
 		case MISSION_GOTOCOORDS:
 #ifdef MIAMI
