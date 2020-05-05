@@ -87,13 +87,19 @@ struct CStoredCollPoly
 
 struct CColModel
 {
+#ifndef MIAMI
 	CColSphere boundingSphere;
 	CColBox boundingBox;
-	short numSpheres;
-	short numLines;
-	short numBoxes;
-	short numTriangles;
-	int level;
+#endif
+	int16 numSpheres;
+	int16 numLines;
+	int16 numBoxes;
+	int16 numTriangles;
+#ifndef MIAMI
+	int32 level;
+#else
+	uint8 level;	// colstore slot but probably same name
+#endif
 	bool ownsCollisionVolumes;
 	CColSphere *spheres;
 	CColLine *lines;

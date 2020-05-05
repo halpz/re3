@@ -26,6 +26,25 @@ public:
 		if(v.y < top) top = v.y;
 		if(v.y > bottom) bottom = v.y;
 	}
+	void ContainRect(const CRect &r){
+		if(r.left < left) left = r.left;
+		if(r.right > right) right = r.right;
+		if(r.top < top) top = r.top;
+		if(r.bottom > bottom) bottom = r.bottom;
+	}
+
+	bool IsPointInside(const CVector2D &p){
+		return p.x >= left &&
+			p.x <= right &&
+			p.y >= top &&
+			p.y <= bottom;
+	}
+	bool IsPointInside(const CVector2D &p, float extraRadius){
+		return p.x >= left-extraRadius &&
+			p.x <= right+extraRadius &&
+			p.y >= top-extraRadius &&
+			p.y <= bottom+extraRadius;
+	}
 
 	void Translate(float x, float y){
 		left += x;

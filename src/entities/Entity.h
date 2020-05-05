@@ -59,7 +59,9 @@ public:
 	uint32 bRenderScorched : 1;
 	uint32 bHasBlip : 1;
 	uint32 bIsBIGBuilding : 1;			// Set if this entity is a big building
-	// VC inserts one more flag here: if drawdist <= 2000
+#ifdef MIAMI
+	uint32 bStreamBIGBuilding : 1;	// set when draw dist <= 2000
+#endif
 	uint32 bRenderDamaged : 1;			// use damaged LOD models for objects with applicable damage
 
 	// flagsC
@@ -69,8 +71,10 @@ public:
 	uint32 bMeleeProof : 1;
 	uint32 bOnlyDamagedByPlayer : 1;
 	uint32 bStreamingDontDelete : 1;	// Dont let the streaming remove this 
+#ifdef GTA_ZONECULL
 	uint32 bZoneCulled : 1;
 	uint32 bZoneCulled2 : 1;    // only treadables+10m
+#endif
 
 	// flagsD
 	uint32 bRemoveFromWorld : 1;		// remove this entity next time it should be processed
@@ -89,7 +93,12 @@ public:
 	uint16 m_scanCode;
 	uint16 m_randomSeed;
 	int16 m_modelIndex;
+#ifndef MIAMI
 	uint16 m_level;	// int16
+#else
+	int8 m_level;
+	int8 m_area;
+#endif
 	CReference *m_pFirstReference;
 
 public:
@@ -147,6 +156,7 @@ public:
 	bool GetIsTouching(CVector const &center, float r);
 	bool GetIsOnScreen(void);
 	bool GetIsOnScreenComplex(void);
+	bool GetIsOnScreenAndNotCulled(void);
 	bool IsVisible(void) { return m_rwObject && bIsVisible && GetIsOnScreen(); }
 	bool IsVisibleComplex(void) { return m_rwObject && bIsVisible && GetIsOnScreenComplex(); }
 	int GetModelIndex(void) { return m_modelIndex; }

@@ -25,7 +25,7 @@ public:
 	uint16  m_noZwrite      : 1;
 
 	CSimpleModelInfo(void) : CBaseModelInfo(MITYPE_SIMPLE) {}
-	CSimpleModelInfo(ModeInfoType id) : CBaseModelInfo(id) {}
+	CSimpleModelInfo(ModelInfoType id) : CBaseModelInfo(id) {}
 	~CSimpleModelInfo() {}
 	void DeleteRwObject(void);
 	RwObject *CreateInstance(void);
@@ -36,10 +36,13 @@ public:
 	void IncreaseAlpha(void);
 	void SetAtomic(int n, RpAtomic *atomic);
 	void SetLodDistances(float *dist);
-	float GetLodDistance(int i) { return m_lodDistances[i]; }
+	float GetLodDistance(int i);
 	float GetNearDistance(void);
 	float GetLargestLodDistance(void);
 	RpAtomic *GetAtomicFromDistance(float dist);
+#ifdef MIAMI
+	RpAtomic *GetFirstAtomicFromDistance(float dist); // inline
+#endif
 	void FindRelatedModel(void);
 	void SetupBigBuilding(void);
 

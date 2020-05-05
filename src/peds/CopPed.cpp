@@ -565,8 +565,10 @@ CCopPed::CopAI(void)
 void
 CCopPed::ProcessControl(void)
 {
+#ifndef MIAMI
 	if (m_nZoneLevel > LEVEL_NONE && m_nZoneLevel != CCollision::ms_collisionInMemory)
 		return;
+#endif
 
 	CPed::ProcessControl();
 	if (bWasPostponed)
@@ -715,7 +717,7 @@ CCopPed::ProcessControl(void)
 		return;
 
 	bool dontShoot = false;
-	if (GetIsOnScreen() && CRenderer::IsEntityCullZoneVisible(this)) {
+	if (GetIsOnScreenAndNotCulled()) {
 		if (((CTimer::GetFrameCounter() + m_randomSeed) & 0x1F) == 17) {
 			CEntity *foundBuilding = nil;
 			CColPoint foundCol;

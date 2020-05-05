@@ -4,7 +4,7 @@
 
 #define MAX_MODEL_NAME (24)
 
-enum ModeInfoType : uint8
+enum ModelInfoType : uint8
 {
 	MITYPE_NA        = 0,
 	MITYPE_SIMPLE    = 1,
@@ -15,7 +15,7 @@ enum ModeInfoType : uint8
 	MITYPE_PED       = 6,
 	MITYPE_XTRACOMPS = 7,
 };
-static_assert(sizeof(ModeInfoType) == 1, "ModeInfoType: error");
+static_assert(sizeof(ModelInfoType) == 1, "ModeInfoType: error");
 
 class C2dEffect;
 
@@ -30,11 +30,11 @@ protected:
 public:
 	uint16       m_refCount;
 	int16        m_txdSlot;
-	ModeInfoType m_type;
+	ModelInfoType m_type;
 	uint8        m_num2dEffects;
-	bool         m_freeCol;
+	bool         m_bOwnsColModel;
 
-	CBaseModelInfo(ModeInfoType type);
+	CBaseModelInfo(ModelInfoType type);
 	virtual ~CBaseModelInfo() {}
 	virtual void Shutdown(void);
 	virtual void DeleteRwObject(void) = 0;
@@ -48,8 +48,8 @@ public:
 	}
 	char *GetName(void) { return m_name; }
 	void SetName(const char *name) { strncpy(m_name, name, 24); }
-	void SetColModel(CColModel *col, bool free = false){
-		m_colModel = col; m_freeCol = free; }
+	void SetColModel(CColModel *col, bool owns = false){
+		m_colModel = col; m_bOwnsColModel = owns; }
 	CColModel *GetColModel(void) { return m_colModel; }
 	void DeleteCollisionModel(void);
 	void ClearTexDictionary(void) { m_txdSlot = -1; }

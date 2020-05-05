@@ -332,6 +332,7 @@ enum Visbility
 int32
 CRenderer::SetupEntityVisibility(CEntity *ent)
 {
+#ifndef MIAMI
 	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->m_modelIndex);
 	CTimeModelInfo *ti;
 	int32 other;
@@ -406,7 +407,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 
 	RpAtomic *a = mi->GetAtomicFromDistance(dist);
 	if(a){
-		mi->m_isDamaged = 0;
+		mi->m_isDamaged = false;
 		if(ent->m_rwObject == nil)
 			ent->CreateRwObject();
 		assert(ent->m_rwObject);
@@ -477,11 +478,164 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 		ent->bDistanceFade = true;
 		return VIS_OFFSCREEN;	// Why this?
 	}
+#else
+	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->m_modelIndex);
+	CTimeModelInfo *ti;
+	int32 other;
+	float dist;
+
+	bool request = true;
+	if(mi->m_type == MITYPE_TIME){
+ 		ti = (CTimeModelInfo*)mi;
+		other = ti->GetOtherTimeModel();
+		if(CClock::GetIsTimeInRange(ti->GetTimeOn(), ti->GetTimeOff())){
+			// don't fade in, or between time objects
+			if(CANTIMECULL)
+				ti->m_alpha = 255;
+		}else{
+			// Hide if possible
+			if(CANTIMECULL)
+				return VIS_INVISIBLE;
+			// can't cull, so we'll try to draw this one, but don't request
+			// it since what we really want is the other one.
+			request = false;
+		}
+	}else{
+// TODO(MIAMI): weapon
+		if(mi->m_type != MITYPE_SIMPLE){
+			if(FindPlayerVehicle() == ent &&
+			   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON){
+				// Player's vehicle in first person mode
+				if(TheCamera.Cams[TheCamera.ActiveCam].DirectionWasLooking == LOOKING_FORWARD ||
+				   ent->GetModelIndex() == MI_RHINO ||
+				   ent->GetModelIndex() == MI_COACH ||
+				   TheCamera.m_bInATunnelAndABigVehicle){
+					ent->bNoBrightHeadLights = true;
+				}else{
+					m_pFirstPersonVehicle = (CVehicle*)ent;
+					ent->bNoBrightHeadLights = false;
+				}
+				return VIS_OFFSCREEN;
+			}else{
+				// All sorts of Clumps
+				if(ent->m_rwObject == nil || !ent->bIsVisible)
+					return VIS_INVISIBLE;
+// TODO(MIAMI): occlusion
+				if(!ent->GetIsOnScreen())
+					return VIS_OFFSCREEN;
+				if(ent->bDrawLast){
+					dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
+					CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
+					ent->bDistanceFade = false;
+					return VIS_INVISIBLE;
+				}else
+					return VIS_VISIBLE;
+			}
+			return VIS_INVISIBLE;
+		}
+// TODO(MIAMI): this is different
+		if(ent->IsObject() &&
+		   ((CObject*)ent)->ObjectCreatedBy == TEMP_OBJECT){
+			if(ent->m_rwObject == nil || !ent->bIsVisible)
+				return VIS_INVISIBLE;
+			return ent->GetIsOnScreen() ? VIS_VISIBLE : VIS_OFFSCREEN;
+		}
+	}
+
+	// Simple ModelInfo
+
+// TODO(MIAMI): area
+
+	dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
+
+	if(LOD_DISTANCE < dist && dist < mi->GetLargestLodDistance() + FADE_DISTANCE)
+		dist += mi->GetLargestLodDistance() - 300.0f;
+
+	if(ent->IsObject() && ent->bRenderDamaged)
+		mi->m_isDamaged = true;
+
+	RpAtomic *a = mi->GetAtomicFromDistance(dist);
+	if(a){
+		mi->m_isDamaged = false;
+		if(ent->m_rwObject == nil)
+			ent->CreateRwObject();
+		assert(ent->m_rwObject);
+		RpAtomic *rwobj = (RpAtomic*)ent->m_rwObject;
+		// Make sure our atomic uses the right geometry and not
+		// that of an atomic for another draw distance.
+		if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
+			RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
+		mi->IncreaseAlpha();
+		if(ent->m_rwObject == nil || !ent->bIsVisible)
+			return VIS_INVISIBLE;
+
+		if(!ent->GetIsOnScreen()){
+			mi->m_alpha = 255;
+			return VIS_OFFSCREEN;
+		}
+
+		if(mi->m_alpha != 255){
+			CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
+			ent->bDistanceFade = true;
+			return VIS_INVISIBLE;
+		}
+
+		if(mi->m_drawLast || ent->bDrawLast){
+			if(CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist)){
+				ent->bDistanceFade = false;
+				return VIS_INVISIBLE;
+			}
+		}
+		return VIS_VISIBLE;
+	}
+
+	// Object is not loaded, figure out what to do
+
+	if(mi->m_noFade){
+		mi->m_isDamaged = false;
+		// request model
+		if(dist - STREAM_DISTANCE < mi->GetLargestLodDistance() && request)
+			return VIS_STREAMME;
+		return VIS_INVISIBLE;
+	}
+
+	// We might be fading
+
+	a = mi->GetAtomicFromDistance(dist - FADE_DISTANCE);
+	mi->m_isDamaged = false;
+	if(a == nil){
+		// request model
+		if(dist - FADE_DISTANCE - STREAM_DISTANCE < mi->GetLargestLodDistance() && request)
+			return VIS_STREAMME;
+		return VIS_INVISIBLE;
+	}
+
+	if(ent->m_rwObject == nil)
+		ent->CreateRwObject();
+	assert(ent->m_rwObject);
+	RpAtomic *rwobj = (RpAtomic*)ent->m_rwObject;
+	if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
+		RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
+	mi->IncreaseAlpha();
+	if(ent->m_rwObject == nil || !ent->bIsVisible)
+		return VIS_INVISIBLE;
+
+// TODO(MIAMI): occlusion
+	if(!ent->GetIsOnScreen()){
+		mi->m_alpha = 255;
+		return VIS_OFFSCREEN;
+	}else{
+		CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
+		ent->bDistanceFade = true;
+		return VIS_OFFSCREEN;	// Why this?
+	}
+#endif
 }
 
 int32
 CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 {
+#ifndef MIAMI
 	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->m_modelIndex);
 	CTimeModelInfo *ti;
 	int32 other;
@@ -492,10 +646,10 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 		// Hide objects not in time range if possible
 		if(CANTIMECULL)
 			if(!CClock::GetIsTimeInRange(ti->GetTimeOn(), ti->GetTimeOff()))
-				return 0;
+				return VIS_INVISIBLE;
 		// Draw like normal
 	}else if(mi->m_type == MITYPE_VEHICLE)
-		return ent->IsVisible();
+		return ent->IsVisible() ? VIS_VISIBLE : VIS_INVISIBLE;
 
 	float dist = (ms_vecCameraPosition-ent->GetPosition()).Magnitude();
 	CSimpleModelInfo *nonLOD = mi->GetRelatedModel();
@@ -507,7 +661,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 		// No non-LOD or non-LOD is completely visible.
 		if(nonLOD == nil ||
 		   nonLOD->GetRwObject() && nonLOD->m_alpha == 255)
-			return 0;
+			return VIS_INVISIBLE;
 
 		// But if it is a time object, we'd rather draw the wrong
 		// non-LOD than the right LOD.
@@ -515,7 +669,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 			ti = (CTimeModelInfo*)nonLOD;
 			other = ti->GetOtherTimeModel();
 			if(other != -1 && CModelInfo::GetModelInfo(other)->GetRwObject())
-				return 0;
+				return VIS_INVISIBLE;
 		}
 	}
 
@@ -531,18 +685,18 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 		if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
 			RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 		if(!ent->IsVisibleComplex())
-			return 0;
+			return VIS_INVISIBLE;
 		if(mi->m_drawLast){
 			CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
-			ent->bDistanceFade = 0;
-			return 0;
+			ent->bDistanceFade = false;
+			return VIS_INVISIBLE;
 		}
-		return 1;
+		return VIS_VISIBLE;
 	}
 
 	if(mi->m_noFade){
 		ent->DeleteRwObject();
-		return 0;
+		return VIS_INVISIBLE;
 	}
 
 
@@ -550,7 +704,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 	a = mi->GetAtomicFromDistance(dist - FADE_DISTANCE);
 	if(a == nil){
 		ent->DeleteRwObject();
-		return 0;
+		return VIS_INVISIBLE;
 	}
 
 	// Fade...
@@ -562,7 +716,122 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 		RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 	if(ent->IsVisibleComplex())
 		CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
-	return 0;
+	return VIS_INVISIBLE;
+#else
+	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->m_modelIndex);
+	CTimeModelInfo *ti;
+	int32 other;
+
+// TODO(MIAMI): area
+
+	bool request = true;
+	if(mi->m_type == MITYPE_TIME){
+		ti = (CTimeModelInfo*)mi;
+		other = ti->GetOtherTimeModel();
+		if(CClock::GetIsTimeInRange(ti->GetTimeOn(), ti->GetTimeOff())){
+			// don't fade in, or between time objects
+			if(CANTIMECULL)
+				ti->m_alpha = 255;
+		}else{
+			// Hide if possible
+			if(CANTIMECULL){
+				ent->DeleteRwObject();
+				return VIS_INVISIBLE;
+			}
+			// can't cull, so we'll try to draw this one, but don't request
+			// it since what we really want is the other one.
+			request = false;
+		}
+	}else if(mi->m_type == MITYPE_VEHICLE)
+		return ent->IsVisible() ? VIS_VISIBLE : VIS_INVISIBLE;
+
+	float dist = (ms_vecCameraPosition-ent->GetPosition()).Magnitude();
+	CSimpleModelInfo *nonLOD = mi->GetRelatedModel();
+
+	// Find out whether to draw below near distance.
+	// This is only the case if there is a non-LOD which is either not
+	// loaded or not completely faded in yet.
+	if(dist < mi->GetNearDistance() && dist < LOD_DISTANCE){
+		// No non-LOD or non-LOD is completely visible.
+		if(nonLOD == nil ||
+		   nonLOD->GetRwObject() && nonLOD->m_alpha == 255)
+			return VIS_INVISIBLE;
+
+		// But if it is a time object, we'd rather draw the wrong
+		// non-LOD than the right LOD.
+		if(nonLOD->m_type == MITYPE_TIME){
+			ti = (CTimeModelInfo*)nonLOD;
+			other = ti->GetOtherTimeModel();
+			if(other != -1 && CModelInfo::GetModelInfo(other)->GetRwObject())
+				return VIS_INVISIBLE;
+		}
+	}
+
+	RpAtomic *a = mi->GetFirstAtomicFromDistance(dist);
+	if(a){
+		if(ent->m_rwObject == nil)
+			ent->CreateRwObject();
+		assert(ent->m_rwObject);
+		RpAtomic *rwobj = (RpAtomic*)ent->m_rwObject;
+
+		// Make sure our atomic uses the right geometry and not
+		// that of an atomic for another draw distance.
+		if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
+			RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
+		mi->IncreaseAlpha();
+// TODO(MIAMI): occlusion
+		if(!ent->IsVisibleComplex()){
+			mi->m_alpha = 255;
+			return VIS_INVISIBLE;
+		}
+
+		if(mi->m_alpha != 255){
+			CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
+			ent->bDistanceFade = true;
+			return VIS_INVISIBLE;
+		}
+
+		if(mi->m_drawLast){
+			CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
+			ent->bDistanceFade = false;
+			return VIS_INVISIBLE;
+		}
+		return VIS_VISIBLE;
+	}
+
+	if(mi->m_noFade){
+		ent->DeleteRwObject();
+		return VIS_INVISIBLE;
+	}
+
+
+	// get faded atomic
+	a = mi->GetFirstAtomicFromDistance(dist - FADE_DISTANCE);
+	if(a == nil){
+		if(ent->bStreamBIGBuilding && dist-STREAM_DISTANCE < mi->GetLodDistance(0) && request){
+			return ent->GetIsOnScreen() ? VIS_STREAMME : VIS_INVISIBLE;
+		}else{
+			ent->DeleteRwObject();
+			return VIS_INVISIBLE;
+		}
+	}
+
+	// Fade...
+	if(ent->m_rwObject == nil)
+		ent->CreateRwObject();
+	assert(ent->m_rwObject);
+	RpAtomic *rwobj = (RpAtomic*)ent->m_rwObject;
+	if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
+		RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
+	mi->IncreaseAlpha();
+// TODO(MIAMI): occlusion
+	if(ent->IsVisibleComplex()){
+		CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
+		ent->bDistanceFade = true;
+	}else
+		mi->m_alpha = 255;
+	return VIS_INVISIBLE;
+#endif
 }
 
 void
@@ -709,7 +978,11 @@ CRenderer::ScanWorld(void)
 			}
 			ScanSectorPoly(poly, 3, ScanSectorList);
 
+#ifndef MIAMI
 			ScanBigBuildingList(CWorld::GetBigBuildingList(CCollision::ms_collisionInMemory));
+#else
+			ScanBigBuildingList(CWorld::GetBigBuildingList(CGame::currLevel));
+#endif
 			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_NONE));
 		}
 	}
@@ -954,11 +1227,27 @@ CRenderer::ScanBigBuildingList(CPtrList &list)
 	CPtrNode *node;
 	CEntity *ent;
 
+#ifndef MIAMI
 	for(node = list.first; node; node = node->next){
 		ent = (CEntity*)node->item;
-		if(!ent->bZoneCulled && SetupBigBuildingVisibility(ent) == 1)
+		if(!ent->bZoneCulled && SetupBigBuildingVisibility(ent) == VIS_VISIBLE)
 			ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
 	}
+#else
+	// TODO(MIAMI): some flags and such
+	for(node = list.first; node; node = node->next){
+		ent = (CEntity*)node->item;
+		switch(SetupBigBuildingVisibility(ent)){
+		case VIS_VISIBLE:
+			ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+			break;
+		case VIS_STREAMME:
+			if(!CStreaming::ms_disableStreaming)
+				CStreaming::RequestModel(ent->GetModelIndex(), 0);
+			break;
+		}
+	}
+#endif
 }
 
 void
@@ -978,7 +1267,9 @@ CRenderer::ScanSectorList(CPtrList *lists)
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
 
+#ifdef GTA_ZONECULL
 			if(IsEntityCullZoneVisible(ent))
+#endif
 				switch(SetupEntityVisibility(ent)){
 				case VIS_VISIBLE:
 					ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
@@ -1001,12 +1292,14 @@ CRenderer::ScanSectorList(CPtrList *lists)
 							CStreaming::RequestModel(ent->GetModelIndex(), 0);
 					break;
 				}
+#ifdef GTA_ZONECULL
 			else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable()){
 				if(!CStreaming::ms_disableStreaming)
 					if(SetupEntityVisibility(ent) == VIS_STREAMME)
 						if(!m_loadingPriority || CStreaming::ms_numModelsRequested < 10)
 							CStreaming::RequestModel(ent->GetModelIndex(), 0);
 			}
+#endif
 		}
 	}
 }
@@ -1028,7 +1321,9 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
 
+#ifdef GTA_ZONECULL
 			if(IsEntityCullZoneVisible(ent))
+#endif
 				switch(SetupEntityVisibility(ent)){
 				case VIS_VISIBLE:
 					ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
@@ -1053,11 +1348,13 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 					}
 					break;
 				}
+#ifdef GTA_ZONECULL
 			else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable()){
 				if(!CStreaming::ms_disableStreaming)
 					if(SetupEntityVisibility(ent) == VIS_STREAMME)
 						CStreaming::RequestModel(ent->GetModelIndex(), 0);
 			}
+#endif
 		}
 	}
 }
@@ -1110,7 +1407,10 @@ CRenderer::ScanSectorList_RequestModels(CPtrList *lists)
 			if(ent->m_scanCode == CWorld::GetCurrentScanCode())
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
-			if(IsEntityCullZoneVisible(ent) && ShouldModelBeStreamed(ent))
+#ifdef GTA_ZONECULL
+			if(IsEntityCullZoneVisible(ent))
+#endif
+			if(ShouldModelBeStreamed(ent))
 				CStreaming::RequestModel(ent->GetModelIndex(), 0);
 		}
 	}
@@ -1155,6 +1455,7 @@ CRenderer::ShouldModelBeStreamed(CEntity *ent)
 		return dist - FADE_DISTANCE - STREAM_DISTANCE < mi->GetLargestLodDistance();
 }
 
+#ifdef GTA_ZONECULL
 bool
 CRenderer::IsEntityCullZoneVisible(CEntity *ent)
 {
@@ -1197,6 +1498,7 @@ CRenderer::IsVehicleCullZoneVisible(CEntity *ent)
 		return !(v->m_pCurGroundEntity && v->m_pCurGroundEntity->bZoneCulled2);
 	return true;
 }
+#endif
 
 void
 CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)

@@ -624,6 +624,10 @@ public:
 	void LoadAllTextures();
 	void LoadSettings();
 	void MessageScreen(const char *);
+#ifdef MIAMI
+	//--MIAMI: TODO: implement the second argument
+	void MessageScreen(const char *str, bool) { MessageScreen(str); }
+#endif
 	void PickNewPlayerColour();
 	void PrintBriefs();
 	static void PrintErrorMessage();

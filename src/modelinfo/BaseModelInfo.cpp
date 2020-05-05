@@ -6,7 +6,7 @@
 #include "BaseModelInfo.h"
 
 
-CBaseModelInfo::CBaseModelInfo(ModeInfoType type)
+CBaseModelInfo::CBaseModelInfo(ModelInfoType type)
 {
 	m_colModel = nil;
 	m_twodEffects = nil;
@@ -15,7 +15,7 @@ CBaseModelInfo::CBaseModelInfo(ModeInfoType type)
 	m_txdSlot = -1;
 	m_type = type;
 	m_num2dEffects = 0;
-	m_freeCol = false;
+	m_bOwnsColModel = false;
 }
 
 void
@@ -31,7 +31,7 @@ CBaseModelInfo::Shutdown(void)
 void
 CBaseModelInfo::DeleteCollisionModel(void)
 {
-	if(m_colModel && m_freeCol){
+	if(m_colModel && m_bOwnsColModel){
 		if(m_colModel)
 			delete m_colModel;
 		m_colModel = nil;
