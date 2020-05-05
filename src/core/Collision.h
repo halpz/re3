@@ -93,11 +93,7 @@ struct CColModel
 	int16 numLines;
 	int16 numBoxes;
 	int16 numTriangles;
-#ifndef MIAMI
 	int32 level;
-#else
-	uint8 level;	// colstore slot but probably same name
-#endif
 	bool ownsCollisionVolumes;
 	CColSphere *spheres;
 	CColLine *lines;

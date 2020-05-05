@@ -59,9 +59,6 @@ public:
 	uint32 bRenderScorched : 1;
 	uint32 bHasBlip : 1;
 	uint32 bIsBIGBuilding : 1;			// Set if this entity is a big building
-#ifdef MIAMI
-	uint32 bStreamBIGBuilding : 1;	// set when draw dist <= 2000
-#endif
 	uint32 bRenderDamaged : 1;			// use damaged LOD models for objects with applicable damage
 
 	// flagsC
@@ -93,12 +90,7 @@ public:
 	uint16 m_scanCode;
 	uint16 m_randomSeed;
 	int16 m_modelIndex;
-#ifndef MIAMI
 	uint16 m_level;	// int16
-#else
-	int8 m_level;
-	int8 m_area;
-#endif
 	CReference *m_pFirstReference;
 
 public:

@@ -4,12 +4,7 @@
 
 enum {
 	STREAM_OFFSET_TXD = MODELINFOSIZE,
-#ifndef MIAMI
 	NUMSTREAMINFO = STREAM_OFFSET_TXD+TXDSTORESIZE
-#else
-	STREAM_OFFSET_COL = STREAM_OFFSET_TXD+TXDSTORESIZE,
-	NUMSTREAMINFO = STREAM_OFFSET_COL+COLSTORESIZE
-#endif
 };
 
 enum StreamFlags
@@ -19,9 +14,6 @@ enum StreamFlags
 	STREAMFLAGS_DEPENDENCY  = 0x04,	// Is this right?
 	STREAMFLAGS_PRIORITY    = 0x08,
 	STREAMFLAGS_NOFADE      = 0x10,
-#ifdef MIAMI
-	STREAMFLAGS_20          = 0x20,
-#endif
 
 	STREAMFLAGS_CANT_REMOVE = STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_SCRIPTOWNED,
 	STREAMFLAGS_KEEP_IN_MEMORY = STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_SCRIPTOWNED|STREAMFLAGS_DEPENDENCY,
@@ -102,9 +94,7 @@ public:
 	static int32 ms_lastVehicleDeleted;
 	static CDirectory *ms_pExtraObjectsDir;
 	static int32 ms_numPriorityRequests;
-#ifndef MIAMI
 	static bool ms_hasLoadedLODs;
-#endif
 	static int32 ms_currentPedGrp;
 	static int32 ms_lastCullZone;
 	static uint16 ms_loadedGangs;
@@ -125,28 +115,14 @@ public:
 	static bool FinishLoadingLargeFile(int8 *buf, int32 streamId);
 	static bool HasModelLoaded(int32 id) { return ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED; }
 	static bool HasTxdLoaded(int32 id) { return HasModelLoaded(id+STREAM_OFFSET_TXD); }
-#ifdef MIAMI
-	static bool HasColLoaded(int32 id) { return HasModelLoaded(id+STREAM_OFFSET_COL); }
-#endif
 	static bool CanRemoveModel(int32 id) { return (ms_aInfoForModel[id].m_flags & STREAMFLAGS_CANT_REMOVE) == 0; }
 	static bool CanRemoveTxd(int32 id) { return CanRemoveModel(id+STREAM_OFFSET_TXD); }
-#ifdef MIAMI
-	static bool CanRemoveCol(int32 id) { return CanRemoveModel(id+STREAM_OFFSET_COL); }
-#endif
 	static void RequestModel(int32 model, int32 flags);
 	static void ReRequestModel(int32 model) { RequestModel(model, ms_aInfoForModel[model].m_flags); }
 	static void RequestTxd(int32 txd, int32 flags) { RequestModel(txd + STREAM_OFFSET_TXD, flags); }
 	static void ReRequestTxd(int32 txd) { ReRequestModel(txd + STREAM_OFFSET_TXD); }
-#ifdef MIAMI
-	static void RequestCol(int32 col, int32 flags) { RequestModel(col + STREAM_OFFSET_COL, flags); }
-	static void ReRequestCol(int32 col) { ReRequestModel(col + STREAM_OFFSET_COL); }
-#endif
 	static void RequestSubway(void);
 	static void RequestBigBuildings(eLevelName level);
-#ifdef MIAMI
-	static void RequestBigBuildings(eLevelName level, const CVector &pos);
-	static void InstanceBigBuildings(eLevelName level, const CVector &pos);
-#endif
 	static void RequestIslands(eLevelName level);
 	static void RequestSpecialModel(int32 modelId, const char *modelName, int32 flags);
 	static void RequestSpecialChar(int32 charId, const char *modelName, int32 flags);
@@ -155,9 +131,6 @@ public:
 	static void DecrementRef(int32 id);
 	static void RemoveModel(int32 id);
 	static void RemoveTxd(int32 id) { RemoveModel(id + STREAM_OFFSET_TXD); }
-#ifdef MIAMI
-	static void RemoveCol(int32 id) { RemoveModel(id + STREAM_OFFSET_COL); }
-#endif
 	static void RemoveUnusedBuildings(eLevelName level);
 	static void RemoveBuildings(eLevelName level);
 	static void RemoveUnusedBigBuildings(eLevelName level);
@@ -172,9 +145,7 @@ public:
 	static bool IsTxdUsedByRequestedModels(int32 txdId);
 	static bool AddToLoadedVehiclesList(int32 modelId);
 	static bool IsObjectInCdImage(int32 id);
-#ifndef MIAMI
 	static void HaveAllBigBuildingsLoaded(eLevelName level);
-#endif
 	static void SetModelIsDeletable(int32 id);
 	static void SetModelTxdIsDeletable(int32 id);
 	static void SetMissionDoesntRequireModel(int32 id);
@@ -183,9 +154,6 @@ public:
 	static void StreamVehiclesAndPeds(void);
 	static void StreamZoneModels(const CVector &pos);
 	static void RemoveCurrentZonesModels(void);
-#ifdef MIAMI
-	static void LoadBigBuildingsWhenNeeded(void);
-#endif
 
 	static int32 GetCdImageOffset(int32 lastPosn);
 	static int32 GetNextFileOnCd(int32 position, bool priority);

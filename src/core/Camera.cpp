@@ -934,13 +934,11 @@ CCamera::CamControl(void)
 			if(CCullZones::CamStairsForPlayer() && CCullZones::FindZoneWithStairsAttributeForPlayer())
 				stairs = true;
 			// Some hack for Mr Whoopee in a bomb shop
-#ifndef MIAMI	// uhh, check this
 			if(Cams[ActiveCam].Using3rdPersonMouseCam() && CCollision::ms_collisionInMemory == LEVEL_COMMERCIAL){
 				if(pTargetEntity->GetPosition().x < 83.0f && pTargetEntity->GetPosition().x > 18.0f &&
 				   pTargetEntity->GetPosition().y < -305.0f && pTargetEntity->GetPosition().y > -390.0f)
 					disableGarageCam = true;
 			}
-#endif
 			if(!disableGarageCam && (CGarages::IsPointInAGarageCameraZone(pTargetEntity->GetPosition()) || stairs)){
 				if(!m_bGarageFixedCamPositionSet && m_bLookingAtPlayer){
 					if(pToGarageWeAreIn || stairs){

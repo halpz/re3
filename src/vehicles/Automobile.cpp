@@ -229,11 +229,9 @@ CAutomobile::ProcessControl(void)
 		colModel = GetColModel();
 	bWarnedPeds = false;
 
-#ifndef MIAMI
 	// skip if the collision isn't for the current level
 	if(colModel->level > LEVEL_NONE && colModel->level != CCollision::ms_collisionInMemory)
 		return;
-#endif
 
 	// Improve grip of vehicles in certain cases
 	bool strongGrip1 = false;

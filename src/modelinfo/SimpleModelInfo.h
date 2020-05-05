@@ -40,9 +40,6 @@ public:
 	float GetNearDistance(void);
 	float GetLargestLodDistance(void);
 	RpAtomic *GetAtomicFromDistance(float dist);
-#ifdef MIAMI
-	RpAtomic *GetFirstAtomicFromDistance(float dist); // inline
-#endif
 	void FindRelatedModel(void);
 	void SetupBigBuilding(void);
 

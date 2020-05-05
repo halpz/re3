@@ -91,3 +91,4 @@ public:
 		float *totalLength, float *totalDuration, CTrainInterpolationLine *interpLines, bool rightRail);
 	static void UpdateTrains(void);
 };
+static_assert(sizeof(CTrain) == 0x2E4, "CTrain: error");

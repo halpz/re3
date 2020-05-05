@@ -858,7 +858,6 @@ CPopulation::AddPedInCar(CVehicle* car)
 void
 CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 {
-#ifndef MIAMI
 	eLevelName level;
 	int zone;
 	int frame = CTimer::GetFrameCounter() & 7;
@@ -941,7 +940,6 @@ CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 			}
 		}
 	}
-#endif
 }
 
 void

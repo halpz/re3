@@ -99,9 +99,6 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_bSirenOrAlarm = 0;
 	m_nCarHornTimer = 0;
 	m_nCarHornPattern = 0;
-#ifdef MIAMI
-	bParking = false;
-#endif
 	m_nAlarmState = 0;
 	m_nDoorLock = CARLOCK_UNLOCKED;
 	m_nLastWeaponDamage = -1;
@@ -121,9 +118,6 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 	AutoPilot.m_bStayInCurrentLevel = false;
 	AutoPilot.m_bIgnorePathfinding = false;
-#ifdef MIAMI
-	AutoPilot.m_nSwitchDistance = 20;
-#endif
 }
 
 CVehicle::~CVehicle()
@@ -1351,25 +1345,5 @@ CVehicle::Load(uint8*& buf)
 	SkipSaveBuf(buf, 12);
 	m_nDoorLock = (eCarLock)ReadSaveBuf<int8>(buf);
 	SkipSaveBuf(buf, 99);
-}
-#endif
-
-#ifdef MIAMI
-eVehicleAppearance
-//--MIAMI: TODO, implement VC version, appearance != type
-// This would work for cars, boats and bikes but not for planes and helis
-CVehicle::GetVehicleAppearance(void)
-{
-	if (IsCar())
-		return VEHICLE_CAR;
-	if (IsBoat())
-		return VEHICLE_BOAT;
-	if (IsBike())
-		return VEHICLE_BIKE;
-	if (IsPlane())
-		return VEHICLE_PLANE;
-	if (IsHeli())
-		return VEHICLE_HELI;
-	return VEHICLE_NONE;
 }
 #endif

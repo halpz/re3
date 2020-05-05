@@ -200,20 +200,6 @@ CModelInfo::GetModelInfo(const char *name, int *id)
 	return nil;
 }
 
-#ifdef MIAMI
-CBaseModelInfo*
-CModelInfo::GetModelInfo(const char *name, int minIndex, int maxIndex)
-{
-	CBaseModelInfo *modelinfo;
-	for(int i = minIndex; i <= maxIndex; i++){
-		modelinfo = CModelInfo::ms_modelInfoPtrs[i];
-	 	if(modelinfo && !CGeneral::faststricmp(modelinfo->GetName(), name))
-			return modelinfo;
-	}
-	return nil;
-}
-#endif
-
 bool
 CModelInfo::IsBoatModel(int32 id)
 {
@@ -228,7 +214,6 @@ CModelInfo::IsBikeModel(int32 id)
 		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_BIKE;
 }
 
-#ifndef MIAMI
 void
 CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
 {
@@ -245,7 +230,6 @@ CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
 		}
 	}
 }
-#endif
 
 void
 CModelInfo::ConstructMloClumps()

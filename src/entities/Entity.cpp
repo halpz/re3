@@ -52,9 +52,6 @@ CEntity::CEntity(void)
 	bRenderScorched = false;
 	bHasBlip = false;
 	bIsBIGBuilding = false;
-#ifdef MIAMI
-	bStreamBIGBuilding = false;
-#endif
 	bRenderDamaged = false;
 
 	bBulletProof = false;
@@ -348,11 +345,6 @@ CEntity::SetupBigBuilding(void)
 	bStreamingDontDelete = true;
 	bUsesCollision = false;
 	m_level = CTheZones::GetLevelFromPosition(GetPosition());
-#ifdef MIAMI
-	if(mi->m_lodDistances[0] <= 2000.0f)
-		bStreamBIGBuilding = true;
-	// TODO: the stuff down there isn't right yet
-#endif
 	if(m_level == LEVEL_NONE){
 		if(mi->GetTxdSlot() != CTxdStore::FindTxdSlot("generic")){
 			mi->SetTexDictionary("generic");

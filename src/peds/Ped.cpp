@@ -9397,10 +9397,8 @@ CPed::ProcessControl(void)
 	CColPoint foundCol;
 	CEntity *foundEnt = nil;
 
-#ifndef MIAMI
 	if (m_nZoneLevel > LEVEL_NONE && m_nZoneLevel != CCollision::ms_collisionInMemory)
 		return;
-#endif
 
 	int alpha = CVisibilityPlugins::GetClumpAlpha(GetClump());
 	if (!bFadeOut) {

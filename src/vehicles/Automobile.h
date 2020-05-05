@@ -197,6 +197,8 @@ public:
 	static void SetAllTaxiLights(bool set);
 };
 
+static_assert(sizeof(CAutomobile) == 0x5A8, "CAutomobile: error");
+
 inline uint8 GetCarDoorFlag(int32 carnode) {
 	switch (carnode) {
 	case CAR_DOOR_LF:

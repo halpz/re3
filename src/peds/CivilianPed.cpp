@@ -187,10 +187,8 @@ CCivilianPed::CivilianAI(void)
 void
 CCivilianPed::ProcessControl(void)
 {
-#ifndef MIAMI
 	if (m_nZoneLevel > LEVEL_NONE && m_nZoneLevel != CCollision::ms_collisionInMemory)
 		return;
-#endif
 
 	CPed::ProcessControl();
 

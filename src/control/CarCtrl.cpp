@@ -1641,7 +1641,6 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 	CPathNode* pTargetNode;
 	int16 numNodes;
 	float distanceToTargetNode;
-#ifndef MIAMI
 	if (pTarget && pTarget->m_pCurGroundEntity &&
 	  pTarget->m_pCurGroundEntity->IsBuilding() &&
 	  ((CBuilding*)pTarget->m_pCurGroundEntity)->GetIsATreadable() &&
@@ -1667,7 +1666,6 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 #endif
 			&pTargetNode, &numNodes, 1, pVehicle, &distanceToTargetNode, 999999.9f, closestNode);
 	}else
-#endif
 	{
 
 		ThePaths.DoPathSearch(0, pCurNode->GetPosition(), curNode,
@@ -2751,15 +2749,3 @@ bool CCarCtrl::MapCouldMoveInThisArea(float x, float y)
 	return false;
 #endif
 }
-
-#ifdef MIAMI
-float CCarCtrl::FindSpeedMultiplierWithSpeedFromNodes(int8 type)
-{
-	switch (type)
-	{
-	case 1: return 1.5f;
-	case 2: return 2.0f;
-	}
-	return 1.0f;
-}
-#endif

@@ -425,14 +425,8 @@ CCopPed::CopAI(void)
 #ifdef VC_PED_PORTS
 						float dotProd;
 						if (m_nRoadblockNode != -1) {
-#ifndef MIAMI
 							CTreadable *roadBlockRoad = ThePaths.m_mapObjects[CRoadBlocks::RoadBlockObjects[m_nRoadblockNode]];
 							dotProd = DotProduct2D(playerOrHisVeh->GetPosition() - roadBlockRoad->GetPosition(), GetPosition() - roadBlockRoad->GetPosition());
-#else
-							// TODO: check this, i'm only getting this compile here....
-							CPathNode *roadBlockNode = &ThePaths.m_pathNodes[CRoadBlocks::RoadBlockNodes[m_nRoadblockNode]];
-							dotProd = DotProduct2D(playerOrHisVeh->GetPosition() - roadBlockNode->GetPosition(), GetPosition() - roadBlockNode->GetPosition());
-#endif
 						} else
 							dotProd = -1.0f;
 
@@ -565,10 +559,8 @@ CCopPed::CopAI(void)
 void
 CCopPed::ProcessControl(void)
 {
-#ifndef MIAMI
 	if (m_nZoneLevel > LEVEL_NONE && m_nZoneLevel != CCollision::ms_collisionInMemory)
 		return;
-#endif
 
 	CPed::ProcessControl();
 	if (bWasPostponed)
