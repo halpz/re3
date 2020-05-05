@@ -57,7 +57,7 @@ CObject::CObject(int32 mi, bool createRW)
 
 CObject::CObject(CDummyObject *dummy)
 {
-	SetModelIndexNoCreate(dummy->m_modelIndex);
+	SetModelIndexNoCreate(dummy->GetModelIndex());
 
 	if (dummy->m_rwObject)
 		AttachToRwObject(dummy->m_rwObject);
@@ -97,7 +97,7 @@ CObject::ProcessControl(void)
 		m_vecMoveSpeed *= fTimeStep;
 		m_vecTurnSpeed *= fTimeStep;
 	}
-	if ((m_modelIndex == MI_EXPLODINGBARREL || m_modelIndex == MI_PETROLPUMP) && bHasBeenDamaged && bIsVisible
+	if ((GetModelIndex() == MI_EXPLODINGBARREL || GetModelIndex() == MI_PETROLPUMP) && bHasBeenDamaged && bIsVisible
 		&& (CGeneral::GetRandomNumber() & 0x1F) == 10) {
 		bExplosionProof = true;
 		bIsVisible = false;
@@ -159,7 +159,7 @@ CObject::ObjectDamage(float amount)
 		return;
 	static int8 nFrameGen = 0;
 	bool bBodyCastDamageEffect = false;
-	if (m_modelIndex == MI_BODYCAST){
+	if (GetModelIndex() == MI_BODYCAST) {
 		if (amount > 50.0f)
 			nBodyCastHealth = (int16)(nBodyCastHealth - 0.5f * amount);
 		if (nBodyCastHealth < 0)
@@ -310,7 +310,7 @@ void
 CObject::Init(void) 
 { 
 	m_type = ENTITY_TYPE_OBJECT;
-	CObjectData::SetObjectData(m_modelIndex, *this);
+	CObjectData::SetObjectData(GetModelIndex(), *this);
 	m_nEndOfLifeTime = 0;
 	ObjectCreatedBy = GAME_OBJECT;
 	bIsStatic = true;
@@ -333,9 +333,9 @@ CObject::Init(void)
 		m_pCurSurface = outEntity;
 	else
 		m_pCurSurface = nil;
-	if (m_modelIndex == MI_BODYCAST)
+	if (GetModelIndex() == MI_BODYCAST)
 		nBodyCastHealth = 1000;
-	else if (m_modelIndex == MI_BUOY)
+	else if (GetModelIndex() == MI_BUOY)
 		bTouchingWater = true;
 }
 

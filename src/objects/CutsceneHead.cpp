@@ -131,7 +131,7 @@ CCutsceneHead::RenderLimb(int32 bone)
 	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(m_parentObject->GetClump());
 	int idx = RpHAnimIDGetIndex(hier, bone);
 	RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
-	CPedModelInfo *mi = (CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex);
+	CPedModelInfo *mi = (CPedModelInfo *)CModelInfo::GetModelInfo(GetModelIndex());
 	switch(bone){
 	case BONE_Lhand:
 		atomic = mi->getLeftHand();

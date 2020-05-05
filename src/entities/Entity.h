@@ -149,7 +149,7 @@ public:
 	bool GetIsOnScreenComplex(void);
 	bool IsVisible(void) { return m_rwObject && bIsVisible && GetIsOnScreen(); }
 	bool IsVisibleComplex(void) { return m_rwObject && bIsVisible && GetIsOnScreenComplex(); }
-	int GetModelIndex(void) { return m_modelIndex; }
+	int16 GetModelIndex(void) const { return m_modelIndex; }
 	void UpdateRwFrame(void);
 	void SetupBigBuilding(void);
 

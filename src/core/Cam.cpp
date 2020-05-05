@@ -4639,7 +4639,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	uint8 camSetArrPos = 0;
 
 	// We may need those later
-	bool isPlane = car->m_modelIndex == MI_DODO;
+	bool isPlane = car->GetModelIndex() == MI_DODO;
 	bool isHeli = false;
 	bool isBike = false;
 	bool isCar = car->IsCar() && !isPlane && !isHeli && !isBike;
@@ -4650,9 +4650,9 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	uint8 nextDirectionIsForward = !(pad->GetLookBehindForCar() || pad->GetLookBehindForPed() || pad->GetLookLeft() || pad->GetLookRight()) &&
 		DirectionWasLooking == LOOKING_FORWARD;
 
-	if (car->m_modelIndex == MI_FIRETRUCK) {
+	if (car->GetModelIndex() == MI_FIRETRUCK) {
 		camSetArrPos = 7;
-	} else if (car->m_modelIndex == MI_RCBANDIT) {
+	} else if (car->GetModelIndex() == MI_RCBANDIT) {
 		camSetArrPos = 5;
 	} else if (car->IsBoat()) {
 		camSetArrPos = 4;
@@ -4851,7 +4851,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	// This is also original LCS and SA bug, or some attempt to fix lag. We'll never know
 
 	// if (car->m_vecMoveSpeed.MagnitudeSqr() < sq(0.2f))
-		if (car->m_modelIndex != MI_FIRETRUCK) {
+		if (car->GetModelIndex() != MI_FIRETRUCK) {
 			// if (!isBike || GetMysteriousWheelRelatedThingBike(car) > 3)
 				// if (!isHeli && (!isPlane || car->GetWheelsOnGround())) {
 
@@ -4907,7 +4907,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 
 	bool correctAlpha = true;
 	//	if (SA checks if we aren't in work car, why?) {
-	if (!isCar || car->m_modelIndex != MI_YARDIE) {
+	if (!isCar || car->GetModelIndex() != MI_YARDIE) {
 		correctAlpha = false;
 	}
 	else {
@@ -5186,13 +5186,13 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	// gTargetCoordsForLookingBehind = TargetCoors;
 
 	// SA code from CAutomobile::TankControl/FireTruckControl.
-	if (car->m_modelIndex == MI_RHINO || car->m_modelIndex == MI_FIRETRUCK) {
+	if (car->GetModelIndex() == MI_RHINO || car->GetModelIndex() == MI_FIRETRUCK) {
 
 		float &carGunLR = ((CAutomobile*)car)->m_fCarGunLR;
 		CVector hi = Multiply3x3(Front, car->GetMatrix());
 
 		// III/VC's firetruck turret angle is reversed
-		float angleToFace = (car->m_modelIndex == MI_FIRETRUCK ? -hi.Heading() : hi.Heading());
+		float angleToFace = (car->GetModelIndex() == MI_FIRETRUCK ? -hi.Heading() : hi.Heading());
 
 		if (angleToFace <= carGunLR + PI) {
 			if (angleToFace < carGunLR - PI)
@@ -5202,7 +5202,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		}
 
 		float neededTurn = angleToFace - carGunLR;
-		float turnPerFrame = CTimer::GetTimeStep() * (car->m_modelIndex == MI_FIRETRUCK ? 0.05f : 0.015f);
+		float turnPerFrame = CTimer::GetTimeStep() * (car->GetModelIndex() == MI_FIRETRUCK ? 0.05f : 0.015f);
 		if (neededTurn <= turnPerFrame) {
 			if (neededTurn < -turnPerFrame)
 				angleToFace = carGunLR - turnPerFrame;
@@ -5210,7 +5210,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 			angleToFace = turnPerFrame + carGunLR;
 		}
 
-		if (car->m_modelIndex == MI_RHINO && carGunLR != angleToFace) {
+		if (car->GetModelIndex() == MI_RHINO && carGunLR != angleToFace) {
 			DMAudio.PlayOneShot(car->m_audioEntityId, SOUND_CAR_TANK_TURRET_ROTATE, Abs(angleToFace - carGunLR));
 		}
 		carGunLR = angleToFace;
@@ -5222,7 +5222,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		}
 
 		// Because firetruk turret also has Y movement
-		if (car->m_modelIndex == MI_FIRETRUCK) {
+		if (car->GetModelIndex() == MI_FIRETRUCK) {
 			float &carGunUD = ((CAutomobile*)car)->m_fCarGunUD;
 
 			float alphaToFace = Atan2(hi.z, hi.Magnitude2D()) + DEGTORAD(15.0f);

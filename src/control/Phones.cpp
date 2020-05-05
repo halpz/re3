@@ -298,7 +298,7 @@ CPhoneInfo::Initialise(void)
 	for (int i = pool->GetSize() - 1; i >= 0; i--) {
 		CBuilding *building = pool->GetSlot(i);
 		if (building) {
-			if (building->m_modelIndex == MI_PHONEBOOTH1) {
+			if (building->GetModelIndex() == MI_PHONEBOOTH1) {
 				CPhone *maxPhone = &m_aPhones[m_nMax];
 				maxPhone->m_nState = PHONE_STATE_FREE;
 				maxPhone->m_vecPos = building->GetPosition();

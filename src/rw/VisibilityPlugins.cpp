@@ -146,7 +146,7 @@ CVisibilityPlugins::RenderFadingEntities(void)
 		CEntity *e = node->item.entity;
 		if(e->m_rwObject == nil)
 			continue;
-		mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(e->m_modelIndex);
+		mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex());
 		if(mi->m_noZwrite)
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, FALSE);
 

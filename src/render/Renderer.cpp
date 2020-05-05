@@ -91,9 +91,7 @@ CRenderer::RenderOneRoad(CEntity *e)
 	if(gbDontRenderBuildings)
 		return;
 	if(gbShowCollisionPolys)
-		CCollision::DrawColModel_Coloured(e->GetMatrix(),
-			*CModelInfo::GetModelInfo(e->m_modelIndex)->GetColModel(),
-			e->m_modelIndex);
+		CCollision::DrawColModel_Coloured(e->GetMatrix(), *CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel(), e->GetModelIndex());
 	else
 		e->Render();
 }
@@ -109,9 +107,7 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 #ifndef MASTER
 	if(gbShowCollisionPolys){
 		if(!e->IsVehicle()){
-			CCollision::DrawColModel_Coloured(e->GetMatrix(),
-				*CModelInfo::GetModelInfo(e->m_modelIndex)->GetColModel(),
-				e->m_modelIndex);
+			CCollision::DrawColModel_Coloured(e->GetMatrix(), *CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel(), e->GetModelIndex());
 			return;
 		}
 	}else if(e->IsBuilding()){
@@ -332,7 +328,7 @@ enum Visbility
 int32
 CRenderer::SetupEntityVisibility(CEntity *ent)
 {
-	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->m_modelIndex);
+	CSimpleModelInfo *mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(ent->GetModelIndex());
 	CTimeModelInfo *ti;
 	int32 other;
 	float dist;
@@ -482,7 +478,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 int32
 CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 {
-	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->m_modelIndex);
+	CSimpleModelInfo *mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(ent->GetModelIndex());
 	CTimeModelInfo *ti;
 	int32 other;
 
@@ -1147,7 +1143,7 @@ CRenderer::SortBIGBuildingsForSectorList(CPtrList *list)
 bool
 CRenderer::ShouldModelBeStreamed(CEntity *ent)
 {
-	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->m_modelIndex);
+	CSimpleModelInfo *mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(ent->GetModelIndex());
 	float dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
 	if(mi->m_noFade)
 		return dist - STREAM_DISTANCE < mi->GetLargestLodDistance();

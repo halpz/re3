@@ -229,7 +229,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				if (m_eType == PICKUP_ON_STREET) {
 					m_nTimer = CTimer::GetTimeInMilliseconds() + 30000;
 				} else if (m_eType == PICKUP_ON_STREET_SLOW) {
-					if (MI_PICKUP_BRIBE == m_pObject->m_modelIndex)
+					if (MI_PICKUP_BRIBE == m_pObject->GetModelIndex())
 						m_nTimer = CTimer::GetTimeInMilliseconds() + 300000;
 					else
 						m_nTimer = CTimer::GetTimeInMilliseconds() + 720000;

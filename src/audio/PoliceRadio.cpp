@@ -538,7 +538,7 @@ cAudioManager::SetupSuspectLastSeenReport()
 					main_color = gCarColourTable[color1][1];
 					color_pre_modifier = gCarColourTable[color1][0];
 					color_post_modifier = gCarColourTable[color1][2];
-					switch (veh->m_modelIndex) {
+					switch (veh->GetModelIndex()) {
 #ifdef FIX_BUGS
 					case MI_COLUMB:
 						main_color = SFX_POLICE_RADIO_BLUE;
@@ -637,7 +637,7 @@ cAudioManager::SetupSuspectLastSeenReport()
 
 						break;
 					default:
-						debug("\n *** UNKNOWN CAR MODEL INDEX %d *** ", veh->m_modelIndex);
+						debug("\n *** UNKNOWN CAR MODEL INDEX %d *** ", veh->GetModelIndex());
 						return;
 					}
 					m_sPoliceRadioQueue.Add(m_anRandomTable[4] % 3 + SFX_POLICE_RADIO_MESSAGE_NOISE_1);

@@ -223,21 +223,21 @@ INITSAVEBUF
 #ifdef COMPATIBLE_SAVES
 			if ((pVehicle->IsCar() || pVehicle->IsBoat()) && pVehicle->VehicleCreatedBy == MISSION_VEHICLE) {
 				WriteSaveBuf<uint32>(buf, pVehicle->m_vehType);
-				WriteSaveBuf<int16>(buf, pVehicle->m_modelIndex);
+				WriteSaveBuf<int16>(buf, pVehicle->GetModelIndex());
 				WriteSaveBuf<int32>(buf, GetVehicleRef(pVehicle));
 				pVehicle->Save(buf);
 			}
 #else
 			if (pVehicle->IsCar() && pVehicle->VehicleCreatedBy == MISSION_VEHICLE) {
 				WriteSaveBuf(buf, (uint32)pVehicle->m_vehType);
-				WriteSaveBuf(buf, pVehicle->m_modelIndex);
+				WriteSaveBuf(buf, pVehicle->GetModelIndex());
 				WriteSaveBuf(buf, GetVehicleRef(pVehicle));
 				memcpy(buf, pVehicle, sizeof(CAutomobile));
 				SkipSaveBuf(buf, sizeof(CAutomobile));
 			}
 			if (pVehicle->IsBoat() && pVehicle->VehicleCreatedBy == MISSION_VEHICLE) {
 				WriteSaveBuf(buf, (uint32)pVehicle->m_vehType);
-				WriteSaveBuf(buf, pVehicle->m_modelIndex);
+				WriteSaveBuf(buf, pVehicle->GetModelIndex());
 				WriteSaveBuf(buf, GetVehicleRef(pVehicle));
 				memcpy(buf, pVehicle, sizeof(CBoat));
 				SkipSaveBuf(buf, sizeof(CBoat));
@@ -279,7 +279,7 @@ INITSAVEBUF
 			bool bHasBeenDamaged = pObject->bHasBeenDamaged;
 			bool bUseVehicleColours = pObject->bUseVehicleColours;
 			CCompressedMatrixNotAligned tmp;
-			WriteSaveBuf(buf, pObject->m_modelIndex);
+			WriteSaveBuf(buf, pObject->GetModelIndex());
 			WriteSaveBuf(buf, GetObjectRef(pObject));
 			tmp.CompressFromFullMatrix(pObject->GetMatrix());
 			WriteSaveBuf(buf, tmp);
@@ -397,7 +397,7 @@ INITSAVEBUF
 			continue;
 		if (!pPed->bInVehicle && pPed->m_nPedType == PEDTYPE_PLAYER1) {
 			WriteSaveBuf(buf, pPed->m_nPedType);
-			WriteSaveBuf(buf, pPed->m_modelIndex);
+			WriteSaveBuf(buf, pPed->GetModelIndex());
 			WriteSaveBuf(buf, GetPedRef(pPed));
 #ifdef COMPATIBLE_SAVES
 			pPed->Save(buf);
