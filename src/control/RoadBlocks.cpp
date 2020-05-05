@@ -15,22 +15,40 @@
 #include "CarCtrl.h"
 #include "General.h"
 
+#ifndef MIAMI
 #define ROADBLOCKDIST (80.0f)
+#else
+#define ROADBLOCKDIST (90.0f)
+#endif
 
 int16 CRoadBlocks::NumRoadBlocks;
+#ifndef MIAMI
 int16 CRoadBlocks::RoadBlockObjects[NUMROADBLOCKS];
+#else
+int16 CRoadBlocks::RoadBlockNodes[NUMROADBLOCKS];
+#endif
 bool CRoadBlocks::InOrOut[NUMROADBLOCKS];
 
+//--MIAMI: TODO: script roadblocks
 void
 CRoadBlocks::Init(void)
 {
 	int i;
 	NumRoadBlocks = 0;
+#ifndef MIAMI
 	for (i = 0; i < ThePaths.m_numMapObjects; i++) {
 		if (ThePaths.m_objectFlags[i] & UseInRoadBlock) {
+#else
+	for(i = 0; i < ThePaths.m_numCarPathNodes; i++){
+		if(ThePaths.m_pathNodes[i].bUseInRoadBlock && ThePaths.m_pathNodes[i].numLinks == 2){
+#endif
 			if (NumRoadBlocks < NUMROADBLOCKS) {
 				InOrOut[NumRoadBlocks] = true;
+#ifndef MIAMI
 				RoadBlockObjects[NumRoadBlocks] = i;
+#else
+				RoadBlockNodes[NumRoadBlocks] = i;
+#endif
 				NumRoadBlocks++;
 			} else {
 #ifndef MASTER
@@ -110,14 +128,19 @@ CRoadBlocks::GenerateRoadBlocks(void)
 	int16 nRoadblockNode = (int16)(NUMROADBLOCKS * frame) / 16;
 	const int16 maxRoadBlocks = (int16)(NUMROADBLOCKS * (frame + 1)) / 16;
 	for (; nRoadblockNode < Min(NumRoadBlocks, maxRoadBlocks); nRoadblockNode++) {
+#ifndef MIAMI
 		CTreadable *mapObject = ThePaths.m_mapObjects[RoadBlockObjects[nRoadblockNode]];
 		CVector2D vecDistance = FindPlayerCoors() - mapObject->GetPosition();
+#else
+		CVector2D vecDistance = FindPlayerCoors() - ThePaths.m_pathNodes[nRoadblockNode].GetPosition();
+#endif
 		if (vecDistance.x > -ROADBLOCKDIST && vecDistance.x < ROADBLOCKDIST &&
 			vecDistance.y > -ROADBLOCKDIST && vecDistance.y < ROADBLOCKDIST &&
 			vecDistance.Magnitude() < ROADBLOCKDIST) {
 			if (!InOrOut[nRoadblockNode]) {
 				InOrOut[nRoadblockNode] = true;
 				if (FindPlayerVehicle() && (CGeneral::GetRandomNumber() & 0x7F) < FindPlayerPed()->m_pWanted->m_RoadblockDensity) {
+#ifndef MIAMI
 					CWanted *pPlayerWanted = FindPlayerPed()->m_pWanted;
 					float fMapObjectRadius = 2.0f * mapObject->GetColModel()->boundingBox.max.x;
 					int32 vehicleId = MI_POLICE;
@@ -187,10 +210,13 @@ CRoadBlocks::GenerateRoadBlocks(void)
 							}
 						}
 					}
+#endif
 				}
 			}
 		} else {
 			InOrOut[nRoadblockNode] = false;
 		}
 	}
+
+//--MIAMI: TODO script roadblocks
 }

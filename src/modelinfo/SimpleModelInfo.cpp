@@ -130,6 +130,16 @@ CSimpleModelInfo::GetAtomicFromDistance(float dist)
 	return nil;
 }
 
+#ifdef MIAMI
+RpAtomic*
+CSimpleModelInfo::GetFirstAtomicFromDistance(float dist)
+{
+	if(dist < m_lodDistances[0] * TheCamera.LODDistMultiplier)
+		return m_atomics[0];
+	return nil;
+}
+#endif
+
 void
 CSimpleModelInfo::FindRelatedModel(void)
 {

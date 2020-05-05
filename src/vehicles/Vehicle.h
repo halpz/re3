@@ -109,6 +109,18 @@ enum eFlightModel
 	FLIGHT_MODEL_SEAPLANE
 };
 
+#ifdef MIAMI
+enum eVehicleAppearance
+{
+	VEHICLE_NONE,
+	VEHICLE_CAR,
+	VEHICLE_BIKE,
+	VEHICLE_HELI,
+	VEHICLE_BOAT,
+	VEHICLE_PLANE,
+};
+#endif
+
 // Or Weapon.h?
 void FireOneInstantHitRound(CVector *shotSource, CVector *shotTarget, int32 damage);
 
@@ -171,6 +183,10 @@ public:
 	uint8 bVehicleColProcessed : 1;// Has ProcessEntityCollision been processed for this car?
 	uint8 bIsCarParkVehicle : 1; // Car has been created using the special CAR_PARK script command
 	uint8 bHasAlreadyBeenRecorded : 1; // Used for replays
+
+#ifdef MIAMI
+	uint8 bParking : 1;
+#endif;
 
 	int8 m_numPedsUseItAsCover;
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
@@ -236,6 +252,9 @@ public:
 	virtual void Load(uint8*& buf);
 #endif
 
+#ifdef MIAMI
+	eVehicleAppearance GetVehicleAppearance(void);
+#endif
 	bool IsCar(void) { return m_vehType == VEHICLE_TYPE_CAR; }
 	bool IsBoat(void) { return m_vehType == VEHICLE_TYPE_BOAT; }
 	bool IsTrain(void) { return m_vehType == VEHICLE_TYPE_TRAIN; }
@@ -290,10 +309,5 @@ public:
 #endif
 	static bool m_bDisableMouseSteering;
 };
-
-static_assert(sizeof(CVehicle) == 0x288, "CVehicle: error");
-static_assert(offsetof(CVehicle, m_pCurGroundEntity) == 0x1E0, "CVehicle: error");
-static_assert(offsetof(CVehicle, m_nAlarmState) == 0x1A0, "CVehicle: error");
-static_assert(offsetof(CVehicle, m_nLastWeaponDamage) == 0x228, "CVehicle: error");
 
 void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);

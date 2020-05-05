@@ -7,7 +7,11 @@ class CRoadBlocks
 {
 public:
 	static int16 NumRoadBlocks;
+#ifndef MIAMI
 	static int16 RoadBlockObjects[NUMROADBLOCKS];
+#else
+	static int16 RoadBlockNodes[NUMROADBLOCKS];
+#endif
 	static bool InOrOut[NUMROADBLOCKS];
 
 	static void Init(void);

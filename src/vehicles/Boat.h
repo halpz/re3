@@ -72,8 +72,6 @@ public:
 
 };
 
-static_assert(sizeof(CBoat) == 0x484, "CBoat: error");
-
 extern float MAX_WAKE_LENGTH;
 extern float MIN_WAKE_INTERVAL;
 extern float WAKE_LIFETIME;

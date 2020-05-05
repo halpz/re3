@@ -89,6 +89,9 @@
 
 
 eLevelName CGame::currLevel;
+#ifdef MIAMI
+int32 CGame::currArea;
+#endif
 bool CGame::bDemoMode = true;
 bool CGame::nastyGame = true;
 bool CGame::frenchGame;
@@ -319,7 +322,9 @@ bool CGame::Initialise(const char* datFile)
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
 	LoadingScreen("Loading the Game", "Setup streaming", nil);
+#ifndef MIAMI
 	CStreaming::Init();
+#endif
 	CStreaming::LoadInitialVehicles();
 	CStreaming::LoadInitialPeds();
 	CStreaming::RequestBigBuildings(LEVEL_NONE);
@@ -367,8 +372,10 @@ bool CGame::Initialise(const char* datFile)
 	CWaterCannons::Init();
 	CBridge::Init();
 	CGarages::Init();
+#ifndef MIAMI
 	LoadingScreen("Loading the Game", "Position dynamic objects", nil);
 	CWorld::RepositionCertainDynamicObjects();
+#endif
 	LoadingScreen("Loading the Game", "Initialise vehicle paths", nil);
 #ifdef GTA_ZONECULL
 	CCullZones::ResolveVisibilities();
@@ -383,7 +390,9 @@ bool CGame::Initialise(const char* datFile)
 	CTheScripts::Process();
 	TheCamera.Process();
 	LoadingScreen("Loading the Game", "Load scene", nil);
+#ifndef MIAMI
 	CModelInfo::RemoveColModelsFromOtherLevels(currLevel);
+#endif
 	CCollision::ms_collisionInMemory = currLevel;
 	for (int i = 0; i < MAX_PADS; i++)
 		CPad::GetPad(i)->Clear(true);
@@ -523,7 +532,9 @@ void CGame::ReloadIPLs(void)
 	CRoadBlocks::Init();
 	CCranes::InitCranes();
 	CGarages::Init();
+#ifndef MIAMI
 	CWorld::RepositionCertainDynamicObjects();
+#endif
 #ifdef GTA_ZONECULL
 	CCullZones::ResolveVisibilities();
 #endif

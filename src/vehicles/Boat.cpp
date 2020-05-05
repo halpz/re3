@@ -109,8 +109,10 @@ CBoat::GetComponentWorldPosition(int32 component, CVector &pos)
 void
 CBoat::ProcessControl(void)
 {
+#ifndef MIAMI
 	if(m_nZoneLevel > LEVEL_NONE && m_nZoneLevel != CCollision::ms_collisionInMemory)
 		return;
+#endif
 
 	bool onLand = m_fDamageImpulse > 0.0f && m_vecDamageNormal.z > 0.1f;
 

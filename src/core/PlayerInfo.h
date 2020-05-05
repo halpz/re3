@@ -80,4 +80,6 @@ public:
 
 	~CPlayerInfo() { };
 };
+#ifndef MIAMI
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");
+#endif

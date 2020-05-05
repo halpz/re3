@@ -417,8 +417,10 @@ void CRecordDataForChase::GiveUsACar(int32 mi, CVector pos, float angle, CAutomo
 	*ppCar = pCar;
 }
 
+//--MIAMI: unused
 void RemoveUnusedCollision(void)
 {
+#ifndef MIAMI
 	static const char* dontDeleteArray[] = {
 		"rd_SrRoad2A50", "rd_SrRoad2A20", "rd_CrossRda1w22", "rd_CrossRda1rw22",
 		"road_broadway02", "road_broadway01", "com_21way5", "com_21way50",
@@ -430,6 +432,7 @@ void RemoveUnusedCollision(void)
 	CModelInfo::RemoveColModelsFromOtherLevels(LEVEL_NONE);
 	for (int i = 0; i < ARRAY_SIZE(dontDeleteArray); i++)
 		CModelInfo::GetModelInfo(dontDeleteArray[i], nil)->GetColModel()->level = LEVEL_COMMERCIAL;
+#endif
 }
 
 void CRecordDataForChase::StartChaseScene(float startTime)

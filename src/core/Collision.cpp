@@ -20,6 +20,10 @@
 #include "SurfaceTable.h"
 #include "Lines.h"
 #include "Collision.h"
+#ifdef MIAMI
+#include "Camera.h"
+#include "ColStore.h"
+#endif
 
 enum Direction
 {
@@ -34,22 +38,32 @@ enum Direction
 eLevelName CCollision::ms_collisionInMemory;
 CLinkList<CColModel*> CCollision::ms_colModelCache;
 
+//--MIAMI: done
 void
 CCollision::Init(void)
 {
 	ms_colModelCache.Init(NUMCOLCACHELINKS);
 	ms_collisionInMemory = LEVEL_NONE;
+#ifdef MIAMI
+	CColStore::Initialise();
+#endif
 }
 
+//--MIAMI: done
 void
 CCollision::Shutdown(void)
 {
 	ms_colModelCache.Shutdown();
+#ifdef MIAMI
+	CColStore::Shutdown();
+#endif
 }
 
+//--MIAMI: done
 void
 CCollision::Update(void)
 {
+#ifndef MIAMI
 	CVector playerCoors;
 	playerCoors = FindPlayerCoors();
 	eLevelName level = CTheZones::m_CurrLevel;
@@ -83,8 +97,10 @@ CCollision::Update(void)
 	if(ms_collisionInMemory != CGame::currLevel)
 		LoadCollisionWhenINeedIt(forceLevelChange);
 	CStreaming::HaveAllBigBuildingsLoaded(CGame::currLevel);
+#endif
 }
 
+//--MIAMI: unused
 eLevelName
 GetCollisionInSectorList(CPtrList &list)
 {
@@ -101,6 +117,7 @@ GetCollisionInSectorList(CPtrList &list)
 	return LEVEL_NONE;
 }
 
+//--MIAMI: unused
 // Get a level this sector is in based on collision models
 eLevelName
 GetCollisionInSector(CSector &sect)
@@ -121,9 +138,11 @@ GetCollisionInSector(CSector &sect)
 	return (eLevelName)level;
 }
 
+//--MIAMI: done
 void
 CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 {
+#ifndef MIAMI
 	eLevelName level, l;
 	bool multipleLevels;
 	CVector playerCoors;
@@ -210,11 +229,14 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 		CTimer::Update();
 		DMAudio.SetEffectsFadeVol(127);
 	}
+#endif
 }
 
+//--MIAMI: done
 void
 CCollision::SortOutCollisionAfterLoad(void)
 {
+#ifndef MIAMI
 	if(ms_collisionInMemory == CGame::currLevel)
 		return;
 
@@ -226,6 +248,10 @@ CCollision::SortOutCollisionAfterLoad(void)
 	}
 	ms_collisionInMemory = CGame::currLevel;
 	CGame::TidyUpMemory(true, false);
+#else
+	CColStore::LoadCollision(TheCamera.GetPosition());
+	CStreaming::LoadAllRequestedModels(false);
+#endif
 }
 
 void
@@ -1974,7 +2000,11 @@ CColModel::CColModel(void)
 	vertices = nil;
 	triangles = nil;
 	trianglePlanes = nil;
+#ifndef MIAMI
 	level = CGame::currLevel;
+#else
+	level = 0;	// generic col slot
+#endif
 	ownsCollisionVolumes = true;
 }
 

@@ -543,11 +543,13 @@ RestoreForStartLoad()
 		ReadDataFromBufferPointer(_buf, TheCamera.GetMatrix().GetPosition().z);
 		CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
 		CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+#ifndef MIAMI
 		CCollision::SortOutCollisionAfterLoad();
 		CStreaming::RequestBigBuildings(CGame::currLevel);
 		CStreaming::LoadAllRequestedModels(false);
 		CStreaming::HaveAllBigBuildingsLoaded(CGame::currLevel);
 		CGame::TidyUpMemory(true, false);
+#endif
 
 		if (CloseFile(file)) {
 			return true;
