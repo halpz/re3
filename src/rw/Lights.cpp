@@ -8,6 +8,7 @@
 #include "Weather.h"
 #include "ZoneCull.h"
 #include "Frontend.h"
+#include "MBlur.h"
 
 RpLight *pAmbient;
 RpLight *pDirect;
@@ -22,6 +23,7 @@ RwRGBAReal DirectionalLightColourForFrame;
 RwRGBAReal AmbientLightColour;
 RwRGBAReal DirectionalLightColour;
 
+//--MIAMI: done
 void
 SetLightsWithTimeOfDayColour(RpWorld *)
 {
@@ -29,17 +31,35 @@ SetLightsWithTimeOfDayColour(RpWorld *)
 	RwMatrix mat;
 
 	if(pAmbient){
-		AmbientLightColourForFrame.red = CTimeCycle::GetAmbientRed() * CCoronas::LightsMult;
-		AmbientLightColourForFrame.green = CTimeCycle::GetAmbientGreen() * CCoronas::LightsMult;
-		AmbientLightColourForFrame.blue = CTimeCycle::GetAmbientBlue() * CCoronas::LightsMult;
+		if(CMBlur::BlurOn){
+			AmbientLightColourForFrame.red = CTimeCycle::GetAmbientRed_Bl() * CCoronas::LightsMult;
+			AmbientLightColourForFrame.green = CTimeCycle::GetAmbientGreen_Bl() * CCoronas::LightsMult;
+			AmbientLightColourForFrame.blue = CTimeCycle::GetAmbientBlue_Bl() * CCoronas::LightsMult;
+		}else{
+			AmbientLightColourForFrame.red = CTimeCycle::GetAmbientRed() * CCoronas::LightsMult;
+			AmbientLightColourForFrame.green = CTimeCycle::GetAmbientGreen() * CCoronas::LightsMult;
+			AmbientLightColourForFrame.blue = CTimeCycle::GetAmbientBlue() * CCoronas::LightsMult;
+		}
+
+		if(CMBlur::BlurOn){
+			AmbientLightColourForFrame_PedsCarsAndObjects.red = CTimeCycle::GetAmbientRed_Obj_Bl() * CCoronas::LightsMult;
+			AmbientLightColourForFrame_PedsCarsAndObjects.green = CTimeCycle::GetAmbientGreen_Obj_Bl() * CCoronas::LightsMult;
+			AmbientLightColourForFrame_PedsCarsAndObjects.blue = CTimeCycle::GetAmbientBlue_Obj_Bl() * CCoronas::LightsMult;
+		}else{
+			AmbientLightColourForFrame_PedsCarsAndObjects.red = CTimeCycle::GetAmbientRed_Obj() * CCoronas::LightsMult;
+			AmbientLightColourForFrame_PedsCarsAndObjects.green = CTimeCycle::GetAmbientGreen_Obj() * CCoronas::LightsMult;
+			AmbientLightColourForFrame_PedsCarsAndObjects.blue = CTimeCycle::GetAmbientBlue_Obj() * CCoronas::LightsMult;
+		}
+
 		if(CWeather::LightningFlash && !CCullZones::CamNoRain()){
 			AmbientLightColourForFrame.red = 1.0f;
 			AmbientLightColourForFrame.green = 1.0f;
 			AmbientLightColourForFrame.blue = 1.0f;
+
+			AmbientLightColourForFrame_PedsCarsAndObjects.red = 1.0f;
+			AmbientLightColourForFrame_PedsCarsAndObjects.green = 1.0f;
+			AmbientLightColourForFrame_PedsCarsAndObjects.blue = 1.0f;
 		}
-		AmbientLightColourForFrame_PedsCarsAndObjects.red = Min(1.0f, AmbientLightColourForFrame.red*1.3f);
-		AmbientLightColourForFrame_PedsCarsAndObjects.green = Min(1.0f, AmbientLightColourForFrame.green*1.3f);
-		AmbientLightColourForFrame_PedsCarsAndObjects.blue = Min(1.0f, AmbientLightColourForFrame.blue*1.3f);
 		RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
 	}
 
