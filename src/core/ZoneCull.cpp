@@ -38,6 +38,7 @@ CCullZones::Init(void)
 	CurrentFlags_Camera = 0;
 	CurrentFlags_Player = 0;
 	bCurrentSubwayIsInvisible = false;
+#ifdef GTA_ZONECULL
 	NumCullZones = 0;
 	OldCullZone = -1;
 	EntityIndicesUsed = 0;
@@ -46,8 +47,10 @@ CCullZones::Init(void)
 		aPointersToBigBuildingsForBuildings[i] = -1;
 	for(i = 0; i < NUMTREADABLES; i++)
 		aPointersToBigBuildingsForTreadables[i] = -1;
+#endif
 }
 
+#ifdef GTA_ZONECULL
 bool CCullZone::TestLine(CVector vec1, CVector vec2)
 {
 	CColPoint colPoint;
@@ -213,6 +216,7 @@ CCullZones::DoVisibilityTestCullZone(int zoneId, bool doIt)
 		}
 	}
 }
+#endif
 
 void
 CCullZones::Update(void)
@@ -225,8 +229,10 @@ CCullZones::Update(void)
 	switch(CTimer::GetFrameCounter() & 7){
 	case 0:
 	case 4:
+#ifdef GTA_ZONECULL
 		/* Update Cull zone */
 		ForceCullZoneCoors(TheCamera.GetGameCamPosition());
+#endif
 		break;
 
 	case 2:
@@ -250,6 +256,7 @@ CCullZones::Update(void)
 void
 CCullZones::ForceCullZoneCoors(CVector coors)
 {
+#ifdef GTA_ZONECULL
 	int32 z;
 	z = FindCullZoneForCoors(coors);
 	if(z != OldCullZone){
@@ -259,8 +266,10 @@ CCullZones::ForceCullZoneCoors(CVector coors)
 			aZones[z].DoStuffEnteringZone();
 		OldCullZone = z;
 	}
+#endif
 }
 
+#ifdef GTA_ZONECULL
 int32
 CCullZones::FindCullZoneForCoors(CVector coors)
 {
@@ -273,6 +282,7 @@ CCullZones::FindCullZoneForCoors(CVector coors)
 			return i;
 	return -1;
 }
+#endif
 
 int32
 CCullZones::FindAttributesForCoors(CVector coors, int32 *wantedLevel)
@@ -350,6 +360,7 @@ CCullZones::AddCullZone(CVector const &position,
 	CAttributeZone *attrib;
 
 	CVector v;
+#ifdef GTA_ZONECULL
 	if((flag & ATTRZONE_NOTCULLZONE) == 0){
 		cull = &aZones[NumCullZones++];
 		v = position;
@@ -372,6 +383,7 @@ CCullZones::AddCullZone(CVector const &position,
 		cull->m_groupIndexCount[2] = 0;
 		cull->m_indexStart = 0;
 	}
+#endif
 	if(flag & ~ATTRZONE_NOTCULLZONE){
 		attrib = &aAttributeZones[NumAttributeZones++];
 		attrib->minx = minx;
@@ -386,6 +398,7 @@ CCullZones::AddCullZone(CVector const &position,
 }
 
 
+#ifdef GTA_ZONECULL
 void
 CCullZone::DoStuffLeavingZone(void)
 {
@@ -561,3 +574,4 @@ CCullZones::DoWeHaveMoreThanXOccurencesOfSet(int32 count, uint16 *set)
 	}
 	return false;
 }
+#endif

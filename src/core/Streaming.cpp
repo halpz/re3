@@ -2235,7 +2235,9 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float 
 				if(xmin < pos.x && pos.x < xmax &&
 				   ymin < pos.y && pos.y < ymax &&
 				   (CVector2D(x, y) - pos).MagnitudeSqr() < lodDistSq)
+#ifdef GTA_ZONECULL
 					if(CRenderer::IsEntityCullZoneVisible(e))
+#endif
 						RequestModel(e->GetModelIndex(), 0);
 			}
 		}
@@ -2259,7 +2261,9 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list)
 		   (!e->IsObject() || ((CObject*)e)->ObjectCreatedBy != TEMP_OBJECT)){
 			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
 			if (mi->GetModelType() != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff()))
+#ifdef GTA_ZONECULL
 				if(CRenderer::IsEntityCullZoneVisible(e))
+#endif
 					RequestModel(e->GetModelIndex(), 0);
 		}
 	}
@@ -2683,7 +2687,9 @@ CStreaming::LoadScene(const CVector &pos)
 			RemoveModel(si - ms_aInfoForModel);
 	}
 	CRenderer::m_loadingPriority = false;
+#ifdef GTA_ZONECULL
 	CCullZones::ForceCullZoneCoors(pos);
+#endif
 	DeleteAllRwObjects();
 #ifndef MIAMI
 	AddModelsToRequestList(pos);

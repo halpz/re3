@@ -71,8 +71,10 @@ public:
 	uint32 bMeleeProof : 1;
 	uint32 bOnlyDamagedByPlayer : 1;
 	uint32 bStreamingDontDelete : 1;	// Dont let the streaming remove this 
+#ifdef GTA_ZONECULL
 	uint32 bZoneCulled : 1;
 	uint32 bZoneCulled2 : 1;    // only treadables+10m
+#endif
 
 	// flagsD
 	uint32 bRemoveFromWorld : 1;		// remove this entity next time it should be processed
@@ -154,6 +156,7 @@ public:
 	bool GetIsTouching(CVector const &center, float r);
 	bool GetIsOnScreen(void);
 	bool GetIsOnScreenComplex(void);
+	bool GetIsOnScreenAndNotCulled(void);
 	bool IsVisible(void) { return m_rwObject && bIsVisible && GetIsOnScreen(); }
 	bool IsVisibleComplex(void) { return m_rwObject && bIsVisible && GetIsOnScreenComplex(); }
 	int16 GetModelIndex(void) const { return m_modelIndex; }

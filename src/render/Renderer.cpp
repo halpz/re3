@@ -1263,7 +1263,9 @@ CRenderer::ScanSectorList(CPtrList *lists)
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
 
+#ifdef GTA_ZONECULL
 			if(IsEntityCullZoneVisible(ent))
+#endif
 				switch(SetupEntityVisibility(ent)){
 				case VIS_VISIBLE:
 					ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
@@ -1286,12 +1288,14 @@ CRenderer::ScanSectorList(CPtrList *lists)
 							CStreaming::RequestModel(ent->GetModelIndex(), 0);
 					break;
 				}
+#ifdef GTA_ZONECULL
 			else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable()){
 				if(!CStreaming::ms_disableStreaming)
 					if(SetupEntityVisibility(ent) == VIS_STREAMME)
 						if(!m_loadingPriority || CStreaming::ms_numModelsRequested < 10)
 							CStreaming::RequestModel(ent->GetModelIndex(), 0);
 			}
+#endif
 		}
 	}
 }
@@ -1313,7 +1317,9 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
 
+#ifdef GTA_ZONECULL
 			if(IsEntityCullZoneVisible(ent))
+#endif
 				switch(SetupEntityVisibility(ent)){
 				case VIS_VISIBLE:
 					ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
@@ -1338,11 +1344,13 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 					}
 					break;
 				}
+#ifdef GTA_ZONECULL
 			else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable()){
 				if(!CStreaming::ms_disableStreaming)
 					if(SetupEntityVisibility(ent) == VIS_STREAMME)
 						CStreaming::RequestModel(ent->GetModelIndex(), 0);
 			}
+#endif
 		}
 	}
 }
@@ -1395,7 +1403,9 @@ CRenderer::ScanSectorList_RequestModels(CPtrList *lists)
 			if(ent->m_scanCode == CWorld::GetCurrentScanCode())
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
+#ifdef GTA_ZONECULL
 			if(IsEntityCullZoneVisible(ent))
+#endif
 			if(ShouldModelBeStreamed(ent))
 				CStreaming::RequestModel(ent->GetModelIndex(), 0);
 		}
@@ -1441,6 +1451,7 @@ CRenderer::ShouldModelBeStreamed(CEntity *ent)
 		return dist - FADE_DISTANCE - STREAM_DISTANCE < mi->GetLargestLodDistance();
 }
 
+#ifdef GTA_ZONECULL
 bool
 CRenderer::IsEntityCullZoneVisible(CEntity *ent)
 {
@@ -1483,6 +1494,7 @@ CRenderer::IsVehicleCullZoneVisible(CEntity *ent)
 		return !(v->m_pCurGroundEntity && v->m_pCurGroundEntity->bZoneCulled2);
 	return true;
 }
+#endif
 
 void
 CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)

@@ -63,8 +63,10 @@ CEntity::CEntity(void)
 	bMeleeProof = false;
 	bOnlyDamagedByPlayer = false;
 	bStreamingDontDelete = false;
+#ifdef GTA_ZONECULL
 	bZoneCulled = false;
 	bZoneCulled2 = false;
+#endif
 
 	bRemoveFromWorld = false;
 	bHasHitWall = false;
@@ -150,6 +152,17 @@ CEntity::GetIsOnScreenComplex(void)
 
 	return TheCamera.IsBoxVisible(boundBox, &TheCamera.GetCameraMatrix());
 }
+
+bool
+CEntity::GetIsOnScreenAndNotCulled(void)
+{
+#ifdef GTA_ZONECULL
+	return GetIsOnScreen() && CRenderer::IsEntityCullZoneVisible(this);
+#else
+	return GetIsOnScreen();
+#endif
+}
+
 
 void
 CEntity::Add(void)
@@ -962,8 +975,10 @@ CEntity::SaveEntityFlags(uint8*& buf)
 	if (bMeleeProof) tmp |= BIT(27);
 	if (bOnlyDamagedByPlayer) tmp |= BIT(28);
 	if (bStreamingDontDelete) tmp |= BIT(29);
+#ifdef GTA_ZONECULL
 	if (bZoneCulled) tmp |= BIT(30);
 	if (bZoneCulled2) tmp |= BIT(31);
+#endif
 
 	WriteSaveBuf<uint32>(buf, tmp);
 
@@ -1015,8 +1030,10 @@ CEntity::LoadEntityFlags(uint8*& buf)
 	bMeleeProof = !!(tmp & BIT(27));
 	bOnlyDamagedByPlayer = !!(tmp & BIT(28));
 	bStreamingDontDelete = !!(tmp & BIT(29));
+#ifdef GTA_ZONECULL
 	bZoneCulled = !!(tmp & BIT(30));
 	bZoneCulled2 = !!(tmp & BIT(31));
+#endif
 
 	tmp = ReadSaveBuf<uint32>(buf);
 

@@ -377,7 +377,9 @@ bool CGame::Initialise(const char* datFile)
 	CWorld::RepositionCertainDynamicObjects();
 #endif
 	LoadingScreen("Loading the Game", "Initialise vehicle paths", nil);
+#ifdef GTA_ZONECULL
 	CCullZones::ResolveVisibilities();
+#endif
 	CTrain::InitTrains();
 	CPlane::InitPlanes();
 	CCredits::Init();
@@ -496,7 +498,9 @@ void CGame::ReInitGameObjectVariables(void)
 	CSpecialFX::Init();
 	CWaterCannons::Init();
 	CParticle::ReloadConfig();
+#ifdef GTA_ZONECULL
 	CCullZones::ResolveVisibilities();
+#endif
 
 	if ( !FrontEndMenuManager.m_bWantToLoad )
 	{
@@ -531,7 +535,9 @@ void CGame::ReloadIPLs(void)
 #ifndef MIAMI
 	CWorld::RepositionCertainDynamicObjects();
 #endif
+#ifdef GTA_ZONECULL
 	CCullZones::ResolveVisibilities();
+#endif
 	CRenderer::SortBIGBuildings();
 	CTimer::Update();
 }
