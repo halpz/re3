@@ -123,8 +123,6 @@ public:
 
 	static void CompressIndicesArray() {};// todo
 
-#ifdef MIAMI
 	//--MIAMI: TODO
 	static bool PoliceAbandonCars(void) { return false; }
-#endif
 };
