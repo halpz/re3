@@ -91,9 +91,7 @@ CRenderer::RenderOneRoad(CEntity *e)
 	if(gbDontRenderBuildings)
 		return;
 	if(gbShowCollisionPolys)
-		CCollision::DrawColModel_Coloured(e->GetMatrix(),
-			*CModelInfo::GetModelInfo(e->m_modelIndex)->GetColModel(),
-			e->m_modelIndex);
+		CCollision::DrawColModel_Coloured(e->GetMatrix(), *CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel(), e->GetModelIndex());
 	else
 		e->Render();
 }
@@ -109,9 +107,7 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 #ifndef MASTER
 	if(gbShowCollisionPolys){
 		if(!e->IsVehicle()){
-			CCollision::DrawColModel_Coloured(e->GetMatrix(),
-				*CModelInfo::GetModelInfo(e->m_modelIndex)->GetColModel(),
-				e->m_modelIndex);
+			CCollision::DrawColModel_Coloured(e->GetMatrix(), *CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel(), e->GetModelIndex());
 			return;
 		}
 	}else if(e->IsBuilding()){
@@ -339,7 +335,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 	float dist;
 
 	bool request = true;
-	if(mi->m_type == MITYPE_TIME){
+	if (mi->GetModelType() == MITYPE_TIME) {
  		ti = (CTimeModelInfo*)mi;
 		other = ti->GetOtherTimeModel();
 		if(CClock::GetIsTimeInRange(ti->GetTimeOn(), ti->GetTimeOff())){
@@ -355,7 +351,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 			request = false;
 		}
 	}else{
-		if(mi->m_type != MITYPE_SIMPLE){
+		if (mi->GetModelType() != MITYPE_SIMPLE) {
 			if(FindPlayerVehicle() == ent &&
 			   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON){
 				// Player's vehicle in first person mode
@@ -485,7 +481,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 	float dist;
 
 	bool request = true;
-	if(mi->m_type == MITYPE_TIME){
+	if(mi->GetModelType() == MITYPE_TIME){
  		ti = (CTimeModelInfo*)mi;
 		other = ti->GetOtherTimeModel();
 		if(CClock::GetIsTimeInRange(ti->GetTimeOn(), ti->GetTimeOff())){
@@ -502,7 +498,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 		}
 	}else{
 // TODO(MIAMI): weapon
-		if(mi->m_type != MITYPE_SIMPLE){
+		if(mi->GetModelType() != MITYPE_SIMPLE){
 			if(FindPlayerVehicle() == ent &&
 			   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON){
 				// Player's vehicle in first person mode
@@ -636,11 +632,11 @@ int32
 CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 {
 #ifndef MIAMI
-	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->m_modelIndex);
+	CSimpleModelInfo *mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(ent->GetModelIndex());
 	CTimeModelInfo *ti;
 	int32 other;
 
-	if(mi->m_type == MITYPE_TIME){
+	if (mi->GetModelType() == MITYPE_TIME) {
  		ti = (CTimeModelInfo*)mi;
 		other = ti->GetOtherTimeModel();
 		// Hide objects not in time range if possible
@@ -648,7 +644,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 			if(!CClock::GetIsTimeInRange(ti->GetTimeOn(), ti->GetTimeOff()))
 				return VIS_INVISIBLE;
 		// Draw like normal
-	}else if(mi->m_type == MITYPE_VEHICLE)
+	} else if (mi->GetModelType() == MITYPE_VEHICLE)
 		return ent->IsVisible() ? VIS_VISIBLE : VIS_INVISIBLE;
 
 	float dist = (ms_vecCameraPosition-ent->GetPosition()).Magnitude();
@@ -665,7 +661,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 
 		// But if it is a time object, we'd rather draw the wrong
 		// non-LOD than the right LOD.
-		if(nonLOD->m_type == MITYPE_TIME){
+		if (nonLOD->GetModelType() == MITYPE_TIME) {
 			ti = (CTimeModelInfo*)nonLOD;
 			other = ti->GetOtherTimeModel();
 			if(other != -1 && CModelInfo::GetModelInfo(other)->GetRwObject())
@@ -725,7 +721,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 // TODO(MIAMI): area
 
 	bool request = true;
-	if(mi->m_type == MITYPE_TIME){
+	if(mi->GetModelType() == MITYPE_TIME){
 		ti = (CTimeModelInfo*)mi;
 		other = ti->GetOtherTimeModel();
 		if(CClock::GetIsTimeInRange(ti->GetTimeOn(), ti->GetTimeOff())){
@@ -742,7 +738,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 			// it since what we really want is the other one.
 			request = false;
 		}
-	}else if(mi->m_type == MITYPE_VEHICLE)
+	}else if(mi->GetModelType() == MITYPE_VEHICLE)
 		return ent->IsVisible() ? VIS_VISIBLE : VIS_INVISIBLE;
 
 	float dist = (ms_vecCameraPosition-ent->GetPosition()).Magnitude();
@@ -759,7 +755,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 
 		// But if it is a time object, we'd rather draw the wrong
 		// non-LOD than the right LOD.
-		if(nonLOD->m_type == MITYPE_TIME){
+		if(nonLOD->GetModelType() == MITYPE_TIME){
 			ti = (CTimeModelInfo*)nonLOD;
 			other = ti->GetOtherTimeModel();
 			if(other != -1 && CModelInfo::GetModelInfo(other)->GetRwObject())
@@ -1447,7 +1443,7 @@ CRenderer::SortBIGBuildingsForSectorList(CPtrList *list)
 bool
 CRenderer::ShouldModelBeStreamed(CEntity *ent)
 {
-	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->m_modelIndex);
+	CSimpleModelInfo *mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(ent->GetModelIndex());
 	float dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
 	if(mi->m_noFade)
 		return dist - STREAM_DISTANCE < mi->GetLargestLodDistance();

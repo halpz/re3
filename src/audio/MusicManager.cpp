@@ -58,7 +58,7 @@ cMusicManager::PlayerInCar()
 	if (FindPlayerVehicle()->GetStatus() == STATUS_WRECKED)
 		return false;
 
-	switch(FindPlayerVehicle()->m_modelIndex) {
+	switch (FindPlayerVehicle()->GetModelIndex()) {
 	case MI_FIRETRUCK:
 	case MI_AMBULAN:
 	case MI_MRWHOOP:

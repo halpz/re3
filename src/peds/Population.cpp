@@ -755,7 +755,7 @@ CPopulation::AddPedInCar(CVehicle* car)
 	int preferredModel;
 
 	CTheZones::GetZoneInfoForTimeOfDay(&coors, &zoneInfo);
-	switch (car->m_modelIndex) {
+	switch (car->GetModelIndex()) {
 		case MI_FIRETRUCK:
 			preferredModel = 0;
 			pedType = PEDTYPE_FIREMAN;
@@ -796,14 +796,14 @@ CPopulation::AddPedInCar(CVehicle* car)
 			int gangOfPed = 0;
 			imSureThatModelIsLoaded = false;
 
-			while (gangOfPed < NUM_GANGS && CGangs::GetGangInfo(gangOfPed)->m_nVehicleMI != car->m_modelIndex)
+			while (gangOfPed < NUM_GANGS && CGangs::GetGangInfo(gangOfPed)->m_nVehicleMI != car->GetModelIndex())
 				gangOfPed++;
 
 			if (gangOfPed < NUM_GANGS) {
 				pedType = gangOfPed + PEDTYPE_GANG1;
 				preferredModel = ChooseGangOccupation(gangOfPed);
 			} else if (gangOfPed == NUM_GANGS) {
-				CVehicleModelInfo *carModelInfo = ((CVehicleModelInfo*)CModelInfo::GetModelInfo(car->m_modelIndex));
+			    CVehicleModelInfo *carModelInfo = ((CVehicleModelInfo *)CModelInfo::GetModelInfo(car->GetModelIndex()));
 				int i = 15;
 				for(; i >= 0; i--) {
 					// Should return random model each time
@@ -972,7 +972,7 @@ CPopulation::ConvertToRealObject(CDummyObject *dummy)
 	CWorld::Remove(dummy);
 	delete dummy;
 	CWorld::Add(obj);
-	int16 mi = obj->m_modelIndex;
+	int16 mi = obj->GetModelIndex();
 	if (mi == MI_GLASS1 || mi == MI_GLASS2 || mi == MI_GLASS3 || mi == MI_GLASS4 ||
 		mi == MI_GLASS5 || mi == MI_GLASS6 || mi == MI_GLASS7 || mi == MI_GLASS8)
 		makeInvisible = true;
@@ -981,7 +981,7 @@ CPopulation::ConvertToRealObject(CDummyObject *dummy)
 
 	if (makeInvisible) {
 		obj->bIsVisible = false;
-	} else if (obj->m_modelIndex == MI_BUOY) {
+	} else if (obj->GetModelIndex() == MI_BUOY) {
 		obj->bIsStatic = false;
 		obj->m_vecMoveSpeed = CVector(0.0f, 0.0f, -0.001f);
 		obj->bTouchingWater = true;
@@ -999,7 +999,7 @@ CPopulation::ConvertToDummyObject(CObject *obj)
 	dummy->UpdateRwFrame();
 
 	bool makeInvisible;
-	int16 mi = obj->m_modelIndex;
+	int16 mi = obj->GetModelIndex();
 	if (mi == MI_GLASS1 || mi == MI_GLASS2 || mi == MI_GLASS3 || mi == MI_GLASS4 ||
 		mi == MI_GLASS5 || mi == MI_GLASS6 || mi == MI_GLASS7 || mi == MI_GLASS8)
 		makeInvisible = true;
@@ -1019,8 +1019,7 @@ bool
 CPopulation::TestRoomForDummyObject(CObject *obj)
 {
 	int16 collidingObjs;
-	CWorld::FindObjectsKindaColliding(obj->m_objectMatrix.GetPosition(),
-		CModelInfo::GetModelInfo(obj->m_modelIndex)->GetColModel()->boundingSphere.radius,
+	CWorld::FindObjectsKindaColliding(obj->m_objectMatrix.GetPosition(), CModelInfo::GetModelInfo(obj->GetModelIndex())->GetColModel()->boundingSphere.radius,
 		false, &collidingObjs, 2, nil, false, true, true, false, false);
 
 	return collidingObjs == 0;

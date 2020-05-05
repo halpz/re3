@@ -235,7 +235,7 @@ CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
 #ifndef MIAMI
 			if(mi->GetColModel()){
 #else
-			if(mi->GetColModel() && mi->m_bOwnsColModel){
+			if(mi->GetColModel() && mi->DoesOwnColModel()){
 #endif
 				LoadCollisionModel(work_buff+24, *mi->GetColModel(), modelname);
 			}else{
@@ -506,7 +506,7 @@ CFileLoader::LoadClumpFile(RwStream *stream, uint32 id)
 		return false;
 	mi = (CClumpModelInfo*)CModelInfo::GetModelInfo(id);
 	mi->SetClump(clump);
-	if(mi->m_type == MITYPE_PED && id != 0 && RwStreamFindChunk(stream, rwID_CLUMP, nil, nil)){
+	if (mi->GetModelType() == MITYPE_PED && id != 0 && RwStreamFindChunk(stream, rwID_CLUMP, nil, nil)) {
 		// Read LOD ped
 		clump = RpClumpStreamRead(stream);
 		if(clump){
@@ -1481,7 +1481,7 @@ CFileLoader::ReloadObject(const char *line)
 #ifdef FIX_BUGS
 		mi &&
 #endif
-		mi->m_type == MITYPE_SIMPLE && !strcmp(mi->GetName(), model) && mi->m_numAtomics == numObjs) {
+	    mi->GetModelType() == MITYPE_SIMPLE && !strcmp(mi->GetName(), model) && mi->m_numAtomics == numObjs) {
 		mi->SetLodDistances(dist);
 		SetModelInfoFlags(mi, flags);
 	} else {

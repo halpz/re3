@@ -758,7 +758,7 @@ CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList &list, const
 		CEntity *pEntity = (CEntity *)pNode->item;
 		if(pEntity->m_scanCode != GetCurrentScanCode()) {
 			pEntity->m_scanCode = GetCurrentScanCode();
-			if(modelId == pEntity->m_modelIndex) {
+			if (modelId == pEntity->GetModelIndex()) {
 				float fMagnitude = 0.0f;
 				if(bCheck2DOnly)
 					fMagnitude = (position - pEntity->GetPosition()).MagnitudeSqr2D();
@@ -953,14 +953,13 @@ CWorld::TestSphereAgainstSectorList(CPtrList &list, CVector spherePos, float rad
 				float distance = diff.Magnitude();
 
 				if(e->GetBoundRadius() + radius > distance) {
-					CColModel *eCol = CModelInfo::GetModelInfo(e->m_modelIndex)->GetColModel();
+					CColModel *eCol = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 					int collidedSpheres =
 					    CCollision::ProcessColModels(sphereMat, sphereCol, e->GetMatrix(), *eCol,
 					                                 gaTempSphereColPoints, nil, nil);
 
 					if(collidedSpheres != 0 ||
-					   (e->IsVehicle() && ((CVehicle *)e)->m_vehType == VEHICLE_TYPE_CAR &&
-					    e->m_modelIndex != MI_DODO &&
+					   (e->IsVehicle() && ((CVehicle *)e)->m_vehType == VEHICLE_TYPE_CAR && e->GetModelIndex() != MI_DODO &&
 					    radius + eCol->boundingBox.max.x > distance)) {
 						return e;
 					}
@@ -1823,7 +1822,7 @@ CWorld::RepositionCertainDynamicObjects()
 void
 CWorld::RepositionOneObject(CEntity *pEntity)
 {
-	int16 modelId = pEntity->m_modelIndex;
+	int16 modelId = pEntity->GetModelIndex();
 	if (IsTrafficLight(modelId) || IsTreeModel(modelId) || modelId == MI_PARKINGMETER ||
 	   modelId == MI_PHONEBOOTH1 || modelId == MI_WASTEBIN || modelId == MI_BIN || modelId == MI_POSTBOX1 ||
 	   modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE || modelId == MI_DUMP1 ||
@@ -2026,8 +2025,7 @@ CWorld::Process(void)
 					if(!movingEnt->bIsInSafePosition) {
 						movingEnt->bIsStuck = true;
 						if(movingEnt->GetStatus() == STATUS_PLAYER) {
-							printf("STUCK: Final Step: Player Entity %d Is Stuck\n",
-							       movingEnt->m_modelIndex);
+							printf("STUCK: Final Step: Player Entity %d Is Stuck\n", movingEnt->GetModelIndex());
 							movingEnt->m_vecMoveSpeed *= 0.3f;
 							movingEnt->ApplyMoveSpeed();
 							movingEnt->ApplyTurnSpeed();
@@ -2119,13 +2117,13 @@ CWorld::TriggerExplosionSectorList(CPtrList &list, const CVector &position, floa
 			if(!pEntity->bExplosionProof && (!pEntity->IsPed() || !pPed->bInVehicle)) {
 				if(pEntity->bIsStatic) {
 					if(pEntity->IsObject()) {
-						if(fPower > pObject->m_fUprootLimit || IsFence(pObject->m_modelIndex)) {
-							if(IsGlass(pObject->m_modelIndex)) {
+						if (fPower > pObject->m_fUprootLimit || IsFence(pObject->GetModelIndex())) {
+							if (IsGlass(pObject->GetModelIndex())) {
 								CGlass::WindowRespondsToExplosion(pObject, position);
 							} else {
 								pObject->bIsStatic = false;
 								pObject->AddToMovingList();
-								int16 modelId = pEntity->m_modelIndex;
+								int16 modelId = pEntity->GetModelIndex();
 								if(modelId != MI_FIRE_HYDRANT ||
 								   pObject->bHasBeenDamaged) {
 									if(pEntity->IsObject() &&

@@ -292,7 +292,7 @@ CBoat::ProcessControl(void)
 				AddWakePoint(GetPosition());
 
 			float steerFactor = 1.0f - DotProduct(m_vecMoveSpeed, GetForward());
-			if(m_modelIndex == MI_GHOST)
+			if (GetModelIndex() == MI_GHOST)
 				steerFactor = 1.0f - DotProduct(m_vecMoveSpeed, GetForward())*0.3f;
 			if(steerFactor < 0.0f) steerFactor = 0.0f;
 

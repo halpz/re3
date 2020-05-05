@@ -474,7 +474,7 @@ CEntity::PreRender(void)
 		break;
 	}
 
-	if(CModelInfo::GetModelInfo(GetModelIndex())->m_num2dEffects != 0)
+	if (CModelInfo::GetModelInfo(GetModelIndex())->GetNum2dEffects() != 0)
 		ProcessLightsForEntity();
 }
 
@@ -633,7 +633,7 @@ CEntity::AddSteamsFromGround(CVector *unused)
 	C2dEffect *effect;
 	CVector pos;
 
-	n = CModelInfo::GetModelInfo(GetModelIndex())->m_num2dEffects;
+	n = CModelInfo::GetModelInfo(GetModelIndex())->GetNum2dEffects();
 	for(i = 0; i < n; i++){
 		effect = CModelInfo::GetModelInfo(GetModelIndex())->Get2dEffect(i);
 		if(effect->type != EFFECT_PARTICLE)
@@ -676,7 +676,7 @@ CEntity::ProcessLightsForEntity(void)
 	flashTimer2 = 0;
 	flashTimer3 = 0;
 
-	n = CModelInfo::GetModelInfo(GetModelIndex())->m_num2dEffects;
+	n = CModelInfo::GetModelInfo(GetModelIndex())->GetNum2dEffects();
 	for(i = 0; i < n; i++, flashTimer1 += 0x80, flashTimer2 += 0x100, flashTimer3 += 0x200){
 		effect = CModelInfo::GetModelInfo(GetModelIndex())->Get2dEffect(i);
 

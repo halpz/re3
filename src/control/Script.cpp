@@ -8074,7 +8074,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				continue;
 			// desperatly want to believe this was inlined :|
 			CBaseModelInfo* pInfo = CModelInfo::GetModelInfo(model);
-			assert(pInfo->m_type == MITYPE_VEHICLE);
+			assert(pInfo->GetModelType() == MITYPE_VEHICLE);
 			CVehicleModelInfo* pVehicleInfo = (CVehicleModelInfo*)pInfo;
 			if (pVehicleInfo->m_vehicleType != VEHICLE_TYPE_CAR) {
 				switch (model) {

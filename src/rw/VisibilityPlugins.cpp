@@ -146,7 +146,7 @@ CVisibilityPlugins::RenderFadingEntities(void)
 		CEntity *e = node->item.entity;
 		if(e->m_rwObject == nil)
 			continue;
-		mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(e->m_modelIndex);
+		mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex());
 		if(mi->m_noZwrite)
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, FALSE);
 
@@ -718,7 +718,7 @@ CVisibilityPlugins::SetAtomicModelInfo(RpAtomic *atomic,
 {
 	AtomicExt *ext = ATOMICEXT(atomic);
 	ext->modelInfo = modelInfo;
-	switch(modelInfo->m_type)
+	switch (modelInfo->GetModelType())
 	case MITYPE_SIMPLE:
 	case MITYPE_TIME:
 		if(modelInfo->m_normalCull)
@@ -828,7 +828,7 @@ CVisibilityPlugins::SetClumpModelInfo(RpClump *clump, CClumpModelInfo *modelInfo
 	SetFrameHierarchyId(RpClumpGetFrame(clump), (int32)modelInfo);
 
 	// Unused
-	switch(modelInfo->m_type){
+	switch (modelInfo->GetModelType()) {
 	// ignore MLO
 	case MITYPE_VEHICLE:
 		vmi = (CVehicleModelInfo*)modelInfo;

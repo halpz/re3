@@ -2987,7 +2987,7 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 	if (ped->IsPlayer())
 		return GetPlayerTalkSfx(sound);
 
-	switch (ped->m_modelIndex) {
+	switch (ped->GetModelIndex()) {
 	case MI_COP:
 		return GetCopTalkSfx(sound);
 	case MI_SWAT:
@@ -3035,13 +3035,13 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 	case MI_SPECIAL02:
 	case MI_SPECIAL03:
 	case MI_SPECIAL04:
-		return GetSpecialCharacterTalkSfx(ped->m_modelIndex, sound);
+		return GetSpecialCharacterTalkSfx(ped->GetModelIndex(), sound);
 	case MI_MALE02:
 		return GetMaleNo2TalkSfx(sound);
 	case MI_MALE03:
 	case MI_P_MAN1:
 	case MI_P_MAN2:
-		return GetBlackProjectMaleTalkSfx(sound, ped->m_modelIndex);
+		return GetBlackProjectMaleTalkSfx(sound, ped->GetModelIndex());
 	case MI_FATMALE01:
 		return GetWhiteFatMaleTalkSfx(sound);
 	case MI_FATMALE02:
@@ -3094,12 +3094,12 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		return GetBlackWorkerMaleTalkSfx(sound);
 	case MI_B_MAN1:
 	case MI_B_MAN3:
-		return GetBusinessMaleYoungTalkSfx(sound, ped->m_modelIndex);
+		return GetBusinessMaleYoungTalkSfx(sound, ped->GetModelIndex());
 	case MI_B_MAN2:
 		return GetBusinessMaleOldTalkSfx(sound);
 	case MI_B_WOM1:
 	case MI_B_WOM2:
-		return GetWhiteBusinessFemaleTalkSfx(sound, ped->m_modelIndex);
+		return GetWhiteBusinessFemaleTalkSfx(sound, ped->GetModelIndex());
 	case MI_B_WOM3:
 		return GetBlackBusinessFemaleTalkSfx(sound);
 	case MI_MOD_MAN:
@@ -3112,7 +3112,7 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		return GetStewardFemaleTalkSfx(sound);
 	case MI_FAN_MAN1:
 	case MI_FAN_MAN2:
-		return GetFanMaleTalkSfx(sound, ped->m_modelIndex);
+		return GetFanMaleTalkSfx(sound, ped->GetModelIndex());
 	case MI_FAN_WOM:
 		return GetFanFemaleTalkSfx(sound);
 	case MI_HOS_MAN:
@@ -3126,7 +3126,7 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 	case MI_SHOPPER1:
 	case MI_SHOPPER2:
 	case MI_SHOPPER3:
-		return GetShopperFemaleTalkSfx(sound, ped->m_modelIndex);
+		return GetShopperFemaleTalkSfx(sound, ped->GetModelIndex());
 	case MI_STUD_MAN:
 		return GetStudentMaleTalkSfx(sound);
 	case MI_STUD_WOM:
@@ -6264,7 +6264,7 @@ cAudioManager::ProcessPed(CPhysical *ped)
 	// params.m_bDistanceCalculated = false;
 	params.m_pPed = (CPed *)ped;
 	params.m_fDistance = GetDistanceSquared(&m_sQueueSample.m_vecPos);
-	if (ped->m_modelIndex == MI_FATMALE02)
+	if (ped->GetModelIndex() == MI_FATMALE02)
 		ProcessPedHeadphones(&params);
 	ProcessPedOneShots(&params);
 }
@@ -7090,7 +7090,7 @@ cAudioManager::ProcessPlane(cVehicleParams *params)
 		ProcessCesna(params);
 		break;
 	default:
-		debug("Plane Model Id is %d\n, ", params->m_pVehicle->m_modelIndex);
+		debug("Plane Model Id is %d\n, ", params->m_pVehicle->GetModelIndex());
 		break;
 	}
 }
@@ -7991,7 +7991,7 @@ cAudioManager::ProcessVehicle(CVehicle *veh)
 	if (handling)
 		params.m_pTransmission = &handling->Transmission;
 
-	params.m_nIndex = veh->m_modelIndex - 90;
+	params.m_nIndex = veh->GetModelIndex() - 90;
 	if (params.m_pVehicle->GetStatus() == STATUS_SIMPLE)
 		velChange = params.m_pVehicle->AutoPilot.m_fMaxTrafficSpeed * 0.02f;
 	else
@@ -8272,7 +8272,7 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams *params)
 
 	if (params->m_fDistance < SQR(SOUND_INTENSITY)) {
 		automobile = (CAutomobile *)params->m_pVehicle;
-		if ((!automobile->m_bSirenOrAlarm || !UsesSirenSwitching(params->m_nIndex)) && automobile->m_modelIndex != MI_MRWHOOP) {
+		if ((!automobile->m_bSirenOrAlarm || !UsesSirenSwitching(params->m_nIndex)) && automobile->GetModelIndex() != MI_MRWHOOP) {
 			if (automobile->m_nCarHornTimer) {
 				if (params->m_pVehicle->GetStatus() != STATUS_PLAYER) {
 					automobile->m_nCarHornTimer = Min(44, automobile->m_nCarHornTimer);

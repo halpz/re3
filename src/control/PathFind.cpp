@@ -661,8 +661,7 @@ CPathFind::CountFloodFillGroups(uint8 type)
 			if(type == PATH_CAR)
 #ifndef MIAMI
 				printf("Single car node: %f %f %f (%d)\n",
-					node->GetX(), node->GetY(), node->GetZ(),
-					m_mapObjects[node->objectIndex]->m_modelIndex);
+					node->GetX(), node->GetY(), node->GetZ(), m_mapObjects[node->objectIndex]->GetModelIndex());
 #else
 				printf("Single car node: %f %f %f\n",
 					node->GetX(), node->GetY(), node->GetZ());
@@ -737,7 +736,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 	// Calculate internal nodes, store them and connect them to defining object
 	for(i = 0; i < m_numMapObjects; i++){
 		tileStart = m_numPathNodes;
-		start = 12*m_mapObjects[i]->m_modelIndex;
+		start = 12 * m_mapObjects[i]->GetModelIndex();
 		for(j = 0; j < 12; j++){
 			if(objectpathinfo[start + j].type == NodeTypeIntern){
 				CalcNodeCoors(
@@ -826,7 +825,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 	TempListLength = 0;
 #ifndef MIAMI
 	for(i = 0; i < m_numMapObjects; i++){
-		start = 12*m_mapObjects[i]->m_modelIndex;
+		start = 12 * m_mapObjects[i]->GetModelIndex();
 		for(j = 0; j < 12; j++){
 			if(objectpathinfo[start + j].type != NodeTypeExtern)
 				continue;
@@ -1056,7 +1055,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				iseg++;
 
 #ifndef MIAMI
-		istart = 12*m_mapObjects[m_pathNodes[i].objectIndex]->m_modelIndex;
+		istart = 12 * m_mapObjects[m_pathNodes[i].objectIndex]->GetModelIndex();
 #endif
 		// Add links to other internal nodes
 		for(j = Max(oldNumPathNodes, i-12); j < Min(m_numPathNodes, i+12); j++){
@@ -1066,7 +1065,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 			jseg = j-i + iseg;
 
 #ifndef MIAMI
-			jstart = 12*m_mapObjects[m_pathNodes[j].objectIndex]->m_modelIndex;
+			jstart = 12 * m_mapObjects[m_pathNodes[j].objectIndex]->GetModelIndex();
 			if(objectpathinfo[istart + iseg].next == jseg ||
 			   objectpathinfo[jstart + jseg].next == iseg){
 #else

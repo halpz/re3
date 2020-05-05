@@ -354,7 +354,7 @@ CPlayerInfo::Process(void)
 	bool startTaxiTimer = true;
 	if (m_bUnusedTaxiThing && m_pPed->bInVehicle) {
 		CVehicle *veh = m_pPed->m_pMyVehicle;
-		if ((veh->m_modelIndex == MI_TAXI || veh->m_modelIndex == MI_CABBIE || veh->m_modelIndex == MI_BORGNINE)
+		if ((veh->GetModelIndex() == MI_TAXI || veh->GetModelIndex() == MI_CABBIE || veh->GetModelIndex() == MI_BORGNINE)
 			&& veh->pDriver == m_pPed && veh->m_nNumPassengers != 0) {
 			for (uint32 timePassed = CTimer::GetTimeInMilliseconds() - m_nUnusedTaxiTimer; timePassed >= 1000; m_nUnusedTaxiTimer += 1000) {
 				timePassed -= 1000;
@@ -407,7 +407,7 @@ CPlayerInfo::Process(void)
 		if (m_pPed->bInVehicle) {
 			if (!m_pRemoteVehicle) {
 				CEntity *surfaceBelowVeh = m_pPed->m_pMyVehicle->m_pCurGroundEntity;
-				if (!surfaceBelowVeh || !CBridge::ThisIsABridgeObjectMovingUp(surfaceBelowVeh->m_modelIndex)) {
+				if (!surfaceBelowVeh || !CBridge::ThisIsABridgeObjectMovingUp(surfaceBelowVeh->GetModelIndex())) {
 					CVehicle *veh = m_pPed->m_pMyVehicle;
 					if (!veh->IsBoat() || veh->m_nDoorLock == CARLOCK_LOCKED_PLAYER_INSIDE) {
 

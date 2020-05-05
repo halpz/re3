@@ -100,7 +100,7 @@ void
 CCutsceneObject::RenderLimb(int32 bone)
 {
 	RpAtomic *atomic;
-	CPedModelInfo *mi = (CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex);
+	CPedModelInfo *mi = (CPedModelInfo *)CModelInfo::GetModelInfo(GetModelIndex());
 	switch(bone){
 	case BONE_head:
 		atomic = mi->getHead();
