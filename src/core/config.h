@@ -7,14 +7,9 @@ enum Config {
 	MAX_CDIMAGES = 8, // additional cdimages
 	MAX_CDCHANNELS = 5,
 
-#ifndef MIAMI
-	MODELINFOSIZE = 5500,
-	TXDSTORESIZE = 850,
-#else
 	MODELINFOSIZE = 6500,
 	TXDSTORESIZE = 1385,
 	COLSTORESIZE = 31,
-#endif
 	EXTRADIRSIZE = 128,
 	CUTSCENEDIRSIZE = 512,
 
@@ -47,17 +42,10 @@ enum Config {
 	NUMTEMPOBJECTS = 30,
 
 	// Path data
-#ifndef MIAMI
-	NUM_PATHNODES = 4930,
-	NUM_CARPATHLINKS = 2076,
-	NUM_MAPOBJECTS = 1250,
-	NUM_PATHCONNECTIONS = 10260,
-#else
 	NUM_PATHNODES = 9650,
 	NUM_CARPATHLINKS = 3500,
 	NUM_MAPOBJECTS = 1250,
 	NUM_PATHCONNECTIONS = 20400,
-#endif
 
 	// Link list lengths
 	NUMALPHALIST = 20,
@@ -123,11 +111,7 @@ enum Config {
 	NUMMODELSPERPEDGROUP = 8,
 	NUMSHOTINFOS = 100,
 
-#ifndef MIAMI
-	NUMROADBLOCKS = 600,
-#else
 	NUMROADBLOCKS = 300,
-#endif
 
 	NUMVISIBLEENTITIES = 2000,
 	NUMINVISIBLEENTITIES = 150,
@@ -159,12 +143,6 @@ enum Config {
 #define GTA_PC
 //#define GTA_PS2
 //#define GTA_XBOX
-
-#ifndef MIAMI
-#define GTA_TRAIN	// This game has trains
-#define GTA_BRIDGE	// This game has the bridge
-#define GTA_ZONECULL	// This game culls by zones
-#endif
 
 // This enables things from the PS2 version on PC
 #define GTA_PS2_STUFF

@@ -20,10 +20,8 @@
 #include "SurfaceTable.h"
 #include "Lines.h"
 #include "Collision.h"
-#ifdef MIAMI
 #include "Camera.h"
 #include "ColStore.h"
-#endif
 
 enum Direction
 {
@@ -44,9 +42,7 @@ CCollision::Init(void)
 {
 	ms_colModelCache.Init(NUMCOLCACHELINKS);
 	ms_collisionInMemory = LEVEL_NONE;
-#ifdef MIAMI
 	CColStore::Initialise();
-#endif
 }
 
 //--MIAMI: done
@@ -54,50 +50,13 @@ void
 CCollision::Shutdown(void)
 {
 	ms_colModelCache.Shutdown();
-#ifdef MIAMI
 	CColStore::Shutdown();
-#endif
 }
 
 //--MIAMI: done
 void
 CCollision::Update(void)
 {
-#ifndef MIAMI
-	CVector playerCoors;
-	playerCoors = FindPlayerCoors();
-	eLevelName level = CTheZones::m_CurrLevel;
-	bool forceLevelChange = false;
-
-	if(CTimer::GetTimeInMilliseconds() < 2000 || CCutsceneMgr::IsCutsceneProcessing())
-		return;
-
-	// hardcode a level if there are no zones
-	if(level == LEVEL_NONE){
-		if(CGame::currLevel == LEVEL_INDUSTRIAL &&
-		   playerCoors.x < 400.0f){
-			level = LEVEL_COMMERCIAL;
-			forceLevelChange = true;
-		}else if(CGame::currLevel == LEVEL_SUBURBAN &&
-		         playerCoors.x > -450.0f && playerCoors.y < -1400.0f){
-			level = LEVEL_COMMERCIAL;
-			forceLevelChange = true;
-		}else{
-			if(playerCoors.x > 800.0f){
-				level = LEVEL_INDUSTRIAL;
-				forceLevelChange = true;
-			}else if(playerCoors.x < -800.0f){
-				level = LEVEL_SUBURBAN;
-				forceLevelChange = true;
-			}
-		}
-	}
-	if(level != LEVEL_NONE && level != CGame::currLevel)
-		CGame::currLevel = level;
-	if(ms_collisionInMemory != CGame::currLevel)
-		LoadCollisionWhenINeedIt(forceLevelChange);
-	CStreaming::HaveAllBigBuildingsLoaded(CGame::currLevel);
-#endif
 }
 
 //--MIAMI: unused
@@ -142,116 +101,12 @@ GetCollisionInSector(CSector &sect)
 void
 CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 {
-#ifndef MIAMI
-	eLevelName level, l;
-	bool multipleLevels;
-	CVector playerCoors;
-	CVehicle *veh;
-	CEntryInfoNode *ei;
-	int sx, sy;
-	int xmin, xmax, ymin, ymax;
-	int x, y;
-
-	level = LEVEL_NONE;
-
-	playerCoors = FindPlayerCoors();
-	sx = CWorld::GetSectorIndexX(playerCoors.x);
-	sy = CWorld::GetSectorIndexY(playerCoors.y);
-	multipleLevels = false;
-
-	veh = FindPlayerVehicle();
-	if(veh && veh->IsTrain()){
-		if(((CTrain*)veh)->m_nDoorState != TRAIN_DOOR_OPEN)
-			return;
-	}else if(playerCoors.z < -4.0f && !CCullZones::DoINeedToLoadCollision())
-		return;
-
-	// Figure out whose level's collisions we're most likely to be interested in
-	if(!forceChange){
-		if(veh && veh->IsBoat()){
-			// on water we expect to be between levels
-			multipleLevels = true;
-		}else{
-			xmin = Max(sx - 1, 0);
-			xmax = Min(sx + 1, NUMSECTORS_X-1);
-			ymin = Max(sy - 1, 0);
-			ymax = Min(sy + 1, NUMSECTORS_Y-1);
-
-			for(x = xmin; x <= xmax; x++)
-				for(y = ymin; y <= ymax; y++){
-					l = GetCollisionInSector(*CWorld::GetSector(x, y));
-					if(l != LEVEL_NONE){
-						if(level == LEVEL_NONE)
-							level = l;
-						if(level != l)
-							multipleLevels = true;
-					}
-				}
-		}
-
-		if(multipleLevels && veh && veh->IsBoat())
-			for(ei = veh->m_entryInfoList.first; ei; ei = ei->next){
-				level = GetCollisionInSector(*ei->sector);
-				if(level != LEVEL_NONE)
-					break;
-			}
-	}
-
-	if(level == CGame::currLevel || forceChange){
-		CTimer::Stop();
-		DMAudio.SetEffectsFadeVol(0);
-		CPad::StopPadsShaking();
-		LoadCollisionScreen(CGame::currLevel);
-		DMAudio.Service();
-
-		CPopulation::DealWithZoneChange(ms_collisionInMemory, CGame::currLevel, false);
-		CStreaming::RemoveIslandsNotUsed(LEVEL_INDUSTRIAL);
-		CStreaming::RemoveIslandsNotUsed(LEVEL_COMMERCIAL);
-		CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
-		CStreaming::RemoveBigBuildings(LEVEL_INDUSTRIAL);
-		CStreaming::RemoveBigBuildings(LEVEL_COMMERCIAL);
-		CStreaming::RemoveBigBuildings(LEVEL_SUBURBAN);
-		CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
-		CStreaming::RemoveUnusedModelsInLoadedList();
-		CGame::TidyUpMemory(true, true);
-		CFileLoader::LoadCollisionFromDatFile(CGame::currLevel);
-		ms_collisionInMemory = CGame::currLevel;
-		CReplay::EmptyReplayBuffer();
-		if(CGame::currLevel != LEVEL_NONE)
-			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
-		CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-		CStreaming::RemoveUnusedBuildings(CGame::currLevel);
-		CStreaming::RequestBigBuildings(CGame::currLevel);
-		CStreaming::LoadAllRequestedModels(true);
-		CStreaming::HaveAllBigBuildingsLoaded(CGame::currLevel);
-
-		CGame::TidyUpMemory(true, true);
-		CTimer::Update();
-		DMAudio.SetEffectsFadeVol(127);
-	}
-#endif
 }
 
 //--MIAMI: done
 void
 CCollision::SortOutCollisionAfterLoad(void)
 {
-#ifndef MIAMI
-	if(ms_collisionInMemory == CGame::currLevel)
-		return;
-
-	CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
-	if(CGame::currLevel != LEVEL_NONE){
-		CFileLoader::LoadCollisionFromDatFile(CGame::currLevel);
-		if(!CGame::playingIntro)
-			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
-	}
-	ms_collisionInMemory = CGame::currLevel;
-	CGame::TidyUpMemory(true, false);
-#else
-	CColStore::LoadCollision(TheCamera.GetPosition());
-	CStreaming::LoadAllRequestedModels(false);
-#endif
 }
 
 void
@@ -2000,11 +1855,7 @@ CColModel::CColModel(void)
 	vertices = nil;
 	triangles = nil;
 	trianglePlanes = nil;
-#ifndef MIAMI
-	level = CGame::currLevel;
-#else
 	level = 0;	// generic col slot
-#endif
 	ownsCollisionVolumes = true;
 }
 

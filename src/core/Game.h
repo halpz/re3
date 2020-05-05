@@ -12,9 +12,7 @@ class CGame
 {
 public:
 	static eLevelName currLevel;
-#ifdef MIAMI
 	static int32 currArea;
-#endif
 	static bool bDemoMode;
 	static bool nastyGame;
 	static bool frenchGame;

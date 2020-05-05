@@ -130,7 +130,6 @@ CSimpleModelInfo::GetAtomicFromDistance(float dist)
 	return nil;
 }
 
-#ifdef MIAMI
 RpAtomic*
 CSimpleModelInfo::GetFirstAtomicFromDistance(float dist)
 {
@@ -138,7 +137,6 @@ CSimpleModelInfo::GetFirstAtomicFromDistance(float dist)
 		return m_atomics[0];
 	return nil;
 }
-#endif
 
 void
 CSimpleModelInfo::FindRelatedModel(void)

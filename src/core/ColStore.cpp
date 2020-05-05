@@ -1,5 +1,4 @@
 #include "common.h"
-#ifdef MIAMI
 
 #include "templates.h"
 #include "General.h"
@@ -227,5 +226,3 @@ CColStore::HasCollisionLoaded(const CVector2D &pos)
 			return false;
 	return true;
 }
-
-#endif

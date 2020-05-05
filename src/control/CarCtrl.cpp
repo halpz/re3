@@ -696,7 +696,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 		if (pVehicle->bExtendedRange)
 			threshold *= 1.5f;
 		if (distanceToPlayer > threshold && !CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
-			if (pVehicle->GetIsOnScreenAndNotCulled()){
+			if (pVehicle->GetIsOnScreen()){
 				pVehicle->bFadeOut = true;
 			}else{
 				CWorld::Remove(pVehicle);
@@ -722,7 +722,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 	if (pVehicle->GetStatus() != STATUS_WRECKED || pVehicle->m_nTimeOfDeath == 0)
 		return;
 	if (CTimer::GetTimeInMilliseconds() > pVehicle->m_nTimeOfDeath + 60000 &&
-		!pVehicle->GetIsOnScreenAndNotCulled()){
+		!pVehicle->GetIsOnScreen()){
 		if ((pVehicle->GetPosition() - vecPlayerPos).MagnitudeSqr() > SQR(7.5f)){
 			if (!CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
 				CWorld::Remove(pVehicle);
@@ -1641,43 +1641,13 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 	CPathNode* pTargetNode;
 	int16 numNodes;
 	float distanceToTargetNode;
-#ifndef MIAMI
-	if (pTarget && pTarget->m_pCurGroundEntity &&
-	  pTarget->m_pCurGroundEntity->IsBuilding() &&
-	  ((CBuilding*)pTarget->m_pCurGroundEntity)->GetIsATreadable() &&
-	  ((CTreadable*)pTarget->m_pCurGroundEntity)->m_nodeIndices[0][0] >= 0){
-		CTreadable* pCurrentMapObject = (CTreadable*)pTarget->m_pCurGroundEntity;
-		int closestNode = -1;
-		float minDist = 100000.0f;
-		for (int i = 0; i < 12; i++){
-			int node = pCurrentMapObject->m_nodeIndices[0][i];
-			if (node < 0)
-				break;
-			float dist = (ThePaths.m_pathNodes[node].GetPosition() - pTarget->GetPosition()).Magnitude();
-			if (dist < minDist){
-				minDist = dist;
-				closestNode = node;
-			}
-		}
-		ThePaths.DoPathSearch(0, pCurNode->GetPosition(), curNode,
+	ThePaths.DoPathSearch(0, pCurNode->GetPosition(), curNode,
 #ifdef FIX_PATHFIND_BUG
-			CVector(targetX, targetY, targetZ),
+		CVector(targetX, targetY, targetZ),
 #else
-			CVector(targetX, targetY, 0.0f),
+		CVector(targetX, targetY, 0.0f),
 #endif
-			&pTargetNode, &numNodes, 1, pVehicle, &distanceToTargetNode, 999999.9f, closestNode);
-	}else
-#endif
-	{
-
-		ThePaths.DoPathSearch(0, pCurNode->GetPosition(), curNode,
-#ifdef FIX_PATHFIND_BUG
-			CVector(targetX, targetY, targetZ),
-#else
-			CVector(targetX, targetY, 0.0f),
-#endif
-			&pTargetNode, &numNodes, 1, pVehicle, &distanceToTargetNode, 999999.9f, -1);
-	}
+		&pTargetNode, &numNodes, 1, pVehicle, &distanceToTargetNode, 999999.9f, -1);
 
 	int newNextNode;
 	int nextLink;

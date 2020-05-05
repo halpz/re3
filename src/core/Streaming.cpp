@@ -18,7 +18,6 @@
 #include "FileMgr.h"
 #include "FileLoader.h"
 #include "Zones.h"
-#include "ZoneCull.h"
 #include "Radar.h"
 #include "Camera.h"
 #include "Record.h"
@@ -28,14 +27,10 @@
 #include "CutsceneMgr.h"
 #include "CdStream.h"
 #include "Streaming.h"
-#ifdef FIX_BUGS
 #include "Replay.h"
-#endif
 #include "main.h"
-#ifdef MIAMI
 #include "ColStore.h"
 #include "DMAudio.h"
-#endif
 
 bool CStreaming::ms_disableStreaming;
 bool CStreaming::ms_bLoadingBigModel;
@@ -57,9 +52,6 @@ int32 CStreaming::ms_vehiclesLoaded[MAXVEHICLESLOADED];
 int32 CStreaming::ms_lastVehicleDeleted;
 CDirectory *CStreaming::ms_pExtraObjectsDir;
 int32 CStreaming::ms_numPriorityRequests;
-#ifndef MIAMI
-bool CStreaming::ms_hasLoadedLODs;
-#endif
 int32 CStreaming::ms_currentPedGrp;
 int32 CStreaming::ms_currentPedLoading;
 int32 CStreaming::ms_lastCullZone;
@@ -190,9 +182,6 @@ CStreaming::Init2(void)
 
 	ms_pExtraObjectsDir = new CDirectory(EXTRADIRSIZE);
 	ms_numPriorityRequests = 0;
-#ifndef MIAMI
-	ms_hasLoadedLODs = true;
-#endif
 	ms_currentPedGrp = -1;
 	ms_lastCullZone = -1;		// unused because RemoveModelsNotVisibleFromCullzone is gone
 	ms_loadedGangs = 0;
@@ -238,19 +227,6 @@ CStreaming::Init2(void)
         CModelInfo::GetModelInfo("IslandLODcomSUB", &islandLODcomSub);
         CModelInfo::GetModelInfo("IslandLODsubIND", &islandLODsubInd);
         CModelInfo::GetModelInfo("IslandLODsubCOM", &islandLODsubCom);
-
-#ifndef MIAMI
-	for(i = CPools::GetBuildingPool()->GetSize()-1; i >= 0; i--){
-		CBuilding *building = CPools::GetBuildingPool()->GetSlot(i);
-		if(building == nil)
-			continue;
-		if(building->GetModelIndex() == islandLODindust) pIslandLODindustEntity = building;
-		if(building->GetModelIndex() == islandLODcomInd) pIslandLODcomIndEntity = building;
-		if(building->GetModelIndex() == islandLODcomSub) pIslandLODcomSubEntity = building;
-		if(building->GetModelIndex() == islandLODsubInd) pIslandLODsubIndEntity = building;
-		if(building->GetModelIndex() == islandLODsubCom) pIslandLODsubComEntity = building;
-	}
-#endif
 }
 
 void
@@ -288,7 +264,6 @@ CStreaming::Shutdown(void)
 void
 CStreaming::Update(void)
 {
-	CEntity *train;
 	CStreamingInfo *si, *prev;
 	bool requestedSubway = false;
 
@@ -302,46 +277,24 @@ CStreaming::Update(void)
 	if(CTimer::GetIsPaused())
 		return;
 
-#ifndef MIAMI
-	train = FindPlayerTrain();
-	if(train && train->GetPosition().z < 0.0f){
-		RequestSubway();
-		requestedSubway = true;
-	}else if(!ms_disableStreaming)
-		AddModelsToRequestList(TheCamera.GetPosition());
-#else
 	LoadBigBuildingsWhenNeeded();
 	if(!ms_disableStreaming && TheCamera.GetPosition().z < 55.0f)
 		AddModelsToRequestList(TheCamera.GetPosition());
-#endif
 
 	DeleteFarAwayRwObjects(TheCamera.GetPosition());
 
 	if(!ms_disableStreaming &&
-#ifndef MIAMI
-	   !CCutsceneMgr::IsRunning() &&
-	   !requestedSubway &&
-	   !CGame::playingIntro &&
-#else
 	   !CCutsceneMgr::IsCutsceneProcessing() &&
-#endif
 	   ms_numModelsRequested < 5 &&
-	   !CRenderer::m_loadingPriority
-#ifdef MIAMI
-	   && CGame::currArea == 0
-		// replay is also MIAMI
-#endif
-#ifdef FIX_BUGS
-		&& !CReplay::IsPlayingBack()
-#endif
-		){
+	   !CRenderer::m_loadingPriority &&
+	   CGame::currArea == 0 &&
+	   !CReplay::IsPlayingBack()){
 		StreamVehiclesAndPeds();
 		StreamZoneModels(FindPlayerCoors());
 	}
 
 	LoadRequestedModels();
 
-#ifdef MIAMI
 	if(CWorld::Players[0].m_pRemoteVehicle){
 		CColStore::AddCollisionNeededAtPosn(FindPlayerCoors());
 		CColStore::LoadCollision(CWorld::Players[0].m_pRemoteVehicle->GetPosition());
@@ -350,7 +303,6 @@ CStreaming::Update(void)
 		CColStore::LoadCollision(FindPlayerCoors());
 		CColStore::EnsureCollisionIsInMemory(FindPlayerCoors());
 	}
-#endif
 
 	for(si = ms_endRequestedList.m_prev; si != &ms_startRequestedList; si = prev){
 		prev = si->m_prev;
@@ -397,8 +349,7 @@ void
 CStreaming::LoadCdDirectory(const char *dirname, int n)
 {
 	int fd, lastID, imgSelector;
-	int modelId, txdId;
-	uint32 posn, size;
+	int modelId;
 	CDirectory::DirectoryInfo direntry;
 	char *dot;
 
@@ -409,50 +360,6 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 	imgSelector = n<<24;
 	assert(sizeof(direntry) == 32);
 	while(CFileMgr::Read(fd, (char*)&direntry, sizeof(direntry))){
-#ifndef MIAMI
-		dot = strchr(direntry.name, '.');
-		if(dot) *dot = '\0';
-		if(direntry.size > (uint32)ms_streamingBufferSize)
-			ms_streamingBufferSize = direntry.size;
-
-		if(!CGeneral::faststrcmp(dot+1, "DFF") || !CGeneral::faststrcmp(dot+1, "dff")){
-			if(CModelInfo::GetModelInfo(direntry.name, &modelId)){
-				if(ms_aInfoForModel[modelId].GetCdPosnAndSize(posn, size)){
-					debug("%s appears more than once in %s\n", direntry.name, dirname);
-					lastID = -1;
-				}else{
-					direntry.offset |= imgSelector;
-					ms_aInfoForModel[modelId].SetCdPosnAndSize(direntry.offset, direntry.size);
-					if(lastID != -1)
-						ms_aInfoForModel[lastID].m_nextID = modelId;
-					lastID = modelId;
-				}
-			}else{
-#ifdef FIX_BUGS
-				// remember which cdimage this came from
-				ms_pExtraObjectsDir->AddItem(direntry, n);
-#else
-				ms_pExtraObjectsDir->AddItem(direntry);
-#endif
-				lastID = -1;
-			}
-		}else if(!CGeneral::faststrcmp(dot+1, "TXD") || !CGeneral::faststrcmp(dot+1, "txd")){
-			txdId = CTxdStore::FindTxdSlot(direntry.name);
-			if(txdId == -1)
-				txdId = CTxdStore::AddTxdSlot(direntry.name);
-			if(ms_aInfoForModel[txdId + STREAM_OFFSET_TXD].GetCdPosnAndSize(posn, size)){
-				debug("%s appears more than once in %s\n", direntry.name, dirname);
-				lastID = -1;
-			}else{
-				direntry.offset |= imgSelector;
-				ms_aInfoForModel[txdId + STREAM_OFFSET_TXD].SetCdPosnAndSize(direntry.offset, direntry.size);
-				if(lastID != -1)
-					ms_aInfoForModel[lastID].m_nextID = txdId + STREAM_OFFSET_TXD;
-				lastID = txdId + STREAM_OFFSET_TXD;
-			}
-		}else
-			lastID = -1;
-#else
 		bool bAddToStreaming = false;
 
 		if(direntry.size > (uint32)ms_streamingBufferSize)
@@ -491,7 +398,7 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 				modelId = CColStore::AddColSlot(direntry.name);
 			modelId += STREAM_OFFSET_COL;
 			bAddToStreaming = true;
-		// TODO: IFP
+		// TODO(MIAMI): IFP
 		}else{
 			*dot = '.';
 			lastID = -1;
@@ -509,7 +416,6 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 				lastID = modelId;
 			}
 		}
-#endif
 	}
 
 	CFileMgr::CloseFile(fd);
@@ -575,11 +481,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			RwStreamClose(stream, &mem);
 			return false;
 		}
-#ifndef MIAMI
-	}else{
-#else
 	}else if(streamId >= STREAM_OFFSET_TXD && streamId < STREAM_OFFSET_COL){
-#endif
 		// Txd
 		assert(streamId < NUMSTREAMINFO);
 		if((ms_aInfoForModel[streamId].m_flags & STREAMFLAGS_KEEP_IN_MEMORY) == 0 &&
@@ -604,7 +506,6 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			RwStreamClose(stream, &mem);
 			return false;
 		}
-#ifdef MIAMI
 	}else if(streamId >= STREAM_OFFSET_COL && streamId < NUMSTREAMINFO){
 		if(!CColStore::LoadCol(streamId-STREAM_OFFSET_COL, mem.start, mem.length)){
 			debug("Failed to load %s.col\n", CColStore::GetColName(streamId - STREAM_OFFSET_COL));
@@ -613,23 +514,10 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			RwStreamClose(stream, &mem);
 			return false;
 		}
-		// TODO: IFPs
-#endif
+		// TODO(MIAMI): IFP
 	}
 
 	RwStreamClose(stream, &mem);
-
-#ifndef MIAMI
-	// We shouldn't even end up here unless load was successful
-	if(!success){
-		ReRequestModel(streamId);
-		if(streamId < STREAM_OFFSET_TXD)
-			debug("Failed to load %s.dff\n", mi->GetName());
-		else
-			debug("Failed to load %s.txd\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD));
-		return false;
-	}
-#endif
 
 	if(streamId < STREAM_OFFSET_TXD){
 		// Model
@@ -648,14 +536,11 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			if((ms_aInfoForModel[streamId].m_flags & STREAMFLAGS_CANT_REMOVE) == 0)
 				ms_aInfoForModel[streamId].AddToList(&ms_startLoadedList);
 		}
-#ifndef MIAMI
-	}else{
-#else
-	}else if(streamId >= STREAM_OFFSET_TXD && streamId < STREAM_OFFSET_COL){	// TODO: animations
-#endif
+	}else if(streamId >= STREAM_OFFSET_TXD && streamId < STREAM_OFFSET_COL){
 		// Txd
 		if((ms_aInfoForModel[streamId].m_flags & STREAMFLAGS_CANT_REMOVE) == 0)
 			ms_aInfoForModel[streamId].AddToList(&ms_startLoadedList);
+		// TODO(MIAMI): animations
 	}
 
 	// Mark objects as loaded
@@ -667,12 +552,6 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 	endTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
 	timeDiff = endTime - startTime;
 	if(timeDiff > 5){
-#ifndef MIAMI
-		if(streamId < STREAM_OFFSET_TXD)
-			debug("model %s took %d ms\n", CModelInfo::GetModelInfo(streamId)->GetName(), timeDiff);
-		else
-			debug("txd %s took %d ms\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD), timeDiff);
-#else
 		// TODO: is this inlined?
 		static char objname[32];
 		if(streamId < STREAM_OFFSET_TXD)
@@ -681,9 +560,8 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			sprintf(objname, "%s.txd", CTxdStore::GetTxdName(streamId-STREAM_OFFSET_TXD));
 		else if(streamId >= STREAM_OFFSET_COL && streamId < NUMSTREAMINFO)
 			sprintf(objname, "%s.col", CColStore::GetColName(streamId-STREAM_OFFSET_COL));
-		// TODO: IFP
+		// TODO(MIAMI): IFP
 		debug("%s took %d ms\n", objname, timeDiff);
-#endif
 	}
 
 	return true;
@@ -841,11 +719,7 @@ CStreaming::RequestSubway(void)
 	}
 }
 
-#ifndef MIAMI
-#define BIGBUILDINGFLAGS STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_PRIORITY
-#else
 #define BIGBUILDINGFLAGS STREAMFLAGS_DONT_REMOVE
-#endif
 
 void
 CStreaming::RequestBigBuildings(eLevelName level)
@@ -857,18 +731,12 @@ CStreaming::RequestBigBuildings(eLevelName level)
 	for(i = n; i >= 0; i--){
 		b = CPools::GetBuildingPool()->GetSlot(i);
 		if(b && b->bIsBIGBuilding && b->m_level == level)
-#ifdef MIAMI
 			if(!b->bStreamBIGBuilding)
-#endif
-			RequestModel(b->GetModelIndex(), BIGBUILDINGFLAGS);
+				RequestModel(b->GetModelIndex(), BIGBUILDINGFLAGS);
 	}
 	RequestIslands(level);
-#ifndef MIAMI
-	ms_hasLoadedLODs = false;
-#endif
 }
 
-#ifdef MIAMI
 void
 CStreaming::RequestBigBuildings(eLevelName level, const CVector &pos)
 {
@@ -903,7 +771,6 @@ CStreaming::InstanceBigBuildings(eLevelName level, const CVector &pos)
 				b->CreateRwObject();
 	}
 }
-#endif
 
 void
 CStreaming::RequestIslands(eLevelName level)
@@ -1002,20 +869,13 @@ CStreaming::RemoveModel(int32 id)
 		return;
 
 	if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED){
-#ifndef MIAMI
-		if(id < STREAM_OFFSET_TXD)
-			CModelInfo::GetModelInfo(id)->DeleteRwObject();
-		else
-			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
-#else
 		if(id < STREAM_OFFSET_TXD)
 			CModelInfo::GetModelInfo(id)->DeleteRwObject();
 		else if(id >= STREAM_OFFSET_TXD && id < STREAM_OFFSET_COL)
 			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
 		else if(id >= STREAM_OFFSET_COL && id < NUMSTREAMINFO)
 			CColStore::RemoveCol(id - STREAM_OFFSET_COL);
-		// TODO: IFP
-#endif
+		// TODO(MIAMI): IFP
 		ms_memoryUsed -= ms_aInfoForModel[id].GetCdSize()*CDSTREAM_SECTOR_SIZE;
 	}
 
@@ -1034,20 +894,13 @@ CStreaming::RemoveModel(int32 id)
 	}
 
 	if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_STARTED){
-#ifndef MIAMI
-		if(id < STREAM_OFFSET_TXD)
-			RpClumpGtaCancelStream();
-		else
-			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
-#else
 		if(id < STREAM_OFFSET_TXD)
 			RpClumpGtaCancelStream();
 		else if(id >= STREAM_OFFSET_TXD && id < STREAM_OFFSET_COL)
 			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
 		else if(id >= STREAM_OFFSET_COL && id < NUMSTREAMINFO)
 			CColStore::RemoveCol(id - STREAM_OFFSET_COL);
-		// TODO: IFP
-#endif
+		// TODO(MIAMI): IFP
 	}
 
 	ms_aInfoForModel[id].m_loadState = STREAMSTATE_NOTLOADED;
@@ -1155,7 +1008,6 @@ DeleteIsland(CEntity *island)
 void
 CStreaming::RemoveIslandsNotUsed(eLevelName level)
 {
-#ifdef MIAMI
 	int i;
 	if(pIslandLODindustEntity == nil)
 	for(i = CPools::GetBuildingPool()->GetSize()-1; i >= 0; i--){
@@ -1168,7 +1020,6 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 		if(building->GetModelIndex() == islandLODsubInd) pIslandLODsubIndEntity = building;
 		if(building->GetModelIndex() == islandLODsubCom) pIslandLODsubComEntity = building;
 	}
-#endif
 
 	switch(level){
 	case LEVEL_INDUSTRIAL:
@@ -1399,43 +1250,6 @@ CStreaming::IsObjectInCdImage(int32 id)
 	uint32 posn, size;
 	return ms_aInfoForModel[id].GetCdPosnAndSize(posn, size);
 }
-
-#ifndef MIAMI
-void
-CStreaming::HaveAllBigBuildingsLoaded(eLevelName level)
-{
-	int i, n;
-	CEntity *e;
-
-	if(ms_hasLoadedLODs)
-		return;
-
-	if(level == LEVEL_INDUSTRIAL){
-		if(ms_aInfoForModel[islandLODcomInd].m_loadState != STREAMSTATE_LOADED ||
-		   ms_aInfoForModel[islandLODsubInd].m_loadState != STREAMSTATE_LOADED)
-			return;
-	}else if(level == LEVEL_COMMERCIAL){
-		if(ms_aInfoForModel[islandLODindust].m_loadState != STREAMSTATE_LOADED ||
-		   ms_aInfoForModel[islandLODsubCom].m_loadState != STREAMSTATE_LOADED)
-			return;
-	}else if(level == LEVEL_SUBURBAN){
-		if(ms_aInfoForModel[islandLODindust].m_loadState != STREAMSTATE_LOADED ||
-		   ms_aInfoForModel[islandLODcomSub].m_loadState != STREAMSTATE_LOADED)
-			return;
-	}
-
-	n = CPools::GetBuildingPool()->GetSize()-1;
-	for(i = n; i >= 0; i--){
-		e = CPools::GetBuildingPool()->GetSlot(i);
-		if(e && e->bIsBIGBuilding && e->m_level == level &&
-		   ms_aInfoForModel[e->GetModelIndex()].m_loadState != STREAMSTATE_LOADED)
-			return;
-	}
-
-	RemoveUnusedBigBuildings(level);
-	ms_hasLoadedLODs = true;
-}
-#endif
 
 void
 CStreaming::SetModelIsDeletable(int32 id)
@@ -1669,7 +1483,6 @@ CStreaming::RemoveCurrentZonesModels(void)
 	ms_loadedGangCars = 0;
 }
 
-#ifdef MIAMI
 void
 CStreaming::LoadBigBuildingsWhenNeeded(void)
 {
@@ -1705,7 +1518,6 @@ CStreaming::LoadBigBuildingsWhenNeeded(void)
 	CTimer::Resume();
 	DMAudio.SetEffectsFadeVol(127);
 }
-#endif
 
 
 // Find starting offset of the cdimage we next want to read
@@ -2235,10 +2047,7 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float 
 				if(xmin < pos.x && pos.x < xmax &&
 				   ymin < pos.y && pos.y < ymax &&
 				   (CVector2D(x, y) - pos).MagnitudeSqr() < lodDistSq)
-#ifdef GTA_ZONECULL
-					if(CRenderer::IsEntityCullZoneVisible(e))
-#endif
-						RequestModel(e->GetModelIndex(), 0);
+					RequestModel(e->GetModelIndex(), 0);
 			}
 		}
 	}
@@ -2261,10 +2070,7 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list)
 		   (!e->IsObject() || ((CObject*)e)->ObjectCreatedBy != TEMP_OBJECT)){
 			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
 			if (mi->GetModelType() != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff()))
-#ifdef GTA_ZONECULL
-				if(CRenderer::IsEntityCullZoneVisible(e))
-#endif
-					RequestModel(e->GetModelIndex(), 0);
+				RequestModel(e->GetModelIndex(), 0);
 		}
 	}
 }
@@ -2687,17 +2493,7 @@ CStreaming::LoadScene(const CVector &pos)
 			RemoveModel(si - ms_aInfoForModel);
 	}
 	CRenderer::m_loadingPriority = false;
-#ifdef GTA_ZONECULL
-	CCullZones::ForceCullZoneCoors(pos);
-#endif
 	DeleteAllRwObjects();
-#ifndef MIAMI
-	AddModelsToRequestList(pos);
-	CRadar::StreamRadarSections(pos);
-	RemoveUnusedBigBuildings(level);
-	RequestBigBuildings(level);
-	LoadAllRequestedModels(false);
-#else
 	if(level == LEVEL_NONE)
 		level = CGame::currLevel;
 	CGame::currLevel = level;
@@ -2711,13 +2507,12 @@ CStreaming::LoadScene(const CVector &pos)
 	AddModelsToRequestList(pos);
 	CRadar::StreamRadarSections(pos);
 
-	// TODO: stream zone vehicles
+	// TODO(MIAMI): stream zone vehicles
 	LoadAllRequestedModels(false);
-	// TODO: InstanceLoadedModels
+	// TODO(MIAMI): InstanceLoadedModels
 
 	for(int i = 0; i < NUMSTREAMINFO; i++)
 		ms_aInfoForModel[i].m_flags &= ~STREAMFLAGS_20;
-#endif
 	debug("End load scene\n");
 }
 

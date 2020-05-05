@@ -23,7 +23,7 @@ else
 	Librw = os.getenv("LIBRW") or "librw"
 end
 
-workspace "re3"
+workspace "reVC"
 	language "C++"
 	configurations { "Debug", "Release" }
 	location "build"
@@ -103,7 +103,7 @@ project "librw"
 	filter  {}
 end
 
-project "re3"
+project "reVC"
 	kind "WindowedApp"
 	targetname "re3"
 	targetdir "bin/%{cfg.platform}/%{cfg.buildcfg}"
@@ -111,6 +111,7 @@ project "re3"
 	characterset ("MBCS")
 	linkoptions "/SAFESEH:NO"
 	
+	defines { "MIAMI" }
 
 	files { "src/*.*" }
 	files { "src/animation/*.*" }
@@ -161,7 +162,7 @@ project "re3"
 
 	libdirs { "milessdk/lib" }
 	
-	setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
+	setpaths("$(GTA_VC_RE_DIR)/", "$(TargetFileName)", "")
 	
 	filter "platforms:*RW33*"
 		staticruntime "on"

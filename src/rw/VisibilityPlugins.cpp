@@ -615,16 +615,6 @@ CVisibilityPlugins::DefaultVisibilityCB(RpClump *clump)
 }
 
 bool
-CVisibilityPlugins::MloVisibilityCB(RpClump *clump)
-{
-	RwFrame *frame = RpClumpGetFrame(clump);
-	CMloModelInfo *modelInfo = (CMloModelInfo*)GetFrameHierarchyId(frame);
-	if (sq(modelInfo->field_34) < GetDistanceSquaredFromCamera(frame))
-		return false;
-	return CVisibilityPlugins::FrustumSphereCB(clump);
-}
-
-bool
 CVisibilityPlugins::FrustumSphereCB(RpClump *clump)
 {
 	RwSphere sphere;
