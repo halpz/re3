@@ -375,7 +375,8 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 
 	// Simple ModelInfo
 
-// TODO(MIAMI): area
+	if(!IsAreaVisible(ent->m_area))
+		return VIS_INVISIBLE;
 
 	dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
 
@@ -469,7 +470,8 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 	CTimeModelInfo *ti;
 	int32 other;
 
-// TODO(MIAMI): area
+	if(!IsAreaVisible(ent->m_area))
+		return VIS_INVISIBLE;
 
 	bool request = true;
 	if(mi->GetModelType() == MITYPE_TIME){

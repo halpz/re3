@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ModelInfo.h"
+
 #define MODELINDICES \
 	X("fire_hydrant",	MI_FIRE_HYDRANT, 0x5F5A00) \
 	X("bagelstnd02",	MI_BAGELSTAND2, 0x5F59FC) \
@@ -370,14 +372,8 @@ void TestModelIndices(void);
 inline bool
 IsGlass(int16 id)
 {
-	return id == MI_GLASS1 ||
-		id == MI_GLASS2 ||
-		id == MI_GLASS3 ||
-		id == MI_GLASS4 ||
-		id == MI_GLASS5 ||
-		id == MI_GLASS6 ||
-		id == MI_GLASS7 ||
-		id == MI_GLASS8;
+	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
+	return mi->IsSimple() && (mi->m_isCodeGlass || mi->m_isArtistGlass);
 }
 
 inline bool

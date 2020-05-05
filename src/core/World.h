@@ -4,19 +4,19 @@
 #include "Lists.h"
 #include "PlayerInfo.h"
 
-/* Sectors span from -2000 to 2000 in x and y.
- * With 100x100 sectors, each is 40x40 units. */
+/* Sectors span from -2400 to 1600 in x and -2000 to 2000 y.
+ * With 80x80 sectors, each is 50x50 units. */
 
-#define SECTOR_SIZE_X (40.0f)
-#define SECTOR_SIZE_Y (40.0f)
+#define SECTOR_SIZE_X (50.0f)
+#define SECTOR_SIZE_Y (50.0f)
 
-#define NUMSECTORS_X (100)
-#define NUMSECTORS_Y (100)
+#define NUMSECTORS_X (80)
+#define NUMSECTORS_Y (80)
 
 #define WORLD_SIZE_X (NUMSECTORS_X * SECTOR_SIZE_X)
 #define WORLD_SIZE_Y (NUMSECTORS_Y * SECTOR_SIZE_Y)
 
-#define WORLD_MIN_X (-2000.0f)
+#define WORLD_MIN_X (-2400.0f)
 #define WORLD_MIN_Y (-2000.0f)
 
 #define WORLD_MAX_X (WORLD_MIN_X + WORLD_SIZE_X)

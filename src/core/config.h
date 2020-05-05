@@ -23,7 +23,7 @@ enum Config {
 
 	MAXVEHICLESLOADED = 50, // 70 on mobile
 
-	NUMOBJECTINFO = 168, // object.dat
+	NUMOBJECTINFO = 400, // TODO(MIAMI): fantasy	// object.dat
 
 	// Pool sizes
 	NUMPTRNODES = 50000,

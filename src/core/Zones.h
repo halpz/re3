@@ -71,10 +71,6 @@ public:
 	                       float minx, float miny, float minz,
 	                       float maxx, float maxy, float maxz,
 	                       eLevelName level);
-	static void CreateMapZone(char *name, eZoneType type,
-	                          float minx, float miny, float minz,
-	                          float maxx, float maxy, float maxz,
-	                          eLevelName level);
 	static CZone *GetZone(uint16 i) { return &ZoneArray[i]; }
 	static void PostZoneCreation(void);
 	static void InsertZoneIntoZoneHierarchy(CZone *zone);
@@ -103,7 +99,6 @@ public:
 	static void SetPedDensity(uint16 zoneid, uint8 day, uint16 peddensity);
 	static void SetPedGroup(uint16 zoneid, uint8 day, uint16 pedgroup);
 	static int16 FindAudioZone(CVector *pos);
-	static eLevelName FindZoneForPoint(const CVector &pos);
 	static CZone *GetPointerForZoneIndex(int32 i) { return i == -1 ? nil : &ZoneArray[i]; }
 	static int32 GetIndexForZonePointer(CZone *zone) { return zone == nil ? -1 : zone - ZoneArray; }
 	static void AddZoneToAudioZoneArray(CZone *zone);

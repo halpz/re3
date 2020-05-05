@@ -31,6 +31,10 @@
 
 // Transition areas between zones
 const RegenerationPoint aSafeZones[] = {
+// TODO(MIAMI): this is totally bogus
+	{ LEVEL_BEACH, LEVEL_MAINLAND, 400.0f, 814.0f, -954.0f, -903.0f, 30.0f, 100.0f,
+		CVector(790.0f, -917.0f, 39.0f), CVector(775.0f, -921.0f, 39.0f), CVector(424.0f, -942.0f, 38.0f), CVector(439.0f, -938.0f, 38.0f) },
+#ifndef MIAMI
 	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 400.0f, 814.0f, -954.0f, -903.0f, 30.0f, 100.0f,
 		CVector(790.0f, -917.0f, 39.0f), CVector(775.0f, -921.0f, 39.0f), CVector(424.0f, -942.0f, 38.0f), CVector(439.0f, -938.0f, 38.0f) },
 	{ LEVEL_INDUSTRIAL, LEVEL_COMMERCIAL, 555.0f, 711.0f, 118.0f, 186.0f, -30.0f, -10.0f,
@@ -47,6 +51,7 @@ const RegenerationPoint aSafeZones[] = {
 		CVector(-321.0f, -1043.0f, -13.2f), CVector(-328.0f, -1045.0f, -13.2f), CVector(-398.0f, -1044.0f, -13.5f), CVector(-390.0f, -1040.5f, -13.5f) },
 	{ LEVEL_COMMERCIAL, LEVEL_SUBURBAN, -425.0f, -280.0f, -471.0f, -447.0f, -20.0f, -5.0f,
 		CVector(-292.0f, -457.0f, -11.6f), CVector(-310.0f, -461.0f, -11.6f), CVector(-413.0f, -461.0f, -11.5f), CVector(-399.0f, -457.0f, -11.3f) }
+#endif
 };
 
 PedGroup CPopulation::ms_pPedGroups[NUMPEDGROUPS];
@@ -109,7 +114,6 @@ CPopulation::Initialise()
 	ms_nTotalCivPeds = 0;
 
 	LoadPedGroups();
-	DealWithZoneChange(LEVEL_COMMERCIAL, LEVEL_INDUSTRIAL, true);
 
 	debug("CPopulation ready\n");
 }
@@ -335,49 +339,10 @@ CPopulation::ChooseGangOccupation(int gangId)
 		return firstGangModel;
 }
 
+//--MIAMI: done
 void
 CPopulation::DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool forceIndustrialZone)
 {
-	bZoneChangeHasHappened = true;
-
-	CVector findSafeZoneAround;
-	int safeZone;
-
-	if (forceIndustrialZone) {
-		// Commercial to industrial transition area on Callahan Bridge
-		findSafeZoneAround.x = 690.0f;
-		findSafeZoneAround.y = -920.0f;
-		findSafeZoneAround.z = 42.0f;
-	} else {
-		findSafeZoneAround = FindPlayerCoors();
-	}
-	eLevelName level;
-	FindCollisionZoneForCoors(&findSafeZoneAround, &safeZone, &level);
-
-	// We aren't in a "safe zone", find closest one
-	if (safeZone < 0)
-		FindClosestZoneForCoors(&findSafeZoneAround, &safeZone, oldLevel, newLevel);
-
-	// No, there should be one!
-	if (safeZone < 0) {
-		if (newLevel == LEVEL_INDUSTRIAL) {
-			safeZone = 0;
-		} else if (newLevel == LEVEL_SUBURBAN) {
-			safeZone = 4;
-		}
-	}
-
-	if (aSafeZones[safeZone].srcLevel == newLevel) {
-		CPopulation::RegenerationPoint_a = aSafeZones[safeZone].srcPosA;
-		CPopulation::RegenerationPoint_b = aSafeZones[safeZone].srcPosB;
-		CPopulation::RegenerationForward = aSafeZones[safeZone].destPosA - aSafeZones[safeZone].srcPosA;
-		RegenerationForward.Normalise();
-	} else if (aSafeZones[safeZone].destLevel == newLevel) {
-		CPopulation::RegenerationPoint_a = aSafeZones[safeZone].destPosA;
-		CPopulation::RegenerationPoint_b = aSafeZones[safeZone].destPosB;
-		CPopulation::RegenerationForward = aSafeZones[safeZone].srcPosA - aSafeZones[safeZone].destPosA;
-		RegenerationForward.Normalise();
-	}
 }
 
 void

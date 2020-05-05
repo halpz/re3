@@ -506,7 +506,7 @@ void CRunningScript::Init()
 #ifdef USE_DEBUG_SCRIPT_LOADER
 int open_script()
 {
-	static int scriptToLoad = 0;
+	static int scriptToLoad = 1;
 
 	if (GetAsyncKeyState('G') & 0x8000)
 		scriptToLoad = 0;
@@ -517,7 +517,7 @@ int open_script()
 
 	switch (scriptToLoad) {
 	case 0: return CFileMgr::OpenFile("main.scm", "rb");
-	case 1: return CFileMgr::OpenFile("main_freeroam.scm", "rb");
+	case 1: return CFileMgr::OpenFile("freeroam_miami.scm", "rb");
 	case 2: return CFileMgr::OpenFile("main_d.scm", "rb");
 	}
 	return CFileMgr::OpenFile("main.scm", "rb");
@@ -7162,7 +7162,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		if (total == 0)
 			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(LEVEL_NONE), pos, range, true, &total, 16, apEntities);
 		if (total == 0)
-			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(CTheZones::FindZoneForPoint(pos)), pos, range, true, &total, 16, apEntities);
+			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(CTheZones::GetLevelFromPosition(pos)), pos, range, true, &total, 16, apEntities);
 		CEntity* pClosestEntity = nil;
 		float min_dist = 2.0f * range;
 		for (int i = 0; i < total; i++) {
@@ -7914,7 +7914,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		if (total == 0)
 			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(LEVEL_NONE), pos, radius, true, &total, 16, apEntities);
 		if (total == 0)
-			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(CTheZones::FindZoneForPoint(pos)), pos, radius, true, &total, 16, apEntities);
+			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(CTheZones::GetLevelFromPosition(pos)), pos, radius, true, &total, 16, apEntities);
 		CEntity* pClosestEntity = nil;
 		float min_dist = 2.0f * radius;
 		for (int i = 0; i < total; i++) {

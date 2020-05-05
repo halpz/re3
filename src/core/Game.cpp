@@ -265,7 +265,7 @@ bool CGame::Initialise(const char* datFile)
 	strcpy(aDatFile, datFile);
 	CPools::Initialise();
 	CIniFile::LoadIniFile();
-	currLevel = LEVEL_INDUSTRIAL;
+	currLevel = LEVEL_BEACH;
 	LoadingScreen("Loading the Game", "Loading generic textures", GetRandomSplashScreen());
 	gameTxdSlot = CTxdStore::AddTxdSlot("generic");
 	CTxdStore::Create(gameTxdSlot);
@@ -588,7 +588,7 @@ void CGame::InitialiseWhenRestarting(void)
 			CTimer::Initialise();
 			FrontEndMenuManager.m_bWantToLoad = false;
 			ReInitGameObjectVariables();
-			currLevel = LEVEL_INDUSTRIAL;
+			currLevel = LEVEL_NONE;
 			CCollision::SortOutCollisionAfterLoad();
 		}
 	}

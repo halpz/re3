@@ -139,7 +139,11 @@ CTheZones::CreateZone(char *name, eZoneType type,
 	for(p = name; *p; p++) if(islower(*p)) *p = toupper(*p);
 
 	// add zone
-	zone = &ZoneArray[TotalNumberOfZones++];
+// TODO(MIAMI): do this properly, also navig zones
+	if(type == ZONE_MAPZONE)
+		zone = &MapZoneArray[TotalNumberOfMapZones++];
+	else
+		zone = &ZoneArray[TotalNumberOfZones++];
 	strncpy(zone->name, name, 7);
 	zone->name[7] = '\0';
 	zone->type = type;
@@ -154,36 +158,6 @@ CTheZones::CreateZone(char *name, eZoneType type,
 		zone->zoneinfoDay = TotalNumberOfZoneInfos++;
 		zone->zoneinfoNight = TotalNumberOfZoneInfos++;
 	}
-}
-
-void
-CTheZones::CreateMapZone(char *name, eZoneType type,
-	                 float minx, float miny, float minz,
-	                 float maxx, float maxy, float maxz,
-	                 eLevelName level)
-{
-	CZone *zone;
-	char *p;
-
-	if(minx > maxx) SWAPF(minx, maxx);
-	if(miny > maxy) SWAPF(miny, maxy);
-	if(minz > maxz) SWAPF(minz, maxz);
-
-	// make upper case
-	for(p = name; *p; p++) if(islower(*p)) *p = toupper(*p);
-
-	// add zone
-	zone = &MapZoneArray[TotalNumberOfMapZones++];
-	strncpy(zone->name, name, 7);
-	zone->name[7] = '\0';
-	zone->type = type;
-	zone->minx = minx;
-	zone->miny = miny;
-	zone->minz = minz;
-	zone->maxx = maxx;
-	zone->maxy = maxy;
-	zone->maxz = maxz;
-	zone->level = level;
 }
 
 void
@@ -563,18 +537,6 @@ CTheZones::FindAudioZone(CVector *pos)
 		if(PointLiesWithinZone(*pos, GetZone(AudioZoneArray[i])))
 			return i;
 	return -1;
-}
-
-eLevelName
-CTheZones::FindZoneForPoint(const CVector &pos)
-{
-	if(PointLiesWithinZone(pos, GetZone(FindZoneByLabelAndReturnIndex("IND_ZON"))))
-		return LEVEL_INDUSTRIAL;
-	if(PointLiesWithinZone(pos, GetZone(FindZoneByLabelAndReturnIndex("COM_ZON"))))
-		return LEVEL_COMMERCIAL;
-	if(PointLiesWithinZone(pos, GetZone(FindZoneByLabelAndReturnIndex("SUB_ZON"))))
-		return LEVEL_SUBURBAN;
-	return LEVEL_NONE;
 }
 
 void

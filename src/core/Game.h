@@ -3,9 +3,30 @@
 enum eLevelName {
 	LEVEL_IGNORE = -1, // beware, this is only used in CPhysical's m_nZoneLevel
 	LEVEL_NONE = 0,
-	LEVEL_INDUSTRIAL,
-	LEVEL_COMMERCIAL,
-	LEVEL_SUBURBAN
+	LEVEL_BEACH,
+	LEVEL_MAINLAND
+};
+
+enum eAreaName {
+	AREA_MAIN_MAP,
+	AREA_HOTEL,
+	AREA_MANSION,
+	AREA_BANK,
+	AREA_MALL,
+	AREA_STRIP_CLUB,
+	AREA_LAWYERS,
+	AREA_COFFEE_SHOP,
+	AREA_CONCERT_HALL,
+	AREA_STUDIO,
+	AREA_RIFLE_RANGE,
+	AREA_BIKER_BAR,
+	AREA_POLICE_STATION,
+	AREA_EVERYWHERE,
+	AREA_DIRT,
+	AREA_BLOOD,
+	AREA_OVALRING,
+	AREA_MALIBU_CLUB,
+	AREA_PRINT_WORKS
 };
 
 class CGame
@@ -43,3 +64,5 @@ public:
 	static void DrasticTidyUpMemory(bool);
 	static void ProcessTidyUpMemory(void);
 };
+
+inline bool IsAreaVisible(int area) { return area == CGame::currArea || area == AREA_EVERYWHERE; }

@@ -14,8 +14,8 @@
 #define HUGE_SECTOR_SIZE       128
 #define EXTRAHUGE_SECTOR_SIZE  256
 
-#define WATER_START_X -2048.0f
-#define WATER_END_X    2048.0f
+#define WATER_START_X (-2048.0f - 400.0f)
+#define WATER_END_X    (2048.0f - 400.0f)
 
 #define WATER_START_Y -2048.0f
 #define WATER_END_Y    2048.0f

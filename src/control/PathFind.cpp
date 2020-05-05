@@ -302,9 +302,9 @@ CPathFind::RegisterMapObject(CTreadable *mapObject)
 	m_mapObjects[m_numMapObjects++] = mapObject;
 }
 
-//--MIAMI: TODO: implement all the arguments once we can load the VC map
+//--MIAMI: done
 void
-CPathFind::StoreNodeInfoPed(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, int16 width, bool crossing)
+CPathFind::StoreNodeInfoPed(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, float width, bool crossing, uint8 spawnRate)
 {
 	int i;
 
@@ -314,22 +314,26 @@ CPathFind::StoreNodeInfoPed(int16 id, int16 node, int8 type, int8 next, int16 x,
 	InfoForTilePeds[i].x = x/16.0f;
 	InfoForTilePeds[i].y = y/16.0f;
 	InfoForTilePeds[i].z = z/16.0f;
+	InfoForTilePeds[i].width = 8.0f*Min(width, 15.0f);
 	InfoForTilePeds[i].numLeftLanes = 0;
 	InfoForTilePeds[i].numRightLanes = 0;
 	InfoForTilePeds[i].crossing = crossing;
-	InfoForTilePeds[i].flag02 = false;
+	InfoForTilePeds[i].speedLimit = 0;
 	InfoForTilePeds[i].roadBlock = false;
 	InfoForTilePeds[i].disabled = false;
 	InfoForTilePeds[i].waterPath = false;
+	InfoForTilePeds[i].flag02 = false;
 	InfoForTilePeds[i].betweenLevels = false;
+	InfoForTilePeds[i].spawnRate = Min(spawnRate, 15);
 
 	if(node == 11)
 		InfoForTilePeds[id*12].SwapConnectionsToBeRightWayRound();
 }
 
-//--MIAMI: TODO: implement all the arguments once we can load the VC map
+//--MIAMI: done
 void
-CPathFind::StoreNodeInfoCar(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, int16 width, int8 numLeft, int8 numRight)
+CPathFind::StoreNodeInfoCar(int16 id, int16 node, int8 type, int8 next, int16 x, int16 y, int16 z, float width, int8 numLeft, int8 numRight,
+	bool disabled, bool betweenLevels, uint8 speedLimit, bool roadBlock, bool waterPath, uint8 spawnRate)
 {
 	int i;
 
@@ -339,17 +343,88 @@ CPathFind::StoreNodeInfoCar(int16 id, int16 node, int8 type, int8 next, int16 x,
 	InfoForTileCars[i].x = x/16.0f;
 	InfoForTileCars[i].y = y/16.0f;
 	InfoForTileCars[i].z = z/16.0f;
+	InfoForTilePeds[i].width = 8.0f*Min(width, 15.0f);
 	InfoForTileCars[i].numLeftLanes = numLeft;
 	InfoForTileCars[i].numRightLanes = numRight;
-	InfoForTileCars[i].crossing = false;
-	InfoForTileCars[i].flag02 = false;
-	InfoForTileCars[i].roadBlock = false;
-	InfoForTileCars[i].disabled = false;
-	InfoForTileCars[i].waterPath = false;
-	InfoForTileCars[i].betweenLevels = false;
+	InfoForTilePeds[i].crossing = false;
+	InfoForTilePeds[i].speedLimit = 0;
+	InfoForTilePeds[i].roadBlock = false;
+	InfoForTilePeds[i].disabled = false;
+	InfoForTilePeds[i].waterPath = false;
+	InfoForTilePeds[i].flag02 = false;
+	InfoForTilePeds[i].betweenLevels = false;
+	InfoForTilePeds[i].spawnRate = Min(spawnRate, 15);
 
 	if(node == 11)
 		InfoForTileCars[id*12].SwapConnectionsToBeRightWayRound();
+}
+
+//--MIAMI: done
+void
+CPathFind::StoreDetachedNodeInfoPed(int32 node, int8 type, int32 next, float x, float y, float z, float width, bool crossing,
+	bool disabled, bool betweenLevels, uint8 spawnRate)
+{
+	int i;
+
+	if(NumDetachedPedNodeGroups >= NUMDETACHED_PEDS)
+		return;
+
+	i = NumDetachedPedNodeGroups*12 + node;
+	DetachedInfoForTilePeds[i].type = type;
+	DetachedInfoForTilePeds[i].next = next;
+	DetachedInfoForTilePeds[i].x = x/16.0f;
+	DetachedInfoForTilePeds[i].y = y/16.0f;
+	DetachedInfoForTilePeds[i].z = z/16.0f;
+	DetachedInfoForTilePeds[i].width = 8.0f*Min(width, 31.0f);
+	DetachedInfoForTilePeds[i].numLeftLanes = 0;
+	DetachedInfoForTilePeds[i].numRightLanes = 0;
+	DetachedInfoForTilePeds[i].crossing = crossing;
+	DetachedInfoForTilePeds[i].speedLimit = 0;
+	DetachedInfoForTilePeds[i].roadBlock = false;
+	DetachedInfoForTilePeds[i].disabled = disabled;
+	DetachedInfoForTilePeds[i].waterPath = false;
+	DetachedInfoForTilePeds[i].flag02 = false;
+	DetachedInfoForTilePeds[i].betweenLevels = betweenLevels;
+	DetachedInfoForTilePeds[i].spawnRate = Min(spawnRate, 15);
+
+	if(node == 11){
+		DetachedInfoForTilePeds[NumDetachedPedNodeGroups*12].SwapConnectionsToBeRightWayRound();
+		NumDetachedPedNodeGroups++;
+	}
+}
+
+//--MIAMI: done
+void
+CPathFind::StoreDetachedNodeInfoCar(int32 node, int8 type, int32 next, float x, float y, float z, float width, int8 numLeft, int8 numRight,
+	bool disabled, bool betweenLevels, uint8 speedLimit, bool roadBlock, bool waterPath, uint8 spawnRate, bool unk)
+{
+	int i;
+
+	if(NumDetachedCarNodeGroups >= NUMDETACHED_CARS)
+		return;
+
+	i = NumDetachedCarNodeGroups*12 + node;
+	DetachedInfoForTileCars[i].type = type;
+	DetachedInfoForTileCars[i].next = next;
+	DetachedInfoForTileCars[i].x = x/16.0f;
+	DetachedInfoForTileCars[i].y = y/16.0f;
+	DetachedInfoForTileCars[i].z = z/16.0f;
+	DetachedInfoForTileCars[i].width = 8.0f*Min(width, 15.0f);
+	DetachedInfoForTileCars[i].numLeftLanes = numLeft;
+	DetachedInfoForTileCars[i].numRightLanes = numRight;
+	DetachedInfoForTileCars[i].crossing = false;
+	DetachedInfoForTileCars[i].speedLimit = speedLimit;
+	DetachedInfoForTileCars[i].roadBlock = roadBlock;
+	DetachedInfoForTileCars[i].disabled = disabled;
+	DetachedInfoForTileCars[i].waterPath = waterPath;
+	DetachedInfoForTileCars[i].flag02 = unk;
+	DetachedInfoForTileCars[i].betweenLevels = betweenLevels;
+	DetachedInfoForTileCars[i].spawnRate = Min(spawnRate, 15);
+
+	if(node == 11){
+		DetachedInfoForTileCars[NumDetachedCarNodeGroups*12].SwapConnectionsToBeRightWayRound();
+		NumDetachedCarNodeGroups++;
+	}
 }
 
 //--MIAMI: done

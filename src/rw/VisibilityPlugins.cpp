@@ -708,11 +708,6 @@ CVisibilityPlugins::SetAtomicModelInfo(RpAtomic *atomic,
 {
 	AtomicExt *ext = ATOMICEXT(atomic);
 	ext->modelInfo = modelInfo;
-	switch (modelInfo->GetModelType())
-	case MITYPE_SIMPLE:
-	case MITYPE_TIME:
-		if(modelInfo->m_normalCull)
-			SetAtomicRenderCallback(atomic, RenderObjNormalAtomic);
 }
 
 CSimpleModelInfo*

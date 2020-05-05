@@ -99,9 +99,6 @@ CFileLoader::LoadLevel(const char *filename)
 			}
 			LoadingScreenLoadingFile(line + 4);
 			LoadScene(line + 4);
-		}else if(strncmp(line, "MAPZONE", 7) == 0){
-			LoadingScreenLoadingFile(line + 8);
-			LoadMapZones(line + 8);
 		}else if(strncmp(line, "SPLASH", 6) == 0){
 			LoadSplash(GetRandomSplashScreen());
 		}else if(strncmp(line, "CDIMAGE", 7) == 0){
@@ -171,6 +168,7 @@ CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
 
 	debug("Loading collision file %s\n", filename);
 	fd = CFileMgr::OpenFile(filename, "rb");
+	assert(fd > 0);
 
 	while(CFileMgr::Read(fd, (char*)&header, sizeof(header))){
 		assert(strncmp(header.ident, "COLL", 4) == 0);
@@ -554,7 +552,9 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	enum {
 		NONE,
 		OBJS,
+		MLO,	// unused but enum still has it
 		TOBJ,
+		WEAP,
 		HIER,
 		CARS,
 		PEDS,
@@ -565,16 +565,17 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	int fd;
 	int section;
 	int pathIndex;
-	char pathTypeStr[20];
 	int id, pathType;
-	int mlo;
+	int minID, maxID;
 
 	section = NONE;
+	minID = INT32_MAX;
+	maxID = -1;
 	pathIndex = -1;
-	mlo = 0;
 	debug("Loading object types from %s...\n", filename);
 
 	fd = CFileMgr::OpenFile(filename, "rb");
+	assert(fd > 0);
 	for(line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)){
 		if(*line == '\0' || *line == '#')
 			continue;
@@ -582,6 +583,7 @@ CFileLoader::LoadObjectTypes(const char *filename)
 		if(section == NONE){
 			if(strncmp(line, "objs", 4) == 0) section = OBJS;
 			else if(strncmp(line, "tobj", 4) == 0) section = TOBJ;
+			else if(strncmp(line, "weap", 4) == 0) section = WEAP;
 			else if(strncmp(line, "hier", 4) == 0) section = HIER;
 			else if(strncmp(line, "cars", 4) == 0) section = CARS;
 			else if(strncmp(line, "peds", 4) == 0) section = PEDS;
@@ -591,10 +593,17 @@ CFileLoader::LoadObjectTypes(const char *filename)
 			section = NONE;
 		}else switch(section){
 		case OBJS:
-			LoadObject(line);
+			id = LoadObject(line);
+			if(id > maxID) maxID = id;
+			if(id < minID) minID = id;
 			break;
 		case TOBJ:
-			LoadTimeObject(line);
+			id = LoadTimeObject(line);
+			if(id > maxID) maxID = id;
+			if(id < minID) minID = id;
+			break;
+		case WEAP:
+			assert(0 && "can't do this yet");
 			break;
 		case HIER:
 			LoadClumpObject(line);
@@ -607,17 +616,15 @@ CFileLoader::LoadObjectTypes(const char *filename)
 			break;
 		case PATH:
 			if(pathIndex == -1){
-				id = LoadPathHeader(line, pathTypeStr);
-				if(strncmp(pathTypeStr, "ped", 4) == 0)
-					pathType = 1;
-				else if(strncmp(pathTypeStr, "car", 4) == 0)
-					pathType = 0;
+				id = LoadPathHeader(line, pathType);
 				pathIndex = 0;
 			}else{
-				if(pathType == 1)
+				if(pathType == 0)
 					LoadPedPathNode(line, id, pathIndex);
-				else if(pathType == 0)
-					LoadCarPathNode(line, id, pathIndex);
+				else if (pathType == 1)
+					LoadCarPathNode(line, id, pathIndex, false);
+				else if (pathType == 2)
+					LoadCarPathNode(line, id, pathIndex, true);
 				pathIndex++;
 				if(pathIndex == 12)
 					pathIndex = -1;
@@ -630,7 +637,7 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	}
 	CFileMgr::CloseFile(fd);
 
-	for(id = 0; id < MODELINFOSIZE; id++){
+	for(id = minID; id <= maxID; id++){
 		CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
 		if(mi && mi->IsSimple())
 			mi->SetupBigBuilding();
@@ -640,16 +647,20 @@ CFileLoader::LoadObjectTypes(const char *filename)
 void
 SetModelInfoFlags(CSimpleModelInfo *mi, uint32 flags)
 {
-	mi->m_normalCull =	!!(flags & 1);
+	mi->m_wetRoadReflection =	!!(flags & 1);
 	mi->m_noFade =	!!(flags & 2);
 	mi->m_drawLast =	!!(flags & (4|8));
 	mi->m_additive =	!!(flags & 8);
 	mi->m_isSubway =	!!(flags & 0x10);
 	mi->m_ignoreLight =	!!(flags & 0x20);
 	mi->m_noZwrite =	!!(flags & 0x40);
+	mi->m_noShadows =	!!(flags & 0x80);
+	mi->m_ignoreDrawDist =	!!(flags & 0x100);
+	mi->m_isCodeGlass =	!!(flags & 0x200);
+	mi->m_isArtistGlass =	!!(flags & 0x400);
 }
 
-void
+int
 CFileLoader::LoadObject(const char *line)
 {
 	int id, numObjs;
@@ -660,7 +671,7 @@ CFileLoader::LoadObject(const char *line)
 	CSimpleModelInfo *mi;
 
 	if(sscanf(line, "%d %s %s %d", &id, model, txd, &numObjs) != 4)
-		return;
+		return 0;	// game returns return value
 
 	switch(numObjs){
 	case 1:
@@ -692,9 +703,11 @@ CFileLoader::LoadObject(const char *line)
 	mi->m_firstDamaged = damaged;
 	mi->SetTexDictionary(txd);
 	MatchModelString(model, id);
+
+	return id;
 }
 
-void
+int
 CFileLoader::LoadTimeObject(const char *line)
 {
 	int id, numObjs;
@@ -706,7 +719,7 @@ CFileLoader::LoadTimeObject(const char *line)
 	CTimeModelInfo *mi, *other;
 
 	if(sscanf(line, "%d %s %s %d", &id, model, txd, &numObjs) != 4)
-		return;
+		return 0;	// game returns return value
 
 	switch(numObjs){
 	case 1:
@@ -742,6 +755,8 @@ CFileLoader::LoadTimeObject(const char *line)
 	if(other)
 		other->SetOtherTimeModel(id);
 	MatchModelString(model, id);
+
+	return id;
 }
 
 void
@@ -872,33 +887,51 @@ CFileLoader::LoadPedObject(const char *line)
 }
 
 int
-CFileLoader::LoadPathHeader(const char *line, char *type)
+CFileLoader::LoadPathHeader(const char *line, int &type)
 {
 	int id;
 	char modelname[32];
 
-	sscanf(line, "%s %d %s", type, &id, modelname);
+	sscanf(line, "%d %d %s", &type, &id, modelname);
 	return id;
 }
 
 void
 CFileLoader::LoadPedPathNode(const char *line, int id, int node)
 {
-	int type, next, cross;
-	float x, y, z, width;
+	int type, next, cross, numLeft, numRight, speed, flags;
+	float x, y, z, width, spawnRate;
 
-	sscanf(line, "%d %d %d %f %f %f %f", &type, &next, &cross, &x, &y, &z, &width);
-	ThePaths.StoreNodeInfoPed(id, node, type, next, x, y, z, 0, !!cross);
+	if(sscanf(line, "%d %d %d %f %f %f %f %d %d %d %d %f",
+			&type, &next, &cross, &x, &y, &z, &width, &numLeft, &numRight,
+			&speed, &flags, &spawnRate) != 12)
+		spawnRate = 1.0f;
+
+	if(id == -1)
+		ThePaths.StoreDetachedNodeInfoPed(node, type, next, x, y, z,
+			width, !!cross, !!(flags&1), !!(flags&4), spawnRate*15.0f);
+	else
+		ThePaths.StoreNodeInfoPed(id, node, type, next, x, y, z,
+			width, !!cross, spawnRate*15.0f);
 }
 
 void
-CFileLoader::LoadCarPathNode(const char *line, int id, int node)
+CFileLoader::LoadCarPathNode(const char *line, int id, int node, bool waterPath)
 {
-	int type, next, cross, numLeft, numRight;
-	float x, y, z, width;
+	int type, next, cross, numLeft, numRight, speed, flags;
+	float x, y, z, width, spawnRate;
 
-	sscanf(line, "%d %d %d %f %f %f %f %d %d", &type, &next, &cross, &x, &y, &z, &width, &numLeft, &numRight);
-	ThePaths.StoreNodeInfoCar(id, node, type, next, x, y, z, 0, numLeft, numRight);
+	if(sscanf(line, "%d %d %d %f %f %f %f %d %d %d %d %f",
+			&type, &next, &cross, &x, &y, &z, &width, &numLeft, &numRight,
+			&speed, &flags, &spawnRate) != 12)
+		spawnRate = 1.0f;
+
+	if(id == -1)
+		ThePaths.StoreDetachedNodeInfoCar(node, type, next, x, y, z, width, numLeft, numRight,
+			!!(flags&1), !!(flags&4), speed, !!(flags&2), waterPath, spawnRate, false);
+	else
+		ThePaths.StoreNodeInfoCar(id, node, type, next, x, y, z, 0, numLeft, numRight,
+			!!(flags&1), !!(flags&4), speed, !!(flags&2), waterPath, spawnRate);
 }
 
 
@@ -991,20 +1024,21 @@ CFileLoader::LoadScene(const char *filename)
 		INST,
 		ZONE,
 		CULL,
+		OCCL,
 		PICK,
 		PATH,
 	};
 	char *line;
 	int fd;
 	int section;
-	int pathIndex;
-	char pathTypeStr[20];
+	int pathType, pathIndex;
 
 	section = NONE;
 	pathIndex = -1;
 	debug("Creating objects from %s...\n", filename);
 
 	fd = CFileMgr::OpenFile(filename, "rb");
+	assert(fd > 0);
 	for(line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)){
 		if(*line == '\0' || *line == '#')
 			continue;
@@ -1015,6 +1049,7 @@ CFileLoader::LoadScene(const char *filename)
 			else if(strncmp(line, "cull", 4) == 0) section = CULL;
 			else if(strncmp(line, "pick", 4) == 0) section = PICK;
 			else if(strncmp(line, "path", 4) == 0) section = PATH;
+			else if(strncmp(line, "occl", 4) == 0) section = OCCL;
 		}else if(strncmp(line, "end", 3) == 0){
 			section = NONE;
 		}else switch(section){
@@ -1027,18 +1062,24 @@ CFileLoader::LoadScene(const char *filename)
 		case CULL:
 			LoadCullZone(line);
 			break;
+		case OCCL:
+			// TODO(MIAMI): occlusion
+			break;
 		case PICK:
 			// unused
 			LoadPickup(line);
 			break;
 		case PATH:
-			// unfinished in the game
 			if(pathIndex == -1){
-				LoadPathHeader(line, pathTypeStr);
-				// type not set
+				LoadPathHeader(line, pathType);
 				pathIndex = 0;
 			}else{
-				// nodes not loaded
+				if(pathType == 0)
+					LoadPedPathNode(line, -1, pathIndex);
+				else if (pathType == 1)
+					LoadCarPathNode(line, -1, pathIndex, false);
+				else if (pathType == 2)
+					LoadCarPathNode(line, -1, pathIndex, true);
 				pathIndex++;
 				if(pathIndex == 12)
 					pathIndex = -1;
@@ -1122,9 +1163,7 @@ CFileLoader::LoadObjectInstance(const char *line)
 		entity->SetModelIndexNoCreate(id);
 		entity->GetMatrix() = CMatrix(xform);
 		CWorld::Add(entity);
-		// TODO(MIAMI)
-//--MIAMI: TODO
-		if(IsGlass(entity->GetModelIndex()))
+		if(IsGlass(entity->GetModelIndex()) && !mi->m_isArtistGlass)
 			entity->bIsVisible = false;
 		entity->m_level = CTheZones::GetLevelFromPosition(entity->GetPosition());
 		entity->m_area = area;
@@ -1172,54 +1211,7 @@ CFileLoader::LoadPickup(const char *line)
 	sscanf(line, "%d %f %f %f", &id, &x, &y, &z);
 }
 
-void
-CFileLoader::LoadMapZones(const char *filename)
-{
-	enum {
-		NONE,
-		INST,
-		ZONE,
-		CULL,
-		PICK,
-		PATH,
-	};
-	char *line;
-	int fd;
-	int section;
-
-	section = NONE;
-	debug("Creating zones from %s...\n", filename);
-
-	fd = CFileMgr::OpenFile(filename, "rb");
-	for(line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)){
-		if(*line == '\0' || *line == '#')
-			continue;
-
-		if(section == NONE){
-			if(strncmp(line, "zone", 4) == 0) section = ZONE;
-		}else if(strncmp(line, "end", 3) == 0){
-			section = NONE;
-		}else switch(section){
-		case ZONE: {
-			char name[24];
-			int type, level;
-			float minx, miny, minz;
-			float maxx, maxy, maxz;
-			if(sscanf(line, "%s %d %f %f %f %f %f %f %d",
-			          &name, &type,
-			          &minx, &miny, &minz,
-			          &maxx, &maxy, &maxz,
-			          &level) == 9)
-				CTheZones::CreateMapZone(name, (eZoneType)type, minx, miny, minz, maxx, maxy, maxz, (eLevelName)level);
-			}
-			break;
-		}
-	}
-	CFileMgr::CloseFile(fd);
-
-	debug("Finished loading IPL\n");
-}
-
+//--MIAMI: unused
 void
 CFileLoader::ReloadPaths(const char *filename)
 {
@@ -1230,10 +1222,10 @@ CFileLoader::ReloadPaths(const char *filename)
 	char *line;
 	int section = NONE;
 	int id, pathType, pathIndex = -1;
-	char pathTypeStr[20];
 	debug("Reloading paths from %s...\n", filename);
 
 	int fd = CFileMgr::OpenFile(filename, "r");
+	assert(fd > 0);
 	for (line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)) {
 		if (*line == '\0' || *line == '#')
 			continue;
@@ -1249,17 +1241,15 @@ CFileLoader::ReloadPaths(const char *filename)
 			switch (section) {
 				case PATH:
 					if (pathIndex == -1) {
-						id = LoadPathHeader(line, pathTypeStr);
-						if (strncmp(pathTypeStr, "ped", 4) == 0)
-							pathType = 1;
-						else if (strncmp(pathTypeStr, "car", 4) == 0)
-							pathType = 0;
+						id = LoadPathHeader(line, pathType);
 						pathIndex = 0;
 					} else {
-						if (pathType == 1)
+						if(pathType == 0)
 							LoadPedPathNode(line, id, pathIndex);
-						else if (pathType == 0)
-							LoadCarPathNode(line, id, pathIndex);
+						else if (pathType == 1)
+							LoadCarPathNode(line, id, pathIndex, false);
+						else if (pathType == 2)
+							LoadCarPathNode(line, id, pathIndex, true);
 						pathIndex++;
 						if (pathIndex == 12)
 							pathIndex = -1;
@@ -1289,6 +1279,7 @@ CFileLoader::ReloadObjectTypes(const char *filename)
 
 	CFileMgr::ChangeDir("\\DATA\\MAPS\\");
 	int fd = CFileMgr::OpenFile(filename, "r");
+	assert(fd > 0);
 	CFileMgr::ChangeDir("\\");
 	for (line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)) {
 		if (*line == '\0' || *line == '#')
@@ -1364,6 +1355,7 @@ CFileLoader::ReLoadScene(const char *filename)
 	char *line;
 	CFileMgr::ChangeDir("\\DATA\\");
 	int fd = CFileMgr::OpenFile(filename, "r");
+	assert(fd > 0);
 	CFileMgr::ChangeDir("\\");
 
 	for (line = CFileLoader::LoadLine(fd); line; line = CFileLoader::LoadLine(fd)) {

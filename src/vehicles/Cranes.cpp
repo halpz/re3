@@ -57,7 +57,8 @@ void CCranes::InitCranes(void)
 			}
 		}
 	}
-	for (CPtrNode* pNode = CWorld::GetBigBuildingList(LEVEL_INDUSTRIAL).first; pNode; pNode = pNode->next) {
+	// TODO(MIAMI): LEVEL_MAINLAND just so it compiles
+	for (CPtrNode* pNode = CWorld::GetBigBuildingList(LEVEL_MAINLAND).first; pNode; pNode = pNode->next) {
 		CEntity* pEntity = (CEntity*)pNode->item;
 		if (MODELID_CRANE_1 == pEntity->GetModelIndex() ||
 			MODELID_CRANE_2 == pEntity->GetModelIndex() ||

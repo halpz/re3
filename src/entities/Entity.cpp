@@ -321,6 +321,7 @@ CEntity::UpdateRwFrame(void)
 	}
 }
 
+//--MIAMI: done
 void
 CEntity::SetupBigBuilding(void)
 {
@@ -333,15 +334,10 @@ CEntity::SetupBigBuilding(void)
 	m_level = CTheZones::GetLevelFromPosition(GetPosition());
 	if(mi->m_lodDistances[0] <= 2000.0f)
 		bStreamBIGBuilding = true;
-	// TODO(MIAMI): the stuff down there isn't right yet
-	if(m_level == LEVEL_NONE){
-		if(mi->GetTxdSlot() != CTxdStore::FindTxdSlot("generic")){
-			mi->SetTexDictionary("generic");
-			printf("%d:%s txd has been set to generic\n", m_modelIndex, mi->GetName());
-		}
-	}
-	if(mi->m_lodDistances[0] > 2000.0f)
+	if(mi->m_lodDistances[0] > 2500.0f || mi->m_ignoreDrawDist)
 		m_level = LEVEL_NONE;
+	else if(m_level == LEVEL_NONE)
+		printf("%s isn't in a level\n", mi->GetName());
 }
 
 CRect

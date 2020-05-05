@@ -14,15 +14,22 @@ public:
 	uint16 m_firstDamaged   : 2; // 0: no damage model
 	                         // 1: 1 and 2 are damage models
 	                         // 2: 2 is damage model
-	uint16  m_normalCull    : 1;
+	uint16  m_wetRoadReflection    : 1;
 	uint16  m_isDamaged     : 1;
+
 	uint16  m_isBigBuilding : 1;
 	uint16  m_noFade        : 1;
 	uint16  m_drawLast      : 1;
 	uint16  m_additive      : 1;
+
 	uint16  m_isSubway      : 1;
 	uint16  m_ignoreLight   : 1;
 	uint16  m_noZwrite      : 1;
+	uint16  m_noShadows     : 1;
+
+	uint16  m_ignoreDrawDist   : 1;
+	uint16  m_isCodeGlass      : 1;
+	uint16  m_isArtistGlass    : 1;
 
 	CSimpleModelInfo(void) : CBaseModelInfo(MITYPE_SIMPLE) {}
 	CSimpleModelInfo(ModelInfoType id) : CBaseModelInfo(id) {}
