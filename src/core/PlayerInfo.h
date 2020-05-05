@@ -62,7 +62,7 @@ public:
 	void DeletePlayerSkin();
 	void AwardMoneyForExplosion(CVehicle *vehicle);	
 	void SetPlayerSkin(char* skin);
-	CVector& GetPos();
+	const CVector &GetPos();
 	void Process(void);
 	void KillPlayer(void);
 	void ArrestPlayer(void);

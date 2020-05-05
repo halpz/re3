@@ -108,7 +108,7 @@ CAnimViewer::Initialise(void) {
 	CTimeCycle::Initialise();
 	CCarCtrl::Init();
 	CPlayerPed *player = new CPlayerPed();
-	player->GetPosition() = CVector(0.0f, 0.0f, 0.0f);
+	player->SetPosition(0.0f, 0.0f, 0.0f);
 	CWorld::Players[0].m_pPed = player;
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
@@ -292,14 +292,14 @@ CAnimViewer::Update(void)
 				}
 				newEntity->bIsStuck = true;
 			}
-			newEntity->GetPosition() = CVector(0.0f, 0.0f, 0.0f);
+			newEntity->SetPosition(0.0f, 0.0f, 0.0f);
 			CWorld::Add(newEntity);
 			TheCamera.TakeControl(pTarget, CCam::MODE_MODELVIEW, JUMP_CUT, CAMCONTROL_SCRIPT);
 		}
 		if (pTarget->IsVehicle() || pTarget->IsPed() || pTarget->IsObject()) {
 			((CPhysical*)pTarget)->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 		}
-		pTarget->GetPosition().z = 0.0f;
+		pTarget->GetMatrix().GetPosition().z = 0.0f;
 
 		if (modelInfo->m_type != MITYPE_PED) {
 

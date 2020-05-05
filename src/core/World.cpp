@@ -1417,7 +1417,7 @@ FindPlayerSpeed(void)
 		return ped->m_vecMoveSpeed;
 }
 
-CVector &
+const CVector &
 FindPlayerCentreOfWorld(int32 player)
 {
 #ifdef FIX_BUGS
@@ -1429,7 +1429,7 @@ FindPlayerCentreOfWorld(int32 player)
 	return CWorld::Players[player].m_pPed->GetPosition();
 }
 
-CVector &
+const CVector &
 FindPlayerCentreOfWorld_NoSniperShift(void)
 {
 #ifdef FIX_BUGS
@@ -1824,12 +1824,7 @@ void
 CWorld::RepositionOneObject(CEntity *pEntity)
 {
 	int16 modelId = pEntity->m_modelIndex;
-	if(modelId == MI_SINGLESTREETLIGHTS1 || modelId == MI_SINGLESTREETLIGHTS2 ||
-	   modelId == MI_SINGLESTREETLIGHTS3 || modelId == MI_DOUBLESTREETLIGHTS || modelId == MI_TREE1 ||
-	   modelId == MI_TREE2 || modelId == MI_TREE3 || modelId == MI_TREE4 || modelId == MI_TREE5 ||
-	   modelId == MI_TREE6 || modelId == MI_TREE7 || modelId == MI_TREE8 || modelId == MI_TREE9 ||
-	   modelId == MI_TREE10 || modelId == MI_TREE11 || modelId == MI_TREE12 || modelId == MI_TREE13 ||
-	   modelId == MI_TREE14 || modelId == MI_TRAFFICLIGHTS || modelId == MI_PARKINGMETER ||
+	if (IsTrafficLight(modelId) || IsTreeModel(modelId) || modelId == MI_PARKINGMETER ||
 	   modelId == MI_PHONEBOOTH1 || modelId == MI_WASTEBIN || modelId == MI_BIN || modelId == MI_POSTBOX1 ||
 	   modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE || modelId == MI_DUMP1 ||
 	   modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||
@@ -1837,7 +1832,7 @@ CWorld::RepositionOneObject(CEntity *pEntity)
 	   modelId == MI_FISHSTALL02 || modelId == MI_FISHSTALL03 || modelId == MI_FISHSTALL04 ||
 	   modelId == MI_BAGELSTAND2 || modelId == MI_FIRE_HYDRANT || modelId == MI_BOLLARDLIGHT ||
 	   modelId == MI_PARKTABLE) {
-		CVector &position = pEntity->GetPosition();
+		CVector &position = pEntity->GetMatrix().GetPosition();
 		float fBoundingBoxMinZ = pEntity->GetColModel()->boundingBox.min.z;
 		position.z = CWorld::FindGroundZFor3DCoord(position.x, position.y,
 		                                           position.z + OBJECT_REPOSITION_OFFSET_Z, nil) -
@@ -1855,7 +1850,7 @@ CWorld::RepositionOneObject(CEntity *pEntity)
 			if(!bFound || fWaterLevel > fGroundZ) {
 				CColModel *pColModel = pEntity->GetColModel();
 				float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
-				pEntity->GetPosition().z = 0.2f * fHeight + fWaterLevel - 0.5f * fHeight;
+				pEntity->GetMatrix().GetPosition().z = 0.2f * fHeight + fWaterLevel - 0.5f * fHeight;
 			}
 		}
 	}

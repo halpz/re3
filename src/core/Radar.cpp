@@ -523,7 +523,7 @@ void CRadar::DrawBlips()
 									DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
 								} else {
 #ifdef TRIANGULAR_BLIPS
-									CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+								    const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
 									const CVector &blipPos = blipEntity->GetPosition();
 									uint8 mode = BLIP_MODE_TRIANGULAR_UP;
 									if (blipPos.z - pos.z <= 2.0f) {
@@ -562,8 +562,8 @@ void CRadar::DrawBlips()
 								DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
 							} else {
 #ifdef TRIANGULAR_BLIPS
-								CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
-								CVector &blipPos = ms_RadarTrace[blipId].m_vecPos;
+							    const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+							    const CVector &blipPos = ms_RadarTrace[blipId].m_vecPos;
 								uint8 mode = BLIP_MODE_TRIANGULAR_UP;
 								if (blipPos.z - pos.z <= 2.0f) {
 									if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;
@@ -629,7 +629,7 @@ void CRadar::DrawBlips()
 								else
 #ifdef TRIANGULAR_BLIPS
 								{
-									CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+								    const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
 									const CVector &blipPos = blipEntity->GetPosition();
 									uint8 mode = BLIP_MODE_TRIANGULAR_UP;
 									if (blipPos.z - pos.z <= 2.0f) {
@@ -678,8 +678,8 @@ void CRadar::DrawBlips()
 							else
 #ifdef TRIANGULAR_BLIPS
 							{
-								CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
-								CVector &blipPos = ms_RadarTrace[blipId].m_vecPos;
+							    const CVector &pos = FindPlayerCentreOfWorld_NoSniperShift();
+							    const CVector &blipPos = ms_RadarTrace[blipId].m_vecPos;
 								uint8 mode = BLIP_MODE_TRIANGULAR_UP;
 								if (blipPos.z - pos.z <= 2.0f) {
 									if (blipPos.z - pos.z < -4.0f) mode = BLIP_MODE_TRIANGULAR_DOWN;

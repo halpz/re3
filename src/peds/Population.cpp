@@ -495,7 +495,7 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors)
 		case PEDTYPE_CIVFEMALE:
 		{
 			CCivilianPed *ped = new CCivilianPed(pedType, miOrCopType);
-			ped->GetPosition() = coors;
+			ped->SetPosition(coors);
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
 			if (ms_bGivePedsWeapons) {
@@ -509,7 +509,7 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors)
 		case PEDTYPE_COP:
 		{
 			CCopPed *ped = new CCopPed((eCopType)miOrCopType);
-			ped->GetPosition() = coors;
+			ped->SetPosition(coors);
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
 			return ped;
@@ -525,7 +525,7 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors)
 		case PEDTYPE_GANG9:
 		{
 			CCivilianPed *ped = new CCivilianPed(pedType, miOrCopType);
-			ped->GetPosition() = coors;
+			ped->SetPosition(coors);
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
 
@@ -540,7 +540,7 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors)
 		case PEDTYPE_EMERGENCY:
 		{
 			CEmergencyPed *ped = new CEmergencyPed(PEDTYPE_EMERGENCY);
-			ped->GetPosition() = coors;
+		    ped->SetPosition(coors);
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
 			return ped;
@@ -548,7 +548,7 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors)
 		case PEDTYPE_FIREMAN:
 		{
 			CEmergencyPed *ped = new CEmergencyPed(PEDTYPE_FIREMAN);
-			ped->GetPosition() = coors;
+		    ped->SetPosition(coors);
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
 			return ped;
@@ -557,7 +557,7 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors)
 		case PEDTYPE_PROSTITUTE:
 		{
 			CCivilianPed *ped = new CCivilianPed(pedType, miOrCopType);
-			ped->GetPosition() = coors;
+			ped->SetPosition(coors);
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
 			return ped;
@@ -880,22 +880,22 @@ CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 						if (veh->bIsLocked || !veh->CanBeDeleted()) {
 							switch (movedVehicleCount & 3) {
 								case 0:
-									veh->GetPosition() = RegenerationPoint_a;
+									veh->SetPosition(RegenerationPoint_a);
 									break;
 								case 1:
-									veh->GetPosition() = RegenerationPoint_b;
+									veh->SetPosition(RegenerationPoint_b);
 									break;
 								case 2:
-									veh->GetPosition() = CVector(RegenerationPoint_a.x, RegenerationPoint_b.y, RegenerationPoint_a.z);
+									veh->SetPosition(RegenerationPoint_a.x, RegenerationPoint_b.y, RegenerationPoint_a.z);
 									break;
 								case 3:
-									veh->GetPosition() = CVector(RegenerationPoint_b.x, RegenerationPoint_a.y, RegenerationPoint_a.z);
+									veh->SetPosition(RegenerationPoint_b.x, RegenerationPoint_a.y, RegenerationPoint_a.z);
 									break;
 								default:
 									break;
 							}
-							veh->GetPosition().z += (movedVehicleCount / 4) * 7.0f;
-							veh->GetForward() = RegenerationForward;
+							veh->GetMatrix().GetPosition().z += (movedVehicleCount / 4) * 7.0f;
+							veh->GetMatrix().GetForward() = RegenerationForward;
 							((CAutomobile*)veh)->PlaceOnRoadProperly();
 							CCarCtrl::JoinCarWithRoadSystem(veh);
 							CTheScripts::ClearSpaceForMissionEntity(veh->GetPosition(), veh);
@@ -924,14 +924,14 @@ CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 						CWorld::Remove(ped);
 						delete ped;
 					} else if (ped->m_nPedType != PEDTYPE_PLAYER1 && ped->m_nPedType != PEDTYPE_PLAYER2) {
-						ped->GetPosition() = RegenerationPoint_a;
+						ped->SetPosition(RegenerationPoint_a);
 
 						bool foundGround;
 						float groundZ = CWorld::FindGroundZFor3DCoord(ped->GetPosition().x, ped->GetPosition().y,
 							ped->GetPosition().z + 2.0f, &foundGround);
 
 						if (foundGround) {
-							ped->GetPosition().z = 1.0f + groundZ;
+							ped->GetMatrix().GetPosition().z = 1.0f + groundZ;
 							//ped->GetPosition().z += 0.0f;
 							CTheScripts::ClearSpaceForMissionEntity(ped->GetPosition(), ped);
 						}

@@ -38,7 +38,7 @@ CPlayerInfo::SetPlayerSkin(char *skin)
 	LoadPlayerSkin();
 }
 
-CVector&
+const CVector &
 CPlayerInfo::GetPos()
 {
 #ifdef FIX_BUGS
@@ -430,7 +430,7 @@ CPlayerInfo::Process(void)
 							CPed::PedSetOutCarCB(0, m_pPed);
 							CAnimManager::BlendAnimation(m_pPed->GetClump(), m_pPed->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
 							CAnimManager::BlendAnimation(m_pPed->GetClump(), ASSOCGRP_STD, ANIM_FALL_LAND, 100.0f);
-							m_pPed->GetPosition() = sth;
+							m_pPed->SetPosition(sth);
 							m_pPed->SetMoveState(PEDMOVE_STILL);
 							m_pPed->m_vecMoveSpeed = veh->m_vecMoveSpeed;
 						}
@@ -456,7 +456,7 @@ CPlayerInfo::Process(void)
 #ifdef VC_PED_PORTS
 						if (carBelow->GetStatus() != STATUS_WRECKED && carBelow->GetUp().z > 0.3f)
 #else
-						if (carBelow->m_status != STATUS_WRECKED)
+						if (carBelow->GetStatus() != STATUS_WRECKED)
 #endif
 							m_pPed->SetSeekBoatPosition(carBelow);
 					}

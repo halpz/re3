@@ -470,19 +470,19 @@ CCamera::Process(void)
 			}
 		}
 
-	GetRight() = CrossProduct(CamUp, CamFront);	// actually Left
-	GetForward() = CamFront;
-	GetUp() = CamUp;
-	GetPosition() = CamSource;
+	GetMatrix().GetRight() = CrossProduct(CamUp, CamFront);	// actually Left
+	GetMatrix().GetForward() = CamFront;
+	GetMatrix().GetUp() = CamUp;
+	GetMatrix().GetPosition() = CamSource;
 
 	// Process Shake
 	float shakeStrength = m_fCamShakeForce - 0.28f*(CTimer::GetTimeInMilliseconds()-m_uiCamShakeStart)/1000.0f;
 	shakeStrength = clamp(shakeStrength, 0.0f, 2.0f);
 	int shakeRand = CGeneral::GetRandomNumber();
 	float shakeOffset = shakeStrength*0.1f;
-	GetPosition().x += shakeOffset*((shakeRand&0xF)-7);
-	GetPosition().y += shakeOffset*(((shakeRand&0xF0)>>4)-7);
-	GetPosition().z += shakeOffset*(((shakeRand&0xF00)>>8)-7);
+	GetMatrix().GetPosition().x += shakeOffset * ((shakeRand & 0xF) - 7);
+	GetMatrix().GetPosition().y += shakeOffset * (((shakeRand & 0xF0) >> 4) - 7);
+	GetMatrix().GetPosition().z += shakeOffset * (((shakeRand & 0xF00) >> 8) - 7);
 
 	if(shakeOffset > 0.0f && m_BlurType != MBLUR_SNIPER)
 		SetMotionBlurAlpha(Min((int)(shakeStrength*255.0f) + 25, 150));
@@ -499,27 +499,27 @@ CCamera::Process(void)
 		CVector Front = Cams[2].Front;
 		CVector Up = Cams[2].Up;
 
-		GetRight() = CrossProduct(Up, Front);
-		GetForward() = Front;
-		GetUp() = Up;
-		GetPosition() = Source;
+		GetMatrix().GetRight() = CrossProduct(Up, Front);
+		GetMatrix().GetForward() = Front;
+		GetMatrix().GetUp() = Up;
+		GetMatrix().GetPosition() = Source;
 
 		CDraw::SetFOV(Cams[2].FOV);
 		m_vecGameCamPos = Cams[ActiveCam].Source;
 
-		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = GetPosition().toRwV3d();
-		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = GetForward().toRwV3d();
-		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = GetUp().toRwV3d();
-		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = GetRight().toRwV3d();
+		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = GetPosition();
+		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = GetForward();
+		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = GetUp();
+		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = GetRight();
 		RwMatrixUpdate(RwFrameGetMatrix(frame));
 		RwFrameUpdateObjects(frame);
 	}else{
 		RwFrame *frame = RwCameraGetFrame(m_pRwCamera);
 		m_vecGameCamPos = GetPosition();
-		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = GetPosition().toRwV3d();
-		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = GetForward().toRwV3d();
-		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = GetUp().toRwV3d();
-		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = GetRight().toRwV3d();
+		*RwMatrixGetPos(RwFrameGetMatrix(frame)) = GetPosition();
+		*RwMatrixGetAt(RwFrameGetMatrix(frame)) = GetForward();
+		*RwMatrixGetUp(RwFrameGetMatrix(frame)) = GetUp();
+		*RwMatrixGetRight(RwFrameGetMatrix(frame)) = GetRight();
 		RwMatrixUpdate(RwFrameGetMatrix(frame));
 		RwFrameUpdateObjects(frame);
 	}

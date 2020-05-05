@@ -317,7 +317,7 @@ CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical *other, CPhysical *phy
 
 	CWorld::Remove(phys);
 	phys->GetMatrix() = other->GetMatrix();
-	phys->GetPosition() = pos;
+	phys->SetPosition(pos);
 	phys->m_vecMoveSpeed = other->m_vecMoveSpeed;
 	phys->GetMatrix().UpdateRW();
 	phys->UpdateRwFrame();
@@ -412,7 +412,7 @@ CPhysical::GetSpeed(const CVector &r)
 void
 CPhysical::ApplyMoveSpeed(void)
 {
-	GetPosition() += m_vecMoveSpeed * CTimer::GetTimeStep();
+	GetMatrix().Translate(m_vecMoveSpeed * CTimer::GetTimeStep());
 }
 
 void
@@ -1167,7 +1167,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 				float f = Min(Abs(dir.z), 0.9f);
 				dir.z = 0.0f;
 				dir.Normalise();
-				B->GetPosition() += dir * colpoints[mostColliding].depth / (1.0f - f);
+				B->GetMatrix().Translate(dir * colpoints[mostColliding].depth / (1.0f - f));
 				// BUG? how can that ever happen? A is a Ped
 				if(B->IsVehicle())
 					B->ProcessEntityCollision(A, colpoints);
@@ -1184,7 +1184,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 
 	if(!doShift)
 		return false;
-	GetPosition() += shift;
+	GetMatrix().Translate(shift);
 	if(boat)
 		ProcessEntityCollision(boat, colpoints);
 	return true;
