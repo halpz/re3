@@ -77,6 +77,7 @@ CEntity::CEntity(void)
 	m_scanCode = 0;
 	m_modelIndex = -1;
 	m_rwObject = nil;
+	m_area = AREA_MAIN_MAP;
 	m_randomSeed = CGeneral::GetRandomNumber();
 	m_pFirstReference = nil;
 }
