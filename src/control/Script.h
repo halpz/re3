@@ -466,9 +466,11 @@ private:
 	int8 ProcessCommands800To899(int32);
 	int8 ProcessCommands900To999(int32);
 	int8 ProcessCommands1000To1099(int32);
-#ifndef GTA_PS2
 	int8 ProcessCommands1100To1199(int32);
-#endif
+	int8 ProcessCommands1200To1299(int32);
+	int8 ProcessCommands1300To1399(int32);
+	int8 ProcessCommands1400To1499(int32);
+
 	void LocatePlayerCommand(int32, uint32*);
 	void LocatePlayerCharCommand(int32, uint32*);
 	void LocatePlayerCarCommand(int32, uint32*);
