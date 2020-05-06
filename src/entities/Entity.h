@@ -97,6 +97,7 @@ public:
 	eEntityStatus GetStatus() const { return (eEntityStatus)m_status; }
 	void SetStatus(eEntityStatus status) { m_status = status; }
 	CColModel *GetColModel(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(); }
+	bool IsStatic(void) { return bIsStatic; }
 #ifdef COMPATIBLE_SAVES
 	void SaveEntityFlags(uint8*& buf);
 	void LoadEntityFlags(uint8*& buf);

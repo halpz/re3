@@ -334,7 +334,7 @@ CPhysical::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 		AddCollisionRecord(ent);
 		if(!ent->IsBuilding())	// Can't this catch dummies too?
 			((CPhysical*)ent)->AddCollisionRecord(this);
-		if(ent->IsBuilding() || ent->bIsStatic)
+		if(ent->IsBuilding() || ent->IsStatic())
 			this->bHasHitWall = true;
 	}
 	return numSpheres;
@@ -549,7 +549,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 		timestepB = B->bIsHeavy ? 2.0f : 1.0f;
 
 	float speedA, speedB;
-	if(B->bIsStatic){
+	if(B->IsStatic()){
 		if(A->bPedPhysics){
 			speedA = DotProduct(A->m_vecMoveSpeed, colpoint.normal);
 			if(speedA < 0.0f){
@@ -632,7 +632,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 			}
 		}
 	
-		if(B->bIsStatic)
+		if(B->IsStatic())
 			return false;
 		if(!B->bInfiniteMass)
 			B->AddToMovingList();
@@ -1089,7 +1089,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 				CObject *Aobj = (CObject*)A;
 				if(Aobj->ObjectCreatedBy != TEMP_OBJECT &&
 				   !Aobj->bHasBeenDamaged &&
-				   Aobj->bIsStatic){
+				   Aobj->IsStatic()){
 					if(Aobj->m_pCollidingEntity == B)
 						Aobj->m_pCollidingEntity = nil;
 				}else if(Aobj->m_pCollidingEntity != B){
@@ -1106,7 +1106,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 				CObject *Bobj = (CObject*)B;
 				if(Bobj->ObjectCreatedBy != TEMP_OBJECT &&
 				   !Bobj->bHasBeenDamaged &&
-				   Bobj->bIsStatic){
+				   Bobj->IsStatic()){
 					if(Bobj->m_pCollidingEntity == A)
 						Bobj->m_pCollidingEntity = nil;
 				}else if(Bobj->m_pCollidingEntity != A){
@@ -1424,7 +1424,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 					skipCollision = true;
 				else if(Aobj->ObjectCreatedBy == TEMP_OBJECT ||
 				   Aobj->bHasBeenDamaged ||
-				   !Aobj->bIsStatic){
+				   !Aobj->IsStatic()){
 					if(Aobj->m_pCollidingEntity == B)
 						skipCollision = true;
 					else{
@@ -1443,7 +1443,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 					skipCollision = true;
 				else if(Bobj->ObjectCreatedBy == TEMP_OBJECT ||
 				   Bobj->bHasBeenDamaged ||
-				   !Bobj->bIsStatic){
+				   !Bobj->IsStatic()){
 					if(Bobj->m_pCollidingEntity == A)
 						skipCollision = true;
 					else{
