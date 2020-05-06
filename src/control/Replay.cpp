@@ -987,7 +987,7 @@ void CReplay::FinishPlayback(void)
 	Mode = MODE_RECORD;
 	if (bDoLoadSceneWhenDone){
 		CVector v_ls(LoadSceneX, LoadSceneY, LoadSceneZ);
-		CGame::currLevel = CTheZones::GetLevelFromPosition(v_ls);
+		CGame::currLevel = CTheZones::GetLevelFromPosition(&v_ls);
 		CCollision::SortOutCollisionAfterLoad();
 		CStreaming::LoadScene(v_ls);
 	}
@@ -1101,7 +1101,7 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 		LoadSceneZ = TheCamera.GetPosition().z;
 		CVector ff_coord;
 		FindFirstFocusCoordinate(&ff_coord);
-		CGame::currLevel = CTheZones::GetLevelFromPosition(ff_coord);
+		CGame::currLevel = CTheZones::GetLevelFromPosition(&ff_coord);
 		CCollision::SortOutCollisionAfterLoad();
 		CStreaming::LoadScene(ff_coord);
 	}

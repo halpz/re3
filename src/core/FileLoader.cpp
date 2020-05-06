@@ -1139,7 +1139,7 @@ CFileLoader::LoadObjectInstance(const char *line)
 			entity = new CBuilding;
 		entity->SetModelIndexNoCreate(id);
 		entity->GetMatrix() = CMatrix(xform);
-		entity->m_level = CTheZones::GetLevelFromPosition(entity->GetPosition());
+		entity->m_level = CTheZones::GetLevelFromPosition(&entity->GetPosition());
 		entity->m_area = area;
 		if(mi->IsSimple()){
 			if(mi->m_isBigBuilding)
@@ -1165,7 +1165,7 @@ CFileLoader::LoadObjectInstance(const char *line)
 		CWorld::Add(entity);
 		if(IsGlass(entity->GetModelIndex()) && !mi->m_isArtistGlass)
 			entity->bIsVisible = false;
-		entity->m_level = CTheZones::GetLevelFromPosition(entity->GetPosition());
+		entity->m_level = CTheZones::GetLevelFromPosition(&entity->GetPosition());
 		entity->m_area = area;
 	}
 

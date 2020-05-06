@@ -2405,7 +2405,7 @@ CStreaming::LoadScene(const CVector &pos)
 	CStreamingInfo *si, *prev;
 	eLevelName level;
 
-	level = CTheZones::GetLevelFromPosition(pos);
+	level = CTheZones::GetLevelFromPosition(&pos);
 	debug("Start load scene\n");
 	for(si = ms_endRequestedList.m_prev; si != &ms_startRequestedList; si = prev){
 		prev = si->m_prev;

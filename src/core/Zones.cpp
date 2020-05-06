@@ -9,17 +9,19 @@
 #include "World.h"
 
 eLevelName CTheZones::m_CurrLevel;
-CZone *CTheZones::m_pPlayersZone;
 int16 CTheZones::FindIndex;
 
 uint16 CTheZones::NumberOfAudioZones;
 int16 CTheZones::AudioZoneArray[NUMAUDIOZONES];
 uint16 CTheZones::TotalNumberOfMapZones;
-uint16 CTheZones::TotalNumberOfZones;
-CZone CTheZones::ZoneArray[NUMZONES];
+uint16 CTheZones::TotalNumberOfInfoZones;
+uint16 CTheZones::TotalNumberOfNavigationZones;
+CZone CTheZones::InfoZoneArray[NUMINFOZONES];
 CZone CTheZones::MapZoneArray[NUMMAPZONES];
+CZone CTheZones::NavigationZoneArray[NUMNAVIGZONES];
 uint16 CTheZones::TotalNumberOfZoneInfos;
-CZoneInfo CTheZones::ZoneInfoArray[2*NUMZONES];
+CZoneInfo CTheZones::ZoneInfoArray[2*NUMINFOZONES];
+
 
 #define SWAPF(a, b) { float t; t = a; a = b; b = t; }
 
@@ -44,12 +46,14 @@ CheckZoneInfo(CZoneInfo *info)
 	assert(info->gangThreshold[7] <= info->gangThreshold[8]);
 }
 
+//--MIAMI: done
 wchar*
 CZone::GetTranslatedName(void)
 {
 	return TheText.Get(name);
 }
 
+//--MIAMI: check out zoneinfo
 void
 CTheZones::Init(void)
 {
@@ -58,9 +62,15 @@ CTheZones::Init(void)
 		AudioZoneArray[i] = -1;
 	NumberOfAudioZones = 0;
 
+	for(i = 0; i < NUMNAVIGZONES; i++)
+		memset(&NavigationZoneArray[i], 0, sizeof(CZone));
+
+	for(i = 0; i < NUMINFOZONES; i++)
+		memset(&InfoZoneArray[i], 0, sizeof(CZone));
+
 	CZoneInfo *zonei;
 	int x = 1000/6;
-	for(i = 0; i < 2*NUMZONES; i++){
+	for(i = 0; i < 2*NUMINFOZONES; i++){
 		zonei = &ZoneInfoArray[i];
 		zonei->carDensity = 10;
 		zonei->carThreshold[0] = x;
@@ -81,54 +91,64 @@ CTheZones::Init(void)
 		zonei->gangThreshold[8] = zonei->gangThreshold[7];
 		CheckZoneInfo(zonei);
 	}
-	TotalNumberOfZoneInfos = 1;	// why 1?
 
-	for(i = 0; i < NUMZONES; i++)
-		memset(&ZoneArray[i], 0, sizeof(CZone));
-	strcpy(ZoneArray[0].name, "CITYZON");
-	ZoneArray[0].minx = -4000.0f;
-	ZoneArray[0].miny = -4000.0f;
-	ZoneArray[0].minz = -500.0f;
-	ZoneArray[0].maxx =  4000.0f;
-	ZoneArray[0].maxy =  4000.0f;
-	ZoneArray[0].maxz =  500.0f;
-	ZoneArray[0].level = LEVEL_NONE;
-	TotalNumberOfZones = 1;
+	TotalNumberOfZoneInfos = 1;	// why 1?
+	TotalNumberOfNavigationZones = 1;
+	TotalNumberOfInfoZones = 1;
+
+	strcpy(InfoZoneArray[0].name, "CITYINF");
+	InfoZoneArray[0].minx = -2400.0f;
+	InfoZoneArray[0].miny = -2000.0f;
+	InfoZoneArray[0].minz = -500.0f;
+	InfoZoneArray[0].maxx =  1600.0f;
+	InfoZoneArray[0].maxy =  2000.0f;
+	InfoZoneArray[0].maxz =  500.0f;
+	InfoZoneArray[0].level = LEVEL_NONE;
+	InfoZoneArray[0].type = ZONE_INFO;
+
+	strcpy(NavigationZoneArray[0].name, "VICE_C");
+	NavigationZoneArray[0].minx = -2400.0f;
+	NavigationZoneArray[0].miny = -2000.0f;
+	NavigationZoneArray[0].minz = -500.0f;
+	NavigationZoneArray[0].maxx =  1600.0f;
+	NavigationZoneArray[0].maxy =  2000.0f;
+	NavigationZoneArray[0].maxz =  500.0f;
+	NavigationZoneArray[0].level = LEVEL_NONE;
+	NavigationZoneArray[0].type = ZONE_NAVIG;
 
 	m_CurrLevel = LEVEL_NONE;
-	m_pPlayersZone = &ZoneArray[0];
 
 	for(i = 0; i < NUMMAPZONES; i++){
 		memset(&MapZoneArray[i], 0, sizeof(CZone));
 		MapZoneArray[i].type = ZONE_MAPZONE;
 	}
 	strcpy(MapZoneArray[0].name, "THEMAP");
-	MapZoneArray[0].minx = -4000.0f;
-	MapZoneArray[0].miny = -4000.0f;
+	MapZoneArray[0].minx = -2400.0f;
+	MapZoneArray[0].miny = -2000.0f;
 	MapZoneArray[0].minz = -500.0f;
-	MapZoneArray[0].maxx =  4000.0f;
-	MapZoneArray[0].maxy =  4000.0f;
+	MapZoneArray[0].maxx =  1600.0f;
+	MapZoneArray[0].maxy =  2000.0f;
 	MapZoneArray[0].maxz =  500.0f;
 	MapZoneArray[0].level = LEVEL_NONE;
-	TotalNumberOfMapZones = 1;
 }
 
+//--MIAMI: done
 void
 CTheZones::Update(void)
 {
 	CVector pos;
 	pos = FindPlayerCoors();
-	m_pPlayersZone = FindSmallestZonePosition(&pos);
-	m_CurrLevel = GetLevelFromPosition(pos);
+	m_CurrLevel = GetLevelFromPosition(&pos);
 }
 
+//--MIAMI: done
 void
 CTheZones::CreateZone(char *name, eZoneType type,
 	              float minx, float miny, float minz,
 	              float maxx, float maxy, float maxz,
 	              eLevelName level)
 {
-	CZone *zone;
+	char tmpname[24];
 	char *p;
 
 	if(minx > maxx) SWAPF(minx, maxx);
@@ -138,46 +158,94 @@ CTheZones::CreateZone(char *name, eZoneType type,
 	// make upper case
 	for(p = name; *p; p++) if(islower(*p)) *p = toupper(*p);
 
+	strncpy(tmpname, name, 7);
+	tmpname[7] = '\0';
+
 	// add zone
-// TODO(MIAMI): do this properly, also navig zones
-	if(type == ZONE_MAPZONE)
-		zone = &MapZoneArray[TotalNumberOfMapZones++];
-	else
-		zone = &ZoneArray[TotalNumberOfZones++];
-	strncpy(zone->name, name, 7);
-	zone->name[7] = '\0';
-	zone->type = type;
-	zone->minx = minx;
-	zone->miny = miny;
-	zone->minz = minz;
-	zone->maxx = maxx;
-	zone->maxy = maxy;
-	zone->maxz = maxz;
-	zone->level = level;
-	if(type == ZONE_AUDIO || type == ZONE_TYPE1 || type == ZONE_TYPE2){
-		zone->zoneinfoDay = TotalNumberOfZoneInfos++;
-		zone->zoneinfoNight = TotalNumberOfZoneInfos++;
+	switch(type){
+	case ZONE_DEFAULT:
+	case ZONE_NAVIG:
+		assert(TotalNumberOfNavigationZones < NUMNAVIGZONES);
+		strcpy(NavigationZoneArray[TotalNumberOfNavigationZones].name, tmpname);
+		NavigationZoneArray[TotalNumberOfNavigationZones].type = type;
+		NavigationZoneArray[TotalNumberOfNavigationZones].minx = minx;
+		NavigationZoneArray[TotalNumberOfNavigationZones].miny = miny;
+		NavigationZoneArray[TotalNumberOfNavigationZones].minz = minz;
+		NavigationZoneArray[TotalNumberOfNavigationZones].maxx = maxx;
+		NavigationZoneArray[TotalNumberOfNavigationZones].maxy = maxy;
+		NavigationZoneArray[TotalNumberOfNavigationZones].maxz = maxz;
+		NavigationZoneArray[TotalNumberOfNavigationZones].level = level;
+		TotalNumberOfNavigationZones++;
+		break;
+	case ZONE_INFO:
+		assert(TotalNumberOfInfoZones < NUMINFOZONES);
+		strcpy(InfoZoneArray[TotalNumberOfInfoZones].name, tmpname);
+		InfoZoneArray[TotalNumberOfInfoZones].type = type;
+		InfoZoneArray[TotalNumberOfInfoZones].minx = minx;
+		InfoZoneArray[TotalNumberOfInfoZones].miny = miny;
+		InfoZoneArray[TotalNumberOfInfoZones].minz = minz;
+		InfoZoneArray[TotalNumberOfInfoZones].maxx = maxx;
+		InfoZoneArray[TotalNumberOfInfoZones].maxy = maxy;
+		InfoZoneArray[TotalNumberOfInfoZones].maxz = maxz;
+		InfoZoneArray[TotalNumberOfInfoZones].level = level;
+		InfoZoneArray[TotalNumberOfInfoZones].zoneinfoDay = TotalNumberOfZoneInfos++;
+		InfoZoneArray[TotalNumberOfInfoZones].zoneinfoNight = TotalNumberOfZoneInfos++;
+		TotalNumberOfInfoZones++;
+		break;
+	case ZONE_MAPZONE:
+		assert(TotalNumberOfMapZones < NUMMAPZONES);
+		strcpy(MapZoneArray[TotalNumberOfMapZones].name, tmpname);
+		MapZoneArray[TotalNumberOfMapZones].type = type;
+		MapZoneArray[TotalNumberOfMapZones].minx = minx;
+		MapZoneArray[TotalNumberOfMapZones].miny = miny;
+		MapZoneArray[TotalNumberOfMapZones].minz = minz;
+		MapZoneArray[TotalNumberOfMapZones].maxx = maxx;
+		MapZoneArray[TotalNumberOfMapZones].maxy = maxy;
+		MapZoneArray[TotalNumberOfMapZones].maxz = maxz;
+		MapZoneArray[TotalNumberOfMapZones].level = level;
+		TotalNumberOfMapZones++;
+		break;
 	}
 }
 
+//--MIAMI: done
 void
 CTheZones::PostZoneCreation(void)
 {
 	int i;
-	for(i = 1; i < TotalNumberOfZones; i++)
-		InsertZoneIntoZoneHierarchy(&ZoneArray[i]);
+	for(i = 1; i < TotalNumberOfNavigationZones; i++)
+		InsertZoneIntoZoneHierarchy(&NavigationZoneArray[i]);
 	InitialiseAudioZoneArray();
 }
 
+//--MIAMI: done, but does nothing
+void
+CTheZones::CheckZonesForOverlap(void)
+{
+	int i, j;
+	char str[116];
+
+	for(i = 1; i < TotalNumberOfInfoZones; i++){
+		ZoneIsEntirelyContainedWithinOtherZone(&InfoZoneArray[i], &InfoZoneArray[0]);
+		
+		for(j = 1; j < TotalNumberOfInfoZones; j++)
+			if(i != j && ZoneIsEntirelyContainedWithinOtherZone(&InfoZoneArray[i], &InfoZoneArray[j]))
+				sprintf(str, "Info zone %s contains %s\n",
+						&InfoZoneArray[j].name, &InfoZoneArray[i].name);
+	}
+}
+
+//--MIAMI: done
 void
 CTheZones::InsertZoneIntoZoneHierarchy(CZone *zone)
 {
 	zone->child = nil;
 	zone->parent = nil;
 	zone->next = nil;
-	InsertZoneIntoZoneHierRecursive(zone, &ZoneArray[0]);
+	InsertZoneIntoZoneHierRecursive(zone, &NavigationZoneArray[0]);
 }
 
+//--MIAMI: done
 bool
 CTheZones::InsertZoneIntoZoneHierRecursive(CZone *inner, CZone *outer)
 {
@@ -221,6 +289,7 @@ CTheZones::InsertZoneIntoZoneHierRecursive(CZone *inner, CZone *outer)
 	return true;
 }
 
+//--MIAMI: done
 bool
 CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone *inner, CZone *outer)
 {
@@ -233,11 +302,11 @@ CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone *inner, CZone *outer)
 	   inner->minz < outer->minz ||
 	   inner->maxz > outer->maxz){
 		CVector vmin(inner->minx, inner->miny, inner->minz);
-		if(PointLiesWithinZone(vmin, outer))
+		if(PointLiesWithinZone(&vmin, outer))
 			sprintf(tmp, "Overlapping zones %s and %s\n",
 			      inner->name, outer->name);
 		CVector vmax(inner->maxx, inner->maxy, inner->maxz);
-		if(PointLiesWithinZone(vmax, outer))
+		if(PointLiesWithinZone(&vmax, outer))
 			sprintf(tmp, "Overlapping zones %s and %s\n",
 			      inner->name, outer->name);
 		return false;
@@ -245,16 +314,18 @@ CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone *inner, CZone *outer)
 	return true;
 }
 
+//--MIAMI: done
 bool
-CTheZones::PointLiesWithinZone(const CVector &v, CZone *zone)
+CTheZones::PointLiesWithinZone(const CVector *v, CZone *zone)
 {
-	return zone->minx <= v.x && v.x <= zone->maxx &&
-	       zone->miny <= v.y && v.y <= zone->maxy &&
-	       zone->minz <= v.z && v.z <= zone->maxz;
+	return zone->minx <= v->x && v->x <= zone->maxx &&
+	       zone->miny <= v->y && v->y <= zone->maxy &&
+	       zone->minz <= v->z && v->z <= zone->maxz;
 }
 
+//--MIAMI: done
 eLevelName
-CTheZones::GetLevelFromPosition(CVector const &v)
+CTheZones::GetLevelFromPosition(const CVector *v)
 {
 	int i;
 //	char tmp[116];
@@ -266,35 +337,35 @@ CTheZones::GetLevelFromPosition(CVector const &v)
 	return MapZoneArray[0].level;
 }
 
+//--MIAMI: done
 CZone*
-CTheZones::FindSmallestZonePosition(const CVector *v)
+CTheZones::FindInformationZoneForPosition(const CVector *v)
 {
-	CZone *best = &ZoneArray[0];
-	// zone to test next
-	CZone *zone = ZoneArray[0].child;
-	while(zone)
-		// if in zone, descent into children
-		if(PointLiesWithinZone(*v, zone)){
-			best = zone;
-			zone = zone->child;
-		// otherwise try next zone
-		}else
-			zone = zone->next;
-	return best;
+	int i;
+//	char tmp[116];
+//	if(!PointLiesWithinZone(v, &InfoZoneArray[0]))
+//		sprintf(tmp, "x = %.3f y= %.3f z = %.3f\n", v.x, v.y, v.z);
+	for(i = 1; i < TotalNumberOfInfoZones; i++)
+		if(PointLiesWithinZone(v, &InfoZoneArray[i]))
+			return &InfoZoneArray[i];
+	return &InfoZoneArray[0];
 }
 
+//--MIAMI: done
 CZone*
-CTheZones::FindSmallestZonePositionType(const CVector *v, eZoneType type)
+CTheZones::FindSmallestNavigationZoneForPosition(const CVector *v, bool findDefault, bool findNavig)
 {
 	CZone *best = nil;
-	if(ZoneArray[0].type == type)
-		best = &ZoneArray[0];
+	if(findDefault && NavigationZoneArray[0].type == ZONE_DEFAULT ||
+	   findNavig && NavigationZoneArray[0].type == ZONE_NAVIG)
+		best = &NavigationZoneArray[0];
 	// zone to test next
-	CZone *zone = ZoneArray[0].child;
+	CZone *zone = NavigationZoneArray[0].child;
 	while(zone)
 		// if in zone, descent into children
-		if(PointLiesWithinZone(*v, zone)){
-			if(zone->type == type)
+		if(PointLiesWithinZone(v, zone)){
+			if(findDefault && zone->type == ZONE_DEFAULT ||
+			   findNavig && zone->type == ZONE_NAVIG)
 				best = zone;
 			zone = zone->child;
 		// otherwise try next zone
@@ -303,47 +374,72 @@ CTheZones::FindSmallestZonePositionType(const CVector *v, eZoneType type)
 	return best;
 }
 
-CZone*
-CTheZones::FindSmallestZonePositionILN(const CVector *v)
-{
-	CZone *best = nil;
-	if(ZoneArray[0].type == ZONE_AUDIO ||
-	   ZoneArray[0].type == ZONE_TYPE1 ||
-	   ZoneArray[0].type == ZONE_TYPE2)
-		best = &ZoneArray[0];
-	// zone to test next
-	CZone *zone = ZoneArray[0].child;
-	while(zone)
-		// if in zone, descent into children
-		if(PointLiesWithinZone(*v, zone)){
-			if(zone->type == ZONE_AUDIO ||
-			   zone->type == ZONE_TYPE1 ||
-			   zone->type == ZONE_TYPE2)
-				best = zone;
-			zone = zone->child;
-		// otherwise try next zone
-		}else
-			zone = zone->next;
-	return best;
-}
-
+//--MIAMI: done
 int16
-CTheZones::FindZoneByLabelAndReturnIndex(char *name)
+CTheZones::FindZoneByLabelAndReturnIndex(char *name, eZoneType type)
 {
 	char str[8];
 	memset(str, 0, 8);
 	strncpy(str, name, 8);
-	for(FindIndex = 0; FindIndex < TotalNumberOfZones; FindIndex++)
-		if(strcmp(GetZone(FindIndex)->name, name) == 0)
-			return FindIndex;
+	switch(type){
+	case ZONE_DEFAULT:
+	case ZONE_NAVIG:
+		for(FindIndex = 0; FindIndex < TotalNumberOfNavigationZones; FindIndex++)
+			if(strcmp(GetNavigationZone(FindIndex)->name, name) == 0)
+				return FindIndex;
+		break;
+
+	case ZONE_INFO:
+		for(FindIndex = 0; FindIndex < TotalNumberOfInfoZones; FindIndex++)
+			if(strcmp(GetInfoZone(FindIndex)->name, name) == 0)
+				return FindIndex;
+		break;
+
+	case ZONE_MAPZONE:
+		for(FindIndex = 0; FindIndex < TotalNumberOfMapZones; FindIndex++)
+			if(strcmp(GetMapZone(FindIndex)->name, name) == 0)
+				return FindIndex;
+		break;
+	}
 	return -1;
 }
 
+//--MIAMI: done
+int16
+CTheZones::FindNextZoneByLabelAndReturnIndex(char *name, eZoneType type)
+{
+	char str[8];
+	memset(str, 0, 8);
+	strncpy(str, name, 8);
+	switch(type){
+	case ZONE_DEFAULT:
+	case ZONE_NAVIG:
+		for(; FindIndex < TotalNumberOfNavigationZones; FindIndex++)
+			if(strcmp(GetNavigationZone(FindIndex)->name, name) == 0)
+				return FindIndex;
+		break;
+
+	case ZONE_INFO:
+		for(; FindIndex < TotalNumberOfInfoZones; FindIndex++)
+			if(strcmp(GetInfoZone(FindIndex)->name, name) == 0)
+				return FindIndex;
+		break;
+
+	case ZONE_MAPZONE:
+		for(; FindIndex < TotalNumberOfMapZones; FindIndex++)
+			if(strcmp(GetMapZone(FindIndex)->name, name) == 0)
+				return FindIndex;
+		break;
+	}
+	return -1;
+}
+
+//--MIAMI: done
 CZoneInfo*
 CTheZones::GetZoneInfo(const CVector *v, uint8 day)
 {
 	CZone *zone;
-	zone = FindSmallestZonePositionILN(v);
+	zone = FindInformationZoneForPosition(v);
 	if(zone == nil)
 		return &ZoneInfoArray[0];
 	return &ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight];
@@ -421,7 +517,7 @@ CTheZones::SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
 {
 	CZone *zone;
 	CZoneInfo *info;
-	zone = GetZone(zoneid);
+	zone = GetInfoZone(zoneid);
 	info = &ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight];
 
 	CheckZoneInfo(info);
@@ -486,7 +582,7 @@ CTheZones::SetZonePedInfo(uint16 zoneid, uint8 day, int16 pedDensity,
 {
 	CZone *zone;
 	CZoneInfo *info;
-	zone = GetZone(zoneid);
+	zone = GetInfoZone(zoneid);
 	info = &ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight];
 	if(pedDensity != -1) info->pedDensity = pedDensity;
 	if(copDensity != -1) info->copDensity = copDensity;
@@ -501,60 +597,64 @@ CTheZones::SetZonePedInfo(uint16 zoneid, uint8 day, int16 pedDensity,
 	if(gang8Density != -1) info->gangDensity[8] = gang8Density;
 }
 
+//--MIAMI: done, unused
 void
 CTheZones::SetCarDensity(uint16 zoneid, uint8 day, uint16 cardensity)
 {
 	CZone *zone;
-	zone = GetZone(zoneid);
-	if(zone->type == ZONE_AUDIO || zone->type == ZONE_TYPE1 || zone->type == ZONE_TYPE2)
-		ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].carDensity = cardensity;
+	zone = GetInfoZone(zoneid);
+	ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].carDensity = cardensity;
 }
 
+//--MIAMI: done, unused
 void
 CTheZones::SetPedDensity(uint16 zoneid, uint8 day, uint16 peddensity)
 {
 	CZone *zone;
-	zone = GetZone(zoneid);
-	if(zone->type == ZONE_AUDIO || zone->type == ZONE_TYPE1 || zone->type == ZONE_TYPE2)
-		ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].pedDensity = peddensity;
+	zone = GetInfoZone(zoneid);
+	ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].pedDensity = peddensity;
 }
 
+//--MIAMI: done
 void
 CTheZones::SetPedGroup(uint16 zoneid, uint8 day, uint16 pedgroup)
 {
 	CZone *zone;
-	zone = GetZone(zoneid);
-	if(zone->type == ZONE_AUDIO || zone->type == ZONE_TYPE1 || zone->type == ZONE_TYPE2)
-		ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].pedGroup = pedgroup;
+	zone = GetInfoZone(zoneid);
+	ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].pedGroup = pedgroup;
 }
 
+//--MIAMI: done
 int16
 CTheZones::FindAudioZone(CVector *pos)
 {
 	int i;
 
 	for(i = 0; i < NumberOfAudioZones; i++)
-		if(PointLiesWithinZone(*pos, GetZone(AudioZoneArray[i])))
+		if(PointLiesWithinZone(pos, GetAudioZone(i)))
 			return i;
 	return -1;
 }
 
+//--MIAMI: done
 void
 CTheZones::AddZoneToAudioZoneArray(CZone *zone)
 {
 	int i, z;
 
-	if(zone->type != ZONE_AUDIO)
+	if(zone->type != ZONE_DEFAULT)
 		return;
 
 	/* This is a bit stupid */
 	z = -1;
-	for(i = 0; i < NUMZONES; i++)
-		if(&ZoneArray[i] == zone)
+	for(i = 0; i < NUMNAVIGZONES; i++)
+		if(&NavigationZoneArray[i] == zone)
 			z = i;
+	assert(NumberOfAudioZones < NUMAUDIOZONES);
 	AudioZoneArray[NumberOfAudioZones++] = z;
 }
 
+//--MIAMI: done
 void
 CTheZones::InitialiseAudioZoneArray(void)
 {
@@ -562,7 +662,7 @@ CTheZones::InitialiseAudioZoneArray(void)
 	CZone *zone;
 
 	gonext = false;
-	zone = &ZoneArray[0];
+	zone = &NavigationZoneArray[0];
 	// Go deep first,
 	// set gonext when backing up a level to visit the next child
 	while(zone)
@@ -586,6 +686,7 @@ CTheZones::InitialiseAudioZoneArray(void)
 		}
 }
 
+//--MIAMI: TODO
 void
 CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 {
@@ -593,32 +694,39 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 	int i;
 
 	*size = SAVE_HEADER_SIZE
-		+ sizeof(int32) // GetIndexForZonePointer
 		+ sizeof(m_CurrLevel) + sizeof(FindIndex)
 		+ sizeof(int16) // padding
-		+ sizeof(ZoneArray) + sizeof(ZoneInfoArray)
-		+ sizeof(TotalNumberOfZones) + sizeof(TotalNumberOfZoneInfos)
+		+ sizeof(NavigationZoneArray) + sizeof(InfoZoneArray) + sizeof(ZoneInfoArray)
+		+ sizeof(TotalNumberOfNavigationZones) + sizeof(TotalNumberOfInfoZones) + sizeof(TotalNumberOfZoneInfos)
 		+ sizeof(MapZoneArray) + sizeof(AudioZoneArray)
 		+ sizeof(TotalNumberOfMapZones) + sizeof(NumberOfAudioZones);
 
 	WriteSaveHeader(buffer, 'Z', 'N', 'S', '\0', *size - SAVE_HEADER_SIZE);
 
-	WriteSaveBuf(buffer, GetIndexForZonePointer(m_pPlayersZone));
 	WriteSaveBuf(buffer, m_CurrLevel);
 	WriteSaveBuf(buffer, FindIndex);
 	WriteSaveBuf(buffer, (int16)0); // padding
 
-	for(i = 0; i < ARRAY_SIZE(ZoneArray); i++){
-		CZone *zone = WriteSaveBuf(buffer, ZoneArray[i]);
-		zone->child = (CZone*)GetIndexForZonePointer(ZoneArray[i].child);
-		zone->parent = (CZone*)GetIndexForZonePointer(ZoneArray[i].parent);
-		zone->next = (CZone*)GetIndexForZonePointer(ZoneArray[i].next);
+// TODO(MIAMI): implement SaveOneZone
+	for(i = 0; i < ARRAY_SIZE(NavigationZoneArray); i++){
+		CZone *zone = WriteSaveBuf(buffer, NavigationZoneArray[i]);
+		zone->child = (CZone*)GetIndexForZonePointer(NavigationZoneArray[i].child);
+		zone->parent = (CZone*)GetIndexForZonePointer(NavigationZoneArray[i].parent);
+		zone->next = (CZone*)GetIndexForZonePointer(NavigationZoneArray[i].next);
+	}
+
+	for(i = 0; i < ARRAY_SIZE(InfoZoneArray); i++){
+		CZone *zone = WriteSaveBuf(buffer, InfoZoneArray[i]);
+		zone->child = (CZone*)GetIndexForZonePointer(InfoZoneArray[i].child);
+		zone->parent = (CZone*)GetIndexForZonePointer(InfoZoneArray[i].parent);
+		zone->next = (CZone*)GetIndexForZonePointer(InfoZoneArray[i].next);
 	}
 
 	for(i = 0; i < ARRAY_SIZE(ZoneInfoArray); i++)
 		WriteSaveBuf(buffer, ZoneInfoArray[i]);
 
-	WriteSaveBuf(buffer, TotalNumberOfZones);
+	WriteSaveBuf(buffer, TotalNumberOfNavigationZones);
+	WriteSaveBuf(buffer, TotalNumberOfInfoZones);
 	WriteSaveBuf(buffer, TotalNumberOfZoneInfos);
 
 	for(i = 0; i < ARRAY_SIZE(MapZoneArray); i++) {
@@ -646,6 +754,7 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 	VALIDATESAVEBUF(*size)
 }
 
+//--MIAMI: TODO
 void
 CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 {
@@ -654,23 +763,32 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 
 	CheckSaveHeader(buffer, 'Z', 'N', 'S', '\0', size - SAVE_HEADER_SIZE);
 
-	m_pPlayersZone = GetPointerForZoneIndex(ReadSaveBuf<int32>(buffer));
 	m_CurrLevel = ReadSaveBuf<eLevelName>(buffer);
 	FindIndex = ReadSaveBuf<int16>(buffer);
 	ReadSaveBuf<int16>(buffer);
 
-	for(i = 0; i < ARRAY_SIZE(ZoneArray); i++){
-		ZoneArray[i] = ReadSaveBuf<CZone>(buffer);
+// TODO(MIAMI): implement LoadOneZone
+	for(i = 0; i < ARRAY_SIZE(NavigationZoneArray); i++){
+		NavigationZoneArray[i] = ReadSaveBuf<CZone>(buffer);
 
-		ZoneArray[i].child = GetPointerForZoneIndex((int32)ZoneArray[i].child);
-		ZoneArray[i].parent = GetPointerForZoneIndex((int32)ZoneArray[i].parent);
-		ZoneArray[i].next = GetPointerForZoneIndex((int32)ZoneArray[i].next);
+		NavigationZoneArray[i].child = GetPointerForZoneIndex((int32)NavigationZoneArray[i].child);
+		NavigationZoneArray[i].parent = GetPointerForZoneIndex((int32)NavigationZoneArray[i].parent);
+		NavigationZoneArray[i].next = GetPointerForZoneIndex((int32)NavigationZoneArray[i].next);
+	}
+
+	for(i = 0; i < ARRAY_SIZE(InfoZoneArray); i++){
+		InfoZoneArray[i] = ReadSaveBuf<CZone>(buffer);
+
+		InfoZoneArray[i].child = GetPointerForZoneIndex((int32)InfoZoneArray[i].child);
+		InfoZoneArray[i].parent = GetPointerForZoneIndex((int32)InfoZoneArray[i].parent);
+		InfoZoneArray[i].next = GetPointerForZoneIndex((int32)InfoZoneArray[i].next);
 	}
 
 	for(i = 0; i < ARRAY_SIZE(ZoneInfoArray); i++)
 		ZoneInfoArray[i] = ReadSaveBuf<CZoneInfo>(buffer);
 
-	TotalNumberOfZones = ReadSaveBuf<int16>(buffer);
+	TotalNumberOfNavigationZones = ReadSaveBuf<int16>(buffer);
+	TotalNumberOfInfoZones = ReadSaveBuf<int16>(buffer);
 	TotalNumberOfZoneInfos = ReadSaveBuf<int16>(buffer);
 
 	for(i = 0; i < ARRAY_SIZE(MapZoneArray); i++){

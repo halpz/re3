@@ -331,7 +331,7 @@ CEntity::SetupBigBuilding(void)
 	bIsBIGBuilding = true;
 	bStreamingDontDelete = true;
 	bUsesCollision = false;
-	m_level = CTheZones::GetLevelFromPosition(GetPosition());
+	m_level = CTheZones::GetLevelFromPosition(&GetPosition());
 	if(mi->m_lodDistances[0] <= 2000.0f)
 		bStreamBIGBuilding = true;
 	if(mi->m_lodDistances[0] > 2500.0f || mi->m_ignoreDrawDist)

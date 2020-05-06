@@ -1003,39 +1003,28 @@ CRenderer::ScanSectorList(CPtrList *lists)
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
 
-#ifdef GTA_ZONECULL
-			if(IsEntityCullZoneVisible(ent))
-#endif
-				switch(SetupEntityVisibility(ent)){
-				case VIS_VISIBLE:
-					ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+			switch(SetupEntityVisibility(ent)){
+			case VIS_VISIBLE:
+				ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+				break;
+			case VIS_INVISIBLE:
+				if(!IsGlass(ent->GetModelIndex()))
 					break;
-				case VIS_INVISIBLE:
-					if(!IsGlass(ent->GetModelIndex()))
-						break;
-					// fall through
-				case VIS_OFFSCREEN:
-					dx = ms_vecCameraPosition.x - ent->GetPosition().x;
-					dy = ms_vecCameraPosition.y - ent->GetPosition().y;
-					if(dx > -65.0f && dx < 65.0f &&
-					   dy > -65.0f && dy < 65.0f &&
-					   ms_nNoOfInVisibleEntities < NUMINVISIBLEENTITIES - 1)
-						ms_aInVisibleEntityPtrs[ms_nNoOfInVisibleEntities++] = ent;
-					break;
-				case VIS_STREAMME:
-					if(!CStreaming::ms_disableStreaming)
-						if(!m_loadingPriority || CStreaming::ms_numModelsRequested < 10)
-							CStreaming::RequestModel(ent->GetModelIndex(), 0);
-					break;
-				}
-#ifdef GTA_ZONECULL
-			else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable()){
+				// fall through
+			case VIS_OFFSCREEN:
+				dx = ms_vecCameraPosition.x - ent->GetPosition().x;
+				dy = ms_vecCameraPosition.y - ent->GetPosition().y;
+				if(dx > -65.0f && dx < 65.0f &&
+				   dy > -65.0f && dy < 65.0f &&
+				   ms_nNoOfInVisibleEntities < NUMINVISIBLEENTITIES - 1)
+					ms_aInVisibleEntityPtrs[ms_nNoOfInVisibleEntities++] = ent;
+				break;
+			case VIS_STREAMME:
 				if(!CStreaming::ms_disableStreaming)
-					if(SetupEntityVisibility(ent) == VIS_STREAMME)
-						if(!m_loadingPriority || CStreaming::ms_numModelsRequested < 10)
-							CStreaming::RequestModel(ent->GetModelIndex(), 0);
+					if(!m_loadingPriority || CStreaming::ms_numModelsRequested < 10)
+						CStreaming::RequestModel(ent->GetModelIndex(), 0);
+				break;
 			}
-#endif
 		}
 	}
 }
@@ -1057,40 +1046,30 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
 
-#ifdef GTA_ZONECULL
-			if(IsEntityCullZoneVisible(ent))
-#endif
-				switch(SetupEntityVisibility(ent)){
-				case VIS_VISIBLE:
-					ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+			switch(SetupEntityVisibility(ent)){
+			case VIS_VISIBLE:
+				ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+				break;
+			case VIS_INVISIBLE:
+				if(!IsGlass(ent->GetModelIndex()))
 					break;
-				case VIS_INVISIBLE:
-					if(!IsGlass(ent->GetModelIndex()))
-						break;
-					// fall through
-				case VIS_OFFSCREEN:
-					dx = ms_vecCameraPosition.x - ent->GetPosition().x;
-					dy = ms_vecCameraPosition.y - ent->GetPosition().y;
-					if(dx > -65.0f && dx < 65.0f &&
-					   dy > -65.0f && dy < 65.0f &&
-					   ms_nNoOfInVisibleEntities < NUMINVISIBLEENTITIES - 1)
-						ms_aInVisibleEntityPtrs[ms_nNoOfInVisibleEntities++] = ent;
-					break;
-				case VIS_STREAMME:
-					if(!CStreaming::ms_disableStreaming){
-						CStreaming::RequestModel(ent->GetModelIndex(), 0);
-						if(CStreaming::ms_aInfoForModel[ent->GetModelIndex()].m_loadState != STREAMSTATE_LOADED)
-							m_loadingPriority = true;
-					}
-					break;
+				// fall through
+			case VIS_OFFSCREEN:
+				dx = ms_vecCameraPosition.x - ent->GetPosition().x;
+				dy = ms_vecCameraPosition.y - ent->GetPosition().y;
+				if(dx > -65.0f && dx < 65.0f &&
+				   dy > -65.0f && dy < 65.0f &&
+				   ms_nNoOfInVisibleEntities < NUMINVISIBLEENTITIES - 1)
+					ms_aInVisibleEntityPtrs[ms_nNoOfInVisibleEntities++] = ent;
+				break;
+			case VIS_STREAMME:
+				if(!CStreaming::ms_disableStreaming){
+					CStreaming::RequestModel(ent->GetModelIndex(), 0);
+					if(CStreaming::ms_aInfoForModel[ent->GetModelIndex()].m_loadState != STREAMSTATE_LOADED)
+						m_loadingPriority = true;
 				}
-#ifdef GTA_ZONECULL
-			else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable()){
-				if(!CStreaming::ms_disableStreaming)
-					if(SetupEntityVisibility(ent) == VIS_STREAMME)
-						CStreaming::RequestModel(ent->GetModelIndex(), 0);
+				break;
 			}
-#endif
 		}
 	}
 }
@@ -1143,9 +1122,6 @@ CRenderer::ScanSectorList_RequestModels(CPtrList *lists)
 			if(ent->m_scanCode == CWorld::GetCurrentScanCode())
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
-#ifdef GTA_ZONECULL
-			if(IsEntityCullZoneVisible(ent))
-#endif
 			if(ShouldModelBeStreamed(ent))
 				CStreaming::RequestModel(ent->GetModelIndex(), 0);
 		}
@@ -1190,51 +1166,6 @@ CRenderer::ShouldModelBeStreamed(CEntity *ent)
 	else
 		return dist - FADE_DISTANCE - STREAM_DISTANCE < mi->GetLargestLodDistance();
 }
-
-#ifdef GTA_ZONECULL
-bool
-CRenderer::IsEntityCullZoneVisible(CEntity *ent)
-{
-	CPed *ped;
-	CObject *obj;
-
-	if(ent->bZoneCulled)
-		return false;
-
-	switch(ent->GetType()){
-	case ENTITY_TYPE_VEHICLE:
-		return IsVehicleCullZoneVisible(ent);
-	case ENTITY_TYPE_PED:
-		ped = (CPed*)ent;
-		if (ped->bInVehicle) {
-			if (ped->m_pMyVehicle)
-				return IsVehicleCullZoneVisible(ped->m_pMyVehicle);
-			else
-				return true;
-		}
-		return !(ped->m_pCurSurface && ped->m_pCurSurface->bZoneCulled2);
-	case ENTITY_TYPE_OBJECT:
-		obj = (CObject*)ent;
-		if(!obj->bIsStatic)
-			return true;
-		return !(obj->m_pCurSurface && obj->m_pCurSurface->bZoneCulled2);
-	}
-	return true;
-}
-
-bool
-CRenderer::IsVehicleCullZoneVisible(CEntity *ent)
-{
-	CVehicle *v = (CVehicle*)ent;
-	switch(v->GetStatus())
-	case STATUS_SIMPLE:
-	case STATUS_PHYSICS:
-	case STATUS_ABANDONED:
-	case STATUS_WRECKED:
-		return !(v->m_pCurGroundEntity && v->m_pCurGroundEntity->bZoneCulled2);
-	return true;
-}
-#endif
 
 void
 CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)

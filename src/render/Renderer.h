@@ -62,10 +62,6 @@ public:
 	static void SortBIGBuildingsForSectorList(CPtrList *list);
 
 	static bool ShouldModelBeStreamed(CEntity *ent);
-#ifdef GTA_ZONECULL
-	static bool IsEntityCullZoneVisible(CEntity *ent);
-	static bool IsVehicleCullZoneVisible(CEntity *ent);
-#endif
 
 	static void RemoveVehiclePedLights(CEntity *ent, bool reset);
 };
