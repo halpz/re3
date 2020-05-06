@@ -20,11 +20,11 @@ typedef RwUInt16 RwImVertexIndex;
 
 enum RwIm3DTransformFlags
 {
-	rwIM3D_VERTEXUV      = 1,
-	rwIM3D_ALLOPAQUE     = 2,
-	rwIM3D_NOCLIP        = 4,
-	rwIM3D_VERTEXXYZ     = 8,
-	rwIM3D_VERTEXRGBA    = 16,
+	rwIM3D_VERTEXUV      = rw::im3d::VERTEXUV,
+	rwIM3D_ALLOPAQUE     = rw::im3d::ALLOPAQUE,
+	rwIM3D_NOCLIP        = rw::im3d::NOCLIP,
+	rwIM3D_VERTEXXYZ     = rw::im3d::VERTEXXYZ,
+	rwIM3D_VERTEXRGBA    = rw::im3d::VERTEXRGBA,
 };
 
 void RwIm2DVertexSetCameraX(RwIm2DVertex *vert, RwReal camx);

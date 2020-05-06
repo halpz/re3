@@ -60,6 +60,8 @@ CLines::RenderLineWithClipping(float x1, float y1, float z1, float x2, float y2,
 	col2.green = c2>>16;
 	col2.blue = c2>>8;
 	col2.alpha = c2;
+// HACK HACK until i got im3d fixed
+RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
 
 	RwIm3DVertexSetRGBA(&v[0], col1.red, col1.green, col1.blue, col1.alpha);
 	RwIm3DVertexSetRGBA(&v[1], col2.red, col2.green, col2.blue, col2.alpha);
