@@ -609,10 +609,9 @@ cAudioManager::ComputeVolume(uint8 emittingVolume, float soundIntensity, float d
 	float newSoundIntensity;
 	if (soundIntensity <= 0.0f)
 		return 0;
-	if ((soundIntensity * 0.2f) <= distance) {
-		newSoundIntensity = soundIntensity * 0.2f;
+	newSoundIntensity = soundIntensity / 5.0f;
+	if (newSoundIntensity <= distance)
 		emittingVolume = sq((soundIntensity - newSoundIntensity - (distance - newSoundIntensity)) / (soundIntensity - newSoundIntensity)) * emittingVolume;
-	}
 	return emittingVolume;
 }
 
@@ -3611,11 +3610,10 @@ cAudioManager::ProcessActiveQueues()
 							SampleManager.SetChannel3DDistances(j, sample.m_fSoundIntensity, 0.25f * sample.m_fSoundIntensity);
 						}
 						SampleManager.SetChannelReverbFlag(j, sample.m_bReverbFlag);
-						continue;
+						break;
 					}
 					sample.m_bIsProcessed = false;
 					m_asActiveSamples[j].m_bIsProcessed = false;
-					break;
 				}
 			}
 		}
