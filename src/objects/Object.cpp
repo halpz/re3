@@ -174,12 +174,12 @@ CObject::ObjectDamage(float amount)
 		const float fDirectionZ = 0.0002f * amount;
 		switch (m_nCollisionDamageEffect)
 		{
-		case COLDAMAGE_EFFECT_CHANGE_MODEL: 
+		case COLLRESPONSE_CHANGE_MODEL: 
 			bRenderDamaged = true;
 			break;
-		case COLDAMAGE_EFFECT_SPLIT_MODEL:
+		case COLLRESPONSE_SPLIT_MODEL:
 			break;
-		case COLDAMAGE_EFFECT_SMASH_COMPLETELY:
+		case COLLRESPONSE_SMASH_COMPLETELY:
 			bIsVisible = false;
 			bUsesCollision = false;
 			bIsStatic = true;
@@ -187,7 +187,7 @@ CObject::ObjectDamage(float amount)
 			SetMoveSpeed(0.0f, 0.0f, 0.0f);
 			SetTurnSpeed(0.0f, 0.0f, 0.0f);
 			break;
-		case COLDAMAGE_EFFECT_CHANGE_THEN_SMASH:
+		case COLLRESPONSE_CHANGE_THEN_SMASH:
 			if (!bRenderDamaged) {
 				bRenderDamaged = true;
 			}
@@ -200,7 +200,7 @@ CObject::ObjectDamage(float amount)
 				SetTurnSpeed(0.0f, 0.0f, 0.0f);
 			}
 			break;
-		case COLDAMAGE_EFFECT_SMASH_CARDBOX_COMPLETELY: {
+		case COLLRESPONSE_SMASH_CARDBOARD_COMPLETELY: {
 			bIsVisible = false;
 			bUsesCollision = false;
 			bIsStatic = true;
@@ -223,7 +223,7 @@ CObject::ObjectDamage(float amount)
 			PlayOneShotScriptObject(_SCRSOUND_CARDBOARD_BOX_SMASH, vecPos);
 			break;
 		}
-		case COLDAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY: {
+		case COLLRESPONSE_SMASH_WOODENBOX_COMPLETELY: {
 			bIsVisible = false;
 			bUsesCollision = false;
 			bIsStatic = true;
@@ -246,7 +246,7 @@ CObject::ObjectDamage(float amount)
 			PlayOneShotScriptObject(_SCRSOUND_WOODEN_BOX_SMASH, vecPos);
 			break;
 		}
-		case COLDAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY: {
+		case COLLRESPONSE_SMASH_TRAFFICCONE_COMPLETELY: {
 			bIsVisible = false;
 			bUsesCollision = false;
 			bIsStatic = true;
@@ -271,7 +271,7 @@ CObject::ObjectDamage(float amount)
 			PlayOneShotScriptObject(_SCRSOUND_TYRE_BUMP, vecPos);
 			break;
 		}
-		case COLDAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY: {
+		case COLLRESPONSE_SMASH_BARPOST_COMPLETELY: {
 			bIsVisible = false;
 			bUsesCollision = false;
 			bIsStatic = true;
