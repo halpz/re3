@@ -119,6 +119,7 @@ struct CCarPathLink
 	float GetY(void) { return y/8.0f; }
 	float GetDirX(void) { return dirX/100.0f; }
 	float GetDirY(void) { return dirY/100.0f; }
+	float GetLaneOffset(void) { return width/80.0f; }
 
 	float OneWayLaneOffset()
 	{
@@ -126,7 +127,7 @@ struct CCarPathLink
 			return 0.5f - 0.5f * numRightLanes;
 		if (numRightLanes == 0)
 			return 0.5f - 0.5f * numLeftLanes;
-		return 0.5f;
+		return 0.5f + GetLaneOffset();
 	}
 };
 
