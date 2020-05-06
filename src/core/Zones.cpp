@@ -325,7 +325,7 @@ CTheZones::PointLiesWithinZone(const CVector *v, CZone *zone)
 
 //--MIAMI: done
 eLevelName
-CTheZones::GetLevelFromPosition(const CVector *v)
+CTheZones::GetLevelFromPosition(CVector const *v)
 {
 	int i;
 //	char tmp[116];
