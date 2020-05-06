@@ -6,14 +6,16 @@
 
 enum ModelInfoType : uint8
 {
-	MITYPE_NA        = 0,
-	MITYPE_SIMPLE    = 1,
-	MITYPE_MLO       = 2,
-	MITYPE_TIME      = 3,
-	MITYPE_CLUMP     = 4,
-	MITYPE_VEHICLE   = 5,
-	MITYPE_PED       = 6,
-	MITYPE_XTRACOMPS = 7,
+	MITYPE_NA,
+	MITYPE_SIMPLE,
+	MITYPE_MLO,	// unused but still in enum
+	MITYPE_TIME,
+	MITYPE_WEAPON,
+	MITYPE_CLUMP,
+	MITYPE_VEHICLE,
+	MITYPE_PED,
+	MITYPE_XTRACOMPS,	// unused but still in enum
+	MITYPE_HAND	// xbox and mobile
 };
 static_assert(sizeof(ModelInfoType) == 1, "ModeInfoType: error");
 
@@ -43,10 +45,9 @@ public:
 
 	// one day it becomes virtual
 	ModelInfoType GetModelType() const { return m_type; }
-	bool IsSimple(void) { return m_type == MITYPE_SIMPLE || m_type == MITYPE_TIME; }
-	bool IsClump(void) { return m_type == MITYPE_CLUMP || m_type == MITYPE_PED || m_type == MITYPE_VEHICLE ||
-		m_type == MITYPE_MLO || m_type == MITYPE_XTRACOMPS;	// unused but what the heck
-	}
+	bool IsBuilding(void) { return m_type == MITYPE_SIMPLE || m_type == MITYPE_TIME; }
+	bool IsSimple(void) { return m_type == MITYPE_SIMPLE || m_type == MITYPE_TIME || m_type == MITYPE_WEAPON; }
+	bool IsClump(void) { return m_type == MITYPE_CLUMP || m_type == MITYPE_PED || m_type == MITYPE_VEHICLE;	}
 	char *GetName(void) { return m_name; }
 	void SetName(const char *name) { strncpy(m_name, name, 24); }
 	void SetColModel(CColModel *col, bool owns = false){

@@ -94,6 +94,7 @@ public:
 	static int32 ms_numVehiclesLoaded;
 	static int32 ms_vehiclesLoaded[MAXVEHICLESLOADED];
 	static int32 ms_lastVehicleDeleted;
+	static bool ms_bIsPedFromPedGroupLoaded[NUMMODELSPERPEDGROUP];
 	static CDirectory *ms_pExtraObjectsDir;
 	static int32 ms_numPriorityRequests;
 	static int32 ms_currentPedGrp;
@@ -145,7 +146,7 @@ public:
 	static void RemoveIslandsNotUsed(eLevelName level);
 	static void RemoveBigBuildings(eLevelName level);
 	static bool RemoveLoadedVehicle(void);
-	static bool RemoveLeastUsedModel(void);
+	static bool RemoveLeastUsedModel(uint32 excludeMask);
 	static void RemoveAllUnusedModels(void);
 	static void RemoveUnusedModelsInLoadedList(void);
 	static bool RemoveReferencedTxds(int32 mem);

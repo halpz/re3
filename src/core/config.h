@@ -3,14 +3,14 @@
 enum Config {
 	NUMPLAYERS = 1,
 
-	NUMCDIMAGES = 12, // gta3.img duplicates (not used on PC)
+	NUMCDIMAGES = 6, // gta3.img duplicates (not used on PC)
 	MAX_CDIMAGES = 8, // additional cdimages
 	MAX_CDCHANNELS = 5,
 
 	MODELINFOSIZE = 6500,
 	TXDSTORESIZE = 1385,
 	COLSTORESIZE = 31,
-	EXTRADIRSIZE = 128,
+	EXTRADIRSIZE = 256,
 	CUTSCENEDIRSIZE = 512,
 
 	SIMPLEMODELSIZE = 5000,	// only 3885 in VC???
@@ -106,7 +106,7 @@ enum Config {
 	NUMPEDROUTES = 200,
 	NUMPHONES = 50,
 	NUMPEDGROUPS = 31,
-	NUMMODELSPERPEDGROUP = 8,
+	NUMMODELSPERPEDGROUP = 8,	// TODO(MIAMI): 16 once we have peds
 	NUMSHOTINFOS = 100,
 
 	NUMROADBLOCKS = 300,

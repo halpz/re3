@@ -501,13 +501,13 @@ CPathFind::PreparePathData(void)
 				}
 		for(i = 0; i < NUMDETACHED_CARS; i++)
 			for(j = 0; j < 12; j++)
-				if(DetachedInfoForTilePeds[i*12 + j].type == NodeTypeExtern){
+				if(DetachedInfoForTileCars[i*12 + j].type == NodeTypeExtern){
 					// MI:%d here but no argument for it
-					if(DetachedInfoForTilePeds[i*12 + j].numLeftLanes < 0)
+					if(DetachedInfoForTileCars[i*12 + j].numLeftLanes < 0)
 						printf("ILLEGAL BLOCK. NEGATIVE NUMBER OF LANES (Obj:%d)\n", i);
-					if(DetachedInfoForTilePeds[i*12 + j].numRightLanes < 0)
+					if(DetachedInfoForTileCars[i*12 + j].numRightLanes < 0)
 						printf("ILLEGAL BLOCK. NEGATIVE NUMBER OF LANES (Obj:%d)\n", i);
-					if(DetachedInfoForTilePeds[i*12 + j].numLeftLanes + DetachedInfoForTilePeds[i*12 + j].numRightLanes <= 0)
+					if(DetachedInfoForTileCars[i*12 + j].numLeftLanes + DetachedInfoForTileCars[i*12 + j].numRightLanes <= 0)
 						printf("ILLEGAL BLOCK. NO LANES IN NODE (Obj:%d)\n", i);
 				}
 

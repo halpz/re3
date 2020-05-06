@@ -357,7 +357,7 @@ enum
 	MI_AIRTRAIN_VLO = 198,
 	MI_LOPOLYGUY,
 
-	NUM_DEFAULT_MODELS
+	NUM_DEFAULT_MODELS = 300	// MIAMI
 };
 
 enum{
@@ -373,7 +373,7 @@ inline bool
 IsGlass(int16 id)
 {
 	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
-	return mi->IsSimple() && (mi->m_isCodeGlass || mi->m_isArtistGlass);
+	return mi->IsBuilding() && (mi->m_isCodeGlass || mi->m_isArtistGlass);
 }
 
 inline bool

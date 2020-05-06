@@ -222,6 +222,7 @@ CColStore::EnsureCollisionIsInMemory(const CVector2D &pos)
 		}
 }
 
+//--MIAMI: done
 bool
 CColStore::HasCollisionLoaded(const CVector2D &pos)
 {

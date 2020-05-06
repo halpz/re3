@@ -641,7 +641,7 @@ CFileLoader::LoadObjectTypes(const char *filename)
 
 	for(id = minID; id <= maxID; id++){
 		CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
-		if(mi && mi->IsSimple())
+		if(mi && mi->IsBuilding())
 			mi->SetupBigBuilding();
 	}
 }
@@ -1143,7 +1143,7 @@ CFileLoader::LoadObjectInstance(const char *line)
 		entity->GetMatrix() = CMatrix(xform);
 		entity->m_level = CTheZones::GetLevelFromPosition(&entity->GetPosition());
 		entity->m_area = area;
-		if(mi->IsSimple()){
+		if(mi->IsBuilding()){
 			if(mi->m_isBigBuilding)
 				entity->SetupBigBuilding();
 			if(mi->m_isSubway)
