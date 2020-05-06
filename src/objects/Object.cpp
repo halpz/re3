@@ -68,6 +68,7 @@ CObject::CObject(CDummyObject *dummy)
 	dummy->DetachFromRwObject();
 	Init();
 	m_level = dummy->m_level;
+	m_area = dummy->m_area;
 }
 
 CObject::~CObject(void)
