@@ -222,7 +222,7 @@ CWaterLevel::DestroyWavyAtomic()
 bool
 CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool bDontCheckZ)
 {
-	int32 x = WATER_HUGE_X(fX);
+	int32 x = WATER_HUGE_X(fX + WATER_X_OFFSET);
 	int32 y = WATER_HUGE_Y(fY);
 	
 	ASSERT( x >= 0 && x < HUGE_SECTOR_SIZE );
@@ -240,8 +240,9 @@ CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool
 	
 	float fWave = Sin
 	(
-		/*( WATER_UNSIGN_Y(fY) - float(y) * MAX_HUGE_SECTORS + WATER_UNSIGN_X(fX) - float(x) * MAX_HUGE_SECTORS )*/ // VC
-		(float)( ((int32)fX & (MAX_HUGE_SECTORS-1)) + ((int32)fY & (MAX_HUGE_SECTORS-1)) )
+		( WATER_UNSIGN_Y(fY)                  - float(y) * MAX_HUGE_SECTORS
+		+ WATER_UNSIGN_X(fX + WATER_X_OFFSET) - float(x) * MAX_HUGE_SECTORS )
+		
 		* (TWOPI / MAX_HUGE_SECTORS ) + fAngle
 	);
 
@@ -261,7 +262,7 @@ CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool
 bool
 CWaterLevel::GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLevel)
 {
-	int32 x = WATER_HUGE_X(fX);
+	int32 x = WATER_HUGE_X(fX + WATER_X_OFFSET);
 	int32 y = WATER_HUGE_Y(fY);
 	
 	ASSERT( x >= 0 && x < HUGE_SECTOR_SIZE );
@@ -382,15 +383,15 @@ CWaterLevel::RenderWater()
 		TheCamera.GetPosition().y
 	);
 
-	int32 nStartX = WATER_TO_HUGE_SECTOR_X(camPos.x - fHugeSectorMaxRenderDist);
-	int32 nEndX   = WATER_TO_HUGE_SECTOR_X(camPos.x + fHugeSectorMaxRenderDist) + 1;
+	int32 nStartX = WATER_TO_HUGE_SECTOR_X(camPos.x - fHugeSectorMaxRenderDist + WATER_X_OFFSET);
+	int32 nEndX   = WATER_TO_HUGE_SECTOR_X(camPos.x + fHugeSectorMaxRenderDist + WATER_X_OFFSET) + 1;
 	int32 nStartY = WATER_TO_HUGE_SECTOR_Y(camPos.y - fHugeSectorMaxRenderDist);
 	int32 nEndY   = WATER_TO_HUGE_SECTOR_Y(camPos.y + fHugeSectorMaxRenderDist) + 1;
 
 	if ( bUseCamStartX )
-		nStartX = WATER_TO_HUGE_SECTOR_X(camPos.x);
+		nStartX = WATER_TO_HUGE_SECTOR_X(camPos.x + WATER_X_OFFSET);
 	if ( bUseCamEndX )
-		nEndX   = WATER_TO_HUGE_SECTOR_X(camPos.x);
+		nEndX   = WATER_TO_HUGE_SECTOR_X(camPos.x + WATER_X_OFFSET);
 	if ( bUseCamStartY )
 		nStartY = WATER_TO_HUGE_SECTOR_Y(camPos.y);
 	if ( bUseCamEndY )                             
@@ -410,7 +411,7 @@ CWaterLevel::RenderWater()
 				|| !(aWaterBlockList[2*x+0][2*y+1] & 128)
 				|| !(aWaterBlockList[2*x+1][2*y+1] & 128) )
 			{
-				float fX = WATER_FROM_HUGE_SECTOR_X(x);
+				float fX = WATER_FROM_HUGE_SECTOR_X(x) - WATER_X_OFFSET;
 				float fY = WATER_FROM_HUGE_SECTOR_Y(y);
 
 				CVector2D vecHugeSectorCentre
@@ -452,7 +453,7 @@ CWaterLevel::RenderWater()
 								{
 									if ( !(aWaterBlockList[x2][y2] & 128) )
 									{
-										float fLargeX = WATER_FROM_LARGE_SECTOR_X(x2);
+										float fLargeX = WATER_FROM_LARGE_SECTOR_X(x2) - WATER_X_OFFSET;
 										float fLargeY = WATER_FROM_LARGE_SECTOR_Y(y2);
 						
 										CVector2D vecLargeSectorCentre
@@ -609,15 +610,15 @@ CWaterLevel::RenderWater()
 	bottom -> top && left -> right
 	*/
 
-	if ( !bUseCamStartY )
+	for ( int32 x = 0; x < 26; x++ )
 	{
-		for ( int32 x = 0; x < 26; x++ )
+		for ( int32 y = 0; y < 5; y++ )
 		{
-			for ( int32 y = 0; y < 5; y++ )
+			float fX = WATER_SIGN_X(float(x) * EXTRAHUGE_SECTOR_SIZE) - 1280.0f - 400.0f;
+			float fY = WATER_SIGN_Y(float(y) * EXTRAHUGE_SECTOR_SIZE) - 1280.0f;
+			
+			if ( !bUseCamStartY )
 			{
-				float fX = WATER_SIGN_X(float(x) * EXTRAHUGE_SECTOR_SIZE) - 1280.0f;
-				float fY = WATER_SIGN_Y(float(y) * EXTRAHUGE_SECTOR_SIZE) - 1280.0f;
-				
 				CVector2D vecExtraHugeSectorCentre
 				(
 					fX + EXTRAHUGE_SECTOR_SIZE/2,
@@ -628,8 +629,7 @@ CWaterLevel::RenderWater()
 				
 				if ( fCamDistToSector < fHugeSectorMaxRenderDistSqr )
 				{
-					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE),
-							&TheCamera.GetCameraMatrix()) )
+					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE), &TheCamera.GetCameraMatrix()) )
 					{
 						RenderOneFlatExtraHugeWaterPoly(
 							vecExtraHugeSectorCentre.x - EXTRAHUGE_SECTOR_SIZE/2,
@@ -639,6 +639,30 @@ CWaterLevel::RenderWater()
 					}
 				}
 			}
+			
+			if ( !bUseCamEndY )
+			{
+				CVector2D vecExtraHugeSectorCentre
+				(
+					fX + EXTRAHUGE_SECTOR_SIZE/2,
+					-(fY + EXTRAHUGE_SECTOR_SIZE/2)
+				);
+				
+				float fCamDistToSector = (vecExtraHugeSectorCentre - camPos).Magnitude();
+				
+				if ( fCamDistToSector < fHugeSectorMaxRenderDistSqr )
+				{
+					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE), &TheCamera.GetCameraMatrix()) )
+					{
+						RenderOneFlatExtraHugeWaterPoly(
+							vecExtraHugeSectorCentre.x - EXTRAHUGE_SECTOR_SIZE/2,
+							vecExtraHugeSectorCentre.y - EXTRAHUGE_SECTOR_SIZE/2,
+							0.0f,
+							color);
+					}
+				}
+			}
+
 		}
 	}
 	
@@ -646,8 +670,8 @@ CWaterLevel::RenderWater()
 	{
 		for ( int32 x = 0; x < 5; x++ )
 		{
-			float fX = WATER_SIGN_X(float(x) * EXTRAHUGE_SECTOR_SIZE) - 1280.0f;
-			float fX2 = WATER_SIGN_X(float(x) * EXTRAHUGE_SECTOR_SIZE) - 1280.0f;
+			float fX = WATER_SIGN_X(float(x) * EXTRAHUGE_SECTOR_SIZE) - 1280.0f - 400.0f;
+			float fX2 = WATER_SIGN_X(float(x) * EXTRAHUGE_SECTOR_SIZE) - 1280.0f + 400.0f;
 			float fY = WATER_SIGN_Y(float(y) * EXTRAHUGE_SECTOR_SIZE) - 1280.0f;
 			
 			if ( !bUseCamStartX )
@@ -662,8 +686,7 @@ CWaterLevel::RenderWater()
 				
 				if ( fCamDistToSector < fHugeSectorMaxRenderDistSqr )
 				{
-					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE),
-							&TheCamera.GetCameraMatrix()) )
+					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE), &TheCamera.GetCameraMatrix()) )
 					{
 						RenderOneFlatExtraHugeWaterPoly(
 							vecExtraHugeSectorCentre.x - EXTRAHUGE_SECTOR_SIZE/2,
@@ -686,8 +709,7 @@ CWaterLevel::RenderWater()
 				
 				if ( fCamDistToSector < fHugeSectorMaxRenderDistSqr )
 				{
-					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE),
-							&TheCamera.GetCameraMatrix()) )
+					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE), &TheCamera.GetCameraMatrix()) )
 					{
 						RenderOneFlatExtraHugeWaterPoly(
 							vecExtraHugeSectorCentre.x - EXTRAHUGE_SECTOR_SIZE/2,
@@ -1087,8 +1109,8 @@ CWaterLevel::CalcDistanceToWater(float fX, float fY)
 {
 	const float fSectorMaxRenderDist = 75.0f;
 	
-	int32 nStartX = WATER_TO_SMALL_SECTOR_X(fX - fSectorMaxRenderDist) - 1;
-	int32 nEndX   = WATER_TO_SMALL_SECTOR_X(fX + fSectorMaxRenderDist) + 1;
+	int32 nStartX = WATER_TO_SMALL_SECTOR_X(fX - fSectorMaxRenderDist + WATER_X_OFFSET) - 1;
+	int32 nEndX   = WATER_TO_SMALL_SECTOR_X(fX + fSectorMaxRenderDist + WATER_X_OFFSET) + 1;
 	int32 nStartY = WATER_TO_SMALL_SECTOR_Y(fY - fSectorMaxRenderDist) - 1;
 	int32 nEndY   = WATER_TO_SMALL_SECTOR_Y(fY + fSectorMaxRenderDist) + 1;
 	
@@ -1105,7 +1127,7 @@ CWaterLevel::CalcDistanceToWater(float fX, float fY)
 		{
 			if ( !(aWaterFineBlockList[x][y] & 128) )
 			{				
-				float fSectorX = WATER_FROM_SMALL_SECTOR_X(x);
+				float fSectorX = WATER_FROM_SMALL_SECTOR_X(x) - WATER_X_OFFSET;
 				float fSectorY = WATER_FROM_SMALL_SECTOR_Y(y);
 				
 				CVector2D vecDist

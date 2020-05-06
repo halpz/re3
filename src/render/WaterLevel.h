@@ -1,8 +1,10 @@
 #pragma once
 
+#define WATER_X_OFFSET (400.0f)
+
 #define WATER_BLOCK_SIZE     LARGE_SECTOR_SIZE
 #define WATER_FINEBLOCK_SIZE HUGE_SECTOR_SIZE
-#define WATER_Z_OFFSET (1.5f)
+#define WATER_Z_OFFSET (0.5f)
 
 #define MAX_SMALL_SECTORS      128
 #define MAX_LARGE_SECTORS      64
@@ -14,8 +16,8 @@
 #define HUGE_SECTOR_SIZE       128
 #define EXTRAHUGE_SECTOR_SIZE  256
 
-#define WATER_START_X (-2048.0f - 400.0f)
-#define WATER_END_X    (2048.0f - 400.0f)
+#define WATER_START_X -2048.0f
+#define WATER_END_X    2048.0f
 
 #define WATER_START_Y -2048.0f
 #define WATER_END_Y    2048.0f
