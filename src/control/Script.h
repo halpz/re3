@@ -6,6 +6,7 @@
 
 class CEntity;
 class CBuilding;
+class CPhysical;
 class CVehicle;
 class CPed;
 class CObject;
@@ -131,6 +132,8 @@ public:
 	void AddEntityToList(int32, uint8);
 	void RemoveEntityFromList(int32, uint8);
 	void Process();
+	void CheckIfCollisionHasLoadedForMissionObject();
+	CPhysical* DoesThisEntityWaitForCollision(int i);
 };
 
 struct CUpsideDownCarCheckEntry

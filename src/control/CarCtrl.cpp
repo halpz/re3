@@ -90,14 +90,16 @@ uint32 aCarsToKeepTime[MAX_CARS_TO_KEEP];
 void
 CCarCtrl::GenerateRandomCars()
 {
-	if (CCutsceneMgr::IsRunning())
+	if (CCutsceneMgr::IsRunning()) {
+		CountDownToCarsAtStart = 2;
 		return;
+	}
 	if (NumRandomCars < 30){
 		if (CountDownToCarsAtStart == 0){
 			GenerateOneRandomCar();
 		}
 		else if (--CountDownToCarsAtStart == 0) {
-			for (int i = 0; i < 50; i++)
+			for (int i = 0; i < 100; i++)
 				GenerateOneRandomCar();
 			CTheCarGenerators::GenerateEvenIfPlayerIsCloseCounter = 20;
 		}

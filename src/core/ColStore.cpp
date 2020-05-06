@@ -9,6 +9,7 @@
 #include "Timer.h"
 #include "Camera.h"
 #include "Frontend.h"
+#include "Physical.h"
 #include "ColStore.h"
 
 CPool<ColDef,ColDef> *CColStore::ms_pColPool;
@@ -174,7 +175,13 @@ CColStore::LoadCollision(const CVector2D &pos)
 		   CGeneral::faststrcmp(GetColName(i), "yacht") == 0){
 			wantThisOne = true;
 		}else{
-			// TODO: check mission cleanup list
+			for (int j = 0; j < MAX_CLEANUP; j++) {
+				CPhysical* pEntity = CTheScripts::MissionCleanup.DoesThisEntityWaitForCollision(j);
+				if (pEntity /* !pEntity->bDontLoadCollision && !pEntity->bIsFrozen */) {
+					if (GetBoundingBox(i).IsPointInside(pEntity->GetPosition(), -80.0f))
+						wantThisOne = true;
+				}
+			}
 		}
 
 		if(wantThisOne)
@@ -221,7 +228,7 @@ CColStore::HasCollisionLoaded(const CVector2D &pos)
 	int i;
 
 	for(i = 1; i < COLSTORESIZE; i++)
-		if(GetSlot(i) && GetBoundingBox(i).IsPointInside(pos, -110.0f) &&
+		if(GetSlot(i) && GetBoundingBox(i).IsPointInside(pos, -115.0f) &&
 		   !GetSlot(i)->isLoaded)
 			return false;
 	return true;
