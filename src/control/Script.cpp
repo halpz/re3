@@ -8214,9 +8214,9 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_CABBIE:
 				case MI_STALLION:
 				case MI_RUMPO:
-				case 151:
-				case 152:
-				case 153:
+//				case 151:
+//				case 152:
+//				case 153:
 					break;
 				default:
 					printf("CREATE_RANDOM_CAR_FOR_CAR_PARK - Unknown car model %d\n", CStreaming::ms_vehiclesLoaded[index]);
