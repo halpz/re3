@@ -10,26 +10,37 @@
 #define MAX_COLLISION_POINTS 32
 #endif
 
-struct CColSphere
+struct CSphere
 {
 	CVector center;
 	float radius;
+	void Set(float radius, const CVector &center) { this->center = center; this->radius = radius; }
+};
+
+struct CBox
+{
+	CVector min;
+	CVector max;
+	CVector GetSize(void) { return max - min; }
+	void Set(const CVector &min, const CVector &max) {  this->min = min; this->max = max; }
+};
+
+struct CColSphere : public CSphere
+{
 	uint8 surface;
 	uint8 piece;
 
 	void Set(float radius, const CVector &center, uint8 surf, uint8 piece);
-	void Set(float radius, const CVector &center) { this->center = center; this->radius = radius; }
+	using CSphere::Set;
 };
 
-struct CColBox
+struct CColBox : public CBox
 {
-	CVector min;
-	CVector max;
 	uint8 surface;
 	uint8 piece;
 
 	void Set(const CVector &min, const CVector &max, uint8 surf, uint8 piece);
-	CVector GetSize(void) { return max - min; }
+	using CBox::Set;
 };
 
 struct CColLine
@@ -85,15 +96,15 @@ struct CStoredCollPoly
 	bool valid;
 };
 
+//--MIAMI: done struct
 struct CColModel
 {
-	// TODO(MIAMI): CSphere and CBox
-	CColSphere boundingSphere;
-	CColBox boundingBox;
+	CSphere boundingSphere;
+	CBox boundingBox;
 	int16 numSpheres;
-	int16 numLines;
 	int16 numBoxes;
 	int16 numTriangles;
+	int8 numLines;
 	uint8 level;	// colstore slot but probably still named level
 	bool ownsCollisionVolumes;
 	CColSphere *spheres;
@@ -133,10 +144,10 @@ public:
 	static void CalculateTrianglePlanes(CColModel *model);
 
 	// all these return true if there's a collision
-	static bool TestSphereSphere(const CColSphere &s1, const CColSphere &s2);
-	static bool TestSphereBox(const CColSphere &sph, const CColBox &box);
-	static bool TestLineBox(const CColLine &line, const CColBox &box);
-	static bool TestVerticalLineBox(const CColLine &line, const CColBox &box);
+	static bool TestSphereSphere(const CSphere &s1, const CSphere &s2);
+	static bool TestSphereBox(const CSphere &sph, const CBox &box);
+	static bool TestLineBox(const CColLine &line, const CBox &box);
+	static bool TestVerticalLineBox(const CColLine &line, const CBox &box);
 	static bool TestLineTriangle(const CColLine &line, const CVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane);
 	static bool TestLineSphere(const CColLine &line, const CColSphere &sph);
 	static bool TestSphereTriangle(const CColSphere &sphere, const CVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane);

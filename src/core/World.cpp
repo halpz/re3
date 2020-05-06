@@ -920,6 +920,7 @@ CWorld::TestSphereAgainstSectorList(CPtrList &list, CVector spherePos, float rad
                                     bool ignoreSomeObjects)
 {
 	static CColModel sphereCol;
+	CColSphere sphere;
 
 	sphereCol.boundingSphere.center.x = 0.0f;
 	sphereCol.boundingSphere.center.y = 0.0f;
@@ -932,7 +933,8 @@ CWorld::TestSphereAgainstSectorList(CPtrList &list, CVector spherePos, float rad
 	sphereCol.boundingBox.max.y = radius;
 	sphereCol.boundingBox.max.z = radius;
 	sphereCol.numSpheres = 1;
-	sphereCol.spheres = &sphereCol.boundingSphere;
+	sphere.Set(radius, CVector(0.0f, 0.0f, 0.0f));
+	sphereCol.spheres = &sphere;
 	sphereCol.numLines = 0;
 	sphereCol.numBoxes = 0;
 	sphereCol.numTriangles = 0;
@@ -1201,7 +1203,7 @@ CWorld::FindObjectsIntersectingCubeSectorList(CPtrList &list, const CVector &vec
 }
 
 void
-CWorld::FindObjectsIntersectingAngledCollisionBox(const CColBox &boundingBox, const CMatrix &matrix,
+CWorld::FindObjectsIntersectingAngledCollisionBox(const CBox &boundingBox, const CMatrix &matrix,
                                                   const CVector &position, float fStartX, float fStartY, float fEndX,
                                                   float fEndY, int16 *nEntitiesFound, int16 maxEntitiesToFind,
                                                   CEntity **aEntities, bool bBuildings, bool bVehicles, bool bPeds,
@@ -1261,7 +1263,7 @@ CWorld::FindObjectsIntersectingAngledCollisionBox(const CColBox &boundingBox, co
 }
 
 void
-CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList &list, const CColBox &boundingBox,
+CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList &list, const CBox &boundingBox,
                                                             const CMatrix &matrix, const CVector &position,
                                                             int16 *nEntitiesFound, int16 maxEntitiesToFind,
                                                             CEntity **aEntities)

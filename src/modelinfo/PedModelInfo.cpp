@@ -255,13 +255,13 @@ CPedModelInfo::CreateHitColModel(void)
 	colmodel->spheres = spheres;
 	colmodel->numSpheres = NUMPEDINFONODES;
 	center.x = center.y = center.z = 0.0f;
-	colmodel->boundingSphere.Set(2.0f, center, 0, 0);
+	colmodel->boundingSphere.Set(2.0f, center);
 	CVector min, max;
 	min.x = min.y = -0.5f;
 	min.z = -1.2f;
 	max.x = max.y = 0.5f;
 	max.z = 1.2f;
-	colmodel->boundingBox.Set(min, max, 0, 0);
+	colmodel->boundingBox.Set(min, max);
 	colmodel->level = LEVEL_NONE;
 	m_hitColModel = colmodel;
 }
@@ -339,13 +339,13 @@ CPedModelInfo::CreateHitColModelSkinned(RpClump *clump)
 	colmodel->spheres = spheres;
 	colmodel->numSpheres = NUMPEDINFONODES;
 	center.x = center.y = center.z = 0.0f;
-	colmodel->boundingSphere.Set(2.0f, center, 0, 0);
+	colmodel->boundingSphere.Set(2.0f, center);
 	CVector min, max;
 	min.x = min.y = -0.5f;
 	min.z = -1.2f;
 	max.x = max.y = 0.5f;
 	max.z = 1.2f;
-	colmodel->boundingBox.Set(min, max, 0, 0);
+	colmodel->boundingBox.Set(min, max);
 	colmodel->level = LEVEL_NONE;
 	m_hitColModel = colmodel;
 }

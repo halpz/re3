@@ -193,6 +193,8 @@ CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
 	CFileMgr::CloseFile(fd);
 }
 
+
+//--MIAMI: done
 bool
 CFileLoader::LoadCollisionFileFirstTime(uint8 *buffer, uint32 size, uint8 colSlot)
 {
