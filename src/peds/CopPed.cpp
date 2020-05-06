@@ -709,7 +709,7 @@ CCopPed::ProcessControl(void)
 		return;
 
 	bool dontShoot = false;
-	if (GetIsOnScreenAndNotCulled()) {
+	if (GetIsOnScreen() && CRenderer::IsEntityCullZoneVisible(this)) {
 		if (((CTimer::GetFrameCounter() + m_randomSeed) & 0x1F) == 17) {
 			CEntity *foundBuilding = nil;
 			CColPoint foundCol;
