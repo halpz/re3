@@ -483,9 +483,6 @@ void CGame::ReInitGameObjectVariables(void)
 	CSpecialFX::Init();
 	CWaterCannons::Init();
 	CParticle::ReloadConfig();
-#ifdef GTA_ZONECULL
-	CCullZones::ResolveVisibilities();
-#endif
 
 	if ( !FrontEndMenuManager.m_bWantToLoad )
 	{

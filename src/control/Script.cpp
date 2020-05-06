@@ -1815,7 +1815,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		if (m_bIsMissionScript)
 			ped->bIsStaticWaitingForCollision = true;
 		CWorld::Add(ped);
-		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
+		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pos);
 		CPopulation::ms_nTotalMissionPeds++;
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
 		StoreParameters(&m_nIp, 1);
@@ -2056,7 +2056,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			car->AutoPilot.m_nCruiseSpeed = car->AutoPilot.m_fMaxTrafficSpeed = 9.0f;
 			car->AutoPilot.m_nCurrentLane = car->AutoPilot.m_nNextLane = 0;
 			car->bEngineOn = false;
-			car->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
+			car->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pos);
 			car->bHasBeenOwnedByPlayer = true;
 			if (m_bIsMissionScript)
 				car->bIsStaticWaitingForCollision = true;
@@ -2759,12 +2759,12 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		CPlayerInfo* pPlayer = &CWorld::Players[ScriptParams[0]];
 		char label[12];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
-		int zoneToCheck = CTheZones::FindZoneByLabelAndReturnIndex(label);
+		int zoneToCheck = CTheZones::FindZoneByLabelAndReturnIndex(label, ZONE_DEFAULT);
 		if (zoneToCheck != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT; /* why only if zone != 1? */
 		CVector pos = pPlayer->GetPos();
-		CZone* pZone = CTheZones::GetZone(zoneToCheck);
-		UpdateCompareFlag(CTheZones::PointLiesWithinZone(pos, pZone));
+		CZone* pZone = CTheZones::GetNavigationZone(zoneToCheck);
+		UpdateCompareFlag(CTheZones::PointLiesWithinZone(&pos, pZone));
 		return 0;
 	}
 	case COMMAND_IS_PLAYER_PRESSING_HORN:
@@ -2863,7 +2863,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 #endif
 		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
 		pPed->StopNonPartialAnims();
-		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
+		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		CWorld::Add(pPed);
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);
@@ -3091,7 +3091,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 16);
-		int zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
+		int zone = CTheZones::FindZoneByLabelAndReturnIndex(label, ZONE_INFO);
 		if (zone < 0) {
 			debug("Couldn't find zone - %s\n", label);
 			return 0;
@@ -3112,41 +3112,17 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		assert(pPed);
 		char label[12];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
-		int zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
+		int zone = CTheZones::FindZoneByLabelAndReturnIndex(label, ZONE_DEFAULT);
 		if (zone != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CVector pos = pPed->bInVehicle ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
-		UpdateCompareFlag(CTheZones::PointLiesWithinZone(pos, CTheZones::GetZone(zone)));
+		UpdateCompareFlag(CTheZones::PointLiesWithinZone(&pos, CTheZones::GetNavigationZone(zone)));
 		return 0;
 	}
+	/* Not implemented.
 	case COMMAND_SET_CAR_DENSITY:
-	{
-		char label[12];
-		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
-		int16 zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
-		m_nIp += 8;
-		CollectParameters(&m_nIp, 2);
-		if (zone < 0) {
-			debug("Couldn't find zone - %s\n", label);
-			return 0;
-		}
-		CTheZones::SetCarDensity(zone, ScriptParams[0], ScriptParams[1]);
-		return 0;
-	}
 	case COMMAND_SET_PED_DENSITY:
-	{
-		char label[12];
-		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
-		int16 zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
-		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CollectParameters(&m_nIp, 2);
-		if (zone < 0) {
-			debug("Couldn't find zone - %s\n", label);
-			return 0;
-		}
-		CTheZones::SetPedDensity(zone, ScriptParams[0], ScriptParams[1]);
-		return 0;
-	}
+	*/
 	case COMMAND_POINT_CAMERA_AT_PLAYER:
 	{
 		CollectParameters(&m_nIp, 3);
@@ -3182,7 +3158,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 10);
-		int16 zone = CTheZones::FindZoneByLabelAndReturnIndex(label);
+		int16 zone = CTheZones::FindZoneByLabelAndReturnIndex(label, ZONE_INFO);
 		if (zone < 0) {
 			debug("Couldn't find zone - %s\n", label);
 			return 0;
@@ -4054,7 +4030,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 #endif
 		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
 		pPed->StopNonPartialAnims();
-		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
+		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		CWorld::Add(pPed);
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);
@@ -5943,10 +5919,10 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	{
 		char zone[KEY_LENGTH_IN_SCRIPT];
 		strncpy(zone, (const char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
-		int nZone = CTheZones::FindZoneByLabelAndReturnIndex(zone);
+		int nZone = CTheZones::FindZoneByLabelAndReturnIndex(zone, ZONE_DEFAULT);
 		if (nZone != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CZone* pZone = CTheZones::GetZone(nZone);
+		CZone* pZone = CTheZones::GetNavigationZone(nZone);
 		int ped_handle = -1;
 		CVector pos = FindPlayerCoors();
 		int i = CPools::GetPedPool()->GetSize();
@@ -5970,7 +5946,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 				continue;
 			if (pPed->bIsLeader || pPed->m_leader)
 				continue;
-			if (!CTheZones::PointLiesWithinZone(pPed->GetPosition(), pZone))
+			if (!CTheZones::PointLiesWithinZone(&pPed->GetPosition(), pZone))
 				continue;
 			if (pos.z - PED_FIND_Z_OFFSET > pPed->GetPosition().z)
 				continue;
@@ -6551,7 +6527,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 2);
-		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
+		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone, ZONE_INFO);
 		if (zone_id < 0) {
 			printf("Couldn't find zone - %s\n", zone);
 			return 0;
@@ -6611,10 +6587,11 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	{
 		char zone[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
-		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
+// TODO(MIAMI): just getting this to compile with new argument
+		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone, ZONE_DEFAULT);
 		if (zone_id != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CZone* pZone = CTheZones::GetZone(zone_id);
+		CZone* pZone = CTheZones::GetNavigationZone(zone_id);
 		CollectParameters(&m_nIp, 1);
 		int handle = -1;
 		uint32 i = CPools::GetVehiclePool()->GetSize();
@@ -6626,7 +6603,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 				continue;
 			if (pVehicle->VehicleCreatedBy != RANDOM_VEHICLE)
 				continue;
-			if (!CTheZones::PointLiesWithinZone(pVehicle->GetPosition(), pZone))
+			if (!CTheZones::PointLiesWithinZone(&pVehicle->GetPosition(), pZone))
 				continue;
 			handle = CPools::GetVehiclePool()->GetIndex(pVehicle);
 			pVehicle->VehicleCreatedBy = MISSION_VEHICLE;
@@ -7117,10 +7094,11 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CollectParameters(&m_nIp, 1);
 		char zone[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
-		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone);
+// TODO(MIAMI): just getting this to compile with new argument
+		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone, ZONE_DEFAULT);
 		if (zone_id != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CZone* pZone = CTheZones::GetZone(zone_id);
+		CZone* pZone = CTheZones::GetNavigationZone(zone_id);
 		UpdateCompareFlag(CExplosion::TestForExplosionInArea((eExplosionType)ScriptParams[0],
 			pZone->minx, pZone->maxx, pZone->miny, pZone->maxy, pZone->minz, pZone->maxz));
 		return 0;
@@ -7252,7 +7230,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		if (total == 0)
 			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(LEVEL_NONE), pos, range, true, &total, 16, apEntities);
 		if (total == 0)
-			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(CTheZones::GetLevelFromPosition(pos)), pos, range, true, &total, 16, apEntities);
+			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(CTheZones::GetLevelFromPosition(&pos)), pos, range, true, &total, 16, apEntities);
 		CEntity* pClosestEntity = nil;
 		float min_dist = 2.0f * range;
 		for (int i = 0; i < total; i++) {
@@ -7439,7 +7417,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		if (m_bIsMissionScript)
 			ped->bIsStaticWaitingForCollision = true;
 		CWorld::Add(ped);
-		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
+		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pos);
 		CPopulation::ms_nTotalMissionPeds++;
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
 		StoreParameters(&m_nIp, 1);
@@ -8006,7 +7984,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		if (total == 0)
 			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(LEVEL_NONE), pos, radius, true, &total, 16, apEntities);
 		if (total == 0)
-			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(CTheZones::GetLevelFromPosition(pos)), pos, radius, true, &total, 16, apEntities);
+			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(CTheZones::GetLevelFromPosition(&pos)), pos, radius, true, &total, 16, apEntities);
 		CEntity* pClosestEntity = nil;
 		float min_dist = 2.0f * radius;
 		for (int i = 0; i < total; i++) {
@@ -8270,7 +8248,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		car->AutoPilot.m_nCruiseSpeed = car->AutoPilot.m_fMaxTrafficSpeed = 9.0f;
 		car->AutoPilot.m_nCurrentLane = car->AutoPilot.m_nNextLane = 0;
 		car->bEngineOn = false;
-		car->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
+		car->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pos);
 		CWorld::Add(car);
 		return 0;
 	}
@@ -8596,7 +8574,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		if (ScriptParams[1])
-			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(pVehicle->GetPosition());
+			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pVehicle->GetPosition());
 		else
 			pVehicle->m_nZoneLevel = LEVEL_NONE;
 		return 0;
@@ -8607,7 +8585,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		if (ScriptParams[1])
-			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
+			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		else
 			pPed->m_nZoneLevel = LEVEL_NONE;
 		return 0;
@@ -9012,7 +8990,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (ScriptParams[1])
 			pPed->m_nZoneLevel = LEVEL_IGNORE;
 		else
-			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
+			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		return 0;
 	}
 	case COMMAND_GET_CHASE_CAR:
@@ -9211,7 +9189,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		if (ScriptParams[1])
 			pVehicle->m_nZoneLevel = LEVEL_IGNORE;
 		else
-			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(pVehicle->GetPosition());
+			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pVehicle->GetPosition());
 		return 0;
 	}
 	case COMMAND_MAKE_CRAIGS_CAR_A_BIT_STRONGER:
@@ -9532,10 +9510,11 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	{
 		char zone[KEY_LENGTH_IN_SCRIPT];
 		strncpy(zone, (const char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
-		int nZone = CTheZones::FindZoneByLabelAndReturnIndex(zone);
+// TODO(MIAMI): just getting this to compile with new argument
+		int nZone = CTheZones::FindZoneByLabelAndReturnIndex(zone, ZONE_DEFAULT);
 		if (nZone != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CZone* pZone = CTheZones::GetZone(nZone);
+		CZone* pZone = CTheZones::GetNavigationZone(nZone);
 		int ped_handle = -1;
 		CVector pos = FindPlayerCoors();
 		int i = CPools::GetPedPool()->GetSize();
@@ -9557,7 +9536,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 				continue;
 			if (pPed->bIsLeader || pPed->m_leader)
 				continue;
-			if (!CTheZones::PointLiesWithinZone(pPed->GetPosition(), pZone))
+			if (!CTheZones::PointLiesWithinZone(&pPed->GetPosition(), pZone))
 				continue;
 			if (pos.z - PED_FIND_Z_OFFSET > pPed->GetPosition().z)
 				continue;

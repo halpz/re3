@@ -32,15 +32,15 @@ void
 CPlaceName::Process()
 {
 	CVector pos = CWorld::Players[CWorld::PlayerInFocus].GetPos();
-	CZone *navigZone = CTheZones::FindSmallestZonePositionType(&pos, ZONE_TYPE1);
-	CZone *audioZone = CTheZones::FindSmallestZonePositionType(&pos, ZONE_AUDIO);
+	CZone *navigZone = CTheZones::FindSmallestNavigationZoneForPosition(&pos, false, true);
+	CZone *defaultZone = CTheZones::FindSmallestNavigationZoneForPosition(&pos, true, false);
 
 	if (navigZone == nil) m_pZone = nil;
-	if (audioZone == nil) m_pZone2 = nil;
+	if (defaultZone == nil) m_pZone2 = nil;
 
 	if (navigZone == m_pZone) {
-		if (audioZone == m_pZone2 || m_pZone != nil) {
-			if (navigZone != nil || audioZone != nil) {
+		if (defaultZone == m_pZone2 || m_pZone != nil) {
+			if (navigZone != nil || defaultZone != nil) {
 				if (m_nAdditionalTimer != 0)
 					m_nAdditionalTimer--;
 			} else {
@@ -49,7 +49,7 @@ CPlaceName::Process()
 				m_pZone2 = nil;
 			}
 		} else {
-			m_pZone2 = audioZone;
+			m_pZone2 = defaultZone;
 			m_nAdditionalTimer = 250;
 		}
 	} else {

@@ -5,9 +5,9 @@
 
 enum eZoneType
 {
-	ZONE_AUDIO,
-	ZONE_TYPE1,	// this should be NAVIG
-	ZONE_TYPE2,	// this should be INFO...but all except MAPINFO get zoneinfo??
+	ZONE_DEFAULT,
+	ZONE_NAVIG,
+	ZONE_INFO,
 	ZONE_MAPZONE,
 };
 
@@ -51,19 +51,20 @@ public:
 
 class CTheZones
 {
-public:
-	static eLevelName m_CurrLevel;
-	static CZone *m_pPlayersZone;
 	static int16 FindIndex;
 
 	static uint16 NumberOfAudioZones;
 	static int16 AudioZoneArray[NUMAUDIOZONES];
 	static uint16 TotalNumberOfMapZones;
-	static uint16 TotalNumberOfZones;
-	static CZone ZoneArray[NUMZONES];
+	static uint16 TotalNumberOfInfoZones;
+	static uint16 TotalNumberOfNavigationZones;
+	static CZone InfoZoneArray[NUMINFOZONES];
 	static CZone MapZoneArray[NUMMAPZONES];
+	static CZone NavigationZoneArray[NUMNAVIGZONES];
 	static uint16 TotalNumberOfZoneInfos;
-	static CZoneInfo ZoneInfoArray[2*NUMZONES];
+	static CZoneInfo ZoneInfoArray[2*NUMINFOZONES];
+public:
+	static eLevelName m_CurrLevel;
 
 	static void Init(void);
 	static void Update(void);
@@ -71,17 +72,21 @@ public:
 	                       float minx, float miny, float minz,
 	                       float maxx, float maxy, float maxz,
 	                       eLevelName level);
-	static CZone *GetZone(uint16 i) { return &ZoneArray[i]; }
+	static CZone *GetInfoZone(uint16 i) { return &InfoZoneArray[i]; }
+	static CZone *GetNavigationZone(uint16 i) { return &NavigationZoneArray[i]; }
+	static CZone *GetMapZone(uint16 i) { return &MapZoneArray[i]; }
+	static CZone *GetAudioZone(uint16 i) { return &InfoZoneArray[AudioZoneArray[i]]; }
 	static void PostZoneCreation(void);
+	static void CheckZonesForOverlap(void);
 	static void InsertZoneIntoZoneHierarchy(CZone *zone);
 	static bool InsertZoneIntoZoneHierRecursive(CZone *z1, CZone *z2);
 	static bool ZoneIsEntirelyContainedWithinOtherZone(CZone *z1, CZone *z2);
-	static bool PointLiesWithinZone(const CVector &v, CZone *zone);
-	static eLevelName GetLevelFromPosition(CVector const &v);
-	static CZone *FindSmallestZonePosition(const CVector *v);
-	static CZone *FindSmallestZonePositionType(const CVector *v, eZoneType type);
-	static CZone *FindSmallestZonePositionILN(const CVector *v);
-	static int16 FindZoneByLabelAndReturnIndex(char *name);
+	static bool PointLiesWithinZone(const CVector *v, CZone *zone);
+	static eLevelName GetLevelFromPosition(const CVector *v);
+	static CZone *FindInformationZoneForPosition(const CVector *v);
+	static CZone *FindSmallestNavigationZoneForPosition(const CVector *v, bool findDefault, bool findNavig);
+	static int16 FindZoneByLabelAndReturnIndex(char *name, eZoneType type);
+	static int16 FindNextZoneByLabelAndReturnIndex(char *name, eZoneType type);
 	static CZoneInfo *GetZoneInfo(const CVector *v, uint8 day);
 	static void GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info);
 	static void SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
@@ -99,8 +104,8 @@ public:
 	static void SetPedDensity(uint16 zoneid, uint8 day, uint16 peddensity);
 	static void SetPedGroup(uint16 zoneid, uint8 day, uint16 pedgroup);
 	static int16 FindAudioZone(CVector *pos);
-	static CZone *GetPointerForZoneIndex(int32 i) { return i == -1 ? nil : &ZoneArray[i]; }
-	static int32 GetIndexForZonePointer(CZone *zone) { return zone == nil ? -1 : zone - ZoneArray; }
+	static CZone *GetPointerForZoneIndex(int32 i) { return i == -1 ? nil : &InfoZoneArray[i]; }
+	static int32 GetIndexForZonePointer(CZone *zone) { return zone == nil ? -1 : zone - InfoZoneArray; }
 	static void AddZoneToAudioZoneArray(CZone *zone);
 	static void InitialiseAudioZoneArray(void);
 	static void SaveAllZones(uint8 *buffer, uint32 *length);
