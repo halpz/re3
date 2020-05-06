@@ -429,8 +429,7 @@ void RwIm3DVertexSetU(RwIm3DVertex *vert, RwReal u) { vert->setU(u); }
 void RwIm3DVertexSetV(RwIm3DVertex *vert, RwReal v) { vert->setV(v); }
 void RwIm3DVertexSetRGBA(RwIm3DVertex *vert, RwUInt8 r, RwUInt8 g, RwUInt8 b, RwUInt8 a) { vert->setColor(r, g, b, a); }
 
-// WARNING: ignoring flags
-void  *RwIm3DTransform(RwIm3DVertex *pVerts, RwUInt32 numVerts, RwMatrix *ltm, RwUInt32 flags) { im3d::Transform(pVerts, numVerts, ltm); return pVerts; }
+void  *RwIm3DTransform(RwIm3DVertex *pVerts, RwUInt32 numVerts, RwMatrix *ltm, RwUInt32 flags) { im3d::Transform(pVerts, numVerts, ltm, flags); return pVerts; }
 RwBool RwIm3DEnd(void) { im3d::End(); return true; }
 RwBool RwIm3DRenderLine(RwInt32 vert1, RwInt32 vert2) {
 	RwImVertexIndex indices[2];
