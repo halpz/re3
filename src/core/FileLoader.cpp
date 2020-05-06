@@ -1088,7 +1088,7 @@ CFileLoader::LoadObjectInstance(const char *line)
 			entity = new CBuilding;
 		entity->SetModelIndexNoCreate(id);
 		entity->GetMatrix() = CMatrix(xform);
-		entity->m_level = CTheZones::GetLevelFromPosition(entity->GetPosition());
+		entity->m_level = CTheZones::GetLevelFromPosition(&entity->GetPosition());
 		if(mi->IsSimple()){
 			if(mi->m_isBigBuilding)
 				entity->SetupBigBuilding();
@@ -1105,7 +1105,7 @@ CFileLoader::LoadObjectInstance(const char *line)
 		CWorld::Add(entity);
 		if(IsGlass(entity->GetModelIndex()))
 			entity->bIsVisible = false;
-		entity->m_level = CTheZones::GetLevelFromPosition(entity->GetPosition());
+		entity->m_level = CTheZones::GetLevelFromPosition(&entity->GetPosition());
 	}
 
 	RwMatrixDestroy(xform);

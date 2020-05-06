@@ -533,7 +533,7 @@ CCullZone::IsEntityCloseEnoughToZone(CEntity *entity, bool checkLevel)
 
 	if (lodDist > distToZone) return true;
 	if (!checkLevel) return false;
-	return CTheZones::GetLevelFromPosition(pos) == CTheZones::GetLevelFromPosition(CVector(minx, miny, minz));
+	return CTheZones::GetLevelFromPosition(&pos) == CTheZones::GetLevelFromPosition(&CVector(minx, miny, minz));
 }
 
 bool

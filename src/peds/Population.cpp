@@ -396,7 +396,7 @@ CPopulation::FindCollisionZoneForCoors(CVector *coors, int *safeZoneOut, eLevelN
 	if (*safeZoneOut >= 0)
 		*levelOut = LEVEL_NONE;
 	else
-		*levelOut = CTheZones::GetLevelFromPosition(*coors);
+		*levelOut = CTheZones::GetLevelFromPosition(coors);
 }
 
 void

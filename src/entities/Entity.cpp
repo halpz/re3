@@ -331,7 +331,7 @@ CEntity::SetupBigBuilding(void)
 	bIsBIGBuilding = true;
 	bStreamingDontDelete = true;
 	bUsesCollision = false;
-	m_level = CTheZones::GetLevelFromPosition(GetPosition());
+	m_level = CTheZones::GetLevelFromPosition(&GetPosition());
 	if(m_level == LEVEL_NONE){
 		if(mi->GetTxdSlot() != CTxdStore::FindTxdSlot("generic")){
 			mi->SetTexDictionary("generic");

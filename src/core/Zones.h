@@ -5,9 +5,9 @@
 
 enum eZoneType
 {
-	ZONE_AUDIO,
-	ZONE_TYPE1,	// this should be NAVIG
-	ZONE_TYPE2,	// this should be INFO...but all except MAPINFO get zoneinfo??
+	ZONE_DEFAULT,
+	ZONE_NAVIG,
+	ZONE_INFO,
 	ZONE_MAPZONE,
 };
 
@@ -51,8 +51,6 @@ public:
 
 class CTheZones
 {
-public:
-	static eLevelName m_CurrLevel;
 	static CZone *m_pPlayersZone;
 	static int16 FindIndex;
 
@@ -64,6 +62,8 @@ public:
 	static CZone MapZoneArray[NUMMAPZONES];
 	static uint16 TotalNumberOfZoneInfos;
 	static CZoneInfo ZoneInfoArray[2*NUMZONES];
+public:
+	static eLevelName m_CurrLevel;
 
 	static void Init(void);
 	static void Update(void);
@@ -76,12 +76,13 @@ public:
 	                          float maxx, float maxy, float maxz,
 	                          eLevelName level);
 	static CZone *GetZone(uint16 i) { return &ZoneArray[i]; }
+	static CZone *GetAudioZone(uint16 i) { return &ZoneArray[AudioZoneArray[i]]; }
 	static void PostZoneCreation(void);
 	static void InsertZoneIntoZoneHierarchy(CZone *zone);
 	static bool InsertZoneIntoZoneHierRecursive(CZone *z1, CZone *z2);
 	static bool ZoneIsEntirelyContainedWithinOtherZone(CZone *z1, CZone *z2);
-	static bool PointLiesWithinZone(const CVector &v, CZone *zone);
-	static eLevelName GetLevelFromPosition(CVector const &v);
+	static bool PointLiesWithinZone(const CVector *v, CZone *zone);
+	static eLevelName GetLevelFromPosition(const CVector *v);
 	static CZone *FindSmallestZonePosition(const CVector *v);
 	static CZone *FindSmallestZonePositionType(const CVector *v, eZoneType type);
 	static CZone *FindSmallestZonePositionILN(const CVector *v);

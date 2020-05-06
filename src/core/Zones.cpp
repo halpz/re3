@@ -23,6 +23,8 @@ CZoneInfo CTheZones::ZoneInfoArray[2*NUMZONES];
 
 #define SWAPF(a, b) { float t; t = a; a = b; b = t; }
 
+inline bool IsNormalZone(int type) { return type == ZONE_DEFAULT || type == ZONE_NAVIG || type == ZONE_INFO; }
+
 static void
 CheckZoneInfo(CZoneInfo *info)
 {
@@ -58,6 +60,9 @@ CTheZones::Init(void)
 		AudioZoneArray[i] = -1;
 	NumberOfAudioZones = 0;
 
+	for(i = 0; i < NUMZONES; i++)
+		memset(&ZoneArray[i], 0, sizeof(CZone));
+
 	CZoneInfo *zonei;
 	int x = 1000/6;
 	for(i = 0; i < 2*NUMZONES; i++){
@@ -81,10 +86,13 @@ CTheZones::Init(void)
 		zonei->gangThreshold[8] = zonei->gangThreshold[7];
 		CheckZoneInfo(zonei);
 	}
-	TotalNumberOfZoneInfos = 1;	// why 1?
 
-	for(i = 0; i < NUMZONES; i++)
-		memset(&ZoneArray[i], 0, sizeof(CZone));
+	TotalNumberOfZoneInfos = 1;	// why 1?
+	TotalNumberOfZones = 1;
+
+	m_CurrLevel = LEVEL_NONE;
+	m_pPlayersZone = &ZoneArray[0];
+
 	strcpy(ZoneArray[0].name, "CITYZON");
 	ZoneArray[0].minx = -4000.0f;
 	ZoneArray[0].miny = -4000.0f;
@@ -93,15 +101,14 @@ CTheZones::Init(void)
 	ZoneArray[0].maxy =  4000.0f;
 	ZoneArray[0].maxz =  500.0f;
 	ZoneArray[0].level = LEVEL_NONE;
-	TotalNumberOfZones = 1;
-
-	m_CurrLevel = LEVEL_NONE;
-	m_pPlayersZone = &ZoneArray[0];
 
 	for(i = 0; i < NUMMAPZONES; i++){
 		memset(&MapZoneArray[i], 0, sizeof(CZone));
 		MapZoneArray[i].type = ZONE_MAPZONE;
 	}
+
+	TotalNumberOfMapZones = 1;
+
 	strcpy(MapZoneArray[0].name, "THEMAP");
 	MapZoneArray[0].minx = -4000.0f;
 	MapZoneArray[0].miny = -4000.0f;
@@ -110,7 +117,6 @@ CTheZones::Init(void)
 	MapZoneArray[0].maxy =  4000.0f;
 	MapZoneArray[0].maxz =  500.0f;
 	MapZoneArray[0].level = LEVEL_NONE;
-	TotalNumberOfMapZones = 1;
 }
 
 void
@@ -119,7 +125,7 @@ CTheZones::Update(void)
 	CVector pos;
 	pos = FindPlayerCoors();
 	m_pPlayersZone = FindSmallestZonePosition(&pos);
-	m_CurrLevel = GetLevelFromPosition(pos);
+	m_CurrLevel = GetLevelFromPosition(&pos);
 }
 
 void
@@ -128,8 +134,8 @@ CTheZones::CreateZone(char *name, eZoneType type,
 	              float maxx, float maxy, float maxz,
 	              eLevelName level)
 {
-	CZone *zone;
 	char *p;
+	char tmpname[8];
 
 	if(minx > maxx) SWAPF(minx, maxx);
 	if(miny > maxy) SWAPF(miny, maxy);
@@ -139,21 +145,22 @@ CTheZones::CreateZone(char *name, eZoneType type,
 	for(p = name; *p; p++) if(islower(*p)) *p = toupper(*p);
 
 	// add zone
-	zone = &ZoneArray[TotalNumberOfZones++];
-	strncpy(zone->name, name, 7);
-	zone->name[7] = '\0';
-	zone->type = type;
-	zone->minx = minx;
-	zone->miny = miny;
-	zone->minz = minz;
-	zone->maxx = maxx;
-	zone->maxy = maxy;
-	zone->maxz = maxz;
-	zone->level = level;
-	if(type == ZONE_AUDIO || type == ZONE_TYPE1 || type == ZONE_TYPE2){
-		zone->zoneinfoDay = TotalNumberOfZoneInfos++;
-		zone->zoneinfoNight = TotalNumberOfZoneInfos++;
+	strncpy(tmpname, name, 7);
+	tmpname[7] = '\0';
+	strcpy(ZoneArray[TotalNumberOfZones].name, tmpname);
+	ZoneArray[TotalNumberOfZones].type = type;
+	ZoneArray[TotalNumberOfZones].minx = minx;
+	ZoneArray[TotalNumberOfZones].miny = miny;
+	ZoneArray[TotalNumberOfZones].minz = minz;
+	ZoneArray[TotalNumberOfZones].maxx = maxx;
+	ZoneArray[TotalNumberOfZones].maxy = maxy;
+	ZoneArray[TotalNumberOfZones].maxz = maxz;
+	ZoneArray[TotalNumberOfZones].level = level;
+	if(IsNormalZone(type)){
+		ZoneArray[TotalNumberOfZones].zoneinfoDay = TotalNumberOfZoneInfos++;
+		ZoneArray[TotalNumberOfZones].zoneinfoNight = TotalNumberOfZoneInfos++;
 	}
+	TotalNumberOfZones++;
 }
 
 void
@@ -259,11 +266,11 @@ CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone *inner, CZone *outer)
 	   inner->minz < outer->minz ||
 	   inner->maxz > outer->maxz){
 		CVector vmin(inner->minx, inner->miny, inner->minz);
-		if(PointLiesWithinZone(vmin, outer))
+		if(PointLiesWithinZone(&vmin, outer))
 			sprintf(tmp, "Overlapping zones %s and %s\n",
 			      inner->name, outer->name);
 		CVector vmax(inner->maxx, inner->maxy, inner->maxz);
-		if(PointLiesWithinZone(vmax, outer))
+		if(PointLiesWithinZone(&vmax, outer))
 			sprintf(tmp, "Overlapping zones %s and %s\n",
 			      inner->name, outer->name);
 		return false;
@@ -272,15 +279,15 @@ CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone *inner, CZone *outer)
 }
 
 bool
-CTheZones::PointLiesWithinZone(const CVector &v, CZone *zone)
+CTheZones::PointLiesWithinZone(const CVector *v, CZone *zone)
 {
-	return zone->minx <= v.x && v.x <= zone->maxx &&
-	       zone->miny <= v.y && v.y <= zone->maxy &&
-	       zone->minz <= v.z && v.z <= zone->maxz;
+	return zone->minx <= v->x && v->x <= zone->maxx &&
+	       zone->miny <= v->y && v->y <= zone->maxy &&
+	       zone->minz <= v->z && v->z <= zone->maxz;
 }
 
 eLevelName
-CTheZones::GetLevelFromPosition(CVector const &v)
+CTheZones::GetLevelFromPosition(CVector const *v)
 {
 	int i;
 //	char tmp[116];
@@ -300,7 +307,7 @@ CTheZones::FindSmallestZonePosition(const CVector *v)
 	CZone *zone = ZoneArray[0].child;
 	while(zone)
 		// if in zone, descent into children
-		if(PointLiesWithinZone(*v, zone)){
+		if(PointLiesWithinZone(v, zone)){
 			best = zone;
 			zone = zone->child;
 		// otherwise try next zone
@@ -319,7 +326,7 @@ CTheZones::FindSmallestZonePositionType(const CVector *v, eZoneType type)
 	CZone *zone = ZoneArray[0].child;
 	while(zone)
 		// if in zone, descent into children
-		if(PointLiesWithinZone(*v, zone)){
+		if(PointLiesWithinZone(v, zone)){
 			if(zone->type == type)
 				best = zone;
 			zone = zone->child;
@@ -333,18 +340,14 @@ CZone*
 CTheZones::FindSmallestZonePositionILN(const CVector *v)
 {
 	CZone *best = nil;
-	if(ZoneArray[0].type == ZONE_AUDIO ||
-	   ZoneArray[0].type == ZONE_TYPE1 ||
-	   ZoneArray[0].type == ZONE_TYPE2)
+	if(IsNormalZone(ZoneArray[0].type))
 		best = &ZoneArray[0];
 	// zone to test next
 	CZone *zone = ZoneArray[0].child;
 	while(zone)
 		// if in zone, descent into children
-		if(PointLiesWithinZone(*v, zone)){
-			if(zone->type == ZONE_AUDIO ||
-			   zone->type == ZONE_TYPE1 ||
-			   zone->type == ZONE_TYPE2)
+		if(PointLiesWithinZone(v, zone)){
+			if(IsNormalZone(zone->type))
 				best = zone;
 			zone = zone->child;
 		// otherwise try next zone
@@ -532,7 +535,7 @@ CTheZones::SetCarDensity(uint16 zoneid, uint8 day, uint16 cardensity)
 {
 	CZone *zone;
 	zone = GetZone(zoneid);
-	if(zone->type == ZONE_AUDIO || zone->type == ZONE_TYPE1 || zone->type == ZONE_TYPE2)
+	if(IsNormalZone(zone->type))
 		ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].carDensity = cardensity;
 }
 
@@ -541,7 +544,7 @@ CTheZones::SetPedDensity(uint16 zoneid, uint8 day, uint16 peddensity)
 {
 	CZone *zone;
 	zone = GetZone(zoneid);
-	if(zone->type == ZONE_AUDIO || zone->type == ZONE_TYPE1 || zone->type == ZONE_TYPE2)
+	if(IsNormalZone(zone->type))
 		ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].pedDensity = peddensity;
 }
 
@@ -550,7 +553,7 @@ CTheZones::SetPedGroup(uint16 zoneid, uint8 day, uint16 pedgroup)
 {
 	CZone *zone;
 	zone = GetZone(zoneid);
-	if(zone->type == ZONE_AUDIO || zone->type == ZONE_TYPE1 || zone->type == ZONE_TYPE2)
+	if(IsNormalZone(zone->type))
 		ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].pedGroup = pedgroup;
 }
 
@@ -560,7 +563,7 @@ CTheZones::FindAudioZone(CVector *pos)
 	int i;
 
 	for(i = 0; i < NumberOfAudioZones; i++)
-		if(PointLiesWithinZone(*pos, GetZone(AudioZoneArray[i])))
+		if(PointLiesWithinZone(pos, GetAudioZone(i)))
 			return i;
 	return -1;
 }
@@ -568,11 +571,11 @@ CTheZones::FindAudioZone(CVector *pos)
 eLevelName
 CTheZones::FindZoneForPoint(const CVector &pos)
 {
-	if(PointLiesWithinZone(pos, GetZone(FindZoneByLabelAndReturnIndex("IND_ZON"))))
+	if(PointLiesWithinZone(&pos, GetZone(FindZoneByLabelAndReturnIndex("IND_ZON"))))
 		return LEVEL_INDUSTRIAL;
-	if(PointLiesWithinZone(pos, GetZone(FindZoneByLabelAndReturnIndex("COM_ZON"))))
+	if(PointLiesWithinZone(&pos, GetZone(FindZoneByLabelAndReturnIndex("COM_ZON"))))
 		return LEVEL_COMMERCIAL;
-	if(PointLiesWithinZone(pos, GetZone(FindZoneByLabelAndReturnIndex("SUB_ZON"))))
+	if(PointLiesWithinZone(&pos, GetZone(FindZoneByLabelAndReturnIndex("SUB_ZON"))))
 		return LEVEL_SUBURBAN;
 	return LEVEL_NONE;
 }
@@ -582,7 +585,7 @@ CTheZones::AddZoneToAudioZoneArray(CZone *zone)
 {
 	int i, z;
 
-	if(zone->type != ZONE_AUDIO)
+	if(zone->type != ZONE_DEFAULT)
 		return;
 
 	/* This is a bit stupid */

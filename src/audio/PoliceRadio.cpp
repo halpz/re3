@@ -306,7 +306,7 @@ cAudioManager::SetupCrimeReport()
 	if (i == ARRAY_SIZE(m_sPoliceRadioQueue.crimes)) return false;
 	audioZoneId = CTheZones::FindAudioZone(&m_sPoliceRadioQueue.crimes[i].position);
 	if (audioZoneId >= 0 && audioZoneId < NUMAUDIOZONES) {
-		zone = &CTheZones::ZoneArray[CTheZones::AudioZoneArray[audioZoneId]];
+		zone = CTheZones::GetAudioZone(audioZoneId);
 		for (int j = 0; j < NUMAUDIOZONES; j++) {
 			if (strcmp(zone->name, ZoneSfx[j].m_aName) == 0) {
 				sampleIndex = ZoneSfx[j].m_nSampleIndex;
@@ -722,7 +722,7 @@ cAudioManager::PlaySuspectLastSeen(float x, float y, float z)
 	if (MusicManager.m_nMusicMode != MUSICMODE_CUTSCENE && 60 - m_sPoliceRadioQueue.policeChannelTimer > 9) {
 		audioZone = CTheZones::FindAudioZone(&vec);
 		if (audioZone >= 0 && audioZone < NUMAUDIOZONES) {
-			zone = &CTheZones::ZoneArray[CTheZones::AudioZoneArray[audioZone]];
+			zone = CTheZones::GetAudioZone(audioZone);
 			for (int i = 0; i < NUMAUDIOZONES; i++) {
 				if (strcmp(zone->name, ZoneSfx[i].m_aName) == 0) {
 					sample = ZoneSfx[i].m_nSampleIndex;

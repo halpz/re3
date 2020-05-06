@@ -1729,7 +1729,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		ped->SetOrientation(0.0f, 0.0f, 0.0f);
 		CTheScripts::ClearSpaceForMissionEntity(pos, ped);
 		CWorld::Add(ped);
-		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
+		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pos);
 		CPopulation::ms_nTotalMissionPeds++;
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
 		StoreParameters(&m_nIp, 1);
@@ -1968,7 +1968,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			car->AutoPilot.m_nCruiseSpeed = car->AutoPilot.m_fMaxTrafficSpeed = 9.0f;
 			car->AutoPilot.m_nCurrentLane = car->AutoPilot.m_nNextLane = 0;
 			car->bEngineOn = false;
-			car->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
+			car->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pos);
 			car->bHasBeenOwnedByPlayer = true;
 			CWorld::Add(car);
 			handle = CPools::GetVehiclePool()->GetIndex(car);
@@ -2674,7 +2674,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 			m_nIp += KEY_LENGTH_IN_SCRIPT; /* why only if zone != 1? */
 		CVector pos = pPlayer->GetPos();
 		CZone* pZone = CTheZones::GetZone(zoneToCheck);
-		UpdateCompareFlag(CTheZones::PointLiesWithinZone(pos, pZone));
+		UpdateCompareFlag(CTheZones::PointLiesWithinZone(&pos, pZone));
 		return 0;
 	}
 	case COMMAND_IS_PLAYER_PRESSING_HORN:
@@ -2773,7 +2773,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 #endif
 		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
 		pPed->StopNonPartialAnims();
-		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
+		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		CWorld::Add(pPed);
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);
@@ -3026,7 +3026,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		if (zone != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CVector pos = pPed->bInVehicle ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
-		UpdateCompareFlag(CTheZones::PointLiesWithinZone(pos, CTheZones::GetZone(zone)));
+		UpdateCompareFlag(CTheZones::PointLiesWithinZone(&pos, CTheZones::GetZone(zone)));
 		return 0;
 	}
 	case COMMAND_SET_CAR_DENSITY:
@@ -3964,7 +3964,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 #endif
 		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
 		pPed->StopNonPartialAnims();
-		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
+		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		CWorld::Add(pPed);
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);
@@ -5880,7 +5880,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 				continue;
 			if (pPed->bIsLeader || pPed->m_leader)
 				continue;
-			if (!CTheZones::PointLiesWithinZone(pPed->GetPosition(), pZone))
+			if (!CTheZones::PointLiesWithinZone(&pPed->GetPosition(), pZone))
 				continue;
 			if (pos.z - PED_FIND_Z_OFFSET > pPed->GetPosition().z)
 				continue;
@@ -6536,7 +6536,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 				continue;
 			if (pVehicle->VehicleCreatedBy != RANDOM_VEHICLE)
 				continue;
-			if (!CTheZones::PointLiesWithinZone(pVehicle->GetPosition(), pZone))
+			if (!CTheZones::PointLiesWithinZone(&pVehicle->GetPosition(), pZone))
 				continue;
 			handle = CPools::GetVehiclePool()->GetIndex(pVehicle);
 			pVehicle->VehicleCreatedBy = MISSION_VEHICLE;
@@ -7347,7 +7347,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		ped->SetOrientation(0.0f, 0.0f, 0.0f);
 		CTheScripts::ClearSpaceForMissionEntity(pos, ped);
 		CWorld::Add(ped);
-		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
+		ped->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pos);
 		CPopulation::ms_nTotalMissionPeds++;
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
 		StoreParameters(&m_nIp, 1);
@@ -8178,7 +8178,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		car->AutoPilot.m_nCruiseSpeed = car->AutoPilot.m_fMaxTrafficSpeed = 9.0f;
 		car->AutoPilot.m_nCurrentLane = car->AutoPilot.m_nNextLane = 0;
 		car->bEngineOn = false;
-		car->m_nZoneLevel = CTheZones::GetLevelFromPosition(pos);
+		car->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pos);
 		CWorld::Add(car);
 		return 0;
 	}
@@ -8504,7 +8504,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		if (ScriptParams[1])
-			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(pVehicle->GetPosition());
+			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pVehicle->GetPosition());
 		else
 			pVehicle->m_nZoneLevel = LEVEL_NONE;
 		return 0;
@@ -8515,7 +8515,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		if (ScriptParams[1])
-			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
+			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		else
 			pPed->m_nZoneLevel = LEVEL_NONE;
 		return 0;
@@ -8920,7 +8920,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (ScriptParams[1])
 			pPed->m_nZoneLevel = LEVEL_IGNORE;
 		else
-			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(pPed->GetPosition());
+			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		return 0;
 	}
 	case COMMAND_GET_CHASE_CAR:
@@ -9119,7 +9119,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		if (ScriptParams[1])
 			pVehicle->m_nZoneLevel = LEVEL_IGNORE;
 		else
-			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(pVehicle->GetPosition());
+			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pVehicle->GetPosition());
 		return 0;
 	}
 	case COMMAND_MAKE_CRAIGS_CAR_A_BIT_STRONGER:
@@ -9465,7 +9465,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 				continue;
 			if (pPed->bIsLeader || pPed->m_leader)
 				continue;
-			if (!CTheZones::PointLiesWithinZone(pPed->GetPosition(), pZone))
+			if (!CTheZones::PointLiesWithinZone(&pPed->GetPosition(), pZone))
 				continue;
 			if (pos.z - PED_FIND_Z_OFFSET > pPed->GetPosition().z)
 				continue;
