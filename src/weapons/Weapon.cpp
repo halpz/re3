@@ -1047,13 +1047,13 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 
 					if ( !victimObject->bInfiniteMass )
 					{
-						if ( victimObject->bIsStatic && victimObject->m_fUprootLimit <= 0.0f )
+						if ( victimObject->IsStatic() && victimObject->m_fUprootLimit <= 0.0f )
 						{
 							victimObject->bIsStatic = false;
 							victimObject->AddToMovingList();
 						}
 
-						if ( !victimObject->bIsStatic )
+						if ( !victimObject->IsStatic())
 						{
 							CVector moveForce = point->normal*-4.0f;
 							victimObject->ApplyMoveForce(moveForce.x, moveForce.y, moveForce.z);
@@ -1296,13 +1296,13 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 
 							if ( !victimObject->bInfiniteMass )
 							{
-								if ( victimObject->bIsStatic && victimObject->m_fUprootLimit <= 0.0f )
+								if ( victimObject->IsStatic() && victimObject->m_fUprootLimit <= 0.0f )
 								{
 									victimObject->bIsStatic = false;
 									victimObject->AddToMovingList();
 								}
 
-								if ( !victimObject->bIsStatic )
+								if ( !victimObject->IsStatic())
 								{
 									CVector moveForce = point.normal*-5.0f;
 									victimObject->ApplyMoveForce(moveForce.x, moveForce.y, moveForce.z);
@@ -2232,7 +2232,7 @@ CWeapon::BlowUpExplosiveThings(CEntity *thing)
 			object->m_vecMoveSpeed.x += float((CGeneral::GetRandomNumber()&255) - 128) * 0.0002f;
 			object->m_vecMoveSpeed.y += float((CGeneral::GetRandomNumber()&255) - 128) * 0.0002f;
 
-			if ( object->bIsStatic )
+			if ( object->IsStatic())
 			{
 				object->bIsStatic = false;
 				object->AddToMovingList();
