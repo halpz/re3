@@ -9548,7 +9548,7 @@ CPed::ProcessControl(void)
 				{
 					CBaseModelInfo *collidingModel = CModelInfo::GetModelInfo(collidingEnt->GetModelIndex());
 					CColModel *collidingCol = collidingModel->GetColModel();
-					if (collidingEnt->IsObject() && ((CObject*)collidingEnt)->m_nSpecialCollisionResponseCases != COLLRESPONSE_CHANGE_THEN_SMASH
+					if (collidingEnt->IsObject() && ((CObject*)collidingEnt)->m_nSpecialCollisionResponseCases != COLLRESPONSE_FENCEPART
 						|| collidingCol->boundingBox.max.x < 3.0f
 						&& collidingCol->boundingBox.max.y < 3.0f) {
 
@@ -16931,7 +16931,7 @@ CPed::SpawnFlyingComponent(int pedNode, int8 direction)
 	obj->ObjectCreatedBy = TEMP_OBJECT;
 	obj->bIsStatic = false;
 	obj->bIsPickup = false;
-	obj->m_nSpecialCollisionResponseCases = COLLRESPONSE_SPLIT_MODEL;
+	obj->m_nSpecialCollisionResponseCases = COLLRESPONSE_SMALLBOX;
 
 	// life time - the more objects the are, the shorter this one will live
 	CObject::nNoTempObjects++;
