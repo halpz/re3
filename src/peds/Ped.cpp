@@ -14857,7 +14857,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 			bHasHitWall = true;
 		}
 	}
-	if (collidingEnt->IsBuilding() || collidingEnt->IsStatic()) {
+	if (collidingEnt->IsBuilding() || collidingEnt->IsStatic()) 	{
 
 		if (bWasStanding) {
 			CVector sphereNormal;
