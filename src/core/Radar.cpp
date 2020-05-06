@@ -66,9 +66,17 @@ CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = {
 	&WeaponSprite
 };
 
+// Why this doesn't coincide with world coordinates i don't know
+#define RADAR_MIN_X (-2000.0f)
+#define RADAR_MIN_Y (-2000.0f)
+#define RADAR_MAX_X (2000.0f)
+#define RADAR_MAX_Y (2000.0f)
+#define RADAR_SIZE_X (RADAR_MAX_X - RADAR_MIN_X)
+#define RADAR_SIZE_Y (RADAR_MAX_Y - RADAR_MIN_Y)
+
 #define RADAR_NUM_TILES (8)
-#define RADAR_TILE_SIZE (WORLD_SIZE_X / RADAR_NUM_TILES)
-static_assert(RADAR_TILE_SIZE == (WORLD_SIZE_Y / RADAR_NUM_TILES), "CRadar: not a square");
+#define RADAR_TILE_SIZE (RADAR_SIZE_X / RADAR_NUM_TILES)
+static_assert(RADAR_TILE_SIZE == (RADAR_SIZE_Y / RADAR_NUM_TILES), "CRadar: not a square");
 
 #define RADAR_MIN_RANGE (120.0f)
 #define RADAR_MAX_RANGE (350.0f)
@@ -738,8 +746,8 @@ void CRadar::DrawRadarMap()
 	DrawRadarMask();
 
 	// top left ist (0, 0)
-	int x = floorf((vec2DRadarOrigin.x - WORLD_MIN_X) / RADAR_TILE_SIZE);
-	int y = ceilf((RADAR_NUM_TILES - 1) - (vec2DRadarOrigin.y - WORLD_MIN_Y) / RADAR_TILE_SIZE);
+	int x = floorf((vec2DRadarOrigin.x - RADAR_MIN_X) / RADAR_TILE_SIZE);
+	int y = ceilf((RADAR_NUM_TILES - 1) - (vec2DRadarOrigin.y - RADAR_MIN_Y) / RADAR_TILE_SIZE);
 	StreamRadarSections(x, y);
 
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
@@ -1260,8 +1268,8 @@ void CRadar::StreamRadarSections(int32 x, int32 y)
 
 void CRadar::TransformRealWorldToTexCoordSpace(CVector2D &out, const CVector2D &in, int32 x, int32 y)
 {
-	out.x = in.x - (x * RADAR_TILE_SIZE + WORLD_MIN_X);
-	out.y = -(in.y - ((RADAR_NUM_TILES - y) * RADAR_TILE_SIZE + WORLD_MIN_Y));
+	out.x = in.x - (x * RADAR_TILE_SIZE + RADAR_MIN_X);
+	out.y = -(in.y - ((RADAR_NUM_TILES - y) * RADAR_TILE_SIZE + RADAR_MIN_Y));
 	out.x /= RADAR_TILE_SIZE;
 	out.y /= RADAR_TILE_SIZE;
 }
