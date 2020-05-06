@@ -5,6 +5,15 @@ class CTimeCycle
 	static int   m_nAmbientRed[NUMHOURS][NUMWEATHERS];
 	static int   m_nAmbientGreen[NUMHOURS][NUMWEATHERS];
 	static int   m_nAmbientBlue[NUMHOURS][NUMWEATHERS];
+	static int   m_nAmbientRed_Obj[NUMHOURS][NUMWEATHERS];
+	static int   m_nAmbientGreen_Obj[NUMHOURS][NUMWEATHERS];
+	static int   m_nAmbientBlue_Obj[NUMHOURS][NUMWEATHERS];
+	static int   m_nAmbientRed_Bl[NUMHOURS][NUMWEATHERS];
+	static int   m_nAmbientGreen_Bl[NUMHOURS][NUMWEATHERS];
+	static int   m_nAmbientBlue_Bl[NUMHOURS][NUMWEATHERS];
+	static int   m_nAmbientRed_Obj_Bl[NUMHOURS][NUMWEATHERS];
+	static int   m_nAmbientGreen_Obj_Bl[NUMHOURS][NUMWEATHERS];
+	static int   m_nAmbientBlue_Obj_Bl[NUMHOURS][NUMWEATHERS];
 	static int   m_nDirectionalRed[NUMHOURS][NUMWEATHERS];
 	static int   m_nDirectionalGreen[NUMHOURS][NUMWEATHERS];
 	static int   m_nDirectionalBlue[NUMHOURS][NUMWEATHERS];
@@ -25,7 +34,7 @@ class CTimeCycle
 	static float m_fSpriteBrightness[NUMHOURS][NUMWEATHERS];
 	static short m_nShadowStrength[NUMHOURS][NUMWEATHERS];
 	static short m_nLightShadowStrength[NUMHOURS][NUMWEATHERS];
-	static short m_nTreeShadowStrength[NUMHOURS][NUMWEATHERS];
+	static short m_nPoleShadowStrength[NUMHOURS][NUMWEATHERS];
 	static float m_fFogStart[NUMHOURS][NUMWEATHERS];
 	static float m_fFarClip[NUMHOURS][NUMWEATHERS];
 	static float m_fLightsOnGroundBrightness[NUMHOURS][NUMWEATHERS];
@@ -41,11 +50,23 @@ class CTimeCycle
 	static float m_fBlurRed[NUMHOURS][NUMWEATHERS];
 	static float m_fBlurGreen[NUMHOURS][NUMWEATHERS];
 	static float m_fBlurBlue[NUMHOURS][NUMWEATHERS];
-	static float m_fBlurAlpha[NUMHOURS][NUMWEATHERS];
+	static float m_fWaterRed[NUMHOURS][NUMWEATHERS];
+	static float m_fWaterGreen[NUMHOURS][NUMWEATHERS];
+	static float m_fWaterBlue[NUMHOURS][NUMWEATHERS];
+	static float m_fWaterAlpha[NUMHOURS][NUMWEATHERS];
 
 	static float m_fCurrentAmbientRed;
 	static float m_fCurrentAmbientGreen;
 	static float m_fCurrentAmbientBlue;
+	static float m_fCurrentAmbientRed_Obj;
+	static float m_fCurrentAmbientGreen_Obj;
+	static float m_fCurrentAmbientBlue_Obj;
+	static float m_fCurrentAmbientRed_Bl;
+	static float m_fCurrentAmbientGreen_Bl;
+	static float m_fCurrentAmbientBlue_Bl;
+	static float m_fCurrentAmbientRed_Obj_Bl;
+	static float m_fCurrentAmbientGreen_Obj_Bl;
+	static float m_fCurrentAmbientBlue_Obj_Bl;
 	static float m_fCurrentDirectionalRed;
 	static float m_fCurrentDirectionalGreen;
 	static float m_fCurrentDirectionalBlue;
@@ -66,7 +87,7 @@ class CTimeCycle
 	static float m_fCurrentSpriteBrightness;
 	static int   m_nCurrentShadowStrength;
 	static int   m_nCurrentLightShadowStrength;
-	static int   m_nCurrentTreeShadowStrength;
+	static int   m_nCurrentPoleShadowStrength;
 	static float m_fCurrentFogStart;
 	static float m_fCurrentFarClip;
 	static float m_fCurrentLightsOnGroundBrightness;
@@ -82,7 +103,10 @@ class CTimeCycle
 	static float m_fCurrentBlurRed;
 	static float m_fCurrentBlurGreen;
 	static float m_fCurrentBlurBlue;
-	static float m_fCurrentBlurAlpha;
+	static float m_fCurrentWaterRed;
+	static float m_fCurrentWaterGreen;
+	static float m_fCurrentWaterBlue;
+	static float m_fCurrentWaterAlpha;
 	static int   m_nCurrentFogColourRed;
 	static int   m_nCurrentFogColourGreen;
 	static int   m_nCurrentFogColourBlue;
@@ -102,6 +126,15 @@ public:
 	static float GetAmbientRed(void) { return m_fCurrentAmbientRed; }
 	static float GetAmbientGreen(void) { return m_fCurrentAmbientGreen; }
 	static float GetAmbientBlue(void) { return m_fCurrentAmbientBlue; }
+	static float GetAmbientRed_Obj(void) { return m_fCurrentAmbientRed_Obj; }
+	static float GetAmbientGreen_Obj(void) { return m_fCurrentAmbientGreen_Obj; }
+	static float GetAmbientBlue_Obj(void) { return m_fCurrentAmbientBlue_Obj; }
+	static float GetAmbientRed_Bl(void) { return m_fCurrentAmbientRed_Bl; }
+	static float GetAmbientGreen_Bl(void) { return m_fCurrentAmbientGreen_Bl; }
+	static float GetAmbientBlue_Bl(void) { return m_fCurrentAmbientBlue_Bl; }
+	static float GetAmbientRed_Obj_Bl(void) { return m_fCurrentAmbientRed_Obj_Bl; }
+	static float GetAmbientGreen_Obj_Bl(void) { return m_fCurrentAmbientGreen_Obj_Bl; }
+	static float GetAmbientBlue_Obj_Bl(void) { return m_fCurrentAmbientBlue_Obj_Bl; }
 	static float GetDirectionalRed(void) { return m_fCurrentDirectionalRed; }
 	static float GetDirectionalGreen(void) { return m_fCurrentDirectionalGreen; }
 	static float GetDirectionalBlue(void) { return m_fCurrentDirectionalBlue; }

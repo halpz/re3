@@ -10,9 +10,20 @@
 #include "FileMgr.h"
 #include "Timecycle.h"
 
+// TODO(MIAMI): change some of the types here
+
 int   CTimeCycle::m_nAmbientRed[NUMHOURS][NUMWEATHERS];
 int   CTimeCycle::m_nAmbientGreen[NUMHOURS][NUMWEATHERS];
 int   CTimeCycle::m_nAmbientBlue[NUMHOURS][NUMWEATHERS];
+int   CTimeCycle::m_nAmbientRed_Obj[NUMHOURS][NUMWEATHERS];
+int   CTimeCycle::m_nAmbientGreen_Obj[NUMHOURS][NUMWEATHERS];
+int   CTimeCycle::m_nAmbientBlue_Obj[NUMHOURS][NUMWEATHERS];
+int   CTimeCycle::m_nAmbientRed_Bl[NUMHOURS][NUMWEATHERS];
+int   CTimeCycle::m_nAmbientGreen_Bl[NUMHOURS][NUMWEATHERS];
+int   CTimeCycle::m_nAmbientBlue_Bl[NUMHOURS][NUMWEATHERS];
+int   CTimeCycle::m_nAmbientRed_Obj_Bl[NUMHOURS][NUMWEATHERS];
+int   CTimeCycle::m_nAmbientGreen_Obj_Bl[NUMHOURS][NUMWEATHERS];
+int   CTimeCycle::m_nAmbientBlue_Obj_Bl[NUMHOURS][NUMWEATHERS];
 int   CTimeCycle::m_nDirectionalRed[NUMHOURS][NUMWEATHERS];
 int   CTimeCycle::m_nDirectionalGreen[NUMHOURS][NUMWEATHERS];
 int   CTimeCycle::m_nDirectionalBlue[NUMHOURS][NUMWEATHERS];
@@ -33,7 +44,7 @@ float CTimeCycle::m_fSpriteSize[NUMHOURS][NUMWEATHERS];
 float CTimeCycle::m_fSpriteBrightness[NUMHOURS][NUMWEATHERS];
 short CTimeCycle::m_nShadowStrength[NUMHOURS][NUMWEATHERS];
 short CTimeCycle::m_nLightShadowStrength[NUMHOURS][NUMWEATHERS];
-short CTimeCycle::m_nTreeShadowStrength[NUMHOURS][NUMWEATHERS];
+short CTimeCycle::m_nPoleShadowStrength[NUMHOURS][NUMWEATHERS];
 float CTimeCycle::m_fFogStart[NUMHOURS][NUMWEATHERS];
 float CTimeCycle::m_fFarClip[NUMHOURS][NUMWEATHERS];
 float CTimeCycle::m_fLightsOnGroundBrightness[NUMHOURS][NUMWEATHERS];
@@ -49,11 +60,24 @@ int   CTimeCycle::m_nFluffyCloudsBottomBlue[NUMHOURS][NUMWEATHERS];
 float CTimeCycle::m_fBlurRed[NUMHOURS][NUMWEATHERS];
 float CTimeCycle::m_fBlurGreen[NUMHOURS][NUMWEATHERS];
 float CTimeCycle::m_fBlurBlue[NUMHOURS][NUMWEATHERS];
-float CTimeCycle::m_fBlurAlpha[NUMHOURS][NUMWEATHERS];
+float CTimeCycle::m_fWaterRed[NUMHOURS][NUMWEATHERS];
+float CTimeCycle::m_fWaterGreen[NUMHOURS][NUMWEATHERS];
+float CTimeCycle::m_fWaterBlue[NUMHOURS][NUMWEATHERS];
+float CTimeCycle::m_fWaterAlpha[NUMHOURS][NUMWEATHERS];
+
 
 float CTimeCycle::m_fCurrentAmbientRed;
 float CTimeCycle::m_fCurrentAmbientGreen;
 float CTimeCycle::m_fCurrentAmbientBlue;
+float CTimeCycle::m_fCurrentAmbientRed_Obj;
+float CTimeCycle::m_fCurrentAmbientGreen_Obj;
+float CTimeCycle::m_fCurrentAmbientBlue_Obj;
+float CTimeCycle::m_fCurrentAmbientRed_Bl;
+float CTimeCycle::m_fCurrentAmbientGreen_Bl;
+float CTimeCycle::m_fCurrentAmbientBlue_Bl;
+float CTimeCycle::m_fCurrentAmbientRed_Obj_Bl;
+float CTimeCycle::m_fCurrentAmbientGreen_Obj_Bl;
+float CTimeCycle::m_fCurrentAmbientBlue_Obj_Bl;
 float CTimeCycle::m_fCurrentDirectionalRed;
 float CTimeCycle::m_fCurrentDirectionalGreen;
 float CTimeCycle::m_fCurrentDirectionalBlue;
@@ -74,7 +98,7 @@ float CTimeCycle::m_fCurrentSpriteSize;
 float CTimeCycle::m_fCurrentSpriteBrightness;
 int   CTimeCycle::m_nCurrentShadowStrength;
 int   CTimeCycle::m_nCurrentLightShadowStrength;
-int   CTimeCycle::m_nCurrentTreeShadowStrength;
+int   CTimeCycle::m_nCurrentPoleShadowStrength;
 float CTimeCycle::m_fCurrentFogStart;
 float CTimeCycle::m_fCurrentFarClip;
 float CTimeCycle::m_fCurrentLightsOnGroundBrightness;
@@ -90,7 +114,10 @@ int   CTimeCycle::m_nCurrentFluffyCloudsBottomBlue;
 float CTimeCycle::m_fCurrentBlurRed;
 float CTimeCycle::m_fCurrentBlurGreen;
 float CTimeCycle::m_fCurrentBlurBlue;
-float CTimeCycle::m_fCurrentBlurAlpha;
+float CTimeCycle::m_fCurrentWaterRed;
+float CTimeCycle::m_fCurrentWaterGreen;
+float CTimeCycle::m_fCurrentWaterBlue;
+float CTimeCycle::m_fCurrentWaterAlpha;
 int   CTimeCycle::m_nCurrentFogColourRed;
 int   CTimeCycle::m_nCurrentFogColourGreen;
 int   CTimeCycle::m_nCurrentFogColourBlue;
@@ -115,18 +142,22 @@ CTimeCycle::Initialise(void)
 	char line[1040];
 
 	int ambR, ambG, ambB;
+	int ambobjR, ambobjG, ambobjB;
+	int ambblR, ambblG, ambblB;
+	int ambobjblR, ambobjblG, ambobjblB;
 	int dirR, dirG, dirB;
 	int skyTopR, skyTopG, skyTopB;
 	int skyBotR, skyBotG, skyBotB;
 	int sunCoreR, sunCoreG, sunCoreB;
 	int sunCoronaR, sunCoronaG, sunCoronaB;
 	float sunSz, sprSz, sprBght;
-	int shad, lightShad, treeShad;
+	int shad, lightShad, poleShad;
 	float farClp, fogSt, lightGnd;
 	int cloudR, cloudG, cloudB;
 	int fluffyTopR, fluffyTopG, fluffyTopB;
 	int fluffyBotR, fluffyBotG, fluffyBotB;
-	float blurR, blurG, blurB, blurA;
+	float blurR, blurG, blurB;
+	float waterR, waterG, waterB, waterA;
 
 	debug("Intialising CTimeCycle...\n");
 
@@ -150,25 +181,39 @@ CTimeCycle::Initialise(void)
 			bi++;
 
 			sscanf(line, "%d %d %d  %d %d %d  %d %d %d  %d %d %d "
+			             "%d %d %d  %d %d %d  %d %d %d "
 			             "%d %d %d  %d %d %d  %f %f %f %d %d %d %f %f %f "
-			             "%d %d %d  %d %d %d  %d %d %d  %f %f %f %f",
+			             "%d %d %d  %d %d %d  %d %d %d  %f %f %f  %f %f %f %f",
 				&ambR, &ambG, &ambB,
-				 &dirR, &dirG, &dirB,
+				 &ambobjR, &ambobjG, &ambobjB,
+				 &ambblR, &ambblG, &ambblB,
+				 &ambobjblR, &ambobjblG, &ambobjblB,
+				&dirR, &dirG, &dirB,
 				 &skyTopR, &skyTopG, &skyTopB,
 				 &skyBotR, &skyBotG, &skyBotB,
 				&sunCoreR, &sunCoreG, &sunCoreB,
 				 &sunCoronaR, &sunCoronaG, &sunCoronaB,
 				 &sunSz, &sprSz, &sprBght,
-				 &shad, &lightShad, &treeShad,
+				 &shad, &lightShad, &poleShad,
 				 &farClp, &fogSt, &lightGnd,
 				&cloudR, &cloudG, &cloudB,
 				 &fluffyTopR, &fluffyTopG, &fluffyTopB,
 				 &fluffyBotR, &fluffyBotG, &fluffyBotB,
-				 &blurR, &blurG, &blurB, &blurA);
+				 &blurR, &blurG, &blurB,
+				 &waterR, &waterG, &waterB, &waterA);
 
 			m_nAmbientRed[h][w] = ambR;
 			m_nAmbientGreen[h][w] = ambG;
 			m_nAmbientBlue[h][w] = ambB;
+			m_nAmbientRed_Obj[h][w] = ambobjR;
+			m_nAmbientGreen_Obj[h][w] = ambobjG;
+			m_nAmbientBlue_Obj[h][w] = ambobjB;
+			m_nAmbientRed_Bl[h][w] = ambblR;
+			m_nAmbientGreen_Bl[h][w] = ambblG;
+			m_nAmbientBlue_Bl[h][w] = ambblB;
+			m_nAmbientRed_Obj_Bl[h][w] = ambobjblR;
+			m_nAmbientGreen_Obj_Bl[h][w] = ambobjblG;
+			m_nAmbientBlue_Obj_Bl[h][w] = ambobjblB;
 			m_nDirectionalRed[h][w] = dirR;
 			m_nDirectionalGreen[h][w] = dirG;
 			m_nDirectionalBlue[h][w] = dirB;
@@ -189,7 +234,7 @@ CTimeCycle::Initialise(void)
 			m_fSpriteBrightness[h][w] = sprBght;
 			m_nShadowStrength[h][w] = shad;
 			m_nLightShadowStrength[h][w] = lightShad;
-			m_nTreeShadowStrength[h][w] = treeShad;
+			m_nPoleShadowStrength[h][w] = poleShad;
 			m_fFarClip[h][w] = farClp;
 			m_fFogStart[h][w] = fogSt;
 			m_fLightsOnGroundBrightness[h][w] = lightGnd;
@@ -205,7 +250,10 @@ CTimeCycle::Initialise(void)
 			m_fBlurRed[h][w] = blurR;
 			m_fBlurGreen[h][w] = blurG;
 			m_fBlurBlue[h][w] = blurB;
-			m_fBlurAlpha[h][w] = blurA;
+			m_fWaterRed[h][w] = waterR;
+			m_fWaterGreen[h][w] = waterG;
+			m_fWaterBlue[h][w] = waterB;
+			m_fWaterAlpha[h][w] = waterA;
 		}
 
 	m_FogReduction = 0;
@@ -220,7 +268,7 @@ CTimeCycle::Update(void)
 	int h2 = (h1+1)%24;
 	int w1 = CWeather::OldWeatherType;
 	int w2 = CWeather::NewWeatherType;
-	float timeInterp = CClock::GetMinutes()/60.0f;
+	float timeInterp = (CClock::GetMinutes() + CClock::GetSeconds()/60.0f)/60.0f;
 	// coefficients for a bilinear interpolation
 	float c0 = (1.0f-timeInterp) * (1.0f-CWeather::InterpolationValue);
 	float c1 = timeInterp * (1.0f-CWeather::InterpolationValue);
@@ -240,16 +288,22 @@ CTimeCycle::Update(void)
 	m_fCurrentAmbientRed = INTERP(m_nAmbientRed);
 	m_fCurrentAmbientGreen = INTERP(m_nAmbientGreen);
 	m_fCurrentAmbientBlue = INTERP(m_nAmbientBlue);
-	m_fCurrentAmbientRed /= 255.0f;
-	m_fCurrentAmbientGreen /= 255.0f;
-	m_fCurrentAmbientBlue /= 255.0f;
+
+	m_fCurrentAmbientRed_Obj = INTERP(m_nAmbientRed_Obj);
+	m_fCurrentAmbientGreen_Obj = INTERP(m_nAmbientGreen_Obj);
+	m_fCurrentAmbientBlue_Obj = INTERP(m_nAmbientBlue_Obj);
+
+	m_fCurrentAmbientRed_Bl = INTERP(m_nAmbientRed_Bl);
+	m_fCurrentAmbientGreen_Bl = INTERP(m_nAmbientGreen_Bl);
+	m_fCurrentAmbientBlue_Bl = INTERP(m_nAmbientBlue_Bl);
+
+	m_fCurrentAmbientRed_Obj_Bl = INTERP(m_nAmbientRed_Obj_Bl);
+	m_fCurrentAmbientGreen_Obj_Bl = INTERP(m_nAmbientGreen_Obj_Bl);
+	m_fCurrentAmbientBlue_Obj_Bl = INTERP(m_nAmbientBlue_Obj_Bl);
 
 	m_fCurrentDirectionalRed = INTERP(m_nDirectionalRed);
 	m_fCurrentDirectionalGreen = INTERP(m_nDirectionalGreen);
 	m_fCurrentDirectionalBlue = INTERP(m_nDirectionalBlue);
-	m_fCurrentDirectionalRed /= 255.0f;
-	m_fCurrentDirectionalGreen /= 255.0f;
-	m_fCurrentDirectionalBlue /= 255.0f;
 
 	m_nCurrentSunCoreRed = INTERP(m_nSunCoreRed);
 	m_nCurrentSunCoreGreen = INTERP(m_nSunCoreGreen);
@@ -264,7 +318,7 @@ CTimeCycle::Update(void)
 	m_fCurrentSpriteBrightness = INTERP(m_fSpriteBrightness);
 	m_nCurrentShadowStrength = INTERP(m_nShadowStrength);
 	m_nCurrentLightShadowStrength = INTERP(m_nLightShadowStrength);
-	m_nCurrentTreeShadowStrength = INTERP(m_nTreeShadowStrength);
+	m_nCurrentPoleShadowStrength = INTERP(m_nPoleShadowStrength);
 	m_fCurrentFarClip = INTERP(m_fFarClip);
 	m_fCurrentFogStart = INTERP(m_fFogStart);
 	m_fCurrentLightsOnGroundBrightness = INTERP(m_fLightsOnGroundBrightness);
@@ -284,25 +338,48 @@ CTimeCycle::Update(void)
 	m_fCurrentBlurRed = INTERP(m_fBlurRed);
 	m_fCurrentBlurGreen = INTERP(m_fBlurGreen);
 	m_fCurrentBlurBlue = INTERP(m_fBlurBlue);
-	m_fCurrentBlurAlpha = INTERP(m_fBlurAlpha);
 
-	if(TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_NORMAL)
-		TheCamera.SetMotionBlur(m_fCurrentBlurRed, m_fCurrentBlurGreen, m_fCurrentBlurBlue, m_fCurrentBlurAlpha, MBLUR_NORMAL);
+	m_fCurrentWaterRed = INTERP(m_fWaterRed);
+	m_fCurrentWaterGreen = INTERP(m_fWaterGreen);
+	m_fCurrentWaterBlue = INTERP(m_fWaterBlue);
+	m_fCurrentWaterAlpha = INTERP(m_fWaterAlpha);
 
 	if(m_FogReduction != 0)
 		m_fCurrentFarClip = Max(m_fCurrentFarClip, m_FogReduction/64.0f * 650.0f);
-	m_nCurrentFogColourRed = (m_nCurrentSkyTopRed + 2*m_nCurrentSkyBottomRed) / 3;
-	m_nCurrentFogColourGreen = (m_nCurrentSkyTopGreen + 2*m_nCurrentSkyBottomGreen) / 3;
-	m_nCurrentFogColourBlue = (m_nCurrentSkyTopBlue + 2*m_nCurrentSkyBottomBlue) / 3;
 
 	m_CurrentStoredValue = (m_CurrentStoredValue+1)&0xF;
 
-	float sunAngle = 2*PI*(CClock::GetMinutes() + CClock::GetHours()*60)/(24*60);
+	float sunAngle = 2*PI*(CClock::GetSeconds()/60.0f + CClock::GetMinutes() + CClock::GetHours()*60)/(24*60);
 	CVector &sunPos = GetSunPosition();
 	sunPos.x = Sin(sunAngle);
 	sunPos.y = 1.0f;
 	sunPos.z = 0.2f - Cos(sunAngle);
 	sunPos.Normalise();
+
+	// TODO(MIAMI): extra colours
+
+	if(TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_NORMAL)
+		TheCamera.SetMotionBlur(m_fCurrentBlurRed, m_fCurrentBlurGreen, m_fCurrentBlurBlue, 5, MBLUR_NORMAL);
+
+	m_nCurrentFogColourRed = (m_nCurrentSkyTopRed + 2*m_nCurrentSkyBottomRed) / 3;
+	m_nCurrentFogColourGreen = (m_nCurrentSkyTopGreen + 2*m_nCurrentSkyBottomGreen) / 3;
+	m_nCurrentFogColourBlue = (m_nCurrentSkyTopBlue + 2*m_nCurrentSkyBottomBlue) / 3;
+
+	m_fCurrentAmbientRed /= 255.0f;
+	m_fCurrentAmbientGreen /= 255.0f;
+	m_fCurrentAmbientBlue /= 255.0f;
+	m_fCurrentAmbientRed_Obj /= 255.0f;
+	m_fCurrentAmbientGreen_Obj /= 255.0f;
+	m_fCurrentAmbientBlue_Obj /= 255.0f;
+	m_fCurrentAmbientRed_Bl /= 255.0f;
+	m_fCurrentAmbientGreen_Bl /= 255.0f;
+	m_fCurrentAmbientBlue_Bl /= 255.0f;
+	m_fCurrentAmbientRed_Obj_Bl /= 255.0f;
+	m_fCurrentAmbientGreen_Obj_Bl /= 255.0f;
+	m_fCurrentAmbientBlue_Obj_Bl /= 255.0f;
+	m_fCurrentDirectionalRed /= 255.0f;
+	m_fCurrentDirectionalGreen /= 255.0f;
+	m_fCurrentDirectionalBlue /= 255.0f;
 
 	CShadows::CalcPedShadowValues(sunPos, 
 		&m_fShadowFrontX[m_CurrentStoredValue], &m_fShadowFrontY[m_CurrentStoredValue],
