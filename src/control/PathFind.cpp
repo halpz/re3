@@ -197,7 +197,7 @@ CPedPath::AddBlockadeSectorList(CPtrList& list, CPedPathNode(*pathNodes)[40], CV
 void 
 CPedPath::AddBlockade(CEntity *pEntity, CPedPathNode(*pathNodes)[40], CVector *pPosition)
 {
-	const CColBox& boundingBox = pEntity->GetColModel()->boundingBox;
+	const CBox& boundingBox = pEntity->GetColModel()->boundingBox;
 	const float fBoundMaxY = boundingBox.max.y + 0.3f;
 	const float fBoundMinY = boundingBox.min.y - 0.3f;
 	const float fBoundMaxX = boundingBox.max.x + 0.3f;

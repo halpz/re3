@@ -130,14 +130,14 @@ CCollision::LoadCollisionScreen(eLevelName level)
 
 
 bool
-CCollision::TestSphereSphere(const CColSphere &s1, const CColSphere &s2)
+CCollision::TestSphereSphere(const CSphere &s1, const CSphere &s2)
 {
 	float d = s1.radius + s2.radius;
 	return (s1.center - s2.center).MagnitudeSqr() < d*d;
 }
 
 bool
-CCollision::TestSphereBox(const CColSphere &sph, const CColBox &box)
+CCollision::TestSphereBox(const CSphere &sph, const CBox &box)
 {
 	if(sph.center.x + sph.radius < box.min.x) return false;
 	if(sph.center.x - sph.radius > box.max.x) return false;
@@ -149,7 +149,7 @@ CCollision::TestSphereBox(const CColSphere &sph, const CColBox &box)
 }
 
 bool
-CCollision::TestLineBox(const CColLine &line, const CColBox &box)
+CCollision::TestLineBox(const CColLine &line, const CBox &box)
 {
 	float t, x, y, z;
 	// If either line point is in the box, we have a collision
@@ -234,7 +234,7 @@ CCollision::TestLineBox(const CColLine &line, const CColBox &box)
 }
 
 bool
-CCollision::TestVerticalLineBox(const CColLine &line, const CColBox &box)
+CCollision::TestVerticalLineBox(const CColLine &line, const CBox &box)
 {
 	if(line.p0.x <= box.min.x) return false;
 	if(line.p0.y <= box.min.y) return false;
