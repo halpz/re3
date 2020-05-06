@@ -30,7 +30,7 @@ build:
   project: build/reVC.sln
   verbosity: minimal
 after_build:
-- 7z a "reVC_%configuration%_%platform%_%APPVEYOR_BUILD_VERSION%.zip" bin/%PLATFORM%/%CONFIGURATION%/re3.exe bin/%PLATFORM%/%CONFIGURATION%/re3.pdb
+- 7z a "reVC_%configuration%_%platform%_%APPVEYOR_BUILD_VERSION%.zip" bin/%PLATFORM%/%CONFIGURATION%/reVC.exe bin/%PLATFORM%/%CONFIGURATION%/reVC.pdb
 artifacts:
 - path: "reVC_%configuration%_%platform%_%APPVEYOR_BUILD_VERSION%.zip"
   name: reVC
