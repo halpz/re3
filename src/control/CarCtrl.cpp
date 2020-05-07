@@ -86,6 +86,7 @@ uint32 CCarCtrl::LastTimeAmbulanceCreated;
 int32 CCarCtrl::TotalNumOfCarsOfRating[TOTAL_CUSTOM_CLASSES];
 int32 CCarCtrl::NextCarOfRating[TOTAL_CUSTOM_CLASSES];
 int32 CCarCtrl::CarArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
+int32 CCarCtrl::NumRequestsOfCarRating[TOTAL_CUSTOM_CLASSES];
 CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];
 uint32 aCarsToKeepTime[MAX_CARS_TO_KEEP];
 
@@ -350,7 +351,7 @@ CCarCtrl::GenerateOneRandomCar()
 		pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(9, 14);
 		if (carClass == EXEC)
 			pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(12, 18);
-		else if (carClass == POOR || carClass == SPECIAL)
+		else if (carClass == POOR)
 			pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(7, 10);
 		CVehicleModelInfo* pVehicleInfo = pVehicle->GetModelInfo();
 		if (pVehicleInfo->GetColModel()->boundingBox.max.y - pVehicle->GetModelInfo()->GetColModel()->boundingBox.min.y > 10.0f || carClass == BIG) {
@@ -608,45 +609,56 @@ CCarCtrl::GenerateOneRandomCar()
 }
 
 int32
+CCarCtrl::ChooseBoatModel(int32 rating)
+{
+	++NumRequestsOfCarRating[rating];
+	return ChooseCarModel(rating);
+}
+
+int32
+CCarCtrl::ChooseBoatRating(CZoneInfo* pZoneInfo)
+{
+	int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
+	for (int i = FIRST_BOAT_RATING; i < FIRST_BOAT_RATING + NUM_BOAT_CLASSES - 1; i++) {
+		if (rnd < pZoneInfo->carThreshold[i])
+			return i;
+	}
+	return FIRST_BOAT_RATING + NUM_BOAT_CLASSES - 1;
+}
+
+int32
+CCarCtrl::ChooseCarRating(CZoneInfo* pZoneInfo)
+{
+	int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
+	for (int i = FIRST_CAR_RATING; i < FIRST_CAR_RATING + NUM_CAR_CLASSES - 1; i++) {
+		if (rnd < pZoneInfo->carThreshold[i])
+			return i;
+	}
+	return FIRST_CAR_RATING + NUM_CAR_CLASSES - 1;
+}
+
+int32
 CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 	int32 model = -1;
-	while (model == -1 || !CStreaming::HasModelLoaded(model)){
+	for (int i = 0; i < 10 && (model == -1 || !CStreaming::HasModelLoaded(model)); i++) {
 		int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
-		// TODO(MIAMI): new car classes
-		if (rnd < pZone->carThreshold[0])
-			model = CCarCtrl::ChooseCarModel((*pClass = NORMAL));
-		else if (rnd < pZone->carThreshold[1])
-			model = CCarCtrl::ChooseCarModel((*pClass = POOR));
-		else if (rnd < pZone->carThreshold[2])
-			model = CCarCtrl::ChooseCarModel((*pClass = RICH));
-		else if (rnd < pZone->carThreshold[3])
-			model = CCarCtrl::ChooseCarModel((*pClass = EXEC));
-		else if (rnd < pZone->carThreshold[4])
-			model = CCarCtrl::ChooseCarModel((*pClass = WORKER));
-		else if (rnd < pZone->carThreshold[5])
-			model = CCarCtrl::ChooseCarModel((*pClass = BIG));
-		else if (rnd < pZone->copThreshold)
-			*pClass = COPS, model = CCarCtrl::ChoosePoliceCarModel();
-		else if (rnd < pZone->gangThreshold[0])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = MAFIA) - MAFIA);
-		else if (rnd < pZone->gangThreshold[1])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = TRIAD) - MAFIA);
-		else if (rnd < pZone->gangThreshold[2])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = DIABLO) - MAFIA);
-		else if (rnd < pZone->gangThreshold[3])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = YAKUZA) - MAFIA);
-		else if (rnd < pZone->gangThreshold[4])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = YARDIE) - MAFIA);
-		else if (rnd < pZone->gangThreshold[5])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = COLOMB) - MAFIA);
-		else if (rnd < pZone->gangThreshold[6])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = NINES) - MAFIA);
-		else if (rnd < pZone->gangThreshold[7])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = GANG8) - MAFIA);
-		else if (rnd < pZone->gangThreshold[8])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = GANG9) - MAFIA);
-		else
-			model = CCarCtrl::ChooseCarModel((*pClass = TAXI));
+
+		if (rnd < pZone->copThreshold) {
+			*pClass = COPS; 
+			model = ChoosePoliceCarModel();
+			continue;
+		}
+
+		for (int i = FIRST_GANG_CAR_RATING; i < FIRST_GANG_CAR_RATING + NUM_GANG_CAR_CLASSES; i++) {
+			if (rnd < pZone->carThreshold[i]) {
+				*pClass = i;
+				model = ChooseGangCarModel(i - FIRST_GANG_CAR_RATING);
+				continue;
+			}
+		}
+
+		*pClass = ChooseCarRating(pZone);
+		model = ChooseCarModel(*pClass);
 	}
 	return model;
 }
@@ -655,33 +667,16 @@ int32
 CCarCtrl::ChooseCarModel(int32 vehclass)
 {
 	int32 model = -1;
-	switch (vehclass) {
-	case POOR:
-	case RICH:
-	case EXEC:
-	case WORKER:
-	// TODO(MIAMI): check this
-	case MOPED:
-	case MOTORBIKE:
-	case LEISUREBOAT:
-	case WORKERBOAT:
-	//
-	case BIG:
-	case TAXI:
-	{
-		if (TotalNumOfCarsOfRating[vehclass] == 0)
-			debug("ChooseCarModel : No cars of type %d have been declared\n", vehclass);
-		model = CarArrays[vehclass][NextCarOfRating[vehclass]];
-		int32 total = TotalNumOfCarsOfRating[vehclass];
-		NextCarOfRating[vehclass] += CGeneral::GetRandomNumberInRange(1, total);
-		while (NextCarOfRating[vehclass] >= total)
-			NextCarOfRating[vehclass] -= total;
-		//NextCarOfRating[vehclass] %= total;
-		TotalNumOfCarsOfRating[vehclass] = total; /* why... */
-	}
-	default:
-		break;
-	}
+	++NumRequestsOfCarRating[vehclass];
+	if (TotalNumOfCarsOfRating[vehclass] == 0)
+		return -1;
+	model = CarArrays[vehclass][NextCarOfRating[vehclass]];
+	int32 total = TotalNumOfCarsOfRating[vehclass];
+	NextCarOfRating[vehclass] += CGeneral::GetRandomNumberInRange(1, total);
+	while (NextCarOfRating[vehclass] >= total)
+		NextCarOfRating[vehclass] -= total;
+	//NextCarOfRating[vehclass] %= total;
+	TotalNumOfCarsOfRating[vehclass] = total; /* why... */
 	return model;
 }
 
