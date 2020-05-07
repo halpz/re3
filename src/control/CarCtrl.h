@@ -23,6 +23,7 @@ enum{
 
 class CCarCtrl
 {
+public:
 	enum eCarClass {
 		POOR = 0,
 		RICH,
@@ -43,7 +44,7 @@ class CCarCtrl
 		GANG9,
 		COPS
 	};
-public:
+
 	static void SwitchVehicleToRealPhysics(CVehicle*);
 	static void AddToCarArray(int32 id, int32 vehclass);
 	static void UpdateCarCount(CVehicle*, bool);

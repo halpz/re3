@@ -812,33 +812,33 @@ CFileLoader::LoadVehicleObject(const char *line)
 
 	// Well this is kinda dumb....
 	if(strncmp(vehclass, "poorfamily", 11) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_POOR;
+		mi->m_vehicleClass = CCarCtrl::POOR;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_POOR);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::POOR);
 	}else if(strncmp(vehclass, "richfamily", 11) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_RICH;
+		mi->m_vehicleClass = CCarCtrl::RICH;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_RICH);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::RICH);
 	}else if(strncmp(vehclass, "executive", 10) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_EXECUTIVE;
+		mi->m_vehicleClass = CCarCtrl::EXEC;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_EXECUTIVE);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::EXEC);
 	}else if(strncmp(vehclass, "worker", 7) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_WORKER;
+		mi->m_vehicleClass = CCarCtrl::WORKER;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_WORKER);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::WORKER);
 	}else if(strncmp(vehclass, "special", 8) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_SPECIAL;
+		mi->m_vehicleClass = CCarCtrl::SPECIAL;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_SPECIAL);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::SPECIAL);
 	}else if(strncmp(vehclass, "big", 4) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_BIG;
+		mi->m_vehicleClass = CCarCtrl::BIG;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_BIG);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::BIG);
 	}else if(strncmp(vehclass, "taxi", 5) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_TAXI;
+		mi->m_vehicleClass = CCarCtrl::TAXI;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_TAXI);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::TAXI);
 	}
 }
 

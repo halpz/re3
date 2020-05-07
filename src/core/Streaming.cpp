@@ -1331,7 +1331,7 @@ CStreaming::StreamVehiclesAndPeds(void)
 		for(i = 1; i <= 10; i++){
 			model =  CCarCtrl::ChooseCarModel(modelQualityClass);
 			modelQualityClass++;
-			if(modelQualityClass >= NUM_VEHICLE_CLASSES)
+			if(modelQualityClass >= CCarCtrl::TOTAL_CUSTOM_CLASSES)
 				modelQualityClass = 0;
 
 			// check if we want to load this model
