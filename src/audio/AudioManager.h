@@ -317,7 +317,7 @@ public:
 	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c) const; // not used
 	float GetCollisionOneShotRatio(int32 a, float b) const;
 	float GetCollisionRatio(float a, float b, float c, float d) const;
-	float GetDistanceSquared(CVector *v) const;
+	float GetDistanceSquared(const CVector &v) const;
 	int32 GetJumboTaxiFreq() const;
 	bool GetMissionAudioLoadingStatus() const;
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
@@ -438,15 +438,15 @@ public:
 	void SetEffectsFadeVolume(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;
 	void SetEntityStatus(int32 id, uint8 status);
-	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(cAudioCollision *audioCollision);
+	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision);
 	void SetMissionAudioLocation(float x, float y, float z);
 	void SetMissionScriptPoliceAudio(int32 sfx) const;
 	void SetMonoMode(uint8); // todo (mobile)
 	void SetMusicFadeVolume(uint8 volume) const;
 	void SetMusicMasterVolume(uint8 volume) const;
 	void SetSpeakerConfig(int32 conf) const;
-	void SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter);
-	void SetUpOneShotCollisionSound(cAudioCollision *col);
+	void SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter);
+	void SetUpOneShotCollisionSound(const cAudioCollision &col);
 	bool SetupCrimeReport();
 	bool SetupJumboEngineSound(uint8 vol, int32 freq);
 	bool SetupJumboFlySound(uint8 emittingVol);
@@ -468,6 +468,8 @@ public:
 	// only used in pc
 	void AdjustSamplesVolume();
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity, float dist);
+
+	void DebugShit();
 };
 
 //dstatic_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
