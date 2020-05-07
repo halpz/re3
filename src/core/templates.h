@@ -17,6 +17,16 @@ public:
 	void clear(void){
 		this->allocPtr = 0;
 	}
+	int getIndex(T *item){
+		assert(item >= &this->store[0]);
+		assert(item < &this->store[n]);
+		return item - this->store;
+	}
+	T *getItem(int index){
+		assert(index >= 0);
+		assert(index < n);
+		return &this->store[index];
+	}
 };
 
 template<typename T, typename U = T>

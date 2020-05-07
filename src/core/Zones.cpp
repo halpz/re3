@@ -47,7 +47,6 @@ CTheZones::Init(void)
 	for(i = 0; i < NUMINFOZONES; i++)
 		memset(&InfoZoneArray[i], 0, sizeof(CZone));
 
-	CZoneInfo *zonei;
 	int x = 1000/9;
 	for(i = 0; i < 2*NUMINFOZONES; i++){
 		// Cars

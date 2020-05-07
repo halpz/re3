@@ -57,4 +57,4 @@ public:
 	void SetRelatedModel(CSimpleModelInfo *m){
 		m_atomics[2] = (RpAtomic*)m; }
 };
-static_assert(sizeof(CSimpleModelInfo) == 0x4C, "CSimpleModelInfo: error");
+//static_assert(sizeof(CSimpleModelInfo) == 0x4C, "CSimpleModelInfo: error");

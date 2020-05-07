@@ -1,3 +1,5 @@
+#pragma once
+
 enum {
 	EFFECT_LIGHT,
 	EFFECT_PARTICLE,
