@@ -255,7 +255,8 @@ enum
 	MI_BUSKER4,
 	// three more peds possible
 
-	MI_LANDSTAL = 90,
+	MI_FIRST_VEHICLE = 90,
+	MI_LANDSTAL = MI_FIRST_VEHICLE,
 	MI_IDAHO,
 	MI_STINGER,
 	MI_LINERUN,

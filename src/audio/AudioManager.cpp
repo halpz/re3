@@ -7989,7 +7989,7 @@ cAudioManager::ProcessVehicle(CVehicle *veh)
 	if (handling)
 		params.m_pTransmission = &handling->Transmission;
 
-	params.m_nIndex = veh->GetModelIndex() - 90;
+	params.m_nIndex = veh->GetModelIndex() - MI_FIRST_VEHICLE;
 	if (params.m_pVehicle->GetStatus() == STATUS_SIMPLE)
 		velChange = params.m_pVehicle->AutoPilot.m_fMaxTrafficSpeed * 0.02f;
 	else

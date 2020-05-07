@@ -79,8 +79,8 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 		if (copType == COP_STREET)
 			pCopPed->SetCurrentWeapon(WEAPONTYPE_COLT45);
 		CPedPlacement::FindZCoorForPed(&posForZ);
-		pCopPed->m_matrix.GetPosition() = posForZ;
-		CVector vecSavedPos = pCopPed->m_matrix.GetPosition();
+		pCopPed->SetPosition(posForZ);
+		CVector vecSavedPos = pCopPed->GetPosition();
 		pCopPed->m_matrix.SetRotate(0.0f, 0.0f, -HALFPI);
 		pCopPed->m_matrix.GetPosition() += vecSavedPos;
 		pCopPed->m_bIsDisabledCop = true;
@@ -133,8 +133,8 @@ CRoadBlocks::GenerateRoadBlocks(void)
 					float fModelRadius = 2.0f * pVehicleColModel->boundingSphere.radius + 0.25f;
 					int16 radius = (int16)(fMapObjectRadius / fModelRadius);
 					if (radius > 0 && radius < 6) {
-						CVector2D vecDistanceToCamera = TheCamera.GetPosition() - mapObject->m_matrix.GetPosition();
-						float fDotProduct = DotProduct2D(vecDistanceToCamera, mapObject->m_matrix.GetUp());
+						CVector2D vecDistanceToCamera = TheCamera.GetPosition() - mapObject->GetPosition();
+						float fDotProduct = DotProduct2D(vecDistanceToCamera, mapObject->GetForward());
 						float fOffset = 0.5f * fModelRadius * (float)(radius - 1);
 						for (int16 i = 0; i < radius; i++) {
 							uint8 nRoadblockType = fDotProduct < 0.0f;
@@ -174,7 +174,7 @@ CRoadBlocks::GenerateRoadBlocks(void)
 								pVehicle->bExtendedRange = true;
 								if (pVehicle->UsesSiren(pVehicle->GetModelIndex()) && CGeneral::GetRandomNumber() & 1)
 									pVehicle->m_bSirenOrAlarm = true;
-								if (pVehicle->m_matrix.GetForward().z > 0.94f) {
+								if (pVehicle->GetForward().z > 0.94f) {
 									CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);
 									CWorld::Add(pVehicle);
 									pVehicle->bCreateRoadBlockPeds = true;
