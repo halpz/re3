@@ -106,8 +106,9 @@
 
 const int32 gaCarsToCollectInCraigsGarages[TOTAL_COLLECTCARS_GARAGES][TOTAL_COLLECTCARS_CARS] =
 {
-	{ MI_SECURICA, MI_MOONBEAM, MI_COACH,    MI_FLATBED,  MI_LINERUN,  MI_TRASH,    MI_PATRIOT,  MI_MRWHOOP,  MI_BLISTA,   MI_MULE,     MI_YANKEE,   MI_BOBCAT,   MI_DODO,     MI_BUS,      MI_RUMPO,    MI_PONY     },
-	{ MI_SENTINEL, MI_CHEETAH,  MI_BANSHEE,  MI_IDAHO,    MI_INFERNUS, MI_TAXI,     MI_KURUMA,   MI_STRETCH,  MI_PEREN,    MI_STINGER,  MI_MANANA,   MI_LANDSTAL, MI_STALLION, MI_BFINJECT, MI_CABBIE,   MI_ESPERANT },
+	// TODO(MIAMI): bogus
+	{ MI_SECURICA, MI_MOONBEAM, MI_COACH,    MI_FLATBED,  MI_LINERUN,  MI_TRASH,    MI_PATRIOT,  MI_MRWHOOP,  MI_BLISTAC,   MI_MULE,     MI_YANKEE,   MI_BOBCAT,   MI_DODO,     MI_BUS,      MI_RUMPO,    MI_PONY     },
+	{ MI_SENTINEL, MI_CHEETAH,  MI_BANSHEE,  MI_IDAHO,    MI_INFERNUS, MI_TAXI,     MI_WASHING,   MI_STRETCH,  MI_PEREN,    MI_STINGER,  MI_MANANA,   MI_LANDSTAL, MI_STALLION, MI_BFINJECT, MI_CABBIE,   MI_ESPERANT },
 	{ MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_LANDSTAL, MI_CHEETAH,  MI_TAXI,     MI_ESPERANT, MI_SENTINEL, MI_IDAHO    }
 };
 
@@ -1612,8 +1613,6 @@ bool CGarages::HasThisCarBeenCollected(int16 garage, uint8 id)
 
 bool CGarage::DoesCraigNeedThisCar(int32 mi)
 {
-	if (mi == MI_CORPSE)
-		mi = MI_MANANA;
 	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType);
 	for (int i = 0; i < TOTAL_COLLECTCARS_CARS; i++) {
 		if (mi == gaCarsToCollectInCraigsGarages[ct][i])
@@ -1624,8 +1623,6 @@ bool CGarage::DoesCraigNeedThisCar(int32 mi)
 
 bool CGarage::HasCraigCollectedThisCar(int32 mi)
 {
-	if (mi == MI_CORPSE)
-		mi = MI_MANANA;
 	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType);
 	for (int i = 0; i < TOTAL_COLLECTCARS_CARS; i++) {
 		if (mi == gaCarsToCollectInCraigsGarages[ct][i])
@@ -1636,8 +1633,6 @@ bool CGarage::HasCraigCollectedThisCar(int32 mi)
 
 bool CGarage::MarkThisCarAsCollectedForCraig(int32 mi)
 {
-	if (mi == MI_CORPSE)
-		mi = MI_MANANA;
 	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType);
 	int index;
 	for (index = 0; index < TOTAL_COLLECTCARS_CARS; index++) {

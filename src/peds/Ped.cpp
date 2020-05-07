@@ -11976,7 +11976,7 @@ CPed::RegisterThreatWithGangPeds(CEntity *attacker)
 	}
 
 	if (attackerPed && attackerPed->IsPlayer() && (attackerPed->m_nPedState == PED_CARJACK || attackerPed->bInVehicle)) {
-		if (!attackerPed->m_pMyVehicle || attackerPed->m_pMyVehicle->GetModelIndex() != MI_TOYZ) {
+		if (!attackerPed->m_pMyVehicle || attackerPed->m_pMyVehicle->GetModelIndex() != MI_TOPFUN) {
 			int16 lastVehicle;
 			CEntity *vehicles[8];
 			CWorld::FindObjectsInRange(GetPosition(), 30.0f, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
@@ -15670,7 +15670,7 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 		} else {
 			if (veh->GetUp().z > -0.8f) {
 				bool addDoorSmoke = false;
-				if (veh->GetModelIndex() == MI_YARDIE)
+				if (veh->GetModelIndex() == MI_VOODOO)
 					addDoorSmoke = true;
 
 				switch (m_vehEnterType) {

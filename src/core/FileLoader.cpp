@@ -781,21 +781,22 @@ CFileLoader::LoadVehicleObject(const char *line)
 {
 	int id;
 	char model[24], txd[24];
-	char type[8], handlingId[16], gamename[32], vehclass[12];
+	char type[8], handlingId[16], gamename[32], anims[16], vehclass[12];
 	uint32 frequency, comprules;
 	int32 level, misc;
 	float wheelScale;
 	CVehicleModelInfo *mi;
 	char *p;
 
-	sscanf(line, "%d %s %s %s %s %s %s %d %d %x %d %f",
+	sscanf(line, "%d %s %s %s %s %s %s %s %d %d %x %d %f",
 		&id, model, txd,
-		type, handlingId, gamename, vehclass,
+		type, handlingId, gamename, anims, vehclass,
 		&frequency, &level, &comprules, &misc, &wheelScale);
 
 	mi = CModelInfo::AddVehicleModel(id);
 	mi->SetName(model);
 	mi->SetTexDictionary(txd);
+	// TODO(MIAMI): anims
 	for(p = gamename; *p; p++)
 		if(*p == '_') *p = ' ';
 	strncpy(mi->m_gameName, gamename, 32);
@@ -826,34 +827,52 @@ CFileLoader::LoadVehicleObject(const char *line)
 	mi->m_handlingId = mod_HandlingManager.GetHandlingId(handlingId);
 
 	// Well this is kinda dumb....
-	if(strncmp(vehclass, "poorfamily", 11) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_POOR;
+	if(strncmp(vehclass, "normal", 7) == 0){
+		mi->m_vehicleClass = CCarCtrl::NORMAL;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_POOR);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::NORMAL);
+	}else if(strncmp(vehclass, "poorfamily", 11) == 0){
+		mi->m_vehicleClass = CCarCtrl::POOR;
+		while(frequency-- > 0)
+			CCarCtrl::AddToCarArray(id, CCarCtrl::POOR);
 	}else if(strncmp(vehclass, "richfamily", 11) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_RICH;
+		mi->m_vehicleClass = CCarCtrl::RICH;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_RICH);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::RICH);
 	}else if(strncmp(vehclass, "executive", 10) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_EXECUTIVE;
+		mi->m_vehicleClass = CCarCtrl::EXEC;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_EXECUTIVE);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::EXEC);
 	}else if(strncmp(vehclass, "worker", 7) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_WORKER;
+		mi->m_vehicleClass = CCarCtrl::WORKER;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_WORKER);
-	}else if(strncmp(vehclass, "special", 8) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_SPECIAL;
-		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_SPECIAL);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::WORKER);
 	}else if(strncmp(vehclass, "big", 4) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_BIG;
+		mi->m_vehicleClass = CCarCtrl::BIG;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_BIG);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::BIG);
 	}else if(strncmp(vehclass, "taxi", 5) == 0){
-		mi->m_vehicleClass = VEHICLE_CLASS_TAXI;
+		mi->m_vehicleClass = CCarCtrl::TAXI;
 		while(frequency-- > 0)
-			CCarCtrl::AddToCarArray(id, VEHICLE_CLASS_TAXI);
+			CCarCtrl::AddToCarArray(id, CCarCtrl::TAXI);
+	}else if(strncmp(vehclass, "moped", 6) == 0){
+		mi->m_vehicleClass = CCarCtrl::MOPED;
+		while(frequency-- > 0)
+			CCarCtrl::AddToCarArray(id, CCarCtrl::MOPED);
+	}else if(strncmp(vehclass, "motorbike", 10) == 0){
+		mi->m_vehicleClass = CCarCtrl::MOTORBIKE;
+		while(frequency-- > 0)
+			CCarCtrl::AddToCarArray(id, CCarCtrl::MOTORBIKE);
+	}else if(strncmp(vehclass, "leisureboat", 12) == 0){
+		mi->m_vehicleClass = CCarCtrl::LEISUREBOAT;
+		while(frequency-- > 0)
+			CCarCtrl::AddToCarArray(id, CCarCtrl::LEISUREBOAT);
+	}else if(strncmp(vehclass, "workerboat", 11) == 0){
+		mi->m_vehicleClass = CCarCtrl::WORKERBOAT;
+		while(frequency-- > 0)
+			CCarCtrl::AddToCarArray(id, CCarCtrl::WORKERBOAT);
+	}else if(strncmp(vehclass, "ignore", 11) == 0){
+		mi->m_vehicleClass = -1;
 	}
 }
 

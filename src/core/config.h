@@ -61,7 +61,7 @@ enum Config {
 	// Cull zones
 	NUMATTRIBZONES = 704,
 
-	NUMHANDLINGS = 57,
+	NUMHANDLINGS = 106,
 
 	PATHNODESIZE = 4500,
 

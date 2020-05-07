@@ -1528,7 +1528,8 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 
 						if(A->GetModelIndex() == MI_RCBANDIT)
 							adhesion *= 0.2f;
-						else if(IsBoatModel(A->GetModelIndex())){
+// TODO(MIAMI): check this
+						else if(A->IsVehicle() && ((CVehicle*)A)->IsBoat()){
 							if(aColPoints[i].normal.z > 0.6f){
 								if(CSurfaceTable::GetAdhesionGroup(aColPoints[i].surfaceB) == ADHESIVE_LOOSE)
 									adhesion *= 3.0f;

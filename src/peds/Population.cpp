@@ -748,7 +748,8 @@ CPopulation::AddPedInCar(CVehicle* car)
 			break;
 		case MI_TAXI:
 		case MI_CABBIE:
-		case MI_BORGNINE:
+		case MI_ZEBRA:
+		case MI_KAUFMAN:
 			if (CGeneral::GetRandomTrueFalse()) {
 				pedType = PEDTYPE_CIVMALE;
 				preferredModel = MI_TAXI_D;

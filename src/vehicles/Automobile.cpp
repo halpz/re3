@@ -195,7 +195,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 		CMatrix mat2(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]));
 		mat1.GetPosition() += CVector(mat2.GetPosition().x + 0.1f, 0.0f, mat2.GetPosition().z);
 		mat1.UpdateRW();
-	}else if(GetModelIndex() == MI_MIAMI_SPARROW || GetModelIndex() == MI_MIAMI_RCRAIDER){
+	}else if(GetModelIndex() == MI_SPARROW || GetModelIndex() == MI_RCRAIDER){
 		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
 		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_RF]), 0);
 		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LB]), 0);
@@ -490,8 +490,7 @@ CAutomobile::ProcessControl(void)
 		TankControl();
 		BlowUpCarsInPath();
 		break;
-	case MI_YARDIE:
-	// beta also had esperanto here it seems
+	case MI_VOODOO:
 		HydraulicControl();
 		break;
 	default:
@@ -673,9 +672,9 @@ CAutomobile::ProcessControl(void)
 		acceleration /= m_fForceMultiplier;
 
 		// unused
-		if(GetModelIndex() == MI_MIAMI_RCBARON ||
-		   GetModelIndex() == MI_MIAMI_RCRAIDER ||
-		   GetModelIndex() == MI_MIAMI_SPARROW)
+		if(GetModelIndex() == MI_RCBARON ||
+		   GetModelIndex() == MI_RCRAIDER ||
+		   GetModelIndex() == MI_SPARROW)
 			acceleration = 0.0f;
 
 		brake = m_fBrakePedal * pHandling->fBrakeDeceleration * CTimer::GetTimeStep();
@@ -1001,7 +1000,7 @@ CAutomobile::ProcessControl(void)
 					m_bSirenOrAlarm = !m_bSirenOrAlarm;
 				}else
 					m_nCarHornTimer = 0;
-			}else if(GetModelIndex() != MI_YARDIE && !CVehicle::bCheat3){
+			}else if(GetModelIndex() != MI_VOODOO && !CVehicle::bCheat3){
 				if(Pads[0].GetHorn())
 					m_nCarHornTimer = 1;
 				else
@@ -1012,7 +1011,7 @@ CAutomobile::ProcessControl(void)
 		// Flying
 
 		if(GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE && GetStatus() != STATUS_PHYSICS){
-			if(GetModelIndex() == MI_MIAMI_RCRAIDER || GetModelIndex() == MI_MIAMI_SPARROW)
+			if(GetModelIndex() == MI_RCRAIDER || GetModelIndex() == MI_SPARROW)
 				m_aWheelSpeed[0] = Max(m_aWheelSpeed[0]-0.0005f, 0.0f);
 		}else if((GetModelIndex() == MI_DODO || CVehicle::bAllDodosCheat) &&
 		         m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
@@ -1022,9 +1021,9 @@ CAutomobile::ProcessControl(void)
 			else
 #endif
 				FlyingControl(FLIGHT_MODEL_DODO);
-		}else if(GetModelIndex() == MI_MIAMI_RCBARON){
+		}else if(GetModelIndex() == MI_RCBARON){
 			FlyingControl(FLIGHT_MODEL_RCPLANE);
-		}else if(GetModelIndex() == MI_MIAMI_RCRAIDER || GetModelIndex() == MI_MIAMI_SPARROW || bAllCarCheat){
+		}else if(GetModelIndex() == MI_RCRAIDER || GetModelIndex() == MI_SPARROW || bAllCarCheat){
 #ifdef ALLCARSHELI_CHEAT
 			if (bAllCarCheat)
 				FlyingControl(FLIGHT_MODEL_HELI);
@@ -1591,7 +1590,8 @@ CAutomobile::PreRender(void)
 
 	case MI_TAXI:
 	case MI_CABBIE:
-	case MI_BORGNINE:
+	case MI_ZEBRA:
+	case MI_KAUFMAN:
 		if(bTaxiLight){
 			CVector pos = GetPosition() + GetUp()*0.95f;
 			CCoronas::RegisterCorona((uintptr)this + 21,

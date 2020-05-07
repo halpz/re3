@@ -15,13 +15,13 @@ CGangInfo::CGangInfo() :
 
 void CGangs::Initialise(void)
 {
-	Gang[GANG_MAFIA].m_nVehicleMI = MI_MAFIA;
-	Gang[GANG_TRIAD].m_nVehicleMI = MI_BELLYUP;
-	Gang[GANG_DIABLOS].m_nVehicleMI = MI_DIABLOS;
-	Gang[GANG_YAKUZA].m_nVehicleMI = MI_YAKUZA;
-	Gang[GANG_YARDIE].m_nVehicleMI = MI_YARDIE;
-	Gang[GANG_COLUMB].m_nVehicleMI = MI_COLUMB;
-	Gang[GANG_HOODS].m_nVehicleMI = MI_HOODS;
+	Gang[GANG_MAFIA].m_nVehicleMI = -1;
+	Gang[GANG_TRIAD].m_nVehicleMI = -1;
+	Gang[GANG_DIABLOS].m_nVehicleMI = -1;
+	Gang[GANG_YAKUZA].m_nVehicleMI = -1;
+	Gang[GANG_YARDIE].m_nVehicleMI = -1;
+	Gang[GANG_COLUMB].m_nVehicleMI = -1;
+	Gang[GANG_HOODS].m_nVehicleMI = -1;
 	Gang[GANG_7].m_nVehicleMI = -1;
 	Gang[GANG_8].m_nVehicleMI = -1;
 #ifdef FIX_BUGS

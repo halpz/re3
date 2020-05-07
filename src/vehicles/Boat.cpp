@@ -287,8 +287,8 @@ CBoat::ProcessControl(void)
 				AddWakePoint(GetPosition());
 
 			float steerFactor = 1.0f - DotProduct(m_vecMoveSpeed, GetForward());
-			if (GetModelIndex() == MI_GHOST)
-				steerFactor = 1.0f - DotProduct(m_vecMoveSpeed, GetForward())*0.3f;
+//			if (GetModelIndex() == MI_GHOST)
+//				steerFactor = 1.0f - DotProduct(m_vecMoveSpeed, GetForward())*0.3f;
 			if(steerFactor < 0.0f) steerFactor = 0.0f;
 
 			CVector propeller(0.0f, -pHandling->Dimension.y*m_fPropellerY, -pHandling->Dimension.z*m_fPropellerZ);

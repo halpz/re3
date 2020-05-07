@@ -21,7 +21,6 @@ const char VehicleNames[NUMHANDLINGS][14] = {
 	"STRETCH",
 	"MANANA",
 	"INFERNUS",
-	"BLISTA",
 	"PONY",
 	"MULE",
 	"CHEETAH",
@@ -38,7 +37,6 @@ const char VehicleNames[NUMHANDLINGS][14] = {
 	"ENFORCER",
 	"SECURICA",
 	"BANSHEE",
-	"PREDATOR",
 	"BUS",
 	"RHINO",
 	"BARRACKS",
@@ -50,22 +48,73 @@ const char VehicleNames[NUMHANDLINGS][14] = {
 	"STALLION",
 	"RUMPO",
 	"RCBANDIT",
-	"BELLYUP",
-	"MRWONGS",
 	"MAFIA",
-	"YARDIE",
-	"YAKUZA",
-	"DIABLOS",
-	"COLUMB",
-	"HOODS",
 	"AIRTRAIN",
 	"DEADDODO",
-	"SPEEDER",
-	"REEFER",
-	"PANLANT",
 	"FLATBED",
 	"YANKEE",
-	"BORGNINE"
+	"GOLFCART",
+	"VOODOO",
+	"WASHING",
+	"CUBAN",
+	"ROMERO",
+	"PACKER",
+	"ADMIRAL",
+	"GANGBUR",
+	"ZEBRA",
+	"TOPFUN",
+	"GLENDALE",
+	"OCEANIC",
+	"HERMES",
+	"SABRE1",
+	"SABRETUR",
+	"PHEONIX",
+	"WALTON",
+	"REGINA",
+	"COMET",
+	"DELUXO",
+	"BURRITO",
+	"SPAND",
+	"BAGGAGE",
+	"KAUFMAN",
+	"RANCHER",
+	"FBIRANCH",
+	"VIRGO",
+	"GREENWOO",
+	"HOTRING",
+	"SANDKING",
+	"BLISTAC",
+	"BOXVILLE",
+	"BENSON",
+	"DESPERAD",
+	"LOVEFIST",
+	"BLOODRA",
+	"BLOODRB",
+	"BIKE",
+	"MOPED",
+	"DIRTBIKE",
+	"ANGEL",
+	"FREEWAY",
+	"PREDATOR",
+	"SPEEDER",
+	"REEFER",
+	"RIO",
+	"SQUALO",
+	"TROPIC",
+	"COASTGRD",
+	"DINGHY",
+	"MARQUIS",
+	"CUPBOAT",
+	"SEAPLANE",
+	"SPARROW",
+	"SEASPAR",
+	"MAVERICK",
+	"COASTMAV",
+	"POLMAV",
+	"HUNTER",
+	"RCBARON",
+	"RCGOBLIN",
+	"RCCOPTER"
 };
 
 cHandlingDataMgr::cHandlingDataMgr(void)
@@ -117,7 +166,9 @@ cHandlingDataMgr::LoadHandlingData(void)
 		// yeah, this is kinda crappy
 		if(strncmp(line, ";the end", 9) == 0)
 			keepGoing = 0;
-		else if(line[0] != ';'){
+//		else if(line[0] != ';'){
+// TODO(MIAMI): read boat, bike, flying values
+		else if(line[0] != ';' && line[0] != '%' && line[0] != '!' && line[0] != '$'){
 			field = 0;
 			strcpy(delim, " \t");
 			// FIX: game seems to use a do-while loop here
@@ -158,11 +209,14 @@ cHandlingDataMgr::LoadHandlingData(void)
 				case 27: handling->fSuspensionLowerLimit = strtod(word, nil); break;
 				case 28: handling->fSuspensionBias = strtod(word, nil); break;
 				case 29:
+					// TODO(MIAMI): suspension anti-dive multiplier
+					break;
+				case 30:
 					sscanf(word, "%x", &handling->Flags);
 					handling->Transmission.Flags = handling->Flags;
 					break;
-				case 30: handling->FrontLights = atoi(word); break;
-				case 31: handling->RearLights = atoi(word); break;
+				case 31: handling->FrontLights = atoi(word); break;
+				case 32: handling->RearLights = atoi(word); break;
 				}
 				field++;
 			}

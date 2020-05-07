@@ -66,7 +66,8 @@ cMusicManager::PlayerInCar()
 	case MI_TRAIN:
 	case MI_SPEEDER:
 	case MI_REEFER:
-	case MI_GHOST: return false;
+//	case MI_GHOST:
+		return false;
 	default: return true;
 	}
 }

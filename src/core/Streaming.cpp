@@ -1285,8 +1285,11 @@ CStreaming::StreamVehiclesAndPeds(void)
 	else if(ms_numVehiclesLoaded <= desiredNumVehiclesLoaded){
 		for(i = 1; i <= 10; i++){
 			model =  CCarCtrl::ChooseCarModel(modelQualityClass);
+// TODO(MIAMI): check this
+if(model < 0)
+	continue;
 			modelQualityClass++;
-			if(modelQualityClass >= NUM_VEHICLE_CLASSES)
+			if(modelQualityClass >= CCarCtrl::TOTAL_CUSTOM_CLASSES)
 				modelQualityClass = 0;
 
 			// check if we want to load this model
@@ -1373,6 +1376,10 @@ CStreaming::StreamZoneModels(const CVector &pos)
 			SetModelTxdIsDeletable(MI_GANG01 + i*2 + 1);
 			ms_loadedGangs &= ~bit;
 		}
+
+// TODO(MIAMI): check this
+if(CGangs::GetGangInfo(i)->m_nVehicleMI < 0)
+	continue;
 
 		if(gangCarsToLoad & bit && (ms_loadedGangCars & bit) == 0){
 			RequestModel(CGangs::GetGangInfo(i)->m_nVehicleMI, STREAMFLAGS_DONT_REMOVE);

@@ -385,7 +385,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 	case FLIGHT_MODEL_HELI:
 	{
 		CVector vecMoveResistance;
-		if (GetModelIndex() == MI_MIAMI_SPARROW)
+		if (GetModelIndex() == MI_SPARROW)
 			vecMoveResistance = vecHeliMoveRes;
 		else
 			vecMoveResistance = vecRCHeliMoveRes;
@@ -436,7 +436,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		ApplyTurnForce(fYaw * GetForward() * fYawVar * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
 
 		CVector vecResistance;
-		if (GetModelIndex() == MI_MIAMI_SPARROW)
+		if (GetModelIndex() == MI_SPARROW)
 			vecResistance = vecHeliResistance;
 		else
 			vecResistance = vecRCHeliResistance;
@@ -875,24 +875,7 @@ CVehicle::IsVehicleNormal(void)
 {
 	if (!pDriver || m_nNumPassengers != 0 || GetStatus() == STATUS_WRECKED)
 		return false;
-	switch (GetModelIndex()){
-	case MI_FIRETRUCK:
-	case MI_AMBULAN:
-	case MI_TAXI:
-	case MI_POLICE:
-	case MI_ENFORCER:
-	case MI_BUS:
-	case MI_RHINO:
-	case MI_BARRACKS:
-	case MI_DODO:
-	case MI_COACH:
-	case MI_CABBIE:
-	case MI_RCBANDIT:
-	case MI_BORGNINE:
-		return false;
-	default:
-		return true;
-	}
+	return GetModelInfo()->m_vehicleClass != -1;
 }
 
 bool
@@ -1091,7 +1074,7 @@ CVehicle::SetDriver(CPed *driver)
 			driver->GiveWeapon(WEAPONTYPE_SHOTGUN, 5);
 		else if(GetModelIndex() == MI_ENFORCER)
 			driver->m_fArmour = Max(driver->m_fArmour, 100.0f);
-		else if(GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE)
+		else if(GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_ZEBRA)	// TODO(MIAMI): check zebra
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
 		bFreebies = false;
 	}
