@@ -3625,14 +3625,14 @@ cAudioManager::ProcessActiveQueues()
 			m_asActiveSamples[i].m_nEntityIndex = AEHANDLE_NONE;
 		}
 	}
-	for (int32 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; ++i) {
+	for (uint8 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; ++i) {
 		tSound &sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
 		if (!sample.m_bIsProcessed && !sample.m_bLoopEnded && m_asAudioEntities[sample.m_nEntityIndex].m_bIsUsed && sample.m_nSampleIndex < NO_SAMPLE) {
 			if (sample.m_nCounter > 255 && sample.m_nLoopCount && sample.m_nLoopsRemaining) {
 				--sample.m_nLoopsRemaining;
 				sample.m_nReleasingVolumeDivider = 1;
 			} else {
-				for (int32 j = 0; j < m_nActiveSamples; ++j) {
+				for (uint8 j = 0; j < m_nActiveSamples; ++j) {
 					if (!m_asActiveSamples[j].m_bIsProcessed) {
 						if (sample.m_nLoopCount) {
 							v28 = sample.m_nFrequency / m_nTimeSpent;

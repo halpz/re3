@@ -438,15 +438,15 @@ public:
 	void SetEffectsFadeVolume(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;
 	void SetEntityStatus(int32 id, uint8 status);
-	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(cAudioCollision *audioCollision);
+	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision);
 	void SetMissionAudioLocation(float x, float y, float z);
 	void SetMissionScriptPoliceAudio(int32 sfx) const;
 	void SetMonoMode(uint8); // todo (mobile)
 	void SetMusicFadeVolume(uint8 volume) const;
 	void SetMusicMasterVolume(uint8 volume) const;
 	void SetSpeakerConfig(int32 conf) const;
-	void SetUpLoopingCollisionSound(cAudioCollision *col, uint8 counter);
-	void SetUpOneShotCollisionSound(cAudioCollision *col);
+	void SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter);
+	void SetUpOneShotCollisionSound(const cAudioCollision &col);
 	bool SetupCrimeReport();
 	bool SetupJumboEngineSound(uint8 vol, int32 freq);
 	bool SetupJumboFlySound(uint8 emittingVol);
