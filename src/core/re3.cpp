@@ -193,7 +193,7 @@ ResetCamStatics(void)
 }
 
 static const char *carnames[] = {
-	"landstal", "idaho", "stinger", "linerun", "peren", "sentinel" "rio", "firetruk", "trash", "stretch", "manana",
+	"landstal", "idaho", "stinger", "linerun", "peren", "sentinel", "rio", "firetruk", "trash", "stretch", "manana",
 	"infernus", "voodoo", "pony", "mule", "cheetah", "ambulan", "fbicar", "moonbeam", "esperant", "taxi", "washing",
 	"bobcat", "mrwhoop", "bfinject", "hunter", "police", "enforcer", "securica", "banshee", "predator", "bus",
 	"rhino", "barracks", "cuban", "chopper", "angel", "coach", "cabbie", "stallion", "rumpo", "rcbandit", "romero",
@@ -203,7 +203,7 @@ static const char *carnames[] = {
 	"hermes", "sabre", "sabretur", "pheonix", "walton", "regina", "comet", "deluxo", "burrito", "spand", "marquis",
 	"baggage", "kaufman", "maverick", "vcnmav", "rancher", "fbiranch", "virgo", "greenwoo", "jetmax", "hotring",
 	"sandking", "blistac", "polmav", "boxville", "benson", "mesa", "rcgoblin", "hotrina", "hotrinb",
-	"bloodra", "bloodrb", "vicechee",
+	"bloodra", "bloodrb", "vicechee"
 };
 
 static std::list<CTweakVar *> TweakVarsList;
