@@ -3089,18 +3089,20 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	case COMMAND_SET_ZONE_CAR_INFO:
 	{
 		char label[12];
+		int16 gangDensities[NUM_GANGS];
+		int i;
+
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CollectParameters(&m_nIp, 16);
+		CollectParameters(&m_nIp, 12);
 		int zone = CTheZones::FindZoneByLabelAndReturnIndex(label, ZONE_INFO);
 		if (zone < 0) {
 			debug("Couldn't find zone - %s\n", label);
 			return 0;
 		}
-		CTheZones::SetZoneCarInfo(zone, ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3],
-			ScriptParams[4], ScriptParams[5], ScriptParams[6], ScriptParams[7], ScriptParams[8], 0, 0,
-			ScriptParams[9], ScriptParams[10], ScriptParams[11], ScriptParams[12],
-			ScriptParams[13], ScriptParams[14], ScriptParams[15]);
+		for(i = 0; i < NUM_GANGS; i++)
+			gangDensities[i] = ScriptParams[2+i];
+		CTheZones::SetZoneCarInfo(zone, ScriptParams[0], ScriptParams[1], ScriptParams[11], gangDensities);
 		return 0;
 	}
 	/* Not implemented.

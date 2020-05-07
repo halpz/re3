@@ -12,7 +12,7 @@ class CZoneInfo;
 
 enum{
 	MAX_CARS_TO_KEEP = 2,
-	MAX_CAR_MODELS_IN_ARRAY = 256,
+	MAX_CAR_MODELS_IN_ARRAY = 25,
 };
 
 #define LANE_WIDTH 5.0f
@@ -34,9 +34,11 @@ public:
 		TAXI,
 		MOPED,
 		MOTORBIKE,
+
 		LEISUREBOAT,
 		WORKERBOAT,
-		TOTAL_CUSTOM_CLASSES,
+
+		COPS,
 		MAFIA,
 		TRIAD,
 		DIABLO,
@@ -46,7 +48,11 @@ public:
 		NINES,
 		GANG8,
 		GANG9,
-		COPS
+		COPSBOAT,
+
+		NUM_CAR_CLASSES = MOTORBIKE+1,
+		NUM_BOAT_CLASSES = 2,
+		TOTAL_CUSTOM_CLASSES = NUM_CAR_CLASSES + NUM_BOAT_CLASSES
 	};
 
 	static void SwitchVehicleToRealPhysics(CVehicle*);

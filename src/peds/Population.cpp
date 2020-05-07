@@ -564,14 +564,12 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 
 	if (ms_nTotalPeds < maxPossiblePedsForArea || addCop) {
 		int decisionThreshold = CGeneral::GetRandomNumberInRange(0, 1000);
-		if (decisionThreshold < zoneInfo.copDensity || addCop) {
+		if (decisionThreshold < zoneInfo.copPedThreshold || addCop) {
 			pedTypeToAdd = PEDTYPE_COP;
 			modelToAdd = ChoosePolicePedOccupation();
 		} else {
-			int16 density = zoneInfo.copDensity;
 			for (int i = 0; i < NUM_GANGS; i++) {
-				density += zoneInfo.gangDensity[i];
-				if (decisionThreshold < density) {
+				if (decisionThreshold < zoneInfo.gangPedThreshold[i]) {
 					pedTypeToAdd = PEDTYPE_GANG1 + i;
 					break;
 				}
