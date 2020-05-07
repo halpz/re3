@@ -21,7 +21,6 @@
 
 int8 CVehicleModelInfo::ms_compsToUse[2] = { -2, -2 };
 int8 CVehicleModelInfo::ms_compsUsed[2];
-RwTexture *CVehicleModelInfo::ms_pEnvironmentMaps[NUM_VEHICLE_ENVMAPS];
 RwRGBA CVehicleModelInfo::ms_vehicleColourTable[256];
 RwTexture *CVehicleModelInfo::ms_colourTextureTable[256];
 
@@ -752,35 +751,26 @@ void
 CVehicleModelInfo::SetVehicleColour(uint8 c1, uint8 c2)
 {
 	RwRGBA col, *colp;
-	RwTexture *coltex;
 	RpMaterial **matp;
 
 	if(c1 != m_currentColour1){
 		col = ms_vehicleColourTable[c1];
-		coltex = ms_colourTextureTable[c1];
 		for(matp = m_materials1; *matp; matp++){
-			if(RpMaterialGetTexture(*matp) && RwTextureGetName(RpMaterialGetTexture(*matp))[0] != '@'){
-				colp = (RwRGBA*)RpMaterialGetColor(*matp);	// get rid of const
-				colp->red = col.red;
-				colp->green = col.green;
-				colp->blue = col.blue;
-			}else
-				RpMaterialSetTexture(*matp, coltex);
+			colp = (RwRGBA*)RpMaterialGetColor(*matp);	// get rid of const
+			colp->red = col.red;
+			colp->green = col.green;
+			colp->blue = col.blue;
 		}
 		m_currentColour1 = c1;
 	}
 
 	if(c2 != m_currentColour2){
 		col = ms_vehicleColourTable[c2];
-		coltex = ms_colourTextureTable[c2];
 		for(matp = m_materials2; *matp; matp++){
-			if(RpMaterialGetTexture(*matp) && RwTextureGetName(RpMaterialGetTexture(*matp))[0] != '@'){
-				colp = (RwRGBA*)RpMaterialGetColor(*matp);	// get rid of const
-				colp->red = col.red;
-				colp->green = col.green;
-				colp->blue = col.blue;
-			}else
-				RpMaterialSetTexture(*matp, coltex);
+			colp = (RwRGBA*)RpMaterialGetColor(*matp);	// get rid of const
+			colp->red = col.red;
+			colp->green = col.green;
+			colp->blue = col.blue;
 		}
 		m_currentColour2 = c2;
 	}
@@ -925,7 +915,6 @@ CVehicleModelInfo::LoadVehicleColours(void)
 			ms_vehicleColourTable[numCols].green = g;
 			ms_vehicleColourTable[numCols].blue = b;
 			ms_vehicleColourTable[numCols].alpha = 0xFF;
-			ms_colourTextureTable[numCols] = CreateCarColourTexture(r, g, b);
 			numCols++;
 		}else if(section == CARS){
 			n = sscanf(&line[start],	// BUG: games doesn't add start
@@ -960,38 +949,33 @@ CVehicleModelInfo::DeleteVehicleColourTextures(void)
 	for(i = 0; i < 256; i++){
 		if(ms_colourTextureTable[i]){
 			RwTextureDestroy(ms_colourTextureTable[i]);
-#ifdef GTA3_1_1_PATCH
 			ms_colourTextureTable[i] = nil;
-#endif
 		}
 	}
 }
 
 RpMaterial*
-CVehicleModelInfo::HasSpecularMaterialCB(RpMaterial *material, void *data)
+CVehicleModelInfo::GetMatFXEffectMaterialCB(RpMaterial *material, void *data)
 {
-	if(RpMaterialGetSurfaceProperties(material)->specular <= 0.0f)
+	if(RpMatFXMaterialGetEffects(material) == rpMATFXEFFECTNULL)
 		return material;
-	*(bool*)data = true;
+	*(int*)data = RpMatFXMaterialGetEffects(material);
 	return nil;
 }
 
 RpMaterial*
-CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial *material, void *data)
+CVehicleModelInfo::SetDefaultEnvironmentMapCB(RpMaterial *material, void *data)
 {
-	float spec;
-
-	spec = RpMaterialGetSurfaceProperties(material)->specular;
-	if(spec <= 0.0f)
-		RpMatFXMaterialSetEffects(material, rpMATFXEFFECTNULL);
-	else{
+	if(RpMatFXMaterialGetEffects(material) == rpMATFXEFFECTENVMAP){
+		RpMatFXMaterialSetEnvMapFrame(material, pMatFxIdentityFrame);
 		if(RpMaterialGetTexture(material) == nil)
 			RpMaterialSetTexture(material, gpWhiteTexture);
 		RpMatFXMaterialSetEffects(material, rpMATFXEFFECTENVMAP);
 #ifndef PS2_MATFX
-		spec *= 0.5f;	// Tone down a bit for PC
+		float coef = RpMatFXMaterialGetEnvMapCoefficient(material);
+		coef *= 0.25f;	// Tone down a bit for PC
+		RpMatFXMaterialSetEnvMapCoefficient(material, coef);
 #endif
-		RpMatFXMaterialSetupEnvMap(material, (RwTexture*)data, pMatFxIdentityFrame, false, spec);
 	}
 	return material;
 }
@@ -999,17 +983,15 @@ CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial *material, void *data)
 RpAtomic*
 CVehicleModelInfo::SetEnvironmentMapCB(RpAtomic *atomic, void *data)
 {
-	bool hasSpec;
+	int fx;
 	RpGeometry *geo;
 
 	geo = RpAtomicGetGeometry(atomic);
-	hasSpec = 0;
-	RpGeometryForAllMaterials(geo, HasSpecularMaterialCB, &hasSpec);
-	if(hasSpec){
-		RpGeometryForAllMaterials(geo, SetEnvironmentMapCB, data);
-		RpGeometrySetFlags(geo, RpGeometryGetFlags(geo) | rpGEOMETRYMODULATEMATERIALCOLOR);
+	fx = 0;
+	RpGeometryForAllMaterials(geo, GetMatFXEffectMaterialCB, &fx);
+	if(fx != rpMATFXEFFECTNULL){
 		RpMatFXAtomicEnableEffects(atomic);
-		// PS2 sets of PS2Manager lighting CB here
+		RpGeometryForAllMaterials(geo, SetDefaultEnvironmentMapCB, data);
 	}
 	return atomic;
 }
@@ -1021,44 +1003,29 @@ CVehicleModelInfo::SetEnvironmentMap(void)
 	int32 i;
 
 	if(pMatFxIdentityFrame == nil){
+		RwV3d axis = { 1.0f, 0.0f, 0.0f };
 		pMatFxIdentityFrame = RwFrameCreate();
-		RwMatrixSetIdentity(RwFrameGetMatrix(pMatFxIdentityFrame));
+		RwMatrixRotate(RwFrameGetMatrix(pMatFxIdentityFrame), &axis, 60.0f, rwCOMBINEREPLACE);
 		RwFrameUpdateObjects(pMatFxIdentityFrame);
 		RwFrameGetLTM(pMatFxIdentityFrame);
 	}
 
-	if(m_envMap != ms_pEnvironmentMaps[0]){
-		m_envMap = ms_pEnvironmentMaps[0];
-		RpClumpForAllAtomics(m_clump, SetEnvironmentMapCB, m_envMap);
-		if(m_wheelId != -1){
-			wheelmi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(m_wheelId);
-			for(i = 0; i < wheelmi->m_numAtomics; i++)
-				SetEnvironmentMapCB(wheelmi->m_atomics[i], m_envMap);
-		}
+	RpClumpForAllAtomics(m_clump, SetEnvironmentMapCB, nil);
+	if(m_wheelId != -1){
+		wheelmi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(m_wheelId);
+		for(i = 0; i < wheelmi->m_numAtomics; i++)
+			SetEnvironmentMapCB(wheelmi->m_atomics[i], nil);
 	}
 }
 
 void
 CVehicleModelInfo::LoadEnvironmentMaps(void)
 {
-	const char *texnames[] = {
-		"reflection01",		// only one used
-		"reflection02",
-		"reflection03",
-		"reflection04",
-		"reflection05",
-		"reflection06",
-	};
 	int32 txdslot;
-	int32 i;
 
 	txdslot = CTxdStore::FindTxdSlot("particle");
 	CTxdStore::PushCurrentTxd();
 	CTxdStore::SetCurrentTxd(txdslot);
-	for(i = 0; i < NUM_VEHICLE_ENVMAPS; i++){
-		ms_pEnvironmentMaps[i] = RwTextureRead(texnames[i], nil);
-		RwTextureSetFilterMode(ms_pEnvironmentMaps[i], rwFILTERLINEAR);
-	}
 	if(gpWhiteTexture == nil){
 		gpWhiteTexture = RwTextureRead("white", nil);
 		RwTextureGetName(gpWhiteTexture)[0] = '@';
@@ -1070,14 +1037,8 @@ CVehicleModelInfo::LoadEnvironmentMaps(void)
 void
 CVehicleModelInfo::ShutdownEnvironmentMaps(void)
 {
-	int32 i;
-
-	// ignoring "initialised" as that's a PS2 thing only
 	RwTextureDestroy(gpWhiteTexture);
 	gpWhiteTexture = nil;
-	for(i = 0; i < NUM_VEHICLE_ENVMAPS; i++)
-		if(ms_pEnvironmentMaps[i])
-			RwTextureDestroy(ms_pEnvironmentMaps[i]);
 	RwFrameDestroy(pMatFxIdentityFrame);
 	pMatFxIdentityFrame = nil;
 }
