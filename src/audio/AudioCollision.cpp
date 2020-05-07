@@ -328,13 +328,13 @@ void
 cAudioManager::ServiceCollisions()
 {
 	int i, j;
-	bool someArr1[NUMAUDIOCOLLISIONS];
-	bool someArr2[NUMAUDIOCOLLISIONS];
+	bool abRepeatedCollision1[NUMAUDIOCOLLISIONS];
+	bool abRepeatedCollision2[NUMAUDIOCOLLISIONS];
 
 	m_sQueueSample.m_nEntityIndex = m_nCollisionEntity;
 
 	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++)
-		someArr1[i] = someArr2[i] = false;
+		abRepeatedCollision1[i] = abRepeatedCollision2[i] = false;
 
 	for (i = 0; i < m_sCollisionManager.m_bCollisionsInQueue; i++) {
 		for (j = 0; j < NUMAUDIOCOLLISIONS; j++) {
@@ -344,8 +344,8 @@ cAudioManager::ServiceCollisions()
 				&& (m_sCollisionManager.m_asCollisions1[index].m_bSurface1 == m_sCollisionManager.m_asCollisions2[j].m_bSurface1)
 				&& (m_sCollisionManager.m_asCollisions1[index].m_bSurface2 == m_sCollisionManager.m_asCollisions2[j].m_bSurface2)
 				) {
-				someArr1[index] = true;
-				someArr2[j] = true;
+				abRepeatedCollision1[index] = true;
+				abRepeatedCollision2[j] = true;
 				m_sCollisionManager.m_asCollisions1[index].m_nBaseVolume = ++m_sCollisionManager.m_asCollisions2[j].m_nBaseVolume;
 				SetUpLoopingCollisionSound(m_sCollisionManager.m_asCollisions1[index], j);
 				break;
@@ -354,7 +354,7 @@ cAudioManager::ServiceCollisions()
 	}
 
 	for (i = 0; i < NUMAUDIOCOLLISIONS; i++) {
-		if (!someArr2[i]) {
+		if (!abRepeatedCollision2[i]) {
 			m_sCollisionManager.m_asCollisions2[i].m_pEntity1 = nil;
 			m_sCollisionManager.m_asCollisions2[i].m_pEntity2 = nil;
 			m_sCollisionManager.m_asCollisions2[i].m_bSurface1 = SURFACE_DEFAULT;
@@ -368,9 +368,9 @@ cAudioManager::ServiceCollisions()
 
 	for (i = 0; i < m_sCollisionManager.m_bCollisionsInQueue; i++) {
 		int index = m_sCollisionManager.m_bIndicesTable[i];
-		if (!someArr1[index]) {
+		if (!abRepeatedCollision1[index]) {
 			for (j = 0; j < NUMAUDIOCOLLISIONS; j++) {
-				if (someArr2[j]) {
+				if (!abRepeatedCollision2[j]) {
 					m_sCollisionManager.m_asCollisions2[j].m_nBaseVolume = 1;
 					m_sCollisionManager.m_asCollisions2[j].m_pEntity1 = m_sCollisionManager.m_asCollisions1[index].m_pEntity1;
 					m_sCollisionManager.m_asCollisions2[j].m_pEntity2 = m_sCollisionManager.m_asCollisions1[index].m_pEntity2;
