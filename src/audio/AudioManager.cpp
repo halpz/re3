@@ -2951,10 +2951,10 @@ cAudioManager::GetCurrent3DProviderIndex() const
 }
 
 float
-cAudioManager::GetDistanceSquared(CVector *v) const
+cAudioManager::GetDistanceSquared(const CVector &v) const
 {
 	const CVector &c = TheCamera.GetPosition();
-	return sq(v->x - c.x) + sq(v->y - c.y) + sq((v->z - c.z) * 0.2f);
+	return sq(v.x - c.x) + sq(v.y - c.y) + sq((v.z - c.z) * 0.2f);
 }
 
 int32
@@ -3625,14 +3625,14 @@ cAudioManager::ProcessActiveQueues()
 			m_asActiveSamples[i].m_nEntityIndex = AEHANDLE_NONE;
 		}
 	}
-	for (int32 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; ++i) {
+	for (uint8 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; ++i) {
 		tSound &sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
 		if (!sample.m_bIsProcessed && !sample.m_bLoopEnded && m_asAudioEntities[sample.m_nEntityIndex].m_bIsUsed && sample.m_nSampleIndex < NO_SAMPLE) {
 			if (sample.m_nCounter > 255 && sample.m_nLoopCount && sample.m_nLoopsRemaining) {
 				--sample.m_nLoopsRemaining;
 				sample.m_nReleasingVolumeDivider = 1;
 			} else {
-				for (int32 j = 0; j < m_nActiveSamples; ++j) {
+				for (uint8 j = 0; j < m_nActiveSamples; ++j) {
 					if (!m_asActiveSamples[j].m_bIsProcessed) {
 						if (sample.m_nLoopCount) {
 							v28 = sample.m_nFrequency / m_nTimeSpent;
@@ -3747,7 +3747,7 @@ cAudioManager::ProcessAirportScriptObject(uint8 sound)
 		default:
 			return;
 		}
-		float distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+		float distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 			m_sQueueSample.m_fDistance = Sqrt(distSquared);
 			m_sQueueSample.m_nVolume = ComputeVolume(110, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
@@ -3970,7 +3970,7 @@ cAudioManager::ProcessBridge()
 
 	if (CBridge::pLiftRoad) {
 		m_sQueueSample.m_vecPos = CBridge::pLiftRoad->GetPosition();
-		dist = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+		dist = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (dist < 202500.0f) {
 			CalculateDistance(distCalculated, dist);
 			switch (CBridge::State) {
@@ -4206,7 +4206,7 @@ cAudioManager::ProcessCinemaScriptObject(uint8 sound)
 		default:
 			return;
 		}
-		float distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+		float distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 			m_sQueueSample.m_fDistance = Sqrt(distSquared);
 			rand = m_anRandomTable[0] % 90 + 30;
@@ -4246,7 +4246,7 @@ cAudioManager::ProcessCrane()
 		if (crane->m_nCraneStatus == CCrane::ACTIVATED) {
 			if (crane->m_nCraneState != CCrane::IDLE) {
 				m_sQueueSample.m_vecPos = crane->m_pCraneEntity->GetPosition();
-				distSquared = GetDistanceSquared(&this->m_sQueueSample.m_vecPos);
+				distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 				if (distSquared < SQR(intensity)) {
 					CalculateDistance(distCalculated, distSquared);
 					m_sQueueSample.m_nVolume = ComputeVolume(100, 80.f, m_sQueueSample.m_fDistance);
@@ -4306,7 +4306,7 @@ cAudioManager::ProcessDocksScriptObject(uint8 sound)
 		default:
 			return;
 		}
-		distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+		distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 			m_sQueueSample.m_fDistance = Sqrt(distSquared);
 			rand = m_anRandomTable[0] % 60 + 40;
@@ -4510,7 +4510,7 @@ cAudioManager::ProcessExplosions(int32 explosion)
 			}
 			pos = CExplosion::GetExplosionPosition(i);
 			m_sQueueSample.m_vecPos = *pos;
-			distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+			distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 				m_sQueueSample.m_fDistance = Sqrt(distSquared);
 				m_sQueueSample.m_nVolume = ComputeVolume(maxVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
@@ -4541,7 +4541,7 @@ cAudioManager::ProcessFireHydrant()
 	static const int intensity = 35;
 
 	m_sQueueSample.m_vecPos = ((CEntity *)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity)->GetPosition();
-	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < SQR(intensity)) {
 		CalculateDistance(distCalculated, distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(40, 35.f, m_sQueueSample.m_fDistance);
@@ -4611,7 +4611,7 @@ void cAudioManager::ProcessFires(int32)
 				m_sQueueSample.m_nReleasingVolumeModificator = 8;
 			}
 			m_sQueueSample.m_vecPos = gFireManager.m_aFires[i].m_vecPos;
-			distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+			distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 				m_sQueueSample.m_fDistance = Sqrt(distSquared);
 				m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
@@ -4875,7 +4875,7 @@ cAudioManager::ProcessGarages()
 			continue;
 		m_sQueueSample.m_vecPos = entity->GetPosition();
 		distCalculated = false;
-		distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+		distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distSquared < 6400.f) {
 			state = CGarages::aGarages[i].m_eGarageState;
 			if (state == GS_OPENING || state == GS_CLOSING || state == GS_AFTERDROPOFF) {
@@ -5021,7 +5021,7 @@ cAudioManager::ProcessHomeScriptObject(uint8 sound)
 		default:
 			return;
 		}
-		dist = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+		dist = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (dist < SQR(m_sQueueSample.m_fSoundIntensity)) {
 			m_sQueueSample.m_fDistance = Sqrt(dist);
 			rand = m_anRandomTable[0] % 30 + 40;
@@ -5173,7 +5173,7 @@ cAudioManager::ProcessLaunderetteScriptObject(uint8 sound)
 	default:
 		return;
 	}
-	float distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	float distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(45, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
@@ -5804,7 +5804,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 		return;
 	}
 
-	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
@@ -5914,7 +5914,7 @@ cAudioManager::ProcessMissionAudio()
 							if (m_sMissionAudio.m_bPredefinedProperties) {
 								SampleManager.SetStreamedVolumeAndPan(80, 63, 1, 1);
 							} else {
-								distSquared = GetDistanceSquared(&m_sMissionAudio.m_vecPos);
+								distSquared = GetDistanceSquared(m_sMissionAudio.m_vecPos);
 								if (distSquared >= 2500.f) {
 									emittingVol = 0;
 									pan = 63;
@@ -6017,14 +6017,14 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 	case SCRIPT_SOUND_INJURED_PED_MALE_OUCH_L:
 		male.m_pPed = nil;
 		male.m_bDistanceCalculated = false;
-		male.m_fDistance = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+		male.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		SetupPedComments(&male, SOUND_INJURED_PED_MALE_OUCH);
 		return;
 	case SCRIPT_SOUND_INJURED_PED_FEMALE_OUCH_S:
 	case SCRIPT_SOUND_INJURED_PED_FEMALE_OUCH_L:
 		female.m_pPed = nil;
 		female.m_bDistanceCalculated = false;
-		female.m_fDistance = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+		female.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		SetupPedComments(&female, SOUND_INJURED_PED_FEMALE);
 		return;
 	case SCRIPT_SOUND_GATE_START_CLUNK:
@@ -6186,7 +6186,7 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
 				m_sQueueSample.m_bIs2D = false;
 				emittingVolume = m_anRandomTable[2] % 20 + 30;
-				distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+				distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 				if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 					m_sQueueSample.m_fDistance = Sqrt(distSquared);
 					m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
@@ -6231,7 +6231,7 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 		return;
 	}
 
-	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
@@ -6261,7 +6261,7 @@ cAudioManager::ProcessPed(CPhysical *ped)
 
 	// params.m_bDistanceCalculated = false;
 	params.m_pPed = (CPed *)ped;
-	params.m_fDistance = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (ped->GetModelIndex() == MI_FATMALE02)
 		ProcessPedHeadphones(&params);
 	ProcessPedOneShots(&params);
@@ -7458,7 +7458,7 @@ cAudioManager::ProcessPoliceCellBeatingScriptObject(uint8 sound)
 		default:
 			return;
 		}
-		distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+		distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 			m_sQueueSample.m_fDistance = Sqrt(distSquared);
 			if (m_FrameCounter & 1)
@@ -7545,7 +7545,7 @@ cAudioManager::ProcessPornCinema(uint8 sound)
 	default:
 		return;
 	}
-	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		if (sound != SCRIPT_SOUND_MISTY_SEX_S && sound != SCRIPT_SOUND_MISTY_SEX_L) {
@@ -7622,7 +7622,7 @@ cAudioManager::ProcessProjectiles()
 			m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 			m_sQueueSample.m_nReleasingVolumeDivider = 3;
 			m_sQueueSample.m_vecPos = CProjectileInfo::ms_apProjectile[i]->GetPosition();
-			float distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+			float distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 				m_sQueueSample.m_fDistance = Sqrt(distSquared);
 				m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
@@ -7762,7 +7762,7 @@ cAudioManager::ProcessSawMillScriptObject(uint8 sound)
 	default:
 		return;
 	}
-	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(30, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
@@ -7835,7 +7835,7 @@ cAudioManager::ProcessShopScriptObject(uint8 sound)
 	default:
 		return;
 	}
-	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(30, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
@@ -7980,7 +7980,7 @@ cAudioManager::ProcessVehicle(CVehicle *veh)
 	m_sQueueSample.m_vecPos = veh->GetPosition();
 
 	params.m_bDistanceCalculated = false;
-	params.m_fDistance = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	params.m_pVehicle = veh;
 	params.m_pTransmission = nil;
 	params.m_nIndex = 0;
@@ -8990,7 +8990,7 @@ void cAudioManager::ProcessWaterCannon(int32)
 	for (int32 i = 0; i < NUM_WATERCANNONS; i++) {
 		if (CWaterCannons::aCannons[i].m_nId) {
 			m_sQueueSample.m_vecPos = CWaterCannons::aCannons[0].m_avecPos[CWaterCannons::aCannons[i].m_nCur];
-			float distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+			float distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SOUND_INTENSITY) {
 				m_sQueueSample.m_fDistance = Sqrt(distSquared);
 				m_sQueueSample.m_nVolume = ComputeVolume(50, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
@@ -9136,7 +9136,7 @@ cAudioManager::ProcessWorkShopScriptObject(uint8 sound)
 	default:
 		return;
 	}
-	distSquared = GetDistanceSquared(&m_sQueueSample.m_vecPos);
+	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(30, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
