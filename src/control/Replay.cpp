@@ -835,13 +835,14 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 					CStreaming::RequestModel(mi, 0);
 				}
 				else {
+// TODO(MIAMI): don't hardcode model indices
 					if (mi == MI_DEADDODO || mi == MI_AIRTRAIN) {
 						new_v = new(vp->index << 8) CPlane(mi, 2);
 					}
 					else if (mi == MI_TRAIN) {
 						new_v = new(vp->index << 8) CTrain(mi, 2);
 					}
-					else if (mi == MI_CHOPPER || mi == MI_ESCAPE) {
+					else if (mi == MI_CHOPPER) {
 						new_v = new(vp->index << 8) CHeli(mi, 2);
 					}
 					else if (CModelInfo::IsBoatModel(mi)){

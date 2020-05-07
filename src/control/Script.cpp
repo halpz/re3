@@ -5346,8 +5346,7 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
-		int mi = pVehicle->GetModelIndex();
-		UpdateCompareFlag(mi == MI_TAXI || mi == MI_CABBIE || mi == MI_BORGNINE);
+		UpdateCompareFlag(pVehicle->IsTaxi());
 		return 0;
 	}
 	case COMMAND_UNLOAD_SPECIAL_CHARACTER:
@@ -8159,7 +8158,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_FBICAR:
 				case MI_MRWHOOP:
 				case MI_BFINJECT:
-				case MI_CORPSE:
+			//	case MI_CORPSE:
 				case MI_POLICE:
 				case MI_ENFORCER:
 				case MI_SECURICA:
@@ -8172,27 +8171,27 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_DODO:
 				case MI_COACH:
 				case MI_RCBANDIT:
-				case MI_BELLYUP:
-				case MI_MRWONGS:
-				case MI_MAFIA:
-				case MI_YARDIE:
-				case MI_YAKUZA:
-				case MI_DIABLOS:
-				case MI_COLUMB:
-				case MI_HOODS:
+			//	case MI_BELLYUP:
+			//	case MI_MRWONGS:
+			//	case MI_MAFIA:
+				case MI_VOODOO:
+			//	case MI_YAKUZA:
+			//	case MI_DIABLOS:
+			//	case MI_COLUMB:
+			//	case MI_HOODS:
 				case MI_AIRTRAIN:
 				case MI_DEADDODO:
 				case MI_SPEEDER:
 				case MI_REEFER:
-				case MI_PANLANT:
+			//	case MI_PANLANT:
 				case MI_FLATBED:
 				case MI_YANKEE:
-				case MI_ESCAPE:
-				case MI_BORGNINE:
-				case MI_TOYZ:
-				case MI_GHOST:
-				case MI_MIAMI_RCBARON:
-				case MI_MIAMI_RCRAIDER:
+			//	case MI_ESCAPE:
+				case MI_ZEBRA:
+				case MI_TOPFUN:
+			//	case MI_GHOST:
+				case MI_RCBARON:
+				case MI_RCRAIDER:
 					model = -1;
 					break;
 				case MI_IDAHO:
@@ -8202,13 +8201,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_PATRIOT:
 				case MI_MANANA:
 				case MI_INFERNUS:
-				case MI_BLISTA:
+			//	case MI_BLISTA:
 				case MI_PONY:
 				case MI_CHEETAH:
 				case MI_MOONBEAM:
 				case MI_ESPERANT:
 				case MI_TAXI:
-				case MI_KURUMA:
+				case MI_WASHING:
 				case MI_BOBCAT:
 				case MI_BANSHEE:
 				case MI_CABBIE:

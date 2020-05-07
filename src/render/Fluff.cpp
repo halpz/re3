@@ -104,7 +104,8 @@ void CMovingThings::Init()
 	EndCloseList.m_pNext = nil;
 	EndCloseList.m_pPrev = &CMovingThings::StartCloseList;
 	Num = 0;
-	
+
+#ifndef MIAMI	// something is still used here actually
 	// Initialize scroll bars
 	 aScrollBars[0].Init(CVector(  228.3f,    -669.0f,     39.0f  ), SCROLL_BUSINESS,       0.0f,     0.5f,     0.5f,   255, 128, 0,   0.3f);
 	 aScrollBars[1].Init(CVector(  772.0f,     164.0f,     -9.5f  ), SCROLL_TRAFFIC,        0.0f,     0.5f,     0.25f,  128, 255, 0,   0.3f);
@@ -137,6 +138,7 @@ void CMovingThings::Init()
 		CVector(58.145f - sz.y * 0.05f - sz.x * 0.3f, -1079.268f + sz.x * 0.05f - sz.y * 0.3f, 32.803f),
 		-sz.x, -sz.y, 0, 255, 0, 100.0f, 0.8f
 	);
+#endif
 }
 
 void CMovingThings::Shutdown()

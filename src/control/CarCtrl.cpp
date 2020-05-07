@@ -329,9 +329,14 @@ CCarCtrl::GenerateOneRandomCar()
 	case RICH:
 	case EXEC:
 	case WORKER:
-	case SPECIAL:
 	case BIG:
 	case TAXI:
+	// TODO(MIAMI): check this
+	case MOPED:
+	case MOTORBIKE:
+	case LEISUREBOAT:
+	case WORKERBOAT:
+	//
 	case MAFIA:
 	case TRIAD:
 	case DIABLO:
@@ -522,7 +527,12 @@ CCarCtrl::GenerateOneRandomCar()
 	case RICH:
 	case EXEC:
 	case WORKER:
-	case SPECIAL:
+	// TODO(MIAMI): check this
+	case MOPED:
+	case MOTORBIKE:
+	case LEISUREBOAT:
+	case WORKERBOAT:
+	//
 	case BIG:
 	case TAXI:
 	case MAFIA:
@@ -602,16 +612,17 @@ CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 	int32 model = -1;
 	while (model == -1 || !CStreaming::HasModelLoaded(model)){
 		int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
+		// TODO(MIAMI): new car classes
 		if (rnd < pZone->carThreshold[0])
-			model = CCarCtrl::ChooseCarModel((*pClass = POOR));
+			model = CCarCtrl::ChooseCarModel((*pClass = NORMAL));
 		else if (rnd < pZone->carThreshold[1])
-			model = CCarCtrl::ChooseCarModel((*pClass = RICH));
+			model = CCarCtrl::ChooseCarModel((*pClass = POOR));
 		else if (rnd < pZone->carThreshold[2])
-			model = CCarCtrl::ChooseCarModel((*pClass = EXEC));
+			model = CCarCtrl::ChooseCarModel((*pClass = RICH));
 		else if (rnd < pZone->carThreshold[3])
-			model = CCarCtrl::ChooseCarModel((*pClass = WORKER));
+			model = CCarCtrl::ChooseCarModel((*pClass = EXEC));
 		else if (rnd < pZone->carThreshold[4])
-			model = CCarCtrl::ChooseCarModel((*pClass = SPECIAL));
+			model = CCarCtrl::ChooseCarModel((*pClass = WORKER));
 		else if (rnd < pZone->carThreshold[5])
 			model = CCarCtrl::ChooseCarModel((*pClass = BIG));
 		else if (rnd < pZone->copThreshold)
@@ -649,7 +660,12 @@ CCarCtrl::ChooseCarModel(int32 vehclass)
 	case RICH:
 	case EXEC:
 	case WORKER:
-	case SPECIAL:
+	// TODO(MIAMI): check this
+	case MOPED:
+	case MOTORBIKE:
+	case LEISUREBOAT:
+	case WORKERBOAT:
+	//
 	case BIG:
 	case TAXI:
 	{

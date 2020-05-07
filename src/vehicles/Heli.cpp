@@ -776,7 +776,6 @@ CHeli::InitHelis(void)
 	for(i = 0; i < NUM_HELIS; i++)
 		pHelis[i] = nil;
 
-	((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_ESCAPE))->SetColModel(&CTempColModels::ms_colModelPed1);
 	((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_CHOPPER))->SetColModel(&CTempColModels::ms_colModelPed1);
 }
 
@@ -787,10 +786,7 @@ GenerateHeli(bool catalina)
 	CVector heliPos;
 	int i;
 
-	if(catalina)
-		heli = new CHeli(MI_ESCAPE, PERMANENT_VEHICLE);
-	else
-		heli = new CHeli(MI_CHOPPER, PERMANENT_VEHICLE);
+	heli = new CHeli(MI_CHOPPER, PERMANENT_VEHICLE);
 
 	if(catalina)
 		heliPos = CVector(-224.0f, 201.0f, 83.0f);
@@ -865,18 +861,6 @@ CHeli::UpdateHelis(void)
 	}else{
 		if(pHelis[HELI_SCRIPT])
 			pHelis[HELI_SCRIPT]->m_heliStatus = HELI_STATUS_FLY_AWAY;
-	}
-
-	// Handle Catalina's heli
-	if(CatalinaHeliOn){
-		if(CStreaming::HasModelLoaded(MI_ESCAPE) && pHelis[HELI_CATALINA] == nil){
-			pHelis[HELI_CATALINA] = GenerateHeli(true);
-			pHelis[HELI_CATALINA]->m_heliType = HELI_TYPE_CATALINA;
-		}else
-			CStreaming::RequestModel(MI_ESCAPE, STREAMFLAGS_DONT_REMOVE);
-	}else{
-		if(pHelis[HELI_CATALINA])
-			pHelis[HELI_CATALINA]->m_heliStatus = HELI_STATUS_FLY_AWAY;
 	}
 
 	// Delete helis that we no longer need

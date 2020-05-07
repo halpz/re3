@@ -36,9 +36,6 @@ RpAtomic *CWaterLevel::ms_pWavyAtomic;
 RpGeometry *CWaterLevel::apGeomArray[8];
 int16 CWaterLevel::nGeomUsed;
 
-//RwTexture *gpWaterTex;
-//RwRaster *gpWaterRaster;
-
 RwTexture *gpWaterTex;
 RwRaster *gpWaterRaster;
 
@@ -84,7 +81,7 @@ CWaterLevel::Initialise(char *pWaterDat)
 	CTxdStore::SetCurrentTxd(slot);
 	
 	if ( gpWaterTex == NULL )
-		gpWaterTex = RwTextureRead("water_old", NULL);
+		gpWaterTex = RwTextureRead("waterclear256", NULL);
 	gpWaterRaster = RwTextureGetRaster(gpWaterTex);
 	
 	CTxdStore::PopCurrentTxd();
@@ -364,10 +361,10 @@ CWaterLevel::RenderWater()
 	WavesCalculatedThisFrame = false;
 
 	RwRGBA color = { 0, 0, 0, 255 };
-	
-	color.red   = uint32((CTimeCycle::GetDirectionalRed()   * 0.5f + CTimeCycle::GetAmbientRed()  ) * 255.0f);
-	color.green = uint32((CTimeCycle::GetDirectionalGreen() * 0.5f + CTimeCycle::GetAmbientGreen()) * 255.0f);
-	color.blue  = uint32((CTimeCycle::GetDirectionalBlue()  * 0.5f + CTimeCycle::GetAmbientBlue() ) * 255.0f);
+
+	color.red   = CTimeCycle::GetWaterRed();
+	color.green = CTimeCycle::GetWaterGreen();
+	color.blue  = CTimeCycle::GetWaterBlue();
 
 	TempBufferVerticesStored = 0;
 	TempBufferIndicesStored = 0;

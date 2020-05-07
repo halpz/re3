@@ -173,6 +173,11 @@ public:
 	static int GetFogBlue(void) { return m_nCurrentFogColourBlue; }
 	static int GetFogReduction(void) { return m_FogReduction; }
 
+	static int GetWaterRed(void) { return m_fCurrentWaterRed; }
+	static int GetWaterGreen(void) { return m_fCurrentWaterGreen; }
+	static int GetWaterBlue(void) { return m_fCurrentWaterBlue; }
+	static int GetWaterAlpha(void) { return m_fCurrentWaterAlpha; }
+
 	static void Initialise(void);
 	static void Update(void);
 	static CVector &GetSunPosition(void) { return m_VectorToSun[m_CurrentStoredValue]; }

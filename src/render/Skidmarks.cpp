@@ -11,8 +11,6 @@ CSkidmark CSkidmarks::aSkidmarks[NUMSKIDMARKS];
 RwImVertexIndex SkidmarkIndexList[SKIDMARK_LENGTH * 6];
 RwIm3DVertex SkidmarkVertices[SKIDMARK_LENGTH * 2];
 RwTexture *gpSkidTex;
-RwTexture *gpSkidBloodTex;
-RwTexture *gpSkidMudTex;
 
 void
 CSkidmarks::Init(void)
@@ -22,8 +20,6 @@ CSkidmarks::Init(void)
 	slot = CTxdStore::FindTxdSlot("particle");
 	CTxdStore::SetCurrentTxd(slot);
 	gpSkidTex = RwTextureRead("particleskid", nil);
-	gpSkidBloodTex = RwTextureRead("particleskidblood", nil);
-	gpSkidMudTex = RwTextureRead("particleskidmud", nil);
 	CTxdStore::PopCurrentTxd();
 
 	for(i = 0; i < NUMSKIDMARKS; i++){
@@ -54,17 +50,7 @@ void
 CSkidmarks::Shutdown(void)
 {
 	RwTextureDestroy(gpSkidTex);
-#ifdef GTA3_1_1_PATCH
 	gpSkidTex = nil;
-#endif
-	RwTextureDestroy(gpSkidBloodTex);
-#ifdef GTA3_1_1_PATCH
-	gpSkidBloodTex = nil;
-#endif
-	RwTextureDestroy(gpSkidMudTex);
-#ifdef GTA3_1_1_PATCH
-	gpSkidMudTex = nil;
-#endif
 }
 
 void
@@ -116,33 +102,23 @@ void
 CSkidmarks::Render(void)
 {
 	int i, j;
-	RwTexture *lastTex = nil;
 
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpSkidTex));
 
 	for(i = 0; i < NUMSKIDMARKS; i++){
 		if(aSkidmarks[i].m_state == 0 || aSkidmarks[i].m_last < 1)
 			continue;
 
-		if(aSkidmarks[i].m_isBloody){
-			if(lastTex != gpSkidBloodTex){
-				RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpSkidBloodTex));
-				lastTex = gpSkidBloodTex;
-			}
-		}else if(aSkidmarks[i].m_isMuddy){
-			if(lastTex != gpSkidMudTex){
-				RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpSkidMudTex));
-				lastTex = gpSkidMudTex;
-			}
-		}else{
-			if(lastTex != gpSkidTex){
-				RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpSkidTex));
-				lastTex = gpSkidTex;
-			}
-		}
+		CRGBA color(0, 0, 0, 255);
+		// TODO(MIAMI): we have a type field here actually (0-3)
+		if(aSkidmarks[i].m_isBloody)	// TODO: type 3
+			color = CRGBA(132, 34, 11, 255);
+		else if(aSkidmarks[i].m_isMuddy)	// TODO: type 1
+			color = CRGBA(90, 62, 9, 255);
 
 		uint32 fade, alpha;
 		if(aSkidmarks[i].m_state == 1 || CTimer::GetTimeInMilliseconds() < aSkidmarks[i].m_fadeStart)
@@ -158,9 +134,9 @@ CSkidmarks::Render(void)
 
 			CVector p1 = aSkidmarks[i].m_pos[j] + aSkidmarks[i].m_side[j];
 			CVector p2 = aSkidmarks[i].m_pos[j] - aSkidmarks[i].m_side[j];
-			RwIm3DVertexSetRGBA(&SkidmarkVertices[j*2+0], 255, 255, 255, alpha);
+			RwIm3DVertexSetRGBA(&SkidmarkVertices[j*2+0], color.red, color.green, color.blue, alpha);
 			RwIm3DVertexSetPos(&SkidmarkVertices[j*2+0], p1.x, p1.y, p1.z+0.1f);
-			RwIm3DVertexSetRGBA(&SkidmarkVertices[j*2+1], 255, 255, 255, alpha);
+			RwIm3DVertexSetRGBA(&SkidmarkVertices[j*2+1], color.red, color.green, color.blue, alpha);
 			RwIm3DVertexSetPos(&SkidmarkVertices[j*2+1], p2.x, p2.y, p2.z+0.1f);
 		}
 

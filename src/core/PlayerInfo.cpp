@@ -354,7 +354,7 @@ CPlayerInfo::Process(void)
 	bool startTaxiTimer = true;
 	if (m_bUnusedTaxiThing && m_pPed->bInVehicle) {
 		CVehicle *veh = m_pPed->m_pMyVehicle;
-		if ((veh->GetModelIndex() == MI_TAXI || veh->GetModelIndex() == MI_CABBIE || veh->GetModelIndex() == MI_BORGNINE)
+		if (veh->IsTaxi()
 			&& veh->pDriver == m_pPed && veh->m_nNumPassengers != 0) {
 			for (uint32 timePassed = CTimer::GetTimeInMilliseconds() - m_nUnusedTaxiTimer; timePassed >= 1000; m_nUnusedTaxiTimer += 1000) {
 				timePassed -= 1000;

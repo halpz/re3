@@ -541,39 +541,41 @@ cAudioManager::SetupSuspectLastSeenReport()
 					color_pre_modifier = gCarColourTable[color1][0];
 					color_post_modifier = gCarColourTable[color1][2];
 					switch (veh->GetModelIndex()) {
+// TODO(MIAMI): just making this compile
 #ifdef FIX_BUGS
-					case MI_COLUMB:
-						main_color = SFX_POLICE_RADIO_BLUE;
-						color_pre_modifier = color_post_modifier = TOTAL_AUDIO_SAMPLES;
+	//				case MI_COLUMB:
+	//					main_color = SFX_POLICE_RADIO_BLUE;
+	//					color_pre_modifier = color_post_modifier = TOTAL_AUDIO_SAMPLES;
 #endif
 					case MI_LANDSTAL:
-					case MI_BLISTA: sample = SFX_POLICE_RADIO_CRUISER; break;
+	//				case MI_BLISTA: 
+						sample = SFX_POLICE_RADIO_CRUISER; break;
 #ifdef FIX_BUGS
-					case MI_YARDIE:
-						color_pre_modifier = TOTAL_AUDIO_SAMPLES;
-						main_color = SFX_POLICE_RADIO_RED;
-						color_post_modifier = SFX_POLICE_RADIO_YELLOW;
-						sample = SFX_POLICE_RADIO_CONVERTIBLE; break;
-					case MI_DIABLOS:
-						main_color = SFX_POLICE_RADIO_BLACK;
+	//				case MI_YARDIE:
+	//					color_pre_modifier = TOTAL_AUDIO_SAMPLES;
+	//					main_color = SFX_POLICE_RADIO_RED;
+	//					color_post_modifier = SFX_POLICE_RADIO_YELLOW;
+	//					sample = SFX_POLICE_RADIO_CONVERTIBLE; break;
+	//				case MI_DIABLOS:
+	//					main_color = SFX_POLICE_RADIO_BLACK;
 #endif
 					case MI_IDAHO:
 					case MI_STALLION: sample = SFX_POLICE_RADIO_CONVERTIBLE; break;
 #ifdef FIX_BUGS
-					case MI_YAKUZA:
-						color_pre_modifier = TOTAL_AUDIO_SAMPLES;
-						main_color = SFX_POLICE_RADIO_SILVER;
-						color_post_modifier = SFX_POLICE_RADIO_RED;
+	//				case MI_YAKUZA:
+	//					color_pre_modifier = TOTAL_AUDIO_SAMPLES;
+	//					main_color = SFX_POLICE_RADIO_SILVER;
+	//					color_post_modifier = SFX_POLICE_RADIO_RED;
 #endif
 					case MI_STINGER:
 					case MI_INFERNUS:
 					case MI_CHEETAH:
 					case MI_BANSHEE: sample = SFX_POLICE_RADIO_SPORTS_CAR; break;
 #ifdef FIX_BUGS
-					case MI_MAFIA:
-						color_pre_modifier = color_post_modifier = TOTAL_AUDIO_SAMPLES;
-						main_color = SFX_POLICE_RADIO_GREY;
-					case MI_KURUMA:
+	//				case MI_MAFIA:
+	//					color_pre_modifier = color_post_modifier = TOTAL_AUDIO_SAMPLES;
+	//					main_color = SFX_POLICE_RADIO_GREY;
+					case MI_WASHING:
 #endif
 					case MI_PEREN:
 					case MI_SENTINEL:
@@ -588,21 +590,18 @@ cAudioManager::SetupSuspectLastSeenReport()
 					case MI_TRASH:
 					case MI_BARRACKS: sample = SFX_POLICE_RADIO_TRUCK; break;
 					case MI_STRETCH: sample = SFX_POLICE_RADIO_LIMO; break;
-#ifdef FIX_BUGS
-					case MI_CORPSE:
-#endif
 					case MI_MANANA:
 					case MI_ESPERANT: sample = SFX_POLICE_RADIO_2_DOOR; break;
 #ifdef FIX_BUGS
-					case MI_HOODS:
-						color_pre_modifier = TOTAL_AUDIO_SAMPLES;
-						main_color = SFX_POLICE_RADIO_BLUE;
-						color_post_modifier = SFX_POLICE_RADIO_GREEN;
-					case MI_BELLYUP:
+	//				case MI_HOODS:
+	//					color_pre_modifier = TOTAL_AUDIO_SAMPLES;
+	//					main_color = SFX_POLICE_RADIO_BLUE;
+	//					color_post_modifier = SFX_POLICE_RADIO_GREEN;
+	//				case MI_BELLYUP:
 					case MI_YANKEE:
-					case MI_TOYZ:
-					case MI_MRWONGS:
-					case MI_PANLANT:
+					case MI_TOPFUN:
+	//				case MI_MRWONGS:
+	//				case MI_PANLANT:
 #endif
 					case MI_PONY:
 					case MI_MULE:
@@ -613,7 +612,8 @@ cAudioManager::SetupSuspectLastSeenReport()
 					case MI_AMBULAN: sample = SFX_POLICE_RADIO_AMBULANCE; break;
 					case MI_TAXI:
 					case MI_CABBIE:
-					case MI_BORGNINE: sample = SFX_POLICE_RADIO_TAXI; break;
+					case MI_ZEBRA: sample = SFX_POLICE_RADIO_TAXI; break;
+					case MI_KAUFMAN: sample = SFX_POLICE_RADIO_TAXI; break;
 					case MI_MRWHOOP:
 						sample = SFX_POLICE_RADIO_ICE_CREAM_VAN;
 						break;
@@ -622,7 +622,7 @@ cAudioManager::SetupSuspectLastSeenReport()
 #ifdef FIX_BUGS
 					case MI_SPEEDER:
 					case MI_REEFER:
-					case MI_GHOST:
+	//				case MI_GHOST:
 #endif
 					case MI_PREDATOR: sample = SFX_POLICE_RADIO_BOAT; break;
 					case MI_BUS:

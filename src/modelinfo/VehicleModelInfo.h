@@ -6,7 +6,6 @@ enum {
 	NUM_FIRST_MATERIALS = 26,
 	NUM_SECOND_MATERIALS = 26,
 	NUM_VEHICLE_COLOURS = 8,
-	NUM_VEHICLE_ENVMAPS = 1
 };
 
 enum {
@@ -33,17 +32,6 @@ enum eVehicleType {
 	VEHICLE_TYPE_PLANE,
 	VEHICLE_TYPE_BIKE,
 	NUM_VEHICLE_TYPES
-};
-
-enum {
-	VEHICLE_CLASS_POOR,
-	VEHICLE_CLASS_RICH,
-	VEHICLE_CLASS_EXECUTIVE,
-	VEHICLE_CLASS_WORKER,
-	VEHICLE_CLASS_SPECIAL,
-	VEHICLE_CLASS_BIG,
-	VEHICLE_CLASS_TAXI,
-	NUM_VEHICLE_CLASSES
 };
 
 enum {
@@ -83,7 +71,6 @@ public:
 
 	static int8 ms_compsToUse[2];
 	static int8 ms_compsUsed[2];
-	static RwTexture *ms_pEnvironmentMaps[NUM_VEHICLE_ENVMAPS];
 	static RwRGBA ms_vehicleColourTable[256];
 	static RwTexture *ms_colourTextureTable[256];
 	static RwObjectNameIdAssocation *ms_vehicleDescs[NUM_VEHICLE_TYPES];
@@ -125,8 +112,8 @@ public:
 	static void DeleteVehicleColourTextures(void);
 
 	static RpAtomic *SetEnvironmentMapCB(RpAtomic *atomic, void *data);
-	static RpMaterial *SetEnvironmentMapCB(RpMaterial *material, void *data);
-	static RpMaterial *HasSpecularMaterialCB(RpMaterial *material, void *data);
+	static RpMaterial *SetDefaultEnvironmentMapCB(RpMaterial *material, void *data);
+	static RpMaterial *GetMatFXEffectMaterialCB(RpMaterial *material, void *data);
 	void SetEnvironmentMap(void);
 	static void LoadEnvironmentMaps(void);
 	static void ShutdownEnvironmentMaps(void);

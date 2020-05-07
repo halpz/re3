@@ -756,6 +756,7 @@ RwCamera *RwCameraForAllClumpsNotInFrustum(RwCamera *camera, RwInt32 numClumps, 
 
 RwBool RpMatFXPluginAttach( void ) { registerMatFXPlugin(); return true; }
 RpAtomic *RpMatFXAtomicEnableEffects( RpAtomic *atomic ) { MatFX::enableEffects(atomic); return atomic; }
+RpMatFXMaterialFlags RpMatFXMaterialGetEffects( const RpMaterial *material ){ return (RpMatFXMaterialFlags)MatFX::getEffects(material); }
 RpMaterial *RpMatFXMaterialSetEffects( RpMaterial *material, RpMatFXMaterialFlags flags ) { MatFX::setEffects(material, (uint32)flags); return material; }
 RpMaterial *RpMatFXMaterialSetupEnvMap( RpMaterial *material, RwTexture *texture, RwFrame *frame, RwBool useFrameBufferAlpha, RwReal coef ) {
 	MatFX *mfx = MatFX::get(material);
@@ -764,8 +765,23 @@ RpMaterial *RpMatFXMaterialSetupEnvMap( RpMaterial *material, RwTexture *texture
 	mfx->setEnvCoefficient(coef);
 	return material;
 }
-
-
+RpMaterial *RpMatFXMaterialSetEnvMapFrame( RpMaterial *material, RwFrame *frame )
+{
+	MatFX *mfx = MatFX::get(material);
+	mfx->setEnvFrame(frame);
+	return material;
+}
+RpMaterial *RpMatFXMaterialSetEnvMapCoefficient( RpMaterial *material, RwReal coef )
+{
+	MatFX *mfx = MatFX::get(material);
+	mfx->setEnvCoefficient(coef);
+	return material;
+}
+RwReal RpMatFXMaterialGetEnvMapCoefficient( const RpMaterial *material )
+{
+	MatFX *mfx = MatFX::get(material);
+	return mfx->getEnvCoefficient();
+}
 
 
 
