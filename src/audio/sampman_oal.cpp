@@ -88,6 +88,32 @@ struct
 {
 	ALuint buffer;
 	ALuint timer;
+	
+	bool IsEmpty() { return timer == 0; }
+	void Set(ALuint buf) { buffer = buf; }
+	void Wait() { timer  = 10000; }
+	void Init()
+	{
+		buffer = 0;
+		timer  = 0;
+	}
+	void Term()
+	{
+		if ( buffer != 0 && alIsBuffer(buffer) )
+			alDeleteBuffers(1, &buffer);
+		timer = 0;
+	}
+	void Update()
+	{
+		if ( !(timer > 0) ) return;
+		timer -= ALuint(CTimer::GetTimeStepInMilliseconds());
+		if ( timer > 0 ) return;
+		if ( buffer != 0 && alIsBuffer(buffer) )
+		{
+			alDeleteBuffers(1, &buffer);
+			timer = ( alGetError() == AL_NO_ERROR ) ? 0 : 10000;
+		}
+	}
 }ALBuffers[SAMPLEBANK_MAX];
 
 uint32     nNumMP3s;
@@ -222,10 +248,7 @@ release_existing()
 	
 	for ( int32 i = 0; i < SAMPLEBANK_MAX; i++ )
 	{
-		if ( ALBuffers[i].buffer != 0 && alIsBuffer(ALBuffers[i].buffer) )
-			alDeleteBuffers(1, &ALBuffers[i].buffer);
-		
-		ALBuffers[i].timer = 0;
+		ALBuffers[i].Term();
 	}
 	
 	if ( ALContext )
@@ -309,8 +332,7 @@ set_new_provider(int index)
 		
 		for ( int32 i = 0; i < SAMPLEBANK_MAX; i++ )
 		{
-			ALBuffers[i].buffer = 0;
-			ALBuffers[i].timer  = 0;
+			ALBuffers[i].Init();
 		}
 		
 		alGenBuffers(MAX_PEDSFX,    pedBuffers);
@@ -640,23 +662,7 @@ cSampleManager::UpdateSoundBuffers(void)
 {	
 	for ( int32 i = 0; i < SAMPLEBANK_MAX; i++ )
 	{
-		if ( ALBuffers[i].timer > 0 )
-		{
-			ALBuffers[i].timer -= ALuint(CTimer::GetTimeStepInMilliseconds());
-			
-			if ( ALBuffers[i].timer <= 0 )
-			{
-				if ( ALBuffers[i].buffer != 0 && alIsBuffer(ALBuffers[i].buffer) )
-				{
-					alDeleteBuffers(1, &ALBuffers[i].buffer);
-					
-					if ( alGetError() == AL_NO_ERROR )
-						ALBuffers[i].timer = 0;
-					else
-						ALBuffers[i].timer = 10000;
-				}
-			}
-		}
+		ALBuffers[i].Update();
 	}
 }
 
@@ -981,15 +987,14 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 		
 		int32 addr = nSampleBankMemoryStartAddress[nBank] + m_aSamples[nSfx].nOffset - m_aSamples[BankStartOffset[nBank]].nOffset;
 	
-		if ( ALBuffers[nSfx].timer == 0 )
+		if ( ALBuffers[nSfx].IsEmpty() )
 		{
 			ALuint buf;
-			
 			alGenBuffers(1, &buf);
 			alBufferData(buf, AL_FORMAT_MONO16, (void *)addr, m_aSamples[nSfx].nSize, m_aSamples[nSfx].nFrequency);
-			ALBuffers[nSfx].buffer = buf;
-			ALBuffers[nSfx].timer  = 10000;
+			ALBuffers[nSfx].Set(buf);
 		}
+		ALBuffers[nSfx].Wait();
 		
 		buffer = ALBuffers[nSfx].buffer;
 	}
