@@ -317,7 +317,7 @@ public:
 	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c) const; // not used
 	float GetCollisionOneShotRatio(int32 a, float b) const;
 	float GetCollisionRatio(float a, float b, float c, float d) const;
-	float GetDistanceSquared(CVector *v) const;
+	float GetDistanceSquared(const CVector &v) const;
 	int32 GetJumboTaxiFreq() const;
 	bool GetMissionAudioLoadingStatus() const;
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
@@ -468,6 +468,8 @@ public:
 	// only used in pc
 	void AdjustSamplesVolume();
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity, float dist);
+
+	void DebugShit();
 };
 
 //dstatic_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");

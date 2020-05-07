@@ -410,7 +410,7 @@ cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface
 		v2 = entity2->GetPosition();
 	}
 	CVector pos = (v1 + v2) * 0.5f;
-	distSquared = GetDistanceSquared(&pos);
+	distSquared = GetDistanceSquared(pos);
 	if(distSquared < SQR(CollisionSoundIntensity)) {
 		m_sCollisionManager.m_sQueue.m_pEntity1 = entity1;
 		m_sCollisionManager.m_sQueue.m_pEntity2 = entity2;
