@@ -41,7 +41,17 @@ class CCarCtrl
 		NINES,
 		GANG8,
 		GANG9,
-		COPS
+		COPS,
+		CLASS12,
+		CLASS13,
+		CLASS14,
+		CLASS15,
+		CLASS16,
+		CLASS17,
+		CLASS18,
+		CLASS19,
+		CLASS20,
+		COPS_BOAT
 	};
 public:
 	static void SwitchVehicleToRealPhysics(CVehicle*);

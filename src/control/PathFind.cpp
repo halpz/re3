@@ -1419,14 +1419,14 @@ CPathFind::NewGenerateCarCreationCoors(float x, float y, float dirX, float dirY,
 		if(m_pathNodes[node1].bDisabled && !ignoreDisabled)
 			continue;
 		dist1 = Distance2D(m_pathNodes[node1].GetPosition(), x, y);
-		if(dist1 < spawnDist + 60.0f){
-			d1 = dist1 - spawnDist;
+		if(dist1 < Max(spawnDist + 70.0f, spawnDist * 1.7f)){
+			d1 = m_pathNodes[node1].bWaterPath ? (dist1 - spawnDist * 1.5f) : (dist1 - spawnDist);
 			for(j = 0; j < m_pathNodes[node1].numLinks; j++){
 				node2 = ConnectedNode(m_pathNodes[node1].firstLink + j);
 				if(m_pathNodes[node2].bDisabled && !ignoreDisabled)
 					continue;
 				dist2 = Distance2D(m_pathNodes[node2].GetPosition(), x, y);
-				d2 = dist2 - spawnDist;
+				d2 = m_pathNodes[node2].bWaterPath ? (dist2 - spawnDist * 1.5f) : (dist2 - spawnDist);
 				if(d1*d2 < 0.0f){
 					// nodes are on different sides of spawn distance
 					float f2 = Abs(d1)/(Abs(d1) + Abs(d2));
