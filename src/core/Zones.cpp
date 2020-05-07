@@ -25,27 +25,6 @@ CZoneInfo CTheZones::ZoneInfoArray[2*NUMINFOZONES];
 
 #define SWAPF(a, b) { float t; t = a; a = b; b = t; }
 
-static void
-CheckZoneInfo(CZoneInfo *info)
-{
-	assert(info->carThreshold[0] >= 0);
-	assert(info->carThreshold[0] <= info->carThreshold[1]);
-	assert(info->carThreshold[1] <= info->carThreshold[2]);
-	assert(info->carThreshold[2] <= info->carThreshold[3]);
-	assert(info->carThreshold[3] <= info->carThreshold[4]);
-	assert(info->carThreshold[4] <= info->carThreshold[5]);
-	assert(info->carThreshold[5] <= info->copThreshold);
-	assert(info->copThreshold <= info->gangThreshold[0]);
-	assert(info->gangThreshold[0] <= info->gangThreshold[1]);
-	assert(info->gangThreshold[1] <= info->gangThreshold[2]);
-	assert(info->gangThreshold[2] <= info->gangThreshold[3]);
-	assert(info->gangThreshold[3] <= info->gangThreshold[4]);
-	assert(info->gangThreshold[4] <= info->gangThreshold[5]);
-	assert(info->gangThreshold[5] <= info->gangThreshold[6]);
-	assert(info->gangThreshold[6] <= info->gangThreshold[7]);
-	assert(info->gangThreshold[7] <= info->gangThreshold[8]);
-}
-
 //--MIAMI: done
 wchar*
 CZone::GetTranslatedName(void)
@@ -53,11 +32,11 @@ CZone::GetTranslatedName(void)
 	return TheText.Get(name);
 }
 
-//--MIAMI: check out zoneinfo
+//--MIAMI: done
 void
 CTheZones::Init(void)
 {
-	int i;
+	int i, j;
 	for(i = 0; i < NUMAUDIOZONES; i++)
 		AudioZoneArray[i] = -1;
 	NumberOfAudioZones = 0;
@@ -68,28 +47,39 @@ CTheZones::Init(void)
 	for(i = 0; i < NUMINFOZONES; i++)
 		memset(&InfoZoneArray[i], 0, sizeof(CZone));
 
-	CZoneInfo *zonei;
-	int x = 1000/6;
+	int x = 1000/9;
 	for(i = 0; i < 2*NUMINFOZONES; i++){
-		zonei = &ZoneInfoArray[i];
-		zonei->carDensity = 10;
-		zonei->carThreshold[0] = x;
-		zonei->carThreshold[1] = zonei->carThreshold[0] + x;
-		zonei->carThreshold[2] = zonei->carThreshold[1] + x;
-		zonei->carThreshold[3] = zonei->carThreshold[2] + x;
-		zonei->carThreshold[4] = zonei->carThreshold[3];
-		zonei->carThreshold[5] = zonei->carThreshold[4];
-		zonei->copThreshold = zonei->carThreshold[5] + x;
-		zonei->gangThreshold[0] = zonei->copThreshold;
-		zonei->gangThreshold[1] = zonei->gangThreshold[0];
-		zonei->gangThreshold[2] = zonei->gangThreshold[1];
-		zonei->gangThreshold[3] = zonei->gangThreshold[2];
-		zonei->gangThreshold[4] = zonei->gangThreshold[3];
-		zonei->gangThreshold[5] = zonei->gangThreshold[4];
-		zonei->gangThreshold[6] = zonei->gangThreshold[5];
-		zonei->gangThreshold[7] = zonei->gangThreshold[6];
-		zonei->gangThreshold[8] = zonei->gangThreshold[7];
-		CheckZoneInfo(zonei);
+		// Cars
+
+		ZoneInfoArray[i].carDensity = 10;
+		ZoneInfoArray[i].carThreshold[0] = x;
+		ZoneInfoArray[i].carThreshold[1] = ZoneInfoArray[i].carThreshold[0] + x;
+		ZoneInfoArray[i].carThreshold[2] = ZoneInfoArray[i].carThreshold[1] + x;
+		ZoneInfoArray[i].carThreshold[3] = ZoneInfoArray[i].carThreshold[2] + x;
+		ZoneInfoArray[i].carThreshold[4] = ZoneInfoArray[i].carThreshold[3] + x;
+		ZoneInfoArray[i].carThreshold[5] = ZoneInfoArray[i].carThreshold[4] + x;
+		ZoneInfoArray[i].carThreshold[6] = ZoneInfoArray[i].carThreshold[5] + x;
+		ZoneInfoArray[i].carThreshold[7] = ZoneInfoArray[i].carThreshold[6] + x;
+		ZoneInfoArray[i].carThreshold[8] = 1000;
+
+		ZoneInfoArray[i].boatThreshold[0] = 500;
+		ZoneInfoArray[i].boatThreshold[1] = 1000;
+
+		// What's going on here? this looks more like density
+		ZoneInfoArray[i].copThreshold = 50;
+		for(j = 0; j < NUM_GANGS; j++)
+			ZoneInfoArray[i].gangThreshold[j] = ZoneInfoArray[i].copThreshold;
+
+		// Peds
+
+		ZoneInfoArray[i].pedDensity = 12;
+
+		// What's going on here? this looks more like density
+		ZoneInfoArray[i].copPedThreshold = 50;
+		for(j = 0; j < NUM_GANGS; j++)
+			ZoneInfoArray[i].gangPedThreshold[j] = ZoneInfoArray[i].copPedThreshold;
+
+		ZoneInfoArray[i].pedGroup = 0;
 	}
 
 	TotalNumberOfZoneInfos = 1;	// why 1?
@@ -450,6 +440,7 @@ CTheZones::GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info)
 {
 	CZoneInfo *day, *night;
 	float d, n;
+	int i;
 
 	day = GetZoneInfo(pos, 1);
 	night = GetZoneInfo(pos, 0);
@@ -469,109 +460,45 @@ CTheZones::GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info)
 			n = 1.0f - d;
 		}
 		info->carDensity = day->carDensity * d + night->carDensity * n;
-		info->carThreshold[0] = day->carThreshold[0] * d + night->carThreshold[0] * n;
-		info->carThreshold[1] = day->carThreshold[1] * d + night->carThreshold[1] * n;
-		info->carThreshold[2] = day->carThreshold[2] * d + night->carThreshold[2] * n;
-		info->carThreshold[3] = day->carThreshold[3] * d + night->carThreshold[3] * n;
-		info->carThreshold[4] = day->carThreshold[4] * d + night->carThreshold[4] * n;
-		info->carThreshold[5] = day->carThreshold[5] * d + night->carThreshold[5] * n;
-		info->copThreshold = day->copThreshold * d + night->copThreshold * n;
-		info->gangThreshold[0] = day->gangThreshold[0] * d + night->gangThreshold[0] * n;
-		info->gangThreshold[1] = day->gangThreshold[1] * d + night->gangThreshold[1] * n;
-		info->gangThreshold[2] = day->gangThreshold[2] * d + night->gangThreshold[2] * n;
-		info->gangThreshold[3] = day->gangThreshold[3] * d + night->gangThreshold[3] * n;
-		info->gangThreshold[4] = day->gangThreshold[4] * d + night->gangThreshold[4] * n;
-		info->gangThreshold[5] = day->gangThreshold[5] * d + night->gangThreshold[5] * n;
-		info->gangThreshold[6] = day->gangThreshold[6] * d + night->gangThreshold[6] * n;
-		info->gangThreshold[7] = day->gangThreshold[7] * d + night->gangThreshold[7] * n;
-		info->gangThreshold[8] = day->gangThreshold[8] * d + night->gangThreshold[8] * n;
+		for(i = 0; i < ARRAY_SIZE(info->carThreshold); i++)
+			info->carThreshold[i] = day->carThreshold[i] * d + night->carThreshold[i] * n;
+		for(i = 0; i < ARRAY_SIZE(info->boatThreshold); i++)
+			info->boatThreshold[i] = day->boatThreshold[i] * d + night->boatThreshold[i] * n;
+		for(i = 0; i < ARRAY_SIZE(info->gangThreshold); i++)
+			info->gangThreshold[i] = day->gangThreshold[i] * d + night->gangThreshold[i] * n;
 
+		info->copThreshold = day->copThreshold * d + night->copThreshold * n;
 		info->pedDensity = day->pedDensity * d + night->pedDensity * n;
-		info->copDensity = day->copDensity * d + night->copDensity * n;
-		info->gangDensity[0] = day->gangDensity[0] * d + night->gangDensity[0] * n;
-		info->gangDensity[1] = day->gangDensity[1] * d + night->gangDensity[1] * n;
-		info->gangDensity[2] = day->gangDensity[2] * d + night->gangDensity[2] * n;
-		info->gangDensity[3] = day->gangDensity[3] * d + night->gangDensity[3] * n;
-		info->gangDensity[4] = day->gangDensity[4] * d + night->gangDensity[4] * n;
-		info->gangDensity[5] = day->gangDensity[5] * d + night->gangDensity[5] * n;
-		info->gangDensity[6] = day->gangDensity[6] * d + night->gangDensity[6] * n;
-		info->gangDensity[7] = day->gangDensity[7] * d + night->gangDensity[7] * n;
-		info->gangDensity[8] = day->gangDensity[8] * d + night->gangDensity[8] * n;
+		info->copPedThreshold = day->copPedThreshold * d + night->copPedThreshold * n;
+		for(i = 0; i < ARRAY_SIZE(info->gangPedThreshold); i++)
+			info->gangPedThreshold[i] = day->gangPedThreshold[i] * d + night->gangPedThreshold[i] * n;
 	}
 	if(CClock::GetIsTimeInRange(5, 19))
 		info->pedGroup = day->pedGroup;
 	else
 		info->pedGroup = night->pedGroup;
-
-	CheckZoneInfo(info);
 }
 
 void
 CTheZones::SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
-	int16 gang0Num, int16 gang1Num, int16 gang2Num,
-	int16 gang3Num, int16 gang4Num, int16 gang5Num,
-	int16 gang6Num, int16 gang7Num, int16 gang8Num,
-	int16 copNum,
-	int16 car0Num, int16 car1Num, int16 car2Num,
-	int16 car3Num, int16 car4Num, int16 car5Num)
+	int16 copCarDensity, const int16 *gangCarDensities)
 {
 	CZone *zone;
 	CZoneInfo *info;
 	zone = GetInfoZone(zoneid);
 	info = &ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight];
 
-	CheckZoneInfo(info);
-
-	if(carDensity != -1) info->carDensity = carDensity;
-	int16 oldCar1Num = info->carThreshold[1] - info->carThreshold[0];
-	int16 oldCar2Num = info->carThreshold[2] - info->carThreshold[1];
-	int16 oldCar3Num = info->carThreshold[3] - info->carThreshold[2];
-	int16 oldCar4Num = info->carThreshold[4] - info->carThreshold[3];
-	int16 oldCar5Num = info->carThreshold[5] - info->carThreshold[4];
-	int16 oldCopNum = info->copThreshold - info->carThreshold[5];
-	int16 oldGang0Num = info->gangThreshold[0] - info->copThreshold;
-	int16 oldGang1Num = info->gangThreshold[1] - info->gangThreshold[0];
-	int16 oldGang2Num = info->gangThreshold[2] - info->gangThreshold[1];
-	int16 oldGang3Num = info->gangThreshold[3] - info->gangThreshold[2];
-	int16 oldGang4Num = info->gangThreshold[4] - info->gangThreshold[3];
-	int16 oldGang5Num = info->gangThreshold[5] - info->gangThreshold[4];
-	int16 oldGang6Num = info->gangThreshold[6] - info->gangThreshold[5];
-	int16 oldGang7Num = info->gangThreshold[7] - info->gangThreshold[6];
-	int16 oldGang8Num = info->gangThreshold[8] - info->gangThreshold[7];
-
-	if(car0Num != -1) info->carThreshold[0] = car0Num;
-	if(car1Num != -1) info->carThreshold[1] = info->carThreshold[0] + car1Num;
-	else              info->carThreshold[1] = info->carThreshold[0] + oldCar1Num;
-	if(car2Num != -1) info->carThreshold[2] = info->carThreshold[1] + car2Num;
-	else              info->carThreshold[2] = info->carThreshold[1] + oldCar2Num;
-	if(car3Num != -1) info->carThreshold[3] = info->carThreshold[2] + car3Num;
-	else              info->carThreshold[3] = info->carThreshold[2] + oldCar3Num;
-	if(car4Num != -1) info->carThreshold[4] = info->carThreshold[3] + car4Num;
-	else              info->carThreshold[4] = info->carThreshold[3] + oldCar4Num;
-	if(car5Num != -1) info->carThreshold[5] = info->carThreshold[4] + car5Num;
-	else              info->carThreshold[5] = info->carThreshold[4] + oldCar5Num;
-	if(copNum != -1) info->copThreshold = info->carThreshold[5] + copNum;
-	else             info->copThreshold = info->carThreshold[5] + oldCopNum;
-	if(gang0Num != -1) info->gangThreshold[0] = info->copThreshold + gang0Num;
-	else               info->gangThreshold[0] = info->copThreshold + oldGang0Num;
-	if(gang1Num != -1) info->gangThreshold[1] = info->gangThreshold[0] + gang1Num;
-	else               info->gangThreshold[1] = info->gangThreshold[0] + oldGang1Num;
-	if(gang2Num != -1) info->gangThreshold[2] = info->gangThreshold[1] + gang2Num;
-	else               info->gangThreshold[2] = info->gangThreshold[1] + oldGang2Num;
-	if(gang3Num != -1) info->gangThreshold[3] = info->gangThreshold[2] + gang3Num;
-	else               info->gangThreshold[3] = info->gangThreshold[2] + oldGang3Num;
-	if(gang4Num != -1) info->gangThreshold[4] = info->gangThreshold[3] + gang4Num;
-	else               info->gangThreshold[4] = info->gangThreshold[3] + oldGang4Num;
-	if(gang5Num != -1) info->gangThreshold[5] = info->gangThreshold[4] + gang5Num;
-	else               info->gangThreshold[5] = info->gangThreshold[4] + oldGang5Num;
-	if(gang6Num != -1) info->gangThreshold[6] = info->gangThreshold[5] + gang6Num;
-	else               info->gangThreshold[6] = info->gangThreshold[5] + oldGang6Num;
-	if(gang7Num != -1) info->gangThreshold[7] = info->gangThreshold[6] + gang7Num;
-	else               info->gangThreshold[7] = info->gangThreshold[6] + oldGang7Num;
-	if(gang8Num != -1) info->gangThreshold[8] = info->gangThreshold[7] + gang8Num;
-	else               info->gangThreshold[8] = info->gangThreshold[7] + oldGang8Num;
-
-	CheckZoneInfo(info);
+	info->carDensity = carDensity;
+	info->copThreshold = copCarDensity;
+	info->gangThreshold[0] = gangCarDensities[0] + copCarDensity;
+	info->gangThreshold[1] = gangCarDensities[1] + info->gangThreshold[0];
+	info->gangThreshold[2] = gangCarDensities[2] + info->gangThreshold[1];
+	info->gangThreshold[3] = gangCarDensities[3] + info->gangThreshold[2];
+	info->gangThreshold[4] = gangCarDensities[4] + info->gangThreshold[3];
+	info->gangThreshold[5] = gangCarDensities[5] + info->gangThreshold[4];
+	info->gangThreshold[6] = gangCarDensities[6] + info->gangThreshold[5];
+	info->gangThreshold[7] = gangCarDensities[7] + info->gangThreshold[6];
+	info->gangThreshold[8] = gangCarDensities[8] + info->gangThreshold[7];
 }
 
 void
@@ -584,17 +511,27 @@ CTheZones::SetZonePedInfo(uint16 zoneid, uint8 day, int16 pedDensity,
 	CZoneInfo *info;
 	zone = GetInfoZone(zoneid);
 	info = &ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight];
-	if(pedDensity != -1) info->pedDensity = pedDensity;
-	if(copDensity != -1) info->copDensity = copDensity;
-	if(gang0Density != -1) info->gangDensity[0] = gang0Density;
-	if(gang1Density != -1) info->gangDensity[1] = gang1Density;
-	if(gang2Density != -1) info->gangDensity[2] = gang2Density;
-	if(gang3Density != -1) info->gangDensity[3] = gang3Density;
-	if(gang4Density != -1) info->gangDensity[4] = gang4Density;
-	if(gang5Density != -1) info->gangDensity[5] = gang5Density;
-	if(gang6Density != -1) info->gangDensity[6] = gang6Density;
-	if(gang7Density != -1) info->gangDensity[7] = gang7Density;
-	if(gang8Density != -1) info->gangDensity[8] = gang8Density;
+	info->pedDensity = pedDensity;
+	info->copPedThreshold = copDensity;
+	info->gangPedThreshold[0] = gang0Density;
+	info->gangPedThreshold[1] = gang1Density;
+	info->gangPedThreshold[2] = gang2Density;
+	info->gangPedThreshold[3] = gang3Density;
+	info->gangPedThreshold[4] = gang4Density;
+	info->gangPedThreshold[5] = gang5Density;
+	info->gangPedThreshold[6] = gang6Density;
+	info->gangPedThreshold[7] = gang7Density;
+	info->gangPedThreshold[8] = gang8Density;
+
+	info->gangPedThreshold[0] += info->copPedThreshold;
+	info->gangPedThreshold[1] = info->gangPedThreshold[0];
+	info->gangPedThreshold[2] = info->gangPedThreshold[1];
+	info->gangPedThreshold[3] = info->gangPedThreshold[2];
+	info->gangPedThreshold[4] = info->gangPedThreshold[3];
+	info->gangPedThreshold[5] = info->gangPedThreshold[4];
+	info->gangPedThreshold[6] = info->gangPedThreshold[5];
+	info->gangPedThreshold[7] = info->gangPedThreshold[6];
+	info->gangPedThreshold[8] = info->gangPedThreshold[7];
 }
 
 //--MIAMI: done, unused

@@ -54,6 +54,7 @@ public:
 	int32 m_handlingId;
 	int32 m_vehicleClass;
 	int32 m_level;
+	int16 m_frequency;
 	CVector m_positions[NUM_VEHICLE_POSITIONS];
 	uint32 m_compRules;
 	float m_bikeSteerAngle;
@@ -121,4 +122,3 @@ public:
 	static int GetMaximumNumberOfPassengersFromNumberOfDoors(int id);
 	static void SetComponentsToUse(int8 c1, int8 c2) { ms_compsToUse[0] = c1; ms_compsToUse[1] = c2; }
 };
-static_assert(sizeof(CVehicleModelInfo) == 0x1F8, "CVehicleModelInfo: error");

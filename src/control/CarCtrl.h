@@ -12,7 +12,7 @@ class CZoneInfo;
 
 enum{
 	MAX_CARS_TO_KEEP = 2,
-	MAX_CAR_MODELS_IN_ARRAY = 256,
+	MAX_CAR_MODELS_IN_ARRAY = 25,
 };
 
 #define LANE_WIDTH 5.0f
@@ -34,8 +34,10 @@ public:
 		TAXI,
 		MOPED,
 		MOTORBIKE,
+
 		LEISUREBOAT,
 		WORKERBOAT,
+
 		COPS,
 		MAFIA,
 		TRIAD,

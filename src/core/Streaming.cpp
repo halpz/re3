@@ -1305,6 +1305,7 @@ if(model < 0)
 	}
 }
 
+//--MIAMI: TODO
 void
 CStreaming::StreamZoneModels(const CVector &pos)
 {
@@ -1318,7 +1319,7 @@ CStreaming::StreamZoneModels(const CVector &pos)
 
 		// unload pevious group
 		if(ms_currentPedGrp != -1)
-			for(i = 0; i < 8; i++){
+			for(i = 0; i < NUMMODELSPERPEDGROUP; i++){
 				if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
 					break;
 				SetModelIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
@@ -1327,7 +1328,7 @@ CStreaming::StreamZoneModels(const CVector &pos)
 
 		ms_currentPedGrp = info.pedGroup;
 
-		for(i = 0; i < 8; i++){
+		for(i = 0; i < NUMMODELSPERPEDGROUP; i++){
 			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
 				break;
 			RequestModel(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i], STREAMFLAGS_DONT_REMOVE);
@@ -1337,29 +1338,20 @@ CStreaming::StreamZoneModels(const CVector &pos)
 
 	gangsToLoad = 0;
 	gangCarsToLoad = 0;
-	if(info.gangDensity[0] != 0) gangsToLoad |= 1<<0;
-	if(info.gangDensity[1] != 0) gangsToLoad |= 1<<1;
-	if(info.gangDensity[2] != 0) gangsToLoad |= 1<<2;
-	if(info.gangDensity[3] != 0) gangsToLoad |= 1<<3;
-	if(info.gangDensity[4] != 0) gangsToLoad |= 1<<4;
-	if(info.gangDensity[5] != 0) gangsToLoad |= 1<<5;
-	if(info.gangDensity[6] != 0) gangsToLoad |= 1<<6;
-	if(info.gangDensity[7] != 0) gangsToLoad |= 1<<7;
-	if(info.gangDensity[8] != 0) gangsToLoad |= 1<<8;
-	if(info.gangThreshold[0] != info.copDensity) gangCarsToLoad |= 1<<0;
-	if(info.gangThreshold[1] != info.gangThreshold[0]) gangCarsToLoad |= 1<<1;
-	if(info.gangThreshold[2] != info.gangThreshold[1]) gangCarsToLoad |= 1<<2;
-	if(info.gangThreshold[3] != info.gangThreshold[2]) gangCarsToLoad |= 1<<3;
-	if(info.gangThreshold[4] != info.gangThreshold[3]) gangCarsToLoad |= 1<<4;
-	if(info.gangThreshold[5] != info.gangThreshold[4]) gangCarsToLoad |= 1<<5;
-	if(info.gangThreshold[6] != info.gangThreshold[5]) gangCarsToLoad |= 1<<6;
-	if(info.gangThreshold[7] != info.gangThreshold[6]) gangCarsToLoad |= 1<<7;
-	if(info.gangThreshold[8] != info.gangThreshold[7]) gangCarsToLoad |= 1<<8;
+	if(info.gangPedThreshold[0] != info.copPedThreshold)
+		gangsToLoad = 1;
+	for(i = 1; i < NUM_GANGS; i++)
+		if(info.gangPedThreshold[i] != info.gangPedThreshold[i-1])
+			gangsToLoad |= 1<<i;
+	if(info.gangThreshold[0] != info.copThreshold)
+		gangCarsToLoad = 1;
+	for(i = 1; i < NUM_GANGS; i++)
+		if(info.gangThreshold[i] != info.gangThreshold[i-1])
+			gangCarsToLoad |= 1<<i;
 
 	if(gangsToLoad == ms_loadedGangs && gangCarsToLoad == ms_loadedGangCars)
 		return;
 
-	// This makes things simpler than the game does it
 	gangsToLoad |= gangCarsToLoad;
 
 	for(i = 0; i < NUM_GANGS; i++){
@@ -1397,7 +1389,7 @@ CStreaming::RemoveCurrentZonesModels(void)
 	int i;
 
 	if(ms_currentPedGrp != -1)
-		for(i = 0; i < 8; i++){
+		for(i = 0; i < NUMMODELSPERPEDGROUP; i++){
 			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
 				break;
 			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != MI_MALE01)

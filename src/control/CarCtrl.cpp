@@ -711,6 +711,7 @@ CCarCtrl::ChooseGangCarModel(int32 gang)
 void
 CCarCtrl::AddToCarArray(int32 id, int32 vehclass)
 {
+	assert(TotalNumOfCarsOfRating[vehclass] < MAX_CAR_MODELS_IN_ARRAY);
 	CarArrays[vehclass][TotalNumOfCarsOfRating[vehclass]++] = id;
 }
 

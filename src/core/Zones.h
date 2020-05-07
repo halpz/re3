@@ -2,6 +2,7 @@
 
 #include "Game.h"
 #include "Gangs.h"
+#include "CarCtrl.h"
 
 enum eZoneType
 {
@@ -37,14 +38,15 @@ class CZoneInfo
 public:
 	// Car data
 	int16 carDensity;
-	int16 carThreshold[6];
-	int16 copThreshold;
+	int16 carThreshold[CCarCtrl::NUM_CAR_CLASSES];
+	int16 boatThreshold[CCarCtrl::NUM_BOAT_CLASSES];
 	int16 gangThreshold[NUM_GANGS];
+	int16 copThreshold;
 
 	// Ped data
 	uint16 pedDensity;
-	uint16 copDensity;
-	uint16 gangDensity[NUM_GANGS];
+	uint16 gangPedThreshold[NUM_GANGS];
+	uint16 copPedThreshold;
 	uint16 pedGroup;
 };
 
@@ -90,12 +92,7 @@ public:
 	static CZoneInfo *GetZoneInfo(const CVector *v, uint8 day);
 	static void GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info);
 	static void SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
-		int16 gang0Num, int16 gang1Num, int16 gang2Num,
-		int16 gang3Num, int16 gang4Num, int16 gang5Num,
-		int16 gang6Num, int16 gang7Num, int16 gang8Num,
-		int16 copNum,
-		int16 car0Num, int16 car1Num, int16 car2Num,
-		int16 car3Num, int16 car4Num, int16 car5Num);
+		int16 copCarDensity, const int16 *gangCarDensities /*[NUMGANGS]*/);
 	static void SetZonePedInfo(uint16 zoneid, uint8 day, int16 pedDensity,
 		int16 gang0Density, int16 gang1Density, int16 gang2Density, int16 gang3Density,
 		int16 gang4Density, int16 gang5Density, int16 gang6Density, int16 gang7Density,
