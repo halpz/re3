@@ -29,7 +29,6 @@
 //TODO: fix eax3 reverb
 //TODO: max channals
 //TODO: loop count
-//TODO: mp3/wav stream
 //TODO: mp3 player
 
 #pragma comment( lib, "OpenAL32.lib" )
@@ -179,9 +178,9 @@ add_providers()
 		defaultProvider = pDeviceList->GetDefaultDevice();
 		if ( defaultProvider > MAXPROVIDERS )
 			defaultProvider = 0;
-	
-		delete pDeviceList;
 	}
+	
+	delete pDeviceList;
 }
 
 static void
@@ -211,6 +210,10 @@ release_existing()
 	
 	for ( int32 i = 0; i < MAX_STREAMS; i++ )
 	{
+		CStream *stream = aStream[i];
+		if (stream)
+			stream->ProviderTerm();
+		
 		alDeleteSources(1, &ALStreamSources[i]);
 		alDeleteBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
 	}
@@ -298,6 +301,10 @@ set_new_provider(int index)
 		{
 			alGenSources(1, &ALStreamSources[i]);
 			alGenBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
+			
+			CStream *stream = aStream[i];
+			if (stream)
+				stream->ProviderInit();
 		}
 		
 		for ( int32 i = 0; i < SAMPLEBANK_MAX; i++ )
@@ -524,6 +531,18 @@ cSampleManager::Initialise(void)
 	}
 	
 	{
+		for ( int32 i = 0; i < MAX_STREAMS; i++ )
+		{
+			aStream[i]       = NULL;
+			nStreamVolume[i] = 100;
+			nStreamPan[i]    = 63;
+		}
+		
+		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
+			nStreamLength[i] = 0;
+	}
+	
+	{
 		add_providers();
 		
 		if ( !InitialiseSampleBanks() )
@@ -545,17 +564,6 @@ cSampleManager::Initialise(void)
 		ASSERT(nSampleBankMemoryStartAddress[SAMPLEBANK_PED] != NULL);
 	}
 	
-	{
-		for ( int32 i = 0; i < MAX_STREAMS; i++ )
-		{
-			aStream[i]     = NULL;
-			nStreamVolume[i] = 100;
-			nStreamPan[i]    = 63;
-		}
-		
-		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
-			nStreamLength[i] = 3600000;
-	}
 	
 	{
 		_bSampmanInitialised = true;
@@ -571,6 +579,25 @@ cSampleManager::Initialise(void)
 		}
 	}
 	
+	{
+	
+		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
+		{	
+			aStream[0] = new CStream(StreamedNameTable[i], ALStreamSources[0], ALStreamBuffers[0]);
+			
+			if ( aStream[0] && aStream[0]->IsOpened() )
+			{
+				uint32 tatalms = aStream[0]->GetLengthMS();
+				delete aStream[0];
+				aStream[0] = NULL;
+				
+				nStreamLength[i] = tatalms;
+			}
+			else
+				USERERROR("Can't open '%s'\n", StreamedNameTable[i]);
+		}
+	}
+		
 	LoadSampleBank(SAMPLEBANK_MAIN);
 	
 	return true;
@@ -653,7 +680,7 @@ cSampleManager::UpdateEffectsVolume(void)
 			if ( GetChannelUsedFlag(i) )
 			{
 				if ( nChannelVolume[i] != 0 )
-					aChannel[i].SetVolume(m_nEffectsFadeVolume * nChannelVolume[i] * m_nEffectsVolume >> 14);
+					aChannel[i].SetVolume(m_nEffectsFadeVolume*nChannelVolume[i]*m_nEffectsVolume >> 14);
 			}
 		}
 	}
@@ -853,7 +880,7 @@ uint32
 cSampleManager::GetSampleLength(uint32 nSample)
 {
 	ASSERT( nSample < TOTAL_AUDIO_SAMPLES );
-	return m_aSamples[nSample].nSize >> 1;
+	return m_aSamples[nSample].nSize / sizeof(uint16);
 }
 
 bool cSampleManager::UpdateReverb(void)
@@ -1018,7 +1045,7 @@ cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_NEWS_INTRO
 		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
 	{
-		nChannelVolume[nChannel] >>= 2;
+		nChannelVolume[nChannel] = vol / 4;
 	}
 
 	// no idea, does this one looks like a bug or it's SetChannelVolume ?
@@ -1060,7 +1087,7 @@ cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 			&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_NEWS_INTRO
 			&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
 		{
-			nChannelVolume[nChannel] >>= 2;
+			nChannelVolume[nChannel] = vol / 4;
 		}
 			
 		aChannel[nChannel].SetVolume(m_nEffectsFadeVolume*vol*m_nEffectsVolume >> 14);
@@ -1209,11 +1236,11 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 		
 		if ( stream->IsOpened() )
 		{
-			nStreamLength[nFile] = stream->GetLength();
+			nStreamLength[nFile] = stream->GetLengthMS();
 			if ( stream->Setup() )
 			{
 				if ( nPos != 0 )
-					stream->SetPos(nPos);
+					stream->SetPosMS(nPos);
 				
 				stream->Start();
 			}
@@ -1253,7 +1280,7 @@ cSampleManager::GetStreamedFilePosition(uint8 nStream)
 	
 	if ( stream )
 	{
-		return stream->GetPos();
+		return stream->GetPosMS();
 	}
 	
 	return 0;
@@ -1270,7 +1297,7 @@ cSampleManager::SetStreamedVolumeAndPan(uint8 nVolume, uint8 nPan, uint8 nEffect
 	if ( nPan > MAX_VOLUME )
 		nPan = MAX_VOLUME;
 		
-	nStreamVolume[nStream] = m_nMusicFadeVolume * nVolume;
+	nStreamVolume[nStream] = nVolume;
 	nStreamPan   [nStream] = nPan;
 	
 	CStream *stream = aStream[nStream];

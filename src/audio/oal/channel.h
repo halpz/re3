@@ -10,9 +10,9 @@
 
 class CChannel
 {
-	ALuint alChannel;
+	ALuint alSource;
 	ALuint alFilter;
-	ALuint Buffer;
+	ALuint alBuffer;
 	float  Pitch, Gain;
 	float  Mix;
 	int32  Frequency;

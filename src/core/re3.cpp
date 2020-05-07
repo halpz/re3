@@ -456,6 +456,20 @@ void re3_trace(const char *filename, unsigned int lineno, const char *func, cons
 	OutputDebugStringA(buff);
 }
 
+void re3_usererror(const char *format, ...)
+{
+	va_list va;
+	va_start(va, format);
+	vsprintf_s(re3_buff, re3_buffsize, format, va);
+	va_end(va);
+	
+	::MessageBoxA(nil, re3_buff, "RE3 Error!",
+		MB_OK|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
+
+	raise(SIGABRT);
+	_exit(3);
+}
+
 #ifdef VALIDATE_SAVE_SIZE
 int32 _saveBufCount;
 #endif
