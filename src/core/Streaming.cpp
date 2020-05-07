@@ -1360,7 +1360,7 @@ CStreaming::StreamZoneModels(const CVector &pos)
 
 		// unload pevious group
 		if(ms_currentPedGrp != -1)
-			for(i = 0; i < 8; i++){
+			for(i = 0; i < NUMMODELSPERPEDGROUP; i++){
 				if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
 					break;
 				SetModelIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
@@ -1369,7 +1369,7 @@ CStreaming::StreamZoneModels(const CVector &pos)
 
 		ms_currentPedGrp = info.pedGroup;
 
-		for(i = 0; i < 8; i++){
+		for(i = 0; i < NUMMODELSPERPEDGROUP; i++){
 			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
 				break;
 			RequestModel(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i], STREAMFLAGS_DONT_REMOVE);

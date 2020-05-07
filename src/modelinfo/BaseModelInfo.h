@@ -48,7 +48,7 @@ public:
 		m_type == MITYPE_MLO || m_type == MITYPE_XTRACOMPS;	// unused but what the heck
 	}
 	char *GetName(void) { return m_name; }
-	void SetName(const char *name) { strncpy(m_name, name, 24); }
+	void SetName(const char *name) { strncpy(m_name, name, MAX_MODEL_NAME); }
 	void SetColModel(CColModel *col, bool owns = false){
 		m_colModel = col; m_bOwnsColModel = owns; }
 	CColModel *GetColModel(void) { return m_colModel; }
