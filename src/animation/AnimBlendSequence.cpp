@@ -2,6 +2,8 @@
 
 #include "AnimBlendSequence.h"
 
+//--MIAMI: file done
+
 CAnimBlendSequence::CAnimBlendSequence(void)
 {
 	type = 0;
@@ -17,6 +19,8 @@ CAnimBlendSequence::~CAnimBlendSequence(void)
 {
 	if(keyFrames)
 		RwFree(keyFrames);
+	if(keyFramesCompressed)
+		RwFree(keyFramesCompressed);
 }
 
 void
@@ -26,18 +30,21 @@ CAnimBlendSequence::SetName(char *name)
 }
 
 void
-CAnimBlendSequence::SetNumFrames(int numFrames, bool translation)
+CAnimBlendSequence::SetNumFrames(int numFrames, bool translation, bool compressed)
 {
-	int sz;
-
 	if(translation){
-		sz = sizeof(KeyFrameTrans);
 		type |= KF_ROT | KF_TRANS;
+		if(compressed)
+			keyFramesCompressed = RwMalloc(sizeof(KeyFrameTrans) * numFrames);
+		else
+			keyFrames = RwMalloc(sizeof(KeyFrameTrans) * numFrames);
 	}else{
-		sz = sizeof(KeyFrame);
 		type |= KF_ROT;
+		if(compressed)
+			keyFramesCompressed = RwMalloc(sizeof(KeyFrame) * numFrames);
+		else
+			keyFrames = RwMalloc(sizeof(KeyFrame) * numFrames);
 	}
-	keyFrames = RwMalloc(sz * numFrames);
 	this->numFrames = numFrames;
 }
 

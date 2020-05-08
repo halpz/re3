@@ -38,6 +38,9 @@ enum Config {
 	NUMCUTSCENEOBJECTS = 50,	// does not exist in VC
 	// TODO(MIAMI): colmodel pool
 
+	NUMANIMBLOCKS = 35,
+	NUMANIMATIONS = 450,
+
 	NUMTEMPOBJECTS = 30,
 
 	// Path data

@@ -5,7 +5,8 @@
 enum {
 	STREAM_OFFSET_TXD = MODELINFOSIZE,
 	STREAM_OFFSET_COL = STREAM_OFFSET_TXD+TXDSTORESIZE,
-	NUMSTREAMINFO = STREAM_OFFSET_COL+COLSTORESIZE
+	STREAM_OFFSET_ANIM = STREAM_OFFSET_COL+COLSTORESIZE,
+	NUMSTREAMINFO = STREAM_OFFSET_ANIM+NUMANIMBLOCKS
 };
 
 enum StreamFlags
@@ -118,16 +119,19 @@ public:
 	static bool HasModelLoaded(int32 id) { return ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED; }
 	static bool HasTxdLoaded(int32 id) { return HasModelLoaded(id+STREAM_OFFSET_TXD); }
 	static bool HasColLoaded(int32 id) { return HasModelLoaded(id+STREAM_OFFSET_COL); }
+	static bool HasAnimLoaded(int32 id) { return HasModelLoaded(id+STREAM_OFFSET_ANIM); }
 	static bool CanRemoveModel(int32 id) { return (ms_aInfoForModel[id].m_flags & STREAMFLAGS_CANT_REMOVE) == 0; }
 	static bool CanRemoveTxd(int32 id) { return CanRemoveModel(id+STREAM_OFFSET_TXD); }
 	static bool CanRemoveCol(int32 id) { return CanRemoveModel(id+STREAM_OFFSET_COL); }
+	static bool CanRemoveAnim(int32 id) { return CanRemoveModel(id+STREAM_OFFSET_ANIM); }
 	static void RequestModel(int32 model, int32 flags);
 	static void ReRequestModel(int32 model) { RequestModel(model, ms_aInfoForModel[model].m_flags); }
 	static void RequestTxd(int32 txd, int32 flags) { RequestModel(txd + STREAM_OFFSET_TXD, flags); }
 	static void ReRequestTxd(int32 txd) { ReRequestModel(txd + STREAM_OFFSET_TXD); }
 	static void RequestCol(int32 col, int32 flags) { RequestModel(col + STREAM_OFFSET_COL, flags); }
 	static void ReRequestCol(int32 col) { ReRequestModel(col + STREAM_OFFSET_COL); }
-	static void RequestSubway(void);
+	static void RequestAnim(int32 col, int32 flags) { RequestModel(col + STREAM_OFFSET_ANIM, flags); }
+	static void ReRequestAnim(int32 col) { ReRequestModel(col + STREAM_OFFSET_ANIM); }
 	static void RequestBigBuildings(eLevelName level);
 	static void RequestBigBuildings(eLevelName level, const CVector &pos);
 	static void InstanceBigBuildings(eLevelName level, const CVector &pos);
@@ -140,6 +144,7 @@ public:
 	static void RemoveModel(int32 id);
 	static void RemoveTxd(int32 id) { RemoveModel(id + STREAM_OFFSET_TXD); }
 	static void RemoveCol(int32 id) { RemoveModel(id + STREAM_OFFSET_COL); }
+	static void RemoveAnim(int32 id) { RemoveModel(id + STREAM_OFFSET_ANIM); }
 	static void RemoveUnusedBuildings(eLevelName level);
 	static void RemoveBuildings(eLevelName level);
 	static void RemoveUnusedBigBuildings(eLevelName level);
@@ -149,7 +154,6 @@ public:
 	static bool RemoveLeastUsedModel(uint32 excludeMask);
 	static void RemoveAllUnusedModels(void);
 	static void RemoveUnusedModelsInLoadedList(void);
-	static bool RemoveReferencedTxds(int32 mem);
 	static int32 GetAvailableVehicleSlot(void);
 	static bool IsTxdUsedByRequestedModels(int32 txdId);
 	static bool AddToLoadedVehiclesList(int32 modelId);

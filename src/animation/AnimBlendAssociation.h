@@ -37,7 +37,8 @@ public:
 
 	CAnimBlendLink link;
 
-	int numNodes;			// taken from CAnimBlendClumpData::numFrames
+	int16 numNodes;			// taken from CAnimBlendClumpData::numFrames
+	int16 groupId;		// ID of CAnimBlendAssocGroup this is in
 	// NB: Order of these depends on order of nodes in Clump this was built from
 	CAnimBlendNode *nodes;
 	CAnimBlendHierarchy *hierarchy;
@@ -46,8 +47,8 @@ public:
 	float currentTime;
 	float speed;
 	float timeStep;
-	int32 animId;
-	int32 flags;
+	int16 animId;
+	int16 flags;
 	int32 callbackType;
 	void (*callback)(CAnimBlendAssociation*, void*);
 	void *callbackArg;
@@ -75,7 +76,7 @@ public:
 	void SetCurrentTime(float time);
 	void SyncAnimation(CAnimBlendAssociation *other);
 	void Start(float time);
-	void UpdateTime(float timeDelta, float relSpeed);
+	bool UpdateTime(float timeDelta, float relSpeed);
 	bool UpdateBlend(float timeDelta);
 
 	void SetRun(void) { flags |= ASSOC_RUNNING; }
@@ -86,4 +87,3 @@ public:
 		return (CAnimBlendAssociation*)((uint8*)l - offsetof(CAnimBlendAssociation, link));
 	}
 };
-static_assert(sizeof(CAnimBlendAssociation) == 0x40, "CAnimBlendAssociation: error");

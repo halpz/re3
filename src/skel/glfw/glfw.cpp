@@ -1678,5 +1678,9 @@ int strcasecmp(const char* str1, const char* str2)
 {
 	return _strcmpi(str1, str2);
 }
+int strncasecmp(const char *str1, const char *str2, size_t len)
+{
+	return _strnicmp(str1, str2, len);
+}
 #endif
 #endif

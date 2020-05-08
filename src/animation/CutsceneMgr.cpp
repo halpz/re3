@@ -185,23 +185,28 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	CGame::DrasticTidyUpMemory(true);
 
 	strcpy(ms_cutsceneName, szCutsceneName);
-	file = CFileMgr::OpenFile("ANIM\\CUTS.IMG", "rb");
+
+	RwStream *stream;
+	stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "ANIM\\CUTS.IMG");
+	assert(stream);
 
 	// Load animations
 	sprintf(gString, "%s.IFP", szCutsceneName);
 	if (ms_pCutsceneDir->FindItem(gString, offset, size)) {
 		CStreaming::MakeSpaceFor(size << 11);
 		CStreaming::ImGonnaUseStreamingMemory();
-		CFileMgr::Seek(file, offset << 11, SEEK_SET);
-		CAnimManager::LoadAnimFile(file, false);
+		RwStreamSkip(stream,  offset << 11);
+		CAnimManager::LoadAnimFile(stream, false);
 		ms_cutsceneAssociations.CreateAssociations(szCutsceneName);
 		CStreaming::IHaveUsedStreamingMemory();
 		ms_animLoaded = true;
 	} else {
 		ms_animLoaded = false;
 	}
+	RwStreamClose(stream, nil);
 
 	// Load camera data
+	file = CFileMgr::OpenFile("ANIM\\CUTS.IMG", "rb");
 	sprintf(gString, "%s.DAT", szCutsceneName);
 	if (ms_pCutsceneDir->FindItem(gString, offset, size)) {
 		CFileMgr::Seek(file, offset << 11, SEEK_SET);

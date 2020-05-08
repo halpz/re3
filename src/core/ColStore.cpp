@@ -39,7 +39,7 @@ CColStore::AddColSlot(const char *name)
 	ColDef *def = ms_pColPool->New();
 	assert(def);
 	def->isLoaded = false;
-	def->a = 0;
+	def->unused = 0;
 	def->bounds.left = 1000000.0f;
 	def->bounds.top = 1000000.0f;
 	def->bounds.right = -1000000.0f;
@@ -133,6 +133,7 @@ CColStore::LoadAllCollision(void)
 	for(i = 1; i < COLSTORESIZE; i++)
 		if(GetSlot(i))
 			CStreaming::RequestCol(i, 0);
+
 	CStreaming::LoadAllRequestedModels(false);
 }
 

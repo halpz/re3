@@ -7,8 +7,11 @@
 #include "AnimBlendAssociation.h"
 #include "RwHelper.h"
 
+//--MIAMI: file done except for one TODO
+
 CAnimBlendAssociation::CAnimBlendAssociation(void)
 {
+	groupId = -1;
 	nodes = nil;
 	blendAmount = 1.0f;
 	blendDelta = 0.0f;
@@ -54,8 +57,8 @@ CAnimBlendAssociation::AllocateAnimBlendNodeArray(int n)
 void
 CAnimBlendAssociation::FreeAnimBlendNodeArray(void)
 {
-	assert(nodes != nil);
-	RwFreeAlign(nodes);
+	if(nodes)
+		RwFreeAlign(nodes);
 }
 
 void
@@ -75,7 +78,10 @@ CAnimBlendAssociation::Init(RpClump *clump, CAnimBlendHierarchy *hier)
 	// NB: This is where the order of nodes is defined
 	for(i = 0; i < hier->numSequences; i++){
 		CAnimBlendSequence *seq = &hier->sequences[i];
-		frame = RpAnimBlendClumpFindFrame(clump, seq->name);
+		if(seq->boneTag == -1)
+			frame = RpAnimBlendClumpFindFrame(clump, seq->name);
+		else
+			frame = RpAnimBlendClumpFindBone(clump, seq->boneTag);
 		if(frame && seq->numFrames > 0)
 			nodes[frame - clumpData->frames].sequence = seq;
 	}
@@ -90,6 +96,7 @@ CAnimBlendAssociation::Init(CAnimBlendAssociation &assoc)
 	numNodes = assoc.numNodes;
 	flags = assoc.flags;
 	animId = assoc.animId;
+	groupId = assoc.groupId;
 	AllocateAnimBlendNodeArray(numNodes);
 	for(i = 0; i < numNodes; i++){
 		nodes[i] = assoc.nodes[i];
@@ -129,9 +136,15 @@ CAnimBlendAssociation::SetCurrentTime(float time)
 		if(!IsRepeating())
 			return;
 	CAnimManager::UncompressAnimation(hierarchy);
-	for(i = 0; i < numNodes; i++)
-		if(nodes[i].sequence)
-			nodes[i].FindKeyFrame(currentTime);
+	if(hierarchy->compressed2){
+		for(i = 0; i < numNodes; i++)
+			if(nodes[i].sequence)
+				nodes[i].SetupKeyFrameCompressed();
+	}else{
+		for(i = 0; i < numNodes; i++)
+			if(nodes[i].sequence)
+				nodes[i].FindKeyFrame(currentTime);
+	}
 }
 
 void
@@ -146,14 +159,20 @@ CAnimBlendAssociation::Start(float time)
 	flags |= ASSOC_RUNNING;
 	SetCurrentTime(time);
 }
-
-void
+bool
 CAnimBlendAssociation::UpdateTime(float timeDelta, float relSpeed)
 {
 	if(!IsRunning())
-		return;
+		return true;
+	if(currentTime >= hierarchy->totalLength){
+		flags &= ~ASSOC_RUNNING;
+		return true;
+	}
 
+	// TODO(MIAMI): we still need this for some reason
+#ifndef NOT_YET
 	timeStep = (flags & ASSOC_MOVEMENT ? relSpeed*hierarchy->totalLength : speed) * timeDelta;
+#endif
 	currentTime += timeStep;
 
 	if(currentTime >= hierarchy->totalLength){
@@ -163,7 +182,6 @@ CAnimBlendAssociation::UpdateTime(float timeDelta, float relSpeed)
 			currentTime -= hierarchy->totalLength;
 		else{
 			currentTime = hierarchy->totalLength;
-			flags &= ~ASSOC_RUNNING;
 			if(flags & ASSOC_FADEOUTWHENDONE){
 				flags |= ASSOC_DELETEFADEDOUT;
 				blendDelta = -4.0f;
@@ -174,6 +192,7 @@ CAnimBlendAssociation::UpdateTime(float timeDelta, float relSpeed)
 			}
 		}
 	}
+	return true;
 }
 
 // return whether we still exist after this function

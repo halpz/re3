@@ -22,7 +22,9 @@ public:
 	bool Update(CVector &trans, CQuaternion &rot, float weight);
 	bool NextKeyFrame(void);
 	bool FindKeyFrame(float t);
+	bool SetupKeyFrameCompressed(void);
 	void CalcDeltas(void);
+	void CalcDeltasCompressed(void);
 	void GetCurrentTranslation(CVector &trans, float weight);
 	void GetEndTranslation(CVector &trans, float weight);
 };

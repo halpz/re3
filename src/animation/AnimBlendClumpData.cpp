@@ -3,6 +3,7 @@
 #include "AnimBlendClumpData.h"
 #include "RwHelper.h"
 
+//--MIAMI: file done
 
 CAnimBlendClumpData::CAnimBlendClumpData(void)
 {

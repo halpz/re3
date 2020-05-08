@@ -386,7 +386,6 @@ RpAnimBlendClumpFillFrameArray(RpClump *clump, AnimBlendFrameData **frames)
 
 AnimBlendFrameData *pFrameDataFound;
 
-// FrameFindCallBack on PS2
 void
 FrameFindByNameCBnonskin(AnimBlendFrameData *frame, void *arg)
 {
@@ -395,7 +394,6 @@ FrameFindByNameCBnonskin(AnimBlendFrameData *frame, void *arg)
 		pFrameDataFound = frame;
 }
 
-#ifdef PED_SKIN
 void
 FrameFindByNameCBskin(AnimBlendFrameData *frame, void *arg)
 {
@@ -403,18 +401,30 @@ FrameFindByNameCBskin(AnimBlendFrameData *frame, void *arg)
 	if(name && CGeneral::faststricmp(name, (char*)arg) == 0)
 		pFrameDataFound = frame;
 }
-#endif
+
+void
+FrameFindByBoneCB(AnimBlendFrameData *frame, void *arg)
+{
+	if(frame->nodeID == (int32)(uintptr)arg)
+		pFrameDataFound = frame;
+}
 
 AnimBlendFrameData*
 RpAnimBlendClumpFindFrame(RpClump *clump, const char *name)
 {
 	pFrameDataFound = nil;
-#ifdef PED_SKIN
 	if(IsClumpSkinned(clump))
 		(*RPANIMBLENDCLUMPDATA(clump))->ForAllFrames(FrameFindByNameCBskin, (void*)name);
 	else
-#endif
 		(*RPANIMBLENDCLUMPDATA(clump))->ForAllFrames(FrameFindByNameCBnonskin, (void*)name);
+	return pFrameDataFound;
+}
+
+AnimBlendFrameData*
+RpAnimBlendClumpFindBone(RpClump *clump, uint32 boneTag)
+{
+	pFrameDataFound = nil;
+	(*RPANIMBLENDCLUMPDATA(clump))->ForAllFrames(FrameFindByBoneCB, (void*)boneTag);
 	return pFrameDataFound;
 }
 
