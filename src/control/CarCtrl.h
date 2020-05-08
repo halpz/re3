@@ -48,10 +48,13 @@ public:
 		NINES,
 		GANG8,
 		GANG9,
-		COPSBOAT,
-
-		NUM_CAR_CLASSES = MOTORBIKE+1,
-		NUM_BOAT_CLASSES = 2,
+		COPS_BOAT,
+		FIRST_CAR_RATING = NORMAL,
+		FIRST_BOAT_RATING = LEISUREBOAT,
+		FIRST_GANG_CAR_RATING = MAFIA,
+		NUM_CAR_CLASSES = MOTORBIKE - FIRST_CAR_RATING + 1,
+		NUM_BOAT_CLASSES = WORKERBOAT - FIRST_BOAT_RATING + 1,
+		NUM_GANG_CAR_CLASSES = GANG9 - FIRST_GANG_CAR_RATING + 1,
 		TOTAL_CUSTOM_CLASSES = NUM_CAR_CLASSES + NUM_BOAT_CLASSES
 	};
 
@@ -116,6 +119,12 @@ public:
 	static void FindLinksToGoWithTheseNodes(CVehicle*);
 	static bool GenerateOneEmergencyServicesCar(uint32, CVector);
 	static float FindSpeedMultiplierWithSpeedFromNodes(int8);
+	static int32 ChooseBoatModel(int32);
+	static int32 ChooseBoatRating(CZoneInfo* pZoneInfo);
+	static int32 ChooseCarRating(CZoneInfo* pZoneInfo);
+	static void AddToLoadedVehicleArray(int32 mi, int32 rating, int32 freq);
+	static void RemoveFromLoadedVehicleArray(int32 mi, int32 rating);
+	static int32 ChooseCarModelToLoad(int rating);
 
 	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle)
 	{
@@ -147,8 +156,12 @@ public:
 	static uint32 LastTimeFireTruckCreated;
 	static uint32 LastTimeAmbulanceCreated;
 	static int32 TotalNumOfCarsOfRating[TOTAL_CUSTOM_CLASSES];
-	static int32 NextCarOfRating[TOTAL_CUSTOM_CLASSES];
 	static int32 CarArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
+
+	static int32 NumRequestsOfCarRating[TOTAL_CUSTOM_CLASSES];
+	static int32 NumOfLoadedCarsOfRating[TOTAL_CUSTOM_CLASSES];
+	static int32 CarFreqArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
+	static int32 LoadedCarsArray[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 };
 
 extern CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];

@@ -58,6 +58,8 @@ public:
 	static void ShutDownForRestart(void);
 	static void InitialiseWhenRestarting(void);
 	static void Process(void);
+
+	static bool IsInInterior(void) { return currArea != AREA_MAIN_MAP; }
 	
 	// NB: these do something on PS2
 	static void TidyUpMemory(bool, bool);

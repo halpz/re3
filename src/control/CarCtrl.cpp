@@ -11,6 +11,7 @@
 #include "Curves.h"
 #include "CutsceneMgr.h"
 #include "Gangs.h"
+#include "Game.h"
 #include "Garages.h"
 #include "General.h"
 #include "IniFile.h"
@@ -29,6 +30,7 @@
 #include "VisibilityPlugins.h"
 #include "Vehicle.h"
 #include "Fire.h"
+#include "WaterLevel.h"
 #include "World.h"
 #include "Zones.h"
 
@@ -82,8 +84,11 @@ uint32 CCarCtrl::LastTimeLawEnforcerCreated;
 uint32 CCarCtrl::LastTimeFireTruckCreated;
 uint32 CCarCtrl::LastTimeAmbulanceCreated;
 int32 CCarCtrl::TotalNumOfCarsOfRating[TOTAL_CUSTOM_CLASSES];
-int32 CCarCtrl::NextCarOfRating[TOTAL_CUSTOM_CLASSES];
 int32 CCarCtrl::CarArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
+int32 CCarCtrl::NumRequestsOfCarRating[TOTAL_CUSTOM_CLASSES];
+int32 CCarCtrl::NumOfLoadedCarsOfRating[TOTAL_CUSTOM_CLASSES];
+int32 CCarCtrl::CarFreqArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
+int32 CCarCtrl::LoadedCarsArray[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];
 uint32 aCarsToKeepTime[MAX_CARS_TO_KEEP];
 
@@ -95,9 +100,8 @@ CCarCtrl::GenerateRandomCars()
 		return;
 	}
 	if (NumRandomCars < 30){
-		if (CountDownToCarsAtStart == 0){
+		if (CountDownToCarsAtStart == 0)
 			GenerateOneRandomCar();
-		}
 		else if (--CountDownToCarsAtStart == 0) {
 			for (int i = 0; i < 100; i++)
 				GenerateOneRandomCar();
@@ -113,6 +117,7 @@ void
 CCarCtrl::GenerateOneRandomCar()
 {
 	static int32 unk = 0;
+	bool bTopDownCamera = false;
 	CPlayerInfo* pPlayer = &CWorld::Players[CWorld::PlayerInFocus];
 	CVector vecTargetPos = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
 	CVector2D vecPlayerSpeed = FindPlayerSpeed();
@@ -127,7 +132,7 @@ CCarCtrl::GenerateOneRandomCar()
 	int carClass;
 	int carModel;
 	if (pWanted->m_nWantedLevel > 1 && NumLawEnforcerCars < pWanted->m_MaximumLawEnforcerVehicles &&
-		pWanted->m_CurrentCops < pWanted->m_MaxCops && (
+		pWanted->m_CurrentCops < pWanted->m_MaxCops && !CGame::IsInInterior() && (
 			pWanted->m_nWantedLevel > 3 ||
 			pWanted->m_nWantedLevel > 2 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 5000 ||
 			pWanted->m_nWantedLevel > 1 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 8000)) {
@@ -137,7 +142,7 @@ CCarCtrl::GenerateOneRandomCar()
 		carModel = ChoosePoliceCarModel();
 	}else{
 		carModel = ChooseModel(&zone, &vecTargetPos, &carClass);
-		if (carClass == COPS && pWanted->m_nWantedLevel >= 1)
+		if (carClass == COPS && pWanted->m_nWantedLevel >= 1 || carModel < 0)
 			/* All cop spawns with wanted level are handled by condition above. */
 			/* In particular it means that cop cars never spawn if player has wanted level of 1. */
 			return;
@@ -161,8 +166,9 @@ CCarCtrl::GenerateOneRandomCar()
 		/* Spawn essentially anywhere. */
 		frontX = frontY = 0.707f; /* 45 degrees */
 		angleLimit = -1.0f;
+		bTopDownCamera = true;
 		invertAngleLimitTest = true;
-		preferredDistance = 40.0f;
+		preferredDistance = 55.0f;
 		/* BUG: testForCollision not initialized in original game. */
 		testForCollision = false;
 	}else if (!pPlayerVehicle){
@@ -176,7 +182,7 @@ CCarCtrl::GenerateOneRandomCar()
 			/* Forward to his current direction (camera direction). */
 			angleLimit = 0.707f; /* 45 degrees */
 			invertAngleLimitTest = true;
-			preferredDistance = 120.0f * TheCamera.GenerationDistMultiplier;
+			preferredDistance = 110.0f * TheCamera.GenerationDistMultiplier;
 			break;
 		case 1:
 			/* Spawn a vehicle close to player to his side. */
@@ -198,14 +204,14 @@ CCarCtrl::GenerateOneRandomCar()
 			/* Spawn a vehicle in a very narrow gap in front of a player */
 			angleLimit = 0.85f; /* approx 30 degrees */
 			invertAngleLimitTest = true;
-			preferredDistance = 120.0f * TheCamera.GenerationDistMultiplier;
+			preferredDistance = 110.0f * TheCamera.GenerationDistMultiplier;
 			break;
 		case 2:
 			/* Spawn a vehicle relatively far away from player. */
 			/* Forward to his current direction (camera direction). */
 			angleLimit = 0.707f; /* 45 degrees */
 			invertAngleLimitTest = true;
-			preferredDistance = 120.0f * TheCamera.GenerationDistMultiplier;
+			preferredDistance = 110.0f * TheCamera.GenerationDistMultiplier;
 			break;
 		case 3:
 			/* Spawn a vehicle close to player to his side. */
@@ -226,14 +232,14 @@ CCarCtrl::GenerateOneRandomCar()
 			/* Spawn a vehicle in a very narrow gap in front of a player */
 			angleLimit = 0.85f; /* approx 30 degrees */
 			invertAngleLimitTest = true;
-			preferredDistance = 120.0f * TheCamera.GenerationDistMultiplier;
+			preferredDistance = 110.0f * TheCamera.GenerationDistMultiplier;
 			break;
 		case 1:
 			/* Spawn a vehicle relatively far away from player. */
 			/* Forward to his current direction (camera direction). */
 			angleLimit = 0.707f; /* 45 degrees */
 			invertAngleLimitTest = true;
-			preferredDistance = 120.0f * TheCamera.GenerationDistMultiplier;
+			preferredDistance = 110.0f * TheCamera.GenerationDistMultiplier;
 			break;
 		case 2:
 		case 3:
@@ -256,7 +262,7 @@ CCarCtrl::GenerateOneRandomCar()
 			/* Forward to his current direction (camera direction). */
 			angleLimit = 0.707f; /* 45 degrees */
 			invertAngleLimitTest = true;
-			preferredDistance = 120.0f * TheCamera.GenerationDistMultiplier;
+			preferredDistance = 110.0f * TheCamera.GenerationDistMultiplier;
 			break;
 		case 1:
 			/* Spawn a vehicle close to player to his side. */
@@ -271,17 +277,36 @@ CCarCtrl::GenerateOneRandomCar()
 		preferredDistance, angleLimit, invertAngleLimitTest, &spawnPosition, &curNodeId, &nextNodeId,
 		&positionBetweenNodes, carClass == COPS && pWanted->m_nWantedLevel >= 1))
 		return;
+	CPathNode* pCurNode = &ThePaths.m_pathNodes[curNodeId];
+	CPathNode* pNextNode = &ThePaths.m_pathNodes[nextNodeId];
+	bool bBoatGenerated = false;
+	if ((CGeneral::GetRandomNumber() & 0xF) > Min(pCurNode->spawnRate, pNextNode->spawnRate))
+		return;
+	if (pCurNode->bWaterPath) {
+		bBoatGenerated = true;
+		if (carClass == COPS) {
+			carModel = MI_PREDATOR;
+			carClass = COPS_BOAT;
+			if (!CStreaming::HasModelLoaded(MI_PREDATOR)) {
+				CStreaming::RequestModel(MI_PREDATOR, STREAMFLAGS_DEPENDENCY);
+				return;
+			}
+			else {
+				return;
+				// TODO: normal boats
+			}
+		}
+	}
 	int16 colliding;
-	CWorld::FindObjectsKindaColliding(spawnPosition, 10.0f, true, &colliding, 2, nil, false, true, true, false, false);
+	CWorld::FindObjectsKindaColliding(spawnPosition, bBoatGenerated ? 40.0f : 10.0f, true, &colliding, 2, nil, false, true, true, false, false);
 	if (colliding)
 		/* If something is already present in spawn position, do not create vehicle*/
 		return;
-	if (!ThePaths.TestCoorsCloseness(vecTargetPos, false, spawnPosition))
+	if (!bBoatGenerated && !ThePaths.TestCoorsCloseness(vecTargetPos, false, spawnPosition))
 		/* Testing if spawn position can reach target position via valid path. */
 		return;
 	int16 idInNode = 0;
-	CPathNode* pCurNode = &ThePaths.m_pathNodes[curNodeId];
-	CPathNode* pNextNode = &ThePaths.m_pathNodes[nextNodeId];
+
 	while (idInNode < pCurNode->numLinks &&
 		ThePaths.ConnectedNode(idInNode + pCurNode->firstLink) != nextNodeId)
 		idInNode++;
@@ -289,79 +314,66 @@ CCarCtrl::GenerateOneRandomCar()
 	CCarPathLink* pPathLink = &ThePaths.m_carPathLinks[connectionId];
 	int16 lanesOnCurrentRoad = pPathLink->pathNodeIndex == nextNodeId ? pPathLink->numLeftLanes : pPathLink->numRightLanes;
 	CVehicleModelInfo* pModelInfo = (CVehicleModelInfo*)CModelInfo::GetModelInfo(carModel);
-	if (lanesOnCurrentRoad == 0 || pModelInfo->m_vehicleType == VEHICLE_TYPE_BIKE)
+	if (lanesOnCurrentRoad == 0)
 		/* Not spawning vehicle if road is one way and intended direction is opposide to that way. */
-		/* Also not spawning bikes but they don't exist in final game. */
 		return;
-	CAutomobile* pCar = new CAutomobile(carModel, RANDOM_VEHICLE);
-	pCar->AutoPilot.m_nPrevRouteNode = 0;
-	pCar->AutoPilot.m_nCurrentRouteNode = curNodeId;
-	pCar->AutoPilot.m_nNextRouteNode = nextNodeId;
+	CVehicle* pVehicle;
+	if (CModelInfo::IsBoatModel(carModel))
+		pVehicle = new CBoat(carModel, RANDOM_VEHICLE);
+	//else if (CModelInfo::IsBikeModel(carModel))
+	//	pVehicle = new CBike(carModel, RANDOM_VEHICLE);
+	else
+		pVehicle = new CAutomobile(carModel, RANDOM_VEHICLE);
+	pVehicle->AutoPilot.m_nPrevRouteNode = 0;
+	pVehicle->AutoPilot.m_nCurrentRouteNode = curNodeId;
+	pVehicle->AutoPilot.m_nNextRouteNode = nextNodeId;
 	switch (carClass) {
-	case POOR:
-	case RICH:
-	case EXEC:
-	case WORKER:
-	case BIG:
-	case TAXI:
-	// TODO(MIAMI): check this
-	case MOPED:
-	case MOTORBIKE:
-	case LEISUREBOAT:
-	case WORKERBOAT:
-	//
-	case MAFIA:
-	case TRIAD:
-	case DIABLO:
-	case YAKUZA:
-	case YARDIE:
-	case COLOMB:
-	case NINES:
-	case GANG8:
-	case GANG9:
-	{
-		pCar->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(9, 14);
-		if (carClass == EXEC)
-			pCar->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(12, 18);
-		else if (carClass == POOR)
-			pCar->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(7, 10);
-		CVehicleModelInfo* pVehicleInfo = pCar->GetModelInfo();
-		if (pVehicleInfo->GetColModel()->boundingBox.max.y - pCar->GetModelInfo()->GetColModel()->boundingBox.min.y > 10.0f || carClass == BIG) {
-			pCar->AutoPilot.m_nCruiseSpeed *= 3;
-			pCar->AutoPilot.m_nCruiseSpeed /= 4;
-		}
-		pCar->AutoPilot.m_fMaxTrafficSpeed = pCar->AutoPilot.m_nCruiseSpeed;
-		pCar->AutoPilot.m_nCarMission = MISSION_CRUISE;
-		pCar->AutoPilot.m_nTempAction = TEMPACT_NONE;
-		pCar->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
-		break;
-	}
 	case COPS:
-		pCar->AutoPilot.m_nTempAction = TEMPACT_NONE;
+		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 		if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel != 0){
-			pCar->AutoPilot.m_nCruiseSpeed = CCarAI::FindPoliceCarSpeedForWantedLevel(pCar);
-			pCar->AutoPilot.m_fMaxTrafficSpeed = pCar->AutoPilot.m_nCruiseSpeed / 2;
-			pCar->AutoPilot.m_nCarMission = CCarAI::FindPoliceCarMissionForWantedLevel();
-			pCar->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
+			pVehicle->AutoPilot.m_nCruiseSpeed = CCarAI::FindPoliceCarSpeedForWantedLevel(pVehicle);
+			pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed / 2;
+			pVehicle->AutoPilot.m_nCarMission = CCarAI::FindPoliceCarMissionForWantedLevel();
+			pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
 		}else{
-			pCar->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(12, 16);
-			pCar->AutoPilot.m_fMaxTrafficSpeed = pCar->AutoPilot.m_nCruiseSpeed;
-			pCar->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
-			pCar->AutoPilot.m_nCarMission = MISSION_CRUISE;
+			pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(12, 16);
+			pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed;
+			pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
+			pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
 		}
 		if (carModel == MI_FBICAR){
-			pCar->m_currentColour1 = 0;
-			pCar->m_currentColour2 = 0;
+			pVehicle->m_currentColour1 = 0;
+			pVehicle->m_currentColour2 = 0;
 			/* FBI cars are gray in carcols, but we want them black if they going after player. */
 		}
+		// TODO(MIAMI): check the flag
+	case COPS_BOAT:
+		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
+		pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(4.0f, 16.0f);
+		pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed;
+		pVehicle->AutoPilot.m_nCarMission = CCarAI::FindPoliceBoatMissionForWantedLevel();
+		break;
 	default:
+		pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(9, 14);
+		if (carClass == EXEC)
+			pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(12, 18);
+		else if (carClass == POOR)
+			pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(7, 10);
+		if (pVehicle->GetColModel()->boundingBox.max.y - pVehicle->GetColModel()->boundingBox.min.y > 10.0f || carClass == BIG) {
+			pVehicle->AutoPilot.m_nCruiseSpeed *= 3;
+			pVehicle->AutoPilot.m_nCruiseSpeed /= 4;
+		}
+		pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed;
+		pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
+		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
+		pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
 		break;
 	}
-	if (pCar && pCar->GetModelIndex() == MI_MRWHOOP)
-		pCar->m_bSirenOrAlarm = true;
-	pCar->AutoPilot.m_nNextPathNodeInfo = connectionId;
-	pCar->AutoPilot.m_nNextLane = pCar->AutoPilot.m_nCurrentLane = CGeneral::GetRandomNumber() % lanesOnCurrentRoad;
-	CBox* boundingBox = &CModelInfo::GetModelInfo(pCar->GetModelIndex())->GetColModel()->boundingBox;
+	if (pVehicle && pVehicle->GetModelIndex() == MI_MRWHOOP)
+		pVehicle->m_bSirenOrAlarm = true;
+	pVehicle->AutoPilot.m_nNextPathNodeInfo = connectionId;
+	pVehicle->AutoPilot.m_nNextLane = pVehicle->AutoPilot.m_nCurrentLane = CGeneral::GetRandomNumber() % lanesOnCurrentRoad;
+	CBox* boundingBox = &CModelInfo::GetModelInfo(pVehicle->GetModelIndex())->GetColModel()->boundingBox;
 	float carLength = 1.0f + (boundingBox->max.y - boundingBox->min.y) / 2;
 	float distanceBetweenNodes = (pCurNode->GetPosition() - pNextNode->GetPosition()).Magnitude2D();
 	/* If car is so long that it doesn't fit between two car nodes, place it directly in the middle. */
@@ -370,20 +382,20 @@ CCarCtrl::GenerateOneRandomCar()
 		positionBetweenNodes = 0.5f;
 	else
 		positionBetweenNodes = Min(1.0f - carLength / distanceBetweenNodes, Max(carLength / distanceBetweenNodes, positionBetweenNodes));
-	pCar->AutoPilot.m_nNextDirection = (curNodeId >= nextNodeId) ? 1 : -1;
+	pVehicle->AutoPilot.m_nNextDirection = (curNodeId >= nextNodeId) ? 1 : -1;
 	if (pCurNode->numLinks == 1){
 		/* Do not create vehicle if there is nowhere to go. */
-		delete pCar;
+		delete pVehicle;
 		return;
 	}
-	int16 nextConnection = pCar->AutoPilot.m_nNextPathNodeInfo;
+	int16 nextConnection = pVehicle->AutoPilot.m_nNextPathNodeInfo;
 	int16 newLink;
-	while (nextConnection == pCar->AutoPilot.m_nNextPathNodeInfo){
+	while (nextConnection == pVehicle->AutoPilot.m_nNextPathNodeInfo){
 		newLink = CGeneral::GetRandomNumber() % pCurNode->numLinks;
 		nextConnection = ThePaths.m_carPathConnections[newLink + pCurNode->firstLink];
 	}
-	pCar->AutoPilot.m_nCurrentPathNodeInfo = nextConnection;
-	pCar->AutoPilot.m_nCurrentDirection = (ThePaths.ConnectedNode(newLink + pCurNode->firstLink) >= curNodeId) ? 1 : -1;
+	pVehicle->AutoPilot.m_nCurrentPathNodeInfo = nextConnection;
+	pVehicle->AutoPilot.m_nCurrentDirection = (ThePaths.ConnectedNode(newLink + pCurNode->firstLink) >= curNodeId) ? 1 : -1;
 	CVector2D vecBetweenNodes = pNextNode->GetPosition() - pCurNode->GetPosition();
 	float forwardX, forwardY;
 	float distBetweenNodes = vecBetweenNodes.Magnitude();
@@ -396,47 +408,47 @@ CCarCtrl::GenerateOneRandomCar()
 	}
 	/* I think the following might be some form of SetRotateZOnly. */
 	/* Setting up direction between two car nodes. */
-	pCar->GetForward() = CVector(forwardX, forwardY, 0.0f);
-	pCar->GetRight() = CVector(forwardY, -forwardX, 0.0f);
-	pCar->GetUp() = CVector(0.0f, 0.0f, 1.0f);
+	pVehicle->GetForward() = CVector(forwardX, forwardY, 0.0f);
+	pVehicle->GetRight() = CVector(forwardY, -forwardX, 0.0f);
+	pVehicle->GetUp() = CVector(0.0f, 0.0f, 1.0f);
 
-	float currentPathLinkForwardX = pCar->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pCar->AutoPilot.m_nCurrentPathNodeInfo].GetDirX();
-	float currentPathLinkForwardY = pCar->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pCar->AutoPilot.m_nCurrentPathNodeInfo].GetDirY();
-	float nextPathLinkForwardX = pCar->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pCar->AutoPilot.m_nNextPathNodeInfo].GetDirX();
-	float nextPathLinkForwardY = pCar->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pCar->AutoPilot.m_nNextPathNodeInfo].GetDirY();
+	float currentPathLinkForwardX = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirX();
+	float currentPathLinkForwardY = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirY();
+	float nextPathLinkForwardX = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirX();
+	float nextPathLinkForwardY = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirY();
 
-	CCarPathLink* pCurrentLink = &ThePaths.m_carPathLinks[pCar->AutoPilot.m_nCurrentPathNodeInfo];
-	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[pCar->AutoPilot.m_nNextPathNodeInfo];
+	CCarPathLink* pCurrentLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];
+	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
 	CVector positionOnCurrentLinkIncludingLane(
-		pCurrentLink->GetX() + ((pCar->AutoPilot.m_nCurrentLane + pCurrentLink->OneWayLaneOffset()) * LANE_WIDTH) * currentPathLinkForwardY,
-		pCurrentLink->GetY() - ((pCar->AutoPilot.m_nCurrentLane + pCurrentLink->OneWayLaneOffset()) * LANE_WIDTH) * currentPathLinkForwardX,
+		pCurrentLink->GetX() + ((pVehicle->AutoPilot.m_nCurrentLane + pCurrentLink->OneWayLaneOffset()) * LANE_WIDTH) * currentPathLinkForwardY,
+		pCurrentLink->GetY() - ((pVehicle->AutoPilot.m_nCurrentLane + pCurrentLink->OneWayLaneOffset()) * LANE_WIDTH) * currentPathLinkForwardX,
 		0.0f);
 	CVector positionOnNextLinkIncludingLane(
-		pNextLink->GetX() + ((pCar->AutoPilot.m_nNextLane + pNextLink->OneWayLaneOffset()) * LANE_WIDTH) * nextPathLinkForwardY,
-		pNextLink->GetY() - ((pCar->AutoPilot.m_nNextLane + pNextLink->OneWayLaneOffset()) * LANE_WIDTH) * nextPathLinkForwardX,
+		pNextLink->GetX() + ((pVehicle->AutoPilot.m_nNextLane + pNextLink->OneWayLaneOffset()) * LANE_WIDTH) * nextPathLinkForwardY,
+		pNextLink->GetY() - ((pVehicle->AutoPilot.m_nNextLane + pNextLink->OneWayLaneOffset()) * LANE_WIDTH) * nextPathLinkForwardX,
 		0.0f);
-	float directionCurrentLinkX = pCurrentLink->GetDirX() * pCar->AutoPilot.m_nCurrentDirection;
-	float directionCurrentLinkY = pCurrentLink->GetDirY() * pCar->AutoPilot.m_nCurrentDirection;
-	float directionNextLinkX = pNextLink->GetDirX() * pCar->AutoPilot.m_nNextDirection;
-	float directionNextLinkY = pNextLink->GetDirY() * pCar->AutoPilot.m_nNextDirection;
+	float directionCurrentLinkX = pCurrentLink->GetDirX() * pVehicle->AutoPilot.m_nCurrentDirection;
+	float directionCurrentLinkY = pCurrentLink->GetDirY() * pVehicle->AutoPilot.m_nCurrentDirection;
+	float directionNextLinkX = pNextLink->GetDirX() * pVehicle->AutoPilot.m_nNextDirection;
+	float directionNextLinkY = pNextLink->GetDirY() * pVehicle->AutoPilot.m_nNextDirection;
 	/* We want to make a path between two links that may not have the same forward directions a curve. */
-	pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve = CCurves::CalcSpeedScaleFactor(
+	pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve = CCurves::CalcSpeedScaleFactor(
 		&positionOnCurrentLinkIncludingLane,
 		&positionOnNextLinkIncludingLane,
 		directionCurrentLinkX, directionCurrentLinkY,
 		directionNextLinkX, directionNextLinkY
-	) * (1000.0f / pCar->AutoPilot.m_fMaxTrafficSpeed);
+	) * (1000.0f / pVehicle->AutoPilot.m_fMaxTrafficSpeed);
 #ifdef FIX_BUGS
 	/* Casting timer to float is very unwanted. In this case it's not awful */
 	/* but in CAutoPilot::ModifySpeed it can even cause crashes (see SilentPatch). */
 
 	/* Second fix: adding 0.5f is a mistake. It should be between 0 and 1. It was fixed in SA.*/
 	/* It is also correct in CAutoPilot::ModifySpeed. */
-	pCar->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
-		(uint32)(positionBetweenNodes * pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve);
+	pVehicle->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
+		(uint32)((0.5f + positionBetweenNodes) * pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve);
 #else
-	pCar->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
-		(0.5f + positionBetweenNodes) * pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve;
+	pVehicle->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
+		(0.5f + positionBetweenNodes) * pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve;
 #endif
 	CVector directionCurrentLink(directionCurrentLinkX, directionCurrentLinkY, 0.0f);
 	CVector directionNextLink(directionNextLinkX, directionNextLinkY, 0.0f);
@@ -447,8 +459,8 @@ CCarCtrl::GenerateOneRandomCar()
 		&positionOnNextLinkIncludingLane,
 		&directionCurrentLink,
 		&directionNextLink,
-		GetPositionAlongCurrentCurve(pCar),
-		pCar->AutoPilot.m_nTimeToSpendOnCurrentCurve,
+		GetPositionAlongCurrentCurve(pVehicle),
+		pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve,
 		&positionIncludingCurve,
 		&directionIncludingCurve
 	);
@@ -459,142 +471,150 @@ CCarCtrl::GenerateOneRandomCar()
 	float groundZ = INFINITE_Z;
 	CColPoint colPoint;
 	CEntity* pEntity;
-	if (CWorld::ProcessVerticalLine(finalPosition, 1000.0f, colPoint, pEntity, true, false, false, false, true, false, nil))
-		groundZ = colPoint.point.z;
-	if (CWorld::ProcessVerticalLine(finalPosition, -1000.0f, colPoint, pEntity, true, false, false, false, true, false, nil)){
-		if (ABS(colPoint.point.z - finalPosition.z) < ABS(groundZ - finalPosition.z))
+	if (bBoatGenerated) {
+		if (!CWaterLevel::GetWaterLevel(finalPosition, &groundZ, true)) {
+			delete pVehicle;
+			return;
+		}
+	}
+	else {
+		if (CWorld::ProcessVerticalLine(finalPosition, 1000.0f, colPoint, pEntity, true, false, false, false, true, false, nil))
 			groundZ = colPoint.point.z;
+		if (CWorld::ProcessVerticalLine(finalPosition, -1000.0f, colPoint, pEntity, true, false, false, false, true, false, nil)) {
+			if (ABS(colPoint.point.z - finalPosition.z) < ABS(groundZ - finalPosition.z))
+				groundZ = colPoint.point.z;
+		}
 	}
 	if (groundZ == INFINITE_Z || ABS(groundZ - finalPosition.z) > 7.0f) {
 		/* Failed to find ground or too far from expected position. */
-		delete pCar;
+		delete pVehicle;
 		return;
 	}
-	finalPosition.z = groundZ + pCar->GetHeightAboveRoad();
-	pCar->SetPosition(finalPosition);
-	pCar->SetMoveSpeed(directionIncludingCurve / GAME_SPEED_TO_CARAI_SPEED);
-	CVector2D speedDifferenceWithTarget = (CVector2D)pCar->GetMoveSpeed() - vecPlayerSpeed;
+	if (CModelInfo::IsBoatModel(carModel)) {
+		finalPosition.z = groundZ;
+		pVehicle->bExtendedRange = true;
+	}
+	else
+		finalPosition.z = groundZ + pVehicle->GetHeightAboveRoad();
+	pVehicle->SetPosition(finalPosition);
+	pVehicle->SetMoveSpeed(directionIncludingCurve / GAME_SPEED_TO_CARAI_SPEED);
+	CVector2D speedDifferenceWithTarget = (CVector2D)pVehicle->GetMoveSpeed() - vecPlayerSpeed;
 	CVector2D distanceToTarget = positionIncludingCurve - vecTargetPos;
 	switch (carClass) {
-	case POOR:
-	case RICH:
-	case EXEC:
-	case WORKER:
-	// TODO(MIAMI): check this
-	case MOPED:
-	case MOTORBIKE:
-	case LEISUREBOAT:
-	case WORKERBOAT:
-	//
-	case BIG:
-	case TAXI:
-	case MAFIA:
-	case TRIAD:
-	case DIABLO:
-	case YAKUZA:
-	case YARDIE:
-	case COLOMB:
-	case NINES:
-	case GANG8:
-	case GANG9:
-		pCar->SetStatus(STATUS_SIMPLE);
-		break;
 	case COPS:
-		pCar->SetStatus((pCar->AutoPilot.m_nCarMission == MISSION_CRUISE) ? STATUS_SIMPLE : STATUS_PHYSICS);
-		pCar->ChangeLawEnforcerState(1);
+		pVehicle->SetStatus((pVehicle->AutoPilot.m_nCarMission == MISSION_CRUISE) ? STATUS_SIMPLE : STATUS_PHYSICS);
+		pVehicle->ChangeLawEnforcerState(1);
 		break;
+	case COPS_BOAT:
+		pVehicle->ChangeLawEnforcerState(1);
+		pVehicle->SetStatus(STATUS_PHYSICS);
 	default:
+		pVehicle->SetStatus(STATUS_SIMPLE);
 		break;
 	}
-	CVisibilityPlugins::SetClumpAlpha(pCar->GetClump(), 0);
-	if (!pCar->GetIsOnScreen()){
-		if ((vecTargetPos - pCar->GetPosition()).Magnitude2D() > 50.0f) {
+	CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);
+	if (!pVehicle->GetIsOnScreen()){
+		if ((vecTargetPos - pVehicle->GetPosition()).Magnitude2D() > 40.0f * (pVehicle->bExtendedRange ? 1.5f : 1.0f)) {
 			/* Too far away cars that are not visible aren't needed. */
-			delete pCar;
+			delete pVehicle;
 			return;
 		}
-	}else if((vecTargetPos - pCar->GetPosition()).Magnitude2D() > TheCamera.GenerationDistMultiplier * 130.0f ||
-		(vecTargetPos - pCar->GetPosition()).Magnitude2D() < TheCamera.GenerationDistMultiplier * 110.0f){
-		delete pCar;
+	}else if((vecTargetPos - pVehicle->GetPosition()).Magnitude2D() > TheCamera.GenerationDistMultiplier * (pVehicle->bExtendedRange ? 1.5f : 1.0f) * 120.0f ||
+		(vecTargetPos - pVehicle->GetPosition()).Magnitude2D() < TheCamera.GenerationDistMultiplier * 100.0f){
+		delete pVehicle;
 		return;
-	}else if((TheCamera.GetPosition() - pCar->GetPosition()).Magnitude2D() < 90.0f * TheCamera.GenerationDistMultiplier){
-		delete pCar;
+	}else if((TheCamera.GetPosition() - pVehicle->GetPosition()).Magnitude2D() < 82.5f * TheCamera.GenerationDistMultiplier || bTopDownCamera ){
+		delete pVehicle;
 		return;
 	}
-	CVehicleModelInfo* pVehicleModel = pCar->GetModelInfo();
+	// TODO(MIAMI): if MARQUIS then delete
+	CVehicleModelInfo* pVehicleModel = pVehicle->GetModelInfo();
 	float radiusToTest = pVehicleModel->GetColModel()->boundingSphere.radius;
 	if (testForCollision){
-		CWorld::FindObjectsKindaColliding(pCar->GetPosition(), radiusToTest + 20.0f, true, &colliding, 2, nil, false, true, false, false, false);
+		CWorld::FindObjectsKindaColliding(pVehicle->GetPosition(), radiusToTest + 20.0f, true, &colliding, 2, nil, false, true, false, false, false);
 		if (colliding){
-			delete pCar;
+			delete pVehicle;
 			return;
 		}
 	}
-	CWorld::FindObjectsKindaColliding(pCar->GetPosition(), radiusToTest, true, &colliding, 2, nil, false, true, false, false, false);
+	CWorld::FindObjectsKindaColliding(pVehicle->GetPosition(), radiusToTest, true, &colliding, 2, nil, false, true, false, false, false);
 	if (colliding){
-		delete pCar;
+		delete pVehicle;
 		return;
 	}
 	if (speedDifferenceWithTarget.x * distanceToTarget.x +
 		speedDifferenceWithTarget.y * distanceToTarget.y >= 0.0f){
-		delete pCar;
+		delete pVehicle;
 		return;
 	}
-	pVehicleModel->AvoidSameVehicleColour(&pCar->m_currentColour1, &pCar->m_currentColour2);
-	CWorld::Add(pCar);
-	if (carClass == COPS)
-		CCarAI::AddPoliceCarOccupants(pCar);
+	pVehicleModel->AvoidSameVehicleColour(&pVehicle->m_currentColour1, &pVehicle->m_currentColour2);
+	CWorld::Add(pVehicle);
+	if (carClass == COPS || carClass == COPS_BOAT)
+		CCarAI::AddPoliceCarOccupants(pVehicle);
 	else
-		pCar->SetUpDriver();
-	if ((CGeneral::GetRandomNumber() & 0x3F) == 0){ /* 1/64 probability */
-		pCar->SetStatus(STATUS_PHYSICS);
-		pCar->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
-		pCar->AutoPilot.m_nCruiseSpeed += 10;
+		pVehicle->SetUpDriver(); //TODO(MIAMI): FIX!
+	if ((CGeneral::GetRandomNumber() & 0x3F) == 0){ /* 1/64 probability */ /* TODO(MIAMI): FIX!*/
+		pVehicle->SetStatus(STATUS_PHYSICS);
+		pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
+		pVehicle->AutoPilot.m_nCruiseSpeed += 10;
 	}
 	if (carClass == COPS)
 		LastTimeLawEnforcerCreated = CTimer::GetTimeInMilliseconds();
+	/* TODO(MIAMI): CADDY, VICECHEE, dead ped code*/
+	return;
+}
+
+int32
+CCarCtrl::ChooseBoatModel(int32 rating)
+{
+	++NumRequestsOfCarRating[rating];
+	return ChooseCarModel(rating);
+}
+
+int32
+CCarCtrl::ChooseBoatRating(CZoneInfo* pZoneInfo)
+{
+	int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
+	for (int i = 0; i < NUM_BOAT_CLASSES - 1; i++) {
+		if (rnd < pZoneInfo->boatThreshold[i])
+			return FIRST_BOAT_RATING + i;
+	}
+	return FIRST_BOAT_RATING + NUM_BOAT_CLASSES - 1;
+}
+
+int32
+CCarCtrl::ChooseCarRating(CZoneInfo* pZoneInfo)
+{
+	int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
+	for (int i = 0; i < NUM_CAR_CLASSES - 1; i++) {
+		if (rnd < pZoneInfo->carThreshold[i])
+			return i;
+	}
+	return FIRST_CAR_RATING + NUM_CAR_CLASSES - 1;
 }
 
 int32
 CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 	int32 model = -1;
-	while (model == -1 || !CStreaming::HasModelLoaded(model)){
+	for (int i = 0; i < 10 && (model == -1 || !CStreaming::HasModelLoaded(model)); i++) {
 		int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
-		// TODO(MIAMI): new car classes
-		if (rnd < pZone->carThreshold[0])
-			model = CCarCtrl::ChooseCarModel((*pClass = NORMAL));
-		else if (rnd < pZone->carThreshold[1])
-			model = CCarCtrl::ChooseCarModel((*pClass = POOR));
-		else if (rnd < pZone->carThreshold[2])
-			model = CCarCtrl::ChooseCarModel((*pClass = RICH));
-		else if (rnd < pZone->carThreshold[3])
-			model = CCarCtrl::ChooseCarModel((*pClass = EXEC));
-		else if (rnd < pZone->carThreshold[4])
-			model = CCarCtrl::ChooseCarModel((*pClass = WORKER));
-		else if (rnd < pZone->carThreshold[5])
-			model = CCarCtrl::ChooseCarModel((*pClass = BIG));
-		else if (rnd < pZone->copThreshold)
-			*pClass = COPS, model = CCarCtrl::ChoosePoliceCarModel();
-		else if (rnd < pZone->gangThreshold[0])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = MAFIA) - MAFIA);
-		else if (rnd < pZone->gangThreshold[1])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = TRIAD) - MAFIA);
-		else if (rnd < pZone->gangThreshold[2])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = DIABLO) - MAFIA);
-		else if (rnd < pZone->gangThreshold[3])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = YAKUZA) - MAFIA);
-		else if (rnd < pZone->gangThreshold[4])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = YARDIE) - MAFIA);
-		else if (rnd < pZone->gangThreshold[5])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = COLOMB) - MAFIA);
-		else if (rnd < pZone->gangThreshold[6])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = NINES) - MAFIA);
-		else if (rnd < pZone->gangThreshold[7])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = GANG8) - MAFIA);
-		else if (rnd < pZone->gangThreshold[8])
-			model = CCarCtrl::ChooseGangCarModel((*pClass = GANG9) - MAFIA);
-		else
-			model = CCarCtrl::ChooseCarModel((*pClass = TAXI));
+
+		if (rnd < pZone->copThreshold) {
+			*pClass = COPS; 
+			model = ChoosePoliceCarModel();
+			continue;
+		}
+
+		for (int i = 0; i < NUM_GANG_CAR_CLASSES; i++) {
+			if (rnd < pZone->gangThreshold[i]) {
+				*pClass = i + FIRST_GANG_CAR_RATING;
+				model = ChooseGangCarModel(i);
+				continue;
+			}
+		}
+
+		*pClass = ChooseCarRating(pZone);
+		model = ChooseCarModel(*pClass);
 	}
 	return model;
 }
@@ -603,34 +623,50 @@ int32
 CCarCtrl::ChooseCarModel(int32 vehclass)
 {
 	int32 model = -1;
-	switch (vehclass) {
-	case POOR:
-	case RICH:
-	case EXEC:
-	case WORKER:
-	// TODO(MIAMI): check this
-	case MOPED:
-	case MOTORBIKE:
-	case LEISUREBOAT:
-	case WORKERBOAT:
-	//
-	case BIG:
-	case TAXI:
-	{
-		if (TotalNumOfCarsOfRating[vehclass] == 0)
-			debug("ChooseCarModel : No cars of type %d have been declared\n", vehclass);
-		model = CarArrays[vehclass][NextCarOfRating[vehclass]];
-		int32 total = TotalNumOfCarsOfRating[vehclass];
-		NextCarOfRating[vehclass] += CGeneral::GetRandomNumberInRange(1, total);
-		while (NextCarOfRating[vehclass] >= total)
-			NextCarOfRating[vehclass] -= total;
-		//NextCarOfRating[vehclass] %= total;
-		TotalNumOfCarsOfRating[vehclass] = total; /* why... */
+	++NumRequestsOfCarRating[vehclass];
+	if (NumOfLoadedCarsOfRating[vehclass] == 0)
+		return -1;
+	int32 rnd = CGeneral::GetRandomNumberInRange(0, CarFreqArrays[vehclass][NumOfLoadedCarsOfRating[vehclass] - 1]);
+	int32 index = 0;
+	while (rnd > CarFreqArrays[vehclass][index])
+		index++;
+	assert(LoadedCarsArray[vehclass][index]);
+	return LoadedCarsArray[vehclass][index];
+}
+
+void
+CCarCtrl::AddToLoadedVehicleArray(int32 mi, int32 rating, int32 freq)
+{
+	LoadedCarsArray[rating][NumOfLoadedCarsOfRating[rating]] = mi;
+	assert(mi >= 130);
+	CarFreqArrays[rating][NumOfLoadedCarsOfRating[rating]] = freq;
+	if (NumOfLoadedCarsOfRating[rating])
+		CarFreqArrays[rating][NumOfLoadedCarsOfRating[rating]] += CarFreqArrays[rating][NumOfLoadedCarsOfRating[rating] - 1];
+	NumOfLoadedCarsOfRating[rating]++;
+}
+
+void
+CCarCtrl::RemoveFromLoadedVehicleArray(int mi, int32 rating)
+{
+	int index = 0;
+	while (LoadedCarsArray[rating][index] != -1) {
+		if (LoadedCarsArray[rating][index] == mi)
+			break;
 	}
-	default:
-		break;
+	int32 freq = CarFreqArrays[rating][index];
+	if (index > 0)
+		freq -= CarFreqArrays[rating][index - 1];
+	while (LoadedCarsArray[rating][index + 1] != -1) {
+		LoadedCarsArray[rating][index] = LoadedCarsArray[rating][index + 1];
+		CarFreqArrays[rating][index] = CarFreqArrays[rating][index + 1] - freq;
 	}
-	return model;
+	--NumOfLoadedCarsOfRating[rating];
+}
+
+int32
+CCarCtrl::ChooseCarModelToLoad(int rating)
+{
+	return CarArrays[rating][CGeneral::GetRandomNumberInRange(0, TotalNumOfCarsOfRating[rating])];
 }
 
 int32
@@ -698,7 +734,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 			return;
 		}
 		float distanceToPlayer = (pVehicle->GetPosition() - vecPlayerPos).Magnitude2D();
-		float threshold = 50.0f;
+		float threshold = 40.0f;
 		if (pVehicle->GetIsOnScreen() ||
 			TheCamera.Cams[TheCamera.ActiveCam].LookingLeft ||
 			TheCamera.Cams[TheCamera.ActiveCam].LookingRight ||
@@ -710,8 +746,10 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 			pVehicle->bIsLawEnforcer ||
 			pVehicle->bIsCarParkVehicle
 			){
-			threshold = 130.0f * TheCamera.GenerationDistMultiplier;
+			threshold = 120.0f * TheCamera.GenerationDistMultiplier;
 		}
+		if (TheCamera.GetForward().z < -0.9f)
+			threshold = 70.0f;
 		if (pVehicle->bExtendedRange)
 			threshold *= 1.5f;
 		if (distanceToPlayer > threshold && !CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
@@ -724,7 +762,8 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 			return;
 		}
 	}
-	if ((pVehicle->GetStatus() == STATUS_SIMPLE || pVehicle->GetStatus() == STATUS_PHYSICS && pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS) &&
+	if ((pVehicle->GetStatus() == STATUS_SIMPLE || pVehicle->GetStatus() == STATUS_PHYSICS &&
+		(pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS || pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS_IGNORE_LIGHTS)) &&
 		CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeToStartMission > 5000 &&
 		!pVehicle->GetIsOnScreen() &&
 		(pVehicle->GetPosition() - vecPlayerPos).Magnitude2D() > 25.0f &&
@@ -1870,9 +1909,11 @@ void CCarCtrl::Init(void)
 	for (int i = 0; i < MAX_CARS_TO_KEEP; i++)
 		apCarsToKeep[i] = nil;
 	for (int i = 0; i < TOTAL_CUSTOM_CLASSES; i++){
-		for (int j = 0; j < MAX_CAR_MODELS_IN_ARRAY; j++)
-			CarArrays[i][j] = 0;
-		NextCarOfRating[i] = 0;
+		for (int j = 0; j < MAX_CAR_MODELS_IN_ARRAY; j++) {
+			LoadedCarsArray[i][j] = -1;
+		}
+		NumOfLoadedCarsOfRating[i] = 0;
+		NumRequestsOfCarRating[i] = 0;
 		TotalNumOfCarsOfRating[i] = 0;
 	}
 }
@@ -1896,7 +1937,7 @@ void CCarCtrl::ReInit(void)
 	for (int i = 0; i < MAX_CARS_TO_KEEP; i++)
 		apCarsToKeep[i] = nil;
 	for (int i = 0; i < TOTAL_CUSTOM_CLASSES; i++)
-		NextCarOfRating[i] = 0;
+		NumRequestsOfCarRating[i] = 0;
 }
 
 void CCarCtrl::DragCarToPoint(CVehicle* pVehicle, CVector* pPoint)

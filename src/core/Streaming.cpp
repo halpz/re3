@@ -1025,7 +1025,9 @@ found:
 	RemoveModel(ms_vehiclesLoaded[ms_lastVehicleDeleted]);
 	ms_numVehiclesLoaded--;
 	ms_vehiclesLoaded[ms_lastVehicleDeleted] = -1;
-	// TODO(MIAMI): CCarCtrl::RemoveFromLoadedVehicleArray
+	CVehicleModelInfo* pVehicleInfo = (CVehicleModelInfo*)CModelInfo::GetModelInfo(id);
+	if (pVehicleInfo->m_vehicleClass != -1)
+		CCarCtrl::RemoveFromLoadedVehicleArray(id, pVehicleInfo->m_vehicleClass);
 	return true;
 }
 
@@ -1159,13 +1161,21 @@ found:
 			ms_lastVehicleDeleted = id;
 			// this is more that we wanted actually
 			ms_numVehiclesLoaded++;
-		}else
+		}
+		else{
 			RemoveModel(id);
+			CVehicleModelInfo* pVehicleInfo = (CVehicleModelInfo*)CModelInfo::GetModelInfo(modelId);
+			if (pVehicleInfo->m_vehicleClass != -1)
+				CCarCtrl::RemoveFromLoadedVehicleArray(modelId, pVehicleInfo->m_vehicleClass);
+		}
 	}
 
 	ms_vehiclesLoaded[ms_lastVehicleDeleted++] = modelId;
 	if(ms_lastVehicleDeleted == MAXVEHICLESLOADED)
 		ms_lastVehicleDeleted = 0;
+	CVehicleModelInfo* pVehicleInfo = (CVehicleModelInfo*)CModelInfo::GetModelInfo(modelId);
+	if (pVehicleInfo->m_vehicleClass != -1)
+		CCarCtrl::AddToLoadedVehicleArray(modelId, pVehicleInfo->m_vehicleClass, pVehicleInfo->m_frequency);
 	return true;
 }
 
@@ -1283,25 +1293,24 @@ CStreaming::StreamVehiclesAndPeds(void)
 	if(timeBeforeNextLoad >= 0)
 		timeBeforeNextLoad--;
 	else if(ms_numVehiclesLoaded <= desiredNumVehiclesLoaded){
-		for(i = 1; i <= 10; i++){
-			model =  CCarCtrl::ChooseCarModel(modelQualityClass);
-// TODO(MIAMI): check this
-if(model < 0)
-	continue;
-			modelQualityClass++;
-			if(modelQualityClass >= CCarCtrl::TOTAL_CUSTOM_CLASSES)
-				modelQualityClass = 0;
-
-			// check if we want to load this model
-			if(ms_aInfoForModel[model].m_loadState == STREAMSTATE_NOTLOADED &&
-			   ((CVehicleModelInfo*)CModelInfo::GetModelInfo(model))->m_level & (1 << (CGame::currLevel-1)))
-				break;
+		CZoneInfo zone;
+		CTheZones::GetZoneInfoForTimeOfDay(&FindPlayerCoors(), &zone);
+		int32 maxReq = -1;
+		int32 mostRequestedRating = 0;
+		for(i = 0; i < CCarCtrl::TOTAL_CUSTOM_CLASSES; i++){
+			if(CCarCtrl::NumRequestsOfCarRating[i] > maxReq &&
+				(i == 0 && zone.carThreshold[0] != 0) ||
+				(i != 0 && zone.carThreshold[i] != zone.carThreshold[i-1])) {
+				maxReq = CCarCtrl::NumRequestsOfCarRating[i];
+				mostRequestedRating = i;
+			}
 		}
-
-		if(i <= 10){
+		model = CCarCtrl::ChooseCarModelToLoad(mostRequestedRating);
+		if(!HasModelLoaded(model)){
 			RequestModel(model, STREAMFLAGS_DEPENDENCY);
-			timeBeforeNextLoad = 500;
+			timeBeforeNextLoad = 350;
 		}
+		CCarCtrl::NumRequestsOfCarRating[mostRequestedRating] = 0;
 	}
 }
 
@@ -2435,7 +2444,14 @@ CStreaming::LoadScene(const CVector &pos)
 	AddModelsToRequestList(pos);
 	CRadar::StreamRadarSections(pos);
 
-	// TODO(MIAMI): stream zone vehicles
+	if (!CGame::IsInInterior()) {
+		for (int i = 0; i < 5; i++) {
+			CZoneInfo zone;
+			CTheZones::GetZoneInfoForTimeOfDay(&pos, &zone);
+			int32 model = CCarCtrl::ChooseCarModelToLoad(CCarCtrl::ChooseCarRating(&zone));
+			CStreaming::RequestModel(model, STREAMFLAGS_DEPENDENCY);
+		}
+	}
 	LoadAllRequestedModels(false);
 	// TODO(MIAMI): InstanceLoadedModels
 

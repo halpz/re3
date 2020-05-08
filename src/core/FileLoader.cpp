@@ -926,10 +926,10 @@ CFileLoader::LoadCarPathNode(const char *line, int id, int node, bool waterPath)
 
 	if(id == -1)
 		ThePaths.StoreDetachedNodeInfoCar(node, type, next, x, y, z, width, numLeft, numRight,
-			!!(flags&1), !!(flags&4), speed, !!(flags&2), waterPath, spawnRate, false);
+			!!(flags&1), !!(flags&4), speed, !!(flags&2), waterPath, spawnRate * 15, false);
 	else
 		ThePaths.StoreNodeInfoCar(id, node, type, next, x, y, z, 0, numLeft, numRight,
-			!!(flags&1), !!(flags&4), speed, !!(flags&2), waterPath, spawnRate);
+			!!(flags&1), !!(flags&4), speed, !!(flags&2), waterPath, spawnRate * 15);
 }
 
 

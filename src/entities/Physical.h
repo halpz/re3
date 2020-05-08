@@ -160,4 +160,3 @@ public:
 	bool CheckCollision(void);
 	bool CheckCollision_SimpleCar(void);
 };
-static_assert(sizeof(CPhysical) == 0x128, "CPhysical: error");
