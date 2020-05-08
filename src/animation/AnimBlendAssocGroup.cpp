@@ -3,6 +3,7 @@
 #include "ctype.h"
 
 #include "General.h"
+#include "RwHelper.h"
 #include "ModelInfo.h"
 #include "AnimManager.h"
 #include "RpAnimBlend.h"
@@ -131,6 +132,10 @@ CAnimBlendAssocGroup::CreateAssociations(const char *name)
 		assert(model);
 		printf("Associated anim %s with model %s\n", anim->name, model->GetName());
 		RpClump *clump = (RpClump*)model->CreateInstance();
+#ifdef PED_SKIN
+		if(IsClumpSkinned(clump))
+			RpClumpForAllAtomics(clump, AtomicRemoveAnimFromSkinCB, nil);
+#endif
 		RpAnimBlendClumpInit(clump);
 		assocList[i].Init(clump, anim);
 		RpClumpDestroy(clump);

@@ -147,11 +147,11 @@ CAnimBlendAssociation::Start(float time)
 	SetCurrentTime(time);
 }
 
-void
+bool
 CAnimBlendAssociation::UpdateTime(float timeDelta, float relSpeed)
 {
 	if(!IsRunning())
-		return;
+		return true;
 
 	timeStep = (flags & ASSOC_MOVEMENT ? relSpeed*hierarchy->totalLength : speed) * timeDelta;
 	currentTime += timeStep;
@@ -174,6 +174,7 @@ CAnimBlendAssociation::UpdateTime(float timeDelta, float relSpeed)
 			}
 		}
 	}
+	return true;
 }
 
 // return whether we still exist after this function

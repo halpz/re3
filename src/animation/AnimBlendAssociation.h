@@ -75,7 +75,7 @@ public:
 	void SetCurrentTime(float time);
 	void SyncAnimation(CAnimBlendAssociation *other);
 	void Start(float time);
-	void UpdateTime(float timeDelta, float relSpeed);
+	bool UpdateTime(float timeDelta, float relSpeed);
 	bool UpdateBlend(float timeDelta);
 
 	void SetRun(void) { flags |= ASSOC_RUNNING; }
