@@ -4489,7 +4489,7 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 */
 	{
 		LookLeftRight = -CPad::GetPad(0)->LookAroundLeftRight();
-		LookUpDown = CPad::GetPad(0)->LookAroundUpDown();
+		LookUpDown = -CPad::GetPad(0)->LookAroundUpDown();
 	}
 	float AlphaOffset, BetaOffset;
 	if(UseMouse){
