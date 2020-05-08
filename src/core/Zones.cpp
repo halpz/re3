@@ -399,6 +399,7 @@ int16
 CTheZones::FindNextZoneByLabelAndReturnIndex(char *name, eZoneType type)
 {
 	char str[8];
+	++FindIndex;
 	memset(str, 0, 8);
 	strncpy(str, name, 8);
 	switch(type){
@@ -499,6 +500,21 @@ CTheZones::SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
 	info->gangThreshold[6] = gangCarDensities[6] + info->gangThreshold[5];
 	info->gangThreshold[7] = gangCarDensities[7] + info->gangThreshold[6];
 	info->gangThreshold[8] = gangCarDensities[8] + info->gangThreshold[7];
+}
+
+void CTheZones::SetZoneCivilianCarInfo(uint16 zoneid, uint8 day,
+	const int16* carDensities, const int16* boatDensities)
+{
+	CZone* zone;
+	CZoneInfo* info;
+	zone = GetInfoZone(zoneid);
+	info = &ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight];
+	info->carThreshold[0] = carDensities[0];
+	for (int i = 1; i < CCarCtrl::NUM_CAR_CLASSES; i++)
+		info->carThreshold[i] = carDensities[i] + info->carThreshold[i-1];
+	info->boatThreshold[0] = boatDensities[0];
+	for (int i = 1; i < CCarCtrl::NUM_BOAT_CLASSES; i++)
+		info->boatThreshold[i] = boatDensities[i] + info->boatThreshold[i - 1];
 }
 
 void

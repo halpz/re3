@@ -93,6 +93,8 @@ public:
 	static void GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info);
 	static void SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,
 		int16 copCarDensity, const int16 *gangCarDensities /*[NUMGANGS]*/);
+	static void SetZoneCivilianCarInfo(uint16 zoneid, uint8 day,
+		const int16* carDensities, const int16* boatDensities);
 	static void SetZonePedInfo(uint16 zoneid, uint8 day, int16 pedDensity,
 		int16 gang0Density, int16 gang1Density, int16 gang2Density, int16 gang3Density,
 		int16 gang4Density, int16 gang5Density, int16 gang6Density, int16 gang7Density,
