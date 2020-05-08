@@ -302,7 +302,7 @@ CCarCtrl::GenerateOneRandomCar()
 		else {
 			int i;
 			carModel = -1;
-			for (i = 10; i > 0 && (carModel == -1 || CStreaming::HasModelLoaded(carModel)); i--) {
+			for (i = 10; i > 0 && (carModel == -1 || !CStreaming::HasModelLoaded(carModel)); i--) {
 				carModel = ChooseBoatModel(ChooseBoatRating(&zone));
 			}
 			if (i == 0)
