@@ -56,6 +56,11 @@ public:
 
 	friend bool GenericLoad(void);
 	friend bool GenericSave(int file);
+
+#ifdef FIX_BUGS
+	static float GetDefaultTimeStep(void) { return 5.0f / 3.0f; }
+	static float GetTimeStepFix(void) { return GetTimeStep() / GetDefaultTimeStep(); }
+#endif
 };
 
 #ifdef FIX_BUGS

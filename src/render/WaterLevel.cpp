@@ -351,8 +351,13 @@ CWaterLevel::RenderWater()
 	
 	if ( !CTimer::GetIsPaused() )
 	{
+#ifdef FIX_BUGS
+		TEXTURE_ADDU += (CGeneral::GetRandomNumberInRange(-0.0005f, 0.0005f) + windAddUV) * CTimer::GetTimeStepFix();
+		TEXTURE_ADDV += (CGeneral::GetRandomNumberInRange(-0.0005f, 0.0005f) + windAddUV) * CTimer::GetTimeStepFix();
+#else
 		TEXTURE_ADDU += CGeneral::GetRandomNumberInRange(-0.0005f, 0.0005f) + windAddUV;
 		TEXTURE_ADDV += CGeneral::GetRandomNumberInRange(-0.0005f, 0.0005f) + windAddUV;
+#endif
 	}
 	
 	if ( TEXTURE_ADDU >= 1.0f )
