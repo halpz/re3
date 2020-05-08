@@ -25,8 +25,6 @@
 #include "Camera.h"
 #include "DMAudio.h"
 
-const float DefaultFOV = 70.0f;	// beta: 80.0f
-
 bool PrintDebugCode = false;
 int16 DebugCamMode;
 
