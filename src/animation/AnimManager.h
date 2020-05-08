@@ -80,6 +80,7 @@ public:
 	static void Shutdown(void);
 	static void UncompressAnimation(CAnimBlendHierarchy *anim);
 	static void RemoveFromUncompressedCache(CAnimBlendHierarchy *hier);
+	static CAnimBlock *GetAnimationBlock(int32 block) { return &ms_aAnimBlocks[block]; }
 	static CAnimBlock *GetAnimationBlock(const char *name);
 	static int32 GetAnimationBlockIndex(const char *name);
 	static int32 RegisterAnimBlock(const char *name);
