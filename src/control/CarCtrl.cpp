@@ -328,44 +328,6 @@ CCarCtrl::GenerateOneRandomCar()
 	pVehicle->AutoPilot.m_nCurrentRouteNode = curNodeId;
 	pVehicle->AutoPilot.m_nNextRouteNode = nextNodeId;
 	switch (carClass) {
-	case POOR:
-	case RICH:
-	case EXEC:
-	case WORKER:
-	case BIG:
-	case TAXI:
-	// TODO(MIAMI): check this
-	case MOPED:
-	case MOTORBIKE:
-	case LEISUREBOAT:
-	case WORKERBOAT:
-	//
-	case MAFIA:
-	case TRIAD:
-	case DIABLO:
-	case YAKUZA:
-	case YARDIE:
-	case COLOMB:
-	case NINES:
-	case GANG8:
-	case GANG9:
-	{
-		pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(9, 14);
-		if (carClass == EXEC)
-			pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(12, 18);
-		else if (carClass == POOR)
-			pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(7, 10);
-		CVehicleModelInfo* pVehicleInfo = pVehicle->GetModelInfo();
-		if (pVehicleInfo->GetColModel()->boundingBox.max.y - pVehicle->GetModelInfo()->GetColModel()->boundingBox.min.y > 10.0f || carClass == BIG) {
-			pVehicle->AutoPilot.m_nCruiseSpeed *= 3;
-			pVehicle->AutoPilot.m_nCruiseSpeed /= 4;
-		}
-		pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed;
-		pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
-		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
-		pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
-		break;
-	}
 	case COPS:
 		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 		if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel != 0){
@@ -392,6 +354,19 @@ CCarCtrl::GenerateOneRandomCar()
 		pVehicle->AutoPilot.m_nCarMission = CCarAI::FindPoliceBoatMissionForWantedLevel();
 		break;
 	default:
+		pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(9, 14);
+		if (carClass == EXEC)
+			pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(12, 18);
+		else if (carClass == POOR)
+			pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(7, 10);
+		if (pVehicle->GetColModel()->boundingBox.max.y - pVehicle->GetColModel()->boundingBox.min.y > 10.0f || carClass == BIG) {
+			pVehicle->AutoPilot.m_nCruiseSpeed *= 3;
+			pVehicle->AutoPilot.m_nCruiseSpeed /= 4;
+		}
+		pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed;
+		pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
+		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
+		pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
 		break;
 	}
 	if (pVehicle && pVehicle->GetModelIndex() == MI_MRWHOOP)
@@ -526,29 +501,6 @@ CCarCtrl::GenerateOneRandomCar()
 	CVector2D speedDifferenceWithTarget = (CVector2D)pVehicle->GetMoveSpeed() - vecPlayerSpeed;
 	CVector2D distanceToTarget = positionIncludingCurve - vecTargetPos;
 	switch (carClass) {
-	case POOR:
-	case RICH:
-	case EXEC:
-	case WORKER:
-	// TODO(MIAMI): check this
-	case MOPED:
-	case MOTORBIKE:
-	case LEISUREBOAT:
-	case WORKERBOAT:
-	//
-	case BIG:
-	case TAXI:
-	case MAFIA:
-	case TRIAD:
-	case DIABLO:
-	case YAKUZA:
-	case YARDIE:
-	case COLOMB:
-	case NINES:
-	case GANG8:
-	case GANG9:
-		pVehicle->SetStatus(STATUS_SIMPLE);
-		break;
 	case COPS:
 		pVehicle->SetStatus((pVehicle->AutoPilot.m_nCarMission == MISSION_CRUISE) ? STATUS_SIMPLE : STATUS_PHYSICS);
 		pVehicle->ChangeLawEnforcerState(1);
@@ -557,6 +509,7 @@ CCarCtrl::GenerateOneRandomCar()
 		pVehicle->ChangeLawEnforcerState(1);
 		pVehicle->SetStatus(STATUS_PHYSICS);
 	default:
+		pVehicle->SetStatus(STATUS_SIMPLE);
 		break;
 	}
 	CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);
