@@ -653,13 +653,16 @@ CCarCtrl::RemoveFromLoadedVehicleArray(int mi, int32 rating)
 	while (LoadedCarsArray[rating][index] != -1) {
 		if (LoadedCarsArray[rating][index] == mi)
 			break;
+		index++;
 	}
+	assert(LoadedCarsArray[rating][index] == mi);
 	int32 freq = CarFreqArrays[rating][index];
 	if (index > 0)
 		freq -= CarFreqArrays[rating][index - 1];
 	while (LoadedCarsArray[rating][index + 1] != -1) {
 		LoadedCarsArray[rating][index] = LoadedCarsArray[rating][index + 1];
 		CarFreqArrays[rating][index] = CarFreqArrays[rating][index + 1] - freq;
+		index++;
 	}
 	--NumOfLoadedCarsOfRating[rating];
 }

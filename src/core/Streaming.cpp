@@ -1164,9 +1164,9 @@ found:
 		}
 		else{
 			RemoveModel(id);
-			CVehicleModelInfo* pVehicleInfo = (CVehicleModelInfo*)CModelInfo::GetModelInfo(modelId);
+			CVehicleModelInfo* pVehicleInfo = (CVehicleModelInfo*)CModelInfo::GetModelInfo(id);
 			if (pVehicleInfo->m_vehicleClass != -1)
-				CCarCtrl::RemoveFromLoadedVehicleArray(modelId, pVehicleInfo->m_vehicleClass);
+				CCarCtrl::RemoveFromLoadedVehicleArray(id, pVehicleInfo->m_vehicleClass);
 		}
 	}
 
@@ -1305,11 +1305,8 @@ CStreaming::StreamVehiclesAndPeds(void)
 				mostRequestedRating = i;
 			}
 		}
-		debug("selected %d with %d\n", mostRequestedRating, maxReq);
 		model = CCarCtrl::ChooseCarModelToLoad(mostRequestedRating);
-		debug("selected %d\n", model);
 		if(!HasModelLoaded(model)){
-			debug("requested %d\n", model);
 			RequestModel(model, STREAMFLAGS_DEPENDENCY);
 			timeBeforeNextLoad = 350;
 		}
