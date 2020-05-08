@@ -597,8 +597,7 @@ CCarCtrl::ChooseCarRating(CZoneInfo* pZoneInfo)
 int32
 CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 	int32 model = -1;
-	int i;
-	for (i = 0; i < 10 && (model == -1 || !CStreaming::HasModelLoaded(model)); i++) {
+	for (int i = 0; i < 10 && (model == -1 || !CStreaming::HasModelLoaded(model)); i++) {
 		int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
 
 		if (rnd < pZone->copThreshold) {
@@ -607,15 +606,16 @@ CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 			continue;
 		}
 
-		for (i = 0; i < NUM_GANG_CAR_CLASSES; i++) {
+		int j;
+		for (j = 0; j < NUM_GANG_CAR_CLASSES; j++) {
 			if (rnd < pZone->gangThreshold[i]) {
-				*pClass = i + FIRST_GANG_CAR_RATING;
-				model = ChooseGangCarModel(i);
+				*pClass = j + FIRST_GANG_CAR_RATING;
+				model = ChooseGangCarModel(j);
 				break;
 			}
 		}
 
-		if (i != NUM_GANG_CAR_CLASSES)
+		if (j != NUM_GANG_CAR_CLASSES)
 			continue;
 
 		*pClass = ChooseCarRating(pZone);
