@@ -20,6 +20,7 @@
 #include "Ped.h"
 #include "PlayerInfo.h"
 #include "PlayerPed.h"
+#include "Population.h"
 #include "Wanted.h"
 #include "Pools.h"
 #include "Renderer.h"
@@ -69,6 +70,10 @@
 #define MIN_ANGLE_TO_APPLY_HANDBRAKE 0.7f
 #define MIN_SPEED_TO_APPLY_HANDBRAKE 0.3f
 
+#define PROBABILITY_OF_DEAD_PED_ACCIDENT 0.005f
+#define DISTANCE_BETWEEN_CAR_AND_DEAD_PED 6.0f
+#define PROBABILITY_OF_PASSENGER_IN_VEHICLE 0.125f
+
 int CCarCtrl::NumLawEnforcerCars;
 int CCarCtrl::NumAmbulancesOnDuty;
 int CCarCtrl::NumFiretrucksOnDuty;
@@ -83,6 +88,8 @@ int32 CCarCtrl::MaxNumberOfCarsInUse = 12;
 uint32 CCarCtrl::LastTimeLawEnforcerCreated;
 uint32 CCarCtrl::LastTimeFireTruckCreated;
 uint32 CCarCtrl::LastTimeAmbulanceCreated;
+int32 CCarCtrl::MiamiViceCycle;
+uint32 CCarCtrl::LastTimeMiamiViceGenerated;
 int32 CCarCtrl::TotalNumOfCarsOfRating[TOTAL_CUSTOM_CLASSES];
 int32 CCarCtrl::CarArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 int32 CCarCtrl::NumRequestsOfCarRating[TOTAL_CUSTOM_CLASSES];
@@ -292,8 +299,17 @@ CCarCtrl::GenerateOneRandomCar()
 				return;
 			}
 			else {
-				return;
-				// TODO: normal boats
+				int i;
+				carModel = -1;
+				for (i = 10; i > 0 && (carModel == -1 || CStreaming::HasModelLoaded(carModel)); i--) {
+					carModel = ChooseBoatModel(ChooseBoatRating(&zone));
+				}
+				if (i == 0)
+					return;
+			}
+			if (pCurNode->bOnlySmallBoats || pNextNode->bOnlySmallBoats) {
+				if (BoatWithTallMast(carModel))
+					return;
 			}
 		}
 	}
@@ -320,8 +336,8 @@ CCarCtrl::GenerateOneRandomCar()
 	CVehicle* pVehicle;
 	if (CModelInfo::IsBoatModel(carModel))
 		pVehicle = new CBoat(carModel, RANDOM_VEHICLE);
-	//else if (CModelInfo::IsBikeModel(carModel))
-	//	pVehicle = new CBike(carModel, RANDOM_VEHICLE);
+	else if (CModelInfo::IsBikeModel(carModel))
+		return; // TODO(MIAMI): spawn bikes
 	else
 		pVehicle = new CAutomobile(carModel, RANDOM_VEHICLE);
 	pVehicle->AutoPilot.m_nPrevRouteNode = 0;
@@ -344,15 +360,15 @@ CCarCtrl::GenerateOneRandomCar()
 		if (carModel == MI_FBICAR){
 			pVehicle->m_currentColour1 = 0;
 			pVehicle->m_currentColour2 = 0;
-			/* FBI cars are gray in carcols, but we want them black if they going after player. */
 		}
-		// TODO(MIAMI): check the flag
+		pVehicle->bCreatedAsPoliceVehicle = true;
 		break;
 	case COPS_BOAT:
 		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 		pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(4.0f, 16.0f);
 		pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed;
 		pVehicle->AutoPilot.m_nCarMission = CCarAI::FindPoliceBoatMissionForWantedLevel();
+		pVehicle->bCreatedAsPoliceVehicle = true;
 		break;
 	default:
 		pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(9, 14);
@@ -445,6 +461,8 @@ CCarCtrl::GenerateOneRandomCar()
 
 	/* Second fix: adding 0.5f is a mistake. It should be between 0 and 1. It was fixed in SA.*/
 	/* It is also correct in CAutoPilot::ModifySpeed. */
+
+	/* It seems like design decisions in VC were made based on this 0.5f addition. Can't remove it anymore. */
 	pVehicle->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
 		(uint32)((0.5f + positionBetweenNodes) * pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve);
 #else
@@ -520,15 +538,21 @@ CCarCtrl::GenerateOneRandomCar()
 			delete pVehicle;
 			return;
 		}
-	}else if((vecTargetPos - pVehicle->GetPosition()).Magnitude2D() > TheCamera.GenerationDistMultiplier * (pVehicle->bExtendedRange ? 1.5f : 1.0f) * 120.0f ||
-		(vecTargetPos - pVehicle->GetPosition()).Magnitude2D() < TheCamera.GenerationDistMultiplier * 100.0f){
-		delete pVehicle;
-		return;
-	}else if((TheCamera.GetPosition() - pVehicle->GetPosition()).Magnitude2D() < 82.5f * TheCamera.GenerationDistMultiplier || bTopDownCamera ){
-		delete pVehicle;
-		return;
+	}else{
+		if ((vecTargetPos - pVehicle->GetPosition()).Magnitude2D() > TheCamera.GenerationDistMultiplier * (pVehicle->bExtendedRange ? 1.5f : 1.0f) * 120.0f ||
+			(vecTargetPos - pVehicle->GetPosition()).Magnitude2D() < TheCamera.GenerationDistMultiplier * 100.0f) {
+			delete pVehicle;
+			return;
+		}
+		if ((TheCamera.GetPosition() - pVehicle->GetPosition()).Magnitude2D() < 82.5f * TheCamera.GenerationDistMultiplier || bTopDownCamera) {
+			delete pVehicle;
+			return;
+		}
+		if (pVehicle->GetModelIndex() == MI_MARQUIS) { // so marquis can only spawn if player doesn't see it?
+			delete pVehicle;
+			return;
+		}
 	}
-	// TODO(MIAMI): if MARQUIS then delete
 	CVehicleModelInfo* pVehicleModel = pVehicle->GetModelInfo();
 	float radiusToTest = pVehicleModel->GetColModel()->boundingSphere.radius;
 	if (testForCollision){
@@ -552,17 +576,93 @@ CCarCtrl::GenerateOneRandomCar()
 	CWorld::Add(pVehicle);
 	if (carClass == COPS || carClass == COPS_BOAT)
 		CCarAI::AddPoliceCarOccupants(pVehicle);
-	else
-		pVehicle->SetUpDriver(); //TODO(MIAMI): FIX!
-	if ((CGeneral::GetRandomNumber() & 0x3F) == 0){ /* 1/64 probability */ /* TODO(MIAMI): FIX!*/
+	else {
+		pVehicle->SetUpDriver();
+		int32 passengers = 0;
+		for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++)
+			passengers += (CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < PROBABILITY_OF_PASSENGER_IN_VEHICLE) ? 1 : 0;
+		if (CModelInfo::IsCarModel(carModel) && (CModelInfo::GetModelInfo(carModel)->GetAnimFileIndex() == CAnimManager::GetAnimationBlockIndex("van") && passengers >= 1))
+			passengers = 1;
+		for (int i = 0; i < passengers; i++) {
+			CPed* pPassenger = pVehicle->SetupPassenger(i);
+			if (pPassenger) {
+				++CPopulation::ms_nTotalCarPassengerPeds;
+				pPassenger->bCarPassenger = true;
+			}
+		}
+	}
+	int nMadDrivers;
+	switch (pVehicle->GetVehicleAppearance()) {
+	case VEHICLE_BIKE:
+		nMadDrivers = 30;
+		break;
+	case VEHICLE_BOAT:
+		nMadDrivers = 40;
+		break;
+	default:
+		nMadDrivers = 6;
+		break;
+	}
+	if ((CGeneral::GetRandomNumber() & 0x7F) < nMadDrivers /* TODO(MIAMI): || mad drivers cheat */) {
 		pVehicle->SetStatus(STATUS_PHYSICS);
 		pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
 		pVehicle->AutoPilot.m_nCruiseSpeed += 10;
 	}
 	if (carClass == COPS)
 		LastTimeLawEnforcerCreated = CTimer::GetTimeInMilliseconds();
-	/* TODO(MIAMI): CADDY, VICECHEE, dead ped code*/
-	return;
+	if (pVehicle->GetModelIndex() == MI_CADDY) {
+		pVehicle->SetStatus(STATUS_PHYSICS);
+		pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
+	}
+	if (carClass == COPS && pVehicle->GetModelIndex() == MI_VICECHEE) {
+		CVehicleModelInfo* pVehicleModel = (CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_VICECHEE);
+		switch (MiamiViceCycle) {
+		case 0:
+			pVehicleModel->SetVehicleColour(53, 77);
+			break;
+		case 1:
+			pVehicleModel->SetVehicleColour(15, 77);
+			break;
+		case 2:
+			pVehicleModel->SetVehicleColour(41, 77);
+			break;
+		case 3:
+			pVehicleModel->SetVehicleColour(61, 77);
+			break;
+		default:
+			break;
+		}
+	}
+	if (CGeneral::GetRandomNumberInRange(0.0f, 1.0f) >= (1 - PROBABILITY_OF_DEAD_PED_ACCIDENT)) {
+		if (CModelInfo::IsCarModel(pVehicle->GetModelIndex()) && !pVehicle->bIsLawEnforcer) {
+			if (CPopulation::AddDeadPedInFrontOfCar(pVehicle->GetPosition() + pVehicle->GetForward() * DISTANCE_BETWEEN_CAR_AND_DEAD_PED, pVehicle)) {
+				pVehicle->AutoPilot.m_nCruiseSpeed = 0;
+				pVehicle->SetMoveSpeed(0.0f, 0.0f, 0.0f);
+				for (int i = 0; i < pVehicle->m_nNumPassengers; i++) {
+					if (pVehicle->pPassengers[i]) {
+						pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+						pVehicle->pPassengers[i]->m_nLastPedState = PED_WANDER_PATH;
+						pVehicle->pPassengers[i]->m_vehicleInAccident = pVehicle;
+						pVehicle->pPassengers[i]->bDeadPedInFrontOfCar = true;
+						pVehicle->RegisterReference((CEntity**)&pVehicle->pPassengers[i]->m_vehicleInAccident);
+					}
+				}
+				if (pVehicle->pDriver) {
+					pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+					pVehicle->pDriver->m_nLastPedState = PED_WANDER_PATH;
+					pVehicle->pDriver->m_vehicleInAccident = pVehicle;
+					pVehicle->pDriver->bDeadPedInFrontOfCar = true;
+					pVehicle->RegisterReference((CEntity**)&pVehicle->pDriver->m_vehicleInAccident);
+				}
+			}
+		}
+	}
+}
+
+bool
+CCarCtrl::BoatWithTallMast(int32 mi)
+{
+	return mi == MI_RIO || mi == MI_TROPIC || mi == MI_MARQUIS;
 }
 
 int32
@@ -680,6 +780,31 @@ CCarCtrl::ChooseCarModelToLoad(int rating)
 int32
 CCarCtrl::ChoosePoliceCarModel(void)
 {
+	if (FindPlayerPed()->m_pWanted->AreMiamiViceRequired() &&
+		CTimer::GetTimeInMilliseconds() > LastTimeMiamiViceGenerated + 120000 &&
+		CStreaming::HasModelLoaded(MI_VICECHEE)) {
+		// TODO(MIAMI): setup correct models!
+		switch (MiamiViceCycle) {
+		case 0:
+			if (CStreaming::HasModelLoaded(MI_COP) && CStreaming::HasModelLoaded(MI_COP))
+				return MI_VICECHEE;
+			break;
+		case 1:
+			if (CStreaming::HasModelLoaded(MI_COP) && CStreaming::HasModelLoaded(MI_COP))
+				return MI_VICECHEE;
+			break;
+		case 2:
+			if (CStreaming::HasModelLoaded(MI_COP) && CStreaming::HasModelLoaded(MI_COP))
+				return MI_VICECHEE;
+			break;
+		case 3:
+			if (CStreaming::HasModelLoaded(MI_COP) && CStreaming::HasModelLoaded(MI_COP))
+				return MI_VICECHEE;
+			break;
+		default:
+			break;
+		}
+	}
 	if (FindPlayerPed()->m_pWanted->AreSwatRequired() &&
 		CStreaming::HasModelLoaded(MI_ENFORCER) &&
 		CStreaming::HasModelLoaded(MI_POLICE))

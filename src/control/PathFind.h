@@ -69,7 +69,7 @@ struct CPathNode
 	uint8 bUseInRoadBlock : 1;
 
 	uint8 bWaterPath : 1;
-	uint8 flagB2 : 1;	// flag 2 in node info, always zero
+	uint8 bOnlySmallBoats : 1;
 	uint8 flagB4 : 1;	// where is this set?
 	uint8 speedLimit : 2;
 	//uint8 flagB20 : 1;
@@ -145,7 +145,7 @@ struct CPathInfoForObject
 	int8 width;
 
 	uint8 crossing : 1;
-	uint8 flag02 : 1;	// always zero
+	uint8 onlySmallBoats : 1;
 	uint8 roadBlock : 1;
 	uint8 disabled : 1;
 	uint8 waterPath : 1;

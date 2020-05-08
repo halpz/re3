@@ -182,6 +182,7 @@ public:
 	uint8 bIsCarParkVehicle : 1; // Car has been created using the special CAR_PARK script command
 	uint8 bHasAlreadyBeenRecorded : 1; // Used for replays
 
+	uint8 bCreatedAsPoliceVehicle : 1;// True if this guy was created as a police vehicle (enforcer, policecar, miamivice car etc)
 	uint8 bParking : 1;
 
 	int8 m_numPedsUseItAsCover;

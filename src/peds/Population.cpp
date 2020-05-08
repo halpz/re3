@@ -83,6 +83,9 @@ CVector CPopulation::RegenerationPoint_a;
 CVector CPopulation::RegenerationPoint_b;
 CVector CPopulation::RegenerationForward;
 
+uint32 CPopulation::ms_nTotalCarPassengerPeds;
+uint32 CPopulation::NumMiamiViceCops;
+
 void
 CPopulation::Initialise()
 {
@@ -102,6 +105,8 @@ CPopulation::Initialise()
 	ms_nNumGang8 = 0;
 	ms_nNumGang9 = 0;
 	ms_nNumDummy = 0;
+
+	ms_nTotalCarPassengerPeds = 0;
 
 	m_AllRandomPedsThisType = -1;
 	PedDensityMultiplier = 1.0f;
@@ -398,6 +403,7 @@ CPopulation::Update()
 				+ ms_nNumGang2 + ms_nNumGang1;
 			ms_nTotalPeds = ms_nNumDummy + ms_nNumEmergency + ms_nNumCop
 				+ ms_nTotalGangPeds + ms_nNumCivFemale + ms_nNumCivMale;
+			ms_nTotalPeds -= ms_nTotalCarPassengerPeds;
 			if (!CCutsceneMgr::IsRunning()) {
 				float pcdm = PedCreationDistMultiplier();
 				AddToPopulation(pcdm * (MIN_CREATION_DIST * TheCamera.GenerationDistMultiplier),
@@ -419,6 +425,7 @@ CPopulation::GeneratePedsAtStartOfGame()
 			+ ms_nNumGang3 + ms_nNumGang2 + ms_nNumGang1;
 		ms_nTotalPeds = ms_nNumDummy + ms_nNumEmergency + ms_nNumCop
 			+ ms_nTotalGangPeds + ms_nNumCivFemale + ms_nNumCivMale;
+		ms_nTotalPeds -= ms_nTotalCarPassengerPeds;
 
 		// Min dist is 10.0f only for start of the game (naturally)
 		AddToPopulation(10.0f, PedCreationDistMultiplier() * (MIN_CREATION_DIST + CREATION_RANGE),
@@ -656,7 +663,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 					generatedCoors.y = yOffset + gangLeader->GetPosition().y;
 				}
 			}
-			if (!CPedPlacement::IsPositionClearForPed(&generatedCoors))
+			if (!CPedPlacement::IsPositionClearForPed(generatedCoors))
 				break;
 
 			// Why no love for last gang member?!
@@ -733,6 +740,7 @@ CPopulation::AddPedInCar(CVehicle* car)
 			break;
 		case MI_POLICE:
 		case MI_PREDATOR:
+		case MI_VICECHEE: // TODO(MIAMI): proper model
 			preferredModel = COP_STREET;
 			pedType = PEDTYPE_COP;
 			break;
@@ -1016,6 +1024,10 @@ CPopulation::ManagePopulation(void)
 			}
 
 			float dist = (ped->GetPosition() - playerPos).Magnitude2D();
+
+			if (ped->IsGangMember() || (ped->bDeadPedInFrontOfCar && ped->m_vehicleInAccident))
+				dist -= 30.0f;
+
 			bool pedIsFarAway = false;
 			if (PedCreationDistMultiplier() * (PED_REMOVE_DIST_SPECIAL * TheCamera.GenerationDistMultiplier) < dist
 				|| (!ped->bCullExtraFarAway && PedCreationDistMultiplier() * PED_REMOVE_DIST * TheCamera.GenerationDistMultiplier < dist)
@@ -1061,4 +1073,50 @@ CPopulation::ManagePopulation(void)
 				RemovePed(ped);
 		}
 	}
+}
+
+CPed* 
+CPopulation::AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit)
+{
+	if (TheCamera.IsSphereVisible(pos, 2.0f)) {
+		float fDistanceToPlayer = (pos - FindPlayerPed()->GetPosition()).Magnitude2D();
+		float fDistanceMultiplier;
+		if (FindPlayerVehicle())
+			fDistanceMultiplier = clamp(FindPlayerVehicle()->GetMoveSpeed().Magnitude2D() - 0.1f + 1.0f, 1.0f, 1.5f);
+		else
+			fDistanceMultiplier = 1.0f;
+		if (40.0f * fDistanceMultiplier > fDistanceToPlayer)
+			return nil;
+	}
+	bool found;
+	float z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &found) + 1.0f;
+	if (!found)
+		return nil;
+	z = Max(z, pos.z);
+	if (!CModelInfo::GetModelInfo(MI_MALE01)->GetRwObject()) // strange way to check it
+		return nil;
+	CPed* pPed = CPopulation::AddPed(PEDTYPE_CIVMALE, MI_MALE01, pos); // TODO(MIAMI): 4th parameter
+	pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+	//TODO(MIAMI): set money == 0
+	pPed->bDeadPedInFrontOfCar = true;
+	pPed->m_vehicleInAccident = pCulprit;
+	pCulprit->RegisterReference((CEntity**)&pPed->m_vehicleInAccident);
+	CEntity* pEntities[3] = { 0 };
+	if (!CPedPlacement::IsPositionClearForPed(pos, 2.0f, 3, pEntities)) {
+		for (int i = 0; i < 3; i++) {
+			if (pEntities[i] && pEntities[i] != pCulprit && pEntities[i] != pPed) {
+				CWorld::Remove(pPed);
+				delete pPed;
+				return nil;
+			}
+		}
+	}
+	CColPoint colpts[32];
+	if (CCollision::ProcessColModels(pCulprit->GetMatrix(), *pCulprit->GetColModel(), pPed->GetMatrix(), *pPed->GetColModel(), colpts, nil, nil)) {
+		CWorld::Remove(pPed);
+		delete pPed;
+		return nil;
+	}
+	CVisibilityPlugins::SetClumpAlpha(pPed->GetClump(), 0);
+	return pPed;
 }

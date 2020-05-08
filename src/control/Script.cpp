@@ -3089,7 +3089,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	case COMMAND_SET_ZONE_CAR_INFO:
 	{
 		char label[12];
-		int16 gangDensities[NUM_GANGS];
+		int16 gangDensities[NUM_GANGS] = { 0 };
 		int i;
 
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
@@ -9849,8 +9849,8 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_SET_ZONE_CIVILIAN_CAR_INFO:
 	{
 		char label[12];
-		int16 carDensities[CCarCtrl::NUM_CAR_CLASSES];
-		int16 boatDensities[CCarCtrl::NUM_BOAT_CLASSES];
+		int16 carDensities[CCarCtrl::NUM_CAR_CLASSES] = { 0 };
+		int16 boatDensities[CCarCtrl::NUM_BOAT_CLASSES] = { 0 };
 		int i;
 
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);

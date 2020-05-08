@@ -389,6 +389,10 @@ public:
 	uint32 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 
+	uint32 bCarPassenger : 1;
+	uint32 bMiamiViceCop : 1;  //
+	uint32 bDeadPedInFrontOfCar : 1;
+
 	uint8 CharCreatedBy;
 	eObjective m_objective;
 	eObjective m_prevObjective;
@@ -452,6 +456,9 @@ public:
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
 	float m_distanceToCountSeekDone;
+
+	CVehicle* m_vehicleInAccident;
+
 	bool bRunningToPhone;
 	int16 m_phoneId;
 	eCrimeType m_crimeToReportOnPhone;

@@ -62,6 +62,9 @@ public:
 	static CVector RegenerationPoint_b;
 	static CVector RegenerationForward;
 
+	static uint32 ms_nTotalCarPassengerPeds;
+	static uint32 NumMiamiViceCops;
+
 	static void Initialise();
 	static void Update(void);
 	static void LoadPedGroups();
@@ -86,4 +89,6 @@ public:
 	static void ConvertAllObjectsToDummyObjects(void);
 	static bool TestRoomForDummyObject(CObject*);
 	static bool TestSafeForRealObject(CDummyObject*);
+
+	static CPed* AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit);
 };

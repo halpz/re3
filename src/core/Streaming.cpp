@@ -1292,6 +1292,15 @@ CStreaming::StreamVehiclesAndPeds(void)
 	else
 		SetModelIsDeletable(MI_CHOPPER);
 
+	if (FindPlayerPed()->m_pWanted->AreMiamiViceRequired()) {
+		//TODO(MIAMI): miami vice peds
+		RequestModel(MI_VICECHEE, STREAMFLAGS_DONT_REMOVE);
+	}
+	else {
+		SetModelIsDeletable(MI_VICECHEE);
+		//TODO(MIAMI): miami vice peds
+	}
+
 	if(timeBeforeNextLoad >= 0)
 		timeBeforeNextLoad--;
 	else if(ms_numVehiclesLoaded <= desiredNumVehiclesLoaded){

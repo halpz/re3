@@ -31,6 +31,7 @@ public:
 
 public:
 	void Initialise();
+	bool AreMiamiViceRequired();
 	bool AreSwatRequired();
 	bool AreFbiRequired();
 	bool AreArmyRequired();

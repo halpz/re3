@@ -402,6 +402,10 @@ CPed::~CPed(void)
 	}
 	if (m_pFire)
 		m_pFire->Extinguish();
+	if (bCarPassenger)
+		CPopulation::ms_nTotalCarPassengerPeds--;
+	if (bMiamiViceCop)
+		CPopulation::NumMiamiViceCops--;
 	CPopulation::UpdatePedCount((ePedType)m_nPedType, true);
 	DMAudio.DestroyEntity(m_audioEntityId);
 }
@@ -604,6 +608,10 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 #ifdef VC_PED_PORTS
 	bSomeVCflag1 = false;
 #endif
+
+	bCarPassenger = false;
+	bMiamiViceCop = false;
+	bDeadPedInFrontOfCar = false;
 
 	if ((CGeneral::GetRandomNumber() & 3) == 0)
 		bHasACamera = true;
