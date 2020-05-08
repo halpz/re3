@@ -606,13 +606,17 @@ CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 			continue;
 		}
 
-		for (int i = 0; i < NUM_GANG_CAR_CLASSES; i++) {
+		int j;
+		for (j = 0; j < NUM_GANG_CAR_CLASSES; j++) {
 			if (rnd < pZone->gangThreshold[i]) {
-				*pClass = i + FIRST_GANG_CAR_RATING;
-				model = ChooseGangCarModel(i);
-				continue;
+				*pClass = j + FIRST_GANG_CAR_RATING;
+				model = ChooseGangCarModel(j);
+				break;
 			}
 		}
+
+		if (j != NUM_GANG_CAR_CLASSES)
+			continue;
 
 		*pClass = ChooseCarRating(pZone);
 		model = ChooseCarModel(*pClass);

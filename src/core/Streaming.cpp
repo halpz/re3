@@ -1342,10 +1342,11 @@ CStreaming::StreamZoneModels(const CVector &pos)
 		for(i = 0; i < NUMMODELSPERPEDGROUP; i++){
 			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
 				break;
-			RequestModel(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i], STREAMFLAGS_DONT_REMOVE);
+			RequestModel(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i], STREAMFLAGS_DEPENDENCY);
 		}
 	}
 	RequestModel(MI_MALE01, STREAMFLAGS_DONT_REMOVE);
+	//RequestModel(MI_HMOCA, STREAMFLAGS_DONT_REMOVE);
 
 	gangsToLoad = 0;
 	gangCarsToLoad = 0;
@@ -1369,8 +1370,8 @@ CStreaming::StreamZoneModels(const CVector &pos)
 		bit = 1<<i;
 
 		if(gangsToLoad & bit && (ms_loadedGangs & bit) == 0){
-			RequestModel(MI_GANG01 + i*2, STREAMFLAGS_DONT_REMOVE);
-			RequestModel(MI_GANG01 + i*2 + 1, STREAMFLAGS_DONT_REMOVE);
+			RequestModel(MI_GANG01 + i*2, STREAMFLAGS_DEPENDENCY);
+			RequestModel(MI_GANG01 + i*2 + 1, STREAMFLAGS_DEPENDENCY);
 			ms_loadedGangs |= bit;
 		}else if((gangsToLoad & bit) == 0 && ms_loadedGangs & bit){
 			SetModelIsDeletable(MI_GANG01 + i*2);
@@ -1380,12 +1381,12 @@ CStreaming::StreamZoneModels(const CVector &pos)
 			ms_loadedGangs &= ~bit;
 		}
 
-// TODO(MIAMI): check this
-if(CGangs::GetGangInfo(i)->m_nVehicleMI < 0)
-	continue;
+		// TODO(MIAMI): check this
+		if(CGangs::GetGangInfo(i)->m_nVehicleMI < 0)
+			continue;
 
-		if(gangCarsToLoad & bit && (ms_loadedGangCars & bit) == 0){
-			RequestModel(CGangs::GetGangInfo(i)->m_nVehicleMI, STREAMFLAGS_DONT_REMOVE);
+		if((gangCarsToLoad & bit) && (ms_loadedGangCars & bit) == 0){
+			RequestModel(CGangs::GetGangInfo(i)->m_nVehicleMI, STREAMFLAGS_DEPENDENCY);
 		}else if((gangCarsToLoad & bit) == 0 && ms_loadedGangCars & bit){
 			SetModelIsDeletable(CGangs::GetGangInfo(i)->m_nVehicleMI);
 			SetModelTxdIsDeletable(CGangs::GetGangInfo(i)->m_nVehicleMI);
