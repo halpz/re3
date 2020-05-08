@@ -187,6 +187,7 @@ public:
 
 #if (defined(_MSC_VER))
 extern int strcasecmp(const char *str1, const char *str2);
+extern int strncasecmp(const char *str1, const char *str2, size_t len);
 #endif
 
 #define clamp(v, low, high) ((v)<(low) ? (low) : (v)>(high) ? (high) : (v))

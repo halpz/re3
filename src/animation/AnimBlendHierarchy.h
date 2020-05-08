@@ -11,7 +11,8 @@ public:
 	char name[24];
 	CAnimBlendSequence *sequences;
 	int16 numSequences;
-	int16 compressed;	// not really used
+	bool compressed;	// not really used
+	bool compressed2;	// not really used
 	float totalLength;
 	CLink<CAnimBlendHierarchy*> *linkPtr;
 
@@ -19,6 +20,7 @@ public:
 	void Shutdown(void);
 	void SetName(char *name);
 	void CalcTotalTime(void);
+	void CalcTotalTimeCompressed(void);
 	void RemoveQuaternionFlips(void);
 	void RemoveAnimSequences(void);
 	void Uncompress(void);

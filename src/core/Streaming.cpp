@@ -358,7 +358,7 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 
 		*dot = '\0';
 
-		if(!CGeneral::faststricmp(dot+1, "DFF")){
+		if(strncasecmp(dot+1, "DFF", 3) == 0){
 			if(CModelInfo::GetModelInfo(direntry.name, &modelId)){
 				bAddToStreaming = true;
 			}else{
@@ -370,13 +370,13 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 #endif
 				lastID = -1;
 			}
-		}else if(!CGeneral::faststricmp(dot+1, "TXD")){
+		}else if(strncasecmp(dot+1, "TXD", 3) == 0){
 			modelId = CTxdStore::FindTxdSlot(direntry.name);
 			if(modelId == -1)
 				modelId = CTxdStore::AddTxdSlot(direntry.name);
 			modelId += STREAM_OFFSET_TXD;
 			bAddToStreaming = true;
-		}else if(!CGeneral::faststricmp(dot+1, "COL")){
+		}else if(strncasecmp(dot+1, "COL", 3) == 0){
 			modelId = CColStore::FindColSlot(direntry.name);
 			if(modelId == -1)
 				modelId = CColStore::AddColSlot(direntry.name);
@@ -413,7 +413,7 @@ GetObjectName(int streamId)
 		sprintf(objname, "%s.dff", CModelInfo::GetModelInfo(streamId)->GetName());
 	else if(streamId >= STREAM_OFFSET_TXD && streamId < STREAM_OFFSET_COL)
 		sprintf(objname, "%s.txd", CTxdStore::GetTxdName(streamId-STREAM_OFFSET_TXD));
-	else if(streamId >= STREAM_OFFSET_COL && streamId < NUMSTREAMINFO)
+	else if(streamId >= STREAM_OFFSET_COL && streamId < STREAM_OFFSET_ANIM)
 		sprintf(objname, "%s.col", CColStore::GetColName(streamId-STREAM_OFFSET_COL));
 	// TODO(MIAMI): IFP
 	return objname;
@@ -506,7 +506,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			RwStreamClose(stream, &mem);
 			return false;
 		}
-	}else if(streamId >= STREAM_OFFSET_COL && streamId < NUMSTREAMINFO){
+	}else if(streamId >= STREAM_OFFSET_COL && streamId < STREAM_OFFSET_ANIM){
 		if(!CColStore::LoadCol(streamId-STREAM_OFFSET_COL, mem.start, mem.length)){
 			debug("Failed to load %s.col\n", CColStore::GetColName(streamId - STREAM_OFFSET_COL));
 			RemoveModel(streamId);
@@ -514,6 +514,8 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			RwStreamClose(stream, &mem);
 			return false;
 		}
+	}else if(streamId >= STREAM_OFFSET_ANIM){
+		assert(streamId < NUMSTREAMINFO);
 		// TODO(MIAMI): IFP
 	}
 
@@ -829,7 +831,7 @@ CStreaming::RemoveModel(int32 id)
 			CModelInfo::GetModelInfo(id)->DeleteRwObject();
 		else if(id >= STREAM_OFFSET_TXD && id < STREAM_OFFSET_COL)
 			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
-		else if(id >= STREAM_OFFSET_COL && id < NUMSTREAMINFO)
+		else if(id >= STREAM_OFFSET_COL && id < STREAM_OFFSET_ANIM)
 			CColStore::RemoveCol(id - STREAM_OFFSET_COL);
 		// TODO(MIAMI): IFP
 		ms_memoryUsed -= ms_aInfoForModel[id].GetCdSize()*CDSTREAM_SECTOR_SIZE;
@@ -854,7 +856,7 @@ CStreaming::RemoveModel(int32 id)
 			RpClumpGtaCancelStream();
 		else if(id >= STREAM_OFFSET_TXD && id < STREAM_OFFSET_COL)
 			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
-		else if(id >= STREAM_OFFSET_COL && id < NUMSTREAMINFO)
+		else if(id >= STREAM_OFFSET_COL && id < STREAM_OFFSET_ANIM)
 			CColStore::RemoveCol(id - STREAM_OFFSET_COL);
 		// TODO(MIAMI): IFP
 	}

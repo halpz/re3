@@ -23,5 +23,6 @@ public:
 			prev->next = next;
 		if(next)
 			next->prev = prev;
+		Init();
 	}
 };

@@ -35,9 +35,6 @@ class CAnimBlendClumpData
 public:
 	CAnimBlendLink link;
 	int32 numFrames;
-#ifdef PED_SKIN
-	int32 modelNumber;	// doesn't seem to be used
-#endif
 	CVector *velocity;
 	// order of frames is determined by RW hierarchy
 	AnimBlendFrameData *frames;
@@ -50,6 +47,3 @@ public:
 #endif
 	void ForAllFrames(void (*cb)(AnimBlendFrameData*, void*), void *arg);
 };
-#ifndef PED_SKIN
-static_assert(sizeof(CAnimBlendClumpData) == 0x14, "CAnimBlendClumpData: error");
-#endif

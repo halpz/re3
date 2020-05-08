@@ -3,7 +3,7 @@
 #include "templates.h"
 
 struct ColDef {	// made up name
-	int32 a;
+	int32 unused;
 	bool isLoaded;
 	CRect bounds;
 	char name[20];

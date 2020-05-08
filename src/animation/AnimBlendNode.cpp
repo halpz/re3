@@ -3,11 +3,13 @@
 #include "AnimBlendAssociation.h"
 #include "AnimBlendNode.h"
 
+//--MIAMI: file done
+
 void 
 CAnimBlendNode::Init(void)
 {
-	frameA = 0;
-	frameB = 0;
+	frameA = -1;
+	frameB = -1;
 	remainingTime = 0.0f;
 	sequence = nil;
 	association = nil;
@@ -92,7 +94,9 @@ CAnimBlendNode::FindKeyFrame(float t)
 	frameA = 0;
 	frameB = frameA;
 
-	if(sequence->numFrames >= 2){
+	if(sequence->numFrames == 1){
+		remainingTime = 0.0f;
+	}else{
 		frameA++;
 
 		// advance until t is between frameB and frameA
@@ -101,8 +105,11 @@ CAnimBlendNode::FindKeyFrame(float t)
 			frameB = frameA++;
 			if(frameA >= sequence->numFrames){
 				// reached end of animation
-				if(!association->IsRepeating())
+				if(!association->IsRepeating()){
+					CalcDeltas();
+					remainingTime = 0.0f;
 					return false;
+				}
 				frameA = 0;
 				frameB = 0;
 			}
@@ -112,6 +119,25 @@ CAnimBlendNode::FindKeyFrame(float t)
 	}
 
 	CalcDeltas();
+	return true;
+}
+
+bool
+CAnimBlendNode::SetupKeyFrameCompressed(void)
+{
+	if(sequence->numFrames < 1)
+		return false;
+
+	frameA = 1;
+	frameB = 0;
+
+	if(sequence->numFrames == 1){
+		frameA = 0;
+		remainingTime = 0.0f;
+	}else
+		remainingTime = sequence->GetKeyFrameCompressed(frameA)->deltaTime/60.0f;
+
+	CalcDeltasCompressed();
 	return true;
 }
 
@@ -130,6 +156,20 @@ CAnimBlendNode::CalcDeltas(void)
 }
 
 void
+CAnimBlendNode::CalcDeltasCompressed(void)
+{
+	if((sequence->type & CAnimBlendSequence::KF_ROT) == 0)
+		return;
+	KeyFrame *kfA = sequence->GetKeyFrameCompressed(frameA);
+	KeyFrame *kfB = sequence->GetKeyFrameCompressed(frameB);
+	float cos = DotProduct(kfA->rotation, kfB->rotation);
+	if(cos > 1.0f)
+		cos = 1.0f;
+	theta = Acos(cos);
+	invSin = theta == 0.0f ?  0.0f : 1.0f/Sin(theta);
+}
+
+void
 CAnimBlendNode::GetCurrentTranslation(CVector &trans, float weight)
 {
 	trans = CVector(0.0f, 0.0f, 0.0f);
@@ -138,7 +178,7 @@ CAnimBlendNode::GetCurrentTranslation(CVector &trans, float weight)
 	if(blend > 0.0f){
 		KeyFrameTrans *kfA = (KeyFrameTrans*)sequence->GetKeyFrame(frameA);
 		KeyFrameTrans *kfB = (KeyFrameTrans*)sequence->GetKeyFrame(frameB);
-		float t = (kfA->deltaTime - remainingTime)/kfA->deltaTime;
+		float t = kfA->deltaTime == 0.0f ? 0.0f : (kfA->deltaTime - remainingTime)/kfA->deltaTime;
 		if(sequence->type & CAnimBlendSequence::KF_TRANS){
 			trans = kfB->translation + t*(kfA->translation - kfB->translation);
 			trans *= blend;

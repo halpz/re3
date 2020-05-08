@@ -1529,7 +1529,6 @@ CCamera::UpdateTargetEntity(void)
 			pTargetEntity = FindPlayerVehicle();
 		else{
 			pTargetEntity = FindPlayerPed();
-#ifndef GTA_PS2_STUFF
 			// this keeps the camera on the player while entering cars
 			if(PLAYER->GetPedState() == PED_ENTER_CAR ||
 			   PLAYER->GetPedState() == PED_CARJACK ||
@@ -1539,7 +1538,6 @@ CCamera::UpdateTargetEntity(void)
 			if(!enteringCar)
 				if(Cams[ActiveCam].CamTargetEntity != pTargetEntity)
 					Cams[ActiveCam].CamTargetEntity = pTargetEntity;
-#endif
 		}
 
 		bool cantOpen = true;
@@ -1558,16 +1556,9 @@ CCamera::UpdateTargetEntity(void)
 
 		if((PLAYER->GetPedState() == PED_CARJACK || PLAYER->GetPedState() == PED_OPEN_DOOR) && !cantOpen){
 			if(!enteringCar && CarZoomIndicator != CAM_ZOOM_1STPRS)
-#ifdef GTA_PS2_STUFF
-// dunno if this has any amazing effects
-			{
-#endif
 				pTargetEntity = PLAYER->m_pMyVehicle;
 			if(PLAYER->m_pMyVehicle == nil)
 				pTargetEntity = PLAYER;
-#ifdef GTA_PS2_STUFF
-			}
-#endif
 		}
 
 		if(PLAYER->GetPedState() == PED_EXIT_CAR)

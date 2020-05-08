@@ -33,12 +33,17 @@ public:
 	CAnimBlendSequence(void);
 	virtual ~CAnimBlendSequence(void);
 	void SetName(char *name);
-	void SetNumFrames(int numFrames, bool translation);
+	void SetNumFrames(int numFrames, bool translation, bool compressed);
 	void RemoveQuaternionFlips(void);
 	KeyFrame *GetKeyFrame(int n) {
 		return type & KF_TRANS ?
 			&((KeyFrameTrans*)keyFrames)[n] :
 			&((KeyFrame*)keyFrames)[n];
+	}
+	KeyFrame *GetKeyFrameCompressed(int n) {
+		return type & KF_TRANS ?
+			&((KeyFrameTrans*)keyFramesCompressed)[n] :
+			&((KeyFrame*)keyFramesCompressed)[n];
 	}
 	bool HasTranslation(void) { return !!(type & KF_TRANS); }
 	// TODO? these are unused
