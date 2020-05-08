@@ -6,8 +6,8 @@
 void 
 CAnimBlendNode::Init(void)
 {
-	frameA = 0;
-	frameB = 0;
+	frameA = -1;
+	frameB = -1;
 	remainingTime = 0.0f;
 	sequence = nil;
 	association = nil;

@@ -1493,11 +1493,13 @@ CStreaming::GetCdImageOffset(int32 lastPosn)
 }
 
 inline bool
-TxdAvailable(int32 txdId)
+ModelNotLoaded(int32 modelId)
 {
-	CStreamingInfo *si = &CStreaming::ms_aInfoForModel[txdId + STREAM_OFFSET_TXD];
-	return si->m_loadState == STREAMSTATE_LOADED || si->m_loadState == STREAMSTATE_READING;
+	CStreamingInfo *si = &CStreaming::ms_aInfoForModel[modelId];
+	return si->m_loadState != STREAMSTATE_LOADED && si->m_loadState != STREAMSTATE_READING;
 }
+
+inline bool TxdNotLoaded(int32 txdId) { return ModelNotLoaded(txdId + STREAM_OFFSET_TXD); }
 
 // Find stream id of next requested file in cdimage
 int32
@@ -1523,10 +1525,15 @@ CStreaming::GetNextFileOnCd(int32 lastPosn, bool priority)
 			continue;
 
 		// request Txd if necessary
-		if(streamId < STREAM_OFFSET_TXD &&
-		   !TxdAvailable(CModelInfo::GetModelInfo(streamId)->GetTxdSlot())){
-			ReRequestTxd(CModelInfo::GetModelInfo(streamId)->GetTxdSlot());
-		}else if(ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size)){
+		if(streamId < STREAM_OFFSET_TXD){
+			int txdId = CModelInfo::GetModelInfo(streamId)->GetTxdSlot();
+			if(TxdNotLoaded(txdId)){
+				ReRequestTxd(txdId);
+				continue;
+			}
+		}
+
+		if(ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size)){
 			if(posn < posnFirst){
 				// find first requested file in image
 				streamIdFirst = streamId;
@@ -1624,7 +1631,7 @@ CStreaming::RequestModelStream(int32 ch)
 		if(streamId < STREAM_OFFSET_TXD){
 			if (havePed && CModelInfo::GetModelInfo(streamId)->GetModelType() == MITYPE_PED ||
 			    haveBigFile && CModelInfo::GetModelInfo(streamId)->GetModelType() == MITYPE_VEHICLE ||
-			   !TxdAvailable(CModelInfo::GetModelInfo(streamId)->GetTxdSlot()))
+			    TxdNotLoaded(CModelInfo::GetModelInfo(streamId)->GetTxdSlot()))
 				break;
 		}else{
 			if(haveBigFile && size > 200)

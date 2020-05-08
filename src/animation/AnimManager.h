@@ -64,8 +64,8 @@ struct AnimAssocDefinition
 class CAnimManager
 {
 	static const AnimAssocDefinition ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_GROUPS];
-	static CAnimBlock ms_aAnimBlocks[2];
-	static CAnimBlendHierarchy ms_aAnimations[250];
+	static CAnimBlock ms_aAnimBlocks[NUMANIMBLOCKS];
+	static CAnimBlendHierarchy ms_aAnimations[NUMANIMATIONS];
 	static int32 ms_numAnimBlocks;
 	static int32 ms_numAnimations;
 	static CAnimBlendAssocGroup *ms_aAnimAssocGroups;

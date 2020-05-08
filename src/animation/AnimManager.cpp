@@ -11,8 +11,8 @@
 #include "AnimBlendAssocGroup.h"
 #include "AnimManager.h"
 
-CAnimBlock CAnimManager::ms_aAnimBlocks[2];
-CAnimBlendHierarchy CAnimManager::ms_aAnimations[250];
+CAnimBlock CAnimManager::ms_aAnimBlocks[NUMANIMBLOCKS];
+CAnimBlendHierarchy CAnimManager::ms_aAnimations[NUMANIMATIONS];
 int32 CAnimManager::ms_numAnimBlocks;
 int32 CAnimManager::ms_numAnimations;
 CAnimBlendAssocGroup *CAnimManager::ms_aAnimAssocGroups;
@@ -750,8 +750,8 @@ CAnimManager::LoadAnimFiles(void)
 		CBaseModelInfo *mi = CModelInfo::GetModelInfo(ms_aAnimAssocDefinitions[i].modelIndex);
 		RpClump *clump = (RpClump*)mi->CreateInstance();
 		RpAnimBlendClumpInit(clump);
-		CAnimBlendAssocGroup *group = &CAnimManager::ms_aAnimAssocGroups[i];
-		const AnimAssocDefinition *def = &CAnimManager::ms_aAnimAssocDefinitions[i];
+		CAnimBlendAssocGroup *group = &ms_aAnimAssocGroups[i];
+		const AnimAssocDefinition *def = &ms_aAnimAssocDefinitions[i];
 		group->CreateAssociations(def->blockName, clump, def->animNames, def->numAnims);
 		for(j = 0; j < group->numAssociations; j++)
 			group->GetAnimation(j)->flags |= def->animDescs[j].flags;
