@@ -3095,14 +3095,21 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 12);
+		for (i = 0; i < NUM_GANGS; i++)
+			gangDensities[i] = ScriptParams[i + 2];
 		int zone = CTheZones::FindZoneByLabelAndReturnIndex(label, ZONE_INFO);
+		for (int i = 0; i < NUM_GANGS; i++) {
+			if (gangDensities[i] != 0 && CGangs::GetGangInfo(i)->m_nVehicleMI == -1)
+				debug("SET_ZONE_CAR_INFO - Gang %d car ratio should be 0 in %s zone\n", i + 1, label);
+		}
 		if (zone < 0) {
 			debug("Couldn't find zone - %s\n", label);
 			return 0;
 		}
-		for(i = 0; i < NUM_GANGS; i++)
-			gangDensities[i] = ScriptParams[2+i];
-		CTheZones::SetZoneCarInfo(zone, ScriptParams[0], ScriptParams[1], ScriptParams[11], gangDensities);
+		while (zone >= 0) {
+			CTheZones::SetZoneCarInfo(zone, ScriptParams[0], ScriptParams[1], ScriptParams[11], gangDensities);
+			zone = CTheZones::FindNextZoneByLabelAndReturnIndex(label, ZONE_INFO);
+		}
 		return 0;
 	}
 	/* Not implemented.
@@ -3166,8 +3173,11 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 			debug("Couldn't find zone - %s\n", label);
 			return 0;
 		}
-		CTheZones::SetZonePedInfo(zone, ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3],
-			ScriptParams[4], ScriptParams[5], ScriptParams[6], ScriptParams[7], ScriptParams[8], ScriptParams[9], ScriptParams[10], ScriptParams[11]);
+		while (zone >= 0) {
+			CTheZones::SetZonePedInfo(zone, ScriptParams[0], ScriptParams[1], ScriptParams[2], ScriptParams[3],
+				ScriptParams[4], ScriptParams[5], ScriptParams[6], ScriptParams[7], ScriptParams[8], ScriptParams[9], ScriptParams[10], ScriptParams[11]);
+			zone = CTheZones::FindNextZoneByLabelAndReturnIndex(label, ZONE_INFO);
+		}
 		return 0;
 	}
 	case COMMAND_SET_TIME_SCALE:
@@ -9835,7 +9845,32 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_IS_OBJECT_IN_AREA_2D:
 	case COMMAND_IS_OBJECT_IN_AREA_3D:
 	case COMMAND_TASK_TOGGLE_DUCK:
+		assert(0);
 	case COMMAND_SET_ZONE_CIVILIAN_CAR_INFO:
+	{
+		char label[12];
+		int16 carDensities[CCarCtrl::NUM_CAR_CLASSES];
+		int16 boatDensities[CCarCtrl::NUM_BOAT_CLASSES];
+		int i;
+
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		CollectParameters(&m_nIp, 12);
+		for (i = 0; i < CCarCtrl::NUM_CAR_CLASSES; i++)
+			carDensities[i] = ScriptParams[i + 1];
+		for (i = 0; i < CCarCtrl::NUM_BOAT_CLASSES; i++)
+			boatDensities[i] = ScriptParams[i + 1 + CCarCtrl::NUM_CAR_CLASSES];
+		int zone = CTheZones::FindZoneByLabelAndReturnIndex(label, ZONE_INFO);
+		if (zone < 0) {
+			debug("Couldn't find zone - %s\n", label);
+			return 0;
+		}
+		while (zone >= 0) {
+			CTheZones::SetZoneCivilianCarInfo(zone, ScriptParams[0], carDensities, boatDensities);
+			zone = CTheZones::FindNextZoneByLabelAndReturnIndex(label, ZONE_INFO);
+		}
+		return 0;
+	}
 	case COMMAND_REQUEST_ANIMATION:
 	case COMMAND_HAS_ANIMATION_LOADED:
 	case COMMAND_REMOVE_ANIMATION:

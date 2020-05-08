@@ -1299,14 +1299,17 @@ CStreaming::StreamVehiclesAndPeds(void)
 		int32 mostRequestedRating = 0;
 		for(i = 0; i < CCarCtrl::TOTAL_CUSTOM_CLASSES; i++){
 			if(CCarCtrl::NumRequestsOfCarRating[i] > maxReq &&
-				(i == 0 && zone.carThreshold[0] != 0) ||
-				(i != 0 && zone.carThreshold[i] != zone.carThreshold[i-1])) {
+				((i == 0 && zone.carThreshold[0] != 0) ||
+				(i != 0 && zone.carThreshold[i] != zone.carThreshold[i-1]))) {
 				maxReq = CCarCtrl::NumRequestsOfCarRating[i];
 				mostRequestedRating = i;
 			}
 		}
+		debug("selected %d with %d\n", mostRequestedRating, maxReq);
 		model = CCarCtrl::ChooseCarModelToLoad(mostRequestedRating);
+		debug("selected %d\n", model);
 		if(!HasModelLoaded(model)){
+			debug("requested %d\n", model);
 			RequestModel(model, STREAMFLAGS_DEPENDENCY);
 			timeBeforeNextLoad = 350;
 		}
