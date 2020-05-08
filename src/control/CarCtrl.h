@@ -69,7 +69,7 @@ public:
 	static void ScanForPedDanger(CVehicle *veh);
 	static void RemoveFromInterestingVehicleList(CVehicle*);
 	static void GenerateRandomCars(void);
-	static void GenerateOneRandomCar(void);
+	static int GenerateOneRandomCar(void);
 	static void GenerateEmergencyServicesCar(void);
 	static int32 ChooseModel(CZoneInfo*, CVector*, int*);
 	static int32 ChoosePoliceCarModel(void);
@@ -122,6 +122,9 @@ public:
 	static int32 ChooseBoatModel(int32);
 	static int32 ChooseBoatRating(CZoneInfo* pZoneInfo);
 	static int32 ChooseCarRating(CZoneInfo* pZoneInfo);
+	static void AddToLoadedVehicleArray(int32 mi, int32 rating, int32 freq);
+	static void RemoveFromLoadedVehicleArray(int32 mi, int32 rating);
+	static int32 ChooseCarModelToLoad(int rating);
 
 	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle)
 	{
@@ -153,10 +156,12 @@ public:
 	static uint32 LastTimeFireTruckCreated;
 	static uint32 LastTimeAmbulanceCreated;
 	static int32 TotalNumOfCarsOfRating[TOTAL_CUSTOM_CLASSES];
-	static int32 NextCarOfRating[TOTAL_CUSTOM_CLASSES];
 	static int32 CarArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 
 	static int32 NumRequestsOfCarRating[TOTAL_CUSTOM_CLASSES];
+	static int32 NumOfLoadedCarsOfRating[TOTAL_CUSTOM_CLASSES];
+	static int32 CarFreqArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
+	static int32 LoadedCarsArray[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 };
 
 extern CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];
