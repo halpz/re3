@@ -298,19 +298,19 @@ CCarCtrl::GenerateOneRandomCar()
 				CStreaming::RequestModel(MI_PREDATOR, STREAMFLAGS_DEPENDENCY);
 				return;
 			}
-			else {
-				int i;
-				carModel = -1;
-				for (i = 10; i > 0 && (carModel == -1 || CStreaming::HasModelLoaded(carModel)); i--) {
-					carModel = ChooseBoatModel(ChooseBoatRating(&zone));
-				}
-				if (i == 0)
-					return;
+		}
+		else {
+			int i;
+			carModel = -1;
+			for (i = 10; i > 0 && (carModel == -1 || CStreaming::HasModelLoaded(carModel)); i--) {
+				carModel = ChooseBoatModel(ChooseBoatRating(&zone));
 			}
-			if (pCurNode->bOnlySmallBoats || pNextNode->bOnlySmallBoats) {
-				if (BoatWithTallMast(carModel))
-					return;
-			}
+			if (i == 0)
+				return;
+		}
+		if (pCurNode->bOnlySmallBoats || pNextNode->bOnlySmallBoats) {
+			if (BoatWithTallMast(carModel))
+				return;
 		}
 	}
 	int16 colliding;
