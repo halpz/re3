@@ -347,6 +347,7 @@ CCarCtrl::GenerateOneRandomCar()
 			/* FBI cars are gray in carcols, but we want them black if they going after player. */
 		}
 		// TODO(MIAMI): check the flag
+		break;
 	case COPS_BOAT:
 		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 		pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(4.0f, 16.0f);
