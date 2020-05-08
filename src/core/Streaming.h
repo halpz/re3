@@ -135,6 +135,8 @@ public:
 	static void RequestBigBuildings(eLevelName level);
 	static void RequestBigBuildings(eLevelName level, const CVector &pos);
 	static void InstanceBigBuildings(eLevelName level, const CVector &pos);
+	static void InstanceLoadedModelsInSectorList(CPtrList &list);
+	static void InstanceLoadedModels(const CVector &pos);
 	static void RequestIslands(eLevelName level);
 	static void RequestSpecialModel(int32 modelId, const char *modelName, int32 flags);
 	static void RequestSpecialChar(int32 charId, const char *modelName, int32 flags);
@@ -156,6 +158,7 @@ public:
 	static void RemoveUnusedModelsInLoadedList(void);
 	static int32 GetAvailableVehicleSlot(void);
 	static bool IsTxdUsedByRequestedModels(int32 txdId);
+	static bool AreAnimsUsedByRequestedModels(int32 animId);
 	static bool AddToLoadedVehiclesList(int32 modelId);
 	static bool IsObjectInCdImage(int32 id);
 	static void SetModelIsDeletable(int32 id);
@@ -196,6 +199,7 @@ public:
 	static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, int32 mem);
 
 	static void LoadScene(const CVector &pos);
+	static void LoadSceneCollision(const CVector &pos);
 
 	static void MemoryCardSave(uint8 *buffer, uint32 *length);
 	static void MemoryCardLoad(uint8 *buffer, uint32 length);

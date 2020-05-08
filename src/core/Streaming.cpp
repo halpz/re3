@@ -328,7 +328,7 @@ CStreaming::LoadCdDirectory(void)
 	ms_imageSize /= CDSTREAM_SECTOR_SIZE;
 }
 
-//--MIAMI: needs IFP
+//--MIAMI: done
 void
 CStreaming::LoadCdDirectory(const char *dirname, int n)
 {
@@ -382,7 +382,10 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 				modelId = CColStore::AddColSlot(direntry.name);
 			modelId += STREAM_OFFSET_COL;
 			bAddToStreaming = true;
-		// TODO(MIAMI): IFP
+		}else if(strncasecmp(dot+1, "IFP", 3) == 0){
+			modelId = CAnimManager::RegisterAnimBlock(direntry.name);
+			modelId += STREAM_OFFSET_ANIM;
+			bAddToStreaming = true;
 		}else{
 			*dot = '.';
 			lastID = -1;
@@ -415,12 +418,15 @@ GetObjectName(int streamId)
 		sprintf(objname, "%s.txd", CTxdStore::GetTxdName(streamId-STREAM_OFFSET_TXD));
 	else if(streamId >= STREAM_OFFSET_COL && streamId < STREAM_OFFSET_ANIM)
 		sprintf(objname, "%s.col", CColStore::GetColName(streamId-STREAM_OFFSET_COL));
-	// TODO(MIAMI): IFP
+	else{
+		assert(streamId < NUMSTREAMINFO);
+		sprintf(objname, "%s.ifp", CAnimManager::GetAnimationBlock(streamId-STREAM_OFFSET_ANIM)->name);
+	}
 	return objname;
 }
 
 
-//--MIAMI: needs IFP
+//--MIAMI: done
 bool
 CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 {
@@ -439,22 +445,23 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 	stream = RwStreamOpen(rwSTREAMMEMORY, rwSTREAMREAD, &mem);
 
 	if(streamId < STREAM_OFFSET_TXD){
-//--MIAMI: also check animation
 		// Model
 		mi = CModelInfo::GetModelInfo(streamId);
 
-		// Txd has to be loaded
-		if(CTxdStore::GetSlot(mi->GetTxdSlot())->texDict == nil){
-			debug("failed to load %s because TXD %s is not in memory\n", mi->GetName(), CTxdStore::GetTxdName(mi->GetTxdSlot()));
+		// Txd and anim have to be loaded
+		int animId = mi->GetAnimFileIndex();
+		if(CTxdStore::GetSlot(mi->GetTxdSlot())->texDict == nil ||
+		   animId != -1 && !CAnimManager::GetAnimationBlock(animId)->isLoaded){
 			RemoveModel(streamId);
-			RemoveTxd(mi->GetTxdSlot());
 			ReRequestModel(streamId);
 			RwStreamClose(stream, &mem);
 			return false;
 		}
 
-		// Set Txd to use
+		// Set Txd and anims to use
 		CTxdStore::AddRef(mi->GetTxdSlot());
+		if(animId != -1)
+			CAnimManager::AddAnimBlockRef(animId);
 		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
 
 		if(mi->IsSimple()){
@@ -471,9 +478,12 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 		}
 		UpdateMemoryUsed();
 
-		// Txd no longer needed unless we only read part of the file
-		if(ms_aInfoForModel[streamId].m_loadState != STREAMSTATE_STARTED)
+		// Txd and anims no longer needed unless we only read part of the file
+		if(ms_aInfoForModel[streamId].m_loadState != STREAMSTATE_STARTED){
 			CTxdStore::RemoveRefWithoutDelete(mi->GetTxdSlot());
+			if(animId != -1)
+				CAnimManager::RemoveAnimBlockRefWithoutDelete(animId);
+		}
 
 		if(!success){
 			debug("Failed to load %s\n", CModelInfo::GetModelInfo(streamId)->GetName());
@@ -516,7 +526,14 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 		}
 	}else if(streamId >= STREAM_OFFSET_ANIM){
 		assert(streamId < NUMSTREAMINFO);
-		// TODO(MIAMI): IFP
+		if((ms_aInfoForModel[streamId].m_flags & STREAMFLAGS_KEEP_IN_MEMORY) == 0 &&
+		   !AreAnimsUsedByRequestedModels(streamId - STREAM_OFFSET_ANIM)){
+			RemoveModel(streamId);
+			RwStreamClose(stream, &mem);
+			return false;
+		}
+		CAnimManager::LoadAnimFile(stream, true, nil);
+		CAnimManager::CreateAnimAssocGroups();
 	}
 
 	RwStreamClose(stream, &mem);
@@ -538,11 +555,12 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			if(CanRemoveModel(streamId))
 				ms_aInfoForModel[streamId].AddToList(&ms_startLoadedList);
 		}
-	}else if(streamId >= STREAM_OFFSET_TXD && streamId < STREAM_OFFSET_COL){
-		// Txd
+	}else if(streamId >= STREAM_OFFSET_TXD && streamId < STREAM_OFFSET_COL ||
+	         streamId >= STREAM_OFFSET_ANIM){
+		assert(streamId < NUMSTREAMINFO);
+		// Txd and anims
 		if(CanRemoveModel(streamId))
 			ms_aInfoForModel[streamId].AddToList(&ms_startLoadedList);
-		// TODO(MIAMI): animations
 	}
 
 	// Mark objects as loaded
@@ -559,7 +577,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 	return true;
 }
 
-//--MIAMI: TODO: anim
+//--MIAMI: done
 bool
 CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 {
@@ -590,12 +608,15 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 			success = AddToLoadedVehiclesList(streamId);
 		mi->RemoveRef();
 		CTxdStore::RemoveRefWithoutDelete(mi->GetTxdSlot());
-		// TODO(MIAMI): animation
+		if(mi->GetAnimFileIndex() != -1)
+			CAnimManager::RemoveAnimBlockRefWithoutDelete(mi->GetAnimFileIndex());
 	}else if(streamId >= STREAM_OFFSET_TXD && streamId < STREAM_OFFSET_COL){
 		// Txd
 		CTxdStore::AddRef(streamId - STREAM_OFFSET_TXD);
 		success = CTxdStore::FinishLoadTxd(streamId - STREAM_OFFSET_TXD, stream);
 		CTxdStore::RemoveRefWithoutDelete(streamId - STREAM_OFFSET_TXD);
+	}else{
+		assert(0 && "invalid streamId");
 	}
 
 	RwStreamClose(stream, &mem);
@@ -619,7 +640,7 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 	return true;
 }
 
-//--MIAMI: TODO: anim
+//--MIAMI: done
 void
 CStreaming::RequestModel(int32 id, int32 flags)
 {
@@ -655,9 +676,13 @@ CStreaming::RequestModel(int32 id, int32 flags)
 	         ms_aInfoForModel[id].m_loadState == STREAMSTATE_LOADED){	// how can this be true again?
 
 		if(ms_aInfoForModel[id].m_loadState == STREAMSTATE_NOTLOADED){
-			if(id < STREAM_OFFSET_TXD)
-				RequestTxd(CModelInfo::GetModelInfo(id)->GetTxdSlot(), flags);
-				// TODO(MIAMI): animation
+			if(id < STREAM_OFFSET_TXD){
+				mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
+				RequestTxd(mi->GetTxdSlot(), flags);
+				int anim = mi->GetAnimFileIndex();
+				if(anim != -1)
+					RequestAnim(anim, STREAMFLAGS_DEPENDENCY);
+			}
 			ms_aInfoForModel[id].AddToList(&ms_startRequestedList);
 			ms_numModelsRequested++;
 			if(flags & STREAMFLAGS_PRIORITY)
@@ -725,7 +750,46 @@ CStreaming::InstanceBigBuildings(eLevelName level, const CVector &pos)
 	}
 }
 
-// TODO(MIAMI): InstanceLoadedModels
+//--MIAMI: done
+void
+CStreaming::InstanceLoadedModelsInSectorList(CPtrList &list)
+{
+	CPtrNode *node;
+	CEntity *e;
+	for(node = list.first; node; node = node->next) {
+		e = (CEntity *)node->item;
+		if(IsAreaVisible(e->m_area) && e->m_rwObject == nil)
+			e->CreateRwObject();
+	}
+}
+
+//--MIAMI: done
+void
+CStreaming::InstanceLoadedModels(const CVector &pos)
+{
+	int minX = CWorld::GetSectorIndexX(pos.x - 80.0f);
+	if(minX <= 0) minX = 0;
+
+	int minY = CWorld::GetSectorIndexY(pos.y - 80.0f);
+	if(minY <= 0) minY = 0;
+
+	int maxX = CWorld::GetSectorIndexX(pos.x + 80.0f);
+	if(maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X - 1;
+
+	int maxY = CWorld::GetSectorIndexY(pos.y + 80.0f);
+	if(maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y - 1;
+
+	int x, y;
+	for(y = minY; y <= maxY; y++){
+		for(x = minX; x <= maxX; x++){
+			CSector *sector = CWorld::GetSector(x, y);
+			InstanceLoadedModelsInSectorList(sector->m_lists[ENTITYLIST_BUILDINGS]);
+			InstanceLoadedModelsInSectorList(sector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP]);
+			InstanceLoadedModelsInSectorList(sector->m_lists[ENTITYLIST_OBJECTS]);
+			InstanceLoadedModelsInSectorList(sector->m_lists[ENTITYLIST_DUMMIES]);
+		}
+	}
+}
 
 //--MIAMI: done
 void
@@ -817,7 +881,7 @@ CStreaming::DecrementRef(int32 id)
 	}
 }
 
-//--MIAMI: TODO: animation
+//--MIAMI: done
 void
 CStreaming::RemoveModel(int32 id)
 {
@@ -833,7 +897,10 @@ CStreaming::RemoveModel(int32 id)
 			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
 		else if(id >= STREAM_OFFSET_COL && id < STREAM_OFFSET_ANIM)
 			CColStore::RemoveCol(id - STREAM_OFFSET_COL);
-		// TODO(MIAMI): IFP
+		else if(id >= STREAM_OFFSET_ANIM){
+			assert(id < NUMSTREAMINFO);
+			CAnimManager::RemoveAnimBlock(id - STREAM_OFFSET_ANIM);
+		}
 		ms_memoryUsed -= ms_aInfoForModel[id].GetCdSize()*CDSTREAM_SECTOR_SIZE;
 	}
 
@@ -858,7 +925,10 @@ CStreaming::RemoveModel(int32 id)
 			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
 		else if(id >= STREAM_OFFSET_COL && id < STREAM_OFFSET_ANIM)
 			CColStore::RemoveCol(id - STREAM_OFFSET_COL);
-		// TODO(MIAMI): IFP
+		else if(id >= STREAM_OFFSET_ANIM){
+			assert(id < NUMSTREAMINFO);
+			CAnimManager::RemoveAnimBlock(id - STREAM_OFFSET_ANIM);
+		}
 	}
 
 	ms_aInfoForModel[id].m_loadState = STREAMSTATE_NOTLOADED;
@@ -1033,7 +1103,7 @@ found:
 	return true;
 }
 
-//--MIAMI: TODO: anim
+//--MIAMI: done
 bool
 CStreaming::RemoveLeastUsedModel(uint32 excludeMask)
 {
@@ -1055,7 +1125,13 @@ CStreaming::RemoveLeastUsedModel(uint32 excludeMask)
 				RemoveModel(streamId);
 				return true;
 			}
-		// TODO(MIAMI): IFP
+		}else if(streamId >= STREAM_OFFSET_ANIM){
+			assert(streamId < NUMSTREAMINFO);
+			if(CAnimManager::GetNumRefsToAnimBlock(streamId - STREAM_OFFSET_ANIM) == 0 &&
+			   !AreAnimsUsedByRequestedModels(streamId - STREAM_OFFSET_ANIM)){
+				RemoveModel(streamId);
+				return true;
+			}
 		}
 	}
 	return (ms_numVehiclesLoaded > 7 || CGame::currArea != AREA_MAIN_MAP && ms_numVehiclesLoaded > 4) && RemoveLoadedVehicle();
@@ -1086,7 +1162,7 @@ CStreaming::RemoveUnusedModelsInLoadedList(void)
 	// empty
 }
 
-//--MIAMI: done, but strangely not found in mobile?
+//--MIAMI: done
 bool
 CStreaming::IsTxdUsedByRequestedModels(int32 txdId)
 {
@@ -1109,6 +1185,34 @@ CStreaming::IsTxdUsedByRequestedModels(int32 txdId)
 		streamId = ms_channel[1].streamIds[i];
 		if(streamId != -1 && streamId < STREAM_OFFSET_TXD &&
 		   CModelInfo::GetModelInfo(streamId)->GetTxdSlot() == txdId)
+			return true;
+	}
+
+	return false;
+}
+
+bool
+CStreaming::AreAnimsUsedByRequestedModels(int32 animId)
+{
+	CStreamingInfo *si;
+	int streamId;
+	int i;
+
+	for(si = ms_startRequestedList.m_next; si != &ms_endRequestedList; si = si->m_next){
+		streamId = si - ms_aInfoForModel;
+		if(streamId < STREAM_OFFSET_TXD &&
+		   CModelInfo::GetModelInfo(streamId)->GetAnimFileIndex() == animId)
+			return true;
+	}
+
+	for(i = 0; i < 4; i++){
+		streamId = ms_channel[0].streamIds[i];
+		if(streamId != -1 && streamId < STREAM_OFFSET_TXD &&
+		   CModelInfo::GetModelInfo(streamId)->GetAnimFileIndex() == animId)
+			return true;
+		streamId = ms_channel[1].streamIds[i];
+		if(streamId != -1 && streamId < STREAM_OFFSET_TXD &&
+		   CModelInfo::GetModelInfo(streamId)->GetAnimFileIndex() == animId)
 			return true;
 	}
 
@@ -1495,11 +1599,14 @@ CStreaming::GetCdImageOffset(int32 lastPosn)
 }
 
 inline bool
-TxdAvailable(int32 txdId)
+ModelNotLoaded(int32 modelId)
 {
-	CStreamingInfo *si = &CStreaming::ms_aInfoForModel[txdId + STREAM_OFFSET_TXD];
-	return si->m_loadState == STREAMSTATE_LOADED || si->m_loadState == STREAMSTATE_READING;
+	CStreamingInfo *si = &CStreaming::ms_aInfoForModel[modelId];
+	return si->m_loadState != STREAMSTATE_LOADED && si->m_loadState != STREAMSTATE_READING;
 }
+
+inline bool TxdNotLoaded(int32 txdId) { return ModelNotLoaded(txdId + STREAM_OFFSET_TXD); }
+inline bool AnimNotLoaded(int32 animId) { return animId != -1 && ModelNotLoaded(animId + STREAM_OFFSET_ANIM); }
 
 // Find stream id of next requested file in cdimage
 int32
@@ -1524,11 +1631,22 @@ CStreaming::GetNextFileOnCd(int32 lastPosn, bool priority)
 		if(priority && ms_numPriorityRequests != 0 && !si->IsPriority())
 			continue;
 
-		// request Txd if necessary
-		if(streamId < STREAM_OFFSET_TXD &&
-		   !TxdAvailable(CModelInfo::GetModelInfo(streamId)->GetTxdSlot())){
-			ReRequestTxd(CModelInfo::GetModelInfo(streamId)->GetTxdSlot());
-		}else if(ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size)){
+		// request Txds or anims if necessary
+		if(streamId < STREAM_OFFSET_TXD){
+			int txdId = CModelInfo::GetModelInfo(streamId)->GetTxdSlot();
+			if(TxdNotLoaded(txdId)){
+				ReRequestTxd(txdId);
+				continue;
+			}
+			int animId = CModelInfo::GetModelInfo(streamId)->GetAnimFileIndex();
+			if(AnimNotLoaded(animId)){
+				ReRequestAnim(animId);
+				continue;
+			}
+		}else if(streamId >= STREAM_OFFSET_ANIM && CCutsceneMgr::IsCutsceneProcessing())
+			continue;
+
+		if(ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size)){
 			if(posn < posnFirst){
 				// find first requested file in image
 				streamIdFirst = streamId;
@@ -1569,6 +1687,7 @@ CStreaming::GetNextFileOnCd(int32 lastPosn, bool priority)
  * TODO: two-part files
  */
 
+//--MIAMI: done
 // Make channel read from disc
 void
 CStreaming::RequestModelStream(int32 ch)
@@ -1590,7 +1709,10 @@ CStreaming::RequestModelStream(int32 ch)
 		if(streamId >= STREAM_OFFSET_TXD && streamId < STREAM_OFFSET_COL){
 			if(IsTxdUsedByRequestedModels(streamId - STREAM_OFFSET_TXD))
 				break;
-// TODO(MIAMI): anims
+		}else if(streamId >= STREAM_OFFSET_ANIM){
+			assert(streamId < NUMSTREAMINFO);
+			if(AreAnimsUsedByRequestedModels(streamId - STREAM_OFFSET_ANIM))
+				break;
 		}else
 			break;
 		RemoveModel(streamId);
@@ -1628,8 +1750,8 @@ CStreaming::RequestModelStream(int32 ch)
 		if(streamId < STREAM_OFFSET_TXD){
 			if (havePed && CModelInfo::GetModelInfo(streamId)->GetModelType() == MITYPE_PED ||
 			    haveBigFile && CModelInfo::GetModelInfo(streamId)->GetModelType() == MITYPE_VEHICLE ||
-			   !TxdAvailable(CModelInfo::GetModelInfo(streamId)->GetTxdSlot()))
-// TODO(MIAMI): anims
+			    TxdNotLoaded(CModelInfo::GetModelInfo(streamId)->GetTxdSlot()) ||
+			    AnimNotLoaded(CModelInfo::GetModelInfo(streamId)->GetAnimFileIndex()))
 				break;
 		}else{
 			if(haveBigFile && size > 200)
@@ -2419,6 +2541,7 @@ CStreaming::MakeSpaceFor(int32 size)
 		}
 }
 
+//--MIAMI: done
 void
 CStreaming::LoadScene(const CVector &pos)
 {
@@ -2456,11 +2579,19 @@ CStreaming::LoadScene(const CVector &pos)
 		}
 	}
 	LoadAllRequestedModels(false);
-	// TODO(MIAMI): InstanceLoadedModels
+	InstanceLoadedModels(pos);
 
 	for(int i = 0; i < NUMSTREAMINFO; i++)
 		ms_aInfoForModel[i].m_flags &= ~STREAMFLAGS_20;
 	debug("End load scene\n");
+}
+
+//--MIAMI: done
+void
+CStreaming::LoadSceneCollision(const CVector &pos)
+{
+	CColStore::LoadCollision(pos);
+	CStreaming::LoadAllRequestedModels(false);
 }
 
 void
