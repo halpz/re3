@@ -1435,9 +1435,9 @@ CRadar::DrawYouAreHereSprite(float x, float y)
 
 	if (show) {
 		float left = x - SCREEN_SCALE_X(12.0f);
-		float top = y - SCREEN_SCALE_Y(2.0f);
+		float top = y;
 		float right = SCREEN_SCALE_X(12.0) + x;
-		float bottom = y - SCREEN_SCALE_Y(26.0f);
+		float bottom = y - SCREEN_SCALE_Y(24.0f);
 		CentreSprite.Draw(CRect(left, top, right, bottom), CRGBA(255, 255, 255, 255));
 	}
 	MapLegendList[MapLegendCounter++] = RADAR_SPRITE_CENTRE;
