@@ -9729,7 +9729,15 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	case COMMAND_IS_MODEL_AVAILABLE:
 	case COMMAND_SHUT_CHAR_UP:
 	case COMMAND_SET_ENABLE_RC_DETONATE:
+		assert(0);
 	case COMMAND_SET_CAR_RANDOM_ROUTE_SEED:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		pVehicle->m_nRouteSeed = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_IS_ANY_PICKUP_AT_COORDS:
 	case COMMAND_GET_FIRST_PICKUP_COORDS:
 	case COMMAND_GET_NEXT_PICKUP_COORDS:

@@ -132,7 +132,7 @@ public:
 	uint8 m_currentColour2;
 	uint8 m_aExtras[2];
 	int16 m_nAlarmState;
-	int16 m_nMissionValue;
+	int16 m_nRouteSeed;
 	CPed *pDriver;
 	CPed *pPassengers[8];
 	uint8 m_nNumPassengers;

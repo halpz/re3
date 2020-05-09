@@ -145,4 +145,6 @@ public:
 		
 	static int32 GetRandomNumberInRange(int32 low, int32 high)
 		{ return low + (high - low)*(GetRandomNumber()/float(MYRAND_MAX + 1)); }
+	static void SetRandomSeed(int32 seed)
+		{ mysrand(seed); }
 };

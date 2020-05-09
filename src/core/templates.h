@@ -133,7 +133,7 @@ public:
 		// TODO: the cast is unsafe
 		return (int)((U*)entry - m_entries);
 	}
-	int GetNoOfUsedSpaces(void){
+	int GetNoOfUsedSpaces(void) const {
 		int i;
 		int n = 0;
 		for(i = 0; i < m_size; i++)
@@ -164,6 +164,7 @@ public:
 		memcpy(entries, m_entries, sizeof(U)*m_size);
 		debug("Stored:%d (/%d)\n", GetNoOfUsedSpaces(), m_size); /* Assumed inlining */
 	}
+	int32 GetNoOfFreeSpaces() const { return GetSize() - GetNoOfUsedSpaces(); }
 };
 
 template<typename T>
