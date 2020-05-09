@@ -43,9 +43,13 @@ CPedPlacement::IsPositionClearOfCars(Const CVector *pos)
 }
 
 bool
-CPedPlacement::IsPositionClearForPed(CVector* pos)
+CPedPlacement::IsPositionClearForPed(const CVector& pos, float radius, int total, CEntity** entities)
 {
 	int16 count;
-	CWorld::FindObjectsKindaColliding(*pos, 0.75f, true, &count, 2, nil, false, true, true, false, false);
+	if (radius == -1.0f)
+		radius = 0.75f;
+	if (total == -1)
+		total = 2;
+	CWorld::FindObjectsKindaColliding(pos, radius, true, &count, total, entities, false, true, true, false, false);
 	return count == 0;
 }

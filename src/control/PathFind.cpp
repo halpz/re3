@@ -322,7 +322,7 @@ CPathFind::StoreNodeInfoPed(int16 id, int16 node, int8 type, int8 next, int16 x,
 	InfoForTilePeds[i].roadBlock = false;
 	InfoForTilePeds[i].disabled = false;
 	InfoForTilePeds[i].waterPath = false;
-	InfoForTilePeds[i].flag02 = false;
+	InfoForTilePeds[i].onlySmallBoats = false;
 	InfoForTilePeds[i].betweenLevels = false;
 	InfoForTilePeds[i].spawnRate = Min(spawnRate, 15);
 
@@ -351,7 +351,7 @@ CPathFind::StoreNodeInfoCar(int16 id, int16 node, int8 type, int8 next, int16 x,
 	InfoForTilePeds[i].roadBlock = false;
 	InfoForTilePeds[i].disabled = false;
 	InfoForTilePeds[i].waterPath = false;
-	InfoForTilePeds[i].flag02 = false;
+	InfoForTilePeds[i].onlySmallBoats = false;
 	InfoForTilePeds[i].betweenLevels = false;
 	InfoForTilePeds[i].spawnRate = Min(spawnRate, 15);
 
@@ -383,7 +383,7 @@ CPathFind::StoreDetachedNodeInfoPed(int32 node, int8 type, int32 next, float x, 
 	DetachedInfoForTilePeds[i].roadBlock = false;
 	DetachedInfoForTilePeds[i].disabled = disabled;
 	DetachedInfoForTilePeds[i].waterPath = false;
-	DetachedInfoForTilePeds[i].flag02 = false;
+	DetachedInfoForTilePeds[i].onlySmallBoats = false;
 	DetachedInfoForTilePeds[i].betweenLevels = betweenLevels;
 	DetachedInfoForTilePeds[i].spawnRate = Min(spawnRate, 15);
 
@@ -396,7 +396,7 @@ CPathFind::StoreDetachedNodeInfoPed(int32 node, int8 type, int32 next, float x, 
 //--MIAMI: done
 void
 CPathFind::StoreDetachedNodeInfoCar(int32 node, int8 type, int32 next, float x, float y, float z, float width, int8 numLeft, int8 numRight,
-	bool disabled, bool betweenLevels, uint8 speedLimit, bool roadBlock, bool waterPath, uint8 spawnRate, bool unk)
+	bool disabled, bool betweenLevels, uint8 speedLimit, bool roadBlock, bool waterPath, uint8 spawnRate, bool onlySmallBoats)
 {
 	int i;
 
@@ -417,7 +417,7 @@ CPathFind::StoreDetachedNodeInfoCar(int32 node, int8 type, int32 next, float x, 
 	DetachedInfoForTileCars[i].roadBlock = roadBlock;
 	DetachedInfoForTileCars[i].disabled = disabled;
 	DetachedInfoForTileCars[i].waterPath = waterPath;
-	DetachedInfoForTileCars[i].flag02 = unk;
+	DetachedInfoForTileCars[i].onlySmallBoats = onlySmallBoats;
 	DetachedInfoForTileCars[i].betweenLevels = betweenLevels;
 	DetachedInfoForTileCars[i].spawnRate = Min(spawnRate, 15);
 
@@ -655,7 +655,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				m_pathNodes[m_numPathNodes].bUseInRoadBlock = objectpathinfo[start + j].roadBlock;
 				m_pathNodes[m_numPathNodes].bDisabled = objectpathinfo[start + j].disabled;
 				m_pathNodes[m_numPathNodes].bWaterPath = objectpathinfo[start + j].waterPath;
-				m_pathNodes[m_numPathNodes].flagB2 = objectpathinfo[start + j].flag02;
+				m_pathNodes[m_numPathNodes].bOnlySmallBoats = objectpathinfo[start + j].onlySmallBoats;
 				m_pathNodes[m_numPathNodes].bBetweenLevels = objectpathinfo[start + j].betweenLevels;
 				m_numPathNodes++;
 			}
@@ -696,7 +696,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 				m_pathNodes[m_numPathNodes].bUseInRoadBlock = detachednodes[start + j].roadBlock;
 				m_pathNodes[m_numPathNodes].bDisabled = detachednodes[start + j].disabled;
 				m_pathNodes[m_numPathNodes].bWaterPath = detachednodes[start + j].waterPath;
-				m_pathNodes[m_numPathNodes].flagB2 = detachednodes[start + j].flag02;
+				m_pathNodes[m_numPathNodes].bOnlySmallBoats = detachednodes[start + j].onlySmallBoats;
 				m_pathNodes[m_numPathNodes].bBetweenLevels = detachednodes[start + j].betweenLevels;
 				m_numPathNodes++;
 			}else if(detachednodes[start + j].type == NodeTypeExtern){

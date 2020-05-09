@@ -124,7 +124,8 @@ public:
 	static int32 ChooseCarRating(CZoneInfo* pZoneInfo);
 	static void AddToLoadedVehicleArray(int32 mi, int32 rating, int32 freq);
 	static void RemoveFromLoadedVehicleArray(int32 mi, int32 rating);
-	static int32 ChooseCarModelToLoad(int rating);
+	static int32 ChooseCarModelToLoad(int32 rating);
+	static bool BoatWithTallMast(int32 mi);
 
 	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle)
 	{
@@ -158,6 +159,8 @@ public:
 	static int32 TotalNumOfCarsOfRating[TOTAL_CUSTOM_CLASSES];
 	static int32 CarArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 
+	static int32 MiamiViceCycle;
+	static uint32 LastTimeMiamiViceGenerated;
 	static int32 NumRequestsOfCarRating[TOTAL_CUSTOM_CLASSES];
 	static int32 NumOfLoadedCarsOfRating[TOTAL_CUSTOM_CLASSES];
 	static int32 CarFreqArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];

@@ -40,6 +40,12 @@ CWanted::Initialise()
 }
 
 bool
+CWanted::AreMiamiViceRequired()
+{
+	return m_nWantedLevel >= 3;
+}
+
+bool
 CWanted::AreSwatRequired()
 {
 	return m_nWantedLevel == 4 || m_bSwatRequired;
