@@ -5,7 +5,6 @@
 #include "AnimBlendHierarchy.h"
 
 enum {
-	// TODO
 	ASSOC_RUNNING = 1,
 	ASSOC_REPEAT = 2,
 	ASSOC_DELETEFADEDOUT = 4,
@@ -13,13 +12,12 @@ enum {
 	ASSOC_PARTIAL = 0x10,
 	ASSOC_MOVEMENT = 0x20,	// ???
 	ASSOC_HAS_TRANSLATION = 0x40,
-	ASSOC_FLAG80 = 0x80, // used for footstep sound calculation
-	ASSOC_FLAG100 = 0x100,
-	ASSOC_FLAG200 = 0x200,
-	ASSOC_FLAG400 = 0x400,	// unused, blending it with move anims makes them stop. 0x800 in VC
-	ASSOC_FLAG800 = 0x800, // anims that we fall to front. 0x1000 in VC
-	ASSOC_HAS_X_TRANSLATION = 0x1000,
-	// 0x2000 is vehicle anims in VC
+	ASSOC_WALK = 0x80,	// for CPed::PlayFootSteps(void)
+	ASSOC_FLAG_XPRESS = 0x100,	// only used by xpress scratch, see CPed::Chat(void)
+	ASSOC_NOWALK = 0x200,	// see CPed::PlayFootSteps(void)
+	ASSOC_BLOCK = 0x400,	// unused in assoc description, blocks other anims from being played
+	ASSOC_FRONTAL = 0x800, // anims that we fall to front
+	ASSOC_HAS_X_TRANSLATION = 0x1000,	// for 2d velocity extraction
 };
 
 // Anim hierarchy associated with a clump

@@ -973,7 +973,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 					if ( victimPed->Dead() )
 					{
 						CAnimBlendAssociation *asoc;
-						if ( RpAnimBlendClumpGetFirstAssociation(victimPed->GetClump(), ASSOC_FLAG800) )
+						if ( RpAnimBlendClumpGetFirstAssociation(victimPed->GetClump(), ASSOC_FRONTAL) )
 							asoc = CAnimManager::BlendAnimation(victimPed->GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT_F, 8.0f);
 						else
 							asoc = CAnimManager::BlendAnimation(victimPed->GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT,   8.0f);

@@ -1327,7 +1327,7 @@ CPlayerPed::ProcessControl(void)
 		case PED_ATTACK:
 		case PED_FIGHT:
 		case PED_AIM_GUN:
-			if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG400)) {
+			if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_BLOCK)) {
 				if (TheCamera.Cams[0].Using3rdPersonMouseCam()) {
 					if (padUsed)
 						PlayerControl1stPersonRunAround(padUsed);
