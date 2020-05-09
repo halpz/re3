@@ -1357,8 +1357,9 @@ cAudioManager::GetBlackProjectMaleTalkSfx(int16 sound, int32 model)
 		return GetGenericMaleTalkSfx(sound);
 	}
 
-	if (model == MI_P_MAN2)
-		sfx += (SFX_BLACK_PROJECT_MALE_VOICE_2_DRIVER_ABUSE_1 - SFX_BLACK_PROJECT_MALE_VOICE_1_DRIVER_ABUSE_1);
+// TODO(MIAMI): just making this compile
+//	if (model == MI_P_MAN2)
+//		sfx += (SFX_BLACK_PROJECT_MALE_VOICE_2_DRIVER_ABUSE_1 - SFX_BLACK_PROJECT_MALE_VOICE_1_DRIVER_ABUSE_1);
 	return sfx;
 }
 
@@ -2188,8 +2189,9 @@ cAudioManager::GetBusinessMaleYoungTalkSfx(int16 sound, int32 model)
 		return GetGenericMaleTalkSfx(sound);
 	}
 
-	if (model == MI_B_MAN3)
-		sfx += (SFX_BUSINESS_MALE_YOUNG_VOICE_2_DRIVER_ABUSE_1 - SFX_BUSINESS_MALE_YOUNG_VOICE_1_DRIVER_ABUSE_1);
+// TODO(MIAMI): just making this compile
+//	if (model == MI_B_MAN3)
+//		sfx += (SFX_BUSINESS_MALE_YOUNG_VOICE_2_DRIVER_ABUSE_1 - SFX_BUSINESS_MALE_YOUNG_VOICE_1_DRIVER_ABUSE_1);
 	return sfx;
 }
 
@@ -2265,8 +2267,9 @@ cAudioManager::GetWhiteBusinessFemaleTalkSfx(int16 sound, int32 model)
 		return GetGenericFemaleTalkSfx(sound);
 	}
 
-	if (model == MI_B_WOM2)
-		sfx += (SFX_WHITE_BUSINESS_FEMALE_VOICE_2_DRIVER_ABUSE_1 - SFX_WHITE_BUSINESS_FEMALE_VOICE_1_DRIVER_ABUSE_1);
+// TODO(MIAMI): just making this compile
+//	if (model == MI_B_WOM2)
+//		sfx += (SFX_WHITE_BUSINESS_FEMALE_VOICE_2_DRIVER_ABUSE_1 - SFX_WHITE_BUSINESS_FEMALE_VOICE_1_DRIVER_ABUSE_1);
 	return sfx;
 }
 
@@ -2451,8 +2454,9 @@ cAudioManager::GetFanMaleTalkSfx(int16 sound, int32 model)
 		return GetGenericMaleTalkSfx(sound);
 	}
 
-	if (model == MI_FAN_MAN2)
-		sfx += (SFX_FOOTBALL_MALE_VOICE_2_DRIVER_ABUSE_1 - SFX_FOOTBALL_MALE_VOICE_1_DRIVER_ABUSE_1);
+// TODO(MIAMI): just making this compile
+//	if (model == MI_FAN_MAN2)
+//		sfx += (SFX_FOOTBALL_MALE_VOICE_2_DRIVER_ABUSE_1 - SFX_FOOTBALL_MALE_VOICE_1_DRIVER_ABUSE_1);
 	return sfx;
 }
 
@@ -2631,11 +2635,12 @@ cAudioManager::GetShopperFemaleTalkSfx(int16 sound, int32 model)
 		return GetGenericFemaleTalkSfx(sound);
 	}
 
-	if (model == MI_SHOPPER2) {
-		sfx += (SFX_SHOPPER_VOICE_2_DRIVER_ABUSE_1 - SFX_SHOPPER_VOICE_1_DRIVER_ABUSE_1);
-	} else if (model == MI_SHOPPER3) {
-		sfx += (SFX_SHOPPER_VOICE_3_DRIVER_ABUSE_1 - SFX_SHOPPER_VOICE_1_DRIVER_ABUSE_1);
-	}
+// TODO(MIAMI): just making this compile
+//	if (model == MI_SHOPPER2) {
+//		sfx += (SFX_SHOPPER_VOICE_2_DRIVER_ABUSE_1 - SFX_SHOPPER_VOICE_1_DRIVER_ABUSE_1);
+//	} else if (model == MI_SHOPPER3) {
+//		sfx += (SFX_SHOPPER_VOICE_3_DRIVER_ABUSE_1 - SFX_SHOPPER_VOICE_1_DRIVER_ABUSE_1);
+//	}
 	return sfx;
 }
 
@@ -3044,6 +3049,8 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		return GetNormalMaleTalkSfx(sound);
 	case MI_TAXI_D:
 		return GetTaxiDriverTalkSfx(sound);
+// TODO(MIAMI): just making this compile
+/*
 	case MI_PIMP:
 		return GetPimpTalkSfx(sound);
 	case MI_GANG01:
@@ -3173,6 +3180,7 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		return GetStudentFemaleTalkSfx(sound);
 	case MI_CAS_MAN:
 		return GetCasualMaleOldTalkSfx(sound);
+*/
 	default:
 		return GetGenericMaleTalkSfx(sound);
 	}
@@ -6303,8 +6311,9 @@ cAudioManager::ProcessPed(CPhysical *ped)
 	// params.m_bDistanceCalculated = false;
 	params.m_pPed = (CPed *)ped;
 	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-	if (ped->GetModelIndex() == MI_FATMALE02)
-		ProcessPedHeadphones(&params);
+// TODO(MIAMI): just making this compile
+//	if (ped->GetModelIndex() == MI_FATMALE02)
+//		ProcessPedHeadphones(&params);
 	ProcessPedOneShots(&params);
 }
 

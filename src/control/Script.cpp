@@ -5903,8 +5903,8 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 				continue;
 			if (pPed->bFadeOut)
 				continue;
-			if (pPed->GetModelIndex() == MI_SCUM_WOM || pPed->GetModelIndex() == MI_SCUM_MAN)
-				continue;
+//			if (pPed->GetModelIndex() == MI_SCUM_WOM || pPed->GetModelIndex() == MI_SCUM_MAN)
+//				continue;
 			if (!ThisIsAValidRandomPed(pPed->m_nPedType))
 				continue;
 			if (pPed->bIsLeader || pPed->m_leader)
@@ -5952,8 +5952,8 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 				continue;
 			if (pPed->bFadeOut)
 				continue;
-			if (pPed->GetModelIndex() == MI_SCUM_WOM || pPed->GetModelIndex() == MI_SCUM_MAN)
-				continue;
+//			if (pPed->GetModelIndex() == MI_SCUM_WOM || pPed->GetModelIndex() == MI_SCUM_MAN)
+//				continue;
 			if (!ThisIsAValidRandomPed(pPed->m_nPedType))
 				continue;
 			if (pPed->bIsLeader || pPed->m_leader)

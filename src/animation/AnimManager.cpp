@@ -81,13 +81,13 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_BOMBER, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
 	{ ANIM_HGUN_RELOAD, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
 	{ ANIM_AK_RELOAD, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
-	{ ANIM_FPS_PUNCH, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_FPS_BAT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_FPS_UZI, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_FPS_PUMP, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_FPS_AK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_FPS_M16, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_FPS_ROCKET, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+//	{ ANIM_FPS_PUNCH, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+//	{ ANIM_FPS_BAT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+//	{ ANIM_FPS_UZI, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+//	{ ANIM_FPS_PUMP, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+//	{ ANIM_FPS_AK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+//	{ ANIM_FPS_M16, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+//	{ ANIM_FPS_ROCKET, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_FIGHT_IDLE, ASSOC_REPEAT },
 	{ ANIM_FIGHT2_IDLE, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_FIGHT_SH_F, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
@@ -263,13 +263,13 @@ char const *aStdAnimations[] = {
 	"bomber",
 	"WEAPON_hgun_rload",
 	"WEAPON_AK_rload",
-	"FPS_PUNCH",
-	"FPS_BAT",
-	"FPS_UZI",
-	"FPS_PUMP",
-	"FPS_AK",
-	"FPS_M16",
-	"FPS_ROCKET",
+//	"FPS_PUNCH",
+//	"FPS_BAT",
+//	"FPS_UZI",
+//	"FPS_PUMP",
+//	"FPS_AK",
+//	"FPS_M16",
+//	"FPS_ROCKET",
 	"FIGHTIDLE",
 	"FIGHT2IDLE",
 	"FIGHTsh_F",
@@ -825,7 +825,8 @@ CAnimManager::BlendAnimation(RpClump *clump, AssocGroupId groupId, AnimationId a
 void
 CAnimManager::LoadAnimFiles(void)
 {
-	LoadAnimFile("ANIM\\PED.IFP");
+//	LoadAnimFile("ANIM\\PED.IFP");
+	LoadAnimFile("ANIM\\PED_MIAMI.IFP");
 	ms_aAnimAssocGroups = new CAnimBlendAssocGroup[NUM_ANIM_ASSOC_GROUPS];
 	CreateAnimAssocGroups();
 }
@@ -986,15 +987,6 @@ CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32]
 					kf->deltaTime = fbuf[10];	// absolute time here
 				}
 			}
-
-/*
-			// convert absolute time to deltas
-			for(l = seq->numFrames-1; l > 0; l--){
-				KeyFrame *kf1 = seq->GetKeyFrame(l);
-				KeyFrame *kf2 = seq->GetKeyFrame(l-1);
-				kf1->deltaTime -= kf2->deltaTime;
-			}
-*/
 		}
 
 		hier->RemoveQuaternionFlips();

@@ -8036,83 +8036,11 @@ CPed::GetNextPointOnRoute(void)
 	return nextPoint;
 }
 
-// These categories are purely random, most of ped models have no correlation. So I don't think making an enum.
 uint8
 CPed::GetPedRadioCategory(uint32 modelIndex)
 {
-	switch (modelIndex) {
-		case MI_MALE01:
-		case MI_FEMALE03:
-		case MI_PROSTITUTE2:
-		case MI_WORKER1:
-		case MI_MOD_MAN:
-		case MI_MOD_WOM:
-		case MI_ST_WOM:
-		case MI_FAN_WOM:
-			return 3;
-		case MI_TAXI_D:
-		case MI_PIMP:
-		case MI_MALE02:
-		case MI_FEMALE02:
-		case MI_FATFEMALE01:
-		case MI_FATFEMALE02:
-		case MI_DOCKER1:
-		case MI_WORKER2:
-		case MI_FAN_MAN2:
-			return 9;
-		case MI_GANG01:
-		case MI_GANG02:
-		case MI_SCUM_MAN:
-		case MI_SCUM_WOM:
-		case MI_HOS_WOM:
-		case MI_CONST1:
-			return 1;
-		case MI_GANG03:
-		case MI_GANG04:
-		case MI_GANG07:
-		case MI_GANG08:
-		case MI_CT_MAN2:
-		case MI_CT_WOM2:
-		case MI_B_MAN3:
-		case MI_SHOPPER3:
-			return 4;
-		case MI_GANG05:
-		case MI_GANG06:
-		case MI_GANG11:
-		case MI_GANG12:
-		case MI_CRIMINAL02:
-		case MI_B_WOM2:
-		case MI_ST_MAN:
-		case MI_HOS_MAN:
-			return 5;
-		case MI_FATMALE01:
-		case MI_LI_MAN2:
-		case MI_SHOPPER1:
-		case MI_CAS_MAN:
-			return 6;
-		case MI_PROSTITUTE:
-		case MI_P_WOM2:
-		case MI_LI_WOM2:
-		case MI_B_WOM3:
-		case MI_CAS_WOM:
-			return 2;
-		case MI_P_WOM1:
-		case MI_DOCKER2:
-		case MI_STUD_MAN:
-			return 7;
-		case MI_CT_MAN1:
-		case MI_CT_WOM1:
-		case MI_LI_MAN1:
-		case MI_LI_WOM1:
-		case MI_B_MAN1:
-		case MI_B_MAN2:
-		case MI_B_WOM1:
-		case MI_SHOPPER2:
-		case MI_STUD_WOM:
-			return 8;
-		default:
-			return 0;
-	}
+	// TODO(MIAMI): remove this function and use modelinfo for radio
+	return 1;
 }
 
 // Some kind of VC leftover I think

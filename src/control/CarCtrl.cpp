@@ -825,7 +825,7 @@ int32
 CCarCtrl::ChooseGangCarModel(int32 gang)
 {
 	if (CStreaming::HasModelLoaded(MI_GANG01 + 2 * gang) &&
-		CStreaming::HasModelLoaded(MI_GANG02 + 2 * gang))
+		CStreaming::HasModelLoaded(MI_GANG01+1 + 2 * gang))
 		return CGangs::GetGangVehicleModel(gang);
 	return -1;
 }

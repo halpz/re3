@@ -176,6 +176,14 @@ enum
 	MI_MEDIC,
 	MI_FIREMAN,
 	MI_MALE01,
+
+	MI_TAXI_D = 28,	// HMOCA
+	MI_GANG01 = 83,	// CBa
+	MI_VICE1 = 97,
+	MI_WFYG2 = 106,	// last regular ped
+	MI_SPECIAL01 = 109,
+	MI_SPECIAL21 = 129,
+/*
 	MI_TAXI_D,
 	MI_PIMP,
 	MI_GANG01,
@@ -256,6 +264,7 @@ enum
 	MI_BUSKER3,
 	MI_BUSKER4,
 	// three more peds possible
+*/
 
 	MI_FIRST_VEHICLE = 130,
 	MI_LANDSTAL = MI_FIRST_VEHICLE,
