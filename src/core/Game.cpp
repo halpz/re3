@@ -604,8 +604,9 @@ void CGame::Process(void)
 	TheCamera.SetMotionBlurAlpha(0);
 	if (TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_SNIPER || TheCamera.m_BlurType == MBLUR_NORMAL)
 		TheCamera.SetMotionBlur(0, 0, 0, 0, MBLUR_NONE);
-
+#ifdef DEBUGMENU
 	DebugMenuProcess();
+#endif
 	CCutsceneMgr::Update();
 	if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused())
 		FrontEndMenuManager.Process();
