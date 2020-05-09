@@ -13,6 +13,7 @@
 #include "DMAudio.h"
 #include "Fire.h"
 #include "Pools.h"
+#include "Population.h"
 #include "Timer.h"
 #include "TrafficLights.h"
 #include "Vehicle.h"
@@ -560,18 +561,15 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* pVehicle)
 	case MI_PREDATOR:
 		pVehicle->SetUpDriver();
 		return;
-//TODO(MIAMI) uncomment this when we have MI_VICECHEE
-/*
 	case MI_VICECHEE:
 	{
-		pVehicle->SetUpDriver()->bIsMiamiViceCop = true;
-		pVehicle->SetUpPassenger(0)->bIsMiamiViceCop = true;
+		pVehicle->SetUpDriver()->bMiamiViceCop = true;
+		pVehicle->SetupPassenger(0)->bMiamiViceCop = true;
 		CPopulation::NumMiamiViceCops += 2;
 		CCarCtrl::MiamiViceCycle = (CCarCtrl::MiamiViceCycle + 1) % 4;
 		CCarCtrl::LastTimeMiamiViceGenerated = CTimer::GetTimeInMilliseconds();
 		return;
 	}
-*/
 	default:
 		return;
 	}

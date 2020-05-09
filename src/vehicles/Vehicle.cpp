@@ -99,6 +99,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_bSirenOrAlarm = 0;
 	m_nCarHornTimer = 0;
 	m_nCarHornPattern = 0;
+	bCreatedAsPoliceVehicle = false;
 	bParking = false;
 	m_nAlarmState = 0;
 	m_nDoorLock = CARLOCK_UNLOCKED;

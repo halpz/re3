@@ -199,6 +199,13 @@ CModelInfo::IsBikeModel(int32 id)
 		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_BIKE;
 }
 
+bool
+CModelInfo::IsCarModel(int32 id)
+{
+	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
+		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_CAR;
+}
+
 void
 CModelInfo::ReInit2dEffects()
 {
