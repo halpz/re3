@@ -901,6 +901,25 @@ CMenuManager::Draw()
 	bool foundTheHoveringItem = false;
 	wchar unicodeTemp[64];
 
+#ifdef MENU_MAP
+	if (m_nCurrScreen == MENUPAGE_MAP) {
+		// Back button
+		wchar *backTx = TheText.Get("FEDS_TB");
+		CFont::SetDropShadowPosition(1);
+		CFont::SetDropColor(CRGBA(0, 0, 0, 255));
+		CFont::PrintString(MENU_X(60.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), backTx);
+		CFont::SetDropShadowPosition(0);
+		if (!CheckHover(MENU_X(30.0f), MENU_X(30.0f) + CFont::GetStringWidth(backTx), SCREEN_SCALE_FROM_BOTTOM(125.0f), SCREEN_SCALE_FROM_BOTTOM(105.0f))) {
+			m_nHoverOption = HOVEROPTION_NOT_HOVERING;
+			m_nCurrOption = m_nPrevOption = 0;
+		} else {
+			m_nHoverOption = HOVEROPTION_RANDOM_ITEM;
+			m_nCurrOption = m_nPrevOption = 1;
+		}
+		return;
+	}
+#endif
+
 	for (int i = 0; i < NUM_MENUROWS; ++i) {
 		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0] != '\0') {
 			wchar *rightText = nil;
@@ -5381,13 +5400,13 @@ CMenuManager::PrintController(void)
 
 #define ZOOM(x, y, in) \
 	do { \
-		if(fMapSize > SCREEN_WIDTH * 2 && in) \
+		if(fMapSize > SCREEN_HEIGHT * 3.0f && in) \
 			break; \
 		float z2 = in? 1.1f : 1.f/1.1f; \
 		fMapCenterX += (x - fMapCenterX) * (1.0f - z2); \
 		fMapCenterY += (y - fMapCenterY) * (1.0f - z2); \
 		\
-		if (fMapSize < SCREEN_WIDTH / 3 && !in) \
+		if (fMapSize < SCREEN_HEIGHT / 2 && !in) \
 			break; \
 		\
 		fMapSize *= z2; \
@@ -5400,10 +5419,18 @@ CMenuManager::PrintMap(void)
 	bMenuMapActive = true;
 	CRadar::InitFrontEndMap();
 
+	// Just entered to map
 	if (!bMapLoaded) {
-		fMapCenterX = SCREEN_WIDTH / 2;
-		fMapCenterY = SCREEN_HEIGHT / 3;
-		fMapSize = SCREEN_HEIGHT / CDraw::GetAspectRatio();
+		fMapSize = SCREEN_HEIGHT * 2.0f;
+		fMapCenterX = 0.0f;
+		fMapCenterY = 0.0f;
+		CVector2D radarSpacePlayer;
+		CVector2D screenSpacePlayer;
+		CRadar::TransformRealWorldPointToRadarSpace(radarSpacePlayer, CVector2D(FindPlayerCoors()));
+		CRadar::TransformRadarPointToScreenSpace(screenSpacePlayer, radarSpacePlayer);
+
+		fMapCenterX = (-screenSpacePlayer.x) + SCREEN_WIDTH / 2;
+		fMapCenterY = (-screenSpacePlayer.y) + SCREEN_HEIGHT / 2;
 		bMapMouseShownOnce = false;
 		bMapLoaded = true;
 
