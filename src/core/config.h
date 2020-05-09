@@ -187,6 +187,7 @@ enum Config {
 #	define NO_MOVIES	// disable intro videos
 #	define NO_CDCHECK
 #	define CHATTYSPLASH	// print what the game is loading
+#	define DEBUGMENU
 //#	define TIMEBARS		// print debug timers
 #endif
 

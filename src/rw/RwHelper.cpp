@@ -13,6 +13,7 @@ RtCharset *debugCharset;
 
 bool gPS2alphaTest = 1;
 
+#ifndef FINAL
 static bool charsetOpen;
 void OpenCharsetSafe()
 {
@@ -20,6 +21,7 @@ void OpenCharsetSafe()
 		RtCharsetOpen();
 	charsetOpen = true;
 }
+#endif
 
 void CreateDebugFont()
 {

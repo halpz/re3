@@ -61,6 +61,7 @@ mysrand(unsigned int seed)
 	myrand_seed = seed;
 }
 
+#ifdef DEBUGMENU
 void WeaponCheat();
 void HealthCheat();
 void TankCheat();
@@ -384,6 +385,7 @@ DebugMenuPopulate(void)
 		CTweakVars::AddDBG("Debug");
 	}
 }
+#endif
 
 const int   re3_buffsize = 1024;
 static char re3_buff[re3_buffsize];
