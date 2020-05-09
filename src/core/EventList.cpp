@@ -67,8 +67,6 @@ CEventList::RegisterEvent(eEventType type, eEventEntity entityType, CEntity *ent
 	switch(entityType){
 	case EVENT_ENTITY_PED:
 		ref = CPools::GetPedRef((CPed*)ent);
-		if(ent->GetModelIndex() >= MI_GANG01 && ent->GetModelIndex() <= MI_CRIMINAL02)
-			copsDontCare = true;
 		break;
 	case EVENT_ENTITY_VEHICLE:
 		ref = CPools::GetVehicleRef((CVehicle*)ent);

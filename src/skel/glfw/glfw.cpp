@@ -1024,12 +1024,14 @@ void resizeCB(GLFWwindow* window, int width, int height) {
 	if (RwInitialised && height > 0 && width > 0) {
 		RwRect r;
 
-		// TODO support resizing with mouse. Now enabling this makes weird things to trails and CameraSize messing with sizes
+		// TODO fix artifacts of resizing with mouse
+		RsGlobal.maximumHeight = height;
+		RsGlobal.maximumWidth = width;
 
 		r.x = 0;
 		r.y = 0;
-		r.w = RsGlobal.maximumWidth;
-		r.h = RsGlobal.maximumHeight;
+		r.w = width;
+		r.h = height;
 
 		RsEventHandler(rsCAMERASIZE, &r);
 	}

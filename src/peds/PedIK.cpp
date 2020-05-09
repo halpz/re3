@@ -33,12 +33,17 @@ CPedIK::CPedIK(CPed *ped)
 
 #ifdef PED_SKIN
 inline RwMatrix*
-GetComponentMatrix(CPed *ped, int32 node)
+GetBoneMatrix(CPed *ped, int32 bone)
 {
 	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(ped->GetClump());
-	int idx = RpHAnimIDGetIndex(hier, ped->m_pFrames[node]->nodeID);
+	int idx = RpHAnimIDGetIndex(hier, bone);
 	RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
 	return &mats[idx];
+}
+inline RwMatrix*
+GetComponentMatrix(CPed *ped, int32 node)
+{
+	return GetBoneMatrix(ped, ped->m_pFrames[node]->nodeID);
 }
 #endif
 
@@ -245,7 +250,7 @@ CPedIK::LookInDirection(float phi, float theta)
 		}
 
 		// parent of head is torso
-		RwMatrix worldMat = *GetComponentMatrix(m_ped, BONE_torso);
+		RwMatrix worldMat = *GetComponentMatrix(m_ped, PED_NECK);
 		ExtractYawAndPitchWorld(&worldMat, &yaw, &pitch);
 
 		LimbMoveStatus headStatus = MoveLimb(m_headOrient, CGeneral::LimitRadianAngle(phi - yaw),

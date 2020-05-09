@@ -21,12 +21,6 @@ CCutsceneObject::CCutsceneObject(void)
 	ObjectCreatedBy = CUTSCENE_OBJECT;
 	m_fMass = 1.0f;
 	m_fTurnMass = 1.0f;
-
-#ifdef PED_SKIN
-	bRenderHead = true;
-	bRenderRightHand = true;
-	bRenderLeftHand = true;
-#endif
 }
 
 void
@@ -85,46 +79,8 @@ CCutsceneObject::PreRender(void)
 void
 CCutsceneObject::Render(void)
 {
-#ifdef PED_SKIN
-	if(IsClumpSkinned(GetClump())){
-		if(bRenderLeftHand) RenderLimb(BONE_Lhand);
-		if(bRenderRightHand) RenderLimb(BONE_Rhand);
-		if(bRenderHead) RenderLimb(BONE_head);
-	}
-#endif
 	CObject::Render();
 }
-
-#ifdef PED_SKIN
-void
-CCutsceneObject::RenderLimb(int32 bone)
-{
-	RpAtomic *atomic;
-	CPedModelInfo *mi = (CPedModelInfo *)CModelInfo::GetModelInfo(GetModelIndex());
-	switch(bone){
-	case BONE_head:
-		atomic = mi->getHead();
-		break;
-	case BONE_Lhand:
-		atomic = mi->getLeftHand();
-		break;
-	case BONE_Rhand:
-		atomic = mi->getRightHand();
-		break;
-	default:
-		return;
-	}
-	if(atomic){
-		RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
-		int idx = RpHAnimIDGetIndex(hier, bone);
-		RwMatrix *mat = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
-		RwFrame *frame = RpAtomicGetFrame(atomic);
-		*RwFrameGetMatrix(frame) = *mat;
-		RwFrameUpdateObjects(frame);
-		RpAtomicRender(atomic);
-	}
-}
-#endif
 
 bool
 CCutsceneObject::SetupLighting(void)

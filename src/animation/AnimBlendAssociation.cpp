@@ -159,6 +159,7 @@ CAnimBlendAssociation::Start(float time)
 	flags |= ASSOC_RUNNING;
 	SetCurrentTime(time);
 }
+
 bool
 CAnimBlendAssociation::UpdateTime(float timeDelta, float relSpeed)
 {

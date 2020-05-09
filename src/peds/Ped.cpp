@@ -2104,10 +2104,10 @@ CPed::PlayFootSteps(void)
 	float walkRunAssocBlend = 0.0f, idleAssocBlend = 0.0f;
 
 	for (; assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-		if (assoc->flags & ASSOC_FLAG80) {
+		if (assoc->flags & ASSOC_WALK) {
 			walkRunAssoc = assoc;
 			walkRunAssocBlend += assoc->blendAmount;
-		} else if ((assoc->flags & ASSOC_FLAG200) == 0) {
+		} else if ((assoc->flags & ASSOC_NOWALK) == 0) {
 			idleAssocBlend += assoc->blendAmount;
 		}
 	}
@@ -3295,7 +3295,7 @@ CPed::Chat(void)
 		} else
 			Say(SOUND_PED_CHAT);
 
-	} else if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG100)) {
+	} else if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG_XPRESS)) {
 
 		if (CGeneral::GetRandomNumber() < 20) {
 			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 4.0f);
@@ -3751,7 +3751,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	bool detectDieAnim = true;
 	if (m_nPedState == PED_FALL || m_nPedState == PED_GETUP) {
 		if (!IsPedHeadAbovePos(-0.3f)) {
-			if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG800))
+			if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
 				dieAnim = ANIM_FLOOR_HIT_F;
 			else
 				dieAnim = ANIM_FLOOR_HIT;
@@ -3773,7 +3773,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					if (IsPedHeadAbovePos(-0.3f)) {
 						dieAnim = NUM_ANIMS;
 					} else {
-						if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG800))
+						if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
 							dieAnim = ANIM_FLOOR_HIT_F;
 						else
 							dieAnim = ANIM_FLOOR_HIT;
@@ -3813,7 +3813,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 						if (IsPedHeadAbovePos(-0.3f)) {
 							dieAnim = NUM_ANIMS;
 						} else {
-							if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG800))
+							if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
 								dieAnim = ANIM_FLOOR_HIT_F;
 							else
 								dieAnim = ANIM_FLOOR_HIT;
@@ -4281,7 +4281,7 @@ CPed::SetGetUp(void)
 			animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 		}
 
-		if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG800))
+		if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
 			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_GETUP_FRONT, 1000.0f);
 		else
 			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_GETUP1, 1000.0f);
@@ -8036,83 +8036,11 @@ CPed::GetNextPointOnRoute(void)
 	return nextPoint;
 }
 
-// These categories are purely random, most of ped models have no correlation. So I don't think making an enum.
 uint8
 CPed::GetPedRadioCategory(uint32 modelIndex)
 {
-	switch (modelIndex) {
-		case MI_MALE01:
-		case MI_FEMALE03:
-		case MI_PROSTITUTE2:
-		case MI_WORKER1:
-		case MI_MOD_MAN:
-		case MI_MOD_WOM:
-		case MI_ST_WOM:
-		case MI_FAN_WOM:
-			return 3;
-		case MI_TAXI_D:
-		case MI_PIMP:
-		case MI_MALE02:
-		case MI_FEMALE02:
-		case MI_FATFEMALE01:
-		case MI_FATFEMALE02:
-		case MI_DOCKER1:
-		case MI_WORKER2:
-		case MI_FAN_MAN2:
-			return 9;
-		case MI_GANG01:
-		case MI_GANG02:
-		case MI_SCUM_MAN:
-		case MI_SCUM_WOM:
-		case MI_HOS_WOM:
-		case MI_CONST1:
-			return 1;
-		case MI_GANG03:
-		case MI_GANG04:
-		case MI_GANG07:
-		case MI_GANG08:
-		case MI_CT_MAN2:
-		case MI_CT_WOM2:
-		case MI_B_MAN3:
-		case MI_SHOPPER3:
-			return 4;
-		case MI_GANG05:
-		case MI_GANG06:
-		case MI_GANG11:
-		case MI_GANG12:
-		case MI_CRIMINAL02:
-		case MI_B_WOM2:
-		case MI_ST_MAN:
-		case MI_HOS_MAN:
-			return 5;
-		case MI_FATMALE01:
-		case MI_LI_MAN2:
-		case MI_SHOPPER1:
-		case MI_CAS_MAN:
-			return 6;
-		case MI_PROSTITUTE:
-		case MI_P_WOM2:
-		case MI_LI_WOM2:
-		case MI_B_WOM3:
-		case MI_CAS_WOM:
-			return 2;
-		case MI_P_WOM1:
-		case MI_DOCKER2:
-		case MI_STUD_MAN:
-			return 7;
-		case MI_CT_MAN1:
-		case MI_CT_WOM1:
-		case MI_LI_MAN1:
-		case MI_LI_WOM1:
-		case MI_B_MAN1:
-		case MI_B_MAN2:
-		case MI_B_WOM1:
-		case MI_SHOPPER2:
-		case MI_STUD_WOM:
-			return 8;
-		default:
-			return 0;
-	}
+	// TODO(MIAMI): remove this function and use modelinfo for radio
+	return 1;
 }
 
 // Some kind of VC leftover I think
@@ -16306,7 +16234,7 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 		if (CGame::nastyGame) {
 			if (hitLevel == HITLEVEL_GROUND) {
 				CAnimBlendAssociation *floorHitAssoc;
-				if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG800)) {
+				if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL)) {
 					floorHitAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT_F, 8.0f);
 				} else {
 					floorHitAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[FIGHTMOVE_HITONFLOOR].animId, 8.0f);
@@ -16328,7 +16256,7 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 		}
 	} else if (m_nPedState == PED_FALL) {
 		if (hitLevel == HITLEVEL_GROUND && !IsPedHeadAbovePos(-0.3f)) {
-			CAnimBlendAssociation *floorHitAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG800) ?
+			CAnimBlendAssociation *floorHitAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL) ?
 				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT_F, 8.0f) :
 				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT, 8.0f);
 			if (floorHitAssoc) {
@@ -17153,7 +17081,7 @@ CPed::SetMoveAnim(void)
 	else
 		animGroupToUse = m_animGroup;
 
-	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG400);
+	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_BLOCK);
 	if (!animAssoc) {
 		CAnimBlendAssociation *fightIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
 		animAssoc = fightIdleAssoc;

@@ -861,15 +861,16 @@ CFileLoader::LoadPedObject(const char *line)
 {
 	int id;
 	char model[24], txd[24];
-	char pedType[24], pedStats[24], animGroup[24];
+	char pedType[24], pedStats[24], animGroup[24], animFile[16];
 	int carsCanDrive;
 	CPedModelInfo *mi;
 	int animGroupId;
+	int radio1, radio2;
 
-	if(sscanf(line, "%d %s %s %s %s %s %x",
+	sscanf(line, "%d %s %s %s %s %s %x %s %d %d",
 	          &id, model, txd,
-	          pedType, pedStats, animGroup, &carsCanDrive) != 7)
-		return;
+	          pedType, pedStats, animGroup, &carsCanDrive,
+		  animFile, &radio1, &radio2);
 
 	mi = CModelInfo::AddPedModel(id);
 	mi->SetName(model);

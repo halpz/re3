@@ -40,6 +40,8 @@ enum
 #define DEFAULT_CAR_ZOOM_VALUE_2 (1.9f)
 #define DEFAULT_CAR_ZOOM_VALUE_3 (3.9f)
 
+const float DefaultFOV = 70.0f; // beta: 80.0f
+
 class CCam
 {
 public:

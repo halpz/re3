@@ -5,8 +5,8 @@
 #include "PedStats.h"
 
 enum PedNode {
-	PED_TORSO,
-	PED_MID,	// Smid on PS2/PC, Storso on mobile/xbox
+	PED_TORSO = 0,	// has no bone!
+	PED_MID,
 	PED_HEAD,
 	PED_UPPERARML,
 	PED_UPPERARMR,
@@ -17,7 +17,15 @@ enum PedNode {
 	PED_FOOTL,
 	PED_FOOTR,
 	PED_LOWERLEGR,
-	PED_NODE_MAX// Not valid: PED_LOWERLEGL
+	PED_LOWERLEGL,
+
+	PED_FOREARML,
+	PED_FOREARMR,
+	PED_CLAVICLEL,
+	PED_CLAVICLER,
+	PED_NECK,
+
+	PED_NODE_MAX
 };
 
 class CPedModelInfo : public CClumpModelInfo

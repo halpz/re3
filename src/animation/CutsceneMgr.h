@@ -41,7 +41,6 @@ public:
 	static void Shutdown(void);
 	static void LoadCutsceneData(const char *szCutsceneName);
 	static void FinishCutscene(void);
-	static void SetHeadAnim(const char *animName, CObject *pObject);
 	static void SetupCutsceneToStart(void);
 	static void SetCutsceneAnim(const char *animName, CObject *pObject);
 	static CCutsceneHead *AddCutsceneHead(CObject *pObject, int modelId);

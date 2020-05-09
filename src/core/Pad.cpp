@@ -140,9 +140,9 @@ void ChangePlayerCheat()
 		do
 		{
 			do
-				modelId = CGeneral::GetRandomNumberInRange(0, MI_CAS_WOM+1);
+				modelId = CGeneral::GetRandomNumberInRange(0, MI_WFYG2+1);
 			while (!CModelInfo::GetModelInfo(modelId));
-		} while (modelId >= MI_SPECIAL01 && modelId <= MI_SPECIAL04 || modelId == MI_TAXI_D);
+		} while (modelId == MI_TAXI_D);
 
 		uint8 flags = CStreaming::ms_aInfoForModel[modelId].m_flags;
 		ped->DeleteRwObject();

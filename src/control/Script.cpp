@@ -5903,8 +5903,8 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 				continue;
 			if (pPed->bFadeOut)
 				continue;
-			if (pPed->GetModelIndex() == MI_SCUM_WOM || pPed->GetModelIndex() == MI_SCUM_MAN)
-				continue;
+//			if (pPed->GetModelIndex() == MI_SCUM_WOM || pPed->GetModelIndex() == MI_SCUM_MAN)
+//				continue;
 			if (!ThisIsAValidRandomPed(pPed->m_nPedType))
 				continue;
 			if (pPed->bIsLeader || pPed->m_leader)
@@ -5952,8 +5952,8 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 				continue;
 			if (pPed->bFadeOut)
 				continue;
-			if (pPed->GetModelIndex() == MI_SCUM_WOM || pPed->GetModelIndex() == MI_SCUM_MAN)
-				continue;
+//			if (pPed->GetModelIndex() == MI_SCUM_WOM || pPed->GetModelIndex() == MI_SCUM_MAN)
+//				continue;
 			if (!ThisIsAValidRandomPed(pPed->m_nPedType))
 				continue;
 			if (pPed->bIsLeader || pPed->m_leader)
@@ -6175,25 +6175,12 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	}
 	case COMMAND_CREATE_CUTSCENE_HEAD:
 	{
-		CollectParameters(&m_nIp, 2);
-		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		assert(pObject);
-		CCutsceneHead* pCutHead = CCutsceneMgr::AddCutsceneHead(pObject, ScriptParams[1]);
-		ScriptParams[0] = CPools::GetObjectPool()->GetIndex(pCutHead);
-		StoreParameters(&m_nIp, 1);
+		assert(0);
 		return 0;
 	}
 	case COMMAND_SET_CUTSCENE_HEAD_ANIM:
 	{
-		CollectParameters(&m_nIp, 1);
-		CObject* pCutHead = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		assert(pCutHead);
-		char name[KEY_LENGTH_IN_SCRIPT];
-		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
-		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CTimer::Stop();
-		CCutsceneMgr::SetHeadAnim(name, pCutHead);
-		CTimer::Update();
+		assert(0);
 		return 0;
 	}
 	case COMMAND_SIN:

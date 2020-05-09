@@ -459,6 +459,8 @@ const CMenuScreen aScreens[] = {
 #ifdef MENU_MAP
    // MENUPAGE_MAP = 59
    { "FEG_MAP", 1, MENUPAGE_NONE, MENUPAGE_NONE, 5, 2,
+		MENUACTION_UNK110,	"", SAVESLOT_NONE, MENUPAGE_NONE, // to prevent cross/enter to go back
+		MENUACTION_CHANGEMENU,	"FEDS_TB", SAVESLOT_NONE, MENUPAGE_NONE,
    },
 #endif
 };
