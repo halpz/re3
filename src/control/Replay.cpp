@@ -47,7 +47,7 @@ CAutomobile *CReplay::pBuf1;
 uint8 *CReplay::pBuf2;
 CPlayerPed *CReplay::pBuf3;
 uint8 *CReplay::pBuf4;
-CCutsceneHead *CReplay::pBuf5;
+CCutsceneObject *CReplay::pBuf5;
 uint8 *CReplay::pBuf6;
 CPtrNode *CReplay::pBuf7;
 uint8 *CReplay::pBuf8;

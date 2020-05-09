@@ -16,7 +16,6 @@
 #include "World.h"
 #include "PlayerPed.h"
 #include "Wanted.h"
-#include "CutsceneHead.h"
 #include "RpAnimBlend.h"
 #include "ModelIndices.h"
 #include "TempColModels.h"
@@ -240,16 +239,6 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 }
 
 void
-CCutsceneMgr::SetHeadAnim(const char *animName, CObject *pObject)
-{
-	CCutsceneHead *pCutsceneHead = (CCutsceneHead*)pObject;
-	char szAnim[CUTSCENENAMESIZE * 2];
-
-	sprintf(szAnim, "%s_%s", ms_cutsceneName, animName);
-	pCutsceneHead->PlayAnimation(szAnim);
-}
-
-void
 CCutsceneMgr::FinishCutscene()
 {
 	CCutsceneMgr::ms_cutsceneTimer = TheCamera.GetCutSceneFinishTime() * 0.001f;
@@ -307,11 +296,7 @@ CCutsceneMgr::SetCutsceneAnim(const char *animName, CObject *pObject)
 CCutsceneHead *
 CCutsceneMgr::AddCutsceneHead(CObject *pObject, int modelId)
 {
-	CCutsceneHead *pHead = new CCutsceneHead(pObject);
-	pHead->SetModelIndex(modelId);
-	CWorld::Add(pHead);
-	ms_pCutsceneObjects[ms_numCutsceneObjs++] = pHead;
-	return pHead;
+	return nil;
 }
 
 CCutsceneObject *
