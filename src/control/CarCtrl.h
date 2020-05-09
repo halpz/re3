@@ -126,6 +126,7 @@ public:
 	static void RemoveFromLoadedVehicleArray(int32 mi, int32 rating);
 	static int32 ChooseCarModelToLoad(int32 rating);
 	static bool BoatWithTallMast(int32 mi);
+	static void RemoveCarsIfThePoolGetsFull(void);
 
 	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle)
 	{

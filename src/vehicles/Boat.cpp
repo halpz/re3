@@ -431,7 +431,7 @@ CBoat::ProcessControl(void)
 				speedUp = pHandling->fBrakeDeceleration - m_vecMoveSpeed.z;
 			if(speedUp < 0.0f) speedUp = 0.0f;
 			float speedFwd = DotProduct(m_vecMoveSpeed, GetForward());
-			speedFwd *= -m_nDeltaVolumeUnderWater * 0.01f * pHandling->fTractionLoss;
+			speedFwd *= -m_nDeltaVolumeUnderWater * 0.01f * pHandling->fBrakeBias;
 			CVector speed = speedFwd*GetForward() + CVector(0.0f, 0.0f, speedUp);
 			CVector splashImpulse = speed * m_fMass;
 			ApplyMoveForce(splashImpulse);

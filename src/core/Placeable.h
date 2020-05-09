@@ -16,7 +16,7 @@ public:
 		m_matrix.GetPosition().y = y;
 		m_matrix.GetPosition().z = z;
 	}
-	void SetPosition(const CVector &pos) { m_matrix.GetPosition() = pos; }
+	void SetPosition(const CVector& pos) { m_matrix.GetPosition() = pos; }
 	CVector &GetRight(void) { return m_matrix.GetRight(); }
 	CVector &GetForward(void) { return m_matrix.GetForward(); }
 	CVector &GetUp(void) { return m_matrix.GetUp(); }

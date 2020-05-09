@@ -130,4 +130,6 @@ public:
 	void Load(uint8*& buf);
 #endif
 
+	float GetCruiseSpeed(void) { return m_nCruiseSpeed * m_fCruiseSpeedMultiplier; }
+
 };

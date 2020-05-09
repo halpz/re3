@@ -55,6 +55,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_fSteerRatio = 0.0f;
 	m_type = ENTITY_TYPE_VEHICLE;
 	VehicleCreatedBy = CreatedBy;
+	m_nRouteSeed = 0;
 	bIsLocked = false;
 	bIsLawEnforcer = false;
 	bIsAmbulanceOnDuty = false;
