@@ -122,7 +122,7 @@ void CBulletInfo::Update(void)
 					}
 					if (pPed->GetPedState() == PED_DEAD) {
 						CAnimBlendAssociation* pAnim;
-						if (RpAnimBlendClumpGetFirstAssociation(pPed->GetClump(), ASSOC_FLAG800))
+						if (RpAnimBlendClumpGetFirstAssociation(pPed->GetClump(), ASSOC_FRONTAL))
 							pAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT_F, 8.0f);
 						else
 							pAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT, 8.0f);
