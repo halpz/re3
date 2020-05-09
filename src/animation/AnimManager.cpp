@@ -825,8 +825,7 @@ CAnimManager::BlendAnimation(RpClump *clump, AssocGroupId groupId, AnimationId a
 void
 CAnimManager::LoadAnimFiles(void)
 {
-//	LoadAnimFile("ANIM\\PED.IFP");
-	LoadAnimFile("ANIM\\PED_MIAMI.IFP");
+	LoadAnimFile("ANIM\\PED.IFP");
 	ms_aAnimAssocGroups = new CAnimBlendAssocGroup[NUM_ANIM_ASSOC_GROUPS];
 	CreateAnimAssocGroups();
 }
