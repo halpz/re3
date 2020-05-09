@@ -131,7 +131,7 @@ public:
 		// TODO: the cast is unsafe
 		return (int)((U*)entry - m_entries);
 	}
-	int GetNoOfUsedSpaces(void){
+	int GetNoOfUsedSpaces(void) const{
 		int i;
 		int n = 0;
 		for(i = 0; i < m_size; i++)
