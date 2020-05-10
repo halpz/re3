@@ -147,7 +147,7 @@ CVisibilityPlugins::RenderFadingEntities(void)
 		if(e->m_rwObject == nil)
 			continue;
 		mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex());
-		if(mi->m_noZwrite)
+		if(mi->GetModelType() == MITYPE_SIMPLE && mi->m_noZwrite)
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, FALSE);
 
 		if(e->bDistanceFade){
@@ -159,7 +159,7 @@ CVisibilityPlugins::RenderFadingEntities(void)
 		}else
 			CRenderer::RenderOneNonRoad(e);
 
-		if(mi->m_noZwrite)
+		if(mi->GetModelType() == MITYPE_SIMPLE && mi->m_noZwrite)
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 	}
 }
@@ -513,6 +513,20 @@ CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic *atomic)
 		}
 	}
 	return atomic;
+}
+
+RpAtomic*
+CVisibilityPlugins::RenderVehicleRotorAlphaCB(RpAtomic *atomic)
+{
+	// TODO(MIAMI):
+	return AtomicDefaultRenderCallBack(atomic);
+}
+
+RpAtomic*
+CVisibilityPlugins::RenderVehicleTailRotorAlphaCB(RpAtomic *atomic)
+{
+	// TODO(MIAMI):
+	return AtomicDefaultRenderCallBack(atomic);
 }
 
 RpAtomic*

@@ -60,6 +60,8 @@ public:
 	static RpAtomic *RenderVehicleReallyLowDetailCB_BigVehicle(RpAtomic *atomic);
 	static RpAtomic *RenderTrainHiDetailCB(RpAtomic *atomic);
 	static RpAtomic *RenderTrainHiDetailAlphaCB(RpAtomic *atomic);
+	static RpAtomic *RenderVehicleRotorAlphaCB(RpAtomic *atomic);
+	static RpAtomic *RenderVehicleTailRotorAlphaCB(RpAtomic *atomic);
 
 	static RpAtomic *RenderPlayerCB(RpAtomic *atomic);
 	static RpAtomic *RenderPedLowDetailCB(RpAtomic *atomic);

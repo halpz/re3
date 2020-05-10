@@ -273,6 +273,20 @@ void NastyLimbsCheat()
 {
 	CPed::bNastyLimbsCheat = !CPed::bNastyLimbsCheat;
 }
+
+void BlackCarsCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	gbBlackCars = true;
+	gbPinkCars = false;
+}
+
+void PinkCarsCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	gbBlackCars = false;
+	gbPinkCars = true;
+}
 //////////////////////////////////////////////////////////////////////////
 
 #ifdef KANGAROO_CHEAT
@@ -950,6 +964,14 @@ void CPad::AddToPCCheatString(char c)
 	// "NASTYLIMBSCHEAT"
 	if ( !_CHEATCMP("TAEHCSBMILYTSAN") )
 		NastyLimbsCheat();
+
+	// "IWANTITPAINTEDBLACK"
+	if ( !_CHEATCMP("KCALBDETNIAPTITNAWI") )
+		BlackCarsCheat();
+
+	// "AHAIRDRESSERSCAR"
+	if ( !_CHEATCMP("RACSRESSERDRIAHA") )
+		PinkCarsCheat();
 
 #ifdef KANGAROO_CHEAT
 	// "KANGAROO"

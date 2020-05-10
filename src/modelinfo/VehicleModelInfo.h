@@ -3,8 +3,8 @@
 #include "ClumpModelInfo.h"
 
 enum {
-	NUM_FIRST_MATERIALS = 26,
-	NUM_SECOND_MATERIALS = 26,
+	NUM_FIRST_MATERIALS = 24,
+	NUM_SECOND_MATERIALS = 20,
 	NUM_VEHICLE_COLOURS = 8,
 };
 
@@ -43,17 +43,18 @@ class CVehicleModelInfo : public CClumpModelInfo
 public:
 	uint8 m_lastColour1;
 	uint8 m_lastColour2;
-	char m_gameName[32];
+	char m_gameName[10];
 	int32 m_vehicleType;
-	union {
-		int32 m_wheelId;
-		int32 m_planeLodId;
-	};
 	float m_wheelScale;
-	int32 m_numDoors;
-	int32 m_handlingId;
-	int32 m_vehicleClass;
-	int32 m_level;
+	union {
+		int16 m_wheelId;
+		int16 m_planeLodId;
+	};
+	int16 m_handlingId;
+	int8 m_numDoors;
+	int8 m_vehicleClass;
+	int8 m_level;
+	int8 m_numComps;
 	int16 m_frequency;
 	CVector m_positions[NUM_VEHICLE_POSITIONS];
 	uint32 m_compRules;
@@ -66,9 +67,11 @@ public:
 	uint8 m_lastColorVariation;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
-	RwTexture *m_envMap;
 	RpAtomic *m_comps[6];
-	int32 m_numComps;
+	union {
+		int32 m_animFileIndex;
+		char *m_animFileName;
+	};
 
 	static int8 ms_compsToUse[2];
 	static int8 ms_compsUsed[2];
@@ -80,6 +83,9 @@ public:
 	void DeleteRwObject(void);
 	RwObject *CreateInstance(void);
 	void SetClump(RpClump *);
+	void SetAnimFile(const char *file);
+	void ConvertAnimFileIndex(void);
+	int GetAnimFileIndex(void) { return m_animFileIndex; }
 
 	static RwFrame *CollapseFramesCB(RwFrame *frame, void *data);
 	static RwObject *MoveObjectsCB(RwObject *object, void *data);
@@ -92,6 +98,7 @@ public:
 	static RpAtomic *SetAtomicRendererCB_Train(RpAtomic *atomic, void *data);
 	static RpAtomic *SetAtomicRendererCB_Boat(RpAtomic *atomic, void *data);
 	static RpAtomic *SetAtomicRendererCB_Heli(RpAtomic *atomic, void *data);
+	static RpAtomic *SetAtomicRendererCB_RealHeli(RpAtomic *atomic, void *data);
 	void SetAtomicRenderCallbacks(void);
 
 	static RwObject *SetAtomicFlagCB(RwObject *object, void *data);
@@ -122,3 +129,6 @@ public:
 	static int GetMaximumNumberOfPassengersFromNumberOfDoors(int id);
 	static void SetComponentsToUse(int8 c1, int8 c2) { ms_compsToUse[0] = c1; ms_compsToUse[1] = c2; }
 };
+
+extern bool gbBlackCars;
+extern bool gbPinkCars;
