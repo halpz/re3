@@ -4,6 +4,7 @@
 #include "BaseModelInfo.h"
 #include "SimpleModelInfo.h"
 #include "TimeModelInfo.h"
+#include "WeaponModelInfo.h"
 #include "ClumpModelInfo.h"
 #include "PedModelInfo.h"
 #include "VehicleModelInfo.h"
@@ -14,6 +15,7 @@ class CModelInfo
 	static CBaseModelInfo *ms_modelInfoPtrs[MODELINFOSIZE];
 	static CStore<CSimpleModelInfo, SIMPLEMODELSIZE> ms_simpleModelStore;
 	static CStore<CTimeModelInfo, TIMEMODELSIZE> ms_timeModelStore;
+	static CStore<CWeaponModelInfo, WEAPONMODELSIZE> ms_weaponModelStore;
 	static CStore<CClumpModelInfo, CLUMPMODELSIZE> ms_clumpModelStore;
 	static CStore<CPedModelInfo, PEDMODELSIZE> ms_pedModelStore;
 	static CStore<CVehicleModelInfo, VEHICLEMODELSIZE> ms_vehicleModelStore;
@@ -25,6 +27,7 @@ public:
 
 	static CSimpleModelInfo *AddSimpleModel(int id);
 	static CTimeModelInfo *AddTimeModel(int id);
+	static CWeaponModelInfo *AddWeaponModel(int id);
 	static CClumpModelInfo *AddClumpModel(int id);
 	static CPedModelInfo *AddPedModel(int id);
 	static CVehicleModelInfo *AddVehicleModel(int id);

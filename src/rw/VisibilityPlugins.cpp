@@ -218,6 +218,25 @@ CVisibilityPlugins::RenderAlphaAtomic(RpAtomic *atomic, int alpha)
 	return atomic;
 }
 
+//--MIAMI: done
+RpAtomic*
+CVisibilityPlugins::RenderWeaponCB(RpAtomic *atomic)
+{
+	RwMatrix *m;
+	RwV3d view;
+	float maxdist, distsq;
+	CSimpleModelInfo *mi;
+
+	mi = GetAtomicModelInfo(atomic);
+	m = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+	RwV3dSub(&view, RwMatrixGetPos(m), ms_pCameraPosn);
+	maxdist = mi->GetLodDistance(0);
+	distsq = RwV3dDotProduct(&view, &view);
+	if(distsq < maxdist*maxdist)
+		AtomicDefaultRenderCallBack(atomic);
+	return atomic;
+}
+
 RpAtomic*
 CVisibilityPlugins::RenderFadingAtomic(RpAtomic *atomic, float camdist)
 {

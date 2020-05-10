@@ -9,6 +9,7 @@ CBaseModelInfo *CModelInfo::ms_modelInfoPtrs[MODELINFOSIZE];
 
 CStore<CSimpleModelInfo, SIMPLEMODELSIZE> CModelInfo::ms_simpleModelStore;
 CStore<CTimeModelInfo, TIMEMODELSIZE> CModelInfo::ms_timeModelStore;
+CStore<CWeaponModelInfo, WEAPONMODELSIZE> CModelInfo::ms_weaponModelStore;
 CStore<CClumpModelInfo, CLUMPMODELSIZE> CModelInfo::ms_clumpModelStore;
 CStore<CPedModelInfo, PEDMODELSIZE> CModelInfo::ms_pedModelStore;
 CStore<CVehicleModelInfo, VEHICLEMODELSIZE> CModelInfo::ms_vehicleModelStore;
@@ -25,6 +26,7 @@ CModelInfo::Initialise(void)
 	ms_2dEffectStore.clear();
 	ms_simpleModelStore.clear();
 	ms_timeModelStore.clear();
+	ms_weaponModelStore.clear();
 	ms_clumpModelStore.clear();
 	ms_pedModelStore.clear();
 	ms_vehicleModelStore.clear();
@@ -86,6 +88,8 @@ CModelInfo::ShutDown(void)
 		ms_simpleModelStore.store[i].Shutdown();
 	for(i = 0; i < ms_timeModelStore.allocPtr; i++)
 		ms_timeModelStore.store[i].Shutdown();
+	for(i = 0; i < ms_weaponModelStore.allocPtr; i++)
+		ms_weaponModelStore.store[i].Shutdown();
 	for(i = 0; i < ms_clumpModelStore.allocPtr; i++)
 		ms_clumpModelStore.store[i].Shutdown();
 	for(i = 0; i < ms_vehicleModelStore.allocPtr; i++)
@@ -98,6 +102,7 @@ CModelInfo::ShutDown(void)
 	ms_2dEffectStore.clear();
 	ms_simpleModelStore.clear();
 	ms_timeModelStore.clear();
+	ms_weaponModelStore.clear();
 	ms_pedModelStore.clear();
 	ms_clumpModelStore.clear();
 	ms_vehicleModelStore.clear();
@@ -118,6 +123,16 @@ CModelInfo::AddTimeModel(int id)
 {
 	CTimeModelInfo *modelinfo;
 	modelinfo = CModelInfo::ms_timeModelStore.alloc();
+	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
+	modelinfo->Init();
+	return modelinfo;
+}
+
+CWeaponModelInfo*
+CModelInfo::AddWeaponModel(int id)
+{
+	CWeaponModelInfo *modelinfo;
+	modelinfo = CModelInfo::ms_weaponModelStore.alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->Init();
 	return modelinfo;
