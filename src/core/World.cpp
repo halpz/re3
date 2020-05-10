@@ -382,7 +382,11 @@ CWorld::ProcessVerticalLine(const CVector &point1, float z2, CColPoint &point, C
 {
 	AdvanceCurrentScanCode();
 	CVector point2(point1.x, point1.y, z2);
-	return ProcessVerticalLineSector(*GetSector(GetSectorIndexX(point1.x), GetSectorIndexY(point1.y)),
+	int secX = GetSectorIndexX(point1.x);
+	int secY = GetSectorIndexY(point1.y);
+	secX = clamp(secX, 0, NUMSECTORS_X-1);
+	secY = clamp(secY, 0, NUMSECTORS_Y-1);
+	return ProcessVerticalLineSector(*GetSector(secX, secY),
 	                                 CColLine(point1, point2), point, entity, checkBuildings, checkVehicles,
 	                                 checkPeds, checkObjects, checkDummies, ignoreSeeThrough, poly);
 }

@@ -806,7 +806,7 @@ CPlane::LoadPath(char const *filename, int32 &numNodes, float &totalLength, bool
 
 	for(i = 0; i < numNodes; i++){
 		*gString = '\0';
-		for(lp = 0; work_buff[bp] != '\n'; bp++, lp++)
+		for(lp = 0; work_buff[bp] != '\n' && work_buff[bp] != '\0'; bp++, lp++)
 			gString[lp] = work_buff[bp];
 		bp++;
 		// BUG: game doesn't terminate string

@@ -398,10 +398,10 @@ CBoat::ProcessControl(void)
 		}
 
 		// Slow down or push down boat as it approaches the world limits
-		m_vecMoveSpeed.x = Min(m_vecMoveSpeed.x, -(GetPosition().x - 1900.0f)*0.01f);	// east
-		m_vecMoveSpeed.x = Max(m_vecMoveSpeed.x, -(GetPosition().x - -1515.0f)*0.01f);	// west
-		m_vecMoveSpeed.y = Min(m_vecMoveSpeed.y, -(GetPosition().y - 600.0f)*0.01f);	// north
-		m_vecMoveSpeed.y = Max(m_vecMoveSpeed.y, -(GetPosition().y - -1900.0f)*0.01f);	// south
+		m_vecMoveSpeed.x = Min(m_vecMoveSpeed.x, -(GetPosition().x - (WORLD_MAX_X-50.0f))*0.01f);	// east
+		m_vecMoveSpeed.x = Max(m_vecMoveSpeed.x, -(GetPosition().x - (WORLD_MIN_X+50.0f))*0.01f);	// west
+		m_vecMoveSpeed.y = Min(m_vecMoveSpeed.y, -(GetPosition().y - (WORLD_MAX_Y-50.0f))*0.01f);	// north
+		m_vecMoveSpeed.y = Max(m_vecMoveSpeed.y, -(GetPosition().y - (WORLD_MIN_Y+50.0f))*0.01f);	// south
 
 		if(!onLand && bBoatInWater)
 			ApplyWaterResistance();
