@@ -292,10 +292,5 @@ public:
 };
 
 VALIDATE_SIZE(CVehicle, 0x288);
-#ifdef CHECK_STRUCT_SIZES
-static_assert(offsetof(CVehicle, m_pCurGroundEntity) == 0x1E0, "CVehicle: error");
-static_assert(offsetof(CVehicle, m_nAlarmState) == 0x1A0, "CVehicle: error");
-static_assert(offsetof(CVehicle, m_nLastWeaponDamage) == 0x228, "CVehicle: error");
-#endif
 
 void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);
