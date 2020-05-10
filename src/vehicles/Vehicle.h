@@ -182,6 +182,7 @@ public:
 	uint8 bIsCarParkVehicle : 1; // Car has been created using the special CAR_PARK script command
 	uint8 bHasAlreadyBeenRecorded : 1; // Used for replays
 
+	uint8 bPartOfConvoy : 1;
 	uint8 bCreatedAsPoliceVehicle : 1;// True if this guy was created as a police vehicle (enforcer, policecar, miamivice car etc)
 	uint8 bParking : 1;
 
@@ -287,6 +288,7 @@ public:
 	bool ShufflePassengersToMakeSpace(void);
 	void InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage);
 	void DoFixedMachineGuns(void);
+	void FireFixedMachineGuns(void);
 
 
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }

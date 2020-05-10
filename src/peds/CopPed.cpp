@@ -17,7 +17,7 @@
 #include "Renderer.h"
 #include "Camera.h"
 
-CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
+CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 {
 	m_nCopType = copType;
 	switch (copType) {
@@ -57,7 +57,23 @@ CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 		m_wepSkills = 32; /* TODO: what is this? seems unused */
 		m_wepAccuracy = 84;
 		break;
-	default:
+	case COP_MIAMIVICE:
+		switch (modifier) {
+		case 0: SetModelIndex(MI_VICE1); break;
+		case 1: SetModelIndex(MI_VICE2); break;
+		case 2: SetModelIndex(MI_VICE3); break;
+		case 3: SetModelIndex(MI_VICE4); break;
+		case 4: SetModelIndex(MI_VICE5); break;
+		case 5: SetModelIndex(MI_VICE6); break;
+		case 6: SetModelIndex(MI_VICE7); break;
+		case 7: SetModelIndex(MI_VICE8); break;
+		default: assert(0); break;
+		}
+		GiveWeapon(WEAPONTYPE_UZI, 1000);
+		SetCurrentWeapon(WEAPONTYPE_UZI);
+		m_fArmour = 100.0f;
+		m_wepSkills = 176;
+		m_wepAccuracy = 76;
 		break;
 	}
 	m_bIsInPursuit = false;

@@ -7,6 +7,7 @@ enum eCopType
 	COP_FBI = 1,
 	COP_SWAT = 2,
 	COP_ARMY = 3,
+	COP_MIAMIVICE = 5
 };
 
 class CCopPed : public CPed
@@ -24,7 +25,7 @@ public:
 	eCopType m_nCopType;
 	int8 field_1364;
 
-	CCopPed(eCopType);
+	CCopPed(eCopType, int32 modifier = 0);
 	~CCopPed();
 
 	void ClearPursuit(void);

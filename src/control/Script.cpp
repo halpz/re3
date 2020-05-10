@@ -9784,7 +9784,15 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_SET_CAR_FORWARD_SPEED:
 	case COMMAND_SET_AREA_VISIBLE:
 	case COMMAND_SET_CUTSCENE_ANIM_TO_LOOP:
+		assert(0);
 	case COMMAND_MARK_CAR_AS_CONVOY_CAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pVehicle);
+		pVehicle->bPartOfConvoy = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_RESET_HAVOC_CAUSED_BY_PLAYER:
 	case COMMAND_GET_HAVOC_CAUSED_BY_PLAYER:
 	case COMMAND_CREATE_SCRIPT_ROADBLOCK:
