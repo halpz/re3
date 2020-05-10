@@ -100,6 +100,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_bSirenOrAlarm = 0;
 	m_nCarHornTimer = 0;
 	m_nCarHornPattern = 0;
+	bPartOfConvoy = false;
 	bCreatedAsPoliceVehicle = false;
 	bParking = false;
 	m_nAlarmState = 0;
@@ -697,48 +698,54 @@ void
 CVehicle::DoFixedMachineGuns(void)
 {
 	if(CPad::GetPad(0)->GetCarGunFired() && !bGunSwitchedOff){
-		if(CTimer::GetTimeInMilliseconds() > m_nGunFiringTime + 150){
-			CVector source, target;
-			float dx, dy, len;
-
-			dx = GetForward().x;
-			dy = GetForward().y;
-			len = Sqrt(SQR(dx) + SQR(dy));
-			if(len < 0.1f) len = 0.1f;
-			dx /= len;
-			dy /= len;
-
-			m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
-
-			source = GetMatrix() * CVector(2.0f, 2.5f, 1.0f);
-			target = source + CVector(dx, dy, 0.0f)*60.0f;
-			target += CVector(
-				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.015f,
-				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.015f,
-				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.02f);
-			CWeapon::DoTankDoomAiming(this, pDriver, &source, &target);
-			FireOneInstantHitRound(&source, &target, 15);
-
-			source = GetMatrix() * CVector(-2.0f, 2.5f, 1.0f);
-			target = source + CVector(dx, dy, 0.0f)*60.0f;
-			target += CVector(
-				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.015f,
-				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.015f,
-				((CGeneral::GetRandomNumber()&0xFF)-128) * 0.02f);
-			CWeapon::DoTankDoomAiming(this, pDriver, &source, &target);
-			FireOneInstantHitRound(&source, &target, 15);
-
-			DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
-
-			m_nAmmoInClip--;
-			if(m_nAmmoInClip == 0){
-				m_nAmmoInClip = 20;
-				m_nGunFiringTime = CTimer::GetTimeInMilliseconds() + 1400;
-			}
-		}
+		FireFixedMachineGuns();
 	}else{
 		if(CTimer::GetTimeInMilliseconds() > m_nGunFiringTime + 1400)
 			m_nAmmoInClip = 20;
+	}
+}
+
+void
+CVehicle::FireFixedMachineGuns(void)
+{
+	if (CTimer::GetTimeInMilliseconds() <= m_nGunFiringTime + 150)
+		return;
+	CVector source, target;
+	float dx, dy, len;
+
+	dx = GetForward().x;
+	dy = GetForward().y;
+	len = Sqrt(SQR(dx) + SQR(dy));
+	if (len < 0.1f) len = 0.1f;
+	dx /= len;
+	dy /= len;
+
+	m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
+
+	source = GetMatrix() * CVector(2.0f, 2.5f, 1.0f);
+	target = source + CVector(dx, dy, 0.0f) * 60.0f;
+	target += CVector(
+		((CGeneral::GetRandomNumber() & 0xFF) - 128) * 0.015f,
+		((CGeneral::GetRandomNumber() & 0xFF) - 128) * 0.015f,
+		((CGeneral::GetRandomNumber() & 0xFF) - 128) * 0.02f);
+	CWeapon::DoTankDoomAiming(this, pDriver, &source, &target);
+	FireOneInstantHitRound(&source, &target, 15);
+
+	source = GetMatrix() * CVector(-2.0f, 2.5f, 1.0f);
+	target = source + CVector(dx, dy, 0.0f) * 60.0f;
+	target += CVector(
+		((CGeneral::GetRandomNumber() & 0xFF) - 128) * 0.015f,
+		((CGeneral::GetRandomNumber() & 0xFF) - 128) * 0.015f,
+		((CGeneral::GetRandomNumber() & 0xFF) - 128) * 0.02f);
+	CWeapon::DoTankDoomAiming(this, pDriver, &source, &target);
+	FireOneInstantHitRound(&source, &target, 15);
+
+	DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
+
+	m_nAmmoInClip--;
+	if (m_nAmmoInClip == 0) {
+		m_nAmmoInClip = 20;
+		m_nGunFiringTime = CTimer::GetTimeInMilliseconds() + 1400;
 	}
 }
 
@@ -1034,7 +1041,7 @@ CVehicle::SetUpDriver(void)
 	if(VehicleCreatedBy != RANDOM_VEHICLE)
 		return nil;
 
-	pDriver = CPopulation::AddPedInCar(this);
+	pDriver = CPopulation::AddPedInCar(this, false);
 	pDriver->m_pMyVehicle = this;
 	pDriver->m_pMyVehicle->RegisterReference((CEntity**)&pDriver->m_pMyVehicle);
 	pDriver->bInVehicle = true;
@@ -1050,7 +1057,7 @@ CVehicle::SetupPassenger(int n)
 	if(pPassengers[n])
 		return pPassengers[n];
 
-	pPassengers[n] = CPopulation::AddPedInCar(this);
+	pPassengers[n] = CPopulation::AddPedInCar(this, true);
 	pPassengers[n]->m_pMyVehicle = this;
 	pPassengers[n]->m_pMyVehicle->RegisterReference((CEntity**)&pPassengers[n]->m_pMyVehicle);
 	pPassengers[n]->bInVehicle = true;

@@ -70,7 +70,7 @@ public:
 	static void LoadPedGroups();
 	static void UpdatePedCount(ePedType, bool);
 	static void DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool);
-	static CPed *AddPedInCar(CVehicle *car);
+	static CPed *AddPedInCar(CVehicle *car, bool isPassenger);
 	static bool IsPointInSafeZone(CVector *coors);
 	static void RemovePed(CPed *ent);
 	static int32 ChooseCivilianOccupation(int32);
@@ -80,7 +80,7 @@ public:
 	static void FindClosestZoneForCoors(CVector*, int*, eLevelName, eLevelName);
 	static void GeneratePedsAtStartOfGame();
 	static float PedCreationDistMultiplier();
-	static CPed *AddPed(ePedType pedType, uint32 mi, CVector const &coors);
+	static CPed *AddPed(ePedType pedType, uint32 mi, CVector const &coors, int32 modifier = 0);
 	static void AddToPopulation(float, float, float, float);
 	static void ManagePopulation(void);
 	static void MoveCarsAndPedsOutOfAbandonedZones(void);

@@ -1397,12 +1397,44 @@ CStreaming::StreamVehiclesAndPeds(void)
 		SetModelIsDeletable(MI_CHOPPER);
 
 	if (FindPlayerPed()->m_pWanted->AreMiamiViceRequired()) {
-		//TODO(MIAMI): miami vice peds
+		SetModelIsDeletable(MI_VICE1);
+		SetModelIsDeletable(MI_VICE2);
+		SetModelIsDeletable(MI_VICE3);
+		SetModelIsDeletable(MI_VICE4);
+		SetModelIsDeletable(MI_VICE5);
+		SetModelIsDeletable(MI_VICE6);
+		SetModelIsDeletable(MI_VICE7);
+		SetModelIsDeletable(MI_VICE8);
+		switch (CCarCtrl::MiamiViceCycle) {
+		case 0:
+			RequestModel(MI_VICE1, STREAMFLAGS_DONT_REMOVE);
+			RequestModel(MI_VICE2, STREAMFLAGS_DONT_REMOVE);
+			break;
+		case 1:
+			RequestModel(MI_VICE3, STREAMFLAGS_DONT_REMOVE);
+			RequestModel(MI_VICE4, STREAMFLAGS_DONT_REMOVE);
+			break;
+		case 2:
+			RequestModel(MI_VICE5, STREAMFLAGS_DONT_REMOVE);
+			RequestModel(MI_VICE6, STREAMFLAGS_DONT_REMOVE);
+			break;
+		case 3:
+			RequestModel(MI_VICE7, STREAMFLAGS_DONT_REMOVE);
+			RequestModel(MI_VICE8, STREAMFLAGS_DONT_REMOVE);
+			break;
+		}
 		RequestModel(MI_VICECHEE, STREAMFLAGS_DONT_REMOVE);
 	}
 	else {
 		SetModelIsDeletable(MI_VICECHEE);
-		//TODO(MIAMI): miami vice peds
+		SetModelIsDeletable(MI_VICE1);
+		SetModelIsDeletable(MI_VICE2);
+		SetModelIsDeletable(MI_VICE3);
+		SetModelIsDeletable(MI_VICE4);
+		SetModelIsDeletable(MI_VICE5);
+		SetModelIsDeletable(MI_VICE6);
+		SetModelIsDeletable(MI_VICE7);
+		SetModelIsDeletable(MI_VICE8);
 	}
 
 	if(timeBeforeNextLoad >= 0)

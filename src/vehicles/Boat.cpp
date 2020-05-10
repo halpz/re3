@@ -3,6 +3,7 @@
 #include "General.h"
 #include "Timecycle.h"
 #include "HandlingMgr.h"
+#include "CarAI.h"
 #include "CarCtrl.h"
 #include "RwHelper.h"
 #include "ModelIndices.h"
@@ -96,7 +97,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 void
 CBoat::SetModelIndex(uint32 id)
 {
-	CEntity::SetModelIndex(id);
+	CVehicle::SetModelIndex(id);
 	SetupModelNodes();
 }
 
@@ -152,6 +153,7 @@ CBoat::ProcessControl(void)
 	case STATUS_SIMPLE:
 		m_bIsAnchored = false;
 		m_fOrientation = INVALID_ORIENTATION;
+		CCarAI::UpdateCarAI(this);
 		CPhysical::ProcessControl();
 		bBoatInWater = true;
 		bPropellerInWater = true;
@@ -160,7 +162,8 @@ CBoat::ProcessControl(void)
 	case STATUS_PHYSICS:
 		m_bIsAnchored = false;
 		m_fOrientation = INVALID_ORIENTATION;
-		CCarCtrl::SteerAIBoatWithPhysics(this);
+		CCarAI::UpdateCarAI(this);
+		CCarCtrl::SteerAICarWithPhysics(this);
 		break;
 	case STATUS_ABANDONED:
 	case STATUS_WRECKED:
@@ -398,10 +401,10 @@ CBoat::ProcessControl(void)
 		}
 
 		// Slow down or push down boat as it approaches the world limits
-		m_vecMoveSpeed.x = Min(m_vecMoveSpeed.x, -(GetPosition().x - (WORLD_MAX_X-50.0f))*0.01f);	// east
-		m_vecMoveSpeed.x = Max(m_vecMoveSpeed.x, -(GetPosition().x - (WORLD_MIN_X+50.0f))*0.01f);	// west
-		m_vecMoveSpeed.y = Min(m_vecMoveSpeed.y, -(GetPosition().y - (WORLD_MAX_Y-50.0f))*0.01f);	// north
-		m_vecMoveSpeed.y = Max(m_vecMoveSpeed.y, -(GetPosition().y - (WORLD_MIN_Y+50.0f))*0.01f);	// south
+		m_vecMoveSpeed.x = Min(m_vecMoveSpeed.x, -(GetPosition().x - (WORLD_MAX_X-100.0f))*0.01f);	// east
+		m_vecMoveSpeed.x = Max(m_vecMoveSpeed.x, -(GetPosition().x - (WORLD_MIN_X+100.0f))*0.01f);	// west
+		m_vecMoveSpeed.y = Min(m_vecMoveSpeed.y, -(GetPosition().y - (WORLD_MAX_Y-100.0f))*0.01f);	// north
+		m_vecMoveSpeed.y = Max(m_vecMoveSpeed.y, -(GetPosition().y - (WORLD_MIN_Y+100.0f))*0.01f);	// south
 
 		if(!onLand && bBoatInWater)
 			ApplyWaterResistance();

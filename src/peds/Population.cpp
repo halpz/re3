@@ -460,7 +460,7 @@ CPopulation::PedCreationDistMultiplier()
 }
 
 CPed*
-CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors)
+CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors, int32 modifier)
 {
 	switch (pedType) {
 		case PEDTYPE_CIVMALE:
@@ -480,7 +480,7 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors)
 		}
 		case PEDTYPE_COP:
 		{
-			CCopPed *ped = new CCopPed((eCopType)miOrCopType);
+			CCopPed *ped = new CCopPed((eCopType)miOrCopType, modifier);
 			ped->SetPosition(coors);
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
@@ -713,9 +713,10 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 }
 
 CPed*
-CPopulation::AddPedInCar(CVehicle* car)
+CPopulation::AddPedInCar(CVehicle* car, bool isPassenger)
 {
 	int defaultModel = MI_MALE01;
+	int miamiViceIndex = 0;
 	bool imSureThatModelIsLoaded = true;
 	CVector coors = FindPlayerCoors();
 	CZoneInfo zoneInfo;
@@ -740,7 +741,6 @@ CPopulation::AddPedInCar(CVehicle* car)
 			break;
 		case MI_POLICE:
 		case MI_PREDATOR:
-		case MI_VICECHEE: // TODO(MIAMI): proper model
 			preferredModel = COP_STREET;
 			pedType = PEDTYPE_COP;
 			break;
@@ -752,6 +752,11 @@ CPopulation::AddPedInCar(CVehicle* car)
 		case MI_BARRACKS:
 			preferredModel = COP_ARMY;
 			pedType = PEDTYPE_COP;
+			break;
+		case MI_VICECHEE: // TODO(MIAMI): figure out new structure of the function
+			preferredModel = COP_MIAMIVICE;
+			pedType = PEDTYPE_COP;
+			miamiViceIndex = (isPassenger ? 2 * CCarCtrl::MiamiViceCycle : 2 * CCarCtrl::MiamiViceCycle + 1);
 			break;
 		case MI_TAXI:
 		case MI_CABBIE:
@@ -799,7 +804,7 @@ CPopulation::AddPedInCar(CVehicle* car)
 		pedType = ((CPedModelInfo*)CModelInfo::GetModelInfo(defaultModel))->m_pedType;
 	}
 
-	CPed *newPed = CPopulation::AddPed((ePedType)pedType, preferredModel, car->GetPosition());
+	CPed *newPed = CPopulation::AddPed((ePedType)pedType, preferredModel, car->GetPosition(), miamiViceIndex);
 	newPed->bUsesCollision = false;
 
 	// what??
