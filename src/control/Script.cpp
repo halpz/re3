@@ -474,11 +474,11 @@ bool CStuckCarCheck::HasCarBeenStuckForAWhile(int32 id)
 void CRunningScript::CollectParameters(uint32* pIp, int16 total)
 {
 	for (int16 i = 0; i < total; i++){
-		float tmp;
 		uint16 varIndex;
 		switch (CTheScripts::Read1ByteFromScript(pIp))
 		{
 		case ARGUMENT_INT32:
+		case ARGUMENT_FLOAT:
 			ScriptParams[i] = CTheScripts::Read4BytesFromScript(pIp);
 			break;
 		case ARGUMENT_GLOBALVAR:
@@ -496,10 +496,6 @@ void CRunningScript::CollectParameters(uint32* pIp, int16 total)
 			break;
 		case ARGUMENT_INT16:
 			ScriptParams[i] = CTheScripts::Read2BytesFromScript(pIp);
-			break;
-		case ARGUMENT_FLOAT:
-			tmp = CTheScripts::ReadFloatFromScript(pIp);
-			ScriptParams[i] = *(int32*)&tmp;
 			break;
 		default:
 			assert(0);
@@ -587,6 +583,9 @@ void CRunningScript::Init()
 }
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
+
+const char* scriptfile = "main.scm";
+
 int open_script()
 {
 	static int scriptToLoad = 1;
@@ -599,11 +598,11 @@ int open_script()
 		scriptToLoad = 2;
 
 	switch (scriptToLoad) {
-	case 0: return CFileMgr::OpenFile("main.scm", "rb");
-	case 1: return CFileMgr::OpenFile("freeroam_miami.scm", "rb");
-	case 2: return CFileMgr::OpenFile("main_d.scm", "rb");
+	case 0: scriptfile = "main.scm"; break;
+	case 1: scriptfile = "freeroam_miami.scm"; break;
+	case 2: scriptfile = "main_d.scm"; break;
 	}
-	return CFileMgr::OpenFile("main.scm", "rb");
+	return CFileMgr::OpenFile(scriptfile, "rb");
 }
 #endif
 
@@ -4670,51 +4669,34 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	}
 	case COMMAND_SET_GARAGE:
 	{
-		CollectParameters(&m_nIp, 7);
+		CollectParameters(&m_nIp, 9);
 		float infX = *(float*)&ScriptParams[0];
 		float infY = *(float*)&ScriptParams[1];
 		float infZ = *(float*)&ScriptParams[2];
-		float supX = *(float*)&ScriptParams[3];
-		float supY = *(float*)&ScriptParams[4];
-		float supZ = *(float*)&ScriptParams[5];
-		if (infX > supX) {
-			infX = *(float*)&ScriptParams[3];
-			supX = *(float*)&ScriptParams[0];
-		}
-		if (infY > supY) {
-			infY = *(float*)&ScriptParams[4];
-			supY = *(float*)&ScriptParams[1];
-		}
-		if (infZ > supZ) {
-			infZ = *(float*)&ScriptParams[5];
-			supZ = *(float*)&ScriptParams[2];
-		}
-		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, supX, supY, supZ, (eGarageType)ScriptParams[6], 0);
+		float X2 = *(float*)&ScriptParams[3];
+		float Y2 = *(float*)&ScriptParams[4];
+		float supX = *(float*)&ScriptParams[5];
+		float supY = *(float*)&ScriptParams[6];
+		float supZ = *(float*)&ScriptParams[7];
+
+		// TODO(MIAMI): new 2 parameters, requires CGarage change
+		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, X2, Y2, supX, supY, supZ, (eGarageType)ScriptParams[8], 0);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
 	case COMMAND_SET_GARAGE_WITH_CAR_MODEL:
 	{
-		CollectParameters(&m_nIp, 8);
+		CollectParameters(&m_nIp, 10);
 		float infX = *(float*)&ScriptParams[0];
 		float infY = *(float*)&ScriptParams[1];
 		float infZ = *(float*)&ScriptParams[2];
-		float supX = *(float*)&ScriptParams[3];
-		float supY = *(float*)&ScriptParams[4];
-		float supZ = *(float*)&ScriptParams[5];
-		if (infX > supX) {
-			infX = *(float*)&ScriptParams[3];
-			supX = *(float*)&ScriptParams[0];
-		}
-		if (infY > supY) {
-			infY = *(float*)&ScriptParams[4];
-			supY = *(float*)&ScriptParams[1];
-		}
-		if (infZ > supZ) {
-			infZ = *(float*)&ScriptParams[5];
-			supZ = *(float*)&ScriptParams[2];
-		}
-		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, supX, supY, supZ, (eGarageType)ScriptParams[6], ScriptParams[7]);
+		float X2 = *(float*)&ScriptParams[3];
+		float Y2 = *(float*)&ScriptParams[4];
+		float supX = *(float*)&ScriptParams[5];
+		float supY = *(float*)&ScriptParams[6];
+		float supZ = *(float*)&ScriptParams[7];
+		// TODO(MIAMI): new 2 parameters, requires CGarage change
+		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, X2, Y2, supX, supY, supZ, (eGarageType)ScriptParams[8], ScriptParams[9]);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -8703,8 +8685,13 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CTimer::Suspend();
 		int offset = CTheScripts::MultiScriptArray[ScriptParams[0]];
+#ifdef USE_DEBUG_SCRIPT_LOADER
+		CFileMgr::ChangeDir("\\data\\");
+		int handle = CFileMgr::OpenFile(scriptfile, "rb");
+#else
 		CFileMgr::ChangeDir("\\");
 		int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
+#endif
 		CFileMgr::Seek(handle, offset, 0);
 		CFileMgr::Read(handle, (const char*)&CTheScripts::ScriptSpace[SIZE_MAIN_SCRIPT], SIZE_MISSION_SCRIPT);
 		CFileMgr::CloseFile(handle);
@@ -9782,7 +9769,13 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_GET_CHAR_WEAPON_IN_SLOT:
 	case COMMAND_GET_CLOSEST_STRAIGHT_ROAD:
 	case COMMAND_SET_CAR_FORWARD_SPEED:
+		assert(0);
 	case COMMAND_SET_AREA_VISIBLE:
+		CollectParameters(&m_nIp, 1);
+		CGame::currArea = ScriptParams[0];
+		// TODO(MIAMI) !!
+		//CStreaming::RemoveBuildingsNotInArea(ScriptParams[0]); 
+		return 0;
 	case COMMAND_SET_CUTSCENE_ANIM_TO_LOOP:
 		assert(0);
 	case COMMAND_MARK_CAR_AS_CONVOY_CAR:

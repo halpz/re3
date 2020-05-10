@@ -197,17 +197,18 @@ void CGarages::Update(void)
 		aGarages[GarageToBeTidied].TidyUpGarage();
 }
 
-int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float Z2, eGarageType type, int32 targetId)
+int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X3, float Y3, float Z2, eGarageType type, int32 targetId)
 {
 	if (NumGarages >= NUM_GARAGES) {
 		assert(0);
 		return NumGarages++;
 	}
 	CGarage* pGarage = &aGarages[NumGarages];
-	pGarage->m_fX1 = Min(X1, X2);
-	pGarage->m_fX2 = Max(X1, X2);
-	pGarage->m_fY1 = Min(Y1, Y2);
-	pGarage->m_fY2 = Max(Y1, Y2);
+	// TODO(MIAMI): proper!
+	pGarage->m_fX1 = Min(Min(X1, X2), X3);
+	pGarage->m_fX2 = Max(Max(X1, X2), X3);
+	pGarage->m_fY1 = Min(Min(Y1, Y2), Y3);
+	pGarage->m_fY2 = Max(Max(Y1, Y2), Y3);
 	pGarage->m_fZ1 = Min(Z1, Z2);
 	pGarage->m_fZ2 = Max(Z1, Z2);
 	pGarage->m_pDoor1 = nil;
@@ -2320,8 +2321,7 @@ void CGarages::Load(uint8* buf, uint32 size)
 bool
 CGarages::IsModelIndexADoor(uint32 id)
 {
-	return id == MI_GARAGEDOOR1 ||
-		id == MI_GARAGEDOOR2 ||
+	return id == MI_GARAGEDOOR2 ||
 		id == MI_GARAGEDOOR3 ||
 		id == MI_GARAGEDOOR4 ||
 		id == MI_GARAGEDOOR5 ||
@@ -2335,7 +2335,6 @@ CGarages::IsModelIndexADoor(uint32 id)
 		id == MI_GARAGEDOOR14 ||
 		id == MI_GARAGEDOOR15 ||
 		id == MI_GARAGEDOOR16 ||
-		id == MI_GARAGEDOOR17 ||
 		id == MI_GARAGEDOOR18 ||
 		id == MI_GARAGEDOOR19 ||
 		id == MI_GARAGEDOOR20 ||
@@ -2344,13 +2343,5 @@ CGarages::IsModelIndexADoor(uint32 id)
 		id == MI_GARAGEDOOR23 ||
 		id == MI_GARAGEDOOR24 ||
 		id == MI_GARAGEDOOR25 ||
-		id == MI_GARAGEDOOR26 ||
-		id == MI_GARAGEDOOR27 ||
-		id == MI_GARAGEDOOR28 ||
-		id == MI_GARAGEDOOR29 ||
-		id == MI_GARAGEDOOR30 ||
-		id == MI_GARAGEDOOR31 ||
-		id == MI_GARAGEDOOR32 ||
-		id == MI_CRUSHERBODY ||
-		id == MI_CRUSHERLID;
+		id == MI_GARAGEDOOR26;
 }

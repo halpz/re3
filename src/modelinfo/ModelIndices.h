@@ -49,37 +49,37 @@
 	X("package1",		MI_COLLECTABLE1, 0x5F5A04) \
 	X("Money",		MI_MONEY, 0x5F5A08) \
 	X("barrel1",		MI_CARMINE, 0x5F5A0C) \
-	X("oddjgaragdoor",	MI_GARAGEDOOR1, 0x5F5A10) \
-	X("bombdoor",		MI_GARAGEDOOR2, 0x5F5A14) \
-	X("door_bombshop",	MI_GARAGEDOOR3, 0x5F5A18) \
-	X("vheistlocdoor",	MI_GARAGEDOOR4, 0x5F5A1C) \
-	X("door2_garage",	MI_GARAGEDOOR5, 0x5F5A20) \
-	X("ind_slidedoor",	MI_GARAGEDOOR6, 0x5F5A24) \
-	X("bankjobdoor",	MI_GARAGEDOOR7, 0x5F5A28) \
-	X("door_jmsgrage",	MI_GARAGEDOOR9, 0x5F5A2C) \
-	X("jamesgrge_kb",	MI_GARAGEDOOR10, 0x5F5A30) \
-	X("door_sfehousegrge",	MI_GARAGEDOOR11, 0x5F5A34) \
-	X("shedgaragedoor",	MI_GARAGEDOOR12, 0x5F5A38) \
-	X("door4_garage",	MI_GARAGEDOOR13, 0x5F5A3C) \
-	X("door_col_compnd_01",	MI_GARAGEDOOR14, 0x5F5A40) \
-	X("door_col_compnd_02",	MI_GARAGEDOOR15, 0x5F5A44) \
-	X("door_col_compnd_03",	MI_GARAGEDOOR16, 0x5F5A48) \
-	X("door_col_compnd_04",	MI_GARAGEDOOR17, 0x5F5A4C) \
-	X("door_col_compnd_05",	MI_GARAGEDOOR18, 0x5F5A50) \
-	X("impex_door",		MI_GARAGEDOOR19, 0x5F5A54) \
-	X("SalvGarage",		MI_GARAGEDOOR20, 0x5F5A58) \
-	X("door3_garage",	MI_GARAGEDOOR21, 0x5F5A5C) \
-	X("leveldoor2",		MI_GARAGEDOOR22, 0x5F5A60) \
-	X("double_garage_dr",	MI_GARAGEDOOR23, 0x5F5A64) \
-	X("amcogaragedoor",	MI_GARAGEDOOR24, 0x5F5A68) \
-	X("towergaragedoor1",	MI_GARAGEDOOR25, 0x5F5A6C) \
-	X("towergaragedoor2",	MI_GARAGEDOOR26, 0x5F5A70) \
-	X("towergaragedoor3",	MI_GARAGEDOOR27, 0x5F5A74) \
-	X("plysve_gragedoor",	MI_GARAGEDOOR28, 0x5F5A78) \
-	X("impexpsubgrgdoor",	MI_GARAGEDOOR29, 0x5F5A7C) \
-	X("Sub_sprayshopdoor",	MI_GARAGEDOOR30, 0x5F5A80) \
-	X("ind_plyrwoor",	MI_GARAGEDOOR31, 0x5F5A84) \
-	X("8ballsuburbandoor",	MI_GARAGEDOOR32, 0x5F5A88) \
+	/*X("oddjgaragdoor",	MI_GARAGEDOOR1, 0x5F5A10)*/ \
+	X("dk_paynspraydoor",		MI_GARAGEDOOR2, 0x5F5A14) \
+	X("dk_waretankdoor1",	MI_GARAGEDOOR3, 0x5F5A18) \
+	X("hav_garagedoor1",	MI_GARAGEDOOR4, 0x5F5A1C) \
+	X("hav_garagedoor02",	MI_GARAGEDOOR5, 0x5F5A20) \
+	X("hav_garagedoor03",	MI_GARAGEDOOR6, 0x5F5A24) \
+	X("hav_garagedoor04",	MI_GARAGEDOOR7, 0x5F5A28) \
+	X("lh_showdoor03",	MI_GARAGEDOOR9, 0x5F5A2C) \
+	X("lh_showdoor1",	MI_GARAGEDOOR10, 0x5F5A30) \
+	X("lhtankdoor",	MI_GARAGEDOOR11, 0x5F5A34) \
+	X("nbtgardoor",	MI_GARAGEDOOR12, 0x5F5A38) \
+	X("dk_camjonesdoor",	MI_GARAGEDOOR13, 0x5F5A3C) \
+	X("nbtgardoor02",	MI_GARAGEDOOR14, 0x5F5A40) \
+	X("dt_savedra",	MI_GARAGEDOOR15, 0x5F5A44) \
+	X("dt_savedrb",	MI_GARAGEDOOR16, 0x5F5A48) \
+	/*X("dk_bombdoor",	MI_GARAGEDOOR17, 0x5F5A4C)*/ \
+	X("dk_bombdoor",	MI_GARAGEDOOR18, 0x5F5A50) \
+	X("haiwshpnsdoor",		MI_GARAGEDOOR19, 0x5F5A54) \
+	X("wshpnsdoor",		MI_GARAGEDOOR20, 0x5F5A58) \
+	X("nbecpnsdoor",	MI_GARAGEDOOR21, 0x5F5A5C) \
+	X("nbtgardoor03",		MI_GARAGEDOOR22, 0x5F5A60) \
+	X("dt_savedrc",	MI_GARAGEDOOR23, 0x5F5A64) \
+	X("dt_savedrd",	MI_GARAGEDOOR24, 0x5F5A68) \
+	X("man_frntstepGD",	MI_GARAGEDOOR25, 0x5F5A6C) \
+	X("svegrgedoor",	MI_GARAGEDOOR26, 0x5F5A70) \
+	/*X("towergaragedoor3",	MI_GARAGEDOOR27, 0x5F5A74)*/ \
+	/*X("plysve_gragedoor",	MI_GARAGEDOOR28, 0x5F5A78)*/ \
+	/*X("impexpsubgrgdoor",	MI_GARAGEDOOR29, 0x5F5A7C)*/ \
+	/*X("Sub_sprayshopdoor",	MI_GARAGEDOOR30, 0x5F5A80)*/ \
+	/*X("ind_plyrwoor",	MI_GARAGEDOOR31, 0x5F5A84)*/ \
+	/*X("8ballsuburbandoor",	MI_GARAGEDOOR32, 0x5F5A88)*/ \
 	X("barrel2",		MI_NAUTICALMINE, 0x5F5A8C) \
 	X("crushercrush",	MI_CRUSHERBODY, 0x5F5A90) \
 	X("crushertop",		MI_CRUSHERLID, 0x5F5A94) \
