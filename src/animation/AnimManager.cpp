@@ -145,7 +145,7 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_DRIVEBY_R, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
 	{ ANIM_CAR_LB, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
 	{ ANIM_DRIVE_BOAT, ASSOC_DELETEFADEDOUT },
-	{ ANIM_CAR_GETOUT_LHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_CAR_GETOUT_RHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_GETOUT_LOW_RHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_CLOSE_RHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_HOOKERTALK, ASSOC_REPEAT | ASSOC_PARTIAL },
@@ -906,6 +906,7 @@ CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32]
 
 	int animIndex = animBlock->firstIndex;
 	for(j = 0; j < animBlock->numAnims; j++){
+		assert(animIndex < ARRAY_SIZE(ms_aAnimations));
 		CAnimBlendHierarchy *hier = &ms_aAnimations[animIndex++];
 
 		// animation name

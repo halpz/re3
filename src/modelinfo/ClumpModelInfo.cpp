@@ -5,6 +5,7 @@
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
 #include "ModelInfo.h"
+#include "AnimManager.h"
 
 void
 CClumpModelInfo::DeleteRwObject(void)
@@ -13,17 +14,17 @@ CClumpModelInfo::DeleteRwObject(void)
 		RpClumpDestroy(m_clump);
 		m_clump = nil;
 		RemoveTexDictionaryRef();
+		if(GetAnimFileIndex() != -1)
+			CAnimManager::RemoveAnimBlockRef(GetAnimFileIndex());
 	}
 }
 
-#ifdef PED_SKIN
 static RpAtomic*
 SetHierarchyForSkinAtomic(RpAtomic *atomic, void *data)
 {
 	RpSkinAtomicSetHAnimHierarchy(atomic, (RpHAnimHierarchy*)data);
 	return nil;
 }
-#endif
 
 RwObject*
 CClumpModelInfo::CreateInstance(void)
@@ -31,24 +32,17 @@ CClumpModelInfo::CreateInstance(void)
 	if(m_clump == nil)
 		return nil;
 	RpClump *clone = RpClumpClone(m_clump);
-#ifdef PED_SKIN
 	if(IsClumpSkinned(clone)){
 		RpHAnimHierarchy *hier;
 		RpHAnimAnimation *anim;
 
 		hier = GetAnimHierarchyFromClump(clone);
 		assert(hier);
-		// This seems dangerous as only the first atomic will get a hierarchy
-		// can we guarantee this if hands and head are also in the clump?
 		RpClumpForAllAtomics(clone, SetHierarchyForSkinAtomic, hier);
 		anim = HAnimAnimationCreateForHierarchy(hier);
 		RpHAnimHierarchySetCurrentAnim(hier, anim);
-//		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
-		// the rest is xbox only:
-		// RpSkinGetNumBones(RpSkinGeometryGetSkin(RpAtomicGetGeometry(IsClumpSkinned(clone))));
-		RpHAnimHierarchyUpdateMatrices(hier);
+		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
 	}
-#endif
 	return (RwObject*)clone;
 }
 
@@ -76,31 +70,19 @@ CClumpModelInfo::SetClump(RpClump *clump)
 	m_clump = clump;
 	CVisibilityPlugins::SetClumpModelInfo(m_clump, this);
 	AddTexDictionaryRef();
-	RpClumpForAllAtomics(clump, SetAtomicRendererCB, nil);
+	if(GetAnimFileIndex() != -1)
+		CAnimManager::AddAnimBlockRef(GetAnimFileIndex());
 
-	// TODO: also set for player?
-	if(strncmp(GetName(), "playerh", 8) == 0)
-		RpClumpForAllAtomics(clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
-
-#ifdef PED_SKIN
 	if(IsClumpSkinned(clump)){
 		int i;
 		RpHAnimHierarchy *hier;
 		RpAtomic *skinAtomic;
 		RpSkin *skin;
 
-		// mobile:
-//		hier = nil;
-//		RwFrameForAllChildren(RpClumpGetFrame(clump), GetHierarchyFromChildNodesCB, &hier);
-//		assert(hier);
-//		RpClumpForAllAtomics(clump, SetHierarchyForSkinAtomic, hier);
-//		skinAtomic = GetFirstAtomic(clump);
-
-		// xbox:
 		hier = GetAnimHierarchyFromClump(clump);
 		assert(hier);
-		RpSkinAtomicSetHAnimHierarchy(IsClumpSkinned(clump), hier);
-		skinAtomic = IsClumpSkinned(clump);
+		RpClumpForAllAtomics(clump, SetHierarchyForSkinAtomic, hier);
+		skinAtomic = GetFirstAtomic(clump);
 
 		assert(skinAtomic);
 		skin = RpSkinGeometryGetSkin(RpAtomicGetGeometry(skinAtomic));
@@ -113,9 +95,29 @@ CClumpModelInfo::SetClump(RpClump *clump)
 			weights->w2 /= sum;
 			weights->w3 /= sum;
 		}
-//		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
+		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
 	}
-#endif
+}
+
+void
+CClumpModelInfo::SetAnimFile(const char *file)
+{
+	if(strcasecmp(file, "null") == 0)
+		return;
+
+	m_animFileName = new char[strlen(file)+1];
+	strcpy(m_animFileName, file);
+}
+
+void
+CClumpModelInfo::ConvertAnimFileIndex(void)
+{
+	if(m_animFileIndex != -1){
+		// we have a string pointer in that union
+		int32 index = CAnimManager::GetAnimationBlockIndex(m_animFileName);
+		delete[] m_animFileName;
+		m_animFileIndex = index;
+	}
 }
 
 void
@@ -139,27 +141,26 @@ CClumpModelInfo::FindFrameFromIdCB(RwFrame *frame, void *data)
 {
 	RwObjectIdAssociation *assoc = (RwObjectIdAssociation*)data;
 
-	if(CVisibilityPlugins::GetFrameHierarchyId(frame) != assoc->id){
-		RwFrameForAllChildren(frame, FindFrameFromIdCB, assoc);
-		return assoc->frame ? nil : frame;
-	}else{
+	if(CVisibilityPlugins::GetFrameHierarchyId(frame) == assoc->id){
 		assoc->frame = frame;
 		return nil;
 	}
+	RwFrameForAllChildren(frame, FindFrameFromIdCB, assoc);
+	return assoc->frame ? nil : frame;
 }
 
+//--MIAMI: unused
 RwFrame*
 CClumpModelInfo::FindFrameFromNameCB(RwFrame *frame, void *data)
 {
 	RwObjectNameAssociation *assoc = (RwObjectNameAssociation*)data;
 
-	if(CGeneral::faststricmp(GetFrameNodeName(frame), assoc->name)){
-		RwFrameForAllChildren(frame, FindFrameFromNameCB, assoc);
-		return assoc->frame ? nil : frame;
-	}else{
+	if(!CGeneral::faststricmp(GetFrameNodeName(frame), assoc->name)){
 		assoc->frame = frame;
 		return nil;
 	}
+	RwFrameForAllChildren(frame, FindFrameFromNameCB, assoc);
+	return assoc->frame ? nil : frame;
 }
 
 RwFrame*
@@ -167,14 +168,13 @@ CClumpModelInfo::FindFrameFromNameWithoutIdCB(RwFrame *frame, void *data)
 {
 	RwObjectNameAssociation *assoc = (RwObjectNameAssociation*)data;
 
-	if(CVisibilityPlugins::GetFrameHierarchyId(frame) ||
-		CGeneral::faststricmp(GetFrameNodeName(frame), assoc->name)){
-		RwFrameForAllChildren(frame, FindFrameFromNameWithoutIdCB, assoc);
-		return assoc->frame ? nil : frame;
-	}else{
+	if(CVisibilityPlugins::GetFrameHierarchyId(frame) == 0 &&
+	   !CGeneral::faststricmp(GetFrameNodeName(frame), assoc->name)){
 		assoc->frame = frame;
 		return nil;
 	}
+	RwFrameForAllChildren(frame, FindFrameFromNameWithoutIdCB, assoc);
+	return assoc->frame ? nil : frame;
 }
 
 RwFrame*

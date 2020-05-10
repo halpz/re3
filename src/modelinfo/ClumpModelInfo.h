@@ -30,9 +30,13 @@ class CClumpModelInfo : public CBaseModelInfo
 {
 public:
 	RpClump *m_clump;
+	union {
+		int32 m_animFileIndex;
+		char *m_animFileName;
+	};
 
-	CClumpModelInfo(void) : CBaseModelInfo(MITYPE_CLUMP) {}
-	CClumpModelInfo(ModelInfoType id) : CBaseModelInfo(id) {}
+	CClumpModelInfo(void) : CBaseModelInfo(MITYPE_CLUMP) { m_animFileIndex = -1; }
+	CClumpModelInfo(ModelInfoType id) : CBaseModelInfo(id) { m_animFileIndex = -1; }
 	~CClumpModelInfo() {}
 	void DeleteRwObject(void);
 	RwObject *CreateInstance(void);
@@ -40,6 +44,9 @@ public:
 	RwObject *GetRwObject(void) { return (RwObject*)m_clump; }
 
 	virtual void SetClump(RpClump *);
+	virtual void SetAnimFile(const char *file);
+	virtual void ConvertAnimFileIndex(void);
+	virtual int GetAnimFileIndex(void) { return m_animFileIndex; }
 
 	static RpAtomic *SetAtomicRendererCB(RpAtomic *atomic, void *data);
 	void SetFrameIds(RwObjectNameIdAssocation *assocs);
