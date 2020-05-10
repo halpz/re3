@@ -120,6 +120,4 @@ public:
 
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CAutoPilot) == 0x70, "CAutoPilot: error");
-#endif
+VALIDATE_SIZE(CAutoPilot, 0x70);

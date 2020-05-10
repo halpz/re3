@@ -14,9 +14,7 @@ struct CKeyEntry
 };
 
 // If this fails, CKeyArray::Load will have to be fixed
-#ifdef CHECK_STRUCT_SIZES
-static_assert(sizeof(CKeyEntry) == 12, "CKeyEntry: error");
-#endif
+VALIDATE_SIZE(CKeyEntry, 12);
 
 class CKeyArray
 {

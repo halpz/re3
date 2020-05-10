@@ -26,7 +26,7 @@ public:
 	void ProcessForDisplayCounter();
 };
 
-static_assert(sizeof(COnscreenTimerEntry) == 0x74, "COnscreenTimerEntry: error");
+VALIDATE_SIZE(COnscreenTimerEntry, 0x74);
 
 class COnscreenTimer
 {
@@ -46,4 +46,4 @@ public:
 	void AddClock(uint32 offset, char* text);
 };
 
-static_assert(sizeof(COnscreenTimer) == 0x78, "COnscreenTimer: error");
+VALIDATE_SIZE(COnscreenTimer, 0x78);

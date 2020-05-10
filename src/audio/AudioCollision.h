@@ -20,9 +20,7 @@ public:
 	// no methods
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(cAudioCollision) == 40, "cAudioCollision: error");
-#endif
+VALIDATE_SIZE(cAudioCollision, 40);
 
 class cAudioCollisionManager
 {
@@ -37,6 +35,4 @@ public:
 	void AddCollisionToRequestedQueue();
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(cAudioCollisionManager) == 852, "cAudioCollisionManager: error");
-#endif
+VALIDATE_SIZE(cAudioCollisionManager, 852);

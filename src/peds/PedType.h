@@ -91,4 +91,4 @@ public:
 	static bool IsThreat(int type, int threat) { return ms_apPedType[type]->m_threats & threat; }
 };
 
-static_assert(sizeof(CPedType) == 0x20, "CPedType: error");
+VALIDATE_SIZE(CPedType, 0x20);

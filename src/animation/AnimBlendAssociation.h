@@ -85,6 +85,4 @@ public:
 	}
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CAnimBlendAssociation) == 0x40, "CAnimBlendAssociation: error");
-#endif
+VALIDATE_SIZE(CAnimBlendAssociation, 0x40);

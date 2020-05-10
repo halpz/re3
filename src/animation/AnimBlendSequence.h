@@ -51,5 +51,5 @@ public:
 #endif
 };
 #ifndef PED_SKIN
-static_assert(sizeof(CAnimBlendSequence) == 0x2C, "CAnimBlendSequence: error");
+VALIDATE_SIZE(CAnimBlendSequence, 0x2C);
 #endif

@@ -72,9 +72,7 @@ public:
 	float GetHeightToDropoffHeight() { return m_fDropoffHeight + (m_bIsCrusher ? 7.0f : 2.0f); }
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CCrane) == 128, "CCrane: error");
-#endif
+VALIDATE_SIZE(CCrane, 128);
 
 class CCranes
 {

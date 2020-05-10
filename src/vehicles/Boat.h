@@ -72,9 +72,7 @@ public:
 
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CBoat) == 0x484, "CBoat: error");
-#endif
+VALIDATE_SIZE(CBoat, 0x484);
 
 extern float MAX_WAKE_LENGTH;
 extern float MIN_WAKE_INTERVAL;

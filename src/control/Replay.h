@@ -109,9 +109,7 @@ class CReplay
 		CVector player_pos;
 	};
 
-#ifdef CHECK_STRUCT_SIZES
-	static_assert(sizeof(tGeneralPacket) == 88, "tGeneralPacket: error");
-#endif
+	VALIDATE_SIZE(tGeneralPacket, 88);
 
 	struct tClockPacket
 	{
@@ -121,7 +119,7 @@ class CReplay
 	private:
 		uint8 __align;
 	};
-	static_assert(sizeof(tClockPacket) == 4, "tClockPacket: error");
+	VALIDATE_SIZE(tClockPacket, 4);
 
 	struct tWeatherPacket
 	{
@@ -130,14 +128,14 @@ class CReplay
 		uint8 new_weather;
 		float interpolation;
 	};
-	static_assert(sizeof(tWeatherPacket) == 8, "tWeatherPacket: error");
+	VALIDATE_SIZE(tWeatherPacket, 8);
 
 	struct tTimerPacket
 	{
 		uint8 type;
 		uint32 timer;
 	};
-	static_assert(sizeof(tTimerPacket) == 8, "tTimerPacket: error");
+	VALIDATE_SIZE(tTimerPacket, 8);
 
 	struct tPedHeaderPacket
 	{
@@ -148,7 +146,7 @@ class CReplay
 	private:
 		uint8 __align[3];
 	};
-	static_assert(sizeof(tPedHeaderPacket) == 8, "tPedHeaderPacket: error");
+	VALIDATE_SIZE(tPedHeaderPacket, 8);
 
 	struct tBulletTracePacket
 	{
@@ -159,7 +157,7 @@ class CReplay
 		CVector inf;
 		CVector sup;
 	};
-	static_assert(sizeof(tBulletTracePacket) == 28, "tBulletTracePacket: error");
+	VALIDATE_SIZE(tBulletTracePacket, 28);
 
 	struct tEndOfFramePacket
 	{
@@ -167,7 +165,7 @@ class CReplay
 	private:
 		uint8 __align[3];
 	};
-	static_assert(sizeof(tEndOfFramePacket) == 4, "tEndOfFramePacket: error");
+	VALIDATE_SIZE(tEndOfFramePacket, 4);
 
 	struct tPedUpdatePacket
 	{
@@ -180,7 +178,7 @@ class CReplay
 		int8 assoc_group_id;
 		uint8 weapon_model;
 	};
-	static_assert(sizeof(tPedUpdatePacket) == 40, "tPedUpdatePacket: error");
+	VALIDATE_SIZE(tPedUpdatePacket, 40);
 
 	struct tVehicleUpdatePacket
 	{
@@ -205,7 +203,7 @@ class CReplay
 		uint8 primary_color;
 		uint8 secondary_color;
 	};
-	static_assert(sizeof(tVehicleUpdatePacket) == 48, "tVehicleUpdatePacket: error");
+	VALIDATE_SIZE(tVehicleUpdatePacket, 48);
 
 private:
 	static uint8 Mode;

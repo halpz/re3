@@ -68,7 +68,9 @@ static const char* pCommandStrings[] = {
 	"Save Movie", "Load Movie", "Play Movie", "END"
 };
 
+#ifdef CHECK_STRUCT_SIZES
 static_assert(ARRAY_SIZE(pCommandStrings) == CSceneEdit::MOVIE_TOTAL_COMMANDS, "Scene edit: not all commands have names");
+#endif
 
 static int32 NextValidModelId(int32 mi, int32 step)
 {

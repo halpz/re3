@@ -29,5 +29,5 @@ public:
 	void RemoveLighting(bool reset);
 };
 #ifndef PED_SKIN
-static_assert(sizeof(CCutsceneObject) == 0x198, "CCutsceneObject: error");
+VALIDATE_SIZE(CCutsceneObject, 0x198);
 #endif

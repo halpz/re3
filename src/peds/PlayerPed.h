@@ -85,5 +85,5 @@ public:
 };
 
 #ifndef PED_SKIN
-static_assert(sizeof(CPlayerPed) == 0x5F0, "CPlayerPed: error");
+VALIDATE_SIZE(CPlayerPed, 0x5F0);
 #endif

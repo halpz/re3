@@ -54,6 +54,4 @@ public:
 	static void SetMaximumWantedLevel(int32 level);
 };
 
-#ifdef CHECK_STRUCT_SIZES
-static_assert(sizeof(CWanted) == 0x204, "CWanted: error");
-#endif
+VALIDATE_SIZE(CWanted, 0x204);

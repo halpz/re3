@@ -75,7 +75,7 @@ public:
 	CVehicle* RestoreCar();
 };
 
-static_assert(sizeof(CStoredCar) == 0x28, "CStoredCar");
+VALIDATE_SIZE(CStoredCar, 0x28);
 
 #define SWITCH_GARAGE_DISTANCE_CLOSE 40.0f
 
@@ -172,9 +172,7 @@ class CGarage
 	friend class CCamera;
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CGarage) == 140, "CGarage");
-#endif
+VALIDATE_SIZE(CGarage, 140);
 
 class CGarages
 {

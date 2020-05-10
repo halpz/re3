@@ -124,9 +124,8 @@ public:
 	CPermanentShadow()
 	{  }
 };
-#ifdef CHECK_STRUCT_SIZES
+
 VALIDATE_SIZE(CPermanentShadow, 0x38);
-#endif
 
 class CPtrList;
 class CAutomobile;

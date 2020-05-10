@@ -25,9 +25,7 @@ struct Queue
 	int32 size;
 };
 
-#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(Queue, 0x10);
-#endif
 
 void CdStreamInitThread(void);
 void CdStreamInit(int32 numChannels);

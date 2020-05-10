@@ -261,8 +261,8 @@ public:
 	void Process_FollowCar_SA(const CVector &CameraTarget, float TargetOrientation, float, float);
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CCam) == 0x1A4, "CCam: wrong size");
+VALIDATE_SIZE(CCam, 0x1A4);
+#ifdef CHECK_STRUCT_SIZES
 static_assert(offsetof(CCam, Alpha) == 0xA8, "CCam: error");
 static_assert(offsetof(CCam, Front) == 0x140, "CCam: error");
 #endif

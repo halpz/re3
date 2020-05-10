@@ -64,9 +64,7 @@ public:
 	static bool HasDropOffCesnaBeenShotDown(void);
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CPlane) == 0x29C, "CPlane: error");
-#endif
+VALIDATE_SIZE(CPlane, 0x29C);
 
 extern float LandingPoint;
 extern float TakeOffPoint;

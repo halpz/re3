@@ -91,6 +91,4 @@ public:
 	static void AddYardieDoorSmoke(CVector const &vecPos, CMatrix const &matMatrix);
 };
 
-#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(CParticle, 0x68);
-#endif

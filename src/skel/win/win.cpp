@@ -90,9 +90,7 @@ static psGlobalType PsGlobal;
 #include "Sprite2d.h"
 #include "AnimViewer.h"
 
-#ifdef CHECK_STRUCT_SIZES 
 VALIDATE_SIZE(psGlobalType, 0x28);
-#endif
 
 // DirectShow interfaces
 IGraphBuilder *pGB = nil;

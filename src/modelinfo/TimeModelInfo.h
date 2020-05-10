@@ -18,6 +18,4 @@ public:
 	CTimeModelInfo *FindOtherTimeModel(void);
 };
 
-#ifdef CHECK_STRUCT_SIZES
-static_assert(sizeof(CTimeModelInfo) == 0x58, "CTimeModelInfo: error");
-#endif
+VALIDATE_SIZE(CTimeModelInfo, 0x58);

@@ -15,7 +15,7 @@ struct cAMCrime {
 	}
 };
 
-static_assert(sizeof(cAMCrime) == 20, "cAMCrime: error ");
+VALIDATE_SIZE(cAMCrime, 20);
 
 class cPoliceRadioQueue
 {
@@ -43,4 +43,4 @@ public:
 	}
 };
 
-static_assert(sizeof(cPoliceRadioQueue) == 444, "cPoliceRadioQueue: error ");
+VALIDATE_SIZE(cPoliceRadioQueue, 444);

@@ -65,6 +65,4 @@ public:
 	bool RestoreLookAt(void);
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CPedIK) == 0x28, "CPedIK: error");
-#endif
+VALIDATE_SIZE(CPedIK, 0x28);

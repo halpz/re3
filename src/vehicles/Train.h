@@ -92,6 +92,4 @@ public:
 	static void UpdateTrains(void);
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CTrain) == 0x2E4, "CTrain: error");
-#endif
+VALIDATE_SIZE(CTrain, 0x2E4);

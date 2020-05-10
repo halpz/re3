@@ -27,6 +27,5 @@ public:
 	void GetEndTranslation(CVector &trans, float weight);
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CAnimBlendNode) == 0x1C, "CAnimBlendNode: error");
-#endif
+
+VALIDATE_SIZE(CAnimBlendNode, 0x1C);

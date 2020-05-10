@@ -32,6 +32,4 @@ public:
 	bool IsWithinArea(float x1, float y1, float z1, float x2, float y2, float z2);
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CPlaceable) == 0x4C, "CPlaceable: error");
-#endif
+VALIDATE_SIZE(CPlaceable, 0x4C);

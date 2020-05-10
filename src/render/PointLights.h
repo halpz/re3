@@ -13,7 +13,7 @@ public:
 	int8 fogType;
 	bool castExtraShadows;
 };
-static_assert(sizeof(CRegisteredPointLight) == 0x2C, "CRegisteredPointLight: error");
+VALIDATE_SIZE(CRegisteredPointLight, 0x2C);
 
 class CPointLights
 {

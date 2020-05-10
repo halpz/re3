@@ -76,4 +76,5 @@ public:
 	static void LoadPedStats(void);
 	static ePedStats GetPedStatType(char *name);
 };
-static_assert(sizeof(CPedStats) == 0x34, "CPedStats: error");
+
+VALIDATE_SIZE(CPedStats, 0x34);

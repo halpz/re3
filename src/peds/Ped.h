@@ -82,7 +82,7 @@ struct FightMove
 	uint8 damage;
 	uint8 flags;
 };
-static_assert(sizeof(FightMove) == 0x18, "FightMove: error");
+VALIDATE_SIZE(FightMove, 0x18);
 
 // TODO: This is eFightState on mobile.
 enum PedFightMoves
@@ -896,6 +896,7 @@ public:
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 
 #ifndef PED_SKIN
+#ifdef CHECK_STRUCT_SIZES
 static_assert(offsetof(CPed, m_nPedState) == 0x224, "CPed: error");
 static_assert(offsetof(CPed, m_pCurSurface) == 0x2FC, "CPed: error");
 static_assert(offsetof(CPed, m_pMyVehicle) == 0x310, "CPed: error");
@@ -907,5 +908,6 @@ static_assert(offsetof(CPed, m_lookTimer) == 0x4CC, "CPed: error");
 static_assert(offsetof(CPed, m_bodyPartBleeding) == 0x4F2, "CPed: error");
 static_assert(offsetof(CPed, m_pedInObjective) == 0x16C, "CPed: error");
 static_assert(offsetof(CPed, m_pEventEntity) == 0x19C, "CPed: error");
-static_assert(sizeof(CPed) == 0x53C, "CPed: error");
+#endif
+VALIDATE_SIZE(CPed, 0x53C);
 #endif

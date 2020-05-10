@@ -173,6 +173,4 @@ public:
 	static void AddSteamsFromGround(CPtrList& list);
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(CEntity) == 0x64, "CEntity: error");
-#endif
+VALIDATE_SIZE(CEntity, 0x64);

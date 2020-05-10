@@ -90,6 +90,4 @@ public:
 	}
 };
 
-#ifdef CHECK_STRUCT_SIZES 
-static_assert(sizeof(C2dEffect) == 0x34, "C2dEffect: error");
-#endif
+VALIDATE_SIZE(C2dEffect, 0x34);
