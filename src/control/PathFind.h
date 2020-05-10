@@ -41,7 +41,8 @@ struct CPedPathNode
 	CPedPathNode* prev;
 	CPedPathNode* next;
 };
-static_assert(sizeof(CPedPathNode) == 0x10, "CPedPathNode: error");
+
+VALIDATE_SIZE(CPedPathNode, 0x10);
 
 class CPedPath {
 public:
@@ -221,7 +222,8 @@ public:
 
 	void DisplayPathData(void);
 };
-static_assert(sizeof(CPathFind) == 0x49bf4, "CPathFind: error");
+
+VALIDATE_SIZE(CPathFind, 0x49bf4);
 
 extern CPathFind ThePaths;
 

@@ -24,4 +24,5 @@ public:
 	void Uncompress(void);
 	void RemoveUncompressedData(void);
 };
-static_assert(sizeof(CAnimBlendHierarchy) == 0x28, "CAnimBlendHierarchy: error");
+
+VALIDATE_SIZE(CAnimBlendHierarchy, 0x28);

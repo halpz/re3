@@ -80,4 +80,5 @@ public:
 
 	~CPlayerInfo() { };
 };
-static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");
+
+VALIDATE_SIZE(CPlayerInfo, 0x13C);

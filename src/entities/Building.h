@@ -16,4 +16,6 @@ public:
 
 	virtual bool GetIsATreadable(void) { return false; }
 };
-static_assert(sizeof(CBuilding) == 0x64, "CBuilding: error");
+
+VALIDATE_SIZE(CBuilding, 0x64);
+

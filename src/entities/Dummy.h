@@ -15,4 +15,6 @@ public:
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
 };
-static_assert(sizeof(CDummy) == 0x68, "CDummy: error");
+
+VALIDATE_SIZE(CDummy, 0x68);
+

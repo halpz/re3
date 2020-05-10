@@ -26,4 +26,6 @@ public:
 	void GetCurrentTranslation(CVector &trans, float weight);
 	void GetEndTranslation(CVector &trans, float weight);
 };
-static_assert(sizeof(CAnimBlendNode) == 0x1C, "CAnimBlendNode: error");
+
+
+VALIDATE_SIZE(CAnimBlendNode, 0x1C);

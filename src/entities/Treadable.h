@@ -12,4 +12,6 @@ public:
 
 	bool GetIsATreadable(void) { return true; }
 };
-static_assert(sizeof(CTreadable) == 0x94, "CTreadable: error");
+
+VALIDATE_SIZE(CTreadable, 0x94);
+

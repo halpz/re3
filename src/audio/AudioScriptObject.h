@@ -148,6 +148,6 @@ public:
 	static void SaveAllAudioScriptObjects(uint8 *buf, uint32 *size);
 };
 
-static_assert(sizeof(cAudioScriptObject) == 20, "cAudioScriptObject: error");
+VALIDATE_SIZE(cAudioScriptObject, 20);
 
 extern void PlayOneShotScriptObject(uint8 id, CVector const &pos);

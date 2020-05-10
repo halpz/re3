@@ -119,4 +119,5 @@ public:
 #endif
 
 };
-static_assert(sizeof(CAutoPilot) == 0x70, "CAutoPilot: error");
+
+VALIDATE_SIZE(CAutoPilot, 0x70);

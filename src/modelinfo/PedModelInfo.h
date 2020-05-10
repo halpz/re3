@@ -56,5 +56,5 @@ public:
 #endif
 };
 #ifndef PED_SKIN
-static_assert(sizeof(CPedModelInfo) == 0x48, "CPedModelInfo: error");
+VALIDATE_SIZE(CPedModelInfo, 0x48);
 #endif

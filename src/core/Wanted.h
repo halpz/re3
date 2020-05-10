@@ -54,4 +54,4 @@ public:
 	static void SetMaximumWantedLevel(int32 level);
 };
 
-static_assert(sizeof(CWanted) == 0x204, "CWanted: error");
+VALIDATE_SIZE(CWanted, 0x204);

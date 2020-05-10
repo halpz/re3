@@ -658,7 +658,7 @@ public:
 };
 
 #ifndef IMPROVED_VIDEOMODE
-static_assert(sizeof(CMenuManager) == 0x564, "CMenuManager: error");
+VALIDATE_SIZE(CMenuManager, 0x564);
 #endif
 
 extern CMenuManager FrontEndMenuManager;

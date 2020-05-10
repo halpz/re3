@@ -24,5 +24,5 @@ public:
 	void PlayAnimation(const char *animName);
 };
 #ifndef PED_SKIN
-static_assert(sizeof(CCutsceneHead) == 0x19C, "CCutsceneHead: error");
+VALIDATE_SIZE(CCutsceneHead, 0x19C);
 #endif

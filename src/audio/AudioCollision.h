@@ -20,7 +20,7 @@ public:
 	// no methods
 };
 
-static_assert(sizeof(cAudioCollision) == 40, "cAudioCollision: error");
+VALIDATE_SIZE(cAudioCollision, 40);
 
 class cAudioCollisionManager
 {
@@ -35,4 +35,4 @@ public:
 	void AddCollisionToRequestedQueue();
 };
 
-static_assert(sizeof(cAudioCollisionManager) == 852, "cAudioCollisionManager: error");
+VALIDATE_SIZE(cAudioCollisionManager, 852);

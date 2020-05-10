@@ -15,7 +15,7 @@ enum ModelInfoType : uint8
 	MITYPE_PED       = 6,
 	MITYPE_XTRACOMPS = 7,
 };
-static_assert(sizeof(ModelInfoType) == 1, "ModeInfoType: error");
+VALIDATE_SIZE(ModelInfoType, 1);
 
 class C2dEffect;
 
@@ -70,4 +70,4 @@ public:
 	uint16 GetNumRefs() const { return m_refCount; }
 };
 
-static_assert(sizeof(CBaseModelInfo) == 0x30, "CBaseModelInfo: error");
+VALIDATE_SIZE(CBaseModelInfo, 0x30);

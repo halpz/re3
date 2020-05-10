@@ -47,7 +47,7 @@ private:
 	void Remove();
 };
 
-static_assert(sizeof(CPickup) == 0x1C, "CPickup: error");
+VALIDATE_SIZE(CPickup, 0x1C);
 
 struct tPickupMessage
 {

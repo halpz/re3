@@ -95,4 +95,6 @@ public:
 
 	static void ActivateHeli(bool activate);
 };
-static_assert(sizeof(CHeli) == 0x33C, "CHeli: error");
+
+VALIDATE_SIZE(CHeli, 0x33C);
+

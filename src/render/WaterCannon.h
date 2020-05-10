@@ -25,7 +25,7 @@ public:
 	void PushPeds(void);
 };
 
-static_assert(sizeof(CWaterCannon) == 412, "CWaterCannon: error");
+VALIDATE_SIZE(CWaterCannon, 412);
 
 class CWaterCannons
 {

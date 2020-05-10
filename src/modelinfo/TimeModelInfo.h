@@ -17,4 +17,5 @@ public:
 	void SetOtherTimeModel(int32 other) { m_otherTimeModelID = other; }
 	CTimeModelInfo *FindOtherTimeModel(void);
 };
-static_assert(sizeof(CTimeModelInfo) == 0x58, "CTimeModelInfo: error");
+
+VALIDATE_SIZE(CTimeModelInfo, 0x58);

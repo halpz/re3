@@ -84,4 +84,5 @@ public:
 		return (CAnimBlendAssociation*)((uint8*)l - offsetof(CAnimBlendAssociation, link));
 	}
 };
-static_assert(sizeof(CAnimBlendAssociation) == 0x40, "CAnimBlendAssociation: error");
+
+VALIDATE_SIZE(CAnimBlendAssociation, 0x40);
