@@ -791,7 +791,7 @@ CFileLoader::LoadVehicleObject(const char *line)
 	// TODO(MIAMI): anims
 	for(p = gamename; *p; p++)
 		if(*p == '_') *p = ' ';
-	strncpy(mi->m_gameName, gamename, 32);
+	strcpy(mi->m_gameName, gamename);
 	mi->m_level = level;
 	mi->m_compRules = comprules;
 
@@ -873,6 +873,7 @@ CFileLoader::LoadPedObject(const char *line)
 	for(animGroupId = 0; animGroupId < NUM_ANIM_ASSOC_GROUPS; animGroupId++)
 		if(strcmp(animGroup, CAnimManager::GetAnimGroupName((AssocGroupId)animGroupId)) == 0)
 			break;
+	assert(animGroupId < NUM_ANIM_ASSOC_GROUPS);
 	mi->m_animGroup = animGroupId;
 	mi->m_carsCanDrive = carsCanDrive;
 }
