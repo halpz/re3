@@ -603,7 +603,7 @@ const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_
 	{ "oldwoman", "ped", MI_COP, 4, aOldWomanAnimations, aStdAnimDescs },
 	{ "jogwoman", "ped", MI_COP, 4, aJoggerWomanAnimations, aStdAnimDescs },
 	{ "panicchunky", "ped", MI_COP, 4, aPanicChunkyAnimations, aStdAnimDescs },
-	{ "skate", "skate", MI_COP, 4, aSkateAnimations, aStdAnimDescs },
+	{ "skate", "ped", MI_COP, 4, aSkateAnimations, aStdAnimDescs },
 	{ "playerback", "ped", MI_COP, 5, aPlayerStrafeBackAnimations, aStdAnimDescs },
 	{ "playerleft", "ped", MI_COP, 5, aPlayerStrafeLeftAnimations, aStdAnimDescsSide },
 	{ "playerright", "ped", MI_COP, 5, aPlayerStrafeRightAnimations, aStdAnimDescsSide },

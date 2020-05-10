@@ -42,6 +42,17 @@ enum eGarageType : int8
 	GARAGE_FOR_SCRIPT_TO_OPEN_AND_CLOSE,
 	GARAGE_KEEPS_OPENING_FOR_SPECIFIC_CAR,
 	GARAGE_MISSION_KEEPCAR_REMAINCLOSED,
+	GARAGE_COLLECTCARS_4,
+	GARAGE_FOR_SCRIPT_TO_OPEN_FOR_CAR,
+	GARAGE_HIDEOUT_FOUR,
+	GARAGE_HIDEOUT_FIVE,
+	GARAGE_HIDEOUT_SIX,
+	GARAGE_HIDEOUT_SEVEN,
+	GARAGE_HIDEOUT_EIGHT,
+	GARAGE_HIDEOUT_NINE,
+	GARAGE_HIDEOUT_TEN,
+	GARAGE_HIDEOUT_ELEVEN,
+	GARAGE_HIDEOUT_TWELVE
 };
 
 enum
@@ -208,7 +219,7 @@ public:
 #endif
 	static void Update(void);
 
-	static int16 AddOne(float X1, float Y1, float Z1, float X2, float Y2, float Z2, eGarageType type, int32 targetId);
+	static int16 AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X3, float Y3, float Z2, eGarageType type, int32 targetId);
 	static void ChangeGarageType(int16, eGarageType, int32);
 	static void PrintMessages(void);
 	static void TriggerMessage(const char* text, int16, uint16 time, int16);
