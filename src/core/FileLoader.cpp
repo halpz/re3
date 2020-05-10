@@ -443,14 +443,6 @@ CFileLoader::LoadClumpFile(RwStream *stream, uint32 id)
 		return false;
 	mi = (CClumpModelInfo*)CModelInfo::GetModelInfo(id);
 	mi->SetClump(clump);
-	if (mi->GetModelType() == MITYPE_PED && id != 0 && RwStreamFindChunk(stream, rwID_CLUMP, nil, nil)) {
-		// Read LOD ped
-		clump = RpClumpStreamRead(stream);
-		if(clump){
-			((CPedModelInfo*)mi)->SetLowDetailClump(clump);
-			RpClumpDestroy(clump);
-		}
-	}
 	return true;
 }
 

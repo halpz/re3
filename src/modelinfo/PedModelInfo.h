@@ -36,32 +36,17 @@ public:
 	ePedStats m_pedStatType;
 	uint32 m_carsCanDrive;
 	CColModel *m_hitColModel;
-#ifdef PED_SKIN
-	RpAtomic *m_head;
-	RpAtomic *m_lhand;
-	RpAtomic *m_rhand;
-#endif
+	int8 radio1, radio2;
 
 	static RwObjectNameIdAssocation m_pPedIds[PED_NODE_MAX];
 
-	CPedModelInfo(void) : CClumpModelInfo(MITYPE_PED) { }
+	CPedModelInfo(void) : CClumpModelInfo(MITYPE_PED) { m_hitColModel = nil; }
+	~CPedModelInfo(void) { delete m_hitColModel; }
 	void DeleteRwObject(void);
 	void SetClump(RpClump *);
 
-	void SetLowDetailClump(RpClump*);
-	void CreateHitColModel(void);
 	void CreateHitColModelSkinned(RpClump *clump);
 	CColModel *GetHitColModel(void) { return m_hitColModel; }
-	static CColModel *AnimatePedColModel(CColModel* colmodel, RwFrame* frame);
 	CColModel *AnimatePedColModelSkinned(RpClump *clump);
-
-#ifdef PED_SKIN
-	static RpAtomic *findLimbsCb(RpAtomic *atomic, void *data);
-	RpAtomic *getHead(void) { return m_head; }
-	RpAtomic *getLeftHand(void) { return m_lhand; }
-	RpAtomic *getRightHand(void) { return m_rhand; }
-#endif
+	CColModel *AnimatePedColModelSkinnedWorld(RpClump *clump);
 };
-#ifndef PED_SKIN
-static_assert(sizeof(CPedModelInfo) == 0x48, "CPedModelInfo: error");
-#endif

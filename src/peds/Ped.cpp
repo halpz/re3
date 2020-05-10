@@ -5153,12 +5153,9 @@ CPed::FightStrike(CVector &touchedNodePos)
 			// He can beat us
 			if (sq(maxDistanceToBeBeaten) > potentialAttackDistance.MagnitudeSqr()) {
 
-#ifdef PED_SKIN
 				// Have to animate a skinned clump because the initial col model is useless
-				if(IsClumpSkinned(GetClump()))
-					ourCol = ((CPedModelInfo *)CModelInfo::GetModelInfo(GetModelIndex()))->AnimatePedColModelSkinned(GetClump());
-				else
-#endif
+				ourCol = ((CPedModelInfo *)CModelInfo::GetModelInfo(GetModelIndex()))->AnimatePedColModelSkinned(GetClump());
+/*	this should all be gone, right?
 				if (nearPed->m_nPedState == PED_FALL
 					|| nearPed->m_nPedState == PED_DEAD || nearPed->m_nPedState == PED_DIE
 					|| !nearPed->IsPedHeadAbovePos(-0.3f)) {
@@ -5171,6 +5168,7 @@ CPed::FightStrike(CVector &touchedNodePos)
 					ourCol = ((CPedModelInfo*)CModelInfo::GetModelInfo(m_modelIndex))->GetHitColModel();
 #endif
 				}
+*/
 
 				for (int j = 0; j < ourCol->numSpheres; j++) {
 					attackDistance = nearPed->GetPosition() + ourCol->spheres[j].center;
@@ -12606,13 +12604,7 @@ CPed::Render(void)
 		bRenderPedInCar && sq(25.0f * TheCamera.LODDistMultiplier) >= (TheCamera.GetPosition() - GetPosition()).MagnitudeSqr()) {
 		CEntity::Render();
 
-#ifdef PED_SKIN
-		if(IsClumpSkinned(GetClump())){
-			renderLimb(PED_HEAD);
-			renderLimb(PED_HANDL);
-			renderLimb(PED_HANDR);
-		}
-		if(m_pWeaponModel && IsClumpSkinned(GetClump())){
+		if(m_pWeaponModel){
 			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
 			int idx = RpHAnimIDGetIndex(hier, m_pFrames[PED_HANDR]->nodeID);
 			RwMatrix *mat = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
@@ -12621,50 +12613,8 @@ CPed::Render(void)
 			RwFrameUpdateObjects(frame);
 			RpAtomicRender(m_pWeaponModel);
 		}
-#endif
 	}
 }
-
-#ifdef PED_SKIN
-static RpMaterial*
-SetLimbAlphaCB(RpMaterial *material, void *data)
-{
-	((RwRGBA*)RpMaterialGetColor(material))->alpha = *(uint8*)data;
-	return material;
-}
-
-void
-CPed::renderLimb(int node)
-{
-	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
-	int idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
-	RwMatrix *mat = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
-	CPedModelInfo *mi = (CPedModelInfo *)CModelInfo::GetModelInfo(GetModelIndex());
-	RpAtomic *atomic;
-	switch(node){
-	case PED_HEAD:
-		atomic = mi->getHead();
-		break;
-	case PED_HANDL:
-		atomic = mi->getLeftHand();
-		break;
-	case PED_HANDR:
-		atomic = mi->getRightHand();
-		break;
-	default:
-		return;
-	}
-	if(atomic == nil)
-		return;
-
-	RwFrame *frame = RpAtomicGetFrame(atomic);
-	*RwFrameGetMatrix(frame) = *mat;
-	RwFrameUpdateObjects(frame);
-	int alpha = CVisibilityPlugins::GetClumpAlpha(GetClump());
-	RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), SetLimbAlphaCB, &alpha);
-	RpAtomicRender(atomic);
-}
-#endif
 
 void
 CPed::ProcessObjective(void)
