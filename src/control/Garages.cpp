@@ -205,12 +205,19 @@ int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X
 	}
 	CGarage* pGarage = &aGarages[NumGarages];
 	// TODO(MIAMI): proper!
-	pGarage->m_fX1 = Min(Min(X1, X2), X3);
-	pGarage->m_fX2 = Max(Max(X1, X2), X3);
-	pGarage->m_fY1 = Min(Min(Y1, Y2), Y3);
-	pGarage->m_fY2 = Max(Max(Y1, Y2), Y3);
-	pGarage->m_fZ1 = Min(Z1, Z2);
-	pGarage->m_fZ2 = Max(Z1, Z2);
+	pGarage->m_fInfX = Min(Min(X1, X2), X3, X2 + X3 - X1);
+	pGarage->m_fSupX = Max(Max(X1, X2), X3);
+	pGarage->m_fInfY = Min(Min(Y1, Y2), Y3, Y2 + Y3 - Y1);
+	pGarage->m_fSupY = Max(Max(Y1, Y2), Y3);
+	pGarage->m_vecCorner1 = CVector(X1, Y1, Z1);
+	pGarage->m_vDir1 = CVector2D(X2 - X1, Y2 - Y1);
+	pGarage->m_vDir1 = CVector2D(X3 - X1, Y3 - Y1);
+	pGarage->m_fSupZ = Z2;
+	pGarage->m_nMaxStoredCars = 4;
+	pGarage->m_fDir1Len = pGarage->m_vDir1.Magnitude();
+	pGarage->m_fDir2Len = pGarage->m_vDir1.Magnitude();
+	pGarage->m_vDir1 /= pGarage->m_fDir1Len;
+	pGarage->m_vDir2 /= pGarage->m_fDir2Len;
 	pGarage->m_pDoor1 = nil;
 	pGarage->m_pDoor2 = nil;
 	pGarage->m_fDoor1Z = Z1;
@@ -257,6 +264,17 @@ int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X
 	case GARAGE_FOR_SCRIPT_TO_OPEN_AND_CLOSE:
 	case GARAGE_KEEPS_OPENING_FOR_SPECIFIC_CAR:
 	case GARAGE_MISSION_KEEPCAR_REMAINCLOSED:
+	case GARAGE_COLLECTCARS_4:
+	case GARAGE_FOR_SCRIPT_TO_OPEN_FOR_CAR:
+	case GARAGE_HIDEOUT_FOUR:
+	case GARAGE_HIDEOUT_FIVE:
+	case GARAGE_HIDEOUT_SIX:
+	case GARAGE_HIDEOUT_SEVEN:
+	case GARAGE_HIDEOUT_EIGHT:
+	case GARAGE_HIDEOUT_NINE:
+	case GARAGE_HIDEOUT_TEN:
+	case GARAGE_HIDEOUT_ELEVEN:
+	case GARAGE_HIDEOUT_TWELVE:
 		pGarage->m_eGarageState = GS_FULLYCLOSED;
 		pGarage->m_fDoorPos = 0.0f;
 		break;

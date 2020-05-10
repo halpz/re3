@@ -2593,6 +2593,54 @@ float CCarCtrl::FindMaxSteerAngle(CVehicle* pVehicle)
 	return pVehicle->GetModelIndex() == MI_ENFORCER ? 0.7f : DEFAULT_MAX_STEER_ANGLE;
 }
 
+void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
+{
+	if (pHeli->m_aWheelSpeed[1] < 0.22f)
+		pHeli->m_aWheelSpeed[1] += 0.001f;
+	if (pHeli->m_aWheelSpeed[1] < 0.22f)
+		return;
+	CVector2D vecToTarget = pHeli->AutoPilot.m_vecDestinationCoors - pHeli->GetPosition();
+	float distanceToTarget = vecToTarget.Magnitude();
+#ifdef FIX_BUGS
+	float speed = pHeli->AutoPilot.GetCruiseSpeed() * 0.01f;
+#else
+	float speed = pHeli->AutoPilot.m_nCruiseSpeed * 0.01f;
+#endif
+	if (distanceToTarget >= 100.0f)
+	{
+		if (distanceToTarget > 75.0f)
+			speed *= 0.7f;
+		else if (distanceToTarget > 10.0f)
+			speed *= 0.4f;
+		else
+			speed *= 0.2f;
+	}
+	CVector2D vecAdvanceThisFrame = vecToTarget;
+	vecAdvanceThisFrame.Normalise();
+	vecAdvanceThisFrame *= speed;
+	float resistance = Pow(0.997f, CTimer::GetTimeStep());
+	pHeli->m_vecMoveSpeed.x *= resistance;
+	pHeli->m_vecMoveSpeed.y *= resistance;
+	vecAdvanceThisFrame -= pHeli->m_vecMoveSpeed;
+	CVector2D vecSpeedChange = vecAdvanceThisFrame - pHeli->m_vecMoveSpeed;
+	float vecSpeedChangeLength = vecSpeedChange.Magnitude();
+	vecSpeedChange.Normalise();
+	float changeMultiplier = 0.002f * CTimer::GetTimeStep();
+	if (distanceToTarget < 5.0f)
+		changeMultiplier /= 5.0f;
+	if (vecSpeedChangeLength < changeMultiplier) {
+		pHeli->m_vecMoveSpeed.x = vecAdvanceThisFrame.x;
+		pHeli->m_vecMoveSpeed.y = vecAdvanceThisFrame.y;
+	}
+	else {
+		pHeli->m_vecMoveSpeed.x += vecSpeedChange.x * changeMultiplier;
+		pHeli->m_vecMoveSpeed.y += vecSpeedChange.y * changeMultiplier;
+	}
+	pHeli->SetPosition(pHeli->GetPosition() + CVector(CTimer::GetTimeStep() * pHeli->m_vecMoveSpeed.x, CTimer::GetTimeStep() * pHeli->m_vecMoveSpeed.y, 0.0f));
+	assert(0);
+	// This is not finished yet. Heli fields in CAutomobile required
+}
+
 void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerve, float* pAccel, float* pBrake, bool* pHandbrake)
 {
 	CVector2D forward = pVehicle->GetForward();
@@ -2620,18 +2668,12 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 		if (PickNextNodeAccordingStrategy(pVehicle)) {
 			switch (pVehicle->AutoPilot.m_nCarMission){
 			case MISSION_GOTOCOORDS:
-				pVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_STRAIGHT;
-				*pSwerve = 0.0f;
-				*pAccel = 0.0f;
-				*pBrake = 0.0f;
-				*pHandbrake = false;
+				SteerAICarWithPhysicsHeadingForTarget(pVehicle, nil, pVehicle->AutoPilot.m_vecDestinationCoors.x,
+					pVehicle->AutoPilot.m_vecDestinationCoors.y, pSwerve, pAccel, pBrake, pHandbrake);
 				return;
 			case MISSION_GOTOCOORDS_ACCURATE:
-				pVehicle->AutoPilot.m_nCarMission = MISSION_GOTO_COORDS_STRAIGHT_ACCURATE;
-				*pSwerve = 0.0f;
-				*pAccel = 0.0f;
-				*pBrake = 0.0f;
-				*pHandbrake = false;
+				SteerAICarWithPhysicsHeadingForTarget(pVehicle, nil, pVehicle->AutoPilot.m_vecDestinationCoors.x,
+					pVehicle->AutoPilot.m_vecDestinationCoors.y, pSwerve, pAccel, pBrake, pHandbrake);
 				return;
 			}
 		}
@@ -2667,6 +2709,7 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 	switch (pVehicle->AutoPilot.m_nDrivingStyle) {
 	case DRIVINGSTYLE_STOP_FOR_CARS:
 	case DRIVINGSTYLE_SLOW_DOWN_FOR_CARS:
+	case DRIVINGSTYLE_STOP_FOR_CARS_IGNORE_LIGHTS:
 		speedStyleMultiplier = FindMaximumSpeedForThisCarInTraffic(pVehicle) / pVehicle->AutoPilot.m_nCruiseSpeed;
 		break;
 	default:
@@ -2933,8 +2976,6 @@ bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* pVehicle, CVector vecTar
 	return false;
 }
 
-
-//TODO
 void CCarCtrl::FindLinksToGoWithTheseNodes(CVehicle* pVehicle)
 {
 	if (pVehicle->m_nRouteSeed)
@@ -2952,11 +2993,21 @@ void CCarCtrl::FindLinksToGoWithTheseNodes(CVehicle* pVehicle)
 		curLink = 0;
 		curConnection = ThePaths.m_carPathConnections[pCurNode->firstLink];
 	}else{
-		curConnection = pVehicle->AutoPilot.m_nNextPathNodeInfo;
-		while (curConnection == pVehicle->AutoPilot.m_nNextPathNodeInfo){
-			curLink = CGeneral::GetRandomNumber() % pCurNode->numLinks;
-			curConnection = ThePaths.m_carPathConnections[curLink + pCurNode->firstLink];
+		int closestLink = -1;
+		float md = 999999.9f;
+
+		for (curLink = 0; curLink < pCurNode->numLinks; curLink++) {
+			int node = ThePaths.ConnectedNode(curLink + pCurNode->firstLink);
+			CPathNode* pNode = &ThePaths.m_pathNodes[node];
+			if (node == pVehicle->AutoPilot.m_nNextRouteNode)
+				continue;
+			float dist = CCollision::DistToLine(&pCurNode->GetPosition(), &pNode->GetPosition(), &pVehicle->GetPosition());
+			if (dist < md) {
+				md = dist;
+				closestLink = curLink;
+			}
 		}
+		curConnection = ThePaths.m_carPathConnections[closestLink + pCurNode->firstLink];
 	}
 	pVehicle->AutoPilot.m_nCurrentPathNodeInfo = curConnection;
 	pVehicle->AutoPilot.m_nCurrentDirection = (ThePaths.ConnectedNode(curLink + pCurNode->firstLink) >= pVehicle->AutoPilot.m_nCurrentRouteNode) ? 1 : -1;

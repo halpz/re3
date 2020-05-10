@@ -94,6 +94,7 @@ class CGarage
 {
 	eGarageType m_eGarageType;
 	eGarageState m_eGarageState;
+	uint8 m_nMaxStoredCars;
 	bool field_2; // unused
 	bool m_bClosingWithoutTargetCar;
 	bool m_bDeactivated;
@@ -108,12 +109,16 @@ class CGarage
 	bool m_bRecreateDoorOnNextRefresh;
 	bool m_bRotatedDoor;
 	bool m_bCameraFollowsPlayer;
-	float m_fX1;
-	float m_fX2;
-	float m_fY1;
-	float m_fY2;
-	float m_fZ1;
-	float m_fZ2;
+	CVector m_vecCorner1;
+	CVector2D m_vDir1;
+	CVector2D m_vDir2;
+	float m_fSupZ;
+	float m_fDir1Len;
+	float m_fDir2Len;
+	float m_fInfX;
+	float m_fSupX;
+	float m_fInfY;
+	float m_fSupY;
 	float m_fDoorPos;
 	float m_fDoorHeight;
 	float m_fDoor1X;
@@ -182,8 +187,6 @@ class CGarage
 	friend class cAudioManager;
 	friend class CCamera;
 };
-
-static_assert(sizeof(CGarage) == 140, "CGarage");
 
 class CGarages
 {
