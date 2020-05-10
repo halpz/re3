@@ -474,11 +474,12 @@ bool CStuckCarCheck::HasCarBeenStuckForAWhile(int32 id)
 void CRunningScript::CollectParameters(uint32* pIp, int16 total)
 {
 	for (int16 i = 0; i < total; i++){
-		float tmp;
+		//float tmp;
 		uint16 varIndex;
 		switch (CTheScripts::Read1ByteFromScript(pIp))
 		{
 		case ARGUMENT_INT32:
+		case ARGUMENT_FLOAT:
 			ScriptParams[i] = CTheScripts::Read4BytesFromScript(pIp);
 			break;
 		case ARGUMENT_GLOBALVAR:
@@ -497,9 +498,9 @@ void CRunningScript::CollectParameters(uint32* pIp, int16 total)
 		case ARGUMENT_INT16:
 			ScriptParams[i] = CTheScripts::Read2BytesFromScript(pIp);
 			break;
-		case ARGUMENT_FLOAT:
-			tmp = CTheScripts::ReadFloatFromScript(pIp);
-			ScriptParams[i] = *(int32*)&tmp;
+		//case ARGUMENT_FLOAT:
+		//	tmp = CTheScripts::ReadFloatFromScript(pIp);
+		//	ScriptParams[i] = *(int32*)&tmp;
 			break;
 		default:
 			assert(0);
@@ -587,6 +588,9 @@ void CRunningScript::Init()
 }
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
+
+const char* scriptfile = "main.scm";
+
 int open_script()
 {
 	static int scriptToLoad = 1;
@@ -599,11 +603,11 @@ int open_script()
 		scriptToLoad = 2;
 
 	switch (scriptToLoad) {
-	case 0: return CFileMgr::OpenFile("main.scm", "rb");
-	case 1: return CFileMgr::OpenFile("freeroam_miami.scm", "rb");
-	case 2: return CFileMgr::OpenFile("main_d.scm", "rb");
+	case 0: scriptfile = "main.scm"; break;
+	case 1: scriptfile = "freeroam_miami.scm"; break;
+	case 2: scriptfile = "main_d.scm"; break;
 	}
-	return CFileMgr::OpenFile("main.scm", "rb");
+	return CFileMgr::OpenFile(scriptfile, "rb");
 }
 #endif
 
@@ -8703,8 +8707,13 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CTimer::Suspend();
 		int offset = CTheScripts::MultiScriptArray[ScriptParams[0]];
+#ifdef USE_DEBUG_SCRIPT_LOADER
+		CFileMgr::ChangeDir("\\data\\");
+		int handle = CFileMgr::OpenFile(scriptfile, "rb");
+#else
 		CFileMgr::ChangeDir("\\");
 		int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
+#endif
 		CFileMgr::Seek(handle, offset, 0);
 		CFileMgr::Read(handle, (const char*)&CTheScripts::ScriptSpace[SIZE_MAIN_SCRIPT], SIZE_MISSION_SCRIPT);
 		CFileMgr::CloseFile(handle);
