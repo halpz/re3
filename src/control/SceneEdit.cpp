@@ -76,7 +76,7 @@ static int32 NextValidModelId(int32 mi, int32 step)
 	int32 i = mi;
 	while (result == -1) {
 		i += step;
-		if (i < 0 || i > 5500) {
+		if (i < 0 || i > MODELINFOSIZE) {
 			step = -step;
 			continue;
 		}

@@ -783,7 +783,7 @@ CFileLoader::LoadVehicleObject(const char *line)
 	mi->SetTexDictionary(txd);
 	for(p = gamename; *p; p++)
 		if(*p == '_') *p = ' ';
-	strncpy(mi->m_gameName, gamename, 32);
+	strcpy(mi->m_gameName, gamename);
 	mi->m_level = level;
 	mi->m_compRules = comprules;
 
