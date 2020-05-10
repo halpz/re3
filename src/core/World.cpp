@@ -1926,6 +1926,7 @@ CWorld::Process(void)
 			if(csObj && csObj->m_entryInfoList.first) {
 				if(csObj->m_rwObject && RwObjectGetType(csObj->m_rwObject) == rpCLUMP &&
 				   RpAnimBlendClumpGetFirstAssociation(csObj->GetClump())) {
+// TODO(MIAMI): doRender argument
 					RpAnimBlendClumpUpdateAnimations(csObj->GetClump(),
 					                                 0.02f * (csObj->IsObject()
 					                                              ? CTimer::GetTimeStepNonClipped()
@@ -1944,6 +1945,7 @@ CWorld::Process(void)
 			CEntity *movingEnt = (CEntity *)node->item;
 			if(movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
 			   RpAnimBlendClumpGetFirstAssociation(movingEnt->GetClump())) {
+// TODO(MIAMI): doRender argument
 				RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(),
 				                                 0.02f * (movingEnt->IsObject()
 				                                              ? CTimer::GetTimeStepNonClipped()

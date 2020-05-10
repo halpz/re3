@@ -1,7 +1,5 @@
 #pragma once
 
-// some miami bike leftovers
-
 enum eBikeNodes {
 	BIKE_NODE_NONE,
 	BIKE_CHASSIS,
@@ -12,4 +10,13 @@ enum eBikeNodes {
 	BIKE_MUDGUARD,
 	BIKE_HANDLEBARS,
 	BIKE_NUM_NODES
+};
+
+enum eBikePositions
+{
+	BIKE_POS_HEADLIGHTS,
+	BIKE_POS_TAILLIGHTS,
+	BIKE_POS_FRONTSEAT,
+	BIKE_POS_BACKSEAT,
+	BIKE_POS_EXHAUST
 };

@@ -5,6 +5,7 @@
 #include "ModelIndices.h"
 #include "AnimManager.h"
 #include "Weapon.h"
+#include "HandlingMgr.h"
 
 class CPed;
 class CFire;
@@ -294,6 +295,7 @@ public:
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
 	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_ZEBRA || GetModelIndex() == MI_KAUFMAN; }
+	bool IsRealHeli(void) { return !!(pHandling->Flags & HANDLING_IS_HELI); }
 	AnimationId GetDriverAnim(void) { return IsCar() && bLowVehicle ? ANIM_CAR_LSIT : (IsBoat() && GetModelIndex() != MI_SPEEDER ? ANIM_DRIVE_BOAT : ANIM_CAR_SIT); }
 
 	static bool bWheelsOnlyCheat;

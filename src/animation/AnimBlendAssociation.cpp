@@ -7,7 +7,7 @@
 #include "AnimBlendAssociation.h"
 #include "RwHelper.h"
 
-//--MIAMI: file done except for one TODO
+//--MIAMI: file done
 
 CAnimBlendAssociation::CAnimBlendAssociation(void)
 {
@@ -160,6 +160,13 @@ CAnimBlendAssociation::Start(float time)
 	SetCurrentTime(time);
 }
 
+void
+CAnimBlendAssociation::UpdateTimeStep(float timeDelta, float relSpeed)
+{
+	if(IsRunning())
+		timeStep = (flags & ASSOC_MOVEMENT ? relSpeed*hierarchy->totalLength : speed) * timeDelta;
+}
+
 bool
 CAnimBlendAssociation::UpdateTime(float timeDelta, float relSpeed)
 {
@@ -170,10 +177,6 @@ CAnimBlendAssociation::UpdateTime(float timeDelta, float relSpeed)
 		return true;
 	}
 
-	// TODO(MIAMI): we still need this for some reason
-#ifndef NOT_YET
-	timeStep = (flags & ASSOC_MOVEMENT ? relSpeed*hierarchy->totalLength : speed) * timeDelta;
-#endif
 	currentTime += timeStep;
 
 	if(currentTime >= hierarchy->totalLength){
