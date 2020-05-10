@@ -43,7 +43,7 @@ CClumpModelInfo::CreateInstance(void)
 		RpClumpForAllAtomics(clone, SetHierarchyForSkinAtomic, hier);
 		anim = HAnimAnimationCreateForHierarchy(hier);
 		RpHAnimHierarchySetCurrentAnim(hier, anim);
-//		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
+		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
 		// the rest is xbox only:
 		// RpSkinGetNumBones(RpSkinGeometryGetSkin(RpAtomicGetGeometry(IsClumpSkinned(clone))));
 		RpHAnimHierarchyUpdateMatrices(hier);
@@ -113,7 +113,7 @@ CClumpModelInfo::SetClump(RpClump *clump)
 			weights->w2 /= sum;
 			weights->w3 /= sum;
 		}
-//		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
+		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
 	}
 #endif
 }
@@ -139,13 +139,12 @@ CClumpModelInfo::FindFrameFromIdCB(RwFrame *frame, void *data)
 {
 	RwObjectIdAssociation *assoc = (RwObjectIdAssociation*)data;
 
-	if(CVisibilityPlugins::GetFrameHierarchyId(frame) != assoc->id){
-		RwFrameForAllChildren(frame, FindFrameFromIdCB, assoc);
-		return assoc->frame ? nil : frame;
-	}else{
+	if(CVisibilityPlugins::GetFrameHierarchyId(frame) == assoc->id){
 		assoc->frame = frame;
 		return nil;
 	}
+	RwFrameForAllChildren(frame, FindFrameFromIdCB, assoc);
+	return assoc->frame ? nil : frame;
 }
 
 RwFrame*
@@ -153,13 +152,12 @@ CClumpModelInfo::FindFrameFromNameCB(RwFrame *frame, void *data)
 {
 	RwObjectNameAssociation *assoc = (RwObjectNameAssociation*)data;
 
-	if(CGeneral::faststricmp(GetFrameNodeName(frame), assoc->name)){
-		RwFrameForAllChildren(frame, FindFrameFromNameCB, assoc);
-		return assoc->frame ? nil : frame;
-	}else{
+	if(!CGeneral::faststricmp(GetFrameNodeName(frame), assoc->name)){
 		assoc->frame = frame;
 		return nil;
 	}
+	RwFrameForAllChildren(frame, FindFrameFromNameCB, assoc);
+	return assoc->frame ? nil : frame;
 }
 
 RwFrame*
@@ -167,14 +165,13 @@ CClumpModelInfo::FindFrameFromNameWithoutIdCB(RwFrame *frame, void *data)
 {
 	RwObjectNameAssociation *assoc = (RwObjectNameAssociation*)data;
 
-	if(CVisibilityPlugins::GetFrameHierarchyId(frame) ||
-		CGeneral::faststricmp(GetFrameNodeName(frame), assoc->name)){
-		RwFrameForAllChildren(frame, FindFrameFromNameWithoutIdCB, assoc);
-		return assoc->frame ? nil : frame;
-	}else{
+	if(CVisibilityPlugins::GetFrameHierarchyId(frame) == 0 &&
+	   !CGeneral::faststricmp(GetFrameNodeName(frame), assoc->name)){
 		assoc->frame = frame;
 		return nil;
 	}
+	RwFrameForAllChildren(frame, FindFrameFromNameWithoutIdCB, assoc);
+	return assoc->frame ? nil : frame;
 }
 
 RwFrame*

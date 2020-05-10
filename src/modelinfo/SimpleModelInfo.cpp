@@ -150,7 +150,7 @@ void
 CSimpleModelInfo::SetupBigBuilding(void)
 {
 	CSimpleModelInfo *related;
-	if(m_lodDistances[0] > LOD_DISTANCE && m_atomics[2] == nil){
+	if(m_lodDistances[0] > LOD_DISTANCE && GetRelatedModel() == nil){
 		m_isBigBuilding = 1;
 		FindRelatedModel();
 		related = GetRelatedModel();

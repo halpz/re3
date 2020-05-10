@@ -147,7 +147,11 @@ CVisibilityPlugins::RenderFadingEntities(void)
 		if(e->m_rwObject == nil)
 			continue;
 		mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex());
+#ifdef FIX_BUGS
+		if(mi->GetModelType() == MITYPE_SIMPLE && mi->m_noZwrite)
+#else
 		if(mi->m_noZwrite)
+#endif
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, FALSE);
 
 		if(e->bDistanceFade){
@@ -159,7 +163,11 @@ CVisibilityPlugins::RenderFadingEntities(void)
 		}else
 			CRenderer::RenderOneNonRoad(e);
 
+#ifdef FIX_BUGS
+		if(mi->GetModelType() == MITYPE_SIMPLE && mi->m_noZwrite)
+#else
 		if(mi->m_noZwrite)
+#endif
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 	}
 }
