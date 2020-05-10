@@ -3856,7 +3856,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					if (IsPedHeadAbovePos(-0.3f)) {
 						dieAnim = NUM_ANIMS;
 					} else {
-						if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG800))
+					    if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
 							dieAnim = ANIM_FLOOR_HIT_F;
 						else
 							dieAnim = ANIM_FLOOR_HIT;

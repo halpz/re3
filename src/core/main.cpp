@@ -91,7 +91,9 @@ void GameInit(void);
 void SystemInit(void);
 void TheGame(void);
 
+#ifdef DEBUGMENU
 void DebugMenuPopulate(void);
+#endif
 
 
 void
@@ -328,11 +330,10 @@ Initialise3D(void *param)
 {
 	if (RsRwInitialise(param))
 	{
-		//
+#ifdef DEBUGMENU
 		DebugMenuInit();
 		DebugMenuPopulate();
-		//
-
+#endif // !DEBUGMENU
 		return CGame::InitialiseRenderWare();
 	}
 
@@ -343,8 +344,9 @@ static void
 Terminate3D(void)
 {
 	CGame::ShutdownRenderWare();
-
+#ifdef DEBUGMENU
 	DebugMenuShutdown();
+#endif // !DEBUGMENU
 	
 	RsRwTerminate();
 
@@ -878,7 +880,9 @@ Render2dStuff(void)
 	CPad::PrintErrorMessage();
 	CFont::DrawFonts();
 
+#ifdef DEBUGMENU
 	DebugMenuRender();
+#endif
 }
 
 void

@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef DEBUGMENU
+
 typedef void (*TriggerFunc)(void);
 
 struct Menu;
@@ -85,3 +87,4 @@ inline DebugMenuEntry *DebugMenuAddVarBool8(const char *path, const char *name, 
 {
 	return DebugMenuAddVarBool8(path, name, (int8_t*)ptr, triggerFunc);
 }
+#endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#ifdef DEBUGMENU
 #include "RwHelper.h"
 #include "Pad.h"
 #include "ControllerConfig.h"
@@ -1313,3 +1314,4 @@ DebugMenuEntrySetAddress(MenuEntry *e, void *addr)
 			((MenuEntry_Float32*)e)->variable = (float*)addr;
 	}
 }
+#endif

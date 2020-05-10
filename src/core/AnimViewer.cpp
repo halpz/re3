@@ -248,8 +248,9 @@ CAnimViewer::Update(void)
 	}
 	CPad::UpdatePads();
 	CPad* pad = CPad::GetPad(0);
-
+#ifdef DEBUGMENU
 	DebugMenuProcess();
+#endif
 
 	CStreaming::UpdateForAnimViewer();
 	CStreaming::RequestModel(modelId, 0);
