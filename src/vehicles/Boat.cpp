@@ -97,7 +97,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 void
 CBoat::SetModelIndex(uint32 id)
 {
-	CEntity::SetModelIndex(id);
+	CVehicle::SetModelIndex(id);
 	SetupModelNodes();
 }
 
