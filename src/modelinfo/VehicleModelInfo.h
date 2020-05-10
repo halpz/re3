@@ -123,4 +123,7 @@ public:
 	static int GetMaximumNumberOfPassengersFromNumberOfDoors(int id);
 	static void SetComponentsToUse(int8 c1, int8 c2) { ms_compsToUse[0] = c1; ms_compsToUse[1] = c2; }
 };
+
+#ifdef CHECK_STRUCT_SIZES
 static_assert(sizeof(CVehicleModelInfo) == 0x1F8, "CVehicleModelInfo: error");
+#endif

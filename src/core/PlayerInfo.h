@@ -80,4 +80,7 @@ public:
 
 	~CPlayerInfo() { };
 };
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CPlayerInfo) == 0x13C, "CPlayerInfo: error");
+#endif

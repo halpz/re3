@@ -260,9 +260,12 @@ public:
 	void Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrientation, float, float);
 	void Process_FollowCar_SA(const CVector &CameraTarget, float TargetOrientation, float, float);
 };
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CCam) == 0x1A4, "CCam: wrong size");
 static_assert(offsetof(CCam, Alpha) == 0xA8, "CCam: error");
 static_assert(offsetof(CCam, Front) == 0x140, "CCam: error");
+#endif
 
 class CCamPathSplines
 {
@@ -637,6 +640,8 @@ uint32    unknown;	// some counter having to do with music
 	bool IsSphereVisible(const CVector &center, float radius);
 	bool IsBoxVisible(RwV3d *box, const CMatrix *mat);
 };
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(offsetof(CCamera, DistanceToWater) == 0xe4, "CCamera: error");
 static_assert(offsetof(CCamera, m_WideScreenOn) == 0x70, "CCamera: error");
 static_assert(offsetof(CCamera, WorldViewerBeingUsed) == 0x75, "CCamera: error");
@@ -650,6 +655,7 @@ static_assert(offsetof(CCamera, m_PreviousCameraPosition) == 0x6B0, "CCamera: er
 static_assert(offsetof(CCamera, m_vecCutSceneOffset) == 0x6F8, "CCamera: error");
 static_assert(offsetof(CCamera, m_arrPathArray) == 0x7a8, "CCamera: error");
 static_assert(sizeof(CCamera) == 0xE9D8, "CCamera: wrong size");
+#endif
 
 extern CCamera TheCamera;
 

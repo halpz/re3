@@ -70,4 +70,6 @@ public:
 	uint16 GetNumRefs() const { return m_refCount; }
 };
 
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CBaseModelInfo) == 0x30, "CBaseModelInfo: error");
+#endif

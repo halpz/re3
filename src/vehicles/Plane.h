@@ -63,7 +63,10 @@ public:
 	static bool HasCesnaBeenDestroyed(void);
 	static bool HasDropOffCesnaBeenShotDown(void);
 };
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CPlane) == 0x29C, "CPlane: error");
+#endif
 
 extern float LandingPoint;
 extern float TakeOffPoint;

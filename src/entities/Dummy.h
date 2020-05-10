@@ -15,4 +15,7 @@ public:
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
 };
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CDummy) == 0x68, "CDummy: error");
+#endif

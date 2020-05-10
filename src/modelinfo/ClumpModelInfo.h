@@ -50,4 +50,7 @@ public:
 	static RwFrame *FillFrameArrayCB(RwFrame *frame, void *data);
 	static RwFrame *GetFrameFromId(RpClump *clump, int32 id);
 };
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CClumpModelInfo) == 0x34, "CClumpModelInfo: error");
+#endif

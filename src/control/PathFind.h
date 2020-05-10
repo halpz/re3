@@ -41,7 +41,10 @@ struct CPedPathNode
 	CPedPathNode* prev;
 	CPedPathNode* next;
 };
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CPedPathNode) == 0x10, "CPedPathNode: error");
+#endif
 
 class CPedPath {
 public:
@@ -221,7 +224,11 @@ public:
 
 	void DisplayPathData(void);
 };
+
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CPathFind) == 0x49bf4, "CPathFind: error");
+#endif
 
 extern CPathFind ThePaths;
 

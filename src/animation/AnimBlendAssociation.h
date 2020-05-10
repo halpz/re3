@@ -84,4 +84,7 @@ public:
 		return (CAnimBlendAssociation*)((uint8*)l - offsetof(CAnimBlendAssociation, link));
 	}
 };
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CAnimBlendAssociation) == 0x40, "CAnimBlendAssociation: error");
+#endif

@@ -172,7 +172,9 @@ class CGarage
 	friend class CCamera;
 };
 
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CGarage) == 140, "CGarage");
+#endif
 
 class CGarages
 {

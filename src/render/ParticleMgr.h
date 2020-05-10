@@ -64,8 +64,10 @@ struct tParticleSystemData
 	RwRaster      **m_ppRaster;
 	CParticle     *m_pParticles;
 };
-VALIDATE_SIZE(tParticleSystemData, 0x88);
 
+#ifdef CHECK_STRUCT_SIZES
+VALIDATE_SIZE(tParticleSystemData, 0x88);
+#endif
 
 class cParticleSystemMgr
 {
@@ -125,6 +127,8 @@ public:
 	void RangeCheck(tParticleSystemData *pData) { }
 };
 
+#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(cParticleSystemMgr, 0x2420);
+#endif
 
 extern cParticleSystemMgr mod_ParticleSystemManager;

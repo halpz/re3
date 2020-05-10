@@ -32,7 +32,9 @@ public:
 	~CPhone() { }
 };
 
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CPhone) == 0x34, "CPhone: error");
+#endif
 
 class CPhoneInfo {
 public:

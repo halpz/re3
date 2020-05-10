@@ -160,4 +160,7 @@ public:
 	bool CheckCollision(void);
 	bool CheckCollision_SimpleCar(void);
 };
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CPhysical) == 0x128, "CPhysical: error");
+#endif

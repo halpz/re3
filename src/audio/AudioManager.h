@@ -52,7 +52,9 @@ public:
 	uint8 m_AudioEvents;
 };
 
+#ifdef CHECK_STRUCT_SIZES
 static_assert(sizeof(tAudioEntity) == 40, "tAudioEntity: error");
+#endif
 
 class tPedComment
 {
@@ -135,7 +137,9 @@ public:
 	float m_fVelocityChange;
 };
 
+#ifdef CHECK_STRUCT_SIZES
 static_assert(sizeof(cVehicleParams) == 0x18, "cVehicleParams: error");
+#endif
 
 enum {
 	/*

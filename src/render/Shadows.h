@@ -51,7 +51,10 @@ public:
     CStoredShadow()
 	{  }
 };
+
+#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(CStoredShadow, 0x30);
+#endif
 
 class CPolyBunch
 {
@@ -65,7 +68,10 @@ public:
     CPolyBunch()
 	{  }
 };
+
+#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(CPolyBunch, 0x6C);
+#endif
 
 class CStaticShadow
 {
@@ -93,7 +99,10 @@ public:
 
 	void Free();
 };
+
+#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(CStaticShadow, 0x40);
+#endif
 
 class CPermanentShadow
 {
@@ -115,7 +124,9 @@ public:
 	CPermanentShadow()
 	{  }
 };
+#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(CPermanentShadow, 0x38);
+#endif
 
 class CPtrList;
 class CAutomobile;

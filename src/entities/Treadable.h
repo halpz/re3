@@ -12,4 +12,7 @@ public:
 
 	bool GetIsATreadable(void) { return true; }
 };
+
+#ifdef CHECK_STRUCT_SIZES
 static_assert(sizeof(CTreadable) == 0x94, "CTreadable: error");
+#endif

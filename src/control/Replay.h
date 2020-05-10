@@ -108,7 +108,10 @@ class CReplay
 		CMatrix camera_pos;
 		CVector player_pos;
 	};
+
+#ifdef CHECK_STRUCT_SIZES
 	static_assert(sizeof(tGeneralPacket) == 88, "tGeneralPacket: error");
+#endif
 
 	struct tClockPacket
 	{

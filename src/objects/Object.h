@@ -97,4 +97,7 @@ public:
 	static void DeleteAllTempObjects();
 	static void DeleteAllTempObjectsInArea(CVector point, float fRadius);
 };
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CObject) == 0x198, "CObject: error");
+#endif

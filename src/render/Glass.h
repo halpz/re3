@@ -21,7 +21,9 @@ public:
 	void Render(void);
 };
 
+#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(CFallingGlassPane, 0x70);
+#endif
 
 enum
 {

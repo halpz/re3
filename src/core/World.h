@@ -45,7 +45,11 @@ class CSector
 public:
 	CPtrList m_lists[NUMSECTORENTITYLISTS];
 };
+
+
+#ifdef CHECK_STRUCT_SIZES 
 static_assert(sizeof(CSector) == 0x28, "CSector: error");
+#endif
 
 class CEntity;
 struct CColPoint;
