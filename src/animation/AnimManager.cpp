@@ -413,6 +413,13 @@ char const *aPlayerBBBatAnimations[] = {
 	"IDLE_STANCE",
 	"walk_start",
 };
+char const *aPlayerChainsawAnimations[] = {
+	"walk_csaw",
+	"run_csaw",
+	"run_csaw",
+	"IDLE_csaw",
+	"walk_start_csaw",
+};
 char const *aShuffleAnimations[] = {
 	"WALK_shuffle",
 	"RUN_civi",
@@ -449,6 +456,12 @@ char const *aOldFatAnimations[] = {
 	"woman_runpanic",
 	"idle_stance",
 };
+char const *aJoggerAnimations[] = {
+	"JOG_maleA",
+	"run_civi",
+	"sprint_civi",
+	"idle_stance",
+};
 char const *aStdWomanAnimations[] = {
 	"woman_walknorm",
 	"woman_run",
@@ -473,14 +486,20 @@ char const *aSexyWomanAnimations[] = {
 	"woman_runpanic",
 	"woman_idlestance",
 };
+char const *aFatWomanAnimations[] = {
+	"walk_fat",
+	"woman_run",
+	"woman_runpanic",
+	"woman_idlestance",
+};
 char const *aOldWomanAnimations[] = {
 	"woman_walkold",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char const *aFatWomanAnimations[] = {
-	"walk_fat",
+char const *aJoggerWomanAnimations[] = {
+	"JOG_maleB",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
@@ -491,22 +510,28 @@ char const *aPanicChunkyAnimations[] = {
 	"woman_runpanic",
 	"idle_stance",
 };
+char const *aSkateAnimations[] = {
+	"skate_run",
+	"skate_sprint",
+	"skate_sprint",
+	"skate_idle",
+};
 char const *aPlayerStrafeBackAnimations[] = {
-	"walk_player_back",
-	"run_player_back",
-	"run_player_back",
+	"walk_back",
+	"run_back",
+	"run_back",
 	"IDLE_STANCE",
 	"walk_start_back",
 };
 char const *aPlayerStrafeLeftAnimations[] = {
-	"walk_player_left",
+	"walk_left",
 	"run_left",
 	"run_left",
 	"IDLE_STANCE",
 	"walk_start_left",
 };
 char const *aPlayerStrafeRightAnimations[] = {
-	"walk_player_right",
+	"walk_right",
 	"run_right",
 	"run_right",
 	"IDLE_STANCE",
@@ -533,6 +558,28 @@ char const *aRocketStrafeRightAnimations[] = {
 	"idle_rocket",
 	"walkst_rocket_right",
 };
+char const *aChainsawStrafeBackAnimations[] = {
+	"walk_csaw_back",
+	"run_csaw_back",
+	"run_csaw_back",
+	"idle_csaw",
+	"walkst_csaw_back",
+};
+char const *aChainsawStrafeLeftAnimations[] = {
+	"walk_csaw_left",
+	"run_csaw_left",
+	"run_csaw_left",
+	"idle_csaw",
+	"walkst_csaw_left",
+};
+char const *aChainsawStrafeRightAnimations[] = {
+	"walk_csaw_right",
+	"run_csaw_right",
+	"run_csaw_right",
+	"idle_csaw",
+	"walkst_csaw_right",
+};
+
 const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_GROUPS] = {
 	{ "man", "ped", MI_COP, 173, aStdAnimations, aStdAnimDescs },
 	{ "player", "ped", MI_COP, 5, aPlayerAnimations, aStdAnimDescs },
@@ -540,25 +587,32 @@ const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_
 	{ "player1armed", "ped", MI_COP, 5, aPlayer1ArmedAnimations, aStdAnimDescs },
 	{ "player2armed", "ped", MI_COP, 5, aPlayer2ArmedAnimations, aStdAnimDescs },
 	{ "playerBBBat", "ped", MI_COP, 5, aPlayerBBBatAnimations, aStdAnimDescs },
+	{ "playercsaw", "ped", MI_COP, 5, aPlayerChainsawAnimations, aStdAnimDescs },
 	{ "shuffle", "ped", MI_COP, 4, aShuffleAnimations, aStdAnimDescs },
 	{ "oldman", "ped", MI_COP, 4, aOldAnimations, aStdAnimDescs },
 	{ "gang1", "ped", MI_COP, 4, aGang1Animations, aStdAnimDescs },
 	{ "gang2", "ped", MI_COP, 4, aGang2Animations, aStdAnimDescs },
 	{ "fatman", "ped", MI_COP, 4, aFatAnimations, aStdAnimDescs },
 	{ "oldfatman", "ped", MI_COP, 4, aOldFatAnimations, aStdAnimDescs },
+	{ "jogger", "ped", MI_COP, 4, aJoggerAnimations, aStdAnimDescs },
 	{ "woman", "ped", MI_COP, 4, aStdWomanAnimations, aStdAnimDescs },
 	{ "shopping", "ped", MI_COP, 4, aWomanShopAnimations, aStdAnimDescs },
 	{ "busywoman", "ped", MI_COP, 4, aBusyWomanAnimations, aStdAnimDescs },
 	{ "sexywoman", "ped", MI_COP, 4, aSexyWomanAnimations, aStdAnimDescs },
-	{ "oldwoman", "ped", MI_COP, 4, aOldWomanAnimations, aStdAnimDescs },
 	{ "fatwoman", "ped", MI_COP, 4, aFatWomanAnimations, aStdAnimDescs },
+	{ "oldwoman", "ped", MI_COP, 4, aOldWomanAnimations, aStdAnimDescs },
+	{ "jogwoman", "ped", MI_COP, 4, aJoggerWomanAnimations, aStdAnimDescs },
 	{ "panicchunky", "ped", MI_COP, 4, aPanicChunkyAnimations, aStdAnimDescs },
+	{ "skate", "skate", MI_COP, 4, aSkateAnimations, aStdAnimDescs },
 	{ "playerback", "ped", MI_COP, 5, aPlayerStrafeBackAnimations, aStdAnimDescs },
 	{ "playerleft", "ped", MI_COP, 5, aPlayerStrafeLeftAnimations, aStdAnimDescsSide },
 	{ "playerright", "ped", MI_COP, 5, aPlayerStrafeRightAnimations, aStdAnimDescsSide },
 	{ "rocketback", "ped", MI_COP, 5, aRocketStrafeBackAnimations, aStdAnimDescs },
 	{ "rocketleft", "ped", MI_COP, 5, aRocketStrafeLeftAnimations, aStdAnimDescsSide },
 	{ "rocketright", "ped", MI_COP, 5, aRocketStrafeRightAnimations, aStdAnimDescsSide },
+	{ "csawback", "ped", MI_COP, 5, aChainsawStrafeBackAnimations, aStdAnimDescs },
+	{ "csawleft", "ped", MI_COP, 5, aChainsawStrafeLeftAnimations, aStdAnimDescsSide },
+	{ "csawright", "ped", MI_COP, 5, aChainsawStrafeRightAnimations, aStdAnimDescsSide },
 };
 
 void
