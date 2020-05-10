@@ -36,7 +36,7 @@ enum eCarPositions
 	CAR_POS_TAILLIGHTS,
 	CAR_POS_FRONTSEAT,
 	CAR_POS_BACKSEAT,
-	CAR_POS_EXHAUST		= 9,
+	CAR_POS_EXHAUST
 };
 
 // These are used for all the wheel arrays

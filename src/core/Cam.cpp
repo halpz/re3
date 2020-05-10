@@ -29,7 +29,7 @@ bool PrintDebugCode = false;
 int16 DebugCamMode;
 
 #ifdef FREE_CAM
-bool CCamera::bFreeCam = true;
+bool CCamera::bFreeCam = false;
 int nPreviousMode = -1;
 #endif
 
@@ -280,12 +280,12 @@ CCam::Process(void)
 				if(DirectionWasLooking != LOOKING_BEHIND)
 					TheCamera.m_bJust_Switched = true;
 				DirectionWasLooking = LOOKING_BEHIND;
-			}else if(CPad::GetPad(0)->GetLookLeft()){
+			}else if(!((CVehicle*)CamTargetEntity)->IsRealHeli() && CPad::GetPad(0)->GetLookLeft()){
 				LookLeft();
 				if(DirectionWasLooking != LOOKING_LEFT)
 					TheCamera.m_bJust_Switched = true;
 				DirectionWasLooking = LOOKING_LEFT;
-			}else if(CPad::GetPad(0)->GetLookRight()){
+			}else if(!((CVehicle*)CamTargetEntity)->IsRealHeli() && CPad::GetPad(0)->GetLookRight()){
 				LookRight();
 				if(DirectionWasLooking != LOOKING_RIGHT)
 					TheCamera.m_bJust_Switched = true;

@@ -2,6 +2,13 @@
 
 #include "Vehicle.h"
 
+enum ePlaneNodes
+{
+	PLANE_WHEEL_FRONT = 2,
+	PLANE_WHEEL_READ,
+	NUM_PLANE_NODES
+};
+
 enum ePlanePositions
 {
 	PLANE_POS_LIGHT_LEFT,

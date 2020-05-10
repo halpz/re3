@@ -195,7 +195,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 		CMatrix mat2(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]));
 		mat1.GetPosition() += CVector(mat2.GetPosition().x + 0.1f, 0.0f, mat2.GetPosition().z);
 		mat1.UpdateRW();
-	}else if(GetModelIndex() == MI_SPARROW || GetModelIndex() == MI_RCRAIDER){
+	}else if(IsRealHeli()){
 		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), 0);
 		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_RF]), 0);
 		RpAtomicSetFlags((RpAtomic*)GetFirstObject(m_aCarNodes[CAR_WHEEL_LB]), 0);
@@ -672,9 +672,7 @@ CAutomobile::ProcessControl(void)
 		acceleration /= m_fForceMultiplier;
 
 		// unused
-		if(GetModelIndex() == MI_RCBARON ||
-		   GetModelIndex() == MI_RCRAIDER ||
-		   GetModelIndex() == MI_SPARROW)
+		if(GetModelIndex() == MI_RCBARON || IsRealHeli())
 			acceleration = 0.0f;
 
 		brake = m_fBrakePedal * pHandling->fBrakeDeceleration * CTimer::GetTimeStep();
@@ -1023,18 +1021,18 @@ CAutomobile::ProcessControl(void)
 				FlyingControl(FLIGHT_MODEL_DODO);
 		}else if(GetModelIndex() == MI_RCBARON){
 			FlyingControl(FLIGHT_MODEL_RCPLANE);
-		}else if(GetModelIndex() == MI_RCRAIDER || GetModelIndex() == MI_SPARROW || bAllCarCheat){
+		}else if(IsRealHeli() || bAllCarCheat){
 #ifdef ALLCARSHELI_CHEAT
 			if (bAllCarCheat)
 				FlyingControl(FLIGHT_MODEL_HELI);
 			else
 #endif
 			{
-				if (CPad::GetPad(0)->GetCircleJustDown())
-					m_aWheelSpeed[0] = Max(m_aWheelSpeed[0] - 0.03f, 0.0f);
-				if (m_aWheelSpeed[0] < 0.22f)
-					m_aWheelSpeed[0] += 0.0001f;
-				if (m_aWheelSpeed[0] > 0.15f)
+			//	if (CPad::GetPad(0)->GetCircleJustDown())
+			//		m_aWheelSpeed[0] = Max(m_aWheelSpeed[0] - 0.03f, 0.0f);
+			//	if (m_aWheelSpeed[0] < 0.22f)
+			//		m_aWheelSpeed[0] += 0.0001f;
+			//	if (m_aWheelSpeed[0] > 0.15f)
 					FlyingControl(FLIGHT_MODEL_HELI);
 			}
 		}

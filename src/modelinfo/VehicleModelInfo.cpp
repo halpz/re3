@@ -16,6 +16,7 @@
 #include "Train.h"
 #include "Plane.h"
 #include "Heli.h"
+#include "Bike.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 
@@ -82,9 +83,13 @@ RwObjectNameIdAssocation carIds[] = {
 };
 
 RwObjectNameIdAssocation boatIds[] = {
-	{ "boat_moving_hi",	BOAT_MOVING,	VEHICLE_FLAG_COLLAPSE },
-	{ "boat_rudder_hi",	BOAT_RUDDER,	VEHICLE_FLAG_COLLAPSE },
-	{ "windscreen",		BOAT_WINDSCREEN,	VEHICLE_FLAG_WINDSCREEN | VEHICLE_FLAG_COLLAPSE },
+	{ "boat_moving_hi",	BOAT_MOVING,	0 },
+	{ "boat_rudder_hi",	BOAT_RUDDER,	0 },
+	{ "boat_flap_left",	BOAT_FLAP_LEFT,	0 },
+	{ "boat_flap_right",	BOAT_FLAP_RIGHT,	0 },
+	{ "boat_rearflap_left",	BOAT_REARFLAP_LEFT,	0 },
+	{ "boat_rearflap_right",	BOAT_REARFLAP_RIGHT,	0 },
+	{ "windscreen_hi_ok",		BOAT_WINDSCREEN,	VEHICLE_FLAG_WINDSCREEN | VEHICLE_FLAG_DRAWLAST },
 	{ "ped_frontseat",	BOAT_POS_FRONTSEAT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
 	{ nil, 0, 0 }
 };
@@ -112,8 +117,8 @@ RwObjectNameIdAssocation heliIds[] = {
 };
 
 RwObjectNameIdAssocation planeIds[] = {
-	{ "wheel_front_dummy",	2,	0 },
-	{ "wheel_rear_dummy",	3,	0 },
+	{ "wheel_front_dummy",	PLANE_WHEEL_FRONT,	0 },
+	{ "wheel_rear_dummy",	PLANE_WHEEL_READ,	0 },
 	{ "light_tailplane",	PLANE_POS_LIGHT_TAIL,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
 	{ "light_left",		PLANE_POS_LIGHT_LEFT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
 	{ "light_right",	PLANE_POS_LIGHT_RIGHT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
@@ -121,16 +126,18 @@ RwObjectNameIdAssocation planeIds[] = {
 };
 
 RwObjectNameIdAssocation bikeIds[] = {
-	{ "chassis_dummy",	1,	0 },
-	{ "forks_front",	2,	0 },
-	{ "forks_rear",		3,	0 },
-	{ "wheel_front",	4,	0 },
-	{ "wheel_rear",		5,	0 },
-	{ "mudguard",		6,	0 },
-	{ "ped_frontseat",	2,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "headlights",		0,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "taillights",		1,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "exhaust",		9,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "chassis_dummy",	BIKE_CHASSIS,	0 },
+	{ "forks_front",	BIKE_FORKS_FRONT,	0 },
+	{ "forks_rear",		BIKE_FORKS_REAR,	0 },
+	{ "wheel_front",	BIKE_WHEEL_FRONT,	0 },
+	{ "wheel_rear",		BIKE_WHEEL_REAR,	0 },
+	{ "mudguard",		BIKE_MUDGUARD,	0 },
+	{ "handlebars",		BIKE_HANDLEBARS,	0 },
+	{ "ped_frontseat",	BIKE_POS_FRONTSEAT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "ped_backseat",	BIKE_POS_BACKSEAT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "headlights",		BIKE_POS_HEADLIGHTS,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "taillights",		BIKE_POS_TAILLIGHTS,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "exhaust",		BIKE_POS_EXHAUST,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
 	{ "extra1",		0,	VEHICLE_FLAG_DRAWLAST | VEHICLE_FLAG_COMP | CLUMP_FLAG_NO_HIERID },
 	{ "extra2",		0,	VEHICLE_FLAG_DRAWLAST | VEHICLE_FLAG_COMP | CLUMP_FLAG_NO_HIERID },
 	{ "extra3",		0,	VEHICLE_FLAG_DRAWLAST | VEHICLE_FLAG_COMP | CLUMP_FLAG_NO_HIERID },

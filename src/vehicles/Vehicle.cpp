@@ -423,17 +423,16 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		}
 		else {
 			fPitch = CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
-			fRoll = CPad::GetPad(0)->GetLookLeft();
-			if (CPad::GetPad(0)->GetLookRight())
-				fRoll = -1.0f;
-			fYaw = CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
+			fYaw = CPad::GetPad(0)->GetLookRight();
+			if (CPad::GetPad(0)->GetLookLeft())
+				fYaw = -1.0f;
+			fRoll = -CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
 		}
 		if (CPad::GetPad(0)->GetHorn()) {
 			fYaw = 0.0f;
 			fPitch = clamp(10.0f * DotProduct(m_vecMoveSpeed, GetUp()), -200.0f, 1.3f);
 			fRoll = clamp(10.0f * DotProduct(m_vecMoveSpeed, GetRight()), -200.0f, 1.3f);
 		}
-		debug("fPitch: %f\n", fPitch);
 		ApplyTurnForce(fPitch * GetUp() * fPitchVar * m_fTurnMass * CTimer::GetTimeStep(), GetForward());
 		ApplyTurnForce(fRoll * GetUp() * fRollVar * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
 		ApplyTurnForce(fYaw * GetForward() * fYawVar * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
