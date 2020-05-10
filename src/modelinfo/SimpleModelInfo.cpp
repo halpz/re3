@@ -3,6 +3,9 @@
 #include "General.h"
 #include "Camera.h"
 #include "ModelInfo.h"
+#include "AnimManager.h"
+
+//--MIAMI: file done
 
 #define LOD_DISTANCE (300.0f)
 
@@ -18,6 +21,8 @@ CSimpleModelInfo::DeleteRwObject(void)
 			RwFrameDestroy(f);
 			m_atomics[i] = nil;
 			RemoveTexDictionaryRef();
+			if(GetAnimFileIndex() != -1)
+				CAnimManager::RemoveAnimBlockRef(GetAnimFileIndex());
 		}
 }
 
@@ -75,10 +80,14 @@ CSimpleModelInfo::SetAtomic(int n, RpAtomic *atomic)
 {
 	AddTexDictionaryRef();
 	m_atomics[n] = atomic;
-	if(m_ignoreLight){
-		RpGeometry *geo = RpAtomicGetGeometry(atomic);
+	if(GetAnimFileIndex() != -1)
+		CAnimManager::AddAnimBlockRef(GetAnimFileIndex());
+	RpGeometry *geo = RpAtomicGetGeometry(atomic);
+	if(m_ignoreLight)
 		RpGeometrySetFlags(geo, RpGeometryGetFlags(geo) & ~rpGEOMETRYLIGHT);
-	}
+	if(RpGeometryGetFlags(geo) & rpGEOMETRYNORMALS &&
+	   RpGeometryGetNumTriangles(geo) > 200)
+		debug("%s has %d polys\n", m_name, RpGeometryGetNumTriangles(geo));
 }
 
 void
@@ -143,11 +152,11 @@ CSimpleModelInfo::GetFirstAtomicFromDistance(float dist)
 }
 
 void
-CSimpleModelInfo::FindRelatedModel(void)
+CSimpleModelInfo::FindRelatedModel(int32 minID, int32 maxID)
 {
 	int i;
 	CBaseModelInfo *mi;
-	for(i = 0; i < MODELINFOSIZE; i++){
+	for(i = minID; i <= maxID; i++){
 		mi = CModelInfo::GetModelInfo(i);
 		if(mi && mi != this &&
 		   !CGeneral::faststrcmp(GetName()+3, mi->GetName()+3)){
@@ -161,12 +170,12 @@ CSimpleModelInfo::FindRelatedModel(void)
 #define NEAR_DRAW_DIST 0.0f	// 100.0f in liberty city
 
 void
-CSimpleModelInfo::SetupBigBuilding(void)
+CSimpleModelInfo::SetupBigBuilding(int32 minID, int32 maxID)
 {
 	CSimpleModelInfo *related;
-	if(m_lodDistances[0] > LOD_DISTANCE && m_atomics[2] == nil){
+	if(m_lodDistances[0] > LOD_DISTANCE && GetRelatedModel() == nil){
 		m_isBigBuilding = 1;
-		FindRelatedModel();
+		FindRelatedModel(minID, maxID);
 		related = GetRelatedModel();
 		if(related){
 			m_lodDistances[2] = related->GetLargestLodDistance()/TheCamera.LODDistMultiplier;

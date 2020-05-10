@@ -7,6 +7,8 @@
 #include "ModelInfo.h"
 #include "AnimManager.h"
 
+//--MIAMI: file done
+
 void
 CClumpModelInfo::DeleteRwObject(void)
 {
