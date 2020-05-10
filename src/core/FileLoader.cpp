@@ -94,7 +94,9 @@ CFileLoader::LoadLevel(const char *filename)
 				CObjectData::Initialise("DATA\\OBJECT.DAT");
 				CStreaming::Init();
 				CColStore::LoadAllCollision();
-				// TODO(MIAMI): anim indices
+				for(int i = 0; i < MODELINFOSIZE; i++)
+					if(CModelInfo::GetModelInfo(i))
+						CModelInfo::GetModelInfo(i)->ConvertAnimFileIndex();
 				objectsLoaded = true;
 			}
 			LoadingScreenLoadingFile(line + 4);
@@ -597,7 +599,7 @@ CFileLoader::LoadObjectTypes(const char *filename)
 			if(id < minID) minID = id;
 			break;
 		case WEAP:
-			assert(0 && "can't do this yet");
+			LoadWeaponObject(line);
 			break;
 		case HIER:
 			LoadClumpObject(line);
@@ -753,6 +755,27 @@ CFileLoader::LoadTimeObject(const char *line)
 	return id;
 }
 
+int
+CFileLoader::LoadWeaponObject(const char *line)
+{
+	int id, numObjs;
+	char model[24], txd[24], animFile[16];
+	float dist;
+	CWeaponModelInfo *mi;
+
+	sscanf(line, "%d %s %s %s %d %f", &id, model, txd, animFile, &numObjs, &dist);
+
+	mi = CModelInfo::AddWeaponModel(id);
+	mi->SetName(model);
+	mi->SetNumAtomics(1);
+	mi->m_lodDistances[0] = dist;
+	mi->SetTexDictionary(txd);
+	mi->SetAnimFile(animFile);
+	mi->SetColModel(&CTempColModels::ms_colModelWeapon);
+	MatchModelString(model, id);
+	return id;
+}
+
 void
 CFileLoader::LoadClumpObject(const char *line)
 {
@@ -773,7 +796,7 @@ CFileLoader::LoadVehicleObject(const char *line)
 {
 	int id;
 	char model[24], txd[24];
-	char type[8], handlingId[16], gamename[32], anims[16], vehclass[12];
+	char type[8], handlingId[16], gamename[32], animFile[16], vehclass[12];
 	uint32 frequency, comprules;
 	int32 level, misc;
 	float wheelScale;
@@ -782,13 +805,13 @@ CFileLoader::LoadVehicleObject(const char *line)
 
 	sscanf(line, "%d %s %s %s %s %s %s %s %d %d %x %d %f",
 		&id, model, txd,
-		type, handlingId, gamename, anims, vehclass,
+		type, handlingId, gamename, animFile, vehclass,
 		&frequency, &level, &comprules, &misc, &wheelScale);
 
 	mi = CModelInfo::AddVehicleModel(id);
 	mi->SetName(model);
 	mi->SetTexDictionary(txd);
-	// TODO(MIAMI): anims
+	mi->SetAnimFile(animFile);
 	for(p = gamename; *p; p++)
 		if(*p == '_') *p = ' ';
 	strcpy(mi->m_gameName, gamename);
@@ -867,6 +890,7 @@ CFileLoader::LoadPedObject(const char *line)
 	mi = CModelInfo::AddPedModel(id);
 	mi->SetName(model);
 	mi->SetTexDictionary(txd);
+	mi->SetAnimFile(animFile);
 	mi->SetColModel(&CTempColModels::ms_colModelPed1);
 	mi->m_pedType = CPedType::FindPedType(pedType);
 	mi->m_pedStatType = CPedStats::GetPedStatType(pedStats);
@@ -876,6 +900,8 @@ CFileLoader::LoadPedObject(const char *line)
 	assert(animGroupId < NUM_ANIM_ASSOC_GROUPS);
 	mi->m_animGroup = animGroupId;
 	mi->m_carsCanDrive = carsCanDrive;
+	mi->radio1 = radio1;
+	mi->radio2 = radio2;
 }
 
 int

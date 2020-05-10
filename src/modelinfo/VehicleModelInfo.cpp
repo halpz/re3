@@ -162,6 +162,7 @@ CVehicleModelInfo::CVehicleModelInfo(void)
 		m_positions[i].z = 0.0f;
 	}
 	m_numColours = 0;
+	m_animFileIndex = -1;
 }
 
 void

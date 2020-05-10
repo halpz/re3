@@ -2358,6 +2358,8 @@ void CPad::ResetCheats(void)
 	CVehicle::bCheat3 = false;
 	CVehicle::bCheat4 = false;
 	CVehicle::bCheat5 = false;
+	gbBlackCars = false;
+	gbPinkCars = false;
 	
 	gbFastTime = false;
 	CTimer::SetTimeScale(1.0f);

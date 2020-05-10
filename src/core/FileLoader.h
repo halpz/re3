@@ -25,6 +25,7 @@ public:
 	static void LoadObjectTypes(const char *filename);
 	static int LoadObject(const char *line);
 	static int LoadTimeObject(const char *line);
+	static int LoadWeaponObject(const char *line);
 	static void LoadClumpObject(const char *line);
 	static void LoadVehicleObject(const char *line);
 	static void LoadPedObject(const char *line);

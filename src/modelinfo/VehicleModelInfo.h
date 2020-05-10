@@ -68,6 +68,7 @@ public:
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
 	RpAtomic *m_comps[6];
+	// This is stupid, CClumpModelInfo already has it!
 	union {
 		int32 m_animFileIndex;
 		char *m_animFileName;

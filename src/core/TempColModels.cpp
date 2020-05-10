@@ -16,6 +16,7 @@ CColModel CTempColModels::ms_colModelPedGroundHit;
 CColModel CTempColModels::ms_colModelBoot1;
 CColModel CTempColModels::ms_colModelDoor1;
 CColModel CTempColModels::ms_colModelBonnet1;
+CColModel CTempColModels::ms_colModelWeapon;
 
 
 CColSphere s_aPedSpheres[3];
@@ -284,6 +285,10 @@ CTempColModels::Initialise(void)
 	ms_colModelBodyPart2.boundingBox.Set(CVector(-0.2f, -0.2f, -0.2f), CVector(0.7f, 0.2f, 0.2f));
 
 	SET_COLMODEL_SPHERES(ms_colModelBodyPart2, s_aBodyPartSpheres2);
+
+
+	ms_colModelWeapon.boundingSphere.Set(0.25f, CVector(0.0f, 0.0f, 0.0f));
+	ms_colModelWeapon.boundingBox.Set(CVector(-0.25f, -0.25, -0.25f), CVector(0.25f, 0.25, 0.25f));
 
 #undef SET_COLMODEL_SPHERES
 }
