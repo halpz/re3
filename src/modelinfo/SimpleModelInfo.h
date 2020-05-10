@@ -48,8 +48,8 @@ public:
 	float GetLargestLodDistance(void);
 	RpAtomic *GetAtomicFromDistance(float dist);
 	RpAtomic *GetFirstAtomicFromDistance(float dist);
-	void FindRelatedModel(void);
-	void SetupBigBuilding(void);
+	void FindRelatedModel(int32 minID, int32 maxID);
+	void SetupBigBuilding(int32 minID, int32 maxID);
 
 	void SetNumAtomics(int n) { m_numAtomics = n; }
 	CSimpleModelInfo *GetRelatedModel(void){

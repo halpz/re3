@@ -642,7 +642,7 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	for(id = minID; id <= maxID; id++){
 		CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
 		if(mi && mi->IsBuilding())
-			mi->SetupBigBuilding();
+			mi->SetupBigBuilding(minID, maxID);
 	}
 }
 
