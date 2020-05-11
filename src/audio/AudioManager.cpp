@@ -9245,7 +9245,7 @@ cAudioManager::ResetTimers(uint32 time)
 		SampleManager.SetEffectsFadeVolume(0);
 		SampleManager.SetMusicFadeVolume(0);
 		MusicManager.ResetMusicAfterReload();
-#ifdef OPENAL
+#ifdef AUDIO_OAL
 		SampleManager.Service();
 #endif
 	}
@@ -9301,7 +9301,7 @@ cAudioManager::ServiceSoundEffects()
 	ProcessMissionAudio();
 	AdjustSamplesVolume();
 	ProcessActiveQueues();
-#ifdef OPENAL
+#ifdef AUDIO_OAL
 	SampleManager.Service();
 #endif
 	for (int32 i = 0; i < m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal; ++i) {

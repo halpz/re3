@@ -1,3 +1,6 @@
+#include "common.h"
+
+#ifdef AUDIO_MSS
 #include <windows.h>
 #include <shobjidl.h>
 #include <shlguid.h>
@@ -8,7 +11,7 @@
 #include "eax-util.h"
 #include "mss.h"
 
-#include "sampman_mss.h"
+#include "sampman.h"
 #include "AudioManager.h"
 #include "MusicManager.h"
 #include "Frontend.h"
@@ -18,7 +21,7 @@
 #pragma comment( lib, "mss32.lib" )
 
 cSampleManager SampleManager;
-int32 BankStartOffset[MAX_SAMPLEBANKS];
+uint32 BankStartOffset[MAX_SAMPLEBANKS];
 ///////////////////////////////////////////////////////////////
 
 char SampleBankDescFilename[] = "AUDIO\\SFX.SDT";
@@ -55,9 +58,9 @@ struct tMP3Entry
 uint32 nNumMP3s;
 tMP3Entry *_pMP3List;
 char _mp3DirectoryPath[MAX_PATH];
-HSTREAM mp3Stream [MAX_MP3STREAMS];
-int8 nStreamPan   [MAX_MP3STREAMS];
-int8 nStreamVolume[MAX_MP3STREAMS];
+HSTREAM mp3Stream [MAX_STREAMS];
+int8 nStreamPan   [MAX_STREAMS];
+int8 nStreamVolume[MAX_STREAMS];
 uint32 _CurMP3Index;
 int32 _CurMP3Pos;
 bool _bIsMp3Active;
@@ -261,6 +264,17 @@ set_new_provider(S32 index)
 	return false;
 }
 
+cSampleManager::cSampleManager(void) : 
+	m_nNumberOfProviders(0)
+{
+	;
+}
+
+cSampleManager::~cSampleManager(void)
+{
+	
+}
+
 void
 cSampleManager::SetSpeakerConfig(int32 which)
 {
@@ -294,6 +308,26 @@ cSampleManager::GetMaximumSupportedChannels(void)
 		return MAXCHANNELS;
 	
 	return _maxSamples;
+}
+
+uint32 cSampleManager::GetNum3DProvidersAvailable()
+{
+	return m_nNumberOfProviders;
+}
+
+void cSampleManager::SetNum3DProvidersAvailable(uint32 num)
+{
+	m_nNumberOfProviders = num;
+}
+	
+char *cSampleManager::Get3DProviderName(uint8 id)
+{
+	return m_aAudioProviders[id];
+}
+
+void cSampleManager::Set3DProviderName(uint8 id, char *name)
+{
+	m_aAudioProviders[id] = name;
 }
 
 int8
@@ -1084,7 +1118,7 @@ cSampleManager::Initialise(void)
 	
 	TRACE("stream");
 	{
-		for ( int32 i = 0; i < MAX_MP3STREAMS; i++ )
+		for ( int32 i = 0; i < MAX_STREAMS; i++ )
 		{
 			mp3Stream    [i] = NULL;
 			nStreamPan   [i] = 63;
@@ -1199,7 +1233,7 @@ cSampleManager::Initialise(void)
 void
 cSampleManager::Terminate(void)
 {
-	for ( int32 i = 0; i < MAX_MP3STREAMS; i++ )
+	for ( int32 i = 0; i < MAX_STREAMS; i++ )
 	{
 		if ( mp3Stream[i] )
 		{
@@ -1366,6 +1400,12 @@ cSampleManager::SetMusicFadeVolume(uint8 nVolume)
 	m_nMusicFadeVolume = nVolume;
 }
 
+void
+cSampleManager::SetMonoMode(uint8 nMode)
+{
+	m_nMonoMode = nMode;
+}
+
 bool
 cSampleManager::LoadSampleBank(uint8 nBank)
 {
@@ -1473,6 +1513,18 @@ cSampleManager::LoadPedComment(uint32 nComment)
 		nCurrentPedSlot = 0;
 	
 	return true;
+}
+
+int32
+cSampleManager::GetBankContainingSound(uint32 offset)
+{
+	if ( offset >= BankStartOffset[SAMPLEBANK_PED] )
+		return SAMPLEBANK_PED;
+	
+	if ( offset >= BankStartOffset[SAMPLEBANK_MAIN] )
+		return SAMPLEBANK_MAIN;
+	
+	return SAMPLEBANK_INVALID;
 }
 
 int32
@@ -1664,7 +1716,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 			OutputDebugString(AIL_last_error());
 			return false;
 		}
-			
+		
 		return true;
 	}
 }
@@ -2255,3 +2307,5 @@ cSampleManager::InitialiseSampleBanks(void)
 	
 	return true;
 }
+
+#endif

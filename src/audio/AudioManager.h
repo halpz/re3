@@ -471,6 +471,8 @@ public:
 	void DebugShit();
 };
 
-//dstatic_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
+#ifdef AUDIO_MSS
+static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
+#endif
 
 extern cAudioManager AudioManager;
