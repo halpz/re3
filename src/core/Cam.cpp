@@ -4539,6 +4539,8 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 			Rotating = false;
 	}
 
+	if(TheCamera.m_bUseTransitionBeta)
+		Beta = CGeneral::GetATanOfXY(-Cos(m_fTransitionBeta), -Sin(m_fTransitionBeta));
 
 	Front = CVector(Cos(Alpha) * Cos(Beta), Cos(Alpha) * Sin(Beta), Sin(Alpha));
 	Source = TargetCoors - Front*CamDist;
