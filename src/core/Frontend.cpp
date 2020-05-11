@@ -1088,7 +1088,7 @@ CMenuManager::Draw()
 				rightText = TheText.Get(gbShowCollisionPolys ? "FEM_ON" : "FEM_OFF");
 				break;
 			case MENUACTION_SHOWCULL:
-				rightText = TheText.Get(gbShowCullZoneDebugStuff ? "FEM_ON" : "FEM_OFF");
+				// REMOVED(MIAMI)
 				break;
 			case MENUACTION_SHOWHEADBOB:
 				rightText = TheText.Get(TheCamera.m_bHeadBob ? "FEM_ON" : "FEM_OFF");
@@ -4464,7 +4464,7 @@ CMenuManager::ProcessButtonPresses(void)
 					CGame::ReloadIPLs();
 					break;
 				case MENUACTION_SHOWCULL:
-					gbShowCullZoneDebugStuff = !gbShowCullZoneDebugStuff;
+					// REMOVED(MIAMI)
 					break;
 				case MENUACTION_MEMCARDSAVECONFIRM:
 					return;

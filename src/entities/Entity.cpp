@@ -53,16 +53,16 @@ CEntity::CEntity(void)
 	bHasBlip = false;
 	bIsBIGBuilding = false;
 	bStreamBIGBuilding = false;
-	bRenderDamaged = false;
 
+	bRenderDamaged = false;
 	bBulletProof = false;
 	bFireProof = false;
 	bCollisionProof = false;
 	bMeleeProof = false;
 	bOnlyDamagedByPlayer = false;
 	bStreamingDontDelete = false;
-
 	bRemoveFromWorld = false;
+
 	bHasHitWall = false;
 	bImBeingRendered = false;
 	bTouchingWater = false;
@@ -70,11 +70,15 @@ CEntity::CEntity(void)
 	bDrawLast = false;
 	bNoBrightHeadLights = false;
 	bDoNotRender = false;
-
 	bDistanceFade = false;
-	m_flagE2 = false;
 
+	m_flagE1 = false;
+	m_flagE2 = false;
+	bOffscreen = false;
 	bIsStaticWaitingForCollision = false;
+	m_flagE10 = false;
+	m_flagE20 = false;
+	m_flagE40 = false;
 
 	m_scanCode = 0;
 	m_modelIndex = -1;
@@ -924,6 +928,7 @@ CEntity::AddSteamsFromGround(CPtrList& list)
 }
 
 #ifdef COMPATIBLE_SAVES
+// TODO(MIAMI)
 void
 CEntity::SaveEntityFlags(uint8*& buf)
 {
@@ -955,26 +960,27 @@ CEntity::SaveEntityFlags(uint8*& buf)
 	if (bMeleeProof) tmp |= BIT(27);
 	if (bOnlyDamagedByPlayer) tmp |= BIT(28);
 	if (bStreamingDontDelete) tmp |= BIT(29);
+	if (bRemoveFromWorld) tmp |= BIT(0);
+	if (bHasHitWall) tmp |= BIT(1);
 
 	WriteSaveBuf<uint32>(buf, tmp);
 
 	tmp = 0;
 
-	if (bRemoveFromWorld) tmp |= BIT(0);
-	if (bHasHitWall) tmp |= BIT(1);
 	if (bImBeingRendered)  tmp |= BIT(2);
 	if (bTouchingWater) tmp |= BIT(3);
 	if (bIsSubway) tmp |= BIT(4);
 	if (bDrawLast) tmp |= BIT(5);
 	if (bNoBrightHeadLights) tmp |= BIT(6);
 	if (bDoNotRender) tmp |= BIT(7);
-
 	if (bDistanceFade) tmp |= BIT(8);
+
 	if (m_flagE2) tmp |= BIT(9);
 
 	WriteSaveBuf<uint32>(buf, tmp);
 }
 
+// TODO(MIAMI)
 void
 CEntity::LoadEntityFlags(uint8*& buf)
 {
@@ -1006,19 +1012,19 @@ CEntity::LoadEntityFlags(uint8*& buf)
 	bMeleeProof = !!(tmp & BIT(27));
 	bOnlyDamagedByPlayer = !!(tmp & BIT(28));
 	bStreamingDontDelete = !!(tmp & BIT(29));
+	bRemoveFromWorld = !!(tmp & BIT(0));
+	bHasHitWall = !!(tmp & BIT(1));
 
 	tmp = ReadSaveBuf<uint32>(buf);
 
-	bRemoveFromWorld = !!(tmp & BIT(0));
-	bHasHitWall = !!(tmp & BIT(1));
 	bImBeingRendered = !!(tmp & BIT(2));
 	bTouchingWater = !!(tmp & BIT(3));
 	bIsSubway = !!(tmp & BIT(4));
 	bDrawLast = !!(tmp & BIT(5));
 	bNoBrightHeadLights = !!(tmp & BIT(6));
 	bDoNotRender = !!(tmp & BIT(7));
-
 	bDistanceFade = !!(tmp & BIT(8));
+
 	m_flagE2 = !!(tmp & BIT(9));
 }
 

@@ -82,9 +82,13 @@ public:
 	uint32 bDistanceFade : 1;			// Fade entity because it is far away
 
 	// flagsE
+	uint32 m_flagE1 : 1;
 	uint32 m_flagE2 : 1;
-	// TODO(MIAMI)
+	uint32 bOffscreen : 1;               // offscreen flag. This can only be trusted when it is set to true
 	uint32 bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
+	uint32 m_flagE10 : 1;
+	uint32 m_flagE20 : 1;
+	uint32 m_flagE40 : 1;
 
 	uint16 m_scanCode;
 	uint16 m_randomSeed;
@@ -151,6 +155,8 @@ public:
 	bool GetIsOnScreenComplex(void);
 	bool IsVisible(void) { return m_rwObject && bIsVisible && GetIsOnScreen(); }
 	bool IsVisibleComplex(void) { return m_rwObject && bIsVisible && GetIsOnScreenComplex(); }
+// TODO(MIAMI):
+	bool IsEntityOccluded(void) { return false; }
 	int16 GetModelIndex(void) const { return m_modelIndex; }
 	void UpdateRwFrame(void);
 	void SetupBigBuilding(void);

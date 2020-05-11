@@ -4,7 +4,6 @@ class CEntity;
 
 extern bool gbShowCollisionPolys;
 extern bool gbShowCollisionLines;
-extern bool gbShowCullZoneDebugStuff;
 extern bool gbBigWhiteDebugLightSwitchedOn;
 
 extern bool gbDontRenderBuildings;
@@ -36,8 +35,8 @@ public:
 
 	static void RenderRoads(void);
 	static void RenderFadingInEntities(void);
+	static void RenderFadingInUnderwaterEntities(void);
 	static void RenderEverythingBarRoads(void);
-	static void RenderVehiclesButNotBoats(void);
 	static void RenderBoats(void);
 	static void RenderOneRoad(CEntity *);
 	static void RenderOneNonRoad(CEntity *);
@@ -61,7 +60,7 @@ public:
 	static void SortBIGBuildings(void);
 	static void SortBIGBuildingsForSectorList(CPtrList *list);
 
-	static bool ShouldModelBeStreamed(CEntity *ent);
+	static bool ShouldModelBeStreamed(CEntity *ent, const CVector &campos);
 
 	static void RemoveVehiclePedLights(CEntity *ent, bool reset);
 };
