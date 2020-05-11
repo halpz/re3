@@ -35,7 +35,7 @@ enum eVehicleType {
 };
 
 enum {
-	NUM_VEHICLE_POSITIONS = 10
+	NUM_VEHICLE_POSITIONS = 5
 };
 
 class CVehicleModelInfo : public CClumpModelInfo

@@ -77,7 +77,7 @@ CEntity::CEntity(void)
 	bOffscreen = false;
 	bIsStaticWaitingForCollision = false;
 	m_flagE10 = false;
-	m_flagE20 = false;
+	bUnderwater = false;
 	m_flagE40 = false;
 
 	m_scanCode = 0;
