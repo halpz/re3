@@ -357,7 +357,7 @@ CTheZones::FindSmallestZonePositionILN(const CVector *v)
 }
 
 int16
-CTheZones::FindZoneByLabelAndReturnIndex(char *name)
+CTheZones::FindZoneByLabelAndReturnIndex(Const char *name)
 {
 	char str[8];
 	memset(str, 0, 8);

@@ -61,7 +61,7 @@ CParticleObject::CParticleObject() :
 	m_nState(POBJECTSTATE_INITIALISED),
 	m_pNext(NULL),
 	m_pPrev(NULL),
-	m_nRemoveTimer(NULL)
+	m_nRemoveTimer(0)
 	
 {
 	;
@@ -1127,13 +1127,21 @@ CParticleObject::SaveParticle(uint8 *buffer, uint32 *length)
 	
 	for ( CParticleObject *p = pCloseListHead; p != NULL; p = p->m_pNext )
 	{
+#ifdef FIX_BUGS
+		*(CParticleObject*)buffer = *p;
+#else
 		memcpy(buffer, p, sizeof(CParticleObject));
+#endif
 		buffer += sizeof(CParticleObject);
 	}
 	
 	for ( CParticleObject *p = pFarListHead; p != NULL; p = p->m_pNext )
 	{
+#ifdef FIX_BUGS
+		*(CParticleObject*)buffer = *p;
+#else
 		memcpy(buffer, p, sizeof(CParticleObject));
+#endif
 		buffer += sizeof(CParticleObject);
 	}
 	

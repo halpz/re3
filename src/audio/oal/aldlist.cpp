@@ -53,7 +53,7 @@ ALDeviceList::ALDeviceList()
 		
 		index = 0;
 		// go through device list (each device terminated with a single NULL, list terminated with double NULL)
-		while (*devices != NULL) {
+		while (*devices != '\0') {
 			if (strcmp(defaultDeviceName, devices) == 0) {
 				defaultDeviceIndex = index;
 			}
@@ -186,7 +186,7 @@ unsigned int ALDeviceList::GetMaxNumSources(int index)
 /*
  * Checks if the extension is supported on the given device
  */
-bool ALDeviceList::IsExtensionSupported(int index, char *szExtName)
+bool ALDeviceList::IsExtensionSupported(int index, const char *szExtName)
 {
 	bool bReturn = false;
 

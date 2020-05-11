@@ -885,7 +885,7 @@ CCam::PrintMode(void)
 		sprintf(buf, "                                                   ");
 		sprintf(buf, "                                                   ");
 
-		static char *modes[] = { "None",
+		static Const char *modes[] = { "None",
 			"Top Down", "GTA Classic", "Behind Car", "Follow Ped",
 			"Aiming", "Debug", "Sniper", "Rocket", "Model Viewer", "Bill",
 			"Syphon", "Circle", "Cheesy Zoom", "Wheel", "Fixed",

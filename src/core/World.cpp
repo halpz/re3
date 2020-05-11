@@ -2205,6 +2205,7 @@ CWorld::TriggerExplosionSectorList(CPtrList &list, const CVector &position, floa
 					case ENTITY_TYPE_OBJECT:
 						pObject->ObjectDamage(300.0f * fDamageMultiplier);
 						break;
+					default: break;
 					}
 				}
 			}

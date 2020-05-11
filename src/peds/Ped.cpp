@@ -5048,13 +5048,13 @@ CPed::LoadFightData(void)
 		sscanf(
 			&line[lp],
 			"%s %f %f %f %f %c %s %d %d",
-			&moveName,
+			moveName,
 			&startFireTime,
 			&endFireTime,
 			&comboFollowOnTime,
 			&strikeRadius,
 			&hitLevel,
-			&animName,
+			animName,
 			&damage,
 			&flags);
 
@@ -10686,6 +10686,7 @@ CPed::ProcessControl(void)
 						Say(SOUND_PED_HANDS_UP);
 					}
 					break;
+				default: break;
 			}
 			SetMoveAnim();
 			if (bPedIsBleeding) {
@@ -11810,8 +11811,10 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 		}
 
 	} else if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER) {
-		switch (ped->m_vehEnterType) {
-			if (!veh->bIsBus) {
+		if (veh->bIsBus) {
+			veh->AddPassenger(ped);
+		} else {
+			switch (ped->m_vehEnterType) {
 				case CAR_DOOR_RF:
 					veh->AddPassenger(ped, 0);
 					break;
@@ -11821,10 +11824,10 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 				case CAR_DOOR_LR:
 					veh->AddPassenger(ped, 1);
 					break;
-			}
-			default:
-				veh->AddPassenger(ped);
+				default:
+					veh->AddPassenger(ped);
 				break;
+			}
 		}
 		ped->m_nPedState = PED_DRIVING;
 		if (ped->m_prevObjective == OBJECTIVE_RUN_TO_AREA || ped->m_prevObjective == OBJECTIVE_GOTO_CHAR_ON_FOOT || ped->m_prevObjective == OBJECTIVE_KILL_CHAR_ON_FOOT)
@@ -17119,6 +17122,7 @@ CPed::SetObjective(eObjective newObj, CVector dest)
 			if (sq(m_distanceToCountSeekDone) > (m_nextRoutePointPos - GetPosition()).MagnitudeSqr2D())
 				return;
 			break;
+		default: break;
 	}
 
 	if (IsTemporaryObjective(m_objective)) {

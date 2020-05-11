@@ -412,7 +412,7 @@ CMenuManager::ThingsToDoBeforeLeavingPage()
 // ------ Functions not in the game/inlined ends
 
 void
-CMenuManager::BuildStatLine(char *text, void *stat, bool itsFloat, void *stat2)
+CMenuManager::BuildStatLine(Const char *text, void *stat, bool itsFloat, void *stat2)
 {
 	if (!text)
 		return;
@@ -5020,6 +5020,7 @@ CMenuManager::SaveLoadFileError_SetUpErrorScreen()
 		case SAVESTATUS_DELETEFAILED10:
 			ChangeScreen(MENUPAGE_DELETE_FAILED, 0, true, false);
 			break;
+		default: break;
 	}
 }
 

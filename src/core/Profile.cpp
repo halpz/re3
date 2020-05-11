@@ -7,7 +7,7 @@ float CProfile::ms_afCumulativeTime[NUM_PROFILES];
 float CProfile::ms_afEndTime[NUM_PROFILES];
 float CProfile::ms_afMaxEndTime[NUM_PROFILES];
 float CProfile::ms_afMaxCumulativeTime[NUM_PROFILES];
-char *CProfile::ms_pProfileString[NUM_PROFILES];
+Const char *CProfile::ms_pProfileString[NUM_PROFILES];
 RwRGBA CProfile::ms_aBarColours[NUM_PROFILES];
 
 void CProfile::Initialise()

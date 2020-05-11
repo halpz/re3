@@ -62,7 +62,10 @@ public:
 
 	CAnimBlendAssociation(void);
 	CAnimBlendAssociation(CAnimBlendAssociation &other);
-	virtual ~CAnimBlendAssociation(void);
+#ifndef FIX_BUGS
+	virtual
+#endif
+	~CAnimBlendAssociation(void);
 	void AllocateAnimBlendNodeArray(int n);
 	void FreeAnimBlendNodeArray(void);
 	void Init(RpClump *clump, CAnimBlendHierarchy *hier);

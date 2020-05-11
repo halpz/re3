@@ -166,6 +166,7 @@ CEmergencyPed::FiremanAI(void)
 			m_nEmergencyPedState = EMERGENCY_PED_READY;
 			SetMoveState(PEDMOVE_WALK);
 			break;
+		default: break;
 	}
 }
 
@@ -410,6 +411,7 @@ CEmergencyPed::MedicAI(void)
 				m_nEmergencyPedState = EMERGENCY_PED_READY;
 				SetMoveState(PEDMOVE_WALK);
 				break;
+			default: break;
 		}
 	}
 }

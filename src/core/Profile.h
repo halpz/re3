@@ -19,7 +19,7 @@ class CProfile
 	static float ms_afEndTime[NUM_PROFILES];
 	static float ms_afMaxEndTime[NUM_PROFILES];
 	static float ms_afMaxCumulativeTime[NUM_PROFILES];
-	static char *ms_pProfileString[NUM_PROFILES];
+	static Const char *ms_pProfileString[NUM_PROFILES];
 	static RwRGBA ms_aBarColours[NUM_PROFILES];
 public:
 	static void Initialise();

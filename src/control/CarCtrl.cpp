@@ -2307,6 +2307,7 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 				*pBrake = 0.0f;
 				*pHandbrake = false;
 				return;
+			default: break;
 			}
 		}
 		pCurrentLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];

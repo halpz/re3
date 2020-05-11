@@ -356,6 +356,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				return true;
 			}
 			break;
+		default: break;
 		}
 	}
 	if (!m_bRemoved && (m_eType == PICKUP_ONCE_TIMEOUT || m_eType == PICKUP_MONEY) && CTimer::GetTimeInMilliseconds() > m_nTimer)
@@ -576,6 +577,7 @@ CPickups::ModelForWeapon(eWeaponType weaponType)
 	case WEAPONTYPE_FLAMETHROWER: return MI_FLAMETHROWER;
 	case WEAPONTYPE_MOLOTOV: return MI_MOLOTOV;
 	case WEAPONTYPE_GRENADE: return MI_GRENADE;
+	default: break;
 	}
 	return 0;
 }
