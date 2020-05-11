@@ -64,4 +64,5 @@ public:
 	bool LookAtPosition(CVector const& pos);
 	bool RestoreLookAt(void);
 };
-static_assert(sizeof(CPedIK) == 0x28, "CPedIK: error");
+
+VALIDATE_SIZE(CPedIK, 0x28);

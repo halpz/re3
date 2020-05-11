@@ -10,7 +10,7 @@ struct CGangInfo
 	CGangInfo();
 };
 
-static_assert(sizeof(CGangInfo) == 0x10, "CGangInfo: error");
+VALIDATE_SIZE(CGangInfo, 0x10);
 
 enum {
 	GANG_MAFIA = 0,
