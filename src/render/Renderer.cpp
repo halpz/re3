@@ -18,11 +18,13 @@
 #include "Streaming.h"
 #include "Shadows.h"
 #include "PointLights.h"
+#include "Occlusion.h"
 #include "Renderer.h"
+
+//--MIAMI: file almost done, just one bike flag left
 
 bool gbShowCollisionPolys;
 bool gbShowCollisionLines;
-bool gbShowCullZoneDebugStuff;
 bool gbBigWhiteDebugLightSwitchedOn;
 
 bool gbDontRenderBuildings;
@@ -140,8 +142,10 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 
 	resetLights = e->SetupLighting();
 
-	if(e->IsVehicle())
+	if(e->IsVehicle()){
+		CVisibilityPlugins::SetupVehicleVariables(e->GetClump());
 		CVisibilityPlugins::InitAlphaAtomicList();
+	}
 
 	// Render Peds in vehicle before vehicle itself
 	if(e->IsVehicle()){
@@ -151,6 +155,7 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 		for(i = 0; i < 8; i++)
 			if(veh->pPassengers[i] && veh->pPassengers[i]->m_nPedState == PED_DRIVING)
 				veh->pPassengers[i]->Render();
+		SetCullMode(rwCULLMODECULLNONE);
 	}
 	e->Render();
 
@@ -158,6 +163,7 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 		e->bImBeingRendered = true;
 		CVisibilityPlugins::RenderAlphaAtomics();
 		e->bImBeingRendered = false;
+		SetCullMode(rwCULLMODECULLBACK);
 	}
 
 	e->RemoveLighting(resetLights);
@@ -178,22 +184,38 @@ CRenderer::RenderFirstPersonVehicle(void)
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 }
 
+inline bool IsRoad(CEntity *e) { return e->IsBuilding() && ((CSimpleModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex()))->m_wetRoadReflection; }
+
 void
 CRenderer::RenderRoads(void)
 {
 	int i;
-	CTreadable *t;
+	CEntity *e;
 
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	SetCullMode(rwCULLMODECULLBACK);
 	DeActivateDirectional();
 	SetAmbientColours();
 
 	for(i = 0; i < ms_nNoOfVisibleEntities; i++){
-		t = (CTreadable*)ms_aVisibleEntityPtrs[i];
-		if(t->IsBuilding() && t->GetIsATreadable()){
-			RenderOneRoad(t);
-		}
+		e = ms_aVisibleEntityPtrs[i];
+		if(IsRoad(e))
+			RenderOneRoad(e);
 	}
+}
+
+inline bool PutIntoSortedVehicleList(CVehicle *veh)
+{
+	if(veh->IsBoat()){
+		int mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
+		if(mode == CCam::MODE_WHEELCAM ||
+		   mode == CCam::MODE_1STPERSON && TheCamera.GetLookDirection() != LOOKING_FORWARD && TheCamera.GetLookDirection() != LOOKING_BEHIND ||
+		   CVisibilityPlugins::GetClumpAlpha(veh->GetClump()) != 255)
+			return false;
+		return true;
+	}else
+		return veh->bTouchingWater;		
 }
 
 void
@@ -204,17 +226,20 @@ CRenderer::RenderEverythingBarRoads(void)
 	CVector dist;
 	EntityInfo ei;
 
+	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	SetCullMode(rwCULLMODECULLBACK);
 	gSortedVehiclesAndPeds.Clear();
 
 	for(i = 0; i < ms_nNoOfVisibleEntities; i++){
 		e = ms_aVisibleEntityPtrs[i];
 
-		if(e->IsBuilding() && ((CBuilding*)e)->GetIsATreadable())
+		if(IsRoad(e))
 			continue;
 
 		if(e->IsVehicle() ||
 		   e->IsPed() && CVisibilityPlugins::GetClumpAlpha((RpClump*)e->m_rwObject) != 255){
-			if(e->IsVehicle() && ((CVehicle*)e)->IsBoat()){
+			if(e->IsVehicle() && PutIntoSortedVehicleList((CVehicle*)e)){
 				ei.ent = e;
 				dist = ms_vecCameraPosition - e->GetPosition();
 				ei.sort = dist.MagnitudeSqr();
@@ -232,26 +257,13 @@ CRenderer::RenderEverythingBarRoads(void)
 }
 
 void
-CRenderer::RenderVehiclesButNotBoats(void)
-{
-	// This function doesn't do anything
-	// because only boats are inserted into the list
-	CLink<EntityInfo> *node;
-
-	for(node = gSortedVehiclesAndPeds.tail.prev;
-	    node != &gSortedVehiclesAndPeds.head;
-	    node = node->prev){
-		// only boats in this list
-		CVehicle *v = (CVehicle*)node->item.ent;
-		if(!v->IsBoat())
-			RenderOneNonRoad(v);
-	}
-}
-
-void
 CRenderer::RenderBoats(void)
 {
 	CLink<EntityInfo> *node;
+
+	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	SetCullMode(rwCULLMODECULLBACK);
 
 	for(node = gSortedVehiclesAndPeds.tail.prev;
 	    node != &gSortedVehiclesAndPeds.head;
@@ -267,9 +279,19 @@ void
 CRenderer::RenderFadingInEntities(void)
 {
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	SetCullMode(rwCULLMODECULLBACK);
 	DeActivateDirectional();
 	SetAmbientColours();
 	CVisibilityPlugins::RenderFadingEntities();
+}
+
+void
+CRenderer::RenderFadingInUnderwaterEntities(void)
+{
+	DeActivateDirectional();
+	SetAmbientColours();
+	CVisibilityPlugins::RenderFadingUnderwaterEntities();
 }
 
 void
@@ -332,44 +354,57 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 			request = false;
 		}
 	}else{
-// TODO(MIAMI): weapon
-		if(mi->GetModelType() != MITYPE_SIMPLE){
+		if(mi->GetModelType() != MITYPE_SIMPLE && mi->GetModelType() != MITYPE_WEAPON){
 			if(FindPlayerVehicle() == ent &&
-			   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON){
+			   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON &&
+//TODO(MIAMI): that bike flag
+			   (!FindPlayerVehicle()->IsBike() || true)){
 				// Player's vehicle in first person mode
-				if(TheCamera.Cams[TheCamera.ActiveCam].DirectionWasLooking == LOOKING_FORWARD ||
+				CVehicle *veh = (CVehicle*)ent;
+				int model = veh->GetModelIndex();
+				int direction = TheCamera.Cams[TheCamera.ActiveCam].DirectionWasLooking;
+				if(direction == LOOKING_FORWARD ||
 				   ent->GetModelIndex() == MI_RHINO ||
 				   ent->GetModelIndex() == MI_COACH ||
-				   TheCamera.m_bInATunnelAndABigVehicle){
+				   TheCamera.m_bInATunnelAndABigVehicle ||
+				   direction == LOOKING_BEHIND && veh->pHandling->Flags & HANDLING_UNKNOWN){
 					ent->bNoBrightHeadLights = true;
-				}else{
+					return VIS_OFFSCREEN;
+				}
+
+				if(direction != LOOKING_BEHIND ||
+				   !veh->IsBoat() || model == MI_REEFER || model == MI_TROPIC || model == MI_PREDATOR || model == MI_SKIMMER){
 					m_pFirstPersonVehicle = (CVehicle*)ent;
 					ent->bNoBrightHeadLights = false;
-				}
-				return VIS_OFFSCREEN;
-			}else{
-				// All sorts of Clumps
-				if(ent->m_rwObject == nil || !ent->bIsVisible)
-					return VIS_INVISIBLE;
-// TODO(MIAMI): occlusion
-				if(!ent->GetIsOnScreen())
 					return VIS_OFFSCREEN;
-				if(ent->bDrawLast){
-					dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
-					CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
-					ent->bDistanceFade = false;
-					return VIS_INVISIBLE;
-				}else
-					return VIS_VISIBLE;
+				}
 			}
-			return VIS_INVISIBLE;
-		}
-// TODO(MIAMI): this is different
-		if(ent->IsObject() &&
-		   ((CObject*)ent)->ObjectCreatedBy == TEMP_OBJECT){
+
+			// All sorts of Clumps
 			if(ent->m_rwObject == nil || !ent->bIsVisible)
 				return VIS_INVISIBLE;
-			return ent->GetIsOnScreen() ? VIS_VISIBLE : VIS_OFFSCREEN;
+			if(!ent->GetIsOnScreen() || ent->IsEntityOccluded())
+				return VIS_OFFSCREEN;
+			if(ent->bDrawLast){
+				dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
+				CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
+				ent->bDistanceFade = false;
+				return VIS_INVISIBLE;
+			}
+			return VIS_VISIBLE;
+		}
+		if(ent->m_flagE10){
+			if(ent->m_rwObject == nil || !ent->bIsVisible)
+				return VIS_INVISIBLE;
+			if(!ent->GetIsOnScreen() || ent->IsEntityOccluded())
+				return VIS_OFFSCREEN;
+			if(ent->bDrawLast){
+				dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
+				CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
+				ent->bDistanceFade = false;
+				return VIS_INVISIBLE;
+			}
+			return VIS_VISIBLE;
 		}
 	}
 
@@ -380,8 +415,14 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 
 	dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
 
+#ifndef FIX_BUGS
+	// Whatever this is supposed to do, it breaks fading for objects
+	// whose draw dist is > LOD_DISTANCE-FADE_DISTANCE, i.e. 280
+	// because decreasing dist here makes the object visible above LOD_DISTANCE
+	// before fading normally once below LOD_DISTANCE.
 	if(LOD_DISTANCE < dist && dist < mi->GetLargestLodDistance() + FADE_DISTANCE)
-		dist += mi->GetLargestLodDistance() - 300.0f;
+		dist += mi->GetLargestLodDistance() - LOD_DISTANCE;
+#endif
 
 	if(ent->IsObject() && ent->bRenderDamaged)
 		mi->m_isDamaged = true;
@@ -401,7 +442,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 		if(ent->m_rwObject == nil || !ent->bIsVisible)
 			return VIS_INVISIBLE;
 
-		if(!ent->GetIsOnScreen()){
+		if(!ent->GetIsOnScreen() || ent->IsEntityOccluded()){
 			mi->m_alpha = 255;
 			return VIS_OFFSCREEN;
 		}
@@ -452,8 +493,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 	if(ent->m_rwObject == nil || !ent->bIsVisible)
 		return VIS_INVISIBLE;
 
-// TODO(MIAMI): occlusion
-	if(!ent->GetIsOnScreen()){
+	if(!ent->GetIsOnScreen() || ent->IsEntityOccluded()){
 		mi->m_alpha = 255;
 		return VIS_OFFSCREEN;
 	}else{
@@ -528,8 +568,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 		if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
 			RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 		mi->IncreaseAlpha();
-// TODO(MIAMI): occlusion
-		if(!ent->IsVisibleComplex()){
+		if(!ent->IsVisibleComplex() || ent->IsEntityOccluded()){
 			mi->m_alpha = 255;
 			return VIS_INVISIBLE;
 		}
@@ -573,18 +612,20 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 	if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
 		RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 	mi->IncreaseAlpha();
-// TODO(MIAMI): occlusion
-	if(ent->IsVisibleComplex()){
-		CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
-		ent->bDistanceFade = true;
-	}else
+	if(!ent->IsVisibleComplex() || ent->IsEntityOccluded()){
 		mi->m_alpha = 255;
+		return VIS_INVISIBLE;
+	}
+	CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
+	ent->bDistanceFade = true;
 	return VIS_INVISIBLE;
 }
 
 void
 CRenderer::ConstructRenderList(void)
 {
+	COcclusion::ProcessBeforeRendering();
+
 	ms_nNoOfVisibleEntities = 0;
 	ms_nNoOfInVisibleEntities = 0;
 	ms_vecCameraPosition = TheCamera.GetPosition();
@@ -644,6 +685,15 @@ CRenderer::ScanWorld(void)
 	CVisibilityPlugins::InitAlphaEntityList();
 	CWorld::AdvanceCurrentScanCode();
 
+	// unused
+	static CVector prevPos;
+	static CVector prevFwd;
+	static bool smallMovement;
+	smallMovement = (TheCamera.GetPosition() - prevPos).MagnitudeSqr() < SQR(4.0f) &&
+		DotProduct(TheCamera.GetForward(), prevFwd) > 0.98f;
+	prevPos = TheCamera.GetPosition();
+	prevFwd = TheCamera.GetForward();
+
 	if(cammatrix->at.z > 0.0f){
 		// looking up, bottom corners are further away
 		vectors[CORNER_LOD_LEFT] = vectors[CORNER_FAR_BOTLEFT] * LOD_DISTANCE/f;
@@ -689,6 +739,7 @@ CRenderer::ScanWorld(void)
 			for(int y = y1; y <= y2; y++)
 				ScanSectorList(CWorld::GetSector(x1, y)->m_lists);
 	}else{
+#ifdef GTA_TRAIN
 		CVehicle *train = FindPlayerTrain();
 		if(train && train->GetPosition().z < 0.0f){
 			poly[0].x = CWorld::GetSectorX(vectors[CORNER_CAM].x);
@@ -698,7 +749,9 @@ CRenderer::ScanWorld(void)
 			poly[2].x = CWorld::GetSectorX(vectors[CORNER_LOD_RIGHT].x);
 			poly[2].y = CWorld::GetSectorY(vectors[CORNER_LOD_RIGHT].y);
 			ScanSectorPoly(poly, 3, ScanSectorList_Subway);
-		}else{
+		}else
+#endif
+		{
 			if(f <= LOD_DISTANCE){
 				poly[0].x = CWorld::GetSectorX(vectors[CORNER_CAM].x);
 				poly[0].y = CWorld::GetSectorY(vectors[CORNER_CAM].y);
@@ -758,6 +811,7 @@ CRenderer::RequestObjectsInFrustum(void)
 	cammatrix = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
 
 	CWorld::AdvanceCurrentScanCode();
+	ms_vecCameraPosition = TheCamera.GetPosition();
 
 	if(cammatrix->at.z > 0.0f){
 		// looking up, bottom corners are further away
@@ -970,13 +1024,20 @@ CRenderer::ScanBigBuildingList(CPtrList &list)
 {
 	CPtrNode *node;
 	CEntity *ent;
+	int vis;
 
-	// TODO(MIAMI): some flags and such
+	int f = CTimer::GetFrameCounter() & 3;
 	for(node = list.first; node; node = node->next){
 		ent = (CEntity*)node->item;
-		switch(SetupBigBuildingVisibility(ent)){
+		if(ent->bOffscreen || (ent->m_randomSeed&3) != f){
+			ent->bOffscreen = true;
+			vis = SetupBigBuildingVisibility(ent);
+		}else
+			vis = VIS_VISIBLE;
+		switch(vis){
 		case VIS_VISIBLE:
 			ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+			ent->bOffscreen = false;
 			break;
 		case VIS_STREAMME:
 			if(!CStreaming::ms_disableStreaming)
@@ -1002,6 +1063,7 @@ CRenderer::ScanSectorList(CPtrList *lists)
 			if(ent->m_scanCode == CWorld::GetCurrentScanCode())
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
+			ent->bOffscreen = false;
 
 			switch(SetupEntityVisibility(ent)){
 			case VIS_VISIBLE:
@@ -1012,10 +1074,11 @@ CRenderer::ScanSectorList(CPtrList *lists)
 					break;
 				// fall through
 			case VIS_OFFSCREEN:
+				ent->bOffscreen = true;
 				dx = ms_vecCameraPosition.x - ent->GetPosition().x;
 				dy = ms_vecCameraPosition.y - ent->GetPosition().y;
-				if(dx > -65.0f && dx < 65.0f &&
-				   dy > -65.0f && dy < 65.0f &&
+				if(dx > -30.0f && dx < 30.0f &&
+				   dy > -30.0f && dy < 30.0f &&
 				   ms_nNoOfInVisibleEntities < NUMINVISIBLEENTITIES - 1)
 					ms_aInVisibleEntityPtrs[ms_nNoOfInVisibleEntities++] = ent;
 				break;
@@ -1045,6 +1108,7 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 			if(ent->m_scanCode == CWorld::GetCurrentScanCode())
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
+			ent->bOffscreen = false;
 
 			switch(SetupEntityVisibility(ent)){
 			case VIS_VISIBLE:
@@ -1055,10 +1119,11 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 					break;
 				// fall through
 			case VIS_OFFSCREEN:
+				ent->bOffscreen = true;
 				dx = ms_vecCameraPosition.x - ent->GetPosition().x;
 				dy = ms_vecCameraPosition.y - ent->GetPosition().y;
-				if(dx > -65.0f && dx < 65.0f &&
-				   dy > -65.0f && dy < 65.0f &&
+				if(dx > -30.0f && dx < 30.0f &&
+				   dy > -30.0f && dy < 30.0f &&
 				   ms_nNoOfInVisibleEntities < NUMINVISIBLEENTITIES - 1)
 					ms_aInVisibleEntityPtrs[ms_nNoOfInVisibleEntities++] = ent;
 				break;
@@ -1074,6 +1139,7 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 	}
 }
 
+#ifdef GTA_TRAIN
 void
 CRenderer::ScanSectorList_Subway(CPtrList *lists)
 {
@@ -1090,15 +1156,17 @@ CRenderer::ScanSectorList_Subway(CPtrList *lists)
 			if(ent->m_scanCode == CWorld::GetCurrentScanCode())
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
+			ent->bOffscreen = false;
 			switch(SetupEntityVisibility(ent)){
 			case VIS_VISIBLE:
 				ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
 				break;
 			case VIS_OFFSCREEN:
+				ent->bOffscreen = true;
 				dx = ms_vecCameraPosition.x - ent->GetPosition().x;
 				dy = ms_vecCameraPosition.y - ent->GetPosition().y;
-				if(dx > -65.0f && dx < 65.0f &&
-				   dy > -65.0f && dy < 65.0f &&
+				if(dx > -30.0f && dx < 30.0f &&
+				   dy > -30.0f && dy < 30.0f &&
 				   ms_nNoOfInVisibleEntities < NUMINVISIBLEENTITIES - 1)
 					ms_aInVisibleEntityPtrs[ms_nNoOfInVisibleEntities++] = ent;
 				break;
@@ -1106,6 +1174,7 @@ CRenderer::ScanSectorList_Subway(CPtrList *lists)
 		}
 	}
 }
+#endif
 
 void
 CRenderer::ScanSectorList_RequestModels(CPtrList *lists)
@@ -1122,7 +1191,7 @@ CRenderer::ScanSectorList_RequestModels(CPtrList *lists)
 			if(ent->m_scanCode == CWorld::GetCurrentScanCode())
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
-			if(ShouldModelBeStreamed(ent))
+			if(ShouldModelBeStreamed(ent, ms_vecCameraPosition))
 				CStreaming::RequestModel(ent->GetModelIndex(), 0);
 		}
 	}
@@ -1157,10 +1226,15 @@ CRenderer::SortBIGBuildingsForSectorList(CPtrList *list)
 }
 
 bool
-CRenderer::ShouldModelBeStreamed(CEntity *ent)
+CRenderer::ShouldModelBeStreamed(CEntity *ent, const CVector &campos)
 {
-	CSimpleModelInfo *mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(ent->GetModelIndex());
-	float dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
+	if(!IsAreaVisible(ent->m_area))
+		return false;
+	CTimeModelInfo *mi = (CTimeModelInfo *)CModelInfo::GetModelInfo(ent->GetModelIndex());
+	if(mi->GetModelType() == MITYPE_TIME)
+		if(!CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff()))
+			return false;
+	float dist = (ent->GetPosition() - campos).Magnitude();
 	if(mi->m_noFade)
 		return dist - STREAM_DISTANCE < mi->GetLargestLodDistance();
 	else
@@ -1171,7 +1245,7 @@ void
 CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)
 {
 	if(ent->bRenderScorched)
-		WorldReplaceScorchedLightsWithNormal(Scene.world);
+		return;
 	CPointLights::RemoveLightsAffectingObject();
 	if(reset)
 		ReSetAmbientAndDirectionalColours();

@@ -111,6 +111,11 @@ CVisibilityPlugins::SetRenderWareCamera(RwCamera *camera)
         ms_pedFadeDist = sq(70.0f * TheCamera.LODDistMultiplier);
 }
 
+void
+CVisibilityPlugins::SetupVehicleVariables(RpClump *vehicle)
+{
+}
+
 RpMaterial*
 SetAlphaCB(RpMaterial *material, void *data)
 {
@@ -162,6 +167,11 @@ CVisibilityPlugins::RenderFadingEntities(void)
 		if(mi->GetModelType() == MITYPE_SIMPLE && mi->m_noZwrite)
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 	}
+}
+
+void
+CVisibilityPlugins::RenderFadingUnderwaterEntities(void)
+{
 }
 
 RpAtomic*
@@ -237,6 +247,7 @@ CVisibilityPlugins::RenderWeaponCB(RpAtomic *atomic)
 	return atomic;
 }
 
+//--MIAMI: done
 RpAtomic*
 CVisibilityPlugins::RenderFadingAtomic(RpAtomic *atomic, float camdist)
 {
@@ -247,29 +258,30 @@ CVisibilityPlugins::RenderFadingAtomic(RpAtomic *atomic, float camdist)
 
 	mi = GetAtomicModelInfo(atomic);
 	lodatm = mi->GetAtomicFromDistance(camdist - FADE_DISTANCE);
-	if(mi->m_additive){
-		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+	if(mi->m_additive)
 		AtomicDefaultRenderCallBack(atomic);
-		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-	}else{
-		fadefactor = (mi->GetLargestLodDistance() - (camdist - FADE_DISTANCE))/FADE_DISTANCE;
-		if(fadefactor > 1.0f)
-			fadefactor = 1.0f;
-		alpha = mi->m_alpha * fadefactor;
-		if(alpha == 255)
-			AtomicDefaultRenderCallBack(atomic);
-		else{
-			RpGeometry *geo = RpAtomicGetGeometry(lodatm);
-			uint32 flags = RpGeometryGetFlags(geo);
-			RpGeometrySetFlags(geo, flags | rpGEOMETRYMODULATEMATERIALCOLOR);
-			RpGeometryForAllMaterials(geo, SetAlphaCB, (void*)alpha);
-			if(geo != RpAtomicGetGeometry(atomic))
-				RpAtomicSetGeometry(atomic, geo, rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
-			AtomicDefaultRenderCallBack(atomic);
-			RpGeometryForAllMaterials(geo, SetAlphaCB, (void*)255);
-			RpGeometrySetFlags(geo, flags);
-		}
+
+	fadefactor = (mi->GetLargestLodDistance() - (camdist - FADE_DISTANCE))/FADE_DISTANCE;
+	if(fadefactor > 1.0f)
+		fadefactor = 1.0f;
+	alpha = mi->m_alpha * fadefactor;
+	if(alpha == 255)
+		AtomicDefaultRenderCallBack(atomic);
+	else{
+		RpGeometry *geo = RpAtomicGetGeometry(lodatm);
+		uint32 flags = RpGeometryGetFlags(geo);
+		RpGeometrySetFlags(geo, flags | rpGEOMETRYMODULATEMATERIALCOLOR);
+		RpGeometryForAllMaterials(geo, SetAlphaCB, (void*)alpha);
+		if(geo != RpAtomicGetGeometry(atomic))
+			RpAtomicSetGeometry(atomic, geo, rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
+		AtomicDefaultRenderCallBack(atomic);
+		RpGeometryForAllMaterials(geo, SetAlphaCB, (void*)255);
+		RpGeometrySetFlags(geo, flags);
 	}
+
+	if(mi->m_additive)
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+
 	return atomic;
 }
 

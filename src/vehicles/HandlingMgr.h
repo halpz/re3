@@ -141,6 +141,7 @@ enum
 	HANDLING_FAT_REARW = 0x1000000,
 	HANDLING_NARROW_FRONTW = 0x2000000,
 	HANDLING_GOOD_INSAND = 0x4000000,
+	HANDLING_UNKNOWN = 0x8000000,	// something for helis and planes
 };
 
 struct tHandlingData
