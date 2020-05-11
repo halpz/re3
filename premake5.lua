@@ -196,5 +196,5 @@ project "re3"
 		
 	filter "platforms:*gl3_glfw*"
 		libdirs { path.join(_OPTIONS["glewdir"], "lib/Release/Win32") }
-		libdirs { path.join(_OPTIONS["glfwdir"], "lib-" .. string.gsub(_ACTION, "vs", "vc")) }
+		libdirs { path.join(_OPTIONS["glfwdir"], "lib-" .. string.gsub(_ACTION or '', "vs", "vc")) }
 		links { "opengl32", "glew32s", "glfw3" }
