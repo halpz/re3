@@ -348,9 +348,11 @@ CAnimBlendAssociation*
 RpAnimBlendClumpGetFirstAssociation(RpClump *clump)
 {
 	CAnimBlendClumpData *clumpData = *RPANIMBLENDCLUMPDATA(clump);
-	if(clumpData == nil) return nil;
-	if(clumpData->link.next == nil) return nil;
-	return CAnimBlendAssociation::FromLink(clumpData->link.next); 
+	if(!RpAnimBlendClumpIsInitialized(clump))
+		return nil;
+	if(clumpData->link.next)
+		return CAnimBlendAssociation::FromLink(clumpData->link.next);
+	return nil;
 }
 
 // FillFrameArrayCallBack on PS2

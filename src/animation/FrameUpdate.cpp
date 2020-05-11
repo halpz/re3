@@ -47,7 +47,12 @@ FrameUpdateCallBackNonSkinned(AnimBlendFrameData *frame, void *arg)
 			(*node)->Update(vec, q, 1.0f-totalBlendAmount);
 			if((*node)->sequence->HasTranslation())
 				pos += vec;
-			rot += q;
+#ifdef FIX_BUGS
+			if(DotProduct(rot, q) < 0.0f)
+				rot -= q;
+			else
+#endif
+				rot += q;
 		}
 		++*node;
 	}
@@ -101,7 +106,12 @@ FrameUpdateCallBackWithVelocityExtractionNonSkinned(AnimBlendFrameData *frame, v
 	for(node = updateData->nodes; *node; node++){
 		if((*node)->sequence){
 			bool nodelooped = (*node)->Update(vec, q, 1.0f-totalBlendAmount);
-			rot += q;
+#ifdef FIX_BUGS
+			if(DotProduct(rot, q) < 0.0f)
+				rot -= q;
+			else
+#endif
+				rot += q;
 			if((*node)->sequence->HasTranslation()){
 				pos += vec;
 				if((*node)->association->HasTranslation()){
@@ -179,7 +189,12 @@ FrameUpdateCallBackWith3dVelocityExtractionNonSkinned(AnimBlendFrameData *frame,
 	for(node = updateData->nodes; *node; node++){
 		if((*node)->sequence){
 			bool nodelooped = (*node)->Update(vec, q, 1.0f-totalBlendAmount);
-			rot += q;
+#ifdef FIX_BUGS
+			if(DotProduct(rot, q) < 0.0f)
+				rot -= q;
+			else
+#endif
+				rot += q;
 			if((*node)->sequence->HasTranslation()){
 				pos += vec;
 				if((*node)->association->HasTranslation()){
@@ -243,7 +258,12 @@ FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg)
 			(*node)->Update(vec, q, 1.0f-totalBlendAmount);
 			if((*node)->sequence->HasTranslation())
 				pos += vec;
-			rot += q;
+#ifdef FIX_BUGS
+			if(DotProduct(rot, q) < 0.0f)
+				rot -= q;
+			else
+#endif
+				rot += q;
 		}
 		++*node;
 	}
@@ -298,7 +318,12 @@ FrameUpdateCallBackWithVelocityExtractionSkinned(AnimBlendFrameData *frame, void
 	for(node = updateData->nodes; *node; node++){
 		if((*node)->sequence){
 			bool nodelooped = (*node)->Update(vec, q, 1.0f-totalBlendAmount);
-			rot += q;
+#ifdef FIX_BUGS
+			if(DotProduct(rot, q) < 0.0f)
+				rot -= q;
+			else
+#endif
+				rot += q;
 			if((*node)->sequence->HasTranslation()){
 				pos += vec;
 				if((*node)->association->HasTranslation()){
@@ -376,7 +401,12 @@ FrameUpdateCallBackWith3dVelocityExtractionSkinned(AnimBlendFrameData *frame, vo
 	for(node = updateData->nodes; *node; node++){
 		if((*node)->sequence){
 			bool nodelooped = (*node)->Update(vec, q, 1.0f-totalBlendAmount);
-			rot += q;
+#ifdef FIX_BUGS
+			if(DotProduct(rot, q) < 0.0f)
+				rot -= q;
+			else
+#endif
+				rot += q;
 			if((*node)->sequence->HasTranslation()){
 				pos += vec;
 				if((*node)->association->HasTranslation()){
