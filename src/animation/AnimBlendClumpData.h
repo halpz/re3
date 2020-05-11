@@ -27,7 +27,7 @@ struct AnimBlendFrameData
 #endif
 };
 #ifndef PED_SKIN
-static_assert(sizeof(AnimBlendFrameData) == 0x14, "AnimBlendFrameData: error");
+VALIDATE_SIZE(AnimBlendFrameData, 0x14);
 #endif
 
 

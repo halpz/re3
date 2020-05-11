@@ -38,7 +38,8 @@ struct CPedPathNode
 	CPedPathNode* prev;
 	CPedPathNode* next;
 };
-static_assert(sizeof(CPedPathNode) == 0x10, "CPedPathNode: error");
+
+VALIDATE_SIZE(CPedPathNode, 0x10);
 
 class CPedPath {
 public:

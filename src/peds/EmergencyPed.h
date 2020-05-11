@@ -37,5 +37,5 @@ public:
 	void MedicAI(void);
 };
 #ifndef PED_SKIN
-static_assert(sizeof(CEmergencyPed) == 0x554, "CEmergencyPed: error");
+VALIDATE_SIZE(CEmergencyPed, 0x554);
 #endif

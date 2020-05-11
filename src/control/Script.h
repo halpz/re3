@@ -28,7 +28,7 @@ struct intro_script_rectangle
 	~intro_script_rectangle() { }
 };
 
-static_assert(sizeof(intro_script_rectangle) == 0x18, "Script.h: error");
+VALIDATE_SIZE(intro_script_rectangle, 0x18);
 
 enum {
 	SCRIPT_TEXT_MAX_LENGTH = 500
@@ -79,7 +79,7 @@ struct intro_text_line
 	}
 };
 
-static_assert(sizeof(intro_text_line) == 0x414, "Script.h: error");
+VALIDATE_SIZE(intro_text_line, 0x414);
 
 struct script_sphere_struct
 {

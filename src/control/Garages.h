@@ -87,7 +87,7 @@ public:
 	CVehicle* RestoreCar();
 };
 
-static_assert(sizeof(CStoredCar) == 0x28, "CStoredCar");
+VALIDATE_SIZE(CStoredCar, 0x28);
 
 #define SWITCH_GARAGE_DISTANCE_CLOSE 40.0f
 

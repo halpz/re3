@@ -12,5 +12,5 @@ public:
 	void ProcessControl(void);
 };
 #ifndef PED_SKIN
-static_assert(sizeof(CCivilianPed) == 0x53C, "CCivilianPed: error");
+VALIDATE_SIZE(CCivilianPed, 0x53C);
 #endif

@@ -22,6 +22,7 @@ struct CdReadInfo
 	HANDLE hFile;
 	OVERLAPPED Overlapped;
 };
+
 VALIDATE_SIZE(CdReadInfo, 0x30);
 
 char gCdImageNames[MAX_CDIMAGES+1][64];

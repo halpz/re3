@@ -11641,7 +11641,9 @@ INITSAVEBUF
 	WriteSaveBuf(buf, varSpace);
 	for (uint32 i = 0; i < varSpace; i++)
 		WriteSaveBuf(buf, ScriptSpace[i]);
+#ifdef CHECK_STRUCT_SIZES
 	static_assert(SCRIPT_DATA_SIZE == 968, "CTheScripts::SaveAllScripts");
+#endif
 	uint32 script_data_size = SCRIPT_DATA_SIZE;
 	WriteSaveBuf(buf, script_data_size);
 	WriteSaveBuf(buf, OnAMissionFlag);
@@ -12067,12 +12069,16 @@ void CRunningScript::Save(uint8*& buf)
 	for (int i = 0; i < 8; i++)
 		WriteSaveBuf<char>(buf, m_abScriptName[i]);
 	WriteSaveBuf<uint32>(buf, m_nIp);
+#ifdef CHECK_STRUCT_SIZES
 	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
+#endif
 	for (int i = 0; i < MAX_STACK_DEPTH; i++)
 		WriteSaveBuf<uint32>(buf, m_anStack[i]);
 	WriteSaveBuf<uint16>(buf, m_nStackPointer);
 	SkipSaveBuf(buf, 2);
+#ifdef CHECK_STRUCT_SIZES
 	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+#endif
 	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
 		WriteSaveBuf<int32>(buf, m_anLocalVariables[i]);
 	WriteSaveBuf<bool>(buf, m_bCondResult);
@@ -12098,12 +12104,16 @@ void CRunningScript::Load(uint8*& buf)
 	for (int i = 0; i < 8; i++)
 		m_abScriptName[i] = ReadSaveBuf<char>(buf);
 	m_nIp = ReadSaveBuf<uint32>(buf);
+#ifdef CHECK_STRUCT_SIZES
 	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
+#endif
 	for (int i = 0; i < MAX_STACK_DEPTH; i++)
 		m_anStack[i] = ReadSaveBuf<uint32>(buf);
 	m_nStackPointer = ReadSaveBuf<uint16>(buf);
 	SkipSaveBuf(buf, 2);
+#ifdef CHECK_STRUCT_SIZES
 	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+#endif
 	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
 		m_anLocalVariables[i] = ReadSaveBuf<int32>(buf);
 	m_bCondResult = ReadSaveBuf<bool>(buf);

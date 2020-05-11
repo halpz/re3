@@ -16,7 +16,7 @@ public:
 	uint8 m_nSpecialCollisionResponseCases;
 	bool m_bCameraToAvoidThisObject;
 };
-static_assert(sizeof(CObjectInfo) == 0x20, "CObjectInfo: error");
+VALIDATE_SIZE(CObjectInfo, 0x20);
 
 class CObjectData
 {

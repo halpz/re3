@@ -32,7 +32,7 @@ public:
 	~CPhone() { }
 };
 
-static_assert(sizeof(CPhone) == 0x34, "CPhone: error");
+VALIDATE_SIZE(CPhone, 0x34);
 
 class CPhoneInfo {
 public:

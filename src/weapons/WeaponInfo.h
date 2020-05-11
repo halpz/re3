@@ -46,4 +46,4 @@ public:
 	static void Shutdown(void);
 };
 
-static_assert(sizeof(CWeaponInfo) == 0x54, "CWeaponInfo: error");
+VALIDATE_SIZE(CWeaponInfo, 0x54);
