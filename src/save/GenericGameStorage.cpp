@@ -1,3 +1,4 @@
+#define WITHWINDOWS
 #include "common.h"
 #include "crossplatform.h"
 #include "main.h"

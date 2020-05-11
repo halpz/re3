@@ -90,7 +90,8 @@ workspace "re3"
           }
           debugdir (gamepath)
           if (exepath) then
-             debugcommand (gamepath .. exepath)
+			 -- Used VS variable $(TargetFileName) because it doesn't accept premake tokens. Does debugcommand even work outside VS??
+             debugcommand (gamepath .. "$(TargetFileName)")
              dir, file = exepath:match'(.*/)(.*)'
              debugdir (gamepath .. (dir or ""))
           end

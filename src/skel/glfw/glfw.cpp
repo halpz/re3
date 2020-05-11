@@ -66,7 +66,7 @@ static psGlobalType PsGlobal;
 #define JIF(x) if (FAILED(hr=(x))) \
 	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return;}
 
-long _dwMemAvailPhys;
+unsigned long _dwMemAvailPhys;
 RwUInt32 gGameState;
 
 #ifdef _WIN32

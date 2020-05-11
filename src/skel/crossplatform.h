@@ -82,7 +82,7 @@ RwBool IsForegroundApp();
 #endif
 
 // Codes compatible with Windows and Linux
-#if !defined _WIN32
+#ifndef _WIN32
 #define DeleteFile unlink
 
 // Needed for save games
@@ -103,7 +103,7 @@ void GetLocalTime_CP(SYSTEMTIME* out);
 #endif
 
 // Compatible with Linux/POSIX and MinGW on Windows
-#if !defined _WIN32
+#ifndef _WIN32
 #include <iostream>
 #include <dirent.h>
 #include <sys/types.h>

@@ -1,6 +1,9 @@
 #include "common.h"
 #include "crossplatform.h"
 
+// Codes compatible with Windows and Linux
+#ifndef _WIN32
+
 // For internal use
 // wMilliseconds is not needed
 void tmToSystemTime(const tm *tm, SYSTEMTIME *out) {
@@ -18,6 +21,7 @@ void GetLocalTime_CP(SYSTEMTIME *out) {
     tm *localTm = localtime(&timestamp);
     tmToSystemTime(localTm, out);
 }
+#endif
 
 // Compatible with Linux/POSIX and MinGW on Windows
 #ifndef _WIN32
@@ -80,6 +84,7 @@ void FileTimeToSystemTime(time_t* writeTime, SYSTEMTIME* out) {
 }
 #endif
 
+// Funcs/features from Windows that we need on other platforms
 #ifndef _WIN32
 char *strupr(char *s) {
    char* tmp = s;
