@@ -557,12 +557,16 @@ RpAtomic*
 CVisibilityPlugins::RenderPedCB(RpAtomic *atomic)
 {
 	int32 alpha;
+	RwV3d cam2atm;
 
-	alpha = GetClumpAlpha(RpAtomicGetClump(atomic));
-	if(alpha == 255)
-		AtomicDefaultRenderCallBack(atomic);
-	else
-		RenderAlphaAtomic(atomic, alpha);
+	RwV3dSub(&cam2atm, &RwFrameGetLTM(RpAtomicGetFrame(atomic))->pos, ms_pCameraPosn);
+	if(RwV3dDotProduct(&cam2atm, &cam2atm) < ms_pedLod1Dist){
+		alpha = GetClumpAlpha(RpAtomicGetClump(atomic));
+		if(alpha == 255)
+			AtomicDefaultRenderCallBack(atomic);
+		else
+			RenderAlphaAtomic(atomic, alpha);
+	}
 	return atomic;
 }
 
