@@ -42,6 +42,7 @@ public:
 	static bool InsertAtomicIntoSortedList(RpAtomic *a, float dist);
 
 	static void SetRenderWareCamera(RwCamera *camera);
+	static void SetupVehicleVariables(RpClump *vehicle);
 
 	static RpAtomic *RenderWheelAtomicCB(RpAtomic *atomic);
 	static RpAtomic *RenderObjNormalAtomic(RpAtomic *atomic);
@@ -70,11 +71,11 @@ public:
 
 	static void RenderAlphaAtomics(void);
 	static void RenderFadingEntities(void);
+	static void RenderFadingUnderwaterEntities(void);
 
 	// All actually unused
 	static bool DefaultVisibilityCB(RpClump *clump);
 	static bool FrustumSphereCB(RpClump *clump);
-	static bool MloVisibilityCB(RpClump *clump);
 	static bool VehicleVisibilityCB(RpClump *clump);
 	static bool VehicleVisibilityCB_BigVehicle(RpClump *clump);
 

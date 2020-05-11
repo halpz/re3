@@ -12,6 +12,7 @@ RtCharset *debugCharset;
 #endif
 
 bool gPS2alphaTest = 1;
+bool gBackfaceCulling;
 
 #ifndef FINAL
 static bool charsetOpen;
@@ -114,6 +115,15 @@ DefinedState(void)
 	RwD3D8SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 	RwD3D8SetRenderState(D3DRS_ALPHAREF, 2);
 #endif
+}
+
+void
+SetCullMode(uint32 mode)
+{
+	if(gBackfaceCulling)
+		RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)mode);
+	else
+		RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 }
 
 RwFrame*

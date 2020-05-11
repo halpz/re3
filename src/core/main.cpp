@@ -778,14 +778,17 @@ RenderScene(void)
 	DoRWRenderHorizon();
 	CRenderer::RenderRoads();
 	CCoronas::RenderReflections();
-	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 	CRenderer::RenderEverythingBarRoads();
-	CRenderer::RenderBoats();
-	DefinedState();
+	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 	CWaterLevel::RenderWater();
+	CRenderer::RenderBoats();
+	CRenderer::RenderFadingInUnderwaterEntities();
+	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+	// CWaterLevel::RenderTransparentWater();
 	CRenderer::RenderFadingInEntities();
-	CRenderer::RenderVehiclesButNotBoats();
+	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 	CWeather::RenderRainStreaks();
+	// CCoronas::RenderSunReflection
 }
 
 void

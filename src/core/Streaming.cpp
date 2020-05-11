@@ -234,7 +234,7 @@ CStreaming::Init(void)
 		}
 	}
 #else
-	CStreaming::Init();
+	CStreaming::Init2();
 #endif
 }
 
@@ -725,7 +725,7 @@ CStreaming::RequestBigBuildings(eLevelName level, const CVector &pos)
 		b = CPools::GetBuildingPool()->GetSlot(i);
 		if(b && b->bIsBIGBuilding && b->m_level == level)
 			if(b->bStreamBIGBuilding){
-				if(CRenderer::ShouldModelBeStreamed(b))
+				if(CRenderer::ShouldModelBeStreamed(b, pos))
 					RequestModel(b->GetModelIndex(), 0);
 			}else
 				RequestModel(b->GetModelIndex(), BIGBUILDINGFLAGS);
@@ -745,7 +745,7 @@ CStreaming::InstanceBigBuildings(eLevelName level, const CVector &pos)
 		b = CPools::GetBuildingPool()->GetSlot(i);
 		if(b && b->bIsBIGBuilding && b->m_level == level &&
 		   b->bStreamBIGBuilding && b->m_rwObject == nil)
-			if(CRenderer::ShouldModelBeStreamed(b))
+			if(CRenderer::ShouldModelBeStreamed(b, pos))
 				b->CreateRwObject();
 	}
 }
