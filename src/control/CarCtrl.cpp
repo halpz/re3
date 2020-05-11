@@ -2523,7 +2523,7 @@ CCarCtrl::RegisterVehicleOfInterest(CVehicle* pVehicle)
 			return;
 		}
 	}
-	uint32 oldestCarWeKeepTime = UINT_MAX;
+	uint32 oldestCarWeKeepTime = UINT32_MAX;
 	int oldestCarWeKeepIndex = 0;
 	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
 		if (apCarsToKeep[i] && aCarsToKeepTime[i] < oldestCarWeKeepTime) {

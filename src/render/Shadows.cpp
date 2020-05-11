@@ -645,7 +645,7 @@ CShadows::StoreShadowForPole(CEntity *pPole, float fOffsetX, float fOffsetY, flo
 		PolePos.x += -CTimeCycle::GetSunPosition().x * (fPoleHeight / 2);
 		PolePos.y += -CTimeCycle::GetSunPosition().y * (fPoleHeight / 2);
 
-		StoreStaticShadow((uint32)pPole + nID + _TODOCONST(51), SHADOWTYPE_DARK, gpPostShadowTex, &PolePos,
+		StoreStaticShadow((uintptr)pPole + nID + _TODOCONST(51), SHADOWTYPE_DARK, gpPostShadowTex, &PolePos,
 				-CTimeCycle::GetSunPosition().x * (fPoleHeight / 2),
 				-CTimeCycle::GetSunPosition().y * (fPoleHeight / 2),
 				CTimeCycle::GetShadowSideX()    * fPoleWidth,
@@ -1516,7 +1516,7 @@ CShadows::UpdatePermanentShadows(void)
 					// timePassed == aPermanentShadows[i].m_nLifeTime -> 0
 					float fMult = 1.0f - float(timePassed - (aPermanentShadows[i].m_nLifeTime * 3 / 4)) / (aPermanentShadows[i].m_nLifeTime / 4);
 
-					StoreStaticShadow((uint32)&aPermanentShadows[i],
+					StoreStaticShadow((uintptr)&aPermanentShadows[i],
 						aPermanentShadows[i].m_nType,
 						aPermanentShadows[i].m_pTexture,
 						&aPermanentShadows[i].m_vecPos,
@@ -1533,7 +1533,7 @@ CShadows::UpdatePermanentShadows(void)
 				}
 				else
 				{
-					StoreStaticShadow((uint32)&aPermanentShadows[i],
+					StoreStaticShadow((uintptr)&aPermanentShadows[i],
 						aPermanentShadows[i].m_nType,
 						aPermanentShadows[i].m_pTexture,
 						&aPermanentShadows[i].m_vecPos,

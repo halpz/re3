@@ -24,7 +24,7 @@ StaticPatcher::Apply()
 	}
 	ms_head = nil;
 }
-
+#ifdef _WIN32
 std::vector<uint32> usedAddresses;
 
 static DWORD protect[2];
@@ -76,3 +76,19 @@ InjectHook_internal(uint32 address, uint32 hook, int type)
 	else
 		VirtualProtect((void*)address, 5, protect[0], &protect[1]);
 }
+#else
+void
+Protect_internal(uint32 address, uint32 size)
+{
+}
+
+void
+Unprotect_internal(void)
+{
+}
+
+void
+InjectHook_internal(uint32 address, uint32 hook, int type)
+{
+}
+#endif

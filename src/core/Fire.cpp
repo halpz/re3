@@ -128,7 +128,7 @@ CFire::ProcessFire(void)
 		lightpos.z = m_vecPos.z + 5.0f;
 
 		if (!m_pEntity) {
-			CShadows::StoreStaticShadow((uint32)this, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &lightpos,
+			CShadows::StoreStaticShadow((uintptr)this, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &lightpos,
 				7.0f, 0.0f, 0.0f, -7.0f,
 				255,                                        // this is 0 on PC which results in no shadow
 				nRandNumber / 2, nRandNumber / 2, 0,
@@ -199,7 +199,7 @@ CFireManager::StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength
 {
 	CPed *ped = (CPed *)entityOnFire;
 	CVehicle *veh = (CVehicle *)entityOnFire;
-	
+
 	if (entityOnFire->IsPed()) {
 		if (ped->m_pFire)
 			return nil;
@@ -212,7 +212,7 @@ CFireManager::StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength
 			return nil;
 	}
 	CFire *fire = GetNextFreeFire();
-	
+
 	if (fire) {
 		if (entityOnFire->IsPed()) {
 			ped->m_pFire = fire;
@@ -243,7 +243,7 @@ CFireManager::StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength
 				veh->m_pCarFire = fire;
 				if (fleeFrom) {
 					CEventList::RegisterEvent(EVENT_CAR_SET_ON_FIRE, EVENT_ENTITY_VEHICLE,
-						entityOnFire, (CPed *)fleeFrom, 10000);	
+						entityOnFire, (CPed *)fleeFrom, 10000);
 				}
 			}
 		}

@@ -3,6 +3,7 @@
 #pragma warning( pop )
 #include "common.h"
 #include "crossplatform.h"
+#include "platform.h"
 
 #include "Timer.h"
 #ifdef GTA_PC

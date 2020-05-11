@@ -1077,7 +1077,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 					SetLookFlag(limitedCam, true);
 					SetAimFlag(limitedCam);
 #ifdef VC_PED_PORTS
-					SetLookTimer(INT_MAX); // removing this makes head move for real, but I experinced some bugs.
+					SetLookTimer(INT32_MAX); // removing this makes head move for real, but I experinced some bugs.
 #endif
 				} else {
 					m_fRotationDest = limitedCam;

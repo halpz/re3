@@ -22,7 +22,6 @@ enum eWinVersion
 	OS_WINXP,
 };
 
-extern DWORD _dwOperatingSystemVersion;
 
 #ifdef __DINPUT_INCLUDED__
 /* platform specfic global data */

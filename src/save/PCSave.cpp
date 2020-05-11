@@ -1,5 +1,4 @@
 #include "common.h"
-#define USEALTERNATIVEWINFUNCS
 #include "crossplatform.h"
 
 #include "FileMgr.h"

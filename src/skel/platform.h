@@ -9,8 +9,11 @@ extern "C"
 {
 #endif                          /* __cplusplus */
 
+#ifdef _WIN32
 extern RwUInt32 psTimer(void);
-
+#else
+extern double psTimer(void);
+#endif
 
 extern RwBool psInitialise(void);
 extern void   psTerminate(void);
@@ -31,6 +34,19 @@ extern RwBool psInstallFileSystem(void);
 /* Handle native texture support */
 extern RwBool psNativeTextureSupport(void);
 
+extern void _InputTranslateShiftKeyUpDown(RsKeyCodes* rs);
+
+extern void HandleExit();
+
+extern void _psSelectScreenVM(RwInt32 videoMode);
+
+extern void InitialiseLanguage();
+
+extern RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode);
+
+extern RwChar** _psGetVideoModeList();
+
+extern RwInt32 _psGetNumVideModes();
 #ifdef    __cplusplus
 }
 #endif                          /* __cplusplus */

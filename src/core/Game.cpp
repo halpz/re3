@@ -2,7 +2,7 @@
 #pragma warning( disable : 4005)
 #pragma warning( pop )
 #include "common.h"
-#include "crossplatform.h"
+#include "platform.h"
 
 #include "Game.h"
 #include "main.h"

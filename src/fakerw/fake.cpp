@@ -7,6 +7,9 @@
 #include <rpskin.h>
 #include <assert.h>
 #include <string.h>
+#ifndef _WIN32
+#include "crossplatform.h"
+#endif
 
 using namespace rw;
 
@@ -371,8 +374,24 @@ RwStream *RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const v
 		StreamFile fakefile;
 		file = rwNewT(StreamFile, 1, 0);
 		memcpy(file, &fakefile, sizeof(StreamFile));
+#ifndef _WIN32
+		// Be case-insensitive and fix backslashes (from https://github.com/OneSadCookie/fcaseopen/)
+		FILE* first = fopen((char*)pData, "r");
+		char *r;
+		if (!first) {
+			r = (char*)alloca(strlen((char*)pData) + 2);
+			// Use default path(and pass error handling to librw) if we can't find any match
+			if (!casepath((char*)pData, r))
+				r = (char*)pData;
+		} else
+			fclose(first);
+
+		if(file->open((char*)r, mode))
+			return file;
+#else
 		if(file->open((char*)pData, mode))
 			return file;
+#endif
 		rwFree(file);
 		return nil;
 	}

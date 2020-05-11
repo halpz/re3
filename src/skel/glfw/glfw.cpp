@@ -7,14 +7,11 @@
 #pragma warning( disable : 4005)
 #pragma warning( pop )
 
-#pragma comment( lib, "Winmm.lib" ) // Needed for time
-
 #if (defined(_MSC_VER))
 #include <tchar.h>
 #endif /* (defined(_MSC_VER)) */
 #include <stdio.h>
 #include "rwcore.h"
-#include "resource.h"
 #include "skeleton.h"
 #include "platform.h"
 #include "crossplatform.h"
@@ -69,14 +66,20 @@ static psGlobalType PsGlobal;
 #define JIF(x) if (FAILED(hr=(x))) \
 	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return;}
 
-
-// TODO: This is used on selecting video mode, so either think something or remove it completely
-DWORD _dwMemTotalVideo = 1024 * (1024 * 1024); // 1024 MB as placeholder
-DWORD _dwMemAvailPhys;
-
-DWORD _dwOperatingSystemVersion;
-
+long _dwMemAvailPhys;
 RwUInt32 gGameState;
+
+#ifdef _WIN32
+DWORD _dwOperatingSystemVersion;
+#include "resource.h"
+#else
+long _dwOperatingSystemVersion;
+#include <sys/sysinfo.h>
+#include <stddef.h>
+#include <locale.h>
+#include <signal.h>
+#include <errno.h>
+#endif
 /*
  *****************************************************************************
  */
@@ -144,7 +147,7 @@ const char *_psGetUserFilesFolder()
 	strcpy(szUserFiles, "data");
 	return szUserFiles;
 #else
-	static CHAR szUserFiles[256];
+	static char szUserFiles[256];
 	strcpy(szUserFiles, "userfiles");
 	_psCreateFolder(szUserFiles);
 	return szUserFiles;
@@ -185,6 +188,8 @@ psCameraShowRaster(RwCamera *camera)
 /*
  *****************************************************************************
  */
+#ifdef _WIN32
+#pragma comment( lib, "Winmm.lib" ) // Needed for time
 RwUInt32
 psTimer(void)
 {
@@ -202,6 +207,16 @@ psTimer(void)
 	
 	return time;
 }
+#else
+double
+psTimer(void)
+{
+	struct timespec start; 
+	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+	return start.tv_sec * 1000.0 + start.tv_nsec/1000000.0;
+}
+#endif       
+
 
 /*
  *****************************************************************************
@@ -209,12 +224,7 @@ psTimer(void)
 void
 psMouseSetPos(RwV2d *pos)
 {
-	POINT point;
-
-	point.x = (RwInt32) pos->x;
-	point.y = (RwInt32) pos->y;
-
-	glfwSetCursorPos(PSGLOBAL(window), point.x, point.y);
+	glfwSetCursorPos(PSGLOBAL(window), pos->x, pos->y);
 	
 	PSGLOBAL(lastMousePos.x) = (RwInt32)pos->x;
 
@@ -285,7 +295,7 @@ psInitialise(void)
 	
 	gGameState = GS_START_UP;
 	TRACE("gGameState = GS_START_UP");
-	
+#ifdef _WIN32
 	OSVERSIONINFO verInfo;
 	verInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	
@@ -330,14 +340,19 @@ psInitialise(void)
 
 	_dwMemAvailPhys = memstats.dwAvailPhys;
 
-#ifdef FIX_BUGS
 	debug("Physical memory size %u\n", memstats.dwTotalPhys);
 	debug("Available physical memory %u\n", memstats.dwAvailPhys);
 #else
-	debug("Physical memory size %d\n", memstats.dwTotalPhys);
-	debug("Available physical memory %d\n", memstats.dwAvailPhys);
-#endif
+	struct sysinfo systemInfo;
+	sysinfo(&systemInfo);
+	
+	_dwMemAvailPhys = systemInfo.freeram;
+	_dwOperatingSystemVersion = OS_WINXP; // To fool other classes
 
+	debug("Physical memory size %u\n", systemInfo.totalram);
+	debug("Available physical memory %u\n", systemInfo.freeram);
+
+#endif
 	TheText.Unload();
 
 	return TRUE;
@@ -413,18 +428,8 @@ RwChar **_psGetVideoModeList()
 		
 		if ( vm.flags & rwVIDEOMODEEXCLUSIVE )
 		{
-			if (   vm.width >= 640
-				&& vm.height >= 480
-				&& (vm.width == 640
-				&& vm.height == 480) 
-				|| !(vm.flags & rwVIDEOMODEEXCLUSIVE)
-				|| (_dwMemTotalVideo - vm.depth * vm.height * vm.width / 8) > (12 * 1024 * 1024)/*12 MB*/ )
-			{
-				_VMList[i] = (RwChar*)RwCalloc(100, sizeof(RwChar));
-				rwsprintf(_VMList[i],"%lu X %lu X %lu", vm.width, vm.height, vm.depth);
-			}
-			else
-				_VMList[i] = nil;
+			_VMList[i] = (RwChar*)RwCalloc(100, sizeof(RwChar));
+			rwsprintf(_VMList[i],"%lu X %lu X %lu", vm.width, vm.height, vm.depth);
 		}
 		else
 			_VMList[i] = nil;
@@ -445,6 +450,8 @@ void _psSelectScreenVM(RwInt32 videoMode)
 	if (!_psSetVideoMode(RwEngineGetCurrentSubSystem(), videoMode))
 	{
 		RsGlobal.quit = TRUE;
+
+		printf("ERROR: Failed to select new screen resolution\n");
 	}
 	else
 		FrontEndMenuManager.LoadAllTextures();
@@ -589,7 +596,7 @@ psSelectDevice()
 #ifdef DEFAULT_NATIVE_RESOLUTION
 				GcurSelVM = 1;
 #else
-				MessageBox(nil, "Cannot find 640x480 video mode", "GTA3", MB_OK);
+				printf("WARNING: Cannot find 640x480 video mode, selecting device cancelled\n");
 				return FALSE;
 #endif
 			}
@@ -602,8 +609,9 @@ psSelectDevice()
 		   FrontEndMenuManager.m_nPrefsHeight == 0 ||
 		   FrontEndMenuManager.m_nPrefsDepth == 0){
 			// Defaults if nothing specified
-			FrontEndMenuManager.m_nPrefsWidth = GetSystemMetrics(SM_CXSCREEN);
-			FrontEndMenuManager.m_nPrefsHeight = GetSystemMetrics(SM_CYSCREEN);
+			const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+			FrontEndMenuManager.m_nPrefsWidth = mode->width;
+			FrontEndMenuManager.m_nPrefsHeight = mode->height;
 			FrontEndMenuManager.m_nPrefsDepth = 32;
 			FrontEndMenuManager.m_nPrefsWindowed = 0;
 		}
@@ -632,7 +640,7 @@ psSelectDevice()
 		}
 
 		if(bestFsMode < 0){
-			MessageBox(nil, "Cannot find desired video mode", "GTA3", MB_OK);
+			printf("WARNING: Cannot find desired video mode, selecting device cancelled\n");
 			return FALSE;
 		}
 		GcurSelVM = bestFsMode;
@@ -886,6 +894,30 @@ CommandLineToArgv(RwChar *cmdLine, RwInt32 *argCount)
  */
 void InitialiseLanguage()
 {
+#ifndef _WIN32
+	// Mandatory for Linux(Unix? Posix?) to set lang. to environment lang.
+	setlocale(LC_ALL, "");	
+
+	char *systemLang, *keyboardLang;
+
+	systemLang = setlocale (LC_ALL, NULL);
+	keyboardLang = setlocale (LC_CTYPE, NULL);
+	
+	short primUserLCID, primSystemLCID;
+	primUserLCID = primSystemLCID = !strncmp(systemLang, "fr_",3) ? LANG_FRENCH :
+					!strncmp(systemLang, "de_",3) ? LANG_GERMAN :
+					!strncmp(systemLang, "en_",3) ? LANG_ENGLISH :
+					!strncmp(systemLang, "it_",3) ? LANG_ITALIAN :
+					!strncmp(systemLang, "es_",3) ? LANG_SPANISH :
+					LANG_OTHER;
+
+	short primLayout = !strncmp(keyboardLang, "fr_",3) ? LANG_FRENCH : (!strncmp(keyboardLang, "de_",3) ? LANG_GERMAN : LANG_ENGLISH);
+
+	short subUserLCID, subSystemLCID;
+	subUserLCID = subSystemLCID = !strncmp(systemLang, "en_AU",5) ? SUBLANG_ENGLISH_AUS : SUBLANG_OTHER;
+	short subLayout = !strncmp(keyboardLang, "en_AU",5) ? SUBLANG_ENGLISH_AUS : SUBLANG_OTHER;
+
+#else
 	WORD primUserLCID	= PRIMARYLANGID(GetSystemDefaultLCID());
 	WORD primSystemLCID = PRIMARYLANGID(GetUserDefaultLCID());
 	WORD primLayout		= PRIMARYLANGID((DWORD)GetKeyboardLayout(0));
@@ -893,7 +925,7 @@ void InitialiseLanguage()
 	WORD subUserLCID	= SUBLANGID(GetSystemDefaultLCID());
 	WORD subSystemLCID	= SUBLANGID(GetUserDefaultLCID());
 	WORD subLayout		= SUBLANGID((DWORD)GetKeyboardLayout(0));
-	
+#endif
 	if (   primUserLCID	  == LANG_GERMAN
 		|| primSystemLCID == LANG_GERMAN
 		|| primLayout	  == LANG_GERMAN )
@@ -987,13 +1019,22 @@ void InitialiseLanguage()
 
 	TheText.Unload();
 	TheText.Load();
+
+#ifndef _WIN32
+	// TODO this is needed for strcasecmp to work correctly across all languages, but can these cause other problems??
+	setlocale(LC_CTYPE, "C");
+	setlocale(LC_COLLATE, "C");
+	setlocale(LC_NUMERIC, "C");
+#endif
 }
 
 /*
  *****************************************************************************
  */
+
 void HandleExit()
 {
+#ifdef _WIN32
 	MSG message;
 	while ( PeekMessage(&message, nil, 0U, 0U, PM_REMOVE|PM_NOYIELD) )
 	{
@@ -1007,8 +1048,21 @@ void HandleExit()
 			DispatchMessage(&message);
 		}
 	}
+#else
+	// We now handle terminate message always, why handle on some cases?
+	return;
+#endif
 }
- 
+
+#ifndef _WIN32
+void terminateHandler(int sig, siginfo_t *info, void *ucontext) {
+	RsGlobal.quit = TRUE;
+}
+
+void dummyHandler(int sig){
+}
+#endif
+
 void resizeCB(GLFWwindow* window, int width, int height) {
 	/*
 	* Handle event to ensure window contents are displayed during re-size
@@ -1210,17 +1264,36 @@ cursorCB(GLFWwindow* window, double xpos, double ypos) {
 /*
  *****************************************************************************
  */
+#ifdef _WIN32
 int PASCAL
 WinMain(HINSTANCE instance,
 	HINSTANCE prevInstance	__RWUNUSED__,
 	CMDSTR cmdLine,
 	int cmdShow)
 {
-	RwV2d pos;
-	RwInt32 argc, i;
+
+	RwInt32 argc;
 	RwChar** argv;
-	StaticPatcher::Apply();
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
+#else
+int
+main(int argc, char *argv[])
+{
+#endif
+	RwV2d pos;
+	RwInt32 i;
+//	StaticPatcher::Apply();
+
+#ifndef _WIN32
+	struct sigaction act;
+	act.sa_sigaction = terminateHandler;
+	act.sa_flags = SA_SIGINFO;
+	sigaction(SIGTERM, &act, NULL);
+	struct sigaction sa;
+	sa.sa_handler = dummyHandler;
+	sa.sa_flags = 0;
+	sigaction(SIGINT, &sa, NULL); // Needed for CdStreamPosix
+#endif
 
 	/* 
 	 * Initialize the platform independent data.
@@ -1231,7 +1304,7 @@ WinMain(HINSTANCE instance,
 		return FALSE;
 	}
 
-
+#ifdef _WIN32
 	/*
 	 * Get proper command line params, cmdLine passed to us does not
 	 * work properly under all circumstances...
@@ -1248,6 +1321,7 @@ WinMain(HINSTANCE instance,
 	 * Parse command line parameters (except program name) one at 
 	 * a time BEFORE RenderWare initialization...
 	 */
+#endif
 	for(i=1; i<argc; i++)
 	{
 		RsEventHandler(rsPREINITCOMMANDLINE, argv[i]);
@@ -1303,8 +1377,7 @@ WinMain(HINSTANCE instance,
 
 		RsEventHandler(rsCAMERASIZE, &r);
 	}
-	
-	SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, FALSE, nil, SPIF_SENDCHANGE);
+#ifdef _WIN32
 	SystemParametersInfo(SPI_SETPOWEROFFACTIVE, FALSE, nil, SPIF_SENDCHANGE);
 	SystemParametersInfo(SPI_SETLOWPOWERACTIVE, FALSE, nil, SPIF_SENDCHANGE);
 	
@@ -1319,7 +1392,7 @@ WinMain(HINSTANCE instance,
 	NewStickyKeys.dwFlags = SKF_TWOKEYSOFF;
 	
 	SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &NewStickyKeys, SPIF_SENDCHANGE);
-	
+#endif
 
 	{
 		CFileMgr::SetDirMyDocuments();
@@ -1335,7 +1408,9 @@ WinMain(HINSTANCE instance,
 		CFileMgr::SetDir("");
 	}
 	
+#ifdef _WIN32
 	SetErrorMode(SEM_FAILCRITICALERRORS);
+#endif
 
 #ifndef MASTER
 	if (TurnOnAnimViewer) {
@@ -1380,7 +1455,7 @@ WinMain(HINSTANCE instance,
 
 					case GS_INIT_ONCE:
 					{
-						CoUninitialize();
+						//CoUninitialize();
 						
 						LoadingScreen(nil, nil, "loadsc0");
 						
@@ -1549,6 +1624,7 @@ WinMain(HINSTANCE instance,
 	 */
 	RsEventHandler(rsTERMINATE, nil);
 
+#ifdef _WIN32
 	/* 
 	 * Free the argv strings...
 	 */
@@ -1557,9 +1633,8 @@ WinMain(HINSTANCE instance,
 	SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &SavedStickyKeys, SPIF_SENDCHANGE);
 	SystemParametersInfo(SPI_SETPOWEROFFACTIVE, TRUE, nil, SPIF_SENDCHANGE);
 	SystemParametersInfo(SPI_SETLOWPOWERACTIVE, TRUE, nil, SPIF_SENDCHANGE);
-	SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, TRUE, nil, SPIF_SENDCHANGE);
-
 	SetErrorMode(0);
+#endif
 
 	return 0;
 }

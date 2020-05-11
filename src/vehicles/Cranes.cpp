@@ -42,7 +42,7 @@ uint32 CCranes::CarsCollectedMilitaryCrane;
 int32 CCranes::NumCranes;
 CCrane CCranes::aCranes[NUM_CRANES];
 
-void CCranes::InitCranes(void) 
+void CCranes::InitCranes(void)
 {
 	CarsCollectedMilitaryCrane = 0;
 	NumCranes = 0;
@@ -657,11 +657,11 @@ void CCranes::Load(uint8* buf, uint32 size)
 	for (int i = 0; i < NUM_CRANES; i++) {
 		CCrane *pCrane = &aCranes[i];
 		if (pCrane->m_pCraneEntity != nil)
-			pCrane->m_pCraneEntity = CPools::GetBuildingPool()->GetSlot((uint32)pCrane->m_pCraneEntity - 1);
+			pCrane->m_pCraneEntity = CPools::GetBuildingPool()->GetSlot((uintptr)pCrane->m_pCraneEntity - 1);
 		if (pCrane->m_pHook != nil)
-			pCrane->m_pHook = CPools::GetObjectPool()->GetSlot((uint32)pCrane->m_pHook - 1);
+			pCrane->m_pHook = CPools::GetObjectPool()->GetSlot((uintptr)pCrane->m_pHook - 1);
 		if (pCrane->m_pVehiclePickedUp != nil)
-			pCrane->m_pVehiclePickedUp = CPools::GetVehiclePool()->GetSlot((uint32)pCrane->m_pVehiclePickedUp - 1);
+			pCrane->m_pVehiclePickedUp = CPools::GetVehiclePool()->GetSlot((uintptr)pCrane->m_pVehiclePickedUp - 1);
 	}
 	for (int i = 0; i < NUM_CRANES; i++) {
 		aCranes[i].m_nAudioEntity = DMAudio.CreateEntity(AUDIOTYPE_CRANE, &aCranes[i]);

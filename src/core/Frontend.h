@@ -662,4 +662,3 @@ VALIDATE_SIZE(CMenuManager, 0x564);
 #endif
 
 extern CMenuManager FrontEndMenuManager;
-extern unsigned long _dwOperatingSystemVersion;

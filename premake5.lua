@@ -29,11 +29,17 @@ workspace "re3"
 	location "build"
 	symbols "Full"
 	staticruntime "off"
+
 	filter { "system:windows" }
 		platforms {
 			"win-x86-RW33_d3d8-mss",
 			"win-x86-librw_d3d9-mss",
 			"win-x86-librw_gl3_glfw-mss",
+		}
+
+	filter { "system:linux" }
+		platforms {
+			"linux-x86-librw_gl3_glfw-oal",
 		}
 
 	filter "configurations:Debug"
@@ -45,6 +51,9 @@ workspace "re3"
 
 	filter { "platforms:win*" }
 		system "windows"
+
+	filter { "platforms:linux*" }
+		system "linux"
 		
 	filter { "platforms:*x86*" }
 		architecture "x86"
@@ -57,30 +66,28 @@ workspace "re3"
 		
 	filter "platforms:*librw_gl3_glfw*"
 		defines { "RW_GL3" }
+		includedirs { path.join(_OPTIONS["glfwdir"], "include") }
+		includedirs { path.join(_OPTIONS["glewdir"], "include") }
+
+	filter "platforms:win*librw_gl3_glfw*"
+		defines { "GLEW_STATIC" }
 		if(not _OPTIONS["with-librw"]) then
 			libdirs { path.join(Librw, "lib/win-x86-gl3/%{cfg.buildcfg}") }
 		end
-		defines { "GLEW_STATIC" }
-		includedirs { path.join(_OPTIONS["glfwdir"], "include") }
-		includedirs { path.join(_OPTIONS["glewdir"], "include") }
+
+	filter "platforms:linux*librw_gl3_glfw*"
+		if(not _OPTIONS["with-librw"]) then
+			libdirs { path.join(Librw, "lib/linux-x86-gl3/%{cfg.buildcfg}") }
+		end
+
 	filter  {}
-	
-    pbcommands = { 
-       "setlocal EnableDelayedExpansion",
-       "set file=$(TargetPath)",
-       "FOR %%i IN (\"%file%\") DO (",
-       "set filename=%%~ni",
-       "set fileextension=%%~xi",
-       "set target=!path!!filename!!fileextension!",
-       "copy /y \"!file!\" \"!target!\"",
-       ")" }
-    
+		
     function setpaths (gamepath, exepath, scriptspath)
        scriptspath = scriptspath or ""
        if (gamepath) then
-          cmdcopy = { "set \"path=" .. gamepath .. scriptspath .. "\"" }
-          table.insert(cmdcopy, pbcommands)
-          postbuildcommands (cmdcopy)
+          postbuildcommands {
+             "{COPY} %{cfg.buildtarget.abspath} " .. gamepath .. scriptspath .. "%{cfg.buildtarget.name}"
+          }
           debugdir (gamepath)
           if (exepath) then
              debugcommand (gamepath .. exepath)
@@ -111,16 +118,12 @@ project "re3"
 	kind "WindowedApp"
 	targetname "re3"
 	targetdir "bin/%{cfg.platform}/%{cfg.buildcfg}"
-	targetextension ".exe"
-	characterset ("MBCS")
-	linkoptions "/SAFESEH:NO"
-	
 
 	files { addSrcFiles("src") }
 	files { addSrcFiles("src/animation") }
 	files { addSrcFiles("src/audio") }
 	--files { addSrcFiles("src/audio/miles") }
-	--files { addSrcFiles("src/audio/openal") }
+	--files { addSrcFiles("src/audio/oal") }
 	files { addSrcFiles("src/control") }
 	files { addSrcFiles("src/core") }
 	files { addSrcFiles("src/entities") }
@@ -132,7 +135,6 @@ project "re3"
 	files { addSrcFiles("src/rw") }
 	files { addSrcFiles("src/save") }
 	files { addSrcFiles("src/skel") }
-	files { addSrcFiles("src/skel/win") }
 	files { addSrcFiles("src/skel/glfw") }
 	files { addSrcFiles("src/text") }
 	files { addSrcFiles("src/vehicles") }
@@ -143,6 +145,7 @@ project "re3"
 	includedirs { "src" }
 	includedirs { "src/animation" }
 	includedirs { "src/audio" }
+	--includedirs { "src/audio/oal" }
 	includedirs { "src/control" }
 	includedirs { "src/core" }
 	includedirs { "src/entities" }
@@ -154,7 +157,6 @@ project "re3"
 	includedirs { "src/rw" }
 	includedirs { "src/save/" }
 	includedirs { "src/skel/" }
-	includedirs { "src/skel/win" }
 	includedirs { "src/skel/glfw" }
 	includedirs { "src/text" }
 	includedirs { "src/vehicles" }
@@ -167,8 +169,22 @@ project "re3"
 
 	libdirs { "milessdk/lib" }
 	
-	setpaths("$(GTA_III_RE_DIR)/", "$(TargetFileName)", "")
+	setpaths("$(GTA_III_RE_DIR)/", "%(cfg.buildtarget.name)", "")
 	
+	filter "platforms:win*"
+		files { addSrcFiles("src/skel/win") }
+		includedirs { "src/skel/win" }
+		linkoptions "/SAFESEH:NO"
+		characterset ("MBCS")
+		targetextension ".exe"
+
+	filter "platforms:linux*"
+		targetextension ".elf"
+		defines { "OPENAL" }
+		links { "openal", "mpg123", "sndfile", "pthread" }
+		files { addSrcFiles("src/audio/oal") }
+		includedirs { "src/audio/oal" }
+
 	filter "platforms:*RW33*"
 		staticruntime "on"
 		includedirs { "rwsdk/include/d3d8" }
@@ -194,7 +210,10 @@ project "re3"
 	filter "platforms:*d3d9*"
 		links { "d3d9" }
 		
-	filter "platforms:*gl3_glfw*"
+	filter "platforms:win*gl3_glfw*"
 		libdirs { path.join(_OPTIONS["glewdir"], "lib/Release/Win32") }
 		libdirs { path.join(_OPTIONS["glfwdir"], "lib-" .. string.gsub(_ACTION, "vs", "vc")) }
 		links { "opengl32", "glew32s", "glfw3" }
+
+	filter "platforms:linux*gl3_glfw*"
+		links { "GL", "GLEW", "glfw" }
