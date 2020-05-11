@@ -62,6 +62,8 @@ public:
     static int32 CarsCrushed;
 	static int32 FastestTimes[TOTAL_FASTEST_TIMES];
 	static int32 HighestScores[TOTAL_HIGHEST_SCORES];
+	static int32 Sprayings;
+	static float AutoPaintingBudget;
 
 public:
 	static void Init(void);

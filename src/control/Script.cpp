@@ -9746,8 +9746,21 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	case COMMAND_IS_CHAR_IN_ANY_PLANE:
 	case COMMAND_IS_PLAYER_IN_ANY_PLANE:
 	case COMMAND_IS_CHAR_IN_WATER:
+		assert(0);
 	case COMMAND_SET_VAR_INT_TO_CONSTANT:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr = ScriptParams[0];
+		return 0;
+	}
 	case COMMAND_SET_LVAR_INT_TO_CONSTANT:
+	{
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		CollectParameters(&m_nIp, 1);
+		*ptr = ScriptParams[0];
+		return 0;
+	}
 	default:
 		assert(0);
 	}
@@ -9802,7 +9815,20 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_GET_NUMBER_OF_SONY_CDS_READ:
 	case COMMAND_ADD_SHORT_RANGE_BLIP_FOR_COORD_OLD:
 	case COMMAND_ADD_SHORT_RANGE_BLIP_FOR_COORD:
+		assert(0);
 	case COMMAND_ADD_SHORT_RANGE_SPRITE_BLIP_FOR_COORD:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		int id = CRadar::SetShortRangeCoordBlip(BLIP_COORD, pos, 5, BLIP_DISPLAY_BOTH);
+		CRadar::SetBlipSprite(id, ScriptParams[3]);
+		ScriptParams[0] = id;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
 	case COMMAND_ADD_MONEY_SPENT_ON_CLOTHES:
 	case COMMAND_SET_HELI_ORIENTATION:
 	case COMMAND_CLEAR_HELI_ORIENTATION:
@@ -10026,7 +10052,11 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	switch (command) {
 	case COMMAND_REGISTER_VIGILANTE_LEVEL:
 	case COMMAND_CLEAR_ALL_CHAR_ANIMS:
+		assert(0);
 	case COMMAND_SET_MAXIMUM_NUMBER_OF_CARS_IN_GARAGE:
+		CollectParameters(&m_nIp, 2);
+		CGarages::SetMaxNumStoredCarsForGarage(ScriptParams[0], ScriptParams[1]);
+		break;
 	case COMMAND_WANTED_STARS_ARE_FLASHING:
 	case COMMAND_SET_ALLOW_HURRICANES:
 	case COMMAND_PLAY_ANNOUNCEMENT:

@@ -58,6 +58,9 @@ int32 CStats::CarsCrushed;
 int32 CStats::FastestTimes[CStats::TOTAL_FASTEST_TIMES];
 int32 CStats::HighestScores[CStats::TOTAL_HIGHEST_SCORES];
 
+int32 CStats::Sprayings;
+float CStats::AutoPaintingBudget;
+
 void CStats::Init()
 {
 	PeopleKilledByOthers = 0;
@@ -113,6 +116,9 @@ void CStats::Init()
 	IndustrialPassed = 0;
 	CommercialPassed = 0;
 	SuburbanPassed = 0;
+
+	Sprayings = 0;
+	AutoPaintingBudget = 0.0f;
 }
 
 void CStats::RegisterFastestTime(int32 index, int32 time)

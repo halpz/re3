@@ -66,12 +66,12 @@ struct sRadarTrace
 	uint16 m_BlipIndex;
 	bool m_bDim;
 	bool m_bInUse;
+	bool m_bShortRange;
 	float m_Radius;
 	int16 m_wScale;
 	uint16 m_eBlipDisplay; // eBlipDisplay
 	uint16 m_eRadarSprite; // eRadarSprite
 };
-VALIDATE_SIZE(sRadarTrace, 0x30);
 
 // Values for screen space
 #define RADAR_LEFT (40.0f)
@@ -149,6 +149,7 @@ public:
 	static void SetBlipSprite(int32 i, int32 icon);
 	static int32 SetCoordBlip(eBlipType type, CVector pos, int32, eBlipDisplay);
 	static int32 SetEntityBlip(eBlipType type, int32, int32, eBlipDisplay);
+	static int32 SetShortRangeCoordBlip(eBlipType type, CVector pos, int32, eBlipDisplay);
 	static void SetRadarMarkerState(int32 i, bool flag);
 	static void ShowRadarMarker(CVector pos, uint32 color, float radius);
 	static void ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha);

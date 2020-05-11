@@ -696,8 +696,8 @@ CCamera::CamControl(void)
 									garageDoorPos2.z = 0.0f;
 #endif
 								}
-								garageCenter.x = (pToGarageWeAreIn->m_fX1 + pToGarageWeAreIn->m_fX2)/2.0f;
-								garageCenter.y = (pToGarageWeAreIn->m_fY1 + pToGarageWeAreIn->m_fY2)/2.0f;
+								garageCenter.x = pToGarageWeAreIn->GetGarageCenterX();
+								garageCenter.y = pToGarageWeAreIn->GetGarageCenterY();
 								garageCenter.z = 0.0f;
 								if(whichDoor == 1)
 									garageCenterToDoor = garageDoorPos1 - garageCenter;
@@ -979,8 +979,8 @@ CCamera::CamControl(void)
 						}
 
 						if(pToGarageWeAreIn){
-							garageCenter.x = (pToGarageWeAreIn->m_fX1 + pToGarageWeAreIn->m_fX2)/2.0f;
-							garageCenter.y = (pToGarageWeAreIn->m_fY1 + pToGarageWeAreIn->m_fY2)/2.0f;
+							garageCenter.x = pToGarageWeAreIn->GetGarageCenterX();
+							garageCenter.y = pToGarageWeAreIn->GetGarageCenterY();
 							garageCenter.z = 0.0f;
 						}else{
 							garageDoorPos1.z = 0.0f;
@@ -1013,8 +1013,8 @@ CCamera::CamControl(void)
 						if(PedZoomIndicator == CAM_ZOOM_TOPDOWN && !stairs){
 							garageCamPos = garageCenter;
 							garageCamPos.z += FindPlayerPed()->GetPosition().z + 2.1f;
-							if(pToGarageWeAreIn && garageCamPos.z > pToGarageWeAreIn->m_fX2)	// What?
-								garageCamPos.z = pToGarageWeAreIn->m_fX2;
+							if(pToGarageWeAreIn && garageCamPos.z > pToGarageWeAreIn->m_fSupX)	// What?
+								garageCamPos.z = pToGarageWeAreIn->m_fSupX;
 						}else
 							garageCamPos.z = ground + 3.1f;
 						SetCamPositionForFixedMode(garageCamPos, CVector(0.0f, 0.0f, 0.0f));

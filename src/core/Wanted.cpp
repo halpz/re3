@@ -462,3 +462,10 @@ CWanted::UpdateCrimesQ(void)
 		}
 	}
 }
+
+void
+CWanted::Suspend(void)
+{
+	// TODO(MIAMI)!
+	Reset(); // <- temporary
+}

@@ -49,6 +49,8 @@ public:
 	void UpdateCrimesQ();
 	void Update();
 
+	void Suspend();
+
 	bool IsIgnored(void) { return m_bIgnoredByCops || m_bIgnoredByEveryone; }
 
 	static int32 WorkOutPolicePresence(CVector posn, float radius);

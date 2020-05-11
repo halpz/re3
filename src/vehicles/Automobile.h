@@ -84,7 +84,6 @@ public:
 	float m_aWheelPosition[4];
 	float m_aWheelSpeed[4];
 	uint8 field_4D8;
-	uint8 m_bombType : 3;
 	uint8 bTaxiLight : 1;
 	uint8 bHadDriver : 1;		// for bombs
 	uint8 bFixedColour : 1;
@@ -92,7 +91,6 @@ public:
 	uint8 bWaterTight : 1;	// no damage for non-player peds
 	uint8 bNotDamagedUpsideDown : 1;
 	uint8 bMoreResistantToDamage : 1;
-	CEntity *m_pBombRigger;
 	int16 field_4E0;
 	uint16 m_hydraulicState;
 	uint32 m_nBusDoorTimerEnd;
