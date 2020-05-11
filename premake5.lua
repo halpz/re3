@@ -104,7 +104,7 @@ project "librw"
 end
 
 local function addSrcFiles( prefix )
-	return prefix .. "/*cpp", prefix .. "/*.h", prefix .. "/*.c", prefix .. "/*.ico", prefix .. "/*.aps", prefix .. "/*.rc"
+	return prefix .. "/*cpp", prefix .. "/*.h", prefix .. "/*.c", prefix .. "/*.ico", prefix .. "/*.rc"
 end
 
 project "re3"
