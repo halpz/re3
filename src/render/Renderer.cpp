@@ -362,21 +362,19 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 					ent->bNoBrightHeadLights = false;
 				}
 				return VIS_OFFSCREEN;
-			}else{
-				// All sorts of Clumps
-				if(ent->m_rwObject == nil || !ent->bIsVisible)
-					return VIS_INVISIBLE;
-				if(!ent->GetIsOnScreen())
-					return VIS_OFFSCREEN;
-				if(ent->bDrawLast){
-					dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
-					CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
-					ent->bDistanceFade = false;
-					return VIS_INVISIBLE;
-				}else
-					return VIS_VISIBLE;
 			}
-			return VIS_INVISIBLE;
+			// All sorts of Clumps
+			if(ent->m_rwObject == nil || !ent->bIsVisible)
+				return VIS_INVISIBLE;
+			if(!ent->GetIsOnScreen())
+				return VIS_OFFSCREEN;
+			if(ent->bDrawLast){
+				dist = (ent->GetPosition() - ms_vecCameraPosition).Magnitude();
+				CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
+				ent->bDistanceFade = false;
+				return VIS_INVISIBLE;
+			}
+			return VIS_VISIBLE;
 		}
 		if(ent->IsObject() &&
 		   ((CObject*)ent)->ObjectCreatedBy == TEMP_OBJECT){
@@ -1196,8 +1194,10 @@ CRenderer::IsVehicleCullZoneVisible(CEntity *ent)
 void
 CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)
 {
-	if(ent->bRenderScorched)
+	if(ent->bRenderScorched){
 		WorldReplaceScorchedLightsWithNormal(Scene.world);
+		return;
+	}
 	CPointLights::RemoveLightsAffectingObject();
 	if(reset)
 		ReSetAmbientAndDirectionalColours();

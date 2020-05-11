@@ -262,7 +262,7 @@ CStreaming::Init(void)
 		}
 	}
 #else
-	CStreaming::Init();
+	CStreaming::Init2();
 #endif
 }
 
