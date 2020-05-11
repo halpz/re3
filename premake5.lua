@@ -170,7 +170,9 @@ project "re3"
 
 	libdirs { "milessdk/lib" }
 	
-	setpaths("$(GTA_III_RE_DIR)/", "%(cfg.buildtarget.name)", "")
+	if(os.getenv("GTA_III_RE_DIR")) then
+		setpaths("$(GTA_III_RE_DIR)/", "%(cfg.buildtarget.name)", "")
+	end
 	
 	filter "platforms:win*"
 		files { addSrcFiles("src/skel/win") }
