@@ -257,7 +257,11 @@ extern RwBool
 RsInputDeviceAttach(RsInputDeviceType inputDevice,
 					RsInputEventHandler inputEventHandler);
 
-extern RwUInt32                 
+#ifdef _WIN32
+extern RwUInt32    
+#else
+extern double
+#endif             
 RsTimer(void);
 
 extern void                     

@@ -1,10 +1,38 @@
 #include <time.h>
 
-// This is the common include for platform/renderer specific skeletons(glfw, win etc.) and cross platform things (like Windows directories wrapper, platform specific global arrays etc.) 
+// This is the common include for platform/renderer specific skeletons(glfw.cpp, win.cpp etc.) and using cross platform things (like Windows directories wrapper, platform specific global arrays etc.) 
+// Functions that's different on glfw and win but have same signature, should be located on platform.h.
 
-// This only has <windef.h> as Win header.
 #ifdef _WIN32
+// This only has <windef.h> as Win header.
 #include "win.h"
+extern DWORD _dwOperatingSystemVersion;
+#else
+char *strupr(char *str);
+char *strlwr(char *str);
+enum {
+	OS_WIN98,
+	OS_WIN2000,
+	OS_WINNT,
+	OS_WINXP,
+};
+
+enum {
+	LANG_OTHER,
+	LANG_GERMAN,
+	LANG_FRENCH,
+	LANG_ENGLISH,
+	LANG_ITALIAN,
+	LANG_SPANISH,
+};
+
+enum {
+	SUBLANG_OTHER,
+	SUBLANG_ENGLISH_AUS
+};
+
+extern long _dwOperatingSystemVersion;
+int casepath(char const *path, char *r);
 #endif
 
 #ifdef RW_GL3
@@ -14,8 +42,8 @@ typedef struct
     RwBool		fullScreen;
     RwV2d		lastMousePos;
     double      mouseWheel; // glfw doesn't cache it
-    int8        joy1id;
-    int8        joy2id;
+    RwInt8        joy1id;
+    RwInt8        joy2id;
 }
 psGlobalType;
 
@@ -44,17 +72,6 @@ enum eGameState
 extern RwUInt32 gGameState;
 
 RwBool IsForegroundApp();
-void InitialiseLanguage();
-RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode);
-
-RwChar** _psGetVideoModeList();
-RwInt32 _psGetNumVideModes();
-
-void _psSelectScreenVM(RwInt32 videoMode);
-void HandleExit();
-void _InputTranslateShiftKeyUpDown(RsKeyCodes* rs);
-
-// Mostly wrappers around Windows functions
 
 #ifndef MAX_PATH
     #if !defined _WIN32 || defined __MINGW32__
@@ -64,39 +81,39 @@ void _InputTranslateShiftKeyUpDown(RsKeyCodes* rs);
     #endif
 #endif
 
-// TODO: Remove USEALTERNATIVEWINFUNCS and don't use it anywhere when re3 becomes fully cross-platform, this is for testing
 // Codes compatible with Windows and Linux
-#if defined USEALTERNATIVEWINFUNCS || !defined _WIN32 || defined __MINGW32__
+#ifndef _WIN32
 #define DeleteFile unlink
 
 // Needed for save games
 struct SYSTEMTIME {
-    uint16 wYear;
-    uint16 wMonth;
-    uint16 wDayOfWeek;
-    uint16 wDay;
-    uint16 wHour;
-    uint16 wMinute;
-    uint16 wSecond;
-    uint16 wMilliseconds;
+    RwUInt16 wYear;
+    RwUInt16 wMonth;
+    RwUInt16 wDayOfWeek;
+    RwUInt16 wDay;
+    RwUInt16 wHour;
+    RwUInt16 wMinute;
+    RwUInt16 wSecond;
+    RwUInt16 wMilliseconds;
 };
 
 void GetLocalTime_CP(SYSTEMTIME* out);
 #define GetLocalTime GetLocalTime_CP
-#define OutputDebugString(s) re3_debug("[DBG-2]: " s "\n")
+#define OutputDebugString(s) re3_debug("[DBG-2]: %s\n",s)
 #endif
 
-// Only runs on GNU/POSIX/etc.
-#if !defined _WIN32 || defined __MINGW32__
+// Compatible with Linux/POSIX and MinGW on Windows
+#ifndef _WIN32
 #include <iostream>
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <langinfo.h>
+#include <unistd.h>
 
-typedef DIR* HANDLE;
+typedef void* HANDLE;
 #define INVALID_HANDLE_VALUE NULL
-#define FindClose closedir
+#define FindClose(h) closedir((DIR*)h)
 #define LOCALE_USER_DEFAULT 0
 #define DATE_SHORTDATE 0
 
@@ -107,7 +124,7 @@ struct WIN32_FIND_DATA {
     time_t ftLastWriteTime;
 };
 
-HANDLE FindFirstFile(char*, WIN32_FIND_DATA*);
+HANDLE FindFirstFile(const char*, WIN32_FIND_DATA*);
 bool FindNextFile(HANDLE, WIN32_FIND_DATA*);
 void FileTimeToSystemTime(time_t*, SYSTEMTIME*);
 void GetDateFormat(int, int, SYSTEMTIME*, int, char*, int);

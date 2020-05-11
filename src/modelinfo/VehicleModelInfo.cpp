@@ -262,7 +262,7 @@ CVehicleModelInfo::HideDamagedAtomicCB(RpAtomic *atomic, void *data)
 RpAtomic*
 CVehicleModelInfo::HideAllComponentsAtomicCB(RpAtomic *atomic, void *data)
 {
-	if(CVisibilityPlugins::GetAtomicId(atomic) & (int)data)
+	if(CVisibilityPlugins::GetAtomicId(atomic) & (uintptr)data)
 		RpAtomicSetFlags(atomic, 0);
 	else
 		RpAtomicSetFlags(atomic, rpATOMICRENDER);
@@ -415,7 +415,7 @@ CVehicleModelInfo::SetAtomicFlagCB(RwObject *object, void *data)
 {
 	RpAtomic *atomic = (RpAtomic*)object;
 	assert(RwObjectGetType(object) == rpATOMIC);
-	CVisibilityPlugins::SetAtomicFlag(atomic, (int)data);
+	CVisibilityPlugins::SetAtomicFlag(atomic, (uintptr)data);
 	return object;
 }
 
@@ -424,7 +424,7 @@ CVehicleModelInfo::ClearAtomicFlagCB(RwObject *object, void *data)
 {
 	RpAtomic *atomic = (RpAtomic*)object;
 	assert(RwObjectGetType(object) == rpATOMIC);
-	CVisibilityPlugins::ClearAtomicFlag(atomic, (int)data);
+	CVisibilityPlugins::ClearAtomicFlag(atomic, (uintptr)data);
 	return object;
 }
 

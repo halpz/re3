@@ -114,7 +114,7 @@ CVisibilityPlugins::SetRenderWareCamera(RwCamera *camera)
 RpMaterial*
 SetAlphaCB(RpMaterial *material, void *data)
 {
-	((RwRGBA*)RpMaterialGetColor(material))->alpha = (uint8)(uint32)data;
+	((RwRGBA*)RpMaterialGetColor(material))->alpha = (uint8)(uintptr)data;
 	return material;
 }
 
@@ -837,15 +837,15 @@ void
 CVisibilityPlugins::SetClumpModelInfo(RpClump *clump, CClumpModelInfo *modelInfo)
 {
 	CVehicleModelInfo *vmi;
-	SetFrameHierarchyId(RpClumpGetFrame(clump), (int32)modelInfo);
+	SetFrameHierarchyId(RpClumpGetFrame(clump), (uintptr)modelInfo);
 
 	// Unused
 	switch (modelInfo->GetModelType()) {
 	// ignore MLO
 	case MITYPE_VEHICLE:
 		vmi = (CVehicleModelInfo*)modelInfo;
-		if(vmi->m_vehicleType == VEHICLE_TYPE_TRAIN || 
-		   vmi->m_vehicleType == VEHICLE_TYPE_HELI || 
+		if(vmi->m_vehicleType == VEHICLE_TYPE_TRAIN ||
+		   vmi->m_vehicleType == VEHICLE_TYPE_HELI ||
 		   vmi->m_vehicleType == VEHICLE_TYPE_PLANE)
 			CLUMPEXT(clump)->visibilityCB = VehicleVisibilityCB_BigVehicle;
 		else

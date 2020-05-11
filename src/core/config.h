@@ -194,19 +194,22 @@ enum Config {
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
 #define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
 #define MORE_LANGUAGES		// Add more translations to the game
-#define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch) 
+#define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch)
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 //#define USE_TEXTURE_POOL
-//#define AUDIO_OAL
+#ifdef _WIN32
 #define AUDIO_MSS
+#else
+#define AUDIO_OAL
+#endif
 
 // Particle
 //#define PC_PARTICLE
 //#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
 
 // Pad
-#ifndef RW_GL3
+#if !defined(RW_GL3) && defined(_WIN32)
 #define XINPUT
 #endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
@@ -224,7 +227,7 @@ enum Config {
 #define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
 #define TRIANGLE_BACK_BUTTON
 // #define CIRCLE_BACK_BUTTON
-#define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better. 
+#define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better.
 #define BETA_SLIDING_TEXT
 
 // Script

@@ -1,5 +1,6 @@
 #define WITHWINDOWS
 #include "common.h"
+#include "crossplatform.h"
 
 #include "DMAudio.h"
 #include "Record.h"
@@ -16,15 +17,19 @@ float CTimer::ms_fTimeStepNonClipped;
 bool  CTimer::m_UserPause;
 bool  CTimer::m_CodePause;
 
-uint32 oldPcTimer;
-
-uint32 suspendPcTimer;
-
 uint32 _nCyclesPerMS = 1;
 
+#ifdef _WIN32
 LARGE_INTEGER _oldPerfCounter;
-
 LARGE_INTEGER perfSuspendCounter;
+#define RsTimerType uint32
+#else
+#define RsTimerType double
+#endif
+
+RsTimerType oldPcTimer;
+
+RsTimerType suspendPcTimer;
 
 uint32 suspendDepth;
 
@@ -45,6 +50,7 @@ void CTimer::Initialise(void)
 	m_snPreviousTimeInMilliseconds = 0;
 	m_snTimeInMilliseconds = 1;
 	
+#ifdef _WIN32
 	LARGE_INTEGER perfFreq;
 	if ( QueryPerformanceFrequency(&perfFreq) )
 	{
@@ -53,6 +59,7 @@ void CTimer::Initialise(void)
 		QueryPerformanceCounter(&_oldPerfCounter);
 	}
 	else
+#endif
 	{
 		OutputDebugString("Performance counter not available, using millesecond timer\n");
 		_nCyclesPerMS = 0;
@@ -77,6 +84,7 @@ void CTimer::Update(void)
 {
 	m_snPreviousTimeInMilliseconds = m_snTimeInMilliseconds;
 	
+#ifdef _WIN32
 	if ( (double)_nCyclesPerMS != 0.0 )
 	{
 		LARGE_INTEGER pc;
@@ -106,10 +114,11 @@ void CTimer::Update(void)
 		}
 	}
 	else
+#endif
 	{
-		uint32 timer = RsTimer();
+		RsTimerType timer = RsTimer();
 		
-		uint32 updInMs = timer - oldPcTimer;
+		RsTimerType updInMs = timer - oldPcTimer;
 		
 		// We need that real frame time to fix transparent menu bug.
 #ifndef FIX_BUGS
@@ -158,9 +167,11 @@ void CTimer::Suspend(void)
 	if ( ++suspendDepth > 1 )
 		return;
 	
+#ifdef _WIN32
 	if ( (double)_nCyclesPerMS != 0.0 )
 		QueryPerformanceCounter(&perfSuspendCounter);
 	else
+#endif
 		suspendPcTimer = RsTimer();
 }
 
@@ -169,6 +180,7 @@ void CTimer::Resume(void)
 	if ( --suspendDepth != 0 )
 		return;
 
+#ifdef _WIN32
 	if ( (double)_nCyclesPerMS != 0.0 )
 	{
 		LARGE_INTEGER pc;
@@ -177,19 +189,23 @@ void CTimer::Resume(void)
 		_oldPerfCounter.LowPart += pc.LowPart - perfSuspendCounter.LowPart;
 	}
 	else
+#endif
 		oldPcTimer += RsTimer() - suspendPcTimer;
 }
 
 uint32 CTimer::GetCyclesPerMillisecond(void)
 {
+#ifdef _WIN32
 	if (_nCyclesPerMS != 0)
 		return _nCyclesPerMS;
 	else 
+#endif
 		return 1;
 }
 
 uint32 CTimer::GetCurrentTimeInCycles(void)
 {
+#ifdef _WIN32
 	if ( _nCyclesPerMS != 0 )
 	{
 		LARGE_INTEGER pc;
@@ -197,6 +213,7 @@ uint32 CTimer::GetCurrentTimeInCycles(void)
 		return (pc.LowPart - _oldPerfCounter.LowPart); // & 0x7FFFFFFF; pointless
 	}
 	else
+#endif
 		return RsTimer() - oldPcTimer;
 }
 

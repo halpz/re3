@@ -1465,7 +1465,7 @@ CStreaming::GetCdImageOffset(int32 lastPosn)
 	int dist, mindist;
 
 	img = -1;
-	mindist = INT_MAX;
+	mindist = INT32_MAX;
 	offset = ms_imageOffsets[ms_lastImageRead];
 	if(lastPosn <= offset || lastPosn > offset + ms_imageSize){
 		// last read position is not in last image
@@ -1513,8 +1513,8 @@ CStreaming::GetNextFileOnCd(int32 lastPosn, bool priority)
 
 	streamIdFirst = -1;
 	streamIdNext = -1;
-	posnFirst = UINT_MAX;
-	posnNext = UINT_MAX;
+	posnFirst = UINT32_MAX;
+	posnNext = UINT32_MAX;
 
 	for(si = ms_startRequestedList.m_next; si != &ms_endRequestedList; si = next){
 		next = si->m_next;
@@ -1834,7 +1834,7 @@ CStreaming::LoadAllRequestedModels(bool priority)
 				status = CdStreamRead(0, ms_pStreamingBuffer[0], imgOffset+posn, size);
 			while(CdStreamSync(0) || status == STREAM_NONE);
 			ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_READING;
-
+			
 			MakeSpaceFor(size * CDSTREAM_SECTOR_SIZE);
 			ConvertBufferToObject(ms_pStreamingBuffer[0], streamId);
 			if(ms_aInfoForModel[streamId].m_loadState == STREAMSTATE_STARTED)

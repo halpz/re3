@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #define WITHWINDOWS
 #include "common.h"
 
@@ -16,9 +17,8 @@ struct CdReadInfo
 	char field_C;
 	bool bLocked;
 	bool bInUse;
-	char _pad0;
 	int32 nStatus;
-	HANDLE hSemaphore;
+	HANDLE hSemaphore; // used for CdStreamSync
 	HANDLE hFile;
 	OVERLAPPED Overlapped;
 };
@@ -32,7 +32,7 @@ int32 gNumChannels;
 HANDLE gImgFiles[MAX_CDIMAGES];
 
 HANDLE _gCdStreamThread;
-HANDLE gCdStreamSema;
+HANDLE gCdStreamSema; // released when we have new thing to read(so channel is set)
 DWORD _gCdStreamThreadId;
 
 CdReadInfo *gpReadInfo;
@@ -296,6 +296,7 @@ CdStreamGetLastPosn(void)
 	return lastPosnRead;
 }
 
+// wait for channel to finish reading
 int32
 CdStreamSync(int32 channel)
 {
@@ -324,6 +325,7 @@ CdStreamSync(int32 channel)
 	if ( _gbCdStreamOverlapped && pChannel->hFile )
 	{
 		ASSERT(pChannel->hFile != nil );
+		// Beware: This is blocking call (because of last parameter)
 		if ( GetOverlappedResult(pChannel->hFile, &pChannel->Overlapped, &NumberOfBytesTransferred, TRUE) )
 			return STREAM_NONE;
 		else
@@ -406,6 +408,7 @@ WINAPI CdStreamThread(LPVOID lpThreadParameter)
 				{
 					pChannel->nStatus = STREAM_NONE;
 				}
+				// Beware: This is blocking call (because of last parameter)
 				else if ( GetLastError() == ERROR_IO_PENDING
 						&& GetOverlappedResult(pChannel->hFile, &pChannel->Overlapped, &NumberOfBytesTransferred, TRUE) )
 				{
@@ -508,3 +511,4 @@ CdStreamGetNumImages(void)
 {	
 	return gNumImages;
 }
+#endif

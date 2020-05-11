@@ -1,6 +1,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <fcntl.h>
+#ifdef _WIN32
 #include <direct.h>
+#endif
 #include "common.h"
 
 #include "FileMgr.h"
@@ -24,6 +26,31 @@ struct myFILE
 #define NUMFILES 20
 static myFILE myfiles[NUMFILES];
 
+
+#if !defined(_WIN32)
+#include <dirent.h>
+#include <errno.h>
+#include <unistd.h>
+#include "crossplatform.h"
+#define _getcwd getcwd
+
+// Case-insensitivity on linux (from https://github.com/OneSadCookie/fcaseopen)
+void mychdir(char const *path)
+{
+    char *r = (char*)alloca(strlen(path) + 2);
+    if (casepath(path, r))
+    {
+        chdir(r);
+    }
+    else
+    {
+        errno = ENOENT;
+    }
+}
+#else
+#define mychdir chdir
+#endif
+
 /* Force file to open as binary but remember if it was text mode */
 static int
 myfopen(const char *filename, const char *mode)
@@ -45,7 +72,31 @@ found:
 			mode++;
 	*p++ = 'b';
 	*p = '\0';
-	myfiles[fd].file = fopen(filename, realmode);
+	
+#if !defined(_WIN32)
+	char *newPath = strdup(filename);
+	// Normally casepath() fixes backslashes, but if the mode is sth other than r/rb it will create new file with backslashes on linux, so fix backslashes here
+	char *nextBs;
+	while(nextBs = strstr(newPath, "\\")){
+		*nextBs = '/';
+	}
+#else
+	const char *newPath = filename;
+#endif
+
+	myfiles[fd].file = fopen(newPath, realmode);
+// Be case-insensitive on linux (from https://github.com/OneSadCookie/fcaseopen/)
+#if !defined(_WIN32)
+	if (!myfiles[fd].file) {
+		char *r = (char*)alloca(strlen(newPath) + 2);
+		if (casepath(newPath, r))
+		{
+		    myfiles[fd].file = fopen(r, realmode);
+		}
+	}
+
+	free(newPath);
+#endif
 	if(myfiles[fd].file == nil)
 		return 0;
 	return fd;
@@ -191,7 +242,7 @@ CFileMgr::ChangeDir(const char *dir)
 		if(dir[strlen(dir)-1] != '\\')
 			strcat(ms_dirName, "\\");
 	}
-	chdir(ms_dirName);
+	mychdir(ms_dirName);
 }
 
 void
@@ -204,14 +255,14 @@ CFileMgr::SetDir(const char *dir)
 		if(dir[strlen(dir)-1] != '\\')
 			strcat(ms_dirName, "\\");
 	}
-	chdir(ms_dirName);
+	mychdir(ms_dirName);
 }
 
 void
 CFileMgr::SetDirMyDocuments(void)
 {
 	SetDir("");	// better start at the root if user directory is relative
-	chdir(_psGetUserFilesFolder());
+	mychdir(_psGetUserFilesFolder());
 }
 
 int

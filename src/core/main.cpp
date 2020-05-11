@@ -1773,6 +1773,8 @@ void GameInit()
 	}
 }
 
+// Not used anyway. PS2 main() port
+#ifdef _WIN32
 int
 main(int argc, char *argv[])
 {
@@ -1844,3 +1846,4 @@ main(int argc, char *argv[])
 	
 	return 0;
 }
+#endif

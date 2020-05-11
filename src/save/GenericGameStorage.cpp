@@ -1,5 +1,5 @@
+#define WITHWINDOWS
 #include "common.h"
-#define USEALTERNATIVEWINFUNCS
 #include "crossplatform.h"
 #include "main.h"
 

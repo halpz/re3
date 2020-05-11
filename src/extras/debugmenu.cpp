@@ -9,10 +9,11 @@
 #include "debugmenu.h"
 #include <new>
 
+#ifdef _WIN32
 #define snprintf _snprintf
 
 #define strdup _strdup
-
+#endif
 
 
 // Font stuff

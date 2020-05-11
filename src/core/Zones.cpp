@@ -703,9 +703,9 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 	for(i = 0; i < ARRAY_SIZE(ZoneArray); i++){
 		ZoneArray[i] = ReadSaveBuf<CZone>(buffer);
 
-		ZoneArray[i].child = GetPointerForZoneIndex((int32)ZoneArray[i].child);
-		ZoneArray[i].parent = GetPointerForZoneIndex((int32)ZoneArray[i].parent);
-		ZoneArray[i].next = GetPointerForZoneIndex((int32)ZoneArray[i].next);
+		ZoneArray[i].child = GetPointerForZoneIndex((uintptr)ZoneArray[i].child);
+		ZoneArray[i].parent = GetPointerForZoneIndex((uintptr)ZoneArray[i].parent);
+		ZoneArray[i].next = GetPointerForZoneIndex((uintptr)ZoneArray[i].next);
 	}
 
 	for(i = 0; i < ARRAY_SIZE(ZoneInfoArray); i++)
@@ -722,9 +722,9 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 		meant for a different array, but the game doesn't brake
 		if save data stored is -1.
 		*/
-		MapZoneArray[i].child = GetPointerForZoneIndex((int32)MapZoneArray[i].child);
-		MapZoneArray[i].parent = GetPointerForZoneIndex((int32)MapZoneArray[i].parent);
-		MapZoneArray[i].next = GetPointerForZoneIndex((int32)MapZoneArray[i].next);
+		MapZoneArray[i].child = GetPointerForZoneIndex((uintptr)MapZoneArray[i].child);
+		MapZoneArray[i].parent = GetPointerForZoneIndex((uintptr)MapZoneArray[i].parent);
+		MapZoneArray[i].next = GetPointerForZoneIndex((uintptr)MapZoneArray[i].next);
 		assert(MapZoneArray[i].child == nil);
 		assert(MapZoneArray[i].parent == nil);
 		assert(MapZoneArray[i].next == nil);
