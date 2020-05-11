@@ -21,7 +21,9 @@ public:
 	};
 
 	static CLinkList<AlphaObjectInfo> m_alphaList;
+	static CLinkList<AlphaObjectInfo> m_alphaBoatAtomicList;
 	static CLinkList<AlphaObjectInfo> m_alphaEntityList;
+	static CLinkList<AlphaObjectInfo> m_alphaUnderwaterEntityList;
 	static RwCamera *ms_pCamera;
 	static RwV3d *ms_pCameraPosn;
 	static float ms_cullCompsDist;
@@ -30,7 +32,6 @@ public:
 	static float ms_vehicleFadeDist;
 	static float ms_bigVehicleLod0Dist;
 	static float ms_bigVehicleLod1Dist;
-	static float ms_pedLod0Dist;
 	static float ms_pedLod1Dist;
 	static float ms_pedFadeDist;
 
@@ -40,6 +41,7 @@ public:
 	static bool InsertEntityIntoSortedList(CEntity *e, float dist);
 	static void InitAlphaAtomicList(void);
 	static bool InsertAtomicIntoSortedList(RpAtomic *a, float dist);
+	static bool InsertAtomicIntoBoatSortedList(RpAtomic *a, float dist);
 
 	static void SetRenderWareCamera(RwCamera *camera);
 	static void SetupVehicleVariables(RpClump *vehicle);
@@ -55,6 +57,7 @@ public:
 	static RpAtomic *RenderVehicleHiDetailCB_BigVehicle(RpAtomic *atomic);
 	static RpAtomic *RenderVehicleHiDetailAlphaCB_BigVehicle(RpAtomic *atomic);
 	static RpAtomic *RenderVehicleHiDetailCB_Boat(RpAtomic *atomic);
+	static RpAtomic *RenderVehicleHiDetailAlphaCB_Boat(RpAtomic *atomic);
 	static RpAtomic *RenderVehicleLowDetailCB_BigVehicle(RpAtomic *atomic);
 	static RpAtomic *RenderVehicleLowDetailAlphaCB_BigVehicle(RpAtomic *atomic);
 	static RpAtomic *RenderVehicleReallyLowDetailCB(RpAtomic *atomic);
@@ -65,11 +68,12 @@ public:
 	static RpAtomic *RenderVehicleTailRotorAlphaCB(RpAtomic *atomic);
 
 	static RpAtomic *RenderPlayerCB(RpAtomic *atomic);
-	static RpAtomic *RenderPedLowDetailCB(RpAtomic *atomic);
-	static RpAtomic *RenderPedHiDetailCB(RpAtomic *atomic);
 	static RpAtomic *RenderPedCB(RpAtomic *atomic);	// for skinned models with only one clump
 
+	static void RenderAtomicList(CLinkList<AlphaObjectInfo> &list);
 	static void RenderAlphaAtomics(void);
+	static void RenderBoatAlphaAtomics(void);
+	static void RenderFadingEntities(CLinkList<AlphaObjectInfo> &list);
 	static void RenderFadingEntities(void);
 	static void RenderFadingUnderwaterEntities(void);
 
