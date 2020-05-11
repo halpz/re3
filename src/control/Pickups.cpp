@@ -485,7 +485,7 @@ CPickups::RemovePickUp(int32 pickupIndex)
 }
 
 int32
-CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quantity)
+CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quantity, uint32 rate, bool highPriority, wchar* pText)
 {
 	bool bFreeFound = false;
 	int32 slot = 0;

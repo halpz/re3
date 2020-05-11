@@ -22,9 +22,6 @@ class CCarGenerator
 	int32 m_nVehicleHandle;
 	uint16 m_nUsesRemaining;
 	bool m_bIsBlocking;
-	CVector m_vecInf;
-	CVector m_vecSup;
-	float m_fSize;
 public:
 	void SwitchOff();
 	void SwitchOn();
@@ -32,7 +29,7 @@ public:
 	void DoInternalProcessing();
 	void Process();
 	void Setup(float x, float y, float z, float angle, int32 mi, int16 color1, int16 color2, uint8 force, uint8 alarm, uint8 lock, uint16 min_delay, uint16 max_delay);
-	bool CheckForBlockage();
+	bool CheckForBlockage(int32 mi);
 	bool CheckIfWithinRangeOfAnyPlayer();
 	void SetUsesRemaining(uint16 uses) { m_nUsesRemaining = uses; }
 };
