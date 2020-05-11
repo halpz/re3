@@ -2628,14 +2628,10 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 	float changeMultiplier = 0.002f * CTimer::GetTimeStep();
 	if (distanceToTarget < 5.0f)
 		changeMultiplier /= 5.0f;
-	if (vecSpeedChangeLength < changeMultiplier) {
-		pHeli->m_vecMoveSpeed.x = vecAdvanceThisFrame.x;
-		pHeli->m_vecMoveSpeed.y = vecAdvanceThisFrame.y;
-	}
-	else {
-		pHeli->m_vecMoveSpeed.x += vecSpeedChange.x * changeMultiplier;
-		pHeli->m_vecMoveSpeed.y += vecSpeedChange.y * changeMultiplier;
-	}
+	if (vecSpeedChangeLength < changeMultiplier)
+		pHeli->AddToMoveSpeed(vecAdvanceThisFrame);
+	else
+		pHeli->AddToMoveSpeed(vecSpeedChange * changeMultiplier);
 	pHeli->SetPosition(pHeli->GetPosition() + CVector(CTimer::GetTimeStep() * pHeli->m_vecMoveSpeed.x, CTimer::GetTimeStep() * pHeli->m_vecMoveSpeed.y, 0.0f));
 	assert(0);
 	// This is not finished yet. Heli fields in CAutomobile required

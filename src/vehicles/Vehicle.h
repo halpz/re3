@@ -187,6 +187,8 @@ public:
 	uint8 bCreatedAsPoliceVehicle : 1;// True if this guy was created as a police vehicle (enforcer, policecar, miamivice car etc)
 	uint8 bParking : 1;
 
+	uint8 m_bombType : 3;
+
 	int8 m_numPedsUseItAsCover;
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
 	int8 m_nPacManPickupsCarried;
@@ -195,6 +197,7 @@ public:
 	float m_fHealth;           // 1000.0f = full health. 250.0f = fire. 0 -> explode
 	uint8 m_nCurrentGear;
 	float m_fChangeGearTime;
+	CEntity* m_pBombRigger;
 	uint32 m_nGunFiringTime;    // last time when gun on vehicle was fired (used on boats)
 	uint32 m_nTimeOfDeath;
 	uint16 m_nTimeBlocked;
