@@ -35,7 +35,7 @@ public:
 	int8 m_nVolumeChange;
 };
 
-static_assert(sizeof(tSound) == 92, "tSound: error");
+VALIDATE_SIZE(tSound, 92);
 
 class CPhysical;
 class CAutomobile;
@@ -52,7 +52,7 @@ public:
 	uint8 m_AudioEvents;
 };
 
-static_assert(sizeof(tAudioEntity) == 40, "tAudioEntity: error");
+VALIDATE_SIZE(tAudioEntity, 40);
 
 class tPedComment
 {
@@ -65,7 +65,7 @@ public:
 	int8 m_nProcess;
 };
 
-static_assert(sizeof(tPedComment) == 28, "tPedComment: error");
+VALIDATE_SIZE(tPedComment, 28);
 
 class cPedComments
 {
@@ -80,7 +80,7 @@ public:
 	void Process();
 };
 
-static_assert(sizeof(cPedComments) == 1164, "cPedComments: error");
+VALIDATE_SIZE(cPedComments, 1164);
 
 class CEntity;
 
@@ -96,8 +96,7 @@ public:
 	int32 m_nMissionAudioCounter;
 	bool m_bIsPlayed;
 };
-
-static_assert(sizeof(cMissionAudio) == 32, "cMissionAudio: error");
+VALIDATE_SIZE(cMissionAudio, 32);
 
 // name made up
 class cAudioScriptObjectManager
@@ -135,7 +134,7 @@ public:
 	float m_fVelocityChange;
 };
 
-static_assert(sizeof(cVehicleParams) == 0x18, "cVehicleParams: error");
+VALIDATE_SIZE(cVehicleParams, 0x18);
 
 enum {
 	/*
@@ -472,6 +471,8 @@ public:
 	void DebugShit();
 };
 
-//dstatic_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
+#ifdef AUDIO_MSS
+static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
+#endif
 
 extern cAudioManager AudioManager;

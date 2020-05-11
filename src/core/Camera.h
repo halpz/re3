@@ -260,9 +260,8 @@ public:
 	void Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrientation, float, float);
 	void Process_FollowCar_SA(const CVector &CameraTarget, float TargetOrientation, float, float);
 };
-static_assert(sizeof(CCam) == 0x1A4, "CCam: wrong size");
-static_assert(offsetof(CCam, Alpha) == 0xA8, "CCam: error");
-static_assert(offsetof(CCam, Front) == 0x140, "CCam: error");
+
+VALIDATE_SIZE(CCam, 0x1A4);
 
 class CCamPathSplines
 {
@@ -637,19 +636,8 @@ uint32    unknown;	// some counter having to do with music
 	bool IsSphereVisible(const CVector &center, float radius);
 	bool IsBoxVisible(RwV3d *box, const CMatrix *mat);
 };
-static_assert(offsetof(CCamera, DistanceToWater) == 0xe4, "CCamera: error");
-static_assert(offsetof(CCamera, m_WideScreenOn) == 0x70, "CCamera: error");
-static_assert(offsetof(CCamera, WorldViewerBeingUsed) == 0x75, "CCamera: error");
-static_assert(offsetof(CCamera, m_uiNumberOfTrainCamNodes) == 0x84, "CCamera: error");
-static_assert(offsetof(CCamera, m_uiTransitionState) == 0x89, "CCamera: error");
-static_assert(offsetof(CCamera, m_uiTimeTransitionStart) == 0x94, "CCamera: error");
-static_assert(offsetof(CCamera, m_BlurBlue) == 0x9C, "CCamera: error");
-static_assert(offsetof(CCamera, Cams) == 0x1A4, "CCamera: error");
-static_assert(offsetof(CCamera, pToGarageWeAreIn) == 0x690, "CCamera: error");
-static_assert(offsetof(CCamera, m_PreviousCameraPosition) == 0x6B0, "CCamera: error");
-static_assert(offsetof(CCamera, m_vecCutSceneOffset) == 0x6F8, "CCamera: error");
-static_assert(offsetof(CCamera, m_arrPathArray) == 0x7a8, "CCamera: error");
-static_assert(sizeof(CCamera) == 0xE9D8, "CCamera: wrong size");
+
+VALIDATE_SIZE(CCamera, 0xE9D8);
 
 extern CCamera TheCamera;
 

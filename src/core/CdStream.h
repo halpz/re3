@@ -27,7 +27,6 @@ struct Queue
 
 VALIDATE_SIZE(Queue, 0x10);
 
-
 void CdStreamInitThread(void);
 void CdStreamInit(int32 numChannels);
 uint32 GetGTA3ImgSize(void);

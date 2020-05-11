@@ -17,7 +17,7 @@ enum ModelInfoType : uint8
 	MITYPE_XTRACOMPS,	// unused but still in enum
 	MITYPE_HAND	// xbox and mobile
 };
-static_assert(sizeof(ModelInfoType) == 1, "ModeInfoType: error");
+VALIDATE_SIZE(ModelInfoType, 1);
 
 class C2dEffect;
 

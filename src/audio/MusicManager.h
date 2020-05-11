@@ -84,6 +84,6 @@ public:
 	bool ChangeRadioChannel();
 };
 
-static_assert(sizeof(cMusicManager) == 0x95C, "cMusicManager: error");
+VALIDATE_SIZE(cMusicManager, 0x95C);
 
 extern cMusicManager MusicManager;

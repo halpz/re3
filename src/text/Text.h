@@ -12,8 +12,9 @@ struct CKeyEntry
 	wchar *value;
 	char key[8];
 };
+
 // If this fails, CKeyArray::Load will have to be fixed
-static_assert(sizeof(CKeyEntry) == 12, "CKeyEntry: error");
+VALIDATE_SIZE(CKeyEntry, 12);
 
 class CKeyArray
 {

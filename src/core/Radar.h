@@ -71,7 +71,7 @@ struct sRadarTrace
 	uint16 m_eBlipDisplay; // eBlipDisplay
 	uint16 m_eRadarSprite; // eRadarSprite
 };
-static_assert(sizeof(sRadarTrace) == 0x30, "sRadarTrace: error");
+VALIDATE_SIZE(sRadarTrace, 0x30);
 
 // Values for screen space
 #define RADAR_LEFT (40.0f)

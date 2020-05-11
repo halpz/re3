@@ -38,7 +38,8 @@ struct CRegisteredCorona
 
 	void Update(void);
 };
-static_assert(sizeof(CRegisteredCorona) == 0x80, "CRegisteredCorona: error");
+
+VALIDATE_SIZE(CRegisteredCorona, 0x80);
 
 class CCoronas
 {

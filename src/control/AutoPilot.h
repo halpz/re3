@@ -133,3 +133,5 @@ public:
 	float GetCruiseSpeed(void) { return m_nCruiseSpeed * m_fCruiseSpeedMultiplier; }
 
 };
+
+VALIDATE_SIZE(CAutoPilot, 0x70);

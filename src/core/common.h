@@ -213,6 +213,7 @@ void mysrand(unsigned int seed);
 void re3_debug(const char *format, ...);
 void re3_trace(const char *filename, unsigned int lineno, const char *func, const char *format, ...);
 void re3_assert(const char *expr, const char *filename, unsigned int lineno, const char *func);
+void re3_usererror(const char *format, ...);
 
 #define DEBUGBREAK() __debugbreak();
 
@@ -220,6 +221,7 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 #define DEV(f, ...)   re3_debug("[DEV]: " f, ## __VA_ARGS__)
 #define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, ## __VA_ARGS__)
 #define Error(f, ...) re3_debug("[ERROR]: " f, ## __VA_ARGS__)
+#define USERERROR(f, ...) re3_usererror(f, ## __VA_ARGS__)
 
 #define assert(_Expression) (void)( (!!(_Expression)) || (re3_assert(#_Expression, __FILE__, __LINE__, __FUNCTION__), 0) )
 #define ASSERT assert
@@ -227,7 +229,11 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 #define _TODO(x)
 #define _TODOCONST(x) (x)
 
+#ifdef CHECK_STRUCT_SIZES 
 #define VALIDATE_SIZE(struc, size) static_assert(sizeof(struc) == size, "Invalid structure size of " #struc)
+#else
+#define VALIDATE_SIZE(struc, size)
+#endif
 #define VALIDATE_OFFSET(struc, member, offset) static_assert(offsetof(struc, member) == offset, "The offset of " #member " in " #struc " is not " #offset "...")
 
 #define PERCENT(x, p)                    ((float(x) * (float(p) / 100.0f)))

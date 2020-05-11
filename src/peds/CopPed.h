@@ -38,5 +38,5 @@ public:
 };
 
 #ifndef PED_SKIN
-static_assert(sizeof(CCopPed) == 0x558, "CCopPed: error");
+VALIDATE_SIZE(CCopPed, 0x558);
 #endif
