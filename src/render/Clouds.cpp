@@ -93,7 +93,7 @@ CClouds::Render(void)
 	int minute = CClock::GetHours()*60 + CClock::GetMinutes();
 	RwV3d campos = *(RwV3d*)&TheCamera.GetPosition();
 
-	float coverage = CWeather::CloudCoverage <= CWeather::Foggyness ? CWeather::Foggyness : CWeather::CloudCoverage;
+	float coverage = Max(CWeather::Foggyness, CWeather::Foggyness);
 
 	// Moon
 	int moonfadeout = Abs(minute - 180);	// fully visible at 3AM
@@ -308,20 +308,19 @@ CClouds::Render(void)
 bool
 UseDarkBackground(void)
 {
-	return RwFrameGetLTM(RwCameraGetFrame(TheCamera.m_pRwCamera))->up.z < -0.9f ||
-		gbShowCollisionPolys;
+	return TheCamera.GetForward().z < -0.9f || gbShowCollisionPolys;
 }
 
 void
 CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 	int16 botred, int16 botgreen, int16 botblue, int16 alpha)
 {
-	RwMatrix *mat = RwFrameGetLTM(RwCameraGetFrame(TheCamera.m_pRwCamera));
-	float c = Sqrt(mat->right.x * mat->right.x + mat->right.y * mat->right.y);
+	CVector left = TheCamera.GetRight();
+	float c = left.Magnitude2D();
 	if(c > 1.0f)
 		c = 1.0f;
 	ms_cameraRoll = Acos(c);
-	if(mat->right.z < 0.0f)
+	if(left.z < 0.0f)
 		ms_cameraRoll = -ms_cameraRoll;
 
 	if(UseDarkBackground()){
