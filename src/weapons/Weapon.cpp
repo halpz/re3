@@ -806,6 +806,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 
 			break;
 		}
+		default: break;
 	}
 
 	DoBulletImpact(shooter, victim, fireSource, &target, &point, ahead);
@@ -1070,6 +1071,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 
 					break;
 				}
+				default: break;
 			}
 		}
 
@@ -1101,6 +1103,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 				PlayOneShotScriptObject(SCRIPT_SOUND_BULLET_HIT_GROUND_3, point->point);
 				break;
 			}
+			default: break;
 		}
 	}
 	else
@@ -1328,6 +1331,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 
 						break;
 					}
+					default: break;
 				}
 			}
 
@@ -1359,6 +1363,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 					PlayOneShotScriptObject(SCRIPT_SOUND_BULLET_HIT_GROUND_3, point.point);
 					break;
 				}
+				default: break;
 			}
 		}
 		else
@@ -1768,6 +1773,7 @@ CWeapon::FireInstantHitFromCar(CAutomobile *shooter, bool left)
 				PlayOneShotScriptObject(SCRIPT_SOUND_BULLET_HIT_GROUND_3, point.point);
 				break;
 			}
+			default: break;
 		}
 	}
 	else
@@ -2037,6 +2043,7 @@ CWeapon::Update(int32 audioEntity)
 
 			break;
 		}
+		default: break;
 	}
 }
 
@@ -2131,6 +2138,7 @@ FireOneInstantHitRound(CVector *source, CVector *target, int32 damage)
 				PlayOneShotScriptObject(SCRIPT_SOUND_BULLET_HIT_GROUND_3, point.point);
 				break;
 			}
+			default: break;
 		}
 	}
 	else

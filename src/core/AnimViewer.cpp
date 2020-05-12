@@ -120,7 +120,7 @@ CAnimViewer::Initialise(void) {
 			if (!CFileMgr::ReadLine(fd, gString, 255))
 				break;
 
-			sscanf(gString, "%s %s", &modelName, &animGroup);
+			sscanf(gString, "%s %s", modelName, animGroup);
 			int groupId;
 			for (groupId = 0; groupId < NUM_ANIM_ASSOC_GROUPS; groupId++) {
 				if (!strcmp(animGroup, CAnimManager::GetAnimGroupName((AssocGroupId)groupId)))

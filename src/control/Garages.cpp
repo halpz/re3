@@ -533,6 +533,7 @@ void CGarage::Update()
 					case GARAGE_BOMBSHOP1: DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB1_SET, 1); break;
 					case GARAGE_BOMBSHOP2: DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB2_SET, 1); break;
 					case GARAGE_BOMBSHOP3: DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB3_SET, 1); break;
+				default: break;
 					}
 					m_eGarageState = GS_OPENING;
 					if (!CGarages::BombsAreFree)
@@ -577,6 +578,7 @@ void CGarage::Update()
 					case GARAGE_BOMBSHOP3:
 						CHud::SetHelpMessage(TheText.Get("GA_8"), false); // Use the detonator to activate the bomb.
 						break;
+				default: break;
 					}
 					CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_GARAGE);
 					FindPlayerPed()->m_pWanted->m_bIgnoredByCops = false;
@@ -2064,6 +2066,7 @@ bool CGarages::IsPointWithinHideOutGarage(Const CVector& point)
 		case GARAGE_HIDEOUT_THREE:
 			if (aGarages[i].IsPointInsideGarage(point))
 				return true;
+		default: break;
 		}
 	}
 	return false;

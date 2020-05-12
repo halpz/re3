@@ -49,7 +49,7 @@ const float fBlueMult = 1.4f;
 
 
 void
-CWaterLevel::Initialise(char *pWaterDat)
+CWaterLevel::Initialise(Const char *pWaterDat)
 {
 	ms_nNoOfWaterLevels = 0;
 	

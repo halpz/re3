@@ -248,6 +248,7 @@ CAutomobile::ProcessControl(void)
 						strongGrip2 = true;
 				}
 			}
+		default: break;
 		}
 	}
 
@@ -419,6 +420,7 @@ CAutomobile::ProcessControl(void)
 		m_fGasPedal = 0.0f;
 		m_nCarHornTimer = 0;
 		break;
+	default: break;
 	}
 
 	// what's going on here?
@@ -1252,6 +1254,7 @@ CAutomobile::PreRender(void)
 					m_aWheelColPoints[i].point + CVector(0.0f, 0.0f, 0.05f),
 					CVector(0.0f, 0.0f, 0.0f), nil, 0.1f);
 				break;
+			default: break;
 			}
 		}
 	}else{
@@ -1376,6 +1379,7 @@ CAutomobile::PreRender(void)
 					GetForward().x, GetForward().y,
 					&m_aWheelSkidmarkMuddy[CARWHEEL_REAR_LEFT], &m_aWheelSkidmarkBloody[CARWHEEL_REAR_LEFT]);
 			break;
+		default: break;
 		}
 
 		switch(m_aWheelState[CARWHEEL_REAR_RIGHT]){
@@ -1393,6 +1397,7 @@ CAutomobile::PreRender(void)
 					GetForward().x, GetForward().y,
 					&m_aWheelSkidmarkMuddy[CARWHEEL_REAR_RIGHT], &m_aWheelSkidmarkBloody[CARWHEEL_REAR_RIGHT]);
 			break;
+			default: break;
 		}
 	}
 
@@ -1845,7 +1850,7 @@ CAutomobile::PreRender(void)
 					false);
 			CVector pos = GetPosition() - 4.0f*GetForward();
 			if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK ||
-			   Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
+			   Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK) {
 				if(m_fBrakePedal > 0.0f)
 					CPointLights::AddLight(CPointLights::LIGHT_POINT, pos, CVector(0.0f, 0.0f, 0.0f),
 						10.0f, 1.0f, 0.0f, 0.0f,
@@ -1854,6 +1859,7 @@ CAutomobile::PreRender(void)
 					CPointLights::AddLight(CPointLights::LIGHT_POINT, pos, CVector(0.0f, 0.0f, 0.0f),
 						7.0f, 0.6f, 0.0f, 0.0f,
 						CPointLights::FOG_NONE, false);
+			}
 		}
 	}else{
 		// Lights off
@@ -3775,6 +3781,7 @@ CAutomobile::IsDoorReady(eDoors door)
 	case DOOR_FRONT_RIGHT: doorflag = CAR_DOOR_FLAG_RF; break;
 	case DOOR_REAR_LEFT: doorflag = CAR_DOOR_FLAG_LR; break;
 	case DOOR_REAR_RIGHT: doorflag = CAR_DOOR_FLAG_RR; break;
+	default: break;
 	}
 	return (doorflag & m_nGettingInFlags) == 0;
 }

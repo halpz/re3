@@ -804,6 +804,7 @@ CStreaming::RequestIslands(eLevelName level)
 		if(islandLODmainland != -1)
 			RequestModel(islandLODmainland, BIGBUILDINGFLAGS);
 		break;
+	default: break;
 	}
 }
 
@@ -1919,7 +1920,7 @@ CStreaming::ProcessLoadingChannel(int32 ch)
 void
 CStreaming::RetryLoadFile(int32 ch)
 {
-	char *key;
+	Const char *key;
 
 	CPad::StopPadsShaking();
 

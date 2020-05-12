@@ -32,7 +32,7 @@ public:
 	char *GetDeviceName(int index);
 	void GetDeviceVersion(int index, int *major, int *minor);
 	unsigned int GetMaxNumSources(int index);
-	bool IsExtensionSupported(int index, char *szExtName);
+	bool IsExtensionSupported(int index, const char *szExtName);
 	int GetDefaultDevice();
 	void FilterDevicesMinVer(int major, int minor);
 	void FilterDevicesMaxVer(int major, int minor);

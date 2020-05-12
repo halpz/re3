@@ -87,7 +87,7 @@ public:
 
 	static void InitTrains(void);
 	static void Shutdown(void);
-	static void ReadAndInterpretTrackFile(char *filename, CTrainNode **nodes, int16 *numNodes, int32 numStations, float *stationDists,
+	static void ReadAndInterpretTrackFile(Const char *filename, CTrainNode **nodes, int16 *numNodes, int32 numStations, float *stationDists,
 		float *totalLength, float *totalDuration, CTrainInterpolationLine *interpLines, bool rightRail);
 	static void UpdateTrains(void);
 };

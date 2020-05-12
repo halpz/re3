@@ -610,6 +610,7 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown(int32 button, 
 		case MOUSE:
 			state = &CPad::GetPad(PAD1)->PCTempMouseState;
 			break;
+		default: break;
 		}
 
 		if (pad != NULL)
@@ -1024,7 +1025,7 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonUp(int32 button, eC
 	case JOYSTICK:
 		state = &CPad::GetPad(PAD1)->PCTempJoyState;
 		break;
-	
+	default: break;
 	}
 
 	if (process)
@@ -1293,6 +1294,7 @@ bool CControllerConfigManager::GetIsKeyboardKeyDown(RsKeyCodes keycode)
 		if (CPad::GetPad(PAD1)->GetApps())
 			return true;
 		break;
+	default: break;
 	}
 
 	return false;
@@ -1493,6 +1495,7 @@ bool CControllerConfigManager::GetIsKeyboardKeyJustDown(RsKeyCodes keycode)
 		if (CPad::GetPad(PAD1)->GetAppsJustDown())
 			return true;
 		break;
+	default: break;
 	}
 
 	return false;
@@ -1530,6 +1533,7 @@ bool CControllerConfigManager::GetIsMouseButtonDown(RsKeyCodes keycode)
 		if (CPad::GetPad(PAD1)->GetMouseX2())
 			return true;
 		break;
+	default: break;
 	}
 
 	return false;
@@ -1567,6 +1571,7 @@ bool CControllerConfigManager::GetIsMouseButtonUp(RsKeyCodes keycode)
 		if (CPad::GetPad(PAD1)->GetMouseX2Up())
 			return true;
 		break;
+	default: break;
 	}
 
 	return false;
@@ -1747,6 +1752,7 @@ void CControllerConfigManager::DeleteMatchingActionInitiators(e_ControllerAction
 			DeleteMatchingCommonControls           (action, key, type);
 			DeleteMatching1rst3rdPersonControls    (action, key, type);
 			break;
+		default: break;
 		}
 	}
 }
@@ -1770,6 +1776,7 @@ bool CControllerConfigManager::GetIsKeyBlank(int32 key, eControllerType type)
 		if (key != 0)
 			return false;
 		break;
+	default: break;
 	}
 
 	return true;
@@ -1836,6 +1843,7 @@ e_ControllerActionType CControllerConfigManager::GetActionType(e_ControllerActio
 	case PED_SNIPER_ZOOM_OUT:
 		return ACTIONTYPE_1RSTPERSON;
 		break;
+	default: break;
 	}
 
 	return ACTIONTYPE_NONE;
@@ -1861,6 +1869,7 @@ void CControllerConfigManager::ClearSettingsAssociatedWithAction(e_ControllerAct
 		m_aSettings[action][type].m_Key = 0;
 		m_aSettings[action][type].m_ContSetOrder = SETORDER_NONE;
 		break;
+	default: break;
 	}
 
 	ResetSettingOrder(action);
@@ -1881,6 +1890,7 @@ wchar *CControllerConfigManager::GetControllerSettingTextWithOrderNumber(e_Contr
 				return GetControllerSettingTextMouse   (action);
 			case JOYSTICK:
 				return GetControllerSettingTextJoystick(action);
+			default: break;
 			}
 		}
 	}
@@ -2224,6 +2234,7 @@ wchar *CControllerConfigManager::GetControllerSettingTextKeyBoard(e_ControllerAc
 					return TheText.Get("FEC_SFT"); // "SHIFT"
 					break;
 				}
+				default: break;
 			}
 		}
 	}
@@ -2256,6 +2267,7 @@ wchar *CControllerConfigManager::GetControllerSettingTextMouse(e_ControllerActio
 	case 7:
 		return TheText.Get("FEC_MXT");	// MXB2
 		break;
+	default: break;
 	}
 
 	return NULL;
@@ -2375,6 +2387,7 @@ bool CControllerConfigManager::GetIsActionAButtonCombo(e_ControllerAction action
 	case PED_CYCLE_TARGET_RIGHT:
 		return true;
 		break;
+	default: break;
 	}
 
 	return false;
@@ -2395,6 +2408,7 @@ wchar *CControllerConfigManager::GetButtonComboText(e_ControllerAction action)
 	case VEHICLE_LOOKBEHIND:
 		return TheText.Get("FEC_LBC");	// Use Look Left With Look Right. 
 		break;
+	default: break;
 	}
 
 	return NULL;

@@ -429,7 +429,7 @@ RwChar **_psGetVideoModeList()
 		if ( vm.flags & rwVIDEOMODEEXCLUSIVE )
 		{
 			_VMList[i] = (RwChar*)RwCalloc(100, sizeof(RwChar));
-			rwsprintf(_VMList[i],"%lu X %lu X %lu", vm.width, vm.height, vm.depth);
+			rwsprintf(_VMList[i],"%d X %d X %d", vm.width, vm.height, vm.depth);
 		}
 		else
 			_VMList[i] = nil;

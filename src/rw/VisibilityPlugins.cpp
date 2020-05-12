@@ -295,7 +295,7 @@ CVisibilityPlugins::RenderFadingAtomic(RpAtomic *atomic, float camdist)
 {
 	RpAtomic *lodatm;
 	float fadefactor;
-	uint8 alpha;
+	uint32 alpha;
 	CSimpleModelInfo *mi;
 
 	mi = GetAtomicModelInfo(atomic);
@@ -889,6 +889,7 @@ CVisibilityPlugins::SetClumpModelInfo(RpClump *clump, CClumpModelInfo *modelInfo
 		else
 			CLUMPEXT(clump)->visibilityCB = VehicleVisibilityCB;
 		break;
+	default: break;
 	}
 }
 
