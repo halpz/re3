@@ -86,7 +86,7 @@ workspace "re3"
        scriptspath = scriptspath or ""
        if (gamepath) then
           postbuildcommands {
-             "{COPY} %{cfg.buildtarget.abspath} " .. gamepath .. scriptspath .. "%{cfg.buildtarget.name}"
+             '{COPY} "%{cfg.buildtarget.abspath}" "' .. gamepath .. scriptspath .. '%{cfg.buildtarget.name}"'
           }
           debugdir (gamepath)
           if (exepath) then
