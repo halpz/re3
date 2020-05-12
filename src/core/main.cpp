@@ -263,6 +263,9 @@ DoFade(void)
 void
 DoRWStuffEndOfFrame(void)
 {
+char buf[100];
+sprintf(buf, "timestep: %f %f", CTimer::GetTimeStep(), CTimer::GetTimeStepInMilliseconds());
+CDebug::PrintAt(buf, 10, 10);
 	CDebug::DisplayScreenStrings();	// custom
 	CDebug::DebugDisplayTextBuffer();
 	FlushObrsPrintfs();
