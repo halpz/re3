@@ -9945,7 +9945,31 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_LOAD_AND_LAUNCH_MISSION_EXCLUSIVE:
 	case COMMAND_IS_MISSION_AUDIO_PLAYING:
 	case COMMAND_CREATE_LOCKED_PROPERTY_PICKUP:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		// TODO(MIAMI) - add text
+		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_PICKUP_PROPERTY, PICKUP_PROPERTY_LOCKED, 0, 0, false, text);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
 	case COMMAND_CREATE_FORSALE_PROPERTY_PICKUP:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
+		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		// TODO(MIAMI) - add text
+		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_PICKUP_PROPERTY_FORSALE, PICKUP_PROPERTY_FORSALE, ScriptParams[3], 0, false, text);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
 	case COMMAND_FREEZE_CAR_POSITION:
 	case COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CHAR:
 	case COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CAR:
@@ -10034,6 +10058,18 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_DOES_VEHICLE_EXIST:
 	case COMMAND_ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT:
 	case COMMAND_ADD_SHORT_RANGE_SPRITE_BLIP_FOR_CONTACT_POINT:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		int id = CRadar::SetShortRangeCoordBlip(BLIP_COORD, pos, 2, BLIP_DISPLAY_BOTH);
+		CRadar::SetBlipSprite(id, ScriptParams[3]);
+		ScriptParams[0] = id;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
 	case COMMAND_IS_CHAR_STUCK:
 	case COMMAND_SET_ALL_TAXIS_HAVE_NITRO:
 	case COMMAND_SET_CHAR_STOP_SHOOT_DONT_SEEK_ENTITY:

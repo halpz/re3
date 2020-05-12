@@ -12,7 +12,9 @@
 #include "Streaming.h"
 #include "Timer.h"
 #include "Vehicle.h"
+#include "VisibilityPlugins.h"
 #include "World.h"
+#include "Zones.h"
 
 uint8 CTheCarGenerators::ProcessCounter;
 uint32 CTheCarGenerators::NumOfCarGenerators;
@@ -38,21 +40,43 @@ uint32 CCarGenerator::CalcNextGen()
 	return CTimer::GetTimeInMilliseconds() + 4;
 }
 
+//TODO(MIAMI): check for more changes - so far only -1 mi is accounted for
 void CCarGenerator::DoInternalProcessing()
 {
-	if (CheckForBlockage()) {
-		m_nTimer += 4;
-		if (m_nUsesRemaining == 0)
-			--CTheCarGenerators::CurrentActiveCount;
-		return;
-	}
+	int mi;
 	if (CCarCtrl::NumParkedCars >= 10)
 		return;
-	CStreaming::RequestModel(m_nModelIndex, STREAMFLAGS_DEPENDENCY);
-	if (!CStreaming::HasModelLoaded(m_nModelIndex))
+	if (m_nModelIndex >= 0) {
+		if (CheckForBlockage(m_nModelIndex)) {
+			m_nTimer += 4;
+			return;
+		}
+		mi = m_nModelIndex;
+	}
+	else {
+		mi = -m_nModelIndex;
+		if (m_nModelIndex == -1 || !CStreaming::HasModelLoaded(mi)) {
+			CZoneInfo pZone;
+			CTheZones::GetZoneInfoForTimeOfDay(&FindPlayerCoors(), &pZone);
+			mi = CCarCtrl::ChooseCarModel(CCarCtrl::ChooseCarRating(&pZone));
+			if (mi < 0)
+				return;
+			m_nModelIndex = -mi;
+			m_nColor1 = -1;
+			m_nColor2 = -1;
+		}
+		if (CheckForBlockage(mi)) {
+			m_nTimer += 4;
+			return;
+		}
+	}
+	CStreaming::RequestModel(mi, STREAMFLAGS_DEPENDENCY);
+	if (!CStreaming::HasModelLoaded(mi))
 		return;
-	if (CModelInfo::IsBoatModel(m_nModelIndex)){
-		CBoat* pBoat = new CBoat(m_nModelIndex, PARKED_VEHICLE);
+	CVehicle* pVehicle;
+	if (CModelInfo::IsBoatModel(mi)){
+		CBoat* pBoat = new CBoat(mi, PARKED_VEHICLE);
+		pVehicle = pBoat;
 		pBoat->bIsStatic = false;
 		pBoat->bEngineOn = false;
 		CVector pos = m_vecPos;
@@ -63,17 +87,7 @@ void CCarGenerator::DoInternalProcessing()
 		pBoat->SetOrientation(0.0f, 0.0f, DEGTORAD(m_fAngle));
 		pBoat->SetStatus(STATUS_ABANDONED);
 		pBoat->m_nDoorLock = CARLOCK_UNLOCKED;
-		CWorld::Add(pBoat);
-		if (CGeneral::GetRandomNumberInRange(0, 100) < m_nAlarm)
-			pBoat->m_nAlarmState = -1;
-		if (CGeneral::GetRandomNumberInRange(0, 100) < m_nDoorlock)
-			pBoat->m_nDoorLock = CARLOCK_LOCKED;
-		if (m_nColor1 != -1 && m_nColor2){
-			pBoat->m_currentColour1 = m_nColor1;
-			pBoat->m_currentColour2 = m_nColor2;
-		}
-		m_nVehicleHandle = CPools::GetVehiclePool()->GetIndex(pBoat);
-	}else{
+	}else{ // TODO(MIAMI): bikes
 		bool groundFound = false;
 		CVector pos = m_vecPos;
 		if (pos.z > -100.0f){
@@ -88,28 +102,35 @@ void CCarGenerator::DoInternalProcessing()
 		}
 		if (!groundFound) {
 			debug("CCarGenerator::DoInternalProcessing - can't find ground z for new car x = %f y = %f \n", m_vecPos.x, m_vecPos.y);
-		}else{
-			CAutomobile* pCar = new CAutomobile(m_nModelIndex, PARKED_VEHICLE);
-			pCar->bIsStatic = false;
-			pCar->bEngineOn = false;
-			pos.z += pCar->GetDistanceFromCentreOfMassToBaseOfModel();
-			pCar->SetPosition(pos);
-			pCar->SetOrientation(0.0f, 0.0f, DEGTORAD(m_fAngle));
-			pCar->SetStatus(STATUS_ABANDONED);
-			pCar->bLightsOn = false;
-			pCar->m_nDoorLock = CARLOCK_UNLOCKED;
-			CWorld::Add(pCar);
-			if (CGeneral::GetRandomNumberInRange(0, 100) < m_nAlarm)
-				pCar->m_nAlarmState = -1;
-			if (CGeneral::GetRandomNumberInRange(0, 100) < m_nDoorlock)
-				pCar->m_nDoorLock = CARLOCK_LOCKED;
-			if (m_nColor1 != -1 && m_nColor2) {
-				pCar->m_currentColour1 = m_nColor1;
-				pCar->m_currentColour2 = m_nColor2;
-			}
-			m_nVehicleHandle = CPools::GetVehiclePool()->GetIndex(pCar);
+			return;
 		}
+		CAutomobile* pCar = new CAutomobile(mi, PARKED_VEHICLE);
+		pVehicle = pCar;
+		pCar->bIsStatic = false;
+		pCar->bEngineOn = false;
+		pos.z += pCar->GetDistanceFromCentreOfMassToBaseOfModel();
+		pCar->SetPosition(pos);
+		pCar->SetOrientation(0.0f, 0.0f, DEGTORAD(m_fAngle));
+		pCar->SetStatus(STATUS_ABANDONED);
+		pCar->bLightsOn = false;
+		pCar->m_nDoorLock = CARLOCK_UNLOCKED;
+
 	}
+	CWorld::Add(pVehicle);
+	if (CGeneral::GetRandomNumberInRange(0, 100) < m_nAlarm)
+		pVehicle->m_nAlarmState = -1;
+	if (CGeneral::GetRandomNumberInRange(0, 100) < m_nDoorlock)
+		pVehicle->m_nDoorLock = CARLOCK_LOCKED;
+	if (m_nColor1 != -1 && m_nColor2 != -1) {
+		pVehicle->m_currentColour1 = m_nColor1;
+		pVehicle->m_currentColour2 = m_nColor2;
+	}
+	else if (m_nModelIndex < -1) {
+		m_nColor1 = pVehicle->m_currentColour1;
+		m_nColor2 = pVehicle->m_currentColour2;
+	}
+	CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);
+	m_nVehicleHandle = CPools::GetVehiclePool()->GetIndex(pVehicle);
 	if (m_nUsesRemaining < -1) /* I don't think this is a correct comparasion */
 		--m_nUsesRemaining;
 	m_nTimer = CalcNextGen();
@@ -155,25 +176,33 @@ void CCarGenerator::Setup(float x, float y, float z, float angle, int32 mi, int1
 	m_nTimer = CTimer::GetTimeInMilliseconds() + 1;
 	m_nUsesRemaining = 0;
 	m_bIsBlocking = false;
-	m_vecInf = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->boundingBox.min;
-	m_vecSup = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->boundingBox.max;
-	m_fSize = Max(m_vecInf.Magnitude(), m_vecSup.Magnitude());
 }
 
-bool CCarGenerator::CheckForBlockage()
+bool CCarGenerator::CheckForBlockage(int32 mi)
 {
 	int16 entities;
-	CWorld::FindObjectsKindaColliding(CVector(m_vecPos), m_fSize, 1, &entities, 2, nil, false, true, true, false, false);
-	return entities > 0;
+	CEntity* pEntities[8];
+	CColModel* pColModel = CModelInfo::GetModelInfo(mi)->GetColModel();
+	CWorld::FindObjectsKindaColliding(CVector(m_vecPos), pColModel->boundingSphere.radius, 1, &entities, 8, pEntities, false, true, true, false, false);
+	for (int i = 0; i < entities; i++) {
+		if (m_vecPos.z + pColModel->boundingBox.min.z < pEntities[i]->GetPosition().z + pEntities[i]->GetColModel()->boundingBox.max.z + 1.0f &&
+			m_vecPos.z + pColModel->boundingBox.max.z < pEntities[i]->GetPosition().z + pEntities[i]->GetColModel()->boundingBox.min.z - 1.0f) {
+			m_bIsBlocking = true;
+			return true;
+		}
+	}
+	return false;
 }
 
 bool CCarGenerator::CheckIfWithinRangeOfAnyPlayer()
 {
 	CVector2D direction = FindPlayerCentreOfWorld(CWorld::PlayerInFocus) - m_vecPos;
 	float distance = direction.Magnitude();
-	float farclip = 120.0f * TheCamera.GenerationDistMultiplier;
+	float farclip = 110.0f * TheCamera.GenerationDistMultiplier;
 	float nearclip = farclip - 20.0f;
-	if (distance >= farclip){
+	bool canBeRemoved = (m_nModelIndex > 0 && CModelInfo::IsBoatModel(m_nModelIndex) && 165.0f * TheCamera.GenerationDistMultiplier > distance &&
+		TheCamera.IsPointVisible(m_vecPos, &TheCamera.GetCameraMatrix())); // TODO(MIAMI) COcclision::IsPositionOccluded(m_vecPos, 0.0f)
+	if (distance >= farclip || canBeRemoved){
 		if (m_bIsBlocking)
 			m_bIsBlocking = false;
 		return false;

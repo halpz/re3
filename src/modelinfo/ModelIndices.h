@@ -158,7 +158,9 @@
 	X("subplatform_n",	MI_SUBPLATFORM_COMN, 0x5F5BB8) \
 	X("Otherside_subway",	MI_SUBPLATFORM_SUB, 0x5F5BBC) \
 	X("subplatform_sub",	MI_SUBPLATFORM_SUB2, 0x5F5BC0) \
-	X("files",		MI_FILES, 0x5F5BC4)
+	X("files",		MI_FILES, 0x5F5BC4) \
+	X("property_locked", MI_PICKUP_PROPERTY, 0x0) \
+	X("property_fsale", MI_PICKUP_PROPERTY_FORSALE, 0x0)
 
 #define X(name, var, addr) extern int16 var;
 	MODELINDICES

@@ -77,7 +77,7 @@ public:
 	static void DoMoneyEffects(CEntity *ent);
 	static void DoMineEffects(CEntity *ent);
 	static void DoPickUpEffects(CEntity *ent);
-	static int32 GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quantity);
+	static int32 GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quantity, uint32 rate = 0, bool highPriority = false, wchar* pText = nil);
 	static int32 GenerateNewOne_WeaponType(CVector pos, eWeaponType weaponType, uint8 type, uint32 quantity);
 	static void RemovePickUp(int32 pickupIndex);
 	static void RemoveAllFloatingPickups();
