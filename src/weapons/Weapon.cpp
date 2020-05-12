@@ -1238,7 +1238,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 					if ( cantStandup )
 						victimPed->SetFall(1500, AnimationId(ANIM_KO_SKID_FRONT + localDir), false);
 
-					victimPed->InflictDamage(nil, m_eWeaponType, info->m_nDamage, (ePedPieceTypes)point.pieceB, localDir);
+					victimPed->InflictDamage(shooter, m_eWeaponType, info->m_nDamage, (ePedPieceTypes)point.pieceB, localDir);
 
 					if ( victimPed->m_nPedType == PEDTYPE_COP )
 						CEventList::RegisterEvent(EVENT_SHOOT_COP, EVENT_ENTITY_PED, victim, (CPed*)shooter, 10000);
