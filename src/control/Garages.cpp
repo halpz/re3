@@ -1509,7 +1509,7 @@ static bool DoINeedToRefreshPointer(CEntity * pDoor, bool bIsDummy, int8 nIndex)
 		if (bIsDummy) {
 			if (CPools::GetDummyPool()->IsFreeSlot(CPools::GetDummyPool()->GetJustIndex((CDummy*)pDoor)))
 				return true;
-			if (nIndex != CPools::GetDummyPool()->GetIndex((CDummy*)pDoor))
+			if (nIndex != (CPools::GetDummyPool()->GetIndex((CDummy*)pDoor) & 0x7F))
 				bNeedToFindDoorEntities = true;
 			if (!CGarages::IsModelIndexADoor(pDoor->GetModelIndex()))
 				return true;
@@ -1517,7 +1517,7 @@ static bool DoINeedToRefreshPointer(CEntity * pDoor, bool bIsDummy, int8 nIndex)
 		else {
 			if (CPools::GetObjectPool()->IsFreeSlot(CPools::GetObjectPool()->GetJustIndex((CObject*)pDoor)))
 				return true;
-			if (nIndex != CPools::GetObjectPool()->GetIndex((CObject*)pDoor))
+			if (nIndex != (CPools::GetObjectPool()->GetIndex((CObject*)pDoor) & 0x7F))
 				bNeedToFindDoorEntities = true;
 			if (!CGarages::IsModelIndexADoor(pDoor->GetModelIndex()))
 				return true;
