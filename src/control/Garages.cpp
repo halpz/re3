@@ -1423,7 +1423,7 @@ void CGarage::UpdateDoorsHeight()
 void CGarage::BuildRotatedDoorMatrix(CEntity * pDoor, float fPosition)
 {
 	float fAngle = -fPosition * HALFPI;
-	CVector up(-Sin(fAngle) * pDoor->GetForward().y, Sin(fAngle) * pDoor->GetForward().z, Cos(fAngle));
+	CVector up(-Sin(fAngle) * pDoor->GetForward().y, Sin(fAngle) * pDoor->GetForward().x, Cos(fAngle));
 	pDoor->GetRight() = CrossProduct(up, pDoor->GetForward());
 	pDoor->GetUp() = up;
 }
