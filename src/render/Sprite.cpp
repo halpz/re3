@@ -267,8 +267,8 @@ CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension(float x, float y, float z, 
 {
 	m_bFlushSpriteBufferSwitchZTest = 0;
 	// TODO: replace with lookup
-	float c = Cos(DEGTORAD(rotation));
-	float s = Sin(DEGTORAD(rotation));
+	float c = Cos(rotation);
+	float s = Sin(rotation);
 
 	float xs[4];
 	float ys[4];
@@ -580,8 +580,8 @@ CSprite::RenderBufferedOneXLUSprite2D_Rotate_Dimension(float x, float y, float w
 {
 	m_bFlushSpriteBufferSwitchZTest = 1;
 	CRGBA col(intens * colour.red >> 8, intens * colour.green >> 8, intens * colour.blue >> 8, alpha);
-	float c = Cos(DEGTORAD(rotation));
-	float s = Sin(DEGTORAD(rotation));
+	float c = Cos(rotation);
+	float s = Sin(rotation);
 
 	Set6Vertices2D(&SpriteBufferVerts[6 * nSpriteBufferIndex],
 		x + c*w - s*h,

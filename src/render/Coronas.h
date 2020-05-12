@@ -81,7 +81,7 @@ public:
 	static float LightsMult;
 	static float SunScreenY;
 	static float SunScreenX;
-	static bool bSmallMoon;
+	static int MoonSize;
 	static bool SunBlockedByClouds;
 	static int bChangeBrightnessImmediately;
 

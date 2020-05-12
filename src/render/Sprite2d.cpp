@@ -151,7 +151,6 @@ CSprite2d::Draw(float x1, float y1, float x2, float y2, float x3, float y3, floa
 	RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::maVertices, 4);
 }
 
-
 // Arguments:
 // 2---3
 // |   |
@@ -459,6 +458,22 @@ CSprite2d::DrawRectXLU(const CRect &r, const CRGBA &c0, const CRGBA &c1, const C
 	RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::maVertices, 4);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+}
+
+void
+CSprite2d::DrawAnyRect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4,
+		const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3)
+{
+	SetVertices(x1, y1, x2, y2, x3, y3, x4, y4, c0, c1, c2, c3);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
+	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEGOURAUD);
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)(c0.alpha != 255 || c1.alpha != 255 || c2.alpha != 255 || c3.alpha != 255));
+	RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::maVertices, 4);
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEGOURAUD);
 }
 
 void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA &color)

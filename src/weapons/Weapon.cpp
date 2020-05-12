@@ -1511,7 +1511,7 @@ CWeapon::FireSniper(CEntity *shooter)
 	CVector dir    = cam->Front;
 
 	if ( DotProduct(dir, CVector(0.0f, -0.9894f, 0.145f)) > 0.997f )
-		CCoronas::bSmallMoon = !CCoronas::bSmallMoon;
+		CCoronas::MoonSize = (CCoronas::MoonSize+1) & 7;
 
 	dir.Normalise();
 	dir *= 16.0f;

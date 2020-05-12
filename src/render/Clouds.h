@@ -8,8 +8,10 @@ public:
 
 	static float ms_cameraRoll;
 	static float ms_horizonZ;
+	static float ms_HorizonTilt;
 	static CRGBA ms_colourTop;
 	static CRGBA ms_colourBottom;
+	static CRGBA ms_colourBkGrd;
 
 	static void Init(void);
 	static void Shutdown(void);

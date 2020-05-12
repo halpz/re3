@@ -32,6 +32,7 @@ uint32 CWeather::LightningFlashLastChange;
 uint32 CWeather::WhenToPlayLightningSound;
 uint32 CWeather::LightningDuration;
 
+float CWeather::ExtraSunnyness;
 float CWeather::Foggyness;
 float CWeather::CloudCoverage;
 float CWeather::Wind;

@@ -60,6 +60,7 @@ public:
 	static void Process(void);
 
 	static bool IsInInterior(void) { return currArea != AREA_MAIN_MAP; }
+	static bool CanSeeOutSideFromCurrArea(void);
 	
 	// NB: these do something on PS2
 	static void TidyUpMemory(bool, bool);
