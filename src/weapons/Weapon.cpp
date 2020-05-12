@@ -997,9 +997,13 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 					for ( int32 i = 0; i < 16; i++ )
 						CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal*0.05f);
 
-					CVector dist = point->point - (*source);
-					CVector offset = dist - Max(0.2f*dist.Magnitude(), 2.0f) * CVector(ahead.x, ahead.y, 0.0f);
-					CVector smokePos = *source + offset;
+#ifndef FIX_BUGS
+				    CVector dist = point->point - (*source);
+				    CVector offset = dist - Max(0.2f * dist.Magnitude(), 2.0f) * CVector(ahead.x, ahead.y, 0.0f);
+				    CVector smokePos = *source + offset;
+#else
+				    CVector smokePos = point->point;
+#endif // !FIX_BUGS
 
 					smokePos.x += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f);
 					smokePos.y += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f);
@@ -1016,9 +1020,13 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 					for ( int32 i = 0; i < 16; i++ )
 						CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal*0.05f);
 
+#ifndef FIX_BUGS
 					CVector dist = point->point - (*source);
 					CVector offset = dist - Max(0.2f*dist.Magnitude(), 0.5f) * CVector(ahead.x, ahead.y, 0.0f);
-					CVector smokePos = *source + offset;
+				    CVector smokePos = *source + offset;
+#else
+				    CVector smokePos = point->point;
+#endif // !FIX_BUGS
 
 					CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, smokePos, CVector(0.0f, 0.0f, 0.0f));
 
@@ -1265,9 +1273,13 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 						for ( int32 i = 0; i < 16; i++ )
 							CParticle::AddParticle(PARTICLE_SPARK, point.point, point.normal*0.05f);
 
+#ifndef FIX_BUGS
 						CVector dist = point.point - (*fireSource);
 						CVector offset = dist - Max(0.2f*dist.Magnitude(), 2.0f) * CVector(shootRot.x, shootRot.y, 0.0f);
 						CVector smokePos = *fireSource + offset;
+#else
+					    CVector smokePos = point.point;
+#endif
 
 						CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, smokePos, CVector(0.0f, 0.0f, 0.0f));
 
@@ -1280,9 +1292,13 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 						for ( int32 i = 0; i < 16; i++ )
 							CParticle::AddParticle(PARTICLE_SPARK, point.point, point.normal*0.05f);
 
+#ifndef FIX_BUGS
 						CVector dist = point.point - (*fireSource);
 						CVector offset = dist - Max(0.2f*dist.Magnitude(), 2.0f) * CVector(shootRot.x, shootRot.y, 0.0f);
-						CVector smokePos = *fireSource + offset;
+					    CVector smokePos = *fireSource + offset;
+#else
+					    CVector smokePos = point.point;
+#endif
 
 						smokePos.x += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f);
 						smokePos.y += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f);
