@@ -1461,7 +1461,7 @@ static bool DoINeedToRefreshPointer(CEntity * pDoor, bool bIsDummy, int8 nIndex)
 		if (bIsDummy) {
 			if (CPools::GetDummyPool()->IsFreeSlot(CPools::GetDummyPool()->GetJustIndex((CDummy*)pDoor)))
 				return true;
-			if (nIndex != CPools::GetDummyPool()->GetIndex((CDummy*)pDoor))
+			if (nIndex != (CPools::GetDummyPool()->GetIndex((CDummy*)pDoor) & 0x7F))
 				bNeedToFindDoorEntities = true;
 			if (!CGarages::IsModelIndexADoor(pDoor->GetModelIndex()))
 				return true;
@@ -1469,7 +1469,7 @@ static bool DoINeedToRefreshPointer(CEntity * pDoor, bool bIsDummy, int8 nIndex)
 		else {
 			if (CPools::GetObjectPool()->IsFreeSlot(CPools::GetObjectPool()->GetJustIndex((CObject*)pDoor)))
 				return true;
-			if (nIndex != CPools::GetObjectPool()->GetIndex((CObject*)pDoor))
+			if (nIndex != (CPools::GetObjectPool()->GetIndex((CObject*)pDoor) & 0x7F))
 				bNeedToFindDoorEntities = true;
 			if (!CGarages::IsModelIndexADoor(pDoor->GetModelIndex()))
 				return true;
@@ -1672,20 +1672,22 @@ void CGarage::FindDoorsEntities()
 			FindDoorsEntitiesSectorList(s->m_lists[ENTITYLIST_DUMMIES_OVERLAP], true);
 		}
 	}
-	if (!m_pDoor1 || !m_pDoor2)
-		return;
-	if (m_pDoor1->GetModelIndex() == MI_CRUSHERBODY || m_pDoor1->GetModelIndex() == MI_CRUSHERLID)
-		return;
-	CVector2D vecDoor1ToGarage(m_pDoor1->GetPosition().x - GetGarageCenterX(), m_pDoor1->GetPosition().y - GetGarageCenterY());
-	CVector2D vecDoor2ToGarage(m_pDoor2->GetPosition().x - GetGarageCenterX(), m_pDoor2->GetPosition().y - GetGarageCenterY());
-	if (DotProduct2D(vecDoor1ToGarage, vecDoor2ToGarage) > 0.0f) {
-		if (vecDoor1ToGarage.MagnitudeSqr() >= vecDoor2ToGarage.MagnitudeSqr()) {
-			m_pDoor1 = m_pDoor2;
-			m_bDoor1IsDummy = m_bDoor2IsDummy;
+	if (m_pDoor1 && m_pDoor2) {
+		CVector2D vecDoor1ToGarage(m_pDoor1->GetPosition().x - GetGarageCenterX(), m_pDoor1->GetPosition().y - GetGarageCenterY());
+		CVector2D vecDoor2ToGarage(m_pDoor2->GetPosition().x - GetGarageCenterX(), m_pDoor2->GetPosition().y - GetGarageCenterY());
+		if (DotProduct2D(vecDoor1ToGarage, vecDoor2ToGarage) > 0.0f) {
+			if (vecDoor1ToGarage.MagnitudeSqr() >= vecDoor2ToGarage.MagnitudeSqr()) {
+				m_pDoor1 = m_pDoor2;
+				m_bDoor1IsDummy = m_bDoor2IsDummy;
+			}
+			m_pDoor2 = nil;
+			m_bDoor2IsDummy = false;
 		}
-		m_pDoor2 = nil;
-		m_bDoor2IsDummy = false;
 	}
+	if (m_pDoor1)
+		m_pDoor1->bUsesCollision = true;
+	if (m_pDoor2)
+		m_pDoor2->bUsesCollision = true;
 }
 
 void CGarage::FindDoorsEntitiesSectorList(CPtrList& list, bool dummy)
@@ -1734,7 +1736,7 @@ void CGarages::SetGarageDoorToRotate(int16 garage)
 	aGarages[garage].m_bRotatedDoor = true;
 	aGarages[garage].m_fDoorHeight /= 2.0f;
 	aGarages[garage].m_fDoorHeight -= 0.1f;
-	aGarages[garage].m_fDoorPos = Max(aGarages[garage].m_fDoorHeight, aGarages[garage].m_fDoorPos);
+	aGarages[garage].m_fDoorPos = Min(aGarages[garage].m_fDoorHeight, aGarages[garage].m_fDoorPos);
 	aGarages[garage].UpdateDoorsHeight();
 }
 
