@@ -86,7 +86,7 @@ public:
 	static CZone *FindSmallestZonePosition(const CVector *v);
 	static CZone *FindSmallestZonePositionType(const CVector *v, eZoneType type);
 	static CZone *FindSmallestZonePositionILN(const CVector *v);
-	static int16 FindZoneByLabelAndReturnIndex(char *name);
+	static int16 FindZoneByLabelAndReturnIndex(Const char *name);
 	static CZoneInfo *GetZoneInfo(const CVector *v, uint8 day);
 	static void GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info);
 	static void SetZoneCarInfo(uint16 zoneid, uint8 day, int16 carDensity,

@@ -753,7 +753,7 @@ CFileLoader::LoadClumpObject(const char *line)
 	char model[24], txd[24];
 	CClumpModelInfo *mi;
 
-	if(sscanf(line, "%d %s %s", &id, &model, &txd) == 3){
+	if(sscanf(line, "%d %s %s", &id, model, txd) == 3){
 		mi = CModelInfo::AddClumpModel(id);
 		mi->SetName(model);
 		mi->SetTexDictionary(txd);
@@ -1184,7 +1184,7 @@ CFileLoader::LoadMapZones(const char *filename)
 			float minx, miny, minz;
 			float maxx, maxy, maxz;
 			if(sscanf(line, "%s %d %f %f %f %f %f %f %d",
-			          &name, &type,
+			          name, &type,
 			          &minx, &miny, &minz,
 			          &maxx, &maxy, &maxz,
 			          &level) == 9)

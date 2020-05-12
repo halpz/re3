@@ -180,6 +180,7 @@ CBoat::ProcessControl(void)
 			return;
 		}
 		break;
+	default: break;
 	}
 
 	float collisionDamage = pHandling->fCollisionDamageMultiplier * m_fDamageImpulse;

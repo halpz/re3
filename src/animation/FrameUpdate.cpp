@@ -147,11 +147,12 @@ FrameUpdateCallBackWithVelocityExtractionNonSkinned(AnimBlendFrameData *frame, v
 		mat->pos.x = pos.x - transx;
 		mat->pos.y = pos.y - transy;
 		mat->pos.z = pos.z;
-		if(mat->pos.z >= -0.8f)
+		if(mat->pos.z >= -0.8f) {
 			if(mat->pos.z < -0.4f)
 				mat->pos.z += (2.5f * mat->pos.z + 2.0f) * frame->resetPos.z;
 			else
 				mat->pos.z += frame->resetPos.z;
+		}
 		mat->pos.x += frame->resetPos.x;
 		mat->pos.y += frame->resetPos.y;
 	}
@@ -361,11 +362,12 @@ FrameUpdateCallBackWithVelocityExtractionSkinned(AnimBlendFrameData *frame, void
 		xform->t.x = pos.x - transx;
 		xform->t.y = pos.y - transy;
 		xform->t.z = pos.z;
-		if(xform->t.z >= -0.8f)
+		if(xform->t.z >= -0.8f) {
 			if(xform->t.z < -0.4f)
 				xform->t.z += (2.5f * xform->t.z + 2.0f) * frame->resetPos.z;
 			else
 				xform->t.z += frame->resetPos.z;
+		}
 		xform->t.x += frame->resetPos.x;
 		xform->t.y += frame->resetPos.y;
 	}

@@ -231,7 +231,7 @@ CCollision::SortOutCollisionAfterLoad(void)
 void
 CCollision::LoadCollisionScreen(eLevelName level)
 {
-	static char *levelNames[4] = {
+	static Const char *levelNames[4] = {
 		"",
 		"IND_ZON",
 		"COM_ZON",

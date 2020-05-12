@@ -431,6 +431,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 				}
 			}
 			break;
+		default: break;
 		}
 	}
 	if (pVehicle->pDriver && pVehicle->pDriver->m_objective == OBJECTIVE_KILL_CHAR_ANY_MEANS){

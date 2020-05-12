@@ -180,7 +180,7 @@ CPedModelInfo::SetLowDetailClump(RpClump *lodclump)
 
 struct ColNodeInfo
 {
-	char *name;
+	Const char *name;
 	int pedNode;
 	int pieceType;
 	float x, z;

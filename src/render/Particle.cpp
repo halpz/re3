@@ -984,6 +984,7 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 		case PARTICLE_WATER_HYDRANT:
 			pParticle->m_vecPosition.z += 20.0f * psystem->m_fPositionRandomError * ms_afRandTable[CGeneral::GetRandomNumber() % RAND_TABLE_SIZE];
 			break;
+		default: break;
 	}
 	
 	if ( fSize != 0.0f )
@@ -1214,6 +1215,7 @@ void CParticle::Update()
 									continue;
 								}
 								break;
+							default: break;
 						}
 					}
 				}
@@ -1295,6 +1297,7 @@ void CParticle::Update()
 									continue;
 								}
 								break;
+							default: break;
 						}
 					}
 				}

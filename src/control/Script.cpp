@@ -11305,6 +11305,7 @@ INITSAVEBUF
 			case ENTITY_TYPE_DUMMY:
 				type = 4;
 				handle = CPools::GetDummyPool()->GetJustIndex((CDummy*)pEntity) + 1;
+			default: break;
 			}
 		}
 		WriteSaveBuf(buf, type);
@@ -11462,6 +11463,7 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntit
 			printf("Deleted a ped where a mission entity should be\n");
 			break;
 		}
+		default: break;
 		}
 	}
 }

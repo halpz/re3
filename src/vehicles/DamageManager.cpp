@@ -85,6 +85,7 @@ CDamageManager::ApplyDamage(tComponent component, float damage, float unused)
 				ProgressEngineDamage();
 			ProgressPanelDamage(subComp);
 			break;
+		default: break;
 		}
 		return true;
 	}

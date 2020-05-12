@@ -996,7 +996,7 @@ CHeli::TestRocketCollision(CVector *rocketPos)
 
 	for(i = 0; i < NUM_HELIS; i++){
 		if(pHelis[i] && !pHelis[i]->bExplosionProof && (*rocketPos - pHelis[i]->GetPosition()).MagnitudeSqr() < sq(8.0f)){
-			pHelis[i]->m_fAngularSpeed = (CGeneral::GetRandomNumber() < RAND_MAX/2) ? 0.05f : -0.05f;
+			pHelis[i]->m_fAngularSpeed = CGeneral::GetRandomTrueFalse() ? 0.05f : -0.05f;
 			pHelis[i]->m_heliStatus = HELI_STATUS_SHOT_DOWN;
 			pHelis[i]->m_nExplosionTimer = CTimer::GetTimeInMilliseconds() + 10000;
 			hit = true;
@@ -1023,7 +1023,7 @@ CHeli::TestBulletCollision(CVector *line0, CVector *line1, CVector *bulletPos, i
 
 			if(pHelis[i]->m_heliType == HELI_CATALINA && pHelis[i]->m_nBulletDamage > 400 ||
 			   pHelis[i]->m_heliType != HELI_CATALINA && pHelis[i]->m_nBulletDamage > 700){
-				pHelis[i]->m_fAngularSpeed = (CGeneral::GetRandomNumber() < RAND_MAX/2) ? 0.05f : -0.05f;
+				pHelis[i]->m_fAngularSpeed = CGeneral::GetRandomTrueFalse() ? 0.05f : -0.05f;
 				pHelis[i]->m_heliStatus = HELI_STATUS_SHOT_DOWN;
 				pHelis[i]->m_nExplosionTimer = CTimer::GetTimeInMilliseconds() + 10000;
 			}

@@ -1174,6 +1174,7 @@ CRenderer::IsEntityCullZoneVisible(CEntity *ent)
 		if(!obj->IsStatic())
 			return true;
 		return !(obj->m_pCurSurface && obj->m_pCurSurface->bZoneCulled2);
+	default: break;
 	}
 	return true;
 }
@@ -1182,12 +1183,14 @@ bool
 CRenderer::IsVehicleCullZoneVisible(CEntity *ent)
 {
 	CVehicle *v = (CVehicle*)ent;
-	switch(v->GetStatus())
+	switch(v->GetStatus()) {
 	case STATUS_SIMPLE:
 	case STATUS_PHYSICS:
 	case STATUS_ABANDONED:
 	case STATUS_WRECKED:
 		return !(v->m_pCurGroundEntity && v->m_pCurGroundEntity->bZoneCulled2);
+	default: break;
+	}
 	return true;
 }
 

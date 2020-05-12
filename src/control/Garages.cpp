@@ -517,6 +517,7 @@ void CGarage::Update()
 				case GARAGE_BOMBSHOP1: DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB1_SET, 1); break;
 				case GARAGE_BOMBSHOP2: DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB2_SET, 1); break;
 				case GARAGE_BOMBSHOP3: DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB3_SET, 1); break;
+				default: break;
 				}
 				m_eGarageState = GS_OPENING;
 				if (!CGarages::BombsAreFree)
@@ -561,6 +562,7 @@ void CGarage::Update()
 				case GARAGE_BOMBSHOP3:
 					CHud::SetHelpMessage(TheText.Get("GA_8"), false); // Use the detonator to activate the bomb.
 					break;
+				default: break;
 				}
 				CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_GARAGE);
 				FindPlayerPed()->m_pWanted->m_bIgnoredByCops = false;
@@ -1065,6 +1067,7 @@ void CGarage::Update()
 				case GARAGE_HIDEOUT_ONE:   StoreAndRemoveCarsForThisHideout(CGarages::aCarsInSafeHouse1, MAX_STORED_CARS_IN_INDUSTRIAL); break;
 				case GARAGE_HIDEOUT_TWO:   StoreAndRemoveCarsForThisHideout(CGarages::aCarsInSafeHouse2, MAX_STORED_CARS_IN_COMMERCIAL); break;
 				case GARAGE_HIDEOUT_THREE: StoreAndRemoveCarsForThisHideout(CGarages::aCarsInSafeHouse3, MAX_STORED_CARS_IN_SUBURBAN);   break;
+				default: break;
 				}
 			}
 			UpdateDoorsHeight();
@@ -1093,6 +1096,7 @@ void CGarage::Update()
 					case GARAGE_HIDEOUT_ONE:   bCreatedAllCars = RestoreCarsForThisHideout(CGarages::aCarsInSafeHouse1); break;
 					case GARAGE_HIDEOUT_TWO:   bCreatedAllCars = RestoreCarsForThisHideout(CGarages::aCarsInSafeHouse2); break;
 					case GARAGE_HIDEOUT_THREE: bCreatedAllCars = RestoreCarsForThisHideout(CGarages::aCarsInSafeHouse3); break;
+					default: break;
 					}
 					if (bCreatedAllCars)
 						m_eGarageState = GS_OPENING;
@@ -2151,6 +2155,7 @@ int32 CGarages::CountCarsInHideoutGarage(eGarageType type)
 		case GARAGE_HIDEOUT_THREE:
 			total += (aCarsInSafeHouse3[i].HasCar());
 			break;
+		default: break;
 		}
 	}
 	return total;
@@ -2165,6 +2170,7 @@ int32 CGarages::FindMaxNumStoredCarsForGarage(eGarageType type)
 		return LIMIT_CARS_IN_COMMERCIAL;
 	case GARAGE_HIDEOUT_THREE:
 		return LIMIT_CARS_IN_SUBURBAN;
+	default: break;
 	}
 	return 0;
 }
@@ -2180,6 +2186,7 @@ bool CGarages::IsPointWithinHideOutGarage(Const CVector& point)
 				point.y > aGarages[i].m_fY1 && point.y < aGarages[i].m_fY2 &&
 				point.z > aGarages[i].m_fZ1 && point.z < aGarages[i].m_fZ2)
 				return true;
+		default: break;
 		}
 	}
 	return false;

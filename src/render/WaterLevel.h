@@ -79,7 +79,7 @@ class CWaterLevel
 	static int16       nGeomUsed;
 
 public:
-	static void    Initialise(char *pWaterDat);
+	static void    Initialise(Const char *pWaterDat);
 	static void    Shutdown();
 	static void    CreateWavyAtomic();
 	static void    DestroyWavyAtomic();

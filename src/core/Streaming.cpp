@@ -710,6 +710,7 @@ CStreaming::RequestSubway(void)
 		RequestModel(MI_SUBPLATFORM_SUB, STREAMFLAGS_NOFADE);
 		RequestModel(MI_SUBPLATFORM_SUB2, STREAMFLAGS_NOFADE);
 		break;
+	default: break;
 	}
 }
 
@@ -747,6 +748,7 @@ CStreaming::RequestIslands(eLevelName level)
 		RequestModel(islandLODindust, BIGBUILDINGFLAGS);
 		RequestModel(islandLODcomSub, BIGBUILDINGFLAGS);
 		break;
+	default: break;
 	}
 }
 
@@ -1750,7 +1752,7 @@ CStreaming::ProcessLoadingChannel(int32 ch)
 void
 CStreaming::RetryLoadFile(int32 ch)
 {
-	char *key;
+	Const char *key;
 
 	CPad::StopPadsShaking();
 

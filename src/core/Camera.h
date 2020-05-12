@@ -403,7 +403,7 @@ public:
 	int m_BlurRed;
 	int m_BlurType;
 
-uint32    unknown;	// some counter having to do with music
+	uint32    unknown;	// some counter having to do with music
 	int m_iWorkOutSpeedThisNumFrames;
 	int m_iNumFramesSoFar;
 
@@ -549,6 +549,7 @@ uint32    unknown;	// some counter having to do with music
 
 	// High level and misc
 	CCamera(void);
+	CCamera(float);
 	void Init(void);
 	void Process(void);
 	void CamControl(void);

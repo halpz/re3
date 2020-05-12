@@ -509,7 +509,7 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 	double xpos = 1.0f, ypos;
 	glfwGetCursorPos(PSGLOBAL(window), &xpos, &ypos);
 
-	if (xpos != NULL) {
+	if (xpos != 0.f) {
 		state.MMB = true;
 		state.RMB = true;
 		state.LMB = true;
@@ -565,7 +565,7 @@ void CPad::UpdateMouse()
 #else
 		double xpos = 1.0f, ypos;
 		glfwGetCursorPos(PSGLOBAL(window), &xpos, &ypos);
-		if (xpos == NULL)
+		if (xpos == 0.f)
 			return;
 
 		int32 signX = 1;
