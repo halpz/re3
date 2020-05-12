@@ -105,8 +105,11 @@ CCutsceneHead::Render(void)
 			m_matrix.SetRotateY(PI/2);
 			m_matrix = CMatrix(mat) * m_matrix;
 		}
+		// This is head...it has no limbs
+#ifndef FIX_BUGS
 		RenderLimb(BONE_Lhand);
 		RenderLimb(BONE_Rhand);
+#endif
 	}else
 #endif
 	{
@@ -127,11 +130,15 @@ CCutsceneHead::Render(void)
 void
 CCutsceneHead::RenderLimb(int32 bone)
 {
+	// It's not clear what this is...
+	// modelinfo for this object is not a ped so it also doesn't have any limbs
+#ifndef FIX_BUGS
 	RpAtomic *atomic;
 	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(m_parentObject->GetClump());
 	int idx = RpHAnimIDGetIndex(hier, bone);
 	RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
-	CPedModelInfo *mi = (CPedModelInfo *)CModelInfo::GetModelInfo(GetModelIndex());
+	CPedModelInfo *mi = (CPedModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
+	assert(mi->GetModelType() == MITYPE_PED);
 	switch(bone){
 	case BONE_Lhand:
 		atomic = mi->getLeftHand();
@@ -148,6 +155,7 @@ CCutsceneHead::RenderLimb(int32 bone)
 		RwFrameUpdateObjects(frame);
 		RpAtomicRender(atomic);
 	}
+#endif
 }
 #endif
 
