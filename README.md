@@ -19,7 +19,7 @@ such that we have a working game at all times.
 - (Optional) If you want to use optional features like Russian language or menu map, copy the files in /gamefiles folder to your game root folder.
 - Move re3.exe to GTA 3 directory and run it.
 
-## How can I build it?
+## Preparing the environment for building
 
 Currently only building on VS2015/2017/2019 (Windows) and GCC (Linux) is tested.
 
