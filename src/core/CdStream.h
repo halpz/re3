@@ -42,3 +42,7 @@ bool CdStreamAddImage(char const *path);
 char *CdStreamGetImageName(int32 cd);
 void CdStreamRemoveImages(void);
 int32 CdStreamGetNumImages(void);
+
+#ifndef _WIN32
+extern bool flushStream[MAX_CDCHANNELS];
+#endif

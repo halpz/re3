@@ -23,6 +23,12 @@
  */
 
 #include "aldlist.h"
+
+#ifndef _WIN32
+#define _stricmp strcasecmp
+#define _strnicmp strncasecmp
+#endif
+
 #ifdef AUDIO_OAL
 /* 
  * Init call
@@ -67,7 +73,7 @@ ALDeviceList::ALDeviceList()
 					if ((bNewName) && (actualDeviceName != NULL) && (strlen(actualDeviceName) > 0)) {
 						memset(&ALDeviceInfo, 0, sizeof(ALDEVICEINFO));
 						ALDeviceInfo.bSelected = true;
-						ALDeviceInfo.strDeviceName = std::string(actualDeviceName, strlen(actualDeviceName));
+						ALDeviceInfo.strDeviceName.assign(actualDeviceName, strlen(actualDeviceName));
 						alcGetIntegerv(device, ALC_MAJOR_VERSION, sizeof(int), &ALDeviceInfo.iMajorVersion);
 						alcGetIntegerv(device, ALC_MINOR_VERSION, sizeof(int), &ALDeviceInfo.iMinorVersion);
 

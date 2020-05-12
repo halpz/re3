@@ -19,7 +19,11 @@ bool TurnOnAnimViewer = false;
 
 RsGlobalType                RsGlobal;
 
-RwUInt32
+#ifdef _WIN32
+RwUInt32    
+#else
+double
+#endif
 RsTimer(void)
 {
 	return psTimer();

@@ -100,10 +100,10 @@ IVideoWindow  *pVW = nil;
 IMediaSeeking *pMS = nil;
 
 DWORD dwDXVersion;
-DWORD _dwMemTotalPhys;
-DWORD _dwMemAvailPhys;
-DWORD _dwMemTotalVirtual;
-DWORD _dwMemAvailVirtual;
+SIZE_T _dwMemTotalPhys;
+SIZE_T _dwMemAvailPhys;
+SIZE_T _dwMemTotalVirtual;
+SIZE_T _dwMemAvailVirtual;
 DWORD _dwMemTotalVideo;
 DWORD _dwMemAvailVideo;
 DWORD _dwOperatingSystemVersion;
@@ -687,10 +687,10 @@ psInitialise(void)
 	
 	_GetVideoMemInfo(&_dwMemTotalVideo, &_dwMemAvailVideo);
 #ifdef FIX_BUGS
-	debug("Physical memory size %u\n", _dwMemTotalPhys);
-	debug("Available physical memory %u\n", _dwMemAvailPhys);
-	debug("Video memory size %u\n", _dwMemTotalVideo);
-	debug("Available video memory %u\n", _dwMemAvailVideo);
+	debug("Physical memory size %lu\n", _dwMemTotalPhys);
+	debug("Available physical memory %lu\n", _dwMemAvailPhys);
+	debug("Video memory size %lu\n", _dwMemTotalVideo);
+	debug("Available video memory %lu\n", _dwMemAvailVideo);
 #else
 	debug("Physical memory size %d\n", _dwMemTotalPhys);
 	debug("Available physical memory %d\n", _dwMemAvailPhys);

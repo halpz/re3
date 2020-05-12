@@ -4,6 +4,10 @@
 #include "common.h"
 #include "sampman.h"
 
+#ifndef _WIN32
+#include <float.h>
+#endif
+
 extern bool IsFXSupported();
 
 CChannel::CChannel()

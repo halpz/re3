@@ -50,8 +50,13 @@ extern "C" {
 
 
 #else // OPENAL
+#ifndef _WIN32
+	#include <AL/al.h>
+	#include <string.h>
+#else
 	#include <al.h>
-	
+#endif
+
 	#ifndef GUID_DEFINED
 		#define GUID_DEFINED
 		typedef struct _GUID

@@ -52,9 +52,7 @@ public:
 	{  }
 };
 
-#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(CStoredShadow, 0x30);
-#endif
 
 class CPolyBunch
 {
@@ -69,9 +67,7 @@ public:
 	{  }
 };
 
-#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(CPolyBunch, 0x6C);
-#endif
 
 class CStaticShadow
 {
@@ -93,16 +89,14 @@ public:
 	bool m_bRendered;
 	bool m_bTemp;
 	RwTexture *m_pTexture;
-	
+
 	CStaticShadow()
 	{  }
 
 	void Free();
 };
 
-#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(CStaticShadow, 0x40);
-#endif
 
 class CPermanentShadow
 {
@@ -120,7 +114,7 @@ public:
 	uint32 m_nTimeCreated;
 	uint32 m_nLifeTime;
 	RwTexture *m_pTexture;
-	
+
 	CPermanentShadow()
 	{  }
 };
@@ -168,7 +162,7 @@ public:
 	static void GeneratePolysForStaticShadow (int16 nStaticShadowID);
 	static void CastShadowSectorList         (CPtrList &PtrList, float fStartX, float fStartY, float fEndX, float fEndY,
 																							     CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance,               float fScale, CPolyBunch **ppPolyBunch);
-	static void CastShadowEntity             (CEntity *pEntity,  float fStartX, float fStartY, float fEndX, float fEndY,                                                                                                                                                     
+	static void CastShadowEntity             (CEntity *pEntity,  float fStartX, float fStartY, float fEndX, float fEndY,
 																							     CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance,               float fScale, CPolyBunch **ppPolyBunch);
 	static void UpdateStaticShadows          (void);
 	static void UpdatePermanentShadows       (void);

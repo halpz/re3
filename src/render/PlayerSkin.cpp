@@ -123,7 +123,7 @@ void
 CPlayerSkin::BeginFrontendSkinEdit(void)
 {
 	LoadPlayerDff();
-	RpClumpForAllAtomics(gpPlayerClump, CClumpModelInfo::SetAtomicRendererCB, CVisibilityPlugins::RenderPlayerCB);
+	RpClumpForAllAtomics(gpPlayerClump, CClumpModelInfo::SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
 	CWorld::Players[0].LoadPlayerSkin();
 	gOldFov = CDraw::GetFOV();
 	CDraw::SetFOV(30.0f);

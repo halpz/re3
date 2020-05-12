@@ -4,13 +4,15 @@
 #include "common.h"
 #include "sampman.h"
 
-typedef long ssize_t;
-
 #include <sndfile.h>
 #include <mpg123.h>
-
+#ifdef _WIN32
+typedef long ssize_t;
 #pragma comment( lib, "libsndfile-1.lib" )
 #pragma comment( lib, "libmpg123.lib" )
+#else
+#include "crossplatform.h"
+#endif
 
 class CSndFile : public IDecoder
 {
@@ -192,7 +194,22 @@ CStream::CStream(char *filename, ALuint &source, ALuint (&buffers)[NUM_STREAMBUF
 	m_nPosBeforeReset(0)
 	
 {
-	strcpy(m_aFilename, filename);
+// Be case-insensitive on linux (from https://github.com/OneSadCookie/fcaseopen/)
+#if !defined(_WIN32)
+	FILE *test = fopen(filename, "r");
+	if (!test) {
+		char *r = (char*)alloca(strlen(filename) + 2);
+		if (casepath(filename, r))
+		{
+		    strcpy(m_aFilename, r);
+		}
+	} else {
+		fclose(test);
+#else
+	{
+#endif
+		strcpy(m_aFilename, filename);
+	}
 		
 	DEV("Stream %s\n", m_aFilename);
 

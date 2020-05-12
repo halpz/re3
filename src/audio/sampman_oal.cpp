@@ -5,16 +5,18 @@
 #include "sampman.h"
 
 #include <time.h>
-#include <io.h>
 
 #include "eax.h"
 #include "eax-util.h"
 
+#ifdef _WIN32
+#include <io.h>
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alext.h>
 #include <AL/efx.h>
 #include <AL/efx-presets.h>
+#endif
 
 #include "oal/oal_utils.h"
 #include "oal/aldlist.h"
@@ -31,7 +33,9 @@
 //TODO: loop count
 //TODO: mp3 player
 
+#ifdef _WIN32
 #pragma comment( lib, "OpenAL32.lib" )
+#endif
 
 cSampleManager SampleManager;
 bool _bSampmanInitialised = false;
@@ -61,15 +65,15 @@ struct
 int defaultProvider;
 
 
-char SampleBankDescFilename[] = "AUDIO\\SFX.SDT";
-char SampleBankDataFilename[] = "AUDIO\\SFX.RAW";
+char SampleBankDescFilename[] = "audio/sfx.SDT";
+char SampleBankDataFilename[] = "audio/sfx.RAW";
 
 FILE *fpSampleDescHandle;
 FILE *fpSampleDataHandle;
 bool  bSampleBankLoaded            [MAX_SAMPLEBANKS];
 int32 nSampleBankDiscStartOffset   [MAX_SAMPLEBANKS];
 int32 nSampleBankSize              [MAX_SAMPLEBANKS];
-int32 nSampleBankMemoryStartAddress[MAX_SAMPLEBANKS];
+uintptr nSampleBankMemoryStartAddress[MAX_SAMPLEBANKS];
 int32 _nSampleDataEndOffset;
 
 int32 nPedSlotSfx    [MAX_PEDSFX];
@@ -88,7 +92,7 @@ struct
 {
 	ALuint buffer;
 	ALuint timer;
-	
+
 	bool IsEmpty() { return timer == 0; }
 	void Set(ALuint buf) { buffer = buf; }
 	void Wait() { timer  = 10000; }
@@ -573,7 +577,7 @@ cSampleManager::Initialise(void)
 			return false;
 		}
 		
-		nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] = (int32)malloc(nSampleBankSize[SAMPLEBANK_MAIN]);
+		nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] = (uintptr)malloc(nSampleBankSize[SAMPLEBANK_MAIN]);
 		ASSERT(nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] != NULL);
 		
 		if ( nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] == NULL )
@@ -582,7 +586,7 @@ cSampleManager::Initialise(void)
 			return false;
 		}
 		
-		nSampleBankMemoryStartAddress[SAMPLEBANK_PED] = (int32)malloc(PED_BLOCKSIZE*MAX_PEDSFX);
+		nSampleBankMemoryStartAddress[SAMPLEBANK_PED] = (uintptr)malloc(PED_BLOCKSIZE*MAX_PEDSFX);
 		ASSERT(nSampleBankMemoryStartAddress[SAMPLEBANK_PED] != NULL);
 	}
 	
@@ -985,7 +989,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 		if ( !IsSampleBankLoaded(nBank) )
 			return false;
 		
-		int32 addr = nSampleBankMemoryStartAddress[nBank] + m_aSamples[nSfx].nOffset - m_aSamples[BankStartOffset[nBank]].nOffset;
+		uintptr addr = nSampleBankMemoryStartAddress[nBank] + m_aSamples[nSfx].nOffset - m_aSamples[BankStartOffset[nBank]].nOffset;
 	
 		if ( ALBuffers[nSfx].IsEmpty() )
 		{

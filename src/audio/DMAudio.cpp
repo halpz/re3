@@ -6,6 +6,7 @@
 #include "AudioScriptObject.h"
 #include "sampman.h"
 #include "Text.h"
+#include "crossplatform.h"
 
 cDMAudio DMAudio;
 

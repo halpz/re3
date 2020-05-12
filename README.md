@@ -19,11 +19,19 @@ such that we have a working game at all times.
 - (Optional) If you want to use optional features like Russian language or menu map, copy the files in /gamefiles folder to your game root folder.
 - Move re3.exe to GTA 3 directory and run it.
 
+## Preparing the environment for building
+
+Currently only building on VS2015/2017/2019 (Windows) and GCC (Linux) is tested.
+
+- Clone the repo.
+- Run `git submodule init` and `git submodule update`.
+- Point GTA_III_RE_DIR environment variable to GTA3 root folder.
+- Run premake
+	- On Windows: one of the `premake-vsXXXX.cmd` variants on root folder
+	- On Linux: proceed to [Building on Linux](https://github.com/GTAmodding/re3/wiki/Building-on-Linux).
+- There are various settings at the very bottom of [config.h](https://github.com/GTAmodding/re3/tree/master/src/core/config.h), you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
+
 > :information_source: **Rendering engine** re3 uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of re3, but you also can use LIBRW enviorenment variable to specify path to your own librw.
-
-> :warning: **Notice for builders** There are various settings at the very bottom of `config.h`, you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
-
-https://github.com/GTAmodding/re3/tree/master/src/core/config.h
 
 ## Contributing
 
@@ -141,11 +149,3 @@ but here are some observations:
     * do *not* use `dw` for `DWORD` or so, we're not programming win32
 
 * Generally, try to make the code look as if R* could have written it
-
-### Environment Variables
-Here you can find a list of variables that you might need to set in windows:
-```
-"GTA_III_RE_DIR" * path to "gta3_re" game folder usually where this plugin run.
-"GTA_III_DIR" * path to "GTAIII" game folder.
-"LIBRW" * path to LIBRW.
-```
