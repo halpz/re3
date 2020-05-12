@@ -5101,7 +5101,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		CColPoint foundCol;
 		CEntity* foundEnt;
 		CWorld::pIgnoreEntity = CamTargetEntity;
-		if (CWorld::ProcessLineOfSight(TargetCoors, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, true, false, true, false)) {
+		if (CWorld::ProcessLineOfSight(TargetCoors, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, false, false, true, false)) {
 			float obstacleTargetDist = (TargetCoors - foundCol.point).Magnitude();
 			float obstacleCamDist = newDistance - obstacleTargetDist;
 			if (!foundEnt->IsPed() || obstacleCamDist <= 1.0f) {
@@ -5110,7 +5110,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 					RwCameraSetNearClipPlane(Scene.camera, Max(0.05f, obstacleTargetDist - 0.3f));
 				}
 			} else {
-				if (!CWorld::ProcessLineOfSight(foundCol.point, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, true, false, true, false)) {
+				if (!CWorld::ProcessLineOfSight(foundCol.point, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, false, false, true, false)) {
 					float lessClip = obstacleCamDist - 0.35f;
 					if (lessClip <= DEFAULT_NEAR)
 						RwCameraSetNearClipPlane(Scene.camera, lessClip);

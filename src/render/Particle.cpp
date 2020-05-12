@@ -1542,7 +1542,7 @@ void CParticle::Render()
 							particle->m_fSize * 63.0f,
 							particle->m_Color,
 							particle->m_nColorIntensity,
-							(float)particle->m_nRotation, //DEGTORAD((float)particle->m_nRotation) ps2
+							DEGTORAD(particle->m_nRotation),
 							particle->m_nAlpha);
 				}
 				else
@@ -1582,7 +1582,7 @@ void CParticle::Render()
 									particle->m_Color.blue,
 									particle->m_nColorIntensity,
 									1.0f / coors.z,
-									float(particle->m_nRotation), // DEGTORAD((float)particle->m_nRotation) ps2
+									DEGTORAD(particle->m_nRotation),
 									particle->m_nAlpha);
 						}
 						else if ( psystem->Flags & SCREEN_TRAIL )
@@ -1635,7 +1635,7 @@ void CParticle::Render()
 									particle->m_Color.blue,
 									particle->m_nColorIntensity,
 									1.0f / coors.z,
-									fRotation,
+									DEGTORAD(fRotation),
 									particle->m_nAlpha);
 			
 							particle->m_vecScreenPosition = coors;
@@ -1684,7 +1684,7 @@ void CParticle::Render()
 									particle->m_Color.blue,
 									particle->m_nColorIntensity,
 									1.0f / coors.z,
-									fRotation,
+									DEGTORAD(fRotation),
 									particle->m_nAlpha);
 						}
 						else if ( psystem->Flags & VERT_TRAIL )

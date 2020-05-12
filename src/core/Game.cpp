@@ -661,6 +661,13 @@ void CGame::Process(void)
 	}
 }
 
+bool
+CGame::CanSeeOutSideFromCurrArea(void)
+{
+	return currArea == AREA_MAIN_MAP || currArea == AREA_MALL || 
+		currArea == AREA_MANSION || currArea == AREA_HOTEL;
+}
+
 void CGame::DrasticTidyUpMemory(bool)
 {
 #ifdef PS2

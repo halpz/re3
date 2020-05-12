@@ -30,6 +30,7 @@ public:
 	static uint32 WhenToPlayLightningSound;
 	static uint32 LightningDuration;
 
+	static float ExtraSunnyness;
 	static float Foggyness;
 	static float CloudCoverage;
 	static float Wind;

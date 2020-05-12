@@ -3,6 +3,7 @@
 #include "Sprite.h"
 #include "Sprite2d.h"
 #include "General.h"
+#include "Game.h"
 #include "Coronas.h"
 #include "Camera.h"
 #include "TxdStore.h"
@@ -23,8 +24,10 @@ uint32 CClouds::IndividualRotation;
 
 float CClouds::ms_cameraRoll;
 float CClouds::ms_horizonZ;
+float CClouds::ms_HorizonTilt;
 CRGBA CClouds::ms_colourTop;
 CRGBA CClouds::ms_colourBottom;
+CRGBA CClouds::ms_colourBkGrd;
 
 void
 CClouds::Init(void)
@@ -44,33 +47,23 @@ void
 CClouds::Shutdown(void)
 {
 	RwTextureDestroy(gpCloudTex[0]);
-#ifdef GTA3_1_1_PATCH
 	gpCloudTex[0] = nil;
-#endif
 	RwTextureDestroy(gpCloudTex[1]);
-#ifdef GTA3_1_1_PATCH
 	gpCloudTex[1] = nil;
-#endif
 	RwTextureDestroy(gpCloudTex[2]);
-#ifdef GTA3_1_1_PATCH
 	gpCloudTex[2] = nil;
-#endif
 	RwTextureDestroy(gpCloudTex[3]);
-#ifdef GTA3_1_1_PATCH
 	gpCloudTex[3] = nil;
-#endif
 	RwTextureDestroy(gpCloudTex[4]);
-#ifdef GTA3_1_1_PATCH
 	gpCloudTex[4] = nil;
-#endif
 }
 
 void
 CClouds::Update(void)
 {
 	float s = Sin(TheCamera.Orientation - 0.85f);
-	CloudRotation += CWeather::Wind*s*0.0025f;
-	IndividualRotation += (CWeather::Wind*CTimer::GetTimeStep() + 0.3f) * 60.0f;
+	CloudRotation += CWeather::Wind*s*0.001f;
+	IndividualRotation += (CWeather::Wind*CTimer::GetTimeStep()*0.5f + 0.3f) * 60.0f;
 }
 
 void
@@ -81,6 +74,9 @@ CClouds::Render(void)
 	RwV3d screenpos;
 	RwV3d worldpos;
 
+	if(!CGame::CanSeeOutSideFromCurrArea())
+		return;
+
 	CCoronas::SunBlockedByClouds = false;
 
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
@@ -90,26 +86,21 @@ CClouds::Render(void)
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 	CSprite::InitSpriteBuffer();
 
-	int minute = CClock::GetHours()*60 + CClock::GetMinutes();
+	float minute = CClock::GetHours()*60 + CClock::GetMinutes() + CClock::GetSeconds()/60.0f;
 	RwV3d campos = *(RwV3d*)&TheCamera.GetPosition();
 
-	float coverage = CWeather::CloudCoverage <= CWeather::Foggyness ? CWeather::Foggyness : CWeather::CloudCoverage;
+	float coverage = Max(CWeather::Foggyness, CWeather::Foggyness);
 
 	// Moon
-	int moonfadeout = Abs(minute - 180);	// fully visible at 3AM
-	if(moonfadeout < 180){			// fade in/out 3 hours
-		int brightness = (1.0f - coverage) * (180 - moonfadeout);
+	float moonfadeout = Abs(minute - 180.0f);	// fully visible at 3AM
+	if((int)moonfadeout < 180){			// fade in/out 3 hours
+		int brightness = (1.0f - coverage) * (180 - (int)moonfadeout);
 		RwV3d pos = { 0.0f, -100.0f, 15.0f };
 		RwV3dAdd(&worldpos, &campos, &pos);
 		if(CSprite::CalcScreenCoors(worldpos, &screenpos, &szx, &szy, false)){
 			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[2]));
-			if(CCoronas::bSmallMoon){
-				szx *= 4.0f;
-				szy *= 4.0f;
-			}else{
-				szx *= 10.0f;
-				szy *= 10.0f;
-			}
+			szx *= CCoronas::MoonSize*2.0f + 4.0f;
+			szy *= CCoronas::MoonSize*2.0f + 4.0f;
 			CSprite::RenderOneXLUSprite(screenpos.x, screenpos.y, screenpos.z,
 				szx, szy, brightness, brightness, brightness, 255, 1.0f/screenpos.z, 255);
 		}
@@ -127,7 +118,7 @@ CClouds::Render(void)
 		starintens = 255 * (60 - CClock::GetMinutes())/60.0f;
 	if(starintens != 0){
 		// R
-		static float StarCoorsX[9] = { 0.0f, 0.05f, 0.12f, 0.5f, 0.8f, 0.6f, 0.27f, 0.55f, 0.75f };
+		static float StarCoorsX[9] = { 0.0f, 0.05f, 0.13f, 0.4f, 0.7f, 0.6f, 0.27f, 0.55f, 0.75f };
 		static float StarCoorsY[9] = { 0.0f, 0.45f, 0.9f, 1.0f, 0.85f, 0.52f, 0.48f, 0.35f, 0.2f };
 		static float StarSizes[9] = { 1.0f, 1.4f, 0.9f, 1.0f, 0.6f, 1.5f, 1.3f, 1.0f, 0.8f };
 		int brightness = (1.0f - coverage) * starintens;
@@ -165,7 +156,7 @@ CClouds::Render(void)
 		1.0f, 0.7f, 0.4f, 0.4f, -0.8f, -0.8f };
 	static float LowCloudsZ[12] = { 0.0f, 1.0f, 0.5f, 0.0f, 1.0f, 0.3f,
 		0.9f, 0.4f, 1.3f, 1.4f, 1.2f, 1.7f };
-	float lowcloudintensity = 1.0f - coverage;
+	float lowcloudintensity = 1.0f - Max(coverage, CWeather::ExtraSunnyness);
 	int r = CTimeCycle::GetLowCloudsRed() * lowcloudintensity;
 	int g = CTimeCycle::GetLowCloudsGreen() * lowcloudintensity;
 	int b = CTimeCycle::GetLowCloudsBlue() * lowcloudintensity;
@@ -186,7 +177,7 @@ CClouds::Render(void)
 	// Fluffy clouds
 	float rot_sin = Sin(CloudRotation);
 	float rot_cos = Cos(CloudRotation);
-	int fluffyalpha = 160 * (1.0f - CWeather::Foggyness);
+	int fluffyalpha = 160 * (1.0f - Max(CWeather::Foggyness, CWeather::ExtraSunnyness));
 	if(fluffyalpha != 0){
 		static float CoorsOffsetX[37] = {
 			0.0f, 60.0f, 72.0f, 48.0f, 21.0f, 12.0f,
@@ -213,7 +204,7 @@ CClouds::Render(void)
 			2.0f, 2.0f, 1.5f, 1.2f, 1.7f, 1.5f, 2.1f
 		};
 		static bool bCloudOnScreen[37];
-		float hilight;
+		float sundist, hilight;
 
 		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
@@ -225,15 +216,16 @@ CClouds::Render(void)
 			worldpos.z = pos.z;
 
 			if(CSprite::CalcScreenCoors(worldpos, &screenpos, &szx, &szy, false)){
-				float sundist = Sqrt(sq(screenpos.x-CCoronas::SunScreenX) + sq(screenpos.y-CCoronas::SunScreenY));
+				sundist = Sqrt(sq(screenpos.x-CCoronas::SunScreenX) + sq(screenpos.y-CCoronas::SunScreenY));
 				int tr = CTimeCycle::GetFluffyCloudsTopRed();
 				int tg = CTimeCycle::GetFluffyCloudsTopGreen();
 				int tb = CTimeCycle::GetFluffyCloudsTopBlue();
 				int br = CTimeCycle::GetFluffyCloudsBottomRed();
 				int bg = CTimeCycle::GetFluffyCloudsBottomGreen();
 				int bb = CTimeCycle::GetFluffyCloudsBottomBlue();
-				if(sundist < SCREEN_WIDTH/2){
-					hilight = (1.0f - coverage) * (1.0f - sundist/(SCREEN_WIDTH/2));
+				int distLimit = (3*SCREEN_WIDTH)/4;
+				if(sundist < distLimit){
+					hilight = (1.0f - coverage) * (1.0f - sundist/(float)distLimit);
 					tr = tr*(1.0f-hilight) + 255*hilight;
 					tg = tg*(1.0f-hilight) + 190*hilight;
 					tb = tb*(1.0f-hilight) + 190*hilight;
@@ -267,8 +259,7 @@ CClouds::Render(void)
 			worldpos.y = campos.x*rot_sin + campos.y*rot_cos + pos.y;
 			worldpos.z = pos.z;
 			if(bCloudOnScreen[i] && CSprite::CalcScreenCoors(worldpos, &screenpos, &szx, &szy, false)){
-				// BUG: this is stupid....would have to do this for each cloud individually
-				if(hilight > 0.0f){
+				if(sundist < SCREEN_WIDTH/3){
 					CSprite::RenderBufferedOneXLUSprite_Rotate_Aspect(screenpos.x, screenpos.y, screenpos.z,
 						szx*30.0f, szy*30.0f,
 						200*hilight, 0, 0, 255, 1.0f/screenpos.z,
@@ -308,21 +299,23 @@ CClouds::Render(void)
 bool
 UseDarkBackground(void)
 {
-	return RwFrameGetLTM(RwCameraGetFrame(TheCamera.m_pRwCamera))->up.z < -0.9f ||
-		gbShowCollisionPolys;
+	return TheCamera.GetForward().z < -0.9f || gbShowCollisionPolys;
 }
 
 void
 CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 	int16 botred, int16 botgreen, int16 botblue, int16 alpha)
 {
-	RwMatrix *mat = RwFrameGetLTM(RwCameraGetFrame(TheCamera.m_pRwCamera));
-	float c = Sqrt(mat->right.x * mat->right.x + mat->right.y * mat->right.y);
+	CVector right = CrossProduct(TheCamera.GetUp(), TheCamera.GetForward());
+	right.Normalise();
+	float c = right.Magnitude2D();
 	if(c > 1.0f)
 		c = 1.0f;
 	ms_cameraRoll = Acos(c);
-	if(mat->right.z < 0.0f)
+	if(right.z < 0.0f)
 		ms_cameraRoll = -ms_cameraRoll;
+
+	ms_HorizonTilt = SCREEN_WIDTH/2.0f * Tan(ms_cameraRoll);
 
 	if(UseDarkBackground()){
 		ms_colourTop.r = 50;
@@ -346,75 +339,74 @@ CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 	}else{
 		ms_horizonZ = CSprite::CalcHorizonCoors();
 
+		int fogr = (topred + 2 * botred) / 3;
+		int fogg = (topgreen + 2 * botgreen) / 3;
+		int fogb = (topblue + 2 * botblue) / 3;
+
 		// Draw top/bottom gradient
 		float gradheight = SCREEN_HEIGHT/2.0f;
-		float topedge = ms_horizonZ - gradheight;
-		float botpos, toppos;
-		if(ms_horizonZ > 0.0f && topedge < SCREEN_HEIGHT){
+
+		ms_colourTop.r = topred;
+		ms_colourTop.g = topgreen;
+		ms_colourTop.b = topblue;
+		ms_colourTop.a = alpha;
+		ms_colourBottom.r = botred;
+		ms_colourBottom.g = botgreen;
+		ms_colourBottom.b = botblue;
+		ms_colourBottom.a = alpha;
+
+		float botright = ms_horizonZ - ms_HorizonTilt;
+		float botleft = ms_horizonZ + ms_HorizonTilt;
+		float topright = botright - gradheight;
+		float topleft = botleft - gradheight;
+
+		CSprite2d::DrawAnyRect(0.0f, topleft,  SCREEN_WIDTH, topright,  0.0f, botleft,  SCREEN_WIDTH, botright,
+			 ms_colourTop, ms_colourTop, ms_colourBottom, ms_colourBottom);
+
+		// draw the small stripe (whatever it's supposed to be)
+		ms_colourTop.r = fogr;
+		ms_colourTop.g = fogg;
+		ms_colourTop.b = fogb;
+		ms_colourTop.a = alpha;
+		topright = ms_horizonZ - ms_HorizonTilt;
+		topleft = ms_horizonZ + ms_HorizonTilt;
+		botright = topright + SMALLSTRIPHEIGHT;
+		botleft = topleft + SMALLSTRIPHEIGHT;
+		CSprite2d::DrawAnyRect(0.0f, topleft,  SCREEN_WIDTH, topright,  0.0f, botleft,  SCREEN_WIDTH, botright,
+			ms_colourTop, ms_colourTop, ms_colourTop, ms_colourTop);
+
+		// Only top
+		if(ms_horizonZ + ms_HorizonTilt - gradheight > 0.0f ||
+		   ms_horizonZ - ms_HorizonTilt - gradheight > 0.0f){
 			ms_colourTop.r = topred;
 			ms_colourTop.g = topgreen;
 			ms_colourTop.b = topblue;
 			ms_colourTop.a = alpha;
-			ms_colourBottom.r = botred;
-			ms_colourBottom.g = botgreen;
-			ms_colourBottom.b = botblue;
-			ms_colourBottom.a = alpha;
 
-			if(ms_horizonZ < SCREEN_HEIGHT)
-				botpos = ms_horizonZ;
-			else{
-				float f = (ms_horizonZ - SCREEN_HEIGHT)/gradheight;
-				ms_colourBottom.r = topred*f + (1.0f-f)*botred;
-				ms_colourBottom.g = topgreen*f + (1.0f-f)*botgreen;
-				ms_colourBottom.b = topblue*f + (1.0f-f)*botblue;
-				botpos = SCREEN_HEIGHT;
+			if(ms_horizonZ - Abs(ms_HorizonTilt) - gradheight > SCREEN_HEIGHT){
+				// only top is visible
+				topleft = 0.0f;
+				topright = 0.0f;
+				botleft = SCREEN_HEIGHT;
+				botright = SCREEN_HEIGHT;
+			}else{
+				botright = ms_horizonZ - ms_HorizonTilt - gradheight;
+				botleft = ms_horizonZ + ms_HorizonTilt - gradheight;
+				topright = Min(ms_horizonZ - ms_HorizonTilt - 2*SCREEN_HEIGHT, 0.0f);
+				topleft = Min(ms_horizonZ + ms_HorizonTilt - 2*SCREEN_HEIGHT, 0.0f);
 			}
-			if(topedge >= 0.0f)
-				toppos = topedge;
-			else{
-				float f = (0.0f - topedge)/gradheight;
-				ms_colourTop.r = botred*f + (1.0f-f)*topred;
-				ms_colourTop.g = botgreen*f + (1.0f-f)*topgreen;
-				ms_colourTop.b = botblue*f + (1.0f-f)*topblue;
-				toppos = 0.0f;
-			}
-			CSprite2d::DrawRect(CRect(0, toppos, SCREEN_WIDTH, botpos),
-				ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
-		}
 
-		// draw the small stripe (whatever it's supposed to be)
-		if(ms_horizonZ > -SMALLSTRIPHEIGHT && ms_horizonZ < SCREEN_HEIGHT){
-			// Same colour as fog
-			ms_colourTop.r = (topred + 2 * botred) / 3;
-			ms_colourTop.g = (topgreen + 2 * botgreen) / 3;
-			ms_colourTop.b = (topblue + 2 * botblue) / 3;
-			CSprite2d::DrawRect(CRect(0, ms_horizonZ, SCREEN_WIDTH, ms_horizonZ+SMALLSTRIPHEIGHT),
+			CSprite2d::DrawAnyRect(0.0f, topleft,  SCREEN_WIDTH, topright,  0.0f, botleft,  SCREEN_WIDTH, botright,
 				ms_colourTop, ms_colourTop, ms_colourTop, ms_colourTop);
 		}
 
-		// Only top
-		if(topedge > 0.0f){
-			ms_colourTop.r = topred;
-			ms_colourTop.g = topgreen;
-			ms_colourTop.b = topblue;
-			ms_colourTop.a = alpha;
-			ms_colourBottom.r = topred;
-			ms_colourBottom.g = topgreen;
-			ms_colourBottom.b = topblue;
-			ms_colourBottom.a = alpha;
-
-			botpos = Min(SCREEN_HEIGHT, topedge);
-			CSprite2d::DrawRect(CRect(0, 0, SCREEN_WIDTH, botpos),
-				ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
-		}
-
 		// Set both to fog colour for RenderHorizon
-		ms_colourTop.r = (topred + 2 * botred) / 3;
-		ms_colourTop.g = (topgreen + 2 * botgreen) / 3;
-		ms_colourTop.b = (topblue + 2 * botblue) / 3;
-		ms_colourBottom.r = (topred + 2 * botred) / 3;
-		ms_colourBottom.g = (topgreen + 2 * botgreen) / 3;
-		ms_colourBottom.b = (topblue + 2 * botblue) / 3;
+		ms_colourTop.r = fogr;
+		ms_colourTop.g = fogg;
+		ms_colourTop.b = fogb;
+		ms_colourBottom.r = fogr;
+		ms_colourBottom.g = fogg;
+		ms_colourBottom.b = fogb;
 	}
 }
 
@@ -427,21 +419,35 @@ CClouds::RenderHorizon(void)
 	ms_colourBottom.a = 230;
 	ms_colourTop.a = 80;
 
-	if(ms_horizonZ > SCREEN_HEIGHT)
-		return;
+	float topright = ms_horizonZ - ms_HorizonTilt;
+	float topleft = ms_horizonZ + ms_HorizonTilt;
+	float botright = topright + SMALLSTRIPHEIGHT;
+	float botleft = topleft + SMALLSTRIPHEIGHT;
 
-	float z1 = Min(ms_horizonZ + SMALLSTRIPHEIGHT, SCREEN_HEIGHT);
-	CSprite2d::DrawRectXLU(CRect(0, ms_horizonZ, SCREEN_WIDTH, z1),
-		ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
+	CSprite2d::DrawAnyRect(0.0f, topleft,  SCREEN_WIDTH, topright,  0.0f, botleft,  SCREEN_WIDTH, botright,
+		ms_colourTop, ms_colourTop, ms_colourBottom, ms_colourBottom);
 
-	// This is just weird
-	float a = SCREEN_HEIGHT/400.0f * HORIZSTRIPHEIGHT +
-		SCREEN_HEIGHT/300.0f * Max(TheCamera.GetPosition().z, 0.0f);
-	float b = TheCamera.GetUp().z < 0.0f ?
-		SCREEN_HEIGHT :
-		SCREEN_HEIGHT * Abs(TheCamera.GetRight().z);
-	float z2 = z1 + (a + b)*TheCamera.LODDistMultiplier;
-	z2 = Min(z2, SCREEN_HEIGHT);
-	CSprite2d::DrawRect(CRect(0, z1, SCREEN_WIDTH, z2),
-		ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
+
+	ms_colourBkGrd.r = 128.0f*CTimeCycle::GetAmbientRed();
+	ms_colourBkGrd.g = 128.0f*CTimeCycle::GetAmbientGreen();
+	ms_colourBkGrd.b = 128.0f*CTimeCycle::GetAmbientBlue();
+	ms_colourBkGrd.a = 255;
+
+	float horzstrip = SCREEN_STRETCH_Y(HORIZSTRIPHEIGHT);
+	topright = botright;
+	topleft = botleft;
+	botright = topright + horzstrip;
+	botleft = topleft + horzstrip;
+
+	CSprite2d::DrawAnyRect(0.0f, topleft,  SCREEN_WIDTH, topright,  0.0f, botleft,  SCREEN_WIDTH, botright,
+		ms_colourBottom, ms_colourBottom, ms_colourBkGrd, ms_colourBkGrd);
+
+
+	topright = botright;
+	topleft = botleft;
+	botright = Max(topright, SCREEN_HEIGHT);
+	botleft = Max(topleft, SCREEN_HEIGHT);
+
+	CSprite2d::DrawAnyRect(0.0f, topleft,  SCREEN_WIDTH, topright,  0.0f, botleft,  SCREEN_WIDTH, botright,
+		ms_colourBkGrd, ms_colourBkGrd, ms_colourBkGrd, ms_colourBkGrd);
 }
