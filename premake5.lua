@@ -123,8 +123,7 @@ project "re3"
 	files { addSrcFiles("src") }
 	files { addSrcFiles("src/animation") }
 	files { addSrcFiles("src/audio") }
-	--files { addSrcFiles("src/audio/miles") }
-	--files { addSrcFiles("src/audio/oal") }
+	files { addSrcFiles("src/audio/oal") }
 	files { addSrcFiles("src/control") }
 	files { addSrcFiles("src/core") }
 	files { addSrcFiles("src/entities") }
@@ -146,7 +145,7 @@ project "re3"
 	includedirs { "src" }
 	includedirs { "src/animation" }
 	includedirs { "src/audio" }
-	--includedirs { "src/audio/oal" }
+	includedirs { "src/audio/oal" }
 	includedirs { "src/control" }
 	includedirs { "src/core" }
 	includedirs { "src/entities" }
@@ -185,8 +184,6 @@ project "re3"
 		targetextension ".elf"
 		defines { "OPENAL" }
 		links { "openal", "mpg123", "sndfile", "pthread" }
-		files { addSrcFiles("src/audio/oal") }
-		includedirs { "src/audio/oal" }
 
 	filter "platforms:*RW33*"
 		staticruntime "on"
