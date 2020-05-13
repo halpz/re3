@@ -90,7 +90,7 @@ CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot)
 		// relocate to another slot??
 		CObject *newObject = new CObject(object->GetModelIndex(), false);
 		CWorld::Remove(object);
-#ifdef FIX_BUGS
+#if 0 // todo better
 		*newObject = *object;
 #else
 		memcpy(newObject, object, ms_pObjectPool->GetMaxEntrySize());
