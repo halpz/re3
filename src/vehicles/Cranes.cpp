@@ -180,7 +180,7 @@ bool CCranes::IsThisCarPickedUp(float X, float Y, CVehicle* pVehicle)
 	for (int i = 0; i < NumCranes; i++) {
 		float distance = (CVector2D(X, Y) - aCranes[i].m_pCraneEntity->GetPosition()).Magnitude();
 		if (distance < MAX_DISTANCE_TO_FIND_CRANE && aCranes[i].m_pVehiclePickedUp == pVehicle) {
-			if (aCranes[i].m_nCraneStatus == CCrane::LIFTING_TARGET || aCranes[i].m_nCraneStatus == CCrane::ROTATING_TARGET)
+			if (aCranes[i].m_nCraneState == CCrane::LIFTING_TARGET || aCranes[i].m_nCraneState == CCrane::ROTATING_TARGET)
 				result = true;
 		}
 	}
