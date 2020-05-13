@@ -102,6 +102,9 @@ CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot)
 	}
 }
 
+#define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
+#define CopyToBuf(buf, data) memcpy(buf, &data, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
+
 void CPools::LoadVehiclePool(uint8* buf, uint32 size)
 {
 INITSAVEBUF
@@ -266,10 +269,10 @@ INITSAVEBUF
 		if (pObject->ObjectCreatedBy == MISSION_OBJECT)
 			++nObjects;
 	}
-	*size = nObjects * (sizeof(int16) + sizeof(int) + sizeof(CCompressedMatrixNotAligned) + sizeof(uint32) +
-		sizeof(float) + sizeof(CCompressedMatrixNotAligned) + sizeof(uint32) + sizeof(int8) + 7 * sizeof(bool) + sizeof(float) +
+	*size = nObjects * (sizeof(int16) + sizeof(int) + sizeof(CCompressedMatrix) +
+		sizeof(float) + sizeof(CCompressedMatrix) + sizeof(int8) + 7 * sizeof(bool) + sizeof(float) +
 		sizeof(int8) + sizeof(int8) + sizeof(uint32) + 2 * sizeof(uint32)) + sizeof(int);
-	WriteSaveBuf(buf, nObjects);
+	CopyToBuf(buf, nObjects);
 	for (int i = 0; i < nPoolSize; i++) {
 		CObject* pObject = GetObjectPool()->GetSlot(i);
 		if (!pObject)
@@ -282,33 +285,32 @@ INITSAVEBUF
 			bool bGlassBroken = pObject->bGlassBroken;
 			bool bHasBeenDamaged = pObject->bHasBeenDamaged;
 			bool bUseVehicleColours = pObject->bUseVehicleColours;
-			CCompressedMatrixNotAligned tmp;
-			WriteSaveBuf(buf, pObject->GetModelIndex());
-			WriteSaveBuf(buf, GetObjectRef(pObject));
+			CCompressedMatrix tmp;
+			CopyToBuf(buf, pObject->m_modelIndex);
+			int32 ref = GetObjectRef(pObject);
+			CopyToBuf(buf, ref);
 			tmp.CompressFromFullMatrix(pObject->GetMatrix());
-			WriteSaveBuf(buf, tmp);
-			WriteSaveBuf(buf, (uint32)0); // game writes ununitialized data here
-			WriteSaveBuf(buf, pObject->m_fUprootLimit);
+			CopyToBuf(buf, tmp);
+			CopyToBuf(buf, pObject->m_fUprootLimit);
 			tmp.CompressFromFullMatrix(pObject->m_objectMatrix);
-			WriteSaveBuf(buf, tmp);
-			WriteSaveBuf(buf, (uint32)0); // same
-			WriteSaveBuf(buf, pObject->ObjectCreatedBy);
-			WriteSaveBuf(buf, bIsPickup);
-			WriteSaveBuf(buf, bPickupObjWithMessage);
-			WriteSaveBuf(buf, bOutOfStock);
-			WriteSaveBuf(buf, bGlassCracked);
-			WriteSaveBuf(buf, bGlassBroken);
-			WriteSaveBuf(buf, bHasBeenDamaged);
-			WriteSaveBuf(buf, bUseVehicleColours);
-			WriteSaveBuf(buf, pObject->m_fCollisionDamageMultiplier);
-			WriteSaveBuf(buf, pObject->m_nCollisionDamageEffect);
-			WriteSaveBuf(buf, pObject->m_nSpecialCollisionResponseCases);
-			WriteSaveBuf(buf, pObject->m_nEndOfLifeTime);
+			CopyToBuf(buf, tmp);
+			CopyToBuf(buf, pObject->ObjectCreatedBy);
+			CopyToBuf(buf, bIsPickup);
+			CopyToBuf(buf, bPickupObjWithMessage);
+			CopyToBuf(buf, bOutOfStock);
+			CopyToBuf(buf, bGlassCracked);
+			CopyToBuf(buf, bGlassBroken);
+			CopyToBuf(buf, bHasBeenDamaged);
+			CopyToBuf(buf, bUseVehicleColours);
+			CopyToBuf(buf, pObject->m_fCollisionDamageMultiplier);
+			CopyToBuf(buf, pObject->m_nCollisionDamageEffect);
+			CopyToBuf(buf, pObject->m_nSpecialCollisionResponseCases);
+			CopyToBuf(buf, pObject->m_nEndOfLifeTime);
 #ifdef COMPATIBLE_SAVES
 			pObject->SaveEntityFlags(buf);
 #else
-			WriteSaveBuf(buf, (pObject->GetAddressOfEntityProperties())[0]);
-			WriteSaveBuf(buf, (pObject->GetAddressOfEntityProperties())[1]);
+			CopyToBuf(buf, (pObject->GetAddressOfEntityProperties())[0]);
+			CopyToBuf(buf, (pObject->GetAddressOfEntityProperties())[1]);
 #endif
 		}
 	}
@@ -318,35 +320,44 @@ VALIDATESAVEBUF(*size)
 void CPools::LoadObjectPool(uint8* buf, uint32 size)
 {
 INITSAVEBUF
-	int nObjects = ReadSaveBuf<int>(buf);
+	int nObjects;
+	CopyFromBuf(buf, nObjects);
 	for (int i = 0; i < nObjects; i++) {
-		int16 mi = ReadSaveBuf<int16>(buf);
-		int ref = ReadSaveBuf<int>(buf);
+		int16 mi;
+		CopyFromBuf(buf, mi);
+		int ref;
+		CopyFromBuf(buf, ref);
 		char* obuf = new char[sizeof(CObject)];
 		CObject* pBufferObject = (CObject*)obuf;
-		CCompressedMatrixNotAligned tmp;
-		tmp = ReadSaveBuf<CCompressedMatrixNotAligned>(buf);
+		CCompressedMatrix tmp;
+		CopyFromBuf(buf, tmp);
 		tmp.DecompressIntoFullMatrix(pBufferObject->GetMatrix());
-		ReadSaveBuf<uint32>(buf);
-		pBufferObject->m_fUprootLimit = ReadSaveBuf<float>(buf);
-		tmp = ReadSaveBuf<CCompressedMatrixNotAligned>(buf);
+		CopyFromBuf(buf, pBufferObject->m_fUprootLimit);
+		CopyFromBuf(buf, tmp);
 		tmp.DecompressIntoFullMatrix(pBufferObject->m_objectMatrix);
-		ReadSaveBuf<uint32>(buf);
-		pBufferObject->ObjectCreatedBy = ReadSaveBuf<int8>(buf);
-		pBufferObject->bIsPickup = ReadSaveBuf<bool>(buf);
-		pBufferObject->bPickupObjWithMessage = ReadSaveBuf<bool>(buf);
-		pBufferObject->bOutOfStock = ReadSaveBuf<bool>(buf);
-		pBufferObject->bGlassCracked = ReadSaveBuf<bool>(buf);
-		pBufferObject->bGlassBroken = ReadSaveBuf<bool>(buf);
-		pBufferObject->bHasBeenDamaged = ReadSaveBuf<bool>(buf);
-		pBufferObject->bUseVehicleColours = ReadSaveBuf<bool>(buf);
-		pBufferObject->m_fCollisionDamageMultiplier = ReadSaveBuf<float>(buf);
-		pBufferObject->m_nCollisionDamageEffect = ReadSaveBuf<uint8>(buf);
-		pBufferObject->m_nSpecialCollisionResponseCases = ReadSaveBuf<uint8>(buf);
-		pBufferObject->m_nEndOfLifeTime = ReadSaveBuf<uint32>(buf);
+		CopyFromBuf(buf, pBufferObject->ObjectCreatedBy);
+		int8 bitFlag;
+		CopyFromBuf(buf, bitFlag);
+		pBufferObject->bIsPickup = bitFlag;
+		CopyFromBuf(buf, bitFlag);
+		pBufferObject->bPickupObjWithMessage = bitFlag;
+		CopyFromBuf(buf, bitFlag);
+		pBufferObject->bOutOfStock = bitFlag;
+		CopyFromBuf(buf, bitFlag);
+		pBufferObject->bGlassCracked = bitFlag;
+		CopyFromBuf(buf, bitFlag);
+		pBufferObject->bGlassBroken = bitFlag;
+		CopyFromBuf(buf, bitFlag);
+		pBufferObject->bHasBeenDamaged = bitFlag;
+		CopyFromBuf(buf, bitFlag);
+		pBufferObject->bUseVehicleColours = bitFlag;
+		CopyFromBuf(buf, pBufferObject->m_fCollisionDamageMultiplier);
+		CopyFromBuf(buf, pBufferObject->m_nCollisionDamageEffect);
+		CopyFromBuf(buf, pBufferObject->m_nSpecialCollisionResponseCases);
+		CopyFromBuf(buf, pBufferObject->m_nEndOfLifeTime);
 #ifndef COMPATIBLE_SAVES
-		(pBufferObject->GetAddressOfEntityProperties())[0] = ReadSaveBuf<uint32>(buf);
-		(pBufferObject->GetAddressOfEntityProperties())[1] = ReadSaveBuf<uint32>(buf);
+		CopyFromBuf(buf, (pBufferObject->GetAddressOfEntityProperties())[0]);
+		CopyFromBuf(buf, (pBufferObject->GetAddressOfEntityProperties())[1]);
 #endif
 		if (GetObjectPool()->GetSlot(ref >> 8))
 			CPopulation::ConvertToDummyObject(GetObjectPool()->GetSlot(ref >> 8));
@@ -394,38 +405,45 @@ INITSAVEBUF
 	}
 	*size = sizeof(int) + nNumPeds * (sizeof(uint32) + sizeof(int16) + sizeof(int) + CPlayerPed::nSaveStructSize +
 		sizeof(CWanted::MaximumWantedLevel) + sizeof(CWanted::nMaximumWantedLevel) + MAX_MODEL_NAME);
-	WriteSaveBuf(buf, nNumPeds);
+	CopyToBuf(buf, nNumPeds);
 	for (int i = 0; i < nPoolSize; i++) {
 		CPed* pPed = GetPedPool()->GetSlot(i);
 		if (!pPed)
 			continue;
 		if (!pPed->bInVehicle && pPed->m_nPedType == PEDTYPE_PLAYER1) {
-			WriteSaveBuf(buf, pPed->m_nPedType);
-			WriteSaveBuf(buf, pPed->GetModelIndex());
-			WriteSaveBuf(buf, GetPedRef(pPed));
+			CopyToBuf(buf, pPed->m_nPedType);
+			CopyToBuf(buf, pPed->m_modelIndex);
+			int32 ref = GetPedRef(pPed);
+			CopyToBuf(buf, ref);
 #ifdef COMPATIBLE_SAVES
 			pPed->Save(buf);
 #else
 			memcpy(buf, pPed, sizeof(CPlayerPed));
 			SkipSaveBuf(buf, sizeof(CPlayerPed));
 #endif
-			WriteSaveBuf(buf, CWanted::MaximumWantedLevel);
-			WriteSaveBuf(buf, CWanted::nMaximumWantedLevel);
+			CopyToBuf(buf, CWanted::MaximumWantedLevel);
+			CopyToBuf(buf, CWanted::nMaximumWantedLevel);
 			memcpy(buf, CModelInfo::GetModelInfo(pPed->GetModelIndex())->GetName(), MAX_MODEL_NAME);
 			SkipSaveBuf(buf, MAX_MODEL_NAME);
 		}
 	}
 VALIDATESAVEBUF(*size);
+#undef CopyToBuf
 }
 
 void CPools::LoadPedPool(uint8* buf, uint32 size)
 {
 INITSAVEBUF
-	int nPeds = ReadSaveBuf<int>(buf);
+	int nPeds;
+	CopyFromBuf(buf, nPeds);
 	for (int i = 0; i < nPeds; i++) {
-		uint32 pedtype = ReadSaveBuf<uint32>(buf);
-		int16 model = ReadSaveBuf<int16>(buf);
-		int ref = ReadSaveBuf<int>(buf);
+		uint32 pedtype;
+		int16 model;
+		int ref;
+
+		CopyFromBuf(buf, pedtype);
+		CopyFromBuf(buf, model);
+		CopyFromBuf(buf, ref);
 #ifdef COMPATIBLE_SAVES
 		CPed* pPed;
 
@@ -443,8 +461,8 @@ INITSAVEBUF
 
 		pPed->Load(buf);
 		if (pedtype == PEDTYPE_PLAYER1) {
-			CWanted::MaximumWantedLevel = ReadSaveBuf<int32>(buf);
-			CWanted::nMaximumWantedLevel = ReadSaveBuf<int32>(buf);
+			CopyFromBuf(buf, CWanted::MaximumWantedLevel);
+			CopyFromBuf(buf, CWanted::nMaximumWantedLevel);
 			SkipSaveBuf(buf, MAX_MODEL_NAME);
 		}
 
@@ -462,10 +480,9 @@ INITSAVEBUF
 		if (pedtype == PEDTYPE_PLAYER1) { // always true
 			memcpy(pbuf, buf, sizeof(CPlayerPed));
 			SkipSaveBuf(buf, sizeof(CPlayerPed));
-			CWanted::MaximumWantedLevel = ReadSaveBuf<int32>(buf);
-			CWanted::nMaximumWantedLevel = ReadSaveBuf<int32>(buf);
-			memcpy(name, buf, MAX_MODEL_NAME);
-			SkipSaveBuf(buf, MAX_MODEL_NAME);
+			CopyFromBuf(buf, CWanted::MaximumWantedLevel);
+			CopyFromBuf(buf, CWanted::nMaximumWantedLevel);
+			CopyFromBuf(buf, name);
 		}
 		CStreaming::RequestSpecialModel(model, name, STREAMFLAGS_DONT_REMOVE);
 		CStreaming::LoadAllRequestedModels(false);
@@ -476,7 +493,7 @@ INITSAVEBUF
 			pPlayerPed->m_fMaxStamina = pBufferPlayer->m_fMaxStamina;
 			pPed = pPlayerPed;
 		}
-		pPed->GetPosition() = pBufferPlayer->GetPosition();
+		pPed->SetPosition(pBufferPlayer->GetPosition());
 		pPed->m_fHealth = pBufferPlayer->m_fHealth;
 		pPed->m_fArmour = pBufferPlayer->m_fArmour;
 		pPed->CharCreatedBy = pBufferPlayer->CharCreatedBy;
@@ -495,3 +512,6 @@ INITSAVEBUF
 	}
 VALIDATESAVEBUF(size)
 }
+
+#undef CopyFromBuf
+#undef CopyToBuf
