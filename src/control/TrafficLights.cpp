@@ -137,7 +137,7 @@ void
 CTrafficLights::ScanForLightsOnMap(void)
 {
 	int x, y;
-	int i, j, l;
+	int i, j, k, l;
 	CPtrNode *node;
 
 	for(x = 0; x < NUMSECTORS_X; x++)
@@ -188,8 +188,9 @@ CTrafficLights::ScanForLightsOnMap(void)
 					for(l = 0; l < ThePaths.m_pathNodes[i].numLinks; l++){
 						j = ThePaths.m_pathNodes[i].firstLink + l;
 						if(ThePaths.ConnectionCrossesRoad(j)){
-							dist2 = Abs(ThePaths.m_pathNodes[j].GetX() - light->GetPosition().x) +
-								Abs(ThePaths.m_pathNodes[j].GetY() - light->GetPosition().y);
+							k = ThePaths.ConnectedNode(j);
+							dist2 = Abs(ThePaths.m_pathNodes[k].GetX() - light->GetPosition().x) +
+								Abs(ThePaths.m_pathNodes[k].GetY() - light->GetPosition().y);
 							if(dist1 < 15.0f || dist2 < 15.0f)
 								ThePaths.ConnectionSetTrafficLight(j);
 						}
