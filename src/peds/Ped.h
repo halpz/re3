@@ -19,6 +19,7 @@ class CObject;
 class CFire;
 struct AnimBlendFrameData;
 class CAnimBlendAssociation;
+class CPedAttractor;
 
 struct PedAudioData
 {
@@ -154,6 +155,7 @@ enum eWaitState {
 enum eObjective : uint32 {
 	OBJECTIVE_NONE,
 	OBJECTIVE_IDLE,
+	OBJ_2,
 	OBJECTIVE_FLEE_TILL_SAFE,
 	OBJECTIVE_GUARD_SPOT,
 	OBJECTIVE_GUARD_AREA,	// not implemented
@@ -165,6 +167,8 @@ enum eObjective : uint32 {
 	OBJECTIVE_FLEE_CHAR_ON_FOOT_ALWAYS,
 	OBJECTIVE_GOTO_CHAR_ON_FOOT,
 	OBJECTIVE_FOLLOW_PED_IN_FORMATION,
+	OBJ_14,
+	OBJ_15,
 	OBJECTIVE_LEAVE_VEHICLE,
 	OBJECTIVE_ENTER_CAR_AS_PASSENGER,
 	OBJECTIVE_ENTER_CAR_AS_DRIVER,
@@ -175,8 +179,8 @@ enum eObjective : uint32 {
 	OBJECTIVE_GOTO_AREA_ANY_MEANS,
 	OBJECTIVE_GOTO_AREA_ON_FOOT,
 	OBJECTIVE_RUN_TO_AREA,
-	OBJECTIVE_23,	// not implemented
-	OBJECTIVE_24,	// not implemented
+	OBJECTIVE_26,	// not implemented
+	OBJECTIVE_27,	// not implemented
 	OBJECTIVE_FIGHT_CHAR,
 	OBJECTIVE_SET_LEADER,
 	OBJECTIVE_FOLLOW_ROUTE,
@@ -185,11 +189,32 @@ enum eObjective : uint32 {
 	OBJECTIVE_CATCH_TRAIN,
 	OBJECTIVE_BUY_ICE_CREAM,
 	OBJECTIVE_STEAL_ANY_CAR,
+	OBJ_36,
 	OBJECTIVE_MUG_CHAR,
-	OBJECTIVE_FLEE_CAR,
-#ifdef VC_PED_PORTS
-	OBJECTIVE_LEAVE_CAR_AND_DIE
-#endif
+	OBJECTIVE_LEAVE_CAR_AND_DIE,
+	OBJECTIVE_USE_SEAT_ATTRACTOR,
+	OBJECTIVE_USE_ATM_ATTRACTOR,
+	OBJECTIVE_FLEE_CAR, // is it 41?
+	OBJ_42,
+	OBJECTIVE_USE_STOP_ATTRACTOR,
+	OBJECTIVE_USE_PIZZA_ATTRACTOR,
+	OBJECTIVE_USE_SHELTER_ATTRACTOR,
+	OBJ_46,
+	OBJ_47,
+	OBJ_48,
+	OBJ_49,
+	OBJ_50,
+	OBJ_51,
+	OBJ_52,
+	OBJECTIVE_USE_ICECREAM_ATTRACTOR,
+	OBJ_53,
+	OBJ_54,
+	OBJ_55,
+	OBJ_56,
+	OBJ_57,
+	OBJ_58,
+	OBJ_59
+
 };
 
 enum {
@@ -389,9 +414,10 @@ public:
 	uint32 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 
-	uint32 bCarPassenger : 1;
-	uint32 bMiamiViceCop : 1;  //
-	uint32 bDeadPedInFrontOfCar : 1;
+	uint32 bHasAlreadyUsedAttractor : 1; // 0x155 0x1
+	uint32 bCarPassenger : 1; // 0x155 0x4
+	uint32 bMiamiViceCop : 1;  // 0x155 0x20
+	uint32 bDeadPedInFrontOfCar : 1; // 0x156 0x40
 
 	uint8 CharCreatedBy;
 	eObjective m_objective;
@@ -457,6 +483,8 @@ public:
 	bool bInVehicle;
 	float m_distanceToCountSeekDone;
 
+	CPedAttractor* m_attractor;
+	int32 m_positionInQueue;
 	CVehicle* m_vehicleInAccident;
 
 	bool bRunningToPhone;
@@ -792,6 +820,8 @@ public:
 #else
 	bool CanPedJumpThis(CEntity*);
 #endif
+
+	void SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float, float, int);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }

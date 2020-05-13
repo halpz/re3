@@ -3,7 +3,8 @@
 enum {
 	EFFECT_LIGHT,
 	EFFECT_PARTICLE,
-	EFFECT_ATTRACTOR
+	EFFECT_ATTRACTOR,
+	EFFECT_PED_ATTRACTOR
 };
 
 enum {
@@ -63,6 +64,11 @@ public:
 		uint8 flags;
 		uint8 probability;
 	};
+	struct PedAttractor {
+		CVector useDir;
+		CVector queueDir;
+		int8 type;
+	};
 
 	CVector pos;
 	CRGBA col;
@@ -71,6 +77,7 @@ public:
 		Light light;
 		Particle particle;
 		Attractor attractor;
+		PedAttractor pedattr;
 	};
 
 	C2dEffect(void) {}

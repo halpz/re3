@@ -459,6 +459,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_vecOffsetSeek.x = 0.0f;
 	m_vecOffsetSeek.y = 0.0f;
 	m_vecOffsetSeek.z = 0.0f;
+	m_attractor = nil;
+	m_positionInQueue = -1;
 	m_pedFormation = FORMATION_UNDEFINED;
 	m_collidingThingTimer = 0;
 	m_nPedStateTimer = 0;
@@ -12658,8 +12660,8 @@ CPed::ProcessObjective(void)
 			case OBJECTIVE_FOLLOW_CAR_IN_CAR:
 			case OBJECTIVE_FIRE_AT_OBJ_FROM_VEHICLE:
 			case OBJECTIVE_DESTROY_OBJ:
-			case OBJECTIVE_23:
-			case OBJECTIVE_24:
+			case OBJECTIVE_26:
+			case OBJECTIVE_27:
 			case OBJECTIVE_SET_LEADER:
 				break;
 			case OBJECTIVE_IDLE:

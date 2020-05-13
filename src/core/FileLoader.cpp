@@ -956,7 +956,7 @@ CFileLoader::LoadCarPathNode(const char *line, int id, int node, bool waterPath)
 void
 CFileLoader::Load2dEffect(const char *line)
 {
-	int id, r, g, b, a, type;
+	int id, r, g, b, a, type, ptype;
 	float x, y, z;
 	char corona[32], shadow[32];
 	int shadowIntens, lightType, roadReflection, flare, flags, probability;
@@ -1028,6 +1028,18 @@ CFileLoader::Load2dEffect(const char *line)
 			&probability);
 		effect->attractor.flags = flags;
 		effect->attractor.probability = probability;
+		break;
+	case EFFECT_PED_ATTRACTOR:
+		sscanf(line, "%d %f %f %f %d %d %d %d %d %d %f %f %f %f %f %f",
+			&id, &x, &y, &z, &r, &g, &b, &a, &type,
+			&ptype,
+			&effect->pedattr.useDir.x,
+			&effect->pedattr.useDir.y,
+			&effect->pedattr.useDir.z,
+			&effect->pedattr.queueDir.x,
+			&effect->pedattr.queueDir.y,
+			&effect->pedattr.queueDir.z);
+		effect->pedattr.type = ptype;
 		break;
 	}
 
