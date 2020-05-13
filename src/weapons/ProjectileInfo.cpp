@@ -116,6 +116,7 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 		elasticity = 0.5f;
 		break;
 	}
+	default: break;
 	}
 
 	int i = 0;
@@ -137,6 +138,7 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 	case WEAPONTYPE_GRENADE:
 		ms_apProjectile[i] = new CProjectile(MI_GRENADE);
 		break;
+	default: break;
 	}
 
 	if (ms_apProjectile[i] == nil)
@@ -183,6 +185,7 @@ CProjectileInfo::RemoveNotAdd(CEntity *entity, eWeaponType weaponType, CVector p
 	case WEAPONTYPE_ROCKETLAUNCHER:
 		CExplosion::AddExplosion(nil, entity, EXPLOSION_ROCKET, pos, 0);
 		break;
+	default: break;
 	}
 }
 

@@ -6,6 +6,7 @@
 #define WITHWINDOWS
 #include "common.h"
 #include "crossplatform.h"
+#include "platform.h"
 #include "Frontend.h"
 #include "Font.h"
 #include "Pad.h"
@@ -411,7 +412,7 @@ CMenuManager::ThingsToDoBeforeLeavingPage()
 // ------ Functions not in the game/inlined ends
 
 void
-CMenuManager::BuildStatLine(char *text, void *stat, bool itsFloat, void *stat2)
+CMenuManager::BuildStatLine(Const char *text, void *stat, bool itsFloat, void *stat2)
 {
 	if (!text)
 		return;
@@ -900,6 +901,7 @@ CMenuManager::Draw()
 	float smallestSliderBar = lineHeight * 0.1f;
 	bool foundTheHoveringItem = false;
 	wchar unicodeTemp[64];
+	char asciiTemp[32];
 
 #ifdef MENU_MAP
 	if (m_nCurrScreen == MENUPAGE_MAP) {
@@ -1054,15 +1056,18 @@ CMenuManager::Draw()
 #else
 				switch (m_PrefsUseWideScreen) {
 				case AR_AUTO:
-					rightText = (wchar*)L"AUTO";
+					sprintf(asciiTemp, "AUTO");
 					break;
 				case AR_4_3:
-					rightText = (wchar*)L"4:3";
+					sprintf(asciiTemp, "4:3");
 					break;
 				case AR_16_9:
-					rightText = (wchar*)L"16:9";
+					sprintf(asciiTemp, "16:9");
 					break;
 				}
+
+				AsciiToUnicode(asciiTemp, unicodeTemp);
+				rightText = unicodeTemp;
 #endif
 				break;
 			case MENUACTION_RADIO:
@@ -1102,13 +1107,12 @@ CMenuManager::Draw()
 				break;
 #ifdef IMPROVED_VIDEOMODE
 			case MENUACTION_SCREENMODE:
-				char mode[32];
 				if (m_nSelectedScreenMode == 0)
-					sprintf(mode, "FULLSCREEN");
+					sprintf(asciiTemp, "FULLSCREEN");
 				else
-					sprintf(mode, "WINDOWED");
+					sprintf(asciiTemp, "WINDOWED");
 
-				AsciiToUnicode(mode, unicodeTemp);
+				AsciiToUnicode(asciiTemp, unicodeTemp);
 				rightText = unicodeTemp;
 				break;
 #endif
@@ -4794,6 +4798,21 @@ CMenuManager::ProcessButtonPresses(void)
 				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
+#ifdef ASPECT_RATIO_SCALE
+			case MENUACTION_WIDESCREEN:
+				if (changeValueBy > 0) {
+					m_PrefsUseWideScreen++;
+					if (m_PrefsUseWideScreen > 2)
+						m_PrefsUseWideScreen = 2;
+				} else {
+					m_PrefsUseWideScreen--;
+					if (m_PrefsUseWideScreen < 0)
+						m_PrefsUseWideScreen = 0;
+				}
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+				SaveSettings();
+				break;
+#endif
 			case MENUACTION_SCREENRES:
 				if (m_bGameNotLoaded) {
 					RwChar** videoMods = _psGetVideoModeList();
@@ -4903,17 +4922,13 @@ CMenuManager::ProcessOnOffMenuOptions()
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		SaveSettings();
 		break;
-	case MENUACTION_WIDESCREEN:
 #ifndef ASPECT_RATIO_SCALE
+	case MENUACTION_WIDESCREEN:
 		m_PrefsUseWideScreen = !m_PrefsUseWideScreen;
-#else
-		m_PrefsUseWideScreen++;
-		if (m_PrefsUseWideScreen > 2)
-			m_PrefsUseWideScreen = 0;
-#endif
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		SaveSettings();
 		break;
+#endif
 	case MENUACTION_SETDBGFLAG:
 		CTheScripts::InvertDebugFlag();
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
@@ -5005,6 +5020,7 @@ CMenuManager::SaveLoadFileError_SetUpErrorScreen()
 		case SAVESTATUS_DELETEFAILED10:
 			ChangeScreen(MENUPAGE_DELETE_FAILED, 0, true, false);
 			break;
+		default: break;
 	}
 }
 

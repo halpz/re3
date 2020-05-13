@@ -22,8 +22,8 @@ void LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 void LoadingIslandScreen(const char *levelName);
 CSprite2d *LoadSplash(const char *name);
 void DestroySplashScreen(void);
-char *GetLevelSplashScreen(int level);
-char *GetRandomSplashScreen(void);
+Const char *GetLevelSplashScreen(int level);
+Const char *GetRandomSplashScreen(void);
 void LittleTest(void);
 void ValidateVersion();
 void ResetLoadingScreenBar(void);

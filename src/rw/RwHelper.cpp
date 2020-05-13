@@ -61,15 +61,15 @@ void *
 RwMallocAlign(RwUInt32 size, RwUInt32 align)
 {
 	void *mem = (void *)malloc(size + align);
-	
+
 	ASSERT(mem != nil);
-	
-	void *addr = (void *)((((RwUInt32)mem) + align) & ~(align - 1));
-	
+
+	void *addr = (void *)((((uintptr)mem) + align) & ~(align - 1));
+
 	ASSERT(addr != nil);
-	
+
 	*(((void **)addr) - 1) = mem;
-	
+
 	return addr;
 }
 
@@ -77,11 +77,11 @@ void
 RwFreeAlign(void *mem)
 {
 	ASSERT(mem != nil);
-	
+
 	void *addr = *(((void **)mem) - 1);
-	
+
 	ASSERT(addr != nil);
-	
+
 	free(addr);
 }
 
@@ -391,7 +391,7 @@ CameraSize(RwCamera * camera, RwRect * rect,
 
 		RwEngineGetVideoModeInfo(&videoMode,
 								 RwEngineGetCurrentVideoMode());
-								 
+
 		origSize.w  = RwRasterGetWidth(RwCameraGetRaster(camera));
 		origSize.h = RwRasterGetHeight(RwCameraGetRaster(camera));
 
@@ -402,7 +402,7 @@ CameraSize(RwCamera * camera, RwRect * rect,
 				/* For full screen applications, resizing the camera just doesn't
 				 * make sense, use the video mode size.
 				 */
-			 
+
 				r.x = r.y = 0;
 				r.w = videoMode.width;
 				r.h = videoMode.height;
@@ -424,11 +424,11 @@ CameraSize(RwCamera * camera, RwRect * rect,
 		{
 			RwRaster           *raster;
 			RwRaster           *zRaster;
-			
+
 			/*
 			 * Destroy rasters...
 			 */
-			 
+
 			raster = RwCameraGetRaster(camera);
 			if( raster )
 			{
@@ -440,14 +440,14 @@ CameraSize(RwCamera * camera, RwRect * rect,
 			{
 				RwRasterDestroy(zRaster);
 			}
-			
+
 			/*
-			 * Create new rasters... 
+			 * Create new rasters...
 			 */
 
 			raster = RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPECAMERA);
 			zRaster = RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPEZBUFFER);
-			
+
 			if( raster && zRaster )
 			{
 				RwCameraSetRaster(camera, raster);
@@ -470,8 +470,8 @@ CameraSize(RwCamera * camera, RwRect * rect,
 				rect->w = origSize.w;
 				rect->h = origSize.h;
 
-				/* 
-				 * Use default values... 
+				/*
+				 * Use default values...
 				 */
 				raster =
 					RwRasterCreate(rect->w, rect->h, 0, rwRASTERTYPECAMERA);
@@ -505,9 +505,9 @@ CameraSize(RwCamera * camera, RwRect * rect,
 				vw.y = viewWindow;
 			}
 		}
-		
+
 		RwCameraSetViewWindow(camera, &vw);
-		
+
 		RsGlobal.width  = rect->w;
 		RsGlobal.height = rect->h;
 	}

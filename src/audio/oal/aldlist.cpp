@@ -23,6 +23,12 @@
  */
 
 #include "aldlist.h"
+
+#ifndef _WIN32
+#define _stricmp strcasecmp
+#define _strnicmp strncasecmp
+#endif
+
 #ifdef AUDIO_OAL
 /* 
  * Init call
@@ -47,7 +53,7 @@ ALDeviceList::ALDeviceList()
 		
 		index = 0;
 		// go through device list (each device terminated with a single NULL, list terminated with double NULL)
-		while (*devices != NULL) {
+		while (*devices != '\0') {
 			if (strcmp(defaultDeviceName, devices) == 0) {
 				defaultDeviceIndex = index;
 			}
@@ -67,7 +73,7 @@ ALDeviceList::ALDeviceList()
 					if ((bNewName) && (actualDeviceName != NULL) && (strlen(actualDeviceName) > 0)) {
 						memset(&ALDeviceInfo, 0, sizeof(ALDEVICEINFO));
 						ALDeviceInfo.bSelected = true;
-						ALDeviceInfo.strDeviceName = std::string(actualDeviceName, strlen(actualDeviceName));
+						ALDeviceInfo.strDeviceName.assign(actualDeviceName, strlen(actualDeviceName));
 						alcGetIntegerv(device, ALC_MAJOR_VERSION, sizeof(int), &ALDeviceInfo.iMajorVersion);
 						alcGetIntegerv(device, ALC_MINOR_VERSION, sizeof(int), &ALDeviceInfo.iMinorVersion);
 
@@ -180,7 +186,7 @@ unsigned int ALDeviceList::GetMaxNumSources(int index)
 /*
  * Checks if the extension is supported on the given device
  */
-bool ALDeviceList::IsExtensionSupported(int index, char *szExtName)
+bool ALDeviceList::IsExtensionSupported(int index, const char *szExtName)
 {
 	bool bReturn = false;
 

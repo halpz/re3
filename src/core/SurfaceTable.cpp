@@ -9,7 +9,7 @@
 float CSurfaceTable::ms_aAdhesiveLimitTable[NUMADHESIVEGROUPS][NUMADHESIVEGROUPS];
 
 void
-CSurfaceTable::Initialise(char *filename)
+CSurfaceTable::Initialise(Const char *filename)
 {
 	int lineno, fieldno;
 	char *line;

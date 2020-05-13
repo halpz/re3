@@ -132,7 +132,7 @@ int32 ScriptParams[32];
 
 const uint32 CRunningScript::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
-	136;	
+	136;
 #else
 	sizeof(CRunningScript);
 #endif
@@ -590,13 +590,14 @@ int open_script()
 {
 	static int scriptToLoad = 1;
 
+#ifdef _WIN32
 	if (GetAsyncKeyState('G') & 0x8000)
 		scriptToLoad = 0;
 	if (GetAsyncKeyState('R') & 0x8000)
 		scriptToLoad = 1;
 	if (GetAsyncKeyState('D') & 0x8000)
 		scriptToLoad = 2;
-
+#endif
 	switch (scriptToLoad) {
 	case 0: scriptfile = "main.scm"; break;
 	case 1: scriptfile = "freeroam_miami.scm"; break;
@@ -834,6 +835,8 @@ int8 CRunningScript::ProcessOneCommand()
 
 int8 CRunningScript::ProcessCommands0To99(int32 command)
 {
+	float *fScriptVar1;
+	int *nScriptVar1;
 	switch (command) {
 	case COMMAND_NOP:
 		return 0;
@@ -1442,7 +1445,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, x2, y2));
 		if (!ScriptParams[5])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -1463,46 +1466,58 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		if (!ScriptParams[7])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
 	}
 	case COMMAND_ADD_INT_VAR_TO_INT_VAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*nScriptVar1 += *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_ADD_INT_LVAR_TO_INT_VAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*nScriptVar1 += *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_ADD_INT_VAR_TO_INT_LVAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*nScriptVar1 += *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_ADD_INT_LVAR_TO_INT_LVAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*nScriptVar1 += *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_ADD_FLOAT_VAR_TO_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_ADD_FLOAT_VAR_TO_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 += *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_SUB_INT_VAR_FROM_INT_VAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*nScriptVar1 -= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_SUB_INT_LVAR_FROM_INT_LVAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*nScriptVar1 -= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_SUB_FLOAT_VAR_FROM_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_SUB_FLOAT_LVAR_FROM_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	default:
 		assert(0);
@@ -1513,66 +1528,88 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 
 int8 CRunningScript::ProcessCommands100To199(int32 command)
 {
+	float *fScriptVar1;
+	int *nScriptVar1;
 	switch (command) {
 	case COMMAND_SUB_INT_LVAR_FROM_INT_VAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*nScriptVar1 -= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_SUB_INT_VAR_FROM_INT_LVAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*nScriptVar1 -= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_SUB_FLOAT_LVAR_FROM_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_SUB_FLOAT_VAR_FROM_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 -= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_MULT_INT_VAR_BY_INT_VAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) *= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*nScriptVar1 *= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_MULT_INT_LVAR_BY_INT_VAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) *= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*nScriptVar1 *= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_MULT_INT_VAR_BY_INT_LVAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) *= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*nScriptVar1 *= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_MULT_INT_LVAR_BY_INT_LVAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) *= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*nScriptVar1 *= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_DIV_INT_VAR_BY_INT_VAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) /= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*nScriptVar1 /= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_DIV_INT_LVAR_BY_INT_VAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) /= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*nScriptVar1 /= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_DIV_INT_VAR_BY_INT_LVAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) /= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*nScriptVar1 /= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_DIV_INT_LVAR_BY_INT_LVAR:
-		*GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) /= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*nScriptVar1 /= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_ADD_TIMED_VAL_TO_FLOAT_VAR:
 	{
@@ -1589,16 +1626,20 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		return 0;
 	}
 	case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_SUB_TIMED_VAL_FROM_FLOAT_VAR:
 	{
@@ -1615,16 +1656,20 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		return 0;
 	}
 	case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_VAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		*fScriptVar1 -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_LVAR:
-		*(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL) -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		*fScriptVar1 -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	case COMMAND_SET_VAR_INT_TO_VAR_INT:
 	{
@@ -1983,7 +2028,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, x2, y2));
 		if (!ScriptParams[5])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -2010,7 +2055,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		if (!ScriptParams[7])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -2226,7 +2271,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		UpdateCompareFlag(vehicle->IsWithinArea(x1, y1, x2, y2));
 		if (!ScriptParams[5])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -2245,7 +2290,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		UpdateCompareFlag(vehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		if (!ScriptParams[7])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -2330,7 +2375,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 	case COMMAND_RETURN_FALSE:
 		UpdateCompareFlag(false);
 		return 0;
-	/* Special command only used by compiler. 
+	/* Special command only used by compiler.
 	case COMMAND_VAR_INT:
 	*/
 	default:
@@ -2341,9 +2386,9 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 }
 
 int8 CRunningScript::ProcessCommands200To299(int32 command)
-{ 
+{
 	switch (command) {
-	/* Special commands. 
+	/* Special commands.
 	case COMMAND_VAR_FLOAT:
 	case COMMAND_LVAR_INT:
 	case COMMAND_LVAR_FLOAT:
@@ -2735,7 +2780,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		pPed->m_fearFlags |= ScriptParams[1];
 		return 0;
 	}
-	/* Not implemented. 
+	/* Not implemented.
 	case COMMAND_SET_CHAR_THREAT_REACTION:
 	*/
 	case COMMAND_SET_CHAR_OBJ_NO_OBJ:
@@ -2747,7 +2792,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		pPed->ClearObjective();
 		return 0;
 	}
-	/* Not implemented. 
+	/* Not implemented.
 	case COMMAND_ORDER_DRIVER_OUT_OF_CAR:
 	case COMMAND_ORDER_CHAR_TO_DRIVE_CAR:
 	case COMMAND_ADD_PATROL_POINT:
@@ -2794,7 +2839,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		UpdateCompareFlag(pPed->bScriptObjectiveCompleted);
 		return 0;
 	}
-	/* Not implemented. 
+	/* Not implemented.
 	case COMMAND_SET_CHAR_DRIVE_AGGRESSION:
 	case COMMAND_SET_CHAR_MAX_DRIVESPEED:
 	*/
@@ -2910,7 +2955,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		CTheScripts::ClearSpaceForMissionEntity(pos, pPlayer->m_pPed);
 		return 0;
 	}
-	/* Not implemented. 
+	/* Not implemented.
 	case COMMAND_MAKE_CHAR_DO_NOTHING:
 	*/
 	default:
@@ -2980,7 +3025,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 			pVehicle->IsWithinArea(x1, y1, x2, y2));
 		if (!ScriptParams[5])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -3000,7 +3045,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 			pVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		if (!ScriptParams[7])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -4412,7 +4457,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CWanted::SetMaximumWantedLevel(ScriptParams[0]);
 		return 0;
 	}
-	/* Debug commands? 
+	/* Debug commands?
 	case COMMAND_SAVE_VAR_INT:
 	case COMMAND_SAVE_VAR_FLOAT:
 	*/
@@ -5190,7 +5235,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[0];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		CCoronas::RegisterCorona((uint32)this + m_nIp, ScriptParams[6], ScriptParams[7], ScriptParams[8],
+		CCoronas::RegisterCorona((uintptr)this + m_nIp, ScriptParams[6], ScriptParams[7], ScriptParams[8],
 			255, pos, *(float*)&ScriptParams[3], 150.0f, ScriptParams[4], ScriptParams[5], 1, 0, 0, 0.0f);
 		return 0;
 	}
@@ -5801,7 +5846,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		UpdateCompareFlag(pPed->bIsShooting && pPed->IsWithinArea(x1, y1, x2, y2));
 		if (!ScriptParams[5])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -5818,14 +5863,14 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		UpdateCompareFlag(pPed->bIsShooting && pPed->IsWithinArea(x1, y1, x2, y2));
 		if (!ScriptParams[5])
 			return 0;
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
 	}
 	case COMMAND_IS_CURRENT_PLAYER_WEAPON:
 	{
-		CollectParameters(&m_nIp, 2); 
+		CollectParameters(&m_nIp, 2);
 		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pPed);
 		UpdateCompareFlag(ScriptParams[1] == pPed->m_weapons[pPed->m_currentWeapon].m_eWeaponType);
@@ -7832,7 +7877,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[0];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		C3dMarkers::PlaceMarkerSet((uint32)this + m_nIp, 4, pos, *(float*)&ScriptParams[3],
+		C3dMarkers::PlaceMarkerSet((uintptr)this + m_nIp, 4, pos, *(float*)&ScriptParams[3],
 			SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B, SPHERE_MARKER_A,
 			SPHERE_MARKER_PULSE_PERIOD, SPHERE_MARKER_PULSE_FRACTION, 0);
 		return 0;
@@ -8039,7 +8084,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		float radius = *(float*)&ScriptParams[3];
 		CTheScripts::GetActualScriptSphereIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		ScriptParams[0] = CTheScripts::AddScriptSphere((uint32)this + m_nIp, pos, radius);
+		ScriptParams[0] = CTheScripts::AddScriptSphere((uintptr)this + m_nIp, pos, radius);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -10392,7 +10437,7 @@ void CRunningScript::LocatePlayerCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10476,9 +10521,9 @@ void CRunningScript::LocatePlayerCharCommand(int32 command, uint32* pIp)
 	UpdateCompareFlag(result);
 	if (debug)
 #ifdef FIX_BUGS
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 #else
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : MAP_Z_LOW_LIMIT);
 #endif
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
@@ -10556,7 +10601,7 @@ void CRunningScript::LocatePlayerCarCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10660,7 +10705,7 @@ void CRunningScript::LocateCharCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10746,9 +10791,9 @@ void CRunningScript::LocateCharCharCommand(int32 command, uint32* pIp)
 	UpdateCompareFlag(result);
 	if (debug)
 #ifdef FIX_BUGS
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 #else
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dX, b3D ? Z : MAP_Z_LOW_LIMIT);
 #endif
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
@@ -10827,7 +10872,7 @@ void CRunningScript::LocateCharCarCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10905,7 +10950,7 @@ void CRunningScript::LocateCharObjectCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -10977,7 +11022,7 @@ void CRunningScript::LocateCarCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -11016,7 +11061,7 @@ void CRunningScript::LocateSniperBulletCommand(int32 command, uint32* pIp)
 	result = CBulletInfo::TestForSniperBullet(X - dX, X + dX, Y - dY, Y + dY, b3D ? Z - dZ : -1000.0f, b3D ? Z + dZ : 1000.0f);
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(X - dX, Y - dY, Z - dZ, X + dX, Y + dY, Z + dZ);
@@ -11133,7 +11178,7 @@ void CRunningScript::PlayerInAreaCheckCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
@@ -11255,7 +11300,7 @@ void CRunningScript::PlayerInAngledAreaCheckCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantAngledArea((uint32)this + m_nIp, infX, infY, supX, supY,
+		CTheScripts::HighlightImportantAngledArea((uintptr)this + m_nIp, infX, infY, supX, supY,
 			rotatedSupX, rotatedSupY, rotatedInfX, rotatedInfY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
@@ -11376,7 +11421,7 @@ void CRunningScript::CharInAreaCheckCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
@@ -11474,7 +11519,7 @@ void CRunningScript::CarInAreaCheckCommand(int32 command, uint32* pIp)
 	}
 	UpdateCompareFlag(result);
 	if (debug)
-		CTheScripts::HighlightImportantArea((uint32)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
+		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, infX, infY, supX, supY, b3D ? (infZ + supZ) / 2 : MAP_Z_LOW_LIMIT);
 	if (CTheScripts::DbgFlag) {
 		if (b3D)
 			CTheScripts::DrawDebugCube(infX, infY, infZ, supX, supY, supZ);
@@ -11732,6 +11777,7 @@ INITSAVEBUF
 			case ENTITY_TYPE_DUMMY:
 				type = 4;
 				handle = CPools::GetDummyPool()->GetJustIndex((CDummy*)pEntity) + 1;
+			default: break;
 			}
 		}
 		WriteSaveBuf(buf, type);
@@ -11889,6 +11935,7 @@ void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntit
 			printf("Deleted a ped where a mission entity should be\n");
 			break;
 		}
+		default: break;
 		}
 	}
 }

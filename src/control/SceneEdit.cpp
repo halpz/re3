@@ -303,7 +303,7 @@ void CSceneEdit::Draw(void)
 			nCommandDrawn -= (MOVIE_TOTAL_COMMANDS - 1);
 		if (nCommandDrawn <= MOVIE_DO_NOTHING)
 			nCommandDrawn += (MOVIE_TOTAL_COMMANDS - 1);
-		sprintf(str, pCommandStrings[nCommandDrawn]);
+		sprintf(str, "%s", pCommandStrings[nCommandDrawn]);
 		AsciiToUnicode(str, wstr);
 		CFont::SetColor(CRGBA(0, 0, 0, 0));
 		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(COMMAND_NAME_X_RIGHT - SHADOW_OFFSET), SCREEN_SCALE_Y(COMMAND_NAME_Y + SHADOW_OFFSET + i * COMMAND_NAME_HEIGHT), wstr);

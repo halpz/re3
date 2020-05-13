@@ -80,6 +80,10 @@ CCamera::CCamera(void)
 	Init();
 }
 
+CCamera::CCamera(float)
+{
+}
+
 void
 CCamera::Init(void)
 {
@@ -87,7 +91,12 @@ CCamera::Init(void)
 	float fMouseAccelHorzntl = m_fMouseAccelHorzntl;
 	float fMouseAccelVertical = m_fMouseAccelVertical;
 #endif
+#ifdef FIX_BUGS
+	static const CCamera DummyCamera = CCamera(0.f);
+	*this = DummyCamera;
+#else
 	memset(this, 0, sizeof(CCamera));	// getting rid of vtable, eh?
+#endif
 #ifdef GTA3_1_1_PATCH
 	m_fMouseAccelHorzntl = fMouseAccelHorzntl;
 	m_fMouseAccelVertical = fMouseAccelVertical;
@@ -744,6 +753,7 @@ CCamera::CamControl(void)
 				case VEHICLE_TYPE_BOAT:
 					ReqMode = CCam::MODE_BEHINDBOAT;
 					break;
+				default: break;
 				}
 
 				// Car zoom value
@@ -2991,7 +3001,7 @@ CCamera::SetZoomValueFollowPedScript(int16 dist)
 	case 0: m_fPedZoomValueScript = 0.25f; break;
 	case 1: m_fPedZoomValueScript = 1.5f; break;
 	case 2: m_fPedZoomValueScript = 2.9f; break;
-	default: m_fPedZoomValueScript = m_fPedZoomValueScript; break;
+	default: break;
 	}
 
 	m_bUseScriptZoomValuePed = true;
@@ -3006,7 +3016,7 @@ CCamera::SetZoomValueCamStringScript(int16 dist)
 		case 0: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_1 : FREE_CAR_ZOOM_VALUE_1; break;
 		case 1: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_2 : FREE_CAR_ZOOM_VALUE_2; break;
 		case 2: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_3 : FREE_CAR_ZOOM_VALUE_3; break;
-		default: m_fCarZoomValueScript = m_fCarZoomValueScript; break;
+		default: break;
 		}
 	} else
 #endif
@@ -3015,7 +3025,7 @@ CCamera::SetZoomValueCamStringScript(int16 dist)
 		case 0: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_1; break;
 		case 1: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_2; break;
 		case 2: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_3; break;
-		default: m_fCarZoomValueScript = m_fCarZoomValueScript; break;
+		default: break;
 		}
 	}
 

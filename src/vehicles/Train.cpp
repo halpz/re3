@@ -514,7 +514,7 @@ CTrain::Shutdown(void)
 }
 
 void
-CTrain::ReadAndInterpretTrackFile(char *filename, CTrainNode **nodes, int16 *numNodes, int32 numStations, float *stationDists,
+CTrain::ReadAndInterpretTrackFile(Const char *filename, CTrainNode **nodes, int16 *numNodes, int32 numStations, float *stationDists,
 		float *totalLength, float *totalDuration, CTrainInterpolationLine *interpLines, bool rightRail)
 {
 #ifdef GTA_TRAIN

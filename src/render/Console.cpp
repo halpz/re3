@@ -17,7 +17,7 @@ CConsole::AddLine(char *s, uint8 r, uint8 g, uint8 b)
 	char tempstr[MAX_STR_LEN+1];
 
 	while (strlen(s) > MAX_STR_LEN) {
-		strncpy_s(tempstr, s, MAX_STR_LEN);
+		strncpy(tempstr, s, MAX_STR_LEN);
 		tempstr[MAX_STR_LEN-1] = '\0';
 		s += MAX_STR_LEN - 1;
 		AddOneLine(tempstr, r, g, b);

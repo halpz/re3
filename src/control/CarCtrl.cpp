@@ -2671,6 +2671,7 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 				SteerAICarWithPhysicsHeadingForTarget(pVehicle, nil, pVehicle->AutoPilot.m_vecDestinationCoors.x,
 					pVehicle->AutoPilot.m_vecDestinationCoors.y, pSwerve, pAccel, pBrake, pHandbrake);
 				return;
+			default: break;
 			}
 		}
 		pCurrentLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];
@@ -2869,7 +2870,7 @@ CCarCtrl::RegisterVehicleOfInterest(CVehicle* pVehicle)
 			return;
 		}
 	}
-	uint32 oldestCarWeKeepTime = UINT_MAX;
+	uint32 oldestCarWeKeepTime = UINT32_MAX;
 	int oldestCarWeKeepIndex = 0;
 	for (int i = 0; i < MAX_CARS_TO_KEEP; i++) {
 		if (apCarsToKeep[i] && aCarsToKeepTime[i] < oldestCarWeKeepTime) {

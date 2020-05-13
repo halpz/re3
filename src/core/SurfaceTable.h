@@ -100,7 +100,7 @@ class CSurfaceTable
 {
 	static float ms_aAdhesiveLimitTable[NUMADHESIVEGROUPS][NUMADHESIVEGROUPS];
 public:
-	static void Initialise(char *filename);
+	static void Initialise(Const char *filename);
 	static int GetAdhesionGroup(uint8 surfaceType);
 	static float GetWetMultiplier(uint8 surfaceType);
 	static float GetAdhesiveLimit(CColPoint &colpoint);

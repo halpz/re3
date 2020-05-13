@@ -1,7 +1,7 @@
-#include <direct.h>
 #include <csignal>
 #define WITHWINDOWS
 #include "common.h"
+#include "crossplatform.h"
 #include "patcher.h"
 #include "Renderer.h"
 #include "Credits.h"
@@ -28,6 +28,11 @@
 #include "debugmenu.h"
 #include "Frontend.h"
 
+#ifndef _WIN32
+#include "assert.h"
+#include <stdarg.h>
+#endif
+
 #include <list>
 
 #ifdef RWLIBS
@@ -36,7 +41,7 @@ extern "C" int vsprintf(char* const _Buffer, char const* const _Format, va_list 
 
 
 #ifdef USE_PS2_RAND
-unsigned __int64 myrand_seed = 1;
+unsigned long long myrand_seed = 1;
 #else
 unsigned long int myrand_seed = 1;
 #endif
@@ -207,13 +212,22 @@ static const char *carnames[] = {
 	"bloodra", "bloodrb", "vicechee"
 };
 
-static std::list<CTweakVar *> TweakVarsList;
+static CTweakVar** TweakVarsList;
+static int TweakVarsListSize = -1;
 static bool bAddTweakVarsNow = false;
 static const char *pTweakVarsDefaultPath = NULL;
 
 void CTweakVars::Add(CTweakVar *var)
 {
-	TweakVarsList.push_back(var);
+	if(TweakVarsListSize == -1) {
+		TweakVarsList = (CTweakVar**)malloc(64 * sizeof(CTweakVar*));
+		TweakVarsListSize = 0;
+	}
+	if(TweakVarsListSize > 63)
+		TweakVarsList = (CTweakVar**) realloc(TweakVarsList, (TweakVarsListSize + 1) * sizeof(var));
+
+	TweakVarsList[TweakVarsListSize++] = var;
+//	TweakVarsList.push_back(var);
 	
 	if ( bAddTweakVarsNow )
 		var->AddDBG(pTweakVarsDefaultPath);
@@ -223,8 +237,8 @@ void CTweakVars::AddDBG(const char *path)
 {
 	pTweakVarsDefaultPath = path;
 
-	for(auto i = TweakVarsList.begin(); i != TweakVarsList.end(); ++i)
-		(*i)->AddDBG(pTweakVarsDefaultPath);
+	for(int i = 0; i < TweakVarsListSize; ++i)
+		TweakVarsList[i]->AddDBG(pTweakVarsDefaultPath);
 	
 	bAddTweakVarsNow = true;
 }
@@ -395,6 +409,7 @@ static char re3_buff[re3_buffsize];
 
 void re3_assert(const char *expr, const char *filename, unsigned int lineno, const char *func)
 {
+#ifdef _WIN32
 	int nCode;
 
 	strcpy_s(re3_buff, re3_buffsize, "Assertion failed!" );
@@ -439,13 +454,22 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 		return;
 
 	abort();
+#else
+	// TODO
+	printf("\nRE3 ASSERT FAILED\n\tFile: %s\n\tLine: %d\n\tFunction: %s\n\tExpression: %s\n",filename,lineno,func,expr);
+	assert(false);
+#endif
 }
 
 void re3_debug(const char *format, ...)
 {
 	va_list va;
 	va_start(va, format);
+#ifdef _WIN32
 	vsprintf_s(re3_buff, re3_buffsize, format, va);
+#else
+	vsprintf(re3_buff, format, va);
+#endif
 	va_end(va);
 
 	printf("%s", re3_buff);
@@ -457,18 +481,26 @@ void re3_trace(const char *filename, unsigned int lineno, const char *func, cons
 	char buff[re3_buffsize *2];
 	va_list va;
 	va_start(va, format);
+#ifdef _WIN32
 	vsprintf_s(re3_buff, re3_buffsize, format, va);
 	va_end(va);
 	
 	sprintf_s(buff, re3_buffsize * 2, "[%s.%s:%d]: %s", filename, func, lineno, re3_buff);
+#else
+	vsprintf(re3_buff, format, va);
+	va_end(va);
 	
-	OutputDebugStringA(buff);
+	sprintf(buff, "[%s.%s:%d]: %s", filename, func, lineno, re3_buff);
+#endif
+
+	OutputDebugString(buff);
 }
 
 void re3_usererror(const char *format, ...)
 {
 	va_list va;
 	va_start(va, format);
+#ifdef _WIN32
 	vsprintf_s(re3_buff, re3_buffsize, format, va);
 	va_end(va);
 	
@@ -477,6 +509,11 @@ void re3_usererror(const char *format, ...)
 
 	raise(SIGABRT);
 	_exit(3);
+#else
+	vsprintf(re3_buff, format, va);
+	printf("\nRE3 Error!\n\t%s\n",re3_buff);
+	assert(false);
+#endif
 }
 
 #ifdef VALIDATE_SAVE_SIZE

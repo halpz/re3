@@ -401,7 +401,7 @@ DestroySplashScreen(void)
 	splashTxdId = -1;
 }
 
-char*
+Const char*
 GetRandomSplashScreen(void)
 {
 	int index;
@@ -424,10 +424,10 @@ GetRandomSplashScreen(void)
 	return splashName;
 }
 
-char*
+Const char*
 GetLevelSplashScreen(int level)
 {
-	static char *splashScreens[4] = {
+	static Const char *splashScreens[4] = {
 		nil,
 		"splash1",
 		"splash2",
@@ -1281,7 +1281,7 @@ void TheGame(void)
 	CGame::Initialise("DATA\\GTA3.DAT");
 #endif
 
-	char *splash = GetRandomSplashScreen(); // inlined here
+	Const char *splash = GetRandomSplashScreen(); // inlined here
 
 	LoadingScreen("Starting Game", NULL, splash);
 
@@ -1315,7 +1315,7 @@ void TheGame(void)
 		if (FrontEndMenuManager.m_bWantToLoad)
 #endif
 		{
-			char *splash1 = GetLevelSplashScreen(CGame::currLevel);
+			Const char *splash1 = GetLevelSplashScreen(CGame::currLevel);
 			LoadSplash(splash1);
 		}
 
@@ -1776,6 +1776,8 @@ void GameInit()
 	}
 }
 
+// Not used anyway. PS2 main() port
+#ifdef _WIN32
 int
 main(int argc, char *argv[])
 {
@@ -1847,3 +1849,4 @@ main(int argc, char *argv[])
 	
 	return 0;
 }
+#endif

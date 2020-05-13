@@ -4,7 +4,7 @@
 
 class CParticle;
 
-enum 
+enum
 {
 	ZCHECK_FIRST      = BIT(0),
 	ZCHECK_STEP       = BIT(1),
@@ -60,14 +60,12 @@ struct tParticleSystemData
 	uint8         m_InitialColorVariation;
 	RwRGBA        m_FadeDestinationColor;
 	uint32        m_ColorFadeTime;
-	
+
 	RwRaster      **m_ppRaster;
 	CParticle     *m_pParticles;
 };
 
-#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(tParticleSystemData, 0x88);
-#endif
 
 class cParticleSystemMgr
 {
@@ -121,14 +119,12 @@ public:
 	tParticleSystemData m_aParticles[MAX_PARTICLES];
 
 	cParticleSystemMgr();
-	
+
 	void Initialise();
 	void LoadParticleData();
 	void RangeCheck(tParticleSystemData *pData) { }
 };
 
-#ifdef CHECK_STRUCT_SIZES
 VALIDATE_SIZE(cParticleSystemMgr, 0x2420);
-#endif
 
 extern cParticleSystemMgr mod_ParticleSystemManager;

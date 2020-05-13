@@ -38,7 +38,7 @@ CPed* crimeReporters[NUMPHONES] = {};
 bool
 isPhoneAvailable(int m_phoneId)
 {
-	return gPhoneInfo.m_aPhones[m_phoneId].m_nState == PHONE_STATE_FREE && 
+	return gPhoneInfo.m_aPhones[m_phoneId].m_nState == PHONE_STATE_FREE &&
 		(crimeReporters[m_phoneId] == nil || !crimeReporters[m_phoneId]->IsPointerValid() || !crimeReporters[m_phoneId]->bRunningToPhone || crimeReporters[m_phoneId]->m_objective > OBJECTIVE_IDLE ||
 			crimeReporters[m_phoneId]->m_nLastPedState != PED_SEEK_POS &&
 			(crimeReporters[m_phoneId]->m_nPedState != PED_MAKE_CALL && crimeReporters[m_phoneId]->m_nPedState != PED_FACE_PHONE && crimeReporters[m_phoneId]->m_nPedState != PED_SEEK_POS));
@@ -194,10 +194,10 @@ CPhoneInfo::HasMessageBeenDisplayed(int phoneId)
 {
 	if (bDisplayingPhoneMessage)
 		return false;
-	
+
 	int state = m_aPhones[phoneId].m_nState;
 
-	return state == PHONE_STATE_REPEATED_MESSAGE_SHOWN_ONCE || 
+	return state == PHONE_STATE_REPEATED_MESSAGE_SHOWN_ONCE ||
 		state == PHONE_STATE_ONETIME_MESSAGE_STARTED ||
 		state == PHONE_STATE_REPEATED_MESSAGE_STARTED;
 }
@@ -218,7 +218,7 @@ INITSAVEBUF
 		m_aPhones[i] = ReadSaveBuf<CPhone>(buf);
 		// It's saved as building pool index in save file, convert it to true entity
 		if (m_aPhones[i].m_pEntity) {
-			m_aPhones[i].m_pEntity = CPools::GetBuildingPool()->GetSlot((int)m_aPhones[i].m_pEntity - 1);
+			m_aPhones[i].m_pEntity = CPools::GetBuildingPool()->GetSlot((uintptr)m_aPhones[i].m_pEntity - 1);
 		}
 	}
 VALIDATESAVEBUF(size)

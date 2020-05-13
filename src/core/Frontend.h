@@ -598,7 +598,7 @@ public:
 #endif
 
 public:
-	static void BuildStatLine(char *text, void *stat, bool itsFloat, void *stat2);
+	static void BuildStatLine(Const char *text, void *stat, bool itsFloat, void *stat2);
 	static void CentreMousePointer();
 	void CheckCodesForControls(int);
 	bool CheckHover(int x1, int x2, int y1, int y2);
@@ -664,4 +664,3 @@ VALIDATE_SIZE(CMenuManager, 0x564);
 #endif
 
 extern CMenuManager FrontEndMenuManager;
-extern unsigned long _dwOperatingSystemVersion;

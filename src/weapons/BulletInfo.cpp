@@ -200,6 +200,7 @@ void CBulletInfo::Update(void)
 				case ENTITY_TYPE_VEHICLE:
 					DMAudio.PlayOneShot(((CVehicle*)pHitEntity)->m_audioEntityId, SOUND_WEAPON_HIT_VEHICLE, 1.0f);
 					break;
+				default: break;
 				}
 			}
 			CGlass::WasGlassHitByBullet(pHitEntity, point.point);

@@ -356,6 +356,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				return true;
 			}
 			break;
+		default: break;
 		}
 	}
 	if (!m_bRemoved && (m_eType == PICKUP_ONCE_TIMEOUT || m_eType == PICKUP_MONEY) && CTimer::GetTimeInMilliseconds() > m_nTimer)
@@ -576,6 +577,7 @@ CPickups::ModelForWeapon(eWeaponType weaponType)
 	case WEAPONTYPE_FLAMETHROWER: return MI_FLAMETHROWER;
 	case WEAPONTYPE_MOLOTOV: return MI_MOLOTOV;
 	case WEAPONTYPE_GRENADE: return MI_GRENADE;
+	default: break;
 	}
 	return 0;
 }
@@ -630,15 +632,15 @@ CPickups::Update()
 		float mult;
 		if ( dist < 10.0f )
 			mult = 1.0f - (dist / 10.0f );
-		else 
+		else
 			mult = 0.0f;
-		
+
 		CVector pos = StaticCamCoors;
 		pos.z += (pPlayerVehicle->GetColModel()->boundingBox.GetSize().z + 2.0f) * mult;
-		
+
 		if ( (CTimer::GetTimeInMilliseconds() - StaticCamStartTime) > 750 )
 		{
-			TheCamera.SetCamPositionForFixedMode(pos, CVector(0.0f, 0.0f, 0.0f));	
+			TheCamera.SetCamPositionForFixedMode(pos, CVector(0.0f, 0.0f, 0.0f));
 			TheCamera.TakeControl(FindPlayerVehicle(), CCam::MODE_FIXED, JUMP_CUT, CAMCONTROL_SCRIPT);
 		}
 
@@ -988,7 +990,7 @@ INITSAVEBUF
 		aPickUps[i] = ReadSaveBuf<CPickup>(buf);
 
 		if (aPickUps[i].m_eType != PICKUP_NONE && aPickUps[i].m_pObject != nil)
-			aPickUps[i].m_pObject = CPools::GetObjectPool()->GetSlot((int32)aPickUps[i].m_pObject - 1);
+			aPickUps[i].m_pObject = CPools::GetObjectPool()->GetSlot((uintptr)aPickUps[i].m_pObject - 1);
 	}
 
 	CollectedPickUpIndex = ReadSaveBuf<uint16>(buf);
@@ -1029,7 +1031,7 @@ CPacManPickup::Update()
 	if (FindPlayerVehicle() == nil) return;
 
 	CVehicle *veh = FindPlayerVehicle();
-	
+
 	if (DistanceSqr2D(FindPlayerVehicle()->GetPosition(), m_vecPosn.x, m_vecPosn.y) < 100.0f && veh->IsSphereTouchingVehicle(m_vecPosn.x, m_vecPosn.y, m_vecPosn.z, 1.5f)) {
 		switch (m_eType)
 		{

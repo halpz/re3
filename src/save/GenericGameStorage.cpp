@@ -1,5 +1,5 @@
+#define WITHWINDOWS
 #include "common.h"
-#define USEALTERNATIVEWINFUNCS
 #include "crossplatform.h"
 #include "main.h"
 
@@ -246,7 +246,7 @@ GenericLoad()
 
 	// Load SimpleVars and Scripts
 	CheckSum = 0;
-	CDate(CompileDateAndTime);
+	CDate dummy; // unused
 	CPad::ResetCheats();
 	if (!ReadInSizeofSaveFileBuffer(file, size))
 		return false;
