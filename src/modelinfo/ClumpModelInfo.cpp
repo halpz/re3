@@ -78,10 +78,6 @@ CClumpModelInfo::SetClump(RpClump *clump)
 	AddTexDictionaryRef();
 	RpClumpForAllAtomics(clump, SetAtomicRendererCB, nil);
 
-	// TODO: also set for player?
-	if(strncmp(GetName(), "playerh", 8) == 0)
-		RpClumpForAllAtomics(clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
-
 #ifdef PED_SKIN
 	if(IsClumpSkinned(clump)){
 		int i;
@@ -114,8 +110,12 @@ CClumpModelInfo::SetClump(RpClump *clump)
 			weights->w3 /= sum;
 		}
 		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
-	}
+	}else
 #endif
+		// do not set on skinned clip because cutscene head is not compatible with player head
+		if(strncmp(GetName(), "playerh", 8) == 0)
+			RpClumpForAllAtomics(clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
+
 }
 
 void
