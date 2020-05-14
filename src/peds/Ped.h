@@ -149,7 +149,22 @@ enum eWaitState {
 	WAITSTATE_PLAYANIM_HANDSUP,
 	WAITSTATE_PLAYANIM_HANDSCOWER,
 	WAITSTATE_PLAYANIM_CHAT,
-	WAITSTATE_FINISH_FLEE
+	WAITSTATE_FINISH_FLEE,
+	WAITSTATE_SIT_DOWN,
+	WAITSTATE_SIT_DOWN_RVRS,
+	WAITSTATE_SIT_UP,
+	WAITSTATE_SIT_IDLE,
+	WAITSTATE_USE_ATM,
+	WAITSTATE_SUN_BATHE_PRE,
+	WAITSTATE_SUN_BATHE_DOWN,
+	WAITSTATE_SUN_BATHE_IDLE,
+	WAITSTATE_RIOT,
+	WAITSTATE_FAST_FALL,
+	WAITSTATE_BOMBER,
+	WAITSTATE_STRIPPER,
+	WAITSTATE_GROUND_ATTACK,
+	WAITSTATE_LANCESITTING,
+	WAITSTATE_PLAYANIM_HANDSUP_SIMPLE,
 };
 
 enum eObjective : uint32 {
@@ -201,14 +216,13 @@ enum eObjective : uint32 {
 	OBJECTIVE_USE_SHELTER_ATTRACTOR,
 	OBJ_46,
 	OBJ_47,
-	OBJ_48,
+	OBJECTIVE_WAIT_FOR_RAIN_TO_END,
 	OBJ_49,
 	OBJ_50,
 	OBJ_51,
-	OBJ_52,
+	OBJECTIVE_WAIT_FOR_BUS,
 	OBJECTIVE_USE_ICECREAM_ATTRACTOR,
-	OBJ_53,
-	OBJ_54,
+	OBJECTIVE_PURCHASE_ICECREAM,
 	OBJ_55,
 	OBJ_56,
 	OBJ_57,
@@ -414,6 +428,8 @@ public:
 	uint32 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 
+	uint32 bReachedAttractorHeadingTarget : 1; // 0x154 0x40
+	uint32 bTurnedAroundOnAttractor : 1; // 0x154 0x80
 	uint32 bHasAlreadyUsedAttractor : 1; // 0x155 0x1
 	uint32 bCarPassenger : 1; // 0x155 0x4
 	uint32 bMiamiViceCop : 1;  // 0x155 0x20
@@ -425,6 +441,7 @@ public:
 	CPed *m_pedInObjective;
 	CVehicle *m_carInObjective;
 	CVector m_nextRoutePointPos;
+	float m_attractorHeading;
 	CPed *m_leader;
 	eFormation m_pedFormation;
 	uint32 m_fearFlags;
@@ -482,7 +499,7 @@ public:
 	CVehicle *m_pMyVehicle;
 	bool bInVehicle;
 	float m_distanceToCountSeekDone;
-
+	float m_acceptableHeadingOffset;
 	CPedAttractor* m_attractor;
 	int32 m_positionInQueue;
 	CVehicle* m_vehicleInAccident;
@@ -610,6 +627,7 @@ public:
 	void SetObjective(eObjective, int16, int16);
 	void SetObjective(eObjective, CVector);
 	void SetObjective(eObjective, CVector, float);
+	void SetObjective(eObjective, float, const CVector&);
 	void ClearChat(void);
 	void InformMyGangOfAttack(CEntity*);
 	void ReactToAttack(CEntity*);
@@ -822,6 +840,7 @@ public:
 #endif
 
 	void SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float, float, int);
+	void ClearWaitState(void);
 
 	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
 	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
@@ -837,6 +856,12 @@ public:
 	bool Driving(void) { return m_nPedState == PED_DRIVING; }
 	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
 	bool EnteringCar(void) { return m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK; }
+	bool HasAttractor(void) { return m_attractor != nil; }
+	bool IsUseAttractorObjective(eObjective obj) {
+		return obj == OBJECTIVE_USE_ATM_ATTRACTOR || obj == OBJECTIVE_USE_ICECREAM_ATTRACTOR ||
+			obj == OBJECTIVE_USE_PIZZA_ATTRACTOR || obj == OBJECTIVE_USE_SEAT_ATTRACTOR ||
+			obj == OBJECTIVE_USE_SHELTER_ATTRACTOR || obj == OBJECTIVE_USE_STOP_ATTRACTOR;
+	}
 
 	void ReplaceWeaponWhenExitingVehicle(void);
 	void RemoveWeaponWhenEnteringVehicle(void);
