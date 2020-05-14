@@ -779,7 +779,11 @@ cSampleManager::IsPedCommentLoaded(uint32 nComment)
 
 	for ( int32 i = 0; i < _TODOCONST(3); i++ )
 	{
+#ifdef FIX_BUGS
+		slot = (nCurrentPedSlot - i - 1) % ARRAY_SIZE(nPedSlotSfx);
+#else
 		slot = nCurrentPedSlot - i - 1;
+#endif
 		if ( nComment == nPedSlotSfx[slot] )
 			return true;
 	}

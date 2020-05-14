@@ -16166,7 +16166,11 @@ CPed::SeekCar(void)
 	}
 
 	if (dest.x == 0.0f && dest.y == 0.0f) {
+#ifdef FIX_BUGS
+		if ((!IsPlayer() && CharCreatedBy != MISSION_CHAR) || vehToSeek->VehicleCreatedBy != MISSION_VEHICLE || vehToSeek->pDriver || !vehToSeek->CanPedOpenLocks(this)) {
+#else
 		if ((!IsPlayer() && CharCreatedBy != MISSION_CHAR) || vehToSeek->VehicleCreatedBy != MISSION_VEHICLE || vehToSeek->pDriver) {
+#endif
 			RestorePreviousState();
 			if (IsPlayer()) {
 				ClearObjective();
