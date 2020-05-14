@@ -715,10 +715,23 @@ void scrollCB(GLFWwindow* window, double xoffset, double yoffset);
 void cursorCB(GLFWwindow* window, double xpos, double ypos);
 void joysChangeCB(int jid, int event);
 
+bool IsThisJoystickBlacklisted(int i)
+{
+	const char *joyname = glfwGetJoystickName(i);
+
+	// this is just a keyboard and mouse
+	// Microsoft Microsoft® 2.4GHz Transceiver v8.0 Consumer Control
+	// Microsoft Microsoft® 2.4GHz Transceiver v8.0 System Control
+	if(strstr(joyname, "2.4GHz Transceiver"))
+		return true;
+
+	return false;
+}
+
 void _InputInitialiseJoys()
 {
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
-		if (glfwJoystickPresent(i)) {
+		if (glfwJoystickPresent(i) && !IsThisJoystickBlacklisted(i)) {
 			if (PSGLOBAL(joy1id) == -1)
 				PSGLOBAL(joy1id) = i;
 			else if (PSGLOBAL(joy2id) == -1)

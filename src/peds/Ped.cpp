@@ -16049,7 +16049,11 @@ CPed::SeekCar(void)
 	}
 
 	if (dest.x == 0.0f && dest.y == 0.0f) {
+#ifdef FIX_BUGS
+		if ((!IsPlayer() && CharCreatedBy != MISSION_CHAR) || vehToSeek->VehicleCreatedBy != MISSION_VEHICLE || vehToSeek->pDriver || !vehToSeek->CanPedOpenLocks(this)) {
+#else
 		if ((!IsPlayer() && CharCreatedBy != MISSION_CHAR) || vehToSeek->VehicleCreatedBy != MISSION_VEHICLE || vehToSeek->pDriver) {
+#endif
 			RestorePreviousState();
 			if (IsPlayer()) {
 				ClearObjective();
@@ -17621,23 +17625,25 @@ CPed::SetExitBoat(CVehicle *boat)
 }
 
 #ifdef COMPATIBLE_SAVES
+#define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
+#define CopyToBuf(buf, data) memcpy(buf, &data, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
 void
 CPed::Save(uint8*& buf)
 {
 	SkipSaveBuf(buf, 52);
-	WriteSaveBuf<float>(buf, GetPosition().x);
-	WriteSaveBuf<float>(buf, GetPosition().y);
-	WriteSaveBuf<float>(buf, GetPosition().z);
+	CopyToBuf(buf, GetPosition().x);
+	CopyToBuf(buf, GetPosition().y);
+	CopyToBuf(buf, GetPosition().z);
 	SkipSaveBuf(buf, 288);
-	WriteSaveBuf<uint8>(buf, CharCreatedBy);
+	CopyToBuf(buf, CharCreatedBy);
 	SkipSaveBuf(buf, 351);
-	WriteSaveBuf<float>(buf, m_fHealth);
-	WriteSaveBuf<float>(buf, m_fArmour);
+	CopyToBuf(buf, m_fHealth);
+	CopyToBuf(buf, m_fArmour);
 	SkipSaveBuf(buf, 148);
 	for (int i = 0; i < 13; i++) // has to be hardcoded
 		m_weapons[i].Save(buf);
 	SkipSaveBuf(buf, 5);
-	WriteSaveBuf<uint8>(buf, m_maxWeaponTypeAllowed);
+	CopyToBuf(buf, m_maxWeaponTypeAllowed);
 	SkipSaveBuf(buf, 162);
 }
 
@@ -17645,19 +17651,21 @@ void
 CPed::Load(uint8*& buf)
 {
 	SkipSaveBuf(buf, 52);
-	GetMatrix().GetPosition().x = ReadSaveBuf<float>(buf);
-	GetMatrix().GetPosition().y = ReadSaveBuf<float>(buf);
-	GetMatrix().GetPosition().z = ReadSaveBuf<float>(buf);
+	CopyFromBuf(buf, GetMatrix().GetPosition().x);
+	CopyFromBuf(buf, GetMatrix().GetPosition().y);
+	CopyFromBuf(buf, GetMatrix().GetPosition().z);
 	SkipSaveBuf(buf, 288);
-	CharCreatedBy = ReadSaveBuf<uint8>(buf);
+	CopyFromBuf(buf, CharCreatedBy);
 	SkipSaveBuf(buf, 351);
-	m_fHealth = ReadSaveBuf<float>(buf);
-	m_fArmour = ReadSaveBuf<float>(buf);
+	CopyFromBuf(buf, m_fHealth);
+	CopyFromBuf(buf, m_fArmour);
 	SkipSaveBuf(buf, 148);
 	for (int i = 0; i < 13; i++) // has to be hardcoded
 		m_weapons[i].Load(buf);
 	SkipSaveBuf(buf, 5);
-	m_maxWeaponTypeAllowed = ReadSaveBuf<uint8>(buf);
+	CopyFromBuf(buf, m_maxWeaponTypeAllowed);
 	SkipSaveBuf(buf, 162);
 }
+#undef CopyFromBuf
+#undef CopyToBuf
 #endif

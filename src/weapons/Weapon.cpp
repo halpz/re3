@@ -2284,27 +2284,32 @@ CWeapon::ProcessLineOfSight(CVector const &point1, CVector const &point2, CColPo
 }
 
 #ifdef COMPATIBLE_SAVES
+#define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
+#define CopyToBuf(buf, data) memcpy(buf, &data, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
 void
 CWeapon::Save(uint8*& buf)
 {
-	WriteSaveBuf<uint32>(buf, m_eWeaponType);
-	WriteSaveBuf<uint32>(buf, m_eWeaponState);
-	WriteSaveBuf<uint32>(buf, m_nAmmoInClip);
-	WriteSaveBuf<uint32>(buf, m_nAmmoTotal);
-	WriteSaveBuf<uint32>(buf, m_nTimer);
-	WriteSaveBuf<bool>(buf, m_bAddRotOffset);
+	CopyToBuf(buf, m_eWeaponType);
+	CopyToBuf(buf, m_eWeaponState);
+	CopyToBuf(buf, m_nAmmoInClip);
+	CopyToBuf(buf, m_nAmmoTotal);
+	CopyToBuf(buf, m_nTimer);
+	CopyToBuf(buf, m_bAddRotOffset);
 	SkipSaveBuf(buf, 3);
 }
 
 void
 CWeapon::Load(uint8*& buf)
 {
-	m_eWeaponType = (eWeaponType)ReadSaveBuf<uint32>(buf);
-	m_eWeaponState = (eWeaponState)ReadSaveBuf<uint32>(buf);
-	m_nAmmoInClip = ReadSaveBuf<uint32>(buf);
-	m_nAmmoTotal = ReadSaveBuf<uint32>(buf);
-	m_nTimer = ReadSaveBuf<uint32>(buf);
-	m_bAddRotOffset = ReadSaveBuf<bool>(buf);
+	CopyFromBuf(buf, m_eWeaponType);
+	CopyFromBuf(buf, m_eWeaponState);
+	CopyFromBuf(buf, m_nAmmoInClip);
+	CopyFromBuf(buf, m_nAmmoTotal);
+	CopyFromBuf(buf, m_nTimer);
+	CopyFromBuf(buf, m_bAddRotOffset);
 	SkipSaveBuf(buf, 3);
 }
+
+#undef CopyFromBuf
+#undef CopyToBuf
 #endif

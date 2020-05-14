@@ -275,47 +275,41 @@ CPlayerInfo::SavePlayerInfo(uint8 *buf, uint32 *size)
 	// Interesting
 	*size = sizeof(CPlayerInfo);
 
-INITSAVEBUF
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nMoney);
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_WBState);
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nWBTime);
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTrafficMultiplier);
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_fRoadDensity);
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney);
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages);
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bInfiniteSprint);
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bFastReload);
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfJailFree);
-	WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree);
-	for (int i = 0; i < sizeof(CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName); i++) {
-		WriteSaveBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName[i]);
-	}
-// Save struct is different
-// VALIDATESAVEBUF(*size)
+#define CopyToBuf(buf, data) memcpy(buf, &data, sizeof(data)); buf += sizeof(data);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nMoney);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_WBState);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nWBTime);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTrafficMultiplier);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_fRoadDensity);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bInfiniteSprint);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bFastReload);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfJailFree);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName);
+#undef CopyToBuf
 }
 
 void
 CPlayerInfo::LoadPlayerInfo(uint8 *buf, uint32 size)
 {
-INITSAVEBUF
-	CWorld::Players[CWorld::PlayerInFocus].m_nMoney = ReadSaveBuf<uint32>(buf);
-	CWorld::Players[CWorld::PlayerInFocus].m_WBState = ReadSaveBuf<int8>(buf);
-	CWorld::Players[CWorld::PlayerInFocus].m_nWBTime = ReadSaveBuf<uint32>(buf);
-	CWorld::Players[CWorld::PlayerInFocus].m_nTrafficMultiplier = ReadSaveBuf<int16>(buf);
-	CWorld::Players[CWorld::PlayerInFocus].m_fRoadDensity = ReadSaveBuf<float>(buf);
-	CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney = ReadSaveBuf<int32>(buf);
-	CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages = ReadSaveBuf<int32>(buf);
-	CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages = ReadSaveBuf<int32>(buf);
-	CWorld::Players[CWorld::PlayerInFocus].m_bInfiniteSprint = ReadSaveBuf<bool>(buf);
-	CWorld::Players[CWorld::PlayerInFocus].m_bFastReload = ReadSaveBuf<bool>(buf);
-	CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfJailFree = ReadSaveBuf<bool>(buf);
-	CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree = ReadSaveBuf<bool>(buf);
-	for (int i = 0; i < sizeof(CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName); i++) {
-		CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName[i] = ReadSaveBuf<char>(buf);
-	}
-// Save struct is different
-// VALIDATESAVEBUF(size)
+#define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); buf += sizeof(data);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nMoney);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_WBState);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nWBTime);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTrafficMultiplier);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_fRoadDensity);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bInfiniteSprint);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bFastReload);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfJailFree);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName)
+#undef CopyFromBuf
 }
 
 void

@@ -1513,17 +1513,19 @@ CPlayerPed::ProcessControl(void)
 }
 
 #ifdef COMPATIBLE_SAVES
+#define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
+#define CopyToBuf(buf, data) memcpy(buf, &data, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
 void
 CPlayerPed::Save(uint8*& buf)
 {
 	CPed::Save(buf);
 	SkipSaveBuf(buf, 16);
-	WriteSaveBuf<float>(buf, m_fMaxStamina);
+	CopyToBuf(buf, m_fMaxStamina);
 	SkipSaveBuf(buf, 28);
-	WriteSaveBuf<int32>(buf, m_nTargettableObjects[0]);
-	WriteSaveBuf<int32>(buf, m_nTargettableObjects[1]);
-	WriteSaveBuf<int32>(buf, m_nTargettableObjects[2]);
-	WriteSaveBuf<int32>(buf, m_nTargettableObjects[3]);
+	CopyToBuf(buf, m_nTargettableObjects[0]);
+	CopyToBuf(buf, m_nTargettableObjects[1]);
+	CopyToBuf(buf, m_nTargettableObjects[2]);
+	CopyToBuf(buf, m_nTargettableObjects[3]);
 	SkipSaveBuf(buf, 116);
 }
 
@@ -1532,12 +1534,14 @@ CPlayerPed::Load(uint8*& buf)
 {
 	CPed::Load(buf);
 	SkipSaveBuf(buf, 16);
-	m_fMaxStamina = ReadSaveBuf<float>(buf);
+	CopyFromBuf(buf, m_fMaxStamina);
 	SkipSaveBuf(buf, 28);
-	m_nTargettableObjects[0] = ReadSaveBuf<int32>(buf);
-	m_nTargettableObjects[1] = ReadSaveBuf<int32>(buf);
-	m_nTargettableObjects[2] = ReadSaveBuf<int32>(buf);
-	m_nTargettableObjects[3] = ReadSaveBuf<int32>(buf);
+	CopyFromBuf(buf, m_nTargettableObjects[0]);
+	CopyFromBuf(buf, m_nTargettableObjects[1]);
+	CopyFromBuf(buf, m_nTargettableObjects[2]);
+	CopyFromBuf(buf, m_nTargettableObjects[3]);
 	SkipSaveBuf(buf, 116);
 }
+#undef CopyFromBuf
+#undef CopyToBuf
 #endif
