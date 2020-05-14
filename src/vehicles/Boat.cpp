@@ -184,7 +184,11 @@ CBoat::ProcessControl(void)
 	}
 
 	float collisionDamage = pHandling->fCollisionDamageMultiplier * m_fDamageImpulse;
+#ifdef FIX_BUGS
+	if (collisionDamage > 25.0f && GetStatus() != STATUS_WRECKED && m_fHealth >= 150.0f && !bCollisionProof) {
+#else
 	if(collisionDamage > 25.0f && GetStatus() != STATUS_WRECKED && m_fHealth >= 150.0f){
+#endif
 		float prevHealth = m_fHealth;
 		if(this == FindPlayerVehicle()){
 			if(bTakeLessDamage)
