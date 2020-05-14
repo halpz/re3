@@ -64,8 +64,8 @@ CPedIK::RotateTorso(AnimBlendFrameData *node, LimbOrientation *limb, bool change
 		// We can't get the parent matrix of an hanim frame but
 		// this function is always called with PED_MID, so we know the parent frame.
 		// Trouble is that PED_MID is "Smid" on PS2/PC but BONE_torso on mobile/xbox...
-		// Assuming BONE_torso, the parent is BONE_mid, so let's use that:
-		RwMatrix *mat = GetBoneMatrix(m_ped, BONE_mid);
+		// so this doesn't exactly do what we'd like anyway
+		RwMatrix* mat = GetComponentMatrix(m_ped, PED_MID);
 
 		RwV3d vec1, vec2;
 		vec1.x = mat->right.z;
