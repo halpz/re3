@@ -314,3 +314,8 @@ public:
 		other.Reorthogonalise();
 	}
 };
+
+class CCompressedMatrix : public CCompressedMatrixNotAligned
+{
+	int _alignment; // no clue what would this align to
+};

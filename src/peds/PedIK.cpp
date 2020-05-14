@@ -65,7 +65,7 @@ CPedIK::RotateTorso(AnimBlendFrameData *node, LimbOrientation *limb, bool change
 		// this function is always called with PED_MID, so we know the parent frame.
 		// Trouble is that PED_MID is "Smid" on PS2/PC but BONE_torso on mobile/xbox...
 		// so this doesn't exactly do what we'd like anyway
-		RwMatrix *mat = GetComponentMatrix(m_ped, PED_MID);
+		RwMatrix* mat = GetComponentMatrix(m_ped, PED_MID);
 
 		RwV3d vec1, vec2;
 		vec1.x = mat->right.z;

@@ -168,7 +168,7 @@ CdStreamInit(int32 numChannels)
 
 	gNumChannels = numChannels;
 
-	gpReadInfo = (CdReadInfo *)calloc(sizeof(CdReadInfo), numChannels);
+	gpReadInfo = (CdReadInfo *)calloc(numChannels, sizeof(CdReadInfo));
 	ASSERT( gpReadInfo != nil );
 
 	CDDEBUG("read info %p", gpReadInfo);

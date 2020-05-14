@@ -107,7 +107,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	else
 		Doors[DOOR_BONNET].Init(0.0f, PI*0.3f, 1, 0);
 	if(pHandling->Flags & HANDLING_HANGING_BOOT)
-		Doors[DOOR_BOOT].Init(PI*0.4f, 0.0f, 0, 0);
+		Doors[DOOR_BOOT].Init(-PI*0.4f, 0.0f, 0, 0);
 	else if(pHandling->Flags & HANDLING_TAILGATE_BOOT)
 		Doors[DOOR_BOOT].Init(0.0, HALFPI, 1, 0);
 	else

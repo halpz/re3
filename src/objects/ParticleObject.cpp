@@ -1127,7 +1127,7 @@ CParticleObject::SaveParticle(uint8 *buffer, uint32 *length)
 	
 	for ( CParticleObject *p = pCloseListHead; p != NULL; p = p->m_pNext )
 	{
-#ifdef FIX_BUGS
+#if 0 // todo better
 		*(CParticleObject*)buffer = *p;
 #else
 		memcpy(buffer, p, sizeof(CParticleObject));
@@ -1137,7 +1137,7 @@ CParticleObject::SaveParticle(uint8 *buffer, uint32 *length)
 	
 	for ( CParticleObject *p = pFarListHead; p != NULL; p = p->m_pNext )
 	{
-#ifdef FIX_BUGS
+#if 0 // todo better
 		*(CParticleObject*)buffer = *p;
 #else
 		memcpy(buffer, p, sizeof(CParticleObject));

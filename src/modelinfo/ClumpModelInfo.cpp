@@ -74,7 +74,6 @@ CClumpModelInfo::SetClump(RpClump *clump)
 	AddTexDictionaryRef();
 	if(GetAnimFileIndex() != -1)
 		CAnimManager::AddAnimBlockRef(GetAnimFileIndex());
-
 	if(IsClumpSkinned(clump)){
 		int i;
 		RpHAnimHierarchy *hier;

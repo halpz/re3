@@ -5661,8 +5661,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
-		assert(pVehicle);
-		UpdateCompareFlag(pVehicle->bIsInWater);
+		UpdateCompareFlag(pVehicle && pVehicle->bIsInWater);
 		return 0;
 	}
 	case COMMAND_GET_CLOSEST_CHAR_NODE:
