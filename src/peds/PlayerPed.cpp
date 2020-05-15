@@ -16,6 +16,7 @@
 #include "Pools.h"
 #include "Darkel.h"
 #include "CarCtrl.h"
+#include "MBlur.h"
 
 #define PAD_MOVE_TO_GAME_WORLD_MOVE 60.0f
 
@@ -31,6 +32,7 @@ CPlayerPed::~CPlayerPed()
 	delete m_pWanted;
 }
 
+// --MIAMI: Done except commented out things
 CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 {
 	m_fMoveSpeed = 0.0f;
@@ -44,26 +46,47 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_nSelectedWepSlot = WEAPONTYPE_UNARMED;
 	m_nSpeedTimer = 0;
 	m_bSpeedTimerFlag = false;
+
+	// This should be something inlined
+	// TODO(Miami)
+
+	// if (pPointGunAt)
+	//	m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
 	m_pPointGunAt = nil;
+	if (m_nPedState == PED_FOLLOW_PATH)
+		ClearFollowPath();
+
+	// TODO(Miami)
+	// This should be something inlined
+
 	m_nPedState = PED_IDLE;
 	m_fMaxStamina = 150.0f;
 	m_fCurrentStamina = m_fMaxStamina;
 	m_fStaminaProgress = 0.0f;
 	m_nEvadeAmount = 0;
-	field_1367 = 0;
+	m_pEvadingFrom = nil;
 	m_nHitAnimDelayTimer = 0;
 	m_fAttackButtonCounter = 0.0f;
 	m_bHaveTargetSelected = false;
 	m_bHasLockOnTarget = false;
+	m_bDrunkVisualsWearOff = true;
 	m_bCanBeDamaged = true;
 	m_fWalkAngle = 0.0f;
 	m_fFPSMoveHeading = 0.0f;
+	m_pMinigunTopAtomic = nil;
+	m_fGunSpinSpeed = 0.0;
+	m_fGunSpinAngle = 0.0;
 	m_nTargettableObjects[0] = m_nTargettableObjects[1] = m_nTargettableObjects[2] = m_nTargettableObjects[3] = -1;
-	field_1413 = 0;
+	unused1 = false;
 	for (int i = 0; i < 6; i++) {
 		m_vecSafePos[i] = CVector(0.0f, 0.0f, 0.0f);
 		m_pPedAtSafePos[i] = nil;
+		m_pCheckPlayers[i] = nil;
 	}
+	m_nCheckPlayersIndex = 0;
+	m_nPadUpPressedInMilliseconds = 0;
+	m_nPadDownPressedInMilliseconds = 0;
+	// TODO(Miami): Idle anim block index
 }
 
 void CPlayerPed::ClearWeaponTarget()
@@ -181,8 +204,9 @@ CPlayerPed::UseSprintEnergy(void)
 	}
 }
 
+// --MIAMI: Use that on everywhere except ProcessPlayerWeapon
 void
-CPlayerPed::MakeChangesForNewWeapon(int8 weapon)
+CPlayerPed::MakeChangesForNewWeapon(eWeaponType weapon)
 {
 	if (m_nPedState == PED_SNIPER_MODE) {
 		RestorePreviousState();
@@ -195,12 +219,20 @@ CPlayerPed::MakeChangesForNewWeapon(int8 weapon)
 	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAim))
 		ClearWeaponTarget();
 
-	CAnimBlendAssociation *weaponAnim = RpAnimBlendClumpGetAssociation(GetClump(), CWeaponInfo::GetWeaponInfo(WEAPONTYPE_SNIPERRIFLE)->m_AnimToPlay);
+	CAnimBlendAssociation* weaponAnim = RpAnimBlendClumpGetAssociation(GetClump(), CWeaponInfo::GetWeaponInfo(WEAPONTYPE_SNIPERRIFLE)->m_bAnimDetonate ? 62 : 205);
 	if (weaponAnim) {
 		weaponAnim->SetRun();
 		weaponAnim->flags |= ASSOC_FADEOUTWHENDONE;
 	}
 	TheCamera.ClearPlayerWeaponMode();
+}
+
+// --MIAMI: Done, but this should be only called from ProcessPlayerWeapon
+void
+CPlayerPed::MakeChangesForNewWeapon(int32 slot)
+{
+	if(slot != -1)
+		MakeChangesForNewWeapon(m_weapons[slot].m_eWeaponType);
 }
 
 void
@@ -222,14 +254,19 @@ CPlayerPed::ReApplyMoveAnims(void)
 	}
 }
 
+// --MIAMI: Done
 void
 CPlayerPed::SetInitialState(void)
 {
+	m_nDrunkenness = 0;
+	m_nFadeDrunkenness = 0;
+	CMBlur::ClearDrunkBlur();
+	m_nDrunkCountdown = 0;
 	m_bAdrenalineActive = false;
 	m_nAdrenalineTime = 0;
-	CTimer::SetTimeStep(1.0f);
+	CTimer::SetTimeScale(1.0f);
 	m_pSeekTarget = nil;
-	m_vecSeekPos = { 0.0f, 0.0f, 0.0f };
+	m_vecSeekPos = CVector(0.0f, 0.0f, 0.0f);
 	m_fleeFromPosX = 0.0f;
 	m_fleeFromPosY = 0.0f;
 	m_fleeFrom = nil;
@@ -241,9 +278,14 @@ CPlayerPed::SetInitialState(void)
 	ClearLookFlag();
 	bIsPointingGunAt = false;
 	bRenderPedInCar = true;
+
 	if (m_pFire)
 		m_pFire->Extinguish();
+
 	RpAnimBlendClumpRemoveAllAssociations(GetClump());
+	if (m_nPedState == PED_FOLLOW_PATH)
+		ClearFollowPath();
+
 	m_nPedState = PED_IDLE;
 	SetMoveState(PEDMOVE_STILL);
 	m_nLastPedState = PED_NONE;
@@ -257,6 +299,11 @@ CPlayerPed::SetInitialState(void)
 	m_bCanBeDamaged = true;
 	m_pedStats->m_temper = 50;
 	m_fWalkAngle = 0.0f;
+	if (m_attachedTo && !bUsesCollision)
+		bUsesCollision = true;
+
+	m_attachedTo = nil;
+	m_attachWepAmmo = 0;
 }
 
 void
@@ -497,8 +544,9 @@ CPlayerPed::DoWeaponSmoothSpray(void)
 {
 	if (m_nPedState == PED_ATTACK && !m_pPointGunAt) {
 		eWeaponType weapon = GetWeapon()->m_eWeaponType;
-		if (weapon == WEAPONTYPE_FLAMETHROWER || weapon == WEAPONTYPE_COLT45 || weapon == WEAPONTYPE_UZI || weapon == WEAPONTYPE_SHOTGUN || 
-			weapon == WEAPONTYPE_AK47 || weapon == WEAPONTYPE_M16 || weapon == WEAPONTYPE_HELICANNON)
+		if (weapon == WEAPONTYPE_FLAMETHROWER || weapon == WEAPONTYPE_COLT45 || weapon == WEAPONTYPE_UZI ||
+			weapon == WEAPONTYPE_TEC9 || weapon == WEAPONTYPE_SILENCED_INGRAM || weapon == WEAPONTYPE_MP5 ||
+			weapon == WEAPONTYPE_SHOTGUN || weapon == WEAPONTYPE_AK47 || weapon == WEAPONTYPE_M16 || weapon == WEAPONTYPE_HELICANNON)
 			return true;
 	}
 	return false;
@@ -586,56 +634,71 @@ CPlayerPed::PlayerControlSniper(CPad *padUsed)
 	GetWeapon()->Update(m_audioEntityId);
 }
 
+// --MIAMI: Made compatible with slots, but still TODO
 // I think R* also used goto in here.
 void
 CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 {
-	if (CDarkel::FrenzyOnGoing())
+	if (CDarkel::FrenzyOnGoing() || m_attachedTo)
 		goto switchDetectDone;
 
-	if (padUsed->CycleWeaponRightJustDown() && !m_pPointGunAt) {
+	if (!m_pPointGunAt && /* !byte_A10B57 && */ GetWeapon()->m_eWeaponType != WEAPONTYPE_DETONATOR) {
+		if (padUsed->CycleWeaponRightJustDown()) {
 
-		if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
-			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON_RUNABOUT
-			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
-			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER_RUNABOUT
-			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER
-			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER_RUNABOUT) {
+			if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON_RUNABOUT
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER_RUNABOUT
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER_RUNABOUT) {
 
-			for (m_nSelectedWepSlot = m_currentWeapon + 1; m_nSelectedWepSlot < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; ++m_nSelectedWepSlot) {
-				if (HasWeapon(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed()) {
-					goto switchDetectDone;
+				for (m_nSelectedWepSlot = m_currentWeapon + 1; m_nSelectedWepSlot < TOTAL_WEAPON_SLOTS; ++m_nSelectedWepSlot) {
+					if (HasWeaponSlot(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed()) {
+						goto spentAmmoCheck;
+					}
 				}
+				m_nSelectedWepSlot = 0;
 			}
-			m_nSelectedWepSlot = WEAPONTYPE_UNARMED;
-		}
-	} else if (padUsed->CycleWeaponLeftJustDown() && !m_pPointGunAt) {
-		if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
-			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
-			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER) {
-
-			for (m_nSelectedWepSlot = m_currentWeapon - 1; ; --m_nSelectedWepSlot) {
-				if (m_nSelectedWepSlot < WEAPONTYPE_UNARMED)
-					m_nSelectedWepSlot = WEAPONTYPE_DETONATOR;
-
-				if (HasWeapon(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed()) {
-					goto switchDetectDone;
-				}
-			}
-		}
-	} else if (CWeaponInfo::GetWeaponInfo((eWeaponType)m_currentWeapon)->m_eWeaponFire != WEAPON_FIRE_MELEE) {
-		if (GetWeapon(m_currentWeapon).m_nAmmoTotal <= 0) {
+		} else if (padUsed->CycleWeaponLeftJustDown()) {
 			if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
 				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
 				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER) {
 
-				for (m_nSelectedWepSlot = m_currentWeapon - 1; m_nSelectedWepSlot >= 0; --m_nSelectedWepSlot) {
-					if (m_nSelectedWepSlot == WEAPONTYPE_BASEBALLBAT && HasWeapon(WEAPONTYPE_BASEBALLBAT)
-						|| GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0 && m_nSelectedWepSlot != WEAPONTYPE_MOLOTOV && m_nSelectedWepSlot != WEAPONTYPE_GRENADE) {
+				for (m_nSelectedWepSlot = m_currentWeapon - 1; ; --m_nSelectedWepSlot) {
+					if (m_nSelectedWepSlot < 0)
+						m_nSelectedWepSlot = 9;
+
+					if (HasWeaponSlot(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed()) {
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+spentAmmoCheck:
+	if (CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_eWeaponFire != WEAPON_FIRE_MELEE
+		/*&& (!padUsed->GetWeapon() || GetWeapon()->m_eWeaponType != WEAPONTYPE_MINIGUN) */) {
+		if (GetWeapon()->m_nAmmoTotal <= 0) {
+			if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
+				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER) {
+
+				if (GetWeapon()->m_eWeaponType != WEAPONTYPE_DETONATOR
+					|| GetWeapon(2).m_eWeaponType != WEAPONTYPE_DETONATOR_GRENADE)
+					m_nSelectedWepSlot = m_currentWeapon - 1;
+				else
+					m_nSelectedWepSlot = 2;
+
+				// BUG: m_nSelectedWepSlot is slot in VC but they compared against weapon types, lol.
+				for (; m_nSelectedWepSlot >= 0; --m_nSelectedWepSlot) {
+					if (m_nSelectedWepSlot == WEAPONTYPE_BASEBALLBAT && GetWeapon(6).m_eWeaponType == WEAPONTYPE_BASEBALLBAT
+						|| GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0
+						/*&& m_nSelectedWepSlot != WEAPONTYPE_MOLOTOV && m_nSelectedWepSlot != WEAPONTYPE_GRENADE && m_nSelectedWepSlot != WEAPONTYPE_TEARGAS */) {
 						goto switchDetectDone;
 					}
 				}
-				m_nSelectedWepSlot = WEAPONTYPE_UNARMED;
+				m_nSelectedWepSlot = 0;
 			}
 		}
 	}
@@ -643,6 +706,7 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 switchDetectDone:
 	if (m_nSelectedWepSlot != m_currentWeapon) {
 		if (m_nPedState != PED_ATTACK && m_nPedState != PED_AIM_GUN && m_nPedState != PED_FIGHT)
+			RemoveWeaponAnims(m_currentWeapon, -1000.0f);
 			MakeChangesForNewWeapon(m_nSelectedWepSlot);
 	}
 }
@@ -934,6 +998,7 @@ CPlayerPed::FindWeaponLockOnTarget(void)
 	return true;
 }
 
+// --MIAMI: Done, but uncomment new weapon types when weapons got ported
 void
 CPlayerPed::ProcessAnimGroups(void)
 {
@@ -946,17 +1011,29 @@ CPlayerPed::ProcessAnimGroups(void)
 			if (m_fWalkAngle > 0.0f) {
 				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 					groupToSet = ASSOCGRP_ROCKETLEFT;
+				else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+					GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
+					/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/ )
+					groupToSet = ASSOCGRP_CHAINSAWLEFT;
 				else
 					groupToSet = ASSOCGRP_PLAYERLEFT;
 			} else {
 				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 					groupToSet = ASSOCGRP_ROCKETRIGHT;
+				else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+					GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
+					/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
+					groupToSet = ASSOCGRP_CHAINSAWRIGHT;
 				else
 					groupToSet = ASSOCGRP_PLAYERRIGHT;
 			}
 		} else {
 			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 				groupToSet = ASSOCGRP_ROCKETBACK;
+			else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+				GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
+				/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
+				groupToSet = ASSOCGRP_CHAINSAWBACK;
 			else
 				groupToSet = ASSOCGRP_PLAYERBACK;
 		}
@@ -964,9 +1041,21 @@ CPlayerPed::ProcessAnimGroups(void)
 		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER) {
 			groupToSet = ASSOCGRP_PLAYERROCKET;
 		} else {
-			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT) {
+			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT
+				/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MACHETE */)
 				groupToSet = ASSOCGRP_PLAYERBBBAT;
-			} else if (GetWeapon()->m_eWeaponType != WEAPONTYPE_COLT45 && GetWeapon()->m_eWeaponType != WEAPONTYPE_UZI) {
+			else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+				GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
+				/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
+				groupToSet = ASSOCGRP_PLAYERCHAINSAW;
+			else if (GetWeapon()->m_eWeaponType != WEAPONTYPE_COLT45 && GetWeapon()->m_eWeaponType != WEAPONTYPE_UZI
+				// I hope this was inlined...
+				/*
+				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_PYTHON*/ && GetWeapon()->m_eWeaponType != WEAPONTYPE_TEC9
+				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_SILENCED_INGRAM && GetWeapon()->m_eWeaponType != WEAPONTYPE_MP5 /*
+				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_GOLFCLUB && GetWeapon()->m_eWeaponType != WEAPONTYPE_KATANA
+				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_CAMERA
+				*/) {
 				if (!GetWeapon()->IsType2Handed()) {
 					groupToSet = ASSOCGRP_PLAYER;
 				} else {
@@ -1185,7 +1274,7 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 		float neededTurn = CGeneral::LimitRadianAngle(padHeading - camOrientation);
 		if (doSmoothSpray) {
 			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER || GetWeapon()->m_eWeaponType == WEAPONTYPE_COLT45
-				|| GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI)
+				|| CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_nWeaponSlot == 5)
 				m_fRotationDest = m_fRotationCur - leftRight / 128.0f * (PI / 80.0f) * CTimer::GetTimeStep();
 			else
 				m_fRotationDest = m_fRotationCur - leftRight / 128.0f * (PI / 128.0f) * CTimer::GetTimeStep();

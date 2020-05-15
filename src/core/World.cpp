@@ -2048,9 +2048,12 @@ CWorld::Process(void)
 				   movingPed->EnteringCar()) {
 					CVehicle *movingCar = movingPed->m_pMyVehicle;
 					if(movingCar) {
+#ifdef GTA_TRAIN
 						if(movingCar->IsTrain()) {
 							movingPed->SetPedPositionInTrain();
-						} else {
+						} else
+#endif
+						{
 							switch(movingPed->m_nPedState) {
 							case PED_ENTER_CAR:
 							case PED_CARJACK: movingPed->EnterCar(); break;
@@ -2235,6 +2238,7 @@ CWorld::UseDetonator(CEntity *pEntity)
 				pVehicle->m_pBlowUpEntity->RegisterReference(&pVehicle->m_pBlowUpEntity);
 		}
 	}
+	CProjectileInfo::RemoveDetonatorProjectiles();
 }
 
 bool

@@ -4,8 +4,8 @@
 
 struct LimbOrientation
 {
-	float phi;
-	float theta;
+	float yaw;
+	float pitch;
 };
 
 struct LimbMovementInfo {
@@ -48,19 +48,17 @@ public:
 	static LimbMovementInfo ms_lowerArmInfo;
 
 	CPedIK(CPed *ped);
-	bool PointGunInDirection(float phi, float theta);
-	bool PointGunInDirectionUsingArm(float phi, float theta);
+	bool PointGunInDirection(float targetYaw, float targetPitch);
+	bool PointGunInDirectionUsingArm(float targetYaw, float targetPitch);
 	bool PointGunAtPosition(CVector const& position);
 	void GetComponentPosition(RwV3d *pos, uint32 node);
-	static RwMatrix *GetWorldMatrix(RwFrame *source, RwMatrix *destination);
 	void RotateTorso(AnimBlendFrameData* animBlend, LimbOrientation* limb, bool changeRoll);
 	void ExtractYawAndPitchLocal(RwMatrix *mat, float *yaw, float *pitch);
 	void ExtractYawAndPitchLocalSkinned(AnimBlendFrameData *node, float *yaw, float *pitch);
 	void ExtractYawAndPitchWorld(RwMatrix *mat, float *yaw, float *pitch);
-	LimbMoveStatus MoveLimb(LimbOrientation &limb, float approxPhi, float approxTheta, LimbMovementInfo &moveInfo);
+	LimbMoveStatus MoveLimb(LimbOrientation &limb, float targetYaw, float targetPitch, LimbMovementInfo &moveInfo);
 	bool RestoreGunPosn(void);
-	void RotateHead(void);
-	bool LookInDirection(float phi, float theta);
+	bool LookInDirection(float targetYaw, float targetPitch);
 	bool LookAtPosition(CVector const& pos);
 	bool RestoreLookAt(void);
 };

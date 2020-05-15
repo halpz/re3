@@ -1627,20 +1627,6 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 			entity = nil;
 	}
 
-	if(CamTargetEntity->m_rwObject){
-		// what's going on here?
-		if(RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_WEAPON_PUMP) ||
-		   RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_WEAPON_THROW) ||
-		   RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_WEAPON_THROWU) ||
-		   RpAnimBlendClumpGetAssociation(CamTargetEntity->GetClump(), ANIM_WEAPON_START_THROW)){
-			CPed *player = FindPlayerPed();
-			float PlayerDist = (Source - player->GetPosition()).Magnitude();
-			if(PlayerDist < 2.75f)
-				Near = PlayerDist/2.75f * DEFAULT_NEAR - 0.3f;
-			RwCameraSetNearClipPlane(Scene.camera, Max(Near, 0.1f));
-		}
-	}
-
 	TheCamera.m_bCamDirectlyInFront = false;
 	TheCamera.m_bCamDirectlyBehind = false;
 

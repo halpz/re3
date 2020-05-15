@@ -499,8 +499,20 @@ INITSAVEBUF
 		pPed->CharCreatedBy = pBufferPlayer->CharCreatedBy;
 		pPed->m_currentWeapon = 0;
 		pPed->m_maxWeaponTypeAllowed = pBufferPlayer->m_maxWeaponTypeAllowed;
-		for (int i = 0; i < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; i++)
-			pPed->m_weapons[i] = pBufferPlayer->m_weapons[i];
+		for (int i = 0; i < TOTAL_WEAPON_SLOTS; i++) {
+			if (pBufferPlayer->HasWeaponSlot(i)) {
+				int modelId = CWeaponInfo::GetWeaponInfo(pBufferPlayer->GetWeapon(i).m_eWeaponType)->m_nModelId;
+				if (modelId != -1) {
+					CStreaming::RequestModel(modelId, STREAMFLAGS_DEPENDENCY);
+					int modelId2 = CWeaponInfo::GetWeaponInfo(pBufferPlayer->GetWeapon(i).m_eWeaponType)->m_nModel2Id;
+					if (modelId2 != -1)
+						CStreaming::RequestModel(modelId2, STREAMFLAGS_DEPENDENCY);
+
+					CStreaming::LoadAllRequestedModels(false);
+				}
+				pPed->GiveWeapon(pBufferPlayer->GetWeapon(i).m_eWeaponType, pBufferPlayer->GetWeapon(i).m_nAmmoTotal);
+			}
+		}
 
 		if (pedtype == PEDTYPE_PLAYER1) {
 			pPed->m_wepAccuracy = 100;

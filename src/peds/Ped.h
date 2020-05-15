@@ -521,8 +521,9 @@ public:
 	uint8 m_stateUnused;
 	uint32 m_timerUnused;
 	CVector2D *m_wanderRangeBounds;	// array with 2 CVector2D (actually unused CRange2D class) - unused
-	CWeapon m_weapons[WEAPONTYPE_TOTAL_INVENTORY_WEAPONS];
+	CWeapon m_weapons[TOTAL_WEAPON_SLOTS];
 	eWeaponType m_storedWeapon;
+	uint32 m_storedWeaponAmmo;
 	uint8 m_currentWeapon;			// eWeaponType
 	uint8 m_maxWeaponTypeAllowed;	// eWeaponType
 	uint8 m_wepSkills;
@@ -548,12 +549,26 @@ public:
 	uint32 m_duckTimer;
 	uint32 m_duckAndCoverTimer;
 	uint32 m_bloodyFootprintCountOrDeathTime;	// Death time when bDoBloodyFootprints is false. Weird decision
+	uint32 m_shotTime;
+	uint32 m_shotTimeAdd;
 	uint8 m_panicCounter;
 	bool m_deadBleeding;
 	int8 m_bodyPartBleeding;		// PedNode, but -1 if there isn't
 	CPed *m_nearPeds[10];
 	uint16 m_numNearPeds;
-	int8 m_lastWepDam;
+	uint16 m_pedMoney;
+ 	int8 m_lastWepDam;
+	CEntity *m_lastDamEntity;
+	CEntity *m_attachedTo;
+	CVector m_vecAttachOffset;
+	uint16 m_attachType;
+	float m_attachRot;
+	uint32 m_attachWepAmmo;
+	uint32 m_threatFlags;
+	uint32 m_threatCheck;
+	uint32 m_lastThreatCheck;
+	uint32 m_sayType;
+	uint32 m_sayTimer;
 	uint32 m_lastSoundStart;
 	uint32 m_soundStart;
 	uint16 m_lastQueuedSound;
@@ -601,7 +616,8 @@ public:
 	void ClearAttack(void);
 	bool IsPedHeadAbovePos(float zOffset);
 	void RemoveWeaponModel(int modelId);
-	void SetCurrentWeapon(uint32 weaponType);
+	void SetCurrentWeapon(eWeaponType weaponType);
+	void SetCurrentWeapon(int weapon);
 	void Duck(void);
 	void ClearDuck(void);
 	void ClearPointGunAt(void);
@@ -612,7 +628,7 @@ public:
 	void PlayFootSteps(void);
 	void QuitEnteringCar(void);
 	void BuildPedLists(void);
-	uint32 GiveWeapon(eWeaponType weaponType, uint32 ammo);
+	int32 GiveWeapon(eWeaponType weaponType, uint32 ammo, bool unused = false);
 	void CalculateNewOrientation(void);
 	float WorkOutHeadingForMovingFirstPerson(float);
 	void CalculateNewVelocity(void);
@@ -685,6 +701,7 @@ public:
 	void RemoveInCarAnims(void);
 	void CollideWithPed(CPed*);
 	void SetDirectionToWalkAroundObject(CEntity*);
+	void RemoveWeaponAnims(int, float);
 	void CreateDeadPedMoney(void);
 	void CreateDeadPedWeaponPickups(void);
 	void SetAttackTimer(uint32);
@@ -700,7 +717,6 @@ public:
 	void EnterCar(void);
 	uint8 GetNearestTrainPedPosition(CVehicle*, CVector&);
 	uint8 GetNearestTrainDoor(CVehicle*, CVector&);
-	void LineUpPedWithTrain(void);
 	void ExitCar(void);
 	void Fight(void);
 	bool FindBestCoordsFromNodes(CVector, CVector*);
@@ -747,7 +763,6 @@ public:
 	void SetExitCar(CVehicle*, uint32);
 	void SetFormation(eFormation);
 	bool WillChat(CPed*);
-	void SetEnterTrain(CVehicle*, uint32);
 	void SetEnterCar_AllClear(CVehicle*, uint32, uint32);
 	void SetSolicit(uint32 time);
 	void ScanForInterestingStuff(void);
@@ -756,6 +771,9 @@ public:
 	bool WarpPedToNearLeaderOffScreen(void);
 	void Solicit(void);
 	void SetExitBoat(CVehicle*);
+	void ClearFollowPath();
+	void GiveDelayedWeapon(eWeaponType weapon, uint32 ammo);
+	void RequestDelayedWeapon();
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -783,8 +801,9 @@ public:
 	static void PedSetDraggedOutCarCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedAnimStepOutCarCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetInTrainCB(CAnimBlendAssociation *assoc, void *arg);
-	static void PedSetOutTrainCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedSetOutTrainCB(CAnimBlendAssociation *assoc, void *arg); // TODO(Miami): Should be under GTA_TRAIN
 	static void FinishedAttackCB(CAnimBlendAssociation *assoc, void *arg);
+	static void FinishedReloadCB(CAnimBlendAssociation *assoc, void *arg);
 	static void FinishFightMoveCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedAnimDoorCloseRollingCB(CAnimBlendAssociation *assoc, void *arg);
 	static void FinishJumpCB(CAnimBlendAssociation *assoc, void *arg);
@@ -813,8 +832,14 @@ public:
 	void SetPedStats(ePedStats);
 	bool IsGangMember(void);
 	void Die(void);
+#ifdef GTA_TRAIN
 	void EnterTrain(void);
 	void ExitTrain(void);
+	void SetExitTrain(CVehicle*);
+	void SetPedPositionInTrain(void);
+	void LineUpPedWithTrain(void);
+	void SetEnterTrain(CVehicle*, uint32);
+#endif
 	void Fall(void);
 	bool IsPedShootable(void);
 	void Look(void);
@@ -822,11 +847,9 @@ public:
 	void RestoreHeadPosition(void);
 	void PointGunAt(void);
 	bool ServiceTalkingWhenDead(void);
-	void SetPedPositionInTrain(void);
 	void SetShootTimer(uint32);
 	void SetSeekCar(CVehicle*, uint32);
 	void SetSeekBoatPosition(CVehicle*);
-	void SetExitTrain(CVehicle*);
 	void WanderRange(void);
 	void SetFollowRoute(int16, int16);
 	void SeekBoatPosition(void);
@@ -866,6 +889,35 @@ public:
 	void ReplaceWeaponWhenExitingVehicle(void);
 	void RemoveWeaponWhenEnteringVehicle(void);
 	bool IsNotInWreckedVehicle();
+
+	// My addons. Maybe inlined in VC?
+	AnimationId GetFireAnimNotDucking(CWeaponInfo* weapon) {
+		// TODO(Miami): Revert that when weapons got ported
+		if (weapon->m_AnimToPlay == ASSOCGRP_STD)
+			return ANIM_FIGHT_PPUNCH;
+
+		if (m_nPedType == PEDTYPE_COP && !!weapon->m_bCop3rd)
+			return ANIM_WEAPON_FIRE_3RD;
+		else
+			return weapon->m_bAnimDetonate ? ANIM_BOMBER : ANIM_WEAPON_FIRE;
+	}
+
+	static AnimationId GetFireAnimGround(CWeaponInfo* weapon, bool kickFloorIfNone = true) {
+		// TODO(Miami): Revert that when weapons got ported
+		if (weapon->m_AnimToPlay == ASSOCGRP_STD)
+			return ANIM_KICK_FLOOR;
+
+		if (!!weapon->m_bGround2nd)
+			return ANIM_WEAPON_CROUCHFIRE;
+		else if (!!weapon->m_bGround3rd)
+			return ANIM_WEAPON_SPECIAL;
+		else if (kickFloorIfNone)
+			return ANIM_KICK_FLOOR;
+		else
+			return (AnimationId)0;
+	}
+	// --
+
 	// My additions, because there were many, many instances of that.
 	inline void SetFindPathAndFlee(CEntity *fleeFrom, int time, bool walk = false)
 	{
@@ -884,43 +936,24 @@ public:
 		if (walk)
 			SetMoveState(PEDMOVE_WALK);
 	}
+	// --
 
 	// Using this to abstract nodes of skinned and non-skinned meshes
 	CVector GetNodePosition(int32 node)
 	{
-#ifdef PED_SKIN
-		if(IsClumpSkinned(GetClump())){
-			RwV3d pos = { 0.0f, 0.0f, 0.0f };
-			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
-			int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
-			RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
-			// this is just stupid
-			//RwV3dTransformPoints(&pos, &pos, 1, &mats[idx]);
-			pos = mats[idx].pos;
-			return pos;
-		}else
-#endif
-		{
-			RwMatrix mat;
-			CPedIK::GetWorldMatrix(m_pFrames[node]->frame, &mat);
-			return mat.pos;
-		}
+		RwV3d pos = { 0.0f, 0.0f, 0.0f };
+		RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+		int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
+		RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
+		pos = mats[idx].pos;
+		return pos;
 	}
 	void TransformToNode(CVector &pos, int32 node)
 	{
-#ifdef PED_SKIN
-		if(IsClumpSkinned(GetClump())){
-			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
-			int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
-			RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
-			RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, &mats[idx]);
-		}else
-#endif
-		{
-			RwFrame *frame;
-			for (frame = m_pFrames[node]->frame; frame; frame = RwFrameGetParent(frame))
-				RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, RwFrameGetMatrix(frame));
-		}
+		RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+		int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
+		RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
+		RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, &mats[idx]);
 	}
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
@@ -953,6 +986,7 @@ public:
 
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 
+// TODO(Miami): Change those when Ped struct is done
 #ifndef PED_SKIN
 VALIDATE_SIZE(CPed, 0x53C);
 #endif

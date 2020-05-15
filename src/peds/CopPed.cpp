@@ -23,7 +23,8 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 	switch (copType) {
 	case COP_STREET:
 		SetModelIndex(MI_COP);
-		GiveWeapon(WEAPONTYPE_COLT45, 1000);
+		// GiveWeapon(WEAPONTYPE_NIGHTSTICK, 1000, true); // TODO(Miami)
+		GiveDelayedWeapon(WEAPONTYPE_COLT45, 1000);
 		m_currentWeapon = WEAPONTYPE_UNARMED;
 		m_fArmour = 0.0f;
 		m_wepSkills = 208; /* TODO: what is this? seems unused */
@@ -31,17 +32,15 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 		break;
 	case COP_FBI:
 		SetModelIndex(MI_FBI);
-		GiveWeapon(WEAPONTYPE_COLT45, 1000);
-		GiveWeapon(WEAPONTYPE_AK47, 1000);
-		SetCurrentWeapon(WEAPONTYPE_AK47);
+		GiveDelayedWeapon(WEAPONTYPE_MP5, 1000);
+		SetCurrentWeapon(WEAPONTYPE_MP5);
 		m_fArmour = 100.0f;
 		m_wepSkills = 176; /* TODO: what is this? seems unused */
 		m_wepAccuracy = 76;
 		break;
 	case COP_SWAT:
 		SetModelIndex(MI_SWAT);
-		GiveWeapon(WEAPONTYPE_COLT45, 1000);
-		GiveWeapon(WEAPONTYPE_UZI, 1000);
+		GiveDelayedWeapon(WEAPONTYPE_UZI, 1000);
 		SetCurrentWeapon(WEAPONTYPE_UZI);
 		m_fArmour = 50.0f;
 		m_wepSkills = 32; /* TODO: what is this? seems unused */
@@ -49,10 +48,8 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 		break;
 	case COP_ARMY:
 		SetModelIndex(MI_ARMY);
-		GiveWeapon(WEAPONTYPE_COLT45, 1000);
-		GiveWeapon(WEAPONTYPE_M16, 1000);
-		GiveWeapon(WEAPONTYPE_GRENADE, 10);
-		SetCurrentWeapon(WEAPONTYPE_M16);
+		GiveDelayedWeapon(WEAPONTYPE_MP5, 1000);
+		SetCurrentWeapon(WEAPONTYPE_MP5);
 		m_fArmour = 100.0f;
 		m_wepSkills = 32; /* TODO: what is this? seems unused */
 		m_wepAccuracy = 84;
@@ -69,7 +66,7 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 		case 7: SetModelIndex(MI_VICE8); break;
 		default: assert(0); break;
 		}
-		GiveWeapon(WEAPONTYPE_UZI, 1000);
+		GiveDelayedWeapon(WEAPONTYPE_UZI, 1000);
 		SetCurrentWeapon(WEAPONTYPE_UZI);
 		m_fArmour = 100.0f;
 		m_wepSkills = 176;

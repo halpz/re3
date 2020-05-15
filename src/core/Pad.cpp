@@ -65,17 +65,36 @@ extern bool gbFastTime;
 void WeaponCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT2"), true);
+
+	CStreaming::RequestModel(MI_GRENADE, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_BOMB, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_AK47, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_BASEBALL_BAT, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_COLT, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_ROCKETLAUNCHER, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_SNIPER, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_MP5, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::LoadAllRequestedModels(false);
+
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_BASEBALLBAT, 0);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_COLT45, 100);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_UZI, 100);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_MP5, 100);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SHOTGUN, 20);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_AK47, 200);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_M16, 200);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SNIPERRIFLE, 5);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_ROCKETLAUNCHER, 5);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_MOLOTOV, 5);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_GRENADE, 5);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_FLAMETHROWER, 200);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_DETONATOR_GRENADE, 5);
+
+	CStreaming::SetModelIsDeletable(MI_GRENADE);
+	CStreaming::SetModelIsDeletable(MI_BOMB);
+	CStreaming::SetModelIsDeletable(MI_AK47);
+	CStreaming::SetModelIsDeletable(MI_BASEBALL_BAT);
+	CStreaming::SetModelIsDeletable(MI_COLT);
+	CStreaming::SetModelIsDeletable(MI_ROCKETLAUNCHER);
+	CStreaming::SetModelIsDeletable(MI_SHOTGUN);
+	CStreaming::SetModelIsDeletable(MI_SNIPER);
+	CStreaming::SetModelIsDeletable(MI_MP5);
 }
 
 void HealthCheat()

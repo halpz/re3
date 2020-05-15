@@ -26,6 +26,7 @@ public:
 	static void RemoveNotAdd(CEntity *entity, eWeaponType weaponType, CVector pos);
 	static bool RemoveIfThisIsAProjectile(CObject *pObject);
 	static void RemoveAllProjectiles();
+	static void RemoveDetonatorProjectiles();
 	static void Update();
 	static bool IsProjectileInRange(float x1, float x2, float y1, float y2, float z1, float z2, bool remove);
 };

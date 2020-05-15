@@ -375,11 +375,11 @@ CFileLoader::FindRelatedModelInfoCB(RpAtomic *atomic, void *data)
 	mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(name, nil);
 	if(mi){
 		assert(mi->IsSimple());
+		CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
 		mi->SetAtomic(n, atomic);
 		RpClumpRemoveAtomic(clump, atomic);
 		RpAtomicSetFrame(atomic, RwFrameCreate());
 		CVisibilityPlugins::SetAtomicModelInfo(atomic, mi);
-		CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
 	}else{
 		debug("Can't find Atomic %s\n", name);
 	}
@@ -506,11 +506,11 @@ CFileLoader::SetRelatedModelInfoCB(RpAtomic *atomic, void *data)
 
 	nodename = GetFrameNodeName(RpAtomicGetFrame(atomic));
 	GetNameAndLOD(nodename, name, &n);
+	CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
 	gpRelatedModelInfo->SetAtomic(n, atomic);
 	RpClumpRemoveAtomic(clump, atomic);
 	RpAtomicSetFrame(atomic, RwFrameCreate());
 	CVisibilityPlugins::SetAtomicModelInfo(atomic, gpRelatedModelInfo);
-	CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
 	return atomic;
 }
 

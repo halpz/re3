@@ -314,6 +314,7 @@ bool CGame::Initialise(const char* datFile)
 	printf("Streaming uses %dK of its memory", CStreaming::ms_memoryUsed / 1024);
 	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
 	CAnimManager::LoadAnimFiles();
+	CStreaming::LoadInitialWeapons();
 	CPed::Initialise();
 	CRouteNode::Initialise();
 	CEventList::Initialise();

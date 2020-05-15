@@ -3,12 +3,14 @@
 #include "RwHelper.h"
 #include "Camera.h"
 #include "MBlur.h"
+#include "Timer.h"
 
 // Originally taken from RW example 'mblur'
 
 RwRaster *CMBlur::pFrontBuffer;
 bool CMBlur::ms_bJustInitialised;
 bool CMBlur::BlurOn;
+float CMBlur::Drunkness;
 
 static RwIm2DVertex Vertex[4];
 static RwIm2DVertex Vertex2[4];
@@ -280,4 +282,11 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type)
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+}
+
+void
+CMBlur::ClearDrunkBlur()
+{
+	Drunkness = 0.0f;
+	CTimer::SetTimeScale(1.0f);
 }

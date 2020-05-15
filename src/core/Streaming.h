@@ -165,6 +165,7 @@ public:
 	static void SetModelTxdIsDeletable(int32 id);
 	static void SetMissionDoesntRequireModel(int32 id);
 	static void LoadInitialPeds(void);
+	static void LoadInitialWeapons(void);
 	static void LoadInitialVehicles(void);
 	static void StreamVehiclesAndPeds(void);
 	static void StreamZoneModels(const CVector &pos);
