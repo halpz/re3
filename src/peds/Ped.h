@@ -833,39 +833,19 @@ public:
 	// Using this to abstract nodes of skinned and non-skinned meshes
 	CVector GetNodePosition(int32 node)
 	{
-#ifdef PED_SKIN
-		if(IsClumpSkinned(GetClump())){
-			RwV3d pos = { 0.0f, 0.0f, 0.0f };
-			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
-			int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
-			RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
-			// this is just stupid
-			//RwV3dTransformPoints(&pos, &pos, 1, &mats[idx]);
-			pos = mats[idx].pos;
-			return pos;
-		}else
-#endif
-		{
-			RwMatrix mat;
-			CPedIK::GetWorldMatrix(m_pFrames[node]->frame, &mat);
-			return mat.pos;
-		}
+		RwV3d pos = { 0.0f, 0.0f, 0.0f };
+		RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+		int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
+		RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
+		pos = mats[idx].pos;
+		return pos;
 	}
 	void TransformToNode(CVector &pos, int32 node)
 	{
-#ifdef PED_SKIN
-		if(IsClumpSkinned(GetClump())){
-			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
-			int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
-			RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
-			RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, &mats[idx]);
-		}else
-#endif
-		{
-			RwFrame *frame;
-			for (frame = m_pFrames[node]->frame; frame; frame = RwFrameGetParent(frame))
-				RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, RwFrameGetMatrix(frame));
-		}
+		RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
+		int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
+		RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
+		RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, &mats[idx]);
 	}
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode

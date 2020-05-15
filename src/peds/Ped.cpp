@@ -2522,40 +2522,23 @@ CPed::CalculateNewVelocity(void)
 	if ((!idleAssoc || idleAssoc->blendAmount < 0.5f) && !fightAssoc) {
 #endif
 		LimbOrientation newUpperLegs;
-		newUpperLegs.phi = localWalkAngle;
+		newUpperLegs.yaw = localWalkAngle;
 
-		if (newUpperLegs.phi < -DEGTORAD(100.0f)) {
-			newUpperLegs.phi += PI;
-		} else if (newUpperLegs.phi > DEGTORAD(100.0f)) {
-			newUpperLegs.phi -= PI;
+		if (newUpperLegs.yaw < -DEGTORAD(100.0f)) {
+			newUpperLegs.yaw += PI;
+		} else if (newUpperLegs.yaw > DEGTORAD(100.0f)) {
+			newUpperLegs.yaw -= PI;
 		}
 
-		if (newUpperLegs.phi > -DEGTORAD(50.0f) && newUpperLegs.phi < DEGTORAD(50.0f)) {
-#ifdef PED_SKIN
-			if(IsClumpSkinned(GetClump())){
-/*
-				// this looks shit
-				newUpperLegs.theta = 0.0f;
-				RwV3d axis = { -1.0f, 0.0f, 0.0f };
-				RtQuatRotate(&m_pFrames[PED_UPPERLEGL]->hanimFrame->q, &axis, RADTODEG(newUpperLegs.phi), rwCOMBINEPRECONCAT);
-				RtQuatRotate(&m_pFrames[PED_UPPERLEGR]->hanimFrame->q, &axis, RADTODEG(newUpperLegs.phi), rwCOMBINEPRECONCAT);
-*/
-				newUpperLegs.theta = 0.1f;
-				RwV3d Xaxis = { 1.0f, 0.0f, 0.0f };
-				RwV3d Zaxis = { 0.0f, 0.0f, 1.0f };
-				RtQuatRotate(&m_pFrames[PED_UPPERLEGL]->hanimFrame->q, &Zaxis, RADTODEG(newUpperLegs.theta), rwCOMBINEPOSTCONCAT);
-				RtQuatRotate(&m_pFrames[PED_UPPERLEGL]->hanimFrame->q, &Xaxis, RADTODEG(newUpperLegs.phi), rwCOMBINEPOSTCONCAT);
-				RtQuatRotate(&m_pFrames[PED_UPPERLEGR]->hanimFrame->q, &Zaxis, RADTODEG(newUpperLegs.theta), rwCOMBINEPOSTCONCAT);
-				RtQuatRotate(&m_pFrames[PED_UPPERLEGR]->hanimFrame->q, &Xaxis, RADTODEG(newUpperLegs.phi), rwCOMBINEPOSTCONCAT);
-
-				bDontAcceptIKLookAts = true;
-			}else
-#endif
-			{
-				newUpperLegs.theta = 0.0f;
-				m_pedIK.RotateTorso(m_pFrames[PED_UPPERLEGL], &newUpperLegs, false);
-				m_pedIK.RotateTorso(m_pFrames[PED_UPPERLEGR], &newUpperLegs, false);
-			}
+		if (newUpperLegs.yaw > -DEGTORAD(50.0f) && newUpperLegs.yaw < DEGTORAD(50.0f)) {
+			newUpperLegs.pitch = 0.1f;
+			RwV3d Xaxis = { 1.0f, 0.0f, 0.0f };
+			RwV3d Zaxis = { 0.0f, 0.0f, 1.0f };
+			RtQuatRotate(&m_pFrames[PED_UPPERLEGL]->hanimFrame->q, &Zaxis, RADTODEG(newUpperLegs.pitch), rwCOMBINEPOSTCONCAT);
+			RtQuatRotate(&m_pFrames[PED_UPPERLEGL]->hanimFrame->q, &Xaxis, RADTODEG(newUpperLegs.yaw), rwCOMBINEPOSTCONCAT);
+			RtQuatRotate(&m_pFrames[PED_UPPERLEGR]->hanimFrame->q, &Zaxis, RADTODEG(newUpperLegs.pitch), rwCOMBINEPOSTCONCAT);
+			RtQuatRotate(&m_pFrames[PED_UPPERLEGR]->hanimFrame->q, &Xaxis, RADTODEG(newUpperLegs.yaw), rwCOMBINEPOSTCONCAT);
+			bDontAcceptIKLookAts = true;
 		}
 	}
 }
