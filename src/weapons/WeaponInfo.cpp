@@ -6,14 +6,25 @@
 #include "AnimManager.h"
 #include "AnimBlendAssociation.h"
 #include "Weapon.h"
+#include "ModelInfo.h"
+#include "ModelIndices.h"
+
+// Yeah...
+int32 CWeaponInfo::ms_aMaxAmmoForWeapon[WEAPONTYPE_TOTALWEAPONS] = {
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+};
 
 CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
 
+// --MIAMI: Todo
 static char ms_aWeaponNames[][32] = {
 	"Unarmed",
 	"BaseballBat",
 	"Colt45",
+	"Tec9",
 	"Uzi",
+	"SilencedIngram",
+	"Mp5",
 	"Shotgun",
 	"AK47",
 	"M16",
@@ -21,9 +32,11 @@ static char ms_aWeaponNames[][32] = {
 	"RocketLauncher",
 	"FlameThrower",
 	"Molotov",
+	"Rocket",
 	"Grenade",
+	"DetonateGrenade",
 	"Detonator",
-	"HeliCannon"
+	"HeliCannon",
 };
 
 CWeaponInfo*
@@ -31,45 +44,62 @@ CWeaponInfo::GetWeaponInfo(eWeaponType weaponType) {
 	return &CWeaponInfo::ms_apWeaponInfos[weaponType];
 }
 
+// --MIAMI: done except WEAPONTYPE_TOTALWEAPONS value
 void
 CWeaponInfo::Initialise(void)
 {
 	debug("Initialising CWeaponInfo...\n");
 	for (int i = 0; i < WEAPONTYPE_TOTALWEAPONS; i++) {
 		ms_apWeaponInfos[i].m_eWeaponFire = WEAPON_FIRE_INSTANT_HIT;
-		ms_apWeaponInfos[i].m_AnimToPlay = ANIM_PUNCH_R;
-		ms_apWeaponInfos[i].m_Anim2ToPlay = NUM_ANIMS;
+		ms_apWeaponInfos[i].m_fRange = 0.0f;
+		ms_apWeaponInfos[i].m_nFiringRate = 0;
+		ms_apWeaponInfos[i].m_nReload = 0;
+		ms_apWeaponInfos[i].m_nAmountofAmmunition = 0;
+		ms_apWeaponInfos[i].m_nDamage = 0;
+		ms_apWeaponInfos[i].m_fSpeed = 0.0f;
+		ms_apWeaponInfos[i].m_fRadius = 0.0f;
+		ms_apWeaponInfos[i].m_fLifespan = 0.0f;
+		ms_apWeaponInfos[i].m_fSpread = 0.0f;
+		ms_apWeaponInfos[i].m_vecFireOffset = CVector(0.0f, 0.0f, 0.0f);
+		// TODO(Miami): ASSOCGRP_UNARMED
+		ms_apWeaponInfos[i].m_AnimToPlay = ASSOCGRP_STD;
+		ms_apWeaponInfos[i].m_fAnimLoopStart = 0.0f;
+		ms_apWeaponInfos[i].m_fAnimLoopEnd = 0.0f;
+		ms_apWeaponInfos[i].m_fAnimFrameFire = 0.0f;
+		ms_apWeaponInfos[i].m_fAnim2LoopStart = 0.0f;
+		ms_apWeaponInfos[i].m_fAnim2LoopEnd = 0.0f;
+		ms_apWeaponInfos[i].m_fAnim2FrameFire = 0.0f;
+		ms_apWeaponInfos[i].m_fAnimBreakout = 0.0f;
 		ms_apWeaponInfos[i].m_bUseGravity = 1;
 		ms_apWeaponInfos[i].m_bSlowsDown = 1;
 		ms_apWeaponInfos[i].m_bRandSpeed = 1;
 		ms_apWeaponInfos[i].m_bExpands = 1;
 		ms_apWeaponInfos[i].m_bExplodes = 1;
+		ms_apWeaponInfos[i].m_nWeaponSlot = 0;
 	}
 	debug("Loading weapon data...\n");
 	LoadWeaponData();
 	debug("CWeaponInfo ready\n");
 }
 
+// --MIAMI: Done, commented parts wait for weapons port
 void
 CWeaponInfo::LoadWeaponData(void)
 {
 	float spread, speed, lifeSpan, radius;
 	float range, fireOffsetX, fireOffsetY, fireOffsetZ;
-	float delayBetweenAnimAndFire, delayBetweenAnim2AndFire, animLoopStart, animLoopEnd;
+	float anim2LoopStart, anim2LoopEnd, delayBetweenAnim2AndFire, animBreakout;
+	float delayBetweenAnimAndFire, animLoopStart, animLoopEnd;
 	int flags, ammoAmount, damage, reload, weaponType;
-	int firingRate, modelId;
+	int firingRate, modelId, modelId2, weaponSlot;
 	char line[256], weaponName[32], fireType[32];
-	char animToPlay[32], anim2ToPlay[32];
-
-	CAnimBlendAssociation *animAssoc;
-	AnimationId animId;
+	char animToPlay[32];
 
 	int bp, buflen;
 	int lp, linelen;
 		
 	CFileMgr::SetDir("DATA");
 	buflen = CFileMgr::LoadFile("WEAPON.DAT", work_buff, sizeof(work_buff), "r");
-	CFileMgr::SetDir("");
 
 	for (bp = 0; bp < buflen; ) {
 		// read file line by line
@@ -101,10 +131,9 @@ CWeaponInfo::LoadWeaponData(void)
 		fireType[0] = '\0';
 		fireOffsetY = 0.0f;
 		fireOffsetZ = 0.0f;
-		animId = ANIM_WALK;
 		sscanf(
 			&line[lp],
-			"%s %s %f %d %d %d %d %f %f %f %f %f %f %f %s %s %f %f %f %f %d %d",
+			"%s %s %f %d %d %d %d %f %f %f %f %f %f %f %s %f %f %f %f %f %f %f %d %d %x %d",
 			weaponName,
 			fireType,
 			&range,
@@ -120,26 +149,22 @@ CWeaponInfo::LoadWeaponData(void)
 			&fireOffsetY,
 			&fireOffsetZ,
 			animToPlay,
-			anim2ToPlay,
 			&animLoopStart,
 			&animLoopEnd,
 			&delayBetweenAnimAndFire,
+			&anim2LoopStart,
+			&anim2LoopEnd,
 			&delayBetweenAnim2AndFire,
+			&animBreakout,
 			&modelId,
-			&flags);
+			&modelId2,
+			&flags,
+			&weaponSlot);
 
 		if (strncmp(weaponName, "ENDWEAPONDATA", 13) == 0)
 			return;
 
 		weaponType = FindWeaponType(weaponName);
-
-		animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, animToPlay);
-		animId = static_cast<AnimationId>(animAssoc->animId);
-
-		if (strncmp(anim2ToPlay, "null", 4) != 0) {
-			animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, anim2ToPlay);
-			ms_apWeaponInfos[weaponType].m_Anim2ToPlay = (AnimationId) animAssoc->animId;
-		}
 
 		CVector vecFireOffset(fireOffsetX, fireOffsetY, fireOffsetZ);
 
@@ -154,12 +179,16 @@ CWeaponInfo::LoadWeaponData(void)
 		ms_apWeaponInfos[weaponType].m_fLifespan = lifeSpan;
 		ms_apWeaponInfos[weaponType].m_fSpread = spread;
 		ms_apWeaponInfos[weaponType].m_vecFireOffset = vecFireOffset;
-		ms_apWeaponInfos[weaponType].m_AnimToPlay = animId;
 		ms_apWeaponInfos[weaponType].m_fAnimLoopStart = animLoopStart / 30.0f;
 		ms_apWeaponInfos[weaponType].m_fAnimLoopEnd = animLoopEnd / 30.0f;
+		ms_apWeaponInfos[weaponType].m_fAnim2LoopStart = anim2LoopStart / 30.0f;
+		ms_apWeaponInfos[weaponType].m_fAnim2LoopEnd = anim2LoopEnd / 30.0f;
 		ms_apWeaponInfos[weaponType].m_fAnimFrameFire = delayBetweenAnimAndFire / 30.0f;
 		ms_apWeaponInfos[weaponType].m_fAnim2FrameFire = delayBetweenAnim2AndFire / 30.0f;
+		ms_apWeaponInfos[weaponType].m_fAnimBreakout = animBreakout / 30.0f;
 		ms_apWeaponInfos[weaponType].m_nModelId = modelId;
+		ms_apWeaponInfos[weaponType].m_nModel2Id = modelId2;
+
 		ms_apWeaponInfos[weaponType].m_bUseGravity = flags;
 		ms_apWeaponInfos[weaponType].m_bSlowsDown = flags >> 1;
 		ms_apWeaponInfos[weaponType].m_bDissipates = flags >> 2;
@@ -171,6 +200,39 @@ CWeaponInfo::LoadWeaponData(void)
 		ms_apWeaponInfos[weaponType].m_b1stPerson = flags >> 8;
 		ms_apWeaponInfos[weaponType].m_bHeavy = flags >> 9;
 		ms_apWeaponInfos[weaponType].m_bThrow = flags >> 10;
+		ms_apWeaponInfos[weaponType].m_bReloadLoop2Start = flags >> 11;
+		ms_apWeaponInfos[weaponType].m_bUse2nd = flags >> 12;
+		ms_apWeaponInfos[weaponType].m_bGround2nd = flags >> 13;
+		ms_apWeaponInfos[weaponType].m_bFinish3rd = flags >> 14;
+		ms_apWeaponInfos[weaponType].m_bReload = flags >> 15;
+		ms_apWeaponInfos[weaponType].m_bFightMode = flags >> 16;
+		ms_apWeaponInfos[weaponType].m_bCrouchFire = flags >> 17;
+		ms_apWeaponInfos[weaponType].m_bCop3rd = flags >> 18;
+		ms_apWeaponInfos[weaponType].m_bGround3rd = flags >> 19;
+		ms_apWeaponInfos[weaponType].m_bPartialAttack = flags >> 20;
+		ms_apWeaponInfos[weaponType].m_bAnimDetonate = flags >> 21;
+
+		ms_apWeaponInfos[weaponType].m_nWeaponSlot = weaponSlot;
+
+		// TODO(Miami): Enable once weapons are done
+		if (animLoopEnd < 98.0f && weaponType != WEAPONTYPE_FLAMETHROWER && weaponType != WEAPONTYPE_SHOTGUN
+			/*&& weaponType != 20 && weaponType != 21*/)
+			ms_apWeaponInfos[weaponType].m_nFiringRate = ((ms_apWeaponInfos[weaponType].m_fAnimLoopEnd - ms_apWeaponInfos[weaponType].m_fAnimLoopStart) * 900.0f);
+
+		if (weaponType == WEAPONTYPE_DETONATOR || weaponType == WEAPONTYPE_HELICANNON)
+			modelId = -1;
+		else if (weaponType == WEAPONTYPE_DETONATOR_GRENADE)
+			modelId = MI_BOMB;
+
+		if (modelId != -1)
+			((CWeaponModelInfo*)CModelInfo::GetModelInfo(modelId))->SetWeaponInfo(weaponType);
+
+		for (int i = 0; i < NUM_ANIM_ASSOC_GROUPS; i++) {
+			if (!strcmp(animToPlay, CAnimManager::GetAnimGroupName((AssocGroupId)i))) {
+				ms_apWeaponInfos[weaponType].m_AnimToPlay = (AssocGroupId)i;
+				break;
+			}
+		}
 	}
 }
 

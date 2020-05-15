@@ -44,7 +44,7 @@ CAnimBlendAssocGroup::DestroyAssociations(void)
 CAnimBlendAssociation*
 CAnimBlendAssocGroup::GetAnimation(uint32 id)
 {
-	return &assocList[id];
+	return &assocList[id - firstAnimId];
 }
 
 CAnimBlendAssociation*

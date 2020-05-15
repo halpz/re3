@@ -3860,7 +3860,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 	{
 		CollectParameters(&m_nIp, 2);
 		CPlayerPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
-		for (int i = 0; i < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; i++){
+		for (int i = 0; i < TOTAL_WEAPON_SLOTS; i++){
 			if (pPed->m_weapons[i].m_eWeaponType == ScriptParams[1])
 				pPed->m_nSelectedWepSlot = i;
 		}
@@ -3870,7 +3870,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 	{
 		CollectParameters(&m_nIp, 2);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
-		for (int i = 0; i < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; i++) {
+		for (int i = 0; i < TOTAL_WEAPON_SLOTS; i++) {
 			if (pPed->m_weapons[i].m_eWeaponType == ScriptParams[1])
 				pPed->SetCurrentWeapon(i);
 		}

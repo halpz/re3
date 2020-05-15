@@ -18,22 +18,32 @@ public:
 	int8 m_nSelectedWepSlot;	// eWeaponType
 	bool m_bSpeedTimerFlag;
 	uint8 m_nEvadeAmount;
-	int8 field_1367;
-	uint32 m_nSpeedTimer;
-	uint32 m_nHitAnimDelayTimer;
+	uint32 m_nSpeedTimer; // m_nStandStillTimer?
+	uint32 m_nHitAnimDelayTimer; // m_nShotDelay?
 	float m_fAttackButtonCounter;
 	bool m_bHaveTargetSelected;	// may have better name
 	CEntity *m_pEvadingFrom;	// is this CPhysical?
 	int32 m_nTargettableObjects[4];
+	uint32 m_nAdrenalineTime;
+	uint8 m_nDrunkenness;             // Needed to work out whether we lost target this frame
+	uint8 m_nFadeDrunkenness;
+	uint8 m_nDrunkCountdown; //countdown in frames when the drunk effect ends
 	bool m_bAdrenalineActive;
 	bool m_bHasLockOnTarget;
-	uint32 m_nAdrenalineTime;
 	bool m_bCanBeDamaged;
-	int8 field_1413;
+	bool m_bDrunkVisualsWearOff; // TODO(Miami): That may be something else
 	CVector m_vecSafePos[6]; // safe places from the player, for example behind a tree
 	CPed *m_pPedAtSafePos[6];
-	float m_fWalkAngle;
+	CPlayerPed* m_pCheckPlayers[6]; //checks something with players, could be a leftover from original multiplayer
+	char unused1;
+	int16 m_nCheckPlayersIndex;
+	float m_fWalkAngle; //angle between heading and walking direction
 	float m_fFPSMoveHeading;
+	RpAtomic* m_pMinigunTopAtomic; //atomic for the spinning part of the minigun model
+	float m_fGunSpinSpeed; // for minigun
+	float m_fGunSpinAngle;
+	unsigned int m_nPadDownPressedInMilliseconds;
+	unsigned int m_nPadUpPressedInMilliseconds;
 
 	CPlayerPed();
 	~CPlayerPed();
@@ -45,7 +55,8 @@ public:
 	void SetWantedLevelNoDrop(int32 level);
 	void KeepAreaAroundPlayerClear(void);
 	void AnnoyPlayerPed(bool);
-	void MakeChangesForNewWeapon(int8);
+	void MakeChangesForNewWeapon(int32);
+	void MakeChangesForNewWeapon(eWeaponType);
 	void SetInitialState(void);
 	void ProcessControl(void);
 	void ClearAdrenaline(void);

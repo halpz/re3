@@ -258,9 +258,11 @@ void CHud::Draw()
 		/*
 			DrawAmmo
 		*/
-		uint32 AmmoAmount = CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition;
-		uint32 AmmoInClip = FindPlayerPed()->m_weapons[FindPlayerPed()->m_currentWeapon].m_nAmmoInClip;
-		uint32 TotalAmmo = FindPlayerPed()->m_weapons[FindPlayerPed()->m_currentWeapon].m_nAmmoTotal;
+		CWeaponInfo *weaponInfo = CWeaponInfo::GetWeaponInfo((eWeaponType)WeaponType);
+		CWeapon *weapon = FindPlayerPed()->GetWeapon();
+		uint32 AmmoAmount = weaponInfo->m_nAmountofAmmunition;
+		uint32 AmmoInClip = weapon->m_nAmmoInClip;
+		uint32 TotalAmmo = weapon->m_nAmmoTotal;
 		uint32 Ammo, Clip;
 
 		if (AmmoAmount <= 1 || AmmoAmount >= 1000)
@@ -291,17 +293,36 @@ void CHud::Draw()
 		/*
 			DrawWeaponIcon
 		*/
-		Sprites[WeaponType].Draw(
-			CRect(SCREEN_SCALE_FROM_RIGHT(99.0f), SCREEN_SCALE_Y(27.0f), SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(91.0f)),
-			CRGBA(255, 255, 255, 255),
-			0.015f,
-			0.015f,
-			1.0f,
-			0.0f,
-			0.015f,
-			1.0f,
-			1.0f,
-			1.0f);
+
+		if (weaponInfo->m_nModelId <= 0) {
+			Sprites[WeaponType].Draw(
+				CRect(SCREEN_SCALE_FROM_RIGHT(99.0f), SCREEN_SCALE_Y(27.0f), SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(91.0f)),
+				CRGBA(255, 255, 255, 255),
+				0.015f,
+				0.015f,
+				1.0f,
+				0.0f,
+				0.015f,
+				1.0f,
+				1.0f,
+				1.0f);
+		} else {
+			CBaseModelInfo *weaponModel = CModelInfo::GetModelInfo(weaponInfo->m_nModelId);
+			RwTexDictionary *weaponTxd = CTxdStore::GetSlot(weaponModel->GetTxdSlot())->texDict;
+			if (weaponTxd) {
+				RwTexture *weaponIcon = RwTexDictionaryFindNamedTexture(weaponTxd, weaponModel->GetName());
+				if (weaponIcon) {
+					RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
+					RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
+					RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(weaponIcon));
+					const float xSize = SCREEN_SCALE_X(64.0f / 2.0f);
+					const float ySize = SCREEN_SCALE_X(64.0f / 2.0f);
+					CSprite::RenderOneXLUSprite(SCREEN_SCALE_FROM_RIGHT(99.0f) + xSize, SCREEN_SCALE_Y(25.0f) + ySize, 1.0f, xSize, ySize,
+						255, 255, 255, 255, 1.0f, 255);
+					RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+				}
+			}
+		}
 
 		CFont::SetBackgroundOff();
 		CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
@@ -311,9 +332,12 @@ void CHud::Draw()
 		CFont::SetPropOn();
 		CFont::SetFontStyle(FONT_BANK);
 
-		if (!CDarkel::FrenzyOnGoing() && WeaponType != WEAPONTYPE_UNARMED && WeaponType != WEAPONTYPE_BASEBALLBAT) {
-			CFont::SetColor(CRGBA(0, 0, 0, 255));
-			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(66.0f), SCREEN_SCALE_Y(73.0f), sPrint);
+		if (!CDarkel::FrenzyOnGoing() && weaponInfo->m_nWeaponSlot > 1 && weapon->m_eWeaponType != WEAPONTYPE_DETONATOR) {
+			CFont::SetDropShadowPosition(2);
+			CFont::SetDropColor(CRGBA(0, 0, 0, 255));
+			CFont::SetColor(CRGBA(255, 150, 225, 255));
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(66.0f), SCREEN_SCALE_Y(90.0f), sPrint);
+			CFont::SetDropShadowPosition(0);
 		}
 
 		/*
@@ -394,10 +418,10 @@ void CHud::Draw()
 			DrawWantedLevel
 		*/
 		CFont::SetBackgroundOff();
-		CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
+		CFont::SetScale(SCREEN_SCALE_X(0.7f), SCREEN_SCALE_Y(1.25f));
 		CFont::SetJustifyOff();
 		CFont::SetCentreOff();
-		CFont::SetRightJustifyOff();
+		CFont::SetRightJustifyOn();
 		CFont::SetPropOn();
 		CFont::SetFontStyle(FONT_HEADING);
 
@@ -405,13 +429,13 @@ void CHud::Draw()
 
 		for (int i = 0; i < 6; i++) {
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
-			CFont::PrintString(2.0f + SCREEN_SCALE_FROM_RIGHT(60.0f - 2.0f + 24.0f * i), SCREEN_SCALE_Y(87.0f + 2.0f), sPrintIcon);
+			CFont::PrintString(2.0f + SCREEN_SCALE_FROM_RIGHT(110.0f - 2.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f + 2.0f), sPrintIcon);
 			if (FindPlayerPed()->m_pWanted->m_nWantedLevel > i
 				&& (CTimer::GetTimeInMilliseconds() > FindPlayerPed()->m_pWanted->m_nLastWantedLevelChange
 					+ 2000 || CTimer::GetFrameCounter() & 4)) {
 
 				CFont::SetColor(CRGBA(193, 164, 120, 255));
-				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(60.0f + 24.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
+				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
 			}
 		}
 

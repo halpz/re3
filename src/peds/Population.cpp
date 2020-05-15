@@ -471,9 +471,28 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors, 
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
 			if (ms_bGivePedsWeapons) {
-				eWeaponType weapon = (eWeaponType)CGeneral::GetRandomNumberInRange(WEAPONTYPE_UNARMED, WEAPONTYPE_DETONATOR);
+				eWeaponType weapon;
+
+				// TODO(Miami): Look here when weapons have been ported
+				switch (CGeneral::GetRandomNumber() & 3) {
+					case 0:
+						weapon = WEAPONTYPE_COLT45;
+						break;
+					case 1:
+						//weapon = WEAPONTYPE_NIGHTSTICK;
+						//break;
+					case 2:
+						//weapon = WEAPONTYPE_GOLFCLUB;
+						//break;
+					case 3:
+						weapon = WEAPONTYPE_TEC9;
+						break;
+					default:
+						break;
+				}
 				if (weapon != WEAPONTYPE_UNARMED) {
-					ped->SetCurrentWeapon(ped->GiveWeapon(weapon, 25001));
+					ped->GiveDelayedWeapon(weapon, 25001);
+					ped->SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(weapon)->m_nWeaponSlot);
 				}
 			}
 			return ped;
@@ -501,12 +520,14 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors, 
 			ped->SetOrientation(0.0f, 0.0f, 0.0f);
 			CWorld::Add(ped);
 
-			uint32 weapon;
+			eWeaponType weapon;
 			if (CGeneral::GetRandomNumberInRange(0, 100) >= 50)
-				weapon = ped->GiveWeapon((eWeaponType)CGangs::GetGangInfo(pedType - PEDTYPE_GANG1)->m_Weapon2, 25001);
+				weapon = (eWeaponType)CGangs::GetGangInfo(pedType - PEDTYPE_GANG1)->m_Weapon2;
 			else
-				weapon = ped->GiveWeapon((eWeaponType)CGangs::GetGangInfo(pedType - PEDTYPE_GANG1)->m_Weapon1, 25001);
-			ped->SetCurrentWeapon(weapon);
+				weapon = (eWeaponType)CGangs::GetGangInfo(pedType - PEDTYPE_GANG1)->m_Weapon1;
+
+			ped->GiveDelayedWeapon(weapon, 25001);
+			ped->SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(weapon)->m_nWeaponSlot);
 			return ped;
 		}
 		case PEDTYPE_EMERGENCY:

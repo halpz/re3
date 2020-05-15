@@ -35,26 +35,26 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_IDLE_ARMED, ASSOC_REPEAT | ASSOC_PARTIAL },
 	{ ANIM_IDLE_CHAT, ASSOC_REPEAT | ASSOC_PARTIAL },
 	{ ANIM_IDLE_TAXI, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_KO_SHOT_FRONT1, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL  },
-	{ ANIM_KO_SHOT_FRONT2, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL  },
-	{ ANIM_KO_SHOT_FRONT3, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL  },
-	{ ANIM_KO_SHOT_FRONT4, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL  },
-	{ ANIM_KO_SHOT_FACE, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL  },
+	{ ANIM_KO_SHOT_FRONT1, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL },
+	{ ANIM_KO_SHOT_FRONT2, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL },
+	{ ANIM_KO_SHOT_FRONT3, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL },
+	{ ANIM_KO_SHOT_FRONT4, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL },
+	{ ANIM_KO_SHOT_FACE, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL },
 	{ ANIM_KO_SHOT_STOM, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
-	{ ANIM_KO_SHOT_ARML, ASSOC_PARTIAL | ASSOC_FRONTAL  },
-	{ ANIM_KO_SHOT_ARMR, ASSOC_PARTIAL | ASSOC_FRONTAL  },
+	{ ANIM_KO_SHOT_ARML, ASSOC_PARTIAL | ASSOC_FRONTAL },
+	{ ANIM_KO_SHOT_ARMR, ASSOC_PARTIAL | ASSOC_FRONTAL },
 	{ ANIM_KO_SHOT_LEGL, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_KO_SHOT_LEGR, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
-	{ ANIM_KD_LEFT, ASSOC_PARTIAL | ASSOC_FRONTAL  },
-	{ ANIM_KD_RIGHT, ASSOC_PARTIAL | ASSOC_FRONTAL  },
+	{ ANIM_KD_LEFT, ASSOC_PARTIAL | ASSOC_FRONTAL },
+	{ ANIM_KD_RIGHT, ASSOC_PARTIAL | ASSOC_FRONTAL },
 	{ ANIM_KO_SKID_FRONT, ASSOC_PARTIAL },
 	{ ANIM_KO_SPIN_R, ASSOC_PARTIAL },
-	{ ANIM_KO_SKID_BACK, ASSOC_PARTIAL | ASSOC_FRONTAL  },
+	{ ANIM_KO_SKID_BACK, ASSOC_PARTIAL | ASSOC_FRONTAL },
 	{ ANIM_KO_SPIN_L, ASSOC_PARTIAL },
-	{ ANIM_SHOT_FRONT_PARTIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
-	{ ANIM_SHOT_LEFT_PARTIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
-	{ ANIM_SHOT_BACK_PARTIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
-	{ ANIM_SHOT_RIGHT_PARTIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
+	{ ANIM_SHOT_FRONT_PARTIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK },
+	{ ANIM_SHOT_LEFT_PARTIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK },
+	{ ANIM_SHOT_BACK_PARTIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK },
+	{ ANIM_SHOT_RIGHT_PARTIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK },
 	{ ANIM_HIT_FRONT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_HIT_LEFT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_HIT_BACK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
@@ -65,29 +65,8 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_HIT_HEAD, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_HIT_WALK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_HIT_WALL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
-	{ ANIM_FLOOR_HIT_F, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_FRONTAL  },
+	{ ANIM_FLOOR_HIT_F, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_FRONTAL },
 	{ ANIM_HIT_BEHIND, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_PUNCH_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_KICK_FLOOR, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_WEAPON_BAT_H, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_WEAPON_BAT_V, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_WEAPON_HGUN_BODY, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
-	{ ANIM_WEAPON_AK_BODY, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_WEAPON_PUMP, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_WEAPON_SNIPER, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_WEAPON_THROW, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_WEAPON_THROWU, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_WEAPON_START_THROW, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_BOMBER, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
-	{ ANIM_HGUN_RELOAD, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
-	{ ANIM_AK_RELOAD, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
-//	{ ANIM_FPS_PUNCH, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-//	{ ANIM_FPS_BAT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-//	{ ANIM_FPS_UZI, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-//	{ ANIM_FPS_PUMP, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-//	{ ANIM_FPS_AK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-//	{ ANIM_FPS_M16, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-//	{ ANIM_FPS_ROCKET, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_FIGHT_IDLE, ASSOC_REPEAT },
 	{ ANIM_FIGHT2_IDLE, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_FIGHT_SH_F, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
@@ -99,7 +78,18 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_FIGHT_PUNCH, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_FIGHT_ROUNDHOUSE, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_FIGHT_LONGKICK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
-	{ ANIM_FIGHT_PPUNCH, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_NOWALK  },
+	{ ANIM_FIGHT_PPUNCH, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_NOWALK },
+	{ ANIM_FIGHT_JAB, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_FIGHT_ELBOW_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_FIGHT_ELBOW_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_FIGHT_BKICK_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_FIGHT_BKICK_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BOMBER, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_PUNCH_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_FIGHT_PPUNCH2, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_KICK_FLOOR, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_WEAPON_THROWU, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_FIGHT_SH_BACK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_CAR_JACKED_RHS, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
 	{ ANIM_CAR_LJACKED_RHS, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
 	{ ANIM_CAR_JACKED_LHS, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
@@ -118,6 +108,7 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_CAR_CLOSEDOOR_LOW_LHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_ROLLDOOR, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_ROLLDOOR_LOW, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_CAR_JUMPIN_LHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_GETOUT_LHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_GETOUT_LOW_LHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_CLOSE_LHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
@@ -133,39 +124,41 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_CAR_CLOSEDOOR_LOW_RHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_SHUFFLE_RHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_LSHUFFLE_RHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_CAR_SIT, ASSOC_DELETEFADEDOUT },
-	{ ANIM_CAR_LSIT, ASSOC_DELETEFADEDOUT },
-	{ ANIM_CAR_SITP, ASSOC_DELETEFADEDOUT },
-	{ ANIM_CAR_SITPLO, ASSOC_DELETEFADEDOUT },
-	{ ANIM_DRIVE_L, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
-	{ ANIM_DRIVE_R, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
-	{ ANIM_DRIVE_LOW_L, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
-	{ ANIM_DRIVE_LOW_R, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
-	{ ANIM_DRIVEBY_L, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
-	{ ANIM_DRIVEBY_R, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
-	{ ANIM_CAR_LB, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
-	{ ANIM_DRIVE_BOAT, ASSOC_DELETEFADEDOUT },
+	{ ANIM_CAR_SIT, ASSOC_DELETEFADEDOUT},
+	{ ANIM_CAR_LSIT, ASSOC_DELETEFADEDOUT},
+	{ ANIM_CAR_SITP, ASSOC_DELETEFADEDOUT},
+	{ ANIM_CAR_SITPLO, ASSOC_DELETEFADEDOUT},
+	{ ANIM_DRIVE_L, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_DRIVE_R, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_DRIVE_LOW_L, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_DRIVE_LOW_R, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_DRIVEBY_L, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_DRIVEBY_R, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_DRIVEBY_L_L, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_DRIVEBY_L_R, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_CAR_LB, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_DRIVE_BOAT, ASSOC_DELETEFADEDOUT | ASSOC_DRIVING },
+	{ ANIM_DRIVE_BOAT_L, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_DRIVE_BOAT_R, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_DRIVE_BOAT_BACK, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_BIKE_PICKUP_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_PICKUP_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_PULLUP_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_PULLUP_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_ELBOW_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_ELBOW_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_FALL_OFF, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
+	{ ANIM_BIKE_FALL_R, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_CAR_GETOUT_RHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_GETOUT_LOW_RHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_CLOSE_RHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_HOOKERTALK, ASSOC_REPEAT | ASSOC_PARTIAL },
-	{ ANIM_COACH_OPEN_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_COACH_OPEN_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_COACH_IN_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_COACH_IN_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_COACH_OUT_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_TRAIN_GETIN, ASSOC_PARTIAL },
-	{ ANIM_TRAIN_GETOUT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_IDLE_STANCE2, ASSOC_PARTIAL },
+	{ ANIM_IDLE_STANCE3, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_CRAWLOUT_RHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_CAR_CRAWLOUT_RHS2, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_VAN_OPEN_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_VAN_GETIN_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_VAN_CLOSE_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_VAN_GETOUT_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_VAN_OPEN, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_VAN_GETIN, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_VAN_CLOSE, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_VAN_GETOUT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_CAR_ROLLOUT_LHS, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION },
+	{ ANIM_CAR_ROLLOUT_LHS2, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION },
 	{ ANIM_GETUP1, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_GETUP2, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_GETUP3, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
@@ -177,33 +170,132 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_FALL_GLIDE, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
 	{ ANIM_FALL_LAND, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_FALL_COLLAPSE, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
+	{ ANIM_FALL_BACK, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
+	{ ANIM_FALL_FRONT, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_FRONTAL },
 	{ ANIM_EV_STEP, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
-	{ ANIM_EV_DIVE, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL  },
-	{ ANIM_XPRESS_SCRATCH, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_FLAG_XPRESS  },
+	{ ANIM_EV_DIVE, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_FRONTAL },
+	{ ANIM_XPRESS_SCRATCH, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_FLAG_XPRESS },
 	{ ANIM_ROAD_CROSS, ASSOC_REPEAT | ASSOC_PARTIAL },
 	{ ANIM_TURN_180, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_ARREST_GUN, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_DROWN, ASSOC_PARTIAL },
-	{ ANIM_CPR, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_DUCK_DOWN, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
 	{ ANIM_DUCK_LOW, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
+	{ ANIM_WEAPON_CROUCH, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
 	{ ANIM_RBLOCK_CSHOOT, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
-	{ ANIM_WEAPON_THROWU2, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_HANDSUP, ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_HANDSCOWER, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
-	{ ANIM_FUCKU, ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
-	{ ANIM_PHONE_IN, ASSOC_PARTIAL },
+	{ ANIM_FUCKU, ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK },
+	{ ANIM_PHONE_IN, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_PHONE_OUT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_PHONE_TALK, ASSOC_REPEAT | ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
+	{ ANIM_SEAT_DOWN, ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_SEAT_UP, ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_SEAT_IDLE, ASSOC_REPEAT | ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_SEAT_DOWN2, ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_ATM, ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_ABSEIL, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
+};
+AnimAssocDesc aVanAnimDescs[] = {
+	{ ANIM_VAN_OPEN_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_VAN_GETIN_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_VAN_CLOSE_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_VAN_GETOUT_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_VAN_OPEN, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_VAN_GETIN, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_VAN_CLOSE, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_VAN_GETOUT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+};
+AnimAssocDesc aCoachAnimDescs[] = {
+	{ ANIM_COACH_OPEN_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_COACH_OPEN_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_COACH_IN_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_COACH_IN_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_COACH_OUT_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+};
+AnimAssocDesc aBikeAnimDescs[] = {
+	{ ANIM_BIKE_RIDE, ASSOC_DELETEFADEDOUT},
+	{ ANIM_BIKE_STILL, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_BIKE_LEFT, ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_BIKE_RIGHT, ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_BIKE_BACK, ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_BIKE_FWD, ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_BIKE_PUSHES, ASSOC_REPEAT | ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_BIKE_JUMPON_R, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_JUMPON_L, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_KICK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_HIT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_GETOFF_RHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_GETOFF_LHS, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_BIKE_GETOFF_BACK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
+	{ ANIM_BIKE_DRIVEBY_RHS, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_BIKE_DRIVEBY_LHS, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_BIKE_DRIVEBY_FT, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL | ASSOC_DRIVING },
+	{ ANIM_BIKE_PASSENGER, ASSOC_DELETEFADEDOUT | ASSOC_DRIVING },
+};
+AnimAssocDesc aMeleeAnimDescs[] = {
+	{ ANIM_MELEE_ATTACK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_MELEE_ATTACK_2ND, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_MELEE_ATTACK_START, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK },
+	{ ANIM_WEAPON_CROUCHRELOAD, ASSOC_REPEAT }, // TODO(Miami): Overload that name for melee/swing
+	{ ANIM_WEAPON_SPECIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION }, // TODO(Miami): Overload that name for melee/swing
+};
+AnimAssocDesc aSwingAnimDescs[] = {
+	{ ANIM_MELEE_ATTACK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_MELEE_ATTACK_2ND, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_MELEE_ATTACK_START, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_WEAPON_CROUCHRELOAD, ASSOC_REPEAT }, // TODO(Miami): Overload that name for melee/swing
+	{ ANIM_WEAPON_SPECIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL }, // TODO(Miami): Overload that name for melee/swing
+};
+AnimAssocDesc aWeaponAnimDescs[] = {
+	{ ANIM_WEAPON_FIRE, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_WEAPON_CROUCHFIRE, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_WEAPON_RELOAD, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_WEAPON_CROUCHRELOAD, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_WEAPON_SPECIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+};
+AnimAssocDesc aMedicAnimDescs[] = {
+	{ ANIM_CPR, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+};
+AnimAssocDesc aSunbatheAnimDescs[] = {
+	{ ANIM_SUNBATHE, ASSOC_REPEAT | ASSOC_PARTIAL },
+	{ ANIM_SUNBATHE_DOWN, ASSOC_REPEAT | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION },
+	{ ANIM_SUNBATHE_UP, ASSOC_REPEAT | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION },
+	{ ANIM_SUNBATHE_ESCAPE, ASSOC_REPEAT | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION },
+};
+AnimAssocDesc aPlayerIdleAnimDescs[] = {
+	{ ANIM_IDLE_STRETCH, ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_IDLE_TIME, ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_IDLE_SHOULDER, ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_IDLE_STRETCH_LEG, ASSOC_DELETEFADEDOUT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+};
+AnimAssocDesc aRiotAnimDescs[] = {
+	{ ANIM_RIOT_ANGRY, ASSOC_REPEAT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_RIOT_ANGRY_B, ASSOC_REPEAT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_RIOT_CHANT, ASSOC_REPEAT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_RIOT_PUNCHES, ASSOC_REPEAT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_RIOT_SHOUT, ASSOC_REPEAT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_RIOT_CHALLENGE, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_RIOT_FUKU, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+};
+AnimAssocDesc aStripAnimDescs[] = {
+	{ ANIM_STRIP_A, ASSOC_REPEAT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_STRIP_B, ASSOC_REPEAT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_STRIP_C, ASSOC_REPEAT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_STRIP_D, ASSOC_REPEAT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_STRIP_E, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_STRIP_F, ASSOC_REPEAT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+	{ ANIM_STRIP_G, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 };
 AnimAssocDesc aStdAnimDescsSide[] = {
-	{ ANIM_WALK, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_WALK | ASSOC_HAS_X_TRANSLATION },
-	{ ANIM_RUN, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_WALK | ASSOC_HAS_X_TRANSLATION },
-	{ ANIM_SPRINT, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_WALK | ASSOC_HAS_X_TRANSLATION },
+	{ ANIM_WALK, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION | ASSOC_WALK },
+	{ ANIM_RUN, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION | ASSOC_WALK },
+	{ ANIM_SPRINT, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION | ASSOC_WALK },
 	{ ANIM_IDLE_STANCE, ASSOC_REPEAT },
 	{ ANIM_WALK_START, ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION },
 };
-char const *aStdAnimations[] = {
+
+char const* aStdAnimations[] = {
 	"walk_civi",
 	"run_civi",
 	"sprint_panic",
@@ -211,7 +303,7 @@ char const *aStdAnimations[] = {
 	"walk_start",
 	"run_stop",
 	"run_stopR",
-	"idle_cam",
+	"idle_hbhb",
 	"idle_hbhb",
 	"idle_tired",
 	"idle_armed",
@@ -249,27 +341,6 @@ char const *aStdAnimations[] = {
 	"HIT_wall",
 	"FLOOR_hit_f",
 	"HIT_behind",
-	"punchR",
-	"KICK_floor",
-	"WEAPON_bat_h",
-	"WEAPON_bat_v",
-	"WEAPON_hgun_body",
-	"WEAPON_AK_body",
-	"WEAPON_pump",
-	"WEAPON_sniper",
-	"WEAPON_throw",
-	"WEAPON_throwu",
-	"WEAPON_start_throw",
-	"bomber",
-	"WEAPON_hgun_rload",
-	"WEAPON_AK_rload",
-//	"FPS_PUNCH",
-//	"FPS_BAT",
-//	"FPS_UZI",
-//	"FPS_PUMP",
-//	"FPS_AK",
-//	"FPS_M16",
-//	"FPS_ROCKET",
 	"FIGHTIDLE",
 	"FIGHT2IDLE",
 	"FIGHTsh_F",
@@ -282,6 +353,17 @@ char const *aStdAnimations[] = {
 	"FIGHTrndhse",
 	"FIGHTlngkck",
 	"FIGHTppunch",
+	"FIGHTjab",
+	"FIGHTelbowL",
+	"FIGHTelbowR",
+	"FIGHTbkickL",
+	"FIGHTbkickR",
+	"bomber",
+	"punchR",
+	"FIGHTppunch",
+	"KICK_floor",
+	"WEAPON_throwu",
+	"FIGHTsh_back",
 	"car_jackedRHS",
 	"car_LjackedRHS",
 	"car_jackedLHS",
@@ -300,6 +382,7 @@ char const *aStdAnimations[] = {
 	"CAR_closedoorL_LHS",
 	"CAR_rolldoor",
 	"CAR_rolldoorLO",
+	"CAR_jumpin_LHS",
 	"CAR_getout_LHS",
 	"CAR_getoutL_LHS",
 	"CAR_close_LHS",
@@ -325,29 +408,31 @@ char const *aStdAnimations[] = {
 	"Drive_LO_R",
 	"Driveby_L",
 	"Driveby_R",
+	"DrivebyL_L",
+	"DrivebyL_R",
 	"CAR_LB",
 	"DRIVE_BOAT",
+	"DRIVE_BOAT_L",
+	"DRIVE_BOAT_R",
+	"DRIVE_BOAT_back",
+	"BIKE_pickupR",
+	"BIKE_pickupL",
+	"BIKE_pullupR",
+	"BIKE_pullupL",
+	"BIKE_elbowR",
+	"BIKE_elbowL",
+	"BIKE_fall_off",
+	"BIKE_fallR",
 	"CAR_getout_RHS",
 	"CAR_getoutL_RHS",
 	"CAR_close_RHS",
 	"car_hookertalk",
-	"COACH_opnL",
-	"COACH_opnR",
-	"COACH_inL",
-	"COACH_inR",
-	"COACH_outL",
-	"TRAIN_getin",
-	"TRAIN_getout",
+	"idle_stance",
+	"idle_stance",
 	"CAR_crawloutRHS",
 	"CAR_crawloutRHS",
-	"VAN_openL",
-	"VAN_getinL",
-	"VAN_closeL",
-	"VAN_getoutL",
-	"VAN_open",
-	"VAN_getin",
-	"VAN_close",
-	"VAN_getout",
+	"CAR_rollout_LHS",
+	"CAR_rollout_LHS",
 	"Getup",
 	"Getup",
 	"Getup",
@@ -359,6 +444,8 @@ char const *aStdAnimations[] = {
 	"FALL_glide",
 	"FALL_land",
 	"FALL_collapse",
+	"FALL_back",
+	"FALL_front",
 	"EV_step",
 	"EV_dive",
 	"XPRESSscratch",
@@ -366,213 +453,444 @@ char const *aStdAnimations[] = {
 	"TURN_180",
 	"ARRESTgun",
 	"DROWN",
-	"CPR",
 	"DUCK_down",
 	"DUCK_low",
+	"WEAPON_crouch",
 	"RBLOCK_Cshoot",
-	"WEAPON_throwu",
 	"handsup",
 	"handsCOWER",
 	"FUCKU",
 	"PHONE_in",
 	"PHONE_out",
 	"PHONE_talk",
+	"SEAT_down",
+	"SEAT_up",
+	"SEAT_idle",
+	"SEAT_down",
+	"ATM",
+	"abseil",
 };
-char const *aPlayerAnimations[] = {
+char const* aVanAnimations[] = {
+	"VAN_openL",
+	"VAN_getinL",
+	"VAN_closeL",
+	"VAN_getoutL",
+	"VAN_open",
+	"VAN_getin",
+	"VAN_close",
+	"VAN_getout",
+};
+char const* aCoachAnimations[] = {
+	"COACH_opnL",
+	"COACH_opnL",
+	"COACH_inL",
+	"COACH_inL",
+	"COACH_outL",
+};
+char const* aBikesAnimations[] = {
+	"BIKEs_Ride",
+	"BIKEs_Still",
+	"BIKEs_Left",
+	"BIKEs_Right",
+	"BIKEs_Back",
+	"BIKEs_Fwd",
+	"BIKEs_pushes",
+	"BIKEs_jumponR",
+	"BIKEs_jumponL",
+	"BIKEs_kick",
+	"BIKEs_hit",
+	"BIKEs_getoffRHS",
+	"BIKEs_getoffLHS",
+	"BIKEs_getoffBACK",
+	"BIKEs_drivebyLHS",
+	"BIKEs_drivebyRHS",
+	"BIKEs_drivebyFT",
+	"BIKEs_passenger",
+};
+char const* aBikevAnimations[] = {
+	"BIKEv_Ride",
+	"BIKEv_Still",
+	"BIKEv_Left",
+	"BIKEv_Right",
+	"BIKEv_Back",
+	"BIKEv_Fwd",
+	"BIKEv_pushes",
+	"BIKEv_jumponR",
+	"BIKEv_jumponL",
+	"BIKEv_kick",
+	"BIKEv_hit",
+	"BIKEv_getoffRHS",
+	"BIKEv_getoffLHS",
+	"BIKEv_getoffBACK",
+	"BIKEv_drivebyLHS",
+	"BIKEv_drivebyRHS",
+	"BIKEv_drivebyFT",
+	"BIKEv_passenger",
+};
+char const* aBikehAnimations[] = {
+	"BIKEh_Ride",
+	"BIKEh_Still",
+	"BIKEh_Left",
+	"BIKEh_Right",
+	"BIKEh_Back",
+	"BIKEh_Fwd",
+	"BIKEh_pushes",
+	"BIKEh_jumponR",
+	"BIKEh_jumponL",
+	"BIKEh_kick",
+	"BIKEh_hit",
+	"BIKEh_getoffRHS",
+	"BIKEh_getoffLHS",
+	"BIKEh_getoffBACK",
+	"BIKEh_drivebyLHS",
+	"BIKEh_drivebyRHS",
+	"BIKEh_drivebyFT",
+	"BIKEh_passenger",
+};
+char const* aBikedAnimations[] = {
+	"BIKEd_Ride",
+	"BIKEd_Still",
+	"BIKEd_Left",
+	"BIKEd_Right",
+	"BIKEd_Back",
+	"BIKEd_Fwd",
+	"BIKEd_pushes",
+	"BIKEd_jumponR",
+	"BIKEd_jumponL",
+	"BIKEd_kick",
+	"BIKEd_hit",
+	"BIKEd_getoffRHS",
+	"BIKEd_getoffLHS",
+	"BIKEd_getoffBACK",
+	"BIKEd_drivebyLHS",
+	"BIKEd_drivebyRHS",
+	"BIKEd_drivebyFT",
+	"BIKEd_passenger",
+};
+char const* aUnarmedAnimations[] = {
+	"punchR",
+	"KICK_floor",
+	"FIGHTppunch",
+};
+char const* aScrewdriverAnimations[] = {
+	"FIGHTbodyblow",
+	"FIGHTbodyblow",
+	"FIGHTppunch",
+	"FIGHTIDLE",
+	"FIGHTbodyblow",
+};
+char const* aKnifeAnimations[] = {
+	"WEAPON_knife_1",
+	"WEAPON_knife_2",
+	"knife_part",
+	"WEAPON_knifeidle",
+	"WEAPON_knife_3",
+};
+char const* aBaseballbatAnimations[] = {
+	"WEAPON_bat_h",
+	"WEAPON_bat_v",
+	"BAT_PART",
+	"WEAPON_bat_h",
+	"WEAPON_golfclub",
+};
+char const* aGolfclubAnimations[] = {
+	"WEAPON_bat_h",
+	"WEAPON_golfclub",
+	"BAT_PART",
+	"WEAPON_bat_h",
+	"WEAPON_bat_v",
+};
+char const* aChainsawAnimations[] = {
+	"WEAPON_csaw",
+	"WEAPON_csawlo",
+	"csaw_part",
+};
+char const* aPythonAnimations[] = {
+	"python_fire",
+	"python_crouchfire",
+	"python_reload",
+	"python_crouchreload",
+};
+char const* aColtAnimations[] = {
+	"colt45_fire",
+	"colt45_crouchfire",
+	"colt45_reload",
+	"colt45_crouchreload",
+	"colt45_cop",
+};
+char const* aShotgunAnimations[] = {
+	"shotgun_fire",
+	"shotgun_crouchfire",
+};
+char const* aBuddyAnimations[] = {
+	"buddy_fire",
+	"buddy_crouchfire",
+};
+char const* aTecAnimations[] = {
+	"TEC_fire",
+	"TEC_crouchfire",
+	"TEC_reload",
+	"TEC_crouchreload",
+};
+char const* aUziAnimations[] = {
+	"UZI_fire",
+	"UZI_crouchfire",
+	"UZI_reload",
+	"UZI_crouchreload",
+};
+char const* aRifleAnimations[] = {
+	"RIFLE_fire",
+	"RIFLE_crouchfire",
+	"RIFLE_load",
+	"RIFLE_crouchload",
+};
+char const* aM60Animations[] = {
+	"M60_fire",
+	"M60_fire",
+	"M60_reload",
+};
+char const* aSniperAnimations[] = {
+	"WEAPON_sniper",
+};
+char const* aThrowAnimations[] = {
+	"WEAPON_throw",
+	"WEAPON_throwu",
+	"WEAPON_start_throw",
+};
+char const* aFlamethrowerAnimations[] = {
+	"FLAME_fire",
+};
+char const* aMedicAnimations[] = {
+	"CPR",
+};
+char const* aSunbatheAnimations[] = {
+	"bather",
+	"batherdown",
+	"batherup",
+	"batherscape",
+};
+char const* aPlayerIdleAnimations[] = {
+	"stretch",
+	"time",
+	"shldr",
+	"strleg",
+};
+char const* aRiotAnimations[] = {
+	"riot_angry",
+	"riot_angry_b",
+	"riot_chant",
+	"riot_punches",
+	"riot_shout",
+	"riot_challenge",
+	"riot_fuku",
+};
+char const* aStripAnimations[] = {
+	"strip_A",
+	"strip_B",
+	"strip_C",
+	"strip_D",
+	"strip_E",
+	"strip_F",
+	"strip_G",
+};
+char const* aLanceAnimations[] = {
+	"lance",
+};
+char const* aPlayerAnimations[] = {
 	"walk_player",
 	"run_player",
 	"SPRINT_civi",
 	"IDLE_STANCE",
 	"walk_start",
 };
-char const *aPlayerWithRocketAnimations[] = {
+char const* aPlayerWithRocketAnimations[] = {
 	"walk_rocket",
 	"run_rocket",
 	"run_rocket",
 	"idle_rocket",
 	"walk_start_rocket",
 };
-char const *aPlayer1ArmedAnimations[] = {
+char const* aPlayer1ArmedAnimations[] = {
 	"walk_player",
 	"run_1armed",
 	"SPRINT_civi",
 	"IDLE_STANCE",
 	"walk_start",
 };
-char const *aPlayer2ArmedAnimations[] = {
-	"walk_player",
+char const* aPlayer2ArmedAnimations[] = {
+	"walk_armed",
 	"run_armed",
 	"run_armed",
-	"idle_stance",
-	"walk_start",
+	"idle_armed",
+	"walk_start_armed",
 };
-char const *aPlayerBBBatAnimations[] = {
+char const* aPlayerBBBatAnimations[] = {
 	"walk_player",
 	"run_player",
 	"run_player",
 	"IDLE_STANCE",
 	"walk_start",
 };
-char const *aPlayerChainsawAnimations[] = {
+char const* aPlayerChainsawAnimations[] = {
 	"walk_csaw",
 	"run_csaw",
 	"run_csaw",
 	"IDLE_csaw",
 	"walk_start_csaw",
 };
-char const *aShuffleAnimations[] = {
+char const* aShuffleAnimations[] = {
 	"WALK_shuffle",
 	"RUN_civi",
 	"SPRINT_civi",
 	"IDLE_STANCE",
 };
-char const *aOldAnimations[] = {
+char const* aOldAnimations[] = {
 	"walk_old",
 	"run_civi",
 	"sprint_civi",
 	"idle_stance",
 };
-char const *aGang1Animations[] = {
+char const* aGang1Animations[] = {
 	"walk_gang1",
 	"run_gang1",
 	"sprint_civi",
 	"idle_stance",
 };
-char const *aGang2Animations[] = {
+char const* aGang2Animations[] = {
 	"walk_gang2",
 	"run_gang1",
 	"sprint_civi",
 	"idle_stance",
 };
-char const *aFatAnimations[] = {
+char const* aFatAnimations[] = {
 	"walk_fat",
 	"run_civi",
 	"woman_runpanic",
 	"idle_stance",
 };
-char const *aOldFatAnimations[] = {
+char const* aOldFatAnimations[] = {
 	"walk_fatold",
 	"run_fatold",
 	"woman_runpanic",
 	"idle_stance",
 };
-char const *aJoggerAnimations[] = {
+char const* aJoggerAnimations[] = {
 	"JOG_maleA",
 	"run_civi",
 	"sprint_civi",
 	"idle_stance",
 };
-char const *aStdWomanAnimations[] = {
+char const* aStdWomanAnimations[] = {
 	"woman_walknorm",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char const *aWomanShopAnimations[] = {
+char const* aWomanShopAnimations[] = {
 	"woman_walkshop",
 	"woman_run",
 	"woman_run",
 	"woman_idlestance",
 };
-char const *aBusyWomanAnimations[] = {
+char const* aBusyWomanAnimations[] = {
 	"woman_walkbusy",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char const *aSexyWomanAnimations[] = {
+char const* aSexyWomanAnimations[] = {
 	"woman_walksexy",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char const *aFatWomanAnimations[] = {
+char const* aFatWomanAnimations[] = {
 	"walk_fat",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char const *aOldWomanAnimations[] = {
+char const* aOldWomanAnimations[] = {
 	"woman_walkold",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char const *aJoggerWomanAnimations[] = {
+char const* aJoggerWomanAnimations[] = {
 	"JOG_maleB",
 	"woman_run",
 	"woman_runpanic",
 	"woman_idlestance",
 };
-char const *aPanicChunkyAnimations[] = {
+char const* aPanicChunkyAnimations[] = {
 	"run_fatold",
 	"woman_runpanic",
 	"woman_runpanic",
 	"idle_stance",
 };
-char const *aSkateAnimations[] = {
+char const* aSkateAnimations[] = {
 	"skate_run",
 	"skate_sprint",
 	"skate_sprint",
 	"skate_idle",
 };
-char const *aPlayerStrafeBackAnimations[] = {
+char const* aPlayerStrafeBackAnimations[] = {
 	"walk_back",
 	"run_back",
 	"run_back",
 	"IDLE_STANCE",
 	"walk_start_back",
 };
-char const *aPlayerStrafeLeftAnimations[] = {
+char const* aPlayerStrafeLeftAnimations[] = {
 	"walk_left",
 	"run_left",
 	"run_left",
 	"IDLE_STANCE",
 	"walk_start_left",
 };
-char const *aPlayerStrafeRightAnimations[] = {
+char const* aPlayerStrafeRightAnimations[] = {
 	"walk_right",
 	"run_right",
 	"run_right",
 	"IDLE_STANCE",
 	"walk_start_right",
 };
-char const *aRocketStrafeBackAnimations[] = {
+char const* aRocketStrafeBackAnimations[] = {
 	"walk_rocket_back",
 	"run_rocket_back",
 	"run_rocket_back",
 	"idle_rocket",
 	"walkst_rocket_back",
 };
-char const *aRocketStrafeLeftAnimations[] = {
+char const* aRocketStrafeLeftAnimations[] = {
 	"walk_rocket_left",
 	"run_rocket_left",
 	"run_rocket_left",
 	"idle_rocket",
 	"walkst_rocket_left",
 };
-char const *aRocketStrafeRightAnimations[] = {
+char const* aRocketStrafeRightAnimations[] = {
 	"walk_rocket_right",
 	"run_rocket_right",
 	"run_rocket_right",
 	"idle_rocket",
 	"walkst_rocket_right",
 };
-char const *aChainsawStrafeBackAnimations[] = {
+char const* aChainsawStrafeBackAnimations[] = {
 	"walk_csaw_back",
 	"run_csaw_back",
 	"run_csaw_back",
 	"idle_csaw",
 	"walkst_csaw_back",
 };
-char const *aChainsawStrafeLeftAnimations[] = {
+char const* aChainsawStrafeLeftAnimations[] = {
 	"walk_csaw_left",
 	"run_csaw_left",
 	"run_csaw_left",
 	"idle_csaw",
 	"walkst_csaw_left",
 };
-char const *aChainsawStrafeRightAnimations[] = {
+char const* aChainsawStrafeRightAnimations[] = {
 	"walk_csaw_right",
 	"run_csaw_right",
 	"run_csaw_right",
@@ -580,8 +898,39 @@ char const *aChainsawStrafeRightAnimations[] = {
 	"walkst_csaw_right",
 };
 
+
+
 const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_GROUPS] = {
 	{ "man", "ped", MI_COP, 173, aStdAnimations, aStdAnimDescs },
+	{ "van", "van", MI_COP, 8, aVanAnimations, aVanAnimDescs },
+	{ "coach", "coach", MI_COP, 5, aCoachAnimations, aCoachAnimDescs },
+	{ "bikes", "bikes", MI_COP, 18, aBikesAnimations, aBikeAnimDescs },
+	{ "bikev", "bikev", MI_COP, 18, aBikevAnimations, aBikeAnimDescs },
+	{ "bikeh", "bikeh", MI_COP, 18, aBikehAnimations, aBikeAnimDescs },
+	{ "biked", "biked", MI_COP, 18, aBikedAnimations, aBikeAnimDescs },
+	{ "unarmed", "ped", MI_COP, 3, aUnarmedAnimations, aMeleeAnimDescs },
+	{ "screwdrv", "ped", MI_COP, 5, aScrewdriverAnimations, aMeleeAnimDescs },
+	{ "knife", "knife", MI_COP, 5, aKnifeAnimations, aMeleeAnimDescs },
+	{ "baseball", "baseball", MI_COP, 5, aBaseballbatAnimations, aSwingAnimDescs },
+	{ "golfclub", "baseball", MI_COP, 5, aGolfclubAnimations, aSwingAnimDescs },
+	{ "chainsaw", "chainsaw", MI_COP, 3, aChainsawAnimations, aMeleeAnimDescs },
+	{ "python", "python", MI_COP, 4, aPythonAnimations, aWeaponAnimDescs },
+	{ "colt45", "colt45", MI_COP, 5, aColtAnimations, aWeaponAnimDescs },
+	{ "shotgun", "shotgun", MI_COP, 2, aShotgunAnimations, aWeaponAnimDescs },
+	{ "buddy", "buddy", MI_COP, 2, aBuddyAnimations, aWeaponAnimDescs },
+	{ "tec", "tec", MI_COP, 4, aTecAnimations, aWeaponAnimDescs },
+	{ "uzi", "uzi", MI_COP, 4, aUziAnimations, aWeaponAnimDescs },
+	{ "rifle", "rifle", MI_COP, 4, aRifleAnimations, aWeaponAnimDescs },
+	{ "m60", "m60", MI_COP, 3, aM60Animations, aWeaponAnimDescs },
+	{ "sniper", "sniper", MI_COP, 1, aSniperAnimations, aWeaponAnimDescs },
+	{ "grenade", "grenade", MI_COP, 3, aThrowAnimations, aWeaponAnimDescs },
+	{ "flame", "flame", MI_COP, 1, aFlamethrowerAnimations, aWeaponAnimDescs },
+	{ "medic", "medic", MI_COP, 1, aMedicAnimations, aMedicAnimDescs },
+	{ "sunbathe", "sunbathe", MI_COP, 1, aSunbatheAnimations, aSunbatheAnimDescs },
+	{ "playidles", "playidles", MI_COP, 4, aPlayerIdleAnimations, aPlayerIdleAnimDescs },
+	{ "riot", "riot", MI_COP, 7, aRiotAnimations, aRiotAnimDescs },
+	{ "strip", "strip", MI_COP, 7, aStripAnimations, aStripAnimDescs },
+	{ "lance", "lance", MI_COP, 1, aLanceAnimations, aSunbatheAnimDescs },
 	{ "player", "ped", MI_COP, 5, aPlayerAnimations, aStdAnimDescs },
 	{ "playerrocket", "ped", MI_COP, 5, aPlayerWithRocketAnimations, aStdAnimDescs },
 	{ "player1armed", "ped", MI_COP, 5, aPlayer1ArmedAnimations, aStdAnimDescs },
@@ -603,7 +952,7 @@ const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_
 	{ "oldwoman", "ped", MI_COP, 4, aOldWomanAnimations, aStdAnimDescs },
 	{ "jogwoman", "ped", MI_COP, 4, aJoggerWomanAnimations, aStdAnimDescs },
 	{ "panicchunky", "ped", MI_COP, 4, aPanicChunkyAnimations, aStdAnimDescs },
-	{ "skate", "ped", MI_COP, 4, aSkateAnimations, aStdAnimDescs },
+	{ "skate", "skate", MI_COP, 4, aSkateAnimations, aStdAnimDescs },
 	{ "playerback", "ped", MI_COP, 5, aPlayerStrafeBackAnimations, aStdAnimDescs },
 	{ "playerleft", "ped", MI_COP, 5, aPlayerStrafeLeftAnimations, aStdAnimDescsSide },
 	{ "playerright", "ped", MI_COP, 5, aPlayerStrafeRightAnimations, aStdAnimDescsSide },
@@ -903,7 +1252,9 @@ CAnimManager::CreateAnimAssocGroups(void)
 		group->firstAnimId = def->animDescs[0].animId;
 		group->CreateAssociations(def->blockName, clump, def->animNames, def->numAnims);
 		for(j = 0; j < group->numAssociations; j++)
-			group->GetAnimation(j)->flags |= def->animDescs[j].flags;
+
+			// GetAnimation(i) in III (but it's in LoadAnimFiles), GetAnimation(group->animDesc[j].animId) in VC
+			group->GetAnimation(def->animDescs[j].animId)->flags |= def->animDescs[j].flags;
 #ifdef PED_SKIN
 		if(IsClumpSkinned(clump))
 			RpClumpForAllAtomics(clump, AtomicRemoveAnimFromSkinCB, nil);

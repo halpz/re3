@@ -1332,12 +1332,14 @@ CStreaming::LoadInitialPeds(void)
 	RequestModel(MI_COP, STREAMFLAGS_DONT_REMOVE);
 	RequestModel(MI_MALE01, STREAMFLAGS_DONT_REMOVE);
 	RequestModel(MI_TAXI_D, STREAMFLAGS_DONT_REMOVE);
+}
 
-// TODO(MIAMI): remove this hack once we can stream weapons
-	for(int i = 0; i < MODELINFOSIZE; i++)
-		if(CModelInfo::GetModelInfo(i) &&
-		   CModelInfo::GetModelInfo(i)->GetModelType() == MITYPE_WEAPON)
-			RequestModel(i, STREAMFLAGS_DONT_REMOVE);
+void
+CStreaming::LoadInitialWeapons(void)
+{
+	// TODO(Miami): Enable when weapons have been ported
+	//CStreaming::RequestModel(MI_NIGHTSTICK, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_MISSILE, STREAMFLAGS_DONT_REMOVE);
 }
 
 void

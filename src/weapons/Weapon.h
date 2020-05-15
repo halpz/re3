@@ -32,6 +32,7 @@ public:
 	static void UpdateWeapons    (void);
 	
 	void Initialise(eWeaponType type, int32 ammo);
+	void Shutdown();
 	
 	bool Fire          (CEntity *shooter, CVector *fireSource);
 	bool FireFromCar   (CAutomobile *shooter, bool left);
