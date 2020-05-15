@@ -5529,17 +5529,17 @@ CPed::SetWaitState(eWaitState state, void *time)
 			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 4.0f);
 			break;
 		case WAITSTATE_SIT_DOWN:
-			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 4.0f); // TODO(MIAMI): proper anim!
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_HANDSUP, 4.0f); // TODO(MIAMI): proper anim!
 			animAssoc->SetFinishCallback(FinishedWaitCB, this);
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 10000;
 			break;
 		case WAITSTATE_SIT_UP:
-			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 4.0f); // TODO(MIAMI): proper anim!
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_HANDSUP, 4.0f); // TODO(MIAMI): proper anim!
 			animAssoc->SetFinishCallback(FinishedWaitCB, this);
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 100000;
 			break;
 		case WAITSTATE_SIT_IDLE:
-			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 5000.0f); // TODO(MIAMI): proper anim!
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_HANDSUP, 5000.0f); // TODO(MIAMI): proper anim!
 			animAssoc->SetFinishCallback(FinishedWaitCB, this);
 			if (time)
 				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
@@ -5547,7 +5547,7 @@ CPed::SetWaitState(eWaitState state, void *time)
 				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(25000, 30000);
 			break;
 		case WAITSTATE_USE_ATM:
-			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 5000.0f); // TODO(MIAMI): proper anim!
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_HANDSUP, 5000.0f); // TODO(MIAMI): proper anim!
 			animAssoc->SetFinishCallback(FinishedWaitCB, this);
 			if (time)
 				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
@@ -14046,7 +14046,7 @@ CPed::ProcessObjective(void)
 							if (GetPedAttractorManager()->IsAtHeadOfQueue(this, m_attractor)) {
 								switch (m_objective) {
 								case OBJECTIVE_USE_SEAT_ATTRACTOR:
-									if (bTurnedAroundOnAttractor) {
+									if (!bTurnedAroundOnAttractor) {
 										ClearObjective();
 										SetWaitState(WAITSTATE_SIT_DOWN, 0);
 									}
@@ -17998,19 +17998,19 @@ CPed::ClearWaitState(void)
 			AnimationId id;
 			switch (m_nWaitState) { // TODO(MIAMI): actual!
 			case WAITSTATE_PLAYANIM_CHAT: id = ANIM_IDLE_CHAT; break;
-			case WAITSTATE_SIT_DOWN: id = ANIM_XPRESS_SCRATCH; break;
-			case WAITSTATE_SIT_DOWN_RVRS: id = ANIM_XPRESS_SCRATCH; break;
-			case WAITSTATE_SIT_UP: id = ANIM_XPRESS_SCRATCH; break;
-			case WAITSTATE_SIT_IDLE: id = ANIM_XPRESS_SCRATCH; break;
-			case WAITSTATE_USE_ATM: id = ANIM_XPRESS_SCRATCH; break;
+			case WAITSTATE_SIT_DOWN: id = ANIM_HANDSUP; break;
+			case WAITSTATE_SIT_DOWN_RVRS: id = ANIM_HANDSUP; break;
+			case WAITSTATE_SIT_UP: id = ANIM_HANDSUP; break;
+			case WAITSTATE_SIT_IDLE: id = ANIM_HANDSUP; break;
+			case WAITSTATE_USE_ATM: id = ANIM_HANDSUP; break;
 			}
 			CAnimBlendAssociation* pAssoc = RpAnimBlendClumpGetAssociation(GetClump(), id);
 			if (pAssoc)
 				pAssoc->blendDelta = -8.0f;
 			if (m_attractor)
 				GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
-			break;
 		}
+		break;
 	case WAITSTATE_RIOT:
 	case WAITSTATE_FAST_FALL:
 	case WAITSTATE_BOMBER:

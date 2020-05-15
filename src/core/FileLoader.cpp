@@ -1033,12 +1033,12 @@ CFileLoader::Load2dEffect(const char *line)
 		sscanf(line, "%d %f %f %f %d %d %d %d %d %d %f %f %f %f %f %f",
 			&id, &x, &y, &z, &r, &g, &b, &a, &type,
 			&ptype,
-			&effect->pedattr.useDir.x,
-			&effect->pedattr.useDir.y,
-			&effect->pedattr.useDir.z,
 			&effect->pedattr.queueDir.x,
 			&effect->pedattr.queueDir.y,
-			&effect->pedattr.queueDir.z);
+			&effect->pedattr.queueDir.z,
+			&effect->pedattr.useDir.x,
+			&effect->pedattr.useDir.y,
+			&effect->pedattr.useDir.z);
 		effect->pedattr.type = ptype;
 		break;
 	}

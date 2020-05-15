@@ -216,7 +216,7 @@ CCivilianPed::ProcessControl(void)
 			// fall through
 		case PED_SEEK_POS:
 			if (Seek()) {
-				if ((m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA) && m_pNextPathNode) {
+				if ((m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA || IsUseAttractorObjective(m_objective)) && m_pNextPathNode) {
 					m_pNextPathNode = nil;
 #ifdef TOGGLEABLE_BETA_FEATURES
 				} else if (bRunningToPhone && m_objective < OBJECTIVE_FLEE_TILL_SAFE) {
@@ -248,7 +248,7 @@ CCivilianPed::ProcessControl(void)
 					} else if (m_objective == OBJECTIVE_GOTO_CHAR_ON_FOOT
 						&& m_pedInObjective && m_pedInObjective->m_nMoveState != PEDMOVE_STILL) {
 						SetMoveState(m_pedInObjective->m_nMoveState);
-					} else if (m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA) {
+					} else if (m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA || IsUseAttractorObjective(m_objective)) {
 						SetIdle();
 					} else {
 						RestorePreviousState();
@@ -422,9 +422,8 @@ void CCivilianPed::UseNearbyAttractors()
 			CSector* s = CWorld::GetSector(x, y);
 			for (CPtrNode* pNode = s->m_lists[ENTITYLIST_BUILDINGS].first; pNode != nil; pNode = pNode->next) {
 				CEntity* pEntity = (CEntity*)pNode->item;
-				if (!pEntity->IsObject())
-					continue;
-				// TODO: some flag check
+				//if (pEntity->IsObject() && (CObject*)(pEntity)->IsBroken())
+					//continue;
 				CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(pEntity->GetModelIndex());
 				for (int i = 0; i < pModelInfo->GetNum2dEffects(); i++) {
 					C2dEffect* pEffect = pModelInfo->Get2dEffect(i);
@@ -433,7 +432,7 @@ void CCivilianPed::UseNearbyAttractors()
 					if (!IsAttractedTo(pEffect->pedattr.type))
 						continue;
 					CVector pos;
-					CPedAttractorManager::ComputeEffectPos(pEffect, GetMatrix(), pos);
+					CPedAttractorManager::ComputeEffectPos(pEffect, pEntity->GetMatrix(), pos);
 					if ((pos - GetPosition()).MagnitudeSqr() < minDistance) {
 						CPedAttractorManager* pManager = GetPedAttractorManager();
 						if (pManager->HasEmptySlot(pEffect) && pManager->IsApproachable(pEffect, pEntity->GetMatrix(), 0, this)) {
@@ -446,9 +445,10 @@ void CCivilianPed::UseNearbyAttractors()
 			}
 			for (CPtrNode* pNode = s->m_lists[ENTITYLIST_OBJECTS].first; pNode != nil; pNode = pNode->next) {
 				CEntity* pEntity = (CEntity*)pNode->item;
-				if (!pEntity->IsObject())
-					continue;
-				// TODO: some flag check
+				//if (pEntity->IsObject() && (CObject*)(pEntity)->IsBroken())
+					//continue;
+				if (pEntity->GetModelIndex() == 3181)
+					debug("get2\n");
 				CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(pEntity->GetModelIndex());
 				for (int i = 0; i < pModelInfo->GetNum2dEffects(); i++) {
 					C2dEffect* pEffect = pModelInfo->Get2dEffect(i);
@@ -457,7 +457,7 @@ void CCivilianPed::UseNearbyAttractors()
 					if (!IsAttractedTo(pEffect->pedattr.type))
 						continue;
 					CVector pos;
-					CPedAttractorManager::ComputeEffectPos(pEffect, GetMatrix(), pos);
+					CPedAttractorManager::ComputeEffectPos(pEffect, pEntity->GetMatrix(), pos);
 					if ((pos - GetPosition()).MagnitudeSqr() < minDistance) {
 						CPedAttractorManager* pManager = GetPedAttractorManager();
 						if (pManager->HasEmptySlot(pEffect) && pManager->IsApproachable(pEffect, pEntity->GetMatrix(), 0, this)) {
@@ -482,7 +482,7 @@ bool CCivilianPed::IsAttractedTo(int8 type)
 	case ATTRACTOR_STOP: return true;
 	case ATTRACTOR_PIZZA: return true;
 	case ATTRACTOR_SHELTER: return CWeather::Rain >= 0.2f;
-	case ATTRACTOR_ICECREAM: return true;
+	case ATTRACTOR_ICECREAM: return false;
 	}
 	return false;
 }

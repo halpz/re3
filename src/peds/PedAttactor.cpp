@@ -485,7 +485,7 @@ bool CPedAttractorManager::BroadcastArrival(CPed* pPed, CPedAttractor* pAttracto
 		return false;
 	if (pAttractor->GetEffect()->type != EFFECT_PED_ATTRACTOR)
 		return nil;
-	if (IsPedRegisteredWithEffect(pPed))
+	if (!IsPedRegisteredWithEffect(pPed))
 		return nil;
 	switch (pAttractor->GetEffect()->pedattr.type) {
 	case ATTRACTOR_ATM: return BroadcastArrival(pPed, pAttractor, vAtmAttractors);
@@ -504,7 +504,7 @@ bool CPedAttractorManager::BroadcastDeparture(CPed* pPed, CPedAttractor* pAttrac
 		return false;
 	if (pAttractor->GetEffect()->type != EFFECT_PED_ATTRACTOR)
 		return nil;
-	if (IsPedRegisteredWithEffect(pPed))
+	if (!IsPedRegisteredWithEffect(pPed))
 		return nil;
 	switch (pAttractor->GetEffect()->pedattr.type) {
 	case ATTRACTOR_ATM: return BroadcastDeparture(pPed, pAttractor, vAtmAttractors);
@@ -523,7 +523,7 @@ bool CPedAttractorManager::IsAtHeadOfQueue(CPed* pPed, CPedAttractor* pAttractor
 		return false;
 	if (pAttractor->GetEffect()->type != EFFECT_PED_ATTRACTOR)
 		return nil;
-	if (IsPedRegisteredWithEffect(pPed))
+	if (!IsPedRegisteredWithEffect(pPed))
 		return nil;
 	switch (pAttractor->GetEffect()->pedattr.type) {
 	case ATTRACTOR_ATM: return IsAtHeadOfQueue(pPed, pAttractor, vAtmAttractors);
@@ -542,7 +542,7 @@ bool CPedAttractorManager::IsInQueue(CPed* pPed, CPedAttractor* pAttractor)
 		return false;
 	if (pAttractor->GetEffect()->type != EFFECT_PED_ATTRACTOR)
 		return nil;
-	if (IsPedRegisteredWithEffect(pPed))
+	if (!IsPedRegisteredWithEffect(pPed))
 		return nil;
 	switch (pAttractor->GetEffect()->pedattr.type) {
 	case ATTRACTOR_ATM: return IsInQueue(pPed, pAttractor, vAtmAttractors);
@@ -747,13 +747,13 @@ bool CPedAttractorManager::IsApproachable(C2dEffect* pEffect, const CMatrix& mat
 	ComputeEffectPos(pEffect, matrix, vecEffectPos);
 	float dp = -DotProduct(vecUseDir, vecEffectPos);
 	if (pEffect->pedattr.type == ATTRACTOR_ATM || pEffect->pedattr.type == ATTRACTOR_PIZZA || pEffect->pedattr.type == ATTRACTOR_ICECREAM) {
-		vecUseDir = vecUseDir;
+		vecUseDir = -vecUseDir;
 		dp = -dp;
 	}
 	if (dp + DotProduct(vecEffectPos, pPed->GetPosition()) > 0.0f) {
 		CVector vecPedToAttractor = pPed->GetPosition() - vecEffectPos;
 		vecPedToAttractor.Normalise();
-		if (DotProduct(vecPedToAttractor, vecUseDir) > 0.25f /* && CWorld::IsWanderPathClear(pPed, vecEffectPos, 2.0f, 0) */)
+		if (DotProduct(vecPedToAttractor, vecUseDir) > 0.25f && CWorld::IsWanderPathClear(pPed->GetPosition(), vecEffectPos, 2.0f, 0))
 			return true;
 	}
 	return false;

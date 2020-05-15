@@ -2236,3 +2236,58 @@ CWorld::UseDetonator(CEntity *pEntity)
 		}
 	}
 }
+
+bool
+CWorld::IsWanderPathClear(CVector const& point1, CVector const& point2, float distance, int maxSteps)
+{
+	if (Abs(point1.z - point2.z) > distance)
+		return false;
+	if (!GetIsLineOfSightClear(point1, point2, true, false, false, false, false, false, false))
+		return false;
+	CVector vecBetween = point2 - point1;
+	uint32 nSteps = Max(vecBetween.Magnitude(), maxSteps);
+	if (nSteps == 0)
+		return true;
+	vecBetween.Normalise();
+	uint32 step = 1;
+	for (step = 1; step < nSteps; step++) {
+		CVector posThisStep = point1 + vecBetween * step;
+		float level;
+		if (!CWaterLevel::GetWaterLevel(posThisStep, &level, false))
+			continue;
+		posThisStep.z = level;
+		AdvanceCurrentScanCode();
+
+		CVector vecCheckedPos(posThisStep.x, posThisStep.y, Max(point1.z, point2.z));
+		CColPoint colpoint;
+		CEntity* entity;
+		if (!ProcessVerticalLineSector(*GetSector(GetSectorIndexX(posThisStep.x), GetSectorIndexY(posThisStep.y)),
+			CColLine(posThisStep, vecCheckedPos), colpoint, entity, true, false, false, false, false, false, nil))
+			return false;
+	}
+
+	CVector posThisStep = point1;
+	AdvanceCurrentScanCode();
+	CVector vecCheckedPos(posThisStep.x, posThisStep.y, point1.z - 5.0f);
+
+	CColPoint colpoint;
+	CEntity* entity;
+	if (!ProcessVerticalLineSector(*GetSector(GetSectorIndexX(posThisStep.x), GetSectorIndexY(posThisStep.y)),
+		CColLine(posThisStep, vecCheckedPos), colpoint, entity, true, false, false, false, false, false, nil))
+		return false;
+
+	float heightNextStep = colpoint.point.z + 0.5f;
+	for (step = 1; step < nSteps; step++) {
+		CVector posThisStep = point1 + vecBetween * step;
+		posThisStep.z = heightNextStep;
+		AdvanceCurrentScanCode();
+		CVector vecCheckedPos(posThisStep.x, posThisStep.y, heightNextStep - 2.0f);
+		if (!ProcessVerticalLineSector(*GetSector(GetSectorIndexX(posThisStep.x), GetSectorIndexY(posThisStep.y)),
+			CColLine(posThisStep, vecCheckedPos), colpoint, entity, true, false, false, false, false, false, nil))
+			return false;
+		if (Abs(colpoint.point.z - heightNextStep) > 1.0f)
+			return false;
+		heightNextStep = colpoint.point.z + 0.5f;
+	}
+	return true;
+}

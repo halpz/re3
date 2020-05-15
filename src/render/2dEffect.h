@@ -65,8 +65,8 @@ public:
 		uint8 probability;
 	};
 	struct PedAttractor {
-		CVector useDir;
 		CVector queueDir;
+		CVector useDir;
 		int8 type;
 	};
 
