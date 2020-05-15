@@ -865,8 +865,8 @@ public:
 	void SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float, float, int);
 	void ClearWaitState(void);
 
-	bool HasWeapon(uint8 weaponType) { return m_weapons[weaponType].m_eWeaponType == weaponType; }
-	CWeapon &GetWeapon(uint8 weaponType) { return m_weapons[weaponType]; }
+	bool HasWeaponSlot(uint8 slot) { return m_weapons[slot].m_eWeaponType != WEAPONTYPE_UNARMED; }
+	CWeapon& GetWeapon(uint8 slot) { return m_weapons[slot]; }
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 
 	PedState GetPedState(void) { return m_nPedState; }

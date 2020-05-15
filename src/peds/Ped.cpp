@@ -5859,17 +5859,17 @@ CPed::SetWaitState(eWaitState state, void *time)
 			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 4.0f);
 			break;
 		case WAITSTATE_SIT_DOWN:
-			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_HANDSUP, 4.0f); // TODO(MIAMI): proper anim!
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_SEAT_DOWN, 4.0f);
 			animAssoc->SetFinishCallback(FinishedWaitCB, this);
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 10000;
 			break;
 		case WAITSTATE_SIT_UP:
-			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_HANDSUP, 4.0f); // TODO(MIAMI): proper anim!
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_SEAT_UP, 4.0f);
 			animAssoc->SetFinishCallback(FinishedWaitCB, this);
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 100000;
 			break;
 		case WAITSTATE_SIT_IDLE:
-			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_HANDSUP, 5000.0f); // TODO(MIAMI): proper anim!
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_SEAT_IDLE, 5000.0f);
 			animAssoc->SetFinishCallback(FinishedWaitCB, this);
 			if (time)
 				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
@@ -5877,7 +5877,7 @@ CPed::SetWaitState(eWaitState state, void *time)
 				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(25000, 30000);
 			break;
 		case WAITSTATE_USE_ATM:
-			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_HANDSUP, 5000.0f); // TODO(MIAMI): proper anim!
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ATM, 5000.0f);
 			animAssoc->SetFinishCallback(FinishedWaitCB, this);
 			if (time)
 				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
@@ -18335,11 +18335,11 @@ CPed::ClearWaitState(void)
 			AnimationId id;
 			switch (m_nWaitState) { // TODO(MIAMI): actual!
 			case WAITSTATE_PLAYANIM_CHAT: id = ANIM_IDLE_CHAT; break;
-			case WAITSTATE_SIT_DOWN: id = ANIM_HANDSUP; break;
-			case WAITSTATE_SIT_DOWN_RVRS: id = ANIM_HANDSUP; break;
-			case WAITSTATE_SIT_UP: id = ANIM_HANDSUP; break;
-			case WAITSTATE_SIT_IDLE: id = ANIM_HANDSUP; break;
-			case WAITSTATE_USE_ATM: id = ANIM_HANDSUP; break;
+			case WAITSTATE_SIT_DOWN: id = ANIM_SEAT_DOWN; break;
+			case WAITSTATE_SIT_DOWN_RVRS: id = ANIM_SEAT_DOWN2; break;
+			case WAITSTATE_SIT_UP: id = ANIM_SEAT_UP; break;
+			case WAITSTATE_SIT_IDLE: id = ANIM_SEAT_IDLE; break;
+			case WAITSTATE_USE_ATM: id = ANIM_ATM; break;
 			}
 			CAnimBlendAssociation* pAssoc = RpAnimBlendClumpGetAssociation(GetClump(), id);
 			if (pAssoc)
