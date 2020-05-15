@@ -14,9 +14,9 @@ public:
 	virtual void SetAnimFile(const char *file);
 	virtual void ConvertAnimFileIndex(void);
 	virtual int GetAnimFileIndex(void) { return m_animFileIndex; }
-
+	virtual void SetAtomic(int n, RpAtomic *atomic);
+	
 	void Init(void);
 	void SetWeaponInfo(int32 weaponId);
 	int32 GetWeaponInfo(void);
-	void SetAtomic(int n, RpAtomic *atomic);
 };

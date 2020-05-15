@@ -18,6 +18,7 @@
 #include "Radar.h"
 #include "Fire.h"
 #include "Darkel.h"
+#include "Streaming.h"
 
 bool CVehicle::bWheelsOnlyCheat;
 bool CVehicle::bAllDodosCheat;
@@ -596,11 +597,14 @@ CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage
 		break;
 	case WEAPONTYPE_COLT45:
 	case WEAPONTYPE_UZI:
+	case WEAPONTYPE_TEC9:
+	case WEAPONTYPE_SILENCED_INGRAM:
+	case WEAPONTYPE_MP5:
 	case WEAPONTYPE_SHOTGUN:
 	case WEAPONTYPE_AK47:
 	case WEAPONTYPE_M16:
 	case WEAPONTYPE_SNIPERRIFLE:
-	case WEAPONTYPE_TOTAL_INVENTORY_WEAPONS:
+	case WEAPONTYPE_HELICANNON:
 	case WEAPONTYPE_UZI_DRIVEBY:
 		if (bBulletProof)
 			return;
@@ -1078,9 +1082,10 @@ CVehicle::SetDriver(CPed *driver)
 			FindPlayerPed()->m_fHealth = Min(FindPlayerPed()->m_fHealth + 20.0f, 100.0f);
 		else if(GetModelIndex() == MI_TAXI)
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
-		else if(GetModelIndex() == MI_POLICE)
+		else if (GetModelIndex() == MI_POLICE) {
+			CStreaming::RequestModel(WEAPONTYPE_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
 			driver->GiveWeapon(WEAPONTYPE_SHOTGUN, 5);
-		else if(GetModelIndex() == MI_ENFORCER)
+		} else if (GetModelIndex() == MI_ENFORCER)
 			driver->m_fArmour = Max(driver->m_fArmour, 100.0f);
 		else if(GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_ZEBRA)	// TODO(MIAMI): check zebra
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;

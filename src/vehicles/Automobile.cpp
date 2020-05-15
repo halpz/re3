@@ -3018,7 +3018,7 @@ CAutomobile::DoDriveByShootings(void)
 {
 	CAnimBlendAssociation *anim;
 	CWeapon *weapon = pDriver->GetWeapon();
-	if(weapon->m_eWeaponType != WEAPONTYPE_UZI)
+	if(CWeaponInfo::GetWeaponInfo(weapon->m_eWeaponType)->m_nWeaponSlot != 5)
 		return;
 
 	weapon->Update(pDriver->m_audioEntityId);

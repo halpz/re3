@@ -35,7 +35,10 @@ uint16 gReloadSampleTime[WEAPONTYPE_LAST_WEAPONTYPE] =
 	0,			// UNARMED
 	0,			// BASEBALLBAT
 	250,		// COLT45
-	400,		// UZI
+	400,		// TEC9
+	400,		// UZIhec
+	400,		// SILENCED_INGRAM
+	400,		// MP5
 	650,		// SHOTGUN
 	300,		// AK47
 	300,		// M16
@@ -43,7 +46,9 @@ uint16 gReloadSampleTime[WEAPONTYPE_LAST_WEAPONTYPE] =
 	400,		// ROCKETLAUNCHER
 	0,			// FLAMETHROWER
 	0,			// MOLOTOV
+	0,			// ROCKET
 	0,			// GRENADE
+	0,			// DETONATEGRENADE
 	0,			// DETONATOR
 	0			// HELICANNON
 };
@@ -85,6 +90,7 @@ CWeapon::UpdateWeapons(void)
 	CBulletInfo::Update();
 }
 
+// --MIAMI: Done
 void
 CWeapon::Initialise(eWeaponType type, int32 ammo)
 {
@@ -96,6 +102,32 @@ CWeapon::Initialise(eWeaponType type, int32 ammo)
 		m_nAmmoTotal = ammo;
 	m_nAmmoInClip = 0;
 	Reload();
+	m_nTimer = 0;
+	int modelId = CWeaponInfo::GetWeaponInfo(m_eWeaponType)->m_nModelId;
+	if (modelId != -1)
+		CModelInfo::GetModelInfo(modelId)->AddRef();
+
+	int model2Id = CWeaponInfo::GetWeaponInfo(m_eWeaponType)->m_nModel2Id;
+	if (model2Id != -1)
+		CModelInfo::GetModelInfo(model2Id)->AddRef();
+}
+
+// --MIAMI: Done
+void
+CWeapon::Shutdown()
+{
+	int modelId = CWeaponInfo::GetWeaponInfo(m_eWeaponType)->m_nModelId;
+	if (modelId != -1)
+		CModelInfo::GetModelInfo(modelId)->RemoveRef();
+
+	int model2Id = CWeaponInfo::GetWeaponInfo(m_eWeaponType)->m_nModel2Id;
+	if (model2Id != -1)
+		CModelInfo::GetModelInfo(model2Id)->RemoveRef();
+
+	m_eWeaponType = WEAPONTYPE_UNARMED;
+	m_eWeaponState = WEAPONSTATE_READY;
+	m_nAmmoInClip = 0;
+	m_nAmmoTotal = 0;
 	m_nTimer = 0;
 }
 
@@ -141,9 +173,20 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 
 			case WEAPONTYPE_COLT45:
 			case WEAPONTYPE_UZI:
+			case WEAPONTYPE_TEC9:
+			case WEAPONTYPE_SILENCED_INGRAM:
+			case WEAPONTYPE_MP5:
 			case WEAPONTYPE_AK47:
+			case WEAPONTYPE_M16:
+			case WEAPONTYPE_HELICANNON:
 			{
-				fired = FireInstantHit(shooter, source);
+				if ((TheCamera.PlayerWeaponMode.Mode == CCam::MODE_HELICANNON_1STPERSON || TheCamera.PlayerWeaponMode.Mode == CCam::MODE_M16_1STPERSON)
+					&& shooter == FindPlayerPed())
+				{
+					fired = FireM16_1stPerson(shooter);
+				}
+				else
+					fired = FireInstantHit(shooter, source);
 
 				break;
 			}
@@ -151,16 +194,6 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 			case WEAPONTYPE_SNIPERRIFLE:
 			{
 				fired = FireSniper(shooter);
-
-				break;
-			}
-
-			case WEAPONTYPE_M16:
-			{
-				if ( TheCamera.PlayerWeaponMode.Mode == CCam::MODE_M16_1STPERSON && shooter == FindPlayerPed() )
-					fired = FireM16_1stPerson(shooter);
-				else
-					fired = FireInstantHit(shooter, source);
 
 				break;
 			}
@@ -184,6 +217,7 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 
 			case WEAPONTYPE_MOLOTOV:
 			case WEAPONTYPE_GRENADE:
+			case WEAPONTYPE_DETONATOR_GRENADE:
 			{
 				if ( shooter == FindPlayerPed() )
 				{
@@ -201,6 +235,11 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 				else
 					fired = FireProjectile(shooter, source, 0.3f);
 
+				if (m_eWeaponType == WEAPONTYPE_DETONATOR_GRENADE) {
+					((CPed*)shooter)->GiveWeapon(WEAPONTYPE_DETONATOR, 1, true);
+					((CPed*)shooter)->GetWeapon(((CPed*)shooter)->GetWeaponSlot(WEAPONTYPE_DETONATOR)).m_eWeaponState = WEAPONSTATE_READY;
+					((CPed*)shooter)->SetCurrentWeapon(WEAPONTYPE_DETONATOR);
+				}
 				break;
 			}
 
@@ -217,19 +256,6 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 				m_nAmmoTotal  = 1;
 				m_nAmmoInClip = m_nAmmoTotal;
 				fired = true;
-
-				break;
-			}
-
-			case WEAPONTYPE_HELICANNON:
-			{
-				if ( (TheCamera.PlayerWeaponMode.Mode == CCam::MODE_HELICANNON_1STPERSON || TheCamera.PlayerWeaponMode.Mode == CCam::MODE_M16_1STPERSON )
-						&& shooter == FindPlayerPed() )
-				{
-					fired = FireM16_1stPerson(shooter);
-				}
-				else
-					fired = FireInstantHit(shooter, source);
 
 				break;
 			}
@@ -343,6 +369,7 @@ CWeapon::FireFromCar(CAutomobile *shooter, bool left)
 	return true;
 }
 
+// --MIAMI: Just a few lines is done
 bool
 CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 {
@@ -350,9 +377,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 
 	CWeaponInfo *info = GetInfo();
 
-	bool anim2Playing = false;
-	if ( RpAnimBlendClumpGetAssociation(shooter->GetClump(), info->m_Anim2ToPlay) )
-		anim2Playing = true;
+	bool anim2Playing = RpAnimBlendClumpGetAssociation(shooter->GetClump(), CPed::GetFireAnimGround(info, false));
 
 	ASSERT(shooter->IsPed());
 
@@ -739,6 +764,9 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 		}
 
 		case WEAPONTYPE_UZI:
+		case WEAPONTYPE_TEC9:
+		case WEAPONTYPE_SILENCED_INGRAM:
+		case WEAPONTYPE_MP5:
 		{
 			CPointLights::AddLight(CPointLights::LIGHT_POINT,
 					*fireSource, CVector(0.0f, 0.0f, 0.0f), 5.0f,
@@ -1387,10 +1415,12 @@ CWeapon::FireProjectile(CEntity *shooter, CVector *fireSource, float power)
 	ASSERT(fireSource!=nil);
 
 	CVector source, target;
+	eWeaponType projectileType = m_eWeaponType;
 
 	if ( m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER )
 	{
 		source = *fireSource;
+		projectileType = WEAPONTYPE_ROCKET;
 
 		if ( shooter->IsPed() && ((CPed*)shooter)->IsPlayer() )
 		{
@@ -1432,7 +1462,7 @@ CWeapon::FireProjectile(CEntity *shooter, CVector *fireSource, float power)
 	if ( !CWorld::GetIsLineOfSightClear(source, target, true, true, false, true, false, false, false) )
 	{
 		if ( m_eWeaponType != WEAPONTYPE_GRENADE )
-			CProjectileInfo::RemoveNotAdd(shooter, m_eWeaponType, *fireSource);
+			CProjectileInfo::RemoveNotAdd(shooter, projectileType, *fireSource);
 		else
 		{
 			if ( shooter->IsPed() )
@@ -1441,14 +1471,14 @@ CWeapon::FireProjectile(CEntity *shooter, CVector *fireSource, float power)
 				source.z -= 0.4f;
 
 				if ( !CWorld::TestSphereAgainstWorld(source, 0.5f, nil, false, false, true, false, false, false) )
-					CProjectileInfo::AddProjectile(shooter, m_eWeaponType, source, 0.0f);
+					CProjectileInfo::AddProjectile(shooter, WEAPONTYPE_GRENADE, source, 0.0f);
 				else
-					CProjectileInfo::RemoveNotAdd(shooter, m_eWeaponType, *fireSource);
+					CProjectileInfo::RemoveNotAdd(shooter, WEAPONTYPE_GRENADE, *fireSource);
 			}
 		}
 	}
 	else
-		CProjectileInfo::AddProjectile(shooter, m_eWeaponType, *fireSource, power);
+		CProjectileInfo::AddProjectile(shooter, projectileType, *fireSource, power);
 
 	return true;
 }
@@ -1555,6 +1585,7 @@ CWeapon::FireSniper(CEntity *shooter)
 	return true;
 }
 
+// --MIAMI: Heavily TODO
 bool
 CWeapon::FireM16_1stPerson(CEntity *shooter)
 {
@@ -1599,7 +1630,9 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 	DoBulletImpact(shooter, victim, &source, &target, &point, front);
 
 	CVector bulletPos;
-	if ( CHeli::TestBulletCollision(&source, &target, &bulletPos, 4) )
+
+	// TODO(Miami): M60
+	if ( CHeli::TestBulletCollision(&source, &target, &bulletPos, (/*m_eWeaponType == WEAPONTYPE_M60 || */ m_eWeaponType == WEAPONTYPE_HELICANNON ? 20 : 4)) )
 	{
 		for ( int32 i = 0; i < 16; i++ )
 			CParticle::AddParticle(PARTICLE_SPARK, bulletPos, CVector(0.0f, 0.0f, 0.0f));
@@ -1609,16 +1642,27 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 	{
 		CPad::GetPad(0)->StartShake_Distance(240, 128, FindPlayerPed()->GetPosition().x, FindPlayerPed()->GetPosition().y, FindPlayerPed()->GetPosition().z);
 
-		if ( m_eWeaponType == WEAPONTYPE_M16 )
-		{
-			TheCamera.Cams[TheCamera.ActiveCam].Beta  += float((CGeneral::GetRandomNumber() & 127) - 64) * 0.0003f;
-			TheCamera.Cams[TheCamera.ActiveCam].Alpha += float((CGeneral::GetRandomNumber() & 127) - 64) * 0.0003f;
+		// TODO(Miami)
+		float mult;
+		switch (m_eWeaponType) {
+			case WEAPONTYPE_M16:  // case WEAPONTYPE_M4:
+			case WEAPONTYPE_HELICANNON:
+			// case WEAPONTYPE_M60:
+				mult = 0.0003f;
+				break;
+			case WEAPONTYPE_AK47: // case WEAPONTYPE_RUGER:
+				mult = 0.00015f;
+				break;
+			default:
+				mult = 0.0002f;
+				break;
 		}
-		else if ( m_eWeaponType == WEAPONTYPE_HELICANNON )
-		{
-			TheCamera.Cams[TheCamera.ActiveCam].Beta  += float((CGeneral::GetRandomNumber() & 127) - 64) * 0.0001f;
-			TheCamera.Cams[TheCamera.ActiveCam].Alpha += float((CGeneral::GetRandomNumber() & 127) - 64) * 0.0001f;
-		}
+
+		if (FindPlayerPed()->bIsDucking || FindPlayerPed()->m_attachedTo)
+			mult *= 0.3f;
+
+		TheCamera.Cams[TheCamera.ActiveCam].Beta  += float((CGeneral::GetRandomNumber() & 127) - 64) * mult;
+		TheCamera.Cams[TheCamera.ActiveCam].Alpha += float((CGeneral::GetRandomNumber() & 127) - 64) * mult;
 	}
 
 	return true;

@@ -6,6 +6,7 @@ public:
 	static RwRaster *pFrontBuffer;
 	static bool ms_bJustInitialised;
 	static bool BlurOn;
+	static float Drunkness;
 
 public:
 	static void MotionBlurOpen(RwCamera *cam);
@@ -13,4 +14,5 @@ public:
 	static void CreateImmediateModeData(RwCamera *cam, RwRect *rect);
 	static void MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type);
 	static void OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type);
+	static void ClearDrunkBlur();
 };

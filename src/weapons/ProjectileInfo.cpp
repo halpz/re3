@@ -45,6 +45,7 @@ CProjectileInfo::GetProjectileInfo(int32 id)
 	return &gaProjectileInfo[id];
 }
 
+// --MIAMI: Mostly done
 bool
 CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos, float speed)
 {
@@ -58,32 +59,36 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 
 	switch (weapon)
 	{
-	case WEAPONTYPE_ROCKETLAUNCHER:
+	case WEAPONTYPE_ROCKET:
 	{
-		float vy = 1.25f;
-		time = CTimer::GetTimeInMilliseconds() + 1400;
-		if (ped->IsPlayer()) {
-			matrix.GetForward() = TheCamera.Cams[TheCamera.ActiveCam].Front;
-			matrix.GetUp() = TheCamera.Cams[TheCamera.ActiveCam].Up;
-			matrix.GetRight() = CrossProduct(TheCamera.Cams[TheCamera.ActiveCam].Up, TheCamera.Cams[TheCamera.ActiveCam].Front);
+		float vy = 0.35f;
+		time = CTimer::GetTimeInMilliseconds() + 2000;
+		if (entity->GetModelIndex() == MI_SPARROW || entity->GetModelIndex() == MI_HUNTER || entity->GetModelIndex() == MI_SENTINEL) {
+			matrix = ped->GetMatrix();
 			matrix.GetPosition() = pos;
-		} else if (ped->m_pSeekTarget != nil) {
+			CVector vecSpeed = ((CPhysical*)entity)->m_vecMoveSpeed;
+			vy += Max(0.0f, DotProduct(vecSpeed, entity->GetForward())) + Max(0.0f, DotProduct(vecSpeed, entity->GetUp()));
+		} else {
+			if (ped->IsPlayer()) {
+				matrix.GetForward() = TheCamera.Cams[TheCamera.ActiveCam].Front;
+				matrix.GetUp() = TheCamera.Cams[TheCamera.ActiveCam].Up;
+				matrix.GetRight() = CrossProduct(TheCamera.Cams[TheCamera.ActiveCam].Up, TheCamera.Cams[TheCamera.ActiveCam].Front);
+				matrix.GetPosition() = pos;
+			} else if (ped->m_pSeekTarget != nil) {
 				float ry = CGeneral::GetRadianAngleBetweenPoints(1.0f, ped->m_pSeekTarget->GetPosition().z, 1.0f, pos.z);
 				float rz = Atan2(-ped->GetForward().x, ped->GetForward().y);
 				vy = 0.35f * speed + 0.15f;
 				matrix.SetTranslate(0.0f, 1.0f, 1.0f);
 				matrix.Rotate(0.0f, ry, rz);
 				matrix.GetPosition() += pos;
-		} else {
-			matrix = ped->GetMatrix();
+			} else {
+				matrix = ped->GetMatrix();
+			}
 		}
 		velocity = Multiply3x3(matrix, CVector(0.0f, vy, 0.0f));
 		gravity = false;
 		break;
 	}
-	case WEAPONTYPE_FLAMETHROWER:
-		Error("Undefined projectile type, AddProjectile, ProjectileInfo.cpp");
-		break;
 	case WEAPONTYPE_MOLOTOV:
 	{
 		time = CTimer::GetTimeInMilliseconds() + 2000;
@@ -100,6 +105,7 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 		break;
 	}
 	case WEAPONTYPE_GRENADE:
+	case WEAPONTYPE_DETONATOR_GRENADE:
 	{
 		time = CTimer::GetTimeInMilliseconds() + 2000;
 		float scale = 0.0f;
@@ -116,7 +122,9 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 		elasticity = 0.5f;
 		break;
 	}
-	default: break;
+	default:
+		Error("Undefined projectile type, AddProjectile, ProjectileInfo.cpp");
+		break;
 	}
 
 	int i = 0;
@@ -127,7 +135,7 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 
 	switch (weapon)
 	{
-	case WEAPONTYPE_ROCKETLAUNCHER:
+	case WEAPONTYPE_ROCKET:
 		ms_apProjectile[i] = new CProjectile(MI_MISSILE);
 		break;
 	case WEAPONTYPE_FLAMETHROWER:
@@ -136,6 +144,7 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 		ms_apProjectile[i] = new CProjectile(MI_MOLOTOV);
 		break;
 	case WEAPONTYPE_GRENADE:
+	case WEAPONTYPE_DETONATOR_GRENADE:
 		ms_apProjectile[i] = new CProjectile(MI_GRENADE);
 		break;
 	default: break;
@@ -158,6 +167,10 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 	CWorld::Add(ms_apProjectile[i]);
 
 	gaProjectileInfo[i].m_vecPos = ms_apProjectile[i]->GetPosition();
+
+	if (entity && entity->IsPed() && !ped->m_pCollidingEntity) {
+		ped->m_pCollidingEntity = ms_apProjectile[i];
+	}
 	return true;
 }
 
@@ -182,7 +195,7 @@ CProjectileInfo::RemoveNotAdd(CEntity *entity, eWeaponType weaponType, CVector p
 	case WEAPONTYPE_MOLOTOV:
 		CExplosion::AddExplosion(nil, entity, EXPLOSION_MOLOTOV, pos, 0);
 		break;
-	case WEAPONTYPE_ROCKETLAUNCHER:
+	case WEAPONTYPE_ROCKET:
 		CExplosion::AddExplosion(nil, entity, EXPLOSION_ROCKET, pos, 0);
 		break;
 	default: break;
@@ -204,17 +217,17 @@ CProjectileInfo::Update()
 			continue;
 		}
 
-		if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER) {
+		if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKET) {
 			CParticle::AddParticle(PARTICLE_SMOKE, ms_apProjectile[i]->GetPosition(), CVector(0.0f, 0.0f, 0.0f));
 		}
 
 		if (CTimer::GetTimeInMilliseconds() <= gaProjectileInfo[i].m_nExplosionTime) {
-			if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER) {
+			if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKET) {
 				CVector pos = ms_apProjectile[i]->GetPosition();
 				CWorld::pIgnoreEntity = ms_apProjectile[i];
 				if (ms_apProjectile[i]->bHasCollided
 					|| !CWorld::GetIsLineOfSightClear(gaProjectileInfo[i].m_vecPos, pos, true, true, true, true, false, false)
-					|| gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER && (CHeli::TestRocketCollision(&pos) || CPlane::TestRocketCollision(&pos))) {
+					|| gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKET && (CHeli::TestRocketCollision(&pos) || CPlane::TestRocketCollision(&pos))) {
 					RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
 				}
 				CWorld::pIgnoreEntity = nil;
@@ -227,14 +240,25 @@ CProjectileInfo::Update()
 				{
 					if (ms_apProjectile[i]->bHasCollided
 						|| !CWorld::GetIsLineOfSightClear(gaProjectileInfo[i].m_vecPos, pos, true, true, true, true, false, false)
-						|| gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER && (CHeli::TestRocketCollision(&pos) || CPlane::TestRocketCollision(&pos))) {
+						|| gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKET && (CHeli::TestRocketCollision(&pos) || CPlane::TestRocketCollision(&pos))) {
 						RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
 					}
 				}
 				CWorld::pIgnoreEntity = nil;
 			}
 		} else {
-			RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
+			if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_DETONATOR_GRENADE) {
+				CEntity *ent = gaProjectileInfo[i].m_pSource;
+				if (ent->IsPed() && ((CPed*)ped)->IsPlayer()) {
+					CPed *ped = (CPed*)ent;
+					if (ped->GetWeapon(ped->GetWeaponSlot(WEAPONTYPE_DETONATOR)).m_eWeaponType != WEAPONTYPE_DETONATOR
+						|| ped->GetWeapon(ped->GetWeaponSlot(WEAPONTYPE_DETONATOR)).m_nAmmoTotal == 0) {
+						gaProjectileInfo[i].m_nExplosionTime = 0;
+					}
+				}
+			} else {
+				RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
+			}
 		}
 
 		gaProjectileInfo[i].m_vecPos = ms_apProjectile[i]->GetPosition();
@@ -247,7 +271,7 @@ CProjectileInfo::IsProjectileInRange(float x1, float x2, float y1, float y2, flo
 	bool result = false;
 	for (int i = 0; i < ARRAY_SIZE(ms_apProjectile); i++) {
 		if (gaProjectileInfo[i].m_bInUse) {
-			if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER || gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_MOLOTOV || gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_GRENADE) {
+			if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKET || gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_MOLOTOV || gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_GRENADE) {
 				const CVector &pos = ms_apProjectile[i]->GetPosition();
 				if (pos.x >= x1 && pos.x <= x2 && pos.y >= y1 && pos.y <= y2 && pos.z >= z1 && pos.z <= z2) {
 					result = true;
@@ -261,6 +285,20 @@ CProjectileInfo::IsProjectileInRange(float x1, float x2, float y1, float y2, flo
 		}
 	}
 	return result;
+}
+
+// --MIAMI: Done
+void
+CProjectileInfo::RemoveDetonatorProjectiles()
+{
+	for (int i = 0; i < ARRAY_SIZE(ms_apProjectile); i++) {
+		if (gaProjectileInfo[i].m_bInUse && gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_DETONATOR_GRENADE) {
+			CExplosion::AddExplosion(nil, gaProjectileInfo[i].m_pSource, EXPLOSION_GRENADE, gaProjectileInfo[i].m_vecPos, 0); // TODO(Miami): New parameter (1)
+			gaProjectileInfo[i].m_bInUse = false;
+			CWorld::Remove(ms_apProjectile[i]);
+			delete ms_apProjectile[i];
+		}
+	}
 }
 
 void

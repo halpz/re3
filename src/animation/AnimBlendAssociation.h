@@ -18,6 +18,7 @@ enum {
 	ASSOC_NOWALK = 0x400,	// see CPed::PlayFootSteps(void)
 	ASSOC_BLOCK = 0x800,	// unused in assoc description, blocks other anims from being played
 	ASSOC_FRONTAL = 0x1000, // anims that we fall to front
+	ASSOC_DRIVING = 0x2000,	// new in VC
 };
 
 // Anim hierarchy associated with a clump

@@ -39,9 +39,10 @@ public:
 	RwObject *CreateInstance(RwMatrix *);
 	RwObject *GetRwObject(void) { return (RwObject*)m_atomics[0]; }
 
+	virtual void SetAtomic(int n, RpAtomic *atomic);
+
 	void Init(void);
 	void IncreaseAlpha(void);
-	void SetAtomic(int n, RpAtomic *atomic);
 	void SetLodDistances(float *dist);
 	float GetLodDistance(int i);
 	float GetNearDistance(void);
