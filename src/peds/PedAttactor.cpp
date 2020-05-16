@@ -12,6 +12,8 @@ const int gcMaxSizeOfPizzaQueue = 5;
 const int gcMaxSizeOfShelterQueue = 5;
 const int gcMaxSizeOfIceCreamQueue = 1;
 
+//--MIAMI: file done, except TODO(MIAMI)
+
 std::vector<CVector> CPedShelterAttractor::ms_displacements;
 
 CPedAttractorManager* GetPedAttractorManager()
@@ -162,6 +164,23 @@ CPedAttractor::CPedAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 ma
 	CPedAttractorManager::ComputeEffectQueueDir(pEffect, matrix, vecQueueDir);
 	CPedAttractorManager::ComputeEffectUseDir(pEffect, matrix, vecUseDir);
 }
+
+void CPedPizzaAttractor::UpdatePedStateOnDeparture(CPed* pPed) const
+{
+	/* TODO(MIAMI): uncomment
+	if (pPed->m_nPedMoney > 10)
+		pPed->m_nPedMoney -= 10;
+	else
+		pPed->m_nPedMoney = 0;
+	*/
+}
+
+void CPedAtmAttractor::UpdatePedStateOnDeparture(CPed* pPed) const
+{
+	/* TODO(MIAMI): uncomment
+	pPed->m_nPedMoney += 20 * CGeneral::GetRandomNumberInRange(1, 51);
+	*/
+};
 
 float CPedAttractor::ComputeDeltaHeading() const
 {
