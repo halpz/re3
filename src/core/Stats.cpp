@@ -61,6 +61,7 @@ int32 CStats::HighestScores[CStats::TOTAL_HIGHEST_SCORES];
 int32 CStats::Sprayings;
 float CStats::AutoPaintingBudget;
 int32 CStats::NoMoreHurricanes;
+float CStats::FashionBudget;
 
 void CStats::Init()
 {
@@ -208,6 +209,19 @@ void CStats::SetTotalNumberMissions(int32 total)
 	TotalNumberMissions = total;
 }
 
+float CStats::GetPercentageProgress()
+{
+	float p;
+	if (TotalProgressInGame == 0.0f)
+		p = 0.0f;
+	else if (CGame::nastyGame)
+		p = 100.0f * ProgressMade / TotalProgressInGame;
+	else
+		p = 100.0f * ProgressMade / (TotalProgressInGame - 1);
+
+	return Min(100.0f, p);
+}
+
 wchar *CStats::FindCriminalRatingString()
 {
 	int rating = FindCriminalRatingNumber();
@@ -247,6 +261,11 @@ int32 CStats::FindCriminalRatingNumber()
 	if (!CommercialPassed && rating >= 4552)
 		rating = 4552;
 	return rating;
+}
+
+void CStats::MoneySpentOnFashion(int32 money)
+{
+	FashionBudget += money;
 }
 
 void CStats::SaveStats(uint8 *buf, uint32 *size)

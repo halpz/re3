@@ -129,12 +129,12 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 }
 
 bool
-CPickup::CanBePickedUp(CPlayerPed *player)
+CPickup::CanBePickedUp(CPlayerPed *player, int playerId)
 {
 	assert(m_pObject != nil);
 	bool cannotBePickedUp =
-		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > 99.5f)
-		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > 99.5f)
+		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > CWorld::Players[playerId].m_nMaxArmour - 0.5f)
+		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > CWorld::Players[playerId].m_nMaxHealth - 0.5f)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_BRIBE && player->m_pWanted->m_nWantedLevel == 0)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_KILLFRENZY && (CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame));
 	return !cannotBePickedUp;
@@ -190,7 +190,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 		}
 
 		// if we didn't then we've got nothing to do
-		if (isPickupTouched && CanBePickedUp(player)) {
+		if (isPickupTouched && CanBePickedUp(player, playerId)) {
 			CPad::GetPad(0)->StartShake(120, 100);
 			switch (m_eType)
 			{
@@ -430,14 +430,14 @@ CPickups::GivePlayerGoodiesWithPickUpMI(int16 modelIndex, int playerIndex)
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_ADRENALINE, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_BODYARMOUR) {
-		player->m_fArmour = 100.0f;
+		player->m_fArmour = CWorld::Players[playerIndex].m_nMaxArmour;
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_ARMOUR, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_INFO) {
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_HEALTH) {
-		player->m_fHealth = 100.0f;
+		player->m_fHealth = CWorld::Players[playerIndex].m_nMaxHealth;
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_HEALTH, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_BONUS) {

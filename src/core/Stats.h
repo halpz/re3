@@ -65,6 +65,7 @@ public:
 	static int32 Sprayings;
 	static float AutoPaintingBudget;
 	static int32 NoMoreHurricanes;
+	static float FashionBudget;
 
 public:
 	static void Init(void);
@@ -88,6 +89,9 @@ public:
 	static void CheckPointReachedSuccessfully() { TotalLegitimateKills += KillsSinceLastCheckpoint; KillsSinceLastCheckpoint = 0; };
 	static void CheckPointReachedUnsuccessfully() { KillsSinceLastCheckpoint = 0; };
 	static int32 FindCriminalRatingNumber();
+	static float GetPercentageProgress();
 	static void SaveStats(uint8 *buf, uint32 *size);
 	static void LoadStats(uint8 *buf, uint32 size);
+
+	static void MoneySpentOnFashion(int32);
 };

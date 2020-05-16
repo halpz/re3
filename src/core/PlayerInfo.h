@@ -52,6 +52,9 @@ public:
 	int32 field_272;
 	bool m_bInfiniteSprint;
 	bool m_bFastReload;
+	bool m_bFireproof;
+	uint8 m_nMaxHealth;
+	uint8 m_nMaxArmour;
 	bool m_bGetOutOfJailFree;
 	bool m_bGetOutOfHospitalFree;
 	char m_aSkinName[32];

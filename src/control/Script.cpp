@@ -4821,7 +4821,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPlayerPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pPed);
-		pPed->m_fHealth = ScriptParams[1];
+		pPed->m_fHealth = Min(ScriptParams[1], CWorld::Players[ScriptParams[0]].m_nMaxHealth);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_HEALTH:
@@ -7173,7 +7173,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPlayerPed* pPlayerPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pPlayerPed);
-		pPlayerPed->m_fArmour = clamp(pPlayerPed->m_fArmour + ScriptParams[1], 0.0f, 100.0f);
+		pPlayerPed->m_fArmour = clamp(pPlayerPed->m_fArmour + ScriptParams[1], 0.0f, CWorld::Players[ScriptParams[0]].m_nMaxArmour);
 		return 0;
 	}
 	case COMMAND_ADD_ARMOUR_TO_CHAR:
@@ -9870,6 +9870,10 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		return 0;
 	}
 	case COMMAND_ADD_MONEY_SPENT_ON_CLOTHES:
+		CollectParameters(&m_nIp, 1);
+		CStats::MoneySpentOnFashion(ScriptParams[0]);
+		return 0;
+		
 	case COMMAND_SET_HELI_ORIENTATION:
 	case COMMAND_CLEAR_HELI_ORIENTATION:
 	case COMMAND_PLANE_GOTO_COORDS:
@@ -10077,10 +10081,41 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_GET_CLOSEST_WATER_NODE:
 	case COMMAND_ADD_PORN_LEAFLET_TO_RUBBISH:
 	case COMMAND_CREATE_CLOTHES_PICKUP:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
+		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
+		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_PICKUP_CLOTHES, PICKUP_ON_STREET, ScriptParams[3]);
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
 	case COMMAND_CHANGE_BLIP_THRESHOLD:
+		assert(0);
 	case COMMAND_MAKE_PLAYER_FIRE_PROOF:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+		pPlayerInfo->m_bFireproof = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_INCREASE_PLAYER_MAX_HEALTH:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+		pPlayerInfo->m_nMaxHealth += ScriptParams[1];
+		pPlayerInfo->m_pPed->m_fHealth = pPlayerInfo->m_nMaxHealth;
+		return 0;
+	}
 	case COMMAND_INCREASE_PLAYER_MAX_ARMOUR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+		pPlayerInfo->m_nMaxArmour += ScriptParams[1];
+		pPlayerInfo->m_pPed->m_fArmour = pPlayerInfo->m_nMaxArmour;
+		return 0;
+	}
 	case COMMAND_CREATE_RANDOM_CHAR_AS_DRIVER:
 	case COMMAND_CREATE_RANDOM_CHAR_AS_PASSENGER:
 	case COMMAND_SET_CHAR_IGNORE_THREATS_BEHIND_OBJECTS:
@@ -10090,6 +10125,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		assert(0);
 	case COMMAND_SET_OBJECT_AREA_VISIBLE:
 	{
+		CollectParameters(&m_nIp, 2);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		assert(pObject);
 		pObject->m_area = ScriptParams[1];
@@ -10157,7 +10193,11 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_SET_LOAD_COLLISION_FOR_OBJECT_FLAG:
 	case COMMAND_ADD_BIG_GUN_FLASH:
 	case COMMAND_HAS_CHAR_BOUGHT_ICE_CREAM:
+		assert(0);
 	case COMMAND_GET_PROGRESS_PERCENTAGE:
+		*(float*)&ScriptParams[0] = CStats::GetPercentageProgress();
+		StoreParameters(&m_nIp, 1);
+		return 0;
 	case COMMAND_SET_SHORTCUT_PICKUP_POINT:
 	case COMMAND_SET_SHORTCUT_DROPOFF_POINT_FOR_MISSION:
 	case COMMAND_GET_RANDOM_ICE_CREAM_CUSTOMER_IN_AREA:

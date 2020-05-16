@@ -1080,14 +1080,14 @@ CVehicle::SetDriver(CPed *driver)
 
 	if(bFreebies && driver == FindPlayerPed()){
 		if(GetModelIndex() == MI_AMBULAN)
-			FindPlayerPed()->m_fHealth = Min(FindPlayerPed()->m_fHealth + 20.0f, 100.0f);
+			FindPlayerPed()->m_fHealth = Min(FindPlayerPed()->m_fHealth + 20.0f, CWorld::Players[0].m_nMaxHealth);
 		else if(GetModelIndex() == MI_TAXI)
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
 		else if (GetModelIndex() == MI_POLICE) {
 			CStreaming::RequestModel(WEAPONTYPE_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
 			driver->GiveWeapon(WEAPONTYPE_SHOTGUN, 5);
 		} else if (GetModelIndex() == MI_ENFORCER)
-			driver->m_fArmour = Max(driver->m_fArmour, 100.0f);
+			driver->m_fArmour = Max(driver->m_fArmour, CWorld::Players[0].m_nMaxArmour);
 		else if(GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_ZEBRA)	// TODO(MIAMI): check zebra
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
 		bFreebies = false;
