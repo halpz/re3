@@ -11,6 +11,7 @@
 #include "SurfaceTable.h"
 #include "Weather.h"
 #include "PedAttractor.h"
+#include "Object.h"
 
 CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 {
@@ -391,8 +392,8 @@ void CCivilianPed::FindNearbyAttractorsSectorList(CPtrList& list, float& minDist
 {
 	for (CPtrNode* pNode = list.first; pNode != nil; pNode = pNode->next) {
 		CEntity* pEntity = (CEntity*)pNode->item;
-		//if (pEntity->IsObject() && (CObject*)(pEntity)->IsBroken())
-			//continue;
+		if (pEntity->IsObject() && (!pEntity->IsStatic() || ((CObject*)pEntity)->bHasBeenDamaged))
+			continue;
 		CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(pEntity->GetModelIndex());
 		for (int i = 0; i < pModelInfo->GetNum2dEffects(); i++) {
 			C2dEffect* pEffect = pModelInfo->Get2dEffect(i);

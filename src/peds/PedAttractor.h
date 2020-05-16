@@ -152,9 +152,9 @@ public:
 	virtual void UpdatePedStateOnDeparture(CPed* pPed) const override
 	{ /*
 		if (pPed->m_money > 10)
-			pPed->m_money = 0;
-		else
 			pPed->m_money -= 10;
+		else
+			pPed->m_money = 0;
 	*/
 	}
 	CPedPizzaAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float unk8, float unk9, float posdisp, float headdisp) :
