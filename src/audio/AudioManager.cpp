@@ -671,10 +671,10 @@ cAudioManager::CreateEntity(int32 type, void *entity)
 			m_asAudioEntities[i].m_nStatus = 0;
 			m_asAudioEntities[i].m_nType = (eAudioType)type;
 			m_asAudioEntities[i].m_pEntity = entity;
-			m_asAudioEntities[i].m_awAudioEvent[0] = SOUND_TOTAL_PED_SOUNDS;
-			m_asAudioEntities[i].m_awAudioEvent[1] = SOUND_TOTAL_PED_SOUNDS;
-			m_asAudioEntities[i].m_awAudioEvent[2] = SOUND_TOTAL_PED_SOUNDS;
-			m_asAudioEntities[i].m_awAudioEvent[3] = SOUND_TOTAL_PED_SOUNDS;
+			m_asAudioEntities[i].m_awAudioEvent[0] = SOUND_NO_SOUND;
+			m_asAudioEntities[i].m_awAudioEvent[1] = SOUND_NO_SOUND;
+			m_asAudioEntities[i].m_awAudioEvent[2] = SOUND_NO_SOUND;
+			m_asAudioEntities[i].m_awAudioEvent[3] = SOUND_NO_SOUND;
 			m_asAudioEntities[i].m_AudioEvents = 0;
 			m_anAudioEntityIndices[m_nAudioEntitiesTotal++] = i;
 			return i;
