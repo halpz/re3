@@ -180,8 +180,25 @@ enum
 	MI_MALE01,
 
 	MI_TAXI_D = 28,	// HMOCA
-	MI_GANG01 = 83,	// CBa
-	MI_VICE1 = 97,
+
+	MI_WFOGO = 63,
+	MI_WMOGO = 64,
+
+	MI_CBA = 83,
+	MI_CBB,
+	MI_HNA,
+	MI_HNB,
+	MI_SGA,
+	MI_SGB,
+	MI_CLA,
+	MI_CLB,
+	MI_GDA,
+	MI_GDB,
+	MI_BKA,
+	MI_BKB,
+	MI_PGA,
+	MI_PGB,
+	MI_VICE1,
 	MI_VICE2,
 	MI_VICE3,
 	MI_VICE4,

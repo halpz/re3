@@ -329,19 +329,7 @@ CPopulation::UpdatePedCount(ePedType pedType, bool decrease)
 int
 CPopulation::ChooseGangOccupation(int gangId)
 {
-	int8 modelOverride = CGangs::GetGangPedModelOverride(gangId);
-
-	// All gangs have 2 models
-	int firstGangModel = 2 * gangId + MI_GANG01;
-
-	// GetRandomNumberInRange never returns max. value
-	if (modelOverride == -1)
-		return CGeneral::GetRandomNumberInRange(firstGangModel, firstGangModel + 2);
-
-	if (modelOverride != 0)
-		return firstGangModel + 1;
-	else
-		return firstGangModel;
+	return CGangs::ChooseGangPedModel(gangId);
 }
 
 //--MIAMI: done

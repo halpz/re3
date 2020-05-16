@@ -1524,26 +1524,26 @@ CStreaming::StreamZoneModels(const CVector &pos)
 		bit = 1<<i;
 
 		if(gangsToLoad & bit && (ms_loadedGangs & bit) == 0){
-			RequestModel(MI_GANG01 + i*2, STREAMFLAGS_DEPENDENCY);
-			RequestModel(MI_GANG01 + i*2 + 1, STREAMFLAGS_DEPENDENCY);
+			RequestModel(CGangs::GetGangPedModel1(i), STREAMFLAGS_DEPENDENCY);
+			RequestModel(CGangs::GetGangPedModel2(i), STREAMFLAGS_DEPENDENCY);
 			ms_loadedGangs |= bit;
 		}else if((gangsToLoad & bit) == 0 && ms_loadedGangs & bit){
-			SetModelIsDeletable(MI_GANG01 + i*2);
-			SetModelIsDeletable(MI_GANG01 + i*2 + 1);
-			SetModelTxdIsDeletable(MI_GANG01 + i*2);
-			SetModelTxdIsDeletable(MI_GANG01 + i*2 + 1);
+			SetModelIsDeletable(CGangs::GetGangPedModel1(i));
+			SetModelIsDeletable(CGangs::GetGangPedModel2(i));
+			SetModelTxdIsDeletable(CGangs::GetGangPedModel1(i));
+			SetModelTxdIsDeletable(CGangs::GetGangPedModel2(i));
 			ms_loadedGangs &= ~bit;
 		}
 
 		// TODO(MIAMI): check this
-		if(CGangs::GetGangInfo(i)->m_nVehicleMI < 0)
+		if(CGangs::GetGangVehicleModel(i) < 0)
 			continue;
 
 		if((gangCarsToLoad & bit) && (ms_loadedGangCars & bit) == 0){
-			RequestModel(CGangs::GetGangInfo(i)->m_nVehicleMI, STREAMFLAGS_DEPENDENCY);
+			RequestModel(CGangs::GetGangVehicleModel(i), STREAMFLAGS_DEPENDENCY);
 		}else if((gangCarsToLoad & bit) == 0 && ms_loadedGangCars & bit){
-			SetModelIsDeletable(CGangs::GetGangInfo(i)->m_nVehicleMI);
-			SetModelTxdIsDeletable(CGangs::GetGangInfo(i)->m_nVehicleMI);
+			SetModelIsDeletable(CGangs::GetGangVehicleModel(i));
+			SetModelTxdIsDeletable(CGangs::GetGangVehicleModel(i));
 		}
 	}
 	ms_loadedGangCars = gangCarsToLoad;
@@ -1563,10 +1563,10 @@ CStreaming::RemoveCurrentZonesModels(void)
 		}
 
 	for(i = 0; i < NUM_GANGS; i++){
-		SetModelIsDeletable(MI_GANG01 + i*2);
-		SetModelIsDeletable(MI_GANG01 + i*2 + 1);
-		if(CGangs::GetGangInfo(i)->m_nVehicleMI != -1)
-			SetModelIsDeletable(CGangs::GetGangInfo(i)->m_nVehicleMI);
+		SetModelIsDeletable(CGangs::GetGangPedModel1(i));
+		SetModelIsDeletable(CGangs::GetGangPedModel2(i));
+		if(CGangs::GetGangVehicleModel(i) != -1)
+			SetModelIsDeletable(CGangs::GetGangVehicleModel(i));
 	}
 
 	ms_currentPedGrp = -1;

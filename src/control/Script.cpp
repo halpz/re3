@@ -4723,8 +4723,6 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		float supX = *(float*)&ScriptParams[5];
 		float supY = *(float*)&ScriptParams[6];
 		float supZ = *(float*)&ScriptParams[7];
-
-		// TODO(MIAMI): new 2 parameters, requires CGarage change
 		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, X2, Y2, supX, supY, supZ, (eGarageType)ScriptParams[8], 0);
 		StoreParameters(&m_nIp, 1);
 		return 0;
@@ -4740,7 +4738,6 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		float supX = *(float*)&ScriptParams[5];
 		float supY = *(float*)&ScriptParams[6];
 		float supZ = *(float*)&ScriptParams[7];
-		// TODO(MIAMI): new 2 parameters, requires CGarage change
 		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, X2, Y2, supX, supY, supZ, (eGarageType)ScriptParams[8], ScriptParams[9]);
 		StoreParameters(&m_nIp, 1);
 		return 0;
@@ -5010,7 +5007,10 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		//case COMMAND_SET_GANG_ATTITUDE:
 		//case COMMAND_SET_GANG_GANG_ATTITUDE:
 		//case COMMAND_SET_GANG_PLAYER_ATTITUDE:
-		//case COMMAND_SET_GANG_PED_MODELS:
+	case COMMAND_SET_GANG_PED_MODELS:
+		CollectParameters(&m_nIp, 3);
+		CGangs::SetGangPedModels(ScriptParams[0], ScriptParams[1], ScriptParams[2]);
+		return 0;
 	case COMMAND_SET_GANG_CAR_MODEL:
 		CollectParameters(&m_nIp, 2);
 		CGangs::SetGangVehicleModel(ScriptParams[0], ScriptParams[1]);
@@ -10087,7 +10087,14 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_ENSURE_PLAYER_HAS_DRIVE_BY_WEAPON:
 	case COMMAND_MAKE_HELI_COME_CRASHING_DOWN:
 	case COMMAND_ADD_EXPLOSION_NO_SOUND:
+		assert(0);
 	case COMMAND_SET_OBJECT_AREA_VISIBLE:
+	{
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObject);
+		pObject->m_area = ScriptParams[1];
+		return 0;
+	}
 	case COMMAND_WAS_VEHICLE_EVER_POLICE:
 	case COMMAND_SET_CHAR_NEVER_TARGETTED:
 	case COMMAND_LOAD_UNCOMPRESSED_ANIM:
@@ -10156,7 +10163,11 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_GET_RANDOM_ICE_CREAM_CUSTOMER_IN_AREA:
 	case COMMAND_GET_RANDOM_ICE_CREAM_CUSTOMER_IN_ZONE:
 	case COMMAND_UNLOCK_ALL_CAR_DOORS_IN_AREA:
+		assert(0);
 	case COMMAND_SET_GANG_ATTACK_PLAYER_WITH_COPS:
+		CollectParameters(&m_nIp, 2);
+		CGangs::SetWillAttackPlayerWithCops((ePedType)((int)PEDTYPE_GANG1 + ScriptParams[0]), !!ScriptParams[1]);
+		return 0;
 	case COMMAND_SET_CHAR_FRIGHTENED_IN_JACKED_CAR:
 	case COMMAND_SET_VEHICLE_TO_FADE_IN:
 	case COMMAND_REGISTER_ODDJOB_MISSION_PASSED:

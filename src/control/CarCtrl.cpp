@@ -889,8 +889,7 @@ CCarCtrl::ChoosePoliceCarModel(void)
 int32
 CCarCtrl::ChooseGangCarModel(int32 gang)
 {
-	if (CStreaming::HasModelLoaded(MI_GANG01 + 2 * gang) &&
-		CStreaming::HasModelLoaded(MI_GANG01+1 + 2 * gang))
+	if (CGangs::HaveGangModelsLoaded(gang))
 		return CGangs::GetGangVehicleModel(gang);
 	return -1;
 }

@@ -511,8 +511,12 @@ void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayB
 	}
 	RetrievePedAnimation(ped, &pp->anim_state);
 	ped->RemoveWeaponModel(-1);
-	if (pp->weapon_model != (uint8)-1)
-		ped->AddWeaponModel(pp->weapon_model);
+	if (pp->weapon_model != (uint16)-1) {
+		if (CStreaming::HasModelLoaded(pp->weapon_model))
+			ped->AddWeaponModel(pp->weapon_model);
+		else
+			CStreaming::RequestModel(pp->weapon_model, 0);
+	}
 	CWorld::Remove(ped);
 	CWorld::Add(ped);
 	buffer->m_nOffset += sizeof(tPedUpdatePacket);
@@ -1220,6 +1224,16 @@ void CReplay::RestoreStuffFromMem(void)
 		ped->m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, ped);
 		DMAudio.SetEntityStatus(ped->m_audioEntityId, true);
 		CPopulation::UpdatePedCount((ePedType)ped->m_nPedType, false);
+		for (int j = 0; j < TOTAL_WEAPON_SLOTS; j++) {
+			int mi1 = CWeaponInfo::GetWeaponInfo(ped->m_weapons[j].m_eWeaponType)->m_nModelId;
+			if (mi1 != -1)
+				CStreaming::RequestModel(mi1, STREAMFLAGS_DEPENDENCY);
+			int mi2 = CWeaponInfo::GetWeaponInfo(ped->m_weapons[j].m_eWeaponType)->m_nModel2Id;
+			if (mi2 != -1)
+				CStreaming::RequestModel(mi2, STREAMFLAGS_DEPENDENCY);
+			CStreaming::LoadAllRequestedModels(false);
+			ped->m_weapons[j].Initialise(ped->m_weapons[j].m_eWeaponType, ped->m_weapons[j].m_nAmmoTotal);
+		}
 		if (ped->m_wepModelID >= 0)
 			ped->AddWeaponModel(ped->m_wepModelID);
 	}
