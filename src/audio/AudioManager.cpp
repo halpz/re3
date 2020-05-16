@@ -32,7 +32,7 @@ cAudioManager::cAudioManager()
 	ClearActiveSamples();
 	GenerateIntegerRandomNumberTable();
 	field_4 = 0;
-	m_bDynamicAcousticModelingStatus = 1;
+	m_bDynamicAcousticModelingStatus = true;
 
 	for (int i = 0; i < NUM_AUDIOENTITIES; i++) {
 		m_asAudioEntities[i].m_bIsUsed = false;
@@ -514,19 +514,19 @@ cAudioManager::RandomDisplacement(uint32 seed) const
 {
 	int32 value;
 
-	static bool bIsEven = true;
-	static uint32 base = 0;
+	static bool bPos = true;
+	static uint32 Adjustment = 0;
 
 	if (!seed)
 		return 0;
 
-	value = m_anRandomTable[(base + seed) % 5] % seed;
-	base += value;
+	value = m_anRandomTable[(Adjustment + seed) % 5] % seed;
+	Adjustment += value;
 
 	if (value % 2) {
-		bIsEven = !bIsEven;
+		bPos = !bPos;
 	}
-	if (!bIsEven)
+	if (!bPos)
 		value = -value;
 	return value;
 }

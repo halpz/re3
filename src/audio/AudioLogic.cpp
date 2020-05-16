@@ -1304,7 +1304,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 				freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
 			SampleManager.SetChannelFrequency(m_nActiveSamples, freq);
 			if (!channelUsed) {
-				SampleManager.SetChannelReverbFlag(m_nActiveSamples, m_bDynamicAcousticModelingStatus != 0);
+				SampleManager.SetChannelReverbFlag(m_nActiveSamples, m_bDynamicAcousticModelingStatus != false);
 				SampleManager.StartChannel(m_nActiveSamples);
 			}
 			LastAccel = accelerateState;
@@ -1326,7 +1326,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 				freq /= 2;
 			SampleManager.SetChannelFrequency(m_nActiveSamples, freq);
 			if (!channelUsed) {
-				SampleManager.SetChannelReverbFlag(m_nActiveSamples, m_bDynamicAcousticModelingStatus != 0);
+				SampleManager.SetChannelReverbFlag(m_nActiveSamples, m_bDynamicAcousticModelingStatus != false);
 				SampleManager.StartChannel(m_nActiveSamples);
 			}
 			LastAccel = accelerateState;
@@ -1349,7 +1349,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 				freq /= 2;
 			SampleManager.SetChannelFrequency(m_nActiveSamples, freq);
 			if (!channelUsed) {
-				SampleManager.SetChannelReverbFlag(m_nActiveSamples, m_bDynamicAcousticModelingStatus != 0);
+				SampleManager.SetChannelReverbFlag(m_nActiveSamples, m_bDynamicAcousticModelingStatus != false);
 				SampleManager.StartChannel(m_nActiveSamples);
 			}
 			LastAccel = accelerateState;
@@ -1515,11 +1515,10 @@ cAudioManager::GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automo
 {
 	float relativeVelChange;
 
-	if (automobile->m_aWheelState[wheel] == 2) {
+	if (automobile->m_aWheelState[wheel] == WHEEL_STATE_SKIDDING)
 		relativeVelChange = Min(1.0f, Abs(velocityChange) / transmission->fMaxVelocity);
-	} else {
+	else
 		relativeVelChange = 0.0f;
-	}
 
 	return Max(relativeVelChange, Min(1.0f, Abs(automobile->m_vecTurnSpeed.z) * 20.0f));
 }
@@ -1606,7 +1605,7 @@ cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 
 	if (params->m_fDistance < SQR(SOUND_INTENSITY)) {
 		CVehicle *veh = params->m_pVehicle;
-		if (veh->m_bSirenOrAlarm == 0 && veh->m_nAlarmState <= 0)
+		if (veh->m_bSirenOrAlarm == false && veh->m_nAlarmState <= 0)
 			return;
 
 #ifdef FIX_BUGS
