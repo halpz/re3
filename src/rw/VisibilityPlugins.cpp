@@ -139,7 +139,7 @@ static float PitchToCamera;
 void
 CVisibilityPlugins::SetupVehicleVariables(RpClump *vehicle)
 {
-	if (vehicle->object.type != rpCLUMP)
+	if (RwObjectGetType((RwObject*)vehicle) != rpCLUMP)
 		return;
 	DistToCameraSq = GetDistanceSquaredFromCamera(RpClumpGetFrame(vehicle));
 	RwV3d distToCam;
