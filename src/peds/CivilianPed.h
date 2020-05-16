@@ -13,6 +13,7 @@ public:
 	void CivilianAI(void);
 	void ProcessControl(void);
 	void UseNearbyAttractors(void);
+	void FindNearbyAttractorsSectorList(CPtrList&, float&, C2dEffect*&, CEntity*&);
 	bool IsAttractedTo(int8);
 };
 #ifndef PED_SKIN

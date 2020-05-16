@@ -386,6 +386,34 @@ const int32 gFrequencyOfAttractorAttempt = 11;
 const float gDistanceToSeekAttractors = 50.0f;
 const float gMaxDistanceToAttract = 10.0f;
 
+/* Probably this was inlined */
+void CCivilianPed::FindNearbyAttractorsSectorList(CPtrList& list, float& minDistance, C2dEffect*& pClosestAttractor, CEntity*& pAttractorEntity)
+{
+	for (CPtrNode* pNode = list.first; pNode != nil; pNode = pNode->next) {
+		CEntity* pEntity = (CEntity*)pNode->item;
+		//if (pEntity->IsObject() && (CObject*)(pEntity)->IsBroken())
+			//continue;
+		CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(pEntity->GetModelIndex());
+		for (int i = 0; i < pModelInfo->GetNum2dEffects(); i++) {
+			C2dEffect* pEffect = pModelInfo->Get2dEffect(i);
+			if (pEffect->type != EFFECT_PED_ATTRACTOR)
+				continue;
+			if (!IsAttractedTo(pEffect->pedattr.type))
+				continue;
+			CVector pos;
+			CPedAttractorManager::ComputeEffectPos(pEffect, pEntity->GetMatrix(), pos);
+			if ((pos - GetPosition()).MagnitudeSqr() < minDistance) {
+				CPedAttractorManager* pManager = GetPedAttractorManager();
+				if (pManager->HasEmptySlot(pEffect) && pManager->IsApproachable(pEffect, pEntity->GetMatrix(), 0, this)) {
+					pClosestAttractor = pEffect;
+					pAttractorEntity = pEntity;
+					minDistance = (pos - GetPosition()).MagnitudeSqr();
+				}
+			}
+		}
+	}
+}
+
 void CCivilianPed::UseNearbyAttractors()
 {
 	if (CWeather::Rain < 0.2f && !m_bAttractorUnk)
@@ -420,52 +448,8 @@ void CCivilianPed::UseNearbyAttractors()
 	for (int y = ystart; y <= yend; y++) {
 		for (int x = xstart; x <= xend; x++) {
 			CSector* s = CWorld::GetSector(x, y);
-			for (CPtrNode* pNode = s->m_lists[ENTITYLIST_BUILDINGS].first; pNode != nil; pNode = pNode->next) {
-				CEntity* pEntity = (CEntity*)pNode->item;
-				//if (pEntity->IsObject() && (CObject*)(pEntity)->IsBroken())
-					//continue;
-				CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(pEntity->GetModelIndex());
-				for (int i = 0; i < pModelInfo->GetNum2dEffects(); i++) {
-					C2dEffect* pEffect = pModelInfo->Get2dEffect(i);
-					if (pEffect->type != EFFECT_PED_ATTRACTOR)
-						continue;
-					if (!IsAttractedTo(pEffect->pedattr.type))
-						continue;
-					CVector pos;
-					CPedAttractorManager::ComputeEffectPos(pEffect, pEntity->GetMatrix(), pos);
-					if ((pos - GetPosition()).MagnitudeSqr() < minDistance) {
-						CPedAttractorManager* pManager = GetPedAttractorManager();
-						if (pManager->HasEmptySlot(pEffect) && pManager->IsApproachable(pEffect, pEntity->GetMatrix(), 0, this)) {
-							pClosestAttractor = pEffect;
-							pAttractorEntity = pEntity;
-							minDistance = (pos - GetPosition()).MagnitudeSqr();
-						}
-					}
-				}
-			}
-			for (CPtrNode* pNode = s->m_lists[ENTITYLIST_OBJECTS].first; pNode != nil; pNode = pNode->next) {
-				CEntity* pEntity = (CEntity*)pNode->item;
-				//if (pEntity->IsObject() && (CObject*)(pEntity)->IsBroken())
-					//continue;
-				CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(pEntity->GetModelIndex());
-				for (int i = 0; i < pModelInfo->GetNum2dEffects(); i++) {
-					C2dEffect* pEffect = pModelInfo->Get2dEffect(i);
-					if (pEffect->type != EFFECT_PED_ATTRACTOR)
-						continue;
-					if (!IsAttractedTo(pEffect->pedattr.type))
-						continue;
-					CVector pos;
-					CPedAttractorManager::ComputeEffectPos(pEffect, pEntity->GetMatrix(), pos);
-					if ((pos - GetPosition()).MagnitudeSqr() < minDistance) {
-						CPedAttractorManager* pManager = GetPedAttractorManager();
-						if (pManager->HasEmptySlot(pEffect) && pManager->IsApproachable(pEffect, pEntity->GetMatrix(), 0, this)) {
-							pClosestAttractor = pEffect;
-							pAttractorEntity = pEntity;
-							minDistance = (pos - GetPosition()).MagnitudeSqr();
-						}
-					}
-				}
-			}
+			FindNearbyAttractorsSectorList(s->m_lists[ENTITYLIST_BUILDINGS], minDistance, pClosestAttractor, pAttractorEntity);
+			FindNearbyAttractorsSectorList(s->m_lists[ENTITYLIST_OBJECTS], minDistance, pClosestAttractor, pAttractorEntity);
 		}
 	}
 	if (pClosestAttractor)
