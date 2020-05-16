@@ -12,6 +12,7 @@
 #include "AudioScriptObject.h"
 #include "RpAnimBlend.h"
 #include "AnimBlendAssociation.h"
+#include "soundlist.h"
 #ifdef FIX_BUGS
 #include "Replay.h"
 #endif
@@ -97,7 +98,7 @@ CPhoneInfo::Update(void)
 					if (scratchTheCabinet) {
 						m_aPhones[phoneId].m_pEntity->GetUp().z = (CGeneral::GetRandomNumber() % 1024) / 16000.0f + 1.0f;
 						if (!phoneRings)
-							PlayOneShotScriptObject(_SCRSOUND_PHONE_RING, m_aPhones[phoneId].m_pEntity->GetPosition());
+						    PlayOneShotScriptObject(SCRIPT_SOUND_PAYPHONE_RINGING, m_aPhones[phoneId].m_pEntity->GetPosition());
 					} else {
 						m_aPhones[phoneId].m_pEntity->GetUp().z = 1.0f;
 					}
@@ -136,7 +137,7 @@ CPhoneInfo::Update(void)
 					if (scratchTheCabinet) {
 						m_aPhones[phoneId].m_pEntity->GetUp().z = (CGeneral::GetRandomNumber() % 1024) / 16000.0f + 1.0f;
 						if (!phoneRings)
-							PlayOneShotScriptObject(_SCRSOUND_PHONE_RING, m_aPhones[phoneId].m_pEntity->GetPosition());
+						    PlayOneShotScriptObject(SCRIPT_SOUND_PAYPHONE_RINGING, m_aPhones[phoneId].m_pEntity->GetPosition());
 					} else {
 						m_aPhones[phoneId].m_pEntity->GetUp().z = 1.0f;
 					}

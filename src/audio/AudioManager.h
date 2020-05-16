@@ -467,8 +467,6 @@ public:
 	// only used in pc
 	void AdjustSamplesVolume();
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity, float dist);
-
-	void DebugShit();
 };
 
 #ifdef AUDIO_MSS

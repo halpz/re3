@@ -11,6 +11,7 @@
 #include "ObjectData.h"
 #include "World.h"
 #include "Floater.h"
+#include "soundlist.h"
 
 int16 CObject::nNoTempObjects;
 int16 CObject::nBodyCastHealth = 1000;
@@ -219,7 +220,7 @@ CObject::ObjectDamage(float amount)
 				int32 nRotationSpeed = CGeneral::GetRandomNumberInRange(-40, 80);
 				CParticle::AddParticle(PARTICLE_CAR_DEBRIS, vecPos, vecDir, nil, fSize, randomColor, nRotationSpeed, 0, currentFrame, 0);
 			}
-			PlayOneShotScriptObject(_SCRSOUND_CARDBOARD_BOX_SMASH, vecPos);
+			PlayOneShotScriptObject(SCRIPT_SOUND_BOX_DESTROYED_2, vecPos);
 			break;
 		}
 		case DAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY: {
@@ -242,7 +243,7 @@ CObject::ObjectDamage(float amount)
 				int32 nRotationSpeed = CGeneral::GetRandomNumberInRange(-40, 80);
 				CParticle::AddParticle(PARTICLE_CAR_DEBRIS, vecPos, vecDir, nil, fSize, randomColor, nRotationSpeed, 0, currentFrame, 0);
 			}
-			PlayOneShotScriptObject(_SCRSOUND_WOODEN_BOX_SMASH, vecPos);
+			PlayOneShotScriptObject(SCRIPT_SOUND_BOX_DESTROYED_1, vecPos);
 			break;
 		}
 		case DAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY: {
@@ -267,7 +268,7 @@ CObject::ObjectDamage(float amount)
 				int32 nRotationSpeed = CGeneral::GetRandomNumberInRange(-40, 80);
 				CParticle::AddParticle(PARTICLE_CAR_DEBRIS, vecPos, vecDir, nil, fSize, color, nRotationSpeed, 0, currentFrame, 0);
 			}
-			PlayOneShotScriptObject(_SCRSOUND_TYRE_BUMP, vecPos);
+			PlayOneShotScriptObject(SCRIPT_SOUND_TIRE_COLLISION, vecPos);
 			break;
 		}
 		case DAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY: {
@@ -292,7 +293,7 @@ CObject::ObjectDamage(float amount)
 				int32 nRotationSpeed = CGeneral::GetRandomNumberInRange(-40, 80);
 				CParticle::AddParticle(PARTICLE_CAR_DEBRIS, vecPos, vecDir, nil, fSize, color, nRotationSpeed, 0, currentFrame, 0);
 			}
-			PlayOneShotScriptObject(_SCRSOUND_COL_CAR, vecPos);
+			PlayOneShotScriptObject(SCRIPT_SOUND_METAL_COLLISION, vecPos);
 			break;
 		}
 		}

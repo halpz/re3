@@ -11,6 +11,7 @@
 #include "AudioScriptObject.h"
 #include "ParticleObject.h"
 #include "Particle.h"
+#include "soundlist.h"
 
 
 #define MAX_PARTICLES_ON_SCREEN   (1000)
@@ -1268,7 +1269,7 @@ void CParticle::Update()
 												nil,
 												particle->m_fSize, color, particle->m_nRotationStep, 0, 0, 0);
 									
-									PlayOneShotScriptObject(_SCRSOUND_BULLET_SHELL_HIT_GROUND_1, particle->m_vecPosition);
+									PlayOneShotScriptObject(SCRIPT_SOUND_GUNSHELL_DROP, particle->m_vecPosition);
 								}
 								break;
 							
@@ -1287,7 +1288,7 @@ void CParticle::Update()
 												nil,
 												particle->m_fSize, color, 0, 0, 0, 0);
 									
-									PlayOneShotScriptObject(_SCRSOUND_BULLET_SHELL_HIT_GROUND_2, particle->m_vecPosition);
+									PlayOneShotScriptObject(SCRIPT_SOUND_GUNSHELL_DROP_SOFT, particle->m_vecPosition);
 								}
 								break;
 								
