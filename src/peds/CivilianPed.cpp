@@ -447,8 +447,6 @@ void CCivilianPed::UseNearbyAttractors()
 				CEntity* pEntity = (CEntity*)pNode->item;
 				//if (pEntity->IsObject() && (CObject*)(pEntity)->IsBroken())
 					//continue;
-				if (pEntity->GetModelIndex() == 3181)
-					debug("get2\n");
 				CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(pEntity->GetModelIndex());
 				for (int i = 0; i < pModelInfo->GetNum2dEffects(); i++) {
 					C2dEffect* pEffect = pModelInfo->Get2dEffect(i);
