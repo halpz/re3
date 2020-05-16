@@ -7459,7 +7459,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 			return;
 		}
 		if (processedAccelSampleStopped) {
-			if (!SampleManager.InitialiseChannel(m_nActiveSamples, soundOffset + 345, 0))
+			if (!SampleManager.InitialiseChannel(m_nActiveSamples, soundOffset + SFX_CAR_ACCEL_1, 0))
 				return;
 			SampleManager.SetChannelLoopCount(m_nActiveSamples, 1);
 			SampleManager.SetChannelLoopPoints(m_nActiveSamples, 0, -1);
@@ -7482,7 +7482,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 		}
 		if (CurrentPretendGear < params->m_pTransmission->nNumberOfGears - 1) {
 			++CurrentPretendGear;
-			if (!SampleManager.InitialiseChannel(m_nActiveSamples, soundOffset + 345, 0))
+			if (!SampleManager.InitialiseChannel(m_nActiveSamples, soundOffset + SFX_CAR_ACCEL_1, 0))
 				return;
 			SampleManager.SetChannelLoopCount(m_nActiveSamples, 1);
 			SampleManager.SetChannelLoopPoints(m_nActiveSamples, 0, -1);
