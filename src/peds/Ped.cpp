@@ -446,8 +446,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_nPedType = pedType;
 	m_lastSoundStart = 0;
 	m_soundStart = 0;
-	m_lastQueuedSound = SOUND_TOTAL_PED_SOUNDS;
-	m_queuedSound = SOUND_TOTAL_PED_SOUNDS;
+	m_lastQueuedSound = SOUND_NO_SOUND;
+	m_queuedSound = SOUND_NO_SOUND;
 	m_objective = OBJECTIVE_NONE;
 	m_prevObjective = OBJECTIVE_NONE;
 	CharCreatedBy = RANDOM_CHAR;
@@ -5873,7 +5873,7 @@ CPed::PlayHitSound(CPed *hitTo)
 		S42 = SOUND_FIGHT_PUNCH_FROM_BEHIND_42,
 		S43 = SOUND_FIGHT_KNEE_OR_KICK_43,
 		S44 = SOUND_FIGHT_KICK_44,
-		NO_SND = SOUND_TOTAL_PED_SOUNDS
+		NO_SND = SOUND_NO_SOUND
 	};
 	uint16 hitSoundsByFightMoves[12][10] = {
 		{S39,S42,S43,S43,S39,S39,S39,S39,S39,S42},
@@ -16503,7 +16503,7 @@ CPed::ServiceTalking(void)
 		} else {
 			m_queuedSound = SOUND_PED_BOMBER;
 		}
-		if (m_queuedSound != SOUND_TOTAL_PED_SOUNDS) {
+		if (m_queuedSound != SOUND_NO_SOUND) {
 			if (m_queuedSound == SOUND_PED_DEATH)
 				m_soundStart = CTimer::GetTimeInMilliseconds() - 1;
 
@@ -16515,7 +16515,7 @@ CPed::ServiceTalking(void)
 					+ CTimer::GetTimeInMilliseconds()
 					+ CGeneral::GetRandomNumberInRange(0, CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nOverrideFixedDelayTime);
 				m_lastQueuedSound = m_queuedSound;
-				m_queuedSound = SOUND_TOTAL_PED_SOUNDS;
+				m_queuedSound = SOUND_NO_SOUND;
 			}
 		}
 	}

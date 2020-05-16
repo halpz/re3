@@ -13,6 +13,7 @@
 #include "Shadows.h"
 #include "ModelIndices.h"
 #include "main.h"
+#include "soundlist.h"
 
 
 uint32 CGlass::NumGlassEntities;
@@ -101,7 +102,7 @@ CFallingGlassPane::Update(void)
 
 			pos = CVector(GetPosition().x, GetPosition().y, m_fGroundZ);
 
-			PlayOneShotScriptObject(_SCRSOUND_GLASS_SHARD, pos);
+			PlayOneShotScriptObject(SCRIPT_SOUND_GLASS_LIGHT_BREAK, pos);
 
 			RwRGBA color = { 255, 255, 255, 255 };
 
@@ -627,7 +628,7 @@ CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, 
 
 	if ( amount > 300.0f )
 	{
-		PlayOneShotScriptObject(_SCRSOUND_GLASS_SMASH_1, object->GetPosition());
+		PlayOneShotScriptObject(SCRIPT_SOUND_GLASS_BREAK_L, object->GetPosition());
 
 		GeneratePanesForWindow(0,
 			CVector(minx,      miny,      minz),
@@ -637,7 +638,7 @@ CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, 
 	}
 	else
 	{
-		PlayOneShotScriptObject(_SCRSOUND_GLASS_SMASH_2, object->GetPosition());
+		PlayOneShotScriptObject(SCRIPT_SOUND_GLASS_BREAK_S, object->GetPosition());
 
 		GeneratePanesForWindow(1,
 			CVector(minx,      miny,      minz),
@@ -659,7 +660,7 @@ CGlass::WindowRespondsToSoftCollision(CEntity *entity, float amount)
 
 	if ( amount > 50.0f && !object->bGlassCracked )
 	{
-		PlayOneShotScriptObject(_SCRSOUND_GLASS_CRACK, object->GetPosition());
+		PlayOneShotScriptObject(SCRIPT_SOUND_GLASS_CRACK, object->GetPosition());
 		object->bGlassCracked = true;
 	}
 }
@@ -675,7 +676,7 @@ CGlass::WasGlassHitByBullet(CEntity *entity, CVector point)
 	{
 		if ( !object->bGlassCracked )
 		{
-			PlayOneShotScriptObject(_SCRSOUND_GLASS_CRACK, object->GetPosition());
+			PlayOneShotScriptObject(SCRIPT_SOUND_GLASS_CRACK, object->GetPosition());
 			object->bGlassCracked = true;
 		}
 		else
