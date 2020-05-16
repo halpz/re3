@@ -8,6 +8,7 @@
 #include "DMAudio.h"
 #include "General.h"
 #include "Pad.h"
+#include "PlayerPed.h"
 #include "Particle.h"
 #include "RenderBuffer.h"
 #include "Stats.h"
@@ -40,41 +41,60 @@ float CWeather::Rain;
 float CWeather::InterpolationValue;
 float CWeather::WetRoads;
 float CWeather::Rainbow;
+float CWeather::SunGlare;
+float CWeather::WindClipped;
+float CWeather::TrafficLightBrightness;
 
 bool CWeather::bScriptsForceRain;
-bool CWeather::Stored_StateStored;
-
-float CWeather::Stored_InterpolationValue;
-int16 CWeather::Stored_OldWeatherType;
-int16 CWeather::Stored_NewWeatherType;
-float CWeather::Stored_Rain;
 
 tRainStreak Streaks[NUM_RAIN_STREAKS];
 
 const int16 WeatherTypesList[] = {
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
+	WEATHER_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
 	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
-	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
-	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
-	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
-	WEATHER_CLOUDY, WEATHER_CLOUDY, WEATHER_RAINY, WEATHER_RAINY,
+	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_CLOUDY,
+	WEATHER_RAINY, WEATHER_RAINY, WEATHER_RAINY, WEATHER_RAINY,
 	WEATHER_CLOUDY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
-	WEATHER_CLOUDY, WEATHER_FOGGY, WEATHER_FOGGY, WEATHER_CLOUDY,
-	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_CLOUDY, WEATHER_CLOUDY,
+	WEATHER_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY
+};
+
+const int16 WeatherTypesList_WithHurricanes[] = {
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
+	WEATHER_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_CLOUDY,
+	WEATHER_HURRICANE, WEATHER_HURRICANE, WEATHER_CLOUDY, WEATHER_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
 	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
 	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
-	WEATHER_CLOUDY, WEATHER_CLOUDY, WEATHER_RAINY, WEATHER_RAINY,
-	WEATHER_CLOUDY, WEATHER_RAINY, WEATHER_CLOUDY, WEATHER_SUNNY,
-	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
-	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
-	WEATHER_SUNNY, WEATHER_FOGGY, WEATHER_FOGGY, WEATHER_SUNNY,
-	WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_RAINY, WEATHER_CLOUDY,
+	WEATHER_CLOUDY, WEATHER_HURRICANE, WEATHER_HURRICANE, WEATHER_HURRICANE,
+	WEATHER_CLOUDY, WEATHER_SUNNY, WEATHER_SUNNY, WEATHER_SUNNY,
+	WEATHER_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY,
+	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY
 };
 
 const float Windiness[] = {
-	0.0f, // WEATHER_SUNNY
+	0.25f,// WEATHER_SUNNY
 	0.7f, // WEATHER_CLOUDY
 	1.0f, // WEATHER_RAINY
-	0.5f  // WEATHER_FOGGY
+	0.0f, // WEATHER_FOGGY
+	0.0f, // WEATHER_EXTRA_SUNNY
+	2.0f, // WEATHER_HURRICANE
+	0.0f
 };
 
 #define MIN_TIME_BETWEEN_LIGHTNING_FLASH_CHANGES (50)
@@ -105,10 +125,9 @@ const float Windiness[] = {
 
 void CWeather::Init(void)
 {
-	NewWeatherType = WEATHER_SUNNY;
+	NewWeatherType = WEATHER_EXTRA_SUNNY;
 	bScriptsForceRain = false;
-	OldWeatherType = WEATHER_CLOUDY;
-	Stored_StateStored = false;
+	OldWeatherType = WEATHER_EXTRA_SUNNY;
 	InterpolationValue = 0.0f;
 	WhenToPlayLightningSound = 0;
 	WeatherTypeInList = 0;
@@ -128,16 +147,8 @@ void CWeather::Update(void)
 			NewWeatherType = ForcedWeatherType;
 		else {
 			WeatherTypeInList = (WeatherTypeInList + 1) % ARRAY_SIZE(WeatherTypesList);
-			NewWeatherType = WeatherTypesList[WeatherTypeInList];
-#ifdef FIX_BUGS
+			NewWeatherType = CStats::NoMoreHurricanes ? WeatherTypesList[WeatherTypeInList] : WeatherTypesList_WithHurricanes[WeatherTypeInList];
 		}
-		if (NewWeatherType == WEATHER_RAINY)
-			CStats::mmRain += CGeneral::GetRandomNumber() & 7;
-#else
-			if (NewWeatherType == WEATHER_RAINY)
-				CStats::mmRain += CGeneral::GetRandomNumber() & 7;
-		}
-#endif
 	}
 	InterpolationValue = fNewInterpolation;
 	if (CPad::GetPad(1)->GetRightShockJustDown()) {
@@ -189,14 +200,14 @@ void CWeather::Update(void)
 	}
 
 	// Wet roads
-	if (OldWeatherType == WEATHER_RAINY) {
-		if (NewWeatherType == WEATHER_RAINY)
+	if (OldWeatherType == WEATHER_RAINY || OldWeatherType == WEATHER_HURRICANE) {
+		if (NewWeatherType == WEATHER_RAINY || NewWeatherType == WEATHER_HURRICANE)
 			WetRoads = 1.0f;
 		else
 			WetRoads = 1.0f - InterpolationValue;
 	}
 	else {
-		if (NewWeatherType == WEATHER_RAINY)
+		if (NewWeatherType == WEATHER_RAINY || NewWeatherType == WEATHER_HURRICANE)
 			WetRoads = InterpolationValue;
 		else
 			WetRoads = 0.0f;
@@ -204,10 +215,10 @@ void CWeather::Update(void)
 
 	// Rain
 	float fNewRain;
-	if (NewWeatherType == WEATHER_RAINY) {
+	if (NewWeatherType == WEATHER_RAINY || NewWeatherType == WEATHER_HURRICANE) {
 		// if raining for >1 hour, values: 0, 0.33, 0.66, 0.99, switching every ~16.5s
 		fNewRain = ((uint16)CTimer::GetTimeInMilliseconds() >> 14) * 0.33f;
-		if (OldWeatherType != WEATHER_RAINY) {
+		if (OldWeatherType != WEATHER_RAINY && OldWeatherType != WEATHER_HURRICANE) {
 			if (InterpolationValue < 0.4f)
 				// if rain has just started (<24 minutes), always 0.5
 				fNewRain = 0.5f;
@@ -218,19 +229,14 @@ void CWeather::Update(void)
 	}
 	else
 		fNewRain = 0.0f;
-	if (Rain != fNewRain) { // ok to use comparasion
-		if (Rain < fNewRain)
-			Rain = Min(fNewRain, Rain + RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
-		else
-			Rain = Max(fNewRain, Rain - RAIN_CHANGE_SPEED * CTimer::GetTimeStep());
-	}
+	Rain = fNewRain;
 
 	// Clouds
-	if (OldWeatherType != WEATHER_SUNNY)
+	if (OldWeatherType != WEATHER_SUNNY && OldWeatherType != WEATHER_EXTRA_SUNNY)
 		CloudCoverage = 1.0f - InterpolationValue;
 	else
 		CloudCoverage = 0.0f;
-	if (NewWeatherType != WEATHER_SUNNY)
+	if (NewWeatherType != WEATHER_SUNNY && OldWeatherType != WEATHER_EXTRA_SUNNY)
 		CloudCoverage += InterpolationValue;
 	
 	// Fog
@@ -240,12 +246,76 @@ void CWeather::Update(void)
 		Foggyness = 0.0f;
 	if (NewWeatherType == WEATHER_FOGGY)
 		Foggyness += InterpolationValue;
-	if (OldWeatherType == WEATHER_RAINY && NewWeatherType == WEATHER_SUNNY && InterpolationValue < 0.5f && CClock::GetHours() > 6 && CClock::GetHours() < 21)
+
+	// Extra Sunnyness
+	if (OldWeatherType == WEATHER_EXTRA_SUNNY)
+		ExtraSunnyness = 1.0f - InterpolationValue;
+	else
+		ExtraSunnyness = 0.0f;
+	if (NewWeatherType == WEATHER_EXTRA_SUNNY)
+		ExtraSunnyness += InterpolationValue;
+
+	// Rainbow
+	if (OldWeatherType == WEATHER_RAINY && (NewWeatherType == WEATHER_SUNNY || NewWeatherType == WEATHER_EXTRA_SUNNY) &&
+		InterpolationValue < 0.5f && CClock::GetHours() > 6 && CClock::GetHours() < 21)
 		Rainbow = 1.0f - 4.0f * Abs(InterpolationValue - 0.25f) / 4.0f;
 	else
 		Rainbow = 0.0f;
+
+	// Sun Glare
+	if (OldWeatherType == WEATHER_EXTRA_SUNNY)
+		SunGlare = 1.0f - InterpolationValue;
+	else
+		SunGlare = 0.0f;
+	if (NewWeatherType == WEATHER_EXTRA_SUNNY)
+		SunGlare += InterpolationValue;
+
+	if (SunGlare > 0.0f) {
+		SunGlare *= Min(1.0f, 7.0 * CTimeCycle::GetSunPosition().z);
+		SunGlare = clamp(SunGlare, 0.0f, 1.0f);
+		// TODO(MIAMI): if (CSpecialFX::bSnapShotActive)...
+	}
+
 	Wind = InterpolationValue * Windiness[NewWeatherType] + (1.0f - InterpolationValue) * Windiness[OldWeatherType];
+	WindClipped = Max(1.0f, Wind);
+
+	if (CClock::GetHours() == 20)
+		TrafficLightBrightness = CClock::GetMinutes() / 60.0f;
+	else if (CClock::GetHours() > 6 && CClock::GetHours() < 20)
+		TrafficLightBrightness = 0.0f;
+	else if (CClock::GetHours() == 6)
+		TrafficLightBrightness = 1.0f - CClock::GetMinutes() / 60.0f;
+	else
+		TrafficLightBrightness = 1.0f;
+	TrafficLightBrightness = Max(WetRoads, TrafficLightBrightness);
+	TrafficLightBrightness = Max(Rain, TrafficLightBrightness);
+
 	AddRain();
+
+	if ((NewWeatherType == WEATHER_SUNNY || NewWeatherType == WEATHER_EXTRA_SUNNY) &&
+		!CGame::IsInInterior() && !CCutsceneMgr::IsRunning() && (CTimer::GetFrameCounter() & 7) == 0) {
+#ifdef FIX_BUGS
+		if (FindPlayerPed() && (!FindPlayerPed()->CheckIfInTheAir() || FindPlayerPed()->CheckIfInTheAir() && FindPlayerPed()->GetPosition().z < 7.5f &&
+			CClock::GetHours() > 6 && CClock::GetHours() < 18))
+#else
+		if (!FindPlayerPed()->CheckIfInTheAir() || FindPlayerPed()->CheckIfInTheAir() && FindPlayerPed()->GetPosition().z < 7.5f &&
+			CClock::GetHours() > 6 && CClock::GetHours() < 18)
+#endif
+			AddHeatHaze();
+	}
+
+	if ((NewWeatherType == WEATHER_SUNNY || NewWeatherType == WEATHER_EXTRA_SUNNY) && !CGame::IsInInterior() && !CCutsceneMgr::IsRunning())
+		AddBeastie();
+}
+
+void CWeather::AddHeatHaze()
+{
+	/* TODO(MIAMI) */
+}
+
+void CWeather::AddBeastie()
+{
+	/* TODO(MIAMI) */
 }
 
 void CWeather::ForceWeather(int16 weather)
@@ -510,24 +580,4 @@ void CWeather::RenderRainStreaks(void)
 	}
 	TempBufferVerticesStored = 0;
 	TempBufferIndicesStored = 0;
-}
-
-void CWeather::StoreWeatherState()
-{
-	Stored_StateStored = true;
-	Stored_InterpolationValue = InterpolationValue;
-	Stored_Rain = Rain;
-	Stored_NewWeatherType = NewWeatherType;
-	Stored_OldWeatherType = OldWeatherType;
-}
-
-void CWeather::RestoreWeatherState()
-{
-#ifdef FIX_BUGS // it's not used anyway though
-	Stored_StateStored = false;
-#endif
-	InterpolationValue = Stored_InterpolationValue;
-	Rain = Stored_Rain;
-	NewWeatherType = Stored_NewWeatherType;
-	OldWeatherType = Stored_OldWeatherType;
 }

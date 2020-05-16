@@ -143,7 +143,8 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 	resetLights = e->SetupLighting();
 
 	if(e->IsVehicle()){
-		CVisibilityPlugins::SetupVehicleVariables(e->GetClump());
+		// unfortunately can't use GetClump here
+		CVisibilityPlugins::SetupVehicleVariables((RpClump*)e->m_rwObject);
 		CVisibilityPlugins::InitAlphaAtomicList();
 	}
 

@@ -60,6 +60,7 @@ int32 CStats::HighestScores[CStats::TOTAL_HIGHEST_SCORES];
 
 int32 CStats::Sprayings;
 float CStats::AutoPaintingBudget;
+int32 CStats::NoMoreHurricanes;
 
 void CStats::Init()
 {
@@ -119,6 +120,7 @@ void CStats::Init()
 
 	Sprayings = 0;
 	AutoPaintingBudget = 0.0f;
+	NoMoreHurricanes = 0;
 }
 
 void CStats::RegisterFastestTime(int32 index, int32 time)
