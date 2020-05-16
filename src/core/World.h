@@ -125,6 +125,8 @@ public:
 	static void CallOffChaseForAreaSectorListVehicles(CPtrList& list, float x1, float y1, float x2, float y2, float fStartX, float fStartY, float fEndX, float fEndY);
 	static void CallOffChaseForAreaSectorListPeds(CPtrList& list, float x1, float y1, float x2, float y2);
 
+	static bool IsWanderPathClear(CVector const&, CVector const&, float, int);
+
 	static float GetSectorX(float f) { return ((f - WORLD_MIN_X)/SECTOR_SIZE_X); }
 	static float GetSectorY(float f) { return ((f - WORLD_MIN_Y)/SECTOR_SIZE_Y); }
 	static int GetSectorIndexX(float f) { return (int)GetSectorX(f); }

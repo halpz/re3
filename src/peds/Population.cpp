@@ -1123,7 +1123,8 @@ CPopulation::AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit)
 		return nil;
 	CPed* pPed = CPopulation::AddPed(PEDTYPE_CIVMALE, MI_MALE01, pos); // TODO(MIAMI): 4th parameter
 	pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
-	//TODO(MIAMI): set money == 0
+	//TODO(MIAMI): uncomment
+	//pPed->m_nPedMoney = 0;
 	pPed->bDeadPedInFrontOfCar = true;
 	pPed->m_vehicleInAccident = pCulprit;
 	pCulprit->RegisterReference((CEntity**)&pPed->m_vehicleInAccident);

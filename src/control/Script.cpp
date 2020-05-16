@@ -5248,12 +5248,8 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 			ScriptParams[3] / 255.0f, ScriptParams[4] / 255.0f, ScriptParams[5] / 255.0f, 0, true);
 		return 0;
 	}
-	case COMMAND_STORE_WEATHER:
-		CWeather::StoreWeatherState();
-		return 0;
-	case COMMAND_RESTORE_WEATHER:
-		CWeather::RestoreWeatherState();
-		return 0;
+	//case COMMAND_STORE_WEATHER:
+	//case COMMAND_RESTORE_WEATHER:
 	case COMMAND_STORE_CLOCK:
 		CClock::StoreClock();
 		return 0;

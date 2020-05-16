@@ -186,7 +186,7 @@ bool CCarGenerator::CheckForBlockage(int32 mi)
 	CWorld::FindObjectsKindaColliding(CVector(m_vecPos), pColModel->boundingSphere.radius, 1, &entities, 8, pEntities, false, true, true, false, false);
 	for (int i = 0; i < entities; i++) {
 		if (m_vecPos.z + pColModel->boundingBox.min.z < pEntities[i]->GetPosition().z + pEntities[i]->GetColModel()->boundingBox.max.z + 1.0f &&
-			m_vecPos.z + pColModel->boundingBox.max.z < pEntities[i]->GetPosition().z + pEntities[i]->GetColModel()->boundingBox.min.z - 1.0f) {
+			m_vecPos.z + pColModel->boundingBox.max.z > pEntities[i]->GetPosition().z + pEntities[i]->GetColModel()->boundingBox.min.z - 1.0f) {
 			m_bIsBlocking = true;
 			return true;
 		}

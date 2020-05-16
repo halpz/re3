@@ -17,6 +17,7 @@
 #include "ModelInfo.h"
 #include "Object.h"
 #include "Pad.h"
+#include "PedAttractor.h"
 #include "Phones.h"
 #include "Pickups.h"
 #include "Plane.h"
@@ -1116,6 +1117,14 @@ void CReplay::StoreStuffInMem(void)
 	for (int i = 0; i < NUMPLAYERS; i++)
 		nHandleOfPlayerPed[i] = CPools::GetPedPool()->GetIndex(CWorld::Players[i].m_pPed);
 #endif
+	int i = CPools::GetPedPool()->GetSize();
+	while (--i >= 0) {
+		CPed* ped = CPools::GetPedPool()->GetSlot(i);
+		if (!ped)
+			continue;
+		if (ped->m_attractor)
+			GetPedAttractorManager()->DeRegisterPed(ped, ped->m_attractor);
+	}
 	CPools::GetVehiclePool()->Store(pBuf0, pBuf1);
 	CPools::GetPedPool()->Store(pBuf2, pBuf3);
 	CPools::GetObjectPool()->Store(pBuf4, pBuf5);

@@ -58,6 +58,7 @@
 #include "ParticleObject.h"
 #include "Floater.h"
 #include "Streaming.h"
+#include "PedAttractor.h"
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
@@ -385,6 +386,8 @@ CPed::DebugRenderOnePedText(void)
 CPed::~CPed(void)
 {
 	CWorld::Remove(this);
+	if (m_attractor)
+		GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
 	CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetIndex(this));
 	if (InVehicle()){
 		uint8 door_flag = GetCarDoorFlag(m_vehEnterType);
@@ -453,13 +456,17 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	CharCreatedBy = RANDOM_CHAR;
 	m_leader = nil;
 	m_pedInObjective = nil;
+	m_attractorHeading = 0.0f;
 	m_carInObjective = nil;
+	m_attractorHeading = 0.0f;
 	bInVehicle = false;
 	m_pMyVehicle = nil;
 	m_pVehicleAnim = nil;
 	m_vecOffsetSeek.x = 0.0f;
 	m_vecOffsetSeek.y = 0.0f;
 	m_vecOffsetSeek.z = 0.0f;
+	m_attractor = nil;
+	m_positionInQueue = -1;
 	m_pedFormation = FORMATION_UNDEFINED;
 	m_collidingThingTimer = 0;
 	m_nPedStateTimer = 0;
@@ -488,6 +495,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_vecSeekPos = CVector(0.0f, 0.0f, 0.0f);
 	m_wepSkills = 0;
 	m_distanceToCountSeekDone = 1.0f;
+	m_acceptableHeadingOffset = 0.1f;
 	bRunningToPhone = false;
 	m_phoneId = -1;
 	m_lastAccident = 0;
@@ -610,6 +618,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bSomeVCflag1 = false;
 #endif
 
+	bReachedAttractorHeadingTarget = false;
+	bTurnedAroundOnAttractor = false;
 	bCarPassenger = false;
 	bMiamiViceCop = false;
 	bDeadPedInFrontOfCar = false;
@@ -3927,6 +3937,8 @@ CPed::SetStoredState(void)
 void
 CPed::SetDie(AnimationId animId, float delta, float speed)
 {
+	if (m_attractor)
+		GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
 	CPlayerPed *player = FindPlayerPed();
 	if (player == this) {
 		if (!player->m_bCanBeDamaged)
@@ -5846,8 +5858,45 @@ CPed::SetWaitState(eWaitState state, void *time)
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 2500;
 			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 4.0f);
 			break;
+		case WAITSTATE_SIT_DOWN:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_SEAT_DOWN, 4.0f);
+			animAssoc->SetFinishCallback(FinishedWaitCB, this);
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 10000;
+			break;
+		case WAITSTATE_SIT_UP:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_SEAT_UP, 4.0f);
+			animAssoc->SetFinishCallback(FinishedWaitCB, this);
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 100000;
+			break;
+		case WAITSTATE_SIT_IDLE:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_SEAT_IDLE, 5000.0f);
+			animAssoc->SetFinishCallback(FinishedWaitCB, this);
+			if (time)
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
+			else
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(25000, 30000);
+			break;
+		case WAITSTATE_USE_ATM:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ATM, 5000.0f);
+			animAssoc->SetFinishCallback(FinishedWaitCB, this);
+			if (time)
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
+			else
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 100000;
+			break;
+		case WAITSTATE_SUN_BATHE_PRE:
+		case WAITSTATE_SUN_BATHE_DOWN:
+		case WAITSTATE_SUN_BATHE_IDLE:
+		case WAITSTATE_RIOT:
+		case WAITSTATE_FAST_FALL:
+		case WAITSTATE_BOMBER:
+		case WAITSTATE_STRIPPER:
+		case WAITSTATE_GROUND_ATTACK:
+		case WAITSTATE_LANCESITTING:
+		case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
+			assert(0);
 		default:
-			m_nWaitState = WAITSTATE_FALSE;
+			ClearWaitState();
 			RestoreHeadingRate();
 			return;
 	}
@@ -7552,7 +7601,7 @@ CPed::Wait(void)
 	CPed *pedWeLook;
 
 	if (DyingOrDead()) {
-		m_nWaitState = WAITSTATE_FALSE;
+		ClearWaitState();
 		RestoreHeadingRate();
 		return;
 	}
@@ -7562,7 +7611,7 @@ CPed::Wait(void)
 		case WAITSTATE_TRAFFIC_LIGHTS:
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
 				if (CTrafficLights::LightForPeds() == PED_LIGHTS_WALK) {
-					m_nWaitState = WAITSTATE_FALSE;
+					ClearWaitState();
 					SetMoveState(PEDMOVE_WALK);
 				}
 			}
@@ -7571,7 +7620,7 @@ CPed::Wait(void)
 		case WAITSTATE_CROSS_ROAD:
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
 				if (CGeneral::GetRandomNumber() & 1 || !m_nWaitTimer)
-					m_nWaitState = WAITSTATE_FALSE;
+					ClearWaitState();
 				else
 					SetWaitState(WAITSTATE_CROSS_ROAD_LOOK, nil);
 
@@ -7585,7 +7634,7 @@ CPed::Wait(void)
 
 		case WAITSTATE_CROSS_ROAD_LOOK:
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ROAD_CROSS);
 				if (animAssoc) {
 					animAssoc->blendDelta = -8.0f;
@@ -7602,7 +7651,7 @@ CPed::Wait(void)
 					CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 4.0f);
 				}
 			} else {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 				SetMoveState(PEDMOVE_WALK);
 			}
 			break;
@@ -7613,13 +7662,13 @@ CPed::Wait(void)
 					m_collidingThingTimer = CTimer::GetTimeInMilliseconds() + 2500;
 				}
 			} else {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 			}
 			break;
 
 		case WAITSTATE_TURN180:
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 				SetMoveState(PEDMOVE_WALK);
 				m_fRotationCur = m_fRotationCur + PI;
 				if (m_nPedState == PED_INVESTIGATE)
@@ -7638,7 +7687,7 @@ CPed::Wait(void)
 					animAssoc->SetFinishCallback(FinishedWaitCB, this);
 					m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 5000;
 				} else {
-					m_nWaitState = WAITSTATE_FALSE;
+					ClearWaitState();
 				}
 			}
 			break;
@@ -7667,7 +7716,7 @@ CPed::Wait(void)
 
 				if (animAssoc->animId == ANIM_TURN_180) {
 					m_fRotationCur = CGeneral::LimitRadianAngle(PI + m_fRotationCur);
-					m_nWaitState = WAITSTATE_FALSE;
+					ClearWaitState();
 					SetMoveState(PEDMOVE_WALK);
 					m_nStoredMoveState = PEDMOVE_NONE;
 					m_panicCounter = 0;
@@ -7704,7 +7753,7 @@ CPed::Wait(void)
 
 		case WAITSTATE_LOOK_ABOUT:
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_HBHB);
 				if (animAssoc) {
 					animAssoc->blendDelta = -8.0f;
@@ -7731,7 +7780,7 @@ CPed::Wait(void)
 
 				TurnBody();
 			} else {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 				m_nWaitTimer = 0;
 				if (m_pLookTarget && m_pLookTarget->IsPed()) {
 
@@ -7806,7 +7855,7 @@ CPed::Wait(void)
 					animAssoc->blendDelta = -4.0f;
 					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 				}
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 			}
 #ifdef VC_PED_PORTS
 			else if (m_nWaitState == WAITSTATE_PLAYANIM_TAXI) {
@@ -7830,13 +7879,59 @@ CPed::Wait(void)
 					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 					CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 4.0f);
 					int timer = 2000;
-					m_nWaitState = WAITSTATE_FALSE;
+					ClearWaitState();
 					SetWaitState(WAITSTATE_CROSS_ROAD_LOOK, &timer);
 				}
 			} else {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 			}
 			break;
+		case WAITSTATE_SIT_DOWN:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				ClearWaitState();
+				SetWaitState(WAITSTATE_SIT_IDLE, 0);
+			}
+			break;
+		//case WAITSTATE_SIT_DOWN_RVRS:
+		case WAITSTATE_SIT_UP:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				if (m_attractor)
+					GetPedAttractorManager()->BroadcastDeparture(this, m_attractor);
+				ClearWaitState();
+				//TODO(MIAMI): scan for threats!
+			}
+			break;
+		case WAITSTATE_SIT_IDLE:
+			if (bTurnedAroundOnAttractor) {
+				m_fRotationCur += PI;
+				m_fRotationCur = CGeneral::LimitRadianAngle(m_fRotationCur);
+				m_fRotationDest = m_fRotationCur;
+				bTurnedAroundOnAttractor = false;
+			}
+			// TODO(MIAMI): scan for threats!
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				ClearWaitState();
+				SetWaitState(WAITSTATE_SIT_UP, 0);
+			}
+			break;
+		case WAITSTATE_USE_ATM:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				if (m_attractor)
+					GetPedAttractorManager()->BroadcastDeparture(this, m_attractor);
+				ClearWaitState();
+			}
+			break;
+		case WAITSTATE_SUN_BATHE_PRE:
+		case WAITSTATE_SUN_BATHE_DOWN:
+		case WAITSTATE_SUN_BATHE_IDLE:
+		case WAITSTATE_RIOT:
+		case WAITSTATE_FAST_FALL:
+		case WAITSTATE_BOMBER:
+		case WAITSTATE_STRIPPER:
+		case WAITSTATE_GROUND_ATTACK:
+		case WAITSTATE_LANCESITTING:
+		case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
+			assert(0);
 		default:
 			break;
 	}
@@ -9837,7 +9932,7 @@ CPed::ProcessControl(void)
 			} else if (m_nPedStateTimer < 1001) {
 				m_nPedStateTimer = 0;
 			}
-		} else {
+		} else if (!GetPedAttractorManager()->IsInQueue(this, m_attractor)) {
 			if (m_panicCounter == 50 && IsPedInControl()) {
 				SetWaitState(WAITSTATE_STUCK, nil);
 				// Leftover
@@ -13015,14 +13110,26 @@ CPed::ProcessObjective(void)
 			case OBJECTIVE_FOLLOW_CAR_IN_CAR:
 			case OBJECTIVE_FIRE_AT_OBJ_FROM_VEHICLE:
 			case OBJECTIVE_DESTROY_OBJ:
-			case OBJECTIVE_23:
-			case OBJECTIVE_24:
+			case OBJECTIVE_26:
+			case OBJECTIVE_27:
 			case OBJECTIVE_SET_LEADER:
 				break;
 			case OBJECTIVE_IDLE:
-				SetIdle();
-				m_objective = OBJECTIVE_NONE;
-				SetMoveState(PEDMOVE_STILL);
+				if (GetPedState() == PED_DRIVING)
+					m_objective = OBJECTIVE_NONE;
+				else {
+					SetIdle();
+					if (m_attractor) {
+						if (m_objectiveTimer && CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+							GetPedAttractorManager()->BroadcastDeparture(this, m_attractor);
+							m_objectiveTimer = 0;
+						}
+					}
+					else {
+						m_objective = OBJECTIVE_NONE;
+						SetMoveState(PEDMOVE_STILL);
+					}
+				}
 				break;
 			case OBJECTIVE_FLEE_TILL_SAFE:
 				if (InVehicle()) {
@@ -14201,6 +14308,187 @@ CPed::ProcessObjective(void)
 				}
 				break;
 			}
+			case OBJECTIVE_USE_SEAT_ATTRACTOR:
+			case OBJECTIVE_USE_ATM_ATTRACTOR:
+			case OBJECTIVE_USE_STOP_ATTRACTOR:
+			case OBJECTIVE_USE_PIZZA_ATTRACTOR:
+			case OBJECTIVE_USE_SHELTER_ATTRACTOR:
+			case OBJECTIVE_USE_ICECREAM_ATTRACTOR:
+				if (CTimer::GetTimeInMilliseconds() > m_objectiveTimer) {
+					m_objectiveTimer = 0;
+					if (m_attractor)
+						GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+				}
+				else {
+					CVector distance = m_nextRoutePointPos - GetPosition();
+					distance.z = 0.0f;
+					if (m_objective == OBJECTIVE_USE_SHELTER_ATTRACTOR) {
+						if (m_nMoveState == PEDMOVE_SPRINT && distance.Magnitude() < SQR(2.0f)) {
+							SetMoveState(PEDMOVE_WALK);
+							bIsRunning = false;
+						}
+						else if (CWeather::Rain < 0.2f && m_attractor) {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							return;
+						}
+					}
+					else if (m_objective == OBJECTIVE_USE_ICECREAM_ATTRACTOR) {
+						if (m_nMoveState == PEDMOVE_SPRINT && distance.Magnitude() < SQR(4.0f)) {
+							SetMoveState(PEDMOVE_WALK);
+							bIsRunning = false;
+						}
+						CVehicle* pIceCreamVan = GetPedAttractorManager()->GetIceCreamVanForEffect(m_attractor->GetEffect());
+						if (0.01f * CTimer::GetTimeStep() * 5.0f < pIceCreamVan->m_fDistanceTravelled) {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							return;
+						}
+						if (!pIceCreamVan->pDriver ||
+							!pIceCreamVan->pDriver->IsPlayer() ||
+							pIceCreamVan->pDriver->GetPedState() == PED_ARRESTED ||
+							pIceCreamVan->pDriver->GetPedState() == PED_DEAD) {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							return;
+						}
+						if (!pIceCreamVan->m_bSirenOrAlarm) {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							return;
+						}
+						if (pIceCreamVan->GetStatus() == STATUS_WRECKED) {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							return;
+						}
+					}
+					if (sq(m_distanceToCountSeekDone) < distance.MagnitudeSqr()) {
+						if (CTimer::GetTimeInMilliseconds() > m_nPedStateTimer || GetPedState() != PED_SEEK_POS)
+							SetSeek(m_vecSeekPos, m_distanceToCountSeekDone);
+					}
+					else {
+						if (!bReachedAttractorHeadingTarget) {
+							float fHeadingDistance = m_fRotationCur - m_attractorHeading;
+							float fSinHeading = Sin(fHeadingDistance);
+							float fCosHeading = Cos(fHeadingDistance);
+							if (fSinHeading > 0.0f) {
+								if (fCosHeading > 0.0f)
+									m_attractorHeading = m_fRotationCur - Asin(fSinHeading);
+								else
+									m_attractorHeading = m_fRotationCur - Acos(fCosHeading);
+							}
+							else {
+								if (fCosHeading > 0.0f)
+									m_attractorHeading = m_fRotationCur - Asin(fSinHeading);
+								else
+									m_attractorHeading = m_fRotationCur + Acos(fCosHeading);
+							}
+							m_fRotationDest = m_attractorHeading;
+							m_headingRate = 3.5f;
+							bReachedAttractorHeadingTarget = true;
+							bTurnedAroundOnAttractor = false;
+						}
+						if (Abs(m_fRotationCur - m_attractorHeading) >= m_acceptableHeadingOffset &&
+							Abs(m_fRotationCur - m_attractorHeading + TWOPI) >= m_acceptableHeadingOffset &&
+							Abs(m_fRotationCur - m_attractorHeading - TWOPI) >= m_acceptableHeadingOffset)
+							SetMoveState(PEDMOVE_STILL);
+						else {
+							m_fRotationDest = m_fRotationCur;
+							bReachedAttractorHeadingTarget = false;
+							bObjectiveCompleted = true;
+							bScriptObjectiveCompleted = true;
+							RestoreHeadingRate();
+							GetPedAttractorManager()->BroadcastArrival(this, m_attractor);
+							if (GetPedAttractorManager()->IsAtHeadOfQueue(this, m_attractor)) {
+								switch (m_objective) {
+								case OBJECTIVE_USE_SEAT_ATTRACTOR:
+									if (!bTurnedAroundOnAttractor) {
+										ClearObjective();
+										SetWaitState(WAITSTATE_SIT_DOWN, 0);
+									}
+									else {
+										ClearObjective();
+										SetWaitState(WAITSTATE_SIT_DOWN_RVRS, 0);
+									}
+									break;
+								case OBJECTIVE_USE_ATM_ATTRACTOR:
+									ClearObjective();
+									SetWaitState(WAITSTATE_USE_ATM, 0);
+									break;
+								case OBJECTIVE_USE_STOP_ATTRACTOR:
+									ClearObjective();
+									SetObjective(OBJECTIVE_WAIT_FOR_BUS);
+									break;
+								case OBJECTIVE_USE_PIZZA_ATTRACTOR:
+									ClearObjective();
+									m_prevObjective = OBJECTIVE_NONE;
+									SetObjective(OBJECTIVE_IDLE);
+									m_objectiveTimer = CTimer::GetTimeInMilliseconds() + m_attractor->GetHeadOfQueueWaitTime();
+									break;
+								case OBJECTIVE_USE_SHELTER_ATTRACTOR:
+									m_prevObjective = OBJECTIVE_NONE;
+									SetObjective(OBJECTIVE_WAIT_FOR_RAIN_TO_END);
+									break;
+								case OBJECTIVE_USE_ICECREAM_ATTRACTOR:
+									m_prevObjective = OBJECTIVE_NONE;
+									SetObjective(OBJECTIVE_PURCHASE_ICECREAM);
+									break;
+								}
+							}
+						}
+					}
+				}
+				return;
+			case OBJECTIVE_WAIT_FOR_RAIN_TO_END:
+				SetIdle();
+				if (m_attractor && CWeather::Rain < 0.2f)
+					GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+				break;
+			case OBJECTIVE_WAIT_FOR_BUS:
+				SetIdle();
+				if (m_attractor) {
+					float left = GetPosition().x - 10.0f;
+					float right = GetPosition().x + 10.0f;
+					float top = GetPosition().y - 10.0f;
+					float bottom = GetPosition().y + 10.0f;
+					int xstart = Max(0, CWorld::GetSectorIndexX(left));
+					int xend = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right));
+					int ystart = Max(0, CWorld::GetSectorIndexY(top));
+					int yend = Min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(bottom));
+					assert(xstart <= xend);
+					assert(ystart <= yend);
+
+					float minDistance = SQR(10.0f);
+					CVehicle* pBus = nil;
+
+					for (int y = ystart; y <= yend; y++) {
+						for (int x = xstart; x <= xend; x++) {
+							CSector* s = CWorld::GetSector(x, y);
+							for (CPtrNode* pNode = s->m_lists[ENTITYLIST_VEHICLES].first; pNode != nil; pNode = pNode->next) {
+								CEntity* pEntity = (CEntity*)pNode->item;
+								if (!pEntity->IsVehicle())
+									continue;
+								CVehicle* pVehicle = (CVehicle*)pEntity;
+								if (!pVehicle->bIsBus)
+									continue;
+								if (pVehicle->GetMoveSpeed().MagnitudeSqr() >= SQR(0.005f))
+									continue;
+								float distanceSq = (GetPosition() - pVehicle->GetPosition()).MagnitudeSqr();
+								if (distanceSq < minDistance) {
+									minDistance = distanceSq;
+									pBus = pVehicle;
+								}
+							}
+						}
+					}
+
+					if (pBus) {
+						if (pBus->m_nNumPassengers >= pBus->m_nNumMaxPassengers - 1)
+							SetObjective(OBJECTIVE_IDLE);
+						else {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, pBus);
+							bDontDragMeOutCar = true; // TODO(MIAMI): check, add more flags
+						}
+					}
+				}
+				break;
 #endif
 		}
 		if (bObjectiveCompleted
@@ -17279,6 +17567,22 @@ CPed::WarpPedIntoCar(CVehicle *car)
 }
 
 void
+CPed::SetObjective(eObjective newObj, float heading, const CVector& pos)
+{
+	switch (newObj) {
+	case OBJECTIVE_USE_SEAT_ATTRACTOR:
+	case OBJECTIVE_USE_ATM_ATTRACTOR:
+	case OBJECTIVE_USE_STOP_ATTRACTOR:
+	case OBJECTIVE_USE_PIZZA_ATTRACTOR:
+	case OBJECTIVE_USE_SHELTER_ATTRACTOR:
+	case OBJECTIVE_USE_ICECREAM_ATTRACTOR:
+		ClearPointGunAt();
+		SetObjective(newObj, pos);
+		m_attractorHeading = heading;
+	}
+}
+
+void
 CPed::SetObjective(eObjective newObj, CVector dest)
 {
 	if (DyingOrDead())
@@ -17327,14 +17631,50 @@ CPed::SetObjective(eObjective newObj, CVector dest)
 			break;
 		case OBJECTIVE_GOTO_AREA_ANY_MEANS:
 		case OBJECTIVE_GOTO_AREA_ON_FOOT:
+		case OBJECTIVE_USE_SEAT_ATTRACTOR:
+		case OBJECTIVE_USE_ATM_ATTRACTOR:
+		case OBJECTIVE_USE_STOP_ATTRACTOR:
+		case OBJECTIVE_USE_PIZZA_ATTRACTOR:
+		case OBJECTIVE_USE_SHELTER_ATTRACTOR:
+		case OBJECTIVE_USE_ICECREAM_ATTRACTOR:
 			bIsRunning = false;
 			m_pNextPathNode = nil;
 			m_nextRoutePointPos = dest;
 			m_vecSeekPos = m_nextRoutePointPos;
 			m_distanceToCountSeekDone = 0.5f;
-			bUsePedNodeSeek = true;
-			if (sq(m_distanceToCountSeekDone) > (m_nextRoutePointPos - GetPosition()).MagnitudeSqr2D())
-				return;
+			if (m_objective == OBJECTIVE_USE_ATM_ATTRACTOR) {
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			if (m_objective == OBJECTIVE_USE_SEAT_ATTRACTOR) {
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			if (m_objective == OBJECTIVE_USE_STOP_ATTRACTOR) {
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			if (m_objective == OBJECTIVE_USE_PIZZA_ATTRACTOR) {
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			if (m_objective == OBJECTIVE_USE_SHELTER_ATTRACTOR) {
+				bIsRunning = true;
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			if (m_objective == OBJECTIVE_USE_ICECREAM_ATTRACTOR) {
+				bIsRunning = true;
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			bUsePedNodeSeek = false;
+			if (sq(m_distanceToCountSeekDone) > (m_nextRoutePointPos - GetPosition()).MagnitudeSqr2D()) {
+				if (!IsUseAttractorObjective(m_objective))
+					return;
+				if (Abs(m_fRotationCur - m_attractorHeading) < m_acceptableHeadingOffset)
+					return;
+			}
 			break;
 		case OBJECTIVE_RUN_TO_AREA:
 			bIsRunning = true;
@@ -17959,6 +18299,65 @@ CPed::SetExitBoat(CVehicle *boat)
 #endif
 	// Not there in VC.
 	CWaterLevel::FreeBoatWakeArray();
+}
+
+void
+CPed::SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float heading, float time, int32 qid)
+{
+	if (!m_attractor)
+		m_attractor = pAttractor;
+	if (m_attractor != pAttractor)
+		return;
+	switch (pAttractor->GetEffect()->pedattr.type) {
+	case ATTRACTOR_ATM: SetObjective(OBJECTIVE_USE_ATM_ATTRACTOR, heading, pos); break;
+	case ATTRACTOR_SEAT: SetObjective(OBJECTIVE_USE_SEAT_ATTRACTOR, heading, pos); break;
+	case ATTRACTOR_STOP: SetObjective(OBJECTIVE_USE_STOP_ATTRACTOR, heading, pos); break;
+	case ATTRACTOR_PIZZA: SetObjective(OBJECTIVE_USE_PIZZA_ATTRACTOR, heading, pos); break;
+	case ATTRACTOR_SHELTER: SetObjective(OBJECTIVE_USE_SHELTER_ATTRACTOR, heading, pos); break;
+	case ATTRACTOR_ICECREAM: SetObjective(OBJECTIVE_USE_ICECREAM_ATTRACTOR, heading, pos); break;
+	default: return;
+	}
+	SetObjectiveTimer(time);
+	m_positionInQueue = qid;
+}
+
+void
+CPed::ClearWaitState(void)
+{
+	switch (m_nWaitState) {
+	case WAITSTATE_PLAYANIM_CHAT:
+	case WAITSTATE_SIT_DOWN:
+	case WAITSTATE_SIT_DOWN_RVRS:
+	case WAITSTATE_SIT_UP:
+	case WAITSTATE_SIT_IDLE:
+	case WAITSTATE_USE_ATM:
+		if (CTimer::GetTimeInMilliseconds() <= m_nWaitTimer) {
+			AnimationId id;
+			switch (m_nWaitState) { // TODO(MIAMI): actual!
+			case WAITSTATE_PLAYANIM_CHAT: id = ANIM_IDLE_CHAT; break;
+			case WAITSTATE_SIT_DOWN: id = ANIM_SEAT_DOWN; break;
+			case WAITSTATE_SIT_DOWN_RVRS: id = ANIM_SEAT_DOWN2; break;
+			case WAITSTATE_SIT_UP: id = ANIM_SEAT_UP; break;
+			case WAITSTATE_SIT_IDLE: id = ANIM_SEAT_IDLE; break;
+			case WAITSTATE_USE_ATM: id = ANIM_ATM; break;
+			}
+			CAnimBlendAssociation* pAssoc = RpAnimBlendClumpGetAssociation(GetClump(), id);
+			if (pAssoc)
+				pAssoc->blendDelta = -8.0f;
+			if (m_attractor)
+				GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+		}
+		break;
+	case WAITSTATE_RIOT:
+	case WAITSTATE_FAST_FALL:
+	case WAITSTATE_BOMBER:
+	case WAITSTATE_STRIPPER:
+	case WAITSTATE_GROUND_ATTACK:
+	case WAITSTATE_LANCESITTING:
+	case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
+		assert(0);
+	}
+	m_nWaitState = WAITSTATE_FALSE;
 }
 
 #ifdef COMPATIBLE_SAVES

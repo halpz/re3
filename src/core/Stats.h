@@ -64,6 +64,7 @@ public:
 	static int32 HighestScores[TOTAL_HIGHEST_SCORES];
 	static int32 Sprayings;
 	static float AutoPaintingBudget;
+	static int32 NoMoreHurricanes;
 
 public:
 	static void Init(void);
