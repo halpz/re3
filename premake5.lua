@@ -23,6 +23,22 @@ else
 	Librw = os.getenv("LIBRW") or "librw"
 end
 
+function getsys(a)
+	if a == 'windows' then
+		return 'win'
+	end
+	return a
+end
+
+function getarch(a)
+	if a == 'x86_64' then
+		return 'amd64'
+	elseif a == 'ARM' then
+		return 'arm'
+	end
+	return a
+end
+
 workspace "reVC"
 	language "C++"
 	configurations { "Debug", "Release" }
@@ -40,6 +56,8 @@ workspace "reVC"
 	filter { "system:linux" }
 		platforms {
 			"linux-x86-librw_gl3_glfw-oal",
+			"linux-amd64-librw_gl3_glfw-oal",
+			"linux-arm-librw_gl3_glfw-oal",
 		}
 
 	filter "configurations:Debug"
@@ -58,6 +76,12 @@ workspace "reVC"
 	filter { "platforms:*x86*" }
 		architecture "x86"
 		
+	filter { "platforms:*amd64*" }
+		architecture "amd64"
+
+	filter { "platforms:*arm*" }
+		architecture "ARM"
+
 	filter { "platforms:*librw_d3d9*" }
 		defines { "RW_D3D9" }
 		if(not _OPTIONS["with-librw"]) then
@@ -68,17 +92,12 @@ workspace "reVC"
 		defines { "RW_GL3" }
 		includedirs { path.join(_OPTIONS["glfwdir"], "include") }
 		includedirs { path.join(_OPTIONS["glewdir"], "include") }
+		if(not _OPTIONS["with-librw"]) then
+			libdirs { path.join(Librw, "lib/%{getsys(cfg.system)}-%{getarch(cfg.architecture)}-gl3/%{cfg.buildcfg}") }
+		end
 
 	filter "platforms:win*librw_gl3_glfw*"
 		defines { "GLEW_STATIC" }
-		if(not _OPTIONS["with-librw"]) then
-			libdirs { path.join(Librw, "lib/win-x86-gl3/%{cfg.buildcfg}") }
-		end
-
-	filter "platforms:linux*librw_gl3_glfw*"
-		if(not _OPTIONS["with-librw"]) then
-			libdirs { path.join(Librw, "lib/linux-x86-gl3/%{cfg.buildcfg}") }
-		end
 
 	filter  {}
 		
@@ -182,7 +201,6 @@ project "reVC"
 		targetextension ".exe"
 
 	filter "platforms:linux*"
-		targetextension ".elf"
 		defines { "OPENAL" }
 		links { "openal", "mpg123", "sndfile", "pthread" }
 

@@ -470,7 +470,7 @@ RwBool RwRenderStateSet(RwRenderState state, void *value)
 	uint32 uival = (uintptr)value;
 	uint32 fog;
 	switch(state){
-	case rwRENDERSTATETEXTURERASTER: SetRenderState(TEXTURERASTER, uival); return true;
+	case rwRENDERSTATETEXTURERASTER: SetRenderStatePtr(TEXTURERASTER, value); return true;
 	case rwRENDERSTATETEXTUREADDRESS: SetRenderState(TEXTUREADDRESS, uival); return true;
 	case rwRENDERSTATETEXTUREADDRESSU: SetRenderState(TEXTUREADDRESSU, uival); return true;
 	case rwRENDERSTATETEXTUREADDRESSV: SetRenderState(TEXTUREADDRESSV, uival); return true;
