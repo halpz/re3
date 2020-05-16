@@ -506,7 +506,7 @@ void CRunningScript::Init()
 #ifdef USE_DEBUG_SCRIPT_LOADER
 int open_script()
 {
-	static int scriptToLoad = 0;
+	static int scriptToLoad = 1;
 
 #ifdef _WIN32
 	if (GetAsyncKeyState('G') & 0x8000)
