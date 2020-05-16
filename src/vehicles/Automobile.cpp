@@ -4024,10 +4024,22 @@ CAutomobile::PlayCarHorn(void)
 {
 	int r;
 
+	if (m_nAlarmState && m_nAlarmState != -1)
+		return;
+
+	if (GetStatus() == STATUS_WRECKED)
+		return;
+
 	if(m_nCarHornTimer != 0)
 		return;
 
-	r = CGeneral::GetRandomNumber() & 7;
+	if (m_nCarHornDelay) {
+		m_nCarHornDelay--;
+		return;
+	}
+
+	m_nCarHornDelay = (CGeneral::GetRandomNumber() & 0x7F) + 150;
+	r = m_nCarHornDelay & 7;
 	if(r < 2){
 		m_nCarHornTimer = 45;
 	}else if(r < 4){

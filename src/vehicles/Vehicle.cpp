@@ -101,6 +101,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_bSirenOrAlarm = 0;
 	m_nCarHornTimer = 0;
 	m_nCarHornPattern = 0;
+	m_nCarHornDelay = 0;
 	bPartOfConvoy = false;
 	bCreatedAsPoliceVehicle = false;
 	bParking = false;
