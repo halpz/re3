@@ -2312,13 +2312,15 @@ CWeapon::BlowUpExplosiveThings(CEntity *thing)
 bool
 CWeapon::HasWeaponAmmoToBeUsed(void)
 {
-	switch (m_eWeaponType) {
-		case WEAPONTYPE_UNARMED:
-		case WEAPONTYPE_BASEBALLBAT:
-			return true;
-		default:
-			return m_nAmmoTotal != 0;
-	}
+	// FIX: This is better (not bug tho)
+#if 0
+	if (m_eWeaponType <= WEAPONTYPE_CHAINSAW)
+#else
+	if (CWeaponInfo::GetWeaponInfo(m_eWeaponType)->m_eWeaponFire == WEAPON_FIRE_MELEE)
+#endif
+		return true;
+	else
+		return m_nAmmoTotal != 0;
 }
 
 bool

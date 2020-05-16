@@ -679,7 +679,7 @@ CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool unused)
 		if (weaponType < WEAPONTYPE_LAST_WEAPONTYPE && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
 
 			// Looks like abandoned idea. This block never runs, ms_aMaxAmmoForWeapon is always -1.
-			GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], (int32) GetWeapon(slot).m_nAmmoTotal);
+			GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], GetWeapon(slot).m_nAmmoTotal);
 		} else {
 			GetWeapon(slot).m_nAmmoTotal = Min(99999, GetWeapon(slot).m_nAmmoTotal);
 		}
@@ -1187,7 +1187,7 @@ CPed::FinishedReloadCB(CAnimBlendAssociation *reloadAssoc, void *arg)
 		}
 	} else if (weapon->m_bReloadLoop2Start && ped->bIsAttacking) {
 		CAnimBlendAssociation *fireAssoc =
-			CAnimManager::BlendAnimation(ped->GetClump(), weapon->m_AnimToPlay, weapon->m_bAnimDetonate ? ANIM_BOMBER : ANIM_WEAPON_FIRE, 8.0f);
+			CAnimManager::BlendAnimation(ped->GetClump(), weapon->m_AnimToPlay, GetPrimaryFireAnim(weapon), 8.0f);
 		fireAssoc->SetFinishCallback(FinishedAttackCB, ped);
 		fireAssoc->SetRun();
 		if (fireAssoc->currentTime != reloadAssoc->hierarchy->totalLength) {
@@ -1302,6 +1302,7 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 	}
 }
 
+// --MIAMI: Done
 void
 CPed::Attack(void)
 {
@@ -3874,12 +3875,7 @@ CPed::ClearAttackByRemovingAnim(void)
 		return;
 
 	CWeaponInfo *weapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
-	CAnimBlendAssociation *weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), weapon->m_bAnimDetonate ? ANIM_BOMBER : ANIM_WEAPON_FIRE);
-	
-	// TODO(Miami): Remove when fighting got ported
-	if (!weaponAssoc) {
-		weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_PPUNCH);
-	}
+	CAnimBlendAssociation *weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetPrimaryFireAnim(weapon));
 
 	if (!weaponAssoc) {
 		if (!!weapon->m_bCrouchFire)
@@ -4882,15 +4878,15 @@ CPed::SetAmmo(eWeaponType weaponType, uint32 ammo)
 	if (slot == -1)
 		return;
 
-	GetWeapon(slot).m_nAmmoTotal += ammo;
+	GetWeapon(slot).m_nAmmoTotal = ammo;
 	if (weaponType < WEAPONTYPE_LAST_WEAPONTYPE && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
 
 		// Looks like abandoned idea. This block never runs, ms_aMaxAmmoForWeapon is always -1.
-		GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], (int32)GetWeapon(slot).m_nAmmoTotal);
+		GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], GetWeapon(slot).m_nAmmoTotal);
 	} else {
 		GetWeapon(slot).m_nAmmoTotal = Min(99999, GetWeapon(slot).m_nAmmoTotal);
 	}
-	uint32 newClip = GetWeapon(slot).m_nAmmoTotal;
+	int32 newClip = GetWeapon(slot).m_nAmmoTotal;
 	if (newClip >= GetWeapon(slot).m_nAmmoInClip)
 		newClip = GetWeapon(slot).m_nAmmoInClip;
 	GetWeapon(slot).m_nAmmoInClip = newClip;
@@ -4911,7 +4907,7 @@ CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo)
 	if (weaponType < WEAPONTYPE_LAST_WEAPONTYPE && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
 
 		// Looks like abandoned idea. This block never runs, ms_aMaxAmmoForWeapon is always -1.
-		GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], (int32)GetWeapon(slot).m_nAmmoTotal);
+		GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], GetWeapon(slot).m_nAmmoTotal);
 	} else {
 		GetWeapon(slot).m_nAmmoTotal = Min(99999, GetWeapon(slot).m_nAmmoTotal);
 	}
@@ -6341,7 +6337,7 @@ CPed::CreateDeadPedWeaponPickups(void)
 
 		eWeaponType weapon = GetWeapon(i).m_eWeaponType;
 		int weaponAmmo = GetWeapon(i).m_nAmmoTotal;
-		if (weapon == WEAPONTYPE_UNARMED || weapon == WEAPONTYPE_DETONATOR || weaponAmmo == 0)
+		if (weapon == WEAPONTYPE_UNARMED || weapon == WEAPONTYPE_DETONATOR || (weaponAmmo == 0 && !GetWeapon(i).IsTypeMelee()))
 			continue;
 
 		angleToPed = i * 1.75f;

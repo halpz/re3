@@ -293,9 +293,12 @@ bool
 CPedIK::PointGunAtPosition(CVector const& position)
 {
 	// TODO(MIAMI): special cases for some weapons
+
+	RwV3d armPos;
+	GetComponentPosition(&armPos, PED_UPPERARMR);
 	return PointGunInDirection(
 		CGeneral::GetRadianAngleBetweenPoints(position.x, position.y, m_ped->GetPosition().x, m_ped->GetPosition().y),
-		CGeneral::GetRadianAngleBetweenPoints(position.z, Distance2D(m_ped->GetPosition(), position.x, position.y), m_ped->GetPosition().z, 0.0f));
+		CGeneral::GetRadianAngleBetweenPoints(position.z, Distance2D(m_ped->GetPosition(), position.x, position.y), armPos.z, 0.0f));
 }
 
 bool

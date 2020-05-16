@@ -92,6 +92,11 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 void CPlayerPed::ClearWeaponTarget()
 {
 	if (m_nPedType == PEDTYPE_PLAYER1) {
+
+		// TODO(Miami)
+		// if (m_pPointGunAt)
+		//	m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
+
 		m_pPointGunAt = nil;
 		TheCamera.ClearPlayerWeaponMode();
 		CWeaponEffects::ClearCrossHair();
@@ -213,13 +218,15 @@ CPlayerPed::MakeChangesForNewWeapon(eWeaponType weapon)
 		TheCamera.ClearPlayerWeaponMode();
 	}
 	SetCurrentWeapon(weapon);
+	m_nSelectedWepSlot = m_currentWeapon;
 
 	GetWeapon()->m_nAmmoInClip = Min(GetWeapon()->m_nAmmoTotal, CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition);
 
 	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAim))
 		ClearWeaponTarget();
 
-	CAnimBlendAssociation* weaponAnim = RpAnimBlendClumpGetAssociation(GetClump(), CWeaponInfo::GetWeaponInfo(WEAPONTYPE_SNIPERRIFLE)->m_bAnimDetonate ? 62 : 205);
+	// WEAPONTYPE_SNIPERRIFLE? Wut?
+	CAnimBlendAssociation* weaponAnim = RpAnimBlendClumpGetAssociation(GetClump(), GetPrimaryFireAnim(CWeaponInfo::GetWeaponInfo(WEAPONTYPE_SNIPERRIFLE)));
 	if (weaponAnim) {
 		weaponAnim->SetRun();
 		weaponAnim->flags |= ASSOC_FADEOUTWHENDONE;
@@ -666,7 +673,10 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 
 				for (m_nSelectedWepSlot = m_currentWeapon - 1; ; --m_nSelectedWepSlot) {
 					if (m_nSelectedWepSlot < 0)
-						m_nSelectedWepSlot = 9;
+						m_nSelectedWepSlot = TOTAL_WEAPON_SLOTS - 1;
+
+					if (m_nSelectedWepSlot == 0)
+						break;
 
 					if (HasWeaponSlot(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed()) {
 						break;
@@ -690,11 +700,16 @@ spentAmmoCheck:
 				else
 					m_nSelectedWepSlot = 2;
 
-				// BUG: m_nSelectedWepSlot is slot in VC but they compared against weapon types, lol.
 				for (; m_nSelectedWepSlot >= 0; --m_nSelectedWepSlot) {
-					if (m_nSelectedWepSlot == WEAPONTYPE_BASEBALLBAT && GetWeapon(6).m_eWeaponType == WEAPONTYPE_BASEBALLBAT
+
+					// BUG: m_nSelectedWepSlot and GetWeapon(..) takes slot in VC but they compared them against weapon types in whole condition! jeez
+#ifdef FIX_BUGS
+					if (m_nSelectedWepSlot == 1 || GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0 && m_nSelectedWepSlot != 2) {
+#else
+					if (m_nSelectedWepSlot == WEAPONTYPE_BASEBALLBAT && GetWeapon(WEAPONTYPE_BASEBALLBAT).m_eWeaponType == WEAPONTYPE_BASEBALLBAT
 						|| GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0
-						/*&& m_nSelectedWepSlot != WEAPONTYPE_MOLOTOV && m_nSelectedWepSlot != WEAPONTYPE_GRENADE && m_nSelectedWepSlot != WEAPONTYPE_TEARGAS */) {
+						&& m_nSelectedWepSlot != WEAPONTYPE_MOLOTOV && m_nSelectedWepSlot != WEAPONTYPE_GRENADE && m_nSelectedWepSlot != WEAPONTYPE_TEARGAS) {
+#endif
 						goto switchDetectDone;
 					}
 				}
@@ -1152,7 +1167,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 		m_nSelectedWepSlot == m_currentWeapon && m_nMoveState != PEDMOVE_SPRINT) {
 
 		// Weapons except throwable and melee ones
-		if (weaponInfo->m_bCanAim || weaponInfo->m_b1stPerson || weaponInfo->m_bExpands) {
+		if (weaponInfo->m_nWeaponSlot > 2) {
 			if ((padUsed->GetTarget() && weaponInfo->m_bCanAimWithArm) || padUsed->GetWeapon()) {
 				float limitedCam = CGeneral::LimitRadianAngle(-TheCamera.Orientation);
 

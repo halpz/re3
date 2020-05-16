@@ -14,7 +14,7 @@ public:
 	float m_fRange;
 	uint32 m_nFiringRate;
 	uint32 m_nReload;
-	uint32 m_nAmountofAmmunition;
+	int32 m_nAmountofAmmunition;
 	uint32 m_nDamage;
 	float m_fSpeed;
 	float m_fRadius;

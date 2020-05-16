@@ -704,6 +704,7 @@ public:
 	void RemoveWeaponAnims(int, float);
 	void CreateDeadPedMoney(void);
 	void CreateDeadPedWeaponPickups(void);
+//	void CreateDeadPedPickupCoors(float *x, float *y, float *z);
 	void SetAttackTimer(uint32);
 	void SetBeingDraggedFromCar(CVehicle*, uint32, bool);
 	void SetRadioStation(void);
@@ -899,7 +900,7 @@ public:
 		if (m_nPedType == PEDTYPE_COP && !!weapon->m_bCop3rd)
 			return ANIM_WEAPON_FIRE_3RD;
 		else
-			return weapon->m_bAnimDetonate ? ANIM_BOMBER : ANIM_WEAPON_FIRE;
+			return GetPrimaryFireAnim(weapon);
 	}
 
 	static AnimationId GetFireAnimGround(CWeaponInfo* weapon, bool kickFloorIfNone = true) {
@@ -915,6 +916,17 @@ public:
 			return ANIM_KICK_FLOOR;
 		else
 			return (AnimationId)0;
+	}
+
+	static AnimationId GetPrimaryFireAnim(CWeaponInfo* weapon) {
+		// TODO(Miami): Revert that when weapons got ported
+		if (weapon->m_AnimToPlay == ASSOCGRP_STD)
+			return ANIM_FIGHT_PPUNCH;
+
+		if (weapon->m_bAnimDetonate)
+			return ANIM_BOMBER;
+		else
+			return ANIM_WEAPON_FIRE;
 	}
 	// --
 
