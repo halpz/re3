@@ -735,6 +735,7 @@ CPlane::InitPlanes(void)
 		TotalDurationOfFlightPath2 = TotalLengthOfFlightPath2/CRUISE_SPEED;
 	}
 
+/*
 	// Mission Cesna
 	if(pPath3Nodes == nil){
 		pPath3Nodes = LoadPath("data\\paths\\flight3.dat", NumPath3Nodes, TotalLengthOfFlightPath3, false);
@@ -746,6 +747,7 @@ CPlane::InitPlanes(void)
 		pPath4Nodes = LoadPath("data\\paths\\flight4.dat", NumPath4Nodes, TotalLengthOfFlightPath4, false);
 		TotalDurationOfFlightPath4 = TotalLengthOfFlightPath4/CRUISE_SPEED;
 	}
+*/
 
 	CStreaming::LoadAllRequestedModels(false);
 	CStreaming::RequestModel(MI_AIRTRAIN, 0);
