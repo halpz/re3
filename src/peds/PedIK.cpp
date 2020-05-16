@@ -21,14 +21,14 @@ CPedIK::CPedIK(CPed *ped)
 {
 	m_ped = ped;
 	m_flags = 0;
-	m_headOrient.phi = 0.0f;
-	m_headOrient.theta = 0.0f;
-	m_torsoOrient.phi = 0.0f;
-	m_torsoOrient.theta = 0.0f;
-	m_upperArmOrient.phi = 0.0f;
-	m_upperArmOrient.theta = 0.0f;
-	m_lowerArmOrient.phi = 0.0f;
-	m_lowerArmOrient.theta = 0.0f;
+	m_headOrient.yaw = 0.0f;
+	m_headOrient.pitch = 0.0f;
+	m_torsoOrient.yaw = 0.0f;
+	m_torsoOrient.pitch = 0.0f;
+	m_upperArmOrient.yaw = 0.0f;
+	m_upperArmOrient.pitch = 0.0f;
+	m_lowerArmOrient.yaw = 0.0f;
+	m_lowerArmOrient.pitch = 0.0f;
 }
 
 #ifdef PED_SKIN
@@ -55,8 +55,8 @@ CPedIK::RotateTorso(AnimBlendFrameData *node, LimbOrientation *limb, bool change
 		RtQuat *q = &node->hanimFrame->q;
 #ifndef FIX_BUGS
 		// this is what the game does (also VC), but it does not look great
-		RtQuatRotate(q, &XaxisIK, RADTODEG(limb->phi), rwCOMBINEPRECONCAT);
-		RtQuatRotate(q, &ZaxisIK, RADTODEG(limb->theta), rwCOMBINEPRECONCAT);	// pitch
+		RtQuatRotate(q, &XaxisIK, RADTODEG(limb->yaw), rwCOMBINEPRECONCAT);
+		RtQuatRotate(q, &ZaxisIK, RADTODEG(limb->pitch), rwCOMBINEPRECONCAT);	// pitch
 #else
 		// copied the code from the non-skinned case
 		// this seems to work ok
@@ -78,8 +78,8 @@ CPedIK::RotateTorso(AnimBlendFrameData *node, LimbOrientation *limb, bool change
 		vec2.z = -(c*mat->at.x + s*mat->at.y);
 
 		// Not sure what exactly to do here
-		RtQuatRotate(q, &vec1, RADTODEG(limb->phi), rwCOMBINEPRECONCAT);
-		RtQuatRotate(q, &vec2, RADTODEG(limb->theta), rwCOMBINEPRECONCAT);
+		RtQuatRotate(q, &vec1, RADTODEG(limb->yaw), rwCOMBINEPRECONCAT);
+		RtQuatRotate(q, &vec2, RADTODEG(limb->pitch), rwCOMBINEPRECONCAT);
 #endif
 		m_ped->bDontAcceptIKLookAts = true;
 	}else
@@ -122,14 +122,14 @@ CPedIK::RotateTorso(AnimBlendFrameData *node, LimbOrientation *limb, bool change
 
 			float curYaw, curPitch;
 			ExtractYawAndPitchWorld(mat, &curYaw, &curPitch);
-			RwMatrixRotate(RwFrameGetMatrix(f), &rightVector, RADTODEG(limb->theta), rwCOMBINEPOSTCONCAT);
-			RwMatrixRotate(RwFrameGetMatrix(f), &upVector, RADTODEG(limb->phi - (curYaw - m_ped->m_fRotationCur)), rwCOMBINEPOSTCONCAT);
+			RwMatrixRotate(RwFrameGetMatrix(f), &rightVector, RADTODEG(limb->pitch), rwCOMBINEPOSTCONCAT);
+			RwMatrixRotate(RwFrameGetMatrix(f), &upVector, RADTODEG(limb->yaw - (curYaw - m_ped->m_fRotationCur)), rwCOMBINEPOSTCONCAT);
 			RwMatrixRotate(RwFrameGetMatrix(f), &forwardVector, RADTODEG(alpha), rwCOMBINEPOSTCONCAT);
 		}else{
 			// pitch
-			RwMatrixRotate(RwFrameGetMatrix(f), &rightVector, RADTODEG(limb->theta), rwCOMBINEPOSTCONCAT);
+			RwMatrixRotate(RwFrameGetMatrix(f), &rightVector, RADTODEG(limb->pitch), rwCOMBINEPOSTCONCAT);
 			// yaw
-			RwMatrixRotate(RwFrameGetMatrix(f), &upVector, RADTODEG(limb->phi), rwCOMBINEPOSTCONCAT);
+			RwMatrixRotate(RwFrameGetMatrix(f), &upVector, RADTODEG(limb->yaw), rwCOMBINEPOSTCONCAT);
 		}
 		RwFrameGetMatrix(f)->pos = pos;
 		RwMatrixDestroy(mat);
@@ -176,43 +176,43 @@ CPedIK::GetWorldMatrix(RwFrame *source, RwMatrix *destination)
 }
 
 LimbMoveStatus
-CPedIK::MoveLimb(LimbOrientation &limb, float approxPhi, float approxTheta, LimbMovementInfo &moveInfo)
+CPedIK::MoveLimb(LimbOrientation &limb, float targetYaw, float targetPitch, LimbMovementInfo &moveInfo)
 {
 	LimbMoveStatus result = ONE_ANGLE_COULDNT_BE_SET_EXACTLY;
 
-	// phi
+	// yaw
 
-	if (limb.phi > approxPhi) {
-		limb.phi -= moveInfo.yawD;
-	} else if (limb.phi < approxPhi) {
-		limb.phi += moveInfo.yawD;
+	if (limb.yaw > targetYaw) {
+		limb.yaw -= moveInfo.yawD;
+	} else if (limb.yaw < targetYaw) {
+		limb.yaw += moveInfo.yawD;
 	}
 
-	if (Abs(limb.phi - approxPhi) < moveInfo.yawD) {
-		limb.phi = approxPhi;
+	if (Abs(limb.yaw - targetYaw) < moveInfo.yawD) {
+		limb.yaw = targetYaw;
 		result = ANGLES_SET_EXACTLY;
 	}
 
-	if (limb.phi > moveInfo.maxYaw || limb.phi < moveInfo.minYaw) {
-		limb.phi = clamp(limb.phi, moveInfo.minYaw, moveInfo.maxYaw);
+	if (limb.yaw > moveInfo.maxYaw || limb.yaw < moveInfo.minYaw) {
+		limb.yaw = clamp(limb.yaw, moveInfo.minYaw, moveInfo.maxYaw);
 		result = ANGLES_SET_TO_MAX;
 	}
 
-	// theta
+	// pitch
 
-	if (limb.theta > approxTheta) {
-		limb.theta -= moveInfo.pitchD;
-	} else if (limb.theta < approxTheta) {
-		limb.theta += moveInfo.pitchD;
+	if (limb.pitch > targetPitch) {
+		limb.pitch -= moveInfo.pitchD;
+	} else if (limb.pitch < targetPitch) {
+		limb.pitch += moveInfo.pitchD;
 	}
 
-	if (Abs(limb.theta - approxTheta) < moveInfo.pitchD)
-		limb.theta = approxTheta;
+	if (Abs(limb.pitch - targetPitch) < moveInfo.pitchD)
+		limb.pitch = targetPitch;
 	else
 		result = ONE_ANGLE_COULDNT_BE_SET_EXACTLY;
 
-	if (limb.theta > moveInfo.maxPitch || limb.theta < moveInfo.minPitch) {
-		limb.theta = clamp(limb.theta, moveInfo.minPitch, moveInfo.maxPitch);
+	if (limb.pitch > moveInfo.maxPitch || limb.pitch < moveInfo.minPitch) {
+		limb.pitch = clamp(limb.pitch, moveInfo.minPitch, moveInfo.maxPitch);
 		result = ANGLES_SET_TO_MAX;
 	}
 	return result;
@@ -231,14 +231,14 @@ void
 CPedIK::RotateHead(void)
 {
 	RtQuat *q = &m_ped->m_pFrames[PED_HEAD]->hanimFrame->q;
-	RtQuatRotate(q, &XaxisIK, RADTODEG(m_headOrient.phi), rwCOMBINEREPLACE);
-	RtQuatRotate(q, &ZaxisIK, RADTODEG(m_headOrient.theta), rwCOMBINEPOSTCONCAT);
+	RtQuatRotate(q, &XaxisIK, RADTODEG(m_headOrient.yaw), rwCOMBINEREPLACE);
+	RtQuatRotate(q, &ZaxisIK, RADTODEG(m_headOrient.pitch), rwCOMBINEPOSTCONCAT);
 	m_ped->bDontAcceptIKLookAts = true;
 }
 #endif
 
 bool
-CPedIK::LookInDirection(float phi, float theta)
+CPedIK::LookInDirection(float targetYaw, float targetPitch)
 {
 	bool success = true;
 	float yaw, pitch;
@@ -246,21 +246,21 @@ CPedIK::LookInDirection(float phi, float theta)
 	if(IsClumpSkinned(m_ped->GetClump())){
 		if (!(m_ped->m_pFrames[PED_HEAD]->flag & AnimBlendFrameData::IGNORE_ROTATION)) {
 			m_ped->m_pFrames[PED_HEAD]->flag |= AnimBlendFrameData::IGNORE_ROTATION;
-			ExtractYawAndPitchLocalSkinned(m_ped->m_pFrames[PED_HEAD], &m_headOrient.phi, &m_headOrient.theta);
+			ExtractYawAndPitchLocalSkinned(m_ped->m_pFrames[PED_HEAD], &m_headOrient.yaw, &m_headOrient.pitch);
 		}
 
 		// parent of head is torso
 		RwMatrix worldMat = *GetBoneMatrix(m_ped, BONE_torso);
 		ExtractYawAndPitchWorld(&worldMat, &yaw, &pitch);
 
-		LimbMoveStatus headStatus = MoveLimb(m_headOrient, CGeneral::LimitRadianAngle(phi - yaw),
+		LimbMoveStatus headStatus = MoveLimb(m_headOrient, CGeneral::LimitRadianAngle(targetYaw - yaw),
 			CGeneral::LimitRadianAngle(DEGTORAD(10.0f)), ms_headInfo);
 		if (headStatus == ANGLES_SET_TO_MAX)
 			success = false;
 
 		if (headStatus != ANGLES_SET_EXACTLY){
 			if (!(m_flags & LOOKAROUND_HEAD_ONLY)){
-				if (MoveLimb(m_torsoOrient, CGeneral::LimitRadianAngle(phi), theta, ms_torsoInfo))
+				if (MoveLimb(m_torsoOrient, CGeneral::LimitRadianAngle(targetYaw), targetPitch, ms_torsoInfo))
 					success = true;
 			}else{
 				RotateHead();
@@ -279,7 +279,7 @@ CPedIK::LookInDirection(float phi, float theta)
 
 		if (!(m_ped->m_pFrames[PED_HEAD]->flag & AnimBlendFrameData::IGNORE_ROTATION)) {
 			m_ped->m_pFrames[PED_HEAD]->flag |= AnimBlendFrameData::IGNORE_ROTATION;
-			ExtractYawAndPitchLocal(frameMat, &m_headOrient.phi, &m_headOrient.theta);
+			ExtractYawAndPitchLocal(frameMat, &m_headOrient.yaw, &m_headOrient.pitch);
 		}
 
 		RwMatrix *worldMat = RwMatrixCreate();
@@ -288,25 +288,25 @@ CPedIK::LookInDirection(float phi, float theta)
 		ExtractYawAndPitchWorld(worldMat, &yaw, &pitch);
 		RwMatrixDestroy(worldMat);
 
-		yaw += m_torsoOrient.phi;
-		float neededPhiTurn = CGeneral::LimitRadianAngle(phi - yaw);
-		pitch *= Cos(neededPhiTurn);
+		yaw += m_torsoOrient.yaw;
+		float neededYawTurn = CGeneral::LimitRadianAngle(targetYaw - yaw);
+		pitch *= Cos(neededYawTurn);
 
-		float neededThetaTurn = CGeneral::LimitRadianAngle(theta - pitch);
-		LimbMoveStatus headStatus = MoveLimb(m_headOrient, neededPhiTurn, neededThetaTurn, ms_headInfo);
+		float neededPitchTurn = CGeneral::LimitRadianAngle(targetPitch - pitch);
+		LimbMoveStatus headStatus = MoveLimb(m_headOrient, neededYawTurn, neededPitchTurn, ms_headInfo);
 		if (headStatus == ANGLES_SET_TO_MAX)
 			success = false;
 
 		if (headStatus != ANGLES_SET_EXACTLY && !(m_flags & LOOKAROUND_HEAD_ONLY)) {
-			float remainingTurn = CGeneral::LimitRadianAngle(phi - m_ped->m_fRotationCur);
-			if (MoveLimb(m_torsoOrient, remainingTurn, theta, ms_torsoInfo))
+			float remainingTurn = CGeneral::LimitRadianAngle(targetYaw - m_ped->m_fRotationCur);
+			if (MoveLimb(m_torsoOrient, remainingTurn, targetPitch, ms_torsoInfo))
 				success = true;
 		}
 		CMatrix nextFrame = CMatrix(frameMat);
 		CVector framePos = nextFrame.GetPosition();
 
-		nextFrame.SetRotateZ(m_headOrient.theta);
-		nextFrame.RotateX(m_headOrient.phi);
+		nextFrame.SetRotateZ(m_headOrient.pitch);
+		nextFrame.RotateX(m_headOrient.yaw);
 		nextFrame.GetPosition() += framePos;
 		nextFrame.UpdateRW();
 
@@ -320,32 +320,32 @@ CPedIK::LookInDirection(float phi, float theta)
 bool
 CPedIK::LookAtPosition(CVector const &pos)
 {
-	float phiToFace = CGeneral::GetRadianAngleBetweenPoints(
+	float yawToFace = CGeneral::GetRadianAngleBetweenPoints(
 		pos.x, pos.y,
 		m_ped->GetPosition().x, m_ped->GetPosition().y);
 
-	float thetaToFace = CGeneral::GetRadianAngleBetweenPoints(
+	float pitchToFace = CGeneral::GetRadianAngleBetweenPoints(
 		pos.z, (m_ped->GetPosition() - pos).Magnitude2D(),
 		m_ped->GetPosition().z, 0.0f);
 
-	return LookInDirection(phiToFace, thetaToFace);
+	return LookInDirection(yawToFace, pitchToFace);
 }
 
 bool
-CPedIK::PointGunInDirection(float phi, float theta)
+CPedIK::PointGunInDirection(float targetYaw, float targetPitch)
 {
 	bool result = true;
 	bool armPointedToGun = false;
-	float angle = CGeneral::LimitRadianAngle(phi - m_ped->m_fRotationCur);
+	float angle = CGeneral::LimitRadianAngle(targetYaw - m_ped->m_fRotationCur);
 	m_flags &= (~GUN_POINTED_SUCCESSFULLY);
 	m_flags |= LOOKAROUND_HEAD_ONLY;
 	if (m_flags & AIMS_WITH_ARM) {
-		armPointedToGun = PointGunInDirectionUsingArm(angle, theta);
-		angle = CGeneral::LimitRadianAngle(angle - m_upperArmOrient.phi);
+		armPointedToGun = PointGunInDirectionUsingArm(angle, targetPitch);
+		angle = CGeneral::LimitRadianAngle(angle - m_upperArmOrient.yaw);
 	}
 	if (armPointedToGun) {
-		if (m_flags & AIMS_WITH_ARM && m_torsoOrient.phi * m_upperArmOrient.phi < 0.0f)
-			MoveLimb(m_torsoOrient, 0.0f, m_torsoOrient.theta, ms_torsoInfo);
+		if (m_flags & AIMS_WITH_ARM && m_torsoOrient.yaw * m_upperArmOrient.yaw < 0.0f)
+			MoveLimb(m_torsoOrient, 0.0f, m_torsoOrient.pitch, ms_torsoInfo);
 	} else {
 		// Unused code
 		RwMatrix *matrix;
@@ -365,7 +365,7 @@ CPedIK::PointGunInDirection(float phi, float theta)
 		}
 		//
 
-		LimbMoveStatus status = MoveLimb(m_torsoOrient, angle, theta, ms_torsoInfo);
+		LimbMoveStatus status = MoveLimb(m_torsoOrient, angle, targetPitch, ms_torsoInfo);
 		if (status == ANGLES_SET_TO_MAX)
 			result = false;
 		else if (status == ANGLES_SET_EXACTLY)
@@ -379,7 +379,7 @@ CPedIK::PointGunInDirection(float phi, float theta)
 }
 
 bool
-CPedIK::PointGunInDirectionUsingArm(float phi, float theta)
+CPedIK::PointGunInDirectionUsingArm(float targetYaw, float targetPitch)
 {
 	bool result = false;
 
@@ -410,18 +410,18 @@ CPedIK::PointGunInDirectionUsingArm(float phi, float theta)
 	RwV3d rightVector = { 0.0f, 0.0f, 1.0f };
 	RwV3d forwardVector = { 1.0f, 0.0f, 0.0f };
 
-	float uaPhi, uaTheta;
+	float uaYaw, uaPitch;
 #ifdef PED_SKIN
 	if(IsClumpSkinned(m_ped->GetClump())){
-		uaPhi = phi;
-		uaTheta = theta + DEGTORAD(10.0f);
+		uaYaw = targetYaw;
+		uaPitch = targetPitch + DEGTORAD(10.0f);
 	}else
 #endif
 	{
-		uaPhi = phi - m_torsoOrient.phi - DEGTORAD(15.0f);
-		uaTheta = CGeneral::LimitRadianAngle(theta - pitch);
+		uaYaw = targetYaw - m_torsoOrient.yaw - DEGTORAD(15.0f);
+		uaPitch = CGeneral::LimitRadianAngle(targetPitch - pitch);
 	}
-	LimbMoveStatus uaStatus = MoveLimb(m_upperArmOrient, uaPhi, uaTheta, ms_upperArmInfo);
+	LimbMoveStatus uaStatus = MoveLimb(m_upperArmOrient, uaYaw, uaPitch, ms_upperArmInfo);
 	if (uaStatus == ANGLES_SET_EXACTLY) {
 		m_flags |= GUN_POINTED_SUCCESSFULLY;
 		result = true;
@@ -433,13 +433,13 @@ CPedIK::PointGunInDirectionUsingArm(float phi, float theta)
 	if(!IsClumpSkinned(m_ped->GetClump()))
 #endif
 	if (uaStatus == ANGLES_SET_TO_MAX) {
-		float laPhi = uaPhi - m_upperArmOrient.phi;
+		float laYaw = uaYaw - m_upperArmOrient.yaw;
 
 		LimbMoveStatus laStatus;
-		if (laPhi > 0.0f)
-			laStatus = MoveLimb(m_lowerArmOrient, laPhi, -DEGTORAD(45.0f), ms_lowerArmInfo);
+		if (laYaw > 0.0f)
+			laStatus = MoveLimb(m_lowerArmOrient, laYaw, -DEGTORAD(45.0f), ms_lowerArmInfo);
 		else
-			laStatus = MoveLimb(m_lowerArmOrient, laPhi, 0.0f, ms_lowerArmInfo);
+			laStatus = MoveLimb(m_lowerArmOrient, laYaw, 0.0f, ms_lowerArmInfo);
 
 		if (laStatus == ANGLES_SET_EXACTLY) {
 			m_flags |= GUN_POINTED_SUCCESSFULLY;
@@ -447,16 +447,16 @@ CPedIK::PointGunInDirectionUsingArm(float phi, float theta)
 		}
 		RwFrame *child = GetFirstChild(m_ped->m_pFrames[PED_UPPERARMR]->frame);
 		RwV3d pos = RwFrameGetMatrix(child)->pos;
-		RwMatrixRotate(RwFrameGetMatrix(child), &forwardVector, RADTODEG(m_lowerArmOrient.theta), rwCOMBINEPOSTCONCAT);
-		RwMatrixRotate(RwFrameGetMatrix(child), &rightVector, RADTODEG(-m_lowerArmOrient.phi), rwCOMBINEPOSTCONCAT);
+		RwMatrixRotate(RwFrameGetMatrix(child), &forwardVector, RADTODEG(m_lowerArmOrient.pitch), rwCOMBINEPOSTCONCAT);
+		RwMatrixRotate(RwFrameGetMatrix(child), &rightVector, RADTODEG(-m_lowerArmOrient.yaw), rwCOMBINEPOSTCONCAT);
 		RwFrameGetMatrix(child)->pos = pos;
 	}
 
 #ifdef PED_SKIN
 	if(IsClumpSkinned(m_ped->GetClump())){
 		RtQuat *q = &m_ped->m_pFrames[PED_UPPERARMR]->hanimFrame->q;
-		RtQuatRotate(q, &XaxisIK, RADTODEG(m_upperArmOrient.phi), rwCOMBINEPOSTCONCAT);
-		RtQuatRotate(q, &ZaxisIK, RADTODEG(m_upperArmOrient.theta), rwCOMBINEPOSTCONCAT);
+		RtQuatRotate(q, &XaxisIK, RADTODEG(m_upperArmOrient.yaw), rwCOMBINEPOSTCONCAT);
+		RtQuatRotate(q, &ZaxisIK, RADTODEG(m_upperArmOrient.pitch), rwCOMBINEPOSTCONCAT);
 		m_ped->bDontAcceptIKLookAts = true;
 	}else
 #endif
@@ -464,8 +464,8 @@ CPedIK::PointGunInDirectionUsingArm(float phi, float theta)
 		RwFrame *frame = m_ped->m_pFrames[PED_UPPERARMR]->frame;
 		// with PED_SKIN we're also getting upVector here
 		RwV3d pos = RwFrameGetMatrix(frame)->pos;
-		RwMatrixRotate(RwFrameGetMatrix(frame), &rightVector, RADTODEG(m_upperArmOrient.theta), rwCOMBINEPOSTCONCAT);
-		RwMatrixRotate(RwFrameGetMatrix(frame), &upVector, RADTODEG(m_upperArmOrient.phi), rwCOMBINEPOSTCONCAT);
+		RwMatrixRotate(RwFrameGetMatrix(frame), &rightVector, RADTODEG(m_upperArmOrient.pitch), rwCOMBINEPOSTCONCAT);
+		RwMatrixRotate(RwFrameGetMatrix(frame), &upVector, RADTODEG(m_upperArmOrient.yaw), rwCOMBINEPOSTCONCAT);
 		RwFrameGetMatrix(frame)->pos = pos;
 	}
 	return result;
@@ -511,8 +511,8 @@ CPedIK::RestoreLookAt(void)
 
 		CMatrix matrix(mat);
 		CVector pos = matrix.GetPosition();
-		matrix.SetRotateZ(m_headOrient.theta);
-		matrix.RotateX(m_headOrient.phi);
+		matrix.SetRotateZ(m_headOrient.pitch);
+		matrix.RotateX(m_headOrient.yaw);
 		matrix.Translate(pos);
 		matrix.UpdateRW();
 	}
