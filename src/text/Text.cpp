@@ -97,7 +97,11 @@ CText::Unload(void)
 wchar*
 CText::Get(const char *key)
 {
+#ifdef FIX_BUGS
+	return keyArray.Search(key, data.chars);
+#else
 	return keyArray.Search(key);
+#endif
 }
 
 wchar UpperCaseTable[128] = {
@@ -196,9 +200,11 @@ CKeyArray::Unload(void)
 void
 CKeyArray::Update(wchar *chars)
 {
+#ifndef FIX_BUGS
 	int i;
 	for(i = 0; i < numEntries; i++)
 		entries[i].value = (wchar*)((uint8*)chars + (uintptr)entries[i].value);
+#endif
 }
 
 CKeyEntry*
@@ -222,15 +228,25 @@ CKeyArray::BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 hi
 }
 
 wchar*
+#ifdef FIX_BUGS
+CKeyArray::Search(const char *key, wchar *data)
+#else
 CKeyArray::Search(const char *key)
+#endif
 {
 	CKeyEntry *found;
 	char errstr[25];
 	int i;
 
+#ifdef FIX_BUGS
+	found = BinarySearch(key, entries, 0, numEntries-1);
+	if(found)
+		return (wchar*)((uint8*)data + found->valueOffset);
+#else
 	found = BinarySearch(key, entries, 0, numEntries-1);
 	if(found)
 		return found->value;
+#endif
 	sprintf(errstr, "%s missing", key);
 	for(i = 0; i < 25; i++)
 		WideErrorString[i] = errstr[i];
