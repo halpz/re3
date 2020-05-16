@@ -901,7 +901,7 @@ char const* aChainsawStrafeRightAnimations[] = {
 
 
 const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_GROUPS] = {
-	{ "man", "ped", MI_COP, 173, aStdAnimations, aStdAnimDescs },
+	{ "man", "ped", MI_COP, awc(aStdAnimations), aStdAnimDescs },
 	{ "van", "van", MI_COP, 8, aVanAnimations, aVanAnimDescs },
 	{ "coach", "coach", MI_COP, 5, aCoachAnimations, aCoachAnimDescs },
 	{ "bikes", "bikes", MI_COP, 18, aBikesAnimations, aBikeAnimDescs },
@@ -963,6 +963,7 @@ const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_
 	{ "csawleft", "ped", MI_COP, 5, aChainsawStrafeLeftAnimations, aStdAnimDescsSide },
 	{ "csawright", "ped", MI_COP, 5, aChainsawStrafeRightAnimations, aStdAnimDescsSide },
 };
+#undef awc
 
 void
 CAnimManager::Initialise(void)

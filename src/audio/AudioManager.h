@@ -75,7 +75,18 @@ public:
 	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 m_nActiveBank;
 
-	cPedComments();
+	cPedComments()
+	{
+		for (int i = 0; i < NUM_PED_COMMENTS_SLOTS; i++)
+			for (int j = 0; j < NUM_PED_COMMENTS_BANKS; j++) {
+				m_asPedComments[j][i].m_nProcess = -1;
+				m_nIndexMap[j][i] = NUM_PED_COMMENTS_SLOTS;
+			}
+
+		for (int i = 0; i < NUM_PED_COMMENTS_BANKS; i++)
+			m_nCommentsInBank[i] = 0;
+		m_nActiveBank = 0;
+	}
 	void Add(tPedComment *com);
 	void Process();
 };
@@ -222,11 +233,10 @@ public:
 	                                      float speedMultiplier) const;
 	int32 ComputePan(float, CVector *);
 	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const;
-	int32 CreateEntity(int32 type, void *entity);
+	int32 CreateEntity(eAudioType type, void *entity);
 
 	void DestroyAllGameCreatedEntities();
 	void DestroyEntity(int32 id);
-	void DoJumboVolOffset() const;
 	void DoPoliceRadioCrackle();
 
 	// functions returning talk sfx,
@@ -434,14 +444,14 @@ public:
 	void ServiceSoundEffects();
 	int8 SetCurrent3DProvider(uint8 which);
 	void SetDynamicAcousticModelingStatus(bool status);
-	void SetEffectsFadeVolume(uint8 volume) const;
+	void SetEffectsFadeVol(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;
 	void SetEntityStatus(int32 id, uint8 status);
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision);
 	void SetMissionAudioLocation(float x, float y, float z);
 	void SetMissionScriptPoliceAudio(int32 sfx) const;
 	void SetMonoMode(uint8); // todo (mobile)
-	void SetMusicFadeVolume(uint8 volume) const;
+	void SetMusicFadeVol(uint8 volume) const;
 	void SetMusicMasterVolume(uint8 volume) const;
 	void SetSpeakerConfig(int32 conf) const;
 	void SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter);
@@ -464,9 +474,11 @@ public:
 	bool UsesSiren(int32 model) const;
 	bool UsesSirenSwitching(int32 model) const;
 
+#ifdef GTA_PC
 	// only used in pc
 	void AdjustSamplesVolume();
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity, float dist);
+#endif
 };
 
 #ifdef AUDIO_MSS
