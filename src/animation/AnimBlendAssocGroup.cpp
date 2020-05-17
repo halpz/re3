@@ -104,7 +104,7 @@ strcmpIgnoringDigits(const char *s1, const char *s2)
 		c2 = toupper(c2);
 #endif
 
-		if(c1 != c2)
+		if(c1 && c2 && c1 != c2)
 			return false;
 	}
 }
@@ -126,6 +126,8 @@ GetModelFromName(const char *name)
 
 	for(i = 0; i < MODELINFOSIZE; i++){
 		mi = CModelInfo::GetModelInfo(i);
+		if (mi && strcmp("drink", mi->GetName()) == 0 && strcmp(name, "drink01") == 0)
+			debug("TEST");
 		if(mi && mi->GetRwObject() && RwObjectGetType(mi->GetRwObject()) == rpCLUMP &&
 		   strcmpIgnoringDigits(mi->GetName(), name))
 			return mi;

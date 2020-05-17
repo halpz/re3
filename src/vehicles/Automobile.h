@@ -91,6 +91,7 @@ public:
 	uint8 bWaterTight : 1;	// no damage for non-player peds
 	uint8 bNotDamagedUpsideDown : 1;
 	uint8 bMoreResistantToDamage : 1;
+	uint8 bTankDetonateCars : 1;
 	int16 field_4E0;
 	uint16 m_hydraulicState;
 	uint32 m_nBusDoorTimerEnd;
@@ -177,6 +178,8 @@ public:
 	void SetPanelDamage(int32 component, ePanels panel, bool noFlyingComponents = false);
 	void SetBumperDamage(int32 component, ePanels panel, bool noFlyingComponents = false);
 	void SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents = false);
+
+	void TellHeliToGoToCoors(float x, float y, float z, uint8 speed);
 
 	void Fix(void);
 	void SetComponentVisibility(RwFrame *frame, uint32 flags);

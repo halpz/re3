@@ -29,6 +29,7 @@ bool CVehicle::bCheat5;
 bool CVehicle::bAltDodoCheat;
 #endif
 bool CVehicle::m_bDisableMouseSteering = true;
+bool CVehicle::bDisableRemoteDetonation;
 
 void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New();  }
 void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehiclePool()->New(handle); }
@@ -1353,14 +1354,14 @@ eVehicleAppearance
 CVehicle::GetVehicleAppearance(void)
 {
 	if (IsCar())
-		return VEHICLE_CAR;
+		return VEHICLE_APPEARANCE_CAR;
 	if (IsBoat())
-		return VEHICLE_BOAT;
+		return VEHICLE_APPEARANCE_BOAT;
 	if (IsBike())
-		return VEHICLE_BIKE;
+		return VEHICLE_APPEARANCE_BIKE;
 	if (IsPlane())
-		return VEHICLE_PLANE;
+		return VEHICLE_APPEARANCE_PLANE;
 	if (IsHeli())
-		return VEHICLE_HELI;
-	return VEHICLE_NONE;
+		return VEHICLE_APPEARANCE_HELI;
+	return VEHICLE_APPEARANCE_NONE;
 }

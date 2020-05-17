@@ -534,6 +534,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fAirResistance = 0.4f / m_fMass;
 	m_fElasticity = 0.05f;
 
+	m_ceaseAttackTimer = 0;
+
 	bIsStanding = false;
 	bWasStanding = false;
 	bIsAttacking = false;
@@ -6326,8 +6328,6 @@ CPed::CreateDeadPedMoney(void)
 void
 CPed::CreateDeadPedWeaponPickups(void)
 {
-	bool found = false;
-	float angleToPed;
 	CVector pickupPos;
 
 	if (bInVehicle)
@@ -6340,34 +6340,10 @@ CPed::CreateDeadPedWeaponPickups(void)
 		if (weapon == WEAPONTYPE_UNARMED || weapon == WEAPONTYPE_DETONATOR || (weaponAmmo == 0 && !GetWeapon(i).IsTypeMelee()))
 			continue;
 
-		angleToPed = i * 1.75f;
-		pickupPos = GetPosition();
-		pickupPos.x += 1.5f * Sin(angleToPed);
-		pickupPos.y += 1.5f * Cos(angleToPed);
-		pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
-
-		CVector pedPos = GetPosition();
-		pedPos.z += 0.3f;
-
-		CVector pedToPickup = pickupPos - pedPos;
-		float distance = pedToPickup.Magnitude();
-
-		// outer edge of pickup
-		distance = (distance + 0.3f) / distance;
-		CVector pickupPos2 = pedPos;
-		pickupPos2 += distance * pedToPickup;
-
-		// pickup must be on ground and line to its edge must be clear
-		if (!found || CWorld::GetIsLineOfSightClear(pickupPos2, pedPos, true, false, false, false, false, false, false)) {
-			// otherwise try another position (but disregard second check apparently)
-			angleToPed += 3.14f;
-			pickupPos = GetPosition();
-			pickupPos.x += 1.5f * Sin(angleToPed);
-			pickupPos.y += 1.5f * Cos(angleToPed);
-			pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
-		}
-		if (found)
-			CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, Min(weaponAmmo, AmmoForWeapon_OnStreet[weapon]));
+		CreateDeadPedPickupCoors(&pickupPos.x, &pickupPos.y, &pickupPos.z);
+		pickupPos.z += 0.4f;
+		// TODO(MIAMI): there is more stuff it seems
+		CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, Min(weaponAmmo, AmmoForWeapon_OnStreet[weapon]));
 	}
 	ClearWeapons();
 }
@@ -18466,4 +18442,36 @@ CPed::ClearFollowPath()
 	}
 	m_nPathNodes = 0;
 	m_nCurPathNode = 0;
+}
+
+void
+CPed::CreateDeadPedPickupCoors(float* x, float* y, float* z)
+{
+	for (int i = 0; i < 32; i++) {
+		CVector pickupPos = GetPosition();
+		pickupPos.x += 1.5f * Sin(CGeneral::GetRandomNumberInRange(0.0f, TWOPI));
+		pickupPos.y += 1.5f * Cos(CGeneral::GetRandomNumberInRange(0.0f, TWOPI));
+		bool found;
+		pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
+		if (!found)
+			continue;
+		CVector vPedPos = GetPosition();
+		vPedPos.z += 0.3f;
+		CVector vTestPos = vPedPos + (pickupPos - vPedPos) * (((pickupPos - vPedPos).Magnitude() + 0.4f) / (pickupPos - vPedPos).Magnitude());
+		if ((vTestPos - FindPlayerCoors()).Magnitude2D() > 2.0f || i > 16) {
+			if (i > 16 || CPickups::TestForPickupsInBubble(pickupPos, 1.3f)) {
+				if (CWorld::GetIsLineOfSightClear(vTestPos, vPedPos, true, i < 16, false, i < 16, false, false)) {
+					if (i > 16 || !CWorld::TestSphereAgainstWorld(pickupPos, 1.2f, nil, false, true, false, false, false, false)) {
+						*x = pickupPos.x;
+						*y = pickupPos.y;
+						*z = pickupPos.z;
+						return;
+					}
+				}
+			}
+		}
+	}
+	*x = GetPosition().x;
+	*y = GetPosition().y;
+	*z = GetPosition().z + 0.4f;
 }

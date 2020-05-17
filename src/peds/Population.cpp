@@ -722,7 +722,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 }
 
 CPed*
-CPopulation::AddPedInCar(CVehicle* car, bool isPassenger)
+CPopulation::AddPedInCar(CVehicle* car, bool isDriver)
 {
 	int defaultModel = MI_MALE01;
 	int miamiViceIndex = 0;
@@ -765,7 +765,7 @@ CPopulation::AddPedInCar(CVehicle* car, bool isPassenger)
 		case MI_VICECHEE: // TODO(MIAMI): figure out new structure of the function
 			preferredModel = COP_MIAMIVICE;
 			pedType = PEDTYPE_COP;
-			miamiViceIndex = (isPassenger ? 2 * CCarCtrl::MiamiViceCycle : 2 * CCarCtrl::MiamiViceCycle + 1);
+			miamiViceIndex = (isDriver ? 2 * CCarCtrl::MiamiViceCycle : 2 * CCarCtrl::MiamiViceCycle + 1);
 			break;
 		case MI_TAXI:
 		case MI_CABBIE:

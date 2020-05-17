@@ -1436,3 +1436,13 @@ CPacManPickups::ResetPowerPillsCarriedByPlayer()
 		FindPlayerVehicle()->m_fForceMultiplier = 1.0f;
 	}
 }
+
+bool
+CPickups::TestForPickupsInBubble(CVector pos, float radius)
+{
+	for (int i = 0; i < NUMPICKUPS; i++) {
+		if ((pos - aPickUps[i].m_vecPos).Magnitude() < radius)
+			return true;
+	}
+	return false;
+}

@@ -472,8 +472,8 @@ public:
 	// not static yet
 	float m_fMouseAccelHorzntl;// acceleration multiplier for 1st person controls
 	float m_fMouseAccelVertical;// acceleration multiplier for 1st person controls
-	float m_f3rdPersonCHairMultX;
-	float m_f3rdPersonCHairMultY;
+	static float m_f3rdPersonCHairMultX;
+	static float m_f3rdPersonCHairMultY;
 
 
 	CCam Cams[3];

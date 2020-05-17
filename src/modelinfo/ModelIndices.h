@@ -161,7 +161,8 @@
 	X("files",		MI_FILES, 0x5F5BC4) \
 	X("property_locked", MI_PICKUP_PROPERTY, 0x0) \
 	X("property_fsale", MI_PICKUP_PROPERTY_FORSALE, 0x0) \
-	X("clothesp", MI_PICKUP_CLOTHES, 0x0)
+	X("clothesp", MI_PICKUP_CLOTHES, 0x0) \
+	X("bigdollar", MI_PICKUP_REVENUE, 0x0)
 
 #define X(name, var, addr) extern int16 var;
 	MODELINDICES

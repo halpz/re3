@@ -960,7 +960,7 @@ void CGarage::Update()
 					if (m_pDoor1) {
 						if (((CVector2D)FindPlayerVehicle()->GetPosition() - (CVector2D)m_pDoor1->GetPosition()).MagnitudeSqr() < SQR(DISTANCE_TO_SHOW_HIDEOUT_MESSAGE) &&
 							CTimer::GetTimeInMilliseconds() - CGarages::LastTimeHelpMessage > TIME_BETWEEN_HIDEOUT_MESSAGES) {
-							if (FindPlayerVehicle()->GetVehicleAppearance() != VEHICLE_HELI && FindPlayerVehicle()->GetVehicleAppearance() != VEHICLE_PLANE) {
+							if (FindPlayerVehicle()->GetVehicleAppearance() != VEHICLE_APPEARANCE_HELI && FindPlayerVehicle()->GetVehicleAppearance() != VEHICLE_APPEARANCE_PLANE) {
 								CHud::SetHelpMessage(TheText.Get("GA_21"), false); // You cannot store any more cars in this garage.
 								CGarages::LastTimeHelpMessage = CTimer::GetTimeInMilliseconds();
 							}
