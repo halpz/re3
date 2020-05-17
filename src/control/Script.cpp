@@ -10140,7 +10140,13 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		//CStreaming::RemoveBuildingsNotInArea(ScriptParams[0]); 
 		return 0;
 	case COMMAND_SET_CUTSCENE_ANIM_TO_LOOP:
-		assert(0);
+	{
+		char key[KEY_LENGTH_IN_SCRIPT];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		debug("SET_CUTSCENE_ANIM_TO_LOOP not implemented yet, skipping\n");
+		return 0;
+	}
 	case COMMAND_MARK_CAR_AS_CONVOY_CAR:
 	{
 		CollectParameters(&m_nIp, 2);
@@ -10406,7 +10412,12 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_PROPERTY_AS_OWNED:
 	case COMMAND_ADD_BLOOD_RING_KILLS:
 	case COMMAND_SET_LONGEST_TIME_IN_BLOOD_RING:
+		assert(0);
 	case COMMAND_REMOVE_EVERYTHING_FOR_HUGE_CUTSCENE:
+	{
+		debug("REMOVE_EVERYTHING_FOR_HUGE_CUTSCENE not implemented, skipping\n");
+		return 0;
+	}
 	case COMMAND_IS_PLAYER_TOUCHING_VEHICLE:
 	case COMMAND_IS_CHAR_TOUCHING_VEHICLE:
 	case COMMAND_CHECK_FOR_PED_MODEL_AROUND_PLAYER:
@@ -10666,6 +10677,11 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	}
 	case COMMAND_SET_SHORTCUT_DROPOFF_POINT_FOR_MISSION:
+	{
+		CollectParameters(&m_nIp, 4);
+		debug("SET_SHORTCUT_DROPOFF_POINT_FOR_MISSION not implemented, skipping");
+		return 0;
+	}
 	case COMMAND_GET_RANDOM_ICE_CREAM_CUSTOMER_IN_AREA:
 	case COMMAND_GET_RANDOM_ICE_CREAM_CUSTOMER_IN_ZONE:
 	case COMMAND_UNLOCK_ALL_CAR_DOORS_IN_AREA:
