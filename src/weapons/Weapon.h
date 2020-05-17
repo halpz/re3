@@ -7,7 +7,8 @@
 
 class CEntity;
 class CPhysical;
-class CAutomobile;
+class CVehicle;
+class CPed;
 struct CColPoint;
 class CWeaponInfo;
 
@@ -35,7 +36,7 @@ public:
 	void Shutdown();
 	
 	bool Fire          (CEntity *shooter, CVector *fireSource);
-	bool FireFromCar   (CAutomobile *shooter, bool left);
+	bool FireFromCar   (CVehicle *shooter, bool left);
 	bool FireMelee     (CEntity *shooter, CVector &fireSource);
 	bool FireInstantHit(CEntity *shooter, CVector *fireSource);
 	
@@ -50,14 +51,14 @@ public:
 	bool FireAreaEffect       (CEntity *shooter, CVector *fireSource);
 	bool FireSniper           (CEntity *shooter);
 	bool FireM16_1stPerson    (CEntity *shooter);
-	bool FireInstantHitFromCar(CAutomobile *shooter, bool left);
+	bool FireInstantHitFromCar(CVehicle *shooter, bool left);
 	
 	static void DoDoomAiming       (CEntity *shooter, CVector *source, CVector *target);
 	static void DoTankDoomAiming   (CEntity *shooter, CEntity *driver, CVector *source, CVector *target);
 	static void DoDriveByAutoAiming(CEntity *shooter, CVector *source, CVector *target);
 	
 	void Reload(void);
-	void Update(int32 audioEntity);
+	void Update(int32 audioEntity, CPed *pedToAdjustSound);
 	bool IsTypeMelee  (void);
 	bool IsType2Handed(void);
 	

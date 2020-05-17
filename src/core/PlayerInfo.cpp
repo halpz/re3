@@ -143,6 +143,7 @@ CPlayerInfo::Clear(void)
 	m_nMaxHealth = m_nMaxArmour = 100;
 	m_bGetOutOfJailFree = false;
 	m_bGetOutOfHospitalFree = false;
+	m_bDriveByAllowed = true;
 	m_nPreviousTimeRewardedForExplosion = 0;
 	m_nExplosionsSinceLastReward = 0;
 }

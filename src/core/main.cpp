@@ -81,7 +81,7 @@ RwRGBA gColourTop;
 bool gameAlreadyInitialised;
 
 float NumberOfChunksLoaded;
-#define TOTALNUMCHUNKS 73.0f
+#define TOTALNUMCHUNKS 95.0f
 
 bool g_SlowMode = false;
 char version_name[64];
@@ -356,6 +356,7 @@ Terminate3D(void)
 CSprite2d splash;
 int splashTxdId = -1;
 
+//--MIAMI: done
 CSprite2d*
 LoadSplash(const char *name)
 {
@@ -401,22 +402,23 @@ DestroySplashScreen(void)
 	splashTxdId = -1;
 }
 
+//--MIAMI: done
 Const char*
 GetRandomSplashScreen(void)
 {
 	int index;
 	static int index2 = 0;
 	static char splashName[128];
-	static int splashIndex[24] = {
-		25, 22, 4, 13,
-		1, 21, 14, 16,
-		10, 12, 5, 9,
-		11, 18, 3, 2,
-		19, 23, 7, 17,
-		15, 6, 8, 20
+	static int splashIndex[12] = {
+		1, 2,
+		3, 4,
+		5, 11,
+		6, 8,
+		9, 10,
+		7, 12
 	};
 
-	index = splashIndex[4*index2 + CGeneral::GetRandomNumberInRange(0, 3)];
+	index = splashIndex[2*index2 + CGeneral::GetRandomNumberInRange(0, 2)];
 	index2++;
 	if(index2 == 6)
 		index2 = 0;
@@ -444,16 +446,14 @@ ResetLoadingScreenBar()
 }
 
 // TODO: compare with PS2
+//--MIAMI: done
 void
 LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 {
 	CSprite2d *splash;
 
 #ifndef RANDOMSPLASH
-	if(CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
-		splashscreen = "mainsc2";
-	else
-		splashscreen = "mainsc1";
+	splashscreen = "LOADSC0";
 #endif
 
 	splash = LoadSplash(splashscreen);
@@ -474,36 +474,50 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		if(str1){
 			NumberOfChunksLoaded += 1;
 
+#ifndef RANDOMSPLASH
 			float hpos = SCREEN_SCALE_X(40);
-			float length = SCREEN_WIDTH - SCREEN_SCALE_X(100);
-			float vpos = SCREEN_HEIGHT - SCREEN_SCALE_Y(13);
-			float height = SCREEN_SCALE_Y(7);
-			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(40, 53, 68, 255));
+			float length = SCREEN_WIDTH - SCREEN_SCALE_X(80);
+			float top = SCREEN_HEIGHT - SCREEN_SCALE_Y(14);
+			float bottom = top + SCREEN_SCALE_Y(5);
+#else
+			float hpos = SCREEN_STRETCH_X(40);
+			float length = SCREEN_STRETCH_X(440);
+			// this is rather weird
+			float top = SCREEN_STRETCH_Y(407.4f - 7.0f/3.0f);
+			float bottom = SCREEN_STRETCH_Y(407.4f + 7.0f/3.0f);
+#endif
+
+			CSprite2d::DrawRect(CRect(hpos-1.0f, top-1.0f, hpos+length+1.0f, bottom+1.0f), CRGBA(40, 53, 68, 255));
+
+			CSprite2d::DrawRect(CRect(hpos, top, hpos+length, bottom), CRGBA(155, 50, 125, 255));
 
 			length *= NumberOfChunksLoaded/TOTALNUMCHUNKS;
-			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(81, 106, 137, 255));
+			CSprite2d::DrawRect(CRect(hpos, top, hpos+length, bottom), CRGBA(255, 150, 225, 255));
 
 			// this is done by the game but is unused
+			CFont::SetBackgroundOff();
 			CFont::SetScale(SCREEN_SCALE_X(2), SCREEN_SCALE_Y(2));
 			CFont::SetPropOn();
 			CFont::SetRightJustifyOn();
+			CFont::SetDropShadowPosition(1);
+			CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 			CFont::SetFontStyle(FONT_HEADING);
 
 #ifdef CHATTYSPLASH
 			// my attempt
 			static wchar tmpstr[80];
 			float yscale = SCREEN_SCALE_Y(0.9f);
-			vpos -= 45*yscale;
+			top -= 45*yscale;
 			CFont::SetScale(SCREEN_SCALE_X(0.75f), yscale);
 			CFont::SetPropOn();
 			CFont::SetRightJustifyOff();
 			CFont::SetFontStyle(FONT_BANK);
 			CFont::SetColor(CRGBA(255, 255, 255, 255));
 			AsciiToUnicode(str1, tmpstr);
-			CFont::PrintString(hpos, vpos, tmpstr);
-			vpos += 22*yscale;
+			CFont::PrintString(hpos, top, tmpstr);
+			top += 22*yscale;
 			AsciiToUnicode(str2, tmpstr);
-			CFont::PrintString(hpos, vpos, tmpstr);
+			CFont::PrintString(hpos, top, tmpstr);
 #endif
 		}
 

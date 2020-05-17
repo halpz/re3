@@ -209,19 +209,6 @@ void CStats::SetTotalNumberMissions(int32 total)
 	TotalNumberMissions = total;
 }
 
-float CStats::GetPercentageProgress()
-{
-	float p;
-	if (TotalProgressInGame == 0.0f)
-		p = 0.0f;
-	else if (CGame::nastyGame)
-		p = 100.0f * ProgressMade / TotalProgressInGame;
-	else
-		p = 100.0f * ProgressMade / (TotalProgressInGame - 1);
-
-	return Min(100.0f, p);
-}
-
 wchar *CStats::FindCriminalRatingString()
 {
 	int rating = FindCriminalRatingNumber();
@@ -261,6 +248,14 @@ int32 CStats::FindCriminalRatingNumber()
 	if (!CommercialPassed && rating >= 4552)
 		rating = 4552;
 	return rating;
+}
+
+float CStats::GetPercentageProgress()
+{
+	float percentCompleted = (CStats::TotalProgressInGame == 0 ? 0 :
+		CStats::ProgressMade * 100.0f / (CGame::nastyGame ? CStats::TotalProgressInGame : CStats::TotalProgressInGame - 1.0f));
+
+	return Min(percentCompleted, 100.0f);
 }
 
 void CStats::MoneySpentOnFashion(int32 money)

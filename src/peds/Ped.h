@@ -523,7 +523,8 @@ public:
 	CVector2D *m_wanderRangeBounds;	// array with 2 CVector2D (actually unused CRange2D class) - unused
 	CWeapon m_weapons[TOTAL_WEAPON_SLOTS];
 	eWeaponType m_storedWeapon;
-	uint32 m_storedWeaponAmmo;
+	eWeaponType m_delayedWeapon;
+	uint32 m_delayedWeaponAmmo;
 	uint8 m_currentWeapon;			// eWeaponType
 	uint8 m_maxWeaponTypeAllowed;	// eWeaponType
 	uint8 m_wepSkills;
@@ -704,7 +705,7 @@ public:
 	void RemoveWeaponAnims(int, float);
 	void CreateDeadPedMoney(void);
 	void CreateDeadPedWeaponPickups(void);
-//	void CreateDeadPedPickupCoors(float *x, float *y, float *z);
+	void CreateDeadPedPickupCoors(float *x, float *y, float *z);
 	void SetAttackTimer(uint32);
 	void SetBeingDraggedFromCar(CVehicle*, uint32, bool);
 	void SetRadioStation(void);
@@ -775,6 +776,7 @@ public:
 	void ClearFollowPath();
 	void GiveDelayedWeapon(eWeaponType weapon, uint32 ammo);
 	void RequestDelayedWeapon();
+	void AddInCarAnims(CVehicle* car, bool isDriver);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -876,7 +878,7 @@ public:
 	bool Dead(void) { return m_nPedState == PED_DEAD; }
 	bool Dying(void) { return m_nPedState == PED_DIE; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
-	bool OnGround(void) { return m_nPedState == PED_FALL || m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	bool OnGround(void) { return m_nPedState == PED_FALL || m_nPedState == PED_DIE || m_nPedState == PED_DEAD || m_nWaitState == WAITSTATE_SUN_BATHE_IDLE; }
 	
 	bool Driving(void) { return m_nPedState == PED_DRIVING; }
 	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
@@ -892,7 +894,7 @@ public:
 	void RemoveWeaponWhenEnteringVehicle(void);
 	bool IsNotInWreckedVehicle();
 
-	// My addons. Maybe inlined in VC?
+	// My names. Inlined in VC
 	AnimationId GetFireAnimNotDucking(CWeaponInfo* weapon) {
 		// TODO(Miami): Revert that when weapons got ported
 		if (weapon->m_AnimToPlay == ASSOCGRP_STD)
@@ -928,6 +930,20 @@ public:
 			return ANIM_BOMBER;
 		else
 			return ANIM_WEAPON_FIRE;
+	}
+
+	static AnimationId GetCrouchReloadAnim(CWeaponInfo* weapon) {
+		if (!!weapon->m_bReload)
+			return ANIM_WEAPON_CROUCHRELOAD;
+		else
+			return (AnimationId)0;
+	}
+
+	static AnimationId GetReloadAnim(CWeaponInfo* weapon) {
+		if (!!weapon->m_bReload)
+			return ANIM_WEAPON_RELOAD;
+		else
+			return (AnimationId)0;
 	}
 	// --
 

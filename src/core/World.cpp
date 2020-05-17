@@ -340,21 +340,6 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 			if(e->IsPed()) {
 				if(e->bUsesCollision || deadPeds && ((CPed *)e)->m_nPedState == PED_DEAD) {
 					colmodel = ((CPedModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex()))->AnimatePedColModelSkinned(e->GetClump());
-/*	this should all be gone, right?
-					if(((CPed *)e)->UseGroundColModel())
-						colmodel = &CTempColModels::ms_colModelPedGroundHit;
-					else
-#ifdef ANIMATE_PED_COL_MODEL
-						colmodel = CPedModelInfo::AnimatePedColModel(
-						    ((CPedModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex()))
-						        ->GetHitColModel(),
-						    RpClumpGetFrame(e->GetClump()));
-#else
-						colmodel =
-						    ((CPedModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex()))
-						        ->GetHitColModel();
-#endif
-*/
 				} else
 					colmodel = nil;
 

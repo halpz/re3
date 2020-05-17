@@ -451,7 +451,7 @@ CPlayerPed::SetRealMoveAnim(void)
 				} else if (curSprintAssoc->blendDelta >= 0.0f || curSprintAssoc->blendAmount >= 0.8f) {
 					if (m_fMoveSpeed < 0.4f) {
 						AnimationId runStopAnim;
-						if (curSprintAssoc->currentTime / curSprintAssoc->hierarchy->totalLength < 0.5) // double
+						if (curSprintAssoc->GetProgress() < 0.5) // double
 							runStopAnim = ANIM_RUN_STOP;
 						else
 							runStopAnim = ANIM_RUN_STOP_R;
@@ -638,7 +638,7 @@ CPlayerPed::PlayerControlSniper(CPad *padUsed)
 		firePos = GetMatrix() * firePos;
 		GetWeapon()->Fire(this, &firePos);
 	}
-	GetWeapon()->Update(m_audioEntityId);
+	GetWeapon()->Update(m_audioEntityId, nil);
 }
 
 // --MIAMI: Made compatible with slots, but still TODO
@@ -742,7 +742,7 @@ CPlayerPed::PlayerControlM16(CPad *padUsed)
 		firePos = GetMatrix() * firePos;
 		GetWeapon()->Fire(this, &firePos);
 	}
-	GetWeapon()->Update(m_audioEntityId);
+	GetWeapon()->Update(m_audioEntityId, nil);
 }
 
 void
@@ -1561,7 +1561,7 @@ CPlayerPed::ProcessControl(void)
 	}
 	if (padUsed && IsPedShootable()) {
 		ProcessWeaponSwitch(padUsed);
-		GetWeapon()->Update(m_audioEntityId);
+		GetWeapon()->Update(m_audioEntityId, this);
 	}
 	ProcessAnimGroups();
 	if (padUsed) {

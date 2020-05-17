@@ -816,29 +816,11 @@ CPopulation::AddPedInCar(CVehicle* car, bool isDriver)
 	CPed *newPed = CPopulation::AddPed((ePedType)pedType, preferredModel, car->GetPosition(), miamiViceIndex);
 	newPed->bUsesCollision = false;
 
-	// what??
-	if (pedType != PEDTYPE_COP) {
-		newPed->SetCurrentWeapon(WEAPONTYPE_COLT45);
+	if (newPed->GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED) {
 		newPed->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(newPed->GetWeapon()->m_eWeaponType)->m_nModelId);
 	}
-	/*
-	// Miami leftover
-	if (car->m_vehType == VEHICLE_TYPE_BIKE) {
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, *((CBike*)car + 308h), 100.0f);
-	} else */
 
-	// FIX: Make peds comfortable while driving car/boat
-#ifdef FIX_BUGS
-	{
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, car->GetDriverAnim(), 100.0f);
-	}
-#else
-	{
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
-	}
-#endif
-	
-	newPed->StopNonPartialAnims();
+	newPed->AddInCarAnims(car, isDriver);
 	return newPed;
 }
 

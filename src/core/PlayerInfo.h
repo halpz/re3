@@ -57,6 +57,7 @@ public:
 	uint8 m_nMaxArmour;
 	bool m_bGetOutOfJailFree;
 	bool m_bGetOutOfHospitalFree;
+	bool m_bDriveByAllowed;
 	char m_aSkinName[32];
 	RwTexture *m_pSkinTexture;
 

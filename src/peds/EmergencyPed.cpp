@@ -49,7 +49,7 @@ CEmergencyPed::ProcessControl(void)
 		return;
 
 	if(!DyingOrDead()) {
-		GetWeapon()->Update(m_audioEntityId);
+		GetWeapon()->Update(m_audioEntityId, nil);
 
 		if (IsPedInControl() && m_moved.Magnitude() > 0.0f)
 			Avoid();

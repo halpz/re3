@@ -75,7 +75,18 @@ public:
 	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 m_nActiveBank;
 
-	cPedComments();
+	cPedComments()
+	{
+		for (int i = 0; i < NUM_PED_COMMENTS_SLOTS; i++)
+			for (int j = 0; j < NUM_PED_COMMENTS_BANKS; j++) {
+				m_asPedComments[j][i].m_nProcess = -1;
+				m_nIndexMap[j][i] = NUM_PED_COMMENTS_SLOTS;
+			}
+
+		for (int i = 0; i < NUM_PED_COMMENTS_BANKS; i++)
+			m_nCommentsInBank[i] = 0;
+		m_nActiveBank = 0;
+	}
 	void Add(tPedComment *com);
 	void Process();
 };
@@ -222,91 +233,15 @@ public:
 	                                      float speedMultiplier) const;
 	int32 ComputePan(float, CVector *);
 	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const;
-	int32 CreateEntity(int32 type, void *entity);
+	int32 CreateEntity(eAudioType type, void *entity);
 
 	void DestroyAllGameCreatedEntities();
 	void DestroyEntity(int32 id);
-	void DoJumboVolOffset() const;
 	void DoPoliceRadioCrackle();
 
 	// functions returning talk sfx,
 	// order from GetPedCommentSfx
-	uint32 GetPlayerTalkSfx(int16 sound);
-	uint32 GetCopTalkSfx(int16 sound);
-	uint32 GetSwatTalkSfx(int16 sound);
-	uint32 GetFBITalkSfx(int16 sound);
-	uint32 GetArmyTalkSfx(int16 sound);
-	uint32 GetMedicTalkSfx(int16 sound);
-	uint32 GetFiremanTalkSfx(int16 sound);
-	uint32 GetNormalMaleTalkSfx(int16 sound);
-	uint32 GetTaxiDriverTalkSfx(int16 sound);
-	uint32 GetPimpTalkSfx(int16 sound);
-	uint32 GetMafiaTalkSfx(int16 sound);
-	uint32 GetTriadTalkSfx(int16 sound);
-	uint32 GetDiabloTalkSfx(int16 sound);
-	uint32 GetYakuzaTalkSfx(int16 sound);
-	uint32 GetYardieTalkSfx(int16 sound);
-	uint32 GetColumbianTalkSfx(int16 sound);
-	uint32 GetHoodTalkSfx(int16 sound);
-	uint32 GetBlackCriminalTalkSfx(int16 sound);
-	uint32 GetWhiteCriminalTalkSfx(int16 sound);
-	uint32 GetMaleNo2TalkSfx(int16 sound);
-	uint32 GetBlackProjectMaleTalkSfx(int16 sound, int32 model);
-	uint32 GetWhiteFatMaleTalkSfx(int16 sound);
-	uint32 GetBlackFatMaleTalkSfx(int16 sound);
-	uint32 GetBlackCasualFemaleTalkSfx(int16 sound);
-	uint32 GetWhiteCasualFemaleTalkSfx(int16 sound);
-	uint32 GetFemaleNo3TalkSfx(int16 sound);
-	uint32 GetBlackFatFemaleTalkSfx(int16 sound);
-	uint32 GetWhiteFatFemaleTalkSfx(int16 sound);
-	uint32 GetBlackFemaleProstituteTalkSfx(int16 sound);
-	uint32 GetWhiteFemaleProstituteTalkSfx(int16 sound);
-	uint32 GetBlackProjectFemaleOldTalkSfx(int16 sound);
-	uint32 GetBlackProjectFemaleYoungTalkSfx(int16 sound);
-	uint32 GetChinatownMaleOldTalkSfx(int16 sound);
-	uint32 GetChinatownMaleYoungTalkSfx(int16 sound);
-	uint32 GetChinatownFemaleOldTalkSfx(int16 sound);
-	uint32 GetChinatownFemaleYoungTalkSfx(int16 sound);
-	uint32 GetLittleItalyMaleTalkSfx(int16 sound);
-	uint32 GetLittleItalyFemaleOldTalkSfx(int16 sound);
-	uint32 GetLittleItalyFemaleYoungTalkSfx(int16 sound);
-	uint32 GetWhiteDockerMaleTalkSfx(int16 sound);
-	uint32 GetBlackDockerMaleTalkSfx(int16 sound);
-	uint32 GetScumMaleTalkSfx(int16 sound);
-	uint32 GetScumFemaleTalkSfx(int16 sound);
-	uint32 GetWhiteWorkerMaleTalkSfx(int16 sound);
-	uint32 GetBlackWorkerMaleTalkSfx(int16 sound);
-	uint32 GetBusinessMaleYoungTalkSfx(int16 sound, int32 model);
-	uint32 GetBusinessMaleOldTalkSfx(int16 sound);
-	uint32 GetWhiteBusinessFemaleTalkSfx(int16 sound, int32 model);
-	uint32 GetBlackBusinessFemaleTalkSfx(int16 sound);
-	uint32 GetSupermodelMaleTalkSfx(int16 sound);
-	uint32 GetSupermodelFemaleTalkSfx(int16 sound);
-	uint32 GetStewardMaleTalkSfx(int16 sound);
-	uint32 GetStewardFemaleTalkSfx(int16 sound);
-	uint32 GetFanMaleTalkSfx(int16 sound, int32 model);
-	uint32 GetFanFemaleTalkSfx(int16 sound);
-	uint32 GetHospitalMaleTalkSfx(int16 sound);
-	uint32 GetHospitalFemaleTalkSfx(int16 sound);
-	uint32 GetWhiteConstructionWorkerTalkSfx(int16 sound);
-	uint32 GetBlackConstructionWorkerTalkSfx(int16 sound);
-	uint32 GetShopperFemaleTalkSfx(int16 sound, int32 model);
-	uint32 GetStudentMaleTalkSfx(int16 sound);
-	uint32 GetStudentFemaleTalkSfx(int16 sound);
-	uint32 GetCasualMaleOldTalkSfx(int16 sound);
-
-	uint32 GetSpecialCharacterTalkSfx(int32 modelIndex, int32 sound);
-	uint32 GetEightTalkSfx(int16 sound);
-	uint32 GetFrankieTalkSfx(int16 sound);
-	uint32 GetMistyTalkSfx(int16 sound);
-	uint32 GetOJGTalkSfx(int16 sound);
-	uint32 GetCatatalinaTalkSfx(int16 sound);
-	uint32 GetBomberTalkSfx(int16 sound);
-	uint32 GetSecurityGuardTalkSfx(int16 sound);
-	uint32 GetChunkyTalkSfx(int16 sound);
-
-	uint32 GetGenericMaleTalkSfx(int16 sound);
-	uint32 GetGenericFemaleTalkSfx(int16 sound);
+	// TODO: miami
 	// end of functions returning talk sfx
 
 	void GenerateIntegerRandomNumberTable();
@@ -387,7 +322,6 @@ public:
 	void ProcessModelCarEngine(cVehicleParams *params);
 	void ProcessOneShotScriptObject(uint8 sound);
 	void ProcessPed(CPhysical *ped);
-	void ProcessPedHeadphones(cPedParams *params);
 	void ProcessPedOneShots(cPedParams *params);
 	void ProcessPhysical(int32 id);
 	void ProcessPlane(cVehicleParams *params);
@@ -434,14 +368,14 @@ public:
 	void ServiceSoundEffects();
 	int8 SetCurrent3DProvider(uint8 which);
 	void SetDynamicAcousticModelingStatus(bool status);
-	void SetEffectsFadeVolume(uint8 volume) const;
+	void SetEffectsFadeVol(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;
 	void SetEntityStatus(int32 id, uint8 status);
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision);
 	void SetMissionAudioLocation(float x, float y, float z);
 	void SetMissionScriptPoliceAudio(int32 sfx) const;
 	void SetMonoMode(uint8); // todo (mobile)
-	void SetMusicFadeVolume(uint8 volume) const;
+	void SetMusicFadeVol(uint8 volume) const;
 	void SetMusicMasterVolume(uint8 volume) const;
 	void SetSpeakerConfig(int32 conf) const;
 	void SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter);
@@ -464,9 +398,11 @@ public:
 	bool UsesSiren(int32 model) const;
 	bool UsesSirenSwitching(int32 model) const;
 
+#ifdef GTA_PC
 	// only used in pc
 	void AdjustSamplesVolume();
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity, float dist);
+#endif
 };
 
 #ifdef AUDIO_MSS
