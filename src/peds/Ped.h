@@ -867,7 +867,6 @@ public:
 
 	void SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float, float, int);
 	void ClearWaitState(void);
-	void CreateDeadPedPickupCoors(float* x, float* y, float* z);
 
 	bool HasWeaponSlot(uint8 slot) { return m_weapons[slot].m_eWeaponType != WEAPONTYPE_UNARMED; }
 	CWeapon& GetWeapon(uint8 slot) { return m_weapons[slot]; }

@@ -94,8 +94,6 @@ public:
 	static void Load(uint8 *buf, uint32 size);
 	static void Save(uint8 *buf, uint32 *size);
 
-	static bool TestForPickupsInBubble(CVector pos, float radius);
-
 	static CPickup aPickUps[NUMPICKUPS];
 
 	// unused
