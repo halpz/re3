@@ -4620,7 +4620,7 @@ CAutomobile::TellHeliToGoToCoors(float x, float y, float z, uint8 speed)
 	AutoPilot.m_vecDestinationCoors.z = z;
 	AutoPilot.m_nCruiseSpeed = speed;
 	SetStatus(STATUS_PHYSICS);
-	assert(0); // TODO(MIAMI)
+	//TODO(MIAMI)
 }
 
 #ifdef COMPATIBLE_SAVES

@@ -126,8 +126,6 @@ GetModelFromName(const char *name)
 
 	for(i = 0; i < MODELINFOSIZE; i++){
 		mi = CModelInfo::GetModelInfo(i);
-		if (mi && strcmp("drink", mi->GetName()) == 0 && strcmp(name, "drink01") == 0)
-			debug("TEST");
 		if(mi && mi->GetRwObject() && RwObjectGetType(mi->GetRwObject()) == rpCLUMP &&
 		   strcmpIgnoringDigits(mi->GetName(), name))
 			return mi;

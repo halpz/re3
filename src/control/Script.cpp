@@ -8327,22 +8327,34 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		DMAudio.PreloadMissionAudio(str);
 		return 0;
 	case COMMAND_HAS_MISSION_AUDIO_LOADED:
+	{
 		CollectParameters(&m_nIp, 1);
-		debug("HAS_MISSION_AUDIO_LOADED doesn't support parameter yet, default to TRUE\n");
+		static bool bShowed = false;
+		if (!bShowed) {
+			debug("HAS_MISSION_AUDIO_LOADED not implemented, default to TRUE\n");
+			bShowed = true;
+		}
 		UpdateCompareFlag(true);
 		//UpdateCompareFlag(DMAudio.GetMissionAudioLoadingStatus() == 1);
 		return 0;
+	}
 	case COMMAND_PLAY_MISSION_AUDIO:
 		CollectParameters(&m_nIp, 1);
 		debug("PLAY_MISSION_AUDIO doesn't support parameter yet, skipping\n");
 		//DMAudio.PlayLoadedMissionAudio();
 		return 0;
 	case COMMAND_HAS_MISSION_AUDIO_FINISHED:
+	{
 		CollectParameters(&m_nIp, 1);
-		debug("HAS_MISSION_AUDIO_FINISHED doesn't support parameter yet, default to TRUE\n");
+		static bool bShowed = false;
+		if (!bShowed) {
+			debug("HAS_MISSION_AUDIO_FINISHED not implemented, default to TRUE\n");
+			bShowed = true;
+		}
 		UpdateCompareFlag(true);
 		//UpdateCompareFlag(DMAudio.IsMissionAudioSampleFinished());
 		return 0;
+	}
 	case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING:
 	{
 		CollectParameters(&m_nIp, 3);
@@ -10296,7 +10308,11 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_GET_WHEELIE_STATS:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("GET_WHEELIE_STATS not implemented, skipping\n");
+		static bool bShowed = false;
+		if (!bShowed) {
+			debug("GET_WHEELIE_STATS not implemented\n");
+			bShowed = true;
+		}
 		for (int i = 0; i < 6; i++)
 			ScriptParams[i] = 0;
 		StoreParameters(&m_nIp, 6);
@@ -10567,7 +10583,11 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		assert(0);
 	case COMMAND_WAS_CUTSCENE_SKIPPED:
 	{
-		debug("WAS_CUTSCENE_SKIPPED is not implemented, defaulted to TRUE\n");
+		static bool bShowed = false;
+		if (!bShowed) {
+			debug("COMMAND_WAS_CUTSCENE_SKIPPED not implemented, default to TRUE\n");
+			bShowed = true;
+		}
 		UpdateCompareFlag(true);
 		return 0;
 	}
@@ -10581,7 +10601,11 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_IS_CHAR_IN_ANY_POLICE_VEHICLE:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("IS_CHAR_IN_ANY_POLICE_VEHICLE is not implemented, defaulted to FALSE\n");
+		static bool bShowed = false;
+		if (!bShowed) {
+			debug("IS_CHAR_IN_ANY_POLICE_VEHICLE not implemented, default to FALSE\n");
+			bShowed = true;
+		}
 		UpdateCompareFlag(false);
 		return 0;
 	}
@@ -10627,7 +10651,11 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		break;
 	case COMMAND_WANTED_STARS_ARE_FLASHING:
 	{
-		debug("WANTED_STARS_ARE_FLASHING not implemented, default to FALSE\n");
+		static bool bShowed = false;
+		if (!bShowed) {
+			debug("WANTED_STARS_ARE_FLASHING not implemented, default to FALSE\n");
+			bShowed = true;
+		}
 		UpdateCompareFlag(false);
 		return 0;
 	}
@@ -10653,7 +10681,11 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		char key[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		debug("IS_PLAYER_IN_INFO_ZONE not implemented, default to FALSE\n");
+		static bool bShowed = false;
+		if (!bShowed) {
+			debug("IS_PLAYER_IN_INFO_ZONE not implemented, default to FALSE\n");
+			bShowed = true;
+		}
 		UpdateCompareFlag(false);
 		return 0;
 	}
@@ -10705,7 +10737,12 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_IS_PLAYER_IN_SHORTCUT_TAXI:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("IS_PLAYER_IN_SHORTCUT_TAXI not implemented, default to FALSE\n");
+		static bool bShowed = false;
+		if (!bShowed) {
+			debug("IS_PLAYER_IN_SHORTCUT_TAXI not implemented, default to FALSE\n");
+			bShowed = true;
+		}
+		UpdateCompareFlag(false);
 		return 0;
 	}
 	case COMMAND_IS_CHAR_DUCKING:
