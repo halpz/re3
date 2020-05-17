@@ -2677,6 +2677,7 @@ CPed::SetPedStats(ePedStats pedStat)
 	m_pedStats = CPedStats::ms_apPedStats[pedStat];
 }
 
+// --MIAMI: Done
 void
 CPed::SetModelIndex(uint32 mi)
 {
@@ -2689,12 +2690,24 @@ CPed::SetModelIndex(uint32 mi)
 	m_animGroup = (AssocGroupId) modelInfo->m_animGroup;
 	CAnimManager::AddAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE);
 
+	// TODO(Miami): This is something inlined for sure
+	bool canUseMyBody = false;
+	if (m_nPedState != PED_DRIVING && m_nPedState != PED_DRAG_FROM_CAR && !bIsDucking) {
+		if (m_animGroup != ASSOCGRP_SEXYWOMAN && m_animGroup != ASSOCGRP_WOMAN)
+			canUseMyBody = true;
+	}
+	if (!canUseMyBody)
+		m_pedIK.m_flags |= CPedIK::LOOKAROUND_HEAD_ONLY;
+
 	// This is a mistake by R*, velocity is CVector, whereas m_vecAnimMoveDelta is CVector2D. 
 	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity = (CVector*) &m_vecAnimMoveDelta;
 
 #ifdef PED_SKIN
 	if(modelInfo->GetHitColModel() == nil)
 		modelInfo->CreateHitColModelSkinned(GetClump());
+
+	if (IsClumpSkinned(GetClump())) // condition isn't there in VC
+		UpdateRpHAnim();
 #endif
 }
 
