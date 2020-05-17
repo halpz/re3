@@ -8739,6 +8739,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 #ifdef USE_DEBUG_SCRIPT_LOADER
 		CFileMgr::ChangeDir("\\data\\");
 		int handle = CFileMgr::OpenFile(scriptfile, "rb");
+		CFileMgr::ChangeDir("\\");
 #else
 		CFileMgr::ChangeDir("\\");
 		int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
@@ -10422,6 +10423,11 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		return 0;
 	}
 	case COMMAND_SET_TONIGHTS_EVENT:
+	{
+		CollectParameters(&m_nIp, 1);
+		debug("skipping SET_TONIGHTS_EVENT\n");
+		return 0;
+	}
 	case COMMAND_CLEAR_CHAR_LAST_DAMAGE_ENTITY:
 	case COMMAND_CLEAR_CAR_LAST_DAMAGE_ENTITY:
 	case COMMAND_FREEZE_OBJECT_POSITION:
