@@ -445,7 +445,6 @@ ResetLoadingScreenBar()
 	NumberOfChunksLoaded = 0.0f;
 }
 
-// TODO: compare with PS2
 //--MIAMI: done
 void
 LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
