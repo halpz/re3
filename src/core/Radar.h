@@ -33,27 +33,47 @@ enum eRadarSprite
 	RADAR_SPRITE_COORD_BLIP = -1,
 #endif
 	RADAR_SPRITE_NONE = 0,
-	RADAR_SPRITE_ASUKA = 1,
-	RADAR_SPRITE_BOMB = 2,
-	RADAR_SPRITE_CAT = 3,
-	RADAR_SPRITE_CENTRE = 4,
-	RADAR_SPRITE_COPCAR = 5,
-	RADAR_SPRITE_DON = 6,
-	RADAR_SPRITE_EIGHT = 7,
-	RADAR_SPRITE_EL = 8,
-	RADAR_SPRITE_ICE = 9,
-	RADAR_SPRITE_JOEY = 10,
-	RADAR_SPRITE_KENJI = 11,
-	RADAR_SPRITE_LIZ = 12,
-	RADAR_SPRITE_LUIGI = 13,
-	RADAR_SPRITE_NORTH = 14,
-	RADAR_SPRITE_RAY = 15,
-	RADAR_SPRITE_SAL = 16,
-	RADAR_SPRITE_SAVE = 17,
-	RADAR_SPRITE_SPRAY = 18,
-	RADAR_SPRITE_TONY = 19,
-	RADAR_SPRITE_WEAPON = 20,
-	RADAR_SPRITE_COUNT = 21,
+	RADAR_SPRITE_CENTRE,
+	RADAR_SPRITE_MAP_HERE,
+	RADAR_SPRITE_NORTH,
+	RADAR_SPRITE_AVERY,
+	RADAR_SPRITE_BIKER,
+	RADAR_SPRITE_CORTEZ,
+	RADAR_SPRITE_DIAZ,
+	RADAR_SPRITE_KENT,
+	RADAR_SPRITE_LAWYER,
+	RADAR_SPRITE_PHIL,
+	RADAR_SPRITE_BIKERS,
+	RADAR_SPRITE_BOATYARD,
+	RADAR_SPRITE_MALIBU_CLUB,
+	RADAR_SPRITE_CUBANS,
+	RADAR_SPRITE_FILM,
+	RADAR_SPRITE_GUN,
+	RADAR_SPRITE_HAITIANS,
+	RADAR_SPRITE_HARDWARE,
+	RADAR_SPRITE_SAVE,
+	RADAR_SPRITE_STRIP,
+	RADAR_SPRITE_ICE,
+	RADAR_SPRITE_KCABS,
+	RADAR_SPRITE_LOVEFIST,
+	RADAR_SPRITE_PRINTWORKS,
+	RADAR_SPRITE_PROPERTY,
+	RADAR_SPRITE_SUNYARD,
+	RADAR_SPRITE_SPRAY,
+	RADAR_SPRITE_TSHIRT,
+	RADAR_SPRITE_TOMMY,
+	RADAR_SPRITE_PHONE,
+	RADAR_SPRITE_RADIO_WILDSTYLE,
+	RADAR_SPRITE_RADIO_FLASH,
+	RADAR_SPRITE_RADIO_KCHAT,
+	RADAR_SPRITE_RADIO_FEVER,
+	RADAR_SPRITE_RADIO_VROCK,
+	RADAR_SPRITE_RADIO_VCPR,
+	RADAR_SPRITE_RADIO_ESPANTOSO,
+	RADAR_SPRITE_RADIO_EMOTION,
+	RADAR_SPRITE_RADIO_WAVE,
+
+	RADAR_SPRITE_COUNT
 };
 
 enum
@@ -91,27 +111,46 @@ class CRadar
 public:
 	static float m_radarRange;
 	static sRadarTrace ms_RadarTrace[NUMRADARBLIPS];
-	static CSprite2d AsukaSprite;
-	static CSprite2d BombSprite;
-	static CSprite2d CatSprite;
 	static CSprite2d CentreSprite;
-	static CSprite2d CopcarSprite;
-	static CSprite2d DonSprite;
-	static CSprite2d EightSprite;
-	static CSprite2d ElSprite;
-	static CSprite2d IceSprite;
-	static CSprite2d JoeySprite;
-	static CSprite2d KenjiSprite;
-	static CSprite2d LizSprite;
-	static CSprite2d LuigiSprite;
+	static CSprite2d MapHereSprite;
 	static CSprite2d NorthSprite;
-	static CSprite2d RaySprite;
-	static CSprite2d SalSprite;
-	static CSprite2d SaveSprite;
+	static CSprite2d AverySprite;
+	static CSprite2d BikerSprite;
+	static CSprite2d CortezSprite;
+	static CSprite2d DiazSprite;
+	static CSprite2d KentSprite;
+	static CSprite2d LawyerSprite;
+	static CSprite2d PhilSprite;
+	static CSprite2d BikersSprite;
+	static CSprite2d BoatyardSprite;
+	static CSprite2d MalibuClubSprite;
+	static CSprite2d CubansSprite;
+	static CSprite2d FilmSprite;
+	static CSprite2d GunSprite;
+	static CSprite2d HaitiansSprite;
+	static CSprite2d HardwareSprite;
+	static CSprite2d SaveHouseSprite;
+	static CSprite2d StripSprite;
+	static CSprite2d IceSprite;
+	static CSprite2d KCabsSprite;
+	static CSprite2d LovefistSprite;
+	static CSprite2d PrintworksSprite;
+	static CSprite2d PropertySprite;
+	static CSprite2d SunYardSprite;
 	static CSprite2d SpraySprite;
-	static CSprite2d TonySprite;
-	static CSprite2d WeaponSprite;
-	static CSprite2d *RadarSprites[21];
+	static CSprite2d TShirtSprite;
+	static CSprite2d TommySprite;
+	static CSprite2d PhoneSprite;
+	static CSprite2d RadioWildstyleSprite;
+	static CSprite2d RadioFlashSprite;
+	static CSprite2d RadioKChatSprite;
+	static CSprite2d RadioFeverSprite;
+	static CSprite2d RadioVRockSprite;
+	static CSprite2d RadioVCPRSprite;
+	static CSprite2d RadioEspantosoSprite;
+	static CSprite2d RadioEmotionSprite;
+	static CSprite2d RadioWaveSprite;
+	static CSprite2d *RadarSprites[RADAR_SPRITE_COUNT];
 	static float cachedCos;
 	static float cachedSin;
 #ifdef MENU_MAP
