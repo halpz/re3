@@ -54,6 +54,7 @@ public:
 	bool m_bFastReload;
 	bool m_bGetOutOfJailFree;
 	bool m_bGetOutOfHospitalFree;
+	bool m_bDriveByAllowed;
 	char m_aSkinName[32];
 	RwTexture *m_pSkinTexture;
 

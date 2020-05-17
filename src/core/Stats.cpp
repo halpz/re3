@@ -249,6 +249,14 @@ int32 CStats::FindCriminalRatingNumber()
 	return rating;
 }
 
+float CStats::GetPercentageProgress()
+{
+	float percentCompleted = (CStats::TotalProgressInGame == 0 ? 0 :
+		CStats::ProgressMade * 100.0f / (CGame::nastyGame ? CStats::TotalProgressInGame : CStats::TotalProgressInGame - 1.0f));
+
+	return Min(percentCompleted, 100.0f);
+}
+
 void CStats::SaveStats(uint8 *buf, uint32 *size)
 {
 	CheckPointReachedSuccessfully();

@@ -44,15 +44,44 @@ uint32 CPickups::StaticCamStartTime;
 
 tPickupMessage CPickups::aMessages[NUMPICKUPMESSAGES];
 
-// 20 ?! Some Miami leftover? (Originally at 0x5ED8D4)
+// TODO(Miami)
 uint16 AmmoForWeapon[20] = { 0, 1, 45, 125, 25, 150, 300, 25, 5, 250, 5, 5, 0, 500, 0, 100, 0, 0, 0, 0 };
-uint16 AmmoForWeapon_OnStreet[20] = { 0, 1, 9, 25, 5, 30, 60, 5, 1, 50, 1, 1, 0, 200, 0, 100, 0, 0, 0, 0 };
+uint16 AmmoForWeapon_OnStreet[WEAPONTYPE_TOTALWEAPONS] = {
+	0,
+	1,
+	4,
+	4,
+	4,
+	4,
+	34,
+	16,
+	100,
+	60,
+	60,
+	60,
+	60,
+	60,
+	20,
+	4,
+	14,
+	1,
+	400,
+};
 uint16 CostOfWeapon[20] = { 0, 10, 250, 800, 1500, 3000, 5000, 10000, 25000, 25000, 2000, 2000, 0, 50000, 0, 3000, 0, 0, 0, 0 };
 
-uint8 aWeaponReds[] = { 255, 0, 128, 255, 255, 0, 255, 0, 128, 128, 255, 255, 128, 0, 255, 0 };
-uint8 aWeaponGreens[] = { 0, 255, 128, 255, 0, 255, 128, 255, 0, 255, 255, 0, 255, 0, 255, 0 };
-uint8 aWeaponBlues[] = { 0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255, 0, 128, 255, 0, 0 };
-float aWeaponScale[] = { 1.0f, 2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f, 1.0f, 1.0f, 1.0f };
+// TODO(Miami): Those are all placeholders!!
+uint8 aWeaponReds[] = { 0, 255, 0, 128, 255, 255, 0, 255, 0, 128, 128, 255,
+255, 255, 255, 255, 255, 255, 255, 255,
+255, 128, 0, 255, 0 };
+uint8 aWeaponGreens[] = { 0, 0, 255, 128, 255, 0, 255, 128, 255, 0, 255, 255,
+255, 255, 255, 255, 255, 255, 255, 255,
+0, 255, 0, 255, 0 };
+uint8 aWeaponBlues[] = { 0, 0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255,
+255, 255, 255, 255, 255, 255, 255, 255,
+0, 128, 255, 0, 0 };
+float aWeaponScale[] = { 1.0f, 1.0f, 2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f,
+1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+1.0f, 1.0f, 1.0f, 1.0f };
 
 void
 CPickup::RemoveKeepType()
@@ -380,6 +409,30 @@ CPickups::Init(void)
 	CollectedPickUpIndex = 0;
 }
 
+// --MIAMI: Done
+bool
+CPickups::TestForPickupsInBubble(CVector pos, float range)
+{
+	for (int i = 0; i < NUMPICKUPS; i++) {
+		if ((aPickUps[i].m_vecPos - pos).Magnitude() < range)
+			return true;
+	}
+	return false;
+}
+
+// --MIAMI: Done
+bool
+CPickups::TryToMerge_WeaponType(CVector pos, eWeaponType weapon, uint8 type, uint32 quantity, bool unused) {
+	for (int i = 0; i < NUMPICKUPS; i++) {
+		if (aPickUps[i].m_eType == type && aPickUps[i].m_eModelIndex == ModelForWeapon(weapon))
+			if ((aPickUps[i].m_vecPos - pos).Magnitude() < 7.5f) {
+				aPickUps[i].m_nQuantity += quantity;
+				return true;
+			}
+	}
+	return false;
+}
+
 bool
 CPickups::IsPickUpPickedUp(int32 pickupId)
 {
@@ -561,53 +614,22 @@ CPickups::GetNewUniquePickupIndex(int32 slot)
 	return slot | (aPickUps[slot].m_nIndex << 16);
 }
 
+// --MIAMI: Done
 int32
 CPickups::ModelForWeapon(eWeaponType weaponType)
 {
-	switch (weaponType)
-	{
-	case WEAPONTYPE_BASEBALLBAT: return MI_BASEBALL_BAT;
-	case WEAPONTYPE_COLT45: return MI_COLT;
-	case WEAPONTYPE_UZI: return MI_UZI;
-	case WEAPONTYPE_SHOTGUN: return MI_SHOTGUN;
-	case WEAPONTYPE_AK47: return MI_AK47;
-	case WEAPONTYPE_M16: return MI_M16;
-	case WEAPONTYPE_SNIPERRIFLE: return MI_SNIPER;
-	case WEAPONTYPE_ROCKETLAUNCHER: return MI_ROCKETLAUNCHER;
-	case WEAPONTYPE_FLAMETHROWER: return MI_FLAMETHROWER;
-	case WEAPONTYPE_MOLOTOV: return MI_MOLOTOV;
-	case WEAPONTYPE_GRENADE: return MI_GRENADE;
-	default: break;
-	}
-	return 0;
+	return CWeaponInfo::GetWeaponInfo(weaponType)->m_nModelId;
 }
 
+// --MIAMI: Done
 eWeaponType
 CPickups::WeaponForModel(int32 model)
 {
 	if (model == MI_PICKUP_BODYARMOUR) return WEAPONTYPE_ARMOUR;
-	switch (model)
-	{
-	case MI_GRENADE: return WEAPONTYPE_GRENADE;
-	case MI_AK47: return WEAPONTYPE_AK47;
-	case MI_BASEBALL_BAT: return WEAPONTYPE_BASEBALLBAT;
-	case MI_COLT: return WEAPONTYPE_COLT45;
-	case MI_MOLOTOV: return WEAPONTYPE_MOLOTOV;
-	case MI_ROCKETLAUNCHER: return WEAPONTYPE_ROCKETLAUNCHER;
-	case MI_SHOTGUN: return WEAPONTYPE_SHOTGUN;
-	case MI_SNIPER: return WEAPONTYPE_SNIPERRIFLE;
-	case MI_UZI: return WEAPONTYPE_UZI;
-	case MI_MISSILE: return WEAPONTYPE_UNARMED;
-	case MI_M16: return WEAPONTYPE_M16;
-	case MI_FLAMETHROWER: return WEAPONTYPE_FLAMETHROWER;
-	}
-	return WEAPONTYPE_UNARMED;
-}
-
-int32
-CPickups::FindColourIndexForWeaponMI(int32 model)
-{
-	return WeaponForModel(model) - 1;
+	if (model == MI_PICKUP_HEALTH) return WEAPONTYPE_HEALTH;
+	if (model == MI_PICKUP_ADRENALINE) return WEAPONTYPE_ARMOUR;
+	if (model == -1) return WEAPONTYPE_UNARMED;
+	return (eWeaponType)((CWeaponModelInfo*)CModelInfo::GetModelInfo(model))->GetWeaponInfo();
 }
 
 void
@@ -685,15 +707,15 @@ CPickups::DoPickUpEffects(CEntity *entity)
 		int16 colorId;
 
 		if (entity->GetModelIndex() == MI_PICKUP_ADRENALINE || entity->GetModelIndex() == MI_PICKUP_CAMERA)
-			colorId = 11;
+			colorId = WEAPONTYPE_LAST_WEAPONTYPE;
 		else if (entity->GetModelIndex() == MI_PICKUP_BODYARMOUR || entity->GetModelIndex() == MI_PICKUP_BRIBE)
-			colorId = 12;
+			colorId = WEAPONTYPE_LAST_WEAPONTYPE + 1;
 		else if (entity->GetModelIndex() == MI_PICKUP_INFO || entity->GetModelIndex() == MI_PICKUP_KILLFRENZY)
-			colorId = 13;
+			colorId = WEAPONTYPE_LAST_WEAPONTYPE + 2;
 		else if (entity->GetModelIndex() == MI_PICKUP_HEALTH || entity->GetModelIndex() == MI_PICKUP_BONUS)
-			colorId = 14;
+			colorId = WEAPONTYPE_LAST_WEAPONTYPE + 3;
 		else
-			colorId = FindColourIndexForWeaponMI(entity->GetModelIndex());
+			colorId = WeaponForModel(entity->GetModelIndex());
 
 		assert(colorId >= 0);
 

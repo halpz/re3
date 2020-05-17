@@ -70,7 +70,7 @@ public:
 	static void LoadPedGroups();
 	static void UpdatePedCount(ePedType, bool);
 	static void DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool);
-	static CPed *AddPedInCar(CVehicle *car, bool isPassenger);
+	static CPed *AddPedInCar(CVehicle *car, bool isDriver);
 	static bool IsPointInSafeZone(CVector *coors);
 	static void RemovePed(CPed *ent);
 	static int32 ChooseCivilianOccupation(int32);

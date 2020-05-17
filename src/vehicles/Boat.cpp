@@ -19,6 +19,9 @@
 #include "Pools.h"
 #include "Pad.h"
 #include "Boat.h"
+#include "AnimBlendAssociation.h"
+#include "RpAnimBlend.h"
+#include "Record.h"
 
 #define INVALID_ORIENTATION (-9999.99f)
 
@@ -149,6 +152,9 @@ CBoat::ProcessControl(void)
 		ProcessControlInputs(0);
 		if(GetModelIndex() == MI_PREDATOR)
 			DoFixedMachineGuns();
+
+		if (!CRecordDataForChase::IsRecording())
+			DoDriveByShootings();
 		break;
 	case STATUS_SIMPLE:
 		m_bIsAnchored = false;
@@ -909,6 +915,68 @@ CBoat::AddWakePoint(CVector point)
 		m_avec2dWakePoints[0] = point;
 		m_afWakePointLifeTime[0] = 400.0f;
 		m_nNumWakePoints = 1;
+	}
+}
+
+void
+CBoat::DoDriveByShootings(void)
+{
+	CAnimBlendAssociation *anim;
+	CPlayerInfo* playerInfo = ((CPlayerPed*)this)->GetPlayerInfoForThisPlayerPed();
+	if (playerInfo && !playerInfo->m_bDriveByAllowed)
+		return;
+
+	CWeapon *weapon = pDriver->GetWeapon();
+	if(CWeaponInfo::GetWeaponInfo(weapon->m_eWeaponType)->m_nWeaponSlot != 5)
+		return;
+
+	weapon->Update(pDriver->m_audioEntityId, nil);
+
+	bool lookingLeft = false;
+	bool lookingRight = false;
+	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN){
+		if(CPad::GetPad(0)->GetLookLeft())
+			lookingLeft = true;
+		if(CPad::GetPad(0)->GetLookRight())
+			lookingRight = true;
+	}else{
+		if(TheCamera.Cams[TheCamera.ActiveCam].LookingLeft)
+			lookingLeft = true;
+		if(TheCamera.Cams[TheCamera.ActiveCam].LookingRight)
+			lookingRight = true;
+	}
+
+	if(lookingLeft || lookingRight){
+		if(lookingLeft){
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_R);
+			if(anim)
+				anim->blendDelta = -1000.0f;
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_L);
+			if(anim == nil || anim->blendDelta < 0.0f)
+				anim = CAnimManager::AddAnimation(pDriver->GetClump(), ASSOCGRP_STD, ANIM_DRIVEBY_L);
+		}else if(pDriver->m_pMyVehicle->pPassengers[0] == nil || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON){
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_L);
+			if(anim)
+				anim->blendDelta = -1000.0f;
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_R);
+			if(anim == nil || anim->blendDelta < 0.0f)
+				anim = CAnimManager::AddAnimation(pDriver->GetClump(), ASSOCGRP_STD, ANIM_DRIVEBY_R);
+		}
+
+		if (!anim || !anim->IsRunning()) {
+			if (CPad::GetPad(0)->GetCarGunFired() && CTimer::GetTimeInMilliseconds() > weapon->m_nTimer) {
+				weapon->FireFromCar(this, lookingLeft);
+				weapon->m_nTimer = CTimer::GetTimeInMilliseconds() + 70;
+			}
+		}
+	}else{
+		weapon->Reload();
+		anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_L);
+		if(anim)
+			anim->blendDelta = -1000.0f;
+		anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_R);
+		if(anim)
+			anim->blendDelta = -1000.0f;
 	}
 }
 

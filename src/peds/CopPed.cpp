@@ -589,7 +589,7 @@ CCopPed::ProcessControl(void)
 		ArrestPlayer();
 		return;
 	}
-	GetWeapon()->Update(m_audioEntityId);
+	GetWeapon()->Update(m_audioEntityId, nil);
 	if (m_moved.Magnitude() > 0.0f)
 		Avoid();
 

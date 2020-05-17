@@ -1,6 +1,13 @@
 #pragma once
 #include "Sprite2d.h"
 
+#define MENU_MAP_LENGTH_UNIT 1190.0f // in game unit
+#define MENU_MAP_WIDTH_SCALE 1.112f // in game unit (originally 1.112494151260504f)
+#define MENU_MAP_HEIGHT_SCALE 1.119f // in game unit (originally 1.118714268907563f)
+#define MENU_MAP_TOP_OFFSET 0.28f // in length unit defined above - ~333 game unit
+#define MENU_MAP_LEFT_OFFSET 0.185f // in length unit defined above - ~220 game unit
+#define MENU_MAP_LENGTH (4000.f / MENU_MAP_LENGTH_UNIT)
+
 enum eBlipType
 {
 	BLIP_NONE,
@@ -111,7 +118,7 @@ public:
 #define NUM_MAP_LEGENDS 75
 	static CRGBA ArrowBlipColour1;
 	static CRGBA ArrowBlipColour2;
-	static uint16 MapLegendList[NUM_MAP_LEGENDS];
+	static int16 MapLegendList[NUM_MAP_LEGENDS];
 	static uint16 MapLegendCounter;
 	static int TargetMarkerId;
 	static CVector TargetMarkerPos;

@@ -200,7 +200,7 @@ CCivilianPed::ProcessControl(void)
 	if (DyingOrDead())
 		return;
 
-	GetWeapon()->Update(m_audioEntityId);
+	GetWeapon()->Update(m_audioEntityId, nil);
 	switch (m_nPedState) {
 		case PED_WANDER_RANGE:
 		case PED_WANDER_PATH:
