@@ -21,16 +21,19 @@ CPedModelInfo::DeleteRwObject(void)
 		frame = RpAtomicGetFrame(m_head);
 		RpAtomicDestroy(m_head);
 		RwFrameDestroy(frame);
+		m_head = nil;
 	}
 	if(m_lhand){
 		frame = RpAtomicGetFrame(m_lhand);
 		RpAtomicDestroy(m_lhand);
 		RwFrameDestroy(frame);
+		m_lhand = nil;
 	}
 	if(m_rhand){
 		frame = RpAtomicGetFrame(m_rhand);
 		RpAtomicDestroy(m_rhand);
 		RwFrameDestroy(frame);
+		m_rhand = nil;
 	}
 #endif
 	CClumpModelInfo::DeleteRwObject();	// PC calls this first
