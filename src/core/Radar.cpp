@@ -21,49 +21,87 @@ sRadarTrace CRadar::ms_RadarTrace[NUMRADARBLIPS];
 CVector2D vec2DRadarOrigin;
 int32 gRadarTxdIds[64];
 
-CSprite2d CRadar::AsukaSprite;
-CSprite2d CRadar::BombSprite;
-CSprite2d CRadar::CatSprite;
 CSprite2d CRadar::CentreSprite;
-CSprite2d CRadar::CopcarSprite;
-CSprite2d CRadar::DonSprite;
-CSprite2d CRadar::EightSprite;
-CSprite2d CRadar::ElSprite;
-CSprite2d CRadar::IceSprite;
-CSprite2d CRadar::JoeySprite;
-CSprite2d CRadar::KenjiSprite;
-CSprite2d CRadar::LizSprite;
-CSprite2d CRadar::LuigiSprite;
+CSprite2d CRadar::MapHereSprite;
 CSprite2d CRadar::NorthSprite;
-CSprite2d CRadar::RaySprite;
-CSprite2d CRadar::SalSprite;
-CSprite2d CRadar::SaveSprite;
+CSprite2d CRadar::AverySprite;
+CSprite2d CRadar::BikerSprite;
+CSprite2d CRadar::CortezSprite;
+CSprite2d CRadar::DiazSprite;
+CSprite2d CRadar::KentSprite;
+CSprite2d CRadar::LawyerSprite;
+CSprite2d CRadar::PhilSprite;
+CSprite2d CRadar::BikersSprite;
+CSprite2d CRadar::BoatyardSprite;
+CSprite2d CRadar::MalibuClubSprite;
+CSprite2d CRadar::CubansSprite;
+CSprite2d CRadar::FilmSprite;
+CSprite2d CRadar::GunSprite;
+CSprite2d CRadar::HaitiansSprite;
+CSprite2d CRadar::HardwareSprite;
+CSprite2d CRadar::SaveHouseSprite;
+CSprite2d CRadar::StripSprite;
+CSprite2d CRadar::IceSprite;
+CSprite2d CRadar::KCabsSprite;
+CSprite2d CRadar::LovefistSprite;
+CSprite2d CRadar::PrintworksSprite;
+CSprite2d CRadar::PropertySprite;
+CSprite2d CRadar::SunYardSprite;
 CSprite2d CRadar::SpraySprite;
-CSprite2d CRadar::TonySprite;
-CSprite2d CRadar::WeaponSprite;
+CSprite2d CRadar::TShirtSprite;
+CSprite2d CRadar::TommySprite;
+CSprite2d CRadar::PhoneSprite;
+CSprite2d CRadar::RadioWildstyleSprite;
+CSprite2d CRadar::RadioFlashSprite;
+CSprite2d CRadar::RadioKChatSprite;
+CSprite2d CRadar::RadioFeverSprite;
+CSprite2d CRadar::RadioVRockSprite;
+CSprite2d CRadar::RadioVCPRSprite;
+CSprite2d CRadar::RadioEspantosoSprite;
+CSprite2d CRadar::RadioEmotionSprite;
+CSprite2d CRadar::RadioWaveSprite;
 
 CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = { 
 	nil,
-	&AsukaSprite,
-	&BombSprite,
-	&CatSprite,
 	&CentreSprite,
-	&CopcarSprite,
-	&DonSprite,
-	&EightSprite,
-	&ElSprite,
-	&IceSprite,
-	&JoeySprite,
-	&KenjiSprite,
-	&LizSprite,
-	&LuigiSprite,
+	&MapHereSprite,
 	&NorthSprite,
-	&RaySprite,
-	&SalSprite,
-	&SaveSprite,
+	&AverySprite,
+	&BikerSprite,
+	&CortezSprite,
+	&DiazSprite,
+	&KentSprite,
+	&LawyerSprite,
+	&PhilSprite,
+	&BikersSprite,
+	&BoatyardSprite,
+	&MalibuClubSprite,
+	&CubansSprite,
+	&FilmSprite,
+	&GunSprite,
+	&HaitiansSprite,
+	&HardwareSprite,
+	&SaveHouseSprite,
+	&StripSprite,
+	&IceSprite,
+	&KCabsSprite,
+	&LovefistSprite,
+	&PrintworksSprite,
+	&PropertySprite,
+	&SunYardSprite,
 	&SpraySprite,
-	&TonySprite,
-	&WeaponSprite
+	&TShirtSprite,
+	&TommySprite,
+	&PhoneSprite,
+	&RadioWildstyleSprite,
+	&RadioFlashSprite,
+	&RadioKChatSprite,
+	&RadioFeverSprite,
+	&RadioVRockSprite,
+	&RadioVCPRSprite,
+	&RadioEspantosoSprite,
+	&RadioEmotionSprite,
+	&RadioWaveSprite
 };
 
 // Why this doesn't coincide with world coordinates i don't know
@@ -374,9 +412,8 @@ int CRadar::ClipRadarPoly(CVector2D *poly, const CVector2D *rect)
 bool CRadar::DisplayThisBlip(int32 counter)
 {
 	switch (ms_RadarTrace[counter].m_eRadarSprite) {
-	case RADAR_SPRITE_BOMB:
 	case RADAR_SPRITE_SPRAY:
-	case RADAR_SPRITE_WEAPON:
+	case RADAR_SPRITE_GUN:
 		return true;
 	default:
 		return false;
@@ -484,8 +521,8 @@ void CRadar::DrawBlips()
 				case BLIP_CAR:
 				case BLIP_CHAR:
 				case BLIP_OBJECT:
-					if (ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_BOMB || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE
-						|| ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SPRAY || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_WEAPON) {
+					if (ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE
+						|| ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SPRAY || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_GUN) {
 
 						switch (ms_RadarTrace[blipId].m_eBlipType) {
 							case BLIP_CAR:
@@ -543,8 +580,8 @@ void CRadar::DrawBlips()
 					break;
 				case BLIP_COORD:
 				case BLIP_CONTACT_POINT:
-					if ((ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_BOMB || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE
-						|| ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SPRAY || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_WEAPON)
+					if ((ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SAVE
+						|| ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_SPRAY || ms_RadarTrace[blipId].m_eRadarSprite == RADAR_SPRITE_GUN)
 						&& (ms_RadarTrace[blipId].m_eBlipType != BLIP_CONTACT_POINT || !CTheScripts::IsPlayerOnAMission())) {
 
 						uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
@@ -594,8 +631,8 @@ void CRadar::DrawBlips()
 				case BLIP_CAR:
 				case BLIP_CHAR:
 				case BLIP_OBJECT:
-					if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_BOMB && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SAVE
-						&& ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SPRAY && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_WEAPON) {
+					if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SAVE
+						&& ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SPRAY && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_GUN) {
 
 						switch (ms_RadarTrace[blipId].m_eBlipType) {
 							case BLIP_CAR:
@@ -663,8 +700,8 @@ void CRadar::DrawBlips()
 			switch (ms_RadarTrace[blipId].m_eBlipType) {
 				case BLIP_COORD:
 				case BLIP_CONTACT_POINT:
-					if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_BOMB && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SAVE
-						&& ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SPRAY && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_WEAPON
+					if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SAVE
+						&& ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_SPRAY && ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_GUN
 						&& (ms_RadarTrace[blipId].m_eBlipType != BLIP_CONTACT_POINT || !CTheScripts::IsPlayerOnAMission())) {
 
 						uint32 color = GetRadarTraceColour(ms_RadarTrace[blipId].m_nColor, ms_RadarTrace[blipId].m_bDim);
@@ -1038,26 +1075,45 @@ CRadar::LoadTextures()
 {
 	CTxdStore::PushCurrentTxd();
 	CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("hud"));
-	AsukaSprite.SetTexture("radar_asuka");
-	BombSprite.SetTexture("radar_bomb");
-	CatSprite.SetTexture("radar_cat");
 	CentreSprite.SetTexture("radar_centre");
-	CopcarSprite.SetTexture("radar_copcar");
-	DonSprite.SetTexture("radar_don");
-	EightSprite.SetTexture("radar_eight");
-	ElSprite.SetTexture("radar_el");
-	IceSprite.SetTexture("radar_ice");
-	JoeySprite.SetTexture("radar_joey");
-	KenjiSprite.SetTexture("radar_kenji");
-	LizSprite.SetTexture("radar_liz");
-	LuigiSprite.SetTexture("radar_luigi");
+	MapHereSprite.SetTexture("arrow");
 	NorthSprite.SetTexture("radar_north");
-	RaySprite.SetTexture("radar_ray");
-	SalSprite.SetTexture("radar_sal");
-	SaveSprite.SetTexture("radar_save");
-	SpraySprite.SetTexture("radar_spray");
-	TonySprite.SetTexture("radar_tony");
-	WeaponSprite.SetTexture("radar_weapon");
+	AverySprite.SetTexture("radar_avery");
+	BikerSprite.SetTexture("radar_biker");
+	CortezSprite.SetTexture("radar_cortez");
+	DiazSprite.SetTexture("radar_diaz");
+	KentSprite.SetTexture("radar_kent");
+	LawyerSprite.SetTexture("radar_lawyer");
+	PhilSprite.SetTexture("radar_phil");
+	BikersSprite.SetTexture("bikers");
+	BoatyardSprite.SetTexture("boatyard");
+	MalibuClubSprite.SetTexture("club");
+	CubansSprite.SetTexture("cubans");
+	FilmSprite.SetTexture("filmstudio");
+	GunSprite.SetTexture("gun");
+	HaitiansSprite.SetTexture("haitians");
+	HardwareSprite.SetTexture("hardware");
+	SaveHouseSprite.SetTexture("radar_save");
+	StripSprite.SetTexture("radar_strip");
+	IceSprite.SetTexture("icecream");
+	KCabsSprite.SetTexture("kcabs");
+	LovefistSprite.SetTexture("lovefist");
+	PrintworksSprite.SetTexture("printworks");
+	PropertySprite.SetTexture("property");
+	SunYardSprite.SetTexture("SunYard");
+	SpraySprite.SetTexture("spray");
+	TShirtSprite.SetTexture("tshirt");
+	TommySprite.SetTexture("tommy");
+	PhoneSprite.SetTexture("phone");
+	RadioWildstyleSprite.SetTexture("RWildstyle");
+	RadioFlashSprite.SetTexture("RFlash");
+	RadioKChatSprite.SetTexture("RKchat");
+	RadioFeverSprite.SetTexture("RFever");
+	RadioVRockSprite.SetTexture("RVRock");
+	RadioVCPRSprite.SetTexture("RVCPR");
+	RadioEspantosoSprite.SetTexture("REspantoso");
+	RadioEmotionSprite.SetTexture("REmotion");
+	RadioWaveSprite.SetTexture("RWave");
 	CTxdStore::PopCurrentTxd();
 }
 
@@ -1239,26 +1295,45 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, 
 
 void CRadar::Shutdown()
 {
-	AsukaSprite.Delete();
-	BombSprite.Delete();
-	CatSprite.Delete();
 	CentreSprite.Delete();
-	CopcarSprite.Delete();
-	DonSprite.Delete();
-	EightSprite.Delete();
-	ElSprite.Delete();
-	IceSprite.Delete();
-	JoeySprite.Delete();
-	KenjiSprite.Delete();
-	LizSprite.Delete();
-	LuigiSprite.Delete();
+	MapHereSprite.Delete();
 	NorthSprite.Delete();
-	RaySprite.Delete();
-	SalSprite.Delete();
-	SaveSprite.Delete();
+	AverySprite.Delete();
+	BikerSprite.Delete();
+	CortezSprite.Delete();
+	DiazSprite.Delete();
+	KentSprite.Delete();
+	LawyerSprite.Delete();
+	PhilSprite.Delete();
+	BikersSprite.Delete();
+	BoatyardSprite.Delete();
+	MalibuClubSprite.Delete();
+	CubansSprite.Delete();
+	FilmSprite.Delete();
+	GunSprite.Delete();
+	HaitiansSprite.Delete();
+	HardwareSprite.Delete();
+	SaveHouseSprite.Delete();
+	StripSprite.Delete();
+	IceSprite.Delete();
+	KCabsSprite.Delete();
+	LovefistSprite.Delete();
+	PrintworksSprite.Delete();
+	PropertySprite.Delete();
+	SunYardSprite.Delete();
 	SpraySprite.Delete();
-	TonySprite.Delete();
-	WeaponSprite.Delete();
+	TShirtSprite.Delete();
+	TommySprite.Delete();
+	PhoneSprite.Delete();
+	RadioWildstyleSprite.Delete();
+	RadioFlashSprite.Delete();
+	RadioKChatSprite.Delete();
+	RadioFeverSprite.Delete();
+	RadioVRockSprite.Delete();
+	RadioVCPRSprite.Delete();
+	RadioEspantosoSprite.Delete();
+	RadioEmotionSprite.Delete();
+	RadioWaveSprite.Delete();
 	RemoveRadarSections();
 }
 
