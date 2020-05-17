@@ -9771,6 +9771,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	case COMMAND_HELI_GOTO_COORDS:
 	case COMMAND_IS_INT_VAR_EQUAL_TO_CONSTANT:
 	case COMMAND_IS_INT_LVAR_EQUAL_TO_CONSTANT:
+		assert(0);
 	case COMMAND_GET_DEAD_CHAR_PICKUP_COORDS:
 	{
 		CollectParameters(&m_nIp, 1);
