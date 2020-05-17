@@ -1045,7 +1045,7 @@ CVehicle::SetUpDriver(void)
 	if(VehicleCreatedBy != RANDOM_VEHICLE)
 		return nil;
 
-	pDriver = CPopulation::AddPedInCar(this, false);
+	pDriver = CPopulation::AddPedInCar(this, true);
 	pDriver->m_pMyVehicle = this;
 	pDriver->m_pMyVehicle->RegisterReference((CEntity**)&pDriver->m_pMyVehicle);
 	pDriver->bInVehicle = true;
@@ -1061,7 +1061,7 @@ CVehicle::SetupPassenger(int n)
 	if(pPassengers[n])
 		return pPassengers[n];
 
-	pPassengers[n] = CPopulation::AddPedInCar(this, true);
+	pPassengers[n] = CPopulation::AddPedInCar(this, false);
 	pPassengers[n]->m_pMyVehicle = this;
 	pPassengers[n]->m_pMyVehicle->RegisterReference((CEntity**)&pPassengers[n]->m_pMyVehicle);
 	pPassengers[n]->bInVehicle = true;

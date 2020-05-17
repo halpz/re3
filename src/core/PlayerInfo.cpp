@@ -142,6 +142,7 @@ CPlayerInfo::Clear(void)
 	m_bFastReload = false;
 	m_bGetOutOfJailFree = false;
 	m_bGetOutOfHospitalFree = false;
+	m_bDriveByAllowed = true;
 	m_nPreviousTimeRewardedForExplosion = 0;
 	m_nExplosionsSinceLastReward = 0;
 }

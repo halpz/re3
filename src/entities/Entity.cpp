@@ -400,22 +400,6 @@ CEntity::PreRender(void)
 				GetMatrix().UpdateRW();
 				UpdateRwFrame();
 			}
-		}else if(IsPickupModel(GetModelIndex())){
-			if(((CObject*)this)->bIsPickup){
-				CPickups::DoPickUpEffects(this);
-				GetMatrix().UpdateRW();
-				UpdateRwFrame();
-			}else if(GetModelIndex() == MI_GRENADE){
-				CMotionBlurStreaks::RegisterStreak((uintptr)this,
-					100, 100, 100,
-					GetPosition() - 0.07f*TheCamera.GetRight(),
-					GetPosition() + 0.07f*TheCamera.GetRight());
-			}else if(GetModelIndex() == MI_MOLOTOV){
-				CMotionBlurStreaks::RegisterStreak((uintptr)this,
-					0, 100, 0,
-					GetPosition() - 0.07f*TheCamera.GetRight(),
-					GetPosition() + 0.07f*TheCamera.GetRight());
-			}
 		}else if(GetModelIndex() == MI_MISSILE){
 			CVector pos = GetPosition();
 			float flicker = (CGeneral::GetRandomNumber() & 0xF)/(float)0x10;
@@ -437,7 +421,22 @@ CEntity::PreRender(void)
 				CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 				CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 		}else if(IsGlass(GetModelIndex())){
-			PreRenderForGlassWindow();
+			if(!((CSimpleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()))->m_isArtistGlass)
+				PreRenderForGlassWindow();
+		}else if (((CObject*)this)->bIsPickup) {
+				CPickups::DoPickUpEffects(this);
+				GetMatrix().UpdateRW();
+				UpdateRwFrame();
+		} else if (GetModelIndex() == MI_GRENADE) {
+			CMotionBlurStreaks::RegisterStreak((uintptr)this,
+				100, 100, 100,
+				GetPosition() - 0.07f * TheCamera.GetRight(),
+				GetPosition() + 0.07f * TheCamera.GetRight());
+		} else if (GetModelIndex() == MI_MOLOTOV) {
+			CMotionBlurStreaks::RegisterStreak((uintptr)this,
+				0, 100, 0,
+				GetPosition() - 0.07f * TheCamera.GetRight(),
+				GetPosition() + 0.07f * TheCamera.GetRight());
 		}
 		// fall through
 	case ENTITY_TYPE_DUMMY:

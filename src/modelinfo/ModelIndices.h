@@ -412,7 +412,9 @@ enum
 	MI_AK47 = 276,
 	MI_SHOTGUN = 279,
 	MI_M16 = 280,
+	MI_TEC9 = 281,
 	MI_UZI = 282,
+	MI_SILENCEDINGRAM = 283,
 	MI_MP5 = 284,
 	MI_SNIPER = 285,
 	MI_ROCKETLAUNCHER = 287,
@@ -527,29 +529,6 @@ IsBannerModel(int16 id)
 		id == MI_CHINABANNER12 ||
 		id == MI_ITALYBANNER1 ||
 		id == MI_CHINALANTERN;
-}
-inline bool
-IsPickupModel(int16 id)
-{
-	return id == MI_GRENADE ||
-		id == MI_AK47 ||
-		id == MI_BASEBALL_BAT ||
-		id == MI_COLT ||
-		id == MI_MOLOTOV ||
-		id == MI_ROCKETLAUNCHER ||
-		id == MI_SHOTGUN ||
-		id == MI_SNIPER ||
-		id == MI_UZI ||
-		id == MI_M16 ||
-		id == MI_FLAMETHROWER ||
-		id == MI_PICKUP_ADRENALINE ||
-		id == MI_PICKUP_BODYARMOUR ||
-		id == MI_PICKUP_INFO ||
-		id == MI_PICKUP_HEALTH ||
-		id == MI_PICKUP_BONUS ||
-		id == MI_PICKUP_BRIBE ||
-		id == MI_PICKUP_KILLFRENZY ||
-		id == MI_PICKUP_CAMERA;
 }
 
 inline bool

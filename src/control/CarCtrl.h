@@ -9,6 +9,7 @@
 #define TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING 2500
 
 class CZoneInfo;
+class CAutomobile;
 
 enum{
 	MAX_CARS_TO_KEEP = 2,

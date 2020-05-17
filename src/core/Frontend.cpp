@@ -5536,9 +5536,10 @@ CMenuManager::PrintMap(void)
 		if (mapPoint.y > fMapCenterY - fMapSize && mapPoint.y < fMapCenterY + fMapSize &&
 			mapPoint.x > fMapCenterX - fMapSize && mapPoint.x < fMapCenterX + fMapSize) {
 
+			// Don't ask me the meanings, I don't know. Found them by trying
 			float diffX = fMapCenterX - fMapSize, diffY = fMapCenterY - fMapSize;
-			float x = ((mapPoint.x - diffX) / (fMapSize * 2)) * 4000.0f - 2000.0f;
-			float y = 2000.0f - ((mapPoint.y - diffY) / (fMapSize * 2)) * 4000.0f;
+			float x = ((mapPoint.x - diffX) / (fMapSize * 2)) * (WORLD_SIZE_X / MENU_MAP_WIDTH_SCALE) - (WORLD_SIZE_X / 2 + MENU_MAP_LEFT_OFFSET * MENU_MAP_LENGTH_UNIT);
+			float y = (WORLD_SIZE_Y / 2 - MENU_MAP_TOP_OFFSET * MENU_MAP_LENGTH_UNIT) - ((mapPoint.y - diffY) / (fMapSize * 2)) * (WORLD_SIZE_Y / MENU_MAP_HEIGHT_SCALE);
 			CRadar::ToggleTargetMarker(x, y);
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		}
@@ -5584,7 +5585,8 @@ CMenuManager::PrintMap(void)
 	if (fMapCenterY + fMapSize < SCREEN_HEIGHT - MENU_Y(60.0f))
 		fMapCenterY = SCREEN_HEIGHT - MENU_Y(60.0f) - fMapSize;
 	
-	fMapCenterY = Min(fMapCenterY, fMapSize); // To not show beyond north border
+	if (fMapCenterY - fMapSize > SCREEN_HEIGHT / 2)
+		fMapCenterY = SCREEN_HEIGHT / 2 + fMapSize;
 
 	bMenuMapActive = false;
 
@@ -5654,9 +5656,7 @@ CMenuManager::ConstructStatLine(int rowIdx)
 
 	STAT_LINE("PL_STAT", nil, false, nil);
 
-	int percentCompleted = (CStats::TotalProgressInGame == 0 ? 0 :
-		CStats::ProgressMade * 100.0f / (CGame::nastyGame ? CStats::TotalProgressInGame : CStats::TotalProgressInGame - 1));
-	percentCompleted = Min(percentCompleted, 100);
+	int percentCompleted = CStats::GetPercentageProgress();
 
 	STAT_LINE("PER_COM", &percentCompleted, false, nil);
 	STAT_LINE("NMISON", &CStats::MissionsGiven, false, nil);

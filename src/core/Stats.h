@@ -90,4 +90,5 @@ public:
 	static int32 FindCriminalRatingNumber();
 	static void SaveStats(uint8 *buf, uint32 *size);
 	static void LoadStats(uint8 *buf, uint32 size);
+	static float GetPercentageProgress();
 };

@@ -2901,13 +2901,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 			pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
 		pVehicle->bEngineOn = true;
 		pPed->bUsesCollision = false;
-#ifdef FIX_BUGS
-		AnimationId anim = pVehicle->GetDriverAnim();
-#else
-		AnimationId anim = pVehicle->bLowVehicle ? ANIM_CAR_LSIT : ANIM_CAR_SIT;
-#endif
-		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
-		pPed->StopNonPartialAnims();
+		pPed->AddInCarAnims(pVehicle, true);
 		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		CWorld::Add(pPed);
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
@@ -4080,13 +4074,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		pPed->SetPedState(PED_DRIVING);
 		pVehicle->SetStatus(STATUS_PHYSICS);
 		pPed->bUsesCollision = false;
-#ifdef FIX_BUGS
-		AnimationId anim = pVehicle->GetDriverAnim();
-#else
-		AnimationId anim = pVehicle->bLowVehicle ? ANIM_CAR_LSIT : ANIM_CAR_SIT;
-#endif
-		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
-		pPed->StopNonPartialAnims();
+		pPed->AddInCarAnims(pVehicle, false);
 		pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		CWorld::Add(pPed);
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
@@ -9753,6 +9741,12 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		return 0;
 	}
 	case COMMAND_IS_ANY_PICKUP_AT_COORDS:
+	{
+		CollectParameters(&m_nIp, 3);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		CRunningScript::UpdateCompareFlag(CPickups::TestForPickupsInBubble(pos, 0.5f));
+		return 0;
+	}
 	case COMMAND_GET_FIRST_PICKUP_COORDS:
 	case COMMAND_GET_NEXT_PICKUP_COORDS:
 	case COMMAND_REMOVE_ALL_CHAR_WEAPONS:
@@ -9778,6 +9772,15 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	case COMMAND_IS_INT_VAR_EQUAL_TO_CONSTANT:
 	case COMMAND_IS_INT_LVAR_EQUAL_TO_CONSTANT:
 	case COMMAND_GET_DEAD_CHAR_PICKUP_COORDS:
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed *pTarget = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		CVector pos;
+		pTarget->CreateDeadPedPickupCoors(&pos.x, &pos.y, &pos.z);
+		*(CVector*)&ScriptParams[0] = pos;
+		StoreParameters(&m_nIp, 3);
+		return 0;
+	}
 	case COMMAND_CREATE_PROTECTION_PICKUP:
 	case COMMAND_IS_CHAR_IN_ANY_BOAT:
 	case COMMAND_IS_PLAYER_IN_ANY_BOAT:

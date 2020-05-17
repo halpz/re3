@@ -85,11 +85,12 @@ public:
 	static bool IsPickUpPickedUp(int32 pickupId);
 	static int32 ModelForWeapon(eWeaponType weaponType);
 	static enum eWeaponType WeaponForModel(int32 model);
-	static int32 FindColourIndexForWeaponMI(int32 model);
 	static int32 GetActualPickupIndex(int32 index);
 	static int32 GetNewUniquePickupIndex(int32 slot);
 	static void PassTime(uint32 time);
 	static bool GivePlayerGoodiesWithPickUpMI(int16 modelIndex, int playerIndex);
+	static bool TestForPickupsInBubble(CVector pos, float range);
+	static bool TryToMerge_WeaponType(CVector pos, eWeaponType weapon, uint8 type, uint32 quantity, bool unused);
 	static void Load(uint8 *buf, uint32 size);
 	static void Save(uint8 *buf, uint32 *size);
 
@@ -103,7 +104,7 @@ public:
 };
 
 extern uint16 AmmoForWeapon[20];
-extern uint16 AmmoForWeapon_OnStreet[20];
+extern uint16 AmmoForWeapon_OnStreet[WEAPONTYPE_TOTALWEAPONS];
 extern uint16 CostOfWeapon[20];
 
 enum ePacmanPickupType

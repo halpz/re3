@@ -87,12 +87,11 @@ static_assert(RADAR_TILE_SIZE == (RADAR_SIZE_Y / RADAR_NUM_TILES), "CRadar: not 
 CRGBA CRadar::ArrowBlipColour1;
 CRGBA CRadar::ArrowBlipColour2;
 uint16 CRadar::MapLegendCounter;
-uint16 CRadar::MapLegendList[NUM_MAP_LEGENDS];
+int16 CRadar::MapLegendList[NUM_MAP_LEGENDS];
 int CRadar::TargetMarkerId = -1;
 CVector CRadar::TargetMarkerPos;
 #endif
 
-// taken from VC
 float CRadar::cachedCos;
 float CRadar::cachedSin;
 
@@ -273,12 +272,9 @@ void CRadar::ClearBlip(int32 i)
 	if (index != -1) {
 		SetRadarMarkerState(index, false);
 		ms_RadarTrace[index].m_bInUse = false;
-#ifndef MENU_MAP
-		// Ssshhh
 		ms_RadarTrace[index].m_eBlipType = BLIP_NONE;
 		ms_RadarTrace[index].m_eBlipDisplay = BLIP_DISPLAY_NEITHER;
 		ms_RadarTrace[index].m_eRadarSprite = RADAR_SPRITE_NONE;
-#endif
 	}
 }
 
@@ -481,11 +477,6 @@ void CRadar::DrawBlips()
 
 		CEntity *blipEntity = nil;
 		for(int blipId = 0; blipId < NUMRADARBLIPS; blipId++) {
-#ifdef MENU_MAP
-			// A little hack to reuse cleared blips in menu map. hehe
-			if (!CMenuManager::bMenuMapActive || ms_RadarTrace[blipId].m_eBlipType == BLIP_CAR ||
-				ms_RadarTrace[blipId].m_eBlipType == BLIP_CHAR || ms_RadarTrace[blipId].m_eBlipType == BLIP_OBJECT)
-#endif
 			if (!ms_RadarTrace[blipId].m_bInUse)
 				continue;
 
@@ -1338,9 +1329,8 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &i
 {
 #ifdef MENU_MAP
 	if (CMenuManager::bMenuMapActive) {
-		// fMapSize is actually half map size. Radar range is 1000, so if x is -2000, in.x + 2.0f is 0.
-		out.x = (CMenuManager::fMapCenterX - CMenuManager::fMapSize) + (in.x + 2.0f) * CMenuManager::fMapSize * 2.0f / 4.0f;
-		out.y = (CMenuManager::fMapCenterY - CMenuManager::fMapSize) + (2.0f - in.y) * CMenuManager::fMapSize * 2.0f / 4.0f;
+		out.x = (CMenuManager::fMapCenterX - CMenuManager::fMapSize) + (MENU_MAP_LENGTH / 2 + MENU_MAP_LEFT_OFFSET + in.x) * CMenuManager::fMapSize * MENU_MAP_WIDTH_SCALE * 2.0f / MENU_MAP_LENGTH;
+		out.y = (CMenuManager::fMapCenterY - CMenuManager::fMapSize) + (MENU_MAP_LENGTH / 2 - MENU_MAP_TOP_OFFSET - in.y) * CMenuManager::fMapSize * MENU_MAP_HEIGHT_SCALE * 2.0f / MENU_MAP_LENGTH;
 	} else
 #endif
 	{
@@ -1428,7 +1418,7 @@ CRadar::InitFrontEndMap()
 	CalculateCachedSinCos();
 	vec2DRadarOrigin.x = 0.0f;
 	vec2DRadarOrigin.y = 0.0f;
-	m_radarRange = 1000.0f; // doesn't mean anything, just affects the calculation in TransformRadarPointToScreenSpace
+	m_radarRange = MENU_MAP_LENGTH_UNIT; // just affects the multiplier in TransformRadarPointToScreenSpace
 	for (int i = 0; i < NUM_MAP_LEGENDS; i++) {
 		MapLegendList[i] = RADAR_SPRITE_NONE;
 	}
