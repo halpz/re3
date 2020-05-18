@@ -1368,3 +1368,18 @@ CVehicle::GetVehicleAppearance(void)
 		return VEHICLE_APPEARANCE_HELI;
 	return VEHICLE_APPEARANCE_NONE;
 }
+
+bool
+IsVehiclePointerValid(CVehicle* pVehicle)
+{
+	if (!pVehicle)
+		return false;
+	int index = CPools::GetVehiclePool()->GetJustIndex(pVehicle);
+#ifdef FIX_BUGS
+	if (index < 0 || index >= NUMVEHICLES)
+#else
+	if (index < 0 || index > NUMVEHICLES)
+#endif
+		return false;
+	return pVehicle->m_vehType == VEHICLE_TYPE_PLANE || pVehicle->m_entryInfoList.first;
+}

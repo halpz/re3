@@ -15,3 +15,5 @@ public:
 	static void *operator new(size_t);
 	static void operator delete(void*, size_t);
 };
+
+bool IsDummyPointerValid(CDummy* pDummy);

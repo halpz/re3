@@ -54,6 +54,7 @@
 #include "Remote.h"
 #include "Replay.h"
 #include "Restart.h"
+#include "RoadBlocks.h"
 #include "RpAnimBlend.h"
 #include "Rubbish.h"
 #include "Shadows.h"
@@ -92,13 +93,10 @@
 
 uint8 CTheScripts::ScriptSpace[SIZE_SCRIPT_SPACE];
 CRunningScript CTheScripts::ScriptsArray[MAX_NUM_SCRIPTS];
-int32 CTheScripts::BaseBriefIdForContact[MAX_NUM_CONTACTS];
-int32 CTheScripts::OnAMissionForContactFlag[MAX_NUM_CONTACTS];
 intro_text_line CTheScripts::IntroTextLines[MAX_NUM_INTRO_TEXT_LINES];
 intro_script_rectangle CTheScripts::IntroRectangles[MAX_NUM_INTRO_RECTANGLES];
 CSprite2d CTheScripts::ScriptSprites[MAX_NUM_SCRIPT_SRPITES];
 script_sphere_struct CTheScripts::ScriptSphereArray[MAX_NUM_SCRIPT_SPHERES];
-tCollectiveData CTheScripts::CollectiveArray[MAX_NUM_COLLECTIVES];
 tUsedObject CTheScripts::UsedObjectArray[MAX_NUM_USED_OBJECTS];
 int32 CTheScripts::MultiScriptArray[MAX_NUM_MISSION_SCRIPTS];
 tBuildingSwap CTheScripts::BuildingSwapArray[MAX_NUM_BUILDING_SWAPS];
@@ -119,8 +117,6 @@ uint16 CTheScripts::NumberOfMissionScripts;
 uint32 CTheScripts::LargestMissionScriptSize;
 uint32 CTheScripts::MainScriptSize;
 uint8 CTheScripts::FailCurrentMission;
-uint8 CTheScripts::CountdownToMakePlayerUnsafe;
-uint8 CTheScripts::DelayMakingPlayerUnsafeThisTime;
 uint16 CTheScripts::NumScriptDebugLines;
 uint16 CTheScripts::NumberOfIntroRectanglesThisFrame;
 uint16 CTheScripts::NumberOfIntroTextLinesThisFrame;
@@ -131,6 +127,11 @@ CStuckCarCheck CTheScripts::StuckCars;
 uint16 CTheScripts::CommandsExecuted;
 uint16 CTheScripts::ScriptsUpdated;
 int32 ScriptParams[32];
+uint8 CTheScripts::RiotIntensity;
+uint32 CTheScripts::LastMissionPassedTime;
+uint16 CTheScripts::NumberOfExclusiveMissionScripts;
+bool CTheScripts::bPlayerHasMetDebbieHarry;
+bool CTheScripts::bPlayerIsInTheStatium;
 
 
 const uint32 CRunningScript::nSaveStructSize =
@@ -272,9 +273,19 @@ void CMissionCleanup::Process()
 	CPopulation::m_AllRandomPedsThisType = -1;
 	CPopulation::PedDensityMultiplier = 1.0f;
 	CCarCtrl::CarDensityMultiplier = 1.0f;
+	CPed::nThreatReactionRangeMultiplier = 1;
+	CPed::nEnterCarRangeMultiplier = 1;
 	FindPlayerPed()->m_pWanted->m_fCrimeSensitivity = 1.0f;
-	TheCamera.Restore();
+	//CRoadBlocks::ClearScriptRoadblocks() // TODO(MIAMI)
+	CRouteNode::Initialise();
+	if (!CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
+		TheCamera.Restore();
 	TheCamera.SetWideScreenOff();
+	// TODO(MIAMI)
+	//CSpecialFX::bLiftCam = false;
+	//CSpecialFX::bVideoCam = false;
+	//CTimeCycle::StopExtraColour(0);
+	// TODO(MIAMI): change this to loop when it supports parameters
 	DMAudio.ClearMissionAudio();
 	CWeather::ReleaseWeather();
 	for (int i = 0; i < NUM_OF_SPECIAL_CHARS; i++)
@@ -283,14 +294,18 @@ void CMissionCleanup::Process()
 		CStreaming::SetMissionDoesntRequireModel(MI_CUTOBJ01 + i);
 	CStreaming::ms_disableStreaming = false;
 	CHud::m_ItemToFlash = -1;
-	CHud::SetHelpMessage(nil, false);
+	CHud::SetHelpMessage(nil, false); // TODO(MIAMI): third parameter is false
 	CUserDisplay::OnscnTimer.m_bDisabled = false;
+	CTheScripts::RemoveScriptTextureDictionary();
 	CWorld::Players[0].m_pPed->m_pWanted->m_bIgnoredByCops = false;
 	CWorld::Players[0].m_pPed->m_pWanted->m_bIgnoredByEveryone = false;
 	CWorld::Players[0].MakePlayerSafe(false);
-
+	//TODO(MIAMI): drunkenness, enable drive by
+	//DMAudio::ShutUpPlayerTalking(0);
 	CVehicle::bDisableRemoteDetonation = false;
-
+	//CVehicle::bDisableRemoteDetonationOnContact = false; // TODO(MIAMI)
+	//CGameLogic::ClearShortCut(); // TODO(MIAMI)
+	CTheScripts::RiotIntensity = 0;
 	CTheScripts::StoreVehicleIndex = -1;
 	CTheScripts::StoreVehicleWasRandom = true;
 	CTheScripts::UpsideDownCars.Init();
@@ -513,7 +528,6 @@ void CRunningScript::CollectParameters(uint32* pIp, int16 total)
 int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 {
 	uint32* pIp = &ip;
-	float tmp;
 	switch (CTheScripts::Read1ByteFromScript(pIp))
 	{
 	case ARGUMENT_INT32:
@@ -527,8 +541,7 @@ int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 	case ARGUMENT_INT16:
 		return CTheScripts::Read2BytesFromScript(pIp);
 	case ARGUMENT_FLOAT:
-		tmp = CTheScripts::ReadFloatFromScript(pIp);
-		return *(int32*)&tmp;
+		return CTheScripts::Read4BytesFromScript(pIp);
 	default:
 		assert(0);
 	}
@@ -637,14 +650,7 @@ void CTheScripts::Init()
 	StoreVehicleIndex = -1;
 	StoreVehicleWasRandom = true;
 	OnAMissionFlag = 0;
-	for (int i = 0; i < MAX_NUM_CONTACTS; i++){
-		BaseBriefIdForContact[i] = 0;
-		OnAMissionForContactFlag[i] = 0;
-	}
-	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++){
-		CollectiveArray[i].index = -1;
-		CollectiveArray[i].unk_data = 0;
-	}
+	LastMissionPassedTime = (uint32)-1;
 	NextFreeCollectiveIndex = 0;
 	LastRandomPedId = -1;
 	for (int i = 0; i < MAX_NUM_USED_OBJECTS; i++){
@@ -658,15 +664,17 @@ void CTheScripts::Init()
 	bUsingAMultiScriptFile = true;
 	for (int i = 0; i < MAX_NUM_MISSION_SCRIPTS; i++)
 		MultiScriptArray[i] = 0;
+	NumberOfExclusiveMissionScripts = 0;
 	NumberOfMissionScripts = 0;
 	LargestMissionScriptSize = 0;
 	MainScriptSize = 0;
 	ReadMultiScriptFileOffsetsFromScript();
 	FailCurrentMission = 0;
-	CountdownToMakePlayerUnsafe = 0;
 	DbgFlag = false;
-	DelayMakingPlayerUnsafeThisTime = 1;
 	NumScriptDebugLines = 0;
+	RiotIntensity = 0;
+	bPlayerHasMetDebbieHarry = false;
+	bPlayerIsInTheStatium = false;
 	for (int i = 0; i < MAX_NUM_SCRIPT_SPHERES; i++){
 		ScriptSphereArray[i].m_bInUse = false;
 		ScriptSphereArray[i].m_Index = 1;
@@ -687,6 +695,7 @@ void CTheScripts::Init()
 		IntroRectangles[i].m_sColor = CRGBA(255, 255, 255, 255);
 	}
 	NumberOfIntroRectanglesThisFrame = 0;
+	RemoveScriptTextureDictionary();
 	for (int i = 0; i < MAX_NUM_BUILDING_SWAPS; i++){
 		BuildingSwapArray[i].m_pBuilding = nil;
 		BuildingSwapArray[i].m_nNewModel = -1;
@@ -694,6 +703,15 @@ void CTheScripts::Init()
 	}
 	for (int i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++)
 		InvisibilitySettingArray[i] = nil;
+}
+
+void CTheScripts::RemoveScriptTextureDictionary()
+{
+	for (int i = 0; i < ARRAY_SIZE(CTheScripts::ScriptSprites); i++)
+		CTheScripts::ScriptSprites[i].Delete();
+	int slot = CTxdStore::FindTxdSlot("script");
+	if (slot != -1)
+		CTxdStore::RemoveTxd(slot);
 }
 
 void CRunningScript::RemoveScriptFromList(CRunningScript** ppScript)
@@ -739,10 +757,6 @@ void CTheScripts::Process()
 	DrawScriptSpheres();
 	if (FailCurrentMission)
 		--FailCurrentMission;
-	if (CountdownToMakePlayerUnsafe){
-		if (--CountdownToMakePlayerUnsafe == 0)
-			CWorld::Players[0].MakePlayerSafe(false);
-	}
 	if (UseTextCommands){
 		for (int i = 0; i < MAX_NUM_INTRO_TEXT_LINES; i++)
 			IntroTextLines[i].Reset();
@@ -849,6 +863,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 	case COMMAND_WAIT:
 		CollectParameters(&m_nIp, 1);
 		m_nWakeTime = CTimer::GetTimeInMilliseconds() + ScriptParams[0];
+		m_bSkipWakeTime = false;
 		return 1;
 	case COMMAND_GOTO:
 		CollectParameters(&m_nIp, 1);
@@ -1262,13 +1277,11 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		UpdateCompareFlag(*ptr1 == *ptr2);
 		return 0;
 	}
-	/* Following commands are not implemented, and go to default case
-	case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_NUMBER:
-	case COMMAND_IS_INT_LVAR_NOT_EQUAL_TO_NUMBER:
-	case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_INT_VAR:
-	case COMMAND_IS_INT_LVAR_NOT_EQUAL_TO_INT_LVAR:
-	case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_INT_LVAR:
-	*/
+	//case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_NUMBER:
+	//case COMMAND_IS_INT_LVAR_NOT_EQUAL_TO_NUMBER:
+	//case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_INT_VAR:
+	//case COMMAND_IS_INT_LVAR_NOT_EQUAL_TO_INT_LVAR:
+	//case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_INT_LVAR:
 	case COMMAND_IS_FLOAT_VAR_EQUAL_TO_NUMBER:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
@@ -1304,19 +1317,18 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		UpdateCompareFlag(*(float*)ptr1 == *(float*)ptr2);
 		return 0;
 	}
-	/* Following commands are not implemented, and go to default case
-	case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_NUMBER:
-	case COMMAND_IS_FLOAT_LVAR_NOT_EQUAL_TO_NUMBER:
-	case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_FLOAT_VAR:
-	case COMMAND_IS_FLOAT_LVAR_NOT_EQUAL_TO_FLOAT_LVAR:
-	case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_FLOAT_LVAR:
-	*/
+	//case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_NUMBER:
+	//case COMMAND_IS_FLOAT_LVAR_NOT_EQUAL_TO_NUMBER:
+	//case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_FLOAT_VAR:
+	//case COMMAND_IS_FLOAT_LVAR_NOT_EQUAL_TO_FLOAT_LVAR:
+	//case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_FLOAT_LVAR:
+	/*
 	case COMMAND_GOTO_IF_TRUE:
 		CollectParameters(&m_nIp, 1);
 		if (m_bCondResult)
 			SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : SIZE_MAIN_SCRIPT - ScriptParams[0]);
-		/* Check COMMAND_GOTO note. */
 		return 0;
+	*/
 	case COMMAND_GOTO_IF_FALSE:
 		CollectParameters(&m_nIp, 1);
 		if (!m_bCondResult)
@@ -1328,12 +1340,14 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 			CTheScripts::bAlreadyRunningAMissionScript = false;
 		RemoveScriptFromList(&CTheScripts::pActiveScripts);
 		AddScriptToList(&CTheScripts::pIdleScripts);
+		m_bIsActive = false;
 		return 1;
 	case COMMAND_START_NEW_SCRIPT:
 	{
 		CollectParameters(&m_nIp, 1);
 		assert(ScriptParams[0] >= 0);
 		CRunningScript* pNew = CTheScripts::StartNewScript(ScriptParams[0]);
+		m_bIsActive = true;
 		int8 type = CTheScripts::Read1ByteFromScript(&m_nIp);
 		float tmp;
 		for (int i = 0; type != ARGUMENT_END; type = CTheScripts::Read1ByteFromScript(&m_nIp), i++) {
@@ -1381,7 +1395,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 	{
 		CollectParameters(&m_nIp, 4);
 		int32 index = ScriptParams[0];
-		assert(index < 1); /* Constant? Also no more double player glitch */
+		assert(index < NUMPLAYERS);
 		printf("&&&&&&&&&&&&&Creating player: %d\n", index);
 		if (!CStreaming::HasModelLoaded(MI_PLAYER)) {
 			CStreaming::RequestSpecialModel(MI_PLAYER, "player", STREAMFLAGS_DONT_REMOVE | STREAMFLAGS_DEPENDENCY);
@@ -1421,20 +1435,49 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CPlayerPed* ped = CWorld::Players[index].m_pPed;
-		if (!ped->bInVehicle) {
-			pos.z += ped->GetDistanceFromCentreOfMassToBaseOfModel();
-			ped->Teleport(pos);
-			CTheScripts::ClearSpaceForMissionEntity(pos, ped);
+		if (ped->bInVehicle) {
+			pos.z += ped->m_pMyVehicle->GetDistanceFromCentreOfMassToBaseOfModel();
+			ped->m_pMyVehicle->Teleport(pos); // removed dumb stuff that was present here
+			CTheScripts::ClearSpaceForMissionEntity(pos, ped->m_pMyVehicle);
 			return 0;
 		}
-		pos.z += ped->m_pMyVehicle->GetDistanceFromCentreOfMassToBaseOfModel();
-		if (ped->m_pMyVehicle->IsBoat())
-			ped->m_pMyVehicle->Teleport(pos);
-		else
-			ped->m_pMyVehicle->Teleport(pos);
-		/* I'll keep this condition here but obviously it is absolutely pointless */
-		/* It's clearly present in disassembly so it had to be in original code */
-		CTheScripts::ClearSpaceForMissionEntity(pos, ped->m_pMyVehicle);
+		pos.z += ped->GetDistanceFromCentreOfMassToBaseOfModel();
+		CVector vOldPos = ped->GetPosition();
+		ped->Teleport(pos);
+		CTheScripts::ClearSpaceForMissionEntity(pos, ped);
+		if (ped) { // great time to check
+			for (int i = 0; i < ped->m_numNearPeds; i++) {
+				CPed* pTestedPed = ped->m_nearPeds[i];
+				if (!pTestedPed || !IsPedPointerValid(pTestedPed))
+					continue;
+				if (pTestedPed->m_pedInObjective == ped && pTestedPed->m_objective == OBJ_15) {
+					CVector vFollowerPos = pTestedPed->GetFormationPosition();
+					CTheScripts::ClearSpaceForMissionEntity(vFollowerPos, ped);
+					bool bFound = false;
+					vFollowerPos.z = CWorld::FindGroundZFor3DCoord(vFollowerPos.x, vFollowerPos.y, vFollowerPos.z + 1.0f, &bFound) + 1.0f;
+					if (bFound) {
+						if (CWorld::GetIsLineOfSightClear(vFollowerPos, ped->GetPosition(), true, false, false, true, false, false)) {
+							pTestedPed->Teleport(vFollowerPos);
+						}
+					}
+				}
+				else if (pTestedPed->m_leader == ped) {
+					CVector vFollowerPos;
+					if (pTestedPed->m_pedFormation)
+						vFollowerPos = pTestedPed->GetFormationPosition();
+					else
+						vFollowerPos = ped->GetPosition() + pTestedPed->GetPosition() - vOldPos;
+					CTheScripts::ClearSpaceForMissionEntity(vFollowerPos, ped);
+					bool bFound = false;
+					vFollowerPos.z = CWorld::FindGroundZFor3DCoord(vFollowerPos.x, vFollowerPos.y, vFollowerPos.z + 1.0f, &bFound) + 1.0f;
+					if (bFound) {
+						if (CWorld::GetIsLineOfSightClear(vFollowerPos, ped->GetPosition(), true, false, false, true, false, false)) {
+							pTestedPed->Teleport(vFollowerPos);
+						}
+					}
+				}
+			}
+		}
 		return 0;
 	}
 	case COMMAND_IS_PLAYER_IN_AREA_2D:
@@ -3508,14 +3551,8 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	case COMMAND_DECLARE_MISSION_FLAG:
 		CTheScripts::OnAMissionFlag = CTheScripts::Read2BytesFromScript(&++m_nIp);
 		return 0;
-	case COMMAND_DECLARE_MISSION_FLAG_FOR_CONTACT:
-		CollectParameters(&m_nIp, 1);
-		CTheScripts::OnAMissionForContactFlag[ScriptParams[0]] = CTheScripts::Read2BytesFromScript(&++m_nIp);
-		return 0;
-	case COMMAND_DECLARE_BASE_BRIEF_ID_FOR_CONTACT:
-		CollectParameters(&m_nIp, 2);
-		CTheScripts::BaseBriefIdForContact[ScriptParams[0]] = ScriptParams[1];
-		return 0;
+	//case COMMAND_DECLARE_MISSION_FLAG_FOR_CONTACT:
+	//case COMMAND_DECLARE_BASE_BRIEF_ID_FOR_CONTACT:
 	case COMMAND_IS_PLAYER_HEALTH_GREATER:
 	{
 		CollectParameters(&m_nIp, 2);
@@ -3830,13 +3867,8 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPlayerInfo* pPlayer = &CWorld::Players[ScriptParams[0]];
 		if (ScriptParams[1]){
-			if (CGame::playingIntro || CTheScripts::DelayMakingPlayerUnsafeThisTime){
-				CTheScripts::CountdownToMakePlayerUnsafe = 50;
-				if (CTheScripts::DelayMakingPlayerUnsafeThisTime)
-					CTheScripts::DelayMakingPlayerUnsafeThisTime--;
-			}else{
-				pPlayer->MakePlayerSafe(false);
-			}
+			pPlayer->MakePlayerSafe(false);
+			// TODO(MIAMI): Four Iron hack
 		}else{
 			pPlayer->MakePlayerSafe(true);
 			if (strcmp(m_abScriptName, "camera") == 0){
@@ -7720,9 +7752,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	}
 	case COMMAND_REMOVE_TEXTURE_DICTIONARY:
 	{
-		for (int i = 0; i < ARRAY_SIZE(CTheScripts::ScriptSprites); i++)
-			CTheScripts::ScriptSprites[i].Delete();
-		CTxdStore::RemoveTxd(CTxdStore::FindTxdSlot("script"));
+		CTheScripts::RemoveScriptTextureDictionary();
 		return 0;
 	}
 	case COMMAND_SET_OBJECT_DYNAMIC:
@@ -10446,7 +10476,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		char key[8];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		debug("skipping LOAD_MISSION_TEXT\n");
+		TheText.LoadMissionText(key);
 		return 0;
 	}
 	case COMMAND_SET_TONIGHTS_EVENT:
@@ -12133,29 +12163,6 @@ void CRunningScript::DoDeatharrestCheck()
 	while (m_nStackPointer > 1)
 		--m_nStackPointer;
 	m_nIp = m_anStack[--m_nStackPointer];
-	int16 messageId;
-	if (pPlayer->IsRestartingAfterDeath())
-		messageId = 0;
-	else if (pPlayer->IsRestartingAfterArrest())
-		messageId = 5;
-	else
-		messageId = 10;
-	messageId += CGeneral::GetRandomNumberInRange(0, 5);
-	bool found = false;
-	for (int16 contact = 0; !found && contact < MAX_NUM_CONTACTS; contact++) {
-		int contactFlagOffset = CTheScripts::OnAMissionForContactFlag[contact];
-		if (contactFlagOffset && CTheScripts::ScriptSpace[contactFlagOffset] == 1) {
-			messageId += CTheScripts::BaseBriefIdForContact[contact];
-			found = true;
-		}
-	}
-	if (!found)
-		messageId = 8001;
-	char tmp[16];
-	sprintf(tmp, "%d", messageId);
-	CMessages::ClearSmallMessagesOnly();
-	wchar* text = TheText.Get(tmp);
-	// ...and do nothing about it
 	*(int32*)&CTheScripts::ScriptSpace[CTheScripts::OnAMissionFlag] = 0;
 	m_bDeatharrestExecuted = true;
 	m_nWakeTime = 0;
@@ -12299,8 +12306,8 @@ void CTheScripts::RenderTheScriptDebugLines()
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)0);
 }
 
-#define SCRIPT_DATA_SIZE sizeof(CTheScripts::OnAMissionFlag) + sizeof(CTheScripts::BaseBriefIdForContact) + sizeof(CTheScripts::OnAMissionForContactFlag) +\
-	sizeof(CTheScripts::CollectiveArray) + 4 * sizeof(uint32) * MAX_NUM_BUILDING_SWAPS + 2 * sizeof(uint32) * MAX_NUM_INVISIBILITY_SETTINGS + 5 * sizeof(uint32)
+#define SCRIPT_DATA_SIZE sizeof(CTheScripts::OnAMissionFlag) +\
+	4 * sizeof(uint32) * MAX_NUM_BUILDING_SWAPS + 2 * sizeof(uint32) * MAX_NUM_INVISIBILITY_SETTINGS + 5 * sizeof(uint32)
 
 void CTheScripts::SaveAllScripts(uint8* buf, uint32* size)
 {
@@ -12320,12 +12327,6 @@ INITSAVEBUF
 	uint32 script_data_size = SCRIPT_DATA_SIZE;
 	WriteSaveBuf(buf, script_data_size);
 	WriteSaveBuf(buf, OnAMissionFlag);
-	for (uint32 i = 0; i < MAX_NUM_CONTACTS; i++) {
-		WriteSaveBuf(buf, OnAMissionForContactFlag[i]);
-		WriteSaveBuf(buf, BaseBriefIdForContact[i]);
-	}
-	for (uint32 i = 0; i < MAX_NUM_COLLECTIVES; i++)
-		WriteSaveBuf(buf, CollectiveArray[i]);
 	WriteSaveBuf(buf, NextFreeCollectiveIndex);
 	for (uint32 i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
 		CBuilding* pBuilding = BuildingSwapArray[i].m_pBuilding;
@@ -12398,12 +12399,6 @@ INITSAVEBUF
 		ScriptSpace[i] = ReadSaveBuf<uint8>(buf);
 	assert(ReadSaveBuf<uint32>(buf) == SCRIPT_DATA_SIZE);
 	OnAMissionFlag = ReadSaveBuf<uint32>(buf);
-	for (uint32 i = 0; i < MAX_NUM_CONTACTS; i++) {
-		OnAMissionForContactFlag[i] = ReadSaveBuf<uint32>(buf);
-		BaseBriefIdForContact[i] = ReadSaveBuf<uint32>(buf);
-	}
-	for (uint32 i = 0; i < MAX_NUM_COLLECTIVES; i++)
-		CollectiveArray[i] = ReadSaveBuf<tCollectiveData>(buf);
 	NextFreeCollectiveIndex = ReadSaveBuf<uint32>(buf);
 	for (uint32 i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
 		uint32 type = ReadSaveBuf<uint32>(buf);

@@ -16,3 +16,5 @@ public:
 
 	virtual bool GetIsATreadable(void) { return false; }
 };
+
+bool IsBuildingPointerValid(CBuilding*);

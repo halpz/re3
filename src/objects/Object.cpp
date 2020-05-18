@@ -396,3 +396,18 @@ CObject::DeleteAllTempObjectsInArea(CVector point, float fRadius)
 		}
 	}
 }
+
+bool
+IsObjectPointerValid(CObject* pObject)
+{
+	if (!pObject)
+		return false;
+	int index = CPools::GetObjectPool()->GetJustIndex(pObject);
+#ifdef FIX_BUGS
+	if (index < 0 || index >= CPools::GetObjectPool()->GetSize())
+#else
+	if (index < 0 || index > CPools::GetObjectPool()->GetSize())
+#endif
+		return false;
+	return pObject->bIsBIGBuilding || pObject->m_entryInfoList.first;
+}

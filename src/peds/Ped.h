@@ -1018,3 +1018,6 @@ void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 #ifndef PED_SKIN
 VALIDATE_SIZE(CPed, 0x53C);
 #endif
+
+bool IsPedPointerValid(CPed*);
+bool IsPedPointerValid_NotInWorld(CPed*);
