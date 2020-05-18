@@ -358,7 +358,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 					pVehicle->AutoPilot.m_nCruiseSpeed = FindPoliceCarSpeedForWantedLevel(pVehicle);
 					pVehicle->SetStatus(STATUS_PHYSICS);
 					pVehicle->AutoPilot.m_nCarMission = 
-						pVehicle->GetVehicleAppearance() == VEHICLE_BOAT ? FindPoliceBoatMissionForWantedLevel() : FindPoliceCarMissionForWantedLevel();
+						pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT ? FindPoliceBoatMissionForWantedLevel() : FindPoliceCarMissionForWantedLevel();
 					pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
 					pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
 				}else if (pVehicle->AutoPilot.m_nCarMission == MISSION_CRUISE){
@@ -432,7 +432,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 	if (pVehicle->bIsLawEnforcer) {
 		if (pVehicle->AutoPilot.m_nCarMission == MISSION_RAMPLAYER_FARAWAY ||
 			pVehicle->AutoPilot.m_nCarMission == MISSION_RAMPLAYER_CLOSE) {
-			if (FindPlayerVehicle() && FindPlayerVehicle()->GetVehicleAppearance() == VEHICLE_BIKE)
+			if (FindPlayerVehicle() && FindPlayerVehicle()->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE)
 				pVehicle->AutoPilot.m_nCarMission = MISSION_BLOCKPLAYER_FARAWAY;
 		}
 	}
@@ -489,16 +489,16 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 
 	if (pVehicle->bIsLawEnforcer && FindPlayerPed()->m_pWanted->m_nWantedLevel > 0) {
 		if (!FindPlayerVehicle() ||
-			FindPlayerVehicle()->GetVehicleAppearance() == VEHICLE_CAR ||
-			FindPlayerVehicle()->GetVehicleAppearance() == VEHICLE_BIKE) {
-			if (pVehicle->GetVehicleAppearance() == VEHICLE_BOAT) {
+			FindPlayerVehicle()->GetVehicleAppearance() == VEHICLE_APPEARANCE_CAR ||
+			FindPlayerVehicle()->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE) {
+			if (pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT) {
 				pVehicle->AutoPilot.m_nTempAction = TEMPACT_WAIT;
 				pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 1000;
 			}
 		}
-		else if (FindPlayerVehicle()->GetVehicleAppearance() == VEHICLE_BOAT) {
-			if (pVehicle->GetVehicleAppearance() == VEHICLE_CAR ||
-				pVehicle->GetVehicleAppearance() == VEHICLE_BIKE) {
+		else if (FindPlayerVehicle()->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT) {
+			if (pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_CAR ||
+				pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE) {
 				pVehicle->AutoPilot.m_nTempAction = TEMPACT_WAIT;
 				pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 1000;
 			}

@@ -104,7 +104,7 @@ strcmpIgnoringDigits(const char *s1, const char *s2)
 		c2 = toupper(c2);
 #endif
 
-		if(c1 != c2)
+		if(c1 && c2 && c1 != c2)
 			return false;
 	}
 }

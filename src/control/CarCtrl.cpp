@@ -655,10 +655,10 @@ CCarCtrl::GenerateOneRandomCar()
 	}
 	int nMadDrivers;
 	switch (pVehicle->GetVehicleAppearance()) {
-	case VEHICLE_BIKE:
+	case VEHICLE_APPEARANCE_BIKE:
 		nMadDrivers = 30;
 		break;
-	case VEHICLE_BOAT:
+	case VEHICLE_APPEARANCE_BOAT:
 		nMadDrivers = 40;
 		break;
 	default:

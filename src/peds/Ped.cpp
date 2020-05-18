@@ -537,6 +537,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fAirResistance = 0.4f / m_fMass;
 	m_fElasticity = 0.05f;
 
+	m_ceaseAttackTimer = 0;
+
 	bIsStanding = false;
 	bWasStanding = false;
 	bIsAttacking = false;

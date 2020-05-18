@@ -221,8 +221,8 @@ enum {
 };
 
 enum {
-	SIZE_MAIN_SCRIPT = 128 * 1024,
-	SIZE_MISSION_SCRIPT = 32 * 1024,
+	SIZE_MAIN_SCRIPT = 225512,
+	SIZE_MISSION_SCRIPT = 35000,
 	SIZE_SCRIPT_SPACE = SIZE_MAIN_SCRIPT + SIZE_MISSION_SCRIPT
 };
 
@@ -507,4 +507,6 @@ private:
 			return false;
 		}
 	}
+	
+	static bool ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami);
 };

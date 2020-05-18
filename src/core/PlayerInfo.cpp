@@ -140,6 +140,7 @@ CPlayerInfo::Clear(void)
 	m_nUpsideDownCounter = 0;
 	m_bInfiniteSprint = false;
 	m_bFastReload = false;
+	m_nMaxHealth = m_nMaxArmour = 100;
 	m_bGetOutOfJailFree = false;
 	m_bGetOutOfHospitalFree = false;
 	m_bDriveByAllowed = true;
