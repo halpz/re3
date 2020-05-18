@@ -865,8 +865,14 @@ CAutomobile::ProcessControl(void)
 			CVector wheelFwd = GetForward();
 			CVector wheelRight = GetRight();
 
+#ifdef FIX_BUGS
+			// Not sure if this is needed, but brake usually has timestep as a factor
+			if(bIsHandbrakeOn)
+				brake = 20000.0f * CTimer::GetTimeStepFix();
+#else
 			if(bIsHandbrakeOn)
 				brake = 20000.0f;
+#endif
 
 			if(m_aWheelTimer[CARWHEEL_REAR_LEFT] > 0.0f){
 				if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier))
