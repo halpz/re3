@@ -926,7 +926,7 @@ const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_
 	{ "grenade", "grenade", MI_COP, awc(aThrowAnimations), aWeaponAnimDescs },
 	{ "flame", "flame", MI_COP, awc(aFlamethrowerAnimations), aWeaponAnimDescs },
 	{ "medic", "medic", MI_COP, awc(aMedicAnimations), aMedicAnimDescs },
-	{ "sunbathe", "sunbathe", MI_COP, awc(aSunbatheAnimations), aSunbatheAnimDescs },
+	{ "sunbathe", "sunbathe", MI_COP, 1, aSunbatheAnimations, aSunbatheAnimDescs },	// NB: not using awc here!
 	{ "playidles", "playidles", MI_COP, awc(aPlayerIdleAnimations), aPlayerIdleAnimDescs },
 	{ "riot", "riot", MI_COP, awc(aRiotAnimations), aRiotAnimDescs },
 	{ "strip", "strip", MI_COP, awc(aStripAnimations), aStripAnimDescs },
