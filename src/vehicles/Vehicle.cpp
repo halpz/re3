@@ -514,6 +514,9 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 					brake = 0.2f * mod_HandlingManager.field_4 / m_fMass;
 				else
 					brake = mod_HandlingManager.field_4 / m_fMass;
+#ifdef FIX_BUGS
+				brake *= CTimer::GetTimeStepFix();
+#endif
 			}
 		}
 
