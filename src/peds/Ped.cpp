@@ -18600,3 +18600,28 @@ CPed::AddInCarAnims(CVehicle* car, bool isDriver)
 
 	StopNonPartialAnims();
 }
+
+bool
+IsPedPointerValid_NotInWorld(CPed* pPed)
+{
+	if (!pPed)
+		return false;
+	int index = CPools::GetPedPool()->GetJustIndex(pPed);
+#ifdef FIX_BUGS
+	if (index < 0 || index >= NUMPEDS)
+#else
+	if (index < 0 || index > NUMPEDS)
+#endif
+		return false;
+	return true;
+}
+
+bool
+IsPedPointerValid(CPed* pPed)
+{
+	if (!IsPedPointerValid_NotInWorld(pPed))
+		return false;
+	if (pPed->bInVehicle && pPed->m_pMyVehicle)
+		return IsEntityPointerValid(pPed->m_pMyVehicle);
+	return pPed->m_entryInfoList.first || pPed == FindPlayerPed();
+}

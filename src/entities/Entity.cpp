@@ -28,6 +28,8 @@
 #include "Bones.h"
 #include "Debug.h"
 #include "Renderer.h"
+#include "Ped.h"
+#include "Dummy.h"
 
 int gBuildings;
 
@@ -1028,3 +1030,18 @@ CEntity::LoadEntityFlags(uint8*& buf)
 }
 
 #endif
+
+bool IsEntityPointerValid(CEntity* pEntity)
+{
+	if (!pEntity)
+		return false;
+	switch (pEntity->GetType()) {
+	case ENTITY_TYPE_NOTHING: return false;
+	case ENTITY_TYPE_BUILDING: return IsBuildingPointerValid((CBuilding*)pEntity);
+	case ENTITY_TYPE_VEHICLE: return IsVehiclePointerValid((CVehicle*)pEntity);
+	case ENTITY_TYPE_PED: return IsPedPointerValid((CPed*)pEntity);
+	case ENTITY_TYPE_OBJECT: return IsObjectPointerValid((CObject*)pEntity);
+	case ENTITY_TYPE_DUMMY: return IsDummyPointerValid((CDummy*)pEntity);
+	}
+	return false;
+}

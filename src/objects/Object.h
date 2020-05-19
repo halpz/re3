@@ -113,3 +113,5 @@ public:
 	static void DeleteAllTempObjects();
 	static void DeleteAllTempObjectsInArea(CVector point, float fRadius);
 };
+
+bool IsObjectPointerValid(CObject* pObject);

@@ -314,3 +314,4 @@ public:
 };
 
 void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);
+bool IsVehiclePointerValid(CVehicle* pVehicle);

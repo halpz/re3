@@ -180,3 +180,5 @@ public:
 
 	static void AddSteamsFromGround(CPtrList& list);
 };
+
+bool IsEntityPointerValid(CEntity*);
