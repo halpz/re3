@@ -1823,7 +1823,7 @@ void
 CWorld::RepositionOneObject(CEntity *pEntity)
 {
 	int16 modelId = pEntity->GetModelIndex();
-	if (IsTrafficLight(modelId) || IsTreeModel(modelId) || modelId == MI_PARKINGMETER ||
+	if (IsStreetLight(modelId) || IsTreeModel(modelId) || modelId == MI_PARKINGMETER ||
 	   modelId == MI_PHONEBOOTH1 || modelId == MI_WASTEBIN || modelId == MI_BIN || modelId == MI_POSTBOX1 ||
 	   modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE || modelId == MI_DUMP1 ||
 	   modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||
