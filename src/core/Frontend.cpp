@@ -740,7 +740,7 @@ CMenuManager::Draw()
 
 		PREPARE_MENU_HEADER
 		CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
-		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(17.f), SCREEN_SCALE_Y(17.f), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
+		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X + 7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 
 		PREPARE_MENU_HEADER
 		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
@@ -1818,11 +1818,21 @@ CMenuManager::DrawControllerSetupScreen()
 
 	switch (m_ControlMethod) {
 		case CONTROL_STANDARD:
-			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y),
+			CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X + 7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f),
+				TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
+
+			PREPARE_MENU_HEADER
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y),
 				TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 			break;
 		case CONTROL_CLASSIC:
-			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y),
+			CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X + 7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f),
+				TheText.Get("FET_CTI"));
+
+			PREPARE_MENU_HEADER
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y),
 				TheText.Get("FET_CTI"));
 			break;
 		default:
