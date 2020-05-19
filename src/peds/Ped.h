@@ -421,20 +421,50 @@ public:
 #ifdef PED_SKIN
 	uint32 bDontAcceptIKLookAts : 1;	// TODO: find uses of this
 #endif
+	uint32 bReachedAttractorHeadingTarget : 1;
+	uint32 bTurnedAroundOnAttractor : 1;
+
+	uint32 bHasAlreadyUsedAttractor : 1;
+	//uint32 b155_2
+	uint32 bCarPassenger : 1;
+	//uint32 b155_8
+	//uint32 b155_10
+	uint32 bMiamiViceCop : 1;
+	//uint32 b155_40
+	//uint32 b155_80
+
+	//uint32 b156_1
+	//uint32 b156_2
+	//uint32 b156_4
+	//uint32 b156_8
+	uint32 bIsPlayerFriend : 1;
+#ifdef VC_PED_PORTS
+	uint32 bHeadStuckInCollision : 1;
+#endif
+	uint32 bDeadPedInFrontOfCar : 1;
+	//uint32 b156_80
+
+	//uint32 b157_1
+	//uint32 b157_2
+	//uint32 b157_4
+	//uint32 b157_8
+	//uint32 b157_10
+	//uint32 b157_20
+	//uint32 b157_40
+	//uint32 b157_80
+
+	//uint32 b158_1
+	//uint32 b158_2
+	//uint32 b158_4
+	//uint32 b158_8
+	//uint32 b158_10
+	//uint32 b158_20
+	//uint32 b158_40
+	//uint32 b158_80
+
 	// our own flags
 	uint32 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
-
-	uint32 bReachedAttractorHeadingTarget : 1; // 0x154 0x40
-	uint32 bTurnedAroundOnAttractor : 1; // 0x154 0x80
-	uint32 bHasAlreadyUsedAttractor : 1; // 0x155 0x1
-	uint32 bCarPassenger : 1; // 0x155 0x4
-	uint32 bMiamiViceCop : 1;  // 0x155 0x20
-	uint32 bIsPlayerFriend : 1; // 0x156 0x10
-#ifdef VC_PED_PORTS
-	uint32 bHeadStuckInCollision : 1; // 0x156 0x20
-#endif
-	uint32 bDeadPedInFrontOfCar : 1; // 0x156 0x40
 
 	uint8 CharCreatedBy;
 	eObjective m_objective;
