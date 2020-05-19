@@ -418,9 +418,6 @@ public:
 	uint32 bVehExitWillBeInstant : 1;
 	uint32 bHasAlreadyBeenRecorded : 1;
 	uint32 bFallenDown : 1;
-#ifdef VC_PED_PORTS
-	uint32 bSomeVCflag1 : 1;
-#endif
 #ifdef PED_SKIN
 	uint32 bDontAcceptIKLookAts : 1;	// TODO: find uses of this
 #endif
@@ -433,6 +430,10 @@ public:
 	uint32 bHasAlreadyUsedAttractor : 1; // 0x155 0x1
 	uint32 bCarPassenger : 1; // 0x155 0x4
 	uint32 bMiamiViceCop : 1;  // 0x155 0x20
+	uint32 bIsPlayerFriend : 1; // 0x156 0x10
+#ifdef VC_PED_PORTS
+	uint32 bHeadStuckInCollision : 1; // 0x156 0x20
+#endif
 	uint32 bDeadPedInFrontOfCar : 1; // 0x156 0x40
 
 	uint8 CharCreatedBy;
@@ -666,7 +667,9 @@ public:
 	void SetPointGunAt(CEntity*);
 	bool Seek(void);
 	bool SetWanderPath(int8);
-	bool SetFollowPath(CVector);
+	bool SetFollowPath(CVector dest, float radius, eMoveState state, CEntity*, CEntity*, int);
+	bool SetFollowPathStatic(void);
+	bool SetFollowPathDynamic(void);
 	void ClearAttackByRemovingAnim(void);
 	void SetStoredState(void);
 	void StopNonPartialAnims(void);
@@ -873,7 +876,12 @@ public:
 	CWeapon *GetWeapon(void) { return &m_weapons[m_currentWeapon]; }
 
 	PedState GetPedState(void) { return m_nPedState; }
-	void SetPedState(PedState state) { m_nPedState = state; }
+	void SetPedState(PedState state) 
+	{
+		if (GetPedState() == PED_FOLLOW_PATH)
+			ClearFollowPath();
+		m_nPedState = state;
+	}
 	bool Dead(void) { return m_nPedState == PED_DEAD; }
 	bool Dying(void) { return m_nPedState == PED_DIE; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
