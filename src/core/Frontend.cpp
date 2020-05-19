@@ -37,6 +37,18 @@
 #include "Messages.h"
 #include "FileLoader.h"
 
+// Similar story to Hud.cpp:
+// Game has colors inlined in code.
+// For easier modification we collect them here:
+CRGBA LABEL_COLOR(255, 150, 225, 255);
+CRGBA SELECTIONBORDER_COLOR(25, 130, 70, 255);
+CRGBA MENUOPTION_COLOR(255, 150, 225, 255);
+CRGBA SELECTEDMENUOPTION_COLOR(255, 150, 225, 255);
+CRGBA HEADER_COLOR(255, 150, 255, 255);
+CRGBA DARKMENUOPTION_COLOR(195, 90, 165, 255);
+CRGBA SLIDERON_COLOR(97, 194, 247, 255);
+CRGBA SLIDEROFF_COLOR(27, 89, 130, 255);
+
 #define TIDY_UP_PBP // ProcessButtonPresses
 #define MAX_VISIBLE_LIST_ROW 30
 #define SCROLLBAR_MAX_HEIGHT 263.0f // not in end result
@@ -197,7 +209,7 @@ const char* FrontendFilenames[][2] = {
 	{"vcpr", "vcprA"},
 	{"espantoso", "espantosoA"},
 	{"emotion", "emotionA"},
-	{"wave", "waveA"},
+	{"wave103", "wave103A"},
 	{"mp3", "mp3A"},
 	{"downOff", "buttonA"},
 	{"downOn", "buttonA"},
@@ -269,7 +281,7 @@ ScaleAndCenterX(float x)
 #endif
 
 #define PREPARE_MENU_HEADER \
-	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255))); \
+	CFont::SetColor(CRGBA(HEADER_COLOR.r, HEADER_COLOR.g, HEADER_COLOR.b, FadeIn(255))); \
 	CFont::SetRightJustifyOn(); \
 	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT)); \
 	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
@@ -291,9 +303,10 @@ ScaleAndCenterX(float x)
 			m_nHoverOption = HOVEROPTION_NOT_HOVERING; \
 	} while(0)
 
+// TODO: this is COMPLETELY different in VC
 #define ProcessRadioIcon(sprite, x, y, radioId, hoverOpt) \
 	do { \
-		sprite.Draw(x, y, MENU_X(MENURADIO_ICON_SCALE), MENU_Y(MENURADIO_ICON_SCALE), radioId == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170)); \
+		sprite.Draw(x, y, MENU_X(MENURADIO_ICON_SCALE), MENU_Y(MENURADIO_ICON_SCALE), radioId == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(255, 255, 255, 100)); \
 			if (CheckHover(x, x + MENU_X(MENURADIO_ICON_SCALE), y, y + MENU_Y(MENURADIO_ICON_SCALE))) \
 				m_nHoverOption = hoverOpt; \
 	} while (0)
@@ -636,15 +649,15 @@ CMenuManager::DisplaySlider(float x, float y, float mostLeftBarSize, float mostR
 
 	int lastActiveBarX = 0;
 	float curBarX = 0.0f;
-	float spacing = SCREEN_SCALE_X(10.0f);
+	float spacing = SCREEN_SCALE_X(4.0f); // TODO: find actual numbers used in the game
 	for (int i = 0; i < 16; i++) {
-		curBarX = i * rectSize/16.0f + x;
+		curBarX = i * rectSize/32.0f + x;
 
 		if (i / 16.0f + 1 / 32.0f < progress) {
-			color = CRGBA(255, 217, 106, FadeIn(255));
+			color = CRGBA(SLIDERON_COLOR.r, SLIDERON_COLOR.g, SLIDERON_COLOR.b, FadeIn(255));
 			lastActiveBarX = curBarX;
 		} else
-			color = CRGBA(185, 120, 0, FadeIn(255));
+			color = CRGBA(SLIDEROFF_COLOR.r, SLIDEROFF_COLOR.g, SLIDEROFF_COLOR.b, FadeIn(255));
 
 		maxBarHeight = Max(mostLeftBarSize, mostRightBarSize);
 
@@ -685,8 +698,10 @@ CMenuManager::Draw()
 	CFont::SetCentreOff();
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
-#ifdef GTA3_1_1_PATCH
-	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
+
+	// no V1.1 text in vc obv
+#if 0 //def GTA3_1_1_PATCH
+	CFont::SetColor(CRGBA(255, 150, 225, FadeIn(255)));
 	CFont::SetRightJustifyOn();
 	CFont::SetFontStyle(FONT_HEADING);
 	CFont::SetScale(MENU_X(0.7f), MENU_Y(0.5f));
@@ -696,6 +711,7 @@ CMenuManager::Draw()
 	AsciiToUnicode(gString, gUString);
 	CFont::PrintString(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 45, gUString);
 #endif
+
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
 
@@ -721,9 +737,13 @@ CMenuManager::Draw()
 	if(!m_bRenderGameInMenu)
 #endif
 	if (aScreens[m_nCurrScreen].m_ScreenName[0] != '\0') {
-		
+
 		PREPARE_MENU_HEADER
-		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
+		CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
+		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X + 7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
+
+		PREPARE_MENU_HEADER
+		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 
 		// Weird place to put that.
 		nextYToUse += 24.0f + 10.0f;
@@ -732,7 +752,7 @@ CMenuManager::Draw()
 	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 	CFont::SetScale(MENU_X(MENUACTION_SCALE_MULT * MENU_TEXT_SIZE_X), MENU_Y(MENUACTION_SCALE_MULT * MENU_TEXT_SIZE_Y));
 	CFont::SetRightJustifyOff();
-	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
+	CFont::SetColor(CRGBA(LABEL_COLOR.r, LABEL_COLOR.g, LABEL_COLOR.b, FadeIn(255)));
 
 	// Label
 	wchar *str;
@@ -830,7 +850,7 @@ CMenuManager::Draw()
 			break;
 		case MENUPAGE_START_MENU:
 			columnWidth = 320;
-			headerHeight = 140;
+			headerHeight = 110;
 			lineHeight = 24;
 			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
@@ -883,7 +903,7 @@ CMenuManager::Draw()
 	}
 
 	float usableLineHeight = lineHeight * 0.9f; // also height of biggest bar in slider
-	float smallestSliderBar = lineHeight * 0.1f;
+	float smallestSliderBar = lineHeight * 0.25f; // TODO: find actual number
 	bool foundTheHoveringItem = false;
 	wchar unicodeTemp[64];
 	char asciiTemp[32];
@@ -1211,7 +1231,7 @@ CMenuManager::Draw()
 				// We keep stretching, because we also stretch background image and we want that bar to be aligned with borders of background
 				CSprite2d::DrawRect(CRect(StretchX(10.0f), MENU_Y(bitAboveNextItemY),
 											SCREEN_STRETCH_FROM_RIGHT(11.0f), MENU_Y(usableLineHeight + nextItemY)),
-											CRGBA(100, 200, 50, FadeIn(50)));
+											CRGBA(SELECTIONBORDER_COLOR.r, SELECTIONBORDER_COLOR.g, SELECTIONBORDER_COLOR.b, FadeIn(255)));
 			}
 
 			CFont::SetColor(CRGBA(0, 0, 0, FadeIn(90)));
@@ -1230,14 +1250,14 @@ CMenuManager::Draw()
 					
 					if(!strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_RES") 
 						&& !m_bGameNotLoaded && textLayer == 1) {
-						CFont::SetColor(CRGBA(155, 117, 6, FadeIn(255)));
+						CFont::SetColor(CRGBA(DARKMENUOPTION_COLOR.r, DARKMENUOPTION_COLOR.g, DARKMENUOPTION_COLOR.b, FadeIn(255)));
 					}
 					CFont::PrintString(MENU_X_RIGHT_ALIGNED(columnWidth - textLayer), itemY, rightText);
 				}
 				if (i == m_nCurrOption && itemsAreSelectable){
-					CFont::SetColor(CRGBA(255, 217, 106, FadeIn(255)));
+					CFont::SetColor(CRGBA(MENUOPTION_COLOR.r, MENUOPTION_COLOR.g, MENUOPTION_COLOR.b, FadeIn(255)));
 				} else {
-					CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
+					CFont::SetColor(CRGBA(SELECTEDMENUOPTION_COLOR.r, SELECTEDMENUOPTION_COLOR.g, SELECTEDMENUOPTION_COLOR.b, FadeIn(255)));
 				}
 			}
 
@@ -1306,15 +1326,15 @@ CMenuManager::Draw()
 
 			// Radio icons
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_RADIO) {
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO1], MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(nextYToUse), 0, HOVEROPTION_RADIO_0);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO2], MENU_X_LEFT_ALIGNED(90.0f), MENU_Y(nextYToUse), 1, HOVEROPTION_RADIO_1);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO5], MENU_X_LEFT_ALIGNED(150.0f), MENU_Y(nextYToUse), 2, HOVEROPTION_RADIO_2);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO7], MENU_X_LEFT_ALIGNED(210.0f), MENU_Y(nextYToUse), 3, HOVEROPTION_RADIO_3);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO8], MENU_X_LEFT_ALIGNED(270.0f), MENU_Y(nextYToUse), 4, HOVEROPTION_RADIO_4);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO3], MENU_X_LEFT_ALIGNED(320.0f), MENU_Y(nextYToUse), 5, HOVEROPTION_RADIO_5);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO4], MENU_X_LEFT_ALIGNED(360.0f), MENU_Y(nextYToUse), 6, HOVEROPTION_RADIO_6);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO6], MENU_X_LEFT_ALIGNED(420.0f), MENU_Y(nextYToUse), 7, HOVEROPTION_RADIO_7);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO9], MENU_X_LEFT_ALIGNED(480.0f), MENU_Y(nextYToUse), 8, HOVEROPTION_RADIO_8);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_WILDSTYLE], MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(nextYToUse), 0, HOVEROPTION_RADIO_0);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_FLASH], MENU_X_LEFT_ALIGNED(90.0f), MENU_Y(nextYToUse), 1, HOVEROPTION_RADIO_1);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_KCHAT], MENU_X_LEFT_ALIGNED(150.0f), MENU_Y(nextYToUse), 2, HOVEROPTION_RADIO_2);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_FEVER], MENU_X_LEFT_ALIGNED(210.0f), MENU_Y(nextYToUse), 3, HOVEROPTION_RADIO_3);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_VROCK], MENU_X_LEFT_ALIGNED(270.0f), MENU_Y(nextYToUse), 4, HOVEROPTION_RADIO_4);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_VCPR], MENU_X_LEFT_ALIGNED(320.0f), MENU_Y(nextYToUse), 5, HOVEROPTION_RADIO_5);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_ESPANTOSO], MENU_X_LEFT_ALIGNED(360.0f), MENU_Y(nextYToUse), 6, HOVEROPTION_RADIO_6);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_EMOTION], MENU_X_LEFT_ALIGNED(420.0f), MENU_Y(nextYToUse), 7, HOVEROPTION_RADIO_7);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_WAVE], MENU_X_LEFT_ALIGNED(480.0f), MENU_Y(nextYToUse), 8, HOVEROPTION_RADIO_8);
 
 				if (DMAudio.IsMP3RadioChannelAvailable())
 					ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_MP3], MENU_X_LEFT_ALIGNED(540.0f), MENU_Y(nextYToUse), 9, HOVEROPTION_RADIO_9);
@@ -1798,11 +1818,21 @@ CMenuManager::DrawControllerSetupScreen()
 
 	switch (m_ControlMethod) {
 		case CONTROL_STANDARD:
-			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y),
+			CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X + 7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f),
+				TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
+
+			PREPARE_MENU_HEADER
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y),
 				TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 			break;
 		case CONTROL_CLASSIC:
-			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y),
+			CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X + 7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f),
+				TheText.Get("FET_CTI"));
+
+			PREPARE_MENU_HEADER
+			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y),
 				TheText.Get("FET_CTI"));
 			break;
 		default:
@@ -2361,12 +2391,15 @@ CMenuManager::DrawFrontEndNormal()
 	// GTA LOGO
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	/*
 	if (m_nCurrScreen == MENUPAGE_START_MENU || m_nCurrScreen == MENUPAGE_PAUSE_MENU) {
 		if (CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
 			m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X_LEFT_ALIGNED(205.0f), MENU_Y(70.0f), MENU_X_LEFT_ALIGNED(435.0f), MENU_Y(180.0f)), CRGBA(255, 255, 255, FadeIn(255)));
 		else
 			m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X_LEFT_ALIGNED(225.0f), MENU_Y(40.0f), MENU_X_LEFT_ALIGNED(415.0f), MENU_Y(210.0f)), CRGBA(255, 255, 255, FadeIn(255)));
 	}
+	*/
+	m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(SCREEN_SCALE_X(27.0f), MENU_Y(8.0f), SCREEN_SCALE_X(157.0f), MENU_Y(138.0f)), CRGBA(255, 255, 255, FadeIn(255)));
 
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
 	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
@@ -5139,6 +5172,9 @@ CMenuManager::PrintController(void)
 	// FIX: Originally this function doesn't have StretchX/Y, everything had constant pixel size (due to screen was abandoned early?)
 	//		Also texts and their alignment were very bad, so I tried to make them readable (commented out the original code, and marked the ones I added with X)
 
+	// sorry!
+
+	/*
 	m_aFrontEndSprites[FE_CONTROLLERSH].Draw(MENU_X_LEFT_ALIGNED(160.0f), MENU_Y(160.0f), MENU_X(240.0f), MENU_Y(180.0f), CRGBA(0, 0, 0, 255));
 	m_aFrontEndSprites[FE_CONTROLLER].Draw(MENU_X_LEFT_ALIGNED(160.0f), MENU_Y(160.0f), MENU_X(235.2f), MENU_Y(175.2f), CRGBA(255, 255, 255, 255));
 	if (m_DisplayControllerOnFoot) {
@@ -5152,6 +5188,7 @@ CMenuManager::PrintController(void)
 		else
 			m_aFrontEndSprites[FE_ARROWS4].Draw(MENU_X_LEFT_ALIGNED(160.0f), MENU_Y(160.0f), MENU_X(235.2f), MENU_Y(175.2f), CRGBA(255, 255, 255, 255));
 	}
+	*/
 
 	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));  // X
 
