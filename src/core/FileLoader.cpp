@@ -1,4 +1,5 @@
 #include "common.h"
+#include <ctype.h>
 #include "main.h"
 
 #include "Quaternion.h"
@@ -26,6 +27,9 @@
 #include "FileLoader.h"
 #include "Streaming.h"
 #include "ColStore.h"
+#include "Occlusion.h"
+
+//--MIAMI: file done
 
 char CFileLoader::ms_line[256];
 
@@ -159,7 +163,6 @@ struct ColHeader
 	uint32 size;
 };
 
-//--MIAMI: done
 void
 CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
 {
@@ -196,7 +199,6 @@ CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
 }
 
 
-//--MIAMI: done
 bool
 CFileLoader::LoadCollisionFileFirstTime(uint8 *buffer, uint32 size, uint8 colSlot)
 {
@@ -298,13 +300,15 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	model.numLines = *(int16*)buf;
 	buf += 4;
 	if(model.numLines > 0){
-		model.lines = (CColLine*)RwMalloc(model.numLines*sizeof(CColLine));
+		//model.lines = (CColLine*)RwMalloc(model.numLines*sizeof(CColLine));
 		for(i = 0; i < model.numLines; i++){
-			model.lines[i].Set(*(CVector*)buf, *(CVector*)(buf+12));
+			//model.lines[i].Set(*(CVector*)buf, *(CVector*)(buf+12));
 			buf += 24;
 		}
 	}else
 		model.lines = nil;
+	model.numLines = 0;
+	model.lines = nil;
 
 	model.numBoxes = *(int16*)buf;
 	buf += 4;
@@ -323,10 +327,12 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 		model.vertices = (CVector*)RwMalloc(numVertices*sizeof(CVector));
 		for(i = 0; i < numVertices; i++){
 			model.vertices[i] = *(CVector*)buf;
+#if 0
 			if(Abs(model.vertices[i].x) >= 256.0f ||
 			   Abs(model.vertices[i].y) >= 256.0f ||
 			   Abs(model.vertices[i].z) >= 256.0f)
 				printf("%s:Collision volume too big\n", modelname);
+#endif
 			buf += 12;
 		}
 	}else
@@ -349,7 +355,7 @@ GetNameAndLOD(char *nodename, char *name, int *n)
 {
 	char *underscore = nil;
 	for(char *s = nodename; *s != '\0'; s++){
-		if(s[0] == '_' && (s[1] == 'l' || s[1] == 'L'))
+		if(s[0] == '_' && (s[1] == 'l' || s[1] == 'L') && isdigit(s[2]))
 			underscore = s;
 	}
 	if(underscore){
@@ -1093,7 +1099,7 @@ CFileLoader::LoadScene(const char *filename)
 			LoadCullZone(line);
 			break;
 		case OCCL:
-			// TODO(MIAMI): occlusion
+			LoadOcclusionVolume(line);
 			break;
 		case PICK:
 			// unused
@@ -1187,7 +1193,9 @@ CFileLoader::LoadObjectInstance(const char *line)
 				CColStore::GetBoundingBox(col->level).ContainRect(entity->GetBoundRect());
 		}else
 			entity->bUsesCollision = false;
-		// TODO(MIAMI): set some flag here if col min is below 6
+
+		if(entity->GetPosition().z + col->boundingBox.min.z < 6.0f)
+			entity->bUnderwater = true;
 	}else{
 		entity = new CDummyObject;
 		entity->SetModelIndexNoCreate(id);
@@ -1240,6 +1248,21 @@ CFileLoader::LoadPickup(const char *line)
 
 	sscanf(line, "%d %f %f %f", &id, &x, &y, &z);
 }
+
+void
+CFileLoader::LoadOcclusionVolume(const char *line)
+{
+	float x, y, z;
+	float width, length, height;
+	float angle;
+
+	sscanf(line, "%f %f %f %f %f %f %f",
+		&x, &y, &z,
+		&width, &length, &height,
+		&angle);
+	COcclusion::AddOne(x, y, z, width, length, z + height/2.0f, angle);
+}
+
 
 //--MIAMI: unused
 void

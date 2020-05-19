@@ -84,6 +84,7 @@
 #include "World.h"
 #include "ZoneCull.h"
 #include "Zones.h"
+#include "Occlusion.h"
 #include "debugmenu.h"
 
 
@@ -272,6 +273,7 @@ bool CGame::Initialise(const char* datFile)
 	ThePaths.AllocatePathFindInfoMem(4500);
 	CWeather::Init();
 	CCullZones::Init();
+	COcclusion::Init();
 	CCollision::Init();
 	CTheZones::Init();
 	CUserDisplay::Init();
