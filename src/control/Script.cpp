@@ -2998,9 +2998,9 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 			pCarGen->SwitchOff();
 		}else if (ScriptParams[1] <= 100){
 			pCarGen->SwitchOn();
+			pCarGen->SetUsesRemaining(ScriptParams[1]);
 		}else{
 			pCarGen->SwitchOn();
-			pCarGen->SetUsesRemaining(ScriptParams[1]);
 		}
 		return 0;
 	}
