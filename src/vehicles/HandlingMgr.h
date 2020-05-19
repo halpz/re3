@@ -85,11 +85,13 @@ enum eHandlingId
 	HANDLING_LOVEFIST,
 	HANDLING_BLOODRA,
 	HANDLING_BLOODRB,
+
 	HANDLING_BIKE,
 	HANDLING_MOPED,
 	HANDLING_DIRTBIKE,
 	HANDLING_ANGEL,
 	HANDLING_FREEWAY,
+
 	HANDLING_PREDATOR,
 	HANDLING_SPEEDER,
 	HANDLING_REEFER,
@@ -100,7 +102,7 @@ enum eHandlingId
 	HANDLING_DINGHY,
 	HANDLING_MARQUIS,
 	HANDLING_CUPBOAT,
-	HANDLING_SEAPLANE,
+	HANDLING_SEAPLANE,	// both boat and plane!
 	HANDLING_SPARROW,
 	HANDLING_SEASPAR,
 	HANDLING_MAVERICK,
@@ -109,7 +111,13 @@ enum eHandlingId
 	HANDLING_HUNTER,
 	HANDLING_RCBARON,
 	HANDLING_RCGOBLIN,
-	HANDLING_RCCOPTER
+	HANDLING_RCCOPTER,
+
+	NUMHANDLINGS,
+
+	NUMBIKEHANDLINGS = HANDLING_FREEWAY+1 - HANDLING_BIKE,
+	NUMFLYINGHANDLINGS = HANDLING_RCCOPTER+1 - HANDLING_SEAPLANE,
+	NUMBOATHANDLINGS = HANDLING_SEAPLANE+1 - HANDLING_PREDATOR,
 };
 
 enum
@@ -168,6 +176,7 @@ struct tHandlingData
 	float fSuspensionUpperLimit;
 	float fSuspensionLowerLimit;
 	float fSuspensionBias;
+	float fSuspensionAntidiveMultiplier;
 	float fCollisionDamageMultiplier;
 	uint32 Flags;
 	float fSeatOffsetDistance;
@@ -175,19 +184,74 @@ struct tHandlingData
 	int8 FrontLights;
 	int8 RearLights;
 };
-VALIDATE_SIZE(tHandlingData, 0xD8);
+
+struct tBikeHandlingData
+{
+	eHandlingId nIdentifier;
+	float fLeanFwdCOM;
+	float fLeanFwdForce;
+	float fLeanBakCOM;
+	float fLeanBackForce;
+	float fMaxLean;
+	float fFullAnimLean;
+	float fDesLean;
+	float fSpeedSteer;
+	float fSlipSteer;
+	float fNoPlayerCOMz;
+	float fWheelieAng;
+	float fStoppieAng;
+	float fWheelieSteer;
+	float fWheelieStabMult;
+	float fStoppieStabMult;
+};
+
+struct tBoatHandlingData
+{
+	eHandlingId nIdentifier;
+	float fThrustY;
+	float fThrustZ;
+	float fThrustAppZ;
+	float fAqPlaneForce;
+	float fAqPlaneLimit;
+	float fAqPlaneOffset;
+	float fWaveAudioMult;
+	float fLook_L_R_BehindCamHeight;
+	CVector vecMoveRes;
+	CVector vecTurnRes;
+};
+
+struct  tFlyingHandlingData
+{
+	eHandlingId nIdentifier;
+	float fThrust;
+	float fThrustFallOff;
+	float fYaw;
+	float fYawStab;
+	float fSideSlip;
+	float fRoll;
+	float fRollStab;
+	float fPitch;
+	float fPitchStab;
+	float fFormLift;
+	float fAttackLift;
+	float fMoveRes;
+	CVector vecTurnRes;
+	CVector vecSpeedRes;
+};
 
 class cHandlingDataMgr
 {
 	float field_0;	// unused it seems
 public:
-	float field_4;	// wheel related
+	float fWheelFriction;
 private:
 	float field_8;	//
 	float field_C;	// unused it seems
 	float field_10;	//
 	tHandlingData HandlingData[NUMHANDLINGS];
-	uint32 field_302C;	// unused it seems
+	tBikeHandlingData BikeHandlingData[NUMBIKEHANDLINGS];
+	tFlyingHandlingData FlyingHandlingData[NUMFLYINGHANDLINGS];
+	tBoatHandlingData BoatHandlingData[NUMBOATHANDLINGS];
 
 public:
 	cHandlingDataMgr(void);
@@ -195,8 +259,12 @@ public:
 	void LoadHandlingData(void);
 	int FindExactWord(const char *word, const char *words, int wordLen, int numWords);
 	void ConvertDataToGameUnits(tHandlingData *handling);
+	void ConvertBikeDataToGameUnits(tBikeHandlingData *handling);
 	int32 GetHandlingId(const char *name);
 	tHandlingData *GetHandlingData(eHandlingId id) { return &HandlingData[id]; }
+	tBikeHandlingData *GetBikePointer(uint8 id) { return &BikeHandlingData[id-HANDLING_BIKE]; }
+	tFlyingHandlingData *GetFlyingPointer(uint8 id);
+	tBoatHandlingData *GetBoatPointer(uint8 id);
 	bool HasRearWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
 	bool HasFrontWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
 };
