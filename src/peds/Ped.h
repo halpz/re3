@@ -79,11 +79,11 @@ struct FightMove
 	float endFireTime;
 	float comboFollowOnTime;
 	float strikeRadius;
+	float extendReachMultiplier;
 	uint8 hitLevel; // FightMoveHitLevel
 	uint8 damage;
 	uint8 flags;
 };
-VALIDATE_SIZE(FightMove, 0x18);
 
 // TODO: This is eFightState on mobile.
 enum PedFightMoves
@@ -94,13 +94,21 @@ enum PedFightMoves
 	FIGHTMOVE_IDLE,
 	FIGHTMOVE_SHUFFLE_F,
 	FIGHTMOVE_KNEE,
-	FIGHTMOVE_HEADBUTT,
-	FIGHTMOVE_PUNCHJAB,
 	FIGHTMOVE_PUNCHHOOK,
-	FIGHTMOVE_KICK,
+	FIGHTMOVE_PUNCHJAB,
+	FIGHTMOVE_PUNCH,
+	FIGHTMOVE_BODYBLOW = FIGHTMOVE_PUNCH,
 	FIGHTMOVE_LONGKICK,
 	FIGHTMOVE_ROUNDHOUSE,
-	FIGHTMOVE_BODYBLOW,
+	// Directionals
+	FIGHTMOVE_FWDLEFT,
+	FIGHTMOVE_FWDRIGHT,
+	FIGHTMOVE_BACKKICK,
+	FIGHTMOVE_BACKFLIP,
+	FIGHTMOVE_BACKLEFT,
+	FIGHTMOVE_BACKRIGHT,
+	FIGHTMOVE_RIGHTSWEEP,
+	// Special
 	FIGHTMOVE_GROUNDKICK,
 	// Opponent
 	FIGHTMOVE_HITFRONT,
@@ -113,6 +121,9 @@ enum PedFightMoves
 	FIGHTMOVE_HITBIGSTEP,
 	FIGHTMOVE_HITONFLOOR,
 	FIGHTMOVE_HITBEHIND,
+	FIGHTMOVE_MELEE1,
+	FIGHTMOVE_MELEE2,
+	FIGHTMOVE_MELEE3,
 	FIGHTMOVE_IDLE2NORM,
 	NUM_FIGHTMOVES
 };
@@ -466,6 +477,7 @@ public:
 	uint32 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 
+	uint8 m_gangFlags;
 	uint8 CharCreatedBy;
 	eObjective m_objective;
 	eObjective m_prevObjective;
@@ -588,7 +600,7 @@ public:
 	int8 m_bodyPartBleeding;		// PedNode, but -1 if there isn't
 	CPed *m_nearPeds[10];
 	uint16 m_numNearPeds;
-	uint16 m_pedMoney;
+	uint16 m_nPedMoney;
  	int8 m_lastWepDam;
 	CEntity *m_lastDamEntity;
 	CEntity *m_attachedTo;
@@ -651,7 +663,7 @@ public:
 	void SetCurrentWeapon(eWeaponType weaponType);
 	void SetCurrentWeapon(int weapon);
 	void Duck(void);
-	void ClearDuck(void);
+	void ClearDuck(bool = false);
 	void ClearPointGunAt(void);
 	void BeingDraggedFromCar(void);
 	void RestartNonPartialAnims(void);
@@ -679,7 +691,7 @@ public:
 	void ClearChat(void);
 	void InformMyGangOfAttack(CEntity*);
 	void ReactToAttack(CEntity*);
-	void SetDuck(uint32);
+	void SetDuck(uint32, bool = false);
 	void RegisterThreatWithGangPeds(CEntity*);
 	bool TurnBody(void);
 	void Chat(void);
@@ -810,6 +822,7 @@ public:
 	void GiveDelayedWeapon(eWeaponType weapon, uint32 ammo);
 	void RequestDelayedWeapon();
 	void AddInCarAnims(CVehicle* car, bool isDriver);
+	bool CanBeDamagedByThisGangMember(CPed*);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -915,7 +928,7 @@ public:
 	bool Dead(void) { return m_nPedState == PED_DEAD; }
 	bool Dying(void) { return m_nPedState == PED_DIE; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
-	bool OnGround(void) { return m_nPedState == PED_FALL || m_nPedState == PED_DIE || m_nPedState == PED_DEAD || m_nWaitState == WAITSTATE_SUN_BATHE_IDLE; }
+	bool OnGround(void) { return m_nPedState == PED_FALL || m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
 	
 	bool Driving(void) { return m_nPedState == PED_DRIVING; }
 	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
@@ -933,10 +946,6 @@ public:
 
 	// My names. Inlined in VC
 	AnimationId GetFireAnimNotDucking(CWeaponInfo* weapon) {
-		// TODO(Miami): Revert that when weapons got ported
-		if (weapon->m_AnimToPlay == ASSOCGRP_STD)
-			return ANIM_FIGHT_PPUNCH;
-
 		if (m_nPedType == PEDTYPE_COP && !!weapon->m_bCop3rd)
 			return ANIM_WEAPON_FIRE_3RD;
 		else
@@ -944,14 +953,10 @@ public:
 	}
 
 	static AnimationId GetFireAnimGround(CWeaponInfo* weapon, bool kickFloorIfNone = true) {
-		// TODO(Miami): Revert that when weapons got ported
-		if (weapon->m_AnimToPlay == ASSOCGRP_STD)
-			return ANIM_KICK_FLOOR;
-
 		if (!!weapon->m_bGround2nd)
 			return ANIM_WEAPON_CROUCHFIRE;
 		else if (!!weapon->m_bGround3rd)
-			return ANIM_WEAPON_SPECIAL;
+			return ANIM_WEAPON_FIRE_3RD;
 		else if (kickFloorIfNone)
 			return ANIM_KICK_FLOOR;
 		else
@@ -959,10 +964,6 @@ public:
 	}
 
 	static AnimationId GetPrimaryFireAnim(CWeaponInfo* weapon) {
-		// TODO(Miami): Revert that when weapons got ported
-		if (weapon->m_AnimToPlay == ASSOCGRP_STD)
-			return ANIM_FIGHT_PPUNCH;
-
 		if (weapon->m_bAnimDetonate)
 			return ANIM_BOMBER;
 		else
@@ -972,6 +973,13 @@ public:
 	static AnimationId GetCrouchReloadAnim(CWeaponInfo* weapon) {
 		if (!!weapon->m_bReload)
 			return ANIM_WEAPON_CROUCHRELOAD;
+		else
+			return (AnimationId)0;
+	}
+
+	static AnimationId GetCrouchFireAnim(CWeaponInfo* weapon) {
+		if (!!weapon->m_bCrouchFire)
+			return ANIM_WEAPON_CROUCHFIRE;
 		else
 			return (AnimationId)0;
 	}

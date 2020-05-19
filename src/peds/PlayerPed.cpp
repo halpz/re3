@@ -1088,6 +1088,7 @@ CPlayerPed::ProcessAnimGroups(void)
 	}
 }
 
+// TODO(Miami): Hella TODO
 void
 CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 {
@@ -1099,8 +1100,9 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 	}
 	if (!m_pFire) {
 		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER ||
-			GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || GetWeapon()->m_eWeaponType == WEAPONTYPE_M16) {
-			if (padUsed->TargetJustDown()) {
+			GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || GetWeapon()->m_eWeaponType == WEAPONTYPE_M16 ||
+			GetWeapon()->m_eWeaponType == WEAPONTYPE_AK47) {
+			if (padUsed->TargetJustDown() || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget) {
 				SetStoredState();
 				m_nPedState = PED_SNIPER_MODE;
 #ifdef FREE_CAM
@@ -1134,7 +1136,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 				else
 #endif
 					SetAttack(m_pPointGunAt);
-			} else if (m_currentWeapon != WEAPONTYPE_UNARMED) {
+			} else {
 				if (m_nPedState == PED_ATTACK) {
 					if (padUsed->WeaponJustDown()) {
 						m_bHaveTargetSelected = true;
@@ -1145,12 +1147,19 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 					m_fAttackButtonCounter = 0.0f;
 					m_bHaveTargetSelected = false;
 				}
-				SetAttack(nil);
-			} else if (padUsed->WeaponJustDown()) {
-				if (m_fMoveSpeed < 1.0f)
-					StartFightAttack(padUsed->GetWeapon());
-				else
-					SetAttack(nil);
+				if (GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED && GetWeapon()->m_eWeaponType != WEAPONTYPE_BRASSKNUCKLE &&
+					!weaponInfo->m_bFightMode) {
+
+					if (GetWeapon()->m_eWeaponType != WEAPONTYPE_DETONATOR && GetWeapon()->m_eWeaponType != WEAPONTYPE_DETONATOR_GRENADE ||
+						padUsed->WeaponJustDown())
+
+						SetAttack(nil);
+				} else if (padUsed->WeaponJustDown()) {
+					if (m_fMoveSpeed < 1.0f || m_nPedState == PED_FIGHT)
+						StartFightAttack(padUsed->GetWeapon());
+					else
+						SetAttack(nil);
+				}
 			}
 		}
 	} else {
@@ -1185,7 +1194,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 #endif
 				} else {
 					m_fRotationDest = limitedCam;
-					m_headingRate = 50.0f;
+					m_headingRate = 12.5f;
 
 					// Anim. fix for shotgun, ak47 and m16 (we must finish rot. it quickly)
 					if (weaponInfo->m_bCanAim && padUsed->WeaponJustDown()) {

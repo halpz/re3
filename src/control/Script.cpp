@@ -10334,8 +10334,20 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 {
 	switch (command) {
 	case COMMAND_SET_CHAR_CAN_BE_DAMAGED_BY_MEMBERS_OF_GANG:
+	{
+		CollectParameters(&m_nIp, 3);
+		CPed *pTarget = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		uint8 flag = 1 << (uint8)ScriptParams[1];
+		if (ScriptParams[2])
+			pTarget->m_gangFlags |= flag;
+		else
+			pTarget->m_gangFlags &= ~flag;
+
+		return 0;
+	}
 	case COMMAND_LOAD_AND_LAUNCH_MISSION_EXCLUSIVE:
 	case COMMAND_IS_MISSION_AUDIO_PLAYING:
+		assert(0);
 	case COMMAND_CREATE_LOCKED_PROPERTY_PICKUP:
 	{
 		CollectParameters(&m_nIp, 3);
