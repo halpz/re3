@@ -2192,6 +2192,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 					phys->RegisterReference((CEntity**)&m_aGroundPhysical[i]);
 					m_aGroundOffset[i] = m_aWheelColPoints[i].point - phys->GetPosition();
 
+#if 0
 					if(phys->GetModelIndex() == MI_BODYCAST && GetStatus() == STATUS_PLAYER){
 						// damage body cast
 						float speed = m_vecMoveSpeed.MagnitudeSqr();
@@ -2208,6 +2209,7 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 							phys->AddToMovingList();
 						}
 					}
+#endif
 				}
 
 				m_nSurfaceTouched = m_aWheelColPoints[i].surfaceB;

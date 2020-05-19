@@ -853,18 +853,12 @@ CPopulation::ConvertToRealObject(CDummyObject *dummy)
 	if (!obj)
 		return;
 
-	bool makeInvisible;
 	CWorld::Remove(dummy);
 	delete dummy;
 	CWorld::Add(obj);
-	int16 mi = obj->GetModelIndex();
-	if (mi == MI_GLASS1 || mi == MI_GLASS2 || mi == MI_GLASS3 || mi == MI_GLASS4 ||
-		mi == MI_GLASS5 || mi == MI_GLASS6 || mi == MI_GLASS7 || mi == MI_GLASS8)
-		makeInvisible = true;
-	else
-		makeInvisible = false;
 
-	if (makeInvisible) {
+	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(obj->GetModelIndex());
+	if (IsGlass(obj->GetModelIndex()) && !mi->m_isArtistGlass) {
 		obj->bIsVisible = false;
 	} else if (obj->GetModelIndex() == MI_BUOY) {
 		obj->bIsStatic = false;
@@ -883,17 +877,9 @@ CPopulation::ConvertToDummyObject(CObject *obj)
 	dummy->GetMatrix().UpdateRW();
 	dummy->UpdateRwFrame();
 
-	bool makeInvisible;
-	int16 mi = obj->GetModelIndex();
-	if (mi == MI_GLASS1 || mi == MI_GLASS2 || mi == MI_GLASS3 || mi == MI_GLASS4 ||
-		mi == MI_GLASS5 || mi == MI_GLASS6 || mi == MI_GLASS7 || mi == MI_GLASS8)
-		makeInvisible = true;
-	else
-		makeInvisible = false;
-
-	if (makeInvisible) {
+	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(obj->GetModelIndex());
+	if (IsGlass(obj->GetModelIndex()) && !mi->m_isArtistGlass)
 		dummy->bIsVisible = false;
-	}
 
 	CWorld::Remove(obj);
 	delete obj;
