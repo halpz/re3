@@ -521,9 +521,9 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 		if(!bBraking){
 			if(m_fGasPedal < 0.01f){
 				if(GetModelIndex() == MI_RCBANDIT)
-					brake = 0.2f * mod_HandlingManager.field_4 / m_fMass;
+					brake = 0.2f * mod_HandlingManager.fWheelFriction / m_fMass;
 				else
-					brake = mod_HandlingManager.field_4 / m_fMass;
+					brake = mod_HandlingManager.fWheelFriction / m_fMass;
 #ifdef FIX_BUGS
 				brake *= CTimer::GetTimeStepFix();
 #endif
