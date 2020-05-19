@@ -149,53 +149,7 @@ bool CMenuManager::m_PrefsMarketing = false;
 bool CMenuManager::m_PrefsDisableTutorials = false;
 #endif // !MASTER
 
-// 0x5F311C
-const char* FrontendFilenames[][2] = {
-	{"fe2_mainpanel_ul", "" },
-	{"fe2_mainpanel_ur", "" },
-	{"fe2_mainpanel_dl", "" },
-	{"fe2_mainpanel_dr", "" },
-	{"fe2_mainpanel_dr2", "" },
-	{"fe2_tabactive", "" },
-	{"fe_iconbrief", "" },
-	{"fe_iconstats", "" },
-	{"fe_iconcontrols", "" },
-	{"fe_iconsave", "" },
-	{"fe_iconaudio", "" },
-	{"fe_icondisplay", "" },
-	{"fe_iconlanguage", "" },
-	{"fe_controller", "" },
-	{"fe_controllersh", "" },
-	{"fe_arrows1", "" },
-	{"fe_arrows2", "" },
-	{"fe_arrows3", "" },
-	{"fe_arrows4", "" },
-	{"fe_radio1", "" },
-	{"fe_radio2", "" },
-	{"fe_radio3", "" },
-	{"fe_radio4", "" },
-	{"fe_radio5", "" },
-	{"fe_radio6", "" },
-	{"fe_radio7", "" },
-	{"fe_radio8", "" },
-	{"fe_radio9", "" },
-};
-
-#ifdef MENU_MAP
-const char* MapFilenames[][2] = {
-	{"mapMid01", "mapMid01A"},
-	{"mapMid02", "mapMid02A"},
-	{"mapMid03", "mapMid03A"},
-	{"mapBot01", "mapBot01A"},
-	{"mapBot02", "mapBot02A"},
-	{"mapBot03", "mapBot03A"},
-	{"mapTop01", "mapTop01A"},
-	{"mapTop02", "mapTop02A"},
-	{"mapTop03", "mapTop03A"},
-};
-CSprite2d CMenuManager::m_aMapSprites[NUM_MAP_SPRITES];
-#endif
-
+/*
 // 0x5F3344
 const char* MenuFilenames[][2] = {
 	{"connection24", ""},
@@ -218,6 +172,37 @@ const char* MenuFilenames[][2] = {
 	{"upON", "buttonA"},
 	{"gta3logo256", "gta3logo256m"},
 	{ nil, nil }
+};
+*/
+
+// 0x68C144
+const char* FrontendFilenames[][2] = {
+	{"background", ""},
+	{"vc_logo", "vc_logom"},
+	{"mouse", "mousea"},
+	{"mapTop01", "mapTop01A"},
+	{"mapTop02", "mapTop02A"},
+	{"mapTop03", "mapTop03A"},
+	{"mapMid01", "mapMid01A"},
+	{"mapMid02", "mapMid02A"},
+	{"mapMid03", "mapMid03A"},
+	{"mapBot01", "mapBot01A"},
+	{"mapBot02", "mapBot02A"},
+	{"mapBot03", "mapBot03A"},
+	{"wildstyle", "wildstyleA"},
+	{"flash", "flashA"},
+	{"kchat", "kchatA"},
+	{"fever", "feverA"},
+	{"vrock", "vrockA"},
+	{"vcpr", "vcprA"},
+	{"espantoso", "espantosoA"},
+	{"emotion", "emotionA"},
+	{"wave", "waveA"},
+	{"mp3", "mp3A"},
+	{"downOff", "buttonA"},
+	{"downOn", "buttonA"},
+	{"upOff", "buttonA"},
+	{"upOn", "buttonA"}
 };
 
 #ifdef ASPECT_RATIO_SCALE
@@ -1332,7 +1317,7 @@ CMenuManager::Draw()
 				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO9], MENU_X_LEFT_ALIGNED(480.0f), MENU_Y(nextYToUse), 8, HOVEROPTION_RADIO_8);
 
 				if (DMAudio.IsMP3RadioChannelAvailable())
-					ProcessRadioIcon(m_aMenuSprites[MENUSPRITE_MP3LOGO], MENU_X_LEFT_ALIGNED(540.0f), MENU_Y(nextYToUse), 9, HOVEROPTION_RADIO_9);
+					ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_MP3], MENU_X_LEFT_ALIGNED(540.0f), MENU_Y(nextYToUse), 9, HOVEROPTION_RADIO_9);
 
 				nextYToUse += 70.0f;
 			}
@@ -2079,13 +2064,13 @@ CMenuManager::DrawFrontEndSaveZone()
 		mouse.Translate(m_nMousePosX, m_nMousePosY);
 		shad.Translate(m_nMousePosX, m_nMousePosY);
 		if(field_518 == 4){
-			m_aMenuSprites[MENUSPRITE_MOUSET].Draw(shad, CRGBA(100, 100, 100, 50));
+			m_aFrontEndSprites[MENUSPRITE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
 			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-			m_aMenuSprites[MENUSPRITE_MOUSET].Draw(mouse, CRGBA(255, 255, 255, 255));
+			m_aFrontEndSprites[MENUSPRITE_MOUSE].Draw(mouse, CRGBA(255, 255, 255, 255));
 		}else{
-			m_aMenuSprites[MENUSPRITE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
+			m_aFrontEndSprites[MENUSPRITE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
 			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-			m_aMenuSprites[MENUSPRITE_MOUSE].Draw(mouse, CRGBA(255, 255, 255, 255));
+			m_aFrontEndSprites[MENUSPRITE_MOUSE].Draw(mouse, CRGBA(255, 255, 255, 255));
 		}
 	}
 }
@@ -2273,13 +2258,13 @@ CMenuManager::DrawFrontEndNormal()
 		mouse.Translate(m_nMousePosX, m_nMousePosY);
 		shad.Translate(m_nMousePosX, m_nMousePosY);
 		if(field_518 == 4){
-			m_aMenuSprites[MENUSPRITE_MOUSET].Draw(shad, CRGBA(100, 100, 100, 50));
+			m_aFrontEndSprites[MENUSPRITE_MOUSET].Draw(shad, CRGBA(100, 100, 100, 50));
 			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-			m_aMenuSprites[MENUSPRITE_MOUSET].Draw(mouse, CRGBA(255, 255, 255, 255));
+			m_aFrontEndSprites[MENUSPRITE_MOUSET].Draw(mouse, CRGBA(255, 255, 255, 255));
 		}else{
-			m_aMenuSprites[MENUSPRITE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
+			m_aFrontEndSprites[MENUSPRITE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
 			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-			m_aMenuSprites[MENUSPRITE_MOUSE].Draw(mouse, CRGBA(255, 255, 255, 255));
+			m_aFrontEndSprites[MENUSPRITE_MOUSE].Draw(mouse, CRGBA(255, 255, 255, 255));
 		}
 	}
 }
@@ -2293,65 +2278,24 @@ CMenuManager::DrawFrontEndNormal()
 
 	LoadSplash(nil);
 	
-	eMenuSprites previousSprite;
+	eMenuSprites previousSprite = MENUSPRITE_BACKGROUND;
+
 	if (m_nMenuFadeAlpha < 255) {
-		switch (m_nPrevScreen) {
-			case MENUPAGE_STATS:
-			case MENUPAGE_START_MENU:
-			case MENUPAGE_PAUSE_MENU:
-				previousSprite = MENUSPRITE_MAINMENU;
-				break;
-			case MENUPAGE_NEW_GAME:
-			case MENUPAGE_CHOOSE_LOAD_SLOT:
-			case MENUPAGE_CHOOSE_DELETE_SLOT:
-			case MENUPAGE_NEW_GAME_RELOAD:
-			case MENUPAGE_LOAD_SLOT_CONFIRM:
-			case MENUPAGE_DELETE_SLOT_CONFIRM:
-			case MENUPAGE_EXIT:
-				previousSprite = MENUSPRITE_SINGLEPLAYER;
-				break;
-			case MENUPAGE_MULTIPLAYER_MAIN:
-				previousSprite = MENUSPRITE_MULTIPLAYER;
-				break;
-			case MENUPAGE_MULTIPLAYER_MAP:
-			case MENUPAGE_MULTIPLAYER_FIND_GAME:
-			case MENUPAGE_SKIN_SELECT:
-			case MENUPAGE_KEYBOARD_CONTROLS:
-			case MENUPAGE_MOUSE_CONTROLS:
-				previousSprite = MENUSPRITE_FINDGAME;
-				break;
-			case MENUPAGE_MULTIPLAYER_CONNECTION:
-			case MENUPAGE_MULTIPLAYER_MODE:
-				previousSprite = MENUSPRITE_CONNECTION;
-				break;
-			case MENUPAGE_MULTIPLAYER_CREATE:
-				previousSprite = MENUSPRITE_HOSTGAME;
-				break;
-			case MENUPAGE_SKIN_SELECT_OLD:
-			case MENUPAGE_OPTIONS:
-				previousSprite = MENUSPRITE_PLAYERSET;
-				break;
-			default:
-				previousSprite = MENUSPRITE_MAINMENU;
-				break;
-		}
-		
 		if (m_nPrevScreen == m_nCurrScreen)
 			CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(0, 0, 0, 255 - m_nMenuFadeAlpha));
 		else
-			m_aMenuSprites[previousSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255 - m_nMenuFadeAlpha));
+			m_aFrontEndSprites[previousSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255 - m_nMenuFadeAlpha));
 	}
 
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 
-	eMenuSprites currentSprite = MENUSPRITE_MAINMENU; // actually uninitialized
+	eMenuSprites currentSprite = MENUSPRITE_BACKGROUND; // actually uninitialized
+
 	switch (m_nCurrScreen) {
 		case MENUPAGE_STATS:
 		case MENUPAGE_START_MENU:
 		case MENUPAGE_PAUSE_MENU:
-			currentSprite = MENUSPRITE_MAINMENU;
-			break;
 		case MENUPAGE_NEW_GAME:
 		case MENUPAGE_CHOOSE_LOAD_SLOT:
 		case MENUPAGE_CHOOSE_DELETE_SLOT:
@@ -2359,28 +2303,18 @@ CMenuManager::DrawFrontEndNormal()
 		case MENUPAGE_LOAD_SLOT_CONFIRM:
 		case MENUPAGE_DELETE_SLOT_CONFIRM:
 		case MENUPAGE_EXIT:
-			currentSprite = MENUSPRITE_SINGLEPLAYER;
-			break;
 		case MENUPAGE_MULTIPLAYER_MAIN:
-			currentSprite = MENUSPRITE_MULTIPLAYER;
-			break;
 		case MENUPAGE_MULTIPLAYER_MAP:
 		case MENUPAGE_MULTIPLAYER_FIND_GAME:
 		case MENUPAGE_SKIN_SELECT:
 		case MENUPAGE_KEYBOARD_CONTROLS:
 		case MENUPAGE_MOUSE_CONTROLS:
-			currentSprite = MENUSPRITE_FINDGAME;
-			break;
 		case MENUPAGE_MULTIPLAYER_CONNECTION:
 		case MENUPAGE_MULTIPLAYER_MODE:
-			currentSprite = MENUSPRITE_CONNECTION;
-			break;
 		case MENUPAGE_MULTIPLAYER_CREATE:
-			currentSprite = MENUSPRITE_HOSTGAME;
-			break;
 		case MENUPAGE_SKIN_SELECT_OLD:
 		case MENUPAGE_OPTIONS:
-			currentSprite = MENUSPRITE_PLAYERSET;
+			currentSprite = MENUSPRITE_BACKGROUND;
 			break;
 	}
 
@@ -2404,13 +2338,13 @@ CMenuManager::DrawFrontEndNormal()
 #endif
 		
 		if (m_nMenuFadeAlpha > 255){
-			m_aMenuSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
+			m_aFrontEndSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
 		} else {
 			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-			m_aMenuSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, m_nMenuFadeAlpha));
+			m_aFrontEndSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, m_nMenuFadeAlpha));
 		}
 	} else {
-		m_aMenuSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
+		m_aFrontEndSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
 		// TODO: what is this? waiting mouse?
 		if(field_518 == 4){
 			if(m_nHoverOption == HOVEROPTION_3 || m_nHoverOption == HOVEROPTION_4 ||
@@ -2422,14 +2356,16 @@ CMenuManager::DrawFrontEndNormal()
 		}
 	}
 
+	m_aFrontEndSprites[currentSprite].Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
+
 	// GTA LOGO
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 	if (m_nCurrScreen == MENUPAGE_START_MENU || m_nCurrScreen == MENUPAGE_PAUSE_MENU) {
 		if (CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
-			m_aMenuSprites[MENUSPRITE_GTA3LOGO].Draw(CRect(MENU_X_LEFT_ALIGNED(205.0f), MENU_Y(70.0f), MENU_X_LEFT_ALIGNED(435.0f), MENU_Y(180.0f)), CRGBA(255, 255, 255, FadeIn(255)));
+			m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X_LEFT_ALIGNED(205.0f), MENU_Y(70.0f), MENU_X_LEFT_ALIGNED(435.0f), MENU_Y(180.0f)), CRGBA(255, 255, 255, FadeIn(255)));
 		else
-			m_aMenuSprites[MENUSPRITE_GTALOGO].Draw(CRect(MENU_X_LEFT_ALIGNED(225.0f), MENU_Y(40.0f), MENU_X_LEFT_ALIGNED(415.0f), MENU_Y(210.0f)), CRGBA(255, 255, 255, FadeIn(255)));
+			m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X_LEFT_ALIGNED(225.0f), MENU_Y(40.0f), MENU_X_LEFT_ALIGNED(415.0f), MENU_Y(210.0f)), CRGBA(255, 255, 255, FadeIn(255)));
 	}
 
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
@@ -2457,19 +2393,19 @@ CMenuManager::DrawFrontEndNormal()
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 
-		CRect mouse(0.0f, 0.0f, MENU_X(75.0f), MENU_Y(75.0f));
-		CRect shad(MENU_X(10.0f), MENU_Y(3.0f), MENU_X(85.0f), MENU_Y(78.0f));
+		CRect mouse(0.0f, 0.0f, MENU_X(40.0f), MENU_Y(40.0f));
+		CRect shad(MENU_X(10.0f), MENU_Y(3.0f), MENU_X(55.0f), MENU_Y(43.0f));
 
 		mouse.Translate(m_nMousePosX, m_nMousePosY);
 		shad.Translate(m_nMousePosX, m_nMousePosY);
 		if(field_518 == 4){
-			m_aMenuSprites[MENUSPRITE_MOUSET].Draw(shad, CRGBA(100, 100, 100, 50));
+			m_aFrontEndSprites[MENUSPRITE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
 			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-			m_aMenuSprites[MENUSPRITE_MOUSET].Draw(mouse, CRGBA(255, 255, 255, 255));
+			m_aFrontEndSprites[MENUSPRITE_MOUSE].Draw(mouse, CRGBA(255, 255, 255, 255));
 		}else{
-			m_aMenuSprites[MENUSPRITE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
+			m_aFrontEndSprites[MENUSPRITE_MOUSE].Draw(shad, CRGBA(100, 100, 100, 50));
 			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-			m_aMenuSprites[MENUSPRITE_MOUSE].Draw(mouse, CRGBA(255, 255, 255, 255));
+			m_aFrontEndSprites[MENUSPRITE_MOUSE].Draw(mouse, CRGBA(255, 255, 255, 255));
 		}
 	}
 }
@@ -2711,21 +2647,21 @@ CMenuManager::DrawPlayerSetupScreen()
 		//		2 - leaves gap between button and scrollbar
 		if (m_nHoverOption == HOVEROPTION_CLICKED_SCROLL_UP) {
 #ifdef FIX_BUGS
-			m_aMenuSprites[MENUSPRITE_UPON].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2), MENU_Y(PLAYERSETUP_LIST_TOP),
+			m_aFrontEndSprites[MENUSPRITE_UPON].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2), MENU_Y(PLAYERSETUP_LIST_TOP),
 				MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2 - PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION), MENU_Y(PLAYERSETUP_LIST_TOP + PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION)),
 				CRGBA(255, 255, 255, FadeIn(255)));
 #else
-			m_aMenuSprites[MENUSPRITE_UPON].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2), MENU_Y(PLAYERSETUP_LIST_TOP),
+			m_aFrontEndSprites[MENUSPRITE_UPON].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2), MENU_Y(PLAYERSETUP_LIST_TOP),
 				MENU_X_RIGHT_ALIGNED(-20.0f), MENU_Y(PLAYERSETUP_LIST_TOP + 58)),
 				CRGBA(255, 255, 255, FadeIn(255)));
 #endif
 		} else {
 #ifdef FIX_BUGS
-			m_aMenuSprites[MENUSPRITE_UPOFF].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 3), MENU_Y(PLAYERSETUP_LIST_TOP),
+			m_aFrontEndSprites[MENUSPRITE_UPOFF].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 3), MENU_Y(PLAYERSETUP_LIST_TOP),
 				MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 3 - PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION), MENU_Y(PLAYERSETUP_LIST_TOP + PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION)),
 				CRGBA(255, 255, 255, FadeIn(255)));
 #else
-			m_aMenuSprites[MENUSPRITE_UPOFF].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 3), MENU_Y(PLAYERSETUP_LIST_TOP),
+			m_aFrontEndSprites[MENUSPRITE_UPOFF].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 3), MENU_Y(PLAYERSETUP_LIST_TOP),
 				MENU_X_RIGHT_ALIGNED(-21.0f), MENU_Y(PLAYERSETUP_LIST_TOP + 58)),
 				CRGBA(255, 255, 255, FadeIn(255)));
 #endif
@@ -2733,21 +2669,21 @@ CMenuManager::DrawPlayerSetupScreen()
 
 		if (m_nHoverOption == HOVEROPTION_CLICKED_SCROLL_DOWN) {
 #ifdef FIX_BUGS
-			m_aMenuSprites[MENUSPRITE_DOWNON].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2), SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM + PLAYERSETUP_SCROLLBUTTON_HEIGHT + 1),
+			m_aFrontEndSprites[MENUSPRITE_DOWNON].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2), SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM + PLAYERSETUP_SCROLLBUTTON_HEIGHT + 1),
 				MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2 - PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION), SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM + PLAYERSETUP_SCROLLBUTTON_HEIGHT + 1 - PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION)),
 				CRGBA(255, 255, 255, FadeIn(255)));
 #else
-			m_aMenuSprites[MENUSPRITE_DOWNON].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2), SCREEN_SCALE_FROM_BOTTOM(141.0f),
+			m_aFrontEndSprites[MENUSPRITE_DOWNON].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2), SCREEN_SCALE_FROM_BOTTOM(141.0f),
 					MENU_X_RIGHT_ALIGNED(-20.0f), SCREEN_SCALE_FROM_BOTTOM(83.0f)),
 				CRGBA(255, 255, 255, FadeIn(255)));
 #endif
 		} else {
 #ifdef FIX_BUGS
-			m_aMenuSprites[MENUSPRITE_DOWNOFF].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 3), SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM + PLAYERSETUP_SCROLLBUTTON_HEIGHT + 1),
+			m_aFrontEndSprites[MENUSPRITE_DOWNOFF].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 3), SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM + PLAYERSETUP_SCROLLBUTTON_HEIGHT + 1),
 				MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 3 - PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION), SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM + PLAYERSETUP_SCROLLBUTTON_HEIGHT + 1 - PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION)),
 				CRGBA(255, 255, 255, FadeIn(255)));
 #else
-			m_aMenuSprites[MENUSPRITE_DOWNOFF].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 3), SCREEN_SCALE_FROM_BOTTOM(141.0f),
+			m_aFrontEndSprites[MENUSPRITE_DOWNOFF].Draw(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 3), SCREEN_SCALE_FROM_BOTTOM(141.0f),
 				MENU_X_RIGHT_ALIGNED(-21.0f), SCREEN_SCALE_FROM_BOTTOM(83.0f)),
 				CRGBA(255, 255, 255, FadeIn(255)));
 #endif
@@ -3021,51 +2957,59 @@ CMenuManager::LoadAllTextures()
 	CStreaming::ImGonnaUseStreamingMemory();
 	CGame::TidyUpMemory(false, true);
 	CTxdStore::PushCurrentTxd();
-	int frontendTxdSlot = CTxdStore::FindTxdSlot("frontend");
+	int frontendTxdSlot1 = CTxdStore::FindTxdSlot("frontend1");
 
-	if(frontendTxdSlot == -1)
-		frontendTxdSlot = CTxdStore::AddTxdSlot("frontend");
+	if(frontendTxdSlot1 == -1)
+		frontendTxdSlot1 = CTxdStore::AddTxdSlot("frontend1");
 
-	printf("LOAD frontend\n");
-	CTxdStore::LoadTxd(frontendTxdSlot, "MODELS/FRONTEND.TXD");
-	CTxdStore::AddRef(frontendTxdSlot);
-	CTxdStore::SetCurrentTxd(frontendTxdSlot);
-#ifndef GTA3_1_1_PATCH
-	CStreaming::IHaveUsedStreamingMemory();
-	CTimer::Update();
-#endif
+	printf("LOAD frontend1\n");
+	CTxdStore::LoadTxd(frontendTxdSlot1, "MODELS/FRONTEN1.TXD");
+	CTxdStore::AddRef(frontendTxdSlot1);
+	CTxdStore::SetCurrentTxd(frontendTxdSlot1);
 
-	for (int i = 0; i < ARRAY_SIZE(FrontendFilenames); i++) {
+	for (int i = 0; i < 3; i++) {
 		m_aFrontEndSprites[i].SetTexture(FrontendFilenames[i][0], FrontendFilenames[i][1]);
 		m_aFrontEndSprites[i].SetAddressing(rwTEXTUREADDRESSBORDER);
 	}
 
-	int menuTxdSlot = CTxdStore::FindTxdSlot("menu");
+	CTxdStore::PopCurrentTxd();
+	CStreaming::IHaveUsedStreamingMemory();
 
-	if (menuTxdSlot == -1)
-		menuTxdSlot = CTxdStore::AddTxdSlot("menu");
 
-	printf("LOAD sprite\n");
-	CTxdStore::LoadTxd(menuTxdSlot, "MODELS/MENU.TXD");
-	CTxdStore::AddRef(menuTxdSlot);
-	CTxdStore::SetCurrentTxd(menuTxdSlot);
+	// if ( !*(_BYTE *)(v1 + 124) )
 
-	for (int i = 0; i < ARRAY_SIZE(MenuFilenames); i++) {
-		m_aMenuSprites[i].SetTexture(MenuFilenames[i][0], MenuFilenames[i][1]);
-		m_aMenuSprites[i].SetAddressing(rwTEXTUREADDRESSBORDER);
+	CStreaming::MakeSpaceFor(350 * CDSTREAM_SECTOR_SIZE); // twice of it in mobile
+	CStreaming::ImGonnaUseStreamingMemory();
+	CTxdStore::PushCurrentTxd();
+
+	int frontendTxdSlot2 = CTxdStore::FindTxdSlot("frontend2");
+
+	if (frontendTxdSlot2 == -1)
+		frontendTxdSlot2 = CTxdStore::AddTxdSlot("frontend2");
+
+	printf("LOAD frontend2\n");
+	CTxdStore::LoadTxd(frontendTxdSlot2, "MODELS/FRONTEN2.TXD");
+	CTxdStore::AddRef(frontendTxdSlot2);
+	CTxdStore::SetCurrentTxd(frontendTxdSlot2);
+
+	for (int i = 3; i < NUM_MENU_SPRITES; i++) {
+		m_aFrontEndSprites[i].SetTexture(FrontendFilenames[i][0], FrontendFilenames[i][1]);
+		m_aFrontEndSprites[i].SetAddressing(rwTEXTUREADDRESSBORDER);
 	}
-#ifdef MENU_MAP
+
+	CTxdStore::PopCurrentTxd();
+	CStreaming::IHaveUsedStreamingMemory();
+
+
+#if 0 //MENU_MAP
 	for (int i = 0; i < ARRAY_SIZE(MapFilenames); i++) {
 		m_aMapSprites[i].SetTexture(MapFilenames[i][0], MapFilenames[i][1]);
 		m_aMapSprites[i].SetAddressing(rwTEXTUREADDRESSBORDER);
 	}
 #endif
-#ifdef GTA3_1_1_PATCH
-	CStreaming::IHaveUsedStreamingMemory();
-	CTimer::Update();
-#endif
+
 	m_bSpritesLoaded = true;
-	CTxdStore::PopCurrentTxd();
+	CTimer::Update();
 }
 
 void
@@ -5147,18 +5091,16 @@ CMenuManager::UnloadTextures()
 	for (int i = 0; i < ARRAY_SIZE(FrontendFilenames); ++i)
 		m_aFrontEndSprites[i].Delete();
 
-	int frontend = CTxdStore::FindTxdSlot("frontend");
+	int frontend = CTxdStore::FindTxdSlot("frontend1");
 	CTxdStore::RemoveTxd(frontend);
 
-	printf("REMOVE menu textures\n");
-	for (int i = 0; i < ARRAY_SIZE(MenuFilenames); ++i)
-		m_aMenuSprites[i].Delete();
-#ifdef MENU_MAP
+	int frontend2 = CTxdStore::FindTxdSlot("frontend2");
+	CTxdStore::RemoveTxd(frontend2);
+
+#ifdef false //MENU_MAP
 	for (int i = 0; i < ARRAY_SIZE(MapFilenames); ++i)
 		m_aMapSprites[i].Delete();
 #endif
-	int menu = CTxdStore::FindTxdSlot("menu");
-	CTxdStore::RemoveTxd(menu);
 
 	m_bSpritesLoaded = false;
 }
@@ -5468,47 +5410,47 @@ CMenuManager::PrintMap(void)
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 
 	if (SCREEN_WIDTH >= fMapCenterX - fMapSize || SCREEN_HEIGHT >= fMapCenterY - fMapSize) {
-		m_aMapSprites[MAPTOP1].Draw(CRect(fMapCenterX - fMapSize, fMapCenterY - fMapSize,
+		m_aFrontEndSprites[MENUSPRITE_MAPTOP01].Draw(CRect(fMapCenterX - fMapSize, fMapCenterY - fMapSize,
 			fMapCenterX - halfTile, fMapCenterY - halfTile), CRGBA(255, 255, 255, FadeIn(255)));
 	}
 
 	if (SCREEN_WIDTH >= fMapCenterX - halfTile || SCREEN_HEIGHT >= fMapCenterY - fMapSize) {
-		m_aMapSprites[MAPTOP2].Draw(CRect(fMapCenterX - halfTile, fMapCenterY - fMapSize,
+		m_aFrontEndSprites[MENUSPRITE_MAPTOP02].Draw(CRect(fMapCenterX - halfTile, fMapCenterY - fMapSize,
 			fMapCenterX + halfTile, fMapCenterY - halfTile), CRGBA(255, 255, 255, FadeIn(255)));
 	}
 
 	if (SCREEN_WIDTH >= fMapCenterX + halfTile || SCREEN_HEIGHT >= fMapCenterY - fMapSize) {
-		m_aMapSprites[MAPTOP3].Draw(CRect(fMapCenterX + halfTile, fMapCenterY - fMapSize,
+		m_aFrontEndSprites[MENUSPRITE_MAPTOP03].Draw(CRect(fMapCenterX + halfTile, fMapCenterY - fMapSize,
 			fMapCenterX + fMapSize, fMapCenterY - halfTile), CRGBA(255, 255, 255, FadeIn(255)));
 	}
 
 	if (SCREEN_WIDTH >= fMapCenterX - fMapSize || SCREEN_HEIGHT >= fMapCenterY - halfTile) {
-		m_aMapSprites[MAPMID1].Draw(CRect(fMapCenterX - fMapSize, fMapCenterY - halfTile,
+		m_aFrontEndSprites[MENUSPRITE_MAPMID01].Draw(CRect(fMapCenterX - fMapSize, fMapCenterY - halfTile,
 			fMapCenterX - halfTile, fMapCenterY + halfTile), CRGBA(255, 255, 255, FadeIn(255)));
 	}
 
 	if (SCREEN_WIDTH >= fMapCenterX - halfTile || SCREEN_HEIGHT >= fMapCenterY - halfTile) {
-		m_aMapSprites[MAPMID2].Draw(CRect(fMapCenterX - halfTile, fMapCenterY - halfTile,
+		m_aFrontEndSprites[MENUSPRITE_MAPMID02].Draw(CRect(fMapCenterX - halfTile, fMapCenterY - halfTile,
 			fMapCenterX + halfTile, fMapCenterY + halfTile), CRGBA(255, 255, 255, FadeIn(255)));
 	}
 
 	if (SCREEN_WIDTH >= fMapCenterX + halfTile || SCREEN_HEIGHT >= fMapCenterY - halfTile) {
-		m_aMapSprites[MAPMID3].Draw(CRect(fMapCenterX + halfTile, fMapCenterY - halfTile,
+		m_aFrontEndSprites[MENUSPRITE_MAPMID03].Draw(CRect(fMapCenterX + halfTile, fMapCenterY - halfTile,
 			fMapCenterX + fMapSize, fMapCenterY + halfTile), CRGBA(255, 255, 255, FadeIn(255)));
 	}
 
 	if (SCREEN_WIDTH >= fMapCenterX - fMapSize || SCREEN_HEIGHT >= fMapCenterY + halfTile) {
-		m_aMapSprites[MAPBOT1].Draw(CRect(fMapCenterX - fMapSize, fMapCenterY + halfTile,
+		m_aFrontEndSprites[MENUSPRITE_MAPBOT01].Draw(CRect(fMapCenterX - fMapSize, fMapCenterY + halfTile,
 			fMapCenterX - halfTile, fMapCenterY + fMapSize), CRGBA(255, 255, 255, FadeIn(255)));
 	}
 
 	if (SCREEN_WIDTH >= fMapCenterX - halfTile || SCREEN_HEIGHT >= fMapCenterY + halfTile) {
-		m_aMapSprites[MAPBOT2].Draw(CRect(fMapCenterX - halfTile, fMapCenterY + halfTile,
+		m_aFrontEndSprites[MENUSPRITE_MAPBOT02].Draw(CRect(fMapCenterX - halfTile, fMapCenterY + halfTile,
 			fMapCenterX + halfTile, fMapCenterY + fMapSize), CRGBA(255, 255, 255, FadeIn(255)));
 	}
 
 	if (SCREEN_WIDTH >= fMapCenterX + halfTile || SCREEN_HEIGHT >= fMapCenterY + halfTile) {
-		m_aMapSprites[MAPBOT3].Draw(CRect(fMapCenterX + halfTile, fMapCenterY + halfTile,
+		m_aFrontEndSprites[MENUSPRITE_MAPBOT03].Draw(CRect(fMapCenterX + halfTile, fMapCenterY + halfTile,
 			fMapCenterX + fMapSize, fMapCenterY + fMapSize), CRGBA(255, 255, 255, FadeIn(255)));
 	}
 
