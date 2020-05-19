@@ -513,6 +513,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fAirResistance = 0.4f / m_fMass;
 	m_fElasticity = 0.05f;
 
+	m_ceaseAttackTimer = 0;
+
 	bIsStanding = false;
 	bWasStanding = false;
 	bIsAttacking = false;
@@ -18604,4 +18606,29 @@ bool
 CPed::CanBeDamagedByThisGangMember(CPed* who)
 {
 	return m_gangFlags & (1 << (uint8)(who->m_nPedType - PEDTYPE_GANG1));
+}
+
+bool
+IsPedPointerValid_NotInWorld(CPed* pPed)
+{
+	if (!pPed)
+		return false;
+	int index = CPools::GetPedPool()->GetJustIndex(pPed);
+#ifdef FIX_BUGS
+	if (index < 0 || index >= NUMPEDS)
+#else
+	if (index < 0 || index > NUMPEDS)
+#endif
+		return false;
+	return true;
+}
+
+bool
+IsPedPointerValid(CPed* pPed)
+{
+	if (!IsPedPointerValid_NotInWorld(pPed))
+		return false;
+	if (pPed->bInVehicle && pPed->m_pMyVehicle)
+		return IsEntityPointerValid(pPed->m_pMyVehicle);
+	return pPed->m_entryInfoList.first || pPed == FindPlayerPed();
 }

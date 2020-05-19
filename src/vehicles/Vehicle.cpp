@@ -29,6 +29,7 @@ bool CVehicle::bCheat5;
 bool CVehicle::bAltDodoCheat;
 #endif
 bool CVehicle::m_bDisableMouseSteering = true;
+bool CVehicle::bDisableRemoteDetonation;
 
 void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New();  }
 void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehiclePool()->New(handle); }
@@ -493,6 +494,11 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	if(contactSpeedRight != 0.0f){
 		// exert opposing force
 		right = -contactSpeedRight/wheelsOnGround;
+#ifdef FIX_BUGS
+		// contactSpeedRight is independent of framerate but right has timestep as a factor
+		// so we probably have to fix this
+		right *= CTimer::GetTimeStepFix();
+#endif
 
 		if(wheelStatus == WHEEL_STATUS_BURST){
 			float fwdspeed = Min(contactSpeedFwd, 0.3f);
@@ -513,13 +519,21 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 		}
 	}else if(contactSpeedFwd != 0.0f){
 		fwd = -contactSpeedFwd/wheelsOnGround;
+#ifdef FIX_BUGS
+		// contactSpeedFwd is independent of framerate but fwd has timestep as a factor
+		// so we probably have to fix this
+		fwd *= CTimer::GetTimeStepFix();
+#endif
 
 		if(!bBraking){
 			if(m_fGasPedal < 0.01f){
 				if(GetModelIndex() == MI_RCBANDIT)
-					brake = 0.2f * mod_HandlingManager.field_4 / m_fMass;
+					brake = 0.2f * mod_HandlingManager.fWheelFriction / m_fMass;
 				else
-					brake = mod_HandlingManager.field_4 / m_fMass;
+					brake = mod_HandlingManager.fWheelFriction / m_fMass;
+#ifdef FIX_BUGS
+				brake *= CTimer::GetTimeStepFix();
+#endif
 			}
 		}
 
@@ -1080,14 +1094,14 @@ CVehicle::SetDriver(CPed *driver)
 
 	if(bFreebies && driver == FindPlayerPed()){
 		if(GetModelIndex() == MI_AMBULAN)
-			FindPlayerPed()->m_fHealth = Min(FindPlayerPed()->m_fHealth + 20.0f, 100.0f);
+			FindPlayerPed()->m_fHealth = Min(FindPlayerPed()->m_fHealth + 20.0f, CWorld::Players[0].m_nMaxHealth);
 		else if(GetModelIndex() == MI_TAXI)
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
 		else if (GetModelIndex() == MI_POLICE) {
 			CStreaming::RequestModel(WEAPONTYPE_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
 			driver->GiveWeapon(WEAPONTYPE_SHOTGUN, 5);
 		} else if (GetModelIndex() == MI_ENFORCER)
-			driver->m_fArmour = Max(driver->m_fArmour, 100.0f);
+			driver->m_fArmour = Max(driver->m_fArmour, CWorld::Players[0].m_nMaxArmour);
 		else if(GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_ZEBRA)	// TODO(MIAMI): check zebra
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 25;
 		bFreebies = false;
@@ -1353,14 +1367,29 @@ eVehicleAppearance
 CVehicle::GetVehicleAppearance(void)
 {
 	if (IsCar())
-		return VEHICLE_CAR;
+		return VEHICLE_APPEARANCE_CAR;
 	if (IsBoat())
-		return VEHICLE_BOAT;
+		return VEHICLE_APPEARANCE_BOAT;
 	if (IsBike())
-		return VEHICLE_BIKE;
+		return VEHICLE_APPEARANCE_BIKE;
 	if (IsPlane())
-		return VEHICLE_PLANE;
+		return VEHICLE_APPEARANCE_PLANE;
 	if (IsHeli())
-		return VEHICLE_HELI;
-	return VEHICLE_NONE;
+		return VEHICLE_APPEARANCE_HELI;
+	return VEHICLE_APPEARANCE_NONE;
+}
+
+bool
+IsVehiclePointerValid(CVehicle* pVehicle)
+{
+	if (!pVehicle)
+		return false;
+	int index = CPools::GetVehiclePool()->GetJustIndex(pVehicle);
+#ifdef FIX_BUGS
+	if (index < 0 || index >= NUMVEHICLES)
+#else
+	if (index < 0 || index > NUMVEHICLES)
+#endif
+		return false;
+	return pVehicle->m_vehType == VEHICLE_TYPE_PLANE || pVehicle->m_entryInfoList.first;
 }

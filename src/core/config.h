@@ -66,7 +66,7 @@ enum Config {
 	// Cull zones
 	NUMATTRIBZONES = 704,
 
-	NUMHANDLINGS = 106,
+	NUMOCCLUSIONVOLUMES = 350,
 
 	PATHNODESIZE = 4500,
 
@@ -194,7 +194,7 @@ enum Config {
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
 #define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
-#define MORE_LANGUAGES		// Add more translations to the game
+//#define MORE_LANGUAGES		// Add more translations to the game
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch)
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number

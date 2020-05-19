@@ -61,6 +61,7 @@ int32 CStats::HighestScores[CStats::TOTAL_HIGHEST_SCORES];
 int32 CStats::Sprayings;
 float CStats::AutoPaintingBudget;
 int32 CStats::NoMoreHurricanes;
+float CStats::FashionBudget;
 
 void CStats::Init()
 {
@@ -255,6 +256,11 @@ float CStats::GetPercentageProgress()
 		CStats::ProgressMade * 100.0f / (CGame::nastyGame ? CStats::TotalProgressInGame : CStats::TotalProgressInGame - 1.0f));
 
 	return Min(percentCompleted, 100.0f);
+}
+
+void CStats::MoneySpentOnFashion(int32 money)
+{
+	FashionBudget += money;
 }
 
 void CStats::SaveStats(uint8 *buf, uint32 *size)

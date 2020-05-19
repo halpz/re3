@@ -220,7 +220,7 @@ enum eObjective : uint32 {
 	OBJECTIVE_LEAVE_CAR_AND_DIE,
 	OBJECTIVE_USE_SEAT_ATTRACTOR,
 	OBJECTIVE_USE_ATM_ATTRACTOR,
-	OBJECTIVE_FLEE_CAR, // is it 41?
+	OBJECTIVE_FLEE_CAR,
 	OBJ_42,
 	OBJECTIVE_USE_STOP_ATTRACTOR,
 	OBJECTIVE_USE_PIZZA_ATTRACTOR,
@@ -563,7 +563,7 @@ public:
 	uint32 m_duckAndCoverTimer;
 	uint32 m_bloodyFootprintCountOrDeathTime;	// Death time when bDoBloodyFootprints is false. Weird decision
 	uint32 m_shotTime;
-	uint32 m_shotTimeAdd;
+	uint32 m_ceaseAttackTimer;
 	uint8 m_panicCounter;
 	bool m_deadBleeding;
 	int8 m_bodyPartBleeding;		// PedNode, but -1 if there isn't
@@ -1026,3 +1026,6 @@ void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 #ifndef PED_SKIN
 VALIDATE_SIZE(CPed, 0x53C);
 #endif
+
+bool IsPedPointerValid(CPed*);
+bool IsPedPointerValid_NotInWorld(CPed*);

@@ -65,6 +65,7 @@ public:
 	static int32 Sprayings;
 	static float AutoPaintingBudget;
 	static int32 NoMoreHurricanes;
+	static float FashionBudget;
 
 public:
 	static void Init(void);
@@ -91,4 +92,6 @@ public:
 	static void SaveStats(uint8 *buf, uint32 *size);
 	static void LoadStats(uint8 *buf, uint32 size);
 	static float GetPercentageProgress();
+
+	static void MoneySpentOnFashion(int32);
 };

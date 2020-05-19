@@ -112,12 +112,12 @@ enum eFlightModel
 
 enum eVehicleAppearance
 {
-	VEHICLE_NONE,
-	VEHICLE_CAR,
-	VEHICLE_BIKE,
-	VEHICLE_HELI,
-	VEHICLE_BOAT,
-	VEHICLE_PLANE,
+	VEHICLE_APPEARANCE_NONE,
+	VEHICLE_APPEARANCE_CAR,
+	VEHICLE_APPEARANCE_BIKE,
+	VEHICLE_APPEARANCE_HELI,
+	VEHICLE_APPEARANCE_BOAT,
+	VEHICLE_APPEARANCE_PLANE,
 };
 
 // Or Weapon.h?
@@ -311,6 +311,8 @@ public:
 	static bool bAltDodoCheat;
 #endif
 	static bool m_bDisableMouseSteering;
+	static bool bDisableRemoteDetonation;
 };
 
 void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);
+bool IsVehiclePointerValid(CVehicle* pVehicle);

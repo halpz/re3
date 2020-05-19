@@ -39,6 +39,7 @@ public:
 	static void LoadZone(const char *line);
 	static void LoadCullZone(const char *line);
 	static void LoadPickup(const char *line);
+	static void LoadOcclusionVolume(const char *line);
 
 	static void ReloadPaths(const char *filename);
 	static void ReloadObjectTypes(const char *filename);

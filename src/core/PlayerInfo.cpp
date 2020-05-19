@@ -140,6 +140,7 @@ CPlayerInfo::Clear(void)
 	m_nUpsideDownCounter = 0;
 	m_bInfiniteSprint = false;
 	m_bFastReload = false;
+	m_nMaxHealth = m_nMaxArmour = 100;
 	m_bGetOutOfJailFree = false;
 	m_bGetOutOfHospitalFree = false;
 	m_bDriveByAllowed = true;
@@ -172,7 +173,6 @@ void
 CPlayerInfo::MakePlayerSafe(bool toggle)
 {
 	if (toggle) {
-		CTheScripts::ResetCountdownToMakePlayerUnsafe();
 		m_pPed->m_pWanted->m_bIgnoredByEveryone = true;
 		CWorld::StopAllLawEnforcersInTheirTracks();
 		CPad::GetPad(0)->DisablePlayerControls |= PLAYERCONTROL_DISABLED_20;
@@ -193,7 +193,8 @@ CPlayerInfo::MakePlayerSafe(bool toggle)
 		CWorld::ExtinguishAllCarFiresInArea(GetPos(), 4000.0f);
 		CReplay::DisableReplays();
 
-	} else if (!CGame::playingIntro && !CTheScripts::IsCountdownToMakePlayerUnsafeOn()) {
+	}
+	else {
 		m_pPed->m_pWanted->m_bIgnoredByEveryone = false;
 		CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_20;
 		m_pPed->bBulletProof = false;

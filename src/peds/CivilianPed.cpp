@@ -325,7 +325,7 @@ CCivilianPed::ProcessControl(void)
 										CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = Max(250, playerSexFrequency - 10);
 									}
 
-									m_pMyVehicle->pDriver->m_fHealth = Min(125.0f, 1.0f + m_pMyVehicle->pDriver->m_fHealth);
+									m_pMyVehicle->pDriver->m_fHealth = Min(CWorld::Players[0].m_nMaxHealth + 25.0f, 1.0f + m_pMyVehicle->pDriver->m_fHealth);
 									if (CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency == 250)
 										CWorld::Players[CWorld::PlayerInFocus].m_nNextSexFrequencyUpdateTime = CTimer::GetTimeInMilliseconds() + 3000;
 							} else {
@@ -336,7 +336,7 @@ CCivilianPed::ProcessControl(void)
 						} else {
 							bWanderPathAfterExitingCar = true;
 							CWorld::Players[CWorld::PlayerInFocus].m_pHooker = nil;
-							m_pMyVehicle->pDriver->m_fHealth = 125.0f;
+							m_pMyVehicle->pDriver->m_fHealth = CWorld::Players[0].m_nMaxHealth + 25.0f;
 							SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
 						}
 					} else {

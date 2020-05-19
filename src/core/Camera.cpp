@@ -61,6 +61,8 @@ enum
 CCamera TheCamera;
 bool CCamera::m_bUseMouse3rdPerson = true;
 bool bDidWeProcessAnyCinemaCam;
+float CCamera::m_f3rdPersonCHairMultX;
+float CCamera::m_f3rdPersonCHairMultY;
 
 #ifdef IMPROVED_CAMERA
 #define KEYJUSTDOWN(k) ControlsManager.GetIsKeyboardKeyJustDown((RsKeyCodes)k)

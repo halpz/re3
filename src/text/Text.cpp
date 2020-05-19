@@ -7,27 +7,36 @@
 #include "Frontend.h"
 #include "Messages.h"
 #include "Text.h"
+#include "Timer.h"
 
 static wchar WideErrorString[25];
 
 CText TheText;
 
+//--MIAMI: DONE
 CText::CText(void)
 {
 	encoding = 'e';
+	bHasMissionTextOffsets = false;
+	bIsMissionTextLoaded = false;
+	memset(szMissionTableName, 0, sizeof(szMissionTableName));
 	memset(WideErrorString, 0, sizeof(WideErrorString));
 }
 
+//--MIAMI: DONE
 void
 CText::Load(void)
 {
-	uint8 *filedata;
-	char filename[32], type[4];
-	int length;
-	int offset, sectlen;
+	char filename[32];
+	uint32 offset;
+	int file;
+	bool tkey_loaded = false, tdat_loaded = false;
+	ChunkHeader m_ChunkHeader;
+
+	bIsMissionTextLoaded = false;
+	bHasMissionTextOffsets = false;
 
 	Unload();
-	filedata = new uint8[0x40000];
 
 	CFileMgr::SetDir("TEXT");
 	switch(CMenuManager::m_PrefsLanguage){
@@ -59,49 +68,64 @@ CText::Load(void)
 #endif
 	}
 
-	length = CFileMgr::LoadFile(filename, filedata, 0x40000, "rb");
-	CFileMgr::SetDir("");
+	file = CFileMgr::OpenFile(filename, "rb");
 
 	offset = 0;
-	while(offset < length){
-		type[0] = filedata[offset++];
-		type[1] = filedata[offset++];
-		type[2] = filedata[offset++];
-		type[3] = filedata[offset++];
-		sectlen = (int)filedata[offset+3]<<24 | (int)filedata[offset+2]<<16 |
-			(int)filedata[offset+1]<<8 | (int)filedata[offset+0];
-		offset += 4;
-		if(sectlen != 0){
-			if(strncmp(type, "TKEY", 4) == 0)
-				keyArray.Load(sectlen, filedata, &offset);
-			else if(strncmp(type, "TDAT", 4) == 0)
-				data.Load(sectlen, filedata, &offset);
-			else
-				offset += sectlen;
+	while (!tkey_loaded || !tdat_loaded) {
+		ReadChunkHeader(&m_ChunkHeader, file, &offset);
+		if (m_ChunkHeader.size != 0) {
+			if (strncmp(m_ChunkHeader.magic, "TABL", 4) == 0) {
+				MissionTextOffsets.Load(m_ChunkHeader.size, file, &offset, 0x58000);
+				bHasMissionTextOffsets = true;
+			} else if (strncmp(m_ChunkHeader.magic, "TKEY", 4) == 0) {
+				this->keyArray.Load(m_ChunkHeader.size, file, &offset);
+				tkey_loaded = true;
+			} else if (strncmp(m_ChunkHeader.magic, "TDAT", 4) == 0) {
+				this->data.Load(m_ChunkHeader.size, file, &offset);
+				tdat_loaded = true;
+			} else {
+				CFileMgr::Seek(file, m_ChunkHeader.size, SEEK_CUR);
+				offset += m_ChunkHeader.size;
+			}
 		}
 	}
 
 	keyArray.Update(data.chars);
-
-	delete[] filedata;
+	CFileMgr::CloseFile(file);
+	CFileMgr::SetDir("");
 }
 
+//--MIAMI: DONE
 void
 CText::Unload(void)
 {
 	CMessages::ClearAllMessagesDisplayedByGame();
-	data.Unload();
 	keyArray.Unload();
+	data.Unload();
+	mission_keyArray.Unload();
+	mission_data.Unload();
+	bIsMissionTextLoaded = false;
+	memset(szMissionTableName, 0, sizeof(szMissionTableName));
 }
 
+//--MIAMI: DONE
 wchar*
 CText::Get(const char *key)
 {
+	uint8 result = false;
 #ifdef FIX_BUGS
-	return keyArray.Search(key, data.chars);
+	wchar *outstr = keyArray.Search(key, data.chars, &result);
 #else
-	return keyArray.Search(key);
+	wchar *outstr = keyArray.Search(key, &result);
 #endif
+
+	if (!result && bHasMissionTextOffsets && bIsMissionTextLoaded)
+#ifdef FIX_BUGS
+		outstr = mission_keyArray.Search(key, mission_data.chars, &result);
+#else
+		outstr = mission_keyArray.Search(key, &result);
+#endif
+	return outstr;
 }
 
 wchar UpperCaseTable[128] = {
@@ -134,6 +158,7 @@ wchar FrenchUpperCaseTable[128] = {
 	253, 254, 255
 };
 
+//--MIAMI: TODO (check tables)
 wchar
 CText::GetUpperCase(wchar c)
 {
@@ -165,6 +190,7 @@ CText::GetUpperCase(wchar c)
 	return c;
 }
 
+//--MIAMI: DONE
 void
 CText::UpperCase(wchar *s)
 {
@@ -174,21 +200,131 @@ CText::UpperCase(wchar *s)
 	}
 }
 
-
+//--MIAMI: DONE
 void
-CKeyArray::Load(uint32 length, uint8 *data, int *offset)
+CText::GetNameOfLoadedMissionText(char *outName)
 {
-	uint32 i;
-	uint8 *rawbytes;
+	strcpy(outName, szMissionTableName);
+}
+
+//--MIAMI: DONE
+void
+CText::ReadChunkHeader(ChunkHeader *buf, int32 file, uint32 *offset)
+{
+	// original code loops 8 times to read 1 byte with CFileMgr::Read, that's retarded
+	CFileMgr::Read(file, (char*)buf, sizeof(ChunkHeader));
+	*offset += sizeof(ChunkHeader);
+}
+
+//--MIAMI: DONE
+void
+CText::LoadMissionText(char *MissionTableName)
+{
+	char filename[32];
+
+	mission_keyArray.Unload();
+	mission_data.Unload();
+
+	bool search_result = false;
+	int missionTableId = 0;
+
+	for (missionTableId = 0; missionTableId < MissionTextOffsets.size; missionTableId++) {
+		if (strncmp(MissionTextOffsets.data[missionTableId].szMissionName, MissionTableName, strlen(MissionTextOffsets.data[missionTableId].szMissionName)) == 0) {
+			search_result = true;
+			break;
+		}
+	}
+
+	if (!search_result) {
+		printf("CText::LoadMissionText - couldn't find %s", MissionTableName);
+		return;
+	}
+
+	CFileMgr::SetDir("TEXT");
+	switch (CMenuManager::m_PrefsLanguage) {
+	case LANGUAGE_AMERICAN:
+		sprintf(filename, "AMERICAN.GXT");
+		break;
+	case LANGUAGE_FRENCH:
+		sprintf(filename, "FRENCH.GXT");
+		break;
+	case LANGUAGE_GERMAN:
+		sprintf(filename, "GERMAN.GXT");
+		break;
+	case LANGUAGE_ITALIAN:
+		sprintf(filename, "ITALIAN.GXT");
+		break;
+	case LANGUAGE_SPANISH:
+		sprintf(filename, "SPANISH.GXT");
+		break;
+#ifdef MORE_LANGUAGES
+	case LANGUAGE_POLISH:
+		sprintf(filename, "POLISH.GXT");
+		break;
+	case LANGUAGE_RUSSIAN:
+		sprintf(filename, "RUSSIAN.GXT");
+		break;
+	case LANGUAGE_JAPANESE:
+		sprintf(filename, "JAPANESE.GXT");
+		break;
+#endif
+	}
+	CTimer::Suspend();
+	int file = CFileMgr::OpenFile(filename, "rb");
+	CFileMgr::Seek(file, MissionTextOffsets.data[missionTableId].offset, SEEK_SET);
+
+	char TableCheck[8];
+	CFileMgr::Read(file, TableCheck, 8);
+	if (strncmp(TableCheck, MissionTableName, 8) != 0)
+		printf("CText::LoadMissionText - expected to find %s in the text file", MissionTableName);
+
+	bool tkey_loaded = false, tdat_loaded = false;
+	ChunkHeader m_ChunkHeader;
+	while (!tkey_loaded || !tdat_loaded) {
+		uint32 bytes_read = 0;
+		ReadChunkHeader(&m_ChunkHeader, file, &bytes_read);
+		if (m_ChunkHeader.size != 0) {
+			if (strncmp(m_ChunkHeader.magic, "TKEY", 4) == 0) {
+				uint32 bytes_read = 0;
+				mission_keyArray.Load(m_ChunkHeader.size, file, &bytes_read);
+				tkey_loaded = true;
+			} else if (strncmp(m_ChunkHeader.magic, "TDAT", 4) == 0) {
+				uint32 bytes_read = 0;
+				mission_data.Load(m_ChunkHeader.size, file, &bytes_read);
+				tdat_loaded = true;
+			} else
+				CFileMgr::Seek(file, m_ChunkHeader.size, SEEK_CUR);
+		}
+	}
+
+	mission_keyArray.Update(mission_data.chars);
+	CFileMgr::CloseFile(file);
+	CTimer::Resume();
+	CFileMgr::SetDir("");
+	strcpy(szMissionTableName, MissionTableName);
+	bIsMissionTextLoaded = true;
+}
+
+
+//--MIAMI: DONE
+void
+CKeyArray::Load(uint32 length, int file, uint32 *offset)
+{
+	char *rawbytes;
 
 	numEntries = length / sizeof(CKeyEntry);
 	entries = new CKeyEntry[numEntries];
-	rawbytes = (uint8*)entries;
+	rawbytes = (char*)entries;
 
-	for(i = 0; i < length; i++)
-		rawbytes[i] = data[(*offset)++];
+#if DUMB
+	for (uint32 i = 0; i < length; i++)
+		CFileMgr::Read(file, &rawbytes[i], 1);
+#else
+	CFileMgr::Read(file, rawbytes, length);
+#endif
 }
 
+//--MIAMI: DONE
 void
 CKeyArray::Unload(void)
 {
@@ -197,6 +333,7 @@ CKeyArray::Unload(void)
 	numEntries = 0;
 }
 
+//--MIAMI: DONE
 void
 CKeyArray::Update(wchar *chars)
 {
@@ -207,6 +344,7 @@ CKeyArray::Update(wchar *chars)
 #endif
 }
 
+//--MIAMI: DONE
 CKeyEntry*
 CKeyArray::BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 high)
 {
@@ -227,11 +365,12 @@ CKeyArray::BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 hi
 	return nil;
 }
 
+//--MIAMI: DONE
 wchar*
 #ifdef FIX_BUGS
-CKeyArray::Search(const char *key, wchar *data)
+CKeyArray::Search(const char *key, wchar *data, uint8 *result)
 #else
-CKeyArray::Search(const char *key)
+CKeyArray::Search(const char *key, uint8 *result)
 #endif
 {
 	CKeyEntry *found;
@@ -240,40 +379,63 @@ CKeyArray::Search(const char *key)
 
 #ifdef FIX_BUGS
 	found = BinarySearch(key, entries, 0, numEntries-1);
-	if(found)
+	if (found) {
+		*result = true;
 		return (wchar*)((uint8*)data + found->valueOffset);
+	}
 #else
 	found = BinarySearch(key, entries, 0, numEntries-1);
-	if(found)
+	if (found) {
+		*result = true;
 		return found->value;
+	}
 #endif
+	*result = false;
+#ifdef MASTER
+	sprintf(errstr, "%");
+#else
 	sprintf(errstr, "%s missing", key);
+#endif // MASTER
 	for(i = 0; i < 25; i++)
 		WideErrorString[i] = errstr[i];
 	return WideErrorString;
 }
 
-
+//--MIAMI: DONE
 void
-CData::Load(uint32 length, uint8 *data, int *offset)
+CData::Load(uint32 length, int file, uint32 *offset)
 {
-	uint32 i;
-	uint8 *rawbytes;
+	char *rawbytes;
 
 	numChars = length / sizeof(wchar);
 	chars = new wchar[numChars];
-	rawbytes = (uint8*)chars;
+	rawbytes = (char*)chars;
 
-	for(i = 0; i < length; i++)
-		rawbytes[i] = data[(*offset)++];
+#if DUMB
+	for(uint32 i = 0; i < length; i++)
+		CFileMgr::Read(file, &rawbytes[i], 1);
+#else
+	CFileMgr::Read(file, rawbytes, length);
+#endif
 }
 
+//--MIAMI: DONE
 void
 CData::Unload(void)
 {
 	delete[] chars;
 	chars = nil;
 	numChars = 0;
+}
+
+//--MIAMI: DONE
+void
+CMissionTextOffsets::Load(uint32 table_size, int file, uint32 *offset, int)
+{
+	// not exact VC code but smaller and better :P
+	size = table_size / sizeof(CMissionTextOffsets::Entry);
+	CFileMgr::Read(file, (char*)data, sizeof(CMissionTextOffsets::Entry) * size);
+	*offset += sizeof(CMissionTextOffsets::Entry) * size;
 }
 
 void

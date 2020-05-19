@@ -100,7 +100,7 @@ void WeaponCheat()
 void HealthCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT3"), true);
-	FindPlayerPed()->m_fHealth = 100.0f;
+	FindPlayerPed()->m_fHealth = CWorld::Players[0].m_nMaxHealth;
 	if (FindPlayerVehicle()) {
 		FindPlayerVehicle()->m_fHealth = 1000.0f;
 		if (FindPlayerVehicle()->m_vehType == VEHICLE_TYPE_CAR)
@@ -224,7 +224,7 @@ void MoneyCheat()
 void ArmourCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT4"), true);
-	FindPlayerPed()->m_fArmour = 100.0f;
+	FindPlayerPed()->m_fArmour = CWorld::Players[0].m_nMaxArmour;
 }
 
 void WantedLevelUpCheat()

@@ -72,6 +72,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	bFixedColour = false;
 	bBigWheels = false;
 	bWaterTight = false;
+	bTankDetonateCars = true;
 
 	SetModelIndex(id);
 
@@ -332,7 +333,7 @@ CAutomobile::ProcessControl(void)
 	bool playerRemote = false;
 	switch(GetStatus()){
 	case STATUS_PLAYER_REMOTE:
-		if(CPad::GetPad(0)->WeaponJustDown()){
+		if(CPad::GetPad(0)->WeaponJustDown() && !bDisableRemoteDetonation){
 			BlowUpCar(FindPlayerPed());
 			CRemote::TakeRemoteControlledCarFromPlayer();
 		}
@@ -864,8 +865,14 @@ CAutomobile::ProcessControl(void)
 			CVector wheelFwd = GetForward();
 			CVector wheelRight = GetRight();
 
+#ifdef FIX_BUGS
+			// Not sure if this is needed, but brake usually has timestep as a factor
+			if(bIsHandbrakeOn)
+				brake = 20000.0f * CTimer::GetTimeStepFix();
+#else
 			if(bIsHandbrakeOn)
 				brake = 20000.0f;
+#endif
 
 			if(m_aWheelTimer[CARWHEEL_REAR_LEFT] > 0.0f){
 				if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier))
@@ -4148,7 +4155,7 @@ CAutomobile::BlowUpCarsInPath(void)
 {
 	int i;
 
-	if(m_vecMoveSpeed.Magnitude() > 0.1f)
+	if(m_vecMoveSpeed.Magnitude() > 0.1f && bTankDetonateCars)
 		for(i = 0; i < m_nCollisionRecords; i++)
 			if(m_aCollisionRecords[i] &&
 			   m_aCollisionRecords[i]->IsVehicle() &&
@@ -4608,6 +4615,18 @@ void
 CAutomobile::SetAllTaxiLights(bool set)
 {
 	m_sAllTaxiLights = set;
+}
+
+void
+CAutomobile::TellHeliToGoToCoors(float x, float y, float z, uint8 speed)
+{
+	AutoPilot.m_nCarMission = MISSION_HELI_FLYTOCOORS;
+	AutoPilot.m_vecDestinationCoors.x = x;
+	AutoPilot.m_vecDestinationCoors.y = y;
+	AutoPilot.m_vecDestinationCoors.z = z;
+	AutoPilot.m_nCruiseSpeed = speed;
+	SetStatus(STATUS_PHYSICS);
+	//TODO(MIAMI)
 }
 
 #ifdef COMPATIBLE_SAVES
