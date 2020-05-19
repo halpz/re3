@@ -209,7 +209,7 @@ const char* FrontendFilenames[][2] = {
 	{"vcpr", "vcprA"},
 	{"espantoso", "espantosoA"},
 	{"emotion", "emotionA"},
-	{"wave", "waveA"},
+	{"wave103", "wave103A"},
 	{"mp3", "mp3A"},
 	{"downOff", "buttonA"},
 	{"downOn", "buttonA"},
@@ -303,9 +303,10 @@ ScaleAndCenterX(float x)
 			m_nHoverOption = HOVEROPTION_NOT_HOVERING; \
 	} while(0)
 
+// TODO: this is COMPLETELY different in VC
 #define ProcessRadioIcon(sprite, x, y, radioId, hoverOpt) \
 	do { \
-		sprite.Draw(x, y, MENU_X(MENURADIO_ICON_SCALE), MENU_Y(MENURADIO_ICON_SCALE), radioId == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(225, 0, 0, 170)); \
+		sprite.Draw(x, y, MENU_X(MENURADIO_ICON_SCALE), MENU_Y(MENURADIO_ICON_SCALE), radioId == m_PrefsRadioStation ? CRGBA(255, 255, 255, 255) : CRGBA(255, 255, 255, 100)); \
 			if (CheckHover(x, x + MENU_X(MENURADIO_ICON_SCALE), y, y + MENU_Y(MENURADIO_ICON_SCALE))) \
 				m_nHoverOption = hoverOpt; \
 	} while (0)
@@ -742,7 +743,7 @@ CMenuManager::Draw()
 		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(17.f), SCREEN_SCALE_Y(17.f), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 
 		PREPARE_MENU_HEADER
-		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(10.f), SCREEN_SCALE_Y(10.f), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
+		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 
 		// Weird place to put that.
 		nextYToUse += 24.0f + 10.0f;
@@ -1325,15 +1326,15 @@ CMenuManager::Draw()
 
 			// Radio icons
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_RADIO) {
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO1], MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(nextYToUse), 0, HOVEROPTION_RADIO_0);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO2], MENU_X_LEFT_ALIGNED(90.0f), MENU_Y(nextYToUse), 1, HOVEROPTION_RADIO_1);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO5], MENU_X_LEFT_ALIGNED(150.0f), MENU_Y(nextYToUse), 2, HOVEROPTION_RADIO_2);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO7], MENU_X_LEFT_ALIGNED(210.0f), MENU_Y(nextYToUse), 3, HOVEROPTION_RADIO_3);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO8], MENU_X_LEFT_ALIGNED(270.0f), MENU_Y(nextYToUse), 4, HOVEROPTION_RADIO_4);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO3], MENU_X_LEFT_ALIGNED(320.0f), MENU_Y(nextYToUse), 5, HOVEROPTION_RADIO_5);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO4], MENU_X_LEFT_ALIGNED(360.0f), MENU_Y(nextYToUse), 6, HOVEROPTION_RADIO_6);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO6], MENU_X_LEFT_ALIGNED(420.0f), MENU_Y(nextYToUse), 7, HOVEROPTION_RADIO_7);
-				ProcessRadioIcon(m_aFrontEndSprites[FE_RADIO9], MENU_X_LEFT_ALIGNED(480.0f), MENU_Y(nextYToUse), 8, HOVEROPTION_RADIO_8);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_WILDSTYLE], MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(nextYToUse), 0, HOVEROPTION_RADIO_0);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_FLASH], MENU_X_LEFT_ALIGNED(90.0f), MENU_Y(nextYToUse), 1, HOVEROPTION_RADIO_1);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_KCHAT], MENU_X_LEFT_ALIGNED(150.0f), MENU_Y(nextYToUse), 2, HOVEROPTION_RADIO_2);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_FEVER], MENU_X_LEFT_ALIGNED(210.0f), MENU_Y(nextYToUse), 3, HOVEROPTION_RADIO_3);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_VROCK], MENU_X_LEFT_ALIGNED(270.0f), MENU_Y(nextYToUse), 4, HOVEROPTION_RADIO_4);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_VCPR], MENU_X_LEFT_ALIGNED(320.0f), MENU_Y(nextYToUse), 5, HOVEROPTION_RADIO_5);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_ESPANTOSO], MENU_X_LEFT_ALIGNED(360.0f), MENU_Y(nextYToUse), 6, HOVEROPTION_RADIO_6);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_EMOTION], MENU_X_LEFT_ALIGNED(420.0f), MENU_Y(nextYToUse), 7, HOVEROPTION_RADIO_7);
+				ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_WAVE], MENU_X_LEFT_ALIGNED(480.0f), MENU_Y(nextYToUse), 8, HOVEROPTION_RADIO_8);
 
 				if (DMAudio.IsMP3RadioChannelAvailable())
 					ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_MP3], MENU_X_LEFT_ALIGNED(540.0f), MENU_Y(nextYToUse), 9, HOVEROPTION_RADIO_9);
@@ -5161,6 +5162,9 @@ CMenuManager::PrintController(void)
 	// FIX: Originally this function doesn't have StretchX/Y, everything had constant pixel size (due to screen was abandoned early?)
 	//		Also texts and their alignment were very bad, so I tried to make them readable (commented out the original code, and marked the ones I added with X)
 
+	// sorry!
+
+	/*
 	m_aFrontEndSprites[FE_CONTROLLERSH].Draw(MENU_X_LEFT_ALIGNED(160.0f), MENU_Y(160.0f), MENU_X(240.0f), MENU_Y(180.0f), CRGBA(0, 0, 0, 255));
 	m_aFrontEndSprites[FE_CONTROLLER].Draw(MENU_X_LEFT_ALIGNED(160.0f), MENU_Y(160.0f), MENU_X(235.2f), MENU_Y(175.2f), CRGBA(255, 255, 255, 255));
 	if (m_DisplayControllerOnFoot) {
@@ -5174,6 +5178,7 @@ CMenuManager::PrintController(void)
 		else
 			m_aFrontEndSprites[FE_ARROWS4].Draw(MENU_X_LEFT_ALIGNED(160.0f), MENU_Y(160.0f), MENU_X(235.2f), MENU_Y(175.2f), CRGBA(255, 255, 255, 255));
 	}
+	*/
 
 	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));  // X
 

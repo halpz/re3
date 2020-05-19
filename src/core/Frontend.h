@@ -7,8 +7,8 @@
 #define MENUHEADER_POS_Y 75.0f
 #define MENUHEADER_HEIGHT 1.3f
 #else
-#define MENUHEADER_POS_X 0.0f
-#define MENUHEADER_POS_Y 412.0f
+#define MENUHEADER_POS_X 10.0f
+#define MENUHEADER_POS_Y 10.0f
 #define MENUHEADER_HEIGHT 1.6f
 #endif
 #define MENUHEADER_WIDTH 0.84f
@@ -95,6 +95,7 @@ enum eLanguages
 #endif
 };
 
+/*
 enum eFrontendSprites
 {
 	FE2_MAINPANEL_UL,
@@ -128,6 +129,7 @@ enum eFrontendSprites
 
 	NUM_FE_SPRITES
 };
+*/
 
 enum eMenuSprites
 {
