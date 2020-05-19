@@ -7,8 +7,8 @@
 #define MENUHEADER_POS_Y 75.0f
 #define MENUHEADER_HEIGHT 1.3f
 #else
-#define MENUHEADER_POS_X 35.0f
-#define MENUHEADER_POS_Y 93.0f
+#define MENUHEADER_POS_X 0.0f
+#define MENUHEADER_POS_Y 412.0f
 #define MENUHEADER_HEIGHT 1.6f
 #endif
 #define MENUHEADER_WIDTH 0.84f
@@ -20,7 +20,7 @@
 
 #define MENURADIO_ICON_SCALE 60.0f
 
-#define MENUSLIDER_X 256.0f
+#define MENUSLIDER_X 128.0f
 #define MENUSLIDER_UNK 256.0f
 
 #define BIGTEXT_X_SCALE 0.75f
