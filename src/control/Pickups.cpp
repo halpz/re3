@@ -1162,45 +1162,6 @@ CPacManPickups::Update()
 void
 CPacManPickups::GeneratePMPickUps(CVector pos, float scrambleMult, int16 count, uint8 type)
 {
-	int i = 0;
-	while (count > 0) {
-		while (aPMPickUps[i].m_eType != PACMAN_NONE)
-			i++;
-
-		bool bPickupCreated = false;
-		while (!bPickupCreated) {
-			CVector newPos = pos;
-			CColPoint colPoint;
-			CEntity *pRoad;
-			uint16 nRand = CGeneral::GetRandomNumber();
-			newPos.x += ((nRand & 0xFF) - 128) * scrambleMult / 128.0f;
-			newPos.y += (((nRand >> 8) & 0xFF) - 128) * scrambleMult / 128.0f;
-			newPos.z = 1000.0f;
-			if (CWorld::ProcessVerticalLine(newPos, -1000.0f, colPoint, pRoad, true, false, false, false, true, false, nil) && pRoad->IsBuilding() && ((CBuilding*)pRoad)->GetIsATreadable()) {
-				newPos.z = 0.7f + colPoint.point.z;
-				aPMPickUps[i].m_eType = type;
-				aPMPickUps[i].m_vecPosn = newPos;
-				CObject *obj = new CObject(MI_BULLION, true);
-				if (obj != nil) {
-					obj->ObjectCreatedBy = MISSION_OBJECT;
-					obj->SetPosition(aPMPickUps[i].m_vecPosn);
-					obj->SetOrientation(0.0f, 0.0f, -HALFPI);
-					obj->GetMatrix().UpdateRW();
-					obj->UpdateRwFrame();
-
-					obj->bAffectedByGravity = false;
-					obj->bExplosionProof = true;
-					obj->bUsesCollision = false;
-					obj->bIsPickup = false;
-					CWorld::Add(obj);
-				}
-				aPMPickUps[i].m_pObject = obj;
-				bPickupCreated = true;
-			}
-		}
-		count--;
-	}
-	bPMActive = true;
 }
 
 // diablo porn mission pickups
@@ -1317,40 +1278,6 @@ static const CVector aRacePoints1[] = {
 void
 CPacManPickups::GeneratePMPickUpsForRace(int32 race)
 {
-	const CVector *pPos = nil;
-	int i = 0;
-
-	if (race == 0) pPos = aRacePoints1; // there's only one available
-	assert(pPos != nil);
-
-	while (!pPos->IsZero()) {
-		while (aPMPickUps[i].m_eType != PACMAN_NONE)
-			i++;
-
-		aPMPickUps[i].m_eType = PACMAN_RACE;
-		aPMPickUps[i].m_vecPosn = *(pPos++);
-		if (race == 0) {
-			CObject* obj = new CObject(MI_DONKEYMAG, true);
-			if (obj != nil) {
-				obj->ObjectCreatedBy = MISSION_OBJECT;
-
-				obj->SetPosition(aPMPickUps[i].m_vecPosn);
-				obj->SetOrientation(0.0f, 0.0f, -HALFPI);
-				obj->GetMatrix().UpdateRW();
-				obj->UpdateRwFrame();
-
-				obj->bAffectedByGravity = false;
-				obj->bExplosionProof = true;
-				obj->bUsesCollision = false;
-				obj->bIsPickup = false;
-
-				CWorld::Add(obj);
-			}
-			aPMPickUps[i].m_pObject = obj;
-		} else
-			aPMPickUps[i].m_pObject = nil;
-	}
-	bPMActive = true;
 }
 
 void
