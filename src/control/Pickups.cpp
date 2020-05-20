@@ -136,6 +136,7 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 	object->bExplosionProof = true;
 	object->bUsesCollision = false;
 	object->bIsPickup = true;
+	object->bHasPreRenderEffects = true;
 
 	object->m_nBonusValue = m_eModelIndex == MI_PICKUP_BONUS ? m_nQuantity : 0;
 
