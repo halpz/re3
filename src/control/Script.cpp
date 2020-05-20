@@ -8222,7 +8222,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		car->SetHeading(DEGTORAD(*(float*)&ScriptParams[3]));
 		CTheScripts::ClearSpaceForMissionEntity(pos, car);
 		car->SetStatus(STATUS_ABANDONED);
-		car->bIsLocked = true;
+		car->bIsLocked = false;
 		car->bIsCarParkVehicle = true;
 		CCarCtrl::JoinCarWithRoadSystem(car);
 		car->AutoPilot.m_nCarMission = MISSION_NONE;
