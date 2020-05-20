@@ -8696,6 +8696,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CTimer::Resume();
 		pMissionScript->m_bIsMissionScript = true;
 		pMissionScript->m_bMissionFlag = true;
+		CTheScripts::bAlreadyRunningAMissionScript = true;
 		return 0;
 	}
 	case COMMAND_SET_OBJECT_DRAW_LAST:
