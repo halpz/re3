@@ -2855,6 +2855,7 @@ CAutomobile::ProcessBuoyancy(void)
 
 		if(impulseRatio > 0.5f){
 			bIsInWater = true;
+			bIsDrowning = true;
 			if(m_vecMoveSpeed.z < -0.1f)
 				m_vecMoveSpeed.z = -0.1f;
 
@@ -2869,8 +2870,11 @@ CAutomobile::ProcessBuoyancy(void)
 					if(pPassengers[i]->IsPlayer() || !bWaterTight)
 						pPassengers[i]->InflictDamage(nil, WEAPONTYPE_DROWNING, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 				}
-		}else
+		}
+		else {
 			bIsInWater = false;
+			bIsDrowning = false;
+		}
 
 		static uint32 nGenerateRaindrops = 0;
 		static uint32 nGenerateWaterCircles = 0;
@@ -2952,6 +2956,7 @@ CAutomobile::ProcessBuoyancy(void)
 		}
 	}else{
 		bIsInWater = false;
+		bIsDrowning = false;
 		bTouchingWater = false;
 
 		static RwRGBA splashCol = {155, 155, 185, 196};

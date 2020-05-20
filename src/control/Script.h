@@ -367,6 +367,7 @@ private:
 	static int32 GetNewUniqueScriptSphereIndex(int32 index);
 	static void RemoveScriptSphere(int32 index);
 	static void RemoveScriptTextureDictionary();
+	static void RemoveThisPed(CPed* pPed);
 
 	friend class CRunningScript;
 	friend class CHud;
