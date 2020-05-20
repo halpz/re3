@@ -399,8 +399,8 @@ CEntity::HasPreRenderEffects(void)
 	   GetModelIndex() == MI_MISSILE ||
 	   GetModelIndex() == MI_BEACHBALL ||
 	   IsGlass(GetModelIndex()) ||
-	   IsObject() && ((CObject*)this)->bIsPickup;
-	   IsStreetLight(GetModelIndex());
+	   IsObject() && ((CObject*)this)->bIsPickup ||
+	   IsLightWithPreRenderEffects(GetModelIndex());
 }
 
 void

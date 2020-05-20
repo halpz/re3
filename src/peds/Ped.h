@@ -444,8 +444,8 @@ public:
 	//uint32 b155_40
 	//uint32 b155_80
 
-	//uint32 b156_1
-	//uint32 b156_2
+	uint32 bIsDrowning : 1;
+	uint32 bCanDrownInWater : 1; // Originally bDrownsInWater
 	//uint32 b156_4
 	//uint32 b156_8
 	uint32 bIsPlayerFriend : 1;
@@ -578,6 +578,7 @@ public:
 	uint8 m_fightButtonPressure;
 	FightState m_fightState;
 	bool m_takeAStepAfterAttack;
+	uint8 m_bleedCounter;
 	CFire *m_pFire;
 	CEntity *m_pLookTarget;
 	float m_fLookDirection;
