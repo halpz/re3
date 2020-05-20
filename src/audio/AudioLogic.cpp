@@ -3849,9 +3849,9 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 	//if (ped->IsPlayer())
 	//	return GetPlayerTalkSfx(sound);
 
-	// TODO: miami peds
+	// TODO(Miami): ped comments
 
-	return TOTAL_AUDIO_SAMPLES;
+	return NO_SAMPLE;
 }
 
 void

@@ -136,6 +136,7 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 	object->bExplosionProof = true;
 	object->bUsesCollision = false;
 	object->bIsPickup = true;
+	object->bHasPreRenderEffects = true;
 
 	object->m_nBonusValue = m_eModelIndex == MI_PICKUP_BONUS ? m_nQuantity : 0;
 
@@ -1015,6 +1016,25 @@ CPickups::RenderPickUpText()
 		CFont::PrintString(aMessages[i].m_pos.x, aMessages[i].m_pos.y, strToPrint);
 	}
 	NumMessages = 0;
+}
+
+void
+CPickups::CreateSomeMoney(CVector pos, int money)
+{
+	bool found;
+
+	int pickupCount = Min(money / 20 + 1, 7);
+	int moneyPerPickup = money / pickupCount;
+
+	for (int i = 0; i < pickupCount; i++) {
+		// (CGeneral::GetRandomNumber() % 256) * PI / 128 gives a float up to something TWOPI-ish.
+		pos.x += 1.5f * Sin((CGeneral::GetRandomNumber() % 256) * PI / 128);
+		pos.y += 1.5f * Cos((CGeneral::GetRandomNumber() % 256) * PI / 128);
+		pos.z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &found) + 0.5f;
+		if (found) {
+			CPickups::GenerateNewOne(CVector(pos.x, pos.y, pos.z), MI_MONEY, PICKUP_MONEY, moneyPerPickup + (CGeneral::GetRandomNumber() & 3));
+		}
+	}
 }
 
 void

@@ -1067,13 +1067,13 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 
 			if(B->IsBuilding())
 				skipShift = false;
-			else if(IsStreetLight(A->GetModelIndex()) &&
+			else if(IsLightWithoutShift(A->GetModelIndex()) &&
 			  (B->IsVehicle() || B->IsPed()) &&
 			  A->GetUp().z < 0.66f)
 				skipShift = true;
 			else if((A->IsVehicle() || A->IsPed()) &&
 			  B->GetUp().z < 0.66f &&
-			  IsStreetLight(B->GetModelIndex()))
+			  IsLightWithoutShift(B->GetModelIndex()))
 				skipShift = true;
 // TODO: maybe flip some ifs here
 			else if(A->IsObject() && B->IsVehicle()){
@@ -1398,7 +1398,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 
 			if(B->IsBuilding())
 				skipCollision = false;
-			else if(IsStreetLight(A->GetModelIndex()) &&
+			else if(IsLightWithoutShift(A->GetModelIndex()) &&
 			  (B->IsVehicle() || B->IsPed()) &&
 			  A->GetUp().z < 0.66f){
 				skipCollision = true;
@@ -1406,7 +1406,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 				Aobj->m_pCollidingEntity = B;
 			}else if((A->IsVehicle() || A->IsPed()) &&
 			  B->GetUp().z < 0.66f &&
-			  IsStreetLight(B->GetModelIndex())){
+			  IsLightWithoutShift(B->GetModelIndex())){
 				skipCollision = true;
 				A->bSkipLineCol = true;
 				Bobj->m_pCollidingEntity = A;

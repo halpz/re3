@@ -145,10 +145,7 @@ CTrafficLights::ScanForLightsOnMap(void)
 		CPtrList &list = CWorld::GetSector(x, y)->m_lists[ENTITYLIST_DUMMIES];
 		for(node = list.first; node; node = node->next){
 			CEntity *light = (CEntity*)node->item;
-			if(light->GetModelIndex() != MI_TRAFFICLIGHTS &&
-			   light->GetModelIndex() != MI_TRAFFICLIGHTS_VERTICAL &&
-			   light->GetModelIndex() != MI_TRAFFICLIGHTS_MIAMI &&
-			   light->GetModelIndex() != MI_TRAFFICLIGHTS_TWOVERTICAL)
+			if (!IsTrafficLight(light->GetModelIndex()))
 				continue;
 
 			// Check cars
