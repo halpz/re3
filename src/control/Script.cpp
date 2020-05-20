@@ -7000,7 +7000,11 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		float heading = LimitAngleOnCircle(
 			RADTODEG(Atan2(-pObject->GetForward().x, pObject->GetForward().y)));
 		float headingTarget = *(float*)&ScriptParams[1];
+#ifdef FIX_BUGS
+		float rotateBy = *(float*)&ScriptParams[2] * CTimer::GetTimeStepFix();
+#else
 		float rotateBy = *(float*)&ScriptParams[2];
+#endif
 		if (headingTarget == heading) { // using direct comparasion here is fine
 			UpdateCompareFlag(true);
 			return 0;
@@ -7049,7 +7053,11 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		assert(pObject);
 		CVector pos = pObject->GetPosition();
 		CVector posTarget = *(CVector*)&ScriptParams[1];
+#ifdef FIX_BUGS
+		CVector slideBy = *(CVector*)&ScriptParams[4] * CTimer::GetTimeStepFix();
+#else
 		CVector slideBy = *(CVector*)&ScriptParams[4];
+#endif
 		if (posTarget == pos) { // using direct comparasion here is fine
 			UpdateCompareFlag(true);
 			return 0;
@@ -7221,12 +7229,13 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	}
 	case COMMAND_CREATE_FLOATING_PACKAGE:
 	{
-		CollectParameters(&m_nIp, 3);
-		CVector pos = *(CVector*)&ScriptParams[0];
-		if (pos.z <= MAP_Z_LOW_LIMIT)
-			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
-		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_FLOATPACKAGE1, PICKUP_FLOATINGPACKAGE, 0);
-		StoreParameters(&m_nIp, 1);
+// removed in MIAMI
+//		CollectParameters(&m_nIp, 3);
+//		CVector pos = *(CVector*)&ScriptParams[0];
+//		if (pos.z <= MAP_Z_LOW_LIMIT)
+//			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
+//		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_FLOATPACKAGE1, PICKUP_FLOATINGPACKAGE, 0);
+//		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
 	case COMMAND_PLACE_OBJECT_RELATIVE_TO_CAR:
@@ -8681,8 +8690,8 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		return 0;
 	}
 	case COMMAND_GET_BODY_CAST_HEALTH:
-		ScriptParams[0] = CObject::nBodyCastHealth;
-		StoreParameters(&m_nIp, 1);
+	//	ScriptParams[0] = CObject::nBodyCastHealth;
+	//	StoreParameters(&m_nIp, 1);
 		return 0;
 	case COMMAND_SET_CHARS_CHATTING:
 	{
