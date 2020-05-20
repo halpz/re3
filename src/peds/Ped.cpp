@@ -595,9 +595,6 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 #ifdef KANGAROO_CHEAT
 	m_ped_flagI80 = false;
 #endif
-#ifdef VC_PED_PORTS
-	bSomeVCflag1 = false;
-#endif
 
 	m_gangFlags = 0xFF;
 
@@ -605,6 +602,10 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bTurnedAroundOnAttractor = false;
 	bCarPassenger = false;
 	bMiamiViceCop = false;
+#ifdef VC_PED_PORTS
+	bHeadStuckInCollision = false;
+#endif
+	bIsPlayerFriend = true;
 	bDeadPedInFrontOfCar = false;
 
 	if ((CGeneral::GetRandomNumber() & 3) == 0)
@@ -10659,7 +10660,7 @@ CPed::ProcessControl(void)
 							flyDir = 1;
 						}
 
-						if (flyDir != 0 && !bSomeVCflag1) {
+						if (flyDir != 0 && !bHeadStuckInCollision) {
 							SetPosition((flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point));
 							GetMatrix().GetPosition().z += FEET_OFFSET;
 							GetMatrix().UpdateRW();
@@ -10766,11 +10767,11 @@ CPed::ProcessControl(void)
 
 					if (CWorld::ProcessVerticalLine(offsetToCheck, GetPosition().z - FEET_OFFSET, foundCol, foundEnt, true, true, false, true, false, false, nil)) {
 #ifdef VC_PED_PORTS
-						if (!bSomeVCflag1 || FEET_OFFSET + foundCol.point.z < GetPosition().z) {
+						if (!bHeadStuckInCollision || FEET_OFFSET + foundCol.point.z < GetPosition().z) {
 							GetMatrix().GetPosition().z = FEET_OFFSET + foundCol.point.z;
 							GetMatrix().UpdateRW();
-							if (bSomeVCflag1)
-								bSomeVCflag1 = false;
+							if (bHeadStuckInCollision)
+								bHeadStuckInCollision = false;
 						}
 #else
 						GetMatrix().GetPosition().z = FEET_OFFSET + foundCol.point.z;
@@ -10840,15 +10841,15 @@ CPed::ProcessControl(void)
 			if (IsPedInControl() && !bIsStanding && !m_pDamageEntity && CheckIfInTheAir()) {
 				SetInTheAir();
 #ifdef VC_PED_PORTS
-				bSomeVCflag1 = false;
+				bHeadStuckInCollision = false;
 #endif
 			}
 #ifdef VC_PED_PORTS
-			if (bSomeVCflag1) {
+			if (bHeadStuckInCollision) {
 				CVector posToCheck = GetPosition();
 				posToCheck.z += 0.9f;
 				if (!CWorld::TestSphereAgainstWorld(posToCheck, 0.2f, this, true, true, false, true, false, false))
-					bSomeVCflag1 = false;
+					bHeadStuckInCollision = false;
 			}
 #endif
 			ProcessObjective();
@@ -15337,10 +15338,10 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 				if (CCollision::IsStoredPolyStillValidVerticalLine(pos, potentialGroundZ, intersectionPoint, &m_collPoly)) {
 					bStillOnValidPoly = true;
 #ifdef VC_PED_PORTS
-					if(!bSomeVCflag1 || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
+					if(!bHeadStuckInCollision || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
 						GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
-						if (bSomeVCflag1)
-							bSomeVCflag1 = false;
+						if (bHeadStuckInCollision)
+							bHeadStuckInCollision = false;
 					}
 #else
 					GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
@@ -15415,10 +15416,10 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 								}
 							}
 #ifdef VC_PED_PORTS
-							if (!bSomeVCflag1 || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
+							if (!bHeadStuckInCollision || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
 								GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
-								if (bSomeVCflag1)
-									bSomeVCflag1 = false;
+								if (bHeadStuckInCollision)
+									bHeadStuckInCollision = false;
 							}
 #else
 							GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
@@ -15505,7 +15506,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 					sphereNormal.x = -m_vecMoveSpeed.x / Max(0.001f, speed);
 					sphereNormal.y = -m_vecMoveSpeed.y / Max(0.001f, speed);
 					GetMatrix().GetPosition().z -= 0.05f;
-					bSomeVCflag1 = true;
+					bHeadStuckInCollision = true;
 				}
 #endif
 				sphereNormal.Normalise();
@@ -16039,8 +16040,9 @@ CPed::SetSolicit(uint32 time)
 }
 
 bool
-CPed::SetFollowPath(CVector dest)
+CPed::SetFollowPath(CVector dest, float radius, eMoveState state, CEntity* pFollowedPed, CEntity*, int time)
 {
+	// TODO(MIAMI): new follow
 	if (m_nPedState == PED_FOLLOW_PATH)
 		return false;
 
