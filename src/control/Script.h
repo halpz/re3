@@ -485,10 +485,11 @@ private:
 
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
 
-	bool ThisIsAValidRandomPed(uint32 pedtype) {
+	bool ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal) {
 		switch (pedtype) {
 		case PEDTYPE_CIVMALE:
 		case PEDTYPE_CIVFEMALE:
+			return civ;
 		case PEDTYPE_GANG1:
 		case PEDTYPE_GANG2:
 		case PEDTYPE_GANG3:
@@ -498,13 +499,16 @@ private:
 		case PEDTYPE_GANG7:
 		case PEDTYPE_GANG8:
 		case PEDTYPE_GANG9:
+			return gang;
 		case PEDTYPE_CRIMINAL:
 		case PEDTYPE_PROSTITUTE:
-			return true;
+			return criminal;
 		default:
 			return false;
 		}
 	}
+
+	bool CheckDamagedWeaponType(int32 type, int32 actual);
 	
 	static bool ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami);
 };
