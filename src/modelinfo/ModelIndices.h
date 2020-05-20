@@ -358,9 +358,38 @@ IsGlass(int16 id)
 }
 
 inline bool
-IsStreetLight(int16 id)
+IsTrafficLight(int16 id)
 {
-	return	id == MI_SINGLESTREETLIGHTS1 ||
+	return id == MI_TRAFFICLIGHTS ||
+		id == MI_TRAFFICLIGHTS_VERTICAL ||
+		id == MI_TRAFFICLIGHTS_MIAMI ||
+		id == MI_TRAFFICLIGHTS_TWOVERTICAL;
+}
+
+inline bool
+IsLightWithoutShift(int16 id)
+{
+	return id == MI_TRAFFICLIGHTS ||
+		id == MI_SINGLESTREETLIGHTS1 ||
+		id == MI_SINGLESTREETLIGHTS2 ||
+		id == MI_SINGLESTREETLIGHTS3 ||
+		id == MI_DOUBLESTREETLIGHTS;
+}
+
+inline bool
+IsLightWithPreRenderEffects(int16 id)
+{
+	return IsTrafficLight(id) ||
+		id == MI_SINGLESTREETLIGHTS1 ||
+		id == MI_SINGLESTREETLIGHTS2 ||
+		id == MI_SINGLESTREETLIGHTS3 ||
+		id == MI_DOUBLESTREETLIGHTS;
+}
+
+inline bool
+IsLightThatNeedsRepositioning(int16 id)
+{
+	return id == MI_SINGLESTREETLIGHTS1 ||
 		id == MI_SINGLESTREETLIGHTS2 ||
 		id == MI_SINGLESTREETLIGHTS3 ||
 		id == MI_TRAFFICLIGHTS_MIAMI ||

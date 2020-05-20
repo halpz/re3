@@ -338,13 +338,13 @@ CObject::Init(void)
 		m_pCurSurface = outEntity;
 	else
 		m_pCurSurface = nil;
-#if 0
-	if (GetModelIndex() == MI_BODYCAST)
-		nBodyCastHealth = 1000;
-	else
-#endif
+
 	if (GetModelIndex() == MI_BUOY)
 		bTouchingWater = true;
+
+	// TODO(Miami): Second flag set initialization
+
+	m_area = AREA_EVERYWHERE;
 }
 
 bool
