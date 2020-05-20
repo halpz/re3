@@ -1018,6 +1018,25 @@ CPickups::RenderPickUpText()
 }
 
 void
+CPickups::CreateSomeMoney(CVector pos, int money)
+{
+	bool found;
+
+	int pickupCount = Min(money / 20 + 1, 7);
+	int moneyPerPickup = money / pickupCount;
+
+	for (int i = 0; i < pickupCount; i++) {
+		// (CGeneral::GetRandomNumber() % 256) * PI / 128 gives a float up to something TWOPI-ish.
+		pos.x += 1.5f * Sin((CGeneral::GetRandomNumber() % 256) * PI / 128);
+		pos.y += 1.5f * Cos((CGeneral::GetRandomNumber() % 256) * PI / 128);
+		pos.z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &found) + 0.5f;
+		if (found) {
+			CPickups::GenerateNewOne(CVector(pos.x, pos.y, pos.z), MI_MONEY, PICKUP_MONEY, moneyPerPickup + (CGeneral::GetRandomNumber() & 3));
+		}
+	}
+}
+
+void
 CPickups::Load(uint8 *buf, uint32 size)
 {
 INITSAVEBUF

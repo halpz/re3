@@ -1818,9 +1818,8 @@ CWorld::RepositionOneObject(CEntity *pEntity)
 	    modelId == MI_DUMP1 || modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||
 	    modelId == MI_PHONESIGN || modelId == MI_FIRE_HYDRANT || modelId == MI_BOLLARDLIGHT ||
 	    modelId == MI_PARKTABLE || modelId == MI_PARKINGMETER2 || modelId == MI_TELPOLE02 ||
-	    modelId == MI_PARKBENCH || modelId == MI_BARRIER1 || IsTreeModel(modelId)
-// TODO(MIAMI): this is actually a different case
-|| IsStreetLight(modelId)
+	    modelId == MI_PARKBENCH || modelId == MI_BARRIER1 || IsTreeModel(modelId) ||
+		IsLightThatNeedsRepositioning(modelId)
 		) {
 		CVector &position = pEntity->GetMatrix().GetPosition();
 		CColModel *pColModel = pEntity->GetColModel();

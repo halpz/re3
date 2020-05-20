@@ -3098,11 +3098,11 @@ CAutomobile::DoDriveByShootings(void)
 	// TODO: what is this?
 	if(!lookingLeft && m_weaponDoorTimerLeft > 0.0f){
 		m_weaponDoorTimerLeft = Max(m_weaponDoorTimerLeft - CTimer::GetTimeStep()*0.1f, 0.0f);
-		ProcessOpenDoor(CAR_DOOR_LF, NUM_ANIMS, m_weaponDoorTimerLeft);
+		ProcessOpenDoor(CAR_DOOR_LF, NUM_STD_ANIMS, m_weaponDoorTimerLeft);
 	}
 	if(!lookingRight && m_weaponDoorTimerRight > 0.0f){
 		m_weaponDoorTimerRight = Max(m_weaponDoorTimerRight - CTimer::GetTimeStep()*0.1f, 0.0f);
-		ProcessOpenDoor(CAR_DOOR_RF, NUM_ANIMS, m_weaponDoorTimerRight);
+		ProcessOpenDoor(CAR_DOOR_RF, NUM_STD_ANIMS, m_weaponDoorTimerRight);
 	}
 }
 
@@ -3787,7 +3787,7 @@ CAutomobile::ProcessOpenDoor(uint32 component, uint32 anim, float time)
 	case ANIM_VAN_GETOUT:
 		ProcessDoorOpenAnimation(this, component, door, time, 0.5f, 0.6f);
 		break;
-	case NUM_ANIMS:
+	case NUM_STD_ANIMS:
 		OpenDoor(component, door, time);
 		break;
 	}

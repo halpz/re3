@@ -1026,7 +1026,7 @@ CPlayerPed::ProcessAnimGroups(void)
 			if (m_fWalkAngle > 0.0f) {
 				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 					groupToSet = ASSOCGRP_ROCKETLEFT;
-				else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+				else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
 					GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
 					/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/ )
 					groupToSet = ASSOCGRP_CHAINSAWLEFT;
@@ -1035,7 +1035,7 @@ CPlayerPed::ProcessAnimGroups(void)
 			} else {
 				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 					groupToSet = ASSOCGRP_ROCKETRIGHT;
-				else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+				else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
 					GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
 					/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
 					groupToSet = ASSOCGRP_CHAINSAWRIGHT;
@@ -1045,7 +1045,7 @@ CPlayerPed::ProcessAnimGroups(void)
 		} else {
 			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
 				groupToSet = ASSOCGRP_ROCKETBACK;
-			else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+			else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
 				GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
 				/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
 				groupToSet = ASSOCGRP_CHAINSAWBACK;
@@ -1057,9 +1057,9 @@ CPlayerPed::ProcessAnimGroups(void)
 			groupToSet = ASSOCGRP_PLAYERROCKET;
 		} else {
 			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT
-				/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MACHETE */)
+				 || GetWeapon()->m_eWeaponType == WEAPONTYPE_MACHETE)
 				groupToSet = ASSOCGRP_PLAYERBBBAT;
-			else if (/*GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW || */
+			else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW ||
 				GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER
 				/* || GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN*/)
 				groupToSet = ASSOCGRP_PLAYERCHAINSAW;
@@ -1067,10 +1067,9 @@ CPlayerPed::ProcessAnimGroups(void)
 				// I hope this was inlined...
 				/*
 				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_PYTHON*/ && GetWeapon()->m_eWeaponType != WEAPONTYPE_TEC9
-				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_SILENCED_INGRAM && GetWeapon()->m_eWeaponType != WEAPONTYPE_MP5 /*
+				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_SILENCED_INGRAM && GetWeapon()->m_eWeaponType != WEAPONTYPE_MP5
 				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_GOLFCLUB && GetWeapon()->m_eWeaponType != WEAPONTYPE_KATANA
-				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_CAMERA
-				*/) {
+				/* && GetWeapon()->m_eWeaponType != WEAPONTYPE_CAMERA */) {
 				if (!GetWeapon()->IsType2Handed()) {
 					groupToSet = ASSOCGRP_PLAYER;
 				} else {
