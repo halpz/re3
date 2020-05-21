@@ -1476,6 +1476,7 @@ void CHud::GetRidOfAllHudMessages()
 	}
 }
 
+#ifdef RELOADABLES
 void CHud::ReloadTXD()
 {
 	for (int i = 0; i < NUM_HUD_SPRITES; ++i) {
@@ -1497,6 +1498,7 @@ void CHud::ReloadTXD()
 		Sprites[i].SetTexture(WeaponFilenames[i].name, WeaponFilenames[i].mask);
 	}
 }
+#endif
 
 void CHud::Initialise()
 {

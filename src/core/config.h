@@ -204,6 +204,9 @@ enum Config {
 #else
 #define AUDIO_OAL
 #endif
+#ifdef DEBUGMENU
+#define RELOADABLES			// some debug menu options to reload TXD files
+#endif
 
 // Particle
 //#define PC_PARTICLE
