@@ -909,7 +909,17 @@ void CHud::Draw()
 #else
 			rect.Translate(RADAR_LEFT, SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
 #endif
-			rect.Grow(4.0f);
+
+			// shadow, might not be exactly accurate numbers
+			rect.Translate(0.f, 4.f);
+			rect.Grow(6.0f);
+			rect.top += 2.f;
+			rect.bottom -= 2.f;
+			Sprites[HUD_RADARDISC].Draw(rect, CRGBA(0, 0, 0, 255));
+
+			rect.Translate(0.f, -4.f);
+			rect.top -= 2.f;
+			rect.bottom += 2.f;
 			Sprites[HUD_RADARDISC].Draw(rect, RADARDISC_COLOR);
 			CRadar::DrawBlips();
 		}
