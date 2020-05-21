@@ -16,11 +16,6 @@
 #include "Streaming.h"
 #include "SpecialFX.h"
 
-CRGBA CARBLIP_COLOR(252, 138, 242, 255);
-CRGBA CHARBLIP_COLOR(252, 138, 242, 255);
-CRGBA OBJECTBLIP_COLOR(252, 138, 242, 255);
-CRGBA COORDBLIP_COLOR(252, 138, 242, 255);
-
 float CRadar::m_radarRange;
 sRadarTrace CRadar::ms_RadarTrace[NUMRADARBLIPS];
 CVector2D vec2DRadarOrigin;
@@ -436,7 +431,7 @@ void CRadar::Draw3dMarkers()
 				if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 					CVector pos = entity->GetPosition();
 					pos.z += 1.2f * CModelInfo::GetModelInfo(entity->GetModelIndex())->GetColModel()->boundingBox.max.z + 2.5f;
-					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 2.5f, 0, CARBLIP_COLOR.r, CARBLIP_COLOR.g, CARBLIP_COLOR.b, 1024, 0.2f, 5);
+					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 2.5f, CARBLIP_MARKER_COLOR_R, CARBLIP_MARKER_COLOR_G, CARBLIP_MARKER_COLOR_B, CARBLIP_MARKER_COLOR_A, 1024, 0.2f, 5);
 				}
 				break;
 			}
@@ -450,7 +445,7 @@ void CRadar::Draw3dMarkers()
 				if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 					CVector pos = entity->GetPosition();
 					pos.z += 3.0f;
-					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 1.5f, 0, CHARBLIP_COLOR.r, CHARBLIP_COLOR.g, CHARBLIP_COLOR.b, 1024, 0.2f, 5);
+					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 1.5f, CHARBLIP_MARKER_COLOR_R, CHARBLIP_MARKER_COLOR_G, CHARBLIP_MARKER_COLOR_B, CHARBLIP_MARKER_COLOR_A, 1024, 0.2f, 5);
 				}
 				break;
 			}
@@ -460,7 +455,7 @@ void CRadar::Draw3dMarkers()
 				if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 					CVector pos = entity->GetPosition();
 					pos.z += CModelInfo::GetModelInfo(entity->GetModelIndex())->GetColModel()->boundingBox.max.z + 1.0f + 1.0f;
-					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 1.0f, 0, OBJECTBLIP_COLOR.r, OBJECTBLIP_COLOR.g, OBJECTBLIP_COLOR.b, 1024, 0.2f, 5);
+					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 1.0f, OBJECTBLIP_MARKER_COLOR_R, OBJECTBLIP_MARKER_COLOR_G, OBJECTBLIP_MARKER_COLOR_B, OBJECTBLIP_MARKER_COLOR_A, 1024, 0.2f, 5);
 				}
 				break;
 			}
@@ -469,7 +464,7 @@ void CRadar::Draw3dMarkers()
 			case BLIP_CONTACT_POINT:
 				if (!CTheScripts::IsPlayerOnAMission()) {
 					if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY)
-						C3dMarkers::PlaceMarkerSet(i | (ms_RadarTrace[i].m_BlipIndex << 16), 4, ms_RadarTrace[i].m_vecPos, 2.0f, 0, COORDBLIP_COLOR.r, COORDBLIP_COLOR.g, COORDBLIP_COLOR.b, 2048, 0.2f, 0);
+						C3dMarkers::PlaceMarkerSet(i | (ms_RadarTrace[i].m_BlipIndex << 16), 4, ms_RadarTrace[i].m_vecPos, 2.0f, COORDBLIP_MARKER_COLOR_R, COORDBLIP_MARKER_COLOR_G, COORDBLIP_MARKER_COLOR_B, COORDBLIP_MARKER_COLOR_A, 2048, 0.2f, 0);
 				}
 				break;
 			}
