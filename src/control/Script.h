@@ -15,6 +15,12 @@ class CPlayerInfo;
 class CRunningScript;
 
 #define KEY_LENGTH_IN_SCRIPT 8
+#define SPHERE_MARKER_R 252
+#define SPHERE_MARKER_G 138
+#define SPHERE_MARKER_B 242
+#define SPHERE_MARKER_A 228
+#define SPHERE_MARKER_PULSE_PERIOD 2048
+#define SPHERE_MARKER_PULSE_FRACTION 0.1f
 
 struct intro_script_rectangle 
 {
