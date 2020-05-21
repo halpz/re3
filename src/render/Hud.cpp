@@ -102,6 +102,7 @@ uint32 CHud::m_WeaponState;
 uint32 CHud::m_WeaponTimer;
 
 uint32 CHud::m_LastDisplayScore;
+uint32 CHud::m_LastWanted;
 
 CSprite2d CHud::Sprites[NUM_HUD_SPRITES];
 
@@ -483,33 +484,46 @@ void CHud::Draw()
 		/*
 			DrawWantedLevel
 		*/
-		CFont::SetBackgroundOff();
-		CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
-		CFont::SetJustifyOff();
-		CFont::SetCentreOff();
-		CFont::SetRightJustifyOn();
-		CFont::SetPropOn();
-		CFont::SetFontStyle(FONT_HEADING);
-		CFont::SetDropShadowPosition(2); // TODO(Miami): Remove that, VC keeps that open above
-
-		AsciiToUnicode("]", sPrintIcon);
-
-		for (int i = 0; i < 6; i++) {
-			if (playerPed->m_pWanted->m_nWantedLevel > i
-				&& (CTimer::GetTimeInMilliseconds() > playerPed->m_pWanted->m_nLastWantedLevelChange
-					+ 2000 || CTimer::GetFrameCounter() & 4)) {
-
-				CFont::SetColor(WANTED_COLOR);
-				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
-
-			// TODO(Miami): There is one more condition in here
-			}else if (playerPed->m_pWanted->m_nWantedLevel <= i) {
-				CFont::SetColor(NOTWANTED_COLOR);
-				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
-			}
+		if (m_LastWanted == playerPed->m_pWanted->m_nWantedLevel)
+			alpha = CHud::DrawFadeState(HUD_WANTED_FADING, 0);
+		else {
+			alpha = CHud::DrawFadeState(HUD_WANTED_FADING, 1);
+			m_LastWanted = playerPed->m_pWanted->m_nWantedLevel;
 		}
 
-		CFont::SetDropShadowPosition(0); // TODO(Miami): Remove that, VC keeps that open
+		if (m_WantedState != FADED_OUT) {
+			CFont::SetBackgroundOff();
+			CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
+			CFont::SetJustifyOff();
+			CFont::SetCentreOff();
+			CFont::SetRightJustifyOn();
+			CFont::SetPropOn();
+			CFont::SetFontStyle(FONT_HEADING);
+			CFont::SetDropShadowPosition(2); // TODO(Miami): Remove that, VC keeps that open above
+			CFont::SetDropColor(CRGBA(0,0,0,alpha)); // TODO(Miami): Remove that, VC keeps that open above
+
+			AsciiToUnicode("]", sPrintIcon);
+
+			for (int i = 0; i < 6; i++) {
+				if (playerPed->m_pWanted->m_nWantedLevel > i
+					&& (CTimer::GetTimeInMilliseconds() > playerPed->m_pWanted->m_nLastWantedLevelChange
+						+ 2000 || CTimer::GetFrameCounter() & 4)) {
+
+					WANTED_COLOR.a = alpha;
+					CFont::SetColor(WANTED_COLOR);
+					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
+
+					// TODO(Miami): There is one more condition in here
+				}
+				else if (playerPed->m_pWanted->m_nWantedLevel <= i) {
+					NOTWANTED_COLOR.a = alpha;
+					CFont::SetColor(NOTWANTED_COLOR);
+					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
+				}
+			}
+
+			CFont::SetDropShadowPosition(0); // TODO(Miami): Remove that, VC keeps that open
+		}
 
 		/*
 			DrawZoneName
@@ -1503,20 +1517,28 @@ void CHud::Initialise()
 	PagerSoundPlayed = 0;
 	PagerXOffset = 150.0f;
 
-	m_WantedFadeTimer = 0;
+#ifdef HUD_AUTO_FADE
+	m_EnergyLostState = START_FADE_OUT;
+	m_WantedState = START_FADE_OUT;
+	m_DisplayScoreState = START_FADE_OUT;
+	m_WeaponState = START_FADE_OUT;
+#else
+	m_EnergyLostState = FADE_DISABLED;
 	m_WantedState = FADE_DISABLED;
+	m_DisplayScoreState = FADE_DISABLED;
+	m_WeaponState = FADE_DISABLED;
+#endif
+	m_WantedFadeTimer = 0;
 	m_WantedTimer = 0;
 	m_EnergyLostFadeTimer = 0;
-	m_EnergyLostState = FADE_DISABLED;
 	m_EnergyLostTimer = 0;
 	m_DisplayScoreFadeTimer = 0;
-	m_DisplayScoreState = FADE_DISABLED;
 	m_DisplayScoreTimer = 0;
 	m_WeaponFadeTimer = 0;
-	m_WeaponState = FADE_DISABLED;
 	m_WeaponTimer = 0;
 
 	m_LastDisplayScore = CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney;
+	m_LastWanted = 0;
 
 	CTxdStore::PopCurrentTxd();
 }
@@ -1542,20 +1564,28 @@ void CHud::ReInitialise() {
 	PagerSoundPlayed = 0;
 	PagerXOffset = 150.0f;
 
-	m_WantedFadeTimer = 0;
+#ifdef HUD_AUTO_FADE
+	m_EnergyLostState = START_FADE_OUT;
+	m_WantedState = START_FADE_OUT;
+	m_DisplayScoreState = START_FADE_OUT;
+	m_WeaponState = START_FADE_OUT;
+#else
+	m_EnergyLostState = FADE_DISABLED;
 	m_WantedState = FADE_DISABLED;
+	m_DisplayScoreState = FADE_DISABLED;
+	m_WeaponState = FADE_DISABLED;
+#endif
+	m_WantedFadeTimer = 0;
 	m_WantedTimer = 0;
 	m_EnergyLostFadeTimer = 0;
-	m_EnergyLostState = FADE_DISABLED;
 	m_EnergyLostTimer = 0;
 	m_DisplayScoreFadeTimer = 0;
-	m_DisplayScoreState = FADE_DISABLED;
 	m_DisplayScoreTimer = 0;
 	m_WeaponFadeTimer = 0;
-	m_WeaponState = FADE_DISABLED;
 	m_WeaponTimer = 0;
 
 	m_LastDisplayScore = CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney;
+	m_LastWanted = 0;
 }
 
 wchar LastBigMessage[6][128];

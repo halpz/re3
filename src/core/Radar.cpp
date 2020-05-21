@@ -264,7 +264,7 @@ int LineRadarBoxCollision(CVector2D &out, const CVector2D &p1, const CVector2D &
 uint8 CRadar::CalculateBlipAlpha(float dist)
 {
 #ifdef MENU_MAP
-	if (CMenuManager::bMenuMapActive)
+	if (FrontEndMenuManager.m_bMenuMapActive)
 		return 255;
 #endif
 	if (dist <= 1.0f)
@@ -487,7 +487,7 @@ void CRadar::DrawBlips()
 		TransformRadarPointToScreenSpace(out, in);
 
 #ifdef MENU_MAP
-		if (!CMenuManager::bMenuMapActive) {
+		if (!FrontEndMenuManager.m_bMenuMapActive) {
 #endif
 			float angle;
 			if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN)
@@ -555,7 +555,7 @@ void CRadar::DrawBlips()
 								TransformRealWorldPointToRadarSpace(in, blipEntity->GetPosition());
 								float dist = LimitRadarPoint(in);
 								TransformRadarPointToScreenSpace(out, in);
-								if (!ms_RadarTrace[blipId].m_bShortRange || dist <= 1.0f || CMenuManager::bMenuMapActive) {
+								if (!ms_RadarTrace[blipId].m_bShortRange || dist <= 1.0f || FrontEndMenuManager.m_bMenuMapActive) {
 									if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE) {
 										DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
 									}
@@ -597,7 +597,7 @@ void CRadar::DrawBlips()
 							TransformRealWorldPointToRadarSpace(in, ms_RadarTrace[blipId].m_vec2DPos);
 							float dist = LimitRadarPoint(in);
 							TransformRadarPointToScreenSpace(out, in);
-							if (!ms_RadarTrace[blipId].m_bShortRange || dist <= 1.0f || CMenuManager::bMenuMapActive) {
+							if (!ms_RadarTrace[blipId].m_bShortRange || dist <= 1.0f || FrontEndMenuManager.m_bMenuMapActive) {
 								if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE) {
 									DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
 								}
@@ -666,7 +666,7 @@ void CRadar::DrawBlips()
 								TransformRealWorldPointToRadarSpace(in, blipEntity->GetPosition());
 								float dist = LimitRadarPoint(in);
 								TransformRadarPointToScreenSpace(out, in);
-								if (!ms_RadarTrace[blipId].m_bShortRange || dist <= 1.0f || CMenuManager::bMenuMapActive) {
+								if (!ms_RadarTrace[blipId].m_bShortRange || dist <= 1.0f || FrontEndMenuManager.m_bMenuMapActive) {
 									if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE)
 										DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
 									else
@@ -717,7 +717,7 @@ void CRadar::DrawBlips()
 							TransformRealWorldPointToRadarSpace(in, ms_RadarTrace[blipId].m_vec2DPos);
 							float dist = LimitRadarPoint(in);
 							TransformRadarPointToScreenSpace(out, in);
-							if (!ms_RadarTrace[blipId].m_bShortRange || dist <= 1.0f || CMenuManager::bMenuMapActive) {
+							if (!ms_RadarTrace[blipId].m_bShortRange || dist <= 1.0f || FrontEndMenuManager.m_bMenuMapActive) {
 								if (ms_RadarTrace[blipId].m_eRadarSprite != RADAR_SPRITE_NONE)
 									DrawRadarSprite(ms_RadarTrace[blipId].m_eRadarSprite, out.x, out.y, CalculateBlipAlpha(dist));
 								else
@@ -744,7 +744,7 @@ void CRadar::DrawBlips()
 			}
 		}
 #ifdef MENU_MAP
-		if (CMenuManager::bMenuMapActive) {
+		if (FrontEndMenuManager.m_bMenuMapActive) {
 			CVector2D in, out;
 			TransformRealWorldPointToRadarSpace(in, FindPlayerCentreOfWorld_NoSniperShift());
 			TransformRadarPointToScreenSpace(out, in);
@@ -899,7 +899,7 @@ void CRadar::DrawRadarSprite(uint16 sprite, float x, float y, uint8 alpha)
 {
 	RadarSprites[sprite]->Draw(CRect(x - SCREEN_SCALE_X(8.0f), y - SCREEN_SCALE_Y(8.0f), x + SCREEN_SCALE_X(8.0f), y + SCREEN_SCALE_Y(8.0f)), CRGBA(255, 255, 255, alpha));
 #ifdef MENU_MAP
-	if (CMenuManager::bMenuMapActive) {
+	if (FrontEndMenuManager.m_bMenuMapActive) {
 		bool alreadyThere = false;
 		for (int i = 0; i < NUM_MAP_LEGENDS; i++) {
 			if (MapLegendList[i] == sprite)
@@ -1047,7 +1047,7 @@ float CRadar::LimitRadarPoint(CVector2D &point)
 
 	dist = point.Magnitude();
 #ifdef MENU_MAP
-	if (CMenuManager::bMenuMapActive)
+	if (FrontEndMenuManager.m_bMenuMapActive)
 		return dist;
 #endif
 	if (dist > 1.0f) {
@@ -1278,7 +1278,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, 
 	}
 #ifdef MENU_MAP
 	// VC uses -1 for coords and -2 for entities but meh, I don't want to edit DrawBlips
-	if (CMenuManager::bMenuMapActive) {
+	if (FrontEndMenuManager.m_bMenuMapActive) {
 		bool alreadyThere = false;
 		for (int i = 0; i < NUM_MAP_LEGENDS; i++) {
 			if (MapLegendList[i] == -1)
@@ -1403,9 +1403,9 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D
 void CRadar::TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &in)
 {
 #ifdef MENU_MAP
-	if (CMenuManager::bMenuMapActive) {
-		out.x = (CMenuManager::fMapCenterX - CMenuManager::fMapSize) + (MENU_MAP_LENGTH / 2 + MENU_MAP_LEFT_OFFSET + in.x) * CMenuManager::fMapSize * MENU_MAP_WIDTH_SCALE * 2.0f / MENU_MAP_LENGTH;
-		out.y = (CMenuManager::fMapCenterY - CMenuManager::fMapSize) + (MENU_MAP_LENGTH / 2 - MENU_MAP_TOP_OFFSET - in.y) * CMenuManager::fMapSize * MENU_MAP_HEIGHT_SCALE * 2.0f / MENU_MAP_LENGTH;
+	if (FrontEndMenuManager.m_bMenuMapActive) {
+		out.x = (FrontEndMenuManager.m_fMapCenterX - FrontEndMenuManager.m_fMapSize) + (MENU_MAP_LENGTH / 2 + MENU_MAP_LEFT_OFFSET + in.x) * FrontEndMenuManager.m_fMapSize * MENU_MAP_WIDTH_SCALE * 2.0f / MENU_MAP_LENGTH;
+		out.y = (FrontEndMenuManager.m_fMapCenterY - FrontEndMenuManager.m_fMapSize) + (MENU_MAP_LENGTH / 2 - MENU_MAP_TOP_OFFSET - in.y) * FrontEndMenuManager.m_fMapSize * MENU_MAP_HEIGHT_SCALE * 2.0f / MENU_MAP_LENGTH;
 	} else
 #endif
 	{
@@ -1463,7 +1463,7 @@ CRadar::CalculateCachedSinCos()
 {
 	if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED
 #ifdef MENU_MAP
-		|| CMenuManager::bMenuMapActive
+		|| FrontEndMenuManager.m_bMenuMapActive
 #endif
 		) {
 		cachedSin = 0.0f;

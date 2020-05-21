@@ -8627,13 +8627,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_ACTIVATE_SAVE_MENU:
 	{
 		CStats::SafeHouseVisits++;
-		FrontEndMenuManager.m_bSaveMenuActive = true;
+		FrontEndMenuManager.m_bActivateSaveMenu = true;
 		FindPlayerPed()->SetMoveSpeed(0.0f, 0.0f, 0.0f);
 		FindPlayerPed()->SetTurnSpeed(0.0f, 0.0f, 0.0f);
 		return 0;
 	}
 	case COMMAND_HAS_SAVE_GAME_FINISHED:
-		UpdateCompareFlag(!FrontEndMenuManager.m_bMenuActive && !FrontEndMenuManager.m_bSaveMenuActive);
+		UpdateCompareFlag(!FrontEndMenuManager.m_bMenuActive && !FrontEndMenuManager.m_bActivateSaveMenu);
 		return 0;
 	case COMMAND_NO_SPECIAL_CAMERA_FOR_THIS_GARAGE:
 		CollectParameters(&m_nIp, 1);
