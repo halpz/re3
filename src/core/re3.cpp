@@ -69,7 +69,7 @@ mysrand(unsigned int seed)
 #ifdef DEBUGMENU
 void WeaponCheat();
 void HealthCheat();
-void TankCheat();
+void VehicleCheat(bool something, int model);
 void BlowUpCarsCheat();
 void ChangePlayerCheat();
 void MayhemCheat();
@@ -293,7 +293,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Health", HealthCheat);
 		DebugMenuAddCmd("Cheats", "Wanted level up", WantedLevelUpCheat);
 		DebugMenuAddCmd("Cheats", "Wanted level down", WantedLevelDownCheat);
-		DebugMenuAddCmd("Cheats", "Tank", TankCheat);
+		DebugMenuAddCmd("Cheats", "Tank", []() { VehicleCheat(true, MI_TAXI); });
 		DebugMenuAddCmd("Cheats", "Blow up cars", BlowUpCarsCheat);
 		DebugMenuAddCmd("Cheats", "Change player", ChangePlayerCheat);
 		DebugMenuAddCmd("Cheats", "Mayhem", MayhemCheat);
