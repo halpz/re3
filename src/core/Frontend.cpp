@@ -3115,6 +3115,9 @@ CMenuManager::LoadSettings()
 			CFileMgr::Read(fileHandle, m_PrefsSkinFile, 256);
 			CFileMgr::Read(fileHandle, (char*)&m_ControlMethod, 1);
 			CFileMgr::Read(fileHandle, (char*)&m_PrefsLanguage, 1);
+#ifdef FREE_CAM
+			CFileMgr::Read(fileHandle, (char*)&TheCamera.bFreeCam, 1);
+#endif
 		}
 	}
 
@@ -3205,6 +3208,9 @@ CMenuManager::SaveSettings()
 		CFileMgr::Write(fileHandle, m_PrefsSkinFile, 256);
 		CFileMgr::Write(fileHandle, (char*)&m_ControlMethod, 1);
 		CFileMgr::Write(fileHandle, (char*)&m_PrefsLanguage, 1);
+#ifdef FREE_CAM
+		CFileMgr::Write(fileHandle, (char*)&TheCamera.bFreeCam, 1);
+#endif
 	}
 
 	CFileMgr::CloseFile(fileHandle);
@@ -4952,6 +4958,13 @@ CMenuManager::ProcessOnOffMenuOptions()
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 		SaveSettings();
 		break;
+#ifdef FREE_CAM
+	case MENUACTION_FREECAM:
+		TheCamera.bFreeCam = !TheCamera.bFreeCam;
+		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+		SaveSettings();
+		break;
+#endif
 	}
 }
 
