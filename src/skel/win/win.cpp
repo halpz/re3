@@ -1222,9 +1222,12 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 
-		case 7:
+#ifdef FIX_BUGS // game turns on menu when focus is re-gained rather than lost
+		case WM_KILLFOCUS:
+#else
+		case WM_SETFOCUS:
+#endif
 		{
-			debug("ALT TABBED! CGame::InitAfterFocusLoss() \n");
 			CGame::InitAfterFocusLoss();
 			break;
 		}
