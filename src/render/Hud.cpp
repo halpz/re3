@@ -1476,6 +1476,28 @@ void CHud::GetRidOfAllHudMessages()
 	}
 }
 
+void CHud::ReloadTXD()
+{
+	for (int i = 0; i < NUM_HUD_SPRITES; ++i) {
+		Sprites[i].Delete();
+	}
+
+	int HudTXD = CTxdStore::FindTxdSlot("hud");
+	CTxdStore::RemoveTxdSlot(HudTXD);
+
+	debug("Reloading HUD.TXD...\n");
+
+	HudTXD = CTxdStore::AddTxdSlot("hud");
+	CTxdStore::LoadTxd(HudTXD, "MODELS/HUD.TXD");
+	CTxdStore::AddRef(HudTXD);
+	CTxdStore::PopCurrentTxd();
+	CTxdStore::SetCurrentTxd(HudTXD);
+
+	for (int i = 0; i < NUM_HUD_SPRITES; i++) {
+		Sprites[i].SetTexture(WeaponFilenames[i].name, WeaponFilenames[i].mask);
+	}
+}
+
 void CHud::Initialise()
 {
 	m_Wants_To_Draw_Hud = true;

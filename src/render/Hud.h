@@ -124,6 +124,7 @@ public:
 	static void Draw();
 	static void DrawAfterFade();
 	static void GetRidOfAllHudMessages();
+	static void ReloadTXD();
 	static void Initialise();
 	static void ReInitialise();
 	static void SetBigMessage(wchar *message, int16 style);

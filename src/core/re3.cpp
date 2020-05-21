@@ -385,6 +385,11 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 
+		DebugMenuAddCmd("Reload", "HUD.TXD", CHud::ReloadTXD);
+		DebugMenuAddCmd("Reload", "FONTS.TXD", NULL);
+		DebugMenuAddCmd("Reload", "FRONTEN1.TXD", NULL);
+		DebugMenuAddCmd("Reload", "FRONTEN2.TXD", NULL);
+
 		extern bool PrintDebugCode;
 		extern int16 DebugCamMode;
 		DebugMenuAddVarBool8("Cam", "Use mouse Cam", &CCamera::m_bUseMouse3rdPerson, nil);
