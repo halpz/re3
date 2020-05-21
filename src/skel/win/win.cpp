@@ -1222,6 +1222,13 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 
+		case 7:
+		{
+			debug("ALT TABBED! CGame::InitAfterFocusLoss() \n");
+			CGame::InitAfterFocusLoss();
+			break;
+		}
+
 	}
 
 	/*
