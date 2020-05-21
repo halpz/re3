@@ -602,6 +602,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bTurnedAroundOnAttractor = false;
 	bCarPassenger = false;
 	bMiamiViceCop = false;
+	bMoneyHasBeenGivenByScript = false;
 
 	bIsDrowning = false;
 	bCanDrownInWater = true;

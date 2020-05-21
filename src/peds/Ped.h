@@ -441,7 +441,7 @@ public:
 	//uint32 b155_8
 	//uint32 b155_10
 	uint32 bMiamiViceCop : 1;
-	//uint32 b155_40
+	uint32 bMoneyHasBeenGivenByScript : 1; //
 	//uint32 b155_80
 
 	uint32 bIsDrowning : 1;
