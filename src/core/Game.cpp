@@ -677,7 +677,7 @@ CGame::InitAfterFocusLoss()
 	//cDMAudio::SetCurrent3DProvider( ? ? ? );
 
 	if (!FrontEndMenuManager.m_bGameNotLoaded && !FrontEndMenuManager.m_bMenuActive)
-		CMenuManager::m_bStartUpFrontEndRequested = true;
+		FrontEndMenuManager.m_bStartUpFrontEndRequested = true;
 }
 
 bool
