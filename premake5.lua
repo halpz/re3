@@ -189,12 +189,12 @@ project "re3"
 	includedirs { "eax" }
 	
 	filter "platforms:*mss"
-		defines { "AUIOD_MSS" }
+		defines { "AUDIO_MSS" }
 		includedirs { "milessdk/include" }
 		libdirs { "milessdk/lib" }
 		
 	filter "platforms:*oal"
-		defines { "AUIOD_OAL" }
+		defines { "AUDIO_OAL" }
 		includedirs { "openal-soft/include" }
 		includedirs { "libsndfile/include" }
 		includedirs { "mpg123/include" }
