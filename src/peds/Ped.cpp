@@ -6025,7 +6025,6 @@ CPed::SetWaitState(eWaitState state, void *time)
 		case WAITSTATE_GROUND_ATTACK:
 		case WAITSTATE_LANCESITTING:
 		case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
-			assert(0);
 		default:
 			ClearWaitState();
 			RestoreHeadingRate();
@@ -18533,7 +18532,7 @@ CPed::Save(uint8*& buf)
 	CopyToBuf(buf, m_fHealth);
 	CopyToBuf(buf, m_fArmour);
 	SkipSaveBuf(buf, 148);
-	for (int i = 0; i < 10; i++) // has to be hardcoded
+	for (int i = 0; i < 13; i++) // has to be hardcoded
 		m_weapons[i].Save(buf);
 	SkipSaveBuf(buf, 5);
 	CopyToBuf(buf, m_maxWeaponTypeAllowed);
@@ -18555,8 +18554,10 @@ CPed::Load(uint8*& buf)
 	SkipSaveBuf(buf, 148);
 
 	CWeapon bufWeapon;
-	for (int i = 0; i < 10; i++) { // has to be hardcoded
+	for (int i = 0; i < 13; i++) { // has to be hardcoded
 		bufWeapon.Load(buf);
+		if (i >= 10)
+			continue; // tmp hack before we fix save/load
 
 		if (bufWeapon.m_eWeaponType != WEAPONTYPE_UNARMED) {
 			int modelId = CWeaponInfo::GetWeaponInfo(bufWeapon.m_eWeaponType)->m_nModelId;
