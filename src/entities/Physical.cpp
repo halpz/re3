@@ -64,6 +64,9 @@ CPhysical::CPhysical(void)
 	m_phy_flagA20 = false;
 
 	m_nZoneLevel = LEVEL_NONE;
+
+	bIsFrozen = false;
+	bDontLoadCollision = false;
 }
 
 CPhysical::~CPhysical(void)

@@ -60,6 +60,9 @@ public:
 	uint8 bHitByTrain : 1;
 	uint8 bSkipLineCol : 1;
 
+	uint8 bIsFrozen : 1;
+	uint8 bDontLoadCollision : 1;
+
 	uint8 m_nSurfaceTouched;
 	int8 m_nZoneLevel;
 
