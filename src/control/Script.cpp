@@ -8712,7 +8712,6 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		return 0;
 	case COMMAND_PRINT_HELP:
 	{
-		debug("PRINT_HELP %s\n", (char*)&CTheScripts::ScriptSpace[m_nIp]);
 		if (CCamera::m_bUseMouse3rdPerson && (
 			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "HELP15", 7) == 0 ||
 			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_2A", 7) == 0 ||
