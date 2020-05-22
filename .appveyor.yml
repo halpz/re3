@@ -6,8 +6,6 @@ configuration:
 platform:
 - win-x86-librw_d3d9-mss
 - win-x86-librw_gl3_glfw-mss
-- win-x86-librw_d3d9-oal
-- win-x86-librw_gl3_glfw-oal
 environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
   GLEW_VER: "2.1.0"

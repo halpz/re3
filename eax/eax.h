@@ -12,7 +12,7 @@
 extern "C" {
 #endif // __cplusplus
 
-#ifndef OPENAL
+#ifndef AUDIO_OAL
 	#include <dsound.h>
 
 	/*
@@ -49,7 +49,7 @@ extern "C" {
     typedef void (CDECL *LPGETCURRENTVERSION)(LPDWORD major, LPDWORD minor);
 
 
-#else // OPENAL
+#else // AUDIO_OAL
 #ifndef _WIN32
 	#include <AL/al.h>
 	#include <string.h>
