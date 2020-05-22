@@ -38,7 +38,7 @@ CRGBA COUNTER_COLOR(97, 194, 247, 255);
 CRGBA PAGER_COLOR(32, 162, 66, 205);
 CRGBA RADARDISC_COLOR(255, 255, 255, 255);
 CRGBA BIGMESSAGE_COLOR(85, 119, 133, 255);
-CRGBA WASTEDBUSTED_COLOR(170, 123, 87, 255);
+CRGBA WASTEDBUSTED_COLOR(255, 150, 225, 255);
 CRGBA ODDJOB_COLOR(89, 115, 150, 255);
 CRGBA ODDJOB2_COLOR(156, 91, 40, 255);
 CRGBA MISSIONTITLE_COLOR(220, 172, 2, 255);
@@ -923,7 +923,17 @@ void CHud::Draw()
 #else
 			rect.Translate(RADAR_LEFT, SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
 #endif
-			rect.Grow(4.0f);
+
+			// shadow, might not be exactly accurate numbers
+			rect.Translate(0.f, 4.f);
+			rect.Grow(6.0f);
+			rect.top += 2.f;
+			rect.bottom -= 2.f;
+			Sprites[HUD_RADARDISC].Draw(rect, CRGBA(0, 0, 0, 255));
+
+			rect.Translate(0.f, -4.f);
+			rect.top -= 2.f;
+			rect.bottom += 2.f;
 			Sprites[HUD_RADARDISC].Draw(rect, RADARDISC_COLOR);
 			CRadar::DrawBlips();
 		}
@@ -1479,6 +1489,30 @@ void CHud::GetRidOfAllHudMessages()
 			m_BigMessage[i][j] = 0;
 	}
 }
+
+#ifdef RELOADABLES
+void CHud::ReloadTXD()
+{
+	for (int i = 0; i < NUM_HUD_SPRITES; ++i) {
+		Sprites[i].Delete();
+	}
+
+	int HudTXD = CTxdStore::FindTxdSlot("hud");
+	CTxdStore::RemoveTxdSlot(HudTXD);
+
+	debug("Reloading HUD.TXD...\n");
+
+	HudTXD = CTxdStore::AddTxdSlot("hud");
+	CTxdStore::LoadTxd(HudTXD, "MODELS/HUD.TXD");
+	CTxdStore::AddRef(HudTXD);
+	CTxdStore::PopCurrentTxd();
+	CTxdStore::SetCurrentTxd(HudTXD);
+
+	for (int i = 0; i < NUM_HUD_SPRITES; i++) {
+		Sprites[i].SetTexture(WeaponFilenames[i].name, WeaponFilenames[i].mask);
+	}
+}
+#endif
 
 void CHud::Initialise()
 {

@@ -590,7 +590,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 							CGlass::WindowRespondsToCollision(B, impulseA, A->m_vecMoveSpeed, colpoint.point, false);
 						else if(!B->bInfiniteMass){
 							B->bIsStatic = false;
-							CWorld::Players[CWorld::PlayerInFocus].m_nHavocCaused += 2;
+							CWorld::Players[CWorld::PlayerInFocus].m_nHavocLevel += 2;
 							CStats::PropertyDestroyed += CGeneral::GetRandomNumberInRange(30, 60);
 						}
 					}else{

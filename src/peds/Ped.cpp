@@ -604,14 +604,25 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bCarPassenger = false;
 	bMiamiViceCop = false;
 	bMoneyHasBeenGivenByScript = false;
+	bHasBeenPhotographed = false;
 
 	bIsDrowning = false;
-	bCanDrownInWater = true;
+	bDrownsInWater = true;
 #ifdef VC_PED_PORTS
 	bHeadStuckInCollision = false;
 #endif
 	bIsPlayerFriend = true;
 	bDeadPedInFrontOfCar = false;
+	bStayInCarOnJack = false;
+
+	bDontFight = false;
+	bDoomAim = true;
+	bCanBeShotInVehicle = true;
+	bIgnoreThreatsBehindObjects = false;
+
+	bNeverEverTargetThisPed = false;
+
+	bBoughtIceCream = false;
 
 	if ((CGeneral::GetRandomNumber() & 3) == 0)
 		bHasACamera = true;
@@ -4117,7 +4128,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	if (DyingOrDead())
 		return false;
 
-	if (method == WEAPONTYPE_DROWNING && !bCanDrownInWater)
+	if (method == WEAPONTYPE_DROWNING && !bDrownsInWater)
 		return false;
 
 	if (!bUsesCollision && (!bInVehicle || m_nPedState != PED_DRIVING) && method != WEAPONTYPE_DROWNING)

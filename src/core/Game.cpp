@@ -664,6 +664,22 @@ void CGame::Process(void)
 	}
 }
 
+void
+CGame::InitAfterFocusLoss()
+{
+	/*
+	byte_869656 = byte_86969D;
+	result = cDMAudio::SetCurrent3DProvider(byte_86969D);
+	if ( !bGameStarted && !bMenuVisible )
+		byte_869642 = 1;
+	*/
+
+	//cDMAudio::SetCurrent3DProvider( ? ? ? );
+
+	if (!FrontEndMenuManager.m_bGameNotLoaded && !FrontEndMenuManager.m_bMenuActive)
+		FrontEndMenuManager.m_bStartUpFrontEndRequested = true;
+}
+
 bool
 CGame::CanSeeOutSideFromCurrArea(void)
 {
