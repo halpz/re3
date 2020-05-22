@@ -54,7 +54,8 @@ extern "C" {
 	#include <AL/al.h>
 	#include <string.h>
 #else
-	#include <al.h>
+	#include <AL/al.h>
+	#include <string.h>
 #endif
 
 	#ifndef GUID_DEFINED
