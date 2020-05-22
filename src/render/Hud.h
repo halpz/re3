@@ -119,6 +119,7 @@ public:
 	static uint32 m_WeaponTimer;
 
 	static uint32 m_LastDisplayScore;
+	static uint32 m_LastWanted;
 
 public:
 	static void Draw();
