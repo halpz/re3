@@ -17,6 +17,11 @@ newoption {
 	description = "Build and use librw from this solution"
 }
 
+newoption {
+	trigger     = "with-opus",
+	description = "Build with opus"
+}
+
 if(_OPTIONS["with-librw"]) then
 	Librw = "librw"
 else
@@ -185,8 +190,25 @@ project "re3"
 
 	includedirs { "milessdk/include" }
 	includedirs { "eax" }
+	
+	includedirs { "openal-soft/include" }
+	includedirs { "mpg123/include" }
+	includedirs { "libsndfile/include" }
+	includedirs { "ogg/include" }
+	includedirs { "opus/include" }
+	includedirs { "opusfile/include" }
 
 	libdirs { "milessdk/lib" }
+	libdirs { "openal-soft/libs/Win32" }
+	libdirs { "mpg123/lib" }
+	libdirs { "libsndfile/lib" }
+	if _OPTIONS["with-opus"] then
+		filter "platforms:win*"
+			libdirs { "ogg/win32/VS2015/Win32/%{cfg.buildcfg}" }
+			libdirs { "opus/win32/VS2015/Win32/%{cfg.buildcfg}" }
+			libdirs { "opusfile/win32/VS2015/Win32/Release-NoHTTP" }
+		filter {}
+	end
 	
 	if(os.getenv("GTA_III_RE_DIR")) then
 		setpaths("$(GTA_III_RE_DIR)/", "%(cfg.buildtarget.name)", "")
@@ -202,6 +224,13 @@ project "re3"
 	filter "platforms:linux*"
 		defines { "OPENAL" }
 		links { "openal", "mpg123", "sndfile", "pthread" }
+	
+	if _OPTIONS["with-opus"] then
+		filter {}
+		links { "libogg" }
+		links { "opus" }
+		links { "opusfile" }
+	end
 
 	filter "platforms:*RW33*"
 		staticruntime "on"

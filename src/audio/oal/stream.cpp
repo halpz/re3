@@ -4,8 +4,9 @@
 #include "common.h"
 #include "sampman.h"
 
-#include <sndfile.h>
-#include <mpg123.h>
+#ifdef AUDIO_OPUS
+#include <opusfile.h>
+#else
 #ifdef _WIN32
 typedef long ssize_t;
 #pragma comment( lib, "libsndfile-1.lib" )
@@ -13,7 +14,11 @@ typedef long ssize_t;
 #else
 #include "crossplatform.h"
 #endif
+#include <sndfile.h>
+#include <mpg123.h>
+#endif
 
+#ifndef AUDIO_OPUS
 class CSndFile : public IDecoder
 {
 	SNDFILE *m_pfSound;
@@ -170,15 +175,111 @@ public:
 		return size;
 	}
 };
+#else
+class COpusFile : public IDecoder
+{
+	OggOpusFile *m_FileH;
+	bool m_bOpened;
+	uint32 m_nRate;
+	uint32 m_nChannels;
+public:
+	_declspec(noinline) COpusFile(const char *path) : m_FileH(nil),
+		m_bOpened(false),
+		m_nRate(0),
+		m_nChannels(0)
+	{
+		int ret;
+		m_FileH = op_open_file(path, &ret);
+
+		if (m_FileH) {
+			m_nChannels = op_head(m_FileH, 0)->channel_count;
+			m_nRate = op_head(m_FileH, 0)->input_sample_rate;
+			auto tags = op_tags(m_FileH, 0);
+			for (int i = 0; i < tags->comments; i++) {
+				if (strncmp(tags->user_comments[i], "SAMPLERATE", sizeof("SAMPLERATE")-1) == 0)
+				{
+					sscanf(tags->user_comments[i], "SAMPLERATE=%i", &m_nRate);
+					break;
+				}
+			}
+			
+			m_bOpened = true;
+		}
+	}
+	
+	~COpusFile()
+	{
+		if (m_FileH)
+		{
+			op_free(m_FileH);
+			m_FileH = nil;
+		}
+	}
+	
+	bool IsOpened()
+	{
+		return m_bOpened;
+	}
+	
+	uint32 GetSampleSize()
+	{
+		return sizeof(uint16);
+	}
+	
+	uint32 GetSampleCount()
+	{
+		if ( !IsOpened() ) return 0;
+		return op_pcm_total(m_FileH, 0);
+	}
+	
+	uint32 GetSampleRate()
+	{
+		return m_nRate;
+	}
+	
+	uint32 GetChannels()
+	{
+		return m_nChannels;
+	}
+	
+	void Seek(uint32 milliseconds)
+	{
+		if ( !IsOpened() ) return;
+		op_pcm_seek(m_FileH, ms2samples(milliseconds) * GetSampleSize());
+	}
+	
+	uint32 Tell()
+	{
+		if ( !IsOpened() ) return 0;
+		return samples2ms(op_pcm_tell(m_FileH)/GetSampleSize());
+	}
+	
+	uint32 Decode(void *buffer)
+	{
+		if ( !IsOpened() ) return 0;
+
+		int size = op_read(m_FileH, (opus_int16 *)buffer, GetBufferSamples(), NULL);
+
+		if (size < 0)
+			return 0;
+
+		return size * m_nChannels * GetSampleSize();
+	}
+};
+#endif
 
 void CStream::Initialise()
 {
+#ifndef AUDIO_OPUS
 	mpg123_init();
+#endif
 }
 
 void CStream::Terminate()
 {
+#ifndef AUDIO_OPUS
 	mpg123_exit();
+#endif
 }
 
 CStream::CStream(char *filename, ALuint &source, ALuint (&buffers)[NUM_STREAMBUFFERS]) :
@@ -213,10 +314,15 @@ CStream::CStream(char *filename, ALuint &source, ALuint (&buffers)[NUM_STREAMBUF
 		
 	DEV("Stream %s\n", m_aFilename);
 
+#ifndef AUDIO_OPUS
 	if (!strcasecmp(&m_aFilename[strlen(m_aFilename) - strlen(".mp3")], ".mp3"))
 		m_pSoundFile = new CMP3File(m_aFilename);
 	else if (!strcasecmp(&m_aFilename[strlen(m_aFilename) - strlen(".wav")], ".wav"))
 		m_pSoundFile = new CSndFile(m_aFilename);
+#else
+	if (!strcasecmp(&m_aFilename[strlen(m_aFilename) - strlen(".opus")], ".opus"))
+		m_pSoundFile = new COpusFile(m_aFilename);
+#endif
 	else 
 		m_pSoundFile = nil;
 	ASSERT(m_pSoundFile != nil);
