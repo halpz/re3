@@ -199,13 +199,13 @@ DoFade(void)
 		}
 	}
 
-	if(CDraw::FadeValue != 0 || CMenuManager::m_PrefsBrightness < 256){
+	if(CDraw::FadeValue != 0 || FrontEndMenuManager.m_PrefsBrightness < 256){
 		CSprite2d *splash = LoadSplash(nil);
 
 		CRGBA fadeColor;
 		CRect rect;
 		int fadeValue = CDraw::FadeValue;
-		float brightness = Min(CMenuManager::m_PrefsBrightness, 256);
+		float brightness = Min(FrontEndMenuManager.m_PrefsBrightness, 256);
 		if(brightness <= 50)
 			brightness = 50;
 		if(FrontEndMenuManager.m_bMenuActive)
@@ -944,35 +944,6 @@ Idle(void *arg)
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
 
-	// We're basically merging FrontendIdle and Idle (just like TheGame on PS2)
-#ifdef PS2_SAVE_DIALOG
-	// Only exists on PC FrontendIdle, probably some PS2 bug fix
-	if (FrontEndMenuManager.m_bMenuActive)
-		CSprite2d::SetRecipNearClip();
-	
-	if (FrontEndMenuManager.m_bGameNotLoaded) {
-		CPad::UpdatePads();
-		FrontEndMenuManager.Process();
-	} else {
-		CPointLights::InitPerFrame();
-#ifdef TIMEBARS
-		tbStartTimer(0, "CGame::Process");
-#endif
-		CGame::Process();
-#ifdef TIMEBARS
-		tbEndTimer("CGame::Process");
-		tbStartTimer(0, "DMAudio.Service");
-#endif
-		DMAudio.Service();
-
-#ifdef TIMEBARS
-		tbEndTimer("DMAudio.Service");
-#endif
-	}
-
-	if (RsGlobal.quit)
-		return;
-#else
 	CPointLights::InitPerFrame();
 #ifdef TIMEBARS
 	tbStartTimer(0, "CGame::Process");
@@ -987,7 +958,6 @@ Idle(void *arg)
 
 #ifdef TIMEBARS
 	tbEndTimer("DMAudio.Service");
-#endif
 #endif
 
 	if(CGame::bDemoMode && CTimer::GetTimeInMilliseconds() > (3*60 + 30)*1000 && !CCutsceneMgr::IsCutsceneProcessing()){
@@ -1004,17 +974,16 @@ Idle(void *arg)
 	if(arg == nil)
 		return;
 
-	if((!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu) &&
+	// m_bRenderGameInMenu is there in III PS2 but I don't know about VC PS2.
+	if((!FrontEndMenuManager.m_bMenuActive/* || FrontEndMenuManager.m_bRenderGameInMenu*/) &&
 	   TheCamera.GetScreenFadeStatus() != FADE_2)
 	{
 #ifdef GTA_PC
-		if (!FrontEndMenuManager.m_bRenderGameInMenu) {
 			// This is from SA, but it's nice for windowed mode
 			RwV2d pos;
 			pos.x = SCREEN_WIDTH / 2.0f;
 			pos.y = SCREEN_HEIGHT / 2.0f;
 			RsMouseSetPos(&pos);
-		}
 #endif
 #ifdef TIMEBARS
 		tbStartTimer(0, "CnstrRenderList");
@@ -1082,10 +1051,6 @@ Idle(void *arg)
 			return;
 	}
 
-#ifdef PS2_SAVE_DIALOG
-	if (FrontEndMenuManager.m_bMenuActive)
-		DefinedState();
-#endif
 #ifdef TIMEBARS
 	tbStartTimer(0, "RenderMenus");
 #endif
@@ -1217,11 +1182,7 @@ AppEventHandler(RsEvent event, void *param)
 
 		case rsFRONTENDIDLE:
 		{
-#ifdef PS2_SAVE_DIALOG
-			Idle((void*)1);
-#else
 			FrontendIdle();
-#endif
 
 			return rsEVENTPROCESSED;
 		}
@@ -1307,9 +1268,9 @@ void TheGame(void)
 		strcpy(TheMemoryCard.LoadFileName, TheMemoryCard.field37);
 		TheMemoryCard.b_FoundRecentSavedGameWantToLoad = true;
 
-		if (CMenuManager::m_PrefsLanguage != TheMemoryCard.GetLanguageToLoad())
+		if (FrontEndMenuManager.m_PrefsLanguage != TheMemoryCard.GetLanguageToLoad())
 		{
-			CMenuManager::m_PrefsLanguage = TheMemoryCard.GetLanguageToLoad();
+			FrontEndMenuManager.m_PrefsLanguage = TheMemoryCard.GetLanguageToLoad();
 			TheText.Unload();
 			TheText.Load();
 		}
@@ -1383,7 +1344,8 @@ void TheGame(void)
 			gMainHeap.PushMemId(_TODOCONST(15));
 #endif
 
-			if (!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu == true && TheCamera.GetScreenFadeStatus() != FADE_2 )
+			// m_bRenderGameInMenu is there in III PS2 but I don't know about VC PS2.
+			if (!FrontEndMenuManager.m_bMenuActive || /*FrontEndMenuManager.m_bRenderGameInMenu == true && */TheCamera.GetScreenFadeStatus() != FADE_2 )
 			{
 #ifdef GTA_PS2
 				gMainHeap.PushMemId(_TODOCONST(11));
@@ -1590,30 +1552,30 @@ void SystemInit()
 	CGame::frenchGame = false;
 	CGame::germanGame = false;
 	CGame::nastyGame = true;
-	CMenuManager::m_PrefsAllowNastyGame = true;
+	FrontEndMenuManager.m_PrefsAllowNastyGame = true;
 	
 #ifdef GTA_PS2
 	int32 lang = sceScfGetLanguage();
 	if ( lang  == SCE_ITALIAN_LANGUAGE )
-		CMenuManager::m_PrefsLanguage = LANGUAGE_ITALIAN;
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_ITALIAN;
 	else if ( lang  == SCE_SPANISH_LANGUAGE )
-		CMenuManager::m_PrefsLanguage = LANGUAGE_SPANISH;
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_SPANISH;
 	else if ( lang  == SCE_GERMAN_LANGUAGE )
 	{
 		CGame::germanGame = true;
 		CGame::nastyGame = false;
-		CMenuManager::m_PrefsAllowNastyGame = false;
-		CMenuManager::m_PrefsLanguage = LANGUAGE_GERMAN;
+		FrontEndMenuManager.m_PrefsAllowNastyGame = false;
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_GERMAN;
 	}
 	else if ( lang  == SCE_FRENCH_LANGUAGE )
 	{
 		CGame::frenchGame = true;
 		CGame::nastyGame = false;
-		CMenuManager::m_PrefsAllowNastyGame = false;
-		CMenuManager::m_PrefsLanguage = LANGUAGE_FRENCH;
+		FrontEndMenuManager.m_PrefsAllowNastyGame = false;
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_FRENCH;
 	}
 	else
-		CMenuManager::m_PrefsLanguage = LANGUAGE_AMERICAN;
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_AMERICAN;
 	
 	FrontEndMenuManager.InitialiseMenuContentsAfterLoadingGame();
 #else

@@ -769,7 +769,7 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown_ThirdPersonOnl
 	if (button == GetControllerKeyAssociatedWithAction(PED_SPRINT, type))
 		state.Cross = 255;
 	
-	if (CMenuManager::m_ControlMethod == CONTROL_CLASSIC)
+	if (FrontEndMenuManager.m_ControlMethod == CONTROL_CLASSIC)
 	{
 		if (button == GetControllerKeyAssociatedWithAction(PED_CYCLE_TARGET_LEFT, type))
 			state.LeftShoulder2 = 255;
@@ -835,7 +835,7 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown_FirstAndThirdP
 			state.RightStickX = 128;
 	}
 
-	if (CMenuManager::m_ControlMethod == CONTROL_CLASSIC)
+	if (FrontEndMenuManager.m_ControlMethod == CONTROL_CLASSIC)
 	{
 		if (button == GetControllerKeyAssociatedWithAction(PED_1RST_PERSON_LOOK_UP, type))
 		{
@@ -1617,7 +1617,7 @@ void CControllerConfigManager::DeleteMatching3rdPersonControls(e_ControllerActio
 		if (key == GetControllerKeyAssociatedWithAction(PED_SPRINT, type))
 			ClearSettingsAssociatedWithAction(PED_SPRINT, type);
 
-		if (CMenuManager::m_ControlMethod == CONTROL_CLASSIC)
+		if (FrontEndMenuManager.m_ControlMethod == CONTROL_CLASSIC)
 		{
 			if (key == GetControllerKeyAssociatedWithAction(PED_CYCLE_TARGET_LEFT, type))
 				ClearSettingsAssociatedWithAction(PED_CYCLE_TARGET_LEFT, type);
@@ -1640,7 +1640,7 @@ void CControllerConfigManager::DeleteMatching1rst3rdPersonControls(e_ControllerA
 		if (key == GetControllerKeyAssociatedWithAction(GO_BACK, type))
 			ClearSettingsAssociatedWithAction(GO_BACK, type);
 
-		if (CMenuManager::m_ControlMethod == CONTROL_CLASSIC)
+		if (FrontEndMenuManager.m_ControlMethod == CONTROL_CLASSIC)
 		{
 			if (key == GetControllerKeyAssociatedWithAction(PED_1RST_PERSON_LOOK_LEFT, type))
 				ClearSettingsAssociatedWithAction(PED_1RST_PERSON_LOOK_LEFT, type);

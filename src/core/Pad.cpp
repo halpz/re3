@@ -701,7 +701,7 @@ CControllerState CPad::ReconcileTwoControllersInput(CControllerState const &Stat
 
 void CPad::StartShake(int16 nDur, uint8 nFreq)
 {
-	if ( !CMenuManager::m_PrefsUseVibration )
+	if ( !FrontEndMenuManager.m_PrefsUseVibration )
 		return;
 	
 	if ( CCutsceneMgr::IsRunning() || CGame::playingIntro )
@@ -723,7 +723,7 @@ void CPad::StartShake(int16 nDur, uint8 nFreq)
 
 void CPad::StartShake_Distance(int16 nDur, uint8 nFreq, float fX, float fY, float fZ)
 {
-	if ( !CMenuManager::m_PrefsUseVibration )
+	if ( !FrontEndMenuManager.m_PrefsUseVibration )
 		return;
 	
 	if ( CCutsceneMgr::IsRunning() || CGame::playingIntro )
@@ -750,7 +750,7 @@ void CPad::StartShake_Distance(int16 nDur, uint8 nFreq, float fX, float fY, floa
 
 void CPad::StartShake_Train(float fX, float fY)
 {
-	if ( !CMenuManager::m_PrefsUseVibration )
+	if ( !FrontEndMenuManager.m_PrefsUseVibration )
 		return;
 	
 	if ( CCutsceneMgr::IsRunning() || CGame::playingIntro )
