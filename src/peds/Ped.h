@@ -466,7 +466,7 @@ public:
 
 	uint32 bNeverEverTargetThisPed : 1;
 	//uint32 b158_2
-	//uint32 b158_4
+	uint32 b158_4 : 1;
 	//uint32 b158_8
 	//uint32 b158_10
 	uint32 bBoughtIceCream : 1;
