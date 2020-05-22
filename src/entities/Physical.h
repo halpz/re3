@@ -18,7 +18,7 @@ public:
 	// The not properly indented fields haven't been checked properly yet
 
 	int32 m_audioEntityId;
-  float unk1;
+	float m_phys_unused1;
 	CTreadable *m_treadable[2];	// car and ped
 	uint32 m_nLastTimeCollided;
 	CVector m_vecMoveSpeed;		// velocity
@@ -37,7 +37,7 @@ public:
 	CEntryInfoList m_entryInfoList;
 	CPtrNode *m_movingListNode;
 
-  char field_EC;
+	int8 m_phys_unused2;
 	uint8 m_nStaticFrames;
 	uint8 m_nCollisionRecords;
 	bool m_bIsVehicleBeingShifted;
@@ -86,7 +86,6 @@ public:
 	void RemoveRefsToEntity(CEntity *ent);
 	static void PlacePhysicalRelativeToOtherPhysical(CPhysical *other, CPhysical *phys, CVector localPos);
 
-	float GetDistanceSq(void) { return m_vecMoveSpeed.MagnitudeSqr() * sq(CTimer::GetTimeStep()); }
 	// get speed of point p relative to entity center
 	CVector GetSpeed(const CVector &r);
 	CVector GetSpeed(void) { return GetSpeed(CVector(0.0f, 0.0f, 0.0f)); }
@@ -94,7 +93,7 @@ public:
 		return 1.0f / (CrossProduct(pos, dir).MagnitudeSqr()/m_fTurnMass +
 		               1.0f/m_fMass);
 	}
-	float GetMassTime(const CVector &pos, const CVector &dir, float t) {
+	float GetMassTweak(const CVector &pos, const CVector &dir, float t) {
 		return 1.0f / (CrossProduct(pos, dir).MagnitudeSqr()/(m_fTurnMass*t) +
 		               1.0f/(m_fMass*t));
 	}
