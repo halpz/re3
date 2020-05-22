@@ -4414,7 +4414,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 	}
 	case COMMAND_SET_CAR_HEAVY:
 	{
-		CollectParameters(&m_nIp, 1);
+		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		if (ScriptParams[1] != 0) {
@@ -10144,12 +10144,12 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(CModelInfo::GetModelInfo(ScriptParams[0]) != nil);
 		return 0;
 	case COMMAND_SHUT_CHAR_UP:
-		CollectParameters(&m_nIp, 1);
+		CollectParameters(&m_nIp, 2);
 		debug("SHUT_CHAR_UP not implemented"); // TODO(MIAMI)
 		return 0;
 	case COMMAND_SET_ENABLE_RC_DETONATE:
 		CollectParameters(&m_nIp, 1);
-		CVehicle::bDisableRemoteDetonation = ScriptParams[0];
+		CVehicle::bDisableRemoteDetonation = !ScriptParams[0];
 		return 0;
 	case COMMAND_SET_CAR_RANDOM_ROUTE_SEED:
 	{
@@ -10588,6 +10588,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		debug("SWITCH_SECURITY_CAMERA is not implemented\n"); // TODO(MIAMI)
+		return 0;
 	}
 	//case COMMAND_IS_CHAR_IN_FLYING_VEHICLE:
 	case COMMAND_IS_PLAYER_IN_FLYING_VEHICLE:
@@ -10689,7 +10690,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	}
 	case COMMAND_HAS_OBJECT_COLLIDED_WITH_ANYTHING:
 	{
-		CollectParameters(&m_nIp, 2);
+		CollectParameters(&m_nIp, 1);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		assert(pObject);
 		UpdateCompareFlag(pObject->m_nCollisionRecords != 0);
@@ -11153,7 +11154,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	//case COMMAND_IS_CAR_DROWNING_IN_WATER:
 	case COMMAND_IS_CHAR_DROWNING_IN_WATER:
 	{
-		CollectParameters(&m_nIp, 2);
+		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		UpdateCompareFlag(pPed && pPed->bIsDrowning);
 		return 0;
@@ -11253,10 +11254,11 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	}
 	case COMMAND_CLEAR_CHAR_WAIT_STATE:
 	{
-		CollectParameters(&m_nIp, 2);
+		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		pPed->ClearWaitState();
+		return 0;
 	}
 	case COMMAND_GET_RANDOM_CAR_OF_TYPE_IN_AREA_NO_SAVE:
 	{
