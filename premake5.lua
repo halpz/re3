@@ -51,6 +51,9 @@ workspace "re3"
 			"win-x86-RW33_d3d8-mss",
 			"win-x86-librw_d3d9-mss",
 			"win-x86-librw_gl3_glfw-mss",
+			"win-x86-RW33_d3d8-oal",
+			"win-x86-librw_d3d9-oal",
+			"win-x86-librw_gl3_glfw-oal",
 		}
 
 	filter { "system:linux" }
@@ -183,11 +186,23 @@ project "re3"
 	includedirs { "src/extras" }
 	includedirs { "eax" }
 
-	includedirs { "milessdk/include" }
 	includedirs { "eax" }
-
-	libdirs { "milessdk/lib" }
 	
+	filter "platforms:*mss"
+		defines { "AUIOD_MSS" }
+		includedirs { "milessdk/include" }
+		libdirs { "milessdk/lib" }
+		
+	filter "platforms:*oal"
+		defines { "AUIOD_OAL" }
+		includedirs { "openal-soft/include" }
+		includedirs { "libsndfile/include" }
+		includedirs { "mpg123/include" }
+		libdirs { "openal-soft/libs/Win32" }
+		libdirs { "libsndfile/lib" }
+		libdirs { "mpg123/lib" }
+	
+	filter {}
 	if(os.getenv("GTA_III_RE_DIR")) then
 		setpaths("$(GTA_III_RE_DIR)/", "%(cfg.buildtarget.name)", "")
 	end
@@ -199,8 +214,7 @@ project "re3"
 		characterset ("MBCS")
 		targetextension ".exe"
 
-	filter "platforms:linux*"
-		defines { "OPENAL" }
+	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
 
 	filter "platforms:*RW33*"
