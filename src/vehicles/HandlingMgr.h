@@ -60,7 +60,9 @@ enum eHandlingId
 	HANDLING_PANLANT,
 	HANDLING_FLATBED,
 	HANDLING_YANKEE,
-	HANDLING_BORGNINE
+	HANDLING_BORGNINE,
+
+	NUMHANDLINGS
 };
 
 enum
@@ -120,7 +122,7 @@ class cHandlingDataMgr
 {
 	float field_0;	// unused it seems
 public:
-	float field_4;	// wheel related
+	float fWheelFriction;	// wheel related
 private:
 	float field_8;	//
 	float field_C;	// unused it seems

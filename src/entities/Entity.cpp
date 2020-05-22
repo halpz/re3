@@ -683,7 +683,7 @@ CEntity::ProcessLightsForEntity(void)
 				lightOn = true;
 			break;
 		case LIGHT_FLICKER_NIGHT:
-			if(CClock::GetHours() > 18 || CClock::GetHours() < 7){
+			if(CClock::GetHours() > 18 || CClock::GetHours() < 7 || CWeather::WetRoads > 0.5f){
 				if((CTimer::GetTimeInMilliseconds() ^ m_randomSeed) & 0x60)
 					lightOn = true;
 				else

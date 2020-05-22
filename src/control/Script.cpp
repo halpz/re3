@@ -759,6 +759,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 	case COMMAND_WAIT:
 		CollectParameters(&m_nIp, 1);
 		m_nWakeTime = CTimer::GetTimeInMilliseconds() + ScriptParams[0];
+		m_bSkipWakeTime = false;
 		return 1;
 	case COMMAND_GOTO:
 		CollectParameters(&m_nIp, 1);
@@ -2997,9 +2998,9 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 			pCarGen->SwitchOff();
 		}else if (ScriptParams[1] <= 100){
 			pCarGen->SwitchOn();
+			pCarGen->SetUsesRemaining(ScriptParams[1]);
 		}else{
 			pCarGen->SwitchOn();
-			pCarGen->SetUsesRemaining(ScriptParams[1]);
 		}
 		return 0;
 	}
@@ -6862,7 +6863,11 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		float heading = LimitAngleOnCircle(
 			RADTODEG(Atan2(-pObject->GetForward().x, pObject->GetForward().y)));
 		float headingTarget = *(float*)&ScriptParams[1];
+#ifdef FIX_BUGS
+		float rotateBy = *(float*)&ScriptParams[2] * CTimer::GetTimeStepFix();
+#else
 		float rotateBy = *(float*)&ScriptParams[2];
+#endif
 		if (headingTarget == heading) { // using direct comparasion here is fine
 			UpdateCompareFlag(true);
 			return 0;
@@ -6911,7 +6916,11 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		assert(pObject);
 		CVector pos = pObject->GetPosition();
 		CVector posTarget = *(CVector*)&ScriptParams[1];
+#ifdef FIX_BUGS
+		CVector slideBy = *(CVector*)&ScriptParams[4] * CTimer::GetTimeStepFix();
+#else
 		CVector slideBy = *(CVector*)&ScriptParams[4];
+#endif
 		if (posTarget == pos) { // using direct comparasion here is fine
 			UpdateCompareFlag(true);
 			return 0;
@@ -8213,7 +8222,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		car->SetHeading(DEGTORAD(*(float*)&ScriptParams[3]));
 		CTheScripts::ClearSpaceForMissionEntity(pos, car);
 		car->SetStatus(STATUS_ABANDONED);
-		car->bIsLocked = true;
+		car->bIsLocked = false;
 		car->bIsCarParkVehicle = true;
 		CCarCtrl::JoinCarWithRoadSystem(car);
 		car->AutoPilot.m_nCarMission = MISSION_NONE;
@@ -8687,6 +8696,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CTimer::Resume();
 		pMissionScript->m_bIsMissionScript = true;
 		pMissionScript->m_bMissionFlag = true;
+		CTheScripts::bAlreadyRunningAMissionScript = true;
 		return 0;
 	}
 	case COMMAND_SET_OBJECT_DRAW_LAST:
