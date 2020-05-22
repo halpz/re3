@@ -1,3 +1,15 @@
 [submodule "librw"]
 	path = librw
 	url = https://github.com/aap/librw
+[submodule "opus"]
+	path = opus
+	url = https://github.com/xiph/opus.git
+	branch = master
+[submodule "opusfile"]
+	path = opusfile
+	url = https://github.com/xiph/opusfile.git
+	branch = master
+[submodule "ogg"]
+	path = ogg
+	url = https://github.com/xiph/ogg.git
+	branch = master
