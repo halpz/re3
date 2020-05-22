@@ -194,9 +194,11 @@ project "re3"
 	includedirs { "openal-soft/include" }
 	includedirs { "mpg123/include" }
 	includedirs { "libsndfile/include" }
-	includedirs { "ogg/include" }
-	includedirs { "opus/include" }
-	includedirs { "opusfile/include" }
+	if _OPTIONS["with-opus"] then
+		includedirs { "ogg/include" }
+		includedirs { "opus/include" }
+		includedirs { "opusfile/include" }
+	end
 
 	libdirs { "milessdk/lib" }
 	libdirs { "openal-soft/libs/Win32" }
