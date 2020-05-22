@@ -8,11 +8,12 @@
 typedef long ssize_t;
 #pragma comment( lib, "libsndfile-1.lib" )
 #pragma comment( lib, "libmpg123.lib" )
-#else
-#include "crossplatform.h"
 #endif
 #include <sndfile.h>
 #include <mpg123.h>
+#ifndef _WIN32
+#include "crossplatform.h"
+#endif
 
 class CSndFile : public IDecoder
 {
