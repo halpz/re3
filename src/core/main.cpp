@@ -689,11 +689,13 @@ DisplayGameDebugText()
 {
 	static bool bDisplayPosn = false;
 	static bool bDisplayRate = false;
+	static bool bDisplayCheatStr = false;
 
 	{
 		SETTWEAKPATH("GameDebugText");
 		TWEAKBOOL(bDisplayPosn);
 		TWEAKBOOL(bDisplayRate);
+		TWEAKBOOL(bDisplayCheatStr);
 	}
 
 
@@ -780,6 +782,26 @@ DisplayGameDebugText()
 		
 		CFont::SetColor(CRGBA(255, 108, 0, 255));
 		CFont::PrintString(40.0f, 40.0f, ustr);
+	}
+
+	if (bDisplayCheatStr)
+	{
+		sprintf(str, "%s", CPad::KeyBoardCheatString);
+		AsciiToUnicode(str, ustr);
+
+		CFont::SetPropOff();
+		CFont::SetBackgroundOff();
+		CFont::SetScale(0.7f, 1.5f);
+		CFont::SetCentreOn();
+		CFont::SetBackGroundOnlyTextOff();
+		CFont::SetWrapx(640.0f);
+		CFont::SetFontStyle(FONT_HEADING);
+
+		CFont::SetColor(CRGBA(0, 0, 0, 255));
+		CFont::PrintString(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH * 0.5f)+2.f, SCREEN_SCALE_FROM_BOTTOM(20.0f)+2.f, ustr);
+
+		CFont::SetColor(CRGBA(255, 150, 225, 255));
+		CFont::PrintString(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH * 0.5f), SCREEN_SCALE_FROM_BOTTOM(20.0f), ustr);
 	}
 }
 #endif
