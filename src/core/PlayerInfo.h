@@ -50,6 +50,7 @@ public:
 	int32 m_nExplosionsSinceLastReward;
 	int32 field_268;
 	int32 field_272;
+	int32 m_nHavocCaused;	// TODO: check offset
 	bool m_bInfiniteSprint;
 	bool m_bFastReload;
 	bool m_bFireproof;

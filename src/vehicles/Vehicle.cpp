@@ -127,6 +127,9 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	AutoPilot.m_bStayInCurrentLevel = false;
 	AutoPilot.m_bIgnorePathfinding = false;
 	AutoPilot.m_nSwitchDistance = 20;
+
+// TODO(MIAMI)
+	bRestingOnPhysical = false;
 }
 
 CVehicle::~CVehicle()

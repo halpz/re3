@@ -59,6 +59,7 @@
 #include "Floater.h"
 #include "Streaming.h"
 #include "PedAttractor.h"
+#include "Debug.h"
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
