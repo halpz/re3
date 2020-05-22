@@ -195,12 +195,6 @@ project "re3"
 		
 	filter "platforms:*oal"
 		defines { "AUDIO_OAL" }
-		includedirs { "openal-soft/include" }
-		includedirs { "libsndfile/include" }
-		includedirs { "mpg123/include" }
-		libdirs { "openal-soft/libs/Win32" }
-		libdirs { "libsndfile/lib" }
-		libdirs { "mpg123/lib" }
 	
 	filter {}
 	if(os.getenv("GTA_III_RE_DIR")) then
@@ -213,6 +207,14 @@ project "re3"
 		linkoptions "/SAFESEH:NO"
 		characterset ("MBCS")
 		targetextension ".exe"
+
+	filter "platforms:win*oal"
+		includedirs { "openal-soft/include" }
+		includedirs { "libsndfile/include" }
+		includedirs { "mpg123/include" }
+		libdirs { "openal-soft/libs/Win32" }
+		libdirs { "libsndfile/lib" }
+		libdirs { "mpg123/lib" }
 
 	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
