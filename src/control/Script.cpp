@@ -8712,6 +8712,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		return 0;
 	case COMMAND_PRINT_HELP:
 	{
+		debug("PRINT_HELP %s\n", (char*)&CTheScripts::ScriptSpace[m_nIp]);
 		if (CCamera::m_bUseMouse3rdPerson && (
 			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "HELP15", 7) == 0 ||
 			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_2A", 7) == 0 ||
@@ -10149,7 +10150,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		return 0;
 	case COMMAND_SET_ENABLE_RC_DETONATE:
 		CollectParameters(&m_nIp, 1);
-		CVehicle::bDisableRemoteDetonation = ScriptParams[0];
+		CVehicle::bDisableRemoteDetonation = !ScriptParams[0];
 		return 0;
 	case COMMAND_SET_CAR_RANDOM_ROUTE_SEED:
 	{
@@ -10690,7 +10691,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	}
 	case COMMAND_HAS_OBJECT_COLLIDED_WITH_ANYTHING:
 	{
-		CollectParameters(&m_nIp, 2);
+		CollectParameters(&m_nIp, 1);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		assert(pObject);
 		UpdateCompareFlag(pObject->m_nCollisionRecords != 0);
