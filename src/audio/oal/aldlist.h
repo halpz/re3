@@ -8,15 +8,20 @@
 #include <vector>
 #include <string>
 
-typedef struct
-{
+struct ALDEVICEINFO {
 	std::string			strDeviceName;
 	int				iMajorVersion;
 	int				iMinorVersion;
 	unsigned int	uiSourceCount;
 	std::vector<std::string>	*pvstrExtensions;
 	bool			bSelected;
-} ALDEVICEINFO, *LPALDEVICEINFO;
+
+	ALDEVICEINFO() : iMajorVersion(0), iMinorVersion(0), uiSourceCount(0), pvstrExtensions(NULL), bSelected(false)
+	{
+	}
+};
+
+typedef ALDEVICEINFO *LPALDEVICEINFO;
 
 class ALDeviceList
 {

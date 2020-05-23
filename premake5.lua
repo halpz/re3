@@ -185,8 +185,6 @@ project "re3"
 	includedirs { "src/weapons" }
 	includedirs { "src/extras" }
 	includedirs { "eax" }
-
-	includedirs { "eax" }
 	
 	filter "platforms:*mss"
 		defines { "AUDIO_MSS" }
