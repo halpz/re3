@@ -174,10 +174,10 @@ add_providers()
 			}
 			
 			if ( alGetEnumValue("AL_EFFECT_EAXREVERB") != 0
-				|| pDeviceList->IsExtensionSupported(i, "EAX2.0")
-				|| pDeviceList->IsExtensionSupported(i, "EAX3.0") 
-				|| pDeviceList->IsExtensionSupported(i, "EAX4.0")
-				|| pDeviceList->IsExtensionSupported(i, "EAX5.0") )
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX2)
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX3) 
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX4)
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX5) )
 			{
 				if ( n < MAXPROVIDERS )
 				{
