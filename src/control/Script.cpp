@@ -6546,7 +6546,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			printf("HAS_CHAR_BEEN_DAMAGED_BY_WEAPON - Character doesn't exist\n");
 		else {
 			if (ScriptParams[1] == WEAPONTYPE_ANYMELEE || ScriptParams[1] == WEAPONTYPE_ANYWEAPON)
-				result = CheckDamagedWeaponType(ScriptParams[1], pPed->m_lastWepDam);
+				result = CheckDamagedWeaponType(pPed->m_lastWepDam, ScriptParams[1]);
 			else
 				result = ScriptParams[1] == pPed->m_lastWepDam;
 		}
@@ -6562,7 +6562,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			printf("HAS_CAR_BEEN_DAMAGED_BY_WEAPON - Vehicle doesn't exist\n");
 		else {
 			if (ScriptParams[1] == WEAPONTYPE_ANYMELEE || ScriptParams[1] == WEAPONTYPE_ANYWEAPON)
-				result = CheckDamagedWeaponType(ScriptParams[1], pVehicle->m_nLastWeaponDamage);
+				result = CheckDamagedWeaponType(pVehicle->m_nLastWeaponDamage, ScriptParams[1]);
 			else
 				result = ScriptParams[1] == pVehicle->m_nLastWeaponDamage;
 		}
@@ -11993,12 +11993,23 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	return -1;
 }
 
-bool CRunningScript::CheckDamagedWeaponType(int32 type, int32 actual)
+bool CRunningScript::CheckDamagedWeaponType(int32 actual, int32 type)
 {
 	if (actual == -1)
 		return false;
+
 	if (type == WEAPONTYPE_ANYMELEE) {
-		switch (actual) {
+		if (actual <= WEAPONTYPE_CHAINSAW)
+			return true;
+		if (actual - WEAPONTYPE_GRENADE <= WEAPONTYPE_MINIGUN)
+			return false;
+		return false;
+	}
+
+	if (type != WEAPONTYPE_ANYWEAPON)
+		return false;
+
+	switch (actual) {
 		case WEAPONTYPE_UNARMED:
 		case WEAPONTYPE_BRASSKNUCKLE:
 		case WEAPONTYPE_SCREWDRIVER:
@@ -12011,16 +12022,44 @@ bool CRunningScript::CheckDamagedWeaponType(int32 type, int32 actual)
 		case WEAPONTYPE_MACHETE:
 		case WEAPONTYPE_KATANA:
 		case WEAPONTYPE_CHAINSAW:
+		case WEAPONTYPE_GRENADE:
+		case WEAPONTYPE_DETONATOR_GRENADE:
+		case WEAPONTYPE_TEARGAS:
+		case WEAPONTYPE_MOLOTOV:
+		case WEAPONTYPE_ROCKET:
+		case WEAPONTYPE_COLT45:
+		case WEAPONTYPE_PYTHON:
+		case WEAPONTYPE_SHOTGUN:
+		case WEAPONTYPE_SPAS12_SHOTGUN:
+		case WEAPONTYPE_STUBBY_SHOTGUN:
+		case WEAPONTYPE_TEC9:
+		case WEAPONTYPE_UZI:
+		case WEAPONTYPE_SILENCED_INGRAM:
+		case WEAPONTYPE_MP5:
+		case WEAPONTYPE_M4:
+		case WEAPONTYPE_RUGER:
+		case WEAPONTYPE_SNIPERRIFLE:
+		case WEAPONTYPE_LASERSCOPE:
+		case WEAPONTYPE_ROCKETLAUNCHER:
+		case WEAPONTYPE_FLAMETHROWER:
+		case WEAPONTYPE_M60:
+		case WEAPONTYPE_MINIGUN:
+		case WEAPONTYPE_DETONATOR:
+		case WEAPONTYPE_HELICANNON:
+		case WEAPONTYPE_CAMERA:
+		case WEAPONTYPE_EXPLOSION:
+		case WEAPONTYPE_UZI_DRIVEBY:
 			return true;
-		default:
+		case WEAPONTYPE_HEALTH:
+		case WEAPONTYPE_ARMOUR:
+		case WEAPONTYPE_RAMMEDBYCAR:
+		case WEAPONTYPE_RUNOVERBYCAR:
+		case WEAPONTYPE_DROWNING:
+		case WEAPONTYPE_FALL:
+		case WEAPONTYPE_UNIDENTIFIED:
 			return false;
-		}
 	}
-	if (type == WEAPONTYPE_ANYWEAPON) {
-		// TODO(MIAMI)!
-		return actual != WEAPONTYPE_UNIDENTIFIED && actual != WEAPONTYPE_RAMMEDBYCAR &&
-			actual != WEAPONTYPE_RUNOVERBYCAR && actual != WEAPONTYPE_FALL && actual != WEAPONTYPE_DROWNING;
-	}
+
 	return false;
 }
 
