@@ -541,7 +541,14 @@ void CGame::InitialiseWhenRestarting(void)
 	
 	CTimer::Initialise();
 	CSprite2d::SetRecipNearClip();
-	
+
+	if (b_FoundRecentSavedGameWantToLoad || FrontEndMenuManager.m_bWantToLoad)
+	{
+		LoadSplash("splash1");
+		if (FrontEndMenuManager.m_bWantToLoad)
+			FrontEndMenuManager.MessageScreen("FELD_WR", true);
+	}
+
 	b_FoundRecentSavedGameWantToLoad = false;
 	
 	TheCamera.Init();
@@ -667,14 +674,8 @@ void CGame::Process(void)
 void
 CGame::InitAfterFocusLoss()
 {
-	/*
-	byte_869656 = byte_86969D;
-	result = cDMAudio::SetCurrent3DProvider(byte_86969D);
-	if ( !bGameStarted && !bMenuVisible )
-		byte_869642 = 1;
-	*/
-
-	//cDMAudio::SetCurrent3DProvider( ? ? ? );
+	FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = FrontEndMenuManager.m_lastWorking3DAudioProvider;
+	DMAudio.SetCurrent3DProvider(FrontEndMenuManager.m_lastWorking3DAudioProvider);
 
 	if (!FrontEndMenuManager.m_bGameNotLoaded && !FrontEndMenuManager.m_bMenuActive)
 		FrontEndMenuManager.m_bStartUpFrontEndRequested = true;
