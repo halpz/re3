@@ -241,19 +241,19 @@ extern RsEventStatus RsEventHandler(RsEvent event, void *param);
 extern RsEventStatus RsKeyboardEventHandler(RsEvent event, void *param);
 extern RsEventStatus RsPadEventHandler(RsEvent event, void *param);
 
-extern RwBool                   
+extern RwBool
 RsInitialize(void);
 
-extern RwBool                   
+extern RwBool
 RsRegisterImageLoader(void);
 
-extern RwBool                   
+extern RwBool
 RsRwInitialize(void *param);
 
-extern RwBool                   
+extern RwBool
 RsSelectDevice(void);
 
-extern RwBool                   
+extern RwBool
 RsInputDeviceAttach(RsInputDeviceType inputDevice,
 					RsInputEventHandler inputEventHandler);
 
