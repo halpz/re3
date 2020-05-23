@@ -246,8 +246,8 @@ RsEventHandler(RsEvent event, void *param)
 				result = (rsEVENTPROCESSED);
 				break;
 
-			case rsRWINITIALISE:
-				result = (RsRwInitialise(param) ?
+			case rsRWINITIALIZE:
+				result = (RsRwInitialize(param) ?
 						  rsEVENTPROCESSED : rsEVENTERROR);
 				break;
 
@@ -256,9 +256,9 @@ RsEventHandler(RsEvent event, void *param)
 				result = (rsEVENTPROCESSED);
 				break;
 
-			case rsINITIALISE:
+			case rsINITIALIZE:
 				result =
-					(RsInitialise()? rsEVENTPROCESSED : rsEVENTERROR);
+					(RsInitialize()? rsEVENTPROCESSED : rsEVENTERROR);
 				break;
 
 			default:
@@ -294,7 +294,7 @@ RsRwTerminate(void)
  *****************************************************************************
  */
 RwBool
-RsRwInitialise(void *displayID)
+RsRwInitialize(void *displayID)
 {
 	RwEngineOpenParams  openParams;
 
@@ -383,7 +383,7 @@ RsTerminate(void)
  *****************************************************************************
  */
 RwBool
-RsInitialise(void)
+RsInitialize(void)
 {
 	/*
 	 * Initialize Platform independent data...
@@ -415,7 +415,7 @@ RsInitialise(void)
 	RsGlobal.pad.inputEventHandler = nil;
 	RsGlobal.pad.used = FALSE;
 
-	result = psInitialise();
+	result = psInitialize();
 
 	return result;
 }

@@ -4333,7 +4333,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 	}
 	case COMMAND_SET_CAR_HEAVY:
 	{
-		CollectParameters(&m_nIp, 1);
+		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		pVehicle->bIsHeavy = (ScriptParams[1] != 0);

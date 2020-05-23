@@ -56,6 +56,9 @@ workspace "re3"
 			"win-x86-RW33_d3d8-mss",
 			"win-x86-librw_d3d9-mss",
 			"win-x86-librw_gl3_glfw-mss",
+			"win-x86-RW33_d3d8-oal",
+			"win-x86-librw_d3d9-oal",
+			"win-x86-librw_gl3_glfw-oal",
 		}
 
 	filter { "system:linux" }
@@ -188,19 +191,15 @@ project "re3"
 	includedirs { "src/extras" }
 	includedirs { "eax" }
 
-	includedirs { "milessdk/include" }
 	includedirs { "eax" }
 	
-	includedirs { "openal-soft/include" }
-	includedirs { "mpg123/include" }
-	includedirs { "libsndfile/include" }
 	if _OPTIONS["with-opus"] then
 		includedirs { "ogg/include" }
 		includedirs { "opus/include" }
 		includedirs { "opusfile/include" }
 	end
 
-	libdirs { "milessdk/lib" }
+		libdirs { "milessdk/lib" }
 	libdirs { "openal-soft/libs/Win32" }
 	libdirs { "mpg123/lib" }
 	libdirs { "libsndfile/lib" }
@@ -211,7 +210,11 @@ project "re3"
 			libdirs { "opusfile/win32/VS2015/Win32/Release-NoHTTP" }
 		filter {}
 	end
+		
+	filter "platforms:*oal"
+		defines { "AUDIO_OAL" }
 	
+	filter {}
 	if(os.getenv("GTA_III_RE_DIR")) then
 		setpaths("$(GTA_III_RE_DIR)/", "%(cfg.buildtarget.name)", "")
 	end
@@ -223,8 +226,15 @@ project "re3"
 		characterset ("MBCS")
 		targetextension ".exe"
 
-	filter "platforms:linux*"
-		defines { "OPENAL" }
+	filter "platforms:win*oal"
+		includedirs { "openal-soft/include" }
+		includedirs { "libsndfile/include" }
+		includedirs { "mpg123/include" }
+		libdirs { "openal-soft/libs/Win32" }
+		libdirs { "libsndfile/lib" }
+		libdirs { "mpg123/lib" }
+
+	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
 	
 	if _OPTIONS["with-opus"] then

@@ -1,7 +1,7 @@
-#include "stream.h"
+#include "common.h"
 
 #ifdef AUDIO_OAL
-#include "common.h"
+#include "stream.h"
 #include "sampman.h"
 
 #ifdef AUDIO_OPUS
