@@ -184,7 +184,7 @@ bool CCranes::IsThisCarPickedUp(float X, float Y, CVehicle* pVehicle)
 				result = true;
 		}
 	}
-	return true;
+	return result;
 }
 
 void CCranes::UpdateCranes(void)
