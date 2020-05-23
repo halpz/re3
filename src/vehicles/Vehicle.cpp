@@ -110,6 +110,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bTyresDontBurst = false;
 	bCreatedAsPoliceVehicle = false;
 	bParking = false;
+	m_nSetPieceExtendedRangeTime = 0;
 	m_nAlarmState = 0;
 	m_nDoorLock = CARLOCK_UNLOCKED;
 	m_nLastWeaponDamage = -1;

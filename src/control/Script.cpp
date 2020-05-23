@@ -59,6 +59,7 @@
 #include "RpAnimBlend.h"
 #include "Rubbish.h"
 #include "SimpleModelInfo.h"
+#include "SetPieces.h"
 #include "Shadows.h"
 #include "SpecialFX.h"
 #include "Sprite.h"
@@ -10900,7 +10901,10 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_ADD_SET_PIECE:
 	{
 		CollectParameters(&m_nIp, 13);
-		debug("ADD_SET_PIECE not implemented, skipping\n");
+		CSetPieces::AddOne(ScriptParams[0],
+			*(CVector2D*)&ScriptParams[1], *(CVector2D*)&ScriptParams[3],
+			*(CVector2D*)&ScriptParams[5], *(CVector2D*)&ScriptParams[7],
+			*(CVector2D*)&ScriptParams[9], *(CVector2D*)&ScriptParams[11]);
 		return 0;
 	}
 	case COMMAND_SET_EXTRA_COLOURS:

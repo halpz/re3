@@ -350,6 +350,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			if (!FindPlayerVehicle() || DotProduct2D(CVector2D(diff.x / distance, diff.y / distance), FindPlayerSpeed()) > 0.05f)
 				pVehicle->AutoPilot.m_nCarMission = MISSION_BLOCKPLAYER_CLOSE;
 			BackToCruisingIfNoWantedLevel(pVehicle);
+			break;
 		}
 		default:
 			if (pVehicle->bIsLawEnforcer && FindPlayerPed()->m_pWanted->m_nWantedLevel > 0 && !CCullZones::NoPolice()){

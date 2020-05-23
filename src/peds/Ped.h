@@ -523,6 +523,7 @@ public:
 	CPathNode *m_pNextPathNode;
 	float m_fHealth;
 	float m_fArmour;
+	uint32 m_nExtendedRangeTimer;
 	int16 m_routeLastPoint;
 	uint16 m_routeStartPoint;
 	int16 m_routePointsPassed;

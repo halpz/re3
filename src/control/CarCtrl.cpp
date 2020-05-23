@@ -971,7 +971,8 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 			pVehicle->GetModelIndex() == MI_AMBULAN ||
 			pVehicle->GetModelIndex() == MI_FIRETRUCK ||
 			pVehicle->bIsLawEnforcer ||
-			pVehicle->bIsCarParkVehicle
+			pVehicle->bIsCarParkVehicle ||
+			CTimer::GetTimeInMilliseconds() < pVehicle->m_nSetPieceExtendedRangeTime
 			){
 			threshold = ONSCREEN_DESPAWN_RANGE * TheCamera.GenerationDistMultiplier;
 		}
@@ -2515,11 +2516,50 @@ void CCarCtrl::SteerAICarWithPhysics_OnlyMission(CVehicle* pVehicle, float* pSwe
 			pSwerve, pAccel, pBrake, pHandbrake);
 		return;
 	case MISSION_BLOCKPLAYER_FORWARDANDBACK:
-		//SteerAICarBlockingPlayerForwardAndBack(pVehicle, pSwerve, pAccel, pBrake, pHandbrake);
+		SteerAICarBlockingPlayerForwardAndBack(pVehicle, pSwerve, pAccel, pBrake, pHandbrake);
 		return;
 	default:
 		assert(0);
 		return;
+	}
+}
+
+void CCarCtrl::SteerAICarBlockingPlayerForwardAndBack(CVehicle* pVehicle, float* pSwerve, float* pAccel, float* pBrake, bool* pHandbrake)
+{
+	*pSwerve = 0.0f;
+	*pHandbrake = false;
+	CVector player = FindPlayerSpeed() + 0.1f * FindPlayerEntity()->GetForward();
+	player.z = 0.0f;
+	CVector right(pVehicle->GetRight().x, pVehicle->GetRight().y, 0.0f);
+	right.Normalise();
+	CVector forward(pVehicle->GetForward().x, pVehicle->GetForward().y, 0.0f);
+	forward.Normalise();
+	float dpPlayerAndRight = DotProduct(player, right);
+	if (dpPlayerAndRight == 0.0f)
+		dpPlayerAndRight = 0.01f;
+	float dpDiffAndRight = -DotProduct((FindPlayerCoors() - pVehicle->GetPosition()), right) / dpPlayerAndRight;
+	if (dpDiffAndRight < 0.0f) {
+		*pAccel = 0.0f;
+		*pBrake = 0.0f;
+		return;
+	}
+	float dpSpeedAndForward = DotProduct(pVehicle->GetMoveSpeed(), forward);
+	float dpPlayerAndForward = DotProduct(player, forward);
+	float dpDiffAndForward = DotProduct((FindPlayerCoors() - pVehicle->GetPosition()), forward);
+	float multiplier = dpPlayerAndForward * dpDiffAndRight + dpDiffAndForward - dpSpeedAndForward * dpDiffAndRight;
+	if (multiplier > 0) {
+		*pAccel = Min(1.0f, 0.1f * multiplier);
+		*pBrake = 0.0f;
+	}
+	else if (dpSpeedAndForward > 0) {
+		*pAccel = 0.0f;
+		*pBrake = Min(1.0f, -0.1f * multiplier);
+		if (*pBrake > 0.95f)
+			*pHandbrake = true;
+	}
+	else {
+		*pAccel = Max(-1.0f, 0.1f * multiplier);
+		*pBrake = 0.0f;
 	}
 }
 

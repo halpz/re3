@@ -205,6 +205,7 @@ public:
 	float m_fChangeGearTime;
 	CEntity* m_pBombRigger;
 	uint32 m_nGunFiringTime;    // last time when gun on vehicle was fired (used on boats)
+	uint32 m_nSetPieceExtendedRangeTime;
 	uint32 m_nTimeOfDeath;
 	uint16 m_nTimeBlocked;
 	int16 m_nBombTimer;        // goes down with each frame
