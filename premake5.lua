@@ -209,6 +209,7 @@ project "re3"
 			libdirs { "opus/win32/VS2015/Win32/%{cfg.buildcfg}" }
 			libdirs { "opusfile/win32/VS2015/Win32/Release-NoHTTP" }
 		filter {}
+		defines { "AUDIO_OPUS" }
 	end
 		
 	filter "platforms:*oal"
