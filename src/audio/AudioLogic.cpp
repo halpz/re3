@@ -1158,7 +1158,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 	static int16 LastBrake = 0;
 	static uint8 CurrentPretendGear = 1;
 	static bool bLostTractionLastFrame = false;
-	static bool bHandbrakeOnLastFrame = 0;
+	static bool bHandbrakeOnLastFrame = false;
 	static int32 nCruising = 0;
 	static bool bAccelSampleStopped = true;
 
@@ -1171,7 +1171,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 		LastAccel = 0;
 		bLostTractionLastFrame = false;
 		LastBrake = 0;
-		bHandbrakeOnLastFrame = 0;
+		bHandbrakeOnLastFrame = false;
 		CurrentPretendGear = 1;
 	}
 	if (CReplay::IsPlayingBack()) {
@@ -1720,7 +1720,7 @@ cAudioManager::ProcessVehicleDoors(cVehicleParams *params)
 	for (int32 i = 0; i < ARRAY_SIZE(automobile->Doors); i++) {
 		if (automobile->Damage.GetDoorStatus(i) == DOOR_STATUS_SWINGING) {
 			doorState = automobile->Doors[i].m_nDoorState;
-			if (doorState == DOOR_STATUS_SMASHED || doorState == DOOR_STATUS_SWINGING) {
+			if (doorState == DOORST_OPEN || doorState == DOORST_CLOSED) {
 				velocity = Min(0.3f, Abs(automobile->Doors[i].m_fAngVel));
 				if (velocity > 0.0035f) {
 					emittingVol = (100.f * velocity * 10.f / 3.f);
