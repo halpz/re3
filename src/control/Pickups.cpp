@@ -46,55 +46,32 @@ tPickupMessage CPickups::aMessages[NUMPICKUPMESSAGES];
 
 // TODO(Miami)
 uint16 AmmoForWeapon[20] = { 0, 1, 45, 125, 25, 150, 300, 25, 5, 250, 5, 5, 0, 500, 0, 100, 0, 0, 0, 0 };
+
+// --MIAMI: Done
 uint16 AmmoForWeapon_OnStreet[WEAPONTYPE_TOTALWEAPONS] = {
-	0,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	1,
-	4,
-	4,
-	4,
-	4,
-	34,
-	16,
-	100,
-	60,
-	60,
-	60,
-	60,
-	60,
-	20,
-	4,
-	14,
-	1,
-	400,
+	0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 34,
+	12, 16, 14, 10, 100, 60, 60, 60, 60, 60, 20, 14,
+	4, 150, 100, 500, 1, 400, 36, 0,
 };
 uint16 CostOfWeapon[20] = { 0, 10, 250, 800, 1500, 3000, 5000, 10000, 25000, 25000, 2000, 2000, 0, 50000, 0, 3000, 0, 0, 0, 0 };
 
 // TODO(Miami): Those are all placeholders!!
 uint8 aWeaponReds[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 255, 0, 128, 255, 255, 0, 255, 0, 128, 128, 255,
-255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 255, 128, 0, 255, 0 };
 uint8 aWeaponGreens[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 0, 255, 128, 255, 0, 255, 128, 255, 0, 255, 255,
-255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 0, 255, 0, 255, 0 };
 uint8 aWeaponBlues[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255,
-255, 255, 255, 255, 255, 255, 255, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 0, 128, 255, 0, 0 };
+
 float aWeaponScale[] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
 2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f,
-1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
 1.0f, 1.0f, 1.0f, 1.0f };
 
 void
@@ -722,13 +699,13 @@ CPickups::DoPickUpEffects(CEntity *entity)
 		int16 colorId;
 
 		if (entity->GetModelIndex() == MI_PICKUP_ADRENALINE || entity->GetModelIndex() == MI_PICKUP_CAMERA)
-			colorId = WEAPONTYPE_LAST_WEAPONTYPE;
+			colorId = WEAPONTYPE_TOTALWEAPONS;
 		else if (entity->GetModelIndex() == MI_PICKUP_BODYARMOUR || entity->GetModelIndex() == MI_PICKUP_BRIBE)
-			colorId = WEAPONTYPE_LAST_WEAPONTYPE + 1;
+			colorId = WEAPONTYPE_TOTALWEAPONS + 1;
 		else if (entity->GetModelIndex() == MI_PICKUP_INFO || entity->GetModelIndex() == MI_PICKUP_KILLFRENZY)
-			colorId = WEAPONTYPE_LAST_WEAPONTYPE + 2;
+			colorId = WEAPONTYPE_TOTALWEAPONS + 2;
 		else if (entity->GetModelIndex() == MI_PICKUP_HEALTH || entity->GetModelIndex() == MI_PICKUP_BONUS)
-			colorId = WEAPONTYPE_LAST_WEAPONTYPE + 3;
+			colorId = WEAPONTYPE_TOTALWEAPONS + 3;
 		else
 			colorId = WeaponForModel(entity->GetModelIndex());
 
