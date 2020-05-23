@@ -8902,7 +8902,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 4);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		assert(pObject);
-		CVector result = pObject->GetPosition() + pObject->GetMatrix() * *(CVector*)&ScriptParams[1];
+		CVector result = Multiply3x3(pObject->GetMatrix(), *(CVector*)&ScriptParams[1]) + pObject->GetPosition();
 		*(CVector*)&ScriptParams[0] = result;
 		StoreParameters(&m_nIp, 3);
 		return 0;
@@ -8935,7 +8935,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 4);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
-		CVector result = pVehicle->GetMatrix() * *(CVector*)&ScriptParams[1] + pVehicle->GetPosition();
+		CVector result = Multiply3x3(pVehicle->GetMatrix(), *(CVector*)&ScriptParams[1]) + pVehicle->GetPosition();
 		*(CVector*)&ScriptParams[0] = result;
 		StoreParameters(&m_nIp, 3);
 		return 0;
@@ -10554,8 +10554,8 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CollectParameters(&m_nIp, 4);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
-		CVector offset = pPed->GetMatrix() * *(CVector*)&ScriptParams[1];
-		*(CVector*)&ScriptParams[0] = pPed->GetPosition() + offset;
+		CVector result = Multiply3x3(pPed->GetMatrix(), *(CVector*)&ScriptParams[1]) + pPed->GetPosition();
+		*(CVector*)&ScriptParams[0] = result;
 		StoreParameters(&m_nIp, 3);
 		return 0;
 	}
