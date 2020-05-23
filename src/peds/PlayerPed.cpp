@@ -47,19 +47,12 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_nSpeedTimer = 0;
 	m_bSpeedTimerFlag = false;
 
-	// This should be something inlined
 	// TODO(Miami)
-
 	// if (pPointGunAt)
 	//	m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
+
 	m_pPointGunAt = nil;
-	if (m_nPedState == PED_FOLLOW_PATH)
-		ClearFollowPath();
-
-	// TODO(Miami)
-	// This should be something inlined
-
-	m_nPedState = PED_IDLE;
+	SetPedState(PED_IDLE);
 	m_fMaxStamina = 150.0f;
 	m_fCurrentStamina = m_fMaxStamina;
 	m_fStaminaProgress = 0.0f;
@@ -290,10 +283,7 @@ CPlayerPed::SetInitialState(void)
 		m_pFire->Extinguish();
 
 	RpAnimBlendClumpRemoveAllAssociations(GetClump());
-	if (m_nPedState == PED_FOLLOW_PATH)
-		ClearFollowPath();
-
-	m_nPedState = PED_IDLE;
+	SetPedState(PED_IDLE);
 	SetMoveState(PEDMOVE_STILL);
 	m_nLastPedState = PED_NONE;
 	m_animGroup = ASSOCGRP_PLAYER;
@@ -1624,6 +1614,21 @@ CPlayerPed::ProcessControl(void)
 	if (!bIsVisible && IsClumpSkinned(GetClump()))
 		UpdateRpHAnim();
 #endif
+}
+
+bool
+CPlayerPed::DoesPlayerWantNewWeapon(eWeaponType weapon, bool onlyIfSlotIsEmpty)
+{
+	uint32 slot = CWeaponInfo::GetWeaponInfo(weapon)->m_nWeaponSlot;
+
+	if (!HasWeaponSlot(slot) || GetWeapon(slot).m_eWeaponType == weapon)
+		return true;
+
+	if (onlyIfSlotIsEmpty)
+		return false;
+
+	// Check if he's using that slot right now.
+	return m_nPedState != PED_ATTACK && m_nPedState != PED_AIM_GUN || slot != m_currentWeapon;
 }
 
 #ifdef COMPATIBLE_SAVES

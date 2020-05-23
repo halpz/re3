@@ -386,6 +386,8 @@ CPed::~CPed(void)
 	}
 	if (m_pFire)
 		m_pFire->Extinguish();
+
+	ClearWeapons();
 	if (bCarPassenger)
 		CPopulation::ms_nTotalCarPassengerPeds--;
 	if (bMiamiViceCop)
@@ -409,10 +411,11 @@ CPed::FlagToDestroyWhenNextProcessed(void)
 	}
 	bInVehicle = false;
 	m_pMyVehicle = nil;
+
 	if (CharCreatedBy == MISSION_CHAR)
-		m_nPedState = PED_DEAD;
+		SetPedState(PED_DEAD);
 	else
-		m_nPedState = PED_NONE;
+		SetPedState(PED_NONE);
 	m_pVehicleAnim = nil;
 }
 
@@ -1884,10 +1887,7 @@ CPed::ClearPointGunAt(void)
 	ClearAimFlag();
 	bIsPointingGunAt = false;
 	if (m_nPedState == PED_AIM_GUN || m_nPedState == PED_ATTACK) {
-
-		if (m_nPedState == PED_FOLLOW_PATH)
-			ClearFollowPath();
-		m_nPedState = PED_IDLE;
+		SetPedState(PED_IDLE);
 		RestorePreviousState();
 	}
 	weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
@@ -4650,10 +4650,7 @@ CPed::SetGetUp(void)
 		}
 		if (m_nPedState != PED_GETUP) {
 			SetStoredState();
-			if (m_nPedState == PED_FOLLOW_PATH)
-				ClearFollowPath();
-
-			m_nPedState = PED_GETUP;
+			SetPedState(PED_GETUP);
 		}
 
 		CVehicle *collidingVeh = (CVehicle*)m_pCollidingEntity;
@@ -4970,10 +4967,7 @@ CPed::SetPointGunAt(CEntity *to)
 	if (m_nPedState != PED_ATTACK)
 		SetStoredState();
 
-	if (m_nPedState == PED_FOLLOW_PATH)
-		ClearFollowPath();
-
-	m_nPedState = PED_AIM_GUN;
+	SetPedState(PED_AIM_GUN);
 	bIsPointingGunAt = true;
 	SetMoveState(PEDMOVE_NONE);
 
@@ -5267,10 +5261,7 @@ CPed::SetAttack(CEntity *victim)
 				&& !(m_pedStats->m_flags & STAT_SHOPPING_BAGS) && curWeapon->m_bPartialAttack)) {
 
 			if (m_nPedState != PED_ATTACK) {
-				if (m_nPedState == PED_FOLLOW_PATH)
-					ClearFollowPath();
-
-				m_nPedState = PED_ATTACK;
+				SetPedState(PED_ATTACK);
 				bIsAttacking = false;
 
 				CAnimBlendAssociation *animAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay, ANIM_MELEE_ATTACK_START, 8.0f);
@@ -5291,10 +5282,7 @@ CPed::SetAttack(CEntity *victim)
 		m_nMoveState == PEDMOVE_WALK || m_nMoveState == PEDMOVE_RUN)) {
 
 		if (m_nPedState != PED_ATTACK) {
-			if (m_nPedState == PED_FOLLOW_PATH)
-				ClearFollowPath();
-
-			m_nPedState = PED_ATTACK;
+			SetPedState(PED_ATTACK);
 			bIsAttacking = false;
 			CAnimBlendAssociation* animAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay, ANIM_MELEE_ATTACK_START, 8.0f);
 			animAssoc->SetRun();
@@ -5371,10 +5359,7 @@ CPed::SetAttack(CEntity *victim)
 			if (m_nPedState != PED_AIM_GUN)
 				SetStoredState();
 
-			if (m_nPedState == PED_FOLLOW_PATH)
-				ClearFollowPath();
-
-			m_nPedState = PED_ATTACK;
+			SetPedState(PED_ATTACK);
 			SetMoveState(PEDMOVE_NONE);
 			if (bCrouchWhenShooting && bIsDucking && !!curWeapon->m_bCrouchFire) {
 				CAnimBlendAssociation* curMoveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(curWeapon));
@@ -6657,10 +6642,7 @@ CPed::SetDead(void)
 	if (m_nPedState == PED_DRIVING)
 		bIsVisible = false;
 
-	if (m_nPedState == PED_FOLLOW_PATH)
-		ClearFollowPath();
-
-	m_nPedState = PED_DEAD;
+	SetPedState(PED_DEAD);
 	m_pVehicleAnim = nil;
 	m_pCollidingEntity = nil;
 

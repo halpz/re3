@@ -1597,7 +1597,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 					if ( CGame::nastyGame )
 					{
 						uint8 bloodAmount = 8;
-						if ( m_eWeaponType == WEAPONTYPE_SHOTGUN || m_eWeaponType == WEAPONTYPE_SPAS12_SHOTGUN || m_eWeaponType == WEAPONTYPE_STUBBY_SHOTGUN)
+						if ( IsShotgun(m_eWeaponType) )
 							bloodAmount = 32;
 
 						CVector dir = (point.point - victim->GetPosition()) * 0.01f;
