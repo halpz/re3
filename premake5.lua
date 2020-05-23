@@ -190,8 +190,6 @@ project "re3"
 	includedirs { "src/weapons" }
 	includedirs { "src/extras" }
 	includedirs { "eax" }
-
-	includedirs { "eax" }
 	
 	if _OPTIONS["with-opus"] then
 		includedirs { "ogg/include" }

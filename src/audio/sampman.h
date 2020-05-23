@@ -3,7 +3,7 @@
 #include "AudioSamples.h"
 
 #define MAX_VOLUME 127
-#define MAX_FREQ   22050
+#define MAX_FREQ DIGITALRATE
 
 struct tSample {
 	int32 nOffset;

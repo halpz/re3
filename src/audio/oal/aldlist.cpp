@@ -35,7 +35,6 @@
  */
 ALDeviceList::ALDeviceList()
 {
-	ALDEVICEINFO	ALDeviceInfo;
 	char *devices;
 	int index;
 	const char *defaultDeviceName;
@@ -71,7 +70,7 @@ ALDeviceList::ALDeviceList()
 						}
 					}
 					if ((bNewName) && (actualDeviceName != NULL) && (strlen(actualDeviceName) > 0)) {
-						memset(&ALDeviceInfo, 0, sizeof(ALDEVICEINFO));
+						ALDEVICEINFO ALDeviceInfo;
 						ALDeviceInfo.bSelected = true;
 						ALDeviceInfo.strDeviceName = actualDeviceName;
 						alcGetIntegerv(device, ALC_MAJOR_VERSION, sizeof(int), &ALDeviceInfo.iMajorVersion);
