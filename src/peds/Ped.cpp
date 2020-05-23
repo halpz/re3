@@ -685,7 +685,7 @@ CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool unused)
 
 	if (m_weapons[slot].m_eWeaponType == weaponType) {
 		GetWeapon(slot).m_nAmmoTotal += ammo;
-		if (weaponType < WEAPONTYPE_LAST_WEAPONTYPE && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
+		if (weaponType < WEAPONTYPE_TOTALWEAPONS && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
 
 			// Looks like abandoned idea. This block never runs, ms_aMaxAmmoForWeapon is always -1.
 			GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], GetWeapon(slot).m_nAmmoTotal);
@@ -884,9 +884,8 @@ CPed::AddWeaponModel(int id)
 		CModelInfo::GetModelInfo(id)->AddRef();
 		m_wepModelID = id;
 
-		// TODO(Miami)
-		// if (IsPlayer() && id == MI_MINIGUN)
-		//	((CPlayerPed*)this)->m_pMinigunTopAtomic = (RpAtomic*)CModelInfo::GetModelInfo(MI_MINIGUN2)->CreateInstance();
+		if (IsPlayer() && id == MI_MINIGUN)
+			((CPlayerPed*)this)->m_pMinigunTopAtomic = (RpAtomic*)CModelInfo::GetModelInfo(MI_MINIGUN2)->CreateInstance();
 	}
 }
 
@@ -898,7 +897,7 @@ CPed::AimGun(void)
 
 	if (m_pSeekTarget) {
 		if (m_pSeekTarget->IsPed()) {
-			((CPed*)m_pSeekTarget)->m_pedIK.GetComponentPosition(&pos, PED_MID);
+			((CPed*)m_pSeekTarget)->m_pedIK.GetComponentPosition(pos, PED_MID);
 			vector = pos;
 		} else {
 			vector = m_pSeekTarget->GetPosition();
@@ -1507,9 +1506,8 @@ CPed::Attack(void)
 			
 			GetWeapon()->Fire(this, &firePos);
 
-			// TODO(Miami): Teargas
-			if (ourWeaponType == WEAPONTYPE_MOLOTOV || ourWeaponType == WEAPONTYPE_GRENADE || ourWeaponType == WEAPONTYPE_DETONATOR_GRENADE 
-				/* ourWeaponType == WEAPONTYPE_TEARGAS*/) {
+			if (ourWeaponType == WEAPONTYPE_MOLOTOV || ourWeaponType == WEAPONTYPE_GRENADE || ourWeaponType == WEAPONTYPE_DETONATOR_GRENADE ||
+				ourWeaponType == WEAPONTYPE_TEARGAS) {
 				RemoveWeaponModel(ourWeapon->m_nModelId);
 			}
 			if (!GetWeapon()->m_nAmmoTotal && ourWeaponFire != WEAPON_FIRE_MELEE && FindPlayerPed() != this) {
@@ -1649,10 +1647,10 @@ CPed::Attack(void)
 					case WEAPONTYPE_MP5:
 						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_UZI_BULLET_ECHO, 0.0f);
 						break;
-					case WEAPONTYPE_AK47:
+					case WEAPONTYPE_RUGER:
 						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
 						break;
-					case WEAPONTYPE_M16:
+					case WEAPONTYPE_M4:
 						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_M16_BULLET_ECHO, 0.0f);
 						break;
 					default:
@@ -1667,7 +1665,7 @@ CPed::Attack(void)
 		if (weaponAnimTime - 2.0f * weaponAnimAssoc->timeStep <= animLoopEnd
 			&& (bIsAttacking || CTimer::GetTimeInMilliseconds() < m_shootTimer)
 			&& (GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING
-				/* || GetWeapon()->m_nWeaponType == WEAPONTYPE_MINIGUN */)) { // TODO(Miami): Minigun
+				|| GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN)) {
 
 			PedOnGroundState pedOnGroundState;
 			if (ourWeapon->m_eWeaponFire == WEAPON_FIRE_MELEE &&
@@ -1715,10 +1713,10 @@ CPed::Attack(void)
 				case WEAPONTYPE_MP5:
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_UZI_BULLET_ECHO, 0.0f);
 					break;
-				case WEAPONTYPE_AK47:
+				case WEAPONTYPE_RUGER:
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
 					break;
-				case WEAPONTYPE_M16:
+				case WEAPONTYPE_M4:
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_M16_BULLET_ECHO, 0.0f);
 					break;
 				default:
@@ -1764,8 +1762,7 @@ CPed::RemoveWeaponModel(int modelId)
 #endif
 		RwFrameForAllObjects(m_pFrames[PED_HANDR]->frame,RemoveAllModelCB,nil);
 
-	// TODO(Miami): Minigun
-	if (IsPlayer() && (modelId == -1 /* || modelId == MI_MINIGUN)*/)) {
+	if (IsPlayer() && (modelId == -1 || modelId == MI_MINIGUN)) {
 		RpAtomic* &atm = ((CPlayerPed*)this)->m_pMinigunTopAtomic;
 		if (atm) {
 			RwFrame *frm = RpAtomicGetFrame(atm);
@@ -1818,7 +1815,7 @@ CPed::SelectGunIfArmed(void)
 
 			// First condition checks for Pistol, Python and Shotguns
 			if ((weaponType >= WEAPONTYPE_COLT45 && weaponType < WEAPONTYPE_TEC9) ||
-				weaponType == WEAPONTYPE_UZI || weaponType == WEAPONTYPE_M16 || weaponType == WEAPONTYPE_MP5 ||
+				weaponType == WEAPONTYPE_UZI || weaponType == WEAPONTYPE_M4 || weaponType == WEAPONTYPE_MP5 ||
 				weaponType == WEAPONTYPE_ROCKETLAUNCHER || weaponType == WEAPONTYPE_FLAMETHROWER || weaponType == WEAPONTYPE_SNIPERRIFLE) {
 				SetCurrentWeapon(i);
 				return true;
@@ -4278,16 +4275,19 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 				break;
 			case WEAPONTYPE_COLT45:
 			case WEAPONTYPE_SHOTGUN:
-				// TODO(Miami): Shotguns
+			case WEAPONTYPE_STUBBY_SHOTGUN:
+			case WEAPONTYPE_SPAS12_SHOTGUN:
 			case WEAPONTYPE_TEC9:
 			case WEAPONTYPE_UZI:
 			case WEAPONTYPE_SILENCED_INGRAM:
 			case WEAPONTYPE_MP5:
-			case WEAPONTYPE_M16:
-			case WEAPONTYPE_AK47:
+			case WEAPONTYPE_M4:
+			case WEAPONTYPE_RUGER:
 			case WEAPONTYPE_SNIPERRIFLE:
+			case WEAPONTYPE_LASERSCOPE:
+			case WEAPONTYPE_M60:
+			case WEAPONTYPE_MINIGUN:
 			case WEAPONTYPE_UZI_DRIVEBY:
-				// TODO(Miami): Laserscope, M60, Minigun
 
 				if (bBulletProof)
 					return false;
@@ -4295,8 +4295,8 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 				bool dontRemoveLimb;
 				if (IsPlayer() || bNoCriticalHits)
 					dontRemoveLimb = true;
-				else if (method != WEAPONTYPE_M16 && method != WEAPONTYPE_AK47 && method != WEAPONTYPE_SNIPERRIFLE
-						/* method != WEAPONTYPE_LASERSCOPE */) { // TODO(Miami): Laserscope
+				else if (method != WEAPONTYPE_M4 && method != WEAPONTYPE_RUGER && method != WEAPONTYPE_SNIPERRIFLE &&
+						method != WEAPONTYPE_LASERSCOPE) {
 					if (method == WEAPONTYPE_SHOTGUN)
 						dontRemoveLimb = CGeneral::GetRandomNumber() & 7;
 					else
@@ -5012,7 +5012,7 @@ CPed::SetAmmo(eWeaponType weaponType, uint32 ammo)
 		return;
 
 	GetWeapon(slot).m_nAmmoTotal = ammo;
-	if (weaponType < WEAPONTYPE_LAST_WEAPONTYPE && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
+	if (weaponType < WEAPONTYPE_TOTALWEAPONS && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
 
 		// Looks like abandoned idea. This block never runs, ms_aMaxAmmoForWeapon is always -1.
 		GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], GetWeapon(slot).m_nAmmoTotal);
@@ -5037,7 +5037,7 @@ CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo)
 		return;
 
 	GetWeapon(slot).m_nAmmoTotal += ammo;
-	if (weaponType < WEAPONTYPE_LAST_WEAPONTYPE && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
+	if (weaponType < WEAPONTYPE_TOTALWEAPONS && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
 
 		// Looks like abandoned idea. This block never runs, ms_aMaxAmmoForWeapon is always -1.
 		GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], GetWeapon(slot).m_nAmmoTotal);
@@ -6711,11 +6711,7 @@ CPed::SetSeek(CVector pos, float distanceToCountDone)
 		|| (m_nPedState == PED_SEEK_POS && m_vecSeekPos.x == pos.x && m_vecSeekPos.y == pos.y))
 		return;
 
-	if (GetWeapon()->m_eWeaponType == WEAPONTYPE_M16
-		|| GetWeapon()->m_eWeaponType == WEAPONTYPE_AK47
-		|| GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE
-		|| GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER
-		|| GetWeapon()->m_eWeaponType == WEAPONTYPE_SHOTGUN) {
+	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAimWithArm) {
 		ClearPointGunAt();
 	}
 
@@ -9734,7 +9730,7 @@ CPed::MoveHeadToLook(void)
 		}
 
 		if (m_pLookTarget->IsPed()) {
-			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition((RwV3d*) &lookPos, PED_MID);
+			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition((RwV3d)lookPos, PED_MID);
 		} else {
 			lookPos = m_pLookTarget->GetPosition();
 		}
@@ -13696,7 +13692,7 @@ CPed::ProcessObjective(void)
 						CVector target;
 						CVector ourHead = GetMatrix() * CVector(0.5f, 0.0f, 0.6f);
 						if (m_pedInObjective->IsPed())
-							m_pedInObjective->m_pedIK.GetComponentPosition((RwV3d*)&target, PED_MID);
+							m_pedInObjective->m_pedIK.GetComponentPosition((RwV3d)target, PED_MID);
 						else
 							target = m_pedInObjective->GetPosition();
 
