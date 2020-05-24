@@ -6212,7 +6212,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		}
 		CCranes::ActivateCrane(infX, supX, infY, supY,
 			*(float*)&ScriptParams[6], *(float*)&ScriptParams[7], *(float*)&ScriptParams[8],
-			DEGTORAD(*(float*)&ScriptParams[8]), true, false,
+			DEGTORAD(*(float*)&ScriptParams[9]), true, false,
 			*(float*)&ScriptParams[0], *(float*)&ScriptParams[1]);
 		return 0;
 	}
