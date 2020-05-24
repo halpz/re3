@@ -175,7 +175,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	m_nNumPassengers = 0;
 
 	m_bombType = CARBOMB_NONE;
-	bHadDriver = false;
+	bDriverLastFrame = false;
 	m_pBombRigger = nil;
 
 	if(m_nDoorLock == CARLOCK_UNLOCKED &&
@@ -276,7 +276,7 @@ CAutomobile::ProcessControl(void)
 
 	// Process driver
 	if(pDriver){
-		if(!bHadDriver && m_bombType == CARBOMB_ONIGNITIONACTIVE){
+		if(!bDriverLastFrame && m_bombType == CARBOMB_ONIGNITIONACTIVE){
 			// If someone enters the car and there is a bomb, detonate
 			m_nBombTimer = 1000;
 			m_pBlowUpEntity = m_pBombRigger;
@@ -284,7 +284,7 @@ CAutomobile::ProcessControl(void)
 				m_pBlowUpEntity->RegisterReference((CEntity**)&m_pBlowUpEntity);
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_TICK, 1.0f);
 		}
-		bHadDriver = true;
+		bDriverLastFrame = true;
 
 		if(IsUpsideDown() && CanPedEnterCar()){
 			if(!pDriver->IsPlayer() &&
@@ -293,7 +293,7 @@ CAutomobile::ProcessControl(void)
 				pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
 		}
 	}else
-		bHadDriver = false;
+		bDriverLastFrame = false;
 
 	// Process passengers
 	if(m_nNumPassengers != 0 && IsUpsideDown() && CanPedEnterCar()){
@@ -3928,7 +3928,7 @@ CAutomobile::SetUpWheelColModel(CColModel *colModel)
 
 	if(m_aCarNodes[CAR_WHEEL_LM] != nil && m_aCarNodes[CAR_WHEEL_RM] != nil){
 		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LM]));
-		colModel->spheres[4].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_RF);
+		colModel->spheres[4].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_LR);
 		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RM]));
 		colModel->spheres[5].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_RR);
 		colModel->numSpheres = 6;
