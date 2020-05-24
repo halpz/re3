@@ -183,7 +183,7 @@ class COpusFile : public IDecoder
 	uint32 m_nRate;
 	uint32 m_nChannels;
 public:
-	_declspec(noinline) COpusFile(const char *path) : m_FileH(nil),
+	COpusFile(const char *path) : m_FileH(nil),
 		m_bOpened(false),
 		m_nRate(0),
 		m_nChannels(0)
@@ -194,7 +194,7 @@ public:
 		if (m_FileH) {
 			m_nChannels = op_head(m_FileH, 0)->channel_count;
 			m_nRate = op_head(m_FileH, 0)->input_sample_rate;
-			auto tags = op_tags(m_FileH, 0);
+			const OpusTags *tags = op_tags(m_FileH, 0);
 			for (int i = 0; i < tags->comments; i++) {
 				if (strncmp(tags->user_comments[i], "SAMPLERATE", sizeof("SAMPLERATE")-1) == 0)
 				{
