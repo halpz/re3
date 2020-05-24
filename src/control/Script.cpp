@@ -11364,7 +11364,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_CLEAR_CHAR_FOLLOW_PATH:
 	{
 		CollectParameters(&m_nIp, 2);
-		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		if (pPed->GetPedState() == PED_FOLLOW_PATH) {
 			pPed->RestorePreviousState();
@@ -11375,7 +11375,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_CHAR_CAN_BE_SHOT_IN_VEHICLE:
 	{
 		CollectParameters(&m_nIp, 2);
-		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		pPed->bCanBeShotInVehicle = ScriptParams[1];
 		return 0;
