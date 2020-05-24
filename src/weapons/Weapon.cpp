@@ -241,51 +241,51 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 			}
 		}
 
-		if ( fired )
+		if (fired)
 		{
 			bool isPlayer = false;
 
-			if ( shooter->IsPed() )
+			if (shooter->IsPed())
 			{
-				CPed *shooterPed = (CPed*)shooter;
+				CPed* shooterPed = (CPed*)shooter;
 
 				shooterPed->bIsShooting = true;
 
-				if ( shooterPed->IsPlayer() )
+				if (shooterPed->IsPlayer())
 					isPlayer = true;
 
 				DMAudio.PlayOneShot(shooterPed->m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
 			}
 
-			if ( m_nAmmoInClip > 0 ) m_nAmmoInClip--;
-			if ( m_nAmmoTotal > 0 && (m_nAmmoTotal < 25000 || isPlayer) ) m_nAmmoTotal--;
+			if (m_nAmmoInClip > 0) m_nAmmoInClip--;
+			if (m_nAmmoTotal > 0 && (m_nAmmoTotal < 25000 || isPlayer)) m_nAmmoTotal--;
 
-			if ( m_eWeaponState == WEAPONSTATE_READY && m_eWeaponType == WEAPONTYPE_FLAMETHROWER )
+			if (m_eWeaponState == WEAPONSTATE_READY && m_eWeaponType == WEAPONTYPE_FLAMETHROWER)
 				DMAudio.PlayOneShot(((CPhysical*)shooter)->m_audioEntityId, SOUND_WEAPON_FLAMETHROWER_FIRE, 0.0f);
 
 			m_eWeaponState = WEAPONSTATE_FIRING;
-		}
 
-		if ( m_nAmmoInClip == 0 )
-		{
-			if ( m_nAmmoTotal == 0 )
-				return true;
-
-			m_eWeaponState = WEAPONSTATE_RELOADING;
-			m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nReload;
-
-			if ( shooter == FindPlayerPed() )
+			if (m_nAmmoInClip == 0)
 			{
-				if ( CWorld::Players[CWorld::PlayerInFocus].m_bFastReload )
-					m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nReload / 4;
+				if (m_nAmmoTotal == 0)
+					return true;
+
+				m_eWeaponState = WEAPONSTATE_RELOADING;
+				m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nReload;
+
+				if (shooter == FindPlayerPed())
+				{
+					if (CWorld::Players[CWorld::PlayerInFocus].m_bFastReload)
+						m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nReload / 4;
+				}
+
+				return true;
 			}
 
-			return true;
+			m_nTimer = CTimer::GetTimeInMilliseconds() + 1000;
+			if (shooter == FindPlayerPed())
+				CStats::RoundsFiredByPlayer++;
 		}
-
-		m_nTimer = CTimer::GetTimeInMilliseconds() + 1000;
-		if ( shooter == FindPlayerPed() )
-			CStats::RoundsFiredByPlayer++;
 	}
 	else
 	{

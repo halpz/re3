@@ -5,13 +5,13 @@
 
 class CWeaponInfo {
 //	static CWeaponInfo(&ms_apWeaponInfos)[14];
-	static CWeaponInfo ms_apWeaponInfos[14];
+	static CWeaponInfo ms_apWeaponInfos[WEAPONTYPE_LAST_WEAPONTYPE];
 public:
 	eWeaponFire m_eWeaponFire;
 	float m_fRange;
 	uint32 m_nFiringRate;
 	uint32 m_nReload;
-	uint32 m_nAmountofAmmunition;
+	int32 m_nAmountofAmmunition;
 	uint32 m_nDamage;
 	float m_fSpeed;
 	float m_fRadius;
