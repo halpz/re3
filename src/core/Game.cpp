@@ -64,6 +64,7 @@
 #include "Script.h"
 #include "Shadows.h"
 #include "Skidmarks.h"
+#include "SetPieces.h"
 #include "SpecialFX.h"
 #include "Sprite2d.h"
 #include "Stats.h"
@@ -275,6 +276,7 @@ bool CGame::Initialise(const char* datFile)
 	CCullZones::Init();
 	COcclusion::Init();
 	CCollision::Init();
+	CSetPieces::Init();
 	CTheZones::Init();
 	CUserDisplay::Init();
 	CMessages::Init();
@@ -529,6 +531,7 @@ void CGame::ShutDownForRestart(void)
 	CRadar::RemoveRadarSections();
 	FrontEndMenuManager.UnloadTextures();
 	CParticleObject::RemoveAllParticleObjects();
+	CSetPieces::Init();
 	CPedType::Shutdown();
 	CSpecialFX::Shutdown();
 	TidyUpMemory(true, false);
@@ -622,6 +625,7 @@ void CGame::Process(void)
 		CAntennas::Update();
 		CGlass::Update();
 		CSceneEdit::Update();
+		CSetPieces::Update();
 		CEventList::Update();
 		CParticle::Update();
 		gFireManager.Update();

@@ -673,6 +673,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_nPedMoney = random % 25;
 	if (m_nPedMoney == 23)
 		m_nPedMoney = 400;
+	m_nExtendedRangeTimer = 0;
 	m_bleedCounter = 0;
 #ifdef PED_SKIN
 	m_pWeaponModel = nil;
