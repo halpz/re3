@@ -447,7 +447,7 @@ public:
 	uint32 bIsDrowning : 1;
 	uint32 bDrownsInWater : 1;
 	//uint32 b156_4
-	//uint32 b156_8
+	uint32 b156_8 : 1;
 	uint32 bIsPlayerFriend : 1;
 #ifdef VC_PED_PORTS
 	uint32 bHeadStuckInCollision : 1;
@@ -864,6 +864,7 @@ public:
 	static void PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 
 	bool IsPlayer(void);
+	bool IsFemale(void) { return m_nPedType == PEDTYPE_CIVFEMALE || m_nPedType == PEDTYPE_PROSTITUTE; }
 	bool UseGroundColModel(void);
 	bool CanSetPedState(void);
 	bool IsPedInControl(void);

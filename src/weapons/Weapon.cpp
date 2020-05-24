@@ -1271,7 +1271,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 				}
 				case ENTITY_TYPE_VEHICLE:
 				{
-					((CVehicle *)victim)->InflictDamage(shooter, m_eWeaponType, info->m_nDamage);
+					((CVehicle *)victim)->InflictDamage(shooter, m_eWeaponType, info->m_nDamage, point->point);
 
 					for ( int32 i = 0; i < 16; i++ )
 						CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal*0.05f);
@@ -1648,7 +1648,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 					case ENTITY_TYPE_VEHICLE:
 					{
 						if (point.pieceB >= SURFACE_STREET_LIGHT && point.pieceB <= SURFACE_METAL_FENCE) {
-							((CVehicle*)victim)->BurstTyre(point.pieceB); // TODO(Miami): New parameter: ,true);
+							((CVehicle*)victim)->BurstTyre(point.pieceB, true);
 
 							for (int32 i = 0; i < 4; i++)
 								CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, point.point, point.normal * 0.05f);

@@ -66,7 +66,7 @@
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
 
-CColPoint aTempPedColPts[MAX_COLLISION_POINTS];
+static CColPoint aTempPedColPts[MAX_COLLISION_POINTS];
 
 // TODO(Miami)
 #define AUDIO_NOT_READY
@@ -4558,7 +4558,8 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					m_pMyVehicle->AutoPilot.m_nTempAction = TEMPACT_HANDBRAKESTRAIGHT;
 					m_pMyVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 2000;
 				}
-				if (m_pMyVehicle->CanPedExitCar()) {
+// TODO(MIAMI): argument
+				if (m_pMyVehicle->CanPedExitCar(false)) {
 					SetObjective(OBJECTIVE_LEAVE_CAR_AND_DIE, m_pMyVehicle);
 				} else {
 					m_fHealth = 0.0f;
@@ -13372,7 +13373,8 @@ CPed::ProcessObjective(void)
 						} else {
 							bool targetHasVeh = m_pedInObjective->bInVehicle;
 							if (!targetHasVeh
-								|| targetHasVeh && m_pedInObjective->m_pMyVehicle->CanPedExitCar()) {
+// TODO(MIAMI): argument
+								|| targetHasVeh && m_pedInObjective->m_pMyVehicle->CanPedExitCar(false)) {
 								m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 0;
 								m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
 								SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
@@ -15427,13 +15429,13 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 				}
 				float minDist = 1.0f;
 				belowTorsoCollided = CCollision::ProcessVerticalLine(ourLine, collidingEnt->GetMatrix(), *hisCol,
-					intersectionPoint, minDist, false, &m_collPoly);
+					intersectionPoint, minDist, false, false, &m_collPoly);
 
 				if (collidedWithBoat && bWasStanding && !belowTorsoCollided) {
 					ourLine.p0.z = ourLine.p1.z;
 					ourLine.p1.z = ourLine.p1.z + gravityEffect;
 					belowTorsoCollided = CCollision::ProcessVerticalLine(ourLine, collidingEnt->GetMatrix(), *hisCol,
-						intersectionPoint, minDist, false, &m_collPoly);
+						intersectionPoint, minDist, false, false, &m_collPoly);
 				}
 				if (belowTorsoCollided) {
 #ifndef VC_PED_PORTS
@@ -16151,7 +16153,8 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 	uint32 optedDoorNode = wantedDoorNode;
 	bool teleportNeeded = false;
 	bool isLow = !!veh->bLowVehicle;
-	if (!veh->CanPedExitCar()) {
+// TODO(MIAMI): argument
+	if (!veh->CanPedExitCar(false)) {
 		if (veh->pDriver && !veh->pDriver->IsPlayer()) {
 			veh->AutoPilot.m_nCruiseSpeed = 0;
 			veh->AutoPilot.m_nCarMission = MISSION_NONE;

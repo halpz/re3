@@ -10943,10 +10943,10 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 				ScriptParams[1] = 0;
 			else if (ScriptParams[1] == 3)
 				ScriptParams[1] = 1;
-			pVehicle->BurstTyre(ScriptParams[1]); // TODO(MIAMI): second param is true
+			pVehicle->BurstTyre(ScriptParams[1], true);
 		}
 		else {
-			pVehicle->BurstTyre(ScriptParams[1]); // TODO(MIAMI): second param is true
+			pVehicle->BurstTyre(ScriptParams[1], true);
 		}
 		return 0;
 	}

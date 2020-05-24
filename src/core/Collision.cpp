@@ -414,8 +414,9 @@ CCollision::TestSphereTriangle(const CColSphere &sphere,
 	return dist < sphere.radius;
 }
 
+//--MIAMI: TODO
 bool
-CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColModel &model, bool ignoreSeeThrough)
+CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColModel &model, bool ignoreSeeThrough, bool ignoreShootThrough)
 {
 	static CMatrix matTransform;
 	int i;
@@ -1042,10 +1043,11 @@ CCollision::ProcessSphereTriangle(const CColSphere &sphere,
 	return true;
 }
 
+//--MIAMI: TODO
 bool
 CCollision::ProcessLineOfSight(const CColLine &line,
 	const CMatrix &matrix, CColModel &model,
-	CColPoint &point, float &mindist, bool ignoreSeeThrough)
+	CColPoint &point, float &mindist, bool ignoreSeeThrough, bool ignoreShootThrough)
 {
 	static CMatrix matTransform;
 	int i;
@@ -1081,10 +1083,11 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 	return false;
 }
 
+//--MIAMI: TODO
 bool
 CCollision::ProcessVerticalLine(const CColLine &line,
 	const CMatrix &matrix, CColModel &model,
-	CColPoint &point, float &mindist, bool ignoreSeeThrough, CStoredCollPoly *poly)
+	CColPoint &point, float &mindist, bool ignoreSeeThrough, bool ignoreShootThrough, CStoredCollPoly *poly)
 {
 	static CStoredCollPoly TempStoredPoly;
 	int i;
