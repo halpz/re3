@@ -3117,15 +3117,6 @@ CCamera::Fade(float timeout, int16 direction)
 		m_iMusicFadingDirection = direction;
 		m_fTimeToFadeMusic = timeout;
 		m_uiFadeTimeStartedMusic = CTimer::GetTimeInMilliseconds();
-// Not on PS2
-		if(!m_bJustJumpedOutOf1stPersonBecauseOfTarget && m_iMusicFadingDirection == FADE_OUT){
-			unknown++;
-			if(unknown >= 2){
-				m_bJustJumpedOutOf1stPersonBecauseOfTarget = true;
-				unknown = 0;
-			}else
-				m_bMoveCamToAvoidGeom = true;
-		}
 	}
 }
 
@@ -3314,8 +3305,9 @@ CCamera::CalculateDerivedValues(void)
 	// left plane
 	m_vecFrustumNormals[1] = CVector(-c, -s, 0.0f);
 
-	c /= CDraw::FindAspectRatio();
-	s /= CDraw::FindAspectRatio();
+	CDraw::CalculateAspectRatio();
+	c /= SCREEN_ASPECT_RATIO;
+	s /= SCREEN_ASPECT_RATIO;
 	// bottom plane
 	m_vecFrustumNormals[2] = CVector(0.0f, -s, -c);
 	// top plane

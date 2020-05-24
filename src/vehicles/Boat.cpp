@@ -930,7 +930,7 @@ CBoat::AddWakePoint(CVector point)
 void
 CBoat::DoDriveByShootings(void)
 {
-	CAnimBlendAssociation *anim;
+	CAnimBlendAssociation *anim = nil;
 	CPlayerInfo* playerInfo = ((CPlayerPed*)this)->GetPlayerInfoForThisPlayerPed();
 	if (playerInfo && !playerInfo->m_bDriveByAllowed)
 		return;

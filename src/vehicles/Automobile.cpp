@@ -3030,7 +3030,7 @@ CAutomobile::ProcessBuoyancy(void)
 void
 CAutomobile::DoDriveByShootings(void)
 {
-	CAnimBlendAssociation *anim;
+	CAnimBlendAssociation *anim = nil;
 	CPlayerInfo* playerInfo = ((CPlayerPed*)this)->GetPlayerInfoForThisPlayerPed();
 	if (playerInfo && !playerInfo->m_bDriveByAllowed)
 		return;
