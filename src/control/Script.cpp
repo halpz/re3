@@ -11,7 +11,6 @@
 #include "CarAI.h"
 #include "CarCtrl.h"
 #include "CarGen.h"
-#include "Ped.h"
 #include "CivilianPed.h"
 #include "Clock.h"
 #include "ColStore.h"
