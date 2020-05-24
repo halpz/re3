@@ -9713,7 +9713,7 @@ CPed::MoveHeadToLook(void)
 		}
 
 		if (m_pLookTarget->IsPed()) {
-			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition((RwV3d)lookPos, PED_MID);
+			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition(*(RwV3d *)&lookPos, PED_MID);
 		} else {
 			lookPos = m_pLookTarget->GetPosition();
 		}
@@ -12804,7 +12804,7 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 }
 
 // --MIAMI: Done, but enumarate weapon slots
-inline void
+void
 CPed::ReplaceWeaponWhenExitingVehicle(void)
 {
 	eWeaponType weaponType = GetWeapon()->m_eWeaponType;
@@ -12821,7 +12821,7 @@ CPed::ReplaceWeaponWhenExitingVehicle(void)
 }
 
 // --MIAMI: Done
-inline void
+void
 CPed::RemoveWeaponWhenEnteringVehicle(void)
 {
 	if (IsPlayer() && HasWeaponSlot(5) && GetWeapon(5).m_nAmmoTotal > 0 && ((CPlayerPed*)this)->GetPlayerInfoForThisPlayerPed()->m_bDriveByAllowed) {
@@ -13675,7 +13675,7 @@ CPed::ProcessObjective(void)
 						CVector target;
 						CVector ourHead = GetMatrix() * CVector(0.5f, 0.0f, 0.6f);
 						if (m_pedInObjective->IsPed())
-							m_pedInObjective->m_pedIK.GetComponentPosition((RwV3d)target, PED_MID);
+							m_pedInObjective->m_pedIK.GetComponentPosition(*(RwV3d *)&target, PED_MID);
 						else
 							target = m_pedInObjective->GetPosition();
 

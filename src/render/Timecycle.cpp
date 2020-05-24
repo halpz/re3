@@ -175,7 +175,7 @@ CTimeCycle::Initialise(void)
 					bi++;
 				bi++;
 			}
-			while(work_buff[bi] != '\n')
+			while(work_buff[bi] != '\n' || work_buff[bi] != '\0')
 				line[li++] = work_buff[bi++];
 			line[li] = '\0';
 			bi++;

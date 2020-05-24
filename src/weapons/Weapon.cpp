@@ -817,7 +817,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			CPed *threatAttack = (CPed*)shooterPed->m_pPointGunAt;
 			if ( threatAttack->IsPed() )
 			{
-				threatAttack->m_pedIK.GetComponentPosition((RwV3d)target, PED_MID);
+				threatAttack->m_pedIK.GetComponentPosition(*(RwV3d *)&target, PED_MID);
 				threatAttack->ReactToPointGun(shooter);
 			}
 			else
@@ -1483,7 +1483,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				{
 					CVector pos;
 					if (shooterPed->m_pPointGunAt->IsPed()) {
-						((CPed*)shooterPed->m_pPointGunAt)->m_pedIK.GetComponentPosition((RwV3d)pos, PED_MID);
+						((CPed*)shooterPed->m_pPointGunAt)->m_pedIK.GetComponentPosition(*(RwV3d *)&pos, PED_MID);
 					} else {
 						pos = ((CPed*)shooterPed->m_pPointGunAt)->GetPosition();
 					}
