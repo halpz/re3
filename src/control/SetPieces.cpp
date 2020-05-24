@@ -13,7 +13,7 @@
 
 #define TIME_BETWEEN_SETPIECE_SPAWNS 20000
 
-// MIAMI: file done
+//--MIAMI: file done
 
 bool CSetPieces::bDebug;
 uint32 CSetPieces::NumSetPieces;

@@ -105,6 +105,8 @@ int32 CCarCtrl::LoadedCarsArray[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];
 uint32 aCarsToKeepTime[MAX_CARS_TO_KEEP];
 
+//--MIAMI: done except heli/plane functions
+
 void
 CCarCtrl::GenerateRandomCars()
 {
