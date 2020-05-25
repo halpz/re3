@@ -1146,7 +1146,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 	int freqModifier;
 	int soundOffset;
 	uint8 engineSoundType;
-	int32 accelerateState;
+	int16 accelerateState;
 	bool channelUsed;
 	bool lostTraction;
 	bool processedAccelSampleStopped;
@@ -1174,47 +1174,47 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 		bHandbrakeOnLastFrame = false;
 		CurrentPretendGear = 1;
 	}
-	if (CReplay::IsPlayingBack()) {
-		accelerateState = 255.f * Max(0.0f, Min(1.0f, automobile->m_fGasPedal));
-	} else {
-		accelerateState = Pads->GetAccelerate();
-	}
+	if (CReplay::IsPlayingBack())
+		accelerateState = 255.f * clamp(automobile->m_fGasPedal, 0.0f, 1.0f);
+	else
+		accelerateState = Pads[0].GetAccelerate();
+
 	channelUsed = SampleManager.GetChannelUsedFlag(m_nActiveSamples);
 	transmission = params->m_pTransmission;
 	velocityChange = params->m_fVelocityChange;
 	relativeVelocityChange = 2.0f * velocityChange / transmission->fMaxVelocity;
 
-	accelerationMultipler = Min(Min(1.f, relativeVelocityChange), 0.f);
+	accelerationMultipler = clamp(relativeVelocityChange, 0.0f, 1.0f);
 	gasPedalAudio = accelerationMultipler;
 	currentGear = params->m_pVehicle->m_nCurrentGear;
 
 	if (transmission->nDriveType == '4') {
 		wheelInUseCounter = 0;
 		for (uint8 i = 0; i < ARRAY_SIZE(automobile->m_aWheelState); i++) {
-			if (automobile->m_aWheelState[i])
+			if (automobile->m_aWheelState[i] != WHEEL_STATE_NORMAL)
 				++wheelInUseCounter;
 		}
 		if (wheelInUseCounter > 2)
 			lostTraction = true;
-	} else if (transmission->nDriveType == 'F') {
-		if ((automobile->m_aWheelState[0] || automobile->m_aWheelState[2]) && (automobile->m_aWheelState[1] || automobile->m_aWheelState[3])) {
+	} else if (transmission->nDriveType == 'F')
+		if ((automobile->m_aWheelState[VEHWHEEL_FRONT_LEFT] != WHEEL_STATE_NORMAL || automobile->m_aWheelState[VEHWHEEL_REAR_LEFT] != WHEEL_STATE_NORMAL) &&
+		    (automobile->m_aWheelState[VEHWHEEL_FRONT_RIGHT] != WHEEL_STATE_NORMAL || automobile->m_aWheelState[VEHWHEEL_REAR_RIGHT] != WHEEL_STATE_NORMAL))
 			lostTraction = true;
-		}
-	} else if (transmission->nDriveType == 'R' && (automobile->m_aWheelState[1] || automobile->m_aWheelState[3])) {
-		lostTraction = true;
-	}
-	if (0.0f != velocityChange) {
+		else if (transmission->nDriveType == 'R' && (automobile->m_aWheelState[VEHWHEEL_FRONT_RIGHT] != WHEEL_STATE_NORMAL ||
+		                                             automobile->m_aWheelState[VEHWHEEL_REAR_RIGHT] != WHEEL_STATE_NORMAL))
+			lostTraction = true;
+
+	if (velocityChange != 0.0f) {
 		time = params->m_pVehicle->m_vecMoveSpeed.z / velocityChange;
-		if (time <= 0.0f) {
-			freqModifier = Max(-0.2f, time) * -15000.f;
-		} else {
-			freqModifier = -(Min(0.2f, time) * 15000.f);
-		}
+		if (time > 0.0f)
+			freqModifier = -(Min(0.2f, time) * 3000.0f * 5.0f);
+		else
+			freqModifier = (Max(-0.2f, time) * 3000.0f * -5.0f);
 		if (params->m_fVelocityChange < -0.001f)
 			freqModifier = -freqModifier;
-	} else {
+	} else
 		freqModifier = 0;
-	}
+
 	engineSoundType = aVehicleSettings[params->m_nIndex].m_bEngineSoundType;
 	soundOffset = 3 * (engineSoundType - 1);
 	if (accelerateState <= 0) {
@@ -1223,11 +1223,11 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 				SampleManager.StopChannel(m_nActiveSamples);
 				bAccelSampleStopped = true;
 			}
-			if (!automobile->m_nWheelsOnGround || automobile->bIsHandbrakeOn || lostTraction) {
+			if (!automobile->m_nWheelsOnGround || automobile->bIsHandbrakeOn || lostTraction)
 				gasPedalAudio = automobile->m_fGasPedalAudio;
-			} else {
+			else
 				gasPedalAudio = Min(1.0f, params->m_fVelocityChange / params->m_pTransmission->fMaxReverseVelocity);
-			}
+
 			gasPedalAudio = Max(0.0f, gasPedalAudio);
 			automobile->m_fGasPedalAudio = gasPedalAudio;
 		} else if (LastAccel > 0) {
@@ -1238,154 +1238,113 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 			nCruising = 0;
 			if (!automobile->m_nWheelsOnGround || automobile->bIsHandbrakeOn || lostTraction ||
 			    params->m_fVelocityChange >= 0.01f && automobile->m_fGasPedalAudio > 0.2f) {
-				automobile->m_fGasPedalAudio = automobile->m_fGasPedalAudio * 0.6f;
+				automobile->m_fGasPedalAudio *= 0.6f;
 				gasPedalAudio = automobile->m_fGasPedalAudio;
 			}
 			if (gasPedalAudio > 0.05f) {
 				freq = (5000.f * (gasPedalAudio - 0.05f) * 20.f / 19) + 19000;
 				if (engineSoundType == 6)
 					freq /= 2;
-				AddPlayerCarSample((25.f * (gasPedalAudio - 0.05f) * 20.f / 19) + 40, freq, (soundOffset + SFX_CAR_FINGER_OFF_ACCEL_1), engineSoundType, 63, 0);
+				AddPlayerCarSample((25.f * (gasPedalAudio - 0.05f) * 20.f / 19) + 40, freq, (soundOffset + SFX_CAR_FINGER_OFF_ACCEL_1), engineSoundType, 63,
+				                   false);
 			}
 		}
 		freq = (10000.f * gasPedalAudio) + 22050;
 		if (engineSoundType == 6)
 			freq /= 2;
-		AddPlayerCarSample(110 - (40.f * gasPedalAudio), freq, (engineSoundType + SFX_CAR_REV_10), 0, 52, 1);
+		AddPlayerCarSample(110 - (40.f * gasPedalAudio), freq, (engineSoundType - 1 + SFX_CAR_IDLE_1), 0, 52, true);
 
 		CurrentPretendGear = Max(1, currentGear);
-		LastAccel = accelerateState;
-
-		bHandbrakeOnLastFrame = automobile->bIsHandbrakeOn;
-		bLostTractionLastFrame = lostTraction;
-		return;
-	}
-	if (!nCruising) {
-		if (accelerateState < 150 || !automobile->m_nWheelsOnGround || automobile->bIsHandbrakeOn || lostTraction ||
-		    currentGear < 2 && velocityChange - automobile->m_fVelocityChangeForAudio < 0.01f) { // here could be used abs
-			if (!automobile->m_nWheelsOnGround || automobile->bIsHandbrakeOn || lostTraction) {
-				if (!automobile->m_nWheelsOnGround && automobile->m_nDriveWheelsOnGround ||
-				    (automobile->bIsHandbrakeOn && !bHandbrakeOnLastFrame || lostTraction && !bLostTractionLastFrame) && automobile->m_nWheelsOnGround) {
-					automobile->m_fGasPedalAudio = automobile->m_fGasPedalAudio * 0.6f;
-				}
-				freqModifier = 0;
-				baseFreq = (15000.f * automobile->m_fGasPedalAudio) + 14000;
-				vol = (25.0f * automobile->m_fGasPedalAudio) + 60;
-			} else {
-				baseFreq = (8000.f * accelerationMultipler) + 16000;
-				vol = (25.0f * accelerationMultipler) + 60;
-				automobile->m_fGasPedalAudio = accelerationMultipler;
-			}
-			freq = freqModifier + baseFreq;
-			if (engineSoundType == 6)
-				freq /= 2;
-			if (channelUsed) {
-				SampleManager.StopChannel(m_nActiveSamples);
-				bAccelSampleStopped = true;
-			}
-			AddPlayerCarSample(vol, freq, (engineSoundType + SFX_PHONE_RING), 0, 2, 1);
-			LastAccel = accelerateState;
-
-			bHandbrakeOnLastFrame = automobile->bIsHandbrakeOn;
-			bLostTractionLastFrame = lostTraction;
-			return;
-		}
-		TranslateEntity(&m_sQueueSample.m_vecPos, &pos);
-		if (bAccelSampleStopped) {
-			if (CurrentPretendGear != 1 || currentGear != 2) {
-				gearNr = currentGear - 1;
-				if (gearNr < 1)
-					gearNr = 1;
-				CurrentPretendGear = gearNr;
-			}
-			processedAccelSampleStopped = true;
-			bAccelSampleStopped = false;
-		}
-		if (channelUsed) {
-			SampleManager.SetChannelEmittingVolume(m_nActiveSamples, 85);
-			SampleManager.SetChannel3DPosition(m_nActiveSamples, pos.x, pos.y, pos.z);
-			SampleManager.SetChannel3DDistances(m_nActiveSamples, 50.f, 12.5f);
-			if (engineSoundType == 6)
-				freq = (GearFreqAdj[CurrentPretendGear] + freqModifier + 22050) / 2;
-			else
-				freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
-			SampleManager.SetChannelFrequency(m_nActiveSamples, freq);
-			if (!channelUsed) {
-				SampleManager.SetChannelReverbFlag(m_nActiveSamples, m_bDynamicAcousticModelingStatus != false);
-				SampleManager.StartChannel(m_nActiveSamples);
-			}
-			LastAccel = accelerateState;
-
-			bHandbrakeOnLastFrame = automobile->bIsHandbrakeOn;
-			bLostTractionLastFrame = lostTraction;
-			return;
-		}
-		if (processedAccelSampleStopped) {
-			if (!SampleManager.InitialiseChannel(m_nActiveSamples, soundOffset + SFX_CAR_ACCEL_1, 0))
-				return;
-			SampleManager.SetChannelLoopCount(m_nActiveSamples, 1);
-			SampleManager.SetChannelLoopPoints(m_nActiveSamples, 0, -1);
-			SampleManager.SetChannelEmittingVolume(m_nActiveSamples, 85);
-			SampleManager.SetChannel3DPosition(m_nActiveSamples, pos.x, pos.y, pos.z);
-			SampleManager.SetChannel3DDistances(m_nActiveSamples, 50.f, 12.5f);
-			freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
-			if (engineSoundType == 6)
-				freq /= 2;
-			SampleManager.SetChannelFrequency(m_nActiveSamples, freq);
-			if (!channelUsed) {
-				SampleManager.SetChannelReverbFlag(m_nActiveSamples, m_bDynamicAcousticModelingStatus != false);
-				SampleManager.StartChannel(m_nActiveSamples);
-			}
-			LastAccel = accelerateState;
-
-			bHandbrakeOnLastFrame = automobile->bIsHandbrakeOn;
-			bLostTractionLastFrame = lostTraction;
-			return;
-		}
-		if (CurrentPretendGear < params->m_pTransmission->nNumberOfGears - 1) {
-			++CurrentPretendGear;
-			if (!SampleManager.InitialiseChannel(m_nActiveSamples, soundOffset + SFX_CAR_ACCEL_1, 0))
-				return;
-			SampleManager.SetChannelLoopCount(m_nActiveSamples, 1);
-			SampleManager.SetChannelLoopPoints(m_nActiveSamples, 0, -1);
-			SampleManager.SetChannelEmittingVolume(m_nActiveSamples, 85);
-			SampleManager.SetChannel3DPosition(m_nActiveSamples, pos.x, pos.y, pos.z);
-			SampleManager.SetChannel3DDistances(m_nActiveSamples, 50.f, 12.5f);
-			freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
-			if (engineSoundType == 6)
-				freq /= 2;
-			SampleManager.SetChannelFrequency(m_nActiveSamples, freq);
-			if (!channelUsed) {
-				SampleManager.SetChannelReverbFlag(m_nActiveSamples, m_bDynamicAcousticModelingStatus != false);
-				SampleManager.StartChannel(m_nActiveSamples);
-			}
-			LastAccel = accelerateState;
-
-			bHandbrakeOnLastFrame = automobile->bIsHandbrakeOn;
-			bLostTractionLastFrame = lostTraction;
-			return;
-		}
-		nCruising = 1;
-	}
-	bAccelSampleStopped = true;
-	if (accelerateState < 150 || !automobile->m_nWheelsOnGround || automobile->bIsHandbrakeOn || lostTraction ||
-	    currentGear < params->m_pTransmission->nNumberOfGears - 1) {
-		nCruising = 0;
 	} else {
-		if (accelerateState >= 220 && 0.001f + params->m_fVelocityChange < automobile->m_fVelocityChangeForAudio) {
-			if (nCruising < 800)
-				++nCruising;
-		} else if (nCruising > 3) {
-			--nCruising;
+		while (nCruising == 0) {
+			if (accelerateState < 150 || !automobile->m_nWheelsOnGround || automobile->bIsHandbrakeOn || lostTraction ||
+			    currentGear < 2 && velocityChange - automobile->m_fVelocityChangeForAudio < 0.01f) { // here could be used abs
+				if (!automobile->m_nWheelsOnGround || automobile->bIsHandbrakeOn || lostTraction) {
+					if (!automobile->m_nWheelsOnGround && automobile->m_nDriveWheelsOnGround ||
+					    (automobile->bIsHandbrakeOn && !bHandbrakeOnLastFrame || lostTraction && !bLostTractionLastFrame) && automobile->m_nWheelsOnGround) {
+						automobile->m_fGasPedalAudio *= 0.6f;
+					}
+					freqModifier = 0;
+					baseFreq = (15000.f * automobile->m_fGasPedalAudio) + 14000;
+					vol = (25.0f * automobile->m_fGasPedalAudio) + 60;
+				} else {
+					baseFreq = (8000.f * accelerationMultipler) + 16000;
+					vol = (25.0f * accelerationMultipler) + 60;
+					automobile->m_fGasPedalAudio = accelerationMultipler;
+				}
+				freq = freqModifier + baseFreq;
+				if (engineSoundType == 6)
+					freq /= 2;
+				if (channelUsed) {
+					SampleManager.StopChannel(m_nActiveSamples);
+					bAccelSampleStopped = true;
+				}
+				AddPlayerCarSample(vol, freq, (engineSoundType - 1 + SFX_CAR_REV_1), 0, 2, true);
+			} else {
+				TranslateEntity(&m_sQueueSample.m_vecPos, &pos);
+				if (bAccelSampleStopped) {
+					if (CurrentPretendGear != 1 || currentGear != 2) {
+						gearNr = currentGear - 1;
+						if (gearNr < 1)
+							gearNr = 1;
+						CurrentPretendGear = gearNr;
+					}
+					processedAccelSampleStopped = true;
+					bAccelSampleStopped = false;
+				}
+
+				if (!channelUsed) {
+					if (!processedAccelSampleStopped) {
+						if (CurrentPretendGear < params->m_pTransmission->nNumberOfGears - 1)
+							++CurrentPretendGear;
+						else {
+							nCruising = 1;
+							break; // while was used just for this fucking place
+						}
+					}
+
+					if (!SampleManager.InitialiseChannel(m_nActiveSamples, soundOffset + SFX_CAR_ACCEL_1, SAMPLEBANK_MAIN))
+						return;
+					SampleManager.SetChannelLoopCount(m_nActiveSamples, 1);
+					SampleManager.SetChannelLoopPoints(m_nActiveSamples, 0, -1);
+				}
+
+				SampleManager.SetChannelEmittingVolume(m_nActiveSamples, 85);
+				SampleManager.SetChannel3DPosition(m_nActiveSamples, pos.x, pos.y, pos.z);
+				SampleManager.SetChannel3DDistances(m_nActiveSamples, 50.f, 12.5f);
+				freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
+				if (engineSoundType == 6)
+					freq /= 2;
+				SampleManager.SetChannelFrequency(m_nActiveSamples, freq);
+				if (!channelUsed) {
+					SampleManager.SetChannelReverbFlag(m_nActiveSamples, m_bDynamicAcousticModelingStatus != false);
+					SampleManager.StartChannel(m_nActiveSamples);
+				}
+			}
+			break;
 		}
-		freq = 27 * nCruising + freqModifier + 22050;
-		if (engineSoundType == 6)
-			freq /= 2;
-		AddPlayerCarSample(85, freq, (soundOffset + SFX_CAR_AFTER_ACCEL_1), engineSoundType, 64, 1);
+		if (nCruising != 0) {
+			bAccelSampleStopped = true;
+			if (accelerateState < 150 || !automobile->m_nWheelsOnGround || automobile->bIsHandbrakeOn || lostTraction ||
+			    currentGear < params->m_pTransmission->nNumberOfGears - 1) {
+				nCruising = 0;
+			} else {
+				if (accelerateState >= 220 && 0.001f + params->m_fVelocityChange < automobile->m_fVelocityChangeForAudio) {
+					if (nCruising < 800)
+						++nCruising;
+				} else if (nCruising > 3) {
+					--nCruising;
+				}
+				freq = 27 * nCruising + freqModifier + 22050;
+				if (engineSoundType == 6)
+					freq /= 2;
+				AddPlayerCarSample(85, freq, (soundOffset + SFX_CAR_AFTER_ACCEL_1), engineSoundType, 64, true);
+			}
+		}
 	}
 	LastAccel = accelerateState;
 
-	bHandbrakeOnLastFrame = automobile->bIsHandbrakeOn;
+	bHandbrakeOnLastFrame = !!automobile->bIsHandbrakeOn;
 	bLostTractionLastFrame = lostTraction;
 }
 
