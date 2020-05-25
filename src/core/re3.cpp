@@ -160,6 +160,13 @@ TeleportToWaypoint(void)
 }
 #endif
 
+static void
+SwitchCarCollision(void)
+{
+	if (FindPlayerVehicle() && FindPlayerVehicle()->IsCar())
+		FindPlayerVehicle()->bUsesCollision = !FindPlayerVehicle()->bUsesCollision;
+}
+
 static int engineStatus;
 static void
 SetEngineStatus(void)
@@ -362,6 +369,7 @@ DebugMenuPopulate(void)
 #ifdef MENU_MAP
 		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
 #endif
+		DebugMenuAddCmd("Debug", "Switch car collision", SwitchCarCollision);
 		DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
 		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
