@@ -3353,7 +3353,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 				noReflection = true;
 			break;
 		case SOUND_WEAPON_SHOT_FIRED:
-			weapon = &ped->m_weapons[ped->m_currentWeapon];
+			weapon = ped->GetWeapon();
 			switch (weapon->m_eWeaponType) {
 			case WEAPONTYPE_COLT45:
 				m_sQueueSample.m_nSampleIndex = SFX_COLT45_LEFT;
@@ -7655,7 +7655,7 @@ cAudioManager::ProcessShopScriptObject(uint8 sound)
 void
 cAudioManager::ProcessAirportScriptObject(uint8 sound)
 {
-	static uint8 counter = 0;
+	static uint8 iSound = 0;
 
 	uint32 time = CTimer::GetTimeInMilliseconds();
 	if (time > gAirportNextTime) {
@@ -7677,7 +7677,7 @@ cAudioManager::ProcessAirportScriptObject(uint8 sound)
 				m_sQueueSample.m_nSampleIndex = (m_anRandomTable[1] & 3) + SFX_AIRPORT_ANNOUNCEMENT_1;
 				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nCounter = counter++;
+				m_sQueueSample.m_nCounter = iSound++;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.m_bReleasingSoundFlag = true;
@@ -7700,7 +7700,7 @@ cAudioManager::ProcessCinemaScriptObject(uint8 sound)
 {
 	uint8 rand;
 
-	static uint8 counter = 0;
+	static uint8 iSound = 0;
 
 	uint32 time = CTimer::GetTimeInMilliseconds();
 	if (time > gCinemaNextTime) {
@@ -7720,11 +7720,11 @@ cAudioManager::ProcessCinemaScriptObject(uint8 sound)
 			rand = m_anRandomTable[0] % 90 + 30;
 			m_sQueueSample.m_nVolume = ComputeVolume(rand, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume) {
-				m_sQueueSample.m_nSampleIndex = counter % 3 + SFX_CINEMA_BASS_1;
+				m_sQueueSample.m_nSampleIndex = iSound % 3 + SFX_CINEMA_BASS_1;
 				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 4);
-				m_sQueueSample.m_nCounter = counter++;
+				m_sQueueSample.m_nCounter = iSound++;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.m_bReleasingSoundFlag = true;
@@ -7749,7 +7749,7 @@ cAudioManager::ProcessDocksScriptObject(uint8 sound)
 	uint8 rand;
 	float distSquared;
 
-	static uint32 counter = 0;
+	static uint8 iSound = 0;
 
 	time = CTimer::GetTimeInMilliseconds();
 	if (time > gDocksNextTime) {
@@ -7773,7 +7773,7 @@ cAudioManager::ProcessDocksScriptObject(uint8 sound)
 				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_DOCKS_FOGHORN);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 8);
-				m_sQueueSample.m_nCounter = counter++;
+				m_sQueueSample.m_nCounter = iSound++;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.m_bReleasingSoundFlag = true;
@@ -7797,7 +7797,7 @@ cAudioManager::ProcessHomeScriptObject(uint8 sound)
 	uint8 rand;
 	float dist;
 
-	static uint8 counter = 0;
+	static uint8 iSound = 0;
 
 	time = CTimer::GetTimeInMilliseconds();
 	if (time > gHomeNextTime) {
@@ -7821,7 +7821,7 @@ cAudioManager::ProcessHomeScriptObject(uint8 sound)
 				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
-				m_sQueueSample.m_nCounter = counter++;
+				m_sQueueSample.m_nCounter = iSound++;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.m_bReleasingSoundFlag = true;
@@ -7847,7 +7847,7 @@ cAudioManager::ProcessPoliceCellBeatingScriptObject(uint8 sound)
 	float distSquared;
 	cPedParams params;
 
-	static uint8 counter = 0;
+	static uint8 iSound = 0;
 
 	if (time > gCellNextTime) {
 		switch (sound) {
@@ -7874,7 +7874,7 @@ cAudioManager::ProcessPoliceCellBeatingScriptObject(uint8 sound)
 				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
-				m_sQueueSample.m_nCounter = counter++;
+				m_sQueueSample.m_nCounter = iSound++;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.m_bReleasingSoundFlag = true;
@@ -7901,7 +7901,7 @@ void
 cAudioManager::ProcessWeather(int32 id)
 {
 	uint8 vol;
-	static uint8 counter = 0;
+	static uint8 iSound = 0;
 
 	if (m_asAudioEntities[id].m_AudioEvents && m_asAudioEntities[id].m_awAudioEvent[0] == SOUND_LIGHTNING) {
 		if (m_asAudioEntities[id].m_afVolume[0] >= 10.f) {
@@ -7918,9 +7918,9 @@ cAudioManager::ProcessWeather(int32 id)
 		m_sQueueSample.m_nVolume = vol;
 		if (TheCamera.SoundDistUp < 20.f)
 			m_sQueueSample.m_nVolume /= 2;
-		if (counter == 4)
-			counter = 0;
-		m_sQueueSample.m_nCounter = counter++;
+		if (iSound == 4)
+			iSound = 0;
+		m_sQueueSample.m_nCounter = iSound++;
 		m_sQueueSample.m_nReleasingVolumeModificator = 0;
 		m_sQueueSample.m_nOffset = (m_anRandomTable[2] & 15) + 55;
 		m_sQueueSample.m_bIs2D = true;
@@ -7962,7 +7962,7 @@ cAudioManager::ProcessFrontEnd()
 	bool processedMission;
 	int16 sample;
 
-	static uint8 counter = 0;
+	static uint8 iSound = 0;
 	static uint32 cPickupNextFrame = 0;
 	static uint32 cPartMisComNextFrame = 0;
 
@@ -8104,7 +8104,7 @@ cAudioManager::ProcessFrontEnd()
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 		}
 		m_sQueueSample.m_nVolume = 110;
-		m_sQueueSample.m_nCounter = counter++;
+		m_sQueueSample.m_nCounter = iSound++;
 		m_sQueueSample.m_nLoopCount = 1;
 		m_sQueueSample.m_bReleasingSoundFlag = true;
 		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -8122,7 +8122,7 @@ cAudioManager::ProcessFrontEnd()
 		AddSampleToRequestedQueue();
 		if (stereo) {
 			++m_sQueueSample.m_nSampleIndex;
-			m_sQueueSample.m_nCounter = counter++;
+			m_sQueueSample.m_nCounter = iSound++;
 			m_sQueueSample.m_nOffset = MAX_VOLUME - m_sQueueSample.m_nOffset;
 			AddSampleToRequestedQueue();
 		}
