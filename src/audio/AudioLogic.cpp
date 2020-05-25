@@ -3975,17 +3975,18 @@ cAudioManager::GetCopTalkSfx(int16 sound)
 	PedState pedState;
 	static uint32 lastSfx = NO_SAMPLE;
 
-	if (sound == SOUND_PED_ARREST_COP) {
+	switch (sound) {
+	case SOUND_PED_ARREST_COP:
 		GetPhrase(&sfx, &lastSfx, SFX_COP_VOICE_1_ARREST_1, 6);
-	} else {
-		if (sound != SOUND_PED_PURSUIT_COP) {
-			return GetGenericMaleTalkSfx(sound);
-		}
-
+		break;
+	case SOUND_PED_PURSUIT_COP:
 		pedState = FindPlayerPed()->m_nPedState;
 		if (pedState == PED_ARRESTED || pedState == PED_DEAD || pedState == PED_DIE)
 			return NO_SAMPLE;
 		GetPhrase(&sfx, &lastSfx, SFX_COP_VOICE_1_CHASE_1, 7);
+		break;
+	default:
+		return GetGenericMaleTalkSfx(sound);
 	}
 
 	return (SFX_COP_VOICE_2_ARREST_1 - SFX_COP_VOICE_1_ARREST_1) * (m_sQueueSample.m_nEntityIndex % 5) + sfx;
@@ -3998,17 +3999,18 @@ cAudioManager::GetSwatTalkSfx(int16 sound)
 	PedState pedState;
 	static uint32 lastSfx = NO_SAMPLE;
 
-	if (sound == SOUND_PED_ARREST_SWAT) {
+	switch (sound) {
+	case SOUND_PED_ARREST_SWAT:
 		GetPhrase(&sfx, &lastSfx, SFX_SWAT_VOICE_1_CHASE_1, 6);
-	} else {
-		if (sound != SOUND_PED_PURSUIT_SWAT) {
-			return GetGenericMaleTalkSfx(sound);
-		}
-
+		break;
+	case SOUND_PED_PURSUIT_SWAT:
 		pedState = FindPlayerPed()->m_nPedState;
 		if (pedState == PED_ARRESTED || pedState == PED_DEAD || pedState == PED_DIE)
 			return NO_SAMPLE;
 		GetPhrase(&sfx, &lastSfx, SFX_SWAT_VOICE_1_CHASE_1, 6);
+		break;
+	default:
+		return GetGenericMaleTalkSfx(sound);
 	}
 
 	return (SFX_SWAT_VOICE_2_CHASE_1 - SFX_SWAT_VOICE_1_CHASE_1) * (m_sQueueSample.m_nEntityIndex % 4) + sfx;
@@ -4021,17 +4023,18 @@ cAudioManager::GetFBITalkSfx(int16 sound)
 	PedState pedState;
 	static uint32 lastSfx = NO_SAMPLE;
 
-	if (sound == SOUND_PED_ARREST_FBI) {
+	switch (sound) {
+	case SOUND_PED_ARREST_FBI:
 		GetPhrase(&sfx, &lastSfx, SFX_FBI_VOICE_1_CHASE_1, 6);
-	} else {
-		if (sound != SOUND_PED_PURSUIT_FBI) {
-			return GetGenericMaleTalkSfx(sound);
-		}
-
+		break;
+	case SOUND_PED_PURSUIT_FBI:
 		pedState = FindPlayerPed()->m_nPedState;
 		if (pedState == PED_ARRESTED || pedState == PED_DEAD || pedState == PED_DIE)
 			return NO_SAMPLE;
 		GetPhrase(&sfx, &lastSfx, SFX_FBI_VOICE_1_CHASE_1, 6);
+		break;
+	default:
+		return GetGenericMaleTalkSfx(sound);
 	}
 
 	return (SFX_FBI_VOICE_2_CHASE_1 - SFX_FBI_VOICE_1_CHASE_1) * (m_sQueueSample.m_nEntityIndex % 3) + sfx;
@@ -4044,14 +4047,15 @@ cAudioManager::GetArmyTalkSfx(int16 sound)
 	PedState pedState;
 	static uint32 lastSfx = NO_SAMPLE;
 
-	if (sound != SOUND_PED_PURSUIT_ARMY) {
+	switch (sound) {
+	case SOUND_PED_PURSUIT_ARMY:
+		pedState = FindPlayerPed()->m_nPedState;
+		if (pedState == PED_ARRESTED || pedState == PED_DEAD || pedState == PED_DIE)
+			return NO_SAMPLE;
+		GetPhrase(&sfx, &lastSfx, SFX_ARMY_VOICE_1_CHASE_1, 15);
+	default:
 		return GetGenericMaleTalkSfx(sound);
 	}
-
-	pedState = FindPlayerPed()->m_nPedState;
-	if (pedState == PED_ARRESTED || pedState == PED_DEAD || pedState == PED_DIE)
-		return NO_SAMPLE;
-	GetPhrase(&sfx, &lastSfx, SFX_ARMY_VOICE_1_CHASE_1, 15);
 
 	return (SFX_ARMY_VOICE_2_CHASE_1 - SFX_ARMY_VOICE_1_CHASE_1) * (m_sQueueSample.m_nEntityIndex % 2) + sfx;
 }
@@ -4133,13 +4137,17 @@ cAudioManager::GetTaxiDriverTalkSfx(int16 sound)
 	uint32 sfx;
 	static uint32 lastSfx = NO_SAMPLE;
 
-	if (sound == SOUND_PED_CAR_JACKED) {
+	switch (sound) {
+	case SOUND_PED_CAR_JACKED:
 		GetPhrase(&sfx, &lastSfx, SFX_ASIAN_TAXI_DRIVER_VOICE_1_CARJACKED_1, 7);
-	} else {
-		if (sound != SOUND_PED_CAR_COLLISION)
-			return GetGenericMaleTalkSfx(sound);
+		break;
+	case SOUND_PED_CAR_COLLISION:
 		GetPhrase(&sfx, &lastSfx, SFX_ASIAN_TAXI_DRIVER_VOICE_1_DRIVER_ABUSE_1, 6);
+		break;
+	default:
+		return GetGenericMaleTalkSfx(sound);
 	}
+
 	return (SFX_ASIAN_TAXI_DRIVER_VOICE_2_DRIVER_ABUSE_1 - SFX_ASIAN_TAXI_DRIVER_VOICE_1_DRIVER_ABUSE_1) * (m_sQueueSample.m_nEntityIndex % 2) + sfx;
 }
 
@@ -6052,10 +6060,14 @@ cAudioManager::GetBomberTalkSfx(int16 sound)
 	uint32 sfx;
 	static uint32 lastSfx = NO_SAMPLE;
 
-	if (sound != SOUND_PED_BOMBER)
+	switch (sound)
+	{
+	case SOUND_PED_BOMBER:
+		GetPhrase(&sfx, &lastSfx, SFX_BOMBERMAN_1, 7);
+		break;
+	default:
 		return GetGenericMaleTalkSfx(sound);
-
-	GetPhrase(&sfx, &lastSfx, SFX_BOMBERMAN_1, 7);
+	}
 	return sfx;
 }
 
@@ -6098,13 +6110,17 @@ cAudioManager::GetChunkyTalkSfx(int16 sound)
 	uint32 sfx;
 	static uint32 lastSfx = NO_SAMPLE;
 
-	if (sound == SOUND_PED_DEATH)
+	switch (sound)
+	{
+	case SOUND_PED_DEATH:
 		return SFX_CHUNKY_DEATH;
-
-	if (sound != SOUND_PED_FLEE_RUN)
+	case SOUND_PED_FLEE_RUN:
+		GetPhrase(&sfx, &lastSfx, SFX_CHUNKY_RUN_1, 5);
+		break;
+	default:
 		return GetGenericMaleTalkSfx(sound);
+	}
 
-	GetPhrase(&sfx, &lastSfx, SFX_CHUNKY_RUN_1, 5);
 	return sfx;
 }
 
@@ -6160,8 +6176,6 @@ cAudioManager::GetGenericFemaleTalkSfx(int16 sound)
 	return sfx;
 }
 
-
-
 void
 cPedComments::Add(tPedComment *com)
 {
@@ -6175,11 +6189,7 @@ cPedComments::Add(tPedComment *com)
 		index = m_nCommentsInBank[m_nActiveBank]++;
 	}
 
-	m_asPedComments[m_nActiveBank][index].m_nSampleIndex = com->m_nSampleIndex;
-	m_asPedComments[m_nActiveBank][index].m_nEntityIndex = com->m_nEntityIndex;
-	m_asPedComments[m_nActiveBank][index].m_vecPos = com->m_vecPos;
-	m_asPedComments[m_nActiveBank][index].m_fDistance = com->m_fDistance;
-	m_asPedComments[m_nActiveBank][index].m_bVolume = com->m_bVolume;
+	m_asPedComments[m_nActiveBank][index] = *com;
 
 	uint32 i = 0;
 	if (index != 0) {
@@ -6466,7 +6476,7 @@ void
 cAudioManager::ProcessScriptObject(int32 id)
 {
 	cAudioScriptObject *entity = (cAudioScriptObject *)m_asAudioEntities[id].m_pEntity;
-	if (entity) {
+	if (entity != 0) {
 		m_sQueueSample.m_vecPos = entity->Posn;
 		if (m_asAudioEntities[id].m_AudioEvents == 1)
 			ProcessOneShotScriptObject(m_asAudioEntities[id].m_awAudioEvent[0]);
