@@ -466,6 +466,10 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	static bool bBraking;
 	static bool bDriving;
 
+#ifdef FIX_BUGS
+	bAlreadySkidding = false;
+#endif
+
 	// how much force we want to apply in these axes
 	float fwd = 0.0f;
 	float right = 0.0f;
@@ -547,7 +551,8 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 		}
 	}
 
-	if(sq(adhesion) < sq(right) + sq(fwd)){
+	float speedSq = sq(right) + sq(fwd);
+	if(sq(adhesion) < speedSq){
 		if(*wheelState != WHEEL_STATE_FIXED){
 			if(bDriving && contactSpeedFwd < 0.2f)
 				*wheelState = WHEEL_STATE_SPINNING;
@@ -555,7 +560,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 				*wheelState = WHEEL_STATE_SKIDDING;
 		}
 
-		float l = Sqrt(sq(right) + sq(fwd));
+		float l = Sqrt(speedSq);
 		float tractionLoss = bAlreadySkidding ? 1.0f : pHandling->fTractionLoss;
 		right *= adhesion * tractionLoss / l;
 		fwd *= adhesion * tractionLoss / l;

@@ -4314,7 +4314,7 @@ GetCurrentAtomicObjectCB(RwObject *object, void *data)
 	return object;
 }
 
-CColPoint spherepoints[MAX_COLLISION_POINTS];
+static CColPoint aTempPedColPts[MAX_COLLISION_POINTS];
 
 CObject*
 CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
@@ -4434,7 +4434,7 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 
 	if(CCollision::ProcessColModels(obj->GetMatrix(), *obj->GetColModel(),
 			this->GetMatrix(), *this->GetColModel(),
-			spherepoints, nil, nil) > 0)
+			aTempPedColPts, nil, nil) > 0)
 		obj->m_pCollidingEntity = this;
 
 	if(bRenderScorched)

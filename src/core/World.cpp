@@ -33,22 +33,22 @@
 
 CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
-CPtrList CWorld::ms_bigBuildingsList[4];// = (CPtrList*)0x6FAB60;
-CPtrList CWorld::ms_listMovingEntityPtrs;// = *(CPtrList*)0x8F433C;
-CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];// = (CSector (*)[NUMSECTORS_Y])0x665608;
-uint16 CWorld::ms_nCurrentScanCode;// = *(uint16*)0x95CC64;
+CPtrList CWorld::ms_bigBuildingsList[4];
+CPtrList CWorld::ms_listMovingEntityPtrs;
+CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];
+uint16 CWorld::ms_nCurrentScanCode;
 
-uint8 CWorld::PlayerInFocus;// = *(uint8 *)0x95CD61;
+uint8 CWorld::PlayerInFocus;
 CPlayerInfo CWorld::Players[NUMPLAYERS];
-bool CWorld::bNoMoreCollisionTorque;// = *(bool*)0x95CDCC;
-CEntity *CWorld::pIgnoreEntity;//	= *(CEntity**)0x8F6494;
-bool CWorld::bIncludeDeadPeds;// = *(bool*)0x95CD8F;
-bool CWorld::bSecondShift;// = *(bool*)0x95CD54;
-bool CWorld::bForceProcessControl;// = *(bool*)0x95CD6C;
-bool CWorld::bProcessCutsceneOnly;// = *(bool*)0x95CD8B;
+bool CWorld::bNoMoreCollisionTorque;
+CEntity *CWorld::pIgnoreEntity;
+bool CWorld::bIncludeDeadPeds;
+bool CWorld::bSecondShift;
+bool CWorld::bForceProcessControl;
+bool CWorld::bProcessCutsceneOnly;
 
-bool CWorld::bDoingCarCollisions;// = *(bool*)0x95CD8C;
-bool CWorld::bIncludeCarTyres;// = *(bool*)0x95CDAA;
+bool CWorld::bDoingCarCollisions;
+bool CWorld::bIncludeCarTyres;
 
 void
 CWorld::Initialise()

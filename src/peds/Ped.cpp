@@ -63,7 +63,7 @@
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
 
-CColPoint aTempPedColPts[MAX_COLLISION_POINTS];
+static CColPoint aTempPedColPts[MAX_COLLISION_POINTS];
 
 // Corresponds to ped sounds (from SOUND_PED_DEATH to SOUND_PED_TAXI_CALL)
 PedAudioData CommentWaitTime[39] = {
