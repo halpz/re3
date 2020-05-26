@@ -1018,7 +1018,7 @@ CPhysical::ApplyFriction(float adhesiveLimit, CColPoint &colpoint)
 			ApplyFrictionTurnForce(frictionDir*fImpulse, pointpos);
 
 			if(fOtherSpeed > 0.1f &&
-			   colpoint.surfaceB != SURFACE_GRASS && colpoint.surfaceB != SURFACE_DIRTTRACK &&
+			   colpoint.surfaceB != SURFACE_GRASS && colpoint.surfaceB != SURFACE_MUD_DRY &&
 			   CSurfaceTable::GetAdhesionGroup(colpoint.surfaceA) == ADHESIVE_HARD){
 				CVector v = frictionDir * fOtherSpeed * 0.25f;
 				for(int i = 0; i < 4; i++)

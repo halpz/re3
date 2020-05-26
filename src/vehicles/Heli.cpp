@@ -590,12 +590,12 @@ CHeli::PreRender(void)
 			g = 6;
 			b = 3;
 			break;
-		case SURFACE_DIRT:
+		case SURFACE_GRAVEL:
 			r = 10;
 			g = 8;
 			b = 7;
 			break;
-		case SURFACE_DIRTTRACK:
+		case SURFACE_MUD_DRY:
 			r = 10;
 			g = 6;
 			b = 3;

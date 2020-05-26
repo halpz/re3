@@ -2037,7 +2037,7 @@ particleProduceFootDust(CPed *ped, CVector const &pos, float size, int times)
 	switch (ped->m_nSurfaceTouched)
 	{
 		case SURFACE_TARMAC:
-		case SURFACE_DIRT:
+		case SURFACE_GRAVEL:
 		case SURFACE_PAVEMENT:
 		case SURFACE_SAND:
 			for (int i = 0; i < times; ++i) {
@@ -2190,7 +2190,7 @@ CPed::PlayFootSteps(void)
 		}
 	}
 
-	if (m_nSurfaceTouched == SURFACE_PUDDLE) {
+	if (m_nSurfaceTouched == SURFACE_WATER) {
 		float pedSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
 		if (pedSpeed > 0.03f && CTimer::GetFrameCounter() % 2 == 0 && pedSpeed > 0.13f) {
 #ifdef PC_PARTICLE
@@ -2588,7 +2588,7 @@ CPed::CanPedDriveOff(void)
 bool
 CPed::CanPedJumpThis(CEntity *unused, CVector *damageNormal = nil)
 {
-	if (m_nSurfaceTouched == SURFACE_PUDDLE)
+	if (m_nSurfaceTouched == SURFACE_WATER)
 		return true;
 
 	CVector pos = GetPosition();
@@ -11055,7 +11055,7 @@ CPed::SetJump(void)
 #ifdef VC_PED_PORTS
 		m_nPedState != PED_JUMP && !RpAnimBlendClumpGetAssociation(GetClump(), ANIM_JUMP_LAUNCH) &&
 #endif
-		(m_nSurfaceTouched != SURFACE_STONE || DotProduct(GetForward(), m_vecDamageNormal) >= 0.0f)) {
+		(m_nSurfaceTouched != SURFACE_STEEP_CLIFF || DotProduct(GetForward(), m_vecDamageNormal) >= 0.0f)) {
 		SetStoredState();
 		m_nPedState = PED_JUMP;
 		CAnimBlendAssociation *jumpAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_JUMP_LAUNCH, 8.0f);
@@ -14781,7 +14781,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 						    GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
 #endif
 							m_nSurfaceTouched = intersectionPoint.surfaceB;
-							if (m_nSurfaceTouched == SURFACE_STONE) {
+							if (m_nSurfaceTouched == SURFACE_STEEP_CLIFF) {
 								bHitSteepSlope = true;
 								m_vecDamageNormal = intersectionPoint.normal;
 							}
@@ -14889,7 +14889,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 #endif
 				sphereNormal.Normalise();
 				collidingPoints[sphere].normal = sphereNormal;
-				if (collidingPoints[sphere].surfaceB == SURFACE_STONE)
+				if (collidingPoints[sphere].surfaceB == SURFACE_STEEP_CLIFF)
 					bHitSteepSlope = true;
 			}
 		}
@@ -16749,7 +16749,7 @@ CPed::UpdatePosition(void)
 		velocityChange = m_moved + velocityOfSurface - m_vecMoveSpeed;
 		m_fRotationCur += curSurface->m_vecTurnSpeed.z * CTimer::GetTimeStep();
 		m_fRotationDest += curSurface->m_vecTurnSpeed.z * CTimer::GetTimeStep();
-	} else if (m_nSurfaceTouched != SURFACE_STONE || m_vecDamageNormal.x == 0.0f && m_vecDamageNormal.y == 0.0f) {
+	} else if (m_nSurfaceTouched != SURFACE_STEEP_CLIFF || m_vecDamageNormal.x == 0.0f && m_vecDamageNormal.y == 0.0f) {
 		velocityChange = m_moved - m_vecMoveSpeed;
 	} else {
 		// Ped got damaged by steep slope

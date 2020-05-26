@@ -769,7 +769,7 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams *params)
 					m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
 					m_sQueueSample.m_bIs2D = false;
 					m_sQueueSample.m_nReleasingVolumeModificator = 3;
-					if (params->m_pVehicle->m_nSurfaceTouched == SURFACE_PUDDLE) {
+					if (params->m_pVehicle->m_nSurfaceTouched == SURFACE_WATER) {
 						m_sQueueSample.m_nSampleIndex = SFX_BOAT_WATER_LOOP;
 						freq = 6050 * emittingVol / 30 + 16000;
 					} else {
@@ -1394,10 +1394,10 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams *params)
 				m_sQueueSample.m_nFrequency = 13000.f * skidVal + 35000.f;
 				m_sQueueSample.m_nVolume /= 4;
 				break;
-			case SURFACE_DIRT:
-			case SURFACE_DIRTTRACK:
+			case SURFACE_GRAVEL:
+			case SURFACE_MUD_DRY:
 			case SURFACE_SAND:
-			case SURFACE_PUDDLE:
+			case SURFACE_WATER:
 				m_sQueueSample.m_nSampleIndex = SFX_GRAVEL_SKID;
 				m_sQueueSample.m_nFrequency = 6000.f * skidVal + 10000.f;
 				break;
@@ -2984,32 +2984,32 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 				case SURFACE_GRASS:
 					sampleIndex = m_anRandomTable[1] % 5 + SFX_FOOTSTEP_GRASS_1;
 					break;
-				case SURFACE_DIRT:
-				case SURFACE_DIRTTRACK:
+				case SURFACE_GRAVEL:
+				case SURFACE_MUD_DRY:
 					sampleIndex = m_anRandomTable[4] % 5 + SFX_FOOTSTEP_GRAVEL_1;
 					break;
-				case SURFACE_METAL6:
-				case SURFACE_METAL_DOOR:
-				case SURFACE_BILLBOARD:
-				case SURFACE_STEEL:
-				case SURFACE_METAL_POLE:
-				case SURFACE_STREET_LIGHT:
-				case SURFACE_METAL14:
-				case SURFACE_METAL15:
-				case SURFACE_METAL_FENCE:
-				case SURFACE_METAL27:
-				case SURFACE_METAL28:
+				case SURFACE_CAR:
+				case SURFACE_GARAGE_DOOR:
+				case SURFACE_CAR_PANEL:
+				case SURFACE_THICK_METAL_PLATE:
+				case SURFACE_SCAFFOLD_POLE:
+				case SURFACE_LAMP_POST:
+				case SURFACE_FIRE_HYDRANT:
+				case SURFACE_GIRDER:
+				case SURFACE_METAL_CHAIN_FENCE:
+				case SURFACE_CONTAINER:
+				case SURFACE_NEWS_VENDOR:
 					sampleIndex = m_anRandomTable[0] % 5 + SFX_FOOTSTEP_METAL_1;
 					break;
 				case SURFACE_SAND:
 					sampleIndex = (m_anRandomTable[4] & 3) + SFX_FOOTSTEP_SAND_1;
 					break;
-				case SURFACE_PUDDLE:
+				case SURFACE_WATER:
 					sampleIndex = (m_anRandomTable[3] & 3) + SFX_FOOTSTEP_WATER_1;
 					break;
-				case SURFACE_WOOD:
-				case SURFACE_WOOD_BOX:
-				case SURFACE_WOOD_PLANK:
+				case SURFACE_WOOD_CRATES:
+				case SURFACE_WOOD_BENCH:
+				case SURFACE_WOOD_SOLID:
 					sampleIndex = m_anRandomTable[2] % 5 + SFX_FOOTSTEP_WOOD_1;
 					break;
 				case SURFACE_HEDGE:
@@ -3056,7 +3056,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			if (!ped->bIsLooking) {
 				maxDist = SQR(30);
 				emittingVol = m_anRandomTable[3] % 20 + 80;
-				if (ped->m_nSurfaceTouched == SURFACE_PUDDLE) {
+				if (ped->m_nSurfaceTouched == SURFACE_WATER) {
 					m_sQueueSample.m_nSampleIndex = (m_anRandomTable[3] & 3) + SFX_FOOTSTEP_WATER_1;
 				} else if (sound == SOUND_FALL_LAND) {
 					m_sQueueSample.m_nSampleIndex = SFX_BODY_LAND;
@@ -6653,12 +6653,12 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 		if (playerPed) {
 			switch (playerPed->m_nSurfaceTouched) {
 			case SURFACE_GRASS:
-			case SURFACE_DIRT:
-			case SURFACE_DIRTTRACK:
-			case SURFACE_SCAFFOLD:
-			case SURFACE_FLESH:
+			case SURFACE_GRAVEL:
+			case SURFACE_MUD_DRY:
+			case SURFACE_TRANSPARENT_CLOTH:
+			case SURFACE_PED:
 			case SURFACE_SAND:
-			case SURFACE_TIRE:
+			case SURFACE_RUBBER:
 			case SURFACE_HEDGE:
 				m_sQueueSample.m_nSampleIndex = SFX_BULLET_SHELL_HIT_GROUND_2;
 				m_sQueueSample.m_nFrequency = RandomDisplacement(500) + 11000;
@@ -6684,7 +6684,7 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 					}
 				}
 				return;
-			case SURFACE_PUDDLE:
+			case SURFACE_WATER:
 				return;
 			default:
 				break;
