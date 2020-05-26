@@ -253,7 +253,7 @@ public:
 	float GetCollisionRatio(float a, float b, float c, float d) const;
 	float GetDistanceSquared(const CVector &v) const;
 	int32 GetJumboTaxiFreq() const;
-	bool GetMissionAudioLoadingStatus() const;
+	uint8 GetMissionAudioLoadingStatus() const;
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
 	uint8 GetNum3DProvidersAvailable() const;
 	int32 GetPedCommentSfx(CPed *ped, int32 sound);
