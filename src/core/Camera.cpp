@@ -3218,7 +3218,7 @@ CCamera::GetLookDirection(void)
 	   Cams[ActiveCam].Mode == CCam::MODE_BEHINDBOAT ||
 	   Cams[ActiveCam].Mode == CCam::MODE_FOLLOWPED)
 		return Cams[ActiveCam].DirectionWasLooking;
-	return LOOKING_FORWARD;;
+	return LOOKING_FORWARD;
 }
 
 bool
