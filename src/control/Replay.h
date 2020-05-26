@@ -11,6 +11,7 @@
 
 class CVehicle;
 struct CReference;
+enum tParticleType;
 
 struct CAddressInReplayBuffer
 {
@@ -287,6 +288,8 @@ public:
 	static bool IsPlayingBack() { return Mode == MODE_PLAYBACK; }
 	static bool IsPlayingBackFromFile() { return bPlayingBackFromFile; }
 
+	static void RecordParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, float fSize, RwRGBA const&color)
+	{ } //TODO
 private:
 	static void RecordThisFrame(void);
 	static void StorePedUpdate(CPed *ped, int id);

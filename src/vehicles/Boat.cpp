@@ -382,8 +382,9 @@ CBoat::ProcessControl(void)
 								CGeneral::GetRandomNumberInRange(0, 30),
 								CGeneral::GetRandomNumberInRange(0, 90), 3);
 #endif
-							if(!cameraHack)
-								CParticle::AddParticle(PARTICLE_BOAT_WAKE, wakePos, wakeDir, nil, 0.0f, jetColor);
+							//TODO: MIAMI:
+							//if(!cameraHack)
+							//	CParticle::AddParticle(PARTICLE_BOAT_WAKE, wakePos, wakeDir, nil, 0.0f, jetColor);
 						}else if((CTimer::GetFrameCounter() + m_randomSeed) & 1){
 #ifdef PC_PARTICLE
 							jetDir.z = 0.018f;
