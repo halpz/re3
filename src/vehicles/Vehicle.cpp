@@ -1757,13 +1757,13 @@ CVehicle::SetupPassenger(int n)
 		if(passenger->m_nPedType == PEDTYPE_CIVMALE || passenger->m_nPedType == PEDTYPE_CIVFEMALE)
 			for(i = 0; i < n; i++)
 				if(pPassengers[i] && pPassengers[n] &&
-				   pPassengers[i]->m_nPedType == PEDTYPE_CIVMALE || pPassengers[i]->m_nPedType == PEDTYPE_CIVFEMALE &&
+				   (pPassengers[i]->m_nPedType == PEDTYPE_CIVMALE || pPassengers[i]->m_nPedType == PEDTYPE_CIVFEMALE) &&
 				   passenger->GetModelIndex() == pPassengers[i]->GetModelIndex()){
 					pPassengers[n] = nil;
 					CPopulation::RemovePed(passenger);
 				}
 	}
-	if(bIsBus)
+	if(bIsBus && pPassengers[n])
 		pPassengers[n]->bRenderPedInCar = false;
 	++m_nNumPassengers;
 	return pPassengers[n];
