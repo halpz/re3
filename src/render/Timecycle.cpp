@@ -350,7 +350,7 @@ CTimeCycle::Update(void)
 	m_CurrentStoredValue = (m_CurrentStoredValue+1)&0xF;
 
 	float sunAngle = 2*PI*(CClock::GetSeconds()/60.0f + CClock::GetMinutes() + CClock::GetHours()*60)/(24*60);
-	CVector &sunPos = GetSunPosition();
+	CVector &sunPos = GetSunDirection();
 	sunPos.x = Sin(sunAngle);
 	sunPos.y = 1.0f;
 	sunPos.z = 0.2f - Cos(sunAngle);

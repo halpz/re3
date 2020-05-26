@@ -3281,6 +3281,18 @@ CCamera::Find3rdPersonQuickAimPitch(void)
 	return -(DEGTORAD(((0.5f - m_f3rdPersonCHairMultY) * 1.8f * 0.5f * Cams[ActiveCam].FOV)) + rot);
 }
 
+bool
+CCamera::Using1stPersonWeaponMode(void)
+{
+	switch(PlayerWeaponMode.Mode)
+	case CCam::MODE_SNIPER:
+	case CCam::MODE_M16_1STPERSON:
+	case CCam::MODE_ROCKETLAUNCHER:
+	case CCam::MODE_HELICANNON_1STPERSON:
+	case CCam::MODE_CAMERA:
+		return true;
+	return false;
+}
 
 
 void
