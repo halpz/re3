@@ -143,7 +143,8 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 	resetLights = e->SetupLighting();
 
 	if(e->IsVehicle()){
-		CVisibilityPlugins::SetupVehicleVariables(e->GetClump());
+		// unfortunately can't use GetClump here
+		CVisibilityPlugins::SetupVehicleVariables((RpClump*)e->m_rwObject);
 		CVisibilityPlugins::InitAlphaAtomicList();
 	}
 
@@ -1244,9 +1245,11 @@ CRenderer::ShouldModelBeStreamed(CEntity *ent, const CVector &campos)
 void
 CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)
 {
-	if(ent->bRenderScorched)
-		return;
-	CPointLights::RemoveLightsAffectingObject();
-	if(reset)
-		ReSetAmbientAndDirectionalColours();
+	if(!ent->bRenderScorched){
+		CPointLights::RemoveLightsAffectingObject();
+		if(reset)
+			ReSetAmbientAndDirectionalColours();
+	}
+	SetAmbientColours();
+	DeActivateDirectional();
 }

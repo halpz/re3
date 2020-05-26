@@ -221,7 +221,7 @@ psCameraBeginUpdate(RwCamera *camera)
 void
 psCameraShowRaster(RwCamera *camera)
 {
-	if (CMenuManager::m_PrefsVsync)
+	if (FrontEndMenuManager.m_PrefsVsync)
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPWAITVSYNC);
 	else
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPDONTWAIT);
@@ -584,7 +584,7 @@ void _psPrintCpuInfo()
  *****************************************************************************
  */
 RwBool
-psInitialise(void)
+psInitialize(void)
 {
 	PsGlobal.lastMousePos.x = PsGlobal.lastMousePos.y = 0.0f;
 
@@ -1222,6 +1222,16 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 
+#ifdef FIX_BUGS // game turns on menu when focus is re-gained rather than lost
+		case WM_KILLFOCUS:
+#else
+		case WM_SETFOCUS:
+#endif
+		{
+			CGame::InitAfterFocusLoss();
+			break;
+		}
+
 	}
 
 	/*
@@ -1525,7 +1535,7 @@ RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode)
 	
 	useDefault = TRUE;
 	
-	if ( RsEventHandler(rsRWINITIALISE, PSGLOBAL(window)) == rsEVENTERROR )
+	if ( RsEventHandler(rsRWINITIALIZE, PSGLOBAL(window)) == rsEVENTERROR )
 		return FALSE;
 	
 	RwInitialised = TRUE;
@@ -1654,7 +1664,7 @@ void InitialiseLanguage()
 		|| primLayout	  == LANG_GERMAN )
 	{
 		CGame::nastyGame = false;
-		CMenuManager::m_PrefsAllowNastyGame = false;
+		FrontEndMenuManager.m_PrefsAllowNastyGame = false;
 		CGame::germanGame = true;
 	}
 	
@@ -1663,7 +1673,7 @@ void InitialiseLanguage()
 		|| primLayout	  == LANG_FRENCH )
 	{
 		CGame::nastyGame = false;
-		CMenuManager::m_PrefsAllowNastyGame = false;
+		FrontEndMenuManager.m_PrefsAllowNastyGame = false;
 		CGame::frenchGame = true;
 	}
 	
@@ -1674,7 +1684,7 @@ void InitialiseLanguage()
 
 #ifdef NASTY_GAME
 	CGame::nastyGame = true;
-	CMenuManager::m_PrefsAllowNastyGame = true;
+	FrontEndMenuManager.m_PrefsAllowNastyGame = true;
 	CGame::noProstitutes = false;
 #endif
 	
@@ -1709,33 +1719,33 @@ void InitialiseLanguage()
 		}
 	}
 	
-	CMenuManager::OS_Language = primUserLCID;
+	FrontEndMenuManager.OS_Language = primUserLCID;
 
 	switch ( lang )
 	{
 		case LANG_GERMAN:
 		{
-			CMenuManager::m_PrefsLanguage = LANGUAGE_GERMAN;
+			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_GERMAN;
 			break;
 		}
 		case LANG_SPANISH:
 		{
-			CMenuManager::m_PrefsLanguage = LANGUAGE_SPANISH;
+			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_SPANISH;
 			break;
 		}
 		case LANG_FRENCH:
 		{
-			CMenuManager::m_PrefsLanguage = LANGUAGE_FRENCH;
+			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_FRENCH;
 			break;
 		}
 		case LANG_ITALIAN:
 		{
-			CMenuManager::m_PrefsLanguage = LANGUAGE_ITALIAN;
+			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_ITALIAN;
 			break;
 		}
 		default:
 		{
-			CMenuManager::m_PrefsLanguage = LANGUAGE_AMERICAN;
+			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_AMERICAN;
 			break;
 		}
 	}
@@ -1894,7 +1904,7 @@ WinMain(HINSTANCE instance,
 	 * Initialize the platform independent data.
 	 * This will in turn initialize the platform specific data...
 	 */
-	if( RsEventHandler(rsINITIALISE, nil) == rsEVENTERROR )
+	if( RsEventHandler(rsINITIALIZE, nil) == rsEVENTERROR )
 	{
 		return FALSE;
 	}
@@ -1960,7 +1970,7 @@ WinMain(HINSTANCE instance,
 	/* 
 	 * Initialize the 3D (RenderWare) components of the app...
 	 */
-	if( rsEVENTERROR == RsEventHandler(rsRWINITIALISE, PSGLOBAL(window)) )
+	if( rsEVENTERROR == RsEventHandler(rsRWINITIALIZE, PSGLOBAL(window)) )
 	{
 		DestroyWindow(PSGLOBAL(window));
 
@@ -2128,7 +2138,7 @@ WinMain(HINSTANCE instance,
 						
 						CoUninitialize();
 						
-						if ( CMenuManager::OS_Language == LANG_FRENCH || CMenuManager::OS_Language == LANG_GERMAN )
+						if ( FrontEndMenuManager.OS_Language == LANG_FRENCH || FrontEndMenuManager.OS_Language == LANG_GERMAN )
 							PlayMovieInWindow(cmdShow, "movies\\GTAtitlesGER.mpg");
 						else
 							PlayMovieInWindow(cmdShow, "movies\\GTAtitles.mpg");
@@ -2179,7 +2189,7 @@ WinMain(HINSTANCE instance,
 						
 						FrontEndMenuManager.m_bGameNotLoaded = true;
 						
-						CMenuManager::m_bStartUpFrontEndRequested = true;
+						FrontEndMenuManager.m_bStartUpFrontEndRequested = true;
 						
 						if ( defaultFullscreenRes )
 						{
@@ -2230,7 +2240,7 @@ WinMain(HINSTANCE instance,
 						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
 						if ( RwInitialised )
 						{
-							if (!CMenuManager::m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
+							if (!FrontEndMenuManager.m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
 								RsEventHandler(rsIDLE, (void *)TRUE);
 						}
 						break;
@@ -2241,7 +2251,7 @@ WinMain(HINSTANCE instance,
 						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
 						if (RwInitialised)
 						{
-							if (!CMenuManager::m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
+							if (!FrontEndMenuManager.m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
 								RsEventHandler(rsANIMVIEWER, (void*)TRUE);
 						}
 						break;

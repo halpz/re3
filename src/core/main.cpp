@@ -81,7 +81,7 @@ RwRGBA gColourTop;
 bool gameAlreadyInitialised;
 
 float NumberOfChunksLoaded;
-#define TOTALNUMCHUNKS 73.0f
+#define TOTALNUMCHUNKS 95.0f
 
 bool g_SlowMode = false;
 char version_name[64];
@@ -137,9 +137,10 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	CRGBA TopColor(TopRed, TopGreen, TopBlue, Alpha);
 	CRGBA BottomColor(BottomRed, BottomGreen, BottomBlue, Alpha);
 
+	CDraw::CalculateAspectRatio();
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &TopColor.rwRGBA, rwCAMERACLEARZ);
 
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
@@ -155,6 +156,7 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 bool
 DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha)
 {
+	CDraw::CalculateAspectRatio();
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
@@ -199,13 +201,13 @@ DoFade(void)
 		}
 	}
 
-	if(CDraw::FadeValue != 0 || CMenuManager::m_PrefsBrightness < 256){
+	if(CDraw::FadeValue != 0 || FrontEndMenuManager.m_PrefsBrightness < 256){
 		CSprite2d *splash = LoadSplash(nil);
 
 		CRGBA fadeColor;
 		CRect rect;
 		int fadeValue = CDraw::FadeValue;
-		float brightness = Min(CMenuManager::m_PrefsBrightness, 256);
+		float brightness = Min(FrontEndMenuManager.m_PrefsBrightness, 256);
 		if(brightness <= 50)
 			brightness = 50;
 		if(FrontEndMenuManager.m_bMenuActive)
@@ -328,7 +330,7 @@ PluginAttach(void)
 static RwBool 
 Initialise3D(void *param)
 {
-	if (RsRwInitialise(param))
+	if (RsRwInitialize(param))
 	{
 #ifdef DEBUGMENU
 		DebugMenuInit();
@@ -356,6 +358,7 @@ Terminate3D(void)
 CSprite2d splash;
 int splashTxdId = -1;
 
+//--MIAMI: done
 CSprite2d*
 LoadSplash(const char *name)
 {
@@ -401,22 +404,23 @@ DestroySplashScreen(void)
 	splashTxdId = -1;
 }
 
+//--MIAMI: done
 Const char*
 GetRandomSplashScreen(void)
 {
 	int index;
 	static int index2 = 0;
 	static char splashName[128];
-	static int splashIndex[24] = {
-		25, 22, 4, 13,
-		1, 21, 14, 16,
-		10, 12, 5, 9,
-		11, 18, 3, 2,
-		19, 23, 7, 17,
-		15, 6, 8, 20
+	static int splashIndex[12] = {
+		1, 2,
+		3, 4,
+		5, 11,
+		6, 8,
+		9, 10,
+		7, 12
 	};
 
-	index = splashIndex[4*index2 + CGeneral::GetRandomNumberInRange(0, 3)];
+	index = splashIndex[2*index2 + CGeneral::GetRandomNumberInRange(0, 2)];
 	index2++;
 	if(index2 == 6)
 		index2 = 0;
@@ -443,17 +447,14 @@ ResetLoadingScreenBar()
 	NumberOfChunksLoaded = 0.0f;
 }
 
-// TODO: compare with PS2
+//--MIAMI: done
 void
 LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 {
 	CSprite2d *splash;
 
 #ifndef RANDOMSPLASH
-	if(CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
-		splashscreen = "mainsc2";
-	else
-		splashscreen = "mainsc1";
+	splashscreen = "LOADSC0";
 #endif
 
 	splash = LoadSplash(splashscreen);
@@ -474,36 +475,50 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		if(str1){
 			NumberOfChunksLoaded += 1;
 
+#ifndef RANDOMSPLASH
 			float hpos = SCREEN_SCALE_X(40);
-			float length = SCREEN_WIDTH - SCREEN_SCALE_X(100);
-			float vpos = SCREEN_HEIGHT - SCREEN_SCALE_Y(13);
-			float height = SCREEN_SCALE_Y(7);
-			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(40, 53, 68, 255));
+			float length = SCREEN_WIDTH - SCREEN_SCALE_X(80);
+			float top = SCREEN_HEIGHT - SCREEN_SCALE_Y(14);
+			float bottom = top + SCREEN_SCALE_Y(5);
+#else
+			float hpos = SCREEN_STRETCH_X(40);
+			float length = SCREEN_STRETCH_X(440);
+			// this is rather weird
+			float top = SCREEN_STRETCH_Y(407.4f - 7.0f/3.0f);
+			float bottom = SCREEN_STRETCH_Y(407.4f + 7.0f/3.0f);
+#endif
+
+			CSprite2d::DrawRect(CRect(hpos-1.0f, top-1.0f, hpos+length+1.0f, bottom+1.0f), CRGBA(40, 53, 68, 255));
+
+			CSprite2d::DrawRect(CRect(hpos, top, hpos+length, bottom), CRGBA(155, 50, 125, 255));
 
 			length *= NumberOfChunksLoaded/TOTALNUMCHUNKS;
-			CSprite2d::DrawRect(CRect(hpos, vpos, hpos + length, vpos + height), CRGBA(81, 106, 137, 255));
+			CSprite2d::DrawRect(CRect(hpos, top, hpos+length, bottom), CRGBA(255, 150, 225, 255));
 
 			// this is done by the game but is unused
+			CFont::SetBackgroundOff();
 			CFont::SetScale(SCREEN_SCALE_X(2), SCREEN_SCALE_Y(2));
 			CFont::SetPropOn();
 			CFont::SetRightJustifyOn();
+			CFont::SetDropShadowPosition(1);
+			CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 			CFont::SetFontStyle(FONT_HEADING);
 
 #ifdef CHATTYSPLASH
 			// my attempt
 			static wchar tmpstr[80];
 			float yscale = SCREEN_SCALE_Y(0.9f);
-			vpos -= 45*yscale;
+			top -= 45*yscale;
 			CFont::SetScale(SCREEN_SCALE_X(0.75f), yscale);
 			CFont::SetPropOn();
 			CFont::SetRightJustifyOff();
 			CFont::SetFontStyle(FONT_BANK);
 			CFont::SetColor(CRGBA(255, 255, 255, 255));
 			AsciiToUnicode(str1, tmpstr);
-			CFont::PrintString(hpos, vpos, tmpstr);
-			vpos += 22*yscale;
+			CFont::PrintString(hpos, top, tmpstr);
+			top += 22*yscale;
 			AsciiToUnicode(str2, tmpstr);
-			CFont::PrintString(hpos, vpos, tmpstr);
+			CFont::PrintString(hpos, top, tmpstr);
 #endif
 		}
 
@@ -676,11 +691,13 @@ DisplayGameDebugText()
 {
 	static bool bDisplayPosn = false;
 	static bool bDisplayRate = false;
+	static bool bDisplayCheatStr = false;
 
 	{
 		SETTWEAKPATH("GameDebugText");
 		TWEAKBOOL(bDisplayPosn);
 		TWEAKBOOL(bDisplayRate);
+		TWEAKBOOL(bDisplayCheatStr);
 	}
 
 
@@ -767,6 +784,26 @@ DisplayGameDebugText()
 		
 		CFont::SetColor(CRGBA(255, 108, 0, 255));
 		CFont::PrintString(40.0f, 40.0f, ustr);
+	}
+
+	if (bDisplayCheatStr)
+	{
+		sprintf(str, "%s", CPad::KeyBoardCheatString);
+		AsciiToUnicode(str, ustr);
+
+		CFont::SetPropOff();
+		CFont::SetBackgroundOff();
+		CFont::SetScale(0.7f, 1.5f);
+		CFont::SetCentreOn();
+		CFont::SetBackGroundOnlyTextOff();
+		CFont::SetWrapx(640.0f);
+		CFont::SetFontStyle(FONT_HEADING);
+
+		CFont::SetColor(CRGBA(0, 0, 0, 255));
+		CFont::PrintString(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH * 0.5f)+2.f, SCREEN_SCALE_FROM_BOTTOM(20.0f)+2.f, ustr);
+
+		CFont::SetColor(CRGBA(255, 150, 225, 255));
+		CFont::PrintString(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH * 0.5f), SCREEN_SCALE_FROM_BOTTOM(20.0f), ustr);
 	}
 }
 #endif
@@ -913,15 +950,12 @@ Render2dStuffAfterFade(void)
 
 	CHud::DrawAfterFade();
 	CFont::DrawFonts();
+	CCredits::Render();
 }
 
 void
 Idle(void *arg)
 {
-#ifdef ASPECT_RATIO_SCALE
-	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
-#endif
-
 	CTimer::Update();
 
 #ifdef TIMEBARS
@@ -931,35 +965,6 @@ Idle(void *arg)
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
 
-	// We're basically merging FrontendIdle and Idle (just like TheGame on PS2)
-#ifdef PS2_SAVE_DIALOG
-	// Only exists on PC FrontendIdle, probably some PS2 bug fix
-	if (FrontEndMenuManager.m_bMenuActive)
-		CSprite2d::SetRecipNearClip();
-	
-	if (FrontEndMenuManager.m_bGameNotLoaded) {
-		CPad::UpdatePads();
-		FrontEndMenuManager.Process();
-	} else {
-		CPointLights::InitPerFrame();
-#ifdef TIMEBARS
-		tbStartTimer(0, "CGame::Process");
-#endif
-		CGame::Process();
-#ifdef TIMEBARS
-		tbEndTimer("CGame::Process");
-		tbStartTimer(0, "DMAudio.Service");
-#endif
-		DMAudio.Service();
-
-#ifdef TIMEBARS
-		tbEndTimer("DMAudio.Service");
-#endif
-	}
-
-	if (RsGlobal.quit)
-		return;
-#else
 	CPointLights::InitPerFrame();
 #ifdef TIMEBARS
 	tbStartTimer(0, "CGame::Process");
@@ -974,7 +979,6 @@ Idle(void *arg)
 
 #ifdef TIMEBARS
 	tbEndTimer("DMAudio.Service");
-#endif
 #endif
 
 	if(CGame::bDemoMode && CTimer::GetTimeInMilliseconds() > (3*60 + 30)*1000 && !CCutsceneMgr::IsCutsceneProcessing()){
@@ -991,17 +995,16 @@ Idle(void *arg)
 	if(arg == nil)
 		return;
 
-	if((!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu) &&
+	// m_bRenderGameInMenu is there in III PS2 but I don't know about VC PS2.
+	if((!FrontEndMenuManager.m_bMenuActive/* || FrontEndMenuManager.m_bRenderGameInMenu*/) &&
 	   TheCamera.GetScreenFadeStatus() != FADE_2)
 	{
 #ifdef GTA_PC
-		if (!FrontEndMenuManager.m_bRenderGameInMenu) {
 			// This is from SA, but it's nice for windowed mode
 			RwV2d pos;
 			pos.x = SCREEN_WIDTH / 2.0f;
 			pos.y = SCREEN_HEIGHT / 2.0f;
 			RsMouseSetPos(&pos);
-		}
 #endif
 #ifdef TIMEBARS
 		tbStartTimer(0, "CnstrRenderList");
@@ -1058,6 +1061,7 @@ Idle(void *arg)
 		tbEndTimer("Render2dStuff");
 #endif
 	}else{
+		CDraw::CalculateAspectRatio();
 #ifdef ASPECT_RATIO_SCALE
 		CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 #else
@@ -1069,10 +1073,6 @@ Idle(void *arg)
 			return;
 	}
 
-#ifdef PS2_SAVE_DIALOG
-	if (FrontEndMenuManager.m_bMenuActive)
-		DefinedState();
-#endif
 #ifdef TIMEBARS
 	tbStartTimer(0, "RenderMenus");
 #endif
@@ -1090,7 +1090,7 @@ Idle(void *arg)
 #ifdef TIMEBARS
 	tbEndTimer("Render2dStuff-Fade");
 #endif
-	CCredits::Render();
+	// CCredits::Render(); // They added it to function above and also forgot it here
 
 #ifdef TIMEBARS
 	tbDisplay();
@@ -1105,10 +1105,7 @@ Idle(void *arg)
 void
 FrontendIdle(void)
 {
-#ifdef ASPECT_RATIO_SCALE
-	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
-#endif
-
+	CDraw::CalculateAspectRatio();
 	CTimer::Update();
 	CSprite2d::SetRecipNearClip(); // this should be on InitialiseRenderWare according to PS2 asm. seems like a bug fix
 	CSprite2d::InitPerFrame();
@@ -1119,11 +1116,7 @@ FrontendIdle(void)
 	if(RsGlobal.quit)
 		return;
 
-#ifdef ASPECT_RATIO_SCALE
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
-#else
-	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
-#endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 	if(!RsCameraBeginUpdate(Scene.camera))
@@ -1133,7 +1126,7 @@ FrontendIdle(void)
 	RenderMenus();
 	DoFade();
 	Render2dStuffAfterFade();
-//	CFont::DrawFonts(); // redundant
+	CFont::DrawFonts();
 	DoRWStuffEndOfFrame();
 }
 
@@ -1149,10 +1142,10 @@ AppEventHandler(RsEvent event, void *param)
 {
 	switch( event )
 	{
-		case rsINITIALISE:
+		case rsINITIALIZE:
 		{
 			CGame::InitialiseOnceBeforeRW();
-			return RsInitialise() ? rsEVENTPROCESSED : rsEVENTERROR;
+			return RsInitialize() ? rsEVENTPROCESSED : rsEVENTERROR;
 		}
 
 		case rsCAMERASIZE:
@@ -1164,7 +1157,7 @@ AppEventHandler(RsEvent event, void *param)
 			return rsEVENTPROCESSED;
 		}
 
-		case rsRWINITIALISE:
+		case rsRWINITIALIZE:
 		{
 			return Initialise3D(param) ? rsEVENTPROCESSED : rsEVENTERROR;
 		}
@@ -1204,11 +1197,7 @@ AppEventHandler(RsEvent event, void *param)
 
 		case rsFRONTENDIDLE:
 		{
-#ifdef PS2_SAVE_DIALOG
-			Idle((void*)1);
-#else
 			FrontendIdle();
-#endif
 
 			return rsEVENTPROCESSED;
 		}
@@ -1243,9 +1232,8 @@ TheModelViewer(void)
 #if (defined(GTA_PS2) || defined(GTA_XBOX))
 	//TODO
 #else
-#ifdef ASPECT_RATIO_SCALE
-	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
-#endif
+
+	CDraw::CalculateAspectRatio();
 	CAnimViewer::Update();
 	CTimer::Update();
 	SetLightsWithTimeOfDayColour(Scene.world);
@@ -1294,9 +1282,9 @@ void TheGame(void)
 		strcpy(TheMemoryCard.LoadFileName, TheMemoryCard.field37);
 		TheMemoryCard.b_FoundRecentSavedGameWantToLoad = true;
 
-		if (CMenuManager::m_PrefsLanguage != TheMemoryCard.GetLanguageToLoad())
+		if (FrontEndMenuManager.m_PrefsLanguage != TheMemoryCard.GetLanguageToLoad())
 		{
-			CMenuManager::m_PrefsLanguage = TheMemoryCard.GetLanguageToLoad();
+			FrontEndMenuManager.m_PrefsLanguage = TheMemoryCard.GetLanguageToLoad();
 			TheText.Unload();
 			TheText.Load();
 		}
@@ -1370,7 +1358,8 @@ void TheGame(void)
 			gMainHeap.PushMemId(_TODOCONST(15));
 #endif
 
-			if (!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu == true && TheCamera.GetScreenFadeStatus() != FADE_2 )
+			// m_bRenderGameInMenu is there in III PS2 but I don't know about VC PS2.
+			if (!FrontEndMenuManager.m_bMenuActive || /*FrontEndMenuManager.m_bRenderGameInMenu == true && */TheCamera.GetScreenFadeStatus() != FADE_2 )
 			{
 #ifdef GTA_PS2
 				gMainHeap.PushMemId(_TODOCONST(11));
@@ -1577,30 +1566,30 @@ void SystemInit()
 	CGame::frenchGame = false;
 	CGame::germanGame = false;
 	CGame::nastyGame = true;
-	CMenuManager::m_PrefsAllowNastyGame = true;
+	FrontEndMenuManager.m_PrefsAllowNastyGame = true;
 	
 #ifdef GTA_PS2
 	int32 lang = sceScfGetLanguage();
 	if ( lang  == SCE_ITALIAN_LANGUAGE )
-		CMenuManager::m_PrefsLanguage = LANGUAGE_ITALIAN;
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_ITALIAN;
 	else if ( lang  == SCE_SPANISH_LANGUAGE )
-		CMenuManager::m_PrefsLanguage = LANGUAGE_SPANISH;
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_SPANISH;
 	else if ( lang  == SCE_GERMAN_LANGUAGE )
 	{
 		CGame::germanGame = true;
 		CGame::nastyGame = false;
-		CMenuManager::m_PrefsAllowNastyGame = false;
-		CMenuManager::m_PrefsLanguage = LANGUAGE_GERMAN;
+		FrontEndMenuManager.m_PrefsAllowNastyGame = false;
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_GERMAN;
 	}
 	else if ( lang  == SCE_FRENCH_LANGUAGE )
 	{
 		CGame::frenchGame = true;
 		CGame::nastyGame = false;
-		CMenuManager::m_PrefsAllowNastyGame = false;
-		CMenuManager::m_PrefsLanguage = LANGUAGE_FRENCH;
+		FrontEndMenuManager.m_PrefsAllowNastyGame = false;
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_FRENCH;
 	}
 	else
-		CMenuManager::m_PrefsLanguage = LANGUAGE_AMERICAN;
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_AMERICAN;
 	
 	FrontEndMenuManager.InitialiseMenuContentsAfterLoadingGame();
 #else

@@ -58,13 +58,18 @@
 #include "ParticleObject.h"
 #include "Floater.h"
 #include "Streaming.h"
+#include "PedAttractor.h"
+#include "Debug.h"
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
 
-CColPoint aTempPedColPts[MAX_COLLISION_POINTS];
+static CColPoint aTempPedColPts[MAX_COLLISION_POINTS];
+
+// TODO(Miami)
+#define AUDIO_NOT_READY
 
 // Corresponds to ped sounds (from SOUND_PED_DEATH to SOUND_PED_TAXI_CALL)
 PedAudioData CommentWaitTime[39] = {
@@ -112,32 +117,8 @@ uint16 nPlayerInComboMove;
 
 RpClump *flyingClumpTemp;
 
-// This is beta fistfite.dat array. Not used anymore since they're being fetched from fistfite.dat.
 FightMove tFightMoves[NUM_FIGHTMOVES] = {
-	{NUM_ANIMS, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_PUNCH_R, 0.2f, 8.0f / 30.0f, 0.0f, 0.3f, HITLEVEL_HIGH, 1, 0},
-	{ANIM_FIGHT_IDLE, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_FIGHT_SH_F, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_FIGHT_KNEE, 4.0f / 30.0f, 0.2f, 0.0f, 0.6f, HITLEVEL_LOW, 2, 0},
-	{ANIM_FIGHT_HEAD, 4.0f / 30.0f, 0.2f, 0.0f, 0.7f, HITLEVEL_HIGH, 3, 0},
-	{ANIM_FIGHT_PUNCH, 4.0f / 30.0f, 7.0f / 30.0f, 10.0f / 30.0f, 0.4f, HITLEVEL_HIGH, 1, 0},
-	{ANIM_FIGHT_LHOOK, 8.0f / 30.0f, 10.0f / 30.0f, 0.0f, 0.4f, HITLEVEL_HIGH, 3, 0},
-	{ANIM_FIGHT_KICK, 8.0f / 30.0f, 10.0f / 30.0f, 0.0f, 0.5, HITLEVEL_MEDIUM, 2, 0},
-	{ANIM_FIGHT_LONGKICK, 8.0f / 30.0f, 10.0f / 30.0f, 0.0f, 0.5, HITLEVEL_MEDIUM, 4, 0},
-	{ANIM_FIGHT_ROUNDHOUSE, 8.0f / 30.0f, 10.0f / 30.0f, 0.0f, 0.6f, HITLEVEL_MEDIUM, 4, 0},
-	{ANIM_FIGHT_BODYBLOW, 5.0f / 30.0f, 7.0f / 30.0f, 0.0f, 0.35f, HITLEVEL_LOW, 2, 0},
-	{ANIM_KICK_FLOOR, 10.0f / 30.0f, 14.0f / 30.0f, 0.0f, 0.4f, HITLEVEL_GROUND, 1, 0},
-	{ANIM_HIT_FRONT, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_HIT_BACK, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_HIT_RIGHT, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_HIT_LEFT, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_HIT_BODYBLOW, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_HIT_CHEST, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_HIT_HEAD, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_HIT_WALK, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_FLOOR_HIT, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_HIT_BEHIND, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
-	{ANIM_FIGHT2_IDLE, 0.0f, 0.0f, 0.0f, 0.0f, HITLEVEL_NULL, 0, 0},
+	// TODO(Miami)
 };
 
 uint16 CPed::nThreatReactionRangeMultiplier = 1;
@@ -385,6 +366,8 @@ CPed::DebugRenderOnePedText(void)
 CPed::~CPed(void)
 {
 	CWorld::Remove(this);
+	if (m_attractor)
+		GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
 	CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetIndex(this));
 	if (InVehicle()){
 		uint8 door_flag = GetCarDoorFlag(m_vehEnterType);
@@ -403,6 +386,8 @@ CPed::~CPed(void)
 	}
 	if (m_pFire)
 		m_pFire->Extinguish();
+
+	ClearWeapons();
 	if (bCarPassenger)
 		CPopulation::ms_nTotalCarPassengerPeds--;
 	if (bMiamiViceCop)
@@ -426,10 +411,11 @@ CPed::FlagToDestroyWhenNextProcessed(void)
 	}
 	bInVehicle = false;
 	m_pMyVehicle = nil;
+
 	if (CharCreatedBy == MISSION_CHAR)
-		m_nPedState = PED_DEAD;
+		SetPedState(PED_DEAD);
 	else
-		m_nPedState = PED_NONE;
+		SetPedState(PED_NONE);
 	m_pVehicleAnim = nil;
 }
 
@@ -446,20 +432,24 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_nPedType = pedType;
 	m_lastSoundStart = 0;
 	m_soundStart = 0;
-	m_lastQueuedSound = SOUND_TOTAL_PED_SOUNDS;
-	m_queuedSound = SOUND_TOTAL_PED_SOUNDS;
+	m_lastQueuedSound = SOUND_NO_SOUND;
+	m_queuedSound = SOUND_NO_SOUND;
 	m_objective = OBJECTIVE_NONE;
 	m_prevObjective = OBJECTIVE_NONE;
 	CharCreatedBy = RANDOM_CHAR;
 	m_leader = nil;
 	m_pedInObjective = nil;
+	m_attractorHeading = 0.0f;
 	m_carInObjective = nil;
+	m_attractorHeading = 0.0f;
 	bInVehicle = false;
 	m_pMyVehicle = nil;
 	m_pVehicleAnim = nil;
 	m_vecOffsetSeek.x = 0.0f;
 	m_vecOffsetSeek.y = 0.0f;
 	m_vecOffsetSeek.z = 0.0f;
+	m_attractor = nil;
+	m_positionInQueue = -1;
 	m_pedFormation = FORMATION_UNDEFINED;
 	m_collidingThingTimer = 0;
 	m_nPedStateTimer = 0;
@@ -488,6 +478,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_vecSeekPos = CVector(0.0f, 0.0f, 0.0f);
 	m_wepSkills = 0;
 	m_distanceToCountSeekDone = 1.0f;
+	m_acceptableHeadingOffset = 0.1f;
 	bRunningToPhone = false;
 	m_phoneId = -1;
 	m_lastAccident = 0;
@@ -525,6 +516,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fTurnMass = 100.0f;
 	m_fAirResistance = 0.4f / m_fMass;
 	m_fElasticity = 0.05f;
+
+	m_ceaseAttackTimer = 0;
 
 	bIsStanding = false;
 	bWasStanding = false;
@@ -606,13 +599,33 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 #ifdef KANGAROO_CHEAT
 	m_ped_flagI80 = false;
 #endif
-#ifdef VC_PED_PORTS
-	bSomeVCflag1 = false;
-#endif
 
+	m_gangFlags = 0xFF;
+
+	bReachedAttractorHeadingTarget = false;
+	bTurnedAroundOnAttractor = false;
 	bCarPassenger = false;
 	bMiamiViceCop = false;
+	bMoneyHasBeenGivenByScript = false;
+	bHasBeenPhotographed = false;
+
+	bIsDrowning = false;
+	bDrownsInWater = true;
+#ifdef VC_PED_PORTS
+	bHeadStuckInCollision = false;
+#endif
+	bIsPlayerFriend = true;
 	bDeadPedInFrontOfCar = false;
+	bStayInCarOnJack = false;
+
+	bDontFight = false;
+	bDoomAim = true;
+	bCanBeShotInVehicle = true;
+	bIgnoreThreatsBehindObjects = false;
+
+	bNeverEverTargetThisPed = false;
+
+	bBoughtIceCream = false;
 
 	if ((CGeneral::GetRandomNumber() & 3) == 0)
 		bHasACamera = true;
@@ -635,6 +648,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_maxWeaponTypeAllowed = WEAPONTYPE_UNARMED;
 	m_currentWeapon = WEAPONTYPE_UNARMED;
 	m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
+	m_delayedWeapon = WEAPONTYPE_UNIDENTIFIED;
 
 	for(int i = 0; i < TOTAL_WEAPON_SLOTS; i++) {
 		CWeapon &weapon = GetWeapon(i);
@@ -646,12 +660,21 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	}
 
 	m_lastFightMove = FIGHTMOVE_NULL;
-	GiveWeapon(WEAPONTYPE_UNARMED, 0);
+	GiveWeapon(WEAPONTYPE_UNARMED, 0, true);
 	m_wepAccuracy = 60;
 	m_lastWepDam = -1;
+	m_lastDamEntity = nil;
+	m_attachedTo = nil;
+	m_attachWepAmmo = 0;
 	m_collPoly.valid = false;
 	m_fCollisionSpeed = 0.0f;
 	m_wepModelID = -1;
+	uint16 random = CGeneral::GetRandomNumber();
+	m_nPedMoney = random % 25;
+	if (m_nPedMoney == 23)
+		m_nPedMoney = 400;
+	m_nExtendedRangeTimer = 0;
+	m_bleedCounter = 0;
 #ifdef PED_SKIN
 	m_pWeaponModel = nil;
 #endif
@@ -666,10 +689,10 @@ CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool unused)
 
 	if (m_weapons[slot].m_eWeaponType == weaponType) {
 		GetWeapon(slot).m_nAmmoTotal += ammo;
-		if (weaponType < WEAPONTYPE_LAST_WEAPONTYPE && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
+		if (weaponType < WEAPONTYPE_TOTALWEAPONS && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
 
 			// Looks like abandoned idea. This block never runs, ms_aMaxAmmoForWeapon is always -1.
-			GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], (int32) GetWeapon(slot).m_nAmmoTotal);
+			GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], GetWeapon(slot).m_nAmmoTotal);
 		} else {
 			GetWeapon(slot).m_nAmmoTotal = Min(99999, GetWeapon(slot).m_nAmmoTotal);
 		}
@@ -865,9 +888,8 @@ CPed::AddWeaponModel(int id)
 		CModelInfo::GetModelInfo(id)->AddRef();
 		m_wepModelID = id;
 
-		// TODO(Miami)
-		// if (IsPlayer() && id == MI_MINIGUN)
-		//	((CPlayerPed*)this)->m_pMinigunTopAtomic = (RpAtomic*)CModelInfo::GetModelInfo(MI_MINIGUN2)->CreateInstance();
+		if (IsPlayer() && id == MI_MINIGUN)
+			((CPlayerPed*)this)->m_pMinigunTopAtomic = (RpAtomic*)CModelInfo::GetModelInfo(MI_MINIGUN2)->CreateInstance();
 	}
 }
 
@@ -879,7 +901,7 @@ CPed::AimGun(void)
 
 	if (m_pSeekTarget) {
 		if (m_pSeekTarget->IsPed()) {
-			((CPed*)m_pSeekTarget)->m_pedIK.GetComponentPosition(&pos, PED_MID);
+			((CPed*)m_pSeekTarget)->m_pedIK.GetComponentPosition(pos, PED_MID);
 			vector = pos;
 		} else {
 			vector = m_pSeekTarget->GetPosition();
@@ -1166,10 +1188,10 @@ CPed::FinishedReloadCB(CAnimBlendAssociation *reloadAssoc, void *arg)
 	if (ped->bIsDucking && ped->bCrouchWhenShooting) {
 		CAnimBlendAssociation *crouchFireAssoc = nil;
 		if (!!weapon->m_bCrouchFire) {
-			crouchFireAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), ANIM_WEAPON_CROUCHFIRE);
+			crouchFireAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), GetCrouchFireAnim(weapon));
 		}
 		if (!!weapon->m_bReload && reloadAssoc) {
-			if (reloadAssoc->animId == ANIM_WEAPON_CROUCHRELOAD && !crouchFireAssoc) {
+			if (reloadAssoc->animId == GetCrouchReloadAnim(weapon) && !crouchFireAssoc) {
 				CAnimBlendAssociation *crouchAssoc = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_WEAPON_CROUCH, 8.0f);
 				crouchAssoc->SetCurrentTime(crouchAssoc->hierarchy->totalLength);
 				crouchAssoc->flags &= ~ASSOC_RUNNING;
@@ -1177,7 +1199,7 @@ CPed::FinishedReloadCB(CAnimBlendAssociation *reloadAssoc, void *arg)
 		}
 	} else if (weapon->m_bReloadLoop2Start && ped->bIsAttacking) {
 		CAnimBlendAssociation *fireAssoc =
-			CAnimManager::BlendAnimation(ped->GetClump(), weapon->m_AnimToPlay, weapon->m_bAnimDetonate ? ANIM_BOMBER : ANIM_WEAPON_FIRE, 8.0f);
+			CAnimManager::BlendAnimation(ped->GetClump(), weapon->m_AnimToPlay, GetPrimaryFireAnim(weapon), 8.0f);
 		fireAssoc->SetFinishCallback(FinishedAttackCB, ped);
 		fireAssoc->SetRun();
 		if (fireAssoc->currentTime != reloadAssoc->hierarchy->totalLength) {
@@ -1202,10 +1224,10 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 	if (ped->m_nPedState != PED_ATTACK) {
 		if (ped->bIsDucking && ped->IsPedInControl()) {
 			if (currentWeapon->m_bReload) {
-				reloadAnimAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), ANIM_WEAPON_CROUCHRELOAD);
+				reloadAnimAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), GetCrouchReloadAnim(currentWeapon));
 			}
 			if (currentWeapon->m_bCrouchFire && attackAssoc) {
-				if (attackAssoc->animId == ANIM_WEAPON_CROUCHFIRE && !reloadAnimAssoc) {
+				if (attackAssoc->animId == GetCrouchFireAnim(currentWeapon) && !reloadAnimAssoc) {
 					newAnim = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_WEAPON_CROUCH, 8.0f);
 					newAnim->SetCurrentTime(newAnim->hierarchy->totalLength);
 					newAnim->flags &= ~ASSOC_RUNNING;
@@ -1228,10 +1250,10 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 
 	if (ped->bIsDucking && ped->bCrouchWhenShooting) {
 		if (currentWeapon->m_bReload) {
-			reloadAnimAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), ANIM_WEAPON_CROUCHRELOAD);
+			reloadAnimAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), GetCrouchReloadAnim(currentWeapon));
 		}
 		if (currentWeapon->m_bCrouchFire && attackAssoc) {
-			if (attackAssoc->animId == ANIM_WEAPON_CROUCHFIRE && !reloadAnimAssoc) {
+			if (attackAssoc->animId == GetCrouchFireAnim(currentWeapon) && !reloadAnimAssoc) {
 				newAnim = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_WEAPON_CROUCH, 8.0f);
 				newAnim->SetCurrentTime(newAnim->hierarchy->totalLength);
 				newAnim->flags &= ~ASSOC_RUNNING;
@@ -1259,15 +1281,6 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 			newAnim->SetFinishCallback(FinishedAttackCB, ped);
 		}
 	} else {
-		// TODO(Miami): Remove this block when fighting has been ported
-		if (attackAssoc && attackAssoc->animId == ANIM_FIGHT_PPUNCH && currentWeapon->m_AnimToPlay == ASSOCGRP_STD)
-		{
-			attackAssoc->blendDelta = -8.0f;
-			attackAssoc->flags |= ASSOC_DELETEFADEDOUT;
-			ped->ClearAttack();
-			return;
-		}
-
 		if (attackAssoc && attackAssoc->animId == ANIM_MELEE_ATTACK && currentWeapon->m_AnimToPlay == ASSOCGRP_UNARMED)
 		{
 			attackAssoc->blendDelta = -8.0f;
@@ -1292,6 +1305,7 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 	}
 }
 
+// --MIAMI: Done except commented things
 void
 CPed::Attack(void)
 {
@@ -1303,7 +1317,6 @@ CPed::Attack(void)
 	float animLoopEnd;
 	CWeaponInfo *ourWeapon;
 	bool attackShouldContinue;
-	AnimationId reloadAnim;
 	CAnimBlendAssociation *reloadAnimAssoc;
 	CAnimBlendAssociation *throwAssoc;
 	float delayBetweenAnimAndFire;
@@ -1317,7 +1330,6 @@ CPed::Attack(void)
 	attackShouldContinue = bIsAttacking;
 	reloadAnimAssoc = nil;
 	throwAssoc = nil;
-	reloadAnim = NUM_ANIMS;
 	animLoopStart = ourWeapon->m_fAnimLoopStart;
 	animLoopEnd = ourWeapon->m_fAnimLoopEnd;
 	delayBetweenAnimAndFire = ourWeapon->m_fAnimFrameFire;
@@ -1325,7 +1337,7 @@ CPed::Attack(void)
 
 	if (bIsDucking) {
 		if (!!ourWeapon->m_bCrouchFire && bCrouchWhenShooting) {
-			weaponAnimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHFIRE);
+			weaponAnimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(ourWeapon));
 			if (weaponAnimAssoc) {
 				animLoopStart = ourWeapon->m_fAnim2LoopStart;
 				animLoopEnd = ourWeapon->m_fAnim2LoopEnd;
@@ -1343,11 +1355,11 @@ CPed::Attack(void)
 	}
 
 	if (ourWeapon->m_bReload) {
-		reloadAnimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_RELOAD);
+		reloadAnimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetReloadAnim(ourWeapon));
 	}
 
 	if (!!ourWeapon->m_bReload && !reloadAnimAssoc)  {
-		reloadAnimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
+		reloadAnimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchReloadAnim(ourWeapon));
 	}
 
 	if ( reloadAnimAssoc && reloadAnimAssoc->IsRunning() ) {
@@ -1378,7 +1390,6 @@ CPed::Attack(void)
 					meleeAttackStarted = true;
 
 				switch ( ourWeapon->m_AnimToPlay ) {
-					case ASSOCGRP_STD: // TODO(Miami): Remove that when weapons ported
 					case ASSOCGRP_UNARMED:
 					case ASSOCGRP_SCREWDRIVER:
 					case ASSOCGRP_KNIFE:
@@ -1419,7 +1430,7 @@ CPed::Attack(void)
 			if (attackShouldContinue) {
 				if (ourWeaponFire != WEAPON_FIRE_PROJECTILE || !IsPlayer() || ((CPlayerPed*)this)->m_bHaveTargetSelected) {
 					if (bCrouchWhenShooting && bIsDucking && !!ourWeapon->m_bCrouchFire) {
-						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ourWeapon->m_AnimToPlay, ANIM_WEAPON_CROUCHFIRE, 8.0f);
+						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ourWeapon->m_AnimToPlay, GetCrouchFireAnim(ourWeapon), 8.0f);
 
 					} else if(!!ourWeapon->m_bUse2nd && CGeneral::GetRandomNumber() & 1){
 						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ourWeapon->m_AnimToPlay, ANIM_WEAPON_FIRE_2ND, 8.0f);
@@ -1469,62 +1480,103 @@ CPed::Attack(void)
 			m_pedIK.m_flags &= ~CPedIK::AIMS_WITH_ARM;
 	}
 
-	// TODO(Miami): Chainsaw
-	if (weaponAnimTime <= delayBetweenAnimAndFire || weaponAnimTime - weaponAnimAssoc->timeStep > delayBetweenAnimAndFire || !weaponAnimAssoc->IsRunning()) {
-		if (weaponAnimAssoc->speed < 1.0f)
-			weaponAnimAssoc->speed = 1.0f;
+	if (ourWeaponType != WEAPONTYPE_CHAINSAW
+		|| !meleeAttackStarted && delayBetweenAnimAndFire - 0.5f >= weaponAnimAssoc->currentTime
+		|| weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep > delayBetweenAnimAndFire) {
 
-	} else {
-		firePos = ourWeapon->m_vecFireOffset;
+		if (ourWeaponType == WEAPONTYPE_CHAINSAW) {
+#ifndef AUDIO_NOT_READY
+			DMAudio.PlayOneShot(m_audioEntityId, 52, 0.0f);
+#endif
+		} else if (weaponAnimTime <= delayBetweenAnimAndFire || weaponAnimTime - weaponAnimAssoc->timeStep > delayBetweenAnimAndFire || !weaponAnimAssoc->IsRunning()) {
+			if (weaponAnimAssoc->speed < 1.0f)
+				weaponAnimAssoc->speed = 1.0f;
 
-		// TODO(Miami): Katana & Chainsaw
-		if (ourWeapon->m_eWeaponFire == WEAPON_FIRE_MELEE) {
-			firePos = GetMatrix() * firePos;
 		} else {
-			// TODO(Miami): Remove ANIM_KICK_FLOOR when fighting is done
-			TransformToNode(firePos, (weaponAnimAssoc->animId == ANIM_KICK_FLOOR ||
-				weaponAnimAssoc->animId == ANIM_MELEE_ATTACK_2ND && ourWeapon->m_AnimToPlay == ASSOCGRP_UNARMED) ? PED_FOOTR : PED_HANDR);
-		}
+			firePos = ourWeapon->m_vecFireOffset;
+
+			if (ourWeaponType != WEAPONTYPE_KATANA && ourWeaponType != WEAPONTYPE_CHAINSAW) {
+				if (ourWeapon->m_eWeaponFire != WEAPON_FIRE_MELEE) {
+					TransformToNode(firePos, (weaponAnimAssoc->animId == ANIM_MELEE_ATTACK_2ND && ourWeapon->m_AnimToPlay == ASSOCGRP_UNARMED) ? PED_FOOTR : PED_HANDR);
+				} else {
+					firePos = GetMatrix() * firePos;
+				}
+			} else {
+				if (weaponAnimAssoc->animId == ANIM_MELEE_ATTACK_2ND)
+					firePos.z = 0.7f * ourWeapon->m_fRadius - 1.0f;
+
+				firePos = GetMatrix() * firePos;
+			}
 			
+			GetWeapon()->Fire(this, &firePos);
+
+			if (ourWeaponType == WEAPONTYPE_MOLOTOV || ourWeaponType == WEAPONTYPE_GRENADE || ourWeaponType == WEAPONTYPE_DETONATOR_GRENADE ||
+				ourWeaponType == WEAPONTYPE_TEARGAS) {
+				RemoveWeaponModel(ourWeapon->m_nModelId);
+			}
+			if (!GetWeapon()->m_nAmmoTotal && ourWeaponFire != WEAPON_FIRE_MELEE && FindPlayerPed() != this) {
+				SelectGunIfArmed();
+			}
+
+			if (GetWeapon()->m_eWeaponState == WEAPONSTATE_MELEE_MADECONTACT) {
+				int damagerType = ENTITY_TYPE_NOTHING;
+				if (m_pDamageEntity && (m_fDamageImpulse == 0.0f || !m_pDamageEntity->IsBuilding())) {
+					damagerType = m_pDamageEntity->GetType();
+				}
+				switch (ourWeapon->m_AnimToPlay) {
+					case ASSOCGRP_UNARMED:
+						if (weaponAnimAssoc->animId == ANIM_MELEE_ATTACK || weaponAnimAssoc->animId == ANIM_MELEE_ATTACK_START) {
+#ifdef AUDIO_NOT_READY
+							DMAudio.PlayOneShot(m_audioEntityId, SOUND_FIGHT_PUNCH_39, 0.0f);
+#else
+							DMAudio.PlayOneShot(m_audioEntityId, SOUND_FIGHT_PUNCH_39, (damagerType | (ourWeaponType << 8)));
+#endif
+						}
+						break;
+					case ASSOCGRP_KNIFE:
+					case ASSOCGRP_BASEBALLBAT:
+					case ASSOCGRP_GOLFCLUB:
+					case ASSOCGRP_CHAINSAW:
+#ifdef AUDIO_NOT_READY
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, 1.0f);
+#else
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, (damagerType | (ourWeaponType << 8)));
+#endif
+						break;
+					default:
+						break;
+				}
+
+				if (bIsAttacking || CTimer::GetTimeInMilliseconds() < m_shootTimer) {
+					weaponAnimAssoc->callbackType = 0;
+				}
+			}
+
+			attackShouldContinue = false;
+		}
+	} else {
+		CVector firePos = ourWeapon->m_vecFireOffset;
+
+		if (weaponAnimAssoc->animId == 206)
+			firePos.z = 0.7f * ourWeapon->m_fRadius - 1.0f;
+
+		firePos = GetMatrix() * firePos;
 		GetWeapon()->Fire(this, &firePos);
-
-		// TODO(Miami)
-		if (ourWeaponType == WEAPONTYPE_MOLOTOV || ourWeaponType == WEAPONTYPE_GRENADE || ourWeaponType == WEAPONTYPE_DETONATOR_GRENADE 
-			/* ourWeaponType == WEAPONTYPE_TEARGAS*/) {
-			RemoveWeaponModel(ourWeapon->m_nModelId);
-		}
-		if (!GetWeapon()->m_nAmmoTotal && ourWeaponFire != WEAPON_FIRE_MELEE && FindPlayerPed() != this) {
-			SelectGunIfArmed();
-		}
-
 		if (GetWeapon()->m_eWeaponState == WEAPONSTATE_MELEE_MADECONTACT) {
-			int damagerType = 0;
-			if (m_pDamageEntity && (m_fDamageImpulse == 0.0f || !m_pDamageEntity->IsBuilding())) {
+			int damagerType = ENTITY_TYPE_PED;
+			if (m_pDamageEntity)
 				damagerType = m_pDamageEntity->GetType();
-			}
-			switch (ourWeapon->m_AnimToPlay) {
-				case ASSOCGRP_STD: // TODO(Miami): Remove after fighting done
-				case ASSOCGRP_UNARMED:
-					if (weaponAnimAssoc->animId == ANIM_FIGHT_PPUNCH || //  TODO(Miami): Remove after fighting done
-						weaponAnimAssoc->animId == ANIM_MELEE_ATTACK || weaponAnimAssoc->animId == ANIM_MELEE_ATTACK_START) {
-						DMAudio.PlayOneShot(m_audioEntityId, SOUND_FIGHT_PUNCH_39, (damagerType | (ourWeaponType << 8)));
-					}
-					break;
-				case ASSOCGRP_KNIFE:
-				case ASSOCGRP_BASEBALLBAT:
-				case ASSOCGRP_GOLFCLUB:
-				case ASSOCGRP_CHAINSAW:
-					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, (damagerType | (ourWeaponType << 8)));
-					break;
-				default:
-					break;
-			}
 
-			if (bIsAttacking || CTimer::GetTimeInMilliseconds() < m_shootTimer) {
-				weaponAnimAssoc->callbackType = 0;
+			DMAudio.PlayOneShot(m_audioEntityId, 54, (float)damagerType);
+			if (IsPlayer()) {
+				CPad::GetPad(0)->StartShake(240, 180);
+			}
+		} else {
+			DMAudio.PlayOneShot(m_audioEntityId, 53, 0.0f);
+			if (IsPlayer()) {
+				CPad::GetPad(0)->StartShake(240, 90);
 			}
 		}
-
 		attackShouldContinue = false;
 	}
 
@@ -1576,12 +1628,12 @@ CPed::Attack(void)
 					if (bIsDucking) {
 						newReloadAssoc = CAnimManager::BlendAnimation(
 							GetClump(), ourWeapon->m_AnimToPlay,
-							ANIM_WEAPON_CROUCHRELOAD,
+							GetCrouchReloadAnim(ourWeapon),
 							8.0f);
 					} else {
 						newReloadAssoc = CAnimManager::BlendAnimation(
 							GetClump(), ourWeapon->m_AnimToPlay,
-							ANIM_WEAPON_RELOAD,
+							GetReloadAnim(ourWeapon),
 							8.0f);
 					}
 					newReloadAssoc->SetFinishCallback(FinishedReloadCB, this);
@@ -1591,19 +1643,38 @@ CPed::Attack(void)
 				bIsAttacking = false;
 				bIsPointingGunAt = false;
 				m_shootTimer = CTimer::GetTimeInMilliseconds();
+#ifdef AUDIO_NOT_READY
+				switch (ourWeaponType) {
+					case WEAPONTYPE_UZI:
+					case WEAPONTYPE_TEC9:
+					case WEAPONTYPE_SILENCED_INGRAM:
+					case WEAPONTYPE_MP5:
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_UZI_BULLET_ECHO, 0.0f);
+						break;
+					case WEAPONTYPE_RUGER:
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
+						break;
+					case WEAPONTYPE_M4:
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_M16_BULLET_ECHO, 0.0f);
+						break;
+					default:
+						break;
+				}
+#else
 				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, GetWeapon()->m_eWeaponType);
+#endif
 				return;
 			}
 		}
 		if (weaponAnimTime - 2.0f * weaponAnimAssoc->timeStep <= animLoopEnd
 			&& (bIsAttacking || CTimer::GetTimeInMilliseconds() < m_shootTimer)
 			&& (GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING
-				/* || GetWeapon()->m_nWeaponType == WEAPONTYPE_MINIGUN */)) {
+				|| GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN)) {
 
 			PedOnGroundState pedOnGroundState;
 			if (ourWeapon->m_eWeaponFire == WEAPON_FIRE_MELEE &&
 				(CGame::nastyGame && ((pedOnGroundState = CheckForPedsOnGroundToAttack(this, nil)) > PED_IN_FRONT_OF_ATTACKER)
-				|| GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT && pedOnGroundState == NO_PED && bIsStanding && m_pCurSurface && m_pCurSurface->IsVehicle())) {
+				|| ourWeaponType == WEAPONTYPE_BASEBALLBAT && pedOnGroundState == NO_PED && bIsStanding && m_pCurSurface && m_pCurSurface->IsVehicle())) {
 
 				AnimationId fireAnim = GetFireAnimGround(ourWeapon, false);
 				if (weaponAnimAssoc->animId == fireAnim)
@@ -1636,10 +1707,28 @@ CPed::Attack(void)
 		ClearAimFlag();
 
 		// Echoes of bullets, at the end of the attack. (Bug: doesn't play while reloading)
-		if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep < ourWeapon->m_fAnimLoopEnd) {
+		if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep < animLoopEnd) {
 
-			// What?! Weapon id as volume??
-			DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, GetWeapon()->m_eWeaponType);
+#ifdef AUDIO_NOT_READY
+			switch (ourWeaponType) {
+				case WEAPONTYPE_UZI:
+				case WEAPONTYPE_TEC9:
+				case WEAPONTYPE_SILENCED_INGRAM:
+				case WEAPONTYPE_MP5:
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_UZI_BULLET_ECHO, 0.0f);
+					break;
+				case WEAPONTYPE_RUGER:
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, 0.0f);
+					break;
+				case WEAPONTYPE_M4:
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_M16_BULLET_ECHO, 0.0f);
+					break;
+				default:
+					break;
+			}
+#else
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, ourWeaponType);
+#endif
 		}
 
 		// Fun fact: removing this part leds to reloading flamethrower
@@ -1677,8 +1766,7 @@ CPed::RemoveWeaponModel(int modelId)
 #endif
 		RwFrameForAllObjects(m_pFrames[PED_HANDR]->frame,RemoveAllModelCB,nil);
 
-	// TODO(Miami): Minigun
-	if (IsPlayer() && (modelId == -1 /* || modelId == MI_MINIGUN)*/)) {
+	if (IsPlayer() && (modelId == -1 || modelId == MI_MINIGUN)) {
 		RpAtomic* &atm = ((CPlayerPed*)this)->m_pMinigunTopAtomic;
 		if (atm) {
 			RwFrame *frm = RpAtomicGetFrame(atm);
@@ -1720,15 +1808,19 @@ CPed::SetCurrentWeapon(int slot)
 	}
 }
 
-// --MIAMI: TODO when weapons got converted
+// --MIAMI: Done
 // Only used while deciding which gun ped should switch to, if no ammo left.
 bool
 CPed::SelectGunIfArmed(void)
 {
-	for (int i = 0; i < m_maxWeaponTypeAllowed; i++) {
+	for (int i = 0; i < TOTAL_WEAPON_SLOTS; i++) {
 		if (GetWeapon(i).m_nAmmoTotal > 0) {
 			eWeaponType weaponType = GetWeapon(i).m_eWeaponType;
-			if (weaponType >= WEAPONTYPE_COLT45 && weaponType != WEAPONTYPE_M16 && weaponType <= WEAPONTYPE_FLAMETHROWER) {
+
+			// First condition checks for Pistol, Python and Shotguns
+			if ((weaponType >= WEAPONTYPE_COLT45 && weaponType < WEAPONTYPE_TEC9) ||
+				weaponType == WEAPONTYPE_UZI || weaponType == WEAPONTYPE_M4 || weaponType == WEAPONTYPE_MP5 ||
+				weaponType == WEAPONTYPE_ROCKETLAUNCHER || weaponType == WEAPONTYPE_FLAMETHROWER || weaponType == WEAPONTYPE_SNIPERRIFLE) {
 				SetCurrentWeapon(i);
 				return true;
 			}
@@ -1738,39 +1830,54 @@ CPed::SelectGunIfArmed(void)
 	return false;
 }
 
+// --MIAMI: Done
 void
 CPed::Duck(void)
 {
 	if (CTimer::GetTimeInMilliseconds() > m_duckTimer)
 		ClearDuck();
+	else if (bIsDucking && bCrouchWhenShooting) {
+		CWeaponInfo *weapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
+		CAnimBlendAssociation *attackAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCH);
+		if (!attackAssoc) {
+			if(!!weapon->m_bCrouchFire)
+				attackAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(weapon));
+		}
+		if (!attackAssoc) {
+			if(!!weapon->m_bReload)
+				attackAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchReloadAnim(weapon));
+		}
+		if (!attackAssoc) {
+			bIsDucking = false;
+		}
+	}
 }
 
+// --MIAMI: Done
 void
-CPed::ClearDuck(void)
+CPed::ClearDuck(bool clearTimer)
 {
 	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DUCK_DOWN);
 	if (!animAssoc) {
 		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DUCK_LOW);
-
-		if (!animAssoc) {
-			bIsDucking = false;
-			return;
-		}
 	}
 
-	if (!bCrouchWhenShooting)
-		return;
+	if (!animAssoc) {
+		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCH);
+	}
 
-	if (m_nPedState != PED_ATTACK && m_nPedState != PED_AIM_GUN)
-		return;
+	if (animAssoc) {
+		animAssoc->flags |= ASSOC_DELETEFADEDOUT;
+		animAssoc->blendDelta = -4.0f;
+	}
+	bIsDucking = false;
 
-	animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_RBLOCK_CSHOOT);
-	if (!animAssoc || animAssoc->blendDelta < 0.0f) {
-		CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_RBLOCK_CSHOOT, 4.0f);
+	if (clearTimer) {
+		m_duckTimer = 0;
 	}
 }
 
-// --MIAMI: Done except commented thing
+// --MIAMI: Done
 void
 CPed::ClearPointGunAt(void)
 {
@@ -1781,17 +1888,14 @@ CPed::ClearPointGunAt(void)
 	ClearAimFlag();
 	bIsPointingGunAt = false;
 	if (m_nPedState == PED_AIM_GUN || m_nPedState == PED_ATTACK) {
-
-		if (m_nPedState == PED_FOLLOW_PATH)
-			ClearFollowPath();
-		m_nPedState = PED_IDLE;
+		SetPedState(PED_IDLE);
 		RestorePreviousState();
 	}
 	weaponInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
 	animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_FIRE);
 	if (!animAssoc || animAssoc->blendDelta < 0.0f) {
 		if (!!weaponInfo->m_bCrouchFire) {
-			animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHFIRE);
+			animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(weaponInfo));
 		}
 	}
 	if (animAssoc) {
@@ -1855,7 +1959,7 @@ CPed::BeingDraggedFromCar(void)
 #ifdef VC_PED_PORTS
 	if (m_objective == OBJECTIVE_LEAVE_CAR_AND_DIE) {
 		if (m_pMyVehicle) {
-			m_pMyVehicle->ProcessOpenDoor(m_vehEnterType, NUM_ANIMS, m_pVehicleAnim->currentTime * 5.0f);
+			m_pMyVehicle->ProcessOpenDoor(m_vehEnterType, NUM_STD_ANIMS, m_pVehicleAnim->currentTime * 5.0f);
 		}
 	}
 #endif
@@ -2122,7 +2226,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 			case ANIM_VAN_GETIN:
 #ifdef VC_PED_PORTS
 				multExtractedFromAnim = true;
-				zBlend = Max(m_pVehicleAnim->currentTime / m_pVehicleAnim->hierarchy->totalLength - 0.3f, 0.0f) / (1.0f - 0.3f);
+				zBlend = Max(m_pVehicleAnim->GetProgress() - 0.3f, 0.0f) / (1.0f - 0.3f);
 				// fall through
 #endif
 			case ANIM_CAR_QJACKED:
@@ -2133,7 +2237,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 #ifdef VC_PED_PORTS
 				if (!multExtractedFromAnim) {
 					multExtractedFromAnim = true;
-					zBlend = Max(m_pVehicleAnim->currentTime / m_pVehicleAnim->hierarchy->totalLength - 0.5f, 0.0f) / (1.0f - 0.5f);
+					zBlend = Max(m_pVehicleAnim->GetProgress() - 0.5f, 0.0f) / (1.0f - 0.5f);
 				}
 				// fall through
 #endif
@@ -2141,14 +2245,14 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 			case ANIM_CAR_CRAWLOUT_RHS2:
 			case ANIM_VAN_GETOUT_L:
 			case ANIM_VAN_GETOUT:
-				seatPosMult = m_pVehicleAnim->currentTime / m_pVehicleAnim->hierarchy->totalLength;
+				seatPosMult = m_pVehicleAnim->GetProgress();
 				break;
 			case ANIM_CAR_GETIN_RHS:
 			case ANIM_CAR_GETIN_LHS:
 #ifdef VC_PED_PORTS
 				if (veh && veh->IsCar() && veh->bIsBus) {
 					multExtractedFromAnimBus = true;
-					zBlend = Min(m_pVehicleAnim->currentTime / m_pVehicleAnim->hierarchy->totalLength, 0.5f) / 0.5f;
+					zBlend = Min(m_pVehicleAnim->GetProgress(), 0.5f) / 0.5f;
 				}
 				// fall through
 #endif
@@ -2309,7 +2413,7 @@ particleProduceFootDust(CPed *ped, CVector const &pos, float size, int times)
 	switch (ped->m_nSurfaceTouched)
 	{
 		case SURFACE_TARMAC:
-		case SURFACE_DIRT:
+		case SURFACE_GRAVEL:
 		case SURFACE_PAVEMENT:
 		case SURFACE_SAND:
 			for (int i = 0; i < times; ++i) {
@@ -2462,7 +2566,7 @@ CPed::PlayFootSteps(void)
 		}
 	}
 
-	if (m_nSurfaceTouched == SURFACE_PUDDLE) {
+	if (m_nSurfaceTouched == SURFACE_WATER) {
 		float pedSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
 		if (pedSpeed > 0.03f && CTimer::GetFrameCounter() % 2 == 0 && pedSpeed > 0.13f) {
 #ifdef PC_PARTICLE
@@ -2617,6 +2721,7 @@ CPed::SetPedStats(ePedStats pedStat)
 	m_pedStats = CPedStats::ms_apPedStats[pedStat];
 }
 
+// --MIAMI: Done
 void
 CPed::SetModelIndex(uint32 mi)
 {
@@ -2629,19 +2734,37 @@ CPed::SetModelIndex(uint32 mi)
 	m_animGroup = (AssocGroupId) modelInfo->m_animGroup;
 	CAnimManager::AddAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE);
 
+	// TODO(Miami): This is inlined CanUseTorsoWhenLooking
+	bool canUseMyBody = false;
+	if (m_nPedState != PED_DRIVING && m_nPedState != PED_DRAG_FROM_CAR && !bIsDucking) {
+		if (m_animGroup != ASSOCGRP_SEXYWOMAN && m_animGroup != ASSOCGRP_WOMAN)
+			canUseMyBody = true;
+	}
+	if (!canUseMyBody)
+		m_pedIK.m_flags |= CPedIK::LOOKAROUND_HEAD_ONLY;
+
 	// This is a mistake by R*, velocity is CVector, whereas m_vecAnimMoveDelta is CVector2D. 
 	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity = (CVector*) &m_vecAnimMoveDelta;
 
 #ifdef PED_SKIN
 	if(modelInfo->GetHitColModel() == nil)
 		modelInfo->CreateHitColModelSkinned(GetClump());
+
+	if (IsClumpSkinned(GetClump())) // condition isn't there in VC
+		UpdateRpHAnim();
 #endif
 }
 
 void
 CPed::RemoveLighting(bool reset)
 {
-	CRenderer::RemoveVehiclePedLights(this, reset);
+	if (!bRenderScorched) {
+		CRenderer::RemoveVehiclePedLights(this, reset);
+		if (reset)
+			ReSetAmbientAndDirectionalColours();
+	}
+	SetAmbientColours();
+	DeActivateDirectional();
 }
 
 bool
@@ -2706,14 +2829,15 @@ CPed::WorkOutHeadingForMovingFirstPerson(float offset)
 		angle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown);
 	} else {
 		if (leftRight < 0.0f)
-			angle = 0.5f * PI;
+			angle = HALFPI;
 		else if (leftRight > 0.0f)
-			angle = -0.5f * PI;
+			angle = -HALFPI;
 	}
 
 	return CGeneral::LimitRadianAngle(offset + angle);
 }
 
+// --MIAMI: Done
 void
 CPed::CalculateNewVelocity(void)
 {
@@ -2727,9 +2851,6 @@ CPed::CalculateNewVelocity(void)
 		} else if(PI + m_fRotationCur < limitedRotDest) {
 			limitedRotDest -= 2 * PI;
 		}
-
-		if (IsPlayer() && m_nPedState == PED_ATTACK)
-			headAmount /= 4.0f;
 
 		float neededTurn = limitedRotDest - m_fRotationCur;
 		if (neededTurn <= headAmount) {
@@ -2754,8 +2875,12 @@ CPed::CalculateNewVelocity(void)
 	}
 
 	if ((!TheCamera.Cams[TheCamera.ActiveCam].GetWeaponFirstPersonOn() && !TheCamera.Cams[0].Using3rdPersonMouseCam())
-		|| FindPlayerPed() != this || !CanStrafeOrMouseControl())
+		|| FindPlayerPed() != this || !CanStrafeOrMouseControl()) {
+
+		if (FindPlayerPed() == this)
+			FindPlayerPed()->m_fWalkAngle = 0.0f;
 		return;
+	}
 
 	float walkAngle = WorkOutHeadingForMovingFirstPerson(m_fRotationCur);
 	float pedSpeed = m_moved.Magnitude();
@@ -2775,16 +2900,13 @@ CPed::CalculateNewVelocity(void)
 
 	CAnimBlendAssociation *idleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
 	CAnimBlendAssociation *fightAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
-#ifdef VC_PED_PORTS
 	if(!fightAssoc)
 		fightAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_TIRED);
 
-	// There is one more anim in VC.
+	if(!fightAssoc)
+		fightAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
 
 	if ((!idleAssoc || idleAssoc->blendAmount < 0.5f) && !fightAssoc && !bIsDucking) {
-#else
-	if ((!idleAssoc || idleAssoc->blendAmount < 0.5f) && !fightAssoc) {
-#endif
 		LimbOrientation newUpperLegs;
 		newUpperLegs.yaw = localWalkAngle;
 
@@ -2843,7 +2965,7 @@ CPed::CanPedDriveOff(void)
 bool
 CPed::CanPedJumpThis(CEntity *unused, CVector *damageNormal = nil)
 {
-	if (m_nSurfaceTouched == SURFACE_PUDDLE)
+	if (m_nSurfaceTouched == SURFACE_WATER)
 		return true;
 
 	CVector pos = GetPosition();
@@ -3864,16 +3986,11 @@ CPed::ClearAttackByRemovingAnim(void)
 		return;
 
 	CWeaponInfo *weapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
-	CAnimBlendAssociation *weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), weapon->m_bAnimDetonate ? ANIM_BOMBER : ANIM_WEAPON_FIRE);
-	
-	// TODO(Miami): Remove when fighting got ported
-	if (!weaponAssoc) {
-		weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_PPUNCH);
-	}
+	CAnimBlendAssociation *weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetPrimaryFireAnim(weapon));
 
 	if (!weaponAssoc) {
 		if (!!weapon->m_bCrouchFire)
-			weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHFIRE);
+			weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(weapon));
 	}
 	if (!weaponAssoc) {
 		if(!!weapon->m_bFinish3rd)
@@ -3927,6 +4044,8 @@ CPed::SetStoredState(void)
 void
 CPed::SetDie(AnimationId animId, float delta, float speed)
 {
+	if (m_attractor)
+		GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
 	CPlayerPed *player = FindPlayerPed();
 	if (player == this) {
 		if (!player->m_bCanBeDamaged)
@@ -3954,7 +4073,7 @@ CPed::SetDie(AnimationId animId, float delta, float speed)
 	}
 
 	m_nPedState = PED_DIE;
-	if (animId == NUM_ANIMS) {
+	if (animId == NUM_STD_ANIMS) {
 		bIsPedDieAnimPlaying = false;
 	} else {
 		CAnimBlendAssociation *dieAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, animId, delta);
@@ -3977,6 +4096,7 @@ CPed::SetDie(AnimationId animId, float delta, float speed)
 	m_bloodyFootprintCountOrDeathTime = CTimer::GetTimeInMilliseconds();
 }
 
+// --MIAMI: Done except commented things
 bool
 CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPieceTypes pedPiece, uint8 direction)
 {
@@ -3988,8 +4108,16 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	bool willLinger = false;
 	int random;
 
+	// TODO(Miami): PlayerInfo thingies here
+
 	if (player == this) {
 		if (!player->m_bCanBeDamaged)
+			return false;
+
+		if (damagedBy && damagedBy->IsPed() && ((CPed*)damagedBy)->m_nPedType == PEDTYPE_GANG7)
+			return false;
+
+		if ((method == WEAPONTYPE_FLAMETHROWER || method == WEAPONTYPE_MOLOTOV) && CWorld::Players[CWorld::PlayerInFocus].m_bFireproof)
 			return false;
 
 		player->AnnoyPlayerPed(false);
@@ -3998,7 +4126,10 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	if (DyingOrDead())
 		return false;
 
-	if (!bUsesCollision && method != WEAPONTYPE_DROWNING)
+	if (method == WEAPONTYPE_DROWNING && !bDrownsInWater)
+		return false;
+
+	if (!bUsesCollision && (!bInVehicle || m_nPedState != PED_DRIVING) && method != WEAPONTYPE_DROWNING)
 		return false;
 
 	if (bOnlyDamagedByPlayer && damagedBy != player && damagedBy != FindPlayerVehicle() &&
@@ -4011,8 +4142,12 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	else
 		healthImpact = damage * m_pedStats->m_defendWeakness;
 
+	if (!IsPlayer() &&
+		(method == WEAPONTYPE_SCREWDRIVER || method == WEAPONTYPE_KNIFE || (method >= WEAPONTYPE_CLEAVER && method <= WEAPONTYPE_CHAINSAW)))
+		m_bleedCounter = 200;
+
 	bool detectDieAnim = true;
-	if (m_nPedState == PED_FALL || m_nPedState == PED_GETUP) {
+	if (m_nPedState == PED_GETUP) {
 		if (!IsPedHeadAbovePos(-0.3f)) {
 			if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
 				dieAnim = ANIM_FLOOR_HIT_F;
@@ -4021,20 +4156,36 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 			dieDelta *= 2.0f;
 			dieSpeed = 0.5f;
 			detectDieAnim = false;
-		} else if (m_nPedState == PED_FALL) {
-			dieAnim = NUM_ANIMS;
-			detectDieAnim = false;
 		}
+	} else if (m_nPedState == PED_FALL) {
+		CAnimBlendAssociation *fallAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_PARTIAL);
+		if (!fallAssoc || fallAssoc->IsRunning()) {
+			if (fallAssoc && fallAssoc->blendDelta >= 0.0f)
+				dieAnim = NUM_STD_ANIMS;
+			else
+				dieAnim = ANIM_KO_SHOT_FRONT1;
+		} else {
+			if (fallAssoc->flags & ASSOC_FRONTAL)
+				dieAnim = ANIM_FLOOR_HIT_F;
+			else
+				dieAnim = ANIM_FLOOR_HIT;
+
+			dieDelta *= 2.0f;
+			dieSpeed = 0.5f;
+		}
+		detectDieAnim = false;
 	}
+
 	if (detectDieAnim) {
 		switch (method) {
 			case WEAPONTYPE_UNARMED:
+			case WEAPONTYPE_BRASSKNUCKLE:
 				if (bMeleeProof)
 					return false;
 
 				if (m_nPedState == PED_FALL) {
 					if (IsPedHeadAbovePos(-0.3f)) {
-						dieAnim = NUM_ANIMS;
+						dieAnim = NUM_STD_ANIMS;
 					} else {
 						if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
 							dieAnim = ANIM_FLOOR_HIT_F;
@@ -4062,19 +4213,28 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					}
 				}
 				break;
+			case WEAPONTYPE_SCREWDRIVER:
+			case WEAPONTYPE_GOLFCLUB:
+			case WEAPONTYPE_NIGHTSTICK:
+			case WEAPONTYPE_KNIFE:
 			case WEAPONTYPE_BASEBALLBAT:
+			case WEAPONTYPE_HAMMER:
+			case WEAPONTYPE_CLEAVER:
+			case WEAPONTYPE_MACHETE:
+			case WEAPONTYPE_KATANA:
+			case WEAPONTYPE_CHAINSAW:
 				if (bMeleeProof)
 					return false;
-#ifdef VC_PED_PORTS
-				if (/*method != WEAPONTYPE_KATANA || */
+
+				if (method != WEAPONTYPE_KATANA ||
 					damagedBy != FindPlayerPed()
 					|| FindPlayerPed()->m_nPedState != PED_FIGHT
-					/*|| FindPlayerPed()->m_lastFightMove != 28 && FindPlayerPed()->m_lastFightMove != 29 */
+					|| FindPlayerPed()->m_lastFightMove != FIGHTMOVE_MELEE1 && FindPlayerPed()->m_lastFightMove != FIGHTMOVE_MELEE2
 					|| CGeneral::GetRandomNumber() & 3) {
 
 					if (m_nPedState == PED_FALL) {
 						if (IsPedHeadAbovePos(-0.3f)) {
-							dieAnim = NUM_ANIMS;
+							dieAnim = NUM_STD_ANIMS;
 						} else {
 							if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
 								dieAnim = ANIM_FLOOR_HIT_F;
@@ -4083,8 +4243,8 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 							dieDelta = dieDelta * 2.0f;
 							dieSpeed = 0.5f;
 						}
-					} else if (damagedBy != FindPlayerPed()) { // || FindPlayerPed()->m_lastFightMove != 29)
-						//if (damagedBy != FindPlayerPed() || FindPlayerPed()->m_lastFightMove != 30) {
+					} else if (damagedBy != FindPlayerPed() || FindPlayerPed()->m_lastFightMove != FIGHTMOVE_MELEE2) {
+						if (damagedBy != FindPlayerPed() || FindPlayerPed()->m_lastFightMove != FIGHTMOVE_MELEE3) {
 							switch (direction) {
 								case 0:
 									dieAnim = ANIM_KO_SKID_FRONT;
@@ -4101,82 +4261,49 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 								default:
 									break;
 							}
-						//} else {
-						//	dieAnim = ANIM_KO_SHOT_STOM;
-						//}
+						} else {
+							dieAnim = ANIM_KO_SHOT_STOM;
+						}
 					} else {
 						dieAnim = ANIM_KO_SHOT_FACE;
 					}
 				} else {
 					dieAnim = ANIM_KO_SHOT_FACE;
-					// SpawnFlyingComponent in VC
 					RemoveBodyPart(PED_HEAD, direction);
 					headShot = true;
 					willLinger = true;
 				}
-#else
-				if (m_nPedState == PED_FALL) {
-					if (IsPedHeadAbovePos(-0.3f)) {
-						dieAnim = NUM_ANIMS;
-					} else {
-					    if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
-							dieAnim = ANIM_FLOOR_HIT_F;
-						else
-							dieAnim = ANIM_FLOOR_HIT;
-						dieDelta = dieDelta * 2.0f;
-						dieSpeed = 0.5f;
-					}
-				} else {
-					switch (direction) {
-						case 0:
-							dieAnim = ANIM_KO_SKID_FRONT;
-							break;
-						case 1:
-							dieAnim = ANIM_KO_SPIN_R;
-							break;
-						case 2:
-							dieAnim = ANIM_KO_SKID_BACK;
-							break;
-						case 3:
-							dieAnim = ANIM_KO_SPIN_L;
-							break;
-						default:
-							break;
-					}
-				}
-#endif
 				break;
 			case WEAPONTYPE_COLT45:
-			case WEAPONTYPE_UZI:
+			case WEAPONTYPE_SHOTGUN:
+			case WEAPONTYPE_STUBBY_SHOTGUN:
+			case WEAPONTYPE_SPAS12_SHOTGUN:
 			case WEAPONTYPE_TEC9:
+			case WEAPONTYPE_UZI:
 			case WEAPONTYPE_SILENCED_INGRAM:
 			case WEAPONTYPE_MP5:
-			case WEAPONTYPE_SHOTGUN:
-			case WEAPONTYPE_AK47:
-			case WEAPONTYPE_M16:
+			case WEAPONTYPE_M4:
+			case WEAPONTYPE_RUGER:
 			case WEAPONTYPE_SNIPERRIFLE:
+			case WEAPONTYPE_LASERSCOPE:
+			case WEAPONTYPE_M60:
+			case WEAPONTYPE_MINIGUN:
+			case WEAPONTYPE_UZI_DRIVEBY:
+
 				if (bBulletProof)
 					return false;
 
 				bool dontRemoveLimb;
 				if (IsPlayer() || bNoCriticalHits)
 					dontRemoveLimb = true;
-				else {
-					switch (method) {
-						case WEAPONTYPE_SNIPERRIFLE:
-							dontRemoveLimb = false;
-							break;
-						case WEAPONTYPE_M16:
-							dontRemoveLimb = false;
-							break;
-						case WEAPONTYPE_SHOTGUN:
-							dontRemoveLimb = CGeneral::GetRandomNumber() & 7;
-							break;
-						default:
-							dontRemoveLimb = CGeneral::GetRandomNumber() & 15;
-							break;
-					}
-				}
+				else if (method != WEAPONTYPE_M4 && method != WEAPONTYPE_RUGER && method != WEAPONTYPE_SNIPERRIFLE &&
+						method != WEAPONTYPE_LASERSCOPE) {
+					if (method == WEAPONTYPE_SHOTGUN)
+						dontRemoveLimb = CGeneral::GetRandomNumber() & 7;
+					else
+						dontRemoveLimb = CGeneral::GetRandomNumber() & 15;
+				} else
+					dontRemoveLimb = false;
 
 				if (dontRemoveLimb) {
 					if (method == WEAPONTYPE_SHOTGUN) {
@@ -4241,8 +4368,8 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					}
 				}
 				break;
-			case WEAPONTYPE_ROCKETLAUNCHER:
 			case WEAPONTYPE_GRENADE:
+			case WEAPONTYPE_ROCKETLAUNCHER:
 			case WEAPONTYPE_EXPLOSION:
 				if (bExplosionProof)
 					return false;
@@ -4339,7 +4466,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					default:
 						break;
 				}
-				if (damagedBy) {
+				if (damagedBy && pedPiece != PEDPIECE_TORSO) {
 					CVehicle *vehicle = (CVehicle*)damagedBy;
 					if (method == WEAPONTYPE_RAMMEDBYCAR) {
 						float vehSpeed = vehicle->m_vecMoveSpeed.Magnitude();
@@ -4398,6 +4525,16 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 			CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss = CTimer::GetTimeInMilliseconds();
 
 		m_lastWepDam = method;
+		m_lastDamEntity = damagedBy;
+	}
+
+	if (method == WEAPONTYPE_FALL) {
+		if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_ROLLOUT_LHS)) {
+			if (m_fHealth >= 1.0 && m_fHealth - healthImpact < 5.0f) {
+				m_fHealth = Min(m_fHealth, 5.0f);
+				return false;
+			}
+		}
 	}
 
 	if (m_fHealth - healthImpact >= 1.0f && !willLinger) {
@@ -4409,6 +4546,8 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		if (method != WEAPONTYPE_DROWNING) {
 #ifdef VC_PED_PORTS
 			if (m_pMyVehicle) {
+
+				// TODO(Miami): Bikes
 				if (m_pMyVehicle->IsCar() && m_pMyVehicle->pDriver == this) {
 					if (m_pMyVehicle->GetStatus() == STATUS_SIMPLE) {
 						m_pMyVehicle->SetStatus(STATUS_PHYSICS);
@@ -4419,7 +4558,8 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					m_pMyVehicle->AutoPilot.m_nTempAction = TEMPACT_HANDBRAKESTRAIGHT;
 					m_pMyVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 2000;
 				}
-				if (m_pMyVehicle->CanPedExitCar()) {
+// TODO(MIAMI): argument
+				if (m_pMyVehicle->CanPedExitCar(false)) {
 					SetObjective(OBJECTIVE_LEAVE_CAR_AND_DIE, m_pMyVehicle);
 				} else {
 					m_fHealth = 0.0f;
@@ -4430,7 +4570,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					SetDie(dieAnim, dieDelta, dieSpeed);
 					/*
 					if (damagedBy == FindPlayerPed() && damagedBy != this) {
-						// PlayerInfo stuff
+						// TODO(Miami): PlayerInfo stuff
 					}
 					*/
 				}
@@ -4459,7 +4599,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		if (player == this)
 			m_pMyVehicle->SetStatus(STATUS_PLAYER_DISABLED);
 
-		SetDie(NUM_ANIMS, 4.0f, 0.0f);
+		SetDie(NUM_STD_ANIMS, 4.0f, 0.0f);
 		return true;
 	} else {
 		m_fHealth = 0.0f;
@@ -4467,7 +4607,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 
 		if (damagedBy == player || damagedBy && damagedBy == FindPlayerVehicle()) {
 
-			// There are PlayerInfo stuff here in VC
+			// TODO(Miami): PlayerInfo stuff
 			CDarkel::RegisterKillByPlayer(this, method, headShot);
 			m_threatEntity = player;
 		} else {
@@ -4512,7 +4652,7 @@ CPed::SetGetUp(void)
 		}
 		if (m_nPedState != PED_GETUP) {
 			SetStoredState();
-			m_nPedState = PED_GETUP;
+			SetPedState(PED_GETUP);
 		}
 
 		CVehicle *collidingVeh = (CVehicle*)m_pCollidingEntity;
@@ -4555,7 +4695,7 @@ CPed::SetGetUp(void)
 		animAssoc->SetFinishCallback(PedGetupCB,this);
 	} else {
 		m_fHealth = 0.0f;
-		SetDie(NUM_ANIMS, 4.0f, 0.0f);
+		SetDie(NUM_STD_ANIMS, 4.0f, 0.0f);
 	}
 }
 
@@ -4829,10 +4969,7 @@ CPed::SetPointGunAt(CEntity *to)
 	if (m_nPedState != PED_ATTACK)
 		SetStoredState();
 
-	if (m_nPedState == PED_FOLLOW_PATH)
-		ClearFollowPath();
-
-	m_nPedState = PED_AIM_GUN;
+	SetPedState(PED_AIM_GUN);
 	bIsPointingGunAt = true;
 	SetMoveState(PEDMOVE_NONE);
 
@@ -4840,7 +4977,7 @@ CPed::SetPointGunAt(CEntity *to)
 
 	if (bCrouchWhenShooting && bIsDucking) {
 		if (!!curWeapon->m_bCrouchFire) {
-			aimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHFIRE);
+			aimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(curWeapon));
 		}
 	} else {
 		aimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_FIRE);
@@ -4849,7 +4986,7 @@ CPed::SetPointGunAt(CEntity *to)
 	if (!aimAssoc || aimAssoc->blendDelta < 0.0f) {
 		if (bCrouchWhenShooting && bIsDucking) {
 			if (!!curWeapon->m_bCrouchFire) {
-				aimAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay, ANIM_WEAPON_CROUCHFIRE, 4.0f);
+				aimAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay, GetCrouchFireAnim(curWeapon), 4.0f);
 			}
 		} else {
 			aimAssoc = CAnimManager::AddAnimation(GetClump(), curWeapon->m_AnimToPlay, ANIM_WEAPON_FIRE);
@@ -4870,15 +5007,15 @@ CPed::SetAmmo(eWeaponType weaponType, uint32 ammo)
 	if (slot == -1)
 		return;
 
-	GetWeapon(slot).m_nAmmoTotal += ammo;
-	if (weaponType < WEAPONTYPE_LAST_WEAPONTYPE && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
+	GetWeapon(slot).m_nAmmoTotal = ammo;
+	if (weaponType < WEAPONTYPE_TOTALWEAPONS && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
 
 		// Looks like abandoned idea. This block never runs, ms_aMaxAmmoForWeapon is always -1.
-		GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], (int32)GetWeapon(slot).m_nAmmoTotal);
+		GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], GetWeapon(slot).m_nAmmoTotal);
 	} else {
 		GetWeapon(slot).m_nAmmoTotal = Min(99999, GetWeapon(slot).m_nAmmoTotal);
 	}
-	uint32 newClip = GetWeapon(slot).m_nAmmoTotal;
+	int32 newClip = GetWeapon(slot).m_nAmmoTotal;
 	if (newClip >= GetWeapon(slot).m_nAmmoInClip)
 		newClip = GetWeapon(slot).m_nAmmoInClip;
 	GetWeapon(slot).m_nAmmoInClip = newClip;
@@ -4896,10 +5033,10 @@ CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo)
 		return;
 
 	GetWeapon(slot).m_nAmmoTotal += ammo;
-	if (weaponType < WEAPONTYPE_LAST_WEAPONTYPE && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
+	if (weaponType < WEAPONTYPE_TOTALWEAPONS && weaponType > WEAPONTYPE_UNARMED && CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType] >= 0) {
 
 		// Looks like abandoned idea. This block never runs, ms_aMaxAmmoForWeapon is always -1.
-		GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], (int32)GetWeapon(slot).m_nAmmoTotal);
+		GetWeapon(slot).m_nAmmoTotal = Min(CWeaponInfo::ms_aMaxAmmoForWeapon[weaponType], GetWeapon(slot).m_nAmmoTotal);
 	} else {
 		GetWeapon(slot).m_nAmmoTotal = Min(99999, GetWeapon(slot).m_nAmmoTotal);
 	}
@@ -4966,7 +5103,7 @@ CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 			else if (animType < 2)
 				stepAnim = ANIM_EV_STEP;
 			else
-				stepAnim = NUM_ANIMS;
+				stepAnim = NUM_STD_ANIMS;
 		}
 		if (!RpAnimBlendClumpGetAssociation(GetClump(), stepAnim)) {
 			CAnimBlendAssociation *stepAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, stepAnim, 8.0f);
@@ -5111,7 +5248,7 @@ CPed::SetAttack(CEntity *victim)
 		return;
 
 	if (curWeapon->m_bReload &&
-		(RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_RELOAD) || RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD))) {
+		(RpAnimBlendClumpGetAssociation(GetClump(), GetReloadAnim(curWeapon)) || RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchReloadAnim(curWeapon)))) {
 		if (!IsPlayer() || m_nPedState != PED_ATTACK || ((CPlayerPed*)this)->m_bHaveTargetSelected)
 			bIsAttacking = false;
 		else
@@ -5120,23 +5257,16 @@ CPed::SetAttack(CEntity *victim)
 		return;
 	}
 
-	// TODO(Miami): Brass knuckles
-	if (GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED || curWeapon->m_bFightMode /* || GetWeapon()->m_eWeaponType == WEAPONTYPE_BRASSKNUCKLES */) {
+	if (GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED || curWeapon->m_bFightMode || GetWeapon()->m_eWeaponType == WEAPONTYPE_BRASSKNUCKLE) {
 		if (IsPlayer() ||
 			(m_nPedState != PED_FIGHT && m_nMoveState != PEDMOVE_NONE && m_nMoveState != PEDMOVE_STILL
 				&& !(m_pedStats->m_flags & STAT_SHOPPING_BAGS) && curWeapon->m_bPartialAttack)) {
 
 			if (m_nPedState != PED_ATTACK) {
-				if (m_nPedState == PED_FOLLOW_PATH)
-					ClearFollowPath();
-
-				m_nPedState = PED_ATTACK;
+				SetPedState(PED_ATTACK);
 				bIsAttacking = false;
 
-				// TODO(Miami): Revert when fighting got ported
-				animAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay,
-					GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED ? ANIM_FIGHT_PPUNCH : ANIM_MELEE_ATTACK_START, 8.0f);
-				// CAnimBlendAssociation *animAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay, ANIM_MELEE_ATTACK_START, 8.0f);
+				CAnimBlendAssociation *animAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay, ANIM_MELEE_ATTACK_START, 8.0f);
 				animAssoc->SetRun();
 				if (animAssoc->currentTime == animAssoc->hierarchy->totalLength)
 					animAssoc->SetCurrentTime(0.0f);
@@ -5154,10 +5284,7 @@ CPed::SetAttack(CEntity *victim)
 		m_nMoveState == PEDMOVE_WALK || m_nMoveState == PEDMOVE_RUN)) {
 
 		if (m_nPedState != PED_ATTACK) {
-			if (m_nPedState == PED_FOLLOW_PATH)
-				ClearFollowPath();
-
-			m_nPedState = PED_ATTACK;
+			SetPedState(PED_ATTACK);
 			bIsAttacking = false;
 			CAnimBlendAssociation* animAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay, ANIM_MELEE_ATTACK_START, 8.0f);
 			animAssoc->SetRun();
@@ -5179,8 +5306,8 @@ CPed::SetAttack(CEntity *victim)
 		aimPos += GetUp() * 0.35f;
 		CEntity *obstacle = CWorld::TestSphereAgainstWorld(aimPos, 0.2f, nil, true, false, false, true, false, false);
 		if (obstacle) {
-			if(gaTempSphereColPoints[0].surfaceB != SURFACE_SCAFFOLD && gaTempSphereColPoints[0].surfaceB != SURFACE_METAL_FENCE &&
-				gaTempSphereColPoints[0].surfaceB != SURFACE_WOOD_BOX && gaTempSphereColPoints[0].surfaceB != SURFACE_METAL_POLE) {
+			if(gaTempSphereColPoints[0].surfaceB != SURFACE_TRANSPARENT_CLOTH && gaTempSphereColPoints[0].surfaceB != SURFACE_METAL_CHAIN_FENCE &&
+				gaTempSphereColPoints[0].surfaceB != SURFACE_WOOD_BENCH && gaTempSphereColPoints[0].surfaceB != SURFACE_SCAFFOLD_POLE) {
 				if (!IsPlayer()) {
 					bObstacleShowedUpDuringKillObjective = true;
 					m_shootTimer = 0;
@@ -5234,19 +5361,16 @@ CPed::SetAttack(CEntity *victim)
 			if (m_nPedState != PED_AIM_GUN)
 				SetStoredState();
 
-			if (m_nPedState == PED_FOLLOW_PATH)
-				ClearFollowPath();
-
-			m_nPedState = PED_ATTACK;
+			SetPedState(PED_ATTACK);
 			SetMoveState(PEDMOVE_NONE);
 			if (bCrouchWhenShooting && bIsDucking && !!curWeapon->m_bCrouchFire) {
-				CAnimBlendAssociation* curMoveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHFIRE);
+				CAnimBlendAssociation* curMoveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(curWeapon));
 				if (curMoveAssoc) {
-					if (strcmp(CAnimManager::GetAnimAssociation(curWeapon->m_AnimToPlay, ANIM_WEAPON_CROUCHFIRE)->hierarchy->name, curMoveAssoc->hierarchy->name) != 0) {
+					if (strcmp(CAnimManager::GetAnimAssociation(curWeapon->m_AnimToPlay, GetCrouchFireAnim(curWeapon))->hierarchy->name, curMoveAssoc->hierarchy->name) != 0) {
 						delete curMoveAssoc;
 					}
 				}
-				animAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay, ANIM_WEAPON_CROUCHFIRE, 8.0f);
+				animAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay, GetCrouchFireAnim(curWeapon), 8.0f);
 			} else {
 				float animDelta = 8.0f;
 				if (curWeapon->m_eWeaponFire == WEAPON_FIRE_MELEE)
@@ -5366,10 +5490,11 @@ CPed::StartFightAttack(uint8 buttonPressure)
 		nPlayerInComboMove = 0;
 }
 
+// --MIAMI: Done
 void
 CPed::LoadFightData(void)
 {
-	float startFireTime, endFireTime, comboFollowOnTime, strikeRadius;
+	float startFireTime, endFireTime, comboFollowOnTime, strikeRadius, extendReachMultiplier;
 	int damage, flags;
 	char line[256], moveName[32], animName[32], hitLevel;
 	int moveId = 0;
@@ -5398,12 +5523,13 @@ CPed::LoadFightData(void)
 
 		sscanf(
 			&line[lp],
-			"%s %f %f %f %f %c %s %d %d",
+			"%s %f %f %f %f %f %c %s %d %d",
 			moveName,
 			&startFireTime,
 			&endFireTime,
 			&comboFollowOnTime,
 			&strikeRadius,
+			&extendReachMultiplier,
 			&hitLevel,
 			animName,
 			&damage,
@@ -5416,6 +5542,7 @@ CPed::LoadFightData(void)
 		tFightMoves[moveId].endFireTime = endFireTime / 30.0f;
 		tFightMoves[moveId].comboFollowOnTime = comboFollowOnTime / 30.0f;
 		tFightMoves[moveId].strikeRadius = strikeRadius;
+		tFightMoves[moveId].extendReachMultiplier = extendReachMultiplier;
 		tFightMoves[moveId].damage = damage;
 		tFightMoves[moveId].flags = flags;
 
@@ -5439,11 +5566,14 @@ CPed::LoadFightData(void)
 				break;
 		}
 
-		if (strncmp(animName, "null", 4) != 0) {
-			animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, animName);
-			tFightMoves[moveId].animId = (AnimationId)animAssoc->animId;
-		} else {
-			tFightMoves[moveId].animId = ANIM_WALK;
+		if (strncmp(animName, "default", 8) != 0) {
+			if (strncmp(animName, "null", 5) != 0) {
+				animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, animName);
+				tFightMoves[moveId].animId = (AnimationId)animAssoc->animId;
+			}
+			else {
+				tFightMoves[moveId].animId = ANIM_WALK;
+			}
 		}
 		moveId++;
 	}
@@ -5503,13 +5633,13 @@ CPed::FightStrike(CVector &touchedNodePos)
 				for (int j = 0; j < hisCol->numSpheres; j++) {
 					attackDistance = hisCol->spheres[j].center;
 					attackDistance -= touchedNodePos;
-					CColSphere *ourPieces = hisCol->spheres;
-					float maxDistanceToBeat = ourPieces[j].radius + tFightMoves[m_lastFightMove].strikeRadius;
+					CColSphere *hisPieces = hisCol->spheres;
+					float maxDistanceToBeat = hisPieces[j].radius + tFightMoves[m_lastFightMove].strikeRadius;
 
 					// We can beat him too
 					if (sq(maxDistanceToBeat) > attackDistance.MagnitudeSqr()) {
 						pedFound = true;
-						closestPedPiece = (ePedPieceTypes) ourPieces[j].piece;
+						closestPedPiece = (ePedPieceTypes) hisPieces[j].piece;
 						break;
 					}
 				}
@@ -5536,6 +5666,7 @@ CPed::FightStrike(CVector &touchedNodePos)
 			damageMult *= m_pedStats->m_attackStrength;
 		}
 
+		/*
 		// Change direction if we used kick.
 		if (m_lastFightMove == FIGHTMOVE_KICK) {
 			if (CGeneral::GetRandomNumber() & 1) {
@@ -5543,7 +5674,7 @@ CPed::FightStrike(CVector &touchedNodePos)
 				if (direction > 3)
 					direction -= 4;
 			}
-		}
+		} */
 		nearPed->ReactToAttack(this);
 
 		// Mostly unused. if > 5, ANIM_HIT_WALK will be run, that's it.
@@ -5720,7 +5851,7 @@ CPed::SetFlee(CVector2D const &from, int time)
 void
 CPed::SetWaitState(eWaitState state, void *time)
 {
-	AnimationId waitAnim = NUM_ANIMS;
+	AnimationId waitAnim = NUM_STD_ANIMS;
 	CAnimBlendAssociation *animAssoc;
 
 	if (!IsPedInControl())
@@ -5807,10 +5938,10 @@ CPed::SetWaitState(eWaitState state, void *time)
 		case WAITSTATE_PLAYANIM_COWER:
 			waitAnim = ANIM_HANDSCOWER;
 		case WAITSTATE_PLAYANIM_HANDSUP:
-			if (waitAnim == NUM_ANIMS)
+			if (waitAnim == NUM_STD_ANIMS)
 				waitAnim = ANIM_HANDSUP;
 		case WAITSTATE_PLAYANIM_HANDSCOWER:
-			if (waitAnim == NUM_ANIMS)
+			if (waitAnim == NUM_STD_ANIMS)
 				waitAnim = ANIM_HANDSCOWER;
 			m_headingRate = 0.0f;
 			if (time)
@@ -5824,10 +5955,10 @@ CPed::SetWaitState(eWaitState state, void *time)
 		case WAITSTATE_PLAYANIM_DUCK:
 			waitAnim = ANIM_DUCK_DOWN;
 		case WAITSTATE_PLAYANIM_TAXI:
-			if (waitAnim == NUM_ANIMS)
+			if (waitAnim == NUM_STD_ANIMS)
 				waitAnim = ANIM_IDLE_TAXI;
 		case WAITSTATE_PLAYANIM_CHAT:
-			if (waitAnim == NUM_ANIMS)
+			if (waitAnim == NUM_STD_ANIMS)
 				waitAnim = ANIM_IDLE_CHAT;
 			if (time)
 				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
@@ -5846,8 +5977,44 @@ CPed::SetWaitState(eWaitState state, void *time)
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 2500;
 			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 4.0f);
 			break;
+		case WAITSTATE_SIT_DOWN:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_SEAT_DOWN, 4.0f);
+			animAssoc->SetFinishCallback(FinishedWaitCB, this);
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 10000;
+			break;
+		case WAITSTATE_SIT_UP:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_SEAT_UP, 4.0f);
+			animAssoc->SetFinishCallback(FinishedWaitCB, this);
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 100000;
+			break;
+		case WAITSTATE_SIT_IDLE:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_SEAT_IDLE, 5000.0f);
+			animAssoc->SetFinishCallback(FinishedWaitCB, this);
+			if (time)
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
+			else
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(25000, 30000);
+			break;
+		case WAITSTATE_USE_ATM:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ATM, 5000.0f);
+			animAssoc->SetFinishCallback(FinishedWaitCB, this);
+			if (time)
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
+			else
+				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 100000;
+			break;
+		case WAITSTATE_SUN_BATHE_PRE:
+		case WAITSTATE_SUN_BATHE_DOWN:
+		case WAITSTATE_SUN_BATHE_IDLE:
+		case WAITSTATE_RIOT:
+		case WAITSTATE_FAST_FALL:
+		case WAITSTATE_BOMBER:
+		case WAITSTATE_STRIPPER:
+		case WAITSTATE_GROUND_ATTACK:
+		case WAITSTATE_LANCESITTING:
+		case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
 		default:
-			m_nWaitState = WAITSTATE_FALSE;
+			ClearWaitState();
 			RestoreHeadingRate();
 			return;
 	}
@@ -5873,7 +6040,7 @@ CPed::PlayHitSound(CPed *hitTo)
 		S42 = SOUND_FIGHT_PUNCH_FROM_BEHIND_42,
 		S43 = SOUND_FIGHT_KNEE_OR_KICK_43,
 		S44 = SOUND_FIGHT_KICK_44,
-		NO_SND = SOUND_TOTAL_PED_SOUNDS
+		NO_SND = SOUND_NO_SOUND
 	};
 	uint16 hitSoundsByFightMoves[12][10] = {
 		{S39,S42,S43,S43,S39,S39,S39,S39,S39,S42},
@@ -6246,6 +6413,7 @@ CPed::CollideWithPed(CPed *collideWith)
 	}
 }
 
+// --MIAMI: Done except commented thing
 void
 CPed::CreateDeadPedMoney(void)
 {
@@ -6253,36 +6421,74 @@ CPed::CreateDeadPedMoney(void)
 		return;
 
 	int skin = GetModelIndex();
+
+	// TODO(Miami): New flag
 	if ((skin >= MI_COP && skin <= MI_FIREMAN) || CharCreatedBy == MISSION_CHAR || bInVehicle)
 		return;
 
-	int money = CGeneral::GetRandomNumber() % 60;
+	int money = m_nPedMoney;
 	if (money < 10)
 		return;
 
-	if (money == 43)
-		money = 700;
+	CVector pickupPos = GetPosition();
+	CPickups::CreateSomeMoney(pickupPos, money);
+	m_nPedMoney = 0;
+}
 
-	int pickupCount = money / 40 + 1;
-	int moneyPerPickup = money / pickupCount;
+void
+CPed::CreateDeadPedPickupCoors(float *x, float *y, float *z)
+{
+	bool found = false;
+	CVector pickupPos;
 
-	for(int i = 0; i < pickupCount; i++) {
-		// (CGeneral::GetRandomNumber() % 256) * PI / 128 gives a float up to something TWOPI-ish.
-		float pickupX = 1.5f * Sin((CGeneral::GetRandomNumber() % 256) * PI / 128) + GetPosition().x;
-		float pickupY = 1.5f * Cos((CGeneral::GetRandomNumber() % 256) * PI / 128) + GetPosition().y;
-		bool found = false;
-		float groundZ = CWorld::FindGroundZFor3DCoord(pickupX, pickupY, GetPosition().z, &found) + 0.5f;
-		if (found) {
-			CPickups::GenerateNewOne(CVector(pickupX, pickupY, groundZ), MI_MONEY, PICKUP_MONEY, moneyPerPickup + (CGeneral::GetRandomNumber() & 7));
+#define NUMBER_OF_ATTEMPTS 32
+	for (int i = 0; i < NUMBER_OF_ATTEMPTS; i++) {
+
+		pickupPos = GetPosition();
+		pickupPos.x = 1.5f * Sin((CGeneral::GetRandomNumber() % 256) * PI / 128) + GetPosition().x;
+		pickupPos.y = 1.5f * Cos((CGeneral::GetRandomNumber() % 256) * PI / 128) + GetPosition().y;
+		pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
+
+		if (!found)
+			continue;
+
+		CVector pedPos = GetPosition();
+		pedPos.z += 0.3f;
+
+		CVector pedToPickup = pickupPos - pedPos;
+		float distance = pedToPickup.Magnitude();
+
+		// outer edge of pickup
+		distance = (distance + 0.4f) / distance;
+		CVector pickupPos2 = pedPos;
+		pickupPos2 += distance * pedToPickup;
+
+		if ((pickupPos - FindPlayerCoors()).Magnitude2D() > 2.0f || i > NUMBER_OF_ATTEMPTS / 2) {
+
+			if (i > NUMBER_OF_ATTEMPTS / 2 || !CPickups::TestForPickupsInBubble(pickupPos, 1.3f)) {
+
+				if (CWorld::GetIsLineOfSightClear(pickupPos2, pedPos,
+					true, i < NUMBER_OF_ATTEMPTS / 2, false, i < NUMBER_OF_ATTEMPTS / 2, false, false, false)) {
+
+					if (i > NUMBER_OF_ATTEMPTS / 2 || !CWorld::TestSphereAgainstWorld(pickupPos, 1.2f, nil, false, true, false, false, false, false)) {
+						*x = pickupPos.x;
+						*y = pickupPos.y;
+						*z = pickupPos.z;
+						return;
+					}
+				}
+			}
 		}
 	}
+	*x = GetPosition().x;
+	*y = GetPosition().y;
+	*z = GetPosition().z + 0.4f;
+#undef NUMBER_OF_ATTEMPTS
 }
 
 void
 CPed::CreateDeadPedWeaponPickups(void)
 {
-	bool found = false;
-	float angleToPed;
 	CVector pickupPos;
 
 	if (bInVehicle)
@@ -6292,37 +6498,14 @@ CPed::CreateDeadPedWeaponPickups(void)
 
 		eWeaponType weapon = GetWeapon(i).m_eWeaponType;
 		int weaponAmmo = GetWeapon(i).m_nAmmoTotal;
-		if (weapon == WEAPONTYPE_UNARMED || weapon == WEAPONTYPE_DETONATOR || weaponAmmo == 0)
+		if (weapon == WEAPONTYPE_UNARMED || weapon == WEAPONTYPE_DETONATOR || (weaponAmmo == 0 && !GetWeapon(i).IsTypeMelee()))
 			continue;
 
-		angleToPed = i * 1.75f;
-		pickupPos = GetPosition();
-		pickupPos.x += 1.5f * Sin(angleToPed);
-		pickupPos.y += 1.5f * Cos(angleToPed);
-		pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
-
-		CVector pedPos = GetPosition();
-		pedPos.z += 0.3f;
-
-		CVector pedToPickup = pickupPos - pedPos;
-		float distance = pedToPickup.Magnitude();
-
-		// outer edge of pickup
-		distance = (distance + 0.3f) / distance;
-		CVector pickupPos2 = pedPos;
-		pickupPos2 += distance * pedToPickup;
-
-		// pickup must be on ground and line to its edge must be clear
-		if (!found || CWorld::GetIsLineOfSightClear(pickupPos2, pedPos, true, false, false, false, false, false, false)) {
-			// otherwise try another position (but disregard second check apparently)
-			angleToPed += 3.14f;
-			pickupPos = GetPosition();
-			pickupPos.x += 1.5f * Sin(angleToPed);
-			pickupPos.y += 1.5f * Cos(angleToPed);
-			pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
+		int quantity = Min(weaponAmmo, AmmoForWeapon_OnStreet[weapon] / 2);
+		CreateDeadPedPickupCoors(&pickupPos.x, &pickupPos.y, &pickupPos.z);
+		if (!CPickups::TryToMerge_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, quantity, false)) {
+			CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, Min(weaponAmmo, quantity));
 		}
-		if (found)
-			CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, Min(weaponAmmo, AmmoForWeapon_OnStreet[weapon]));
 	}
 	ClearWeapons();
 }
@@ -6420,13 +6603,6 @@ CPed::RemoveWeaponAnims(int unused, float animDelta)
 	CAnimBlendAssociation *weaponAssoc;
 	//CWeaponInfo::GetWeaponInfo(unused);
 
-	// TODO(Miami): Remove when fighting got ported
-	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_PPUNCH);
-	if (weaponAssoc) {
-		weaponAssoc->blendDelta = animDelta;
-		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
-	}
-
 	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_FIRE);
 	if (weaponAssoc) {
 		weaponAssoc->blendDelta = animDelta;
@@ -6468,10 +6644,7 @@ CPed::SetDead(void)
 	if (m_nPedState == PED_DRIVING)
 		bIsVisible = false;
 
-	if (m_nPedState == PED_FOLLOW_PATH)
-		ClearFollowPath();
-
-	m_nPedState = PED_DEAD;
+	SetPedState(PED_DEAD);
 	m_pVehicleAnim = nil;
 	m_pCollidingEntity = nil;
 
@@ -6522,11 +6695,7 @@ CPed::SetSeek(CVector pos, float distanceToCountDone)
 		|| (m_nPedState == PED_SEEK_POS && m_vecSeekPos.x == pos.x && m_vecSeekPos.y == pos.y))
 		return;
 
-	if (GetWeapon()->m_eWeaponType == WEAPONTYPE_M16
-		|| GetWeapon()->m_eWeaponType == WEAPONTYPE_AK47
-		|| GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE
-		|| GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER
-		|| GetWeapon()->m_eWeaponType == WEAPONTYPE_SHOTGUN) {
+	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAimWithArm) {
 		ClearPointGunAt();
 	}
 
@@ -6587,6 +6756,7 @@ CPed::DoesLOSBulletHitPed(CColPoint &colPoint)
 	return retVal;
 }
 
+// TODO(Miami): Ducking doesn't work, fix this
 bool
 CPed::DuckAndCover(void)
 {
@@ -6604,9 +6774,11 @@ CPed::DuckAndCover(void)
 				SetAimFlag(m_pedInObjective);
 
 		} else {
-			bCrouchWhenShooting = false;
 			bKindaStayInSamePlace = false;
-			bIsDucking = false;
+			if (bIsDucking)
+				ClearDuck(true);
+
+			bCrouchWhenShooting = false;
 			bDuckAndCover = false;
 			m_headingRate = 10.0f;
 			m_duckAndCoverTimer = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(20000,30000);
@@ -6619,8 +6791,11 @@ CPed::DuckAndCover(void)
 	bool justDucked = false;
 	CVehicle *foundVeh = nil;
 	float maxDist = 225.0f;
-	bIsDucking = false;
+	if (bIsDucking)
+		ClearDuck(true);
+
 	bCrouchWhenShooting = false;
+
 	if (CTimer::GetTimeInMilliseconds() > m_leaveCarTimer) {
 		CVector pos = GetPosition();
 		int16 lastVehicle;
@@ -7009,13 +7184,9 @@ CPed::Fight(void)
 				case FIGHTMOVE_KNEE:
 					TransformToNode(touchingNodePos, PED_LOWERLEGR);
 					break;
-				case FIGHTMOVE_HEADBUTT:
-					TransformToNode(touchingNodePos, PED_HEAD);
-					break;
 				case FIGHTMOVE_PUNCHJAB:
 					TransformToNode(touchingNodePos, PED_HANDL);
 					break;
-				case FIGHTMOVE_KICK:
 				case FIGHTMOVE_LONGKICK:
 				case FIGHTMOVE_ROUNDHOUSE:
 				case FIGHTMOVE_GROUNDKICK:
@@ -7076,12 +7247,12 @@ CPed::Fight(void)
 			canRoundhouse = false;
 			punchOnly = false;
 			canKick = true;
-			nextFightMove = (m_fightButtonPressure > 190 ? FIGHTMOVE_HEADBUTT : FIGHTMOVE_KNEE);
+			nextFightMove = (m_fightButtonPressure > 190 ? FIGHTMOVE_BODYBLOW : FIGHTMOVE_KNEE);
 			hasShoppingBags = false;
 			canKneeHead = true;
 			nPlayerInComboMove = 0;
 		} else {
-			nextFightMove = (m_fightButtonPressure > 120 ? FIGHTMOVE_HEADBUTT : FIGHTMOVE_KNEE);
+			nextFightMove = (m_fightButtonPressure > 120 ? FIGHTMOVE_BODYBLOW : FIGHTMOVE_KNEE);
 			uint16 pedFeatures = m_pedStats->m_flags;
 			punchOnly = pedFeatures & STAT_PUNCH_ONLY;
 			canRoundhouse = pedFeatures & STAT_CAN_ROUNDHOUSE;
@@ -7120,7 +7291,7 @@ CPed::Fight(void)
 								&& neededTurn < DEGTORAD(35.0f)
 								&& (canKick || hasShoppingBags)) {
 
-								nextFightMove = FIGHTMOVE_KICK;
+								nextFightMove = FIGHTMOVE_LONGKICK;
 								if (hasShoppingBags) {
 									nextFightMove = FIGHTMOVE_ROUNDHOUSE;
 								} else if (canRoundhouse && CGeneral::GetRandomNumber() & 1) {
@@ -7213,7 +7384,7 @@ CPed::Fight(void)
 						if (fightingPedDist >= 1.3f) {
 
 							if (fightingPedDist < 1.7f && canKick) {
-								nextFightMove = FIGHTMOVE_KICK;
+								nextFightMove = FIGHTMOVE_LONGKICK;
 								if (canRoundhouse && CGeneral::GetRandomNumber() & 1)
 									nextFightMove = FIGHTMOVE_ROUNDHOUSE;
 
@@ -7547,12 +7718,12 @@ CPed::FinishedWaitCB(CAnimBlendAssociation *animAssoc, void *arg)
 void
 CPed::Wait(void)
 {
-	AnimationId mustHaveAnim = NUM_ANIMS;
+	AnimationId mustHaveAnim = NUM_STD_ANIMS;
 	CAnimBlendAssociation *animAssoc;
 	CPed *pedWeLook;
 
 	if (DyingOrDead()) {
-		m_nWaitState = WAITSTATE_FALSE;
+		ClearWaitState();
 		RestoreHeadingRate();
 		return;
 	}
@@ -7562,7 +7733,7 @@ CPed::Wait(void)
 		case WAITSTATE_TRAFFIC_LIGHTS:
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
 				if (CTrafficLights::LightForPeds() == PED_LIGHTS_WALK) {
-					m_nWaitState = WAITSTATE_FALSE;
+					ClearWaitState();
 					SetMoveState(PEDMOVE_WALK);
 				}
 			}
@@ -7571,7 +7742,7 @@ CPed::Wait(void)
 		case WAITSTATE_CROSS_ROAD:
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
 				if (CGeneral::GetRandomNumber() & 1 || !m_nWaitTimer)
-					m_nWaitState = WAITSTATE_FALSE;
+					ClearWaitState();
 				else
 					SetWaitState(WAITSTATE_CROSS_ROAD_LOOK, nil);
 
@@ -7585,7 +7756,7 @@ CPed::Wait(void)
 
 		case WAITSTATE_CROSS_ROAD_LOOK:
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ROAD_CROSS);
 				if (animAssoc) {
 					animAssoc->blendDelta = -8.0f;
@@ -7602,7 +7773,7 @@ CPed::Wait(void)
 					CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 4.0f);
 				}
 			} else {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 				SetMoveState(PEDMOVE_WALK);
 			}
 			break;
@@ -7613,13 +7784,13 @@ CPed::Wait(void)
 					m_collidingThingTimer = CTimer::GetTimeInMilliseconds() + 2500;
 				}
 			} else {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 			}
 			break;
 
 		case WAITSTATE_TURN180:
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 				SetMoveState(PEDMOVE_WALK);
 				m_fRotationCur = m_fRotationCur + PI;
 				if (m_nPedState == PED_INVESTIGATE)
@@ -7638,7 +7809,7 @@ CPed::Wait(void)
 					animAssoc->SetFinishCallback(FinishedWaitCB, this);
 					m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 5000;
 				} else {
-					m_nWaitState = WAITSTATE_FALSE;
+					ClearWaitState();
 				}
 			}
 			break;
@@ -7667,7 +7838,7 @@ CPed::Wait(void)
 
 				if (animAssoc->animId == ANIM_TURN_180) {
 					m_fRotationCur = CGeneral::LimitRadianAngle(PI + m_fRotationCur);
-					m_nWaitState = WAITSTATE_FALSE;
+					ClearWaitState();
 					SetMoveState(PEDMOVE_WALK);
 					m_nStoredMoveState = PEDMOVE_NONE;
 					m_panicCounter = 0;
@@ -7704,7 +7875,7 @@ CPed::Wait(void)
 
 		case WAITSTATE_LOOK_ABOUT:
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_HBHB);
 				if (animAssoc) {
 					animAssoc->blendDelta = -8.0f;
@@ -7717,7 +7888,7 @@ CPed::Wait(void)
 			mustHaveAnim = ANIM_HANDSUP;
 			
 		case WAITSTATE_PLAYANIM_HANDSCOWER:
-			if (mustHaveAnim == NUM_ANIMS)
+			if (mustHaveAnim == NUM_STD_ANIMS)
 				mustHaveAnim = ANIM_HANDSCOWER;
 
 			animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), mustHaveAnim);
@@ -7731,7 +7902,7 @@ CPed::Wait(void)
 
 				TurnBody();
 			} else {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 				m_nWaitTimer = 0;
 				if (m_pLookTarget && m_pLookTarget->IsPed()) {
 
@@ -7789,15 +7960,15 @@ CPed::Wait(void)
 			mustHaveAnim = ANIM_HANDSCOWER;
 
 		case WAITSTATE_PLAYANIM_DUCK:
-			if (mustHaveAnim == NUM_ANIMS)
+			if (mustHaveAnim == NUM_STD_ANIMS)
 				mustHaveAnim = ANIM_DUCK_DOWN;
 
 		case WAITSTATE_PLAYANIM_TAXI:
-			if (mustHaveAnim == NUM_ANIMS)
+			if (mustHaveAnim == NUM_STD_ANIMS)
 				mustHaveAnim = ANIM_IDLE_TAXI;
 
 		case WAITSTATE_PLAYANIM_CHAT:
-			if (mustHaveAnim == NUM_ANIMS)
+			if (mustHaveAnim == NUM_STD_ANIMS)
 				mustHaveAnim = ANIM_IDLE_CHAT;
 
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
@@ -7806,7 +7977,7 @@ CPed::Wait(void)
 					animAssoc->blendDelta = -4.0f;
 					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 				}
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 			}
 #ifdef VC_PED_PORTS
 			else if (m_nWaitState == WAITSTATE_PLAYANIM_TAXI) {
@@ -7830,13 +8001,59 @@ CPed::Wait(void)
 					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 					CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 4.0f);
 					int timer = 2000;
-					m_nWaitState = WAITSTATE_FALSE;
+					ClearWaitState();
 					SetWaitState(WAITSTATE_CROSS_ROAD_LOOK, &timer);
 				}
 			} else {
-				m_nWaitState = WAITSTATE_FALSE;
+				ClearWaitState();
 			}
 			break;
+		case WAITSTATE_SIT_DOWN:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				ClearWaitState();
+				SetWaitState(WAITSTATE_SIT_IDLE, 0);
+			}
+			break;
+		//case WAITSTATE_SIT_DOWN_RVRS:
+		case WAITSTATE_SIT_UP:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				if (m_attractor)
+					GetPedAttractorManager()->BroadcastDeparture(this, m_attractor);
+				ClearWaitState();
+				//TODO(MIAMI): scan for threats!
+			}
+			break;
+		case WAITSTATE_SIT_IDLE:
+			if (bTurnedAroundOnAttractor) {
+				m_fRotationCur += PI;
+				m_fRotationCur = CGeneral::LimitRadianAngle(m_fRotationCur);
+				m_fRotationDest = m_fRotationCur;
+				bTurnedAroundOnAttractor = false;
+			}
+			// TODO(MIAMI): scan for threats!
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				ClearWaitState();
+				SetWaitState(WAITSTATE_SIT_UP, 0);
+			}
+			break;
+		case WAITSTATE_USE_ATM:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+				if (m_attractor)
+					GetPedAttractorManager()->BroadcastDeparture(this, m_attractor);
+				ClearWaitState();
+			}
+			break;
+		case WAITSTATE_SUN_BATHE_PRE:
+		case WAITSTATE_SUN_BATHE_DOWN:
+		case WAITSTATE_SUN_BATHE_IDLE:
+		case WAITSTATE_RIOT:
+		case WAITSTATE_FAST_FALL:
+		case WAITSTATE_BOMBER:
+		case WAITSTATE_STRIPPER:
+		case WAITSTATE_GROUND_ATTACK:
+		case WAITSTATE_LANCESITTING:
+		case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
+			assert(0);
 		default:
 			break;
 	}
@@ -8539,13 +8756,21 @@ CPed::SetLanding(void)
 	CAnimBlendAssociation *fallAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL);
 	CAnimBlendAssociation *landAssoc;
 
+	if (fallAssoc && bIsDrowning)
+		return;
+
 	RpAnimBlendClumpSetBlendDeltas(GetClump(), ASSOC_PARTIAL, -1000.0f);
-	if (fallAssoc) {
+	if (fallAssoc || m_nPedType == PEDTYPE_COP && bKnockedUpIntoAir) {
 		landAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_FALL_COLLAPSE);
 		DMAudio.PlayOneShot(m_audioEntityId, SOUND_FALL_COLLAPSE, 1.0f);
 
 		if (IsPlayer())
 			Say(SOUND_PED_LAND);
+
+		if (m_nPedType == PEDTYPE_COP) {
+			if (bKnockedUpIntoAir)
+				bKnockedUpIntoAir = false;
+		}
 
 	} else {
 		landAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_FALL_LAND);
@@ -8854,7 +9079,11 @@ CPed::InvestigateEvent(void)
 bool
 CPed::IsPedDoingDriveByShooting(void)
 {
+#ifdef FIX_BUGS
 	if (FindPlayerPed() == this && CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_nWeaponSlot == 5) {
+#else
+	if (FindPlayerPed() == this && GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI) {
+#endif
 		if (TheCamera.Cams[TheCamera.ActiveCam].LookingLeft || TheCamera.Cams[TheCamera.ActiveCam].LookingRight)
 			return true;
 	}
@@ -9140,7 +9369,7 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 void
 CPed::Look(void)
 {
-	// UNUSED: This is a perfectly empty function.
+	TurnBody();
 }
 
 bool
@@ -9485,7 +9714,7 @@ CPed::MoveHeadToLook(void)
 		}
 
 		if (m_pLookTarget->IsPed()) {
-			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition((RwV3d*) &lookPos, PED_MID);
+			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition(*(RwV3d *)&lookPos, PED_MID);
 		} else {
 			lookPos = m_pLookTarget->GetPosition();
 		}
@@ -9505,7 +9734,7 @@ CPed::MoveHeadToLook(void)
 
 		bool notRocketLauncher = false;
 		bool notTwoHanded = false;
-		AnimationId animToPlay = NUM_ANIMS;
+		AnimationId animToPlay = NUM_STD_ANIMS;
 
 		if (!GetWeapon()->IsType2Handed())
 			notTwoHanded = true;
@@ -9534,7 +9763,7 @@ CPed::MoveHeadToLook(void)
 			animToPlay = ANIM_FUCKU;
 		}
 
-		if (animToPlay != NUM_ANIMS) {
+		if (animToPlay != NUM_STD_ANIMS) {
 			CAnimBlendAssociation *newAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, animToPlay, 4.0f);
 
 			if (newAssoc) {
@@ -9726,6 +9955,7 @@ CPed::ProcessControl(void)
 	bIsShooting = false;
 	BuildPedLists();
 	bIsInWater = false;
+	bIsDrowning = false;
 	ProcessBuoyancy();
 
 	if (m_nPedState != PED_ARRESTED) {
@@ -9837,7 +10067,7 @@ CPed::ProcessControl(void)
 			} else if (m_nPedStateTimer < 1001) {
 				m_nPedStateTimer = 0;
 			}
-		} else {
+		} else if (!GetPedAttractorManager()->IsInQueue(this, m_attractor)) {
 			if (m_panicCounter == 50 && IsPedInControl()) {
 				SetWaitState(WAITSTATE_STUCK, nil);
 				// Leftover
@@ -9891,11 +10121,8 @@ CPed::ProcessControl(void)
 					if (m_nPedState == PED_FOLLOW_PATH) {
 						if (DotProduct(m_vecDamageNormal, GetForward()) < -0.866f && CanPedJumpThis(collidingEnt, &m_vecDamageNormal)) {
 							SetJump();
-
-							// Moved break into here, for compatibility with III
-							break;
 						}
-						// break;
+						break;
 					}
 #endif
 					if (m_pedInObjective &&
@@ -10477,7 +10704,7 @@ CPed::ProcessControl(void)
 							flyDir = 1;
 						}
 
-						if (flyDir != 0 && !bSomeVCflag1) {
+						if (flyDir != 0 && !bHeadStuckInCollision) {
 							SetPosition((flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point));
 							GetMatrix().GetPosition().z += FEET_OFFSET;
 							GetMatrix().UpdateRW();
@@ -10584,11 +10811,11 @@ CPed::ProcessControl(void)
 
 					if (CWorld::ProcessVerticalLine(offsetToCheck, GetPosition().z - FEET_OFFSET, foundCol, foundEnt, true, true, false, true, false, false, nil)) {
 #ifdef VC_PED_PORTS
-						if (!bSomeVCflag1 || FEET_OFFSET + foundCol.point.z < GetPosition().z) {
+						if (!bHeadStuckInCollision || FEET_OFFSET + foundCol.point.z < GetPosition().z) {
 							GetMatrix().GetPosition().z = FEET_OFFSET + foundCol.point.z;
 							GetMatrix().UpdateRW();
-							if (bSomeVCflag1)
-								bSomeVCflag1 = false;
+							if (bHeadStuckInCollision)
+								bHeadStuckInCollision = false;
 						}
 #else
 						GetMatrix().GetPosition().z = FEET_OFFSET + foundCol.point.z;
@@ -10658,15 +10885,15 @@ CPed::ProcessControl(void)
 			if (IsPedInControl() && !bIsStanding && !m_pDamageEntity && CheckIfInTheAir()) {
 				SetInTheAir();
 #ifdef VC_PED_PORTS
-				bSomeVCflag1 = false;
+				bHeadStuckInCollision = false;
 #endif
 			}
 #ifdef VC_PED_PORTS
-			if (bSomeVCflag1) {
+			if (bHeadStuckInCollision) {
 				CVector posToCheck = GetPosition();
 				posToCheck.z += 0.9f;
 				if (!CWorld::TestSphereAgainstWorld(posToCheck, 0.2f, this, true, true, false, true, false, false))
-					bSomeVCflag1 = false;
+					bHeadStuckInCollision = false;
 			}
 #endif
 			ProcessObjective();
@@ -10866,15 +11093,13 @@ CPed::ProcessControl(void)
 						return;
 					}
 
-					if (m_pMyVehicle->pDriver != this || m_pMyVehicle->IsBoat()) {
+					if (m_pMyVehicle->pDriver != this) {
 						LookForSexyPeds();
 						LookForSexyCars();
 						break;
 					}
 
-					if (m_pMyVehicle->m_vehType == VEHICLE_TYPE_BIKE || !m_pMyVehicle->pDriver->IsPlayer()) {
-						break;
-					}
+					// TODO(Miami): Start KILL_CHAR_ON_BOAT objective
 
 					CPad* pad = CPad::GetPad(0);
 
@@ -10904,12 +11129,24 @@ CPed::ProcessControl(void)
 						}
 					}
 #endif
+
+					// TODO(Miami): This part moved to DriveVehicle in VC
 					float steerAngle = m_pMyVehicle->m_fSteerAngle;
 					CAnimBlendAssociation *lDriveAssoc;
 					CAnimBlendAssociation *rDriveAssoc;
 					CAnimBlendAssociation *lbAssoc;
 					CAnimBlendAssociation *sitAssoc;
-					if (m_pMyVehicle->bLowVehicle) {
+					if (m_pMyVehicle->IsBoat() && !(m_pMyVehicle->pHandling->Flags & HANDLING_SIT_IN_BOAT)) {
+						sitAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_BOAT);
+
+						if (!sitAssoc || sitAssoc->blendAmount < 1.0f) {
+							break;
+						}
+
+						lDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_BOAT_L);
+						rDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_BOAT_R);
+						lbAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BOAT_LB);
+					} else if (m_pMyVehicle->bLowVehicle) {
 						sitAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_LSIT);
 
 						if (!sitAssoc || sitAssoc->blendAmount < 1.0f) {
@@ -10929,18 +11166,21 @@ CPed::ProcessControl(void)
 						lDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_L);
 						rDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_R);
 						lbAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_LB);
+					}
 
-						if (lbAssoc &&
-							TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON
-							&& TheCamera.Cams[TheCamera.ActiveCam].DirectionWasLooking == LOOKING_LEFT) {
-							lbAssoc->blendDelta = -1000.0f;
-						}
+					if (lbAssoc &&
+						TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON
+						&& TheCamera.Cams[TheCamera.ActiveCam].DirectionWasLooking == LOOKING_LEFT) {
+						lbAssoc->blendDelta = -1000.0f;
 					}
 
 					CAnimBlendAssociation *driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVEBY_L);
-
 					if (!driveByAssoc)
 						driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVEBY_R);
+					if (!driveByAssoc)
+						driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVEBY_LOW_L);
+					if (!driveByAssoc)
+						driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVEBY_LOW_R);
 
 					if (m_pMyVehicle->bLowVehicle || m_pMyVehicle->m_fGasPedal >= 0.0f || driveByAssoc) {
 						if (steerAngle == 0.0f || driveByAssoc) {
@@ -10955,6 +11195,8 @@ CPed::ProcessControl(void)
 
 							if (rDriveAssoc)
 								rDriveAssoc->blendAmount = clamp(steerAngle * -100.0f / 61.0f, 0.0f, 1.0f);
+							else if (m_pMyVehicle->IsBoat() && !(m_pMyVehicle->pHandling->Flags & HANDLING_SIT_IN_BOAT))
+								CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT_R);
 							else if (m_pMyVehicle->bLowVehicle)
 								CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_LOW_R);
 							else
@@ -10966,6 +11208,8 @@ CPed::ProcessControl(void)
 
 							if (lDriveAssoc)
 								lDriveAssoc->blendAmount = clamp(steerAngle * 100.0f / 61.0f, 0.0f, 1.0f);
+							else if (m_pMyVehicle->IsBoat() && !(m_pMyVehicle->pHandling->Flags & HANDLING_SIT_IN_BOAT))
+								CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT_L);
 							else if (m_pMyVehicle->bLowVehicle)
 								CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_LOW_L);
 							else
@@ -10978,10 +11222,18 @@ CPed::ProcessControl(void)
 
 						if ((TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_1STPERSON
 							|| TheCamera.Cams[TheCamera.ActiveCam].DirectionWasLooking != LOOKING_LEFT)
-							&& (!lbAssoc || lbAssoc->blendAmount < 1.0f)) {
-							CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_LB, 4.0f);
+							&& (!lbAssoc || lbAssoc->blendAmount < 1.0f && lbAssoc->blendDelta <= 0.0f)) {
+
+							if(m_pMyVehicle->IsBoat() && !(m_pMyVehicle->pHandling->Flags & HANDLING_SIT_IN_BOAT))
+								CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_BOAT_LB, 4.0f);
+							else
+								CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_LB, 4.0f);
 						}
 					}
+
+					// TODO(Miami): This part belongs to DriveVehicle
+					if (!m_pMyVehicle)
+						return;
 					break;
 				}
 				case PED_DIE:
@@ -11001,8 +11253,11 @@ CPed::ProcessControl(void)
 				default: break;
 			}
 			SetMoveAnim();
-			if (bPedIsBleeding) {
+			if (bPedIsBleeding || m_bleedCounter != 0) {
 				if (CGame::nastyGame) {
+					if (m_bleedCounter != 0)
+						m_bleedCounter--;
+
 					if (!(CTimer::GetFrameCounter() & 3)) {
 						CVector cameraDist = GetPosition() - TheCamera.GetPosition();
 						if (cameraDist.MagnitudeSqr() < sq(50.0f)) {
@@ -11033,7 +11288,8 @@ CPed::ProcessControl(void)
 			}
 			m_pCurrentPhysSurface = nil;
 		}
-	}
+	} else
+		ServiceTalking();
 }
 
 void
@@ -11054,11 +11310,28 @@ CPed::SetInTheAir(void)
 
 }
 
+// --MIAMI: Done
 void
 CPed::RestoreHeadPosition(void)
 {
+	// TODO(Miami): This is inlined CanUseTorsoWhenLooking
+	bool canUseMyBody = false;
+	if (m_nPedState != PED_DRIVING && m_nPedState != PED_DRAG_FROM_CAR && !bIsDucking) {
+		if (m_animGroup != ASSOCGRP_SEXYWOMAN && m_animGroup != ASSOCGRP_WOMAN)
+			canUseMyBody = true;
+	}
+	if (!canUseMyBody)
+		m_pedIK.m_flags |= CPedIK::LOOKAROUND_HEAD_ONLY;
+
 	if (m_pedIK.RestoreLookAt()) {
 		bIsRestoringLook = false;
+		canUseMyBody = false;
+		if (m_nPedState != PED_DRIVING && m_nPedState != PED_DRAG_FROM_CAR && !bIsDucking) {
+			if (m_animGroup != ASSOCGRP_SEXYWOMAN && m_animGroup != ASSOCGRP_WOMAN)
+				canUseMyBody = true;
+		}
+		if(canUseMyBody)
+			m_pedIK.m_flags &= ~CPedIK::LOOKAROUND_HEAD_ONLY;
 	}
 }
 
@@ -11071,7 +11344,7 @@ CPed::PointGunAt(void)
 	CAnimBlendAssociation *weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_FIRE);
 	if (!weaponAssoc || weaponAssoc->blendDelta < 0.0f) {
 		if (!!weaponInfo->m_bCrouchFire) {
-			weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHFIRE);
+			weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(weaponInfo));
 			animLoopStart = weaponInfo->m_fAnim2LoopStart;
 		}
 	}
@@ -11374,7 +11647,7 @@ CPed::SetJump(void)
 #ifdef VC_PED_PORTS
 		m_nPedState != PED_JUMP && !RpAnimBlendClumpGetAssociation(GetClump(), ANIM_JUMP_LAUNCH) &&
 #endif
-		(m_nSurfaceTouched != SURFACE_STONE || DotProduct(GetForward(), m_vecDamageNormal) >= 0.0f)) {
+		(m_nSurfaceTouched != SURFACE_STEEP_CLIFF || DotProduct(GetForward(), m_vecDamageNormal) >= 0.0f)) {
 		SetStoredState();
 		m_nPedState = PED_JUMP;
 		CAnimBlendAssociation *jumpAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_JUMP_LAUNCH, 8.0f);
@@ -12143,19 +12416,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 			ped->SetObjective(OBJECTIVE_NONE);
 	}
 
-	if (veh->pDriver == ped) {
-		if (veh->bLowVehicle) {
-			ped->m_pVehicleAnim = CAnimManager::BlendAnimation(ped->GetClump(),	ASSOCGRP_STD, ANIM_CAR_LSIT, 100.0f);
-		} else {
-			ped->m_pVehicleAnim = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
-		}
-	} else if (veh->bLowVehicle) {
-		ped->m_pVehicleAnim = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_CAR_SITPLO, 100.0f);
-	} else {
-		ped->m_pVehicleAnim = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_CAR_SITP, 100.0f);
-	}
-	
-	ped->StopNonPartialAnims();
+	ped->AddInCarAnims(veh, veh->pDriver == ped);
 	if (veh->bIsBus)
 		ped->bRenderPedInCar = false;
 
@@ -12544,7 +12805,7 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 }
 
 // --MIAMI: Done, but enumarate weapon slots
-inline void
+void
 CPed::ReplaceWeaponWhenExitingVehicle(void)
 {
 	eWeaponType weaponType = GetWeapon()->m_eWeaponType;
@@ -12560,11 +12821,11 @@ CPed::ReplaceWeaponWhenExitingVehicle(void)
 	}
 }
 
-// --MIAMI: Add driveby check, enumarate weapon slots
-inline void
+// --MIAMI: Done
+void
 CPed::RemoveWeaponWhenEnteringVehicle(void)
 {
-	if (IsPlayer() && GetWeapon(5).m_eWeaponType && GetWeapon(5).m_nAmmoTotal > 0) {
+	if (IsPlayer() && HasWeaponSlot(5) && GetWeapon(5).m_nAmmoTotal > 0 && ((CPlayerPed*)this)->GetPlayerInfoForThisPlayerPed()->m_bDriveByAllowed) {
 		if (m_storedWeapon == WEAPONTYPE_UNIDENTIFIED)
 			m_storedWeapon = GetWeapon()->m_eWeaponType;
 		SetCurrentWeapon(GetWeapon(5).m_eWeaponType);
@@ -13015,14 +13276,26 @@ CPed::ProcessObjective(void)
 			case OBJECTIVE_FOLLOW_CAR_IN_CAR:
 			case OBJECTIVE_FIRE_AT_OBJ_FROM_VEHICLE:
 			case OBJECTIVE_DESTROY_OBJ:
-			case OBJECTIVE_23:
-			case OBJECTIVE_24:
+			case OBJECTIVE_26:
+			case OBJECTIVE_27:
 			case OBJECTIVE_SET_LEADER:
 				break;
 			case OBJECTIVE_IDLE:
-				SetIdle();
-				m_objective = OBJECTIVE_NONE;
-				SetMoveState(PEDMOVE_STILL);
+				if (GetPedState() == PED_DRIVING)
+					m_objective = OBJECTIVE_NONE;
+				else {
+					SetIdle();
+					if (m_attractor) {
+						if (m_objectiveTimer && CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
+							GetPedAttractorManager()->BroadcastDeparture(this, m_attractor);
+							m_objectiveTimer = 0;
+						}
+					}
+					else {
+						m_objective = OBJECTIVE_NONE;
+						SetMoveState(PEDMOVE_STILL);
+					}
+				}
 				break;
 			case OBJECTIVE_FLEE_TILL_SAFE:
 				if (InVehicle()) {
@@ -13100,7 +13373,8 @@ CPed::ProcessObjective(void)
 						} else {
 							bool targetHasVeh = m_pedInObjective->bInVehicle;
 							if (!targetHasVeh
-								|| targetHasVeh && m_pedInObjective->m_pMyVehicle->CanPedExitCar()) {
+// TODO(MIAMI): argument
+								|| targetHasVeh && m_pedInObjective->m_pMyVehicle->CanPedExitCar(false)) {
 								m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 0;
 								m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
 								SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
@@ -13403,7 +13677,7 @@ CPed::ProcessObjective(void)
 						CVector target;
 						CVector ourHead = GetMatrix() * CVector(0.5f, 0.0f, 0.6f);
 						if (m_pedInObjective->IsPed())
-							m_pedInObjective->m_pedIK.GetComponentPosition((RwV3d*)&target, PED_MID);
+							m_pedInObjective->m_pedIK.GetComponentPosition(*(RwV3d *)&target, PED_MID);
 						else
 							target = m_pedInObjective->GetPosition();
 
@@ -14087,7 +14361,7 @@ CPed::ProcessObjective(void)
 
 							if (reloadAssoc || !m_pedInObjective->IsPedShootable()) {
 								if (reloadAssoc &&
-									(!reloadAssoc->IsRunning() || reloadAssoc->currentTime / reloadAssoc->hierarchy->totalLength > 0.8f)) {
+									(!reloadAssoc->IsRunning() || reloadAssoc->GetProgress() > 0.8f)) {
 									CAnimBlendAssociation *punchAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT_PPUNCH, 8.0f);
 									punchAssoc->flags |= ASSOC_DELETEFADEDOUT;
 									punchAssoc->flags |= ASSOC_FADEOUTWHENDONE;
@@ -14201,6 +14475,187 @@ CPed::ProcessObjective(void)
 				}
 				break;
 			}
+			case OBJECTIVE_USE_SEAT_ATTRACTOR:
+			case OBJECTIVE_USE_ATM_ATTRACTOR:
+			case OBJECTIVE_USE_STOP_ATTRACTOR:
+			case OBJECTIVE_USE_PIZZA_ATTRACTOR:
+			case OBJECTIVE_USE_SHELTER_ATTRACTOR:
+			case OBJECTIVE_USE_ICECREAM_ATTRACTOR:
+				if (CTimer::GetTimeInMilliseconds() > m_objectiveTimer) {
+					m_objectiveTimer = 0;
+					if (m_attractor)
+						GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+				}
+				else {
+					CVector distance = m_nextRoutePointPos - GetPosition();
+					distance.z = 0.0f;
+					if (m_objective == OBJECTIVE_USE_SHELTER_ATTRACTOR) {
+						if (m_nMoveState == PEDMOVE_SPRINT && distance.Magnitude() < SQR(2.0f)) {
+							SetMoveState(PEDMOVE_WALK);
+							bIsRunning = false;
+						}
+						else if (CWeather::Rain < 0.2f && m_attractor) {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							return;
+						}
+					}
+					else if (m_objective == OBJECTIVE_USE_ICECREAM_ATTRACTOR) {
+						if (m_nMoveState == PEDMOVE_SPRINT && distance.Magnitude() < SQR(4.0f)) {
+							SetMoveState(PEDMOVE_WALK);
+							bIsRunning = false;
+						}
+						CVehicle* pIceCreamVan = GetPedAttractorManager()->GetIceCreamVanForEffect(m_attractor->GetEffect());
+						if (0.01f * CTimer::GetTimeStep() * 5.0f < pIceCreamVan->m_fDistanceTravelled) {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							return;
+						}
+						if (!pIceCreamVan->pDriver ||
+							!pIceCreamVan->pDriver->IsPlayer() ||
+							pIceCreamVan->pDriver->GetPedState() == PED_ARRESTED ||
+							pIceCreamVan->pDriver->GetPedState() == PED_DEAD) {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							return;
+						}
+						if (!pIceCreamVan->m_bSirenOrAlarm) {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							return;
+						}
+						if (pIceCreamVan->GetStatus() == STATUS_WRECKED) {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							return;
+						}
+					}
+					if (sq(m_distanceToCountSeekDone) < distance.MagnitudeSqr()) {
+						if (CTimer::GetTimeInMilliseconds() > m_nPedStateTimer || GetPedState() != PED_SEEK_POS)
+							SetSeek(m_vecSeekPos, m_distanceToCountSeekDone);
+					}
+					else {
+						if (!bReachedAttractorHeadingTarget) {
+							float fHeadingDistance = m_fRotationCur - m_attractorHeading;
+							float fSinHeading = Sin(fHeadingDistance);
+							float fCosHeading = Cos(fHeadingDistance);
+							if (fSinHeading > 0.0f) {
+								if (fCosHeading > 0.0f)
+									m_attractorHeading = m_fRotationCur - Asin(fSinHeading);
+								else
+									m_attractorHeading = m_fRotationCur - Acos(fCosHeading);
+							}
+							else {
+								if (fCosHeading > 0.0f)
+									m_attractorHeading = m_fRotationCur - Asin(fSinHeading);
+								else
+									m_attractorHeading = m_fRotationCur + Acos(fCosHeading);
+							}
+							m_fRotationDest = m_attractorHeading;
+							m_headingRate = 3.5f;
+							bReachedAttractorHeadingTarget = true;
+							bTurnedAroundOnAttractor = false;
+						}
+						if (Abs(m_fRotationCur - m_attractorHeading) >= m_acceptableHeadingOffset &&
+							Abs(m_fRotationCur - m_attractorHeading + TWOPI) >= m_acceptableHeadingOffset &&
+							Abs(m_fRotationCur - m_attractorHeading - TWOPI) >= m_acceptableHeadingOffset)
+							SetMoveState(PEDMOVE_STILL);
+						else {
+							m_fRotationDest = m_fRotationCur;
+							bReachedAttractorHeadingTarget = false;
+							bObjectiveCompleted = true;
+							bScriptObjectiveCompleted = true;
+							RestoreHeadingRate();
+							GetPedAttractorManager()->BroadcastArrival(this, m_attractor);
+							if (GetPedAttractorManager()->IsAtHeadOfQueue(this, m_attractor)) {
+								switch (m_objective) {
+								case OBJECTIVE_USE_SEAT_ATTRACTOR:
+									if (!bTurnedAroundOnAttractor) {
+										ClearObjective();
+										SetWaitState(WAITSTATE_SIT_DOWN, 0);
+									}
+									else {
+										ClearObjective();
+										SetWaitState(WAITSTATE_SIT_DOWN_RVRS, 0);
+									}
+									break;
+								case OBJECTIVE_USE_ATM_ATTRACTOR:
+									ClearObjective();
+									SetWaitState(WAITSTATE_USE_ATM, 0);
+									break;
+								case OBJECTIVE_USE_STOP_ATTRACTOR:
+									ClearObjective();
+									SetObjective(OBJECTIVE_WAIT_FOR_BUS);
+									break;
+								case OBJECTIVE_USE_PIZZA_ATTRACTOR:
+									ClearObjective();
+									m_prevObjective = OBJECTIVE_NONE;
+									SetObjective(OBJECTIVE_IDLE);
+									m_objectiveTimer = CTimer::GetTimeInMilliseconds() + m_attractor->GetHeadOfQueueWaitTime();
+									break;
+								case OBJECTIVE_USE_SHELTER_ATTRACTOR:
+									m_prevObjective = OBJECTIVE_NONE;
+									SetObjective(OBJECTIVE_WAIT_FOR_RAIN_TO_END);
+									break;
+								case OBJECTIVE_USE_ICECREAM_ATTRACTOR:
+									m_prevObjective = OBJECTIVE_NONE;
+									SetObjective(OBJECTIVE_PURCHASE_ICECREAM);
+									break;
+								}
+							}
+						}
+					}
+				}
+				return;
+			case OBJECTIVE_WAIT_FOR_RAIN_TO_END:
+				SetIdle();
+				if (m_attractor && CWeather::Rain < 0.2f)
+					GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+				break;
+			case OBJECTIVE_WAIT_FOR_BUS:
+				SetIdle();
+				if (m_attractor) {
+					float left = GetPosition().x - 10.0f;
+					float right = GetPosition().x + 10.0f;
+					float top = GetPosition().y - 10.0f;
+					float bottom = GetPosition().y + 10.0f;
+					int xstart = Max(0, CWorld::GetSectorIndexX(left));
+					int xend = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right));
+					int ystart = Max(0, CWorld::GetSectorIndexY(top));
+					int yend = Min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(bottom));
+					assert(xstart <= xend);
+					assert(ystart <= yend);
+
+					float minDistance = SQR(10.0f);
+					CVehicle* pBus = nil;
+
+					for (int y = ystart; y <= yend; y++) {
+						for (int x = xstart; x <= xend; x++) {
+							CSector* s = CWorld::GetSector(x, y);
+							for (CPtrNode* pNode = s->m_lists[ENTITYLIST_VEHICLES].first; pNode != nil; pNode = pNode->next) {
+								CEntity* pEntity = (CEntity*)pNode->item;
+								if (!pEntity->IsVehicle())
+									continue;
+								CVehicle* pVehicle = (CVehicle*)pEntity;
+								if (!pVehicle->bIsBus)
+									continue;
+								if (pVehicle->GetMoveSpeed().MagnitudeSqr() >= SQR(0.005f))
+									continue;
+								float distanceSq = (GetPosition() - pVehicle->GetPosition()).MagnitudeSqr();
+								if (distanceSq < minDistance) {
+									minDistance = distanceSq;
+									pBus = pVehicle;
+								}
+							}
+						}
+					}
+
+					if (pBus) {
+						if (pBus->m_nNumPassengers >= pBus->m_nNumMaxPassengers - 1)
+							SetObjective(OBJECTIVE_IDLE);
+						else {
+							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+							SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, pBus);
+							bDontDragMeOutCar = true; // TODO(MIAMI): check, add more flags
+						}
+					}
+				}
+				break;
 #endif
 		}
 		if (bObjectiveCompleted
@@ -14931,10 +15386,10 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 				if (CCollision::IsStoredPolyStillValidVerticalLine(pos, potentialGroundZ, intersectionPoint, &m_collPoly)) {
 					bStillOnValidPoly = true;
 #ifdef VC_PED_PORTS
-					if(!bSomeVCflag1 || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
+					if(!bHeadStuckInCollision || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
 						GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
-						if (bSomeVCflag1)
-							bSomeVCflag1 = false;
+						if (bHeadStuckInCollision)
+							bHeadStuckInCollision = false;
 					}
 #else
 					GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
@@ -14974,13 +15429,13 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 				}
 				float minDist = 1.0f;
 				belowTorsoCollided = CCollision::ProcessVerticalLine(ourLine, collidingEnt->GetMatrix(), *hisCol,
-					intersectionPoint, minDist, false, &m_collPoly);
+					intersectionPoint, minDist, false, false, &m_collPoly);
 
 				if (collidedWithBoat && bWasStanding && !belowTorsoCollided) {
 					ourLine.p0.z = ourLine.p1.z;
 					ourLine.p1.z = ourLine.p1.z + gravityEffect;
 					belowTorsoCollided = CCollision::ProcessVerticalLine(ourLine, collidingEnt->GetMatrix(), *hisCol,
-						intersectionPoint, minDist, false, &m_collPoly);
+						intersectionPoint, minDist, false, false, &m_collPoly);
 				}
 				if (belowTorsoCollided) {
 #ifndef VC_PED_PORTS
@@ -15009,16 +15464,16 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 								}
 							}
 #ifdef VC_PED_PORTS
-							if (!bSomeVCflag1 || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
+							if (!bHeadStuckInCollision || FEET_OFFSET + intersectionPoint.point.z < GetPosition().z) {
 								GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
-								if (bSomeVCflag1)
-									bSomeVCflag1 = false;
+								if (bHeadStuckInCollision)
+									bHeadStuckInCollision = false;
 							}
 #else
 							GetMatrix().GetPosition().z = FEET_OFFSET + intersectionPoint.point.z;
 #endif
 							m_nSurfaceTouched = intersectionPoint.surfaceB;
-							if (m_nSurfaceTouched == SURFACE_STONE) {
+							if (m_nSurfaceTouched == SURFACE_STEEP_CLIFF) {
 								bHitSteepSlope = true;
 								m_vecDamageNormal = intersectionPoint.normal;
 							}
@@ -15099,12 +15554,12 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 					sphereNormal.x = -m_vecMoveSpeed.x / Max(0.001f, speed);
 					sphereNormal.y = -m_vecMoveSpeed.y / Max(0.001f, speed);
 					GetMatrix().GetPosition().z -= 0.05f;
-					bSomeVCflag1 = true;
+					bHeadStuckInCollision = true;
 				}
 #endif
 				sphereNormal.Normalise();
 				collidingPoints[sphere].normal = sphereNormal;
-				if (collidingPoints[sphere].surfaceB == SURFACE_STONE)
+				if (collidingPoints[sphere].surfaceB == SURFACE_STEEP_CLIFF)
 					bHitSteepSlope = true;
 			}
 		}
@@ -15218,19 +15673,22 @@ CPed::SetEnterTrain(CVehicle *train, uint32 unused)
 }
 #endif
 
+// --MIAMI: Done, but what is this parameter for?
 void
-CPed::SetDuck(uint32 time)
+CPed::SetDuck(uint32 time, bool sth)
 {
-	if (bIsDucking || CTimer::GetTimeInMilliseconds() <= m_duckTimer)
-		return;
-
-	if (bCrouchWhenShooting && (m_nPedState == PED_ATTACK || m_nPedState == PED_AIM_GUN)) {
-		CAnimBlendAssociation *duckAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DUCK_LOW);
-		if (!duckAssoc || duckAssoc->blendDelta < 0.0f) {
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DUCK_LOW, 4.0f);
-			bIsDucking = true;
+	if (bIsDucking || CTimer::GetTimeInMilliseconds() <= m_duckTimer && !sth) {
+		if (sth && CTimer::GetTimeInMilliseconds() + time > m_duckTimer)
 			m_duckTimer = CTimer::GetTimeInMilliseconds() + time;
-		}
+		return;
+	}
+
+	CAnimBlendAssociation *duckAssoc;
+	if (bCrouchWhenShooting) {
+		duckAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_WEAPON_CROUCH, 4.0f);
+		duckAssoc->flags &= ~ASSOC_FADEOUTWHENDONE;
+		bIsDucking = true;
+		m_duckTimer = CTimer::GetTimeInMilliseconds() + time;
 	} else {
 		CAnimBlendAssociation *duckAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DUCK_DOWN);
 		if (!duckAssoc || duckAssoc->blendDelta < 0.0f) {
@@ -15518,6 +15976,7 @@ CPed::ProcessBuoyancy(void)
 				m_vecMoveSpeed.y *= speedMult;
 				m_vecMoveSpeed.z *= speedMult;
 				bIsStanding = false;
+				bIsDrowning = true;
 				InflictDamage(nil, WEAPONTYPE_DROWNING, 3.0f * CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 			}
 			if (buoyancyImpulse.z / m_fMass > 0.002f * CTimer::GetTimeStep()) {
@@ -15630,8 +16089,9 @@ CPed::SetSolicit(uint32 time)
 }
 
 bool
-CPed::SetFollowPath(CVector dest)
+CPed::SetFollowPath(CVector dest, float radius, eMoveState state, CEntity* pFollowedPed, CEntity*, int time)
 {
+	// TODO(MIAMI): new follow
 	if (m_nPedState == PED_FOLLOW_PATH)
 		return false;
 
@@ -15693,7 +16153,8 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 	uint32 optedDoorNode = wantedDoorNode;
 	bool teleportNeeded = false;
 	bool isLow = !!veh->bLowVehicle;
-	if (!veh->CanPedExitCar()) {
+// TODO(MIAMI): argument
+	if (!veh->CanPedExitCar(false)) {
 		if (veh->pDriver && !veh->pDriver->IsPlayer()) {
 			veh->AutoPilot.m_nCruiseSpeed = 0;
 			veh->AutoPilot.m_nCarMission = MISSION_NONE;
@@ -16503,7 +16964,7 @@ CPed::ServiceTalking(void)
 		} else {
 			m_queuedSound = SOUND_PED_BOMBER;
 		}
-		if (m_queuedSound != SOUND_TOTAL_PED_SOUNDS) {
+		if (m_queuedSound != SOUND_NO_SOUND) {
 			if (m_queuedSound == SOUND_PED_DEATH)
 				m_soundStart = CTimer::GetTimeInMilliseconds() - 1;
 
@@ -16515,7 +16976,7 @@ CPed::ServiceTalking(void)
 					+ CTimer::GetTimeInMilliseconds()
 					+ CGeneral::GetRandomNumberInRange(0, CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nOverrideFixedDelayTime);
 				m_lastQueuedSound = m_queuedSound;
-				m_queuedSound = SOUND_TOTAL_PED_SOUNDS;
+				m_queuedSound = SOUND_NO_SOUND;
 			}
 		}
 	}
@@ -16969,7 +17430,7 @@ CPed::UpdatePosition(void)
 		velocityChange = m_moved + velocityOfSurface - m_vecMoveSpeed;
 		m_fRotationCur += curSurface->m_vecTurnSpeed.z * CTimer::GetTimeStep();
 		m_fRotationDest += curSurface->m_vecTurnSpeed.z * CTimer::GetTimeStep();
-	} else if (m_nSurfaceTouched != SURFACE_STONE || m_vecDamageNormal.x == 0.0f && m_vecDamageNormal.y == 0.0f) {
+	} else if (m_nSurfaceTouched != SURFACE_STEEP_CLIFF || m_vecDamageNormal.x == 0.0f && m_vecDamageNormal.y == 0.0f) {
 		velocityChange = m_moved - m_vecMoveSpeed;
 	} else {
 		// Ped got damaged by steep slope
@@ -17245,37 +17706,31 @@ CPed::WarpPedIntoCar(CVehicle *car)
 		DMAudio.PlayOneShot(car->m_audioEntityId, SOUND_CAR_ENGINE_START, 1.0f);
 	}
 
-#ifdef VC_PED_PORTS
 	RpAnimBlendClumpSetBlendDeltas(GetClump(), ASSOC_PARTIAL, -1000.0f);
 
-	// VC uses AddInCarAnims but we don't have that
-	m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, car->GetDriverAnim(), 100.0f);
+	AddInCarAnims(car, car->pDriver == this);
 	RemoveWeaponWhenEnteringVehicle();
-#else
-	if (car->IsBoat()) {
-#ifndef FIX_BUGS
-		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
-#else
-		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, car->GetDriverAnim(), 100.0f);
-#endif
-		CWeaponInfo *ourWeapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
-		RemoveWeaponModel(ourWeapon->m_nModelId);
-	} else {
-		// Because we can use Uzi for drive by
-		RemoveWeaponWhenEnteringVehicle();
 
-		if (car->bLowVehicle)
-			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_LSIT, 100.0f);
-		else
-			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
-	}
-#endif
-
-	StopNonPartialAnims();
 	if (car->bIsBus)
 		bRenderPedInCar = false;
 
 	bChangedSeat = true;
+}
+
+void
+CPed::SetObjective(eObjective newObj, float heading, const CVector& pos)
+{
+	switch (newObj) {
+	case OBJECTIVE_USE_SEAT_ATTRACTOR:
+	case OBJECTIVE_USE_ATM_ATTRACTOR:
+	case OBJECTIVE_USE_STOP_ATTRACTOR:
+	case OBJECTIVE_USE_PIZZA_ATTRACTOR:
+	case OBJECTIVE_USE_SHELTER_ATTRACTOR:
+	case OBJECTIVE_USE_ICECREAM_ATTRACTOR:
+		ClearPointGunAt();
+		SetObjective(newObj, pos);
+		m_attractorHeading = heading;
+	}
 }
 
 void
@@ -17327,14 +17782,50 @@ CPed::SetObjective(eObjective newObj, CVector dest)
 			break;
 		case OBJECTIVE_GOTO_AREA_ANY_MEANS:
 		case OBJECTIVE_GOTO_AREA_ON_FOOT:
+		case OBJECTIVE_USE_SEAT_ATTRACTOR:
+		case OBJECTIVE_USE_ATM_ATTRACTOR:
+		case OBJECTIVE_USE_STOP_ATTRACTOR:
+		case OBJECTIVE_USE_PIZZA_ATTRACTOR:
+		case OBJECTIVE_USE_SHELTER_ATTRACTOR:
+		case OBJECTIVE_USE_ICECREAM_ATTRACTOR:
 			bIsRunning = false;
 			m_pNextPathNode = nil;
 			m_nextRoutePointPos = dest;
 			m_vecSeekPos = m_nextRoutePointPos;
 			m_distanceToCountSeekDone = 0.5f;
-			bUsePedNodeSeek = true;
-			if (sq(m_distanceToCountSeekDone) > (m_nextRoutePointPos - GetPosition()).MagnitudeSqr2D())
-				return;
+			if (m_objective == OBJECTIVE_USE_ATM_ATTRACTOR) {
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			if (m_objective == OBJECTIVE_USE_SEAT_ATTRACTOR) {
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			if (m_objective == OBJECTIVE_USE_STOP_ATTRACTOR) {
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			if (m_objective == OBJECTIVE_USE_PIZZA_ATTRACTOR) {
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			if (m_objective == OBJECTIVE_USE_SHELTER_ATTRACTOR) {
+				bIsRunning = true;
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			if (m_objective == OBJECTIVE_USE_ICECREAM_ATTRACTOR) {
+				bIsRunning = true;
+				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
+				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
+			}
+			bUsePedNodeSeek = false;
+			if (sq(m_distanceToCountSeekDone) > (m_nextRoutePointPos - GetPosition()).MagnitudeSqr2D()) {
+				if (!IsUseAttractorObjective(m_objective))
+					return;
+				if (Abs(m_fRotationCur - m_attractorHeading) < m_acceptableHeadingOffset)
+					return;
+			}
 			break;
 		case OBJECTIVE_RUN_TO_AREA:
 			bIsRunning = true;
@@ -17501,25 +17992,13 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 	m_vecOffsetSeek = doorOpenPos - GetPosition();
 	m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 600;
 	if (car->IsBoat()) {
-#ifdef VC_PED_PORTS
-		// VC checks for handling flag, but we can't do that
-		if(car->GetModelIndex() == MI_SPEEDER)
+		if(car->pHandling->Flags & HANDLING_SIT_IN_BOAT)
 			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
 		else
 			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
 
 		PedSetInCarCB(nil, this);
 		bVehExitWillBeInstant = true;
-#else
-
-#ifndef FIX_BUGS
-		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
-#else
-		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, car->GetDriverAnim(), 100.0f);
-#endif
-
-		m_pVehicleAnim->SetFinishCallback(PedSetInCarCB, this);
-#endif
 		if (IsPlayer())
 			CWaterLevel::AllocateBoatWakeArray();
 	} else {
@@ -17961,6 +18440,65 @@ CPed::SetExitBoat(CVehicle *boat)
 	CWaterLevel::FreeBoatWakeArray();
 }
 
+void
+CPed::SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float heading, float time, int32 qid)
+{
+	if (!m_attractor)
+		m_attractor = pAttractor;
+	if (m_attractor != pAttractor)
+		return;
+	switch (pAttractor->GetEffect()->pedattr.type) {
+	case ATTRACTOR_ATM: SetObjective(OBJECTIVE_USE_ATM_ATTRACTOR, heading, pos); break;
+	case ATTRACTOR_SEAT: SetObjective(OBJECTIVE_USE_SEAT_ATTRACTOR, heading, pos); break;
+	case ATTRACTOR_STOP: SetObjective(OBJECTIVE_USE_STOP_ATTRACTOR, heading, pos); break;
+	case ATTRACTOR_PIZZA: SetObjective(OBJECTIVE_USE_PIZZA_ATTRACTOR, heading, pos); break;
+	case ATTRACTOR_SHELTER: SetObjective(OBJECTIVE_USE_SHELTER_ATTRACTOR, heading, pos); break;
+	case ATTRACTOR_ICECREAM: SetObjective(OBJECTIVE_USE_ICECREAM_ATTRACTOR, heading, pos); break;
+	default: return;
+	}
+	SetObjectiveTimer(time);
+	m_positionInQueue = qid;
+}
+
+void
+CPed::ClearWaitState(void)
+{
+	switch (m_nWaitState) {
+	case WAITSTATE_PLAYANIM_CHAT:
+	case WAITSTATE_SIT_DOWN:
+	case WAITSTATE_SIT_DOWN_RVRS:
+	case WAITSTATE_SIT_UP:
+	case WAITSTATE_SIT_IDLE:
+	case WAITSTATE_USE_ATM:
+		if (CTimer::GetTimeInMilliseconds() <= m_nWaitTimer) {
+			AnimationId id;
+			switch (m_nWaitState) { // TODO(MIAMI): actual!
+			case WAITSTATE_PLAYANIM_CHAT: id = ANIM_IDLE_CHAT; break;
+			case WAITSTATE_SIT_DOWN: id = ANIM_SEAT_DOWN; break;
+			case WAITSTATE_SIT_DOWN_RVRS: id = ANIM_SEAT_DOWN2; break;
+			case WAITSTATE_SIT_UP: id = ANIM_SEAT_UP; break;
+			case WAITSTATE_SIT_IDLE: id = ANIM_SEAT_IDLE; break;
+			case WAITSTATE_USE_ATM: id = ANIM_ATM; break;
+			}
+			CAnimBlendAssociation* pAssoc = RpAnimBlendClumpGetAssociation(GetClump(), id);
+			if (pAssoc)
+				pAssoc->blendDelta = -8.0f;
+			if (m_attractor)
+				GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+		}
+		break;
+	case WAITSTATE_RIOT:
+	case WAITSTATE_FAST_FALL:
+	case WAITSTATE_BOMBER:
+	case WAITSTATE_STRIPPER:
+	case WAITSTATE_GROUND_ATTACK:
+	case WAITSTATE_LANCESITTING:
+	case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
+		assert(0);
+	}
+	m_nWaitState = WAITSTATE_FALSE;
+}
+
 #ifdef COMPATIBLE_SAVES
 #define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
 #define CopyToBuf(buf, data) memcpy(buf, &data, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
@@ -17977,7 +18515,7 @@ CPed::Save(uint8*& buf)
 	CopyToBuf(buf, m_fHealth);
 	CopyToBuf(buf, m_fArmour);
 	SkipSaveBuf(buf, 148);
-	for (int i = 0; i < 10; i++) // has to be hardcoded
+	for (int i = 0; i < 13; i++) // has to be hardcoded
 		m_weapons[i].Save(buf);
 	SkipSaveBuf(buf, 5);
 	CopyToBuf(buf, m_maxWeaponTypeAllowed);
@@ -17999,8 +18537,10 @@ CPed::Load(uint8*& buf)
 	SkipSaveBuf(buf, 148);
 
 	CWeapon bufWeapon;
-	for (int i = 0; i < 10; i++) { // has to be hardcoded
+	for (int i = 0; i < 13; i++) { // has to be hardcoded
 		bufWeapon.Load(buf);
+		if (i >= 10)
+			continue; // tmp hack before we fix save/load
 
 		if (bufWeapon.m_eWeaponType != WEAPONTYPE_UNARMED) {
 			int modelId = CWeaponInfo::GetWeaponInfo(bufWeapon.m_eWeaponType)->m_nModelId;
@@ -18023,14 +18563,15 @@ CPed::Load(uint8*& buf)
 #undef CopyToBuf
 #endif
 
+// --MIAMI: Done
 void
 CPed::GiveDelayedWeapon(eWeaponType weapon, uint32 ammo)
 {
-	m_storedWeapon = weapon;
-	m_storedWeaponAmmo = ammo;
-	if (m_storedWeapon != WEAPONTYPE_UNIDENTIFIED) {
-		int modelId1 = CWeaponInfo::GetWeaponInfo(m_storedWeapon)->m_nModelId;
-		int modelId2 = CWeaponInfo::GetWeaponInfo(m_storedWeapon)->m_nModel2Id;
+	m_delayedWeapon = weapon;
+	m_delayedWeaponAmmo = ammo;
+	if (m_delayedWeapon != WEAPONTYPE_UNIDENTIFIED) {
+		int modelId1 = CWeaponInfo::GetWeaponInfo(m_delayedWeapon)->m_nModelId;
+		int modelId2 = CWeaponInfo::GetWeaponInfo(m_delayedWeapon)->m_nModel2Id;
 		if (modelId1 != -1)
 			CStreaming::RequestModel(modelId1, STREAMFLAGS_DEPENDENCY);
 		if (modelId2 != -1)
@@ -18038,18 +18579,19 @@ CPed::GiveDelayedWeapon(eWeaponType weapon, uint32 ammo)
 
 		if ((modelId1 == -1 || CStreaming::HasModelLoaded(modelId1))
 			&& (modelId2 == -1 || CStreaming::HasModelLoaded(modelId2))) {
-			GiveWeapon(m_storedWeapon, m_storedWeaponAmmo, 1);
-			m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
+			GiveWeapon(m_delayedWeapon, m_delayedWeaponAmmo, true);
+			m_delayedWeapon = WEAPONTYPE_UNIDENTIFIED;
 		}
 	}
 }
 
+// --MIAMI: Done
 void
 CPed::RequestDelayedWeapon()
 {
-	if (m_storedWeapon != WEAPONTYPE_UNIDENTIFIED) {
-		int modelId1 = CWeaponInfo::GetWeaponInfo(m_storedWeapon)->m_nModelId;
-		int modelId2 = CWeaponInfo::GetWeaponInfo(m_storedWeapon)->m_nModel2Id;
+	if (m_delayedWeapon != WEAPONTYPE_UNIDENTIFIED) {
+		int modelId1 = CWeaponInfo::GetWeaponInfo(m_delayedWeapon)->m_nModelId;
+		int modelId2 = CWeaponInfo::GetWeaponInfo(m_delayedWeapon)->m_nModel2Id;
 		if (modelId1 != -1)
 			CStreaming::RequestModel(modelId1, STREAMFLAGS_DEPENDENCY);
 		if (modelId2 != -1)
@@ -18057,12 +18599,13 @@ CPed::RequestDelayedWeapon()
 
 		if ((modelId1 == -1 || CStreaming::HasModelLoaded(modelId1))
 			&& (modelId2 == -1 || CStreaming::HasModelLoaded(modelId2))) {
-			GiveWeapon(m_storedWeapon, m_storedWeaponAmmo, 1);
-			m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
+			GiveWeapon(m_delayedWeapon, m_delayedWeaponAmmo, 1);
+			m_delayedWeapon = WEAPONTYPE_UNIDENTIFIED;
 		}
 	}
 }
 
+// --MIAMI: Done
 void
 CPed::ClearFollowPath()
 {
@@ -18071,4 +18614,75 @@ CPed::ClearFollowPath()
 	}
 	m_nPathNodes = 0;
 	m_nCurPathNode = 0;
+}
+
+// --MIAMI: Done except bikes
+void
+CPed::AddInCarAnims(CVehicle* car, bool isDriver)
+{
+	AnimationId anim;
+	AssocGroupId group;
+	if (car->IsBoat()) {
+		if (car->pHandling->Flags & HANDLING_SIT_IN_BOAT) {
+			anim = ANIM_CAR_SIT;
+		} else {
+			anim = ANIM_DRIVE_BOAT;
+		}
+		group = ASSOCGRP_STD;
+	} else if (car->IsBike()) {
+		if (isDriver) {
+			// TODO(Miami): Bikes
+		} else {
+			// TODO(Miami): Bikes
+		}
+	} else {
+		if (isDriver) {
+			if (car->bLowVehicle) {
+				anim = ANIM_CAR_LSIT;
+			} else {
+				anim = ANIM_CAR_SIT;
+			}
+		} else {
+			if (car->bLowVehicle) {
+				anim = ANIM_CAR_SITPLO;
+			} else {
+				anim = ANIM_CAR_SITP;
+			}
+		}
+		group = ASSOCGRP_STD;
+	}
+	m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), group, anim, 100.0f);
+
+	StopNonPartialAnims();
+}
+
+bool
+CPed::CanBeDamagedByThisGangMember(CPed* who)
+{
+	return m_gangFlags & (1 << (uint8)(who->m_nPedType - PEDTYPE_GANG1));
+}
+
+bool
+IsPedPointerValid_NotInWorld(CPed* pPed)
+{
+	if (!pPed)
+		return false;
+	int index = CPools::GetPedPool()->GetJustIndex(pPed);
+#ifdef FIX_BUGS
+	if (index < 0 || index >= NUMPEDS)
+#else
+	if (index < 0 || index > NUMPEDS)
+#endif
+		return false;
+	return true;
+}
+
+bool
+IsPedPointerValid(CPed* pPed)
+{
+	if (!IsPedPointerValid_NotInWorld(pPed))
+		return false;
+	if (pPed->bInVehicle && pPed->m_pMyVehicle)
+		return IsEntityPointerValid(pPed->m_pMyVehicle);
+	return pPed->m_entryInfoList.first || pPed == FindPlayerPed();
 }

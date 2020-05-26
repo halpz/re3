@@ -50,10 +50,16 @@ public:
 	int32 m_nExplosionsSinceLastReward;
 	int32 field_268;
 	int32 field_272;
+	uint32 m_nHavocLevel;
+	float m_fMediaAttention;
 	bool m_bInfiniteSprint;
 	bool m_bFastReload;
+	bool m_bFireproof;
+	uint8 m_nMaxHealth;
+	uint8 m_nMaxArmour;
 	bool m_bGetOutOfJailFree;
 	bool m_bGetOutOfHospitalFree;
+	bool m_bDriveByAllowed;
 	char m_aSkinName[32];
 	RwTexture *m_pSkinTexture;
 
@@ -69,7 +75,7 @@ public:
 	bool IsPlayerInRemoteMode(void);
 	void PlayerFailedCriticalMission(void);
 	void Clear(void);
-	void BlowUpRCBuggy(void);
+	void BlowUpRCBuggy(bool);
 	void CancelPlayerEnteringCars(CVehicle*);
 	bool IsRestartingAfterDeath(void);
 	bool IsRestartingAfterArrest(void);

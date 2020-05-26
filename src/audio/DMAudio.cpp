@@ -29,7 +29,7 @@ cDMAudio::Service(void)
 }
 
 int32
-cDMAudio::CreateEntity(int32 type, void *UID)
+cDMAudio::CreateEntity(eAudioType type, void *UID)
 {
 	return AudioManager.CreateEntity(type, (CPhysical *)UID);
 }
@@ -82,7 +82,7 @@ cDMAudio::SetEffectsFadeVol(uint8 volume)
 	uint8 vol = volume;
 	if ( vol > MAX_VOLUME ) vol = MAX_VOLUME;
 	
-	AudioManager.SetEffectsFadeVolume(vol);
+	AudioManager.SetEffectsFadeVol(vol);
 }
 
 void
@@ -91,7 +91,7 @@ cDMAudio::SetMusicFadeVol(uint8 volume)
 	uint8 vol = volume;
 	if ( vol > MAX_VOLUME ) vol = MAX_VOLUME;
 	
-	AudioManager.SetMusicFadeVolume(vol);
+	AudioManager.SetMusicFadeVol(vol);
 }
 
 uint8

@@ -176,7 +176,7 @@ class CReplay
 		CStoredAnimationState anim_state;
 		CCompressedMatrixNotAligned matrix;
 		int8 assoc_group_id;
-		uint8 weapon_model;
+		uint16 weapon_model;
 	};
 	VALIDATE_SIZE(tPedUpdatePacket, 40);
 

@@ -61,6 +61,8 @@ enum
 CCamera TheCamera;
 bool CCamera::m_bUseMouse3rdPerson = true;
 bool bDidWeProcessAnyCinemaCam;
+float CCamera::m_f3rdPersonCHairMultX;
+float CCamera::m_f3rdPersonCHairMultY;
 
 #ifdef IMPROVED_CAMERA
 #define KEYJUSTDOWN(k) ControlsManager.GetIsKeyboardKeyJustDown((RsKeyCodes)k)
@@ -80,10 +82,6 @@ CCamera::CCamera(void)
 	Init();
 }
 
-CCamera::CCamera(float)
-{
-}
-
 void
 CCamera::Init(void)
 {
@@ -91,12 +89,7 @@ CCamera::Init(void)
 	float fMouseAccelHorzntl = m_fMouseAccelHorzntl;
 	float fMouseAccelVertical = m_fMouseAccelVertical;
 #endif
-#ifdef FIX_BUGS
-	static const CCamera DummyCamera = CCamera(0.f);
-	*this = DummyCamera;
-#else
-	memset(this, 0, sizeof(CCamera));	// getting rid of vtable, eh?
-#endif
+	memset(this, 0, sizeof(CCamera));	// this is fine, no vtable
 #ifdef GTA3_1_1_PATCH
 	m_fMouseAccelHorzntl = fMouseAccelHorzntl;
 	m_fMouseAccelVertical = fMouseAccelVertical;
@@ -3044,33 +3037,25 @@ CCamera::SetNearClipScript(float clip)
 void
 CCamera::ProcessFade(void)
 {
-	float fade = (CTimer::GetTimeInMilliseconds() - m_uiFadeTimeStarted)/1000.0f;
-	// Why even set CDraw::FadeValue if m_fFLOATingFade sets it anyway?
 	if(m_bFading){
 		if(m_iFadingDirection == FADE_IN){
 			if(m_fTimeToFadeOut != 0.0f){
-				m_fFLOATingFade = 255.0f - 255.0f*fade/m_fTimeToFadeOut;
-				if(m_fFLOATingFade <= 0.0f){
-					m_bFading = false;
-					CDraw::FadeValue = 0;
-					m_fFLOATingFade = 0.0f;
-				}
+				m_fFLOATingFade -= CTimer::GetTimeStepInSeconds() * 255.0f / m_fTimeToFadeOut;
 			}else{
+				m_fFLOATingFade = 0.0f;
+			}
+			if (m_fFLOATingFade <= 0.0f) {
 				m_bFading = false;
-				CDraw::FadeValue = 0;
 				m_fFLOATingFade = 0.0f;
 			}
 		}else if(m_iFadingDirection == FADE_OUT){
 			if(m_fTimeToFadeOut != 0.0f){
-				m_fFLOATingFade = 255.0f*fade/m_fTimeToFadeOut;
-				if(m_fFLOATingFade >= 255.0f){
-					m_bFading = false;
-					CDraw::FadeValue = 255;
-					m_fFLOATingFade = 255.0f;
-				}
+				m_fFLOATingFade += CTimer::GetTimeStepInSeconds() * 255.0f / m_fTimeToFadeOut;
 			}else{
+				m_fFLOATingFade = 255.0f;
+			}
+			if (m_fFLOATingFade >= 255.0f) {
 				m_bFading = false;
-				CDraw::FadeValue = 255;
 				m_fFLOATingFade = 255.0f;
 			}
 		}
@@ -3132,15 +3117,6 @@ CCamera::Fade(float timeout, int16 direction)
 		m_iMusicFadingDirection = direction;
 		m_fTimeToFadeMusic = timeout;
 		m_uiFadeTimeStartedMusic = CTimer::GetTimeInMilliseconds();
-// Not on PS2
-		if(!m_bJustJumpedOutOf1stPersonBecauseOfTarget && m_iMusicFadingDirection == FADE_OUT){
-			unknown++;
-			if(unknown >= 2){
-				m_bJustJumpedOutOf1stPersonBecauseOfTarget = true;
-				unknown = 0;
-			}else
-				m_bMoveCamToAvoidGeom = true;
-		}
 	}
 }
 
@@ -3217,7 +3193,7 @@ CCamera::GetLookDirection(void)
 	   Cams[ActiveCam].Mode == CCam::MODE_BEHINDBOAT ||
 	   Cams[ActiveCam].Mode == CCam::MODE_FOLLOWPED)
 		return Cams[ActiveCam].DirectionWasLooking;
-	return LOOKING_FORWARD;;
+	return LOOKING_FORWARD;
 }
 
 bool
@@ -3305,6 +3281,18 @@ CCamera::Find3rdPersonQuickAimPitch(void)
 	return -(DEGTORAD(((0.5f - m_f3rdPersonCHairMultY) * 1.8f * 0.5f * Cams[ActiveCam].FOV)) + rot);
 }
 
+bool
+CCamera::Using1stPersonWeaponMode(void)
+{
+	switch(PlayerWeaponMode.Mode)
+	case CCam::MODE_SNIPER:
+	case CCam::MODE_M16_1STPERSON:
+	case CCam::MODE_ROCKETLAUNCHER:
+	case CCam::MODE_HELICANNON_1STPERSON:
+	case CCam::MODE_CAMERA:
+		return true;
+	return false;
+}
 
 
 void
@@ -3329,8 +3317,9 @@ CCamera::CalculateDerivedValues(void)
 	// left plane
 	m_vecFrustumNormals[1] = CVector(-c, -s, 0.0f);
 
-	c /= CDraw::FindAspectRatio();
-	s /= CDraw::FindAspectRatio();
+	CDraw::CalculateAspectRatio();
+	c /= SCREEN_ASPECT_RATIO;
+	s /= SCREEN_ASPECT_RATIO;
 	// bottom plane
 	m_vecFrustumNormals[2] = CVector(0.0f, -s, -c);
 	// top plane

@@ -129,7 +129,8 @@ CCoronas::Update(void)
 void
 CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 alpha,
 	const CVector &coors, float size, float drawDist, RwTexture *tex,
-	int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle)
+	int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle,
+	bool longDist, float nearDist)
 {
 	int i;
 
@@ -192,11 +193,13 @@ CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 al
 
 void
 CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 alpha,
-		const CVector &coors, float size, float drawDist, uint8 type,
-		int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle)
+	const CVector &coors, float size, float drawDist, uint8 type,
+	int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle,
+	bool longDist, float nearDist)
 {
 	RegisterCorona(id, red, green, blue, alpha, coors, size, drawDist,
-		gpCoronaTexture[type], flareType, reflection, LOScheck, drawStreak, someAngle);
+		gpCoronaTexture[type], flareType, reflection, LOScheck, drawStreak, someAngle,
+		longDist, nearDist);
 }
 
 void
@@ -506,18 +509,18 @@ CCoronas::DoSunAndMoon(void)
 {
 	// yeah, moon is done somewhere else....
 
-	CVector sunCoors = CTimeCycle::GetSunPosition();
+	CVector sunCoors = CTimeCycle::GetSunDirection();
 	sunCoors *= 150.0f;
 	sunCoors += TheCamera.GetPosition();
 
-	if(CTimeCycle::GetSunPosition().z > -0.2f){
+	if(CTimeCycle::GetSunDirection().z > -0.2f){
 		float size = ((CGeneral::GetRandomNumber()&0xFF) * 0.005f + 10.0f) * CTimeCycle::GetSunSize();
 		RegisterCorona(SUN_CORE,
 			CTimeCycle::GetSunCoreRed(), CTimeCycle::GetSunCoreGreen(), CTimeCycle::GetSunCoreBlue(),
 			255, sunCoors, size,
 			999999.88f, TYPE_STAR, FLARE_NONE, REFLECTION_OFF, LOSCHECK_OFF, STREAK_OFF, 0.0f);
 
-		if(CTimeCycle::GetSunPosition().z > 0.0f)
+		if(CTimeCycle::GetSunDirection().z > 0.0f)
 			RegisterCorona(SUN_CORONA,
 				CTimeCycle::GetSunCoronaRed(), CTimeCycle::GetSunCoronaGreen(), CTimeCycle::GetSunCoronaBlue(),
 				255, sunCoors, 25.0f * CTimeCycle::GetSunSize(),

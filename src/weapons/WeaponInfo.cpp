@@ -11,7 +11,8 @@
 
 // Yeah...
 int32 CWeaponInfo::ms_aMaxAmmoForWeapon[WEAPONTYPE_TOTALWEAPONS] = {
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1
 };
 
 CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
@@ -19,28 +20,47 @@ CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
 // --MIAMI: Todo
 static char ms_aWeaponNames[][32] = {
 	"Unarmed",
+	"BrassKnuckle",
+	"ScrewDriver",
+	"GolfClub",
+	"NightStick",
+	"Knife",
 	"BaseballBat",
+	"Hammer",
+	"Cleaver",
+	"Machete",
+	"Katana",
+	"Chainsaw",
+	"Grenade",
+	"DetonateGrenade",
+	"TearGas",
+	"Molotov",
+	"Rocket",
 	"Colt45",
+	"Python",
+	"Shotgun",
+	"Spas12Shotgun",
+	"StubbyShotgun",
 	"Tec9",
 	"Uzi",
 	"SilencedIngram",
 	"Mp5",
-	"Shotgun",
-	"AK47",
-	"M16",
+	"m4",
+	"Ruger",
 	"SniperRifle",
+	"LaserScope",
 	"RocketLauncher",
 	"FlameThrower",
-	"Molotov",
-	"Rocket",
-	"Grenade",
-	"DetonateGrenade",
+	"M60",
+	"Minigun",
 	"Detonator",
 	"HeliCannon",
+	"Camera",
 };
 
 CWeaponInfo*
-CWeaponInfo::GetWeaponInfo(eWeaponType weaponType) {
+CWeaponInfo::GetWeaponInfo(eWeaponType weaponType)
+{
 	return &CWeaponInfo::ms_apWeaponInfos[weaponType];
 }
 
@@ -61,8 +81,7 @@ CWeaponInfo::Initialise(void)
 		ms_apWeaponInfos[i].m_fLifespan = 0.0f;
 		ms_apWeaponInfos[i].m_fSpread = 0.0f;
 		ms_apWeaponInfos[i].m_vecFireOffset = CVector(0.0f, 0.0f, 0.0f);
-		// TODO(Miami): ASSOCGRP_UNARMED
-		ms_apWeaponInfos[i].m_AnimToPlay = ASSOCGRP_STD;
+		ms_apWeaponInfos[i].m_AnimToPlay = ASSOCGRP_UNARMED;
 		ms_apWeaponInfos[i].m_fAnimLoopStart = 0.0f;
 		ms_apWeaponInfos[i].m_fAnimLoopEnd = 0.0f;
 		ms_apWeaponInfos[i].m_fAnimFrameFire = 0.0f;
@@ -214,9 +233,7 @@ CWeaponInfo::LoadWeaponData(void)
 
 		ms_apWeaponInfos[weaponType].m_nWeaponSlot = weaponSlot;
 
-		// TODO(Miami): Enable once weapons are done
-		if (animLoopEnd < 98.0f && weaponType != WEAPONTYPE_FLAMETHROWER && weaponType != WEAPONTYPE_SHOTGUN
-			/*&& weaponType != 20 && weaponType != 21*/)
+		if (animLoopEnd < 98.0f && weaponType != WEAPONTYPE_FLAMETHROWER && !CWeapon::IsShotgun(weaponType))
 			ms_apWeaponInfos[weaponType].m_nFiringRate = ((ms_apWeaponInfos[weaponType].m_fAnimLoopEnd - ms_apWeaponInfos[weaponType].m_fAnimLoopStart) * 900.0f);
 
 		if (weaponType == WEAPONTYPE_DETONATOR || weaponType == WEAPONTYPE_HELICANNON)
@@ -254,6 +271,7 @@ CWeaponInfo::FindWeaponFireType(char *name)
 	if (strcmp(name, "INSTANT_HIT") == 0) return WEAPON_FIRE_INSTANT_HIT;
 	if (strcmp(name, "PROJECTILE") == 0) return WEAPON_FIRE_PROJECTILE;
 	if (strcmp(name, "AREA_EFFECT") == 0) return WEAPON_FIRE_AREA_EFFECT;
+	if (strcmp(name, "CAMERA") == 0) return WEAPON_FIRE_CAMERA;
 	Error("Unknown weapon fire type, WeaponInfo.cpp");
 	return WEAPON_FIRE_INSTANT_HIT;
 }

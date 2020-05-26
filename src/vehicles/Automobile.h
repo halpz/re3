@@ -83,14 +83,16 @@ public:
 	float m_aWheelRotation[4];
 	float m_aWheelPosition[4];
 	float m_aWheelSpeed[4];
+	float m_fRotorSpeed;
 	uint8 field_4D8;
 	uint8 bTaxiLight : 1;
-	uint8 bHadDriver : 1;		// for bombs
+	//uint8 bHadDriver : 1;		// for bombs
 	uint8 bFixedColour : 1;
 	uint8 bBigWheels : 1;
 	uint8 bWaterTight : 1;	// no damage for non-player peds
 	uint8 bNotDamagedUpsideDown : 1;
 	uint8 bMoreResistantToDamage : 1;
+	uint8 bTankDetonateCars : 1;
 	int16 field_4E0;
 	uint16 m_hydraulicState;
 	uint32 m_nBusDoorTimerEnd;
@@ -145,7 +147,7 @@ public:
 	void RemoveRefsToVehicle(CEntity *ent);
 	void BlowUpCar(CEntity *ent);
 	bool SetUpWheelColModel(CColModel *colModel);
-	void BurstTyre(uint8 tyre);
+	void BurstTyre(uint8 tyre, bool applyForces);
 	bool IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset);
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
@@ -177,6 +179,8 @@ public:
 	void SetPanelDamage(int32 component, ePanels panel, bool noFlyingComponents = false);
 	void SetBumperDamage(int32 component, ePanels panel, bool noFlyingComponents = false);
 	void SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents = false);
+
+	void TellHeliToGoToCoors(float x, float y, float z, uint8 speed);
 
 	void Fix(void);
 	void SetComponentVisibility(RwFrame *frame, uint32 flags);

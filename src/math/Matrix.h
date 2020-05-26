@@ -78,7 +78,8 @@ public:
 		return *this;
 	}
 
-	CVector &GetPosition(void){ return *(CVector*)&m_matrix.pos; }
+	const CVector &GetPosition(void) const { return *(CVector*)&m_matrix.pos; }
+	CVector& GetPosition(void) { return *(CVector*)&m_matrix.pos; }
 	CVector &GetRight(void) { return *(CVector*)&m_matrix.right; }
 	CVector &GetForward(void) { return *(CVector*)&m_matrix.up; }
 	CVector &GetUp(void) { return *(CVector*)&m_matrix.at; }

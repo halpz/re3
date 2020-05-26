@@ -66,7 +66,7 @@ enum Config {
 	// Cull zones
 	NUMATTRIBZONES = 704,
 
-	NUMHANDLINGS = 106,
+	NUMOCCLUSIONVOLUMES = 350,
 
 	PATHNODESIZE = 4500,
 
@@ -95,7 +95,7 @@ enum Config {
 	NUMPACMANPICKUPS = 256,
 	NUMEVENTS = 64,
 
-	NUM_CARGENS = 160,
+	NUM_CARGENS = 185,
 
 	NUM_PATH_NODES_IN_AUTOPILOT = 8,
 
@@ -135,6 +135,8 @@ enum Config {
 	NUM_CRANES = 8,
 
 	NUM_EXPLOSIONS = 48,
+
+	NUM_SETPIECES = 96
 };
 
 // We'll use this once we're ready to become independent of the game
@@ -194,15 +196,13 @@ enum Config {
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
 #define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
-#define MORE_LANGUAGES		// Add more translations to the game
+//#define MORE_LANGUAGES		// Add more translations to the game
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch)
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 //#define USE_TEXTURE_POOL
-#ifdef _WIN32
-#define AUDIO_MSS
-#else
-#define AUDIO_OAL
+#ifdef DEBUGMENU
+#define RELOADABLES			// some debug menu options to reload TXD files
 #endif
 
 // Particle
@@ -222,7 +222,6 @@ enum Config {
 // Hud, frontend and radar
 #define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
-#define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
 // #define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
 #define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
 #define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm

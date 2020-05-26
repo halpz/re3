@@ -29,6 +29,7 @@
 #include "Radar.h"
 #include "Restart.h"
 #include "Script.h"
+#include "SetPieces.h"
 #include "Stats.h"
 #include "Streaming.h"
 #include "Timer.h"
@@ -206,6 +207,7 @@ GenericSave(int file)
 	WriteSaveDataBlock(cAudioScriptObject::SaveAllAudioScriptObjects);
 	WriteSaveDataBlock(CWorld::Players[CWorld::PlayerInFocus].SavePlayerInfo);
 	WriteSaveDataBlock(CStats::SaveStats);
+	WriteSaveDataBlock(CSetPieces::Save);
 	WriteSaveDataBlock(CStreaming::MemoryCardSave);
 	WriteSaveDataBlock(CPedType::Save);
 
@@ -337,12 +339,14 @@ GenericLoad()
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Stats \n", CStats::LoadStats);
 	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading Set Pieces \n", CSetPieces::Load);
+	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Streaming Stuff \n", CStreaming::MemoryCardLoad);
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading PedType Stuff \n", CPedType::Load);
 
-	DMAudio.SetMusicMasterVolume(CMenuManager::m_PrefsMusicVolume);
-	DMAudio.SetEffectsMasterVolume(CMenuManager::m_PrefsSfxVolume);
+	DMAudio.SetMusicMasterVolume(FrontEndMenuManager.m_PrefsMusicVolume);
+	DMAudio.SetEffectsMasterVolume(FrontEndMenuManager.m_PrefsSfxVolume);
 	if (!CloseFile(file)) {
 		PcSaveHelper.nErrorCode = SAVESTATUS_ERR_LOAD_CLOSE;
 		return false;

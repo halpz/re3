@@ -23,7 +23,7 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 	switch (copType) {
 	case COP_STREET:
 		SetModelIndex(MI_COP);
-		// GiveWeapon(WEAPONTYPE_NIGHTSTICK, 1000, true); // TODO(Miami)
+		GiveWeapon(WEAPONTYPE_NIGHTSTICK, 1000, true);
 		GiveDelayedWeapon(WEAPONTYPE_COLT45, 1000);
 		m_currentWeapon = WEAPONTYPE_UNARMED;
 		m_fArmour = 0.0f;
@@ -257,7 +257,7 @@ CCopPed::ArrestPlayer(void)
 				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ARREST_GUN, 4.0f);
 
 			CVector suspMidPos;
-			suspect->m_pedIK.GetComponentPosition((RwV3d*)suspMidPos, PED_MID);
+			suspect->m_pedIK.GetComponentPosition(*(RwV3d *)&suspMidPos, PED_MID);
 			m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(suspMidPos.x, suspMidPos.y,
 				GetPosition().x, GetPosition().y);
 
@@ -589,7 +589,7 @@ CCopPed::ProcessControl(void)
 		ArrestPlayer();
 		return;
 	}
-	GetWeapon()->Update(m_audioEntityId);
+	GetWeapon()->Update(m_audioEntityId, nil);
 	if (m_moved.Magnitude() > 0.0f)
 		Avoid();
 

@@ -64,6 +64,7 @@
 #include "Script.h"
 #include "Shadows.h"
 #include "Skidmarks.h"
+#include "SetPieces.h"
 #include "SpecialFX.h"
 #include "Sprite2d.h"
 #include "Stats.h"
@@ -84,6 +85,7 @@
 #include "World.h"
 #include "ZoneCull.h"
 #include "Zones.h"
+#include "Occlusion.h"
 #include "debugmenu.h"
 
 
@@ -220,20 +222,20 @@ bool CGame::InitialiseOnceAfterRW(void)
 
 	if ( FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -99 || FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -2 )
 	{
-		CMenuManager::m_PrefsSpeakers = 0;
+		FrontEndMenuManager.m_PrefsSpeakers = 0;
 		int8 provider = DMAudio.AutoDetect3DProviders();
 		if ( provider != -1 )
 			FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = provider;
 	}
 
 	DMAudio.SetCurrent3DProvider(FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);
-	DMAudio.SetSpeakerConfig(CMenuManager::m_PrefsSpeakers);
-	DMAudio.SetDynamicAcousticModelingStatus(CMenuManager::m_PrefsDMA);
-	DMAudio.SetMusicMasterVolume(CMenuManager::m_PrefsMusicVolume);
-	DMAudio.SetEffectsMasterVolume(CMenuManager::m_PrefsSfxVolume);
+	DMAudio.SetSpeakerConfig(FrontEndMenuManager.m_PrefsSpeakers);
+	DMAudio.SetDynamicAcousticModelingStatus(FrontEndMenuManager.m_PrefsDMA);
+	DMAudio.SetMusicMasterVolume(FrontEndMenuManager.m_PrefsMusicVolume);
+	DMAudio.SetEffectsMasterVolume(FrontEndMenuManager.m_PrefsSfxVolume);
 	DMAudio.SetEffectsFadeVol(127);
 	DMAudio.SetMusicFadeVol(127);
-	CWorld::Players[0].SetPlayerSkin(CMenuManager::m_PrefsSkinFile);
+	CWorld::Players[0].SetPlayerSkin(FrontEndMenuManager.m_PrefsSkinFile);
 
 	return true;
 }
@@ -272,7 +274,9 @@ bool CGame::Initialise(const char* datFile)
 	ThePaths.AllocatePathFindInfoMem(4500);
 	CWeather::Init();
 	CCullZones::Init();
+	COcclusion::Init();
 	CCollision::Init();
+	CSetPieces::Init();
 	CTheZones::Init();
 	CUserDisplay::Init();
 	CMessages::Init();
@@ -527,6 +531,7 @@ void CGame::ShutDownForRestart(void)
 	CRadar::RemoveRadarSections();
 	FrontEndMenuManager.UnloadTextures();
 	CParticleObject::RemoveAllParticleObjects();
+	CSetPieces::Init();
 	CPedType::Shutdown();
 	CSpecialFX::Shutdown();
 	TidyUpMemory(true, false);
@@ -539,7 +544,14 @@ void CGame::InitialiseWhenRestarting(void)
 	
 	CTimer::Initialise();
 	CSprite2d::SetRecipNearClip();
-	
+
+	if (b_FoundRecentSavedGameWantToLoad || FrontEndMenuManager.m_bWantToLoad)
+	{
+		LoadSplash("splash1");
+		if (FrontEndMenuManager.m_bWantToLoad)
+			FrontEndMenuManager.MessageScreen("FELD_WR", true);
+	}
+
 	b_FoundRecentSavedGameWantToLoad = false;
 	
 	TheCamera.Init();
@@ -620,6 +632,7 @@ void CGame::Process(void)
 		CAntennas::Update();
 		CGlass::Update();
 		CSceneEdit::Update();
+		CSetPieces::Update();
 		CEventList::Update();
 		CParticle::Update();
 		gFireManager.Update();
@@ -660,6 +673,16 @@ void CGame::Process(void)
 			CCarCtrl::RemoveDistantCars();
 		}
 	}
+}
+
+void
+CGame::InitAfterFocusLoss()
+{
+	FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = FrontEndMenuManager.m_lastWorking3DAudioProvider;
+	DMAudio.SetCurrent3DProvider(FrontEndMenuManager.m_lastWorking3DAudioProvider);
+
+	if (!FrontEndMenuManager.m_bGameNotLoaded && !FrontEndMenuManager.m_bMenuActive)
+		FrontEndMenuManager.m_bStartUpFrontEndRequested = true;
 }
 
 bool

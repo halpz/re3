@@ -29,28 +29,51 @@
 #include "WaterLevel.h"
 #include "WeaponInfo.h"
 #include "World.h"
+#include "SurfaceTable.h"
 
-uint16 gReloadSampleTime[WEAPONTYPE_LAST_WEAPONTYPE] =
+// TODO(Miami)
+#define AUDIO_NOT_READY
+
+// TODO(Miami): Those are mostly placeholders!!!
+uint16 gReloadSampleTime[] =
 {
 	0,			// UNARMED
-	0,			// BASEBALLBAT
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,			// GRENADE
+	0,			// DETONATEGRENADE
+	0,			// TEARGAS
+	0,			// MOLOTOV
+	0,			// ROCKET
 	250,		// COLT45
+	250,		// PYTHON
+	650,		// SHOTGUN
+	650,		// SPAS12 SHOTGUN
+	650,		// STUBBY SHOTGUN
 	400,		// TEC9
 	400,		// UZIhec
 	400,		// SILENCED_INGRAM
 	400,		// MP5
-	650,		// SHOTGUN
-	300,		// AK47
 	300,		// M16
+	300,		// AK47
 	423,		// SNIPERRIFLE
+	423,		// LASERSCOPE
 	400,		// ROCKETLAUNCHER
 	0,			// FLAMETHROWER
-	0,			// MOLOTOV
-	0,			// ROCKET
-	0,			// GRENADE
-	0,			// DETONATEGRENADE
+	0,			// M60
+	0,			// MINIGUN
 	0,			// DETONATOR
-	0			// HELICANNON
+	0,			// HELICANNON
+	0			// CAMERA
 };
 
 CWeaponInfo *
@@ -96,10 +119,7 @@ CWeapon::Initialise(eWeaponType type, int32 ammo)
 {
 	m_eWeaponType = type;
 	m_eWeaponState = WEAPONSTATE_READY;
-	if (ammo > 99999)
-		m_nAmmoTotal = 99999;
-	else
-		m_nAmmoTotal = ammo;
+	m_nAmmoTotal = Min(ammo, 99999);
 	m_nAmmoInClip = 0;
 	Reload();
 	m_nTimer = 0;
@@ -156,6 +176,7 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 		return false;
 
 	bool fired;
+	bool addFireRateAsDelay = true;
 
 	if ( GetInfo()->m_eWeaponFire != WEAPON_FIRE_MELEE )
 	{
@@ -165,33 +186,40 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 		switch ( m_eWeaponType )
 		{
 			case WEAPONTYPE_SHOTGUN:
+			case WEAPONTYPE_SPAS12_SHOTGUN:
+			case WEAPONTYPE_STUBBY_SHOTGUN:
 			{
+				addFireRateAsDelay = true;
 				fired = FireShotgun(shooter, source);
 
 				break;
 			}
 
 			case WEAPONTYPE_COLT45:
+			case WEAPONTYPE_PYTHON:
 			case WEAPONTYPE_UZI:
 			case WEAPONTYPE_TEC9:
 			case WEAPONTYPE_SILENCED_INGRAM:
 			case WEAPONTYPE_MP5:
-			case WEAPONTYPE_AK47:
-			case WEAPONTYPE_M16:
+			case WEAPONTYPE_M4:
+			case WEAPONTYPE_RUGER:
+			case WEAPONTYPE_M60:
+			case WEAPONTYPE_MINIGUN:
 			case WEAPONTYPE_HELICANNON:
 			{
 				if ((TheCamera.PlayerWeaponMode.Mode == CCam::MODE_HELICANNON_1STPERSON || TheCamera.PlayerWeaponMode.Mode == CCam::MODE_M16_1STPERSON)
-					&& shooter == FindPlayerPed())
-				{
+					&& shooter == FindPlayerPed()) {
+					addFireRateAsDelay = false;
 					fired = FireM16_1stPerson(shooter);
-				}
-				else
+				} else {
+					addFireRateAsDelay = true;
 					fired = FireInstantHit(shooter, source);
-
+				}
 				break;
 			}
 
 			case WEAPONTYPE_SNIPERRIFLE:
+			case WEAPONTYPE_LASERSCOPE:
 			{
 				fired = FireSniper(shooter);
 
@@ -218,6 +246,7 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 			case WEAPONTYPE_MOLOTOV:
 			case WEAPONTYPE_GRENADE:
 			case WEAPONTYPE_DETONATOR_GRENADE:
+			case WEAPONTYPE_TEARGAS:
 			{
 				if ( shooter == FindPlayerPed() )
 				{
@@ -267,51 +296,58 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 			}
 		}
 
-		if ( fired )
+		if (fired)
 		{
 			bool isPlayer = false;
 
-			if ( shooter->IsPed() )
+			if (shooter->IsPed())
 			{
-				CPed *shooterPed = (CPed*)shooter;
+				CPed* shooterPed = (CPed*)shooter;
 
 				shooterPed->bIsShooting = true;
 
-				if ( shooterPed->IsPlayer() )
+				if (shooterPed->IsPlayer())
 					isPlayer = true;
 
 				DMAudio.PlayOneShot(shooterPed->m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
 			}
 
-			if ( m_nAmmoInClip > 0 ) m_nAmmoInClip--;
-			if ( m_nAmmoTotal > 0 && (m_nAmmoTotal < 25000 || isPlayer) ) m_nAmmoTotal--;
+			if (m_nAmmoInClip > 0)
+				m_nAmmoInClip--;
 
-			if ( m_eWeaponState == WEAPONSTATE_READY && m_eWeaponType == WEAPONTYPE_FLAMETHROWER )
+			if (m_nAmmoTotal > 0 && (m_nAmmoTotal < 25000 || isPlayer) && (!isPlayer || CStats::GetPercentageProgress() < 100.0f || m_eWeaponType == WEAPONTYPE_DETONATOR))
+				m_nAmmoTotal--;
+
+			if (m_eWeaponState == WEAPONSTATE_READY && m_eWeaponType == WEAPONTYPE_FLAMETHROWER)
 				DMAudio.PlayOneShot(((CPhysical*)shooter)->m_audioEntityId, SOUND_WEAPON_FLAMETHROWER_FIRE, 0.0f);
 
 			m_eWeaponState = WEAPONSTATE_FIRING;
-		}
 
-		if ( m_nAmmoInClip == 0 )
-		{
-			if ( m_nAmmoTotal == 0 )
-				return true;
-
-			m_eWeaponState = WEAPONSTATE_RELOADING;
-			m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nReload;
-
-			if ( shooter == FindPlayerPed() )
+			if (m_nAmmoInClip == 0)
 			{
-				if ( CWorld::Players[CWorld::PlayerInFocus].m_bFastReload )
-					m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nReload / 4;
+				if (m_nAmmoTotal == 0)
+					return true;
+
+				m_eWeaponState = WEAPONSTATE_RELOADING;
+				m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nReload;
+
+				if (shooter == FindPlayerPed())
+				{
+					if (CWorld::Players[CWorld::PlayerInFocus].m_bFastReload)
+						m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nReload / 4;
+				}
+
+				return true;
 			}
 
-			return true;
-		}
+			if (addFireRateAsDelay)
+				m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nFiringRate;
+			else
+				m_nTimer = CTimer::GetTimeInMilliseconds();
 
-		m_nTimer = CTimer::GetTimeInMilliseconds() + 1000;
-		if ( shooter == FindPlayerPed() )
-			CStats::RoundsFiredByPlayer++;
+			if (shooter == FindPlayerPed())
+				CStats::RoundsFiredByPlayer++;
+		}
 	}
 	else
 	{
@@ -319,9 +355,15 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 		{
 			m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nReload;
 			m_eWeaponState = WEAPONSTATE_FIRING;
+#ifndef AUDIO_NOT_READY
+			if (shooter->IsPed() && m_eWeaponType != WEAPONTYPE_CHAINSAW)
+			{
+				DMAudio.PlayOneShot(((CPed*)shooter)->m_audioEntityId, 188, m_eWeaponType << 8);
+			}
+#endif
 		}
 
-		FireMelee(shooter, *source);
+		fired = FireMelee(shooter, *source);
 	}
 
 	if ( m_eWeaponType == WEAPONTYPE_UNARMED || m_eWeaponType == WEAPONTYPE_BASEBALLBAT )
@@ -331,7 +373,7 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 }
 
 bool
-CWeapon::FireFromCar(CAutomobile *shooter, bool left)
+CWeapon::FireFromCar(CVehicle *shooter, bool left)
 {
 	ASSERT(shooter!=nil);
 
@@ -369,7 +411,7 @@ CWeapon::FireFromCar(CAutomobile *shooter, bool left)
 	return true;
 }
 
-// --MIAMI: Just a few lines is done
+// --MIAMI: Done, except commented things
 bool
 CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 {
@@ -383,20 +425,33 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 
 	CPed *shooterPed = (CPed*)shooter;
 
+	if (shooterPed == FindPlayerPed()) {
+		if (m_eWeaponType == WEAPONTYPE_GOLFCLUB || m_eWeaponType == WEAPONTYPE_NIGHTSTICK ||
+			(m_eWeaponType >= WEAPONTYPE_BASEBALLBAT && m_eWeaponType <= WEAPONTYPE_CHAINSAW)) {
+			
+			// TODO(Miami): BreakGlassPhysically
+			if (m_eWeaponType == WEAPONTYPE_CHAINSAW) {
+				CEventList::RegisterEvent(EVENT_GUNSHOT, EVENT_ENTITY_PED, FindPlayerPed(), FindPlayerPed(), 1000);
+			}
+		}
+	}
+
+	int damageEntityRegistered = 0;
+
 	for ( int32 i = 0; i < shooterPed->m_numNearPeds; i++ )
 	{
 		CPed *victimPed = shooterPed->m_nearPeds[i];
 		ASSERT(victimPed!=nil);
 
 		if ( (victimPed->m_nPedType != shooterPed->m_nPedType || victimPed == shooterPed->m_pSeekTarget)
-				&& victimPed != shooterPed->m_leader || !(CGeneral::GetRandomNumber() & 31) )
+				&& victimPed != shooterPed->m_leader || !(CGeneral::GetRandomNumber() & 31)
+				&& (!shooterPed->IsGangMember() || victimPed->CanBeDamagedByThisGangMember(shooterPed)) )
 		{
 			bool collided = false;
 
-			CColModel *victimPedCol = &CTempColModels::ms_colModelPed1;
-			if ( victimPed->OnGround() || !victimPed->IsPedHeadAbovePos(-0.3f) )
-				victimPedCol = &CTempColModels::ms_colModelPedGroundHit;
-
+			if (victimPed->m_nPedState == PED_DRIVING && (m_eWeaponType == WEAPONTYPE_UNARMED || m_eWeaponType == WEAPONTYPE_BRASSKNUCKLE
+				|| info->m_bFightMode))
+				continue;
 
 			float victimPedRadius = victimPed->GetBoundRadius() + info->m_fRadius;
 			if ( victimPed->bUsesCollision || victimPed->Dead() || victimPed->Driving() )
@@ -405,12 +460,29 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 				if ( SQR(victimPedRadius) > (victimPedPos-(*fireSource)).MagnitudeSqr() )
 				{
 					CVector collisionDist;
+					CColModel* victimPedCol = &CTempColModels::ms_colModelPed1;
+					bool useLocalPos = false;
+					if (victimPed->m_nPedState == PED_FALL
+						|| victimPed->m_nPedState == PED_DIE && victimPed->bIsPedDieAnimPlaying
+						|| victimPed->m_nWaitState == WAITSTATE_SIT_IDLE
+						|| victimPed->m_nWaitState == WAITSTATE_SUN_BATHE_IDLE)
+					{
+						useLocalPos = true;
+						victimPedCol = ((CPedModelInfo*)CModelInfo::GetModelInfo(victimPed->GetModelIndex()))->AnimatePedColModelSkinnedWorld(victimPed->GetClump());
+					} else if (victimPed->DyingOrDead()) {
+						victimPedCol = &CTempColModels::ms_colModelPedGroundHit;
+					}
 
 					int32 s = 0;
 					while ( s < victimPedCol->numSpheres )
 					{
 						CColSphere *sphere = &victimPedCol->spheres[s];
-						collisionDist = victimPedPos+sphere->center-(*fireSource);
+
+						if (useLocalPos) {
+							collisionDist = sphere->center - (*fireSource);
+						} else {
+							collisionDist = victimPedPos + sphere->center - (*fireSource);
+						}
 
 						if ( SQR(sphere->radius + info->m_fRadius) > collisionDist.MagnitudeSqr() )
 						{
@@ -431,65 +503,115 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 
 							int32 localDir = victimPed->GetLocalDirection(posOffset);
 
-							bool isBat = m_eWeaponType == WEAPONTYPE_BASEBALLBAT;
+							bool isHeavy = m_eWeaponType >= WEAPONTYPE_GOLFCLUB && m_eWeaponType <= WEAPONTYPE_KATANA && m_eWeaponType != WEAPONTYPE_HAMMER;
+
+							if (shooterPed->m_fDamageImpulse == 0.0f) {
+								shooterPed->m_pDamageEntity = victimPed;
+								victimPed->RegisterReference(&shooterPed->m_pDamageEntity);
+							}
+
+							damageEntityRegistered = 3;
+							// TODO(Miami): Bike
 
 							if ( !victimPed->DyingOrDead() )
 								victimPed->ReactToAttack(shooterPed);
 
 							uint8 hitLevel = HITLEVEL_HIGH;
-							if ( isBat && victimPed->OnGround() )
+							if ( isHeavy && (victimPed->OnGround() || victimPed->m_nWaitState == WAITSTATE_SUN_BATHE_IDLE))
 								hitLevel = HITLEVEL_GROUND;
 
 							victimPed->StartFightDefend(localDir, hitLevel, 10);
 
 							if ( !victimPed->DyingOrDead() )
 							{
-								if ( shooterPed->IsPlayer() && isBat && anim2Playing )
+								if ( shooterPed->IsPlayer() && isHeavy && anim2Playing )
 									victimPed->InflictDamage(shooterPed, m_eWeaponType, 100.0f, PEDPIECE_TORSO, localDir);
 								else if ( shooterPed->IsPlayer() && ((CPlayerPed*)shooterPed)->m_bAdrenalineActive )
 									victimPed->InflictDamage(shooterPed, m_eWeaponType, 3.5f*info->m_nDamage, PEDPIECE_TORSO, localDir);
 								else
 								{
-									if ( victimPed->IsPlayer() && isBat ) // wtf, it's not fair
+									if ( victimPed->IsPlayer() && isHeavy ) // wtf, it's not fair
 										victimPed->InflictDamage(shooterPed, m_eWeaponType, 2.0f*info->m_nDamage, PEDPIECE_TORSO, localDir);
 									else
 										victimPed->InflictDamage(shooterPed, m_eWeaponType,      info->m_nDamage, PEDPIECE_TORSO, localDir);
 								}
 							}
 
-							if ( CGame::nastyGame )
+							if ( CGame::nastyGame && victimPed->GetIsOnScreen() )
 							{
-								if ( victimPed->GetIsOnScreen() )
+								CVector dir = collisionDist * RecipSqrt(1.0f, 10.0f*collisionDist.MagnitudeSqr());
+
+								CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, dir);
+								CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, dir);
+								CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, dir);
+
+								if ( isHeavy )
 								{
-									CVector dir = collisionDist * RecipSqrt(1.0f, 10.0f*collisionDist.MagnitudeSqr());
-
-									CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, dir);
-									CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, dir);
+									dir.x += CGeneral::GetRandomNumberInRange(-0.05f, 0.05f);
+									dir.y += CGeneral::GetRandomNumberInRange(-0.05f, 0.05f);
 									CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, dir);
 
-									if ( isBat )
+									dir.x += CGeneral::GetRandomNumberInRange(-0.05f, 0.05f);
+									dir.y += CGeneral::GetRandomNumberInRange(-0.05f, 0.05f);
+									CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, dir);
+								}
+
+								if (m_eWeaponType == WEAPONTYPE_CHAINSAW)
+								{
+									if (victimPed->m_nPedState != PED_DEAD && !((CTimer::GetFrameCounter() + 17) & 1)
+										|| victimPed->m_nPedState == PED_DEAD && !((CTimer::GetFrameCounter() + 17) & 3))
 									{
-										dir.x += CGeneral::GetRandomNumberInRange(-0.05f, 0.05f);
-										dir.y += CGeneral::GetRandomNumberInRange(-0.05f, 0.05f);
-										CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, dir);
-
-										dir.x += CGeneral::GetRandomNumberInRange(-0.05f, 0.05f);
-										dir.y += CGeneral::GetRandomNumberInRange(-0.05f, 0.05f);
-										CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, dir);
+										CParticle::AddParticle(PARTICLE_TEST, bloodPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.2f);
 									}
+									CVector newDir(dir);
+									newDir.z += 0.2f;
+									CParticle::AddParticle(PARTICLE_BLOOD_SMALL, bloodPos, newDir);
+									CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, newDir);
+									newDir.z = dir.z + 0.1f;
+									CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, newDir);
+									newDir.x = 0.0f;
+									newDir.y = 0.0f;
+									newDir.z = 0.01f;
+									CParticle::AddParticle(PARTICLE_DEBRIS2, bloodPos, newDir);
+
+									// TODO(Miami): New particle
+									/*
+									v116.z = 0.0;
+									v116.x = CGeneral::GetRandomNumberInRange(-0.15f, 0.15f);
+									v116.y = CGeneral::GetRandomNumberInRange(0.1f, 0.35f);
+									v115.x = CGeneral::GetRandomNumberInRange(SCREEN_STRETCH_X(50.0f), SCREEN_STRETCH_FROM_RIGHT(50.0f));
+									v115.z = 1.0;
+									v115.y = CGeneral::GetRandomNumberInRange(SCREEN_STRETCH_Y(50.0f), SCREEN_STRETCH_FROM_BOTTOM(50.0f));
+									CParticle::AddParticle(41, v115, v116, nil, CGeneral::GetRandomNumberInRange(0.1f, 0.15f),
+										CRGBA(0, 0, 0, 0), 0, 0, CGeneral::GetRandomNumber() & 1, 0);
+
+									*/
+								}
+								if (info->m_AnimToPlay == ASSOCGRP_KNIFE)
+								{
+									dir.x += 0.1f * shooterPed->GetUp().x + 0.05f * shooterPed->GetRight().x;
+									dir.y += 0.1f * shooterPed->GetUp().y + 0.05f * shooterPed->GetRight().y;
+									dir.z += 0.1f * shooterPed->GetUp().z + 0.05f * shooterPed->GetRight().z;
+									CParticle::AddParticle(PARTICLE_BLOOD_SPURT, bloodPos, dir);
+									CParticle::AddParticle(PARTICLE_BLOOD_SPURT, bloodPos, dir);
+									CParticle::AddParticle(PARTICLE_BLOOD_SPURT, bloodPos, dir);
 								}
 							}
 
 							if ( !victimPed->OnGround() )
 							{
 								if ( victimPed->m_fHealth > 0.0f
-									&& (victimPed->m_fHealth < 20.0f && victimPedHealth > 20.0f || isBat && !victimPed->IsPlayer()) )
+									&& (victimPed->m_fHealth < 30.0f && victimPedHealth > 20.0f ||
+										(isHeavy || m_eWeaponType == WEAPONTYPE_BRASSKNUCKLE) && !victimPed->IsPlayer()) )
 								{
 									posOffset.Normalise();
 									victimPed->bIsStanding = false;
-									victimPed->ApplyMoveForce(posOffset.x*-5.0f, posOffset.y*-5.0f, 3.0f);
+									if(m_eWeaponType == WEAPONTYPE_CHAINSAW)
+										victimPed->ApplyMoveForce(posOffset.x*-2.0f, posOffset.y*-2.0f, 2.0f);
+									else
+										victimPed->ApplyMoveForce(posOffset.x*-5.0f, posOffset.y*-5.0f, 3.0f);
 
-									if ( isBat && victimPed->IsPlayer() )
+									if ( isHeavy && victimPed->IsPlayer() )
 										victimPed->SetFall(3000, AnimationId(ANIM_KO_SKID_FRONT + localDir), false);
 									else
 										victimPed->SetFall(1500, AnimationId(ANIM_KO_SKID_FRONT + localDir), false);
@@ -502,19 +624,150 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 							{
 								posOffset.Normalise();
 								victimPed->bIsStanding = false;
-								victimPed->ApplyMoveForce(posOffset.x*-5.0f, posOffset.y*-5.0f, 3.0f);
+								if(m_eWeaponType == WEAPONTYPE_CHAINSAW)
+									victimPed->ApplyMoveForce(posOffset.x*-1.0f, posOffset.y*-1.0f, 1.0f);
+								else
+									victimPed->ApplyMoveForce(posOffset.x*-5.0f, posOffset.y*-5.0f, 3.0f);
 							}
 
 							m_eWeaponState = WEAPONSTATE_MELEE_MADECONTACT;
 
-							if ( victimPed->m_nPedType == PEDTYPE_COP )
-								CEventList::RegisterEvent(EVENT_ASSAULT_POLICE, EVENT_ENTITY_PED, victimPed, shooterPed, 2000);
-							else
-								CEventList::RegisterEvent(EVENT_ASSAULT,        EVENT_ENTITY_PED, victimPed, shooterPed, 2000);
+							if (m_eWeaponType != WEAPONTYPE_KNIFE && m_eWeaponType != WEAPONTYPE_MACHETE
+								&& m_eWeaponType != WEAPONTYPE_KATANA && m_eWeaponType != WEAPONTYPE_CHAINSAW) {
+
+								if (victimPed->m_nPedType == PEDTYPE_COP)
+									CEventList::RegisterEvent(EVENT_ASSAULT_POLICE, EVENT_ENTITY_PED, victimPed, shooterPed, 2000);
+								else
+									CEventList::RegisterEvent(EVENT_ASSAULT, EVENT_ENTITY_PED, victimPed, shooterPed, 2000);
+							} else {
+								if (victimPed->m_nPedType == PEDTYPE_COP)
+									CEventList::RegisterEvent(EVENT_ASSAULT_NASTYWEAPON_POLICE, EVENT_ENTITY_PED, victimPed, shooterPed, 2000);
+								else
+									CEventList::RegisterEvent(EVENT_ASSAULT_NASTYWEAPON, EVENT_ENTITY_PED, victimPed, shooterPed, 2000);
+							}
 						}
 					}
 				}
 			}
+		}
+	}
+	CVehicle *nearVeh = (CVehicle*)CWorld::TestSphereAgainstWorld(fireSource, info->m_fRadius, nil, false, true, false, false, false, false);
+	if (nearVeh && nearVeh->IsCar())
+	{
+		CAutomobile *nearCar = (CAutomobile*)nearVeh;
+		m_eWeaponState = WEAPONSTATE_MELEE_MADECONTACT;
+		if (shooterPed == FindPlayerPed())
+		{
+			if (nearCar->IsLawEnforcementVehicle())
+			{
+				FindPlayerPed()->SetWantedLevelNoDrop(1);
+			}
+			CEventList::RegisterEvent(EVENT_ASSAULT, EVENT_ENTITY_VEHICLE, nearCar, shooterPed, 2000);
+		}
+		float oldHealth = nearCar->m_fHealth;
+		if (m_eWeaponType == WEAPONTYPE_CHAINSAW)
+		{
+			for(int i=0; i<4; i++) {
+				CParticle::AddParticle(PARTICLE_SPARK_SMALL, gaTempSphereColPoints[0].point, CVector(0.0f, 0.0f, 0.3f));
+				CParticle::AddParticle(PARTICLE_SPARK, gaTempSphereColPoints[0].point, gaTempSphereColPoints[0].normal * 0.1f);
+			}
+		}
+		if (m_eWeaponType == WEAPONTYPE_CHAINSAW)
+		{
+			nearCar->VehicleDamage(info->m_nDamage * (0.00075f * nearCar->pHandling->fMass), gaTempSphereColPoints[0].pieceB);
+
+			// TODO(Miami): Particle not in III
+			// CParticle::AddParticle(81, gaTempSphereColPoints[0].point, CVector(0.0f, 0.0f, 0.0f), 0, 0.0f, 0, 0, 0, 0);
+		}
+		else
+		{
+			nearCar->VehicleDamage(info->m_nDamage* (0.00075f * nearCar->pHandling->fMass), gaTempSphereColPoints[0].pieceB);
+		}
+		if (nearCar->m_fHealth < oldHealth)
+		{
+			nearCar->m_nLastWeaponDamage = m_eWeaponType;
+			nearCar->m_pLastDamageEntity = shooterPed;
+		}
+		if (shooterPed->m_fDamageImpulse == 0.0f)
+		{
+			shooterPed->m_pDamageEntity = nearCar;
+			nearCar->RegisterReference(&shooterPed->m_pDamageEntity);
+		}
+		damageEntityRegistered = 2;
+		if (FindPlayerPed()->GetWeapon() == this && nearCar->VehicleCreatedBy != MISSION_VEHICLE)
+		{
+			if (nearCar->AutoPilot.m_nDrivingStyle != DRIVINGSTYLE_PLOUGH_THROUGH
+				&& (CGeneral::GetRandomTrueFalse() || nearCar->AutoPilot.m_nCarMission != MISSION_CRUISE))
+			{
+				int leaveCarDelay = 200;
+				CPed *driver = nearCar->pDriver;
+				if (driver && driver->CharCreatedBy != MISSION_CHAR)
+				{
+					if (driver->m_pedStats->m_temper <= driver->m_pedStats->m_fear)
+					{
+						driver->SetObjective(OBJECTIVE_FLEE_TILL_SAFE);
+					}
+					else
+					{
+						driver->SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, FindPlayerPed());
+						driver->m_objectiveTimer = CTimer::GetTimeInMilliseconds() + 10000;
+						driver->m_prevObjective = OBJECTIVE_KILL_CHAR_ON_FOOT;
+					}
+					driver->m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + 200;
+					leaveCarDelay = 400;
+				}
+				for (int j = 0; j < nearCar->m_nNumPassengers; ++j)
+				{
+					CPed *passenger = nearCar->pPassengers[j];
+					if (passenger && passenger->CharCreatedBy != MISSION_CHAR)
+					{
+						nearCar->pPassengers[j]->SetObjective(OBJECTIVE_FLEE_TILL_SAFE);
+						passenger->m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + leaveCarDelay;
+						leaveCarDelay += 200;
+					}
+				}
+			}
+			else
+			{
+				CPed *driver = nearCar->pDriver;
+				if (driver)
+				{
+					if (driver->m_objective != OBJECTIVE_LEAVE_VEHICLE && driver->m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT &&
+						driver->m_objective != OBJECTIVE_FLEE_TILL_SAFE)
+					{
+						if (nearCar->AutoPilot.m_nDrivingStyle != DRIVINGSTYLE_PLOUGH_THROUGH)
+							nearCar->AutoPilot.m_nCruiseSpeed = nearCar->AutoPilot.m_nCruiseSpeed * 1.5f;
+
+						nearCar->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_PLOUGH_THROUGH;
+					}
+				}
+			}
+		}
+	}
+	if (m_eWeaponType == WEAPONTYPE_CHAINSAW)
+	{
+		CEntity *nearStatic = (CObject*)CWorld::TestSphereAgainstWorld(fireSource, info->m_fRadius, nil, true, false, false, true, false, false);
+		if (nearStatic)
+		{
+			for(int i=0; i < 4; i++) {
+				CParticle::AddParticle(PARTICLE_SPARK_SMALL, gaTempSphereColPoints[0].point, CVector(0.0f, 0.0f, 0.3f), 0, 0.0f, 0, 0, 0, 0);
+				CParticle::AddParticle(PARTICLE_SPARK, gaTempSphereColPoints[0].point, 0.1f * gaTempSphereColPoints[0].normal, 0, 0.0f, 0, 0, 0, 0);
+			}
+
+			// TODO(Miami): Particle not in III
+			//CParticle::AddParticle(81, gaTempSphereColPoints[0].point, CVector(0.0f, 0.0f, 0.0f), 0, 0.0f, 0, 0, 0, 0);
+			
+			if (!damageEntityRegistered)
+			{
+				m_eWeaponState = WEAPONSTATE_MELEE_MADECONTACT;
+				if (shooterPed->m_fDamageImpulse == 0.0f)
+				{
+					shooterPed->m_pDamageEntity = nearStatic;
+					nearStatic->RegisterReference(&shooterPed->m_pDamageEntity);
+				}
+			}
+			if (nearStatic->IsObject() && ((CObject*)nearStatic)->m_nCollisionDamageEffect >= DAMAGE_EFFECT_SMASH_COMPLETELY)
+				((CObject*)nearStatic)->ObjectDamage(200.0f);
 		}
 	}
 
@@ -564,7 +817,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			CPed *threatAttack = (CPed*)shooterPed->m_pPointGunAt;
 			if ( threatAttack->IsPed() )
 			{
-				threatAttack->m_pedIK.GetComponentPosition(target, PED_MID);
+				threatAttack->m_pedIK.GetComponentPosition(*(RwV3d *)&target, PED_MID);
 				threatAttack->ReactToPointGun(shooter);
 			}
 			else
@@ -606,7 +859,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 		CWorld::bIncludeDeadPeds = false;
 
 		int32 rotSpeed = 1;
-		if ( m_eWeaponType == WEAPONTYPE_M16  )
+		if ( m_eWeaponType == WEAPONTYPE_M4  )
 			rotSpeed = 4;
 
 		CVector bulletPos;
@@ -634,7 +887,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 		ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
 
 		int32 rotSpeed = 1;
-		if ( m_eWeaponType == WEAPONTYPE_M16  )
+		if ( m_eWeaponType == WEAPONTYPE_M4  )
 			rotSpeed = 4;
 
 		CVector bulletPos;
@@ -659,45 +912,15 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 
 	switch ( m_eWeaponType )
 	{
-		case WEAPONTYPE_AK47:
+		case WEAPONTYPE_M4:
+		case WEAPONTYPE_RUGER:
+		case WEAPONTYPE_M60:
+		case WEAPONTYPE_MINIGUN:
+		case WEAPONTYPE_HELICANNON:
 		{
 			static uint8 counter = 0;
 
-			if ( !(++counter & 1) )
-			{
-				CPointLights::AddLight(CPointLights::LIGHT_POINT,
-					*fireSource, CVector(0.0f, 0.0f, 0.0f), 5.0f,
-					1.0f, 0.8f, 0.0f, CPointLights::FOG_NONE, false);
-
-				CVector gunflashPos = *fireSource;
-				gunflashPos += CVector(0.06f*ahead.x, 0.06f*ahead.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.10f);
-				gunflashPos += CVector(0.06f*ahead.x, 0.06f*ahead.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.08f);
-				gunflashPos += CVector(0.05f*ahead.x, 0.05f*ahead.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.06f);
-				gunflashPos += CVector(0.04f*ahead.x, 0.04f*ahead.y, 0.0f);
-				CParticle::AddParticle(PARTICLE_GUNFLASH_NOANIM, gunflashPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.04f);
-
-				CVector gunsmokePos = *fireSource;
-				float rnd = CGeneral::GetRandomNumberInRange(0.05f, 0.25f);
-				CParticle::AddParticle(PARTICLE_GUNSMOKE2, gunsmokePos, CVector(ahead.x*rnd, ahead.y*rnd, 0.0f));
-
-				CVector gunshellPos = *fireSource;
-				gunshellPos -= CVector(0.5f*ahead.x, 0.5f*ahead.y, 0.0f);
-				CVector dir = CrossProduct(CVector(ahead.x, ahead.y, 0.0f), CVector(0.0f, 0.0f, 5.0f));
-				dir.Normalise2D();
-				AddGunshell(shooter, gunshellPos, CVector2D(dir.x, dir.y), 0.018f);
-			}
-
-			break;
-		}
-
-		case WEAPONTYPE_M16:
-		{
-			static uint8 counter = 0;
-
-			if ( !(++counter & 1) )
+			if ( info->m_nFiringRate >= 50 && !(++counter & 1) )
 			{
 				CPointLights::AddLight(CPointLights::LIGHT_POINT,
 					*fireSource, CVector(0.0f, 0.0f, 0.0f), 5.0f,
@@ -805,6 +1028,9 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 		}
 
 		case WEAPONTYPE_COLT45:
+		case WEAPONTYPE_PYTHON:
+		case WEAPONTYPE_SNIPERRIFLE:
+		case WEAPONTYPE_LASERSCOPE:
 		{
 			CPointLights::AddLight(CPointLights::LIGHT_POINT,
 					*fireSource, CVector(0.0f, 0.0f, 0.0f), 5.0f,
@@ -918,7 +1144,8 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 					}
 					else
 					{
-						if ( m_eWeaponType == WEAPONTYPE_SHOTGUN || m_eWeaponType == WEAPONTYPE_HELICANNON )
+						if ( IsShotgun(m_eWeaponType) || m_eWeaponType == WEAPONTYPE_HELICANNON
+							|| m_eWeaponType == WEAPONTYPE_M60 || m_eWeaponType == WEAPONTYPE_PYTHON)
 						{
 							posOffset.Normalise();
 							victimPed->bIsStanding = false;
@@ -943,7 +1170,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 									asoc->blendAmount = 0.0f;
 									asoc->blendDelta  = 8.0f;
 
-									if ( m_eWeaponType == WEAPONTYPE_AK47 || m_eWeaponType == WEAPONTYPE_M16 )
+									if ( m_eWeaponType == WEAPONTYPE_M4 )
 										victimPlayer->m_nHitAnimDelayTimer = CTimer::GetTimeInMilliseconds() + 2500;
 									else
 										victimPlayer->m_nHitAnimDelayTimer = CTimer::GetTimeInMilliseconds() + 1000;
@@ -972,7 +1199,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 					if ( CGame::nastyGame )
 					{
 						uint8 bloodAmount = 8;
-						if ( m_eWeaponType == WEAPONTYPE_SHOTGUN || m_eWeaponType == WEAPONTYPE_HELICANNON )
+						if ( IsShotgun(m_eWeaponType) || m_eWeaponType == WEAPONTYPE_HELICANNON )
 							bloodAmount = 32;
 
 						CVector dir = (point->point - victim->GetPosition()) * 0.01f;
@@ -1044,7 +1271,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 				}
 				case ENTITY_TYPE_VEHICLE:
 				{
-					((CVehicle *)victim)->InflictDamage(shooter, m_eWeaponType, info->m_nDamage);
+					((CVehicle *)victim)->InflictDamage(shooter, m_eWeaponType, info->m_nDamage, point->point);
 
 					for ( int32 i = 0; i < 16; i++ )
 						CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal*0.05f);
@@ -1188,10 +1415,35 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 	else
 		shooterAngle = RADTODEG(shooter->GetForward().Heading());
 
+	int shootsAtOnce;
+	int checkObstacleOnShootNo;
+	float angleRange;
+	switch (m_eWeaponType) {
+		case WEAPONTYPE_SHOTGUN:
+			angleRange = DEGTORAD(9.0f);
+			checkObstacleOnShootNo = 1;
+			shootsAtOnce = 3;
+			break;
+		case WEAPONTYPE_SPAS12_SHOTGUN:
+			angleRange = DEGTORAD(6.0f);
+			checkObstacleOnShootNo = 1;
+			shootsAtOnce = 3;
+			break;
+		case WEAPONTYPE_STUBBY_SHOTGUN:
+			angleRange = DEGTORAD(18.0f);
+			checkObstacleOnShootNo = 2;
+			shootsAtOnce = 5;
+			break;
+		default:
+			break;
+	}
+	bool statUpdated = false;
+	float halfAngleRange = angleRange / 2.f;
+	float angleBetweenTwoShot = angleRange / (shootsAtOnce - 1.f);
 
-	for ( int32 i = 0; i < 5; i++ ) // five shoots at once
+	for ( int32 i = 0; i < shootsAtOnce; i++ )
 	{
-		float shootAngle = DEGTORAD(7.5f*i + shooterAngle - 15.0f);
+		float shootAngle = DEGTORAD(RADTODEG(halfAngleRange - angleBetweenTwoShot * i) + shooterAngle);
 		CVector2D shootRot(-Sin(shootAngle), Cos(shootAngle));
 
 		CVector source, target;
@@ -1203,12 +1455,17 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 			TheCamera.Find3rdPersonCamTargetVector(1.0f, *fireSource, source, target);
 			CVector Left = CrossProduct(TheCamera.Cams[TheCamera.ActiveCam].Front, TheCamera.Cams[TheCamera.ActiveCam].Up);
 
-			float f = float(i - 2) * (DEGTORAD(7.5f) / 2);
+			float f = (i - (shootsAtOnce / 2)) * angleBetweenTwoShot;
 			target  = f * Left + target - source;
 			target *= info->m_fRange;
 			target += source;
+			CWorld::bIncludeDeadPeds = true;
+			//bProcessVehicleWheels = true; // TODO(Miami): bProcessVehicleWheels
+			//bProcessPedsOnBoatsAndBikes = true; // TODO(Miami): bProcessPedsOnBoatsAndBikes
 
-			ProcessLineOfSight(source, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
+			ProcessLineOfSight(source, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, false, false); // TODO(Miami): New parameter: ,true);
+			CWorld::bIncludeDeadPeds = false;
+			//bProcessVehicleWheels = false; // TODO(Miami): bProcessVehicleWheels
 		}
 		else
 		{
@@ -1224,24 +1481,84 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 					DoDoomAiming(shooter, fireSource, &target);
 				else
 				{
-					float distToTarget = (shooterPed->m_pPointGunAt->GetPosition() - (*fireSource)).Magnitude2D();
-					target.z += info->m_fRange / distToTarget * (shooterPed->m_pPointGunAt->GetPosition().z - target.z);
+					CVector pos;
+					if (shooterPed->m_pPointGunAt->IsPed()) {
+						((CPed*)shooterPed->m_pPointGunAt)->m_pedIK.GetComponentPosition(*(RwV3d *)&pos, PED_MID);
+					} else {
+						pos = ((CPed*)shooterPed->m_pPointGunAt)->GetPosition();
+					}
+
+					float distToTarget = (pos - (*fireSource)).Magnitude2D();
+					target.z += info->m_fRange / distToTarget * (pos.z - target.z);
 				}
 			}
+			if (shooter == FindPlayerPed())
+				CWorld::bIncludeDeadPeds = true;
 
-			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
+			//bProcessPedsOnBoatsAndBikes = true; // TODO(Miami): bProcessPedsOnBoatsAndBikes
+			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, false, false); // TODO(Miami): New parameter: ,true);
+			CWorld::bIncludeDeadPeds = false;
 		}
+		//bProcessPedsOnBoatsAndBikes = false; // TODO(Miami): bProcessPedsOnBoatsAndBikes
 
 		if ( victim )
 		{
 			CGlass::WasGlassHitByBullet(victim, point.point);
+			CWeapon::BlowUpExplosiveThings(victim);
+			if (i == checkObstacleOnShootNo)
+			{
+				if (shooter)
+				{
+					if (shooter->IsPed() && !((CPed*)shooter)->IsPlayer())
+					{
+						CPed *shooterPed = (CPed*)shooter;
+						CEntity *guyWePointGun = shooterPed->m_pPointGunAt;
+						if (guyWePointGun)
+						{
+							if (victim != guyWePointGun)
+							{
+								float distWithAim = (guyWePointGun->GetPosition() - shooter->GetPosition()).Magnitude();
+								float distWithBullet = (point.point - shooter->GetPosition()).Magnitude();
+								if (distWithAim > 0.1f && distWithBullet > 0.1f)
+								{
+									// Normalize
+									CVector aimDir = (guyWePointGun->GetPosition() - shooter->GetPosition()) * (1.0f / distWithAim);
+									CVector bulletDir = (point.point - shooter->GetPosition()) * (1.0f / distWithBullet);
 
+									float dotProd = DotProduct(aimDir, bulletDir);
+									float aimAndBulletAngle;
+									if (dotProd <= 0.35f)
+										aimAndBulletAngle = PI;
+									else
+										aimAndBulletAngle = Acos(dotProd);
+
+									if (aimAndBulletAngle <= DEGTORAD(45.0f) && (aimAndBulletAngle <= DEGTORAD(15.0f) || distWithBullet / distWithAim >= 0.75f) && distWithBullet / distWithAim >= 0.99f)
+									{
+										shooterPed->bObstacleShowedUpDuringKillObjective = false;
+										shooterPed->m_shotTime = 0;
+									}
+									else
+									{
+										shooterPed->bObstacleShowedUpDuringKillObjective = true;
+										shooterPed->m_shootTimer = 0;
+										shooterPed->m_shotTime = CTimer::GetTimeInMilliseconds();
+										if (distWithAim >= 10.0f)
+											shooterPed->SetAttackTimer(3000);
+										else
+											shooterPed->SetAttackTimer(1500);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 			CBulletTraces::AddTrace(fireSource, &point.point);
 
 			if ( victim->IsPed() )
 			{
 				CPed *victimPed = (CPed *)victim;
-				if ( !victimPed->OnGround() && victim != shooter && victimPed->DoesLOSBulletHitPed(point) )
+				if ( !victimPed->DyingOrDead() && victim != shooter )
 				{
 					bool cantStandup = true;
 
@@ -1254,7 +1571,8 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 
 					posOffset.Normalise();
 
-					if ( victimPed->m_getUpTimer > (CTimer::GetTimeInMilliseconds() - 3000) )
+					if ( victimPed->m_getUpTimer > (CTimer::GetTimeInMilliseconds() - 3000) || 
+						!victimPed->bCanBeShotInVehicle)
 						cantStandup = false;
 
 					if ( victimPed->bIsStanding && cantStandup )
@@ -1279,7 +1597,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 					if ( CGame::nastyGame )
 					{
 						uint8 bloodAmount = 8;
-						if ( m_eWeaponType == WEAPONTYPE_SHOTGUN )
+						if ( IsShotgun(m_eWeaponType) )
 							bloodAmount = 32;
 
 						CVector dir = (point.point - victim->GetPosition()) * 0.01f;
@@ -1291,6 +1609,36 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 								CParticle::AddParticle(PARTICLE_BLOOD_SMALL, point.point, dir);
 						}
 					}
+				} else {
+					if (CGame::nastyGame)
+					{
+						CVector dir = (point.point - victim->GetPosition()) * 0.01f;
+						dir.z = 0.01f;
+
+						if (victimPed->GetIsOnScreen())
+						{
+							for (uint8 i = 0; i < 8; i++)
+								CParticle::AddParticle(PARTICLE_BLOOD_SMALL, point.point + CVector(0.0f, 0.0f, 0.15f), dir);
+						}
+						if (victimPed->Dead())
+						{
+							CAnimBlendAssociation *hitAssoc;
+							if (RpAnimBlendClumpGetFirstAssociation(victimPed->GetClump(), ASSOC_FRONTAL))
+							{
+								hitAssoc = CAnimManager::BlendAnimation(victimPed->GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT_F, 8.0f);
+							}
+							else
+							{
+								hitAssoc = CAnimManager::BlendAnimation(victimPed->GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT, 8.0f);
+							}
+							if (hitAssoc)
+							{
+								hitAssoc->SetCurrentTime(0.0f);
+								hitAssoc->SetRun();
+								hitAssoc->flags &= ~ASSOC_DELETEFADEDOUT;
+							}
+						}
+					}
 				}
 			}
 			else
@@ -1299,21 +1647,29 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				{
 					case ENTITY_TYPE_VEHICLE:
 					{
-						((CVehicle *)victim)->InflictDamage(shooter, m_eWeaponType, info->m_nDamage);
+						if (point.pieceB >= SURFACE_LAMP_POST && point.pieceB <= SURFACE_METAL_CHAIN_FENCE) {
+							((CVehicle*)victim)->BurstTyre(point.pieceB, true);
 
-						for ( int32 i = 0; i < 16; i++ )
-							CParticle::AddParticle(PARTICLE_SPARK, point.point, point.normal*0.05f);
+							for (int32 i = 0; i < 4; i++)
+								CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, point.point, point.normal * 0.05f);
+						}
+						else
+						{
+							((CVehicle*)victim)->InflictDamage(shooter, m_eWeaponType, info->m_nDamage);
+
+							for (int32 i = 0; i < 16; i++)
+								CParticle::AddParticle(PARTICLE_SPARK, point.point, point.normal * 0.05f);
 
 #ifndef FIX_BUGS
-						CVector dist = point.point - (*fireSource);
-						CVector offset = dist - Max(0.2f*dist.Magnitude(), 2.0f) * CVector(shootRot.x, shootRot.y, 0.0f);
-						CVector smokePos = *fireSource + offset;
+							CVector dist = point.point - (*fireSource);
+							CVector offset = dist - Max(0.2f * dist.Magnitude(), 2.0f) * CVector(shootRot.x, shootRot.y, 0.0f);
+							CVector smokePos = *fireSource + offset;
 #else
-					    CVector smokePos = point.point;
+							CVector smokePos = point.point;
 #endif
 
-						CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, smokePos, CVector(0.0f, 0.0f, 0.0f));
-
+							CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, smokePos, CVector(0.0f, 0.0f, 0.0f));
+						}
 						break;
 					}
 
@@ -1343,13 +1699,15 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 
 							if ( !victimObject->bInfiniteMass )
 							{
-								if ( victimObject->IsStatic() && victimObject->m_fUprootLimit <= 0.0f )
+								bool notStatic = !victimObject->IsStatic();
+								if ( notStatic && victimObject->m_fUprootLimit <= 0.0f )
 								{
 									victimObject->bIsStatic = false;
 									victimObject->AddToMovingList();
 								}
 
-								if ( !victimObject->IsStatic())
+								notStatic = !victimObject->IsStatic();
+								if ( !notStatic )
 								{
 									CVector moveForce = point.normal*-5.0f;
 									victimObject->ApplyMoveForce(moveForce.x, moveForce.y, moveForce.z);
@@ -1372,17 +1730,29 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				}
 				case ENTITY_TYPE_VEHICLE:
 				{
+					if (!statUpdated) {
+						//CStats::NumBulletsHit++; // TODO(Miami): Stats
+						statUpdated = true;
+					}
 					DMAudio.PlayOneShot(((CPhysical*)victim)->m_audioEntityId, SOUND_WEAPON_HIT_VEHICLE, 1.0f);
 					break;
 				}
 				case ENTITY_TYPE_PED:
 				{
+					if (!statUpdated) {
+						//CStats::NumBulletsHit++; // TODO(Miami): Stats
+						statUpdated = true;
+					}
 					DMAudio.PlayOneShot(((CPhysical*)victim)->m_audioEntityId, SOUND_WEAPON_HIT_PED, 1.0f);
 					((CPed*)victim)->Say(SOUND_PED_BULLET_HIT);
 					break;
 				}
 				case ENTITY_TYPE_OBJECT:
 				{
+					if (!statUpdated) {
+						//CStats::NumBulletsHit++; // TODO(Miami): Stats
+						statUpdated = true;
+					}
 					PlayOneShotScriptObject(SCRIPT_SOUND_BULLET_HIT_GROUND_2, point.point);
 					break;
 				}
@@ -1631,8 +2001,7 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 
 	CVector bulletPos;
 
-	// TODO(Miami): M60
-	if ( CHeli::TestBulletCollision(&source, &target, &bulletPos, (/*m_eWeaponType == WEAPONTYPE_M60 || */ m_eWeaponType == WEAPONTYPE_HELICANNON ? 20 : 4)) )
+	if ( CHeli::TestBulletCollision(&source, &target, &bulletPos, (m_eWeaponType == WEAPONTYPE_M60 || m_eWeaponType == WEAPONTYPE_HELICANNON ? 20 : 4)) )
 	{
 		for ( int32 i = 0; i < 16; i++ )
 			CParticle::AddParticle(PARTICLE_SPARK, bulletPos, CVector(0.0f, 0.0f, 0.0f));
@@ -1642,15 +2011,14 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 	{
 		CPad::GetPad(0)->StartShake_Distance(240, 128, FindPlayerPed()->GetPosition().x, FindPlayerPed()->GetPosition().y, FindPlayerPed()->GetPosition().z);
 
-		// TODO(Miami)
 		float mult;
 		switch (m_eWeaponType) {
-			case WEAPONTYPE_M16:  // case WEAPONTYPE_M4:
+			case WEAPONTYPE_M4:
 			case WEAPONTYPE_HELICANNON:
-			// case WEAPONTYPE_M60:
+			case WEAPONTYPE_M60:
 				mult = 0.0003f;
 				break;
-			case WEAPONTYPE_AK47: // case WEAPONTYPE_RUGER:
+			case WEAPONTYPE_RUGER:
 				mult = 0.00015f;
 				break;
 			default:
@@ -1669,7 +2037,7 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 }
 
 bool
-CWeapon::FireInstantHitFromCar(CAutomobile *shooter, bool left)
+CWeapon::FireInstantHitFromCar(CVehicle *shooter, bool left)
 {
 	CWeaponInfo *info = GetInfo();
 
@@ -2040,8 +2408,10 @@ CWeapon::Reload(void)
 }
 
 void
-CWeapon::Update(int32 audioEntity)
+CWeapon::Update(int32 audioEntity, CPed *pedToAdjustSound)
 {
+	CWeaponInfo *info = GetInfo();
+
 	switch ( m_eWeaponState )
 	{
 		case WEAPONSTATE_MELEE_MADECONTACT:
@@ -2052,9 +2422,9 @@ CWeapon::Update(int32 audioEntity)
 
 		case WEAPONSTATE_FIRING:
 		{
-			if ( m_eWeaponType == WEAPONTYPE_SHOTGUN && AEHANDLE_IS_OK(audioEntity) )
+			if ( IsShotgun(m_eWeaponType) && AEHANDLE_IS_OK(audioEntity) )
 			{
-				uint32 timePassed = m_nTimer - gReloadSampleTime[WEAPONTYPE_SHOTGUN];
+				uint32 timePassed = m_nTimer - gReloadSampleTime[m_eWeaponType];
 				if ( CTimer::GetPreviousTimeInMilliseconds() < timePassed && CTimer::GetTimeInMilliseconds() >= timePassed )
 					DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, 0.0f);
 			}
@@ -2072,11 +2442,59 @@ CWeapon::Update(int32 audioEntity)
 
 		case WEAPONSTATE_RELOADING:
 		{
-			if  ( AEHANDLE_IS_OK(audioEntity) && m_eWeaponType < WEAPONTYPE_LAST_WEAPONTYPE )
+			if  ( AEHANDLE_IS_OK(audioEntity) && m_eWeaponType < WEAPONTYPE_TOTALWEAPONS)
 			{
-				uint32 timePassed = m_nTimer - gReloadSampleTime[m_eWeaponType];
-				if ( CTimer::GetPreviousTimeInMilliseconds() < timePassed && CTimer::GetTimeInMilliseconds() >= timePassed )
-					DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, 0.0f);
+				CAnimBlendAssociation *reloadAssoc = nil;
+				if (pedToAdjustSound) {
+					if (CPed::GetReloadAnim(info) && (!CWorld::Players[CWorld::PlayerInFocus].m_bFastReload || !pedToAdjustSound->IsPlayer())) {
+						reloadAssoc = RpAnimBlendClumpGetAssociation(pedToAdjustSound->GetClump(), CPed::GetReloadAnim(info));
+						if (!reloadAssoc) {
+							reloadAssoc = RpAnimBlendClumpGetAssociation(pedToAdjustSound->GetClump(), CPed::GetCrouchReloadAnim(info));
+						}
+					}
+				}
+				if (reloadAssoc && reloadAssoc->IsRunning() && reloadAssoc->blendAmount > 0.2f) {
+					float soundStart = 0.75f;
+					switch (info->m_AnimToPlay) {
+						case ASSOCGRP_PYTHON:
+							soundStart = 0.5f;
+							break;
+						case ASSOCGRP_COLT:
+						case ASSOCGRP_TEC:
+							soundStart = 0.7f;
+							break;
+						case ASSOCGRP_UZI:
+							soundStart = 0.75f;
+							break;
+						case ASSOCGRP_RIFLE:
+							soundStart = 0.75f;
+							break;
+						case ASSOCGRP_M60:
+							soundStart = 0.7f;
+							break;
+						default:
+							break;
+					}
+					if (reloadAssoc->GetProgress() >= soundStart && (reloadAssoc->currentTime - reloadAssoc->timeStep) / reloadAssoc->hierarchy->totalLength < soundStart) {
+#ifdef AUDIO_NOT_READY
+						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, 0.0f);
+#else
+						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, m_eWeaponType);
+#endif
+					}
+					if (CTimer::GetTimeInMilliseconds() > m_nTimer && reloadAssoc->GetProgress() < 0.9f) {
+						m_nTimer = CTimer::GetTimeInMilliseconds();
+					}
+				} else {
+					uint32 timePassed = m_nTimer - gReloadSampleTime[m_eWeaponType];
+					if (CTimer::GetPreviousTimeInMilliseconds() < timePassed && CTimer::GetTimeInMilliseconds() >= timePassed) {
+#ifdef AUDIO_NOT_READY
+						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, 0.0f);
+#else
+						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, m_eWeaponType);
+#endif
+					}
+				}
 			}
 
 			if ( CTimer::GetTimeInMilliseconds() > m_nTimer )
@@ -2199,13 +2617,15 @@ FireOneInstantHitRound(CVector *source, CVector *target, int32 damage)
 bool
 CWeapon::IsTypeMelee(void)
 {
-	return m_eWeaponType == WEAPONTYPE_UNARMED || m_eWeaponType == WEAPONTYPE_BASEBALLBAT;
+	return CWeaponInfo::GetWeaponInfo(m_eWeaponType)->m_eWeaponFire == WEAPON_FIRE_MELEE;
 }
 
 bool
 CWeapon::IsType2Handed(void)
 {
-	return m_eWeaponType >= WEAPONTYPE_SHOTGUN && m_eWeaponType <= WEAPONTYPE_FLAMETHROWER && m_eWeaponType != WEAPONTYPE_ROCKETLAUNCHER;
+	return m_eWeaponType == WEAPONTYPE_FLAMETHROWER || m_eWeaponType == WEAPONTYPE_HELICANNON || m_eWeaponType == WEAPONTYPE_M60 ||
+		m_eWeaponType == WEAPONTYPE_M4 || IsShotgun(m_eWeaponType) ||
+		m_eWeaponType == WEAPONTYPE_RUGER || m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || m_eWeaponType == WEAPONTYPE_LASERSCOPE;
 }
 
 void
@@ -2312,13 +2732,15 @@ CWeapon::BlowUpExplosiveThings(CEntity *thing)
 bool
 CWeapon::HasWeaponAmmoToBeUsed(void)
 {
-	switch (m_eWeaponType) {
-		case WEAPONTYPE_UNARMED:
-		case WEAPONTYPE_BASEBALLBAT:
-			return true;
-		default:
-			return m_nAmmoTotal != 0;
-	}
+	// FIX: This is better (not bug tho)
+#if 0
+	if (m_eWeaponType <= WEAPONTYPE_CHAINSAW)
+#else
+	if (CWeaponInfo::GetWeaponInfo(m_eWeaponType)->m_eWeaponFire == WEAPON_FIRE_MELEE)
+#endif
+		return true;
+	else
+		return m_nAmmoTotal != 0;
 }
 
 bool

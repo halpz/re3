@@ -2,12 +2,17 @@
 
 #include "ModelIndices.h"
 #include "Gangs.h"
+#include "General.h"
+#include "Streaming.h"
 #include "Weapon.h"
 
 CGangInfo CGangs::Gang[NUM_GANGS];
+bool CGangs::GangAttackWithCops[NUM_GANGS];
 
 CGangInfo::CGangInfo() :
-	m_nVehicleMI(MI_BUS),
+	m_nVehicleMI(-1),
+	m_nPedModel1MI(-1),
+	m_nPedModel2MI(-1),
 	m_nPedModelOverride(-1),
 	m_Weapon1(WEAPONTYPE_UNARMED),
 	m_Weapon2(WEAPONTYPE_UNARMED)
@@ -15,19 +20,61 @@ CGangInfo::CGangInfo() :
 
 void CGangs::Initialise(void)
 {
-	Gang[GANG_MAFIA].m_nVehicleMI = -1;
-	Gang[GANG_TRIAD].m_nVehicleMI = -1;
-	Gang[GANG_DIABLOS].m_nVehicleMI = -1;
-	Gang[GANG_YAKUZA].m_nVehicleMI = -1;
-	Gang[GANG_YARDIE].m_nVehicleMI = -1;
-	Gang[GANG_COLUMB].m_nVehicleMI = -1;
-	Gang[GANG_HOODS].m_nVehicleMI = -1;
-	Gang[GANG_7].m_nVehicleMI = -1;
-	Gang[GANG_8].m_nVehicleMI = -1;
+	SetGangPedModels(GANG_CUBAN, MI_CBA, MI_CBB);
+	SetGangPedModels(GANG_HAITIAN, MI_HNA, MI_HNB);
+	SetGangPedModels(GANG_STREET, MI_SGA, MI_SGB);
+	SetGangPedModels(GANG_DIAZ, MI_CLA, MI_CLB);
+	SetGangPedModels(GANG_SECURITY, MI_GDA, MI_GDB);
+	SetGangPedModels(GANG_BIKER, MI_BKA, MI_BKB);
+	SetGangPedModels(GANG_PLAYER, MI_PGA, MI_PGB);
+	SetGangPedModels(GANG_GOLFER, MI_WFOGO, MI_WMOGO);
+	SetGangVehicleModel(GANG_CUBAN, MI_CUBAN);
+	SetGangVehicleModel(GANG_HAITIAN, MI_VOODOO);
+	SetGangVehicleModel(GANG_STREET, MI_GANGBUR);
+	SetGangVehicleModel(GANG_DIAZ, -1);
+	SetGangVehicleModel(GANG_SECURITY, -1);
+	SetGangVehicleModel(GANG_BIKER, MI_ANGEL);
+	SetGangVehicleModel(GANG_PLAYER, -1);
+	SetGangVehicleModel(GANG_GOLFER, MI_CADDY);
+	SetGangWeapons(GANG_GOLFER, WEAPONTYPE_GOLFCLUB, WEAPONTYPE_GOLFCLUB);
 #ifdef FIX_BUGS
 	for (int i = 0; i < NUM_GANGS; i++)
-		Gang[i].m_nPedModelOverride = -1;
+		SetGangPedModelOverride(i, -1);
 #endif
+}
+
+bool CGangs::HaveGangModelsLoaded(int16 gang)
+{
+	CGangInfo* pGangInfo = GetGangInfo(gang);
+	return CStreaming::HasModelLoaded(pGangInfo->m_nPedModel1MI) && CStreaming::HasModelLoaded(pGangInfo->m_nPedModel2MI);
+}
+
+void CGangs::SetGangPedModels(int16 gang, int32 mi1, int32 mi2)
+{
+	GetGangInfo(gang)->m_nPedModel1MI = mi1;
+	GetGangInfo(gang)->m_nPedModel2MI = mi2;
+}
+
+void CGangs::SetWillAttackPlayerWithCops(ePedType type, bool will)
+{
+	if (type >= PEDTYPE_GANG1 && type <= PEDTYPE_GANG9)
+		GangAttackWithCops[type - PEDTYPE_GANG1] = will;
+}
+
+bool CGangs::GetWillAttackPlayerWithCops(ePedType type)
+{
+	if (type >= PEDTYPE_GANG1 && type <= PEDTYPE_GANG9)
+		return GangAttackWithCops[type - PEDTYPE_GANG1];
+	return false;
+}
+
+int32 CGangs::ChooseGangPedModel(int16 gang)
+{
+	CGangInfo* pGangInfo = GetGangInfo(gang);
+	if (pGangInfo->m_nPedModelOverride != -1 || CGeneral::GetRandomTrueFalse())
+		return pGangInfo->m_nPedModel1MI;
+	else
+		return pGangInfo->m_nPedModel2MI;
 }
 
 void CGangs::SetGangVehicleModel(int16 gang, int32 model)

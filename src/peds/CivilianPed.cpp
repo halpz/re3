@@ -9,6 +9,9 @@
 #include "World.h"
 #include "Vehicle.h"
 #include "SurfaceTable.h"
+#include "Weather.h"
+#include "PedAttractor.h"
+#include "Object.h"
 
 CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 {
@@ -16,6 +19,8 @@ CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 	for (int i = 0; i < ARRAY_SIZE(m_nearPeds); i++) {
 		m_nearPeds[i] = nil;
 	}
+	m_nAttractorCycleState = 0;
+	m_bAttractorUnk = (CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 1.25f);
 }
 
 void
@@ -98,7 +103,7 @@ CCivilianPed::CivilianAI(void)
 		SetLookTimer(500);
 	} else if (closestThreatFlag == PED_FLAG_DEADPEDS) {
 		float eventDistSqr = (m_pEventEntity->GetPosition() - GetPosition()).MagnitudeSqr2D();
-		if (IsGangMember() && m_nPedType == ((CPed*)m_pEventEntity)->m_nPedType) {
+		if (((CPed*)m_pEventEntity)->bIsDrowning || IsGangMember() && m_nPedType == ((CPed*)m_pEventEntity)->m_nPedType) {
 			if (eventDistSqr < sq(5.0f)) {
 				SetFindPathAndFlee(m_pEventEntity, 2000);
 				SetMoveState(PEDMOVE_RUN);
@@ -195,7 +200,7 @@ CCivilianPed::ProcessControl(void)
 	if (DyingOrDead())
 		return;
 
-	GetWeapon()->Update(m_audioEntityId);
+	GetWeapon()->Update(m_audioEntityId, nil);
 	switch (m_nPedState) {
 		case PED_WANDER_RANGE:
 		case PED_WANDER_PATH:
@@ -212,7 +217,7 @@ CCivilianPed::ProcessControl(void)
 			// fall through
 		case PED_SEEK_POS:
 			if (Seek()) {
-				if ((m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA) && m_pNextPathNode) {
+				if ((m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA || IsUseAttractorObjective(m_objective)) && m_pNextPathNode) {
 					m_pNextPathNode = nil;
 #ifdef TOGGLEABLE_BETA_FEATURES
 				} else if (bRunningToPhone && m_objective < OBJECTIVE_FLEE_TILL_SAFE) {
@@ -244,7 +249,7 @@ CCivilianPed::ProcessControl(void)
 					} else if (m_objective == OBJECTIVE_GOTO_CHAR_ON_FOOT
 						&& m_pedInObjective && m_pedInObjective->m_nMoveState != PEDMOVE_STILL) {
 						SetMoveState(m_pedInObjective->m_nMoveState);
-					} else if (m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA) {
+					} else if (m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA || IsUseAttractorObjective(m_objective)) {
 						SetIdle();
 					} else {
 						RestorePreviousState();
@@ -320,7 +325,7 @@ CCivilianPed::ProcessControl(void)
 										CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency = Max(250, playerSexFrequency - 10);
 									}
 
-									m_pMyVehicle->pDriver->m_fHealth = Min(125.0f, 1.0f + m_pMyVehicle->pDriver->m_fHealth);
+									m_pMyVehicle->pDriver->m_fHealth = Min(CWorld::Players[0].m_nMaxHealth + 25.0f, 1.0f + m_pMyVehicle->pDriver->m_fHealth);
 									if (CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency == 250)
 										CWorld::Players[CWorld::PlayerInFocus].m_nNextSexFrequencyUpdateTime = CTimer::GetTimeInMilliseconds() + 3000;
 							} else {
@@ -331,7 +336,7 @@ CCivilianPed::ProcessControl(void)
 						} else {
 							bWanderPathAfterExitingCar = true;
 							CWorld::Players[CWorld::PlayerInFocus].m_pHooker = nil;
-							m_pMyVehicle->pDriver->m_fHealth = 125.0f;
+							m_pMyVehicle->pDriver->m_fHealth = CWorld::Players[0].m_nMaxHealth + 25.0f;
 							SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
 						}
 					} else {
@@ -365,6 +370,10 @@ CCivilianPed::ProcessControl(void)
 	if (IsPedInControl())
 		CivilianAI();
 
+	if (CharCreatedBy == RANDOM_CHAR) {
+		UseNearbyAttractors();
+	}
+
 	if (CTimer::GetTimeInMilliseconds() > m_timerUnused) {
 		m_stateUnused = 0;
 		m_timerUnused = 0;
@@ -372,4 +381,91 @@ CCivilianPed::ProcessControl(void)
 
 	if (m_moved.Magnitude() > 0.0f)
 		Avoid();
+}
+
+const int32 gFrequencyOfAttractorAttempt = 11;
+const float gDistanceToSeekAttractors = 50.0f;
+const float gMaxDistanceToAttract = 10.0f;
+
+/* Probably this was inlined */
+void CCivilianPed::FindNearbyAttractorsSectorList(CPtrList& list, float& minDistance, C2dEffect*& pClosestAttractor, CEntity*& pAttractorEntity)
+{
+	for (CPtrNode* pNode = list.first; pNode != nil; pNode = pNode->next) {
+		CEntity* pEntity = (CEntity*)pNode->item;
+		if (pEntity->IsObject() && (!pEntity->IsStatic() || ((CObject*)pEntity)->bHasBeenDamaged))
+			continue;
+		CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(pEntity->GetModelIndex());
+		for (int i = 0; i < pModelInfo->GetNum2dEffects(); i++) {
+			C2dEffect* pEffect = pModelInfo->Get2dEffect(i);
+			if (pEffect->type != EFFECT_PED_ATTRACTOR)
+				continue;
+			if (!IsAttractedTo(pEffect->pedattr.type))
+				continue;
+			CVector pos;
+			CPedAttractorManager::ComputeEffectPos(pEffect, pEntity->GetMatrix(), pos);
+			if ((pos - GetPosition()).MagnitudeSqr() < minDistance) {
+				CPedAttractorManager* pManager = GetPedAttractorManager();
+				if (pManager->HasEmptySlot(pEffect) && pManager->IsApproachable(pEffect, pEntity->GetMatrix(), 0, this)) {
+					pClosestAttractor = pEffect;
+					pAttractorEntity = pEntity;
+					minDistance = (pos - GetPosition()).MagnitudeSqr();
+				}
+			}
+		}
+	}
+}
+
+void CCivilianPed::UseNearbyAttractors()
+{
+	if (CWeather::Rain < 0.2f && !m_bAttractorUnk)
+		return;
+	if (HasAttractor())
+		return;
+	if (m_nAttractorCycleState != gFrequencyOfAttractorAttempt) {
+		m_nAttractorCycleState++;
+		return;
+	}
+	m_nAttractorCycleState = 0;
+	if (!IsPedInControl())
+		return;
+	if (m_nPedState == PED_FLEE_ENTITY)
+		return;
+
+	float left = GetPosition().x - gDistanceToSeekAttractors;
+	float right = GetPosition().x + gDistanceToSeekAttractors;
+	float top = GetPosition().y - gDistanceToSeekAttractors;
+	float bottom = GetPosition().y + gDistanceToSeekAttractors;
+	int xstart = Max(0, CWorld::GetSectorIndexX(left));
+	int xend = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right));
+	int ystart = Max(0, CWorld::GetSectorIndexY(top));
+	int yend = Min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(bottom));
+	assert(xstart <= xend);
+	assert(ystart <= yend);
+
+	float minDistance = SQR(gMaxDistanceToAttract);
+	C2dEffect* pClosestAttractor = nil;
+	CEntity* pAttractorEntity = nil;
+
+	for (int y = ystart; y <= yend; y++) {
+		for (int x = xstart; x <= xend; x++) {
+			CSector* s = CWorld::GetSector(x, y);
+			FindNearbyAttractorsSectorList(s->m_lists[ENTITYLIST_BUILDINGS], minDistance, pClosestAttractor, pAttractorEntity);
+			FindNearbyAttractorsSectorList(s->m_lists[ENTITYLIST_OBJECTS], minDistance, pClosestAttractor, pAttractorEntity);
+		}
+	}
+	if (pClosestAttractor)
+		GetPedAttractorManager()->RegisterPedWithAttractor(this, pClosestAttractor, pAttractorEntity->GetMatrix());
+}
+
+bool CCivilianPed::IsAttractedTo(int8 type)
+{
+	switch (type) {
+	case ATTRACTOR_ATM: return true;
+	case ATTRACTOR_SEAT: return true;
+	case ATTRACTOR_STOP: return true;
+	case ATTRACTOR_PIZZA: return true;
+	case ATTRACTOR_SHELTER: return CWeather::Rain >= 0.2f;
+	case ATTRACTOR_ICECREAM: return false;
+	}
+	return false;
 }

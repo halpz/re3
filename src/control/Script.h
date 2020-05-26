@@ -15,6 +15,12 @@ class CPlayerInfo;
 class CRunningScript;
 
 #define KEY_LENGTH_IN_SCRIPT 8
+#define SPHERE_MARKER_R 252
+#define SPHERE_MARKER_G 138
+#define SPHERE_MARKER_B 242
+#define SPHERE_MARKER_A 228
+#define SPHERE_MARKER_PULSE_PERIOD 2048
+#define SPHERE_MARKER_PULSE_FRACTION 0.1f
 
 struct intro_script_rectangle 
 {
@@ -221,20 +227,18 @@ enum {
 };
 
 enum {
-	SIZE_MAIN_SCRIPT = 128 * 1024,
-	SIZE_MISSION_SCRIPT = 32 * 1024,
+	SIZE_MAIN_SCRIPT = 225512,
+	SIZE_MISSION_SCRIPT = 35000,
 	SIZE_SCRIPT_SPACE = SIZE_MAIN_SCRIPT + SIZE_MISSION_SCRIPT
 };
 
 enum {
 	MAX_NUM_SCRIPTS = 128,
-	MAX_NUM_CONTACTS = 16,
 	MAX_NUM_INTRO_TEXT_LINES = 2,
 	MAX_NUM_INTRO_RECTANGLES = 16,
 	MAX_NUM_SCRIPT_SRPITES = 16,
 	MAX_NUM_SCRIPT_SPHERES = 16,
-	MAX_NUM_COLLECTIVES = 32,
-	MAX_NUM_USED_OBJECTS = 200,
+	MAX_NUM_USED_OBJECTS = 220,
 	MAX_NUM_MISSION_SCRIPTS = 120,
 	MAX_NUM_BUILDING_SWAPS = 25,
 	MAX_NUM_INVISIBILITY_SETTINGS = 20,
@@ -245,13 +249,10 @@ class CTheScripts
 {
 	static uint8 ScriptSpace[SIZE_SCRIPT_SPACE];
 	static CRunningScript ScriptsArray[MAX_NUM_SCRIPTS];
-	static int32 BaseBriefIdForContact[MAX_NUM_CONTACTS];
-	static int32 OnAMissionForContactFlag[MAX_NUM_CONTACTS];
 	static intro_text_line IntroTextLines[MAX_NUM_INTRO_TEXT_LINES];
 	static intro_script_rectangle IntroRectangles[MAX_NUM_INTRO_RECTANGLES];
 	static CSprite2d ScriptSprites[MAX_NUM_SCRIPT_SRPITES];
 	static script_sphere_struct ScriptSphereArray[MAX_NUM_SCRIPT_SPHERES];
-	static tCollectiveData CollectiveArray[MAX_NUM_COLLECTIVES];
 	static tUsedObject UsedObjectArray[MAX_NUM_USED_OBJECTS];
 	static int32 MultiScriptArray[MAX_NUM_MISSION_SCRIPTS];
 	static tBuildingSwap BuildingSwapArray[MAX_NUM_BUILDING_SWAPS];
@@ -275,14 +276,17 @@ class CTheScripts
 	static uint32 LargestMissionScriptSize;
 	static uint32 MainScriptSize;
 	static uint8 FailCurrentMission;
-	static uint8 CountdownToMakePlayerUnsafe;
-	static uint8 DelayMakingPlayerUnsafeThisTime;
 	static uint16 NumScriptDebugLines;
 	static uint16 NumberOfIntroRectanglesThisFrame;
 	static uint16 NumberOfIntroTextLinesThisFrame;
 	static uint8 UseTextCommands;
 	static uint16 CommandsExecuted;
 	static uint16 ScriptsUpdated;
+	static uint8 RiotIntensity;
+	static uint32 LastMissionPassedTime;
+	static uint16 NumberOfExclusiveMissionScripts;
+	static bool bPlayerIsInTheStatium;
+	static bool bPlayerHasMetDebbieHarry;
 
 public:
 	static void Init();
@@ -305,9 +309,6 @@ public:
 	static void InvertDebugFlag() { DbgFlag = !DbgFlag; }
 
 	static int32* GetPointerToScriptVariable(int32 offset) { assert(offset >= 8 && offset < CTheScripts::GetSizeOfVariableSpace()); return (int32*)&ScriptSpace[offset]; }
-
-	static void ResetCountdownToMakePlayerUnsafe() { CountdownToMakePlayerUnsafe = 0; }
-	static bool IsCountdownToMakePlayerUnsafeOn() { return CountdownToMakePlayerUnsafe != 0; }
 
 	static int32 Read4BytesFromScript(uint32* pIp) {
 		int32 retval = ScriptSpace[*pIp + 3] << 24 | ScriptSpace[*pIp + 2] << 16 | ScriptSpace[*pIp + 1] << 8 | ScriptSpace[*pIp];
@@ -371,6 +372,8 @@ private:
 	static int32 AddScriptSphere(int32 id, CVector pos, float radius);
 	static int32 GetNewUniqueScriptSphereIndex(int32 index);
 	static void RemoveScriptSphere(int32 index);
+	static void RemoveScriptTextureDictionary();
+	static void RemoveThisPed(CPed* pPed);
 
 	friend class CRunningScript;
 	friend class CHud;
@@ -414,6 +417,7 @@ class CRunningScript
 	uint32 m_anStack[MAX_STACK_DEPTH];
 	uint16 m_nStackPointer;
 	int32 m_anLocalVariables[NUM_LOCAL_VARS + NUM_TIMERS];
+	bool m_bIsActive;
 	bool m_bCondResult;
 	bool m_bIsMissionScript;
 	bool m_bSkipWakeTime;
@@ -484,13 +488,16 @@ private:
 	void PlayerInAngledAreaCheckCommand(int32, uint32*);
 	void CharInAreaCheckCommand(int32, uint32*);
 	void CarInAreaCheckCommand(int32, uint32*);
+	void LocateObjectCommand(int32, uint32*);
+	void ObjectInAreaCheckCommand(int32, uint32*);
 
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
 
-	bool ThisIsAValidRandomPed(uint32 pedtype) {
+	bool ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal) {
 		switch (pedtype) {
 		case PEDTYPE_CIVMALE:
 		case PEDTYPE_CIVFEMALE:
+			return civ;
 		case PEDTYPE_GANG1:
 		case PEDTYPE_GANG2:
 		case PEDTYPE_GANG3:
@@ -500,11 +507,16 @@ private:
 		case PEDTYPE_GANG7:
 		case PEDTYPE_GANG8:
 		case PEDTYPE_GANG9:
+			return gang;
 		case PEDTYPE_CRIMINAL:
 		case PEDTYPE_PROSTITUTE:
-			return true;
+			return criminal;
 		default:
 			return false;
 		}
 	}
+
+	bool CheckDamagedWeaponType(int32 actual, int32 type);
+	
+	static bool ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami);
 };

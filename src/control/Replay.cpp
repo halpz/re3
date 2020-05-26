@@ -17,6 +17,7 @@
 #include "ModelInfo.h"
 #include "Object.h"
 #include "Pad.h"
+#include "PedAttractor.h"
 #include "Phones.h"
 #include "Pickups.h"
 #include "Plane.h"
@@ -510,8 +511,12 @@ void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayB
 	}
 	RetrievePedAnimation(ped, &pp->anim_state);
 	ped->RemoveWeaponModel(-1);
-	if (pp->weapon_model != (uint8)-1)
-		ped->AddWeaponModel(pp->weapon_model);
+	if (pp->weapon_model != (uint16)-1) {
+		if (CStreaming::HasModelLoaded(pp->weapon_model))
+			ped->AddWeaponModel(pp->weapon_model);
+		else
+			CStreaming::RequestModel(pp->weapon_model, 0);
+	}
 	CWorld::Remove(ped);
 	CWorld::Add(ped);
 	buffer->m_nOffset += sizeof(tPedUpdatePacket);
@@ -1116,6 +1121,14 @@ void CReplay::StoreStuffInMem(void)
 	for (int i = 0; i < NUMPLAYERS; i++)
 		nHandleOfPlayerPed[i] = CPools::GetPedPool()->GetIndex(CWorld::Players[i].m_pPed);
 #endif
+	int i = CPools::GetPedPool()->GetSize();
+	while (--i >= 0) {
+		CPed* ped = CPools::GetPedPool()->GetSlot(i);
+		if (!ped)
+			continue;
+		if (ped->m_attractor)
+			GetPedAttractorManager()->DeRegisterPed(ped, ped->m_attractor);
+	}
 	CPools::GetVehiclePool()->Store(pBuf0, pBuf1);
 	CPools::GetPedPool()->Store(pBuf2, pBuf3);
 	CPools::GetObjectPool()->Store(pBuf4, pBuf5);
@@ -1211,6 +1224,16 @@ void CReplay::RestoreStuffFromMem(void)
 		ped->m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, ped);
 		DMAudio.SetEntityStatus(ped->m_audioEntityId, true);
 		CPopulation::UpdatePedCount((ePedType)ped->m_nPedType, false);
+		for (int j = 0; j < TOTAL_WEAPON_SLOTS; j++) {
+			int mi1 = CWeaponInfo::GetWeaponInfo(ped->m_weapons[j].m_eWeaponType)->m_nModelId;
+			if (mi1 != -1)
+				CStreaming::RequestModel(mi1, STREAMFLAGS_DEPENDENCY);
+			int mi2 = CWeaponInfo::GetWeaponInfo(ped->m_weapons[j].m_eWeaponType)->m_nModel2Id;
+			if (mi2 != -1)
+				CStreaming::RequestModel(mi2, STREAMFLAGS_DEPENDENCY);
+			CStreaming::LoadAllRequestedModels(false);
+			ped->m_weapons[j].Initialise(ped->m_weapons[j].m_eWeaponType, ped->m_weapons[j].m_nAmmoTotal);
+		}
 		if (ped->m_wepModelID >= 0)
 			ped->AddWeaponModel(ped->m_wepModelID);
 	}

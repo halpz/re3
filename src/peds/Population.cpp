@@ -329,19 +329,7 @@ CPopulation::UpdatePedCount(ePedType pedType, bool decrease)
 int
 CPopulation::ChooseGangOccupation(int gangId)
 {
-	int8 modelOverride = CGangs::GetGangPedModelOverride(gangId);
-
-	// All gangs have 2 models
-	int firstGangModel = 2 * gangId + MI_GANG01;
-
-	// GetRandomNumberInRange never returns max. value
-	if (modelOverride == -1)
-		return CGeneral::GetRandomNumberInRange(firstGangModel, firstGangModel + 2);
-
-	if (modelOverride != 0)
-		return firstGangModel + 1;
-	else
-		return firstGangModel;
+	return CGangs::ChooseGangPedModel(gangId);
 }
 
 //--MIAMI: done
@@ -473,17 +461,16 @@ CPopulation::AddPed(ePedType pedType, uint32 miOrCopType, CVector const &coors, 
 			if (ms_bGivePedsWeapons) {
 				eWeaponType weapon;
 
-				// TODO(Miami): Look here when weapons have been ported
 				switch (CGeneral::GetRandomNumber() & 3) {
 					case 0:
 						weapon = WEAPONTYPE_COLT45;
 						break;
 					case 1:
-						//weapon = WEAPONTYPE_NIGHTSTICK;
-						//break;
+						weapon = WEAPONTYPE_NIGHTSTICK;
+						break;
 					case 2:
-						//weapon = WEAPONTYPE_GOLFCLUB;
-						//break;
+						weapon = WEAPONTYPE_GOLFCLUB;
+						break;
 					case 3:
 						weapon = WEAPONTYPE_TEC9;
 						break;
@@ -734,7 +721,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 }
 
 CPed*
-CPopulation::AddPedInCar(CVehicle* car, bool isPassenger)
+CPopulation::AddPedInCar(CVehicle* car, bool isDriver)
 {
 	int defaultModel = MI_MALE01;
 	int miamiViceIndex = 0;
@@ -777,7 +764,7 @@ CPopulation::AddPedInCar(CVehicle* car, bool isPassenger)
 		case MI_VICECHEE: // TODO(MIAMI): figure out new structure of the function
 			preferredModel = COP_MIAMIVICE;
 			pedType = PEDTYPE_COP;
-			miamiViceIndex = (isPassenger ? 2 * CCarCtrl::MiamiViceCycle : 2 * CCarCtrl::MiamiViceCycle + 1);
+			miamiViceIndex = (isDriver ? 2 * CCarCtrl::MiamiViceCycle : 2 * CCarCtrl::MiamiViceCycle + 1);
 			break;
 		case MI_TAXI:
 		case MI_CABBIE:
@@ -828,29 +815,11 @@ CPopulation::AddPedInCar(CVehicle* car, bool isPassenger)
 	CPed *newPed = CPopulation::AddPed((ePedType)pedType, preferredModel, car->GetPosition(), miamiViceIndex);
 	newPed->bUsesCollision = false;
 
-	// what??
-	if (pedType != PEDTYPE_COP) {
-		newPed->SetCurrentWeapon(WEAPONTYPE_COLT45);
+	if (newPed->GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED) {
 		newPed->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(newPed->GetWeapon()->m_eWeaponType)->m_nModelId);
 	}
-	/*
-	// Miami leftover
-	if (car->m_vehType == VEHICLE_TYPE_BIKE) {
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, *((CBike*)car + 308h), 100.0f);
-	} else */
 
-	// FIX: Make peds comfortable while driving car/boat
-#ifdef FIX_BUGS
-	{
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, car->GetDriverAnim(), 100.0f);
-	}
-#else
-	{
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
-	}
-#endif
-	
-	newPed->StopNonPartialAnims();
+	newPed->AddInCarAnims(car, isDriver);
 	return newPed;
 }
 
@@ -883,18 +852,12 @@ CPopulation::ConvertToRealObject(CDummyObject *dummy)
 	if (!obj)
 		return;
 
-	bool makeInvisible;
 	CWorld::Remove(dummy);
 	delete dummy;
 	CWorld::Add(obj);
-	int16 mi = obj->GetModelIndex();
-	if (mi == MI_GLASS1 || mi == MI_GLASS2 || mi == MI_GLASS3 || mi == MI_GLASS4 ||
-		mi == MI_GLASS5 || mi == MI_GLASS6 || mi == MI_GLASS7 || mi == MI_GLASS8)
-		makeInvisible = true;
-	else
-		makeInvisible = false;
 
-	if (makeInvisible) {
+	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(obj->GetModelIndex());
+	if (IsGlass(obj->GetModelIndex()) && !mi->m_isArtistGlass) {
 		obj->bIsVisible = false;
 	} else if (obj->GetModelIndex() == MI_BUOY) {
 		obj->bIsStatic = false;
@@ -913,17 +876,9 @@ CPopulation::ConvertToDummyObject(CObject *obj)
 	dummy->GetMatrix().UpdateRW();
 	dummy->UpdateRwFrame();
 
-	bool makeInvisible;
-	int16 mi = obj->GetModelIndex();
-	if (mi == MI_GLASS1 || mi == MI_GLASS2 || mi == MI_GLASS3 || mi == MI_GLASS4 ||
-		mi == MI_GLASS5 || mi == MI_GLASS6 || mi == MI_GLASS7 || mi == MI_GLASS8)
-		makeInvisible = true;
-	else
-		makeInvisible = false;
-
-	if (makeInvisible) {
+	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(obj->GetModelIndex());
+	if (IsGlass(obj->GetModelIndex()) && !mi->m_isArtistGlass)
 		dummy->bIsVisible = false;
-	}
 
 	CWorld::Remove(obj);
 	delete obj;
@@ -1123,7 +1078,7 @@ CPopulation::AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit)
 		return nil;
 	CPed* pPed = CPopulation::AddPed(PEDTYPE_CIVMALE, MI_MALE01, pos); // TODO(MIAMI): 4th parameter
 	pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
-	//TODO(MIAMI): set money == 0
+	pPed->m_nPedMoney = 0;
 	pPed->bDeadPedInFrontOfCar = true;
 	pPed->m_vehicleInAccident = pCulprit;
 	pCulprit->RegisterReference((CEntity**)&pPed->m_vehicleInAccident);
@@ -1137,7 +1092,7 @@ CPopulation::AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit)
 			}
 		}
 	}
-	CColPoint colpts[32];
+	CColPoint colpts[MAX_COLLISION_POINTS];
 	if (CCollision::ProcessColModels(pCulprit->GetMatrix(), *pCulprit->GetColModel(), pPed->GetMatrix(), *pPed->GetColModel(), colpts, nil, nil)) {
 		CWorld::Remove(pPed);
 		delete pPed;

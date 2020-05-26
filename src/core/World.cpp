@@ -33,22 +33,24 @@
 
 CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
-CPtrList CWorld::ms_bigBuildingsList[4];// = (CPtrList*)0x6FAB60;
-CPtrList CWorld::ms_listMovingEntityPtrs;// = *(CPtrList*)0x8F433C;
-CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];// = (CSector (*)[NUMSECTORS_Y])0x665608;
-uint16 CWorld::ms_nCurrentScanCode;// = *(uint16*)0x95CC64;
+CPtrList CWorld::ms_bigBuildingsList[4];
+CPtrList CWorld::ms_listMovingEntityPtrs;
+CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];
+uint16 CWorld::ms_nCurrentScanCode;
 
-uint8 CWorld::PlayerInFocus;// = *(uint8 *)0x95CD61;
+uint8 CWorld::PlayerInFocus;
 CPlayerInfo CWorld::Players[NUMPLAYERS];
-bool CWorld::bNoMoreCollisionTorque;// = *(bool*)0x95CDCC;
-CEntity *CWorld::pIgnoreEntity;//	= *(CEntity**)0x8F6494;
-bool CWorld::bIncludeDeadPeds;// = *(bool*)0x95CD8F;
-bool CWorld::bSecondShift;// = *(bool*)0x95CD54;
-bool CWorld::bForceProcessControl;// = *(bool*)0x95CD6C;
-bool CWorld::bProcessCutsceneOnly;// = *(bool*)0x95CD8B;
+bool CWorld::bNoMoreCollisionTorque;
+CEntity *CWorld::pIgnoreEntity;
+bool CWorld::bIncludeDeadPeds;
+bool CWorld::bSecondShift;
+bool CWorld::bForceProcessControl;
+bool CWorld::bProcessCutsceneOnly;
 
-bool CWorld::bDoingCarCollisions;// = *(bool*)0x95CD8C;
-bool CWorld::bIncludeCarTyres;// = *(bool*)0x95CDAA;
+bool CWorld::bDoingCarCollisions;
+bool CWorld::bIncludeCarTyres;
+
+CColPoint CWorld::m_aTempColPts[MAX_COLLISION_POINTS];
 
 void
 CWorld::Initialise()
@@ -165,7 +167,7 @@ CWorld::CameraToIgnoreThisObject(CEntity *ent)
 bool
 CWorld::ProcessLineOfSight(const CVector &point1, const CVector &point2, CColPoint &point, CEntity *&entity,
                            bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects,
-                           bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects)
+                           bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects, bool ignoreShootThrough)
 {
 	int x, xstart, xend;
 	int y, ystart, yend;
@@ -184,7 +186,7 @@ CWorld::ProcessLineOfSight(const CVector &point1, const CVector &point2, CColPoi
 
 #define LOSARGS                                                                                                        \
 	CColLine(point1, point2), point, dist, entity, checkBuildings, checkVehicles, checkPeds, checkObjects,         \
-	    checkDummies, ignoreSeeThrough, ignoreSomeObjects
+	    checkDummies, ignoreSeeThrough, ignoreSomeObjects, ignoreShootThrough
 
 	if(xstart == xend && ystart == yend) {
 		// Only one sector
@@ -266,7 +268,7 @@ CWorld::ProcessLineOfSight(const CVector &point1, const CVector &point2, CColPoi
 bool
 CWorld::ProcessLineOfSightSector(CSector &sector, const CColLine &line, CColPoint &point, float &dist, CEntity *&entity,
                                  bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects,
-                                 bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects)
+                                 bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects, bool ignoreShootThrough)
 {
 	float mindist = dist;
 	bool deadPeds = !!bIncludeDeadPeds;
@@ -274,39 +276,39 @@ CWorld::ProcessLineOfSightSector(CSector &sector, const CColLine &line, CColPoin
 
 	if(checkBuildings) {
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_BUILDINGS], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_BUILDINGS_OVERLAP], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 	}
 
 	if(checkVehicles) {
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_VEHICLES], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_VEHICLES_OVERLAP], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 	}
 
 	if(checkPeds) {
 		if(deadPeds) bIncludeDeadPeds = true;
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_PEDS], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_PEDS_OVERLAP], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 		bIncludeDeadPeds = false;
 	}
 
 	if(checkObjects) {
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_OBJECTS], line, point, mindist, entity,
-		                             ignoreSeeThrough, ignoreSomeObjects);
+		                             ignoreSeeThrough, ignoreSomeObjects, ignoreShootThrough);
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_OBJECTS_OVERLAP], line, point, mindist, entity,
-		                             ignoreSeeThrough, ignoreSomeObjects);
+		                             ignoreSeeThrough, ignoreSomeObjects, ignoreShootThrough);
 	}
 
 	if(checkDummies) {
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_DUMMIES], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_DUMMIES_OVERLAP], line, point, mindist, entity,
-		                             ignoreSeeThrough);
+		                             ignoreSeeThrough, false, ignoreShootThrough);
 	}
 
 	bIncludeDeadPeds = deadPeds;
@@ -320,7 +322,7 @@ CWorld::ProcessLineOfSightSector(CSector &sector, const CColLine &line, CColPoin
 
 bool
 CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColPoint &point, float &dist,
-                                     CEntity *&entity, bool ignoreSeeThrough, bool ignoreSomeObjects)
+                                     CEntity *&entity, bool ignoreSeeThrough, bool ignoreSomeObjects, bool ignoreShootThrough)
 {
 	bool deadPeds = false;
 	float mindist = dist;
@@ -340,21 +342,6 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 			if(e->IsPed()) {
 				if(e->bUsesCollision || deadPeds && ((CPed *)e)->m_nPedState == PED_DEAD) {
 					colmodel = ((CPedModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex()))->AnimatePedColModelSkinned(e->GetClump());
-/*	this should all be gone, right?
-					if(((CPed *)e)->UseGroundColModel())
-						colmodel = &CTempColModels::ms_colModelPedGroundHit;
-					else
-#ifdef ANIMATE_PED_COL_MODEL
-						colmodel = CPedModelInfo::AnimatePedColModel(
-						    ((CPedModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex()))
-						        ->GetHitColModel(),
-						    RpClumpGetFrame(e->GetClump()));
-#else
-						colmodel =
-						    ((CPedModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex()))
-						        ->GetHitColModel();
-#endif
-*/
 				} else
 					colmodel = nil;
 
@@ -362,7 +349,7 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 				colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 
 			if(colmodel && CCollision::ProcessLineOfSight(line, e->GetMatrix(), *colmodel, point, dist,
-			                                              ignoreSeeThrough))
+			                                              ignoreSeeThrough, ignoreShootThrough))
 				entity = e;
 		}
 	}
@@ -451,7 +438,7 @@ CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CCol
 
 			colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 			if(CCollision::ProcessVerticalLine(line, e->GetMatrix(), *colmodel, point, dist,
-			                                   ignoreSeeThrough, poly))
+			                                   ignoreSeeThrough, false, poly))
 				entity = e;
 		}
 	}
@@ -652,7 +639,7 @@ CWorld::GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bo
 
 				colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 
-				if(CCollision::TestLineOfSight(line, e->GetMatrix(), *colmodel, ignoreSeeThrough))
+				if(CCollision::TestLineOfSight(line, e->GetMatrix(), *colmodel, ignoreSeeThrough, false))
 					return false;
 			}
 		}
@@ -1828,18 +1815,21 @@ void
 CWorld::RepositionOneObject(CEntity *pEntity)
 {
 	int16 modelId = pEntity->GetModelIndex();
-	if (IsTrafficLight(modelId) || IsTreeModel(modelId) || modelId == MI_PARKINGMETER ||
-	   modelId == MI_PHONEBOOTH1 || modelId == MI_WASTEBIN || modelId == MI_BIN || modelId == MI_POSTBOX1 ||
-	   modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE || modelId == MI_DUMP1 ||
-	   modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||
-	   modelId == MI_PHONESIGN || modelId == MI_TAXISIGN || modelId == MI_FISHSTALL01 ||
-	   modelId == MI_FISHSTALL02 || modelId == MI_FISHSTALL03 || modelId == MI_FISHSTALL04 ||
-	   modelId == MI_BAGELSTAND2 || modelId == MI_FIRE_HYDRANT || modelId == MI_BOLLARDLIGHT ||
-	   modelId == MI_PARKTABLE) {
+	if (modelId == MI_PARKINGMETER || modelId == MI_PHONEBOOTH1 || modelId == MI_WASTEBIN ||
+	    modelId == MI_BIN || modelId == MI_POSTBOX1 || modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE ||
+	    modelId == MI_DUMP1 || modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||
+	    modelId == MI_PHONESIGN || modelId == MI_FIRE_HYDRANT || modelId == MI_BOLLARDLIGHT ||
+	    modelId == MI_PARKTABLE || modelId == MI_PARKINGMETER2 || modelId == MI_TELPOLE02 ||
+	    modelId == MI_PARKBENCH || modelId == MI_BARRIER1 || IsTreeModel(modelId) ||
+		IsLightThatNeedsRepositioning(modelId)
+		) {
 		CVector &position = pEntity->GetMatrix().GetPosition();
-		float fBoundingBoxMinZ = pEntity->GetColModel()->boundingBox.min.z;
+		CColModel *pColModel = pEntity->GetColModel();
+		float fBoundingBoxMinZ = pColModel->boundingBox.min.z;
+		float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
+		if(fHeight < OBJECT_REPOSITION_OFFSET_Z) fHeight = OBJECT_REPOSITION_OFFSET_Z;
 		position.z = CWorld::FindGroundZFor3DCoord(position.x, position.y,
-		                                           position.z + OBJECT_REPOSITION_OFFSET_Z, nil) -
+		                                           position.z + fHeight, nil) -
 		             fBoundingBoxMinZ;
 		pEntity->m_matrix.UpdateRW();
 		pEntity->UpdateRwFrame();
@@ -2239,4 +2229,59 @@ CWorld::UseDetonator(CEntity *pEntity)
 		}
 	}
 	CProjectileInfo::RemoveDetonatorProjectiles();
+}
+
+bool
+CWorld::IsWanderPathClear(CVector const& point1, CVector const& point2, float distance, int maxSteps)
+{
+	if (Abs(point1.z - point2.z) > distance)
+		return false;
+	if (!GetIsLineOfSightClear(point1, point2, true, false, false, false, false, false, false))
+		return false;
+	CVector vecBetween = point2 - point1;
+	uint32 nSteps = Max(vecBetween.Magnitude(), maxSteps);
+	if (nSteps == 0)
+		return true;
+	vecBetween.Normalise();
+	uint32 step = 1;
+	for (step = 1; step < nSteps; step++) {
+		CVector posThisStep = point1 + vecBetween * step;
+		float level;
+		if (!CWaterLevel::GetWaterLevel(posThisStep, &level, false))
+			continue;
+		posThisStep.z = level;
+		AdvanceCurrentScanCode();
+
+		CVector vecCheckedPos(posThisStep.x, posThisStep.y, Max(point1.z, point2.z));
+		CColPoint colpoint;
+		CEntity* entity;
+		if (!ProcessVerticalLineSector(*GetSector(GetSectorIndexX(posThisStep.x), GetSectorIndexY(posThisStep.y)),
+			CColLine(posThisStep, vecCheckedPos), colpoint, entity, true, false, false, false, false, false, nil))
+			return false;
+	}
+
+	CVector posThisStep = point1;
+	AdvanceCurrentScanCode();
+	CVector vecCheckedPos(posThisStep.x, posThisStep.y, point1.z - 5.0f);
+
+	CColPoint colpoint;
+	CEntity* entity;
+	if (!ProcessVerticalLineSector(*GetSector(GetSectorIndexX(posThisStep.x), GetSectorIndexY(posThisStep.y)),
+		CColLine(posThisStep, vecCheckedPos), colpoint, entity, true, false, false, false, false, false, nil))
+		return false;
+
+	float heightNextStep = colpoint.point.z + 0.5f;
+	for (step = 1; step < nSteps; step++) {
+		CVector posThisStep = point1 + vecBetween * step;
+		posThisStep.z = heightNextStep;
+		AdvanceCurrentScanCode();
+		CVector vecCheckedPos(posThisStep.x, posThisStep.y, heightNextStep - 2.0f);
+		if (!ProcessVerticalLineSector(*GetSector(GetSectorIndexX(posThisStep.x), GetSectorIndexY(posThisStep.y)),
+			CColLine(posThisStep, vecCheckedPos), colpoint, entity, true, false, false, false, false, false, nil))
+			return false;
+		if (Abs(colpoint.point.z - heightNextStep) > 1.0f)
+			return false;
+		heightNextStep = colpoint.point.z + 0.5f;
+	}
+	return true;
 }

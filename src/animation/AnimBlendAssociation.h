@@ -84,7 +84,8 @@ public:
 
 	void SetRun(void) { flags |= ASSOC_RUNNING; }
 
-	inline float GetTimeLeft() { return hierarchy->totalLength - currentTime; }
+	float GetTimeLeft() { return hierarchy->totalLength - currentTime; }
+	float GetProgress() { return currentTime / hierarchy->totalLength; }
 
 	static CAnimBlendAssociation *FromLink(CAnimBlendLink *l) {
 		return (CAnimBlendAssociation*)((uint8*)l - offsetof(CAnimBlendAssociation, link));

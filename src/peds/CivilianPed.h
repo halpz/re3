@@ -4,12 +4,17 @@
 
 class CCivilianPed : public CPed
 {
+	bool m_bAttractorUnk;
+	int32 m_nAttractorCycleState;
 public:
 	CCivilianPed(ePedType, uint32);
 	~CCivilianPed(void) { }
 
 	void CivilianAI(void);
 	void ProcessControl(void);
+	void UseNearbyAttractors(void);
+	void FindNearbyAttractorsSectorList(CPtrList&, float&, C2dEffect*&, CEntity*&);
+	bool IsAttractedTo(int8);
 };
 #ifndef PED_SKIN
 VALIDATE_SIZE(CCivilianPed, 0x53C);

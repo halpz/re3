@@ -49,7 +49,7 @@ CKeyboardState CPad::OldKeyState;
 CKeyboardState CPad::NewKeyState;
 CKeyboardState CPad::TempKeyState;
 
-char CPad::KeyBoardCheatString[20];
+char CPad::KeyBoardCheatString[30];
 
 CMouseControllerState CPad::OldMouseControllerState;
 CMouseControllerState CPad::NewMouseControllerState;
@@ -68,39 +68,39 @@ void WeaponCheat()
 
 	CStreaming::RequestModel(MI_GRENADE, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::RequestModel(MI_BOMB, STREAMFLAGS_DONT_REMOVE);
-	CStreaming::RequestModel(MI_AK47, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_RUGER, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::RequestModel(MI_BASEBALL_BAT, STREAMFLAGS_DONT_REMOVE);
-	CStreaming::RequestModel(MI_COLT, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_COLT45, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::RequestModel(MI_ROCKETLAUNCHER, STREAMFLAGS_DONT_REMOVE);
-	CStreaming::RequestModel(MI_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
-	CStreaming::RequestModel(MI_SNIPER, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_SPAS12_SHOTGUN, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_SNIPERRIFLE, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::RequestModel(MI_MP5, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::LoadAllRequestedModels(false);
 
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_BASEBALLBAT, 0);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_COLT45, 100);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_MP5, 100);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SHOTGUN, 20);
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_AK47, 200);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SPAS12_SHOTGUN, 20);
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_RUGER, 200);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SNIPERRIFLE, 5);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_ROCKETLAUNCHER, 5);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_DETONATOR_GRENADE, 5);
 
 	CStreaming::SetModelIsDeletable(MI_GRENADE);
 	CStreaming::SetModelIsDeletable(MI_BOMB);
-	CStreaming::SetModelIsDeletable(MI_AK47);
+	CStreaming::SetModelIsDeletable(MI_RUGER);
 	CStreaming::SetModelIsDeletable(MI_BASEBALL_BAT);
-	CStreaming::SetModelIsDeletable(MI_COLT);
+	CStreaming::SetModelIsDeletable(MI_COLT45);
 	CStreaming::SetModelIsDeletable(MI_ROCKETLAUNCHER);
-	CStreaming::SetModelIsDeletable(MI_SHOTGUN);
-	CStreaming::SetModelIsDeletable(MI_SNIPER);
+	CStreaming::SetModelIsDeletable(MI_SPAS12_SHOTGUN);
+	CStreaming::SetModelIsDeletable(MI_SNIPERRIFLE);
 	CStreaming::SetModelIsDeletable(MI_MP5);
 }
 
 void HealthCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT3"), true);
-	FindPlayerPed()->m_fHealth = 100.0f;
+	FindPlayerPed()->m_fHealth = CWorld::Players[0].m_nMaxHealth;
 	if (FindPlayerVehicle()) {
 		FindPlayerVehicle()->m_fHealth = 1000.0f;
 		if (FindPlayerVehicle()->m_vehType == VEHICLE_TYPE_CAR)
@@ -108,31 +108,31 @@ void HealthCheat()
 	}
 }
 
-void TankCheat()
+void VehicleCheat(bool something, int model)
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
-	CStreaming::RequestModel(MI_RHINO, 0);
-	CStreaming::LoadAllRequestedModels(false);
-	if (CStreaming::ms_aInfoForModel[MI_RHINO].m_loadState == STREAMSTATE_LOADED) {
+	CStreaming::RequestModel(model, 0);
+	CStreaming::LoadAllRequestedModels(something);
+	if (CStreaming::ms_aInfoForModel[model].m_loadState == STREAMSTATE_LOADED) {
 		CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 		int32 node = ThePaths.FindNodeClosestToCoors(FindPlayerCoors(), PATH_CAR, 100.0f);
 
 		if (node < 0) return;
-		
+
 #ifdef FIX_BUGS
-		CAutomobile* tank = new CAutomobile(MI_RHINO, RANDOM_VEHICLE);
+		CAutomobile* vehicle = new CAutomobile(model, RANDOM_VEHICLE);
 #else
-		CAutomobile *tank = new CAutomobile(MI_RHINO, MISSION_VEHICLE);
+		CAutomobile* vehicle = new CAutomobile(MI_RHINO, MISSION_VEHICLE);
 #endif
-		if (tank != nil) {
+		if (vehicle != nil) {
 			CVector pos = ThePaths.m_pathNodes[node].GetPosition();
 			pos.z += 4.0f;
-			tank->SetPosition(pos);
-			tank->SetOrientation(0.0f, 0.0f, DEGTORAD(200.0f));
+			vehicle->SetPosition(pos);
+			vehicle->SetOrientation(0.0f, 0.0f, DEGTORAD(200.0f));
 
-			tank->SetStatus(STATUS_ABANDONED);
-			tank->m_nDoorLock = CARLOCK_UNLOCKED;
-			CWorld::Add(tank);
+			vehicle->SetStatus(STATUS_ABANDONED);
+			vehicle->m_nDoorLock = CARLOCK_UNLOCKED;
+			CWorld::Add(vehicle);
 		}
 	}
 }
@@ -224,7 +224,7 @@ void MoneyCheat()
 void ArmourCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT4"), true);
-	FindPlayerPed()->m_fArmour = 100.0f;
+	FindPlayerPed()->m_fArmour = CWorld::Players[0].m_nMaxArmour;
 }
 
 void WantedLevelUpCheat()
@@ -701,7 +701,7 @@ CControllerState CPad::ReconcileTwoControllersInput(CControllerState const &Stat
 
 void CPad::StartShake(int16 nDur, uint8 nFreq)
 {
-	if ( !CMenuManager::m_PrefsUseVibration )
+	if ( !FrontEndMenuManager.m_PrefsUseVibration )
 		return;
 	
 	if ( CCutsceneMgr::IsRunning() || CGame::playingIntro )
@@ -723,7 +723,7 @@ void CPad::StartShake(int16 nDur, uint8 nFreq)
 
 void CPad::StartShake_Distance(int16 nDur, uint8 nFreq, float fX, float fY, float fZ)
 {
-	if ( !CMenuManager::m_PrefsUseVibration )
+	if ( !FrontEndMenuManager.m_PrefsUseVibration )
 		return;
 	
 	if ( CCutsceneMgr::IsRunning() || CGame::playingIntro )
@@ -750,7 +750,7 @@ void CPad::StartShake_Distance(int16 nDur, uint8 nFreq, float fX, float fY, floa
 
 void CPad::StartShake_Train(float fX, float fY)
 {
-	if ( !CMenuManager::m_PrefsUseVibration )
+	if ( !FrontEndMenuManager.m_PrefsUseVibration )
 		return;
 	
 	if ( CCutsceneMgr::IsRunning() || CGame::playingIntro )
@@ -824,7 +824,7 @@ void CPad::AddToCheatString(char c)
 	
 	// "CCCCCC321TCT"	-	CIRCLE CIRCLE CIRCLE CIRCLE CIRCLE CIRCLE R1 L2 L1 TRIANGLE CIRCLE TRIANGLE
 	else if ( !_CHEATCMP("TCT123CCCCCC") )
-		TankCheat();
+		VehicleCheat(true, MI_RHINO);
 	
 	// "CCCSSSSS1TCT"	-	CIRCLE CIRCLE CIRCLE SQUARE SQUARE SQUARE SQUARE SQUARE L1 TRIANGLE CIRCLE TRIANGLE
 	else if ( !_CHEATCMP("TCT1SSSSSCCC") )
@@ -905,10 +905,46 @@ void CPad::AddToPCCheatString(char c)
 	// "NOPOLICEPLEASE"
 	if ( !_CHEATCMP("ESAELPECILOPON") )
 		WantedLevelDownCheat();
-	
-	// "GIVEUSATANK"
-	if ( !_CHEATCMP("KNATASUEVIG") )
-		TankCheat();
+
+	// "PANZER"
+	if ( !_CHEATCMP("REZNAP") )
+		VehicleCheat(true, MI_RHINO);
+
+	// "TRAVELINSTYLE"
+	if ( !_CHEATCMP("ELYTSNILEVART") )
+		VehicleCheat(true, MI_BLOODRA);
+
+	// "GETTHEREQUICKLY"
+	if ( !_CHEATCMP("YLKCIUQEREHTTEG") )
+		VehicleCheat(true, MI_BLOODRB);
+
+	// "GETTHEREFAST"
+	if ( !_CHEATCMP("TSAFEREHTTEG") )
+		VehicleCheat(true, MI_SABRETUR);
+
+	// "GETTHEREVERYFASTINDEED"
+	if ( !_CHEATCMP("DEEDNITSAFYREVEREHTTEG") )
+		VehicleCheat(true, MI_HOTRINA);
+
+	// "GETTHEREAMAZINGLYFAST"
+	if ( !_CHEATCMP("TSAFYLGNIZAMAEREHTTEG") )
+		VehicleCheat(true, MI_HOTRINB);
+
+	// "THELASTRIDE"
+	if ( !_CHEATCMP("EDIRTSALEHT") )
+		VehicleCheat(true, MI_ROMERO);
+
+	// "ROCKANDROLLCAR"
+	if ( !_CHEATCMP("RACLLORDNAKCOR") )
+		VehicleCheat(true, MI_LOVEFIST);
+
+	// "RUBBISHCAR"
+	if ( !_CHEATCMP("RACHSIBBUR") )
+		VehicleCheat(true, MI_TRASH);
+
+	// "BETTERTHANWALKING"
+	if ( !_CHEATCMP("GNIKLAWNAHTRETTEB") )
+		VehicleCheat(true, MI_CADDY);
 	
 	// "BANGBANGBANG"
 	if ( !_CHEATCMP("GNABGNABGNAB") )

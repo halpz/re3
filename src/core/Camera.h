@@ -91,7 +91,9 @@ public:
 		MODE_M16_1STPERSON_RUNABOUT,
 		MODE_FIGHT_CAM_RUNABOUT,
 		MODE_EDITOR,
-		MODE_HELICANNON_1STPERSON, // vice city leftover
+		MODE_HELICANNON_1STPERSON,
+		MODE_45,
+		MODE_CAMERA,
 	};
 
 	bool    bBelowMinDist; //used for follow ped mode
@@ -472,8 +474,8 @@ public:
 	// not static yet
 	float m_fMouseAccelHorzntl;// acceleration multiplier for 1st person controls
 	float m_fMouseAccelVertical;// acceleration multiplier for 1st person controls
-	float m_f3rdPersonCHairMultX;
-	float m_f3rdPersonCHairMultY;
+	static float m_f3rdPersonCHairMultX;
+	static float m_f3rdPersonCHairMultY;
 
 
 	CCam Cams[3];
@@ -549,7 +551,6 @@ public:
 
 	// High level and misc
 	CCamera(void);
-	CCamera(float);
 	void Init(void);
 	void Process(void);
 	void CamControl(void);
@@ -626,6 +627,7 @@ public:
 	void UpdateAimingCoors(CVector const &coors);
 	void Find3rdPersonCamTargetVector(float dist, CVector pos, CVector &source, CVector &target);
 	float Find3rdPersonQuickAimPitch(void);
+	bool Using1stPersonWeaponMode(void);
 
 	// Physical camera
 	void SetRwCamera(RwCamera *cam);

@@ -18,6 +18,7 @@
 #endif
 #include "PointLights.h"
 #include "SpecialFX.h"
+#include "Script.h"
 #include "Shadows.h"
 
 #ifdef DEBUGMENU
@@ -642,12 +643,12 @@ CShadows::StoreShadowForPole(CEntity *pPole, float fOffsetX, float fOffsetY, flo
 		PolePos.y += fOffsetX * pPole->GetRight().y + fOffsetY * pPole->GetForward().y;
 		PolePos.z += fOffsetZ;
 
-		PolePos.x += -CTimeCycle::GetSunPosition().x * (fPoleHeight / 2);
-		PolePos.y += -CTimeCycle::GetSunPosition().y * (fPoleHeight / 2);
+		PolePos.x += -CTimeCycle::GetSunDirection().x * (fPoleHeight / 2);
+		PolePos.y += -CTimeCycle::GetSunDirection().y * (fPoleHeight / 2);
 
 		StoreStaticShadow((uintptr)pPole + nID + _TODOCONST(51), SHADOWTYPE_DARK, gpPostShadowTex, &PolePos,
-				-CTimeCycle::GetSunPosition().x * (fPoleHeight / 2),
-				-CTimeCycle::GetSunPosition().y * (fPoleHeight / 2),
+				-CTimeCycle::GetSunDirection().x * (fPoleHeight / 2),
+				-CTimeCycle::GetSunDirection().y * (fPoleHeight / 2),
 				CTimeCycle::GetShadowSideX()    * fPoleWidth,
 				CTimeCycle::GetShadowSideY()    * fPoleWidth,
 				2 * (int32)((pPole->GetUp().z - 0.5f) * CTimeCycle::GetShadowStrength() * 2.0f) / 3,
@@ -1766,6 +1767,6 @@ CShadows::RenderIndicatorShadow(uint32 nID, uint8 ShadowType, RwTexture *pTextur
 	ASSERT(pPosn != NULL);
 
 	C3dMarkers::PlaceMarkerSet(nID, _TODOCONST(4), *pPosn, Max(fFrontX, -fSideY),
-			0, 128, 255, 128,
-			2048, 0.2f, 0);
+		SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B,
+		SPHERE_MARKER_A, SPHERE_MARKER_PULSE_PERIOD, 0.2f, 0);
 }

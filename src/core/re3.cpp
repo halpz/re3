@@ -69,7 +69,7 @@ mysrand(unsigned int seed)
 #ifdef DEBUGMENU
 void WeaponCheat();
 void HealthCheat();
-void TankCheat();
+void VehicleCheat(bool something, int model);
 void BlowUpCarsCheat();
 void ChangePlayerCheat();
 void MayhemCheat();
@@ -159,6 +159,13 @@ TeleportToWaypoint(void)
 			FindPlayerPed()->Teleport(CRadar::TargetMarkerPos + CVector(0.0f, 0.0f, FEET_OFFSET));
 }
 #endif
+
+static void
+SwitchCarCollision(void)
+{
+	if (FindPlayerVehicle() && FindPlayerVehicle()->IsCar())
+		FindPlayerVehicle()->bUsesCollision = !FindPlayerVehicle()->bUsesCollision;
+}
 
 static int engineStatus;
 static void
@@ -273,7 +280,7 @@ DebugMenuPopulate(void)
 {
 	if(1){
 		static const char *weathers[] = {
-			"Sunny", "Cloudy", "Rainy", "Foggy"
+			"Sunny", "Cloudy", "Rainy", "Foggy", "Extrasunny", "Stormy"
 		};
 		DebugMenuEntry *e;
 		e = DebugMenuAddVar("Time & Weather", "Current Hour", &CClock::GetHoursRef(), nil, 1, 0, 23, nil);
@@ -281,9 +288,9 @@ DebugMenuPopulate(void)
 		e = DebugMenuAddVar("Time & Weather", "Current Minute", &CClock::GetMinutesRef(),
 			[](){ CWeather::InterpolationValue = CClock::GetMinutes()/60.0f; }, 1, 0, 59, nil);
 			DebugMenuEntrySetWrap(e, true);
-		e = DebugMenuAddVar("Time & Weather", "Old Weather", (int16*)&CWeather::OldWeatherType, nil, 1, 0, 3, weathers);
+		e = DebugMenuAddVar("Time & Weather", "Old Weather", (int16*)&CWeather::OldWeatherType, nil, 1, 0, 5, weathers);
 		DebugMenuEntrySetWrap(e, true);
-		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 3, weathers);
+		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 5, weathers);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVar("Time & Weather", "Wind", (float*)&CWeather::Wind, nil, 0.1f, 0.0f, 1.0f);
 		DebugMenuAddVar("Time & Weather", "Time scale", (float*)&CTimer::GetTimeScale(), nil, 0.1f, 0.0f, 10.0f);
@@ -293,7 +300,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Health", HealthCheat);
 		DebugMenuAddCmd("Cheats", "Wanted level up", WantedLevelUpCheat);
 		DebugMenuAddCmd("Cheats", "Wanted level down", WantedLevelDownCheat);
-		DebugMenuAddCmd("Cheats", "Tank", TankCheat);
+		DebugMenuAddCmd("Cheats", "Tank", []() { VehicleCheat(true, MI_TAXI); });
 		DebugMenuAddCmd("Cheats", "Blow up cars", BlowUpCarsCheat);
 		DebugMenuAddCmd("Cheats", "Change player", ChangePlayerCheat);
 		DebugMenuAddCmd("Cheats", "Mayhem", MayhemCheat);
@@ -337,7 +344,11 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Banshee", [](){ SpawnCar(MI_BANSHEE); });
 		DebugMenuAddCmd("Spawn", "Spawn Cuban", [](){ SpawnCar(MI_CUBAN); });
 		DebugMenuAddCmd("Spawn", "Spawn Voodoo", [](){ SpawnCar(MI_VOODOO); });
+		DebugMenuAddCmd("Spawn", "Spawn Maverick", [](){ SpawnCar(MI_MAVERICK); });
+		DebugMenuAddCmd("Spawn", "Spawn VCN Maverick", [](){ SpawnCar(MI_VCNMAV); });
 		DebugMenuAddCmd("Spawn", "Spawn Sparrow", [](){ SpawnCar(MI_SPARROW); });
+		DebugMenuAddCmd("Spawn", "Spawn Sea Sparrow", [](){ SpawnCar(MI_SEASPAR); });
+		DebugMenuAddCmd("Spawn", "Spawn Hunter", [](){ SpawnCar(MI_HUNTER); });
 		DebugMenuAddCmd("Spawn", "Spawn Rhino", [](){ SpawnCar(MI_RHINO); });
 		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
 		DebugMenuAddCmd("Spawn", "Spawn Predator", [](){ SpawnCar(MI_PREDATOR); });
@@ -365,6 +376,7 @@ DebugMenuPopulate(void)
 #ifdef MENU_MAP
 		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
 #endif
+		DebugMenuAddCmd("Debug", "Switch car collision", SwitchCarCollision);
 		DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
 		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
@@ -384,6 +396,13 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
+
+#ifdef RELOADABLES
+		DebugMenuAddCmd("Reload", "HUD.TXD", CHud::ReloadTXD);
+		DebugMenuAddCmd("Reload", "FONTS.TXD", NULL);
+		DebugMenuAddCmd("Reload", "FRONTEN1.TXD", NULL);
+		DebugMenuAddCmd("Reload", "FRONTEN2.TXD", NULL);
+#endif
 
 		extern bool PrintDebugCode;
 		extern int16 DebugCamMode;

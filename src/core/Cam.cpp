@@ -29,7 +29,7 @@ bool PrintDebugCode = false;
 int16 DebugCamMode;
 
 #ifdef FREE_CAM
-bool CCamera::bFreeCam = true;
+bool CCamera::bFreeCam;
 int nPreviousMode = -1;
 #endif
 
@@ -504,11 +504,11 @@ CCam::ProcessSpecialHeightRoutines(void)
 
 			switch(((CPhysical*)CamTargetEntity)->m_nSurfaceTouched)
 			case SURFACE_GRASS:
-			case SURFACE_DIRT:
-			case SURFACE_DIRTTRACK:
-			case SURFACE_STEEL:
-			case SURFACE_TIRE:
-			case SURFACE_STONE:
+			case SURFACE_GRAVEL:
+			case SURFACE_MUD_DRY:
+			case SURFACE_THICK_METAL_PLATE:
+			case SURFACE_RUBBER:
+			case SURFACE_STEEP_CLIFF:
 				OnRoad = true;
 
 			if(CCullZones::PlayerNoRain())
@@ -565,9 +565,9 @@ CCam::ProcessSpecialHeightRoutines(void)
 		if(PreviouslyFailedRoadHeightCheck && m_fCloseInPedHeightOffset < 0.0001f){
 			if(colPoint.surfaceB != SURFACE_TARMAC &&
 			   colPoint.surfaceB != SURFACE_GRASS &&
-			   colPoint.surfaceB != SURFACE_DIRT &&
-			   colPoint.surfaceB != SURFACE_DIRTTRACK &&
-			   colPoint.surfaceB != SURFACE_STONE){
+			   colPoint.surfaceB != SURFACE_GRAVEL &&
+			   colPoint.surfaceB != SURFACE_MUD_DRY &&
+			   colPoint.surfaceB != SURFACE_STEEP_CLIFF){
 				if(m_fRoadOffSet > 1.4f)
 					m_fRoadOffSet = 1.4f;
 			}else{
@@ -1408,11 +1408,11 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 			bool foo = false;
 			switch(((CPhysical*)CamTargetEntity)->m_nSurfaceTouched)
 			case SURFACE_GRASS:
-			case SURFACE_DIRT:
+			case SURFACE_GRAVEL:
 			case SURFACE_PAVEMENT:
-			case SURFACE_STEEL:
-			case SURFACE_TIRE:
-			case SURFACE_STONE:
+			case SURFACE_THICK_METAL_PLATE:
+			case SURFACE_RUBBER:
+			case SURFACE_STEEP_CLIFF:
 				foo = true;
 			if(foo)
 				WellBufferMe(TargetHeight, &m_fCamBufferedHeight, &m_fCamBufferedHeightSpeed, 0.4f, 0.05f, false);
@@ -1596,7 +1596,7 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 	CWorld::pIgnoreEntity = nil;
 
 	float ViewPlaneHeight = Tan(DEGTORAD(FOV) / 2.0f);
-	float ViewPlaneWidth = ViewPlaneHeight * CDraw::FindAspectRatio() * fTweakFOV;
+	float ViewPlaneWidth = ViewPlaneHeight * CDraw::CalculateAspectRatio() * fTweakFOV;
 	float Near = RwCameraGetNearClipPlane(Scene.camera);
 	float radius = ViewPlaneWidth*Near;
 	entity = CWorld::TestSphereAgainstWorld(Source + Front*Near, radius, nil, true, true, false, true, false, false);
@@ -1750,8 +1750,8 @@ CCam::WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation)
 	else
 		WellBufferMe(TargetZOffSet, &RoadHeightFix, &RoadHeightFixSpeed, 0.27f, 0.1f, false);
 
-	if((colpoint.surfaceB == SURFACE_DEFAULT || colpoint.surfaceB >= SURFACE_METAL6) &&
-	   colpoint.surfaceB != SURFACE_STEEL && colpoint.surfaceB != SURFACE_STONE &&
+	if((colpoint.surfaceB == SURFACE_DEFAULT || colpoint.surfaceB >= SURFACE_CAR) &&
+	   colpoint.surfaceB != SURFACE_THICK_METAL_PLATE && colpoint.surfaceB != SURFACE_STEEP_CLIFF &&
 	   RoadHeightFix > 1.4f)
 		RoadHeightFix = 1.4f;
 
@@ -2429,7 +2429,7 @@ CCam::Process_Rocket(const CVector &CameraTarget, float, float, float)
 		ResetStatics = false;
 	}
 
-	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
+	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(HeadPos, PED_HEAD);
 	Source = HeadPos;
 	Source.z += 0.1f;
 	Source.x -= 0.19f*Cos(m_fInitialPlayerOrientation);
@@ -2568,7 +2568,7 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 	HeadPos.x = 0.0f;
 	HeadPos.y = 0.0f;
 	HeadPos.z = 0.0f;
-	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
+	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(HeadPos, PED_HEAD);
 	Source = HeadPos;
 	Source.z += 0.1f;
 	Source.x -= 0.19f * Cos(m_fInitialPlayerOrientation);
@@ -2657,7 +2657,7 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 			ResetStatics = false;
 		}
 
-		((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
+		((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(HeadPos, PED_HEAD);
 		Source = HeadPos;
 		Source.z += 0.1f;
 		Source.x -= 0.19f*Cos(m_fInitialPlayerOrientation);
@@ -2925,7 +2925,7 @@ CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float
 		ResetStatics = false;
 	}
 
-	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
+	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(HeadPos, PED_HEAD);
 	Source = HeadPos;
 	Source.z += 0.1f;
 	Source.x -= 0.19f*Cos(m_fInitialPlayerOrientation);
@@ -3630,7 +3630,7 @@ CCam::Process_Fixed(const CVector &CameraTarget, float, float, float)
 	if(TheCamera.m_bUseSpecialFovTrain)
 		FOV = TheCamera.m_fFovForTrain;
 
-	if(CMenuManager::m_ControlMethod == 0 && Using3rdPersonMouseCam()){
+	if(FrontEndMenuManager.m_ControlMethod == 0 && Using3rdPersonMouseCam()){
 		CPed *player = FindPlayerPed();
 		if(player && player->CanStrafeOrMouseControl()){
 			float Heading = Front.Heading();
@@ -4574,7 +4574,7 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 	CWorld::pIgnoreEntity = nil;
 
 	float ViewPlaneHeight = Tan(DEGTORAD(FOV) / 2.0f);
-	float ViewPlaneWidth = ViewPlaneHeight * CDraw::FindAspectRatio() * fTweakFOV;
+	float ViewPlaneWidth = ViewPlaneHeight * CDraw::CalculateAspectRatio() * fTweakFOV;
 	float Near = RwCameraGetNearClipPlane(Scene.camera);
 	float radius = ViewPlaneWidth*Near;
 	entity = CWorld::TestSphereAgainstWorld(Source + Front*Near, radius, nil, true, true, false, true, false, false);

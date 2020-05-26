@@ -44,15 +44,35 @@ uint32 CPickups::StaticCamStartTime;
 
 tPickupMessage CPickups::aMessages[NUMPICKUPMESSAGES];
 
-// 20 ?! Some Miami leftover? (Originally at 0x5ED8D4)
+// TODO(Miami)
 uint16 AmmoForWeapon[20] = { 0, 1, 45, 125, 25, 150, 300, 25, 5, 250, 5, 5, 0, 500, 0, 100, 0, 0, 0, 0 };
-uint16 AmmoForWeapon_OnStreet[20] = { 0, 1, 9, 25, 5, 30, 60, 5, 1, 50, 1, 1, 0, 200, 0, 100, 0, 0, 0, 0 };
+
+// --MIAMI: Done
+uint16 AmmoForWeapon_OnStreet[WEAPONTYPE_TOTALWEAPONS] = {
+	0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 34,
+	12, 16, 14, 10, 100, 60, 60, 60, 60, 60, 20, 14,
+	4, 150, 100, 500, 1, 400, 36, 0,
+};
 uint16 CostOfWeapon[20] = { 0, 10, 250, 800, 1500, 3000, 5000, 10000, 25000, 25000, 2000, 2000, 0, 50000, 0, 3000, 0, 0, 0, 0 };
 
-uint8 aWeaponReds[] = { 255, 0, 128, 255, 255, 0, 255, 0, 128, 128, 255, 255, 128, 0, 255, 0 };
-uint8 aWeaponGreens[] = { 0, 255, 128, 255, 0, 255, 128, 255, 0, 255, 255, 0, 255, 0, 255, 0 };
-uint8 aWeaponBlues[] = { 0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255, 0, 128, 255, 0, 0 };
-float aWeaponScale[] = { 1.0f, 2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f, 1.0f, 1.0f, 1.0f };
+// TODO(Miami): Those are all placeholders!!
+uint8 aWeaponReds[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 0, 128, 255, 255, 0, 255, 0, 128, 128, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+255, 128, 0, 255, 0 };
+uint8 aWeaponGreens[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+0, 255, 128, 255, 0, 255, 128, 255, 0, 255, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+0, 255, 0, 255, 0 };
+uint8 aWeaponBlues[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255,
+255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+0, 128, 255, 0, 0 };
+
+float aWeaponScale[] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f,
+1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+1.0f, 1.0f, 1.0f, 1.0f };
 
 void
 CPickup::RemoveKeepType()
@@ -93,6 +113,7 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 	object->bExplosionProof = true;
 	object->bUsesCollision = false;
 	object->bIsPickup = true;
+	object->bHasPreRenderEffects = true;
 
 	object->m_nBonusValue = m_eModelIndex == MI_PICKUP_BONUS ? m_nQuantity : 0;
 
@@ -129,12 +150,12 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 }
 
 bool
-CPickup::CanBePickedUp(CPlayerPed *player)
+CPickup::CanBePickedUp(CPlayerPed *player, int playerId)
 {
 	assert(m_pObject != nil);
 	bool cannotBePickedUp =
-		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > 99.5f)
-		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > 99.5f)
+		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > CWorld::Players[playerId].m_nMaxArmour - 0.5f)
+		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > CWorld::Players[playerId].m_nMaxHealth - 0.5f)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_BRIBE && player->m_pWanted->m_nWantedLevel == 0)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_KILLFRENZY && (CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame));
 	return !cannotBePickedUp;
@@ -190,7 +211,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 		}
 
 		// if we didn't then we've got nothing to do
-		if (isPickupTouched && CanBePickedUp(player)) {
+		if (isPickupTouched && CanBePickedUp(player, playerId)) {
 			CPad::GetPad(0)->StartShake(120, 100);
 			switch (m_eType)
 			{
@@ -380,6 +401,30 @@ CPickups::Init(void)
 	CollectedPickUpIndex = 0;
 }
 
+// --MIAMI: Done
+bool
+CPickups::TestForPickupsInBubble(CVector pos, float range)
+{
+	for (int i = 0; i < NUMPICKUPS; i++) {
+		if ((aPickUps[i].m_vecPos - pos).Magnitude() < range)
+			return true;
+	}
+	return false;
+}
+
+// --MIAMI: Done
+bool
+CPickups::TryToMerge_WeaponType(CVector pos, eWeaponType weapon, uint8 type, uint32 quantity, bool unused) {
+	for (int i = 0; i < NUMPICKUPS; i++) {
+		if (aPickUps[i].m_eType == type && aPickUps[i].m_eModelIndex == ModelForWeapon(weapon))
+			if ((aPickUps[i].m_vecPos - pos).Magnitude() < 7.5f) {
+				aPickUps[i].m_nQuantity += quantity;
+				return true;
+			}
+	}
+	return false;
+}
+
 bool
 CPickups::IsPickUpPickedUp(int32 pickupId)
 {
@@ -430,14 +475,14 @@ CPickups::GivePlayerGoodiesWithPickUpMI(int16 modelIndex, int playerIndex)
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_ADRENALINE, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_BODYARMOUR) {
-		player->m_fArmour = 100.0f;
+		player->m_fArmour = CWorld::Players[playerIndex].m_nMaxArmour;
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_ARMOUR, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_INFO) {
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_HEALTH) {
-		player->m_fHealth = 100.0f;
+		player->m_fHealth = CWorld::Players[playerIndex].m_nMaxHealth;
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_HEALTH, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_BONUS) {
@@ -561,53 +606,22 @@ CPickups::GetNewUniquePickupIndex(int32 slot)
 	return slot | (aPickUps[slot].m_nIndex << 16);
 }
 
+// --MIAMI: Done
 int32
 CPickups::ModelForWeapon(eWeaponType weaponType)
 {
-	switch (weaponType)
-	{
-	case WEAPONTYPE_BASEBALLBAT: return MI_BASEBALL_BAT;
-	case WEAPONTYPE_COLT45: return MI_COLT;
-	case WEAPONTYPE_UZI: return MI_UZI;
-	case WEAPONTYPE_SHOTGUN: return MI_SHOTGUN;
-	case WEAPONTYPE_AK47: return MI_AK47;
-	case WEAPONTYPE_M16: return MI_M16;
-	case WEAPONTYPE_SNIPERRIFLE: return MI_SNIPER;
-	case WEAPONTYPE_ROCKETLAUNCHER: return MI_ROCKETLAUNCHER;
-	case WEAPONTYPE_FLAMETHROWER: return MI_FLAMETHROWER;
-	case WEAPONTYPE_MOLOTOV: return MI_MOLOTOV;
-	case WEAPONTYPE_GRENADE: return MI_GRENADE;
-	default: break;
-	}
-	return 0;
+	return CWeaponInfo::GetWeaponInfo(weaponType)->m_nModelId;
 }
 
+// --MIAMI: Done
 eWeaponType
 CPickups::WeaponForModel(int32 model)
 {
 	if (model == MI_PICKUP_BODYARMOUR) return WEAPONTYPE_ARMOUR;
-	switch (model)
-	{
-	case MI_GRENADE: return WEAPONTYPE_GRENADE;
-	case MI_AK47: return WEAPONTYPE_AK47;
-	case MI_BASEBALL_BAT: return WEAPONTYPE_BASEBALLBAT;
-	case MI_COLT: return WEAPONTYPE_COLT45;
-	case MI_MOLOTOV: return WEAPONTYPE_MOLOTOV;
-	case MI_ROCKETLAUNCHER: return WEAPONTYPE_ROCKETLAUNCHER;
-	case MI_SHOTGUN: return WEAPONTYPE_SHOTGUN;
-	case MI_SNIPER: return WEAPONTYPE_SNIPERRIFLE;
-	case MI_UZI: return WEAPONTYPE_UZI;
-	case MI_MISSILE: return WEAPONTYPE_UNARMED;
-	case MI_M16: return WEAPONTYPE_M16;
-	case MI_FLAMETHROWER: return WEAPONTYPE_FLAMETHROWER;
-	}
-	return WEAPONTYPE_UNARMED;
-}
-
-int32
-CPickups::FindColourIndexForWeaponMI(int32 model)
-{
-	return WeaponForModel(model) - 1;
+	if (model == MI_PICKUP_HEALTH) return WEAPONTYPE_HEALTH;
+	if (model == MI_PICKUP_ADRENALINE) return WEAPONTYPE_ARMOUR;
+	if (model == -1) return WEAPONTYPE_UNARMED;
+	return (eWeaponType)((CWeaponModelInfo*)CModelInfo::GetModelInfo(model))->GetWeaponInfo();
 }
 
 void
@@ -685,15 +699,15 @@ CPickups::DoPickUpEffects(CEntity *entity)
 		int16 colorId;
 
 		if (entity->GetModelIndex() == MI_PICKUP_ADRENALINE || entity->GetModelIndex() == MI_PICKUP_CAMERA)
-			colorId = 11;
+			colorId = WEAPONTYPE_TOTALWEAPONS;
 		else if (entity->GetModelIndex() == MI_PICKUP_BODYARMOUR || entity->GetModelIndex() == MI_PICKUP_BRIBE)
-			colorId = 12;
+			colorId = WEAPONTYPE_TOTALWEAPONS + 1;
 		else if (entity->GetModelIndex() == MI_PICKUP_INFO || entity->GetModelIndex() == MI_PICKUP_KILLFRENZY)
-			colorId = 13;
+			colorId = WEAPONTYPE_TOTALWEAPONS + 2;
 		else if (entity->GetModelIndex() == MI_PICKUP_HEALTH || entity->GetModelIndex() == MI_PICKUP_BONUS)
-			colorId = 14;
+			colorId = WEAPONTYPE_TOTALWEAPONS + 3;
 		else
-			colorId = FindColourIndexForWeaponMI(entity->GetModelIndex());
+			colorId = WeaponForModel(entity->GetModelIndex());
 
 		assert(colorId >= 0);
 
@@ -982,6 +996,25 @@ CPickups::RenderPickUpText()
 }
 
 void
+CPickups::CreateSomeMoney(CVector pos, int money)
+{
+	bool found;
+
+	int pickupCount = Min(money / 20 + 1, 7);
+	int moneyPerPickup = money / pickupCount;
+
+	for (int i = 0; i < pickupCount; i++) {
+		// (CGeneral::GetRandomNumber() % 256) * PI / 128 gives a float up to something TWOPI-ish.
+		pos.x += 1.5f * Sin((CGeneral::GetRandomNumber() % 256) * PI / 128);
+		pos.y += 1.5f * Cos((CGeneral::GetRandomNumber() % 256) * PI / 128);
+		pos.z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &found) + 0.5f;
+		if (found) {
+			CPickups::GenerateNewOne(CVector(pos.x, pos.y, pos.z), MI_MONEY, PICKUP_MONEY, moneyPerPickup + (CGeneral::GetRandomNumber() & 3));
+		}
+	}
+}
+
+void
 CPickups::Load(uint8 *buf, uint32 size)
 {
 INITSAVEBUF
@@ -1126,45 +1159,6 @@ CPacManPickups::Update()
 void
 CPacManPickups::GeneratePMPickUps(CVector pos, float scrambleMult, int16 count, uint8 type)
 {
-	int i = 0;
-	while (count > 0) {
-		while (aPMPickUps[i].m_eType != PACMAN_NONE)
-			i++;
-
-		bool bPickupCreated = false;
-		while (!bPickupCreated) {
-			CVector newPos = pos;
-			CColPoint colPoint;
-			CEntity *pRoad;
-			uint16 nRand = CGeneral::GetRandomNumber();
-			newPos.x += ((nRand & 0xFF) - 128) * scrambleMult / 128.0f;
-			newPos.y += (((nRand >> 8) & 0xFF) - 128) * scrambleMult / 128.0f;
-			newPos.z = 1000.0f;
-			if (CWorld::ProcessVerticalLine(newPos, -1000.0f, colPoint, pRoad, true, false, false, false, true, false, nil) && pRoad->IsBuilding() && ((CBuilding*)pRoad)->GetIsATreadable()) {
-				newPos.z = 0.7f + colPoint.point.z;
-				aPMPickUps[i].m_eType = type;
-				aPMPickUps[i].m_vecPosn = newPos;
-				CObject *obj = new CObject(MI_BULLION, true);
-				if (obj != nil) {
-					obj->ObjectCreatedBy = MISSION_OBJECT;
-					obj->SetPosition(aPMPickUps[i].m_vecPosn);
-					obj->SetOrientation(0.0f, 0.0f, -HALFPI);
-					obj->GetMatrix().UpdateRW();
-					obj->UpdateRwFrame();
-
-					obj->bAffectedByGravity = false;
-					obj->bExplosionProof = true;
-					obj->bUsesCollision = false;
-					obj->bIsPickup = false;
-					CWorld::Add(obj);
-				}
-				aPMPickUps[i].m_pObject = obj;
-				bPickupCreated = true;
-			}
-		}
-		count--;
-	}
-	bPMActive = true;
 }
 
 // diablo porn mission pickups
@@ -1281,40 +1275,6 @@ static const CVector aRacePoints1[] = {
 void
 CPacManPickups::GeneratePMPickUpsForRace(int32 race)
 {
-	const CVector *pPos = nil;
-	int i = 0;
-
-	if (race == 0) pPos = aRacePoints1; // there's only one available
-	assert(pPos != nil);
-
-	while (!pPos->IsZero()) {
-		while (aPMPickUps[i].m_eType != PACMAN_NONE)
-			i++;
-
-		aPMPickUps[i].m_eType = PACMAN_RACE;
-		aPMPickUps[i].m_vecPosn = *(pPos++);
-		if (race == 0) {
-			CObject* obj = new CObject(MI_DONKEYMAG, true);
-			if (obj != nil) {
-				obj->ObjectCreatedBy = MISSION_OBJECT;
-
-				obj->SetPosition(aPMPickUps[i].m_vecPosn);
-				obj->SetOrientation(0.0f, 0.0f, -HALFPI);
-				obj->GetMatrix().UpdateRW();
-				obj->UpdateRwFrame();
-
-				obj->bAffectedByGravity = false;
-				obj->bExplosionProof = true;
-				obj->bUsesCollision = false;
-				obj->bIsPickup = false;
-
-				CWorld::Add(obj);
-			}
-			aPMPickUps[i].m_pObject = obj;
-		} else
-			aPMPickUps[i].m_pObject = nil;
-	}
-	bPMActive = true;
 }
 
 void

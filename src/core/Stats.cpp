@@ -57,9 +57,13 @@ int32 CStats::mmRain;
 int32 CStats::CarsCrushed;
 int32 CStats::FastestTimes[CStats::TOTAL_FASTEST_TIMES];
 int32 CStats::HighestScores[CStats::TOTAL_HIGHEST_SCORES];
+int32 CStats::PropertyDestroyed;
 
 int32 CStats::Sprayings;
 float CStats::AutoPaintingBudget;
+int32 CStats::NoMoreHurricanes;
+float CStats::FashionBudget;
+int32 CStats::SafeHouseVisits;
 
 void CStats::Init()
 {
@@ -119,6 +123,8 @@ void CStats::Init()
 
 	Sprayings = 0;
 	AutoPaintingBudget = 0.0f;
+	NoMoreHurricanes = 0;
+	SafeHouseVisits = 0;
 }
 
 void CStats::RegisterFastestTime(int32 index, int32 time)
@@ -245,6 +251,19 @@ int32 CStats::FindCriminalRatingNumber()
 	if (!CommercialPassed && rating >= 4552)
 		rating = 4552;
 	return rating;
+}
+
+float CStats::GetPercentageProgress()
+{
+	float percentCompleted = (CStats::TotalProgressInGame == 0 ? 0 :
+		CStats::ProgressMade * 100.0f / (CGame::nastyGame ? CStats::TotalProgressInGame : CStats::TotalProgressInGame - 1.0f));
+
+	return Min(percentCompleted, 100.0f);
+}
+
+void CStats::MoneySpentOnFashion(int32 money)
+{
+	FashionBudget += money;
 }
 
 void CStats::SaveStats(uint8 *buf, uint32 *size)
