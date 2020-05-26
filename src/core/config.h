@@ -227,6 +227,8 @@ enum Config {
 #define USE_DEBUG_SCRIPT_LOADER	// makes game load main_freeroam.scm by default
 #define USE_MEASUREMENTS_IN_METERS // makes game use meters instead of feet in script
 #define USE_PRECISE_MEASUREMENT_CONVERTION // makes game convert feet to meeters more precisely
+#define MISSION_REPLAY // mobile feature
+//#define SIMPLIER_MISSIONS // apply simplifications from mobile
 
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 
