@@ -1647,7 +1647,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				{
 					case ENTITY_TYPE_VEHICLE:
 					{
-						if (point.pieceB >= SURFACE_STREET_LIGHT && point.pieceB <= SURFACE_METAL_FENCE) {
+						if (point.pieceB >= SURFACE_LAMP_POST && point.pieceB <= SURFACE_METAL_CHAIN_FENCE) {
 							((CVehicle*)victim)->BurstTyre(point.pieceB, true);
 
 							for (int32 i = 0; i < 4; i++)

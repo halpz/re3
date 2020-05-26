@@ -703,7 +703,7 @@ CVehicle::BladeColSectorList(CPtrList &list, CColModel &rotorColModel, CMatrix &
 			}
 
 			if(hadCollision && !entity->IsPed())
-				DMAudio.ReportCollision(this, entity, SURFACE_BILLBOARD, SURFACE_TARMAC, 50.0f, 0.09f);
+				DMAudio.ReportCollision(this, entity, SURFACE_CAR_PANEL, SURFACE_TARMAC, 50.0f, 0.09f);
 			m_fElasticity = savedElasticity;
 		}
 	}
@@ -2082,7 +2082,7 @@ CVehicle::HeliDustGenerate(CEntity *heli, float radius, float ground, int rnd)
 
 			float waterLevel = 0.0f;
 			if(CWaterLevel::GetWaterLevel(pos, &waterLevel, false) && waterLevel > particleZ){
-				surface = SURFACE_PUDDLE;
+				surface = SURFACE_WATER;
 				n = rnd;
 				particleZ = waterLevel;
 			}
@@ -2090,7 +2090,7 @@ CVehicle::HeliDustGenerate(CEntity *heli, float radius, float ground, int rnd)
 
 		if(n){
 			pos.z = particleZ;
-			if(surface == SURFACE_PUDDLE){
+			if(surface == SURFACE_WATER){
 				float red = (0.3*CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed_Obj())*255.0f/4.0f;
 				float green = (0.3*CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen_Obj())*255.0f/4.0f;
 				float blue = (0.3*CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue_Obj())*255.0f/4.0f;
@@ -2119,18 +2119,18 @@ CVehicle::HeliDustGenerate(CEntity *heli, float radius, float ground, int rnd)
 					g = 10;
 					b = 3;
 					break;
-				case SURFACE_DIRT:
+				case SURFACE_GRAVEL:
 					r = 10;
 					g = 8;
 					b = 7;
 					break;
-				case SURFACE_DIRTTRACK:
+				case SURFACE_MUD_DRY:
 					r = 10;
 					g = 6;
 					b = 3;
 					break;
 				case SURFACE_SAND:
-				case SURFACE_SAND33:
+				case SURFACE_SAND_BEACH:
 					r = 10;
 					g = 10;
 					b = 7;

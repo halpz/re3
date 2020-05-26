@@ -609,7 +609,7 @@ CAutomobile::ProcessControl(void)
 					m_aSuspensionSpringRatio[i], bias);
 				m_aWheelSkidmarkMuddy[i] =
 					m_aWheelColPoints[i].surfaceB == SURFACE_GRASS ||
-					m_aWheelColPoints[i].surfaceB == SURFACE_DIRTTRACK ||
+					m_aWheelColPoints[i].surfaceB == SURFACE_MUD_DRY ||
 					m_aWheelColPoints[i].surfaceB == SURFACE_SAND;
 			}else{
 				contactPoints[i] = Multiply3x3(GetMatrix(), colModel->lines[i].p1);
@@ -733,7 +733,7 @@ CAutomobile::ProcessControl(void)
 				else
 					fThrust = acceleration;
 
-				m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceA = SURFACE_RUBBER29;
+				m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceA = SURFACE_WHEELBASE;
 				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_FRONT_LEFT])*traction;
 				if(GetStatus() == STATUS_PLAYER)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceB);
@@ -767,7 +767,7 @@ CAutomobile::ProcessControl(void)
 				else
 					fThrust = acceleration;
 
-				m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceA = SURFACE_RUBBER29;
+				m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceA = SURFACE_WHEELBASE;
 				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_FRONT_RIGHT])*traction;
 				if(GetStatus() == STATUS_PLAYER)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceB);
@@ -848,7 +848,7 @@ CAutomobile::ProcessControl(void)
 				else
 					fThrust = acceleration;
 
-				m_aWheelColPoints[CARWHEEL_REAR_LEFT].surfaceA = SURFACE_RUBBER29;
+				m_aWheelColPoints[CARWHEEL_REAR_LEFT].surfaceA = SURFACE_WHEELBASE;
 				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_REAR_LEFT])*traction;
 				if(GetStatus() == STATUS_PLAYER)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_REAR_LEFT].surfaceB);
@@ -882,7 +882,7 @@ CAutomobile::ProcessControl(void)
 				else
 					fThrust = acceleration;
 
-				m_aWheelColPoints[CARWHEEL_REAR_RIGHT].surfaceA = SURFACE_RUBBER29;
+				m_aWheelColPoints[CARWHEEL_REAR_RIGHT].surfaceA = SURFACE_WHEELBASE;
 				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_REAR_RIGHT])*traction;
 				if(GetStatus() == STATUS_PLAYER)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_REAR_RIGHT].surfaceB);
@@ -1097,10 +1097,10 @@ CAutomobile::ProcessControl(void)
 		}
 
 		uint8 surf = m_aWheelColPoints[i].surfaceB;
-		if(surf == SURFACE_DIRT || surf == SURFACE_PUDDLE || surf == SURFACE_HEDGE){
+		if(surf == SURFACE_GRAVEL || surf == SURFACE_WATER || surf == SURFACE_HEDGE){
 			if(surfShake < 0.2f)
 				surfShake = 0.3f;
-		}else if(surf == SURFACE_DIRTTRACK || surf == SURFACE_SAND){
+		}else if(surf == SURFACE_MUD_DRY || surf == SURFACE_SAND){
 			if(surfShake < 0.1f)
 				surfShake = 0.2f;
 		}else if(surf == SURFACE_GRASS){
@@ -2933,7 +2933,7 @@ CAutomobile::ProcessBuoyancy(void)
 		static RwRGBA smokeCol = {255, 255, 255, 255};
 
 		for(i = 0; i < 4; i++){
-			if(m_aSuspensionSpringRatio[i] < 1.0f && m_aWheelColPoints[i].surfaceB == SURFACE_PUDDLE){
+			if(m_aSuspensionSpringRatio[i] < 1.0f && m_aWheelColPoints[i].surfaceB == SURFACE_WATER){
 				CVector pos = m_aWheelColPoints[i].point + 0.3f*GetUp() - GetPosition();
 				CVector vSpeed = GetSpeed(pos);
 				vSpeed.z = 0.0f;
@@ -3540,7 +3540,7 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 				CGeneral::GetRandomNumberInRange(0.02f, 0.1f), grassCol);
 		}
 		return 0;
-	case SURFACE_DIRT:
+	case SURFACE_GRAVEL:
 		dir.x = -0.05f*m_vecMoveSpeed.x;
 		dir.y = -0.05f*m_vecMoveSpeed.y;
 		for(i = 0; i < 4; i++){
@@ -3549,7 +3549,7 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 				CGeneral::GetRandomNumberInRange(0.02f, 0.06f), dirtCol);
 		}
 		return 1;
-	case SURFACE_DIRTTRACK:
+	case SURFACE_MUD_DRY:
 		dir.x = -0.05f*m_vecMoveSpeed.x;
 		dir.y = -0.05f*m_vecMoveSpeed.y;
 		for(i = 0; i < 4; i++){
@@ -3899,19 +3899,19 @@ CAutomobile::SetUpWheelColModel(CColModel *colModel)
 
 	CMatrix mat;
 	mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]));
-	colModel->spheres[0].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_LF);
+	colModel->spheres[0].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_RUBBER, CAR_PIECE_WHEEL_LF);
 	mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LB]));
-	colModel->spheres[1].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_LR);
+	colModel->spheres[1].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_RUBBER, CAR_PIECE_WHEEL_LR);
 	mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]));
-	colModel->spheres[2].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_RF);
+	colModel->spheres[2].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_RUBBER, CAR_PIECE_WHEEL_RF);
 	mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RB]));
-	colModel->spheres[3].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_RR);
+	colModel->spheres[3].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_RUBBER, CAR_PIECE_WHEEL_RR);
 
 	if(m_aCarNodes[CAR_WHEEL_LM] != nil && m_aCarNodes[CAR_WHEEL_RM] != nil){
 		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LM]));
-		colModel->spheres[4].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_LR);
+		colModel->spheres[4].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_RUBBER, CAR_PIECE_WHEEL_LR);
 		mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RM]));
-		colModel->spheres[5].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_TIRE, CAR_PIECE_WHEEL_RR);
+		colModel->spheres[5].Set(mi->m_wheelScale, mat.GetPosition(), SURFACE_RUBBER, CAR_PIECE_WHEEL_RR);
 		colModel->numSpheres = 6;
 	}else
 		colModel->numSpheres = 4;
