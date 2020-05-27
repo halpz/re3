@@ -11,7 +11,7 @@ CDamageManager::CDamageManager(void)
 {
 	ResetDamageStatus();
 	m_fWheelDamageEffect = 0.75f;
-	field_24 = 1;
+	field_18 = 1;
 }
 
 void
@@ -28,12 +28,8 @@ CDamageManager::FuckCarCompletely(void)
 	m_wheelStatus[0] = WHEEL_STATUS_MISSING;
 	// wheels 1-3 not reset?
 
-	m_doorStatus[0] = DOOR_STATUS_MISSING;
-	m_doorStatus[1] = DOOR_STATUS_MISSING;
-	m_doorStatus[2] = DOOR_STATUS_MISSING;
-	m_doorStatus[3] = DOOR_STATUS_MISSING;
-	m_doorStatus[4] = DOOR_STATUS_MISSING;
-	m_doorStatus[5] = DOOR_STATUS_MISSING;
+	for(i = 0; i < ARRAY_SIZE(m_doorStatus); i++)
+		m_doorStatus[i] = DOOR_STATUS_MISSING;
 
 	for(i = 0; i < 3; i++){
 #ifdef FIX_BUGS
