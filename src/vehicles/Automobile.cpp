@@ -3232,7 +3232,7 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 	if(impulse > 25.0f && GetStatus() != STATUS_WRECKED){
 		if(bIsLawEnforcer &&
 		   FindPlayerVehicle() && FindPlayerVehicle() == m_pDamageEntity &&
-			GetStatus() != STATUS_ABANDONED &&
+		   GetStatus() != STATUS_ABANDONED &&
 		   FindPlayerVehicle()->m_vecMoveSpeed.Magnitude() >= m_vecMoveSpeed.Magnitude() &&
 		   FindPlayerVehicle()->m_vecMoveSpeed.Magnitude() > 0.1f)
 			FindPlayerPed()->SetWantedLevelNoDrop(1);
@@ -3276,6 +3276,7 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 			case CAR_PIECE_BONNET:
 					GetComponentWorldPosition(CAR_BONNET, pos);
 					dmgDrawCarCollidingParticles(pos, impulse);
+					if(GetModelIndex() != MI_DODO)
 					if(Damage.ApplyDamage(COMPONENT_DOOR_BONNET, impulse*impulseMult, pHandling->fCollisionDamageMultiplier)){
 						SetDoorDamage(CAR_BONNET, DOOR_BONNET);
 						doubleMoney = true;
@@ -3286,7 +3287,7 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 			case CAR_PIECE_BUMP_REAR:
 				GetComponentWorldPosition(CAR_BUMP_REAR, pos);
 				dmgDrawCarCollidingParticles(pos, impulse);
-				if(Damage.ApplyDamage(COMPONENT_BUMPER_FRONT, impulse*impulseMult, pHandling->fCollisionDamageMultiplier)){
+				if(Damage.ApplyDamage(COMPONENT_BUMPER_REAR, impulse*impulseMult, pHandling->fCollisionDamageMultiplier)){
 					SetBumperDamage(CAR_BUMP_REAR, VEHBUMPER_REAR);
 					doubleMoney = true;
 				}
@@ -3542,8 +3543,8 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 	int i;
 	CVector dir;
 	static RwRGBA grassCol = { 8, 24, 8, 255 };
-	static RwRGBA dirtCol = { 64, 64, 64, 255 };
-	static RwRGBA dirttrackCol = { 64, 32, 16, 255 };
+	static RwRGBA gravelCol = { 64, 64, 64, 255 };
+	static RwRGBA mudCol = { 64, 32, 16, 255 };
 	static RwRGBA waterCol = { 48, 48, 64, 0 };
 
 	if(!belowEffectSpeed)
@@ -3565,7 +3566,7 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 		for(i = 0; i < 4; i++){
 			dir.z = CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
 			CParticle::AddParticle(PARTICLE_WHEEL_DIRT, colpoint->point, dir, nil,
-				CGeneral::GetRandomNumberInRange(0.02f, 0.06f), dirtCol);
+				CGeneral::GetRandomNumberInRange(0.02f, 0.06f), gravelCol);
 		}
 		return 1;
 	case SURFACE_MUD_DRY:
@@ -3574,7 +3575,7 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 		for(i = 0; i < 4; i++){
 			dir.z = CGeneral::GetRandomNumberInRange(0.03f, 0.06f);
 			CParticle::AddParticle(PARTICLE_WHEEL_DIRT, colpoint->point, dir, nil,
-				CGeneral::GetRandomNumberInRange(0.02f, 0.06f), dirttrackCol);
+				CGeneral::GetRandomNumberInRange(0.02f, 0.06f), mudCol);
 		}
 		return 0;
 	default:
@@ -4420,7 +4421,7 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 		dist += GetUp();
 		if(GetUp().z > 0.0f){
 			// simulate fast upward movement if going fast
-			float speed = CVector2D(m_vecMoveSpeed).MagnitudeSqr();
+			float speed = CVector2D(m_vecMoveSpeed).Magnitude();
 			obj->GetMatrix().Translate(GetUp()*speed);
 		}
 	}
@@ -4452,8 +4453,11 @@ CAutomobile::RemoveBonnetInPedCollision(void)
 
 	if(Damage.GetDoorStatus(DOOR_BONNET) == DOOR_STATUS_SWINGING &&
 	   Doors[DOOR_BONNET].RetAngleWhenOpen()*0.4f < Doors[DOOR_BONNET].m_fAngle){
-		// BUG? why not COMPGROUP_BONNET?
+#ifdef FIX_BUGS
+		obj = SpawnFlyingComponent(CAR_BONNET, COMPGROUP_BONNET);
+#else
 		obj = SpawnFlyingComponent(CAR_BONNET, COMPGROUP_DOOR);
+#endif
 		// make both doors invisible on car
 		SetComponentVisibility(m_aCarNodes[CAR_BONNET], ATOMIC_FLAG_NONE);
 		Damage.SetDoorStatus(DOOR_BONNET, DOOR_STATUS_MISSING);
@@ -4514,13 +4518,16 @@ CAutomobile::SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents
 		status = DOOR_STATUS_MISSING;
 	}
 
-	if(status == DOOR_STATUS_SMASHED){
+	switch(status){
+	case DOOR_STATUS_SMASHED:
 		// show damaged part
 		SetComponentVisibility(m_aCarNodes[component], ATOMIC_FLAG_DAM);
-	}else if(status == DOOR_STATUS_SWINGING){
+		break;
+	case DOOR_STATUS_SWINGING:
 		// turn off angle cull for swinging doors
 		RwFrameForAllObjects(m_aCarNodes[component], CVehicleModelInfo::SetAtomicFlagCB, (void*)ATOMIC_FLAG_NOCULL);
-	}else if(status == DOOR_STATUS_MISSING){
+		break;
+	case DOOR_STATUS_MISSING:
 		if(!noFlyingComponents){
 			if(door == DOOR_BONNET)
 				SpawnFlyingComponent(component, COMPGROUP_BONNET);
@@ -4531,6 +4538,7 @@ CAutomobile::SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents
 		}
 		// hide both
 		SetComponentVisibility(m_aCarNodes[component], ATOMIC_FLAG_NONE);
+		break;
 	}
 }
 

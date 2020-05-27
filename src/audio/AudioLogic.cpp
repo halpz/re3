@@ -8552,12 +8552,12 @@ const MissionAudioData MissionAudioNameSfxAssoc[] = {
     {"door_1", STREAMED_SOUND_MISSION_DOOR_1}, {"door_2", STREAMED_SOUND_MISSION_DOOR_2},   {"door_3", STREAMED_SOUND_MISSION_DOOR_3},
     {"door_4", STREAMED_SOUND_MISSION_DOOR_4}, {"door_5", STREAMED_SOUND_MISSION_DOOR_5},   {"door_6", STREAMED_SOUND_MISSION_DOOR_6},
     {"t3_a", STREAMED_SOUND_MISSION_T3_A},     {"t3_b", STREAMED_SOUND_MISSION_T3_B},       {"t3_c", STREAMED_SOUND_MISSION_T3_C},
-    {"k1_b", STREAMED_SOUND_MISSION_K1_B},     {"c_1", STREAMED_SOUND_MISSION_CAT1}};
+    {"k1_b", STREAMED_SOUND_MISSION_K1_B},     {"c_1", STREAMED_SOUND_MISSION_CAT1},        {nil, 0}};
 
 int32
 FindMissionAudioSfx(const char *name)
 {
-	for (uint32 i = 0; i < ARRAY_SIZE(MissionAudioNameSfxAssoc); ++i) {
+	for (uint32 i = 0; MissionAudioNameSfxAssoc[i].m_pName != nil; ++i) {
 		if (!CGeneral::faststricmp(MissionAudioNameSfxAssoc[i].m_pName, name))
 			return MissionAudioNameSfxAssoc[i].m_nId;
 	}

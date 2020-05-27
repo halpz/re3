@@ -780,7 +780,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 		return false;
 	if (pPassengers[1] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_LR) &&
-		IsRoomForPedToLeaveCar(COMPONENT_DOOR_REAR_LEFT, nil)) {
+		IsRoomForPedToLeaveCar(CAR_DOOR_LR, nil)) {
 		if (!pPassengers[2] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RR)) {
 			pPassengers[2] = pPassengers[1];
 			pPassengers[1] = nil;
@@ -797,7 +797,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 	}
 	if (pPassengers[2] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_RR) &&
-		IsRoomForPedToLeaveCar(COMPONENT_DOOR_REAR_RIGHT, nil)) {
+		IsRoomForPedToLeaveCar(CAR_DOOR_RR, nil)) {
 		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
 			pPassengers[1] = pPassengers[2];
 			pPassengers[2] = nil;
@@ -814,7 +814,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 	}
 	if (pPassengers[0] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_RF) &&
-		IsRoomForPedToLeaveCar(COMPONENT_DOOR_FRONT_RIGHT, nil)) {
+		IsRoomForPedToLeaveCar(CAR_DOOR_RF, nil)) {
 		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
 			pPassengers[1] = pPassengers[0];
 			pPassengers[0] = nil;
@@ -1192,7 +1192,7 @@ CVehicle::ProcessCarAlarm(void)
 {
 	uint32 step;
 
-	if(m_nAlarmState == 0 || m_nAlarmState == -1)
+	if(!IsAlarmOn())
 		return;
 
 	step = CTimer::GetTimeStepInMilliseconds();
