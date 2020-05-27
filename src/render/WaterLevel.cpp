@@ -26,6 +26,7 @@
 #include "Occlusion.h"
 #include "Replay.h"
 #include "WaterLevel.h"
+#include "SurfaceTable.h"
 
 #define RwIm3DVertexSet_RGBA(vert, rgba) RwIm3DVertexSetRGBA(vert, rgba.red, rgba.green, rgba.blue, rgba.alpha) // (RwRGBAAssign(&(_dst)->color, &_src))
 
