@@ -31,6 +31,8 @@
 #include "Weather.h"
 #include "Coronas.h"
 
+//--MIAMI: done
+
 bool CVehicle::bWheelsOnlyCheat;
 bool CVehicle::bAllDodosCheat;
 bool CVehicle::bCheat3;
@@ -141,8 +143,26 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
 	if(m_audioEntityId >= 0)
 		DMAudio.SetEntityStatus(m_audioEntityId, true);
-// TODO(MIAMI):
-	m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
+	//m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
+	switch(GetModelIndex()){
+	case MI_HUNTER:
+	case MI_ANGEL:
+	case MI_FREEWAY:
+		m_nRadioStation = V_ROCK;
+		break;
+	case MI_RCBARON:
+	case MI_RCBANDIT:
+	case MI_RCRAIDER:
+	case MI_RCGOBLIN:
+	case MI_TOPFUN:
+	case MI_CADDY:
+	case MI_BAGGAGE:
+		m_nRadioStation = RADIO_OFF;
+		break;
+	default:
+		m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
+		break;
+	}
 	m_pCurGroundEntity = nil;
 	m_bRainAudioCounter = 0;
 	m_bRainSamplesCounter = 0;
@@ -1212,8 +1232,7 @@ CVehicle::InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage
 							SetStatus(STATUS_ABANDONED);
 							pDriver->bFleeAfterExitingCar = true;
 							pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
-// TODO(MIAMI):
-//							pDriver->Say(120);
+							pDriver->Say(SOUND_PED_FLEE_SPRINT);
 						}
 						int time = 200;
 						for (int i = 0; i < m_nNumMaxPassengers; i++) {
@@ -1223,8 +1242,7 @@ CVehicle::InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage
 								pPassengers[i]->bFleeAfterExitingCar = true;
 								pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
 								pPassengers[i]->m_objectiveTimer = CTimer::GetTimeInMilliseconds() + time;
-// TODO(MIAMI):
-//								pPassengers[i]->Say(120);
+								pPassengers[i]->Say(SOUND_PED_FLEE_SPRINT);
 								time += 200;
 							}
 						}

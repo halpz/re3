@@ -273,12 +273,13 @@ CAutomobile::ProcessControl(void)
 	}
 
 	// Process driver
-	if(IsUpsideDown() && CanPedEnterCar()){
-		if(!pDriver->IsPlayer() &&
-		   !(pDriver->m_leader && pDriver->m_leader->bInVehicle) &&
-		   pDriver->CharCreatedBy != MISSION_CHAR)
-			pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
-	}
+	if(pDriver)
+		if(IsUpsideDown() && CanPedEnterCar()){
+			if(!pDriver->IsPlayer() &&
+			   !(pDriver->m_leader && pDriver->m_leader->bInVehicle) &&
+			   pDriver->CharCreatedBy != MISSION_CHAR)
+				pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+		}
 
 	ActivateBombWhenEntered();
 
