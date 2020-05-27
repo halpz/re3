@@ -403,12 +403,11 @@ CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool
 {
 	int32 x = WATER_TO_SMALL_SECTOR_X(fX + WATER_X_OFFSET);
 	int32 y = WATER_TO_SMALL_SECTOR_Y(fY);
-	
-	ASSERT( x >= 0 && x < MAX_SMALL_SECTORS );
-	ASSERT( y >= 0 && y < MAX_SMALL_SECTORS );
-	
+		
+#ifdef FIX_BUGS
 	if ( x < 0 || x >= MAX_SMALL_SECTORS ) return false;
 	if ( y < 0 || y >= MAX_SMALL_SECTORS ) return false;
+#endif
 
 	uint8 nBlock = aWaterFineBlockList[x][y];
 
@@ -447,8 +446,10 @@ CWaterLevel::GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLeve
 	int32 x = WATER_TO_SMALL_SECTOR_X(fX + WATER_X_OFFSET);
 	int32 y = WATER_TO_SMALL_SECTOR_Y(fY);
 		
+#ifdef FIX_BUGS
 	if ( x < 0 || x >= MAX_SMALL_SECTORS ) return false;
 	if ( y < 0 || y >= MAX_SMALL_SECTORS ) return false;
+#endif
 	
 	uint8 nBlock = aWaterFineBlockList[x][y];
 		
@@ -670,7 +671,7 @@ CWaterLevel::RenderWater()
 	int32 nEndX   = WATER_TO_HUGE_SECTOR_X(camPos.x + fHugeSectorMaxRenderDist + WATER_X_OFFSET) + 1;
 	int32 nStartY = WATER_TO_HUGE_SECTOR_Y(camPos.y - fHugeSectorMaxRenderDist);
 	int32 nEndY   = WATER_TO_HUGE_SECTOR_Y(camPos.y + fHugeSectorMaxRenderDist) + 1;
-
+	
 	if ( bUseCamStartX )
 		nStartX = WATER_TO_HUGE_SECTOR_X(camPos.x + WATER_X_OFFSET);
 	if ( bUseCamEndX )
@@ -1856,6 +1857,9 @@ CWaterLevel::PreCalcWaterGeometry(void)
 	
 	int32 BlockX = WATER_TO_SMALL_SECTOR_X(fCamX + WATER_X_OFFSET) + 1;
 	int32 BlockY = WATER_TO_SMALL_SECTOR_Y(fCamY                 ) + 1;
+	
+	ASSERT( BlockX >= 0 && BlockX < MAX_SMALL_SECTORS );
+	ASSERT( BlockY >= 0 && BlockY < MAX_SMALL_SECTORS );
 	
 	if ( _IsColideWithBlock(BlockX, BlockY, nBlock) )
 	{
