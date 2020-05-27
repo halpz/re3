@@ -2884,7 +2884,7 @@ CWaterLevel::HandleBeachToysStuff(void)
 							
 							if ( GetGroundLevel(vecPos, &fGroundLevel, &coldata, 30.0f) )
 							{
-								if ( coldata.SurfaceType == 18 )
+								if ( coldata.SurfaceType == SURFACE_SAND )
 								{
 									CEntity *toy = CreateBeachToy(vecPos, BEACHTOY_BALL);
 									
@@ -2928,7 +2928,7 @@ CWaterLevel::HandleBeachToysStuff(void)
 							
 							if ( GetGroundLevel(vecPos, &fGroundLevel, &coldata, 30.0f) )
 							{
-								if ( coldata.SurfaceType == 18 )
+								if ( coldata.SurfaceType == SURFACE_SAND )
 								{
 									CEntity *toy = CreateBeachToy(vecPos, BEACHTOY_LOUNGE);
 									if ( toy )
