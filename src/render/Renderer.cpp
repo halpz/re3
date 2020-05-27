@@ -394,7 +394,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 			}
 			return VIS_VISIBLE;
 		}
-		if(ent->m_flagE10){
+		if(ent->bDontStream){
 			if(ent->m_rwObject == nil || !ent->bIsVisible)
 				return VIS_INVISIBLE;
 			if(!ent->GetIsOnScreen() || ent->IsEntityOccluded())

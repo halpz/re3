@@ -276,7 +276,7 @@ public:
 	virtual void BlowUpCar(CEntity *ent) {}
 	virtual bool SetUpWheelColModel(CColModel *colModel) { return false; }
 	virtual void BurstTyre(uint8 tyre, bool applyForces) {}
-	virtual bool IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos) { return false;}
+	virtual bool IsRoomForPedToLeaveCar(uint32 component, CVector *forcedDoorPos) { return false; }
 	virtual bool IsClearToDriveAway(void);
 	virtual float GetHeightAboveRoad(void);
 	virtual void PlayCarHorn(void) {}
@@ -340,6 +340,7 @@ public:
 	void FireFixedMachineGuns(void);
 	void ActivateBomb(void);
 	void ActivateBombWhenEntered(void);
+	void KillPedsInVehicle(void);
 
 	void SetComponentAtomicAlpha(RpAtomic *atomic, int32 alpha);
 	void UpdateClumpAlpha(void);

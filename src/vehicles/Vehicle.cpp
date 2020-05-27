@@ -707,12 +707,12 @@ CVehicle::BladeColSectorList(CPtrList &list, CColModel &rotorColModel, CMatrix &
 				// Apply Collision
 				if(IsCar()){
 					CAutomobile *heli = (CAutomobile*)this;
-					if(heli->m_fRotorSpeed > 0.15f){
+					if(heli->m_aWheelSpeed[1] > 0.15f){
 						ApplyCollision(CWorld::m_aTempColPts[i], impulse);
 						ApplyTurnForce(m_fTurnMass*ROTOR_COL_TURNMULT*tangentSpeed, colpos - center);
-						heli->m_fRotorSpeed = 0.15f;
-					}else if(heli->m_fRotorSpeed < 0.075f && heli->m_fRotorSpeed > 0.0f)
-						heli->m_fRotorSpeed *= -1.0f;
+						heli->m_aWheelSpeed[1] = 0.15f;
+					}else if(heli->m_aWheelSpeed[1] < 0.075f && heli->m_aWheelSpeed[1] > 0.0f)
+						heli->m_aWheelSpeed[1] *= -1.0f;
 				}
 
 				float damageImpulse = damageMult * Max(impulse, ROTOR_DEFAULT_DAMAGE*m_fMass/3000.0f);
@@ -1395,7 +1395,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 		return false;
 	if (pPassengers[1] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_LR) &&
-		IsRoomForPedToLeaveCar(COMPONENT_DOOR_REAR_LEFT, nil)) {
+		IsRoomForPedToLeaveCar(CAR_DOOR_LR, nil)) {
 		if (!pPassengers[2] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RR)) {
 			pPassengers[2] = pPassengers[1];
 			pPassengers[1] = nil;
@@ -1412,7 +1412,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 	}
 	if (pPassengers[2] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_RR) &&
-		IsRoomForPedToLeaveCar(COMPONENT_DOOR_REAR_RIGHT, nil)) {
+		IsRoomForPedToLeaveCar(CAR_DOOR_RR, nil)) {
 		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
 			pPassengers[1] = pPassengers[2];
 			pPassengers[2] = nil;
@@ -1429,7 +1429,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 	}
 	if (pPassengers[0] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_RF) &&
-		IsRoomForPedToLeaveCar(COMPONENT_DOOR_FRONT_RIGHT, nil)) {
+		IsRoomForPedToLeaveCar(CAR_DOOR_RF, nil)) {
 		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
 			pPassengers[1] = pPassengers[0];
 			pPassengers[0] = nil;
@@ -1581,9 +1581,8 @@ CVehicle::CarHasRoof(void)
 {
 	if((pHandling->Flags & HANDLING_HAS_NO_ROOF) == 0)
 		return true;
-	if(m_aExtras[0] && m_aExtras[1])
-		return false;
-	return true;
+	// component 0 is assumed to be a roof
+	return m_aExtras[0] == 0 || m_aExtras[1] == 0;
 }
 
 bool
@@ -1977,7 +1976,7 @@ CVehicle::ProcessCarAlarm(void)
 {
 	uint32 step;
 
-	if(m_nAlarmState == 0 || m_nAlarmState == -1)
+	if(!IsAlarmOn())
 		return;
 
 	step = CTimer::GetTimeStepInMilliseconds();
@@ -2263,6 +2262,32 @@ CVehicle::DoSunGlare(void)
 				CCoronas::TYPE_STAR, CCoronas::FLARE_NONE,
 				CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF,
 				CCoronas::STREAK_OFF, 0.0f);
+		}
+	}
+}
+
+void
+CVehicle::KillPedsInVehicle(void)
+{
+	int i;
+	if(pDriver){
+		CDarkel::RegisterKillByPlayer(pDriver, WEAPONTYPE_EXPLOSION);
+		if(pDriver->GetPedState() == PED_DRIVING){
+			pDriver->SetDead();
+			if(!pDriver->IsPlayer())
+				pDriver->FlagToDestroyWhenNextProcessed();
+		}else
+			pDriver->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+	}
+	for(i = 0; i < m_nNumMaxPassengers; i++){
+		if(pPassengers[i]){
+			CDarkel::RegisterKillByPlayer(pPassengers[i], WEAPONTYPE_EXPLOSION);
+			if(pPassengers[i]->GetPedState() == PED_DRIVING){
+				pPassengers[i]->SetDead();
+				if(!pPassengers[i]->IsPlayer())
+					pPassengers[i]->FlagToDestroyWhenNextProcessed();
+			}else
+				pPassengers[i]->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
 		}
 	}
 }

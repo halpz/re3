@@ -69,7 +69,6 @@ enum {
 class CAutomobile : public CVehicle
 {
 public:
-	// 0x288
 	CDamageManager Damage;
 	CDoor Doors[6];
 	RwFrame *m_aCarNodes[NUM_CAR_NODES];
@@ -83,10 +82,8 @@ public:
 	float m_aWheelRotation[4];
 	float m_aWheelPosition[4];
 	float m_aWheelSpeed[4];
-	float m_fRotorSpeed;
 	uint8 field_4D8;
 	uint8 bTaxiLight : 1;
-	//uint8 bHadDriver : 1;		// for bombs
 	uint8 bFixedColour : 1;
 	uint8 bBigWheels : 1;
 	uint8 bWaterTight : 1;	// no damage for non-player peds
@@ -111,6 +108,7 @@ public:
 	float m_weaponDoorTimerRight;
 	float m_fCarGunLR;
 	float m_fCarGunUD;
+	float m_fHeliOrientation;
 	float m_fPropellerRotation;
 	uint8 stuff4[4];
 	uint8 m_nWheelsOnGround;
@@ -144,6 +142,9 @@ public:
 	bool IsDoorFullyOpen(eDoors door);
 	bool IsDoorClosed(eDoors door);
 	bool IsDoorMissing(eDoors door);
+	bool IsDoorReady(uint32 door);
+	bool IsDoorMissing(uint32 door);
+	bool IsOpenTopCar(void);
 	void RemoveRefsToVehicle(CEntity *ent);
 	void BlowUpCar(CEntity *ent);
 	bool SetUpWheelColModel(CColModel *colModel);
@@ -158,6 +159,7 @@ public:
 	void VehicleDamage(float impulse, uint16 damagedPiece);
 	void ProcessBuoyancy(void);
 	void DoDriveByShootings(void);
+	void DoHoverSuspensionRatios(void);
 	int32 RcbanditCheckHitWheels(void);
 	int32 RcbanditCheck1CarWheels(CPtrList &list);
 	void PlaceOnRoadProperly(void);
@@ -181,6 +183,8 @@ public:
 	void SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents = false);
 
 	void TellHeliToGoToCoors(float x, float y, float z, uint8 speed);
+	void SetHeliOrientation(float orient) { m_fHeliOrientation = orient; }
+	void ClearHeliOrientation(void) { m_fHeliOrientation = -1.0f; }
 
 	void Fix(void);
 	void SetComponentVisibility(RwFrame *frame, uint32 flags);
@@ -190,6 +194,11 @@ public:
 	void HideAllComps(void);
 	void ShowAllComps(void);
 	void ReduceHornCounter(void);
+
+	void PopBoot(void);
+	void PopBootUsingPhysics(void);
+	void CloseAllDoors(void);
+
 #ifdef COMPATIBLE_SAVES
 	virtual void Save(uint8*& buf);
 	virtual void Load(uint8*& buf);
