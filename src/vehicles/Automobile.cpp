@@ -4405,7 +4405,7 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 	         (component == COMPGROUP_BONNET || component == COMPGROUP_BOOT || component == CAR_WINDSCREEN)){
 		obj->m_vecMoveSpeed.z *= -1.5f;
 		obj->m_vecMoveSpeed.z += 0.04f;
-	}else{p
+	}else{
 		obj->m_vecMoveSpeed.z *= 0.25f;
 	}
 	obj->m_vecMoveSpeed.x *= 0.75f;
