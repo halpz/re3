@@ -486,9 +486,9 @@ CMenuManager::Initialise(void)
 	// TODO(Miami)
 	// DMAudio.SetMP3BoostVolume(m_PrefsMP3BoostVolume);
 	if (DMAudio.IsMP3RadioChannelAvailable()) {
-		if (m_PrefsRadioStation < HEAD_RADIO || m_PrefsRadioStation > USERTRACK)
+		if (m_PrefsRadioStation < WILDSTYLE || m_PrefsRadioStation > USERTRACK)
 			m_PrefsRadioStation = CGeneral::GetRandomNumber() % 10;
-	} else if (m_PrefsRadioStation < HEAD_RADIO || m_PrefsRadioStation > CHATTERBOX)
+	} else if (m_PrefsRadioStation < WILDSTYLE || m_PrefsRadioStation > WAVE)
 		m_PrefsRadioStation = CGeneral::GetRandomNumber() % 9;
 
 	CFileMgr::SetDir("");
@@ -4413,7 +4413,7 @@ CMenuManager::ProcessButtonPresses(void)
 						m_PrefsSpeakers = 0;
 						m_PrefsMusicVolume = 102;
 						m_PrefsStereoMono = 0;
-						m_PrefsRadioStation = HEAD_RADIO;
+						m_PrefsRadioStation = WILDSTYLE;
 						DMAudio.SetMusicMasterVolume(102);
 						DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
 						DMAudio.SetRadioInCar(m_PrefsRadioStation);
@@ -4609,15 +4609,15 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation += changeValueBy;
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 				if (DMAudio.IsMP3RadioChannelAvailable()) {
-					if (m_PrefsRadioStation < HEAD_RADIO)
+					if (m_PrefsRadioStation < WILDSTYLE)
 						m_PrefsRadioStation = USERTRACK;
 					if (m_PrefsRadioStation > USERTRACK)
-						m_PrefsRadioStation = HEAD_RADIO;
+						m_PrefsRadioStation = WILDSTYLE;
 				} else {
-					if (m_PrefsRadioStation < HEAD_RADIO)
-						m_PrefsRadioStation = CHATTERBOX;
-					if (m_PrefsRadioStation > CHATTERBOX)
-						m_PrefsRadioStation = HEAD_RADIO;
+					if (m_PrefsRadioStation < WILDSTYLE)
+						m_PrefsRadioStation = WAVE;
+					if (m_PrefsRadioStation > WAVE)
+						m_PrefsRadioStation = WILDSTYLE;
 				}
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
