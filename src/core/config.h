@@ -205,7 +205,8 @@ enum Config {
 #define RELOADABLES			// some debug menu options to reload TXD files
 #endif
 
-//#define PC_WATER
+#define PC_WATER
+#define WATER_CHEATS
 
 // Particle
 #define PC_PARTICLE

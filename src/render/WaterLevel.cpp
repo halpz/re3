@@ -6,6 +6,7 @@
 #include "Weather.h"
 #include "Camera.h"
 #include "Vehicle.h"
+#include "PlayerPed.h"
 #include "Boat.h"
 #include "World.h"
 #include "General.h"
@@ -23,6 +24,7 @@
 #include <rpworld.h>
 #include <rpmatfx.h>
 #include "Occlusion.h"
+#include "Replay.h"
 #include "WaterLevel.h"
 
 #define RwIm3DVertexSet_RGBA(vert, rgba) RwIm3DVertexSetRGBA(vert, rgba.red, rgba.green, rgba.blue, rgba.alpha) // (RwRGBAAssign(&(_dst)->color, &_src))
@@ -136,22 +138,22 @@ WaterLevelInitialise(Const char *pWaterDat)
 	int32 slot = CTxdStore::FindTxdSlot("particle");
 	CTxdStore::SetCurrentTxd(slot);
 	
-	if ( gpWaterTex == NULL )
-		gpWaterTex = RwTextureRead("waterclear256", NULL);
+	if ( gpWaterTex == nil )
+		gpWaterTex = RwTextureRead("waterclear256", nil);
 	gpWaterRaster = RwTextureGetRaster(gpWaterTex);
 	
-	if ( gpWaterEnvTex == NULL )
-		gpWaterEnvTex = RwTextureRead("waterreflection2", NULL);
+	if ( gpWaterEnvTex == nil )
+		gpWaterEnvTex = RwTextureRead("waterreflection2", nil);
 	gpWaterEnvRaster = RwTextureGetRaster(gpWaterEnvTex);
 	
 #ifdef PC_WATER
-	if ( gpWaterEnvBaseTex == NULL )
-		gpWaterEnvBaseTex = RwTextureRead("sandywater", NULL);
+	if ( gpWaterEnvBaseTex == nil )
+		gpWaterEnvBaseTex = RwTextureRead("sandywater", nil);
 	gpWaterEnvBaseRaster = RwTextureGetRaster(gpWaterEnvBaseTex);
 #endif
 	
-	if ( gpWaterWakeTex == NULL )
-		gpWaterWakeTex = RwTextureRead("waterwake", NULL);
+	if ( gpWaterWakeTex == nil )
+		gpWaterWakeTex = RwTextureRead("waterwake", nil);
 	gpWaterWakeRaster = RwTextureGetRaster(gpWaterWakeTex);
 	
 	CTxdStore::PopCurrentTxd();
@@ -169,7 +171,7 @@ CWaterLevel::Shutdown()
 #define _DELETE_TEXTURE(t) if ( t )	\
 		{ \
 			RwTextureDestroy(t); \
-			t = NULL; \
+			t = nil; \
 		}
 
 	_DELETE_TEXTURE(gpWaterTex);
@@ -366,7 +368,7 @@ CWaterLevel::CreateWavyAtomic()
 	
 	static RwFrame *wakeEnvFrame;
 	
-	if ( wakeEnvFrame == NULL )
+	if ( wakeEnvFrame == nil )
 	{
 		wakeEnvFrame = RwFrameCreate();
 		RwMatrixSetIdentity(RwFrameGetMatrix(wakeEnvFrame));
@@ -412,7 +414,7 @@ CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool
 	if ( nBlock == 0x80 )
 		return false;
 
-	ASSERT( pfOutLevel != NULL );
+	ASSERT( pfOutLevel != nil );
 	*pfOutLevel = ms_aWaterZs[nBlock];
 
 	float fAngle = (CTimer::GetTimeInMilliseconds() & 4095) * (TWOPI / 4096.0f);
@@ -443,10 +445,7 @@ CWaterLevel::GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLeve
 {
 	int32 x = WATER_TO_SMALL_SECTOR_X(fX + WATER_X_OFFSET);
 	int32 y = WATER_TO_SMALL_SECTOR_Y(fY);
-	
-	ASSERT( x >= 0 && x < MAX_SMALL_SECTORS );
-	ASSERT( y >= 0 && y < MAX_SMALL_SECTORS );
-	
+		
 	if ( x < 0 || x >= MAX_SMALL_SECTORS ) return false;
 	if ( y < 0 || y >= MAX_SMALL_SECTORS ) return false;
 	
@@ -455,13 +454,14 @@ CWaterLevel::GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLeve
 	if ( nBlock == 0x80 )
 		return false;
 	
-	ASSERT( pfOutLevel != NULL );
+	ASSERT( pfOutLevel != nil );
 	*pfOutLevel = ms_aWaterZs[nBlock];
 
 	return true;
 }
 
-float CWaterLevel::GetWaterWavesOnly(short x, short y)
+float
+CWaterLevel::GetWaterWavesOnly(short x, short y)
 {
 	float fAngle = (CTimer::GetTimeInMilliseconds() & 4095) * (TWOPI / 4096.0f);
 	
@@ -472,9 +472,10 @@ float CWaterLevel::GetWaterWavesOnly(short x, short y)
 	return fWave * fWindFactor;
 }
 	   
-CVector CWaterLevel::GetWaterNormal(float fX, float fY)
+CVector
+CWaterLevel::GetWaterNormal(float fX, float fY)
 {
-	//TODO: BUG ? ignore x offset
+	//TODO: BUG ? no x offset
 	
 	int32 x = WATER_TO_SMALL_SECTOR_X(fX);
 	int32 y = WATER_TO_SMALL_SECTOR_Y(fY);
@@ -497,7 +498,8 @@ CVector CWaterLevel::GetWaterNormal(float fX, float fY)
 }
 
 
-inline float _GetWaterDrawDist()
+inline float
+_GetWaterDrawDist()
 {
 	if     ( TheCamera.GetPosition().z < 15.0f  ) return 1200.0f;
 	if     ( TheCamera.GetPosition().z > 60.0f  ) return 2000.0f;
@@ -536,7 +538,8 @@ _GetCamBounds(bool *bUseCamStartY, bool *bUseCamEndY, bool *bUseCamStartX, bool 
 }
 
 
-inline bool _IsColideWithBlock(int32 x, int32 y, int32 &block)
+inline bool 
+_IsColideWithBlock(int32 x, int32 y, int32 &block)
 {
 	block = CWaterLevel::aWaterFineBlockList[x + 0][y + 0];
 	if (!(block & 0x80))
@@ -873,7 +876,8 @@ CWaterLevel::RenderWater()
 }
 
 
-void CWaterLevel::RenderTransparentWater(void)
+void
+CWaterLevel::RenderTransparentWater(void)
 {
 	bool bUseCamEndX  = false;
 	bool bUseCamStartY = false;
@@ -1212,7 +1216,8 @@ void CWaterLevel::RenderOneFlatSmallWaterPoly(float fX, float fY, float fZ, RwRG
 	TempBufferIndicesStored += 6;
 }
 
-void CWaterLevel::RenderOneFlatLargeWaterPoly(float fX, float fY, float fZ, RwRGBA const &color)
+void
+CWaterLevel::RenderOneFlatLargeWaterPoly(float fX, float fY, float fZ, RwRGBA const &color)
 {
 	if ( TempBufferIndicesStored >= TEMPBUFFERINDEXSIZE-6 || TempBufferVerticesStored >= TEMPBUFFERVERTSIZE-4 )
 		RenderAndEmptyRenderBuffer();
@@ -1253,7 +1258,8 @@ void CWaterLevel::RenderOneFlatLargeWaterPoly(float fX, float fY, float fZ, RwRG
 	TempBufferIndicesStored += 6;
 }
 
-void CWaterLevel::RenderOneFlatHugeWaterPoly(float fX, float fY, float fZ, RwRGBA const &color)
+void
+CWaterLevel::RenderOneFlatHugeWaterPoly(float fX, float fY, float fZ, RwRGBA const &color)
 {
 	if ( TempBufferIndicesStored >= TEMPBUFFERINDEXSIZE-6 || TempBufferVerticesStored >= TEMPBUFFERVERTSIZE-4 )
 		RenderAndEmptyRenderBuffer();
@@ -1301,7 +1307,8 @@ void CWaterLevel::RenderOneFlatHugeWaterPoly(float fX, float fY, float fZ, RwRGB
 	TempBufferIndicesStored += 6;
 }
 
-void CWaterLevel::RenderOneFlatExtraHugeWaterPoly(float fX, float fY, float fZ, RwRGBA const &color)
+void
+CWaterLevel::RenderOneFlatExtraHugeWaterPoly(float fX, float fY, float fZ, RwRGBA const &color)
 {
 	if ( TempBufferIndicesStored >= TEMPBUFFERINDEXSIZE-6 || TempBufferVerticesStored >= TEMPBUFFERVERTSIZE-4 )
 		RenderAndEmptyRenderBuffer();
@@ -1349,7 +1356,8 @@ void CWaterLevel::RenderOneFlatExtraHugeWaterPoly(float fX, float fY, float fZ, 
 	TempBufferIndicesStored += 6;
 }
 
-void CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &color, bool bDontRender)
+void
+CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &color, bool bDontRender)
 {
 	CVector vecSectorPos(fX + (SMALL_SECTOR_SIZE/2), fY + (SMALL_SECTOR_SIZE/2), fZ + 2.0f);
 
@@ -1387,10 +1395,10 @@ void CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const
 		float waveWind = CWeather::WindClipped * fWave2Ampl + 0.05f;
 
 		float waveA = (TWOPI / 16.0f)
-			* ((fNormalDirectionScalar1 * fabs(camMat->at.x + camMat->at.y) + fNormMult) * (CWeather::WindClipped * 0.4f + 0.2f));
+			* ((fNormalDirectionScalar1 * Abs(camMat->at.x + camMat->at.y) + fNormMult) * (CWeather::WindClipped * 0.4f + 0.2f));
 
 		float waveB = TWOPI / (16.0f * fWave2NormScale)
-			* ((fNormalDirectionScalar2 * fabs(camMat->at.y - camMat->at.x) + fNormMultB) * (CWeather::WindClipped * 0.2f + 0.1f));
+			* ((fNormalDirectionScalar2 * Abs(camMat->at.y - camMat->at.x) + fNormMultB) * (CWeather::WindClipped * 0.2f + 0.1f));
 
 		CVector vA(1.0f, 0.0f, 0.0f);
 		CVector vB(0.0f, 1.0f, 0.0f);
@@ -1423,8 +1431,8 @@ void CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const
 
 				wavyMorphVerts->z = wind * Sin(waveMulA) + waveWind * Sin(waveMulB);
 
-				vA.z = (waveA * Cos(waveMulA)) - (waveB * cos(waveMulB));
-				vB.z = (waveA * Cos(waveMulA)) + (waveB * cos(waveMulB));
+				vA.z = (waveA * Cos(waveMulA)) - (waveB * Cos(waveMulB));
+				vB.z = (waveA * Cos(waveMulA)) + (waveB * Cos(waveMulB));
 
 				CVector norm = CrossProduct(vA, vB);
 				norm.Normalise();
@@ -1470,7 +1478,8 @@ void CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const
 	}
 }
 		
-int16 _RoundValue(int32 v)
+int16
+_RoundValue(int32 v)
 {
 	int16 result = v;
 	
@@ -1480,7 +1489,8 @@ int16 _RoundValue(int32 v)
 	return result;
 }
 
-void CWaterLevel::RenderWavyMask(float fX, float fY, float fZ,
+void
+CWaterLevel::RenderWavyMask(float fX, float fY, float fZ,
 		float fSectorX, float fSectorY,
 #ifdef PC_WATER
 		float fCamPosX, float fCamPosY,
@@ -1647,7 +1657,7 @@ void CWaterLevel::RenderWavyMask(float fX, float fY, float fZ,
 							CParticle::AddParticle(PARTICLE_WATER_SPARK,
 								vecPos,
 								CVector(0.0f, 0.0f, 0.0f),
-								NULL,
+								nil,
 								0.0f,
 								15,
 								CGeneral::GetRandomNumberInRange(-90, 90),
@@ -1670,7 +1680,7 @@ void CWaterLevel::RenderWavyMask(float fX, float fY, float fZ,
 							CParticle::AddParticle(PARTICLE_WATER_SPARK,
 								vecPos,
 								CVector(0.0f, 0.0f, 0.0f),
-								NULL,
+								nil,
 								0.0f,
 								15,
 								CGeneral::GetRandomNumberInRange(-90, 90),
@@ -1693,7 +1703,7 @@ void CWaterLevel::RenderWavyMask(float fX, float fY, float fZ,
 							CParticle::AddParticle(PARTICLE_WATER_SPARK,
 								vecPos,
 								CVector(0.0f, 0.0f, 0.0f),
-								NULL,
+								nil,
 								0.0f,
 								15,
 								CGeneral::GetRandomNumberInRange(-90, 90),
@@ -1716,7 +1726,7 @@ void CWaterLevel::RenderWavyMask(float fX, float fY, float fZ,
 							CParticle::AddParticle(PARTICLE_WATER_SPARK,
 								vecPos,
 								CVector(0.0f, 0.0f, 0.0f),
-								NULL,
+								nil,
 								0.0f,
 								15,
 								CGeneral::GetRandomNumberInRange(-90, 90),
@@ -1796,7 +1806,8 @@ void CWaterLevel::RenderWavyMask(float fX, float fY, float fZ,
 }
 
 #ifdef PC_WATER
-void CWaterLevel::PreCalcWaterGeometry(void)
+void
+CWaterLevel::PreCalcWaterGeometry(void)
 {
 	if ( !RequireWavySector )
 	{
@@ -1869,7 +1880,8 @@ void CWaterLevel::PreCalcWaterGeometry(void)
 		MaskCalculatedThisFrame = false;
 }
 
-bool CWaterLevel::PreCalcWavySector(RwRGBA const &color)
+bool
+CWaterLevel::PreCalcWavySector(RwRGBA const &color)
 {	
 	float fAngle = (CTimer::GetTimeInMilliseconds() & 4095) * (TWOPI / 4096.0f);
 	
@@ -1933,10 +1945,10 @@ bool CWaterLevel::PreCalcWavySector(RwRGBA const &color)
 			float waveMulA = (morphVertYHalf + morphVertXHalf) * (TWOPI / 16.0f) + fAngle;	  
 			float waveMulB = (morphVertYHalf - morphVertXHalf) * (TWOPI / (16.0f * fWave2InvLength)) + fAngle;		
 	
-			wavyMorphVerts->z = wind * sinf(waveMulA) + waveWind * sin(waveMulB);
+			wavyMorphVerts->z = wind * Sin(waveMulA) + waveWind * Sin(waveMulB);
 			
-			vA.z = (waveA * cos(waveMulA)) - (waveB * cos(waveMulB));
-			vB.z = (waveA * cos(waveMulA)) + (waveB * cos(waveMulB));
+			vA.z = (waveA * Cos(waveMulA)) - (waveB * Cos(waveMulB));
+			vB.z = (waveA * Cos(waveMulA)) + (waveB * Cos(waveMulB));
 
 			CVector norm = CrossProduct(vA, vB);
 			norm.Normalise();
@@ -1958,7 +1970,8 @@ bool CWaterLevel::PreCalcWavySector(RwRGBA const &color)
 	return true;
 }
 
-bool CWaterLevel::PreCalcWavyMask(float fX, float fY, float fZ,
+bool
+CWaterLevel::PreCalcWavyMask(float fX, float fY, float fZ,
 		float fSectorX, float fSectorY,
 		float fCamPosX, float fCamPosY,
 		float fCamDirX, float fCamDirY,
@@ -2060,7 +2073,7 @@ bool CWaterLevel::PreCalcWavyMask(float fX, float fY, float fZ,
 							CParticle::AddParticle(PARTICLE_WATER_SPARK,
 								vecPos,
 								CVector(0.0f, 0.0f, 0.0f),
-								NULL,
+								nil,
 								0.0f,
 								15,
 								CGeneral::GetRandomNumberInRange(-90, 90),
@@ -2083,7 +2096,7 @@ bool CWaterLevel::PreCalcWavyMask(float fX, float fY, float fZ,
 							CParticle::AddParticle(PARTICLE_WATER_SPARK,
 								vecPos,
 								CVector(0.0f, 0.0f, 0.0f),
-								NULL,
+								nil,
 								0.0f,
 								15,
 								CGeneral::GetRandomNumberInRange(-90, 90),
@@ -2106,7 +2119,7 @@ bool CWaterLevel::PreCalcWavyMask(float fX, float fY, float fZ,
 							CParticle::AddParticle(PARTICLE_WATER_SPARK,
 								vecPos,
 								CVector(0.0f, 0.0f, 0.0f),
-								NULL,
+								nil,
 								0.0f,
 								15,
 								CGeneral::GetRandomNumberInRange(-90, 90),
@@ -2129,7 +2142,7 @@ bool CWaterLevel::PreCalcWavyMask(float fX, float fY, float fZ,
 							CParticle::AddParticle(PARTICLE_WATER_SPARK,
 								vecPos,
 								CVector(0.0f, 0.0f, 0.0f),
-								NULL,
+								nil,
 								0.0f,
 								15,
 								CGeneral::GetRandomNumberInRange(-90, 90),
@@ -2183,7 +2196,8 @@ bool CWaterLevel::PreCalcWavyMask(float fX, float fY, float fZ,
 }
 #endif
 
-void CWaterLevel::RenderBoatWakes(void)
+void
+CWaterLevel::RenderBoatWakes(void)
 {
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void *)gpWaterWakeRaster);
 #ifndef PC_WATER
@@ -2205,7 +2219,7 @@ void CWaterLevel::RenderBoatWakes(void)
 	{
 		CBoat *pBoat = CBoat::apFrameWakeGeneratingBoats[idx];
 
-		if ( pBoat == NULL )
+		if ( pBoat == nil )
 			break;
 
 		CVector2D vecDistA(pBoat->GetForward().x, pBoat->GetForward().y);
@@ -2301,19 +2315,21 @@ void CWaterLevel::RenderBoatWakes(void)
 	RenderAndEmptyRenderBuffer();
 }
 
-inline float _GetWindedWave(float fX, float fY)
+inline float
+_GetWindedWave(float fX, float fY)
 {
 	float fAngle = (CTimer::GetTimeInMilliseconds() & 4095) * (TWOPI / 4096.0f);	
 	float x = WATER_HUGE_X(fX + WATER_X_OFFSET);
 	float y = WATER_HUGE_Y(fY);
 	
 	float fWindFactor (CWeather::WindClipped * 0.4f + 0.2f);
-	float fWave = sin(( (x - floorf(x)) + (y - floorf(y)) ) * TWOPI + fAngle);
+	float fWave = Sin(( (x - floorf(x)) + (y - floorf(y)) ) * TWOPI + fAngle);
 
 	return fWindFactor * fWave;
 }
 
-void CWaterLevel::RenderWakeSegment(CVector2D &vecA, CVector2D &vecB, CVector2D &vecC, CVector2D &vecD,
+void
+CWaterLevel::RenderWakeSegment(CVector2D &vecA, CVector2D &vecB, CVector2D &vecC, CVector2D &vecD,
 		float &fSizeA, float &fSizeB, 
 		float &fAlphaA, float &fAlphaB, 
 		float &fWakeZ)
@@ -2398,7 +2414,8 @@ void CWaterLevel::RenderWakeSegment(CVector2D &vecA, CVector2D &vecB, CVector2D 
 	}
 }
 
-void CWaterLevel::RenderOneSlopedUnderWaterPoly(float fX, float fY, float fZ, RwRGBA const&color)
+void
+CWaterLevel::RenderOneSlopedUnderWaterPoly(float fX, float fY, float fZ, RwRGBA const&color)
 {
 	CVector2D camPos(TheCamera.GetPosition().x, TheCamera.GetPosition().y);
 	
@@ -2475,7 +2492,8 @@ void CWaterLevel::RenderOneSlopedUnderWaterPoly(float fX, float fY, float fZ, Rw
 	TempBufferIndicesStored += 6;
 }
 
-void CWaterLevel::RenderOneFlatSmallWaterPolyBlended(float fX, float fY, float fZ, float fCamX, float fCamY,
+void
+CWaterLevel::RenderOneFlatSmallWaterPolyBlended(float fX, float fY, float fZ, float fCamX, float fCamY,
 		RwRGBA const &color, RwRGBA const &colorTrans,
 		float fDrawDist)
 {
@@ -2588,7 +2606,7 @@ CWaterLevel::RenderAndEmptyRenderBuffer()
 	{
 		LittleTest();
 
-		if ( RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, NULL, rwIM3D_VERTEXUV) )
+		if ( RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, rwIM3D_VERTEXUV) )
 		{
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStored);
 			RwIm3DEnd();
@@ -2599,18 +2617,19 @@ CWaterLevel::RenderAndEmptyRenderBuffer()
 	TempBufferVerticesStored = 0;
 }
 
-bool CWaterLevel::GetGroundLevel(CVector const &vecPosn, float *pfOutLevel, ColData *pData, float fDistance)
+bool
+CWaterLevel::GetGroundLevel(CVector const &vecPosn, float *pfOutLevel, ColData *pData, float fDistance)
 {
 	CColPoint point;
 	CEntity *entity;
 	
 	if ( !CWorld::ProcessVerticalLine(vecPosn + CVector(0.0f, 0.0f, fDistance),
-			-fDistance, point, entity, true, false, false, false, true, false, NULL) )
+			-fDistance, point, entity, true, false, false, false, true, false, nil) )
 		return false;
 		
 	*pfOutLevel = point.point.z;
 	
-	if ( pData != NULL )
+	if ( pData != nil )
 	{
 		pData->SurfaceType = point.surfaceB;
 		pData->PieceType   = point.pieceB;
@@ -2619,7 +2638,8 @@ bool CWaterLevel::GetGroundLevel(CVector const &vecPosn, float *pfOutLevel, ColD
 	return true;
 }
 
-bool CWaterLevel::IsLocationOutOfWorldBounds_WS(CVector const &vecPosn, int nOffset)
+bool
+CWaterLevel::IsLocationOutOfWorldBounds_WS(CVector const &vecPosn, int nOffset)
 {
 	int32 x = int32((vecPosn.x / 50.0f) + 48.0f);
 	int32 y = int32((vecPosn.y / 50.0f) + 40.0f);
@@ -2627,7 +2647,8 @@ bool CWaterLevel::IsLocationOutOfWorldBounds_WS(CVector const &vecPosn, int nOff
 	return x < nOffset || x >= 80 - nOffset || y < nOffset || y >= 80 - nOffset;
 }
 
-bool CWaterLevel::GetGroundLevel_WS(CVector const &vecPosn, float *pfOutLevel, ColData *pData, float fDistance)
+bool
+CWaterLevel::GetGroundLevel_WS(CVector const &vecPosn, float *pfOutLevel, ColData *pData, float fDistance)
 {
 	if ( IsLocationOutOfWorldBounds_WS(vecPosn, 0) )
 		return false;
@@ -2635,7 +2656,8 @@ bool CWaterLevel::GetGroundLevel_WS(CVector const &vecPosn, float *pfOutLevel, C
 		return GetGroundLevel(vecPosn, pfOutLevel, pData, fDistance);
 }
 
-bool CWaterLevel::GetWaterDepth(CVector const &vecPosn, float *pfDepth, float *pfLevelNoWaves, float *pfGroundLevel)
+bool
+CWaterLevel::GetWaterDepth(CVector const &vecPosn, float *pfDepth, float *pfLevelNoWaves, float *pfGroundLevel)
 {
 	float fLevelNoWaves;
 	float fGroundLevel;
@@ -2643,38 +2665,291 @@ bool CWaterLevel::GetWaterDepth(CVector const &vecPosn, float *pfDepth, float *p
 	if ( !GetWaterLevelNoWaves(vecPosn.x, vecPosn.y, vecPosn.z, &fLevelNoWaves) )
 		return false;
 	
-	if ( !GetGroundLevel(vecPosn, &fGroundLevel, NULL, 30.0f) )
+	if ( !GetGroundLevel(vecPosn, &fGroundLevel, nil, 30.0f) )
 		fGroundLevel = -100.0;
 	
-	if ( pfDepth != NULL )
+	if ( pfDepth != nil )
 		*pfDepth = fLevelNoWaves - fGroundLevel;
 
-	if ( pfLevelNoWaves != NULL )
+	if ( pfLevelNoWaves != nil )
 		*pfLevelNoWaves = fLevelNoWaves;
 
-	if ( pfGroundLevel != NULL )
+	if ( pfGroundLevel != nil )
 		*pfGroundLevel = fGroundLevel;
 	
 	return true;
 }
 
-void CWaterLevel::RenderSeaBirds()
+void
+CWaterLevel::RenderSeaBirds()
 {
+	CVector cur_pos = TheCamera.GetPosition();
+	
+	if ( !CCullZones::CamNoRain()
+		&& !CCullZones::PlayerNoRain()
+		&& (CWeather::NewWeatherType == WEATHER_SUNNY || CWeather::NewWeatherType == WEATHER_EXTRA_SUNNY)
+		&& CClock::ms_nGameClockHours > 6 && CClock::ms_nGameClockHours < 20 )
+	{
+		static CVector prev_pos(0.0f, 0.0f, 0.0f);
+		static CVector prev_front(0.0f, 0.0f, 0.0f);
+		static int32 timecounter;
+
+		if ( Abs(prev_pos.x - cur_pos.x) + Abs(prev_pos.y - cur_pos.y) + Abs(prev_pos.z - cur_pos.z) > 1.5f )
+		{
+			prev_pos = cur_pos;
+			timecounter = CTimer::GetTimeInMilliseconds();
+		}
+		else if ( (CTimer::GetTimeInMilliseconds() - timecounter) > 5000 )
+		{
+			static int32 birdgenTime = 0;
+			
+			if ( (CTimer::GetTimeInMilliseconds() - birdgenTime) > 1000 )
+			{
+				birdgenTime = CTimer::GetTimeInMilliseconds();
+				
+				CVector vecPos = cur_pos;
+				
+				float fAngle = CGeneral::GetRandomNumberInRange(90.0f, 150.0f);
+				
+				uint16 nSinCosIdx = CGeneral::GetRandomNumber() % (CParticle::SIN_COS_TABLE_SIZE-1);
+				
+				float fCos = CParticle::Cos(nSinCosIdx);
+				float fSin = CParticle::Sin(nSinCosIdx);
+
+				vecPos.x += (fCos - fSin) * fAngle;
+				vecPos.y += (fSin + fCos) * fAngle;
+				vecPos.z += CGeneral::GetRandomNumberInRange(10.0f, 30.0f);
+				
+				CVector vecDir(CGeneral::GetRandomNumberInRange(-1.0f, 1.0f),
+								CGeneral::GetRandomNumberInRange(-1.0f, 1.0f),
+								0.0f);
+				
+				CParticle::AddParticle(PARTICLE_BIRD_FRONT, vecPos, vecDir, nil, 0.0f, 0, 0, 0, 0);
+			}
+		}
+	}
 }
 
-void CWaterLevel::RenderShipsOnHorizon()
+void
+CWaterLevel::RenderShipsOnHorizon()
 {
+	CVector cur_pos = FindPlayerPed()->GetPosition();
+
+	static CVector prev_pos(0.0f, 0.0f, 0.0f);
+	static CVector prev_front(0.0f, 0.0f, 0.0f);
+	static int32 timecounter;
+
+	if ( Abs(prev_pos.x - cur_pos.x) + Abs(prev_pos.y - cur_pos.y) + Abs(prev_pos.z - cur_pos.z) > 1.5f )
+	{
+		prev_pos = cur_pos;
+		timecounter = CTimer::GetTimeInMilliseconds();
+	}
+	else if ( (CTimer::GetTimeInMilliseconds() - timecounter) > 5000 )
+	{
+		static int32 shipgenTime = 0;
+		
+		if ( (CTimer::GetTimeInMilliseconds() - shipgenTime) > 4000 )
+		{
+			shipgenTime = CTimer::GetTimeInMilliseconds();
+			
+			CVector vecPos = cur_pos;
+			
+			float fAngle = CGeneral::GetRandomNumberInRange(450.0f, 750.0f);
+			
+			uint16 nSinCosIdx = CGeneral::GetRandomNumber() % (CParticle::SIN_COS_TABLE_SIZE-1);
+			
+			float fCos = CParticle::Cos(nSinCosIdx);
+			float fSin = CParticle::Sin(nSinCosIdx);
+
+			vecPos.x += (fCos - fSin) * fAngle;
+			vecPos.y += (fSin + fCos) * fAngle;
+			
+			float fLevelNoWaves;
+			
+			if ( GetWaterLevelNoWaves(vecPos.x, vecPos.y, vecPos.z, &fLevelNoWaves) )
+			{
+				if ( IsLocationOutOfWorldBounds_WS(vecPos, 1) )
+				{
+					vecPos.z  = fLevelNoWaves + 9.5f;
+					
+					CVector vecDir
+					(
+						CGeneral::GetRandomNumberInRange(-0.1f, 0.1f),
+						0.0f,
+						0.0f
+					);
+					
+					CParticle::AddParticle(PARTICLE_SHIP_SIDE, vecPos, vecDir,
+						nil, 0.0f, 0, 0, CGeneral::GetRandomNumber() & 7, 0);
+				}
+			}
+		}
+	}
 }
 
-void CWaterLevel::HandleSeaLifeForms()
+void
+CWaterLevel::HandleSeaLifeForms()
 {
+	if ( CReplay::IsPlayingBack() )
+		return;
+	
+	CVector cur_pos = FindPlayerPed()->GetPosition();
+
+	static CVector prev_pos(0.0f, 0.0f, 0.0f);
+	static int32 timecounter;
+	
+	if ( Abs(prev_pos.x - cur_pos.x) + Abs(prev_pos.y - cur_pos.y) + Abs(prev_pos.z - cur_pos.z) > 1.5f )
+	{
+		prev_pos = cur_pos;
+		timecounter = CTimer::GetTimeInMilliseconds();
+	}
+	else if ( (CTimer::GetTimeInMilliseconds() - timecounter) > 5000 )
+	{
+//TODO(MIAMI)
+//		if ( CWaterCreatures::IsSpaceForMoreWaterCreatures() )
+		{
+			for ( int32 i = 0; i < 3; i++ )
+			{
+				CVector vecPos = cur_pos;
+				
+				float fAngle = CGeneral::GetRandomNumberInRange(15.0f, 30.0f);
+				
+				uint16 nSinCosIdx = CGeneral::GetRandomNumber() % (CParticle::SIN_COS_TABLE_SIZE-1);
+				
+				float fCos = CParticle::Cos(nSinCosIdx);
+				float fSin = CParticle::Sin(nSinCosIdx);
+				
+				vecPos.x += (fCos - fSin) * fAngle;
+				vecPos.y += (fSin + fCos) * fAngle;
+				
+				//TODO(MIAMI)
+				//CWaterCreatures::CreateOne(vecPos, 0xFFFFFFFF);
+			}
+		}
+	}
+	
+	//TODO(MIAMI)
+	//CWaterCreatures::UpdateAll();
 }
 
-void CWaterLevel::HandleBeachToysStuff(void)
+void
+CWaterLevel::HandleBeachToysStuff(void)
 {
+	CVector cur_pos = FindPlayerPed()->GetPosition();
+	
+	static bool bBeachBallInit = true;
+	static CVector FirstBeachBallPos = cur_pos;
+	static bool bLoungeInit = true;
+	static CVector FirstLoungePos = cur_pos;
+	static CVector prev_pos(0.0f, 0.0f, 0.0f);
+	static int32 timecounter;
+
+	if ( Abs(prev_pos.x - cur_pos.x) + Abs(prev_pos.y - cur_pos.y) + Abs(prev_pos.z - cur_pos.z) > 1.5f )
+	{
+		prev_pos = cur_pos;
+		timecounter = CTimer::GetTimeInMilliseconds();
+	}
+	else if ( (CTimer::GetTimeInMilliseconds() - timecounter) > 5000 )
+	{
+		static int32 toygenTime = CTimer::GetTimeInMilliseconds();
+		
+		if ( (CTimer::GetTimeInMilliseconds() - toygenTime) > 20000 )
+		{
+			toygenTime = CTimer::GetTimeInMilliseconds();
+			
+			if ( bBeachBallInit ||  (cur_pos - FirstBeachBallPos).MagnitudeSqr() > 6400.0f )
+			{
+				for ( int32 i = 0; i < 3; i++ )
+				{
+					CVector vecPos = cur_pos;
+					
+					float fAngle = CGeneral::GetRandomNumberInRange(20.0f, 35.0f);
+					
+					uint16 nSinCosIdx = CGeneral::GetRandomNumber() % (CParticle::SIN_COS_TABLE_SIZE-1);
+					
+					float fCos = CParticle::Cos(nSinCosIdx);
+					float fSin = CParticle::Sin(nSinCosIdx);
+					
+					vecPos.x += (fCos - fSin) * fAngle;
+					vecPos.y += (fSin + fCos) * fAngle;
+					
+					if ( TheCamera.IsSphereVisible(vecPos, 1.0f, &TheCamera.GetCameraMatrix()) )
+					{
+						float fWaterLevel;
+						
+						if ( !GetWaterLevel(vecPos.x, vecPos.y, vecPos.z, &fWaterLevel, false) )
+						{
+							float fGroundLevel;
+							ColData coldata;
+							
+							if ( GetGroundLevel(vecPos, &fGroundLevel, &coldata, 30.0f) )
+							{
+								if ( coldata.SurfaceType == 18 )
+								{
+									CEntity *toy = CreateBeachToy(vecPos, BEACHTOY_BALL);
+									
+									if ( toy )
+									{
+										FirstBeachBallPos = cur_pos;
+										bBeachBallInit = false;
+										i = 10;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			if ( bLoungeInit ||  (cur_pos - FirstLoungePos).MagnitudeSqr() > 6400.0f )
+			{
+				for ( int32 i = 0; i < 5; i++ )
+				{
+					CVector vecPos = cur_pos;
+					
+					float fAngle = CGeneral::GetRandomNumberInRange(20.0f, 35.0f);
+					
+					uint16 nSinCosIdx = CGeneral::GetRandomNumber() % (CParticle::SIN_COS_TABLE_SIZE-1);
+					
+					float fCos = CParticle::Cos(nSinCosIdx);
+					float fSin = CParticle::Sin(nSinCosIdx);
+					
+					vecPos.x += (fCos - fSin) * fAngle;
+					vecPos.y += (fSin + fCos) * fAngle;
+					
+					if ( TheCamera.IsSphereVisible(vecPos, 2.0f, &TheCamera.GetCameraMatrix()) )
+					{
+						float fWaterLevel;
+						
+						if ( !GetWaterLevel(vecPos.x, vecPos.y, vecPos.z, &fWaterLevel, false) )
+						{
+							float fGroundLevel;
+							ColData coldata;
+							
+							if ( GetGroundLevel(vecPos, &fGroundLevel, &coldata, 30.0f) )
+							{
+								if ( coldata.SurfaceType == 18 )
+								{
+									CEntity *toy = CreateBeachToy(vecPos, BEACHTOY_LOUNGE);
+									if ( toy )
+									{
+										toy->SetHeading(DEGTORAD(CGeneral::GetRandomNumberInRange(0.0f, 359.0f)));
+										FirstLoungePos = cur_pos;
+										bLoungeInit = false;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
-CEntity *CWaterLevel::CreateBeachToy(CVector const &vec, eBeachToy beachtoy)
+CEntity *
+CWaterLevel::CreateBeachToy(CVector const &vec, eBeachToy beachtoy)
 {
-	return NULL;
+	//TODO(MIAMI)
+	return nil;
 }
