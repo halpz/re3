@@ -10398,8 +10398,8 @@ void CRunningScript::LocateCharCarCommand(int32 command, uint32* pIp)
 		case COMMAND_LOCATE_CHAR_ON_FOOT_CAR_3D:
 			result = !pPed->bInVehicle;
 			break;
-		case COMMAND_LOCATE_CHAR_IN_CAR_CHAR_2D:
-		case COMMAND_LOCATE_CHAR_IN_CAR_CHAR_3D:
+		case COMMAND_LOCATE_CHAR_IN_CAR_CAR_2D:
+		case COMMAND_LOCATE_CHAR_IN_CAR_CAR_3D:
 			result = pPed->bInVehicle;
 			break;
 		default:
