@@ -2,6 +2,7 @@
 
 #include "Pools.h"
 #include "World.h"
+#include "ParticleType.h"
 
 #ifdef FIX_BUGS
 #ifndef DONT_FIX_REPLAY_BUGS
@@ -11,7 +12,6 @@
 
 class CVehicle;
 struct CReference;
-enum tParticleType;
 
 struct CAddressInReplayBuffer
 {
