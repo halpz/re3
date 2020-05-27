@@ -152,7 +152,7 @@ RwReal       RwCameraGetNearClipPlane(const RwCamera *camera) { return camera->n
 RwReal       RwCameraGetFarClipPlane(const RwCamera *camera) { return camera->farPlane; }
 RwCamera    *RwCameraSetFogDistance(RwCamera *camera, RwReal fogDistance) { camera->fogPlane = fogDistance; return camera; }
 RwReal       RwCameraGetFogDistance(const RwCamera *camera) { return camera->fogPlane; }
-RwCamera    *RwCameraGetCurrentCamera(void);
+RwCamera    *RwCameraGetCurrentCamera(void) { return rw::engine->currentCamera; }
 RwCameraProjection RwCameraGetProjection(const RwCamera *camera);
 const RwV2d *RwCameraGetViewWindow(const RwCamera *camera) { return &camera->viewWindow; }
 RwMatrix    *RwCameraGetViewMatrix(RwCamera *camera) { return &camera->viewMatrix; }
