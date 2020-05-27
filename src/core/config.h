@@ -205,6 +205,8 @@ enum Config {
 #define RELOADABLES			// some debug menu options to reload TXD files
 #endif
 
+//#define PC_WATER
+
 // Particle
 #define PC_PARTICLE
 //#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
