@@ -315,7 +315,7 @@ ScaleAndCenterX(float x)
 
 // --- Functions not in the game/inlined starts
 
-inline void
+void
 CMenuManager::ScrollUpListByOne() 
 {
 	if (m_nSelectedListRow == m_nFirstVisibleRowOnList) {
@@ -329,7 +329,7 @@ CMenuManager::ScrollUpListByOne()
 	}
 }
 
-inline void
+void
 CMenuManager::ScrollDownListByOne()
 {
 	if (m_nSelectedListRow == m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW - 1) {
@@ -345,7 +345,7 @@ CMenuManager::ScrollDownListByOne()
 	}
 }
 
-inline void
+void
 CMenuManager::PageUpList(bool playSoundOnSuccess)
 {
 	if (m_nTotalListRow > MAX_VISIBLE_LIST_ROW) {
@@ -363,7 +363,7 @@ CMenuManager::PageUpList(bool playSoundOnSuccess)
 	}
 }
 
-inline void
+void
 CMenuManager::PageDownList(bool playSoundOnSuccess)
 {
 	if (m_nTotalListRow > MAX_VISIBLE_LIST_ROW) {
@@ -381,7 +381,7 @@ CMenuManager::PageDownList(bool playSoundOnSuccess)
 	}
 }
 
-inline void
+void
 CMenuManager::ThingsToDoBeforeGoingBack()
 {
 	if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) && strcmp(m_aSkinName, m_PrefsSkinFile) != 0) {
@@ -419,7 +419,7 @@ CMenuManager::ThingsToDoBeforeGoingBack()
 #endif
 }
 
-inline int8
+int8
 CMenuManager::GetPreviousPageOption()
 {
 #ifndef CUSTOM_FRONTEND_OPTIONS

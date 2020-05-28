@@ -647,12 +647,12 @@ public:
 	int ConstructStatLine(int);
 
 	// New (inlined ones and the ones we can't believe it's not inlined)
-	void ThingsToDoBeforeGoingBack();
-	void ScrollUpListByOne();
-	void ScrollDownListByOne();
-	void PageUpList(bool);
-	void PageDownList(bool);
-	int8 GetPreviousPageOption();
+	inline void ThingsToDoBeforeGoingBack();
+	inline void ScrollUpListByOne();
+	inline void ScrollDownListByOne();
+	inline void PageUpList(bool);
+	inline void PageDownList(bool);
+	inline int8 GetPreviousPageOption();
 	
 	// uint8 GetNumberOfMenuOptions();
 };
