@@ -372,6 +372,9 @@ private:
 	friend class CRunningScript;
 	friend class CHud;
 	friend void CMissionCleanup::Process();
+#ifdef FIX_BUGS
+	friend void RetryMission(int, int);
+#endif
 };
 
 
@@ -479,6 +482,10 @@ private:
 	void CharInAreaCheckCommand(int32, uint32*);
 	void CarInAreaCheckCommand(int32, uint32*);
 
+#ifdef MISSION_REPLAY
+	bool CanAllowMissionReplay();
+#endif
+
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
 
 	bool ThisIsAValidRandomPed(uint32 pedtype) {
@@ -502,3 +509,15 @@ private:
 		}
 	}
 };
+
+#ifdef MISSION_REPLAY
+extern int AllowMissionReplay;
+extern uint32 WaitForMissionActivate;
+extern uint32 WaitForSave;
+extern uint32 MissionStartTime;
+extern int missionRetryScriptIndex;
+extern bool doingMissionRetry;
+
+uint32 AddExtraDeathDelay();
+void RetryMission(int, int);
+#endif
