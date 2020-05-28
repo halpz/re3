@@ -41,6 +41,7 @@ bool CVehicle::bCheat5;
 #ifdef ALT_DODO_CHEAT
 bool CVehicle::bAltDodoCheat;
 #endif
+bool CVehicle::bHoverCheat;
 bool CVehicle::m_bDisableMouseSteering = true;
 bool CVehicle::bDisableRemoteDetonation;
 bool CVehicle::bDisableRemoteDetonationOnContact;

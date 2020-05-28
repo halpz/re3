@@ -321,6 +321,12 @@ void RenderWaterLayersCheat(void)
 			CWaterLevel::m_nRenderWaterLayers = 0;
 }
 
+void BackToTheFuture(void)
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CVehicle::bHoverCheat = !CVehicle::bHoverCheat;
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -1080,7 +1086,11 @@ void CPad::AddToPCCheatString(char c)
 	if (!_CHEATCMP("TAEHCSREYALRETAW"))
 		RenderWaterLayersCheat();
 #endif
-	
+
+	// SEAWAYS
+	if (!_CHEATCMP("SYAWAES"))
+		BackToTheFuture();
+
 	#undef _CHEATCMP
 }
 

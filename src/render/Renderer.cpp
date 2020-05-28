@@ -269,10 +269,8 @@ CRenderer::RenderBoats(void)
 	for(node = gSortedVehiclesAndPeds.tail.prev;
 	    node != &gSortedVehiclesAndPeds.head;
 	    node = node->prev){
-		// only boats in this list
 		CVehicle *v = (CVehicle*)node->item.ent;
-		if(v->IsBoat())
-			RenderOneNonRoad(v);
+		RenderOneNonRoad(v);
 	}
 }
 

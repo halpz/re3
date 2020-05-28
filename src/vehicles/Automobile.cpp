@@ -210,7 +210,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	}
 }
 
-
+//--MIAMI: done
 void
 CAutomobile::SetModelIndex(uint32 id)
 {
@@ -1188,6 +1188,7 @@ CAutomobile::ProcessControl(void)
 	}
 }
 
+//--MIAMI: done
 void
 CAutomobile::Teleport(CVector pos)
 {
@@ -2797,18 +2798,45 @@ CAutomobile::ProcessBuoyancy(void)
 	CVector impulse, point;
 
 	if(mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancy, &point, &impulse)){
-		bTouchingWater = true;
-		ApplyMoveForce(impulse);
-		ApplyTurnForce(impulse, point);
-
-		CVector initialSpeed = m_vecMoveSpeed;
 		float timeStep = Max(CTimer::GetTimeStep(), 0.01f);
 		float impulseRatio = impulse.z / (GRAVITY * m_fMass * timeStep);
 		float waterResistance = Pow(1.0f - 0.05f*impulseRatio, CTimer::GetTimeStep());
 		m_vecMoveSpeed *= waterResistance;
 		m_vecTurnSpeed *= waterResistance;
 
-		if(impulseRatio > 0.5f){
+		bool heliHitWaterHard = false;
+		if(IsRealHeli() && m_aWheelSpeed[1] > 0.15f){
+			if(GetModelIndex() == MI_SEASPAR){
+				if(impulseRatio > 3.0f){
+					m_aWheelSpeed[1] = 0.0f;
+					heliHitWaterHard = true;
+				}
+			}else{
+				float strength = 1.0f/Max(8.0f*impulseRatio, 1.0f);
+				ApplyMoveForce(-2.0f*impulse/strength);
+				ApplyTurnForce(-impulse/strength, point);
+				if(impulseRatio > 0.9f){
+					m_aWheelSpeed[1] = 0.0f;
+					heliHitWaterHard = true;
+				}else
+					return;
+			}
+		}
+
+		bTouchingWater = true;
+		ApplyMoveForce(impulse);
+		ApplyTurnForce(impulse, point);
+		CVector initialSpeed = m_vecMoveSpeed;
+
+		if(m_modelIndex == MI_SEASPAR && impulseRatio < 3.0f && (GetUp().z > -0.5f || impulseRatio < 0.6f) ||
+		   CVehicle::bHoverCheat && GetStatus() == STATUS_PLAYER && GetUp().z > 0.1f){
+			bIsInWater = false;
+			bIsDrowning = false;
+		}else if(heliHitWaterHard || impulseRatio > 1.0f ||
+		         impulseRatio > 0.6f && (m_aSuspensionSpringRatio[0] == 1.0f ||
+		                                 m_aSuspensionSpringRatio[1] == 1.0f ||
+		                                 m_aSuspensionSpringRatio[2] == 1.0f ||
+		                                 m_aSuspensionSpringRatio[3] == 1.0f)){
 			bIsInWater = true;
 			bIsDrowning = true;
 			if(m_vecMoveSpeed.z < -0.1f)
@@ -2825,8 +2853,7 @@ CAutomobile::ProcessBuoyancy(void)
 					if(pPassengers[i]->IsPlayer() || !bWaterTight)
 						pPassengers[i]->InflictDamage(nil, WEAPONTYPE_DROWNING, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 				}
-		}
-		else {
+		}else{
 			bIsInWater = false;
 			bIsDrowning = false;
 		}
@@ -2834,49 +2861,33 @@ CAutomobile::ProcessBuoyancy(void)
 		static uint32 nGenerateRaindrops = 0;
 		static uint32 nGenerateWaterCircles = 0;
 
-		if(initialSpeed.z < -0.3f && impulse.z > 0.3f){
-#if defined(PC_PARTICLE) || defined (PS2_ALTERNATIVE_CARSPLASH)
+		if(initialSpeed.z < -0.1f && impulse.z > 0.3f || heliHitWaterHard){
 			RwRGBA color;
-			color.red = (0.5f * CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed())*0.45f*255;
-			color.green = (0.5f * CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen())*0.45f*255;
-			color.blue = (0.5f * CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue())*0.45f*255;
+			color.red = (0.5f * CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed_Obj())*0.45f*255;
+			color.green = (0.5f * CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen_Obj())*0.45f*255;
+			color.blue = (0.5f * CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue_Obj())*0.45f*255;
 			color.alpha = CGeneral::GetRandomNumberInRange(0, 32) + 128;
+			CVector target = CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.15f, 0.45f));
 			CParticleObject::AddObject(POBJECT_CAR_WATER_SPLASH, GetPosition(),
-				CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.15f, 0.3f)),
-				0.0f, 75, color, true);
-#else
-			CVector pos = (initialSpeed * 2.0f) + (GetPosition() + point);
-	
-			for ( int32 i = 0; i < 360; i += 4 )
-			{
-				float fSin = Sin(float(i));
-				float fCos = Cos(float(i));
-				
-				CVector dir(fSin*0.01f, fCos*0.01f, CGeneral::GetRandomNumberInRange(0.25f, 0.45f));
-				
-				CParticle::AddParticle(PARTICLE_CAR_SPLASH,
-					pos + CVector(fSin*4.5f, fCos*4.5f, 0.0f),
-					dir, NULL, 0.0f, CRGBA(225, 225, 255, 180));
-	
-				for ( int32 j = 0; j < 3; j++ )
-				{
-					float fMul = 1.5f * float(j + 1);
-					
-					CParticle::AddParticle(PARTICLE_CAR_SPLASH,
-						pos + CVector(fSin * fMul, fCos * fMul, 0.0f),
-						dir, NULL, 0.0f, CRGBA(225, 225, 255, 180));                      
-				}
-			}
-#endif
+				target, 0.0f, 75, color, true);
 
 			nGenerateRaindrops = CTimer::GetTimeInMilliseconds() + 300;
 			nGenerateWaterCircles = CTimer::GetTimeInMilliseconds() + 60;
+
+			if(heliHitWaterHard){
+				CVector right = CrossProduct(GetForward(), CVector(0.0f, 0.0f, 1.0f));
+				CParticleObject::AddObject(POBJECT_CAR_WATER_SPLASH, GetPosition() + right,
+					target, 0.0f, 75, color, true);
+				CParticleObject::AddObject(POBJECT_CAR_WATER_SPLASH, GetPosition() - right,
+					target, 0.0f, 75, color, true);
+			}
+
 			if(m_vecMoveSpeed.z < -0.2f)
 				m_vecMoveSpeed.z = -0.2f;
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_WATER_FALL, 0.0f);
 		}
 
-		if(nGenerateWaterCircles > 0 && nGenerateWaterCircles < CTimer::GetTimeInMilliseconds()){
+		if(nGenerateWaterCircles > 0 && nGenerateWaterCircles <= CTimer::GetTimeInMilliseconds()){
 			CVector pos = GetPosition();
 			float waterLevel = 0.0f;
 			if(CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &waterLevel, false))
@@ -2896,7 +2907,7 @@ CAutomobile::ProcessBuoyancy(void)
 			}
 		}
 
-		if(nGenerateRaindrops > 0 && nGenerateRaindrops < CTimer::GetTimeInMilliseconds()){
+		if(nGenerateRaindrops > 0 && nGenerateRaindrops <= CTimer::GetTimeInMilliseconds()){
 			CVector pos = GetPosition();
 			float waterLevel = 0.0f;
 			if(CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &waterLevel, false))
@@ -2922,13 +2933,7 @@ CAutomobile::ProcessBuoyancy(void)
 				CVector pos = m_aWheelColPoints[i].point + 0.3f*GetUp() - GetPosition();
 				CVector vSpeed = GetSpeed(pos);
 				vSpeed.z = 0.0f;
-#ifdef GTA_PS2_STUFF
-				// ps2 puddle physics
-				CVector moveForce = CTimer::GetTimeStep() * (m_fMass * (vSpeed * -0.003f));
-				ApplyMoveForce(moveForce.x, moveForce.y, moveForce.z);
-#endif
 				float fSpeed = vSpeed.MagnitudeSqr();
-#ifdef PC_PARTICLE
 				if(fSpeed > sq(0.05f)){
 					fSpeed = Sqrt(fSpeed);
 
@@ -2948,40 +2953,12 @@ CAutomobile::ProcessBuoyancy(void)
 					if((CTimer::GetFrameCounter() & 0xF) == 0)
 						DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_SPLASH, 2000.0f*fSpeed);
 				}
-#else
-				if ( ( (CTimer::GetFrameCounter() + i) & 3 ) == 0 )
-				{
-					if(fSpeed > sq(0.05f))
-					{
-						fSpeed = Sqrt(fSpeed);
-						CRGBA color(155, 185, 155, 255);
-						float boxY = GetColModel()->boundingBox.max.y;
-						CVector right = 0.5f * GetRight();
-						
-						if ( i == 2 )
-						{
-							CParticle::AddParticle(PARTICLE_PED_SPLASH,
-								GetPosition() + (boxY * GetForward()) + right,
-								0.75f*m_vecMoveSpeed, NULL, 0.0f, color);
-			
-						}
-						else if ( i == 0 )
-						{
-							CParticle::AddParticle(PARTICLE_PED_SPLASH,
-								GetPosition() + (boxY * GetForward()) - right,
-								0.75f*m_vecMoveSpeed, NULL, 0.0f, color);
-						}
-						
-						if((CTimer::GetFrameCounter() & 0xF) == 0)
-							DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_SPLASH, 2000.0f*fSpeed);
-					}
-				}
-#endif	
 			}
 		}
 	}
 }
 
+//--MIAMI: done
 void
 CAutomobile::DoDriveByShootings(void)
 {
@@ -2998,7 +2975,8 @@ CAutomobile::DoDriveByShootings(void)
 
 	bool lookingLeft = false;
 	bool lookingRight = false;
-	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN){
+	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
+	   TheCamera.m_bObbeCinematicCarCamOn){
 		if(CPad::GetPad(0)->GetLookLeft())
 			lookingLeft = true;
 		if(CPad::GetPad(0)->GetLookRight())
@@ -3489,18 +3467,20 @@ CAutomobile::dmgDrawCarCollidingParticles(const CVector &pos, float amount)
 			CGeneral::GetRandomNumberInRange(0.0f, 4.0f));
 }
 
+//--MIAMI: done
 void
 CAutomobile::AddDamagedVehicleParticles(void)
 {
+	int i, n;
+
 	if(this == FindPlayerVehicle() && TheCamera.GetLookingForwardFirstPerson())
 		return;
-
-	uint8 engineStatus = Damage.GetEngineStatus();
-	if(engineStatus < ENGINE_STATUS_STEAM1)
+	if(this != FindPlayerVehicle() && (CTimer::GetFrameCounter() + m_randomSeed) & 1)
+		return;
+	if(m_fHealth >= 650.0f)
 		return;
 
-	float fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward()) * 180.0f;
-	CVector direction = 0.5f*m_vecMoveSpeed;
+	CVector direction = 0.85f*m_vecMoveSpeed;
 	CVector damagePos = ((CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()))->m_positions[CAR_POS_HEADLIGHTS];
 
 	switch(Damage.GetDoorStatus(DOOR_BONNET)){
@@ -3518,26 +3498,72 @@ CAutomobile::AddDamagedVehicleParticles(void)
 
 	if(GetModelIndex() == MI_BFINJECT)
 		damagePos = CVector(0.3f, -1.5f, -0.1f);
-
+	else if(GetModelIndex() == MI_CADDY)
+		damagePos = CVector(0.6f, -1.0f, -0.25f);
+	else if(IsRealHeli()){
+		damagePos.x = 0.4f*GetColModel()->boundingBox.max.x;
+		damagePos.y = 0.2f*GetColModel()->boundingBox.min.y;
+		damagePos.z = 0.3f*GetColModel()->boundingBox.max.z;
+	}else
+		damagePos.z += 0.4f*(GetColModel()->boundingBox.max.z-damagePos.z) * DotProduct(GetForward(), m_vecMoveSpeed);
 	damagePos = GetMatrix()*damagePos;
 	damagePos.z += 0.15f;
 
-	if(engineStatus < ENGINE_STATUS_STEAM2){
-		if(fwdSpeed < 90.0f){
-			direction.z += 0.05f;
-			CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, direction, nil, 0.1f);
+	bool electric = pHandling->Transmission.nEngineType == 'E';
+
+	if(electric && m_fHealth < 320.0f && m_fHealth > 1.0f){
+		direction = 0.85f*m_vecMoveSpeed;
+		direction += GetRight() * CGeneral::GetRandomNumberInRange(0.0f, 0.04f) * (1.0f - 2.0f*m_vecMoveSpeed.Magnitude());
+		direction.z += 0.001f;
+		n = (CGeneral::GetRandomNumber() & 7) + 2;
+		for(i = 0; i < n; i++)
+			CParticle::AddParticle(PARTICLE_SPARK_SMALL, damagePos, direction);
+		if(((CTimer::GetFrameCounter() + m_randomSeed) & 7) == 0)
+			CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, damagePos, 0.8f*m_vecMoveSpeed, nil, 0.1f, 0, 0, 0, 1000);
+	}else if(electric && m_fHealth < 460.0f){
+		direction = 0.85f*m_vecMoveSpeed;
+		direction += GetRight() * CGeneral::GetRandomNumberInRange(0.0f, 0.04f) * (1.0f - 2.0f*m_vecMoveSpeed.Magnitude());
+		direction.z += 0.001f;
+		n = (CGeneral::GetRandomNumber() & 3) + 2;
+		for(i = 0; i < n; i++)
+			CParticle::AddParticle(PARTICLE_SPARK_SMALL, damagePos, direction);
+		if(((CTimer::GetFrameCounter() + m_randomSeed) & 0xF) == 0)
+			CParticle::AddParticle(PARTICLE_ENGINE_SMOKE, damagePos, 0.8f*m_vecMoveSpeed, nil, 0.1f, 0, 0, 0, 1000);
+	}else if(m_fHealth < 250.0f){
+		// nothing
+	}else if(m_fHealth < 320.0f){
+		CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, damagePos, 0.8f*direction);
+	}else if(m_fHealth < 390.0f){
+		CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, 0.75f*direction);
+		CParticle::AddParticle(PARTICLE_ENGINE_SMOKE, damagePos, 0.85f*direction);
+	}else if(m_fHealth < 460.0f){
+		int rnd = CTimer::GetFrameCounter() + m_randomSeed;
+		if(rnd < 10 ||
+		   rnd < 70 && rnd > 25 ||
+		   rnd < 160 && rnd > 100 ||
+		   rnd < 200 && rnd > 175 ||
+		   rnd > 235)
+			return;
+		direction.z += 0.05f*Max(1.0f - 1.6f*m_vecMoveSpeed.Magnitude(), 0.0f);
+		if(electric){
+			// BUG. we had that case already
+			direction = 0.85f*m_vecMoveSpeed;
+			direction += GetRight() * CGeneral::GetRandomNumberInRange(0.0f, 0.04f) * (1.0f - 2.0f*m_vecMoveSpeed.Magnitude());
+			direction.z += 0.001f;
+			n = (CGeneral::GetRandomNumber() & 2) + 2;
+			for(i = 0; i < n; i++)
+				CParticle::AddParticle(PARTICLE_SPARK_SMALL, damagePos, direction);
+			if(((CTimer::GetFrameCounter() + m_randomSeed) & 0xF) == 0)
+				CParticle::AddParticle(PARTICLE_ENGINE_SMOKE, damagePos, 0.8f*m_vecMoveSpeed, nil, 0.1f, 0, 0, 0, 1000);
+		}else{
+			if(TheCamera.GetLookDirection() != LOOKING_FORWARD)
+				CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, 0.75f*direction);
+			else if(((CTimer::GetFrameCounter() + m_randomSeed) & 1) == 0)
+				CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, 0.85f*m_vecMoveSpeed);
 		}
-	}else if(engineStatus < ENGINE_STATUS_SMOKE){
-		if(fwdSpeed < 90.0f)
-			CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, direction, nil, 0.0f);
-	}else if(engineStatus < ENGINE_STATUS_ON_FIRE){
-		if(fwdSpeed < 90.0f){
-			CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, direction, nil, 0.0f);
-			CParticle::AddParticle(PARTICLE_ENGINE_SMOKE, damagePos, 0.3f*direction, nil, 0.0f);
-		}
-	}else if(m_fHealth > 250.0f){
-		if(fwdSpeed < 90.0f)
-			CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, damagePos, 0.2f*direction, nil, 0.0f);
+	}else if(((CTimer::GetFrameCounter() + m_randomSeed) & 3) == 0 ||
+	         ((CTimer::GetFrameCounter() + m_randomSeed) & 3) == 2){
+		CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, 0.9f*direction);
 	}
 }
 

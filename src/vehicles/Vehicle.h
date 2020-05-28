@@ -362,6 +362,7 @@ public:
 #ifdef ALT_DODO_CHEAT
 	static bool bAltDodoCheat;
 #endif
+	static bool bHoverCheat;
 	static bool m_bDisableMouseSteering;
 	static bool bDisableRemoteDetonation;
 	static bool bDisableRemoteDetonationOnContact;
