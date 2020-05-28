@@ -538,22 +538,14 @@ void CRunningScript::Init()
 }
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
+int scriptToLoad = 0;
+
 #ifdef _WIN32
 #include <Windows.h>
 #endif
 int open_script()
 {
-	static int scriptToLoad = 0;
-
-	// Doesn't work because of CGame::Initialise is blocking
-	/*
-	if (glfwGetKey(PSGLOBAL(window), GLFW_KEY_G) == GLFW_PRESS)
-		scriptToLoad = 0;
-	if (glfwGetKey(PSGLOBAL(window), GLFW_KEY_R) == GLFW_PRESS)
-		scriptToLoad = 1;
-	if (glfwGetKey(PSGLOBAL(window), GLFW_KEY_D) == GLFW_PRESS)
-		scriptToLoad = 2;
-	*/
+	// glfwGetKey doesn't work because of CGame::Initialise is blocking
 #ifdef _WIN32
 	if (GetAsyncKeyState('G') & 0x8000)
 		scriptToLoad = 0;

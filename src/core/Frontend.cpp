@@ -3568,6 +3568,9 @@ CMenuManager::Process(void)
 			}
 #endif
 			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
+#ifdef USE_DEBUG_SCRIPT_LOADER
+				scriptToLoad = 0;
+#endif
 				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
 				if (m_PrefsVsyncDisp != m_PrefsVsync)
 					m_PrefsVsync = m_PrefsVsyncDisp;
@@ -3686,6 +3689,24 @@ CMenuManager::ProcessButtonPresses(void)
 	bool goDown = false;
 #ifdef TIDY_UP_PBP
 	bool assumeIncrease = false;
+#endif
+
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	if (m_nCurrScreen == MENUPAGE_START_MENU || m_nCurrScreen == MENUPAGE_NEW_GAME || m_nCurrScreen == MENUPAGE_NEW_GAME_RELOAD) {
+#ifdef RW_GL3
+		if (glfwGetKey(PSGLOBAL(window), GLFW_KEY_R) == GLFW_PRESS) {
+			scriptToLoad = 1;
+			DoSettingsBeforeStartingAGame();
+			return;
+		}
+#elif defined _WIN32
+		if (GetAsyncKeyState('R') & 0x8000) {
+			scriptToLoad = 1;
+			DoSettingsBeforeStartingAGame();
+			return;
+		}
+#endif
+	}
 #endif
 
 	if (!m_bShowMouse && (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY)) {
