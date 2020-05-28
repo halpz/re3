@@ -95,7 +95,6 @@ void TheGame(void);
 void DebugMenuPopulate(void);
 #endif
 
-
 void
 ValidateVersion()
 {

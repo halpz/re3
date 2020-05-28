@@ -27,6 +27,7 @@
 #include "Radar.h"
 #include "debugmenu.h"
 #include "Frontend.h"
+#include "Text.h"
 
 #ifndef _WIN32
 #include "assert.h"
@@ -65,6 +66,100 @@ mysrand(unsigned int seed)
 {
 	myrand_seed = seed;
 }
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+#include "frontendoption.h"
+#include "platform.h"
+
+void ReloadFrontendOptions(void)
+{
+	RemoveCustomFrontendOptions();
+	CustomFrontendOptionsPopulate();
+}
+
+#ifdef MORE_LANGUAGES
+void LangPolSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_POLISH;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangRusSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_RUSSIAN;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangJapSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_JAPANESE;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+#endif
+
+#ifdef IMPROVED_VIDEOMODE
+void ScreenModeChange(int8 displayedValue)
+{
+	if (displayedValue != FrontEndMenuManager.m_nPrefsWindowed) {
+		FrontEndMenuManager.m_nPrefsWindowed = displayedValue;
+		_psSelectScreenVM(FrontEndMenuManager.m_nPrefsVideoMode); // apply same resolution
+		FrontEndMenuManager.SetHelperText(0);
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+#endif
+
+#ifdef FREE_CAM
+void ToggleFreeCam(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		TheCamera.bFreeCam = !TheCamera.bFreeCam;
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+#endif
+
+// Reloaded on language change, so you can use hardcoded wchar* and TheText.Get with peace of mind
+void
+CustomFrontendOptionsPopulate(void)
+{
+#ifdef MORE_LANGUAGES
+	FrontendOptionSetPosition(MENUPAGE_LANGUAGE_SETTINGS);
+	FrontendOptionAddDynamic(TheText.Get("FEL_POL"), nil, LangPolSelect, nil);
+	FrontendOptionAddDynamic(TheText.Get("FEL_RUS"), nil, LangRusSelect, nil);
+	FrontendOptionAddDynamic(TheText.Get("FEL_JAP"), nil, LangJapSelect, nil);
+#endif
+
+#ifdef IMPROVED_VIDEOMODE
+	static const wchar *screenModes[] = { (wchar*)L"FULLSCREEN", (wchar*)L"WINDOWED" };
+	FrontendOptionSetPosition(MENUPAGE_GRAPHICS_SETTINGS, 8);
+	FrontendOptionAddSelect(TheText.Get("SCRFOR"), screenModes, 2, (int8*)&FrontEndMenuManager.m_nPrefsWindowed, true, ScreenModeChange, nil);
+#endif
+
+#ifdef MENU_MAP
+	FrontendOptionSetPosition(MENUPAGE_PAUSE_MENU, 2);
+	FrontendOptionAddRedirect(TheText.Get("FEG_MAP"), MENUPAGE_MAP);
+#endif
+
+#ifdef FREE_CAM
+	static const wchar *text = (wchar*)L"TOGGLE FREE CAM";
+	FrontendOptionSetPosition(MENUPAGE_CONTROLLER_PC, 1);
+	FrontendOptionAddDynamic(text, nil, ToggleFreeCam, nil);
+#endif
+}
+#endif
 
 #ifdef DEBUGMENU
 void WeaponCheat();
@@ -382,6 +477,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Catalina Fly Away", CHeli::MakeCatalinaHeliFlyAway);
 		DebugMenuAddVarBool8("Debug", "Script Heli On", &CHeli::ScriptHeliOn, nil);
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		DebugMenuAddCmd("Debug", "Reload custom frontend options", ReloadFrontendOptions);
+#endif
 #ifdef TOGGLEABLE_BETA_FEATURES
 		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", &CPed::bPopHeadsOnHeadshot, nil);
 		DebugMenuAddVarBool8("Debug", "Toggle peds running to phones to report crimes", &CPed::bMakePedsRunToPhonesToReportCrimes, nil);

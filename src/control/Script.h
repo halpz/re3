@@ -521,3 +521,7 @@ extern bool doingMissionRetry;
 uint32 AddExtraDeathDelay();
 void RetryMission(int, int);
 #endif
+
+#ifdef USE_DEBUG_SCRIPT_LOADER
+extern int scriptToLoad;
+#endif

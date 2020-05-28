@@ -370,13 +370,8 @@ enum eMenuAction
 	MENUACTION_UNK112,
 	MENUACTION_REJECT_RETRY,
 	MENUACTION_UNK114,
-#ifdef MORE_LANGUAGES
-	MENUACTION_LANG_PL,
-	MENUACTION_LANG_RUS,
-	MENUACTION_LANG_JAP,
-#endif
-#ifdef IMPROVED_VIDEOMODE
-	MENUACTION_SCREENMODE
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	MENUACTION_TRIGGERFUNC
 #endif
 };
 
@@ -472,7 +467,7 @@ struct CMenuScreen
 		int32 m_Action; // eMenuAction
 		char m_EntryName[8];
 		int32 m_SaveSlot; // eSaveSlot
-		int32 m_TargetMenu; // eMenuScreen
+		int32 m_TargetMenu; // eMenuScreen // FrontendOption ID if it's a custom option
 	} m_aEntries[NUM_MENUROWS];
 };
 
@@ -651,12 +646,14 @@ public:
 	int GetNumOptionsCntrlConfigScreens();
 	int ConstructStatLine(int);
 
-	// New (not in function or inlined in the game)
-	void ThingsToDoBeforeLeavingPage();
+	// Those are either inlined in game, not in function yet, or I can't believe that they're not inlined.
+	// Names were made up by me.
+	void ThingsToDoBeforeGoingBack();
 	void ScrollUpListByOne();
 	void ScrollDownListByOne();
 	void PageUpList(bool);
 	void PageDownList(bool);
+	int8 GetPreviousPageOption();
 	
 	// uint8 GetNumberOfMenuOptions();
 };
@@ -666,3 +663,4 @@ VALIDATE_SIZE(CMenuManager, 0x564);
 #endif
 
 extern CMenuManager FrontEndMenuManager;
+extern CMenuScreen aScreens[];

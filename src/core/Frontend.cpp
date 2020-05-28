@@ -23,7 +23,6 @@
 #include "GenericGameStorage.h"
 #include "Script.h"
 #include "Camera.h"
-#include "MenuScreens.h"
 #include "ControllerConfig.h"
 #include "Vehicle.h"
 #include "MBlur.h"
@@ -36,6 +35,7 @@
 #include "Stats.h"
 #include "Messages.h"
 #include "FileLoader.h"
+#include "frontendoption.h"
 
 #define TIDY_UP_PBP // ProcessButtonPresses
 #define MAX_VISIBLE_LIST_ROW 30
@@ -315,7 +315,7 @@ ScaleAndCenterX(float x)
 
 // --- Functions not in the game/inlined starts
 
-inline void
+void
 CMenuManager::ScrollUpListByOne() 
 {
 	if (m_nSelectedListRow == m_nFirstVisibleRowOnList) {
@@ -329,7 +329,7 @@ CMenuManager::ScrollUpListByOne()
 	}
 }
 
-inline void
+void
 CMenuManager::ScrollDownListByOne()
 {
 	if (m_nSelectedListRow == m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW - 1) {
@@ -345,7 +345,7 @@ CMenuManager::ScrollDownListByOne()
 	}
 }
 
-inline void
+void
 CMenuManager::PageUpList(bool playSoundOnSuccess)
 {
 	if (m_nTotalListRow > MAX_VISIBLE_LIST_ROW) {
@@ -363,7 +363,7 @@ CMenuManager::PageUpList(bool playSoundOnSuccess)
 	}
 }
 
-inline void
+void
 CMenuManager::PageDownList(bool playSoundOnSuccess)
 {
 	if (m_nTotalListRow > MAX_VISIBLE_LIST_ROW) {
@@ -381,8 +381,8 @@ CMenuManager::PageDownList(bool playSoundOnSuccess)
 	}
 }
 
-inline void
-CMenuManager::ThingsToDoBeforeLeavingPage()
+void
+CMenuManager::ThingsToDoBeforeGoingBack()
 {
 	if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) && strcmp(m_aSkinName, m_PrefsSkinFile) != 0) {
 		CWorld::Players[0].SetPlayerSkin(m_PrefsSkinFile);
@@ -395,9 +395,6 @@ CMenuManager::ThingsToDoBeforeLeavingPage()
 #endif
 	} else if (m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
 		m_nDisplayVideoMode = m_nPrefsVideoMode;
-#ifdef IMPROVED_VIDEOMODE
-		m_nSelectedScreenMode = m_nPrefsWindowed;
-#endif
 	}
 
 	if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
@@ -407,6 +404,43 @@ CMenuManager::ThingsToDoBeforeLeavingPage()
 	if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) || (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS)) {
 		m_nTotalListRow = 0;
 	}
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	for (int i = 0; i < numCustomFrontendOptions; i++) {
+		FrontendOption &option = customFrontendOptions[i];
+		if (option.type != FEOPTION_REDIRECT && option.type != FEOPTION_GOBACK && m_nCurrScreen == option.screen) {
+			if (option.returnPrevPageFunc)
+				option.returnPrevPageFunc();
+
+			if (option.onlyApplyOnEnter)
+				option.displayedValue = *option.value;
+		}
+	}
+#endif
+}
+
+int8
+CMenuManager::GetPreviousPageOption()
+{
+#ifndef CUSTOM_FRONTEND_OPTIONS
+	return !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry[1] : aScreens[m_nCurrScreen].m_ParentEntry[0];
+#else
+	int8 prevPage = !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_PreviousPage[1] : aScreens[m_nCurrScreen].m_PreviousPage[0];
+
+	if (prevPage == -1) // Game also does same
+		return 0;
+
+	prevPage = prevPage == MENUPAGE_NONE ? (!m_bGameNotLoaded ? MENUPAGE_PAUSE_MENU : MENUPAGE_START_MENU) : prevPage;
+
+	for (int i = 0; i < NUM_MENUROWS; i++) {
+		if (aScreens[prevPage].m_aEntries[i].m_TargetMenu == m_nCurrScreen) {
+			return i;
+		}
+	}
+
+	// Couldn't find current screen option on previous page, use default behaviour (maybe save-related screen?)
+	return !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry[1] : aScreens[m_nCurrScreen].m_ParentEntry[0];
+#endif
 }
 
 // ------ Functions not in the game/inlined ends
@@ -923,6 +957,9 @@ CMenuManager::Draw()
 #endif
 
 	for (int i = 0; i < NUM_MENUROWS; ++i) {
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		bool isOptionDisabled = false;
+#endif
 		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0] != '\0') {
 			wchar *rightText = nil;
 			wchar *leftText;
@@ -1105,17 +1142,6 @@ CMenuManager::Draw()
 				AsciiToUnicode(_psGetVideoModeList()[m_nDisplayVideoMode], unicodeTemp);
 				rightText = unicodeTemp;
 				break;
-#ifdef IMPROVED_VIDEOMODE
-			case MENUACTION_SCREENMODE:
-				if (m_nSelectedScreenMode == 0)
-					sprintf(asciiTemp, "FULLSCREEN");
-				else
-					sprintf(asciiTemp, "WINDOWED");
-
-				AsciiToUnicode(asciiTemp, unicodeTemp);
-				rightText = unicodeTemp;
-				break;
-#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex == -1)
 					rightText = TheText.Get("FEA_NAH");
@@ -1166,6 +1192,28 @@ CMenuManager::Draw()
 			case MENUACTION_MOUSESTEER:
 				rightText = TheText.Get(CVehicle::m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
 				break;
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			case MENUACTION_TRIGGERFUNC:
+				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
+				if (m_nCurrScreen == option.screen && i == option.screenOptionOrder) {
+					leftText = (wchar*)option.leftText;
+					if (option.type == FEOPTION_SELECT) {
+						if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
+							option.displayedValue = 0;
+
+						rightText = (wchar*)option.rightTexts[option.displayedValue];
+
+					} else if (option.type == FEOPTION_DYNAMIC) {
+						if (option.drawFunc) {
+							option.drawFunc(unicodeTemp, &isOptionDisabled);
+							rightText = unicodeTemp;
+						}
+					}
+				} else
+					assert(0 && "Custom frontend options is borked");
+
+				break;
+#endif
 			}
 
 			float nextItemY = headerHeight + nextYToUse;
@@ -1244,7 +1292,11 @@ CMenuManager::Draw()
 						CFont::SetRightJustifyOn();
 					
 					if(!strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_RES") 
-						&& !m_bGameNotLoaded && textLayer == 1) {
+						&& !m_bGameNotLoaded && textLayer == 1
+#ifdef CUSTOM_FRONTEND_OPTIONS
+						|| isOptionDisabled
+#endif
+						) {
 						CFont::SetColor(CRGBA(155, 117, 6, FadeIn(255)));
 					}
 					CFont::PrintString(MENU_X_RIGHT_ALIGNED(columnWidth - textLayer), itemY, rightText);
@@ -1287,12 +1339,12 @@ CMenuManager::Draw()
 					SetHelperText(3);
 				}
 			}
-#ifdef IMPROVED_VIDEOMODE
-			if (m_nSelectedScreenMode != m_nPrefsWindowed) {
-				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "SCRFOR") != 0
-					&& m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
-					m_nSelectedScreenMode = m_nPrefsWindowed;
-				}
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_TRIGGERFUNC) {
+				FrontendOption &option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
+				if (option.onlyApplyOnEnter && m_nCurrOption != i)
+					option.displayedValue = *option.value;
 			}
 #endif
 
@@ -2993,6 +3045,11 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		default:
 			break;
 		}
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		RemoveCustomFrontendOptions();
+		CustomFrontendOptionsPopulate();
+#endif
 	}
 }
 
@@ -3138,6 +3195,9 @@ CMenuManager::LoadSettings()
 			CFileMgr::Read(fileHandle, m_PrefsSkinFile, 256);
 			CFileMgr::Read(fileHandle, (char*)&m_ControlMethod, 1);
 			CFileMgr::Read(fileHandle, (char*)&m_PrefsLanguage, 1);
+#ifdef FREE_CAM
+			CFileMgr::Read(fileHandle, (char*)&TheCamera.bFreeCam, 1);
+#endif
 		}
 	}
 
@@ -3228,6 +3288,9 @@ CMenuManager::SaveSettings()
 		CFileMgr::Write(fileHandle, m_PrefsSkinFile, 256);
 		CFileMgr::Write(fileHandle, (char*)&m_ControlMethod, 1);
 		CFileMgr::Write(fileHandle, (char*)&m_PrefsLanguage, 1);
+#ifdef FREE_CAM
+		CFileMgr::Write(fileHandle, (char*)&TheCamera.bFreeCam, 1);
+#endif
 	}
 
 	CFileMgr::CloseFile(fileHandle);
@@ -3505,6 +3568,9 @@ CMenuManager::Process(void)
 			}
 #endif
 			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
+#ifdef USE_DEBUG_SCRIPT_LOADER
+				scriptToLoad = 0;
+#endif
 				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
 				if (m_PrefsVsyncDisp != m_PrefsVsync)
 					m_PrefsVsync = m_PrefsVsyncDisp;
@@ -3623,6 +3689,24 @@ CMenuManager::ProcessButtonPresses(void)
 	bool goDown = false;
 #ifdef TIDY_UP_PBP
 	bool assumeIncrease = false;
+#endif
+
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	if (m_nCurrScreen == MENUPAGE_START_MENU || m_nCurrScreen == MENUPAGE_NEW_GAME || m_nCurrScreen == MENUPAGE_NEW_GAME_RELOAD) {
+#ifdef RW_GL3
+		if (glfwGetKey(PSGLOBAL(window), GLFW_KEY_R) == GLFW_PRESS) {
+			scriptToLoad = 1;
+			DoSettingsBeforeStartingAGame();
+			return;
+		}
+#elif defined _WIN32
+		if (GetAsyncKeyState('R') & 0x8000) {
+			scriptToLoad = 1;
+			DoSettingsBeforeStartingAGame();
+			return;
+		}
+#endif
+	}
 #endif
 
 	if (!m_bShowMouse && (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY)) {
@@ -4329,10 +4413,12 @@ CMenuManager::ProcessButtonPresses(void)
 				CWorld::Players[0].SetPlayerSkin(m_PrefsSkinFile);
 				SaveSettings();
 			} else {
-				if (!m_bGameNotLoaded)
-					ChangeScreen(aScreens[m_nCurrScreen].m_PreviousPage[1], aScreens[m_nCurrScreen].m_ParentEntry[1], true, true);
-				else
-					ChangeScreen(aScreens[m_nCurrScreen].m_PreviousPage[0], aScreens[m_nCurrScreen].m_ParentEntry[0], true, true);
+#ifndef TIDY_UP_PBP
+				ChangeScreen(!m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_PreviousPage[1] : aScreens[m_nCurrScreen].m_PreviousPage[0],
+					GetPreviousPageOption(), true, true);
+#else
+				goBack = true;
+#endif
 			}
 		} else if (m_nCurrScreen != MENUPAGE_MULTIPLAYER_FIND_GAME) {
 			option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
@@ -4384,26 +4470,6 @@ CMenuManager::ProcessButtonPresses(void)
 					InitialiseChangedLanguageSettings();
 					SaveSettings();
 					break;
-#ifdef MORE_LANGUAGES
-				case MENUACTION_LANG_PL:
-					m_PrefsLanguage = LANGUAGE_POLISH;
-					m_bFrontEnd_ReloadObrTxtGxt = true;
-					InitialiseChangedLanguageSettings();
-					SaveSettings();
-					break;
-				case MENUACTION_LANG_RUS:
-					m_PrefsLanguage = LANGUAGE_RUSSIAN;
-					m_bFrontEnd_ReloadObrTxtGxt = true;
-					CMenuManager::InitialiseChangedLanguageSettings();
-					SaveSettings();
-					break;
-				case MENUACTION_LANG_JAP:
-					m_PrefsLanguage = LANGUAGE_JAPANESE;
-					m_bFrontEnd_ReloadObrTxtGxt = true;
-					InitialiseChangedLanguageSettings();
-					SaveSettings();
-					break;
-#endif
 				case MENUACTION_POPULATESLOTS_CHANGEMENU:
 					PcSaveHelper.PopulateSlotInfo();
 
@@ -4433,10 +4499,8 @@ CMenuManager::ProcessButtonPresses(void)
 						if (strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB", 8) == 0) {
 #ifndef TIDY_UP_PBP
 							ResetHelperText();
-							if (!m_bGameNotLoaded)
-								ChangeScreen(aScreens[m_nCurrScreen].m_PreviousPage[1], aScreens[m_nCurrScreen].m_ParentEntry[1], true, true);
-							else
-								ChangeScreen(aScreens[m_nCurrScreen].m_PreviousPage[0], aScreens[m_nCurrScreen].m_ParentEntry[0], true, true);
+							ChangeScreen(!m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_PreviousPage[1] : aScreens[m_nCurrScreen].m_PreviousPage[0],
+								GetPreviousPageOption(), true, true);
 #else
 							goBack = true;
 							break;
@@ -4543,16 +4607,6 @@ CMenuManager::ProcessButtonPresses(void)
 						SaveSettings();
 					}
 					break;
-#ifdef IMPROVED_VIDEOMODE
-				case MENUACTION_SCREENMODE:
-					if (m_nSelectedScreenMode != m_nPrefsWindowed) {
-						m_nPrefsWindowed = m_nSelectedScreenMode;
-						_psSelectScreenVM(m_nPrefsVideoMode); // apply same resolution
-						SetHelperText(0);
-						SaveSettings();
-					}
-					break;
-#endif
 				case MENUACTION_AUDIOHW:
 				{
 					int selectedProvider = m_nPrefsAudio3DProviderIndex;
@@ -4680,6 +4734,31 @@ CMenuManager::ProcessButtonPresses(void)
 					RetryMission(2, 0);
 					return;
 #endif
+#ifdef CUSTOM_FRONTEND_OPTIONS
+				case MENUACTION_TRIGGERFUNC:
+					FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
+					if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
+						if (option.type == FEOPTION_SELECT) {
+							if (!option.onlyApplyOnEnter) {
+								option.displayedValue++;
+								if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
+									option.displayedValue = 0;
+							}
+							option.changeFunc(option.displayedValue);
+							*option.value = option.displayedValue;
+
+						} else if (option.type == FEOPTION_DYNAMIC) {
+							option.buttonPressFunc(FEOPTION_ACTION_SELECT);
+						} else if (option.type == FEOPTION_REDIRECT) {
+							ChangeScreen(option.to, option.option, true, option.fadeIn);
+						} else if (option.type == FEOPTION_GOBACK) {
+							goBack = true;
+						}
+					} else
+						assert(0 && "Custom frontend options are borked");
+
+					break;
+#endif
 			}
 		}
 		ProcessOnOffMenuOptions();
@@ -4712,7 +4791,7 @@ CMenuManager::ProcessButtonPresses(void)
 #endif
 			RequestFrontEndShutDown();
 		}
-		// It's now in ThingsToDoBeforeLeavingPage()
+		// It's now in ThingsToDoBeforeGoingBack()
 #ifndef TIDY_UP_PBP
 		else if (m_nCurrScreen == MENUPAGE_SOUND_SETTINGS) {
 			DMAudio.StopFrontEndTrack();
@@ -4721,10 +4800,10 @@ CMenuManager::ProcessButtonPresses(void)
 #endif
 
 		int oldScreen = !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_PreviousPage[1] : aScreens[m_nCurrScreen].m_PreviousPage[0];
-		int oldOption = !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry[1] : aScreens[m_nCurrScreen].m_ParentEntry[0];
+		int oldOption = GetPreviousPageOption();
 
 		if (oldScreen != -1) {
-			ThingsToDoBeforeLeavingPage();
+			ThingsToDoBeforeGoingBack();
 
 #ifdef PS2_LIKE_MENU
 			if (!bottomBarActive &&
@@ -4822,11 +4901,11 @@ CMenuManager::ProcessButtonPresses(void)
 				if (changeValueBy > 0) {
 					m_PrefsUseWideScreen++;
 					if (m_PrefsUseWideScreen > 2)
-						m_PrefsUseWideScreen = 2;
+						m_PrefsUseWideScreen = 0;
 				} else {
 					m_PrefsUseWideScreen--;
 					if (m_PrefsUseWideScreen < 0)
-						m_PrefsUseWideScreen = 0;
+						m_PrefsUseWideScreen = 2;
 				}
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 				SaveSettings();
@@ -4853,12 +4932,6 @@ CMenuManager::ProcessButtonPresses(void)
 					}
 				}
 				break;
-#ifdef IMPROVED_VIDEOMODE
-			case MENUACTION_SCREENMODE:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
-				m_nSelectedScreenMode = !m_nSelectedScreenMode;
-				break;
-#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex != -1) {
 					m_nPrefsAudio3DProviderIndex += changeValueBy;
@@ -4881,6 +4954,34 @@ CMenuManager::ProcessButtonPresses(void)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 				SaveSettings();
 				break;
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			case MENUACTION_TRIGGERFUNC:
+				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
+				if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
+					if (option.type == FEOPTION_SELECT) {
+						if (changeValueBy > 0) {
+							option.displayedValue++;
+							if (option.displayedValue >= option.numRightTexts)
+								option.displayedValue = 0;
+						} else {
+							option.displayedValue--;
+							if (option.displayedValue < 0)
+								option.displayedValue = option.numRightTexts - 1;
+						}
+						if (!option.onlyApplyOnEnter) {
+							option.changeFunc(option.displayedValue);
+							*option.value = option.displayedValue;
+						}
+					} else if (option.type == FEOPTION_DYNAMIC) {
+						option.buttonPressFunc(changeValueBy > 0 ? FEOPTION_ACTION_RIGHT : FEOPTION_ACTION_LEFT);
+					}
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+				}
+				else
+					assert(0 && "Custom frontend options are borked");
+
+				break;
+#endif
 		}
 		ProcessOnOffMenuOptions();
 		if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
@@ -5102,7 +5203,7 @@ CMenuManager::SwitchMenuOnAndOff()
 			bottomBarActive = false;
 #endif
 #ifdef FIX_BUGS
-			ThingsToDoBeforeLeavingPage();
+			ThingsToDoBeforeGoingBack();
 #endif
 			ShutdownJustMenu();
 			SaveSettings();
@@ -5849,3 +5950,4 @@ uint8 CMenuManager::GetNumberOfMenuOptions()
 
 #undef GetBackJustUp
 #undef GetBackJustDown
+#undef ChangeScreen

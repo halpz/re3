@@ -192,6 +192,10 @@ enum Config {
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
 #define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
 #define MORE_LANGUAGES		// Add more translations to the game
+#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
+
+// Rendering/display
+#define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch)
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
@@ -212,7 +216,6 @@ enum Config {
 #define REGISTER_START_BUTTON
 
 // Hud, frontend and radar
-#define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
 #define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
 // #define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
@@ -222,6 +225,7 @@ enum Config {
 // #define CIRCLE_BACK_BUTTON
 #define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better.
 #define BETA_SLIDING_TEXT
+#define CUSTOM_FRONTEND_OPTIONS
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER	// makes game load main_freeroam.scm by default
@@ -229,8 +233,6 @@ enum Config {
 #define USE_PRECISE_MEASUREMENT_CONVERTION // makes game convert feet to meeters more precisely
 #define MISSION_REPLAY // mobile feature
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
-
-#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 
 // Replay
 //#define DONT_FIX_REPLAY_BUGS // keeps various bugs in CReplay, some of which are fairly cool!
