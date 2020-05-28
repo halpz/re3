@@ -18000,8 +18000,9 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 
 		PedSetInCarCB(nil, this);
 		bVehExitWillBeInstant = true;
-		if (IsPlayer())
-			CWaterLevel::AllocateBoatWakeArray();
+		// TODO(Miami):
+		//if (IsPlayer())
+		//	CWaterLevel::AllocateBoatWakeArray();
 	} else {
 		if (zDiff > 4.4f) {
 			if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)
@@ -18437,8 +18438,10 @@ CPed::SetExitBoat(CVehicle *boat)
 	SetMoveState(PEDMOVE_STILL);
 	m_vecMoveSpeed = boat->m_vecMoveSpeed;
 #endif
+	
+	// TODO(Miami):
 	// Not there in VC.
-	CWaterLevel::FreeBoatWakeArray();
+	//CWaterLevel::FreeBoatWakeArray();
 }
 
 void

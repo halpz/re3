@@ -306,7 +306,7 @@ bool CGame::Initialise(const char* datFile)
 	CWorld::Players[0].LoadPlayerSkin();
 	TestModelIndices();
 	LoadingScreen("Loading the Game", "Setup water", nil);
-	CWaterLevel::Initialise("DATA\\WATER.DAT");
+	WaterLevelInitialise("DATA\\WATER.DAT");
 	TheConsole.Init();
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
@@ -683,6 +683,13 @@ CGame::InitAfterFocusLoss()
 
 	if (!FrontEndMenuManager.m_bGameNotLoaded && !FrontEndMenuManager.m_bMenuActive)
 		FrontEndMenuManager.m_bStartUpFrontEndRequested = true;
+}
+
+bool
+CGame::CanSeeWaterFromCurrArea(void)
+{
+	return currArea == AREA_MAIN_MAP || currArea == AREA_MANSION
+		|| currArea == AREA_HOTEL;
 }
 
 bool

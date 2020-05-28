@@ -35,6 +35,7 @@
 #include "Streaming.h"
 #include "PathFind.h"
 #include "Wanted.h"
+#include "WaterLevel.h"
 #include "General.h"
 
 CPad Pads[MAX_PADS];
@@ -306,6 +307,21 @@ void PinkCarsCheat()
 	gbBlackCars = false;
 	gbPinkCars = true;
 }
+
+void NoSeaBedCheat(void)
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CWaterLevel::m_bRenderSeaBed = !CWaterLevel::m_bRenderSeaBed;
+}
+
+void RenderWaterLayersCheat(void)
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	if ( ++CWaterLevel::m_nRenderWaterLayers > 5 )
+			CWaterLevel::m_nRenderWaterLayers = 0;
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 
 #ifdef KANGAROO_CHEAT
@@ -1050,6 +1066,16 @@ void CPad::AddToPCCheatString(char c)
 	// "IWANTTOMASTERDODO"
 	if (!_CHEATCMP("ODODRETSAMOTTNAWI"))
 		AltDodoCheat();
+#endif
+
+#if !defined(PC_WATER) && defined(WATER_CHEATS)
+	// SEABEDCHEAT
+	if (!_CHEATCMP("TAEHCDEBAESON"))
+		NoSeaBedCheat();
+	
+	// WATERLAYERSCHEAT
+	if (!_CHEATCMP("TAEHCSREYALRETAW"))
+		RenderWaterLayersCheat();
 #endif
 	
 	#undef _CHEATCMP
