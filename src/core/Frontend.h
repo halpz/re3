@@ -646,13 +646,14 @@ public:
 	int GetNumOptionsCntrlConfigScreens();
 	int ConstructStatLine(int);
 
-	// New (inlined ones and the ones we can't believe it's not inlined)
-	inline void ThingsToDoBeforeGoingBack();
-	inline void ScrollUpListByOne();
-	inline void ScrollDownListByOne();
-	inline void PageUpList(bool);
-	inline void PageDownList(bool);
-	inline int8 GetPreviousPageOption();
+	// Those are either inlined in game, not in function yet, or I can't believe that they're not inlined.
+	// Names were made up by me.
+	void ThingsToDoBeforeGoingBack();
+	void ScrollUpListByOne();
+	void ScrollDownListByOne();
+	void PageUpList(bool);
+	void PageDownList(bool);
+	int8 GetPreviousPageOption();
 	
 	// uint8 GetNumberOfMenuOptions();
 };

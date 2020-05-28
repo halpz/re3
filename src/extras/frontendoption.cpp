@@ -50,8 +50,13 @@ RemoveCustomFrontendOptions()
 	for (int i = 0; i < MENUPAGES; i++) {
 		for (int j = 0; j < NUM_MENUROWS; j++) {
 			if (aScreens[i].m_aEntries[j].m_Action == MENUACTION_TRIGGERFUNC) {
-				aScreens[i].m_aEntries[j].m_Action = MENUACTION_NOTHING;
-				aScreens[i].m_aEntries[j].m_EntryName[0] = '\0';
+				int k;
+				for (k = j; k < NUM_MENUROWS-1; k++) {
+					memcpy(&aScreens[i].m_aEntries[k], &aScreens[i].m_aEntries[k+1], sizeof(CMenuScreen::CMenuEntry));
+				}
+				aScreens[i].m_aEntries[k].m_Action = MENUACTION_NOTHING;
+				aScreens[i].m_aEntries[k].m_EntryName[0] = '\0';
+				j--;
 			}
 		}
 	}
