@@ -27,6 +27,9 @@
 #include "Gangs.h"
 #include "Garages.h"
 #include "General.h"
+#ifdef MISSION_REPLAY
+#include "GenericGameStorage.h"
+#endif
 #include "HandlingMgr.h"
 #include "Heli.h"
 #include "Hud.h"
@@ -126,6 +129,38 @@ CStuckCarCheck CTheScripts::StuckCars;
 uint16 CTheScripts::CommandsExecuted;
 uint16 CTheScripts::ScriptsUpdated;
 int32 ScriptParams[32];
+
+#ifdef MISSION_REPLAY
+
+static const char* nonMissionScripts[] = {
+	"copcar",
+	"ambulan",
+	"taxi",
+	"firetru",
+	"rampage",
+	"t4x4_1",
+	"t4x4_2",
+	"t4x4_3",
+	"rc1",
+	"rc2",
+	"rc3",
+	"rc4",
+	"hj",
+	"usj",
+	"mayhem"
+};
+
+int AllowMissionReplay;
+uint32 NextMissionDelay;
+uint32 MissionStartTime;
+uint32 WaitForMissionActivate;
+uint32 WaitForSave;
+float oldTargetX;
+float oldTargetY;
+int missionRetryScriptIndex;
+bool doingMissionRetry;
+
+#endif
 
 
 const uint32 CRunningScript::nSaveStructSize =
@@ -677,6 +712,41 @@ void CTheScripts::Process()
 		if (UseTextCommands == 1)
 			UseTextCommands = 0;
 	}
+
+#ifdef MISSION_REPLAY
+	static uint32 TimeToWaitTill;
+	switch (AllowMissionReplay) {
+	case 2:
+		AllowMissionReplay = 3;
+		TimeToWaitTill = CTimer::GetTimeInMilliseconds() + (AddExtraDeathDelay() > 1000 ? 4000 : 2500);
+		break;
+	case 3:
+		if (TimeToWaitTill < CTimer::GetTimeInMilliseconds())
+			AllowMissionReplay = 4;
+		break;
+	case 4:
+		AllowMissionReplay = 5;
+		RetryMission(0, 0);
+	case 6:
+		AllowMissionReplay = 7;
+		TimeToWaitTill = CTimer::GetTimeInMilliseconds() + 500;
+	case 7:
+		if (TimeToWaitTill < CTimer::GetTimeInMilliseconds()) {
+			AllowMissionReplay = 0;
+			return;
+		}
+		break;
+	}
+	if (WaitForMissionActivate) {
+		if (WaitForMissionActivate > CTimer::GetTimeInMilliseconds())
+			return;
+		WaitForMissionActivate = 0;
+		WaitForSave = CTimer::GetTimeInMilliseconds() + 3000;
+	}
+	if (WaitForSave && WaitForSave > CTimer::GetTimeInMilliseconds())
+		WaitForSave = 0;
+#endif
+
 	CRunningScript* script = pActiveScripts;
 	while (script != nil){
 		CRunningScript* next = script->GetNext();
@@ -1250,6 +1320,17 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 			CTheScripts::bAlreadyRunningAMissionScript = false;
 		RemoveScriptFromList(&CTheScripts::pActiveScripts);
 		AddScriptToList(&CTheScripts::pIdleScripts);
+#ifdef MISSION_REPLAY
+		if (m_bMissionFlag) {
+			CPlayerInfo* pPlayerInfo = &CWorld::Players[CWorld::PlayerInFocus];
+			if (pPlayerInfo->m_pPed->GetPedState() != PED_DEAD && pPlayerInfo->m_WBState == WBSTATE_PLAYING && !m_bDeatharrestExecuted)
+				SaveGameForPause(1);
+			oldTargetX = oldTargetY = 0.0f;
+			if (AllowMissionReplay == 1)
+				AllowMissionReplay = 2;
+			// I am fairly sure they forgot to set return value here
+		}
+#endif
 		return 1;
 	case COMMAND_START_NEW_SCRIPT:
 	{
@@ -2160,7 +2241,14 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(car);
+#if defined MISSION_REPLAY && defined SIMPLIER_MISSIONS
+		car->AutoPilot.m_nCruiseSpeed = *(float*)&ScriptParams[1];
+		if (missionRetryScriptIndex == 40 && car->GetModelIndex() == MI_CHEETAH) // Turismo
+			car->AutoPilot.m_nCruiseSpeed = 8 * car->AutoPilot.m_nCruiseSpeed / 10;
+		car->AutoPilot.m_nCruiseSpeed = Min(car->AutoPilot.m_nCruiseSpeed, 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
+#else
 		car->AutoPilot.m_nCruiseSpeed = Min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
+#endif
 		return 0;
 	}
 	case COMMAND_SET_CAR_DRIVING_STYLE:
@@ -2230,6 +2318,10 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 	case COMMAND_PRINT_BIG:
 	{
 		wchar* key = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
+#ifdef MISSION_REPLAY
+		if (strcmp((char*)&CTheScripts::ScriptSpace[m_nIp], "M_FAIL") == 0 && CanAllowMissionReplay())
+			AllowMissionReplay = 1;
+#endif
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CollectParameters(&m_nIp, 2);
 		CMessages::AddBigMessage(key, ScriptParams[0], ScriptParams[1] - 1);
@@ -8490,6 +8582,10 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	case COMMAND_MAKE_PLAYER_SAFE_FOR_CUTSCENE:
 	{
 		CollectParameters(&m_nIp, 1);
+#ifdef MISSION_REPLAY
+		AllowMissionReplay = 0;
+		SaveGameForPause(3);
+#endif
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
 		CPad::GetPad(ScriptParams[0])->DisablePlayerControls |= PLAYERCONTROL_DISABLED_80;
 		pPlayerInfo->MakePlayerSafe(true);
@@ -8696,6 +8792,11 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	case COMMAND_LOAD_AND_LAUNCH_MISSION_INTERNAL:
 	{
 		CollectParameters(&m_nIp, 1);
+#ifdef MISSION_REPLAY
+		missionRetryScriptIndex = ScriptParams[0];
+		if (missionRetryScriptIndex == 19)
+			CStats::LastMissionPassedName[0] = '\0';
+#endif
 		CTimer::Suspend();
 		int offset = CTheScripts::MultiScriptArray[ScriptParams[0]];
 		CFileMgr::ChangeDir("\\");
@@ -11085,6 +11186,12 @@ void CRunningScript::DoDeatharrestCheck()
 	CPlayerInfo* pPlayer = &CWorld::Players[CWorld::PlayerInFocus];
 	if (!pPlayer->IsRestartingAfterDeath() && !pPlayer->IsRestartingAfterArrest() && !CTheScripts::UpsideDownCars.AreAnyCarsUpsideDown())
 		return;
+#ifdef MISSION_REPLAY
+	if (AllowMissionReplay != 0)
+		return;
+	if (CanAllowMissionReplay())
+		AllowMissionReplay = 1;
+#endif
 	assert(m_nStackPointer > 0);
 	while (m_nStackPointer > 1)
 		--m_nStackPointer;
@@ -11766,3 +11873,43 @@ void CRunningScript::Load(uint8*& buf)
 	prev = p;
 #endif
 }
+
+#ifdef MISSION_REPLAY
+
+bool CRunningScript::CanAllowMissionReplay()
+{
+	if (AllowMissionReplay)
+		return false;
+	if (CStats::LastMissionPassedName[0] == '\0')
+		return false;
+	for (int i = 0; i < ARRAY_SIZE(nonMissionScripts); i++) {
+		if (strcmp(m_abScriptName, nonMissionScripts[i]) == 0)
+			return false;
+	}
+	return true;
+}
+
+uint32 AddExtraDeathDelay()
+{
+	if (missionRetryScriptIndex == 63)
+		return 7000;
+	if (missionRetryScriptIndex == 64)
+		return 4000;
+	return 1000;
+}
+
+void RetryMission(int type, int unk)
+{
+	if (type == 0) {
+		doingMissionRetry = true;
+		FrontEndMenuManager.m_nCurrScreen = MENUPAGE_MISSION_RETRY;
+		FrontEndMenuManager.RequestFrontEndStartUp();
+	}
+	else if (type == 2) {
+		doingMissionRetry = false;
+		AllowMissionReplay = 6;
+		CTheScripts::MissionCleanup.Process();
+	}
+}
+
+#endif

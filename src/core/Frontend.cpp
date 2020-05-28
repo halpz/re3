@@ -3560,6 +3560,13 @@ CMenuManager::Process(void)
 				SaveLoadFileError_SetUpErrorScreen();
 		}
 		if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
+#ifdef MISSION_REPLAY
+			if (doingMissionRetry) {
+				RetryMission(2, 0);
+				m_nCurrSaveSlot = SLOT_COUNT;
+				doingMissionRetry = false;
+			}
+#endif
 			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
 				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
 				if (m_PrefsVsyncDisp != m_PrefsVsync)
@@ -4694,6 +4701,18 @@ CMenuManager::ProcessButtonPresses(void)
 					DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
 					OutputDebugString("STARTED PLAYING FRONTEND AUDIO TRACK");
 					break;
+#ifdef MISSION_REPLAY
+				case MENUACTION_REJECT_RETRY:
+					doingMissionRetry = false;
+					AllowMissionReplay = 0;
+					RequestFrontEndShutDown();
+					break;
+				case MENUACTION_UNK114:
+					doingMissionRetry = false;
+					RequestFrontEndShutDown();
+					RetryMission(2, 0);
+					return;
+#endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
 				case MENUACTION_TRIGGERFUNC:
 					FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
