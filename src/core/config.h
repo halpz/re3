@@ -196,6 +196,7 @@ enum Config {
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 //#define USE_TEXTURE_POOL
+#define CUSTOM_FRONTEND_OPTIONS
 
 // Particle
 //#define PC_PARTICLE

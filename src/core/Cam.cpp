@@ -29,7 +29,7 @@ bool PrintDebugCode = false;
 int16 DebugCamMode;
 
 #ifdef FREE_CAM
-bool CCamera::bFreeCam = true;
+bool CCamera::bFreeCam;
 int nPreviousMode = -1;
 #endif
 
