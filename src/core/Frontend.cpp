@@ -959,6 +959,10 @@ CMenuManager::Draw()
 	}
 #endif
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	static int lastOption = m_nCurrOption;
+#endif
+
 	for (int i = 0; i < NUM_MENUROWS; ++i) {
 #ifdef CUSTOM_FRONTEND_OPTIONS
 		bool isOptionDisabled = false;
@@ -1344,7 +1348,6 @@ CMenuManager::Draw()
 			}
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
-			static int lastOption = m_nCurrOption;
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_TRIGGERFUNC) {
 				FrontendOption &option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
 				if (option.onlyApplyOnEnter && m_nCurrOption != i)
@@ -1355,7 +1358,6 @@ CMenuManager::Draw()
 					if (oldOption.type == FEOPTION_DYNAMIC)
 						oldOption.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
 				}
-				lastOption = m_nCurrOption;
 			}
 #endif
 
@@ -1401,6 +1403,10 @@ CMenuManager::Draw()
 			}
 		}
 	}
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	lastOption = m_nCurrOption;
+#endif
 
 	switch (m_nCurrScreen) {
 	case MENUPAGE_CONTROLLER_SETTINGS:
