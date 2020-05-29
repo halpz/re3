@@ -412,7 +412,7 @@ CMenuManager::ThingsToDoBeforeGoingBack()
 			if (option.returnPrevPageFunc)
 				option.returnPrevPageFunc();
 
-			if (option.type == FEOPTION_DYNAMIC)
+			if (m_nCurrOption == option.screenOptionOrder && option.type == FEOPTION_DYNAMIC)
 				option.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
 
 			if (option.onlyApplyOnEnter)
@@ -1344,11 +1344,18 @@ CMenuManager::Draw()
 			}
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
+			static int lastOption = m_nCurrOption;
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_TRIGGERFUNC) {
 				FrontendOption &option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
 				if (option.onlyApplyOnEnter && m_nCurrOption != i)
 					option.displayedValue = *option.value;
 
+				if (m_nCurrOption != lastOption && lastOption == i) {
+					FrontendOption &oldOption = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[lastOption].m_TargetMenu];
+					if (oldOption.type == FEOPTION_DYNAMIC)
+						oldOption.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+				}
+				lastOption = m_nCurrOption;
 			}
 #endif
 
@@ -4339,13 +4346,6 @@ CMenuManager::ProcessButtonPresses(void)
 			m_nCurrOption--;
 		}
 	}
-#ifdef CUSTOM_FRONTEND_OPTIONS
-	if (m_nCurrOption != prevOption && aScreens[m_nCurrScreen].m_aEntries[prevOption].m_Action == MENUACTION_TRIGGERFUNC) {
-		FrontendOption &option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[prevOption].m_TargetMenu];
-		if (option.type == FEOPTION_DYNAMIC)
-			option.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
-	}
-#endif
 
 	if (optionSelected) {
 		int option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
