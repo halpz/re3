@@ -65,6 +65,8 @@
 #define MAX_BOAT_WAKES 8
 
 extern RwRaster* gpWaterRaster;
+//"Custom" Don´t Render Water Toggle
+extern bool gbDontRenderWater;
 
 class CWaterLevel
 {
