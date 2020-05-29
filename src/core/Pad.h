@@ -29,9 +29,7 @@ public:
 	float GetRightStickX(void) { return RightStickX/32767.0f; };
 	float GetRightStickY(void) { return RightStickY/32767.0f; };
 
-#ifdef DETECT_PAD_INPUT_SWITCH
-	bool IsAnyButtonPressed();
-#endif
+	bool CheckForInput();
 	void Clear(void);
 };
 VALIDATE_SIZE(CControllerState, 0x2A);
@@ -260,6 +258,7 @@ public:
 	static void ResetCheats(void);
 	static char *EditString(char *pStr, int32 nSize);
 	static int32 *EditCodesForControls(int32 *pRsKeys, int32 nSize);
+	uint32 InputHowLongAgo(void);
 
 #ifdef XINPUT
 	void AffectFromXinput(uint32 pad);

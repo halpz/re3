@@ -308,7 +308,7 @@ CCam::Process(void)
 	}
 
 	if(Mode == MODE_SNIPER || Mode == MODE_ROCKETLAUNCHER || Mode == MODE_M16_1STPERSON ||
-	   Mode == MODE_1STPERSON || Mode == MODE_HELICANNON_1STPERSON || GetWeaponFirstPersonOn())
+	   Mode == MODE_1STPERSON || Mode == MODE_HELICANNON_1STPERSON || Mode == MODE_CAMERA || GetWeaponFirstPersonOn())
 		ClipIfPedInFrontOfPlayer();
 }
 

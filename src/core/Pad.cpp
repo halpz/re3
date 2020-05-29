@@ -378,15 +378,13 @@ void AltDodoCheat(void)
 }
 #endif
 
-#ifdef DETECT_PAD_INPUT_SWITCH
 bool
-CControllerState::IsAnyButtonPressed(void)
+CControllerState::CheckForInput(void)
 {
 	return !!LeftStickX || !!LeftStickY || !!RightStickX || !!RightStickY || !!LeftShoulder1 || !!LeftShoulder2 || !!RightShoulder1 || !!RightShoulder2 ||
-	       !!DPadUp || !!DPadDown || !!DPadLeft || !!DPadRight || !!Start || !!Select || !!Square || !!Triangle || !!Cross || !!Circle || !!LeftShock ||
-	       !!RightShock || !!NetworkTalk;
+		!!DPadUp || !!DPadDown || !!DPadLeft || !!DPadRight || !!Start || !!Select || !!Square || !!Triangle || !!Cross || !!Circle || !!LeftShock ||
+		!!RightShock;
 }
-#endif
 
 void
 CControllerState::Clear(void)
@@ -482,6 +480,11 @@ void CPad::Clear(bool bResetPlayerControls)
 	LastTimeTouched = CTimer::GetTimeInMilliseconds();
 	AverageWeapon = 0;
 	AverageEntries = 0;
+}
+
+uint32 CPad::InputHowLongAgo()
+{
+	return CTimer::GetTimeInMilliseconds() - LastTimeTouched;
 }
 
 void CPad::ClearMouseHistory()
@@ -1155,7 +1158,7 @@ void CPad::UpdatePads(void)
 	CapturePad(0);
 #endif
 #ifdef DETECT_PAD_INPUT_SWITCH
-	if (GetPad(0)->PCTempJoyState.IsAnyButtonPressed())
+	if (GetPad(0)->PCTempJoyState.CheckForInput())
 		IsAffectedByController = true;
 	else {
 #endif
@@ -1165,11 +1168,11 @@ void CPad::UpdatePads(void)
 
 #ifdef DETECT_PAD_INPUT_SWITCH
 	}
-	if (IsAffectedByController && (GetPad(0)->PCTempKeyState.IsAnyButtonPressed() || GetPad(0)->PCTempMouseState.IsAnyButtonPressed()))
+	if (IsAffectedByController && (GetPad(0)->PCTempKeyState.CheckForInput() || GetPad(0)->PCTempMouseState.CheckForInput()))
 		IsAffectedByController = false;
 #endif
 	
-	if ( CReplay::IsPlayingBackFromFile() )
+	if ( CReplay::IsPlayingBackFromFile() && !FrontEndMenuManager.m_bMenuActive )
 		bUpdate = false;
 	
 	if ( bUpdate )
@@ -1209,6 +1212,9 @@ void CPad::Update(int16 unk)
 	PCTempMouseState.Clear();
 	
 	ProcessPCSpecificStuff();
+
+	if (NewState.CheckForInput())
+		LastTimeTouched = CTimer::GetTimeInMilliseconds();
 	
 	if ( ++iCurrHornHistory >= HORNHISTORY_SIZE )
 		iCurrHornHistory = 0;

@@ -3664,7 +3664,7 @@ CPed::Chat(void)
 		} else
 			Say(SOUND_PED_CHAT);
 
-	} else if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG_XPRESS)) {
+	} else if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_IDLE)) {
 
 		if (CGeneral::GetRandomNumber() < 20) {
 			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 4.0f);
@@ -6608,7 +6608,12 @@ CPed::RemoveWeaponAnims(int unused, float animDelta)
 		weaponAssoc->blendDelta = animDelta;
 		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
 	}
-	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHFIRE);
+	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_FIRE_2ND);
+	if (weaponAssoc) {
+		weaponAssoc->blendDelta = animDelta;
+		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
+	}
+	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_FIRE_3RD);
 	if (weaponAssoc) {
 		weaponAssoc->blendDelta = animDelta;
 		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
@@ -6619,11 +6624,6 @@ CPed::RemoveWeaponAnims(int unused, float animDelta)
 		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
 	}
 	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
-	if (weaponAssoc) {
-		weaponAssoc->blendDelta = animDelta;
-		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
-	}
-	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_SPECIAL);
 	if (weaponAssoc) {
 		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
 		if (weaponAssoc->flags & ASSOC_PARTIAL)

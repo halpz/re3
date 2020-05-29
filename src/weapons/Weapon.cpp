@@ -1965,6 +1965,7 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 
 	if (!( mode == CCam::MODE_M16_1STPERSON
 		|| mode == CCam::MODE_SNIPER
+		|| mode == CCam::MODE_CAMERA
 		|| mode == CCam::MODE_ROCKETLAUNCHER
 		|| mode == CCam::MODE_M16_1STPERSON_RUNABOUT
 		|| mode == CCam::MODE_SNIPER_RUNABOUT

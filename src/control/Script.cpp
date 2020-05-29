@@ -1,4 +1,3 @@
-#define WITHWINDOWS	// for our script loading hack
 #include "common.h"
 
 #include "Script.h"
@@ -599,13 +598,15 @@ void CRunningScript::Init()
 }
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
+int scriptToLoad = 0;
+const char *scriptfile = "main.scm";
 
-const char* scriptfile = "main.scm";
-
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 int open_script()
 {
-	static int scriptToLoad = 1;
-
+	// glfwGetKey doesn't work because of CGame::Initialise is blocking
 #ifdef _WIN32
 	if (GetAsyncKeyState('G') & 0x8000)
 		scriptToLoad = 0;

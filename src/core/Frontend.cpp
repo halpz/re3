@@ -3470,6 +3470,24 @@ CMenuManager::ProcessButtonPresses(void)
 	bool assumeIncrease = false;
 #endif
 
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	if (m_nCurrScreen == MENUPAGE_START_MENU || m_nCurrScreen == MENUPAGE_NEW_GAME || m_nCurrScreen == MENUPAGE_NEW_GAME_RELOAD) {
+#ifdef RW_GL3
+		if (glfwGetKey(PSGLOBAL(window), GLFW_KEY_R) == GLFW_PRESS) {
+			scriptToLoad = 1;
+			DoSettingsBeforeStartingAGame();
+			return;
+		}
+#elif defined _WIN32
+		if (GetAsyncKeyState('R') & 0x8000) {
+			scriptToLoad = 1;
+			DoSettingsBeforeStartingAGame();
+			return;
+		}
+#endif
+	}
+#endif
+
 	if (!m_bShowMouse && (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY)) {
 		m_bShowMouse = true;
 	}
@@ -4894,6 +4912,9 @@ CMenuManager::ProcessFileActions()
 	}
 	if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
 		if (CheckSlotDataValid(m_nCurrSaveSlot)) {
+#ifdef USE_DEBUG_SCRIPT_LOADER
+			scriptToLoad = 0;
+#endif
 			DoSettingsBeforeStartingAGame();
 			m_bWantToLoad = true;
 		}
