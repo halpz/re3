@@ -14,6 +14,10 @@ extern wchar gUString[256];
 extern wchar gUString2[256];
 extern bool gbPrintShite;
 extern bool gbModelViewer;
+//Custom Timebars Toggle
+#ifdef TIMEBARS
+extern bool gbShowTimebars;
+#endif
 
 class CSprite2d;
 

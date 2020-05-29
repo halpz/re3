@@ -73,6 +73,10 @@ float FramesPerSecond = 30.0f;
 
 bool gbPrintShite = false;
 bool gbModelViewer;
+//Custom Timebars Toggle
+#ifdef TIMEBARS
+bool gbShowTimebars;
+#endif
 
 int32 frameCount;
 
@@ -1096,8 +1100,12 @@ Idle(void *arg)
 #endif
 	CCredits::Render();
 
+
 #ifdef TIMEBARS
+//Custom Timebars toggle
+	if (gbShowTimebars)
 	tbDisplay();
+
 #endif
 
 	DoRWStuffEndOfFrame();
