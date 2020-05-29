@@ -412,6 +412,9 @@ CMenuManager::ThingsToDoBeforeGoingBack()
 			if (option.returnPrevPageFunc)
 				option.returnPrevPageFunc();
 
+			if (option.type == FEOPTION_DYNAMIC)
+				option.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+
 			if (option.onlyApplyOnEnter)
 				option.displayedValue = *option.value;
 		}
@@ -1205,8 +1208,7 @@ CMenuManager::Draw()
 
 					} else if (option.type == FEOPTION_DYNAMIC) {
 						if (option.drawFunc) {
-							option.drawFunc(unicodeTemp, &isOptionDisabled);
-							rightText = unicodeTemp;
+							rightText = option.drawFunc(&isOptionDisabled);
 						}
 					}
 				} else
@@ -1291,14 +1293,15 @@ CMenuManager::Draw()
 					if (!CFont::Details.centre)
 						CFont::SetRightJustifyOn();
 					
-					if(!strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_RES") 
-						&& !m_bGameNotLoaded && textLayer == 1
+					if(textLayer == 1)
+						if(!strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_RES") 
+							&& !m_bGameNotLoaded
 #ifdef CUSTOM_FRONTEND_OPTIONS
-						|| isOptionDisabled
+							|| isOptionDisabled
 #endif
-						) {
-						CFont::SetColor(CRGBA(155, 117, 6, FadeIn(255)));
-					}
+							)
+							CFont::SetColor(CRGBA(155, 117, 6, FadeIn(255)));
+
 					CFont::PrintString(MENU_X_RIGHT_ALIGNED(columnWidth - textLayer), itemY, rightText);
 				}
 				if (i == m_nCurrOption && itemsAreSelectable){
@@ -1345,6 +1348,7 @@ CMenuManager::Draw()
 				FrontendOption &option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
 				if (option.onlyApplyOnEnter && m_nCurrOption != i)
 					option.displayedValue = *option.value;
+
 			}
 #endif
 
@@ -4318,6 +4322,7 @@ CMenuManager::ProcessButtonPresses(void)
 	}
 #endif
 
+	int prevOption = m_nCurrOption;
 	if (goDown && (m_nCurrScreen != MENUPAGE_MULTIPLAYER_FIND_GAME)) {
 		m_nCurrOption++;
 		if (m_nCurrOption == NUM_MENUROWS || (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_NOTHING)) {
@@ -4334,6 +4339,13 @@ CMenuManager::ProcessButtonPresses(void)
 			m_nCurrOption--;
 		}
 	}
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	if (m_nCurrOption != prevOption && aScreens[m_nCurrScreen].m_aEntries[prevOption].m_Action == MENUACTION_TRIGGERFUNC) {
+		FrontendOption &option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[prevOption].m_TargetMenu];
+		if (option.type == FEOPTION_DYNAMIC)
+			option.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+	}
+#endif
 
 	if (optionSelected) {
 		int option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;

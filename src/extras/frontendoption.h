@@ -21,6 +21,7 @@
 #define FEOPTION_ACTION_LEFT 0
 #define FEOPTION_ACTION_RIGHT 1
 #define FEOPTION_ACTION_SELECT 2
+#define FEOPTION_ACTION_FOCUSLOSS 3
 
 void RemoveCustomFrontendOptions();
 void CustomFrontendOptionsPopulate();
@@ -32,7 +33,7 @@ typedef void (*ReturnPrevPageFunc)();
 typedef void (*ChangeFunc)(int8 displayedValue); // called before updating the value
 
 // for dynamic options
-typedef void (*DrawFunc)(wchar* out, bool* disabled); // parameters should be set by user, both is allocated. disabled option will be dark yellow
+typedef wchar* (*DrawFunc)(bool* disabled); // should return pointer to right text. *disabled = true will make it dark yellow
 typedef void (*ButtonPressFunc)(int8 action); // see FEOPTION_ACTIONs above
 
 struct FrontendOption
