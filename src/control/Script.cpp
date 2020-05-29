@@ -10474,6 +10474,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		ScriptParams[1] = pPed->GetWeapon(ScriptParams[1]).m_nAmmoTotal;
 		ScriptParams[2] = CPickups::ModelForWeapon((eWeaponType)ScriptParams[0]);
 		StoreParameters(&m_nIp, 3);
+		return 0;
 	}
 	case COMMAND_GET_CLOSEST_STRAIGHT_ROAD:
 	{
@@ -10482,6 +10483,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		for (int i = 0; i < 7; i++)
 			ScriptParams[i] = 0;
 		StoreParameters(&m_nIp, 7); // TODO(MIAMI)
+		return 0;
 	}
 	case COMMAND_SET_CAR_FORWARD_SPEED:
 	{
