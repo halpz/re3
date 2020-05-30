@@ -131,11 +131,11 @@ CRoadBlocks::GenerateRoadBlocks(void)
 					forward.Normalise();
 					if (ThePaths.m_pathNodes[node].HasDivider()) {
 						CreateRoadBlockBetween2Points(
-							ThePaths.m_pathNodes[node].GetPosition() + (length * 0.5f + ThePaths.m_pathNodes[node].GetDivider()) * forward,
-							ThePaths.m_pathNodes[node].GetPosition() + ThePaths.m_pathNodes[node].GetDivider() * forward);
+							ThePaths.m_pathNodes[node].GetPosition() + (length * 0.5f + ThePaths.m_pathNodes[node].GetDividerWidth()) * forward,
+							ThePaths.m_pathNodes[node].GetPosition() + ThePaths.m_pathNodes[node].GetDividerWidth() * forward);
 						CreateRoadBlockBetween2Points(
-							ThePaths.m_pathNodes[node].GetPosition() - ThePaths.m_pathNodes[node].GetDivider() * forward,
-							ThePaths.m_pathNodes[node].GetPosition() - (length * 0.5f + ThePaths.m_pathNodes[node].GetDivider()) * forward);
+							ThePaths.m_pathNodes[node].GetPosition() - ThePaths.m_pathNodes[node].GetDividerWidth() * forward,
+							ThePaths.m_pathNodes[node].GetPosition() - (length * 0.5f + ThePaths.m_pathNodes[node].GetDividerWidth()) * forward);
 					}
 					else {
 						CreateRoadBlockBetween2Points(

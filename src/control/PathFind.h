@@ -88,7 +88,7 @@ struct CPathNode
 	float GetY(void) { return y/8.0f; }
 	float GetZ(void) { return z/8.0f; }
 	bool HasDivider(void) { return width != 0; }
-	float GetDivider(void) { return width/(2*8.0f); }
+	float GetDividerWidth(void) { return width/(2*8.0f); }
 	CPathNode *GetPrev(void);
 	CPathNode *GetNext(void);
 	void SetPrev(CPathNode *node);
