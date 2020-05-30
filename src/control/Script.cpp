@@ -272,7 +272,7 @@ void CMissionCleanup::Process()
 	CPed::nThreatReactionRangeMultiplier = 1;
 	CPed::nEnterCarRangeMultiplier = 1;
 	FindPlayerPed()->m_pWanted->m_fCrimeSensitivity = 1.0f;
-	//CRoadBlocks::ClearScriptRoadblocks() // TODO(MIAMI)
+	CRoadBlocks::ClearScriptRoadBlocks();
 	CRouteNode::Initialise();
 	if (!CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
 		TheCamera.Restore();
@@ -10533,12 +10533,12 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_CREATE_SCRIPT_ROADBLOCK:
 	{
 		CollectParameters(&m_nIp, 6);
-		debug("CREATE_SCRIPT_ROADBLOCK not implemented\n"); // TODO(MIAMI)
+		CRoadBlocks::RegisterScriptRoadBlock(*(CVector*)&ScriptParams[0], *(CVector*)&ScriptParams[3]);
 		return 0;
 	}
 	case COMMAND_CLEAR_ALL_SCRIPT_ROADBLOCKS:
 	{
-		debug("CLEAR_ALL_SCRIPT_ROADBLOCKS not implemented\n"); // TODO(MIAMI)
+		CRoadBlocks::ClearScriptRoadBlocks();
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_WALK_TO_CHAR:
