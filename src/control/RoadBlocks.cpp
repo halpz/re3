@@ -174,7 +174,7 @@ CRoadBlocks::GenerateRoadBlocks(void)
 								pVehicle->bExtendedRange = true;
 								if (pVehicle->UsesSiren(pVehicle->GetModelIndex()) && CGeneral::GetRandomNumber() & 1)
 									pVehicle->m_bSirenOrAlarm = true;
-								if (pVehicle->GetForward().z > 0.94f) {
+								if (pVehicle->GetUp().z > 0.94f) {
 									CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);
 									CWorld::Add(pVehicle);
 									pVehicle->bCreateRoadBlockPeds = true;
