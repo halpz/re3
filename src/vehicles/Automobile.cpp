@@ -67,7 +67,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 
 	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(id);
 	m_fFireBlowUpTimer = 0.0f;
-	field_4E0 = 0;
+	m_auto_unk1 = 0;
 	bTaxiLight = m_sAllTaxiLights;
 	bFixedColour = false;
 	bBigWheels = false;
@@ -77,8 +77,8 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 
 	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)mi->m_handlingId);
 
-	field_49C = 20.0f;
-	field_4D8 = 0;
+	m_auto_unused1 = 20.0f;
+	m_auto_unused2 = 0;
 
 	mi->ChooseVehicleColour(m_currentColour1, m_currentColour2);
 
@@ -236,23 +236,16 @@ CAutomobile::ProcessControl(void)
 	// Improve grip of vehicles in certain cases
 	bool strongGrip1 = false;
 	bool strongGrip2 = false;
-	if(FindPlayerVehicle() && this != FindPlayerVehicle()){
-		switch(AutoPilot.m_nCarMission){
-		case MISSION_RAMPLAYER_FARAWAY:
-		case MISSION_RAMPLAYER_CLOSE:
-		case MISSION_BLOCKPLAYER_FARAWAY:
-		case MISSION_BLOCKPLAYER_CLOSE:
-			if(FindPlayerSpeed().Magnitude() > 0.3f){
-				strongGrip1 = true;
-				if(FindPlayerSpeed().Magnitude() > 0.4f){
-					if(m_vecMoveSpeed.Magnitude() < 0.3f)
-						strongGrip2 = true;
-				}else{
-					if((GetPosition() - FindPlayerCoors()).Magnitude() > 50.0f)
-						strongGrip2 = true;
-				}
-			}
-		default: break;
+	if(FindPlayerVehicle() && this != FindPlayerVehicle() &&
+	   (AutoPilot.m_nCarMission == MISSION_RAMPLAYER_FARAWAY || AutoPilot.m_nCarMission == MISSION_RAMPLAYER_CLOSE ||
+	    AutoPilot.m_nCarMission == MISSION_BLOCKPLAYER_FARAWAY || AutoPilot.m_nCarMission == MISSION_BLOCKPLAYER_CLOSE)){
+		if(FindPlayerSpeed().Magnitude() > 0.3f){
+			strongGrip1 = true;
+			if(FindPlayerSpeed().Magnitude() > 0.4f &&
+			   m_vecMoveSpeed.Magnitude() < 0.3f)
+				strongGrip2 = true;
+			else if((GetPosition() - FindPlayerCoors()).Magnitude() > 50.0f)
+				strongGrip2 = true;
 		}
 	}
 
@@ -263,7 +256,7 @@ CAutomobile::ProcessControl(void)
 
 	// Scan if this car sees the player committing any crimes
 	if(GetStatus() != STATUS_ABANDONED && GetStatus() != STATUS_WRECKED &&
-		GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE && GetStatus() != STATUS_PLAYER_DISABLED){
+	   GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE && GetStatus() != STATUS_PLAYER_DISABLED){
 		switch(GetModelIndex())
 		case MI_FBICAR:
 		case MI_POLICE:
@@ -596,7 +589,7 @@ CAutomobile::ProcessControl(void)
 			m_aSuspensionSpringRatio[i] = (m_aSuspensionSpringRatio[i]-wheelRadius)/(1.0f-wheelRadius);
 		}
 
-		float fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward());
+		float fwdSpeed = Abs(DotProduct(m_vecMoveSpeed, GetForward()));
 		CVector contactPoints[4];	// relative to model
 		CVector contactSpeeds[4];	// speed at contact points
 		CVector springDirections[4];	// normalized, in model space
@@ -689,7 +682,7 @@ CAutomobile::ProcessControl(void)
 		float brakeBiasFront = neutralHandling ? 1.0f : 2.0f*pHandling->fBrakeBias;
 		float brakeBiasRear  = neutralHandling ? 1.0f : 2.0f*(1.0f-pHandling->fBrakeBias);
 		float tractionBiasFront = neutralHandling ? 1.0f : 2.0f*pHandling->fTractionBias;
-		float tractionBiasRear  = neutralHandling ? 1.0f : 2.0f*(1.0f-pHandling->fTractionBias);
+		float tractionBiasRear  = neutralHandling ? 1.0f : 2.0f-tractionBiasFront;
 
 		// Count how many wheels are touching the ground
 
@@ -1160,7 +1153,7 @@ CAutomobile::ProcessControl(void)
 				uint8 freq = Min(200.0f*suspShake*speed*2000.0f/m_fMass + 100.0f, 250.0f);
 				CPad::GetPad(0)->StartShake(20000.0f*CTimer::GetTimeStep()/freq, freq);
 			}else{
-				uint8 freq = Min(200.0f*surfShake*speed*2000.0f/m_fMass + 40.0f, 145.0f);
+				uint8 freq = Min(200.0f*surfShake*speed*2000.0f/m_fMass + 40.0f, 150.0f);
 				CPad::GetPad(0)->StartShake(5000.0f*CTimer::GetTimeStep()/freq, freq);
 			}
 		}
@@ -1302,7 +1295,7 @@ CAutomobile::PreRender(void)
 
 		int drawParticles = Abs(fwdSpeed) < 90.0f;
 		if(GetStatus() == STATUS_SIMPLE || GetStatus() == STATUS_PHYSICS ||
-			GetStatus() == STATUS_PLAYER || GetStatus() == STATUS_PLAYER_PLAYBACKFROMBUFFER){
+		   GetStatus() == STATUS_PLAYER || GetStatus() == STATUS_PLAYER_PLAYBACKFROMBUFFER){
 			bool rearSkidding = false;
 			if(m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SKIDDING ||
 			   m_aWheelState[CARWHEEL_REAR_RIGHT] == WHEEL_STATE_SKIDDING)
@@ -1434,7 +1427,7 @@ CAutomobile::PreRender(void)
 			n = 6.0f*CWeather::Rain;
 			for(j = 0; j <= n; j++)
 				CParticle::AddParticle(PARTICLE_RAIN_SPLASHUP,
-					c + CVector(CGeneral::GetRandomNumberInRange(-.04f, 0.4f), CGeneral::GetRandomNumberInRange(-.04f, 0.4f), 0.0f),
+					c + CVector(CGeneral::GetRandomNumberInRange(-0.4f, 0.4f), CGeneral::GetRandomNumberInRange(-0.4f, 0.4f), 0.0f),
 					CVector(0.0f, 0.0f, 0.0f),
 					nil, 0.0f, 0, 0, CGeneral::GetRandomNumber() & 1);
 		}
@@ -1622,11 +1615,9 @@ CAutomobile::PreRender(void)
 		break;
 	}
 
-	if(GetModelIndex() == MI_RCBANDIT || GetModelIndex() == MI_DODO ||
-	   GetModelIndex() == MI_RHINO) {
-		CShadows::StoreShadowForCar(this);
-		return;
-	}
+	if(GetModelIndex() != MI_RCBANDIT && GetModelIndex() != MI_DODO &&
+	   GetModelIndex() != MI_RHINO) {
+	// Process lights
 
 	// Turn lights on/off
 	bool shouldLightsBeOn = 
@@ -1873,13 +1864,8 @@ CAutomobile::PreRender(void)
 						CPointLights::FOG_NONE, false);
 			}
 		}
-	}else{
+	}else if(GetStatus() != STATUS_ABANDONED && GetStatus() != STATUS_WRECKED){
 		// Lights off
-
-		if(GetStatus() == STATUS_ABANDONED || GetStatus() == STATUS_WRECKED) {
-			CShadows::StoreShadowForCar(this);
-			return;
-		}
 
 		CVector lightPos = mi->m_positions[CAR_POS_TAILLIGHTS];
 		CVector lightR = GetMatrix() * lightPos;
@@ -1936,6 +1922,8 @@ CAutomobile::PreRender(void)
 			if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
 				CCoronas::UpdateCoronaCoors((uintptr)this + 3, lightR, 50.0f*TheCamera.LODDistMultiplier, 0.0f);
 		}
+	}
+	// end of lights
 	}
 
 	CShadows::StoreShadowForCar(this);
@@ -2507,7 +2495,7 @@ CAutomobile::TankControl(void)
 			float f = i/15.0f;
 			CParticle::AddParticle(PARTICLE_GUNSMOKE2, point1,
 				shotDir*CGeneral::GetRandomNumberInRange(0.3f, 1.0f)*f,
-				nil, CGeneral::GetRandomNumberInRange(0.5f, 1.0f)*f, black);
+				nil, CGeneral::GetRandomNumberInRange(0.5f, 1.5f)*f, black);
 		}
 
 		// And some gun flashes near the gun
@@ -2538,6 +2526,9 @@ CAutomobile::TankControl(void)
 		mat.UpdateRW();
 	}
 }
+
+#define HYDRAULIC_UPPER_EXT (-0.12f)
+#define HYDRAULIC_LOWER_EXT (0.14f)
 
 void
 CAutomobile::HydraulicControl(void)
@@ -2601,8 +2592,8 @@ CAutomobile::HydraulicControl(void)
 			m_hydraulicState = 20;
 		else{
 			m_hydraulicState = 0;
-			normalUpperLimit += -0.12f;
-			normalSpringLength = normalUpperLimit - (normalLowerLimit+0.14f);
+			normalUpperLimit += HYDRAULIC_UPPER_EXT;
+			normalSpringLength = normalUpperLimit - (normalLowerLimit+HYDRAULIC_LOWER_EXT);
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_2, 0.0f);
 		}
 
@@ -2635,7 +2626,7 @@ CAutomobile::HydraulicControl(void)
 		float radius = Max(specialColModel->boundingBox.min.Magnitude(), specialColModel->boundingBox.max.Magnitude());
 		if(specialColModel->boundingSphere.radius < radius)
 			specialColModel->boundingSphere.radius = radius;
-
+		return;
 	}
 
 	if(playerInfo->m_WBState != WBSTATE_PLAYING)
@@ -2645,8 +2636,6 @@ CAutomobile::HydraulicControl(void)
 	if(m_hydraulicState < 20 && m_fVelocityChangeForAudio > 0.2f){
 		if(m_hydraulicState == 0){
 			m_hydraulicState = 20;
-			for(i = 0; i < 4; i++)
-				m_aWheelPosition[i] -= 0.06f;
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_1, 0.0f);
 			setPrevRatio = true;
 		}else{
@@ -2674,8 +2663,8 @@ CAutomobile::HydraulicControl(void)
 
 		if(m_hydraulicState < 100){
 			if(m_hydraulicState == 0){
-				normalUpperLimit += -0.12f;
-				normalLowerLimit += 0.14f;
+				normalUpperLimit += HYDRAULIC_UPPER_EXT;
+				normalLowerLimit += HYDRAULIC_LOWER_EXT;
 				normalSpringLength = normalUpperLimit - normalLowerLimit;
 			}
 
@@ -2740,8 +2729,8 @@ CAutomobile::HydraulicControl(void)
 			// Lowered, move wheels up
 
 			if(m_hydraulicState == 0){
-				normalUpperLimit += -0.12f;
-				normalLowerLimit += 0.14f;
+				normalUpperLimit += HYDRAULIC_UPPER_EXT;
+				normalLowerLimit += HYDRAULIC_LOWER_EXT;
 				normalSpringLength = normalUpperLimit - normalLowerLimit;
 			}
 
@@ -2782,8 +2771,8 @@ CAutomobile::HydraulicControl(void)
 			}
 
 			if(m_fVelocityChangeForAudio < 0.1f){
-				normalUpperLimit += -0.12f;
-				normalLowerLimit += 0.14f;
+				normalUpperLimit += HYDRAULIC_UPPER_EXT;
+				normalLowerLimit += HYDRAULIC_LOWER_EXT;
 				normalSpringLength = normalUpperLimit - normalLowerLimit;
 			}
 
@@ -2920,7 +2909,7 @@ CAutomobile::ProcessBuoyancy(void)
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_WATER_FALL, 0.0f);
 		}
 
-		if(nGenerateWaterCircles > 0 && nGenerateWaterCircles < CTimer::GetTimeInMilliseconds()){
+		if(nGenerateWaterCircles > 0 && nGenerateWaterCircles <= CTimer::GetTimeInMilliseconds()){
 			CVector pos = GetPosition();
 			float waterLevel = 0.0f;
 			if(CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &waterLevel, false))
@@ -2940,7 +2929,7 @@ CAutomobile::ProcessBuoyancy(void)
 			}
 		}
 
-		if(nGenerateRaindrops > 0 && nGenerateRaindrops < CTimer::GetTimeInMilliseconds()){
+		if(nGenerateRaindrops > 0 && nGenerateRaindrops <= CTimer::GetTimeInMilliseconds()){
 			CVector pos = GetPosition();
 			float waterLevel = 0.0f;
 			if(CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &waterLevel, false))

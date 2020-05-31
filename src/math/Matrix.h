@@ -223,6 +223,7 @@ public:
 	void SetRotate(float xAngle, float yAngle, float zAngle);
 	void Rotate(float x, float y, float z);
 	void RotateX(float x);
+	void RotateY(float y);
 	void RotateZ(float z);
 
 	void Reorthogonalise(void);

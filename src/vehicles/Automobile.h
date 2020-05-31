@@ -84,13 +84,13 @@ public:
 	float m_aSuspensionSpringRatio[4];
 	float m_aSuspensionSpringRatioPrev[4];
 	float m_aWheelTimer[4];		// set to 4.0 when wheel is touching ground, then decremented
-	float field_49C;
+	float m_auto_unused1;
 	bool m_aWheelSkidmarkMuddy[4];
 	bool m_aWheelSkidmarkBloody[4];
 	float m_aWheelRotation[4];
 	float m_aWheelPosition[4];
 	float m_aWheelSpeed[4];
-	uint8 field_4D8;
+	uint8 m_auto_unused2;
 	uint8 m_bombType : 3;
 	uint8 bTaxiLight : 1;
 	uint8 bDriverLastFrame  : 1;		// for bombs
@@ -100,7 +100,7 @@ public:
 	uint8 bNotDamagedUpsideDown : 1;
 	uint8 bMoreResistantToDamage : 1;
 	CEntity *m_pBombRigger;
-	int16 field_4E0;
+	int16 m_auto_unk1;
 	uint16 m_hydraulicState;
 	uint32 m_nBusDoorTimerEnd;
 	uint32 m_nBusDoorTimerStart;

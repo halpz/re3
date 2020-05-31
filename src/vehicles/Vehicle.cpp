@@ -288,7 +288,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 	{
 		// thrust
 		float fForwSpeed = DotProduct(GetMoveSpeed(), GetForward());
-		CVector vecWidthForward = GetColModel()->boundingBox.min.y * GetForward();
+		CVector vecTail = GetColModel()->boundingBox.min.y * GetForward();
 		float fThrust = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
 		if (fForwSpeed > 0.1f || (flightModel == FLIGHT_MODEL_RCPLANE && fForwSpeed > 0.02f))
 			fThrust += 1.0f;
@@ -311,13 +311,13 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 			fSideSlipAccel = Abs(fSideSpeed) * fSideSpeed * fSeaSideSlipMult;
 		ApplyMoveForce(m_fMass * GetRight() * fSideSlipAccel * CTimer::GetTimeStep());
 
-		float fYaw = -DotProduct(GetSpeed(vecWidthForward), GetRight());
+		float fYaw = -DotProduct(GetSpeed(vecTail), GetRight());
 		float fYawAccel;
 		if (flightModel == FLIGHT_MODEL_RCPLANE)
 			fYawAccel = fRCRudderMult * fYaw * Abs(fYaw) + fRCYawMult * fSteerLR * fForwSpeed;
 		else
 			fYawAccel = fSeaRudderMult * fYaw * Abs(fYaw) + fSeaYawMult * fSteerLR * fForwSpeed;
-		ApplyTurnForce(fYawAccel * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), vecWidthForward);
+		ApplyTurnForce(fYawAccel * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), vecTail);
 
 		float fRollAccel;
 		if (flightModel == FLIGHT_MODEL_RCPLANE) {
@@ -341,14 +341,14 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		ApplyTurnForce(fStabiliseSpeed * m_fTurnMass * GetRight(), GetUp()); // no CTimer::GetTimeStep(), is it right? VC doesn't have it too
 
 		// up/down
-		float fTail = -DotProduct(GetSpeed(vecWidthForward), GetUp());
+		float fTail = -DotProduct(GetSpeed(vecTail), GetUp());
 		float fSteerUD = -CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
 		float fPitchAccel;
 		if (flightModel == FLIGHT_MODEL_RCPLANE)
 			fPitchAccel = fRCTailMult * fTail * Abs(fTail) + fRCPitchMult * fSteerUD * fForwSpeed;
 		else
 			fPitchAccel = fSeaTailMult * fTail * Abs(fTail) + fSeaPitchMult * fSteerUD * fForwSpeed;
-		ApplyTurnForce(fPitchAccel * m_fTurnMass * GetUp() * CTimer::GetTimeStep(), vecWidthForward);
+		ApplyTurnForce(fPitchAccel * m_fTurnMass * GetUp() * CTimer::GetTimeStep(), vecTail);
 
 		float fLift = -DotProduct(GetMoveSpeed(), GetUp()) / Max(0.01f, GetMoveSpeed().Magnitude());
 		float fLiftAccel;
