@@ -60,6 +60,7 @@
 #include "Streaming.h"
 #include "PedAttractor.h"
 #include "Debug.h"
+#include "GameLogic.h"
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
@@ -16228,6 +16229,12 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 		return;
 	}
 	if (!someoneExitsFromOurExitDoor || m_nPedType == PEDTYPE_COP && veh->bIsBus) {
+#if defined GTAVC_JP_PATCH || defined FIX_BUGS
+		if (veh->pDriver == this && !IsPlayer() && veh == CGameLogic::pShortCutTaxi) {
+			m_objective = OBJECTIVE_NONE;
+			return;
+		}
+#endif
 		// Again, unused...
 		// CVector exitPos = GetPositionToOpenCarDoor(veh, optedDoorNode);
 		bool thereIsRoom = veh->IsRoomForPedToLeaveCar(optedDoorNode, nil);
@@ -18664,6 +18671,35 @@ bool
 CPed::CanBeDamagedByThisGangMember(CPed* who)
 {
 	return m_gangFlags & (1 << (uint8)(who->m_nPedType - PEDTYPE_GANG1));
+}
+
+void
+CPed::Undress(const char* name)
+{
+	int mi = GetModelIndex();
+	CAnimBlendAssociation* pAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_PHONE_OUT);
+	//if (pAnim)
+	//	FinishTalkingOnMobileCB(pAnim, this); // TODO(MIAMI)
+	DeleteRwObject();
+	if (m_nPedType == PEDTYPE_PLAYER1)
+		mi = MI_PLAYER;
+	CStreaming::RequestSpecialModel(mi, name, STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+	CWorld::Remove(this);
+}
+
+void
+CPed::Dress(void)
+{
+	int mi = GetModelIndex();
+	m_modelIndex = -1;
+	SetModelIndex(mi);
+	m_nPedState = PED_IDLE;
+	m_nLastPedState = PED_NONE;
+	m_objective = OBJECTIVE_NONE;
+	m_prevObjective = OBJECTIVE_NONE;
+	m_nWaitState = WAITSTATE_FALSE;
+	CWorld::Add(this);
+	m_headingRate = m_pedStats->m_headingChangeRate;
 }
 
 bool

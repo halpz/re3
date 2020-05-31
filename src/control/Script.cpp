@@ -26,6 +26,7 @@
 #include "Fire.h"
 #include "Frontend.h"
 #include "Gangs.h"
+#include "GameLogic.h"
 #include "Garages.h"
 #include "General.h"
 #include "HandlingMgr.h"
@@ -300,7 +301,7 @@ void CMissionCleanup::Process()
 	//DMAudio::ShutUpPlayerTalking(0);
 	CVehicle::bDisableRemoteDetonation = false;
 	CVehicle::bDisableRemoteDetonationOnContact = false;
-	//CGameLogic::ClearShortCut(); // TODO(MIAMI)
+	CGameLogic::ClearShortCut();
 	CTheScripts::RiotIntensity = 0;
 	CTheScripts::StoreVehicleIndex = -1;
 	CTheScripts::StoreVehicleWasRandom = true;
@@ -6506,7 +6507,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		++CStats::MissionsPassed;
 		CStats::CheckPointReachedSuccessfully();
 		CTheScripts::LastMissionPassedTime = CTimer::GetTimeInMilliseconds();
-		//CGameLogic::RemoveShortCutDropOffPointForMission() // TODO(MIAMI)
+		CGameLogic::RemoveShortCutDropOffPointForMission();
 		return 0;
 	}
 	case COMMAND_SET_CHAR_RUNNING:
@@ -7153,13 +7154,8 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, name);
 		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			name[i] = tolower(name[i]);
-		int mi = pPed->GetModelIndex();
-		pPed->DeleteRwObject();
-		if (pPed->IsPlayer())
-			mi = 0;
-		CStreaming::RequestSpecialModel(mi, name, STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CWorld::Remove(pPed);
+		pPed->Undress(name);
 		return 0;
 	}
 	case COMMAND_DRESS_CHAR:
@@ -7167,10 +7163,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
-		int mi = pPed->GetModelIndex();
-		pPed->m_modelIndex = -1;
-		pPed->SetModelIndex(mi);
-		CWorld::Add(pPed);
+		pPed->Dress();
 		return 0;
 	}
 	/*
@@ -9045,7 +9038,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		pMissionScript->m_bIsMissionScript = true;
 		pMissionScript->m_bMissionFlag = true;
 		CTheScripts::bAlreadyRunningAMissionScript = true;
-		//CGameLogic::ClearShortcut(); // TODO(MIAMI)
+		CGameLogic::ClearShortCut();
 		return 0;
 	}
 	case COMMAND_SET_OBJECT_DRAW_LAST:
@@ -11440,11 +11433,13 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_UP_TAXI_SHORTCUT:
 	{
 		CollectParameters(&m_nIp, 8);
-		debug("SET_UP_TAXI_SHORTCUT is not implemented\n"); // TODO(MIAMI)
+		CGameLogic::SetUpShortCut(
+			*(CVector*)&ScriptParams[0], *(float*)&ScriptParams[3],
+			*(CVector*)&ScriptParams[4], *(float*)&ScriptParams[7]);
 		return 0;
 	}
 	case COMMAND_CLEAR_TAXI_SHORTCUT:
-		debug("CLEAR_TAXI_SHORTCUT is not implemented\n"); // TODO(MIAMI)
+		CGameLogic::ClearShortCut();
 		return 0;
 	//case COMMAND_SET_CHAR_OBJ_GOTO_CAR_ON_FOOT:
 	//case COMMAND_GET_CLOSEST_WATER_NODE:
@@ -11910,13 +11905,13 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_SET_SHORTCUT_PICKUP_POINT:
 	{
 		CollectParameters(&m_nIp, 4);
-		debug("SET_SHORTCUT_PICKUP_POINT not implemented, skipping\n");
+		CGameLogic::AddShortCutPointAfterDeath(*(CVector*)&ScriptParams[0], *(float*)&ScriptParams[3]);
 		return 0;
 	}
 	case COMMAND_SET_SHORTCUT_DROPOFF_POINT_FOR_MISSION:
 	{
 		CollectParameters(&m_nIp, 4);
-		debug("SET_SHORTCUT_DROPOFF_POINT_FOR_MISSION not implemented, skipping");
+		CGameLogic::AddShortCutDropOffPointForMission(*(CVector*)&ScriptParams[0], *(float*)&ScriptParams[3]);
 		return 0;
 	}
 	case COMMAND_GET_RANDOM_ICE_CREAM_CUSTOMER_IN_AREA:
@@ -11948,16 +11943,14 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		++CStats::MissionsPassed;
 		CStats::CheckPointReachedSuccessfully();
 		CTheScripts::LastMissionPassedTime = CTimer::GetTimeInMilliseconds();
-		// CGameLogic::RemoveShortCutDropOffPointForMission(); // TODO(MIAMI)
+		CGameLogic::RemoveShortCutDropOffPointForMission();
+		return 0;
 	case COMMAND_IS_PLAYER_IN_SHORTCUT_TAXI:
 	{
 		CollectParameters(&m_nIp, 1);
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("IS_PLAYER_IN_SHORTCUT_TAXI not implemented, default to FALSE\n");
-			bShowed = true;
-		}
-		UpdateCompareFlag(false);
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		assert(pPed);
+		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle && pPed->m_pMyVehicle == CGameLogic::pShortCutTaxi);
 		return 0;
 	}
 	case COMMAND_IS_CHAR_DUCKING:
@@ -11980,6 +11973,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	case COMMAND_IS_AUSTRALIAN_GAME:
 		UpdateCompareFlag(false); // should we make some check?
+		return 0;
 	case COMMAND_DISARM_CAR_BOMB:
 	{
 		CollectParameters(&m_nIp, 1);
