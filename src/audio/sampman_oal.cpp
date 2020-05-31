@@ -1319,7 +1319,7 @@ cSampleManager::SetStreamedVolumeAndPan(uint8 nVolume, uint8 nPan, uint8 nEffect
 	{
 		if ( nEffectFlag ) {
 			if ( nStream == 1 ) // TODO(MIAMI): || nStream == 2 when we have second mission channel?
-				stream->SetVolume(128*nVolume*m_nEffectsVolume >> 14)
+				stream->SetVolume(128*nVolume*m_nEffectsVolume >> 14);
 			else
 				stream->SetVolume(m_nEffectsFadeVolume*nVolume*m_nEffectsVolume >> 14);
 		}
