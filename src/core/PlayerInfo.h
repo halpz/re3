@@ -42,6 +42,7 @@ public:
 	uint32 m_nTimeLastHealthLoss;
 	uint32 m_nTimeLastArmourLoss;
 	uint32 m_nTimeTankShotGun;
+	int32 m_nTimeNotFullyOnGround;
 	int32 m_nUpsideDownCounter;
 	int32 field_248;
 	int16 m_nTrafficMultiplier;

@@ -42,6 +42,7 @@ bool CVehicle::bCheat5;
 bool CVehicle::bAltDodoCheat;
 #endif
 bool CVehicle::bHoverCheat;
+bool CVehicle::bAllTaxisHaveNitro;
 bool CVehicle::m_bDisableMouseSteering = true;
 bool CVehicle::bDisableRemoteDetonation;
 bool CVehicle::bDisableRemoteDetonationOnContact;
@@ -126,7 +127,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bCreatedAsPoliceVehicle = false;
 	bRestingOnPhysical = false;
 	bParking = false;
-	bCanPark = CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 0.0f;	// BUG? this makes no sense
+	bCanPark = CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 0.0f;	// never true. probably doesn't work very well
 	bIsVan = false;
 	bIsBus = false;
 	bIsBig = false;
@@ -345,7 +346,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 
 		// thrust
 		float fForwSpeed = DotProduct(GetMoveSpeed(), GetForward());
-		CVector vecWidthForward = GetColModel()->boundingBox.min.y * GetForward();
+		CVector vecTail = GetColModel()->boundingBox.min.y * GetForward();
 		float fThrust = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
 		float fThrustAccel;
 		if(fForwSpeed > 0.0f || fThrust > 0.0f)
@@ -363,9 +364,9 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		float fSideSlipAccel = pFlyingHandling->fSideSlip * fSideSpeed * Abs(fSideSpeed);
 		ApplyMoveForce(m_fMass * GetRight() * fSideSlipAccel * CTimer::GetTimeStep());
 
-		float fYaw = -DotProduct(GetSpeed(vecWidthForward), GetRight());
+		float fYaw = -DotProduct(GetSpeed(vecTail), GetRight());
 		float fYawAccel = pFlyingHandling->fYawStab * fYaw * Abs(fYaw) + pFlyingHandling->fYaw * fSteerLR * fForwSpeed;
-		ApplyTurnForce(fYawAccel * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), vecWidthForward);
+		ApplyTurnForce(fYawAccel * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), vecTail);
 
 		float fRollAccel;
 		if (flightModel == FLIGHT_MODEL_RCPLANE) {
@@ -385,9 +386,9 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		ApplyTurnForce(fStabiliseSpeed * m_fTurnMass * GetRight(), GetUp()); // no CTimer::GetTimeStep(), is it right?
 
 		// up/down
-		float fTail = -DotProduct(GetSpeed(vecWidthForward), GetUp());
+		float fTail = -DotProduct(GetSpeed(vecTail), GetUp());
 		float fPitchAccel = pFlyingHandling->fPitchStab * fTail * Abs(fTail) + pFlyingHandling->fPitch * fSteerUD * fForwSpeed;
-		ApplyTurnForce(fPitchAccel * m_fTurnMass * GetUp() * CTimer::GetTimeStep(), vecWidthForward);
+		ApplyTurnForce(fPitchAccel * m_fTurnMass * GetUp() * CTimer::GetTimeStep(), vecTail);
 
 		float fLift = -DotProduct(GetMoveSpeed(), GetUp()) / Max(0.01f, GetMoveSpeed().Magnitude());
 		float fLiftAccel = (pFlyingHandling->fAttackLift * fLift + pFlyingHandling->fFormLift) * fForwSpeed * fForwSpeed;
@@ -555,7 +556,7 @@ CVehicle::DoBladeCollision(CVector pos, CMatrix &matrix, int16 rotorType, float 
 	rotorColModel.numSpheres = 1;
 
 	pos = matrix * pos;
-	bool hadCollision;
+	bool hadCollision = false;
 	int minX = CWorld::GetSectorIndexX(pos.x - radius);
 	if(minX <= 0) minX = 0;
 
@@ -656,7 +657,7 @@ CVehicle::BladeColSectorList(CPtrList &list, CColModel &rotorColModel, CMatrix &
 		if(entity->IsPed())
 			entityCol = ((CPedModelInfo*)CModelInfo::GetModelInfo(entity->GetModelIndex()))->AnimatePedColModelSkinned(entity->GetClump());
 		else
-			entityCol = CModelInfo::GetModelInfo(entity->GetModelIndex())->GetColModel();
+			entityCol = entity->GetColModel();
 		if(entityCol)
 			numCollisions = CCollision::ProcessColModels(matrix, rotorColModel, entity->GetMatrix(), *entityCol,
 				CWorld::m_aTempColPts, nil, nil);
@@ -691,10 +692,12 @@ CVehicle::BladeColSectorList(CPtrList &list, CColModel &rotorColModel, CMatrix &
 				CVector localColpos = colpos - center;
 				float axisDir = DotProduct(axis, localColpos);
 				float colDir = DotProduct(CWorld::m_aTempColPts[i].normal, localColpos);
+
 				if(2.0f*ROTOR_SEMI_THICKNESS < Abs(axisDir) &&
 				   ROTOR_DISGUARD_MULT*Abs(colDir) < Abs(axisDir))
 					continue;
 
+				hadCollision = true;
 				colpos -= axisDir*axis;	// get rid of axis component
 
 				CVector tangentSpeed = CrossProduct(turnSpeed, colpos - center);
@@ -720,7 +723,6 @@ CVehicle::BladeColSectorList(CPtrList &list, CColModel &rotorColModel, CMatrix &
 				if(damageImpulse > m_fDamageImpulse)
 					SetDamagedPieceRecord(0, damageImpulse, entity, CWorld::m_aTempColPts[i].normal);
 
-				hadCollision = true;
 			}
 
 			if(hadCollision && !entity->IsPed())
@@ -1710,6 +1712,15 @@ CVehicle::CanPedExitCar(bool jumpExit)
 			return false;
 		return true;
 	}
+}
+
+bool
+CVehicle::CanPedJumpOutCar(void)
+{
+	if(GetUp().z < 0.3f)
+		return false;
+	float speed = m_vecMoveSpeed.MagnitudeSqr();
+	return speed < 0.1f || speed > 0.5f ? false : true;
 }
 
 bool

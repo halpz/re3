@@ -3778,7 +3778,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 		if(FindPlayerVehicle())
 			FindPlayerVehicle()->Teleport(Source);
 		else
-			CWorld::Players[CWorld::PlayerInFocus].m_pPed->SetPosition(Source);	
+			CWorld::Players[CWorld::PlayerInFocus].m_pPed->SetPosition(Source);
 	}
 
 	// stay inside sectors
@@ -3845,8 +3845,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 		if(FindPlayerVehicle())
 			FindPlayerVehicle()->Teleport(Source);
 		else
-			CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetPosition() = Source;
-			
+			CWorld::Players[CWorld::PlayerInFocus].m_pPed->SetPosition(Source);
 	}
 
 	// stay inside sectors

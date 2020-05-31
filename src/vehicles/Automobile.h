@@ -3,6 +3,7 @@
 #include "Vehicle.h"
 #include "DamageManager.h"
 #include "Door.h"
+#include "Skidmarks.h"
 
 class CObject;
 
@@ -76,13 +77,14 @@ public:
 	float m_aSuspensionSpringRatio[4];
 	float m_aSuspensionSpringRatioPrev[4];
 	float m_aWheelTimer[4];		// set to 4.0 when wheel is touching ground, then decremented
-	float field_49C;
-	bool m_aWheelSkidmarkMuddy[4];
+	float m_auto_unused1;
+	eSkidmarkType m_aWheelSkidmarkType[4];
 	bool m_aWheelSkidmarkBloody[4];
+	bool m_aWheelSkidmarkUnk[4];
 	float m_aWheelRotation[4];
 	float m_aWheelPosition[4];
 	float m_aWheelSpeed[4];
-	uint8 field_4D8;
+	uint8 m_auto_unused2;
 	uint8 bTaxiLight : 1;
 	uint8 bFixedColour : 1;
 	uint8 bBigWheels : 1;
@@ -90,7 +92,9 @@ public:
 	uint8 bNotDamagedUpsideDown : 1;
 	uint8 bMoreResistantToDamage : 1;
 	uint8 bTankDetonateCars : 1;
-	int16 field_4E0;
+	uint8 bStuckInSand : 1;
+	uint8 bHeliDestroyed : 1;
+	int16 m_doingBurnout;
 	uint16 m_hydraulicState;
 	uint32 m_nBusDoorTimerEnd;
 	uint32 m_nBusDoorTimerStart;
@@ -98,6 +102,9 @@ public:
 	float m_aSuspensionLineLength[4];
 	float m_fHeightAboveRoad;
 	float m_fTraction;
+	float m_fTireTemperature;
+	float m_fOrientation;	// for heli and plane go-to
+	float m_auto_unk4;	// related to the above
 	float m_fVelocityChangeForAudio;
 	float m_randomValues[6];	// used for what?
 	float m_fFireBlowUpTimer;
@@ -183,6 +190,7 @@ public:
 	void SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents = false);
 
 	void TellHeliToGoToCoors(float x, float y, float z, uint8 speed);
+	void TellPlaneToGoToCoors(float x, float y, float z, uint8 speed);
 	void SetHeliOrientation(float orient) { m_fHeliOrientation = orient; }
 	void ClearHeliOrientation(void) { m_fHeliOrientation = -1.0f; }
 
@@ -198,6 +206,7 @@ public:
 	void PopBoot(void);
 	void PopBootUsingPhysics(void);
 	void CloseAllDoors(void);
+	void KnockPedOutCar(eWeaponType weapon, uint16 door, CPed *ped);
 
 #ifdef COMPATIBLE_SAVES
 	virtual void Save(uint8*& buf);

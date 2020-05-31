@@ -317,6 +317,7 @@ public:
 	bool CanDoorsBeDamaged(void);
 	bool CanPedEnterCar(void);
 	bool CanPedExitCar(bool jumpExit);
+	bool CanPedJumpOutCar(void);
 	bool CanPedJumpOffBike(void);
 	// do these two actually return something?
 	CPed *SetUpDriver(void);
@@ -348,11 +349,12 @@ public:
 	static void HeliDustGenerate(CEntity *heli, float radius, float ground, int rnd);
 	void DoSunGlare(void);
 
-	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
+	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1 && GetStatus() != STATUS_WRECKED; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
 	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_ZEBRA || GetModelIndex() == MI_KAUFMAN; }
 	bool IsLimo(void) { return GetModelIndex() == MI_STRETCH || GetModelIndex() == MI_LOVEFIST; }
 	bool IsRealHeli(void) { return !!(pHandling->Flags & HANDLING_IS_HELI); }
+	bool IsRealPlane(void) { return !!(pHandling->Flags & HANDLING_IS_PLANE); }
 
 	static bool bWheelsOnlyCheat;
 	static bool bAllDodosCheat;
@@ -363,6 +365,7 @@ public:
 	static bool bAltDodoCheat;
 #endif
 	static bool bHoverCheat;
+	static bool bAllTaxisHaveNitro;
 	static bool m_bDisableMouseSteering;
 	static bool bDisableRemoteDetonation;
 	static bool bDisableRemoteDetonationOnContact;
