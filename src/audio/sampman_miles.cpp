@@ -2289,7 +2289,7 @@ cSampleManager::SetStreamedVolumeAndPan(uint8 nVolume, uint8 nPan, uint8 nEffect
 			if ( nEffectFlag )
 			{
 				if ( nStream == 1 ) // TODO(MIAMI): || nStream == 2 when we have second mission channel?
-					AIL_set_stream_volume(mp3Stream[nStream], 64*vol*m_nEffectsVolume >> 14);
+					AIL_set_stream_volume(mp3Stream[nStream], 128*vol*m_nEffectsVolume >> 14);
 				else
 					AIL_set_stream_volume(mp3Stream[nStream], m_nEffectsFadeVolume*vol*m_nEffectsVolume >> 14);
 			}
