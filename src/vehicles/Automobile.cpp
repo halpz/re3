@@ -840,7 +840,7 @@ CAutomobile::ProcessControl(void)
 			if(GetStatus() == STATUS_PLAYER && pHandling->Flags & HANDLING_IS_BUS){
 				if(m_nBusDoorTimerEnd == 0)
 					m_nBusDoorTimerEnd = 1000;
-				else if(m_nBusDoorTimerEnd > (uint32)CTimer::GetTimeStepInMilliseconds())
+				else if(m_nBusDoorTimerEnd > CTimer::GetTimeStepInMilliseconds())
 					m_nBusDoorTimerEnd -= CTimer::GetTimeStepInMilliseconds();
 			}
 

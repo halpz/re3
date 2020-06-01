@@ -18,10 +18,10 @@ public:
 	static const float &GetTimeStep(void) { return ms_fTimeStep; }
 	static void SetTimeStep(float ts) { ms_fTimeStep = ts; }
 	static float GetTimeStepInSeconds() { return ms_fTimeStep / 50.0f; }
-	static float GetTimeStepInMilliseconds() { return ms_fTimeStep / 50.0f * 1000.0f; }
+	static uint32 GetTimeStepInMilliseconds() { return ms_fTimeStep / 50.0f * 1000.0f; }
 	static const float &GetTimeStepNonClipped(void) { return ms_fTimeStepNonClipped; }
 	static float GetTimeStepNonClippedInSeconds(void) { return ms_fTimeStepNonClipped / 50.0f; }
-	static float GetTimeStepNonClippedInMilliseconds(void) { return ms_fTimeStepNonClipped / 50.0f * 1000.0f; }
+	static uint32 GetTimeStepNonClippedInMilliseconds(void) { return ms_fTimeStepNonClipped / 50.0f * 1000.0f; }
 	static void SetTimeStepNonClipped(float ts) { ms_fTimeStepNonClipped = ts; }
 	static const uint32 &GetFrameCounter(void) { return m_FrameCounter; }
 	static void SetFrameCounter(uint32 fc) { m_FrameCounter = fc; }
