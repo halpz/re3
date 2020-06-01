@@ -461,7 +461,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "Don't render Peds", &gbDontRenderPeds, nil);
 		DebugMenuAddVarBool8("Render", "Don't render Vehicles", &gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Render", "Don't render Objects", &gbDontRenderObjects, nil);
-		DebugMenuAddVarBool8("Render", "Don´t Render Water", &gbDontRenderWater, nil);
+		DebugMenuAddVarBool8("Render", "Don't Render Water", &gbDontRenderWater, nil);
 
 		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
 #ifdef MENU_MAP
@@ -492,7 +492,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 
 		DebugMenuAddVarBool8("Debug", "Show DebugStuffInRelease", &gbDebugStuffInRelease, nil);
+#ifdef TIMEBARS
 		DebugMenuAddVarBool8("Debug", "Show Timebars", &gbShowTimebars, nil);
+#endif
 
 		extern bool PrintDebugCode;
 		extern int16 DebugCamMode;
