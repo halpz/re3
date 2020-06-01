@@ -261,6 +261,14 @@ public:
 		m_matrix.at.y = 0.0f;
 		m_matrix.at.z = 1.0f;
 	}
+	void SetTranslateOnly(float x, float y, float z) {
+		m_matrix.pos.x = x;
+		m_matrix.pos.y = y;
+		m_matrix.pos.z = z;
+	}
+	void SetTranslateOnly(const CVector& pos) {
+		SetTranslateOnly(pos.x, pos.y, pos.z);
+	}
 };
 
 
