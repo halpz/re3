@@ -113,6 +113,18 @@ CWeapon::UpdateWeapons(void)
 	CBulletInfo::Update();
 }
 
+//--MIAMI: done
+CWeapon::CWeapon(eWeaponType type, int32 ammo)
+{
+	m_eWeaponType = type;
+	m_eWeaponState = WEAPONSTATE_READY;
+	m_nAmmoTotal = Min(ammo, 99999);
+	m_nAmmoInClip = 0;
+	Reload();
+	m_nTimer = 0;
+	m_bAddRotOffset = false;
+}
+
 // --MIAMI: Done
 void
 CWeapon::Initialise(eWeaponType type, int32 ammo)

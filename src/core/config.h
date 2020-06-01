@@ -41,7 +41,7 @@ enum Config {
 	NUMANIMBLOCKS = 35,
 	NUMANIMATIONS = 450,
 
-	NUMTEMPOBJECTS = 30,
+	NUMTEMPOBJECTS = 40,
 
 	// Path data
 	NUM_PATHNODES = 9650,
@@ -218,7 +218,7 @@ enum Config {
 // Water & Particle
 #define PC_PARTICLE
 //#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
-#define PC_WATER
+// #define PC_WATER
 #define WATER_CHEATS
 
 // Pad

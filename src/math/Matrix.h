@@ -130,12 +130,17 @@ public:
 	{
 		float *pFloatMatrix = (float*)&m_matrix;
 		for (int i = 0; i < 3; i++)
-#ifdef FIX_BUGS // BUGFIX from VC
 			for (int j = 0; j < 3; j++)
-#else
-			for (int j = 0; j < 4; j++)
-#endif
 				pFloatMatrix[i * 4 + j] *= scale;
+	}
+	void Scale(float sx, float sy, float sz)
+	{
+		float *pFloatMatrix = (float*)&m_matrix;
+		for (int i = 0; i < 3; i++){
+			pFloatMatrix[i * 4 + 0] *= sx;
+			pFloatMatrix[i * 4 + 1] *= sy;
+			pFloatMatrix[i * 4 + 2] *= sz;
+		}
 	}
 
 
@@ -224,6 +229,7 @@ public:
 	void SetRotate(float xAngle, float yAngle, float zAngle);
 	void Rotate(float x, float y, float z);
 	void RotateX(float x);
+	void RotateY(float y);
 	void RotateZ(float z);
 
 	void Reorthogonalise(void);
