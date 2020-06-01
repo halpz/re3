@@ -1007,7 +1007,7 @@ CPlayerPed::FindWeaponLockOnTarget(void)
 	return true;
 }
 
-// --MIAMI: Done, but uncomment new weapon types when weapons got ported
+// --MIAMI: Done
 void
 CPlayerPed::ProcessAnimGroups(void)
 {

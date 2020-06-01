@@ -8662,6 +8662,7 @@ CPed::HaveReachedNextPointOnRoute(float distToCountReached)
 	return true;
 }
 
+// --MIAMI: Done
 void
 CPed::Idle(void)
 {
@@ -8683,39 +8684,9 @@ CPed::Idle(void)
 		}
 	}
 
-	CAnimBlendAssociation *armedIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_ARMED);
-	CAnimBlendAssociation *unarmedIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
-	int waitTime;
+	if (m_nMoveState != PEDMOVE_STILL && !IsPlayer())
+		SetMoveState(PEDMOVE_STILL);
 
-	if (m_nMoveState == PEDMOVE_STILL) {
-
-		eWeaponType curWeapon = GetWeapon()->m_eWeaponType;
-		if (!armedIdleAssoc ||
-			CTimer::GetTimeInMilliseconds() <= m_nWaitTimer && curWeapon != WEAPONTYPE_UNARMED && curWeapon != WEAPONTYPE_MOLOTOV && curWeapon != WEAPONTYPE_GRENADE) {
-
-			if ((!GetWeapon()->IsType2Handed() || curWeapon == WEAPONTYPE_SHOTGUN) && curWeapon != WEAPONTYPE_BASEBALLBAT
-				|| !unarmedIdleAssoc || unarmedIdleAssoc->blendAmount <= 0.95f || m_nWaitState != WAITSTATE_FALSE || CTimer::GetTimeInMilliseconds() <= m_nWaitTimer) {
-
-				m_moved = CVector2D(0.0f, 0.0f);
-				return;
-			}
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_ARMED, 3.0f);
-			waitTime = CGeneral::GetRandomNumberInRange(4000, 7500);
-		} else {
-			armedIdleAssoc->blendDelta = -2.0f;
-			armedIdleAssoc->flags |= ASSOC_DELETEFADEDOUT;
-			waitTime = CGeneral::GetRandomNumberInRange(3000, 8500);
-		}
-		m_nWaitTimer = CTimer::GetTimeInMilliseconds() + waitTime;
-	} else {
-		if (armedIdleAssoc) {
-			armedIdleAssoc->blendDelta = -8.0f;
-			armedIdleAssoc->flags |= ASSOC_DELETEFADEDOUT;
-			m_nWaitTimer = 0;
-		}
-		if (!IsPlayer())
-			SetMoveState(PEDMOVE_STILL);
-	}
 	m_moved = CVector2D(0.0f, 0.0f);
 }
 
@@ -17861,10 +17832,11 @@ CPed::SetObjective(eObjective newObj, CVector dest)
 	}
 }
 
+// --MIAMI: Done
 void
 CPed::SetMoveAnim(void)
 {
-	if (m_nStoredMoveState == m_nMoveState || !IsPedInControl())
+	if (m_nStoredMoveState == m_nMoveState || !IsPedInControl() || m_attachedTo)
 		return;
 
 	if (m_nMoveState == PEDMOVE_NONE) {
@@ -17880,12 +17852,14 @@ CPed::SetMoveAnim(void)
 
 	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_BLOCK);
 	if (!animAssoc) {
-		CAnimBlendAssociation *fightIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
-		animAssoc = fightIdleAssoc;
-		if (fightIdleAssoc && m_nPedState == PED_FIGHT)
+		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
+		if (!animAssoc)
+			animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
+
+		if (animAssoc && m_nPedState == PED_FIGHT)
 			return;
 
-		if (fightIdleAssoc) {
+		if (animAssoc) {
 			CAnimBlendAssociation *idleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
 			if (!idleAssoc || idleAssoc->blendDelta <= 0.0f) {
 				animAssoc->flags |= ASSOC_DELETEFADEDOUT;
