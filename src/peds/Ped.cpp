@@ -16630,6 +16630,8 @@ CPed::ScanForThreats(void)
 	
 	CPed *shooter = nil;
 	if ((fearFlags & PED_FLAG_GUN) && (shooter = CheckForGunShots()) && (m_nPedType != shooter->m_nPedType || m_nPedType == PEDTYPE_CIVMALE || m_nPedType == PEDTYPE_CIVFEMALE)) {
+//TODO(MIAMI): just a quick fix for heli weapons
+if(shooter->IsPed()){
 		if (!IsGangMember()) {
 			m_threatEntity = shooter;
 			m_threatEntity->RegisterReference((CEntity **) &m_threatEntity);
@@ -16641,6 +16643,7 @@ CPed::ScanForThreats(void)
 			m_threatEntity->RegisterReference((CEntity **) &m_threatEntity);
 			return CPedType::GetFlag(shooter->m_nPedType);
 		}
+}
 	}
 
 	CPed *deadPed = nil;

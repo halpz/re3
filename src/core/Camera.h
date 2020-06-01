@@ -382,6 +382,7 @@ public:
 	bool m_WideScreenOn;
 	bool m_1rstPersonRunCloseToAWall;
 	bool m_bHeadBob;
+	bool m_bVehicleSuspenHigh;
 	bool m_bFailedCullZoneTestPreviously;
 
 	bool m_FadeTargetIsSplashScreen;

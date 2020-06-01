@@ -41,7 +41,7 @@ enum Config {
 	NUMANIMBLOCKS = 35,
 	NUMANIMATIONS = 450,
 
-	NUMTEMPOBJECTS = 30,
+	NUMTEMPOBJECTS = 40,
 
 	// Path data
 	NUM_PATHNODES = 9650,
@@ -208,7 +208,7 @@ enum Config {
 #define RELOADABLES			// some debug menu options to reload TXD files
 #endif
 
-#define PC_WATER
+//#define PC_WATER
 #define WATER_CHEATS
 
 // Particle
