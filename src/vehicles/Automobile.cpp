@@ -846,7 +846,7 @@ CAutomobile::ProcessControl(void)
 
 			if(m_aSuspensionSpringRatio[0] < 1.0f || m_aSuspensionSpringRatio[1] < 1.0f ||
 			   m_aSuspensionSpringRatio[2] < 1.0f || m_aSuspensionSpringRatio[3] < 1.0f)
-				ApplyTurnForce(-0.008*Min(m_fTurnMass, 2500.0f)*GetUp(), -1.0f*GetForward());
+				ApplyTurnForce(-GRAVITY*Min(m_fTurnMass, 2500.0f)*GetUp(), -1.0f*GetForward());
 		}
 
 		brake = m_fBrakePedal * pHandling->fBrakeDeceleration * CTimer::GetTimeStep();
