@@ -1,10 +1,16 @@
 #pragma once
 
+#ifdef FIX_HIGH_FPS_BUGS_ON_FRONTEND
+#define PauseModeTime double
+#else
+#define PauseModeTime uint32
+#endif
+
 class CTimer
 {
 
 	static uint32 m_snTimeInMilliseconds;
-	static uint32 m_snTimeInMillisecondsPauseMode;
+	static PauseModeTime m_snTimeInMillisecondsPauseMode;
 	static uint32 m_snTimeInMillisecondsNonClipped;
 	static uint32 m_snPreviousTimeInMilliseconds;
 	static uint32 m_FrameCounter;
@@ -29,7 +35,7 @@ public:
 	static void SetTimeInMilliseconds(uint32 t) { m_snTimeInMilliseconds = t; }
 	static uint32 GetTimeInMillisecondsNonClipped(void) { return m_snTimeInMillisecondsNonClipped; }
 	static void SetTimeInMillisecondsNonClipped(uint32 t) { m_snTimeInMillisecondsNonClipped = t; }
-	static uint32 GetTimeInMillisecondsPauseMode(void) { return m_snTimeInMillisecondsPauseMode; }
+	static PauseModeTime GetTimeInMillisecondsPauseMode(void) { return m_snTimeInMillisecondsPauseMode; }
 	static void SetTimeInMillisecondsPauseMode(uint32 t) { m_snTimeInMillisecondsPauseMode = t; }
 	static uint32 GetPreviousTimeInMilliseconds(void) { return m_snPreviousTimeInMilliseconds; }
 	static void SetPreviousTimeInMilliseconds(uint32 t) { m_snPreviousTimeInMilliseconds = t; }
@@ -63,6 +69,6 @@ public:
 #endif
 };
 
-#ifdef FIX_BUGS
+#ifdef FIX_HIGH_FPS_BUGS_ON_FRONTEND
 extern double frameTime;
 #endif

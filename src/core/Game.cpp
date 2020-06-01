@@ -492,22 +492,7 @@ void CGame::ReInitGameObjectVariables(void)
 
 void CGame::ReloadIPLs(void)
 {
-	CTimer::Stop();
-	CWorld::RemoveStaticObjects();
-	ThePaths.Init();
-	CCullZones::Init();
-	CFileLoader::ReloadPaths("GTA3.IDE");
-	CFileLoader::LoadScene("INDUST.IPL");
-	CFileLoader::LoadScene("COMMER.IPL");
-	CFileLoader::LoadScene("SUBURBAN.IPL");
-	CFileLoader::LoadScene("CULL.IPL");
-	ThePaths.PreparePathData();
-	CTrafficLights::ScanForLightsOnMap();
-	CRoadBlocks::Init();
-	CCranes::InitCranes();
-	CGarages::Init();
-	CRenderer::SortBIGBuildings();
-	CTimer::Update();
+	// Empty and unused
 }
 
 void CGame::ShutDownForRestart(void)
@@ -578,7 +563,7 @@ void CGame::InitialiseWhenRestarting(void)
 			for ( int32 i = 0; i < 50; i++ )
 			{
 				HandleExit();
-				FrontEndMenuManager.MessageScreen("FED_LFL"); // Loading save game has failed. The game will restart now. 
+				FrontEndMenuManager.MessageScreen("FED_LFL", true); // Loading save game has failed. The game will restart now. 
 			}
 			
 			ShutDownForRestart();
