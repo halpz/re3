@@ -523,6 +523,7 @@ void CGame::ShutDownForRestart(void)
 	CTheScripts::UndoBuildingSwaps();
 	CTheScripts::UndoEntityInvisibilitySettings();
 	CWorld::ClearForRestart();
+	CGameLogic::ClearShortCut();
 	CTimer::Shutdown();
 	CStreaming::FlushRequestList();
 	CStreaming::DeleteAllRwObjects();

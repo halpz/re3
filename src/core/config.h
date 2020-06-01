@@ -115,6 +115,7 @@ enum Config {
 	NUMSHOTINFOS = 100,
 
 	NUMROADBLOCKS = 300,
+	NUM_SCRIPT_ROADBLOCKS = 16,
 
 	NUMVISIBLEENTITIES = 2000,
 	NUMINVISIBLEENTITIES = 150,
@@ -136,7 +137,8 @@ enum Config {
 
 	NUM_EXPLOSIONS = 48,
 
-	NUM_SETPIECES = 96
+	NUM_SETPIECES = 96,
+	NUM_SHORTCUT_START_POINTS = 16
 };
 
 // We'll use this once we're ready to become independent of the game
@@ -166,6 +168,7 @@ enum Config {
 #elif defined GTA_PC
 #	define GTA3_1_1_PATCH
 //#	define GTA3_STEAM_PATCH
+//# define GTAVC_JP_PATCH
 #	ifdef GTA_PS2_STUFF
 #		define USE_PS2_RAND
 #		define RANDOMSPLASH	// use random splash as on PS2
