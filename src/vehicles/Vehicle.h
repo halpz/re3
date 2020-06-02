@@ -242,7 +242,7 @@ public:
 	uint8 m_nCarHornDelay;
 	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
-	float m_fSteerRatio;
+	float m_fSteerInput;
 	eVehicleType m_vehType;
 
 	static void *operator new(size_t);
