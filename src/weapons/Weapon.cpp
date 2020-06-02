@@ -25,7 +25,8 @@
 #include "Stats.h"
 #include "TempColModels.h"
 #include "Timer.h"
-#include "Vehicle.h"
+#include "Automobile.h"
+#include "Boat.h"
 #include "WaterLevel.h"
 #include "WeaponInfo.h"
 #include "World.h"
@@ -1631,31 +1632,29 @@ CWeapon::FireInstantHitFromCar(CAutomobile *shooter, bool left)
 
 	CVehicleModelInfo *modelInfo = shooter->GetModelInfo();
 
-	#define FRONTSEATPOS() (&(shooter->IsBoat() ? modelInfo->m_positions[BOAT_POS_FRONTSEAT] : modelInfo->m_positions[CAR_POS_FRONTSEAT]))
-
 	CVector source, target;
 	if ( left )
 	{
 		source = shooter->GetMatrix() * CVector(-shooter->GetColModel()->boundingBox.max.x + -0.2f,
-												float(CGeneral::GetRandomNumber() & 255) * 0.001f + FRONTSEATPOS()->y,
-												FRONTSEATPOS()->z + 0.5f);
+												float(CGeneral::GetRandomNumber() & 255) * 0.001f + modelInfo->GetFrontSeatPosn().y,
+												modelInfo->GetFrontSeatPosn().z + 0.5f);
 		source += CTimer::GetTimeStep() * shooter->m_vecMoveSpeed;
 
 
 		target = shooter->GetMatrix() * CVector(-info->m_fRange,
-													FRONTSEATPOS()->y,
-													FRONTSEATPOS()->z + 0.5f);
+													modelInfo->GetFrontSeatPosn().y,
+													modelInfo->GetFrontSeatPosn().z + 0.5f);
 	}
 	else
 	{
 		source = shooter->GetMatrix() * CVector(shooter->GetColModel()->boundingBox.max.x + 0.2f,
-												float(CGeneral::GetRandomNumber() & 255) * 0.001f + FRONTSEATPOS()->y,
-												FRONTSEATPOS()->z + 0.5f);
+												float(CGeneral::GetRandomNumber() & 255) * 0.001f + modelInfo->GetFrontSeatPosn().y,
+												modelInfo->GetFrontSeatPosn().z + 0.5f);
 		source += CTimer::GetTimeStep() * shooter->m_vecMoveSpeed;
 
 		target = shooter->GetMatrix() * CVector(info->m_fRange,
-													FRONTSEATPOS()->y,
-													FRONTSEATPOS()->z + 0.5f);
+													modelInfo->GetFrontSeatPosn().y,
+													modelInfo->GetFrontSeatPosn().z + 0.5f);
 	}
 	#undef FRONTSEATPOS
 

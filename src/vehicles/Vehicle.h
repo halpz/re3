@@ -28,12 +28,6 @@ enum eCarLock {
 	CARLOCK_SKIP_SHUT_DOORS
 };
 
-
-enum
-{
-	BOAT_POS_FRONTSEAT
-};
-
 enum eDoors
 {
 	DOOR_BONNET = 0,

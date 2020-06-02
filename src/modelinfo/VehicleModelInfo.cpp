@@ -16,6 +16,7 @@
 #include "Train.h"
 #include "Plane.h"
 #include "Heli.h"
+#include "Bike.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 
@@ -120,16 +121,16 @@ RwObjectNameIdAssocation planeIds[] = {
 };
 
 RwObjectNameIdAssocation bikeIds[] = {
-	{ "chassis_dummy",	1,	0 },
-	{ "forks_front",	2,	0 },
-	{ "forks_rear",		3,	0 },
-	{ "wheel_front",	4,	0 },
-	{ "wheel_rear",		5,	0 },
-	{ "mudguard",		6,	0 },
-	{ "ped_frontseat",	2,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "headlights",		0,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "taillights",		1,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
-	{ "exhaust",		9,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "chassis_dummy",	BIKE_CHASSIS,	0 },
+	{ "forks_front",	BIKE_FORKS_FRONT,	0 },
+	{ "forks_rear",		BIKE_FORKS_REAR,	0 },
+	{ "wheel_front",	BIKE_WHEEL_FRONT,	0 },
+	{ "wheel_rear",		BIKE_WHEEL_REAR,	0 },
+	{ "mudguard",		BIKE_MUDGUARD,	0 },
+	{ "ped_frontseat",	CAR_POS_FRONTSEAT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "headlights",		CAR_POS_HEADLIGHTS,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "taillights",		CAR_POS_TAILLIGHTS,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "exhaust",		CAR_POS_EXHAUST,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
 	{ "extra1",		0,	VEHICLE_FLAG_DRAWLAST | VEHICLE_FLAG_COMP | CLUMP_FLAG_NO_HIERID },
 	{ "extra2",		0,	VEHICLE_FLAG_DRAWLAST | VEHICLE_FLAG_COMP | CLUMP_FLAG_NO_HIERID },
 	{ "extra3",		0,	VEHICLE_FLAG_DRAWLAST | VEHICLE_FLAG_COMP | CLUMP_FLAG_NO_HIERID },

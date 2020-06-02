@@ -145,8 +145,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	for(i = 0; i < 4; i++){
 		m_aGroundPhysical[i] = nil;
 		m_aGroundOffset[i] = CVector(0.0f, 0.0f, 0.0f);
-		m_aSuspensionSpringRatio[i] = 1.0f;
-		m_aSuspensionSpringRatioPrev[i] = m_aSuspensionSpringRatio[i];
+		m_aSuspensionSpringRatioPrev[i] = m_aSuspensionSpringRatio[i] = 1.0f;
 		m_aWheelTimer[i] = 0.0f;
 		m_aWheelRotation[i] = 0.0f;
 		m_aWheelSpeed[i] = 0.0f;
@@ -2314,6 +2313,17 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 	m_fSteerAngle = DEGTORAD(pHandling->fSteeringLock) * fValue;
 
 	if(bComedyControls){
+#if 0	// old comedy controls from PS2 - same as bike's
+		if(((CTimer::GetTimeInMilliseconds() >> 10) & 0xF) < 12)
+			m_fGasPedal = 1.0f;
+		if((((CTimer::GetTimeInMilliseconds() >> 10)+6) & 0xF) < 12)
+			m_fBrakePedal = 0.0f;
+		bIsHandbrakeOn = false;
+		if(CTimer::GetTimeInMilliseconds() & 0x800)
+			m_fSteerAngle += 0.08f;
+		else
+			m_fSteerAngle -= 0.03f;
+#else
 		int rnd = CGeneral::GetRandomNumber() % 10;
 		switch(m_comedyControlState){
 		case 0:
@@ -2333,8 +2343,10 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 				m_comedyControlState = 0;
 			break;
 		}
-	}else
+	}else{
 		m_comedyControlState = 0;
+#endif
+	}
 
 	// Brake if player isn't in control
 	// BUG: game always uses pad 0 here
@@ -3948,8 +3960,8 @@ CAutomobile::BurstTyre(uint8 wheel)
 			CCarCtrl::SwitchVehicleToRealPhysics(this);
 		}
 
-		ApplyMoveForce(GetRight() * CGeneral::GetRandomNumberInRange(-0.3f, 0.3f));
-		ApplyTurnForce(GetRight() * CGeneral::GetRandomNumberInRange(-0.3f, 0.3f), GetForward());
+		ApplyMoveForce(GetRight() * m_fMass * CGeneral::GetRandomNumberInRange(-0.03f, 0.03f));
+		ApplyTurnForce(GetRight() * m_fTurnMass * CGeneral::GetRandomNumberInRange(-0.03f, 0.03f), GetForward());
 	}
 }
 
@@ -3964,10 +3976,10 @@ CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset)
 	CVector seatPos;
 	switch(component){
 	case CAR_DOOR_RF:
-		seatPos = mi->m_positions[mi->m_vehicleType == VEHICLE_TYPE_BOAT ? BOAT_POS_FRONTSEAT : CAR_POS_FRONTSEAT];
+		seatPos = mi->GetFrontSeatPosn();
 		break;
 	case CAR_DOOR_LF:
-		seatPos = mi->m_positions[mi->m_vehicleType == VEHICLE_TYPE_BOAT ? BOAT_POS_FRONTSEAT : CAR_POS_FRONTSEAT];
+		seatPos = mi->GetFrontSeatPosn();
 		seatPos.x = -seatPos.x;
 		break;
 	case CAR_DOOR_RR:
@@ -4558,7 +4570,7 @@ CAutomobile::SetupModelNodes(void)
 	int i;
 	for(i = 0; i < NUM_CAR_NODES; i++)
 		m_aCarNodes[i] = nil;
-	CClumpModelInfo::FillFrameArray((RpClump*)m_rwObject, m_aCarNodes);
+	CClumpModelInfo::FillFrameArray(GetClump(), m_aCarNodes);
 }
 
 void

@@ -30,22 +30,6 @@ enum eCarNodes
 	NUM_CAR_NODES,
 };
 
-enum eCarPositions
-{
-	CAR_POS_HEADLIGHTS,
-	CAR_POS_TAILLIGHTS,
-	CAR_POS_FRONTSEAT,
-	CAR_POS_BACKSEAT,
-	// these are unused so we don't know the actual values
-	CAR_POS_REVERSELIGHTS,
-	CAR_POS_BRAKELIGHTS,
-	CAR_POS_INDICATORS_FRONT,
-	CAR_POS_INDICATORS_BACK,
-	CAR_POS_STEERWHEEL,
-	//
-	CAR_POS_EXHAUST
-};
-
 // These are used for all the wheel arrays
 // DON'T confuse with VEHWHEEL, which are vehicle components
 enum {

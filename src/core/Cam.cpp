@@ -5,6 +5,7 @@
 #include "World.h"
 #include "Vehicle.h"
 #include "Automobile.h"
+#include "Boat.h"
 #include "Ped.h"
 #include "PlayerPed.h"
 #include "CopPed.h"
@@ -2732,7 +2733,7 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 	}else{
 		assert(CamTargetEntity->IsVehicle());
 		CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(CamTargetEntity->GetModelIndex());
-		CVector CamPos = mi->m_vehicleType == VEHICLE_TYPE_BOAT ? mi->m_positions[BOAT_POS_FRONTSEAT] : mi->m_positions[CAR_POS_FRONTSEAT];
+		CVector CamPos = mi->GetFrontSeatPosn();
 		CamPos.x = 0.0f;
 		CamPos.y += -0.08f;
 		CamPos.z += 0.62f;

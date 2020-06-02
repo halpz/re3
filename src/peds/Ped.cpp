@@ -1682,11 +1682,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float seatP
 
 	switch (component) {
 		case CAR_DOOR_RF:
-			if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
-				vehDoorPos = vehModel->m_positions[BOAT_POS_FRONTSEAT];
-			else
-				vehDoorPos = vehModel->m_positions[CAR_POS_FRONTSEAT];
-
+			vehDoorPos = vehModel->GetFrontSeatPosn();
 			vehDoorPos.x += seatOffset;
 			vehDoorOffset.x = -vehDoorOffset.x;
 			break;
@@ -1698,11 +1694,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float seatP
 			break;
 
 		case CAR_DOOR_LF:
-			if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
-				vehDoorPos = vehModel->m_positions[BOAT_POS_FRONTSEAT];
-			else
-				vehDoorPos = vehModel->m_positions[CAR_POS_FRONTSEAT];
-
+			vehDoorPos = vehModel->GetFrontSeatPosn();
 			vehDoorPos.x = -(vehDoorPos.x + seatOffset);
 			break;
 
@@ -1712,11 +1704,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float seatP
 			break;
 
 		default:
-			if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
-				vehDoorPos = vehModel->m_positions[BOAT_POS_FRONTSEAT];
-			else
-				vehDoorPos = vehModel->m_positions[CAR_POS_FRONTSEAT];
-
+			vehDoorPos = vehModel->GetFrontSeatPosn();
 			vehDoorOffset = CVector(0.0f, 0.0f, 0.0f);
 	}
 	return vehDoorPos - vehDoorOffset;
@@ -15031,11 +15019,7 @@ CPed::SeekBoatPosition(void)
 		CVehicleModelInfo *boatModel = m_carInObjective->GetModelInfo();
 
 		CVector enterOffset;
-		if (boatModel->m_vehicleType == VEHICLE_TYPE_BOAT)
-			enterOffset = boatModel->m_positions[BOAT_POS_FRONTSEAT];
-		else
-			enterOffset = boatModel->m_positions[CAR_POS_FRONTSEAT];
-
+		enterOffset = boatModel->GetFrontSeatPosn();
 		enterOffset.x = 0.0f;
 		CMatrix boatMat(m_carInObjective->GetMatrix());
 		SetMoveState(PEDMOVE_WALK);
@@ -16817,29 +16801,20 @@ CPed::SetPedPositionInCar(void)
 	CMatrix newMat(m_pMyVehicle->GetMatrix());
 	CVector seatPos;
 	if (m_pMyVehicle->pDriver == this) {
-		if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
-			seatPos = vehModel->m_positions[BOAT_POS_FRONTSEAT];
-		else
-			seatPos = vehModel->m_positions[CAR_POS_FRONTSEAT];
-
+		seatPos = vehModel->GetFrontSeatPosn();
 		if (!m_pMyVehicle->IsBoat() && m_pMyVehicle->m_vehType != VEHICLE_TYPE_BIKE)
 			seatPos.x = -seatPos.x;
 
 	} else if (m_pMyVehicle->pPassengers[0] == this) {
-		if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT)
-			seatPos = vehModel->m_positions[BOAT_POS_FRONTSEAT];
-		else
-			seatPos = vehModel->m_positions[CAR_POS_FRONTSEAT];
+		seatPos = vehModel->GetFrontSeatPosn();
 	} else if (m_pMyVehicle->pPassengers[1] == this) {
 		seatPos = vehModel->m_positions[CAR_POS_BACKSEAT];
 		seatPos.x = -seatPos.x;
 	} else {
 		if (m_pMyVehicle->pPassengers[2] == this) {
 			seatPos = vehModel->m_positions[CAR_POS_BACKSEAT];
-		} else if (vehModel->m_vehicleType == VEHICLE_TYPE_BOAT) {
-			seatPos = vehModel->m_positions[BOAT_POS_FRONTSEAT];
 		} else {
-			seatPos = vehModel->m_positions[CAR_POS_FRONTSEAT];
+			seatPos = vehModel->GetFrontSeatPosn();
 		}
 	}
 	newMat.GetPosition() += Multiply3x3(newMat, seatPos);
