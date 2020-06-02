@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Skidmarks.h"
+
 enum eBikeNodes {
 	BIKE_NODE_NONE,
 	BIKE_CHASSIS,
@@ -60,7 +62,14 @@ public:
 	uint32 field_47C;
 	uint8 m_bike_unused2;
 	uint8 unused[3];	// looks like padding..but for what?
-	uint8 m_bike_flags;
+	uint8 m_bike_flag01 : 1;
+	uint8 m_bike_flag02 : 1;
+	uint8 m_bike_flag04 : 1;
+	uint8 m_bike_flag08 : 1;
+	uint8 m_bike_flag10 : 1;
+	uint8 m_bike_flag20 : 1;
+	uint8 m_bike_flag40 : 1;
+	uint8 m_bike_flag80 : 1;
 	int16 m_doingBurnout;
 	float m_fTireTemperature;
 	float someAngle;
