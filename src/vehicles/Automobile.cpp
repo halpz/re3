@@ -175,8 +175,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	for(i = 0; i < 4; i++){
 		m_aGroundPhysical[i] = nil;
 		m_aGroundOffset[i] = CVector(0.0f, 0.0f, 0.0f);
-		m_aSuspensionSpringRatio[i] = 1.0f;
-		m_aSuspensionSpringRatioPrev[i] = m_aSuspensionSpringRatio[i];
+		m_aSuspensionSpringRatioPrev[i] = m_aSuspensionSpringRatio[i] = 1.0f;
 		m_aWheelTimer[i] = 0.0f;
 		m_aWheelRotation[i] = 0.0f;
 		m_aWheelSpeed[i] = 0.0f;
@@ -4850,8 +4849,8 @@ CAutomobile::BurstTyre(uint8 wheel, bool applyForces)
 		}
 
 		if(applyForces){
-			ApplyMoveForce(GetRight() * CGeneral::GetRandomNumberInRange(-0.3f, 0.3f));
-			ApplyTurnForce(GetRight() * CGeneral::GetRandomNumberInRange(-0.3f, 0.3f), GetForward());
+			ApplyMoveForce(GetRight() * m_fMass * CGeneral::GetRandomNumberInRange(-0.03f, 0.03f));
+			ApplyTurnForce(GetRight() * m_fTurnMass * CGeneral::GetRandomNumberInRange(-0.03f, 0.03f), GetForward());
 		}
 	}
 }
@@ -4867,10 +4866,10 @@ CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset)
 	CVector seatPos;
 	switch(component){
 	case CAR_DOOR_RF:
-		seatPos = mi->m_positions[mi->m_vehicleType == VEHICLE_TYPE_BOAT ? BOAT_POS_FRONTSEAT : CAR_POS_FRONTSEAT];
+		seatPos = mi->GetFrontSeatPosn();
 		break;
 	case CAR_DOOR_LF:
-		seatPos = mi->m_positions[mi->m_vehicleType == VEHICLE_TYPE_BOAT ? BOAT_POS_FRONTSEAT : CAR_POS_FRONTSEAT];
+		seatPos = mi->GetFrontSeatPosn();
 		seatPos.x = -seatPos.x;
 		break;
 	case CAR_DOOR_RR:
@@ -4898,7 +4897,7 @@ CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset)
 
 	CVector dist = doorPos - seatPos;
 
-	// Removing that makes this func. return false for van doors.
+	// Removing that makes thiProcessEntityCollisions func. return false for van doors.
 	doorPos.z += 0.5f;
 	float length = dist.Magnitude();
 	CVector pedPos = seatPos + dist*((length+0.6f)/length);
@@ -5519,7 +5518,7 @@ CAutomobile::SetupModelNodes(void)
 	int i;
 	for(i = 0; i < NUM_CAR_NODES; i++)
 		m_aCarNodes[i] = nil;
-	CClumpModelInfo::FillFrameArray((RpClump*)m_rwObject, m_aCarNodes);
+	CClumpModelInfo::FillFrameArray(GetClump(), m_aCarNodes);
 }
 
 void

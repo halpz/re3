@@ -16,6 +16,7 @@
 #include "Boat.h"
 #include "Heli.h"
 #include "Automobile.h"
+#include "Bike.h"
 #include "Ped.h"
 #include "Particle.h"
 #include "Console.h"
@@ -112,6 +113,8 @@ SpawnCar(int id)
 		CVehicle *v;
 		if(CModelInfo::IsBoatModel(id))
 			v = new CBoat(id, RANDOM_VEHICLE);
+		if(CModelInfo::IsBikeModel(id))
+			v = new CBike(id, RANDOM_VEHICLE);
 		else
 			v = new CAutomobile(id, RANDOM_VEHICLE);
 
@@ -141,10 +144,12 @@ FixCar(void)
 	if(veh == nil)
 		return;
 	veh->m_fHealth = 1000.0f;
-	if(!veh->IsCar())
-		return;
-	((CAutomobile*)veh)->Damage.SetEngineStatus(0);
-	((CAutomobile*)veh)->Fix();
+	if(veh->IsCar()){
+		((CAutomobile*)veh)->Damage.SetEngineStatus(0);
+		((CAutomobile*)veh)->Fix();
+	}else if(veh->IsBike()){
+		((CBike*)veh)->Fix();
+	}
 }
 
 #ifdef MENU_MAP
@@ -355,6 +360,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Rhino", [](){ SpawnCar(MI_RHINO); });
 		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
 		DebugMenuAddCmd("Spawn", "Spawn Predator", [](){ SpawnCar(MI_PREDATOR); });
+		DebugMenuAddCmd("Spawn", "Spawn PCJ 600", [](){ SpawnCar(MI_PCJ600); });
 
 		DebugMenuAddVarBool8("Render", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVarBool8("Render", "Backface Culling", &gBackfaceCulling, nil);

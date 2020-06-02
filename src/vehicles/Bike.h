@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Vehicle.h"
 #include "Skidmarks.h"
 
 enum eBikeNodes {
@@ -14,20 +15,23 @@ enum eBikeNodes {
 	BIKE_NUM_NODES
 };
 
-enum eBikePositions
-{
-	BIKE_POS_HEADLIGHTS,
-	BIKE_POS_TAILLIGHTS,
-	BIKE_POS_FRONTSEAT,
-	BIKE_POS_BACKSEAT,
-	BIKE_POS_EXHAUST
+enum {
+	BIKEWHEEL_FRONT,
+	BIKEWHEEL_REAR,
+};
+
+enum {
+	BIKESUSP_FRONT_1,
+	BIKESUSP_FRONT_2,
+	BIKESUSP_REAR_1,
+	BIKESUSP_REAR_2,
 };
 
 class CBike : public CVehicle
 {
 public:
 	RwFrame *m_aBikeNodes[BIKE_NUM_NODES];
-	bool m_bLeanMatrixCalculated;
+	bool bLeanMatrixClean;
 	CMatrix m_leanMatrix;
 	CVector wheelieNormal;
 	CVector wheelieRight;
@@ -83,4 +87,43 @@ public:
 	uint8 m_nDriveWheelsOnGroundPrev;
 	float m_fGasPedalAudio;
 	tWheelState m_aWheelState[2];
+
+	CBike(int32 id, uint8 CreatedBy);
+
+	// from CEntity
+	void SetModelIndex(uint32 id);
+	void ProcessControl(void);
+	void Teleport(CVector v);
+	void PreRender(void);
+	void Render(void);
+
+	// from CPhysical
+	int32 ProcessEntityCollision(CEntity *ent, CColPoint *colpoints);
+
+	// from CVehicle
+	void ProcessControlInputs(uint8);
+	void GetComponentWorldPosition(int32 component, CVector &pos);
+	bool IsComponentPresent(int32 component);
+	void SetComponentRotation(int32 component, CVector rotation);
+	bool IsDoorReady(eDoors door);
+	bool IsDoorFullyOpen(eDoors door);
+	bool IsDoorClosed(eDoors door);
+	bool IsDoorMissing(eDoors door);
+	void RemoveRefsToVehicle(CEntity *ent);
+	void BlowUpCar(CEntity *ent);
+	bool SetUpWheelColModel(CColModel *colModel);
+	void BurstTyre(uint8 tyre, bool applyForces);
+	bool IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset);
+	float GetHeightAboveRoad(void);
+	void PlayCarHorn(void);
+
+	void PlayHornIfNecessary(void);
+	void ResetSuspension(void);
+	void SetupSuspensionLines(void);
+	void CalculateLeanMatrix(void);
+	void GetCorrectedWorldDoorPosition(CVector &pos, CVector p1, CVector p2);
+
+	void Fix(void);
+	void SetupModelNodes(void);
+	void ReduceHornCounter(void);
 };
