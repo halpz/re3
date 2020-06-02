@@ -2241,22 +2241,22 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 	// Steer left/right
 	if(CCamera::m_bUseMouse3rdPerson && !CVehicle::m_bDisableMouseSteering){
 		if(CPad::GetPad(pad)->GetMouseX() != 0.0f){
-			m_fSteerRatio += fMouseSteerSens*CPad::GetPad(pad)->GetMouseX();
+			m_fSteerInput += fMouseSteerSens*CPad::GetPad(pad)->GetMouseX();
 			nLastControlInput = 2;
-			if(Abs(m_fSteerRatio) < fMouseCentreRange)
-				m_fSteerRatio *= Pow(fMouseCentreMult, CTimer::GetTimeStep());
+			if(Abs(m_fSteerInput) < fMouseCentreRange)
+				m_fSteerInput *= Pow(fMouseCentreMult, CTimer::GetTimeStep());
 		}else if(CPad::GetPad(pad)->GetSteeringLeftRight() || nLastControlInput != 2){
 			// mouse hasn't move, steer with pad like below
-			m_fSteerRatio += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteerRatio)*
+			m_fSteerInput += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteerInput)*
 				0.2f*CTimer::GetTimeStep();
 			nLastControlInput = 0;
 		}
 	}else{
-		m_fSteerRatio += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteerRatio)*
+		m_fSteerInput += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteerInput)*
 			0.2f*CTimer::GetTimeStep();
 		nLastControlInput = 0;
 	}
-	m_fSteerRatio = clamp(m_fSteerRatio, -1.0f, 1.0f);
+	m_fSteerInput = clamp(m_fSteerInput, -1.0f, 1.0f);
 
 	// Accelerate/Brake
 	float acceleration = (CPad::GetPad(pad)->GetAccelerate() - CPad::GetPad(pad)->GetBrake())/255.0f;
@@ -2307,10 +2307,10 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 
 	// Actually turn wheels
 	static float fValue;	// why static?
-	if(m_fSteerRatio < 0.0f)
-		fValue = -sq(m_fSteerRatio);
+	if(m_fSteerInput < 0.0f)
+		fValue = -sq(m_fSteerInput);
 	else
-		fValue = sq(m_fSteerRatio);
+		fValue = sq(m_fSteerInput);
 	m_fSteerAngle = DEGTORAD(pHandling->fSteeringLock) * fValue;
 
 	if(bComedyControls){
