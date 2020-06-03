@@ -1144,7 +1144,7 @@ void CHud::DrawAfterFade()
 				m_fHelpMessageTime = CMessages::GetWideStringLength(m_HelpMessage) * 0.05f + 3.0f;
 
 				if (TheCamera.m_ScreenReductionPercentage == 0.0f)
-					DMAudio.PlayFrontEndSound(SOUND_A0, 0);
+					DMAudio.PlayFrontEndSound(SOUND_HUD_SOUND, 0);
 				break;
 			case 1:
 			case 2:
