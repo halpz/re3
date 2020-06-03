@@ -3119,6 +3119,17 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 	m_fSteerAngle = DEGTORAD(pHandling->fSteeringLock) * fValue;
 
 	if(bComedyControls){
+#if 0	// old comedy controls from PS2 - same as bike's
+		if(((CTimer::GetTimeInMilliseconds() >> 10) & 0xF) < 12)
+			m_fGasPedal = 1.0f;
+		if((((CTimer::GetTimeInMilliseconds() >> 10)+6) & 0xF) < 12)
+			m_fBrakePedal = 0.0f;
+		bIsHandbrakeOn = false;
+		if(CTimer::GetTimeInMilliseconds() & 0x800)
+			m_fSteerAngle += 0.08f;
+		else
+			m_fSteerAngle -= 0.03f;
+#else
 		int rnd = CGeneral::GetRandomNumber() % 10;
 		switch(m_comedyControlState){
 		case 0:
@@ -3138,8 +3149,10 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 				m_comedyControlState = 0;
 			break;
 		}
-	}else
+	}else{
 		m_comedyControlState = 0;
+#endif
+	}
 
 	// Brake if player isn't in control
 	// BUG: game always uses pad 0 here
@@ -3429,8 +3442,6 @@ CAutomobile::HydraulicControl(void)
 	if(m_hydraulicState < 20 && m_fVelocityChangeForAudio > 0.2f){
 		if(m_hydraulicState == 0){
 			m_hydraulicState = 20;
-			for(i = 0; i < 4; i++)
-				m_aWheelPosition[i] -= 0.06f;
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_1, 0.0f);
 			setPrevRatio = true;
 		}else{
