@@ -18606,15 +18606,12 @@ CPed::ClearFollowPath()
 void
 CPed::AddInCarAnims(CVehicle* car, bool isDriver)
 {
-	AnimationId anim;
-	AssocGroupId group;
 	if (car->IsBoat()) {
 		if (car->pHandling->Flags & HANDLING_SIT_IN_BOAT) {
-			anim = ANIM_CAR_SIT;
+			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
 		} else {
-			anim = ANIM_DRIVE_BOAT;
+			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT, 100.0f);
 		}
-		group = ASSOCGRP_STD;
 	} else if (car->IsBike()) {
 		if (isDriver) {
 			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ((CBike*)car)->m_bikeAnimType, ANIM_BIKE_RIDE, 100.0f);
@@ -18626,20 +18623,18 @@ CPed::AddInCarAnims(CVehicle* car, bool isDriver)
 	} else {
 		if (isDriver) {
 			if (car->bLowVehicle) {
-				anim = ANIM_CAR_LSIT;
+				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_LSIT, 100.0f);
 			} else {
-				anim = ANIM_CAR_SIT;
+				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
 			}
 		} else {
 			if (car->bLowVehicle) {
-				anim = ANIM_CAR_SITPLO;
+				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_SITPLO, 100.0f);
 			} else {
-				anim = ANIM_CAR_SITP;
+				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_SITP, 100.0f);
 			}
 		}
-		group = ASSOCGRP_STD;
 	}
-	m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), group, anim, 100.0f);
 
 	StopNonPartialAnims();
 }
