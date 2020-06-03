@@ -36,7 +36,7 @@ public:
 	CVector wheelieNormal;
 	CVector wheelieRight;
 	tBikeHandlingData *pBikeHandling;
-	int32 m_bikeAnimType;
+	AssocGroupId m_bikeAnimType;
 	uint8 m_wheelStatus[2];
 	CColPoint m_aWheelColPoints[4];
 	float m_aSuspensionSpringRatio[4];

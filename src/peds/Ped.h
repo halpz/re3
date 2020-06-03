@@ -245,6 +245,7 @@ enum eObjective : uint32 {
 enum {
 	RANDOM_CHAR = 1,
 	MISSION_CHAR,
+	TODO_CHAR, // TODO(Miami)
 };
 
 enum PedLineUpPhase {
@@ -281,7 +282,7 @@ enum PedState
 	PED_PURSUE,
 	PED_FOLLOW_PATH,
 	PED_SNIPER_MODE,
-	PED_ROCKET_ODE,
+	PED_ROCKET_MODE,
 	PED_DUMMY,
 	PED_PAUSE,
 	PED_ATTACK,
@@ -301,12 +302,17 @@ enum PedState
 	PED_INVESTIGATE,
 	PED_STEP_AWAY,
 	PED_ON_FIRE,
+	PED_SUN_BATHE,
+	PED_FLASH,
+	PED_JOG,
+	PED_ANSWER_MOBILE,
 
 	PED_UNKNOWN,	// Same with IDLE, but also infects up to 5 peds with same pedType and WANDER_PATH, so they become stone too. HANG_OUT in Fire_Head's idb
 
 	PED_STATES_NO_AI,
 
-	// One of these states isn't on PS2 - start
+	PED_ABSEIL,
+	PED_SIT,
 	PED_JUMP,
 	PED_FALL,
 	PED_GETUP,
@@ -317,7 +323,6 @@ enum PedState
 	PED_ENTER_TRAIN,
 	PED_EXIT_TRAIN,
 	PED_ARREST_PLAYER,
-	// One of these states isn't on PS2 - end
 
 	PED_DRIVING,
 	PED_PASSENGER,
@@ -332,6 +337,7 @@ enum PedState
 	PED_EXIT_CAR,
 	PED_HANDS_UP,
 	PED_ARRESTED,
+	PED_DEPLOY_STINGER
 };
 
 enum eMoveState {
@@ -518,7 +524,6 @@ public:
 	uint16 m_nPathNodes;
 	int16 m_nCurPathNode;
 	int8 m_nPathDir;
-public:
 	CPathNode *m_pLastPathNode;
 	CPathNode *m_pNextPathNode;
 	float m_fHealth;
@@ -559,6 +564,7 @@ public:
 	float m_fleeFromPosY;
 	CEntity *m_fleeFrom;
 	uint32 m_fleeTimer;
+	CEntity* pThreatEx; // TODO(Miami): What is this?
 	CEntity* m_collidingEntityWhileFleeing;
 	uint32 m_collidingThingTimer;
 	CEntity *m_pCollidingEntity;
@@ -825,6 +831,15 @@ public:
 	void RequestDelayedWeapon();
 	void AddInCarAnims(CVehicle* car, bool isDriver);
 	bool CanBeDamagedByThisGangMember(CPed*);
+	void AnswerMobile(void);
+	void BuyIceCream(void);
+	void CheckThreatValidity(void);
+	void ClearAnswerMobile(void);
+	void SetAnswerMobile(void);
+	void AttachPedToEntity(CEntity*, CVector, uint16, float, eWeaponType);
+	void DettachPedFromEntity();
+	void PedShuffle();
+	void DriveVehicle();
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -908,11 +923,7 @@ public:
 	void UpdatePosition(void);
 	CObject *SpawnFlyingComponent(int, int8);
 	void SetCarJack_AllClear(CVehicle*, uint32, uint32);
-#ifdef VC_PED_PORTS
 	bool CanPedJumpThis(CEntity*, CVector*);
-#else
-	bool CanPedJumpThis(CEntity*);
-#endif
 
 	void SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float, float, int);
 	void ClearWaitState(void);
@@ -1063,6 +1074,8 @@ public:
 #endif
 };
 
+void FinishTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
+void StartTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 
 // TODO(Miami): Change those when Ped struct is done

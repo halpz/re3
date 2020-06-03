@@ -9913,13 +9913,21 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		StoreParameters(&m_nIp, 3);
 		return 0;
 	case COMMAND_ATTACH_CHAR_TO_CAR:
-		// TODO(MIAMI)
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 8);
+		CPed *pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		CVehicle *pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+		pPed->AttachPedToEntity(pVehicle, *(CVector*)&ScriptParams[2], ScriptParams[5], DEGTORAD(ScriptParams[6]), (eWeaponType)ScriptParams[7]);
 		return 0;
+	}
 	case COMMAND_DETACH_CHAR_FROM_CAR:
-		// TODO(MIAMI)
-		assert(0);
+	{
+		CollectParameters(&m_nIp, 1);
+		CPed *pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		if (pPed && pPed->m_attachedTo)
+			pPed->DettachPedFromEntity();
 		return 0;
+	}
 	case COMMAND_SET_CAR_CHANGE_LANE: // for some reason changed in SA
 	{
 		CollectParameters(&m_nIp, 2);
@@ -10964,14 +10972,15 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
-		assert(pPed);
-		debug("SET_CHAR_SHUFFLE_INTO_DRIVERS_SEAT is not implemented\n");
+		pPed->PedShuffle();
 		return 0;
 	}
 	case COMMAND_ATTACH_CHAR_TO_OBJECT:
 	{
 		CollectParameters(&m_nIp, 8);
-		debug("ATTACH_CHAR_TO_OBJECT is not implemented\n");
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[1]);
+		pPed->AttachPedToEntity(pObject, *(CVector*)&ScriptParams[2], ScriptParams[5], DEGTORAD(ScriptParams[6]), (eWeaponType)ScriptParams[7]);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_AS_PLAYER_FRIEND:
@@ -11309,7 +11318,11 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_CHAR_ANSWERING_MOBILE:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("SET_CHAR_ANSWERING_MOBILE not implemented\n"); // TODO(MIAMI)
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		if (ScriptParams[1])
+			pPed->SetAnswerMobile();
+		else
+			pPed->ClearAnswerMobile();
 		return 0;
 	}
 	case COMMAND_SET_PLAYER_DRUNKENNESS:
@@ -11988,7 +12001,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_ADD_BIG_GUN_FLASH:
 	{
 		CollectParameters(&m_nIp, 6);
-		debug("ADD_BIG_GUN_FLASH not implemented\n"); // TODO(MIAMI)
+		CWeapon::AddGunFlashBigGuns(*(CVector*)&ScriptParams[0], *(CVector*)&ScriptParams[3]);
 		return 0;
 	}
 	case COMMAND_HAS_CHAR_BOUGHT_ICE_CREAM:

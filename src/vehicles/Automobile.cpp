@@ -1447,8 +1447,7 @@ CAutomobile::ProcessControl(void)
 					gun.FireProjectile(this, &source, 0.0f);
 
 					CStats::RoundsFiredByPlayer++;
-//TODO(MIAMI):
-//					DMAudio.PlayOneShot(m_audioEntityId, 55, 0.0f);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
 					m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
 				// Hunter gun
 				}else if(CPad::GetPad(0)->GetHandBrake() && CTimer::GetTimeInMilliseconds() > m_nGunFiringTime+60){
@@ -1458,8 +1457,7 @@ CAutomobile::ProcessControl(void)
 					gun.FireInstantHit(this, &source);
 					gun.AddGunshell(this, source, CVector2D(0.0f, 0.1f), 0.025f);
 					CStats::RoundsFiredByPlayer++;
-//TODO(MIAMI):
-//					DMAudio.PlayOneShot(m_audioEntityId, 55, 0.0f);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
 					m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
 				}
 			}else if(GetModelIndex() == MI_SEASPAR && GetStatus() == STATUS_PLAYER){
@@ -1471,8 +1469,7 @@ CAutomobile::ProcessControl(void)
 					gun.FireInstantHit(this, &source);
 					gun.AddGunshell(this, source, CVector2D(0.0f, 0.1f), 0.025f);
 					CStats::RoundsFiredByPlayer++;
-//TODO(MIAMI):
-//					DMAudio.PlayOneShot(m_audioEntityId, 55, 0.0f);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
 					m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
 				}
 			}
@@ -3032,7 +3029,7 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 
 	if(!CPad::GetPad(pad)->GetExitVehicle() ||
 	   pDriver && pDriver->m_pVehicleAnim && (pDriver->m_pVehicleAnim->animId == ANIM_CAR_ROLLOUT_LHS ||
-	                                          pDriver->m_pVehicleAnim->animId == ANIM_CAR_ROLLOUT_LHS2))
+	                                          pDriver->m_pVehicleAnim->animId == ANIM_CAR_ROLLOUT_RHS))
 		bIsHandbrakeOn = !!CPad::GetPad(pad)->GetHandBrake();
 	else
 		bIsHandbrakeOn = true;
@@ -4838,8 +4835,7 @@ CAutomobile::BurstTyre(uint8 wheel, bool applyForces)
 	if(status == WHEEL_STATUS_OK){
 		Damage.SetWheelStatus(wheel, WHEEL_STATUS_BURST);
 		CStats::TyresPopped++;
-// TODO(MIAMI)
-//		DMAudio.PlayOneShot(m_audioEntityId, SOUND_15, 0.0f);
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_TYRE_POP, 0.0f);
 
 		if(GetStatus() == STATUS_SIMPLE){
 			SetStatus(STATUS_PHYSICS);
@@ -5411,8 +5407,7 @@ CAutomobile::SetPanelDamage(int32 component, ePanels panel, bool noFlyingCompone
 	if(m_aCarNodes[component] == nil)
 		return;
 	if(status == PANEL_STATUS_SMASHED1){
-// TODO(MIAMI)
-//		DMAudio.PlayOneShot(m_audioEntityId, SOUND_12, 0.0f);
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_WINDSHIELD_CRACK, 0.0f);
 		// show damaged part
 		SetComponentVisibility(m_aCarNodes[component], ATOMIC_FLAG_DAM);
 	}else if(status == PANEL_STATUS_MISSING){
