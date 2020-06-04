@@ -3426,8 +3426,6 @@ CAutomobile::HydraulicControl(void)
 	if(m_hydraulicState < 20 && m_fVelocityChangeForAudio > 0.2f){
 		if(m_hydraulicState == 0){
 			m_hydraulicState = 20;
-			for(i = 0; i < 4; i++)
-				m_aWheelPosition[i] -= 0.06f;
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_1, 0.0f);
 			setPrevRatio = true;
 		}else{
