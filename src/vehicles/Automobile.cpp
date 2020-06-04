@@ -1595,7 +1595,7 @@ CAutomobile::ProcessControl(void)
 
 		if(this == FindPlayerVehicle())
 // BUG: this only observes one of the wheels
-			TheCamera.m_bVehicleSuspenHigh = suspChange > 0.05f;
+			TheCamera.m_bVehicleSuspenHigh = Abs(suspChange) > 0.05f;
 
 		m_aSuspensionSpringRatioPrev[i] = m_aSuspensionSpringRatio[i];
 		m_aSuspensionSpringRatio[i] = 1.0f;

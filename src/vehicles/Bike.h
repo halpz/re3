@@ -71,12 +71,12 @@ public:
 	uint8 bWaterTight : 1;
 	uint8 m_bike_flag08 : 1;
 	uint8 bIsStanding : 1;
-	uint8 m_bike_flag20 : 1;
+	uint8 bExtraSpeed : 1;	// leaning forward
 	uint8 m_bike_flag40 : 1;
 	uint8 m_bike_flag80 : 1;
 	int16 m_doingBurnout;
 	float m_fTireTemperature;
-	float someAngle;
+	float m_fBrakeDestabilization;
 	uint32 field_490;
 	float m_fFireBlowUpTimer;
 	CPhysical *m_aGroundPhysical[4];
