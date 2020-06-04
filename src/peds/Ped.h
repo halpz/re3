@@ -468,7 +468,7 @@ public:
 	CEntity *m_pCollidingEntity;
 	uint8 m_stateUnused;
 	uint32 m_timerUnused;
-	CVector2D *m_wanderRangeBounds;	// array with 2 CVector2D (actually unused CRange2D class) - unused
+	class CRange2D *m_wanderRangeBounds;
 	CWeapon m_weapons[WEAPONTYPE_TOTAL_INVENTORY_WEAPONS];
 	eWeaponType m_storedWeapon;
 	uint8 m_currentWeapon;			// eWeaponType

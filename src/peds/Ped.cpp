@@ -57,6 +57,7 @@
 #include "Timecycle.h"
 #include "ParticleObject.h"
 #include "Floater.h"
+#include "Range2D.h"
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
@@ -14927,17 +14928,9 @@ CPed::WanderRange(void)
 	bool arrived = Seek();
 	if (arrived) {
 		Idle();
-		if (((m_randomSeed % 256) + 3 * CTimer::GetFrameCounter()) % 1000 > 997) {
-
-			int xDiff = Abs(m_wanderRangeBounds[1].x - m_wanderRangeBounds[0].x);
-			int yDiff = Abs(m_wanderRangeBounds[1].y - m_wanderRangeBounds[0].y);
-
-			CVector newCoords(
-				(CGeneral::GetRandomNumber() % xDiff) + m_wanderRangeBounds[0].x,
-				(CGeneral::GetRandomNumber() % yDiff) + m_wanderRangeBounds[0].y,
-				GetPosition().z);
-
-			SetSeek(newCoords, 2.5f);
+		if ((m_randomSeed + 3 * CTimer::GetFrameCounter()) % 1000 > 997) {
+			CVector2D newCoords2D = m_wanderRangeBounds->GetRandomPointInRange();
+			SetSeek(CVector(newCoords2D.x, newCoords2D.y, GetPosition().z), 2.5f);
 		}
 	}
 }

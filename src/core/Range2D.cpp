@@ -18,5 +18,11 @@ CRange2D::DebugShowRange(float, int)
 CVector2D
 CRange2D::GetRandomPointInRange()
 {
-	return CVector2D(CGeneral::GetRandomNumberInRange(min.x, max.x), CGeneral::GetRandomNumberInRange(min.y, max.y));
+	int distX = Abs(max.x - min.x);
+	int distY = Abs(max.y - min.y);
+
+	float outX = CGeneral::GetRandomNumber() % distX + min.x;
+	float outY = CGeneral::GetRandomNumber() % distY + min.y;
+
+	return CVector2D(outX, outY);
 }

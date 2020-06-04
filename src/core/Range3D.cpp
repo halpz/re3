@@ -18,6 +18,13 @@ CRange3D::DebugShowRange(float, int)
 CVector
 CRange3D::GetRandomPointInRange()
 {
-	return CVector(CGeneral::GetRandomNumberInRange(min.x, max.x), CGeneral::GetRandomNumberInRange(min.y, max.y),
-	               CGeneral::GetRandomNumberInRange(min.z, max.z));
+	int distX = Abs(max.x - min.x);
+	int distY = Abs(max.y - min.y);
+	int distZ = Abs(max.z - min.z);
+
+	float outX = CGeneral::GetRandomNumber() % distX + min.x;
+	float outY = CGeneral::GetRandomNumber() % distY + min.y;
+	float outZ = CGeneral::GetRandomNumber() % distZ + min.z;
+
+	return CVector(outX, outY, outZ);
 }
