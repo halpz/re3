@@ -220,6 +220,7 @@ void
 CAutomobile::ProcessControl(void)
 {
 	int i;
+	float wheelRot;
 	CColModel *colModel;
 
 	if(bUsingSpecialColModel)
@@ -372,11 +373,9 @@ CAutomobile::ProcessControl(void)
 
 		pHandling->Transmission.CalculateGearForSimpleCar(AutoPilot.m_fMaxTrafficSpeed/50.0f, m_nCurrentGear);
 
-		{
-		float wheelRot = ProcessWheelRotation(WHEEL_STATE_NORMAL, GetForward(), m_vecMoveSpeed, 0.35f);
+		wheelRot = ProcessWheelRotation(WHEEL_STATE_NORMAL, GetForward(), m_vecMoveSpeed, 0.35f);
 		for(i = 0; i < 4; i++)
 			m_aWheelRotation[i] += wheelRot;
-		}
 
 		PlayHornIfNecessary();
 		ReduceHornCounter();
@@ -618,7 +617,7 @@ CAutomobile::ProcessControl(void)
 		for(i = 0; i < 4; i++){
 			if(m_aSuspensionSpringRatio[i] < 1.0f){
 				float bias = pHandling->fSuspensionBias;
-				if(i == 1 || i == 3)	// rear
+				if(i == CARWHEEL_REAR_LEFT || i == CARWHEEL_REAR_RIGHT)
 					bias = 1.0f - bias;
 
 				ApplySpringCollision(pHandling->fSuspensionForceLevel,
