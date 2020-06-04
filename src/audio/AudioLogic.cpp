@@ -1554,27 +1554,23 @@ cAudioManager::UsesSirenSwitching(int32 model) const
 	}
 }
 
-void
+bool
 cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 {
 	const float SOUND_INTENSITY = 110.0f;
 
 	if (params->m_fDistance < SQR(SOUND_INTENSITY)) {
 		CVehicle *veh = params->m_pVehicle;
-		if (veh->m_bSirenOrAlarm == false && veh->m_nAlarmState <= 0)
-			return;
+		if (veh->m_bSirenOrAlarm == false && !veh->IsAlarmOn())
+			return true;
 
-#ifdef FIX_BUGS
-		if (params->m_pVehicle->GetStatus() == STATUS_WRECKED)
-			return;
-#endif
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		m_sQueueSample.m_nVolume = ComputeVolume(80, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 5;
 			if (UsesSiren(params->m_nIndex)) {
 				if (params->m_pVehicle->GetStatus() == STATUS_ABANDONED)
-					return;
+					return true;
 				if (veh->m_nCarHornTimer && params->m_nIndex != FIRETRUK) {
 					m_sQueueSample.m_nSampleIndex = SFX_SIREN_FAST;
 					if (params->m_nIndex == FBICAR)
@@ -1604,8 +1600,11 @@ cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 			m_sQueueSample.m_bReverbFlag = true;
 			m_sQueueSample.m_bRequireReflection = false;
 			AddSampleToRequestedQueue();
-		}
-	}
+			return true;
+		} else
+			return true;
+	} else
+		return false;
 }
 
 bool
@@ -2046,7 +2045,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			maxDist = SQR(SOUND_INTENSITY);
 			break;
 		}
-		case SOUND_17: {
+		case SOUND_BOAT_SLOWDOWN: {
 			const float SOUND_INTENSITY = 50.0f;
 			m_sQueueSample.m_nSampleIndex = SFX_POLICE_BOAT_THUMB_OFF;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -2059,8 +2058,8 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			maxDist = SQR(SOUND_INTENSITY);
 			break;
 		}
-		case SOUND_18:
-		case SOUND_19: {
+		case SOUND_TRAIN_DOOR_CLOSE:
+		case SOUND_TRAIN_DOOR_OPEN: {
 			const float SOUND_INTENSITY = 35.0f;
 			m_sQueueSample.m_nSampleIndex = SFX_AIR_BRAKES;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -2414,7 +2413,7 @@ cAudioManager::ProcessBoatEngine(cVehicleParams *params)
 					m_sQueueSample.m_nSampleIndex = SFX_POLICE_BOAT_IDLE;
 					if (LastAccel > 20) {
 						oneShotVol = LastVol;
-						PlayOneShot(m_sQueueSample.m_nEntityIndex, SOUND_17, oneShotVol);
+						PlayOneShot(m_sQueueSample.m_nEntityIndex, SOUND_BOAT_SLOWDOWN, oneShotVol);
 					}
 				} else {
 					emittingVol = 105 * padAccelerate / 255 + 15;
@@ -8002,7 +8001,7 @@ cAudioManager::ProcessFrontEnd()
 			processedPickup = true;
 			stereo = true;
 			break;
-		case SOUND_4A:
+		case SOUND_PICKUP_ERROR:
 			m_sQueueSample.m_nSampleIndex = SFX_PICKUP_ERROR_LEFT;
 			processedPickup = true;
 			stereo = true;
@@ -8037,19 +8036,19 @@ cAudioManager::ProcessFrontEnd()
 			m_sQueueSample.m_nSampleIndex = SFX_START_BUTTON_LEFT;
 			stereo = true;
 			break;
-		case SOUND_FRONTEND_MENU_COMPLETED:
+		case SOUND_FRONTEND_MENU_NEW_PAGE:
 			m_sQueueSample.m_nSampleIndex = SFX_PAGE_CHANGE_AND_BACK_LEFT;
 			stereo = true;
 			break;
-		case SOUND_FRONTEND_MENU_DENIED:
+		case SOUND_FRONTEND_MENU_NAVIGATION:
 			m_sQueueSample.m_nSampleIndex = SFX_HIGHLIGHT_LEFT;
 			stereo = true;
 			break;
-		case SOUND_FRONTEND_MENU_SUCCESS:
+		case SOUND_FRONTEND_MENU_SETTING_CHANGE:
 			m_sQueueSample.m_nSampleIndex = SFX_SELECT_LEFT;
 			stereo = true;
 			break;
-		case SOUND_FRONTEND_EXIT:
+		case SOUND_FRONTEND_MENU_BACK:
 			m_sQueueSample.m_nSampleIndex = SFX_SUB_MENU_BACK_LEFT;
 			stereo = true;
 			break;
@@ -8071,7 +8070,7 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_FRONTEND_RADIO_CHANGE:
 			m_sQueueSample.m_nSampleIndex = SFX_RADIO_CLICK;
 			break;
-		case SOUND_A0:
+		case SOUND_HUD:
 			m_sQueueSample.m_nSampleIndex = SFX_INFO;
 			break;
 		default:

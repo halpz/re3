@@ -829,6 +829,9 @@ CPed::ClearAimFlag(void)
 		bIsAimingGun = false;
 		bIsRestoringGun = true;
 		m_pedIK.m_flags &= ~CPedIK::AIMS_WITH_ARM;
+#ifdef VC_PED_PORTS
+		m_lookTimer = 0;
+#endif
 	}
 
 	if (IsPlayer())
@@ -3378,9 +3381,14 @@ CPed::SetStoredState(void)
 		if (m_nMoveState == PEDMOVE_NONE || m_nMoveState == PEDMOVE_STILL)
 			m_nMoveState = PEDMOVE_WALK;
 	}
-	m_nLastPedState = m_nPedState;
-	if (m_nMoveState >= m_nPrevMoveState)
-		m_nPrevMoveState = m_nMoveState;
+#ifdef VC_PED_PORTS
+	if (m_nPedState != PED_IDLE)
+#endif
+	{
+		m_nLastPedState = m_nPedState;
+		if (m_nMoveState >= m_nPrevMoveState)
+			m_nPrevMoveState = m_nMoveState;
+	}
 }
 
 void
@@ -5149,7 +5157,10 @@ CPed::SetWaitState(eWaitState state, void *time)
 		case WAITSTATE_DOUBLEBACK:
 			m_headingRate = 0.0f;
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 3500;
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_HBHB, 4.0f);
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_HBHB, 4.0f);
+#ifdef FIX_BUGS
+			animAssoc->SetFinishCallback(RestoreHeadingRateCB, this);
+#endif
 			break;
 		case WAITSTATE_HITWALL:
 			m_headingRate = 2.0f;
@@ -5183,7 +5194,10 @@ CPed::SetWaitState(eWaitState state, void *time)
 			SetMoveAnim();
 			m_headingRate = 0.0f;
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 5000;
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 4.0f);
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 4.0f);
+#ifdef FIX_BUGS
+			animAssoc->SetFinishCallback(RestoreHeadingRateCB, this);
+#endif
 
 			if (m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER && CharCreatedBy == RANDOM_CHAR && m_nPedState == PED_SEEK_CAR) {
 				ClearObjective();
@@ -5196,7 +5210,11 @@ CPed::SetWaitState(eWaitState state, void *time)
 			SetMoveAnim();
 			m_headingRate = 0.0f;
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 5000;
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_HBHB, 4.0f);
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_HBHB, 4.0f);
+#ifdef FIX_BUGS
+			animAssoc->SetFinishCallback(RestoreHeadingRateCB, this);
+#endif
+
 			break;
 		case WAITSTATE_PLAYANIM_COWER:
 			waitAnim = ANIM_HANDSCOWER;
@@ -5238,7 +5256,10 @@ CPed::SetWaitState(eWaitState state, void *time)
 			SetMoveAnim();
 			m_headingRate = 0.0f;
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 2500;
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 4.0f);
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 4.0f);
+#ifdef FIX_BUGS
+			animAssoc->SetFinishCallback(RestoreHeadingRateCB, this);
+#endif
 			break;
 		default:
 			m_nWaitState = WAITSTATE_FALSE;
@@ -5730,6 +5751,9 @@ CPed::SetChat(CEntity *chatWith, uint32 time)
 
 	m_nPedState = PED_CHAT;
 	SetMoveState(PEDMOVE_STILL);
+#ifdef VC_PED_PORTS
+	m_lookTimer = 0;
+#endif
 	SetLookFlag(chatWith, true);
 	m_standardTimer = CTimer::GetTimeInMilliseconds() + time;
 	m_lookTimer = CTimer::GetTimeInMilliseconds() + 3000;
@@ -5738,10 +5762,7 @@ CPed::SetChat(CEntity *chatWith, uint32 time)
 void
 CPed::SetDead(void)
 {
-#ifdef VC_PED_PORTS
-	if (!RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DROWN))
-#endif
-		bUsesCollision = false;
+	bUsesCollision = false;
 
 	m_fHealth = 0.0f;
 	if (m_nPedState == PED_DRIVING)
@@ -9236,17 +9257,6 @@ CPed::ProcessControl(void)
 
 					float oldDestRot = CGeneral::LimitRadianAngle(m_fRotationDest);
 
-#ifdef VC_PED_PORTS
-					if (m_nPedState == PED_FOLLOW_PATH) {
-						if (DotProduct(m_vecDamageNormal, GetForward()) < -0.866f && CanPedJumpThis(collidingEnt, &m_vecDamageNormal)) {
-							SetJump();
-
-							// Moved break into here, for compatibility with III
-							break;
-						}
-						// break;
-					}
-#endif
 					if (m_pedInObjective &&
 						(m_objective == OBJECTIVE_GOTO_CHAR_ON_FOOT || m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT)) {
 
@@ -10072,7 +10082,7 @@ CPed::ProcessControl(void)
 				case PED_SEEK_ENTITY:
 				case PED_PURSUE:
 				case PED_SNIPER_MODE:
-				case PED_ROCKET_ODE:
+				case PED_ROCKET_MODE:
 				case PED_DUMMY:
 				case PED_FACE_PHONE:
 				case PED_MAKE_CALL:
