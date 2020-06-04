@@ -21,10 +21,10 @@ enum {
 };
 
 enum {
-	BIKESUSP_FRONT_1,
-	BIKESUSP_FRONT_2,
-	BIKESUSP_REAR_1,
-	BIKESUSP_REAR_2,
+	BIKESUSP_F1,
+	BIKESUSP_F2,
+	BIKESUSP_R1,
+	BIKESUSP_R2,
 };
 
 class CBike : public CVehicle
@@ -33,8 +33,8 @@ public:
 	RwFrame *m_aBikeNodes[BIKE_NUM_NODES];
 	bool bLeanMatrixClean;
 	CMatrix m_leanMatrix;
-	CVector wheelieNormal;
-	CVector wheelieRight;
+	CVector m_vecAvgSurfaceNormal;
+	CVector m_vecAvgSurfaceRight;
 	tBikeHandlingData *pBikeHandling;
 	AssocGroupId m_bikeAnimType;
 	uint8 m_wheelStatus[2];
@@ -58,7 +58,7 @@ public:
 	float m_fFrontForkY;
 	float m_fFrontForkZ;
 	float m_fFrontForkSlope;
-	float m_fBikeSteerAngle;
+	float m_fWheelAngle;
 	float m_fLeanLRAngle;
 	float m_fLeanLRAngle2;
 	float m_fLeanInput;
@@ -68,9 +68,9 @@ public:
 	uint8 unused[3];	// looks like padding..but for what?
 	uint8 m_bike_flag01 : 1;
 	uint8 m_bike_flag02 : 1;
-	uint8 m_bike_flag04 : 1;
+	uint8 bWaterTight : 1;
 	uint8 m_bike_flag08 : 1;
-	uint8 m_bike_flag10 : 1;
+	uint8 bIsStanding : 1;
 	uint8 m_bike_flag20 : 1;
 	uint8 m_bike_flag40 : 1;
 	uint8 m_bike_flag80 : 1;
@@ -117,6 +117,9 @@ public:
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
+	void VehicleDamage(void);
+	void ProcessBuoyancy(void);
+	void DoDriveByShootings(void);
 	void PlayHornIfNecessary(void);
 	void ResetSuspension(void);
 	void SetupSuspensionLines(void);

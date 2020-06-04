@@ -128,11 +128,13 @@ enum eVehicleAppearance
 	VEHICLE_APPEARANCE_PLANE,
 };
 
-// TODO
+// TODO: what is this even?
 enum eBikeWheelSpecial
 {
-	BIKE_WHEEL_2 = 2,
-	BIKE_WHEEL_3,
+	BIKE_WHEELSPEC_0,	// both wheels on ground
+	BIKE_WHEELSPEC_1,	// rear wheel on ground
+	BIKE_WHEELSPEC_2,	// only front wheel on ground
+	BIKE_WHEELSPEC_3,	// can't happen
 };
 
 enum

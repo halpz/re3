@@ -255,6 +255,7 @@ void
 CAutomobile::ProcessControl(void)
 {
 	int i;
+	float wheelRot;
 	CColModel *colModel;
 
 	if(bUsingSpecialColModel)
@@ -422,7 +423,7 @@ CAutomobile::ProcessControl(void)
 					float slowdown;
 					CVector parallelSpeed = m_vecMoveSpeed - DotProduct(m_vecMoveSpeed, GetUp())*m_vecMoveSpeed;
 					float fSpeed = parallelSpeed.MagnitudeSqr();
-					if(fSpeed > 0.09f){
+					if(fSpeed > SQR(0.3f)){
 						fSpeed = Sqrt(fSpeed);
 						parallelSpeed *= 0.3f / fSpeed;
 						slowdown = SAND_SLOWDOWN * Max(1.0f - 2.0f*fSpeed, 0.2f);
@@ -461,11 +462,9 @@ CAutomobile::ProcessControl(void)
 
 		pHandling->Transmission.CalculateGearForSimpleCar(AutoPilot.m_fMaxTrafficSpeed/50.0f, m_nCurrentGear);
 
-		{
-		float wheelRot = ProcessWheelRotation(WHEEL_STATE_NORMAL, GetForward(), m_vecMoveSpeed, 0.35f);
+		wheelRot = ProcessWheelRotation(WHEEL_STATE_NORMAL, GetForward(), m_vecMoveSpeed, 0.35f);
 		for(i = 0; i < 4; i++)
 			m_aWheelRotation[i] += wheelRot;
-		}
 
 		PlayHornIfNecessary();
 		ReduceHornCounter();
@@ -500,7 +499,7 @@ CAutomobile::ProcessControl(void)
 		break;
 
 	case STATUS_ABANDONED:
-		if(m_vecMoveSpeed.MagnitudeSqr() < 0.01f)
+		if(m_vecMoveSpeed.MagnitudeSqr() < SQR(0.1f))
 			m_fBrakePedal = 0.2f;
 		else
 			m_fBrakePedal = 0.0f;
@@ -529,7 +528,7 @@ CAutomobile::ProcessControl(void)
 		break;
 
 	case STATUS_PLAYER_DISABLED:
-		if(m_vecMoveSpeed.MagnitudeSqr() < 0.01f ||
+		if(m_vecMoveSpeed.MagnitudeSqr() < SQR(0.1f) ||
 		   (pDriver && pDriver->IsPlayer() &&
 		    (pDriver->GetPedState() == PED_ARRESTED ||
 		     pDriver->GetPedState() == PED_DRAG_FROM_CAR ||
@@ -770,7 +769,7 @@ CAutomobile::ProcessControl(void)
 		for(i = 0; i < 4; i++){
 			if(m_aSuspensionSpringRatio[i] < 1.0f){
 				float bias = pHandling->fSuspensionBias;
-				if(i == 1 || i == 3)	// rear
+				if(i == CARWHEEL_REAR_LEFT || i == CARWHEEL_REAR_RIGHT)
 					bias = 1.0f - bias;
 
 				ApplySpringCollisionAlt(pHandling->fSuspensionForceLevel,
@@ -822,7 +821,6 @@ CAutomobile::ProcessControl(void)
 				m_aGroundPhysical[i] = nil;
 			}
 		}
-
 
 		bool gripCheat = true;
 		fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward());
@@ -1062,6 +1060,7 @@ CAutomobile::ProcessControl(void)
 			}else if(m_doingBurnout && !mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier)){
 				rearBrake = 0.0f;
 				rearTraction = 0.0f;
+				// BUG: missing timestep
 				ApplyTurnForce(contactPoints[CARWHEEL_REAR_LEFT], -0.001f*m_fTurnMass*m_fSteerAngle*GetRight());
 			}else if(m_fTireTemperature > 1.0f){
 				rearTraction *= m_fTireTemperature;
@@ -1155,7 +1154,7 @@ CAutomobile::ProcessControl(void)
 		}
 
 		if(m_doingBurnout && !mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) &&
-	           (m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING || m_aWheelState[CARWHEEL_REAR_RIGHT])){
+	           (m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING || m_aWheelState[CARWHEEL_REAR_RIGHT] == WHEEL_STATE_SPINNING)){
 			m_fTireTemperature += 0.001f*CTimer::GetTimeStep();
 			if(m_fTireTemperature > 3.0f)
 				m_fTireTemperature = 3.0f;
@@ -1375,14 +1374,14 @@ CAutomobile::ProcessControl(void)
 
 		// Flying
 
-		bool foo = false;
+		bool playRotorSound = false;
 		if(GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE && GetStatus() != STATUS_PHYSICS){
 			if(IsRealHeli()){
 				bEngineOn = false;
 				m_aWheelSpeed[1] = Max(m_aWheelSpeed[1]-0.0005f, 0.0f);
 				if(GetModelIndex() != MI_RCRAIDER && GetModelIndex() != MI_RCGOBLIN)
 					if(m_aWheelSpeed[1] < 0.154f && m_aWheelSpeed[1] > 0.0044f)
-						foo = true;
+						playRotorSound = true;
 			}
 		}else if((GetModelIndex() == MI_DODO || CVehicle::bAllDodosCheat) &&
 		         m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
@@ -1476,10 +1475,25 @@ CAutomobile::ProcessControl(void)
 
 			if(GetModelIndex() != MI_RCRAIDER && GetModelIndex() != MI_RCGOBLIN)
 				if(m_aWheelSpeed[1] < 0.154f && m_aWheelSpeed[1] > 0.0044f)
-					foo = true;
+					playRotorSound = true;
 		}
 
-//TODO(MIAMI): propeller stuff
+		// Play rotor sound
+		if(playRotorSound && m_aCarNodes[CAR_BONNET]){
+			CVector camDist = TheCamera.GetPosition() - GetPosition();
+			float distSq = camDist.MagnitudeSqr();
+			if(distSq < SQR(20.0f) && Abs(m_fPropellerRotation - m_aWheelRotation[1]) > DEGTORAD(30.0f)){
+				CMatrix mat;
+				mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_BONNET]));
+				CVector blade = mat.GetRight();
+				blade = GetMatrix() * blade;
+				camDist /= Max(Sqrt(distSq), 0.01f);
+				if(Abs(DotProduct(camDist, blade)) > 0.95f){
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_31, 0.0f);
+					m_fPropellerRotation = m_aWheelRotation[1];
+				}
+			}
+		}
 	}
 
 
@@ -1559,8 +1573,10 @@ CAutomobile::ProcessControl(void)
 	for(i = 0; i < 4; i++){
 		float suspChange = m_aSuspensionSpringRatioPrev[i] - m_aSuspensionSpringRatio[i];
 		if(suspChange > 0.3f && !drivingInSand && speedsq > 0.04f){
-//TODO(MIAMI): depends on wheel status
-			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP, suspChange);
+			if(Damage.GetWheelStatus(i) == WHEEL_STATUS_BURST)
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP_2, suspChange);
+			else
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP, suspChange);
 			if(suspChange > suspShake)
 				suspShake = suspChange;
 		}
@@ -4192,12 +4208,12 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 			   pDriver &&
 			   m_pDamageEntity && m_pDamageEntity->IsVehicle() &&
 			   (this != FindPlayerVehicle() || ((CVehicle*)m_pDamageEntity)->VehicleCreatedBy == MISSION_VEHICLE) &&
+// TODO(MIAMI): enum
 			   ((CVehicle*)m_pDamageEntity)->pDriver){
-// TODO(MIAMI)
-//				if(GetVehicleAppearance() == VEHICLE_APPEARANCE_CAR)
-//					pDriver->Say(145);
-//				else
-//					pDriver->Say(144);
+				if(GetVehicleAppearance() == VEHICLE_APPEARANCE_CAR)
+					pDriver->Say(145);
+				else
+					pDriver->Say(144);
 			}
 
 			int oldHealth = m_fHealth;
@@ -4828,7 +4844,6 @@ CAutomobile::BurstTyre(uint8 wheel, bool applyForces)
 	case CAR_PIECE_WHEEL_LR: wheel = VEHWHEEL_REAR_LEFT; break;
 	case CAR_PIECE_WHEEL_RF: wheel = VEHWHEEL_FRONT_RIGHT; break;
 	case CAR_PIECE_WHEEL_RR: wheel = VEHWHEEL_REAR_RIGHT; break;
-	default: assert(0 && "invalid wheel");
 	}
 
 	int status = Damage.GetWheelStatus(wheel);

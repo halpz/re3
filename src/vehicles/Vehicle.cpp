@@ -926,7 +926,7 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 	if(bAlreadySkidding)
 		adhesion *= pHandling->fTractionLoss;
 
-	if(special == BIKE_WHEEL_2 || special == BIKE_WHEEL_3)
+	if(special == BIKE_WHEELSPEC_2 || special == BIKE_WHEELSPEC_3)
 		contactSpeedRight = 0.0f;
 	else
 		contactSpeedRight = DotProduct(wheelContactSpeed, wheelRight);
