@@ -458,7 +458,6 @@ CPhysical::ApplyFrictionTurnForce(float jx, float jy, float jz, float px, float 
 	m_vecTurnFriction += turnimpulse*(1.0f/m_fTurnMass);
 }
 
-bool debugSprings;
 bool
 CPhysical::ApplySpringCollision(float springConst, CVector &springDir, CVector &point, float springRatio, float bias)
 {
@@ -468,10 +467,6 @@ CPhysical::ApplySpringCollision(float springConst, CVector &springDir, CVector &
 		float impulse = -GRAVITY*m_fMass*step * springConst * compression * bias*2.0f;
 		ApplyMoveForce(springDir*impulse);
 		ApplyTurnForce(springDir*impulse, point);
-if(debugSprings){
-printf("spring : %.3f %.3f %.3f\n", springDir.x*impulse, springDir.y*impulse, springDir.z*impulse);
-printf("speed: %.3f %.3f %.3f\n", m_vecMoveSpeed.x, m_vecMoveSpeed.y, m_vecMoveSpeed.z);
-}
 	}
 	return true;
 }
@@ -489,11 +484,6 @@ CPhysical::ApplySpringCollisionAlt(float springConst, CVector &springDir, CVecto
 			impulse *= 0.75f;
 		ApplyMoveForce(forceDir*impulse);
 		ApplyTurnForce(forceDir*impulse, point);
-if(debugSprings){
-printf("spring alt: %.3f %.3f %.3f   %.3f\n", forceDir.x*impulse, forceDir.y*impulse, forceDir.z*impulse, springRatio);
-printf("speed: %.3f %.3f %.3f\n", m_vecMoveSpeed.x, m_vecMoveSpeed.y, m_vecMoveSpeed.z);
-printf("pos: %.3f %.3f %.3f\n", GetPosition().x, GetPosition().y, GetPosition().z);
-}
 	}
 	return true;
 }
