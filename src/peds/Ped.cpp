@@ -66,48 +66,6 @@ uint16 gnNumTempPedList;
 
 static CColPoint aTempPedColPts[MAX_COLLISION_POINTS];
 
-// Corresponds to ped sounds (from SOUND_PED_DEATH to SOUND_PED_TAXI_CALL)
-PedAudioData CommentWaitTime[39] = {
-	{500, 800, 500, 2},
-	{500, 800, 500, 2},
-	{500, 800, 500, 2},
-	{500, 800, 500, 2},
-	{100, 2, 100, 2},
-	{700, 500, 1000, 500},
-	{700, 500, 1000, 500},
-	{5000, 2000, 15000, 3000},
-	{5000, 2000, 15000, 3000},
-	{5000, 2000, 15000, 3000},
-	{6000, 6000, 6000, 6000},
-	{1000, 1000, 2000, 2000},
-	{1000, 500, 2000, 1500},
-	{1000, 500, 2000, 1500},
-	{800, 200, 1000, 500},
-	{800, 200, 1000, 500},
-	{800, 400, 2000, 1000},
-	{800, 400, 2000, 1000},
-	{400, 300, 2000, 1000},
-	{2000, 1000, 2500, 1500},
-	{200, 200, 200, 200},
-	{6000, 3000, 5000, 6000},
-	{6000, 3000, 9000, 5000},
-	{6000, 3000, 9000, 5000},
-	{6000, 3000, 9000, 5000},
-	{400, 300, 4000, 1000},
-	{400, 300, 4000, 1000},
-	{400, 300, 4000, 1000},
-	{1000, 500, 3000, 1000},
-	{1000, 500, 1000, 1000},
-	{3000, 2000, 3000, 2000},
-	{1000, 500, 3000, 6000},
-	{1000, 500, 2000, 4000},
-	{1000, 500, 2000, 5000},
-	{1000, 500, 3000, 2000},
-	{1600, 1000, 2000, 2000},
-	{3000, 2000, 5000, 3000},
-	{1000, 1000, 1000, 1000},
-	{1000, 1000, 5000, 5000},
-};
 uint16 nPlayerInComboMove;
 
 RpClump *flyingClumpTemp;
@@ -160,226 +118,9 @@ void *CPed::operator new(size_t sz, int handle) { return CPools::GetPedPool()->N
 void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }
 void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((CPed*)p); }
 
-static char ObjectiveText[][28] = {
-	"No Obj",
-	"Wait on Foot",
-	"Flee on Foot Till Safe",
-	"Guard Spot",
-	"Guard Area",
-	"Wait in Car",
-	"Wait in Car then Getout",
-	"Kill Char on Foot",
-	"Kill Char Any Means",
-	"Flee Char on Foot Till Safe",
-	"Flee Char on Foot Always",
-	"GoTo Char on Foot",
-	"Follow Char in Formation",
-	"Leave Car",
-	"Enter Car as Passenger",
-	"Enter Car as Driver",
-	"Follow Car in Car",
-	"Fire at Obj from Vehicle",
-	"Destroy Obj",
-	"Destroy Car",
-	"GoTo Area Any Means",
-	"GoTo Area on Foot",
-	"Run to Area",
-	"GoTo Area in Car",
-	"Follow Car on Foot Woffset",
-	"Guard Attack",
-	"Set Leader",
-	"Follow Route",
-	"Solicit",
-	"Take Taxi",
-	"Catch Train",
-	"Buy IceCream",
-	"Steal Any Car",
-	"Mug Char",
-#ifdef VC_PED_PORTS
-	"Leave Car and Die"
-#endif
-};
-
-static char StateText[][18] = {
-	"None",
-	"Idle",
-	"Look Entity",
-	"Look Heading",
-	"Wander Range",
-	"Wander Path",
-	"Seek Pos",
-	"Seek Entity",
-	"Flee Pos",
-	"Flee Entity",
-	"Pursue",
-	"Follow Path",
-	"Sniper Mode",
-	"Rocket Mode",
-	"Dummy",
-	"Pause",
-	"Attack",
-	"Fight",
-	"Face Phone",
-	"Make Call",
-	"Chat",
-	"Mug",
-	"AimGun",
-	"AI Control",
-	"Seek Car",
-	"Seek InBoat",
-	"Follow Route",
-	"C.P.R.",
-	"Solicit",
-	"Buy IceCream",
-	"Investigate",
-	"Step away",
-	"On Fire",
-	"Unknown",
-	"STATES_NO_AI",
-	"Jump",
-	"Fall",
-	"GetUp",
-	"Stagger",
-	"Dive away",
-	"STATES_NO_ST",
-	"Enter Train",
-	"Exit Train",
-	"Arrest Plyr",
-	"Driving",
-	"Passenger",
-	"Taxi Passngr",
-	"Open Door",
-	"Die",
-	"Dead",
-	"CarJack",
-	"Drag fm Car",
-	"Enter Car",
-	"Steal Car",
-	"Exit Car",
-	"Hands Up",
-	"Arrested",
-};
-
-static char PersonalityTypeText[][18] = {
-	"Player",
-	"Cop",
-	"Medic",
-	"Fireman",
-	"Gang 1",
-	"Gang 2",
-	"Gang 3",
-	"Gang 4",
-	"Gang 5",
-	"Gang 6",
-	"Gang 7",
-	"Street Guy",
-	"Suit Guy",
-	"Sensible Guy",
-	"Geek Guy",
-	"Old Guy",
-	"Tough Guy",
-	"Street Girl",
-	"Suit Girl",
-	"Sensible Girl",
-	"Geek Girl",
-	"Old Girl",
-	"Tough Girl",
-	"Tramp Male",
-	"Tramp Female",
-	"Tourist",
-	"Prostitute",
-	"Criminal",
-	"Busker",
-	"Taxi Driver",
-	"Psycho",
-	"Steward",
-	"Sports Fan",
-	"Shopper",
-	"Old Shopper"
-};
-
-static char WaitStateText[][16] = {
-	"No Wait",
-	"Traffic Lights",
-	"Pause CrossRoad",
-	"Look CrossRoad",
-	"Look Ped",
-	"Look Shop",
-	"Look Accident",
-	"FaceOff Gang",
-	"Double Back",
-	"Hit Wall",
-	"Turn 180deg",
-	"Surprised",
-	"Ped Stuck",
-	"Look About",
-	"Play Duck",
-	"Play Cower",
-	"Play Taxi",
-	"Play HandsUp",
-	"Play HandsCower",
-	"Play Chat",
-	"Finish Flee",
-};
-
 #ifdef TOGGLEABLE_BETA_FEATURES
 bool CPed::bPopHeadsOnHeadshot = false;
 bool CPed::bMakePedsRunToPhonesToReportCrimes = false;
-#endif
-
-#ifndef MASTER
-int nDisplayDebugInfo = 0;
-
-void
-CPed::SwitchDebugDisplay(void)
-{
-	nDisplayDebugInfo = !nDisplayDebugInfo;
-}
-
-void
-CPed::DebugRenderOnePedText(void)
-{
-	if ((GetPosition() - TheCamera.GetPosition()).MagnitudeSqr() < sq(30.0f)) {
-		float width, height;
-		RwV3d screenCoords;
-		CVector bitAbove = GetPosition();
-		bitAbove.z += 2.0f;
-		if (CSprite::CalcScreenCoors(bitAbove, &screenCoords, &width, &height, true)) {
-
-			float lineHeight = SCREEN_SCALE_Y(Min(height/100.0f, 0.7f) * 22.0f);
-
-			DefinedState();
-			CFont::SetPropOn();
-			CFont::SetBackgroundOn();
-
-			// Originally both of them were being divided by 60.0f.
-			float xScale = Min(width / 240.0f, 0.7f);
-			float yScale = Min(height / 80.0f, 0.7f);
-
-			CFont::SetScale(SCREEN_SCALE_X(xScale), SCREEN_SCALE_Y(yScale));
-			CFont::SetCentreOn();
-			CFont::SetCentreSize(SCREEN_WIDTH);
-			CFont::SetJustifyOff();
-			CFont::SetColor(CRGBA(255, 255, 0, 255));
-			CFont::SetBackGroundOnlyTextOn();
-			CFont::SetFontStyle(0);
-			AsciiToUnicode(StateText[m_nPedState], gUString);
-			CFont::PrintString(screenCoords.x, screenCoords.y, gUString);
-			AsciiToUnicode(ObjectiveText[m_objective], gUString);
-			CFont::PrintString(screenCoords.x, screenCoords.y + lineHeight, gUString);
-			AsciiToUnicode(PersonalityTypeText[m_pedStats->m_type], gUString);
-			CFont::PrintString(screenCoords.x, screenCoords.y + 2 * lineHeight, gUString);
-			AsciiToUnicode(WaitStateText[m_nWaitState], gUString);
-			CFont::PrintString(screenCoords.x, screenCoords.y + 3 * lineHeight, gUString);
-			if (m_nPedState == PED_SEEK_POS || m_nPedState == PED_SEEK_ENTITY) {
-				sprintf(gString, "Safe distance to target: %.2f", m_distanceToCountSeekDone);
-				AsciiToUnicode(gString, gUString);
-				CFont::PrintString(screenCoords.x, screenCoords.y + 4 * lineHeight, gUString);
-			}
-			DefinedState();
-		}
-	}
-}
 #endif
 
 CPed::~CPed(void)
@@ -2369,7 +2110,7 @@ CPed::SetupLighting(void)
 
 #ifndef MASTER
 	// Originally this was being called through iteration of Sectors, but putting it here is better.
-	if (nDisplayDebugInfo && !IsPlayer())
+	if (GetDebugDisplay() != 0 && !IsPlayer())
 		DebugRenderOnePedText();
 #endif
 
@@ -5563,78 +5304,6 @@ CPed::PlayHitSound(CPed *hitTo)
 
 	if (soundId != NO_SND)
 		DMAudio.PlayOneShot(m_audioEntityId, soundId, 0.0f);
-}
-
-void
-CPed::Say(uint16 audio)
-{
-	uint16 audioToPlay = audio;
-
-	if (IsPlayer()) {
-
-		// Ofc this part isn't in VC.
-		switch (audio) {
-			case SOUND_PED_DEATH:
-				audioToPlay = SOUND_PED_DAMAGE;
-				break;
-			case SOUND_PED_DAMAGE:
-			case SOUND_PED_HIT:
-			case SOUND_PED_LAND:
-				break;
-			case SOUND_PED_BULLET_HIT:
-			case SOUND_PED_CAR_JACKED:
-			case SOUND_PED_DEFEND:
-				audioToPlay = SOUND_PED_HIT;
-				break;
-			default:
-				return;
-		}
-	} else {
-		if (3.0f + TheCamera.GetPosition().z < GetPosition().z)
-			return;
-
-		if (TheCamera.m_CameraAverageSpeed > 1.65f) {
-#ifdef VC_PED_PORTS
-			if (audio != SOUND_PED_DAMAGE && audio != SOUND_PED_HIT && audio != SOUND_PED_LAND)
-#endif
-				return;
-
-		} else if (TheCamera.m_CameraAverageSpeed > 1.25f) {
-			if (audio != SOUND_PED_DEATH &&
-#ifdef VC_PED_PORTS
-				audio != SOUND_PED_DAMAGE && audio != SOUND_PED_HIT && audio != SOUND_PED_LAND &&
-#endif
-				audio != SOUND_PED_TAXI_WAIT && audio != SOUND_PED_EVADE)
-				return;
-
-		} else if (TheCamera.m_CameraAverageSpeed > 0.9f) {
-			switch (audio) {
-				case SOUND_PED_DEATH:
-#ifdef VC_PED_PORTS
-				case SOUND_PED_DAMAGE:
-				case SOUND_PED_HIT:
-				case SOUND_PED_LAND:
-#endif
-				case SOUND_PED_BURNING:
-				case SOUND_PED_FLEE_SPRINT:
-				case SOUND_PED_TAXI_WAIT:
-				case SOUND_PED_EVADE:
-				case SOUND_PED_CAR_COLLISION:
-					break;
-				default:
-					return;
-			}
-		}
-	}
-
-	if (audioToPlay < m_queuedSound) {
-		if (audioToPlay != m_lastQueuedSound || audioToPlay == SOUND_PED_DEATH
-			|| CommentWaitTime[audioToPlay - SOUND_PED_DEATH].m_nOverrideMaxRandomDelayTime
-				+ m_lastSoundStart
-				+ (uint32) CGeneral::GetRandomNumberInRange(0, CommentWaitTime[audioToPlay - SOUND_PED_DEATH].m_nMaxRandomDelayTime) <= CTimer::GetTimeInMilliseconds()) {
-			m_queuedSound = audioToPlay;
-		}
-	}
 }
 
 void
@@ -11053,12 +10722,6 @@ CPed::SetJump(void)
 	}
 }
 
-bool
-CPed::ServiceTalkingWhenDead(void)
-{
-	return m_queuedSound == SOUND_PED_DEATH;
-}
-
 void
 CPed::RemoveInCarAnims(void)
 {
@@ -16245,34 +15908,6 @@ CPed::SeekCar(void)
 						SetMoveState(PEDMOVE_STILL);
 					}
 				}
-			}
-		}
-	}
-}
-
-void
-CPed::ServiceTalking(void)
-{
-	if (!bBodyPartJustCameOff || m_bodyPartBleeding != PED_HEAD) {
-		if (CGeneral::faststricmp(CModelInfo::GetModelInfo(GetModelIndex())->GetName(), "bomber")) {
-			if (m_nPedState == PED_ON_FIRE)
-				m_queuedSound = SOUND_PED_BURNING;
-		} else {
-			m_queuedSound = SOUND_PED_BOMBER;
-		}
-		if (m_queuedSound != SOUND_NO_SOUND) {
-			if (m_queuedSound == SOUND_PED_DEATH)
-				m_soundStart = CTimer::GetTimeInMilliseconds() - 1;
-
-			if (CTimer::GetTimeInMilliseconds() > m_soundStart) {
-				DMAudio.PlayOneShot(m_audioEntityId, m_queuedSound, 1.0f);
-				m_lastSoundStart = CTimer::GetTimeInMilliseconds();
-				m_soundStart =
-					CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nFixedDelayTime
-					+ CTimer::GetTimeInMilliseconds()
-					+ CGeneral::GetRandomNumberInRange(0, CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nOverrideFixedDelayTime);
-				m_lastQueuedSound = m_queuedSound;
-				m_queuedSound = SOUND_NO_SOUND;
 			}
 		}
 	}

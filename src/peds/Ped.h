@@ -879,8 +879,21 @@ public:
 
 #ifndef MASTER
 	// Mobile things
+	void DebugDrawPedDestination(CPed *, int, int);
+	void DebugDrawPedDesiredHeading(CPed *, int, int);
+	void DebugDrawCollisionRadius(float, float, float, float, int);
+	void DebugDrawVisionRange(CVector, float);
+	void DebugDrawVisionSimple(CVector, float);
+	void DebugDrawLook();
+	void DebugDrawPedPsyche();
+	void DebugDrawDebugLines();
+
 	static void SwitchDebugDisplay(void);
+	static int GetDebugDisplay(void);
+
+	void DebugDrawLookAtPoints();
 	void DebugRenderOnePedText(void);
+	void DebugRenderClosePedText();
 #endif
 
 #ifdef PED_SKIN
