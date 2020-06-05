@@ -96,7 +96,7 @@ CBike::CBike(int32 id, uint8 CreatedBy)
 	m_bike_flag08 = false;
 	bIsStanding = false;
 	bExtraSpeed = false;
-	m_bike_flag40 = false;
+	bIsOnFire = false;
 	m_bike_flag80 = false;
 
 	m_fTireTemperature = 0.0f;
@@ -209,22 +209,35 @@ CBike::ProcessControl(void)
 
 			if(m_fLeanInput < 0.0f){
 				m_vecCentreOfMass.y = pHandling->CentreOfMass.y + pBikeHandling->fLeanBakCOM*m_fLeanInput;
+				CVector com = m_vecCentreOfMass;
+#ifdef FIX_BUGS
+				// center of mass has to have world space orientation. unfortunately we can't do wheelies
+				// at high speed then, flipping y here is like riding south without this fix where wheelies work
+				com.y = -com.y;
+				com = Multiply3x3(GetMatrix(), com);
+#endif
 				if(m_fBrakePedal == 0.0f && !bIsHandbrakeOn || m_nWheelsOnGround == 0){
 					if(GetModelIndex() == MI_SANCHEZ){
 						float force = m_fLeanInput*m_fTurnMass*pBikeHandling->fLeanBackForce*Min(m_vecMoveSpeed.Magnitude(), 0.1f);
 						force *= 0.7f*m_fGasPedal + 0.3f;
-						ApplyTurnForce(-force*CTimer::GetTimeStep()*GetUp(), m_vecCentreOfMass+GetForward());
+						ApplyTurnForce(-force*CTimer::GetTimeStep()*GetUp(), com+GetForward());
 					}else{
 						float force = m_fLeanInput*m_fTurnMass*pBikeHandling->fLeanBackForce*Min(m_vecMoveSpeed.Magnitude(), 0.1f);
 						force *= 0.5f*m_fGasPedal + 0.5f;
-						ApplyTurnForce(-force*CTimer::GetTimeStep()*GetUp(), m_vecCentreOfMass+GetForward());
+						ApplyTurnForce(-force*CTimer::GetTimeStep()*GetUp(), com+GetForward());
 					}
 				}
 			}else{
 				m_vecCentreOfMass.y = pHandling->CentreOfMass.y + pBikeHandling->fLeanFwdCOM*m_fLeanInput;
+				CVector com = m_vecCentreOfMass;
+#ifdef FIX_BUGS
+				// see above
+				com.y = -com.y;
+				com = Multiply3x3(GetMatrix(), com);
+#endif
 				if(m_fBrakePedal < 0.0f || m_nWheelsOnGround == 0){
 					float force = m_fLeanInput*m_fTurnMass*pBikeHandling->fLeanFwdForce*Min(m_vecMoveSpeed.Magnitude(), 0.1f);
-					ApplyTurnForce(-force*CTimer::GetTimeStep()*GetUp(), m_vecCentreOfMass+GetForward());
+					ApplyTurnForce(-force*CTimer::GetTimeStep()*GetUp(), com+GetForward());
 				}
 			}
 
@@ -388,12 +401,10 @@ CBike::ProcessControl(void)
 		float turnY = localTurnSpeed.y*(res.y - 1.0f);
 
 		res = -GetUp() * turnY * m_fTurnMass;
-		// BUG? matrix multiplication
-		ApplyTurnForce(res, GetRight() + Multiply3x3(GetMatrix(),m_vecCentreOfMass));
+		ApplyTurnForce(res, GetRight() + Multiply3x3(GetMatrix(), m_vecCentreOfMass));
 
 		res = GetUp() * turnX * m_fTurnMass;
-		// BUG? matrix multiplication
-		ApplyTurnForce(res, GetForward() + Multiply3x3(GetMatrix(),m_vecCentreOfMass));
+		ApplyTurnForce(res, GetForward() + Multiply3x3(GetMatrix(), m_vecCentreOfMass));
 
 		if(GetStatus() != STATUS_PLAYER)
 			m_vecCentreOfMass = pHandling->CentreOfMass;
@@ -1049,6 +1060,41 @@ CBike::ProcessControl(void)
 			}
 		}
 	}
+
+	if(m_fHealth < 250.0f && GetStatus() != STATUS_WRECKED){
+		// Car is on fire
+
+		CVector damagePos, fireDir;
+
+		// move fire forward if in first person
+		if(this == FindPlayerVehicle() && TheCamera.GetLookingForwardFirstPerson()){
+			damagePos = CVector(0.0f, 1.2f, -0.4f);
+			fireDir = CVector(0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.01125f, 0.09f));
+		}else{
+			damagePos = ((CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()))->m_positions[CAR_POS_BACKSEAT];
+			damagePos.z -= 0.3f;
+			fireDir = CGeneral::GetRandomNumberInRange(0.02025f, 0.09f) * GetRight();
+			fireDir -= CGeneral::GetRandomNumberInRange(0.02025f, 0.18f) * GetForward();
+			fireDir.z = CGeneral::GetRandomNumberInRange(0.00225f, 0.018f);
+		}
+
+		damagePos = GetMatrix()*damagePos;
+		CParticle::AddParticle(PARTICLE_CARFLAME, damagePos, fireDir,
+			nil, 0.9f);
+
+		CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, damagePos, CVector(0.0f, 0.0f, 0.0f), nil, 0.5f);
+
+		damagePos.x += CGeneral::GetRandomNumberInRange(-0.5625f, 0.5625f),
+		damagePos.y += CGeneral::GetRandomNumberInRange(-0.5625f, 0.5625f),
+		damagePos.z += CGeneral::GetRandomNumberInRange(0.5625f, 2.25f);
+		CParticle::AddParticle(PARTICLE_CARFLAME_SMOKE, damagePos, CVector(0.0f, 0.0f, 0.0f));
+
+		// Blow up car after 5 seconds
+		m_fFireBlowUpTimer += CTimer::GetTimeStepInMilliseconds();
+		if(m_fFireBlowUpTimer > 5000.0f)
+			BlowUpCar(m_pSetOnFireEntity);
+	}else
+		m_fFireBlowUpTimer = 0.0f;
 
 	ProcessDelayedExplosion();
 
@@ -1915,7 +1961,7 @@ void
 CBike::Fix(void)
 {
 	bIsDamaged = false;
-	m_bike_flag40 = false;
+	bIsOnFire = false;
 	m_wheelStatus[0] = WHEEL_STATUS_OK;
 	m_wheelStatus[1] = WHEEL_STATUS_OK;
 }

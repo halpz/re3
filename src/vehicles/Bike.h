@@ -72,7 +72,7 @@ public:
 	uint8 m_bike_flag08 : 1;
 	uint8 bIsStanding : 1;
 	uint8 bExtraSpeed : 1;	// leaning forward
-	uint8 m_bike_flag40 : 1;
+	uint8 bIsOnFire : 1;
 	uint8 m_bike_flag80 : 1;
 	int16 m_doingBurnout;
 	float m_fTireTemperature;

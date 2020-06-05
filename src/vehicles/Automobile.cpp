@@ -1546,10 +1546,8 @@ CAutomobile::ProcessControl(void)
 
 		// Blow up car after 5 seconds
 		m_fFireBlowUpTimer += CTimer::GetTimeStepInMilliseconds();
-		if(m_fFireBlowUpTimer > 5000.0f){
-			CWorld::Players[CWorld::PlayerInFocus].AwardMoneyForExplosion(this);
+		if(m_fFireBlowUpTimer > 5000.0f)
 			BlowUpCar(m_pSetOnFireEntity);
-		}
 	}else
 		m_fFireBlowUpTimer = 0.0f;
 
