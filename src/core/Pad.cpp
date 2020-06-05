@@ -984,7 +984,7 @@ int Cheat_strncmp(char* sourceStr, char* origCheatStr)
 	char cheatCodeVals[] = { 3,5,7,1,13,27,3,7,1,11,13,8,7,32,13,6,28,19,10,3,3,5,7,1,13,27,3,7 };
 
 	for (int32 i = 0; i < strlen(origCheatStr); i++) {
-		if ((sourceStr[i] != origCheatStr[i] - cheatCodeVals[i]) || i >= 28) {
+		if ((sourceStr[i] != origCheatStr[i] - cheatCodeVals[i]) || i >= ARRAY_SIZE(cheatCodeVals)) {
 			return 1;
 		}
 	}
