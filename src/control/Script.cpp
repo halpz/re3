@@ -4,6 +4,7 @@
 #include "ScriptCommands.h"
 
 #include "AnimBlendAssociation.h"
+#include "Bike.h"
 #include "Boat.h"
 #include "BulletInfo.h"
 #include "Camera.h"
@@ -2189,9 +2190,12 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		else {
 			CVehicle* car;
 
-			// TODO(MIAMI)
-			//if (!CModelInfo::IsBikeModel(ScriptParams[0]))
-			car = new CAutomobile(ScriptParams[0], MISSION_VEHICLE);
+			if (!CModelInfo::IsBikeModel(ScriptParams[0]))
+				car = new CAutomobile(ScriptParams[0], MISSION_VEHICLE);
+			else {
+				car = new CBike(ScriptParams[0], MISSION_VEHICLE);
+				((CBike*)(car))->bIsStanding = true;
+			}
 			CVector pos = *(CVector*)&ScriptParams[1];
 			if (pos.z <= MAP_Z_LOW_LIMIT)
 				pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
@@ -7406,7 +7410,13 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 				if (pPed->GetPedState() == PED_EXIT_CAR || pPed->GetPedState() == PED_DRAG_FROM_CAR) {
 					uint8 flags = 0;
 					if (pPed->m_pMyVehicle->IsBike()) {
-						//TODO(MIAMI)
+						if (pPed->m_vehEnterType == CAR_DOOR_LF ||
+							pPed->m_vehEnterType == CAR_DOOR_RF ||
+							pPed->m_vehEnterType == CAR_WINDSCREEN)
+							flags = CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_RF;
+						else if (pPed->m_vehEnterType == CAR_DOOR_LR ||
+							pPed->m_vehEnterType == CAR_DOOR_RR)
+							flags = CAR_DOOR_FLAG_LR | CAR_DOOR_FLAG_RR;
 					}
 					else {
 						switch (pPed->m_vehEnterType) {
@@ -8046,7 +8056,8 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		if (pVehicle->IsBike()) {
-			//TODO(MIAMI)
+			CBike* pBike = (CBike*)pBike;
+			pBike->bWaterTight = ScriptParams[1] != 0;
 		}
 		else if (pVehicle->IsCar()) {
 			CAutomobile* pCar = (CAutomobile*)pVehicle;
@@ -8542,8 +8553,12 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		if (model == -1)
 			return 0;
 		CVehicle* car;
-		//if (CModelInfo::IsBikeModel(model)) // TODO(MIAMI)
-		car = new CAutomobile(model, MISSION_VEHICLE);
+		if (CModelInfo::IsBikeModel(model)) {
+			car = new CBike(model, MISSION_VEHICLE);
+			((CBike*)(car))->bIsStanding = true;
+		}
+		else
+			car = new CAutomobile(model, MISSION_VEHICLE);
 		CVector pos = *(CVector*)&ScriptParams[0];
 		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
 		car->SetPosition(pos);
@@ -9248,8 +9263,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (pVehicle->m_vehType == VEHICLE_TYPE_CAR)
 			((CAutomobile*)pVehicle)->m_fTraction = fTraction;
 		else
-			// TODO(MIAMI)
-			//((CBike*)pVehicle)->m_fTraction = fTraction;
+			((CBike*)pVehicle)->m_fTraction = fTraction;
 		return 0;
 	}
 	case COMMAND_ARE_MEASUREMENTS_IN_METRES:
@@ -10337,8 +10351,21 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		bool bIsBurst = false;
+		CBike* pBike = (CBike*)pVehicle;
 		if (pVehicle->m_vehType == VEHICLE_APPEARANCE_BIKE) {
-			assert("IS_CAR_TYPE_BURST not yet implemented for bikes");
+			if (ScriptParams[1] == 4) {
+				for (int i = 0; i < 2; i++) {
+					if (pBike->m_wheelStatus[i] == WHEEL_STATUS_BURST)
+						bIsBurst = true;
+				}
+			}
+			else {
+				if (ScriptParams[1] == 2)
+					ScriptParams[1] = 0;
+				if (ScriptParams[1] == 3)
+					ScriptParams[1] = 1;
+				bIsBurst = pBike->m_wheelStatus[ScriptParams[1]] == WHEEL_STATUS_BURST;
+			}
 		}
 		else {
 			CAutomobile* pCar = (CAutomobile*)pVehicle;
