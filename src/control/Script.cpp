@@ -8056,7 +8056,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pVehicle);
 		if (pVehicle->IsBike()) {
-			CBike* pBike = (CBike*)pBike;
+			CBike* pBike = (CBike*)pVehicle;
 			pBike->bWaterTight = ScriptParams[1] != 0;
 		}
 		else if (pVehicle->IsCar()) {
