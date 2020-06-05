@@ -62,8 +62,8 @@ public:
 	float m_fLeanLRAngle;
 	float m_fLeanLRAngle2;
 	float m_fLeanInput;
-	uint32 field_478;
-	uint32 field_47C;
+	float m_fPedLeanAmountLR;
+	float m_fPedLeanAmountUD;
 	uint8 m_bike_unused2;
 	uint8 unused[3];	// looks like padding..but for what?
 	uint8 m_bike_flag01 : 1;
@@ -73,7 +73,7 @@ public:
 	uint8 bIsStanding : 1;
 	uint8 bExtraSpeed : 1;	// leaning forward
 	uint8 m_bike_flag40 : 1;
-	uint8 m_bike_flag80 : 1;
+	uint8 m_bike_flag80 : 1; // doing wheelie?
 	int16 m_doingBurnout;
 	float m_fTireTemperature;
 	float m_fBrakeDestabilization;

@@ -86,8 +86,8 @@ CBike::CBike(int32 id, uint8 CreatedBy)
 	m_fGasPedal = 0.0f;
 	m_fBrakePedal = 0.0f;
 	m_fLeanInput = 0.0f;
-	field_478 = 0;
-	field_47C = 0;
+	m_fPedLeanAmountLR = 0.0f;
+	m_fPedLeanAmountUD = 0.0f;
 	m_pSetOnFireEntity = nil;
 	m_pBombRigger = nil;
 	m_fGasPedalAudio = 0.0f;
@@ -307,8 +307,8 @@ CBike::ProcessControl(void)
 			m_nCarHornTimer = 0;
 
 		bCanStand = (pDriver || pPassengers[0] || bIsBeingCarJacked) && !bIsStanding;
-		field_478 = 0;
-		field_47C = 0;
+		m_fPedLeanAmountLR = 0.0f;
+		m_fPedLeanAmountUD = 0.0f;
 		m_bike_flag80 = false;
 
 		if(bIsBeingCarJacked){
@@ -331,8 +331,8 @@ CBike::ProcessControl(void)
 
 		bCanStand = false;
 		m_bike_flag80 = false;
-		field_478 = 0;
-		field_47C = 0;
+		m_fPedLeanAmountLR = 0.0f;
+		m_fPedLeanAmountUD = 0.0f;
 		break;
 
 	case STATUS_PLAYER_DISABLED:

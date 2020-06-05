@@ -4957,7 +4957,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 				pPed->FlagToDestroyWhenNextProcessed();
 		}
 		else {
-			pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+			pPed->SetDie();
 		}
 		return 0;
 	}

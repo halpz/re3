@@ -2289,7 +2289,7 @@ CVehicle::KillPedsInVehicle(void)
 			if(!pDriver->IsPlayer())
 				pDriver->FlagToDestroyWhenNextProcessed();
 		}else
-			pDriver->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+			pDriver->SetDie();
 	}
 	for(i = 0; i < m_nNumMaxPassengers; i++){
 		if(pPassengers[i]){
@@ -2299,7 +2299,7 @@ CVehicle::KillPedsInVehicle(void)
 				if(!pPassengers[i]->IsPlayer())
 					pPassengers[i]->FlagToDestroyWhenNextProcessed();
 			}else
-				pPassengers[i]->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+				pPassengers[i]->SetDie();
 		}
 	}
 }

@@ -9,6 +9,7 @@
 #include "Physical.h"
 #include "Weapon.h"
 #include "WeaponInfo.h"
+#include "AnimationId.h"
 
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
@@ -251,7 +252,8 @@ enum {
 enum PedLineUpPhase {
 	LINE_UP_TO_CAR_START,
 	LINE_UP_TO_CAR_END,
-	LINE_UP_TO_CAR_2 // Buggy. Used for cops arresting you from passenger door
+	LINE_UP_TO_CAR_2, // Buggy. Used for cops arresting you from passenger door
+	LINE_UP_TO_CAR_FALL
 };
 
 enum PedOnGroundState {
@@ -655,7 +657,7 @@ public:
 	void SetLookFlag(CEntity *target, bool keepTryingToLook);
 	void SetLookFlag(float direction, bool keepTryingToLook);
 	void SetLookTimer(int time);
-	void SetDie(AnimationId anim, float arg1, float arg2);
+	void SetDie(AnimationId anim = ANIM_KO_SHOT_FRONT1, float arg1 = 4.0f, float arg2 = 0.0f);
 	void SetDead(void);
 	void ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer);
 	void RemoveBodyPart(PedNode nodeId, int8 direction);
