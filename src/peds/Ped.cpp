@@ -4270,33 +4270,40 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		if (method != WEAPONTYPE_DROWNING) {
 #ifdef VC_PED_PORTS
 			if (m_pMyVehicle) {
-
-				// TODO(Miami): Bikes
-				if (m_pMyVehicle->IsCar() && m_pMyVehicle->pDriver == this) {
-					if (m_pMyVehicle->GetStatus() == STATUS_SIMPLE) {
-						m_pMyVehicle->SetStatus(STATUS_PHYSICS);
-						CCarCtrl::SwitchVehicleToRealPhysics(m_pMyVehicle);
-					}
-					m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
-					m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 0;
-					m_pMyVehicle->AutoPilot.m_nTempAction = TEMPACT_HANDBRAKESTRAIGHT;
-					m_pMyVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 2000;
-				}
-// TODO(MIAMI): argument
-				if (m_pMyVehicle->CanPedExitCar(false)) {
-					SetObjective(OBJECTIVE_LEAVE_CAR_AND_DIE, m_pMyVehicle);
-				} else {
+				bool bDone = false;
+				if (m_pMyVehicle->IsBike()) {
 					m_fHealth = 0.0f;
-					if (m_pMyVehicle && m_pMyVehicle->pDriver == this) {
-						SetRadioStation();
-						m_pMyVehicle->SetStatus(STATUS_ABANDONED);
+					//CBike::KnockOffRider -- TODO(MIAMI)
+					bDone = true;
+				}
+				else {
+					if (m_pMyVehicle->IsCar() && m_pMyVehicle->pDriver == this) {
+						if (m_pMyVehicle->GetStatus() == STATUS_SIMPLE) {
+							m_pMyVehicle->SetStatus(STATUS_PHYSICS);
+							CCarCtrl::SwitchVehicleToRealPhysics(m_pMyVehicle);
+						}
+						m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
+						m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 0;
+						m_pMyVehicle->AutoPilot.m_nTempAction = TEMPACT_HANDBRAKESTRAIGHT;
+						m_pMyVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 2000;
 					}
-					SetDie(dieAnim, dieDelta, dieSpeed);
-					/*
-					if (damagedBy == FindPlayerPed() && damagedBy != this) {
-						// TODO(Miami): PlayerInfo stuff
+					// TODO(MIAMI): argument
+					if (m_pMyVehicle->CanPedExitCar(false)) {
+						SetObjective(OBJECTIVE_LEAVE_CAR_AND_DIE, m_pMyVehicle);
 					}
-					*/
+					else {
+						m_fHealth = 0.0f;
+						if (m_pMyVehicle && m_pMyVehicle->pDriver == this) {
+							SetRadioStation();
+							m_pMyVehicle->SetStatus(STATUS_ABANDONED);
+						}
+						SetDie(dieAnim, dieDelta, dieSpeed);
+						/*
+						if (damagedBy == FindPlayerPed() && damagedBy != this) {
+							// TODO(Miami): PlayerInfo stuff
+						}
+						*/
+					}
 				}
 				for (int i = 0; i < ARRAY_SIZE(m_pMyVehicle->pPassengers); i++) {
 					CPed* passenger = m_pMyVehicle->pPassengers[i];
@@ -4314,6 +4321,8 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 				} else {
 					CDarkel::RegisterKillNotByPlayer(this, method);
 				}
+				if (bDone)
+					return true;
 			}
 #endif
 			m_fHealth = 1.0f;
