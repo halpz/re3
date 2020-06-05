@@ -1078,7 +1078,7 @@ CPopulation::AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit)
 	if (!CModelInfo::GetModelInfo(MI_MALE01)->GetRwObject()) // strange way to check it
 		return nil;
 	CPed* pPed = CPopulation::AddPed(PEDTYPE_CIVMALE, MI_MALE01, pos); // TODO(MIAMI): 4th parameter
-	pPed->SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+	pPed->SetDie();
 	pPed->m_nPedMoney = 0;
 	pPed->bDeadPedInFrontOfCar = true;
 	pPed->m_vehicleInAccident = pCulprit;
