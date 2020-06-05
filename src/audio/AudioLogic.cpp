@@ -6536,9 +6536,9 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 		m_sQueueSample.m_bIs2D = false;
 		emittingVolume = m_anRandomTable[2] % 20 + 90;
 		break;
-	case SCRIPT_SOUND_110:
-	case SCRIPT_SOUND_111:
-		if (SampleManager.IsSampleBankLoaded(0) != 1)
+	case SCRIPT_SOUND_TRAIN_ANNOUNCEMENT_1:
+	case SCRIPT_SOUND_TRAIN_ANNOUNCEMENT_2:
+		if (!SampleManager.IsSampleBankLoaded(0))
 			return;
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		m_sQueueSample.m_nSampleIndex = SFX_TRAIN_STATION_ANNOUNCE;
