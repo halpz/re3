@@ -323,6 +323,12 @@ void CloudyWeatherCheat()
 	CWeather::ForceWeatherNow(WEATHER_CLOUDY);
 }
 
+void StormyWeatherCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT7"), true);
+	CWeather::ForceWeatherNow(WEATHER_HURRICANE);
+}
+
 void RainyWeatherCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT7"), true);
@@ -973,163 +979,173 @@ void CPad::AddToCheatString(char c)
 }
 #endif
 
+int CheatComp(char* sourceStr, char* origCheatStr)
+{
+	char cheatCodeVals[] = { 3,5,7,1,13,27,3,7,1,11,13,8,7,32,13,6,28,19,10,3,3,5,7,1,13,27,3,7 };
+
+	for (int32 i = 0; i < strlen(origCheatStr); i++) {
+		if (sourceStr[i] != origCheatStr[i] - cheatCodeVals[i]) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
 void CPad::AddToPCCheatString(char c)
 {
-	for ( int32 i = ARRAY_SIZE(KeyBoardCheatString) - 2; i >= 0; i-- )
+	for (int32 i = ARRAY_SIZE(KeyBoardCheatString) - 2; i >= 0; i--)
 		KeyBoardCheatString[i + 1] = KeyBoardCheatString[i];
-	
+
 	KeyBoardCheatString[0] = c;
-	
-	#define _CHEATCMP(str) strncmp(str, KeyBoardCheatString, sizeof(str)-1)
-	
+
+#define _CHEATCMP(str) strncmp(str, KeyBoardCheatString, sizeof(str)-1)
+
 	// "THUGSTOOLS"
-	if (!_CHEATCMP("SLOOTSGUHT"))
+	if (!CheatComp(KeyBoardCheatString, "VQVPanJ\\I_"))
 		WeaponCheat1();
 
 	// "PROFESSIONALTOOLS"
-	if (!_CHEATCMP("SLOOTLANOISSEFORP"))
+	if (!CheatComp(KeyBoardCheatString, "VQVPagDUPT`[Lf\\Xl"))
 		WeaponCheat2();
 
 	// "NUTTERTOOLS"
-	if (!_CHEATCMP("SLOOTRETTUN"))
+	if (!CheatComp(KeyBoardCheatString, "VQVPamH[U`["))
 		WeaponCheat3();
 
-	// "IFIWEREARICHMAN"
-	if ( !_CHEATCMP("NAMHCIRAEREWIFI") )
-		MoneyCheat();
-	
+	// "PRECIOUSPROTECTION"
+	if (!CheatComp(KeyBoardCheatString, "QTPUP`WVS[`]ViPKnc"))
+		ArmourCheat();
+
 	// "ASPIRINE"
-	if (!_CHEATCMP("ENIRIPSA"))
+	if (!CheatComp(KeyBoardCheatString, "HSPSVkVH"))
 		HealthCheat();
-	
-	// "MOREPOLICEPLEASE"
-	if ( !_CHEATCMP("ESAELPECILOPEROM") )
+
+	// "YOUWONTTAKEMEALIVE"
+	if (!CheatComp(KeyBoardCheatString, "H[PMN`PLLLa\\Uod[kl"))
 		WantedLevelUpCheat();
-	
+
 	// "LEAVEMEALONE"
-	if (!_CHEATCMP("ENOLAEMEVAEL"))
+	if (!CheatComp(KeyBoardCheatString, "HSVMN`PLWLRT"))
 		WantedLevelDownCheat();
 
+	// "APLEASANTDAY"
+	if (!CheatComp(KeyBoardCheatString, "\\FKU[\\VHFW]I"))
+		CloudyWeatherCheat();
+
+	// "ALOVELYDAY"
+	if (!CheatComp(KeyBoardCheatString, "\\FKZY`YVML"))
+		SunnyWeatherCheat();
+
+	// "ABITDRIEG"
+
+	// "CATSANDDOGS"
+	if (!CheatComp(KeyBoardCheatString, "VLVEQiDZULP"))
+		StormyWeatherCheat();
+
+	// "CANTSEEATHING"
+	if (!CheatComp(KeyBoardCheatString, "JSPIa\\HLT_[IJ"))
+		FoggyWeatherCheat();
+
 	// "PANZER"
-	if ( !_CHEATCMP("REZNAP") )
+	if (!CheatComp(KeyBoardCheatString, "UJaONk"))
 		VehicleCheat(true, MI_RHINO);
 
+	// "LIFEISPASSINGMEBY"
+
+	// "BIGBANG"
+	if (!CheatComp(KeyBoardCheatString, "JSHCTdE"))
+		BlowUpCarsCheat();
+
+	// "STILLLIKEDRESSINGUP"
+	if (!CheatComp(KeyBoardCheatString, "SZNOVnVLSORSPlYReg]"))
+		ChangePlayerCheat();
+
+	// "FIGHTFIGHTFIGHT"
+	if (!CheatComp(KeyBoardCheatString, "WMNJSoKNJQaPNiS"))
+		MayhemCheat();
+
+	// "NOBODYLIKESME"
+	if (!CheatComp(KeyBoardCheatString, "HRZFXdO`EZOWU"))
+		EverybodyAttacksPlayerCheat();
+
+	// "OURGODGIVENRIGHTTOBEARARMS"
+	if (!CheatComp(KeyBoardCheatString, "VRYB_\\HIP_aPNi_TaiSJGTNSbj"))
+		WeaponsForAllCheat();
+
 	// "TRAVELINSTYLE"
-	if ( !_CHEATCMP("ELYTSNILEVART") )
+	if (!_CHEATCMP("ELYTSNILEVART"))
 		VehicleCheat(true, MI_BLOODRA);
 
 	// "GETTHEREQUICKLY"
-	if ( !_CHEATCMP("YLKCIUQEREHTTEG") )
+	if (!_CHEATCMP("YLKCIUQEREHTTEG"))
 		VehicleCheat(true, MI_BLOODRB);
 
 	// "GETTHEREFAST"
-	if ( !_CHEATCMP("TSAFEREHTTEG") )
+	if (!_CHEATCMP("TSAFEREHTTEG"))
 		VehicleCheat(true, MI_SABRETUR);
 
 	// "GETTHEREVERYFASTINDEED"
-	if ( !_CHEATCMP("DEEDNITSAFYREVEREHTTEG") )
+	if (!_CHEATCMP("DEEDNITSAFYREVEREHTTEG"))
 		VehicleCheat(true, MI_HOTRINA);
 
 	// "GETTHEREAMAZINGLYFAST"
-	if ( !_CHEATCMP("TSAFYLGNIZAMAEREHTTEG") )
+	if (!_CHEATCMP("TSAFYLGNIZAMAEREHTTEG"))
 		VehicleCheat(true, MI_HOTRINB);
 
 	// "THELASTRIDE"
-	if ( !_CHEATCMP("EDIRTSALEHT") )
+	if (!_CHEATCMP("EDIRTSALEHT"))
 		VehicleCheat(true, MI_ROMERO);
 
 	// "ROCKANDROLLCAR"
-	if ( !_CHEATCMP("RACLLORDNAKCOR") )
+	if (!_CHEATCMP("RACLLORDNAKCOR"))
 		VehicleCheat(true, MI_LOVEFIST);
 
 	// "RUBBISHCAR"
-	if ( !_CHEATCMP("RACHSIBBUR") )
+	if (!_CHEATCMP("RACHSIBBUR"))
 		VehicleCheat(true, MI_TRASH);
 
 	// "BETTERTHANWALKING"
-	if ( !_CHEATCMP("GNIKLAWNAHTRETTEB") )
+	if (!_CHEATCMP("GNIKLAWNAHTRETTEB"))
 		VehicleCheat(true, MI_CADDY);
-	
-	// "BANGBANGBANG"
-	if ( !_CHEATCMP("GNABGNABGNAB") )
-		BlowUpCarsCheat();
-	
-	// "ILIKEDRESSINGUP"
-	if ( !_CHEATCMP("PUGNISSERDEKILI") )
-		ChangePlayerCheat();
-	
-	// "ITSALLGOINGMAAAD"
-	if ( !_CHEATCMP("DAAAMGNIOGLLASTI") )
-		MayhemCheat();
-	
-	// "NOBODYLIKESME"
-	if ( !_CHEATCMP("EMSEKILYDOBON") )
-		EverybodyAttacksPlayerCheat();
-	
-	// "WEAPONSFORALL"
-	if ( !_CHEATCMP("LLAROFSNOPAEW") )
-		WeaponsForAllCheat();
-	
+
 	// "TIMEFLIESWHENYOU"
-	if ( !_CHEATCMP("UOYNEHWSEILFEMIT") )
+	if (!_CHEATCMP("UOYNEHWSEILFEMIT"))
 		FastTimeCheat();
-	
+
 	// "BOOOOORING"
-	if ( !_CHEATCMP("GNIROOOOOB") )
+	if (!_CHEATCMP("GNIROOOOOB"))
 		SlowTimeCheat();
-	
-#ifndef GTA3_1_1_PATCH
-	// "TURTOISE"
-	if ( !_CHEATCMP("ESIOTRUT") )
-		ArmourCheat();
-#else	
-	// "PRECIOUSPROTECTION"
-	if (!_CHEATCMP("NOITCETORPSUOICERP"))
-		ArmourCheat();
-#endif
-	
-	// "SKINCANCERFORME"
-	if ( !_CHEATCMP("EMROFRECNACNIKS") )
-		SunnyWeatherCheat();
-	
-	// "ILIKESCOTLAND"
-	if ( !_CHEATCMP("DNALTOCSEKILI") )
-		CloudyWeatherCheat();
-	
+
 	// "ILOVESCOTLAND"
-	if ( !_CHEATCMP("DNALTOCSEVOLI") )
+	if (!_CHEATCMP("DNALTOCSEVOLI"))
 		RainyWeatherCheat();
-	
-	// "PEASOUP"
-	if ( !_CHEATCMP("PUOSAEP") )
-		FoggyWeatherCheat();
-	
+
 	// "MADWEATHER"
-	if ( !_CHEATCMP("REHTAEWDAM") )
+	if (!_CHEATCMP("REHTAEWDAM"))
 		FastWeatherCheat();
-	
+
 	// "ANICESETOFWHEELS"
-	if ( !_CHEATCMP("SLEEHWFOTESECINA") )
+	if (!_CHEATCMP("SLEEHWFOTESECINA"))
 		OnlyRenderWheelsCheat();
-	
+
 	// "CHITTYCHITTYBB"
-	if ( !_CHEATCMP("BBYTTIHCYTTIHC") )
+	if (!_CHEATCMP("BBYTTIHCYTTIHC"))
 		ChittyChittyBangBangCheat();
-	
+
 	// "CORNERSLIKEMAD"
-	if ( !_CHEATCMP("DAMEKILSRENROC") )
+	if (!_CHEATCMP("DAMEKILSRENROC"))
 		StrongGripCheat();
-	
+
 	// "NASTYLIMBSCHEAT"
-	if ( !_CHEATCMP("TAEHCSBMILYTSAN") )
+	if (!_CHEATCMP("TAEHCSBMILYTSAN"))
 		NastyLimbsCheat();
 
 	// "IWANTITPAINTEDBLACK"
-	if ( !_CHEATCMP("KCALBDETNIAPTITNAWI") )
+	if (!_CHEATCMP("KCALBDETNIAPTITNAWI"))
 		BlackCarsCheat();
 
 	// "AHAIRDRESSERSCAR"
-	if ( !_CHEATCMP("RACSRESSERDRIAHA") )
+	if (!_CHEATCMP("RACSRESSERDRIAHA"))
 		PinkCarsCheat();
 
 #ifdef KANGAROO_CHEAT
@@ -1160,7 +1176,7 @@ void CPad::AddToPCCheatString(char c)
 	// SEABEDCHEAT
 	if (!_CHEATCMP("TAEHCDEBAESON"))
 		NoSeaBedCheat();
-	
+
 	// WATERLAYERSCHEAT
 	if (!_CHEATCMP("TAEHCSREYALRETAW"))
 		RenderWaterLayersCheat();
@@ -1170,7 +1186,7 @@ void CPad::AddToPCCheatString(char c)
 	if (!_CHEATCMP("SYAWAES"))
 		BackToTheFuture();
 
-	#undef _CHEATCMP
+#undef _CHEATCMP
 }
 
 #ifdef XINPUT
