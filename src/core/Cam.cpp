@@ -25,7 +25,7 @@
 #include "Debug.h"
 #include "Camera.h"
 #include "DMAudio.h"
-#include <vehicles\Bike.h>
+#include "Bike.h"
 
 bool PrintDebugCode = false;
 int16 DebugCamMode;

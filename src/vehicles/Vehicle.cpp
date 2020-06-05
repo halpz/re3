@@ -5,6 +5,8 @@
 #include "Timer.h"
 #include "Pad.h"
 #include "Vehicle.h"
+#include "Bike.h"
+#include "Automobile.h"
 #include "Pools.h"
 #include "HandlingMgr.h"
 #include "CarCtrl.h"
@@ -893,7 +895,7 @@ float fTweakBikeWheelTurnForce = 2.0f;
 
 void
 CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
-	int32 wheelsOnGround, float thrust, float brake, float adhesion, float unk, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, eBikeWheelSpecial special, uint16 wheelStatus)
+	int32 wheelsOnGround, float thrust, float brake, float adhesion, float destabTraction, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, eBikeWheelSpecial special, uint16 wheelStatus)
 {
 	// BUG: using statics here is probably a bad idea
 	static bool bAlreadySkidding = false;	// this is never reset
@@ -1010,14 +1012,14 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 		right *= adhesion * tractionLoss / l;
 		fwd *= adhesion * tractionLoss / l;
 
-		if(unk < 1.0f)
-			right *= unk;
-	}else if(unk < 1.0f){
+		if(destabTraction < 1.0f)
+			right *= destabTraction;
+	}else if(destabTraction < 1.0f){
 		if(!bAlreadySkidding)
-			unk *= pHandling->fTractionLoss;
-		if(sq(adhesion*unk) < speedSq){
+			destabTraction *= pHandling->fTractionLoss;
+		if(sq(adhesion*destabTraction) < speedSq){
 			float l = Sqrt(speedSq);
-			right *= adhesion * unk / l;
+			right *= adhesion * destabTraction / l;
 		}
 	}
 
@@ -1030,15 +1032,14 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 		float impulse = speed*m_fMass;
 		float turnImpulse = speed*GetMass(wheelContactPoint, direction);
 		CVector vTurnImpulse = turnImpulse * direction;
-		float turnRight = DotProduct(vTurnImpulse, GetRight());
 
 		ApplyMoveForce(impulse * direction);
 
+		float turnRight = DotProduct(vTurnImpulse, GetRight());
 		float contactRight = DotProduct(wheelContactPoint, GetRight());
 		float contactFwd = DotProduct(wheelContactPoint, GetForward());
 
-		if(wheelId != CARWHEEL_REAR_LEFT ||
-		   !bBraking && !bReversing)
+		if(wheelId != BIKEWHEEL_REAR || !bBraking && !bReversing)
 			ApplyTurnForce((vTurnImpulse - turnRight*GetRight()) * fTweakBikeWheelTurnForce,
 				wheelContactPoint - contactRight*GetRight());
 
