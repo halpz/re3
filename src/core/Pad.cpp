@@ -979,12 +979,12 @@ void CPad::AddToCheatString(char c)
 }
 #endif
 
-int CheatComp(char* sourceStr, char* origCheatStr)
+int Cheat_strncmp(char* sourceStr, char* origCheatStr)
 {
 	char cheatCodeVals[] = { 3,5,7,1,13,27,3,7,1,11,13,8,7,32,13,6,28,19,10,3,3,5,7,1,13,27,3,7 };
 
 	for (int32 i = 0; i < strlen(origCheatStr); i++) {
-		if (sourceStr[i] != origCheatStr[i] - cheatCodeVals[i]) {
+		if ((sourceStr[i] != origCheatStr[i] - cheatCodeVals[i]) || i >= 28) {
 			return 1;
 		}
 	}
@@ -1001,77 +1001,94 @@ void CPad::AddToPCCheatString(char c)
 #define _CHEATCMP(str) strncmp(str, KeyBoardCheatString, sizeof(str)-1)
 
 	// "THUGSTOOLS"
-	if (!CheatComp(KeyBoardCheatString, "VQVPanJ\\I_"))
+	if (!Cheat_strncmp(KeyBoardCheatString, "VQVPanJ\\I_")) {
+		KeyBoardCheatString[0] = ' ';
 		WeaponCheat1();
-
+	}
 	// "PROFESSIONALTOOLS"
-	if (!CheatComp(KeyBoardCheatString, "VQVPagDUPT`[Lf\\Xl"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VQVPagDUPT`[Lf\\Xl")) {
+		KeyBoardCheatString[0] = ' ';
 		WeaponCheat2();
-
+	}
 	// "NUTTERTOOLS"
-	if (!CheatComp(KeyBoardCheatString, "VQVPamH[U`["))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VQVPamH[U`[")) {
+		KeyBoardCheatString[0] = ' ';
 		WeaponCheat3();
-
+	}
 	// "PRECIOUSPROTECTION"
-	if (!CheatComp(KeyBoardCheatString, "QTPUP`WVS[`]ViPKnc"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "QTPUP`WVS[`]ViPKnc")) {
+		KeyBoardCheatString[0] = ' ';
 		ArmourCheat();
-
+	}
 	// "ASPIRINE"
-	if (!CheatComp(KeyBoardCheatString, "HSPSVkVH"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "HSPSVkVH")) {
+		KeyBoardCheatString[0] = ' ';
 		HealthCheat();
-
+	}
 	// "YOUWONTTAKEMEALIVE"
-	if (!CheatComp(KeyBoardCheatString, "H[PMN`PLLLa\\Uod[kl"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "H[PMN`PLLLa\\Uod[kl")) {
+		KeyBoardCheatString[0] = ' ';
 		WantedLevelUpCheat();
-
+	}
 	// "LEAVEMEALONE"
-	if (!CheatComp(KeyBoardCheatString, "HSVMN`PLWLRT"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "HSVMN`PLWLRT")) {
+		KeyBoardCheatString[0] = ' ';
 		WantedLevelDownCheat();
-
+	}
 	// "APLEASANTDAY"
-	if (!CheatComp(KeyBoardCheatString, "\\FKU[\\VHFW]I"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "\\FKU[\\VHFW]I")) {
+		KeyBoardCheatString[0] = ' ';
 		CloudyWeatherCheat();
-
+	}
 	// "ALOVELYDAY"
-	if (!CheatComp(KeyBoardCheatString, "\\FKZY`YVML"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "\\FKZY`YVML")) {
+		KeyBoardCheatString[0] = ' ';
 		SunnyWeatherCheat();
-
+	}
 	// "ABITDRIEG"
 
 	// "CATSANDDOGS"
-	if (!CheatComp(KeyBoardCheatString, "VLVEQiDZULP"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VLVEQiDZULP")) {
+		KeyBoardCheatString[0] = ' ';
 		StormyWeatherCheat();
-
+	}
 	// "CANTSEEATHING"
-	if (!CheatComp(KeyBoardCheatString, "JSPIa\\HLT_[IJ"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "JSPIa\\HLT_[IJ")) {
+		KeyBoardCheatString[0] = ' ';
 		FoggyWeatherCheat();
-
+	}
 	// "PANZER"
-	if (!CheatComp(KeyBoardCheatString, "UJaONk"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "UJaONk")) {
+		KeyBoardCheatString[0] = ' ';
 		VehicleCheat(true, MI_RHINO);
-
+	}
 	// "LIFEISPASSINGMEBY"
 
 	// "BIGBANG"
-	if (!CheatComp(KeyBoardCheatString, "JSHCTdE"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "JSHCTdE")) {
+		KeyBoardCheatString[0] = ' ';
 		BlowUpCarsCheat();
-
+	}
 	// "STILLLIKEDRESSINGUP"
-	if (!CheatComp(KeyBoardCheatString, "SZNOVnVLSORSPlYReg]"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "SZNOVnVLSORSPlYReg]")) {
+		KeyBoardCheatString[0] = ' ';
 		ChangePlayerCheat();
-
+	}
 	// "FIGHTFIGHTFIGHT"
-	if (!CheatComp(KeyBoardCheatString, "WMNJSoKNJQaPNiS"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "WMNJSoKNJQaPNiS")) {
+		KeyBoardCheatString[0] = ' ';
 		MayhemCheat();
-
+	}
 	// "NOBODYLIKESME"
-	if (!CheatComp(KeyBoardCheatString, "HRZFXdO`EZOWU"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "HRZFXdO`EZOWU")) {
+		KeyBoardCheatString[0] = ' ';
 		EverybodyAttacksPlayerCheat();
-
+	}
 	// "OURGODGIVENRIGHTTOBEARARMS"
-	if (!CheatComp(KeyBoardCheatString, "VRYB_\\HIP_aPNi_TaiSJGTNSbj"))
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VRYB_\\HIP_aPNi_TaiSJGTNSbj")) {
+		KeyBoardCheatString[0] = ' ';
 		WeaponsForAllCheat();
-
+	}
 	// "TRAVELINSTYLE"
 	if (!_CHEATCMP("ELYTSNILEVART"))
 		VehicleCheat(true, MI_BLOODRA);
