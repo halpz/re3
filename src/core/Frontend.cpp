@@ -4545,11 +4545,6 @@ CMenuManager::ProcessButtonPresses(void)
 					}
 					break;
 				}
-				//case MENUACTION_KEYBOARDCTRLS:
-				//	SwitchToNewScreen(MENUPAGE_KEYBOARD_CONTROLS);
-				//	m_nSelectedListRow = 0;
-				//	m_nCurrExLayer = HOVEROPTION_LIST;
-				//	break;
 			}
 		}
 		ProcessOnOffMenuOptions();
@@ -4767,6 +4762,7 @@ void
 CMenuManager::ProcessOnOffMenuOptions()
 {
 	switch (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action) {
+#ifdef LEGACY_MENU_OPTIONS
 	case MENUACTION_CTRLVIBRATION:
 		m_PrefsUseVibration = !m_PrefsUseVibration;
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
@@ -4777,6 +4773,7 @@ CMenuManager::ProcessOnOffMenuOptions()
 			CPad::GetPad(0)->Mode = 0;
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		break;
+#endif
 	case MENUACTION_FRAMESYNC:
 		m_PrefsVsyncDisp = !m_PrefsVsyncDisp;
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
