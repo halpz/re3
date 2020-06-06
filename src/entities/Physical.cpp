@@ -63,6 +63,9 @@ CPhysical::CPhysical(void)
 	m_phy_flagA10 = false;
 	m_phy_flagA20 = false;
 
+#ifdef FIX_BUGS
+	m_nSurfaceTouched = SURFACE_DEFAULT;
+#endif
 	m_nZoneLevel = LEVEL_NONE;
 }
 

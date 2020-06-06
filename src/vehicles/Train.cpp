@@ -63,6 +63,10 @@ CTrain::CTrain(int32 id, uint8 CreatedBy)
 
 	bUsesCollision = true;
 	SetStatus(STATUS_TRAIN_MOVING);
+
+#ifdef FIX_BUGS
+	m_isFarAway = true;
+#endif
 }
 
 void

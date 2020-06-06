@@ -59,6 +59,9 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bIsLawEnforcer = false;
 	bIsAmbulanceOnDuty = false;
 	bIsFireTruckOnDuty = false;
+#ifdef FIX_BUGS
+	bIsHandbrakeOn = false;
+#endif
 	CCarCtrl::UpdateCarCount(this, false);
 	m_fHealth = 1000.0f;
 	bEngineOn = true;

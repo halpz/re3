@@ -11763,7 +11763,11 @@ void CTheScripts::UpdateObjectIndices()
 			if (!pModel)
 				continue;
 			strcpy(name, pModel->GetName());
+#ifdef FIX_BUGS
+			for (int k = 0; k < USED_OBJECT_NAME_LENGTH && name[k]; k++)
+#else
 			for (int k = 0; k < USED_OBJECT_NAME_LENGTH; k++)
+#endif
 				name[k] = toupper(name[k]);
 			if (strcmp(name, UsedObjectArray[i].name) == 0) {
 				found = true;
