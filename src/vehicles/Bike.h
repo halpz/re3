@@ -117,6 +117,7 @@ public:
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
+	void KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBackOn);
 	void VehicleDamage(void);
 	void ProcessBuoyancy(void);
 	void DoDriveByShootings(void);

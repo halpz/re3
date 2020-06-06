@@ -2,16 +2,20 @@
 #include "General.h"
 #include "Pad.h"
 #include "DMAudio.h"
+#include "Timecycle.h"
 #include "Camera.h"
 #include "Darkel.h"
 #include "Rubbish.h"
 #include "Explosion.h"
 #include "Particle.h"
+#include "ParticleObject.h"
+#include "WaterLevel.h"
 #include "World.h"
 #include "SurfaceTable.h"
 #include "Record.h"
 #include "CarCtrl.h"
 #include "CarAI.h"
+#include "Script.h"
 #include "Stats.h"
 #include "Replay.h"
 #include "AnimManager.h"
@@ -1792,6 +1796,207 @@ CBike::PlayCarHorn(void)
 		if(pDriver)
 			pDriver->Say(SOUND_PED_CAR_COLLISION);
 	}
+}
+
+void
+CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBackOn)
+{
+	AnimationId anim = ANIM_KO_SHOT_FRONT1;
+	if(ped == nil)
+		return;
+
+	if(!ped->IsPlayer()){
+		if(bGetBackOn){
+			if(ped->m_pedStats->m_temper > ped->m_pedStats->m_fear &&
+			   ped->CharCreatedBy != MISSION_CHAR && ped->m_pMyVehicle->VehicleCreatedBy != MISSION_VEHICLE &&
+			   FindPlayerPed()->m_carInObjective == ped->m_pMyVehicle &&
+			   !CTheScripts::IsPlayerOnAMission())
+				ped->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, ped->m_pMyVehicle);
+			else if(ped->m_pedStats->m_temper > ped->m_pedStats->m_fear &&
+			   ped->CharCreatedBy != MISSION_CHAR && ped->m_pMyVehicle->VehicleCreatedBy != MISSION_VEHICLE &&
+			   !CTheScripts::IsPlayerOnAMission())
+				ped->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, ped->m_pMyVehicle);
+			else if(ped->m_pedStats->m_temper <= ped->m_pedStats->m_fear &&
+			   ped->CharCreatedBy != MISSION_CHAR && ped->m_pMyVehicle->VehicleCreatedBy != MISSION_VEHICLE &&
+			   !CTheScripts::IsPlayerOnAMission()){
+//TODO(MIAMI): is this right?
+				ped->SetObjective(OBJ_47, ped->m_pMyVehicle);
+				ped->m_nPathDir += CGeneral::GetRandomNumberInRange(0, 8);
+			}
+		}else if(ped->m_leader == nil){
+			if(pDriver == ped)
+				ped->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, this);
+			else
+				ped->SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, this);
+		}
+	}
+
+	if(ped->IsPed()){
+		CAnimBlendAssociation *assoc;
+		for(assoc = RpAnimBlendClumpGetFirstAssociation(ped->GetClump(), ASSOC_DRIVING);
+		    assoc;
+		    assoc = RpAnimBlendGetNextAssociation(assoc))
+			assoc->flags |= ASSOC_DELETEFADEDOUT;
+	}
+
+	ped->SetPedState(PED_IDLE);
+	CAnimManager::BlendAnimation(ped->GetClump(), ped->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
+	ped->m_vehEnterType = CAR_DOOR_LF;
+	CPed::PedSetOutCarCB(nil, ped);
+	ped->SetMoveState(PEDMOVE_STILL);
+	if(GetUp().z < 0.0f)
+		ped->SetHeading(CGeneral::LimitRadianAngle(GetForward().Heading() + PI));
+	else
+		ped->SetHeading(GetForward().Heading());
+
+	switch(weapon){
+	case WEAPONTYPE_UNARMED:
+	case WEAPONTYPE_UNIDENTIFIED:
+		ped->m_vecMoveSpeed = m_vecMoveSpeed;
+		ped->m_pCollidingEntity = this;
+		anim = NUM_STD_ANIMS;
+		break;
+
+	case WEAPONTYPE_RAMMEDBYCAR:
+		switch(direction){
+		case 0:
+			anim = ANIM_BIKE_FALL_R;
+			ped->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.1f);
+			if(m_vecMoveSpeed.MagnitudeSqr() < SQR(0.3f))
+				ped->ApplyMoveForce(5.0f*GetUp() - 6.0f*GetForward());
+			ped->m_pCollidingEntity = this;
+			break;
+		case 1:
+		case 2:
+			if(m_vecMoveSpeed.MagnitudeSqr() > SQR(0.3f)){
+				anim = ANIM_KO_SPIN_R;
+				ped->m_vecMoveSpeed = 0.3f*m_vecMoveSpeed;
+				ped->ApplyMoveForce(5.0f*GetUp() + 6.0f*GetRight());
+			}else{
+				anim = ANIM_KD_LEFT;
+				ped->m_vecMoveSpeed = m_vecMoveSpeed;
+				ped->ApplyMoveForce(4.0f*GetUp() + 8.0f*GetRight());
+			}
+			// BUG or is it intentionally missing?
+			//ped->m_pCollidingEntity = this;
+			break;
+		case 3:
+			if(m_vecMoveSpeed.MagnitudeSqr() > SQR(0.3f)){
+				anim = ANIM_KO_SPIN_L;
+				ped->m_vecMoveSpeed = 0.3f*m_vecMoveSpeed;
+				ped->ApplyMoveForce(5.0f*GetUp() - 6.0f*GetRight());
+			}else{
+				anim = ANIM_KD_RIGHT;
+				ped->m_vecMoveSpeed = m_vecMoveSpeed;
+				ped->ApplyMoveForce(4.0f*GetUp() - 8.0f*GetRight());
+			}
+			// BUG or is it intentionally missing?
+			//ped->m_pCollidingEntity = this;
+			break;
+		}
+		break;
+
+	case WEAPONTYPE_DROWNING:{
+		RwRGBA color;
+		anim = ANIM_FALL_FALL;
+		ped->m_vecMoveSpeed *= 0.2f;
+		ped->m_vecMoveSpeed.z = 0.0f;
+		ped->m_pCollidingEntity = this;
+		color.red = (0.5f * CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed_Obj())*0.45f*255;
+		color.green = (0.5f * CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen_Obj())*0.45f*255;
+		color.blue = (0.5f * CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue_Obj())*0.45f*255;
+		color.alpha = CGeneral::GetRandomNumberInRange(0, 48) + 48;
+		DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLASH, 0.0f);
+		CVector splashPos = ped->GetPosition() + 2.2f*ped->m_vecMoveSpeed;
+		float waterZ = 0.0f;
+		if(CWaterLevel::GetWaterLevel(splashPos, &waterZ, false))
+			splashPos.z = waterZ;
+		CParticleObject::AddObject(POBJECT_PED_WATER_SPLASH, splashPos, CVector(0.0f, 0.0f, 0.1f),
+			0.0f, 200, color, true);
+		break;
+	}
+
+	case WEAPONTYPE_FALL: {
+		ped->m_vecMoveSpeed = ped->m_pMyVehicle->m_vecMoveSpeed;
+		float forceXY = -0.6*m_fDamageImpulse * ped->m_fMass / m_fMass;
+		ped->ApplyMoveForce(m_vecDamageNormal.x*forceXY, m_vecDamageNormal.y*forceXY,
+			CGeneral::GetRandomNumberInRange(3.0f, 7.0f));
+		ped->m_pCollidingEntity = this;
+		switch(direction){
+		case 0: anim = ANIM_KO_SKID_BACK; break;
+		case 1: anim = ANIM_KD_RIGHT; break;
+		case 2: anim = ANIM_KO_SKID_FRONT; break;
+		case 3: anim = ANIM_KD_LEFT; break;
+		}
+		if(m_nWheelsOnGround == 0)
+			ped->b158_4 = true;
+		break;
+	}
+
+	case WEAPONTYPE_BASEBALLBAT:
+	default: {
+		ped->m_vecMoveSpeed = ped->m_pMyVehicle->m_vecMoveSpeed;
+		static float minForceZ = 8.0f;
+		static float maxForceZ = 15.0f;
+		float forceXY = -0.6*m_fDamageImpulse * ped->m_fMass / m_fMass;
+		ped->ApplyMoveForce(m_vecDamageNormal.x*forceXY, m_vecDamageNormal.y*forceXY,
+			CGeneral::GetRandomNumberInRange(minForceZ, maxForceZ));
+		ped->m_pCollidingEntity = this;
+		switch(direction){
+		case 0: anim = ANIM_KO_SKID_BACK; break;
+		case 1: anim = ANIM_KD_RIGHT; break;
+		case 2: anim = ANIM_KO_SKID_FRONT; break;
+		case 3: anim = ANIM_KD_LEFT; break;
+		}
+		ped->b158_4 = true;
+		if(ped->IsPlayer())
+			ped->Say(SOUND_PED_DAMAGE);
+		break;
+	}
+	}
+
+	if(weapon == WEAPONTYPE_DROWNING){
+		ped->bIsStanding = false;
+		ped->bWasStanding = false;
+		ped->bIsInTheAir = true;
+		ped->bIsInWater = true;
+		ped->bTouchingWater = true;
+		CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_FALL_FALL, 4.0f);
+	}else if(weapon != WEAPONTYPE_UNARMED){
+		if(ped->m_fHealth > 0.0f)
+			ped->SetFall(1000, anim, 0);
+		else
+			ped->SetDie(anim);
+		ped->bIsStanding = false;
+	}
+
+	CEntity *ent = CWorld::TestSphereAgainstWorld(ped->GetPosition()+CVector(0.0f, 0.0, 0.5f), 0.4f, nil, true, false, false, false, false, false);
+	if(ent == nil)
+		ent = CWorld::TestSphereAgainstWorld(ped->GetPosition()+CVector(0.0f, 0.0, 0.8f), 0.4f, nil, true, false, false, false, false, false);
+	if(ent == nil)
+		ent = CWorld::TestSphereAgainstWorld(ped->GetPosition()+CTimer::GetTimeStep()*ped->m_vecMoveSpeed+CVector(0.0f, 0.0, 0.5f), 0.4f, nil, true, false, false, false, false, false);
+	if(ent == nil)
+		ent = CWorld::TestSphereAgainstWorld(ped->GetPosition()+CTimer::GetTimeStep()*ped->m_vecMoveSpeed+CVector(0.0f, 0.0, 0.8f), 0.4f, nil, true, false, false, false, false, false);
+	if(ent){
+		CColPoint point;
+		ent = nil;
+		if(CWorld::ProcessVerticalLine(ped->GetPosition(), ped->GetPosition().z-2.0f, point, ent, true, false, false, false, false, false, nil)){
+			if(ped->m_pMyVehicle == nil){
+				ped->m_pMyVehicle = this;
+				ped->PositionPedOutOfCollision();
+				ped->m_pMyVehicle = nil;
+			}else
+				ped->PositionPedOutOfCollision();
+		}else
+			ped->GetMatrix().Translate(CVector(0.0f, 0.0f, -2.0f));
+		ped->m_pCollidingEntity = ped->m_pMyVehicle;
+		ped->b158_4 = true;
+		ped->bHeadStuckInCollision = true;
+	}else if(weapon == WEAPONTYPE_RAMMEDBYCAR){
+		if(CWorld::TestSphereAgainstWorld(ped->GetPosition()+CVector(0.0f, 0.0, 1.3f), 0.6f, nil, true, false, false, false, false, false) == nil)
+			ped->GetMatrix().Translate(CVector(0.0f, 0.0f, 0.5f));
+	}
+	ped->m_pMyVehicle = nil;
 }
 
 void
