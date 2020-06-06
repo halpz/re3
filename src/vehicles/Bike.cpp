@@ -3,6 +3,7 @@
 #include "Pad.h"
 #include "DMAudio.h"
 #include "Timecycle.h"
+#include "ZoneCull.h"
 #include "Camera.h"
 #include "Darkel.h"
 #include "Rubbish.h"
@@ -10,6 +11,7 @@
 #include "Particle.h"
 #include "ParticleObject.h"
 #include "WaterLevel.h"
+#include "Floater.h"
 #include "World.h"
 #include "SurfaceTable.h"
 #include "Record.h"
@@ -555,6 +557,7 @@ CBike::ProcessControl(void)
 		m_fAirResistance = savedAirResistance;
 
 		ProcessBuoyancy();
+
 		// Rescale spring ratios, i.e. subtract wheel radius
 		for(i = 0; i < 4; i++){
 			// wheel radius in relation to suspension line
@@ -1570,7 +1573,64 @@ CBike::ProcessControlInputs(uint8 pad)
 void
 CBike::ProcessBuoyancy(void)
 {
-	// TODO
+	int i;
+	CVector impulse, point;
+
+	if(mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancy, &point, &impulse)){
+		bTouchingWater = true;
+		ApplyMoveForce(impulse);
+		ApplyTurnForce(impulse, point);
+
+		float timeStep = Max(CTimer::GetTimeStep(), 0.01f);
+		float impulseRatio = impulse.z / (GRAVITY * m_fMass * timeStep);
+		float waterResistance = Pow(1.0f - 0.05f*impulseRatio, CTimer::GetTimeStep());
+		m_vecMoveSpeed *= waterResistance;
+		m_vecTurnSpeed *= waterResistance;
+
+		if(impulseRatio > 0.8f ||
+		   impulseRatio > 0.4f && (m_aSuspensionSpringRatio[0] == 1.0f ||
+		                           m_aSuspensionSpringRatio[1] == 1.0f ||
+		                           m_aSuspensionSpringRatio[2] == 1.0f ||
+		                           m_aSuspensionSpringRatio[3] == 1.0f)){
+			bIsInWater = true;
+			bIsDrowning = true;
+			if(m_vecMoveSpeed.z < -0.1f)
+				m_vecMoveSpeed.z = -0.1f;
+
+			if(pDriver){
+				pDriver->bIsInWater = true;
+				if(pDriver->IsPlayer() || !bWaterTight){
+					if(m_aSuspensionSpringRatio[0] < 1.0f ||
+					   m_aSuspensionSpringRatio[1] < 1.0f ||
+					   m_aSuspensionSpringRatio[2] < 1.0f ||
+					   m_aSuspensionSpringRatio[3] < 1.0f)
+						pDriver->InflictDamage(nil, WEAPONTYPE_DROWNING, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+					else
+						KnockOffRider(WEAPONTYPE_DROWNING, 0, pDriver, false);
+				}
+			}
+			for(i = 0; i < m_nNumMaxPassengers; i++)
+				if(pPassengers[i]){
+					pPassengers[i]->bIsInWater = true;
+					if(pPassengers[i]->IsPlayer() || !bWaterTight){
+						if(m_aSuspensionSpringRatio[0] < 1.0f ||
+						   m_aSuspensionSpringRatio[1] < 1.0f ||
+						   m_aSuspensionSpringRatio[2] < 1.0f ||
+						   m_aSuspensionSpringRatio[3] < 1.0f)
+							pPassengers[i]->InflictDamage(nil, WEAPONTYPE_DROWNING, CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+						else
+							KnockOffRider(WEAPONTYPE_DROWNING, 0, pPassengers[i], false);
+					}
+				}
+		}else{
+			bIsInWater = false;
+			bIsDrowning = false;
+		}
+	}else{
+		bIsInWater = false;
+		bIsDrowning = false;
+		bTouchingWater = false;
+	}
 }
 
 void
@@ -1582,7 +1642,101 @@ CBike::DoDriveByShootings(void)
 void
 CBike::VehicleDamage(void)
 {
-	// TODO
+	float impulse = m_fDamageImpulse;
+	float colSpeed = 800.0f*impulse/m_fMass;
+	if(GetStatus() == STATUS_PLAYER)
+		colSpeed *= 0.65f;
+	else if(VehicleCreatedBy == MISSION_VEHICLE)
+		colSpeed *= 0.4f;
+
+	if(!bCanBeDamaged)
+		return;
+
+	if(GetStatus() == STATUS_PLAYER && CStats::GetPercentageProgress() >= 100.0f)
+		impulse *= 0.5f;
+
+	if(bIsStanding && impulse > 20.0f)
+		bIsStanding = false;
+
+	// Inflict damage on the driver and passenger
+	if(pDriver && pDriver->GetPedState() == PED_DRIVING && colSpeed > 10.0f){
+		float fwd = 0.6f;
+		if(Abs(DotProduct(m_vecDamageNormal, GetForward())) > 0.85f){
+			float u = Max(DotProduct(m_vecDamageNormal, CVector(0.0f, 0.0f, 1.0f)), 0.0f);
+			if(u < 0.85f)
+				u = 0.0f;
+			fwd += 7.0f * SQR(u);
+		}
+		float up = 0.05f;
+
+		if(GetModelIndex() == MI_SANCHEZ){
+			fwd *= 0.65f;
+			up *= 0.75f;
+		}
+
+		float total = fwd*Abs(DotProduct(m_vecDamageNormal, GetForward())) +
+			0.45f*Abs(DotProduct(m_vecDamageNormal, GetRight())) +
+			up*Max(DotProduct(m_vecDamageNormal, GetUp()), 0.0f);
+		float damage = (total - 1.5f*Max(DotProduct(m_vecDamageNormal, GetUp()), 0.0f))*colSpeed;
+
+		if(pDriver->IsPlayer() && CCullZones::CamStairsForPlayer() && CCullZones::FindZoneWithStairsAttributeForPlayer())
+			damage = 0.0f;
+
+		if(damage > 75.0f){
+			int dir = -10;
+			if(pDriver){
+				dir = pDriver->GetLocalDirection(-m_vecDamageNormal);
+				if(pDriver->m_fHealth > 0.0f)
+					pDriver->InflictDamage(m_pDamageEntity, WEAPONTYPE_RAMMEDBYCAR, 0.05f*damage, PEDPIECE_TORSO, dir);
+				if(pDriver && pDriver->GetPedState() == PED_DRIVING)
+					KnockOffRider(WEAPONTYPE_RAMMEDBYCAR, dir, pDriver, false);
+			}
+			if(pPassengers[0]){
+				dir = pPassengers[0]->GetLocalDirection(-m_vecDamageNormal);
+				if(pPassengers[0]->m_fHealth > 0.0f)
+					pPassengers[0]->InflictDamage(m_pDamageEntity, WEAPONTYPE_RAMMEDBYCAR, 0.05f*damage, PEDPIECE_TORSO, dir);
+				if(pPassengers[0] && pPassengers[0]->GetPedState() == PED_DRIVING)
+					KnockOffRider(WEAPONTYPE_RAMMEDBYCAR, dir, pPassengers[0], false);
+			}
+		}
+	}
+
+	if(impulse > 25.0f && GetStatus() != STATUS_WRECKED){
+		float damage = (impulse-25.0f)*pHandling->fCollisionDamageMultiplier;
+		if(damage > 0.0f){
+			if(damage > 5.0f &&
+			   pDriver &&
+			   m_pDamageEntity && m_pDamageEntity->IsVehicle() &&
+			   (this != FindPlayerVehicle() || ((CVehicle*)m_pDamageEntity)->VehicleCreatedBy == MISSION_VEHICLE) &&
+			   ((CVehicle*)m_pDamageEntity)->pDriver)
+// TODO(MIAMI): enum
+					pDriver->Say(144);
+
+			int oldHealth = m_fHealth;
+			if(this == FindPlayerVehicle())
+				m_fHealth -= bTakeLessDamage ? damage/6.0f : damage/2.0f;
+			else if(bTakeLessDamage)
+				m_fHealth -= damage/12.0f;
+			else if(m_pDamageEntity && m_pDamageEntity == FindPlayerVehicle())
+				m_fHealth -= damage/1.5f;
+			else
+				m_fHealth -= damage/4.0f;
+			if(m_fHealth <= 0.0f && oldHealth > 0)
+				m_fHealth = 1.0f;
+		}
+	}
+
+	if(m_fHealth < 250.0f){
+		// Car is on fire
+		if(!bIsOnFire){
+			// Set engine on fire and remember who did this
+			bIsOnFire = true;
+			m_fFireBlowUpTimer = 0.0f;
+			m_pSetOnFireEntity = m_pDamageEntity;
+			if(m_pSetOnFireEntity)
+				m_pSetOnFireEntity->RegisterReference(&m_pSetOnFireEntity);
+		}
+	}
 }
 
 void
@@ -1819,7 +1973,6 @@ CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBa
 			else if(ped->m_pedStats->m_temper <= ped->m_pedStats->m_fear &&
 			   ped->CharCreatedBy != MISSION_CHAR && ped->m_pMyVehicle->VehicleCreatedBy != MISSION_VEHICLE &&
 			   !CTheScripts::IsPlayerOnAMission()){
-//TODO(MIAMI): is this right?
 				ped->SetObjective(OBJ_47, ped->m_pMyVehicle);
 				ped->m_nPathDir += CGeneral::GetRandomNumberInRange(0, 8);
 			}
@@ -1857,7 +2010,8 @@ CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBa
 		anim = NUM_STD_ANIMS;
 		break;
 
-	case WEAPONTYPE_RAMMEDBYCAR:
+	case WEAPONTYPE_BASEBALLBAT:
+	default:
 		switch(direction){
 		case 0:
 			anim = ANIM_BIKE_FALL_R;
@@ -1933,8 +2087,7 @@ CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBa
 		break;
 	}
 
-	case WEAPONTYPE_BASEBALLBAT:
-	default: {
+	case WEAPONTYPE_RAMMEDBYCAR: {
 		ped->m_vecMoveSpeed = ped->m_pMyVehicle->m_vecMoveSpeed;
 		static float minForceZ = 8.0f;
 		static float maxForceZ = 15.0f;
