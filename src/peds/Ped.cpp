@@ -5683,6 +5683,7 @@ CPed::SetFlee(CVector2D const &from, int time)
 	}
 }
 
+// --MIAMI: Only some part is done
 void
 CPed::SetWaitState(eWaitState state, void *time)
 {
@@ -5857,13 +5858,20 @@ CPed::SetWaitState(eWaitState state, void *time)
 			else
 				m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 100000;
 			break;
+		case WAITSTATE_FAST_FALL:
+			SetFall(-1, ANIM_KO_SKID_FRONT, true);
+			break;
+		case WAITSTATE_BOMBER:
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_BOMBER, 4.0f);
+			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
+			break;
+		case WAITSTATE_LANCESITTING:
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_LANCE, ANIM_SUNBATHE, 4.0f);
+			break;
 		case WAITSTATE_SUN_BATHE_PRE:
 		case WAITSTATE_SUN_BATHE_DOWN:
 		case WAITSTATE_SUN_BATHE_IDLE:
-		case WAITSTATE_FAST_FALL:
-		case WAITSTATE_BOMBER:
 		case WAITSTATE_GROUND_ATTACK:
-		case WAITSTATE_LANCESITTING:
 		case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
 		default:
 			ClearWaitState();
@@ -7650,6 +7658,7 @@ CPed::FinishLaunchCB(CAnimBlendAssociation *animAssoc, void *arg)
 	}
 }
 
+// --MIAMI: Done
 void
 CPed::FinishedWaitCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -7660,6 +7669,7 @@ CPed::FinishedWaitCB(CAnimBlendAssociation *animAssoc, void *arg)
 	ped->Wait();
 }
 
+// --MIAMI: Some part is done
 void
 CPed::Wait(void)
 {
@@ -7988,13 +7998,39 @@ CPed::Wait(void)
 				ClearWaitState();
 			}
 			break;
+		case WAITSTATE_RIOT:
+			if (m_nPedState == PED_FLEE_ENTITY || m_nPedState == PED_ATTACK) {
+				ClearWaitState();
+				break;
+			}
+
+			PlayRandomAnimationsFromAnimBlock(this, ASSOCGRP_RIOT, ANIM_RIOT_ANGRY, ANIM_RIOT_FUKU - ANIM_RIOT_ANGRY + 1);
+			if (IsPedInControl() && CGeneral::GetRandomNumberInRange(0.f,1.f) < 0.25f
+				&& CPopulation::CanJeerAtStripper(m_modelIndex)) {
+				for (int i = 0; i < m_numNearPeds; ++i) {
+					CPed *nearPed = m_nearPeds[i];
+					if (nearPed) {
+						if ((GetPosition() - nearPed->GetPosition()).MagnitudeSqr() < sq(10.f)) {
+							for (int anim = ANIM_STRIP_A; anim <= ANIM_STRIP_G; anim++) {
+								if (RpAnimBlendClumpGetAssociation(nearPed->GetClump(), anim))
+									Say(SOUND_PED_149);
+							}
+						}
+					}
+				}
+			}
+			break;
+		case WAITSTATE_BOMBER:
+			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer)
+				ClearWaitState();
+			break;
+		case WAITSTATE_STRIPPER:
+			PlayRandomAnimationsFromAnimBlock(this, ASSOCGRP_STRIP, ANIM_STRIP_A, ANIM_STRIP_G - ANIM_STRIP_A + 1);
+			break;
 		case WAITSTATE_SUN_BATHE_PRE:
 		case WAITSTATE_SUN_BATHE_DOWN:
 		case WAITSTATE_SUN_BATHE_IDLE:
-		case WAITSTATE_RIOT:
 		case WAITSTATE_FAST_FALL:
-		case WAITSTATE_BOMBER:
-		case WAITSTATE_STRIPPER:
 		case WAITSTATE_GROUND_ATTACK:
 		case WAITSTATE_LANCESITTING:
 		case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
@@ -18325,41 +18361,106 @@ CPed::SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float head
 	m_positionInQueue = qid;
 }
 
+// --MIAMI: Done
 void
 CPed::ClearWaitState(void)
 {
+	CAnimBlendAssociation *assoc;
 	switch (m_nWaitState) {
-	case WAITSTATE_PLAYANIM_CHAT:
-	case WAITSTATE_SIT_DOWN:
-	case WAITSTATE_SIT_DOWN_RVRS:
-	case WAITSTATE_SIT_UP:
-	case WAITSTATE_SIT_IDLE:
-	case WAITSTATE_USE_ATM:
-		if (CTimer::GetTimeInMilliseconds() <= m_nWaitTimer) {
-			AnimationId id;
-			switch (m_nWaitState) { // TODO(MIAMI): actual!
-			case WAITSTATE_PLAYANIM_CHAT: id = ANIM_IDLE_CHAT; break;
-			case WAITSTATE_SIT_DOWN: id = ANIM_SEAT_DOWN; break;
-			case WAITSTATE_SIT_DOWN_RVRS: id = ANIM_SEAT_DOWN2; break;
-			case WAITSTATE_SIT_UP: id = ANIM_SEAT_UP; break;
-			case WAITSTATE_SIT_IDLE: id = ANIM_SEAT_IDLE; break;
-			case WAITSTATE_USE_ATM: id = ANIM_ATM; break;
+		case WAITSTATE_PLAYANIM_CHAT:
+		case WAITSTATE_SIT_DOWN:
+		case WAITSTATE_SIT_DOWN_RVRS:
+		case WAITSTATE_SIT_UP:
+		case WAITSTATE_SIT_IDLE:
+		case WAITSTATE_USE_ATM:
+			if (CTimer::GetTimeInMilliseconds() <= m_nWaitTimer) {
+				if (m_nWaitState == WAITSTATE_USE_ATM) {
+					assoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ATM);
+					if (assoc)
+						assoc->blendDelta = -8.0f;
+					if (m_attractor)
+						GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+
+				} else if (m_nWaitState == WAITSTATE_PLAYANIM_CHAT) {
+					assoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_CHAT);
+					if (assoc)
+						assoc->blendDelta = -8.0f;
+					if (m_attractor)
+						GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+
+				} else if (m_nWaitState == WAITSTATE_SIT_DOWN || m_nWaitState == WAITSTATE_SIT_DOWN_RVRS || m_nWaitState == WAITSTATE_SIT_IDLE || m_nWaitState == WAITSTATE_SIT_UP) {
+					switch (m_nWaitState) {
+						case WAITSTATE_SIT_DOWN:
+							assoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_SEAT_DOWN);
+							if (assoc)
+								assoc->blendDelta = -8.0f;
+							break;
+						case WAITSTATE_SIT_IDLE:
+							assoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_SEAT_IDLE);
+							if (assoc)
+								assoc->blendDelta = -8.0f;
+							break;
+						case WAITSTATE_SIT_UP:
+							assoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_SEAT_UP);
+							if (assoc)
+								assoc->blendDelta = -8.0f;
+							break;
+						default:
+							break;
+					}
+					if (m_attractor)
+						GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+				}
 			}
-			CAnimBlendAssociation* pAssoc = RpAnimBlendClumpGetAssociation(GetClump(), id);
-			if (pAssoc)
-				pAssoc->blendDelta = -8.0f;
-			if (m_attractor)
-				GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+			break;
+		case WAITSTATE_RIOT:
+		{
+			CAnimBlock* riotAnimBlock = CAnimManager::GetAnimationBlock("riot");
+
+			for (assoc = RpAnimBlendClumpGetFirstAssociation(GetClump()); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
+				int first = riotAnimBlock->firstIndex;
+				int index = assoc->hierarchy - CAnimManager::GetAnimation(0);
+				if (index >= first && index < first + riotAnimBlock->numAnims) {
+					assoc->blendDelta = -1000.0f;
+				}
+			}
+			break;
 		}
-		break;
-	case WAITSTATE_RIOT:
-	case WAITSTATE_FAST_FALL:
-	case WAITSTATE_BOMBER:
-	case WAITSTATE_STRIPPER:
-	case WAITSTATE_GROUND_ATTACK:
-	case WAITSTATE_LANCESITTING:
-	case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
-		assert(0);
+		case WAITSTATE_FAST_FALL:
+			if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_KO_SKID_FRONT))
+				SetGetUp();
+
+			break;
+		case WAITSTATE_BOMBER:
+			assoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BOMBER);
+			if (assoc)
+				assoc->blendDelta = -8.0f;
+			break;
+		case WAITSTATE_STRIPPER:
+		{
+			CAnimBlock* stripAnimBlock = CAnimManager::GetAnimationBlock("strip");
+
+			for (assoc = RpAnimBlendClumpGetFirstAssociation(GetClump()); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
+				int first = stripAnimBlock->firstIndex;
+				int index = assoc->hierarchy - CAnimManager::GetAnimation(0);
+				if (index >= first && index < first + stripAnimBlock->numAnims) {
+					assoc->blendDelta = -1000.0f;
+				}
+			}
+			break;
+		}
+		case WAITSTATE_LANCESITTING:
+			assoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_SUNBATHE);
+			if (assoc)
+				assoc->blendDelta = -8.0f;
+			break;
+		case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
+			assoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_HANDSUP);
+			if (assoc)
+				assoc->blendDelta = -8.0f;
+			break;
+		default:
+			break;
 	}
 	m_nWaitState = WAITSTATE_FALSE;
 }
@@ -19044,6 +19145,42 @@ CPed::DriveVehicle(void)
 			else
 				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_LB, 4.0f);
 		}
+	}
+}
+
+void
+PlayRandomAnimationsFromAnimBlock(CPed* ped, AssocGroupId animGroup, uint32 first, uint32 amount)
+{
+	if (!ped->IsPedInControl())
+		return;
+
+	const char *groupName = CAnimManager::GetAnimGroupName(animGroup);
+	CAnimBlock *animBlock = CAnimManager::GetAnimationBlock(groupName);
+	CAnimBlendAssociation *assoc;
+	for (assoc = RpAnimBlendClumpGetFirstAssociation(ped->GetClump()); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
+		int first = animBlock->firstIndex;
+		int index = assoc->hierarchy - CAnimManager::GetAnimation(0);
+		if (index >= first && index < first + animBlock->numAnims) {
+			break;
+		}
+	}
+
+	if (CTimer::GetTimeInMilliseconds() > ped->m_nWaitTimer && assoc)
+		assoc->flags &= ~ASSOC_REPEAT;
+
+	if (!assoc || assoc->blendDelta < 0.0f) {
+		int selectedAnimOffset;
+		do
+			selectedAnimOffset = CGeneral::GetRandomNumberInRange(0, amount);
+		while (assoc && first + selectedAnimOffset == assoc->animId);
+
+		assoc = CAnimManager::BlendAnimation(ped->GetClump(), animGroup, (AnimationId)(first + selectedAnimOffset), 3.0f);
+
+		assoc->SetFinishCallback(CPed::FinishedWaitCB, ped);
+		if (assoc->flags & ASSOC_REPEAT)
+			ped->m_nWaitTimer = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(3000, 8000);
+		else
+			ped->m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 8000;
 	}
 }
 
