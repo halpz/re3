@@ -1974,7 +1974,7 @@ CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBa
 			   ped->CharCreatedBy != MISSION_CHAR && ped->m_pMyVehicle->VehicleCreatedBy != MISSION_VEHICLE &&
 			   !CTheScripts::IsPlayerOnAMission()){
 				ped->SetObjective(OBJ_47, ped->m_pMyVehicle);
-				ped->m_nPathDir += CGeneral::GetRandomNumberInRange(0, 8);
+				ped->m_nPathDir = CGeneral::GetRandomNumberInRange(0, 8);
 			}
 		}else if(ped->m_leader == nil){
 			if(pDriver == ped)
