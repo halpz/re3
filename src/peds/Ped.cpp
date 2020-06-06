@@ -5785,6 +5785,7 @@ CPed::SetWaitState(eWaitState state, void *time)
 #ifdef FIX_BUGS
 			animAssoc->SetFinishCallback(RestoreHeadingRateCB, this);
 #endif
+
 			break;
 		case WAITSTATE_PLAYANIM_COWER:
 			waitAnim = ANIM_HANDSCOWER;
@@ -6523,6 +6524,9 @@ CPed::Die(void)
 uint8
 CPed::DoesLOSBulletHitPed(CColPoint &colPoint)
 {
+#ifdef FIX_BUGS
+	return 1;
+#else
 	uint8 retVal = 2;
 
 	float headZ = GetNodePosition(PED_HEAD).z;
@@ -6538,6 +6542,7 @@ CPed::DoesLOSBulletHitPed(CColPoint &colPoint)
 		retVal = 0;
 
 	return retVal;
+#endif
 }
 
 // --MIAMI: Done
