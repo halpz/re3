@@ -6955,7 +6955,6 @@ CPed::ExitCar(void)
 				// TODO(Miami): What are those?
 				if (m_vehEnterType == 18 || m_vehEnterType == 8) {
 					((CBike*)m_pMyVehicle)->KnockOffRider(WEAPONTYPE_UNARMED, 0, this, false);
-					return;
 				}
 			} else if (m_pMyVehicle->IsCar()) {
 				if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_ROLLOUT_LHS)) {

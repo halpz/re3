@@ -936,15 +936,27 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 	} else
 #endif
 	{
-		for (; (*s != ' ' || spaces) && *s != '\0'; s++) {
-			if (*s == '~') {
+		for (wchar c = *s; (c != ' ' || spaces) && c != '\0'; c = *(++s)) {
+			if (c == '~') {
+
+				// This is original code
+#if 0
 				s++;
-				while (*s != '~') s++;
-				s++;
-				if (*s == ' ' && !spaces)
-					break;
+				while (*s != '~') {
+					s++;
+				}
+#else
+				// TODO(Miami): This is my code to prevent fuck up until InsertPlayerControlKeysInString is done 
+				if (*(s + 1) != '~') {
+					s++;
+					while (*s != '~') {
+						s++;
+					}
+				}
+#endif
+			} else {
+				w += GetCharacterSize(c - ' ');
 			}
-			w += GetCharacterSize(*s - ' ');
 		}
 	}
 	return w;
