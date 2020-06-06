@@ -469,7 +469,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	static bool bBraking;
 	static bool bDriving;
 
-#ifdef FIX_BUGS
+#ifdef FIX_SIGNIFICANT_BUGS
 	bAlreadySkidding = false;
 #endif
 
