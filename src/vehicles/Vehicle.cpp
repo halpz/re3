@@ -748,7 +748,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	static bool bBraking;
 	static bool bDriving;
 
-#ifdef FIX_BUGS
+#ifdef FIX_SIGNIFICANT_BUGS
 	bAlreadySkidding = false;
 #endif
 
@@ -903,7 +903,7 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 	static bool bDriving;
 	static bool bReversing;
 
-#ifdef FIX_BUGS
+#ifdef FIX_SIGNIFICANT_BUGS
 	bAlreadySkidding = false;
 #endif
 
@@ -1032,7 +1032,6 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 		float impulse = speed*m_fMass;
 		float turnImpulse = speed*GetMass(wheelContactPoint, direction);
 		CVector vTurnImpulse = turnImpulse * direction;
-
 		ApplyMoveForce(impulse * direction);
 
 		float turnRight = DotProduct(vTurnImpulse, GetRight());

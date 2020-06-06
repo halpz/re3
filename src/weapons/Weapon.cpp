@@ -387,7 +387,7 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 }
 
 bool
-CWeapon::FireFromCar(CVehicle *shooter, bool left)
+CWeapon::FireFromCar(CVehicle *shooter, bool left, bool right)
 {
 	ASSERT(shooter!=nil);
 
@@ -397,7 +397,7 @@ CWeapon::FireFromCar(CVehicle *shooter, bool left)
 	if ( m_nAmmoInClip <= 0 )
 		return false;
 
-	if ( FireInstantHitFromCar(shooter, left) )
+	if ( FireInstantHitFromCar(shooter, left, right) )
 	{
 		DMAudio.PlayOneShot(shooter->m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
 
@@ -2021,8 +2021,9 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 }
 
 bool
-CWeapon::FireInstantHitFromCar(CVehicle *shooter, bool left)
+CWeapon::FireInstantHitFromCar(CVehicle *shooter, bool left, bool right)
 {
+// TODO(MIAMI): bikes
 	CWeaponInfo *info = GetInfo();
 
 	CVehicleModelInfo *modelInfo = shooter->GetModelInfo();

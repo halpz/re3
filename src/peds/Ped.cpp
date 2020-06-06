@@ -6797,7 +6797,7 @@ CPed::EnterCar(void)
 		LineUpPedWithCar(LINE_UP_TO_CAR_START);
 		if (veh->IsBike()) {
 			CBike *bike = (CBike*)veh;
-			if (bike->GetStatus() != STATUS_ABANDONED || bike->m_bike_flag08 || !m_pVehicleAnim) {
+			if (bike->GetStatus() != STATUS_ABANDONED || bike->bIsBeingPickedUp || !m_pVehicleAnim) {
 				if (m_nPedState == PED_CARJACK && m_pVehicleAnim) {
 					if (m_pVehicleAnim->currentTime > 0.4f && m_pVehicleAnim->currentTime - m_pVehicleAnim->timeStep <= 0.4f) {
 						int anim = m_pVehicleAnim->animId;
@@ -6813,9 +6813,9 @@ CPed::EnterCar(void)
 
 				// One is pickup and other one is pullup, not same :p
 				if ((anim == ANIM_BIKE_PICKUP_R || anim == ANIM_BIKE_PICKUP_L) && m_pVehicleAnim->currentTime > 0.4667f)
-					bike->m_bike_flag08 = true;
+					bike->bIsBeingPickedUp = true;
 				else if ((anim == ANIM_BIKE_PULLUP_R || anim == ANIM_BIKE_PULLUP_L) && m_pVehicleAnim->currentTime > 0.4667f)
-					bike->m_bike_flag08 = true;
+					bike->bIsBeingPickedUp = true;
 			}
 		}
 	} else {
