@@ -243,6 +243,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_nPedState = PED_IDLE;
 	m_nLastPedState = PED_NONE;
 	m_nMoveState = PEDMOVE_STILL;
+#ifdef FIX_BUGS
+	m_nPrevMoveState = PEDMOVE_NONE;
+#endif
 	m_nStoredMoveState = PEDMOVE_NONE;
 	m_pFire = nil;
 	m_pPointGunAt = nil;

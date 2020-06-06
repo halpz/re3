@@ -99,7 +99,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_numPedsUseItAsCover = 0;
 	bIsCarParkVehicle = false;
 	bHasAlreadyBeenRecorded = false;
-	m_bSirenOrAlarm = 0;
+	m_bSirenOrAlarm = false;
 	m_nCarHornTimer = 0;
 	m_nCarHornPattern = 0;
 	m_nAlarmState = 0;
