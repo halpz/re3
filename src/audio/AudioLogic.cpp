@@ -59,6 +59,67 @@ void
 cAudioManager::PreInitialiseGameSpecificSetup() const
 {
 	BankStartOffset[SAMPLEBANK_MAIN] = SAMPLEBANK_START;
+#ifdef GTA_PS2
+	BankStartOffset[SAMPLEBANK_CAR_PACARD] = SFX_CAR_ACCEL_1;
+	BankStartOffset[SAMPLEBANK_CAR_PATHFINDER] = SFX_CAR_ACCEL_2;
+	BankStartOffset[SAMPLEBANK_CAR_PORSCHE] = SFX_CAR_ACCEL_3;
+	BankStartOffset[SAMPLEBANK_CAR_SPIDER] = SFX_CAR_ACCEL_4;
+	BankStartOffset[SAMPLEBANK_CAR_MERC] = SFX_CAR_ACCEL_5;
+	BankStartOffset[SAMPLEBANK_CAR_MACKTRUCK] = SFX_CAR_ACCEL_6;
+	BankStartOffset[SAMPLEBANK_CAR_HOTROD] = SFX_CAR_ACCEL_7;
+	BankStartOffset[SAMPLEBANK_CAR_COBRA] = SFX_CAR_ACCEL_8;
+	BankStartOffset[SAMPLEBANK_CAR_NONE] = SFX_CAR_ACCEL_9;
+	BankStartOffset[SAMPLEBANK_FRONTEND] = SFX_PAGE_CHANGE_AND_BACK_LEFT;
+	BankStartOffset[SAMPLEBANK_TRAIN] = SFX_TRAIN_STATION_AMBIENCE_LOOP;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_1] = SFX_CLUB_1;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_2] = SFX_CLUB_2;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_3] = SFX_CLUB_3;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_4] = SFX_CLUB_4;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_5] = SFX_CLUB_5;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_6] = SFX_CLUB_6;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_7] = SFX_CLUB_7;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_8] = SFX_CLUB_8;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_9] = SFX_CLUB_9;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_10] = SFX_CLUB_10;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_11] = SFX_CLUB_11;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_12] = SFX_CLUB_12;
+	BankStartOffset[SAMPLEBANK_BUILDING_CLUB_RAGGA] = SFX_CLUB_RAGGA;
+	BankStartOffset[SAMPLEBANK_BUILDING_STRIP_CLUB_1] = SFX_STRIP_CLUB_1;
+	BankStartOffset[SAMPLEBANK_BUILDING_STRIP_CLUB_2] = SFX_STRIP_CLUB_2;
+	BankStartOffset[SAMPLEBANK_BUILDING_WORKSHOP] = SFX_WORKSHOP_1;
+	BankStartOffset[SAMPLEBANK_BUILDING_PIANO_BAR] = SFX_PIANO_BAR_1;
+	BankStartOffset[SAMPLEBANK_BUILDING_SAWMILL] = SFX_SAWMILL_LOOP;
+	BankStartOffset[SAMPLEBANK_BUILDING_DOG_FOOD_FACTORY] = SFX_DOG_FOOD_FACTORY;
+	BankStartOffset[SAMPLEBANK_BUILDING_LAUNDERETTE] = SFX_LAUNDERETTE_LOOP;
+	BankStartOffset[SAMPLEBANK_BUILDING_RESTAURANT_CHINATOWN] = SFX_RESTAURANT_CHINATOWN;
+	BankStartOffset[SAMPLEBANK_BUILDING_RESTAURANT_ITALY] = SFX_RESTAURANT_ITALY;
+	BankStartOffset[SAMPLEBANK_BUILDING_RESTAURANT_GENERIC_1] = SFX_RESTAURANT_GENERIC_1;
+	BankStartOffset[SAMPLEBANK_BUILDING_RESTAURANT_GENERIC_2] = SFX_RESTAURANT_GENERIC_2;
+	BankStartOffset[SAMPLEBANK_BUILDING_AIRPORT] = SFX_AIRPORT_ANNOUNCEMENT_1;
+	BankStartOffset[SAMPLEBANK_BUILDING_SHOP] = SFX_SHOP_LOOP;
+	BankStartOffset[SAMPLEBANK_BUILDING_CINEMA] = SFX_CINEMA_BASS_1;
+	BankStartOffset[SAMPLEBANK_BUILDING_DOCKS] = SFX_DOCKS_FOGHORN;
+	BankStartOffset[SAMPLEBANK_BUILDING_HOME] = SFX_HOME_1;
+	BankStartOffset[SAMPLEBANK_BUILDING_PORN_1] = SFX_PORN_1_LOOP;
+	BankStartOffset[SAMPLEBANK_BUILDING_PORN_2] = SFX_PORN_2_LOOP;
+	BankStartOffset[SAMPLEBANK_BUILDING_PORN_3] = SFX_PORN_3_LOOP;
+	BankStartOffset[SAMPLEBANK_BUILDING_POLICE_BALL] = SFX_POLICE_BALL_1;
+	BankStartOffset[SAMPLEBANK_BUILDING_BANK_ALARM] = SFX_BANK_ALARM_1;
+	BankStartOffset[SAMPLEBANK_BUILDING_RAVE_INDUSTRIAL] = SFX_RAVE_INDUSTRIAL;
+	BankStartOffset[SAMPLEBANK_BUILDING_RAVE_COMMERCIAL] = SFX_RAVE_COMMERCIAL;
+	BankStartOffset[SAMPLEBANK_BUILDING_RAVE_SUBURBAN] = SFX_RAVE_SUBURBAN;
+	BankStartOffset[SAMPLEBANK_BUILDING_RAVE_COMMERCIAL_2] = SFX_RAVE_COMMERCIAL_2;
+	BankStartOffset[SAMPLEBANK_BUILDING_39] = SFX_CLUB_1_1;
+	BankStartOffset[SAMPLEBANK_BUILDING_40] = SFX_CLUB_1_2;
+	BankStartOffset[SAMPLEBANK_BUILDING_41] = SFX_CLUB_1_3;
+	BankStartOffset[SAMPLEBANK_BUILDING_42] = SFX_CLUB_1_4;
+	BankStartOffset[SAMPLEBANK_BUILDING_43] = SFX_CLUB_1_5;
+	BankStartOffset[SAMPLEBANK_BUILDING_44] = SFX_CLUB_1_6;
+	BankStartOffset[SAMPLEBANK_BUILDING_45] = SFX_CLUB_1_7;
+	BankStartOffset[SAMPLEBANK_BUILDING_46] = SFX_CLUB_1_8;
+	BankStartOffset[SAMPLEBANK_BUILDING_47] = SFX_CLUB_1_9;
+	BankStartOffset[SAMPLEBANK_EXTRAS] = SFX_EXPLOSION_1;
+#endif // GTA_PS2
 	BankStartOffset[SAMPLEBANK_PED] = SAMPLEBANK_PED_START;
 }
 
@@ -407,7 +468,7 @@ enum
 
 struct tVehicleSampleData {
 	eSfxSample m_nAccelerationSampleIndex;
-	uint8 m_bEngineSoundType;
+	uint8 m_nBank;
 	eSfxSample m_nHornSample;
 	int32 m_nHornFrequency;
 	uint8 m_nSirenOrAlarmSample;
@@ -415,76 +476,77 @@ struct tVehicleSampleData {
 	uint8 m_bDoorType;
 };
 
-const tVehicleSampleData aVehicleSettings[MAX_CARS] = {{SFX_CAR_REV_2, 2, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 11487, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_8, 8, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_ALARM_1, 10928, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 12893, SFX_CAR_ALARM_1, 8941, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_BMW328, 10706, SFX_CAR_ALARM_1, 11922, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_ALARM_1, 7948, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 29711, SFX_POLICE_SIREN_SLOW, 11556, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 31478, SFX_CAR_ALARM_1, 8941, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_BMW328, 9538, SFX_CAR_ALARM_1, 12220, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_3, 3, SFX_CAR_HORN_BMW328, 12017, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_2, 2, SFX_CAR_HORN_JEEP, 22295, SFX_CAR_ALARM_1, 12200, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_ALARM_1, 13400, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_BUS, 18286, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_3, 3, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_ALARM_1, 13600, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_JEEP, 22295, SFX_AMBULANCE_SIREN_SLOW, 8795, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_PORSCHE, 9271, SFX_POLICE_SIREN_SLOW, 16168, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 12170, SFX_CAR_ALARM_1, 8000, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_BUS2, 12345, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_2, 2, SFX_CAR_HORN_BMW328, 10796, SFX_CAR_ALARM_1, 8543, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_PORSCHE, 9271, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_2, 2, SFX_CAR_HORN_PICKUP, 10924, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_PICKUP, 11025, SFX_ICE_CREAM_TUNE, 11025, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_7, 7, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_ALARM_1, 10000, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_BMW328, 10706, SFX_POLICE_SIREN_SLOW, 13596, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_BUS, 17260, SFX_POLICE_SIREN_SLOW, 13000, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_8, 8, SFX_CAR_HORN_PORSCHE, 10400, SFX_CAR_ALARM_1, 10123, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 26513, SFX_POLICE_SIREN_SLOW, 13596, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_BUS2, 11652, SFX_CAR_ALARM_1, 10554, DOOR_TYPE_AIRBREAK},
-                                                 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_ALARM_1, 8000, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_1, 0, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_AIRBREAK},
-                                                 {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CESNA_IDLE, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_BUS, 16291, SFX_CAR_ALARM_1, 7500, DOOR_TYPE_AIRBREAK},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 10233, SFX_CAR_ALARM_1, 8935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_ALARM_1, 8935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 0, SFX_CAR_HORN_PICKUP, 2000, SFX_CAR_ALARM_1, 17000, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_BMW328, 9003, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_2, 2, SFX_CAR_HORN_PORSCHE, 12375, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_BUS2, 15554, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_7, 7, SFX_CAR_HORN_BUS2, 13857, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_7, 7, SFX_CAR_HORN_PICKUP, 10924, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 20143, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9000, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_BUS, 18286, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_ALARM_1, 13400, DOOR_TYPE_NEW},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
-                                                 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD}};
+const tVehicleSampleData aVehicleSettings[MAX_CARS] = {
+    {SFX_CAR_REV_2, SAMPLEBANK_CAR_PATHFINDER, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_56CHEV, 11487, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_8, SAMPLEBANK_CAR_COBRA, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_ALARM_1, 10928, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_6, SAMPLEBANK_CAR_MACKTRUCK, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_56CHEV, 12893, SFX_CAR_ALARM_1, 8941, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_5, SAMPLEBANK_CAR_MERC, SFX_CAR_HORN_BMW328, 10706, SFX_CAR_ALARM_1, 11922, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_ALARM_1, 7948, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_6, SAMPLEBANK_CAR_MACKTRUCK, SFX_CAR_HORN_TRUCK, 29711, SFX_POLICE_SIREN_SLOW, 11556, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_6, SAMPLEBANK_CAR_MACKTRUCK, SFX_CAR_HORN_TRUCK, 31478, SFX_CAR_ALARM_1, 8941, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_BMW328, 9538, SFX_CAR_ALARM_1, 12220, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_3, SAMPLEBANK_CAR_PORSCHE, SFX_CAR_HORN_BMW328, 12017, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_2, SAMPLEBANK_CAR_PATHFINDER, SFX_CAR_HORN_JEEP, 22295, SFX_CAR_ALARM_1, 12200, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_ALARM_1, 13400, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_BUS, 18286, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_3, SAMPLEBANK_CAR_PORSCHE, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_ALARM_1, 13600, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_JEEP, 22295, SFX_AMBULANCE_SIREN_SLOW, 8795, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_5, SAMPLEBANK_CAR_MERC, SFX_CAR_HORN_PORSCHE, 9271, SFX_POLICE_SIREN_SLOW, 16168, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_56CHEV, 12170, SFX_CAR_ALARM_1, 8000, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_BUS2, 12345, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_2, SAMPLEBANK_CAR_PATHFINDER, SFX_CAR_HORN_BMW328, 10796, SFX_CAR_ALARM_1, 8543, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_5, SAMPLEBANK_CAR_MERC, SFX_CAR_HORN_PORSCHE, 9271, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_2, SAMPLEBANK_CAR_PATHFINDER, SFX_CAR_HORN_PICKUP, 10924, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_PICKUP, 11025, SFX_ICE_CREAM_TUNE, 11025, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_7, SAMPLEBANK_CAR_HOTROD, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_ALARM_1, 10000, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_5, SAMPLEBANK_CAR_MERC, SFX_CAR_HORN_BMW328, 10706, SFX_POLICE_SIREN_SLOW, 13596, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_BUS, 17260, SFX_POLICE_SIREN_SLOW, 13000, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_8, SAMPLEBANK_CAR_COBRA, SFX_CAR_HORN_PORSCHE, 10400, SFX_CAR_ALARM_1, 10123, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 26513, SFX_POLICE_SIREN_SLOW, 13596, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_6, SAMPLEBANK_CAR_MACKTRUCK, SFX_CAR_HORN_BUS2, 11652, SFX_CAR_ALARM_1, 10554, DOOR_TYPE_AIRBREAK},
+    {SFX_CAR_REV_6, SAMPLEBANK_CAR_MACKTRUCK, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_ALARM_1, 8000, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_6, SAMPLEBANK_CAR_MACKTRUCK, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_1, SAMPLEBANK_MAIN, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_AIRBREAK},
+    {SFX_CAR_REV_1, SAMPLEBANK_MAIN, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CESNA_IDLE, SAMPLEBANK_MAIN, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_6, SAMPLEBANK_CAR_MACKTRUCK, SFX_CAR_HORN_BUS, 16291, SFX_CAR_ALARM_1, 7500, DOOR_TYPE_AIRBREAK},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_56CHEV, 10233, SFX_CAR_ALARM_1, 8935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_ALARM_1, 8935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_MAIN, SFX_CAR_HORN_PICKUP, 2000, SFX_CAR_ALARM_1, 17000, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_5, SAMPLEBANK_CAR_MERC, SFX_CAR_HORN_BMW328, 9003, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_2, SAMPLEBANK_CAR_PATHFINDER, SFX_CAR_HORN_PORSCHE, 12375, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_5, SAMPLEBANK_CAR_MERC, SFX_CAR_HORN_BUS2, 15554, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_7, SAMPLEBANK_CAR_HOTROD, SFX_CAR_HORN_BUS2, 13857, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_7, SAMPLEBANK_CAR_HOTROD, SFX_CAR_HORN_PICKUP, 10924, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_1, SAMPLEBANK_MAIN, SFX_CAR_HORN_JEEP, 20143, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_MAIN, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9000, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_6, SAMPLEBANK_CAR_MACKTRUCK, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_BUS, 18286, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_TRUCK},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_4, SAMPLEBANK_CAR_SPIDER, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_ALARM_1, 13400, DOOR_TYPE_NEW},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD},
+    {SFX_CAR_REV_1, SAMPLEBANK_CAR_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_ALARM_1, 9935, DOOR_TYPE_OLD}};
 
 
 bool bPlayerJustEnteredCar;
@@ -951,7 +1013,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 			if (m_sQueueSample.m_nVolume != 0) {
 				if (automobile->GetStatus() == STATUS_SIMPLE) {
 					if (modificator < 0.02f) {
-						m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_bEngineSoundType - 1 + SFX_CAR_IDLE_1;
+						m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_nBank - CAR_SAMPLEBANKS_OFFSET + SFX_CAR_IDLE_1;
 						freq = modificator * 10000 + 22050;
 						m_sQueueSample.m_nCounter = 52;
 					} else {
@@ -960,7 +1022,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 					}
 				} else {
 					if (automobile->m_fGasPedal < 0.05f) {
-						m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_bEngineSoundType - 1 + SFX_CAR_IDLE_1;
+						m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_nBank - CAR_SAMPLEBANKS_OFFSET + SFX_CAR_IDLE_1;
 						freq = modificator * 10000 + 22050;
 						m_sQueueSample.m_nCounter = 52;
 					} else {
@@ -1016,13 +1078,17 @@ cAudioManager::PlayerJustLeftCar(void) const
 }
 
 void
-cAudioManager::AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 unk1, uint8 counter, bool notLooping)
+cAudioManager::AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 bank, uint8 counter, bool notLooping)
 {
 	m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, 50.f, m_sQueueSample.m_fDistance);
 	if (m_sQueueSample.m_nVolume != 0) {
 		m_sQueueSample.m_nCounter = counter;
 		m_sQueueSample.m_nSampleIndex = sample;
+#ifdef GTA_PS2
+		m_sQueueSample.m_nBankIndex = bank;
+#else
 		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+#endif // GTA_PS2
 		m_sQueueSample.m_bIs2D = false;
 		m_sQueueSample.m_nReleasingVolumeModificator = 0;
 		m_sQueueSample.m_nFrequency = freq;
@@ -1059,11 +1125,11 @@ cAudioManager::ProcessCesna(cVehicleParams *params)
 			} else if (nAccel < 60) {
 				++nAccel;
 			}
-			AddPlayerCarSample(85 * (60 - nAccel) / 60 + 20, 8500 * nAccel / 60 + 17000, SFX_CESNA_IDLE, 0, 52, true);
-			AddPlayerCarSample(85 * nAccel / 60 + 20, 8500 * nAccel / 60 + 17000, SFX_CESNA_REV, 0, 2, true);
+			AddPlayerCarSample(85 * (60 - nAccel) / 60 + 20, 8500 * nAccel / 60 + 17000, SFX_CESNA_IDLE, SAMPLEBANK_MAIN, 52, true);
+			AddPlayerCarSample(85 * nAccel / 60 + 20, 8500 * nAccel / 60 + 17000, SFX_CESNA_REV, SAMPLEBANK_MAIN, 2, true);
 		}
 	} else if (params->m_nIndex == DODO) {
-		AddPlayerCarSample(105, 17000, SFX_CESNA_IDLE, 0, 52, true);
+		AddPlayerCarSample(105, 17000, SFX_CESNA_IDLE, SAMPLEBANK_MAIN, 52, true);
 	} else if (params->m_fDistance < SQR(200)) {
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		m_sQueueSample.m_nVolume = ComputeVolume(80, 200.f, m_sQueueSample.m_fDistance);
@@ -1205,8 +1271,8 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 	} else
 		freqModifier = 0;
 
-	engineSoundType = aVehicleSettings[params->m_nIndex].m_bEngineSoundType;
-	soundOffset = 3 * (engineSoundType - 1);
+	engineSoundType = aVehicleSettings[params->m_nIndex].m_nBank;
+	soundOffset = 3 * (engineSoundType - CAR_SAMPLEBANKS_OFFSET);
 	if (accelerateState <= 0) {
 		if (params->m_fVelocityChange < -0.001f) {
 			if (channelUsed) {
@@ -1233,16 +1299,16 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 			}
 			if (gasPedalAudio > 0.05f) {
 				freq = (5000.f * (gasPedalAudio - 0.05f) * 20.f / 19) + 19000;
-				if (engineSoundType == 6)
+				if (engineSoundType == SAMPLEBANK_CAR_MACKTRUCK)
 					freq /= 2;
 				AddPlayerCarSample((25.f * (gasPedalAudio - 0.05f) * 20.f / 19) + 40, freq, (soundOffset + SFX_CAR_FINGER_OFF_ACCEL_1), engineSoundType, 63,
 				                   false);
 			}
 		}
 		freq = (10000.f * gasPedalAudio) + 22050;
-		if (engineSoundType == 6)
+		if (engineSoundType == SAMPLEBANK_CAR_MACKTRUCK)
 			freq /= 2;
-		AddPlayerCarSample(110 - (40.f * gasPedalAudio), freq, (engineSoundType - 1 + SFX_CAR_IDLE_1), 0, 52, true);
+		AddPlayerCarSample(110 - (40.f * gasPedalAudio), freq, (engineSoundType - CAR_SAMPLEBANKS_OFFSET + SFX_CAR_IDLE_1), SAMPLEBANK_MAIN, 52, true);
 
 		CurrentPretendGear = Max(1, currentGear);
 	} else {
@@ -1263,13 +1329,13 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 					automobile->m_fGasPedalAudio = accelerationMultipler;
 				}
 				freq = freqModifier + baseFreq;
-				if (engineSoundType == 6)
+				if (engineSoundType == SAMPLEBANK_CAR_MACKTRUCK)
 					freq /= 2;
 				if (channelUsed) {
 					SampleManager.StopChannel(m_nActiveSamples);
 					bAccelSampleStopped = true;
 				}
-				AddPlayerCarSample(vol, freq, (engineSoundType - 1 + SFX_CAR_REV_1), 0, 2, true);
+				AddPlayerCarSample(vol, freq, (engineSoundType - CAR_SAMPLEBANKS_OFFSET + SFX_CAR_REV_1), SAMPLEBANK_MAIN, 2, true);
 			} else {
 				TranslateEntity(&m_sQueueSample.m_vecPos, &pos);
 				if (bAccelSampleStopped) {
@@ -1303,7 +1369,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 				SampleManager.SetChannel3DPosition(m_nActiveSamples, pos.x, pos.y, pos.z);
 				SampleManager.SetChannel3DDistances(m_nActiveSamples, 50.f, 12.5f);
 				freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
-				if (engineSoundType == 6)
+				if (engineSoundType == SAMPLEBANK_CAR_MACKTRUCK)
 					freq /= 2;
 				SampleManager.SetChannelFrequency(m_nActiveSamples, freq);
 				if (!channelUsed) {
@@ -1326,7 +1392,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 					--nCruising;
 				}
 				freq = 27 * nCruising + freqModifier + 22050;
-				if (engineSoundType == 6)
+				if (engineSoundType == SAMPLEBANK_CAR_MACKTRUCK)
 					freq /= 2;
 				AddPlayerCarSample(85, freq, (soundOffset + SFX_CAR_AFTER_ACCEL_1), engineSoundType, 64, true);
 			}
@@ -6331,7 +6397,7 @@ cAudioManager::ProcessExplosions(int32 explosion)
 				if (type == EXPLOSION_HELI)
 					m_sQueueSample.m_nFrequency = 8 * m_sQueueSample.m_nFrequency / 10;
 				m_sQueueSample.m_nReleasingVolumeModificator = 0;
-				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_nBankIndex = SAMPLEBANK_EXTRAS;
 				break;
 			}
 			pos = CExplosion::GetExplosionPosition(i);
@@ -6538,11 +6604,11 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 		break;
 	case SCRIPT_SOUND_TRAIN_ANNOUNCEMENT_1:
 	case SCRIPT_SOUND_TRAIN_ANNOUNCEMENT_2:
-		if (!SampleManager.IsSampleBankLoaded(0))
+		if (!SampleManager.IsSampleBankLoaded(SAMPLEBANK_TRAIN))
 			return;
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		m_sQueueSample.m_nSampleIndex = SFX_TRAIN_STATION_ANNOUNCE;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_TRAIN;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_TRAIN_STATION_ANNOUNCE);
 		m_sQueueSample.m_nReleasingVolumeModificator = 0;
@@ -6739,7 +6805,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_1_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_1;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6749,7 +6815,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_1_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_1;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6759,7 +6825,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_2_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_2;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_2;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_2);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6769,7 +6835,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_2_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_2;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_2;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_2);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6779,7 +6845,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_3_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_3;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_3;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_3);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6789,7 +6855,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_3_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_3;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_3;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_3);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6799,7 +6865,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_4_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_4;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_4;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_4);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6809,7 +6875,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_4_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_4;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_4;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_4);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6819,7 +6885,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_5_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_5;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_5;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_5);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6829,7 +6895,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_5_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_5;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_5;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_5);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6839,7 +6905,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_6_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_6;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_6;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_6);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6849,7 +6915,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_6_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_6;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_6;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_6);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6859,7 +6925,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_7_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_7;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_7;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_7);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6869,7 +6935,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_7_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_7;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_7;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_7);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6879,7 +6945,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_8_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_8;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_8;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_8);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6889,7 +6955,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_8_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_8;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_8;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_8);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6899,7 +6965,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_9_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_9;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_9;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_9);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6909,7 +6975,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_9_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_9;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_9;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_9);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6919,7 +6985,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_10_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_10;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_10;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_10);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6929,7 +6995,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_10_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_10;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_10;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_10);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6939,7 +7005,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_11_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_11;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_11;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_11);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6949,7 +7015,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_11_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_11;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_11;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_11);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6959,7 +7025,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_12_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_12;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_12;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_12);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6969,7 +7035,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_12_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_12;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_12;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_12);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6979,7 +7045,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_13_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_RAGGA;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_RAGGA;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_RAGGA);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6989,7 +7055,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_13_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_RAGGA;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_RAGGA;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_RAGGA);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -6999,7 +7065,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_STRIP_CLUB_LOOP_1_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_STRIP_CLUB_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_STRIP_CLUB_1;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_STRIP_CLUB_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7009,7 +7075,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_STRIP_CLUB_LOOP_1_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_STRIP_CLUB_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_STRIP_CLUB_1;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_STRIP_CLUB_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7019,7 +7085,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_STRIP_CLUB_LOOP_2_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_STRIP_CLUB_2;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_STRIP_CLUB_2;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_STRIP_CLUB_2);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7029,7 +7095,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_STRIP_CLUB_LOOP_2_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_STRIP_CLUB_2;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_STRIP_CLUB_2;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_STRIP_CLUB_2);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7047,7 +7113,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_38:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_DOG_FOOD_FACTORY;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_DOG_FOOD_FACTORY;
 		emittingVolume = 110;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_DOG_FOOD_FACTORY);
 		m_sQueueSample.m_nReleasingVolumeModificator = 6;
@@ -7057,7 +7123,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_39:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_DOG_FOOD_FACTORY;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_DOG_FOOD_FACTORY;
 		emittingVolume = 110;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_DOG_FOOD_FACTORY);
 		m_sQueueSample.m_nReleasingVolumeModificator = 6;
@@ -7071,7 +7137,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_CHINATOWN_RESTAURANT_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_CHINATOWN;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RESTAURANT_CHINATOWN;
 		emittingVolume = 110;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_CHINATOWN);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7081,7 +7147,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_CHINATOWN_RESTAURANT_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_CHINATOWN;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RESTAURANT_CHINATOWN;
 		emittingVolume = 110;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_CHINATOWN);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7091,7 +7157,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_CIPRIANI_RESAURANT_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_ITALY;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RESTAURANT_ITALY;
 		emittingVolume = 110;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_ITALY);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7101,7 +7167,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_CIPRIANI_RESAURANT_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_ITALY;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RESTAURANT_ITALY;
 		emittingVolume = 110;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_ITALY);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7111,7 +7177,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_46_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_GENERIC_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RESTAURANT_GENERIC_1;
 		emittingVolume = 110;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_GENERIC_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7121,7 +7187,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_47_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_GENERIC_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RESTAURANT_GENERIC_1;
 		emittingVolume = 110;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_GENERIC_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7131,7 +7197,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_MARCO_BISTRO_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_GENERIC_2;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RESTAURANT_GENERIC_2;
 		emittingVolume = 110;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_GENERIC_2);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7141,7 +7207,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_MARCO_BISTRO_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_GENERIC_2;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RESTAURANT_GENERIC_2;
 		emittingVolume = 110;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_GENERIC_2);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7171,7 +7237,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_FRANKIE_PIANO:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_PIANO_BAR_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_PIANO_BAR;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_PIANO_BAR_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7181,7 +7247,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_PARTY_1_LOOP:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CLUB_1;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7201,7 +7267,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_BANK_ALARM_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_BANK_ALARM_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_BANK_ALARM;
 		emittingVolume = 90;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BANK_ALARM_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 2;
@@ -7211,7 +7277,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_BANK_ALARM_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_BANK_ALARM_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_BANK_ALARM;
 		emittingVolume = 90;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BANK_ALARM_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 2;
@@ -7221,7 +7287,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_POLICE_BALL_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_POLICE_BALL_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_POLICE_BALL;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_POLICE_BALL_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 2;
@@ -7231,7 +7297,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_POLICE_BALL_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_POLICE_BALL_1;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_POLICE_BALL;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_POLICE_BALL_1);
 		m_sQueueSample.m_nReleasingVolumeModificator = 2;
@@ -7241,7 +7307,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_RAVE_LOOP_INDUSTRIAL_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_RAVE_INDUSTRIAL;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RAVE_INDUSTRIAL;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RAVE_INDUSTRIAL);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7251,7 +7317,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_RAVE_LOOP_INDUSTRIAL_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_RAVE_INDUSTRIAL;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RAVE_INDUSTRIAL;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RAVE_INDUSTRIAL);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7266,7 +7332,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_RAVE_2_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_RAVE_COMMERCIAL;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RAVE_COMMERCIAL;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7277,7 +7343,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_RAVE_2_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_RAVE_COMMERCIAL;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RAVE_COMMERCIAL;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7287,7 +7353,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_RAVE_3_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_RAVE_SUBURBAN;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RAVE_SUBURBAN;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RAVE_SUBURBAN);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7297,7 +7363,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_RAVE_3_LOOP_L:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		m_sQueueSample.m_nSampleIndex = SFX_RAVE_SUBURBAN;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_RAVE_SUBURBAN;
 		emittingVolume = MAX_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RAVE_SUBURBAN);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -7350,38 +7416,38 @@ cAudioManager::ProcessPornCinema(uint8 sound)
 	case SCRIPT_SOUND_PORN_CINEMA_1_S:
 	case SCRIPT_SOUND_MISTY_SEX_S:
 		m_sQueueSample.m_nSampleIndex = SFX_PORN_1_LOOP;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_PORN_1;
 		sample = SFX_PORN_1_GROAN_1;
 		m_sQueueSample.m_fSoundIntensity = 20.0f;
 		break;
 	case SCRIPT_SOUND_PORN_CINEMA_1_L:
 	case SCRIPT_SOUND_MISTY_SEX_L:
 		m_sQueueSample.m_nSampleIndex = SFX_PORN_1_LOOP;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_PORN_1;
 		sample = SFX_PORN_1_GROAN_1;
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		break;
 	case SCRIPT_SOUND_PORN_CINEMA_2_S:
 		m_sQueueSample.m_nSampleIndex = SFX_PORN_2_LOOP;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_PORN_2;
 		sample = SFX_PORN_2_GROAN_1;
 		m_sQueueSample.m_fSoundIntensity = 20.0f;
 		break;
 	case SCRIPT_SOUND_PORN_CINEMA_2_L:
 		m_sQueueSample.m_nSampleIndex = SFX_PORN_2_LOOP;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_PORN_2;
 		sample = SFX_PORN_2_GROAN_1;
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		break;
 	case SCRIPT_SOUND_PORN_CINEMA_3_S:
 		m_sQueueSample.m_nSampleIndex = SFX_PORN_3_LOOP;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_PORN_3;
 		m_sQueueSample.m_fSoundIntensity = 20.0f;
 		sample = SFX_PORN_3_GROAN_1;
 		break;
 	case SCRIPT_SOUND_PORN_CINEMA_3_L:
 		m_sQueueSample.m_nSampleIndex = SFX_PORN_3_LOOP;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_PORN_3;
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
 		sample = SFX_PORN_3_GROAN_1;
 		break;
@@ -7454,7 +7520,7 @@ cAudioManager::ProcessWorkShopScriptObject(uint8 sound)
 		m_sQueueSample.m_nVolume = ComputeVolume(30, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nSampleIndex = SFX_WORKSHOP_1;
-			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+			m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_WORKSHOP;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_WORKSHOP_1);
 			m_sQueueSample.m_nCounter = 0;
 			m_sQueueSample.m_bIs2D = false;
@@ -7493,7 +7559,7 @@ cAudioManager::ProcessSawMillScriptObject(uint8 sound)
 		m_sQueueSample.m_nVolume = ComputeVolume(30, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nSampleIndex = SFX_SAWMILL_LOOP;
-			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+			m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_SAWMILL;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_SAWMILL_LOOP);
 			m_sQueueSample.m_nCounter = 0;
 			m_sQueueSample.m_bIs2D = false;
@@ -7513,7 +7579,7 @@ cAudioManager::ProcessSawMillScriptObject(uint8 sound)
 			m_sQueueSample.m_nVolume = ComputeVolume(70, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				m_sQueueSample.m_nSampleIndex = SFX_SAWMILL_CUT_WOOD;
-				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_SAWMILL;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nCounter = 1;
 				m_sQueueSample.m_bIs2D = false;
@@ -7549,7 +7615,7 @@ cAudioManager::ProcessLaunderetteScriptObject(uint8 sound)
 		m_sQueueSample.m_nVolume = ComputeVolume(45, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nSampleIndex = SFX_LAUNDERETTE_LOOP;
-			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+			m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_LAUNDERETTE;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_LAUNDERETTE_LOOP);
 			m_sQueueSample.m_nCounter = 0;
 			m_sQueueSample.m_bIs2D = false;
@@ -7567,7 +7633,7 @@ cAudioManager::ProcessLaunderetteScriptObject(uint8 sound)
 		m_sQueueSample.m_nVolume = ComputeVolume(110, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nSampleIndex = SFX_LAUNDERETTE_SONG_LOOP;
-			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+			m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_LAUNDERETTE;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_LAUNDERETTE_SONG_LOOP);
 			m_sQueueSample.m_nCounter = 1;
 			m_sQueueSample.m_bIs2D = false;
@@ -7606,7 +7672,7 @@ cAudioManager::ProcessShopScriptObject(uint8 sound)
 		m_sQueueSample.m_nVolume = ComputeVolume(30, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nSampleIndex = SFX_SHOP_LOOP;
-			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+			m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_SHOP;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_SHOP_LOOP);
 			m_sQueueSample.m_nCounter = 0;
 			m_sQueueSample.m_bIs2D = false;
@@ -7627,7 +7693,7 @@ cAudioManager::ProcessShopScriptObject(uint8 sound)
 			if (m_sQueueSample.m_nVolume != 0) {
 				rand = m_anRandomTable[1] & 1;
 				m_sQueueSample.m_nSampleIndex = rand + SFX_SHOP_TILL_1;
-				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_SHOP;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nCounter = rand + 1;
 				m_sQueueSample.m_bIs2D = false;
@@ -7670,7 +7736,7 @@ cAudioManager::ProcessAirportScriptObject(uint8 sound)
 			m_sQueueSample.m_nVolume = ComputeVolume(110, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				m_sQueueSample.m_nSampleIndex = (m_anRandomTable[1] & 3) + SFX_AIRPORT_ANNOUNCEMENT_1;
-				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_AIRPORT;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nCounter = iSound++;
 				m_sQueueSample.m_bIs2D = false;
@@ -7716,7 +7782,7 @@ cAudioManager::ProcessCinemaScriptObject(uint8 sound)
 			m_sQueueSample.m_nVolume = ComputeVolume(rand, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				m_sQueueSample.m_nSampleIndex = iSound % 3 + SFX_CINEMA_BASS_1;
-				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_CINEMA;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 4);
 				m_sQueueSample.m_nCounter = iSound++;
@@ -7765,7 +7831,7 @@ cAudioManager::ProcessDocksScriptObject(uint8 sound)
 			m_sQueueSample.m_nVolume = ComputeVolume(rand, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				m_sQueueSample.m_nSampleIndex = SFX_DOCKS_FOGHORN;
-				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_DOCKS;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_DOCKS_FOGHORN);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 8);
 				m_sQueueSample.m_nCounter = iSound++;
@@ -7813,7 +7879,7 @@ cAudioManager::ProcessHomeScriptObject(uint8 sound)
 			m_sQueueSample.m_nVolume = ComputeVolume(rand, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				m_sQueueSample.m_nSampleIndex = m_anRandomTable[0] % 5 + SFX_HOME_1;
-				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_nBankIndex = SAMPLEBANK_BUILDING_HOME;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
 				m_sQueueSample.m_nCounter = iSound++;
@@ -7901,7 +7967,7 @@ cAudioManager::ProcessWeather(int32 id)
 	if (m_asAudioEntities[id].m_AudioEvents && m_asAudioEntities[id].m_awAudioEvent[0] == SOUND_LIGHTNING) {
 		if (m_asAudioEntities[id].m_afVolume[0] >= 10.f) {
 			m_sQueueSample.m_nSampleIndex = SFX_EXPLOSION_1;
-			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+			m_sQueueSample.m_nBankIndex = SAMPLEBANK_EXTRAS;
 			m_sQueueSample.m_nFrequency = RandomDisplacement(500) + 4000;
 			vol = (m_asAudioEntities[id].m_afVolume[0] - 10.f) + 40;
 		} else {
@@ -7955,6 +8021,7 @@ cAudioManager::ProcessFrontEnd()
 	bool stereo;
 	bool processedPickup;
 	bool processedMission;
+	bool frontendBank;
 	int16 sample;
 
 	static uint8 iSound = 0;
@@ -7965,6 +8032,7 @@ cAudioManager::ProcessFrontEnd()
 		processedPickup = false;
 		stereo = false;
 		processedMission = false;
+		frontendBank = false;
 		switch (m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i]) {
 		case SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM:
 			m_sQueueSample.m_nSampleIndex = SFX_ERROR_FIRE_RIFLE;
@@ -8017,6 +8085,7 @@ cAudioManager::ProcessFrontEnd()
 			stereo = true;
 			break;
 		case SOUND_PAGER:
+			// TODO: ps2 code
 			m_sQueueSample.m_nSampleIndex = SFX_PAGER;
 			break;
 		case SOUND_RACE_START_3:
@@ -8039,31 +8108,39 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_FRONTEND_MENU_NEW_PAGE:
 			m_sQueueSample.m_nSampleIndex = SFX_PAGE_CHANGE_AND_BACK_LEFT;
 			stereo = true;
+			frontendBank = true;
 			break;
 		case SOUND_FRONTEND_MENU_NAVIGATION:
 			m_sQueueSample.m_nSampleIndex = SFX_HIGHLIGHT_LEFT;
 			stereo = true;
+			frontendBank = true;
 			break;
 		case SOUND_FRONTEND_MENU_SETTING_CHANGE:
 			m_sQueueSample.m_nSampleIndex = SFX_SELECT_LEFT;
 			stereo = true;
+			frontendBank = true;
 			break;
 		case SOUND_FRONTEND_MENU_BACK:
 			m_sQueueSample.m_nSampleIndex = SFX_SUB_MENU_BACK_LEFT;
 			stereo = true;
+			frontendBank = true;
 			break;
 		case SOUND_9A:
 			m_sQueueSample.m_nSampleIndex = SFX_STEREO_LEFT;
 			stereo = true;
+			frontendBank = true;
 			break;
 		case SOUND_9B:
 			m_sQueueSample.m_nSampleIndex = SFX_MONO;
+			frontendBank = true;
 			break;
 		case SOUND_FRONTEND_AUDIO_TEST:
 			m_sQueueSample.m_nSampleIndex = m_anRandomTable[0] % 3 + SFX_NOISE_BURST_1;
+			frontendBank = true;
 			break;
 		case SOUND_FRONTEND_FAIL:
 			m_sQueueSample.m_nSampleIndex = SFX_ERROR_LEFT;
+			frontendBank = true;
 			stereo = true;
 			break;
 		case SOUND_FRONTEND_NO_RADIO:
@@ -8102,7 +8179,7 @@ cAudioManager::ProcessFrontEnd()
 		m_sQueueSample.m_nCounter = iSound++;
 		m_sQueueSample.m_nLoopCount = 1;
 		m_sQueueSample.m_bReleasingSoundFlag = true;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+		m_sQueueSample.m_nBankIndex = frontendBank ? SAMPLEBANK_FRONTEND : SAMPLEBANK_MAIN;
 		m_sQueueSample.m_nReleasingVolumeModificator = 0;
 		m_sQueueSample.m_bIs2D = true;
 		m_sQueueSample.m_nEmittingVolume = m_sQueueSample.m_nVolume;
@@ -8428,7 +8505,7 @@ cAudioManager::ProcessBridgeWarning()
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 0;
 			m_sQueueSample.m_nSampleIndex = SFX_BRIDGE_OPEN_WARNING;
-			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+			m_sQueueSample.m_nBankIndex = SAMPLEBANK_EXTRAS;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_nReleasingVolumeModificator = 1;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BRIDGE_OPEN_WARNING);
