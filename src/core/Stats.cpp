@@ -332,6 +332,7 @@ void CStats::SaveStats(uint8 *buf, uint32 *size)
 		sizeof(TotalNumberMissions) +
 		sizeof(FastestTimes) +
 		sizeof(HighestScores) +
+		sizeof(BestPositions) +
 		sizeof(KillsSinceLastCheckpoint) +
 		sizeof(TotalLegitimateKills) +
 		sizeof(LastMissionPassedName);
