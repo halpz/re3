@@ -56,8 +56,8 @@ struct CFontRenderState
 class CSprite2d;
 
 enum {
-	FONT_STANDART,
 	FONT_BANK,
+	FONT_STANDARD,
 	FONT_HEADING,
 #ifdef MORE_LANGUAGES
 	FONT_JAPANESE,

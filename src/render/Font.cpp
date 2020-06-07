@@ -328,7 +328,7 @@ CFont::PrintChar(float x, float y, wchar c)
 	}
 #endif
 
-	if(Details.style == FONT_STANDART || Details.style == FONT_HEADING){
+	if(Details.style == FONT_BANK || Details.style == FONT_HEADING){
 		if (bDontPrint) return;
 		CSprite2d::AddToBuffer(
 			CRect(x, y,
@@ -818,11 +818,7 @@ CFont::PrintString(float x, float y, wchar *start, wchar *end, float spwidth)
 	if (v7 != 0.0f && (CFont::Details.style == 0 || CFont::Details.style == 1))
 	{
 		auto v8 = CFont::Details.color;
-		CFont::Details.color.r = CFont::Details.dropColor.r;
-		//v18 = v8;
-		CFont::Details.color.g = CFont::Details.dropColor.g;
-		CFont::Details.color.b = CFont::Details.dropColor.b;
-		CFont::Details.color.a = CFont::Details.dropColor.a;
+		CFont::Details.color = CFont::Details.dropColor;
 		CFont::Details.dropShadowPosition = 0;
 		CFont::Details.bIsShadow = true;
 		if (0.0f != CFont::Details.slant)
@@ -1244,7 +1240,7 @@ CFont::SetFontStyle(int16 style)
 {
 	if (style == FONT_HEADING)
 	{
-		Details.style = FONT_BANK;
+		Details.style = FONT_STANDARD;
 		Details.bFontHalfTexture = true;
 	}
 	else

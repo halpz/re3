@@ -904,7 +904,7 @@ void CHud::Draw()
 			CFont::SetCentreOff();
 			CFont::SetJustifyOff();
 			CFont::SetPropOff();
-			CFont::SetFontStyle(FONT_PAGER);
+			CFont::SetFontStyle(FONT_STANDARD);
 			CFont::PrintString(SCREEN_SCALE_X(52.0f - PagerXOffset), SCREEN_SCALE_Y(54.0f), m_PagerMessage);
 		}
 
