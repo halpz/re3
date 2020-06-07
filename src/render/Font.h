@@ -121,9 +121,10 @@ public:
 #endif
 	static uint16 *GetNextSpace(wchar *s);
 #ifdef MORE_LANGUAGES
-	static uint16 *ParseToken(wchar *s, wchar*, bool japShit = false);
+	static uint16 *ParseToken(wchar *s, bool japShit = false);
 #else
-	static uint16 *ParseToken(wchar *s, wchar*);
+	static uint16 *ParseToken(wchar *s);
+	static uint16* ParseToken(wchar *s, CRGBA &color, bool &flash, bool &bold);
 #endif
 	static void DrawFonts(void);
 	static void RenderFontBuffer(void);

@@ -863,9 +863,22 @@ CFont::PrintString(float x, float y, wchar *start, wchar *end, float spwidth)
 	for(s = start; s < end; s++){
 		if (*s == '~')
 		{
-			for (auto i = ParseToken(s, &unused); s != i; FontRenderStatePointer = (char*)FontRenderStatePointer + 2)
+			for (auto i = ParseToken(s); s != i; FontRenderStatePointer = (char*)FontRenderStatePointer + 2)
 			{
+				s = i;
 				*(wchar*)FontRenderStatePointer = *s;
+			}
+			if (CFont::Details.bFlash)
+			{
+				if (CTimer::GetTimeInMilliseconds() - CFont::Details.nFlashTimer > 300)
+				{
+					Details.bFlashState = !Details.bFlashState;
+					Details.nFlashTimer = CTimer::GetTimeInMilliseconds();
+				}
+				if (Details.bFlashState)
+					Details.color.a = 0;
+				else
+					Details.color.a = 255;
 			}
 		}
 		else
@@ -1079,7 +1092,7 @@ CFont::GetNextSpace(wchar *s)
 
 #ifdef MORE_LANGUAGES
 wchar*
-CFont::ParseToken(wchar *s, wchar*, bool japShit)
+CFont::ParseToken(wchar *s, bool japShit)
 {
 	s++;
 	if ((Details.color.r || Details.color.g || Details.color.b) && !japShit) {
@@ -1109,40 +1122,138 @@ CFont::ParseToken(wchar *s, wchar*, bool japShit)
 }
 #else
 wchar*
-CFont::ParseToken(wchar *s, wchar*)
+CFont::ParseToken(wchar *s)
 {
+	Details.anonymous_23 = 0;
 	s++;
 	if(Details.color.r || Details.color.g || Details.color.b)
 		switch(*s){
+		case 'B':
+			Details.bBold = !Details.bBold;
 		case 'N':
 		case 'n':
 			NewLine = 1;
 			break;
-		case 'b': SetColor(CRGBA(0x80, 0xA7, 0xF3, 0xFF)); break;
-		case 'g': SetColor(CRGBA(0x5F, 0xA0, 0x6A, 0xFF)); break;
-		case 'h': SetColor(CRGBA(0xE1, 0xE1, 0xE1, 0xFF)); break;
-		case 'l': SetColor(CRGBA(0x00, 0x00, 0x00, 0xFF)); break;
-		case 'p': SetColor(CRGBA(0xA8, 0x6E, 0xFC, 0xFF)); break;
-		case 'r': SetColor(CRGBA(0x71, 0x2B, 0x49, 0xFF)); break;
-		case 'w': SetColor(CRGBA(0xAF, 0xAF, 0xAF, 0xFF)); break;
-		case 'y': SetColor(CRGBA(0xD2, 0xC4, 0x6A, 0xFF)); break;
+		case 'b': SetColor(CRGBA(27, 89, 130, 255)); Details.anonymous_23 = 1; break;
+		case 'f':
+			Details.bFlash = !Details.bFlash;
+			if (Details.bFlash)
+				Details.color.a = 255;
+			break;
+		case 'g': SetColor(CRGBA(255, 150, 225, 255)); Details.anonymous_23 = 1; break;
+		case 'h': SetColor(CRGBA(225, 225, 225, 255)); Details.anonymous_23 = 1; break;
+		case 'l': SetColor(CRGBA(0, 0, 0, 255)); Details.anonymous_23 = 1; break;
+		case 'o': SetColor(CRGBA(229, 125, 126, 255)); Details.anonymous_23 = 1; break;
+		case 'p': SetColor(CRGBA(168, 110, 252, 255)); Details.anonymous_23 = 1; break;
+		case 'q': SetColor(CRGBA(199, 144, 203, 255)); Details.anonymous_23 = 1; break;
+		case 'r': SetColor(CRGBA(255, 150, 225, 255)); Details.anonymous_23 = 1; break;
+		case 't': SetColor(CRGBA(86, 212, 146, 255)); Details.anonymous_23 = 1; break;
+		case 'w': SetColor(CRGBA(175, 175, 175, 255)); Details.anonymous_23 = 1; break;
+		case 'x': SetColor(CRGBA(132, 146, 197, 255)); Details.anonymous_23 = 1; break;
+		case 'y': SetColor(CRGBA(255, 227, 79, 255)); Details.anonymous_23 = 1; break;
 		}
 	while(*s != '~') s++;
-	return s+1;
+	s++;
+	if (*s == '~')
+		s = ParseToken(s);
+	return s;
 }
 #endif
+
+wchar*
+CFont::ParseToken(wchar* str, CRGBA &color, bool &flash, bool &bold)
+{
+	wchar* v4; // eax
+	wchar* result; // eax
+
+	Details.anonymous_23 = 0;
+	v4 = str + 1;
+	if (Details.color.r || Details.color.g || Details.color.b)
+	{
+		switch (*v4)
+		{
+		case 'B':
+			bold = !bold;
+			break;
+		case 'b':
+			color.r = 27;
+			color.g = 89;
+			color.b = 130;
+			break;
+		case 'f':
+			flash = !flash;
+			break;
+		case 'g':
+			color.r = 255;
+			color.g = 150;
+			color.b = 225;
+			break;
+		case 'h':
+			color.r = 225;
+			color.g = 225;
+			color.b = 225;
+			break;
+		case 'l':
+			color.r = 0;
+			color.g = 0;
+			color.b = 0;
+			break;
+		case 'o':
+			color.r = 229;
+			color.g = 125;
+			color.b = 126;
+			break;
+		case 'p':
+			color.r = 168;
+			color.g = 110;
+			color.b = 252;
+			break;
+		case 'q':
+			color.r = 199;
+			color.g = 144;
+			color.b = 203;
+			break;
+		case 'r':
+			color.r = 255;
+			color.g = 150;
+			color.b = 225;
+			break;
+		case 't':
+			color.r = 86;
+			color.g = 212;
+			color.b = 146;
+			break;
+		case 'w':
+			color.r = 175;
+			color.g = 175;
+			color.b = 175;
+			break;
+		case 'x':
+			color.r = 132;
+			color.g = 146;
+			color.b = 197;
+			break;
+		case 'y':
+			color.r = 255;
+			color.g = 227;
+			color.b = 79;
+			break;
+		default:
+			break;
+		}
+	}
+	while (*v4 != '~')
+		++v4;
+	result = v4 + 1;
+	if (*result == '~')
+		result = CFont::ParseToken(result, color, flash, bold);
+	return result;
+}
 
 void
 CFont::DrawFonts(void)
 {
 	RenderFontBuffer();
-	//CSprite2d::DrawBank(Details.bank);
-	//CSprite2d::DrawBank(Details.bank+1);
-	//CSprite2d::DrawBank(Details.bank+2);
-//#ifdef MORE_LANGUAGES
-//	if (IsJapanese())
-//		CSprite2d::DrawBank(Details.bank+3);
-//#endif
 }
 
 void
@@ -1158,12 +1269,12 @@ CFont::RenderFontBuffer()
 	float v7; // [esp+Ch] [ebp-24h]
 	float v8; // [esp+10h] [ebp-20h]
 	CRGBA v9; // [esp+1Ch] [ebp-14h]
-	char v10; // [esp+22h] [ebp-Eh]
-	char v11; // [esp+23h] [ebp-Dh]
+	bool v10; // [esp+22h] [ebp-Eh]
+	bool v11; // [esp+23h] [ebp-Dh]
 
 	if (FontRenderStatePointer != FontRenderStateBuf) {
-		v11 = 0;
-		v10 = 0;
+		v11 = false;
+		v10 = false;
 		Sprite[RenderState.FontStyle].SetRenderState();
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 		RenderState = *(CFontRenderState*)&FontRenderStateBuf[0];
@@ -1190,8 +1301,8 @@ CFont::RenderFontBuffer()
 				}
 				if (string[0] == '~')
 				{
-					//v1 = CFont::ParseToken(v1, &v9, (_BOOL1*)&v10, (_BOOL1*)&v11);
-					string = CFont::ParseToken(string, nil);
+					string = CFont::ParseToken(string, v9, v10, v11);
+					//string = CFont::ParseToken(string);
 					if (v10)
 					{
 						if (CTimer::GetTimeInMilliseconds() - Details.nFlashTimer > 300) {
@@ -1253,11 +1364,11 @@ CFont::SetFontStyle(int16 style)
 wchar CFont::FindNewCharacter(wchar c)
 {
 	if (c >= 16 && c <= 26)
-		return 128;
+		return c + 128;
 	if (c >= 8 && c <= 9)
-		return 86;
+		return c + 86;
 	if (c == 4)
-		return 89;
+		return c + 89;
 	if (c == 7)
 		return 206;
 	if (c == 14)
