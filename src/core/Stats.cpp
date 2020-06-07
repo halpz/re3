@@ -60,6 +60,7 @@ int32 CStats::mmRain;
 int32 CStats::CarsCrushed;
 int32 CStats::FastestTimes[CStats::TOTAL_FASTEST_TIMES];
 int32 CStats::HighestScores[CStats::TOTAL_HIGHEST_SCORES];
+int32 CStats::BestPositions[CStats::TOTAL_BEST_POSITIONS];
 int32 CStats::PropertyDestroyed;
 
 int32 CStats::Sprayings;
@@ -119,6 +120,8 @@ void CStats::Init()
 		FastestTimes[i] = 0;
 	for (int i = 0; i < TOTAL_HIGHEST_SCORES; i++)
 		HighestScores[i] = 0;
+	for (int i = 0; i < TOTAL_BEST_POSITIONS; i++)
+		BestPositions[i] = INT_MAX;
 	for (int i = 0; i < NUM_PEDTYPES; i++)
 		PedsKilledOfThisType[i] = 0;
 	IndustrialPassed = 0;
@@ -144,6 +147,12 @@ void CStats::RegisterHighestScore(int32 index, int32 score)
 {
 	assert(index >= 0 && index < TOTAL_HIGHEST_SCORES);
 	HighestScores[index] = Max(HighestScores[index], score);
+}
+
+void CStats::RegisterBestPosition(int32 index, int32 position)
+{
+	assert(index >= 0 && index < TOTAL_BEST_POSITIONS);
+	BestPositions[index] = Min(BestPositions[index], position);
 }
 
 void CStats::RegisterElBurroTime(int32 time)
@@ -377,6 +386,7 @@ void CStats::SaveStats(uint8 *buf, uint32 *size)
 	CopyToBuf(buf, TotalNumberMissions);
 	CopyToBuf(buf, FastestTimes);
 	CopyToBuf(buf, HighestScores);
+	CopyToBuf(buf, BestPositions);
 	CopyToBuf(buf, KillsSinceLastCheckpoint);
 	CopyToBuf(buf, TotalLegitimateKills);
 	CopyToBuf(buf, LastMissionPassedName);
@@ -440,6 +450,7 @@ void CStats::LoadStats(uint8 *buf, uint32 size)
 	CopyFromBuf(buf, TotalNumberMissions);
 	CopyFromBuf(buf, FastestTimes);
 	CopyFromBuf(buf, HighestScores);
+	CopyFromBuf(buf, BestPositions);
 	CopyFromBuf(buf, KillsSinceLastCheckpoint);
 	CopyFromBuf(buf, TotalLegitimateKills);
 	CopyFromBuf(buf, LastMissionPassedName);

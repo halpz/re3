@@ -11956,7 +11956,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	case COMMAND_REGISTER_BEST_POSITION:
 		CollectParameters(&m_nIp, 2);
-		debug("REGISTER_BEST_POSITION not implemented\n");
+		CStats::RegisterBestPosition(ScriptParams[0], ScriptParams[1]);
 		return 0;
 	case COMMAND_IS_PLAYER_IN_INFO_ZONE:
 	{
