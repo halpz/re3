@@ -925,7 +925,7 @@ CCarCtrl::RemoveCarsIfThePoolGetsFull(void)
 	if (CPools::GetVehiclePool()->GetNoOfFreeSpaces() >= 8)
 		return;
 	int i = CPools::GetVehiclePool()->GetSize();
-	float md = 999999.9f;
+	float md = 10000000.f;
 	CVehicle* pClosestVehicle = nil;
 	while (i--) {
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
@@ -2424,7 +2424,13 @@ void CCarCtrl::SteerAICarWithPhysics_OnlyMission(CVehicle* pVehicle, float* pSwe
 	case MISSION_GOTOCOORDS_ACCURATE:
 	case MISSION_RAMCAR_FARAWAY:
 	case MISSION_BLOCKCAR_FARAWAY:
-		SteerAICarWithPhysicsFollowPath(pVehicle, pSwerve, pAccel, pBrake, pHandbrake);
+		if (pVehicle->AutoPilot.m_bIgnorePathfinding) {
+			*pSwerve = 0.0f;
+			*pAccel = 1.0f;
+			*pBrake = 0.0f;
+			*pHandbrake = false;
+		}else
+			SteerAICarWithPhysicsFollowPath(pVehicle, pSwerve, pAccel, pBrake, pHandbrake);
 		return;
 	case MISSION_RAMPLAYER_CLOSE:
 	{
@@ -3050,6 +3056,7 @@ bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* pVehicle, CVector vecTar
 		pVehicle->AutoPilot.m_aPathFindNodesInfo, &pVehicle->AutoPilot.m_nPathFindNodesCount);
 	if (pVehicle->AutoPilot.m_nPathFindNodesCount < 2){
 		pVehicle->AutoPilot.m_nPrevRouteNode = pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_nNextRouteNode = 0;
+		pVehicle->AutoPilot.m_nPathFindNodesCount = 0;
 		return true;
 	}
 	pVehicle->AutoPilot.m_nPrevRouteNode = 0;
