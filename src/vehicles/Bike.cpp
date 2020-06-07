@@ -1351,12 +1351,7 @@ CBike::PreRender(void)
 
 		CMatrix mat;
 		CVector headLightPos = mi->m_positions[CAR_POS_HEADLIGHTS];
-#ifdef FIX_BUGS
-		if(GetModelIndex() == MI_FAGGIO || GetModelIndex() == MI_PIZZABOY)
-#else
-		if(GetModelIndex() == 152)	// this is the bobcat in VC
-#endif
-		{
+		if(GetModelIndex() == 152){	// this is the bobcat in VC, but we don't want that effect anyway
 			mat.SetUnity();
 			mat.RotateZ(m_fWheelAngle);
 			mat = m_leanMatrix * mat;
