@@ -1615,7 +1615,7 @@ void CCarCtrl::WeaveThroughPedsSectorList(CPtrList& lst, CVehicle* pVehicle, CPh
 			continue;
 		if (Abs(pPed->GetPosition().z - pVehicle->GetPosition().z) >= PED_HEIGHT_DIFF_TO_CONSIDER_WEAVING)
 			continue;
-		if (pPed->m_pCurSurface != pVehicle)
+		if (pPed->m_pCurSurface != pVehicle && pPed->m_attachedTo != pVehicle)
 			WeaveForPed(pPed, pVehicle, pAngleToWeaveLeft, pAngleToWeaveRight);
 	}
 
