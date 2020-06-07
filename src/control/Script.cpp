@@ -11888,6 +11888,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		debug("REGISTER_VIGILANTE_LEVEL not implemented\n"); // TODO(MIAMI)
 	case COMMAND_CLEAR_ALL_CHAR_ANIMS:
 	{
+		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		if (!pPed->bInVehicle) {
