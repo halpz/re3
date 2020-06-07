@@ -329,7 +329,7 @@ void CHud::Draw()
 		CFont::SetCentreOn();
 		CFont::SetCentreSize(SCREEN_SCALE_X(640.0f));
 		CFont::SetPropOn();
-		CFont::SetFontStyle(FONT_BANK);
+		CFont::SetFontStyle(FONT_STANDARD);
 
 		if (!CDarkel::FrenzyOnGoing() && WeaponType != WEAPONTYPE_UNARMED && WeaponType != WEAPONTYPE_BASEBALLBAT) {
 			CFont::SetColor(AMMO_COLOR);
@@ -520,7 +520,7 @@ void CHud::Draw()
 					CFont::SetRightJustifyOn();
 					CFont::SetRightJustifyWrap(0.0f);
 					CFont::SetBackGroundOnlyTextOff();
-					CFont::SetFontStyle(FONT_BANK);
+					CFont::SetFontStyle(FONT_STANDARD);
 					CFont::SetColor(CRGBA(0, 0, 0, fZoneAlpha));
 					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f) + SCREEN_SCALE_X(1.0f), SCREEN_SCALE_FROM_BOTTOM(30.0f) + SCREEN_SCALE_Y(1.0f), m_ZoneToPrint);
 
@@ -614,7 +614,7 @@ void CHud::Draw()
 					CFont::SetRightJustifyOn();
 					CFont::SetRightJustifyWrap(0.0f);
 					CFont::SetBackGroundOnlyTextOff();
-					CFont::SetFontStyle(FONT_BANK);
+					CFont::SetFontStyle(FONT_STANDARD);
 					CFont::SetColor(CRGBA(0, 0, 0, fVehicleAlpha));
 					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f) + SCREEN_SCALE_X(1.0f), SCREEN_SCALE_FROM_BOTTOM(55.0f) + SCREEN_SCALE_Y(1.0f), m_pVehicleNameToPrint);
 
@@ -920,7 +920,7 @@ void CHud::Draw()
 			CFont::SetScale(SCREEN_SCALE_X(0.48f), SCREEN_SCALE_Y(1.120f));
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
-			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+			CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 
 			float offsetX = SCREEN_SCALE_X(40.0f) + SCREEN_SCALE_X(8.0f);
 			float center = SCREEN_SCALE_FROM_RIGHT(50.0f) - SCREEN_SCALE_X(8.0f) - offsetX;
@@ -1123,7 +1123,7 @@ void CHud::DrawAfterFade()
 			else
 #endif
 				CFont::SetWrapx(SCREEN_SCALE_X(200.0f + 26.0f - 4.0f));
-			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+			CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 			CFont::SetBackgroundOn();
 			CFont::SetBackGroundOnlyTextOff();
 			CFont::SetBackgroundColor(CRGBA(0, 0, 0, fAlpha * 0.9f));
@@ -1201,7 +1201,7 @@ void CHud::DrawAfterFade()
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetCentreSize(SCREEN_SCALE_X(600.0f));
-		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 		CFont::PrintString((SCREEN_WIDTH / 2) + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[3]);
@@ -1218,7 +1218,7 @@ void CHud::DrawAfterFade()
 		CFont::SetPropOn();
 		CFont::SetCentreSize(SCREEN_SCALE_X(620.0f));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 
 		CFont::PrintString((SCREEN_WIDTH / 2) - SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(84.0f) - SCREEN_SCALE_Y(2.0f), m_BigMessage[4]);
 
@@ -1275,7 +1275,7 @@ void CHud::DrawAfterFade()
 			CFont::SetPropOn();
 			CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
-			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+			CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 
 #ifdef BETA_SLIDING_TEXT
 			CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f) - SCREEN_SCALE_X(OddJob2XOffset), SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(20.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[5]);

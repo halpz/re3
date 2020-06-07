@@ -28,7 +28,7 @@ struct CFontDetails
 class CSprite2d;
 
 enum {
-	FONT_BANK,
+	FONT_STANDARD,
 	FONT_PAGER,
 	FONT_HEADING,
 #ifdef MORE_LANGUAGES
