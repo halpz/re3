@@ -11886,6 +11886,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_REGISTER_VIGILANTE_LEVEL:
 		CollectParameters(&m_nIp, 1);
 		debug("REGISTER_VIGILANTE_LEVEL not implemented\n"); // TODO(MIAMI)
+		return 0;
 	case COMMAND_CLEAR_ALL_CHAR_ANIMS:
 	{
 		CollectParameters(&m_nIp, 1);
