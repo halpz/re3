@@ -4370,6 +4370,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	if (bInVehicle) {
 		if (method != WEAPONTYPE_DROWNING) {
 			if (m_pMyVehicle) {
+				CVehicle* pVehicle = m_pMyVehicle;
 				bool bDone = false;
 				if (m_pMyVehicle->IsBike()) {
 					m_fHealth = 0.0f;
@@ -4405,13 +4406,13 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 						*/
 					}
 				}
-				for (int i = 0; i < ARRAY_SIZE(m_pMyVehicle->pPassengers); i++) {
-					CPed* passenger = m_pMyVehicle->pPassengers[i];
+				for (int i = 0; i < ARRAY_SIZE(pVehicle->pPassengers); i++) {
+					CPed* passenger = pVehicle->pPassengers[i];
 					if (passenger && passenger != this && damagedBy)
 						passenger->ReactToAttack(damagedBy);
 				}
 
-				CPed *driverOfVeh = m_pMyVehicle->pDriver;
+				CPed *driverOfVeh = pVehicle->pDriver;
 				if (driverOfVeh && driverOfVeh != this && damagedBy)
 					driverOfVeh->ReactToAttack(damagedBy);
 
