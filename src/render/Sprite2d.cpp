@@ -317,12 +317,12 @@ CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, con
 
 	screenz = NearScreenZ;
 	recipz = RecipNearClip;
-	//z = RwCameraGetNearClipPlane(Scene.camera);	// not done by game
+	z = RwCameraGetNearClipPlane(Scene.camera);	// not done by game
 
 	RwIm2DVertexSetScreenX(&verts[0], r.left);
 	RwIm2DVertexSetScreenY(&verts[0], r.top);
 	RwIm2DVertexSetScreenZ(&verts[0], screenz);
-	//RwIm2DVertexSetCameraZ(&verts[0], z);
+	RwIm2DVertexSetCameraZ(&verts[0], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[0], recipz);
 	RwIm2DVertexSetIntRGBA(&verts[0], c2.r, c2.g, c2.b, c2.a);
 	RwIm2DVertexSetU(&verts[0], u0, recipz);
@@ -331,7 +331,7 @@ CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, con
 	RwIm2DVertexSetScreenX(&verts[1], r.right);
 	RwIm2DVertexSetScreenY(&verts[1], r.top);
 	RwIm2DVertexSetScreenZ(&verts[1], screenz);
-	//RwIm2DVertexSetCameraZ(&verts[1], z);
+	RwIm2DVertexSetCameraZ(&verts[1], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[1], recipz);
 	RwIm2DVertexSetIntRGBA(&verts[1], c3.r, c3.g, c3.b, c3.a);
 	RwIm2DVertexSetU(&verts[1], u1, recipz);
@@ -340,7 +340,7 @@ CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, con
 	RwIm2DVertexSetScreenX(&verts[2], r.right);
 	RwIm2DVertexSetScreenY(&verts[2], r.bottom);
 	RwIm2DVertexSetScreenZ(&verts[2], screenz);
-	//RwIm2DVertexSetCameraZ(&verts[2], z);
+	RwIm2DVertexSetCameraZ(&verts[2], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[2], recipz);
 	RwIm2DVertexSetIntRGBA(&verts[2], c1.r, c1.g, c1.b, c1.a);
 	RwIm2DVertexSetU(&verts[2], u2, recipz);
@@ -349,30 +349,11 @@ CSprite2d::SetVertices(RwIm2DVertex *verts, const CRect &r, const CRGBA &c0, con
 	RwIm2DVertexSetScreenX(&verts[3], r.left);
 	RwIm2DVertexSetScreenY(&verts[3], r.bottom);
 	RwIm2DVertexSetScreenZ(&verts[3], screenz);
-	//RwIm2DVertexSetCameraZ(&verts[3], z);
+	RwIm2DVertexSetCameraZ(&verts[3], z);
 	RwIm2DVertexSetRecipCameraZ(&verts[3], recipz);
 	RwIm2DVertexSetIntRGBA(&verts[3], c0.r, c0.g, c0.b, c0.a);
 	RwIm2DVertexSetU(&verts[3], u3, recipz);
 	RwIm2DVertexSetV(&verts[3], v3, recipz);
-
-	/*RwIm2DVertexSetScreenX(&verts[4], r.right);
-	RwIm2DVertexSetScreenY(&verts[4], r.bottom);
-	RwIm2DVertexSetScreenZ(&verts[4], screenz);
-	RwIm2DVertexSetCameraZ(&verts[4], z);
-	RwIm2DVertexSetRecipCameraZ(&verts[4], recipz);
-	RwIm2DVertexSetIntRGBA(&verts[4], c1.r, c1.g, c1.b, c1.a);
-	RwIm2DVertexSetU(&verts[4], u3, recipz);
-	RwIm2DVertexSetV(&verts[4], v3, recipz);
-
-	RwIm2DVertexSetScreenX(&verts[5], r.right);
-	RwIm2DVertexSetScreenY(&verts[5], r.top);
-	RwIm2DVertexSetScreenZ(&verts[5], screenz);
-	RwIm2DVertexSetCameraZ(&verts[5], z);
-	RwIm2DVertexSetRecipCameraZ(&verts[5], recipz);
-	RwIm2DVertexSetIntRGBA(&verts[5], c3.r, c3.g, c3.b, c3.a);
-	RwIm2DVertexSetU(&verts[5], u1, recipz);
-	RwIm2DVertexSetV(&verts[5], v1, recipz);*/
-
 }
 
 void

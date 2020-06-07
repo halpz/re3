@@ -30,7 +30,7 @@ struct CFontDetails
 	char bFlashState;
 	char anonymous_21;
 	int nFlashTimer;
-	char anonymous_23;
+	bool anonymous_23;
 	uint32 anonymous_25;
 };
 
@@ -39,18 +39,18 @@ struct CFontRenderState
 	uint32 anonymous_0;
 	float fTextPosX;
 	float fTextPosY;
-	float fTextSizeX;
-	float fTextSizeY;
+	float scaleX;
+	float scaleY;
 	CRGBA color;
 	float fExtraSpace;
-	float fSlant;
-	float fSlantRefPointX;
-	float fSlantRefPointY;
+	float slant;
+	float slantRefX;
+	float slantRefY;
 	bool bIsShadow;
 	bool bFontHalfTexture;
-	bool bProp;
+	bool proportional;
 	bool anonymous_14;
-	int16 FontStyle;
+	int16 style;
 };
 
 class CSprite2d;
@@ -62,7 +62,7 @@ enum {
 #ifdef MORE_LANGUAGES
 	FONT_JAPANESE,
 #endif
-	MAX_FONTS
+	MAX_FONTS = FONT_HEADING
 };
 
 enum {
@@ -111,8 +111,9 @@ public:
 #ifdef MORE_LANGUAGES
 	static bool PrintString(float x, float y, wchar *start, wchar* &end, float spwidth, float japX);
 #else
-	static void PrintString(float x, float y, wchar *start, wchar *end, float spwidth);
+	static void PrintString(float x, float y, uint32, wchar *start, wchar *end, float spwidth);
 #endif
+	static void PrintStringFromBottom(float x, float y, wchar *str);
 	static float GetCharacterWidth(wchar c);
 	static float GetCharacterSize(wchar c);
 	static float GetStringWidth(wchar *s, bool spaces = false);
@@ -186,7 +187,7 @@ public:
 	static void SetBackGroundOnlyTextOff(void) { Details.backgroundOnlyText = false; }
 	static void SetPropOn(void) { Details.proportional = true; }
 	static void SetPropOff(void) { Details.proportional = false; }
-	static void SetFontStyle(int16 style);// { Details.style = style; }
+	static void SetFontStyle(int16 style);
 	static void SetRightJustifyWrap(float wrap) { Details.rightJustifyWrap = wrap; }
 	static void SetAlphaFade(float fade) { Details.alphaFade = fade; }
 	static void SetDropShadowPosition(int16 pos) { Details.dropShadowPosition = pos; }
