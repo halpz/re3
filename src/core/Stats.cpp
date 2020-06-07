@@ -4,6 +4,8 @@
 #include "Text.h"
 #include "World.h"
 
+#include <climits>
+
 //TODO
 int32 CStats::SeagullsKilled;
 
