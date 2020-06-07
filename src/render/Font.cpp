@@ -483,6 +483,8 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 					              xstart;
 #ifdef MORE_LANGUAGES
 					PrintString(xleft, y, start, s, spaceWidth, xstart);
+#else
+					PrintString(xleft, y, start, s, spaceWidth);
 #endif
 					// reset things
 					lineLength = 0.0f;
