@@ -264,7 +264,7 @@ INITSAVEBUF
 	WriteSaveBuf(buffer, ProcessCounter);
 	WriteSaveBuf(buffer, GenerateEvenIfPlayerIsCloseCounter);
 	WriteSaveBuf(buffer, (int16)0); // alignment
-	WriteSaveBuf(buffer, sizeof(CarGeneratorArray));
+	WriteSaveBuf(buffer, (uint32)sizeof(CarGeneratorArray));
 	for (int i = 0; i < NUM_CARGENS; i++)
 		WriteSaveBuf(buffer, CarGeneratorArray[i]);
 VALIDATESAVEBUF(*size)

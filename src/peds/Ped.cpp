@@ -185,6 +185,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_queuedSound = SOUND_NO_SOUND;
 	m_objective = OBJECTIVE_NONE;
 	m_prevObjective = OBJECTIVE_NONE;
+#ifdef FIX_BUGS
+	m_objectiveTimer = 0;
+#endif
 	CharCreatedBy = RANDOM_CHAR;
 	m_leader = nil;
 	m_pedInObjective = nil;
@@ -244,6 +247,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_nPedState = PED_IDLE;
 	m_nLastPedState = PED_NONE;
 	m_nMoveState = PEDMOVE_STILL;
+#ifdef FIX_BUGS
+	m_nPrevMoveState = PEDMOVE_NONE;
+#endif
 	m_nStoredMoveState = PEDMOVE_NONE;
 	m_pFire = nil;
 	m_pPointGunAt = nil;

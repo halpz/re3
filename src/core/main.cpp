@@ -514,7 +514,7 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 			CFont::SetScale(SCREEN_SCALE_X(0.75f), yscale);
 			CFont::SetPropOn();
 			CFont::SetRightJustifyOff();
-			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetFontStyle(FONT_STANDARD);
 			CFont::SetColor(CRGBA(255, 255, 255, 255));
 			AsciiToUnicode(str1, tmpstr);
 			CFont::PrintString(hpos, top, tmpstr);
@@ -711,7 +711,7 @@ DisplayGameDebugText()
 
 	CFont::SetPropOn();
 	CFont::SetBackgroundOff();
-	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetFontStyle(FONT_STANDARD);
 	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.5f));
 	CFont::SetCentreOff();
 	CFont::SetRightJustifyOff();
