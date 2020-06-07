@@ -12,10 +12,6 @@ public:
 
 	static void SetRecipNearClip(void);
 	static void InitPerFrame(void);
-	//static int32 GetBank(int32 n, RwTexture *tex);
-	//static void AddSpriteToBank(int32 bank, const CRect &rect, const CRGBA &col,
-	//	float u0, float v0, float u1, float v1, float u3, float v3, float u2, float v2);
-	//static void DrawBank(int32 bank);
 
 	CSprite2d(void) : m_pTexture(nil) {};
 	~CSprite2d(void) { Delete(); };

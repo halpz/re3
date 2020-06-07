@@ -27,8 +27,7 @@ struct CFontDetails
 	uint32 bank;
 	int16 dropShadowPosition;
 	CRGBA dropColor;
-	char bFlashState;
-	char anonymous_21;
+	bool bFlashState;
 	int nFlashTimer;
 	bool anonymous_23;
 	uint32 anonymous_25;

@@ -430,43 +430,26 @@ void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, 
 }
 
 void
-CSprite2d::AddToBuffer(const CRect &r, const CRGBA &c, float a3, float a4, float a5, float a6, float a7, float a8, float a9, float a10)
+CSprite2d::AddToBuffer(const CRect &r, const CRGBA &c, float u0, float v0, float u1, float v1, float u3, float v3, float u2, float v2)
 {
-	RwIm2DVertex* v = TempVertexBuffer;
-	SetVertices(
-		&v[nextBufferVertex],
-		r,
-		c,
-		c,
-		c,
-		c,
-		a3,
-		a4,
-		a5,
-		a6,
-		a7,
-		a8,
-		a9,
-		a10);
-	RwImVertexIndex *v12 = &TempBufferRenderIndexList[nextBufferIndex];
-	v12[0] = nextBufferVertex;
-	v12[1] = nextBufferVertex + 1;
-	v12[2] = nextBufferVertex + 2;
-	v12[3] = nextBufferVertex + 3;
-	v12[4] = nextBufferVertex;
-	v12[5] = nextBufferVertex + 2;
+	SetVertices(&TempVertexBuffer[nextBufferVertex], r, c, c, c, c, u0, v0, u1, v1, u3, v3, u2, v2);
+	RwImVertexIndex *pIndexList = &TempBufferRenderIndexList[nextBufferIndex];
+	pIndexList[0] = nextBufferVertex;
+	pIndexList[1] = nextBufferVertex + 1;
+	pIndexList[2] = nextBufferVertex + 2;
+	pIndexList[3] = nextBufferVertex + 3;
+	pIndexList[4] = nextBufferVertex;
+	pIndexList[5] = nextBufferVertex + 2;
 	nextBufferIndex += 6;
 	nextBufferVertex += 4;
 	if (IsVertexBufferFull())
 		RenderVertexBuffer();
 }
 
-bool CSprite2d::IsVertexBufferFull()
+bool
+CSprite2d::IsVertexBufferFull()
 {
-	bool result = true;
-	if (nextBufferVertex <= 380 && nextBufferIndex <= 1018)
-		result = false;
-	return result;
+	return (nextBufferVertex > ARRAY_SIZE(TempVertexBuffer)-128-4 || nextBufferIndex > ARRAY_SIZE(TempBufferRenderIndexList)-6);
 }
 
 void

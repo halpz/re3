@@ -394,7 +394,7 @@ CFont::PrintChar(float x, float y, wchar c)
 		CSprite2d::AddToBuffer(
 			CRect(x, y,
 				x + 32.0f * RenderState.scaleX * w,
-				y + 32.0f * RenderState.scaleX * 0.5f),
+				y + 32.0f * RenderState.scaleY * 0.5f),
 			RenderState.color,
 			xoff / 16.0f, yoff / 16.0f,
 			(xoff + w) / 16.0f, yoff / 16.0f,
@@ -811,8 +811,8 @@ CFont::PrintString(float x, float y, uint32, wchar *start, wchar *end, float spw
 		RenderState.style = Details.style;
 	}
 
-	float dropShadowPosition = CFont::Details.dropShadowPosition;
-	if (dropShadowPosition != 0.0f && (CFont::Details.style == FONT_BANK || CFont::Details.style == FONT_STANDARD)) {
+	float dropShadowPosition = Details.dropShadowPosition;
+	if (dropShadowPosition != 0.0f && (Details.style == FONT_BANK || Details.style == FONT_STANDARD)) {
 		CRGBA color = Details.color;
 		Details.color = Details.dropColor;
 		Details.dropShadowPosition = 0;
@@ -828,11 +828,11 @@ CFont::PrintString(float x, float y, uint32, wchar *start, wchar *end, float spw
 		}
 		Details.color = color;
 		Details.dropShadowPosition = dropShadowPosition;
-		Details.bIsShadow = 0;
+		Details.bIsShadow = false;
 	}
-	if (FontRenderStatePointer.pStr >= (wchar*)&FontRenderStateBuf[1024] - (end - start + 26)) // why 26?
-		CFont::RenderFontBuffer();
-	CFontRenderState* pRenderState = FontRenderStatePointer.pRenderState;
+	if (FontRenderStatePointer.pStr >= (wchar*)&FontRenderStateBuf[ARRAY_SIZE(FontRenderStateBuf)] - (end - start + 26)) // why 26?
+		RenderFontBuffer();
+	CFontRenderState *pRenderState = FontRenderStatePointer.pRenderState;
 	pRenderState->fTextPosX = x;
 	pRenderState->fTextPosY = y;
 	pRenderState->scaleX = Details.scaleX;
@@ -994,15 +994,28 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 	} else
 #endif
 	{
-		for (; (*s != ' ' || spaces) && *s != '\0'; s++) {
-			if (*s == '~') {
+		for (wchar c = *s; (c != ' ' || spaces) && c != '\0'; c = *(++s)) {
+			if (c == '~') {
+
+				// This is original code
+#if 0
 				s++;
-				while (*s != '~') s++;
-				s++;
-				if (*s == ' ' && !spaces)
-					break;
+				while (*s != '~') {
+					s++;
+				}
+#else
+				// TODO(Miami): This is my code to prevent fuck up until InsertPlayerControlKeysInString is done 
+				if (*(s + 1) != '~') {
+					s++;
+					while (*s != '~') {
+						s++;
+					}
+				}
+#endif
 			}
-			w += GetCharacterSize(*s - ' ');
+			else {
+				w += GetCharacterSize(c - ' ');
+			}
 		}
 	}
 	return w;
@@ -1136,7 +1149,7 @@ CFont::ParseToken(wchar *s)
 wchar*
 CFont::ParseToken(wchar* str, CRGBA &color, bool &flash, bool &bold)
 {
-	Details.anonymous_23 = 0;
+	Details.anonymous_23 = false;
 	wchar *s = str + 1;
 	if (Details.color.r || Details.color.g || Details.color.b)
 	{
@@ -1215,7 +1228,7 @@ CFont::ParseToken(wchar* str, CRGBA &color, bool &flash, bool &bold)
 	while (*s != '~')
 		++s;
 	if (*(++s) == '~')
-		s = CFont::ParseToken(s, color, flash, bold);
+		s = ParseToken(s, color, flash, bold);
 	return s;
 }
 
@@ -1260,7 +1273,7 @@ CFont::RenderFontBuffer()
 			color = RenderState.color;
 		}
 		if (*pRenderStateBufPointer.pStr == '~') {
-			pRenderStateBufPointer.pStr = CFont::ParseToken(pRenderStateBufPointer.pStr, color, bFlash, bBold);
+			pRenderStateBufPointer.pStr = ParseToken(pRenderStateBufPointer.pStr, color, bFlash, bBold);
 			if (bFlash) {
 				if (CTimer::GetTimeInMilliseconds() - Details.nFlashTimer > 300) {
 					Details.bFlashState = !Details.bFlashState;
@@ -1286,9 +1299,9 @@ CFont::RenderFontBuffer()
 			PrintChar(textPosX + 2.0f, textPosY, c);
 			textPosX += 2.0f;
 		}
-		textPosX += CFont::RenderState.scaleX * (RenderState.proportional ? Size[RenderState.style][c] : Size[RenderState.style][209]);
+		textPosX += RenderState.scaleX * (RenderState.proportional ? Size[RenderState.style][c] : Size[RenderState.style][209]);
 		if (c == '\0')
-			textPosX += CFont::RenderState.fExtraSpace;
+			textPosX += RenderState.fExtraSpace;
 	}
 	CSprite2d::RenderVertexBuffer();
 	FontRenderStatePointer.pRenderState = (CFontRenderState*)FontRenderStateBuf;
