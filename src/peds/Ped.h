@@ -1092,6 +1092,7 @@ public:
 void FinishTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
 void StartTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
 void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
+void PlayRandomAnimationsFromAnimBlock(CPed* ped, AssocGroupId animGroup, uint32 first, uint32 amount);
 
 // TODO(Miami): Change those when Ped struct is done
 #ifndef PED_SKIN

@@ -826,7 +826,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 	if (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL) {
 		CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENULABEL_X_MARGIN));
 		CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENULABEL_WIDTH));
-		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 		CFont::SetScale(MENU_X(BIGTEXT2_X_SCALE), MENU_Y(BIGTEXT2_Y_SCALE));
 		CFont::SetRightJustifyOff();
 
@@ -911,7 +911,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 			wchar* leftText;
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot >= SAVESLOT_1 && aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot <= SAVESLOT_8) {
 				CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
-				CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+				CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 				CFont::SetScale(MENU_X(MEDIUMTEXT_X_SCALE), MENU_Y(MEDIUMTEXT_Y_SCALE));
 				CFont::SetDropShadowPosition(0);
 			} else {
@@ -1255,7 +1255,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 						CFont::SetCentreOff();
 						CFont::SetRightJustifyOn();
 						if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot >= SAVESLOT_1 && aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot <= SAVESLOT_8) {
-							CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+							CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 							CFont::SetScale(MENU_X(MEDIUMTEXT_X_SCALE), MENU_Y(MEDIUMTEXT_Y_SCALE));
 						} else {
 							CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
@@ -1720,7 +1720,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 					
 					CFont::SetRightJustifyOff();
 					CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-					CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+					CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 					if (!m_bKeyIsOK)
 						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 
@@ -1733,7 +1733,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 					CFont::PrintString(MENU_X_LEFT_ALIGNED(275.0f), SCREEN_SCALE_FROM_BOTTOM(114.0f), TheText.Get("FET_CIG")); // BACKSPACE TO CLEAR - LMB,RETURN TO CHANGE
 					CFont::SetRightJustifyOff();
 					CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-					CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+					CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 					m_bKeyIsOK = false;
 					m_bKeyChangeNotProcessed = false;
 				}
@@ -1745,7 +1745,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 				CFont::PrintString(MENU_X_LEFT_ALIGNED(275.0f), SCREEN_SCALE_FROM_BOTTOM(114.0f), TheText.Get("FET_EIG")); // CANNOT SET A CONTROL FOR THIS ACTION
 				CFont::SetRightJustifyOff();
 				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-				CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+				CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 			}
 		}
 	}
@@ -1918,7 +1918,7 @@ CMenuManager::DrawControllerSetupScreen()
 	CFont::PrintString(MENU_X_LEFT_ALIGNED(CONTSETUP_COLUMN_3_X), MENU_Y(CONTSETUP_LIST_TOP), TheText.Get("FET_CCR"));
 	CFont::SetRightJustifyOff();
 	CFont::SetScale(MENU_X_LEFT_ALIGNED(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 	int yStart;
 	if (m_ControlMethod == CONTROL_CLASSIC)
 		yStart = CONTSETUP_LIST_HEADER_HEIGHT + 29;
@@ -2221,7 +2221,7 @@ CMenuManager::DrawBackground()
 			if (CheckHover(xStart, xStart + optionWidth, optionTop, optionBottom))
 				hoveredBottomBarOption = i;
 
-			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+			CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 			CFont::SetScale(MENU_X(0.35f), MENU_Y(0.7f));
 			CFont::SetRightJustifyOff();
 			if (hoveredBottomBarOption == i && hoveredBottomBarOption != curBottomBarOption)
@@ -2626,7 +2626,7 @@ CMenuManager::DrawPlayerSetupScreen()
 	// Skin list
 	CFont::SetRightJustifyOff();
 	CFont::SetScale(MENU_X(PLAYERSETUP_ROW_TEXT_X_SCALE), MENU_Y(PLAYERSETUP_ROW_TEXT_Y_SCALE));
-	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 	if (m_nSkinsTotal > 0) {
 		for (m_pSelectedSkin = m_pSkinListHead.nextSkin; m_pSelectedSkin->skinId != m_nFirstVisibleRowOnList;
 			m_pSelectedSkin = m_pSelectedSkin->nextSkin);
@@ -3281,7 +3281,7 @@ CMenuManager::SmallMessageScreen(const char* text)
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
 	CSprite2d::DrawRect(CRect(SCREEN_SCALE_X(95.0f), SCREEN_SCALE_FROM_BOTTOM(165.0f), SCREEN_SCALE_FROM_RIGHT(95.0f), SCREEN_SCALE_Y(115.0f)), CRGBA(50, 50, 50, FadeIn(210)));
-	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 	CFont::SetCentreSize(SCREEN_SCALE_X(430.0f));
 	CFont::SetCentreOn();
 	CFont::SetColor(CRGBA(255, 217, 106, FadeIn(255)));
@@ -3293,7 +3293,7 @@ void
 CMenuManager::PrintBriefs()
 {
 	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
-	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 	CFont::SetRightJustifyOff();
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X * 0.7), MENU_Y(MENU_TEXT_SIZE_Y * 0.9)); // second mulipliers are double, idk why
 
@@ -3345,7 +3345,7 @@ CMenuManager::PrintStats()
 {
 	int rowNum = ConstructStatLine(99999);
 #ifdef GTA3_1_1_PATCH
-	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 #endif
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X * 0.7), MENU_Y(MENU_TEXT_SIZE_Y * 0.9)); // second mulipliers are double, idk why
 	float nextYChange, y, alphaMult;
@@ -4545,11 +4545,6 @@ CMenuManager::ProcessButtonPresses(void)
 					}
 					break;
 				}
-				//case MENUACTION_KEYBOARDCTRLS:
-				//	SwitchToNewScreen(MENUPAGE_KEYBOARD_CONTROLS);
-				//	m_nSelectedListRow = 0;
-				//	m_nCurrExLayer = HOVEROPTION_LIST;
-				//	break;
 			}
 		}
 		ProcessOnOffMenuOptions();
@@ -4767,6 +4762,7 @@ void
 CMenuManager::ProcessOnOffMenuOptions()
 {
 	switch (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action) {
+#ifdef LEGACY_MENU_OPTIONS
 	case MENUACTION_CTRLVIBRATION:
 		m_PrefsUseVibration = !m_PrefsUseVibration;
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
@@ -4777,6 +4773,7 @@ CMenuManager::ProcessOnOffMenuOptions()
 			CPad::GetPad(0)->Mode = 0;
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		break;
+#endif
 	case MENUACTION_FRAMESYNC:
 		m_PrefsVsyncDisp = !m_PrefsVsyncDisp;
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
@@ -5341,7 +5338,7 @@ CMenuManager::PrintMap(void)
 		CRGBA(MAPINFOBOX_COLOR.r, MAPINFOBOX_COLOR.g, MAPINFOBOX_COLOR.b, MAPINFOBOX_COLOR.a));
 
 	CFont::SetScale(MENU_X(0.4f), MENU_Y(0.7f));
-	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
 
 	float nextX = MENU_X(30.0f), nextY = 95.0f;
