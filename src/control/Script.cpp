@@ -1531,7 +1531,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 				CPed* pTestedPed = ped->m_nearPeds[i];
 				if (!pTestedPed || !IsPedPointerValid(pTestedPed))
 					continue;
-				if (pTestedPed->m_pedInObjective == ped && pTestedPed->m_objective == OBJ_15) {
+				if (pTestedPed->m_pedInObjective == ped && pTestedPed->m_objective == OBJECTIVE_FOLLOW_PED_IN_FORMATION) {
 					CVector vFollowerPos = pTestedPed->GetFormationPosition();
 					CTheScripts::ClearSpaceForMissionEntity(vFollowerPos, ped);
 					bool bFound = false;
@@ -10678,7 +10678,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
 		assert(pTargetPed);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, pPed);
+		pPed->SetObjective(OBJECTIVE_GOTO_CHAR_ON_FOOT_WALKING, pPed);
 		return 0;
 	}
 	//case COMMAND_IS_PICKUP_IN_ZONE:
@@ -10713,8 +10713,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
 		assert(pTargetPed);
 		pPed->bScriptObjectiveCompleted = false;
-		debug("SET_CHAR_OBJ_AIM_GUN_AT_CHAR is not implemented\n");
-		//pPed->SetObjective(OBJECTIVE_AIM_GUN_AT_PED, pTargetPed); // TODO(MIAMI) -- when objective is implemented
+		pPed->SetObjective(OBJECTIVE_AIM_GUN_AT_PED, pTargetPed);
 		return 0;
 	}
 	case COMMAND_SWITCH_SECURITY_CAMERA:
@@ -11122,8 +11121,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		pos.y = *(float*)&ScriptParams[2];
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pPed->bScriptObjectiveCompleted = false;
-		debug("SET_CHAR_OBJ_SPRINT_TO_COORD is not implemented\n");
-		//pPed->SetObjective(OBJECTIVE_SPRINT_TO_COORD, pos); // TODO(MIAMI) -- when objective is implemented
+		pPed->SetObjective(OBJECTIVE_SPRINT_TO_COORD, pos);
 		return 0;
 	}
 	case COMMAND_CREATE_SWAT_ROPE:
