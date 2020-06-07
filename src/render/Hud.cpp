@@ -20,7 +20,7 @@
 #include "TxdStore.h"
 #include "User.h"
 #include "World.h"
-#include <animation\CutsceneMgr.h>
+#include "CutsceneMgr.h"
 
 // Game has colors inlined in code.
 // For easier modification we collect them here:

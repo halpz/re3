@@ -616,7 +616,7 @@ public:
 	CEntity *m_attachedTo;
 	CVector m_vecAttachOffset;
 	uint16 m_attachType;
-	float m_attachRot;
+	float m_attachRotStep;
 	uint32 m_attachWepAmmo;
 	uint32 m_threatFlags;
 	uint32 m_threatCheck;
@@ -841,6 +841,7 @@ public:
 	void DettachPedFromEntity();
 	void PedShuffle();
 	void DriveVehicle();
+	void PositionAttachedPed();
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);

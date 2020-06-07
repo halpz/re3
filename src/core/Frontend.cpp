@@ -3272,7 +3272,7 @@ CMenuManager::MessageScreen(const char *text, bool blackBg)
 	DoRWStuffEndOfFrame();
 }
 
-// TODO(Miami)
+// --MIAMI: Done
 void
 CMenuManager::SmallMessageScreen(const char* text)
 {
@@ -3284,9 +3284,19 @@ CMenuManager::SmallMessageScreen(const char* text)
 	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 	CFont::SetCentreSize(SCREEN_SCALE_X(430.0f));
 	CFont::SetCentreOn();
-	CFont::SetColor(CRGBA(255, 217, 106, FadeIn(255)));
+	CFont::SetColor(CRGBA(LABEL_COLOR.r, LABEL_COLOR.g, LABEL_COLOR.b, FadeIn(255)));
+	CFont::SetDropShadowPosition(2);
+	CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 	CFont::SetScale(SCREEN_SCALE_X(SMALLTEXT_X_SCALE), SCREEN_SCALE_Y(SMALLTEXT_Y_SCALE));
-	CFont::PrintString(SCREEN_SCALE_X(320.0f), SCREEN_SCALE_Y(170.0f), TheText.Get(text));
+	
+	int numOfLines = CFont::GetNumberLines(SCREEN_WIDTH / 2.f, SCREEN_SCALE_Y(135.f), TheText.Get(text));
+	float y;
+	if (numOfLines > 1)
+		y = SCREEN_SCALE_Y(192.f) - numOfLines * SCREEN_SCALE_Y(8.f);
+	else
+		y = SCREEN_SCALE_Y(182.f);
+
+	CFont::PrintString(SCREEN_WIDTH / 2.f, y, TheText.Get(text));
 }
 
 void

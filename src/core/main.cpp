@@ -234,18 +234,13 @@ DoFade(void)
 			fadeColor.a = alpha;
 		}
 
+		// This is CCamera::GetScreenRect in VC
 		if(TheCamera.m_WideScreenOn){
-			// what's this?
 			float y = SCREEN_HEIGHT/2 * TheCamera.m_ScreenReductionPercentage/100.0f;
 			rect.left = 0.0f;
 			rect.right = SCREEN_WIDTH;
-#ifdef FIX_BUGS
-			rect.top = y - SCREEN_SCALE_Y(8.0f);
-			rect.bottom = SCREEN_HEIGHT - y - SCREEN_SCALE_Y(8.0f);
-#else
-			rect.top = y - 8.0f;
-			rect.bottom = SCREEN_HEIGHT - y - 8.0f;
-#endif // FIX_BUGS
+			rect.top = y - SCREEN_SCALE_Y(22.0f);
+			rect.bottom = SCREEN_HEIGHT - y - SCREEN_SCALE_Y(14.0f);
 		}else{
 			rect.left = 0.0f;
 			rect.right = SCREEN_WIDTH;
