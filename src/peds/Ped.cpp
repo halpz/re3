@@ -18809,7 +18809,7 @@ CPed::AttachPedToEntity(CEntity *ent, CVector offset, uint16 type, float rot, eW
 	m_attachedTo->RegisterReference(&m_attachedTo);
 	m_vecAttachOffset = offset;
 	m_attachType = type;
-	m_attachRot = rot;
+	m_attachRotStep = rot;
 	if (IsPlayer()) {
 		bUsesCollision = false;
 	} else if (ent->IsVehicle()) {
@@ -18843,8 +18843,7 @@ CPed::AttachPedToEntity(CEntity *ent, CVector offset, uint16 type, float rot, eW
 		SetCurrentWeapon(weapon);
 	}
 
-	// TODO(Miami)
-	// PositionAttachedPed();
+	PositionAttachedPed();
 }
 
 // --MIAMI: Done
@@ -19195,6 +19194,55 @@ CPed::DriveVehicle(void)
 			else
 				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_LB, 4.0f);
 		}
+	}
+}
+
+// --MIAMI: Done
+void
+CPed::PositionAttachedPed()
+{
+	CMatrix rotMatrix, targetMat;
+	targetMat = m_attachedTo->GetMatrix();
+	targetMat.GetPosition() += Multiply3x3(m_attachedTo->GetMatrix(), m_vecAttachOffset);
+	float objAngle = m_attachedTo->GetForward().Heading();
+
+	if (!IsPlayer()) {
+		float targetAngle = objAngle;
+		switch (m_attachType) {
+			case 1:
+				targetAngle += HALFPI;
+				break;
+			case 2:
+				targetAngle += PI;
+				break;
+			case 3:
+				targetAngle -= HALFPI;
+				break;
+			default:
+				break;
+		}
+		targetAngle = CGeneral::LimitRadianAngle(targetAngle);
+		m_fRotationCur = CGeneral::LimitRadianAngle(m_fRotationCur);
+		float neededTurn = m_fRotationCur - targetAngle;
+
+		if (neededTurn > PI)
+			neededTurn -= TWOPI;
+		else if (neededTurn < -PI)
+			neededTurn += TWOPI;
+
+		if (neededTurn > m_attachRotStep)
+			m_fRotationCur = CGeneral::LimitRadianAngle(targetAngle + m_attachRotStep);
+		else if (-m_attachRotStep > neededTurn)
+			m_fRotationCur = CGeneral::LimitRadianAngle(targetAngle - m_attachRotStep);
+		else
+			m_fRotationCur = CGeneral::LimitRadianAngle(m_fRotationCur);
+	}
+	rotMatrix.SetRotateZ(m_fRotationCur - objAngle);
+	targetMat = targetMat * rotMatrix;
+	GetMatrix() = targetMat;
+	if (m_attachedTo->IsVehicle() || m_attachedTo->IsObject()) {
+		m_vecMoveSpeed = ((CPhysical*)m_attachedTo)->m_vecMoveSpeed;
+		m_vecTurnSpeed = ((CPhysical*)m_attachedTo)->m_vecTurnSpeed;
 	}
 }
 
