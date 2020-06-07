@@ -711,7 +711,7 @@ CBike::ProcessControl(void)
 		fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward());
 		if(!CVehicle::bCheat3)
 			gripCheat = false;
-		float acceleration = pHandling->Transmission.CalculateDriveAcceleration(m_fGasPedal, m_nCurrentGear, m_fChangeGearTime, fwdSpeed, gripCheat);
+		acceleration = pHandling->Transmission.CalculateDriveAcceleration(m_fGasPedal, m_nCurrentGear, m_fChangeGearTime, fwdSpeed, gripCheat);
 		acceleration /= m_fForceMultiplier;
 
 		brake = m_fBrakePedal * pHandling->fBrakeDeceleration * CTimer::GetTimeStep();
