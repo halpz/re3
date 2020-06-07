@@ -14,22 +14,50 @@ struct CFontDetails
 	bool background;
 	bool backgroundOnlyText;
 	bool proportional;
+	bool bIsShadow;
+	bool bFlash;
+	bool bBold;
 	float alphaFade;
 	CRGBA backgroundColor;
 	float wrapX;
 	float centreSize;
 	float rightJustifyWrap;
 	int16 style;
-	int32 bank;
+	bool bFontHalfTexture;
+	uint32 bank;
 	int16 dropShadowPosition;
 	CRGBA dropColor;
+	char bFlashState;
+	char anonymous_21;
+	int nFlashTimer;
+	char anonymous_23;
+	uint32 anonymous_25;
+};
+
+struct CFontRenderState
+{
+	uint32 anonymous_0;
+	float fTextPosX;
+	float fTextPosY;
+	float fTextSizeX;
+	float fTextSizeY;
+	CRGBA color;
+	float fExtraSpace;
+	float fSlant;
+	float fSlantRefPointX;
+	float fSlantRefPointY;
+	bool bIsShadow;
+	bool bFontHalfTexture;
+	bool bProp;
+	bool anonymous_14;
+	int16 FontStyle;
 };
 
 class CSprite2d;
 
 enum {
+	FONT_STANDART,
 	FONT_BANK,
-	FONT_PAGER,
 	FONT_HEADING,
 #ifdef MORE_LANGUAGES
 	FONT_JAPANESE,
@@ -65,12 +93,13 @@ class CFont
 	static uint8 LanguageSet;
 	static int32 Slot;
 #else
-	static int16 Size[MAX_FONTS][193];
+	static int16 Size[MAX_FONTS][210];
 #endif
 	static int16 NewLine;
 public:
 	static CSprite2d Sprite[MAX_FONTS];
 	static CFontDetails Details;
+	static CFontRenderState RenderState;
 
 	static void Initialise(void);
 	static void Shutdown(void);
@@ -97,6 +126,7 @@ public:
 	static uint16 *ParseToken(wchar *s, wchar*);
 #endif
 	static void DrawFonts(void);
+	static void RenderFontBuffer(void);
 	static uint16 character_code(uint8 c);
 
 	static CFontDetails GetDetails() { return Details; }
@@ -155,14 +185,14 @@ public:
 	static void SetBackGroundOnlyTextOff(void) { Details.backgroundOnlyText = false; }
 	static void SetPropOn(void) { Details.proportional = true; }
 	static void SetPropOff(void) { Details.proportional = false; }
-	static void SetFontStyle(int16 style) { Details.style = style; }
+	static void SetFontStyle(int16 style);// { Details.style = style; }
 	static void SetRightJustifyWrap(float wrap) { Details.rightJustifyWrap = wrap; }
 	static void SetAlphaFade(float fade) { Details.alphaFade = fade; }
 	static void SetDropShadowPosition(int16 pos) { Details.dropShadowPosition = pos; }
 	static void SetBackgroundColor(CRGBA col);
 	static void SetColor(CRGBA col);
 	static void SetDropColor(CRGBA col);
-
+	static wchar FindNewCharacter(wchar c);
 #ifdef MORE_LANGUAGES
 	static void ReloadFonts(uint8 set);
 
