@@ -1681,11 +1681,11 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*nScriptVar1 *= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
-	case COMMAND_MULT_INT_LVAR_BY_INT_VAR:
+	case COMMAND_MULT_INT_VAR_BY_INT_LVAR:
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*nScriptVar1 *= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
-	case COMMAND_MULT_INT_VAR_BY_INT_LVAR:
+	case COMMAND_MULT_INT_LVAR_BY_INT_VAR:
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*nScriptVar1 *= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1697,11 +1697,11 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
-	case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_VAR:
+	case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_LVAR:
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
-	case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_LVAR:
+	case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_VAR:
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*fScriptVar1 *= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1713,11 +1713,11 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*nScriptVar1 /= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
-	case COMMAND_DIV_INT_LVAR_BY_INT_VAR:
+	case COMMAND_DIV_INT_VAR_BY_INT_LVAR:
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*nScriptVar1 /= *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
-	case COMMAND_DIV_INT_VAR_BY_INT_LVAR:
+	case COMMAND_DIV_INT_LVAR_BY_INT_VAR:
 		nScriptVar1 = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*nScriptVar1 /= *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1729,11 +1729,11 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
-	case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_VAR:
+	case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_LVAR:
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
-	case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_LVAR:
+	case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_VAR:
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*fScriptVar1 /= *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1759,11 +1759,19 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
+#ifdef FIX_BUGS
+	case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_LVAR:
+#else
 	case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_VAR:
+#endif
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
+#ifdef FIX_BUGS
+	case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_VAR:
+#else
 	case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_LVAR:
+#endif
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*fScriptVar1 += CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1789,11 +1797,19 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
+#ifdef FIX_BUGS // in SA it was fixed by reversing their order in enum
+	case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_LVAR:
+#else
 	case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_VAR:
+#endif
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*fScriptVar1 -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
+#ifdef FIX_BUGS
+	case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_VAR:
+#else
 	case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_LVAR:
+#endif
 		fScriptVar1 = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*fScriptVar1 -= CTimer::GetTimeStep() * *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
@@ -1807,13 +1823,13 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	}
-	case COMMAND_SET_LVAR_INT_TO_VAR_INT:
+	case COMMAND_SET_VAR_INT_TO_LVAR_INT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	}
-	case COMMAND_SET_VAR_INT_TO_LVAR_INT:
+	case COMMAND_SET_LVAR_INT_TO_VAR_INT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
@@ -1831,13 +1847,13 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	}
-	case COMMAND_SET_LVAR_FLOAT_TO_VAR_FLOAT:
+	case COMMAND_SET_VAR_FLOAT_TO_LVAR_FLOAT:
 	{
 		float* ptr = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	}
-	case COMMAND_SET_VAR_FLOAT_TO_LVAR_FLOAT:
+	case COMMAND_SET_LVAR_FLOAT_TO_VAR_FLOAT:
 	{
 		float* ptr = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
@@ -1855,13 +1871,13 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	}
-	case COMMAND_CSET_LVAR_INT_TO_VAR_FLOAT:
+	case COMMAND_CSET_VAR_INT_TO_LVAR_FLOAT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	}
-	case COMMAND_CSET_VAR_INT_TO_LVAR_FLOAT:
+	case COMMAND_CSET_LVAR_INT_TO_VAR_FLOAT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*ptr = *(float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
@@ -1879,13 +1895,13 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		return 0;
 	}
-	case COMMAND_CSET_LVAR_FLOAT_TO_VAR_INT:
+	case COMMAND_CSET_VAR_FLOAT_TO_LVAR_INT:
 	{
 		float* ptr = (float*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		return 0;
 	}
-	case COMMAND_CSET_VAR_FLOAT_TO_LVAR_INT:
+	case COMMAND_CSET_LVAR_FLOAT_TO_VAR_INT:
 	{
 		float* ptr = (float*)GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		*ptr = *GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
