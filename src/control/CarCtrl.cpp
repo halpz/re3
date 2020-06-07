@@ -984,13 +984,15 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 					if (pVehicle->GetModelIndex() == MI_RCBANDIT){
 						if (dotVelocity * GAME_SPEED_TO_METERS_PER_SECOND / 2 > distanceUntilHit)
 							pPed->SetEvasiveStep(pVehicle, 0);
-					}else if (dotVelocity > 0.3f){
-						if (sideLength - 0.5f < sidewaysDistance)
+					}
+					else if (dotVelocity > 0.3f) {
+						if (sideLength + 0.1f < sidewaysDistance)
 							pPed->SetEvasiveStep(pVehicle, 0);
 						else
 							pPed->SetEvasiveDive(pVehicle, 0);
-					}else{
-						if (sideLength + 0.1f < sidewaysDistance)
+					}
+					else if (dotVelocity > 0.1f) {
+						if (sideLength - 0.5f < sidewaysDistance)
 							pPed->SetEvasiveStep(pVehicle, 0);
 						else
 							pPed->SetEvasiveDive(pVehicle, 0);
@@ -1019,7 +1021,7 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 						CPlayerPed* pPlayerPed = (CPlayerPed*)pPed;
 						if (pPlayerPed->IsPlayer() && dotDirection < frontSafe &&
 						  pPlayerPed->IsPedInControl() &&
-						  pPlayerPed->m_fMoveSpeed < 0.1f && pPlayerPed->bIsLooking &&
+						  pPlayerPed->m_fMoveSpeed < 1.0f && !pPlayerPed->bIsLooking &&
 						  CTimer::GetTimeInMilliseconds() > pPlayerPed->m_lookTimer) {
 							pPlayerPed->AnnoyPlayerPed(false);
 							pPlayerPed->SetLookFlag(pVehicle, true);
