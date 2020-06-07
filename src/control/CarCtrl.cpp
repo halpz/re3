@@ -1127,7 +1127,7 @@ CCarCtrl::FindMaximumSpeedForThisCarInTraffic(CVehicle* pVehicle)
 		}
 	}
 	pVehicle->bWarnedPeds = true;
-	if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS)
+	if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS || pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS_IGNORE_LIGHTS)
 		return maxSpeed;
 	return (maxSpeed + pVehicle->AutoPilot.GetCruiseSpeed()) / 2;
 }
@@ -1226,13 +1226,13 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 					if (pVehicle->GetModelIndex() == MI_RCBANDIT){
 						if (dotVelocity * GAME_SPEED_TO_METERS_PER_SECOND / 2 > distanceUntilHit)
 							pPed->SetEvasiveStep(pVehicle, 0);
-					}else if (dotVelocity > 0.3f){
-						if (sideLength - 0.5f < sidewaysDistance)
+					}else if (dotVelocity > 0.3f) {
+						if (sideLength + 0.1f < sidewaysDistance)
 							pPed->SetEvasiveStep(pVehicle, 0);
 						else
 							pPed->SetEvasiveDive(pVehicle, 0);
-					}else{
-						if (sideLength + 0.1f < sidewaysDistance)
+					}else if (dotVelocity > 0.1f) {
+						if (sideLength - 0.5f < sidewaysDistance)
 							pPed->SetEvasiveStep(pVehicle, 0);
 						else
 							pPed->SetEvasiveDive(pVehicle, 0);
@@ -1261,7 +1261,7 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 						CPlayerPed* pPlayerPed = (CPlayerPed*)pPed;
 						if (pPlayerPed->IsPlayer() && dotDirection < frontSafe &&
 						  pPlayerPed->IsPedInControl() &&
-						  pPlayerPed->m_fMoveSpeed < 0.1f && pPlayerPed->bIsLooking &&
+						  pPlayerPed->m_fMoveSpeed < 1.0f && !pPlayerPed->bIsLooking &&
 						  CTimer::GetTimeInMilliseconds() > pPlayerPed->m_lookTimer) {
 							pPlayerPed->AnnoyPlayerPed(false);
 							pPlayerPed->SetLookFlag(pVehicle, true);
@@ -2751,10 +2751,12 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 		if (PickNextNodeAccordingStrategy(pVehicle)) {
 			switch (pVehicle->AutoPilot.m_nCarMission){
 			case MISSION_GOTOCOORDS:
+				pVehicle->AutoPilot.m_nCarMission = MISSION_GOTOCOORDS_STRAIGHT;
 				SteerAICarWithPhysicsHeadingForTarget(pVehicle, nil, pVehicle->AutoPilot.m_vecDestinationCoors.x,
 					pVehicle->AutoPilot.m_vecDestinationCoors.y, pSwerve, pAccel, pBrake, pHandbrake);
 				return;
 			case MISSION_GOTOCOORDS_ACCURATE:
+				pVehicle->AutoPilot.m_nCarMission = MISSION_GOTO_COORDS_STRAIGHT_ACCURATE;
 				SteerAICarWithPhysicsHeadingForTarget(pVehicle, nil, pVehicle->AutoPilot.m_vecDestinationCoors.x,
 					pVehicle->AutoPilot.m_vecDestinationCoors.y, pSwerve, pAccel, pBrake, pHandbrake);
 				return;
