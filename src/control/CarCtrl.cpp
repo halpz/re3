@@ -2690,7 +2690,7 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 		if (Abs(ZSpeedChangeTarget) < ZSpeedChangeMax)
 			pHeli->SetMoveSpeed(pHeli->GetMoveSpeed().x, pHeli->GetMoveSpeed().y, ZSpeedTarget);
 		else if (ZSpeedChangeTarget < 0.0f)
-			pHeli->AddToMoveSpeed(0.0f, 0.0f, 1.5f * ZSpeedChangeMax);
+			pHeli->AddToMoveSpeed(0.0f, 0.0f, -1.5f * ZSpeedChangeMax);
 		else
 			pHeli->AddToMoveSpeed(0.0f, 0.0f, ZSpeedChangeMax);
 	}
@@ -2715,6 +2715,13 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 			ZTurnSpeedTarget = -0.03f;
 	}
 	float ZTurnSpeedChangeTarget = ZTurnSpeedTarget - pHeli->GetTurnSpeed().z;
+	float ZTurnSpeedLimit = 0.0002f * CTimer::GetTimeStep();
+	if (Abs(ZTurnSpeedChangeTarget) < ZTurnSpeedLimit)
+		pHeli->m_vecTurnSpeed.z = ZTurnSpeedTarget;
+	else if (ZTurnSpeedChangeTarget < 0.0f)
+		pHeli->m_vecTurnSpeed.z -= ZTurnSpeedLimit;
+	else
+		pHeli->m_vecTurnSpeed.z += ZTurnSpeedLimit;
 	pHeli->m_fOrientation += pHeli->GetTurnSpeed().z * CTimer::GetTimeStep();
 	CVector up;
 	if (pHeli->bHeliMinimumTilt)
