@@ -601,7 +601,7 @@ CBike::ProcessControl(void)
 				m_aSuspensionSpringRatio[i] = 1.0f;
 			else if(m_wheelStatus[i/2] == WHEEL_STATUS_BURST){
 				// wheel more bumpy the faster we are
-				if(i == BIKESUSP_F1 || BIKESUSP_R1)
+				if(i == BIKESUSP_F1 || i == BIKESUSP_R1)
 					rnd = CGeneral::GetRandomNumberInRange(0, (uint16)(40*fwdSpeed) + 98) < 100;
 				if(rnd){
 					m_aSuspensionSpringRatio[i] += 0.3f*(m_aSuspensionLineLength[i]-m_aSuspensionSpringLength[i])/m_aSuspensionSpringLength[i];
