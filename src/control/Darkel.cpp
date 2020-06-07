@@ -74,7 +74,7 @@ CDarkel::DrawMessages()
 					CFont::SetScale(SCREEN_SCALE_X(1.3f), SCREEN_SCALE_Y(1.3f));
 					CFont::SetJustifyOff();
 					CFont::SetColor(CRGBA(255, 255, 128, CalcFade(timePassedSinceStart, 3000, 11000)));
-					CFont::SetFontStyle(FONT_STANDARD);
+					CFont::SetFontStyle(FONT_BANK);
 					if (pStartMessage) {
 						CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, pStartMessage);
 					}
@@ -84,7 +84,7 @@ CDarkel::DrawMessages()
 					CFont::SetScale(SCREEN_SCALE_X(1.3f), SCREEN_SCALE_Y(1.3f));
 					CFont::SetJustifyOff();
 					CFont::SetColor(CRGBA(255, 255, 128, CalcFade(timePassedSinceStart, 0, 8000)));
-					CFont::SetFontStyle(FONT_STANDARD);
+					CFont::SetFontStyle(FONT_BANK);
 					if (pStartMessage) {
 						CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, pStartMessage);
 					}
@@ -124,7 +124,7 @@ CDarkel::DrawMessages()
 					CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
 					CFont::SetJustifyOff();
 					CFont::SetColor(CRGBA(128, 255, 128, CalcFade(timePassedSinceStart, 0, 5000)));
-					CFont::SetFontStyle(FONT_STANDARD);
+					CFont::SetFontStyle(FONT_BANK);
 					int y = SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(25.0f - timePassedSinceStart * 0.01f);
 					CFont::PrintString(SCREEN_WIDTH / 2, y, TheText.Get("KF_3"));
 				}

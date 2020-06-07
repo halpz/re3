@@ -250,7 +250,7 @@ CFont::Initialise(void)
 	SetBackgroundColor(CRGBA(0x80, 0x80, 0x80, 0x80));
 	SetBackGroundOnlyTextOff();
 	SetPropOn();
-	SetFontStyle(FONT_STANDARD);
+	SetFontStyle(FONT_BANK);
 	SetRightJustifyWrap(0.0f);
 	SetAlphaFade(255.0f);
 	SetDropShadowPosition(0);
@@ -348,7 +348,7 @@ CFont::PrintChar(float x, float y, wchar c)
 	}
 #endif
 
-	if(Details.style == FONT_STANDARD || Details.style == FONT_HEADING){
+	if(Details.style == FONT_BANK || Details.style == FONT_HEADING){
 		if(Details.dropShadowPosition != 0){
 			CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
 				CRect(x + SCREEN_SCALE_X(Details.dropShadowPosition),
@@ -828,7 +828,7 @@ CFont::GetCharacterWidth(wchar c)
 	if (IsJapanese()) {
 		if (!Details.proportional)
 			return Size[0][Details.style][192];
-		if (c <= 94 || Details.style == FONT_HEADING || Details.style == FONT_STANDARD) {
+		if (c <= 94 || Details.style == FONT_HEADING || Details.style == FONT_BANK) {
 			switch (Details.style)
 			{
 			case FONT_JAPANESE:
@@ -844,7 +844,7 @@ CFont::GetCharacterWidth(wchar c)
 		{
 		case FONT_JAPANESE:
 			return 29.4f;
-		case FONT_STANDARD:
+		case FONT_BANK:
 			return 10.0f;
 		case FONT_PAGER:
 			return 31.5f;
@@ -874,7 +874,7 @@ CFont::GetCharacterSize(wchar c)
 	{
 		if (!Details.proportional)
 			return Size[0][Details.style][192] * Details.scaleX;
-		if (c <= 94 || Details.style == FONT_HEADING || Details.style == FONT_STANDARD) {
+		if (c <= 94 || Details.style == FONT_HEADING || Details.style == FONT_BANK) {
 			switch (Details.style)
 			{
 			case FONT_JAPANESE:
@@ -890,7 +890,7 @@ CFont::GetCharacterSize(wchar c)
 		{
 		case FONT_JAPANESE:
 			return 29.4f * Details.scaleX;
-		case FONT_STANDARD:
+		case FONT_BANK:
 			return 10.0f * Details.scaleX;
 		case FONT_PAGER:
 			return 31.5f * Details.scaleX;
