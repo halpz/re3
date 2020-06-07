@@ -2442,16 +2442,24 @@ CBike::BurstTyre(uint8 wheel, bool applyForces)
 			ApplyTurnForce(GetRight() * m_fTurnMass * CGeneral::GetRandomNumberInRange(-0.02f, 0.02f), GetForward());
 		}
 
-#ifdef FIX_SIGNIFICANT_BUGS
 		// This code checks piece types originally so it is never triggered
 		// as we have converted them to wheel indices above already.
 		if(pDriver){
+#ifdef FIX_SIGNIFICANT_BUGS
 			if(wheel == BIKEWHEEL_FRONT && (m_aSuspensionSpringRatioPrev[BIKESUSP_F1] < 1.0f || m_aSuspensionSpringRatioPrev[BIKESUSP_F2] < 1.0f) ||
 			   wheel == BIKEWHEEL_REAR && (m_aSuspensionSpringRatioPrev[BIKESUSP_R1] < 1.0f || m_aSuspensionSpringRatioPrev[BIKESUSP_R2] < 1.0f)){
+#else
+			if(wheel == CAR_PIECE_WHEEL_LF && (m_aSuspensionSpringRatioPrev[BIKESUSP_F1] < 1.0f || m_aSuspensionSpringRatioPrev[BIKESUSP_F2] < 1.0f) ||
+			   wheel == CAR_PIECE_WHEEL_LR && (m_aSuspensionSpringRatioPrev[BIKESUSP_R1] < 1.0f || m_aSuspensionSpringRatioPrev[BIKESUSP_R2] < 1.0f)){
+#endif
 				float speedSq = m_vecMoveSpeed.MagnitudeSqr();
 				if(speedSq > fBikeBurstFallSpeed &&
 				   (GetStatus() != STATUS_PLAYER || speedSq > fBikeBurstFallSpeedPlayer)){
+#ifdef FIX_SIGNIFICANT_BUGS
 					if(wheel == BIKEWHEEL_FRONT){
+#else
+					if(wheel == CAR_PIECE_WHEEL_LF){
+#endif
 						KnockOffRider(WEAPONTYPE_RAMMEDBYCAR, 0, pDriver, false);
 						if(pPassengers[0])
 							KnockOffRider(WEAPONTYPE_RAMMEDBYCAR, 0, pPassengers[0], false);
@@ -2460,7 +2468,6 @@ CBike::BurstTyre(uint8 wheel, bool applyForces)
 				}
 			}
 		}
-#endif
 	}
 }
 
