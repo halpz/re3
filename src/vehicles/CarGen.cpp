@@ -210,7 +210,7 @@ bool CCarGenerator::CheckIfWithinRangeOfAnyPlayer()
 	float farclip = 110.0f * TheCamera.GenerationDistMultiplier;
 	float nearclip = farclip - 20.0f;
 	bool canBeRemoved = (m_nModelIndex > 0 && CModelInfo::IsBoatModel(m_nModelIndex) && 165.0f * TheCamera.GenerationDistMultiplier > distance &&
-		TheCamera.IsPointVisible(m_vecPos, &TheCamera.GetCameraMatrix())); // TODO(MIAMI) COcclision::IsPositionOccluded(m_vecPos, 0.0f)
+		TheCamera.IsSphereVisible(m_vecPos, 0.0f)); // TODO(MIAMI) COcclision::IsPositionOccluded(m_vecPos, 0.0f)
 	if (distance >= farclip || canBeRemoved){
 		if (m_bIsBlocking)
 			m_bIsBlocking = false;
