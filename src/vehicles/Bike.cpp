@@ -2685,7 +2685,7 @@ CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBa
 		case 3: anim = ANIM_KD_LEFT; break;
 		}
 		if(m_nWheelsOnGround == 0)
-			ped->b158_4 = true;
+			ped->bKnockedOffBike = true;
 		break;
 	}
 
@@ -2703,7 +2703,7 @@ CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBa
 		case 2: anim = ANIM_KO_SKID_FRONT; break;
 		case 3: anim = ANIM_KD_LEFT; break;
 		}
-		ped->b158_4 = true;
+		ped->bKnockedOffBike = true;
 		if(ped->IsPlayer())
 			ped->Say(SOUND_PED_DAMAGE);
 		break;
@@ -2745,7 +2745,7 @@ CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBa
 		}else
 			ped->GetMatrix().Translate(CVector(0.0f, 0.0f, -2.0f));
 		ped->m_pCollidingEntity = ped->m_pMyVehicle;
-		ped->b158_4 = true;
+		ped->bKnockedOffBike = true;
 		ped->bHeadStuckInCollision = true;
 	}else if(weapon == WEAPONTYPE_RAMMEDBYCAR){
 		if(CWorld::TestSphereAgainstWorld(ped->GetPosition()+CVector(0.0f, 0.0, 1.3f), 0.6f, nil, true, false, false, false, false, false) == nil)

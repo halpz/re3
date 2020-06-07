@@ -3770,7 +3770,8 @@ CPed::ClearAll(void)
 	bIsPointingGunAt = false;
 	bRenderPedInCar = true;
 	bKnockedUpIntoAir = false;
-	b158_4 = false;
+	bCrouchWhenScared = false;
+	bKnockedOffBike = false;
 	m_pCollidingEntity = nil;
 }
 
@@ -7054,7 +7055,7 @@ CPed::Fall(void)
 	CAnimBlendAssociation *firstPartialAssoc;
 	CAnimBlendAssociation *fallAssoc;
 
-	if (IsPlayer() && (bKnockedUpIntoAir || b158_4) && !bIsStanding) {
+	if (IsPlayer() && (bKnockedUpIntoAir || bKnockedOffBike) && !bIsStanding) {
 		firstPartialAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_PARTIAL);
 
 		// What???
@@ -7082,7 +7083,7 @@ CPed::Fall(void)
 		} else {
 			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FALL_BACK, 8.0f);
 		}
-	} else if ((bKnockedUpIntoAir || b158_4) && bIsStanding && !bWasStanding) {
+	} else if ((bKnockedUpIntoAir || bKnockedOffBike) && bIsStanding && !bWasStanding) {
 		fallAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_BACK);
 
 		if (!fallAssoc)
@@ -7090,7 +7091,7 @@ CPed::Fall(void)
 
 		if (fallAssoc) {
 			bKnockedUpIntoAir = false;
-			b158_4 = false;
+			bKnockedOffBike = false;
 			fallAssoc->speed = 3.0f;
 			if (IsPlayer())
 				Say(SOUND_PED_LAND);
@@ -7099,7 +7100,7 @@ CPed::Fall(void)
 			firstPartialAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_PARTIAL);
 			if (firstPartialAssoc && !firstPartialAssoc->IsRunning()) {
 				bKnockedUpIntoAir = false;
-				b158_4 = false;
+				bKnockedOffBike = false;
 			}
 		}
 	}

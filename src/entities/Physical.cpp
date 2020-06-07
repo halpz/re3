@@ -1610,7 +1610,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 				A->bSkipLineCol = true;
 			}else if(A->IsPed() && Aped->m_pCollidingEntity == B){
 				skipCollision = true;
-				if(!Aped->bKnockedUpIntoAir || Aped->b158_4)
+				if(!Aped->bKnockedUpIntoAir || Aped->bKnockedOffBike)
 					A->bSkipLineCol = true;
 			}else if(B->IsPed() && Bped->m_pCollidingEntity == A){
 				skipCollision = true;

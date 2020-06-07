@@ -10772,13 +10772,22 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_SET_HELI_ORIENTATION:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("SET_HELI_ORIENTATION is not implemented\n"); // TODO(MIAMI);
+		CAutomobile* pHeli = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pHeli && pHeli->IsCar() && pHeli->IsRealHeli());
+		float fAngle = DEGTORAD(*(float*)&ScriptParams[1] - 90.0f);
+		while (fAngle < 0.0f)
+			fAngle += TWOPI;
+		while (fAngle > TWOPI)
+			fAngle -= TWOPI;
+		pHeli->SetHeliOrientation(fAngle);
 		return 0;
 	}
 	case COMMAND_CLEAR_HELI_ORIENTATION:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("SET_HELI_ORIENTATION is not implemented\n"); // TODO(MIAMI);
+		CAutomobile* pHeli = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pHeli && pHeli->IsCar() && pHeli->IsRealHeli());
+		pHeli->ClearHeliOrientation();
 		return 0;
 	}
 	case COMMAND_PLANE_GOTO_COORDS:
@@ -10879,9 +10888,10 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_POP_CAR_BOOT:
 	{
 		CollectParameters(&m_nIp, 1);
-		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
-		assert(pVehicle);
-		debug("POP_CAR_BOOT is not implemented\n"); // TODO(MIAMI)
+		CollectParameters(&m_nIp, 1);
+		CAutomobile* pCar = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pCar&& pCar->IsCar());
+		pCar->PopBoot();
 		return 0;
 	}
 	case COMMAND_SHUT_PLAYER_UP:
@@ -11143,7 +11153,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_CREATE_SWAT_ROPE:
 	{
 		CollectParameters(&m_nIp, 3);
-		debug("SET_CHAR_OBJ_SPRINT_TO_COORD is not implemented\n");
+		debug("CREATE_SWAT_ROPE is not implemented\n");
 		return 0;
 	}
 	//case COMMAND_SET_FIRST_PERSON_CONTROL_CAMERA:
@@ -11163,7 +11173,9 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_CLOSE_ALL_CAR_DOORS:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("CLOSE_ALL_CAR_DOORS is not implemented\n"); // TODO(MIAMI)
+		CAutomobile* pCar = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pCar&& pCar->IsCar());
+		pCar->CloseAllDoors();
 		return 0;
 	}
 	case COMMAND_GET_DISTANCE_BETWEEN_COORDS_2D:
@@ -11183,7 +11195,9 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_POP_CAR_BOOT_USING_PHYSICS:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("POP_CAR_BOOT_USING_PHYSICS is not implemented\n"); // TODO(MIAMI)
+		CAutomobile* pCar = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pCar && pCar->IsCar());
+		pCar->PopBootUsingPhysics();
 		return 0;
 	}
 	//case COMMAND_SET_FIRST_PERSON_WEAPON_CAMERA:
@@ -11727,7 +11741,9 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_MAKE_HELI_COME_CRASHING_DOWN:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("MAKE_HELI_COME_CRASHING_DOWN is not implemented\n");
+		CAutomobile* pHeli = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		assert(pHeli && pHeli->IsCar() && pHeli->IsRealHeli());
+		pHeli->bHeliDestroyed = true;
 		return 0;
 	}
 	case COMMAND_ADD_EXPLOSION_NO_SOUND:
@@ -11775,18 +11791,18 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	{
 		CollectParameters(&m_nIp, 2);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
-		debug("SET_CHAR_CROUCH_WHEN_THREATENED not implemented, skipping\n");
+		assert(pPed);
+		pPed->bCrouchWhenScared = true;
 		return 0;
 	}
 	case COMMAND_IS_CHAR_IN_ANY_POLICE_VEHICLE:
 	{
 		CollectParameters(&m_nIp, 1);
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("IS_CHAR_IN_ANY_POLICE_VEHICLE not implemented, default to FALSE\n");
-			bShowed = true;
-		}
-		UpdateCompareFlag(false);
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
+		assert(pPed);
+		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle &&
+			pPed->m_pMyVehicle->IsLawEnforcementVehicle() &&
+			pPed->m_pMyVehicle->GetModelIndex() != MI_PREDATOR);
 		return 0;
 	}
 	case COMMAND_DOES_CHAR_EXIST:
@@ -11817,7 +11833,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_ALL_TAXIS_HAVE_NITRO:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("SET_ALL_TAXIS_HAVE_NITRO is not implemented\n"); // TODO(MIAMI)
+		CVehicle::bAllTaxisHaveNitro = ScriptParams[0] != 0;
 		return 0;
 	}
 	case COMMAND_SET_CHAR_STOP_SHOOT_DONT_SEEK_ENTITY:
@@ -11914,7 +11930,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_PLAY_ANNOUNCEMENT:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("PLAY_ANNOUNCEMENT not implemented, skipping\n");
+		DMAudio.PlayRadioAnnouncement(ScriptParams[0] + STREAMED_SOUND_ANNOUNCE_BRIDGE_CLOSED);
 		return 0;
 	}
 	case COMMAND_SET_PLAYER_IS_IN_STADIUM:

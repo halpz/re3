@@ -473,8 +473,8 @@ public:
 	uint32 bIgnoreThreatsBehindObjects : 1;
 
 	uint32 bNeverEverTargetThisPed : 1;
-	//uint32 b158_2
-	uint32 b158_4 : 1;
+	uint32 bCrouchWhenScared : 1;
+	uint32 bKnockedOffBike : 1;
 	//uint32 b158_8
 	//uint32 b158_10
 	uint32 bBoughtIceCream : 1;
