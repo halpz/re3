@@ -149,10 +149,19 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (void *)1);
 	if (m_nPoliceChannelEntity >= 0)
 		SetEntityStatus(m_nPoliceChannelEntity, 1);
-
-	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (void *)1);
+#ifdef GTA_BRIDGE
+	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (void*)1);
 	if (m_nBridgeEntity >= 0)
 		SetEntityStatus(m_nBridgeEntity, 1);
+#endif // GTA_BRIDGE
+	m_nEscalatorEntity = CreateEntity(AUDIOTYPE_ESCALATOR, (void*)1);
+	if (m_nEscalatorEntity >= 0)
+		SetEntityStatus(m_nEscalatorEntity, 1);
+
+	m_nExtraSoundsEntity = CreateEntity(AUDIOTYPE_EXTRA_SOUNDS, (void*)1);
+	if (m_nExtraSoundsEntity >= 0)
+		SetEntityStatus(m_nExtraSoundsEntity, 1);
+
 
 	m_sMissionAudio.m_nSampleIndex[0] = NO_SAMPLE;
 	m_sMissionAudio.m_nLoadingStatus[0] = LOADING_STATUS_NOT_LOADED;
@@ -178,9 +187,19 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 void
 cAudioManager::PreTerminateGameSpecificShutdown()
 {
+#ifdef GTA_BRIDGE
 	if (m_nBridgeEntity >= 0) {
 		DestroyEntity(m_nBridgeEntity);
 		m_nBridgeEntity = AEHANDLE_NONE;
+	}
+#endif
+	if (m_nEscalatorEntity >= 0) {
+		DestroyEntity(m_nEscalatorEntity);
+		m_nEscalatorEntity = AEHANDLE_NONE;
+	}
+	if (m_nExtraSoundsEntity >= 0) {
+		DestroyEntity(m_nExtraSoundsEntity);
+		m_nExtraSoundsEntity = AEHANDLE_NONE;
 	}
 	if (m_nPoliceChannelEntity >= 0) {
 		DestroyEntity(m_nPoliceChannelEntity);

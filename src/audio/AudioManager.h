@@ -28,6 +28,7 @@ public:
 	uint8 m_nLoopsRemaining;
 	bool m_bRequireReflection; // Used for oneshots
 	uint8 m_nOffset;
+	uint8 field_4C;
 	int32 m_nReleasingVolumeDivider;
 	bool m_bIsProcessed;
 	bool m_bLoopEnded;
@@ -35,7 +36,7 @@ public:
 	int8 m_nVolumeChange;
 };
 
-VALIDATE_SIZE(tSound, 92);
+VALIDATE_SIZE(tSound, 96);
 
 class CPhysical;
 class CAutomobile;
@@ -193,6 +194,14 @@ public:
 	CVector m_avecReflectionsPos[NUM_AUDIO_REFLECTIONS];
 	float m_afReflectionsDistances[NUM_AUDIO_REFLECTIONS];
 	cAudioScriptObjectManager m_sAudioScriptObjectManager;
+
+	// miami
+	uint8 field_4B30;
+	uint8 m_bPlayerMood;
+	uint32 field_4B34;
+	uint8 field_rest[4];
+	uint8 field_4B3C;
+
 	cPedComments m_sPedComments;
 	int32 m_nFireAudioEntity;
 	int32 m_nWaterCannonEntity;
@@ -202,7 +211,11 @@ public:
 	int32 m_nCollisionEntity;
 	cAudioCollisionManager m_sCollisionManager;
 	int32 m_nProjectileEntity;
+#ifdef GTA_BRIDGE
 	int32 m_nBridgeEntity;
+#endif
+	int32 m_nEscalatorEntity;
+	int32 m_nExtraSoundsEntity;
 	cMissionAudio m_sMissionAudio;
 	uint8 field_5538; // something related to phone dialogues
 	int32 m_anRandomTable[5];
@@ -210,6 +223,7 @@ public:
 	uint8 m_nUserPause;
 	uint8 m_nPreviousUserPause;
 	uint32 m_FrameCounter;
+	uint32 field_5554;
 
 	cAudioManager();
 	~cAudioManager();
@@ -408,7 +422,7 @@ public:
 };
 
 #ifdef AUDIO_MSS
-//static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
+static_assert(sizeof(cAudioManager) == 0x5558, "cAudioManager: error");
 #endif
 
 extern cAudioManager AudioManager;
