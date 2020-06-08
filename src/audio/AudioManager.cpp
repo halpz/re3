@@ -257,7 +257,8 @@ cAudioManager::ResetTimers(uint32 time)
 			m_nActiveSampleQueue = 0;
 		}
 		ClearActiveSamples();
-		ClearMissionAudio();
+		ClearMissionAudio(0);
+		ClearMissionAudio(1);
 		SampleManager.StopChannel(policeChannel);
 		SampleManager.SetEffectsFadeVolume(0);
 		SampleManager.SetMusicFadeVolume(0);
