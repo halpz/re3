@@ -214,7 +214,7 @@ void
 CAnimViewer::Update(void)
 {
 	static int modelId = 0;
-	static int animId = 17;	////////////////////////////0;
+	static int animId = 0;
 	// Please don't make this bool, static bool's are problematic on my side.
 	static int reloadIFP = 0;
 
