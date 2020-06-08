@@ -290,7 +290,7 @@ cDMAudio::StopCutSceneMusic(void)
 }
 
 void
-cDMAudio::PreloadMissionAudio(char *missionAudio)
+cDMAudio::PreloadMissionAudio(Const char *missionAudio)
 {
 	AudioManager.PreloadMissionAudio(missionAudio);
 }

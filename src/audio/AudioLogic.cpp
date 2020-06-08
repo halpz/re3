@@ -5605,7 +5605,7 @@ cAudioManager::MissionScriptAudioUsesPoliceChannel(int32 soundMission) const
 }
 
 void
-cAudioManager::PreloadMissionAudio(const char *name)
+cAudioManager::PreloadMissionAudio(Const char *name)
 {
 	if (m_bIsInitialised) {
 		int32 missionAudioSfx = FindMissionAudioSfx(name);

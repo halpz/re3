@@ -213,7 +213,7 @@ public:
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; }
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
 	int32 GetRandomNumberInRange(int32 idx, int32 low, int32 high) const { return (m_anRandomTable[idx] % (high - low + 1)) + low; }
-	bool IsMissionAudioPlaying() const { return m_sMissionAudio.m_nPlayStatus == 1; }
+	bool IsMissionAudioSamplePlaying() const { return m_sMissionAudio.m_nPlayStatus == 1; }
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample);
@@ -283,7 +283,7 @@ public:
 	void PostInitialiseGameSpecificSetup();
 	void PostTerminateGameSpecificShutdown();
 	void PreInitialiseGameSpecificSetup() const;
-	void PreloadMissionAudio(const char *name);
+	void PreloadMissionAudio(Const char *name);
 	void PreTerminateGameSpecificShutdown();
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();

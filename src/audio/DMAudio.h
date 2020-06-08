@@ -76,7 +76,7 @@ public:
 	void PlayPreloadedCutSceneMusic(void);
 	void StopCutSceneMusic(void);
 	
-	void PreloadMissionAudio(char *missionAudio);
+	void PreloadMissionAudio(Const char *missionAudio);
 	uint8 GetMissionAudioLoadingStatus(void);
 	void SetMissionAudioLocation(float x, float y, float z);
 	void PlayLoadedMissionAudio(void);
