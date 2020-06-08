@@ -38,7 +38,6 @@
 #include "Debug.h"
 
 //--MIAMI: done except for TODOs
-// BUGS: bikes get stuck in sand for some reason
 
 // TODO: maybe put this somewhere else
 inline void
