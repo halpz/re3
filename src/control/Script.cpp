@@ -8662,7 +8662,6 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		strncpy(str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
 		for (int i = 0; i < KEY_LENGTH_IN_SCRIPT; i++)
 			str[i] = tolower(str[i]);
-		static bool bShowed = false;
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		DMAudio.PreloadMissionAudio(ScriptParams[0] - 1, str);
 		return 0;

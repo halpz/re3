@@ -5700,7 +5700,7 @@ cAudioManager::IsMissionAudioSamplePlaying(uint8 slot) const
 	} else {
 		static int32 cPretendFrame[MISSION_AUDIO_SLOTS] = { 1, 1 };
 
-		return (cPretendFrame[MISSION_AUDIO_SLOTS]++ % 64) != 0;
+		return (cPretendFrame[slot]++ % 64) != 0;
 	}
 }
 
@@ -5716,7 +5716,7 @@ cAudioManager::IsMissionAudioSampleFinished(uint8 slot)
 
 	static int32 cPretendFrame[MISSION_AUDIO_SLOTS] = { 1, 1 };
 
-	return (cPretendFrame[MISSION_AUDIO_SLOTS]++ % 64) == 0;
+	return (cPretendFrame[slot]++ % 64) == 0;
 }
 
 void
