@@ -127,7 +127,7 @@ CBike::CBike(int32 id, uint8 CreatedBy)
 	bIsOnFire = false;
 	m_bike_flag80 = false;
 
-	m_fTireTemperature = 0.0f;
+	m_fTireTemperature = 1.0f;
 	m_fBrakeDestabilization = 0.0f;
 	field_490 = 0;
 
