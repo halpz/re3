@@ -173,6 +173,9 @@ public:
 	static int GetFogBlue(void) { return m_nCurrentFogColourBlue; }
 	static int GetFogReduction(void) { return m_FogReduction; }
 
+	static int GetBlurRed(void) { return m_fCurrentBlurRed; }
+	static int GetBlurGreen(void) { return m_fCurrentBlurGreen; }
+	static int GetBlurBlue(void) { return m_fCurrentBlurBlue; }
 	static int GetWaterRed(void) { return m_fCurrentWaterRed; }
 	static int GetWaterGreen(void) { return m_fCurrentWaterGreen; }
 	static int GetWaterBlue(void) { return m_fCurrentWaterBlue; }

@@ -20,6 +20,7 @@
 #include "Replay.h"
 #include "CutsceneMgr.h"
 #include "Renderer.h"
+#include "Timecycle.h"
 #include "MBlur.h"
 #include "Text.h"
 #include "Hud.h"
@@ -61,6 +62,8 @@ enum
 CCamera TheCamera;
 bool CCamera::m_bUseMouse3rdPerson = true;
 bool bDidWeProcessAnyCinemaCam;
+float CCamera::m_fMouseAccelHorzntl;
+float CCamera::m_fMouseAccelVertical;
 float CCamera::m_f3rdPersonCHairMultX;
 float CCamera::m_f3rdPersonCHairMultY;
 
@@ -75,26 +78,16 @@ float CCamera::m_f3rdPersonCHairMultY;
 
 CCamera::CCamera(void)
 {
-#ifdef GTA3_1_1_PATCH
-	m_fMouseAccelHorzntl = 0.0025f;
-	m_fMouseAccelVertical = 0.003f;
-#endif
 	Init();
 }
 
+//--MIAMI: done
 void
 CCamera::Init(void)
 {
-#ifdef GTA3_1_1_PATCH
-	float fMouseAccelHorzntl = m_fMouseAccelHorzntl;
-	float fMouseAccelVertical = m_fMouseAccelVertical;
-#endif
 	memset(this, 0, sizeof(CCamera));	// this is fine, no vtable
-#ifdef GTA3_1_1_PATCH
-	m_fMouseAccelHorzntl = fMouseAccelHorzntl;
-	m_fMouseAccelVertical = fMouseAccelVertical;
-#endif
 	m_pRwCamera = nil;
+	m_bPlayerWasOnBike = false;
 	m_1rstPersonRunCloseToAWall = false;
 	m_fPositionAlongSpline = 0.0f;
 	m_bCameraJustRestored = false;
@@ -103,8 +96,22 @@ CCamera::Init(void)
 	Cams[2].Init();
 	Cams[0].Mode = CCam::MODE_FOLLOWPED;
 	Cams[1].Mode = CCam::MODE_FOLLOWPED;
-	unknown = 0;
-	m_bJustJumpedOutOf1stPersonBecauseOfTarget = 0;
+	m_bEnable1rstPersonCamCntrlsScript = false;
+	m_bAllow1rstPersonWeaponsCamera = false;
+	m_bVehicleSuspenHigh = false;
+	Cams[0].m_fMinRealGroundDist = 1.85f;
+	// TODO: what weird value is this?
+	Cams[0].m_fTargetCloseInDist = 2.0837801f - Cams[0].m_fMinRealGroundDist;
+	Cams[0].m_fTargetZoomGroundOne = 0.25f;
+	Cams[0].m_fTargetZoomGroundTwo = 1.5f;
+	Cams[0].m_fTargetZoomGroundThree = 4.0f;
+	Cams[0].m_fTargetZoomOneZExtra = -0.14f;
+	Cams[0].m_fTargetZoomTwoZExtra = 0.16f;
+	Cams[0].m_fTargetZoomThreeZExtra = 0.25f;
+	// TODO: another weird value
+	Cams[0].m_fTargetZoomZCloseIn = 0.90040702f;
+	m_bMoveCamToAvoidGeom = false;
+	SetMotionBlur(CTimeCycle::GetBlurRed(), CTimeCycle::GetBlurGreen(), CTimeCycle::GetBlurBlue(), m_motionBlur, MBLUR_NORMAL);
 	ClearPlayerWeaponMode();
 	m_bInATunnelAndABigVehicle = false;
 	m_iModeObbeCamIsInForCar = OBBE_INVALID;
@@ -122,8 +129,8 @@ CCamera::Init(void)
 	Cams[1].m_fPlayerVelocity = 0.0f;
 	Cams[2].m_fPlayerVelocity = 0.0f;
 	m_bHeadBob = false;
-	m_fFractionInterToStopMovingTarget = 0.25f;
-	m_fFractionInterToStopCatchUpTarget = 0.75f;
+	m_fFractionInterToStopMoving = 0.25f;
+	m_fFractionInterToStopCatchUp = 0.75f;
 	m_fGaitSwayBuffer = 0.85f;
 	m_bScriptParametersSetForInterPol = false;
 	m_uiCamShakeStart = 0;
@@ -168,10 +175,11 @@ CCamera::Init(void)
 		m_bMusicFading = false;
 		m_fTimeToFadeMusic = 0.0f;
 		m_fFLOATingFadeMusic = 0.0f;
+		m_fMouseAccelHorzntl = 0.003f;
+		m_fMouseAccelVertical = 0.0025f;
 	}
-	m_bMoveCamToAvoidGeom = false;
 	if(FrontEndMenuManager.m_bWantToRestart)
-		m_bMoveCamToAvoidGeom = true;
+		m_fTimeToFadeMusic = 0.0f;
 	m_bStartingSpline = false;
 	m_iTypeOfSwitch = INTERPOLATION;
 	m_bUseScriptZoomValuePed = false;
@@ -190,6 +198,8 @@ CCamera::Init(void)
 	m_uiTimeLastChange = 0;
 	m_uiTimeWeEnteredIdle = 0;
 	m_bIdleOn = false;
+	m_uiTimeWeLeftIdle_StillNoInput = 0;
+	m_uiTimeWeEnteredIdle = 0;
 	LODDistMultiplier = 1.0f;
 	m_bCamDirectlyBehind = false;
 	m_bCamDirectlyInFront = false;
@@ -209,12 +219,10 @@ CCamera::Init(void)
 	m_uiTransitionState = 0;
 	m_uiTimeTransitionStart = 0;
 	m_bLookingAtPlayer = true;
-#ifndef GTA3_1_1_PATCH
-	m_fMouseAccelHorzntl = 0.0025f;
-	m_fMouseAccelVertical = 0.003f;
-#endif
 	m_f3rdPersonCHairMultX = 0.53f;
 	m_f3rdPersonCHairMultY = 0.4f;
+	m_fAvoidTheGeometryProbsTimer = 0.0f;
+	m_nAvoidTheGeometryProbsDirn = 0;
 }
 
 void
@@ -322,12 +330,12 @@ CCamera::Process(void)
 			currentTime = m_uiTransitionDuration;
 		float fractionInter = (float) currentTime / m_uiTransitionDuration;
 
-		if(fractionInter <= m_fFractionInterToStopMovingTarget){
+		if(fractionInter <= m_fFractionInterToStopMoving){
 			float inter;
-			if(m_fFractionInterToStopMovingTarget == 0.0f)
+			if(m_fFractionInterToStopMoving == 0.0f)
 				inter = 0.0f;
 			else
-				inter = (m_fFractionInterToStopMovingTarget - fractionInter)/m_fFractionInterToStopMovingTarget;
+				inter = (m_fFractionInterToStopMoving - fractionInter)/m_fFractionInterToStopMoving;
 			inter = 0.5f - 0.5*Cos(inter*PI);	// smooth it
 
 			m_vecSourceWhenInterPol = m_cvecStartingSourceForInterPol + inter*m_cvecSourceSpeedAtStartInter;
@@ -381,12 +389,12 @@ CCamera::Process(void)
 			}
 			CamUp.Normalise();
 			FOV = m_fFOVWhenInterPol;
-		}else if(fractionInter > m_fFractionInterToStopMovingTarget && fractionInter <= 1.0f){
+		}else if(fractionInter > m_fFractionInterToStopMoving && fractionInter <= 1.0f){
 			float inter;
-			if(m_fFractionInterToStopCatchUpTarget == 0.0f)
+			if(m_fFractionInterToStopCatchUp == 0.0f)
 				inter = 0.0f;
 			else
-				inter = (fractionInter - m_fFractionInterToStopMovingTarget)/m_fFractionInterToStopCatchUpTarget;
+				inter = (fractionInter - m_fFractionInterToStopMoving)/m_fFractionInterToStopCatchUp;
 			inter = 0.5f - 0.5*Cos(inter*PI);	// smooth it
 
 			CamSource = m_vecSourceWhenInterPol + inter*(Cams[ActiveCam].Source - m_vecSourceWhenInterPol);
@@ -1610,7 +1618,7 @@ CCamera::UpdateSoundDistances(void)
 	}
 	f = (n + 1) / 6.0f;
 	SoundDistUp = (1.0f-f)*SoundDistUpAsReadOld + f*SoundDistUpAsRead;
-
+/*
 	// check left
 	n = (CTimer::GetFrameCounter()+2) % 12;
 	if(n == 0){
@@ -1637,6 +1645,7 @@ CCamera::UpdateSoundDistances(void)
 	}
 	f = (n + 1) / 6.0f;
 	SoundDistRight = (1.0f-f)*SoundDistRightAsReadOld + f*SoundDistRightAsRead;
+*/
 }
 
 void
@@ -1681,6 +1690,129 @@ CamShakeNoPos(CCamera *cam, float strength)
 	}
 }
 
+bool bAvoidTest1 = false;
+bool bAvoidTest2 = false;	// unused
+bool bAvoidTest3 = false;	// unused
+float fRangePlayerRadius = 0.5f;
+float fCloseNearClipLimit = 0.15f;
+float fAvoidTweakFOV = 1.15f;
+float fAvoidProbTimerDamp = 0.9f;
+
+//--MIAMI: done
+void
+CCamera::AvoidTheGeometry(const CVector &Source, const CVector &TargetPos, CVector &NewSource, float FOV)
+{
+	float Beta = 0.0f;
+	float Alpha = 0.0f;
+
+	CVector vDist = TargetPos - Source;
+	m_vecClearGeometryVec = CVector(0.0f, 0.0f, 0.0f);
+	float fDist = vDist.Magnitude();
+	float fDistOnGround = vDist.Magnitude2D();
+	if(vDist.x == 0.0f && vDist.y == 0.0f)
+		Beta = CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
+	else
+		Beta = CGeneral::GetATanOfXY(vDist.x, vDist.y);
+	if(fDistOnGround != 0.0f || vDist.z != 0.0f)
+		Alpha = CGeneral::GetATanOfXY(fDistOnGround, vDist.z);
+	CVector Front(Cos(Alpha)*Cos(Beta), Cos(Alpha)*Sin(Beta), Sin(Alpha));
+	NewSource = TargetPos - Front*fDist;
+	Front.Normalise();
+
+	// Clip camera source
+	CColPoint point;
+	CEntity *entity = nil;
+	CWorld::pIgnoreEntity = pTargetEntity;
+	if(CWorld::ProcessLineOfSight(TargetPos, NewSource, point, entity, true, false, false, true, false, false, true)){
+		CVector ClipPoint1 = point.point;
+		NewSource = point.point;
+		if(!bAvoidTest1){
+			if(CWorld::ProcessLineOfSight(NewSource, TargetPos, point, entity, false, true, true, true, false, false, true)){
+				if((NewSource - point.point).Magnitude() < RwCameraGetNearClipPlane(Scene.camera))
+					NewSource = point.point;
+				else if((NewSource - ClipPoint1).Magnitude() < RwCameraGetNearClipPlane(Scene.camera))
+					NewSource = ClipPoint1;
+			}
+		}
+	}
+	CWorld::pIgnoreEntity = nil;
+
+
+	vDist = TargetPos - NewSource;
+	fDist = vDist.Magnitude();
+	if(FindPlayerPed())
+		if(fDist - fRangePlayerRadius < RwCameraGetNearClipPlane(Scene.camera))
+			RwCameraSetNearClipPlane(Scene.camera, Max(fDist - fRangePlayerRadius, fCloseNearClipLimit));
+
+
+	static float fClearGeomAmount;
+	static float fClearGeomAmountSpeed;
+	float Near = RwCameraGetNearClipPlane(Scene.camera);
+	float ViewPlaneHeight = Tan(DEGTORAD(FOV) / 2.0f);
+	float ViewPlaneWidth = ViewPlaneHeight * CDraw::CalculateAspectRatio() * fAvoidTweakFOV;
+	CVector Center = NewSource + Front*Near;
+	float fClearGeomTarget = 0.0f;
+	if(CWorld::TestSphereAgainstWorld(Center, ViewPlaneWidth, nil, true, false, false, true, false, true)){
+		CVector CamToCol = gaTempSphereColPoints[0].point - NewSource;
+		float FrontDist = DotProduct(CamToCol, Front);
+		CVector CenterToCol = gaTempSphereColPoints[0].point - Center;
+		if(FrontDist < DEFAULT_NEAR && FrontDist > fCloseNearClipLimit){
+			if(FrontDist < RwCameraGetNearClipPlane(Scene.camera))
+				RwCameraSetNearClipPlane(Scene.camera, FrontDist);
+		}else if(FrontDist < fCloseNearClipLimit)
+			RwCameraSetNearClipPlane(Scene.camera, fCloseNearClipLimit);
+
+		float ColDepth = ViewPlaneWidth - CenterToCol.Magnitude();	// amount of radius in collision
+		CenterToCol.Normalise();
+		CVector Normal = gaTempSphereColPoints[0].normal;
+		Normal.Normalise();
+		if(-DotProduct(CenterToCol, Normal) < 0.0f)
+			Normal = -Normal;	// always push away from col surface
+		float DistToMove = DotProduct(-ColDepth*CenterToCol, Normal);
+		m_vecClearGeometryVec = DistToMove*Normal;	// move source so this point is out of collision
+
+		if(pTargetEntity && pTargetEntity->IsPed() && RwCameraGetNearClipPlane(Scene.camera) < 2.0f*fCloseNearClipLimit){
+			float TargetNormalDir = DotProduct(Normal, pTargetEntity->GetForward());
+			if(TargetNormalDir < 0.0f){
+				// target looking towards collision
+				if(m_fAvoidTheGeometryProbsTimer < 0.0f)
+					m_fAvoidTheGeometryProbsTimer = 0.0f;
+				m_fAvoidTheGeometryProbsTimer += CTimer::GetTimeStep();
+			}else if(TargetNormalDir > 0.5f){
+				// target looking away from collision
+				if(m_fAvoidTheGeometryProbsTimer > 0.0f)
+					m_fAvoidTheGeometryProbsTimer = 0.0f;
+				m_fAvoidTheGeometryProbsTimer -= CTimer::GetTimeStep();
+			}
+
+			if(m_nAvoidTheGeometryProbsDirn == 0){
+				if(CrossProduct(pTargetEntity->GetPosition() - NewSource, Normal).z > 0.0f)
+					m_nAvoidTheGeometryProbsDirn = -1;
+				else
+					m_nAvoidTheGeometryProbsDirn = 1;
+			}
+		}
+
+		fClearGeomTarget = 1.0f;
+	}
+
+	m_fAvoidTheGeometryProbsTimer *= Pow(fAvoidProbTimerDamp, CTimer::GetTimeStep());
+	WellBufferMe(fClearGeomTarget, &fClearGeomAmount, &fClearGeomAmountSpeed, 0.2f, 0.05f, false);
+	m_vecClearGeometryVec *= fClearGeomAmount;
+	m_bMoveCamToAvoidGeom = true;
+}
+
+void
+CCamera::GetArrPosForVehicleType(int apperance, int &index)
+{
+	switch(apperance){
+	case VEHICLE_APPEARANCE_CAR: index = 0; break;
+	case VEHICLE_APPEARANCE_BIKE: index = 1; break;
+	case VEHICLE_APPEARANCE_HELI: index = 2; break;
+	case VEHICLE_APPEARANCE_PLANE: index = 3; break;
+	case VEHICLE_APPEARANCE_BOAT: index = 4; break;
+	}
+}
 
 
 void
@@ -1828,28 +1960,25 @@ CCamera::SetCamPositionForFixedMode(const CVector &Source, const CVector &UpOffS
 }
 
 
-
-/*
- * On PS2 the transition happens between Cams[1] and Cams[2].
- * On PC the whole system has been changed.
- */
+//--MIAMI: done
 void
 CCamera::StartTransition(int16 newMode)
 {
-	bool foo = false;
+	bool switchFromFixedSyphon = false;
 	bool switchSyphonMode = false;
-	bool switchPedToCar = false;
 	bool switchPedMode = false;
+	bool switchPedToCar = false;
+	bool switchFromFight = false;
+	bool switchBikeToPed = false;
 	bool switchFromFixed = false;
 	bool switch1stPersonToVehicle = false;
 	float betaOffset, targetBeta, camBeta, deltaBeta;
 	int door;
 	bool vehicleVertical;
 
-// missing on PS2
 	m_bItsOkToLookJustAtThePlayer = false;
-	m_fFractionInterToStopMovingTarget = 0.25f;
-	m_fFractionInterToStopCatchUpTarget = 0.75f;
+	m_fFractionInterToStopMoving = 0.25f;
+	m_fFractionInterToStopCatchUp = 0.75f;
 
 	if(Cams[ActiveCam].Mode == CCam::MODE_SYPHON_CRIM_IN_FRONT ||
 	   Cams[ActiveCam].Mode == CCam::MODE_FOLLOWPED ||
@@ -1859,16 +1988,19 @@ CCamera::StartTransition(int16 newMode)
 		   newMode == CCam::MODE_FOLLOWPED ||
 		   newMode == CCam::MODE_SYPHON ||
 		   newMode == CCam::MODE_SPECIAL_FIXED_FOR_SYPHON)
-			m_bItsOkToLookJustAtThePlayer = true;
+			switchPedMode = true;
 		if(newMode == CCam::MODE_CAM_ON_A_STRING)
 			switchPedToCar = true;
 	}
-//
 
+	if(Cams[ActiveCam].Mode == CCam::MODE_SPECIAL_FIXED_FOR_SYPHON)
+		switchFromFixedSyphon = true;
+	if(Cams[ActiveCam].Mode == CCam::MODE_CAM_ON_A_STRING && newMode == CCam::MODE_FOLLOWPED && m_bPlayerWasOnBike)
+		switchBikeToPed = true;
 	if(Cams[ActiveCam].Mode == CCam::MODE_SYPHON_CRIM_IN_FRONT && newMode == CCam::MODE_SYPHON)
 		switchSyphonMode = true;
 	if(Cams[ActiveCam].Mode == CCam::MODE_FIGHT_CAM && newMode == CCam::MODE_FOLLOWPED)
-		switchPedMode = true;
+		switchFromFight = true;
 	if(Cams[ActiveCam].Mode == CCam::MODE_FIXED)
 		switchFromFixed = true;
 
@@ -1889,12 +2021,6 @@ CCamera::StartTransition(int16 newMode)
 		((CPed*)pTargetEntity)->m_fRotationDest = angle;
 	}
 
-/*	// PS2
-	ActiveCam = (ActiveCam+1)%2;
-	Cams[ActiveCam].Init();
-	Cams[ActiveCam].Mode = newMode;
- */
-
 	Cams[ActiveCam].m_cvecCamFixedModeVector = m_vecFixedModeVector;
 	Cams[ActiveCam].CamTargetEntity = pTargetEntity;
 	Cams[ActiveCam].m_cvecCamFixedModeSource = m_vecFixedModeSource;
@@ -1909,16 +2035,17 @@ CCamera::StartTransition(int16 newMode)
 	   newMode == CCam::MODE_1STPERSON_RUNABOUT ||
 	   newMode == CCam::MODE_M16_1STPERSON_RUNABOUT ||
 	   newMode == CCam::MODE_FIGHT_CAM_RUNABOUT ||
-	   newMode == CCam::MODE_HELICANNON_1STPERSON)
+	   newMode == CCam::MODE_HELICANNON_1STPERSON ||
+	   newMode == CCam::MODE_CAMERA)
 		Cams[ActiveCam].Alpha = 0.0f;
 
-	// PS2 also copies values to ActiveCam here
 	switch(Cams[ActiveCam].Mode)
 	case CCam::MODE_SNIPER_RUNABOUT:
 	case CCam::MODE_ROCKETLAUNCHER_RUNABOUT:
 	case CCam::MODE_1STPERSON_RUNABOUT:
 	case CCam::MODE_M16_1STPERSON_RUNABOUT:
 	case CCam::MODE_FIGHT_CAM_RUNABOUT:
+	case CCam::MODE_CAMERA:
 		if(newMode == CCam::MODE_CAM_ON_A_STRING || newMode == CCam::MODE_BEHINDBOAT)
 			switch1stPersonToVehicle = true;
 
@@ -1932,16 +2059,6 @@ CCamera::StartTransition(int16 newMode)
 		betaOffset = DEGTORAD(55.0f);
 		if(m_bJustCameOutOfGarage){
 			m_bUseTransitionBeta = true;
-/*
-			// weird logic...
-			if(CMenuManager::m_ControlMethod == CONTROL_CLASSIC)
-				Cams[ActiveCam].m_fTransitionBeta = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y) + PI;
-			else if(Cams[ActiveCam].Front.x != 0.0f && Cams[ActiveCam].Front.y != 0.0f)	// && is wrong here
-				Cams[ActiveCam].m_fTransitionBeta = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y) + PI;
-			else
-				Cams[ActiveCam].m_fTransitionBeta = 0.0f;
-*/
-			// this is better:
 			if(Cams[ActiveCam].Front.x != 0.0f || Cams[ActiveCam].Front.y != 0.0f)
 				Cams[ActiveCam].m_fTransitionBeta = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y) + PI;
 			else
@@ -2010,6 +2127,7 @@ CCamera::StartTransition(int16 newMode)
 	case CCam::MODE_M16_1STPERSON_RUNABOUT:
 	case CCam::MODE_FIGHT_CAM_RUNABOUT:
 	case CCam::MODE_HELICANNON_1STPERSON:
+	case CCam::MODE_CAMERA:
 		if(FindPlayerVehicle())
 			Cams[ActiveCam].Beta = Atan2(FindPlayerVehicle()->GetForward().x, FindPlayerVehicle()->GetForward().y);
 		else
@@ -2027,42 +2145,7 @@ CCamera::StartTransition(int16 newMode)
 		if(!m_bLookingAtPlayer || m_bJustCameOutOfGarage)
 			break;
 		m_bUseTransitionBeta = true;
-		targetBeta = CGeneral::GetATanOfXY(pTargetEntity->GetForward().x, pTargetEntity->GetForward().y);
-		camBeta = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y);
-		deltaBeta = targetBeta - camBeta;
-		while(deltaBeta >= PI) deltaBeta -= 2*PI;
-		while(deltaBeta < -PI) deltaBeta += 2*PI;
-		deltaBeta = Abs(deltaBeta);
-		// switchFromFixed logic again here, skipped
-		if(switchFromFixed){
-			Cams[ActiveCam].m_fTransitionBeta = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y);
-			break;
-		}
-
-		door = FindPlayerPed()->m_vehEnterType;
-		if(deltaBeta > HALFPI){
-			if(((CVehicle*)pTargetEntity)->IsUpsideDown()){
-				if(door == CAR_DOOR_LF || door == CAR_DOOR_LR)	// BUG: game checks LF twice
-					betaOffset = -DEGTORAD(57.0f);
-			}else{
-				if(door == CAR_DOOR_RF || door == CAR_DOOR_RR)
-					betaOffset = -DEGTORAD(57.0f);
-			}
-			Cams[ActiveCam].m_fTransitionBeta = targetBeta + betaOffset + PI;
-		}else{
-			if(((CVehicle*)pTargetEntity)->IsUpsideDown()){
-				if(door == CAR_DOOR_RF || door == CAR_DOOR_RR)
-					betaOffset = -DEGTORAD(57.0f);
-				else if(door == CAR_DOOR_LF || door == CAR_DOOR_LR)
-					betaOffset = DEGTORAD(57.0f);
-			}else{
-				if(door == CAR_DOOR_LF || door == CAR_DOOR_LR)
-					betaOffset = -DEGTORAD(57.0f);
-				else if(door == CAR_DOOR_RF || door == CAR_DOOR_RR)
-					betaOffset = DEGTORAD(57.0f);
-			}
-			Cams[ActiveCam].m_fTransitionBeta = targetBeta + betaOffset;
-		}
+		Cams[ActiveCam].m_fTransitionBeta = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y);
 		break;
 
 	case CCam::MODE_BEHINDBOAT:
@@ -2087,27 +2170,34 @@ CCamera::StartTransition(int16 newMode)
 	m_uiTransitionDuration = 1350;
 	if(switchSyphonMode)
 		m_uiTransitionDuration = 1800;
-	else if(switchPedMode)
+	else if(switchFromFight)
 		m_uiTransitionDuration = 750;
-// not on PS2
 	else if(switchPedToCar){
-		m_fFractionInterToStopMovingTarget = 0.2f;
-		m_fFractionInterToStopCatchUpTarget = 0.8f;
-		m_uiTransitionDuration = 950;
+		m_fFractionInterToStopMoving = 0.1f;
+		m_fFractionInterToStopCatchUp = 0.9f;
+		m_uiTransitionDuration = 750;
+	}else if(switchFromFixedSyphon){
+		m_fFractionInterToStopMoving = 0.0f;
+		m_fFractionInterToStopCatchUp = 1.0f;
+		m_uiTransitionDuration = 600;
 	}else if(switchFromFixed){
-		m_fFractionInterToStopMovingTarget = 0.05f;
-		m_fFractionInterToStopCatchUpTarget = 0.95f;
+		m_fFractionInterToStopMoving = 0.05f;
+		m_fFractionInterToStopCatchUp = 0.95f;
+	}else if(switchBikeToPed){
+		m_uiTransitionDuration = 800;
 	}else if(switch1stPersonToVehicle){
-		m_fFractionInterToStopMovingTarget = 0.0f;
-		m_fFractionInterToStopCatchUpTarget = 1.0f;
+		m_fFractionInterToStopMoving = 0.0f;
+		m_fFractionInterToStopCatchUp = 1.0f;
 		m_uiTransitionDuration = 1;
+	}else if(switchPedMode){
+		m_fFractionInterToStopMoving = 0.5f;
+		m_fFractionInterToStopCatchUp = 0.5f;
+		m_uiTransitionDuration = 350;
 	}else
 		m_uiTransitionDuration = 1350;	// already set above
-//
 	m_uiTransitionState = 1;
 	m_uiTimeTransitionStart = CTimer::GetTimeInMilliseconds();
 	m_uiTransitionJUSTStarted = 1;
-// PS2 returns here
 	if(m_vecDoingSpecialInterPolation){
 		m_cvecStartingSourceForInterPol = SourceDuringInter;
 		m_cvecStartingTargetForInterPol = TargetDuringInter;
@@ -2138,10 +2228,22 @@ CCamera::StartTransition(int16 newMode)
 	m_fBetaSpeedAtStartInter = Cams[ActiveCam].m_fBetaSpeedOverOneFrame;
 	m_fFOVSpeedAtStartInter = Cams[ActiveCam].m_fFovSpeedOverOneFrame;
 	Cams[ActiveCam].ResetStatics = true;
-	if(!m_bLookingAtPlayer && m_bScriptParametersSetForInterPol){
-		m_fFractionInterToStopMovingTarget = m_fScriptPercentageInterToStopMoving;
-		m_fFractionInterToStopCatchUpTarget = m_fScriptPercentageInterToCatchUp;
-		m_uiTransitionDuration = m_fScriptTimeForInterPolation;
+	if(m_bLookingAtPlayer){
+		if(switchPedMode)
+			m_uiTransitionDurationTargetCoors = 350;
+		else
+			m_uiTransitionDurationTargetCoors = 600;
+		m_fFractionInterToStopMovingTarget = 0.0f;
+		m_fFractionInterToStopCatchUpTarget = 1.0f;
+	}else{
+		if(m_bScriptParametersSetForInterPol){
+			m_fFractionInterToStopMoving = m_fScriptPercentageInterToStopMoving;
+			m_fFractionInterToStopCatchUp = m_fScriptPercentageInterToCatchUp;
+			m_uiTransitionDuration = m_fScriptTimeForInterPolation;
+		}
+		m_uiTransitionDurationTargetCoors = m_uiTransitionDuration;
+		m_fFractionInterToStopMovingTarget = m_fFractionInterToStopMoving;
+		m_fFractionInterToStopCatchUpTarget = m_fFractionInterToStopCatchUp;
 	}
 }
 
