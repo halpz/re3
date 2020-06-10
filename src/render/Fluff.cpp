@@ -896,7 +896,7 @@ CSmokeTrail::RegisterPoint(CVector regPosition, float opacity) {
 		for (int32 i = 15; i > 0; i--) {
 			m_pos[i] = m_pos[i - 1];
 			m_time[i] = m_time[i - 1];
-			m_density[i] = m_density[i - 1];
+			m_opacity[i] = m_opacity[i - 1];
 		}
 		++m_seed;
 	}
@@ -905,9 +905,9 @@ CSmokeTrail::RegisterPoint(CVector regPosition, float opacity) {
 	if (bAddedNewPoint || !m_time[0]) {
 		m_time[0] = CTimer::GetTimeInMilliseconds();
 		float density = 0.1f / (m_pos[1] - m_pos[2]).Magnitude();
-		m_density[1] = opacity * Min(density, 1.0f);
+		m_opacity[1] = opacity * Min(density, 1.0f);
 	}
-	m_density[0] = 0.0f;
+	m_opacity[0] = 0.0f;
 }
 
 void
@@ -942,7 +942,7 @@ CSmokeTrail::Render(void) {
 				m_time[i] = 0;
 
 			if (m_time[i]) {
-				int alpha = (1.0f - timeSinceSpawned / 2250.0f) * 110.0f * m_density[i];
+				int alpha = (1.0f - timeSinceSpawned / 2250.0f) * 110.0f * m_opacity[i];
 				float offset = timeSinceSpawned * CWeather::Wind * 0.0001f;
 				float posX = (m_pos[i].x + timeSinceSpawned * RandomSmoke[(i - m_seed) & 0xF] * 0.00001f) - offset;
 				float posY = (m_pos[i].y + timeSinceSpawned * RandomSmoke[(i - m_seed + 5) & 0xF] * 0.00001f) - offset;

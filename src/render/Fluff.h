@@ -107,7 +107,7 @@ public:
 
 class CSmokeTrail {
 	CVector m_pos[16];
-	float m_density[16];
+	float m_opacity[16];
 	int m_time[16];
 	char m_unused[536];
 	int m_seed;
