@@ -13,6 +13,7 @@
 #include "Stats.h"
 #include "maths.h"
 #include "Frontend.h"
+#include "SmokeTrails.h"
 
 uint8 ScrollCharSet[59][5] = {
 	{ 0x00, 0x00, 0x00, 0x00, 0x00 }, // ' '
@@ -99,6 +100,8 @@ CMovingThing CMovingThings::aMovingThings[NUMMOVINGTHINGS];
  
 void CMovingThings::Init()
 {
+	CSmokeTrails::Init();
+
 	StartCloseList.m_pNext = &CMovingThings::EndCloseList;
 	StartCloseList.m_pPrev = nil;
 	EndCloseList.m_pNext = nil;
@@ -189,6 +192,8 @@ void CMovingThings::Update()
 
 void CMovingThings::Render()
 {
+	CSmokeTrails::Update();
+
 	int i;
 	for (i = 0; i < 11; ++i)
 	{
@@ -205,6 +210,8 @@ void CMovingThings::Render()
 		if (aDigitalClocks[i].IsVisible())
 			aDigitalClocks[i].Render();
 	}
+
+	CSmokeTrails::Render();
 }
 
 // ---------- CMovingThing ----------
