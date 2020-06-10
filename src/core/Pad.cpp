@@ -37,7 +37,7 @@
 #include "Wanted.h"
 #include "WaterLevel.h"
 #include "General.h"
-#include "SmokeTrails.h"
+#include "Fluff.h"
 
 CPad Pads[MAX_PADS];
 CMousePointerStateHelper MousePointerStateHelper;
