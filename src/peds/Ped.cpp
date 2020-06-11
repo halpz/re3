@@ -13389,6 +13389,8 @@ CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 	return true;
 }
 
+extern CVector vecTestTemp(-1.0f, -1.0f, -1.0f);
+
 // --MIAMI: Done except comment
 void
 CPed::Render(void)
@@ -13420,9 +13422,7 @@ CPed::Render(void)
 					CMatrix mgTopMat, localAdjMat;
 					mgTopMat.Attach(RwFrameGetMatrix(frame));
 					localAdjMat.SetRotateX(player->m_fGunSpinAngle);
-
-					// TODO(Miami): What are those numbers?!
-					// localAdjMat.Rotate(flt_691FFC * flt_97F878, flt_691FF8 * flt_97F87C, flt_691FF4 * flt_97F880);
+					localAdjMat.Rotate(DEGTORAD(-4.477f)* vecTestTemp.x, DEGTORAD(29.731f) * vecTestTemp.y, DEGTORAD(1.064f) * vecTestTemp.z);
 					localAdjMat.GetPosition() += CVector(0.829f, -0.001f, 0.226f);
 					mgTopMat = mgTopMat * localAdjMat;
 					mgTopMat.UpdateRW();
