@@ -13389,6 +13389,8 @@ CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 	return true;
 }
 
+extern CVector vecTestTemp(-1.0f, -1.0f, -1.0f);
+
 // --MIAMI: Done except comment
 void
 CPed::Render(void)
@@ -13423,7 +13425,10 @@ CPed::Render(void)
 
 					// TODO(Miami): What are those numbers?!
 					// localAdjMat.Rotate(flt_691FFC * flt_97F878, flt_691FF8 * flt_97F87C, flt_691FF4 * flt_97F880);
-					localAdjMat.Rotate(0.078f, -0.519f, -0.0185f);
+					float rotX = DEGTORAD(-4.469f)* vecTestTemp.x;
+					float rotY = DEGTORAD(27.736f) * vecTestTemp.y;
+					float rotZ = DEGTORAD(1.064f) * vecTestTemp.z;
+					localAdjMat.Rotate(rotX, rotY, rotZ);
 					localAdjMat.GetPosition() += CVector(0.829f, -0.001f, 0.226f);
 					mgTopMat = mgTopMat * localAdjMat;
 					mgTopMat.UpdateRW();
