@@ -40,11 +40,11 @@ CCam::Init(void)
 	Mode = MODE_FOLLOWPED;
 	Front = CVector(0.0f, 0.0f, -1.0f);
 	Up = CVector(0.0f, 0.0f, 1.0f);
-	Rotating = 0;
+	Rotating = false;
 	m_iDoCollisionChecksOnFrameNum = 1;
 	m_iDoCollisionCheckEveryNumOfFrames = 9;
 	m_iFrameNumWereAt = 0;
-	m_bCollisionChecksOn = 1;
+	m_bCollisionChecksOn = false;
 	m_fRealGroundDist = 0.0f;
 	BetaSpeed = 0.0f;
 	AlphaSpeed = 0.0f;
@@ -54,19 +54,19 @@ CCam::Init(void)
 	DistanceSpeed = 0.0f;
 	m_pLastCarEntered = 0;
 	m_pLastPedLookedAt = 0;
-	ResetStatics = 1;
+	ResetStatics = true;
 	Beta = 0.0f;
-	m_bFixingBeta = 0;
+	m_bFixingBeta = false;
 	CA_MIN_DISTANCE = 0.0f;
 	CA_MAX_DISTANCE = 0.0f;
-	LookingBehind = 0;
-	LookingLeft = 0;
-	LookingRight = 0;
+	LookingBehind = false;
+	LookingLeft = false;
+	LookingRight = false;
 	m_fPlayerInFrontSyphonAngleOffSet = DEGTORAD(20.0f);
 	m_fSyphonModeTargetZOffSet = 0.5f;
 	m_fRadiusForDead = 1.5f;
 	DirectionWasLooking = LOOKING_FORWARD;
-	LookBehindCamWasInFront = 0;
+	LookBehindCamWasInFront = false;
 	f_Roll = 0.0f;
 	f_rollSpeed = 0.0f;
 	m_fCloseInPedHeightOffset = 0.0f;
@@ -1007,6 +1007,9 @@ static float DefaultMaxStep = 0.15f;
 void
 CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, float, float)
 {
+	if(!CamTargetEntity->IsPed())
+		return;
+
 	const float GroundDist = 1.85f;
 
 	CVector TargetCoors, Dist, IdealSource;
@@ -1023,7 +1026,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	bool GoingBehind = false;
 	bool Obscured = false;
 	bool BuildingCheckObscured = false;
-	bool HackPlayerOnStoppingTrain = false;
+	bool StandingInTrain = false;
 	static int TimeIndicatedWantedToGoDown = 0;
 	static bool StartedCountingForGoDown = false;
 	float DeltaBeta;
@@ -1031,12 +1034,6 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	m_bFixingBeta = false;
 	bBelowMinDist = false;
 	bBehindPlayerDesired = false;
-
-#ifdef FIX_BUGS
-	if(!CamTargetEntity->IsPed())
-		return;
-#endif
-	assert(CamTargetEntity->IsPed());
 
 	// CenterDist should be > LateralDist because we don't have an angle for safety in this case
 	float CenterDist, LateralDist;
@@ -1103,7 +1100,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 
 	if(FindPlayerVehicle())
 		if(FindPlayerVehicle()->m_vehType == VEHICLE_TYPE_TRAIN)
-			HackPlayerOnStoppingTrain = true;
+			StandingInTrain = true;
 
 	if(TheCamera.m_bCamDirectlyInFront){
 		 m_bCollisionChecksOn = true;
@@ -1356,7 +1353,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 
 
 	if(TheCamera.m_bCamDirectlyBehind || TheCamera.m_bCamDirectlyInFront ||
-	   HackPlayerOnStoppingTrain || Rotating){
+	   StandingInTrain || Rotating){
 		if(TheCamera.m_bCamDirectlyBehind){
 			Beta = TargetOrientation + PI;
 			Source.x = TargetCoors.x + RotDistance * Cos(Beta);
@@ -1367,7 +1364,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 			Source.x = TargetCoors.x + RotDistance * Cos(Beta);
 			Source.y = TargetCoors.y + RotDistance * Sin(Beta);
 		}
-		if(HackPlayerOnStoppingTrain){
+		if(StandingInTrain){
 			Beta = TargetOrientation + PI;
 			Source.x = TargetCoors.x + RotDistance * Cos(Beta);
 			Source.y = TargetCoors.y + RotDistance * Sin(Beta);
@@ -2477,8 +2474,8 @@ CCam::Process_Rocket(const CVector &CameraTarget, float, float, float)
 	}else{
 		float xdir = LookLeftRight < 0.0f ? -1.0f : 1.0f;
 		float ydir = LookUpDown < 0.0f ? -1.0f : 1.0f;
-		Beta += SQR(LookLeftRight/100.0f)*xdir/17.5 * FOV/80.0f * CTimer::GetTimeStep();
-		Alpha += SQR(LookUpDown/150.0f)*ydir/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Beta += SQR(LookLeftRight/100.0f)*xdir*0.8f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Alpha += SQR(LookUpDown/150.0f)*ydir*1.0f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 	}
 	while(Beta >= PI) Beta -= 2*PI;
 	while(Beta < -PI) Beta += 2*PI;
@@ -2579,8 +2576,8 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 	}else{
 		float xdir = LookLeftRight < 0.0f ? -1.0f : 1.0f;
 		float ydir = LookUpDown < 0.0f ? -1.0f : 1.0f;
-		Beta += SQR(LookLeftRight/100.0f)*xdir/17.5 * FOV/80.0f * CTimer::GetTimeStep();
-		Alpha += SQR(LookUpDown/150.0f)*ydir/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Beta += SQR(LookLeftRight/100.0f)*xdir*0.8f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Alpha += SQR(LookUpDown/150.0f)*ydir*1.0f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 	}
 	while(Beta >= PI) Beta -= 2*PI;
 	while(Beta < -PI) Beta += 2*PI;
@@ -2691,8 +2688,8 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 		LookUpDown = CPad::GetPad(0)->LookAroundUpDown();
 		float xdir = LookLeftRight < 0.0f ? -1.0f : 1.0f;
 		float ydir = LookUpDown < 0.0f ? -1.0f : 1.0f;
-		Beta += SQR(LookLeftRight/100.0f)*xdir/17.5 * FOV/80.0f * CTimer::GetTimeStep();
-		Alpha += SQR(LookUpDown/150.0f)*ydir/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Beta += SQR(LookLeftRight/100.0f)*xdir*0.8f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Alpha += SQR(LookUpDown/150.0f)*ydir*1.0f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 		while(Beta >= PI) Beta -= 2*PI;
 		while(Beta < -PI) Beta += 2*PI;
 		if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
@@ -2870,8 +2867,8 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 		}else{
 			float xdir = LookLeftRight < 0.0f ? -1.0f : 1.0f;
 			float ydir = LookUpDown < 0.0f ? -1.0f : 1.0f;
-			Beta += SQR(LookLeftRight/100.0f)*xdir/17.5 * FOV/80.0f * CTimer::GetTimeStep();
-			Alpha += SQR(LookUpDown/150.0f)*ydir/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+			Beta += SQR(LookLeftRight/100.0f)*xdir*0.8f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+			Alpha += SQR(LookUpDown/150.0f)*ydir*1.0f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 		}
 		while(Beta >= PI) Beta -= 2*PI;
 		while(Beta < -PI) Beta += 2*PI;
@@ -2973,8 +2970,8 @@ CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float
 	}else{
 		float xdir = LookLeftRight < 0.0f ? -1.0f : 1.0f;
 		float ydir = LookUpDown < 0.0f ? -1.0f : 1.0f;
-		Beta += SQR(LookLeftRight/100.0f)*xdir/17.5 * FOV/80.0f * CTimer::GetTimeStep();
-		Alpha += SQR(LookUpDown/150.0f)*ydir/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Beta += SQR(LookLeftRight/100.0f)*xdir*0.8f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Alpha += SQR(LookUpDown/150.0f)*ydir*1.0f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 	}
 	while(Beta >= PI) Beta -= 2*PI;
 	while(Beta < -PI) Beta += 2*PI;

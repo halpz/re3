@@ -111,7 +111,7 @@ CCamera::Init(void)
 	Cams[0].Mode = CCam::MODE_FOLLOWPED;
 	Cams[1].Mode = CCam::MODE_FOLLOWPED;
 	unknown = 0;
-	m_bJustJumpedOutOf1stPersonBecauseOfTarget = 0;
+	m_bJustJumpedOutOf1stPersonBecauseOfTarget = false;
 	ClearPlayerWeaponMode();
 	m_bInATunnelAndABigVehicle = false;
 	m_iModeObbeCamIsInForCar = OBBE_INVALID;
@@ -2869,6 +2869,13 @@ CCamera::Process_Train_Camera_Control(void)
 		if(node >= m_uiNumberOfTrainCamNodes)
 			node = 0;
 	}
+#ifdef FIX_BUGS
+	// Not really a bug but be nice and respect the debug mode
+	if(DebugCamMode){
+		TakeControl(target, DebugCamMode, JUMP_CUT, CAMCONTROL_SCRIPT);
+		return;
+	}
+#endif
 
 	if(found){
 		SetWideScreenOn();
