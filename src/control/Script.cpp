@@ -7743,7 +7743,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CollectParameters(&m_nIp, 4);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		assert(pObject);
-		pObject->SetMoveSpeed(pObject->GetMoveSpeed() + 0.02f * *(CVector*)&ScriptParams[1]);
+		pObject->SetMoveSpeed(pObject->GetMoveSpeed() + METERS_PER_SECOND_TO_GAME_SPEED * *(CVector*)&ScriptParams[1]);
 		return 0;
 	}
 	case COMMAND_DRAW_SPRITE:
