@@ -2654,7 +2654,6 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 #else
 	float speed = pHeli->AutoPilot.m_nCruiseSpeed * 0.01f;
 #endif
-	float tmp = speed;
 	if (distanceToTarget <= 100.0f)
 	{
 		if (distanceToTarget > 75.0f)
