@@ -639,8 +639,8 @@ PlayAnnouncement(uint8 sound, uint8 station)
 void
 ProcessTrainAnnouncements(void)
 {
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
+	for (int i = 0; i < ARRAY_SIZE(StationDist); i++) {
+		for (int j = 0; j < ARRAY_SIZE(EngineTrackPosition); j++) {
 			if (!bTrainArrivalAnnounced[i]) {
 				float preDist = StationDist[i] - 100.0f;
 				if (preDist < 0.0f)
