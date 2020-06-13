@@ -131,16 +131,16 @@ void CHud::Draw()
 		return;
 
 	if (m_Wants_To_Draw_Hud && !TheCamera.m_WideScreenOn) {
-		bool DrawCrossHair = 0;
-		bool DrawCrossHairPC = 0;
+		bool DrawCrossHair = false;
+		bool DrawCrossHairPC = false;
 
 		int32 WeaponType = FindPlayerPed()->m_weapons[FindPlayerPed()->m_currentWeapon].m_eWeaponType;
 		int32 Mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 
 		if (Mode == CCam::MODE_SNIPER || Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_M16_1STPERSON || Mode == CCam::MODE_HELICANNON_1STPERSON)
-			DrawCrossHair = 1;
+			DrawCrossHair = true;
 		if (Mode == CCam::MODE_M16_1STPERSON_RUNABOUT || Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT || Mode == CCam::MODE_SNIPER_RUNABOUT)
-			DrawCrossHairPC = 1;
+			DrawCrossHairPC = true;
 
 		/*
 			Draw Crosshairs
@@ -149,7 +149,7 @@ void CHud::Draw()
 		    (!CPad::GetPad(0)->GetLookBehindForPed() || TheCamera.m_bPlayerIsInGarage) || Mode == CCam::MODE_1STPERSON_RUNABOUT) {
 			if (FindPlayerPed() && !FindPlayerPed()->EnteringCar()) {
 				if ((WeaponType >= WEAPONTYPE_COLT45 && WeaponType <= WEAPONTYPE_M16) || WeaponType == WEAPONTYPE_FLAMETHROWER)
-					DrawCrossHairPC = 1;
+					DrawCrossHairPC = true;
 			}
 		}
 
