@@ -524,8 +524,8 @@ public:
 	float m_fFLOATingFadeMusic;
 	float m_fTimeToFadeOut;
 	float m_fTimeToFadeMusic;
-	float m_fFractionInterToStopMovingTarget;
-	float m_fFractionInterToStopCatchUpTarget;
+	float m_fFractionInterToStopMoving;
+	float m_fFractionInterToStopCatchUp;
 	float m_fGaitSwayBuffer;
 	float m_fScriptPercentageInterToStopMoving;
 	float m_fScriptPercentageInterToCatchUp;

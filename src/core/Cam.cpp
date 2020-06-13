@@ -52,8 +52,8 @@ CCam::Init(void)
 	f_max_role_angle = DEGTORAD(5.0f);
 	Distance = 30.0f;
 	DistanceSpeed = 0.0f;
-	m_pLastCarEntered = 0;
-	m_pLastPedLookedAt = 0;
+	m_pLastCarEntered = nil;
+	m_pLastPedLookedAt = nil;
 	ResetStatics = true;
 	Beta = 0.0f;
 	m_bFixingBeta = false;
@@ -1001,8 +1001,8 @@ CCam::GetPedBetaAngleForClearView(const CVector &Target, float Dist, float BetaO
 	return 0.0f;
 }
 
-static float DefaultAcceleration = 0.045f;
-static float DefaultMaxStep = 0.15f;
+float DefaultAcceleration = 0.045f;
+float DefaultMaxStep = 0.15f;
 
 void
 CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, float, float)
@@ -1473,14 +1473,14 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	ResetStatics = false;
 }
 
-static float fBaseDist = 1.7f;
-static float fAngleDist = 2.0f;
-static float fFalloff = 3.0f;
-static float fStickSens = 0.01f;
-static float fTweakFOV = 1.05f;
-static float fTranslateCamUp = 0.8f;
-static int16 nFadeControlThreshhold = 45;
-static float fDefaultAlphaOrient = -0.22f;
+float fBaseDist = 1.7f;
+float fAngleDist = 2.0f;
+float fFalloff = 3.0f;
+float fStickSens = 0.01f;
+float fTweakFOV = 1.05f;
+float fTranslateCamUp = 0.8f;
+int16 nFadeControlThreshhold = 45;
+float fDefaultAlphaOrient = -0.22f;
 
 void
 CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrientation, float, float)
@@ -1522,8 +1522,8 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 		BetaOffset = LookLeftRight * TheCamera.m_fMouseAccelHorzntl * FOV/80.0f;
 		AlphaOffset = LookUpDown * TheCamera.m_fMouseAccelVertical * FOV/80.0f;
 	}else{
-		BetaOffset = LookLeftRight * fStickSens * (0.5f/7.0f) * FOV/80.0f * CTimer::GetTimeStep();
-		AlphaOffset = LookUpDown * fStickSens * (0.3f/7.0f) * FOV/80.0f * CTimer::GetTimeStep();
+		BetaOffset = LookLeftRight * fStickSens * (1.0f/14.0f) * FOV/80.0f * CTimer::GetTimeStep();
+		AlphaOffset = LookUpDown * fStickSens * (0.6f/14.0f) * FOV/80.0f * CTimer::GetTimeStep();
 	}
 
 	if(TheCamera.GetFading() && TheCamera.GetFadingDirection() == FADE_IN && nFadeControlThreshhold < CDraw::FadeValue ||
@@ -1545,7 +1545,7 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 	while(Beta >= PI) Beta -= 2*PI;
 	while(Beta < -PI) Beta += 2*PI;
 	if(Alpha > DEGTORAD(45.0f)) Alpha = DEGTORAD(45.0f);
-	if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+	else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 	TargetCoors = CameraTarget;
 	TargetCoors.z += fTranslateCamUp;
@@ -1583,7 +1583,7 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 	if(CWorld::ProcessLineOfSight(TargetCoors, Source, colPoint, entity, true, true, true, true, false, false, true)){
 		float PedColDist = (TargetCoors - colPoint.point).Magnitude();
 		float ColCamDist = CamDist - PedColDist;
-		if(entity->IsPed() && ColCamDist > 1.0f){
+		if(entity->IsPed() && ColCamDist > DEFAULT_NEAR + 0.1f){
 			// Ped in the way but not clipping through
 			if(CWorld::ProcessLineOfSight(colPoint.point, Source, colPoint, entity, true, true, true, true, false, false, true)){
 				PedColDist = (TargetCoors - colPoint.point).Magnitude();
@@ -1621,9 +1621,12 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 		if(dist == 0.1f)
 			Source += (TargetCoors - Source)*0.3f;
 
+		Near = RwCameraGetNearClipPlane(Scene.camera);
 #ifndef FIX_BUGS
 		// this is totally wrong...
 		radius = Tan(FOV / 2.0f) * Near;
+#else
+		radius = ViewPlaneWidth*Near;
 #endif
 		// Keep testing
 		entity = CWorld::TestSphereAgainstWorld(Source + Front*Near, radius, nil, true, true, false, true, false, false);
@@ -2693,7 +2696,7 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 		while(Beta >= PI) Beta -= 2*PI;
 		while(Beta < -PI) Beta += 2*PI;
 		if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
-		if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+		else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 		TargetCoors.x = 3.0f * Cos(Alpha) * Cos(Beta) + Source.x;
 		TargetCoors.y = 3.0f * Cos(Alpha) * Sin(Beta) + Source.y;
@@ -2740,7 +2743,7 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 		CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(CamTargetEntity->GetModelIndex());
 		CVector CamPos = mi->GetFrontSeatPosn();
 		CamPos.x = 0.0f;
-		CamPos.y += -0.08f;
+		CamPos.y += 0.08f;
 		CamPos.z += 0.62f;
 		FOV = 60.0f;
 		Source = Multiply3x3(CamTargetEntity->GetMatrix(), CamPos);
@@ -4581,8 +4584,8 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 		BetaOffset = LookLeftRight * TheCamera.m_fMouseAccelHorzntl * FOV/80.0f;
 		AlphaOffset = LookUpDown * TheCamera.m_fMouseAccelVertical * FOV/80.0f;
 	}else{
-		BetaOffset = LookLeftRight * fStickSens * (0.5f/10.0f) * FOV/80.0f * CTimer::GetTimeStep();
-		AlphaOffset = LookUpDown * fStickSens * (0.3f/10.0f) * FOV/80.0f * CTimer::GetTimeStep();
+		BetaOffset = LookLeftRight * fStickSens * (1.0f/20.0f) * FOV/80.0f * CTimer::GetTimeStep();
+		AlphaOffset = LookUpDown * fStickSens * (0.6f/20.0f) * FOV/80.0f * CTimer::GetTimeStep();
 	}
 
 	// Stop centering once stick has been touched
@@ -4654,7 +4657,7 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 	if(CWorld::ProcessLineOfSight(TargetCoors, Source, colPoint, entity, true, true, true, true, false, false, true)){
 		float PedColDist = (TargetCoors - colPoint.point).Magnitude();
 		float ColCamDist = CamDist - PedColDist;
-		if(entity->IsPed() && ColCamDist > 1.0f){
+		if(entity->IsPed() && ColCamDist > DEFAULT_NEAR + 0.1f){
 			// Ped in the way but not clipping through
 			if(CWorld::ProcessLineOfSight(colPoint.point, Source, colPoint, entity, true, true, true, true, false, false, true)){
 				PedColDist = (TargetCoors - colPoint.point).Magnitude();
@@ -4693,6 +4696,8 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 			Source += (TargetCoors - Source)*0.3f;
 
 		// Keep testing
+		Near = RwCameraGetNearClipPlane(Scene.camera);
+		radius = ViewPlaneWidth*Near;
 		entity = CWorld::TestSphereAgainstWorld(Source + Front*Near, radius, nil, true, true, false, true, false, false);
 
 		i++;

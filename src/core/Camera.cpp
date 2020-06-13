@@ -129,8 +129,8 @@ CCamera::Init(void)
 	Cams[1].m_fPlayerVelocity = 0.0f;
 	Cams[2].m_fPlayerVelocity = 0.0f;
 	m_bHeadBob = false;
-	m_fFractionInterToStopMovingTarget = 0.25f;
-	m_fFractionInterToStopCatchUpTarget = 0.75f;
+	m_fFractionInterToStopMoving = 0.25f;
+	m_fFractionInterToStopCatchUp = 0.75f;
 	m_fGaitSwayBuffer = 0.85f;
 	m_bScriptParametersSetForInterPol = false;
 	m_uiCamShakeStart = 0;
@@ -329,12 +329,12 @@ CCamera::Process(void)
 			currentTime = m_uiTransitionDuration;
 		float fractionInter = (float) currentTime / m_uiTransitionDuration;
 
-		if(fractionInter <= m_fFractionInterToStopMovingTarget){
+		if(fractionInter <= m_fFractionInterToStopMoving){
 			float inter;
-			if(m_fFractionInterToStopMovingTarget == 0.0f)
+			if(m_fFractionInterToStopMoving == 0.0f)
 				inter = 0.0f;
 			else
-				inter = (m_fFractionInterToStopMovingTarget - fractionInter)/m_fFractionInterToStopMovingTarget;
+				inter = (m_fFractionInterToStopMoving - fractionInter)/m_fFractionInterToStopMoving;
 			inter = 0.5f - 0.5*Cos(inter*PI);	// smooth it
 
 			m_vecSourceWhenInterPol = m_cvecStartingSourceForInterPol + inter*m_cvecSourceSpeedAtStartInter;
@@ -388,12 +388,12 @@ CCamera::Process(void)
 			}
 			CamUp.Normalise();
 			FOV = m_fFOVWhenInterPol;
-		}else if(fractionInter > m_fFractionInterToStopMovingTarget && fractionInter <= 1.0f){
+		}else if(fractionInter > m_fFractionInterToStopMoving && fractionInter <= 1.0f){
 			float inter;
-			if(m_fFractionInterToStopCatchUpTarget == 0.0f)
+			if(m_fFractionInterToStopCatchUp == 0.0f)
 				inter = 0.0f;
 			else
-				inter = (fractionInter - m_fFractionInterToStopMovingTarget)/m_fFractionInterToStopCatchUpTarget;
+				inter = (fractionInter - m_fFractionInterToStopMoving)/m_fFractionInterToStopCatchUp;
 			inter = 0.5f - 0.5*Cos(inter*PI);	// smooth it
 
 			CamSource = m_vecSourceWhenInterPol + inter*(Cams[ActiveCam].Source - m_vecSourceWhenInterPol);
@@ -1846,10 +1846,9 @@ CCamera::SetCamPositionForFixedMode(const CVector &Source, const CVector &UpOffS
 void
 CCamera::StartTransition(int16 newMode)
 {
-	bool foo = false;
 	bool switchSyphonMode = false;
 	bool switchPedToCar = false;
-	bool switchPedMode = false;
+	bool switchFromFight = false;
 	bool switchFromFixed = false;
 	bool switch1stPersonToVehicle = false;
 	float betaOffset, targetBeta, camBeta, deltaBeta;
@@ -1858,8 +1857,8 @@ CCamera::StartTransition(int16 newMode)
 
 // missing on PS2
 	m_bItsOkToLookJustAtThePlayer = false;
-	m_fFractionInterToStopMovingTarget = 0.25f;
-	m_fFractionInterToStopCatchUpTarget = 0.75f;
+	m_fFractionInterToStopMoving = 0.25f;
+	m_fFractionInterToStopCatchUp = 0.75f;
 
 	if(Cams[ActiveCam].Mode == CCam::MODE_SYPHON_CRIM_IN_FRONT ||
 	   Cams[ActiveCam].Mode == CCam::MODE_FOLLOWPED ||
@@ -1878,7 +1877,7 @@ CCamera::StartTransition(int16 newMode)
 	if(Cams[ActiveCam].Mode == CCam::MODE_SYPHON_CRIM_IN_FRONT && newMode == CCam::MODE_SYPHON)
 		switchSyphonMode = true;
 	if(Cams[ActiveCam].Mode == CCam::MODE_FIGHT_CAM && newMode == CCam::MODE_FOLLOWPED)
-		switchPedMode = true;
+		switchFromFight = true;
 	if(Cams[ActiveCam].Mode == CCam::MODE_FIXED)
 		switchFromFixed = true;
 
@@ -2097,19 +2096,19 @@ CCamera::StartTransition(int16 newMode)
 	m_uiTransitionDuration = 1350;
 	if(switchSyphonMode)
 		m_uiTransitionDuration = 1800;
-	else if(switchPedMode)
+	else if(switchFromFight)
 		m_uiTransitionDuration = 750;
 // not on PS2
 	else if(switchPedToCar){
-		m_fFractionInterToStopMovingTarget = 0.2f;
-		m_fFractionInterToStopCatchUpTarget = 0.8f;
+		m_fFractionInterToStopMoving = 0.2f;
+		m_fFractionInterToStopCatchUp = 0.8f;
 		m_uiTransitionDuration = 950;
 	}else if(switchFromFixed){
-		m_fFractionInterToStopMovingTarget = 0.05f;
-		m_fFractionInterToStopCatchUpTarget = 0.95f;
+		m_fFractionInterToStopMoving = 0.05f;
+		m_fFractionInterToStopCatchUp = 0.95f;
 	}else if(switch1stPersonToVehicle){
-		m_fFractionInterToStopMovingTarget = 0.0f;
-		m_fFractionInterToStopCatchUpTarget = 1.0f;
+		m_fFractionInterToStopMoving = 0.0f;
+		m_fFractionInterToStopCatchUp = 1.0f;
 		m_uiTransitionDuration = 1;
 	}else
 		m_uiTransitionDuration = 1350;	// already set above
@@ -2149,8 +2148,8 @@ CCamera::StartTransition(int16 newMode)
 	m_fFOVSpeedAtStartInter = Cams[ActiveCam].m_fFovSpeedOverOneFrame;
 	Cams[ActiveCam].ResetStatics = true;
 	if(!m_bLookingAtPlayer && m_bScriptParametersSetForInterPol){
-		m_fFractionInterToStopMovingTarget = m_fScriptPercentageInterToStopMoving;
-		m_fFractionInterToStopCatchUpTarget = m_fScriptPercentageInterToCatchUp;
+		m_fFractionInterToStopMoving = m_fScriptPercentageInterToStopMoving;
+		m_fFractionInterToStopCatchUp = m_fScriptPercentageInterToCatchUp;
 		m_uiTransitionDuration = m_fScriptTimeForInterPolation;
 	}
 }
