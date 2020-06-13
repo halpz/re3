@@ -166,6 +166,9 @@ bool doingMissionRetry;
 
 #endif
 
+#ifdef MISSION_SWITCHER
+int switchMissionTo = -1;
+#endif
 
 const uint32 CRunningScript::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
@@ -886,10 +889,18 @@ void CRunningScript::Process()
 
 int8 CRunningScript::ProcessOneCommand()
 {
-	++CTheScripts::CommandsExecuted;
-	int32 command = CTheScripts::Read2BytesFromScript(&m_nIp);
-	m_bNotFlag = (command & 0x8000);
-	command &= 0x7FFF;
+	int32 command;
+#ifdef MISSION_SWITCHER
+	if (switchMissionTo != -1)
+		command = COMMAND_LOAD_AND_LAUNCH_MISSION_INTERNAL;
+	else
+#endif
+	{
+		++CTheScripts::CommandsExecuted;
+		command = CTheScripts::Read2BytesFromScript(&m_nIp);
+		m_bNotFlag = (command & 0x8000);
+		command &= 0x7FFF;
+	}
 	if (command < 100)
 		return ProcessCommands0To99(command);
 	if (command < 200)
@@ -2032,7 +2043,13 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		ped->ClearAll();
 		int8 path = ScriptParams[1];
 		if (ScriptParams[1] < 0 || ScriptParams[1] > 7)
+			// Max number GetRandomNumberInRange returns is max-1
+#ifdef FIX_BUGS
+			path = CGeneral::GetRandomNumberInRange(0, 8);
+#else
 			path = CGeneral::GetRandomNumberInRange(0, 7);
+#endif
+
 		ped->SetWanderPath(path);
 		return 0;
 	}
@@ -2051,10 +2068,11 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		eMoveState state;
 		switch (ScriptParams[5]) {
 		case 0: state = PEDMOVE_WALK; break;
-		case 1: state = PEDMOVE_SPRINT; break;
+		case 1: state = PEDMOVE_RUN; break;
 		default: assert(0);
 		}
 		ped->ClearAll();
+		ped->m_pathNodeTimer = 0;
 		ped->SetFollowPath(pos, radius, state, nil, nil, 999999);
 		return 0;
 	}
@@ -9125,7 +9143,14 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		return 0;
 	case COMMAND_LOAD_AND_LAUNCH_MISSION_INTERNAL:
 	{
+#ifdef MISSION_SWITCHER
+		if (switchMissionTo != -1) {
+			ScriptParams[0] = switchMissionTo;
+			switchMissionTo = -1;
+		} else
+#endif
 		CollectParameters(&m_nIp, 1);
+
 		if (CTheScripts::NumberOfExclusiveMissionScripts > 0 && ScriptParams[0] <= UINT16_MAX - 2)
 			return 0;
 #ifdef MISSION_REPLAY
@@ -10676,7 +10701,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
 		assert(pTargetPed);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_GOTO_CHAR_ON_FOOT_WALKING, pPed);
+		pPed->SetObjective(OBJECTIVE_GOTO_CHAR_ON_FOOT_WALKING, pTargetPed);
 		return 0;
 	}
 	//case COMMAND_IS_PICKUP_IN_ZONE:
@@ -14220,7 +14245,7 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 	pPed->CharCreatedBy = RANDOM_CHAR;
 	if (pPed->m_nPedType == PEDTYPE_PROSTITUTE)
 		pPed->m_objectiveTimer = CTimer::GetTimeInMilliseconds() + 30000;
-	if (pPed->bInVehicle) {
+	if (pPed->InVehicle()) {
 		if (pPed->m_pMyVehicle->pDriver == pPed) {
 			if (pPed->m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR) {
 				CCarCtrl::JoinCarWithRoadSystem(pPed->m_pMyVehicle);
@@ -14245,10 +14270,14 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 	pPed->ClearObjective();
 	pPed->bRespondsToThreats = true;
 	pPed->bScriptObjectiveCompleted = false;
+	pPed->bKindaStayInSamePlace = false;
 	pPed->ClearLeader();
 	if (pPed->IsPedInControl())
 		pPed->SetWanderPath(CGeneral::GetRandomNumber() & 7);
 	if (flees) {
+		if (pPed->m_nPedState == PED_FOLLOW_PATH && state != PED_FOLLOW_PATH)
+			pPed->ClearFollowPath();
+
 		pPed->m_nPedState = state;
 		pPed->SetMoveState(ms);
 	}

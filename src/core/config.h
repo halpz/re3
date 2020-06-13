@@ -202,12 +202,11 @@ enum Config {
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 #define FIX_HIGH_FPS_BUGS_ON_FRONTEND
 
-// Rendering/display
-#define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 // Just debug menu entries
 #ifdef DEBUGMENU
 #define TOGGLEABLE_BETA_FEATURES // not too many things
 #define RELOADABLES			// some debug menu options to reload TXD files
+#define MISSION_SWITCHER // from debug menu
 #endif
 
 // Rendering/display

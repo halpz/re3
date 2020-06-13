@@ -10,11 +10,11 @@
 #include "Weapon.h"
 #include "WeaponInfo.h"
 #include "AnimationId.h"
+#include "PathFind.h"
 
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
 
-struct CPathNode;
 class CAccident;
 class CObject;
 class CFire;
@@ -346,6 +346,9 @@ enum eMoveState {
 	PEDMOVE_NONE,
 	PEDMOVE_STILL,
 	PEDMOVE_WALK,
+	
+	PEDMOVE_UNK,
+
 	PEDMOVE_RUN,
 	PEDMOVE_SPRINT,
 };
@@ -521,13 +524,20 @@ public:
 	int32 m_nPrevMoveState;
 	eWaitState m_nWaitState;
 	uint32 m_nWaitTimer;
-	void *m_pPathNodesStates[8]; // unused, probably leftover from VC
-	CVector2D m_stPathNodeStates[10];
-	uint16 m_nPathNodes;
-	int16 m_nCurPathNode;
-	int8 m_nPathDir;
-	CPathNode *m_pLastPathNode;
-	CPathNode *m_pNextPathNode;
+	CPathNode* m_pathNodesToGo[8];
+	int16 m_nNumPathNodes;
+	int16 m_nCurPathNodeId;
+	CEntity* m_followPathWalkAroundEnt;
+	CEntity* m_followPathTargetEnt;
+	uint32 m_pathNodeTimer;
+	CPathNode m_pathNodeObjPool[8];
+	CPathNode* m_pCurPathNode;
+	char m_nPathDir;
+	CPathNode* m_pLastPathNode;
+	CPathNode* m_pNextPathNode;
+	CVector m_followPathDestPos;
+	float m_followPathAbortDist;
+	eMoveState m_followPathMoveState;
 	float m_fHealth;
 	float m_fArmour;
 	uint32 m_nExtendedRangeTimer;
@@ -756,6 +766,7 @@ public:
 	void RemoveInCarAnims(void);
 	void CollideWithPed(CPed*);
 	void SetDirectionToWalkAroundObject(CEntity*);
+	bool SetDirectionToWalkAroundVehicle(CVehicle*);
 	void RemoveWeaponAnims(int, float);
 	void CreateDeadPedMoney(void);
 	void CreateDeadPedWeaponPickups(void);
@@ -778,7 +789,7 @@ public:
 	bool FindBestCoordsFromNodes(CVector, CVector*);
 	void Wait(void);
 	void ProcessObjective(void);
-	bool SeekFollowingPath(CVector*);
+	CVector *SeekFollowingPath(void);
 	void Flee(void);
 	void FollowPath(void);
 	CVector GetFormationPosition(void);
