@@ -375,6 +375,11 @@ private:
 	static void RemoveScriptTextureDictionary();
 	static void RemoveThisPed(CPed* pPed);
 
+#ifdef MISSION_SWITCHER
+public:
+	static void SwitchToMission(int32 mission);
+#endif
+
 	friend class CRunningScript;
 	friend class CHud;
 	friend void CMissionCleanup::Process();
@@ -526,6 +531,8 @@ private:
 	bool CheckDamagedWeaponType(int32 actual, int32 type);
 	
 	static bool ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami);
+
+	friend class CTheScripts;
 };
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
@@ -545,8 +552,4 @@ void RetryMission(int, int);
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
 extern int scriptToLoad;
-#endif
-
-#ifdef MISSION_SWITCHER
-extern int switchMissionTo;
 #endif

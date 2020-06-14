@@ -315,7 +315,7 @@ int8 nextMissionToSwitch = 0;
 static void
 SwitchToMission(void)
 {
-	switchMissionTo = nextMissionToSwitch;
+	CTheScripts::SwitchToMission(nextMissionToSwitch);
 }
 #endif
 
