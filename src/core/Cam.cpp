@@ -111,7 +111,11 @@ CCam::Process(void)
 		Fwd.x = CamTargetEntity->GetForward().x;
 		Fwd.y = CamTargetEntity->GetForward().y;
 		Fwd.Normalise();
-		// Game normalizes again here manually. useless, so skipped
+		float FwdLength = Fwd.Magnitude2D();
+		if(FwdLength != 0.0f){
+			Fwd.x /= FwdLength;
+			Fwd.y /= FwdLength;
+		}
 
 		float FwdSpeedX = ((CVehicle*)CamTargetEntity)->GetMoveSpeed().x * Fwd.x;
 		float FwdSpeedY = ((CVehicle*)CamTargetEntity)->GetMoveSpeed().y * Fwd.y;
@@ -272,7 +276,7 @@ CCam::Process(void)
 	CVector TargetToCam = Source - m_cvecTargetCoorsForFudgeInter;
 	float DistOnGround = TargetToCam.Magnitude2D();
 	m_fTrueBeta = CGeneral::GetATanOfXY(TargetToCam.x, TargetToCam.y);
-	m_fTrueAlpha = CGeneral::GetATanOfXY(TargetToCam.z, DistOnGround);
+	m_fTrueAlpha = CGeneral::GetATanOfXY(DistOnGround, TargetToCam.z);
 	if(TheCamera.m_uiTransitionState == 0)
 		KeepTrackOfTheSpeed(Source, m_cvecTargetCoorsForFudgeInter, Up, m_fTrueAlpha, m_fTrueBeta, FOV);
 
@@ -2585,7 +2589,7 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 	while(Beta >= PI) Beta -= 2*PI;
 	while(Beta < -PI) Beta += 2*PI;
 	if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
-	if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+	else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 #ifdef GTA3_1_1_PATCH
 	HeadPos.x = 0.0f;
@@ -2876,7 +2880,7 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 		while(Beta >= PI) Beta -= 2*PI;
 		while(Beta < -PI) Beta += 2*PI;
 		if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
-		if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+		else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 		TargetCoors.x = 3.0f * Cos(Alpha) * Cos(Beta) + Source.x;
 		TargetCoors.y = 3.0f * Cos(Alpha) * Sin(Beta) + Source.y;
@@ -2920,13 +2924,8 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 void
 CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float, float)
 {
-	if(CamTargetEntity->m_rwObject == nil)
-		return;
-
-#ifdef FIX_BUGS
 	if(!CamTargetEntity->IsPed())
 		return;
-#endif
 
 	static bool FailedTestTwelveFramesAgo = false;
 	RwV3d HeadPos;
@@ -2936,9 +2935,9 @@ CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float
 	static float TargetFOV = 0.0f;
 
 	if(ResetStatics){
-		Beta = TargetOrientation;
+		Beta = ((CPed*)CamTargetEntity)->m_fRotationCur + HALFPI;
 		Alpha = 0.0f;
-		m_fInitialPlayerOrientation = TargetOrientation;
+		m_fInitialPlayerOrientation = ((CPed*)CamTargetEntity)->m_fRotationCur + HALFPI;
 		FailedTestTwelveFramesAgo = false;
 		// static DPadVertical unused
 		// static DPadHorizontal unused
@@ -2979,7 +2978,7 @@ CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float
 	while(Beta >= PI) Beta -= 2*PI;
 	while(Beta < -PI) Beta += 2*PI;
 	if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
-	if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+	else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 	TargetCoors.x = 3.0f * Cos(Alpha) * Cos(Beta) + Source.x;
 	TargetCoors.y = 3.0f * Cos(Alpha) * Sin(Beta) + Source.y;
@@ -3627,12 +3626,12 @@ CCam::Process_WheelCam(const CVector&, float, float, float)
 	}
 
 	CVector NewUp(0.0f, 0.0f, 1.0f);
-	CVector Left = CrossProduct(Front, NewUp);
-	Left.Normalise();
-	NewUp = CrossProduct(Left, Front);
+	CVector Right = CrossProduct(Front, NewUp);
+	Right.Normalise();
+	NewUp = CrossProduct(Right, Front);
 
 	float Roll = Cos((CTimer::GetTimeInMilliseconds()&0x1FFFF)/(float)0x1FFFF * TWOPI);
-	Up = Cos(Roll*0.4f)*NewUp + Sin(Roll*0.4f)*Left;
+	Up = Cos(Roll*0.4f)*NewUp + Sin(Roll*0.4f)*Right;
 }
 
 void
@@ -3753,7 +3752,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 	TargetCoors.z = Source.z + Sin(Alpha) * 3.0f;
 
 	if(Alpha > DEGTORAD(89.5f)) Alpha = DEGTORAD(89.5f);
-	if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
+	else if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
 
 	if(CPad::GetPad(1)->GetSquare() || KEYDOWN('W'))
 		Speed += 0.1f;
@@ -3846,7 +3845,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 	TargetCoors.z = Source.z + Sin(Alpha) * 3.0f;
 
 	if(Alpha > DEGTORAD(89.5f)) Alpha = DEGTORAD(89.5f);
-	if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
+	else if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
 
 	if(CPad::GetPad(1)->GetSquare() || CPad::GetPad(1)->GetLeftMouse())
 		Speed += 0.1f;
@@ -3925,7 +3924,7 @@ CCam::Process_Editor(const CVector&, float, float, float)
 	CSceneEdit::m_vecCamHeading = TargetCoors - Source;
 
 	if(Alpha > DEGTORAD(89.5f)) Alpha = DEGTORAD(89.5f);
-	if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
+	else if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
 
 	if(CPad::GetPad(1)->GetSquare() || CPad::GetPad(1)->GetLeftMouse())
 		Speed += 0.1f;
@@ -4056,11 +4055,11 @@ bool
 CCam::ProcessArrestCamOne(void)
 {
 	FOV = 45.0f;
-	if(ResetStatics)
+	if(!ResetStatics)
 		return true;
 
 #ifdef FIX_BUGS
-	if(!CamTargetEntity->IsPed())
+	if(!CamTargetEntity->IsPed() || ((CPlayerPed*)TheCamera.pTargetEntity)->m_pArrestingCop == nil)
 		return true;
 #endif
 
@@ -4597,7 +4596,7 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 	while(Beta >= PI) Beta -= 2.0f*PI;
 	while(Beta < -PI) Beta += 2.0f*PI;
 	if(Alpha > DEGTORAD(45.0f)) Alpha = DEGTORAD(45.0f);
-	if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+	else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 
 	float BetaDiff = TargetOrientation+PI - Beta;
