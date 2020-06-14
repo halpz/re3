@@ -273,13 +273,13 @@ CAutomobile::ProcessControl(void)
 	if(CReplay::IsPlayingBack())
 		return;
 
-	UpdatePassengerList();
-
 	// Heli wind
 	if(IsRealHeli())
 		if((GetStatus() == STATUS_PLAYER || GetStatus() == STATUS_PHYSICS) && m_aWheelSpeed[1] > 0.075f ||
 		   GetStatus() == STATUS_SIMPLE)
 			CWindModifiers::RegisterOne(GetPosition(), 1);
+
+	UpdatePassengerList();
 
 	// Improve grip of vehicles in certain cases
 	bool strongGrip1 = false;

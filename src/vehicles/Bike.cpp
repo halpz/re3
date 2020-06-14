@@ -125,7 +125,7 @@ CBike::CBike(int32 id, uint8 CreatedBy)
 	bIsStanding = false;
 	bExtraSpeed = false;
 	bIsOnFire = false;
-	m_bike_flag80 = false;
+	bWheelieCam = false;
 
 	m_fTireTemperature = 1.0f;
 	m_fBrakeDestabilization = 0.0f;
@@ -314,7 +314,7 @@ CBike::ProcessControl(void)
 		ReduceHornCounter();
 		bVehicleColProcessed = false;
 		bAudioChangingGear = false;
-		m_bike_flag80 = false;
+		bWheelieCam = false;
 		// that's all we do for simple vehicles
 		return;
 
@@ -324,7 +324,7 @@ CBike::ProcessControl(void)
 		PlayHornIfNecessary();
 
 		bBalancedByRider = true;
-		m_bike_flag80 = false;
+		bWheelieCam = false;
 
 		if(bIsBeingCarJacked){
 			m_fGasPedal = 0.0f;
@@ -350,7 +350,7 @@ CBike::ProcessControl(void)
 		bBalancedByRider = (pDriver || pPassengers[0] || bIsBeingCarJacked) && !bIsStanding;
 		m_fPedLeanAmountLR = 0.0f;
 		m_fPedLeanAmountUD = 0.0f;
-		m_bike_flag80 = false;
+		bWheelieCam = false;
 
 		if(bIsBeingCarJacked){
 			m_fGasPedal = 0.0f;
@@ -371,7 +371,7 @@ CBike::ProcessControl(void)
 			m_nCarHornTimer = 0;
 
 		bBalancedByRider = false;
-		m_bike_flag80 = false;
+		bWheelieCam = false;
 		m_fPedLeanAmountLR = 0.0f;
 		m_fPedLeanAmountUD = 0.0f;
 		break;
@@ -393,7 +393,7 @@ CBike::ProcessControl(void)
 			m_nCarHornTimer = 0;
 
 		bBalancedByRider = true;
-		m_bike_flag80 = false;
+		bWheelieCam = false;
 		break;
 	}
 
@@ -1344,7 +1344,7 @@ CBike::PreRender(void)
 		// 1.0 if directly behind car, -1.0 if in front
 		float behindness = DotProduct(lookVector, GetForward());
 		// 0.0 if behind car, PI if in front
-		float angle = Abs(PI/2.0f - Acos(Abs(behindness)));
+		float angle = Abs(Acos(Abs(behindness)));
 
 		// Headlight
 

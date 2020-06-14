@@ -19847,7 +19847,7 @@ CPed::DriveVehicle(void)
 
 		} else if (targetUDLean > -1.0f) {
 			targetUDLean = bike->m_fLeanInput;
-			bike->m_bike_flag80 = false;
+			bike->bWheelieCam = false;
 			neededAngForWheelie = 1.0f;
 			if (bike->m_aWheelTimer[0] != 0.0f || bike->m_aWheelTimer[1] != 0.0f || bike->GetForward().z <= 0.0f ||
 				(0.0f == bike->m_aWheelTimer[2] && 0.0f == bike->m_aWheelTimer[3])) {
@@ -19857,13 +19857,13 @@ CPed::DriveVehicle(void)
 
 					stoppieAng = bike->pBikeHandling->fStoppieAng;
 					if (stoppieAng - bike->GetForward().z > 0.6f * stoppieAng)
-						bike->m_bike_flag80 = true;
+						bike->bWheelieCam = true;
 				}
 			} else {
 				float wheelieAng = bike->pBikeHandling->fWheelieAng;
 				neededAngForWheelie = wheelieAng - bike->GetForward().z;
 				if (neededAngForWheelie < wheelieAng / 2.f)
-					bike->m_bike_flag80 = true;
+					bike->bWheelieCam = true;
 			}
 			if (neededAngForWheelie >= 0.15f) {
 				if (bike->m_fBrakePedal <= 0.5f || velocityFwdDotProd <= 0.01f) {

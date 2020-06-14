@@ -36,6 +36,8 @@ int16 CPickups::NumMessages;
 int32 CPickups::aPickUpsCollected[NUMCOLLECTEDPICKUPS];
 int16 CPickups::CollectedPickUpIndex;
 
+int32 CPickups::PlayerOnWeaponPickup;
+
 // unused
 bool CPickups::bPickUpcamActivated;
 CVehicle *CPickups::pPlayerVehicle;
