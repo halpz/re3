@@ -546,3 +546,7 @@ void RetryMission(int, int);
 #ifdef USE_DEBUG_SCRIPT_LOADER
 extern int scriptToLoad;
 #endif
+
+#ifdef MISSION_SWITCHER
+extern int switchMissionTo;
+#endif

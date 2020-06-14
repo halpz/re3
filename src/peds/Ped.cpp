@@ -102,6 +102,9 @@ bool CPed::bPedCheat2;
 bool CPed::bPedCheat3;
 CVector2D CPed::ms_vec2DFleePosition;
 
+CVector vecNextPathNode;
+bool vecNextPathNodeInitialized;
+
 void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
 void *CPed::operator new(size_t sz, int handle) { return CPools::GetPedPool()->New(handle); }
 void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }
@@ -145,6 +148,7 @@ CPed::~CPed(void)
 	DMAudio.DestroyEntity(m_audioEntityId);
 }
 
+// --MIAMI: Done
 void
 CPed::FlagToDestroyWhenNextProcessed(void)
 {
@@ -231,6 +235,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_wepSkills = 0;
 	m_distanceToCountSeekDone = 1.0f;
 	m_acceptableHeadingOffset = 0.1f;
+	m_followPathDestPos = CVector(0.f, 0.f, 0.f);
+	m_followPathAbortDist = 0.0f;
+	m_followPathMoveState = PEDMOVE_NONE;
 	bRunningToPhone = false;
 	m_phoneId = -1;
 	m_lastAccident = 0;
@@ -257,11 +264,20 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fLookDirection = 0.0f;
 	m_pCurSurface = nil;
 	m_wanderRangeBounds = nil;
-	m_nPathNodes = 0;
-	m_nCurPathNode = 0;
+
+	for (int i = 0; i < ARRAY_SIZE(m_pathNodesToGo); i++) {
+		m_pathNodesToGo[i] = nil;
+	}
+	m_nNumPathNodes = 0;
+	m_nCurPathNodeId = 0;
 	m_nPathDir = 0;
 	m_pLastPathNode = nil;
 	m_pNextPathNode = nil;
+	m_followPathWalkAroundEnt = nil;
+	m_followPathTargetEnt = nil;
+	m_pathNodeTimer = 0;
+	m_pCurPathNode = nil;
+
 	m_routeLastPoint = -1;
 	m_routeStartPoint = 0;
 	m_routePointsPassed = 0;
@@ -398,9 +414,6 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 
 	for (int i = 0; i < ARRAY_SIZE(m_nearPeds); i++) {
 		m_nearPeds[i] = nil;
-		if (i < ARRAY_SIZE(m_pPathNodesStates)) {
-			m_pPathNodesStates[i] = nil;
-		}
 	}
 	m_maxWeaponTypeAllowed = WEAPONTYPE_UNARMED;
 	m_currentWeapon = WEAPONTYPE_UNARMED;
@@ -995,7 +1008,7 @@ CPed::FinishedReloadCB(CAnimBlendAssociation *reloadAssoc, void *arg)
 void
 CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 {
-	CAnimBlendAssociation *newAnim, *reloadAnimAssoc;
+	CAnimBlendAssociation *newAnim, *reloadAnimAssoc = nil;
 	CPed *ped = (CPed*)arg;
 	CWeaponInfo *currentWeapon = CWeaponInfo::GetWeaponInfo(ped->GetWeapon()->m_eWeaponType);
 
@@ -1650,65 +1663,70 @@ CPed::ClearPointGunAt(void)
 	}
 }
 
+// --MIAMI: Done
 void
 CPed::BeingDraggedFromCar(void)
 {
-	CAnimBlendAssociation *animAssoc;
 	AnimationId enterAnim;
 	bool dontRunAnim = false;
-	PedLineUpPhase lineUpType;
 
 	if (!m_pVehicleAnim) {
 		CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 100.0f);
-		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_SIT);
-		if (!animAssoc) {
-			animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_LSIT);
-			if (!animAssoc) {
-				animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_SITP);
-				if (!animAssoc)
-					animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_SITPLO);
-			}
+
+		AssocGroupId assocGroup;
+		if (m_pMyVehicle->IsBike()) {
+			enterAnim = ANIM_BIKE_HIT;
+			assocGroup = ((CBike*)m_pMyVehicle)->m_bikeAnimType;
+
+		} else {
+			if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR) {
+				if (bWillBeQuickJacked && m_vehEnterType == CAR_DOOR_LF) {
+					enterAnim = ANIM_CAR_QJACKED;
+				} else if (m_pMyVehicle->bLowVehicle) {
+					enterAnim = ANIM_CAR_LJACKED_LHS;
+				} else {
+					enterAnim = ANIM_CAR_JACKED_LHS;
+				}
+			} else if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR) {
+				if (m_pMyVehicle->bLowVehicle)
+					enterAnim = ANIM_CAR_LJACKED_RHS;
+				else
+					enterAnim = ANIM_CAR_JACKED_RHS;
+			} else
+				dontRunAnim = true;
+
+			assocGroup = ASSOCGRP_STD;
 		}
-		if (animAssoc)
-			animAssoc->blendDelta = -1000.0f;
-
-		if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR) {
-			if (bWillBeQuickJacked) {
-				enterAnim = ANIM_CAR_QJACKED;
-			} else if (m_pMyVehicle->bLowVehicle) {
-				enterAnim = ANIM_CAR_LJACKED_LHS;
-			} else {
-				enterAnim = ANIM_CAR_JACKED_LHS;
-			}
-		} else if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR) {
-			if (m_pMyVehicle->bLowVehicle)
-				enterAnim = ANIM_CAR_LJACKED_RHS;
-			else
-				enterAnim = ANIM_CAR_JACKED_RHS;
-		} else
-			dontRunAnim = true;
-
 
 		if (!dontRunAnim)
-			m_pVehicleAnim = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, enterAnim);
+			m_pVehicleAnim = CAnimManager::AddAnimation(GetClump(), assocGroup, enterAnim);
 
 		m_pVehicleAnim->SetFinishCallback(PedSetDraggedOutCarCB, this);
-		lineUpType = LINE_UP_TO_CAR_START;
+
+		if (m_pMyVehicle && m_pMyVehicle->IsBike()) {
+			LineUpPedWithCar(LINE_UP_TO_CAR_FALL);
+		} else {
+			LineUpPedWithCar(LINE_UP_TO_CAR_START);
+		}
+		return;
+
+	} else if (m_pVehicleAnim->animId == ANIM_BIKE_HIT) {
+		LineUpPedWithCar(LINE_UP_TO_CAR_FALL);
+
 	} else if (m_pVehicleAnim->currentTime <= 1.4f) {
 		m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-		lineUpType = LINE_UP_TO_CAR_START;
+		LineUpPedWithCar(LINE_UP_TO_CAR_START);
+
 	} else {
-		lineUpType = LINE_UP_TO_CAR_2;
+		LineUpPedWithCar(LINE_UP_TO_CAR_2);
 	}
-	
-	LineUpPedWithCar(lineUpType);
-#ifdef VC_PED_PORTS
+
+	static float mult = 5.f;
 	if (m_objective == OBJECTIVE_LEAVE_CAR_AND_DIE) {
 		if (m_pMyVehicle) {
-			m_pMyVehicle->ProcessOpenDoor(m_vehEnterType, NUM_STD_ANIMS, m_pVehicleAnim->currentTime * 5.0f);
+			m_pMyVehicle->ProcessOpenDoor(m_vehEnterType, NUM_STD_ANIMS, m_pVehicleAnim->currentTime * mult);
 		}
 	}
-#endif
 }
 
 void
@@ -4575,6 +4593,7 @@ CPed::ClearInvestigateEvent(void)
 		SetMoveState(PEDMOVE_WALK);
 }
 
+// --MIAMI: Done
 void
 CPed::ClearLeader(void)
 {
@@ -4836,19 +4855,15 @@ CPed::SetPointGunAt(CEntity *to)
 
 	CAnimBlendAssociation *aimAssoc;
 
-	if (bCrouchWhenShooting && bIsDucking) {
-		if (!!curWeapon->m_bCrouchFire) {
-			aimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(curWeapon));
-		}
+	if (bCrouchWhenShooting && bIsDucking && GetCrouchFireAnim(curWeapon)) {
+		aimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(curWeapon));
 	} else {
 		aimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_FIRE);
 	}
 
 	if (!aimAssoc || aimAssoc->blendDelta < 0.0f) {
-		if (bCrouchWhenShooting && bIsDucking) {
-			if (!!curWeapon->m_bCrouchFire) {
-				aimAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay, GetCrouchFireAnim(curWeapon), 4.0f);
-			}
+		if (bCrouchWhenShooting && bIsDucking && GetCrouchFireAnim(curWeapon)) {
+			aimAssoc = CAnimManager::BlendAnimation(GetClump(), curWeapon->m_AnimToPlay, GetCrouchFireAnim(curWeapon), 4.0f);
 		} else {
 			aimAssoc = CAnimManager::AddAnimation(GetClump(), curWeapon->m_AnimToPlay, ANIM_WEAPON_FIRE);
 		}
@@ -5741,7 +5756,7 @@ CPed::SetWaitState(eWaitState state, void *time)
 	if (!IsPedInControl())
 		return;
 
-	if (m_nWaitState == WAITSTATE_RIOT && state == WAITSTATE_FALSE)
+	if (m_nWaitState == WAITSTATE_RIOT && state != WAITSTATE_FALSE)
 		return;
 
 	if (state != m_nWaitState)
@@ -6429,8 +6444,10 @@ CPed::SetBuyIceCream(void)
 void
 CPed::SetChat(CEntity *chatWith, uint32 time)
 {
-	if(m_nPedState != PED_CHAT)
+	if (m_nPedState != PED_CHAT) {
+		m_nLastPedState = PED_NONE;
 		SetStoredState();
+	}
 
 	SetPedState(PED_CHAT);
 	SetMoveState(PEDMOVE_STILL);
@@ -6510,6 +6527,7 @@ CPed::SetDead(void)
 	CEventList::RegisterEvent(EVENT_DEAD_PED, EVENT_ENTITY_PED, this, nil, 1000);
 }
 
+// --MIAMI: Done
 void
 CPed::SetSeek(CEntity *seeking, float distanceToCountDone)
 {
@@ -6519,24 +6537,25 @@ CPed::SetSeek(CEntity *seeking, float distanceToCountDone)
 	if (m_nPedState == PED_SEEK_ENTITY && m_pSeekTarget == seeking)
 		return;
 
-	if (!seeking)
+	if (!seeking || m_nPedState == PED_FOLLOW_PATH)
 		return;
 
 	if (m_nPedState != PED_SEEK_ENTITY)
 		SetStoredState();
 
-	m_nPedState = PED_SEEK_ENTITY;
+	SetPedState(PED_SEEK_ENTITY);
 	m_distanceToCountSeekDone = distanceToCountDone;
 	m_pSeekTarget = seeking;
 	m_pSeekTarget->RegisterReference((CEntity **) &m_pSeekTarget);
 	SetMoveState(PEDMOVE_STILL);
 }
 
+// --MIAMI: Done
 void
 CPed::SetSeek(CVector pos, float distanceToCountDone)
 {
 	if (!IsPedInControl()
-		|| (m_nPedState == PED_SEEK_POS && m_vecSeekPos.x == pos.x && m_vecSeekPos.y == pos.y))
+		|| (m_nPedState == PED_SEEK_POS && m_vecSeekPos.x == pos.x && m_vecSeekPos.y == pos.y) || m_nPedState == PED_FOLLOW_PATH)
 		return;
 
 	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAimWithArm) {
@@ -6546,7 +6565,7 @@ CPed::SetSeek(CVector pos, float distanceToCountDone)
 	if (m_nPedState != PED_SEEK_POS)
 		SetStoredState();
 
-	m_nPedState = PED_SEEK_POS;
+	SetPedState(PED_SEEK_POS);
 	m_distanceToCountSeekDone = distanceToCountDone;
 	m_vecSeekPos = pos;
 }
@@ -8094,6 +8113,7 @@ CPed::Wait(void)
 		RestoreHeadingRate();
 }
 
+// --MIAMI: Done
 bool
 CPed::Seek(void)
 {
@@ -8112,7 +8132,7 @@ CPed::Seek(void)
 									false, true, false, false, false, false);
 
 				if (obstacle) {
-					if (!obstacle->IsVehicle() || ((CVehicle*)obstacle)->m_vehType == VEHICLE_TYPE_CAR) {
+					if (!obstacle->IsVehicle() || ((CVehicle*)obstacle)->IsCar()) {
 						distanceToCountItDone = 2.5f;
 					} else {
 						CVehicleModelInfo *vehModel = (CVehicleModelInfo *)CModelInfo::GetModelInfo(obstacle->GetModelIndex());
@@ -8127,6 +8147,13 @@ CPed::Seek(void)
 
 	if (!m_pSeekTarget && m_nPedState == PED_SEEK_ENTITY)
 		ClearSeek();
+
+	if (m_objective == OBJECTIVE_FOLLOW_PED_IN_FORMATION && !m_pedInObjective) {
+		m_objective = OBJECTIVE_NONE;
+		ClearObjective();
+		SetWanderPath(0);
+		return false;
+	}
 
 	float seekPosDist = (m_vecSeekPos - GetPosition()).Magnitude2D();
 	if (seekPosDist < 2.0f || m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT) {
@@ -8163,7 +8190,9 @@ CPed::Seek(void)
 		}
 	}
 
-	if (seekPosDist >= distanceToCountItDone) {
+	CVector *nextNode = SeekFollowingPath();
+
+	if (nextNode || seekPosDist >= distanceToCountItDone) {
 		if (bIsRunning && nextMove != PEDMOVE_SPRINT)
 			nextMove = PEDMOVE_RUN;
 
@@ -8200,10 +8229,17 @@ CPed::Seek(void)
 					m_actionY = 0;
 				}
 			}
+
 		} else {
-			m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(
-				m_vecSeekPos.x, m_vecSeekPos.y,
-				GetPosition().x, GetPosition().y);
+			if (nextNode) {
+				m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(
+					nextNode->x, nextNode->y,
+					GetPosition().x, GetPosition().y);
+			} else {
+				m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(
+					m_vecSeekPos.x, m_vecSeekPos.y,
+					GetPosition().x, GetPosition().y);
+			}
 
 			float neededTurn = Abs(m_fRotationDest - m_fRotationCur);
 
@@ -8237,7 +8273,7 @@ CPed::Seek(void)
 	}
 
 	if (m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA || m_objective == OBJECTIVE_SPRINT_TO_COORD ||
-		m_objective == OBJECTIVE_GOTO_AREA_ANY_MEANS) {
+		m_objective == OBJECTIVE_GOTO_AREA_ANY_MEANS || IsUseAttractorObjective(m_objective)) {
 
 		if (m_pNextPathNode)
 			m_pNextPathNode = nil;
@@ -8247,16 +8283,30 @@ CPed::Seek(void)
 		bUsePedNodeSeek = true;
 	}
 
-	if (SeekFollowingPath(nil))
-		m_nCurPathNode++;
-
 	return true;
 }
 
-bool
-CPed::SeekFollowingPath(CVector *unused)
+CVector*
+CPed::SeekFollowingPath(void)
 {
-	return m_nCurPathNode <= m_nPathNodes && m_nPathNodes;
+	// unused
+	if (!vecNextPathNodeInitialized)
+		vecNextPathNodeInitialized = true;
+
+	if (m_nCurPathNodeId >= m_nNumPathNodes || m_nNumPathNodes == 0)
+		return nil;
+
+	vecNextPathNode = m_pathNodesToGo[m_nCurPathNodeId]->GetPosition();
+
+	if ((vecNextPathNode - GetPosition()).Magnitude2D() < m_distanceToCountSeekDone) {
+		m_nCurPathNodeId++;
+		if (m_nCurPathNodeId < m_nNumPathNodes)
+			m_pCurPathNode = m_pathNodesToGo[m_nCurPathNodeId];
+	}
+	if (m_nCurPathNodeId == m_nNumPathNodes)
+		return nil;
+	else
+		return &vecNextPathNode;
 }
 
 void
@@ -8442,31 +8492,34 @@ CPed::Flee(void)
 
 }
 
+// --MIAMI: Done
 void
 CPed::FollowPath(void)
 {
-	m_vecSeekPos.x = m_stPathNodeStates[m_nCurPathNode].x;
-	m_vecSeekPos.y = m_stPathNodeStates[m_nCurPathNode].y;
-	m_vecSeekPos.z = GetPosition().z;
-	
-	// Mysterious code
-/*	int v4 = 0;
-	int maxNodeIndex = m_nPathNodes - 1;
-	if (maxNodeIndex > 0) {
-		if (maxNodeIndex > 8)  {
-			while (v4 < maxNodeIndex - 8)
-				v4 += 8;
-		}
+	m_pCurPathNode = m_pathNodesToGo[m_nCurPathNodeId];
+	if (m_pathNodeTimer && CTimer::GetTimeInMilliseconds() > m_pathNodeTimer) {
+		RestorePreviousState();
+		ClearFollowPath();
+		m_pathNodeTimer = 0;
+	} else {
+		if (m_pathNodesToGo[m_nCurPathNodeId]) {
+			m_vecSeekPos.x = m_pathNodesToGo[m_nCurPathNodeId]->GetPosition().x;
+			m_vecSeekPos.y = m_pathNodesToGo[m_nCurPathNodeId]->GetPosition().y;
+			m_vecSeekPos.z = GetPosition().z;
 
-		while (v4 < maxNodeIndex)
-			v4++;
-
-	}
-*/
-	if (Seek()) {
-		m_nCurPathNode++;
-		if (m_nCurPathNode == m_nPathNodes)
+			if (Seek()) {
+				if (m_nCurPathNodeId == m_nNumPathNodes) {
+					RestorePreviousState();
+					ClearFollowPath();
+					SetFollowPath(m_followPathDestPos, m_followPathAbortDist, m_followPathMoveState, m_followPathWalkAroundEnt,
+						m_followPathTargetEnt, m_pathNodeTimer - CTimer::GetTimeInMilliseconds());
+				}
+			}
+		} else {
 			RestorePreviousState();
+			ClearFollowPath();
+			m_pathNodeTimer = 0;
+		}
 	}
 }
 
@@ -10534,17 +10587,22 @@ CPed::ProcessControl(void)
 								if (!bVehEnterDoorIsBlocked) {
 									if (collidingVeh->GetStatus() != STATUS_PLAYER || CharCreatedBy == MISSION_CHAR) {
 
-										// VC calls SetDirectionToWalkAroundVehicle instead if ped is in PED_SEEK_CAR.
-										SetDirectionToWalkAroundObject(collidingVeh);
-										CWorld::Players[CWorld::PlayerInFocus].m_nLastBumpPlayerCarTimer = m_nPedStateTimer;
+										if (m_nPedState == PED_SEEK_CAR) {
+											SetDirectionToWalkAroundObject(collidingVeh);
+											CWorld::Players[CWorld::PlayerInFocus].m_nLastBumpPlayerCarTimer = m_nPedStateTimer;
+										} else {
+											SetDirectionToWalkAroundVehicle(collidingVeh);
+										}
 									} else {
 										if (CTimer::GetTimeInMilliseconds() >= CWorld::Players[CWorld::PlayerInFocus].m_nLastBumpPlayerCarTimer
 											|| m_nPedStateTimer >= CTimer::GetTimeInMilliseconds()) {
 
-											// VC calls SetDirectionToWalkAroundVehicle instead if ped is in PED_SEEK_CAR.
-											SetDirectionToWalkAroundObject(collidingVeh);
-											CWorld::Players[CWorld::PlayerInFocus].m_nLastBumpPlayerCarTimer = m_nPedStateTimer;
-
+											if (m_nPedState == PED_SEEK_CAR) {
+												SetDirectionToWalkAroundObject(collidingVeh);
+												CWorld::Players[CWorld::PlayerInFocus].m_nLastBumpPlayerCarTimer = m_nPedStateTimer;
+											} else {
+												SetDirectionToWalkAroundVehicle(collidingVeh);
+											}
 										} else if (m_fleeFrom != collidingVeh) {
 											SetFlee(collidingVeh, 4000);
 											bUsePedNodeSeek = false;
@@ -14926,6 +14984,9 @@ CPed::SetSeekCar(CVehicle *car, uint32 doorNode)
 	if (m_nPedState == PED_SEEK_CAR)
 		return;
 
+	if (!CanSetPedState() || m_nPedState == PED_DRIVING)
+		return;
+
 	SetStoredState();
 	m_pSeekTarget = car;
 	m_pSeekTarget->RegisterReference((CEntity**) &m_pSeekTarget);
@@ -15024,7 +15085,13 @@ CanWeSeeTheCorner(CVector2D dist, CVector2D fwdOffset)
 }
 #endif
 
-// This function looks completely same on VC.
+// --MIAMI: Done
+bool
+CPed::SetDirectionToWalkAroundVehicle(CVehicle* veh)
+{
+	return SetFollowPath(m_vecSeekPos, 0.0f, m_nMoveState, veh, m_pedInObjective, m_nMoveState == PEDMOVE_WALK ? 2000 : 250);
+}
+
 void
 CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 {
@@ -16355,36 +16422,519 @@ CPed::SetSolicit(uint32 time)
 	}
 }
 
+// --MIAMI: Done
 bool
-CPed::SetFollowPath(CVector dest, float radius, eMoveState state, CEntity* pFollowedPed, CEntity*, int time)
+CPed::SetFollowPathStatic(void)
 {
-	// TODO(MIAMI): new follow
-	if (m_nPedState == PED_FOLLOW_PATH)
-		return false;
+	ClearFollowPath();
+	if (sq(m_followPathAbortDist) > (GetPosition() - m_followPathDestPos).MagnitudeSqr()
+		&& CWorld::IsWanderPathClear(GetPosition(), m_followPathDestPos, 0.5f, 4)) {
 
-	if (FindPlayerPed() != this)
-		return false;
+		RestorePreviousState();
+		if (m_objective == OBJECTIVE_NONE) {
+			if (m_followPathMoveState == PEDMOVE_RUN)
+				SetObjective(OBJECTIVE_RUN_TO_AREA, m_followPathDestPos);
+			else
+				SetObjective(OBJECTIVE_GOTO_AREA_ON_FOOT, m_followPathDestPos);			
+		}
+		SetPedState(PED_NONE);
+		return true;
+	} else {
+		ThePaths.DoPathSearch(PATH_PED, GetPosition(), -1, m_followPathDestPos, m_pathNodesToGo, &m_nNumPathNodes,
+			ARRAY_SIZE(m_pathNodesToGo), nil, nil, 999999.0f, -1);
 
-	if ((dest - GetPosition()).Magnitude() <= 2.0f)
-		return false;
+		if (m_nNumPathNodes != 0) {
+			if (m_nNumPathNodes > 0 && m_pathNodesToGo[0] != m_pCurPathNode) {
+				for (int i = 0; i < ARRAY_SIZE(m_pathNodesToGo) - 1; i++) {
+					m_pathNodesToGo[i] = m_pathNodesToGo[i+1];
+				}
+				--m_nNumPathNodes;
+			}
+			for (int i = 0; i < m_nNumPathNodes; ++i) {
+				CVector nodePos = m_pathNodesToGo[i]->GetPosition();
+				if (sq(m_followPathAbortDist) > (nodePos - m_followPathDestPos).MagnitudeSqr()
+					&& CWorld::IsWanderPathClear(nodePos, m_followPathDestPos, 0.5f, 4)) {
 
-	CVector pointPoses[7];
-	int16 pointsFound;
-	CPedPath::CalcPedRoute(0, GetPosition(), dest, pointPoses, &pointsFound, 7);
-	for(int i = 0; i < pointsFound; i++) {
-		m_stPathNodeStates[i].x = pointPoses[i].x;
-		m_stPathNodeStates[i].y = pointPoses[i].y;
+					m_nNumPathNodes = i + 1;
+					break;
+				}
+			}
+
+			m_nCurPathNodeId = 0;
+			if (m_pCurPathNode) {
+				for (int j = 0; j < m_nNumPathNodes; ++j) {
+					if (m_pathNodesToGo[j] == m_pCurPathNode) {
+						m_nCurPathNodeId = j;
+						break;
+					}
+				}
+			}
+			m_pCurPathNode = m_pathNodesToGo[m_nCurPathNodeId];
+			PedState oldLastState = m_nLastPedState;
+			m_nLastPedState = PED_NONE;
+			SetStoredState();
+			if (m_nLastPedState == PED_NONE)
+				m_nLastPedState = oldLastState;
+
+			m_nPedState = PED_FOLLOW_PATH;
+			m_nMoveState = m_followPathMoveState;
+			return true;
+		} else {
+			RestorePreviousState();
+			if (m_objective == OBJECTIVE_NONE) {
+				if (m_followPathMoveState == PEDMOVE_RUN)
+					SetObjective(OBJECTIVE_RUN_TO_AREA, m_followPathDestPos);
+				else
+					SetObjective(OBJECTIVE_GOTO_AREA_ON_FOOT, m_followPathDestPos);
+			}
+			SetPedState(PED_NONE);
+			return true;
+		}
+	}
+}
+
+// --MIAMI: Done
+bool
+CPed::SetFollowPath(CVector dest, float radius, eMoveState state, CEntity* walkAroundEnt, CEntity* targetEnt, int time)
+{
+	if (m_nPedState == PED_FOLLOW_PATH) {
+		bool stopFollow = false;
+		if (walkAroundEnt && walkAroundEnt != m_followPathWalkAroundEnt || !walkAroundEnt && m_followPathWalkAroundEnt
+			|| targetEnt && targetEnt != m_followPathTargetEnt || !targetEnt && m_followPathTargetEnt) {
+			stopFollow = true;
+
+		} else if (targetEnt) {
+			if ((targetEnt->GetPosition() - m_followPathDestPos).MagnitudeSqr() > 1.f)
+				stopFollow = true;
+
+		} else if (!walkAroundEnt && !targetEnt) {
+			if ((dest - m_followPathDestPos).MagnitudeSqr() > 1.f)
+				stopFollow = true;
+		}
+
+		if (!stopFollow)
+			return false;
+	}
+	m_pathNodeTimer = CTimer::GetTimeInMilliseconds() + time;
+	m_followPathWalkAroundEnt = walkAroundEnt;
+	m_followPathTargetEnt = targetEnt;
+	m_distanceToCountSeekDone = 0.5f;
+
+	bool weHaveTargetPed = targetEnt && targetEnt->IsPed();
+	bool useDestVec = !weHaveTargetPed;
+
+	CVector targetPos;
+	if (useDestVec)
+		targetPos = dest;
+	else
+		targetPos = targetEnt->GetPosition();
+
+	m_followPathDestPos = targetPos;
+	if (targetEnt && m_nPedState == PED_SEEK_POS) {
+		m_followPathDestPos = m_vecSeekPos;
 	}
 
-	m_nCurPathNode = 0;
-	m_nPathNodes = pointsFound;
-	if (m_nPathNodes < 1)
-		return false;
+	float newRadius = radius > 0.f ? radius : 20.f;
+	bool useGivenPedMove = true;
 
-	SetStoredState();
-	m_nPedState = PED_FOLLOW_PATH;
-	SetMoveState(PEDMOVE_WALK);
-	return true;
+	m_followPathAbortDist = newRadius;
+
+	if (state != PEDMOVE_RUN && state != PEDMOVE_WALK)
+		useGivenPedMove = false;
+
+	if (useGivenPedMove)
+		m_followPathMoveState = state;
+	else
+		m_followPathMoveState = PEDMOVE_WALK;
+
+	if (m_followPathWalkAroundEnt)
+		return SetFollowPathDynamic();
+	else
+		return SetFollowPathStatic();
+}
+
+// --MIAMI: Done
+bool
+CPed::SetFollowPathDynamic(void)
+{
+	CVector colBoxMin = m_followPathWalkAroundEnt->GetColModel()->boundingBox.min + CVector(-0.35f, -0.35f, 0.f);
+	CVector colBoxMax = m_followPathWalkAroundEnt->GetColModel()->boundingBox.max + CVector(0.35f, 0.35f, 0.f);
+
+	CVector colCornerOffsets[4]; // BL, BR, TR, TL
+	colCornerOffsets[0] = CVector(colBoxMin.x, colBoxMin.y, 0.f);
+	colCornerOffsets[1] = CVector(colBoxMax.x, colBoxMin.y, 0.f);
+	colCornerOffsets[2] = CVector(colBoxMax.x, colBoxMax.y, 0.f);
+	colCornerOffsets[3] = CVector(colBoxMin.x, colBoxMax.y, 0.f);
+
+	if (m_followPathWalkAroundEnt->IsVehicle() && ((CVehicle*)m_followPathWalkAroundEnt)->IsUpsideDown()) {
+		CVector old0 = colCornerOffsets[0];
+		colCornerOffsets[0] = colCornerOffsets[1];
+		colCornerOffsets[1] = old0;
+		CVector old2 = colCornerOffsets[2];
+		colCornerOffsets[2] = colCornerOffsets[3];
+		colCornerOffsets[3] = old2;
+	}
+
+	CVector colCornerPos[4]; // global. again BL, BR, TR, TL
+	float dotProdCorrection[4];
+	CVector colBoxPlaneNormal[4];
+
+	for (int i=0; i<4; i++) {
+		colCornerPos[i] = m_followPathWalkAroundEnt->GetMatrix() * colCornerOffsets[i];
+		colCornerPos[i].z = GetPosition().z;
+	}
+
+	CVector prevColCorner = colCornerPos[3];  // top left
+	CVector *curCornerPos;
+	CVector fwdToNextCorner;
+
+	for (int i=0; i<4; i++) {
+		curCornerPos = &colCornerPos[i];
+		fwdToNextCorner = *curCornerPos - prevColCorner;
+		fwdToNextCorner.Normalise();
+		colBoxPlaneNormal[i] = CrossProduct(fwdToNextCorner, CVector(0.f, 0.f, 1.f));
+		dotProdCorrection[i] = -DotProduct(prevColCorner, colBoxPlaneNormal[i]); // yes, dp with global coord, as if in distance to plane calculation
+		prevColCorner = *curCornerPos;
+	}
+
+	bool weReGoingGreat = false;
+	CVector startVecCandidate = GetPosition();
+	CVector targetVecCandidate = m_followPathDestPos;
+	CVector dirToGo = targetVecCandidate - startVecCandidate;
+	dirToGo.Normalise();
+	CVector ourPos = startVecCandidate;
+	
+	for (int i=0; i<4; i++) {
+		CVector curPlaneNormal = colBoxPlaneNormal[i];
+		float minusGlobalCornerPos = dotProdCorrection[i];
+		float startVecDistToPlane = DotProduct(curPlaneNormal, startVecCandidate) + minusGlobalCornerPos;
+
+#define FRONT_OF_PLANE 1
+#define ON_THE_PLANE 0
+#define BEHIND_THE_PLANE -1
+
+		int8 startVecStatus;
+		int8 targetVecStatus;
+
+		if (startVecDistToPlane > 0.1f)
+			startVecStatus = FRONT_OF_PLANE;
+		else if (startVecDistToPlane < -0.1f)
+			startVecStatus = BEHIND_THE_PLANE;
+		else
+			startVecStatus = ON_THE_PLANE;
+
+		float targetVecDistToPlane = DotProduct(curPlaneNormal, targetVecCandidate) + minusGlobalCornerPos;
+		if (targetVecDistToPlane > 0.1f)
+			targetVecStatus = FRONT_OF_PLANE;
+		else if (targetVecDistToPlane < -0.1f)
+			targetVecStatus = BEHIND_THE_PLANE;
+		else
+			targetVecStatus = ON_THE_PLANE;
+
+
+		if (startVecStatus == BEHIND_THE_PLANE || targetVecStatus == BEHIND_THE_PLANE) {
+			if (startVecStatus == BEHIND_THE_PLANE && targetVecStatus == FRONT_OF_PLANE) {
+				targetVecCandidate = -(DotProduct(ourPos, curPlaneNormal) + minusGlobalCornerPos) / DotProduct(dirToGo, curPlaneNormal) * dirToGo + ourPos;
+
+			} else if (startVecStatus == FRONT_OF_PLANE && targetVecStatus == BEHIND_THE_PLANE) {
+				startVecCandidate = -(DotProduct(ourPos, curPlaneNormal) + minusGlobalCornerPos) / DotProduct(dirToGo, curPlaneNormal) * dirToGo + ourPos;
+			}
+		} else {
+			weReGoingGreat = true;
+			if (startVecStatus == ON_THE_PLANE)
+				startVecCandidate += (0.1f - startVecDistToPlane) * curPlaneNormal;
+
+			if (targetVecStatus == ON_THE_PLANE)
+				targetVecCandidate += (0.1f - targetVecDistToPlane) * curPlaneNormal;
+		}
+#undef FRONT_OF_PLANE
+#undef ON_THE_PLANE
+#undef BEHIND_THE_PLANE
+	}
+
+	if (!weReGoingGreat) {
+		CVector avgOfColPoints = (colCornerPos[0] + colCornerPos[1] + colCornerPos[2] + colCornerPos[3]) / 4.f;
+		float radius = 0.0f;
+
+		// Find radius of col box of the entity we follow
+		for (int i=0; i<4; i++) {
+			float cornerDist = (colCornerPos[i] - avgOfColPoints).MagnitudeSqr();
+
+			if (cornerDist > radius)
+				radius = cornerDist;
+		}
+		CColSphere followedEntSphere;
+		followedEntSphere.Set(Sqrt(radius) * 1.1f, avgOfColPoints, 0, 0);
+		CVector distToDest = m_followPathDestPos - GetPosition();
+		distToDest.z = 0.f;
+		
+		if (distToDest.Magnitude() == 0.0f)
+			return false;
+
+		distToDest.Normalise();
+
+		// Entity we follow doesn't go toward destination anymore, abort the following.
+		if (!followedEntSphere.IntersectRay(GetPosition(), distToDest, startVecCandidate, targetVecCandidate)) {
+			m_pathNodeTimer = 0;
+			if (m_nPedState == PED_FOLLOW_PATH)
+				RestorePreviousState();
+
+			return false;
+		}
+	}
+
+	int lastPlaneBehindUs = -1;
+	int lastPlaneInFrontOfUs = -1;
+	CVector oldstartVecCandidate = startVecCandidate;
+	CVector oldDirToGo = targetVecCandidate - startVecCandidate;
+	oldDirToGo.Normalise();
+		
+
+	// At least one plane should be between target and us.
+	for (int i=0; i<4; i++) {
+		CVector curPlaneNormal = colBoxPlaneNormal[i];
+		float minusGlobalCornerPos = dotProdCorrection[i];
+		float startVecDistToPlane = DotProduct(curPlaneNormal, startVecCandidate) + minusGlobalCornerPos;
+		float targetVecDistToPlane = DotProduct(curPlaneNormal, targetVecCandidate) + minusGlobalCornerPos;
+
+		if (startVecDistToPlane > 0.0f && targetVecDistToPlane < 0.0f) {
+			lastPlaneInFrontOfUs = i;
+			startVecCandidate = -(DotProduct(oldstartVecCandidate, curPlaneNormal) + minusGlobalCornerPos) / DotProduct(oldDirToGo, curPlaneNormal) * oldDirToGo + oldstartVecCandidate;
+
+		} else if (startVecDistToPlane < 0.0f && targetVecDistToPlane > 0.0f) {
+			lastPlaneBehindUs = i;
+			targetVecCandidate = -(DotProduct(oldstartVecCandidate, curPlaneNormal) + minusGlobalCornerPos) / DotProduct(oldDirToGo, curPlaneNormal) * oldDirToGo + oldstartVecCandidate;
+		}
+	}
+
+	CVector destsVariant1[5];
+	CVector destsVariant2[5];
+
+	// If not, followed entity diverged from route and we should abort the following.
+	if (lastPlaneBehindUs >= 0 && lastPlaneInFrontOfUs >= 0) {
+
+		int planeInFrontCircular = (lastPlaneInFrontOfUs + 4) % -4;
+		int planeInFrontCircularMinusOne = (lastPlaneInFrontOfUs + 3) % -4;
+		int planeInBehindCircular = (lastPlaneBehindUs + 4) % -4;
+		int planeInBehindCircularMinusOne = (lastPlaneBehindUs + 3) % -4;
+
+		destsVariant1[0] = GetPosition();
+		destsVariant1[1] = colCornerPos[planeInFrontCircularMinusOne];
+
+		int destsVar1LastNode = 2;
+		for(; planeInFrontCircularMinusOne != planeInBehindCircular; destsVar1LastNode++) {
+			planeInFrontCircularMinusOne = (planeInFrontCircularMinusOne + 3) % -4;
+			destsVariant1[destsVar1LastNode] = colCornerPos[planeInFrontCircularMinusOne];
+		}
+		destsVariant1[destsVar1LastNode] = m_followPathDestPos;
+
+		destsVariant2[0] = GetPosition();
+		destsVariant2[1] = colCornerPos[planeInFrontCircular];
+
+		int destsVar2LastNode = 2;
+		for (; planeInFrontCircular != planeInBehindCircularMinusOne; destsVar2LastNode++) {
+			planeInFrontCircular = (planeInFrontCircular + 5) % -4;
+			destsVariant2[destsVar2LastNode] = colCornerPos[planeInFrontCircular];
+		}
+		destsVariant2[destsVar2LastNode] = m_followPathDestPos;
+		CEntity *foundEnt1 = nil;
+		int dests1isOk = true;
+		int nodeToStopDestsVar1 = destsVar1LastNode + 1;
+		CVector avgOfColPoints2 = (colCornerPos[0] + colCornerPos[1] + colCornerPos[2] + colCornerPos[3]) / 4.f;
+
+		CVector prevDestVar1 = destsVariant1[0];
+			
+		for (int i = 1; i < destsVar1LastNode + 1; i++) {
+			CVector *curDestVar1 = &destsVariant1[i];
+
+			CVector routeNormalHalf = *curDestVar1 - prevDestVar1;
+			routeNormalHalf.z = 0.f;
+			routeNormalHalf.Normalise();
+			routeNormalHalf *= 0.5f;
+
+			float oldX = -routeNormalHalf.x;
+			routeNormalHalf.z = 0.0f;
+			routeNormalHalf.x = routeNormalHalf.y;
+			routeNormalHalf.y = oldX;
+
+			if (DotProduct(*curDestVar1 - avgOfColPoints2, routeNormalHalf) < 0.0f)
+				routeNormalHalf *= -1.f;
+
+			CColPoint foundCol;
+			bool foundObstacle = CWorld::ProcessLineOfSight(prevDestVar1, *curDestVar1, foundCol, foundEnt1,
+				true, true, true, true, false, false, false, false);
+
+			if (!foundObstacle)
+				foundObstacle = CWorld::ProcessLineOfSight(prevDestVar1 + routeNormalHalf, *curDestVar1 + routeNormalHalf, foundCol, foundEnt1, true, true, true, true, false, false, false, false);
+
+			if (foundObstacle) {
+				if (foundEnt1 == m_followPathWalkAroundEnt || foundEnt1 == this || foundEnt1 == m_pSeekTarget) {
+					foundEnt1 = nil;
+
+				} else {
+					if (!foundEnt1->IsPed()) {
+						dests1isOk = false;
+						nodeToStopDestsVar1 = i;
+						break;
+					}
+					if (((CPed*)foundEnt1)->m_nPedState == PED_IDLE) {
+						dests1isOk = false;
+						nodeToStopDestsVar1 = i;
+						break;
+					}
+					if (DotProduct(*curDestVar1 - prevDestVar1, foundEnt1->GetForward()) < 0.f) {
+						dests1isOk = false;
+						nodeToStopDestsVar1 = i;
+						break;
+					}
+					if (((CPed*)foundEnt1)->m_pedInObjective == this) {
+						dests1isOk = false;
+						nodeToStopDestsVar1 = i;
+						break;
+					}
+				}
+			}
+			prevDestVar1 = *curDestVar1;
+		}
+		CEntity *foundEnt2 = nil;
+		int dests2isOk = true;
+		int nodeToStopDestsVar2 = destsVar2LastNode + 1;
+
+		CVector prevDestVar2 = destsVariant2[0];
+
+		for (int i = 1; i < destsVar2LastNode + 1; i++) {
+			CVector *curDestVar2 = &destsVariant2[i];
+
+			CVector routeNormalHalf = *curDestVar2 - prevDestVar2;
+			routeNormalHalf.z = 0.f;
+			routeNormalHalf.Normalise();
+			routeNormalHalf *= 0.5f;
+
+			float oldX = -routeNormalHalf.x;
+			routeNormalHalf.z = 0.0f;
+			routeNormalHalf.x = routeNormalHalf.y;
+			routeNormalHalf.y = oldX;
+
+			if (DotProduct(*curDestVar2 - avgOfColPoints2, routeNormalHalf) < 0.0f)
+				routeNormalHalf *= -1.f;
+
+			CColPoint foundCol;
+			bool foundObstacle = CWorld::ProcessLineOfSight(prevDestVar2, *curDestVar2, foundCol, foundEnt2,
+				true, true, true, true, false, false, false, false);
+
+			if (!foundObstacle)
+				foundObstacle = CWorld::ProcessLineOfSight(prevDestVar2 + routeNormalHalf, *curDestVar2 + routeNormalHalf, foundCol, foundEnt2, true, true, true, true, false, false, false, false);
+
+				if (foundObstacle) {
+					if (foundEnt2 == m_followPathWalkAroundEnt || foundEnt2 == this || foundEnt2 == m_pSeekTarget) {
+						foundEnt2 = 0;
+					} else {
+						if (!foundEnt2->IsPed()) {
+							dests2isOk = false;
+							nodeToStopDestsVar2 = i;
+							break;
+						}
+						if (((CPed*)foundEnt2)->m_nPedState == PED_IDLE) {
+							dests2isOk = false;
+							nodeToStopDestsVar2 = i;
+							break;
+						}
+						if (DotProduct(*curDestVar2 - prevDestVar2, foundEnt2->GetForward()) < 0.f) {
+							dests2isOk = false;
+							nodeToStopDestsVar2 = i;
+								break;
+						}
+						if (((CPed*)foundEnt2)->m_pedInObjective == this) {
+							dests2isOk = false;
+							nodeToStopDestsVar2 = i;
+							break;
+						}
+					}
+				}
+				prevDestVar2 = *curDestVar2;
+		}
+
+		float destTotalLengthVar1 = 0.0f;
+		for(int i=0; i < destsVar1LastNode; i++){
+			destTotalLengthVar1 += (destsVariant1[i + 1] - destsVariant1[i]).Magnitude();
+		}
+
+		float destTotalLengthVar2 = 0.0f;
+		for (int i = 0; i < destsVar2LastNode; i++) {
+			destTotalLengthVar2 += (destsVariant2[i + 1] - destsVariant2[i]).Magnitude();
+		}
+
+		int destVariantToUse;
+		if (dests1isOk && dests2isOk) {
+			if (destTotalLengthVar1 < destTotalLengthVar2)
+				destVariantToUse = 1;
+			else
+				destVariantToUse = 2;
+
+		} else if (dests1isOk) {
+			destVariantToUse = 1;
+
+		} else if (dests2isOk) {
+			destVariantToUse = 2;
+
+		} else if (nodeToStopDestsVar1 == 1 && nodeToStopDestsVar2 > 1) {
+			destVariantToUse = 2;
+
+		} else if (nodeToStopDestsVar1 > 1 && nodeToStopDestsVar2 == 1) {
+			destVariantToUse = 1;
+
+		} else if (foundEnt1 == foundEnt2) {
+			if (destTotalLengthVar1 < destTotalLengthVar2)
+				destVariantToUse = 1;
+			else
+				destVariantToUse = 2;
+
+		} else if (foundEnt1->GetColModel()->boundingSphere.radius >= foundEnt2->GetColModel()->boundingSphere.radius) {
+			destVariantToUse = 2;
+		} else {
+			destVariantToUse = 1;
+		}
+
+		if (destVariantToUse == 1) {
+			ClearFollowPath();
+			for (int i = 1; i < destsVar1LastNode; i++) {
+				CPathNode* nextNode = &m_pathNodeObjPool[m_nNumPathNodes];
+				nextNode->SetPosition(destsVariant1[i]);
+				m_pathNodesToGo[m_nNumPathNodes++] = nextNode;
+			}
+		} else if (destVariantToUse == 2) {
+			ClearFollowPath();
+			for (int i = 1; i < destsVar2LastNode; i++) {
+				CPathNode *nextNode = &m_pathNodeObjPool[m_nNumPathNodes];
+				nextNode->SetPosition(destsVariant2[i]);
+				m_pathNodesToGo[m_nNumPathNodes++] = nextNode;
+			}
+		}
+		if (m_nNumPathNodes != 0) {
+			PedState oldLastState = m_nLastPedState;
+			m_nLastPedState = PED_NONE;
+			SetStoredState();
+			if (m_nLastPedState == PED_NONE)
+				m_nLastPedState = oldLastState;
+
+			m_nPedState = PED_FOLLOW_PATH;
+			m_nMoveState = m_followPathMoveState;
+			return true;
+
+		} else {
+			m_pathNodeTimer = 0;
+			if (m_nPedState == PED_FOLLOW_PATH)
+				RestorePreviousState();
+
+			return false;
+		}
+	} else {
+		m_pathNodeTimer = 0;
+		if (m_nPedState == PED_FOLLOW_PATH)
+			RestorePreviousState();
+
+		return false;
+	}
 }
 
 void
@@ -18942,11 +19492,11 @@ CPed::RequestDelayedWeapon()
 void
 CPed::ClearFollowPath()
 {
-	for (int i = 0; i < ARRAY_SIZE(m_pPathNodesStates); i++) {
-		m_pPathNodesStates[i] = nil;
+	for (int i = 0; i < ARRAY_SIZE(m_pathNodesToGo); i++) {
+		m_pathNodesToGo[i] = nil;
 	}
-	m_nPathNodes = 0;
-	m_nCurPathNode = 0;
+	m_nNumPathNodes = 0;
+	m_nCurPathNodeId = 0;
 }
 
 // --MIAMI: Done
@@ -19303,7 +19853,7 @@ CPed::DriveVehicle(void)
 				(0.0f == bike->m_aWheelTimer[2] && 0.0f == bike->m_aWheelTimer[3])) {
 
 				if (0.0f == bike->m_aWheelTimer[2] && 0.0f == bike->m_aWheelTimer[3] &&
-					(bike->GetForward().y < 0.0f && (bike->m_aWheelTimer[0] != 0.0f || bike->m_aWheelTimer[1] != 0.0f))) {
+					(bike->GetForward().z < 0.0f && (bike->m_aWheelTimer[0] != 0.0f || bike->m_aWheelTimer[1] != 0.0f))) {
 
 					stoppieAng = bike->pBikeHandling->fStoppieAng;
 					if (stoppieAng - bike->GetForward().z > 0.6f * stoppieAng)
