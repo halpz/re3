@@ -70,6 +70,8 @@ class CPickups
 	static int16 NumMessages;
 	static tPickupMessage aMessages[NUMPICKUPMESSAGES];
 public:
+	static int32 PlayerOnWeaponPickup;
+
 	static void Init();
 	static void Update();
 	static void RenderPickUpText();

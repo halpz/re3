@@ -357,7 +357,7 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 		if(mi->GetModelType() != MITYPE_SIMPLE && mi->GetModelType() != MITYPE_WEAPON){
 			if(FindPlayerVehicle() == ent &&
 			   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON &&
-			   !(FindPlayerVehicle()->IsBike() && ((CBike*)FindPlayerVehicle())->m_bike_flag80)){
+			   !(FindPlayerVehicle()->IsBike() && ((CBike*)FindPlayerVehicle())->bWheelieCam)){
 				// Player's vehicle in first person mode
 				CVehicle *veh = (CVehicle*)ent;
 				int model = veh->GetModelIndex();
