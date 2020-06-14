@@ -904,6 +904,8 @@ CBoat::AddWakePoint(CVector point)
 			}
 			m_avec2dWakePoints[0] = point;
 			m_afWakePointLifeTime[0] = 400.0f;
+			if(m_nNumWakePoints < ARRAY_SIZE(m_afWakePointLifeTime))
+				m_nNumWakePoints++;
 		}
 	}else{
 		m_avec2dWakePoints[0] = point;
