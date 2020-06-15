@@ -244,10 +244,18 @@ CCam::Process(void)
 	case MODE_PLAYER_FALLEN_WATER:
 		Process_Player_Fallen_Water(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
-//	case MODE_CAM_ON_TRAIN_ROOF:
-//	case MODE_CAM_RUNNING_SIDE_TRAIN:
-//	case MODE_BLOOD_ON_THE_TRACKS:
-//	case MODE_IM_THE_PASSENGER_WOOWOO:
+/*	case MODE_CAM_ON_TRAIN_ROOF:
+		Process_Cam_On_Train_Roof(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
+	case MODE_CAM_RUNNING_SIDE_TRAIN:
+		Process_Cam_Running_Side_Train(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
+	case MODE_BLOOD_ON_THE_TRACKS:
+		Process_Blood_On_The_Tracks(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
+	case MODE_IM_THE_PASSENGER_WOOWOO:
+		Process_Im_The_Passenger_Woo_Woo(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;*/
 	case MODE_SYPHON_CRIM_IN_FRONT:
 		Process_Syphon_Crim_In_Front(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
@@ -2742,7 +2750,7 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 		while(Beta >= PI) Beta -= 2*PI;
 		while(Beta < -PI) Beta += 2*PI;
 		if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
-		if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+		else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 		TargetCoors.x = 3.0f * Cos(Alpha) * Cos(Beta) + Source.x;
 		TargetCoors.y = 3.0f * Cos(Alpha) * Sin(Beta) + Source.y;
@@ -4313,6 +4321,88 @@ CCam::ProcessArrestCamTwo(void)
 		}
 	}
 	return false;
+}
+
+
+void
+CCam::Process_Im_The_Passenger_Woo_Woo(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	FOV = 50.0f;
+
+	Source = CamTargetEntity->GetPosition();
+	Source.z += 2.5f;
+	Front = CamTargetEntity->GetForward();
+	Front.Normalise();
+	Source += 1.35f*Front;
+	float heading = CGeneral::GetATanOfXY(Front.x, Front.y) + DEGTORAD(45.0f);
+	Front.x = Cos(heading);
+	Front.y = Sin(heading);
+	Up = CamTargetEntity->GetUp();
+
+	GetVectorsReadyForRW();
+}
+
+void
+CCam::Process_Blood_On_The_Tracks(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	FOV = 50.0f;
+
+	Source = CamTargetEntity->GetPosition();
+	Source.z += 5.45f;
+
+	static CVector Test = -CamTargetEntity->GetForward();
+#ifdef FIX_BUGS
+	if(ResetStatics){
+		Test = -CamTargetEntity->GetForward();
+		ResetStatics = false;
+	}
+#endif
+
+	Source.x += 19.45*Test.x;
+	Source.y += 19.45*Test.y;
+	Front = Test;
+	Front.Normalise();
+	Up = CamTargetEntity->GetUp();
+
+	GetVectorsReadyForRW();
+}
+
+void
+CCam::Process_Cam_Running_Side_Train(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	FOV = 60.0f;
+
+	Source = CamTargetEntity->GetPosition();
+	Source.z += 4.0f;
+	CVector fwd = CamTargetEntity->GetForward();
+	float heading = CGeneral::GetATanOfXY(fwd.x, fwd.y) - DEGTORAD(15.0f);
+	Source.x -= Cos(heading)*10.0f;
+	Source.y -= Sin(heading)*10.0f;
+	heading -= DEGTORAD(5.0f);
+	Front = fwd;
+	Front.x += Cos(heading);
+	Front.y += Sin(heading);
+	Front.z -= 0.056f;
+	Front.Normalise();
+	Up = CamTargetEntity->GetUp();
+
+	GetVectorsReadyForRW();
+}
+
+void
+CCam::Process_Cam_On_Train_Roof(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	static float RoofMultiplier = 1.5f;
+
+	Source = CamTargetEntity->GetPosition();
+	Source.z += 4.8f;
+	Front = CamTargetEntity->GetForward();
+	Front.Normalise();
+	Source += Front*RoofMultiplier;
+	Up = CamTargetEntity->GetUp();
+	Up.Normalise();
+
+	GetVectorsReadyForRW();
 }
 
 

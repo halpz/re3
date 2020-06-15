@@ -22,6 +22,7 @@
 #include "Weapon.h"
 #include "WeaponInfo.h"
 #include "World.h"
+#include "SurfaceTable.h"
 
 #define BULLET_LIFETIME (1000)
 #define NUM_PED_BLOOD_PARTICLES (8)
@@ -228,7 +229,7 @@ bool CBulletInfo::TestForSniperBullet(float x1, float x2, float y1, float y2, fl
 #ifdef FIX_BUGS // original code is not going work anyway...
 	CColLine line(PlayerSniperBulletStart, PlayerSniperBulletEnd);
 	CColBox box;
-	box.Set(CVector(x1, y1, z1), CVector(x2, y2, z2), 0, 0);
+	box.Set(CVector(x1, y1, z1), CVector(x2, y2, z2), SURFACE_DEFAULT, 0);
 	return CCollision::TestLineBox(line, box);
 #else
 	float minP = 0.0f;

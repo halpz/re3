@@ -2974,6 +2974,13 @@ CCamera::Process_Train_Camera_Control(void)
 		if(node >= m_uiNumberOfTrainCamNodes)
 			node = 0;
 	}
+#ifdef FIX_BUGS
+	// Not really a bug but be nice and respect the debug mode
+	if(DebugCamMode){
+		TakeControl(target, DebugCamMode, JUMP_CUT, CAMCONTROL_SCRIPT);
+		return;
+	}
+#endif
 
 	if(found){
 		SetWideScreenOn();

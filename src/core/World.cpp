@@ -941,7 +941,7 @@ CWorld::TestSphereAgainstSectorList(CPtrList &list, CVector spherePos, float rad
 
 			if(e != entityToIgnore && e->bUsesCollision &&
 			   !(ignoreSomeObjects && CameraToIgnoreThisObject(e))) {
-				CVector diff = spherePos - e->GetPosition();
+				CVector diff = spherePos - e->GetBoundCentre();
 				float distance = diff.Magnitude();
 
 				if(e->GetBoundRadius() + radius > distance) {
