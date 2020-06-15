@@ -10237,6 +10237,7 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 				ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(), ((CBike*)veh)->m_bikeAnimType,
 					enterDoor == DOOR_FRONT_LEFT || enterDoor == DOOR_REAR_LEFT ? ANIM_BIKE_JUMPON_R : ANIM_BIKE_JUMPON_L);
 				ped->m_pVehicleAnim->SetFinishCallback(PedAnimGetInCB, ped);
+				((CBike*)veh)->bIsBeingPickedUp = true;
 			}
 		} else if (ped->m_vehEnterType == CAR_WINDSCREEN) {
 			if (veh->pDriver->m_nPedState != PED_DRIVING || veh->pDriver->bDontDragMeOutCar) {
@@ -10246,6 +10247,7 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 				ped->m_pVehicleAnim->SetFinishCallback(PedAnimGetInCB, ped);
 				pedToDragOut = veh->pDriver;
 			}
+			((CBike*)veh)->bIsBeingPickedUp = true;
 		} else {
 			if (enterDoor == DOOR_FRONT_LEFT || enterDoor == DOOR_FRONT_RIGHT) {
 				if (veh->pDriver) {
@@ -10266,6 +10268,7 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 				} else {
 					ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(), ((CBike*)veh)->m_bikeAnimType, enterDoor == DOOR_FRONT_LEFT ? ANIM_BIKE_JUMPON_R : ANIM_BIKE_JUMPON_L);
 					ped->m_pVehicleAnim->SetFinishCallback(PedAnimGetInCB, ped);
+					((CBike*)veh)->bIsBeingPickedUp = true;
 				}
 			} else {
 				if (veh->pPassengers[0]) {
@@ -10288,10 +10291,10 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 					ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(),
 						((CBike*)veh)->m_bikeAnimType, enterDoor == DOOR_REAR_LEFT ? ANIM_BIKE_JUMPON_R : ANIM_BIKE_JUMPON_L);
 					ped->m_pVehicleAnim->SetFinishCallback(PedAnimGetInCB, ped);
+					((CBike*)veh)->bIsBeingPickedUp = true;
 				}
 			}
 		}
-		((CBike*)veh)->bIsBeingPickedUp = true;
 
 		// TODO(Miami): This looks like something inlined
 		if (pedToDragOut) {
