@@ -154,8 +154,8 @@ void CHud::Draw()
 		return;
 
 	if (m_Wants_To_Draw_Hud && !TheCamera.m_WideScreenOn) {
-		bool DrawCrossHair = 0;
-		bool DrawCrossHairPC = 0;
+		bool DrawCrossHair = false;
+		bool DrawCrossHairPC = false;
 
 		CPlayerPed *playerPed = FindPlayerPed();
 		eWeaponType WeaponType = playerPed->GetWeapon()->m_eWeaponType;

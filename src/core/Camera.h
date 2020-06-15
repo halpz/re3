@@ -240,6 +240,11 @@ public:
 	bool GetLookFromLampPostPos(CEntity *Target, CPed *Cop, CVector &TargetCoors, CVector &SourceOut);
 	bool GetLookOverShoulderPos(CEntity *Target, CPed *Cop, CVector &TargetCoors, CVector &SourceOut);
 
+	void Process_Im_The_Passenger_Woo_Woo(const CVector& CameraTarget, float TargetOrientation, float, float);
+	void Process_Blood_On_The_Tracks(const CVector& CameraTarget, float TargetOrientation, float, float);
+	void Process_Cam_Running_Side_Train(const CVector& CameraTarget, float TargetOrientation, float, float);
+	void Process_Cam_On_Train_Roof(const CVector& CameraTarget, float TargetOrientation, float, float);
+
 	// custom stuff
 	void Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrientation, float, float);
 	void Process_FollowCar_SA(const CVector &CameraTarget, float TargetOrientation, float, float);
