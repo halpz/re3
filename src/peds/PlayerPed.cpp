@@ -81,7 +81,7 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	for (int i = 0; i < 6; i++) {
 		m_vecSafePos[i] = CVector(0.0f, 0.0f, 0.0f);
 		m_pPedAtSafePos[i] = nil;
-		m_pCheckPlayers[i] = nil;
+		m_pMeleeList[i] = nil;
 	}
 	m_nCheckPlayersIndex = 0;
 	m_nPadUpPressedInMilliseconds = 0;
@@ -1709,6 +1709,18 @@ CPlayerPed::PlayIdleAnimations(CPad *padUsed)
 			}
 		}
 	}
+}
+
+void
+CPlayerPed::RemovePedFromMeleeList(CPed *ped)
+{
+	int i = 0;
+	for (; m_pMeleeList[i] != ped; i++) {
+		if (i >= ARRAY_SIZE(m_pMeleeList))
+			return;
+	}
+	m_pMeleeList[i] = nil;
+	ped->m_attackTimer = 0;
 }
 
 #ifdef COMPATIBLE_SAVES

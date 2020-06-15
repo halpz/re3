@@ -603,18 +603,12 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 									newDir.z = 0.01f;
 									CParticle::AddParticle(PARTICLE_DEBRIS2, bloodPos, newDir);
 
-									// TODO(Miami): New particle
-									/*
-									v116.z = 0.0;
-									v116.x = CGeneral::GetRandomNumberInRange(-0.15f, 0.15f);
-									v116.y = CGeneral::GetRandomNumberInRange(0.1f, 0.35f);
-									v115.x = CGeneral::GetRandomNumberInRange(SCREEN_STRETCH_X(50.0f), SCREEN_STRETCH_FROM_RIGHT(50.0f));
-									v115.z = 1.0;
-									v115.y = CGeneral::GetRandomNumberInRange(SCREEN_STRETCH_Y(50.0f), SCREEN_STRETCH_FROM_BOTTOM(50.0f));
-									CParticle::AddParticle(41, v115, v116, nil, CGeneral::GetRandomNumberInRange(0.1f, 0.15f),
+									CVector dropDir(CGeneral::GetRandomNumberInRange(-0.15f, 0.15f), CGeneral::GetRandomNumberInRange(0.1f, 0.35f), 0.f);
+									CVector dropPos(CGeneral::GetRandomNumberInRange(SCREEN_STRETCH_X(50.0f), SCREEN_STRETCH_FROM_RIGHT(50.0f)),
+										CGeneral::GetRandomNumberInRange(SCREEN_STRETCH_Y(50.0f), SCREEN_STRETCH_FROM_BOTTOM(50.0f)), 1.f);
+									CParticle::AddParticle(PARTICLE_BLOODDROP, dropPos, dropDir, nil, CGeneral::GetRandomNumberInRange(0.1f, 0.15f),
 										CRGBA(0, 0, 0, 0), 0, 0, CGeneral::GetRandomNumber() & 1, 0);
 
-									*/
 								}
 								if (info->m_AnimToPlay == ASSOCGRP_KNIFE)
 								{
@@ -705,8 +699,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 		{
 			nearCar->VehicleDamage(info->m_nDamage * (0.00075f * nearCar->pHandling->fMass), gaTempSphereColPoints[0].pieceB);
 
-			// TODO(Miami): Particle not in III
-			// CParticle::AddParticle(81, gaTempSphereColPoints[0].point, CVector(0.0f, 0.0f, 0.0f), 0, 0.0f, 0, 0, 0, 0);
+			CParticle::AddParticle(PARTICLE_HEATHAZE, gaTempSphereColPoints[0].point, CVector(0.0f, 0.0f, 0.0f), 0, 0.0f, 0, 0, 0, 0);
 		}
 		else
 		{
@@ -783,8 +776,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 				CParticle::AddParticle(PARTICLE_SPARK, gaTempSphereColPoints[0].point, 0.1f * gaTempSphereColPoints[0].normal, 0, 0.0f, 0, 0, 0, 0);
 			}
 
-			// TODO(Miami): Particle not in III
-			//CParticle::AddParticle(81, gaTempSphereColPoints[0].point, CVector(0.0f, 0.0f, 0.0f), 0, 0.0f, 0, 0, 0, 0);
+			CParticle::AddParticle(PARTICLE_HEATHAZE, gaTempSphereColPoints[0].point, CVector(0.0f, 0.0f, 0.0f), 0, 0.0f, 0, 0, 0, 0);
 			
 			if (!damageEntityRegistered)
 			{

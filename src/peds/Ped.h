@@ -594,6 +594,7 @@ public:
 	CEntity *m_pPointGunAt;
 	CVector m_vecHitLastPos;
 	uint32 m_lastFightMove;
+	uint32 m_lastHitState; // TODO(Miami): What's this?
 	uint8 m_fightButtonPressure;
 	FightState m_fightState;
 	bool m_takeAStepAfterAttack;
@@ -756,7 +757,8 @@ public:
 	void SetAttack(CEntity*);
 	void StartFightAttack(uint8);
 	void SetWaitState(eWaitState, void*);
-	bool FightStrike(CVector&);
+	bool FightStrike(CVector&, bool);
+	void FightHitPed(CPed*, CVector&, CVector&, int16);
 	int GetLocalDirection(const CVector2D &);
 	void StartFightDefend(uint8, uint8, uint8);
 	void PlayHitSound(CPed*);
@@ -1017,6 +1019,13 @@ public:
 	static AnimationId GetReloadAnim(CWeaponInfo* weapon) {
 		if (!!weapon->m_bReload)
 			return ANIM_WEAPON_RELOAD;
+		else
+			return (AnimationId)0;
+	}
+
+	static AnimationId GetFightIdleWithMeleeAnim(CWeaponInfo* weapon) {
+		if (!!weapon->m_bFightMode)
+			return ANIM_MELEE_IDLE_FIGHTMODE;
 		else
 			return (AnimationId)0;
 	}
