@@ -2,7 +2,7 @@
 
 #include "WeaponType.h"
 
-#define DRIVEBYAUTOAIMING_MAXDIST (2.5f)
+#define CAR_DRIVEBYAUTOAIMING_MAXDIST (2.5f)
 #define DOOMAUTOAIMING_MAXDIST    (9000.0f)
 
 class CEntity;
@@ -56,7 +56,7 @@ public:
 	
 	static void DoDoomAiming       (CEntity *shooter, CVector *source, CVector *target);
 	static void DoTankDoomAiming   (CEntity *shooter, CEntity *driver, CVector *source, CVector *target);
-	static void DoDriveByAutoAiming(CEntity *shooter, CVector *source, CVector *target);
+	static void DoDriveByAutoAiming(CEntity *driver, CVehicle *vehicle, CVector *source, CVector *target);
 	
 	void Reload(void);
 	void Update(int32 audioEntity, CPed *pedToAdjustSound);

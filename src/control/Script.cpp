@@ -9996,7 +9996,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 				continue;
 			if (pPed->CharCreatedBy != RANDOM_CHAR)
 				continue;
-			if (!pPed->IsPedInControl() && pPed->GetPedState() != PED_DRIVING /* && pPed->GetPedState() != PED_ONROPE */) // TODO(MIAMI)!
+			if (!pPed->IsPedInControl() && pPed->GetPedState() != PED_DRIVING && pPed->GetPedState() != PED_ABSEIL)
 				continue;
 			if (pPed->bRemoveFromWorld)
 				continue;
@@ -10640,7 +10640,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		char key[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		debug("SET_CUTSCENE_ANIM_TO_LOOP not implemented yet, skipping\n");
+		CCutsceneMgr::SetCutsceneAnimToLoop(key);
 		return 0;
 	}
 	case COMMAND_MARK_CAR_AS_CONVOY_CAR:
@@ -11339,6 +11339,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	{
 		CollectParameters(&m_nIp, 2);
 		debug("ATTACH_CUTSCENE_OBJECT_TO_COMPONENT not implemented, skipping\n"); // TODO(MIAMI)
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		return 0;
 	}
 	case COMMAND_SET_CHAR_STAY_IN_CAR_WHEN_JACKED:
@@ -11464,7 +11465,15 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_FIRE_HUNTER_GUN:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("FIRE_HUNTER_GUN is not implemented, skipping\n"); // TODO(MIAMI)
+		CVehicle *pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		if (CTimer::GetTimeInMilliseconds() > pVehicle->m_nGunFiringTime + 150) {
+			CWeapon gun(WEAPONTYPE_HELICANNON, 5000);
+			CVector worldGunPos = (pVehicle->GetMatrix() * vecHunterGunPos) + (CTimer::GetTimeStep() * pVehicle->m_vecMoveSpeed);
+			gun.FireInstantHit(pVehicle, &worldGunPos);
+			gun.AddGunshell(pVehicle, worldGunPos, CVector2D(0.f, 0.1f), 0.025f);
+			DMAudio.PlayOneShot(pVehicle->m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.f);
+			pVehicle->m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
+		}
 		return 0;
 	}
 	case COMMAND_SET_PROPERTY_AS_OWNED:
@@ -11704,7 +11713,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_CHAR_IGNORE_THREATS_BEHIND_OBJECTS:
 	{
 		CollectParameters(&m_nIp, 2);
-		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		pPed->bIgnoreThreatsBehindObjects = ScriptParams[1];
 		return 0;
@@ -11769,12 +11778,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	}
 	case COMMAND_WAS_CUTSCENE_SKIPPED:
 	{
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("COMMAND_WAS_CUTSCENE_SKIPPED not implemented, default to TRUE\n");
-			bShowed = true;
-		}
-		UpdateCompareFlag(true);
+		UpdateCompareFlag(CCutsceneMgr::WasCutsceneSkipped());
 		return 0;
 	}
 	case COMMAND_SET_CHAR_CROUCH_WHEN_THREATENED:
