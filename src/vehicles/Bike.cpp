@@ -411,13 +411,13 @@ CBike::ProcessControl(void)
 				fDx = fDAxisXExtra;
 				if(!(m_aWheelTimer[BIKESUSP_R1] == 0.0f && m_aWheelTimer[BIKESUSP_R2] == 0.0f) &&
 				   GetForward().z > 0.0f)
-					res.x -= Max(0.25f*Abs(pBikeHandling->fWheelieAng-GetForward().z), 0.07f);
+					res.x -= Min(0.25f*Abs(pBikeHandling->fWheelieAng-GetForward().z), 0.07f);
 				else
 					res.x = fInAirXRes;
 			}else if(m_aWheelTimer[BIKESUSP_R1] == 0.0f && m_aWheelTimer[BIKESUSP_R2] == 0.0f){
 				fDx = fDAxisXExtra;
 				if(GetForward().z < 0.0f)
-					res.x *= Max(0.3f*Abs(pBikeHandling->fStoppieAng-GetForward().z), 0.1f) + 0.9f;
+					res.x *= Min(0.3f*Abs(pBikeHandling->fStoppieAng-GetForward().z), 0.1f) + 0.9f;
 			}
 		}
 
@@ -1014,7 +1014,7 @@ CBike::ProcessControl(void)
 			m_vecAvgSurfaceRight.Normalise();
 			float lean;
 			if(m_nWheelsOnGround == 0)
-				lean = -m_fSteerAngle/DEGTORAD(pHandling->fSteeringLock)*0.5f*GRAVITY*CTimer::GetTimeStep();
+				lean = -(m_fSteerAngle/DEGTORAD(pHandling->fSteeringLock))*0.5f*GRAVITY*CTimer::GetTimeStep();
 			else
 				lean = DotProduct(m_vecMoveSpeed-initialMoveSpeed, m_vecAvgSurfaceRight);
 			lean /= GRAVITY*Max(CTimer::GetTimeStep(), 0.01f);

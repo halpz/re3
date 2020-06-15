@@ -34,7 +34,7 @@ public:
 	bool m_bDrunkVisualsWearOff; // TODO(Miami): That may be something else
 	CVector m_vecSafePos[6]; // safe places from the player, for example behind a tree
 	CPed *m_pPedAtSafePos[6];
-	CPlayerPed* m_pCheckPlayers[6]; //checks something with players, could be a leftover from original multiplayer
+	CPlayerPed* m_pMeleeList[6];
 	char unused1;
 	int16 m_nCheckPlayersIndex;
 	float m_fWalkAngle; //angle between heading and walking direction
@@ -84,6 +84,7 @@ public:
 	void PlayerControlZelda(CPad*);
 	bool DoesPlayerWantNewWeapon(eWeaponType, bool);
 	void PlayIdleAnimations(CPad*);
+	void RemovePedFromMeleeList(CPed*);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);
