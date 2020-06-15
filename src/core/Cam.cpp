@@ -4550,7 +4550,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	// We may need those later
 	bool isPlane = car->GetVehicleAppearance() == VEHICLE_APPEARANCE_PLANE;
 	bool isHeli = car->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI;
-	bool isBike = car->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE || car->IsBike();
+	bool isBike = car->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE;
 	bool isCar = car->IsCar() && !isPlane && !isHeli && !isBike;
 
 	CPad* pad = CPad::GetPad(0);
@@ -4623,11 +4623,11 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 
 	// Taken from VC CCam::Cam_On_A_String_Unobscured. If we don't this, we will end up seeing the world from the inside of RC Goblin/Raider.
 	// I couldn't find where SA does that. It's possible that they've increased the size of these veh.'s collision bounding box.
-	if (car->m_modelIndex == MI_RCRAIDER || car->m_modelIndex == MI_RCBANDIT) {
-		newDistance += 6.0f;
-	} else if (car->m_modelIndex == MI_RCBARON) {
-		newDistance += 9.5f;
-	}
+
+	if (car->m_modelIndex == MI_RCRAIDER || car->m_modelIndex == MI_RCGOBLIN)
+		newDistance += INIT_RC_HELI_HORI_EXTRA;
+	else if (car->m_modelIndex == MI_RCBARON)
+		newDistance += INIT_RC_PLANE_HORI_EXTRA;
 
 	float minDistForThisCar = approxCarLength * CARCAM_SET[camSetArrPos][3];
 
