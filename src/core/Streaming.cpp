@@ -1554,19 +1554,32 @@ CStreaming::RemoveCurrentZonesModels(void)
 {
 	int i;
 
-	if(ms_currentPedGrp != -1)
-		for(i = 0; i < NUMMODELSPERPEDGROUP; i++){
-			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
+	if (ms_currentPedGrp != -1)
+		for (i = 0; i < NUMMODELSPERPEDGROUP; i++) {
+			if (CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
 				break;
-			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != MI_MALE01)
+			if (CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != MI_MALE01) {
 				SetModelIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
+				SetModelTxdIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
+			}
 		}
 
-	for(i = 0; i < NUM_GANGS; i++){
-		SetModelIsDeletable(CGangs::GetGangPedModel1(i));
-		SetModelIsDeletable(CGangs::GetGangPedModel2(i));
-		if(CGangs::GetGangVehicleModel(i) != -1)
+	CStreaming::RequestModel(MI_MALE01, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::RequestModel(MI_TAXI_D, STREAMFLAGS_DONT_REMOVE);
+
+	for (i = 0; i < NUM_GANGS; i++) {
+		if (CGangs::GetGangPedModel1(i) != -1) {
+			SetModelIsDeletable(CGangs::GetGangPedModel1(i));
+			SetModelTxdIsDeletable(CGangs::GetGangPedModel1(i));
+		}
+		if (CGangs::GetGangPedModel2(i) != -1) {
+			SetModelIsDeletable(CGangs::GetGangPedModel2(i));
+			SetModelTxdIsDeletable(CGangs::GetGangPedModel2(i));
+		}
+		if (CGangs::GetGangVehicleModel(i) != -1) {
 			SetModelIsDeletable(CGangs::GetGangVehicleModel(i));
+			SetModelTxdIsDeletable(CGangs::GetGangVehicleModel(i));
+		}
 	}
 
 	ms_currentPedGrp = -1;

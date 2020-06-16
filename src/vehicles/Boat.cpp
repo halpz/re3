@@ -55,6 +55,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 	SetModelIndex(mi);
 
 	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)minfo->m_handlingId);
+	pFlyingHandling = mod_HandlingManager.GetFlyingPointer((eHandlingId)minfo->m_handlingId);
 	minfo->ChooseVehicleColour(m_currentColour1, m_currentColour2);
 
 	m_fMass = pHandling->fMass;
@@ -545,6 +546,28 @@ CBoat::ProcessControl(void)
 		}
 	}
 
+	if (m_modelIndex == MI_SKIMMER && CTimer::GetTimeStep() > 0.0f) {
+		if (GetStatus() == STATUS_PLAYER) {
+			if (m_fPropellerY <= CTimer::GetTimeStep() * 0.0005f) {
+				m_fPropellerY = 0.0f;
+			}
+			else {
+				m_fPropellerY -= CTimer::GetTimeStep() * 0.0005f;
+			}
+		}
+		else {
+			if (m_fPropellerY < 0.22f) {
+				m_fPropellerY += CTimer::GetTimeStep() * 0.001f;
+			}
+			FlyingControl(FLIGHT_MODEL_SEAPLANE);
+		}
+	}
+	else {
+		if (bCheat8) {
+			FlyingControl(FLIGHT_MODEL_PLANE);
+		}
+	}
+
 	ProcessDelayedExplosion();
 }
 
@@ -563,7 +586,7 @@ CBoat::ProcessControlInputs(uint8 pad)
 		m_fAccelerate += (CPad::GetPad(pad)->GetAccelerate()/255.0f - m_fAccelerate)*0.1f;
 		m_fAccelerate = clamp(m_fAccelerate, 0.0f, 1.0f);
 	}else
-		m_fAccelerate = -m_fBrake*0.2f;
+		m_fAccelerate = -m_fBrake*0.3f;
 
 	m_fSteeringLeftRight += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteeringLeftRight)*0.2f;
 	m_fSteeringLeftRight = clamp(m_fSteeringLeftRight, -1.0f, 1.0f);
@@ -912,20 +935,35 @@ void
 CBoat::AddWakePoint(CVector point)
 {
 	int i;
-	if(m_afWakePointLifeTime[0] > 0.0f){
-		if((CVector2D(GetPosition()) - m_avec2dWakePoints[0]).MagnitudeSqr() < SQR(1.0f)){
-			for(i = Min(m_nNumWakePoints, ARRAY_SIZE(m_afWakePointLifeTime)-1); i != 0; i--){
-				m_avec2dWakePoints[i] = m_avec2dWakePoints[i-1];
-				m_afWakePointLifeTime[i] = m_afWakePointLifeTime[i-1];
+	if (m_afWakePointLifeTime[0] > 0.0f) {
+		if ((CVector2D(GetPosition()) - m_avec2dWakePoints[0]).MagnitudeSqr() < SQR(2.0f)) {
+			if (GetStatus() == STATUS_PHYSICS) {
+				if (VehicleCreatedBy == MISSION_VEHICLE) {
+					if (m_nNumWakePoints >= 20)
+						m_nNumWakePoints = 20;
+				}
+				else {
+					if (m_nNumWakePoints >= 15)
+						m_nNumWakePoints = 15;
+				}
+			}
+			else {
+				if (m_nNumWakePoints >= 31)
+					m_nNumWakePoints = 31;
+			}
+			for (i = m_nNumWakePoints; i != 0; i--) {
+				m_avec2dWakePoints[i] = m_avec2dWakePoints[i - 1];
+				m_afWakePointLifeTime[i] = m_afWakePointLifeTime[i - 1];
 			}
 			m_avec2dWakePoints[0] = point;
-			m_afWakePointLifeTime[0] = 400.0f;
-			if(m_nNumWakePoints < ARRAY_SIZE(m_afWakePointLifeTime))
+			m_afWakePointLifeTime[0] = 150.0f;
+			if (m_nNumWakePoints < ARRAY_SIZE(m_afWakePointLifeTime))
 				m_nNumWakePoints++;
 		}
-	}else{
+	}
+	else {
 		m_avec2dWakePoints[0] = point;
-		m_afWakePointLifeTime[0] = 400.0f;
+		m_afWakePointLifeTime[0] = 150.0f;
 		m_nNumWakePoints = 1;
 	}
 }
