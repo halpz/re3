@@ -31,6 +31,7 @@
 #include "Text.h"
 #include "WaterLevel.h"
 #include "main.h"
+#include "Script.h"
 
 #ifndef _WIN32
 #include "assert.h"
@@ -212,7 +213,7 @@ SpawnCar(int id)
 		CVehicle *v;
 		if(CModelInfo::IsBoatModel(id))
 			v = new CBoat(id, RANDOM_VEHICLE);
-		if(CModelInfo::IsBikeModel(id))
+		else if(CModelInfo::IsBikeModel(id))
 			v = new CBike(id, RANDOM_VEHICLE);
 		else
 			v = new CAutomobile(id, RANDOM_VEHICLE);
@@ -308,6 +309,15 @@ ResetCamStatics(void)
 {
 	TheCamera.Cams[TheCamera.ActiveCam].ResetStatics = true;
 }
+
+#ifdef MISSION_SWITCHER
+int8 nextMissionToSwitch = 0;
+static void
+SwitchToMission(void)
+{
+	CTheScripts::SwitchToMission(nextMissionToSwitch);
+}
+#endif
 
 static const char *carnames[] = {
 	"landstal", "idaho", "stinger", "linerun", "peren", "sentinel", "rio", "firetruk", "trash", "stretch", "manana",
@@ -512,7 +522,10 @@ DebugMenuPopulate(void)
 #ifdef TIMEBARS
 		DebugMenuAddVarBool8("Debug", "Show Timebars", &gbShowTimebars, nil);
 #endif
-
+#ifdef MISSION_SWITCHER
+		DebugMenuAddInt8("Debug", "Select mission no", &nextMissionToSwitch, nil, 1, 0, 96, nil);
+		DebugMenuAddCmd("Debug", "Start selected mission ", SwitchToMission);
+#endif
 		extern bool PrintDebugCode;
 		extern int16 DebugCamMode;
 		DebugMenuAddVarBool8("Cam", "Use mouse Cam", &CCamera::m_bUseMouse3rdPerson, nil);

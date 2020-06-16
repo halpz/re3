@@ -71,11 +71,6 @@ uint8 aWeaponBlues[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 0, 128, 255, 0, 0 };
 
-float aWeaponScale[] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f,
-1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-1.0f, 1.0f, 1.0f, 1.0f };
-
 void
 CPickup::RemoveKeepType()
 {
@@ -699,41 +694,51 @@ CPickups::DoPickUpEffects(CEntity *entity)
 
 
 		int16 colorId;
+		bool doInnerGlow = false;
+		bool doOuterGlow = true;
 
-		if (entity->GetModelIndex() == MI_PICKUP_ADRENALINE || entity->GetModelIndex() == MI_PICKUP_CAMERA)
+		if (entity->GetModelIndex() == MI_PICKUP_ADRENALINE || entity->GetModelIndex() == MI_PICKUP_CAMERA) {
 			colorId = WEAPONTYPE_TOTALWEAPONS;
-		else if (entity->GetModelIndex() == MI_PICKUP_BODYARMOUR || entity->GetModelIndex() == MI_PICKUP_BRIBE)
+			doInnerGlow = true;
+			doOuterGlow = false;
+		} else if (entity->GetModelIndex() == MI_PICKUP_BODYARMOUR) {
 			colorId = WEAPONTYPE_TOTALWEAPONS + 1;
-		else if (entity->GetModelIndex() == MI_PICKUP_INFO || entity->GetModelIndex() == MI_PICKUP_KILLFRENZY)
+		} else if (entity->GetModelIndex() == MI_PICKUP_BRIBE) {
+			doInnerGlow = true;
+			doOuterGlow = false;
+		} else if (entity->GetModelIndex() == MI_PICKUP_INFO || entity->GetModelIndex() == MI_PICKUP_KILLFRENZY) {
 			colorId = WEAPONTYPE_TOTALWEAPONS + 2;
-		else if (entity->GetModelIndex() == MI_PICKUP_HEALTH || entity->GetModelIndex() == MI_PICKUP_BONUS)
-			colorId = WEAPONTYPE_TOTALWEAPONS + 3;
-		else
+			doInnerGlow = true;
+			doOuterGlow = false;
+		} else if (entity->GetModelIndex() == MI_PICKUP_HEALTH || entity->GetModelIndex() == MI_PICKUP_BONUS) {
+			colorId = WEAPONTYPE_TOTALWEAPONS;
+			doInnerGlow = true;
+			doOuterGlow = false;
+		} else
 			colorId = WeaponForModel(entity->GetModelIndex());
 
-		assert(colorId >= 0);
+		const CVector& pos = entity->GetPosition();
+		if (doOuterGlow) {
+			float colorModifier = ((CGeneral::GetRandomNumber() & 0x1F) * 0.015f + 1.0f) * modifiedSin * 0.15f;
+			CShadows::StoreStaticShadow(
+				(uintptr)entity,
+				SHADOWTYPE_ADDITIVE,
+				gpShadowExplosionTex,
+				&pos,
+				2.0f, 0.0f, 0.0f, -2.0f,
+				255,                                        // this is 0 on PC which results in no shadow
+				aWeaponReds[colorId] * colorModifier, aWeaponGreens[colorId] * colorModifier, aWeaponBlues[colorId] * colorModifier,
+				4.0f, 1.0f, 40.0f, false, 0.0f);
 
-		const CVector &pos = entity->GetPosition();
-
-		float colorModifier = ((CGeneral::GetRandomNumber() & 0x1F) * 0.015f + 1.0f) * modifiedSin * 0.15f;
-		CShadows::StoreStaticShadow(
-			(uintptr)entity,
-			SHADOWTYPE_ADDITIVE,
-			gpShadowExplosionTex,
-			&pos,
-			2.0f, 0.0f, 0.0f, -2.0f,
-			255,                                        // this is 0 on PC which results in no shadow
-			aWeaponReds[colorId] * colorModifier, aWeaponGreens[colorId] * colorModifier, aWeaponBlues[colorId] * colorModifier,
-			4.0f, 1.0f, 40.0f, false, 0.0f);
-
-		float radius = (CGeneral::GetRandomNumber() & 0xF) * 0.1f + 3.0f;
-		CPointLights::AddLight(CPointLights::LIGHT_POINT, pos, CVector(0.0f, 0.0f, 0.0f), radius, aWeaponReds[colorId] * modifiedSin / 256.0f, aWeaponGreens[colorId] * modifiedSin / 256.0f, aWeaponBlues[colorId] * modifiedSin / 256.0f, CPointLights::FOG_NONE, true);
-		float size = (CGeneral::GetRandomNumber() & 0xF) * 0.0005f + 0.6f;
-		CCoronas::RegisterCorona( (uintptr)entity,
-			aWeaponReds[colorId] * modifiedSin / 2.0f, aWeaponGreens[colorId] * modifiedSin / 2.0f, aWeaponBlues[colorId] * modifiedSin / 2.0f,
-			255,
-			pos,
-			size, 65.0f, CCoronas::TYPE_RING, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
+			float radius = (CGeneral::GetRandomNumber() & 0xF) * 0.1f + 3.0f;
+			CPointLights::AddLight(CPointLights::LIGHT_POINT, pos, CVector(0.0f, 0.0f, 0.0f), radius, aWeaponReds[colorId] * modifiedSin / 256.0f, aWeaponGreens[colorId] * modifiedSin / 256.0f, aWeaponBlues[colorId] * modifiedSin / 256.0f, CPointLights::FOG_NONE, true);
+			float size = (CGeneral::GetRandomNumber() & 0xF) * 0.0005f + 0.6f;
+			CCoronas::RegisterCorona((uintptr)entity,
+				aWeaponReds[colorId] * modifiedSin / 2.0f, aWeaponGreens[colorId] * modifiedSin / 2.0f, aWeaponBlues[colorId] * modifiedSin / 2.0f,
+				255,
+				pos,
+				size, 65.0f, CCoronas::TYPE_RING, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
+		}
 
 		CObject *object = (CObject*)entity;
 		if (object->bPickupObjWithMessage || object->bOutOfStock || object->m_nBonusValue) {
@@ -760,7 +765,19 @@ CPickups::DoPickUpEffects(CEntity *entity)
 			}
 		}
 
-		entity->GetMatrix().SetRotateZOnlyScaled((float)(CTimer::GetTimeInMilliseconds() & 0x7FF) * DEGTORAD(360.0f / 0x800), aWeaponScale[colorId]);
+		uint32 model = entity->GetModelIndex();
+		CColModel* colModel = entity->GetColModel();
+		CVector colLength = colModel->boundingBox.max - colModel->boundingBox.min;
+
+		float scale = (Max(1.f, 1.2f / Max(colLength.x, Max(colLength.y, colLength.z))) - 1.0f) * 0.6f + 1.0f;
+		if (model == MI_MINIGUN || model == MI_MINIGUN2)
+			scale = 1.2f;
+
+		entity->GetMatrix().SetRotateZOnlyScaled((float)(CTimer::GetTimeInMilliseconds() & 0x7FF) * DEGTORAD(360.0f / 0x800), scale);
+
+		if (doInnerGlow)
+			CCoronas::RegisterCorona((uintptr)entity + 1, 126, 69, 121, 255, entity->GetPosition(), 1.2f, 50.0f,
+				CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.f, false);
 	}
 }
 

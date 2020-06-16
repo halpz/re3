@@ -10,11 +10,11 @@
 #include "Weapon.h"
 #include "WeaponInfo.h"
 #include "AnimationId.h"
+#include "PathFind.h"
 
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
 
-struct CPathNode;
 class CAccident;
 class CObject;
 class CFire;
@@ -346,6 +346,9 @@ enum eMoveState {
 	PEDMOVE_NONE,
 	PEDMOVE_STILL,
 	PEDMOVE_WALK,
+	
+	PEDMOVE_UNK,
+
 	PEDMOVE_RUN,
 	PEDMOVE_SPRINT,
 };
@@ -521,13 +524,20 @@ public:
 	int32 m_nPrevMoveState;
 	eWaitState m_nWaitState;
 	uint32 m_nWaitTimer;
-	void *m_pPathNodesStates[8]; // unused, probably leftover from VC
-	CVector2D m_stPathNodeStates[10];
-	uint16 m_nPathNodes;
-	int16 m_nCurPathNode;
-	int8 m_nPathDir;
-	CPathNode *m_pLastPathNode;
-	CPathNode *m_pNextPathNode;
+	CPathNode* m_pathNodesToGo[8];
+	int16 m_nNumPathNodes;
+	int16 m_nCurPathNodeId;
+	CEntity* m_followPathWalkAroundEnt;
+	CEntity* m_followPathTargetEnt;
+	uint32 m_pathNodeTimer;
+	CPathNode m_pathNodeObjPool[8];
+	CPathNode* m_pCurPathNode;
+	char m_nPathDir;
+	CPathNode* m_pLastPathNode;
+	CPathNode* m_pNextPathNode;
+	CVector m_followPathDestPos;
+	float m_followPathAbortDist;
+	eMoveState m_followPathMoveState;
 	float m_fHealth;
 	float m_fArmour;
 	uint32 m_nExtendedRangeTimer;
@@ -584,6 +594,7 @@ public:
 	CEntity *m_pPointGunAt;
 	CVector m_vecHitLastPos;
 	uint32 m_lastFightMove;
+	uint32 m_lastHitState; // TODO(Miami): What's this?
 	uint8 m_fightButtonPressure;
 	FightState m_fightState;
 	bool m_takeAStepAfterAttack;
@@ -746,7 +757,8 @@ public:
 	void SetAttack(CEntity*);
 	void StartFightAttack(uint8);
 	void SetWaitState(eWaitState, void*);
-	bool FightStrike(CVector&);
+	bool FightStrike(CVector&, bool);
+	void FightHitPed(CPed*, CVector&, CVector&, int16);
 	int GetLocalDirection(const CVector2D &);
 	void StartFightDefend(uint8, uint8, uint8);
 	void PlayHitSound(CPed*);
@@ -756,6 +768,7 @@ public:
 	void RemoveInCarAnims(void);
 	void CollideWithPed(CPed*);
 	void SetDirectionToWalkAroundObject(CEntity*);
+	bool SetDirectionToWalkAroundVehicle(CVehicle*);
 	void RemoveWeaponAnims(int, float);
 	void CreateDeadPedMoney(void);
 	void CreateDeadPedWeaponPickups(void);
@@ -778,7 +791,7 @@ public:
 	bool FindBestCoordsFromNodes(CVector, CVector*);
 	void Wait(void);
 	void ProcessObjective(void);
-	bool SeekFollowingPath(CVector*);
+	CVector *SeekFollowingPath(void);
 	void Flee(void);
 	void FollowPath(void);
 	CVector GetFormationPosition(void);
@@ -1006,6 +1019,13 @@ public:
 	static AnimationId GetReloadAnim(CWeaponInfo* weapon) {
 		if (!!weapon->m_bReload)
 			return ANIM_WEAPON_RELOAD;
+		else
+			return (AnimationId)0;
+	}
+
+	static AnimationId GetFightIdleWithMeleeAnim(CWeaponInfo* weapon) {
+		if (!!weapon->m_bFightMode)
+			return ANIM_MELEE_IDLE_FIGHTMODE;
 		else
 			return (AnimationId)0;
 	}

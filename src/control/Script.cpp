@@ -166,7 +166,6 @@ bool doingMissionRetry;
 
 #endif
 
-
 const uint32 CRunningScript::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
 	136;
@@ -2032,7 +2031,13 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		ped->ClearAll();
 		int8 path = ScriptParams[1];
 		if (ScriptParams[1] < 0 || ScriptParams[1] > 7)
+			// Max number GetRandomNumberInRange returns is max-1
+#ifdef FIX_BUGS
+			path = CGeneral::GetRandomNumberInRange(0, 8);
+#else
 			path = CGeneral::GetRandomNumberInRange(0, 7);
+#endif
+
 		ped->SetWanderPath(path);
 		return 0;
 	}
@@ -2051,10 +2056,11 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		eMoveState state;
 		switch (ScriptParams[5]) {
 		case 0: state = PEDMOVE_WALK; break;
-		case 1: state = PEDMOVE_SPRINT; break;
+		case 1: state = PEDMOVE_RUN; break;
 		default: assert(0);
 		}
 		ped->ClearAll();
+		ped->m_pathNodeTimer = 0;
 		ped->SetFollowPath(pos, radius, state, nil, nil, 999999);
 		return 0;
 	}
@@ -9126,6 +9132,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	case COMMAND_LOAD_AND_LAUNCH_MISSION_INTERNAL:
 	{
 		CollectParameters(&m_nIp, 1);
+
 		if (CTheScripts::NumberOfExclusiveMissionScripts > 0 && ScriptParams[0] <= UINT16_MAX - 2)
 			return 0;
 #ifdef MISSION_REPLAY
@@ -9989,7 +9996,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 				continue;
 			if (pPed->CharCreatedBy != RANDOM_CHAR)
 				continue;
-			if (!pPed->IsPedInControl() && pPed->GetPedState() != PED_DRIVING /* && pPed->GetPedState() != PED_ONROPE */) // TODO(MIAMI)!
+			if (!pPed->IsPedInControl() && pPed->GetPedState() != PED_DRIVING && pPed->GetPedState() != PED_ABSEIL)
 				continue;
 			if (pPed->bRemoveFromWorld)
 				continue;
@@ -10633,7 +10640,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		char key[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		debug("SET_CUTSCENE_ANIM_TO_LOOP not implemented yet, skipping\n");
+		CCutsceneMgr::SetCutsceneAnimToLoop(key);
 		return 0;
 	}
 	case COMMAND_MARK_CAR_AS_CONVOY_CAR:
@@ -10676,7 +10683,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
 		assert(pTargetPed);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_GOTO_CHAR_ON_FOOT_WALKING, pPed);
+		pPed->SetObjective(OBJECTIVE_GOTO_CHAR_ON_FOOT_WALKING, pTargetPed);
 		return 0;
 	}
 	//case COMMAND_IS_PICKUP_IN_ZONE:
@@ -11332,6 +11339,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	{
 		CollectParameters(&m_nIp, 2);
 		debug("ATTACH_CUTSCENE_OBJECT_TO_COMPONENT not implemented, skipping\n"); // TODO(MIAMI)
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		return 0;
 	}
 	case COMMAND_SET_CHAR_STAY_IN_CAR_WHEN_JACKED:
@@ -11457,7 +11465,15 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_FIRE_HUNTER_GUN:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("FIRE_HUNTER_GUN is not implemented, skipping\n"); // TODO(MIAMI)
+		CVehicle *pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		if (CTimer::GetTimeInMilliseconds() > pVehicle->m_nGunFiringTime + 150) {
+			CWeapon gun(WEAPONTYPE_HELICANNON, 5000);
+			CVector worldGunPos = (pVehicle->GetMatrix() * vecHunterGunPos) + (CTimer::GetTimeStep() * pVehicle->m_vecMoveSpeed);
+			gun.FireInstantHit(pVehicle, &worldGunPos);
+			gun.AddGunshell(pVehicle, worldGunPos, CVector2D(0.f, 0.1f), 0.025f);
+			DMAudio.PlayOneShot(pVehicle->m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.f);
+			pVehicle->m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
+		}
 		return 0;
 	}
 	case COMMAND_SET_PROPERTY_AS_OWNED:
@@ -11697,7 +11713,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_CHAR_IGNORE_THREATS_BEHIND_OBJECTS:
 	{
 		CollectParameters(&m_nIp, 2);
-		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		pPed->bIgnoreThreatsBehindObjects = ScriptParams[1];
 		return 0;
@@ -11762,12 +11778,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	}
 	case COMMAND_WAS_CUTSCENE_SKIPPED:
 	{
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("COMMAND_WAS_CUTSCENE_SKIPPED not implemented, default to TRUE\n");
-			bShowed = true;
-		}
-		UpdateCompareFlag(true);
+		UpdateCompareFlag(CCutsceneMgr::WasCutsceneSkipped());
 		return 0;
 	}
 	case COMMAND_SET_CHAR_CROUCH_WHEN_THREATENED:
@@ -14220,7 +14231,7 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 	pPed->CharCreatedBy = RANDOM_CHAR;
 	if (pPed->m_nPedType == PEDTYPE_PROSTITUTE)
 		pPed->m_objectiveTimer = CTimer::GetTimeInMilliseconds() + 30000;
-	if (pPed->bInVehicle) {
+	if (pPed->InVehicle()) {
 		if (pPed->m_pMyVehicle->pDriver == pPed) {
 			if (pPed->m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR) {
 				CCarCtrl::JoinCarWithRoadSystem(pPed->m_pMyVehicle);
@@ -14245,10 +14256,14 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 	pPed->ClearObjective();
 	pPed->bRespondsToThreats = true;
 	pPed->bScriptObjectiveCompleted = false;
+	pPed->bKindaStayInSamePlace = false;
 	pPed->ClearLeader();
 	if (pPed->IsPedInControl())
 		pPed->SetWanderPath(CGeneral::GetRandomNumber() & 7);
 	if (flees) {
+		if (pPed->m_nPedState == PED_FOLLOW_PATH && state != PED_FOLLOW_PATH)
+			pPed->ClearFollowPath();
+
 		pPed->m_nPedState = state;
 		pPed->SetMoveState(ms);
 	}
@@ -14450,4 +14465,55 @@ void RetryMission(int type, int unk)
 	}
 }
 
+#endif
+
+#ifdef MISSION_SWITCHER
+void
+CTheScripts::SwitchToMission(int32 mission)
+{
+	for (CRunningScript* pScript = CTheScripts::pActiveScripts; pScript != nil; pScript = pScript->GetNext()) {
+		if (!pScript->m_bIsMissionScript || !pScript->m_bDeatharrestEnabled) {
+			continue;
+		}
+		while (pScript->m_nStackPointer > 0)
+			--pScript->m_nStackPointer;
+
+		pScript->m_nIp = pScript->m_anStack[pScript->m_nStackPointer];
+		*(int32*)&CTheScripts::ScriptSpace[CTheScripts::OnAMissionFlag] = 0;
+		pScript->m_nWakeTime = 0;
+		pScript->m_bDeatharrestExecuted = true;
+
+		while (!pScript->ProcessOneCommand());
+
+		CMessages::ClearMessages();
+	}
+
+	if (CTheScripts::NumberOfExclusiveMissionScripts > 0 && mission <= UINT16_MAX - 2)
+		return;
+
+#ifdef MISSION_REPLAY
+	missionRetryScriptIndex = mission;
+	if (missionRetryScriptIndex == 19)
+		CStats::LastMissionPassedName[0] = '\0';
+#endif
+	CTimer::Suspend();
+	int offset = CTheScripts::MultiScriptArray[mission];
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	CFileMgr::ChangeDir("\\data\\");
+	int handle = CFileMgr::OpenFile(scriptfile, "rb");
+	CFileMgr::ChangeDir("\\");
+#else
+	CFileMgr::ChangeDir("\\");
+	int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
+#endif
+	CFileMgr::Seek(handle, offset, 0);
+	CFileMgr::Read(handle, (const char*)&CTheScripts::ScriptSpace[SIZE_MAIN_SCRIPT], SIZE_MISSION_SCRIPT);
+	CFileMgr::CloseFile(handle);
+	CRunningScript* pMissionScript = CTheScripts::StartNewScript(SIZE_MAIN_SCRIPT);
+	CTimer::Resume();
+	pMissionScript->m_bIsMissionScript = true;
+	pMissionScript->m_bMissionFlag = true;
+	CTheScripts::bAlreadyRunningAMissionScript = true;
+	CGameLogic::ClearShortCut();
+}
 #endif

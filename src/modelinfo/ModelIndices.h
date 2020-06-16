@@ -484,6 +484,21 @@ IsLightObject(int16 id)
 }
 
 inline bool
+IsLampPost(int16 id)
+{
+	return id == MI_SINGLESTREETLIGHTS1 ||
+		id == MI_SINGLESTREETLIGHTS2 ||
+		id == MI_SINGLESTREETLIGHTS3 ||
+		id == MI_BOLLARDLIGHT ||
+		id == MI_MLAMPPOST ||
+		id == MI_STREETLAMP1 ||
+		id == MI_STREETLAMP2 ||
+		id == MI_TELPOLE02 ||
+		id == MI_TRAFFICLIGHTS_MIAMI ||
+		id == MI_TRAFFICLIGHTS_TWOVERTICAL;
+}
+
+inline bool
 IsBodyPart(int16 id)
 {
 	return id == MI_BODYPARTA || id == MI_BODYPARTB;

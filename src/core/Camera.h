@@ -26,20 +26,6 @@ enum
 	CAM_ZOOM_CINEMATIC,
 };
 
-#ifdef FREE_CAM // LCS values
-#define FREE_CAR_ZOOM_VALUE_1 (-1.0f)
-#define FREE_CAR_ZOOM_VALUE_2 (2.0f)
-#define FREE_CAR_ZOOM_VALUE_3 (6.0f)
-
-#define FREE_BOAT_ZOOM_VALUE_1 (-2.41f)
-#define FREE_BOAT_ZOOM_VALUE_2 (6.49f)
-#define FREE_BOAT_ZOOM_VALUE_3 (15.0f)
-#endif
-
-#define DEFAULT_CAR_ZOOM_VALUE_1 (0.05f)
-#define DEFAULT_CAR_ZOOM_VALUE_2 (1.9f)
-#define DEFAULT_CAR_ZOOM_VALUE_3 (3.9f)
-
 const float DefaultFOV = 70.0f; // beta: 80.0f
 
 class CCam
@@ -121,9 +107,8 @@ public:
 
 	float   f_max_role_angle; //=DEGTORAD(5.0f);    
 	float   f_Roll; //used for adding a slight roll to the camera in the
-	float	f_rollSpeed;	//TODO(MIAMI): remove
+	float	f_rollSpeed;
 	float   m_fSyphonModeTargetZOffSet;
-	float	m_fRoadOffSet;
 	float   m_fAmountFractionObscured;
 	float   m_fAlphaSpeedOverOneFrame;
 	float   m_fBetaSpeedOverOneFrame;
@@ -208,11 +193,11 @@ public:
 	void ProcessSpecialHeightRoutines(void);
 	void GetVectorsReadyForRW(void);
 	CVector DoAverageOnVector(const CVector &vec);
-	float GetPedBetaAngleForClearView(const CVector &Target, float Dist, float BetaOffset, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies);
 	void WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, float TargetHeight);
 	bool RotCamIfInFrontCar(CVector &TargetCoors, float TargetOrientation);
 	void Cam_On_A_String_Unobscured(const CVector &TargetCoors, float BaseDist);
 	void FixCamWhenObscuredByVehicle(const CVector &TargetCoors);
+	bool GetBoatLook_L_R_HeightOffset(float &Offset);
 	void LookBehind(void);
 	void LookLeft(void);
 	void LookRight(void);
@@ -246,26 +231,14 @@ public:
 	bool Process_WheelCam(const CVector&, float, float, float);
 	void Process_Fixed(const CVector &CameraTarget, float, float, float);
 	void Process_Player_Fallen_Water(const CVector &CameraTarget, float TargetOrientation, float, float);
-	void Process_Circle(const CVector &CameraTarget, float, float, float);
 	void Process_SpecialFixedForSyphon(const CVector &CameraTarget, float, float, float);
+	void Process_LightHouse(const CVector &CameraTarget, float, float, float);
 	void ProcessPedsDeadBaby(void);
 	bool ProcessArrestCamOne(void);
 	bool ProcessArrestCamTwo(void);
-
-	/* Some of the unused PS2 cams */
-	void Process_Chris_With_Binding_PlusRotation(const CVector &CameraTarget, float, float, float);
-	void Process_ReactionCam(const CVector &CameraTarget, float TargetOrientation, float, float);
-	void Process_FollowPed_WithBinding(const CVector &CameraTarget, float TargetOrientation, float, float);
-	// TODO:
-	// CCam::Process_CushyPillows_Arse
-	// CCam::Process_Look_At_Cars
-	// CCam::Process_CheesyZoom
-	// CCam::Process_Aiming
-	// CCam::Process_Bill	// same as BehindCar due to unused variables
-	// CCam::Process_Im_The_Passenger_Woo_Woo
-	// CCam::Process_Blood_On_The_Tracks
-	// CCam::Process_Cam_Running_Side_Train
-	// CCam::Process_Cam_On_Train_Roof
+	bool GetLookAlongGroundPos(CEntity *Target, CPed *Cop, CVector &TargetCoors, CVector &SourceOut);
+	bool GetLookFromLampPostPos(CEntity *Target, CPed *Cop, CVector &TargetCoors, CVector &SourceOut);
+	bool GetLookOverShoulderPos(CEntity *Target, CPed *Cop, CVector &TargetCoors, CVector &SourceOut);
 
 	// custom stuff
 	void Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrientation, float, float);

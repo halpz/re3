@@ -166,3 +166,5 @@ public:
 
 	static void SetAllTaxiLights(bool set);
 };
+
+extern CVector vecHunterGunPos;

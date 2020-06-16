@@ -76,6 +76,16 @@ float CCamera::m_f3rdPersonCHairMultY;
 #define CTRLDOWN(key) ((KEYDOWN(rsLCTRL) || KEYDOWN(rsRCTRL)) && KEYDOWN((RsKeyCodes)key))
 #endif
 
+const float ZOOM_ONE_DISTANCE[] = { -0.6f, 0.05f, -3.2f, 0.05f, -2.41f };
+const float ZOOM_TWO_DISTANCE[] = { 1.9f, 1.4f, 0.65f, 1.9f, 6.49f };
+const float ZOOM_THREE_DISTANCE[] = { 15.9f, 15.9f, 15.9f, 15.9f, 25.25f };
+
+#ifdef FREE_CAM
+const float LCS_ZOOM_ONE_DISTANCE[] = { -1.0f, -0.2f, -3.2f, 0.05f, -2.41f };
+const float LCS_ZOOM_TWO_DISTANCE[] = { 2.0f, 2.2f, 1.65f, 2.9f, 6.49f };
+const float LCS_ZOOM_THREE_DISTANCE[] = { 6.0f, 6.0f, 15.9f, 15.9f, 15.0f };
+#endif
+
 CCamera::CCamera(void)
 {
 	Init();
@@ -670,6 +680,10 @@ CCamera::CamControl(void)
 					if(CarZoomIndicator != CAM_ZOOM_1STPRS && CarZoomIndicator != CAM_ZOOM_TOPDOWN)
 						ReqMode = CCam::MODE_CAM_ON_A_STRING;
 
+				int vehApp = ((CVehicle*)pTargetEntity)->GetVehicleAppearance();
+				int vehArrPos = 0;
+				GetArrPosForVehicleType(vehApp, vehArrPos);
+
 				switch(((CVehicle*)pTargetEntity)->m_vehType){
 				case VEHICLE_TYPE_CAR:
 				case VEHICLE_TYPE_BIKE:
@@ -758,26 +772,26 @@ CCamera::CamControl(void)
 				}
 
 				// Car zoom value
-				if(CarZoomIndicator == CAM_ZOOM_1STPRS && !m_bPlayerIsInGarage){
+				if (CarZoomIndicator == CAM_ZOOM_1STPRS && !m_bPlayerIsInGarage) {
 					CarZoomValue = 0.0f;
 					ReqMode = CCam::MODE_1STPERSON;
 				}
 #ifdef FREE_CAM
 				else if (bFreeCam) {
 					if (CarZoomIndicator == CAM_ZOOM_1)
-						CarZoomValue = ((CVehicle*)pTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_1 : FREE_CAR_ZOOM_VALUE_1;
+						CarZoomValue = LCS_ZOOM_ONE_DISTANCE[vehArrPos];
 					else if (CarZoomIndicator == CAM_ZOOM_2)
-						CarZoomValue = ((CVehicle*)pTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_2 : FREE_CAR_ZOOM_VALUE_2;
+						CarZoomValue = LCS_ZOOM_TWO_DISTANCE[vehArrPos];
 					else if (CarZoomIndicator == CAM_ZOOM_3)
-						CarZoomValue = ((CVehicle*)pTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_3 : FREE_CAR_ZOOM_VALUE_3;
+						CarZoomValue = LCS_ZOOM_THREE_DISTANCE[vehArrPos];
 				}
 #endif
-				else if(CarZoomIndicator == CAM_ZOOM_1)
-					CarZoomValue = DEFAULT_CAR_ZOOM_VALUE_1;
+				else if (CarZoomIndicator == CAM_ZOOM_1)
+					CarZoomValue = ZOOM_ONE_DISTANCE[vehArrPos];
 				else if(CarZoomIndicator == CAM_ZOOM_2)
-					CarZoomValue = DEFAULT_CAR_ZOOM_VALUE_2;
+					CarZoomValue = ZOOM_TWO_DISTANCE[vehArrPos];
 				else if(CarZoomIndicator == CAM_ZOOM_3)
-					CarZoomValue = DEFAULT_CAR_ZOOM_VALUE_3;
+					CarZoomValue = ZOOM_THREE_DISTANCE[vehArrPos];
 
 				if(CarZoomIndicator == CAM_ZOOM_TOPDOWN && !m_bPlayerIsInGarage){
 					CarZoomValue = 1.0f;
@@ -2960,6 +2974,13 @@ CCamera::Process_Train_Camera_Control(void)
 		if(node >= m_uiNumberOfTrainCamNodes)
 			node = 0;
 	}
+#ifdef FIX_BUGS
+	// Not really a bug but be nice and respect the debug mode
+	if(DebugCamMode){
+		TakeControl(target, DebugCamMode, JUMP_CUT, CAMCONTROL_SCRIPT);
+		return;
+	}
+#endif
 
 	if(found){
 		SetWideScreenOn();
@@ -3103,26 +3124,42 @@ CCamera::SetZoomValueFollowPedScript(int16 dist)
 void
 CCamera::SetZoomValueCamStringScript(int16 dist)
 {
-#ifdef FREE_CAM
-	if (bFreeCam) {
-		switch (dist) {
-		case 0: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_1 : FREE_CAR_ZOOM_VALUE_1; break;
-		case 1: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_2 : FREE_CAR_ZOOM_VALUE_2; break;
-		case 2: m_fCarZoomValueScript = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->IsBoat() ? FREE_BOAT_ZOOM_VALUE_3 : FREE_CAR_ZOOM_VALUE_3; break;
-		default: break;
-		}
-	} else
-#endif
-	{
-		switch (dist) {
-		case 0: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_1; break;
-		case 1: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_2; break;
-		case 2: m_fCarZoomValueScript = DEFAULT_CAR_ZOOM_VALUE_3; break;
-		default: break;
-		}
-	}
+	if (Cams[ActiveCam].CamTargetEntity->IsVehicle()) {
+		int vehApp = ((CVehicle*)Cams[ActiveCam].CamTargetEntity)->GetVehicleAppearance();
+		int vehArrPos = 0;
+		GetArrPosForVehicleType(vehApp, vehArrPos);
 
-	m_bUseScriptZoomValueCar = true;
+#ifdef FREE_CAM
+		if (bFreeCam) {
+			switch (dist) {
+			case 0: m_fCarZoomValueScript = LCS_ZOOM_ONE_DISTANCE[vehArrPos]; break;
+			case 1: m_fCarZoomValueScript = LCS_ZOOM_TWO_DISTANCE[vehArrPos]; break;
+			case 2: m_fCarZoomValueScript = LCS_ZOOM_THREE_DISTANCE[vehArrPos]; break;
+			default: break;
+			}
+		}
+		else
+#endif
+		{
+			switch (dist) {
+			case 0: m_fCarZoomValueScript = ZOOM_ONE_DISTANCE[vehArrPos]; break;
+			case 1: m_fCarZoomValueScript = ZOOM_TWO_DISTANCE[vehArrPos]; break;
+			case 2: m_fCarZoomValueScript = ZOOM_THREE_DISTANCE[vehArrPos]; break;
+			default: break;
+			}
+		}
+
+		m_bUseScriptZoomValueCar = true;
+	} else {
+		switch (dist) {
+		case 0: m_fPedZoomValueScript = 0.25f; break;
+		case 1: m_fPedZoomValueScript = 1.5f; break;
+		case 2: m_fPedZoomValueScript = 2.9f; break;
+		default: break;
+		}
+
+		m_bUseScriptZoomValuePed = true;
+	}
 }
 
 void
