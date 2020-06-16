@@ -71,11 +71,6 @@ uint8 aWeaponBlues[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 0, 128, 255, 0, 0 };
 
-float aWeaponScale[] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f,
-1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-1.0f, 1.0f, 1.0f, 1.0f };
-
 void
 CPickup::RemoveKeepType()
 {
@@ -770,7 +765,15 @@ CPickups::DoPickUpEffects(CEntity *entity)
 			}
 		}
 
-		entity->GetMatrix().SetRotateZOnlyScaled((float)(CTimer::GetTimeInMilliseconds() & 0x7FF) * DEGTORAD(360.0f / 0x800), aWeaponScale[colorId]);
+		uint32 model = entity->GetModelIndex();
+		CColModel* colModel = entity->GetColModel();
+		CVector colLength = colModel->boundingBox.max - colModel->boundingBox.min;
+
+		float scale = (Max(1.f, 1.2f / Max(colLength.x, Max(colLength.y, colLength.z))) - 1.0f) * 0.6f + 1.0f;
+		if (model == MI_MINIGUN || model == MI_MINIGUN2)
+			scale = 1.2f;
+
+		entity->GetMatrix().SetRotateZOnlyScaled((float)(CTimer::GetTimeInMilliseconds() & 0x7FF) * DEGTORAD(360.0f / 0x800), scale);
 
 		if (doInnerGlow)
 			CCoronas::RegisterCorona((uintptr)entity + 1, 126, 69, 121, 255, entity->GetPosition(), 1.2f, 50.0f,
