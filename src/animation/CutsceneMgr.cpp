@@ -288,6 +288,10 @@ CCutsceneMgr::SetCutsceneAnim(const char *animName, CObject *pObject)
 	RpAnimBlendClumpRemoveAllAssociations((RpClump*)pObject->m_rwObject);
 
 	pNewAnim = ms_cutsceneAssociations.CopyAnimation(animName);
+	if (!pNewAnim) {
+		debug("\n\nHaven't I told you I can't find the fucking animation %s\n\n\n", animName);
+		return;
+	}
 	pNewAnim->SetCurrentTime(0.0f);
 	pNewAnim->flags |= ASSOC_HAS_TRANSLATION;
 	pNewAnim->flags &= ~ASSOC_RUNNING;
