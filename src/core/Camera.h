@@ -193,11 +193,11 @@ public:
 	void ProcessSpecialHeightRoutines(void);
 	void GetVectorsReadyForRW(void);
 	CVector DoAverageOnVector(const CVector &vec);
-	float GetPedBetaAngleForClearView(const CVector &Target, float Dist, float BetaOffset, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies);
 	void WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, float TargetHeight);
 	bool RotCamIfInFrontCar(CVector &TargetCoors, float TargetOrientation);
 	void Cam_On_A_String_Unobscured(const CVector &TargetCoors, float BaseDist);
 	void FixCamWhenObscuredByVehicle(const CVector &TargetCoors);
+	bool GetBoatLook_L_R_HeightOffset(float &Offset);
 	void LookBehind(void);
 	void LookLeft(void);
 	void LookRight(void);
@@ -239,11 +239,6 @@ public:
 	bool GetLookAlongGroundPos(CEntity *Target, CPed *Cop, CVector &TargetCoors, CVector &SourceOut);
 	bool GetLookFromLampPostPos(CEntity *Target, CPed *Cop, CVector &TargetCoors, CVector &SourceOut);
 	bool GetLookOverShoulderPos(CEntity *Target, CPed *Cop, CVector &TargetCoors, CVector &SourceOut);
-
-	void Process_Im_The_Passenger_Woo_Woo(const CVector& CameraTarget, float TargetOrientation, float, float);
-	void Process_Blood_On_The_Tracks(const CVector& CameraTarget, float TargetOrientation, float, float);
-	void Process_Cam_Running_Side_Train(const CVector& CameraTarget, float TargetOrientation, float, float);
-	void Process_Cam_On_Train_Roof(const CVector& CameraTarget, float TargetOrientation, float, float);
 
 	// custom stuff
 	void Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrientation, float, float);

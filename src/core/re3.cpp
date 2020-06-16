@@ -213,7 +213,7 @@ SpawnCar(int id)
 		CVehicle *v;
 		if(CModelInfo::IsBoatModel(id))
 			v = new CBoat(id, RANDOM_VEHICLE);
-		if(CModelInfo::IsBikeModel(id))
+		else if(CModelInfo::IsBikeModel(id))
 			v = new CBike(id, RANDOM_VEHICLE);
 		else
 			v = new CAutomobile(id, RANDOM_VEHICLE);
