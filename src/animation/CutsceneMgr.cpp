@@ -123,6 +123,7 @@ char CCutsceneMgr::ms_cutsceneName[CUTSCENENAMESIZE];
 CAnimBlendAssocGroup CCutsceneMgr::ms_cutsceneAssociations;
 CVector CCutsceneMgr::ms_cutsceneOffset;
 float CCutsceneMgr::ms_cutsceneTimer;
+bool CCutsceneMgr::ms_wasCutsceneSkipped;
 uint32 CCutsceneMgr::ms_cutsceneLoadStatus;
 
 RpAtomic *
@@ -145,6 +146,7 @@ CCutsceneMgr::Initialise(void)
 {
 	ms_numCutsceneObjs = 0;
 	ms_loaded = false;
+	ms_wasCutsceneSkipped = false;
 	ms_running = false;
 	ms_animLoaded = false;
 	ms_cutsceneProcessing = false;
@@ -169,9 +171,10 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	CPlayerPed *pPlayerPed;
 
 	ms_cutsceneProcessing = true;
+	ms_wasCutsceneSkipped = false;
 	if (!strcasecmp(szCutsceneName, "jb"))
 		ms_useLodMultiplier = true;
-	CTimer::Stop();
+	CTimer::Suspend();
 
 	ms_pCutsceneDir->numEntries = 0;
 	ms_pCutsceneDir->ReadDirFile("ANIM\\CUTS.DIR");
@@ -225,18 +228,19 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	ms_cutsceneOffset = CVector(0.0f, 0.0f, 0.0f);
 
 	pPlayerPed = FindPlayerPed();
-	CTimer::Update();
-
 	pPlayerPed->m_pWanted->ClearQdCrimes();
 	pPlayerPed->bIsVisible = false;
 	pPlayerPed->m_fCurrentStamina = pPlayerPed->m_fMaxStamina;
 	CPad::GetPad(0)->DisablePlayerControls |= PLAYERCONTROL_DISABLED_80;
 	CWorld::Players[CWorld::PlayerInFocus].MakePlayerSafe(true);
+
+	CTimer::Resume();
 }
 
 void
 CCutsceneMgr::FinishCutscene()
 {
+	ms_wasCutsceneSkipped = true;
 	CCutsceneMgr::ms_cutsceneTimer = TheCamera.GetCutSceneFinishTime() * 0.001f;
 	TheCamera.FinishCutscene();
 
@@ -258,10 +262,13 @@ CCutsceneMgr::SetupCutsceneToStart(void)
 		if (CAnimBlendAssociation *pAnimBlendAssoc = RpAnimBlendClumpGetFirstAssociation((RpClump*)ms_pCutsceneObjects[i]->m_rwObject)) {
 			assert(pAnimBlendAssoc->hierarchy->sequences[0].HasTranslation());
 			ms_pCutsceneObjects[i]->SetPosition(ms_cutsceneOffset + ((KeyFrameTrans*)pAnimBlendAssoc->hierarchy->sequences[0].GetKeyFrame(0))->translation);
-			CWorld::Add(ms_pCutsceneObjects[i]);
 			pAnimBlendAssoc->SetRun();
 		} else {
 			ms_pCutsceneObjects[i]->SetPosition(ms_cutsceneOffset);
+		}
+		CWorld::Add(ms_pCutsceneObjects[i]);
+		if (RwObjectGetType(ms_pCutsceneObjects[i]->m_rwObject) == rpCLUMP) {
+			ms_pCutsceneObjects[i]->UpdateRpHAnim();
 		}
 	}
 
@@ -287,6 +294,12 @@ CCutsceneMgr::SetCutsceneAnim(const char *animName, CObject *pObject)
 
 	pAnimBlendClumpData = *RPANIMBLENDCLUMPDATA(pObject->m_rwObject);
 	pAnimBlendClumpData->link.Prepend(&pNewAnim->link);
+}
+
+void
+CCutsceneMgr::SetCutsceneAnimToLoop(const char* animName)
+{
+	ms_cutsceneAssociations.GetAnimation(animName)->flags |= ASSOC_REPEAT;
 }
 
 CCutsceneHead *
@@ -329,6 +342,7 @@ void
 CCutsceneMgr::DeleteCutsceneData(void)
 {
 	if (!ms_loaded) return;
+	CTimer::Suspend();
 
 	ms_cutsceneProcessing = false;
 	ms_useLodMultiplier = false;
@@ -359,9 +373,8 @@ CCutsceneMgr::DeleteCutsceneData(void)
 		if (CGeneral::faststricmp(ms_cutsceneName, "bet"))
 			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	}
-	CTimer::Stop();
 	CGame::DrasticTidyUpMemory(TheCamera.GetScreenFadeStatus() == 2);
-	CTimer::Update();
+	CTimer::Resume();
 }
 
 void

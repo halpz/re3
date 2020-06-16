@@ -795,6 +795,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 	return true;
 }
 
+// --MIAMI: Done except comments
 bool
 CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 {
@@ -842,19 +843,40 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 				target = threatAttack->GetPosition();
 
 			target -= *fireSource;
-			target *= info->m_fRange / target.Magnitude();
+			float distToTarget = target.Magnitude();
+			target *= info->m_fRange / distToTarget;
 			target += *fireSource;
 
-			if ( inaccuracy != 0 )
+			if (shooter == FindPlayerPed() && inaccuracy != 0.f)
 			{
+				float newInaccuracy = 2.5f * FindPlayerPed()->m_fAttackButtonCounter * (inaccuracy * Min(1.f, 5.f / distToTarget));
+				if (FindPlayerPed()->bIsDucking)
+					newInaccuracy *= 0.4f;
+
+				target.x += CGeneral::GetRandomNumberInRange(-0.15f, 0.15f) * newInaccuracy;
+				target.y += CGeneral::GetRandomNumberInRange(-0.15f, 0.15f) * newInaccuracy;
+				target.z += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f) * newInaccuracy;
+				FindPlayerPed()->m_fAttackButtonCounter += info->m_nDamage * 0.04f;
+			}
+			else if (inaccuracy > 0.f)
+			{
+				if (threatAttack == FindPlayerPed())
+				{
+					float speed = Min(0.33f, FindPlayerPed()->m_vecMoveSpeed.Magnitude());
+					inaccuracy *= (0.3f * speed * 100.f / 33.f + 0.8f);
+				}
 				target.x += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f) * inaccuracy;
 				target.y += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f) * inaccuracy;
 				target.z += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f) * inaccuracy;
 			}
 
-			CWorld::bIncludeDeadPeds = true;
-			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
+			if (shooter == FindPlayerPed())
+				CWorld::bIncludeDeadPeds = true;
+
+			// bProcessPedsOnBoatsAndBikes = true; // TODO(Miami)
+			CWorld::ProcessLineOfSight(*fireSource, target, point, victim, true, true, true, true, true, false, false, true);
 			CWorld::bIncludeDeadPeds = false;
+			// bProcessPedsOnBoatsAndBikes = false; // TODO(Miami)
 		}
 		else
 		{
@@ -864,7 +886,9 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 
 			shooterPed->TransformToNode(target, PED_HANDR);
 
-			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
+			// bProcessPedsOnBoatsAndBikes = true; // TODO(Miami)
+			CWorld::ProcessLineOfSight(*fireSource, target, point, victim, true, true, true, true, true, false, false, true);
+			// bProcessPedsOnBoatsAndBikes = false; // TODO(Miami)
 		}
 	}
 	else if ( shooter == FindPlayerPed() && TheCamera.Cams[0].Using3rdPersonMouseCam()  )
@@ -872,9 +896,17 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 		CVector src, trgt;
 		TheCamera.Find3rdPersonCamTargetVector(info->m_fRange, *fireSource, src, trgt);
 
+		// bProcessPedsOnBoatsAndBikes = true; // TODO(Miami)
 		CWorld::bIncludeDeadPeds = true;
-		ProcessLineOfSight(src, trgt,point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
+		// bProcessVehicleWheels = true; // TODO(Miami)
+		CWorld::ProcessLineOfSight(src, trgt, point, victim, true, true, true, true, true, false, false, true);
+		// bProcessPedsOnBoatsAndBikes = false; // TODO(Miami)
 		CWorld::bIncludeDeadPeds = false;
+		// bProcessVehicleWheels = false; // TODO(Miami)
+
+		// TODO(Miami)
+		// if (victim)
+		//	CWeapon::CheckForShootingVehicleOccupant(v39, victim, point, m_eWeaponType, src, trgt);
 
 		int32 rotSpeed = 1;
 		if ( m_eWeaponType == WEAPONTYPE_M4  )
@@ -889,30 +921,77 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 	}
 	else
 	{
-		float shooterHeading = RADTODEG(shooter->GetForward().Heading());
-		float shooterAngle   = DEGTORAD(shooterHeading);
-
-		CVector2D rotOffset(-Sin(shooterAngle), Cos(shooterAngle));
-		rotOffset.Normalise();
-
-		target   = *fireSource;
-		target.x += rotOffset.x * info->m_fRange;
-		target.y += rotOffset.y * info->m_fRange;
-
-		if ( shooter->IsPed() )
-			DoDoomAiming(shooter, fireSource, &target);
-
-		ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
-
-		int32 rotSpeed = 1;
-		if ( m_eWeaponType == WEAPONTYPE_M4  )
-			rotSpeed = 4;
-
-		CVector bulletPos;
-		if ( CHeli::TestBulletCollision(fireSource, &target, &bulletPos, 4) )
+		uint32 model = shooter->GetModelIndex();
+		if (model == MI_HUNTER || model == MI_SEASPAR || model == MI_SPARROW)
 		{
-			for ( int32 i = 0; i < 16; i++ )
-				CParticle::AddParticle(PARTICLE_SPARK, bulletPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, rotSpeed);
+			float inaccuracyMult = 0.6f;
+			target = shooter->GetForward();
+			if (shooter->GetStatus() == STATUS_PLAYER)
+			{
+				target *= info->m_fRange;
+				target += *fireSource;
+				CWeapon::DoDriveByAutoAiming(FindPlayerPed(), (CVehicle*)shooter, fireSource, &target);
+				target -= *fireSource;
+				target.Normalise();
+				if (model == MI_SEASPAR || model == MI_SPARROW)
+					inaccuracyMult = 0.1f;
+				else
+					inaccuracyMult = 0.3f;
+			}
+			target.x += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f) * inaccuracyMult;
+			target.y += CGeneral::GetRandomNumberInRange(-0.2f, 0.2f) * inaccuracyMult;
+			target.z += CGeneral::GetRandomNumberInRange(-0.1f, 0.1f) * inaccuracyMult;
+
+			target.Normalise();
+			target *= info->m_fRange;
+			target += *fireSource;
+			CWorld::pIgnoreEntity = shooter;
+			CWorld::ProcessLineOfSight(*fireSource, target, point, victim, true, true, true, true, true, false, false, true);
+			CWorld::pIgnoreEntity = nil;
+
+			int32 rotSpeed = 1;
+			if (m_eWeaponType == WEAPONTYPE_M4)
+				rotSpeed = 4;
+
+			CVector bulletPos;
+			if (CHeli::TestBulletCollision(fireSource, &target, &bulletPos, 4))
+			{
+				for (int32 i = 0; i < 16; i++)
+					CParticle::AddParticle(PARTICLE_SPARK, bulletPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, rotSpeed);
+			}
+		}
+		else
+		{
+			float shooterHeading = RADTODEG(shooter->GetForward().Heading());
+			float shooterAngle = DEGTORAD(shooterHeading);
+
+			CVector2D rotOffset(-Sin(shooterAngle), Cos(shooterAngle));
+			rotOffset.Normalise();
+
+			target = *fireSource;
+			target.x += rotOffset.x * info->m_fRange;
+			target.y += rotOffset.y * info->m_fRange;
+
+			CParticle::HandleShootableBirdsStuff(shooter, *fireSource);
+			if (shooter->IsPed() && ((CPed*)shooter)->bDoomAim && (shooter != FindPlayerPed() || !info->m_bCanAim))
+			{
+				CWeapon::DoDoomAiming(shooter, fireSource, &target);
+			}
+
+			// CWorld::bProcessPedsOnBoatsAndBikes = 1; // TODO(Miami)
+			CWorld::ProcessLineOfSight(*fireSource, target, point, victim, true, true, true, true, true, false, false, true);
+			// CWorld::bProcessPedsOnBoatsAndBikes = 0; // TODO(Miami)
+
+			int32 rotSpeed = 1;
+			if (m_eWeaponType == WEAPONTYPE_M4)
+				rotSpeed = 4;
+
+			CVector bulletPos;
+			if (CHeli::TestBulletCollision(fireSource, &target, &bulletPos, 4))
+			{
+				for (int32 i = 0; i < 16; i++)
+					CParticle::AddParticle(PARTICLE_SPARK, bulletPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, rotSpeed);
+			}
 		}
 	}
 
@@ -932,7 +1011,6 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 
 	if ( shooter == FindPlayerPed() )
 	{
-		CStats::InstantHitsFiredByPlayer++;
 		if ( !(CTimer::GetFrameCounter() & 3) )
 			MakePedsJumpAtShot((CPhysical*)shooter, fireSource, &target);
 	}
@@ -1345,6 +1423,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 	BlowUpExplosiveThings(victim);
 }
 
+// --MIAMI: Done except comments, and didn't check particle coords precisely
 bool
 CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 {
@@ -1438,7 +1517,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 			//bProcessVehicleWheels = true; // TODO(Miami): bProcessVehicleWheels
 			//bProcessPedsOnBoatsAndBikes = true; // TODO(Miami): bProcessPedsOnBoatsAndBikes
 
-			ProcessLineOfSight(source, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, false, false); // TODO(Miami): New parameter: ,true);
+			CWorld::ProcessLineOfSight(source, target, point, victim, true, true, true, true, true, false, false, true);
 			CWorld::bIncludeDeadPeds = false;
 			//bProcessVehicleWheels = false; // TODO(Miami): bProcessVehicleWheels
 		}
@@ -1471,7 +1550,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				CWorld::bIncludeDeadPeds = true;
 
 			//bProcessPedsOnBoatsAndBikes = true; // TODO(Miami): bProcessPedsOnBoatsAndBikes
-			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, false, false); // TODO(Miami): New parameter: ,true);
+			CWorld::ProcessLineOfSight(*fireSource, target, point, victim, true, true, true, true, true, false, false, true);
 			CWorld::bIncludeDeadPeds = false;
 		}
 		//bProcessPedsOnBoatsAndBikes = false; // TODO(Miami): bProcessPedsOnBoatsAndBikes
@@ -2056,7 +2135,7 @@ CWeapon::FireInstantHitFromCar(CVehicle *shooter, bool left, bool right)
 						float(CGeneral::GetRandomNumber()&255)*0.01f-1.28f,
 						float(CGeneral::GetRandomNumber()&255)*0.01f-1.28f);
 
-	DoDriveByAutoAiming(FindPlayerPed(), &source, &target);
+	DoDriveByAutoAiming(FindPlayerPed(), shooter, &source, &target);
 
 	CEventList::RegisterEvent(EVENT_GUNSHOT, EVENT_ENTITY_PED, FindPlayerPed(), FindPlayerPed(), 1000);
 
@@ -2176,6 +2255,7 @@ CWeapon::FireInstantHitFromCar(CVehicle *shooter, bool left, bool right)
 	return true;
 }
 
+// --MIAMI: Done
 void
 CWeapon::DoDoomAiming(CEntity *shooter, CVector *source, CVector *target)
 {
@@ -2188,8 +2268,6 @@ CWeapon::DoDoomAiming(CEntity *shooter, CVector *source, CVector *target)
 #endif
 
 	CPed *shooterPed = (CPed*)shooter;
-	if ( shooterPed->IsPed() && shooterPed->bCrouchWhenShooting )
-		return;
 
 	int16 lastEntity;
 	CEntity *entities[16];
@@ -2208,7 +2286,8 @@ CWeapon::DoDoomAiming(CEntity *shooter, CVector *source, CVector *target)
 			if ( !(victim->GetStatus() == STATUS_TRAIN_MOVING
 				|| victim->GetStatus() == STATUS_TRAIN_NOT_MOVING
 				|| victim->GetStatus() == STATUS_HELI
-				|| victim->GetStatus() == STATUS_PLANE) )
+				|| victim->GetStatus() == STATUS_PLANE
+				|| victim->GetStatus() == STATUS_WRECKED) )
 			{
 				float distToVictim   = (shooterPed->GetPosition()-victim->GetPosition()).Magnitude2D();
 				float distToVictimZ  = Abs(shooterPed->GetPosition().z-victim->GetPosition().z);
@@ -2227,7 +2306,10 @@ CWeapon::DoDoomAiming(CEntity *shooter, CVector *source, CVector *target)
 		}
 	}
 
-	if ( closestEntityDist < DOOMAUTOAIMING_MAXDIST )
+	CColPoint foundCol;
+	CEntity *foundEnt;
+	if (closestEntityDist < DOOMAUTOAIMING_MAXDIST
+		&& !CWorld::ProcessLineOfSight(*source, entities[closestEntity]->GetPosition(), foundCol, foundEnt, true, false, false, false, false, false, false, true))
 	{
 		CEntity *victim = entities[closestEntity];
 		ASSERT(victim !=nil);
@@ -2316,10 +2398,11 @@ CWeapon::DoTankDoomAiming(CEntity *shooter, CEntity *driver, CVector *source, CV
 	}
 }
 
+// --MIAMI: Done
 void
-CWeapon::DoDriveByAutoAiming(CEntity *shooter, CVector *source, CVector *target)
+CWeapon::DoDriveByAutoAiming(CEntity *driver, CVehicle *vehicle, CVector *source, CVector *target)
 {
-	ASSERT(shooter!=nil);
+	ASSERT(driver!=nil);
 	ASSERT(source!=nil);
 	ASSERT(target!=nil);
 
@@ -2327,27 +2410,36 @@ CWeapon::DoDriveByAutoAiming(CEntity *shooter, CVector *source, CVector *target)
 	CEntity entity; // unused
 #endif
 
-	CPed *shooterPed = (CPed*)shooter;
-	if ( shooterPed->IsPed() && shooterPed->bCrouchWhenShooting )
-		return;
+	CPed *shooterPed = (CPed*)driver;
 
 	int16 lastEntity;
-	CEntity *entities[16];
-	CWorld::FindObjectsInRange(*source, (*target-*source).Magnitude(), true, &lastEntity, 15, entities, false, false, true, false, false);
+	CEntity *peds[16];
+	CWorld::FindObjectsInRange(*source, (*target-*source).Magnitude(), true, &lastEntity, 15, peds, false, false, true, false, false);
 
 	float closestEntityDist = 10000.0f;
 	int16 closestEntity;
 
 	for ( int32 i = 0; i < lastEntity; i++ )
 	{
-		CEntity *victim = entities[i];
+		CPed *victim = (CPed*)peds[i];
 		ASSERT(victim!=nil);
 
-		if ( shooter != victim )
+		if (driver != victim && !victim->DyingOrDead() && victim->m_attachedTo != vehicle)
 		{
 			float lineDist = CCollision::DistToLine(source, target, &victim->GetPosition());
-			float distToVictim  = (victim->GetPosition() - shooter->GetPosition()).Magnitude();
-			float pedDist = 0.15f*distToVictim + lineDist;
+
+			uint32 model = vehicle->GetModelIndex();
+			float pedDist;
+			if (model == MI_HUNTER || model == MI_SEASPAR || model == MI_SPARROW)
+			{
+				float distToVictim = (victim->GetPosition() - vehicle->GetPosition()).Magnitude();
+				pedDist = lineDist / Max(5.f, distToVictim);
+			}
+			else
+			{
+				float distToVictim = (victim->GetPosition() - driver->GetPosition()).Magnitude();
+				pedDist = 0.15f * distToVictim + lineDist;
+			}
 
 			if ( DotProduct((*target-*source), victim->GetPosition()-*source) > 0.0f && pedDist < closestEntityDist)
 			{
@@ -2356,14 +2448,24 @@ CWeapon::DoDriveByAutoAiming(CEntity *shooter, CVector *source, CVector *target)
 			}
 		}
 	}
-
-	if ( closestEntityDist < DRIVEBYAUTOAIMING_MAXDIST )
+	uint32 model = vehicle->GetModelIndex();
+	float maxAimDistance = CAR_DRIVEBYAUTOAIMING_MAXDIST;
+	if (model == MI_HUNTER)
 	{
-		CEntity *victim = entities[closestEntity];
+		maxAimDistance = Tan(DEGTORAD(30.f));
+	}
+	else if (model == MI_SEASPAR || model == MI_SPARROW)
+	{
+		maxAimDistance = Tan(DEGTORAD(10.f));
+	}
+
+	if ( closestEntityDist < maxAimDistance )
+	{
+		CEntity *victim = peds[closestEntity];
 		ASSERT(victim!=nil);
 
 		float distToTarget = (*source - *target).Magnitude();
-		float distToSource      = (*source - victim->GetPosition()).Magnitude();
+		float distToSource = (*source - victim->GetPosition()).Magnitude();
 		*target = (distToTarget / distToSource) * (victim->GetPosition() - *source) + *source;
 	}
 }
