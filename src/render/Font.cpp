@@ -1069,9 +1069,6 @@ CFont::GetNextSpace(wchar *s)
 			if(*s == '~'){
 				s++;
 				while(*s != '~') s++;
-				s++;
-				if(*s == ' ')
-					break;
 			}
 	}
 	return s;
