@@ -5136,6 +5136,9 @@ CAutomobile::ProcessSwingingDoor(int32 component, eDoors door)
 	if(Damage.GetDoorStatus(door) != DOOR_STATUS_SWINGING)
 		return;
 
+	if (m_aCarNodes[component] == nil)
+		return;
+
 	CMatrix mat(RwFrameGetMatrix(m_aCarNodes[component]));
 	CVector pos = mat.GetPosition();
 	float axes[3] = { 0.0f, 0.0f, 0.0f };

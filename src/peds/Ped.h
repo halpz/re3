@@ -346,9 +346,7 @@ enum eMoveState {
 	PEDMOVE_NONE,
 	PEDMOVE_STILL,
 	PEDMOVE_WALK,
-	
-	PEDMOVE_UNK,
-
+	PEDMOVE_JOG,
 	PEDMOVE_RUN,
 	PEDMOVE_SPRINT,
 };
@@ -400,7 +398,7 @@ public:
 	uint32 bScriptObjectiveCompleted : 1;
 
 	uint32 bKindaStayInSamePlace : 1;
-	uint32 bBeingChasedByPolice : 1; // Unused VC leftover. Should've been set for criminal/gang members
+	uint32 bBeingChasedByPolice : 1;
 	uint32 bNotAllowedToDuck : 1;
 	uint32 bCrouchWhenShooting : 1;
 	uint32 bIsDucking : 1;
@@ -883,7 +881,9 @@ public:
 	static void PedSetDraggedOutCarCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedAnimStepOutCarCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetInTrainCB(CAnimBlendAssociation *assoc, void *arg);
-	static void PedSetOutTrainCB(CAnimBlendAssociation *assoc, void *arg); // TODO(Miami): Should be under GTA_TRAIN
+#ifdef GTA_TRAIN
+	static void PedSetOutTrainCB(CAnimBlendAssociation *assoc, void *arg);
+#endif
 	static void FinishedAttackCB(CAnimBlendAssociation *assoc, void *arg);
 	static void FinishedReloadCB(CAnimBlendAssociation *assoc, void *arg);
 	static void FinishFightMoveCB(CAnimBlendAssociation *assoc, void *arg);
@@ -940,7 +940,6 @@ public:
 	CObject *SpawnFlyingComponent(int, int8);
 	void SetCarJack_AllClear(CVehicle*, uint32, uint32);
 	bool CanPedJumpThis(CEntity*, CVector*);
-
 	void SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float, float, int);
 	void ClearWaitState(void);
 	void Undress(const char*);
@@ -1113,7 +1112,6 @@ public:
 
 void FinishTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
 void StartTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
-void FinishFuckUCB(CAnimBlendAssociation *assoc, void *arg);
 void PlayRandomAnimationsFromAnimBlock(CPed* ped, AssocGroupId animGroup, uint32 first, uint32 amount);
 
 // TODO(Miami): Change those when Ped struct is done

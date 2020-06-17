@@ -3215,7 +3215,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 				m_sQueueSample.m_bRequireReflection = true;
 			}
 			break;
-		case SOUND_FIGHT_PUNCH_33:
+		case SOUND_FIGHT_37:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_1;
 			m_sQueueSample.m_nFrequency = 18000;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -3235,7 +3235,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
-		case SOUND_FIGHT_KICK_34:
+		case SOUND_FIGHT_38:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_1;
 			m_sQueueSample.m_nFrequency = 16500;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -3255,7 +3255,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
-		case SOUND_FIGHT_HEADBUTT_35:
+		case SOUND_FIGHT_39:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_1;
 			m_sQueueSample.m_nFrequency = 20000;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -3275,7 +3275,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
-		case SOUND_FIGHT_PUNCH_36:
+		case SOUND_FIGHT_40:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_2;
 			m_sQueueSample.m_nFrequency = 18000;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -3295,7 +3295,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
-		case SOUND_FIGHT_PUNCH_37:
+		case SOUND_FIGHT_41:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_2;
 			m_sQueueSample.m_nFrequency = 16500;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -3315,7 +3315,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
-		case SOUND_FIGHT_CLOSE_PUNCH_38:
+		case SOUND_FIGHT_42:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_2;
 			m_sQueueSample.m_nFrequency = 20000;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -3335,7 +3335,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
-		case SOUND_FIGHT_PUNCH_39:
+		case SOUND_FIGHT_43:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_4;
 			m_sQueueSample.m_nFrequency = 18000;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -3355,7 +3355,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
-		case SOUND_FIGHT_PUNCH_OR_KICK_BELOW_40:
+		case SOUND_FIGHT_44:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_4;
 			m_sQueueSample.m_nFrequency = 16500;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -3375,7 +3375,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
-		case SOUND_FIGHT_PUNCH_41:
+		case SOUND_FIGHT_45:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_4;
 			m_sQueueSample.m_nFrequency = 20000;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -3395,7 +3395,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
-		case SOUND_FIGHT_PUNCH_FROM_BEHIND_42:
+		case SOUND_FIGHT_46:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_5;
 			m_sQueueSample.m_nFrequency = 18000;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -3415,7 +3415,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
-		case SOUND_FIGHT_KNEE_OR_KICK_43:
+		case SOUND_FIGHT_47:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_5;
 			m_sQueueSample.m_nFrequency = 16500;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
@@ -3435,7 +3435,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
-		case SOUND_FIGHT_KICK_44:
+		case SOUND_FIGHT_48:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_5;
 			m_sQueueSample.m_nFrequency = 20000;
 			m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;

@@ -10877,7 +10877,6 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_POP_CAR_BOOT:
 	{
 		CollectParameters(&m_nIp, 1);
-		CollectParameters(&m_nIp, 1);
 		CAutomobile* pCar = (CAutomobile*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		assert(pCar&& pCar->IsCar());
 		pCar->PopBoot();

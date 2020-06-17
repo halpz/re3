@@ -1150,6 +1150,7 @@ CWeapon::AddGunshell(CEntity *shooter, CVector const &source, CVector2D const &d
 	}
 }
 
+// --MIAMI: Done?
 void
 CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 		CVector *source, CVector *target, CColPoint *point, CVector2D ahead)
@@ -1163,73 +1164,99 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 
 	if ( victim )
 	{
+		if (shooter)
+		{
+			if (shooter && shooter->IsPed() && ((CPed*)shooter)->m_attachedTo == victim)
+				return;
+
+			if (shooter->IsPed() && !((CPed*)shooter)->IsPlayer())
+			{
+				CPed* shooterPed = (CPed*)shooter;
+				CEntity* guyWePointGun = shooterPed->m_pPointGunAt;
+				if (guyWePointGun)
+				{
+					if (victim != guyWePointGun)
+					{
+						float distWithAim = (guyWePointGun->GetPosition() - shooter->GetPosition()).Magnitude();
+						float distWithBullet = (point->point - shooter->GetPosition()).Magnitude();
+						if (distWithAim > 0.1f && distWithBullet > 0.1f)
+						{
+							// Normalize
+							CVector aimDir = (guyWePointGun->GetPosition() - shooter->GetPosition()) * (1.0f / distWithAim);
+							CVector bulletDir = (point->point - shooter->GetPosition()) * (1.0f / distWithBullet);
+
+							float dotProd = DotProduct(aimDir, bulletDir);
+							float aimAndBulletAngle;
+							if (dotProd <= 0.35f)
+								aimAndBulletAngle = PI;
+							else
+								aimAndBulletAngle = Acos(dotProd);
+
+							if (aimAndBulletAngle <= DEGTORAD(45.0f) && (aimAndBulletAngle <= DEGTORAD(15.0f) || distWithBullet / distWithAim >= 0.75f) && distWithBullet / distWithAim >= 0.99f)
+							{
+								shooterPed->bObstacleShowedUpDuringKillObjective = false;
+								shooterPed->m_shotTime = 0;
+							}
+							else
+							{
+								shooterPed->bObstacleShowedUpDuringKillObjective = true;
+								shooterPed->m_shootTimer = 0;
+								shooterPed->m_shotTime = CTimer::GetTimeInMilliseconds();
+								if (distWithAim < 10.0f)
+									shooterPed->SetAttackTimer(1500);
+								else
+									shooterPed->SetAttackTimer(3000);
+							}
+						}
+					}
+				}
+			}
+		}
 		CGlass::WasGlassHitByBullet(victim, point->point);
 
 		CVector traceTarget = point->point;
 		CBulletTraces::AddTrace(source, &traceTarget);
 
-		if ( shooter != nil )
-		{
-			if ( shooter == FindPlayerPed() )
-			{
-				if ( victim->IsPed() || victim->IsVehicle() )
-					CStats::InstantHitsHitByPlayer++;
-			}
-		}
+		if (victim->IsPed() && shooter->IsVehicle() && ((CVehicle*)shooter)->pDriver)
+			shooter = ((CVehicle*)shooter)->pDriver;
 
-		if ( victim->IsPed() && ((CPed*)shooter)->m_nPedType != ((CPed*)victim)->m_nPedType || ((CPed*)shooter)->m_nPedType == PEDTYPE_PLAYER2 )
+		if ( victim->IsPed() && shooter->IsPed() &&
+			(((CPed*)shooter)->m_nPedType != ((CPed*)victim)->m_nPedType || ((CPed*)shooter)->m_nPedType == PEDTYPE_PLAYER2 ||
+				!((CPed*)shooter)->IsGangMember() && ((CPed*)shooter)->m_nPedType != PEDTYPE_COP))
 		{
 			CPed *victimPed = (CPed *)victim;
-			if ( !victimPed->OnGround() && victim != shooter )
+			if ( !victimPed->DyingOrDead() && victim != shooter )
 			{
-				if ( victimPed->DoesLOSBulletHitPed(*point) )
+				CVector pos = victimPed->GetPosition();
+
+				CVector2D posOffset(source->x-pos.x, source->y-pos.y);
+				int32 localDir = victimPed->GetLocalDirection(posOffset);
+
+				victimPed->ReactToAttack(shooter);
+
+				if ( !victimPed->IsPedInControl() || victimPed->bIsDucking )
 				{
-					CVector pos = victimPed->GetPosition();
-
-					CVector2D posOffset(source->x-pos.x, source->y-pos.y);
-					int32 localDir = victimPed->GetLocalDirection(posOffset);
-
-					victimPed->ReactToAttack(shooter);
-
-					if ( !victimPed->IsPedInControl() || victimPed->bIsDucking )
+					victimPed->InflictDamage(shooter, m_eWeaponType, info->m_nDamage, (ePedPieceTypes)point->pieceB, localDir);
+				}
+				else
+				{
+					if ( victimPed->bCanBeShotInVehicle && (IsShotgun(m_eWeaponType) ||
+						(!victimPed->IsPlayer() && (m_eWeaponType == WEAPONTYPE_HELICANNON || m_eWeaponType == WEAPONTYPE_M60 || m_eWeaponType == WEAPONTYPE_PYTHON))))
 					{
+						posOffset.Normalise();
+						victimPed->bIsStanding = false;
+
+						victimPed->ApplyMoveForce(posOffset.x*-5.0f, posOffset.y*-5.0f, 5.0f);
+						victimPed->SetFall(1500, AnimationId(ANIM_KO_SKID_FRONT + localDir), false);
+
 						victimPed->InflictDamage(shooter, m_eWeaponType, info->m_nDamage, (ePedPieceTypes)point->pieceB, localDir);
 					}
 					else
 					{
-						if ( IsShotgun(m_eWeaponType) || m_eWeaponType == WEAPONTYPE_HELICANNON
-							|| m_eWeaponType == WEAPONTYPE_M60 || m_eWeaponType == WEAPONTYPE_PYTHON)
+						if ( victimPed->IsPlayer() )
 						{
-							posOffset.Normalise();
-							victimPed->bIsStanding = false;
-
-							victimPed->ApplyMoveForce(posOffset.x*-5.0f, posOffset.y*-5.0f, 5.0f);
-							victimPed->SetFall(1500, AnimationId(ANIM_KO_SKID_FRONT + localDir), false);
-
-							victimPed->InflictDamage(shooter, m_eWeaponType, info->m_nDamage, (ePedPieceTypes)point->pieceB, localDir);
-						}
-						else
-						{
-							if ( victimPed->IsPlayer() )
-							{
-								CPlayerPed *victimPlayer = (CPlayerPed *)victimPed;
-								if ( victimPlayer->m_nHitAnimDelayTimer < CTimer::GetTimeInMilliseconds() )
-								{
-									victimPed->ClearAttackByRemovingAnim();
-
-									CAnimBlendAssociation *asoc = CAnimManager::AddAnimation(victimPed->GetClump(), ASSOCGRP_STD, AnimationId(ANIM_SHOT_FRONT_PARTIAL + localDir));
-									ASSERT(asoc!=nil);
-
-									asoc->blendAmount = 0.0f;
-									asoc->blendDelta  = 8.0f;
-
-									if ( m_eWeaponType == WEAPONTYPE_M4 )
-										victimPlayer->m_nHitAnimDelayTimer = CTimer::GetTimeInMilliseconds() + 2500;
-									else
-										victimPlayer->m_nHitAnimDelayTimer = CTimer::GetTimeInMilliseconds() + 1000;
-								}
-							}
-							else
+							CPlayerPed *victimPlayer = (CPlayerPed *)victimPed;
+							if ( victimPlayer->m_nHitAnimDelayTimer < CTimer::GetTimeInMilliseconds() && victimPed->m_nPedState != PED_DRIVING )
 							{
 								victimPed->ClearAttackByRemovingAnim();
 
@@ -1238,31 +1265,53 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 
 								asoc->blendAmount = 0.0f;
 								asoc->blendDelta  = 8.0f;
-							}
 
-							victimPed->InflictDamage(shooter, m_eWeaponType, info->m_nDamage, (ePedPieceTypes)point->pieceB, localDir);
+								if ( m_eWeaponType == WEAPONTYPE_M4 )
+									victimPlayer->m_nHitAnimDelayTimer = CTimer::GetTimeInMilliseconds() + 2500;
+								else
+									victimPlayer->m_nHitAnimDelayTimer = CTimer::GetTimeInMilliseconds() + 1000;
+							}
 						}
+						else
+						{
+							victimPed->ClearAttackByRemovingAnim();
+
+							CAnimBlendAssociation *asoc = CAnimManager::AddAnimation(victimPed->GetClump(), ASSOCGRP_STD, AnimationId(ANIM_SHOT_FRONT_PARTIAL + localDir));
+							ASSERT(asoc!=nil);
+
+							asoc->blendAmount = 0.0f;
+							asoc->blendDelta  = 8.0f;
+						}
+
+						victimPed->InflictDamage(shooter, m_eWeaponType, info->m_nDamage, (ePedPieceTypes)point->pieceB, localDir);
+					}
+				}
+
+				if ( victimPed->m_nPedType == PEDTYPE_COP )
+					CEventList::RegisterEvent(EVENT_SHOOT_COP, EVENT_ENTITY_PED, victim, (CPed*)shooter, 10000);
+				else
+					CEventList::RegisterEvent(EVENT_SHOOT_PED, EVENT_ENTITY_PED, victim, (CPed*)shooter, 10000);
+
+				if ( CGame::nastyGame )
+				{
+					uint8 bloodAmount = 8;
+					if ( IsShotgun(m_eWeaponType) || m_eWeaponType == WEAPONTYPE_HELICANNON )
+						bloodAmount = 32;
+
+					CVector dir = (point->point - victim->GetPosition()) * 0.01f;
+					dir.z = 0.01f;
+
+					if ( victimPed->GetIsOnScreen() )
+					{
+						for ( uint8 i = 0; i < bloodAmount; i++ )
+							CParticle::AddParticle(PARTICLE_BLOOD_SMALL, point->point, dir);
 					}
 
-					if ( victimPed->m_nPedType == PEDTYPE_COP )
-						CEventList::RegisterEvent(EVENT_SHOOT_COP, EVENT_ENTITY_PED, victim, (CPed*)shooter, 10000);
-					else
-						CEventList::RegisterEvent(EVENT_SHOOT_PED, EVENT_ENTITY_PED, victim, (CPed*)shooter, 10000);
-
-					if ( CGame::nastyGame )
+					if (m_eWeaponType == WEAPONTYPE_MINIGUN)
 					{
-						uint8 bloodAmount = 8;
-						if ( IsShotgun(m_eWeaponType) || m_eWeaponType == WEAPONTYPE_HELICANNON )
-							bloodAmount = 32;
-
-						CVector dir = (point->point - victim->GetPosition()) * 0.01f;
-						dir.z = 0.01f;
-
-						if ( victimPed->GetIsOnScreen() )
-						{
-							for ( uint8 i = 0; i < bloodAmount; i++ )
-								CParticle::AddParticle(PARTICLE_BLOOD_SMALL, point->point, dir);
-						}
+						CParticle::AddParticle(PARTICLE_TEST, point->point, CVector(0.f, 0.f, 0.f), nil, 0.f, 0, 0, 0, 0);
+						CParticle::AddParticle(PARTICLE_TEST, point->point + CVector(0.2f, -0.2f, 0.f), CVector(0.f, 0.f, 0.f), nil, 0.f, 0, 0, 0, 0);
+						CParticle::AddParticle(PARTICLE_TEST, point->point + CVector(-0.2f, 0.2f, 0.f), CVector(0.f, 0.f, 0.f), nil, 0.f, 0, 0, 0, 0);
 					}
 				}
 			}
@@ -1307,9 +1356,8 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 						CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal*0.05f);
 
 #ifndef FIX_BUGS
-				    CVector dist = point->point - (*source);
-				    CVector offset = dist - Max(0.2f * dist.Magnitude(), 2.0f) * CVector(ahead.x, ahead.y, 0.0f);
-				    CVector smokePos = *source + offset;
+					CVector dist = point->point - (*source);
+					CVector smokePos = point->point - Max(0.1f * dist.Magnitude(), 0.2f) / dist.Magnitude();
 #else
 				    CVector smokePos = point->point;
 #endif // !FIX_BUGS
@@ -1324,20 +1372,30 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 				}
 				case ENTITY_TYPE_VEHICLE:
 				{
-					((CVehicle *)victim)->InflictDamage(shooter, m_eWeaponType, info->m_nDamage, point->point);
+					if (point->pieceB >= SURFACE_LAMP_POST && point->pieceB <= SURFACE_METAL_CHAIN_FENCE) {
+						((CVehicle*)victim)->BurstTyre(point->pieceB, true);
 
-					for ( int32 i = 0; i < 16; i++ )
-						CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal*0.05f);
+						for (int32 i = 0; i < 4; i++)
+							CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, point->point, point->normal * 0.05f);
+					}
+					else
+					{
+						((CVehicle*)victim)->InflictDamage(shooter, m_eWeaponType, info->m_nDamage);
+
+						for (int32 i = 0; i < 16; i++)
+							CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal * 0.05f);
 
 #ifndef FIX_BUGS
-					CVector dist = point->point - (*source);
-					CVector offset = dist - Max(0.2f*dist.Magnitude(), 0.5f) * CVector(ahead.x, ahead.y, 0.0f);
-				    CVector smokePos = *source + offset;
+						CVector dist = point.point - (*fireSource);
+						CVector offset = dist - Max(0.2f * dist.Magnitude(), 0.5f) * CVector(ahead.x, ahead.y, 0.0f);
+						CVector smokePos = *fireSource + offset;
 #else
-				    CVector smokePos = point->point;
-#endif // !FIX_BUGS
+						CVector smokePos = point->point;
+#endif
 
-					CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, smokePos, CVector(0.0f, 0.0f, 0.0f));
+						CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, smokePos, CVector(0.0f, 0.0f, 0.0f));
+					}
+
 
 					if ( shooter->IsPed() )
 					{
@@ -1362,19 +1420,23 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 
 					CObject *victimObject = (CObject *)victim;
 
-					if ( !victimObject->bInfiniteMass )
+					if ( !victimObject->bInfiniteMass && victimObject->m_fCollisionDamageMultiplier < 99.9f)
 					{
-						if ( victimObject->IsStatic() && victimObject->m_fUprootLimit <= 0.0f )
+						bool notStatic = !victimObject->IsStatic();
+						if (notStatic && victimObject->m_fUprootLimit <= 0.0f)
 						{
 							victimObject->bIsStatic = false;
 							victimObject->AddToMovingList();
 						}
 
-						if ( !victimObject->IsStatic())
+						notStatic = !victimObject->IsStatic();
+						if (!notStatic)
 						{
-							CVector moveForce = point->normal*-4.0f;
+							CVector moveForce = point->normal * -4.0f;
 							victimObject->ApplyMoveForce(moveForce.x, moveForce.y, moveForce.z);
 						}
+					} else if (victimObject->m_nCollisionDamageEffect >= DAMAGE_EFFECT_SMASH_COMPLETELY) {
+						victimObject->ObjectDamage(50.f);
 					}
 
 					break;
@@ -1392,17 +1454,20 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 			}
 			case ENTITY_TYPE_VEHICLE:
 			{
+				CStats::InstantHitsHitByPlayer++;
 				DMAudio.PlayOneShot(((CPhysical*)victim)->m_audioEntityId, SOUND_WEAPON_HIT_VEHICLE, 1.0f);
 				break;
 			}
 			case ENTITY_TYPE_PED:
 			{
+				CStats::InstantHitsHitByPlayer++;
 				DMAudio.PlayOneShot(((CPhysical*)victim)->m_audioEntityId, SOUND_WEAPON_HIT_PED, 1.0f);
 				((CPed*)victim)->Say(SOUND_PED_BULLET_HIT);
 				break;
 			}
 			case ENTITY_TYPE_OBJECT:
 			{
+				CStats::InstantHitsHitByPlayer++;
 				PlayOneShotScriptObject(SCRIPT_SOUND_BULLET_HIT_GROUND_2, point->point);
 				break;
 			}
@@ -1596,10 +1661,10 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 										shooterPed->bObstacleShowedUpDuringKillObjective = true;
 										shooterPed->m_shootTimer = 0;
 										shooterPed->m_shotTime = CTimer::GetTimeInMilliseconds();
-										if (distWithAim >= 10.0f)
-											shooterPed->SetAttackTimer(3000);
-										else
+										if (distWithAim < 10.0f)
 											shooterPed->SetAttackTimer(1500);
+										else
+											shooterPed->SetAttackTimer(3000);
 									}
 								}
 							}
@@ -1785,7 +1850,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				case ENTITY_TYPE_VEHICLE:
 				{
 					if (!statUpdated) {
-						//CStats::NumBulletsHit++; // TODO(Miami): Stats
+						CStats::InstantHitsHitByPlayer++;
 						statUpdated = true;
 					}
 					DMAudio.PlayOneShot(((CPhysical*)victim)->m_audioEntityId, SOUND_WEAPON_HIT_VEHICLE, 1.0f);
@@ -1794,7 +1859,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				case ENTITY_TYPE_PED:
 				{
 					if (!statUpdated) {
-						//CStats::NumBulletsHit++; // TODO(Miami): Stats
+						CStats::InstantHitsHitByPlayer++;
 						statUpdated = true;
 					}
 					DMAudio.PlayOneShot(((CPhysical*)victim)->m_audioEntityId, SOUND_WEAPON_HIT_PED, 1.0f);
@@ -1804,7 +1869,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				case ENTITY_TYPE_OBJECT:
 				{
 					if (!statUpdated) {
-						//CStats::NumBulletsHit++; // TODO(Miami): Stats
+						CStats::InstantHitsHitByPlayer++;
 						statUpdated = true;
 					}
 					PlayOneShotScriptObject(SCRIPT_SOUND_BULLET_HIT_GROUND_2, point.point);
@@ -2776,6 +2841,7 @@ CWeapon::HitsGround(CEntity *holder, CVector *fireSource, CEntity *aimingTo)
 	return false;
 }
 
+// --MIAMI: Done
 void
 CWeapon::BlowUpExplosiveThings(CEntity *thing)
 {
@@ -2783,14 +2849,14 @@ CWeapon::BlowUpExplosiveThings(CEntity *thing)
 	{
 		CObject *object = (CObject*)thing;
 		int32 mi = object->GetModelIndex();
-		if ( IsExplosiveThingModel(mi) && !object->bHasBeenDamaged )
+		if ( IsExplosiveThingModel(mi) && !object->bHasBeenDamaged && object->IsObject() )
 		{
 			object->bHasBeenDamaged = true;
 
 			CExplosion::AddExplosion(object, FindPlayerPed(), EXPLOSION_BARREL, object->GetPosition()+CVector(0.0f,0.0f,0.5f), 100);
 
 			if ( MI_EXPLODINGBARREL == mi )
-				object->m_vecMoveSpeed.z += 0.75f;
+				object->m_vecMoveSpeed.z += 0.55f;
 			else
 				object->m_vecMoveSpeed.z += 0.45f;
 
