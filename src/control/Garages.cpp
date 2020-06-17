@@ -3,6 +3,7 @@
 #include "Garages.h"
 #include "main.h"
 
+#include "Bike.h"
 #ifdef FIX_BUGS
 #include "Boat.h"
 #endif
@@ -414,7 +415,8 @@ void CGarage::Update()
 						((CAutomobile*)(FindPlayerVehicle()))->Fix();
 					}
 					else {
-						// TODO(MIAMI): Bike Fix
+						((CBike*)(FindPlayerVehicle()))->m_fFireBlowUpTimer = 0.0f;
+						((CBike*)(FindPlayerVehicle()))->Fix();
 					}
 					FindPlayerVehicle()->m_nDoorLock = CARLOCK_UNLOCKED;
 					++CStats::Sprayings;
@@ -1792,7 +1794,12 @@ CVehicle* CStoredCar::RestoreCar()
 	CVehicle* pVehicle;
 	if (CModelInfo::IsBoatModel(m_nModelIndex))
 		pVehicle = new CBoat(m_nModelIndex, RANDOM_VEHICLE);
-	// else if bike - TODO(MIAMI)
+	else if (CModelInfo::IsBikeModel(m_nModelIndex))
+	{
+		CBike* pBike = new CBike(m_nModelIndex, RANDOM_VEHICLE);
+		pBike->bIsStanding = true;
+		pVehicle = pBike;
+	}
 	else
 		pVehicle = new CAutomobile(m_nModelIndex, RANDOM_VEHICLE);
 	pVehicle->SetPosition(m_vecPos);

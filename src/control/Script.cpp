@@ -9976,7 +9976,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	}
 	case COMMAND_GET_RANDOM_COP_IN_AREA:
 	{
-		CollectParameters(&m_nIp, 4);
+		CollectParameters(&m_nIp, 9);
 		int ped_handle = -1;
 		CVector pos = FindPlayerCoors();
 		float x1 = *(float*)&ScriptParams[0];
