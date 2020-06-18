@@ -83,7 +83,8 @@ RwFrame *RwFrameTranslate(RwFrame * frame, const RwV3d * v, RwOpCombineType comb
 RwFrame *RwFrameRotate(RwFrame * frame, const RwV3d * axis, RwReal angle, RwOpCombineType combine) { frame->rotate(axis, angle, (CombineOp)combine); return frame; }
 RwFrame *RwFrameScale(RwFrame * frame, const RwV3d * v, RwOpCombineType combine) { frame->scale(v, (CombineOp)combine); return frame; }
 RwFrame *RwFrameTransform(RwFrame * frame, const RwMatrix * m, RwOpCombineType combine) { frame->transform(m, (CombineOp)combine); return frame; }
-//RwFrame *RwFrameOrthoNormalize(RwFrame * frame);
+//TODO: actually implement this!
+RwFrame *RwFrameOrthoNormalize(RwFrame * frame) { return frame; }
 RwFrame *RwFrameSetIdentity(RwFrame * frame) { frame->matrix.setIdentity(); frame->updateObjects(); return frame; }
 //RwFrame *RwFrameCloneHierarchy(RwFrame * root);
 //RwBool RwFrameDestroyHierarchy(RwFrame * frame);
