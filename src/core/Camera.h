@@ -624,7 +624,7 @@ public:
 	void SetNewPlayerWeaponMode(int16 mode, int16 minZoom, int16 maxZoom);
 	void ClearPlayerWeaponMode(void);
 	void UpdateAimingCoors(CVector const &coors);
-	void Find3rdPersonCamTargetVector(float dist, CVector pos, CVector &source, CVector &target);
+	bool Find3rdPersonCamTargetVector(float dist, CVector pos, CVector &source, CVector &target);
 	float Find3rdPersonQuickAimPitch(void);
 
 	// Physical camera
