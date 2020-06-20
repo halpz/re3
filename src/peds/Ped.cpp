@@ -4069,7 +4069,8 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	bool willLinger = false;
 	int random;
 
-	// TODO(Miami): PlayerInfo thingies here
+	if (damagedBy == FindPlayerPed() && damagedBy != this && damage > 3.0f)
+		++CWorld::Players[CWorld::PlayerInFocus].m_nHavocLevel;
 
 	if (player == this) {
 		if (!player->m_bCanBeDamaged)
@@ -4535,11 +4536,11 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 							m_pMyVehicle->SetStatus(STATUS_ABANDONED);
 						}
 						SetDie(dieAnim, dieDelta, dieSpeed);
-						/*
+
 						if (damagedBy == FindPlayerPed() && damagedBy != this) {
-							// TODO(Miami): PlayerInfo stuff
+							CWorld::Players[CWorld::PlayerInFocus].m_nHavocLevel += 10;
+							CWorld::Players[CWorld::PlayerInFocus].m_fMediaAttention += 5.f;
 						}
-						*/
 					}
 				}
 				for (int i = 0; i < ARRAY_SIZE(pVehicle->pPassengers); i++) {
@@ -4575,9 +4576,9 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		SetDie(dieAnim, dieDelta, dieSpeed);
 
 		if (damagedBy == player || damagedBy && damagedBy == FindPlayerVehicle()) {
-
-			// TODO(Miami): PlayerInfo stuff
 			CDarkel::RegisterKillByPlayer(this, method, headShot);
+			CWorld::Players[CWorld::PlayerInFocus].m_nHavocLevel += 10;
+			CWorld::Players[CWorld::PlayerInFocus].m_fMediaAttention += 5.f;
 			m_threatEntity = player;
 		} else {
 			CDarkel::RegisterKillNotByPlayer(this, method);
