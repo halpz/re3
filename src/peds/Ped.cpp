@@ -1098,8 +1098,7 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 		return;
 	}
 	
-	// Not for unarmed, it's for weapons using unarmed anims
-	if (currentWeapon->m_bUse2nd && ped->bIsAttacking && currentWeapon->m_AnimToPlay == ASSOCGRP_UNARMED) {
+	if (currentWeapon->m_bUse2nd && ped->bIsAttacking && currentWeapon->m_AnimToPlay != ASSOCGRP_THROW) {
 		AnimationId groundAnim = GetFireAnimGround(currentWeapon);
 		CAnimBlendAssociation *groundAnimAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), groundAnim);
 		if (!groundAnimAssoc || groundAnimAssoc->blendAmount <= 0.95f && groundAnimAssoc->blendDelta <= 0.0f) {
@@ -11391,14 +11390,6 @@ CPed::ProcessControl(void)
 
 			if (m_nWaitState != WAITSTATE_FALSE)
 				Wait();
-
-			if (m_nPedState != PED_IDLE) {
-				CAnimBlendAssociation *idleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_ARMED);
-				if(idleAssoc) {
-					idleAssoc->blendDelta = -8.0f;
-					idleAssoc->flags |= ASSOC_DELETEFADEDOUT;
-				}
-			}
 
 			switch (m_nPedState) {
 				case PED_IDLE:
