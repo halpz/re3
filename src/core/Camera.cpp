@@ -228,6 +228,7 @@ void
 CCamera::Process(void)
 {
 	// static bool InterpolatorNotInitialised = true;	// unused
+	static CVector PreviousFudgedTargetCoors;	// only PS2
 	static float PlayerMinDist = 1.6f;	// not on PS2
 	static bool WasPreviouslyInterSyhonFollowPed = false;	// only written
 	float FOV = 0.0f;
@@ -287,19 +288,19 @@ CCamera::Process(void)
 
 	// Stop transition when it's done
 	if(m_uiTransitionState != 0){
-/*
-		// PS2:
+#ifdef PS2_CAM_TRANSITION
 		if(!m_bWaitForInterpolToFinish){
 			Cams[(ActiveCam+1)%2].Process();
 			Cams[(ActiveCam+1)%2].ProcessSpecialHeightRoutines();
 		}
-*/
-		// not PS2 (done in CamControl there it seems)
+#else
+		// done in CamControl on PS2 it seems
 		if(CTimer::GetTimeInMilliseconds() > m_uiTransitionDuration+m_uiTimeTransitionStart){
 			m_uiTransitionState = 0;
 			m_vecDoingSpecialInterPolation = false;
 			m_bWaitForInterpolToFinish = false;
 		}
+#endif
 	}
 
 	if(m_bUseNearClipScript)
@@ -322,8 +323,90 @@ CCamera::Process(void)
 
 	if(m_uiTransitionState != 0 && !lookLRBVehicle){
 		// Process transition
-		// different on PS2
+#ifdef PS2_CAM_TRANSITION
+		bool lookingAtPlayerNow = false;
+		bool wasLookingAtPlayer = false;
+		bool transitionPedMode = false;
+		bool setWait = false;
+		if(Cams[ActiveCam].CamTargetEntity == Cams[(ActiveCam+1)%2].CamTargetEntity){
+			if(Cams[ActiveCam].Mode == CCam::MODE_SYPHON ||
+			   Cams[ActiveCam].Mode == CCam::MODE_SYPHON_CRIM_IN_FRONT ||
+			   Cams[ActiveCam].Mode == CCam::MODE_FOLLOWPED ||
+			   Cams[ActiveCam].Mode == CCam::MODE_SPECIAL_FIXED_FOR_SYPHON)
+				lookingAtPlayerNow = true;
+			if(Cams[(ActiveCam+1)%2].Mode == CCam::MODE_SYPHON ||
+			   Cams[(ActiveCam+1)%2].Mode == CCam::MODE_SYPHON_CRIM_IN_FRONT ||
+			   Cams[(ActiveCam+1)%2].Mode == CCam::MODE_FOLLOWPED ||
+			   Cams[(ActiveCam+1)%2].Mode == CCam::MODE_SPECIAL_FIXED_FOR_SYPHON)	// checked twice for some reason
+				wasLookingAtPlayer = true;
 
+			if(!m_vecDoingSpecialInterPolation &&
+			   (Cams[ActiveCam].Mode == CCam::MODE_FOLLOWPED || Cams[ActiveCam].Mode == CCam::MODE_FIGHT_CAM) &&
+			   (Cams[(ActiveCam+1)%2].Mode == CCam::MODE_FOLLOWPED || Cams[(ActiveCam+1)%2].Mode == CCam::MODE_FIGHT_CAM))
+				transitionPedMode = true;
+		}
+
+		if(lookingAtPlayerNow && wasLookingAtPlayer){
+			CVector playerDist;
+			playerDist.x = FindPlayerPed()->GetPosition().x - GetPosition().x;
+			playerDist.y = FindPlayerPed()->GetPosition().y - GetPosition().y;
+			playerDist.z = FindPlayerPed()->GetPosition().z - GetPosition().z;
+			if(playerDist.Magnitude() > 17.5f &&
+			   (Cams[ActiveCam].Mode == CCam::MODE_SYPHON || Cams[ActiveCam].Mode == CCam::MODE_SYPHON_CRIM_IN_FRONT))
+				setWait = true;
+		}
+		if(setWait)
+			m_bWaitForInterpolToFinish = true;
+
+
+		uint32 currentTime = CTimer::GetTimeInMilliseconds() - m_uiTimeTransitionStart;
+		if(currentTime >= m_uiTransitionDuration)
+			currentTime = m_uiTransitionDuration;
+		float inter = (float) currentTime / m_uiTransitionDuration;
+		inter = 0.5f - 0.5*Cos(inter*PI);	// smooth it
+
+		if(m_vecDoingSpecialInterPolation){
+			Cams[(ActiveCam+1)%2].Source = m_vecOldSourceForInter;
+			Cams[(ActiveCam+1)%2].Front = m_vecOldFrontForInter;
+			Cams[(ActiveCam+1)%2].Up = m_vecOldUpForInter;
+			Cams[(ActiveCam+1)%2].FOV = m_vecOldFOVForInter;
+			if(WasPreviouslyInterSyhonFollowPed)
+				Cams[(ActiveCam+1)%2].m_cvecTargetCoorsForFudgeInter.z = PreviousFudgedTargetCoors.z;
+		}
+
+		CamSource = inter*Cams[ActiveCam].Source + (1.0f-inter)*Cams[(ActiveCam+1)%2].Source;
+		FOV = inter*Cams[ActiveCam].FOV + (1.0f-inter)*Cams[(ActiveCam+1)%2].FOV;
+
+		CVector tmpFront = Cams[(ActiveCam+1)%2].Front;
+		float Alpha_other = CGeneral::GetATanOfXY(tmpFront.Magnitude2D(), tmpFront.z);
+		if(Alpha_other > PI) Alpha_other -= TWOPI;
+		float Beta_other = 0.0f;
+		if(tmpFront.x != 0.0f || tmpFront.y != 0.0f)
+			Beta_other = CGeneral::GetATanOfXY(tmpFront.x, tmpFront.y);
+		tmpFront = Cams[ActiveCam].Front;
+		float Alpha_active = CGeneral::GetATanOfXY(tmpFront.Magnitude2D(), tmpFront.z);
+		if(Alpha_active > PI) Alpha_other -= TWOPI;
+		float Beta_active = 0.0f;
+		if(tmpFront.x != 0.0f || tmpFront.y != 0.0f)
+			Beta_active = CGeneral::GetATanOfXY(tmpFront.x, tmpFront.y);
+
+		float DeltaBeta = Beta_active - Beta_other;
+		float Alpha = inter*Alpha_active + (1.0f-inter)*Alpha_other;
+
+		if(m_uiTransitionJUSTStarted){
+			while(DeltaBeta > PI) DeltaBeta -= TWOPI;
+			while(DeltaBeta <= -PI) DeltaBeta += TWOPI;
+			m_uiTransitionJUSTStarted = false;
+		}else{
+			if(DeltaBeta < m_fOldBetaDiff)
+				while(Abs(DeltaBeta - m_fOldBetaDiff) > PI) DeltaBeta += TWOPI;
+			else
+				while(Abs(DeltaBeta - m_fOldBetaDiff) > PI) DeltaBeta -= TWOPI;
+		}
+		m_fOldBetaDiff = DeltaBeta;
+		float Beta = inter*DeltaBeta + Beta_other;
+		assert(0 && "TODO");
+#else
 		uint32 currentTime = CTimer::GetTimeInMilliseconds() - m_uiTimeTransitionStart;
 		if(currentTime >= m_uiTransitionDuration)
 			currentTime = m_uiTransitionDuration;
@@ -457,6 +540,7 @@ CCamera::Process(void)
 		float Alpha = CGeneral::GetATanOfXY(DistOnGround, Dist.z);
 		float Beta = CGeneral::GetATanOfXY(Dist.x, Dist.y);
 		Cams[ActiveCam].KeepTrackOfTheSpeed(CamSource, Target, CamUp, Alpha, Beta, FOV);
+#endif
 	}else{
 		// No transition, take Cam values directly
 		if(WorldViewerBeingUsed){
@@ -550,8 +634,10 @@ CCamera::Process(void)
 		LODDistMultiplier = 70.0f/CDraw::GetFOV() * CDraw::GetAspectRatio()/(4.0f/3.0f);
 	else
 		LODDistMultiplier = 1.0f;
+	// missing on PS2
 	GenerationDistMultiplier = LODDistMultiplier;
 	LODDistMultiplier *= CRenderer::ms_lodDistScale;
+	//
 
 	// Keep track of speed
 	if(m_bJustInitalised || m_bJust_Switched){
@@ -1582,7 +1668,7 @@ CCamera::UpdateTargetEntity(void)
 			pTargetEntity = FindPlayerPed();
 		if(PLAYER->GetPedState() == PED_DRAG_FROM_CAR)
 			pTargetEntity = FindPlayerPed();
-		if(pTargetEntity->IsVehicle() && CarZoomIndicator != CAM_ZOOM_1STPRS && FindPlayerPed()->GetPedState() == PED_ARRESTED)
+		if(pTargetEntity->IsVehicle() && CarZoomIndicator == CAM_ZOOM_1STPRS && FindPlayerPed()->GetPedState() == PED_ARRESTED)
 			pTargetEntity = FindPlayerPed();
 	}
 }
@@ -1859,7 +1945,7 @@ CCamera::StartTransition(int16 newMode)
 	int door;
 	bool vehicleVertical;
 
-// missing on PS2
+#ifndef PS2_CAM_TRANSITION
 	m_bItsOkToLookJustAtThePlayer = false;
 	m_fFractionInterToStopMoving = 0.25f;
 	m_fFractionInterToStopCatchUp = 0.75f;
@@ -1876,7 +1962,7 @@ CCamera::StartTransition(int16 newMode)
 		if(newMode == CCam::MODE_CAM_ON_A_STRING)
 			switchPedToCar = true;
 	}
-//
+#endif
 
 	if(Cams[ActiveCam].Mode == CCam::MODE_SYPHON_CRIM_IN_FRONT && newMode == CCam::MODE_SYPHON)
 		switchSyphonMode = true;
@@ -1902,11 +1988,11 @@ CCamera::StartTransition(int16 newMode)
 		((CPed*)pTargetEntity)->m_fRotationDest = angle;
 	}
 
-/*	// PS2
+#ifdef PS2_CAM_TRANSITION
 	ActiveCam = (ActiveCam+1)%2;
 	Cams[ActiveCam].Init();
 	Cams[ActiveCam].Mode = newMode;
- */
+#endif
 
 	Cams[ActiveCam].m_cvecCamFixedModeVector = m_vecFixedModeVector;
 	Cams[ActiveCam].CamTargetEntity = pTargetEntity;
@@ -2102,7 +2188,7 @@ CCamera::StartTransition(int16 newMode)
 		m_uiTransitionDuration = 1800;
 	else if(switchFromFight)
 		m_uiTransitionDuration = 750;
-// not on PS2
+#ifndef PS2_CAM_TRANSITION
 	else if(switchPedToCar){
 		m_fFractionInterToStopMoving = 0.2f;
 		m_fFractionInterToStopCatchUp = 0.8f;
@@ -2116,11 +2202,11 @@ CCamera::StartTransition(int16 newMode)
 		m_uiTransitionDuration = 1;
 	}else
 		m_uiTransitionDuration = 1350;	// already set above
-//
+#endif
 	m_uiTransitionState = 1;
 	m_uiTimeTransitionStart = CTimer::GetTimeInMilliseconds();
 	m_uiTransitionJUSTStarted = 1;
-// PS2 returns here
+#ifndef PS2_CAM_TRANSITION
 	if(m_vecDoingSpecialInterPolation){
 		m_cvecStartingSourceForInterPol = SourceDuringInter;
 		m_cvecStartingTargetForInterPol = TargetDuringInter;
@@ -2156,6 +2242,7 @@ CCamera::StartTransition(int16 newMode)
 		m_fFractionInterToStopCatchUp = m_fScriptPercentageInterToCatchUp;
 		m_uiTransitionDuration = m_fScriptTimeForInterPolation;
 	}
+#endif
 }
 
 void

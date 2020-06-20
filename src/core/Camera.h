@@ -188,7 +188,6 @@ public:
 	CPed         *m_pLastPedLookedAt;// So interpolation works 
 	bool        m_bFirstPersonRunAboutActive;
 
-
 	CCam(void) { Init(); }
 	void Init(void);
 	void Process(void);
@@ -518,7 +517,6 @@ public:
 	CVector m_vecOldSourceForInter;
 	CVector m_vecOldFrontForInter;
 	CVector m_vecOldUpForInter;
-
 	float m_vecOldFOVForInter;
 	float m_fFLOATingFade;
 	float m_fFLOATingFadeMusic;
