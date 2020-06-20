@@ -330,6 +330,8 @@ CPlayerPed::SetRealMoveAnim(void)
 		curIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_TIRED);
 	if (!curIdleAssoc)
 		curIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
+	if (!curIdleAssoc)
+		curIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
 
 	if ((!curRunStopAssoc || !(curRunStopAssoc->IsRunning())) && (!curRunStopRAssoc || !(curRunStopRAssoc->IsRunning()))) {
 
@@ -400,7 +402,10 @@ CPlayerPed::SetRealMoveAnim(void)
 
 				delete curIdleAssoc;
 				delete RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_TIRED);
-				delete RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
+				CAnimBlendAssociation *fightIdleAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
+				if (!fightIdleAnim)
+					fightIdleAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
+				delete fightIdleAnim;
 				delete curSprintAssoc;
 
 				curSprintAssoc = nil;
@@ -569,6 +574,7 @@ CPlayerPed::DoesTargetHaveToBeBroken(CVector target, CWeapon *weaponUsed)
 	if (distVec.Magnitude() > CWeaponInfo::GetWeaponInfo(weaponUsed->m_eWeaponType)->m_fRange)
 		return true;
 
+/*
 	if (weaponUsed->m_eWeaponType != WEAPONTYPE_SHOTGUN && weaponUsed->m_eWeaponType != WEAPONTYPE_RUGER)
 		return false;
 
@@ -576,7 +582,7 @@ CPlayerPed::DoesTargetHaveToBeBroken(CVector target, CWeapon *weaponUsed)
 
 	if (DotProduct(distVec,GetForward()) < 0.4f)
 		return true;
-
+*/
 	return false;
 }
 
@@ -622,6 +628,14 @@ CPlayerPed::PlayerControlSniper(CPad *padUsed)
 {
 	ProcessWeaponSwitch(padUsed);
 	TheCamera.PlayerExhaustion = (1.0f - (m_fCurrentStamina - -150.0f) / 300.0f) * 0.9f + 0.1f;
+
+	if (padUsed->DuckJustDown() && !bIsDucking && m_nMoveState != PEDMOVE_SPRINT) {
+		bCrouchWhenShooting = true;
+		SetDuck(60000, true);
+	} else if (bIsDucking && (padUsed->DuckJustDown() || m_nMoveState == PEDMOVE_SPRINT)) {
+		ClearDuck(true);
+		bCrouchWhenShooting = false;
+	}
 
 	if (!padUsed->GetTarget()) {
 		RestorePreviousState();
@@ -730,6 +744,14 @@ CPlayerPed::PlayerControlM16(CPad *padUsed)
 	ProcessWeaponSwitch(padUsed);
 	TheCamera.PlayerExhaustion = (1.0f - (m_fCurrentStamina - -150.0f) / 300.0f) * 0.9f + 0.1f;
 
+	if (padUsed->DuckJustDown() && !bIsDucking && m_nMoveState != PEDMOVE_SPRINT) {
+		bCrouchWhenShooting = true;
+		SetDuck(60000, true);
+	} else if (bIsDucking && (padUsed->DuckJustDown() || m_nMoveState == PEDMOVE_SPRINT)) {
+		ClearDuck(true);
+		bCrouchWhenShooting = false;
+	}
+
 	if (!padUsed->GetTarget()) {
 		RestorePreviousState();
 		TheCamera.ClearPlayerWeaponMode();
@@ -803,6 +825,12 @@ CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 			m_fMoveSpeed = 0.0f;
 		}
 	}
+
+	if (m_nPedState == PED_ANSWER_MOBILE) {
+		SetRealMoveAnim();
+		return;
+	}
+
 	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy)
 		&& padUsed->GetSprint()) {
 		m_nMoveState = PEDMOVE_SPRINT;
@@ -1084,7 +1112,7 @@ CPlayerPed::ProcessAnimGroups(void)
 	}
 }
 
-// TODO(Miami): Hella TODO
+// TODO(Miami)
 void
 CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 {
@@ -1094,38 +1122,64 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 		CWeaponEffects::ClearCrossHair();
 		ClearPointGunAt();
 	}
+
+	if (padUsed->DuckJustDown() && !bIsDucking && m_nMoveState != PEDMOVE_SPRINT) {
+		bCrouchWhenShooting = true;
+		SetDuck(60000, true);
+	} else if (bIsDucking && (padUsed->DuckJustDown() || m_nMoveState == PEDMOVE_SPRINT ||
+		padUsed->GetSprint() || padUsed->JumpJustDown() || padUsed->ExitVehicleJustDown())) {
+
+		ClearDuck(true);
+		bCrouchWhenShooting = false;
+	}
+
+	if(weaponInfo->m_bCanAim)
+		m_wepAccuracy = 95;
+	else
+		m_wepAccuracy = 100;
+
 	if (!m_pFire) {
-		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER ||
-			GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || GetWeapon()->m_eWeaponType == WEAPONTYPE_M4 ||
-			GetWeapon()->m_eWeaponType == WEAPONTYPE_RUGER) {
-			if (padUsed->TargetJustDown()/* || TheCamera.m_bAllow1rstPersonWeaponsCamera */) { // TODO(Miami): Cam
-				SetStoredState();
-				m_nPedState = PED_SNIPER_MODE;
+		eWeaponType weapon = GetWeapon()->m_eWeaponType;
+		if (weapon == WEAPONTYPE_ROCKETLAUNCHER || weapon == WEAPONTYPE_SNIPERRIFLE ||
+			weapon == WEAPONTYPE_LASERSCOPE || weapon == WEAPONTYPE_M4 ||
+			weapon == WEAPONTYPE_RUGER || weapon == WEAPONTYPE_M60 ||
+			weapon == WEAPONTYPE_CAMERA) {
+
+			if (padUsed->TargetJustDown() || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget) {
 #ifdef FREE_CAM
 				if (CCamera::bFreeCam && TheCamera.Cams[0].Using3rdPersonMouseCam()) {
 					m_fRotationCur = CGeneral::LimitRadianAngle(-TheCamera.Orientation);
 					SetHeading(m_fRotationCur);
 				}
 #endif
-				if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER)
+				if (weapon == WEAPONTYPE_ROCKETLAUNCHER)
 					TheCamera.SetNewPlayerWeaponMode(CCam::MODE_ROCKETLAUNCHER, 0, 0);
-				else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE)
+				else if (weapon == WEAPONTYPE_SNIPERRIFLE || weapon == WEAPONTYPE_LASERSCOPE)
 					TheCamera.SetNewPlayerWeaponMode(CCam::MODE_SNIPER, 0, 0);
+				else if (weapon == WEAPONTYPE_CAMERA)
+					TheCamera.SetNewPlayerWeaponMode(CCam::MODE_CAMERA, 0, 0);
 				else
 					TheCamera.SetNewPlayerWeaponMode(CCam::MODE_M16_1STPERSON, 0, 0);
 
 				m_fMoveSpeed = 0.0f;
 				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_STANCE, 1000.0f);
-			}
-			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER || GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE
-				|| TheCamera.PlayerWeaponMode.Mode == CCam::MODE_M16_1STPERSON)
+				SetPedState(PED_SNIPER_MODE);
 				return;
+			}
+			if (!TheCamera.Using1stPersonWeaponMode())
+				if (weapon == WEAPONTYPE_ROCKETLAUNCHER || weapon == WEAPONTYPE_SNIPERRIFLE || weapon == WEAPONTYPE_LASERSCOPE || weapon == WEAPONTYPE_CAMERA)
+					return;
 		}
 	}
 
 	if (padUsed->GetWeapon() && m_nMoveState != PEDMOVE_SPRINT) {
 		if (m_nSelectedWepSlot == m_currentWeapon) {
 			if (m_pPointGunAt) {
+				if (m_nPedState == PED_ATTACK) {
+					m_fAttackButtonCounter *= Pow(0.94f, CTimer::GetTimeStep());
+				} else {
+					m_fAttackButtonCounter = 0.0f;
+				}
 #ifdef FREE_CAM
 				if (CCamera::bFreeCam && weaponInfo->m_eWeaponFire == WEAPON_FIRE_MELEE && m_fMoveSpeed < 1.0f)
 					StartFightAttack(padUsed->GetWeapon());
@@ -1220,7 +1274,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 	}
 #endif
 
-	if (padUsed->GetTarget() && m_nSelectedWepSlot == m_currentWeapon && m_nMoveState != PEDMOVE_SPRINT) {
+	if (padUsed->GetTarget() && m_nSelectedWepSlot == m_currentWeapon && m_nMoveState != PEDMOVE_SPRINT && !TheCamera.Using1stPersonWeaponMode() && weaponInfo->m_bCanAim) {
 		if (m_pPointGunAt) {
 			// what??
 			if (!m_pPointGunAt
@@ -1228,15 +1282,26 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 				|| (!CCamera::bFreeCam && CCamera::m_bUseMouse3rdPerson)
 #else
 				|| CCamera::m_bUseMouse3rdPerson
-#endif
-				|| m_pPointGunAt->IsPed() && ((CPed*)m_pPointGunAt)->bInVehicle) {
+#endif		
+			) {
 				ClearWeaponTarget();
 				return;
 			}
-			if (CPlayerPed::DoesTargetHaveToBeBroken(m_pPointGunAt->GetPosition(), GetWeapon())) {
+
+			CPed *gunPointed = (CPed*)m_pPointGunAt;
+			if (gunPointed && gunPointed->IsPed() &&
+				((gunPointed->bInVehicle && (!gunPointed->m_pMyVehicle || !gunPointed->m_pMyVehicle->IsBike())) || !CGame::nastyGame && gunPointed->DyingOrDead())) {
 				ClearWeaponTarget();
 				return;
 			}
+			if (CPlayerPed::DoesTargetHaveToBeBroken(m_pPointGunAt->GetPosition(), GetWeapon()) || 
+				(!bCanPointGunAtTarget && !weaponInfo->m_bCanAimWithArm)) {
+				ClearWeaponTarget();
+				return;
+			}
+
+			// TODO(Miami): RotatePlayerToTrackTarget
+
 			if (m_pPointGunAt) {
 				if (padUsed->ShiftTargetLeftJustDown())
 					FindNextWeaponLockOnTarget(m_pPointGunAt, true);
@@ -1247,11 +1312,11 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 			TheCamera.UpdateAimingCoors(m_pPointGunAt->GetPosition());
 		}
 #ifdef FREE_CAM
-		else if ((CCamera::bFreeCam && weaponInfo->m_eWeaponFire == WEAPON_FIRE_MELEE) || (weaponInfo->m_bCanAim && !CCamera::m_bUseMouse3rdPerson)) {
+		else if ((CCamera::bFreeCam && weaponInfo->m_eWeaponFire == WEAPON_FIRE_MELEE) || !CCamera::m_bUseMouse3rdPerson) {
 #else
-		else if (weaponInfo->m_bCanAim && !CCamera::m_bUseMouse3rdPerson) {
+		else if (!CCamera::m_bUseMouse3rdPerson) {
 #endif
-			if (padUsed->TargetJustDown()/* || TheCamera.m_bAllow1rstPersonWeaponsCamera */) // TODO(Miami): Cam
+			if (padUsed->TargetJustDown() || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget)
 				FindWeaponLockOnTarget();
 		}
 	} else if (m_pPointGunAt) {

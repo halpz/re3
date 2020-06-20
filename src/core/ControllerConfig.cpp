@@ -767,7 +767,7 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown_FirstPersonOnl
 	if (button == GetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_OUT, type))
 		state.Cross = 255;
 	if (button == GetControllerKeyAssociatedWithAction(PED_DUCK, type))
-		state.RightShock = 255;
+		state.LeftShock = 255;
 }
 
 void CControllerConfigManager::AffectControllerStateOn_ButtonDown_ThirdPersonOnly(int32 button, eControllerType type, CControllerState &state)
@@ -785,7 +785,7 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown_ThirdPersonOnl
 	if (button == GetControllerKeyAssociatedWithAction(PED_SPRINT, type))
 		state.Cross = 255;
 	if (button == GetControllerKeyAssociatedWithAction(PED_DUCK, type))
-		state.RightShock = 255;
+		state.LeftShock = 255;
 	
 	if (FrontEndMenuManager.m_ControlMethod == CONTROL_CLASSIC)
 	{

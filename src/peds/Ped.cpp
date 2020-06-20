@@ -1113,19 +1113,15 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 			newAnim->SetFinishCallback(FinishedAttackCB, ped);
 		}
 	} else {
-		if (attackAssoc && attackAssoc->animId == ANIM_MELEE_ATTACK && currentWeapon->m_AnimToPlay == ASSOCGRP_UNARMED)
-		{
+		if (attackAssoc && attackAssoc->animId == ANIM_MELEE_ATTACK && currentWeapon->m_AnimToPlay == ASSOCGRP_UNARMED) {
 			attackAssoc->blendDelta = -8.0f;
 			attackAssoc->flags |= ASSOC_DELETEFADEDOUT;
 			ped->ClearAttack();
 			return;
 		}
-		if (attackAssoc)
-		{
-			if (currentWeapon->m_AnimToPlay == ASSOCGRP_THROW)
-			{
-				if ((attackAssoc->animId == ANIM_THROWABLE_THROW || attackAssoc->animId == ANIM_THROWABLE_THROWU) && ped->GetWeapon()->m_nAmmoTotal > 0)
-				{
+		if (attackAssoc) {
+			if (currentWeapon->m_AnimToPlay == ASSOCGRP_THROW) {
+				if ((attackAssoc->animId == ANIM_THROWABLE_THROW || attackAssoc->animId == ANIM_THROWABLE_THROWU) && ped->GetWeapon()->m_nAmmoTotal > 0) {
 					ped->RemoveWeaponModel(currentWeapon->m_nModelId);
 					ped->AddWeaponModel(currentWeapon->m_nModelId);
 				}
@@ -1661,7 +1657,6 @@ CPed::ClearDuck(bool clearTimer)
 	if (!animAssoc) {
 		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DUCK_LOW);
 	}
-
 	if (!animAssoc) {
 		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCH);
 	}
@@ -6806,30 +6801,6 @@ void
 CPed::Die(void)
 {
 	// UNUSED: This is a perfectly empty function.
-}
-
-uint8
-CPed::DoesLOSBulletHitPed(CColPoint &colPoint)
-{
-#ifdef FIX_BUGS
-	return 1;
-#else
-	uint8 retVal = 2;
-
-	float headZ = GetNodePosition(PED_HEAD).z;
-
-	if (m_nPedState == PED_FALL)
-		retVal = 1;
-
-	float colZ = colPoint.point.z;
-	if (colZ < headZ)
-		retVal = 1;
-
-	if (headZ + 0.2f <= colZ)
-		retVal = 0;
-
-	return retVal;
-#endif
 }
 
 // --MIAMI: Done

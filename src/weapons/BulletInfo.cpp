@@ -76,7 +76,6 @@ bool CBulletInfo::AddBullet(CEntity* pSource, eWeaponType type, CVector vecPosit
 
 void CBulletInfo::Update(void)
 {
-	bool bAddSound = true;
 	bPlayerSniperBullet = false;
 	for (int i = 0; i < NUM_BULLETS; i++) {
 		CBulletInfo* pBullet = &gaBulletInfo[i];
@@ -93,26 +92,23 @@ void CBulletInfo::Update(void)
 		CWorld::pIgnoreEntity = pBullet->m_pSource;
 		CColPoint point;
 		CEntity* pHitEntity;
-		if (CWorld::ProcessLineOfSight(vecOldPos, vecNewPos, point, pHitEntity, true, true, true, true, true, true)) {
+		if (CWorld::ProcessLineOfSight(vecOldPos, vecNewPos, point, pHitEntity, true, true, true, true, true, false, false, true)) {
 			if (pBullet->m_pSource && (pHitEntity->IsPed() || pHitEntity->IsVehicle()))
 				CStats::InstantHitsHitByPlayer++;
+
+			CWeapon::CheckForShootingVehicleOccupant(&pHitEntity, &point, pBullet->m_eWeaponType, vecOldPos, vecNewPos);
 			if (pHitEntity->IsPed()) {
 				CPed* pPed = (CPed*)pHitEntity;
 				if (!pPed->DyingOrDead() && pPed != pBullet->m_pSource) {
-					if (pPed->DoesLOSBulletHitPed(point)) {
-						if (pPed->IsPedInControl() && !pPed->bIsDucking) {
-							pPed->ClearAttackByRemovingAnim();
-							CAnimBlendAssociation* pAnim = CAnimManager::AddAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_SHOT_FRONT_PARTIAL);
-							pAnim->SetBlend(0.0f, 8.0f);
-						}
-						pPed->InflictDamage(pBullet->m_pSource, pBullet->m_eWeaponType, pBullet->m_nDamage, (ePedPieceTypes)point.pieceB, pPed->GetLocalDirection(pPed->GetPosition() - point.point));
-						CEventList::RegisterEvent(pPed->m_nPedType == PEDTYPE_COP ? EVENT_SHOOT_COP : EVENT_SHOOT_PED, EVENT_ENTITY_PED, pPed, (CPed*)pBullet->m_pSource, 1000);
-						pBullet->m_bInUse = false;
-						vecNewPos = point.point;
+					if (pPed->IsPedInControl() && !pPed->bIsDucking) {
+						pPed->ClearAttackByRemovingAnim();
+						CAnimBlendAssociation* pAnim = CAnimManager::AddAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_SHOT_FRONT_PARTIAL);
+						pAnim->SetBlend(0.0f, 8.0f);
 					}
-					else {
-						bAddSound = false;
-					}
+					pPed->InflictDamage(pBullet->m_pSource, pBullet->m_eWeaponType, pBullet->m_nDamage, (ePedPieceTypes)point.pieceB, pPed->GetLocalDirection(pPed->GetPosition() - point.point));
+					CEventList::RegisterEvent(pPed->m_nPedType == PEDTYPE_COP ? EVENT_SHOOT_COP : EVENT_SHOOT_PED, EVENT_ENTITY_PED, pPed, (CPed*)pBullet->m_pSource, 1000);
+					pBullet->m_bInUse = false;
+					vecNewPos = point.point;
 				}
 				if (CGame::nastyGame) {
 					CVector vecParticleDirection = (point.point - pPed->GetPosition()) * 0.01f;
@@ -170,7 +166,7 @@ void CBulletInfo::Update(void)
 				vecNewPos = point.point;
 #endif
 			}
-			if (pBullet->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE && bAddSound) {
+			if (pBullet->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || pBullet->m_eWeaponType == WEAPONTYPE_LASERSCOPE) {
 				cAudioScriptObject* pAudio;
 				switch (pHitEntity->GetType()) {
 				case ENTITY_TYPE_BUILDING:
@@ -210,7 +206,7 @@ void CBulletInfo::Update(void)
 		CWorld::pIgnoreEntity = nil;
 		CWorld::bIncludeDeadPeds = false;
 		CWorld::bIncludeCarTyres = false;
-		if (pBullet->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE) {
+		if (pBullet->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || pBullet->m_eWeaponType == WEAPONTYPE_LASERSCOPE) {
 			bPlayerSniperBullet = true;
 			PlayerSniperBulletStart = pBullet->m_vecPosition;
 			PlayerSniperBulletEnd = vecNewPos;
