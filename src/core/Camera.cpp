@@ -230,7 +230,7 @@ CCamera::Process(void)
 	// static bool InterpolatorNotInitialised = true;	// unused
 	static CVector PreviousFudgedTargetCoors;	// only PS2
 	static float PlayerMinDist = 1.6f;	// not on PS2
-	static bool WasPreviouslyInterSyhonFollowPed = false;	// only written
+	static bool WasPreviouslyInterSyhonFollowPed = false;	// only used on PS2
 	float FOV = 0.0f;
 	float oldBeta, newBeta;
 	float deltaBeta = 0.0f;
@@ -382,13 +382,13 @@ CCamera::Process(void)
 		if(Alpha_other > PI) Alpha_other -= TWOPI;
 		float Beta_other = 0.0f;
 		if(tmpFront.x != 0.0f || tmpFront.y != 0.0f)
-			Beta_other = CGeneral::GetATanOfXY(tmpFront.x, tmpFront.y);
+			Beta_other = CGeneral::GetATanOfXY(-tmpFront.y, tmpFront.x);
 		tmpFront = Cams[ActiveCam].Front;
 		float Alpha_active = CGeneral::GetATanOfXY(tmpFront.Magnitude2D(), tmpFront.z);
-		if(Alpha_active > PI) Alpha_other -= TWOPI;
+		if(Alpha_active > PI) Alpha_active -= TWOPI;
 		float Beta_active = 0.0f;
 		if(tmpFront.x != 0.0f || tmpFront.y != 0.0f)
-			Beta_active = CGeneral::GetATanOfXY(tmpFront.x, tmpFront.y);
+			Beta_active = CGeneral::GetATanOfXY(-tmpFront.y, tmpFront.x);
 
 		float DeltaBeta = Beta_active - Beta_other;
 		float Alpha = inter*Alpha_active + (1.0f-inter)*Alpha_other;
@@ -405,7 +405,71 @@ CCamera::Process(void)
 		}
 		m_fOldBetaDiff = DeltaBeta;
 		float Beta = inter*DeltaBeta + Beta_other;
-		assert(0 && "TODO");
+
+		CVector FudgedTargetCoors;
+		if(lookingAtPlayerNow && wasLookingAtPlayer){
+			// BUG? how is this interpolation ever used when values are overwritten below?
+			float PlayerDist = (pTargetEntity->GetPosition() - CamSource).Magnitude2D();
+			float MinDist = Min(Cams[(ActiveCam+1)%2].m_fMinDistAwayFromCamWhenInterPolating, Cams[ActiveCam].m_fMinDistAwayFromCamWhenInterPolating);
+			if(PlayerDist < MinDist){
+				CamSource.x = pTargetEntity->GetPosition().x - MinDist*Cos(Beta - HALFPI);
+				CamSource.y = pTargetEntity->GetPosition().y - MinDist*Sin(Beta - HALFPI);
+			}else{
+				CamSource.x = pTargetEntity->GetPosition().x - PlayerDist*Cos(Beta - HALFPI);
+				CamSource.y = pTargetEntity->GetPosition().y - PlayerDist*Sin(Beta - HALFPI);
+			}
+
+			CColPoint colpoint;
+			CEntity *entity = nil;
+			if(CWorld::ProcessLineOfSight(pTargetEntity->GetPosition(), CamSource, colpoint, entity, true, false, false, true, false, true, true)){
+				CamSource = colpoint.point;
+				RwCameraSetNearClipPlane(Scene.camera, 0.05f);
+			}
+
+			CamFront = pTargetEntity->GetPosition() - CamSource;
+			FudgedTargetCoors = inter*Cams[ActiveCam].m_cvecTargetCoorsForFudgeInter + (1.0f-inter)*Cams[(ActiveCam+1)%2].m_cvecTargetCoorsForFudgeInter;
+			PreviousFudgedTargetCoors = FudgedTargetCoors;
+			CamFront.Normalise();
+			CamUp = CVector(0.0f, 0.0f, 1.0f);
+			CamRight = CrossProduct(CamFront, CamUp);
+			CamRight.Normalise();
+			CamUp = CrossProduct(CamRight, CamFront);
+
+			WasPreviouslyInterSyhonFollowPed = true;
+		}else
+			WasPreviouslyInterSyhonFollowPed = false;
+
+		if(transitionPedMode){
+			FudgedTargetCoors = inter*Cams[ActiveCam].m_cvecTargetCoorsForFudgeInter + (1.0f-inter)*Cams[(ActiveCam+1)%2].m_cvecTargetCoorsForFudgeInter;
+			PreviousFudgedTargetCoors = FudgedTargetCoors;
+			CVector CamToTarget = pTargetEntity->GetPosition() - CamSource;
+			float tmpBeta = CGeneral::GetATanOfXY(CamToTarget.x, CamToTarget.y);
+			float PlayerDist = (pTargetEntity->GetPosition() - CamSource).Magnitude2D();
+			float MinDist = Min(Cams[(ActiveCam+1)%2].m_fMinDistAwayFromCamWhenInterPolating, Cams[ActiveCam].m_fMinDistAwayFromCamWhenInterPolating);
+			if(PlayerDist < MinDist){
+				CamSource.x = pTargetEntity->GetPosition().x - MinDist*Cos(tmpBeta - HALFPI);
+				CamSource.y = pTargetEntity->GetPosition().y - MinDist*Sin(tmpBeta - HALFPI);
+			}
+			CamFront = FudgedTargetCoors - CamSource;
+			CamFront.Normalise();
+			CamUp = CVector(0.0f, 0.0f, 1.0f);
+			CamUp.Normalise();
+			CamRight = CrossProduct(CamFront, CamUp);
+			CamRight.Normalise();
+			CamUp = CrossProduct(CamRight, CamFront);
+			CamUp.Normalise();
+		}else{
+			CamFront.x = Cos(Alpha) * Sin(Beta);
+			CamFront.y = Cos(Alpha) * -Cos(Beta);
+			CamFront.z = Sin(Alpha);
+			CamFront.Normalise();
+			CamUp = inter*Cams[ActiveCam].Up + (1.0f-inter)*Cams[(ActiveCam+1)%2].Up;
+			CamUp.Normalise();
+			CamRight = CrossProduct(CamFront, CamUp);
+			CamRight.Normalise();
+			CamUp = CrossProduct(CamRight, CamFront);
+			CamUp.Normalise();
+		}
 #else
 		uint32 currentTime = CTimer::GetTimeInMilliseconds() - m_uiTimeTransitionStart;
 		if(currentTime >= m_uiTransitionDuration)
@@ -698,6 +762,16 @@ CCamera::CamControl(void)
 
 	if(Cams[ActiveCam].CamTargetEntity == nil && pTargetEntity == nil)
 		pTargetEntity = PLAYER;
+
+#ifdef PS2_CAM_TRANSITION
+	// Stop transition when it's done
+	if(m_uiTransitionState != 0)
+		if(CTimer::GetTimeInMilliseconds() > m_uiTransitionDuration+m_uiTimeTransitionStart){
+			m_uiTransitionState = 0;
+			m_vecDoingSpecialInterPolation = false;
+			m_bWaitForInterpolToFinish = false;
+		}
+#endif
 
 	m_iZoneCullFrameNumWereAt++;
 	if(m_iZoneCullFrameNumWereAt > m_iCheckCullZoneThisNumFrames)
@@ -2248,10 +2322,17 @@ CCamera::StartTransition(int16 newMode)
 void
 CCamera::StartTransitionWhenNotFinishedInter(int16 mode)
 {
+#ifdef PS2_CAM_TRANSITION
+	m_vecOldSourceForInter = GetPosition();
+	m_vecOldFrontForInter = GetForward();
+	m_vecOldUpForInter = GetUp();
+	m_vecOldFOVForInter = CDraw::GetFOV();
+#endif
 	m_vecDoingSpecialInterPolation = true;
 	StartTransition(mode);
 }
 
+#ifndef PS2_CAM_TRANSITION
 void
 CCamera::StoreValuesDuringInterPol(CVector &source, CVector &target, CVector &up, float &FOV)
 {
@@ -2264,7 +2345,7 @@ CCamera::StoreValuesDuringInterPol(CVector &source, CVector &target, CVector &up
 	m_fBetaDuringInterPol = CGeneral::GetATanOfXY(Dist.x, Dist.y);
 	m_fAlphaDuringInterPol = CGeneral::GetATanOfXY(DistOnGround, Dist.z);
 }
-
+#endif
 
 
 void

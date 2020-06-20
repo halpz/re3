@@ -425,9 +425,12 @@ public:
 	float CarZoomValueSmooth;
 
 	float DistanceToWater;
+#ifndef PS2_CAM_TRANSITION
 	float FOVDuringInter;
+#endif
 	float LODDistMultiplier;
 	float GenerationDistMultiplier;
+#ifndef PS2_CAM_TRANSITION
 	float m_fAlphaSpeedAtStartInter;
 	float m_fAlphaWhenInterPol;
 	float m_fAlphaDuringInterPol;
@@ -438,6 +441,7 @@ public:
 	float m_fFOVSpeedAtStartInter;
 	float m_fStartingBetaForInterPol;
 	float m_fStartingAlphaForInterPol;
+#endif
 	float m_PedOrientForBehindOrInFront;
 	float m_CameraAverageSpeed;
 	float m_CameraSpeedSoFar;
@@ -487,7 +491,7 @@ public:
 	CVector m_vecFixedModeSource;
 	CVector m_vecFixedModeUpOffSet;
 	CVector m_vecCutSceneOffset;
-
+#ifndef PS2_CAM_TRANSITION
 	CVector m_cvecStartingSourceForInterPol;
 	CVector m_cvecStartingTargetForInterPol;
 	CVector m_cvecStartingUpForInterPol;
@@ -497,11 +501,13 @@ public:
 	CVector m_vecSourceWhenInterPol;
 	CVector m_vecTargetWhenInterPol;
 	CVector m_vecUpWhenInterPol;
-
+#endif
 	CVector m_vecGameCamPos;
+#ifndef PS2_CAM_TRANSITION
 	CVector SourceDuringInter;
 	CVector TargetDuringInter;
 	CVector UpDuringInter;
+#endif
 	RwCamera *m_pRwCamera;
 	CEntity *pTargetEntity;
 	CCamPathSplines m_arrPathArray[MAX_NUM_OF_SPLINETYPES];
