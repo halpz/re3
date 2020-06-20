@@ -249,7 +249,8 @@ class CCamPathSplines
 {
 public:
 	enum {MAXPATHLENGTH=800};
-	float m_arr_PathData[MAXPATHLENGTH];
+//	float m_arr_PathData[MAXPATHLENGTH];
+	float *m_arr_PathData;
 	CCamPathSplines(void);
 };
 
@@ -551,6 +552,7 @@ public:
 	bool Get_Just_Switched_Status() { return m_bJust_Switched; }
 	void AvoidTheGeometry(const CVector &Source, const CVector &TargetPos, CVector &NewSource, float FOV);
 	void GetArrPosForVehicleType(int apperance, int &index);
+	void GetScreenRect(CRect &rect);
 
 	// Who's in control
 	void TakeControl(CEntity *target, int16 mode, int16 typeOfSwitch, int32 controller);
@@ -576,6 +578,7 @@ public:
 	bool TryToStartNewCamMode(int32 obbeMode);
 	void DontProcessObbeCinemaCamera(void);
 	void ProcessObbeCinemaCameraCar(void);
+	void ProcessObbeCinemaCameraHeli(void);
 	void ProcessObbeCinemaCameraPed(void);
 
 	// Train
@@ -584,6 +587,7 @@ public:
 
 	// Script
 	void LoadPathSplines(int file);
+	void DeleteCutSceneCamDataMemory(void);
 	void FinishCutscene(void);
 	float GetPositionAlongSpline(void) { return m_fPositionAlongSpline; }
 	uint32 GetCutSceneFinishTime(void);
@@ -617,7 +621,7 @@ public:
 	void SetNewPlayerWeaponMode(int16 mode, int16 minZoom, int16 maxZoom);
 	void ClearPlayerWeaponMode(void);
 	void UpdateAimingCoors(CVector const &coors);
-	void Find3rdPersonCamTargetVector(float dist, CVector pos, CVector &source, CVector &target);
+	bool Find3rdPersonCamTargetVector(float dist, CVector pos, CVector &source, CVector &target);
 	float Find3rdPersonQuickAimPitch(void);
 	bool Using1stPersonWeaponMode(void);
 

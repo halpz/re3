@@ -8959,6 +8959,13 @@ CPed::GetWeaponSlot(eWeaponType weaponType)
 	return CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponSlot;
 }
 
+// --MIAMI: Done
+bool
+CPed::CanWeRunAndFireWithWeapon(void)
+{
+	return CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAimWithArm;
+}
+
 void
 CPed::GoToNearestDoor(CVehicle *veh)
 {
