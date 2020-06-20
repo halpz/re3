@@ -3513,6 +3513,11 @@ CCam::Process_FlyBy(const CVector&, float, float, float)
 
 	if(TheCamera.m_bcutsceneFinished)
 		return;
+#ifdef FIX_BUGS
+	// this would crash, not nice when cycling debug mode
+	if(TheCamera.m_arrPathArray[0].m_arr_PathData == nil)
+		return;
+#endif
 
 	Up = CVector(0.0f, 0.0f, 1.0f);
 	if(TheCamera.m_bStartingSpline)

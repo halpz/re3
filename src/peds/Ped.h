@@ -798,6 +798,7 @@ public:
 	int GetNextPointOnRoute(void);
 	uint8 GetPedRadioCategory(uint32);
 	int GetWeaponSlot(eWeaponType);
+	bool CanWeRunAndFireWithWeapon(void);
 	void GoToNearestDoor(CVehicle*);
 	bool HaveReachedNextPointOnRoute(float);
 	void Idle(void);

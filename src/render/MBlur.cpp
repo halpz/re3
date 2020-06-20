@@ -146,13 +146,13 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
 }
 
 void
-CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type)
+CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 alpha)
 {
 	RwRGBA color = { (RwUInt8)red, (RwUInt8)green, (RwUInt8)blue, (RwUInt8)blur };
 	if(ms_bJustInitialised)
 		ms_bJustInitialised = false;
 	else
-		OverlayRender(cam, pFrontBuffer, color, type);
+		OverlayRender(cam, pFrontBuffer, color, type, alpha);
 	if(BlurOn){
 		RwRasterPushContext(pFrontBuffer);
 		RwRasterRenderFast(RwCameraGetRaster(cam), 0, 0);
@@ -161,7 +161,7 @@ CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, u
 }
 
 void
-CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type)
+CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type, int32 alpha)
 {
 	int r, g, b, a;
 
@@ -282,6 +282,12 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type)
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+}
+
+void
+CMBlur::SetDrunkBlur(float drunkness)
+{
+	Drunkness = clamp(drunkness, 0.0f, 1.0f);
 }
 
 void
