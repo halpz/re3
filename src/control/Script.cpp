@@ -11819,6 +11819,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	}
 	case COMMAND_IS_CHAR_STUCK:
 	{
+		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		UpdateCompareFlag(pPed->m_nWaitState == WAITSTATE_STUCK);
