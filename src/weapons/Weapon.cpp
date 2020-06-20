@@ -194,8 +194,12 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 
 	if ( GetInfo()->m_eWeaponFire != WEAPON_FIRE_MELEE )
 	{
-		if ( m_nAmmoInClip <= 0 )
-			return false;
+		if (m_nAmmoInClip <= 0) {
+			if (m_nAmmoTotal <= 0 || m_eWeaponState == WEAPONSTATE_RELOADING)
+				return false;
+
+			Reload();
+		}
 
 		switch ( m_eWeaponType )
 		{
@@ -223,10 +227,10 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 			{
 				if ((TheCamera.PlayerWeaponMode.Mode == CCam::MODE_HELICANNON_1STPERSON || TheCamera.PlayerWeaponMode.Mode == CCam::MODE_M16_1STPERSON)
 					&& shooter == FindPlayerPed()) {
-					addFireRateAsDelay = false;
+					addFireRateAsDelay = true;
 					fired = FireM16_1stPerson(shooter);
 				} else {
-					addFireRateAsDelay = true;
+					addFireRateAsDelay = false;
 					fired = FireInstantHit(shooter, source);
 				}
 				break;
@@ -235,8 +239,11 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 			case WEAPONTYPE_SNIPERRIFLE:
 			case WEAPONTYPE_LASERSCOPE:
 			{
-				fired = FireSniper(shooter);
-
+				if (shooter == FindPlayerPed()) {
+					fired = FireSniper(shooter);
+				} else {
+					fired = FireInstantHit(shooter, source);
+				}
 				break;
 			}
 
@@ -339,8 +346,12 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 
 			if (m_nAmmoInClip == 0)
 			{
-				if (m_nAmmoTotal == 0)
+				if (m_nAmmoTotal == 0) {
+					if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_CAMERA)
+						CPad::GetPad(0)->Clear(false);
+
 					return true;
+				}
 
 				m_eWeaponState = WEAPONSTATE_RELOADING;
 				m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nReload;
@@ -1026,7 +1037,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 		{
 			static uint8 counter = 0;
 
-			if ( info->m_nFiringRate >= 50 && !(++counter & 1) )
+			if ( info->m_nFiringRate >= 50 || !(++counter & 1) )
 			{
 				AddGunFlashBigGuns(*fireSource, *fireSource + target);
 
@@ -2586,9 +2597,10 @@ CWeapon::Update(int32 audioEntity, CPed *pedToAdjustSound)
 
 			if ( CTimer::GetTimeInMilliseconds() > m_nTimer )
 			{
-				if ( GetInfo()->m_eWeaponFire != WEAPON_FIRE_MELEE && m_nAmmoTotal == 0 )
+				if ( GetInfo()->m_eWeaponFire != WEAPON_FIRE_MELEE && m_nAmmoTotal == 0 ) {
 					m_eWeaponState = WEAPONSTATE_OUT_OF_AMMO;
-				else
+					// TODO(Miami): CPickups::RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo
+				} else
 					m_eWeaponState = WEAPONSTATE_READY;
 			}
 

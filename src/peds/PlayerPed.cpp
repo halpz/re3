@@ -738,6 +738,7 @@ switchDetectDone:
 	}
 }
 
+// --MIAMI: Done
 void
 CPlayerPed::PlayerControlM16(CPad *padUsed)
 {
@@ -757,10 +758,19 @@ CPlayerPed::PlayerControlM16(CPad *padUsed)
 		TheCamera.ClearPlayerWeaponMode();
 	}
 
-	if (padUsed->GetWeapon()) {
-		CVector firePos(0.0f, 0.0f, 0.6f);
-		firePos = GetMatrix() * firePos;
-		GetWeapon()->Fire(this, &firePos);
+	if (padUsed->GetWeapon() && CTimer::GetTimeInMilliseconds() > GetWeapon()->m_nTimer) {
+		if (GetWeapon()->m_eWeaponState == WEAPONSTATE_OUT_OF_AMMO) {
+			DMAudio.PlayFrontEndSound(SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM, 0.f);
+			GetWeapon()->m_nTimer = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_nFiringRate + CTimer::GetTimeInMilliseconds();
+		} else {
+			CVector firePos(0.0f, 0.0f, 0.6f);
+			firePos = GetMatrix() * firePos;
+			GetWeapon()->Fire(this, &firePos);
+			m_nPadDownPressedInMilliseconds = CTimer::GetTimeInMilliseconds();
+		}
+	} else if (CTimer::GetTimeInMilliseconds() > GetWeapon()->m_nTimer &&
+		CTimer::GetTimeInMilliseconds() - CTimer::GetTimeStepInMilliseconds() < GetWeapon()->m_nTimer && GetWeapon()->m_eWeaponState != WEAPONSTATE_OUT_OF_AMMO) {
+		DMAudio.PlayFrontEndSound(SOUND_WEAPON_AK47_BULLET_ECHO, GetWeapon()->m_eWeaponType);
 	}
 	GetWeapon()->Update(m_audioEntityId, nil);
 }
@@ -1583,11 +1593,11 @@ CPlayerPed::ProcessControl(void)
 			}
 			break;
 		case PED_SNIPER_MODE:
-			if (FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_M4) {
+			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE || GetWeapon()->m_eWeaponType == WEAPONTYPE_LASERSCOPE) {
 				if (padUsed)
-					PlayerControlM16(padUsed);
+					PlayerControlSniper(padUsed);
 			} else if (padUsed) {
-				PlayerControlSniper(padUsed);
+				PlayerControlM16(padUsed);
 			}
 			break;
 		case PED_SEEK_CAR:
