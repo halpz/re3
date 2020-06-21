@@ -233,6 +233,8 @@ enum Config {
 #define USE_PRECISE_MEASUREMENT_CONVERTION // makes game convert feet to meeters more precisely
 #define MISSION_REPLAY // mobile feature
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
+#define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+#define SCRIPT_LOG_FILE_LEVEL 1 // 0 == no log, 1 == overwrite every frame, 2 == full log
 
 // Replay
 //#define DONT_FIX_REPLAY_BUGS // keeps various bugs in CReplay, some of which are fairly cool!

@@ -350,6 +350,7 @@ private:
 	static bool IsPlayerStopped(CPlayerInfo*);
 	static bool IsVehicleStopped(CVehicle*);
 
+	static void PrintListSizes();
 	static void ReadObjectNamesFromScript();
 	static void UpdateObjectIndices();
 	static void ReadMultiScriptFileOffsetsFromScript();
@@ -484,6 +485,11 @@ private:
 
 #ifdef MISSION_REPLAY
 	bool CanAllowMissionReplay();
+#endif
+
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+	int CollectParameterForDebug(char* buf, bool& var);
+	void GetStoredParameterForDebug(char* buf);
 #endif
 
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
