@@ -249,7 +249,7 @@ public:
 	// CCam::Process_Look_At_Cars
 	// CCam::Process_CheesyZoom
 	// CCam::Process_Aiming
-	// CCam::Process_Bill	// same as BehindCar due to unused variables
+	void Process_Bill(const CVector &CameraTarget, float TargetOrientation, float SpeedVar, float TargetSpeedVar);
 	void Process_Im_The_Passenger_Woo_Woo(const CVector &CameraTarget, float TargetOrientation, float, float);
 	void Process_Blood_On_The_Tracks(const CVector &CameraTarget, float TargetOrientation, float, float);
 	void Process_Cam_Running_Side_Train(const CVector &CameraTarget, float TargetOrientation, float, float);

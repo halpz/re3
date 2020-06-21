@@ -167,7 +167,9 @@ CCam::Process(void)
 	case MODE_MODELVIEW:
 		Process_ModelView(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
-//	case MODE_BILL:
+	case MODE_BILL:
+		Process_Bill(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
 	case MODE_SYPHON:
 		Process_Syphon(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
@@ -1665,6 +1667,8 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 	}
 }
 
+float fBillsBetaOffset;	// made up name, actually in CCam
+
 void
 CCam::Process_BehindCar(const CVector &CameraTarget, float TargetOrientation, float, float)
 {
@@ -1684,6 +1688,15 @@ CCam::Process_BehindCar(const CVector &CameraTarget, float TargetOrientation, fl
 	if(Length < 0.002f)
 		Length = 0.002f;
 	Beta = CGeneral::GetATanOfXY(TargetCoors.x - Source.x, TargetCoors.y - Source.y);
+#ifdef TOGGLEABLE_BETA_FEATURES
+	// This is completely made up but Bill's cam manipulates an angle before calling this
+	// and otherwise calculating Beta doesn't make much sense.
+	Beta += fBillsBetaOffset;
+	fBillsBetaOffset = 0.0f;
+	Dist.x = -Length*Cos(Beta);
+	Dist.y = -Length*Sin(Beta);
+	Source = TargetCoors + Dist;
+#endif
 	if(Length > CA_MAX_DISTANCE){
 		Source.x = TargetCoors.x + Dist.x/Length * CA_MAX_DISTANCE;
 		Source.y = TargetCoors.y + Dist.y/Length * CA_MAX_DISTANCE;
@@ -1773,8 +1786,13 @@ CCam::WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation)
 	else
 		WellBufferMe(TargetZOffSet, &RoadHeightFix, &RoadHeightFixSpeed, 0.27f, 0.1f, false);
 
-	if((colpoint.surfaceB == SURFACE_DEFAULT || colpoint.surfaceB >= SURFACE_CAR) &&
-	   colpoint.surfaceB != SURFACE_THICK_METAL_PLATE && colpoint.surfaceB != SURFACE_STEEP_CLIFF &&
+	if(colpoint.surfaceB != SURFACE_TARMAC &&
+	   colpoint.surfaceB != SURFACE_GRASS &&
+	   colpoint.surfaceB != SURFACE_GRAVEL &&
+	   colpoint.surfaceB != SURFACE_MUD_DRY &&
+	   colpoint.surfaceB != SURFACE_PAVEMENT &&
+	   colpoint.surfaceB != SURFACE_THICK_METAL_PLATE &&
+	   colpoint.surfaceB != SURFACE_STEEP_CLIFF &&
 	   RoadHeightFix > 1.4f)
 		RoadHeightFix = 1.4f;
 
@@ -4419,6 +4437,24 @@ CCam::Process_FollowPed_WithBinding(const CVector &CameraTarget, float TargetOri
 //	Source += Front2 * TheCamera.m_fPedZoomValueSmooth;
 
 	GetVectorsReadyForRW();
+}
+
+void
+CCam::Process_Bill(const CVector &CameraTarget, float TargetOrientation, float SpeedVar, float TargetSpeedVar)
+{
+#ifdef FIX_BUGS
+	fBillsBetaOffset += CPad::GetPad(0)->GetRightStickX()/1000.0f;
+#else
+	// just wtf is this? this code must be ancient
+	if(CPad::GetPad(0)->GetStart())
+		fBillsBetaOffset += CPad::GetPad(0)->GetLeftStickX()/1000.0f;
+#endif
+	while(fBillsBetaOffset > TWOPI) fBillsBetaOffset -= TWOPI;
+	while(fBillsBetaOffset < 0.0f) fBillsBetaOffset += TWOPI;
+	TargetOrientation += fBillsBetaOffset;
+	while(TargetOrientation > TWOPI) TargetOrientation -= TWOPI;
+	while(TargetOrientation < 0.0f) TargetOrientation += TWOPI;
+	Process_BehindCar(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 }
 
 void
