@@ -618,7 +618,7 @@ CCamera::Process(void)
 			CamUp = Cams[ActiveCam].Up;
 			FOV = Cams[ActiveCam].FOV;
 		}
-		WasPreviouslyInterSyhonFollowPed = false;	// unused
+		WasPreviouslyInterSyhonFollowPed = false;	// only used on PS2
 	}
 
 	if(m_uiTransitionState != 0)
@@ -717,7 +717,7 @@ CCamera::Process(void)
 	}
 	m_PreviousCameraPosition = GetPosition();
 
-	// PS2: something going on with forward vector here
+	// PS2 normalizes a CVector2D GetForward() here. is it used anywhere?
 
 	if(Cams[ActiveCam].DirectionWasLooking != LOOKING_FORWARD && Cams[ActiveCam].Mode != CCam::MODE_TOP_DOWN_PED){
 		Cams[ActiveCam].Source = Cams[ActiveCam].SourceBeforeLookBehind;
@@ -1366,6 +1366,7 @@ CCamera::CamControl(void)
 
 	// Restore with a jump cut
 	if(m_bRestoreByJumpCut){
+		// PS2 just sets m_bCamDirectlyBehind here
 		if(ReqMode != CCam::MODE_FOLLOWPED &&
 		   ReqMode != CCam::MODE_M16_1STPERSON &&
 		   ReqMode != CCam::MODE_SNIPER &&
@@ -1381,6 +1382,7 @@ CCamera::CamControl(void)
 		Cams[ActiveCam].CamTargetEntity = pTargetEntity;
 		Cams[ActiveCam].m_cvecCamFixedModeSource = m_vecFixedModeSource;
 		Cams[ActiveCam].m_cvecCamFixedModeUpOffSet = m_vecFixedModeUpOffSet;
+		// PS2 sets this to m_bLookingAtVector
 		Cams[ActiveCam].m_bCamLookingAtVector = false;
 		Cams[ActiveCam].m_vecLastAboveWaterCamPosition = Cams[(ActiveCam+1)%2].m_vecLastAboveWaterCamPosition;
 		m_bRestoreByJumpCut = false;
@@ -1519,7 +1521,7 @@ CCamera::CamControl(void)
 					switchByJumpCut = true;
 					if(Cams[ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED){
 						CVector front = Cams[ActiveCam].Source - FindPlayerPed()->GetPosition();
-						front.z = 0.0f;
+						front.z = 0.0f;	// missing on PS2
 						front.Normalise();
 #ifdef FIX_BUGS
 						// this is almost as bad as the bugged code
@@ -1556,6 +1558,7 @@ CCamera::CamControl(void)
 
 		if((m_uiTransitionState == 0 || switchByJumpCut) && ReqMode != Cams[ActiveCam].Mode){
 			if(switchByJumpCut){
+				// PS2 just sets m_bCamDirectlyBehind here
 				if(!m_bPlayerIsInGarage || m_bJustCameOutOfGarage){
 					if(ReqMode != CCam::MODE_FOLLOWPED &&
 					   ReqMode != CCam::MODE_M16_1STPERSON &&
@@ -1594,6 +1597,8 @@ CCamera::CamControl(void)
 			if(ReqMode == CCam::MODE_FOLLOWPED && Cams[ActiveCam].Mode == CCam::MODE_FIGHT_CAM)
 				startTransition = false;
 
+#ifndef PS2_CAM_TRANSITION
+			// done in Process on PS2
 			if(!m_bWaitForInterpolToFinish && m_bLookingAtPlayer && m_uiTransitionState != 0){
 				CVector playerDist;
 				playerDist.x = FindPlayerPed()->GetPosition().x - GetPosition().x;
@@ -1606,6 +1611,7 @@ CCamera::CamControl(void)
 						m_bWaitForInterpolToFinish = true;
 				}
 			}
+#endif
 			if(m_bWaitForInterpolToFinish)
 				startTransition = false;
 
@@ -1615,10 +1621,14 @@ CCamera::CamControl(void)
 				Cams[ActiveCam].CamTargetEntity->RegisterReference(&Cams[ActiveCam].CamTargetEntity);
 			}
 		}else if(ReqMode == CCam::MODE_FIXED && pTargetEntity != Cams[ActiveCam].CamTargetEntity && m_bPlayerIsInGarage){
+#ifdef PS2_CAM_TRANSITION
+			StartTransitionWhenNotFinishedInter(ReqMode);
+#else
 			if(m_uiTransitionState != 0)
 				StartTransitionWhenNotFinishedInter(ReqMode);
 			else
 				StartTransition(ReqMode);
+#endif
 			pTargetEntity->RegisterReference(&pTargetEntity);
 			Cams[ActiveCam].CamTargetEntity->RegisterReference(&Cams[ActiveCam].CamTargetEntity);
 		}
@@ -2004,7 +2014,7 @@ CCamera::SetCamPositionForFixedMode(const CVector &Source, const CVector &UpOffS
 
 
 /*
- * On PS2 the transition happens between Cams[1] and Cams[2].
+ * On PS2 the transition happens between Cams[0] and Cams[1].
  * On PC the whole system has been changed.
  */
 void
@@ -2042,8 +2052,10 @@ CCamera::StartTransition(int16 newMode)
 		switchSyphonMode = true;
 	if(Cams[ActiveCam].Mode == CCam::MODE_FIGHT_CAM && newMode == CCam::MODE_FOLLOWPED)
 		switchFromFight = true;
+#ifndef PS2_CAM_TRANSITION
 	if(Cams[ActiveCam].Mode == CCam::MODE_FIXED)
 		switchFromFixed = true;
+#endif
 
 	m_bUseTransitionBeta = false;
 
@@ -2097,12 +2109,27 @@ CCamera::StartTransition(int16 newMode)
 
 	switch(newMode){
 	case CCam::MODE_BEHINDCAR:
+#ifdef PS2_CAM_TRANSITION
+		Cams[ActiveCam].Source = Cams[(ActiveCam+1)%2].Source;
+		Cams[ActiveCam].Beta = Cams[(ActiveCam+1)%2].Beta;
+#endif
+		Cams[ActiveCam].BetaSpeed = 0.0f;
+		break;
+
+	case CCam::MODE_BEHINDBOAT:
+#ifdef PS2_CAM_TRANSITION
+		Cams[ActiveCam].Source = Cams[(ActiveCam+1)%2].Source;
+		Cams[ActiveCam].Beta = Cams[(ActiveCam+1)%2].Beta;
+#endif
 		Cams[ActiveCam].BetaSpeed = 0.0f;
 		break;
 
 	case CCam::MODE_FOLLOWPED:
 		// Getting out of vehicle normally
 		betaOffset = DEGTORAD(55.0f);
+#ifdef PS2_CAM_TRANSITION
+		Cams[ActiveCam].Source = Cams[(ActiveCam+1)%2].Source;
+#endif
 		if(m_bJustCameOutOfGarage){
 			m_bUseTransitionBeta = true;
 /*
@@ -2116,13 +2143,21 @@ CCamera::StartTransition(int16 newMode)
 */
 			// this is better:
 			if(Cams[ActiveCam].Front.x != 0.0f || Cams[ActiveCam].Front.y != 0.0f)
+#ifdef PS2_CAM_TRANSITION
+				Cams[ActiveCam].m_fTransitionBeta = CGeneral::GetATanOfXY(Cams[(ActiveCam+1)%2].Front.x, Cams[(ActiveCam+1)%2].Front.y) + PI;
+#else
 				Cams[ActiveCam].m_fTransitionBeta = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y) + PI;
+#endif
 			else
 				Cams[ActiveCam].m_fTransitionBeta = 0.0f;
 		}
 		if(m_bTargetJustCameOffTrain)
 			m_bCamDirectlyInFront = true;
+#ifdef PS2_CAM_TRANSITION
+		if(Cams[(ActiveCam+1)%2].Mode != CCam::MODE_CAM_ON_A_STRING)
+#else
 		if(Cams[ActiveCam].Mode != CCam::MODE_CAM_ON_A_STRING)
+#endif
 			break;
 		m_bUseTransitionBeta = true;
 		vehicleVertical = false;
@@ -2134,7 +2169,11 @@ CCamera::StartTransition(int16 newMode)
 			Cams[ActiveCam].m_fTransitionBeta = 0.0f;
 			break;
 		}
+#ifdef PS2_CAM_TRANSITION
+		camBeta = CGeneral::GetATanOfXY(Cams[(ActiveCam+1)%2].Front.x, Cams[(ActiveCam+1)%2].Front.y);
+#else
 		camBeta = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y);
+#endif
 		if(((CPed*)pTargetEntity)->m_carInObjective)
 			targetBeta = CGeneral::GetATanOfXY(((CPed*)pTargetEntity)->m_carInObjective->GetForward().x, ((CPed*)pTargetEntity)->m_carInObjective->GetForward().y);
 		else
@@ -2190,6 +2229,10 @@ CCamera::StartTransition(int16 newMode)
 		break;
 
 	case CCam::MODE_SYPHON:
+#ifdef PS2_CAM_TRANSITION
+		Cams[ActiveCam].Beta = Cams[(ActiveCam+1)%2].Beta;
+		Cams[ActiveCam].Source = Cams[(ActiveCam+1)%2].Source;
+#endif
 		Cams[ActiveCam].Alpha = 0.0f;
 		Cams[ActiveCam].AlphaSpeed = 0.0f;
 		break;
@@ -2197,20 +2240,29 @@ CCamera::StartTransition(int16 newMode)
 	case CCam::MODE_CAM_ON_A_STRING:
 		// Get into vehicle
 		betaOffset = DEGTORAD(57.0f);
+#ifdef PS2_CAM_TRANSITION
+		Cams[ActiveCam].Source = Cams[(ActiveCam+1)%2].Source;
+#endif
 		if(!m_bLookingAtPlayer || m_bJustCameOutOfGarage)
 			break;
 		m_bUseTransitionBeta = true;
 		targetBeta = CGeneral::GetATanOfXY(pTargetEntity->GetForward().x, pTargetEntity->GetForward().y);
+#ifdef PS2_CAM_TRANSITION
+		camBeta = CGeneral::GetATanOfXY(Cams[(ActiveCam+1)%2].Front.x, Cams[(ActiveCam+1)%2].Front.y);
+#else
 		camBeta = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y);
+#endif
 		deltaBeta = targetBeta - camBeta;
 		while(deltaBeta >= PI) deltaBeta -= 2*PI;
 		while(deltaBeta < -PI) deltaBeta += 2*PI;
 		deltaBeta = Abs(deltaBeta);
-		// switchFromFixed logic again here, skipped
+#ifndef PS2_CAM_TRANSITION
+		switchFromFixed = Cams[ActiveCam].Mode == CCam::MODE_FIXED;
 		if(switchFromFixed){
 			Cams[ActiveCam].m_fTransitionBeta = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y);
 			break;
 		}
+#endif
 
 		door = FindPlayerPed()->m_vehEnterType;
 		if(deltaBeta > HALFPI){
@@ -2238,15 +2290,23 @@ CCamera::StartTransition(int16 newMode)
 		}
 		break;
 
-	case CCam::MODE_BEHINDBOAT:
-		Cams[ActiveCam].BetaSpeed = 0.0f;
-		break;
-
 	case CCam::MODE_PED_DEAD_BABY:
+#ifdef PS2_CAM_TRANSITION
+		Cams[ActiveCam].Source = Cams[(ActiveCam+1)%2].Source;
+#endif
 		Cams[ActiveCam].Alpha = DEGTORAD(15.0f);
 		break;
 
+#ifdef PS2_CAM_TRANSITION
+	case CCam::MODE_PLAYER_FALLEN_WATER:
+		Cams[ActiveCam].m_vecLastAboveWaterCamPosition = Cams[(ActiveCam+1)%2].m_vecLastAboveWaterCamPosition;
+		break;
+#endif
+
 	case CCam::MODE_FIGHT_CAM:
+#ifdef PS2_CAM_TRANSITION
+		Cams[ActiveCam].Source = Cams[(ActiveCam+1)%2].Source;
+#endif
 		Cams[ActiveCam].Beta = 0.0f;
 		Cams[ActiveCam].BetaSpeed = 0.0f;
 		Cams[ActiveCam].Alpha = 0.0f;
@@ -2254,6 +2314,7 @@ CCamera::StartTransition(int16 newMode)
 		break;
 	}
 
+#ifndef PS2_CAM_TRANSITION
 	Cams[ActiveCam].Init();
 	Cams[ActiveCam].Mode = newMode;
 
@@ -2262,7 +2323,6 @@ CCamera::StartTransition(int16 newMode)
 		m_uiTransitionDuration = 1800;
 	else if(switchFromFight)
 		m_uiTransitionDuration = 750;
-#ifndef PS2_CAM_TRANSITION
 	else if(switchPedToCar){
 		m_fFractionInterToStopMoving = 0.2f;
 		m_fFractionInterToStopCatchUp = 0.8f;
@@ -2276,6 +2336,13 @@ CCamera::StartTransition(int16 newMode)
 		m_uiTransitionDuration = 1;
 	}else
 		m_uiTransitionDuration = 1350;	// already set above
+#else
+	if(switchSyphonMode)
+		m_uiTransitionDuration = 1800;
+	else if(switchFromFight)
+		m_uiTransitionDuration = 750;
+	else
+		m_uiTransitionDuration = 1350;
 #endif
 	m_uiTransitionState = 1;
 	m_uiTimeTransitionStart = CTimer::GetTimeInMilliseconds();
