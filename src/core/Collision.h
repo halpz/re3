@@ -89,6 +89,8 @@ struct CColPoint
 	uint8 surfaceB;
 	uint8 pieceB;
 	float depth;
+
+	CColPoint& operator=(const CColPoint& other);
 };
 
 struct CStoredCollPoly

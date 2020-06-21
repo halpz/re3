@@ -194,8 +194,12 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 
 	if ( GetInfo()->m_eWeaponFire != WEAPON_FIRE_MELEE )
 	{
-		if ( m_nAmmoInClip <= 0 )
-			return false;
+		if (m_nAmmoInClip <= 0) {
+			if (m_nAmmoTotal <= 0 || m_eWeaponState == WEAPONSTATE_RELOADING)
+				return false;
+
+			Reload();
+		}
 
 		switch ( m_eWeaponType )
 		{
@@ -223,10 +227,10 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 			{
 				if ((TheCamera.PlayerWeaponMode.Mode == CCam::MODE_HELICANNON_1STPERSON || TheCamera.PlayerWeaponMode.Mode == CCam::MODE_M16_1STPERSON)
 					&& shooter == FindPlayerPed()) {
-					addFireRateAsDelay = false;
+					addFireRateAsDelay = true;
 					fired = FireM16_1stPerson(shooter);
 				} else {
-					addFireRateAsDelay = true;
+					addFireRateAsDelay = false;
 					fired = FireInstantHit(shooter, source);
 				}
 				break;
@@ -235,8 +239,11 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 			case WEAPONTYPE_SNIPERRIFLE:
 			case WEAPONTYPE_LASERSCOPE:
 			{
-				fired = FireSniper(shooter);
-
+				if (shooter == FindPlayerPed()) {
+					fired = FireSniper(shooter);
+				} else {
+					fired = FireInstantHit(shooter, source);
+				}
 				break;
 			}
 
@@ -339,8 +346,12 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 
 			if (m_nAmmoInClip == 0)
 			{
-				if (m_nAmmoTotal == 0)
+				if (m_nAmmoTotal == 0) {
+					if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_CAMERA)
+						CPad::GetPad(0)->Clear(false);
+
 					return true;
+				}
 
 				m_eWeaponState = WEAPONSTATE_RELOADING;
 				m_nTimer = CTimer::GetTimeInMilliseconds() + GetInfo()->m_nReload;
@@ -386,6 +397,7 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 		return fired;
 }
 
+// --MIAMI: Done
 bool
 CWeapon::FireFromCar(CVehicle *shooter, bool left, bool right)
 {
@@ -401,8 +413,11 @@ CWeapon::FireFromCar(CVehicle *shooter, bool left, bool right)
 	{
 		DMAudio.PlayOneShot(shooter->m_audioEntityId, SOUND_WEAPON_SHOT_FIRED, 0.0f);
 
-		if ( m_nAmmoInClip > 0 ) m_nAmmoInClip--;
-		if ( m_nAmmoTotal < 25000 && m_nAmmoTotal > 0 ) m_nAmmoTotal--;
+		if ( m_nAmmoInClip > 0 )
+			m_nAmmoInClip--;
+
+		if ( m_nAmmoTotal < 25000 && m_nAmmoTotal > 0 && (!shooter || shooter->GetStatus() != STATUS_PLAYER || CStats::GetPercentageProgress() < 100.f))
+			m_nAmmoTotal--;
 
 		m_eWeaponState = WEAPONSTATE_FIRING;
 
@@ -418,8 +433,6 @@ CWeapon::FireFromCar(CVehicle *shooter, bool left, bool right)
 		}
 
 		m_nTimer = CTimer::GetTimeInMilliseconds() + 1000;
-		if ( shooter == FindPlayerVehicle() )
-			CStats::RoundsFiredByPlayer++;
 	}
 
 	return true;
@@ -898,18 +911,17 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 
 		// bProcessPedsOnBoatsAndBikes = true; // TODO(Miami)
 		CWorld::bIncludeDeadPeds = true;
-		// bProcessVehicleWheels = true; // TODO(Miami)
+		CWorld::bIncludeCarTyres = true;
 		CWorld::ProcessLineOfSight(src, trgt, point, victim, true, true, true, true, true, false, false, true);
 		// bProcessPedsOnBoatsAndBikes = false; // TODO(Miami)
 		CWorld::bIncludeDeadPeds = false;
-		// bProcessVehicleWheels = false; // TODO(Miami)
+		CWorld::bIncludeCarTyres = false;
 
-		// TODO(Miami)
-		// if (victim)
-		//	CWeapon::CheckForShootingVehicleOccupant(v39, victim, point, m_eWeaponType, src, trgt);
+		if (victim)
+			CheckForShootingVehicleOccupant(&victim, &point, m_eWeaponType, src, trgt);
 
 		int32 rotSpeed = 1;
-		if ( m_eWeaponType == WEAPONTYPE_M4  )
+		if ( m_eWeaponType == WEAPONTYPE_M4 )
 			rotSpeed = 4;
 
 		CVector bulletPos;
@@ -1025,7 +1037,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 		{
 			static uint8 counter = 0;
 
-			if ( info->m_nFiringRate >= 50 && !(++counter & 1) )
+			if ( info->m_nFiringRate >= 50 || !(++counter & 1) )
 			{
 				AddGunFlashBigGuns(*fireSource, *fireSource + target);
 
@@ -1579,12 +1591,12 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 			target *= info->m_fRange;
 			target += source;
 			CWorld::bIncludeDeadPeds = true;
-			//bProcessVehicleWheels = true; // TODO(Miami): bProcessVehicleWheels
+			CWorld::bIncludeCarTyres = true;
 			//bProcessPedsOnBoatsAndBikes = true; // TODO(Miami): bProcessPedsOnBoatsAndBikes
 
 			CWorld::ProcessLineOfSight(source, target, point, victim, true, true, true, true, true, false, false, true);
 			CWorld::bIncludeDeadPeds = false;
-			//bProcessVehicleWheels = false; // TODO(Miami): bProcessVehicleWheels
+			CWorld::bIncludeCarTyres = false;
 		}
 		else
 		{
@@ -2074,7 +2086,7 @@ CWeapon::FireSniper(CEntity *shooter)
 	return true;
 }
 
-// --MIAMI: Heavily TODO
+// --MIAMI: Done
 bool
 CWeapon::FireM16_1stPerson(CEntity *shooter)
 {
@@ -2096,10 +2108,12 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 
 	CWeaponInfo *info = GetInfo();
 
+	CWorld::bIncludeCarTyres = true;
+	// bProcessPedsOnBoatsAndBikes = true; // TODO(Miami)
+
 	CColPoint point;
 	CEntity *victim;
 
-	CWorld::bIncludeCarTyres = true;
 	CWorld::pIgnoreEntity = shooter;
 	CWorld::bIncludeDeadPeds = true;
 
@@ -2109,9 +2123,12 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 	CVector source = cam->Source;
 	CVector target = cam->Front*info->m_fRange + source;
 
-	ProcessLineOfSight(source, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
-	CWorld::bIncludeDeadPeds = false;
+	if (CWorld::ProcessLineOfSight(source, target, point, victim, true, true, true, true, true, false, false, true)) {
+		CheckForShootingVehicleOccupant(&victim, &point, m_eWeaponType, source, target);
+	}
 	CWorld::pIgnoreEntity = nil;
+	CWorld::bIncludeDeadPeds = false;
+	// bProcessPedsOnBoatsAndBikes = false; // TODO(Miami)
 	CWorld::bIncludeCarTyres = false;
 
 	CVector2D front(cam->Front.x, cam->Front.y);
@@ -2129,17 +2146,17 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 
 	if ( shooter == FindPlayerPed() )
 	{
-		CPad::GetPad(0)->StartShake_Distance(240, 128, FindPlayerPed()->GetPosition().x, FindPlayerPed()->GetPosition().y, FindPlayerPed()->GetPosition().z);
-
 		float mult;
 		switch (m_eWeaponType) {
 			case WEAPONTYPE_M4:
-			case WEAPONTYPE_HELICANNON:
-			case WEAPONTYPE_M60:
 				mult = 0.0003f;
 				break;
 			case WEAPONTYPE_RUGER:
 				mult = 0.00015f;
+				break;
+			case WEAPONTYPE_HELICANNON:
+			case WEAPONTYPE_M60:
+				mult = 0.0003f;
 				break;
 			default:
 				mult = 0.0002f;
@@ -2151,6 +2168,13 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 
 		TheCamera.Cams[TheCamera.ActiveCam].Beta  += float((CGeneral::GetRandomNumber() & 127) - 64) * mult;
 		TheCamera.Cams[TheCamera.ActiveCam].Alpha += float((CGeneral::GetRandomNumber() & 127) - 64) * mult;
+
+		// yes, double
+		double notFiringRate = (20.0 - info->m_nFiringRate) / 80.0;
+		double raisedNotFiringRate = Max(1.0, Max(0.0, notFiringRate));
+
+		uint8 shakeFreq = 80.0 * raisedNotFiringRate + 130.0;
+		CPad::GetPad(0)->StartShake(20000.0f * CTimer::GetTimeStep() / shakeFreq, shakeFreq);
 	}
 
 	return true;
@@ -2573,9 +2597,10 @@ CWeapon::Update(int32 audioEntity, CPed *pedToAdjustSound)
 
 			if ( CTimer::GetTimeInMilliseconds() > m_nTimer )
 			{
-				if ( GetInfo()->m_eWeaponFire != WEAPON_FIRE_MELEE && m_nAmmoTotal == 0 )
+				if ( GetInfo()->m_eWeaponFire != WEAPON_FIRE_MELEE && m_nAmmoTotal == 0 ) {
 					m_eWeaponState = WEAPONSTATE_OUT_OF_AMMO;
-				else
+					// TODO(Miami): CPickups::RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo
+				} else
 					m_eWeaponState = WEAPONSTATE_READY;
 			}
 
@@ -2955,6 +2980,81 @@ CWeapon::AddGunFlashBigGuns(CVector start, CVector end)
 	CVector gunsmokePos = start;
 	float rnd = CGeneral::GetRandomNumberInRange(0.05f, 0.25f);
 	CParticle::AddParticle(PARTICLE_GUNSMOKE2, gunsmokePos, CVector(ahead.x * rnd, ahead.y * rnd, 0.0f));
+}
+
+// --MIAMI: Done
+void
+CWeapon::CheckForShootingVehicleOccupant(CEntity **victim, CColPoint *point, eWeaponType weapon, CVector const& source, CVector const& target)
+{
+	if (!(*victim)->IsVehicle())
+		return;
+
+	CColSphere headSphere;
+
+	CVehicle *veh = (CVehicle*)*victim;
+	CColPoint origPoint(*point);
+	float radius = 1.0f;
+	bool found = false;
+	CColLine shootLine(source, target);
+
+	if (veh->pDriver && veh->pDriver->bCanBeShotInVehicle) {
+		CVector pos(0.f, 0.f, 0.f);
+		veh->pDriver->TransformToNode(pos, PED_HEAD);
+		headSphere.Set(0.2f, pos + CVector(0.f, 0.f, 0.1f), 0, PEDPIECE_HEAD);
+		if (CCollision::ProcessLineSphere(shootLine, headSphere, *point, radius)) {
+			*victim = veh->pDriver;
+			found = true;
+		}
+	}
+	
+	for(int i = 0; i < ARRAY_SIZE(veh->pPassengers); i++) {
+		CPed *passenger = veh->pPassengers[i];
+		if (passenger && passenger->bCanBeShotInVehicle) {
+			CVector pos(0.f, 0.f, 0.f);
+			passenger->TransformToNode(pos, PED_HEAD);
+			headSphere.Set(0.2f, pos + CVector(0.f, 0.f, 0.1f), 0, PEDPIECE_HEAD);
+			if (CCollision::ProcessLineSphere(shootLine, headSphere, *point, radius)) {
+				*victim = passenger;
+				found = true;
+			}
+		}
+	}
+	if (veh->IsCar()) {
+		CVector distVec = target - source;
+		if (DotProduct(distVec, veh->GetForward()) < 0.0f && DotProduct(distVec, veh->GetUp()) <= 0.0f) {
+			CColModel *colModel = veh->GetColModel();
+			if (colModel->numTriangles > 0) {
+				bool passesGlass = false;
+				CMatrix invVehMat;
+				Invert(veh->GetMatrix(), invVehMat);
+				shootLine.p0 = invVehMat * shootLine.p0;
+				shootLine.p1 = invVehMat * shootLine.p1;
+				CCollision::CalculateTrianglePlanes(colModel);
+				for (int i = 0; i < colModel->numTriangles; i++) {
+					if (colModel->triangles[i].surface == SURFACE_GLASS &&
+						CCollision::TestLineTriangle(shootLine, colModel->vertices, colModel->triangles[i], colModel->trianglePlanes[i])) {
+						passesGlass = true;
+						break;
+					}
+				}
+				CAutomobile *car = (CAutomobile*)veh;
+
+				// No need to damage windscreen if there isn't one.
+				if (passesGlass && car->Damage.ProgressPanelDamage(VEHPANEL_WINDSCREEN)) {
+					if (car->Damage.GetPanelStatus(VEHPANEL_WINDSCREEN) == PANEL_STATUS_SMASHED2)
+						car->Damage.ProgressPanelDamage(VEHPANEL_WINDSCREEN);
+
+					car->SetPanelDamage(CAR_WINDSCREEN, VEHPANEL_WINDSCREEN, true);
+					DMAudio.PlayOneShot(veh->m_audioEntityId, SOUND_CAR_WINDSHIELD_CRACK, 0.f);
+				}
+			}
+		}
+	}
+
+	if (!found) {
+		*victim = veh;
+		*point = origPoint;
+	}
 }
 
 #ifdef COMPATIBLE_SAVES

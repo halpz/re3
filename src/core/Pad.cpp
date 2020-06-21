@@ -2336,6 +2336,14 @@ bool CPad::TargetJustDown(void)
 	return false;
 }
 
+bool CPad::DuckJustDown(void)
+{
+	if (ArePlayerControlsDisabled())
+		return false;
+
+	return !!(NewState.LeftShock && !OldState.LeftShock);
+}
+
 bool CPad::JumpJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )

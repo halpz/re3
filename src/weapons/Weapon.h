@@ -72,7 +72,10 @@ public:
 	
 	static bool IsShotgun(int weapon) { return weapon == WEAPONTYPE_SHOTGUN || weapon == WEAPONTYPE_SPAS12_SHOTGUN || weapon == WEAPONTYPE_STUBBY_SHOTGUN; }
 
+	// TODO(Miami): Is that still used?
 	static bool ProcessLineOfSight(CVector const &point1, CVector const &point2, CColPoint &point, CEntity *&entity, eWeaponType type, CEntity *shooter, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects);
+
+	static void CheckForShootingVehicleOccupant(CEntity**, CColPoint*, eWeaponType, CVector const&, CVector const&);
 
 #ifdef COMPATIBLE_SAVES
 	void Save(uint8*& buf);

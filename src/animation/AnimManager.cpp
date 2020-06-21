@@ -237,14 +237,14 @@ AnimAssocDesc aMeleeAnimDescs[] = {
 	{ ANIM_MELEE_ATTACK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_MELEE_ATTACK_2ND, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_MELEE_ATTACK_START, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK },
-	{ ANIM_WEAPON_CROUCHRELOAD, ASSOC_REPEAT }, // TODO(Miami): Overload that name for melee/swing
+	{ ANIM_MELEE_IDLE_FIGHTMODE, ASSOC_REPEAT },
 	{ ANIM_WEAPON_SPECIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION }, // TODO(Miami): Overload that name for melee/swing
 };
 AnimAssocDesc aSwingAnimDescs[] = {
 	{ ANIM_MELEE_ATTACK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_MELEE_ATTACK_2ND, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_MELEE_ATTACK_START, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
-	{ ANIM_WEAPON_CROUCHRELOAD, ASSOC_REPEAT }, // TODO(Miami): Overload that name for melee/swing
+	{ ANIM_MELEE_IDLE_FIGHTMODE, ASSOC_REPEAT },
 	{ ANIM_WEAPON_SPECIAL, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL }, // TODO(Miami): Overload that name for melee/swing
 };
 AnimAssocDesc aWeaponAnimDescs[] = {
@@ -1006,6 +1006,7 @@ CAnimManager::UncompressAnimation(CAnimBlendHierarchy *hier)
 			if(link == nil){
 				ms_animCache.tail.prev->item->RemoveUncompressedData();
 				ms_animCache.Remove(ms_animCache.tail.prev);
+				ms_animCache.tail.prev->item->linkPtr = nil;
 				link = ms_animCache.Insert(hier);
 			}
 			hier->linkPtr = link;

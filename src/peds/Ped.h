@@ -778,7 +778,6 @@ public:
 	void SetChat(CEntity*, uint32);
 	void DeadPedMakesTyresBloody(void);
 	void MakeTyresMuddySectorList(CPtrList&);
-	uint8 DoesLOSBulletHitPed(CColPoint &point);
 	bool DuckAndCover(void);
 	void EndFight(uint8);
 	void EnterCar(void);

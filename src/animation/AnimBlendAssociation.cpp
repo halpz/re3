@@ -133,8 +133,11 @@ CAnimBlendAssociation::SetCurrentTime(float time)
 	int i;
 
 	for(currentTime = time; currentTime >= hierarchy->totalLength; currentTime -= hierarchy->totalLength)
-		if(!IsRepeating())
-			return;
+		if (!IsRepeating()) {
+			currentTime = hierarchy->totalLength;
+			break;
+		}
+
 	CAnimManager::UncompressAnimation(hierarchy);
 	if(hierarchy->compressed2){
 		for(i = 0; i < numNodes; i++)

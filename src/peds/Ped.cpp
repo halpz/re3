@@ -1098,8 +1098,7 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 		return;
 	}
 	
-	// Not for unarmed, it's for weapons using unarmed anims
-	if (currentWeapon->m_bUse2nd && ped->bIsAttacking && currentWeapon->m_AnimToPlay == ASSOCGRP_UNARMED) {
+	if (currentWeapon->m_bUse2nd && ped->bIsAttacking && currentWeapon->m_AnimToPlay != ASSOCGRP_THROW) {
 		AnimationId groundAnim = GetFireAnimGround(currentWeapon);
 		CAnimBlendAssociation *groundAnimAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), groundAnim);
 		if (!groundAnimAssoc || groundAnimAssoc->blendAmount <= 0.95f && groundAnimAssoc->blendDelta <= 0.0f) {
@@ -1113,19 +1112,15 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 			newAnim->SetFinishCallback(FinishedAttackCB, ped);
 		}
 	} else {
-		if (attackAssoc && attackAssoc->animId == ANIM_MELEE_ATTACK && currentWeapon->m_AnimToPlay == ASSOCGRP_UNARMED)
-		{
+		if (attackAssoc && attackAssoc->animId == ANIM_MELEE_ATTACK && currentWeapon->m_AnimToPlay == ASSOCGRP_UNARMED) {
 			attackAssoc->blendDelta = -8.0f;
 			attackAssoc->flags |= ASSOC_DELETEFADEDOUT;
 			ped->ClearAttack();
 			return;
 		}
-		if (attackAssoc)
-		{
-			if (currentWeapon->m_AnimToPlay == ASSOCGRP_THROW)
-			{
-				if ((attackAssoc->animId == ANIM_THROWABLE_THROW || attackAssoc->animId == ANIM_THROWABLE_THROWU) && ped->GetWeapon()->m_nAmmoTotal > 0)
-				{
+		if (attackAssoc) {
+			if (currentWeapon->m_AnimToPlay == ASSOCGRP_THROW) {
+				if ((attackAssoc->animId == ANIM_THROWABLE_THROW || attackAssoc->animId == ANIM_THROWABLE_THROWU) && ped->GetWeapon()->m_nAmmoTotal > 0) {
 					ped->RemoveWeaponModel(currentWeapon->m_nModelId);
 					ped->AddWeaponModel(currentWeapon->m_nModelId);
 				}
@@ -1661,7 +1656,6 @@ CPed::ClearDuck(bool clearTimer)
 	if (!animAssoc) {
 		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DUCK_LOW);
 	}
-
 	if (!animAssoc) {
 		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCH);
 	}
@@ -4075,7 +4069,8 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	bool willLinger = false;
 	int random;
 
-	// TODO(Miami): PlayerInfo thingies here
+	if (damagedBy == FindPlayerPed() && damagedBy != this && damage > 3.0f)
+		++CWorld::Players[CWorld::PlayerInFocus].m_nHavocLevel;
 
 	if (player == this) {
 		if (!player->m_bCanBeDamaged)
@@ -4541,11 +4536,11 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 							m_pMyVehicle->SetStatus(STATUS_ABANDONED);
 						}
 						SetDie(dieAnim, dieDelta, dieSpeed);
-						/*
+
 						if (damagedBy == FindPlayerPed() && damagedBy != this) {
-							// TODO(Miami): PlayerInfo stuff
+							CWorld::Players[CWorld::PlayerInFocus].m_nHavocLevel += 10;
+							CWorld::Players[CWorld::PlayerInFocus].m_fMediaAttention += 5.f;
 						}
-						*/
 					}
 				}
 				for (int i = 0; i < ARRAY_SIZE(pVehicle->pPassengers); i++) {
@@ -4581,9 +4576,9 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		SetDie(dieAnim, dieDelta, dieSpeed);
 
 		if (damagedBy == player || damagedBy && damagedBy == FindPlayerVehicle()) {
-
-			// TODO(Miami): PlayerInfo stuff
 			CDarkel::RegisterKillByPlayer(this, method, headShot);
+			CWorld::Players[CWorld::PlayerInFocus].m_nHavocLevel += 10;
+			CWorld::Players[CWorld::PlayerInFocus].m_fMediaAttention += 5.f;
 			m_threatEntity = player;
 		} else {
 			CDarkel::RegisterKillNotByPlayer(this, method);
@@ -6806,30 +6801,6 @@ void
 CPed::Die(void)
 {
 	// UNUSED: This is a perfectly empty function.
-}
-
-uint8
-CPed::DoesLOSBulletHitPed(CColPoint &colPoint)
-{
-#ifdef FIX_BUGS
-	return 1;
-#else
-	uint8 retVal = 2;
-
-	float headZ = GetNodePosition(PED_HEAD).z;
-
-	if (m_nPedState == PED_FALL)
-		retVal = 1;
-
-	float colZ = colPoint.point.z;
-	if (colZ < headZ)
-		retVal = 1;
-
-	if (headZ + 0.2f <= colZ)
-		retVal = 0;
-
-	return retVal;
-#endif
 }
 
 // --MIAMI: Done
@@ -11420,14 +11391,6 @@ CPed::ProcessControl(void)
 
 			if (m_nWaitState != WAITSTATE_FALSE)
 				Wait();
-
-			if (m_nPedState != PED_IDLE) {
-				CAnimBlendAssociation *idleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_ARMED);
-				if(idleAssoc) {
-					idleAssoc->blendDelta = -8.0f;
-					idleAssoc->flags |= ASSOC_DELETEFADEDOUT;
-				}
-			}
 
 			switch (m_nPedState) {
 				case PED_IDLE:

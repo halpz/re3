@@ -1861,6 +1861,19 @@ CColTrianglePlane::Set(const CVector *v, CColTriangle &tri)
 		dir = normal.z < 0.0f ? DIR_Z_NEG : DIR_Z_POS;
 }
 
+CColPoint&
+CColPoint::operator=(const CColPoint& other)
+{
+	point = other.point;
+	normal = other.normal;
+	surfaceA = other.surfaceA;
+	pieceA = other.pieceA;
+	surfaceB = other.surfaceB;
+	pieceB = other.pieceB;
+	// doesn't copy depth
+	return *this;
+}
+
 CColModel::CColModel(void)
 {
 	numSpheres = 0;
