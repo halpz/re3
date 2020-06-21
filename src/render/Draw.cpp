@@ -6,6 +6,7 @@
 
 #ifdef ASPECT_RATIO_SCALE
 float CDraw::ms_fAspectRatio = DEFAULT_ASPECT_RATIO;
+float CDraw::ms_fScaledFOV = 45.0f;
 #endif
 
 float CDraw::ms_fNearClipZ;
@@ -60,8 +61,7 @@ void
 CDraw::SetFOV(float fov)
 {
 #ifdef ASPECT_RATIO_SCALE
-	ms_fFOV = ConvertFOV(fov);
-#else
-	ms_fFOV = fov;
+	ms_fScaledFOV = ConvertFOV(fov);
 #endif
+	ms_fFOV = fov;
 }
