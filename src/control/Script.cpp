@@ -9958,7 +9958,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		SaveGameForPause(3);
 #endif
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
-		CPad::GetPad(ScriptParams[0])->DisablePlayerControls |= PLAYERCONTROL_DISABLED_80;
+		CPad::GetPad(ScriptParams[0])->SetDisablePlayerControls(PLAYERCONTROL_CUTSCENE);
 		pPlayerInfo->MakePlayerSafe(true);
 		CCutsceneMgr::StartCutsceneProcessing();
 		return 0;
@@ -10684,7 +10684,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		printf("End preload end of game audio\n");
 		return 0;
 	case COMMAND_ENABLE_PLAYER_CONTROL_CAMERA:
-		CPad::GetPad(0)->DisablePlayerControls &= PLAYERCONTROL_DISABLED_1;
+		CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_CAMERA);
 		return 0;
 #ifndef GTA_PS2
 	// To be precise, on PS2 previous handlers were in 1000-1099 function

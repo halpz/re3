@@ -3834,7 +3834,11 @@ CCam::Process_Debug(const CVector&, float, float, float)
 		Source.y += 1.0f;
 	GetVectorsReadyForRW();
 
-	CPad::GetPad(0)->DisablePlayerControls = PLAYERCONTROL_DISABLED_1;
+#ifdef FIX_BUGS
+	CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_CAMERA);
+#else
+	CPad::GetPad(0)->DisablePlayerControls = PLAYERCONTROL_CAMERA;
+#endif
 
 	if(CPad::GetPad(1)->GetLeftShockJustDown() && gbBigWhiteDebugLightSwitchedOn)
 		CShadows::StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &Source,
