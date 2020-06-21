@@ -2292,6 +2292,10 @@ CCamera::StartTransition(int16 newMode)
 		Cams[ActiveCam].BetaSpeed = 0.0f;
 		break;
 
+	case CCam::MODE_BEHINDBOAT:
+		Cams[ActiveCam].BetaSpeed = 0.0f;
+		break;
+
 	case CCam::MODE_FOLLOWPED:
 		// Getting out of vehicle normally
 		betaOffset = DEGTORAD(55.0f);
@@ -2384,10 +2388,6 @@ CCamera::StartTransition(int16 newMode)
 			break;
 		m_bUseTransitionBeta = true;
 		Cams[ActiveCam].m_fTransitionBeta = CGeneral::GetATanOfXY(Cams[ActiveCam].Front.x, Cams[ActiveCam].Front.y);
-		break;
-
-	case CCam::MODE_BEHINDBOAT:
-		Cams[ActiveCam].BetaSpeed = 0.0f;
 		break;
 
 	case CCam::MODE_PED_DEAD_BABY:

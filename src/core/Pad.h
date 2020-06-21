@@ -444,6 +444,7 @@ public:
 	bool GetLeftShoulder2(void)  { return !!NewState.LeftShoulder2; }
 	bool GetRightShoulder1(void) { return !!NewState.RightShoulder1; }
 	bool GetRightShoulder2(void) { return !!NewState.RightShoulder2; }
+	bool GetStart()              { return !!NewState.Start; }
 	int16 GetLeftStickX(void)    { return NewState.LeftStickX; }
 	int16 GetLeftStickY(void)    { return NewState.LeftStickY; }
 	int16 GetRightStickX(void)    { return NewState.RightStickX; }
