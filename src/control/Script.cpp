@@ -1350,7 +1350,7 @@ static void PrintToLog(const char* format, ...)
 #ifdef _WIN32
 	vsprintf_s(tmp, 1024, format, va);
 #else
-	vsprintf(re3_buff, format, va);
+	vsprintf(tmp, format, va);
 #endif
 	va_end(va);
 
