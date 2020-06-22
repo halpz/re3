@@ -781,7 +781,7 @@ CCamera::CamControl(void)
 		m_bFailedCullZoneTestPreviously = CCullZones::CamCloseInForPlayer();
 
 	if(m_bLookingAtPlayer){
-		CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_1;
+		CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_CAMERA);
 		FindPlayerPed()->bIsVisible = true;
 	}
 
@@ -1049,7 +1049,7 @@ CCamera::CamControl(void)
 				m_bFirstPersonBeingUsed = false;
 			if(m_bFirstPersonBeingUsed){
 				ReqMode = CCam::MODE_1STPERSON;
-				CPad::GetPad(0)->DisablePlayerControls |= PLAYERCONTROL_DISABLED_1;
+				CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_CAMERA);
 			}
 
 			// Zoom value

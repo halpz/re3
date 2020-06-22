@@ -1157,7 +1157,38 @@ enum {
 	COMMAND_CAN_CHAR_SEE_DEAD_CHAR,
 	COMMAND_SET_ENTER_CAR_RANGE_MULTIPLIER,
 #ifndef GTA3_1_1_PATCH
-	COMMAND_SET_THREAT_REACTION_RANGE_MULTIPLIER
+	COMMAND_SET_THREAT_REACTION_RANGE_MULTIPLIER,
+#endif
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+	LAST_SCRIPT_COMMAND
 #endif
 #endif
 };
+
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+
+enum eScriptArgument
+{
+	ARGTYPE_NONE = 0,
+	ARGTYPE_INT,
+	ARGTYPE_FLOAT,
+	ARGTYPE_STRING,
+	ARGTYPE_LABEL,
+	ARGTYPE_BOOL,
+	ARGTYPE_PED_HANDLE,
+	ARGTYPE_VEHICLE_HANDLE,
+	ARGTYPE_OBJECT_HANDLE,
+	ARGTYPE_ANDOR
+};
+
+struct tScriptCommandData
+{
+	int id;
+	const char name[64];
+	eScriptArgument input[18];
+	eScriptArgument output[18];
+	bool cond;
+	int position;
+	const char name_override[8];
+};
+#endif
