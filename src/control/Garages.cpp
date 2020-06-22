@@ -1100,7 +1100,7 @@ bool CGarage::IsStaticPlayerCarEntirelyInside()
 		return false;
 	if (FindPlayerPed()->GetPedState() != PED_DRIVING)
 		return false;
-	if (FindPlayerPed()->m_objective == OBJECTIVE_LEAVE_VEHICLE)
+	if (FindPlayerPed()->m_objective == OBJECTIVE_LEAVE_CAR)
 		return false;
 	CVehicle* pVehicle = FindPlayerVehicle();
 	if (pVehicle->GetPosition().x < m_fInfX || pVehicle->GetPosition().x > m_fSupX ||

@@ -1228,7 +1228,7 @@ CVehicle::InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage
 					if(AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_PLOUGH_THROUGH ||
 					   CGeneral::GetRandomNumberInRange(0.0f, 1.0f) > 0.5f && AutoPilot.m_nCarMission == MISSION_CRUISE){
 						// Drive away like a maniac
-						if(pDriver && pDriver->m_objective != OBJECTIVE_LEAVE_VEHICLE){
+						if(pDriver && pDriver->m_objective != OBJECTIVE_LEAVE_CAR){
 							if(AutoPilot.m_nDrivingStyle != DRIVINGSTYLE_PLOUGH_THROUGH)
 								AutoPilot.m_nCruiseSpeed *= 1.5f;
 							AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_PLOUGH_THROUGH;
@@ -1238,16 +1238,16 @@ CVehicle::InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage
 						if (pDriver && pDriver->CharCreatedBy != MISSION_CHAR) {
 							SetStatus(STATUS_ABANDONED);
 							pDriver->bFleeAfterExitingCar = true;
-							pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+							pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 							pDriver->Say(SOUND_PED_FLEE_SPRINT);
 						}
 						int time = 200;
 						for (int i = 0; i < m_nNumMaxPassengers; i++) {
 							if (pPassengers[i] &&
-							    pPassengers[i]->m_objective != OBJECTIVE_LEAVE_VEHICLE &&
+							    pPassengers[i]->m_objective != OBJECTIVE_LEAVE_CAR &&
 							    pPassengers[i]->CharCreatedBy != MISSION_CHAR) {
 								pPassengers[i]->bFleeAfterExitingCar = true;
-								pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+								pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 								pPassengers[i]->m_objectiveTimer = CTimer::GetTimeInMilliseconds() + time;
 								pPassengers[i]->Say(SOUND_PED_FLEE_SPRINT);
 								time += 200;
@@ -1504,7 +1504,7 @@ CVehicle::MakeNonDraggedPedsLeaveVehicle(CPed *ped1, CPed *ped2, CPlayerPed *&pl
 	int time = 1800;
 	for(i = 0; i < numPeds3; i++){
 		peds3[i]->m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + time;
-		peds3[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+		peds3[i]->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 		time += CGeneral::GetRandomNumberInRange(300.0f, 600.0f);
 	}
 

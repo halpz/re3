@@ -503,7 +503,7 @@ CGameLogic::UpdateShortCut()
 	case SHORTCUT_ARRIVING:
 		if (CTimer::GetTimeInMilliseconds() > ShortCutTimer) {
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney = Max(0, CWorld::Players[CWorld::PlayerInFocus].m_nMoney - SHORTCUT_TAXI_COST);
-			FindPlayerPed()->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pShortCutTaxi);
+			FindPlayerPed()->SetObjective(OBJECTIVE_LEAVE_CAR, pShortCutTaxi);
 			FindPlayerPed()->m_carInObjective = pShortCutTaxi;
 			ShortCutState = SHORTCUT_GETTING_OUT;
 		}

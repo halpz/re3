@@ -44,7 +44,7 @@ CAnimBlendHierarchy::CalcTotalTime(void)
 #endif
 
 		totalLength = Max(totalLength, sequences[i].GetKeyFrame(sequences[i].numFrames-1)->deltaTime);
-		for(j = sequences[i].numFrames-1; j > 0; j--){
+		for(j = sequences[i].numFrames-1; j >= 1; j--){
 			KeyFrame *kf1 = sequences[i].GetKeyFrame(j);
 			KeyFrame *kf2 = sequences[i].GetKeyFrame(j-1);
 			kf1->deltaTime -= kf2->deltaTime;
@@ -66,7 +66,7 @@ CAnimBlendHierarchy::CalcTotalTimeCompressed(void)
 #endif
 
 		totalLength = Max(totalLength, sequences[i].GetKeyFrameCompressed(sequences[i].numFrames-1)->deltaTime/60.0f);
-		for(j = sequences[i].numFrames-1; j > 0; j--){
+		for(j = sequences[i].numFrames-1; j >= 1; j--){
 			KeyFrame *kf1 = sequences[i].GetKeyFrameCompressed(j);
 			KeyFrame *kf2 = sequences[i].GetKeyFrameCompressed(j-1);
 			kf1->deltaTime -= kf2->deltaTime;

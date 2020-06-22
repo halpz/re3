@@ -67,8 +67,3 @@ extern CPhoneInfo gPhoneInfo;
 
 void PhonePutDownCB(CAnimBlendAssociation *assoc, void *arg);
 void PhonePickUpCB(CAnimBlendAssociation *assoc, void *arg);
-
-#ifdef TOGGLEABLE_BETA_FEATURES
-extern CPed *crimeReporters[NUMPHONES];
-bool isPhoneAvailable(int);
-#endif

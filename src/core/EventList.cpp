@@ -187,6 +187,7 @@ CEventList::FindClosestEvent(eEventType type, CVector posn, int32 *event)
 	return found;
 }
 
+// --MIAMI: Done
 void
 CEventList::ReportCrimeForEvent(eEventType type, int32 crimeId, bool copsDontCare)
 {
@@ -201,19 +202,31 @@ CEventList::ReportCrimeForEvent(eEventType type, int32 crimeId, bool copsDontCar
 	case EVENT_HIT_AND_RUN_COP: crime = CRIME_RUNOVER_COP; break;
 	case EVENT_SHOOT_PED: crime = CRIME_SHOOT_PED; break;
 	case EVENT_SHOOT_COP: crime = CRIME_SHOOT_COP; break;
+	case EVENT_EXPLOSION: crime = CRIME_EXPLOSION; break;
 	case EVENT_PED_SET_ON_FIRE: crime = CRIME_PED_BURNED; break;
 	case EVENT_COP_SET_ON_FIRE: crime = CRIME_COP_BURNED; break;
 	case EVENT_CAR_SET_ON_FIRE: crime = CRIME_VEHICLE_BURNED; break;
+	case EVENT_ASSAULT_NASTYWEAPON: crime = CRIME_HIT_PED_NASTYWEAPON; break;
+	case EVENT_ASSAULT_NASTYWEAPON_POLICE: crime = CRIME_HIT_COP_NASTYWEAPON; break;
 	default: crime = CRIME_NONE; break;
 	}
 	
+	if (crime == CRIME_HIT_PED && IsPedPointerValid((CPed*)crimeId) && FindPlayerPed()->m_pWanted->m_nWantedLevel == 0 && ((CPed*)crimeId)->bBeingChasedByPolice) {
+		if (!((CPed*)crimeId)->DyingOrDead()) {
+			CMessages::AddBigMessage(TheText.Get("GOODBOY"), 5000, 0);
+			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 50;
+		}
+		return;
+	}
+
 	if(crime == CRIME_NONE)
 		return;
 
 	CVector playerPedCoors = FindPlayerPed()->GetPosition();
 	CVector playerCoors = FindPlayerCoors();
 
-	if(CWanted::WorkOutPolicePresence(playerCoors, 14.0f) != 0){
+	if(CWanted::WorkOutPolicePresence(playerCoors, 14.0f) != 0 ||
+		CGame::germanGame && (crime == CRIME_SHOOT_PED || crime == CRIME_SHOOT_COP || crime == CRIME_COP_BURNED || crime == CRIME_VEHICLE_BURNED)){
 		FindPlayerPed()->m_pWanted->RegisterCrime_Immediately(crime, playerPedCoors, crimeId, copsDontCare);
 		FindPlayerPed()->m_pWanted->SetWantedLevelNoDrop(1);
 	}else
@@ -221,7 +234,7 @@ CEventList::ReportCrimeForEvent(eEventType type, int32 crimeId, bool copsDontCar
 
 	if(type == EVENT_ASSAULT_POLICE)
 		FindPlayerPed()->SetWantedLevelNoDrop(1);
-	if(type == EVENT_SHOOT_COP)
+	if(type == EVENT_SHOOT_COP || type == EVENT_ASSAULT_NASTYWEAPON_POLICE)
 		FindPlayerPed()->SetWantedLevelNoDrop(2);
 
 }

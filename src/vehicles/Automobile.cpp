@@ -322,7 +322,7 @@ CAutomobile::ProcessControl(void)
 			if(!pDriver->IsPlayer() &&
 			   !(pDriver->m_leader && pDriver->m_leader->bInVehicle) &&
 			   pDriver->CharCreatedBy != MISSION_CHAR)
-				pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+				pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 		}
 
 	ActivateBombWhenEntered();
@@ -334,7 +334,7 @@ CAutomobile::ProcessControl(void)
 				if(!pPassengers[i]->IsPlayer() &&
 				   !(pPassengers[i]->m_leader && pPassengers[i]->m_leader->bInVehicle) &&
 				   pPassengers[i]->CharCreatedBy != MISSION_CHAR)
-					pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+					pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 	}
 
 	CRubbish::StirUp(this);
@@ -442,7 +442,7 @@ CAutomobile::ProcessControl(void)
 		}else if(pDriver && pDriver->IsPlayer() &&
 		         (pDriver->GetPedState() == PED_ARRESTED ||
 		          pDriver->GetPedState() == PED_DRAG_FROM_CAR ||
-		          (pDriver->GetPedState() == PED_EXIT_CAR || pDriver->m_objective == OBJECTIVE_LEAVE_VEHICLE) && !CanPedJumpOutCar())){
+		          (pDriver->GetPedState() == PED_EXIT_CAR || pDriver->m_objective == OBJECTIVE_LEAVE_CAR) && !CanPedJumpOutCar())){
 			bIsHandbrakeOn = true;
 			m_fBrakePedal = 1.0f;
 			m_fGasPedal = 0.0f;
@@ -532,7 +532,7 @@ CAutomobile::ProcessControl(void)
 		   (pDriver && pDriver->IsPlayer() &&
 		    (pDriver->GetPedState() == PED_ARRESTED ||
 		     pDriver->GetPedState() == PED_DRAG_FROM_CAR ||
-		     (pDriver->GetPedState() == PED_EXIT_CAR || pDriver->m_objective == OBJECTIVE_LEAVE_VEHICLE) && !CanPedJumpOutCar()))){
+		     (pDriver->GetPedState() == PED_EXIT_CAR || pDriver->m_objective == OBJECTIVE_LEAVE_CAR) && !CanPedJumpOutCar()))){
 			bIsHandbrakeOn = true;
 			m_fBrakePedal = 1.0f;
 			m_fGasPedal = 0.0f;

@@ -585,7 +585,7 @@ void CCarAI::AddFiretruckOccupants(CVehicle* pVehicle)
 void CCarAI::TellOccupantsToLeaveCar(CVehicle* pVehicle)
 {
 	if (pVehicle->pDriver){
-		pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+		pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 		if (pVehicle->GetModelIndex() == MI_AMBULAN)
 			pVehicle->pDriver->Say(SOUND_PED_LEAVE_VEHICLE);
 	}
@@ -593,7 +593,7 @@ void CCarAI::TellOccupantsToLeaveCar(CVehicle* pVehicle)
 	for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++){
 		if (pVehicle->pPassengers[i]) {
 			pVehicle->pPassengers[i]->m_leaveCarTimer = timer;
-			pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+			pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 			timer += CGeneral::GetRandomNumberInRange(200, 400);
 		}
 	}
@@ -602,7 +602,7 @@ void CCarAI::TellOccupantsToLeaveCar(CVehicle* pVehicle)
 void CCarAI::TellOccupantsToFleeCar(CVehicle* pVehicle)
 {
 	if (pVehicle->pDriver && !pVehicle->pDriver->IsPlayer()) {
-		pVehicle->pDriver->SetObjective(OBJECTIVE_FLEE_TILL_SAFE);
+		pVehicle->pDriver->SetObjective(OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE);
 		if (pVehicle->GetModelIndex() != MI_FIRETRUCK && pVehicle->GetModelIndex() == MI_AMBULAN)
 			pVehicle->pDriver->Say(SOUND_PED_LEAVE_VEHICLE);
 	}
@@ -610,7 +610,7 @@ void CCarAI::TellOccupantsToFleeCar(CVehicle* pVehicle)
 	for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++) {
 		if (pVehicle->pPassengers[i]) {
 			pVehicle->pPassengers[i]->m_leaveCarTimer = timer;
-			pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_FLEE_TILL_SAFE);
+			pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE);
 			timer += CGeneral::GetRandomNumberInRange(200, 400);
 		}
 	}
