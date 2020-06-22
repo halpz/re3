@@ -16,14 +16,15 @@ private:
 	static float ms_fNearClipZ;
 	static float ms_fFarClipZ;
 	static float ms_fFOV;
-public:
-	static float ms_fLODDistance;	// set but unused?
-
 #ifdef ASPECT_RATIO_SCALE
 	// we use this variable to scale a lot of 2D elements
 	// so better cache it
 	static float ms_fAspectRatio;
+	// similar thing for 3D rendering
+	static float ms_fScaledFOV;
 #endif
+public:
+	static float ms_fLODDistance;	// set but unused?
 
 	static uint8 FadeValue;
 	static uint8 FadeRed;
@@ -37,6 +38,11 @@ public:
 
 	static void SetFOV(float fov);
 	static float GetFOV(void) { return ms_fFOV; }
+#ifdef ASPECT_RATIO_SCALE
+	static float GetScaledFOV(void) { return ms_fScaledFOV; }
+#else
+	static float GetScaledFOV(void) { return ms_fFOV; }
+#endif
 
 	static float FindAspectRatio(void);
 #ifdef ASPECT_RATIO_SCALE

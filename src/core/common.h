@@ -111,7 +111,7 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 #define SCREEN_WIDTH ((float)RsGlobal.width)
 #define SCREEN_HEIGHT ((float)RsGlobal.height)
 #define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
-#define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
+#define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetScaledFOV() * 0.5f)))
 
 // This scales from PS2 pixel coordinates to the real resolution
 #define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH / DEFAULT_SCREEN_WIDTH)
