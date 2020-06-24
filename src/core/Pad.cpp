@@ -1610,7 +1610,7 @@ int16 CPad::GetSteeringUpDown(void)
 		case 2:
 		{
 			int16 axis = NewState.LeftStickY;
-			int16 dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
+			int16 dpad = (NewState.DPadDown - NewState.DPadUp) / 2;
 			
 			if ( Abs(axis) > Abs(dpad) )
 				return axis;
