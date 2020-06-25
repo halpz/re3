@@ -98,18 +98,18 @@ CAnimBlendNode::FindKeyFrame(float t)
 		remainingTime = 0.0f;
 	}else{
 		// advance until t is between frameB and frameA
-		while(t > sequence->GetKeyFrame(++frameA)->deltaTime){
+		while (t > sequence->GetKeyFrame(++frameA)->deltaTime) {
 			t -= sequence->GetKeyFrame(frameA)->deltaTime;
-			if(frameA + 1 >= sequence->numFrames){
+			if (frameA + 1 >= sequence->numFrames) {
 				// reached end of animation
-				if(!association->IsRepeating()){
+				if (!association->IsRepeating()) {
 					CalcDeltas();
 					remainingTime = 0.0f;
 					return false;
 				}
 				frameA = 0;
 			}
-			frameB = frameA++;
+			frameB = frameA;
 		}
 
 		remainingTime = sequence->GetKeyFrame(frameA)->deltaTime - t;
