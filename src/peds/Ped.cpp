@@ -8644,11 +8644,11 @@ CPed::LookForInterestingNodes(void)
 		return false;
 	}
 
-	switch (effect->attractor.flags) {
-		case ATTRACTORFLAG_ICECREAM:
+	switch (effect->attractor.type) {
+		case ATTRACTORTYPE_ICECREAM:
 			SetInvestigateEvent(EVENT_ICECREAM, CVector2D(effectPos), 0.1f, 15000, angleToFace);
 			break;
-		case ATTRACTORFLAG_STARE:
+		case ATTRACTORTYPE_STARE:
 			SetInvestigateEvent(EVENT_SHOPSTALL, CVector2D(effectPos), 1.0f,
 								CGeneral::GetRandomNumberInRange(8000, 10 * effect->attractor.probability + 8500),
 								angleToFace);

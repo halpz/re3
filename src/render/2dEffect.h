@@ -25,8 +25,8 @@ enum {
 };
 
 enum {
-	ATTRACTORFLAG_ICECREAM,
-	ATTRACTORFLAG_STARE
+	ATTRACTORTYPE_ICECREAM,
+	ATTRACTORTYPE_STARE
 };
 
 enum {
@@ -60,7 +60,7 @@ public:
 	};
 	struct Attractor {
 		CVector dir;
-		uint8 flags;
+		int8 type;
 		uint8 probability;
 	};
 

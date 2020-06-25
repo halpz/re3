@@ -977,7 +977,7 @@ CFileLoader::Load2dEffect(const char *line)
 			&effect->attractor.dir.y,
 			&effect->attractor.dir.z,
 			&probability);
-		effect->attractor.flags = flags;
+		effect->attractor.type = flags;
 		effect->attractor.probability = probability;
 		break;
 	}
