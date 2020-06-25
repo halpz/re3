@@ -1485,7 +1485,7 @@ CPlayerPed::ProcessControl(void)
 			SetDead();
 		return;
 	}
-	if (m_nPedState == PED_DRIVING && m_objective != OBJECTIVE_LEAVE_VEHICLE) {
+	if (m_nPedState == PED_DRIVING && m_objective != OBJECTIVE_LEAVE_CAR) {
 		if (m_pMyVehicle->IsCar() && ((CAutomobile*)m_pMyVehicle)->Damage.GetDoorStatus(DOOR_FRONT_LEFT) == DOOR_STATUS_SWINGING) {
 			CAnimBlendAssociation *rollDoorAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_ROLLDOOR);
 			if (!rollDoorAssoc) {

@@ -500,7 +500,11 @@ void CHud::Draw()
 						CFont::SetColor(WANTED_COLOR);
 						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
 
-						// TODO(Miami): There is one more condition in here
+					} else if (playerPed->m_pWanted->m_nMinWantedLevel > i && CTimer::GetFrameCounter() & 4) {
+						WANTED_COLOR_FLASH.a = alpha;
+						CFont::SetColor(WANTED_COLOR_FLASH);
+						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
+
 					} else if (playerPed->m_pWanted->m_nWantedLevel <= i) {
 						NOTWANTED_COLOR.a = alpha;
 						CFont::SetColor(NOTWANTED_COLOR);

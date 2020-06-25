@@ -1530,7 +1530,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 				CPed* pTestedPed = ped->m_nearPeds[i];
 				if (!pTestedPed || !IsPedPointerValid(pTestedPed))
 					continue;
-				if (pTestedPed->m_pedInObjective == ped && pTestedPed->m_objective == OBJECTIVE_FOLLOW_PED_IN_FORMATION) {
+				if (pTestedPed->m_pedInObjective == ped && pTestedPed->m_objective == OBJECTIVE_FOLLOW_CHAR_IN_FORMATION) {
 					CVector vFollowerPos = pTestedPed->GetFormationPosition();
 					CTheScripts::ClearSpaceForMissionEntity(vFollowerPos, ped);
 					bool bFound = false;
@@ -2070,7 +2070,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(ped);
 		ped->bScriptObjectiveCompleted = false;
-		ped->SetObjective(OBJECTIVE_IDLE);
+		ped->SetObjective(OBJECTIVE_WAIT_ON_FOOT);
 		return 0;
 	}
 	case COMMAND_GET_CHAR_COORDINATES:
@@ -3840,7 +3840,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_IDLE);
+		pPed->SetObjective(OBJECTIVE_WAIT_ON_FOOT);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_FLEE_ON_FOOT_TILL_SAFE:
@@ -4321,7 +4321,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		assert(pPed);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+		pPed->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_ENTER_CAR_AS_PASSENGER:
@@ -4353,7 +4353,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		assert(pPed);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_DESTROY_OBJ, pVehicle);
+		pPed->SetObjective(OBJECTIVE_DESTROY_OBJECT, pVehicle);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_DESTROY_CAR:
@@ -6568,7 +6568,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		assert(pPed);
 		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, pTargetPed);
+		pPed->SetObjective(OBJECTIVE_FOLLOW_CHAR_IN_FORMATION, pTargetPed);
 		pPed->SetFormation((eFormation)ScriptParams[2]);
 		return 0;
 	}
@@ -8804,7 +8804,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pPed->m_pMyVehicle);
+		pPed->SetObjective(OBJECTIVE_LEAVE_CAR, pPed->m_pMyVehicle);
 		return 0;
 	}
 	case COMMAND_SET_SPRITES_DRAW_BEFORE_FADE:
@@ -9537,7 +9537,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CPlayerPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pPed);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
-		UpdateCompareFlag(pPed->GetPedState() == PED_DRIVING && pPed->m_objective != OBJECTIVE_LEAVE_VEHICLE && pPed->m_pMyVehicle == pVehicle);
+		UpdateCompareFlag(pPed->GetPedState() == PED_DRIVING && pPed->m_objective != OBJECTIVE_LEAVE_CAR && pPed->m_pMyVehicle == pVehicle);
 		return 0;
 	}
 	case COMMAND_IS_PLAYER_SITTING_IN_ANY_CAR:
@@ -9545,7 +9545,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPlayerPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		assert(pPed);
-		UpdateCompareFlag(pPed->GetPedState() == PED_DRIVING && pPed->m_objective != OBJECTIVE_LEAVE_VEHICLE);
+		UpdateCompareFlag(pPed->GetPedState() == PED_DRIVING && pPed->m_objective != OBJECTIVE_LEAVE_CAR);
 		return 0;
 	}
 	/*
@@ -9582,7 +9582,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		assert(pPed);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
 		assert(pVehicle);
-		UpdateCompareFlag(pPed->GetPedState() == PED_DRIVING && pPed->m_objective != OBJECTIVE_LEAVE_VEHICLE && pPed->m_pMyVehicle == pVehicle);
+		UpdateCompareFlag(pPed->GetPedState() == PED_DRIVING && pPed->m_objective != OBJECTIVE_LEAVE_CAR && pPed->m_pMyVehicle == pVehicle);
 		return 0;
 	}
 	case COMMAND_IS_CHAR_SITTING_IN_ANY_CAR:
@@ -9590,7 +9590,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		assert(pPed);
-		UpdateCompareFlag(pPed->GetPedState() == PED_DRIVING && pPed->m_objective != OBJECTIVE_LEAVE_VEHICLE);
+		UpdateCompareFlag(pPed->GetPedState() == PED_DRIVING && pPed->m_objective != OBJECTIVE_LEAVE_CAR);
 		return 0;
 	}
 	case COMMAND_IS_PLAYER_ON_FOOT:
@@ -10718,7 +10718,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
 		assert(pTargetPed);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_AIM_GUN_AT_PED, pTargetPed);
+		pPed->SetObjective(OBJECTIVE_AIM_GUN_AT, pTargetPed);
 		return 0;
 	}
 	case COMMAND_SWITCH_SECURITY_CAMERA:
@@ -11134,7 +11134,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		pos.y = *(float*)&ScriptParams[2];
 		pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_SPRINT_TO_COORD, pos);
+		pPed->SetObjective(OBJECTIVE_SPRINT_TO_AREA, pos);
 		return 0;
 	}
 	case COMMAND_CREATE_SWAT_ROPE:
@@ -14239,7 +14239,7 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 		}
 		else {
 			if (pPed->m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR) {
-				pPed->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pPed->m_pMyVehicle);
+				pPed->SetObjective(OBJECTIVE_LEAVE_CAR, pPed->m_pMyVehicle);
 				pPed->bWanderPathAfterExitingCar = true;
 			}
 		}

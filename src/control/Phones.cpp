@@ -34,18 +34,6 @@ CPed *CPhoneInfo::pCallBackPed; // ped who picking up the phone (reset after pic
 	after 60 seconds of last phone pick-up.
 */
 
-#ifdef TOGGLEABLE_BETA_FEATURES
-CPed* crimeReporters[NUMPHONES] = {};
-bool
-isPhoneAvailable(int m_phoneId)
-{
-	return gPhoneInfo.m_aPhones[m_phoneId].m_nState == PHONE_STATE_FREE &&
-		(crimeReporters[m_phoneId] == nil || !crimeReporters[m_phoneId]->IsPointerValid() || !crimeReporters[m_phoneId]->bRunningToPhone || crimeReporters[m_phoneId]->m_objective > OBJECTIVE_IDLE ||
-			crimeReporters[m_phoneId]->m_nLastPedState != PED_SEEK_POS &&
-			(crimeReporters[m_phoneId]->m_nPedState != PED_MAKE_CALL && crimeReporters[m_phoneId]->m_nPedState != PED_FACE_PHONE && crimeReporters[m_phoneId]->m_nPedState != PED_SEEK_POS));
-}
-#endif
-
 void
 CPhoneInfo::Update(void)
 {
@@ -164,11 +152,7 @@ CPhoneInfo::FindNearestFreePhone(CVector *pos)
 
 	for (int phoneId = 0; phoneId < m_nMax; phoneId++) {
 
-		if (gPhoneInfo.m_aPhones[phoneId].m_nState == PHONE_STATE_FREE
-#ifdef TOGGLEABLE_BETA_FEATURES
-			&& isPhoneAvailable(phoneId)
-#endif
-			) {
+		if (gPhoneInfo.m_aPhones[phoneId].m_nState == PHONE_STATE_FREE) {
 			float phoneDist = (m_aPhones[phoneId].m_vecPos - *pos).Magnitude2D();
 
 			if (phoneDist < nearestPhoneDist) {

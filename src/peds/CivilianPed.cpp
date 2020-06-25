@@ -118,31 +118,12 @@ CCivilianPed::CivilianAI(void)
 					investigateDeadPed = false;
 			}
 
-#ifdef TOGGLEABLE_BETA_FEATURES
-			eCrimeType crime = (((CPed*)m_pEventEntity)->m_ped_flagI40 ?
-				(((CPed*)m_pEventEntity)->m_nPedType == PEDTYPE_COP ? CRIME_RUNOVER_COP : CRIME_RUNOVER_PED) :
-				(((CPed*)m_pEventEntity)->m_nPedType == PEDTYPE_COP ? CRIME_SHOOT_COP : CRIME_SHOOT_PED));
-			bool eligibleToReport = bMakePedsRunToPhonesToReportCrimes && killerOfDeadPed && killerOfDeadPed->IsPed() && ((CPed*)killerOfDeadPed)->IsPlayer() &&
-				m_pedStats->m_fear <= m_pedStats->m_lawfulness && m_pedStats->m_temper <= m_pedStats->m_fear;
-			if (IsGangMember() || !eligibleToReport || !RunToReportCrime(crime))
-#endif
 			if (investigateDeadPed)
 				SetInvestigateEvent(EVENT_DEAD_PED, CVector2D(m_pEventEntity->GetPosition()), 1.0f, 20000, 0.0f);
 
 		} else {
-#ifdef TOGGLEABLE_BETA_FEATURES
-			CEntity* killerOfDeadPed = ((CPed*)m_pEventEntity)->m_threatEntity;
-			eCrimeType crime = (((CPed*)m_pEventEntity)->m_ped_flagI40 ?
-				(((CPed*)m_pEventEntity)->m_nPedType == PEDTYPE_COP ? CRIME_RUNOVER_COP : CRIME_RUNOVER_PED) :
-				(((CPed*)m_pEventEntity)->m_nPedType == PEDTYPE_COP ? CRIME_SHOOT_COP : CRIME_SHOOT_PED));
-			bool eligibleToReport = bMakePedsRunToPhonesToReportCrimes && killerOfDeadPed && killerOfDeadPed->IsPed() && ((CPed*)killerOfDeadPed)->IsPlayer() &&
-				m_pedStats->m_fear <= m_pedStats->m_lawfulness && m_pedStats->m_temper <= m_pedStats->m_fear;
-			if(!eligibleToReport || !RunToReportCrime(crime))
-#endif
-			{
-				SetFindPathAndFlee(m_pEventEntity, 5000);
-				SetMoveState(PEDMOVE_RUN);
-			}
+			SetFindPathAndFlee(m_pEventEntity, 5000);
+			SetMoveState(PEDMOVE_RUN);
 		}
 	} else if (closestThreatFlag == PED_FLAG_EXPLOSION) {
 		CVector2D eventDistVec = m_eventOrThreat - GetPosition();
@@ -219,18 +200,7 @@ CCivilianPed::ProcessControl(void)
 			if (Seek()) {
 				if ((m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA || IsUseAttractorObjective(m_objective)) && m_pNextPathNode) {
 					m_pNextPathNode = nil;
-#ifdef TOGGLEABLE_BETA_FEATURES
-				} else if (bRunningToPhone && m_objective < OBJECTIVE_FLEE_TILL_SAFE) {
-					if (!isPhoneAvailable(m_phoneId)) {
-						RestorePreviousState();
-						crimeReporters[m_phoneId] = nil;
-						m_phoneId = -1;
-						bRunningToPhone = false;
-					} else {
-						crimeReporters[m_phoneId] = this;
-						m_nPedState = PED_FACE_PHONE;
-					}
-#else
+
 				} else if (bRunningToPhone) {
 					if (gPhoneInfo.m_aPhones[m_phoneId].m_nState != PHONE_STATE_FREE) {
 						RestorePreviousState();
@@ -239,9 +209,8 @@ CCivilianPed::ProcessControl(void)
 						gPhoneInfo.m_aPhones[m_phoneId].m_nState = PHONE_STATE_REPORTING_CRIME;
 						m_nPedState = PED_FACE_PHONE;
 					}
-#endif
 				} else if (m_objective != OBJECTIVE_KILL_CHAR_ANY_MEANS && m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT) {
-					if (m_objective == OBJECTIVE_FOLLOW_PED_IN_FORMATION) {
+					if (m_objective == OBJECTIVE_FOLLOW_CHAR_IN_FORMATION) {
 						if (m_moved.Magnitude() == 0.0f) {
 							if (m_pedInObjective->m_nMoveState == PEDMOVE_STILL)
 								m_fRotationDest = m_pedInObjective->m_fRotationCur;
@@ -331,13 +300,13 @@ CCivilianPed::ProcessControl(void)
 							} else {
 								bWanderPathAfterExitingCar = true;
 								CWorld::Players[CWorld::PlayerInFocus].m_pHooker = nil;
-								SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
+								SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
 							}
 						} else {
 							bWanderPathAfterExitingCar = true;
 							CWorld::Players[CWorld::PlayerInFocus].m_pHooker = nil;
 							m_pMyVehicle->pDriver->m_fHealth = CWorld::Players[0].m_nMaxHealth + 25.0f;
-							SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
+							SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
 						}
 					} else {
 						CWorld::Players[CWorld::PlayerInFocus].m_nNextSexFrequencyUpdateTime = CTimer::GetTimeInMilliseconds() + 3000;
@@ -350,7 +319,7 @@ CCivilianPed::ProcessControl(void)
 				} else {
 					bWanderPathAfterExitingCar = true;
 					CWorld::Players[CWorld::PlayerInFocus].m_pHooker = nil;
-					SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
+					SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
 				}
 			}
 

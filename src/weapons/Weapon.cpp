@@ -740,7 +740,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 				{
 					if (driver->m_pedStats->m_temper <= driver->m_pedStats->m_fear)
 					{
-						driver->SetObjective(OBJECTIVE_FLEE_TILL_SAFE);
+						driver->SetObjective(OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE);
 					}
 					else
 					{
@@ -756,7 +756,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 					CPed *passenger = nearCar->pPassengers[j];
 					if (passenger && passenger->CharCreatedBy != MISSION_CHAR)
 					{
-						nearCar->pPassengers[j]->SetObjective(OBJECTIVE_FLEE_TILL_SAFE);
+						nearCar->pPassengers[j]->SetObjective(OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE);
 						passenger->m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + leaveCarDelay;
 						leaveCarDelay += 200;
 					}
@@ -767,8 +767,8 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 				CPed *driver = nearCar->pDriver;
 				if (driver)
 				{
-					if (driver->m_objective != OBJECTIVE_LEAVE_VEHICLE && driver->m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT &&
-						driver->m_objective != OBJECTIVE_FLEE_TILL_SAFE)
+					if (driver->m_objective != OBJECTIVE_LEAVE_CAR && driver->m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT &&
+						driver->m_objective != OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE)
 					{
 						if (nearCar->AutoPilot.m_nDrivingStyle != DRIVINGSTYLE_PLOUGH_THROUGH)
 							nearCar->AutoPilot.m_nCruiseSpeed = nearCar->AutoPilot.m_nCruiseSpeed * 1.5f;

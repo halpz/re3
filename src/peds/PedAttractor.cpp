@@ -276,27 +276,27 @@ static bool IsPedUsingAttractorOfThisType(int8 type, CPed* pPed)
 {
 	switch (type) {
 	case ATTRACTOR_ATM:
-		if (pPed->m_objective == OBJECTIVE_USE_ATM_ATTRACTOR)
+		if (pPed->m_objective == OBJECTIVE_GOTO_ATM_ON_FOOT)
 			return true;
 		break;
 	case ATTRACTOR_SEAT:
-		if (pPed->m_objective == OBJECTIVE_USE_SEAT_ATTRACTOR)
+		if (pPed->m_objective == OBJECTIVE_GOTO_SEAT_ON_FOOT)
 			return true;
 		break;
 	case ATTRACTOR_STOP:
-		if (pPed->m_objective == OBJECTIVE_USE_STOP_ATTRACTOR || pPed->m_objective == OBJECTIVE_WAIT_FOR_BUS || pPed->m_objective == OBJECTIVE_IDLE)
+		if (pPed->m_objective == OBJECTIVE_GOTO_BUS_STOP_ON_FOOT || pPed->m_objective == OBJECTIVE_WAIT_ON_FOOT_AT_BUS_STOP || pPed->m_objective == OBJECTIVE_WAIT_ON_FOOT)
 			return true;
 		break;
 	case ATTRACTOR_PIZZA:
-		if (pPed->m_objective == OBJECTIVE_USE_PIZZA_ATTRACTOR || pPed->m_objective == OBJECTIVE_IDLE)
+		if (pPed->m_objective == OBJECTIVE_GOTO_PIZZA_ON_FOOT || pPed->m_objective == OBJECTIVE_WAIT_ON_FOOT)
 			return true;
 		break;
 	case ATTRACTOR_SHELTER:
-		if (pPed->m_objective == OBJECTIVE_USE_SHELTER_ATTRACTOR || pPed->m_objective == OBJECTIVE_WAIT_FOR_RAIN_TO_END)
+		if (pPed->m_objective == OBJECTIVE_GOTO_SHELTER_ON_FOOT || pPed->m_objective == OBJECTIVE_WAIT_ON_FOOT_AT_SHELTER)
 			return true;
 		break;
 	case ATTRACTOR_ICECREAM:
-		if (pPed->m_objective == OBJECTIVE_USE_ICECREAM_ATTRACTOR || pPed->m_objective == OBJECTIVE_PURCHASE_ICECREAM)
+		if (pPed->m_objective == OBJECTIVE_GOTO_ICE_CREAM_VAN_ON_FOOT || pPed->m_objective == OBJECTIVE_WAIT_ON_FOOT_AT_ICE_CREAM_VAN)
 			return true;
 		break;
 	}

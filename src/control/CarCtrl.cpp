@@ -701,7 +701,7 @@ CCarCtrl::GenerateOneRandomCar()
 				pVehicle->SetMoveSpeed(0.0f, 0.0f, 0.0f);
 				for (int i = 0; i < pVehicle->m_nNumPassengers; i++) {
 					if (pVehicle->pPassengers[i]) {
-						pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+						pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 						pVehicle->pPassengers[i]->m_nLastPedState = PED_WANDER_PATH;
 						pVehicle->pPassengers[i]->m_vehicleInAccident = pVehicle;
 						pVehicle->pPassengers[i]->bDeadPedInFrontOfCar = true;
@@ -709,7 +709,7 @@ CCarCtrl::GenerateOneRandomCar()
 					}
 				}
 				if (pVehicle->pDriver) {
-					pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+					pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 					pVehicle->pDriver->m_nLastPedState = PED_WANDER_PATH;
 					pVehicle->pDriver->m_vehicleInAccident = pVehicle;
 					pVehicle->pDriver->bDeadPedInFrontOfCar = true;

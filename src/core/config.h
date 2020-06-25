@@ -204,7 +204,6 @@ enum Config {
 
 // Just debug menu entries
 #ifdef DEBUGMENU
-#define TOGGLEABLE_BETA_FEATURES // not too many things
 #define RELOADABLES			// some debug menu options to reload TXD files
 #define MISSION_SWITCHER // from debug menu
 #endif

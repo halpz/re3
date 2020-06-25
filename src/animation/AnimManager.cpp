@@ -1004,9 +1004,10 @@ CAnimManager::UncompressAnimation(CAnimBlendHierarchy *hier)
 		}else{
 			CLink<CAnimBlendHierarchy*> *link = ms_animCache.Insert(hier);
 			if(link == nil){
-				ms_animCache.tail.prev->item->RemoveUncompressedData();
+				CAnimBlendHierarchy *lastHier = ms_animCache.tail.prev->item;
+				lastHier->RemoveUncompressedData();
 				ms_animCache.Remove(ms_animCache.tail.prev);
-				ms_animCache.tail.prev->item->linkPtr = nil;
+				lastHier->linkPtr = nil;
 				link = ms_animCache.Insert(hier);
 			}
 			hier->linkPtr = link;

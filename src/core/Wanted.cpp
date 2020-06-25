@@ -12,14 +12,18 @@
 #include "General.h"
 
 int32 CWanted::MaximumWantedLevel = 6;
-int32 CWanted::nMaximumWantedLevel = 6400;
+int32 CWanted::nMaximumWantedLevel = 9600;
+
+// --MIAMI: File done except stats
 
 void
 CWanted::Initialise()
 {
 	m_nChaos = 0;
+	m_nMinChaos = 0;
 	m_nLastUpdateTime = 0;
 	m_nLastWantedLevelChange = 0;
+	m_nLastTimeSuspended = 0;
 	m_CurrentCops = 0;
 	m_MaxCops = 0;
 	m_MaximumLawEnforcerVehicles = 0;
@@ -31,6 +35,7 @@ CWanted::Initialise()
 	m_bArmyRequired = false;
 	m_fCrimeSensitivity = 1.0f;
 	m_nWantedLevel = 0;
+	m_nMinWantedLevel = 0;
 	m_CopsBeatingSuspect = 0;
 
 	for (int i = 0; i < ARRAY_SIZE(m_pCops); i++)
@@ -75,7 +80,7 @@ CWanted::NumOfHelisRequired()
 		return 1;
 	case 5:
 	case 6:
-		return 2;
+		return 1;
 	default:
 		return 0;
 	}
@@ -93,22 +98,22 @@ CWanted::SetWantedLevel(int32 level)
 		m_nChaos = 0;
 		break;
 	case 1:
-		m_nChaos = 60;
+		m_nChaos = 70;
 		break;
 	case 2:
-		m_nChaos = 220;
+		m_nChaos = 200;
 		break;
 	case 3:
-		m_nChaos = 420;
+		m_nChaos = 570;
 		break;
 	case 4:
-		m_nChaos = 820;
+		m_nChaos = 1220;
 		break;
 	case 5:
-		m_nChaos = 1620;
+		m_nChaos = 2420;
 		break;
 	case 6:
-		m_nChaos = 3220;
+		m_nChaos = 4820;
 		break;
 	default:
 		break;
@@ -119,8 +124,18 @@ CWanted::SetWantedLevel(int32 level)
 void
 CWanted::SetWantedLevelNoDrop(int32 level)
 {
+	if (m_nWantedLevel < m_nMinWantedLevel)
+		SetWantedLevel(m_nMinWantedLevel);
+
 	if (level > m_nWantedLevel)
 		SetWantedLevel(level);
+}
+
+void
+CWanted::CheatWantedLevel(int32 level)
+{
+	SetWantedLevel(level);
+	UpdateWantedLevel();
 }
 
 void
@@ -132,27 +147,27 @@ CWanted::SetMaximumWantedLevel(int32 level)
 		MaximumWantedLevel = 0;
 		break;
 	case 1:
-		nMaximumWantedLevel = 120;
+		nMaximumWantedLevel = 115;
 		MaximumWantedLevel = 1;
 		break;
 	case 2:
-		nMaximumWantedLevel = 300;
+		nMaximumWantedLevel = 365;
 		MaximumWantedLevel = 2;
 		break;
 	case 3:
-		nMaximumWantedLevel = 600;
+		nMaximumWantedLevel = 875;
 		MaximumWantedLevel = 3;
 		break;
 	case 4:
-		nMaximumWantedLevel = 1200;
+		nMaximumWantedLevel = 1800;
 		MaximumWantedLevel = 4;
 		break;
 	case 5:
-		nMaximumWantedLevel = 2400;
+		nMaximumWantedLevel = 3600;
 		MaximumWantedLevel = 5;
 		break;
 	case 6:
-		nMaximumWantedLevel = 4800;
+		nMaximumWantedLevel = 7200;
 		MaximumWantedLevel = 6;
 		break;
 	}
@@ -167,7 +182,11 @@ CWanted::RegisterCrime(eCrimeType type, const CVector &coors, uint32 id, bool po
 void
 CWanted::RegisterCrime_Immediately(eCrimeType type, const CVector &coors, uint32 id, bool policeDoesntCare)
 {
+#ifdef FIX_BUGS
+	if(!AddCrimeToQ(type, id, coors, true, policeDoesntCare))
+#else
 	if(!AddCrimeToQ(type, id, coors, false, policeDoesntCare))
+#endif
 		ReportCrimeNow(type, coors, policeDoesntCare);
 }
 
@@ -271,14 +290,25 @@ CWanted::ReportCrimeNow(eCrimeType type, const CVector &coors, bool policeDoesnt
 	case CRIME_DESTROYED_CESSNA:
 		m_nChaos += 500.0f*chaos;
 		break;
+	case CRIME_EXPLOSION:
+		m_nChaos += 25.0f * chaos;
+		break;
+	case CRIME_HIT_PED_NASTYWEAPON:
+		m_nChaos += 35.0f * chaos;
+		break;
+	case CRIME_HIT_COP_NASTYWEAPON:
+		m_nChaos += 100.0f * chaos;
+		break;
 	default:
 	//	Error("Undefined crime type, RegisterCrime, Crime.cpp");	// different file for some reason
 		Error("Undefined crime type, RegisterCrime, Wanted.cpp");
 	}
+	m_nChaos = Max(m_nChaos, m_nMinChaos);
 	DMAudio.ReportCrime(type, coors);
 	UpdateWantedLevel();
 }
 
+// TODO(Miami): Stats
 void
 CWanted::UpdateWantedLevel()
 {
@@ -287,47 +317,41 @@ CWanted::UpdateWantedLevel()
 	if (m_nChaos > nMaximumWantedLevel)
 		m_nChaos = nMaximumWantedLevel;
 
-	if (m_nChaos >= 0 && m_nChaos < 40) {
+	if (m_nChaos >= 0 && m_nChaos < 50) {
 		m_nWantedLevel = 0;
 		m_MaximumLawEnforcerVehicles = 0;
 		m_MaxCops = 0;
 		m_RoadblockDensity = 0;
-	}
-	else if (m_nChaos >= 40 && m_nChaos < 200) {
+	} else if (m_nChaos >= 50 && m_nChaos < 180) {
 		m_nWantedLevel = 1;
 		m_MaximumLawEnforcerVehicles = 1;
 		m_MaxCops = 1;
 		m_RoadblockDensity = 0;
-	}
-	else if (m_nChaos >= 200 && m_nChaos < 400) {
+	} else if (m_nChaos >= 180 && m_nChaos < 550) {
 		m_nWantedLevel = 2;
 		m_MaximumLawEnforcerVehicles = 2;
 		m_MaxCops = 3;
 		m_RoadblockDensity = 0;
-	}
-	else if (m_nChaos >= 400 && m_nChaos < 800) {
+	} else if (m_nChaos >= 550 && m_nChaos < 1200) {
 		m_nWantedLevel = 3;
 		m_MaximumLawEnforcerVehicles = 2;
 		m_MaxCops = 4;
-		m_RoadblockDensity = 4;
-	}
-	else if (m_nChaos >= 800 && m_nChaos < 1600) {
+		m_RoadblockDensity = 12;
+	} else if (m_nChaos >= 1200 && m_nChaos < 2400) {
 		m_nWantedLevel = 4;
 		m_MaximumLawEnforcerVehicles = 2;
 		m_MaxCops = 6;
-		m_RoadblockDensity = 8;
-	}
-	else if (m_nChaos >= 1600 && m_nChaos < 3200) {
+		m_RoadblockDensity = 18;
+	} else if (m_nChaos >= 2400 && m_nChaos < 4800) {
 		m_nWantedLevel = 5;
 		m_MaximumLawEnforcerVehicles = 3;
 		m_MaxCops = 8;
-		m_RoadblockDensity = 10;
-	}
-	else if (m_nChaos >= 3200) {
+		m_RoadblockDensity = 24;
+	} else if (m_nChaos >= 4800) {
 		m_nWantedLevel = 6;
 		m_MaximumLawEnforcerVehicles = 3;
 		m_MaxCops = 10;
-		m_RoadblockDensity = 12;
+		m_RoadblockDensity = 30;
 	}
 
 	if (CurrWantedLevel != m_nWantedLevel)
@@ -369,6 +393,10 @@ CWanted::WorkOutPolicePresence(CVector posn, float radius)
 void
 CWanted::Update(void)
 {
+	if (CTimer::GetTimeInMilliseconds() > m_nLastTimeSuspended + 20000) {
+		m_nMinChaos = 0;
+		m_nMinWantedLevel = 0;
+	}
 	if (CTimer::GetTimeInMilliseconds() - m_nLastUpdateTime > 1000) {
 		if (m_nWantedLevel > 1) {
 			m_nLastUpdateTime = CTimer::GetTimeInMilliseconds();
@@ -466,6 +494,12 @@ CWanted::UpdateCrimesQ(void)
 void
 CWanted::Suspend(void)
 {
-	// TODO(MIAMI)!
-	Reset(); // <- temporary
+	// TODO(Miami): Stats
+	// dwStarsEvaded += m_nWantedLevel;
+	m_nMinChaos = m_nChaos;
+	m_nMinWantedLevel = m_nWantedLevel;
+	m_nLastTimeSuspended = CTimer::GetTimeInMilliseconds();
+	m_nChaos = 0;
+	m_nWantedLevel = 0;
+	ResetPolicePursuit();
 }
