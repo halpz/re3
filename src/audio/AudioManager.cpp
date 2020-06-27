@@ -4738,11 +4738,11 @@ cAudioManager::ProcessFrontEnd()
 			m_sQueueSample.m_nSampleIndex = SFX_SUB_MENU_BACK_LEFT;
 			stereo = true;
 			break;
-		case SOUND_9A:
+		case SOUND_FRONTEND_STEREO:
 			m_sQueueSample.m_nSampleIndex = SFX_STEREO_LEFT;
 			stereo = true;
 			break;
-		case SOUND_9B:
+		case SOUND_FRONTEND_MONO:
 			m_sQueueSample.m_nSampleIndex = SFX_MONO;
 			break;
 		case SOUND_FRONTEND_AUDIO_TEST:
@@ -9337,9 +9337,9 @@ cAudioManager::SetCurrent3DProvider(uint8 which)
 }
 
 void
-cAudioManager::SetDynamicAcousticModelingStatus(bool status)
+cAudioManager::SetDynamicAcousticModelingStatus(uint8 status)
 {
-	m_bDynamicAcousticModelingStatus = status;
+	m_bDynamicAcousticModelingStatus = status!=0;
 }
 
 void
@@ -9368,6 +9368,12 @@ cAudioManager::SetMissionAudioLocation(float x, float y, float z)
 		m_sMissionAudio.m_bPredefinedProperties = false;
 		m_sMissionAudio.m_vecPos = CVector(x, y, z);
 	}
+}
+
+void
+cAudioManager::SetMonoMode(uint8 mono)
+{
+	SampleManager.SetMonoMode(mono);
 }
 
 void

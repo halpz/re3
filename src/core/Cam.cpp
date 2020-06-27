@@ -2895,7 +2895,7 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 					FOV /= (255.0f*CTimer::GetTimeStep() + 10000.0f) / 10000.0f;
 			}
 
-			TheCamera.SetMotionBlur(180, 255, 180, 120, MBLUR_SNIPER);
+			TheCamera.SetMotionBlur(180, 255, 180, 120, MOTION_BLUR_SNIPER);
 
 			if(FOV > DefaultFOV)
 				FOV = DefaultFOV;
@@ -3009,7 +3009,7 @@ CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float
 			FOVSpeed = 0.0f;
 	}
 
-	TheCamera.SetMotionBlur(180, 255, 180, 120, MBLUR_SNIPER);
+	TheCamera.SetMotionBlur(180, 255, 180, 120, MOTION_BLUR_SNIPER);
 
 	if(FOV > DefaultFOV)
 		FOV = DefaultFOV;
@@ -3644,7 +3644,7 @@ CCam::Process_Fixed(const CVector &CameraTarget, float, float, float)
 	if(TheCamera.m_bUseSpecialFovTrain)
 		FOV = TheCamera.m_fFovForTrain;
 
-	if(CMenuManager::m_ControlMethod == 0 && Using3rdPersonMouseCam()){
+	if(CMenuManager::m_ControlMethod == CONTROL_STANDARD && Using3rdPersonMouseCam()){
 		CPed *player = FindPlayerPed();
 		if(player && player->CanStrafeOrMouseControl()){
 			float Heading = Front.Heading();

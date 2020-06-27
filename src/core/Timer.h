@@ -56,6 +56,7 @@ public:
 
 	friend bool GenericLoad(void);
 	friend bool GenericSave(int file);
+	friend class CMemoryCard;
 
 #ifdef FIX_BUGS
 	static float GetDefaultTimeStep(void) { return 5.0f / 3.0f; }

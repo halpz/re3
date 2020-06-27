@@ -11,6 +11,7 @@ public:
 	static void SetDirMyDocuments(void);
 	static int LoadFile(const char *file, uint8 *buf, int unused, const char *mode);
 	static int OpenFile(const char *file, const char *mode);
+	static int OpenFile(const char *file) { return OpenFile(file, "rb"); }
 	static int OpenFileForWriting(const char *file);
 	static int Read(int fd, const char *buf, int len);
 	static int Write(int fd, const char *buf, int len);

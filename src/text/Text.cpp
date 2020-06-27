@@ -31,29 +31,29 @@ CText::Load(void)
 
 	CFileMgr::SetDir("TEXT");
 	switch(CMenuManager::m_PrefsLanguage){
-	case LANGUAGE_AMERICAN:
+	case CMenuManager::LANGUAGE_AMERICAN:
 		sprintf(filename, "AMERICAN.GXT");
 		break;
-	case LANGUAGE_FRENCH:
+	case CMenuManager::LANGUAGE_FRENCH:
 		sprintf(filename, "FRENCH.GXT");
 		break;
-	case LANGUAGE_GERMAN:
+	case CMenuManager::LANGUAGE_GERMAN:
 		sprintf(filename, "GERMAN.GXT");
 		break;
-	case LANGUAGE_ITALIAN:
+	case CMenuManager::LANGUAGE_ITALIAN:
 		sprintf(filename, "ITALIAN.GXT");
 		break;
-	case LANGUAGE_SPANISH:
+	case CMenuManager::LANGUAGE_SPANISH:
 		sprintf(filename, "SPANISH.GXT");
 		break;
 #ifdef MORE_LANGUAGES
-	case LANGUAGE_POLISH:
+	case CMenuManager::LANGUAGE_POLISH:
 		sprintf(filename, "POLISH.GXT");
 		break;
-	case LANGUAGE_RUSSIAN:
+	case CMenuManager::LANGUAGE_RUSSIAN:
 		sprintf(filename, "RUSSIAN.GXT");
 		break;
-	case LANGUAGE_JAPANESE:
+	case CMenuManager::LANGUAGE_JAPANESE:
 		sprintf(filename, "JAPANESE.GXT");
 		break;
 #endif
@@ -298,10 +298,30 @@ UnicodeToAsciiForSaveLoad(wchar *src)
 	return aStr;
 }
 
+char*
+UnicodeToAsciiForMemoryCard(wchar *src)
+{
+	static char aStr[256];
+	int len;
+	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
+		if(*src < 256)
+			aStr[len] = *src;
+		else
+			aStr[len] = '#';
+	aStr[len] = '\0';
+	return aStr;
+}
+
 void
 UnicodeStrcpy(wchar *dst, const wchar *src)
 {
 	while((*dst++ = *src++) != '\0');
+}
+
+void
+UnicodeStrcat(wchar *dst, wchar *append)
+{
+	UnicodeStrcpy(&dst[UnicodeStrlen(dst)], append);
 }
 
 int

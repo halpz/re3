@@ -5,6 +5,7 @@
 
 #define WITHWINDOWS
 #include "common.h"
+#ifndef PS2_MENU
 #include "crossplatform.h"
 #include "platform.h"
 #include "Frontend.h"
@@ -5830,3 +5831,5 @@ uint8 CMenuManager::GetNumberOfMenuOptions()
 
 #undef GetBackJustUp
 #undef GetBackJustDown
+
+#endif
