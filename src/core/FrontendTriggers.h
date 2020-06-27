@@ -87,14 +87,14 @@ wchar *PrintStatLine(char const *text, void *stat, unsigned char itsFloat, void 
 			if ( itsFloat )
 				sprintf(line, "  %.2f %s %.2f", *(float*)stat, UnicodeToAscii(TheText.Get("FEST_OO")), *(float*)stat2);
 			else
-				sprintf(line, "  %d %s %d", *(int*)stat, UnicodeToAscii(TheText.Get("FEST_OO")), *(int*)stat2);
+				sprintf(line, "  %d %s %d", *(int32*)stat, UnicodeToAscii(TheText.Get("FEST_OO")), *(int32*)stat2);
 		}
 		else
 		{
 			if (itsFloat)
 				sprintf(line, "  %.2f", *(float*)stat);
 			else
-				sprintf(line, "  %d", *(int*)stat);
+				sprintf(line, "  %d", *(int32*)stat);
 		}
 		
 		wchar *pStatLine = aStatLines[nStatLinesIndex++];
@@ -105,7 +105,7 @@ wchar *PrintStatLine(char const *text, void *stat, unsigned char itsFloat, void 
 		return pStatLine;
 	}
 
-	return NULL;
+	return nil;
 }
 
 void
@@ -139,7 +139,7 @@ DisplayMemoryCardAccessMsg(wchar *msg, CRGBA const &color)
 }
 
 void
-FillMenuWithMemCardFileListing(CMenuMultiChoiceTwoLinesTriggered *widget, void (*cancelTrigger)(CMenuMultiChoiceTwoLinesTriggered *), void (*selectTrigger)(CMenuMultiChoiceTwoLinesTriggered *), wchar *text, int y, int height, int offset)
+FillMenuWithMemCardFileListing(CMenuMultiChoiceTwoLinesTriggered *widget, void (*cancelTrigger)(CMenuMultiChoiceTwoLinesTriggered *), void (*selectTrigger)(CMenuMultiChoiceTwoLinesTriggered *), wchar *text, int32 y, int32 height, int32 offset)
 {
 	if ( widget )
 	{
@@ -149,7 +149,7 @@ FillMenuWithMemCardFileListing(CMenuMultiChoiceTwoLinesTriggered *widget, void (
 		
 		widget->DeactivateMenu(); // TODO check
 		widget->m_numOptions = 0;
-		widget->AddTitle(NULL, 0.0f, 0.0f, 0);
+		widget->AddTitle(nil, 0.0f, 0.0f, 0);
 		
 		TheMemoryCard.PopulateSlotInfo(CARD_ONE);
 		
@@ -169,7 +169,7 @@ FillMenuWithMemCardFileListing(CMenuMultiChoiceTwoLinesTriggered *widget, void (
 				sprintf(buff, "%s %d ", UnicodeToAscii(TheText.Get("FES_SLO")), i+1);
 				AsciiToUnicode(buff, MemoryCard_FileNames[i]);
 				
-				wchar *datetime = NULL;
+				wchar *datetime = nil;
 				
 				switch ( TheMemoryCard.GetInfoOnSpecificSlot(i) )
 				{
@@ -181,7 +181,7 @@ FillMenuWithMemCardFileListing(CMenuMultiChoiceTwoLinesTriggered *widget, void (
 					}
 					case CMemoryCard::SLOT_PRESENT:
 					{
-						if ( TheMemoryCard.GetNameOfSavedGame(i) != NULL )
+						if ( TheMemoryCard.GetNameOfSavedGame(i) != nil )
 						{
 							UnicodeStrcpy(MemoryCard_FileNames[i], TheMemoryCard.GetNameOfSavedGame(i));
 							datetime = TheMemoryCard.GetDateAndTimeOfSavedGame(i);
@@ -273,7 +273,7 @@ TriggerSaveZone_FormatCard(CMenuMultiChoiceTriggered *widget)
 {
 	if ( widget )
 	{
-		FillMenuWithMemCardFileListing(&MenuSaveZoneSSL_1, TriggerSaveZone_BackToMainMenuTwoLines, TriggerSaveZone_SaveSlots, NULL, 0, 34, 22);
+		FillMenuWithMemCardFileListing(&MenuSaveZoneSSL_1, TriggerSaveZone_BackToMainMenuTwoLines, TriggerSaveZone_SaveSlots, nil, 0, 34, 22);
 		
 		if ( TheMemoryCard.GetError() == CMemoryCard::NO_ERR_SUCCESS)
 		{
@@ -331,7 +331,7 @@ TriggerSaveZone_FormatCard(CMenuMultiChoiceTriggered *widget)
 				
 				if ( TheMemoryCard.GetError() == CMemoryCard::NO_ERR_SUCCESS )
 				{
-					FillMenuWithMemCardFileListing(&MenuSaveZoneSSL_1, TriggerSaveZone_BackToMainMenuTwoLines, TriggerSaveZone_SaveSlots, NULL, 0, 34, 22);
+					FillMenuWithMemCardFileListing(&MenuSaveZoneSSL_1, TriggerSaveZone_BackToMainMenuTwoLines, TriggerSaveZone_SaveSlots, nil, 0, 34, 22);
 					pActiveMenuPage = &MenuPageSaveZone_SaveSlots;
 					bMemoryCardSpecialZone = true;
 					bIgnoreTriangleButton = true;
@@ -377,7 +377,7 @@ TriggerSaveZone_FormatCardSelect(CMenuMultiChoiceTriggered *widget)
 {
 	if ( widget )
 	{
-		FillMenuWithMemCardFileListing(&MenuSaveZoneSSL_1, TriggerSaveZone_BackToMainMenuTwoLines, TriggerSaveZone_SaveSlots, NULL, 0, 34, 22);
+		FillMenuWithMemCardFileListing(&MenuSaveZoneSSL_1, TriggerSaveZone_BackToMainMenuTwoLines, TriggerSaveZone_SaveSlots, nil, 0, 34, 22);
 		
 		if ( TheMemoryCard.GetError() == CMemoryCard::NO_ERR_SUCCESS )
 		{
@@ -615,7 +615,7 @@ TriggerSaveZone_SaveGameSelect(CMenuMultiChoiceTriggered *widget)
 {	
 	if ( widget )
 	{
-		FillMenuWithMemCardFileListing(&MenuSaveZoneSSL_1, TriggerSaveZone_BackToMainMenuTwoLines, TriggerSaveZone_SaveSlots, NULL, 0, 34, 22);
+		FillMenuWithMemCardFileListing(&MenuSaveZoneSSL_1, TriggerSaveZone_BackToMainMenuTwoLines, TriggerSaveZone_SaveSlots, nil, 0, 34, 22);
 		
 		if ( TheMemoryCard.GetError() == CMemoryCard::ERR_NOFORMAT)
 		{
@@ -916,8 +916,8 @@ TriggerSave_DeleteGameDeleteGame(CMenuMultiChoiceTriggered *widget)
 			}
 			else
 			{
-				FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect,     NULL, 0, 34, 22);
-				FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, NULL, 0, 34, 22);
+				FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect,     nil, 0, 34, 22);
+				FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, nil, 0, 34, 22);
 				
 				pMenuSave = &MenuPage_SaveBasic;
 				pMenuSave->ActivatePage();
@@ -965,8 +965,8 @@ TriggerSave_DeleteGameDeleteGameSelect(CMenuMultiChoiceTwoLinesTriggered *widget
 void
 TriggerSave_DeleteGameSelect(CMenuMultiChoiceTriggered *widget)
 {	
-	FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, NULL, 0, 34, 22);
-	FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect,     NULL, 0, 34, 22);
+	FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, nil, 0, 34, 22);
+	FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect,     nil, 0, 34, 22);
 	
 	pMenuSave = &MenuPage_SaveDeleteGame;
 	pMenuSave->ActivatePage();
@@ -1078,8 +1078,8 @@ TriggerSave_LoadGameLoadGameSelect(CMenuMultiChoiceTwoLinesTriggered *widget)
 void
 TriggerSave_LoadGameSelect(CMenuMultiChoiceTriggered *widget)
 {
-	FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect,     NULL, 0, 34, 22);
-	FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, NULL, 0, 34, 22);
+	FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect,     nil, 0, 34, 22);
+	FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, nil, 0, 34, 22);
 	
 	pMenuSave = &MenuPage_SaveLoadGame;
 	pMenuSave->ActivatePage();

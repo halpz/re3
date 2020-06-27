@@ -488,7 +488,7 @@ void
 CMenuMultiChoiceTriggered::SelectCurrentOptionUnderCursor(void)
 {
 	CMenuMultiChoice::SelectCurrentOptionUnderCursor();
-	if(m_cursor != -1 && m_triggers[m_cursor] != NULL )
+	if(m_cursor != -1 && m_triggers[m_cursor] != nil )
 		m_triggers[m_cursor](this);
 }
 

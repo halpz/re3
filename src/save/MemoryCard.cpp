@@ -1859,7 +1859,7 @@ CMemoryCard::SaveGame(void)
 	buf = work_buff;
 	reserved = 0;
 	
-	for (int i = 0; i < 3; i++)
+	for (int32 i = 0; i < 3; i++)
 	{
 		size = align4bytes(saveSize - totalSize - 4);
 		if (size > sizeof(work_buff))

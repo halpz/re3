@@ -16,7 +16,7 @@ class CTriggerCaller
 	int field_C;
 public:
 	
-	CTriggerCaller() : bHasTrigger(false), pFunc(NULL)
+	CTriggerCaller() : bHasTrigger(false), pFunc(nil)
 	{}
 	
 	void SetTrigger(void *func, void *trigger)
@@ -31,11 +31,11 @@ public:
 	
 	void CallTrigger(void)
 	{
-		if ( bHasTrigger && pFunc != NULL )
+		if ( bHasTrigger && pFunc != nil )
 			pFunc(pTrigger);
 		
 		bHasTrigger = false;
-		pFunc = NULL;
+		pFunc = nil;
 	}
 	
 	bool CanCall()
@@ -52,7 +52,7 @@ public:
 	wchar *m_text;
 
 	CPlaceableText(void)
-	 : m_position(0.0f, 0.0f), m_color(255, 255, 255, 255), m_text(NULL) {}
+	 : m_position(0.0f, 0.0f), m_color(255, 255, 255, 255), m_text(nil) {}
 	void SetPosition(float x, float y) { m_position.x = x; m_position.y = y; }
 	void SetColor(const CRGBA &color) { m_color = color; }
 	CRGBA GetColor(void) { return m_color; }

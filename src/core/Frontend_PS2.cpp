@@ -248,7 +248,7 @@ float CMenuManager::fMapCenterX;
 
 CMenuManager::CMenuManager(void)
 {
-	int i;
+	int32 i;
 
 	SetSoundLevelsForMusicMenu();
 
@@ -289,7 +289,7 @@ CMenuManager::CMenuManager(void)
 void
 CMenuManager::LoadAllTextures(void)
 {
-	int i;
+	int32 i;
 
 	if(m_bTexturesLoaded)
 		return;
@@ -313,7 +313,7 @@ CMenuManager::LoadAllTextures(void)
 	CStreaming::MakeSpaceFor(60*1024);
 	CStreaming::ImGonnaUseStreamingMemory();
 	CGame::TidyUpMemory(false, true);
-	int slot = CTxdStore::FindTxdSlot("frontend");
+	int32 slot = CTxdStore::FindTxdSlot("frontend");
 	if(slot == -1)
 		slot = CTxdStore::AddTxdSlot("frontend");
 	printf("LOAD frontend\n");
@@ -334,8 +334,8 @@ CMenuManager::LoadAllTextures(void)
 void
 CMenuManager::UnloadTextures(void)
 {
-	int slot;
-	int i;
+	int32 slot;
+	int32 i;
 
 	if ( !m_bTexturesLoaded )
 		return;
@@ -1079,8 +1079,8 @@ CMenuManager::InitialiseMenuContents(void)
 
 		MenuLanguage_1.SetMenuSelection(m_PrefsLanguage);
 
-		FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect,     NULL, 0, 34, 22);
-		FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, NULL, 0, 34, 22);
+		FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect,     nil, 0, 34, 22);
+		FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, nil, 0, 34, 22);
 
 		MenuBriefs_1.m_numTexts = 0;
 		MenuBriefs_1.AddText(TheText.Get("FEB_PMB"), 0.0f, 0.0f, TITLE_TEXT_COLOR, 0); // Previous Mission Briefs:
@@ -1120,8 +1120,8 @@ CMenuManager::InitialiseMenuContents(void)
 
 		nStatLinesIndex = 0;
 
-		#define STAT_HEADER(str) do { MenuStats_1.AddTextLine(TheText.Get(str), NULL); } while(0)
-		#define STAT_PARAM(str) do { MenuStats_1.AddTextLine(NULL, TheText.Get(str)); } while(0)
+		#define STAT_HEADER(str) do { MenuStats_1.AddTextLine(TheText.Get(str), nil); } while(0)
+		#define STAT_PARAM(str) do { MenuStats_1.AddTextLine(nil, TheText.Get(str)); } while(0)
 		#define STAT_LINE(str, left, isFloat, right) do { MenuStats_1.AddTextLine(TheText.Get(str), PrintStatLine(str, left, isFloat, right)); } while(0)
 
 		int32 nTemp;
@@ -1131,9 +1131,9 @@ CMenuManager::InitialiseMenuContents(void)
 		int32 percentCompleted = (CStats::TotalProgressInGame == 0 ? 0 : CStats::ProgressMade * 100.0f / (CGame::nastyGame ? CStats::TotalProgressInGame : CStats::TotalProgressInGame - 1));
 		percentCompleted = Min(percentCompleted, 100);
 
-		STAT_LINE("PER_COM", &percentCompleted,       0, NULL);
+		STAT_LINE("PER_COM", &percentCompleted,       0, nil);
 
-		STAT_LINE("NMISON",  &CStats::MissionsGiven,  0, NULL);
+		STAT_LINE("NMISON",  &CStats::MissionsGiven,  0, nil);
 
 		STAT_LINE("FEST_MP", &CStats::MissionsPassed, 0, &CStats::TotalNumberMissions);
 
@@ -1144,71 +1144,71 @@ CMenuManager::InitialiseMenuContents(void)
 		float packagesPercent = 0.0f;
 		if (player.m_nTotalPackages != 0)
 			packagesPercent = player.m_nCollectedPackages * 100.0f / player.m_nTotalPackages;
-		int nPackagesPercent = packagesPercent;
+		int32 nPackagesPercent = packagesPercent;
 		nTemp = 100;
 
 		STAT_LINE("PERPIC", &nPackagesPercent,       0, &nTemp);
 
 		STAT_LINE("NOUNIF", &CStats::NumberOfUniqueJumpsFound, 0, &CStats::TotalNumberOfUniqueJumps);
 
-		STAT_LINE("DAYSPS", &CStats::DaysPassed, 0, NULL);
+		STAT_LINE("DAYSPS", &CStats::DaysPassed, 0, nil);
 
 		if ( CGame::nastyGame )
 		{
-			STAT_LINE("PE_WAST", &CStats::PeopleKilledByPlayer, 0, NULL);
-			STAT_LINE("PE_WSOT", &CStats::PeopleKilledByOthers, 0, NULL);
+			STAT_LINE("PE_WAST", &CStats::PeopleKilledByPlayer, 0, nil);
+			STAT_LINE("PE_WSOT", &CStats::PeopleKilledByOthers, 0, nil);
 		}
 
-		STAT_LINE("CAR_EXP", &CStats::CarsExploded, 0, NULL);
+		STAT_LINE("CAR_EXP", &CStats::CarsExploded, 0, nil);
 
-		STAT_LINE("TM_BUST", &CStats::TimesArrested, 0, NULL);
+		STAT_LINE("TM_BUST", &CStats::TimesArrested, 0, nil);
 
-		STAT_LINE("TM_DED", &CStats::TimesDied, 0, NULL);
+		STAT_LINE("TM_DED", &CStats::TimesDied, 0, nil);
 
 		nTemp = CStats::PedsKilledOfThisType[PEDTYPE_GANG9] + CStats::PedsKilledOfThisType[PEDTYPE_GANG8]
 			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG7] + CStats::PedsKilledOfThisType[PEDTYPE_GANG6]
 			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG5] + CStats::PedsKilledOfThisType[PEDTYPE_GANG4]
 			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG3] + CStats::PedsKilledOfThisType[PEDTYPE_GANG2]
 			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG1];
-		STAT_LINE("GNG_WST", &nTemp, 0, NULL);
+		STAT_LINE("GNG_WST", &nTemp, 0, nil);
 
 		nTemp = CStats::PedsKilledOfThisType[PEDTYPE_CRIMINAL];
-		STAT_LINE("DED_CRI", &nTemp, 0, NULL);
+		STAT_LINE("DED_CRI", &nTemp, 0, nil);
 
-		STAT_LINE("HEL_DST", &CStats::HelisDestroyed, 0, NULL);
+		STAT_LINE("HEL_DST", &CStats::HelisDestroyed, 0, nil);
 
-		STAT_LINE("KGS_EXP", &CStats::KgsOfExplosivesUsed, 0, NULL);
+		STAT_LINE("KGS_EXP", &CStats::KgsOfExplosivesUsed, 0, nil);
 
 		nTemp = (CStats::InstantHitsFiredByPlayer == 0 ? 0 : CStats::InstantHitsHitByPlayer * 100.0f / CStats::InstantHitsFiredByPlayer);
-		STAT_LINE("ACCURA", &nTemp, 0, NULL);
+		STAT_LINE("ACCURA", &nTemp, 0, nil);
 
 		if (CStats::ElBurroTime > 0)
-			STAT_LINE("ELBURRO", &CStats::ElBurroTime, 0, NULL);
+			STAT_LINE("ELBURRO", &CStats::ElBurroTime, 0, nil);
 
 		if (CStats::Record4x4One > 0)
-			STAT_LINE("FEST_R1", &CStats::Record4x4One, 0, NULL);
+			STAT_LINE("FEST_R1", &CStats::Record4x4One, 0, nil);
 
 		if (CStats::Record4x4Two > 0)
-			STAT_LINE("FEST_R2", &CStats::Record4x4Two, 0, NULL);
+			STAT_LINE("FEST_R2", &CStats::Record4x4Two, 0, nil);
 
 		if (CStats::Record4x4Three > 0)
-			STAT_LINE("FEST_R3", &CStats::Record4x4Three, 0, NULL);
+			STAT_LINE("FEST_R3", &CStats::Record4x4Three, 0, nil);
 
 		if (CStats::Record4x4Mayhem > 0)
-			STAT_LINE("FEST_RM", &CStats::Record4x4Mayhem, 0, NULL);
+			STAT_LINE("FEST_RM", &CStats::Record4x4Mayhem, 0, nil);
 
 		if (CStats::LongestFlightInDodo > 0)
-			STAT_LINE("FEST_LF", &CStats::LongestFlightInDodo, 0, NULL);
+			STAT_LINE("FEST_LF", &CStats::LongestFlightInDodo, 0, nil);
 
 		if (CStats::TimeTakenDefuseMission > 0)
-			STAT_LINE("FEST_BD", &CStats::TimeTakenDefuseMission, 0, NULL);
+			STAT_LINE("FEST_BD", &CStats::TimeTakenDefuseMission, 0, nil);
 
-		STAT_LINE("CAR_CRU", &CStats::CarsCrushed, 0, NULL);
+		STAT_LINE("CAR_CRU", &CStats::CarsCrushed, 0, nil);
 
 		if (CStats::HighestScores[0] > 0)
 		{
 			STAT_HEADER("FEST_BB");
-			STAT_LINE("FEST_H0", &CStats::HighestScores[0], 0, NULL);
+			STAT_LINE("FEST_H0", &CStats::HighestScores[0], 0, nil);
 		}
 
 		int32 hs = 0;
@@ -1219,27 +1219,27 @@ CMenuManager::InitialiseMenuContents(void)
 			STAT_HEADER("FEST_GC");
 
 		if (CStats::HighestScores[1] > 0)
-			STAT_LINE("FEST_H1", &CStats::HighestScores[1], 0, NULL);
+			STAT_LINE("FEST_H1", &CStats::HighestScores[1], 0, nil);
 
 		if (CStats::HighestScores[2] > 0)
-			STAT_LINE("FEST_H2", &CStats::HighestScores[2], 0, NULL);
+			STAT_LINE("FEST_H2", &CStats::HighestScores[2], 0, nil);
 
 		if (CStats::HighestScores[3] > 0)
-			STAT_LINE("FEST_H3", &CStats::HighestScores[3], 0, NULL);
+			STAT_LINE("FEST_H3", &CStats::HighestScores[3], 0, nil);
 
 		if (CStats::HighestScores[4] > 0)
-			STAT_LINE("FEST_H4", &CStats::HighestScores[4], 0, NULL);
+			STAT_LINE("FEST_H4", &CStats::HighestScores[4], 0, nil);
 
-		STAT_LINE("FESTDFM", &CStats::DistanceTravelledOnFoot, 0, NULL);
-		STAT_LINE("FESTDCM", &CStats::DistanceTravelledInVehicle, 0, NULL);
-		STAT_LINE("MMRAIN", &CStats::mmRain, 0, NULL);
+		STAT_LINE("FESTDFM", &CStats::DistanceTravelledOnFoot, 0, nil);
+		STAT_LINE("FESTDCM", &CStats::DistanceTravelledInVehicle, 0, nil);
+		STAT_LINE("MMRAIN", &CStats::mmRain, 0, nil);
 		nTemp = (int32)CStats::MaximumJumpDistance;
-		STAT_LINE("MXCARDM", &nTemp, 0, NULL);
+		STAT_LINE("MXCARDM", &nTemp, 0, nil);
 		nTemp = (int32)CStats::MaximumJumpHeight;
-		STAT_LINE("MXCARJM", &nTemp, 0, NULL);
+		STAT_LINE("MXCARJM", &nTemp, 0, nil);
 
-		STAT_LINE("MXFLIP", &CStats::MaximumJumpFlips, 0, NULL);
-		STAT_LINE("MXJUMP", &CStats::MaximumJumpSpins, 0, NULL);
+		STAT_LINE("MXFLIP", &CStats::MaximumJumpFlips, 0, nil);
+		STAT_LINE("MXJUMP", &CStats::MaximumJumpSpins, 0, nil);
 
 		STAT_HEADER("BSTSTU");
 
@@ -1256,14 +1256,14 @@ CMenuManager::InitialiseMenuContents(void)
 			default: STAT_PARAM("NOSTUC"); break;
 		}
 
-		STAT_LINE("PASDRO", &CStats::PassengersDroppedOffWithTaxi, 0, NULL);
-		STAT_LINE("MONTAX", &CStats::MoneyMadeWithTaxi, 0, NULL);
-		STAT_LINE("FEST_LS", &CStats::LivesSavedWithAmbulance, 0, NULL);
-		STAT_LINE("FEST_HA", &CStats::HighestLevelAmbulanceMission, 0, NULL);
-		STAT_LINE("FEST_CC", &CStats::CriminalsCaught, 0, NULL);
-		STAT_LINE("FEST_FE", &CStats::FiresExtinguished, 0, NULL);
+		STAT_LINE("PASDRO", &CStats::PassengersDroppedOffWithTaxi, 0, nil);
+		STAT_LINE("MONTAX", &CStats::MoneyMadeWithTaxi, 0, nil);
+		STAT_LINE("FEST_LS", &CStats::LivesSavedWithAmbulance, 0, nil);
+		STAT_LINE("FEST_HA", &CStats::HighestLevelAmbulanceMission, 0, nil);
+		STAT_LINE("FEST_CC", &CStats::CriminalsCaught, 0, nil);
+		STAT_LINE("FEST_FE", &CStats::FiresExtinguished, 0, nil);
 		int32 rnd = ((CGeneral::GetRandomNumber() & 255) + 100) * 2384;
-		STAT_LINE("DAYPLC", &rnd, 0, NULL);
+		STAT_LINE("DAYPLC", &rnd, 0, nil);
 
 		#undef STAT_LINE
 
@@ -1367,8 +1367,8 @@ CMenuManager::DrawFrontEndNormal(void)
 
 		if ( (counter & 63 ) == 0 )
 		{
-			FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect, NULL, 0, 34, 22);
-			FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, NULL, 0, 34, 22);
+			FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect, nil, 0, 34, 22);
+			FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, nil, 0, 34, 22);
 		}
 	}
 
@@ -1455,7 +1455,7 @@ CMenuManager::DrawFrontEndNormal(void)
 	float iconY = 54.0f;
 	float iconWidth = 540.0f;
 	float iconHeight = 296.0f;
-	int sprite = FE_ICONBRIEF;
+	int32 sprite = FE_ICONBRIEF;
 
 #ifdef PS2_MENU_USEALLPAGEICONS
 	switch(m_currentPage)
@@ -1819,7 +1819,7 @@ CMenuManager::DrawFrontEndSaveZone(void)
 		counter++;
 		if ( counter & 63 )
 		{
-			FillMenuWithMemCardFileListing(&MenuSaveZoneSSL_1, TriggerSaveZone_BackToMainMenuTwoLines, TriggerSaveZone_SaveSlots, NULL, 0, 34, 22);
+			FillMenuWithMemCardFileListing(&MenuSaveZoneSSL_1, TriggerSaveZone_BackToMainMenuTwoLines, TriggerSaveZone_SaveSlots, nil, 0, 34, 22);
 
 			if ( TheMemoryCard.GetError() == CMemoryCard::ERR_NOFORMAT )
 			{
@@ -1921,7 +1921,7 @@ CMenuManager::DrawMemoryCardStartUpMenus()
 		}
 	}
 
-	MCMenu.AddOption(TheText.Get("FEM_NO"),  X(30.0f),  Y(110.0f), NULL, 0, 0);// 125.714294f
+	MCMenu.AddOption(TheText.Get("FEM_NO"),  X(30.0f),  Y(110.0f), nil, 0, 0);// 125.714294f
 	MCMenu.AddOption(TheText.Get("FEM_YES"), X(-30.0f), Y(110.0f), TriggerMCSUM_Yes, 0, 0);// 125.714294f
 	MCMenu.SetColors(TITLE_TEXT_COLOR, TEXT_COLOR, TEXT_COLOR);
 	page.AddMenu(&MCMenu);

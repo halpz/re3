@@ -369,10 +369,10 @@ CControllerState::Clear(void)
 
 void CKeyboardState::Clear()
 {
-	for ( int32 i = 0; i < 12; i++	)
+	for ( int32 i = 0; i < ARRAY_SIZE(F); i++	)
 		F[i] = 0;
 
-	for ( int32 i = 0; i < 256; i++	 )
+	for ( int32 i = 0; i < ARRAY_SIZE(VK_KEYS); i++	 )
 		VK_KEYS[i] = 0;
 
 	ESC = INS = DEL = HOME = END = PGUP = PGDN = 0;
