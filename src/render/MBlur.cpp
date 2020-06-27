@@ -20,14 +20,14 @@ CMBlur::MotionBlurOpen(RwCamera *cam)
 {
 #ifdef GTA_PS2
 	RwRect rect = {0, 0, 0, 0};
-	 
+	
 	if (pFrontBuffer)
-        return TRUE;
+		return TRUE;
 	
 	BlurOn = true;
 	
 	rect.w = RwRasterGetWidth(RwCameraGetRaster(cam));
-    rect.h = RwRasterGetHeight(RwCameraGetRaster(cam));
+	rect.h = RwRasterGetHeight(RwCameraGetRaster(cam));
 	
 	pFrontBuffer = RwRasterCreate(0, 0, 0, rwRASTERDONTALLOCATE|rwRASTERTYPECAMERATEXTURE);
 	if (!pFrontBuffer)

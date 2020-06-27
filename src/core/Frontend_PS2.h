@@ -193,12 +193,7 @@ public:
 	static float fMapCenterX;
 #endif
 
-#ifdef IMPROVED_VIDEOMODE
-	//int32 m_nPrefsWidth = 1280 ;//640;
-	//int32 m_nPrefsHeight = 960;//480;
-	//int32 m_nPrefsWidth = 1024;
-	//int32 m_nPrefsHeight = 768;
-	
+#ifdef IMPROVED_VIDEOMODE	
 	int32 m_nPrefsWidth = 640;
 	int32 m_nPrefsHeight = 480;
 	int32 m_nPrefsDepth = 32;

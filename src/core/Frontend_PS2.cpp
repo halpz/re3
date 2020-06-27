@@ -249,7 +249,7 @@ float CMenuManager::fMapCenterX;
 CMenuManager::CMenuManager(void)
 {
 	int i;
-	
+
 	SetSoundLevelsForMusicMenu();
 
 	m_pageState = PAGESTATE_NORMAL;
@@ -274,12 +274,12 @@ CMenuManager::CMenuManager(void)
 	m_bWantToUpdateContent = false;
 	field_3C = 0;
 	m_bInSaveZone = false;
-	
+
 	for(i = 0; i < NUM_PAGES; i++){
 		BUTTONTAB_TEXT_X_SCALES[i] = 1.0f;
 		PANEL_TEXT_X_SCALES[i] = 1.0f;
 	}
-	
+
 #ifdef GTA_PC
 	TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
 	CMBlur::BlurOn = m_PrefsShowTrails;
@@ -308,7 +308,7 @@ CMenuManager::LoadAllTextures(void)
 
 	CFileMgr::SetDir("");
 	CFileMgr::SetDir("");
-	
+
 	CTimer::Stop();
 	CStreaming::MakeSpaceFor(60*1024);
 	CStreaming::ImGonnaUseStreamingMemory();
@@ -336,7 +336,7 @@ CMenuManager::UnloadTextures(void)
 {
 	int slot;
 	int i;
-	
+
 	if ( !m_bTexturesLoaded )
 		return;
 
@@ -854,188 +854,188 @@ CMenuManager::InitialiseChangedLanguageSettings(void)
 	if ( bFrontEnd_ReloadObrTxtGxt )
 	{
 		bFrontEnd_ReloadObrTxtGxt = false;
-		
+
 		CTimer::Stop();
 		TheText.Unload();
 		TheText.Load();
 		CTimer::Update();
-		
+
 		FrontEndMenuManager.AnaliseMenuContents();
 		CGame::frenchGame = false;
 		CGame::germanGame = false;
-		if ( m_PrefsAllowNastyGame )	
+		if ( m_PrefsAllowNastyGame )
 			CGame::nastyGame = true;
-		
+
 		for ( int32 i = 0; i < NUM_PAGES; i++ )
 		{
 			BUTTONTAB_TEXT_X_SCALES[i] = 1.0f;
 			PANEL_TEXT_X_SCALES[i] = 1.0f;
 		}
-		
+
 		switch ( m_PrefsLanguage )
 		{
 			case LANGUAGE_AMERICAN:
 			{
 				MENU_TEXT_SIZE_X = 0.644f;
 				MENU_TEXT_SIZE_Y = 0.84f;//0.96f;
-				
+
 				BUTTONTAB_TEXT_SIZE_X = 0.35f;
 				BUTTONTAB_TEXT_SIZE_Y = 0.7f;//0.8f;
-				
+
 				BUTTONTAB_TEXT_X_SCALES[6] = 0.94f;
-				
+
 				CONTR_DESCR_NEW_TEXTSCALE.x = 0.4564f;
 				CONTR_DESCR_NEW_TEXTSCALE.y = 0.63f;//0.72f;
-				
+
 				CONFIGS_NEW_TEXTSCALE.x = 0.49f;
 				CONFIGS_NEW_TEXTSCALE.y = 0.7f;//0.8f;
-				
+
 				AUDIO_OUTPUT_POS.x = 0.0f;
 				AUDIO_OUTPUT_POS.y = 0.0f;
-				
+
 				AUDIO_RSTATION_POS.x = 154.0f;
 				AUDIO_RSTATION_POS.y = 0.0f;
-				
+
 				DISPLAY_BRIGHTNESS_POS.x = 0.0f;
 				DISPLAY_BRIGHTNESS_POS.y = 0.0f;
-				
+
 				MEMCARD_ACCESS_MSG_SIZE_X = 0.84f;
 				MEMCARD_ACCESS_MSG_SIZE_Y = 1.12f;//1.28f;
-				
+
 				break;
 			}
-		
+
 			case LANGUAGE_FRENCH:
 			{
 				CGame::frenchGame = true;
 				if ( m_PrefsAllowNastyGame )
 					CGame::nastyGame = false;
-				
+
 				MENU_TEXT_SIZE_X = 0.504f;
 				MENU_TEXT_SIZE_Y = 0.84f;//0.96f;
-				
+
 				BUTTONTAB_TEXT_SIZE_X = 0.32f;
 				BUTTONTAB_TEXT_SIZE_Y = 0.7f;//0.8f;
-				
+
 				BUTTONTAB_TEXT_X_SCALES[0] = 0.84f;
 				BUTTONTAB_TEXT_X_SCALES[3] = 0.84f;
 				PANEL_TEXT_X_SCALES[1] = 0.8f;
-				
+
 				CONTR_DESCR_NEW_TEXTSCALE.x = 0.385f;
 				CONTR_DESCR_NEW_TEXTSCALE.y = 0.63f;//0.72f;
-				
+
 				CONFIGS_NEW_TEXTSCALE.x = 0.455f;
 				CONFIGS_NEW_TEXTSCALE.y = 0.7f;//0.8f;
-				
+
 				AUDIO_OUTPUT_POS.x = -15.0f;
 				AUDIO_OUTPUT_POS.y = 0.0f;
-				
+
 				AUDIO_RSTATION_POS.x = 184.0f;
 				AUDIO_RSTATION_POS.y = 0.0f;
-				
+
 				DISPLAY_BRIGHTNESS_POS.x = 20.0f;
 				DISPLAY_BRIGHTNESS_POS.y = 0.0f;
-				
+
 				MEMCARD_ACCESS_MSG_SIZE_X = 0.84f;
 				MEMCARD_ACCESS_MSG_SIZE_Y = 1.12f;//1.28f;
-				
+
 				break;
 			}
-			
+
 			case LANGUAGE_GERMAN:
 			{
 				CGame::germanGame = true;
 				if ( m_PrefsAllowNastyGame )
 					CGame::nastyGame = false;
-				
+
 				MENU_TEXT_SIZE_X = 0.546f;
 				MENU_TEXT_SIZE_Y = 0.84f;//0.96f;
-				
+
 				BUTTONTAB_TEXT_SIZE_X = 0.32f;
 				BUTTONTAB_TEXT_SIZE_Y = 0.7f;//0.8f;
-				
+
 				CONTR_DESCR_NEW_TEXTSCALE.x = 0.35f;
 				CONTR_DESCR_NEW_TEXTSCALE.y = 0.63f;//0.72f;
-				
+
 				CONFIGS_NEW_TEXTSCALE.x = 0.434f;
 				CONFIGS_NEW_TEXTSCALE.y = 0.7f;//0.8f;
-				
+
 				AUDIO_OUTPUT_POS.x = -15.0f;
 				AUDIO_OUTPUT_POS.y = 0.0f;
-				
+
 				AUDIO_RSTATION_POS.x = 154.0f;
 				AUDIO_RSTATION_POS.y = 0.0f;
-				
+
 				DISPLAY_BRIGHTNESS_POS.x = 20.0f;
 				DISPLAY_BRIGHTNESS_POS.y = 0.0f;
-				
+
 				MEMCARD_ACCESS_MSG_SIZE_X = 0.7f;
 				MEMCARD_ACCESS_MSG_SIZE_Y = 1.12f;//1.28f;
-				
+
 				break;
 			}
-			
+
 			case LANGUAGE_ITALIAN:
 			{
 				MENU_TEXT_SIZE_X = 0.574f;
 				MENU_TEXT_SIZE_Y = 0.84f;//0.96f;
-				
+
 				BUTTONTAB_TEXT_SIZE_X = 0.32f;
 				BUTTONTAB_TEXT_SIZE_Y = 0.7f;//0.8f;
-				
+
 				BUTTONTAB_TEXT_X_SCALES[0] = 0.86f;
 				PANEL_TEXT_X_SCALES[1] = 0.9f;
-				
+
 				CONTR_DESCR_NEW_TEXTSCALE.x = 0.385f;
 				CONTR_DESCR_NEW_TEXTSCALE.y = 0.63f;//0.72f;
-				
+
 				CONFIGS_NEW_TEXTSCALE.x = 0.42f;
 				CONFIGS_NEW_TEXTSCALE.y = 0.7f;//0.8f;
-				
+
 				AUDIO_OUTPUT_POS.x = 10.0f;
 				AUDIO_OUTPUT_POS.y = 0.0f;
-				
+
 				AUDIO_RSTATION_POS.x = 194.0f;
 				AUDIO_RSTATION_POS.y = 0.0f;
-				
+
 				DISPLAY_BRIGHTNESS_POS.x = 10.0f;
 				DISPLAY_BRIGHTNESS_POS.y = 0.0f;
-				
+
 				MEMCARD_ACCESS_MSG_SIZE_X = 0.84f;
 				MEMCARD_ACCESS_MSG_SIZE_Y = 1.12f;//1.28f;
-				
+
 				break;
 			}
-			
+
 			case LANGUAGE_SPANISH:
 			{
 				MENU_TEXT_SIZE_X = 0.546f;
 				MENU_TEXT_SIZE_Y = 0.84f;//0.96f;
-				
+
 				BUTTONTAB_TEXT_SIZE_X = 0.35f;
 				BUTTONTAB_TEXT_SIZE_Y = 0.7f;//0.8f;
-				
+
 				BUTTONTAB_TEXT_X_SCALES[0] = 0.78f;
 				PANEL_TEXT_X_SCALES[1] = 0.95f;
-				
+
 				CONTR_DESCR_NEW_TEXTSCALE.x = 0.364f;
 				CONTR_DESCR_NEW_TEXTSCALE.y = 0.63f;//0.72f;
-				
+
 				CONFIGS_NEW_TEXTSCALE.x = 0.455f;
 				CONFIGS_NEW_TEXTSCALE.y = 0.7f;//0.8f;
-				
+
 				AUDIO_OUTPUT_POS.x = 10.0f;
 				AUDIO_OUTPUT_POS.y = 0.0f;
-				
+
 				AUDIO_RSTATION_POS.x = 124.0f;
 				AUDIO_RSTATION_POS.y = 0.0f;
-				
+
 				DISPLAY_BRIGHTNESS_POS.x = 30.0f;
 				DISPLAY_BRIGHTNESS_POS.y = 0.0f;
-				
+
 				MEMCARD_ACCESS_MSG_SIZE_X = 0.84f;
 				MEMCARD_ACCESS_MSG_SIZE_Y = 1.12f;//1.28f;
-				
+
 				break;
 			}
 		}
@@ -1048,9 +1048,9 @@ CMenuManager::InitialiseMenuContents(void)
 	if ( m_bWantToUpdateContent == false )
 	{
 		m_bWantToUpdateContent = true;
-		
+
 		m_pageState = PAGESTATE_NORMAL;
-		
+
 		switch ( CPad::GetPad(0)->GetMode() )
 		{
 			case 3: m_PrefsControllerConfig = CONFIG_4; break;
@@ -1058,38 +1058,38 @@ CMenuManager::InitialiseMenuContents(void)
 			case 1: m_PrefsControllerConfig = CONFIG_2; break;
 			case 0: m_PrefsControllerConfig = CONFIG_1; break;
 		}
-		
+
 		MenuControls_1.SetMenuSelection(m_PrefsControllerConfig);
 		MenuControls_5.SetMenuSelection(m_PrefsUseVibration);
-		
+
 		MenuAudio_1.SetMenuSelection(m_PrefsMusicVolume / 127.0f * 100.0f + 0.5f);
 		MenuAudio_2.SetMenuSelection(m_PrefsSfxVolume   / 127.0f * 100.0f + 0.5f);
 		MenuAudio_3.SetMenuSelection(m_PrefsRadioStation);
 		MenuAudio_4.SetMenuSelection(m_PrefsStereoMono);
-		
+
 		MenuDisplay_1.SetMenuSelection(m_PrefsBrightness / 512.0f * 100.0f + 0.5f);
 #ifdef PS2
 		m_PrefsShowTrails = BlurOn;
 #else
 		m_PrefsShowTrails = CMBlur::BlurOn;
 #endif
-		MenuDisplay_2.SetMenuSelection(m_PrefsShowTrails);		
+		MenuDisplay_2.SetMenuSelection(m_PrefsShowTrails);
 		MenuDisplay_3.SetMenuSelection(m_PrefsShowSubtitles);
 		MenuDisplay_4.SetMenuSelection(m_PrefsUseWideScreen);
-		
+
 		MenuLanguage_1.SetMenuSelection(m_PrefsLanguage);
-		
+
 		FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect,     NULL, 0, 34, 22);
 		FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, NULL, 0, 34, 22);
-		
+
 		MenuBriefs_1.m_numTexts = 0;
 		MenuBriefs_1.AddText(TheText.Get("FEB_PMB"), 0.0f, 0.0f, TITLE_TEXT_COLOR, 0); // Previous Mission Briefs:
-		
+
 		static wchar StringsToDisplay[NUMPREVIOUSBRIEFS][256];
-		
+
 		CRGBA newColor;
 		int32 brierY = 36;
-	
+
 		for ( int32 i = NUMPREVIOUSBRIEFS-1; i >= 0; i-- )
 		{
 			tPreviousBrief &brief = CMessages::PreviousBriefs[i];
@@ -1114,122 +1114,122 @@ CMenuManager::InitialiseMenuContents(void)
 				brierY += 54;
 			}
 		}
-		
+
 		MenuStats_1.m_scrollPosition = 0.0f;
 		MenuStats_1.ResetNumberOfTextLines();
-		
+
 		nStatLinesIndex = 0;
-				
+
 		#define STAT_HEADER(str) do { MenuStats_1.AddTextLine(TheText.Get(str), NULL); } while(0)
 		#define STAT_PARAM(str) do { MenuStats_1.AddTextLine(NULL, TheText.Get(str)); } while(0)
 		#define STAT_LINE(str, left, isFloat, right) do { MenuStats_1.AddTextLine(TheText.Get(str), PrintStatLine(str, left, isFloat, right)); } while(0)
-		
+
 		int32 nTemp;
-		
+
 		STAT_HEADER("PL_STAT");
-		
+
 		int32 percentCompleted = (CStats::TotalProgressInGame == 0 ? 0 : CStats::ProgressMade * 100.0f / (CGame::nastyGame ? CStats::TotalProgressInGame : CStats::TotalProgressInGame - 1));
 		percentCompleted = Min(percentCompleted, 100);
-		
+
 		STAT_LINE("PER_COM", &percentCompleted,       0, NULL);
-		
+
 		STAT_LINE("NMISON",  &CStats::MissionsGiven,  0, NULL);
-		
+
 		STAT_LINE("FEST_MP", &CStats::MissionsPassed, 0, &CStats::TotalNumberMissions);
-		
+
 		if ( CGame::nastyGame )
 			STAT_LINE("FEST_RP", &CStats::NumberKillFrenziesPassed, 0, &CStats::TotalNumberKillFrenzies);
-		
+
 		CPlayerInfo &player = CWorld::Players[CWorld::PlayerInFocus];
 		float packagesPercent = 0.0f;
 		if (player.m_nTotalPackages != 0)
 			packagesPercent = player.m_nCollectedPackages * 100.0f / player.m_nTotalPackages;
 		int nPackagesPercent = packagesPercent;
 		nTemp = 100;
-		
+
 		STAT_LINE("PERPIC", &nPackagesPercent,       0, &nTemp);
-		
+
 		STAT_LINE("NOUNIF", &CStats::NumberOfUniqueJumpsFound, 0, &CStats::TotalNumberOfUniqueJumps);
-		
+
 		STAT_LINE("DAYSPS", &CStats::DaysPassed, 0, NULL);
-		
+
 		if ( CGame::nastyGame )
 		{
 			STAT_LINE("PE_WAST", &CStats::PeopleKilledByPlayer, 0, NULL);
 			STAT_LINE("PE_WSOT", &CStats::PeopleKilledByOthers, 0, NULL);
 		}
-		
+
 		STAT_LINE("CAR_EXP", &CStats::CarsExploded, 0, NULL);
-		
+
 		STAT_LINE("TM_BUST", &CStats::TimesArrested, 0, NULL);
-		
+
 		STAT_LINE("TM_DED", &CStats::TimesDied, 0, NULL);
-		
+
 		nTemp = CStats::PedsKilledOfThisType[PEDTYPE_GANG9] + CStats::PedsKilledOfThisType[PEDTYPE_GANG8]
 			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG7] + CStats::PedsKilledOfThisType[PEDTYPE_GANG6]
 			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG5] + CStats::PedsKilledOfThisType[PEDTYPE_GANG4]
 			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG3] + CStats::PedsKilledOfThisType[PEDTYPE_GANG2]
 			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG1];
 		STAT_LINE("GNG_WST", &nTemp, 0, NULL);
-		
+
 		nTemp = CStats::PedsKilledOfThisType[PEDTYPE_CRIMINAL];
 		STAT_LINE("DED_CRI", &nTemp, 0, NULL);
-		
+
 		STAT_LINE("HEL_DST", &CStats::HelisDestroyed, 0, NULL);
-		
+
 		STAT_LINE("KGS_EXP", &CStats::KgsOfExplosivesUsed, 0, NULL);
-		
+
 		nTemp = (CStats::InstantHitsFiredByPlayer == 0 ? 0 : CStats::InstantHitsHitByPlayer * 100.0f / CStats::InstantHitsFiredByPlayer);
 		STAT_LINE("ACCURA", &nTemp, 0, NULL);
-		
+
 		if (CStats::ElBurroTime > 0)
 			STAT_LINE("ELBURRO", &CStats::ElBurroTime, 0, NULL);
-		
+
 		if (CStats::Record4x4One > 0)
 			STAT_LINE("FEST_R1", &CStats::Record4x4One, 0, NULL);
-		
+
 		if (CStats::Record4x4Two > 0)
 			STAT_LINE("FEST_R2", &CStats::Record4x4Two, 0, NULL);
-		
+
 		if (CStats::Record4x4Three > 0)
 			STAT_LINE("FEST_R3", &CStats::Record4x4Three, 0, NULL);
-		
+
 		if (CStats::Record4x4Mayhem > 0)
 			STAT_LINE("FEST_RM", &CStats::Record4x4Mayhem, 0, NULL);
-		
+
 		if (CStats::LongestFlightInDodo > 0)
 			STAT_LINE("FEST_LF", &CStats::LongestFlightInDodo, 0, NULL);
-		
+
 		if (CStats::TimeTakenDefuseMission > 0)
 			STAT_LINE("FEST_BD", &CStats::TimeTakenDefuseMission, 0, NULL);
-		
+
 		STAT_LINE("CAR_CRU", &CStats::CarsCrushed, 0, NULL);
-		
+
 		if (CStats::HighestScores[0] > 0)
 		{
 			STAT_HEADER("FEST_BB");
 			STAT_LINE("FEST_H0", &CStats::HighestScores[0], 0, NULL);
 		}
-		
+
 		int32 hs = 0;
 		for ( int32 i = 1; i < 5; i++ )
 			hs += CStats::HighestScores[i];
 
 		if (hs > 0)
 			STAT_HEADER("FEST_GC");
-		
+
 		if (CStats::HighestScores[1] > 0)
 			STAT_LINE("FEST_H1", &CStats::HighestScores[1], 0, NULL);
-		
+
 		if (CStats::HighestScores[2] > 0)
 			STAT_LINE("FEST_H2", &CStats::HighestScores[2], 0, NULL);
-		
+
 		if (CStats::HighestScores[3] > 0)
 			STAT_LINE("FEST_H3", &CStats::HighestScores[3], 0, NULL);
-		
+
 		if (CStats::HighestScores[4] > 0)
 			STAT_LINE("FEST_H4", &CStats::HighestScores[4], 0, NULL);
-		
+
 		STAT_LINE("FESTDFM", &CStats::DistanceTravelledOnFoot, 0, NULL);
 		STAT_LINE("FESTDCM", &CStats::DistanceTravelledInVehicle, 0, NULL);
 		STAT_LINE("MMRAIN", &CStats::mmRain, 0, NULL);
@@ -1237,10 +1237,10 @@ CMenuManager::InitialiseMenuContents(void)
 		STAT_LINE("MXCARDM", &nTemp, 0, NULL);
 		nTemp = (int32)CStats::MaximumJumpHeight;
 		STAT_LINE("MXCARJM", &nTemp, 0, NULL);
-		
+
 		STAT_LINE("MXFLIP", &CStats::MaximumJumpFlips, 0, NULL);
 		STAT_LINE("MXJUMP", &CStats::MaximumJumpSpins, 0, NULL);
-		
+
 		STAT_HEADER("BSTSTU");
 
 		switch (CStats::BestStuntJump)
@@ -1255,7 +1255,7 @@ CMenuManager::InitialiseMenuContents(void)
 			case 8:  STAT_PARAM("PQUINS"); break;
 			default: STAT_PARAM("NOSTUC"); break;
 		}
-		
+
 		STAT_LINE("PASDRO", &CStats::PassengersDroppedOffWithTaxi, 0, NULL);
 		STAT_LINE("MONTAX", &CStats::MoneyMadeWithTaxi, 0, NULL);
 		STAT_LINE("FEST_LS", &CStats::LivesSavedWithAmbulance, 0, NULL);
@@ -1264,23 +1264,23 @@ CMenuManager::InitialiseMenuContents(void)
 		STAT_LINE("FEST_FE", &CStats::FiresExtinguished, 0, NULL);
 		int32 rnd = ((CGeneral::GetRandomNumber() & 255) + 100) * 2384;
 		STAT_LINE("DAYPLC", &rnd, 0, NULL);
-		
+
 		#undef STAT_LINE
-		
+
 		MenuStats_2.m_numTexts = 0;
 		MenuStats_2.AddText(TheText.Get("CRIMRA"), 0.0f, 0.0f, CRIM_RATING_TEXT_COLOR, 0);
-		
+
 		char rating[16];
 		wchar urating[16];
 		sprintf(rating, "  %d", CStats::FindCriminalRatingNumber());
 		AsciiToUnicode(rating, urating);
-	
+
 		wchar *pStatLine = aStatLines[nStatLinesIndex++];
 		UnicodeStrcpy(pStatLine, CStats::FindCriminalRatingString());
 		UnicodeStrcat(pStatLine, urating);
-		
+
 		MenuStats_2.AddText(pStatLine, X(MenuStats_1.m_width), 0.0f, CRIM_RATING_TEXT_COLOR, 1);
-		
+
 		MenuSaveZoneSG_1.SetMenuSelection(1);
 		MenuSaveZoneFC_1.SetMenuSelection(1);
 	}
@@ -1293,8 +1293,8 @@ CMenuManager::AnaliseMenuContents(void)
 	if ( m_bWantToUpdateContent )
 	{
 		m_bWantToUpdateContent = false;
-		
-		m_PrefsControllerConfig = (CONTRCONFIG)MenuControls_1.GetMenuSelection();		
+
+		m_PrefsControllerConfig = (CONTRCONFIG)MenuControls_1.GetMenuSelection();
 		switch ( m_PrefsControllerConfig )
 		{
 			case CONFIG_4: CPad::GetPad(0)->SetMode(3); break;
@@ -1302,15 +1302,15 @@ CMenuManager::AnaliseMenuContents(void)
 			case CONFIG_2: CPad::GetPad(0)->SetMode(1); break;
 			case CONFIG_1: CPad::GetPad(0)->SetMode(0); break;
 		}
-		
+
 		m_PrefsUseVibration = MenuControls_5.m_title.m_bSelected;
-		
+
 		m_PrefsMusicVolume   = float(MenuAudio_1.GetMenuSelection())/100.0f*127.0f+0.5f;
 		m_PrefsSfxVolume     = float(MenuAudio_2.GetMenuSelection())/100.0f*127.0f+0.5f;
 		m_PrefsRadioStation  = MenuAudio_3.GetMenuSelection();
 		m_PrefsStereoMono    = MenuAudio_4.GetMenuSelection();
 		m_PrefsBrightness    = float(MenuDisplay_1.GetMenuSelection()) / 100.0f*512.0f + 0.5f;
-		m_PrefsShowTrails    = MenuDisplay_2.GetMenuSelection(); 
+		m_PrefsShowTrails    = MenuDisplay_2.GetMenuSelection();
 		m_PrefsShowSubtitles = MenuDisplay_3.GetMenuSelection();
 		m_PrefsUseWideScreen = MenuDisplay_4.GetMenuSelection();
 #ifdef PS2
@@ -1318,7 +1318,7 @@ CMenuManager::AnaliseMenuContents(void)
 #else
 		CMBlur::BlurOn       = m_PrefsShowTrails;
 #endif
-		
+
 		if ( m_PrefsLanguage != MenuLanguage_1.GetMenuSelection() )
 		{
 			m_PrefsLanguage = MenuLanguage_1.GetMenuSelection();
@@ -1346,10 +1346,10 @@ CMenuManager::DrawFrontEnd(void)
 		DrawFrontEndSaveZone();
 	else
 		DrawFrontEndNormal();
-	
+
 	if ( MemCardAccessTriggerCaller.CanCall() )
 		MemCardAccessTriggerCaller.CallTrigger();
-	
+
 	DisplayWarningControllerMsg();
 }
 
@@ -1358,39 +1358,39 @@ CMenuManager::DrawFrontEndNormal(void)
 {
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
-	
+
 	if ( bMemoryCardSpecialZone )
 	{
 		static uint8 counter = 0;
-		
+
 		counter++;
-		
+
 		if ( (counter & 63 ) == 0 )
 		{
 			FillMenuWithMemCardFileListing(&MenuSaveLG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_LoadGameLoadGameSelect, NULL, 0, 34, 22);
 			FillMenuWithMemCardFileListing(&MenuSaveDG_2, TriggerSave_BackToMainMenuTwoLines, TriggerSave_DeleteGameDeleteGameSelect, NULL, 0, 34, 22);
 		}
 	}
-	
+
 	m_fade = 255;
 	if ( m_nChangePageTimer != 0 && m_nChangePageTimer >= CTimer::GetTimeInMillisecondsPauseMode() )
 		m_fade = uint32(float(m_nChangePageTimer - CTimer::GetTimeInMillisecondsPauseMode()) / 250.0f * 255.0f);
-	
+
 	m_someAlpha = 255;
-	
+
 	m_position.x = 0.0f;
 	m_position.y = 0.0f;
-	
+
 	if ( m_nStartPauseTimer != 0 && m_nStartPauseTimer >= CTimer::GetTimeInMillisecondsPauseMode() )
 	{
 		float slide = float(m_nStartPauseTimer - CTimer::GetTimeInMillisecondsPauseMode()) / 800.0f;
 		float alpha = 1.0f;
-		
+
 		if ((m_nStartPauseTimer - CTimer::GetTimeInMillisecondsPauseMode()) <= 1600)
 			alpha = float(m_nStartPauseTimer - CTimer::GetTimeInMillisecondsPauseMode()) / 400.0f;
-		
+
 		m_someAlpha = 255 - clamp(alpha, 0.0f, 1.0f) * 255.0f;
-		
+
 		switch ( m_nSlidingDir )
 		{
 			case SLIDE_TO_RIGHT:  m_position.x =   slide * X(700.0f);  break;
@@ -1400,27 +1400,27 @@ CMenuManager::DrawFrontEndNormal(void)
 			default:              m_position.y =   slide * Y(500.0f);  break;
 		}
 	}
-	
+
 	if ( m_nEndPauseTimer != 0 && m_nEndPauseTimer >= CTimer::GetTimeInMillisecondsPauseMode() )
 	{
 		float slide = float(m_nEndPauseTimer - CTimer::GetTimeInMillisecondsPauseMode()) / 800.0f;
 		float alpha = float((int32)(m_nEndPauseTimer - CTimer::GetTimeInMillisecondsPauseMode()) + -266) / 533.0f;
-				
+
 		m_someAlpha = clamp(alpha, 0.0f, 1.0f) * 255.0f;
-		
+
 		switch ( m_nSlidingDir )
 		{
 			case SLIDE_TO_TOP:    m_position.y =   (1.0f - slide) * Y(500.0f);  break;
 			case SLIDE_TO_RIGHT:  m_position.x =   (1.0f - slide) * X(700.0f);  break;
 			case SLIDE_TO_LEFT:   m_position.x =   (1.0f - slide) * X(700.0f);  break;
 			case SLIDE_TO_BOTTOM: m_position.y = -((1.0f - slide) * Y(500.0f)); break;
-			default:              m_position.y = -((1.0f - slide) * Y(500.0f)); break;	
+			default:              m_position.y = -((1.0f - slide) * Y(500.0f)); break;
 		}
 	}
-	
+
 	if ( m_someAlpha < 255 )
 		m_fade = m_someAlpha;
-	
+
 	float posX, posY;
 
 	/* Draw splash */
@@ -1456,7 +1456,7 @@ CMenuManager::DrawFrontEndNormal(void)
 	float iconWidth = 540.0f;
 	float iconHeight = 296.0f;
 	int sprite = FE_ICONBRIEF;
-	
+
 #ifdef PS2_MENU_USEALLPAGEICONS
 	switch(m_currentPage)
 	{
@@ -1511,18 +1511,18 @@ CMenuManager::DrawFrontEndNormal(void)
 
 	/* Overwrite tab buttons if entered page */
 	bool bOverwriteTab = false;
-	
+
 	switch ( m_pageState )
 	{
 		case PAGESTATE_NORMAL:
 		case PAGESTATE_HIGHLIGHTED:
 			break;
-			
+
 		case PAGESTATE_SELECTED:
 			bOverwriteTab = true;
 			break;
 	}
-	
+
 	if( bOverwriteTab )
 	{
 		CRGBA shadow(41, 101, 102, m_someAlpha);
@@ -1623,12 +1623,12 @@ CMenuManager::DrawFrontEndNormal(void)
 			CFont::PrintString(m_position.x+X(242.0f), m_position.y+Y(360.0f), TheText.Get("FEDSSC1"));
 			CFont::PrintString(m_position.x+X(242.0f), m_position.y+Y(372.0f), TheText.Get("FEDSSC2"));
 			break;
-		
+
 		case PAGE_BRIEFS:
 			CFont::PrintString(m_position.x+X(52.0f), m_position.y+Y(360.0f), TheText.Get("FEDS_ST"));
 			CFont::PrintString(m_position.x+X(52.0f), m_position.y+Y(372.0f), TheText.Get("FEDS_AM"));
 			break;
-		
+
 		case PAGE_LOAD:
 		case PAGE_CONTROLS:
 		case PAGE_AUDIO:
@@ -1638,13 +1638,13 @@ CMenuManager::DrawFrontEndNormal(void)
 			CFont::PrintString(m_position.x+X(52.0f), m_position.y+Y(360.0f), TheText.Get("FEDS_SE"));
 			CFont::PrintString(m_position.x+X(52.0f), m_position.y+Y(372.0f), TheText.Get("FEDS_BA"));
 			CFont::PrintString(m_position.x+X(52.0f), m_position.y+Y(384.0f), TheText.Get("FEDS_ST"));
-			
+
 			switch ( m_pageState )
 			{
 				case PAGESTATE_NORMAL:
 					CFont::PrintString(m_position.x+X(242.0f), m_position.y+Y(372.0f), TheText.Get("FEDS_AM")); // <>-CHANGE MENU
 					break;
-				
+
 				case PAGESTATE_HIGHLIGHTED:
 				case PAGESTATE_SELECTED:
 				{
@@ -1653,15 +1653,15 @@ CMenuManager::DrawFrontEndNormal(void)
 					CFont::PrintString(m_position.x+X(242.0f-10.0f), m_position.y+Y(372.0f), TheText.Get("FEA_LE")); // <
 					CFont::PrintString(m_position.x+X(242.0f+11.0f), m_position.y+Y(372.0f), TheText.Get("FEA_RI")); // >
 					CFont::PrintString(m_position.x+X(242.0f+20.0f), m_position.y+Y(372.0f), TheText.Get("FEDSAS3")); // - CHANGE SELECTION
-					
+
 					break;
 				}
 			}
-			
+
 			break;
 		}
 	}
-	
+
 	CFont::DrawFonts();
 
 	/* Draw tab button texts */
@@ -1673,7 +1673,7 @@ CMenuManager::DrawFrontEndNormal(void)
 	CFont::SetRightJustifyOff();
 	CFont::SetBackGroundOnlyTextOn();
 	CFont::SetWrapx(SCRW-X(40.0f)); // 600.0f
-	
+
 	switch ( m_pageState )
 	{
 		case PAGESTATE_NORMAL:
@@ -1693,10 +1693,10 @@ CMenuManager::DrawFrontEndNormal(void)
 			CFont::PrintString(m_position.x+X(422.0f), m_position.y+Y(408.0f), TheText.Get("FEB_DIS"));
 			CFont::SetScale(X(BUTTONTAB_TEXT_SIZE_X*BUTTONTAB_TEXT_X_SCALES[PAGE_LANGUAGE]), Y(BUTTONTAB_TEXT_SIZE_Y));
 			CFont::PrintString(m_position.x+X(488.0f), m_position.y+Y(408.0f), TheText.Get("FEB_LAN"));
-			
+
 			break;
 		}
-		
+
 		case PAGESTATE_HIGHLIGHTED:
 		case PAGESTATE_SELECTED:
 		{
@@ -1733,11 +1733,11 @@ CMenuManager::DrawFrontEndNormal(void)
 				CFont::PrintString(m_position.x+X(488.0f), m_position.y+Y(408.0f), TheText.Get("FEB_LAN"));
 				break;
 			}
-			
+
 			break;
 		}
 	}
-	
+
 	CFont::DrawFonts();
 
 	pActiveMenuPage = nil;
@@ -1751,7 +1751,7 @@ CMenuManager::DrawFrontEndNormal(void)
 		case PAGE_DISPLAY:	pActiveMenuPage = &MenuPage_Display; break;
 		case PAGE_LANGUAGE:	pActiveMenuPage = &MenuPage_Language; break;
 	}
-	
+
 	CFont::SetFontStyle(FONT_BANK);
 	CFont::SetBackgroundOff();
 	CFont::SetScale(X(MENU_TEXT_SIZE_X), Y(MENU_TEXT_SIZE_Y));
@@ -1762,13 +1762,13 @@ CMenuManager::DrawFrontEndNormal(void)
 	CFont::SetBackGroundOnlyTextOn();
 	CFont::SetWrapx(SCRW-X(40.0f)); // 600.0f
 	CFont::SetRightJustifyWrap(X(38.0f));
-	
+
 	if(m_currentPage == PAGE_LANGUAGE)
 	{
 		CFont::SetCentreOn();
 		CFont::SetCentreSize(SCRW-X(40.0f)); // 600.0f
 	}
-	
+
 	if ( m_nEndPauseTimer != 0 )
 	{
 		switch ( m_currentPage )
@@ -1777,33 +1777,33 @@ CMenuManager::DrawFrontEndNormal(void)
 			case PAGE_BRIEFS:
 			case PAGE_CONTROLS:
 				break;
-				
+
 			default:
 				CFont::SetWrapx(X(1200.0f));
 				break;
 		}
 	}
-	
+
 	if(pActiveMenuPage)
 	{
 		pActiveMenuPage->SetAlpha(m_fade);
-		
+
 		switch ( m_pageState )
 		{
 			case PAGESTATE_NORMAL:
 				pActiveMenuPage->DrawNormal(m_position.x, m_position.y);
 				break;
-				
+
 			case PAGESTATE_HIGHLIGHTED:
 				pActiveMenuPage->DrawHighlighted(CRGBA(rgbaATC.r, rgbaATC.g, rgbaATC.b, m_fade), m_position.x, m_position.y);
 				break;
-				
+
 			case PAGESTATE_SELECTED:
 				pActiveMenuPage->Draw(CRGBA(rgbaATC.r, rgbaATC.g, rgbaATC.b, m_fade), CRGBA(MENU_SELECTED_COLOR.r, MENU_SELECTED_COLOR.g, MENU_SELECTED_COLOR.b, m_fade), m_position.x, m_position.y);
 				break;
 		}
 	}
-	
+
 	CFont::DrawFonts();
 	CFont::DrawFonts();
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
@@ -1820,7 +1820,7 @@ CMenuManager::DrawFrontEndSaveZone(void)
 		if ( counter & 63 )
 		{
 			FillMenuWithMemCardFileListing(&MenuSaveZoneSSL_1, TriggerSaveZone_BackToMainMenuTwoLines, TriggerSaveZone_SaveSlots, NULL, 0, 34, 22);
-			
+
 			if ( TheMemoryCard.GetError() == CMemoryCard::ERR_NOFORMAT )
 			{
 				pActiveMenuPage = &MenuPageSaveZone_FormatCard;
@@ -1829,16 +1829,16 @@ CMenuManager::DrawFrontEndSaveZone(void)
 			}
 		}
 	}
-	
+
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
-	
+
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
-	
+
 	m_fade = 255;
-	
+
 	CSprite2d::DrawRect(CRect(X(50.0f), Y(50.0f), X(590.0f), Y(398.0f)), CRGBA(0, 0, 0, 175)); //CRect(50.0f, 57.142f, 590.0f, 454.857147f)
-	
+
 	CFont::SetFontStyle(FONT_BANK);
 	CFont::SetBackgroundOff();
 	CFont::SetScale(X(MENU_TEXT_SIZE_X), Y(MENU_TEXT_SIZE_Y));
@@ -1849,14 +1849,14 @@ CMenuManager::DrawFrontEndSaveZone(void)
 	CFont::SetBackGroundOnlyTextOn();
 	CFont::SetRightJustifyWrap(X(70.0f));
 	CFont::SetWrapx(SCRW-X(70.0f)); // 570.0f
-	
+
 	if ( pActiveMenuPage )
 	{
 		pActiveMenuPage->SetAlpha(m_fade);
 		pActiveMenuPage->Draw(CRGBA(rgbaATC.r, rgbaATC.g, rgbaATC.b, m_fade), TITLE_TEXT_COLOR, 0.0f, 0.0f);
 	}
-	
-	
+
+
 	CFont::DrawFonts();
 	CFont::SetFontStyle(FONT_BANK);
 	CFont::SetBackgroundOff();
@@ -1868,22 +1868,22 @@ CMenuManager::DrawFrontEndSaveZone(void)
 	CFont::SetBackGroundOnlyTextOn();
 	CFont::SetWrapx(SCRW-X(40.0f)); //600.0f
 	CFont::SetColor(TEXT_COLOR);
-	
+
 	wchar *text;
 	if ( pActiveMenuPage == &MenuPageSaveZone_FormatCard
 		|| pActiveMenuPage == &MenuPageSaveZone_SaveSlots
 		|| pActiveMenuPage == &MenuPageSaveZone_SaveGame )
 	{
-		text = TheText.Get("FEDS_SB"); // / button - SELECT " button - BACK 
+		text = TheText.Get("FEDS_SB"); // / button - SELECT " button - BACK
 	}
 	else
 	{
 		text = TheText.Get("FEDS_SE"); // / button - SELECT
 	}
-	
+
 	CFont::PrintString(X(180.0f), Y(376.0f), text); // 180.0f, 429.714294f
 	CFont::DrawFonts();
-	
+
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 }
 
@@ -1892,11 +1892,11 @@ CMenuManager::DrawMemoryCardStartUpMenus()
 {
 	CFont::SetAlphaFade(255.0f);
 	bMemoryCardStartUpMenus_ExitNow = false;
-	
+
 	CMenuPage page; // + 0x40 data
 	CMenuMultiChoiceTriggered MCMenu;
 	MCMenu.SetPosition(X(320.0f), Y(150.0f)); //171.428574f
-	
+
 	switch ( TheMemoryCard.CheckCardStateAtGameStartUp(CARD_ONE) )
 	{
 		case CMemoryCard::MCSTATE_NEED_200KB: // 200KB
@@ -1905,14 +1905,14 @@ CMenuManager::DrawMemoryCardStartUpMenus()
 			MCMenu.AddTitle(TheText.Get("MCGNSP"), 0.0f, 0.0f, 0);
 			break;
 		}
-		
+
 		case CMemoryCard::MCSTATE_NEED_500KB: // 500KB
 		{
 			// There is insufficient space on the Memory Card (PS2) in MEMORY CARD slot 1. At least 500KB is needed to save this application data. Do you wish to start? (YES or NO)
 			MCMenu.AddTitle(TheText.Get("MCDNSP"), 0.0f, 0.0f, 0);
 			break;
 		}
-		
+
 		case CMemoryCard::MCSTATE_OK:
 		case CMemoryCard::MCSTATE_NOCARD:
 		{
@@ -1920,24 +1920,24 @@ CMenuManager::DrawMemoryCardStartUpMenus()
 			break;
 		}
 	}
-		
+
 	MCMenu.AddOption(TheText.Get("FEM_NO"),  X(30.0f),  Y(110.0f), NULL, 0, 0);// 125.714294f
 	MCMenu.AddOption(TheText.Get("FEM_YES"), X(-30.0f), Y(110.0f), TriggerMCSUM_Yes, 0, 0);// 125.714294f
 	MCMenu.SetColors(TITLE_TEXT_COLOR, TEXT_COLOR, TEXT_COLOR);
 	page.AddMenu(&MCMenu);
-	
+
 	MCMenu.GoFirst();
-	
+
 	page.SetShadows(true, TEXT_SHADOW_COLOR, SHADOW_VECTOR);
-	
+
 	CTimer::Initialise();
 	CTimer::StartUserPause();
-	
-	while ( !bMemoryCardStartUpMenus_ExitNow ) 
+
+	while ( !bMemoryCardStartUpMenus_ExitNow )
 	{
 #ifdef GTA_PC
 		HandleExit();
-		
+
 		if(RsGlobal.quit)
 			return;
 #endif
@@ -1953,7 +1953,7 @@ CMenuManager::DrawMemoryCardStartUpMenus()
 			page.GoUp();
 		if ( CPad::GetPad(0)->GetCrossJustDown() || CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetRightMouseJustDown() )
 			page.SelectCurrentOptionUnderCursor();
-		
+
 		if ( CPad::GetPad(0)->GetCircleJustDown() || CPad::GetPad(0)->GetEscapeJustDown() )
 			;
 #else
@@ -1970,15 +1970,15 @@ CMenuManager::DrawMemoryCardStartUpMenus()
 		if ( CPad::GetPad(0)->GetCircleJustDown() )
 			;
 #endif
-		
+
 		static int32 MemCardStatusWaiter = 0;
-		
+
 		MemCardStatusWaiter++;
-		
+
 		if ( MemCardStatusWaiter > 120 )
 		{
 			MemCardStatusWaiter = 0;
-			
+
 			switch ( TheMemoryCard.CheckCardStateAtGameStartUp(CARD_ONE) )
 			{
 				case CMemoryCard::MCSTATE_NEED_200KB:
@@ -1987,21 +1987,21 @@ CMenuManager::DrawMemoryCardStartUpMenus()
 					MCMenu.AddTitle(TheText.Get("MCGNSP"), 0.0f, 0.0f, 0);
 					break;
 				}
-				
+
 				case CMemoryCard::MCSTATE_NEED_500KB:
 				{
 					// There is insufficient space on the Memory Card (PS2) in MEMORY CARD slot 1. At least 500KB is needed to save this application data. Do you wish to start? (YES or NO)
 					MCMenu.AddTitle(TheText.Get("MCDNSP"), 0.0f, 0.0f, 0);
 					break;
 				}
-				
+
 				case CMemoryCard::MCSTATE_NOCARD:
 				{
 					// There is no Memory Card (PS2) in MEMORY CARD slot 1. Do you wish to start? (YES or NO)
 					MCMenu.AddTitle(TheText.Get("MCSTNS"), 0.0f, 0.0f, 0);
 					break;
 				}
-				
+
 				case CMemoryCard::MCSTATE_OK:
 				{
 					bMemoryCardStartUpMenus_ExitNow = true;
@@ -2009,17 +2009,17 @@ CMenuManager::DrawMemoryCardStartUpMenus()
 				}
 			}
 		}
-		
+
 		DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
 		CFont::InitPerFrame();
-		
+
 		RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 		CSprite2d *splash = LoadSplash("splash1");
 		splash->Draw(CRect(0.0f, 0.0f, SCRW, SCRH), BACKGROUND_SPLASH_COLOR);
 		RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
-		
+
 		SetRandomActiveTextlineColor(1);
-		
+
 		CRGBA col(rgbaATC.r, rgbaATC.g, rgbaATC.b, 255);
 		CFont::SetFontStyle(FONT_BANK);
 		CFont::SetBackgroundOff();
@@ -2031,10 +2031,10 @@ CMenuManager::DrawMemoryCardStartUpMenus()
 		CFont::SetWrapx(SCRW-X(60.0f)); // 580.0f
 		CFont::SetCentreOn();
 		CFont::SetCentreSize(SCRW-X(120.0f)); // 520.0f
-		
+
 		MCMenu.Draw(col, TITLE_TEXT_COLOR, 0.0f, 0.0f);
 		CFont::DrawFonts();
-		
+
 		CFont::SetFontStyle(FONT_BANK);
 		CFont::SetScale(X(0.4f), Y(0.64f)); // 0.731429
 		CFont::SetPropOn();
@@ -2044,37 +2044,37 @@ CMenuManager::DrawMemoryCardStartUpMenus()
 		CFont::SetBackGroundOnlyTextOn();
 		CFont::SetWrapx(SCRW-X(60.0f)); // 580.0f
 		CFont::SetColor(TEXT_COLOR);
-		
-		
+
+
 		CPlaceableShText text;
 		text.SetPosition(X(240.0f), Y(378.0f), false); // 432.000000
 		text.SetColor(TEXT_COLOR);
 		text.m_text = TheText.Get("FEDS_SE"); // / button - SELECT
 		text.SetShadows(true, TEXT_SHADOW_COLOR, SHADOW_VECTOR);
 		text.Draw(0.0f, 0.0f);
-		
+
 		CFont::DrawFonts();
 		DisplayWarningControllerMsg();
 		DoRWStuffEndOfFrame();
 		CPad::UpdatePads();
 		CTimer::Update();
 	}
-	
+
 	CTimer::EndUserPause();
 	CTimer::Stop();
-	
+
 	for ( int32 i = 0; i < 100; i++ )
 	{
 #ifdef GTA_PC
 		HandleExit();
 #endif
 		DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
-		
+
 		RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 		CSprite2d *splash = LoadSplash("splash1");
 		splash->Draw(CRect(0.0f, 0.0f, SCRW, SCRH), BACKGROUND_SPLASH_COLOR);
 		RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
-		
+
 		DoRWStuffEndOfFrame();
 	}
 }
@@ -2087,7 +2087,7 @@ CMenuManager::Process(void)
 		InitialiseMenusOnce();
 		m_bWantToRestart = false;
 		WorkOutMenuState(false);
-		
+
 		if ( m_bMenuActive )
 		{
 			if ( !m_bInSaveZone )
@@ -2121,13 +2121,13 @@ CMenuManager::WorkOutMenuState(uint8 bExit)
 #endif
 	bool bIsCreditsOrDraw      = CCredits::AreCreditsDone() || m_bMenuActive;
 	bool bIsDemoOrDraw         = m_bMenuActive || CGame::bDemoMode;
-	
+
 	if ( (bIsStartPressed && bIsCreditsOrDraw) || bExit || (!bIsDemoOrDraw && CPad::IsNoOrObsolete()) )
 	{
 		if ( m_nStartPauseTimer == 0 && m_nEndPauseTimer == 0 )
 		{
 			m_bMenuActive = !m_bMenuActive;
-			
+
 			if ( !m_bMenuActive )
 			{
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_STARTING, 0);
@@ -2135,38 +2135,38 @@ CMenuManager::WorkOutMenuState(uint8 bExit)
 				gMusicPlaying = false;
 				bMemoryCardSpecialZone = false;
 				bIgnoreTriangleButton = false;
-				
+
 				m_bMenuActive = true;
-				
+
 				m_nEndPauseTimer = CTimer::GetTimeInMillisecondsPauseMode() + 800;
-				
+
 				if ( m_currentPage == PAGE_CONTROLS || m_currentPage == PAGE_BRIEFS || m_currentPage == PAGE_LOAD )
 				{
 					m_nSlidingDir = CGeneral::GetRandomNumber() & (SLIDE_MAX-1);
-					
+
 					switch ( m_nSlidingDir ) //m_nSlidingDir &= ~1;
 					{
 						case SLIDE_TO_LEFT:  m_nSlidingDir = SLIDE_TO_TOP;    break;
 						case SLIDE_TO_RIGHT: m_nSlidingDir = SLIDE_TO_BOTTOM; break;
 					}
-					
+
 					m_position.y = Y(500.0f); // 571.428589f;
 				}
 			}
 			else
 			{
 				DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
-				
+
 				if ( DMAudio.GetRadioInCar() < 9 )
 					m_PrefsRadioStation = DMAudio.GetRadioInCar();
 				else
 					m_PrefsRadioStation = CGeneral::GetRandomNumber() % 9;
-				
+
 				CTimer::StartUserPause();
 				CPad::StopPadsShaking();
 				m_nStartPauseTimer = CTimer::GetTimeInMillisecondsPauseMode() + 800;
 				m_nSlidingDir = CGeneral::GetRandomNumber() & (SLIDE_MAX-1);
-				
+
 				switch ( m_nSlidingDir )
 				{
 					case SLIDE_TO_RIGHT:  m_position.y = Y(612.5f); break;
@@ -2175,17 +2175,17 @@ CMenuManager::WorkOutMenuState(uint8 bExit)
 					case SLIDE_TO_TOP:    m_position.y = Y(500.0f); break;
 					default:              m_position.y = Y(500.0f); break;
 				}
-				
+
 				if ( m_currentPage == PAGE_CONTROLS || m_currentPage == PAGE_BRIEFS )
 				{
 					m_nSlidingDir = CGeneral::GetRandomNumber() & (SLIDE_MAX-1);
-								
+
 					switch ( m_nSlidingDir ) //m_nSlidingDir &= ~1;
 					{
 						case SLIDE_TO_LEFT:  m_nSlidingDir = SLIDE_TO_TOP;    break;
 						case SLIDE_TO_RIGHT: m_nSlidingDir = SLIDE_TO_BOTTOM; break;
 					}
-					
+
 					m_position.y = Y(500.0f); //571.428589f
 				}
 			}
@@ -2201,29 +2201,29 @@ CMenuManager::WorkOutMenuState(uint8 bExit)
 		CTimer::StartUserPause();
 		pActiveMenuPage = &MenuPageSaveZone_SaveGame;
 	}
-	
+
 	if ( m_pageState == PAGESTATE_NORMAL && gMusicPlaying )
 	{
 		DMAudio.StopFrontEndTrack();
 		gMusicPlaying = false;
 	}
-	
+
 	if ( m_nChangePageTimer != 0 && CTimer::GetTimeInMillisecondsPauseMode() >= m_nChangePageTimer )
 	{
 		m_nChangePageTimer = 0;
 		pMenuSave = &MenuPage_SaveBasic;
 		m_currentPage = m_newPage;
 	}
-	
+
 	if ( m_nPageLeftTimer != 0 && CTimer::GetTimeInMillisecondsPauseMode() >= m_nPageLeftTimer )
 		m_nPageLeftTimer = 0;
-	
+
 	if ( m_nPageRightTimer != 0 && CTimer::GetTimeInMillisecondsPauseMode() >= m_nPageRightTimer )
 		m_nPageRightTimer = 0;
-	
+
 	if ( m_nStartPauseTimer != 0 && CTimer::GetTimeInMillisecondsPauseMode() >= m_nStartPauseTimer )
 		m_nStartPauseTimer = 0;
-	
+
 	if ( m_nEndPauseTimer != 0 && CTimer::GetTimeInMillisecondsPauseMode() >= m_nEndPauseTimer )
 	{
 		m_nEndPauseTimer = 0;
@@ -2242,7 +2242,7 @@ CMenuManager::ProcessControllerInput(void)
 		CPad::StopPadsShaking();
 		TimeToStopPadShaking = 0;
 	}
-	
+
 #ifdef GTA_PC
 	if ( CPad::GetPad(0)->GetDPadLeft() || CPad::GetPad(0)->GetLeft() )
 #else
@@ -2254,7 +2254,7 @@ CMenuManager::ProcessControllerInput(void)
 			case PAGESTATE_NORMAL:
 			case PAGESTATE_HIGHLIGHTED:
 				break;
-				
+
 			case PAGESTATE_SELECTED:
 			{
 				if ( pActiveMenuPage )
@@ -2275,7 +2275,7 @@ CMenuManager::ProcessControllerInput(void)
 			case PAGESTATE_NORMAL:
 			case PAGESTATE_HIGHLIGHTED:
 				break;
-			
+
 			case PAGESTATE_SELECTED:
 			{
 				if ( pActiveMenuPage )
@@ -2284,21 +2284,21 @@ CMenuManager::ProcessControllerInput(void)
 			}
 		}
 	}
-	
+
 #ifdef GTA_PC
 	if ( CPad::GetPad(0)->GetDPadLeftJustDown() || CPad::GetPad(0)->GetLeftJustDown() )
 #else
 	if ( CPad::GetPad(0)->GetDPadLeftJustDown() )
 #endif
 		ProcessDPadLeftJustDown();
-		
+
 #ifdef GTA_PC
 	if ( CPad::GetPad(0)->GetDPadRightJustDown() || CPad::GetPad(0)->GetRightJustDown() )
 #else
 	if ( CPad::GetPad(0)->GetDPadRightJustDown() )
 #endif
 		ProcessDPadRightJustDown();
-	
+
 #ifdef GTA_PC
 	if ( CPad::GetPad(0)->GetDPadUp() || CPad::GetPad(0)->GetUp() )
 #else
@@ -2316,10 +2316,10 @@ CMenuManager::ProcessControllerInput(void)
 				}
 				break;
 			}
-			
+
 			case PAGESTATE_HIGHLIGHTED:
 				break;
-				
+
 			case PAGESTATE_SELECTED:
 			{
 				if ( pActiveMenuPage )
@@ -2328,7 +2328,7 @@ CMenuManager::ProcessControllerInput(void)
 			}
 		}
 	}
-	
+
 #ifdef GTA_PC
 	if ( CPad::GetPad(0)->GetDPadDown() || CPad::GetPad(0)->GetDown() )
 #else
@@ -2344,12 +2344,12 @@ CMenuManager::ProcessControllerInput(void)
 					if ( pActiveMenuPage )
 						pActiveMenuPage->GoDownStill();
 				}
-				
+
 				break;
 			}
 			case PAGESTATE_HIGHLIGHTED:
 				break;
-				
+
 			case PAGESTATE_SELECTED:
 			{
 				if ( pActiveMenuPage )
@@ -2358,21 +2358,21 @@ CMenuManager::ProcessControllerInput(void)
 			}
 		}
 	}
-	
+
 #ifdef GTA_PC
 	if ( CPad::GetPad(0)->GetDPadUpJustDown() || CPad::GetPad(0)->GetUpJustDown() )
 #else
 	if ( CPad::GetPad(0)->GetDPadUpJustDown() )
 #endif
 		ProcessDPadUpJustDown();
-	
+
 #ifdef GTA_PC
 	if ( CPad::GetPad(0)->GetDPadDownJustDown() || CPad::GetPad(0)->GetDownJustDown() )
 #else
 	if ( CPad::GetPad(0)->GetDPadDownJustDown() )
 #endif
 		ProcessDPadDownJustDown();
-	
+
 	if ( CPad::GetPad(0)->GetLeftShoulder1JustDown() )
 	{
 		switch ( m_pageState )
@@ -2380,13 +2380,13 @@ CMenuManager::ProcessControllerInput(void)
 			case PAGESTATE_NORMAL:
 				ProcessDPadLeftJustDown();
 				break;
-				
+
 			case PAGESTATE_HIGHLIGHTED:
 			case PAGESTATE_SELECTED:
 				break;
 		}
 	}
-	
+
 	if ( CPad::GetPad(0)->GetRightShoulder1JustDown() )
 	{
 		switch ( m_pageState )
@@ -2394,20 +2394,20 @@ CMenuManager::ProcessControllerInput(void)
 			case PAGESTATE_NORMAL:
 				ProcessDPadRightJustDown();
 				break;
-				
+
 			case PAGESTATE_HIGHLIGHTED:
 			case PAGESTATE_SELECTED:
 				break;
 		}
 	}
-	
+
 #ifdef GTA_PC
 	if ( CPad::GetPad(0)->GetCrossJustDown() || CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetRightMouseJustDown() )
 #else
 	if ( CPad::GetPad(0)->GetCrossJustDown() )
 #endif
 		ProcessDPadCrossJustDown();
-	
+
 #ifdef GTA_PC
 	if ( CPad::GetPad(0)->GetTriangleJustDown() || CPad::GetPad(0)->GetBackspaceJustDown() || (m_pageState != PAGESTATE_NORMAL && CPad::GetPad(0)->GetEscapeJustDown()) )
 #else
@@ -2425,7 +2425,7 @@ CMenuManager::ProcessDPadLeftJustDown(void)
 		if ( pActiveMenuPage )
 		{
 			pActiveMenuPage->GoLeft();
-			
+
 			if ( pActiveMenuPage->m_pCurrentControl == &MenuSaveZoneSSL_1 )
 			{
 				if ( MenuSaveZoneSSL_1.m_numOptions < 2 )
@@ -2448,7 +2448,7 @@ CMenuManager::ProcessDPadLeftJustDown(void)
 					if ( m_nChangePageTimer == 0 )
 					{
 						if ( --m_newPage < PAGE_FIRST ) m_newPage = PAGE_LAST;
-						
+
 						m_nPageLeftTimer   = CTimer::GetTimeInMillisecondsPauseMode() + 300;
 						m_nPageRightTimer  = 0;
 						m_nChangePageTimer = CTimer::GetTimeInMillisecondsPauseMode() + 250;
@@ -2456,26 +2456,26 @@ CMenuManager::ProcessDPadLeftJustDown(void)
 						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 					}
 				}
-				
+
 				break;
 			}
-		
+
 			case PAGESTATE_HIGHLIGHTED:
 			{
 				if ( pActiveMenuPage )
 					pActiveMenuPage->GoLeftMenuOnPage();
-			
+
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
-				
+
 				break;
 			}
-			
+
 			case PAGESTATE_SELECTED:
 			{
 				if ( pActiveMenuPage )
 				{
 					pActiveMenuPage->GoLeft();
-					
+
 					if ( m_currentPage == PAGE_AUDIO)
 					{
 						if ( pActiveMenuPage->m_pCurrentControl == &MenuAudio_1 )
@@ -2512,7 +2512,7 @@ CMenuManager::ProcessDPadLeftJustDown(void)
 							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 					}
 				}
-				
+
 				break;
 			}
 		}
@@ -2527,7 +2527,7 @@ CMenuManager::ProcessDPadRightJustDown(void)
 		if ( pActiveMenuPage )
 		{
 			pActiveMenuPage->GoRight();
-			
+
 			if ( pActiveMenuPage->m_pCurrentControl == &MenuSaveZoneSSL_1 )
 			{
 				if ( MenuSaveZoneSSL_1.m_numOptions < 2 )
@@ -2550,7 +2550,7 @@ CMenuManager::ProcessDPadRightJustDown(void)
 					if ( m_nChangePageTimer == 0 )
 					{
 						if ( ++m_newPage > PAGE_LAST ) m_newPage = PAGE_FIRST;
-						
+
 						m_nPageLeftTimer   = 0;
 						m_nPageRightTimer  = CTimer::GetTimeInMillisecondsPauseMode() + 300;
 						m_nChangePageTimer = CTimer::GetTimeInMillisecondsPauseMode() + 250;
@@ -2558,26 +2558,26 @@ CMenuManager::ProcessDPadRightJustDown(void)
 						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 					}
 				}
-				
+
 				break;
 			}
-		
+
 			case PAGESTATE_HIGHLIGHTED:
 			{
 				if ( pActiveMenuPage )
 					pActiveMenuPage->GoRightMenuOnPage();
-				
+
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
-				
+
 				break;
 			}
-		
+
 			case PAGESTATE_SELECTED:
 			{
 				if ( pActiveMenuPage )
 				{
 					pActiveMenuPage->GoRight();
-					
+
 					if ( m_currentPage == PAGE_AUDIO)
 					{
 						if ( pActiveMenuPage->m_pCurrentControl == &MenuAudio_1 )
@@ -2614,7 +2614,7 @@ CMenuManager::ProcessDPadRightJustDown(void)
 							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 					}
 				}
-				
+
 				break;
 			}
 		}
@@ -2629,7 +2629,7 @@ CMenuManager::ProcessDPadUpJustDown(void)
 		if ( pActiveMenuPage )
 		{
 			pActiveMenuPage->GoUp();
-			
+
 			if ( pActiveMenuPage->m_pCurrentControl == &MenuSaveZoneSSL_1 )
 			{
 				if ( MenuSaveZoneSSL_1.m_numOptions < 2 )
@@ -2647,22 +2647,22 @@ CMenuManager::ProcessDPadUpJustDown(void)
 		{
 			case PAGESTATE_NORMAL:
 				break;
-				
+
 			case PAGESTATE_HIGHLIGHTED:
 			{
 				if ( pActiveMenuPage )
 					pActiveMenuPage->GoUpMenuOnPage();
-			
+
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 				break;
 			}
-		
+
 			case PAGESTATE_SELECTED:
 			{
 				if ( pActiveMenuPage )
 				{
 					pActiveMenuPage->GoUp();
-					
+
 					if ( pActiveMenuPage->m_pCurrentControl == &MenuSaveDG_2 )
 					{
 						if ( MenuSaveDG_2.m_numOptions < 2 )
@@ -2680,7 +2680,7 @@ CMenuManager::ProcessDPadUpJustDown(void)
 					else
 						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
 				}
-				
+
 				break;
 			}
 		}
@@ -2695,7 +2695,7 @@ CMenuManager::ProcessDPadDownJustDown(void)
 		if ( pActiveMenuPage )
 		{
 			pActiveMenuPage->GoDown();
-			
+
 			if ( pActiveMenuPage->m_pCurrentControl == &MenuSaveZoneSSL_1 )
 			{
 				if ( MenuSaveZoneSSL_1.m_numOptions < 2 )
@@ -2713,23 +2713,23 @@ CMenuManager::ProcessDPadDownJustDown(void)
 		{
 			case PAGESTATE_NORMAL:
 				break;
-				
+
 			case PAGESTATE_HIGHLIGHTED:
 			{
 				if ( pActiveMenuPage )
 					pActiveMenuPage->GoDownMenuOnPage();
-		
+
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
-				
+
 				break;
 			}
-			
+
 			case PAGESTATE_SELECTED:
 			{
 				if ( pActiveMenuPage )
 				{
 					pActiveMenuPage->GoDown();
-					
+
 					if ( pActiveMenuPage->m_pCurrentControl == &MenuSaveDG_2 )
 					{
 						if ( MenuSaveDG_2.m_numOptions < 2 )
@@ -2759,7 +2759,7 @@ CMenuManager::ProcessDPadTriangleJustDown(void)
 	if ( pActiveMenuPage )
 	{
 		pActiveMenuPage->SelectDefaultCancelAction();
-		
+
 		if ( m_bMenuActive || m_bInSaveZone )
 		{
 			if ( bIgnoreTriangleButton )
@@ -2776,12 +2776,12 @@ CMenuManager::ProcessDPadTriangleJustDown(void)
 					case PAGESTATE_NORMAL:
 						WorkOutMenuState(true);
 						break;
-					
+
 					case PAGESTATE_HIGHLIGHTED:
 						m_pageState = PAGESTATE_NORMAL;
 						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 						break;
-					
+
 					case PAGESTATE_SELECTED:
 					{
 						m_pageState = PAGESTATE_HIGHLIGHTED;
@@ -2810,12 +2810,12 @@ CMenuManager::ProcessDPadTriangleJustDown(void)
 				case PAGESTATE_NORMAL:
 					WorkOutMenuState(false);
 					break;
-					
+
 				case PAGESTATE_HIGHLIGHTED:
 					m_pageState = PAGESTATE_NORMAL;
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
 					break;
-					
+
 				case PAGESTATE_SELECTED:
 				{
 					m_pageState = PAGESTATE_HIGHLIGHTED;
@@ -2843,7 +2843,7 @@ CMenuManager::ProcessDPadCrossJustDown(void)
 	{
 		if ( pActiveMenuPage )
 			pActiveMenuPage->SelectCurrentOptionUnderCursor();
-		
+
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 	}
 	else
@@ -2860,7 +2860,7 @@ CMenuManager::ProcessDPadCrossJustDown(void)
 						if ( pActiveMenuPage->m_numControls == 1 )
 							m_pageState = PAGESTATE_SELECTED;
 					}
-					
+
 					switch ( m_currentPage )
 					{
 						case PAGE_AUDIO:
@@ -2884,11 +2884,11 @@ CMenuManager::ProcessDPadCrossJustDown(void)
 							break;
 						}
 					}
-					
+
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 					break;
 				}
-				
+
 				case PAGESTATE_HIGHLIGHTED:
 				{
 					m_pageState = PAGESTATE_SELECTED;
@@ -2901,17 +2901,17 @@ CMenuManager::ProcessDPadCrossJustDown(void)
 							pActiveMenuPage->ActiveMenuTwoState_SelectNextPosition();
 						}
 					}
-					
+
 					switch ( m_currentPage )
 					{
 						case PAGE_AUDIO:
 						{
 							if ( pActiveMenuPage->m_pCurrentControl != &MenuAudio_4 )
 								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
-							
+
 							break;
 						}
-						
+
 						default:
 						{
 							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
@@ -2922,13 +2922,13 @@ CMenuManager::ProcessDPadCrossJustDown(void)
 					}
 					break;
 				}
-				
+
 				case PAGESTATE_SELECTED:
 				{
 					if ( pActiveMenuPage )
-					{					
+					{
 						pActiveMenuPage->SelectCurrentOptionUnderCursor();
-						
+
 						switch ( m_currentPage )
 						{
 							case PAGE_AUDIO:
@@ -2937,17 +2937,17 @@ CMenuManager::ProcessDPadCrossJustDown(void)
 									m_pageState = PAGESTATE_HIGHLIGHTED;
 								break;
 							}
-							
+
 							case PAGE_LOAD:
 							case PAGE_LANGUAGE:
 								break;
-								
+
 							default:
 								m_pageState = PAGESTATE_HIGHLIGHTED;
 								break;
 						}
 					}
-					
+
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
 					break;
 				}
@@ -2969,25 +2969,25 @@ CMenuManager::DoHackingMenusAtPageBrowse(void)
 				{
 					int32 sel = MenuControls_1.GetMenuSelection();
 					MenuControls_1.GoFirst();
-					
+
 					for ( int32 i = 0; i < sel; i++ )
 						MenuControls_1.GoNext();
 				}
 				break;
 			}
-			
+
 			case PAGE_AUDIO:
 			{
 				if ( pActiveMenuPage->m_pCurrentControl == &MenuAudio_3  )
 				{
 					int32 sel = MenuAudio_3.GetMenuSelection();
 					MenuAudio_3.GoFirst();
-					
+
 					for ( int32 i = 0; i < sel; i++ )
 						MenuAudio_3.GoNext();
 				}
 				break;
-			}	
+			}
 		}
 	}
 }
@@ -3004,7 +3004,7 @@ CMenuManager::FilterOutColorMarkersFromString(wchar *string, CRGBA &color)
 {
 	wchar buf[300];
 	UnicodeStrcpy(buf, string);
-	
+
 	wchar *src = buf;
 	wchar *dst = string;
 	while ( *src != '\0' )
@@ -3012,7 +3012,7 @@ CMenuManager::FilterOutColorMarkersFromString(wchar *string, CRGBA &color)
 		if ( *src == '~' )
 		{
 			src++;
-			
+
 			if ( *src == 'l' )      color = CRGBA(0, 0, 0, 255);
 			else if ( *src == 'p' ) color = CRGBA(255, 0, 255, 255);
 			else if ( *src == 'y' ) color = CRGBA(255, 255, 0, 255);
@@ -3020,14 +3020,14 @@ CMenuManager::FilterOutColorMarkersFromString(wchar *string, CRGBA &color)
 			else if ( *src == 'b' ) color = CRGBA(40, 40, 255, 255);
 			else if ( *src == 'g' ) color = CRGBA(40, 235, 40, 255);
 			else if ( *src == 'r' ) color = CRGBA(255, 0, 0, 255);
-			
+
 			while ( *src++ != '~' )
 				;
 		}
 		else
 			*dst++ = *src++;
 	}
-	
+
 	*dst = '\0';
 }
 
