@@ -945,7 +945,7 @@ CFileLoader::Load2dEffect(const char *line)
 			&effect->light.dist,
 			&effect->light.range,
 			&effect->light.size,
-			&effect->light.shadowRange,
+			&effect->light.shadowSize,
 			&shadowIntens, &lightType, &roadReflection, &flare, &flags);
 		effect->light.corona = RwTextureRead(corona, nil);
 		effect->light.shadow = RwTextureRead(shadow, nil);
