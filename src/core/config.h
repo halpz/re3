@@ -236,6 +236,10 @@ enum Config {
 #define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define SCRIPT_LOG_FILE_LEVEL 1 // 0 == no log, 1 == overwrite every frame, 2 == full log
 
+#ifndef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+#define USE_BASIC_SCRIPT_DEBUG_OUTPUT
+#endif
+
 // Replay
 //#define DONT_FIX_REPLAY_BUGS // keeps various bugs in CReplay, some of which are fairly cool!
 //#define USE_BETA_REPLAY_MODE // adds another replay mode, a few seconds slomo (caution: buggy!)
