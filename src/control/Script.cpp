@@ -2097,7 +2097,7 @@ int8 CRunningScript::ProcessOneCommand()
 	m_bNotFlag = (command & 0x8000);
 	command &= 0x7FFF;
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-	char commandInfo[128];
+	char commandInfo[1024];
 	uint32 ip = m_nIp;
 	if (command < ARRAY_SIZE(commands)) {
 		script_assert(commands[command].id == command);
