@@ -48,7 +48,7 @@ public:
 		float dist;
 		float range;	// of pointlight
 		float size;
-		float shadowRange;
+		float shadowSize;
 		uint8 lightType;	// LIGHT_
 		uint8 roadReflection;
 		uint8 flareType;
