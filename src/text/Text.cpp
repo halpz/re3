@@ -271,9 +271,9 @@ UnicodeToAscii(wchar *src)
 {
 	static char aStr[256];
 	int len;
-	for(len = 0; *src != '\0' && len < ARRAY_SIZE(aStr)-1; len++, src++)
+	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
 #ifdef MORE_LANGUAGES
-		if(*src < 128 || ((CGame::russianGame || CGame::japaneseGame) && *src < ARRAY_SIZE(aStr)))
+		if(*src < 128 || ((CGame::russianGame || CGame::japaneseGame) && *src < 256))
 #else
 		if(*src < 128)
 #endif
@@ -289,8 +289,8 @@ UnicodeToAsciiForSaveLoad(wchar *src)
 {
 	static char aStr[256];
 	int len;
-	for(len = 0; *src != '\0' && len < ARRAY_SIZE(aStr)-1; len++, src++)
-		if(*src < ARRAY_SIZE(aStr))
+	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
+		if(*src < 256)
 			aStr[len] = *src;
 		else
 			aStr[len] = '#';
@@ -303,8 +303,8 @@ UnicodeToAsciiForMemoryCard(wchar *src)
 {
 	static char aStr[256];
 	int len;
-	for(len = 0; *src != '\0' && len < ARRAY_SIZE(aStr)-1; len++, src++)
-		if(*src < ARRAY_SIZE(aStr))
+	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
+		if(*src < 256)
 			aStr[len] = *src;
 		else
 			aStr[len] = '#';
