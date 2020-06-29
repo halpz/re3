@@ -2399,7 +2399,9 @@ WinMain(HINSTANCE instance,
 		
 		CPad::ResetCheats();
 		CPad::StopPadsShaking();
+		
 		DMAudio.ChangeMusicMode(MUSICMODE_DISABLE);
+		
 #ifdef PS2_MENU
 		CGame::ShutDownForRestart();
 #endif
